@@ -7,7 +7,7 @@
 
 MATHTL_DIR = $(HOME)/c++/MathTL
 
-CXX = g++-3.4
+CXX = g++ # be sure to use a gcc 3.x!
 CXXFLAGS += -I$(MATHTL_DIR) -Wall
 
 # mature test programs

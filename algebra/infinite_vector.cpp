@@ -223,13 +223,13 @@ namespace MathTL
   double operator * (const InfiniteVector<C,I>& v, const InfiniteVector<C,I>& w)
   {
     double r(0);
-    typedef typename InfiniteVector<C,I>::entry_const_iterator entry_const_iterator;
-    entry_const_iterator itv(v.begin()), itvend(v.end()), itw(w.begin()), itwend(w.end());
+    typedef typename InfiniteVector<C,I>::const_iterator const_iterator;
+    const_iterator itv(v.begin()), itvend(v.end()), itw(w.begin()), itwend(w.end());
     for (; itv != itvend && itw != itwend; ++itv)
       {
  	while (itw != itwend && itw.index() < itv.index()) ++itw;
  	if (itv.index() == itw.index())
- 	  r += itw.entry() * itv.entry();
+ 	  r += *itw * *itv;
       }
     return r;
   }
@@ -247,7 +247,7 @@ namespace MathTL
 	for (const_iterator it(begin()), itend(end());
 	     it != itend; ++it, ++id)
 	  {
-	    sv[id] = std::make_pair<I,C>(it.index(), *it);
+	    sv[id] = std::make_pair<I,C>(it.index(), *it); // gcc 2.95 hangs here
 	  }
 	  
 	// sort vector (Introsort, O(N*log N))
@@ -285,7 +285,7 @@ namespace MathTL
 	for (const_iterator it(begin()), itend(end());
 	     it != itend; ++it, ++id)
 	  {
-	    sv[id] = std::make_pair<I,C>(it.index(), *it);
+	    sv[id] = std::make_pair<I,C>(it.index(), *it); // gcc 2.95 hangs here
 	  }
 	  
 	// sort vector (Introsort, O(N*log N))

@@ -45,7 +45,8 @@ int main()
   coeffs[1] = 0;
   coeffs[2] = 0;
   coeffs[3] = 0;
-  SampledMapping<1>(Grid<1>(0.0, 3.0, 30), Spline<2>(knots, coeffs)).matlab_output(cout);
+  SampledMapping<1> sm1(Grid<1>(0.0, 3.0, 30), Spline<2>(knots, coeffs));
+  sm1.matlab_output(cout);
 
   cout << "* writing point values of a linear spline with multiple knots to a file..." << endl;
   knots[0] =  0.0;
@@ -59,7 +60,8 @@ int main()
   coeffs[2] = 0;
   coeffs[3] = 1;
   std::ofstream fs("multipleknots2.m");
-  SampledMapping<1>(Grid<1>(0.0, 3.0, 60), Spline<2>(knots, coeffs)).matlab_output(fs);
+  SampledMapping<1> sm2(Grid<1>(0.0, 3.0, 60), Spline<2>(knots, coeffs));
+  sm2.matlab_output(fs);
   fs.close();
 
   cout << "* writing point values of a cubic spline with multiple knots to a file..." << endl;
@@ -77,6 +79,7 @@ int main()
   coeffs[2] = 2;
   coeffs[3] = 1;
   std::ofstream fs2("multipleknots3.m");
-  SampledMapping<1>(Grid<1>(0.0, 2.0, 1000), Spline<3>(knots, coeffs)).matlab_output(fs2);
+  SampledMapping<1> sm3(Grid<1>(0.0, 2.0, 1000), Spline<3>(knots, coeffs));
+  sm3.matlab_output(fs2);
   fs2.close();
 }

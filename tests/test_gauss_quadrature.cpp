@@ -111,9 +111,11 @@ int main()
       {
         Polynomial<double> p;
         p.set_coefficient(power, 1.0);
+	double integral = Gleg.integrate(p, Point<1>(-1.0), Point<1>(1.0));
+	double exact = (w*p).integrate(-1.0, 1.0, false);
         cout << "  integration of p(x)=" << p << " yields: "
-             << Gleg.integrate(p, Point<1>(-1.0), Point<1>(1.0)) << ", absolute error: "
-             << fabs(Gleg.integrate(p, Point<1>(-1.0), Point<1>(1.0))-(w*p).integrate(-1.0, 1.0)) << endl;
+             << integral << ", absolute error: "
+             << fabs(integral-exact) << endl;
       }
   }
 

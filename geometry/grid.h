@@ -81,6 +81,11 @@ namespace MathTL
     inline unsigned int size() const { return grid_.size(); }
 
     /*!
+      reading access to the grid points
+    */
+    inline const Array1D<double>& points() const { return grid_; }
+
+    /*!
       Matlab output of the grid onto a stream
     */
     void matlab_output(std::ostream& os) const

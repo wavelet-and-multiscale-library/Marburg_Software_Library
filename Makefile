@@ -1,7 +1,7 @@
 # +----------------------------------------------------------------+
 # | Makefile for MathTL - Mathematical Template Library for C++    |
 # |                                                                |
-# | Copyright (c) 2004                                             |
+# | Copyright (c) 2002-2005                                        |
 # | Thorsten Raasch                                                |
 # +----------------------------------------------------------------+
 

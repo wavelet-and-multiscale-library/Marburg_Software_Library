@@ -11,7 +11,7 @@
 #define _MATHTL_MULTIINDEX_H
 
 #include <iostream>
-#include <utils/array1d.h>
+#include <utils/fixed_array1d.h>
 
 namespace MathTL
 {
@@ -21,7 +21,7 @@ namespace MathTL
   */
   template <class I, unsigned int DIMENSION>
   class MultiIndex
-    : public Array1D<I>
+    : public FixedArray1D<I, DIMENSION>
   {
   public:
     /*!

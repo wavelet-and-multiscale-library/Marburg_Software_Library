@@ -56,10 +56,6 @@ int main()
   cout << "3*q: " << 3.*q << endl;
 
   cout << "p=" << p << ", q=" << q << endl;
-//   LPoly dummy(q);
-//   dummy *= p;
-//   cout << "dummy=q, dummy*=p: " << dummy << endl;
-
   cout << "p*q: " << p*q << endl;
 
 //   cout << "(1+z)^2: ";

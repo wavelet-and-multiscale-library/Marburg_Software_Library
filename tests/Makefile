@@ -7,7 +7,7 @@
 
 MATHTL_DIR = $(HOME)/c++/MathTL
 
-CXX = g++
+CXX = g++-3.4
 CXXFLAGS += -I$(MATHTL_DIR) -Wall
 
 EXEOBJF = \

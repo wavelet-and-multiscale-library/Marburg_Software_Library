@@ -64,6 +64,21 @@ int main(int, char **)
   for (unsigned int k(0); k <= 2; k++)
     cout << "p^" << k << ":" << endl << p.power(k) << endl;
 
+  Polynomial<double> s;
+  s.set_coefficient(0, 43);
+  s.set_coefficient(1, 3);
+  s.set_coefficient(2, 3);
+  s.set_coefficient(3, 1);
+  cout << "a new polynomial s:" << endl << s << endl;
+  Polynomial<double> divisor, dividend, remainder;
+  divisor.set_coefficient(0, 1);
+  divisor.set_coefficient(1, 1);
+  s.divide(divisor, dividend, remainder);
+  cout << "division of s by " << divisor << " yields dividend" << endl
+       << dividend << endl
+       << "and remainder" << endl
+       << remainder << endl;
+
   cout << "derivative of p:" << endl << p.differentiate() << endl;
   cout << "antiderivative of p: " << endl << p.integrate() << endl;
 

@@ -26,6 +26,7 @@ namespace MathTL
     - summation (coeffientwise)
     - multiplication with constants
     - multiplication with other polynomials
+    - division with remainder
     - raising a polynomial to some power
     - substitution into another polynomial, special version for scale and shift
     - symbolic differentiation and integration
@@ -202,7 +203,7 @@ namespace MathTL
     /*!
       pointwise multiplication with another polynomial *this *= p
     */
-    void multiply (const Polynomial<C>& p);
+    void multiply(const Polynomial<C>& p);
 
     /*!
       pointwise multiplication with another polynomial
@@ -221,6 +222,11 @@ namespace MathTL
     Polynomial<C> power(const unsigned int k) const;
 
     /*!
+      divide the polynomial by another one with remainder: *this = p * q + r
+    */
+    void divide(const Polynomial<C>& q, Polynomial<C>& p, Polynomial<C>& r) const;
+
+    /*!
       (symbolic) differentiation
     */
     Polynomial differentiate() const;
@@ -236,6 +242,12 @@ namespace MathTL
     double integrate(const double a,
 		     const double b,
 		     const bool quadrature = false) const;
+
+  protected:
+    /*!
+      trim leading zero coefficients in the polynomial
+    */
+    void trim();
   };
   
   /*!

@@ -71,6 +71,8 @@ namespace MathTL
       }
 
     Vector<C>::operator [] (k) = coeff;
+
+    trim();
   }
 
   template <class C>
@@ -78,6 +80,8 @@ namespace MathTL
   {
     assert(coeffs.size() > 0);
     Vector<C>::operator = (coeffs);
+
+    trim();
   }
 
   template <class C>
@@ -133,6 +137,8 @@ namespace MathTL
 	*it *= factor;
 	factor *= s;
       }
+
+    trim(); // TODO: check s=0
   }
   
   template <class C>
@@ -155,6 +161,8 @@ namespace MathTL
       }
     
     swap(new_coeffs);
+
+    // no trimming necessary
   }
 
   template <class C>
@@ -184,12 +192,15 @@ namespace MathTL
  	Vector<C>::swap(r);
  	set_coefficient(0, get_coefficient(0) + a0);
       }
+
+    // no trimming necessary
   }
 
   template <class C>
   Polynomial<C>& Polynomial<C>::operator = (const Polynomial<C>& p)
   {
     Vector<C>::operator = (p);
+    trim();
     return *this;
   }
 
@@ -198,7 +209,7 @@ namespace MathTL
   {
     Vector<C>::resize(1, false);
     set_coefficient(0, c);
-    return *this;
+    return *this; // no trimming necessary
   }
 
   template <class C>
@@ -216,6 +227,8 @@ namespace MathTL
 	help.add(p);
       }
     swap(help);
+
+    trim();
   }
 
   template <class C>
@@ -233,6 +246,8 @@ namespace MathTL
 	help.add(s, p); // help <- help + s*p
       }
     swap(help);
+
+    trim();
   }
 
   template <class C>
@@ -250,13 +265,15 @@ namespace MathTL
 	help.sadd(s, p); // help <- s*help + p
       }
     swap(help);
+
+    trim();
   }
 
   template <class C>
   inline
   Polynomial<C>& Polynomial<C>::operator += (const Polynomial<C>& p)
   {
-    add(p);
+    add(p); // trims
     return *this;
   }
 
@@ -264,7 +281,7 @@ namespace MathTL
   inline
   Polynomial<C> Polynomial<C>::operator + (const Polynomial<C>& p) const
   {
-    return (Polynomial<C>(*this) += p);
+    return (Polynomial<C>(*this) += p); // trims
   }
 
   template <class C>
@@ -282,13 +299,15 @@ namespace MathTL
 	help.add(C(-1), p);
       }
     swap(help);
+
+    trim();
   }
 
   template <class C>
   inline
   Polynomial<C>& Polynomial<C>::operator -= (const Polynomial<C>& p)
   {
-    subtract(p);
+    subtract(p); // trims
     return *this;
   }
 
@@ -296,7 +315,7 @@ namespace MathTL
   inline
   Polynomial<C> Polynomial<C>::operator - () const
   {
-    return (Polynomial<C>() -= *this);
+    return (Polynomial<C>() -= *this); // trims
   }
 
   template <class C>
@@ -334,13 +353,15 @@ namespace MathTL
 	coeffs[n+m] += Vector<C>::operator [] (n) * p.get_coefficient(m);
 
     swap(coeffs);
+
+    trim(); // for safety
   }
 
   template <class C>
   inline
   Polynomial<C>& Polynomial<C>::operator *= (const Polynomial<C>& p)
   {
-    multiply(p);
+    multiply(p); // trims
     return *this;
   }
 
@@ -348,7 +369,7 @@ namespace MathTL
   inline
   Polynomial<C> Polynomial<C>::operator * (const Polynomial<C>& p)
   {
-    return (Polynomial(*this) *= p);
+    return (Polynomial(*this) *= p); // trims
   }
 
   template <class C>
@@ -360,6 +381,22 @@ namespace MathTL
       r.multiply(*this);
 
     return r;
+  }
+
+  template <class C>
+  void Polynomial<C>::divide(const Polynomial<C>& q,
+			     Polynomial<C>& p, Polynomial<C>& r) const
+  {
+    r = *this;
+    p = 0;
+    for (int k(r.degree()-q.degree()); k >= 0; k = r.degree()-q.degree())
+      {
+ 	double factor = r.get_coefficient(r.degree()) / q.get_coefficient(q.degree());
+ 	p.set_coefficient(k, factor);
+ 	Polynomial monom;
+ 	monom.set_coefficient(k, factor);
+ 	r.subtract(monom * q);
+      }
   }
 
   template <class C>
@@ -415,6 +452,26 @@ namespace MathTL
   Polynomial<C> operator * (const C c, const Polynomial<C>& p)
   {
     return (Polynomial<C>(p) *= c);
+  }
+
+  template <class C>
+  void Polynomial<C>::trim()
+  {
+    // determine "true" degree
+    unsigned int deg(0);
+    for(unsigned int i(1); i <= degree(); i++)
+      {
+	if (get_coefficient(i) != 0)
+	  deg = i;
+      } 
+
+    if (deg < degree())
+      {
+	Vector<C> trimmed(std::max(1u, deg+1));
+	for (unsigned int i(0); i < trimmed.size(); i++)
+	  trimmed[i] = get_coefficient(i);
+	swap(trimmed);
+      }
   }
 
   template <class C>

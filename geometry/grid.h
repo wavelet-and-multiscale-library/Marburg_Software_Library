@@ -123,7 +123,7 @@ namespace MathTL
   protected:
     /*!
       internal storage for the grid points
-      (a 2D array would be sufficient, but we don't have one...)
+      (a 2D array would be sufficient, which is not available at the moment)
     */
     Matrix<double> gridx_, gridy_;
   };

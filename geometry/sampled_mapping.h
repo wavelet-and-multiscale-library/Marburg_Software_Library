@@ -61,7 +61,8 @@ namespace MathTL
 
   //
   //
-  // template specialization to one and two space dimensions
+  // template specializations to one and two space dimensions
+
   template <>
   class SampledMapping<1>
     : protected Grid<1>

@@ -33,10 +33,37 @@ int main()
   cout << "  + values at a finer resolution:" << endl;
   cout << phi2.evaluate(2);
 
-  cout << "- CDF<3>, function values and first derivative:" << endl;
+  cout << "- CDF<3>, function values and first derivative, clipped to [0,1]:" << endl;
   RefinableFunction<CDFMask_primal<3> > phi3;
   cout << phi3.evaluate(2);
   cout << phi3.evaluate(MultiIndex<unsigned int, 1>(1), 2);
+
+  cout << "- the Haar function on a higher level:" << endl;
+  phi.evaluate(MultiIndex<unsigned int, 1>(),
+	       1, MultiIndex<int, 1>(1),
+	       MultiIndex<int, 1>(0), MultiIndex<int, 1>(1),
+	       2).matlab_output(cout);
+
+  cout << "- the CDF<3> function phi_{0,0}, clipped to [-2,2]:" << endl;
+  phi3.evaluate(MultiIndex<unsigned int, 1>(),
+		0, MultiIndex<int, 1>(0),
+		MultiIndex<int, 1>(-2), MultiIndex<int, 1>(2),
+		2).matlab_output(cout);
+  cout << "- the CDF<3> function phi_{1,-1}, clipped to [-2,2]:" << endl;
+  phi3.evaluate(MultiIndex<unsigned int, 1>(),
+		1, MultiIndex<int, 1>(-1),
+		MultiIndex<int, 1>(-2), MultiIndex<int, 1>(2),
+		2).matlab_output(cout);
+  cout << "- first derivative of the CDF<3> function phi_{0,0}, clipped to [-2,2]:" << endl;
+  phi3.evaluate(MultiIndex<unsigned int, 1>(1),
+		0, MultiIndex<int, 1>(0),
+		MultiIndex<int, 1>(-2), MultiIndex<int, 1>(2),
+		2).matlab_output(cout);
+  cout << "- first derivative of the CDF<3> function phi_{1,1}, clipped to [-2,2]:" << endl;
+  phi3.evaluate(MultiIndex<unsigned int, 1>(1),
+		1, MultiIndex<int, 1>(1),
+		MultiIndex<int, 1>(-2), MultiIndex<int, 1>(2),
+		2).matlab_output(cout);
 
 //   cout << "- calculating moments of a CDF<2> function:" << endl;
 //   for (unsigned int n(0); n <= 9; n++)

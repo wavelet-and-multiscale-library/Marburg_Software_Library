@@ -71,11 +71,13 @@ namespace WaveletTL
 
       We assume that \partial^\mu\phi is zero at the boundary of its support.
     */
-    SampledMapping<DIMENSION> evaluate(const int j,
-				       const MultiIndex<int, DIMENSION>& k,
-				       const MultiIndex<int, DIMENSION>& a,
-				       const MultiIndex<int, DIMENSION>& b,
-				       const int resolution) const;
+    SampledMapping<DIMENSION>
+    evaluate(const MultiIndex<unsigned int, DIMENSION>& mu,
+	     const int j,
+	     const MultiIndex<int, DIMENSION>& k,
+	     const MultiIndex<int, DIMENSION>& a,
+	     const MultiIndex<int, DIMENSION>& b,
+	     const int resolution) const;
   };
 
   /*!
@@ -87,56 +89,14 @@ namespace WaveletTL
   {
   };
 
+
 #if 0
-  /*!
-    Base class for a refinable function \phi on \mathbb R.
-
-    A refinable function \phi on \mathbb R^d fulfills the refinement equation
-    
-      \phi(x) = \sum_{k\in\mathbb Z^d} a_k * \phi(M * x - k)
-
-    where M\in\mathbb Z^{d\times d} is an expanding matrix and the a_k are
-    real coefficients.
-    In this module we will (at least for the moment) only support the case
-    d = 1 and M = 2, so that
-
-      \phi(x) = \sum_{k\in\mathbb Z} a_k * \phi(2 * x - k)
-
-    The coefficients a_k are stored in a univariate Laurent polynomial.
-    Since a refinable function admits much more functionality, we do not only
-    use LaurentPolynomial<double> but specify the mask via a template parameter
-    MASK which is assumed to have the signature of a LaurentPolynomial<double>.
-  */
   template <class MASK>
   class RefinableFunction
     : public MASK
   {
   public:
-    /*!
-      Evaluate the n-th derivative of a dilated and translated version
-      of the refinable function \phi
-      
-        (d/dx)^n \phi_{j,k}(x) = 2^{jn} * 2^{j/2} * \phi^{(n)}(2^j * x - k)
-      
-      on a dyadic subgrid of the interval [a,b].
-
-      You should know at compile time which derivative is needed,
-      since it is specified as a template paramter.
-
-      We assume that \phi^{(n)} is zero at the boundary of its support.
-    */
-    template <unsigned int DERIVATIVE>
-    SampledMapping<1> evaluate(const int j, const int k,
-			       const int a, const int b,
-			       const int resolution) const;
-
-    /*!
-      Evaluate a mu-th derivative of the refinable function \phi
-      on the grid \mathbb Z.
-
-      We assume that the derivative of \phi is zero at the boundary of its support.
-    */
-    InfiniteVector<double, int> evaluate(const unsigned int mu = 0) const;
+    //! (...)
 
     /*!
       Compute the n-th moment

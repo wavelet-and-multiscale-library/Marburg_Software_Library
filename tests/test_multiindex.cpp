@@ -14,7 +14,7 @@ int main()
   
   typedef MultiIndex<int,3> MIndex;
   MIndex lambda;
-  cout << "- an empty3-index: " << lambda << endl;
+  cout << "- an empty 3-index: " << lambda << endl;
   MIndex lambda2;
   lambda2[0] = 3;
   lambda2[1] = 1;

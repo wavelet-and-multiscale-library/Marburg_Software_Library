@@ -8,6 +8,8 @@ namespace MathTL
   MultiIndex<I, DIMENSION>::MultiIndex()
     : FixedArray1D<I, DIMENSION>()
   {
+    for (unsigned int i(0); i < DIMENSION; i++)
+      FixedArray1D<I, DIMENSION>::operator [] (i) = I(0);
   }
 
   template <class I, unsigned int DIMENSION>

@@ -87,9 +87,14 @@ namespace MathTL
     bool operator != (const Tensor<1, DIM, VALUE>&) const;
 
     /*!
-      in-place addition of two tensors
+      in-place summation of two tensors
     */
     Tensor<1, DIM, VALUE>& operator += (const Tensor<1, DIM, VALUE>&);
+
+    /*!
+      in place summation *this += s*t
+    */
+    void add(const VALUE s, const Tensor<1, DIM, VALUE>& T);
 
     /*!
       in-place subtraction of two tensors

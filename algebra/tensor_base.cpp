@@ -77,6 +77,14 @@ namespace MathTL
   
   template <unsigned int DIM, class VALUE>
   inline
+  void Tensor<1, DIM, VALUE>::add(const VALUE s, const Tensor<1, DIM, VALUE>& T)
+  {
+    for (unsigned int i(0); i < DIM; ++i)
+      values[i] += s * T.values[i];
+  }
+
+  template <unsigned int DIM, class VALUE>
+  inline
   Tensor<1, DIM, VALUE>&
   Tensor<1, DIM, VALUE>::operator -= (const Tensor<1, DIM, VALUE>& T)
   {

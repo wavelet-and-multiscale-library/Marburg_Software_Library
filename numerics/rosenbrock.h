@@ -52,16 +52,24 @@ namespace MathTL
   {
   public:
     /*!
-      default constructor: yields linear-implicit Euler
+      enum type for the different builtin methods
+
+      References:
+      [Euler] Deuflhard/Bornemann, Numerik II
+      [ROS2]  Blom, Hundsdorfer, Spee, Verwer:
+              A Second-Order Rosenbrock Method Applied to Photochemical Dispersion Problems,
+	      SIAM J. Sci. Comput. 20(1999), 1456-1480
+              
      */
-    Rosenbrock();
+    enum Method {
+      Euler,
+      ROS2
+    };
 
     /*!
-      construct Rosenbrock method from given coefficients
-    */
-    Rosenbrock(const LowerTriangularMatrix<double>& alpha,
-	       const LowerTriangularMatrix<double>& gamma,
-	       const Vector<double>& b);
+      construct one of the builtin Rosenbrock methods
+     */
+    Rosenbrock(const Method method = Euler);
 
     /*!
       increment function u^{(m)} -> u^{(m+1)}
@@ -69,7 +77,7 @@ namespace MathTL
     void increment(const IVP& ivp,
 		   const double t_m, const VECTOR& u_m,
 		   const double tau,
-		   VECTOR& umplus1) const;
+		   VECTOR& u_mplus1) const;
     
   protected:
     /*!
@@ -77,6 +85,11 @@ namespace MathTL
     */
     LowerTriangularMatrix<double> alpha_, gamma_;
     Vector<double> b_;
+
+    /*!
+      toggle method
+    */
+    Method method_;
   };
 }
 

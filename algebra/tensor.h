@@ -91,6 +91,11 @@ namespace MathTL
     Tensor<RANK, DIM, VALUE>& operator += (const Tensor<RANK, DIM, VALUE>&);
 
     /*!
+      in place summation *this += s*t
+    */
+    void add(const VALUE s, const Tensor<RANK, DIM, VALUE>& T);
+    
+    /*!
       in-place difference of two tensors
     */
     Tensor<RANK, DIM, VALUE>& operator -= (const Tensor<RANK, DIM, VALUE>&);

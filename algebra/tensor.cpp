@@ -89,6 +89,14 @@ namespace MathTL
   
   template <unsigned int RANK, unsigned int DIM, class VALUE>
   inline
+  void Tensor<RANK, DIM, VALUE>::add(const VALUE s, const Tensor<RANK, DIM, VALUE>& T)
+  {
+    for (unsigned int i(0); i < DIM; ++i)
+      subtensor[i].add(s, T.subtensor[i]);
+  }
+
+  template <unsigned int RANK, unsigned int DIM, class VALUE>
+  inline
   Tensor<RANK, DIM, VALUE>&
   Tensor<RANK, DIM, VALUE>::operator -= (const Tensor<RANK, DIM, VALUE>& T)
   {

@@ -15,7 +15,7 @@ namespace MathTL
 	double pkminus1(pk), pkminus2(0.0);
 	for (unsigned int k(1); k <= n; k++)
 	  {
-	    pk = (x+a(k))*pkminus1 + b(k)*pkminus2;
+	    pk = (x-a(k))*pkminus1 - b(k)*pkminus2;
 
 	    if (k < n)
 	      {
@@ -38,8 +38,8 @@ namespace MathTL
 	q.set_coefficient(1, 1.0);
 	for (unsigned int k(1); k <= n; k++)
 	  {
-	    q.set_coefficient(0, a(k)); // q(x)=x+a(k)
-	    pk = q*pkminus1 + b(k)*pkminus2;
+	    q.set_coefficient(0, -a(k)); // q(x)=x-a(k)
+	    pk = q*pkminus1 - b(k)*pkminus2;
 
 	    if (k < n)
 	      {
@@ -63,7 +63,7 @@ namespace MathTL
 	double pk(1.0), pkminus1(1.0), pkminus2(0.0);
 	for (unsigned int k(1); k < coeffs.size(); k++)
 	  {
-	    pk = (x+a(k))*pkminus1 + b(k)*pkminus2;
+	    pk = (x-a(k))*pkminus1 - b(k)*pkminus2;
 	    S += coeffs[k] * pk;
 
 	    if (k < coeffs.size()-1)
@@ -86,7 +86,7 @@ namespace MathTL
     // calculate u_N,...,u_1
     for (unsigned int k(coeffs.size()-1); k >= 1; --k)
       {
-	uk = (x+a(k+1))*ukplus1 + b(k+1)*ukplus2 + coeffs[k];
+	uk = (x-a(k+1))*ukplus1 - b(k+1)*ukplus2 + coeffs[k];
 	if (k > 1)
 	  {
 	    ukplus2 = ukplus1;
@@ -94,10 +94,10 @@ namespace MathTL
 	  }
       }
 
-    // calculate u_0 = b_2*u_2 + \alpha_0
-    double u0(b(2)*ukplus1 + coeffs(0));
+    // calculate u_0 = -b_2*u_2 + \alpha_0
+    double u0(-b(2)*ukplus1 + coeffs(0));
 	
-    return u0 + uk*(x+a(1));
+    return u0 + uk*(x-a(1));
   }
 
   double Monomial::a(const unsigned int k) const
@@ -122,9 +122,9 @@ namespace MathTL
     if (k >= 2)
       {
 	if (k == 2)
-	  r = -0.5;
+	  r = 0.5;
 	else
-	  r = -0.25;
+	  r = 0.25;
       }
 
     return r;
@@ -142,9 +142,9 @@ namespace MathTL
     if (k >= 2)
       {
 	if (k == 2)
-	  r = -1.0/3.0;
+	  r = 1.0/3.0;
 	else
-	  r = -(k-1.0)*(k-1.0)/((2*k-1.0)*(2*k-3.0));
+	  r = (k-1.0)*(k-1.0)/((2*k-1.0)*(2*k-3.0));
       }
     
     return r;

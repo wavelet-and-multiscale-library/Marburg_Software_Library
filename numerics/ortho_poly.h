@@ -25,11 +25,15 @@ namespace MathTL
     Abstract base class for orthogonal polynomials that fulfill a
     (homogeneous) three-term recursion of the form
 
-      p_k(t) = (t+a_k) * p_{k-1}(t) + b_k * p_{k-2}(t),   k=1,2,...
+      p_k(t) = (t-a_k) * p_{k-1}(t) - b_k * p_{k-2}(t),   k=1,2,...
 
     where p_{-1}(t)=0, p_0(t)=1.
+
     Due to the specific shape of the recurrence relation, the
-    p_k will have leading coefficient 1.
+    p_k will have leading coefficient 1. Moreover, we have
+
+      a_k = <tp_{k-1}, p_{k-1}> / <p_{k-1}, p_{k-1}>
+      b_k = <tp_{k-1}, p_{k-2}> / <p_{k-2}, p_{k-2}>
    */
   class OrthogonalPolynomial
   {
@@ -79,7 +83,7 @@ namespace MathTL
     double b(const unsigned int k) const;
   };
 
-  //! (normalized) Chebyshev polynomials
+  //! Chebyshev polynomials with leading coefficient 1
   class ChebyshevPolynomial : public OrthogonalPolynomial
   {
   public:
@@ -87,7 +91,7 @@ namespace MathTL
     double b(const unsigned int k) const;
   };
 
-  //! (normalized) Legendre polynomials
+  //! Legendre polynomials with leading coefficient 1
   class LegendrePolynomial : public OrthogonalPolynomial
   {
   public:

@@ -26,7 +26,7 @@ namespace WaveletTL
 
     where M\in\mathbb Z^{d\times d} is an expanding matrix and the a_k are
     real coefficients.
-    In this library we will (at least for the moment) only support the case
+    In this module we will (at least for the moment) only support the case
     d = 1 and M = 2, so that
 
       \phi(x) = \sum_{k\in\mathbb Z} a_k * \phi(2 * x - k)

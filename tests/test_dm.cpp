@@ -3,6 +3,7 @@
 #include <Rd/cdf_mask.h>
 #include <Rd/dm_mask.h>
 #include <Rd/refinable.h>
+#include <Rd/multi_refinable.h>
 
 using namespace std;
 using namespace WaveletTL;
@@ -25,6 +26,9 @@ int main()
   cout << "- evaluate this at the integers:" << endl;
   dm2.evaluate<0u>(0, 0, -2, 2, 0).matlab_output(cout);
 
+  cout << "- DM multivariate mask for integrals of two Haar fcts. and the trivial fct.:" << endl;
+  MultivariateRefinableFunction<DMMask2<HaarMask, HaarMask>, 2> dm_multi;
+  cout << dm_multi << endl;
 
   return 0;
 }

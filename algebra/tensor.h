@@ -98,12 +98,12 @@ namespace MathTL
     /*!
       in-place multiplication of a tensor with a scalar from the left
     */
-    Tensor<RANK, DIM, VALUE>& operator *= (const double s);
+    Tensor<RANK, DIM, VALUE>& operator *= (const VALUE s);
 
     /*!
       in-place division of a tensor by a scalar
     */
-    Tensor<RANK, DIM, VALUE>& operator /= (const double s);
+    Tensor<RANK, DIM, VALUE>& operator /= (const VALUE s);
 
     /*!
       sum of two tensors (makes a copy)

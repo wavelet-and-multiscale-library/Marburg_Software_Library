@@ -100,7 +100,7 @@ namespace MathTL
   template <unsigned int RANK, unsigned int DIM, class VALUE>
   inline
   Tensor<RANK, DIM, VALUE>&
-  Tensor<RANK, DIM, VALUE>::operator *= (const double s)
+  Tensor<RANK, DIM, VALUE>::operator *= (const VALUE s)
   {
     for (unsigned int i(0); i < DIM; ++i)
       subtensor[i] *= s;
@@ -110,7 +110,7 @@ namespace MathTL
   template <unsigned int RANK, unsigned int DIM, class VALUE>
   inline
   Tensor<RANK, DIM, VALUE>&
-  Tensor<RANK, DIM, VALUE>::operator /= (const double s)
+  Tensor<RANK, DIM, VALUE>::operator /= (const VALUE s)
   {
     for (unsigned int i(0); i < DIM; ++i)
       subtensor[i] /= s;

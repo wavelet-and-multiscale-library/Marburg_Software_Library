@@ -52,10 +52,13 @@ int main()
   Dahlquist problem;
   Rosenbrock<Point<1>, IVP<1> > R1;
 
-  Point<1> result;
-  cout << problem.u0 << endl;
-  R1.increment(problem, 0, problem.u0, 0.1, result);
+  Point<1> temp(problem.u0), result;
+  for (int i = 1; i <= 20; i++)
+    {
+      R1.increment(problem, i*0.05, temp, 0.05, result);
+      temp = result;
+    }
   cout << result << endl;
-
+  
   return 0;
 }

@@ -15,7 +15,10 @@
 
 namespace MathTL
 {
-  // a class for points in the d-dimensional Euclidean space
+  /*!
+    a class for points in the d-dimensional Euclidean space
+    where d is a priori known
+  */
   template <unsigned int DIM, class VALUE = double>
   class Point : public Tensor<1, DIM, VALUE>
   {

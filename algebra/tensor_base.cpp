@@ -35,7 +35,7 @@ namespace MathTL
 
   template <unsigned int DIM, class VALUE>
   inline
-  const double Tensor<1, DIM, VALUE>::operator [] (const size_type i) const
+  const VALUE Tensor<1, DIM, VALUE>::operator [] (const size_type i) const
   {
     assert(i >= 0 && i < DIM);
     return values[i];
@@ -43,7 +43,7 @@ namespace MathTL
 
   template <unsigned int DIM, class VALUE>
   inline
-  double& Tensor<1, DIM, VALUE>::operator [] (const size_type i)
+  VALUE& Tensor<1, DIM, VALUE>::operator [] (const size_type i)
   {
     assert(i >= 0 && i < DIM);
     return values[i];
@@ -88,7 +88,7 @@ namespace MathTL
   template <unsigned int DIM, class VALUE>
   inline
   Tensor<1, DIM, VALUE>&
-  Tensor<1, DIM, VALUE>::operator *= (const double s)
+  Tensor<1, DIM, VALUE>::operator *= (const VALUE s)
   {
     for (unsigned int i(0); i < DIM; ++i)
       values[i] *= s;
@@ -98,7 +98,7 @@ namespace MathTL
   template <unsigned int DIM, class VALUE>
   inline
   Tensor<1, DIM, VALUE>&
-  Tensor<1, DIM, VALUE>::operator /= (const double s)
+  Tensor<1, DIM, VALUE>::operator /= (const VALUE s)
   {
     assert(s != 0);
     for (unsigned int i(0); i < DIM; ++i)
@@ -132,9 +132,9 @@ namespace MathTL
 
   template <unsigned int DIM, class VALUE>
   inline
-  double Tensor<1, DIM, VALUE>::operator * (const Tensor<1, DIM, VALUE>& T) const
+  VALUE Tensor<1, DIM, VALUE>::operator * (const Tensor<1, DIM, VALUE>& T) const
   {
-    double r(0);
+    VALUE r(0);
     for (unsigned int i(0); i < DIM; ++i)
       r += values[i] * T.values[i];
     return r;

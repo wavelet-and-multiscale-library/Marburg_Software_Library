@@ -69,12 +69,12 @@ namespace MathTL
     /*!
       read-only access to the i-th coordinate
     */
-    const double operator [] (const size_type i) const;
+    const VALUE operator [] (const size_type i) const;
 
     /*!
       read-write access to the i-th coordinate
     */
-    double& operator [] (const size_type i);
+    VALUE& operator [] (const size_type i);
 
     /*!
       equality test of two tensors
@@ -99,12 +99,12 @@ namespace MathTL
     /*!
       in-place multiplication of a tensor with a scalar from the left
     */
-    Tensor<1, DIM, VALUE>& operator *= (const double s);
+    Tensor<1, DIM, VALUE>& operator *= (const VALUE s);
 
     /*!
       in-place division of a tensor by a scalar
     */
-    Tensor<1, DIM, VALUE>& operator /= (const double s);
+    Tensor<1, DIM, VALUE>& operator /= (const VALUE s);
 
     /*!
       sum of two tensors (makes a copy)
@@ -124,7 +124,7 @@ namespace MathTL
     /*!
       inner product of two rank 1 tensors (scalar product)
     */
-    double operator * (const Tensor<1, DIM, VALUE>&) const;
+    VALUE operator * (const Tensor<1, DIM, VALUE>&) const;
 
     /*!
       estimate memory consumption in bytes
@@ -135,7 +135,7 @@ namespace MathTL
     /*!
       internal storage for the vector entries
     */
-    Array1D<double> values;
+    Array1D<VALUE> values;
   };
 
   /*!

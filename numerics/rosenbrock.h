@@ -11,6 +11,7 @@
 #define _MATHTL_ROSENBROCK_H
 
 #include <algebra/triangular_matrix.h>
+#include <algebra/vector.h>
 
 namespace MathTL
 {
@@ -50,7 +51,6 @@ namespace MathTL
   class Rosenbrock
   {
   public:
-    
     /*!
       default constructor: yields linear-implicit Euler
      */
@@ -67,7 +67,7 @@ namespace MathTL
       increment function u^{(m)} -> u^{(m+1)}
     */
     void increment(const IVP& ivp,
-		   const double t, const VECTOR& um,
+		   const double t_m, const VECTOR& u_m,
 		   const double tau,
 		   VECTOR& umplus1) const;
     

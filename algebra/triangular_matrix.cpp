@@ -132,7 +132,7 @@ namespace MathTL
   const C LowerTriangularMatrix<C>::operator () (const size_type row,
 						 const size_type column) const
   {
-    return row >= column ? entries_[triangle_index(row,column,rowdim_,coldim_)] : 0;
+    return row >= column ? entries_[triangle_index(row,column,rowdim_,coldim_)] : C(0);
   }
 
   template <class C>

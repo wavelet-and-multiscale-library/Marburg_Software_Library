@@ -16,14 +16,14 @@
 namespace MathTL
 {
   // a class for points in the d-dimensional Euclidean space
-  template <unsigned int DIM>
-    class Point : public Tensor<1, DIM>
+  template <unsigned int DIM, class VALUE = double>
+  class Point : public Tensor<1, DIM, VALUE>
   {
   public:
     /*!
       value type of the vector (cf. STL containers)
      */
-    typedef double value_type;
+    typedef VALUE value_type;
 
     /*!
       pointer type (cf. STL containers)
@@ -69,22 +69,22 @@ namespace MathTL
     /*!
       copy constructor from a tensor of rank 1
     */
-    Point(const Tensor<1, DIM>&);
+    Point(const Tensor<1, DIM, VALUE>&);
 
     /*!
       constructor from a real number, this is only allowed for DIM==1
     */
-    explicit Point(const double x);
+    explicit Point(const VALUE x);
 
     /*!
       constructor from two real numbers, this is only allowed for DIM==2
     */
-    Point(const double x, const double y);
+    Point(const VALUE x, const VALUE y);
 
     /*!
       constructor from three real numbers, this is only allowed for DIM==3
     */
-    Point(const double x, const double y, const double z);
+    Point(const VALUE x, const VALUE y, const VALUE z);
 
     /*!
       size/dimension of the point (cf. std::vector signature)
@@ -95,20 +95,20 @@ namespace MathTL
       Matlab-style read-only access operator (operator [] is inherited
       from the Tensor class)
     */
-    const double operator () (const size_type i) const;
+    const VALUE operator () (const size_type i) const;
 
     /*!
       Matlab-style read-write access operator (operator [] is inherited
       from the Tensor class)
     */
-    double& operator () (const size_type i);
+    VALUE& operator () (const size_type i);
   };
 
   /*!
     stream output for points (overloaded from the tensor one)
    */
-  template <unsigned int DIM>
-  std::ostream& operator << (std::ostream& os, const Point<DIM>& p);
+  template <unsigned int DIM, class VALUE>
+  std::ostream& operator << (std::ostream& os, const Point<DIM, VALUE>& p);
 }
 
 #include "geometry/point.cpp"

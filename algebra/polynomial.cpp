@@ -14,7 +14,12 @@ namespace MathTL
 {
   template <class C>
   Polynomial<C>::Polynomial()
-    : Vector<C>(1)
+    : Vector<C>(1), Function<1,C>()
+  {
+  }
+
+  template <class C>
+  Polynomial<C>::~Polynomial()
   {
   }
 
@@ -46,6 +51,18 @@ namespace MathTL
     Vector<C>::operator [] (k) = coeff;
   }
 
+  template <class C>
+  C Polynomial<C>::value(const Point<1>& p,
+			 const unsigned int component) const
+  {
+    return 0.0;
+  }
+
+  template <class C>
+  void Polynomial<C>::vector_value(const Point<1> &p,
+				   Array1D<C>& values) const
+  {
+  }
 
 //   Polynomial::Polynomial(const Polynomial &p)
 //   {

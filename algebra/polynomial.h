@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <algebra/vector.h>
+#include <utils/function.h>
 
 namespace MathTL
 {
@@ -30,18 +31,25 @@ namespace MathTL
     - symbolic differentiation and integration
     - exact integration over an interval (with or without quadrature formulae)
 
-    Since polynomials are completely determined by their coefficients,
-    we derive the class from Vector<C>.
+    We derive Polynomial<C> from the class Function<1>, as it is indeed
+    one. Since polynomials are completely determined by their coefficients,
+    we derive the class also from Vector<C>, but protected to hide the Vector
+    signature.
   */
   template <class C>
   class Polynomial
-    : protected Vector<C>
+    : protected Vector<C>, public Function<1, C>
   {
   public:
     /*!
       default constructor: yields the zero polynomial of degree zero
     */
     Polynomial();
+
+    /*!
+      virtual destructor
+    */
+    virtual ~Polynomial();
     
     /*!
       degree of the polynomial
@@ -57,6 +65,18 @@ namespace MathTL
       write access to single coefficients
     */
     void set_coefficient(const unsigned int k, const C coeff);
+
+    /*!
+      evaluate the polynomial (Horner scheme)
+    */
+    C value(const Point<1>& p,
+	    const unsigned int component = 0) const;
+
+    /*!
+      evaluate the polynomial (Horner scheme)
+    */
+    void vector_value(const Point<1> &p,
+		      Array1D<C>& values) const;
   };
 
 //   class Polynomial

@@ -15,8 +15,8 @@
 
 namespace MathTL
 {
-  template <unsigned int RANK, unsigned int DIM> class Tensor;
-  template <unsigned int DIM> class Tensor<1, DIM>;
+  template <unsigned int RANK, unsigned int DIM, class VALUE> class Tensor;
+  template <unsigned int DIM, class VALUE> class Tensor<1, DIM, VALUE>;
 
   /*!
     This class models tensors of an arbitrary rank r on the Euclidean space
@@ -24,7 +24,7 @@ namespace MathTL
     rank. Tensors of rank 1 are modeled via template specialization
     in tensor_base.h .
   */
-  template <unsigned int RANK, unsigned int DIM>
+  template <unsigned int RANK, unsigned int DIM, class VALUE = double>
   class Tensor
   {
   public:
@@ -32,7 +32,7 @@ namespace MathTL
       type of internal storage object, due to the recursive structure it
       is just a tensor with lower rank
      */
-    typedef Tensor<RANK-1, DIM> value_type;
+    typedef Tensor<RANK-1, DIM, VALUE> value_type;
 
     /*!
       size type
@@ -63,62 +63,62 @@ namespace MathTL
     /*!
       read-only access to the subtensors
     */
-    const Tensor<RANK-1, DIM>& operator [] (const size_type i) const;
+    const Tensor<RANK-1, DIM, VALUE>& operator [] (const size_type i) const;
 
     /*!
       read-write access to the subtensors
     */
-    Tensor<RANK-1, DIM>& operator [] (const size_type i);
+    Tensor<RANK-1, DIM, VALUE>& operator [] (const size_type i);
 
     /*!
       assignment of a tensor
     */
-    Tensor<RANK, DIM>& operator = (const Tensor<RANK, DIM>&);
+    Tensor<RANK, DIM, VALUE>& operator = (const Tensor<RANK, DIM, VALUE>&);
 
     /*!
       equality test of two tensors
     */
-    bool operator == (const Tensor<RANK, DIM>&) const;
+    bool operator == (const Tensor<RANK, DIM, VALUE>&) const;
 
     /*!
       non-equality test of two tensors
     */
-    bool operator != (const Tensor<RANK, DIM>&) const;
+    bool operator != (const Tensor<RANK, DIM, VALUE>&) const;
 
     /*!
       in-place sum of two tensors
     */
-    Tensor<RANK, DIM>& operator += (const Tensor<RANK, DIM>&);
+    Tensor<RANK, DIM, VALUE>& operator += (const Tensor<RANK, DIM, VALUE>&);
 
     /*!
       in-place difference of two tensors
     */
-    Tensor<RANK, DIM>& operator -= (const Tensor<RANK, DIM>&);
+    Tensor<RANK, DIM, VALUE>& operator -= (const Tensor<RANK, DIM, VALUE>&);
 
     /*!
       in-place multiplication of a tensor with a scalar from the left
     */
-    Tensor<RANK, DIM>& operator *= (const double s);
+    Tensor<RANK, DIM, VALUE>& operator *= (const double s);
 
     /*!
       in-place division of a tensor by a scalar
     */
-    Tensor<RANK, DIM>& operator /= (const double s);
+    Tensor<RANK, DIM, VALUE>& operator /= (const double s);
 
     /*!
       sum of two tensors (makes a copy)
     */
-    Tensor<RANK, DIM> operator + (const Tensor<RANK, DIM>&) const;
+    Tensor<RANK, DIM, VALUE> operator + (const Tensor<RANK, DIM, VALUE>&) const;
 
     /*!
       difference of two tensors (makes a copy)
     */
-    Tensor<RANK, DIM> operator - (const Tensor<RANK, DIM>&) const;
+    Tensor<RANK, DIM, VALUE> operator - (const Tensor<RANK, DIM, VALUE>&) const;
 
     /*!
       tensor with negated entries
     */
-    Tensor<RANK, DIM> operator - () const;
+    Tensor<RANK, DIM, VALUE> operator - () const;
     
     /*!
       estimate memory consumption in bytes
@@ -128,7 +128,7 @@ namespace MathTL
   protected:
     // internally, we store a tensor of rank r just as a d-dimensional array
     // of tensors of lower rank
-    Tensor<RANK-1, DIM> subtensor[DIM];
+    Tensor<RANK-1, DIM, VALUE> subtensor[DIM];
   };
 
   //
@@ -140,14 +140,16 @@ namespace MathTL
     due to the recursive structure, the elements of the tensor are printed
     with one blank in between, two blanks between rank 1 subtensors and so on.
   */
-  template <unsigned int RANK, unsigned int DIM>
-    std::ostream& operator << (std::ostream& os, const Tensor<RANK, DIM>& T);
+  template <unsigned int RANK, unsigned int DIM, class VALUE>
+  std::ostream& operator << (std::ostream& os,
+			     const Tensor<RANK, DIM, VALUE>& T);
 
   /*!
     stream output for dimension 1 tensors
   */
-  template <unsigned int RANK>
-    std::ostream& operator << (std::ostream& os, const Tensor<RANK, 1>& T);
+  template <unsigned int RANK, class VALUE>
+    std::ostream& operator << (std::ostream& os,
+			       const Tensor<RANK, 1, VALUE>& T);
 }
 
 // include implementation of inline functions

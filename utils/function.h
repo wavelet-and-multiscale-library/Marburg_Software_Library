@@ -16,9 +16,9 @@
 
 namespace MathTL
 {
-  template <unsigned int DIM> class Point;
-  template <unsigned int RANK, unsigned int DIM> class Tensor;
-  template <unsigned int DIM> class Tensor<1, DIM>;
+  template <unsigned int DIM, class VALUE> class Point;
+  template <unsigned int RANK, unsigned int DIM, class VALUE> class Tensor;
+  template <unsigned int DIM, class VALUE> class Tensor<1, DIM, VALUE>;
 
   /*!
     Base class for scalar or vector-valued functions on \mathbb R^d
@@ -26,7 +26,7 @@ namespace MathTL
     (this function model is essetially compatible to that of the deal.II
     library, version 5)
    */
-  template <unsigned int DIM>
+  template <unsigned int DIM, class VALUE = double>
   class Function : public FunctionTime
   {
   public:
@@ -61,8 +61,8 @@ namespace MathTL
     /*!
       evaluate (a component of) the function
     */
-    virtual double value (const Point<DIM>& p,
-			  const unsigned int component = 0) const = 0;
+    virtual VALUE value (const Point<DIM>& p,
+			 const unsigned int component = 0) const = 0;
 
     /*!
       evaluate the function
@@ -84,9 +84,9 @@ namespace MathTL
   /*!
     scalar or vector valued zero function
    */
-  template <unsigned int DIM>
+  template <unsigned int DIM, class VALUE = double>
   class ZeroFunction
-    : public Function<DIM>
+    : public Function<DIM, VALUE>
   {
   public:
     /*!
@@ -102,14 +102,14 @@ namespace MathTL
     /*!
       evaluate one component of the zero function
      */
-    double value(const Point<DIM>& p,
-		 const unsigned int component = 0) const;
+    VALUE value(const Point<DIM>& p,
+		const unsigned int component = 0) const;
 
     /*!
       evaluate the zero function
     */
     void vector_value(const Point<DIM> &p,
-		      Array1D<double>& values) const;
+		      Array1D<VALUE>& values) const;
   };
   
 }

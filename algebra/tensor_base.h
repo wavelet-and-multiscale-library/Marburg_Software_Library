@@ -17,21 +17,21 @@
 namespace MathTL
 {
   // general template declaration, see tensor.h
-  template <unsigned int RANK, unsigned int DIM> class Tensor;
-  template <unsigned int DIM> class Tensor<1, DIM>;
+  template <unsigned int RANK, unsigned int DIM, class VALUE> class Tensor;
+  template <unsigned int DIM, class VALUE> class Tensor<1, DIM, VALUE>;
 
   /*!
     Special version of tensors of rank 1 on the Euclidean space
     \mathbb R^d, i.e., vectors of dimension DIM.
   */
-  template <unsigned int DIM>
-    class Tensor<1, DIM>
+  template <unsigned int DIM, class VALUE = double>
+  class Tensor<1, DIM, VALUE>
   {
   public:
     /*!
       type of internal storage object: a real number
      */
-    typedef double value_type;
+    typedef VALUE value_type;
 
     /*!
       size type
@@ -79,52 +79,52 @@ namespace MathTL
     /*!
       equality test of two tensors
     */
-    bool operator == (const Tensor<1, DIM>&) const;
+    bool operator == (const Tensor<1, DIM, VALUE>&) const;
 
     /*!
       non-equality test of two tensors
     */
-    bool operator != (const Tensor<1, DIM>&) const;
+    bool operator != (const Tensor<1, DIM, VALUE>&) const;
 
     /*!
       in-place addition of two tensors
     */
-    Tensor<1, DIM>& operator += (const Tensor<1, DIM>&);
+    Tensor<1, DIM, VALUE>& operator += (const Tensor<1, DIM, VALUE>&);
 
     /*!
       in-place subtraction of two tensors
     */
-    Tensor<1, DIM>& operator -= (const Tensor<1, DIM>&);
+    Tensor<1, DIM, VALUE>& operator -= (const Tensor<1, DIM, VALUE>&);
 
     /*!
       in-place multiplication of a tensor with a scalar from the left
     */
-    Tensor<1, DIM>& operator *= (const double s);
+    Tensor<1, DIM, VALUE>& operator *= (const double s);
 
     /*!
       in-place division of a tensor by a scalar
     */
-    Tensor<1, DIM>& operator /= (const double s);
+    Tensor<1, DIM, VALUE>& operator /= (const double s);
 
     /*!
       sum of two tensors (makes a copy)
     */
-    Tensor<1, DIM> operator + (const Tensor<1, DIM>&) const;
+    Tensor<1, DIM, VALUE> operator + (const Tensor<1, DIM, VALUE>&) const;
 
     /*!
       difference of two tensors (makes a copy)
     */
-    Tensor<1, DIM> operator - (const Tensor<1, DIM>&) const;
+    Tensor<1, DIM, VALUE> operator - (const Tensor<1, DIM, VALUE>&) const;
 
     /*!
       tensor with negated entries
     */
-    Tensor<1, DIM> operator - () const;
+    Tensor<1, DIM, VALUE> operator - () const;
     
     /*!
       inner product of two rank 1 tensors (scalar product)
     */
-    double operator * (const Tensor<1, DIM>&) const;
+    double operator * (const Tensor<1, DIM, VALUE>&) const;
 
     /*!
       estimate memory consumption in bytes
@@ -141,14 +141,16 @@ namespace MathTL
   /*!
     stream output for rank 1 tensors
   */
-  template <unsigned int DIM>
-    std::ostream& operator << (std::ostream& os, const Tensor<1, DIM>& T);
+  template <unsigned int DIM, class VALUE>
+    std::ostream& operator << (std::ostream& os,
+			       const Tensor<1, DIM, VALUE>& T);
 
   /*!
     stream output for rank and dimension 1 tensors
   */
-  std::ostream& operator << (std::ostream& os, const Tensor<1, 1>& T);
-
+  template <class VALUE>
+  std::ostream& operator << (std::ostream& os,
+			     const Tensor<1, 1, VALUE>& T);
 }
 
 #include <algebra/tensor_base.cpp>

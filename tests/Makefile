@@ -8,7 +8,7 @@
 MATHTL_DIR = $(HOME)/c++/MathTL
 
 CXX = g++
-CXXFLAGS += -I$(MATHTL_DIR) -Wall
+CXXFLAGS += -I$(MATHTL_DIR) -Wall -pipe
 
 EXEOBJF = \
   test_random.o\

@@ -55,7 +55,7 @@ namespace MathTL
     square of l_2 norm
   */
   template <class VECTOR>
-  const double norm_sqr(const VECTOR& v)
+  const double l2_norm_sqr(const VECTOR& v)
   {
     double r(0.0);
 
@@ -71,7 +71,7 @@ namespace MathTL
   template <class VECTOR>
   const double l2_norm(const VECTOR& v)
   {
-    return sqrt(norm_sqr(v));
+    return sqrt(l2_norm_sqr(v));
   }
 
   /*!

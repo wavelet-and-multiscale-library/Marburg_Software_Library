@@ -14,6 +14,7 @@
 #include <utils/function.h>
 #include <algebra/infinite_vector.h>
 #include <algebra/polynomial.h>
+#include <algebra/laurent_polynomial.h>
 #include <geometry/point.h>
 #include <utils/multiindex.h>
 
@@ -59,6 +60,12 @@ namespace MathTL
       constructor from a constant
     */
     explicit MultivariateLaurentPolynomial(const R c);
+
+    /*!
+      constructor from a univariate Laurent polynomial,
+      embedding via z -> z_{n+1}
+    */
+    MultivariateLaurentPolynomial(const LaurentPolynomial<R>& p, const unsigned int n = 0);
 
     /*!
       virtual destructor

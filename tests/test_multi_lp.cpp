@@ -59,6 +59,12 @@ int main()
   cout << "p=" << p << ", q=" << q << endl;
   cout << "p*q: " << p*q << endl;
 
+  LaurentPolynomial<double> uni(42);
+  uni.set_coefficient(2, -3.14);
+  cout << "- construction from a univariate Laurent polynomial:" << endl
+       << MultivariateLaurentPolynomial<double, 3>(uni) << endl
+       << MultivariateLaurentPolynomial<double, 3>(uni, 2) << endl;
+
 //   cout << "(1+z)^2: ";
 //   LaurentPolynomial<double> s(1);
 //   s.set_coefficient(1, 1);

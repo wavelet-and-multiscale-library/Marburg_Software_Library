@@ -24,6 +24,21 @@ namespace MathTL
   }
 
   template <class R, unsigned int DIMENSION>
+  MultivariateLaurentPolynomial<R, DIMENSION>::MultivariateLaurentPolynomial
+  (const LaurentPolynomial<R>& p, const unsigned int n)
+    : InfiniteVector<R, MultiIndex<int, DIMENSION> >(), Function<DIMENSION, R>()
+  {
+    for (typename LaurentPolynomial<R>::const_iterator it(p.begin());
+	 it != p.end(); ++it)
+      {
+	MultiIndex<int, DIMENSION> index;
+	for (unsigned int i(0); i < DIMENSION; i++) index[i] = 0;
+	index[n] = it.index();
+	set_coefficient(index, *it);
+      }
+  }
+
+  template <class R, unsigned int DIMENSION>
   MultivariateLaurentPolynomial<R, DIMENSION>::~MultivariateLaurentPolynomial()
   {
   }

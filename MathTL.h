@@ -33,6 +33,7 @@
 #include <io/vector_io.h>
 
 #include <geometry/point.h>
+#include <geometry/grid.h>
 
 #include <numerics/iteratsolv.h>
 #include <numerics/eigenvalues.h>

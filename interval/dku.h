@@ -12,7 +12,7 @@
 
 #include <iostream>
 #include <cmath>
-#include <Rd/cdf_util.h>
+#include <Rd/cdf_utils.h>
 #include <Rd/cdf_basis.h>
 #include <algebra/matrix.h>
 #include <utils/array1d.h>

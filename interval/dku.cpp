@@ -3,6 +3,10 @@
 #include <cmath>
 #include <iostream>
 #include <utils/tiny_tools.h>
+#include <Rd/haar_mask.h>
+#include <Rd/cdf_mask.h>
+#include <Rd/dm_mask.h>
+#include <Rd/multi_refinable.h>
 
 using std::cout;
 using std::endl;
@@ -98,7 +102,10 @@ namespace WaveletTL
   }
 
   template <int d, int dt>
-  DKUBasis<d, dt>::DKUBasis()
+  DKUBasis<d, dt>::DKUBasis(const Array1D<int>& primalBC,
+			    const Array1D<int>& dualBC)
+    : primalBC_(primalBC),
+      dualBC_(dualBC)
   {
     ell1_ = -(d/2);
     ell2_ = d-d/2;
@@ -107,14 +114,6 @@ namespace WaveletTL
     ellT_ = ell2T_;
     ell_ = ellT_-(dt-d);
     
-//     cout << "ell1  = " << ell1_ << endl;
-//     cout << "ell2  = " << ell2_ << endl;
-//     cout << "ell1T = " << ell1T_ << endl;
-//     cout << "ell2T = " << ell2T_ << endl;
-//     cout << "ellT  = " << ellT_ << endl;
-//     cout << "ell   = " << ell_ << endl;
-//     cout << cdf_.a() << endl;
-
     // setup Alpha
     Alpha_.resize(ellT()+ell2T()-1, dt);
     for (unsigned int m(0); m < Alpha_.row_dimension(); m++)
@@ -195,8 +194,38 @@ namespace WaveletTL
       for (int m(2*ell()+ell1()); m <= 2*ell()+ell2()-2; m++)
 	BetaLT_(m-2*ell()-ell1(), r) = betaLT_(m, r);
     
+    // setup GammaL:
+    //
+    // 1. compute the integrals
+    //      z(s,t) = \int_0^1\phi(x-s)\tilde\phi(x-t)\,dx
+    //    exactly with the [DM] trick
+    MultivariateRefinableFunction<DMMask2<HaarMask, CDFMask_primal<d>, CDFMask_dual<d, dt> >, 2> zmask;
+    InfiniteVector<double, MultiIndex<int, 2> > zvalues(zmask.evaluate());
+    //
+    // 2. compute the integrals
+    //      I(nu,mu) = \int_0^\infty\phi(x-\nu)\tilde\phi(x-\mu)\,dx
+    //    exactly using the z(s,t) values
+    Matrix<double> I(ell()-d+dt-1+ell2(), ellT()-1+ell2T());
+    for (int nu(-ell2()+1); nu <= -ell1()-1; nu++)
+      for (int mu(-ell2T()+1); mu <= -ell1T()-1; mu++)
+ 	{
+ 	  double help(0);
+ 	  int diff(mu - nu);
+ 	  for (int s(max(-ell2()+1, -ell2T()+1-diff)); s <= nu; s++)
+ 	    help += zvalues.get_coefficient(MultiIndex<int, 2>(s, s+diff));
+	  
+ 	  I(nu+ell2()-1, mu+ell2T()-1) = help; // (5.1.7)
+ 	}
+    for (int nu(-ell2()+1); nu <= ell()-d+dt-1; nu++)
+      for (int mu(-ell2T()+1); mu <= ellT()-1; mu++)
+	{
+	  if ((nu >= -ell1()) || ((nu <= ell()-1) && (mu >= -ell1T())))
+	    I(nu+ell2()-1, mu+ell2T()-1) = (nu == mu ? 1 : 0);
+	}
+    //
+    // 3. 
     
-
+    
 //     // check Alpha
 //     cout << Alpha_ << endl;
 //     for (int m(-ell2T()+1); m <= ellT()-1; m++) {

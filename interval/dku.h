@@ -14,6 +14,7 @@
 #include <cmath>
 #include <Rd/cdf_basis.h>
 #include <algebra/matrix.h>
+#include <utils/array1d.h>
 
 using MathTL::Matrix;
 
@@ -29,8 +30,14 @@ namespace WaveletTL
   class DKUBasis
   {
   public:
-    //! default constructor
-    DKUBasis();
+    /*!
+      constructor:
+
+      + primalBC: order of primal boundary conditions
+      + dualBC  : order of dual boundary conditions
+    */
+    DKUBasis(const Array1D<int>& primalBC,
+	     const Array1D<int>& dualBC);
 
     //! left support bound for a primal CDF function
     inline const int ell1() const { return ell1_; }
@@ -63,6 +70,9 @@ namespace WaveletTL
 
     Matrix<double> Alpha_, AlphaT_;
     Matrix<double> BetaL_, BetaLT_;
+    Matrix<double> GammaL_;
+
+    Array1D<int> primalBC_, dualBC_;
 
   private:
     // private helper routines

@@ -95,5 +95,10 @@ int main()
   for (set<MI>::const_iterator it(degree4.begin()); it != degree4.end(); ++it)
     cout << *it << endl;
 
+  MI gamma;
+  gamma[0] = 3; gamma[1] = 2;
+  cout << "- the 2-index gamma=" << gamma << " has degree "
+       << multi_degree(gamma) << " and faculty " << multi_faculty(gamma) << endl;
+
   return 0;
 }

@@ -43,14 +43,12 @@ inline R hypot(const R a, const R b)
   return r;
 }
 
-//! faculty of an integer
-inline int faculty (const int n)
+//! faculty of a (signed or unsigned) integer
+template <class I>
+I faculty (const I n)
 {
-  assert (n >= 0);
-  
-  int r(1);
-  for (int i(n); i > 1; r *= i, i--);
-  
+  I r(1);
+  for (I i(2); i <= n; r *= i, i++);
   return r;
 }
 

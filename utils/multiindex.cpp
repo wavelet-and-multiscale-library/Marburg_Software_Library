@@ -1,6 +1,7 @@
 // implementation for multiindex.h
 #include <cassert>
 #include <algorithm>
+#include <utils/tiny_tools.h>
 
 namespace MathTL
 {
@@ -108,6 +109,24 @@ namespace MathTL
 	  }	
       }
 
+    return r;
+  }
+
+  template <unsigned int DIMENSION>
+  unsigned int multi_degree(const MultiIndex<unsigned int, DIMENSION>& alpha)
+  {
+    unsigned int r(alpha[0]);
+    for (unsigned int i(1); i < DIMENSION; i++)
+      r += alpha[i];
+    return r;
+  }
+
+  template<unsigned int DIMENSION>
+  unsigned int multi_faculty(const MultiIndex<unsigned int, DIMENSION>& alpha)
+  {
+    unsigned int r(faculty(alpha[0]));
+    for (unsigned int i(1); i < DIMENSION; i++)
+      r *= faculty(alpha[i]);
     return r;
   }
 }

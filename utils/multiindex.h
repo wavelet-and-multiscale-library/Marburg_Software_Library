@@ -67,17 +67,29 @@ namespace MathTL
       \alpha \le \gamma \le \beta
     holds.
   */
-  template<class I, unsigned int DIMENSION>
+  template <class I, unsigned int DIMENSION>
   std::set<MultiIndex<I, DIMENSION> >
   cuboid_indices(const MultiIndex<I, DIMENSION>& alpha,
 		 const MultiIndex<I, DIMENSION>& beta);
+
+  /*!
+    degree of a multiindex \alpha\in\mathbb N^d
+  */
+  template <unsigned int DIMENSION>
+  unsigned int multi_degree(const MultiIndex<unsigned int, DIMENSION>& alpha);
+
+  /*!
+    faculty of a multiindex \alpha\in\mathbb N^d
+  */
+  template <unsigned int DIMENSION>
+  unsigned int multi_faculty(const MultiIndex<unsigned int, DIMENSION>& alpha);
 
   /*!
     Compute all multiindices \alpha\in\mathbb N^d with degree |\alpha|=k
   */
   template <unsigned int DIMENSION>
   std::set<MultiIndex<unsigned int, DIMENSION> >
-  degree_indices(const unsigned int k);
+  degree_indices(const unsigned int k);  
   
   //! stream output
   template<class I, unsigned int DIMENSION>

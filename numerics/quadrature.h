@@ -42,12 +42,22 @@ namespace MathTL
     QuadratureRule();
 
     /*!
+      copy constructor: copy points and weights
+    */
+    QuadratureRule(const QuadratureRule<DIM>& Q);
+
+    /*!
       construct quadrature rule as a tensor product from
       a lower dimensional one and a one-dimensional one
     */
     QuadratureRule(const SubQuadratureRule& Q,
  		   const QuadratureRule<1>& Q1);
     
+    /*!
+      virtual destructor
+    */
+    virtual ~QuadratureRule();
+
     /*!
       return number of quadrature points
     */
@@ -143,7 +153,7 @@ namespace MathTL
   /*!
     construct composite quadrature rule from a simple one
    */
-  template <unsigned int DIM, class QUADRATURE>
+  template <unsigned int DIM>
   class CompositeRule
     : public QuadratureRule<DIM>
   {
@@ -152,23 +162,32 @@ namespace MathTL
       construct composite quadrature rule on [0,1]^{DIM} with
       N subintervals from a simple quadrature rule
     */
-    CompositeRule(const unsigned int N = 1);
+    CompositeRule(const QuadratureRule<1>& Q,
+		  const unsigned int N = 1);
     
   protected:
     /*!
       basic 1D quadrature rule
     */
-    QUADRATURE Q_;
+    const QuadratureRule<1> Q_;
 
     /*!
       number of subintervals
     */
     unsigned int N_;
+
+  private:
+    /*!
+      check whether a given 1D quadrature rule uses both endpoints
+      (needed to glue N quadrature rules neatly together,
+      this is only called for DIM==1)
+    */
+    static bool uses_both_endpoints(const QuadratureRule<1>& Q);
   };
 }
 
 
-// include implementation of inline functions
+// include implementation of inline functions and specializations
 #include <numerics/quadrature.cpp>
 
 #endif

@@ -111,24 +111,34 @@ int main()
   cout << "- construct a 2D Quadrature rule as a tensor product," << endl
        << "  points: " << points2D << ", weights: " << weights2D << endl;
   
-//   for (unsigned int N(1); N <= (1<<4); N <<= 1)
-//     {
-//       CompositeRule<1, SimpsonRule> CompTQ(N);
-//       cout << "* composite rule (trapez., N=" << N << "): "
-//   	   << CompTQ.integrate(g) << endl;
-//     }
-//   for (int N(1); N <= (1<<4); N <<= 1)
-//     {
-//       CompositeRule<SimpsonRule> CompSQ(0.0, M_PI, N);
-//       cout << "* composite rule (Simpson, N=" << N << "): "
-// 	   << CompSQ.integrate(g) << endl;
-//     }
-//   for (int N(1); N <= (1<<4); N <<= 1)
-//     {
-//       CompositeRule<GaussLegendreRule<2> > CompSQ(0.0, M_PI, N);
-//       cout << "* composite rule (2-point Gauss, N=" << N << "): "
-// 	   << CompSQ.integrate(g) << endl;
-//     }
+  cout << "- construct 1D composite rules:" << endl;
+  for (unsigned int N(1); N <= (1<<4); N <<= 1)
+    {
+      CompositeRule<1> CompTQ(TQ, N);
+      cout << "* trapezoidal composite rule with " << N
+	   << " subdivisions," << endl
+	   << "  integration: "
+	   << CompTQ.integrate(g) << endl;
+//       Array1D<Point<1> > points;
+//       Array1D<double> weights;
+//       CompTQ.get_points(points);
+//       CompTQ.get_weights(weights);
+//       cout << "  points: " << points << ", weights: " << weights << endl;
+    }
+
+  for (unsigned int N(1); N <= (1<<4); N <<= 1)
+    {
+      CompositeRule<1> CompG2Q(G2Q, N);
+      cout << "* Gauss 2-point composite rule with " << N
+ 	   << " subdivisions," << endl
+	   << "  integration: "
+	   << CompG2Q.integrate(g) << endl;
+//       Array1D<Point<1> > points;
+//       Array1D<double> weights;
+//       CompG2Q.get_points(points);
+//       CompG2Q.get_weights(weights);
+//       cout << "  points: " << points << ", weights: " << weights << endl;
+    }
 
 //   Bspline<2> N2;
 //   cout << "- integrating N_2 with composite rules:" << endl;

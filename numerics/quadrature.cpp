@@ -10,6 +10,18 @@ namespace MathTL
   {
   }
 
+  template <>
+  QuadratureRule<0>::QuadratureRule()
+  {
+    // empty quadrature rule
+  }
+
+  template <unsigned int DIM>
+  QuadratureRule<DIM>::QuadratureRule(const QuadratureRule<DIM>& Q)
+    : points_(Q.points_), weights_(Q.weights_)
+  {
+  }
+
   template <unsigned int DIM>
   QuadratureRule<DIM>::QuadratureRule(const SubQuadratureRule& Q,
 				      const QuadratureRule<1>& Q1)
@@ -34,6 +46,17 @@ namespace MathTL
 	  points_[current_index](DIM-1) = Q1points[j](0);
 	  weights_[current_index] = Qweights[i] * Q1weights[j];
 	}
+  }
+  template <>
+  QuadratureRule<1>::QuadratureRule(const QuadratureRule<0>& Q,
+				    const QuadratureRule<1>& Q1)
+  {
+    assert(false); // this constructor should never be called
+  }
+
+  template <unsigned int DIM>
+  QuadratureRule<DIM>::~QuadratureRule()
+  {
   }
 
   template <unsigned int DIM>
@@ -142,33 +165,102 @@ namespace MathTL
       }
   }
 
-  template <unsigned int DIM, class QUADRATURE>
-  CompositeRule<DIM, QUADRATURE>::CompositeRule(const unsigned int N)
-    : Q_(), N_(N)
+  template <unsigned int DIM>
+  CompositeRule<DIM>::CompositeRule(const QuadratureRule<1>& Q,
+				    const unsigned int N)
+    : QuadratureRule<DIM>(CompositeRule<DIM-1>(Q, N),
+			  CompositeRule<1>(Q, N)),
+      Q_(Q), N_(N)
   {
-//     points_.resize((N+1)*DIM);
-//     cout << "after points.resize" << endl;
-//     weights_.resize((N+1)*DIM);
   }
 
-//   template <class Q>
-//   CompositeRule<Q>::CompositeRule(const double a, const double b, const int N)
-//     : a_(a), b_(b), N_(N) {}
+  template <>
+  bool CompositeRule<1>::uses_both_endpoints(const QuadratureRule<1>& Q)
+  {
+    bool left(false), right(false);
 
-//   template <class Q>
-//   template <class FUNCTION>
-//   double CompositeRule<Q>::integrate(FUNCTION f) const
-//   {
-//     double r(0);
-//     for (int k(0); k < N_; k++)
-//       {
-// 	// TODO: use only one internal instance of Q
-// 	// -> maybe we can use templates afterwards!
-// 	r += Q(a_+k*(b_-a_)/N_, a_+(k+1)*(b_-a_)/N_).integrate(f);
-//       }
+    Array1D<Point<1> > points;
+    Q.get_points(points);
+    Array1D<double> weights;
+    Q.get_weights(weights);
 
-//     return r;
-//   }
+    for (unsigned int i(0); i < Q.get_N(); i++)
+      {
+	if (points[i] == Point<1>(0.0)) left = true;
+	if (points[i] == Point<1>(1.0)) right = true;
+      }
 
+    return (left && right);
+  }  
 
+  template <>
+  CompositeRule<1>::CompositeRule(const QuadratureRule<1>& Q,
+				  const unsigned int N)
+    : Q_(Q), N_(N)
+  {
+    Array1D<Point<1> > points;
+    Q.get_points(points);
+    Array1D<double> weights;
+    Q.get_weights(weights);
+
+    // check whether we have to take care of double points
+    if (uses_both_endpoints(Q))
+      {
+	points_.resize(N*(Q.get_N()-1)+1);
+	weights_.resize(N*(Q.get_N()-1)+1);
+
+	// the double points have to be glued,
+	// which changes their weight
+	double double_point_weight(0.0);
+	unsigned int n_end_points(0);
+	for (unsigned int i(0); i < Q.get_N(); i++)
+	  if (points[i] == Point<1>(0.0) ||
+	      points[i] == Point<1>(1.0))
+	    {
+	      double_point_weight += weights[i];
+	      n_end_points++;
+	    }
+
+	double_point_weight /= N;
+
+	// the base quadrature formula should not have doubly used points:
+	assert(n_end_points == 2);
+
+	unsigned int next_point(0);
+	for (unsigned int copy(0); copy < N; copy++)
+	  for (unsigned int q_point(0); q_point < Q.get_N(); q_point++)
+	    {
+	      if (copy > 0 && points[q_point] == Point<1>(0.0))
+		continue;
+	      
+	      points_[next_point]
+		= Point<1>(points[q_point](0)/N + (1.0*copy)/N);
+
+	      if (copy != N-1 && points[q_point] == Point<1>(1.0))
+		weights_[next_point] = double_point_weight;
+	      else
+		weights_[next_point] = weights[q_point]/N;
+
+	      next_point++;
+	    }
+      }
+    else
+      {
+	points_.resize(N*Q.get_N());
+	weights_.resize(N*Q.get_N());
+
+	// we can just copy the points appropriately
+	unsigned int next_point(0);
+	for (unsigned int copy(0); copy < N; copy++)
+	  for (unsigned int q_point(0); q_point < Q.get_N(); q_point++)
+	    {
+	      points_[next_point]
+		= Point<1>(points[q_point](0)/N + (1.0*copy)/N);
+	      weights_[next_point]
+		= weights[q_point]/N;
+	      
+	      next_point++;
+	    }
+      }
+  }
 }

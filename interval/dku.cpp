@@ -105,7 +105,7 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
-  DKUBasis<d, dT>::DKUBasis(BiorthogonalizationMethod bio)
+  DKUBasis<d, dT>::DKUBasis(DKUBiorthogonalizationMethod bio)
     : ell1_(ell1<d>()),
       ell2_(ell2<d>()),
       ell1T_(ell1T<d,dT>()),
@@ -230,26 +230,41 @@ namespace WaveletTL
 	GammaL_(r, k) = help; // (5.1.5)
       }
     
-    // setup CL
-    switch(bio) {
-    case none:
-    default:
-      for (int i(0); i < dT; i++)
+    // setup CL and CLT
+    if (bio == none) {
+      for (unsigned int i(0); i < dT; i++)
 	CL_(i, i) = 1.0;
-    };
 
-    // setup CLT
-    Matrix<double> CLGammaLInv;
-    QRDecomposition<double>(CL_ * GammaL_).inverse(CLGammaLInv);
-    CLT_ = transpose(CLGammaLInv);
+      Matrix<double> CLGammaLInv;
+      QRDecomposition<double>(CL_ * GammaL_).inverse(CLGammaLInv);
+      CLT_ = transpose(CLGammaLInv);
+    }
 
-#if 1
+    if (bio == SVD) {
+      MathTL::SVD<double> svd(GammaL_);
+      Matrix<double> U, V;
+      Vector<double> S;
+      svd.getU(U);
+      svd.getV(V);
+      svd.getS(S);
+
+      for (unsigned int i(0); i < dT; i++) {
+	S[i] = 1.0 / sqrt(S[i]);
+	for (unsigned int j(0); j < dT; j++) {
+	  CL_(i, j) = S[i] * U(j, i);
+	  CLT_(i, j) = S[i] * V(i, j);
+	}
+      }
+    }
+
+#if 0
     // check matrix product CL * GammaL * (CLT)^T
     Matrix<double> check(CL_ * GammaL_ * transpose(CLT_));
     for (unsigned int i(0); i < check.row_dimension(); i++)
       check(i, i) -= 1;
     cout << "error for CLT: " << row_sum_norm(check) << endl;
 #endif
+
 
   }
 }

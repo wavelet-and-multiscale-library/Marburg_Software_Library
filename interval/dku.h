@@ -22,12 +22,22 @@ using MathTL::Matrix;
 namespace WaveletTL
 {
   /*!
-    Template class for the wavelet bases on the interval introduced in [DKU].
+    biorthogonalization method for the DKU basis
+  */
+  enum DKUBiorthogonalizationMethod
+    {
+      none, // C_L = I
+      SVD   // Gamma_L = U*S*V, C_L = S^{-1/2}U^T, C_L_T = S^{-1/2}V
+    };
 
-    Please note that in this class, we follow the _original_ construction
-    without the modifications done in [DS].
+  /*!
+    Template class for the wavelet bases on the interval introduced in [DKU], [DS].
+    All formulas refer to [DKU], except those explicitly denoted by [DS].
 
     References:
+    [B]   Barsch:
+          Adaptive Multiskalenverfahren fuer elliptische partielle Dgln. - Realisierung,
+	  Umsetzung und numerische Ergebnisse
     [DKU] Dahmen, Kunoth, Urban:
           Biorthogonal spline-wavelets on the interval - Stability and moment conditions
     [DS]  Dahmen, Schneider:
@@ -37,16 +47,11 @@ namespace WaveletTL
   class DKUBasis
   {
   public:
-    enum BiorthogonalizationMethod
-      {
-	none // C_L = I
-      };
-    
     /*!
       constructor
       (ellT = ell2T)
     */
-    explicit DKUBasis(BiorthogonalizationMethod bio = none);
+    explicit DKUBasis(DKUBiorthogonalizationMethod bio = none);
 
     //! DKU parameter ell-tilde (3.2.10)
     inline const int ellT() const { return ellT_; }

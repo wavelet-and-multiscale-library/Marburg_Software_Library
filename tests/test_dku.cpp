@@ -9,9 +9,9 @@ int main()
 {
   cout << "Testing the DKU bases..." << endl;
 
-  const int d = 3;
-  const int dT = 5;
-  DKUBasis<d, dT> basis;
+  const int d = 2;
+  const int dT = 2;
+  DKUBasis<d, dT> basis(WaveletTL::SVD);
   cout << "- the (" << d << "," << dT << ") basis has j0=" << basis.j0() << endl;
 
   return 0;

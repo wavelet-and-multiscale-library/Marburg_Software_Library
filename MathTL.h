@@ -29,6 +29,7 @@
 #include <algebra/symmetric_matrix.h>
 #include <algebra/atra.h>
 #include <algebra/polynomial.h>
+#include <algebra/laurent_polynomial.h>
 
 #include <io/vector_io.h>
 #include <io/matrix_io.h>

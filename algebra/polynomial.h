@@ -59,7 +59,7 @@ namespace MathTL
     /*!
       constructor from a constant
     */
-    Polynomial(const C c);
+    explicit Polynomial(const C c);
 
     /*!
       virtual destructor

@@ -141,11 +141,29 @@ int main()
     }
 
   Bspline<2> N2;
-  cout << "- integrating N_2 with composite rules:" << endl;
+  cout << "- integrating N_2 with composite rules (should be 1):" << endl;
   for (int N(1); N <= (1<<3); N <<= 1)
     {
       cout << "* composite rule (trapez., N=" << N << "): "
 	   << CompositeRule<1>(TQ, N).integrate(N2, Point<1>(0.0), Point<1>(2.0))
+ 	   << endl;
+    }
+  
+  Bspline<3> N3;
+  cout << "- integrating N_3 with composite rules (should be 1):" << endl;
+  for (int N(1); N <= (1<<5); N <<= 1)
+    {
+      cout << "* composite rule (trapez., N=" << N << "): "
+	   << CompositeRule<1>(TQ, N).integrate(N3, Point<1>(0.0), Point<1>(3.0))
+ 	   << endl;
+    }
+  
+  Bspline<4> N4;
+  cout << "- integrating N_4 with composite rules (should be 1):" << endl;
+  for (int N(1); N <= (1<<5); N <<= 1)
+    {
+      cout << "* composite rule (trapez., N=" << N << "): "
+	   << CompositeRule<1>(TQ, N).integrate(N4, Point<1>(0.0), Point<1>(4.0))
  	   << endl;
     }
   

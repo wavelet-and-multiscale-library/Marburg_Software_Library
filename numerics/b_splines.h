@@ -18,11 +18,11 @@ namespace MathTL
   /*!
     evaluate a B-spline N_d(x) via recursion
   */
-  template <unsigned int d>
+  template <int d>
   double evaluate_Bspline(const double x)
   {
-    return x*evaluate_Bspline<d-1>(x)
-      + (d-x)*evaluate_Bspline<d-1>(x-1)/((double) d - 1);
+    return (x*evaluate_Bspline<d-1>(x)
+      + (d-x)*evaluate_Bspline<d-1>(x-1))/(d-1);
   }
  
   /*!
@@ -38,7 +38,7 @@ namespace MathTL
   /*!
     evaluate a shifted B-spline N_d(x-k) via recursion
   */
-  double EvaluateBspline(const unsigned int d, const int k, const double x)
+  double EvaluateBspline(const int d, const int k, const double x)
   {
     if (x < k)
       return 0.;
@@ -63,7 +63,7 @@ namespace MathTL
 		  }
 		else
 		  return ((x-k) * EvaluateBspline(d-1, k, x)
-			  + (k+d-x) * EvaluateBspline(d-1, k+1, x)) / (double)(d-1);
+			  + (k+d-x) * EvaluateBspline(d-1, k+1, x)) / (d-1);
 	      }
 	  }
       }
@@ -73,7 +73,7 @@ namespace MathTL
     evaluate a primal CDF function
       phi_{j,k}(x) = 2^{j/2}N_d(2^jx-k+d/2)
   */
-  inline double EvaluateBspline_td(const unsigned int d, const int j, const int k, const double x)
+  inline double EvaluateBspline_td(const int d, const int j, const int k, const double x)
   {
     const double factor(ldexp(1.0, j));
     return sqrt(factor) * EvaluateBspline(d, k, factor * x + d/2);
@@ -82,7 +82,7 @@ namespace MathTL
   /*!
     evaluate the first derivative N_d'(x-k) of a shifted B-spline
   */
-  inline double EvaluateBspline_x(const unsigned int d, const int k, const double x)
+  inline double EvaluateBspline_x(const int d, const int k, const double x)
   {
     if (d == 1)
       return 0.;
@@ -94,7 +94,7 @@ namespace MathTL
     evaluate the first derivative of a primal CDF function
       phi_{j,k}'(x) = 2^{j/2}N_d(2^jx-k+d/2)
   */
-  inline double EvaluateBspline_td_x(const unsigned int d, const int j, const int k, const double x)
+  inline double EvaluateBspline_td_x(const int d, const int j, const int k, const double x)
   {
     const double factor(ldexp(1.0, j));
     return factor * sqrt(factor) * EvaluateBspline_x(d, k, factor * x + d/2);
@@ -103,7 +103,7 @@ namespace MathTL
   /*!
     B-spline N_d(x) as Function object
   */
-  template <unsigned int d>
+  template <int d>
   class Bspline : public Function<1>
   {
   public:

@@ -62,7 +62,8 @@ namespace MathTL
   public:
     /*!
       default constructor: splines are real-valued;
-      the default knot sequence is {0,1,...,d} to house a cardinal B-spline
+      the default knot sequence is {0,1,...,d},
+      the default spline is a cardinal B-spline, alpha_j = delta_{j,0}
     */
     Spline()
       : Function<1>(1), knots_(d+1), coeffs_(1)
@@ -70,7 +71,7 @@ namespace MathTL
       for (unsigned int i(0); i <= d; i++)
 	knots_[i] = i;
 
-      coeffs_[0] = 1.0; // for testing purposes
+      coeffs_[0] = 1.0;
     }
 
     /*!

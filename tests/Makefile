@@ -14,7 +14,7 @@ EXEOBJF = \
   test_random.o\
   test_tensor.o test_point.o test_array1d.o\
   test_function.o test_polynomial.o test_laurent_polynomial.o\
-  test_vector.o test_vectorspeed.o test_matrix.o\
+  test_vector.o test_infinite_vector.o test_vectorspeed.o test_matrix.o\
   test_iteratsolv.o test_eigenvalues.o test_decomp.o\
   test_ortho_poly.o test_quadrature.o test_gauss_quadrature.o\
   test_recursion.o\

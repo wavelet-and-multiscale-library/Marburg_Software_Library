@@ -54,12 +54,13 @@ int main()
        << ", ||x||_1 = " << l1_norm(v)
        << ", ||x||_infinity = " << linfty_norm(v) << endl;
 
-//   cout << "- external arithmetic functionality:" << endl;
-//   RawVector<double> a(dim), b(dim);
-//   a(1) = 23; a(2) = 10; b(1) = -1.5; b(2) = 3; b(4) = 8;
-//   cout << "  a=" << a << ", b=" << b << endl;
-//   cout << "  a+b=" << a+b << ", a-b=" << a-b << endl;
-//   cout << "  a*b=" << a*b << endl;
+  cout << "- external arithmetic functionality:" << endl;
+  Vector<double> a(dim), b(dim);
+  a(1) = 23; a(2) = 10; b(1) = -1.5; b(2) = 3; b(4) = 8;
+  cout << "  a=" << a << ", b=" << b << endl;
+  cout << "  a+b=" << a+b << ", a-b=" << a-b << endl;
+  cout << "  mean value of a: " << mean_value(a) << endl;
+  cout << "  a*b=" << a*b << endl;
 
 //   cout << endl;
 //   cout << "- testing the sparse (map) representation of vectors:" << endl;

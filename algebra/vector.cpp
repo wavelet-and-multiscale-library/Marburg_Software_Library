@@ -152,7 +152,8 @@ namespace MathTL
   }
 
   template <class C>
-  bool Vector<C>::operator == (const Vector<C>& v)
+  template <class VECTOR>
+  bool Vector<C>::operator == (const VECTOR& v)
   {
     if (size_ != v.size()) return false;
 
@@ -163,32 +164,35 @@ namespace MathTL
   }
 
   template <class C>
+  template <class VECTOR>
   inline
-  bool Vector<C>::operator != (const Vector<C>& v)
+  bool Vector<C>::operator != (const VECTOR& v)
   {
     return !((*this) == v);
   }
 
   template <class C>
-  void Vector<C>::add(const Vector<C>& v)
+  template <class VECTOR>
+  void Vector<C>::add(const VECTOR& v)
   {
     assert(size_ > 0);
     assert(size_ == v.size());
 
     iterator it(begin()), itend(end());
-    const_iterator itv(v.begin());
+    typename VECTOR::const_iterator itv(v.begin());
     while(it != itend)
       *it++ += *itv++;
   }
    
   template <class C>
-  void Vector<C>::sadd(const C s, const Vector<C>& v)
+  template <class VECTOR>
+  void Vector<C>::sadd(const C s, const VECTOR& v)
   {
     assert(size_ > 0);
     assert(size_ == v.size());
 
     iterator it(begin()), itend(end());
-    const_iterator itv(v.begin());
+    typename VECTOR::const_iterator itv(v.begin());
     while(it != itend)
       {
 	*it = s*(*it) + *itv++;
@@ -207,20 +211,22 @@ namespace MathTL
   }
 
   template <class C>
-  Vector<C>& Vector<C>::operator += (const Vector<C>& v)
+  template <class VECTOR>
+  Vector<C>& Vector<C>::operator += (const VECTOR& v)
   {
     add(v); // handles the assertions
     return *this;
   }
 
   template <class C>
-  Vector<C>& Vector<C>::operator -= (const Vector<C>& v)
+  template <class VECTOR>
+  Vector<C>& Vector<C>::operator -= (const VECTOR& v)
   {
     assert(size_ > 0);
     assert(size_ == v.size());
     
     iterator it(begin()), itend(end());
-    const_iterator itv(v.begin());
+    typename VECTOR::const_iterator itv(v.begin());
     while(it != itend)
       *it++ -= *itv++;
 
@@ -239,6 +245,25 @@ namespace MathTL
   {
     // we don't catch the division by zero exception here!
     return (*this *= 1.0/s);
+  }
+
+  template <class C>
+  template <class VECTOR>
+  const C Vector<C>::operator * (const VECTOR& v)
+  {
+    assert(size_ == v.size());
+
+    if (this == reinterpret_cast<const Vector<C>*>(&v))
+      return l2_norm_sqr(*this);
+
+    C r(0);
+    
+    const_iterator it(begin()), itend(end());
+    typename VECTOR::const_iterator itv(v.begin());
+    while(it != itend)
+      r += *it++ * *itv++;
+
+    return r;
   }
 
   template <class C>

@@ -12,6 +12,10 @@
 
 #include <iostream>
 
+// external functionality, for convenience:
+#include <utils/vector_norms.h>
+#include <utils/vector_arithmetics.h>
+
 namespace MathTL
 {
   /*!
@@ -151,25 +155,29 @@ namespace MathTL
     Vector<C>& operator = (const C c);
 
     /*!
-      equality test
+      equality test with another vector
      */
-    bool operator == (const Vector<C>& v);
+    template <class VECTOR>
+    bool operator == (const VECTOR& v);
 
     /*!
       non-equality test
     */
-    bool operator != (const Vector<C>& v);
+    template <class VECTOR>
+    bool operator != (const VECTOR& v);
 
     /*!
       in place summation *this += v
     */
-    void add(const Vector<C>& v);
+    template <class VECTOR>
+    void add(const VECTOR& v);
     
     /*!
       in place summation *this = s*(*this) + v
       (AXPY level 1 BLAS routine)
     */
-    void sadd(const C s, const Vector<C>& v);
+    template <class VECTOR>
+    void sadd(const C s, const VECTOR& v);
 
     /*!
       in place scaling *this *= s
@@ -179,12 +187,14 @@ namespace MathTL
     /*!
       in place summation
     */
-    Vector<C>& operator += (const Vector<C>& v);
+    template <class VECTOR>
+    Vector<C>& operator += (const VECTOR& v);
 
     /*!
       in place subtraction
     */
-    Vector<C>& operator -= (const Vector<C>& v);
+    template <class VECTOR>
+    Vector<C>& operator -= (const VECTOR& v);
 
     /*!
       in place multiplication with a scalar
@@ -195,6 +205,12 @@ namespace MathTL
       in place division by a (nontrivial) scalar
     */
     Vector<C>& operator /= (const C c);
+
+    /*!
+      inner product
+    */
+    template <class VECTOR>
+    const C operator * (const VECTOR& v);
 
   protected:
     /*!

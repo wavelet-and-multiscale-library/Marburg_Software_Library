@@ -359,13 +359,13 @@ namespace WaveletTL
     }
 
 #if 1
-    // check biorthogonality of matrix product CL * GammaL * (CLT)^T
+    // check biorthogonality of the matrix product CL * GammaL * (CLT)^T
     Matrix<double> check(CL_ * GammaL_ * transpose(CLT_));
     for (unsigned int i(0); i < check.row_dimension(); i++)
       check(i, i) -= 1;
     cout << "error for CLT: " << row_sum_norm(check) << endl;
 #endif
 
-
+    // setup CLA, CLAT
   }
 }

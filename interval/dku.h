@@ -54,7 +54,7 @@ namespace WaveletTL
       constructor
       (ellT = ell2T)
     */
-    explicit DKUBasis(DKUBiorthogonalizationMethod bio = none);
+    explicit DKUBasis(DKUBiorthogonalizationMethod bio = BernsteinSVD);
 
     //! DKU parameter ell-tilde (3.2.10)
     inline const int ellT() const { return ellT_; }
@@ -76,7 +76,7 @@ namespace WaveletTL
     Matrix<double> Alpha_, AlphaT_;
     Matrix<double> BetaL_, BetaLT_;
     Matrix<double> GammaL_;
-    Matrix<double> CL_, CLT_;
+    Matrix<double> CL_, CLT_, CLA_, CLAT_;
 
   private:
     // private helper routines

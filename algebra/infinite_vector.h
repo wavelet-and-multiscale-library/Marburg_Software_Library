@@ -175,6 +175,51 @@ namespace MathTL
     */
     C& operator [] (const I& index);
 
+    /*!
+      in place summation *this += v
+    */
+    template <class C2>
+    void add(const InfiniteVector<C2,I>& v);
+
+    /*!
+      in place summation *this += s*v
+    */
+    template <class C2>
+    void add(const C2 s, const InfiniteVector<C2,I>& v);
+    
+    /*!
+      in place summation *this = s*(*this) + v
+      (AXPY level 1 BLAS routine)
+    */
+    template <class C2>
+    void sadd(const C s, const InfiniteVector<C2,I>& v);
+
+    /*!
+      in place scaling *this *= s
+    */
+    void scale(const C s);
+
+    /*!
+      in place summation
+    */
+    template <class C2>
+    InfiniteVector<C,I>& operator += (const InfiniteVector<C2,I>& v);
+
+    /*!
+      in place subtraction
+    */
+    template <class C2>
+    InfiniteVector<C,I>& operator -= (const InfiniteVector<C2,I>& v);
+
+    /*!
+      in place multiplication with a scalar
+    */
+    InfiniteVector<C,I>& operator *= (const C c);
+    
+    /*!
+      in place division by a (nontrivial) scalar
+    */
+    InfiniteVector<C,I>& operator /= (const C c);
   };
 
 

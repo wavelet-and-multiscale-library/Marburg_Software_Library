@@ -54,6 +54,79 @@ namespace MathTL
   }
 
   template <class C, class I>
+  template <class C2>
+  void InfiniteVector<C,I>::add(const InfiniteVector<C2,I>& v)
+  {
+    for (typename InfiniteVector<C2,I>::const_iterator itv(v.begin()), itvend(v.end());
+	 itv != itvend; ++itv)
+      this->operator [] (itv->index()) += itv->value();
+  }
+   
+  template <class C, class I>
+  template <class C2>
+  void InfiniteVector<C,I>::add(const C2 s, const InfiniteVector<C2,I>& v)
+  {
+    // the following code can be optimized (not O(N) now)
+    for (typename InfiniteVector<C2,I>::const_iterator itv(v.begin()), itvend(v.end());
+	 itv != itvend; ++itv)
+      this->operator [] (itv->index()) += s*itv->value();
+  }
+   
+  template <class C, class I>
+  template <class C2>
+  void InfiniteVector<C,I>::sadd(const C s, const InfiniteVector<C2,I>& v)
+  {
+    // the following code can be optimized (not O(N) now)
+    for (typename InfiniteVector<C2,I>::const_iterator itv(v.begin()), itvend(v.end());
+	 itv != itvend; ++itv)
+      this->operator [] (itv->index()) = 
+	s*this->operator [] (itv->index()) + itv->value();
+  }
+
+  template <class C, class I>
+  void InfiniteVector<C,I>::scale(const C s)
+  {
+    typename std::map<I,C>::iterator it(std::map<I,C>::begin()),
+      itend(std::map<I,C>::end());
+    while(it != itend)
+      (*it++).second *= s;
+  }
+
+  template <class C, class I>
+  template <class C2>
+  inline
+  InfiniteVector<C,I>& InfiniteVector<C,I>::operator += (const InfiniteVector<C2,I>& v)
+  {
+    add(v);
+    return *this;
+  }
+
+  template <class C, class I>
+  template <class C2>
+  InfiniteVector<C,I>& InfiniteVector<C,I>::operator -= (const InfiniteVector<C2,I>& v)
+  {
+    for (typename InfiniteVector<C2,I>::const_iterator itv(v.begin()), itvend(v.end());
+	 itv != itvend; ++itv)
+      this->operator [] (itv->index()) -= itv->value();
+    
+    return *this;
+  }
+   
+  template <class C, class I>
+  InfiniteVector<C,I>& InfiniteVector<C,I>::operator *= (const C s)
+  {
+    scale(s);
+    return *this;
+  }
+
+  template <class C, class I>
+  InfiniteVector<C,I>& InfiniteVector<C,I>::operator /= (const C s)
+  {
+    // we don't catch the division by zero exception here!
+    return (*this *= 1.0/s);
+  }
+
+  template <class C, class I>
   InfiniteVector<C,I>::Accessor::
   Accessor(const typename std::map<I,C>::const_iterator& entry)
     : entry_(entry)

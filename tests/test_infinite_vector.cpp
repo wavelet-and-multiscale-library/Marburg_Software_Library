@@ -37,21 +37,21 @@ int main()
   else
     cout << "  ... no!" << endl;
 
-//   cout << "- in place summation s+=t:" << endl;
-//   s += t;
-//   cout << s << endl;
+  cout << "- in place summation s+=t:" << endl;
+  s += t;
+  cout << s;
 
-//   cout << "- in place subtraction t-=s:" << endl;
-//   t -= s;
-//   cout << t << endl;
+  cout << "- in place subtraction t-=s:" << endl;
+  t -= s;
+  cout << t;
 
-//   cout << "- in place multiplication s*=2:" << endl;
-//   s *= 2;
-//   cout << s << endl;
+  cout << "- in place multiplication s*=2:" << endl;
+  s *= 2;
+  cout << s;
   
-//   cout << "- in place division s/=3:" << endl;
-//   s /= 3;
-//   cout << s << endl;
+  cout << "- in place division s/=3:" << endl;
+  s /= 3;
+  cout << s;
 
 //   cout << "- ell_p norms of s:" << endl;
 //   cout << "  ||x||_2 = " << norm(s)

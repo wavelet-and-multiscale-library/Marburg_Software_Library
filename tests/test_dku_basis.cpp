@@ -25,6 +25,13 @@ int main()
   cout << "- leftmost wavelet on the coarsest level: " << basis.firstWavelet(basis.j0()) << endl;
   cout << "- rightmost wavelet on the coarsest level: " << basis.lastWavelet(basis.j0()) << endl;
 
+  cout << "- iterating from first generator on coarsest level to last wavelet on next level:" << endl;
+  Basis::Index index(basis.firstGenerator(basis.j0()));
+  for (;; ++index) {
+    cout << index << endl;
+    if (index == basis.lastWavelet(basis.j0()+1)) break;
+  }
+
 //   InfiniteVector<double, Basis::Index> coeff;
 //   coeff[RIndex(2,0,0)] = 1.0;
 //   coeff[RIndex(2,0,1)] = -3.14;

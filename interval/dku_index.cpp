@@ -60,4 +60,32 @@ namespace WaveletTL
 	    (j_ == lambda.j() && e_ < lambda.e()) ||
 	    (j_ == lambda.j() && e_ == lambda.e() && k_ < lambda.k()));
   }
+
+  template <int d, int dT>
+  DKUIndex<d, dT>& DKUIndex<d, dT>::operator ++ ()
+  {
+    switch (e_) {
+    case 0:
+      if (k_ == basis_->DeltaRmax(j_)) {
+	e_ = 1;
+	k_ = 0;
+      }
+      else
+	k_++;
+      break;
+    case 1:
+      if (k_ == (1<<j_)-1) {
+	j_++;
+	k_ = 0;
+      }
+      else
+	k_++;
+      break;
+    default:
+      break;
+    }
+    
+    return *this;
+  }
+
 }

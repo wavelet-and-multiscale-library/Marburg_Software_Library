@@ -16,9 +16,9 @@ int main()
 
   cout << "- writing access on s:" << endl;
   s[1] = 2;
-//  cout << "  (size after writing the first element: " << s.size() << ")" << endl;
+  cout << "  (size after writing the first element: " << s.size() << ")" << endl;
   s[3] = 42;
-//   cout << "  (size after writing the second element: " << s.size() << ")" << endl;
+  cout << "  (size after writing the second element: " << s.size() << ")" << endl;
   cout << s;
 
   cout << "- copy constructor t(s):" << endl;

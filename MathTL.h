@@ -39,5 +39,6 @@
 #include <numerics/ortho_poly.h>
 #include <numerics/quadrature.h>
 #include <numerics/gauss_quadrature.h>
+#include <numerics/recursion.h>
 
 #endif

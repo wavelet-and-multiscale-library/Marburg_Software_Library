@@ -8,8 +8,6 @@ namespace MathTL
 {
   double OrthogonalPolynomial::operator () (const unsigned int n, const double x) const
   {
-    assert(n >= 0);
-
     double pk(1.0); // p_0(x)
 
     if (n > 0)

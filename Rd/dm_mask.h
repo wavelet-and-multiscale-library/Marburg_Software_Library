@@ -11,7 +11,6 @@
 #define _WAVELETTL_DM_MASK_H
 
 #include <algebra/laurent_polynomial.h>
-#include <Rd/trivial_mask.h>
 
 using namespace MathTL;
 

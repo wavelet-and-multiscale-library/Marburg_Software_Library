@@ -195,6 +195,8 @@ namespace WaveletTL
       for (int m(2*ell()+ell1()); m <= 2*ell()+ell2()-2; m++)
 	BetaLT_(m-2*ell()-ell1(), r) = betaLT_(m, r);
     
+    
+
 //     // check Alpha
 //     cout << Alpha_ << endl;
 //     for (int m(-ell2T()+1); m <= ellT()-1; m++) {

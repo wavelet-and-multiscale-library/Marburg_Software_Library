@@ -53,15 +53,26 @@ namespace MathTL
   {
   public:
     /*!
-      construct N-point Gauss rule on [0,1] from three-term recursion coefficients
+      construct N-point Gauss rule from three-term recursion coefficients
       for orthogonal polynomials P on [a,b]
+
+      \param P orth. polynomial, should provide a_1,...,a_N and b_1,...,b_N
+      \param N number of quadrature points
     */
     GaussRule(const OrthogonalPolynomial& P,
 	      const double a, const double b,
 	      const unsigned int N);
 
     /*!
-      construct N-point Gauss rule on [0,1] from (at least) 2N generalized moments
+      construct N-point Gauss rule from (at least) 2N (monomial) moments
+      of the weight function \int_a^b x^k w(x)dx
+    */
+    GaussRule(const Array1D<double>& moments,
+	      const double a, const double b,
+	      const unsigned int N);
+
+    /*!
+      construct N-point Gauss rule from (at least) 2N generalized moments
       of the weight function \int_a^b T_k(x)w(x)dx
     */
     GaussRule(const Array1D<double>& moments,
@@ -71,7 +82,7 @@ namespace MathTL
 
   private:
     /*!
-      doubly used initialization routine
+      shared initialization routine
     */
     void init(const OrthogonalPolynomial& P,
 	      const double a, const double b,

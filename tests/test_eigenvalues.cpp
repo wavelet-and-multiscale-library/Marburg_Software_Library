@@ -21,6 +21,7 @@ int main()
        << A;
   
   Vector<double> xk(banddim, false), err(banddim, false);
+  xk = 1;
   cout << "- calculating the maximal eigenvalue of A ..." << endl;
   unsigned int iterations;
   double lambda = PowerIteration(A, xk, 1e-6, 100, iterations);
@@ -32,6 +33,7 @@ int main()
        << "  with \\|A*xk-lambdak*xk\\|_\\infty=" << linfty_norm(err) << endl;
   
   cout << "- calculating the minimal eigenvalue of A ..." << endl;
+  xk = 1;
   lambda = 1./InversePowerIteration(A, xk, 1e-6, 200, iterations);
   A.apply(xk, err);
   err.add(-lambda, xk);

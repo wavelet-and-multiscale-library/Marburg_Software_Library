@@ -12,10 +12,12 @@ namespace MathTL
 			const double tol, const unsigned int maxit, unsigned int &iterations)
   {
     double lambdak(0), error = 2.0 * tol;
-    
+
+    assert(xk.size() == A.row_dimension());
+
     // start with xk=(1,...,1)^T
-    xk.resize(A.row_dimension(), false);
-    xk = 1;
+//     xk.resize(A.row_dimension(), false);
+//     xk = 1;
 
     VECTOR yk(xk.size(), false), diff(xk.size(), false);
     A.apply(xk, yk);
@@ -42,8 +44,10 @@ namespace MathTL
   {
     double lambdak(0), error = 2.0 * tol;
     
-    xk.resize(A.row_dimension(), false);
-    xk = 1;
+    assert(xk.size() == A.row_dimension());
+//     xk.resize(A.row_dimension(), false);
+//     xk = 1;
+
     VECTOR yk(xk.size(),false);
     yk = 1; // initial value for CG iteration
     

@@ -23,7 +23,7 @@ namespace MathTL
   /*!
     von Mises power iteration, cf. [Golub/van Loan]
     \param A symmetric matrix
-    \param xk eigenvector (1-normalized)
+    \param xk eigenvector (1-normalized), starting vector
     \param tol stopping tolerance
     \param maxiter maximal number of iterations
     \param iterations iterations performed
@@ -36,7 +36,7 @@ namespace MathTL
   /*!
     von Mises inverse power iteration, cf. Golub/van Loan
     \param A symmetric matrix
-    \param xk eigenvector (1-normalized)
+    \param xk eigenvector (1-normalized), starting vector
     \param tol stopping tolerance
     \param maxiter maximal number of iterations
     \param iterations iterations performed

@@ -109,35 +109,46 @@ namespace MathTL
   };
 
   /*!
-    orthogonal polynomials on [a,b] given by generalized moments of the
-    weight function
+    orthogonal polynomials on [a,b] given by monomial or
+    generalized moments of the weight function
       \nu_k = \int_a^b T_k(x)w(x)dx
     where the T_k also fulfill a three-term recursion;
     since we can only input a finite number of moments (2N),
-    it is only possible to access a_1,...,a_N and b_1,...,b_N
+    it is only possible to access a_1,...,a_N and b_1,...,b_N,
+    so you should initialize with N as large as required for
+    your purposes.
 
     references:
-    * Sack/Donovan: An Algorithm for Gaussian Quadrature given Modified
+    + Sack/Donovan: An Algorithm for Gaussian Quadrature given Modified
       Moments, Numer. Math. 18(1972), 465-478
-    * Golub/Gutknecht: Modified Moments for Indefinite Weight Functions,
+    + Golub/Gutknecht: Modified Moments for Indefinite Weight Functions,
       Numer. Math. 57(1990), 607-624
+    + Golub/Welsch: Calculation of Gauss quadrature rules,
+      Math. Comp. 23(1969), 221-230
   */
   class GenMomentsPolynomial : public OrthogonalPolynomial
   {
   public:
     /*!
-      possible methods to compute the recursion coefficients
-      - SackDonovan: 2(i),(ii) of [GG]
+      Golub/Welsch algorithm: [GW]
+      
+      \param moments (at least) 2*N+1 monomial moments of the weight function
+      \param N number of three-term recursion coefficients created
     */
-    enum GMPMethod { SackDonovan };
-
+    GenMomentsPolynomial(const Array1D<double>& moments,
+			 const double a, const double b,
+			 const unsigned int N);
+    
+    /*!
+      Sack/Donovan algorithm: 2(i),(ii) of [GG]
+    */
     GenMomentsPolynomial(const Array1D<double>& moments,
 			 const OrthogonalPolynomial& T,
 			 const double a, const double b,
-			 const unsigned int N,
-			 GMPMethod method = SackDonovan);
+			 const unsigned int N);
 
     virtual ~GenMomentsPolynomial() {}
+
     double a(const unsigned int k) const;
     double b(const unsigned int k) const;
     

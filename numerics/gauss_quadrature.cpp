@@ -42,6 +42,21 @@ namespace MathTL
     init(P, a, b, N);
   }
 
+  GaussRule::GaussRule(const Array1D<double>& moments,
+		       const double a, const double b,
+		       const unsigned int N)
+  {
+#if 0
+    // Sack/Donovan
+    Monomial T;
+    GenMomentsPolynomial P(moments, T, a, b, N);
+#else
+    // Golub/Welsch
+    GenMomentsPolynomial P(moments, a, b, N);
+#endif
+    init(P, a, b, N);
+  }
+
   void GaussRule::init(const OrthogonalPolynomial& P,
 		       const double a, const double b,
 		       const unsigned int N)
@@ -52,6 +67,7 @@ namespace MathTL
     SymmetricMatrix<double> J(N);
     for (unsigned int n(0); n < N; n++)
       {
+	// TODO: hier kommt die Index-out-of-bounds-exception!!!
 	J(n, n) = P.a(n+1);
 	if (n < N-1)
 	  J(n, n+1) = sqrt(P.b(n+2));

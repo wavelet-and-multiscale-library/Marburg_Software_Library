@@ -76,9 +76,9 @@ namespace MathTL
     Array1D(const Array1D<C>& a);
     
     /*!
-      construct an array of positive size and initialize its elements
-      (Please note that the builtin types (int, double, ...) are not
-      automatically set to _zero_, this depends on the compiler!)
+      construct an array of positive size,
+      please note that the builtin types (int, double, ...) are _not_
+      automatically set to _zero_, this depends on the compiler!
     */
     Array1D(const size_type s);
 

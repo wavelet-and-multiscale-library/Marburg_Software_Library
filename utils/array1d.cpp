@@ -21,7 +21,9 @@ namespace MathTL
     if (s == 0)
       data_ = 0;
     else
-      data_ = new C[s]; // calls C()
+      {
+	data_ = new C[s]; // calls C()
+      }
   }
 
   template <class C>

@@ -16,7 +16,7 @@
 namespace MathTL
 {
   /*!
-    evaluate a B-spline N_d(x) via recursion
+    evaluate a cardinal B-spline N_d(x) via recursion
   */
   template <int d>
   double evaluate_Bspline(const double x)
@@ -26,7 +26,7 @@ namespace MathTL
   }
  
   /*!
-    evaluate a B-spline N_1(x) = \chi_{[0,1)}
+    evaluate a cardinal B-spline N_1(x) = \chi_{[0,1)}
   */
   template <>
   inline
@@ -36,7 +36,7 @@ namespace MathTL
   }
 
   /*!
-    evaluate a shifted B-spline N_d(x-k) via recursion
+    evaluate a shifted cardinal B-spline N_d(x-k) via recursion
   */
   double EvaluateBspline(const int d, const int k, const double x)
   {
@@ -80,7 +80,7 @@ namespace MathTL
   }
   
   /*!
-    evaluate the first derivative N_d'(x-k) of a shifted B-spline
+    evaluate the first derivative N_d'(x-k) of a shifted cardinal B-spline
   */
   inline double EvaluateBspline_x(const int d, const int k, const double x)
   {
@@ -101,7 +101,7 @@ namespace MathTL
   }
 
   /*!
-    B-spline N_d(x) as Function object
+    cardinal B-spline N_d(x) as Function object
   */
   template <int d>
   class Bspline : public Function<1>

@@ -91,6 +91,20 @@ namespace MathTL
   }
 
   template <class C>
+  inline
+  const C Matrix<C>::operator () (const size_type row, const size_type column) const
+  {
+    return entries_[row+column*rowdim_];
+  }
+
+  template <class C>
+  inline
+  C& Matrix<C>::operator () (const size_type row, const size_type column)
+  {
+    return entries_[row+column*rowdim_];
+  }
+
+  template <class C>
   template <class C2>
   bool Matrix<C>::operator == (const Matrix<C2>& M) const
   {
@@ -107,25 +121,10 @@ namespace MathTL
   }
 
   template <class C>
-  inline
-  const C Matrix<C>::operator () (const size_type row, const size_type column) const
-  {
-    return entries_[row+column*rowdim_];
-  }
-
-  template <class C>
-  inline
-  C& Matrix<C>::operator () (const size_type row, const size_type column)
-  {
-    return entries_[row+column*rowdim_];
-  }
-
-  template <class C>
   Matrix<C>& Matrix<C>::operator = (const Matrix<C>& M)
   {
-    assert(rowdim_ = M.rowdim_);
-    assert(coldim_ = M.coldim_);
-
+    rowdim_ = M.rowdim_;
+    coldim_ = M.coldim_;
     entries_ = M.entries_;
 
     return *this;

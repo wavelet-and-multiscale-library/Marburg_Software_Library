@@ -172,8 +172,7 @@ namespace MathTL
   template <class C>
   Vector<C>& Vector<C>::operator = (const Vector<C>& v)
   {
-    assert(size_ == v.size());
-
+    resize(v.size(), false);
     std::copy(v.begin(), v.end(), begin());
 
     return *this;

@@ -1,9 +1,9 @@
 #include <iostream>
 #include <algebra/matrix.h>
+#include <algebra/triangular_matrix.h>
 #include <algebra/vector.h>
 #include <algebra/matrix_norms.h>
 // #include "symmarray2d.h"
-// #include "triangarray2d.h"
 
 using std::cout;
 using std::endl;
@@ -114,33 +114,35 @@ int main()
 //     Sbycol(3,3,"1 2 4 3 5 6",false); // note the permutation!
 //   cout << Sbycol << endl;
   
-//   cout << "- a lower triangular default matrix:" << endl;
-//   RawMatrix<double,LowerTriangularArray2D<double> > Ldefault;
-//   cout << Ldefault << endl;
+  cout << "- a lower triangular default matrix:" << endl;
+  LowerTriangularMatrix<double> Ldefault;
+  cout << Ldefault;
   
-//   cout << "- a lower triangular 3x3 matrix L:" << endl;
-//   RawMatrix<double,LowerTriangularArray2D<double> > L(3,3);
-//   cout << L << endl;
+  cout << "- a lower triangular 3x3 matrix L:" << endl;
+  LowerTriangularMatrix<double> L(3);
+  cout << L;
 
-//   cout << "- constructing a lower triangular matrix from a string:" << endl;
-//   RawMatrix<double,LowerTriangularArray2D<double> > Lbyrow(4,4,"1 2 3 4 5 6 7 8 9 10");
-//   cout << Lbyrow << endl;
+  cout << "- constructing a lower triangular matrix from a string:" << endl;
+  LowerTriangularMatrix<double> Lbyrow(4,4,"1 2 3 4 5 6 7 8 9 10");
+  cout << Lbyrow;
 
-//   cout << "- constructing a lower triangular matrix from a string (columnwise):" << endl;
-//   RawMatrix<double,LowerTriangularArray2D<double> > Lbycol(4,4,"1 2 4 7 3 5 8 6 9 10",false);
-//   cout << Lbycol << endl;
+  cout << "- constructing a lower triangular matrix from a string (columnwise):" << endl;
+  LowerTriangularMatrix<double> Lbycol(4,4,"1 2 4 7 3 5 8 6 9 10", false);
+  cout << Lbycol;
 
-//   cout << "- testing APPLY, using the vector ";
-//   L = Lbyrow;
-//   x.resize(L.coldim());
-//   for (int i(0); i < x.dim(); i++) x(i)=i+1;
-//   cout << x << ", result: ";
-//   L.APPLY(x,y);
-//   cout << y << endl;
+  cout << "- testing apply(), using the vector ";
+  L = Lbyrow;
+  x.resize(L.column_dimension());
+  for (unsigned int i(0); i < x.size(); i++) x(i)=i+1;
+  cout << x << ", result: ";
+  y.resize(L.row_dimension());
+  L.apply(x,y);
+  cout << y << endl;
 
-//   cout << "- testing APPLYtr, result: ";
-//   L.APPLYtr(x,y);
-//   cout << y << endl;
+  cout << "- testing apply_transposed(), result: ";
+  y.resize(L.column_dimension());
+  L.apply_transposed(x,y);
+  cout << y << endl;
 
 //   cout << "- an upper triangular default matrix:" << endl;
 //   RawMatrix<double,UpperTriangularArray2D<double> > Rdefault;

@@ -170,7 +170,18 @@ namespace WaveletTL
 
     return r;
   }
-  
+
+  template <class MASK, unsigned int DIMENSION>
+  SampledMapping<DIMENSION>
+  MultivariateRefinableFunction<MASK, DIMENSION>::evaluate
+  (const int j,
+   const MultiIndex<int, DIMENSION>& k,
+   const MultiIndex<int, DIMENSION>& a,
+   const MultiIndex<int, DIMENSION>& b,
+   const int resolution) const
+  {
+    // continue here!!!
+  }
 
 #if 0
   template <class MASK>

@@ -60,6 +60,22 @@ namespace WaveletTL
     InfiniteVector<double, MultiIndex<int, DIMENSION> >
     evaluate(const MultiIndex<unsigned int, DIMENSION>& mu,
 	     const int resolution = 0) const;
+
+    /*!
+      Evaluate the mu-th (partial) derivative of a dilated and translated version
+      of the refinable function \phi
+      
+      \partial^\mu \phi_{j,k}(x) = 2^{j|\mu|} * 2^{jd/2} * \partial^\mu\phi(2^j*x-k)
+      
+      on a dyadic subgrid of the cuboid [a,b]^d.
+
+      We assume that \partial^\mu\phi is zero at the boundary of its support.
+    */
+    SampledMapping<DIMENSION> evaluate(const int j,
+				       const MultiIndex<int, DIMENSION>& k,
+				       const MultiIndex<int, DIMENSION>& a,
+				       const MultiIndex<int, DIMENSION>& b,
+				       const int resolution) const;
   };
 
   /*!

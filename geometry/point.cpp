@@ -1,6 +1,6 @@
 // implementation of the Point<DIM>:: inline methods
 
-#include "io/vector_io.h"
+#include <io/vector_io.h>
 
 namespace MathTL
 {

@@ -10,7 +10,6 @@
 #ifndef _WAVELETTL_DM_MASK_H
 #define _WAVELETTL_DM_MASK_H
 
-#include <algebra/laurent_polynomial.h>
 #include <algebra/multi_laurent_polynomial.h>
 
 using namespace MathTL;
@@ -26,6 +25,8 @@ namespace WaveletTL
     of phi_0 and phi_1. You can directly use the class as a template parameter
     of RefinableFunction<>.
 
+    Make sure that the template parameters refer to univariate functions.
+
     References:
     [DM] W. Dahmen and C. Micchelli,
          Using the refinement equation for evaluating integrals of wavelets,
@@ -33,7 +34,7 @@ namespace WaveletTL
   */
   template <class MASK0, class MASK1>
   class DMMask1
-    : public LaurentPolynomial<double>
+    : public MultivariateLaurentPolynomial<double, 1>
   {
   public:
     //! default constructor, set up the mask

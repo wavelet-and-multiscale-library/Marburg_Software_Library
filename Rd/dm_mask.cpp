@@ -15,11 +15,12 @@ namespace WaveletTL
       for (typename MASK1::const_iterator it1(mask1.begin());
 	   it1 != mask1.end(); ++it1)
 	{
-	  LaurentPolynomial<double>::operator [] (it0.index()-it1.index())
+	  MultivariateLaurentPolynomial<double, 1>::operator []
+	    (MultiIndex<int, 1>(it0.index()[0]-it1.index()[0]))
 	    += 0.5 * *it0 * *it1;
 	}
   }
-
+  
   template <class MASK0, class MASK1, class MASK2>
   DMMask2<MASK0, MASK1, MASK2>::DMMask2()
   {
@@ -35,8 +36,8 @@ namespace WaveletTL
 	     it2 != mask2.end(); ++it2)
 	  {
 	    MultivariateLaurentPolynomial<double, 2>::operator []
-	      (MultiIndex<int, 2>(it0.index()-it1.index(),
-				  it0.index()-it2.index()))
+	      (MultiIndex<int, 2>(it0.index()[0]-it1.index()[0],
+				  it0.index()[0]-it2.index()[0]))
 	      += 0.5 * *it0 * *it1 * *it2;
 	  }
   }

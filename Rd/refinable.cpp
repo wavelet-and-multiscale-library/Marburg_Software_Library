@@ -50,7 +50,7 @@ namespace WaveletTL
     
     // exclude the special case of \chi_{[0,1)^d}
     if (suppleft == suppright-1) {
-      r.set_coefficient(MultiIndex<int, 1>(), 1);
+      r.set_coefficient(MultiIndex<int, DIMENSION>(), 1);
     } else {
       // for convenience, collect all integer points from the interior of the support cube
       MultiIndex<int, DIMENSION> alpha, beta;

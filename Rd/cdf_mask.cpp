@@ -8,7 +8,7 @@ using MathTL::Polynomial;
 
 namespace WaveletTL
 {
-  template <unsigned int d>
+  template <int d>
   CDFMask_primal<d>::CDFMask_primal()
   {
     // The primal generators are B-splines of order d, centered around (d mod 2)/2.
@@ -19,7 +19,7 @@ namespace WaveletTL
       set_coefficient(k, ldexp(1., 1 - d) * binomial(d, k + d/2));
   }
 
-  template <unsigned int d, unsigned int dt>
+  template <int d, int dt>
   CDFMask_dual<d, dt>::CDFMask_dual()
   {
     assert(d >= 1);

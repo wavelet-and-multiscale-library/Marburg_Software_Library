@@ -16,7 +16,7 @@
 namespace WaveletTL
 {
   // since C++ does not allow typedef template, we use this simple wrapper class:
-  template <unsigned int d, unsigned int dt>
+  template <int d, int dt>
   class CDFBasis
     : public RBasis<CDFMask_primal<d>, CDFMask_dual<d, dt> >
   {

@@ -23,7 +23,7 @@ namespace WaveletTL
     [CDF] Cohen, Daubechies, Feauveau: Biorthogonal bases of compactly supported wavelets,
           Comm. Pure Appl. Math. 45(1992), 485--560.
   */
-  template <unsigned int d>
+  template <int d>
   class CDFMask_primal
     : public virtual LaurentPolynomial<double>
   {
@@ -37,7 +37,7 @@ namespace WaveletTL
     [CDF] Cohen, Daubechies, Feauveau: Biorthogonal bases of compactly supported wavelets,
           Comm. Pure Appl. Math. 45(1992), 485--560.
   */
-  template <unsigned int d, unsigned int dt>
+  template <int d, int dt>
   class CDFMask_dual
     : public virtual LaurentPolynomial<double>
   {

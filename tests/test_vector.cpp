@@ -69,6 +69,20 @@ int main()
   cout << "  mean value of a: " << mean_value(a) << endl;
   cout << "  a*b=" << a*b << endl;
 
+  Vector<double> tocompress(5);
+  tocompress[0] = 1;
+  tocompress[1] = 1e-10;
+  tocompress[2] = 1e-11;
+  tocompress[3] = 1e-12;
+  tocompress[4] = 1e-13;
+  cout << "- a vector to be compressed:" << endl
+       << tocompress << endl;
+  
+  tocompress.compress(1e-10);
+  cout << "- after compress():" << endl
+       << tocompress << endl;
+
+
 //   cout << endl;
 //   cout << "- testing the sparse (map) representation of vectors:" << endl;
 //   RawVector<double,SparseArray1D<double> > s(dim);

@@ -250,6 +250,12 @@ namespace MathTL
     template <class C2>
     const C operator * (const Vector<C2>& v) const;
 
+    /*!
+      set all values below a threshold to zero
+      (fabs<C> should exist)
+    */
+    void compress(const double eta = 1e-16);
+    
   protected:
     /*!
       internal storage is just a pointer to a C array

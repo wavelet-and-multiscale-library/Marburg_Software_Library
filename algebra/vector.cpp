@@ -191,6 +191,17 @@ namespace MathTL
   }
 
   template <class C>
+  void Vector<C>::compress(const double eta)
+  {
+    for (iterator it(begin()), itend(end());
+	 it != itend; ++it)
+      {
+	if (fabs(*it) < eta)
+	  *it = C(0);
+      }
+  }
+
+  template <class C>
   template <class C2>
   bool Vector<C>::operator == (const Vector<C2>& v) const
   {

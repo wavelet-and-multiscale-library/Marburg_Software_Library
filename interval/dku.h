@@ -30,7 +30,7 @@ namespace WaveletTL
       SVD,          // Gamma_L = U*S*V, C_L = S^{-1/2}U^T, C_L_T = S^{-1/2}V
       Bernstein,    // transformation to Bernstein basis on [0,b]
       partialSVD,   // partial SVD
-      BernsteinSVD  // partial SVD plus transformation to Bernstein basis
+      BernsteinSVD  // transformation to Bernstein basis plus partial SVD
     };
 
   /*!

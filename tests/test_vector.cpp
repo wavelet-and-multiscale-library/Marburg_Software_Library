@@ -1,6 +1,6 @@
 #include <iostream>
 #include "algebra/vector.h"
-#include "utils/vector_norms.h"
+#include "algebra/vector_norms.h"
 
 using std::cout;
 using std::endl;

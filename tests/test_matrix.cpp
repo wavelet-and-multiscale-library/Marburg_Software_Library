@@ -47,23 +47,26 @@ int main()
   N = O;
   cout << "- N=O:" << endl << N;
 
-//   cout << "- testing APPLY, using the vector" << endl;
-//   RawVector<double> x(3), y;
-//   x(0) = 1; x(1) = -1; x(2) = -2;
-//   cout << x << ";" << endl;
-//   cout << "  Nx=";
-//   N.APPLY(x,y);
-//   cout << y << endl;
+  Vector<double> x(3), y(2);
+  x(0) = 1; x(1) = -1; x(2) = -2;
+  cout << "- testing apply(), using the vector x="
+       << x << ";" << endl;
+  cout << "  Nx=";
+  N.apply(x,y);
+  cout << y << endl;
   
-//   cout << "- choose another matrix A (constructed from a string):" << endl;
-//   RawMatrix<double> A(3,3,"1 2 3 4 5 6 7 8 9");
-//   cout << A << endl;
-//   cout << "  Ax=";
-//   A.APPLY(x,y);
-//   cout << y << endl;
-//   cout << "  A^Tx=";
-//   A.APPLYtr(x,y);
-//   cout << y << endl;
+  cout << "- choose another matrix A (constructed from a string):" << endl;
+  Matrix<double> A(3,3,"1 2 3 4 5 6 7 8 9");
+  cout << A;
+  y.resize(3);
+  cout << "  Ax=";
+  A.apply(x,y);
+  cout << y << endl;
+  cout << "  A^Tx=";
+  A.apply_transposed(x,y);
+  cout << y << endl;
+
+  cout << "- testing matrix norms for A:" << endl;
 
 //   cout << "- A*A:" << endl
 //        << A*A << endl;

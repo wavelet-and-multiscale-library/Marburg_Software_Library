@@ -1,6 +1,7 @@
 // implementation of MathTL::Matrix inline functions
 
 #include <iomanip>
+#include <sstream>
 
 namespace MathTL
 {
@@ -20,10 +21,34 @@ namespace MathTL
 
   template <class C>
   inline
-  Matrix<C>::Matrix(const size_type row_dimension, const size_type column_dimension)
+  Matrix<C>::Matrix(const size_type row_dimension,
+		    const size_type column_dimension)
     : entries_(row_dimension*column_dimension), rowdim_(row_dimension),
       coldim_(column_dimension)
   {
+  }
+
+  template <class C>
+  Matrix<C>::Matrix(const size_type row_dimension,
+		    const size_type column_dimension,
+		    const char* str,
+		    const bool byrow)
+    : entries_(row_dimension*column_dimension, false),
+      rowdim_(row_dimension), coldim_(column_dimension)
+  {
+    std::istringstream ins(str);
+    if (byrow)
+      {
+	for (size_type i(0); i < rowdim_ && ins.good(); i++)
+	  for (size_type j(0); j < coldim_ && ins.good(); j++)
+	    ins >> (*this).operator () (i,j);
+      }
+    else
+      {
+	for (size_type j(0); j < coldim_ && ins.good(); j++)
+	  for (size_type i(0); i < rowdim_ && ins.good(); i++)
+	    ins >> (*this).operator () (i,j);
+      }
   }
 
   template <class C>
@@ -120,6 +145,36 @@ namespace MathTL
   void swap(Matrix<C>& M1, Matrix<C>& M2)
   {
     M1.swap(M2);
+  }
+
+  template <class C>
+  template <class VECTOR>
+  void Matrix<C>::apply(const VECTOR& x, VECTOR& Mx) const
+  {
+    assert(Mx.size() == rowdim_);
+    
+    for (typename Matrix<C>::size_type i(0); i < rowdim_; i++)
+      {
+	Mx[i] = 0;
+	for (typename Matrix<C>::size_type j(0);
+	     j < coldim_; j++)
+	  Mx[i] += this->operator () (i, j) * x[j];
+      }
+  }
+
+  template <class C>
+  template <class VECTOR>
+  void Matrix<C>::apply_transposed(const VECTOR& x, VECTOR& Mtx) const
+  {
+    assert(Mtx.size() == coldim_);
+    
+    for (typename Matrix<C>::size_type i(0); i < coldim_; i++)
+      {
+	Mtx[i] = 0;
+	for (typename Matrix<C>::size_type j(0);
+	     j < rowdim_; j++)
+	  Mtx[i] += this->operator () (j, i) * x[j];
+      }
   }
 
   template <class C>

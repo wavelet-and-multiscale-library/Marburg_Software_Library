@@ -13,8 +13,8 @@
 #include <iostream>
 
 // external functionality, for convenience:
-#include <utils/vector_norms.h>
-#include <utils/vector_arithmetics.h>
+#include <algebra/vector_norms.h>
+#include <algebra/vector_arithmetics.h>
 
 namespace MathTL
 {

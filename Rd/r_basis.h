@@ -24,6 +24,11 @@ namespace WaveletTL
   {
   public:
     /*!
+      default constructor
+    */
+    RBasis();
+
+    /*!
       wavelet index class
     */
     typedef RIndex Index;
@@ -39,20 +44,14 @@ namespace WaveletTL
     inline const RefinableFunction<DUALMASK> aT() const { return aT_; }
 
     /*!
-      reading access to the k-th primal wavelet coefficient
+      reading access to the primal wavelet coefficients
     */
-    inline const double b(const int k) const
-    {
-      return (k%2 == 0 ? aT_.get_coefficient(1-k) : -aT_.get_coefficient(1-k));
-    }
+    inline const MultivariateLaurentPolynomial<double, 1>& b() const { return b_; }
 
     /*!
-      reading access to the k-th dual wavelet coefficient
+      reading access to the dual wavelet coefficients
     */
-    inline const double bT(const int k) const
-    {
-      return (k%2 == 0 ? a_.get_coefficient(1-k) : -a_.get_coefficient(1-k));
-    }
+    inline const MultivariateLaurentPolynomial<double, 1>& bT() const { return bT_; }
 
     //! DECOMPOSE routine, simple version
     /*!
@@ -150,8 +149,8 @@ namespace WaveletTL
       on a dyadic subgrid of the interval [A,B].
       We assume that the derivative vanishes at the boundary of its support.
      */
-    template <unsigned int DERIVATIVE>
-    SampledMapping<1> evaluate(const Index& lambda,
+    SampledMapping<1> evaluate(const unsigned int derivative,
+			       const Index& lambda,
 			       const bool primal,
 			       const int A, const int B,
 			       const int resolution) const;
@@ -161,8 +160,8 @@ namespace WaveletTL
       Evaluate an arbitrary linear combination of primal or dual
       wavelets on a dyadic subgrid of [A,B].
     */
-    template <unsigned int DERIVATIVE>
-    SampledMapping<1> evaluate(const InfiniteVector<double, Index>& coeffs,
+    SampledMapping<1> evaluate(const unsigned int derivative,
+			       const InfiniteVector<double, Index>& coeffs,
 			       const bool primal,
 			       const int A, const int B,
 			       const int resolution) const;
@@ -177,6 +176,16 @@ namespace WaveletTL
       one instance of the dual mask
     */
     RefinableFunction<DUALMASK> aT_;
+
+    /*!
+      primal wavelet coefficients
+    */
+    MultivariateLaurentPolynomial<double, 1> b_;
+
+    /*!
+      dual wavelet coefficients
+    */
+    MultivariateLaurentPolynomial<double, 1> bT_;
   };
 }
 

@@ -6,6 +6,22 @@
 namespace WaveletTL
 {
   template <class PRIMALMASK, class DUALMASK>
+  RBasis<PRIMALMASK, DUALMASK>::RBasis()
+  {
+    // setup primal wavelet coefficients
+    //   b_k = (-1)^k*aT_{1-k}
+    for (typename PRIMALMASK::const_iterator it(aT_.begin()); it != aT_.end(); ++it)
+      b_.set_coefficient(MultiIndex<int, 1>(1-it.index()[0]),
+			 (it.index()[0]%2 == 0 ? -(*it) : *it));
+    
+    // setup dual wavelet coefficients
+    //   bT_k = (-1)^k*a_{1-k}
+    for (typename DUALMASK::const_iterator it(a_.begin()); it != a_.end(); ++it)
+      bT_.set_coefficient(MultiIndex<int, 1>(1-it.index()[0]),
+			  (it.index()[0]%2 == 0 ? -(*it) : *it));
+  }
+
+  template <class PRIMALMASK, class DUALMASK>
   void
   RBasis<PRIMALMASK, DUALMASK>::decompose(const InfiniteVector<double, Index>& c,
 					  const int j0,
@@ -14,9 +30,9 @@ namespace WaveletTL
     for (InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
 	 it != itend; ++it)
       {
-	InfiniteVector<double, Index> help;
-	decompose_1(it.index(), j0, help);
-	d += *it * help;
+ 	InfiniteVector<double, Index> help;
+ 	decompose_1(it.index(), j0, help);
+ 	d += *it * help;
       }
   }
   
@@ -90,24 +106,25 @@ namespace WaveletTL
 	  {
 	    // j>j0, perform multiscale decomposition
 	    
-	    const int abegin(a().begin().index()),
-	      aend(a().rbegin().index()),
-	      bbegin(1-aT().rbegin().index()),
-	      bend(1-aT().begin().index());
+	    const int abegin(a().begin().index()[0]),
+	      aend(a().rbegin().index()[0]),
+	      bbegin(b().begin().index()[0]),
+	      bend(b().rbegin().index()[0]);
 	    
 	    // compute d_{j-1}
- 	    for (int l((int)ceil((lambda.k()-bend)/2.0));
-		 l <= (int)floor((lambda.k()-bbegin)/2.0); l++)
- 	      c[Index(lambda.j()-1, 1, l)] = M_SQRT1_2 * b(lambda.k()-2*l);
+  	    for (int l((int)ceil((lambda.k()-bend)/2.0));
+ 		 l <= (int)floor((lambda.k()-bbegin)/2.0); l++)
+  	      c[Index(lambda.j()-1, 1, l)] =
+		M_SQRT1_2 * b().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*l));
 
-	    // compute c_{j_0} via recursion
-	    for (int l((int)ceil((lambda.k()-aend)/2.0));
-		 l <= (int)floor((lambda.k()-abegin)/2.0); l++)
-	      {
-		InfiniteVector<double, Index> d;
-		decompose_1(Index(lambda.j()-1, 0, l), j0, d);
-		c += M_SQRT1_2 * a().get_coefficient(lambda.k()-2*l) * d;
-	      }
+ 	    // compute c_{j_0} via recursion
+ 	    for (int l((int)ceil((lambda.k()-aend)/2.0));
+ 		 l <= (int)floor((lambda.k()-abegin)/2.0); l++)
+ 	      {
+ 		InfiniteVector<double, Index> d;
+ 		decompose_1(Index(lambda.j()-1, 0, l), j0, d);
+ 		c += M_SQRT1_2 * a().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*l)) * d;
+ 	      }
 	  }
       }
   }
@@ -137,15 +154,16 @@ namespace WaveletTL
 	  {
 	    // j>j0, perform multiscale decomposition
 	    
-	    const int aTbegin(aT().begin().index()),
-	      aTend(aT().rbegin().index()),
-	      bTbegin(1-a().rbegin().index()),
-	      bTend(1-a().begin().index());
+	    const int aTbegin(aT().begin().index()[0]),
+	      aTend(aT().rbegin().index()[0]),
+	      bTbegin(bT().begin().index()[0]),
+	      bTend(bT().rbegin().index()[0]);
 	    
 	    // compute d_{j-1}
  	    for (int l((int)ceil((lambda.k()-bTend)/2.0));
 		 l <= (int)floor((lambda.k()-bTbegin)/2.0); l++)
- 	      c[Index(lambda.j()-1, 1, l)] = M_SQRT1_2 * bT(lambda.k()-2*l);
+ 	      c[Index(lambda.j()-1, 1, l)] =
+		M_SQRT1_2 * bT().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*l));
 	    
 	    // compute c_{j_0} via recursion
 	    for (int l((int)ceil((lambda.k()-aTend)/2.0));
@@ -153,7 +171,7 @@ namespace WaveletTL
 	      {
 		InfiniteVector<double, Index> d;
 		decompose_t_1(Index(lambda.j()-1, 0, l), j0, d);
-		c += M_SQRT1_2 * aT().get_coefficient(lambda.k()-2*l) * d;
+		c += M_SQRT1_2 * aT().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*l)) * d;
 	      }
 	  }
       }
@@ -174,10 +192,10 @@ namespace WaveletTL
       {
 	// reconstruct by recursion
 
-	const int aTbegin(aT().begin().index()),
-	  aTend(aT().rbegin().index()),
-	  bTbegin(1-a().rbegin().index()),
-	  bTend(1-a().begin().index());
+	const int aTbegin(aT().begin().index()[0]),
+	  aTend(aT().rbegin().index()[0]),
+	  bTbegin(bT().begin().index()[0]),
+	  bTend(bT().rbegin().index()[0]);
 
 	if (lambda.e() == 0)
 	  {
@@ -185,7 +203,7 @@ namespace WaveletTL
  	      {
  		InfiniteVector<double, Index> d;
  		reconstruct_1(Index(lambda.j()+1, 0, l), j, d);
- 		c += M_SQRT1_2 * aT().get_coefficient(l-2*lambda.k()) * d;
+ 		c += M_SQRT1_2 * aT().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k())) * d;
  	      }
  	  }
  	else
@@ -194,7 +212,7 @@ namespace WaveletTL
  	      {
  		InfiniteVector<double, Index> d;
  		reconstruct_1(Index(lambda.j()+1, 0, l), j, d);
- 		c += M_SQRT1_2 * bT(l-2*lambda.k()) * d;
+ 		c += M_SQRT1_2 * bT().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k())) * d;
  	      }
 	  }
       }
@@ -215,10 +233,10 @@ namespace WaveletTL
       {
 	// reconstruct by recursion
 
-	const int abegin(a().begin().index()),
-	  aend(a().rbegin().index()),
-	  bbegin(1-aT().rbegin().index()),
-	  bend(1-aT().begin().index());
+	const int abegin(a().begin().index()[0]),
+	  aend(a().rbegin().index()[0]),
+	  bbegin(b().begin().index()[0]),
+	  bend(b().rbegin().index()[0]);
 	    
 	if (lambda.e() == 0)
 	  {
@@ -226,7 +244,7 @@ namespace WaveletTL
  	      {
  		InfiniteVector<double, Index> d;
  		reconstruct_t_1(Index(lambda.j()+1, 0, l), j, d);
- 		c += M_SQRT1_2 * a().get_coefficient(l-2*lambda.k()) * d;
+ 		c += M_SQRT1_2 * a().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k())) * d;
  	      }
  	  }
  	else
@@ -235,16 +253,16 @@ namespace WaveletTL
  	      {
  		InfiniteVector<double, Index> d;
  		reconstruct_t_1(Index(lambda.j()+1, 0, l), j, d);
- 		c += M_SQRT1_2 * b(l-2*lambda.k()) * d;
+ 		c += M_SQRT1_2 * b().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k())) * d;
  	      }
 	  }
       }
   }
 
   template <class PRIMALMASK, class DUALMASK>
-  template <unsigned int DERIVATIVE>
   SampledMapping<1>
-  RBasis<PRIMALMASK, DUALMASK>::evaluate(const RIndex& lambda,
+  RBasis<PRIMALMASK, DUALMASK>::evaluate(const unsigned int derivative,
+					 const RIndex& lambda,
 					 const bool primal,
 					 const int A, const int B,
 					 const int resolution) const
@@ -257,18 +275,28 @@ namespace WaveletTL
  	  reconstruct_1(lambda, lambda.j()+1, gcoeffs);
  	else
  	  reconstruct_t_1(lambda, lambda.j()+1, gcoeffs);
- 	return evaluate<DERIVATIVE>(gcoeffs, primal, A, B, resolution);
+ 	return evaluate(derivative, gcoeffs, primal, A, B, resolution);
       }
     
     return (primal
-	    ? a().evaluate<DERIVATIVE>(lambda.j(), lambda.k(), A, B, resolution)
- 	    : aT().evaluate<DERIVATIVE>(lambda.j(), lambda.k(), A, B, resolution));
+	    ? a().evaluate(MultiIndex<unsigned int, 1>(derivative),
+			   lambda.j(),
+			   MultiIndex<int, 1>(lambda.k()),
+			   MultiIndex<int, 1>(A),
+			   MultiIndex<int, 1>(B),
+			   resolution)
+ 	    : aT().evaluate(MultiIndex<unsigned int, 1>(derivative),
+			    lambda.j(),
+			    MultiIndex<int, 1>(lambda.k()),
+			    MultiIndex<int, 1>(A),
+			    MultiIndex<int, 1>(B),
+			    resolution));
   }
 
   template <class PRIMALMASK, class DUALMASK>
-  template <unsigned int DERIVATIVE>
   SampledMapping<1>
-  RBasis<PRIMALMASK, DUALMASK>::evaluate(const InfiniteVector<double, Index>& coeffs,
+  RBasis<PRIMALMASK, DUALMASK>::evaluate(const unsigned int derivative,
+					 const InfiniteVector<double, Index>& coeffs,
 					 const bool primal,
 					 const int A, const int B,
 					 const int resolution) const
@@ -295,7 +323,7 @@ namespace WaveletTL
 	for (InfiniteVector<double,RIndex>::const_iterator it(gcoeffs.begin()), itend(gcoeffs.end());
 	     it != itend; ++it)
 	  {
-	    SampledMapping<1> help(evaluate<DERIVATIVE>(it.index(), primal, A, B, resolution));
+	    SampledMapping<1> help(evaluate(derivative, it.index(), primal, A, B, resolution));
 	    for (unsigned int i(0); i < values.size(); i++)
 	      values[i] += *it * help.values()[i];
 	  }

@@ -312,7 +312,8 @@ namespace MathTL
   template <class MATRIX>
   double CondSymm(const MATRIX& A, double tol, unsigned int maxit)
   {
-    Vector<double> x;
+    Vector<double> x(A.row_dimension(), false);
+    x = 1;
     unsigned int iterations;
     
     return abs(PowerIteration(A, x, tol, maxit, iterations)

@@ -155,6 +155,11 @@ namespace MathTL
     Vector<C>& operator = (const C c);
 
     /*!
+      swap components of two vectors
+    */
+    void swap (Vector<C>& v);
+
+    /*!
       equality test with another vector
      */
     template <class VECTOR>
@@ -224,6 +229,12 @@ namespace MathTL
     size_type size_;
   };
 
+  /*!
+    swap the values of two vectors
+  */
+  template <class C>
+  void swap(Vector<C>& v1, Vector<C>& v2);
+  
   /*!
     stream output for vectors
     (we overload this for code clarity)

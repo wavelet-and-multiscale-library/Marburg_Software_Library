@@ -152,6 +152,14 @@ namespace MathTL
   }
 
   template <class C>
+  inline
+  void Vector<C>::swap(Vector<C>& v)
+  {
+    std::swap(size_, v.size_);
+    std::swap(values_, v.values_);
+  }
+
+  template <class C>
   template <class VECTOR>
   bool Vector<C>::operator == (const VECTOR& v)
   {
@@ -264,6 +272,13 @@ namespace MathTL
       r += *it++ * *itv++;
 
     return r;
+  }
+
+  template <class C>
+  inline
+  void swap(Vector<C>& v1, Vector<C>& v2)
+  {
+    v1.swap(v2);
   }
 
   template <class C>

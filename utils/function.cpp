@@ -26,7 +26,7 @@ namespace MathTL
   {
     return sizeof(*this);
   }
-
+  
   template <unsigned int DIM>
   inline
   ZeroFunction<DIM>::ZeroFunction(const unsigned int n_components)
@@ -46,5 +46,14 @@ namespace MathTL
 				  const unsigned int component) const
   {
     return 0.0;
+  }
+
+  template <unsigned int DIM>
+  inline
+  void ZeroFunction<DIM>::vector_value(const Point<DIM> &p,
+				       Array1D<double>& values) const
+  {
+    for (unsigned int i(0); i < n_components; i++)
+      values[i] = value(p, i);
   }
 }

@@ -10,6 +10,8 @@
 #ifndef _MATHTL_ARRAY1D_H
 #define _MATHTL_ARRAY1D_H
 
+#include <iostream>
+
 namespace MathTL
 {
   /*!
@@ -51,6 +53,11 @@ namespace MathTL
     ~Array1D();
 
     /*!
+      size of the array
+    */
+    const size_type size() const;
+
+    /*!
       read-only access to the i-th array member
     */
     const C& operator [] (const size_type i) const;
@@ -71,9 +78,15 @@ namespace MathTL
     */
     size_type size_;
   };
+
+  /*!
+    stream output for arrays
+   */
+  template <class C>
+  std::ostream& operator << (std::ostream& os, const Array1D<C>& A);
 }
 
-// include implementation inline functions
+// include implementation of inline functions
 #include "utils/array1d.cpp"
 
 #endif

@@ -10,6 +10,7 @@
 #ifndef _MATHTL_FUNCTION_H
 #define _MATHTL_FUNCTION_H
 
+#include "utils/array1d.h"
 #include "utils/function_time.h"
 #include "geometry/point.h"
 
@@ -64,6 +65,12 @@ namespace MathTL
 			  const unsigned int component = 0) const = 0;
 
     /*!
+      evaluate the function
+    */
+    virtual void vector_value(const Point<DIM> &p,
+			      Array1D<double>& values) const = 0;
+
+    /*!
       (estimate of) memory consumption in bytes
     */
     const size_type memory_consumption() const;
@@ -73,6 +80,10 @@ namespace MathTL
   //
   //
   // some example functions
+
+  /*!
+    scalar or vector valued zero function
+   */
   template <unsigned int DIM>
   class ZeroFunction
     : public Function<DIM>
@@ -89,10 +100,16 @@ namespace MathTL
     virtual ~ZeroFunction();
 
     /*!
-      evaluate zero function
+      evaluate one component of the zero function
      */
     double value(const Point<DIM>& p,
-		 const unsigned int component = 1) const;
+		 const unsigned int component = 0) const;
+
+    /*!
+      evaluate the zero function
+    */
+    void vector_value(const Point<DIM> &p,
+		      Array1D<double>& values) const;
   };
   
 }

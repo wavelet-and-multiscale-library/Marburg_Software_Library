@@ -1,22 +1,24 @@
 // implementation of the Point<DIM>:: inline methods
 
+#include "io/vector_io.h"
+
 namespace MathTL
 {
-  template <int DIM>
+  template <unsigned int DIM>
   inline
   Point<DIM>::Point()
     : Tensor<1, DIM>(true)
   {
   }
 
-  template <int DIM>
+  template <unsigned int DIM>
   inline
   Point<DIM>::Point(const Tensor<1, DIM>& T)
     : Tensor<1, DIM>(T)
   {
   }
 
-  template <int DIM>
+  template <unsigned int DIM>
   inline
   Point<DIM>::Point(const double x)
   {
@@ -24,7 +26,7 @@ namespace MathTL
     this->values[0] = x;
   }
 
-  template <int DIM>
+  template <unsigned int DIM>
   inline
   Point<DIM>::Point(const double x, const double y)
   {
@@ -33,7 +35,7 @@ namespace MathTL
     this->values[1] = y;
   }
 
-  template <int DIM>
+  template <unsigned int DIM>
   inline
   Point<DIM>::Point(const double x, const double y, const double z)
   {
@@ -43,7 +45,15 @@ namespace MathTL
     this->values[2] = z;
   }
 
-  template <int DIM>
+  template <unsigned int DIM>
+  inline
+  const typename Point<DIM>::size_type
+  Point<DIM>::size() const
+  {
+    return DIM;
+  }
+
+  template <unsigned int DIM>
   inline
   const double Point<DIM>::operator () (const size_type i) const
   {
@@ -51,11 +61,19 @@ namespace MathTL
     return this->values[i];
   }
 
-  template <int DIM>
+  template <unsigned int DIM>
   inline
   double& Point<DIM>::operator () (const size_type i)
   {
     assert(i < DIM);
     return this->values[i];
+  }
+
+  template <unsigned int DIM>
+  inline
+  std::ostream& operator << (std::ostream& os, const Point<DIM>& p)
+  {
+    using namespace VectorIO;
+    print_vector(p, os);
   }
 }

@@ -10,12 +10,13 @@
 #ifndef _MATHTL_POINT_H
 #define _MATHTL_POINT_H
 
+#include <iostream>
 #include "algebra/tensor.h"
 
 namespace MathTL
 {
   // a class for points in the d-dimensional Euclidean space
-  template <int DIM>
+  template <unsigned int DIM>
     class Point : public Tensor<1, DIM>
   {
   public:
@@ -86,6 +87,11 @@ namespace MathTL
     Point(const double x, const double y, const double z);
 
     /*!
+      size/dimension of the point (cf. std::vector signature)
+     */
+    const size_type size() const;
+
+    /*!
       Matlab-style read-only access operator (operator [] is inherited
       from the Tensor class)
     */
@@ -97,6 +103,12 @@ namespace MathTL
     */
     double& operator () (const size_type i);
   };
+
+  /*!
+    stream output for points (overloaded from the tensor one)
+   */
+  template <unsigned int DIM>
+  std::ostream& operator << (std::ostream& os, const Point<DIM>& p);
 }
 
 #include "geometry/point.cpp"

@@ -135,8 +135,6 @@ namespace MathTL
   //
   // external functionality for general tensors
 
-  
-
   /*!
     stream output for general tensors:
     due to the recursive structure, the elements of the tensor are printed

@@ -1,6 +1,7 @@
 // implementation of some (inline) Array1D<C>:: methods
 
 #include <cassert>
+#include "io/vector_io.h"
 
 namespace MathTL
 {
@@ -29,6 +30,14 @@ namespace MathTL
     if (data_ != 0)
       delete [] data_;
   }
+  
+  template <class C>
+  inline
+  const typename Array1D<C>::size_type
+  Array1D<C>::size() const
+  {
+    return size_;
+  }
 
   template <class C>
   inline
@@ -45,4 +54,13 @@ namespace MathTL
     assert(i < size_);
     return data_[i];
   }
+
+  template <class C>
+  inline
+  std::ostream& operator << (std::ostream& os, const Array1D<C>& A)
+  {
+    using namespace VectorIO;
+    print_vector(A, os);
+  }
+
 }

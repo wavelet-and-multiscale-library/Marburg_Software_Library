@@ -25,6 +25,7 @@ namespace MathTL
   {
     double r(0);
 
+    // take care of multiple knots
     double diff = knots[j+d-1] - knots[j];
     if (diff > 0) r += (x - knots[j]) * evaluate_Bspline<d-1>(knots, j, x) / diff;
     diff = knots[j+d] - knots[j+1];

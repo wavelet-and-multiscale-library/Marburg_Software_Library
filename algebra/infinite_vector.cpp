@@ -2,6 +2,8 @@
 
 #include <cmath>
 #include <algorithm>
+#include <vector>
+#include <utility>
 
 namespace MathTL
 {
@@ -66,6 +68,13 @@ namespace MathTL
   void InfiniteVector<C,I>::swap(InfiniteVector<C,I>& v)
   {
     std::map<I,C>::swap(v);
+  }
+
+  template <class C, class I>
+  inline
+  void InfiniteVector<C,I>::clear()
+  {
+    std::map<I,C>::clear();
   }
 
   template <class C, class I>
@@ -185,6 +194,83 @@ namespace MathTL
   }
 
   template <class C, class I>
+  double InfiniteVector<C,I>::weak_norm(const double tau) const
+  {
+    double r(0.0);
+
+    if (size() > 0)
+      {
+	// prepare vector to be sorted
+	std::vector<std::pair<I,C> > sv(size());
+	unsigned int id(0);
+	for (const_iterator it(begin()), itend(end());
+	     it != itend; ++it, ++id)
+	  {
+	    sv[id] = std::make_pair<I,C>(it.index(), *it);
+	  }
+	  
+	// sort vector (Introsort, O(N*log N))
+	sort(sv.begin(), sv.end(), decreasing_order());
+	  
+	// compute \|*this\|_{\ell^w_\tau}:=\sup_{N=1}^\infty N^{1/tau}|v_N^*|
+	// where the v_N^* are the decreasing rearrangement of me
+	for (unsigned int N(1); N <= sv.size(); N++)
+	  r = std::max(r, pow(N, 1.0/tau) * fabs(sv[N-1].second));
+      }
+
+    return r;
+  }
+
+  template <class C, class I>
+  void InfiniteVector<C,I>::n_coarse(const double eps, InfiniteVector<C,I>& v) const
+  {
+    // We use a straightforward implementation with complexity O(N*log(N)):
+    // - sort my entries in modulus
+    //   1. possibility: use a helper multimap object
+    //   2. possibility: use a sorted vector (preferred solution, since no
+    //                   slow insertion sort algorithm is launched!)
+    // - insert the largest in modulus entries into v until
+    //     \|*this-v\|_{\ell_2}\le\epsilon
+    //
+    // Another possibility would be binary binning, which we will implement
+    // in a later stage of the library!
+
+    v.clear();
+    if (size() > 0)
+      {
+	// prepare vector to be sorted
+	std::vector<std::pair<I,C> > sv(size());
+	unsigned int id(0);
+	for (const_iterator it(begin()), itend(end());
+	     it != itend; ++it, ++id)
+	  {
+	    sv[id] = std::make_pair<I,C>(it.index(), *it);
+	  }
+	  
+	// sort vector (Introsort, O(N*log N))
+	sort(sv.begin(), sv.end(), decreasing_order());
+
+	// insert largest in modulus entries until tolerance is reached
+	double coarsenorm(0);
+	double nrm(l2_norm(*this));
+	double bound(nrm*nrm - eps*eps);
+	typename std::vector<std::pair<I,C> >::iterator it(sv.begin());
+	do
+	  {
+	    coarsenorm += it->second * it->second;
+	    ++it;
+	  }
+	while ((it != sv.end()) && (coarsenorm < bound));
+	sv.erase(it, sv.end());
+
+	// insert relevant entries in v (-> insertion sort, we hope that
+	// the number of entries is neglectible)
+	for (unsigned int i(0); i < sv.size(); i++)
+	  v[sv[i].first] = sv[i].second;
+      }
+  }
+
+  template <class C, class I>
   InfiniteVector<C,I>::const_iterator::
   const_iterator(const typename std::map<I,C>::const_iterator& entry)
     : std::map<I,C>::const_iterator(entry)
@@ -253,7 +339,9 @@ namespace MathTL
   InfiniteVector<C,I>::const_iterator::
   operator == (const const_iterator& it) const
   {
-    return (index() == it.index());
+    // quick, dirty hack
+    return (static_cast<typename std::map<I,C>::const_iterator>(*this)
+	    == static_cast<typename std::map<I,C>::const_iterator>(it));
   }
 
   template <class C, class I>

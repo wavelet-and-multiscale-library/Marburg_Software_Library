@@ -70,32 +70,33 @@ int main()
   cout << "  a*b=" << sa*sb << endl;
   cout << "  mean value of a: " << mean_value(sa) << endl;
 
-//   cout << "- preparing a large random vector for the NCOARSE routine with size ";
-//   InfiniteVector<float,int> v,w;
-//   for (int i=0; i < 10000; i++) v(i) = (double)rand()/(double)RAND_MAX;
-//   cout << v.size() << endl;
-//   double eps = 0.1;
-//   cout << "- NCOARSE(" << eps << ",w) yields w with ";
-//   v.NCOARSE(eps,w);
-//   cout << w.size() << " entries and ||v-w||_2=" << norm(v-w)
-//        << " (||v||=" << norm(v) << ")" << endl;
-//   eps = 1.0;
-//   cout << "- NCOARSE(" << eps << ",w) yields w with ";
-//   v.NCOARSE(eps,w);
-//   cout << w.size() << " entries and ||v-w||_2=" << norm(v-w)
-//        << " (||v||=" << norm(v) << ")" << endl;
-//   eps = 10.0;
-//   cout << "- NCOARSE(" << eps << ",w) yields w with ";
-//   v.NCOARSE(eps,w);
-//   cout << w.size() << " entries and ||v-w||_2=" << norm(v-w)
-//        << " (||v||=" << norm(v) << ")" << endl;
+  cout << "- preparing a large random vector for the NCOARSE routine with size ";
+  InfiniteVector<float,int> v, w;
+  for (unsigned int i=0; i < 1000; i++)
+    {
+      v[i] = (double)rand()/(double)RAND_MAX;
+    }
+  cout << v.size()
+       << " and ||v||_2=" << l2_norm(v) << endl;
+
+  double eps = 0.1;
+  cout << "- NCOARSE(" << eps << ",w) yields w with ";
+  v.n_coarse(eps,w);
+  cout << w.size() << " entries and ||v-w||_2=" << l2_norm(v-w) << endl;
+  eps = 1.0;
+  cout << "- NCOARSE(" << eps << ",w) yields w with ";
+  v.n_coarse(eps,w);
+  cout << w.size() << " entries and ||v-w||_2=" << l2_norm(v-w) << endl;
+  eps = 10.0;
+  cout << "- NCOARSE(" << eps << ",w) yields w with ";
+  v.n_coarse(eps,w);
+  cout << w.size() << " entries and ||v-w||_2=" << l2_norm(v-w) << endl;
   
-  
-//   cout << "- some weak \ell_\tau norms of v:" << endl;
-//   for (double tau(1.8); tau >= 0.2; tau -= 0.2)
-//     {
-//       cout << "  tau=" << tau << ", ||v||_{\\ell^w_\\tau}=" << v.weak_norm(tau) << endl;
-//     }
+  cout << "- some weak \\ell_\\tau norms of v:" << endl;
+  for (double tau(1.8); tau >= 0.2; tau -= 0.2)
+    {
+      cout << "  tau=" << tau << ", ||v||_{\\ell^w_\\tau}=" << v.weak_norm(tau) << endl;
+    }
 
   return 0;
 }

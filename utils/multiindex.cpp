@@ -129,4 +129,14 @@ namespace MathTL
       r *= faculty(alpha[i]);
     return r;
   }
+
+  template <class I, unsigned int DIMENSION>
+  int multi_power(const MultiIndex<I, DIMENSION>& alpha,
+		  const MultiIndex<unsigned int, DIMENSION>& beta)
+  {
+    int r(intpower(alpha[0], beta[0]));
+    for (unsigned int i(1); i < DIMENSION; i++)
+      r *= intpower(alpha[i], beta[i]);
+    return r;
+  }
 }

@@ -81,12 +81,11 @@ inline int minus1power(const int k)
 }
 
 //! integer power n^k, 0^0=1
-int intpower(const int n, const int k)
+template <class I, class J>
+int intpower(const I n, const J k)
 {
-  assert(k >= 0);
-
   int r(1);
-  for (int i(1); i <= k; i++)
+  for (J j(1); j <= k; j++)
     r *= n;
 
   return r;

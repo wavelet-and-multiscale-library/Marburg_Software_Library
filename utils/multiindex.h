@@ -85,6 +85,13 @@ namespace MathTL
   unsigned int multi_faculty(const MultiIndex<unsigned int, DIMENSION>& alpha);
 
   /*!
+    \beta-th power of a multiindex \alpha
+  */
+  template <class I, unsigned int DIMENSION>
+  int multi_power(const MultiIndex<I, DIMENSION>& alpha,
+		  const MultiIndex<unsigned int, DIMENSION>& beta);
+  
+  /*!
     Compute all multiindices \alpha\in\mathbb N^d with degree |\alpha|=k
   */
   template <unsigned int DIMENSION>

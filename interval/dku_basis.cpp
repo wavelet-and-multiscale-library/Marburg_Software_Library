@@ -1,16 +1,18 @@
-// implementation for dku.h
+// implementation for dku_basis.h
 
 #include <cmath>
 #include <iostream>
+
 #include <utils/tiny_tools.h>
-#include <Rd/haar_mask.h>
-#include <Rd/cdf_mask.h>
-#include <Rd/dm_mask.h>
-#include <Rd/multi_refinable.h>
 #include <algebra/matrix_norms.h>
 #include <algebra/triangular_matrix.h>
 #include <numerics/eigenvalues.h>
 #include <numerics/matrix_decomp.h>
+
+#include <Rd/haar_mask.h>
+#include <Rd/cdf_mask.h>
+#include <Rd/dm_mask.h>
+#include <Rd/multi_refinable.h>
 
 using std::cout;
 using std::endl;

@@ -14,7 +14,7 @@ EXEOBJF = \
   test_refinable.o\
   test_dm.o\
   test_r_basis.o\
-  test_dku.o\
+  test_dku_basis.o\
   test_periodic.o
 
 EXES = $(EXEOBJF:.o=)

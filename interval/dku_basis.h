@@ -7,8 +7,8 @@
 // | Thorsten Raasch                                                    |
 // +--------------------------------------------------------------------+
 
-#ifndef _WAVELETTL_DKU_H
-#define _WAVELETTL_DKU_H
+#ifndef _WAVELETTL_DKU_BASIS_H
+#define _WAVELETTL_DKU_BASIS_H
 
 #include <iostream>
 #include <cmath>
@@ -151,6 +151,6 @@ namespace WaveletTL
   };
 }
 
-#include <interval/dku.cpp>
+#include <interval/dku_basis.cpp>
 
 #endif

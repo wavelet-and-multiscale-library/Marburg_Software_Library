@@ -1,7 +1,9 @@
 #include <iostream>
-#include <interval/dku.h>
+
 #include <algebra/infinite_vector.h>
 #include <utils/array1d.h>
+
+#include <interval/dku_basis.h>
 
 using namespace std;
 using namespace WaveletTL;

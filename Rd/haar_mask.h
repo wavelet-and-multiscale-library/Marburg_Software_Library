@@ -19,14 +19,14 @@ namespace WaveletTL
 {
   class HaarMask
     : public virtual LaurentPolynomial<double>
+  {
+  public:
+    HaarMask()
     {
-    public:
-      HaarMask()
-	{
-	  set_coefficient(0, 1);
-	  set_coefficient(1, 1);
-	}
-    };
+      set_coefficient(0, 1);
+      set_coefficient(1, 1);
+    }
+  };
 }
 
 #endif

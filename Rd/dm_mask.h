@@ -11,6 +11,7 @@
 #define _WAVELETTL_DM_MASK_H
 
 #include <algebra/laurent_polynomial.h>
+#include <Rd/trivial_mask.h>
 
 using namespace MathTL;
 
@@ -25,20 +26,41 @@ namespace WaveletTL
     of phi_0 and phi_1. You can directly use the class as a template parameter
     of RefinableFunction<>.
 
-    TODO: also handle the case of derivatives and the restriction to [0,1]
-
     References:
     [DM] W. Dahmen and C. Micchelli,
          Using the refinement equation for evaluating integrals of wavelets,
 	 SIAM J. Numer. Anal. 30(1993), 507-537
   */
   template <class MASK0, class MASK1>
-  class DMMask
+  class DMMask1
     : public LaurentPolynomial<double>
   {
   public:
     //! default constructor, set up the mask
-    DMMask();
+    DMMask1();
+  };
+
+  /*!
+    According to [DM], for refinable functions phi_0, phi_1, phi_2, the function
+
+      F(t_1, t_2) = \int_{\mathbb R}\phi_0(x)\phi_1(x-t_1)\phi_2(x-t_2)\,dx
+
+    is again refinable. This template class computes the mask of F from those
+    of phi_0, phi_1 and phi_2. You can directly use the class as a template parameter
+    of MultivariateRefinableFunction<2, *>.
+
+    References:
+    [DM] W. Dahmen and C. Micchelli,
+         Using the refinement equation for evaluating integrals of wavelets,
+	 SIAM J. Numer. Anal. 30(1993), 507-537
+  */
+  template <class MASK0, class MASK1, class MASK2>
+  class DMMask2
+    : public LaurentPolynomial<double>
+  {
+  public:
+    //! default constructor, set up the mask
+    DMMask2();
   };
 }
 

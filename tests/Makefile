@@ -21,7 +21,8 @@ EXEOBJF = \
   test_grid.o test_sampled_mapping.o\
   test_splines.o\
   test_rosenbrock.o\
-  test_differences.o
+  test_differences.o\
+  test_multiindex.o
 
 EXES = $(EXEOBJF:.o=)
 

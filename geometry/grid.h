@@ -83,7 +83,13 @@ namespace MathTL
     /*!
       Matlab output of the grid onto a stream
     */
-    void matlab_output(std::ostream& os) const;
+    void matlab_output(std::ostream& os) const
+    {
+      os << "x = "
+	 << grid_
+	 << ";"
+	 << std::endl;
+    }
     
   protected:
     /*!
@@ -91,14 +97,6 @@ namespace MathTL
     */
     Array1D<double> grid_;
   };
-
-  void Grid<1>::matlab_output(std::ostream& os) const
-  {
-    os << "x = "
-       << grid_
-       << ";"
-       << std::endl;
-  }
 
   /*!
     specialization of Grid to two space dimensions:
@@ -145,7 +143,16 @@ namespace MathTL
     /*!
       Matlab output of the grid onto a stream
     */
-    void matlab_output(std::ostream& os) const;
+    void matlab_output(std::ostream& os) const
+    {
+      os << "x = ";
+      print_matrix(gridx_, os);
+      os << ";" << std::endl;
+      
+      os << "y = ";
+      print_matrix(gridy_, os);
+      os << ";" << std::endl;
+    }
     
   protected:
     /*!
@@ -154,17 +161,6 @@ namespace MathTL
     */
     Matrix<double> gridx_, gridy_;
   };
-
-  void Grid<2>::matlab_output(std::ostream& os) const
-  {
-    os << "x = ";
-    print_matrix(gridx_, os);
-    os << ";" << std::endl;
-
-    os << "y = ";
-    print_matrix(gridy_, os);
-    os << ";" << std::endl;
-  }
 }
 
 #endif

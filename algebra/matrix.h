@@ -71,18 +71,6 @@ namespace MathTL
     bool empty() const;
 
     /*!
-      equality test with another matrix
-    */
-    template <class C2>
-    bool operator == (const Matrix<C2>& v) const;
-
-    /*!
-      non-equality test
-    */
-    template <class C2>
-    bool operator != (const Matrix<C2>& v) const;
-
-    /*!
       read-only access to a matrix entry
     */
     const C operator () (const size_type row, const size_type column) const;
@@ -92,6 +80,28 @@ namespace MathTL
     */
     C& operator () (const size_type row, const size_type column);
 
+    /*!
+      equality test with another matrix
+    */
+    template <class C2>
+    bool operator == (const Matrix<C2>& M) const;
+
+    /*!
+      non-equality test
+    */
+    template <class C2>
+    bool operator != (const Matrix<C2>& M) const;
+
+    /*!
+      assignment from another matrix of the same dimensions
+    */
+    Matrix<C>& operator = (const Matrix<C>& M);
+
+    /*!
+      swap entries of two matrices
+    */
+    void swap (Matrix<C>& M);
+    
     /*!
       stream output with user-defined tabwidth and precision
       (cf. deal.II)
@@ -119,6 +129,12 @@ namespace MathTL
     size_type coldim_;
   };
 
+  /*!
+    swap the entries of two matrices
+  */
+  template <class C>
+  void swap(Matrix<C>& M1, Matrix<C>& M2);
+  
   /*!
     Matlab-style stream output for dense matrices
   */

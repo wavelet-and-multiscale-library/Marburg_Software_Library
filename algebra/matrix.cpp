@@ -67,18 +67,18 @@ namespace MathTL
 
   template <class C>
   template <class C2>
-  bool Matrix<C>::operator == (const Matrix<C2>& v) const
+  bool Matrix<C>::operator == (const Matrix<C2>& M) const
   {
-    if (rowdim_ != v.rowdim_ || coldim_ != v.coldim_) return false;
-    return std::equal(entries_.begin(), entries_.end(), v.entries_.begin());
+    if (rowdim_ != M.rowdim_ || coldim_ != M.coldim_) return false;
+    return std::equal(entries_.begin(), entries_.end(), M.entries_.begin());
   }
   
   template <class C>
   template <class C2>
   inline
-  bool Matrix<C>::operator != (const Matrix<C2>& v) const
+  bool Matrix<C>::operator != (const Matrix<C2>& M) const
   {
-    return !((*this) == v);
+    return !((*this) == M);
   }
 
   template <class C>
@@ -93,6 +93,33 @@ namespace MathTL
   C& Matrix<C>::operator () (const size_type row, const size_type column)
   {
     return entries_[row+column*rowdim_];
+  }
+
+  template <class C>
+  Matrix<C>& Matrix<C>::operator = (const Matrix<C>& M)
+  {
+    assert(rowdim_ = M.rowdim_);
+    assert(coldim_ = M.coldim_);
+
+    entries_ = M.entries_;
+
+    return *this;
+  }
+
+  template <class C>
+  inline
+  void Matrix<C>::swap(Matrix<C>& M)
+  {
+    std::swap(rowdim_, M.rowdim_);
+    std::swap(coldim_, M.coldim_);
+    entries_.swap(M.entries_);
+  }
+
+  template <class C>
+  inline
+  void swap(Matrix<C>& M1, Matrix<C>& M2)
+  {
+    M1.swap(M2);
   }
 
   template <class C>

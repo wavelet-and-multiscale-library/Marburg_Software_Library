@@ -38,6 +38,15 @@ int main()
   else
     cout << "  ... no!" << endl;
 
+  Matrix<double> O(2,3);
+  O(0,0) = 3.14; O(1,1) = -7.0;
+  cout << "- another matrix O:" << endl << O;
+  swap(N,O);
+  cout << "- after swapping, N=" << endl << N
+       << "  ... and O=" << endl << O;
+  N = O;
+  cout << "- N=O:" << endl << N;
+
 //   cout << "- testing APPLY, using the vector" << endl;
 //   RawVector<double> x(3), y;
 //   x(0) = 1; x(1) = -1; x(2) = -2;

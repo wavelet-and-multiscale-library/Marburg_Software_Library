@@ -163,7 +163,9 @@ namespace MathTL
   Vector<C>& Vector<C>::operator = (const C c)
   {
     assert(size() > 0);
+
     std::fill(begin(), end(), c);
+
     return *this;
   }
 
@@ -171,7 +173,9 @@ namespace MathTL
   Vector<C>& Vector<C>::operator = (const Vector<C>& v)
   {
     assert(size_ == v.size());
+
     std::copy(v.begin(), v.end(), begin());
+
     return *this;
   }
 
@@ -205,6 +209,7 @@ namespace MathTL
   bool Vector<C>::operator < (const Vector<C2>& v) const
   {
     assert(size_ == v.size());
+
     return std::lexicographical_compare(begin(), end(), v.begin(), v.end());
   }
 

@@ -66,7 +66,7 @@ namespace WaveletTL
 
       We assume that the derivative of \phi is zero at the boundary of its support.
     */
-    InfiniteVector<double, int> evaluate(const unsigned int mu) const;
+    InfiniteVector<double, int> evaluate(const unsigned int mu = 0) const;
 
     /*!
       Compute the n-th moment

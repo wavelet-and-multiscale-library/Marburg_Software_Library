@@ -9,10 +9,10 @@ int main()
 {
   cout << "Testing the DKU bases..." << endl;
 
-  Array1D<int> bc(2);
-  bc[0] = bc[1] = 0; // free boundary conditions
-  DKUBasis<2, 2> basis(bc, bc);
-  cout << "- the (2,2) basis has j0=" << basis.j0() << endl;
+  const int d = 3;
+  const int dT = 5;
+  DKUBasis<d, dT> basis;
+  cout << "- the (" << d << "," << dT << ") basis has j0=" << basis.j0() << endl;
 
   return 0;
 }

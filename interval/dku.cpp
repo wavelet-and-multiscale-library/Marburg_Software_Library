@@ -7,6 +7,9 @@
 #include <Rd/cdf_mask.h>
 #include <Rd/dm_mask.h>
 #include <Rd/multi_refinable.h>
+#include <algebra/matrix_norms.h>
+#include <numerics/eigenvalues.h>
+#include <numerics/matrix_decomp.h>
 
 using std::cout;
 using std::endl;
@@ -14,8 +17,8 @@ using std::endl;
 namespace WaveletTL
 {
   // helper routine to check Alpha
-  template <int d, int dt>
-  double DKUBasis<d, dt>::alpha_(const int m, const int r) const
+  template <int d, int dT>
+  double DKUBasis<d, dT>::alpha_(const int m, const int r) const
   {
     double result(0);
 
@@ -26,7 +29,7 @@ namespace WaveletTL
 	if (m == 0)
 	  {
 	    double dummy(0);
-	    for (int k(ell1()); k <= ell2(); k++)
+	    for (int k(ell1_); k <= ell2_; k++)
 	      {
 		double dummy1(0);
 		for (int s(0); s <= r-1; s++)
@@ -46,8 +49,8 @@ namespace WaveletTL
   }
 
   // helper routine to check AlphaT
-  template <int d, int dt>
-  double DKUBasis<d, dt>::alphaT_(const int m, const int r) const
+  template <int d, int dT>
+  double DKUBasis<d, dT>::alphaT_(const int m, const int r) const
   {
     double result(0);
 
@@ -58,7 +61,7 @@ namespace WaveletTL
 	if (m == 0)
 	  {
 	    double dummy(0);
-	    for (int k(ell1T()); k <= ell2T(); k++)
+	    for (int k(ell1T_); k <= ell2T_; k++)
 	      {
 		double dummy1(0);
 		for (int s(0); s <= r-1; s++)
@@ -78,175 +81,175 @@ namespace WaveletTL
   }
 
   // helper routine to check BetaL
-  template <int d, int dt>
-  double DKUBasis<d, dt>::betaL_(const int m, const int r) const
+  template <int d, int dT>
+  double DKUBasis<d, dT>::betaL_(const int m, const int r) const
   {
     double result(0);
 
-    for (int q((int)ceil((m-ell2T())/2.0)); q <= ellT()-1; q++)
+    for (int q((int)ceil((m-ell2T_)/2.0)); q <= ellT_-1; q++)
       result += Alpha_(q, r) * cdf_.aT().get_coefficient(m-2*q); // (3.2.31)
 
     return result * M_SQRT1_2;
   }
 
   // helper routine to check BetaL
-  template <int d, int dt>
-  double DKUBasis<d, dt>::betaLT_(const int m, const int r) const
+  template <int d, int dT>
+  double DKUBasis<d, dT>::betaLT_(const int m, const int r) const
   {
     double result(0);
 
-    for (int q((int)ceil((m-ell2())/2.0)); q <= ell()-1; q++)
+    for (int q((int)ceil((m-ell2_)/2.0)); q <= ell_-1; q++)
       result += AlphaT_(q, r) * cdf_.a().get_coefficient(m-2*q); // (3.2.31)
 
     return result * M_SQRT1_2;
   }
 
-  template <int d, int dt>
-  DKUBasis<d, dt>::DKUBasis(const Array1D<int>& primalBC,
-			    const Array1D<int>& dualBC)
-    : primalBC_(primalBC),
-      dualBC_(dualBC)
+  template <int d, int dT>
+  DKUBasis<d, dT>::DKUBasis(BiorthogonalizationMethod bio)
+    : ell1_(ell1<d>()),
+      ell2_(ell2<d>()),
+      ell1T_(ell1T<d,dT>()),
+      ell2T_(ell2T<d,dT>()),
+      GammaL_(dT, dT),
+      CL_(dT, dT),
+      CLT_(dT, dT)
   {
-    ell1_ = -(d/2);
-    ell2_ = d-d/2;
-    ell1T_ = ell1_-dt+1;
-    ell2T_ = ell2_+dt-1;
-    ellT_ = ell2T_;
-    ell_ = ellT_-(dt-d);
-    
+    ellT_ = ell2T<d,dT>(); // (3.2.10)
+    ell_ = ellT_-(dT-d); // (3.2.16)
+
     // setup Alpha
-    Alpha_.resize(ellT()+ell2T()-1, dt);
+    Alpha_.resize(ellT_+ell2T_-1, dT);
     for (unsigned int m(0); m < Alpha_.row_dimension(); m++)
       Alpha_(m, 0) = 1.0; // (5.1.1)
-    for (int r(1); r < (int)Alpha_.column_dimension(); r++)
-      {
+    for (int r(1); r < (int)Alpha_.column_dimension(); r++) {
+      double dummy(0);
+      for (int k(ell1_); k <= ell2_; k++) {
+	double dummy1(0);
+	for (int s(0); s <= r-1; s++)
+	  dummy1 += binomial(r, s) * intpower(k, r-s) * Alpha_(ell2T_-1, s);
+	dummy += cdf_.a().get_coefficient(k) * dummy1; // (5.1.3)
+      }
+      Alpha_(ell2T_-1, r) = dummy / (ldexp(1.0, r+1) - 2.0);
+    }
+    for (int r(1); r < (int)Alpha_.column_dimension(); r++) {
+      for (int m(-ell2T_+1); m < 0; m++) {
 	double dummy(0);
-	for (int k(ell1()); k <= ell2(); k++)
-	  {
-	    double dummy1(0);
-	    for (int s(0); s <= r-1; s++)
-	      dummy1 += binomial(r, s) * intpower(k, r-s) * Alpha_(ell2T()-1, s);
-	    dummy += cdf_.a().get_coefficient(k) * dummy1; // (5.1.3)
-	  }
-	Alpha_(ell2T()-1, r) = dummy / (ldexp(1.0, r+1) - 2.0);
+	for (int i(0); i <= r; i++)
+	  dummy += binomial(r, i) * intpower(m, i) * Alpha_(ell2T_-1, r-i); // (5.1.2)
+	Alpha_(m+ell2T_-1, r) = dummy;
       }
-    for (int r(1); r < (int)Alpha_.column_dimension(); r++)
-      {
-	for (int m(-ell2T()+1); m < 0; m++)
-	  {
-	    double dummy(0);
-	    for (int i(0); i <= r; i++)
-	      dummy += binomial(r, i) * intpower(m, i) * Alpha_(ell2T()-1, r-i); // (5.1.2)
-	    Alpha_(m+ell2T()-1, r) = dummy;
-	  }
-	for (int m(1); m <= ellT()-1; m++)
-	  {
-	    double dummy(0);
-	    for (int i(0); i <= r; i++)
-	      dummy += binomial(r, i) * intpower(m, i) * Alpha_(ell2T()-1, r-i); // (5.1.2)
-	    Alpha_(m+ell2T()-1, r) = dummy;
-	  }
+      for (int m(1); m <= ellT_-1; m++) {
+	double dummy(0);
+	for (int i(0); i <= r; i++)
+	  dummy += binomial(r, i) * intpower(m, i) * Alpha_(ell2T_-1, r-i); // (5.1.2)
+	Alpha_(m+ell2T_-1, r) = dummy;
       }
-
+    }
+    
     // setup AlphaT
-    AlphaT_.resize(ell()+ell2()-1, d);
+    AlphaT_.resize(ell_+ell2_-1, d);
     for (unsigned int m(0); m < AlphaT_.row_dimension(); m++)
       AlphaT_(m, 0) = 1.0; // (5.1.1)
-    for (int r(1); r < (int)AlphaT_.column_dimension(); r++)
-      {
+    for (int r(1); r < (int)AlphaT_.column_dimension(); r++) {
+      double dummy(0);
+      for (int k(ell1T_); k <= ell2T_; k++) {
+	double dummy1(0);
+	for (int s(0); s <= r-1; s++)
+	  dummy1 += binomial(r, s) * intpower(k, r-s) * AlphaT_(ell2_-1, s); // (5.1.3)
+	dummy += cdf_.aT().get_coefficient(k) * dummy1;
+      }
+      AlphaT_(ell2_-1, r) = dummy / (ldexp(1.0, r+1) - 2.0);
+    }
+    for (int r(1); r < (int)AlphaT_.column_dimension(); r++) {
+      for (int m(-ell2_+1); m < 0; m++) {
 	double dummy(0);
-	for (int k(ell1T()); k <= ell2T(); k++)
-	  {
-	    double dummy1(0);
-	    for (int s(0); s <= r-1; s++)
-	      dummy1 += binomial(r, s) * intpower(k, r-s) * AlphaT_(ell2()-1, s); // (5.1.3)
-	    dummy += cdf_.aT().get_coefficient(k) * dummy1;
-	  }
-	AlphaT_(ell2()-1, r) = dummy / (ldexp(1.0, r+1) - 2.0);
+	for (int i(0); i <= r; i++)
+	  dummy += binomial(r, i) * intpower(m, i) * AlphaT_(ell2_-1, r-i); // (5.1.2)
+	AlphaT_(m+ell2_-1, r) = dummy;
       }
-    for (int r(1); r < (int)AlphaT_.column_dimension(); r++)
-      {
-	for (int m(-ell2()+1); m < 0; m++)
-	  {
-	    double dummy(0);
-	    for (int i(0); i <= r; i++)
-	      dummy += binomial(r, i) * intpower(m, i) * AlphaT_(ell2()-1, r-i); // (5.1.2)
-	    AlphaT_(m+ell2()-1, r) = dummy;
-	  }
-	for (int m(1); m <= ell()-1; m++)
-	  {
-	    double dummy(0);
-	    for (int i(0); i <= r; i++)
-	      dummy += binomial(r, i) * intpower(m, i) * AlphaT_(ell2()-1, r-i); // (5.1.2)
-	    AlphaT_(m+ell2()-1, r) = dummy;
-	  }
+      for (int m(1); m <= ell_-1; m++) {
+	double dummy(0);
+	for (int i(0); i <= r; i++)
+	  dummy += binomial(r, i) * intpower(m, i) * AlphaT_(ell2_-1, r-i); // (5.1.2)
+	AlphaT_(m+ell2_-1, r) = dummy;
       }
+    }
     
     // setup BetaL
-    BetaL_.resize(ell2T()-ell1T()-1, dt);
-    for (int r(0); r < dt; r++)
-      for (int m(2*ellT()+ell1T()); m <= 2*ellT()+ell2T()-2; m++)
-	BetaL_(m-2*ellT()-ell1T(), r) = betaL_(m, r);
+    BetaL_.resize(ell2T_-ell1T_-1, dT);
+    for (int r(0); r < dT; r++)
+      for (int m(2*ellT_+ell1T_); m <= 2*ellT_+ell2T_-2; m++)
+	BetaL_(m-2*ellT_-ell1T_, r) = betaL_(m, r);
 
     // setup BetaLT
-    BetaLT_.resize(ell2()-ell1()-1, d);
+    BetaLT_.resize(ell2_-ell1_-1, d);
     for (int r(0); r < d; r++)
-      for (int m(2*ell()+ell1()); m <= 2*ell()+ell2()-2; m++)
-	BetaLT_(m-2*ell()-ell1(), r) = betaLT_(m, r);
+      for (int m(2*ell_+ell1_); m <= 2*ell_+ell2_-2; m++)
+	BetaLT_(m-2*ell_-ell1_, r) = betaLT_(m, r);
     
     // setup GammaL:
     //
     // 1. compute the integrals
     //      z(s,t) = \int_0^1\phi(x-s)\tilde\phi(x-t)\,dx
     //    exactly with the [DM] trick
-    MultivariateRefinableFunction<DMMask2<HaarMask, CDFMask_primal<d>, CDFMask_dual<d, dt> >, 2> zmask;
+    MultivariateRefinableFunction<DMMask2<HaarMask, CDFMask_primal<d>, CDFMask_dual<d, dT> >, 2> zmask;
     InfiniteVector<double, MultiIndex<int, 2> > zvalues(zmask.evaluate());
     //
     // 2. compute the integrals
     //      I(nu,mu) = \int_0^\infty\phi(x-\nu)\tilde\phi(x-\mu)\,dx
     //    exactly using the z(s,t) values
-    Matrix<double> I(ell()-d+dt-1+ell2(), ellT()-1+ell2T());
-    for (int nu(-ell2()+1); nu <= -ell1()-1; nu++)
-      for (int mu(-ell2T()+1); mu <= -ell1T()-1; mu++)
- 	{
- 	  double help(0);
- 	  int diff(mu - nu);
- 	  for (int s(max(-ell2()+1, -ell2T()+1-diff)); s <= nu; s++)
- 	    help += zvalues.get_coefficient(MultiIndex<int, 2>(s, s+diff));
-	  
- 	  I(nu+ell2()-1, mu+ell2T()-1) = help; // (5.1.7)
- 	}
-    for (int nu(-ell2()+1); nu <= ell()-d+dt-1; nu++)
-      for (int mu(-ell2T()+1); mu <= ellT()-1; mu++)
-	{
-	  if ((nu >= -ell1()) || ((nu <= ell()-1) && (mu >= -ell1T())))
-	    I(nu+ell2()-1, mu+ell2T()-1) = (nu == mu ? 1 : 0);
-	}
+    Matrix<double> I(ell_-d+dT-1+ell2_, ellT_-1+ell2T_);
+    for (int nu(-ell2_+1); nu <= -ell1_-1; nu++)
+      for (int mu(-ell2T_+1); mu <= -ell1T_-1; mu++) {
+	double help(0);
+	int diff(mu - nu);
+	for (int s(-ell2_+1); s <= nu; s++)
+	  help += zvalues.get_coefficient(MultiIndex<int, 2>(s, s+diff));
+	I(nu+ell2_-1, mu+ell2T_-1) = help; // (5.1.7)
+      }
+    for (int nu(-ell2_+1); nu <= ell_-d+dT-1; nu++)
+      for (int mu(-ell2T_+1); mu <= ellT_-1; mu++) {
+	if ((nu >= -ell1_) || ((nu <= ell_-1) && (mu >= -ell1T_)))
+	  I(nu+ell2_-1, mu+ell2T_-1) = (nu == mu ? 1 : 0); // (5.1.6)
+      }
     //
-    // 3. 
+    // 3. finally, compute the Gramian GammaL
+    for (int r(0); r <= d-1; r++)
+      for (int k(0); k <= dT-1; k++) {
+	double help(0);
+	for (int nu(-ell2_+1); nu <= ell_-1; nu++)
+	  for (int mu(-ell2T_+1); mu <= ellT_-1; mu++)
+	    help += AlphaT_(nu+ell2_-1, r) * Alpha_(mu+ell2T_-1, k) * I(nu+ell2_-1, mu+ell2T_-1);
+	GammaL_(r, k) = help; // (5.1.4)
+      }
+    for (int r(d); r <= dT-1; r++)
+      for (int k(0); k <= dT-1; k++) {
+	double help(0);
+	for (int mu(-ell2T_+1); mu <= ellT_-1; mu++)
+	  help += Alpha_(mu+ell2T_-1, k) * I(ell_-d+r+ell2_-1, mu+ell2T_-1);
+	GammaL_(r, k) = help; // (5.1.5)
+      }
     
-    
-//     // check Alpha
-//     cout << Alpha_ << endl;
-//     for (int m(-ell2T()+1); m <= ellT()-1; m++) {
-//       for (int r(0); r < dt; r++) {
-// 	cout << alpha_(m, r) << " ";
-//       }
-//       cout << endl;
-//     }
-    
-//     cout << AlphaT_ << endl;
-//     for (int m(-ell2()+1); m <= ell()-1; m++) {
-//       for (int r(0); r < d; r++) {
-// 	cout << alphaT_(m, r) << " ";
-//       }
-//       cout << endl;
-//     }
+    // setup CL
+    switch(bio) {
+    case none:
+    default:
+      for (int i(0); i < dT; i++)
+	CL_(i, i) = 1.0;
+    };
 
-//     // check BetaL
-//     cout << BetaL_ << endl;
+    // setup CLT
+    Matrix<double> CLGammaLInv;
+    QRDecomposition<double>(CL_ * GammaL_).inverse(CLGammaLInv);
+    CLT_ = transpose(CLGammaLInv);
 
-//     // check BetaLT
-//     cout << BetaLT_ << endl;
+#if 1
+    // check matrix product CL * GammaL * (CLT)^T
+    Matrix<double> check(CL_ * GammaL_ * transpose(CLT_));
+    for (unsigned int i(0); i < check.row_dimension(); i++)
+      check(i, i) -= 1;
+    cout << "error for CLT: " << row_sum_norm(check) << endl;
+#endif
+
   }
 }

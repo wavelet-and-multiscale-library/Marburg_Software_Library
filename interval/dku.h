@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <Rd/cdf_util.h>
 #include <Rd/cdf_basis.h>
 #include <algebra/matrix.h>
 #include <utils/array1d.h>
@@ -23,33 +24,29 @@ namespace WaveletTL
   /*!
     Template class for the wavelet bases on the interval introduced in [DKU].
 
+    Please note that in this class, we follow the _original_ construction
+    without the modifications done in [DS].
+
     References:
-    [DKU]
+    [DKU] Dahmen, Kunoth, Urban:
+          Biorthogonal spline-wavelets on the interval - Stability and moment conditions
+    [DS]  Dahmen, Schneider:
+          Wavelets with complementary boundary conditions - Function spaces on the cube
   */
   template <int d, int dt>
   class DKUBasis
   {
   public:
+    enum BiorthogonalizationMethod
+      {
+	none // C_L = I
+      };
+    
     /*!
-      constructor:
-
-      + primalBC: order of primal boundary conditions
-      + dualBC  : order of dual boundary conditions
+      constructor
+      (ellT = ell2T)
     */
-    DKUBasis(const Array1D<int>& primalBC,
-	     const Array1D<int>& dualBC);
-
-    //! left support bound for a primal CDF function
-    inline const int ell1() const { return ell1_; }
-
-    //! right support bound for a primal CDF function
-    inline const int ell2() const { return ell2_; }
-
-    //! left support bound for a dual CDF function
-    inline const int ell1T() const { return ell1T_; }
-
-    //! right support bound for a dual CDF function
-    inline const int ell2T() const { return ell2T_; }
+    explicit DKUBasis(BiorthogonalizationMethod bio = none);
 
     //! DKU parameter ell-tilde (3.2.10)
     inline const int ellT() const { return ellT_; }
@@ -58,10 +55,10 @@ namespace WaveletTL
     inline const int ell() const { return ell_; }
 
     //! coarsest possible level
-    inline const int j0() const { return (int) ceil(log(ellT()+ell2T()-1.)/log(2.0)+1); }
+    inline const int j0() const { return (int) ceil(log(ellT_+ell2T_-1.)/log(2.0)+1); }
 
   protected:
-    int ell1_, ell2_, ell1T_, ell2T_, ellT_, ell_;
+    int ell1_, ell2_, ell1T_, ell2T_, ell_, ellT_;
 
     /*!
       an instance of the CDF basis on R
@@ -71,8 +68,7 @@ namespace WaveletTL
     Matrix<double> Alpha_, AlphaT_;
     Matrix<double> BetaL_, BetaLT_;
     Matrix<double> GammaL_;
-
-    Array1D<int> primalBC_, dualBC_;
+    Matrix<double> CL_, CLT_;
 
   private:
     // private helper routines

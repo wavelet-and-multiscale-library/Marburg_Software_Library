@@ -185,6 +185,12 @@ namespace MathTL
   void swap(Matrix<C>& M1, Matrix<C>& M2);
 
   /*!
+    matrix-matrix difference M-N
+  */
+  template <class C>
+  Matrix<C> operator - (const Matrix<C>& M, const Matrix<C>& N);
+
+  /*!
     matrix-matrix multiplication M*N
   */
   template <class C>

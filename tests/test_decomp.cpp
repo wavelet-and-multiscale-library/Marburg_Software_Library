@@ -76,19 +76,19 @@ int main()
   Matrix<double> V;
   svd.getV(V);
   cout << V << endl;
-  cout << "  * check:" << endl;
-  Matrix<double> USV(banddim);
-  for (size_type i(0); i < banddim; i++)
-    for (size_type j(0); j < banddim; j++)
-      {
-	for (size_type k(0); k < banddim; k++)
-	  USV(i,j) += US(i,k) * V(k,j);
-      }
-  cout << USV;
+  cout << "  * check of A-UV*S yields error " << row_sum_norm(Matrix<double>(A)-(US*V)) << endl;
   cout << "  * singular values:" << endl;
   Vector<double> S;
   svd.getS(S);
   cout << S << endl;
+
+  Matrix<double> U;
+  svd.getU(U);
+  for (unsigned int i(0); i < U.row_dimension(); i++)
+    for (unsigned int j(0); j < U.column_dimension(); j++)
+      U(i, j) *= S[j];
+  
+  cout << "  * check of A-U*S*V yields error " << row_sum_norm(Matrix<double>(A)-(U*V)) << endl;
 
   cout << "- check linear solver using QR decomposition:" << endl
        << "  * a small test matrix B:" << endl;

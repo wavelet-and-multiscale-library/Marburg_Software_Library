@@ -78,7 +78,7 @@ namespace MathTL
   //! singular value decomposition
   /*!
     Compute the singular value decomposition of an m-by-n matrix A, in the form
-      A = U*S*V'
+      A = U*S*V
     where U is an m-by-n orthogonal matrix, S is an n-by-n diagonal matrix
     and V is an n-by-n orthogonal matrix.
     The singular values sigma_k = S(k,k) are ordered such that

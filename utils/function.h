@@ -10,9 +10,9 @@
 #ifndef _MATHTL_FUNCTION_H
 #define _MATHTL_FUNCTION_H
 
-#include "utils/array1d.h"
-#include "utils/function_time.h"
-#include "geometry/point.h"
+#include <algebra/vector.h>
+#include <utils/function_time.h>
+#include <geometry/point.h>
 
 namespace MathTL
 {
@@ -68,7 +68,7 @@ namespace MathTL
       evaluate the function
     */
     virtual void vector_value(const Point<DIM> &p,
-			      Array1D<double>& values) const = 0;
+			      Vector<VALUE>& values) const = 0;
 
     /*!
       (estimate of) memory consumption in bytes
@@ -109,7 +109,7 @@ namespace MathTL
       evaluate the zero function
     */
     void vector_value(const Point<DIM> &p,
-		      Array1D<VALUE>& values) const;
+		      Vector<VALUE>& values) const;
   };
   
 }

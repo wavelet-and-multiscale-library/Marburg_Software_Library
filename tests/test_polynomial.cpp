@@ -18,12 +18,12 @@ int main(int, char **)
   p.set_coefficient(2, -2);
   cout << "A non-constant polynomial p:" << endl << p << endl;
 
-//   double x = 1.2;
-//   cout << "Evaluating p at x=" << x << ":" << endl << p(x) << endl;
+  double x = 1.2;
+  cout << "Evaluating p at x=" << x << ":" << endl << p(x) << endl;
 
-//   q.setCoeff(0, -20);
-//   q.setCoeff(1, 4);
-//   cout << "Another polynomial q:" << endl << q << endl;
+  q.set_coefficient(0, -20);
+  q.set_coefficient(1, 4);
+  cout << "Another polynomial q:" << endl << q << endl;
 
 //   cout << "p circ q:" << endl << p.substituteInto(q) << endl;
 

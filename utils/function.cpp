@@ -51,7 +51,7 @@ namespace MathTL
   template <unsigned int DIM, class VALUE>
   inline
   void ZeroFunction<DIM, VALUE>::vector_value(const Point<DIM> &p,
-					      Array1D<VALUE>& values) const
+					      Vector<VALUE>& values) const
   {
     for (unsigned int i(0); i < n_components; i++)
       values[i] = value(p, i);

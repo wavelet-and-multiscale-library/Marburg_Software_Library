@@ -69,14 +69,28 @@ namespace MathTL
     /*!
       evaluate the polynomial (Horner scheme)
     */
+    C operator () (const C x) const;
+
+    /*!
+      evaluate the polynomial (Horner scheme)
+      (calls operator ())
+    */
     C value(const Point<1>& p,
 	    const unsigned int component = 0) const;
 
     /*!
       evaluate the polynomial (Horner scheme)
+      (calls operator ())
     */
     void vector_value(const Point<1> &p,
-		      Array1D<C>& values) const;
+		      Vector<C>& values) const;
+
+    /*!
+      
+    */
+
+//     void         substituteIntoMe(const Polynomial &p);     // result: this\circ p
+//     Polynomial   substituteInto(const Polynomial &p) const; // "
   };
 
 //   class Polynomial
@@ -99,12 +113,8 @@ namespace MathTL
 // 			   const double b,
 // 			   const bool quadrature = false) const;
   
-//     void         substituteIntoMe(const Polynomial &p);     // result: this\circ p
-//     Polynomial   substituteInto(const Polynomial &p) const; // "
-
 //     Polynomial power(const int k) const; // raise Polynomial to the k-th power
 
-//     double operator () (const double x) const;  // point evaluation (Horner scheme)
 //     double derivative(const double x) const;    // point evaluation of first derivative (Horner scheme)
 
 //     Polynomial& operator = (const Polynomial &p);

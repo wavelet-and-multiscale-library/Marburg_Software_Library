@@ -52,16 +52,31 @@ namespace MathTL
   }
 
   template <class C>
-  C Polynomial<C>::value(const Point<1>& p,
-			 const unsigned int component) const
+  C Polynomial<C>::operator () (const C x) const
   {
-    return 0.0;
+    C value(Vector<C>::operator [] (degree()));
+
+    for (unsigned int k(degree()); k > 0; k--)
+      value = value * x + Vector<C>::operator [] (k-1);
+
+    return value;
   }
 
   template <class C>
-  void Polynomial<C>::vector_value(const Point<1> &p,
-				   Array1D<C>& values) const
+  inline
+  C Polynomial<C>::value(const Point<1>& p,
+			 const unsigned int component) const
   {
+    return this->operator () (p[0]);
+  }
+
+  template <class C>
+  inline
+  void Polynomial<C>::vector_value(const Point<1> &p,
+				   Vector<C>& values) const
+  {
+    values.resize(1, false);
+    values[0] = this->operator () (p[0]);
   }
 
 //   Polynomial::Polynomial(const Polynomial &p)
@@ -81,37 +96,10 @@ namespace MathTL
 //     a.resize(1, c);
 //   }
 
-//   //
-//   //
-//   // default destructor
-
-//   Polynomial::~Polynomial()
-//   {
-//   }
-
-
-//   //
-//   //
-//   // Polynomial methods
-
 
 //   const CoeffsType *Polynomial::getCoeffs() const
 //   {
 //     return &a;
-//   }
-
-//   void Polynomial::setCoeff(const int k, const double coeff)
-//   {
-//     assert(k >= 0);
-
-//     if (k > deg() || deg() == 0)
-//       {
-// 	CoeffsType help(a);
-// 	a.resize(k+1, 0.0);
-// 	std::copy(&help[0], &help[help.size()], &a[0]);
-//       }
-  
-//     a[k] = coeff;
 //   }
 
 //   void Polynomial::setCoeffs(const CoeffsType *coeffs)
@@ -226,15 +214,6 @@ namespace MathTL
 //   //
 //   //
 //   // Polynomial operators
-
-//   double Polynomial::operator () (const double x) const
-//   {
-//     double value = a[deg()];
-//     for (int k = deg(); k > 0; k--)
-//       value = value * x + a[k-1];
-  
-//     return value;
-//   }
 
 //   double Polynomial::derivative(const double x) const
 //   {

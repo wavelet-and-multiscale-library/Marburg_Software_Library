@@ -1,10 +1,28 @@
 // implementation for dku.h
 
 #include <cmath>
+#include <iostream>
 #include <utils/tiny_tools.h>
+
+using std::cout;
+using std::endl;
 
 namespace WaveletTL
 {
+  // just a helper routine to check Alpha
+  template <unsigned int d, unsigned int dt>
+  double DKUBasis<d, dt>::Alpha_(const int m, const unsigned int r)
+  {
+    if (r == 0u)
+      return 0; // (5.1.1)
+    else
+      {
+	
+      }
+
+    return 42;
+  }
+
   template <unsigned int d, unsigned int dt>
   DKUBasis<d, dt>::DKUBasis()
     : ellT_(ell2T()),
@@ -29,5 +47,15 @@ namespace WaveletTL
       }
 
     cout << Alpha_ << endl;
+
+    for (int m(-ell2T()+1); m <= ellT()-1; m++)
+      {
+	for (unsigned int r(0); r < dt; r++)
+	  {
+	    cout << Alpha_(m, r) << " ";
+	  }
+	cout << endl;
+      }
+    
   }
 }

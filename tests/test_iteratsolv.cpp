@@ -27,9 +27,9 @@ int main()
   cout << "- the right-hand side b:" << endl
        << b << endl;
   
-  for (unsigned int i(0); i <= 3; i++)
+  for (unsigned int i(0); i <= 4; i++)
     {
-      double omega = 0.35 + i*0.05;
+      double omega = 0.4 + i*0.025;
       xk = 0;
       cout << "- Richardson iteration with omega=" << omega << " ..." << endl;
       Richardson(A, b, xk, omega, 1e-8, maxiter, iterations);
@@ -41,21 +41,26 @@ int main()
 	   << " after " << iterations << " iterations." << endl;
     }
 
-//   cout << "- determine optimal relaxation parameter for Richardson iteration:" << endl;
+  cout << "- determine optimal relaxation parameter for Richardson iteration:" << endl;
+  Matrix<double> evecs;
+  Vector<double> evals;
+  SymmEigenvalues(A, evals, evecs); // for safety, we compute ALL eigenvalues
 //   double lambdamax = PowerIteration(A, xk, 1e-6, 1000, iterations);
 //   double lambdamin = 1./InversePowerIteration(A, xk, 1e-6, 1000, iterations);
-//   cout << "  lambdamax=" << lambdamax << ", 2/lambdamax=" << 2./lambdamax
-//        << ", lambdamin=" << lambdamin << endl;
-//   double omegastar = 2./(lambdamin+lambdamax);
-//   xk = 0;
-//   cout << "  Richardson iteration with omegastar=" << omegastar << " ..." << endl;
-//   Richardson(A, b, xk, omegastar, 1e-8, maxiter, iterations);
-//   A.APPLY(xk, err);
-//   err -= b;
-//   cout << "  ... yields a solution xk=" << endl
-//        << xk
-//        << "  with \\|A*xk-b\\|_\\infty=" << maxnorm(err)
-//        << " after " << iterations << " iterations." << endl;
+  double lambdamax = evals[evals.size()-1];
+  double lambdamin = evals[0];
+  cout << "  lambdamax=" << lambdamax
+       << ", lambdamin=" << lambdamin << endl;
+  double omegastar = 2./(lambdamin+lambdamax);
+  xk = 0;
+  cout << "  Richardson iteration with omegastar=" << omegastar << " ..." << endl;
+  Richardson(A, b, xk, omegastar, 1e-8, maxiter, iterations);
+  A.apply(xk, err);
+  err -= b;
+  cout << "  ... yields a solution xk=" << endl
+       << xk
+       << "  with \\|A*xk-b\\|_\\infty=" << linfty_norm(err)
+       << " after " << iterations << " iterations." << endl;
 
   xk = 0; xk(0) = 1;
   cout << "- Jacobi iteration ..." << endl;

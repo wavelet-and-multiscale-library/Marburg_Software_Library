@@ -10,7 +10,7 @@ int main()
 {
   cout << "Testing the computation of extremal eigenvalues..." << endl;
 
-  unsigned int banddim = 8;
+  unsigned int banddim = 10;
   SymmetricMatrix<double> A(banddim);
   for (unsigned int i(0); i < banddim; i++)
     {

@@ -53,6 +53,12 @@ namespace MathTL
     return *this;
   }
 
+//   template <unsigned int DIM, class VALUE>
+//   Point<DIM, VALUE>& Point<DIM, VALUE>::operator = (const Point<DIM, VALUE>& p)
+//   {
+//     return (Tensor<1, DIM, VALUE>::operator = (p));
+//   }
+
   template <unsigned int DIM, class VALUE>
   inline
   const typename Point<DIM, VALUE>::size_type

@@ -37,8 +37,8 @@ int main()
   Point<2> x(1, 1);
   cout << "p(" << x << ")=" << p.value(x) << endl;
   Point<2> y(2, -3);
-//   x = Point<2>(2, -3);
   cout << "p(" << y << ")=" << p.value(y) << endl;
+//   cout << p.value(Point<2>(2, -3)) << endl; // gcc 2.95 does not like this
 
   cout << "- algebraic functionality:" << endl;
   q += p;

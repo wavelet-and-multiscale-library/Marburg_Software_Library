@@ -94,6 +94,11 @@ namespace MathTL
     */
     Point<DIM, VALUE>& operator = (const VALUE x);
 
+//     /*!
+//       assignment operator (for safety, Tensor class already has one)
+//     */
+//     Point<DIM, VALUE>& operator = (const Point<DIM, VALUE>& p);
+
     /*!
       size/dimension of the point (cf. std::vector signature)
      */

@@ -32,10 +32,11 @@ namespace WaveletTL
     InfiniteVector<double, MultiIndex<int, DIMENSION> > r;
 
     // compute a support cube
-    int suppleft(begin().index()[0]);
+    int suppleft(MultivariateLaurentPolynomial<double, DIMENSION>::begin().index()[0]);
     int suppright(suppleft);
     
-    for (typename MASK::const_iterator it(begin()); it != end(); ++it)
+    for (typename MASK::const_iterator it(MultivariateLaurentPolynomial<double, DIMENSION>::begin());
+	 it != MultivariateLaurentPolynomial<double, DIMENSION>::end(); ++it)
       {
  	for (unsigned int i(0); i < DIMENSION; i++)
  	  {

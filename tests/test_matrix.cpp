@@ -28,12 +28,15 @@ int main()
   N(0,0) = 23; N(0,1) = 42; N(0,2) = 3; N(1,1) = -1.5;
   cout << N;
 
-//   cout << "- testing copy constructor:" << endl;
-//   RawMatrix<double> Ncopy(N);
-//   cout << Ncopy << endl;
+  cout << "- testing copy constructor:" << endl;
+  Matrix<double> Ncopy(N);
+  cout << Ncopy;
 
-//   cout << "- reference counter of N: " << N.refc()
-//        << endl;
+  cout << "- are the two matrices equal?" << endl;
+  if (N == Ncopy)
+    cout << "  ... yes!" << endl;
+  else
+    cout << "  ... no!" << endl;
 
 //   cout << "- testing APPLY, using the vector" << endl;
 //   RawVector<double> x(3), y;

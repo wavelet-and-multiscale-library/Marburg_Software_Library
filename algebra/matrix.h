@@ -36,6 +36,11 @@ namespace MathTL
     explicit Matrix(const size_type n = 0);
 
     /*!
+      copy constructor
+    */
+    Matrix(const Matrix<C>& M);
+
+    /*!
       construct m*n rectangular matrix
     */
     Matrix(const size_type row_dimension, const size_type column_dimension);
@@ -64,6 +69,18 @@ namespace MathTL
       return true if matrix is empty (cf. STL containers)
     */
     bool empty() const;
+
+    /*!
+      equality test with another matrix
+    */
+    template <class C2>
+    bool operator == (const Matrix<C2>& v) const;
+
+    /*!
+      non-equality test
+    */
+    template <class C2>
+    bool operator != (const Matrix<C2>& v) const;
 
     /*!
       read-only access to a matrix entry

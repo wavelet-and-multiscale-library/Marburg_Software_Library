@@ -13,6 +13,13 @@ namespace MathTL
 
   template <class C>
   inline
+  Matrix<C>::Matrix(const Matrix<C>& M)
+    : entries_(M.entries_), rowdim_(M.rowdim_), coldim_(M.coldim_)
+  {
+  }
+
+  template <class C>
+  inline
   Matrix<C>::Matrix(const size_type row_dimension, const size_type column_dimension)
     : entries_(row_dimension*column_dimension), rowdim_(row_dimension),
       coldim_(column_dimension)
@@ -56,6 +63,22 @@ namespace MathTL
   bool Matrix<C>::empty() const
   {
     return size()==0;
+  }
+
+  template <class C>
+  template <class C2>
+  bool Matrix<C>::operator == (const Matrix<C2>& v) const
+  {
+    if (rowdim_ != v.rowdim_ || coldim_ != v.coldim_) return false;
+    return std::equal(entries_.begin(), entries_.end(), v.entries_.begin());
+  }
+  
+  template <class C>
+  template <class C2>
+  inline
+  bool Matrix<C>::operator != (const Matrix<C2>& v) const
+  {
+    return !((*this) == v);
   }
 
   template <class C>

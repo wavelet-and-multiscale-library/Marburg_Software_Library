@@ -36,20 +36,20 @@ namespace WaveletTL
     /*!
       reading access to the dual mask
     */
-    inline const RefinableFunction<DUALMASK> at() const { return at_; }
+    inline const RefinableFunction<DUALMASK> aT() const { return aT_; }
 
     /*!
       reading access to the k-th primal wavelet coefficient
     */
     inline const double b(const int k) const
     {
-      return (k%2 == 0 ? at_.get_coefficient(1-k) : -at_.get_coefficient(1-k));
+      return (k%2 == 0 ? aT_.get_coefficient(1-k) : -aT_.get_coefficient(1-k));
     }
 
     /*!
       reading access to the k-th dual wavelet coefficient
     */
-    inline const double bt(const int k) const
+    inline const double bT(const int k) const
     {
       return (k%2 == 0 ? a_.get_coefficient(1-k) : -a_.get_coefficient(1-k));
     }
@@ -176,7 +176,7 @@ namespace WaveletTL
     /*!
       one instance of the dual mask
     */
-    RefinableFunction<DUALMASK> at_;
+    RefinableFunction<DUALMASK> aT_;
   };
 }
 

@@ -48,13 +48,13 @@ int main()
   cout << "  + primal mask:" << endl;
   cout << basis.a() << endl;
   cout << "  + dual mask:" << endl;
-  cout << basis.at() << endl;
+  cout << basis.aT() << endl;
   cout << "  + primal wavelet mask:" << endl;
-  for (int k(1-basis.at().rbegin().index()); k <= 1-basis.at().begin().index(); k++)
+  for (int k(1-basis.aT().rbegin().index()); k <= 1-basis.aT().begin().index(); k++)
     cout << "k=" << k << ": " << basis.b(k) << endl;
   cout << "  + dual wavelet mask:" << endl;
   for (int k(1-basis.a().rbegin().index()); k <= 1-basis.a().begin().index(); k++)
-    cout << "k=" << k << ": " << basis.bt(k) << endl;
+    cout << "k=" << k << ": " << basis.bT(k) << endl;
 
   InfiniteVector<double, RIndex> coeff;
   coeff[RIndex(2,0,0)] = 1.0;

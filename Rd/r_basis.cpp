@@ -92,8 +92,8 @@ namespace WaveletTL
 	    
 	    const int abegin(a().begin().index()),
 	      aend(a().rbegin().index()),
-	      bbegin(1-at().rbegin().index()),
-	      bend(1-at().begin().index());
+	      bbegin(1-aT().rbegin().index()),
+	      bend(1-aT().begin().index());
 	    
 	    // compute d_{j-1}
  	    for (int l((int)ceil((lambda.k()-bend)/2.0));
@@ -137,23 +137,23 @@ namespace WaveletTL
 	  {
 	    // j>j0, perform multiscale decomposition
 	    
-	    const int atbegin(at().begin().index()),
-	      atend(at().rbegin().index()),
-	      btbegin(1-a().rbegin().index()),
-	      btend(1-a().begin().index());
+	    const int aTbegin(aT().begin().index()),
+	      aTend(aT().rbegin().index()),
+	      bTbegin(1-a().rbegin().index()),
+	      bTend(1-a().begin().index());
 	    
 	    // compute d_{j-1}
- 	    for (int l((int)ceil((lambda.k()-btend)/2.0));
-		 l <= (int)floor((lambda.k()-btbegin)/2.0); l++)
- 	      c[Index(lambda.j()-1, 1, l)] = M_SQRT1_2 * bt(lambda.k()-2*l);
+ 	    for (int l((int)ceil((lambda.k()-bTend)/2.0));
+		 l <= (int)floor((lambda.k()-bTbegin)/2.0); l++)
+ 	      c[Index(lambda.j()-1, 1, l)] = M_SQRT1_2 * bT(lambda.k()-2*l);
 	    
 	    // compute c_{j_0} via recursion
-	    for (int l((int)ceil((lambda.k()-atend)/2.0));
-		 l <= (int)floor((lambda.k()-atbegin)/2.0); l++)
+	    for (int l((int)ceil((lambda.k()-aTend)/2.0));
+		 l <= (int)floor((lambda.k()-aTbegin)/2.0); l++)
 	      {
 		InfiniteVector<double, Index> d;
 		decompose_t_1(Index(lambda.j()-1, 0, l), j0, d);
-		c += M_SQRT1_2 * at().get_coefficient(lambda.k()-2*l) * d;
+		c += M_SQRT1_2 * aT().get_coefficient(lambda.k()-2*l) * d;
 	      }
 	  }
       }
@@ -174,27 +174,27 @@ namespace WaveletTL
       {
 	// reconstruct by recursion
 
-	const int atbegin(at().begin().index()),
-	  atend(at().rbegin().index()),
-	  btbegin(1-a().rbegin().index()),
-	  btend(1-a().begin().index());
+	const int aTbegin(aT().begin().index()),
+	  aTend(aT().rbegin().index()),
+	  bTbegin(1-a().rbegin().index()),
+	  bTend(1-a().begin().index());
 
 	if (lambda.e() == 0)
 	  {
- 	    for (int l(2*lambda.k()+atbegin); l <= 2*lambda.k()+atend; l++)
+ 	    for (int l(2*lambda.k()+aTbegin); l <= 2*lambda.k()+aTend; l++)
  	      {
  		InfiniteVector<double, Index> d;
  		reconstruct_1(Index(lambda.j()+1, 0, l), j, d);
- 		c += M_SQRT1_2 * at().get_coefficient(l-2*lambda.k()) * d;
+ 		c += M_SQRT1_2 * aT().get_coefficient(l-2*lambda.k()) * d;
  	      }
  	  }
  	else
  	  {
- 	    for (int l(2*lambda.k()+btbegin); l <= 2*lambda.k()+btend; l++)
+ 	    for (int l(2*lambda.k()+bTbegin); l <= 2*lambda.k()+bTend; l++)
  	      {
  		InfiniteVector<double, Index> d;
  		reconstruct_1(Index(lambda.j()+1, 0, l), j, d);
- 		c += M_SQRT1_2 * bt(l-2*lambda.k()) * d;
+ 		c += M_SQRT1_2 * bT(l-2*lambda.k()) * d;
  	      }
 	  }
       }
@@ -217,8 +217,8 @@ namespace WaveletTL
 
 	const int abegin(a().begin().index()),
 	  aend(a().rbegin().index()),
-	  bbegin(1-at().rbegin().index()),
-	  bend(1-at().begin().index());
+	  bbegin(1-aT().rbegin().index()),
+	  bend(1-aT().begin().index());
 	    
 	if (lambda.e() == 0)
 	  {
@@ -262,7 +262,7 @@ namespace WaveletTL
     
     return (primal
 	    ? a().evaluate<DERIVATIVE>(lambda.j(), lambda.k(), A, B, resolution)
- 	    : at().evaluate<DERIVATIVE>(lambda.j(), lambda.k(), A, B, resolution));
+ 	    : aT().evaluate<DERIVATIVE>(lambda.j(), lambda.k(), A, B, resolution));
   }
 
   template <class PRIMALMASK, class DUALMASK>

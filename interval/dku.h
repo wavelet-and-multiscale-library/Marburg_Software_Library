@@ -66,6 +66,10 @@ namespace WaveletTL
 
     int ellT_;
     Matrix<double> Alpha_, AlphaT_;
+
+  private:
+    double alpha_(const int m, const unsigned int r) const;
+    double alphaT_(const int m, const unsigned int r) const;
   };
 }
 

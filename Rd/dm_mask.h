@@ -12,7 +12,6 @@
 
 #include <algebra/laurent_polynomial.h>
 #include <algebra/multi_laurent_polynomial.h>
-#include <Rd/trivial_mask.h>
 
 using namespace MathTL;
 
@@ -55,7 +54,7 @@ namespace WaveletTL
          Using the refinement equation for evaluating integrals of wavelets,
 	 SIAM J. Numer. Anal. 30(1993), 507-537
   */
-  template <class MASK0, class MASK1, class MASK2 = TrivialMask>
+  template <class MASK0, class MASK1, class MASK2>
   class DMMask2
     : public MultivariateLaurentPolynomial<double, 2>
   {

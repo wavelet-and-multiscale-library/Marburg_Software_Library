@@ -31,9 +31,10 @@ namespace WaveletTL
 
       \phi(x) = \sum_{k\in\mathbb Z} a_k * \phi(2 * x - k)
 
-    The coefficients a_k are be stored in a univariate Laurent polynomial.
+    The coefficients a_k are stored in a univariate Laurent polynomial.
     Since a refinable function admits much more functionality, we do not only
-    use LaurentPolynomial<double> but specify the mask via a template parameter.
+    use LaurentPolynomial<double> but specify the mask via a template parameter
+    MASK which is assumed to have the signature of a LaurentPolynomial<double>.
   */
   template <class MASK>
   class RefinableFunction

@@ -8,7 +8,7 @@
 include ../config
 
 CXX = g++
-CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall
+CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 
 EXEOBJF = \
   test_refinable.o\

@@ -26,12 +26,19 @@ int main()
   cout << "- evaluate this at the integers:" << endl;
   dm2.evaluate<0u>(0, 0, -2, 2, 0).matlab_output(cout);
 
-  cout << "- DM multivariate mask for integrals of two Haar fcts. and the trivial fct.:" << endl;
-  MultivariateRefinableFunction<DMMask2<HaarMask, HaarMask>, 2> dm_multi;
+  cout << "- DM multivariate mask for integrals of three Haar fcts.:" << endl;
+  MultivariateRefinableFunction<DMMask2<HaarMask, HaarMask, HaarMask>, 2> dm_multi;
   cout << dm_multi << endl;
   
   cout << "- evaluate this at the integers:" << endl;
   cout << dm_multi.evaluate();
+
+  cout << "- DM multivariate mask for integrals of two hat fcts. and the Haar fct.:" << endl;
+  MultivariateRefinableFunction<DMMask2<CDFMask_primal<2>, CDFMask_primal<2>, HaarMask>, 2> dm_multi2;
+  cout << dm_multi2 << endl;
+ 
+  cout << "- evaluate this at the integers:" << endl;
+  cout << dm_multi2.evaluate();
 
   return 0;
 }

@@ -14,30 +14,27 @@
 
 namespace MathTL
 {
-  namespace VectorIO
+  /*
+    generic input/output routines for VECTOR classes with a standard
+    signature like of std::vector<T>
+    We use the size() routine for determining the dimension of the vector.
+  */
+  
+  /*!
+    generic Matlab-style stream output of the form
+    [x_1 x_2 ... x_n]
+  */
+  template <class VECTOR>
+  void print_vector(const VECTOR& v, std::ostream& os)
   {
-    /*
-      generic input/output routines for VECTOR classes with a standard
-      signature like of std::vector<T>
-      We use the size() routine for determining the dimension of the vector.
-    */
-    
-    /*!
-      generic Matlab-style stream output of the form
-      [x_1 x_2 ... x_n]
-    */
-    template <class VECTOR>
-    void print_vector(const VECTOR& v, std::ostream& os)
-    {
-      os << "[";
-      if (v.size() > 0)
-	{
-	  os << v[0];
-	  for (unsigned int i(1); i < v.size(); i++)
-	    os << " " << v[i];
-	}
-      os << "]";
-    }
+    os << "[";
+    if (v.size() > 0)
+      {
+	os << v[0];
+	for (unsigned int i(1); i < v.size(); i++)
+	  os << " " << v[i];
+      }
+    os << "]";
   }
 }
 

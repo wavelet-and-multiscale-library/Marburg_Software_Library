@@ -73,7 +73,6 @@ namespace MathTL
   inline
   std::ostream& operator << (std::ostream& os, const Point<DIM>& p)
   {
-    using namespace VectorIO;
     print_vector(p, os);
   }
 }

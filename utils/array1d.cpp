@@ -59,7 +59,6 @@ namespace MathTL
   inline
   std::ostream& operator << (std::ostream& os, const Array1D<C>& A)
   {
-    using namespace VectorIO;
     print_vector(A, os);
   }
 

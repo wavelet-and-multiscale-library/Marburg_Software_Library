@@ -29,7 +29,7 @@ EXEOBJF2 = \
 
 EXES2 = $(EXEOBJF2:.o=)
 
-all:: tests tests2
+all:: tests1 tests
 
 tests1:: $(EXES)
 

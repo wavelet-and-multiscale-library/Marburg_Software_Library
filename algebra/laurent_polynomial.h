@@ -195,38 +195,7 @@ namespace MathTL
       raise the Laurent polynomial to some power
     */
     LaurentPolynomial<R> power(const unsigned int k) const;
-
-//     inline int kbegin() const { return _coeffs.begin()->first; }
-//     inline int kend() const { return _coeffs.rbegin()->first; }
   };
-
-
-
-//   template <class R> LaurentPolynomial<R>& LaurentPolynomial<R>::operator += (const LaurentPolynomial<R>& p)
-//   {
-//     for (LaurentIterator it(p.begin()); it != p.end(); it++)
-//       {
-// 	R help(getCoefficient(it->first) + it->second);
-// 	if (help != 0)
-// 	  setCoefficient(it->first, help);
-// 	else
-// 	  _coeffs.erase(it->first);
-//       }
-//     return *this;
-//   }
-
-//   template <class R> LaurentPolynomial<R>& LaurentPolynomial<R>::operator -= (const LaurentPolynomial<R>& p)
-//   {
-//     for (LaurentIterator it(p.begin()); it != p.end(); it++)
-//       {
-// 	R help(getCoefficient(it->first) - it->second);
-// 	if (help != 0)
-// 	  setCoefficient(it->first, help);
-// 	else
-// 	  _coeffs.erase(it->first);
-//       }
-//     return *this;
-//   }
 
   /*!
     multiplication of a Laurent polynomial with a real number from the left

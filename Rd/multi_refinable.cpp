@@ -60,7 +60,7 @@ namespace WaveletTL
     // In the following, we set up the eigenvalue problem for the values
     //   V_\alpha := D^\mu\phi(\alpha), \alpha\in\mathbb Z^d
     // The eigenvector is determined uniquely by the following equations,
-    // see [DM] for details:
+    // see [DM] for details (so we don't need an iterative scheme):
     //
     // (3.22) eigenvalue condition
     //   2^{-|\mu|}V_\alpha = \sum_\beta a_{2\alpha-\beta}V_\beta, \alpha\in\mathbb Z^d
@@ -80,11 +80,6 @@ namespace WaveletTL
 		       plus.begin(), plus.end(),
 		       inserter(nus, nus.begin()));
       }
-
-    // for safety, re-compute the number of multiindices \nu\in\mathbb N^d, such that |\nu|\le|\mu|
-    unsigned int extra_rows(0);
-    for (unsigned int k(0); k <= degmu; k++)
-      extra_rows += binomial(DIMENSION+k-1, k); // \#\{\nu\in\mathbb N^d: |\nu|=k\}
 
     Matrix<double> A(indices.size() + nus.size(), indices.size());
     Vector<double> b(indices.size() + nus.size());
@@ -118,12 +113,14 @@ namespace WaveletTL
 	b[m] = (*rowit2 == mu ? facmu : 0);
       }
 
+    // the system matrix is rectangular, but Ax=b is solvable via a QR decomposition
     QRDecomposition<double> qr(A);
     assert(qr.hasFullRank());
     Vector<double> x;
     qr.solve(b, x);
     x.compress(1e-15);
 
+    // reinterpret the entries of x
     for (colit = indices.begin(), n = 0; colit != indices.end(); ++colit, n++)
       r.set_coefficient(*colit, x[n]);
 

@@ -65,23 +65,18 @@ int main()
 		MultiIndex<int, 1>(-2), MultiIndex<int, 1>(2),
 		2).matlab_output(cout);
 
-//   cout << "- calculating moments of a CDF<2> function:" << endl;
-//   for (unsigned int n(0); n <= 9; n++)
-//     {
-//       cout << "    n=" << n << ": M_n=" << phi2.moment(n)
-//   	   << " (exact value: ";
-//       if (n % 2 == 0)
-//   	cout << 2.0/((n+1)*(n+2)); // exact moments, cf. [BDK]
-//       else
-//   	cout << "0";
-//       cout << ")" << endl;
-//     }
-
-//   cout << "- evaluate the CDF<2> function with the [DM] version of evaluate():" << endl
-//        << phi2.evaluate(0) << endl;
-
-//   cout << "- evaluate the CDF<3> function with the [DM] version of evaluate():" << endl
-//        << phi3.evaluate(0) << endl;
-
+  cout << "- calculating moments of a CDF<2> function:" << endl;
+  for (unsigned int n(0); n <= 9; n++)
+    {
+      cout << "    n=" << n << ": M_n="
+	   << phi2.moment(MultiIndex<unsigned int, 1>(n))
+   	   << " (exact value: ";
+      if (n % 2 == 0)
+   	cout << 2.0/((n+1)*(n+2)); // exact moments, cf. [BDK]
+      else
+   	cout << "0";
+      cout << ")" << endl;
+    }
+  
   return 0;
 }

@@ -78,6 +78,17 @@ namespace WaveletTL
 	     const MultiIndex<int, DIMENSION>& a,
 	     const MultiIndex<int, DIMENSION>& b,
 	     const int resolution) const;
+
+    /*!
+      Compute the \alpha-th (monomial) moment
+        M_\alpha:=\int_{-\infty}^\infty x^\alpha\phi(x)\,dx
+      of the refinable function \phi
+
+      Reference:
+      [BBDK] Barinka, Barsch, Dahlke, Konik:
+             Some Remarks on Quadrature Formulae for Refinable Functions and Wavelets
+    */
+    double moment(const MultiIndex<unsigned int, DIMENSION>& alpha) const;
   };
 
   /*!
@@ -88,30 +99,6 @@ namespace WaveletTL
     : public MultivariateRefinableFunction<MASK, 1>
   {
   };
-
-
-#if 0
-  template <class MASK>
-  class RefinableFunction
-    : public MASK
-  {
-  public:
-    //! (...)
-
-    /*!
-      Compute the n-th moment
-        M_n:=\int_{-\infty}^\infty x^n\phi(x)\,dx
-      of the refinable function \phi
-    */
-    double moment(const unsigned int n) const;
-
-  protected:
-    /*!
-      helper function for the moment calculation
-    */
-    double cnk(const unsigned int n, const unsigned int k) const;
-  };
-#endif
 
 }
 

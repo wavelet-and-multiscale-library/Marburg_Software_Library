@@ -161,8 +161,7 @@ namespace WaveletTL
 		 maskit != MultivariateLaurentPolynomial<double, DIMENSION>::end(); ++maskit) {
 	      for (unsigned int i(0); i < DIMENSION; i++)
 		l[i] = m[i] - (1<<(newres-1)) * maskit.index()[i];
-	      r[m] += MultivariateLaurentPolynomial<double, DIMENSION>::get_coefficient(maskit.index())
-		* coarse.get_coefficient(l);
+	      r[m] += *maskit * coarse.get_coefficient(l);
 	    }
 	  }
       }
@@ -194,38 +193,42 @@ namespace WaveletTL
     return SampledMapping<DIMENSION>(a, b, v, resolution);
   }
 
-#if 0
-  //! (...)
-
-  template <class MASK>
-  double RefinableFunction<MASK>::cnk(const unsigned int n, const unsigned int k) const
-  {
-    double r(0);
-
-    for (LaurentPolynomial<double>::const_iterator it(LaurentPolynomial<double>::begin());
-	 it != LaurentPolynomial<double>::end(); ++it)
-      r += pow(it.index(), (double)k) * *it;
-    
-    return r * binomial(n, k) * ldexp(1.0, -((int)n+1));
-  }
-
-  template <class MASK>
-  double RefinableFunction<MASK>::moment(const unsigned int n) const
+  template <class MASK, unsigned int DIMENSION>
+  double
+  MultivariateRefinableFunction<MASK, DIMENSION>::moment
+  (const MultiIndex<unsigned int, DIMENSION>& alpha) const
   {
     double r(1.0);
     
-    if (n > 0)
+    int degree(multi_degree(alpha));
+    if (degree > 0)
       {
 	r = 0.0;
-	
-	for (unsigned int k(0); k < n; k++)
-	  r += cnk(n, n-k) * moment(k);
-	
-	r /= 1.0 - ldexp(1.0, -(int)n); // != 0 !
+
+	// collect all multiindices \beta, such that (0,...,0)\le\beta\le\alpha
+	std::set<MultiIndex<unsigned int, DIMENSION> > indices
+	  (cuboid_indices<unsigned int, DIMENSION>(MultiIndex<unsigned int, DIMENSION>(), alpha));
+	indices.erase(alpha);
+
+	for (typename std::set<MultiIndex<unsigned int, DIMENSION> >::const_iterator it(indices.begin());
+	     it != indices.end(); ++it)
+	  {
+	    MultiIndex<unsigned int, DIMENSION> alphaminusbeta;
+	    for (unsigned int i(0); i < DIMENSION; i++)
+	      alphaminusbeta[i] = alpha[i] - (*it)[i];
+	    
+	    double calphabeta(0.0);
+ 	    for (typename MASK::const_iterator maskit(MultivariateLaurentPolynomial<double, DIMENSION>::begin());
+ 		 maskit != MultivariateLaurentPolynomial<double, DIMENSION>::end(); ++maskit) {
+ 	      calphabeta += *maskit * multi_power(maskit.index(), alphaminusbeta);
+ 	    }
+	    
+	    r += ldexp(1.0, -(int)(degree+DIMENSION)) * calphabeta * multi_binomial(alpha, *it)
+	      * moment(*it);
+	  }
+	r /= 1.0 - ldexp(1.0, -degree);
       }
-    
+
     return r;
   }
-#endif
-
 }

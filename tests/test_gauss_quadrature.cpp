@@ -37,8 +37,7 @@ int main()
 
   cout << "Testing GaussRule class ..." << endl;
 
-  for (unsigned int N(1); N <= 8; N++)
-    {
+  for (unsigned int N(1); N <= 8; N++) {
       GaussLegendreRule Gauss(N);
       cout << "* Gauss-Legendre reference rule(N=" << N << "): " << endl;
       Array1D<Point<1> > points;
@@ -50,8 +49,7 @@ int main()
     }
 
   LegendrePolynomial leg;
-  for (unsigned int N(1); N <= 10; N++)
-    {
+  for (unsigned int N(1); N <= 10; N++) {
       GaussRule GL(leg, -1.0, 1.0, N);
       cout << "* Gauss-Legendre rule from the recursion coefficients (N=" << N << "): " << endl;
       Array1D<Point<1> > points;
@@ -62,8 +60,7 @@ int main()
       cout << "  quadrature yields: " << GL.integrate(g) << endl;
     }
  
-  for (unsigned int N(1); N <= 10; N++)
-    {
+  for (unsigned int N(1); N <= 10; N++) {
 #if 1
       // set up 2N+1 monomial moments of w(x)=1 on [-1,1] (yields a bit more exact values)
       Array1D<double> moments(2*N+1);
@@ -90,6 +87,35 @@ int main()
       cout << "  points: " << points << ", weights: " << weights << endl;
       cout << "  quadrature yields: " << GL.integrate(g) << endl;
     }
+
+  for (unsigned int N(1); N <= 4; N++) {
+    // set up generalized moments of w(x)=1 on [-1,1] w.r.t. the (normalized) Legendre polynomials
+    Array1D<double> moments(2*N);
+    Polynomial<double> w(1);
+    for (unsigned int n(0); n < 2*N; n++) {
+      moments[n] = (w*leg.assemble(n)).integrate(-1.0, 1.0);
+    }
+    GaussRule Gleg(moments, leg, -1.0, 1.0, N);
+
+    cout << "* Gauss-Legendre rule from generalized moments"
+	 << " (w.r.t. Legendre poly., N="
+	 << N << "): " << endl;
+    Array1D<Point<1> > points;
+    Array1D<double> weights;
+    Gleg.get_points(points);
+    Gleg.get_weights(weights);
+    cout << "  points: " << points << ", weights: " << weights << endl;
+    cout << "  quadrature yields: " << Gleg.integrate(g) << endl;
+
+    for (unsigned int power(0); power <= 8; power++)
+      {
+        Polynomial<double> p;
+        p.set_coefficient(power, 1.0);
+        cout << "  integration of p(x)=" << p << " yields: "
+             << Gleg.integrate(p, Point<1>(-1.0), Point<1>(1.0)) << ", absolute error: "
+             << fabs(Gleg.integrate(p, Point<1>(-1.0), Point<1>(1.0))-(w*p).integrate(-1.0, 1.0)) << endl;
+      }
+  }
 
   return 0;
 }

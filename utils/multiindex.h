@@ -29,6 +29,11 @@ namespace MathTL
     */
     MultiIndex();
 
+    /*!
+      copy constructor
+    */
+    MultiIndex(const MultiIndex& lambda);
+  
     //! check equality
     bool operator == (const MultiIndex& lambda) const;
 

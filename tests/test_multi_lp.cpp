@@ -41,7 +41,7 @@ int main()
 
   cout << "- algebraic functionality:" << endl;
   q += p;
-  q.dump();
+//   q.dump();
   cout << "q+=p: " << q << endl;
 
 //   q -= p;

@@ -9,6 +9,12 @@ namespace MathTL
   }
 
   template <class I, unsigned int DIMENSION>
+  MultiIndex<I, DIMENSION>::MultiIndex(const MultiIndex<I, DIMENSION>& lambda)
+    : Array1D<I>(lambda)
+  {
+  }
+
+  template <class I, unsigned int DIMENSION>
   bool MultiIndex<I, DIMENSION>::operator == (const MultiIndex& lambda) const
   {
     for (unsigned int i(0); i < DIMENSION; i++)

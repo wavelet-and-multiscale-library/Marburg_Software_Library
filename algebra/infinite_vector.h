@@ -212,9 +212,19 @@ namespace MathTL
     C operator [] (const I& index) const;
 
     /*!
+      read-only access to the vector entries
+    */
+    C get_coefficient(const I& index) const;
+
+    /*!
       read-write access to the vector entries
     */
     C& operator [] (const I& index);
+
+    /*!
+      set a vector entry
+    */
+    void set_coefficient(const I& index, const C value);
 
     /*!
       number of nonzero entries
@@ -224,21 +234,18 @@ namespace MathTL
     /*!
       in place summation *this += v
     */
-    template <class C2>
-    void add(const InfiniteVector<C2,I>& v);
+    void add(const InfiniteVector<C,I>& v);
 
     /*!
       in place summation *this += s*v
     */
-    template <class C2>
-    void add(const C2 s, const InfiniteVector<C2,I>& v);
+    void add(const C s, const InfiniteVector<C,I>& v);
     
     /*!
       in place summation *this = s*(*this) + v
       (AXPY level 1 BLAS routine)
     */
-    template <class C2>
-    void sadd(const C s, const InfiniteVector<C2,I>& v);
+    void sadd(const C s, const InfiniteVector<C,I>& v);
 
     /*!
       in place scaling *this *= s
@@ -248,20 +255,17 @@ namespace MathTL
     /*!
       in place summation
     */
-    template <class C2>
-    InfiniteVector<C,I>& operator += (const InfiniteVector<C2,I>& v);
+    InfiniteVector<C,I>& operator += (const InfiniteVector<C,I>& v);
 
     /*!
       in place subtraction *this -= v
     */
-    template <class C2>
-    void subtract(const InfiniteVector<C2,I>& v);
+    void subtract(const InfiniteVector<C,I>& v);
 
     /*!
       in place subtraction
     */
-    template <class C2>
-    InfiniteVector<C,I>& operator -= (const InfiniteVector<C2,I>& v);
+    InfiniteVector<C,I>& operator -= (const InfiniteVector<C,I>& v);
 
     /*!
       in place multiplication with a scalar
@@ -276,8 +280,7 @@ namespace MathTL
     /*!
       inner product
     */
-    template <class C2>
-    const C operator * (const InfiniteVector<C2,I>& v) const;
+    const C operator * (const InfiniteVector<C,I>& v) const;
 
     /*!
       helper struct to handle decreasing order in modulus
@@ -314,9 +317,9 @@ namespace MathTL
     (you should avoid using this operator, since it requires one vector
     to be copied. Use += or add() instead!)
    */
-  template <class C, class C2, class I>
+  template <class C, class I>
   InfiniteVector<C,I> operator + (const InfiniteVector<C,I>& v1,
-				  const InfiniteVector<C2,I>& v2)
+				  const InfiniteVector<C,I>& v2)
   {
     InfiniteVector<C,I> r(v1);
     r += v2;
@@ -328,9 +331,9 @@ namespace MathTL
     (you should avoid using this operator, since it requires one vector
     to be copied. Use -= or sadd() instead!)
    */
-  template <class C, class C2, class I>
+  template <class C, class I>
   InfiniteVector<C,I> operator - (const InfiniteVector<C,I>& v1,
-				  const InfiniteVector<C2,I>& v2)
+				  const InfiniteVector<C,I>& v2)
   {
     InfiniteVector<C,I> r(v1);
     r -= v2;

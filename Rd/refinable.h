@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <geometry/sampled_mapping.h>
+#include <algebra/infinite_vector.h>
 
 using namespace MathTL;
 
@@ -58,6 +59,14 @@ namespace WaveletTL
     SampledMapping<1> evaluate(const int j, const int k,
 			       const int a, const int b,
 			       const int resolution) const;
+
+    /*!
+      Evaluate a mu-th derivative of the refinable function \phi
+      on the grid \mathbb Z.
+
+      We assume that the derivative of \phi is zero at the boundary of its support.
+    */
+    InfiniteVector<double, int> evaluate(const unsigned int mu) const;
 
     /*!
       Compute the n-th moment

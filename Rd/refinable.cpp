@@ -4,7 +4,10 @@
 #include <cmath>
 #include <iostream>
 #include <utils/array1d.h>
+#include <utils/tiny_tools.h>
 #include <algebra/matrix.h>
+#include <algebra/triangular_matrix.h>
+#include <numerics/matrix_decomp.h>
 #include <numerics/eigenvalues.h>
 #include <numerics/differences.h>
 
@@ -246,6 +249,98 @@ namespace WaveletTL
 
     return SampledMapping<1>(grid, values);
   }
+
+  template <class MASK>
+  InfiniteVector<double, int> RefinableFunction<MASK>::evaluate(const unsigned int mu) const
+  {
+    InfiniteVector<double, int> r;
+
+    // compute the support cube
+    int suppleft(LaurentPolynomial<double>::begin().index());
+    int suppright(suppleft);
+    
+    for (typename MASK::const_iterator it(LaurentPolynomial<double>::begin());
+ 	 it != LaurentPolynomial<double>::end(); ++it)
+      {
+	suppleft = std::min(suppleft, it.index());
+	suppright = std::max(suppright, it.index());
+      }
+
+    int alpha = suppleft+1;
+    int beta = suppright-1;
+
+//     // for convenience, collect all integer points from the interior of the support cube
+//     MultiIndex<int, DIMENSION> alpha, beta;
+//     for (unsigned int i(0); i < DIMENSION; i++)
+//       {
+// 	alpha[i] = suppleft+1;
+// 	beta[i] = suppright-1;
+//       }
+//     std::set<MultiIndex<int, DIMENSION> > indices
+//       (cuboid_indices<int, DIMENSION>(alpha, beta));
+
+    // In the following, we set up the eigenvalue problem for the values
+    //   V_\alpha := D^\mu\phi(\alpha), \alpha\in\mathbb Z
+    // The eigenvector is determined uniquely by the following equations,
+    // see [DM] for details (so we don't need an iterative scheme):
+    //
+    // (3.22) eigenvalue condition
+    //   2^{-\mu}V_\alpha = \sum_\beta a_{2\alpha-\beta}V_\beta, \alpha\in\mathbb Z
+    //
+    // (3.23) orthogonality condition
+    //   \sum_\alpha (-\alpha)^\nu V_\alpha = \mu!\delta_{\mu,\nu}, \nu\le\mu
+
+    unsigned int facmu(faculty(mu));
+
+//     // we also collect all \nu\in\mathbb N^d, such that |\nu|\le\mu|
+//     std::set<MultiIndex<unsigned int, DIMENSION> > nus;
+//     for (unsigned int degnu(0); degnu <= degmu; degnu++)
+//       {
+// 	std::set<MultiIndex<unsigned int, DIMENSION> > sofar(nus);
+// 	std::set<MultiIndex<unsigned int, DIMENSION> > plus(degree_indices<DIMENSION>(degnu));
+// 	std::set_union(sofar.begin(), sofar.end(),
+// 		       plus.begin(), plus.end(),
+// 		       inserter(nus, nus.begin()));
+//       }
+
+    Matrix<double> A((beta-alpha+1) + (mu+1), beta-alpha+1);
+    Vector<double> b((beta-alpha+1) + (mu+1));
+
+    for (unsigned int m(0); m < A.column_dimension(); m++)
+      {
+	// (3.22)
+	for (unsigned int n(0); n < A.column_dimension(); n++)
+	  {
+ 	    A(m, n) = LaurentPolynomial<double>::get_coefficient(2*(alpha+m)-(alpha+n));
+	  }
+	A(m, m) -= ldexp(1.0, -mu);
+	// b[m] = 0;
+      }
+
+    for (unsigned int m(A.column_dimension()), nu(0); m < A.row_dimension(); m++, nu++)
+      {
+ 	// (3.23)
+ 	for (unsigned int n(0); n < A.column_dimension(); n++)
+ 	  {
+ 	    A(m, n) = minus1power(nu) * intpower(alpha+n, nu);
+	  }
+	b[m] = (nu == mu ? facmu : 0);
+      }
+
+    // the system matrix is rectangular, but Ax=b is solvable via a QR decomposition
+    QRDecomposition<double> qr(A);
+    assert(qr.hasFullRank());
+    Vector<double> x;
+    qr.solve(b, x);
+    x.compress(1e-15);
+
+    // reinterpret the entries of x
+    for (unsigned int n(0); n < A.column_dimension(); n++)
+      r.set_coefficient(alpha+n, x[n]);
+
+    return r;
+  }
+
 
   template <class MASK>
   double RefinableFunction<MASK>::cnk(const unsigned int n, const unsigned int k) const

@@ -47,5 +47,11 @@ int main()
       cout << ")" << endl;
     }
 
+  cout << "- evaluate the CDF<2> function with the [DM] version of evaluate():" << endl
+       << phi2.evaluate(0) << endl;
+
+  cout << "- evaluate the CDF<3> function with the [DM] version of evaluate():" << endl
+       << phi3.evaluate(0) << endl;
+
   return 0;
 }

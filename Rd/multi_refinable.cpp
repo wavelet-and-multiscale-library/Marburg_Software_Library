@@ -4,11 +4,9 @@
 #include <cmath>
 #include <iostream>
 #include <set>
-#include <utils/fixed_array1d.h>
 #include <utils/tiny_tools.h>
 #include <algebra/matrix.h>
 #include <algebra/triangular_matrix.h>
-#include <numerics/eigenvalues.h>
 #include <numerics/differences.h>
 #include <numerics/matrix_decomp.h>
 
@@ -108,7 +106,7 @@ namespace WaveletTL
 	unsigned int degnu(multi_degree(*rowit2));
 	for (colit = indices.begin(), n = 0; colit != indices.end(); ++colit, n++)
 	  {
-	    A(m, n) = minus1power(degnu) * multi_power(alpha, *rowit2);
+	    A(m, n) = minus1power(degnu) * multi_power(*colit, *rowit2);
 	  }
 	b[m] = (*rowit2 == mu ? facmu : 0);
       }

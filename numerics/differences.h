@@ -53,4 +53,7 @@ namespace MathTL
   InfiniteVector<double, int> backward_difference<1>(const InfiniteVector<double, int>& a);
 }
 
+// include implementation
+#include <numerics/differences.cpp>
+
 #endif

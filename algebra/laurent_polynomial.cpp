@@ -305,6 +305,14 @@ namespace MathTL
   }
 
   template <class R>
+  void LaurentPolynomial<R>::divide(const LaurentPolynomial<R>& q,
+				    LaurentPolynomial<R>& p) const
+  {
+    LaurentPolynomial<R> r;
+    divide(q, p, r);
+  }
+
+  template <class R>
   std::ostream& operator << (std::ostream& s, const LaurentPolynomial<R>& p)
   {
     for (typename LaurentPolynomial<R>::const_iterator it(p.begin());

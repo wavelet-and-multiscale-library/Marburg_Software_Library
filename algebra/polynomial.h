@@ -224,6 +224,11 @@ namespace MathTL
     /*!
       divide the polynomial by another one with remainder: *this = p * q + r
     */
+    void divide(const Polynomial<C>& q, Polynomial<C>& p) const;
+
+    /*!
+      divide the polynomial by another one with remainder: *this = p * q + r
+    */
     void divide(const Polynomial<C>& q, Polynomial<C>& p, Polynomial<C>& r) const;
 
     /*!

@@ -215,6 +215,11 @@ namespace MathTL
     /*!
       division with remainder by another Laurent polynomial q: *this = p * q + r
     */
+    void divide(const LaurentPolynomial<R>& q, LaurentPolynomial<R>& p) const;
+
+    /*!
+      division with remainder by another Laurent polynomial q: *this = p * q + r
+    */
     void divide(const LaurentPolynomial<R>& q,
 		LaurentPolynomial<R>& p, LaurentPolynomial<R>& r) const;
   };

@@ -403,6 +403,13 @@ namespace MathTL
   }
 
   template <class C>
+  void Polynomial<C>::divide(const Polynomial<C>& q, Polynomial<C>& p) const
+  {
+    Polynomial<C> r;
+    divide(q, p, r);
+  }
+
+  template <class C>
   Polynomial<C> Polynomial<C>::differentiate() const
   {
     Vector<C> coeffs(std::max(degree(),(unsigned int)1));

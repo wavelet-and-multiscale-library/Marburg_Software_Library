@@ -11,25 +11,31 @@ int main()
   cout << "Testing the InfiniteVector class ..." << endl;
 
   InfiniteVector<float,long int> s;
-//   cout << "- a zero vector:" << endl
-//        << s << endl;
+  cout << "- a zero vector:" << endl
+       << s << endl;
 
-//   cout << "- writing access on s:" << endl;
-//   s(1) = 1;
-//   cout << "  (size after writing the first element: " << s.size() << ")" << endl;
-//   s(3) = 42;
+  cout << "- writing access on s:" << endl;
+  s[1] = 2;
+//  cout << "  (size after writing the first element: " << s.size() << ")" << endl;
+  s[3] = 42;
 //   cout << "  (size after writing the second element: " << s.size() << ")" << endl;
-//   cout << s << endl;
+  cout << s;
 
-//   cout << "- copy constructor t(s):" << endl;
-//   InfiniteVector<float,long int> t(s);
-//   cout << t << endl;
+  cout << "- copy constructor t(s):" << endl;
+  InfiniteVector<float,long int> t(s);
+  cout << t;
 
-//   cout << "- are the two vectors equal?" << endl;
-//   if (t == s)
-//     cout << "  ... yes!" << endl;
-//   else
-//     cout << "  ... no!" << endl;
+  cout << "- are the two vectors equal?" << endl;
+  if (t == s)
+    cout << "  ... yes!" << endl;
+  else
+    cout << "  ... no!" << endl;
+
+  cout << "- are the two vectors inequal?" << endl;
+  if (t != s)
+    cout << "  ... yes!" << endl;
+  else
+    cout << "  ... no!" << endl;
 
 //   cout << "- in place summation s+=t:" << endl;
 //   s += t;

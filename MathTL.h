@@ -21,6 +21,7 @@
 #include <algebra/tensor.h>
 #include <algebra/tensor_base.h>
 #include <algebra/vector.h>
+#include <algebra/infinite_vector.h>
 #include <algebra/vector_norms.h>
 #include <algebra/vector_arithmetics.h>
 #include <algebra/matrix.h>

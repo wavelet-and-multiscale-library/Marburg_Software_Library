@@ -11,12 +11,173 @@
 #define _MATHTL_INFINITE_VECTOR_H
 
 #include <cmath>
+#include <map>
 #include <vector>
 #include <algorithm>
 // #include "map_iterator.h"
 
 namespace MathTL
 {
+  /*!
+    A model class InfiniteVector<C,I> for inherently sparse,
+    arbitrarily indexed vectors
+      x = (x_i)_{i\in I}
+    with entries from a (scalar) class C.
+    InfiniteVector<C,I> may act as a realization of coefficient_type in the FWT.
+    
+    Although internally, we will model InfiniteVector as a map<I,C>,
+    the access to the vector entries takes place by a nested iterator
+    class (compare the deal.II matrix classes) which is STL-compatible.
+    
+  */
+  template <class C, class I>
+  class InfiniteVector
+    : protected std::map<I,C>
+  {
+  public:
+    /*!
+      default constructor: yields empty (zero) vector
+    */
+    InfiniteVector();
+
+    /*!
+      copy constructor
+    */
+    InfiniteVector(const InfiniteVector<C,I>& v);
+
+    /*!
+      forward declaration of const_iterator
+    */
+    class const_iterator;
+    
+    /*!
+      nested accessor class for const_iterator
+    */
+    class Accessor
+    {
+    public:
+      /*!
+	construct an accessor from a map::const_iterator
+       */
+      Accessor(const typename std::map<I,C>::const_iterator& entry);
+
+      /*!
+	index of current entry
+      */
+      I index() const;
+
+      /*!
+	value of current vector entry
+      */
+      C value() const;
+
+      /*!
+	compare two accessors
+      */
+      bool operator == (const Accessor& a) const;
+
+      /*!
+	non-equality test
+      */
+      bool operator != (const Accessor& a) const;
+
+    protected:
+      /*!
+	STL iterator pointing to current entry
+	(one would also like Accessor to be a direct descendant
+	of std::map<I,C>::const_iterator, however this posed
+	some problems implementing it, maybe we do so
+	in a later version)
+      */
+      typename std::map<I,C>::const_iterator entry_;
+
+      /*!
+	const_iterator should have access to protected members
+       */
+      friend class const_iterator;
+    };
+
+    /*!
+      STL-compliant const_iterator scanning the nontrivial entries
+    */
+    class const_iterator
+    {
+    public:
+      /*!
+	constructs a const_iterator from a map::const_iterator
+      */
+      const_iterator(const typename std::map<I,C>::const_iterator& entry);
+
+      /*!
+	prefix increment of the const_iterator
+      */
+      const_iterator& operator ++ ();
+
+      /*!
+	dereference const_iterator
+      */
+      const Accessor& operator * () const;
+
+      /*!
+	dereference const_iterator
+      */
+      const Accessor* operator -> () const;
+
+      /*!
+	compare positions of two iterators
+      */
+      bool operator == (const const_iterator& it) const;
+
+      /*!
+	non-equality test
+      */
+      bool operator != (const const_iterator& it) const;
+
+      /*!
+	comparison, corresponds to the order relation on I
+       */
+      bool operator < (const const_iterator& it) const;
+
+    private:
+      /*!
+	store accessor to current vector entry
+      */
+      Accessor accessor_;
+    };
+
+    /*!
+      const_iterator pointing to the first nontrivial vector entry
+    */
+    const_iterator begin() const;
+
+    /*!
+      const_iterator pointing to one after the last nontrivial vector entry
+    */
+    const_iterator end() const;
+
+    /*!
+      equality test
+    */
+    bool operator == (const InfiniteVector<C,I>& v) const;
+
+    /*!
+      non-equality test
+    */
+    bool operator != (const InfiniteVector<C,I>& v) const;
+
+    /*!
+      read-only access to the vector entries
+    */
+    C operator [] (const I& index) const;
+
+    /*!
+      read-write access to the vector entries
+    */
+    C& operator [] (const I& index);
+
+  };
+
+
   //! helper struct modelling a decreasing order in modulus
   /*!
     helper struct to handle decreasing order in modulus
@@ -35,74 +196,10 @@ namespace MathTL
 //     }
 //   };
   
-  // A model class InfiniteVector<C,I> for arbitrarily indexed vectors
-  //   x = (x_i)_{i\in I}
-  // with entries from an arbitrary (scalar) class C and an internal representation.
-  // InfiniteVector<C,I> may act as a realization of coefficient_type in the FWT.
-
-  // Any realization class VECTOR for such mathematical objects should
-  // adhere to the following (minimal) signature:
-  //
-  // template <class C> class VECTOR
-  // {
-  // public:
-  //   typedef entry_const_iterator;          // const iterator scanning the nonzero entries
-  //   typedef entry_iterator;                // iterator scanning the nonzero entries
-  //   int size() const;                      // storage requirements
-  //   const C operator () (const int) const; // reading access to x_i
-  //   C& operator () (const int);            // writing access to x_i
-  //   VECTOR& operator = (const C&);         // assignment of a constant
-  //   VECTOR& operator += (const VECTOR&);   // in-place summation
-  //   VECTOR& operator -= (const VECTOR&);   // in-place subtraction
-  //   VECTOR& operator *= (const C&);        // in-place scalar multiplication
-  //   VECTOR& operator /= (const C&);        // in-place scalar division
-  //   entry_const_iterator begin() const;    // first nonzero entry (for reading access)
-  //   entry_iterator begin();                // first nonzero entry (for writing)
-  //   entry_const_iterator end() const;      // one behind last nonzero entry (read)
-  //   entry_iterator end();                  // one behind last nonzero entry (write)
-  // }
-
-  template <class C, class I>
-  class InfiniteVector
-  {
-  public:
-//     typedef C                     value_type;
-//     typedef MapIterator<C,I>      entry_iterator;
-//     typedef MapConstIterator<C,I> entry_const_iterator;
-//     typedef InfiniteVector<C,I>   self_type;
-
-    //! default constructor
-    InfiniteVector() {}
-//     InfiniteVector() : data_() {}
-
-//     //! copy constructor
-//     InfiniteVector(const self_type& v) : data_(v.data_) {}
-
-//     //! reading access
-//     inline const C operator () (const I& i) const
-//     {
-//       // We don't use operator [] for reading,
-//       // since it may add unwanted zero elements!
-//       typename std::map<I,C>::const_iterator it(data_.lower_bound(i));
-//       if (it != data_.end() && !data_.key_comp()(i,it->first))
-// 	return it->second; 
-//       return C(0);
-//     }
-    
-//     //! writing access
-//     inline C& operator () (const I& i) { return data_[i]; }
 
 //     //! set vector to zero
 //     inline void clear() { data_.clear(); }
 
-//     //! in place summation
-//     self_type& operator += (const self_type& a)
-//     {
-//       for (entry_const_iterator ita(a.begin()), itaend(a.end());
-// 	   ita != itaend; ++ita)
-// 	this->operator () (ita.index()) += ita.entry();
-//       return *this;
-//     }
     
 //     //! in place subtraction
 //     self_type& operator -= (const self_type& a)
@@ -227,31 +324,11 @@ namespace MathTL
 
 //   protected:
 //     std::map<I,C> data_;
-  };
+//   };
 
 //   //
 //   // some algorithms
   
-//   //! equality test
-//   template <class C, class I>
-//   bool operator == (const InfiniteVector<C,I>& v, const InfiniteVector<C,I>& w)
-//   {
-//     for (typename InfiniteVector<C,I>::entry_const_iterator itv(v.begin()), vend(v.end());
-// 	 itv != vend; ++itv)
-//       {
-// 	if (w(itv.index()) != itv.entry()) return false;
-//       }
-//     for (typename InfiniteVector<C,I>::entry_const_iterator itw(w.begin()), wend(w.end());
-// 	 itw != wend; ++itw)
-//       {
-// 	if (v(itw.index()) != itw.entry()) return false;
-//       }
-//     return true;
-//   }
-  
-//   //! non-equality test
-//   template <class C, class I>
-//   bool operator != (const InfiniteVector<C,I>& v, const InfiniteVector<C,I>& w) { return !(v == w); }
 
 //   //! summation
 //   template <class C, class I>
@@ -304,16 +381,12 @@ namespace MathTL
 //       }
 //     return r;
 //   }
-  
-//   //! generic stream output
-//   template<class C, class I>
-//   std::ostream& operator << (std::ostream& os, const InfiniteVector<C,I>& v)
-//   {
-//     for (typename InfiniteVector<C,I>::entry_const_iterator it(v.begin()), itend(v.end());
-// 	 it != itend; ++it)
-//       os << it.index() << ": " << it.entry() << endl;
-//     return os;
-//   }
+
+  /*!
+    stream output for infinite vectors
+  */
+  template<class C, class I>
+  std::ostream& operator << (std::ostream& os, const InfiniteVector<C,I>& v);
 
 //   //! ell_2 norm
 //   template <class C, class I>
@@ -349,5 +422,8 @@ namespace MathTL
 //   }
 
 }
+
+// include implementation of inline functions
+#include <algebra/infinite_vector.cpp>
 
 #endif

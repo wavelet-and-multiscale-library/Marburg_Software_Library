@@ -82,4 +82,16 @@ inline int minus1power(const int k)
   return (k%2==0 ? 1 : -1);
 }
 
+//! integer power n^k
+int intpower(const int n, const int k)
+{
+  assert(k >= 0);
+
+  int r(1);
+  for (int i(1); i <= abs(n); i++)
+    r *= n;
+
+  return r;
+}
+
 #endif

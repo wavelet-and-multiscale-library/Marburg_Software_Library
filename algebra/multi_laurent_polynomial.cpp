@@ -165,6 +165,67 @@ namespace MathTL
   }
 
   template <class R, unsigned int DIMENSION>
+  inline
+  MultivariateLaurentPolynomial<R, DIMENSION>
+  MultivariateLaurentPolynomial<R, DIMENSION>::operator +
+  (const MultivariateLaurentPolynomial<R, DIMENSION>& p) const
+  {
+    return (MultivariateLaurentPolynomial<R, DIMENSION>(*this) += p);
+  }
+
+  template <class R, unsigned int DIMENSION>
+  inline
+  void MultivariateLaurentPolynomial<R, DIMENSION>::subtract
+  (const MultivariateLaurentPolynomial<R, DIMENSION>& p)
+  {
+    InfiniteVector<R, MultiIndex<int, DIMENSION> >::subtract(p);
+  }
+
+  template <class R, unsigned int DIMENSION>
+  inline
+  MultivariateLaurentPolynomial<R, DIMENSION>&
+  MultivariateLaurentPolynomial<R, DIMENSION>::operator -=
+  (const MultivariateLaurentPolynomial<R, DIMENSION>& p)
+  {
+    subtract(p);
+    return *this;
+  }
+
+  template <class R, unsigned int DIMENSION>
+  inline
+  MultivariateLaurentPolynomial<R, DIMENSION>
+  MultivariateLaurentPolynomial<R, DIMENSION>::operator - () const
+  {
+    return (MultivariateLaurentPolynomial<R, DIMENSION>() -= *this);
+  }
+
+  template <class R, unsigned int DIMENSION>
+  inline
+  MultivariateLaurentPolynomial<R, DIMENSION>
+  MultivariateLaurentPolynomial<R, DIMENSION>::operator -
+  (const MultivariateLaurentPolynomial<R, DIMENSION>& p) const
+  {
+    return (MultivariateLaurentPolynomial<R, DIMENSION>(*this) -= p);
+  }
+
+  template <class R, unsigned int DIMENSION>
+  inline
+  MultivariateLaurentPolynomial<R, DIMENSION>&
+  MultivariateLaurentPolynomial<R, DIMENSION>::operator *= (const R c)
+  {
+    InfiniteVector<R, MultiIndex<int, DIMENSION> >::scale(c);
+    return *this;
+  }
+
+  template <class R, unsigned int DIMENSION>
+  inline
+  MultivariateLaurentPolynomial<R, DIMENSION> operator *
+  (const R c, const MultivariateLaurentPolynomial<R, DIMENSION>& p)
+  {
+    return (MultivariateLaurentPolynomial<R, DIMENSION>(p) *= c);
+  }
+
+  template <class R, unsigned int DIMENSION>
   void MultivariateLaurentPolynomial<R, DIMENSION>::dump() const
   {
     cout << InfiniteVector<R, MultiIndex<int, DIMENSION> >(*this) << endl;
@@ -177,15 +238,6 @@ namespace MathTL
     cout << *(InfiniteVector<R, MultiIndex<int, DIMENSION> >::begin()) << endl;
     cout << *(begin()) << endl;
     cout << get_coefficient(begin().index()) << endl;
-  }
-
-  template <class R, unsigned int DIMENSION>
-  inline
-  MultivariateLaurentPolynomial<R, DIMENSION>
-  MultivariateLaurentPolynomial<R, DIMENSION>::operator +
-  (const MultivariateLaurentPolynomial<R, DIMENSION>& p) const
-  {
-    return (MultivariateLaurentPolynomial<R, DIMENSION>(*this) += p);
   }
 
   template <class R, unsigned int DIMENSION>

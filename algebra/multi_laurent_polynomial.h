@@ -147,10 +147,47 @@ namespace MathTL
     operator + (const MultivariateLaurentPolynomial<R, DIMENSION>& p) const;
 
     /*!
+      pointwise difference of two Laurent polynomials *this -= p
+    */
+    void subtract(const MultivariateLaurentPolynomial<R, DIMENSION>& p);
+
+    /*!
+      pointwise difference of two Laurent polynomials
+    */
+    MultivariateLaurentPolynomial<R, DIMENSION>&
+    operator -= (const MultivariateLaurentPolynomial<R, DIMENSION> &p);
+
+    /*!
+      sign
+      (makes a copy of *this)
+    */
+    MultivariateLaurentPolynomial<R, DIMENSION> operator - () const;
+    
+    /*!
+      pointwise difference of two Laurent polynomials
+      (don't use this extensively, since one copy has to be made!)
+    */
+    MultivariateLaurentPolynomial<R, DIMENSION>
+    operator - (const MultivariateLaurentPolynomial<R, DIMENSION> &p) const;
+
+    /*!
+      multiplication with a real number
+    */
+    MultivariateLaurentPolynomial<R, DIMENSION>& operator *= (const R c);
+
+    /*!
       just for testing
     */
     void dump() const;
   };
+
+  /*!
+    multiplication with a real number from the right
+    (don't use this extensively, since one copy has to be made!)
+  */
+  template <class R, unsigned int DIMENSION>
+  MultivariateLaurentPolynomial<R, DIMENSION> operator *
+  (const R c, const MultivariateLaurentPolynomial<R, DIMENSION>& p);
   
   /*!
     stream output for multivariate Laurent polynomials,

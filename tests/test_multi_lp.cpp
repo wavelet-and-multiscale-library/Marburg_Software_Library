@@ -44,16 +44,17 @@ int main()
 //   q.dump();
   cout << "q+=p: " << q << endl;
 
-//   q -= p;
-//   q -= p;
-//   cout << "q-=p; q-=p: " << q << endl;
-//   q = p;
-//   q *= 3;
-//   cout << "q=p; q*=3: " << q << endl;
-//   cout << "q+p: " << q+p << endl;
-//   cout << "q-p: " << q-p << endl;
-//   cout << "-q: " << -q << endl;
-//   cout << "3*q: " << 3.*q << endl;
+  q -= p;
+  q -= p;
+  cout << "q-=p; q-=p: " << q << endl;
+  q = p;
+  q *= 3;
+  cout << "q=p; q*=3: " << q << endl;
+  cout << "q+p: " << q+p << endl;
+  cout << "q-p: " << q-p << endl;
+  cout << "-q: " << -q << endl;
+  cout << "3*q: " << 3. * q << endl;
+
 //   cout << "p*q: " << p*q << endl;
 //   cout << "(1+z)^2: ";
 //   LaurentPolynomial<double> s(1);

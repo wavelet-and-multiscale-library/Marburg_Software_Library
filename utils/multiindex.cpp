@@ -139,4 +139,14 @@ namespace MathTL
       r *= intpower(alpha[i], beta[i]);
     return r;
   }
+
+  template <class I, unsigned int DIMENSION>
+  int multi_binomial(const MultiIndex<I, DIMENSION>& beta,
+		     const MultiIndex<I, DIMENSION>& alpha)
+  {
+    int r(binomial(beta[0], alpha[0]));
+    for (unsigned int i(1); i < DIMENSION; i++)
+      r *= binomial(beta[i], alpha[i]);
+    return r;
+  }
 }

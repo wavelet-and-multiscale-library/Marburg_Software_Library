@@ -92,6 +92,13 @@ namespace MathTL
 		  const MultiIndex<unsigned int, DIMENSION>& beta);
   
   /*!
+    binomial \beta over \alpha of two multiindices
+  */
+  template <class I, unsigned int DIMENSION>
+  int multi_binomial(const MultiIndex<I, DIMENSION>& beta,
+		     const MultiIndex<I, DIMENSION>& alpha);
+
+  /*!
     Compute all multiindices \alpha\in\mathbb N^d with degree |\alpha|=k
   */
   template <unsigned int DIMENSION>

@@ -25,7 +25,7 @@ namespace MathTL
   */
   template <unsigned int DIM>
   class SampledMapping
-    : protected Grid<DIM>
+    : public Grid<DIM>
   {
   public:
     /*!
@@ -65,7 +65,7 @@ namespace MathTL
 
   template <>
   class SampledMapping<1>
-    : protected Grid<1>
+    : public Grid<1>
   {
   public:
     /*!
@@ -135,7 +135,7 @@ namespace MathTL
 
   template <>
   class SampledMapping<2>
-    : protected Grid<2>
+    : public Grid<2>
   {
   public:
     /*!

@@ -187,6 +187,11 @@ namespace MathTL
     void swap (InfiniteVector<C,I>& v);
 
     /*!
+      test emptyness
+    */
+    inline bool empty() const { return std::map<I,C>::empty(); }
+
+    /*!
       set infinite vector to zero
     */
     void clear();

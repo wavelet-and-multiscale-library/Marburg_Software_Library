@@ -10,35 +10,27 @@ MATHTL_DIR = $(HOME)/c++/MathTL
 CXX = g++
 CXXFLAGS += -I$(MATHTL_DIR) -Wall
 
-# mature test programs
 EXEOBJF = \
   test_random.o\
   test_tensor.o test_point.o test_array1d.o\
   test_vector.o test_infinite_vector.o test_vectorspeed.o test_matrix.o\
-  test_function.o test_polynomial.o\
+  test_function.o test_polynomial.o test_laurent_polynomial.o\
   test_iteratsolv.o test_eigenvalues.o test_decomp.o\
   test_ortho_poly.o test_quadrature.o test_gauss_quadrature.o\
   test_recursion.o\
   test_grid.o test_sampled_mapping.o\
   test_splines.o\
-  test_rosenbrock.o
+  test_rosenbrock.o\
+  test_differences.o
 
 EXES = $(EXEOBJF:.o=)
 
-# test programs under construction
-EXEOBJF2 = \
- test_laurent_polynomial.o
+all:: tests
 
-EXES2 = $(EXEOBJF2:.o=)
-
-all:: tests1 tests
-
-tests1:: $(EXES)
-
-tests:: $(EXES2)
+tests:: $(EXES)
 
 clean::
-	rm -f $(EXEOBJF) $(EXES) $(EXEOBJF2) $(EXES2)
+	rm -f $(EXEOBJF) $(EXES)
 
 veryclean:: clean
 	rm -f *~
@@ -46,11 +38,5 @@ veryclean:: clean
 $(EXEOBJF): %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
 
-$(EXEOBJF2): %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
-
 $(EXES): %: %.o
-	$(CXX) $< -g -o $@
-
-$(EXES2): %: %.o
 	$(CXX) $< -g -o $@

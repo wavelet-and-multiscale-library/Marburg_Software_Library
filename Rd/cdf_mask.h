@@ -11,9 +11,9 @@
 #define _WAVELETTL_CDF_MASK_H
 
 #include <iostream>
-#include <algebra/laurent_polynomial.h>
+#include <algebra/multi_laurent_polynomial.h>
 
-using MathTL::LaurentPolynomial;
+using MathTL::MultivariateLaurentPolynomial;
 
 namespace WaveletTL
 {
@@ -25,7 +25,7 @@ namespace WaveletTL
   */
   template <int d>
   class CDFMask_primal
-    : public virtual LaurentPolynomial<double>
+    : public virtual MultivariateLaurentPolynomial<double, 1>
   {
   public:
     CDFMask_primal();
@@ -39,7 +39,7 @@ namespace WaveletTL
   */
   template <int d, int dt>
   class CDFMask_dual
-    : public virtual LaurentPolynomial<double>
+    : public virtual MultivariateLaurentPolynomial<double, 1>
   {
   public:
     CDFMask_dual();

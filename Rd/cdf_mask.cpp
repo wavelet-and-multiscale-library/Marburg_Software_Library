@@ -3,8 +3,10 @@
 #include <cmath>
 #include <algebra/polynomial.h>
 #include <utils/tiny_tools.h>
+#include <utils/multiindex.h>
 
 using MathTL::Polynomial;
+using MathTL::MultiIndex;
 
 namespace WaveletTL
 {
@@ -16,7 +18,7 @@ namespace WaveletTL
     //   a(z) = (1+z)^d * z^{-floor(d/2)},
     // the coefficients of which can be calculated in closed form (faster):
     for (int k(- (int)d/2); k <= ceil((int)d/2.); k++)
-      set_coefficient(k, ldexp(1., 1 - d) * binomial(d, k + d/2));
+      set_coefficient(MultiIndex<int, 1>(k), ldexp(1., 1 - d) * binomial(d, k + d/2));
   }
 
   template <int d, int dt>
@@ -52,6 +54,6 @@ namespace WaveletTL
     u.multiply(ldexp(1.0, -dt+1) * uh3.power(dt));
     
     for (unsigned int k(0); k <= u.degree(); k++)
-      set_coefficient((int)k - d/2 - dt + 1, u.get_coefficient(k));
+      set_coefficient(MultiIndex<int, 1>((int)k - d/2 - dt + 1), u.get_coefficient(k));
   }
 }

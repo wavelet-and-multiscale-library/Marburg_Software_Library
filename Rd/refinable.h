@@ -11,13 +11,67 @@
 #define _WAVELETTL_REFINABLE_H
 
 #include <iostream>
-#include <geometry/sampled_mapping.h>
+#include <utils/multiindex.h>
 #include <algebra/infinite_vector.h>
+#include <geometry/point.h>
+#include <geometry/sampled_mapping.h>
 
 using namespace MathTL;
 
 namespace WaveletTL
 {
+  /*!
+    Base class for a multivariate refinable function \phi on \mathbb R^d.
+
+    A refinable function \phi on \mathbb R^d fulfills the refinement equation
+    
+      \phi(x) = \sum_{k\in\mathbb Z^d} a_k * \phi(M * x - k)
+
+    where M\in\mathbb Z^{d\times d} is an expanding matrix and the a_k are
+    real coefficients.
+    In this module we will (at least for the moment) only support the case
+    M = 2*I, so that
+
+      \phi(x) = \sum_{k\in\mathbb Z^d} a_k * \phi(2 * x - k)
+
+    The coefficients a_k are stored in a multivariate Laurent polynomial.
+    Since a refinable function admits much more functionality, we do not only
+    use MultivariateLaurentPolynomial<double,d> but specify the
+    mask via a template parameter MASK which is assumed to have the signature
+    of a MultivariateLaurentPolynomial<double, d>.
+  */
+  template <class MASK, unsigned int DIMENSION>
+  class MultivariateRefinableFunction
+    : public MASK
+  {
+  public:
+    /*!
+      Evaluate the refinable function \phi on the grid 2^{-resolution}\mathbb Z^d.
+      We assume that \phi is zero at the boundary of its support.
+    */
+    InfiniteVector<double, MultiIndex<int, DIMENSION> >
+    evaluate(const int resolution = 0) const;
+    
+    /*!
+      Evaluate the mu-th (partial) derivative of the refinable function \phi
+      on the grid 2^{-resolution}\mathbb Z^d.
+      We assume that the derivative of \phi is zero at the boundary of its support (!)
+    */
+    InfiniteVector<double, MultiIndex<int, DIMENSION> >
+    evaluate(const MultiIndex<unsigned int, DIMENSION>& mu,
+	     const int resolution = 0) const;
+  };
+
+  /*!
+    shorthand notation for univariate refinable functions
+  */
+  template <class MASK>
+  class RefinableFunction
+    : public MultivariateRefinableFunction<MASK, 1>
+  {
+  };
+
+#if 0
   /*!
     Base class for a refinable function \phi on \mathbb R.
 
@@ -81,6 +135,8 @@ namespace WaveletTL
     */
     double cnk(const unsigned int n, const unsigned int k) const;
   };
+#endif
+
 }
 
 #include <Rd/refinable.cpp>

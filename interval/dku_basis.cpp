@@ -12,7 +12,7 @@
 #include <Rd/haar_mask.h>
 #include <Rd/cdf_mask.h>
 #include <Rd/dm_mask.h>
-#include <Rd/multi_refinable.h>
+#include <Rd/refinable.h>
 
 using std::cout;
 using std::endl;

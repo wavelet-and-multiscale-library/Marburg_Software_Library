@@ -11,20 +11,22 @@
 #define _WAVELETTL_HAAR_MASK_H
 
 #include <iostream>
-#include <algebra/laurent_polynomial.h>
+#include <algebra/multi_laurent_polynomial.h>
+#include <utils/multiindex.h>
 
-using MathTL::LaurentPolynomial;
+using MathTL::MultivariateLaurentPolynomial;
+using MathTL::MultiIndex;
 
 namespace WaveletTL
 {
   class HaarMask
-    : public virtual LaurentPolynomial<double>
+    : public virtual MultivariateLaurentPolynomial<double, 1>
   {
   public:
     HaarMask()
     {
-      set_coefficient(0, 1);
-      set_coefficient(1, 1);
+      set_coefficient(MultiIndex<int, 1>(0), 1);
+      set_coefficient(MultiIndex<int, 1>(1), 1);
     }
   };
 }

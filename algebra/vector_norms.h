@@ -15,9 +15,7 @@ namespace MathTL
 {
   /*
     computation of different (quasi-)norms for generic VECTOR classes
-    with a standard signatur like std::vector<T>
-
-    We use the size() routine for determining the dimension of the vector.
+    with a standard signature like std::vector<T>
 
     You can use template specialization to speed up the norm computation
     for specific VECTOR classes.
@@ -31,8 +29,9 @@ namespace MathTL
   {
     double r(0.0);
 
-    for (unsigned int i(0); i < v.size(); i++)
-      r = std::max(fabs(v[i]), r);
+    for (typename VECTOR::const_iterator it(v.begin()), itend(v.end());
+	 it != itend; ++it)
+      r = std::max(fabs(*it), r);
 
     return r;
   }
@@ -45,8 +44,9 @@ namespace MathTL
   {
     double r(0.0);
     
-    for (unsigned int i(0); i < v.size(); i++)
-      r += fabs(v[i]);
+    for (typename VECTOR::const_iterator it(v.begin()), itend(v.end());
+	 it != itend; ++it)
+      r += fabs(*it);
 
     return r;
   }
@@ -59,8 +59,9 @@ namespace MathTL
   {
     double r(0.0);
 
-    for (unsigned int i(0); i < v.size(); i++)
-      r += v[i] * v[i];
+    for (typename VECTOR::const_iterator it(v.begin()), itend(v.end());
+	 it != itend; ++it)
+      r += *it * *it;
 
     return r;
   }
@@ -82,8 +83,9 @@ namespace MathTL
   {
     double r(0.0);
 
-    for (unsigned int i(0); i < v.size(); i++)
-      r += pow(fabs(v[i]), p);
+    for (typename VECTOR::const_iterator it(v.begin()), itend(v.end());
+	 it != itend; ++it)
+      r += pow(fabs(*it), p);
     
     return pow(r, 1.0/p);
   }

@@ -10,11 +10,11 @@
 #ifndef _MATHTL_INFINITE_VECTOR_H
 #define _MATHTL_INFINITE_VECTOR_H
 
-#include <cmath>
 #include <map>
-#include <vector>
-#include <algorithm>
-// #include "map_iterator.h"
+
+// external functionality, for convenience:
+#include <algebra/vector_norms.h>
+#include <algebra/vector_arithmetics.h>
 
 namespace MathTL
 {
@@ -46,61 +46,10 @@ namespace MathTL
     InfiniteVector(const InfiniteVector<C,I>& v);
 
     /*!
-      forward declaration of const_iterator
-    */
-    class const_iterator;
-    
-    /*!
-      nested accessor class for const_iterator
-    */
-    class Accessor
-    {
-    public:
-      /*!
-	construct an accessor from a map::const_iterator
-       */
-      Accessor(const typename std::map<I,C>::const_iterator& entry);
-
-      /*!
-	index of current entry
-      */
-      I index() const;
-
-      /*!
-	value of current vector entry
-      */
-      C value() const;
-
-      /*!
-	compare two accessors
-      */
-      bool operator == (const Accessor& a) const;
-
-      /*!
-	non-equality test
-      */
-      bool operator != (const Accessor& a) const;
-
-    protected:
-      /*!
-	STL iterator pointing to current entry
-	(one would also like Accessor to be a direct descendant
-	of std::map<I,C>::const_iterator, however this posed
-	some problems implementing it, maybe we do so
-	in a later version)
-      */
-      typename std::map<I,C>::const_iterator entry_;
-
-      /*!
-	const_iterator should have access to protected members
-       */
-      friend class const_iterator;
-    };
-
-    /*!
       STL-compliant const_iterator scanning the nontrivial entries
     */
     class const_iterator
+      : protected std::map<I,C>::const_iterator
     {
     public:
       /*!
@@ -114,14 +63,25 @@ namespace MathTL
       const_iterator& operator ++ ();
 
       /*!
-	dereference const_iterator
+	postfix increment of the const_iterator
       */
-      const Accessor& operator * () const;
+      const_iterator operator ++ (int step);
 
       /*!
 	dereference const_iterator
       */
-      const Accessor* operator -> () const;
+      const C& operator * () const;
+
+      /*!
+	dereference const_iterator
+      */
+      const C* operator -> () const;
+
+      /*!
+	index of current iterator
+	(maybe the only difference to an STL iterator)
+      */
+      I index() const;
 
       /*!
 	compare positions of two iterators
@@ -134,15 +94,9 @@ namespace MathTL
       bool operator != (const const_iterator& it) const;
 
       /*!
-	comparison, corresponds to the order relation on I
+	comparison, corresponding to the order relation on I
        */
       bool operator < (const const_iterator& it) const;
-
-    private:
-      /*!
-	store accessor to current vector entry
-      */
-      Accessor accessor_;
     };
 
     /*!
@@ -220,7 +174,51 @@ namespace MathTL
       in place division by a (nontrivial) scalar
     */
     InfiniteVector<C,I>& operator /= (const C c);
+
+//     /*!
+//       inner product
+//     */
+//     template <class C2>
+//     const C operator * (const InfiniteVector<C2,I>& v) const;
   };
+
+//   /*!
+//     sum of two infinite vectors
+//     (you should avoid using this operator, since it requires one vector
+//     to be copied. Use += or add() instead!)
+//    */
+//   template <class C, class C2, class I>
+//   InfiniteVector<C,I> operator + (const InfiniteVector<C,I>& v1,
+// 				  const InfiniteVector<C2,I>& v2)
+//   {
+//     InfiniteVector<C,I> r(v1);
+//     r += v2;
+//     return r;
+//   }
+
+//   /*!
+//     difference of two infinite vectors
+//     (you should avoid using this operator, since it requires one vector
+//     to be copied. Use -= or sadd() instead!)
+//    */
+//   template <class C, class C2, class I>
+//   InfiniteVector<C,I> operator - (const InfiniteVector<C,I>& v1,
+// 				  const InfiniteVector<C2,I>& v2)
+//   {
+//     InfiniteVector<C,I> r(v1);
+//     r -= v2;
+//     return r;
+//   }
+
+
+
+
+
+
+
+
+
+
 
 
   //! helper struct modelling a decreasing order in modulus

@@ -57,9 +57,9 @@ namespace MathTL
   template <class C2>
   void InfiniteVector<C,I>::add(const InfiniteVector<C2,I>& v)
   {
-    for (typename InfiniteVector<C2,I>::const_iterator itv(v.begin()), itvend(v.end());
-	 itv != itvend; ++itv)
-      this->operator [] (itv->index()) += itv->value();
+    typename InfiniteVector<C2,I>::const_iterator itv(v.begin()), itvend(v.end());
+    while (itv != itvend)
+      this->operator [] (itv.index()) += *itv++;
   }
    
   template <class C, class I>
@@ -67,9 +67,9 @@ namespace MathTL
   void InfiniteVector<C,I>::add(const C2 s, const InfiniteVector<C2,I>& v)
   {
     // the following code can be optimized (not O(N) now)
-    for (typename InfiniteVector<C2,I>::const_iterator itv(v.begin()), itvend(v.end());
-	 itv != itvend; ++itv)
-      this->operator [] (itv->index()) += s*itv->value();
+    typename InfiniteVector<C2,I>::const_iterator itv(v.begin()), itvend(v.end());
+    while (itv != itvend)
+      this->operator [] (itv->index()) += s * *itv++;
   }
    
   template <class C, class I>
@@ -77,10 +77,10 @@ namespace MathTL
   void InfiniteVector<C,I>::sadd(const C s, const InfiniteVector<C2,I>& v)
   {
     // the following code can be optimized (not O(N) now)
-    for (typename InfiniteVector<C2,I>::const_iterator itv(v.begin()), itvend(v.end());
-	 itv != itvend; ++itv)
+    typename InfiniteVector<C2,I>::const_iterator itv(v.begin()), itvend(v.end());
+    while (itv != itvend)
       this->operator [] (itv->index()) = 
-	s*this->operator [] (itv->index()) + itv->value();
+	s*this->operator [] (itv->index()) + *itv++;
   }
 
   template <class C, class I>
@@ -105,9 +105,9 @@ namespace MathTL
   template <class C2>
   InfiniteVector<C,I>& InfiniteVector<C,I>::operator -= (const InfiniteVector<C2,I>& v)
   {
-    for (typename InfiniteVector<C2,I>::const_iterator itv(v.begin()), itvend(v.end());
-	 itv != itvend; ++itv)
-      this->operator [] (itv->index()) -= itv->value();
+    typename InfiniteVector<C2,I>::const_iterator itv(v.begin()), itvend(v.end());
+    while (itv != itvend)
+      this->operator [] (itv.index()) -= *itv++;
     
     return *this;
   }
@@ -126,45 +126,65 @@ namespace MathTL
     return (*this *= 1.0/s);
   }
 
-  template <class C, class I>
-  InfiniteVector<C,I>::Accessor::
-  Accessor(const typename std::map<I,C>::const_iterator& entry)
-    : entry_(entry)
-  {
-  }
-  
-  template <class C, class I>
-  I InfiniteVector<C,I>::Accessor::index() const
-  {
-    return entry_->first;
-  }
-  
-  template <class C, class I>
-  C InfiniteVector<C,I>::Accessor::value() const
-  {
-    return entry_->second;
-  }
+//   template <class C, class I>
+//   template <class C2>
+//   const C InfiniteVector<C,I>::operator * (const InfiniteVector<C2,I>& v) const
+//   {
+//     if (this == reinterpret_cast<const InfiniteVector<C,I>*>(&v))
+//       return l2_norm_sqr(*this);
 
-  template <class C, class I>
-  inline
-  bool
-  InfiniteVector<C,I>::Accessor::operator == (const Accessor& a) const
-  {
-    return (index() == a.index() && value() == a.value());
-  }
+//     C r(0);
+    
+//     const_iterator it(begin()), itend(end());
+//     typename InfiniteVector<C2,I>::const_iterator itv(v.begin());
+//     while(it != itend)
+//       r += (*it++).value() * (*itv++).value();
+    
+//     return r;
+//   }
 
-  template <class C, class I>
-  inline
-  bool
-  InfiniteVector<C,I>::Accessor::operator != (const Accessor& a) const
-  {
-    return !((*this) == a);
-  }
+
+
+  
+//   template <class C, class I>
+//   InfiniteVector<C,I>::Accessor::
+//   Accessor(const typename std::map<I,C>::const_iterator& entry)
+//     : entry_(entry)
+//   {
+//   }
+  
+//   template <class C, class I>
+//   I InfiniteVector<C,I>::Accessor::index() const
+//   {
+//     return entry_->first;
+//   }
+  
+//   template <class C, class I>
+//   C InfiniteVector<C,I>::Accessor::value() const
+//   {
+//     return entry_->second;
+//   }
+
+//   template <class C, class I>
+//   inline
+//   bool
+//   InfiniteVector<C,I>::Accessor::operator == (const Accessor& a) const
+//   {
+//     return (index() == a.index() && value() == a.value());
+//   }
+
+//   template <class C, class I>
+//   inline
+//   bool
+//   InfiniteVector<C,I>::Accessor::operator != (const Accessor& a) const
+//   {
+//     return !((*this) == a);
+//   }
 
   template <class C, class I>
   InfiniteVector<C,I>::const_iterator::
   const_iterator(const typename std::map<I,C>::const_iterator& entry)
-    : accessor_(entry)
+    : std::map<I,C>::const_iterator(entry)
   {
   }
 
@@ -184,18 +204,25 @@ namespace MathTL
 
   template <class C, class I>
   inline
-  const typename InfiniteVector<C,I>::Accessor&
+  const C&
   InfiniteVector<C,I>::const_iterator::operator * () const
   {
-    return accessor_;
+    return (std::map<I,C>::const_iterator::operator *()).second;
   }
 
   template <class C, class I>
   inline
-  const typename InfiniteVector<C,I>::Accessor*
+  const C*
   InfiniteVector<C,I>::const_iterator::operator -> () const
   {
-    return &accessor_;
+    return &(std::map<I,C>::const_iterator::operator *).second;
+  }
+
+  template <class C, class I>
+  inline
+  I InfiniteVector<C,I>::const_iterator::index() const
+  {
+    return (std::map<I,C>::const_iterator::operator *()).first;
   }
 
   template <class C, class I>
@@ -203,8 +230,18 @@ namespace MathTL
   typename InfiniteVector<C,I>::const_iterator&
   InfiniteVector<C,I>::const_iterator::operator ++ ()
   {
-    ++accessor_.entry_;
+    std::map<I,C>::const_iterator::operator ++ ();
     return *this;
+  }
+
+  template <class C, class I>
+  inline
+  typename InfiniteVector<C,I>::const_iterator
+  InfiniteVector<C,I>::const_iterator::operator ++ (int step)
+  {
+    InfiniteVector<C,I>::const_iterator r(*this);
+    std::map<I,C>::const_iterator::operator ++ (step);
+    return r;
   }
 
   template <class C, class I>
@@ -213,7 +250,7 @@ namespace MathTL
   InfiniteVector<C,I>::const_iterator::
   operator == (const const_iterator& it) const
   {
-    return (accessor_.index() == it.accessor_.index());
+    return (index() == it.index());
   }
 
   template <class C, class I>
@@ -238,7 +275,7 @@ namespace MathTL
 	for (typename InfiniteVector<C,I>::const_iterator it(v.begin());
 	     it != v.end(); ++it)
 	  {
-	    os << it->index() << ": " << it->value() << endl;
+	    os << it.index() << ": " << *it << endl;
 	  }
       }
 

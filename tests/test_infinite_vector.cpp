@@ -53,14 +53,14 @@ int main()
   s /= 3;
   cout << s;
 
-//   cout << "- ell_p norms of s:" << endl;
-//   cout << "  ||x||_2 = " << norm(s)
-//        << ", ||x||_1 = " << norm(s,1)
-//        << ", ||x||_infinity = " << maxnorm(s) << endl;
+  cout << "- ell_p norms of s:" << endl;
+  cout << "  ||x||_2 = " << l2_norm(s)
+       << ", ||x||_1 = " << l1_norm(s)
+       << ", ||x||_infinity = " << linfty_norm(s) << endl;
 
 //   cout << "- external arithmetic functionality:" << endl;
 //   InfiniteVector<float,long int> sa, sb;
-//   sa(1) = 23; sa(2) = 10; sb(1) = -1.5; sb(3) = 3; sb(4) = 8;
+//   sa[1] = 23; sa[2] = 10; sb[1] = -1.5; sb[3] = 3; sb[4] = 8;
 //   cout << "  a=" << endl << sa << "b=" << endl << sb;
 //   cout << "  a+b=" << endl << sa+sb << "a-b=" << endl << sa-sb;
 //   cout << "  a*b=" << sa*sb << endl;

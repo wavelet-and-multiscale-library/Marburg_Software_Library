@@ -52,7 +52,6 @@ int main()
   Dahlquist problem;
 
   cout << "* testing the linear-implicit Euler:" << endl;
-
   Rosenbrock<Point<1>, IVP<1> > R1;
   Point<1> temp, result;
   double err, olderr = 0;
@@ -75,7 +74,6 @@ int main()
     }
 
   cout << "* testing ROS2:" << endl;
-
   Rosenbrock<Point<1>, IVP<1> > R2(Rosenbrock<Point<1>, IVP<1> >::ROS2);
   for (int expo = 0; expo <= 6; expo++)
     {
@@ -95,5 +93,24 @@ int main()
       olderr = err;
     }
 
+  cout << "* testing ROWDA3:" << endl;
+  Rosenbrock<Point<1>, IVP<1> > R3(Rosenbrock<Point<1>, IVP<1> >::ROWDA3);
+  for (int expo = 0; expo <= 6; expo++)
+    {
+      temp = problem.u0;
+      int N = 1<<expo;
+      double h = 1.0/N;
+      for (int i = 1; i <= N; i++)
+	{
+	  R3.increment(problem, i*h, temp, h, result);
+	  temp = result;
+	}
+      err = fabs(result[0] - M_E);
+      if (expo > 0)
+	{
+	  cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2 << endl;
+	}
+      olderr = err;
+    }
   return 0;
 }

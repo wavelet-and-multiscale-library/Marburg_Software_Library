@@ -18,6 +18,19 @@ namespace MathTL
 	b_.resize(2);
 	b_[0] = b_[1] = 0.5;
 	break;
+      case ROWDA3:
+	alpha_ = LowerTriangularMatrix<double>(3);
+	alpha_(1,0) = alpha_(2,0) = 0.7;
+	gamma_ = LowerTriangularMatrix<double>(3);
+	gamma_(0,0) = gamma_(1,1) = gamma_(2,2) = 0.435866521508459;
+	gamma_(1,0) = 0.1685887625570998;
+	gamma_(2,0) = 4.943922277836421;
+	gamma_(2,1) = 1.0;
+	b_.resize(3);
+	b_[0] = 0.3197278911564624;
+	b_[1] = 0.7714777906171382;
+	b_[2] = -0.09120568177360061;
+	break;
       case Euler:
       default:
 	alpha_ = LowerTriangularMatrix<double>(1, 1, "0");

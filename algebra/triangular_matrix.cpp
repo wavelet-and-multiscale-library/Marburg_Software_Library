@@ -221,4 +221,133 @@ namespace MathTL
     M.print(os);
     return os;
   }
+
+  template <class C>
+  inline
+  UpperTriangularMatrix<C>::UpperTriangularMatrix(const size_type n)
+    : LowerTriangularMatrix<C>(n)
+  {
+  }
+
+  template <class C>
+  inline
+  UpperTriangularMatrix<C>::UpperTriangularMatrix(const UpperTriangularMatrix<C>& M)
+    : LowerTriangularMatrix<C>(M)
+  {
+  }
+
+  template <class C>
+  UpperTriangularMatrix<C>::UpperTriangularMatrix(const size_type rows,
+						  const size_type columns)
+    : LowerTriangularMatrix<C>(columns, rows)
+  {
+  }
+
+  template <class C>
+  UpperTriangularMatrix<C>::UpperTriangularMatrix(const size_type rows,
+						  const size_type columns,
+						  const char* str,
+						  const bool byrow)
+    : LowerTriangularMatrix<C>(columns,rows,str,!byrow)
+  {
+  }
+
+  template <class C>
+  inline
+  const typename UpperTriangularMatrix<C>::size_type
+  UpperTriangularMatrix<C>::row_dimension() const
+  {
+    return LowerTriangularMatrix<C>::column_dimension();
+  }
+
+  template <class C>
+  inline
+  const typename UpperTriangularMatrix<C>::size_type
+  UpperTriangularMatrix<C>::column_dimension() const
+  {
+    return LowerTriangularMatrix<C>::row_dimension();
+  }
+
+  template <class C>
+  inline
+  const C UpperTriangularMatrix<C>::operator () (const size_type row,
+						 const size_type column) const
+  {
+    return LowerTriangularMatrix<C>::operator () (column, row);
+  }
+
+  template <class C>
+  inline
+  C& UpperTriangularMatrix<C>::operator () (const size_type row,
+					    const size_type column)
+  {
+    return LowerTriangularMatrix<C>::operator () (column, row);
+  }
+
+  template <class C>
+  template <class C2>
+  inline
+  bool UpperTriangularMatrix<C>::operator == (const UpperTriangularMatrix<C2>& M) const
+  {
+    return LowerTriangularMatrix<C>::operator == (M);
+  }
+  
+  template <class C>
+  template <class C2>
+  inline
+  bool UpperTriangularMatrix<C>::operator != (const UpperTriangularMatrix<C2>& M) const
+  {
+    return !((*this) == M);
+  }
+
+  template <class C>
+  UpperTriangularMatrix<C>&
+  UpperTriangularMatrix<C>::operator = (const UpperTriangularMatrix<C>& M)
+  {
+    LowerTriangularMatrix<C>::operator = (M);
+    return *this;
+  }
+
+  template <class C>
+  template <class VECTOR>
+  void UpperTriangularMatrix<C>::apply(const VECTOR& x, VECTOR& Mx) const
+  {
+    LowerTriangularMatrix<C>::apply_transposed(x, Mx);
+  }
+
+  template <class C>
+  template <class VECTOR>
+  void UpperTriangularMatrix<C>::apply_transposed(const VECTOR& x, VECTOR& Mtx) const
+  {
+    LowerTriangularMatrix<C>::apply(x, Mtx);
+  }
+
+  template <class C>
+  void UpperTriangularMatrix<C>::print(std::ostream &os,
+				       const unsigned int tabwidth,
+				       const unsigned int precision) const
+  {
+    if (empty())
+      os << "[]" << std::endl; // Matlab style
+    else
+      {
+	for (typename UpperTriangularMatrix<C>::size_type i(0);
+	     i < row_dimension(); ++i)
+	  {
+	    for (typename UpperTriangularMatrix<C>::size_type j(0);
+		 j < column_dimension(); ++j)
+	      os << std::setw(tabwidth) << std::setprecision(precision)
+		 << this->operator () (i, j);
+	    os << std::endl;
+	  }
+      }
+  }
+
+  template <class C>
+  inline
+  std::ostream& operator << (std::ostream& os, const UpperTriangularMatrix<C>& M)
+  {
+    M.print(os);
+    return os;
+  }
 }

@@ -72,8 +72,11 @@ int main()
   cout << "  max. column sum ||A||_1: " << column_sum_norm(A) << endl;
   cout << "  Frobenius norm ||A||_F: " << frobenius_norm(A) << endl;
 
-//   cout << "- A*A:" << endl
-//        << A*A << endl;
+  cout << "- A*A:" << endl
+       << A*A << endl;
+
+  cout << "- A^T:" << endl
+       << transpose(A) << endl;
 
 // //   cout << "- testing row iterators:" << endl;
 // //   for (RawMatrix<double>::row_const_iterator it(N.rowbegin());

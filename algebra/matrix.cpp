@@ -198,6 +198,13 @@ namespace MathTL
   }
 
   template <class C>
+  inline
+  void Matrix<C>::compress(const double eta)
+  {
+    entries_.compress(eta);
+  }
+
+  template <class C>
   void Matrix<C>::print(std::ostream &os,
 			const unsigned int tabwidth,
 			const unsigned int precision) const
@@ -218,6 +225,38 @@ namespace MathTL
       }
   }
   
+  template <class C>
+  Matrix<C> operator * (const Matrix<C>& M, const Matrix<C>& N)
+  {
+    assert(M.column_dimension() == N.row_dimension());
+    typedef typename Matrix<C>::size_type size_type;
+
+    Matrix<C> R(M.row_dimension(), N.column_dimension());
+    for (size_type i(0); i < M.row_dimension(); i++)
+      for (size_type j(0); j < N.column_dimension(); j++)
+	{
+	  double help(0);
+	  for (size_type k(0); k < N.row_dimension(); k++)
+	    help += M(i, k) * N(k, j);
+	  R(i, j) = help;
+	}
+
+    return R;
+  }
+
+  template <class C>
+  Matrix<C> transpose(const Matrix<C>& M)
+  {
+    typedef typename Matrix<C>::size_type size_type;
+
+    Matrix<C> R(M.column_dimension(), M.row_dimension());
+    for (size_type i(0); i < M.row_dimension(); i++)
+      for (size_type j(0); j < M.column_dimension(); j++)
+	R(j, i) = M(i, j);
+
+    return R;
+  }
+
   template <class C>
   inline
   std::ostream& operator << (std::ostream& os, const Matrix<C>& M)

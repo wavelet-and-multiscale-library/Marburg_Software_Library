@@ -61,6 +61,11 @@ namespace MathTL
     */
     void solve(const Vector<C>& b, Vector<C>& x) const;
 
+    /*!
+      After the QR decomposition, compute the inverse of A.
+    */
+    void inverse(Matrix<C>& AInv) const;
+
   protected:
     //! m = A.row_dimension(), n = A.column_dimension()
     typename Matrix<C>::size_type rowdim_, coldim_;

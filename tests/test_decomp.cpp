@@ -110,5 +110,13 @@ int main()
   qr2.solve(c, x);
   cout << "  * solve() output x: " << x << endl;
 
+  cout << "- check computation of inverses via QR decomposition:" << endl
+       << "  * a small test matrix M:" << endl;
+  Matrix<double> M(3, 3, "1 2 3 0 1 2 0 0 1"), MInv;
+  cout << M;
+  QRDecomposition<double> qr3(M);
+  qr3.inverse(MInv);
+  cout << "  * inverse() output:" << endl << MInv;
+
   return 0;
 }

@@ -172,6 +172,40 @@ namespace MathTL
       }   
   }
 
+  template <class C>
+  void QRDecomposition<C>::inverse(Matrix<C>& AInv) const
+  {
+    assert(coldim_ == rowdim_);
+    AInv.resize(coldim_, coldim_);
+
+    // maybe one can speed up the following code by using QR_ directly
+    UpperTriangularMatrix<double> R;
+    getR(R);
+    Matrix<double> Q;
+    getQ(Q);
+
+    // special backsubstitution
+    typedef typename Matrix<C>::size_type size_type;
+    for (size_type i(0); i < coldim_; i++)
+      {
+	AInv(coldim_-1, i) = Q(i, coldim_-1) / R(coldim_-1, coldim_-1);
+	for (size_type j(coldim_-2); j >= 0;)
+	  {
+	    double c(Q(i, j));
+	    for (size_type k(j+1); k <= coldim_-1; k++)
+	      c -= R(j, k) * AInv(k, i);
+	    AInv(j, i) = c / R(j, j);
+	    
+	    if (j == 0)
+	      break;
+	    else
+	      --j;
+	  }
+      }
+
+    AInv.compress();
+  }
+
   //
   //
   // SVD

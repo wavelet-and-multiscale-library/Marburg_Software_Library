@@ -14,7 +14,8 @@ EXEOBJF = \
   test_tensor.o test_point.o test_array1d.o\
   test_function.o test_polynomial.o\
   test_vector.o test_vectorspeed.o test_matrix.o\
-  test_iteratsolv.o test_eigenvalues.o test_decomp.o
+  test_iteratsolv.o test_eigenvalues.o test_decomp.o\
+  test_ortho_poly.o
 
 EXES = $(EXEOBJF:.o=)
 

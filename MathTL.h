@@ -36,5 +36,6 @@
 #include <numerics/iteratsolv.h>
 #include <numerics/eigenvalues.h>
 #include <numerics/matrix_decomp.h>
+#include <numerics/ortho_poly.h>
 
 #endif

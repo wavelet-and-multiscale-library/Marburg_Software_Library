@@ -11,7 +11,7 @@ int main()
 
   const int d = 2;
   const int dT = 2;
-  DKUBasis<d, dT> basis(Bernstein);
+  DKUBasis<d, dT> basis(BernsteinSVD);
   cout << "- the (" << d << "," << dT << ") basis has j0=" << basis.j0() << endl;
 
   return 0;

@@ -22,13 +22,15 @@ using MathTL::Matrix;
 namespace WaveletTL
 {
   /*!
-    biorthogonalization method for the DKU basis
+    biorthogonalization methods for the DKU basis, see, e.g., [B]
   */
   enum DKUBiorthogonalizationMethod
     {
-      none,     // C_L = I
-      SVD,      // Gamma_L = U*S*V, C_L = S^{-1/2}U^T, C_L_T = S^{-1/2}V
-      Bernstein // transformation to Bernstein basis on [0,b]
+      none,         // C_L = I
+      SVD,          // Gamma_L = U*S*V, C_L = S^{-1/2}U^T, C_L_T = S^{-1/2}V
+      Bernstein,    // transformation to Bernstein basis on [0,b]
+      partialSVD,   // partial SVD
+      BernsteinSVD  // partial SVD plus transformation to Bernstein basis
     };
 
   /*!

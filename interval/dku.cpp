@@ -259,8 +259,12 @@ namespace WaveletTL
     }
 
     if (bio == Bernstein) {
-      const double b(1);
-      const double bT(1);
+      double b(0);
+      if (d == 2)
+	b = 0.7; // cf. [DKU]
+      else {
+	b = 3.6;
+      }
 
       // CL_ : transformation to Bernstein polynomials (triangular)
       //   (Z_b^m)_{r,l} = (-1)^{r-1}\binom{m-1}{r}\binom{r}{l}b^{-r}, r>=l, 0 otherwise
@@ -275,28 +279,84 @@ namespace WaveletTL
       CLT_ = transpose(CLGammaLInv);
     }
 
-#if 0
-      // setup basis transformation matrices
+    if (bio == partialSVD) {
+      MathTL::SVD<double> svd(GammaL_);
+      Matrix<double> U, V;
+      Vector<double> S;
+      svd.getU(U);
+      svd.getV(V);
+      svd.getS(S);
+
+      Matrix<double> GammaLInv;
+      QRDecomposition<double>(GammaL_).inverse(GammaLInv);
+      const double a = 1.0 / GammaLInv(0, 0);
+      
+      Matrix<double> R(dT, dT);
+      for (unsigned int i(0); i < dT; i++)
+	S[i] = sqrt(S[i]);
+      for (unsigned int j(0); j < dT; j++)
+	R(0, j) = a * V(0, j) / S[j];
+      for (unsigned int i(1); i < dT; i++)
+	for (unsigned int j(0); j < dT; j++)
+	  R(i, j) = U(j, i) * S[j];
+
+      for (unsigned int i(0); i < dT; i++)
+	for (unsigned int j(0); j < dT; j++)
+	  U(i, j) /= S[i];
+      CL_ = R*U;
+
+      Matrix<double> CLGammaLInv;
+      QRDecomposition<double>(CL_ * GammaL_).inverse(CLGammaLInv);
+      CLT_ = transpose(CLGammaLInv);
+    }
+
+    if (bio == BernsteinSVD) {
+      double b(0);
+      if (d == 2)
+	b = 0.7; // cf. [DKU]
+      else {
+	b = 3.6;
+      }
+
+      // CL_ : transformation to Bernstein polynomials (triangular)
       //   (Z_b^m)_{r,l} = (-1)^{r-1}\binom{m-1}{r}\binom{r}{l}b^{-r}, r>=l, 0 otherwise
-      LowerTriangularMatrix<double> Z(d, d), ZT(dT, dT);
       for (unsigned int j(0); j < d; j++)
 	for (unsigned int k(0); k <= j; k++)
-	  Z(j, k) = minus1power(j-k) * std::pow(b, -(int)j) * binomial(d-1, j) * binomial(j, k);
+	  CL_(k, j) = minus1power(j-k) * std::pow(b, -(int)j) * binomial(d-1, j) * binomial(j, k);
+      for (unsigned int j(d); j < dT; j++)
+	CL_(j, j) = 1.0;
+
+      Matrix<double> GammaLNew(CL_ * GammaL_);
+
+      MathTL::SVD<double> svd(GammaLNew);
+      Matrix<double> U, V;
+      Vector<double> S;
+      svd.getU(U);
+      svd.getV(V);
+      svd.getS(S);
+
+      Matrix<double> GammaLNewInv;
+      QRDecomposition<double>(GammaLNew).inverse(GammaLNewInv);
+      const double a = 1.0 / GammaLNewInv(0, 0);
+
+      Matrix<double> R(dT, dT);
+      for (unsigned int i(0); i < dT; i++)
+	S[i] = sqrt(S[i]);
       for (unsigned int j(0); j < dT; j++)
-	for (unsigned int k(0); k <= j; k++)
-	  ZT(j, k) = minus1power(j-k) * std::pow(bT, -(int)j) * binomial(dT-1, j) * binomial(j, k);      
+	R(0, j) = a * V(0, j) / S[j];
+      for (unsigned int i(1); i < dT; i++)
+	for (unsigned int j(0); j < dT; j++)
+	  R(i, j) = U(j, i) * S[j];
 
-      // setup backtransformation matrices
-      LowerTriangularMatrix<double> Zinv(d, d), ZTinv(dT, dT);
-      for (unsigned int j(0); j < d; j++)
-	for (unsigned int k(0); k <= j; k++)
-	  Zinv(j, k) = std::pow(b, (int)k) / binomial(d-1, k) * binomial(j, k);
-      for (unsigned int j(0); j < dT; j++)
-	for (unsigned int k(0); k <= j; k++)
-	  ZTinv(j, k) = std::pow(bT, (int)k) / binomial(dT-1, k) * binomial(j, k);
-#endif
+      for (unsigned int i(0); i < dT; i++)
+	for (unsigned int j(0); j < dT; j++)
+	  U(i, j) /= S[i];
+      CL_ = R*U*CL_;
 
-
+      Matrix<double> CLGammaLInv;
+      QRDecomposition<double>(CL_ * GammaL_).inverse(CLGammaLInv);
+      CLT_ = transpose(CLGammaLInv);
+    }
 
 #if 1
     // check biorthogonality of matrix product CL * GammaL * (CLT)^T

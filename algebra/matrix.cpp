@@ -34,6 +34,19 @@ namespace MathTL
 
   template <class C>
   inline
+  Matrix<C>::Matrix(const LowerTriangularMatrix<C>& M)
+    : entries_(M.row_dimension()*M.column_dimension()),
+      rowdim_(M.row_dimension()), coldim_(M.column_dimension())
+  {
+    for (size_type i(0); i < rowdim_; i++)
+      for (size_type j(0); j <= i; j++)
+	{
+	  this->operator () (i, j) = M(i, j);
+	}
+  }
+
+  template <class C>
+  inline
   Matrix<C>::Matrix(const size_type row_dimension,
 		    const size_type column_dimension)
     : entries_(row_dimension*column_dimension), rowdim_(row_dimension),

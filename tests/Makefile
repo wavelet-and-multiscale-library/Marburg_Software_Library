@@ -25,7 +25,8 @@ EXES = $(EXEOBJF:.o=)
 
 # test programs under construction
 EXEOBJF2 = \
-  test_splines.o
+  test_splines.o\
+  test_rosenbrock.o
 
 EXES2 = $(EXEOBJF2:.o=)
 

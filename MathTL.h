@@ -48,6 +48,7 @@
 #include <numerics/ortho_poly.h>
 #include <numerics/quadrature.h>
 #include <numerics/recursion.h>
+#include <numerics/rosenbrock.h>
 #include <numerics/splines.h>
 
 #endif

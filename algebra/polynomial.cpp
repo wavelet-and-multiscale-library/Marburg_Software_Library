@@ -387,9 +387,12 @@ namespace MathTL
   void Polynomial<C>::divide(const Polynomial<C>& q,
 			     Polynomial<C>& p, Polynomial<C>& r) const
   {
+    assert(degree() >= q.degree());
+
     r = *this;
     p = 0;
-    for (int k(r.degree()-q.degree()); k >= 0; k = r.degree()-q.degree())
+    for (int k(r.degree() - q.degree());
+	 k >= 0; k = r.degree() - q.degree())
       {
  	double factor = r.get_coefficient(r.degree()) / q.get_coefficient(q.degree());
  	p.set_coefficient(k, factor);

@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <algorithm>
+#include <algebra/vector.h>
 
 namespace MathTL
 {
@@ -25,6 +26,16 @@ namespace MathTL
   }
 
   template <class R>
+  LaurentPolynomial<R>::LaurentPolynomial(const Polynomial<R>& p)
+    : InfiniteVector<R,int>(), Function<1,R>()
+  {
+    Vector<R> c;
+    p.get_coefficients(c);
+    for (unsigned int i(0); i < c.size(); i++)
+      set_coefficient(i, c[i]);
+  }
+
+  template <class R>
   LaurentPolynomial<R>::~LaurentPolynomial()
   {
   }
@@ -34,6 +45,21 @@ namespace MathTL
   {
     InfiniteVector<R,int>::operator = (p);
     return *this;
+  }
+
+  template <class R>
+  LaurentPolynomial<R>& LaurentPolynomial<R>::operator = (const R c)
+  {
+    InfiniteVector<R,int>::clear();
+    set_coefficient(0, c);
+    return *this;
+  }
+
+  template <class R>
+  inline
+  unsigned int LaurentPolynomial<R>::degree() const
+  {
+    return (InfiniteVector<R,int>::empty() ? 0 : rbegin().index() - begin().index());
   }
 
   template <class R>
@@ -248,6 +274,34 @@ namespace MathTL
       r.multiply(*this);
     
     return r;
+  }
+
+  template <class R>
+  void LaurentPolynomial<R>::divide(const LaurentPolynomial<R>& q,
+				    LaurentPolynomial<R>& p,
+				    LaurentPolynomial<R>& r) const
+  {
+    assert(degree() >= q.degree());
+
+    Polynomial<R> helpthis, helpp, helpq, helpr;
+    
+    for (unsigned int k(0); k <= degree(); k++)
+      helpthis.set_coefficient(k, get_coefficient(((int) k) + begin().index()));
+    for (unsigned int k(0); k <= q.degree(); k++)
+      helpq.set_coefficient(k, q.get_coefficient(((int) k) + q.begin().index()));
+
+    helpthis.divide(helpq, helpp, helpr);
+    
+    LaurentPolynomial<R> monom;
+    monom.set_coefficient(begin().index()-q.begin().index(), 1.0);
+    p = monom * LaurentPolynomial<R>(helpp);
+
+    if (helpr.degree() > 0 || helpr.get_coefficient(0) != R(0))
+      {
+	LaurentPolynomial<R> monom2;
+	monom2.set_coefficient(begin().index(), 1.0);
+	r = monom2 * LaurentPolynomial<R>(helpr);
+      }
   }
 
   template <class R>

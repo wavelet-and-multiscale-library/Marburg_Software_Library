@@ -13,6 +13,7 @@
 #include <cassert>
 #include <utils/function.h>
 #include <algebra/infinite_vector.h>
+#include <algebra/polynomial.h>
 #include <geometry/point.h>
 
 namespace MathTL
@@ -58,6 +59,11 @@ namespace MathTL
     explicit LaurentPolynomial(const R c);
 
     /*!
+      constructor from a polynomial
+    */
+    explicit LaurentPolynomial(const Polynomial<R>& p);
+
+    /*!
       virtual destructor
     */
     virtual ~LaurentPolynomial();
@@ -66,6 +72,16 @@ namespace MathTL
       assignment of another Laurent polynomial
     */
     LaurentPolynomial<R>& operator = (const LaurentPolynomial<R>& p);
+
+    /*!
+      assignment of a constant
+    */
+    LaurentPolynomial<R>& operator = (const R c);
+
+    /*!
+      (Euclidean) degree of a Laurent polnomial
+    */
+    unsigned int degree() const;
 
     /*!
       (Polynomial-like) read-only access to single coefficients
@@ -195,6 +211,12 @@ namespace MathTL
       raise the Laurent polynomial to some power
     */
     LaurentPolynomial<R> power(const unsigned int k) const;
+
+    /*!
+      division with remainder by another Laurent polynomial q: *this = p * q + r
+    */
+    void divide(const LaurentPolynomial<R>& q,
+		LaurentPolynomial<R>& p, LaurentPolynomial<R>& r) const;
   };
 
   /*!

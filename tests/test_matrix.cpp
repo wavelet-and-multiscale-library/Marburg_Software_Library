@@ -1,6 +1,7 @@
 #include <iostream>
 #include <algebra/matrix.h>
 #include <algebra/vector.h>
+#include <algebra/matrix_norms.h>
 // #include "symmarray2d.h"
 // #include "triangarray2d.h"
 
@@ -67,6 +68,9 @@ int main()
   cout << y << endl;
 
   cout << "- testing matrix norms for A:" << endl;
+  cout << "  max. row sum ||A||_infty: " << row_sum_norm(A) << endl;
+  cout << "  max. column sum ||A||_1: " << column_sum_norm(A) << endl;
+  cout << "  Frobenius norm ||A||_F: " << frobenius_norm(A) << endl;
 
 //   cout << "- A*A:" << endl
 //        << A*A << endl;

@@ -13,6 +13,9 @@
 #include <iostream>
 #include <algebra/vector.h>
 
+// matrix norms, for convenience
+#include <algebra/matrix_norms.h>
+
 namespace MathTL
 {
   /*!

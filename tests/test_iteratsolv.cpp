@@ -67,45 +67,45 @@ int main()
        << "  with \\|A*xk-b\\|_\\infty=" << linfty_norm(err)
        << " after " << iterations << " iterations." << endl;
   
-//   xk = 0; xk(0) = 1;
-//   cout << "- Gauss-Seidel iteration ..." << endl;
-//   GaussSeidel(A, b, xk, 1e-8, maxiter, iterations);
-//   A.APPLY(xk, err);
-//   err -= b;
-//   cout << "  ... yields a solution xk=" << endl
-//        << xk
-//        << "  with \\|A*xk-b\\|_\\infty=" << maxnorm(err)
-//        << " after " << iterations << " iterations." << endl;
+  xk = 0; xk(0) = 1;
+  cout << "- Gauss-Seidel iteration ..." << endl;
+  GaussSeidel(A, b, xk, 1e-8, maxiter, iterations);
+  A.apply(xk, err);
+  err -= b;
+  cout << "  ... yields a solution xk=" << endl
+       << xk
+       << "  with \\|A*xk-b\\|_\\infty=" << linfty_norm(err)
+       << " after " << iterations << " iterations." << endl;
   
-//   xk = 0; xk(0) = 1;
-//   cout << "- SOR iteration ..." << endl;
-//   SOR(A, b, xk, 1.2, 1e-8, maxiter, iterations);
-//   A.APPLY(xk, err);
-//   err -= b;
-//   cout << "  ... yields a solution xk=" << endl
-//        << xk
-//        << "  with \\|A*xk-b\\|_\\infty=" << maxnorm(err)
-//        << " after " << iterations << " iterations." << endl;
+  xk = 0; xk(0) = 1;
+  cout << "- SOR iteration ..." << endl;
+  SOR(A, b, xk, 1.2, 1e-8, maxiter, iterations);
+  A.apply(xk, err);
+  err -= b;
+  cout << "  ... yields a solution xk=" << endl
+       << xk
+       << "  with \\|A*xk-b\\|_\\infty=" << linfty_norm(err)
+       << " after " << iterations << " iterations." << endl;
   
-//   xk = 0; xk(0) = 1;
-//   cout << "- SSOR iteration ..." << endl;
-//   SSOR(A, b, xk, 1.2, 1e-8, maxiter, iterations);
-//   A.APPLY(xk, err);
-//   err -= b;
-//   cout << "  ... yields a solution xk=" << endl
-//        << xk
-//        << "  with \\|A*xk-b\\|_\\infty=" << maxnorm(err)
-//        << " after " << iterations << " iterations." << endl;
+  xk = 0; xk(0) = 1;
+  cout << "- SSOR iteration ..." << endl;
+  SSOR(A, b, xk, 1.2, 1e-8, maxiter, iterations);
+  A.apply(xk, err);
+  err -= b;
+  cout << "  ... yields a solution xk=" << endl
+       << xk
+       << "  with \\|A*xk-b\\|_\\infty=" << linfty_norm(err)
+       << " after " << iterations << " iterations." << endl;
 
-//   xk = 0; xk(0) = 1;
-//   cout << "- CG iteration ..." << endl;
-//   CG(A, b, xk, 1e-8, maxiter, iterations);
-//   A.APPLY(xk, err);
-//   err -= b;
-//   cout << "  ... yields a solution xk=" << endl
-//        << xk << endl
-//        << "  with \\|A*xk-b\\|_\\infty=" << maxnorm(err)
-//        << " after " << iterations << " iterations." << endl;
+  xk = 0; xk(0) = 1;
+  cout << "- CG iteration ..." << endl;
+  CG(A, b, xk, 1e-8, maxiter, iterations);
+  A.apply(xk, err);
+  err -= b;
+  cout << "  ... yields a solution xk=" << endl
+       << xk << endl
+       << "  with \\|A*xk-b\\|_\\infty=" << linfty_norm(err)
+       << " after " << iterations << " iterations." << endl;
 
   return 0;
 }

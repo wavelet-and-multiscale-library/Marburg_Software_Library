@@ -49,120 +49,126 @@ namespace MathTL
 
   template <class VECTOR, class MATRIX>
   void GaussSeidel(const MATRIX &A, const VECTOR &b, VECTOR &xk,
-		   const double tol, const int maxiter, int& iterations)
+		   const double tol, const unsigned int maxiter, unsigned int& iterations)
   {
-    const int n(A.coldim());
+    const typename MATRIX::size_type n(A.column_dimension());
 
-    VECTOR rk;
+    VECTOR rk(A.row_dimension(), false);
     double error = 2*tol;
     
     for (iterations = 0; iterations <= maxiter && error > tol; iterations++)
       {
-	for (int i(0); i < n; i++)
+	for (typename MATRIX::size_type i(0); i < n; i++)
 	  {
-	    xk(i) = b(i);
-	    for (int j(0); j < n; j++)
+	    xk[i] = b[i];
+	    for (typename MATRIX::size_type j(0); j < n; j++)
 	      if (j != i)
-		xk(i) -= A(i, j) * xk(j);
-	    xk(i) /= A(i, i);
+		xk[i] -= A(i, j) * xk[j];
+	    xk[i] /= A(i, i);
 	  }
 	
-	A.APPLY(xk, rk);
+	A.apply(xk, rk);
 	rk -= b;
-	error = norm(rk);
+
+	error = l2_norm(rk);
       }
   }
 
   template <class VECTOR, class MATRIX>
   void SOR(const MATRIX &A, const VECTOR &b, VECTOR &xk, const double omega,
-	   const double tol, const int maxiter, int& iterations)
+	   const double tol, const unsigned int maxiter, unsigned int& iterations)
   {
-    const int n(A.coldim());
+    const typename MATRIX::size_type n(A.column_dimension());
 
-    VECTOR rk;
+    VECTOR rk(A.row_dimension(), false);
     double error = 2*tol;
     
     for (iterations = 0; iterations <= maxiter && error > tol; iterations++)
       {
-	for (int i(0); i < n; i++)
+	for (typename MATRIX::size_type i(0); i < n; i++)
 	  {
-	    double sigma(b(i));
-	    for (int j(0); j < n; j++)
+	    double sigma(b[i]);
+	    for (typename MATRIX::size_type j(0); j < n; j++)
 	      if (j != i)
-		sigma -= A(i, j) * xk(j);
+		sigma -= A(i, j) * xk[j];
 	    sigma /= A(i, i);
-	    xk(i) += omega * (sigma - xk(i));
+	    xk[i] += omega * (sigma - xk[i]);
 	  }
 	
-	A.APPLY(xk, rk);
+	A.apply(xk, rk);
 	rk -= b;
-	error = norm(rk);
+
+	error = l2_norm(rk);
       }
   }
 
   template <class VECTOR, class MATRIX>
   void SSOR(const MATRIX &A, const VECTOR &b, VECTOR &xk, const double omega,
-	   const double tol, const int maxiter, int& iterations)
+	   const double tol, const unsigned int maxiter, unsigned int& iterations)
   {
-    const int n(A.coldim());
+    const typename MATRIX::size_type n(A.column_dimension());
     
-    VECTOR rk, xkpuf(xk);
+    VECTOR rk(A.row_dimension(), false), xkpuf(xk);
     double error = 2*tol;
     
     for (iterations = 0; iterations <= maxiter && error > tol; iterations++)
       {
-	for (int i(0); i < n; i++)
+	for (typename MATRIX::size_type i(0); i < n; i++)
 	  {
 	    double sigma(0);
-	    for (int j(0); j <= i-1; j++)
-	      sigma += A(i, j) * xkpuf(j);
-	    for (int j(i+1); j < n; j++)
-	      sigma += A(i, j) * xk(j);
-	    sigma = (b(i)-sigma) / A(i, i);
-	    xkpuf(i) = xk(i) + omega * (sigma - xk(i));
+	    for (typename MATRIX::size_type j(0); j+1 <= i; j++)
+	      sigma += A(i, j) * xkpuf[j];
+	    for (typename MATRIX::size_type j(i+1); j < n; j++)
+	      sigma += A(i, j) * xk[j];
+	    sigma = (b[i]-sigma) / A(i, i);
+	    xkpuf[i] = xk[i] + omega * (sigma - xk[i]);
 	  }
-	
-	for (int i(n-1); i >= 0; i--)
+
+	for (typename MATRIX::size_type i(n); i >= 1; i--)
 	  {
 	    double sigma(0);
-	    for (int j(0); j <= i-1; j++)
-	      sigma += A(i, j) * xkpuf(j);
-	    for (int j(i+1); j < n; j++)
-	      sigma += A(i, j) * xk(j);
-	    sigma = (b(i)-sigma) / A(i, i);
-	    xk(i) = xkpuf(i) + omega * (sigma - xkpuf(i));
+	    for (typename MATRIX::size_type j(0); j+1 <= i-1; j++)
+	      sigma += A(i-1, j) * xkpuf[j];
+	    for (typename MATRIX::size_type j(i); j < n; j++)
+	      sigma += A(i-1, j) * xk[j];
+	    sigma = (b[i-1]-sigma) / A(i-1, i-1);
+	    xk[i-1] = xkpuf[i-1] + omega * (sigma - xkpuf[i-1]);
 	  }
 	
-	A.APPLY(xk, rk);
+	A.apply(xk, rk);
 	rk -= b;
-	error = norm(rk);
+
+	error = l2_norm(rk);
       }
   }
 
   template <class VECTOR, class MATRIX>
   bool CG(const MATRIX &A, const VECTOR &b, VECTOR &xk,
-	  const double tol, const int maxiter, int& iterations)
+	  const double tol, const unsigned int maxiter, unsigned int& iterations)
   {
     iterations = 0;
     
-    VECTOR gk, dk, Adk;
+    VECTOR gk(A.row_dimension(), false),
+      dk(A.row_dimension(), false),
+      Adk(A.row_dimension(), false);
     
     // first residual
-    A.APPLY(xk, gk);
-    gk -= b;
+    A.apply(xk, gk);
+    gk -= b; // gk = A*xk-b
     
     // first direction
-    dk = -gk;
+    dk = gk;
+    dk.scale(-1.0); // dk = -gk
     
-    double error = norm(gk);
+    double error = l2_norm(gk);
     for (iterations = 1; error > tol && iterations <= maxiter; iterations++)
       {
 	const double denom = gk * gk;
-	A.APPLY(dk, Adk);
+	A.apply(dk, Adk);
 	const double alpha = denom / (dk * Adk);
-	xk += alpha * dk;
-	gk += alpha * Adk;
-	error = norm(gk);
+	xk.add(alpha, dk);
+	gk.add(alpha, Adk);
+	error = l2_norm(gk);
 	const double beta = (gk * gk) / denom;
 	dk *= beta; 
 	dk -= gk;

@@ -65,7 +65,7 @@ namespace FLAT
   */
   template <class VECTOR, class MATRIX>
   void GaussSeidel(const MATRIX &A, const VECTOR &b, VECTOR &xk,
-		   const double tol, const int maxiter, int& iterations);
+		   const double tol, const unsigned int maxiter, unsigned int& iterations);
 
   //! SOR
   /*!
@@ -79,7 +79,7 @@ namespace FLAT
   */
   template <class VECTOR, class MATRIX>
   void SOR(const MATRIX &A, const VECTOR &b, VECTOR &xk, const double omega,
-	   const double tol, const int maxiter, int& iterations);
+	   const double tol, const unsigned int maxiter, unsigned int& iterations);
   
   //! SSOR
   /*!
@@ -93,7 +93,7 @@ namespace FLAT
   */
   template <class VECTOR, class MATRIX>
   void SSOR(const MATRIX &A, const VECTOR &b, VECTOR &xk, const double omega,
-	   const double tol, const int maxiter, int& iterations);
+	   const double tol, const unsigned int maxiter, unsigned int& iterations);
  
   //! conjugate gradient iteration
   /*!
@@ -107,7 +107,7 @@ namespace FLAT
   */
   template <class VECTOR, class MATRIX>
   bool CG(const MATRIX &A, const VECTOR &b, VECTOR &xk,
-	  const double tol, const int maxiter, int& iterations);
+	  const double tol, const unsigned int maxiter, unsigned int& iterations);
 }
 
 #include <numerics/iteratsolv.cpp>

@@ -3,9 +3,9 @@
 #include <vector>
 #include <numerics/quadrature.h>
 #include <numerics/gauss_quadrature.h>
+#include <numerics/b_splines.h>
 #include <utils/function.h>
 #include <utils/array1d.h>
-// #include "bsplines.h"
 
 using std::cout;
 using std::endl;
@@ -140,14 +140,14 @@ int main()
 //       cout << "  points: " << points << ", weights: " << weights << endl;
     }
 
-//   Bspline<2> N2;
-//   cout << "- integrating N_2 with composite rules:" << endl;
-//   for (int N(1); N <= (1<<3); N <<= 1)
-//     {
-//       cout << "* composite rule (trapez., N=" << N << "): "
-// 	   << CompositeRule<TrapezoidalRule>(0.0, 2.0, N).integrate(N2)
-// 	   << endl;
-//     }
+  Bspline<2> N2;
+  cout << "- integrating N_2 with composite rules:" << endl;
+  for (int N(1); N <= (1<<3); N <<= 1)
+    {
+      cout << "* composite rule (trapez., N=" << N << "): "
+	   << CompositeRule<1>(TQ, N).integrate(N2, Point<1>(0.0), Point<1>(2.0))
+ 	   << endl;
+    }
   
   return 0;
 }

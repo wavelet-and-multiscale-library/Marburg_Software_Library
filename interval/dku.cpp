@@ -8,6 +8,7 @@
 #include <Rd/dm_mask.h>
 #include <Rd/multi_refinable.h>
 #include <algebra/matrix_norms.h>
+#include <algebra/triangular_matrix.h>
 #include <numerics/eigenvalues.h>
 #include <numerics/matrix_decomp.h>
 
@@ -257,8 +258,48 @@ namespace WaveletTL
       }
     }
 
+    if (bio == Bernstein) {
+      const double b(1);
+      const double bT(1);
+
+      // CL_ : transformation to Bernstein polynomials (triangular)
+      //   (Z_b^m)_{r,l} = (-1)^{r-1}\binom{m-1}{r}\binom{r}{l}b^{-r}, r>=l, 0 otherwise
+      for (unsigned int j(0); j < d; j++)
+	for (unsigned int k(0); k <= j; k++)
+	  CL_(k, j) = minus1power(j-k) * std::pow(b, -(int)j) * binomial(d-1, j) * binomial(j, k);
+      for (unsigned int j(d); j < dT; j++)
+	CL_(j, j) = 1.0;
+
+      Matrix<double> CLGammaLInv;
+      QRDecomposition<double>(CL_ * GammaL_).inverse(CLGammaLInv);
+      CLT_ = transpose(CLGammaLInv);
+    }
+
 #if 0
-    // check matrix product CL * GammaL * (CLT)^T
+      // setup basis transformation matrices
+      //   (Z_b^m)_{r,l} = (-1)^{r-1}\binom{m-1}{r}\binom{r}{l}b^{-r}, r>=l, 0 otherwise
+      LowerTriangularMatrix<double> Z(d, d), ZT(dT, dT);
+      for (unsigned int j(0); j < d; j++)
+	for (unsigned int k(0); k <= j; k++)
+	  Z(j, k) = minus1power(j-k) * std::pow(b, -(int)j) * binomial(d-1, j) * binomial(j, k);
+      for (unsigned int j(0); j < dT; j++)
+	for (unsigned int k(0); k <= j; k++)
+	  ZT(j, k) = minus1power(j-k) * std::pow(bT, -(int)j) * binomial(dT-1, j) * binomial(j, k);      
+
+      // setup backtransformation matrices
+      LowerTriangularMatrix<double> Zinv(d, d), ZTinv(dT, dT);
+      for (unsigned int j(0); j < d; j++)
+	for (unsigned int k(0); k <= j; k++)
+	  Zinv(j, k) = std::pow(b, (int)k) / binomial(d-1, k) * binomial(j, k);
+      for (unsigned int j(0); j < dT; j++)
+	for (unsigned int k(0); k <= j; k++)
+	  ZTinv(j, k) = std::pow(bT, (int)k) / binomial(dT-1, k) * binomial(j, k);
+#endif
+
+
+
+#if 1
+    // check biorthogonality of matrix product CL * GammaL * (CLT)^T
     Matrix<double> check(CL_ * GammaL_ * transpose(CLT_));
     for (unsigned int i(0); i < check.row_dimension(); i++)
       check(i, i) -= 1;

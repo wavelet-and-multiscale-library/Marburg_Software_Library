@@ -26,8 +26,9 @@ namespace WaveletTL
   */
   enum DKUBiorthogonalizationMethod
     {
-      none, // C_L = I
-      SVD   // Gamma_L = U*S*V, C_L = S^{-1/2}U^T, C_L_T = S^{-1/2}V
+      none,     // C_L = I
+      SVD,      // Gamma_L = U*S*V, C_L = S^{-1/2}U^T, C_L_T = S^{-1/2}V
+      Bernstein // transformation to Bernstein basis on [0,b]
     };
 
   /*!
@@ -43,7 +44,7 @@ namespace WaveletTL
     [DS]  Dahmen, Schneider:
           Wavelets with complementary boundary conditions - Function spaces on the cube
   */
-  template <int d, int dt>
+  template <int d, int dT>
   class DKUBasis
   {
   public:
@@ -68,7 +69,7 @@ namespace WaveletTL
     /*!
       an instance of the CDF basis on R
     */
-    CDFBasis<d, dt> cdf_;
+    CDFBasis<d, dT> cdf_;
 
     Matrix<double> Alpha_, AlphaT_;
     Matrix<double> BetaL_, BetaLT_;

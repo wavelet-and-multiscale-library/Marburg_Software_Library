@@ -110,6 +110,16 @@ namespace MathTL
     const_iterator end() const;
 
     /*!
+      assignment from another vector
+    */
+    InfiniteVector<C,I>& operator = (const InfiniteVector<C,I>& v);
+
+    /*!
+      swap components of two vectors
+    */
+    void swap (InfiniteVector<C,I>& v);
+
+    /*!
       equality test
     */
     bool operator == (const InfiniteVector<C,I>& v) const;
@@ -128,6 +138,11 @@ namespace MathTL
       read-write access to the vector entries
     */
     C& operator [] (const I& index);
+
+    /*!
+      number of nonzero entries
+    */
+    size_t size() const;
 
     /*!
       in place summation *this += v
@@ -175,40 +190,40 @@ namespace MathTL
     */
     InfiniteVector<C,I>& operator /= (const C c);
 
-//     /*!
-//       inner product
-//     */
-//     template <class C2>
-//     const C operator * (const InfiniteVector<C2,I>& v) const;
+    /*!
+      inner product
+    */
+    template <class C2>
+    const C operator * (const InfiniteVector<C2,I>& v) const;
   };
 
-//   /*!
-//     sum of two infinite vectors
-//     (you should avoid using this operator, since it requires one vector
-//     to be copied. Use += or add() instead!)
-//    */
-//   template <class C, class C2, class I>
-//   InfiniteVector<C,I> operator + (const InfiniteVector<C,I>& v1,
-// 				  const InfiniteVector<C2,I>& v2)
-//   {
-//     InfiniteVector<C,I> r(v1);
-//     r += v2;
-//     return r;
-//   }
+  /*!
+    sum of two infinite vectors
+    (you should avoid using this operator, since it requires one vector
+    to be copied. Use += or add() instead!)
+   */
+  template <class C, class C2, class I>
+  InfiniteVector<C,I> operator + (const InfiniteVector<C,I>& v1,
+				  const InfiniteVector<C2,I>& v2)
+  {
+    InfiniteVector<C,I> r(v1);
+    r += v2;
+    return r;
+  }
 
-//   /*!
-//     difference of two infinite vectors
-//     (you should avoid using this operator, since it requires one vector
-//     to be copied. Use -= or sadd() instead!)
-//    */
-//   template <class C, class C2, class I>
-//   InfiniteVector<C,I> operator - (const InfiniteVector<C,I>& v1,
-// 				  const InfiniteVector<C2,I>& v2)
-//   {
-//     InfiniteVector<C,I> r(v1);
-//     r -= v2;
-//     return r;
-//   }
+  /*!
+    difference of two infinite vectors
+    (you should avoid using this operator, since it requires one vector
+    to be copied. Use -= or sadd() instead!)
+   */
+  template <class C, class C2, class I>
+  InfiniteVector<C,I> operator - (const InfiniteVector<C,I>& v1,
+				  const InfiniteVector<C2,I>& v2)
+  {
+    InfiniteVector<C,I> r(v1);
+    r -= v2;
+    return r;
+  }
 
 
 
@@ -409,61 +424,17 @@ namespace MathTL
 //     return r;
 //   }
 
-//   //! scalar product of two vectors
-//   template <class C, class I>
-//   double operator * (const InfiniteVector<C,I>& v, const InfiniteVector<C,I>& w)
-//   {
-//     double r(0);
-//     typedef typename InfiniteVector<C,I>::entry_const_iterator entry_const_iterator;
-//     entry_const_iterator itv(v.begin()), itvend(v.end()), itw(w.begin()), itwend(w.end());
-//     for (; itv != itvend && itw != itwend; ++itv)
-//       {
-//  	while (itw != itwend && itw.index() < itv.index()) ++itw;
-//  	if (itv.index() == itw.index())
-//  	  r += itw.entry() * itv.entry();
-//       }
-//     return r;
-//   }
+  /*!
+    swap the values of two infinite vectors
+  */
+  template <class C, class I>
+  void swap(InfiniteVector<C,I>& v1, InfiniteVector<C,I>& v2);
 
   /*!
     stream output for infinite vectors
   */
   template<class C, class I>
   std::ostream& operator << (std::ostream& os, const InfiniteVector<C,I>& v);
-
-//   //! ell_2 norm
-//   template <class C, class I>
-//   double norm(const InfiniteVector<C,I>& v)
-//   {
-//     double r(0);
-//     typedef typename InfiniteVector<C,I>::entry_const_iterator entry_const_iterator;
-//     for (entry_const_iterator it(v.begin()), itend(v.end()); it != itend; ++it)
-//       r += it.entry() * it.entry();
-//     return sqrt(r);
-//   }
-  
-//   //! ell_p (quasi-) norm
-//   template <class C, class I>
-//   double norm(const InfiniteVector<C,I>& v, double p)
-//   {
-//     double r(0);
-//     typedef typename InfiniteVector<C,I>::entry_const_iterator entry_const_iterator;
-//     for (entry_const_iterator it(v.begin()), itend(v.end()); it != itend; ++it)
-//       r += pow(fabs(it.entry()), p);
-//     return pow(r, 1./p);
-//   }
-  
-//   //! maximum norm
-//   template <class C, class I>
-//   double maxnorm(const InfiniteVector<C,I>& v)
-//   {
-//     double r(0);
-//     typedef typename InfiniteVector<C,I>::entry_const_iterator entry_const_iterator;
-//     for (entry_const_iterator it(v.begin()), itend(v.end()); it != itend; ++it)
-//       r = std::max(fabs(it.entry()),r);
-//     return r;
-//   }
-
 }
 
 // include implementation of inline functions

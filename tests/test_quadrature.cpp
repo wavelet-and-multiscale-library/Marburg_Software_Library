@@ -45,8 +45,6 @@ int main()
 //   cout << "  (points: " << points << ", weights: " << weights << ")" << endl;
   TrapezoidalRule TQ;
   cout << "* trapezoidal rule: " << TQ.integrate(g) << endl;
-//   MPQ.get_points(points);
-//   MPQ.get_weights(weights);
   SimpsonRule SQ;
   cout << "* Simpson rule: " << SQ.integrate(g) << endl;
   GaussLegendreRule<1> G1Q;
@@ -61,6 +59,12 @@ int main()
   GaussLegendreRule<4> G4Q;
   cout << "* Gauss-Legendre rule (N=4): "
        << G4Q.integrate(g) << endl;
+  GaussLegendreRule<5> G5Q;
+  cout << "* Gauss-Legendre rule (N=5): "
+       << G5Q.integrate(g) << endl;
+  GaussLegendreRule<6> G6Q;
+  cout << "* Gauss-Legendre rule (N=6): "
+       << G6Q.integrate(g) << endl;
   ClosedNewtonCotesRule<1> CNC1Q;
   cout << "* closed Newton-Cotes rule (N=1): "
        << CNC1Q.integrate(g) << endl;
@@ -70,24 +74,46 @@ int main()
   ClosedNewtonCotesRule<3> CNC3Q;
   cout << "* closed Newton-Cotes rule (N=3): "
        << CNC3Q.integrate(g) << endl;
+  ClosedNewtonCotesRule<4> CNC4Q;
+  cout << "* closed Newton-Cotes rule (N=4): "
+       << CNC4Q.integrate(g) << endl;
+  ClosedNewtonCotesRule<5> CNC5Q;
+  cout << "* closed Newton-Cotes rule (N=5): "
+       << CNC5Q.integrate(g) << endl;
+  ClosedNewtonCotesRule<10> CNC10Q;
+  cout << "* closed Newton-Cotes rule (N=10): "
+       << CNC10Q.integrate(g) << endl;
+  ClosedNewtonCotesRule<20> CNC20Q;
+  cout << "* closed Newton-Cotes rule (N=20): "
+       << CNC20Q.integrate(g) << endl;
 
-
-//   ClosedNewtonCotesRule<4> CNC4Q;
-//   cout << "* closed Newton-Cotes rule (N=4): "
-//        << CNC4Q.integrate(g) << endl;
-//   ClosedNewtonCotesRule<5> CNC5Q;
-//   cout << "* closed Newton-Cotes rule (N=5): "
-//        << CNC5Q.integrate(g) << endl;
-//   ClosedNewtonCotesRule<10> CNC10Q(0.0, M_PI);
-//   cout << "* closed Newton-Cotes rule (N=10): "
-//        << CNC10Q.integrate(g) << endl;
-//   ClosedNewtonCotesRule<20> CNC20Q(0.0, M_PI);
-//   cout << "* closed Newton-Cotes rule (N=20): "
-//        << CNC20Q.integrate(g) << endl;
+  cout << "- check integration over arbitrary intervals, e.g. [0,3]: " << endl;
+  cout << "* Simpson rule: "
+       << SQ.integrate(g, Point<1>(0.0), Point<1>(3.0)) << endl;
+  cout << "* Gauss-Legendre rule (N=1): "
+       << G1Q.integrate(g, Point<1>(0.0), Point<1>(3.0)) << endl;
+  cout << "* Gauss-Legendre rule (N=2): "
+       << G2Q.integrate(g, Point<1>(0.0), Point<1>(3.0)) << endl;
+  cout << "* Gauss-Legendre rule (N=3): "
+       << G3Q.integrate(g, Point<1>(0.0), Point<1>(3.0)) << endl;
+  cout << "* Gauss-Legendre rule (N=4): "
+       << G4Q.integrate(g, Point<1>(0.0), Point<1>(3.0)) << endl;
+  cout << "* Gauss-Legendre rule (N=5): "
+       << G5Q.integrate(g, Point<1>(0.0), Point<1>(3.0)) << endl;
+  cout << "* Gauss-Legendre rule (N=6): "
+       << G6Q.integrate(g, Point<1>(0.0), Point<1>(3.0)) << endl;
+  
+  QuadratureRule<2> TensorQ(SQ, G2Q);
+  Array1D<Point<2> > points2D;
+  Array1D<double> weights2D;
+  TensorQ.get_points(points2D);
+  TensorQ.get_weights(weights2D);
+  cout << "- construct a 2D Quadrature rule as a tensor product," << endl
+       << "  points: " << points2D << ", weights: " << weights2D << endl;
   
 //   for (unsigned int N(1); N <= (1<<4); N <<= 1)
 //     {
-//       CompositeRule<1> CompTQ(TQ, N);
+//       CompositeRule<1, SimpsonRule> CompTQ(N);
 //       cout << "* composite rule (trapez., N=" << N << "): "
 //   	   << CompTQ.integrate(g) << endl;
 //     }

@@ -71,6 +71,11 @@ namespace MathTL
     Array1D();
 
     /*!
+      copy constructor
+    */
+    Array1D(const Array1D<C>& a);
+    
+    /*!
       construct an array of positive size and initialize its elements
       (Please note that the builtin types (int, double, ...) are not
       automatically set to _zero_, this depends on the compiler!)
@@ -91,6 +96,11 @@ namespace MathTL
       resize the array
     */
     void resize(const size_type s);
+
+    /*!
+      assignment
+    */
+    Array1D<C>& operator = (const Array1D<C>& a);
 
     /*!
       read-only access to the i-th array member

@@ -48,6 +48,7 @@ namespace MathTL
       {
 	delete [] values_;
 	values_ = 0;
+	size_ = 0;
       }
   }
   

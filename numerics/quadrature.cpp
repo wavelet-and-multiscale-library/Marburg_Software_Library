@@ -4,51 +4,37 @@
 
 namespace MathTL
 {
-//   template <unsigned int DIM>
-//   QuadratureRule<DIM>::QuadratureRule(const QuadratureRule<DIM-1>& Q,
-// 				      const QuadratureRule<1>& Q1)
-//     : 
-//   {
-//   }
+  template <unsigned int DIM>
+  QuadratureRule<DIM>::QuadratureRule()
+    : points_(), weights_()
+  {
+  }
 
-// template <int dim>
-// Quadrature<dim>::Quadrature (const SubQuadrature &q1,
-// 			     const Quadrature<1> &q2)
-// 		:
-// 		n_quadrature_points (q1.n_quadrature_points *
-// 				     q2.n_quadrature_points),
-// 		quadrature_points (n_quadrature_points),
-// 		weights (n_quadrature_points, 0)
-// {
-//   unsigned int present_index = 0;
-//   for (unsigned int i=0; i<q1.n_quadrature_points; ++i)
-//     for (unsigned int j=0; j<q2.n_quadrature_points; ++j)
-//       {
-// 					 // compose coordinates of
-// 					 // new quadrature point by tensor
-// 					 // product in the last component
-// 	for (unsigned int d=0; d<dim-1; ++d)
-// 	  quadrature_points[present_index](d)
-// 	    = q1.point(i)(d);
-// 	quadrature_points[present_index](dim-1)
-// 	  = q2.point(j)(0);
-					       
-// 	weights[present_index] = q1.weight(i) * q2.weight(j);
+  template <unsigned int DIM>
+  QuadratureRule<DIM>::QuadratureRule(const SubQuadratureRule& Q,
+				      const QuadratureRule<1>& Q1)
+    : points_(Q.get_N() * Q1.get_N()),
+      weights_(Q.get_N() * Q1.get_N())
+  {
+    Array1D<Point<DIM-1> > Qpoints;
+    Q.get_points(Qpoints);
+    Array1D<Point<1> > Q1points;
+    Q1.get_points(Q1points);
+    Array1D<double> Qweights, Q1weights;
+    Q.get_weights(Qweights);
+    Q1.get_weights(Q1weights);
 
-// 	++present_index;
-//       };
-
-// #ifdef DEBUG
-//   double sum = 0;
-//   for (unsigned int i=0; i<n_quadrature_points; ++i)
-//     sum += weights[i];
-// 				   // we cant guarantee the sum of weights
-// 				   // to be exactly one, but it should be
-// 				   // near that. 
-//   Assert ((sum>0.999999) && (sum<1.000001), ExcInternalError());
-// #endif
-// }
-
+    // compute tensor product
+    unsigned int current_index(0);
+    for (unsigned int i(0); i < Q.get_N(); i++)
+      for (unsigned int j(0); j < Q1.get_N(); j++, current_index++)
+	{
+	  for (unsigned int d(0); d < DIM-1; d++)
+	    points_[current_index](d) = Qpoints[i](d);
+	  points_[current_index](DIM-1) = Q1points[j](0);
+	  weights_[current_index] = Qweights[i] * Q1weights[j];
+	}
+  }
 
   template <unsigned int DIM>
   inline
@@ -74,16 +60,32 @@ namespace MathTL
   template <unsigned int DIM>
   double QuadratureRule<DIM>::integrate(const Function<DIM, double>& f) const
   {
-    cout << "integrate() called, with points " << endl;
-    print_vector(points_, cout);
-    cout << " and weights ";
-    print_vector(weights_, cout);
-    cout << endl;
-
     double r(0.0);
     
     for (unsigned int k(0); k < points_.size(); k++)
       r += weights_[k] * f.value(points_[k]);
+    
+    return r;
+  }
+
+  template <unsigned int DIM>
+  double QuadratureRule<DIM>::integrate(const Function<DIM, double>& f,
+					const Point<DIM>& a, const Point<DIM>& b) const
+  {
+    double r(0.0);
+    
+    Point<DIM> helppoint;
+    double helpweight;
+    for (unsigned int k(0); k < points_.size(); k++)
+      {
+	helpweight = weights_[k];
+	for (unsigned int d(0); d < DIM; d++)
+	  {
+	    helppoint(d) = a(d) + points_[k](d)*(b(d)-a(d));
+	    helpweight *= (b(d)-a(d));
+	  }
+	r += helpweight * f.value(helppoint);
+      }
     
     return r;
   }
@@ -138,20 +140,12 @@ namespace MathTL
 	  }
 	weights_[n] = p.integrate(0, N)/(double) N;
       }
-
-    cout << "constructed closed NC rule, points: " << endl;
-    print_vector(points_, cout);
-    cout << ", weights: ";
-    print_vector(weights_, cout);
-    cout << endl;
   }
 
-  template <unsigned int DIM>
-  CompositeRule<DIM>::CompositeRule(const QuadratureRule<1>& Q,
-				    const unsigned int N)
-    : Q_(Q), N_(N)
+  template <unsigned int DIM, class QUADRATURE>
+  CompositeRule<DIM, QUADRATURE>::CompositeRule(const unsigned int N)
+    : Q_(), N_(N)
   {
-//     cout << "before points.resize" << endl;
 //     points_.resize((N+1)*DIM);
 //     cout << "after points.resize" << endl;
 //     weights_.resize((N+1)*DIM);

@@ -32,11 +32,21 @@ namespace MathTL
   {
   public:
     /*!
+      typedef for lower-dimensional quadrature rule
+    */
+    typedef QuadratureRule<DIM-1> SubQuadratureRule;
+
+    /*!
+      default constructor: yields empty quadrature rule
+    */
+    QuadratureRule();
+
+    /*!
       construct quadrature rule as a tensor product from
       a lower dimensional one and a one-dimensional one
     */
-//     QuadratureRule(const QuadratureRule<DIM-1>& Q,
-// 		   const QuadratureRule<1>& Q1);
+    QuadratureRule(const SubQuadratureRule& Q,
+ 		   const QuadratureRule<1>& Q1);
     
     /*!
       return number of quadrature points
@@ -44,7 +54,7 @@ namespace MathTL
     unsigned int get_N() const;
 
     /*!
-      return quadrature points
+      return all quadrature points
     */
     void get_points(Array1D<Point<DIM> >& points) const;
 
@@ -58,6 +68,14 @@ namespace MathTL
       (we assume that the function is real-valued)
     */
     double integrate(const Function<DIM, double>& f) const;
+
+    /*!
+      Evaluate quadrature rule on [a,b] where a,b are points in \mathbb R^d.
+      We do so by rescaling the integral to one over [0,1]^{DIM}
+      (we assume that the function is real-valued)
+    */
+    double integrate(const Function<DIM, double>& f,
+		     const Point<DIM>& a, const Point<DIM>& b) const;
 
   protected:
     /*!
@@ -125,7 +143,7 @@ namespace MathTL
   /*!
     construct composite quadrature rule from a simple one
    */
-  template <unsigned int DIM>
+  template <unsigned int DIM, class QUADRATURE>
   class CompositeRule
     : public QuadratureRule<DIM>
   {
@@ -134,14 +152,13 @@ namespace MathTL
       construct composite quadrature rule on [0,1]^{DIM} with
       N subintervals from a simple quadrature rule
     */
-    CompositeRule(const QuadratureRule<1>& Q,
-		  const unsigned int N = 1);
+    CompositeRule(const unsigned int N = 1);
     
   protected:
     /*!
       basic 1D quadrature rule
     */
-    QuadratureRule<1> Q_;
+    QUADRATURE Q_;
 
     /*!
       number of subintervals

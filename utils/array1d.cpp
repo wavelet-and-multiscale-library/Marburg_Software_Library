@@ -25,13 +25,31 @@ namespace MathTL
 
   template <class C>
   inline
+  Array1D<C>::Array1D(const Array1D<C>& a)
+    : data_(0), size_(a.size())
+  {
+    if (size_ > 0)
+      {
+	data_ = new C[size_];
+	std::copy(a.begin(), a.end(), begin());
+      }
+  }
+
+  template <class C>
+  Array1D<C>& Array1D<C>::operator = (const Array1D<C>& a)
+  {
+    resize(a.size());
+    std::copy(a.begin(), a.end(), begin());
+
+    return *this;
+  }
+
+  template <class C>
+  inline
   Array1D<C>::~Array1D()
   {
-    if (data_ != 0)
-      {
-	delete [] data_;
-	data_ = 0;
-      }
+    if (data_ != 0) delete [] data_;
+    size_ = 0;
   }
   
   template <class C>
@@ -47,11 +65,7 @@ namespace MathTL
   {
     if (s == 0)
       {
-	if (data_ != 0)
-	  {
-	    delete [] data_;
-	    data_ = 0;
-	  }
+	if (data_ != 0) delete [] data_;
 	size_ = 0;
       }
     else
@@ -121,5 +135,4 @@ namespace MathTL
     print_vector(A, os);
     return os;
   }
-
 }

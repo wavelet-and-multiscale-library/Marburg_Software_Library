@@ -31,6 +31,7 @@
 #include <algebra/polynomial.h>
 
 #include <io/vector_io.h>
+#include <io/matrix_io.h>
 
 #include <geometry/point.h>
 #include <geometry/grid.h>

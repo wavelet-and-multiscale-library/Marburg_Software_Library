@@ -11,7 +11,7 @@
 #define _MATHTL_GRID_H
 
 #include <utils/array1d.h>
-#include <geometry/point.h>
+#include <algebra/matrix.h>
 
 namespace MathTL
 {
@@ -36,7 +36,6 @@ namespace MathTL
 
     /*!
       Matlab output of the grid onto a stream
-      
     */
     void matlab_output(std::ostream& os) const;
   };
@@ -55,9 +54,9 @@ namespace MathTL
     Grid();
 
     /*!
-      construct a grid from an array of 1D points
+      construct a 1D grid from an array of 1D points
     */
-    Grid(const Array1D<Point<1> >& grid);
+    Grid(const Array1D<double>& grid);
 
     /*!
       Matlab output of the grid onto a stream
@@ -68,8 +67,41 @@ namespace MathTL
     /*!
       internal storage for the grid points
     */
-    Array1D<Point<1> > grid_;
+    Array1D<double> grid_;
   };
+
+  /*!
+    specialization of Grid to two space dimensions:
+    2-dimensional grids (quad-meshes) consist of 2 matrices x and y,
+    holding the x- and y-coordinates of the mesh points
+  */
+  template <>
+  class Grid<2>
+  {
+  public:
+    /*!
+      default constructor: empty grid
+    */
+    Grid();
+
+    /*!
+      construct a 2D grid from two matrices 
+    */
+    Grid(const Matrix<double>& gridx, const Matrix<double>& gridy);
+
+    /*!
+      Matlab output of the grid onto a stream
+    */
+    void matlab_output(std::ostream& os) const;
+    
+  private:
+    /*!
+      internal storage for the grid points
+      (a 2D array would be sufficient, but we don't have one...)
+    */
+    Matrix<double> gridx_, gridy_;
+  };
+
 }
 
 // include implementation of inline functions

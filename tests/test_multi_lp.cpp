@@ -7,39 +7,37 @@ using namespace MathTL;
 
 int main()
 {
-  cout << "Testing MultiLaurentPolynomial<>..." << endl;
+  cout << "Testing MultivariateLaurentPolynomial<>..." << endl;
 
   cout << "- the zero multivariate Laurent polynomial:" << endl;
-  typedef MultiLaurentPolynomial<double, 2> LPoly;
+  typedef MultivariateLaurentPolynomial<double, 2> LPoly;
   LPoly p;
-//   cout << p << endl;
-//   cout << "  (it has degree " << p.degree() << ")" << endl;
+  cout << p << endl;
   
-//   cout << "- a constant polynomial r\\in\\mathbb L[x], x\\in\\mathbb R:" << endl;
-//   LaurentPolynomial<double> r(42);
-//   cout << r << endl;
-//   cout << "  (it has degree " << r.degree() << ")" << endl;
+  cout << "- a constant multivariate Laurent polynomial:" << endl;
+  LPoly r(42);
+  cout << r << endl;
 
 //   cout << "- checking assignment operator (q=r):" << endl;
 //   LaurentPolynomial<double> q = r;
 //   cout << q << endl;
   
-//   cout << "- adding a nontrivial power:" << endl;
-//   p.set_coefficient(3, 23);
-//   cout << p << endl;
+  cout << "- adding a nontrivial power:" << endl;
+  MultiIndex<int, 2> index;
+  index[0] = 1; index[1] = 2;
+  p.set_coefficient(index, 23);
+  cout << p << endl;
   
-//   cout << "- adding a negative power:" << endl;
-//   p.set_coefficient(-2, 4);
-//   cout << p << endl;
-//   cout << "  (p now has degree " << p.degree() << ")" << endl;
+  cout << "- adding another power:" << endl;
+  index[0] = -3; index[1] = 3;
+  p.set_coefficient(index, 4);
+  cout << p << endl;
   
-//   cout << "- evaluating p at some (nontrivial) points:" << endl;
-//   double x(1);
-//   cout << "p(" << x << ")=" << p.value(x) << endl;
-//   x = 2;
-//   cout << "p(" << x << ")=" << p.value(x) << endl;
-//   x = -0.3;
-//   cout << "p(" << x << ")=" << p.value(x) << endl;
+  cout << "- evaluating p at some (nontrivial) points:" << endl;
+  Point<2> x(1, 1);
+  cout << "p(" << x << ")=" << p.value(x) << endl;
+  x = Point<2>(2, -3);
+  cout << "p(" << x << ")=" << p.value(x) << endl;
 
 //   cout << "- algebraic functionality:" << endl;
 //   q += p;

@@ -79,7 +79,7 @@ namespace MathTL
     LaurentPolynomial<R>& operator = (const R c);
 
     /*!
-      (Euclidean) degree of a Laurent polnomial
+      (Euclidean) degree of a Laurent polynomial
     */
     unsigned int degree() const;
 

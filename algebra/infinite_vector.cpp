@@ -100,7 +100,7 @@ namespace MathTL
     // the following code can be optimized (not O(N) now)
     typename InfiniteVector<C2,I>::const_iterator itv(v.begin()), itvend(v.end());
     while (itv != itvend)
-      this->operator [] (itv->index()) += s * *itv++;
+      this->operator [] (itv.index()) += s * *itv++;
   }
    
   template <class C, class I>
@@ -110,8 +110,8 @@ namespace MathTL
     // the following code can be optimized (not O(N) now)
     typename InfiniteVector<C2,I>::const_iterator itv(v.begin()), itvend(v.end());
     while (itv != itvend)
-      this->operator [] (itv->index()) = 
-	s*this->operator [] (itv->index()) + *itv++;
+      this->operator [] (itv.index()) = 
+	s*this->operator [] (itv.index()) + *itv++;
   }
 
   template <class C, class I>

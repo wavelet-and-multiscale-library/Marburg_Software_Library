@@ -11,13 +11,13 @@
 #define _MATHTL_LAURENT_POLYNOMIAL_H
 
 #include <cassert>
-#include <map>
+#include <iterator>
 #include <utils/function.h>
+#include <algebra/infinite_vector.h>
 #include <geometry/point.h>
 
 namespace MathTL
 {
-  
   /*!
     A template class for general univariate Laurent polynomials, i.e.,
     expressions of the form
@@ -28,28 +28,18 @@ namespace MathTL
   */
   template <class R>
   class LaurentPolynomial
-    : public std::map<int, R>, public Function<1, R>
+    : protected InfiniteVector<R,int>, public Function<1, R>
   {
   public:
     /*!
       const_iterator scanning the nontrivial coefficients
     */
-    typedef typename std::map<int, R>::const_iterator const_iterator;
+    typedef typename InfiniteVector<R,int>::const_iterator const_iterator;
 
-    /*!
-      iterator scanning the nontrivial coefficients
-    */
-    typedef typename std::map<int, R>::iterator iterator;
-
-    /*!
-      const_reverse_iterator scanning the nontrivial coefficients
-    */
-    typedef typename std::map<int, R>::const_reverse_iterator const_reverse_iterator;
-
-    /*!
-      reverse_iterator scanning the nontrivial coefficients
-    */
-    typedef typename std::map<int, R>::reverse_iterator reverse_iterator;
+//     /*!
+//       const_reverse_iterator scanning the nontrivial coefficients
+//     */
+//     typedef typename std::reverse_iterator<const_iterator> const_reverse_iterator;
 
     /*!
       default constructor, yields zero (Laurent) polynomial
@@ -87,6 +77,26 @@ namespace MathTL
     void set_coefficient(const int k, const R coeff);
 
     /*!
+      const_iterator pointing to the first nontrivial coefficient
+    */
+    const_iterator begin() const;
+
+    /*!
+      const_iterator pointing to one behind the last nontrivial coefficient
+    */
+    const_iterator end() const;
+
+//     /*!
+//       const_reverse_iterator pointing to the last nontrivial coefficient
+//     */
+//     const_reverse_iterator rbegin() const;
+
+//     /*!
+//       const_reverse_iterator pointing to one before the first nontrivial coefficient
+//     */
+//     const_reverse_iterator rend() const;
+
+    /*!
       evaluate the Laurent polynomial (Horner scheme)
     */
     R value(const R x) const;
@@ -100,15 +110,60 @@ namespace MathTL
 
     /*!
       evaluate the Laurent polynomial (Horner scheme)
-      (calls the above value(const C))
+      (calls the above value(const R))
     */
     void vector_value(const Point<1> &p,
 		      Vector<R>& values) const;
 
+    /*!
+      pointwise sum of two Laurent polynomials *this += p
+    */
+    void add(const LaurentPolynomial<R>& p);
 
+    /*!
+      pointwise weighted sum of two Laurent polynomials *this += s*p
+    */
+    void add(const R s, const LaurentPolynomial<R>& p);
+
+    /*!
+      pointwise sum of two Laurent polynomials
+    */
+    LaurentPolynomial<R>& operator += (const LaurentPolynomial<R>& p);
+
+    /*!
+      pointwise sum of two Laurent polynomials
+      (don't use this extensively, since one copy has to be made!)
+    */
+    LaurentPolynomial<R> operator + (const LaurentPolynomial<R>& p) const;
+
+    /*!
+      pointwise difference of two Laurentpolynomials
+    */
+    LaurentPolynomial<R>& operator -= (const LaurentPolynomial<R> &p);
+
+    /*!
+      sign
+      (makes a copy of *this)
+    */
+    LaurentPolynomial<R> operator - () const;
     
-//     R    getCoefficient(const int coeff) const;
-//     void setCoefficient(const int coeff, const R value);
+    /*!
+      pointwise difference of two Laurent polynomials
+      (don't use this extensively, since one copy has to be made!)
+    */
+    LaurentPolynomial<R> operator - (const LaurentPolynomial<R> &p) const;
+
+    /*!
+      multiplication with a real number
+    */
+    LaurentPolynomial<R>& operator *= (const R c);
+
+    /*!
+      multiplication with a real number from the right
+      (don't use this extensively, since one copy has to be made!)
+    */
+    LaurentPolynomial<R> operator * (const R c) const;
+    
     
 //     typedef typename std::map<int, R>::const_iterator LaurentIterator;
 //     inline LaurentIterator begin() const { return _coeffs.begin(); }
@@ -117,7 +172,6 @@ namespace MathTL
 //     inline int kbegin() const { return _coeffs.begin()->first; }
 //     inline int kend() const { return _coeffs.rbegin()->first; }
 
-//     LaurentPolynomial<R>& operator += (const LaurentPolynomial<R>& p);
 //     LaurentPolynomial<R>& operator -= (const LaurentPolynomial<R>& p);
 //     LaurentPolynomial<R>& operator *= (const R c);
 //     LaurentPolynomial<R>& operator *= (const LaurentPolynomial<R>& p);
@@ -239,13 +293,15 @@ namespace MathTL
 //     return r;
 //   }
 
-//   template <class R> LaurentPolynomial<R> operator * (const R c, const LaurentPolynomial<R>& p)
-//   {
-//     LaurentPolynomial<R> r(p);
-//     r *= c;
-
-//     return r;
-//   }
+  /*!
+    multiplication of a Laurent polynomial with a real number from the left
+  */
+  template <class R>
+  inline
+  LaurentPolynomial<R> operator * (const R c, const LaurentPolynomial<R>& p)
+  {
+    return (LaurentPolynomial<R>(p) *= c);
+  }
 
 //   template <class R> LaurentPolynomial<R> operator * (const LaurentPolynomial<R>& p, const LaurentPolynomial<R>& q)
 //   {

@@ -7,21 +7,21 @@ namespace MathTL
 {
   template <class R>
   LaurentPolynomial<R>::LaurentPolynomial()
-    : std::map<int,R>(), Function<1,R>()
+    : InfiniteVector<R,int>(), Function<1,R>()
   {
   }
 
   template <class R>
   LaurentPolynomial<R>::LaurentPolynomial(const LaurentPolynomial<R>& p)
-    : std::map<int,R>(p)
+    : InfiniteVector<R,int>(p)
   {
   }
 
   template <class R>
   LaurentPolynomial<R>::LaurentPolynomial(const R value)
-    : std::map<int,R>(), Function<1,R>()
+    : InfiniteVector<R,int>(), Function<1,R>()
   {
-    this->operator [] (0) = value;
+    set_coefficient(0, value);
   }
 
   template <class R>
@@ -32,8 +32,7 @@ namespace MathTL
   template <class R>
   LaurentPolynomial<R>& LaurentPolynomial<R>::operator = (const LaurentPolynomial<R>& p)
   {
-    std::map<int,R>::operator = (p);
-
+    InfiniteVector<R,int>::operator = (p);
     return *this;
   }
 
@@ -41,13 +40,7 @@ namespace MathTL
   inline
   R LaurentPolynomial<R>::get_coefficient(const int k) const
   {
-    // we must not use std::map<int,R>::operator [] for reading,
-    // since it may add unwanted zero elements!
-    typename std::map<int,R>::const_iterator it(lower_bound(k));
-    if (it != end() && !key_comp()(k,it->first))
-      return it->second;
-
-    return R(0);
+    return InfiniteVector<R,int>::operator [] (k);
   }
 
   template <class R>
@@ -55,29 +48,61 @@ namespace MathTL
   void LaurentPolynomial<R>::set_coefficient(const int k,
 					     const R coeff)
   {
-    std::map<int,R>::operator [] (k) = coeff;
+    InfiniteVector<R,int>::operator [] (k) = coeff;
   }
+
+  template <class R>
+  inline
+  typename LaurentPolynomial<R>::const_iterator
+  LaurentPolynomial<R>::begin() const
+  {
+    return InfiniteVector<R,int>::begin();
+  }
+
+  template <class R>
+  inline
+  typename LaurentPolynomial<R>::const_iterator
+  LaurentPolynomial<R>::end() const
+  {
+    return InfiniteVector<R,int>::end();
+  }  
+
+//   template <class R>
+//   inline
+//   typename LaurentPolynomial<R>::const_reverse_iterator
+//   LaurentPolynomial<R>::rbegin() const
+//   {
+//     return reverse_iterator(end());
+//   }
+  
+//   template <class R>
+//   inline
+//   typename LaurentPolynomial<R>::const_reverse_iterator
+//   LaurentPolynomial<R>::rend() const
+//   {
+//     return reverse_iterator(begin());
+//   }
 
   template <class R>
   R LaurentPolynomial<R>::value(const R x) const
   {
-    assert(x != 0 || begin()->first >= 0);
+//     assert(x != 0 || get_coefficient(0) == R(0));
 
     R r(0);
     
-    // Horner scheme for shifted Laurent polynomial
-    if (!empty())
-      r = get_coefficient(rbegin()->first);
-    for (const_reverse_iterator it(rbegin()); it != rend();)
-      {
-	for (int i((it++)->first); i > it->first; i--)
-	  r *= x;
-	r += it->second;
-      }
+//     // Horner scheme for a shifted Laurent polynomial
+//     if (!empty())
+//       r = get_coefficient(rbegin()->first);
+//     for (const_reverse_iterator it(rbegin()); it != rend();)
+//       {
+// 	for (int i((it++).index()); i > it.index(); i--)
+// 	  r *= x;
+// 	r += *it;
+//       }
 
-    // shift back
-    for (int i(begin()->first); i < 0; i++)
-      r /= x;
+//     // shift back
+//     for (int i(begin()->first); i < 0; i++)
+//       r /= x;
 
     return r;
   }
@@ -99,75 +124,97 @@ namespace MathTL
     values[0] = value(p[0]);
   }
 
-//   template <class C>
-//   std::ostream& operator << (std::ostream &s, const Polynomial<C> &p)
-//   {
-//     double c;
-//     int oldprecision = s.precision();
-//     std::ios::fmtflags oldflags = s.flags();
-//     //  s.setf(ios::scientific, ios::floatfield);
-//     s.precision(12);
+  template <class R>
+  inline
+  void LaurentPolynomial<R>::add(const LaurentPolynomial<R>& p)
+  {
+    InfiniteVector<R,int>::add(p);
+  }
 
-//     bool first = true;
-//     for (unsigned int k = p.degree(); k >= 1; k--)
-//       {
-// 	c = p.get_coefficient(k);
-// 	if (c != 0)
-// 	  {
-// 	    if (!first)
-// 	      {
-// 		if (c >= 0)
-// 		  s << "+";
-// 	      }
-// 	    if (fabs(c) != 1)
-// 	      s << c;
-// 	    else
-// 	      if (c == -1)
-// 		s << "-";
-// 	    s << "x";
-// 	    if (k > 1)
-// 	      s << "^" << k;
-// 	    first = false;
-// 	  }
-//       }
-  
-//     c = p.get_coefficient(0);
+  template <class R>
+  inline
+  void LaurentPolynomial<R>::add(const R s, const LaurentPolynomial<R>& p)
+  {
+    InfiniteVector<R,int>::add(s, p);
+  }
 
-//     if ((c!=0)||(p.degree()==0))
-//       {
-// 	if (!first)
-// 	  {
-// 	    if (c >= 0)
-// 	      s << "+";
-// 	  }
-// 	s << c;
-//       }
-  
-//     s.setf(oldflags);
-//     s.precision(oldprecision);
+  template <class R>
+  inline
+  LaurentPolynomial<R>&
+  LaurentPolynomial<R>::operator += (const LaurentPolynomial<R>& p)
+  {
+    add(p);
+    return *this;
+  }
 
-//     return s;
-//   }
+  template <class R>
+  inline
+  LaurentPolynomial<R>
+  LaurentPolynomial<R>::operator + (const LaurentPolynomial<R>& p) const
+  {
+    return (LaurentPolynomial<R>(*this) += p);
+  }
+
+  template <class R>
+  inline
+  LaurentPolynomial<R>&
+  LaurentPolynomial<R>::operator -= (const LaurentPolynomial<R>& p)
+  {
+    add(R(-1.0), p);
+    return *this;
+  }
+
+  template <class R>
+  inline
+  LaurentPolynomial<R> LaurentPolynomial<R>::operator - () const
+  {
+    return (LaurentPolynomial<R>() -= *this);
+  }
+
+  template <class R>
+  inline
+  LaurentPolynomial<R>
+  LaurentPolynomial<R>::operator - (const LaurentPolynomial<R>& p) const
+  {
+    return (LaurentPolynomial<R>(*this) -= p);
+  }
+
+  template <class R>
+  inline
+  LaurentPolynomial<R>&
+  LaurentPolynomial<R>::operator *= (const R c)
+  {
+    InfiniteVector<R,int>::scale(c);
+    return *this;
+  }
+
+  template <class R>
+  inline
+  LaurentPolynomial<R>
+  LaurentPolynomial<R>::operator * (const R c) const
+  {
+    return (LaurentPolynomial<R>(*this) *= c);
+  }
 
   template <class R>
   std::ostream& operator << (std::ostream& s, const LaurentPolynomial<R>& p)
   {
     for (typename LaurentPolynomial<R>::const_iterator it(p.begin());
-	 it != p.end(); ++it)
+ 	 it != p.end(); ++it)
       {
  	if (it != p.begin())
  	  s << "+";
- 	s << "(" << it->second << ")";
- 	if (it->first != 0)
+ 	s << "(" << *it << ")";
+ 	if (it.index() != 0)
  	  {
  	    s << "z";
- 	    if (it->first != 1)
+ 	    if (it.index() != 1)
  	      {
  		s << "^";
- 		if (it->first < 0)
- 		  s << "{" << it->first << "}";
+ 		if (it.index() < 0)
+ 		  s << "{" << it.index() << "}";
  		else
- 		  s << it->first;
+ 		  s << it.index();
  	      }
  	  }
       }

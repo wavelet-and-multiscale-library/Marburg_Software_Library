@@ -146,7 +146,7 @@ namespace MathTL
     void add(const Polynomial<C>& p);
 
     /*!
-      pointwise weihted sum of two polynomials *this += s*p
+      pointwise weighted sum of two polynomials *this += s*p
     */
     void add(const C s, const Polynomial<C>& p);
 

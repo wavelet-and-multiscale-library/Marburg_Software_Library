@@ -1,5 +1,6 @@
 // implementation of LaurentPolynomial inline functions
 
+#include <cassert>
 #include <algorithm>
 
 namespace MathTL
@@ -42,7 +43,7 @@ namespace MathTL
   {
     // we must not use std::map<int,R>::operator [] for reading,
     // since it may add unwanted zero elements!
-    typename std::map<int,R>::const_iterator ir(lower_bound(k));
+    typename std::map<int,R>::const_iterator it(lower_bound(k));
     if (it != end() && !key_comp()(k,it->first))
       return it->second;
 
@@ -60,13 +61,25 @@ namespace MathTL
   template <class R>
   R LaurentPolynomial<R>::value(const R x) const
   {
-//     C value(Vector<C>::operator [] (degree()));
+    assert(x != 0 || begin()->first >= 0);
 
-//     for (unsigned int k(degree()); k > 0; k--)
-//       value = value * x + get_coefficient(k-1);
+    R r(0);
+    
+    // Horner scheme for shifted Laurent polynomial
+    if (!empty())
+      r = get_coefficient(rbegin()->first);
+    for (const_reverse_iterator it(rbegin()); it != rend();)
+      {
+	for (int i((it++)->first); i > it->first; i--)
+	  r *= x;
+	r += it->second;
+      }
 
-//     return value;
-    return 0.0;
+    // shift back
+    for (int i(begin()->first); i < 0; i++)
+      r /= x;
+
+    return r;
   }
 
   template <class R>

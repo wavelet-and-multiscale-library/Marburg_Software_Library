@@ -42,6 +42,16 @@ namespace MathTL
     typedef typename std::map<int, R>::iterator iterator;
 
     /*!
+      const_reverse_iterator scanning the nontrivial coefficients
+    */
+    typedef typename std::map<int, R>::const_reverse_iterator const_reverse_iterator;
+
+    /*!
+      reverse_iterator scanning the nontrivial coefficients
+    */
+    typedef typename std::map<int, R>::reverse_iterator reverse_iterator;
+
+    /*!
       default constructor, yields zero (Laurent) polynomial
     */
     LaurentPolynomial();
@@ -97,8 +107,6 @@ namespace MathTL
 
 
     
-//     LaurentPolynomial<R>& operator = (const R& value);
-    
 //     R    getCoefficient(const int coeff) const;
 //     void setCoefficient(const int coeff, const R value);
     
@@ -113,8 +121,6 @@ namespace MathTL
 //     LaurentPolynomial<R>& operator -= (const LaurentPolynomial<R>& p);
 //     LaurentPolynomial<R>& operator *= (const R c);
 //     LaurentPolynomial<R>& operator *= (const LaurentPolynomial<R>& p);
-
-//     const R operator () (const R x) const;
 
 //     friend LaurentPolynomial<R> operator + <> (const LaurentPolynomial<R>& p, const LaurentPolynomial<R>& q);
 //     friend LaurentPolynomial<R> operator - <> (const LaurentPolynomial<R>& p, const LaurentPolynomial<R>& q);
@@ -150,20 +156,6 @@ namespace MathTL
 //     return *this;
 //   }
 
-
-//   template <class R> R LaurentPolynomial<R>::getCoefficient(const int coeff) const
-//   {
-//     // remark: to fulfill constness, we have to "emulate" the [] operator which is not const
-//     LaurentIterator it(_coeffs.lower_bound(coeff));
-//     if (it != _coeffs.end() && !(_coeffs.key_comp()(coeff, it->first)))
-//       return it->second;
-//     return R();
-//   }
-
-//   template <class R> void LaurentPolynomial<R>::setCoefficient(const int coeff, const R value)
-//   {
-//     _coeffs[coeff] = value;
-//   }
 
 //   template <class R> LaurentPolynomial<R>& LaurentPolynomial<R>::operator += (const LaurentPolynomial<R>& p)
 //   {
@@ -218,28 +210,6 @@ namespace MathTL
 //     return *this;
 //   }
 
-//   template <class R> const R LaurentPolynomial<R>::operator () (const R x) const
-//   {
-//     assert(x != 0 || _coeffs.begin()->first >= 0);
-
-//     R r(0); // we assume that this explicit constructor exists
-
-//     // apply Horner scheme
-//     if (!_coeffs.empty())
-//       r = getCoefficient(_coeffs.rbegin()->first);
-//     typedef typename std::map<int, R>::const_reverse_iterator myIterator;
-//     for (myIterator it(_coeffs.rbegin()); it != _coeffs.rend();)
-//       {
-// 	for (int i((it++)->first); i > it->first; i--)
-// 	  r *= x;
-// 	r += it->second;
-//       }
-
-//     for (int i(_coeffs.begin()->first); i < 0; i++)
-//       r /= x;
-
-//     return r;
-//   }
 
 //   //
 //   //

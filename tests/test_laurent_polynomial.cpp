@@ -26,22 +26,17 @@ int main()
   p.set_coefficient(3, 23);
   cout << p << endl;
   
-//   cout << "- adding a negative power:" << endl;
-//   p.setCoefficient(-2, 4);
-//   cout << p << endl;
+  cout << "- adding a negative power:" << endl;
+  p.set_coefficient(-2, 4);
+  cout << p << endl;
   
-//   cout << "- testing the = operator:" << endl;
-//   LaurentPolynomial<double> q;
-//   q = p;
-//   cout << q << endl;
-  
-//   cout << "- evaluating p at some points:" << endl;
-//   double x(1);
-//   cout << "p(" << x << ")=" << p(x) << endl;
-//   x = 2;
-//   cout << "p(" << x << ")=" << p(x) << endl;
-//   x = -0.3;
-//   cout << "p(" << x << ")=" << p(x) << endl;
+  cout << "- evaluating p at some (nontrivial) points:" << endl;
+  double x(1);
+  cout << "p(" << x << ")=" << p.value(x) << endl;
+  x = 2;
+  cout << "p(" << x << ")=" << p.value(x) << endl;
+  x = -0.3;
+  cout << "p(" << x << ")=" << p.value(x) << endl;
 
 //   cout << "- algebraic functionality:" << endl;
 //   q += p;

@@ -21,7 +21,7 @@ namespace MathTL
     evaluate a B-spline N_{j,d}(x) via recursion
   */
   template <int d>
-  double evaluate_Bspline(const Array1D<double>& knots, const int j, const double x)
+  double evaluate_Bspline(const Array1D<double>& knots, const unsigned int j, const double x)
   {
     double r(0);
 
@@ -38,9 +38,9 @@ namespace MathTL
   */
   template <>
   inline
-  double evaluate_Bspline<1>(const Array1D<double>& knots, const int j, const double x)
+  double evaluate_Bspline<1>(const Array1D<double>& knots, const unsigned int j, const double x)
   {
-    return (x >=  knots[j] && x < knots[j+1] ? 1.0 : 0.0);
+    return (x >= knots[j] && x < knots[j+1] ? 1.0 : 0.0);
   }
 
   /*!
@@ -73,11 +73,12 @@ namespace MathTL
     }
 
     /*!
-      construct spline from a knot sequence
+      construct spline from a knot sequence and given coefficients
      */
-    Spline(const Array1D<double>& knots)
-      : Function<1>(1), knots_(knots)
+    Spline(const Array1D<double>& knots, const Array1D<double>& coeffs)
+      : Function<1>(1), knots_(knots), coeffs_(coeffs)
     {
+      assert(knots.size() == coeffs.size()+d);
     }
 
     /*!
@@ -91,7 +92,14 @@ namespace MathTL
     inline double value(const Point<1>& p,
 			const unsigned int component = 0) const
     {
-      return evaluate_Bspline<d>(knots_, 0, p(0));
+      double r(0);
+      
+      for (unsigned int i(0); i < coeffs_.size(); i++) {
+	if (coeffs_[i] != 0)
+	  r += coeffs_[i] * evaluate_Bspline<d>(knots_, i, p(0));
+      }
+
+      return r;
     }
   
     /*!
@@ -103,11 +111,6 @@ namespace MathTL
       values.resize(1, false);
       values[0] = value(p);
     }
-
-//     void dump()
-//     {
-//       std::cout << knots_ << std::endl;
-//     }
     
   protected:
     /*!

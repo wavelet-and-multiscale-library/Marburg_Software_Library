@@ -10,6 +10,7 @@
 #ifndef _MATHTL_GRID_H
 #define _MATHTL_GRID_H
 
+#include <geometry/point.h>
 #include <utils/array1d.h>
 #include <algebra/matrix.h>
 

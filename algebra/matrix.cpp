@@ -76,6 +76,14 @@ namespace MathTL
   }
 
   template <class C>
+  void Matrix<C>::resize(const size_type rows, const size_type columns)
+  {
+    entries_.resize(rows*columns);
+    rowdim_ = rows;
+    coldim_ = columns;
+  }
+
+  template <class C>
   inline
   const typename Matrix<C>::size_type
   Matrix<C>::memory_consumption() const
@@ -185,6 +193,7 @@ namespace MathTL
       os << "[]" << std::endl; // Matlab style
     else
       {
+	unsigned int old_precision = os.precision(precision);
 	for (typename Matrix<C>::size_type i(0); i < row_dimension(); ++i)
 	  {
 	    for (typename Matrix<C>::size_type j(0); j < column_dimension(); ++j)
@@ -192,6 +201,7 @@ namespace MathTL
 		 << this->operator () (i, j);
 	    os << std::endl;
 	  }
+	os.precision(old_precision);
       }
   }
   

@@ -30,7 +30,7 @@ namespace MathTL
   */
   template <class VECTOR, class MATRIX>
   double PowerIteration(const MATRIX& A, VECTOR& xk,
-			const double tol, const int maxit, int &iterations);
+			const double tol, const unsigned int maxit, unsigned int &iterations);
   
   //! inverse power iteration
   /*!
@@ -43,7 +43,7 @@ namespace MathTL
   */
   template <class VECTOR, class MATRIX>
   double InversePowerIteration(const MATRIX& A, VECTOR& xk,
-			       const double tol, const int maxit, int &iterations);
+			       const double tol, const unsigned int maxit, unsigned int &iterations);
 
   //! solve symmetric eigenvalue problem
   /*!
@@ -58,12 +58,12 @@ namespace MathTL
   //! spectral condition number of a symmetric matrix
   template <class MATRIX>
   double CondSymm(const MATRIX& A,
-		  double tol = 1e-6, int maxit = 100);
+		  double tol = 1e-6, unsigned int maxit = 100);
 
   //! spectral condition number of a potentially nonsymmetric matrix
   template <class MATRIX>
   double CondNonSymm(const MATRIX &A,
-		     double tol = 1e-6, int maxit = 100);
+		     double tol = 1e-6, unsigned int maxit = 100);
 }
 
 #include "numerics/eigenvalues.cpp"

@@ -105,6 +105,14 @@ namespace MathTL
   }
 
   template <class C>
+  void LowerTriangularMatrix<C>::resize(const size_type rows, const size_type columns)
+  {
+    entries_.resize(triangle_size(rows*columns));
+    rowdim_ = rows;
+    coldim_ = columns;
+  }
+
+  template <class C>
   inline
   const typename LowerTriangularMatrix<C>::size_type
   LowerTriangularMatrix<C>::memory_consumption() const
@@ -202,6 +210,7 @@ namespace MathTL
       os << "[]" << std::endl; // Matlab style
     else
       {
+	unsigned int old_precision = os.precision(precision);
 	for (typename LowerTriangularMatrix<C>::size_type i(0);
 	     i < row_dimension(); ++i)
 	  {
@@ -211,6 +220,7 @@ namespace MathTL
 		 << this->operator () (i, j);
 	    os << std::endl;
 	  }
+	os.precision(old_precision);
       }
   }
 
@@ -266,6 +276,13 @@ namespace MathTL
   UpperTriangularMatrix<C>::column_dimension() const
   {
     return LowerTriangularMatrix<C>::row_dimension();
+  }
+
+  template <class C>
+  inline
+  void UpperTriangularMatrix<C>::resize(const size_type rows, const size_type columns)
+  {
+    LowerTriangularMatrix<C>::resize(columns, rows);
   }
 
   template <class C>
@@ -331,6 +348,7 @@ namespace MathTL
       os << "[]" << std::endl; // Matlab style
     else
       {
+	unsigned int old_precision = os.precision(precision);
 	for (typename UpperTriangularMatrix<C>::size_type i(0);
 	     i < row_dimension(); ++i)
 	  {
@@ -340,6 +358,7 @@ namespace MathTL
 		 << this->operator () (i, j);
 	    os << std::endl;
 	  }
+	os.precision(old_precision);
       }
   }
 

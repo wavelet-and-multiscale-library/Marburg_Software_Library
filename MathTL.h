@@ -25,12 +25,13 @@
 #include <algebra/matrix_norms.h>
 #include <algebra/triangular_matrix.h>
 #include <algebra/symmetric_matrix.h>
+#include <algebra/atra.h>
 
 #include <io/vector_io.h>
 
 #include <geometry/point.h>
 
 #include <numerics/iteratsolv.h>
-// #include <numerics/eigenvalues.h>
+#include <numerics/eigenvalues.h>
 
 #endif

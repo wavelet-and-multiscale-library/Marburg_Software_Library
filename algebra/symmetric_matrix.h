@@ -56,6 +56,11 @@ namespace MathTL
 		    const bool byrow = true);
 
     /*!
+      resize matrix and initialize with zero
+    */
+    void resize(const size_type n);
+
+    /*!
       read-only access to a matrix entry
     */
     const C operator () (const size_type row, const size_type column) const;

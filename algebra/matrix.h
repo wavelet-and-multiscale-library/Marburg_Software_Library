@@ -77,6 +77,11 @@ namespace MathTL
     const size_type size() const;
     
     /*!
+      resize matrix and initialize with zero
+    */
+    void resize(const size_type rows, const size_type columns = rows);
+
+    /*!
       (estimate for the) memory consumption in bytes
     */
     const size_type memory_consumption() const;

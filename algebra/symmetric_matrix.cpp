@@ -29,6 +29,13 @@ namespace MathTL
 
   template <class C>
   inline
+  void SymmetricMatrix<C>::resize(const size_type n)
+  {
+    LowerTriangularMatrix<C>::resize(n);
+  }
+
+  template <class C>
+  inline
   const C SymmetricMatrix<C>::operator () (const size_type row,
 					   const size_type column) const
   {
@@ -86,7 +93,7 @@ namespace MathTL
   template <class VECTOR>
   void SymmetricMatrix<C>::apply_transposed(const VECTOR& x, VECTOR& Mtx) const
   {
-    apply_transposed(x, Mtx);
+    apply(x, Mtx);
   }
 
   template <class C>
@@ -98,6 +105,7 @@ namespace MathTL
       os << "[]" << std::endl; // Matlab style
     else
       {
+	unsigned int old_precision = os.precision(precision);
 	for (typename SymmetricMatrix<C>::size_type i(0);
 	     i < row_dimension(); ++i)
 	  {
@@ -107,6 +115,7 @@ namespace MathTL
 		 << this->operator () (i, j);
 	    os << std::endl;
 	  }
+	os.precision(old_precision);
       }
   }
 

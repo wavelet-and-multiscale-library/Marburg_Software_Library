@@ -67,42 +67,42 @@ namespace MathTL
     return InfiniteVector<R,int>::end();
   }  
 
-//   template <class R>
-//   inline
-//   typename LaurentPolynomial<R>::const_reverse_iterator
-//   LaurentPolynomial<R>::rbegin() const
-//   {
-//     return reverse_iterator(end());
-//   }
+  template <class R>
+  inline
+  typename LaurentPolynomial<R>::const_reverse_iterator
+  LaurentPolynomial<R>::rbegin() const
+  {
+    return InfiniteVector<R,int>::rbegin();
+  }
   
-//   template <class R>
-//   inline
-//   typename LaurentPolynomial<R>::const_reverse_iterator
-//   LaurentPolynomial<R>::rend() const
-//   {
-//     return reverse_iterator(begin());
-//   }
+  template <class R>
+  inline
+  typename LaurentPolynomial<R>::const_reverse_iterator
+  LaurentPolynomial<R>::rend() const
+  {
+    return InfiniteVector<R,int>::rend();
+  }
 
   template <class R>
   R LaurentPolynomial<R>::value(const R x) const
   {
-//     assert(x != 0 || get_coefficient(0) == R(0));
+    assert(x != 0 || get_coefficient(0) == R(0));
 
     R r(0);
     
-//     // Horner scheme for a shifted Laurent polynomial
-//     if (!empty())
-//       r = get_coefficient(rbegin()->first);
-//     for (const_reverse_iterator it(rbegin()); it != rend();)
-//       {
-// 	for (int i((it++).index()); i > it.index(); i--)
-// 	  r *= x;
-// 	r += *it;
-//       }
+    // Horner scheme for a shifted Laurent polynomial
+    if (!empty())
+      r = *rbegin();
+    for (const_reverse_iterator it(rbegin()); it != rend();)
+      {
+ 	for (int i((it++).index()); i > it.index(); i--)
+ 	  r *= x;
+ 	r += *it;
+      }
 
-//     // shift back
-//     for (int i(begin()->first); i < 0; i++)
-//       r /= x;
+     // shift back
+    for (int i(begin().index()); i < 0; i++)
+      r /= x;
 
     return r;
   }
@@ -140,6 +140,13 @@ namespace MathTL
 
   template <class R>
   inline
+  void LaurentPolynomial<R>::sadd(const R s, const LaurentPolynomial<R>& p)
+  {
+    InfiniteVector<R,int>::sadd(s, p);
+  }
+
+  template <class R>
+  inline
   LaurentPolynomial<R>&
   LaurentPolynomial<R>::operator += (const LaurentPolynomial<R>& p)
   {
@@ -157,10 +164,17 @@ namespace MathTL
 
   template <class R>
   inline
+  void LaurentPolynomial<R>::subtract(const LaurentPolynomial<R>& p)
+  {
+    InfiniteVector<R,int>::subtract(p);
+  }
+
+  template <class R>
+  inline
   LaurentPolynomial<R>&
   LaurentPolynomial<R>::operator -= (const LaurentPolynomial<R>& p)
   {
-    add(R(-1.0), p);
+    subtract(p);
     return *this;
   }
 
@@ -194,6 +208,46 @@ namespace MathTL
   LaurentPolynomial<R>::operator * (const R c) const
   {
     return (LaurentPolynomial<R>(*this) *= c);
+  }
+
+  template <class R>
+  void LaurentPolynomial<R>::multiply(const LaurentPolynomial<R>& p)
+  {
+    InfiniteVector<R,int> coeffs;
+    for (const_iterator it(begin()), itend(end()); it != itend; ++it)
+      for (const_iterator itp(p.begin()), itpend(p.end()); itp != itpend; ++itp)
+	coeffs[it.index()+itp.index()] += *it * *itp;
+
+    swap(coeffs);    
+  }
+
+  template <class R>
+  inline
+  LaurentPolynomial<R>&
+  LaurentPolynomial<R>::operator *= (const LaurentPolynomial<R>& p)
+  {
+    multiply(p);
+    return *this;
+  }
+
+  template <class R>
+  inline
+  LaurentPolynomial<R>
+  LaurentPolynomial<R>::operator * (const LaurentPolynomial<R>& p)
+  {
+    return (LaurentPolynomial(*this) *= p);
+  }
+
+  template <class R>
+  LaurentPolynomial<R>
+  LaurentPolynomial<R>::power(const unsigned int k) const
+  {
+    LaurentPolynomial<R> r(1);
+    
+    for (unsigned int i(0); i < k; i++)
+      r.multiply(*this);
+    
+    return r;
   }
 
   template <class R>

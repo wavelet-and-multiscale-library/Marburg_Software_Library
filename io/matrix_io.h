@@ -38,7 +38,7 @@ namespace MathTL
 	      os << " ";
 	  }
 	if (row < M.row_dimension()-1)
-	  os << ";";
+	  os << "; ";
       }
     os << "]";
   }

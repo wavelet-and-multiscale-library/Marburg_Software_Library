@@ -236,6 +236,23 @@ namespace MathTL
   }
 
   template <class C>
+  void Polynomial<C>::sadd(const C s, const Polynomial<C>& p)
+  {
+    Vector<C> help(std::max(degree(), p.degree())+1);
+    if (degree()+1 == help.size())
+      {
+	std::copy(p.begin(), p.end(), help.begin());
+	help.add(s, *this); // help <- help + s*(*this)
+      }
+    else
+      {
+	std::copy(begin(), end(), help.begin());
+	help.sadd(s, p); // help <- s*help + p
+      }
+    swap(help);
+  }
+
+  template <class C>
   inline
   Polynomial<C>& Polynomial<C>::operator += (const Polynomial<C>& p)
   {
@@ -251,10 +268,27 @@ namespace MathTL
   }
 
   template <class C>
+  void Polynomial<C>::subtract(const Polynomial<C>& p)
+  {
+    Vector<C> help(std::max(degree(), p.degree())+1);
+    if (degree()+1 == help.size())
+      {
+	std::copy(p.begin(), p.end(), help.begin());
+	help.sadd(C(-1), *this);
+      }
+    else
+      {
+	std::copy(begin(), end(), help.begin());
+	help.add(C(-1), p);
+      }
+    swap(help);
+  }
+
+  template <class C>
   inline
   Polynomial<C>& Polynomial<C>::operator -= (const Polynomial<C>& p)
   {
-    add(C(-1), p);
+    subtract(p);
     return *this;
   }
 
@@ -291,7 +325,8 @@ namespace MathTL
   }
 
   template <class C>
-  Polynomial<C>& Polynomial<C>::operator *= (const Polynomial<C>& p)
+  void
+  Polynomial<C>::multiply(const Polynomial<C>& p)
   {
     Vector<C> coeffs(degree()+p.degree()+1);
     for (unsigned int n(0); n <= degree(); n++)
@@ -299,6 +334,13 @@ namespace MathTL
 	coeffs[n+m] += Vector<C>::operator [] (n) * p.get_coefficient(m);
 
     swap(coeffs);
+  }
+
+  template <class C>
+  inline
+  Polynomial<C>& Polynomial<C>::operator *= (const Polynomial<C>& p)
+  {
+    multiply(p);
     return *this;
   }
 
@@ -312,15 +354,10 @@ namespace MathTL
   template <class C>
   Polynomial<C> Polynomial<C>::power(const unsigned int k) const
   {
-    Polynomial<C> r;
-    if (k == 0)
-      r = 1;
-    else
-      {
-	r = *this;
-	for (unsigned int l(2); l <= k; l++)
-	  r *= *this;
-      }
+    Polynomial<C> r(1);
+
+    for (unsigned int i(0); i < k; i++)
+      r.multiply(*this);
 
     return r;
   }

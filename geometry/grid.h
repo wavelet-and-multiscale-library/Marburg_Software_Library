@@ -16,7 +16,7 @@
 namespace MathTL
 {
   /*!
-    Abstract base class for n-dimensional rectangular grids in the
+    Base class for n-dimensional rectangular grids in the
     style of Matlab. There, rectangular grids are the core ingredients for plotting
     functions from n-D to m-D.
     A 1-dimensional grid is just a vector x holding the mesh points.
@@ -33,6 +33,11 @@ namespace MathTL
       default constructor: empty grid
     */
     Grid();
+
+    /*!
+      number of grid points
+    */
+    unsigned int size() const;
 
     /*!
       Matlab output of the grid onto a stream
@@ -59,11 +64,21 @@ namespace MathTL
     Grid(const Array1D<double>& grid);
 
     /*!
+      construct an equidistant 1D grid with N+1 points
+    */
+    Grid(const double a, const double b, const unsigned N);
+
+    /*!
+      number of grid points
+    */
+    unsigned int size() const;
+
+    /*!
       Matlab output of the grid onto a stream
     */
     void matlab_output(std::ostream& os) const;
     
-  private:
+  protected:
     /*!
       internal storage for the grid points
     */
@@ -90,18 +105,28 @@ namespace MathTL
     Grid(const Matrix<double>& gridx, const Matrix<double>& gridy);
 
     /*!
+      construct an equidistant 2D grid with (N_x+1)*(N_y+1) points
+    */
+    Grid(const Point<2>& a, const Point<2>& b,
+	 const unsigned N_x, const unsigned N_y);
+
+    /*!
+      number of grid points
+    */
+    unsigned int size() const;
+
+    /*!
       Matlab output of the grid onto a stream
     */
     void matlab_output(std::ostream& os) const;
     
-  private:
+  protected:
     /*!
       internal storage for the grid points
       (a 2D array would be sufficient, but we don't have one...)
     */
     Matrix<double> gridx_, gridy_;
   };
-
 }
 
 // include implementation of inline functions

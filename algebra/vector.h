@@ -223,6 +223,12 @@ namespace MathTL
     Vector<C>& operator += (const Vector<C2>& v);
 
     /*!
+      in place subtraction *this -= v
+    */
+    template <class C2>
+    void subtract(const Vector<C2>& v);
+
+    /*!
       in place subtraction
     */
     template <class C2>

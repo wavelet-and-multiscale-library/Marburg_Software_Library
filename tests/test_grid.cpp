@@ -21,6 +21,9 @@ int main()
   points[2] = 3.0;
   Grid<1>(points).matlab_output(cout);
 
+  cout << "- an equidistant 1D grid:" << endl;
+  Grid<1>(0.0, 1.0, 5).matlab_output(cout);
+
   cout << "- empty 2D grid:" << endl;
   Grid<2>().matlab_output(cout);
 
@@ -31,6 +34,10 @@ int main()
   gridy(0,0) = gridy(0,1) = 0.0;
   gridy(1,0) = gridy(1,1) = 1.0;
   Grid<2>(gridx, gridy).matlab_output(cout);
+
+  cout << "- an equidistant 2D grid:" << endl;
+  Grid<2> equi(Point<2>(0.0, 0.0), Point<2>(1.0, 1.0), 2, 4);
+  equi.matlab_output(cout);
 
   return 0;
 }

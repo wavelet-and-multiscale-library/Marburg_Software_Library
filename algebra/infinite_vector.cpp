@@ -88,11 +88,19 @@ namespace MathTL
   template <class C2>
   void InfiniteVector<C,I>::add(const InfiniteVector<C2,I>& v)
   {
+    // the following code can be optimized (not O(N) now)
     typename InfiniteVector<C2,I>::const_iterator itv(v.begin()), itvend(v.end());
     while (itv != itvend)
-      this->operator [] (itv.index()) += *itv++;
+      {
+	C help(this->operator [] (itv.index()) + *itv);
+	if (help != C(0))
+	  this->operator [] (itv.index()) = help;
+	else
+	  std::map<I,C>::erase(itv.index());
+	++itv;
+      }
   }
-   
+
   template <class C, class I>
   template <class C2>
   void InfiniteVector<C,I>::add(const C2 s, const InfiniteVector<C2,I>& v)
@@ -100,7 +108,14 @@ namespace MathTL
     // the following code can be optimized (not O(N) now)
     typename InfiniteVector<C2,I>::const_iterator itv(v.begin()), itvend(v.end());
     while (itv != itvend)
-      this->operator [] (itv.index()) += s * *itv++;
+      {
+	C help(this->operator [] (itv.index()) + s * *itv);
+	if (help != C(0))
+	  this->operator [] (itv.index()) = help;
+	else
+	  std::map<I,C>::erase(itv.index());
+	++itv;
+      }
   }
    
   template <class C, class I>
@@ -110,17 +125,28 @@ namespace MathTL
     // the following code can be optimized (not O(N) now)
     typename InfiniteVector<C2,I>::const_iterator itv(v.begin()), itvend(v.end());
     while (itv != itvend)
-      this->operator [] (itv.index()) = 
-	s*this->operator [] (itv.index()) + *itv++;
+      {
+	C help(s * this->operator [] (itv.index()) + *itv);
+	if (help != C(0))
+	  this->operator [] (itv.index()) = help;
+	else
+	  std::map<I,C>::erase(itv.index());
+	++itv;
+      }
   }
 
   template <class C, class I>
   void InfiniteVector<C,I>::scale(const C s)
   {
-    typename std::map<I,C>::iterator it(std::map<I,C>::begin()),
-      itend(std::map<I,C>::end());
-    while(it != itend)
-      (*it++).second *= s;
+    if (s == C(0))
+      clear();
+    else
+      {
+	typename std::map<I,C>::iterator it(std::map<I,C>::begin()),
+	  itend(std::map<I,C>::end());
+	while(it != itend)
+	  (*it++).second *= s;
+      }
   }
 
   template <class C, class I>
@@ -134,12 +160,27 @@ namespace MathTL
 
   template <class C, class I>
   template <class C2>
-  InfiniteVector<C,I>& InfiniteVector<C,I>::operator -= (const InfiniteVector<C2,I>& v)
+  void InfiniteVector<C,I>::subtract(const InfiniteVector<C2,I>& v)
   {
+    // the following code can be optimized (not O(N) now)
     typename InfiniteVector<C2,I>::const_iterator itv(v.begin()), itvend(v.end());
     while (itv != itvend)
-      this->operator [] (itv.index()) -= *itv++;
-    
+      {
+	C help(this->operator [] (itv.index()) - *itv);
+	if (help != C(0))
+	  this->operator [] (itv.index()) = help;
+	else
+	  std::map<I,C>::erase(itv.index());
+	++itv;
+      }
+  }
+
+  template <class C, class I>
+  template <class C2>
+  inline
+  InfiniteVector<C,I>& InfiniteVector<C,I>::operator -= (const InfiniteVector<C2,I>& v)
+  {
+    subtract(v);
     return *this;
   }
    
@@ -304,7 +345,7 @@ namespace MathTL
   const C*
   InfiniteVector<C,I>::const_iterator::operator -> () const
   {
-    return &(std::map<I,C>::const_iterator::operator *).second;
+    return &((std::map<I,C>::const_iterator::operator *()).second);
   }
 
   template <class C, class I>
@@ -358,6 +399,100 @@ namespace MathTL
   bool
   InfiniteVector<C,I>::const_iterator::
   operator < (const const_iterator& it) const
+  {
+    return (index() < it.index());
+  }
+
+  template <class C, class I>
+  InfiniteVector<C,I>::const_reverse_iterator::
+  const_reverse_iterator(const std::reverse_iterator<typename std::map<I,C>::const_iterator>& entry)
+    : std::reverse_iterator<typename std::map<I,C>::const_iterator>(entry)
+  {
+  }
+
+  template <class C, class I>
+  typename InfiniteVector<C,I>::const_reverse_iterator
+  InfiniteVector<C,I>::rbegin() const
+  {
+    return const_reverse_iterator(std::reverse_iterator<typename std::map<I,C>::const_iterator>
+				  (std::map<I,C>::end()));
+  }
+
+  template <class C, class I>
+  typename InfiniteVector<C,I>::const_reverse_iterator
+  InfiniteVector<C,I>::rend() const
+  {
+    return const_reverse_iterator(std::reverse_iterator<typename std::map<I,C>::const_iterator>
+				  (std::map<I,C>::begin()));
+  }
+
+  template <class C, class I>
+  inline
+  const C&
+  InfiniteVector<C,I>::const_reverse_iterator::operator * () const
+  {
+    return (std::reverse_iterator<typename std::map<I,C>::const_iterator>::operator *()).second;
+  }
+
+  template <class C, class I>
+  inline
+  const C*
+  InfiniteVector<C,I>::const_reverse_iterator::operator -> () const
+  {
+    return &(std::reverse_iterator<typename std::map<I,C>::const_iterator>::operator *).second;
+  }
+
+  template <class C, class I>
+  inline
+  I InfiniteVector<C,I>::const_reverse_iterator::index() const
+  {
+    return (std::reverse_iterator<typename std::map<I,C>::const_iterator>::operator *()).first;
+  }
+
+  template <class C, class I>
+  inline
+  typename InfiniteVector<C,I>::const_reverse_iterator&
+  InfiniteVector<C,I>::const_reverse_iterator::operator ++ ()
+  {
+    std::reverse_iterator<typename std::map<I,C>::const_iterator>::operator ++ ();
+    return *this;
+  }
+
+  template <class C, class I>
+  inline
+  typename InfiniteVector<C,I>::const_reverse_iterator
+  InfiniteVector<C,I>::const_reverse_iterator::operator ++ (int step)
+  {
+    InfiniteVector<C,I>::const_reverse_iterator r(*this);
+    std::reverse_iterator<typename std::map<I,C>::const_iterator>::operator ++ (step);
+    return r;
+  }
+
+  template <class C, class I>
+  inline
+  bool
+  InfiniteVector<C,I>::const_reverse_iterator::
+  operator == (const const_reverse_iterator& it) const
+  {
+    // quick, dirty hack
+    return (static_cast<std::reverse_iterator<typename std::map<I,C>::const_iterator> >(*this)
+	    == static_cast<std::reverse_iterator<typename std::map<I,C>::const_iterator> >(it));
+  }
+
+  template <class C, class I>
+  inline
+  bool
+  InfiniteVector<C,I>::const_reverse_iterator::
+  operator != (const const_reverse_iterator& it) const
+  {
+    return !(*this == it);
+  }
+
+  template <class C, class I>
+  inline
+  bool
+  InfiniteVector<C,I>::const_reverse_iterator::
+  operator < (const const_reverse_iterator& it) const
   {
     return (index() < it.index());
   }

@@ -151,6 +151,11 @@ namespace MathTL
     void add(const C s, const Polynomial<C>& p);
 
     /*!
+      pointwise weighted sum of two polynomials *this = s*(*this) + v
+    */
+    void sadd(const C s, const Polynomial<C>& p);
+
+    /*!
       pointwise sum of two polynomials
     */
     Polynomial<C>& operator += (const Polynomial<C>& p);
@@ -160,6 +165,11 @@ namespace MathTL
       (don't use this extensively, since one copy has to be made!)
     */
     Polynomial<C> operator + (const Polynomial<C>& p) const;
+
+    /*!
+      pointwise difference of two polynomials *this -= p
+    */
+    void subtract(const Polynomial<C> &p);
 
     /*!
       pointwise difference of two polynomials
@@ -190,6 +200,11 @@ namespace MathTL
     Polynomial<C> operator * (const C c) const;
 
     /*!
+      pointwise multiplication with another polynomial *this *= p
+    */
+    void multiply (const Polynomial<C>& p);
+
+    /*!
       pointwise multiplication with another polynomial
     */
     Polynomial<C>& operator *= (const Polynomial<C>& p);
@@ -203,7 +218,7 @@ namespace MathTL
     /*!
       raise the polynomial to some power
     */
-    Polynomial <C> power(const unsigned int k) const;
+    Polynomial<C> power(const unsigned int k) const;
 
     /*!
       (symbolic) differentiation

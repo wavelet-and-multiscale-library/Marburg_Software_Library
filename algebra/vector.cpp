@@ -279,16 +279,23 @@ namespace MathTL
 
   template <class C>
   template <class C2>
-  Vector<C>& Vector<C>::operator -= (const Vector<C2>& v)
+  void Vector<C>::subtract(const Vector<C2>& v)
   {
     assert(size_ > 0);
     assert(size_ == v.size());
-    
+
     iterator it(begin()), itend(end());
     typename Vector<C2>::const_iterator itv(v.begin());
-    while(it != itend)
+    while (it != itend)
       *it++ -= *itv++;
+  }
 
+  template <class C>
+  template <class C2>
+  inline
+  Vector<C>& Vector<C>::operator -= (const Vector<C2>& v)
+  {
+    subtract(v); // handles the assertions
     return *this;
   }
    

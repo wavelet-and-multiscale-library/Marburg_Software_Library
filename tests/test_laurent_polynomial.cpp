@@ -29,13 +29,13 @@ int main()
   p.set_coefficient(-2, 4);
   cout << p << endl;
   
-//   cout << "- evaluating p at some (nontrivial) points:" << endl;
-//   double x(1);
-//   cout << "p(" << x << ")=" << p.value(x) << endl;
-//   x = 2;
-//   cout << "p(" << x << ")=" << p.value(x) << endl;
-//   x = -0.3;
-//   cout << "p(" << x << ")=" << p.value(x) << endl;
+  cout << "- evaluating p at some (nontrivial) points:" << endl;
+  double x(1);
+  cout << "p(" << x << ")=" << p.value(x) << endl;
+  x = 2;
+  cout << "p(" << x << ")=" << p.value(x) << endl;
+  x = -0.3;
+  cout << "p(" << x << ")=" << p.value(x) << endl;
 
   cout << "- algebraic functionality:" << endl;
   q += p;
@@ -50,12 +50,12 @@ int main()
   cout << "q-p: " << q-p << endl;
   cout << "-q: " << -q << endl;
   cout << "3*q: " << 3.*q << endl;
-//   cout << "p*q: " << p*q << endl;
-//   cout << "(1+z)^2: ";
-//   LaurentPolynomial<double> r;
-//   r.setCoefficient(0, 1);
-//   r.setCoefficient(1, 1);
-//   cout << power(r, 2) << endl;
+  cout << "p*q: " << p*q << endl;
+  cout << "(1+z)^2: ";
+  LaurentPolynomial<double> s(1);
+  s.set_coefficient(1, 1);
+  cout << s.power(2) << endl;
+  cout << "(1+z)^3: " << s.power(3) << endl;
 
   return 0;
 }

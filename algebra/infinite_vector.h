@@ -12,6 +12,7 @@
 
 #include <map>
 #include <algorithm>
+#include <iterator>
 
 // external functionality, for convenience:
 #include <algebra/vector_norms.h>
@@ -111,6 +112,71 @@ namespace MathTL
     const_iterator end() const;
 
     /*!
+      STL-compliant const_reverse_iterator scanning the nontrivial entries
+      in a reverse way
+    */
+    class const_reverse_iterator
+      : protected std::reverse_iterator<typename std::map<I,C>::const_iterator>
+    {
+    public:
+      /*!
+	constructs a const_reverse_iterator from a map::const_iterator
+      */
+      const_reverse_iterator(const std::reverse_iterator<typename std::map<I,C>::const_iterator>& entry);
+
+      /*!
+	prefix increment of the const_reverse_iterator
+      */
+      const_reverse_iterator& operator ++ ();
+
+      /*!
+	postfix increment of the const_reverse_iterator
+      */
+      const_reverse_iterator operator ++ (int step);
+
+      /*!
+	dereference const_reverse_iterator
+      */
+      const C& operator * () const;
+
+      /*!
+	dereference const_reverse_iterator
+      */
+      const C* operator -> () const;
+
+      /*!
+	index of current iterator
+	(maybe the only difference to an STL iterator)
+      */
+      I index() const;
+
+      /*!
+	compare positions of two iterators
+      */
+      bool operator == (const const_reverse_iterator& it) const;
+
+      /*!
+	non-equality test
+      */
+      bool operator != (const const_reverse_iterator& it) const;
+
+      /*!
+	comparison, corresponding to the order relation on I
+       */
+      bool operator < (const const_reverse_iterator& it) const;
+    };
+
+    /*!
+      const_reverse_iterator pointing to the last nontrivial vector entry
+    */
+    const_reverse_iterator rbegin() const;
+
+    /*!
+      const_reverse_iterator pointing to one before the first last nontrivial vector entry
+    */
+    const_reverse_iterator rend() const;
+
+    /*!
       assignment from another vector
     */
     InfiniteVector<C,I>& operator = (const InfiniteVector<C,I>& v);
@@ -179,6 +245,12 @@ namespace MathTL
     */
     template <class C2>
     InfiniteVector<C,I>& operator += (const InfiniteVector<C2,I>& v);
+
+    /*!
+      in place subtraction *this -= v
+    */
+    template <class C2>
+    void subtract(const InfiniteVector<C2,I>& v);
 
     /*!
       in place subtraction

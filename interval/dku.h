@@ -12,10 +12,13 @@
 
 #include <iostream>
 #include <cmath>
-#include <Rd/cdf_utils.h>
-#include <Rd/cdf_basis.h>
+
 #include <algebra/matrix.h>
 #include <utils/array1d.h>
+
+#include <Rd/cdf_utils.h>
+#include <Rd/cdf_basis.h>
+#include <interval/dku_index.h>
 
 using MathTL::Matrix;
 
@@ -87,6 +90,11 @@ namespace WaveletTL
     inline const int Delta0Tmax(const int j) const { return (1<<j)-ellT()-(d%2); }
     inline const int DeltaRTmin(const int j) const { return (1<<j)-ellT()+1-(d%2); }
     inline const int DeltaRTmax(const int j) const { return (1<<j)-ellT()+dT-(d%2); }
+
+    /*!
+      wavelet index class
+    */
+    typedef DKUIndex<d, dT> Index;
 
   protected:
     int ell1_, ell2_, ell1T_, ell2T_, ell_, ellT_;

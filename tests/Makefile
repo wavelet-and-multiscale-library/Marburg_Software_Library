@@ -7,7 +7,6 @@
 
 MATHTL_DIR = $(HOME)/c++/MathTL
 
-# be sure to use a gcc 3.x!
 CXX = g++
 CXXFLAGS += -I$(MATHTL_DIR) -Wall
 

@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <algebra/vector.h>
+#include <algebra/symmetric_matrix.h>
 
 // matrix norms, for convenience
 #include <algebra/matrix_norms.h>
@@ -43,6 +44,11 @@ namespace MathTL
     */
     Matrix(const Matrix<C>& M);
 
+    /*!
+      copy constructor from symmetric matrices
+    */
+    Matrix(const SymmetricMatrix<C>& M);
+    
     /*!
       construct m*n rectangular matrix
     */
@@ -171,7 +177,7 @@ namespace MathTL
   */
   template <class C>
   void swap(Matrix<C>& M1, Matrix<C>& M2);
-  
+
   /*!
     Matlab-style stream output for dense matrices
   */

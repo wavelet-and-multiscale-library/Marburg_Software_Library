@@ -20,9 +20,9 @@ namespace MathTL
   inline
   typename LowerTriangularMatrix<C>::size_type
   LowerTriangularMatrix<C>::triangle_index(const size_type row,
-			    const size_type column,
-			    const size_type rowdim,
-			    const size_type coldim)
+					   const size_type column,
+					   const size_type rowdim,
+					   const size_type coldim)
   {
     typename LowerTriangularMatrix<C>::size_type index(0);
     if (column > row)
@@ -107,7 +107,7 @@ namespace MathTL
   template <class C>
   void LowerTriangularMatrix<C>::resize(const size_type rows, const size_type columns)
   {
-    entries_.resize(triangle_size(rows*columns));
+    entries_.resize(triangle_size(rows,columns));
     rowdim_ = rows;
     coldim_ = columns;
   }
@@ -192,10 +192,10 @@ namespace MathTL
   {
     assert(Mtx.size() == coldim_);
     
-    for (typename Matrix<C>::size_type i(0); i < coldim_; i++)
+    for (typename LowerTriangularMatrix<C>::size_type i(0); i < coldim_; i++)
       {
 	Mtx[i] = 0;
-	for (typename Matrix<C>::size_type j(i);
+	for (typename LowerTriangularMatrix<C>::size_type j(i);
 	     j < rowdim_; j++)
 	  Mtx[i] += this->operator () (j, i) * x[j];
       }

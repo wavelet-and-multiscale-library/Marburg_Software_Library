@@ -15,6 +15,7 @@
 #include <utils/array1d.h>
 #include <utils/function.h>
 #include <utils/function_time.h>
+#include <utils/tiny_tools.h>
 
 #include <algebra/tensor.h>
 #include <algebra/tensor_base.h>
@@ -33,5 +34,6 @@
 
 #include <numerics/iteratsolv.h>
 #include <numerics/eigenvalues.h>
+#include <numerics/matrix_decomp.h>
 
 #endif

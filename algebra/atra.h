@@ -42,7 +42,7 @@ namespace MathTL
   private:
     const MATRIX& A_;
   };
-  
+
   template <class MATRIX> template <class VECTOR>
   void AtrA<MATRIX>::apply(const VECTOR& x, VECTOR& AtrAx) const
   {
@@ -81,6 +81,13 @@ namespace MathTL
   private:
     const MATRIX& A_;
   };
+
+  /*!
+    Matlab-style stream output
+  */
+  template <class MATRIX>
+  std::ostream& operator << (std::ostream& os, const AAtr<MATRIX>& M);
+
   
   template <class MATRIX> template <class VECTOR>
   void AAtr<MATRIX>::apply(const VECTOR& x, VECTOR& AAtrx) const

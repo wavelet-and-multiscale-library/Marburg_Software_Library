@@ -32,7 +32,7 @@ namespace WaveletTL
       \phi(x) = \sum_{k\in\mathbb Z} a_k * \phi(2 * x - k)
 
     The coefficients a_k are be stored in a univariate Laurent polynomial.
-    Since a refinable function has much more functionality, we do not only
+    Since a refinable function admits much more functionality, we do not only
     use LaurentPolynomial<double> but specify the mask via a template parameter.
   */
   template <class MASK>
@@ -57,6 +57,19 @@ namespace WaveletTL
     SampledMapping<1> evaluate(const int j, const int k,
 			       const int a, const int b,
 			       const int resolution) const;
+
+    /*!
+      Compute the n-th moment
+        M_n:=\int_{-\infty}^\infty x^n\phi(x)\,dx
+      of the refinable function \phi
+    */
+    double moment(const unsigned int n) const;
+
+  protected:
+    /*!
+      helper function for the moment calculation
+    */
+    double cnk(const unsigned int n, const unsigned int k) const;
   };
 }
 

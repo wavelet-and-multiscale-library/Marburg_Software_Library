@@ -247,4 +247,32 @@ namespace WaveletTL
     return SampledMapping<1>(grid, values);
   }
 
+  template <class MASK>
+  double RefinableFunction<MASK>::cnk(const unsigned int n, const unsigned int k) const
+  {
+    double r(0);
+
+    for (LaurentPolynomial<double>::const_iterator it(begin()); it != end(); ++it)
+      r += pow(it.index(), (double)k) * *it;
+    
+    return r * binomial(n, k) * ldexp(1.0, -((int)n+1));
+  }
+
+  template <class MASK>
+  double RefinableFunction<MASK>::moment(const unsigned int n) const
+  {
+    double r(1.0);
+    
+    if (n > 0)
+      {
+	r = 0.0;
+	
+	for (unsigned int k(0); k < n; k++)
+	  r += cnk(n, n-k) * moment(k);
+	
+	r /= 1.0 - ldexp(1.0, -(int)n); // != 0 !
+      }
+    
+    return r;
+  }
 }

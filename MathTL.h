@@ -27,6 +27,7 @@
 #include <algebra/triangular_matrix.h>
 #include <algebra/symmetric_matrix.h>
 #include <algebra/atra.h>
+#include <algebra/polynomial.h>
 
 #include <io/vector_io.h>
 

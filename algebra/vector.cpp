@@ -173,16 +173,7 @@ namespace MathTL
   bool Vector<C>::operator == (const Vector<C2>& v) const
   {
     if (size_ != v.size()) return false;
-
-    const_iterator it(begin()), itend(end());
-    typename Vector<C2>::const_iterator itv(v.begin());
-    while (it != itend)
-      {
-	if (*it++ != *itv++)
-	  return false;
-      }
-    
-    return true;
+    return std::equal(begin(), end(), v.begin());
   }
 
   template <class C>
@@ -199,7 +190,7 @@ namespace MathTL
   bool Vector<C>::operator < (const Vector<C2>& v) const
   {
     assert(size_ == v.size());
-    return std::lexicographical_compare(begin(), end(), v.begin(), v.end(), std::less<C>());
+    return std::lexicographical_compare(begin(), end(), v.begin(), v.end());
   }
 
   template <class C>

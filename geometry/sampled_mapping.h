@@ -11,17 +11,20 @@
 #define _MATHTL_SAMPLED_MAPPING_H
 
 #include <iostream>
+
 #include <geometry/grid.h>
 #include <utils/array1d.h>
 #include <utils/function.h>
+#include <utils/multiindex.h>
 #include <algebra/matrix.h>
+#include <algebra/infinite_vector.h>
 
 namespace MathTL
 {
   /*!
     Abstract base class for a mapping from R^n to R,
     represented by finite many samples on a rectangular grid (Matlab style).
-    Meaningful values for n are n=1 and n=2 so far.
+    Meaningful values for n are n=1 and n=2 so far (see specializations).
   */
   template <unsigned int DIM>
   class SampledMapping
@@ -47,6 +50,15 @@ namespace MathTL
       constructor from a fixed grid and a Function object
     */
     SampledMapping(const Grid<DIM>& grid, const Function<DIM>& f);
+
+    /*!
+      constructor from given values on 2^{-resolution}\mathbb Z^d,
+      clipped to the cuboid <a,b> in \mathbb Z^d
+    */
+    SampledMapping(const MultiIndex<int, DIM>& a,
+		   const MultiIndex<int, DIM>& b,
+		   const InfiniteVector<double, MultiIndex<int, DIMENSION> >& values,
+		   const int resolution);
 
     /*!
       assignment operator
@@ -97,6 +109,20 @@ namespace MathTL
     {
       for (unsigned int n(0); n < grid.size(); n++)
 	values_[n] = f.value(Point<1>(grid_[n]));
+    }
+
+    /*!
+      constructor from given values on 2^{-resolution}\mathbb Z, clipped to [a,b]
+    */
+    SampledMapping(const MultiIndex<int, 1>& a,
+		   const MultiIndex<int, 1>& b,
+		   const InfiniteVector<double, MultiIndex<int, 1> >& values,
+		   const int resolution)
+      : Grid<1>(a[0], b[0], (1<<resolution)*(b[0]-a[0]))
+    {
+      values_.resize(Grid<1>::size());
+      for (int k(a[0]<<resolution), n(0); k <= (b[0]<<resolution); k++, n++)
+	values_[n] = values.get_coefficient(MultiIndex<int, 1>(k));
     }
 
     /*!
@@ -169,6 +195,17 @@ namespace MathTL
       for (unsigned int m(0); m < values_.row_dimension(); m++)
 	for (unsigned int n(0); n < values_.column_dimension(); n++)
 	  values_(m,n) = f.value(Point<2>(gridx_(m,n), gridy_(m,n)));
+    }
+
+    /*!
+      constructor from given values on 2^{-resolution}\mathbb Z^2,
+      clipped to [a,b]^2
+    */
+    SampledMapping(const MultiIndex<int, 2>& a,
+		   const MultiIndex<int, 2>& b,
+		   const InfiniteVector<double, MultiIndex<int, 2> >& values,
+		   const int resolution)
+    {
     }
 
     /*!

@@ -33,8 +33,8 @@ int main()
   cout << "- evaluate this at the integers:" << endl;
   cout << dm_multi.evaluate();
 
-  cout << "- DM multivariate mask for integrals of two hat fcts. and the Haar fct.:" << endl;
-  MultivariateRefinableFunction<DMMask2<CDFMask_primal<2>, CDFMask_primal<2>, HaarMask>, 2> dm_multi2;
+  cout << "- DM multivariate mask for integrals of a Haar fct. and two translated hat fcts.:" << endl;
+  MultivariateRefinableFunction<DMMask2<HaarMask, CDFMask_primal<2>, CDFMask_primal<2> >, 2> dm_multi2;
   cout << dm_multi2 << endl;
  
   cout << "- evaluate this at the integers:" << endl;

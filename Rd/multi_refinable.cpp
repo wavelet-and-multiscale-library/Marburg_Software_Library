@@ -7,12 +7,14 @@
 #include <utils/fixed_array1d.h>
 #include <utils/tiny_tools.h>
 #include <algebra/matrix.h>
+#include <algebra/triangular_matrix.h>
 #include <numerics/eigenvalues.h>
 #include <numerics/differences.h>
-
+#include <numerics/matrix_decomp.h>
 
 using std::cout;
 using std::endl;
+using namespace MathTL;
 
 namespace WaveletTL
 {
@@ -44,10 +46,6 @@ namespace WaveletTL
  	    suppright = std::max(suppright, it.index()[i]);
  	  }
       }
-    cout << "support cube: ["
- 	 << suppleft << ","
- 	 << suppright << "]^"
- 	 << DIMENSION << endl;
 
     // for convenience, collect all integer points from the interior of the support cube
     MultiIndex<int, DIMENSION> alpha, beta;
@@ -58,11 +56,6 @@ namespace WaveletTL
       }
     std::set<MultiIndex<int, DIMENSION> > indices
       (cuboid_indices<int, DIMENSION>(alpha, beta));
-
-    cout << "indices in the support cube:" << endl;
-    for (typename std::set<MultiIndex<int, DIMENSION> >::const_iterator it(indices.begin());
- 	 it != indices.end(); ++it)
-      cout << *it << endl;
 
     // In the following, we set up the eigenvalue problem for the values
     //   V_\alpha := D^\mu\phi(\alpha), \alpha\in\mathbb Z^d
@@ -76,7 +69,6 @@ namespace WaveletTL
     //   \sum_\alpha (-\alpha)^\nu V_\alpha = \mu!\delta_{\mu,\nu}, |\nu|\le|\mu|
 
     unsigned int degmu(multi_degree(mu)), facmu(multi_faculty(mu));
-    cout << "deg(mu): " << degmu << ", factorial(mu): " << facmu << endl;
 
     // we also collect all \nu\in\mathbb N^d, such that |\nu|\le\mu|
     std::set<MultiIndex<unsigned int, DIMENSION> > nus;
@@ -89,17 +81,10 @@ namespace WaveletTL
 		       inserter(nus, nus.begin()));
       }
 
-    cout << "all multiindices with degree <= deg(mu):" << endl;
-    for (typename std::set<MultiIndex<unsigned int, DIMENSION> >::const_iterator it(nus.begin());
- 	 it != nus.end(); ++it)
-      cout << *it << endl;
-    
     // for safety, re-compute the number of multiindices \nu\in\mathbb N^d, such that |\nu|\le|\mu|
     unsigned int extra_rows(0);
     for (unsigned int k(0); k <= degmu; k++)
       extra_rows += binomial(DIMENSION+k-1, k); // \#\{\nu\in\mathbb N^d: |\nu|=k\}
-
-    cout << "number of extra rows: " << nus.size() << ", should equal " << extra_rows << endl;
 
     Matrix<double> A(indices.size() + nus.size(), indices.size());
     Vector<double> b(indices.size() + nus.size());
@@ -133,8 +118,14 @@ namespace WaveletTL
 	b[m] = (*rowit2 == mu ? facmu : 0);
       }
 
-    cout << "matrix for the eigenvalue problem:" << endl << A << endl;
-    cout << "rhs for the eigenvalue problem:" << endl << b << endl;
+    QRDecomposition<double> qr(A);
+    assert(qr.hasFullRank());
+    Vector<double> x;
+    qr.solve(b, x);
+    x.compress(1e-15);
+
+    for (colit = indices.begin(), n = 0; colit != indices.end(); ++colit, n++)
+      r.set_coefficient(*colit, x[n]);
 
     return r;
   }

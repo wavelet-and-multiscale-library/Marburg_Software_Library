@@ -37,7 +37,7 @@ namespace FLAT
   */
   template <class VECTOR, class MATRIX>
   void Richardson(const MATRIX &A, const VECTOR &b, VECTOR &xk, const double omega,
-		  const double tol, const int maxiter, int& iterations);
+		  const double tol, const unsigned int maxiter, unsigned int& iterations);
 
   //! Jacobi iteration
   /*!
@@ -51,7 +51,7 @@ namespace FLAT
   */
   template <class VECTOR, class MATRIX>
   void Jacobi(const MATRIX &A, const VECTOR &b, VECTOR &xk,
-	      const double tol, const int maxiter, int& iterations);
+	      const double tol, const unsigned int maxiter, unsigned int& iterations);
 
   //! Gauss-Seidel iteration
   /*!

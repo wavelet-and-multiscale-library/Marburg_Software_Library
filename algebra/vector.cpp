@@ -227,6 +227,19 @@ namespace MathTL
    
   template <class C>
   template <class C2>
+  void Vector<C>::add(const C2 s, const Vector<C2>& v)
+  {
+    assert(size_ > 0);
+    assert(size_ == v.size());
+
+    iterator it(begin()), itend(end());
+    typename Vector<C2>::const_iterator itv(v.begin());
+    while (it != itend)
+      *it++ += s * *itv++;
+  }
+   
+  template <class C>
+  template <class C2>
   void Vector<C>::sadd(const C s, const Vector<C2>& v)
   {
     assert(size_ > 0);

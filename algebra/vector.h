@@ -199,6 +199,12 @@ namespace MathTL
     void add(const Vector<C2>& v);
     
     /*!
+      in place summation *this += s*v
+    */
+    template <class C2>
+    void add(const C2 s, const Vector<C2>& v);
+    
+    /*!
       in place summation *this = s*(*this) + v
       (AXPY level 1 BLAS routine)
     */
@@ -281,7 +287,7 @@ namespace MathTL
     r -= v2;
     return r;
   }
-  
+
   /*!
     stream output for vectors
     (we overload this for code clarity)

@@ -4,43 +4,46 @@ namespace MathTL
 {
   template <class VECTOR, class MATRIX>
   void Richardson(const MATRIX &A, const VECTOR &b, VECTOR &xk, const double omega,
-		  const double tol, const int maxiter, int& iterations)
+		  const double tol, const unsigned int maxiter, unsigned int& iterations)
   {
     // first residual
-    VECTOR rk;
-    A.APPLY(xk, rk);
-    rk -= b;
-    double error = norm(rk);
+    VECTOR rk(A.row_dimension(), false);
+    A.apply(xk, rk);
+    rk -= b; // rk=A*xk-b
+    double error = l2_norm(rk);
 
     for (iterations = 1; iterations <= maxiter && error > tol; iterations++)
       {
-	xk -= omega * rk;
-	A.APPLY(xk, rk);
+	xk.add(-omega, rk);
+
+	A.apply(xk, rk);
 	rk -= b;
-	error = norm(rk);
+
+	error = l2_norm(rk);
       }
   }
 
   template <class VECTOR, class MATRIX>
   void Jacobi(const MATRIX &A, const VECTOR &b, VECTOR &xk,
-	      const double tol, const int maxiter, int& iterations)
+	      const double tol, const unsigned int maxiter, unsigned int& iterations)
   {
-    const int n(A.coldim());
+    const typename MATRIX::size_type n(A.column_dimension());
     
     // first residual
-    VECTOR rk;
-    A.APPLY(xk, rk);
-    rk -= b;
-    double error = norm(rk);
+    VECTOR rk(A.row_dimension(), false);
+    A.apply(xk, rk);
+    rk -= b; // rk=A*xk-b
+    double error = l2_norm(rk);
 
     for (iterations = 1; iterations <= maxiter && error > tol; iterations++)
       {
-	for (int i(0); i < n; i++)
-	  xk(i) -= rk(i) / A(i, i);
+	for (typename VECTOR::size_type i(0); i < n; i++)
+	  xk[i] -= rk[i] / A(i, i);
 
-	A.APPLY(xk, rk);
+	A.apply(xk, rk);
 	rk -= b;
-	error = norm(rk);
+
+	error = l2_norm(rk);
       }
   }
 

@@ -92,6 +92,7 @@ namespace MathTL
   std::ostream& operator << (std::ostream& os, const Array1D<C>& A)
   {
     print_vector(A, os);
+    return os;
   }
 
 }

@@ -8,7 +8,7 @@
 MATHTL_DIR = $(HOME)/c++/MathTL
 
 CXX = g++
-CXXFLAGS += -I$(MATHTL_DIR)
+CXXFLAGS += -I$(MATHTL_DIR) -Wall
 
 EXEOBJF = \
   test_tensor.o test_point.o test_array1d.o\

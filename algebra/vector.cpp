@@ -223,6 +223,8 @@ namespace MathTL
     const_iterator itv(v.begin());
     while(it != itend)
       *it++ -= *itv++;
+
+    return *this;
   }
    
   template <class C>
@@ -244,5 +246,6 @@ namespace MathTL
   std::ostream& operator << (std::ostream& os, const Vector<C>& v)
   {
     print_vector(v, os);
+    return os;
   }
 }

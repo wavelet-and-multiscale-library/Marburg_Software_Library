@@ -1,5 +1,6 @@
 #include <iostream>
 #include "algebra/vector.h"
+#include "utils/vector_norms.h"
 
 using std::cout;
 using std::endl;
@@ -48,10 +49,10 @@ int main()
   v /= 3;
   cout << v << endl;
 
-//   cout << "- ell_p norms of v:" << endl;
-//   cout << "  ||x||_2 = " << norm(v)
-//        << ", ||x||_1 = " << norm(v,1)
-//        << ", ||x||_infinity = " << maxnorm(v) << endl;
+  cout << "- ell_p norms of v:" << endl;
+  cout << "  ||x||_2 = " << l2_norm(v)
+       << ", ||x||_1 = " << l1_norm(v)
+       << ", ||x||_infinity = " << linfty_norm(v) << endl;
 
 //   cout << "- external arithmetic functionality:" << endl;
 //   RawVector<double> a(dim), b(dim);

@@ -74,5 +74,6 @@ namespace MathTL
   std::ostream& operator << (std::ostream& os, const Point<DIM>& p)
   {
     print_vector(p, os);
+    return os;
   }
 }

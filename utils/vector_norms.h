@@ -48,7 +48,7 @@ namespace MathTL
     for (unsigned int i(0); i < v.size(); i++)
       r += fabs(v[i]);
 
-    return sqrt(r);
+    return r;
   }
 
   /*!

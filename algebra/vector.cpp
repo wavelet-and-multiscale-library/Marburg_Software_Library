@@ -3,6 +3,7 @@
 #include <io/vector_io.h>
 #include <cassert>
 #include <algorithm>
+#include <functional>
 
 namespace MathTL
 {
@@ -152,6 +153,14 @@ namespace MathTL
   }
 
   template <class C>
+  Vector<C>& Vector<C>::operator = (const Vector<C>& v)
+  {
+    assert(size_ == v.size());
+    std::copy(v.begin(), v.end(), begin());
+    return *this;
+  }
+
+  template <class C>
   inline
   void Vector<C>::swap(Vector<C>& v)
   {
@@ -160,47 +169,61 @@ namespace MathTL
   }
 
   template <class C>
-  template <class VECTOR>
-  bool Vector<C>::operator == (const VECTOR& v)
+  template <class C2>
+  bool Vector<C>::operator == (const Vector<C2>& v) const
   {
     if (size_ != v.size()) return false;
 
-    for (unsigned int i(0); i < size_; i++)
-      if (v[i] != values_[i]) return false;
-
+    const_iterator it(begin()), itend(end());
+    typename Vector<C2>::const_iterator itv(v.begin());
+    while (it != itend)
+      {
+	if (*it++ != *itv++)
+	  return false;
+      }
+    
     return true;
   }
 
   template <class C>
-  template <class VECTOR>
+  template <class C2>
   inline
-  bool Vector<C>::operator != (const VECTOR& v)
+  bool Vector<C>::operator != (const Vector<C2>& v) const
   {
     return !((*this) == v);
   }
 
   template <class C>
-  template <class VECTOR>
-  void Vector<C>::add(const VECTOR& v)
+  template <class C2>
+  inline
+  bool Vector<C>::operator < (const Vector<C2>& v) const
+  {
+    assert(size_ == v.size());
+    return std::lexicographical_compare(begin(), end(), v.begin(), v.end(), std::less<C>());
+  }
+
+  template <class C>
+  template <class C2>
+  void Vector<C>::add(const Vector<C2>& v)
   {
     assert(size_ > 0);
     assert(size_ == v.size());
 
     iterator it(begin()), itend(end());
-    typename VECTOR::const_iterator itv(v.begin());
-    while(it != itend)
+    typename Vector<C2>::const_iterator itv(v.begin());
+    while (it != itend)
       *it++ += *itv++;
   }
    
   template <class C>
-  template <class VECTOR>
-  void Vector<C>::sadd(const C s, const VECTOR& v)
+  template <class C2>
+  void Vector<C>::sadd(const C s, const Vector<C2>& v)
   {
     assert(size_ > 0);
     assert(size_ == v.size());
 
     iterator it(begin()), itend(end());
-    typename VECTOR::const_iterator itv(v.begin());
+    typename Vector<C2>::const_iterator itv(v.begin());
     while(it != itend)
       {
 	*it = s*(*it) + *itv++;
@@ -219,22 +242,23 @@ namespace MathTL
   }
 
   template <class C>
-  template <class VECTOR>
-  Vector<C>& Vector<C>::operator += (const VECTOR& v)
+  template <class C2>
+  inline
+  Vector<C>& Vector<C>::operator += (const Vector<C2>& v)
   {
     add(v); // handles the assertions
     return *this;
   }
 
   template <class C>
-  template <class VECTOR>
-  Vector<C>& Vector<C>::operator -= (const VECTOR& v)
+  template <class C2>
+  Vector<C>& Vector<C>::operator -= (const Vector<C2>& v)
   {
     assert(size_ > 0);
     assert(size_ == v.size());
     
     iterator it(begin()), itend(end());
-    typename VECTOR::const_iterator itv(v.begin());
+    typename Vector<C2>::const_iterator itv(v.begin());
     while(it != itend)
       *it++ -= *itv++;
 
@@ -256,8 +280,8 @@ namespace MathTL
   }
 
   template <class C>
-  template <class VECTOR>
-  const C Vector<C>::operator * (const VECTOR& v)
+  template <class C2>
+  const C Vector<C>::operator * (const Vector<C2>& v) const
   {
     assert(size_ == v.size());
 
@@ -267,7 +291,7 @@ namespace MathTL
     C r(0);
     
     const_iterator it(begin()), itend(end());
-    typename VECTOR::const_iterator itv(v.begin());
+    typename Vector<C2>::const_iterator itv(v.begin());
     while(it != itend)
       r += *it++ * *itv++;
 

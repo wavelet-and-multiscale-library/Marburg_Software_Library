@@ -155,6 +155,11 @@ namespace MathTL
     Vector<C>& operator = (const C c);
 
     /*!
+      assignment from another vector
+    */
+    Vector<C>& operator = (const Vector<C>& v);
+
+    /*!
       swap components of two vectors
     */
     void swap (Vector<C>& v);
@@ -162,27 +167,33 @@ namespace MathTL
     /*!
       equality test with another vector
      */
-    template <class VECTOR>
-    bool operator == (const VECTOR& v);
+    template <class C2>
+    bool operator == (const Vector<C2>& v) const;
 
     /*!
       non-equality test
     */
-    template <class VECTOR>
-    bool operator != (const VECTOR& v);
+    template <class C2>
+    bool operator != (const Vector<C2>& v) const;
+
+    /*!
+      lexicographical order
+    */
+    template <class C2>
+    bool operator < (const Vector<C2>& v) const;
 
     /*!
       in place summation *this += v
     */
-    template <class VECTOR>
-    void add(const VECTOR& v);
+    template <class C2>
+    void add(const Vector<C2>& v);
     
     /*!
       in place summation *this = s*(*this) + v
       (AXPY level 1 BLAS routine)
     */
-    template <class VECTOR>
-    void sadd(const C s, const VECTOR& v);
+    template <class C2>
+    void sadd(const C s, const Vector<C2>& v);
 
     /*!
       in place scaling *this *= s
@@ -192,14 +203,14 @@ namespace MathTL
     /*!
       in place summation
     */
-    template <class VECTOR>
-    Vector<C>& operator += (const VECTOR& v);
+    template <class C2>
+    Vector<C>& operator += (const Vector<C2>& v);
 
     /*!
       in place subtraction
     */
-    template <class VECTOR>
-    Vector<C>& operator -= (const VECTOR& v);
+    template <class C2>
+    Vector<C>& operator -= (const Vector<C2>& v);
 
     /*!
       in place multiplication with a scalar
@@ -214,8 +225,8 @@ namespace MathTL
     /*!
       inner product
     */
-    template <class VECTOR>
-    const C operator * (const VECTOR& v);
+    template <class C2>
+    const C operator * (const Vector<C2>& v) const;
 
   protected:
     /*!

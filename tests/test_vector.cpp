@@ -58,6 +58,11 @@ int main()
   Vector<double> a(dim), b(dim);
   a(1) = 23; a(2) = 10; b(1) = -1.5; b(2) = 3; b(4) = 8;
   cout << "  a=" << a << ", b=" << b << endl;
+  cout << "  check lexicographical order: ";
+  if (a < b)
+    cout << "true" << endl;
+  else
+    cout << "false" << endl;
   swap(a,b);
   cout << "  after swapping, a=" << a << ", b=" << b << endl;
   cout << "  a+b=" << a+b << ", a-b=" << a-b << endl;

@@ -62,7 +62,7 @@ namespace MathTL
   //
   //
   // template specialization to one and two space dimensions
-
+  template <>
   class SampledMapping<1>
     : protected Grid<1>
   {
@@ -104,6 +104,7 @@ namespace MathTL
     Array1D<double> values_;
   };
 
+  template <>
   class SampledMapping<2>
     : protected Grid<2>
   {

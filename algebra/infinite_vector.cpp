@@ -369,7 +369,7 @@ namespace MathTL
   typename InfiniteVector<C,I>::const_iterator
   InfiniteVector<C,I>::const_iterator::operator ++ (int step)
   {
-    InfiniteVector<C,I>::const_iterator r(*this);
+    typename InfiniteVector<C,I>::const_iterator r(*this);
     std::map<I,C>::const_iterator::operator ++ (step);
     return r;
   }
@@ -463,7 +463,7 @@ namespace MathTL
   typename InfiniteVector<C,I>::const_reverse_iterator
   InfiniteVector<C,I>::const_reverse_iterator::operator ++ (int step)
   {
-    InfiniteVector<C,I>::const_reverse_iterator r(*this);
+    typename InfiniteVector<C,I>::const_reverse_iterator r(*this);
     std::reverse_iterator<typename std::map<I,C>::const_iterator>::operator ++ (step);
     return r;
   }
@@ -517,7 +517,7 @@ namespace MathTL
 	for (typename InfiniteVector<C,I>::const_iterator it(v.begin());
 	     it != v.end(); ++it)
 	  {
-	    os << it.index() << ": " << *it << endl;
+	    os << it.index() << ": " << *it << std::endl;
 	  }
       }
 

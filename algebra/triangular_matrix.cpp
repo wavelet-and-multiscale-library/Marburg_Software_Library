@@ -344,7 +344,7 @@ namespace MathTL
 				       const unsigned int tabwidth,
 				       const unsigned int precision) const
   {
-    if (empty())
+    if (LowerTriangularMatrix<C>::empty())
       os << "[]" << std::endl; // Matlab style
     else
       {

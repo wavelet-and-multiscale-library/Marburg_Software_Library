@@ -9,6 +9,7 @@
 #define _MATHTL_VECTOR_NORMS_H
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 
 namespace MathTL
@@ -85,9 +86,9 @@ namespace MathTL
 
     for (typename VECTOR::const_iterator it(v.begin()), itend(v.end());
 	 it != itend; ++it)
-      r += pow(fabs(*it), p);
+      r += std::pow(fabs(*it), p);
     
-    return pow(r, 1.0/p);
+    return std::pow(r, 1.0/p);
   }
 }
 

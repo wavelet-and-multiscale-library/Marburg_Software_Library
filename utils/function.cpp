@@ -53,7 +53,8 @@ namespace MathTL
   void ZeroFunction<DIM, VALUE>::vector_value(const Point<DIM> &p,
 					      Vector<VALUE>& values) const
   {
-    for (unsigned int i(0); i < n_components; i++)
+    for (unsigned int i(0);
+	 i < Function<DIM, VALUE>::n_components; i++)
       values[i] = value(p, i);
   }
 }

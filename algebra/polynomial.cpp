@@ -212,7 +212,7 @@ namespace MathTL
       }
     else
       {
-	std::copy(begin(), end(), help.begin());
+	std::copy(Vector<C>::begin(), Vector<C>::end(), help.begin());
 	help.add(p);
       }
     swap(help);
@@ -229,7 +229,7 @@ namespace MathTL
       }
     else
       {
-	std::copy(begin(), end(), help.begin());
+	std::copy(Vector<C>::begin(), Vector<C>::end(), help.begin());
 	help.add(s, p); // help <- help + s*p
       }
     swap(help);
@@ -246,7 +246,7 @@ namespace MathTL
       }
     else
       {
-	std::copy(begin(), end(), help.begin());
+	std::copy(Vector<C>::begin(), Vector<C>::end(), help.begin());
 	help.sadd(s, p); // help <- s*help + p
       }
     swap(help);
@@ -278,7 +278,7 @@ namespace MathTL
       }
     else
       {
-	std::copy(begin(), end(), help.begin());
+	std::copy(Vector<C>::begin(), Vector<C>::end(), help.begin());
 	help.add(C(-1), p);
       }
     swap(help);

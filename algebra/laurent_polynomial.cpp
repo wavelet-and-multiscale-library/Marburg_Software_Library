@@ -91,7 +91,7 @@ namespace MathTL
     R r(0);
     
     // Horner scheme for a shifted Laurent polynomial
-    if (!empty())
+    if (!InfiniteVector<R,int>::empty())
       r = *rbegin();
     for (const_reverse_iterator it(rbegin()); it != rend();)
       {

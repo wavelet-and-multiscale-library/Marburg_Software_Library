@@ -39,7 +39,9 @@ namespace MathTL
   const C SymmetricMatrix<C>::operator () (const size_type row,
 					   const size_type column) const
   {
-    return entries_[triangle_index(row,column,rowdim_,coldim_)];
+    return LowerTriangularMatrix<C>::entries_[triangle_index(row,column,
+							     LowerTriangularMatrix<C>::rowdim_,
+							     LowerTriangularMatrix<C>::coldim_)];
   }
   
   template <class C>
@@ -47,7 +49,9 @@ namespace MathTL
   C& SymmetricMatrix<C>::operator () (const size_type row,
 				      const size_type column)
   {
-    return entries_[triangle_index(row,column,rowdim_,coldim_)];    
+    return LowerTriangularMatrix<C>::entries_[triangle_index(row,column,
+							     LowerTriangularMatrix<C>::rowdim_,
+							     LowerTriangularMatrix<C>::coldim_)];    
   }
 
   template <class C>
@@ -78,13 +82,14 @@ namespace MathTL
   template <class VECTOR>
   void SymmetricMatrix<C>::apply(const VECTOR& x, VECTOR& Mx) const
   {
-    assert(Mx.size() == rowdim_);
+    assert(Mx.size() == LowerTriangularMatrix<C>::rowdim_);
     
-    for (typename SymmetricMatrix<C>::size_type i(0); i < rowdim_; i++)
+    for (typename SymmetricMatrix<C>::size_type i(0);
+	 i < LowerTriangularMatrix<C>::rowdim_; i++)
       {
 	Mx[i] = 0;
 	for (typename SymmetricMatrix<C>::size_type j(0);
-	     j < coldim_; j++)
+	     j < LowerTriangularMatrix<C>::coldim_; j++)
 	  Mx[i] += this->operator () (i, j) * x[j];
       }
   }
@@ -101,16 +106,16 @@ namespace MathTL
 				 const unsigned int tabwidth,
 				 const unsigned int precision) const
   {
-    if (empty())
+    if (LowerTriangularMatrix<C>::empty())
       os << "[]" << std::endl; // Matlab style
     else
       {
 	unsigned int old_precision = os.precision(precision);
 	for (typename SymmetricMatrix<C>::size_type i(0);
-	     i < row_dimension(); ++i)
+	     i < SymmetricMatrix<C>::row_dimension(); ++i)
 	  {
 	    for (typename SymmetricMatrix<C>::size_type j(0);
-		 j < column_dimension(); ++j)
+		 j < SymmetricMatrix<C>::column_dimension(); ++j)
 	      os << std::setw(tabwidth) << std::setprecision(precision)
 		 << this->operator () (i, j);
 	    os << std::endl;

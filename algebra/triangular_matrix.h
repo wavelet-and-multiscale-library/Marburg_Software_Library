@@ -243,7 +243,7 @@ namespace MathTL
     /*!
       resize matrix and initialize with zero
     */
-    void resize(const size_type rows, const size_type columns = rows);
+    void resize(const size_type rows, const size_type columns);
 
     /*!
       read-only access to a matrix entry

@@ -33,6 +33,16 @@ namespace MathTL
       copy constructor
     */
     MultiIndex(const MultiIndex& lambda);
+
+    /*!
+      constructor from a single index, this is only allowed for DIMENSION == 1
+    */
+    explicit MultiIndex(const I& i0);
+
+    /*!
+      constructor from two single indices, this is only allowed for DIMENSION == 2
+    */
+    MultiIndex(const I& i0, const I& i1);
   
     //! check equality
     bool operator == (const MultiIndex& lambda) const;
@@ -47,9 +57,9 @@ namespace MathTL
     //! lexicographic order <=
     bool operator <= (const MultiIndex& lambda) const
     { return (*this < lambda || *this == lambda); }
-
+    
   };
-
+  
   //! stream output
   template<class I, unsigned int DIMENSION>
   inline std::ostream&

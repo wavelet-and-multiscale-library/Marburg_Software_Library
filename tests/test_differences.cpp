@@ -3,7 +3,8 @@
 #include <algebra/polynomial.h>
 #include <algebra/infinite_vector.h>
 #include <numerics/differences.h>
-#include <numerics/differences.cpp>
+#include <numerics/multi_differences.h>
+#include <utils/multiindex.h>
 
 using std::cout;
 using std::endl;
@@ -44,6 +45,29 @@ int main()
 
   cout << "- result of backward_difference<2>:" << endl;
   cout << backward_difference<2>(values);
+
+  Polynomial<double> q;
+  q.set_coefficient(3, -1.0); // x^3
+ 
+  InfiniteVector<double, MultiIndex<int, 2> > values2;
+  for (int x = -2; x <= 3; x++)
+    for (int y = -1; y <= 2; y++)
+      values2.set_coefficient(MultiIndex<int, 2>(x, y), p.value(x)*q.value(y));
+
+  cout << "- a sampled multivariate polynomial:" << endl;
+  cout << values2;
+
+  cout << "- result of multivariate_forward_difference<2, 0>:" << endl;
+  cout << multivariate_forward_difference<2, 0>(values2);
+
+  cout << "- result of multivariate_forward_difference<2, 1>:" << endl;
+  cout << multivariate_forward_difference<2, 1>(values2);
+
+  cout << "- result of multivariate_forward_difference<2, 0>:" << endl;
+  cout << multivariate_backward_difference<2, 0>(values2);
+
+  cout << "- result of multivariate_forward_difference<2, 1>:" << endl;
+  cout << multivariate_backward_difference<2, 1>(values2);
 
   return 0;
 }

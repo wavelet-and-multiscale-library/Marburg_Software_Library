@@ -1,9 +1,9 @@
 // implementation of differences.h template functions
 
-#ifndef _MATHTL_DIFFERENCES_CPP
-#define _MATHTL_DIFFERENCES_CPP
+// #ifndef _MATHTL_DIFFERENCES_CPP
+// #define _MATHTL_DIFFERENCES_CPP
 
-#include <numerics/differences.h>
+// #include <numerics/differences.h>
 
 namespace MathTL
 {
@@ -76,4 +76,4 @@ namespace MathTL
   }
 }
 
-#endif
+// #endif

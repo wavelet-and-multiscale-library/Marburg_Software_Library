@@ -57,6 +57,21 @@ namespace MathTL
   }
 
   template <class C>
+  inline
+  const typename Vector<C>::size_type
+  Vector<C>::memory_consumption() const
+  {
+    return sizeof(*this) + size_*sizeof(C);
+  }
+
+  template <class C>
+  inline
+  bool Vector<C>::empty() const
+  {
+    return size()==0;
+  }
+
+  template <class C>
   void Vector<C>::resize(const size_type s, const bool initialize)
   {
     if (s == 0)

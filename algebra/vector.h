@@ -103,6 +103,16 @@ namespace MathTL
     const size_type size() const;
 
     /*!
+      (estimate for the) memory consumption in bytes
+    */
+    const size_type memory_consumption() const;
+
+    /*!
+      return true if dimension is zero
+     */
+    bool empty() const;
+
+    /*!
       resize vector, initialize with C(0) if desired
     */
     void resize(const size_type s, const bool initialize = true);

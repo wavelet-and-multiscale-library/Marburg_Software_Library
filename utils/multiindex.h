@@ -25,11 +25,24 @@ namespace MathTL
   {
   public:
     /*!
-      default constructor, yields empty multiindex
+      default constructor, yields a zero multiindex
     */
-    MultiIndex() : Array1D<I>(DIMENSION) {}
+    MultiIndex();
 
-    
+    //! check equality
+    bool operator == (const MultiIndex& lambda) const;
+
+    //! check non-equality
+    inline bool operator != (const MultiIndex& lambda) const
+    { return !(*this == lambda); }
+
+    //! lexicographic order <
+    bool operator < (const MultiIndex& lambda) const;
+
+    //! lexicographic order <=
+    bool operator <= (const MultiIndex& lambda) const
+    { return (*this < lambda || *this == lambda); }
+
   };
 
   //! stream output
@@ -51,5 +64,7 @@ namespace MathTL
     return os;
   }
 }
+
+#include <utils/multiindex.cpp>
 
 #endif

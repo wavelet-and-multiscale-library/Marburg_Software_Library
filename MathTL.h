@@ -23,6 +23,7 @@
 #include <algebra/laurent_polynomial.h>
 #include <algebra/matrix.h>
 #include <algebra/matrix_norms.h>
+#include <algebra/multi_laurent_polynomial.h>
 #include <algebra/polynomial.h>
 #include <algebra/symmetric_matrix.h>
 #include <algebra/tensor_base.h>

@@ -3,6 +3,7 @@
 #include <map>
 #include <utils/array1d.h>
 #include <utils/multiindex.h>
+#include <algebra/infinite_vector.h>
 
 using namespace std;
 using namespace MathTL;
@@ -34,12 +35,19 @@ int main()
   M.insert(lambda2);
   for (set<MIndex>::const_iterator it(M.begin()); it != M.end(); ++it)
     cout << *it << endl;
+
   cout << "  * making a map out of the two multiindices:" << endl;
   map<MIndex,double> c;
-  c.insert(std::make_pair<MIndex,double>(lambda,42.0));
-  c.insert(std::make_pair<MIndex,double>(lambda2,23.0));
+  c.insert(std::make_pair<MIndex,double>(lambda, 42.0));
+  c.insert(std::make_pair<MIndex,double>(lambda2, 23.0));
   for (map<MIndex,double>::const_iterator it(c.begin()); it != c.end(); ++it)
     cout << it->first << ", " << it->second << endl;
+
+  cout << "  * making an InfiniteVector of the two multiindices:" << endl;
+  InfiniteVector<double, MIndex> v;
+  v[lambda] = 42.0;
+  v[lambda2] = 23.0;
+  cout << v;
 
   return 0;
 }

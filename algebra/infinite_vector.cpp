@@ -312,6 +312,7 @@ namespace MathTL
   }
 
   template <class C, class I>
+  inline
   InfiniteVector<C,I>::const_iterator::
   const_iterator(const typename std::map<I,C>::const_iterator& entry)
     : std::map<I,C>::const_iterator(entry)
@@ -319,6 +320,7 @@ namespace MathTL
   }
 
   template <class C, class I>
+  inline
   typename InfiniteVector<C,I>::const_iterator
   InfiniteVector<C,I>::begin() const
   {
@@ -326,6 +328,7 @@ namespace MathTL
   }
 
   template <class C, class I>
+  inline
   typename InfiniteVector<C,I>::const_iterator
   InfiniteVector<C,I>::end() const
   {

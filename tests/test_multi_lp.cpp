@@ -18,9 +18,9 @@ int main()
   LPoly r(42);
   cout << r << endl;
 
-//   cout << "- checking assignment operator (q=r):" << endl;
-//   LaurentPolynomial<double> q = r;
-//   cout << q << endl;
+  cout << "- checking assignment operator (q=r):" << endl;
+  LPoly q = r;
+  cout << q << endl;
   
   cout << "- adding a nontrivial power:" << endl;
   MultiIndex<int, 2> index;
@@ -39,9 +39,11 @@ int main()
   x = Point<2>(2, -3);
   cout << "p(" << x << ")=" << p.value(x) << endl;
 
-//   cout << "- algebraic functionality:" << endl;
-//   q += p;
-//   cout << "q+=p: " << q << endl;
+  cout << "- algebraic functionality:" << endl;
+  q += p;
+  q.dump();
+  cout << "q+=p: " << q << endl;
+
 //   q -= p;
 //   q -= p;
 //   cout << "q-=p; q-=p: " << q << endl;

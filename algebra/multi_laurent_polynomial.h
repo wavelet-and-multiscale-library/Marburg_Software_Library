@@ -61,6 +61,22 @@ namespace MathTL
     explicit MultivariateLaurentPolynomial(const R c);
 
     /*!
+      virtual destructor
+    */
+    virtual ~MultivariateLaurentPolynomial();
+
+    /*!
+      assignment of another Laurent polynomial
+    */
+    MultivariateLaurentPolynomial<R, DIMENSION>& operator =
+    (const MultivariateLaurentPolynomial<R, DIMENSION>& p);
+
+    /*!
+      assignment of a constant
+    */
+    MultivariateLaurentPolynomial<R, DIMENSION>& operator = (const R c);
+
+    /*!
       (Polynomial-like) read-only access to single coefficients
     */
     R get_coefficient(const MultiIndex<int, DIMENSION>& k) const;
@@ -102,6 +118,38 @@ namespace MathTL
     void vector_value(const Point<DIMENSION> &p,
 		      Vector<R>& values) const;
 
+    /*!
+      pointwise sum of two Laurent polynomials *this += p
+    */
+    void add(const MultivariateLaurentPolynomial<R, DIMENSION>& p);
+
+    /*!
+      pointwise weighted sum of two Laurent polynomials *this += s*p
+    */
+    void add(const R s, const MultivariateLaurentPolynomial<R, DIMENSION>& p);
+
+    /*!
+      pointwise weighted sum of two Laurent polynomials *this = s*(*this) + p
+    */
+    void sadd(const R s, const MultivariateLaurentPolynomial<R, DIMENSION>& p);
+
+    /*!
+      pointwise sum of two Laurent polynomials
+    */
+    MultivariateLaurentPolynomial<R, DIMENSION>&
+    operator += (const MultivariateLaurentPolynomial<R, DIMENSION>& p);
+
+    /*!
+      pointwise sum of two Laurent polynomials
+      (don't use this extensively, since one copy has to be made!)
+    */
+    MultivariateLaurentPolynomial<R, DIMENSION>
+    operator + (const MultivariateLaurentPolynomial<R, DIMENSION>& p) const;
+
+    /*!
+      just for testing
+    */
+    void dump() const;
   };
   
   /*!
@@ -110,7 +158,7 @@ namespace MathTL
   */
   template <class R, unsigned int DIMENSION>
   std::ostream& operator <<
-    (std::ostream &s, const MultivariateLaurentPolynomial<R, DIMENSION> &p);
+    (std::ostream& s, const MultivariateLaurentPolynomial<R, DIMENSION> &p);
 }
 
 // include implementation

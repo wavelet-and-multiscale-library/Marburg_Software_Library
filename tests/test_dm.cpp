@@ -29,6 +29,9 @@ int main()
   cout << "- DM multivariate mask for integrals of two Haar fcts. and the trivial fct.:" << endl;
   MultivariateRefinableFunction<DMMask2<HaarMask, HaarMask>, 2> dm_multi;
   cout << dm_multi << endl;
+  
+  cout << "- evaluate this at the integers:" << endl;
+  cout << dm_multi.evaluate();
 
   return 0;
 }

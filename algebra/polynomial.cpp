@@ -1,6 +1,7 @@
 // implementation of MathTL::Polynomial inline functions
 
 #include <cassert>
+#include <cmath>
 #include <numerics/gauss_data.h>
 #include <utils/tiny_tools.h>
 

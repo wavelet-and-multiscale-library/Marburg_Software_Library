@@ -255,6 +255,32 @@ namespace MathTL
   */
   template <class C>
   void swap(Vector<C>& v1, Vector<C>& v2);
+
+  /*!
+    sum of two vectors
+    (you should avoid using this operator, since it requires one vector
+    to be copied. Use += or add() instead!)
+   */
+  template <class C, class C2>
+  Vector<C> operator + (const Vector<C>& v1, const Vector<C2>& v2)
+  {
+    Vector<C> r(v1);
+    r += v2;
+    return r;
+  }
+
+  /*!
+    difference of two vectors
+    (you should avoid using this operator, since it requires one vector
+    to be copied. Use -= or sadd() instead!)
+   */
+  template <class C, class C2>
+  Vector<C> operator - (const Vector<C>& v1, const Vector<C2>& v2)
+  {
+    Vector<C> r(v1);
+    r -= v2;
+    return r;
+  }
   
   /*!
     stream output for vectors

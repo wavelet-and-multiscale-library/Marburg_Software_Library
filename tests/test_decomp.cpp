@@ -57,7 +57,7 @@ int main()
   qr.getQ(Q);
   cout << Q << endl;
   cout << "  * check:" << endl;
-  Matrix<double> QR(banddim, banddim);
+  Matrix<double> QR(banddim);
   for (size_type i(0); i < banddim; i++)
     for (size_type j(0); j < banddim; j++)
       {
@@ -66,22 +66,29 @@ int main()
       }
   cout << QR;
 
-//   cout << "- perform SVD of A..." << endl;
-//   SVD<double> svd(A);
-//   cout << "  * U*S:" << endl;
-//   RawMatrix<double> US;
-//   svd.getUS(US);
-//   cout << US << endl;
-//   cout << "  * V:" << endl;
-//   RawMatrix<double> V;
-//   svd.getV(V);
-//   cout << V << endl;
-//   cout << "  * check:" << endl
-//        << US*transpose(V) << endl;
-//   cout << "  * singular values:" << endl;
-//   DenseArray1D<double> S;
-//   svd.getS(S);
-//   cout << S << endl;
+  cout << "- perform SVD of A..." << endl;
+  SVD<double> svd(A);
+  cout << "  * U*S:" << endl;
+  Matrix<double> US;
+  svd.getUS(US);
+  cout << US << endl;
+  cout << "  * V:" << endl;
+  Matrix<double> V;
+  svd.getV(V);
+  cout << V << endl;
+  cout << "  * check:" << endl;
+  Matrix<double> USV(banddim);
+  for (size_type i(0); i < banddim; i++)
+    for (size_type j(0); j < banddim; j++)
+      {
+	for (size_type k(0); k < banddim; k++)
+	  USV(i,j) += US(i,k) * V(k,j);
+      }
+  cout << USV;
+  cout << "  * singular values:" << endl;
+  Vector<double> S;
+  svd.getS(S);
+  cout << S << endl;
 
   return 0;
 }

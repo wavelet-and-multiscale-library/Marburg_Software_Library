@@ -63,43 +63,42 @@ namespace MathTL
     Vector<C> Rdiag_;
   };
 
-//   //! singular value decomposition
-//   /*!
-//     Compute the singular value decomposition of an m-by-n matrix A, in the form
-//       A = U*S*V'
-//     where U is an m-by-n orthogonal matrix, S is an n-by-n diagonal matrix
-//     and V is an n-by-n orthogonal matrix.
-//     The singular values sigma_k = S(k,k) are ordered such that
-//       sigma_0 >= sigma_1 >= ... >= sigma_{n-1}
-//   */
-//   template <class C>
-//   class SVD
-//   {
-//   public:
-//     //! default constructor, perform SVD
-//     template <class S>
-//     SVD(const RawMatrix<C,S>& A);
+  //! singular value decomposition
+  /*!
+    Compute the singular value decomposition of an m-by-n matrix A, in the form
+      A = U*S*V'
+    where U is an m-by-n orthogonal matrix, S is an n-by-n diagonal matrix
+    and V is an n-by-n orthogonal matrix.
+    The singular values sigma_k = S(k,k) are ordered such that
+      sigma_0 >= sigma_1 >= ... >= sigma_{n-1}
+  */
+  template <class C>
+  class SVD
+  {
+  public:
+    //! default constructor, perform SVD
+    SVD(const Matrix<C>& A);
 
-//     //! return U
-//     void getU(RawMatrix<C>& U) const;
+    //! return U
+    void getU(Matrix<C>& U) const;
 
-//     //! return U*S
-//     void getUS(RawMatrix<C>& US) const;
+    //! return U*S
+    void getUS(Matrix<C>& US) const;
 
-//     //! return singular values diag(S)
-//     void getS(DenseArray1D<C>& S) const { S = Sdiag_; }
+    //! return singular values diag(S)
+    void getS(Vector<C>& S) const { S = Sdiag_; }
 
-//     //! return V
-//     void getV(RawMatrix<C>& V) const;
+    //! return V
+    void getV(Matrix<C>& V) const;
 
-//   protected:
-//     //! m=A.rowdim(), n=A.coldim()
-//     int rowdim_, coldim_;
-//     //! storage for the decomposition
-//     DenseArray2D<C> U_, V_;
-//     //! storage for diag(S)
-//     DenseArray1D<C> Sdiag_;
-//   };
+  protected:
+    //! m=A.rowdim(), n=A.coldim()
+    typename Matrix<C>::size_type rowdim_, coldim_;
+    //! storage for the decomposition
+    Matrix<C> U_, V_;
+    //! storage for diag(S)
+    Vector<C> Sdiag_;
+  };
 }
 
 #include <numerics/matrix_decomp.cpp>

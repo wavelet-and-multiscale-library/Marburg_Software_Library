@@ -13,6 +13,7 @@
 #include <geometry/point.h>
 #include <utils/array1d.h>
 #include <algebra/matrix.h>
+#include <io/matrix_io.h>
 
 namespace MathTL
 {
@@ -33,7 +34,7 @@ namespace MathTL
     /*!
       default constructor: empty grid
     */
-    Grid();
+    Grid() {}
 
     /*!
       number of grid points
@@ -57,22 +58,27 @@ namespace MathTL
     /*!
       default constructor: empty grid
     */
-    Grid();
+    Grid() : grid_() {}
 
     /*!
       construct a 1D grid from an array of 1D points
     */
-    Grid(const Array1D<double>& grid);
+    Grid(const Array1D<double>& grid) : grid_(grid) {}
 
     /*!
       construct an equidistant 1D grid with N+1 points
     */
-    Grid(const double a, const double b, const unsigned N);
+    Grid(const double a, const double b, const unsigned N)
+      : grid_(N+1)
+    {
+      for (unsigned int n(0); n <= N; n++)
+	grid_[n] = a+(b-a)*n/N;
+    }
 
     /*!
       number of grid points
     */
-    unsigned int size() const;
+    inline unsigned int size() const { return grid_.size(); }
 
     /*!
       Matlab output of the grid onto a stream
@@ -86,6 +92,14 @@ namespace MathTL
     Array1D<double> grid_;
   };
 
+  void Grid<1>::matlab_output(std::ostream& os) const
+  {
+    os << "x = "
+       << grid_
+       << ";"
+       << std::endl;
+  }
+
   /*!
     specialization of Grid to two space dimensions:
     2-dimensional grids (quad-meshes) consist of 2 matrices x and y,
@@ -98,23 +112,35 @@ namespace MathTL
     /*!
       default constructor: empty grid
     */
-    Grid();
+    Grid() : gridx_(), gridy_() {}
 
     /*!
       construct a 2D grid from two matrices 
     */
-    Grid(const Matrix<double>& gridx, const Matrix<double>& gridy);
+    Grid(const Matrix<double>& gridx, const Matrix<double>& gridy)
+      : gridx_(gridx), gridy_(gridy)
+    {
+    }
 
     /*!
       construct an equidistant 2D grid with (N_x+1)*(N_y+1) points
     */
     Grid(const Point<2>& a, const Point<2>& b,
-	 const unsigned N_x, const unsigned N_y);
+	 const unsigned N_x, const unsigned N_y)
+      : gridx_(N_y+1, N_x+1), gridy_(N_y+1, N_x+1)
+    {
+      for (unsigned int n_x(0); n_x <= N_x; n_x++)
+	for (unsigned int n_y(0); n_y <= N_y; n_y++)
+	  {
+	    gridx_(n_y, n_x) = a(0) + (b(0)-a(0))*n_x/N_x;
+	    gridy_(n_y, n_x) = a(1) + (b(1)-a(1))*n_y/N_y;
+	  }
+    }
 
     /*!
       number of grid points
     */
-    unsigned int size() const;
+    inline unsigned int size() const { return gridx_.size() * gridy_.size(); }
 
     /*!
       Matlab output of the grid onto a stream
@@ -128,9 +154,17 @@ namespace MathTL
     */
     Matrix<double> gridx_, gridy_;
   };
-}
 
-// include implementation of inline functions
-#include <geometry/grid.cpp>
+  void Grid<2>::matlab_output(std::ostream& os) const
+  {
+    os << "x = ";
+    print_matrix(gridx_, os);
+    os << ";" << std::endl;
+
+    os << "y = ";
+    print_matrix(gridy_, os);
+    os << ";" << std::endl;
+  }
+}
 
 #endif

@@ -95,7 +95,7 @@ namespace MathTL
     /*!
       release allocated memory
     */
-    ~Vector();
+    virtual ~Vector();
 
     /*!
       size/dimension of the vector

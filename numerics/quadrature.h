@@ -32,6 +32,28 @@ namespace MathTL
   {
   public:
     /*!
+      construct quadrature rule as a tensor product from
+      a lower dimensional one and a one-dimensional one
+    */
+//     QuadratureRule(const QuadratureRule<DIM-1>& Q,
+// 		   const QuadratureRule<1>& Q1);
+    
+    /*!
+      return number of quadrature points
+    */
+    unsigned int get_N() const;
+
+    /*!
+      return quadrature points
+    */
+    void get_points(Array1D<Point<DIM> >& points) const;
+
+    /*!
+      return quadrature weights
+    */
+    void get_weights(Array1D<double>& weights) const;
+
+    /*!
       evaluate quadrature rule on [0,1]^{DIM}
       (we assume that the function is real-valued)
     */
@@ -98,6 +120,33 @@ namespace MathTL
       construct Simpson rule
     */
     SimpsonRule();
+  };
+
+  /*!
+    construct composite quadrature rule from a simple one
+   */
+  template <unsigned int DIM>
+  class CompositeRule
+    : public QuadratureRule<DIM>
+  {
+  public:
+    /*!
+      construct composite quadrature rule on [0,1]^{DIM} with
+      N subintervals from a simple quadrature rule
+    */
+    CompositeRule(const QuadratureRule<1>& Q,
+		  const unsigned int N = 1);
+    
+  protected:
+    /*!
+      basic 1D quadrature rule
+    */
+    QuadratureRule<1> Q_;
+
+    /*!
+      number of subintervals
+    */
+    unsigned int N_;
   };
 }
 

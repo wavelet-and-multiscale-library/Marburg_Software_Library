@@ -28,7 +28,10 @@ namespace MathTL
   Array1D<C>::~Array1D()
   {
     if (data_ != 0)
-      delete [] data_;
+      {
+	delete [] data_;
+	data_ = 0;
+      }
   }
   
   template <class C>
@@ -44,8 +47,11 @@ namespace MathTL
   {
     if (s == 0)
       {
-	if (data_ != 0) delete [] data_;
-	data_ = 0;
+	if (data_ != 0)
+	  {
+	    delete [] data_;
+	    data_ = 0;
+	  }
 	size_ = 0;
       }
     else

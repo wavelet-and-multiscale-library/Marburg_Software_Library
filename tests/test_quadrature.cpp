@@ -1,8 +1,10 @@
 #include <iostream>
 #include <cmath>
+#include <vector>
 #include <numerics/quadrature.h>
 #include <numerics/gauss_quadrature.h>
 #include <utils/function.h>
+#include <utils/array1d.h>
 // #include "bsplines.h"
 
 using std::cout;
@@ -36,8 +38,15 @@ int main()
   cout << "Testing QuadratureRule class ..." << endl;
   MidpointRule MPQ;
   cout << "* midpoint rule: " << MPQ.integrate(g) << endl;
+//   Array1D<Point<1> > points;
+//   Array1D<double> weights;
+//   MPQ.get_points(points);
+//   MPQ.get_weights(weights);
+//   cout << "  (points: " << points << ", weights: " << weights << ")" << endl;
   TrapezoidalRule TQ;
   cout << "* trapezoidal rule: " << TQ.integrate(g) << endl;
+//   MPQ.get_points(points);
+//   MPQ.get_weights(weights);
   SimpsonRule SQ;
   cout << "* Simpson rule: " << SQ.integrate(g) << endl;
   GaussLegendreRule<1> G1Q;
@@ -61,12 +70,14 @@ int main()
   ClosedNewtonCotesRule<3> CNC3Q;
   cout << "* closed Newton-Cotes rule (N=3): "
        << CNC3Q.integrate(g) << endl;
-  ClosedNewtonCotesRule<4> CNC4Q;
-  cout << "* closed Newton-Cotes rule (N=4): "
-       << CNC4Q.integrate(g) << endl;
-  ClosedNewtonCotesRule<5> CNC5Q;
-  cout << "* closed Newton-Cotes rule (N=5): "
-       << CNC5Q.integrate(g) << endl;
+
+
+//   ClosedNewtonCotesRule<4> CNC4Q;
+//   cout << "* closed Newton-Cotes rule (N=4): "
+//        << CNC4Q.integrate(g) << endl;
+//   ClosedNewtonCotesRule<5> CNC5Q;
+//   cout << "* closed Newton-Cotes rule (N=5): "
+//        << CNC5Q.integrate(g) << endl;
 //   ClosedNewtonCotesRule<10> CNC10Q(0.0, M_PI);
 //   cout << "* closed Newton-Cotes rule (N=10): "
 //        << CNC10Q.integrate(g) << endl;
@@ -74,11 +85,11 @@ int main()
 //   cout << "* closed Newton-Cotes rule (N=20): "
 //        << CNC20Q.integrate(g) << endl;
   
-//   for (int N(1); N <= (1<<4); N <<= 1)
+//   for (unsigned int N(1); N <= (1<<4); N <<= 1)
 //     {
-//       CompositeRule<TrapezoidalRule> CompTQ(0.0, M_PI, N);
+//       CompositeRule<1> CompTQ(TQ, N);
 //       cout << "* composite rule (trapez., N=" << N << "): "
-// 	   << CompTQ.integrate(g) << endl;
+//   	   << CompTQ.integrate(g) << endl;
 //     }
 //   for (int N(1); N <= (1<<4); N <<= 1)
 //     {

@@ -45,7 +45,10 @@ namespace MathTL
   Vector<C>::~Vector()
   {
     if (values_ != 0)
-      delete [] values_;
+      {
+	delete [] values_;
+	values_ = 0;
+      }
   }
   
   template <class C>

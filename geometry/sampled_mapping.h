@@ -57,7 +57,7 @@ namespace MathTL
     */
     SampledMapping(const MultiIndex<int, DIM>& a,
 		   const MultiIndex<int, DIM>& b,
-		   const InfiniteVector<double, MultiIndex<int, DIMENSION> >& values,
+		   const InfiniteVector<double, MultiIndex<int, DIM> >& values,
 		   const int resolution);
 
     /*!

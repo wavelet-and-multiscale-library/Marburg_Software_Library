@@ -25,7 +25,8 @@ namespace WaveletTL
 	// First we sample the generator on a fine dyadic grid,
 	// the wavelet values can then be derived very easily
 	
-	const int kbegin(begin().index()), kend(rbegin().index());
+	const int kbegin(LaurentPolynomial<double>::begin().index()),
+	  kend(LaurentPolynomial<double>::rbegin().index());
 	
 	if (kend - kbegin == 1)
 	  {
@@ -56,7 +57,7 @@ namespace WaveletTL
 	    Matrix<double> A(kend-kbegin-1, kend-kbegin-1);
 	    for (int m(kbegin+1); m < kend; m++)
 	      for (int n(kbegin+1); n < kend; n++)
-		A(m-kbegin-1, n-kbegin-1) = get_coefficient(2*m-n);
+		A(m-kbegin-1, n-kbegin-1) = LaurentPolynomial<double>::get_coefficient(2*m-n);
 	    
 	    // We assume that the largest eigenvalue of A is 1,
 	    // so a power iteration should converge to the values of
@@ -89,7 +90,7 @@ namespace WaveletTL
 			if ((1<<(reshelp-(j1-1)))*(l-(1<<(j1-1))*m)-(1<<reshelp)*kbegin >= 0
 			    && (1<<(reshelp-(j1-1)))*(l-(1<<(j1-1))*m)-(1<<reshelp)*kbegin < (int) svalues.size())
 			  svalues[(1<<(reshelp-j1))*l-(1<<reshelp)*kbegin]
-			    += get_coefficient(m)
+			    += LaurentPolynomial<double>::get_coefficient(m)
 			    * svalues[(1<<(reshelp-(j1-1)))*(l-(1<<(j1-1))*m)-(1<<reshelp)*kbegin];
 		      }
 		  }
@@ -145,7 +146,8 @@ namespace WaveletTL
 	factor.set_coefficient(1, 0.5); // factor(z) = (1+z)/2
 	this->divide(factor.power(DERIVATIVE), mask);
 
-	const int kbegin(begin().index()), kend(rbegin().index());
+	const int kbegin(LaurentPolynomial<double>::begin().index()),
+	  kend(LaurentPolynomial<double>::rbegin().index());
  	const int kstarend(kend - (int) DERIVATIVE);
 
   	// we compute the values of the corresponding refinable function phi^*
@@ -212,7 +214,7 @@ namespace WaveletTL
  		    if ((1<<(reshelp-(j1-1)))*(l-(1<<(j1-1))*m)-(1<<reshelp)*kbegin >= 0
  			&& (1<<(reshelp-(j1-1)))*(l-(1<<(j1-1))*m)-(1<<reshelp)*kbegin < (int) svalues.size())
  		      svalues[(1<<(reshelp-j1))*l-(1<<reshelp)*kbegin]
- 			+= (1<<DERIVATIVE) * get_coefficient(m)
+ 			+= (1<<DERIVATIVE) * LaurentPolynomial<double>::get_coefficient(m)
  			* svalues[(1<<(reshelp-(j1-1)))*(l-(1<<(j1-1))*m)-(1<<reshelp)*kbegin];
  		  }
  	      }

@@ -90,5 +90,25 @@ int main()
   svd.getS(S);
   cout << S << endl;
 
+  cout << "- check linear solver using QR decomposition:" << endl
+       << "  * a small test matrix B:" << endl;
+  Matrix<double> B(3, 2, "1 1 -1 1 0 1");
+  cout << B;
+  Vector<double> xexact(2);
+  xexact[0] = 1; xexact[1] = 2;
+  cout << "  * a vector x: " << xexact << endl;
+  Vector<double> c(3);
+  for (unsigned int i(0); i < 3; i++)
+    {
+      c[i] = 0;
+      for (unsigned int j(0); j < 2; j++)
+	c[i] += B(i, j) * xexact[j];
+    }
+  cout << "  * rhs vector c: " << c << endl;
+  Vector<double> x;
+  QRDecomposition<double> qr2(B);
+  qr2.solve(c, x);
+  cout << "  * solve() output x: " << x << endl;
+
   return 0;
 }

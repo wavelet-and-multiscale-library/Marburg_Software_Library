@@ -1,6 +1,10 @@
 #include <cmath>
 #include <cassert>
+#include <iostream>
 #include <utils/tiny_tools.h>
+
+using std::cout;
+using std::endl;
 
 namespace MathTL
 {
@@ -131,6 +135,41 @@ namespace MathTL
 	else
 	  --k;
       }
+  }
+
+  template <class C>
+  void QRDecomposition<C>::solve(const Vector<C>& b, Vector<C>& x) const
+  {
+    x.resize(coldim_);
+    Vector<C> Qtb(coldim_);
+
+    // maybe one can speed up the following code by using QR_ directly
+    UpperTriangularMatrix<double> R;
+    getR(R);
+    Matrix<double> Q;
+    getQ(Q);
+    
+    typedef typename Matrix<C>::size_type size_type;
+    for (size_type i(0); i < coldim_; i++)
+      {
+ 	Qtb[i] = 0;
+ 	for (size_type j(0); j < rowdim_; j++)
+	  Qtb[i] += Q(j, i) * b[j];
+      }
+
+    // backsubstitution
+    for (size_type i(coldim_-1); i >= 0;)
+      {
+	x[i] = Qtb[i];
+	for (size_type j(i+1); j < coldim_; j++)
+	  x[i] -= R(i, j) * x[j];
+	x[i] /= R(i, i);
+
+	if (i == 0) // unsigned!!!
+	  break;
+	else
+	  --i;
+      }   
   }
 
   //

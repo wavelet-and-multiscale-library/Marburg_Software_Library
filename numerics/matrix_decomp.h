@@ -54,8 +54,15 @@ namespace MathTL
     //! return Q
     void getQ(Matrix<C>& Q) const;
 
+    /*!
+      After the QR decomposition, solve the linear system Ax = b,
+      where we assume that b is in the range of A.
+      The vector x will be resized properly
+    */
+    void solve(const Vector<C>& b, Vector<C>& x) const;
+
   protected:
-    //! m=A.row_dimension(), n=A.column_dimension()
+    //! m = A.row_dimension(), n = A.column_dimension()
     typename Matrix<C>::size_type rowdim_, coldim_;
     //! storage for the decomposition
     Matrix<C> QR_;

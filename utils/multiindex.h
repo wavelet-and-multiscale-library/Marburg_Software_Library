@@ -11,6 +11,7 @@
 #define _MATHTL_MULTIINDEX_H
 
 #include <iostream>
+#include <set>
 #include <utils/fixed_array1d.h>
 
 namespace MathTL
@@ -59,6 +60,17 @@ namespace MathTL
     { return (*this < lambda || *this == lambda); }
     
   };
+
+  /*!
+    For two multiindices \alpha and \beta, return the set
+    of all multiindices \gamma such that the componentwise property
+      \alpha \le \gamma \le \beta
+    holds.
+  */
+  template<class I, unsigned int DIMENSION>
+  std::set<MultiIndex<I, DIMENSION> >
+  cuboid_indices(const MultiIndex<I, DIMENSION>& alpha,
+		 const MultiIndex<I, DIMENSION>& beta);
   
   //! stream output
   template<class I, unsigned int DIMENSION>

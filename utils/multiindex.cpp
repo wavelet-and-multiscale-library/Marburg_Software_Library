@@ -51,4 +51,35 @@ namespace MathTL
 					FixedArray1D<I, DIMENSION>::end(),
 					lambda.begin(), lambda.end());
   }
+
+  template<class I, unsigned int DIMENSION>
+  std::set<MultiIndex<I, DIMENSION> >
+  cuboid_indices(const MultiIndex<I, DIMENSION>& alpha,
+		 const MultiIndex<I, DIMENSION>& beta)
+  {
+    typedef std::set<MultiIndex<I, DIMENSION> > set_type;
+    set_type r;
+
+    MultiIndex<I, DIMENSION> gamma(alpha);
+    for (I index(alpha[0]); index <= beta[0]; index++)
+      {
+	gamma[0] = index;
+	r.insert(gamma);
+      }
+    for (unsigned int i(1); i < DIMENSION; i++)
+      {
+	set_type sofar(r);
+	for (typename set_type::const_iterator it(sofar.begin()); it != sofar.end(); ++it)
+	  {
+	    gamma = *it;
+	    for (I index(alpha[i]); index <= beta[i]; index++)
+	      {
+		gamma[i] = index;
+		r.insert(gamma);
+	      }
+	  }
+      }
+
+    return r;
+  }
 }

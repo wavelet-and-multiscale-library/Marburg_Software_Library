@@ -82,4 +82,32 @@ namespace MathTL
 
     return r;
   }
+
+  template <unsigned int DIMENSION>
+  std::set<MultiIndex<unsigned int, DIMENSION> >
+  degree_indices(const unsigned int k)
+  {
+    typedef std::set<MultiIndex<unsigned int, DIMENSION> > set_type;
+    set_type r;
+
+    MultiIndex<unsigned int, DIMENSION> alpha;
+    r.insert(alpha);
+    for (unsigned int i(1); i <= k; i++)
+      {
+	set_type sofar(r);
+	r.clear();
+	for (typename set_type::const_iterator it(sofar.begin()); it != sofar.end(); ++it)
+	  {
+	    alpha = *it;
+	    for (unsigned int j(0); j < DIMENSION; j++)
+	      {
+		alpha[j] += 1;
+		r.insert(alpha);
+		alpha[j] -= 1;
+	      }
+	  }	
+      }
+
+    return r;
+  }
 }

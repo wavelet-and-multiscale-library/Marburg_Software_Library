@@ -89,5 +89,11 @@ int main()
   for (set<MIndex3>::const_iterator it(cuboid3.begin()); it != cuboid3.end(); ++it)
     cout << *it << endl;
 
+  typedef MultiIndex<unsigned int, 2> MI;
+  cout << "- all 2-indices with degree 4:" << endl;
+  set<MI> degree4(degree_indices<2>(4));
+  for (set<MI>::const_iterator it(degree4.begin()); it != degree4.end(); ++it)
+    cout << *it << endl;
+
   return 0;
 }

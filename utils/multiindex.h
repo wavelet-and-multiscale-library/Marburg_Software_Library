@@ -71,6 +71,13 @@ namespace MathTL
   std::set<MultiIndex<I, DIMENSION> >
   cuboid_indices(const MultiIndex<I, DIMENSION>& alpha,
 		 const MultiIndex<I, DIMENSION>& beta);
+
+  /*!
+    Compute all multiindices \alpha\in\mathbb N^d with degree |\alpha|=k
+  */
+  template <unsigned int DIMENSION>
+  std::set<MultiIndex<unsigned int, DIMENSION> >
+  degree_indices(const unsigned int k);
   
   //! stream output
   template<class I, unsigned int DIMENSION>

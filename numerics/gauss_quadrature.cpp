@@ -5,8 +5,7 @@
 
 namespace MathTL
 {
-  template <unsigned int N>
-  GaussLegendreRule<N>::GaussLegendreRule()
+  GaussLegendreRule::GaussLegendreRule(const unsigned int N)
   {
     assert(N <= 10);
 

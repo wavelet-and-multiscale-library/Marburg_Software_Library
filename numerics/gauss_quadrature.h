@@ -18,7 +18,6 @@ namespace MathTL
     N-point 1D Gauss-Legendre quadrature rule
     (uses precomputed points and weights for 1<=N<=10
   */
-  template <unsigned int N = 1>
   class GaussLegendreRule
     : public QuadratureRule<1>
   {
@@ -26,7 +25,7 @@ namespace MathTL
     /*!
       construct N-point Gauss-legendre rule
     */
-    GaussLegendreRule();
+    GaussLegendreRule(const unsigned int N);
   };
 }
 

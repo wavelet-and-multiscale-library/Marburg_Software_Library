@@ -141,8 +141,7 @@ namespace MathTL
     weights_[1] = 2.0/3.0;
   }
 
-  template <unsigned int N>
-  ClosedNewtonCotesRule<N>::ClosedNewtonCotesRule()
+  ClosedNewtonCotesRule::ClosedNewtonCotesRule(const unsigned int N)
   {
     points_.resize(N+1);
     weights_.resize(N+1);

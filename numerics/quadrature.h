@@ -114,14 +114,13 @@ namespace MathTL
   /*!
     closed 1D Newton-Cotes rule with N subintervals, i.e., N+1 points
   */
-  template <unsigned int N = 1>
   class ClosedNewtonCotesRule : public QuadratureRule<1>
   {
   public:
     /*!
-      construct closed Newton Cotes rule
+      construct closed Newton Cotes rule with N subintervals
     */
-    ClosedNewtonCotesRule();
+    ClosedNewtonCotesRule(const unsigned int N);
   };
 
   /*!

@@ -36,74 +36,48 @@ int main()
   TestFunction g;
 
   cout << "Testing QuadratureRule class ..." << endl;
+
   MidpointRule MPQ;
   cout << "* midpoint rule: " << MPQ.integrate(g) << endl;
-//   Array1D<Point<1> > points;
-//   Array1D<double> weights;
-//   MPQ.get_points(points);
-//   MPQ.get_weights(weights);
-//   cout << "  (points: " << points << ", weights: " << weights << ")" << endl;
+
   TrapezoidalRule TQ;
   cout << "* trapezoidal rule: " << TQ.integrate(g) << endl;
+
   SimpsonRule SQ;
   cout << "* Simpson rule: " << SQ.integrate(g) << endl;
-  GaussLegendreRule<1> G1Q;
-  cout << "* Gauss-Legendre rule (N=1): "
-       << G1Q.integrate(g) << endl;
-  GaussLegendreRule<2> G2Q;
-  cout << "* Gauss-Legendre rule (N=2): "
-       << G2Q.integrate(g) << endl;
-  GaussLegendreRule<3> G3Q;
-  cout << "* Gauss-Legendre rule (N=3): "
-       << G3Q.integrate(g) << endl;
-  GaussLegendreRule<4> G4Q;
-  cout << "* Gauss-Legendre rule (N=4): "
-       << G4Q.integrate(g) << endl;
-  GaussLegendreRule<5> G5Q;
-  cout << "* Gauss-Legendre rule (N=5): "
-       << G5Q.integrate(g) << endl;
-  GaussLegendreRule<6> G6Q;
-  cout << "* Gauss-Legendre rule (N=6): "
-       << G6Q.integrate(g) << endl;
-  ClosedNewtonCotesRule<1> CNC1Q;
-  cout << "* closed Newton-Cotes rule (N=1): "
-       << CNC1Q.integrate(g) << endl;
-  ClosedNewtonCotesRule<2> CNC2Q;
-  cout << "* closed Newton-Cotes rule (N=2): "
-       << CNC2Q.integrate(g) << endl;
-  ClosedNewtonCotesRule<3> CNC3Q;
-  cout << "* closed Newton-Cotes rule (N=3): "
-       << CNC3Q.integrate(g) << endl;
-  ClosedNewtonCotesRule<4> CNC4Q;
-  cout << "* closed Newton-Cotes rule (N=4): "
-       << CNC4Q.integrate(g) << endl;
-  ClosedNewtonCotesRule<5> CNC5Q;
-  cout << "* closed Newton-Cotes rule (N=5): "
-       << CNC5Q.integrate(g) << endl;
-  ClosedNewtonCotesRule<10> CNC10Q;
-  cout << "* closed Newton-Cotes rule (N=10): "
-       << CNC10Q.integrate(g) << endl;
-  ClosedNewtonCotesRule<20> CNC20Q;
-  cout << "* closed Newton-Cotes rule (N=20): "
-       << CNC20Q.integrate(g) << endl;
+
+  for (unsigned int N(1); N <= 6; N++)
+    {
+      GaussLegendreRule Gauss(N);
+      cout << "* Gauss-Legendre rule (N=" << N << "): "
+	   << Gauss.integrate(g) << endl;
+    }
+  
+  for (unsigned int N(1); N <= 5; N++)
+    {
+      ClosedNewtonCotesRule NewtonCotes(N);
+      cout << "* closed Newton-Cotes rule (N=" << N << "): "
+	   << NewtonCotes.integrate(g) << endl;
+    }
+  for (unsigned int N(10); N <= 25; N+=5)
+    {
+      ClosedNewtonCotesRule NewtonCotes(N);
+      cout << "* closed Newton-Cotes rule (N=" << N << "): "
+	   << NewtonCotes.integrate(g) << endl;
+    }
 
   cout << "- check integration over arbitrary intervals, e.g. [0,3]: " << endl;
   cout << "* Simpson rule: "
        << SQ.integrate(g, Point<1>(0.0), Point<1>(3.0)) << endl;
-  cout << "* Gauss-Legendre rule (N=1): "
-       << G1Q.integrate(g, Point<1>(0.0), Point<1>(3.0)) << endl;
-  cout << "* Gauss-Legendre rule (N=2): "
-       << G2Q.integrate(g, Point<1>(0.0), Point<1>(3.0)) << endl;
-  cout << "* Gauss-Legendre rule (N=3): "
-       << G3Q.integrate(g, Point<1>(0.0), Point<1>(3.0)) << endl;
-  cout << "* Gauss-Legendre rule (N=4): "
-       << G4Q.integrate(g, Point<1>(0.0), Point<1>(3.0)) << endl;
-  cout << "* Gauss-Legendre rule (N=5): "
-       << G5Q.integrate(g, Point<1>(0.0), Point<1>(3.0)) << endl;
-  cout << "* Gauss-Legendre rule (N=6): "
-       << G6Q.integrate(g, Point<1>(0.0), Point<1>(3.0)) << endl;
+
+  for (unsigned int N(1); N <= 6; N++)
+    {
+      GaussLegendreRule Gauss(N);
+      cout << "* Gauss-Legendre rule (N=" << N << "): "
+	   << Gauss.integrate(g, Point<1>(0.0), Point<1>(3.0)) << endl;
+    }
   
-  QuadratureRule<2> TensorQ(SQ, G2Q);
+  QuadratureRule<2> TensorQ(SQ, GaussLegendreRule(2));
   Array1D<Point<2> > points2D;
   Array1D<double> weights2D;
   TensorQ.get_points(points2D);
@@ -128,7 +102,7 @@ int main()
 
   for (unsigned int N(1); N <= (1<<4); N <<= 1)
     {
-      CompositeRule<1> CompG2Q(G2Q, N);
+      CompositeRule<1> CompG2Q(GaussLegendreRule(2), N);
       cout << "* Gauss 2-point composite rule with " << N
  	   << " subdivisions," << endl
 	   << "  integration: "

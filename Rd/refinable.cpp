@@ -252,7 +252,8 @@ namespace WaveletTL
   {
     double r(0);
 
-    for (LaurentPolynomial<double>::const_iterator it(begin()); it != end(); ++it)
+    for (LaurentPolynomial<double>::const_iterator it(LaurentPolynomial<double>::begin());
+	 it != LaurentPolynomial<double>::end(); ++it)
       r += pow(it.index(), (double)k) * *it;
     
     return r * binomial(n, k) * ldexp(1.0, -((int)n+1));

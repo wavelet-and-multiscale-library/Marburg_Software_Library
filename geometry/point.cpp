@@ -58,7 +58,7 @@ namespace MathTL
   const typename Point<DIM, VALUE>::size_type
   Point<DIM, VALUE>::size() const
   {
-    return dimension;
+    return this->dimension;
   }
 
   template <unsigned int DIM, class VALUE>

@@ -7,6 +7,7 @@
 #include <algebra/vector.h>
 #include <algebra/matrix.h>
 #include <algebra/symmetric_matrix.h>
+#include <numerics/quadrature.h>
 #include <numerics/eigenvalues.h>
 
 namespace MathTL
@@ -25,29 +26,43 @@ namespace MathTL
       }
   }
 
-  GaussRule::GaussRule(const OrthogonalPolynomial& poly,
+  GaussRule::GaussRule(const OrthogonalPolynomial& P,
 		       const double a, const double b,
 		       const unsigned int N)
   {
-    points_.resize(N);
-    weights_.resize(N);
+    init(P, a, b, N);
+  }
 
+  GaussRule::GaussRule(const Array1D<double>& moments,
+		       const OrthogonalPolynomial& T,
+		       const double a, const double b,
+		       const unsigned int N)
+  {
+    GenMomentsPolynomial P(moments, T, a, b, N);
+    init(P, a, b, N);
+  }
+
+  void GaussRule::init(const OrthogonalPolynomial& P,
+		       const double a, const double b,
+		       const unsigned int N)
+  {
+    // the eigenvalues of the following matrix J are the Gauss points,
+    // the first component of the respective eigenvector is the
+    // square root of the weight
     SymmetricMatrix<double> J(N);
     for (unsigned int n(0); n < N; n++)
       {
-	J(n, n) = poly.a(n+1);
+	J(n, n) = P.a(n+1);
 	if (n < N-1)
-	  J(n, n+1) = sqrt(poly.b(n+2));
+	  J(n, n+1) = sqrt(P.b(n+2));
       }
-
-    // the eigenvalues of J are the Gauss points,
-    // the first component of the respective eigenvector is the
-    // square root of the weight
     Matrix<double> evecs;
     Vector<double> evals;
     SymmEigenvalues(J,evals,evecs);
 
     // copy points and weights, rescale interval
+    points_.resize(N);
+    weights_.resize(N);
     for (unsigned int n(0); n < N; n++)
       {
 	points_[n] = (evals[n] - a)/(b-a);

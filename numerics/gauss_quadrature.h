@@ -10,6 +10,7 @@
 #ifndef _MATHTL_GAUSS_QUADRATURE_H
 #define _MATHTL_GAUSS_QUADRATURE_H
 
+#include <utils/array1d.h>
 #include <numerics/quadrature.h>
 #include <numerics/ortho_poly.h>
 
@@ -53,9 +54,26 @@ namespace MathTL
   public:
     /*!
       construct N-point Gauss rule on [0,1] from three-term recursion coefficients
-      for orthogonal polynomials on [a,b]
+      for orthogonal polynomials P on [a,b]
     */
-    GaussRule(const OrthogonalPolynomial& poly,
+    GaussRule(const OrthogonalPolynomial& P,
+	      const double a, const double b,
+	      const unsigned int N);
+
+    /*!
+      construct N-point Gauss rule on [0,1] from (at least) 2N generalized moments
+      of the weight function \int_a^b T_k(x)w(x)dx
+    */
+    GaussRule(const Array1D<double>& moments,
+	      const OrthogonalPolynomial& T,
+	      const double a, const double b,
+	      const unsigned int N);
+
+  private:
+    /*!
+      doubly used initialization routine
+    */
+    void init(const OrthogonalPolynomial& P,
 	      const double a, const double b,
 	      const unsigned int N);
   };

@@ -1,6 +1,8 @@
 // implementation for ortho_poly.h
 
 #include <cassert>
+#include <iostream>
+#include <algebra/triangular_matrix.h>
 
 namespace MathTL
 {
@@ -148,5 +150,58 @@ namespace MathTL
       }
     
     return r;
+  }
+
+  GenMomentsPolynomial::GenMomentsPolynomial(const Array1D<double>& moments,
+					     const OrthogonalPolynomial& T,
+					     const double a, const double b,
+					     const unsigned int N,
+					     GenMomentsPolynomial::GMPMethod method)
+    : ak_(N), bk_(N)
+  {
+    switch(method)
+      {
+      case SackDonovan:
+	{
+	  assert(N >= 1);
+	  assert(moments.size() >= 2*N);
+	  
+	  // set up the matrix S of the products <T_m,T_n>_w columnwise,
+	  // thereby also computing the a_k and b_k
+	  LowerTriangularMatrix<double> S(2*N, 2*N);
+	  for (unsigned m(0); m < 2*N; m++)
+	    S(m, 0) = moments[m];
+	  
+	  ak_[0] = T.a(1) + S(1,0)/S(0,0); // a_1
+	  bk_[0] = 0.0; // b_1
+	  
+	  for (unsigned int n(1); n <= N-1; n++)
+	    {
+	      for (unsigned int m(n); m <= 2*N-n-1; m++)
+		{
+		  S(m,n) = T.b(m+1)*S(m-1,n-1)+(T.a(m+1)-ak_[n-1])*S(m,n-1)+S(m+1,n-1);
+		  if (n > 1)
+		    S(m,n) -= bk_[n-1]*S(m,n-2);
+		}
+	      
+	      bk_[n] = S(n,n)/S(n-1,n-1); // b_{n+1}
+	      ak_[n] = T.a(n+1) + S(n+1,n)/S(n,n)-S(n,n-1)/S(n-1,n-1); // a_{n+1}
+	    }
+	}
+      default:
+	break;
+      }
+  }
+
+  double GenMomentsPolynomial::a(const unsigned int k) const
+  {
+    assert(k >= 1 && k <= ak_.size());
+    return ak_[k-1];
+  }
+
+  double GenMomentsPolynomial::b(const unsigned int k) const
+  {
+    assert(k >= 1 && k <= bk_.size());
+    return bk_[k-1];
   }
 }

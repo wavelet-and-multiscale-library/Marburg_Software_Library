@@ -27,7 +27,7 @@ namespace MathTL
     - multiplication with constants
     - multiplication with other polynomials
     - raising a polynomial to some power
-    - substitution into another polynomial
+    - substitution into another polynomial, special version for scale and shift
     - symbolic differentiation and integration
     - exact integration over an interval (with or without quadrature formulae)
 
@@ -47,10 +47,25 @@ namespace MathTL
     Polynomial();
 
     /*!
+      copy constructor
+    */
+    Polynomial(const Polynomial<C>& p);
+
+    /*!
+      constructor from a coefficient vector
+    */
+    Polynomial(const Vector<C>& coeffs);
+
+    /*!
+      constructor from a constant
+    */
+    Polynomial(const C c);
+
+    /*!
       virtual destructor
     */
     virtual ~Polynomial();
-    
+
     /*!
       degree of the polynomial
     */
@@ -62,82 +77,159 @@ namespace MathTL
     C get_coefficient(const unsigned int k) const;
 
     /*!
+      get all coefficients at once
+    */
+    void get_coefficients(Vector<C>& coeffs) const;
+
+    /*!
       write access to single coefficients
     */
     void set_coefficient(const unsigned int k, const C coeff);
 
     /*!
-      evaluate the polynomial (Horner scheme)
+      set all coefficients at once
     */
-    C operator () (const C x) const;
+    void set_coefficients(const Vector<C>& coeffs);
 
     /*!
       evaluate the polynomial (Horner scheme)
-      (calls operator ())
+    */
+    C value(const C x) const;
+
+    /*!
+      evaluate n-th derivative of the polynomial (full Horner scheme)
+    */
+    C value(const C x, const unsigned int derivative) const;
+
+    /*!
+      evaluate the polynomial (Horner scheme)
+      (calls the above value(const C))
     */
     C value(const Point<1>& p,
 	    const unsigned int component = 0) const;
 
     /*!
       evaluate the polynomial (Horner scheme)
-      (calls operator ())
+      (calls the above value(const C))
     */
     void vector_value(const Point<1> &p,
 		      Vector<C>& values) const;
 
     /*!
-      
+      in place scaling p(x) -> p(s*x)
     */
+    void scale(const C s);
 
-//     void         substituteIntoMe(const Polynomial &p);     // result: this\circ p
-//     Polynomial   substituteInto(const Polynomial &p) const; // "
+    /*!
+      in place shift p(x) -> p(x+s)
+    */
+    void shift(const C s);
+
+    /*!
+      substitute another polynomial into this one *this <- *this\circ p
+    */
+    void chain(const Polynomial<C>& p);
+
+    /*!
+      assignment of another polynomial
+    */
+    Polynomial<C>& operator = (const Polynomial<C>& p);
+
+    /*!
+      assignment of a constant polynomial (implicit conversion)
+    */
+    Polynomial<C>& operator = (const C c);
+
+    /*!
+      pointwise sum of two polynomials *this += p
+    */
+    void add(const Polynomial<C>& p);
+
+    /*!
+      pointwise weihted sum of two polynomials *this += s*p
+    */
+    void add(const C s, const Polynomial<C>& p);
+
+    /*!
+      pointwise sum of two polynomials
+    */
+    Polynomial<C>& operator += (const Polynomial<C>& p);
+
+    /*!
+      pointwise sum of two polynomials
+      (don't use this extensively, since one copy has to be made!)
+    */
+    Polynomial<C> operator + (const Polynomial<C>& p) const;
+
+    /*!
+      pointwise difference of two polynomials
+    */
+    Polynomial<C>& operator -= (const Polynomial<C> &p);
+
+    /*!
+      sign
+      (makes a copy of *this)
+    */
+    Polynomial<C> operator - () const;
+    
+    /*!
+      pointwise difference of two polynomials
+      (don't use this extensively, since one copy has to be made!)
+    */
+    Polynomial<C> operator - (const Polynomial<C> &p) const;
+
+    /*!
+      multiplication with a real number
+    */
+    Polynomial<C>& operator *= (const C c);
+
+    /*!
+      multiplication with a real number
+      (don't use this extensively, since one copy has to be made!)
+    */
+    Polynomial<C> operator * (const C c) const;
+
+    /*!
+      pointwise multiplication with another polynomial
+    */
+    Polynomial<C>& operator *= (const Polynomial<C>& p);
+
+    /*!
+      pointwise multiplication with another polynomial
+      (don't use this extensively, since one copy has to be made!)
+    */
+    Polynomial<C> operator * (const Polynomial<C>& p);
+
+    /*!
+      raise the polynomial to some power
+    */
+    Polynomial <C> power(const unsigned int k) const;
+
+    /*!
+      (symbolic) differentiation
+    */
+    Polynomial differentiate() const;
+
+    /*!
+      (symbolic) integration
+    */
+    Polynomial integrate() const;
+
+    /*!
+      integration over [a,b], optional use of (Gauss) quadrature formulae
+    */
+    double integrate(const double a,
+		     const double b,
+		     const bool quadrature = false) const;
   };
-
-//   class Polynomial
-//   {
-//   public:
-//     Polynomial(const Polynomial &p);
-//     Polynomial(const CoeffsType *coeffs);
-//     Polynomial(const double c);
-//     ~Polynomial();
   
-//     const CoeffsType *getCoeffs() const;
-//     void              setCoeffs(const CoeffsType *coeffs);
-
-
-//     Polynomial   sdifferentiate() const;                // symbolic differentiation
-//     Polynomial   sintegrate() const;                    // symbolic integration
+  /*!
+    multiplication with a real number
+    (makes a copy)
+  */
+  template <class C>
+  Polynomial<C> operator * (const C c, const Polynomial<C>& p);
   
-//     // integration over [a,b], optional use of quadrature formulae
-//     double       integrate(const double a,
-// 			   const double b,
-// 			   const bool quadrature = false) const;
-  
-//     Polynomial power(const int k) const; // raise Polynomial to the k-th power
-
-//     double derivative(const double x) const;    // point evaluation of first derivative (Horner scheme)
-
-//     Polynomial& operator = (const Polynomial &p);
-//     Polynomial& operator = (const double c);                       // type conversion
-  
-//     Polynomial& operator += (const Polynomial &p); // pointwise
-//     Polynomial& operator -= (const Polynomial &p); // pointwise
-//     Polynomial& operator *= (const double c);      // multiplication with a constant
-//     Polynomial& operator *= (const Polynomial &p); // pointwise
-
-//     friend Polynomial operator + (const Polynomial &p, const Polynomial &q);
-//     friend Polynomial operator - (const Polynomial &p, const Polynomial &q);
-//     friend Polynomial operator - (const Polynomial &p);
-//     friend Polynomial operator * (const double c, const Polynomial &p);  
-//     friend Polynomial operator * (const Polynomial &p, const Polynomial &q);  
-//   };
-
-//   Polynomial operator + (const Polynomial &p, const Polynomial &q);
-//   Polynomial operator - (const Polynomial &p, const Polynomial &q);
-//   Polynomial operator - (const Polynomial &p);
-//   Polynomial operator * (const double c, const Polynomial &p);  
-//   Polynomial operator * (const Polynomial &p, const Polynomial &q);  
-
   /*!
     stream output for polynomials,
     for readability we also print out the powers

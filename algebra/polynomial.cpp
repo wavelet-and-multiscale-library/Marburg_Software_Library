@@ -2,13 +2,7 @@
 
 #include <cassert>
 #include <numerics/gauss_data.h>
-// #include <iostream>
-// #include <iomanip>
-// #include <vector>
-// #include <cmath>
-// #include <algorithm>
-
-// using namespace std;
+#include <utils/tiny_tools.h>
 
 namespace MathTL
 {
@@ -16,6 +10,25 @@ namespace MathTL
   Polynomial<C>::Polynomial()
     : Vector<C>(1), Function<1,C>()
   {
+  }
+  
+  template <class C>
+  Polynomial<C>::Polynomial(const Polynomial<C>& p)
+    : Vector<C>(p)
+  {
+  }
+
+  template <class C>
+  Polynomial<C>::Polynomial(const Vector<C>& coeffs)
+    : Vector<C>(coeffs)
+  {
+  }
+
+  template <class C>
+  Polynomial<C>::Polynomial(const C c)
+    : Vector<C>(1)
+  {
+    set_coefficient(0, c);
   }
 
   template <class C>
@@ -36,6 +49,13 @@ namespace MathTL
   {
     return Vector<C>::operator [] (k);
   }
+
+  template <class C>
+  inline
+  void Polynomial<C>::get_coefficients(Vector<C>& coeffs) const
+  {
+    coeffs = *this;
+  }
   
   template <class C>
   void Polynomial<C>::set_coefficient(const unsigned int k,
@@ -43,7 +63,8 @@ namespace MathTL
   {
     if (k > degree())
       {
-	Vector<C> help(*this);
+	Vector<C> help;
+	help.swap(*this);
 	Vector<C>::resize(k+1);
 	std::copy(help.begin(), help.end(), Vector<C>::begin());
       }
@@ -52,14 +73,36 @@ namespace MathTL
   }
 
   template <class C>
-  C Polynomial<C>::operator () (const C x) const
+  void Polynomial<C>::set_coefficients(const Vector<C>& coeffs)
+  {
+    assert(coeffs.size() > 0);
+    Vector<C>::operator = (coeffs);
+  }
+
+  template <class C>
+  C Polynomial<C>::value(const C x) const
   {
     C value(Vector<C>::operator [] (degree()));
 
     for (unsigned int k(degree()); k > 0; k--)
-      value = value * x + Vector<C>::operator [] (k-1);
+      value = value * x + get_coefficient(k-1);
 
     return value;
+  }
+
+  template <class C>
+  C Polynomial<C>::value(const C x, const unsigned int derivative) const
+  {
+    // storage for full Horner scheme
+    Vector<C> horner(*this);
+
+    for (unsigned row(0); row <= derivative; row++)
+      {
+	for (unsigned n(degree()); n > row; n--)
+	  horner[n-1] += x*horner[n];
+      }
+
+    return horner[derivative] * faculty(derivative);
   }
 
   template <class C>
@@ -67,7 +110,7 @@ namespace MathTL
   C Polynomial<C>::value(const Point<1>& p,
 			 const unsigned int component) const
   {
-    return this->operator () (p[0]);
+    return value(p[0]);
   }
 
   template <class C>
@@ -76,288 +119,265 @@ namespace MathTL
 				   Vector<C>& values) const
   {
     values.resize(1, false);
-    values[0] = this->operator () (p[0]);
+    values[0] = value(p[0]);
   }
 
-//   Polynomial::Polynomial(const Polynomial &p)
-//   {
-//     a.resize(p.getCoeffs()->size(), 0.0);
-//     a = *p.getCoeffs();
-//   }
-
-//   Polynomial::Polynomial(const CoeffsType *coeffs)
-//   {
-//     a.resize(coeffs->size(), 0.0);
-//     a = *coeffs;
-//   }
-
-//   Polynomial::Polynomial(const double c)
-//   {
-//     a.resize(1, c);
-//   }
-
-
-//   const CoeffsType *Polynomial::getCoeffs() const
-//   {
-//     return &a;
-//   }
-
-//   void Polynomial::setCoeffs(const CoeffsType *coeffs)
-//   {
-//     a.resize(coeffs->size(), 0.0);
-//     a = *coeffs;
-//   }
-
-
-//   Polynomial Polynomial::sdifferentiate() const
-//   {
-//     CoeffsType c(0.0, deg());
-
-//     for (int n = 1; n <= deg(); n++)
-//       c[n-1] = n * a[n];
+  template <class C>
+  void Polynomial<C>::scale(const C s)
+  {
+    C factor(1.0);
+    for (typename Vector<C>::iterator it(Vector<C>::begin()), itend(Vector<C>::end());
+	 it != itend; ++it)
+      {
+	*it *= factor;
+	factor *= s;
+      }
+  }
   
-//     Polynomial r(&c);
+  template <class C>
+  void Polynomial<C>::shift(const C s)
+  {
+    Vector<C> new_coeffs(*this);
+    
+    for (unsigned int d(1); d < new_coeffs.size(); d++)
+      {
+	unsigned int n(d);
+	unsigned int binomial(1);
+	C s_power(s);
+	for (unsigned int k(0); k < d; k++)
+	  {
+	    binomial = (binomial*(n-k))/(k+1);
+	    new_coeffs[d-k-1] +=
+	      new_coeffs[d] * binomial * s_power;
+	    s_power *= s;
+	  }
+      }
+    
+    swap(new_coeffs);
+  }
 
-//     return r;
-//   }
+  template <class C>
+  void Polynomial<C>::chain(const Polynomial<C>& p)
+  {
+    if (degree() > 0)
+      {
+	// maybe the following can be optimized
 
-//   Polynomial Polynomial::sintegrate() const
-//   {
-//     CoeffsType c(0.0, deg()+2);
+  	Polynomial<C> q;
+  	C a0(get_coefficient(0)); // not changed by substitution
 
-//     for (int n = 0; n <= deg(); n++)
-//       c[n+1] = a[n] / (n + 1.0);
+  	Polynomial<C> r;
+  	for (unsigned int expo = 1; expo <= degree(); expo++)
+  	  {
+  	    if (get_coefficient(expo) != 0)
+  	      {
+  		q = p;
+  		for (unsigned int l = 2; l <= expo; l++)
+  		  q *= p;
+  		q *= get_coefficient(expo);
 
-//     Polynomial r(&c);
+  		r += q;
+  	      }
+  	  }
 
-//     return r;
-//   }
+ 	Vector<C>::swap(r);
+ 	set_coefficient(0, get_coefficient(0) + a0);
+      }
+  }
 
-//   double Polynomial::integrate(const double a,
-// 			       const double b,
-// 			       const bool quadrature) const
-//   {
-//     assert(a <= b);
+  template <class C>
+  Polynomial<C>& Polynomial<C>::operator = (const Polynomial<C>& p)
+  {
+    Vector<C>::operator = (p);
+    return *this;
+  }
 
-//     double r = 0;
+  template <class C>
+  Polynomial<C>& Polynomial<C>::operator = (const C c)
+  {
+    Vector<C>::resize(1, false);
+    set_coefficient(0, c);
+    return *this;
+  }
 
-//     if(quadrature)
-//       {
-// 	int N = (int)ceil((deg()+1)/2.0); // we must ensure 2*N-1>=deg()
+  template <class C>
+  void Polynomial<C>::add(const Polynomial<C>& p)
+  {
+    Vector<C> help(std::max(degree(), p.degree())+1);
+    if (degree()+1 == help.size())
+      {
+	std::copy(p.begin(), p.end(), help.begin());
+	help.add(*this);
+      }
+    else
+      {
+	std::copy(begin(), end(), help.begin());
+	help.add(p);
+      }
+    swap(help);
+  }
 
-// 	for(int i = 1; i <= N; i++)
-// 	  r += GaussWeights[N-1][i-1] * this->operator()((a+b + (b-a)*GaussPoints[N-1][i-1])/2.0);
+  template <class C>
+  void Polynomial<C>::add(const C s, const Polynomial<C>& p)
+  {
+    Vector<C> help(std::max(degree(), p.degree())+1);
+    if (degree()+1 == help.size())
+      {
+	std::copy(p.begin(), p.end(), help.begin());
+	help.sadd(s, *this); // help <- s*help + *this
+      }
+    else
+      {
+	std::copy(begin(), end(), help.begin());
+	help.add(s, p); // help <- help + s*p
+      }
+    swap(help);
+  }
+
+  template <class C>
+  inline
+  Polynomial<C>& Polynomial<C>::operator += (const Polynomial<C>& p)
+  {
+    add(p);
+    return *this;
+  }
+
+  template <class C>
+  inline
+  Polynomial<C> Polynomial<C>::operator + (const Polynomial<C>& p) const
+  {
+    return (Polynomial<C>(*this) += p);
+  }
+
+  template <class C>
+  inline
+  Polynomial<C>& Polynomial<C>::operator -= (const Polynomial<C>& p)
+  {
+    add(C(-1), p);
+    return *this;
+  }
+
+  template <class C>
+  inline
+  Polynomial<C> Polynomial<C>::operator - () const
+  {
+    return (Polynomial<C>() -= *this);
+  }
+
+  template <class C>
+  inline
+  Polynomial<C> Polynomial<C>::operator - (const Polynomial<C>& p) const
+  {
+    return (Polynomial<C>(*this) -= p);
+  }
+
+  template <class C>
+  Polynomial<C>& Polynomial<C>::operator *= (const C c)
+  {
+    if (c == C(0))
+      Vector<C>::resize(1); // p(x)=0, degree changes
+    else
+      Vector<C>::operator *= (c);
+
+    return *this;
+  }
+
+  template <class C>
+  inline
+  Polynomial<C> Polynomial<C>::operator * (const C c) const
+  {
+    return (Polynomial(*this) *= c);
+  }
+
+  template <class C>
+  Polynomial<C>& Polynomial<C>::operator *= (const Polynomial<C>& p)
+  {
+    Vector<C> coeffs(degree()+p.degree()+1);
+    for (unsigned int n(0); n <= degree(); n++)
+      for (unsigned int m(0); m <= p.degree(); m++)
+	coeffs[n+m] += Vector<C>::operator [] (n) * p.get_coefficient(m);
+
+    swap(coeffs);
+    return *this;
+  }
+
+  template <class C>
+  inline
+  Polynomial<C> Polynomial<C>::operator * (const Polynomial<C>& p)
+  {
+    return (Polynomial(*this) *= p);
+  }
+
+  template <class C>
+  Polynomial<C> Polynomial<C>::power(const unsigned int k) const
+  {
+    Polynomial<C> r;
+    if (k == 0)
+      r = 1;
+    else
+      {
+	r = *this;
+	for (unsigned int l(2); l <= k; l++)
+	  r *= *this;
+      }
+
+    return r;
+  }
+
+  template <class C>
+  Polynomial<C> Polynomial<C>::differentiate() const
+  {
+    Vector<C> coeffs(std::max(degree(),(unsigned int)1));
+
+    for (unsigned int n(1); n <= degree(); n++)
+      coeffs[n-1] = n * get_coefficient(n);
+
+    return Polynomial<C>(coeffs);
+  }
+
+  template <class C>
+  Polynomial<C> Polynomial<C>::integrate() const
+  {
+    Vector<C> coeffs(degree()+2);
+    
+    for (unsigned int n(0); n <= degree(); n++)
+      coeffs[n+1] = get_coefficient(n) / (n + 1.0);
+
+    return Polynomial<C>(coeffs);
+  }
+
+  template <class C>
+  double Polynomial<C>::integrate(const double a,
+				  const double b,
+				  const bool quadrature) const
+  {
+    assert(a <= b);
+
+    double r(0);
+
+    if(quadrature)
+      {
+	const unsigned int N = (unsigned int)ceil((degree()+1)/2.0); // ensures 2*N-1>=degree()
+
+	for(unsigned int i(0); i < N; i++)
+	  r += GaussWeights[N-1][i] * value((a+b + (b-a)*GaussPoints[N-1][i])/2.0);
       
-// 	r *= b-a;
-//       }
-//     else
-//       {
-// 	Polynomial P(sintegrate());
-// 	r =  P(b)-P(a);
-//       }
+	r *= b-a;
+      }
+    else
+      {
+	Polynomial<C> P(integrate());
+	r = P.value(b)-P.value(a);
+      }
 
-//     return r;
-//   }
+    return r;
+  }
 
-//   void Polynomial::substituteIntoMe(const Polynomial &p)
-//   {
-//     if (deg() > 0)
-//       {
-// 	Polynomial q;
-// 	double a0 = a[0]; // not changed by substitution
-
-// 	Polynomial r;
-// 	for (int expo = 1; expo <= deg(); expo++)
-// 	  {
-// 	    if (a[expo] != 0)
-// 	      {
-// 		q = p;
-// 		for (int l = 2; l <= expo; l++)
-// 		  q *= p;
-// 		q *= a[expo];
-
-// 		r += q;
-// 	      }
-// 	  }
-
-// 	setCoeffs(r.getCoeffs());
-// 	a[0] += a0;
-//       }
-//   }
-
-//   Polynomial Polynomial::substituteInto(const Polynomial &p) const
-//   {
-//     Polynomial r(&a);
-//     r.substituteIntoMe(p);
-
-//     return r;
-//   }
-
-//   Polynomial Polynomial::power(const int k) const
-//   {
-//     assert(k >= 0);
-
-//     Polynomial r;
-
-//     if (k == 0)
-//       r = 1;
-//     else
-//       {
-// 	r = Polynomial(*this);
-// 	for (int l=2; l <= k; l++)
-// 	  r *= (*this);
-//       }
-  
-//     return r;
-//   }
-
-//   //
-//   //
-//   // Polynomial operators
-
-//   double Polynomial::derivative(const double x) const
-//   {
-//     double r = 0;
-
-//     if (deg() > 0)
-//       {
-// 	CoeffsType help(0.0, deg());
-
-// 	help[deg()-1] = a[deg()];
-// 	for (int k = deg()-1; k > 0; k--)
-// 	  help[k-1] = help[k] * x + a[k];
-
-// 	r = help[deg()-1];
-// 	for (int k = deg()-1; k > 0; k--)
-// 	  r = r * x + help[k-1];
-//       }
-
-//     return r;
-//   }
-
-//   Polynomial& Polynomial::operator = (const Polynomial &p)
-//   {
-//     setCoeffs(p.getCoeffs());
-
-//     return *this;
-//   }
-
-//   Polynomial& Polynomial::operator = (const double c)
-//   {
-//     a.resize(1, c);
-
-//     return *this;
-//   }
-
-//   Polynomial& Polynomial::operator += (const Polynomial &p)
-//   {
-//     if (p.deg() > deg() || deg() == 0)
-//       {
-// 	CoeffsType help(0.0, p.deg()+1);
-
-// 	for (int n(0); n <= deg(); n++)
-// 	  help[n] = getCoeff(n);
-
-// 	a.resize(help.size(), 0.0);
-// 	a = help;
-//       }
-
-//     for (int n = 0; n <= p.deg(); n++)
-//       a[n] += p.getCoeff(n);
-  
-//     return *this;
-//   }
-
-//   Polynomial& Polynomial::operator -= (const Polynomial &p)
-//   {
-//     if (p.deg() > deg() || deg() == 0)
-//       {
-// 	CoeffsType help(0.0, p.deg()+1);
-
-// 	for (int n(0); n <= deg(); n++)
-// 	  help[n] = getCoeff(n);
-
-// 	a.resize(help.size(), 0.0);
-// 	a = help;
-//       }
-
-//     for (int n = 0; n <= p.deg(); n++)
-//       a[n] -= p.getCoeff(n);
-  
-//     return *this;
-//   }
-
-//   Polynomial& Polynomial::operator *= (const double c)
-//   {
-//     if (c == 0)
-//       {
-// 	a.resize(0);
-//       }
-//     else
-//       for (int n = 0; n <= deg(); n++)
-// 	a[n] *= c;
-  
-//     return *this;
-//   }
-
-//   Polynomial& Polynomial::operator *= (const Polynomial &p)
-//   {
-//     CoeffsType b(0.0, deg()+p.deg()+1);
-//     const CoeffsType *coeffs = p.getCoeffs();
-
-//     for (int n = 0; n <= deg(); n++)
-//       for (int m = 0; m <= p.deg(); m++)
-// 	b[n+m] += a[n] * (*coeffs)[m];
-
-//     a.resize(b.size(), 0.0);
-//     std::copy(&b[0], &b[b.size()], &a[0]);
-  
-//     return *this;
-//   }
-
-//   //
-//   //
-//   // (friend) operators
-
-//   Polynomial operator + (const Polynomial &p, const Polynomial &q)
-//   {
-//     Polynomial r(p);
-//     r += q;
-
-//     return r;
-//   }
-
-//   Polynomial operator - (const Polynomial &p, const Polynomial &q)
-//   {
-//     Polynomial r(p);
-//     r -= q;
-
-//     return r;
-//   }
-
-//   Polynomial operator - (const Polynomial &p)
-//   {
-//     Polynomial r(p);
-//     r *= -1;
-
-//     return r;
-//   }
-
-//   Polynomial operator * (const double c, const Polynomial &p)
-//   {
-//     Polynomial r(p);
-//     r *= c;
-
-//     return r;
-//   }
-
-//   Polynomial operator * (const Polynomial &p, const Polynomial &q)
-//   {
-//     Polynomial r(p);
-//     r *= q;
-
-//     return r;
-//   }
+  template <class C>
+  Polynomial<C> operator * (const C c, const Polynomial<C>& p)
+  {
+    return (Polynomial<C>(p) *= c);
+  }
 
   template <class C>
   std::ostream& operator << (std::ostream &s, const Polynomial<C> &p)

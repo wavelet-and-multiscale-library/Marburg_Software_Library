@@ -51,7 +51,7 @@ namespace MathTL
   R MultivariateLaurentPolynomial<R, DIMENSION>::get_coefficient
   (const MultiIndex<int, DIMENSION>& k) const
   {
-    return InfiniteVector<R, MultiIndex<int, DIMENSION> >::operator [] (k);
+    return InfiniteVector<R, MultiIndex<int, DIMENSION> >::get_coefficient(k);
   }
 
   template <class R, unsigned int DIMENSION>
@@ -59,7 +59,7 @@ namespace MathTL
   void MultivariateLaurentPolynomial<R, DIMENSION>::set_coefficient
   (const MultiIndex<int, DIMENSION>& k, const R coeff)
   {
-    InfiniteVector<R, MultiIndex<int, DIMENSION> >::operator [] (k) = coeff;
+    InfiniteVector<R, MultiIndex<int, DIMENSION> >::set_coefficient(k, coeff);
   }
 
   template <class R, unsigned int DIMENSION>
@@ -223,6 +223,43 @@ namespace MathTL
   (const R c, const MultivariateLaurentPolynomial<R, DIMENSION>& p)
   {
     return (MultivariateLaurentPolynomial<R, DIMENSION>(p) *= c);
+  }
+
+  template <class R, unsigned int DIMENSION>
+  void MultivariateLaurentPolynomial<R, DIMENSION>::multiply
+  (const MultivariateLaurentPolynomial<R, DIMENSION>& p)
+  {
+    InfiniteVector<R, MultiIndex<int, DIMENSION> > coeffs;
+    MultiIndex<int, DIMENSION> index;
+    for (const_iterator it(begin()), itend(end()); it != itend; ++it)
+      for (const_iterator itp(p.begin()), itpend(p.end()); itp != itpend; ++itp)
+	{
+	  for (unsigned int i(0); i < DIMENSION; i++)
+	    index[i] = it.index()[i] + itp.index()[i];
+
+	  coeffs.set_coefficient(index, coeffs.get_coefficient(index) + (*it * *itp));
+	}
+    
+    swap(coeffs);    
+  }
+
+  template <class R, unsigned int DIMENSION>
+  inline
+  MultivariateLaurentPolynomial<R, DIMENSION>&
+  MultivariateLaurentPolynomial<R, DIMENSION>::operator *=
+  (const MultivariateLaurentPolynomial<R, DIMENSION>& p)
+  {
+    multiply(p);
+    return *this;
+  }
+
+  template <class R, unsigned int DIMENSION>
+  inline
+  MultivariateLaurentPolynomial<R, DIMENSION> operator *
+  (const MultivariateLaurentPolynomial<R, DIMENSION>& p,
+   const MultivariateLaurentPolynomial<R, DIMENSION>& q)
+  {
+    return (MultivariateLaurentPolynomial<R, DIMENSION>(p) *= q);
   }
 
   template <class R, unsigned int DIMENSION>

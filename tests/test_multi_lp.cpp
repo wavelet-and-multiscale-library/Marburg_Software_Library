@@ -53,9 +53,15 @@ int main()
   cout << "q+p: " << q+p << endl;
   cout << "q-p: " << q-p << endl;
   cout << "-q: " << -q << endl;
-  cout << "3*q: " << 3. * q << endl;
+  cout << "3*q: " << 3.*q << endl;
 
-//   cout << "p*q: " << p*q << endl;
+  cout << "p=" << p << ", q=" << q << endl;
+//   LPoly dummy(q);
+//   dummy *= p;
+//   cout << "dummy=q, dummy*=p: " << dummy << endl;
+
+  cout << "p*q: " << p*q << endl;
+
 //   cout << "(1+z)^2: ";
 //   LaurentPolynomial<double> s(1);
 //   s.set_coefficient(1, 1);

@@ -230,10 +230,9 @@ namespace MathTL
 
   template <class R>
   inline
-  LaurentPolynomial<R>
-  LaurentPolynomial<R>::operator * (const R c) const
+  LaurentPolynomial<R> operator * (const R c, const LaurentPolynomial<R>& p)
   {
-    return (LaurentPolynomial<R>(*this) *= c);
+    return (LaurentPolynomial<R>(p) *= c);
   }
 
   template <class R>
@@ -259,9 +258,9 @@ namespace MathTL
   template <class R>
   inline
   LaurentPolynomial<R>
-  LaurentPolynomial<R>::operator * (const LaurentPolynomial<R>& p)
+  operator * (const LaurentPolynomial<R>& p, const LaurentPolynomial<R>& q)
   {
-    return (LaurentPolynomial(*this) *= p);
+    return (LaurentPolynomial<R>(p) *= q);
   }
 
   template <class R>

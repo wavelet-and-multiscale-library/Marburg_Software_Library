@@ -52,7 +52,7 @@ namespace MathTL
     typename std::map<I,C>::const_iterator it(lower_bound(index));
     if (it != std::map<I,C>::end())
       {
-	if (!std::map<I,C>::key_comp()(index,it->first))
+	if (!std::map<I,C>::key_comp()(index, it->first))
 	  return it->second;
       }
     return C(0);
@@ -62,7 +62,13 @@ namespace MathTL
   inline
   C& InfiniteVector<C,I>::operator [] (const I& index)
   {
-    return std::map<I,C>::operator [] (index);
+    typename std::map<I,C>::iterator it(lower_bound(index));
+    if (it != std::map<I,C>::end() &&
+	!std::map<I,C>::key_comp()(index, it->first))
+      return it->second;
+    else
+//       return std::map<I,C>::insert(it, typename std::map<I,C>::value_type(index, C(0)))->second;
+      return std::map<I,C>::insert(typename std::map<I,C>::value_type(index, C(0))).first->second;
   }
 
   template <class C, class I>
@@ -70,15 +76,11 @@ namespace MathTL
   {
     typename std::map<I,C>::iterator it(lower_bound(index));
 
-    if (it != std::map<I,C>::end())
-      {
-	if (!std::map<I,C>::key_comp()(index,it->first))
-	  it->second = value;
-      }
+    if (it != std::map<I,C>::end() &&
+	!std::map<I,C>::key_comp()(index,it->first))
+      it->second = value;
     else
-      {
-	std::map<I,C>::insert(typename std::map<I,C>::value_type(index, value));
-      }
+      std::map<I,C>::insert(typename std::map<I,C>::value_type(index, value));
   }
 
   template <class C, class I>
@@ -135,9 +137,9 @@ namespace MathTL
     typename InfiniteVector<C,I>::const_iterator itv(v.begin()), itvend(v.end());
     while (itv != itvend)
       {
-	C help(this->operator [] (itv.index()) + s * *itv);
+	C help(get_coefficient(itv.index()) + s * *itv);
 	if (help != C(0))
-	  this->operator [] (itv.index()) = help;
+	  set_coefficient(itv.index(), help);
 	else
 	  std::map<I,C>::erase(itv.index());
 	++itv;
@@ -151,9 +153,9 @@ namespace MathTL
     typename InfiniteVector<C,I>::const_iterator itv(v.begin()), itvend(v.end());
     while (itv != itvend)
       {
-	C help(s * this->operator [] (itv.index()) + *itv);
+	C help(s * get_coefficient(itv.index()) + *itv);
 	if (help != C(0))
-	  this->operator [] (itv.index()) = help;
+	  set_coefficient(itv.index(), help);
 	else
 	  std::map<I,C>::erase(itv.index());
 	++itv;
@@ -189,9 +191,9 @@ namespace MathTL
     typename InfiniteVector<C,I>::const_iterator itv(v.begin()), itvend(v.end());
     while (itv != itvend)
       {
-	C help(this->operator [] (itv.index()) - *itv);
+	C help(get_coefficient(itv.index()) - *itv);
 	if (help != C(0))
-	  this->operator [] (itv.index()) = help;
+	  set_coefficient(itv.index(), help);
 	else
 	  std::map<I,C>::erase(itv.index());
 	++itv;

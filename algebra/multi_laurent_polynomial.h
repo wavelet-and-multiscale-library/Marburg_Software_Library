@@ -176,6 +176,17 @@ namespace MathTL
     MultivariateLaurentPolynomial<R, DIMENSION>& operator *= (const R c);
 
     /*!
+      pointwise multiplication with another Laurent polynomial
+    */
+    void multiply(const MultivariateLaurentPolynomial<R, DIMENSION>& p);
+
+    /*!
+      pointwise multiplication with another Laurent polynomial
+    */
+    MultivariateLaurentPolynomial<R, DIMENSION>& operator *=
+    (const MultivariateLaurentPolynomial<R, DIMENSION>& p);
+
+    /*!
       just for testing
     */
     void dump() const;
@@ -189,6 +200,14 @@ namespace MathTL
   MultivariateLaurentPolynomial<R, DIMENSION> operator *
   (const R c, const MultivariateLaurentPolynomial<R, DIMENSION>& p);
   
+  /*!
+    pointwise multiplication of two Laurent polynomials
+  */
+  template <class R, unsigned int DIMENSION>
+  MultivariateLaurentPolynomial<R, DIMENSION> operator *
+  (const MultivariateLaurentPolynomial<R, DIMENSION>& p,
+   const MultivariateLaurentPolynomial<R, DIMENSION>& q);
+
   /*!
     stream output for multivariate Laurent polynomials,
     for readability we also print out the powers

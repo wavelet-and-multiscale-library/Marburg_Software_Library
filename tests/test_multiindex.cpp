@@ -36,18 +36,33 @@ int main()
   for (set<MIndex>::const_iterator it(M.begin()); it != M.end(); ++it)
     cout << *it << endl;
 
-  cout << "  * making a map out of the two multiindices:" << endl;
+  cout << "  * making a map:" << endl;
   map<MIndex,double> c;
+  MIndex lambda3;
+  lambda3[0] = -2;
   c.insert(std::make_pair<MIndex,double>(lambda, 42.0));
   c.insert(std::make_pair<MIndex,double>(lambda2, 23.0));
+  c.insert(std::make_pair<MIndex,double>(lambda3, 3.14));
   for (map<MIndex,double>::const_iterator it(c.begin()); it != c.end(); ++it)
     cout << it->first << ", " << it->second << endl;
 
-  cout << "  * making an InfiniteVector of the two multiindices:" << endl;
+  cout << "  * making an InfiniteVector:" << endl;
   InfiniteVector<double, MIndex> v;
   v[lambda] = 42.0;
   v[lambda2] = 23.0;
+  v[lambda3] = 3.14;
   cout << v;
+
+  cout << "  * making a map based on a 2-index:" << endl;
+  typedef MultiIndex<int,2> MIndex2;
+  MIndex2 n;
+  n[0] = 2; n[1] = 4;
+  map<MIndex2,double> d;
+  d[n] = 1.0;
+  n[0] = -6; n[1] = 6;
+  d[n] = -1.0;
+  for (map<MIndex2,double>::const_iterator it(d.begin()); it != d.end(); ++it)
+    cout << it->first << ", " << it->second << endl;
 
   return 0;
 }

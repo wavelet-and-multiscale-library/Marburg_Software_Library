@@ -202,12 +202,6 @@ namespace MathTL
     LaurentPolynomial<R>& operator *= (const LaurentPolynomial<R>& p);
 
     /*!
-      pointwise multiplication with another Laurent polynomial
-      (don't use this extensively, since one copy has to be made!)
-    */
-    LaurentPolynomial<R> operator * (const LaurentPolynomial<R>& p);
-    
-    /*!
       raise the Laurent polynomial to some power
     */
     LaurentPolynomial<R> power(const unsigned int k) const;
@@ -228,12 +222,15 @@ namespace MathTL
     multiplication of a Laurent polynomial with a real number from the left
   */
   template <class R>
-  inline
-  LaurentPolynomial<R> operator * (const R c, const LaurentPolynomial<R>& p)
-  {
-    return (LaurentPolynomial<R>(p) *= c);
-  }
+  LaurentPolynomial<R> operator * (const R c, const LaurentPolynomial<R>& p);
 
+  /*!
+    pointwise multiplication of two Laurent polynomials
+  */
+  template <class R>
+  LaurentPolynomial<R> operator * (const LaurentPolynomial<R>& p,
+				   const LaurentPolynomial<R>& q);
+    
   /*!
     stream output for Laurent polynomials,
     for readability we also print out the powers

@@ -37,5 +37,7 @@
 #include <numerics/eigenvalues.h>
 #include <numerics/matrix_decomp.h>
 #include <numerics/ortho_poly.h>
+#include <numerics/quadrature.h>
+#include <numerics/gauss_quadrature.h>
 
 #endif

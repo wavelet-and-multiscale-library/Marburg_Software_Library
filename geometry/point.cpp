@@ -46,6 +46,14 @@ namespace MathTL
   }
 
   template <unsigned int DIM, class VALUE>
+  Point<DIM, VALUE>& Point<DIM, VALUE>::operator = (const VALUE x)
+  {
+    assert(DIM == 1);
+    values[0] = x;
+    return *this;
+  }
+
+  template <unsigned int DIM, class VALUE>
   inline
   const typename Point<DIM, VALUE>::size_type
   Point<DIM, VALUE>::size() const

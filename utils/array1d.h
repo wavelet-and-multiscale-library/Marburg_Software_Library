@@ -73,7 +73,7 @@ namespace MathTL
     /*!
       construct an array of positive size and initialize its elements
       (Please note that the builtin types (int, double, ...) are not
-      automatically set to zero, this depends on the compiler!)
+      automatically set to _zero_, this depends on the compiler!)
     */
     Array1D(const size_type s);
 
@@ -86,6 +86,11 @@ namespace MathTL
       size of the array
     */
     const size_type size() const;
+
+    /*!
+      resize the array
+    */
+    void resize(const size_type s);
 
     /*!
       read-only access to the i-th array member

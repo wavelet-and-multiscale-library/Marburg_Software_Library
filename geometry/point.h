@@ -87,6 +87,11 @@ namespace MathTL
     Point(const VALUE x, const VALUE y, const VALUE z);
 
     /*!
+      set point to a real number, this is only allowed for DIM==1
+    */
+    Point<DIM, VALUE>& operator = (const VALUE x);
+
+    /*!
       size/dimension of the point (cf. std::vector signature)
      */
     const size_type size() const;

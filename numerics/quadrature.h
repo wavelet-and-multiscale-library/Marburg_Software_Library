@@ -1,0 +1,108 @@
+// -*- c++ -*-
+
+// +--------------------------------------------------------------------+
+// | This file is part of MathTL - the Mathematical Template Library    |
+// |                                                                    |
+// | Copyright (c) 2002-2004                                            |
+// | Thorsten Raasch                                                    |
+// +--------------------------------------------------------------------+
+
+#ifndef _MATHTL_QUADRATURE_H
+#define _MATHTL_QUADRATURE_H
+
+#include <utils/array1d.h>
+#include <utils/function.h>
+#include <geometry/point.h>
+
+namespace MathTL
+{
+  /*!
+    A base class for N-point quadrature rules in DIM space dimensions
+    on a box spanned by a,b\in\mathbb R^{DIM}
+      Q(f) = \sum_{k=1}^N w_k f(x_k)
+    with nodes x_k and weights w_k.
+    Internally, we store the nodes and weights for quadrature on [0,1]^{DIM}
+    and scale the nodes appropriately when quadrature has to be performed
+
+    (this class is _not_ intended to be used in practice,
+    please use derived special versions below instead!)
+   */
+  template <unsigned int DIM>
+  class QuadratureRule
+  {
+  public:
+    /*!
+      evaluate quadrature rule on [0,1]^{DIM}
+      (we assume that the function is real-valued)
+    */
+    double integrate(const Function<DIM, double>& f) const;
+
+  protected:
+    /*!
+      nodes of the quadrature rule
+    */
+    Array1D<Point<DIM> > points_;
+
+    /*!
+      weights of the quadrature rule
+    */
+    Array1D<double> weights_;
+  };
+
+  /*!
+    1D midpoint rule Q(f) = (b-a) * f((a+b)/2)
+  */
+  class MidpointRule : public QuadratureRule<1>
+  {
+  public:
+    /*!
+      construct midpoint rule
+    */
+    MidpointRule();
+  };
+
+  /*!
+    closed 1D Newton-Cotes rule with N subintervals, i.e., N+1 points
+  */
+  template <unsigned int N = 1>
+  class ClosedNewtonCotesRule : public QuadratureRule<1>
+  {
+  public:
+    /*!
+      construct closed Newton Cotes rule
+    */
+    ClosedNewtonCotesRule();
+  };
+
+  /*!
+    trapezoidal rule Q(f) = (b-a)/2 * (f(a)+f(b))
+    (equivalent to ClosedNewtonCotesRule<1>)
+   */
+  class TrapezoidalRule: public QuadratureRule<1>
+  {
+  public:
+    /*!
+      construct trapezoidal rule
+    */
+    TrapezoidalRule();
+  };
+
+  /*!
+    Simpson rule Q(f) = (b-a)/6 * (f(a)+4*f(a+b)/2+f(b))
+    (equivalent to ClosedNewtonCotesRule<2>)
+   */
+  class SimpsonRule: public QuadratureRule<1>
+  {
+  public:
+    /*!
+      construct Simpson rule
+    */
+    SimpsonRule();
+  };
+}
+
+
+// include implementation of inline functions
+#include <numerics/quadrature.cpp>
+
+#endif

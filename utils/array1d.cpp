@@ -40,6 +40,27 @@ namespace MathTL
   }
 
   template <class C>
+  void Array1D<C>::resize(const size_type s)
+  {
+    if (s == 0)
+      {
+	if (data_ != 0) delete [] data_;
+	data_ = 0;
+	size_ = 0;
+      }
+    else
+      {
+	if (size_ != s)
+	  {
+	    if (data_ != 0) delete [] data_;
+	    data_ = new C[s]; // calls C()
+	    size_ = s;
+	  }
+      }
+
+  }
+
+  template <class C>
   inline
   const C& Array1D<C>::operator [] (const size_type i) const
   {

@@ -85,6 +85,18 @@ namespace WaveletTL
     return result * M_SQRT1_2;
   }
 
+  // helper routine to check BetaL
+  template <int d, int dt>
+  double DKUBasis<d, dt>::betaLT_(const int m, const int r) const
+  {
+    double result(0);
+
+    for (int q((int)ceil((m-ell2())/2.0)); q <= ell()-1; q++)
+      result += AlphaT_(q, r) * cdf_.a().get_coefficient(m-2*q); // (3.2.31)
+
+    return result * M_SQRT1_2;
+  }
+
   template <int d, int dt>
   DKUBasis<d, dt>::DKUBasis()
   {
@@ -177,8 +189,12 @@ namespace WaveletTL
       for (int m(2*ellT()+ell1T()); m <= 2*ellT()+ell2T()-2; m++)
 	BetaL_(m-2*ellT()-ell1T(), r) = betaL_(m, r);
 
+    // setup BetaLT
+    BetaLT_.resize(ell2()-ell1()-1, d);
+    for (int r(0); r < d; r++)
+      for (int m(2*ell()+ell1()); m <= 2*ell()+ell2()-2; m++)
+	BetaLT_(m-2*ell()-ell1(), r) = betaLT_(m, r);
     
-
 //     // check Alpha
 //     cout << Alpha_ << endl;
 //     for (int m(-ell2T()+1); m <= ellT()-1; m++) {
@@ -198,5 +214,8 @@ namespace WaveletTL
 
 //     // check BetaL
 //     cout << BetaL_ << endl;
+
+//     // check BetaLT
+//     cout << BetaLT_ << endl;
   }
 }

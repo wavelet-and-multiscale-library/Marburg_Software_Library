@@ -49,7 +49,7 @@ namespace MathTL
   Point<DIM, VALUE>& Point<DIM, VALUE>::operator = (const VALUE x)
   {
     assert(DIM == 1);
-    values[0] = x;
+    this->values[0] = x;
     return *this;
   }
 

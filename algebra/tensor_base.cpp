@@ -1,6 +1,7 @@
 // implementation of some (inline) Tensor<1, DIM>:: methods
 
 #include <cassert>
+#include <io/vector_io.h>
 
 namespace MathTL
 {
@@ -22,6 +23,14 @@ namespace MathTL
   {
     for (unsigned int i(0); i < DIM; ++i)
       values[i] = 0;
+  }
+
+  template <unsigned int DIM>
+  inline
+  const typename Tensor<1, DIM>::size_type
+  Tensor<1, DIM>::size() const
+  {
+    return dimension;
   }
 
   template <unsigned int DIM>
@@ -147,19 +156,14 @@ namespace MathTL
   inline
   std::ostream& operator << (std::ostream& os, const Tensor<1, DIM>& T)
   {
-    os << "[";
-    for (unsigned int i(0); i < DIM-1; ++i)
-      os << T[i] << ' ';
-    os << T[DIM-1] << "]";
-
+    print_vector(T, os);
     return os;
   }
 
   inline
   std::ostream& operator << (std::ostream& os, const Tensor<1, 1>& T)
   {
-    os << "[" << T[0] << "]";
-    
+    print_vector(T, os);
     return os;
   }
 }

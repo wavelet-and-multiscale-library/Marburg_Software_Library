@@ -57,6 +57,38 @@ namespace MathTL
 
   template <class C>
   inline
+  typename Array1D<C>::const_iterator
+  Array1D<C>::begin() const
+  {
+    return &data_[0];
+  }
+
+  template <class C>
+  inline
+  typename Array1D<C>::iterator
+  Array1D<C>::begin()
+  {
+    return &data_[0];
+  }
+
+  template <class C>
+  inline
+  typename Array1D<C>::const_iterator
+  Array1D<C>::end() const
+  {
+    return &data_[size_];
+  }
+
+  template <class C>
+  inline
+  typename Array1D<C>::iterator
+  Array1D<C>::end()
+  {
+    return &data_[size_];
+  }
+
+  template <class C>
+  inline
   std::ostream& operator << (std::ostream& os, const Array1D<C>& A)
   {
     print_vector(A, os);

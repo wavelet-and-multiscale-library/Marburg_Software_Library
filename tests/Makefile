@@ -12,7 +12,8 @@ CXXFLAGS += -I$(MATHTL_DIR)
 
 EXEOBJF = \
   test_tensor.o test_point.o test_array1d.o\
-  test_function.o
+  test_function.o\
+  test_vector.o
 
 EXES = $(EXEOBJF:.o=)
 

@@ -18,6 +18,9 @@ namespace MathTL
     with a standard signatur like std::vector<T>
 
     We use the size() routine for determining the dimension of the vector.
+
+    You can use template specialization to speed up the norm computation
+    for specific VECTOR classes.
   */
 
   /*!

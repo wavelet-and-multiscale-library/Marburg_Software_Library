@@ -26,9 +26,39 @@ namespace MathTL
   {
   public:
     /*!
-      type of the objects stored in this array
+      value type (cf. STL containers)
      */
     typedef C value_type;
+
+    /*!
+      pointer type (cf. STL containers)
+     */
+    typedef value_type* pointer;
+
+    /*!
+      const pointer type (cf. STL containers)
+    */
+    typedef const value_type* const_pointer;
+
+    /*!
+      iterator type (cf. STL containers)
+    */
+    typedef value_type* iterator;
+
+    /*!
+      const iterator type (cf. STL containers)
+    */
+    typedef const value_type* const_iterator;
+
+    /*!
+      reference type (cf. STL containers)
+    */
+    typedef value_type& reference;
+    
+    /*!
+      const reference type (cf. STL containers)
+    */
+    typedef const value_type& const_reference;
 
     /*!
       type of indexes and size of the array
@@ -67,7 +97,29 @@ namespace MathTL
     */
     C& operator [] (const size_type i);
 
-  private:
+    /*!
+      read-only iterator access to first element (cf. STL containers)
+    */
+    const_iterator begin() const;
+
+    /*!
+      read-write iterator access to first element (cf. STL containers)
+    */
+    iterator begin();
+
+    /*!
+      read-only iterator access to the element behind the last one
+      (cf. STL containers)
+    */
+    const_iterator end() const;
+
+    /*!
+      read-only iterator access to the element behind the last one
+      (cf. STL containers)
+    */
+    iterator end();
+
+  protected:
     /*!
       internal storage is just a pointer to a C array
     */

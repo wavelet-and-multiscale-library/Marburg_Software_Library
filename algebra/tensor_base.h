@@ -62,6 +62,11 @@ namespace MathTL
     void clear();
 
     /*!
+      size of the tensor as a vector (cf. std::vector signature)
+    */
+    const size_type size() const;
+    
+    /*!
       read-only access to the i-th coordinate
     */
     const double operator [] (const size_type i) const;
@@ -128,8 +133,7 @@ namespace MathTL
     
   protected:
     /*!
-      storage for the vector entries
-      (TODO: use my own array class)
+      internal storage for the vector entries
     */
     Array1D<double> values;
   };

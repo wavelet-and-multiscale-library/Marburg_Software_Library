@@ -11,7 +11,6 @@
 #define _MATHTL_VECTOR_H
 
 #include <iostream>
-#include "utils/array1d.h"
 
 namespace MathTL
 {
@@ -22,52 +21,53 @@ namespace MathTL
     designed for numerical computations.
     The signature parallels that of std::vector.
 
-    A Vector<C> is derived from Array1D<C>, so we also refer to
-    the Array1D<C> documentation here.
+    A Vector<C> has essentially the same functionality as an Array1D<C>.
+    However, we deliberately don't use inheritance here in order to
+    really provide a raw class with maximum performance.
   */
   template <class C>
-  class Vector : public Array1D<C>
+  class Vector
   {
   public:
     /*!
       value type (cf. STL containers)
-     */
-    typedef typename Array1D<C>::value_type value_type;
-
+    */
+    typedef C value_type;
+    
     /*!
       pointer type (cf. STL containers)
      */
-    typedef typename Array1D<C>::pointer pointer;
+    typedef value_type* pointer;
 
     /*!
       const pointer type (cf. STL containers)
     */
-    typedef typename Array1D<C>::const_pointer const_pointer;
+    typedef const value_type* const_pointer;
 
     /*!
       iterator type (cf. STL containers)
     */
-    typedef typename Array1D<C>::iterator iterator;
+    typedef value_type* iterator;
 
     /*!
       const iterator type (cf. STL containers)
     */
-    typedef typename Array1D<C>::const_iterator const_iterator;
+    typedef const value_type* const_iterator;
 
     /*!
       reference type (cf. STL containers)
     */
-    typedef typename Array1D<C>::reference reference;
+    typedef value_type& reference;
     
     /*!
       const reference type (cf. STL containers)
     */
-    typedef typename Array1D<C>::const_reference const_reference;
+    typedef const value_type& const_reference;
 
     /*!
       type of indexes and size type (cf. STL containers)
-    */
-    typedef typename Array1D<C>::size_type size_type;
+     */
+    typedef size_t size_type;
 
     /*!
       default constructor: yields a 0-dimensional vector
@@ -84,9 +84,128 @@ namespace MathTL
     explicit Vector(const size_type s, const bool initialize = true);
 
     /*!
+      copy constructor
+    */
+    Vector(const Vector<C>& v);
+
+    /*!
+      release allocated memory
+    */
+    ~Vector();
+
+    /*!
+      size/dimension of the vector
+    */
+    const size_type size() const;
+
+    /*!
+      resize vector, initialize with C(0) if desired
+    */
+    void resize(const size_type s, const bool initialize = true);
+
+    /*!
+      C style read-only access to the i-th vector component
+    */
+    const C operator [] (const size_type i) const;
+
+    /*!
+      Matlab style read-only access to the i-th vector component
+    */
+    const C operator () (const size_type i) const;
+
+    /*!
+      C style read-write access to the i-th vector component
+    */
+    C& operator [] (const size_type i);
+
+    /*!
+      Matlab style read-write access to the i-th vector component
+    */
+    C& operator () (const size_type i);
+
+    /*!
+      read-only iterator access to first element (cf. STL containers)
+    */
+    const_iterator begin() const;
+
+    /*!
+      read-write iterator access to first element (cf. STL containers)
+    */
+    iterator begin();
+
+    /*!
+      read-only iterator access to the element behind the last one
+      (cf. STL containers)
+    */
+    const_iterator end() const;
+
+    /*!
+      read-only iterator access to the element behind the last one
+      (cf. STL containers)
+    */
+    iterator end();
+
+    /*!
       assignment of a constant value to each component
      */
-    Vector<C>& operator = (const C& c);
+    Vector<C>& operator = (const C c);
+
+    /*!
+      equality test
+     */
+    bool operator == (const Vector<C>& v);
+
+    /*!
+      non-equality test
+    */
+    bool operator != (const Vector<C>& v);
+
+    /*!
+      in place summation *this += v
+    */
+    void add(const Vector<C>& v);
+    
+    /*!
+      in place summation *this = s*(*this) + v
+      (AXPY level 1 BLAS routine)
+    */
+    void sadd(const C s, const Vector<C>& v);
+
+    /*!
+      in place scaling *this *= s
+    */
+    void scale(const C s);
+
+    /*!
+      in place summation
+    */
+    Vector<C>& operator += (const Vector<C>& v);
+
+    /*!
+      in place subtraction
+    */
+    Vector<C>& operator -= (const Vector<C>& v);
+
+    /*!
+      in place multiplication with a scalar
+    */
+    Vector<C>& operator *= (const C c);
+    
+    /*!
+      in place division by a (nontrivial) scalar
+    */
+    Vector<C>& operator /= (const C c);
+
+  protected:
+    /*!
+      internal storage is just a pointer to a C array
+    */
+    C* values_;
+
+    /*!
+      size/dimension of the vector
+    */
+    size_type size_;
   };
 
   /*!

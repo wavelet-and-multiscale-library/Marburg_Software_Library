@@ -14,42 +14,39 @@ int main()
   cout << "- a zero vector of dimension " << v.size() << ":" << endl
        << v << endl;
 
-//   v.resize(dim);
-//   cout << "- resized to dimension " << v.dim() << ":" << endl
-//        << v << endl;
+  v.resize(dim);
+  cout << "- resized to dimension " << v.size() << ":" << endl
+       << v << endl;
 
-//   cout << "- writing access on v:" << endl;
-//   v(1) = 1; v(3) = 42;
-//   cout << v << endl;
+  cout << "- writing access on v:" << endl;
+  v(1) = 1; v[3] = 42;
+  cout << v << endl;
 
-//   cout << "- copy constructor w(v):" << endl;
-//   RawVector<double> w(v);
-//   cout << w << endl;
+  cout << "- copy constructor w(v):" << endl;
+  Vector<double> w(v);
+  cout << w << endl;
 
-//   cout << "- reference counter of w:" << endl
-//        << w.refc() << endl;
+  cout << "- are the two vectors equal?" << endl;
+  if (w == v)
+    cout << "  ... yes!" << endl;
+  else
+    cout << "  ... no!" << endl;
 
-//   cout << "- are the two vectors equal?" << endl;
-//   if (w == v)
-//     cout << "  ... yes!" << endl;
-//   else
-//     cout << "  ... no!" << endl;
+  cout << "- in place summation v+=w:" << endl;
+  v += w;
+  cout << v << endl;
 
-//   cout << "- in place summation v+=w:" << endl;
-//   v += w;
-//   cout << v << endl;
+  cout << "- in place subtraction w-=v:" << endl;
+  w -= v;
+  cout << w << endl;
 
-//   cout << "- in place subtraction w-=v:" << endl;
-//   w -= v;
-//   cout << w << endl;
-
-//   cout << "- in place multiplication v*=2:" << endl;
-//   v *= 2;
-//   cout << v << endl;
+  cout << "- in place multiplication v*=2:" << endl;
+  v *= 2;
+  cout << v << endl;
   
-//   cout << "- in place division v/=3:" << endl;
-//   v /= 3;
-//   cout << v << endl;
+  cout << "- in place division v/=3:" << endl;
+  v /= 3;
+  cout << v << endl;
 
 //   cout << "- ell_p norms of v:" << endl;
 //   cout << "  ||x||_2 = " << norm(v)

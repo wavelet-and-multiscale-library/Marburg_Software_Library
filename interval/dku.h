@@ -84,17 +84,43 @@ namespace WaveletTL
     inline const int DeltaRmin(const int j) const { return (1<<j)-ell()+1-(d%2); }
     inline const int DeltaRmax(const int j) const { return (1<<j)-ell()+d-(d%2); }
 
-    inline const int DeltaLTmin() const { return ellT()-dT; }
+    inline const int DeltaLTmin() const { return ellT()-dT; } // == DeltaLmin()
     inline const int DeltaLTmax() const { return ellT()-1; }
     inline const int Delta0Tmin() const { return ellT(); }
     inline const int Delta0Tmax(const int j) const { return (1<<j)-ellT()-(d%2); }
     inline const int DeltaRTmin(const int j) const { return (1<<j)-ellT()+1-(d%2); }
-    inline const int DeltaRTmax(const int j) const { return (1<<j)-ellT()+dT-(d%2); }
+    inline const int DeltaRTmax(const int j) const { return (1<<j)-ellT()+dT-(d%2); } // == DeltaRmax()
+
+    /*!
+      boundary indices in \nabla_j
+    */
+    inline const int Nablamin() const { return 0; }
+    inline const int Nablamax(const int j) const { return (1<<j)-1; }
 
     /*!
       wavelet index class
     */
     typedef DKUIndex<d, dT> Index;
+
+    /*!
+      first (leftmost) generator on scale j >= j0
+    */
+    Index firstGenerator(const int j) const;
+
+    /*!
+      last (rightmost) generator on scale j >= j0
+    */
+    Index lastGenerator(const int j) const;
+
+    /*!
+      first (leftmost) wavelet on scale j >= j0
+    */
+    Index firstWavelet(const int j) const;
+
+    /*!
+      last (rightmost) wavelet on scale j >= j0
+    */
+    Index lastWavelet(const int j) const;
 
   protected:
     int ell1_, ell2_, ell1T_, ell2T_, ell_, ellT_;

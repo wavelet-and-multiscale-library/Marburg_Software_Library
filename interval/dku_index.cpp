@@ -21,14 +21,17 @@ namespace WaveletTL
     j_ = lambda.j();
     e_ = lambda.e();
     k_ = lambda.k();
+    basis_ = lambda.basis();
   }
 
   template <int d, int dT>
-  DKUIndex<d, dT>::DKUIndex(const int j, const int e, const int k)
+  DKUIndex<d, dT>::DKUIndex(const int j, const int e, const int k,
+			    const DKUBasis<d, dT>* basis)
   {
     j_ = j;
     e_ = e;
     k_ = k;
+    basis_ = basis;
   }
 
   template <int d, int dT>
@@ -37,6 +40,7 @@ namespace WaveletTL
     j_ = lambda.j();
     e_ = lambda.e();
     k_ = lambda.k();
+    basis_ = lambda.basis();
 
     return *this;
   }

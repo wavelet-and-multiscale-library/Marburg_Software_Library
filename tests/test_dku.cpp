@@ -18,7 +18,12 @@ int main()
 
   cout << "- the default wavelet index: " << Basis::Index(&basis) << endl;
 
-  InfiniteVector<double, Basis::Index> coeff;
+  cout << "- leftmost generator on the coarsest level: " << basis.firstGenerator(basis.j0()) << endl;
+  cout << "- rightmost generator on the coarsest level: " << basis.lastGenerator(basis.j0()) << endl;
+  cout << "- leftmost wavelet on the coarsest level: " << basis.firstWavelet(basis.j0()) << endl;
+  cout << "- rightmost wavelet on the coarsest level: " << basis.lastWavelet(basis.j0()) << endl;
+
+//   InfiniteVector<double, Basis::Index> coeff;
 //   coeff[RIndex(2,0,0)] = 1.0;
 //   coeff[RIndex(2,0,1)] = -3.14;
 //   coeff[RIndex(2,0,3)] = 2.0;

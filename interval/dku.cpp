@@ -333,4 +333,36 @@ namespace WaveletTL
       }
     CLAT_.compress();
   }
+
+  template <int d, int dT>
+  typename DKUBasis<d, dT>::Index
+  DKUBasis<d, dT>::firstGenerator(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 0, DeltaLmin(), this);
+  }
+
+  template <int d, int dT>
+  typename DKUBasis<d, dT>::Index
+  DKUBasis<d, dT>::lastGenerator(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 0, DeltaRmax(j0()), this);
+  }
+
+  template <int d, int dT>
+  typename DKUBasis<d, dT>::Index
+  DKUBasis<d, dT>::firstWavelet(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 1, Nablamin(), this);
+  }
+
+  template <int d, int dT>
+  typename DKUBasis<d, dT>::Index
+  DKUBasis<d, dT>::lastWavelet(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 1, Nablamax(j), this);
+  }
 }

@@ -26,7 +26,8 @@ namespace WaveletTL
   public:
     /*!
       constructor with given interval basis
-      (also serves as default constructor, but yields invalid
+      (also serves as a default constructor, but yields an invalid index then
+      because the underlying interval basis must be specified to work correctly)
      */
     DKUIndex(const DKUBasis<d, dT>* basis = 0);
 
@@ -34,7 +35,7 @@ namespace WaveletTL
     DKUIndex(const DKUIndex& lambda);
   
     //! constructor with specified parameters
-    DKUIndex(const int j, const int e, const int k);
+    DKUIndex(const int j, const int e, const int k, const DKUBasis<d, dT>* basis);
 
     //! assignment
     DKUIndex& operator = (const DKUIndex& lambda);
@@ -65,6 +66,9 @@ namespace WaveletTL
     //! translation index k
     int k() const { return k_; }
     
+    //! underlying basis
+    const DKUBasis<d, dT>* basis() const { return basis_; }
+
   protected:
     //! scale, type, translation
     int j_, e_, k_;

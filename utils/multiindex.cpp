@@ -45,6 +45,8 @@ namespace MathTL
   inline
   bool MultiIndex<I, DIMENSION>::operator < (const MultiIndex& lambda) const
   {
-    return std::lexicographical_compare(begin(), end(), lambda.begin(), lambda.end());
+    return std::lexicographical_compare(FixedArray1D<I, DIMENSION>::begin(),
+					FixedArray1D<I, DIMENSION>::end(),
+					lambda.begin(), lambda.end());
   }
 }

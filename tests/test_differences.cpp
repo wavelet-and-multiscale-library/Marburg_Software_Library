@@ -3,6 +3,7 @@
 #include <algebra/polynomial.h>
 #include <algebra/infinite_vector.h>
 #include <numerics/differences.h>
+#include <numerics/differences.cpp>
 
 using std::cout;
 using std::endl;

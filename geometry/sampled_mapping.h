@@ -110,6 +110,11 @@ namespace MathTL
     }
 
     /*!
+      reading access to the function values
+    */
+    inline const Array1D<double>& values() const { return values_; }
+
+    /*!
       Matlab output of the sampled mapping onto a stream
     */
     void matlab_output(std::ostream& os) const

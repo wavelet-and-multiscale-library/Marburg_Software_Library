@@ -75,7 +75,9 @@ namespace MathTL
     double adjointSummation(const Vector<double>& coeffs, const double x) const;
   };
 
-  //! monomials x^n
+  /*!
+    the monomials x^n
+  */
   class Monomial : public OrthogonalPolynomial
   {
   public:
@@ -83,7 +85,10 @@ namespace MathTL
     double b(const unsigned int k) const;
   };
 
-  //! Chebyshev polynomials with leading coefficient 1
+  /*!
+    Chebyshev polynomials on [-1,1] with leading coefficient 1
+    (corresponding weight function: w(x)=1/sqrt(1-x^2) )
+  */
   class ChebyshevPolynomial : public OrthogonalPolynomial
   {
   public:
@@ -91,7 +96,10 @@ namespace MathTL
     double b(const unsigned int k) const;
   };
 
-  //! Legendre polynomials with leading coefficient 1
+  /*!
+    Legendre polynomials on [-1,1] with leading coefficient 1
+    (corresponding weight function: w(x)=1)
+  */
   class LegendrePolynomial : public OrthogonalPolynomial
   {
   public:

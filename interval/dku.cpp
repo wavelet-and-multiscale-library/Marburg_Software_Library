@@ -17,86 +17,20 @@ using std::endl;
 
 namespace WaveletTL
 {
-  // helper routine to check Alpha
+  // helper routine to compute BetaL
   template <int d, int dT>
-  double DKUBasis<d, dT>::alpha_(const int m, const int r) const
-  {
+  double DKUBasis<d, dT>::betaL_(const int m, const int r) const {
     double result(0);
-
-    if (r == 0)
-      result = 1.0; // (5.1.1)
-    else
-      {
-	if (m == 0)
-	  {
-	    double dummy(0);
-	    for (int k(ell1_); k <= ell2_; k++)
-	      {
-		double dummy1(0);
-		for (int s(0); s <= r-1; s++)
-		  dummy1 += binomial(r, s) * intpower(k, r-s) * alpha_(0, s);
-		dummy += cdf_.a().get_coefficient(k) * dummy1; // (5.1.3)
-	      }
-	    result = dummy / (ldexp(1.0, r+1) - 2.0);
-	  }
-	else
-	  {
-  	    for (int i(0); i <= r; i++)
- 	      result += binomial(r, i) * intpower(m, i) * alpha_(0, r-i); // (5.1.2)
-	  }
-      }
-
-    return result;
-  }
-
-  // helper routine to check AlphaT
-  template <int d, int dT>
-  double DKUBasis<d, dT>::alphaT_(const int m, const int r) const
-  {
-    double result(0);
-
-    if (r == 0)
-      result = 1.0; // (5.1.1)
-    else
-      {
-	if (m == 0)
-	  {
-	    double dummy(0);
-	    for (int k(ell1T_); k <= ell2T_; k++)
-	      {
-		double dummy1(0);
-		for (int s(0); s <= r-1; s++)
-		  dummy1 += binomial(r, s) * intpower(k, r-s) * alphaT_(0, s);
-		dummy += cdf_.aT().get_coefficient(k) * dummy1; // (5.1.3)
-	      }
-	    result = dummy / (ldexp(1.0, r+1) - 2.0);
-	  }
-	else
-	  {
- 	    for (int i(0); i <= r; i++)
-	      result += binomial(r, i) * intpower(m, i) * alphaT_(0, r-i); // (5.1.2)
-	  }
-      }
-
-    return result;
-  }
-
-  // helper routine to check BetaL
-  template <int d, int dT>
-  double DKUBasis<d, dT>::betaL_(const int m, const int r) const
-  {
-    double result(0);
-
+    
     for (int q((int)ceil((m-ell2T_)/2.0)); q <= ellT_-1; q++)
       result += Alpha_(q, r) * cdf_.aT().get_coefficient(m-2*q); // (3.2.31)
-
+    
     return result * M_SQRT1_2;
   }
-
-  // helper routine to check BetaL
+  
+  // helper routine to compute BetaLT
   template <int d, int dT>
-  double DKUBasis<d, dT>::betaLT_(const int m, const int r) const
-  {
+  double DKUBasis<d, dT>::betaLT_(const int m, const int r) const {
     double result(0);
 
     for (int q((int)ceil((m-ell2_)/2.0)); q <= ell_-1; q++)
@@ -116,9 +50,10 @@ namespace WaveletTL
       CLT_(dT, dT)
   {
     ellT_ = ell2T<d,dT>(); // (3.2.10)
-    ell_ = ellT_-(dT-d); // (3.2.16)
+    ell_  = ellT_-(dT-d);  // (3.2.16)
 
     // setup Alpha
+    // (offset in first argument: ell2T()-1)
     Alpha_.resize(ellT_+ell2T_-1, dT);
     for (unsigned int m(0); m < Alpha_.row_dimension(); m++)
       Alpha_(m, 0) = 1.0; // (5.1.1)
@@ -148,6 +83,7 @@ namespace WaveletTL
     }
     
     // setup AlphaT
+    // (offset in first argument: ell2()-1)
     AlphaT_.resize(ell_+ell2_-1, d);
     for (unsigned int m(0); m < AlphaT_.row_dimension(); m++)
       AlphaT_(m, 0) = 1.0; // (5.1.1)
@@ -188,7 +124,8 @@ namespace WaveletTL
       for (int m(2*ell_+ell1_); m <= 2*ell_+ell2_-2; m++)
 	BetaLT_(m-2*ell_-ell1_, r) = betaLT_(m, r);
     
-    // setup GammaL:
+    // setup GammaL
+    //
     //
     // 1. compute the integrals
     //      z(s,t) = \int_0^1\phi(x-s)\tilde\phi(x-t)\,dx
@@ -215,6 +152,7 @@ namespace WaveletTL
       }
     //
     // 3. finally, compute the Gramian GammaL
+    //    (offsets: entry (r,k) <-> index (r+ellT()-dT,k+ellT()-dT) )
     for (int r(0); r <= d-1; r++)
       for (int k(0); k <= dT-1; k++) {
 	double help(0);
@@ -232,6 +170,8 @@ namespace WaveletTL
       }
     
     // setup CL and CLT
+    // (offsets: entry (i,j) <-> index (i+ellT()-dT,j+ellT()-dT) )
+    //
     if (bio == none) {
       for (unsigned int i(0); i < dT; i++)
 	CL_(i, i) = 1.0;
@@ -358,7 +298,7 @@ namespace WaveletTL
       CLT_ = transpose(CLGammaLInv);
     }
 
-#if 1
+#if 0
     // check biorthogonality of the matrix product CL * GammaL * (CLT)^T
     Matrix<double> check(CL_ * GammaL_ * transpose(CLT_));
     for (unsigned int i(0); i < check.row_dimension(); i++)
@@ -366,6 +306,31 @@ namespace WaveletTL
     cout << "error for CLT: " << row_sum_norm(check) << endl;
 #endif
 
-    // setup CLA, CLAT
+    // setup CLA <-> CL * (AlphaT)^T
+    // (offsets: for CLA  entry (i,j) <-> index (i+1-ell2(),j+ellT()-dT) )
+    CLA_.resize(ellT_+ell2_-1, dT);
+    for (int i(1-ell2_); i <= ell_-1; i++) // the (3.2.25) bounds
+      for (int r(ellT_-dT); r <= ellT_-1; r++) {
+	double help(0);
+	for (int m(ell_-d); m <= ell_-1; m++)
+	  help += CL_(r-ellT_+dT, m-ellT_+dT) * AlphaT_(i+ell2_-1, m-ell_+d);
+	CLA_(i-1+ell2_, r-ellT_+dT) = help;
+      }
+    for (int i(ell_); i <= ellT_-1; i++)
+      for (int r(ellT_-dT); r <= ellT_-1; r++)
+	CLA_(i-1+ell2_, r-ellT_+dT) = CL_(r-ellT_+dT, i-ellT_+dT);
+    CLA_.compress();
+
+    // setup CLAT <-> CLT * Alpha^T
+    // (offsets: for CLAT entry (i,j) <-> index (i+1-ell2T(),j+ellT()-dT) )
+    CLAT_.resize(ell_+ell2T_-1, dT);
+    for (int i(1-ell2T_); i <= ellT_-1; i++) // the (3.2.26) bounds
+      for (int r(ellT_-dT); r <= ellT_-1; r++) {
+	double help(0);
+	for (int m(ellT_-dT); m <= ellT_-1; m++)
+	  help += CLT_(r-ellT_+dT, m-ellT_+dT) * Alpha_(i+ell2T_-1, m-ellT_+dT);
+	CLAT_(i-1+ell2T_, r-ellT_+dT) = help;
+      }
+    CLAT_.compress();
   }
 }

@@ -23,6 +23,11 @@ namespace WaveletTL
 {
   /*!
     biorthogonalization methods for the DKU basis, see, e.g., [B]
+
+    The methods 'partialSVD' and 'BernsteinSVD' enable the [DKU] boundary treatment:
+    at the boundary, exactly one generator and one wavelet does not vanish,
+    which can be modified to satisfy homogeneous boundary conditions for the primal
+    basis.
   */
   enum DKUBiorthogonalizationMethod
     {
@@ -34,8 +39,9 @@ namespace WaveletTL
     };
 
   /*!
-    Template class for the wavelet bases on the interval introduced in [DKU], [DS].
-    All formulas refer to [DKU], except those explicitly denoted by [DS].
+    Template class for the wavelet bases on the interval as introduced in [DKU], [DS].
+    All formulas refer to the preprint version of [DKU],
+    except those explicitly denoted by [DS].
 
     References:
     [B]   Barsch:
@@ -65,6 +71,23 @@ namespace WaveletTL
     //! coarsest possible level
     inline const int j0() const { return (int) ceil(log(ellT_+ell2T_-1.)/log(2.0)+1); }
 
+    /*!
+      boundary indices in \Delta_j^X and \tilde\Delta_j^X (3.2.17)
+     */
+    inline const int DeltaLmin() const { return ell()-d; }
+    inline const int DeltaLmax() const { return ell()-1; }
+    inline const int Delta0min() const { return ell(); }
+    inline const int Delta0max(const int j) const { return (1<<j)-ell()-(d%2); }
+    inline const int DeltaRmin(const int j) const { return (1<<j)-ell()+1-(d%2); }
+    inline const int DeltaRmax(const int j) const { return (1<<j)-ell()+d-(d%2); }
+
+    inline const int DeltaLTmin() const { return ellT()-dT; }
+    inline const int DeltaLTmax() const { return ellT()-1; }
+    inline const int Delta0Tmin() const { return ellT(); }
+    inline const int Delta0Tmax(const int j) const { return (1<<j)-ellT()-(d%2); }
+    inline const int DeltaRTmin(const int j) const { return (1<<j)-ellT()+1-(d%2); }
+    inline const int DeltaRTmax(const int j) const { return (1<<j)-ellT()+dT-(d%2); }
+
   protected:
     int ell1_, ell2_, ell1T_, ell2T_, ell_, ellT_;
 
@@ -76,7 +99,14 @@ namespace WaveletTL
     Matrix<double> Alpha_, AlphaT_;
     Matrix<double> BetaL_, BetaLT_;
     Matrix<double> GammaL_;
-    Matrix<double> CL_, CLT_, CLA_, CLAT_;
+    Matrix<double> CL_, CLT_;
+
+    /*!
+      coefficients in (3.2.25), (3.2.26)
+      (represent biorthogonalized boundary generators as cardinal B-splines)
+    */
+    Matrix<double> CLA_;  // coefficients for the primal generators
+    Matrix<double> CLAT_; // coefficients for the dual generators
 
   private:
     // private helper routines

@@ -1,6 +1,7 @@
 // implementation of some (inline) Array1D<C>:: methods
 
 #include <cassert>
+#include <algorithm>
 #include "io/vector_io.h"
 
 namespace MathTL

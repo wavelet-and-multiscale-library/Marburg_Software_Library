@@ -3,7 +3,7 @@
 #include <algebra/triangular_matrix.h>
 #include <algebra/vector.h>
 #include <algebra/matrix_norms.h>
-// #include "symmarray2d.h"
+#include <algebra/symmetric_matrix.h>
 
 using std::cout;
 using std::endl;
@@ -97,23 +97,6 @@ int main()
 // //       cout << endl;
 // //     }
 
-//   cout << "- a symmetric default matrix:" << endl;
-//   RawMatrix<double,SymmetricArray2D<double> > S;
-//   cout << S << endl;
-  
-//   cout << "- a symmetric 3x3 matrix T:" << endl;
-//   RawMatrix<double,SymmetricArray2D<double> > T(3,3);
-//   cout << T << endl;
-
-//   cout << "- constructing a symmetric matrix from a string:" << endl;
-//   RawMatrix<double,SymmetricArray2D<double> > Sbyrow(4,4,"1 2 3 4 5 6 7 8 9 10");
-//   cout << Sbyrow << endl;
-
-//   cout << "- constructing a symmetric matrix from a string (columnwise):" << endl;
-//   RawMatrix<double,SymmetricArray2D<double> >
-//     Sbycol(3,3,"1 2 4 3 5 6",false); // note the permutation!
-//   cout << Sbycol << endl;
-  
   cout << "- a lower triangular default matrix:" << endl;
   LowerTriangularMatrix<double> Ldefault;
   cout << Ldefault;
@@ -245,5 +228,22 @@ int main()
   Rnonq2.apply_transposed(x,y);
   cout << y << endl;
 
+  cout << "- a symmetric default matrix:" << endl;
+  SymmetricMatrix<double> S;
+  cout << S;
+  
+  cout << "- a symmetric 3x3 matrix T:" << endl;
+  SymmetricMatrix<double> T(3);
+  cout << T;
+
+  cout << "- constructing a symmetric matrix from a string:" << endl;
+  SymmetricMatrix<double> Sbyrow(4,"1 2 3 4 5 6 7 8 9 10");
+  cout << Sbyrow;
+
+  cout << "- constructing a symmetric matrix from a string (columnwise):" << endl;
+  SymmetricMatrix<double>
+    Sbycol(3,"1 2 4 3 5 6",false); // note the permutation!
+  cout << Sbycol;
+  
   return 0;
 }

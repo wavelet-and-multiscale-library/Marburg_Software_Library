@@ -23,6 +23,8 @@
 #include <algebra/vector_arithmetics.h>
 #include <algebra/matrix.h>
 #include <algebra/matrix_norms.h>
+#include <algebra/triangular_matrix.h>
+#include <algebra/symmetric_matrix.h>
 
 #include <io/vector_io.h>
 

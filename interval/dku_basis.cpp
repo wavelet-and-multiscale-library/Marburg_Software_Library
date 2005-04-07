@@ -25,7 +25,7 @@ namespace WaveletTL
     double result(0);
     
     for (int q((int)ceil((m-ell2T_)/2.0)); q <= ellT_-1; q++)
-      result += Alpha_(q, r) * cdf_.aT().get_coefficient(m-2*q); // (3.2.31)
+      result += Alpha_(q, r) * cdf_.aT().get_coefficient(MultiIndex<int, 1>(m-2*q)); // (3.2.31)
     
     return result * M_SQRT1_2;
   }
@@ -36,7 +36,7 @@ namespace WaveletTL
     double result(0);
 
     for (int q((int)ceil((m-ell2_)/2.0)); q <= ell_-1; q++)
-      result += AlphaT_(q, r) * cdf_.a().get_coefficient(m-2*q); // (3.2.31)
+      result += AlphaT_(q, r) * cdf_.a().get_coefficient(MultiIndex<int, 1>(m-2*q)); // (3.2.31)
 
     return result * M_SQRT1_2;
   }
@@ -65,7 +65,7 @@ namespace WaveletTL
 	double dummy1(0);
 	for (int s(0); s <= r-1; s++)
 	  dummy1 += binomial(r, s) * intpower(k, r-s) * Alpha_(ell2T_-1, s);
-	dummy += cdf_.a().get_coefficient(k) * dummy1; // (5.1.3)
+	dummy += cdf_.a().get_coefficient(MultiIndex<int, 1>(k)) * dummy1; // (5.1.3)
       }
       Alpha_(ell2T_-1, r) = dummy / (ldexp(1.0, r+1) - 2.0);
     }
@@ -95,7 +95,7 @@ namespace WaveletTL
 	double dummy1(0);
 	for (int s(0); s <= r-1; s++)
 	  dummy1 += binomial(r, s) * intpower(k, r-s) * AlphaT_(ell2_-1, s); // (5.1.3)
-	dummy += cdf_.aT().get_coefficient(k) * dummy1;
+	dummy += cdf_.aT().get_coefficient(MultiIndex<int, 1>(k)) * dummy1;
       }
       AlphaT_(ell2_-1, r) = dummy / (ldexp(1.0, r+1) - 2.0);
     }

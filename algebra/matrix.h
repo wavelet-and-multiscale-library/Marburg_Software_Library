@@ -134,6 +134,11 @@ namespace MathTL
       swap entries of two matrices
     */
     void swap (Matrix<C>& M);
+
+    /*!
+      create mirrored matrix (flip row and column numbers)
+    */
+    void mirror (Matrix<C>& M) const;
     
     /*!
       matrix-vector multiplication Mx = (*this) * x;

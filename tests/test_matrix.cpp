@@ -48,6 +48,10 @@ int main()
   N = O;
   cout << "- N=O:" << endl << N;
 
+  Matrix<double> Q;
+  O.mirror(Q);
+  cout << "- O mirrored:" << endl << Q;
+
   Vector<double> x(3), y(2);
   x(0) = 1; x(1) = -1; x(2) = -2;
   cout << "- testing apply(), using the vector x="

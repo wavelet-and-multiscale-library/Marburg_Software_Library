@@ -181,6 +181,15 @@ namespace MathTL
   }
 
   template <class C>
+  void Matrix<C>::mirror(Matrix<C>& M) const
+  {
+    M.resize(rowdim_, coldim_);
+    for (typename Matrix<C>::size_type j(0); j < rowdim_; j++)
+      for (typename Matrix<C>::size_type k(0); k < coldim_; k++)
+	M(j, k) = this->operator () (rowdim_-j-1, coldim_-k-1);
+  }
+
+  template <class C>
   template <class VECTOR>
   void Matrix<C>::apply(const VECTOR& x, VECTOR& Mx) const
   {

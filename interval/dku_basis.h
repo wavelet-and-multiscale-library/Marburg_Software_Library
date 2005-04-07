@@ -122,6 +122,22 @@ namespace WaveletTL
     */
     Index lastWavelet(const int j) const;
 
+    /*!
+      Evaluate a single primal/dual generator or wavelet \psi_\lambda
+      on a dyadic subgrid of [0,1].
+     */
+    SampledMapping<1> evaluate(const Index& lambda,
+			       const bool primal,
+			       const int resolution) const;
+
+    /*!
+      Evaluate an arbitrary linear combination of primal or dual
+      wavelets on a dyadic subgrid of [0,1].
+    */
+    SampledMapping<1> evaluate(const InfiniteVector<double, Index>& coeffs,
+			       const bool primal,
+			       const int resolution) const;
+
   protected:
     int ell1_, ell2_, ell1T_, ell2T_, ell_, ellT_;
 
@@ -136,11 +152,14 @@ namespace WaveletTL
     Matrix<double> CL_, CLT_;
 
     /*!
-      coefficients in (3.2.25), (3.2.26)
-      (represent biorthogonalized boundary generators as cardinal B-splines)
+      coefficients combining (3.2.25), (3.2.26) and the biorthogonalization
+      (represent biorthogonalized boundary generators as linear combinations
+      of restricted ones from the line)
     */
-    Matrix<double> CLA_;  // coefficients for the primal generators
-    Matrix<double> CLAT_; // coefficients for the dual generators
+    Matrix<double> CLA_;  // left primal boundary generators
+    Matrix<double> CRA_;  // right primal boundary generators (mirrored)
+    Matrix<double> CLAT_; // left dual boundary generators
+    Matrix<double> CRAT_; // right dual boundary generators (mirrored)
 
   private:
     // private helper routines

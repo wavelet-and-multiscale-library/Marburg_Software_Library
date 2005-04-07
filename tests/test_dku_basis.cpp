@@ -15,7 +15,7 @@ int main()
   const int d = 2;
   const int dT = 2;
   typedef DKUBasis<d, dT> Basis;
-  Basis basis(none);
+  Basis basis;
   cout << "- the (" << d << "," << dT << ") basis has j0=" << basis.j0() << endl;
 
   cout << "- the default wavelet index: " << Basis::Index(&basis) << endl;
@@ -30,6 +30,13 @@ int main()
   for (;; ++index) {
     cout << index << endl;
     if (index == basis.lastWavelet(basis.j0()+1)) break;
+  }
+
+  cout << "- evaluating some generators:" << endl;
+  Basis::Index lambda(basis.firstGenerator(basis.j0()));
+  for (;; ++lambda) {
+    basis.evaluate(lambda, true, 4).matlab_output(cout);
+    if (lambda == basis.lastGenerator(basis.j0())) break;
   }
 
   return 0;

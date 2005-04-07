@@ -13,6 +13,7 @@
 #include <Rd/cdf_mask.h>
 #include <Rd/dm_mask.h>
 #include <Rd/refinable.h>
+#include <Rd/r_index.h>
 
 using std::cout;
 using std::endl;
@@ -309,7 +310,7 @@ namespace WaveletTL
 #endif
 
     // setup CLA <-> CL * (AlphaT)^T
-    // (offsets: for CLA  entry (i,j) <-> index (i+1-ell2(),j+ellT()-dT) )
+    // (offsets: for CLA entry (i,j) <-> index (i+1-ell2(),j+ellT()-dT) )
     CLA_.resize(ellT_+ell2_-1, dT);
     for (int i(1-ell2_); i <= ell_-1; i++) // the (3.2.25) bounds
       for (int r(ellT_-dT); r <= ellT_-1; r++) {
@@ -323,6 +324,10 @@ namespace WaveletTL
 	CLA_(i-1+ell2_, r-ellT_+dT) = CL_(r-ellT_+dT, i-ellT_+dT);
     CLA_.compress();
 
+    // setup CRA <-> mirrored CLA
+    // (offsets: for CRA entry (i,j) <-> index () )
+    CLA_.mirror(CRA_);
+
     // setup CLAT <-> CLT * Alpha^T
     // (offsets: for CLAT entry (i,j) <-> index (i+1-ell2T(),j+ellT()-dT) )
     CLAT_.resize(ell_+ell2T_-1, dT);
@@ -334,6 +339,7 @@ namespace WaveletTL
 	CLAT_(i-1+ell2T_, r-ellT_+dT) = help;
       }
     CLAT_.compress();
+    CLAT_.mirror(CRAT_);
   }
 
   template <int d, int dT>
@@ -367,4 +373,76 @@ namespace WaveletTL
     assert(j >= j0());
     return Index(j, 1, Nablamax(j), this);
   }
+
+  template <int d, int dT>
+  SampledMapping<1>
+  DKUBasis<d, dT>::evaluate(const Index& lambda,
+			    const bool primal,
+			    const int resolution) const
+  {
+    if (lambda.e() == 0) // generator
+      {
+	if (lambda.k() <= DeltaLmax())
+	  {
+	    // left boundary generator
+	    InfiniteVector<double, RIndex> coeffs;
+	    if (primal)
+	      {
+		for(int i(0); i < ellT_+ell2_-1; i++)
+		  {
+		    double v(CLA_(i, lambda.k()-ellT_+dT));
+		    if (v != 0)
+		      coeffs.set_coefficient(RIndex(lambda.j(), 0, i+1-ell2_), v);
+		  }
+	      }
+	    else
+	      {
+		// TODO!!!
+	      }
+	    return cdf_.evaluate(0, coeffs, primal, 0, 1, resolution);
+	  }
+	else
+	  {
+	    if (lambda.k() >= DeltaRmin(lambda.j()))
+	      {
+		// right boundary generator
+		InfiniteVector<double, RIndex> coeffs;
+		if (primal)
+		  {
+		    for (int i(0); i < ellT_+ell2_-1; i++)
+		      {
+ 			double v(CRA_(i, lambda.k()+dT-1-DeltaRmax(lambda.j()))); // +offset
+			if (v != 0)
+			  coeffs.set_coefficient(RIndex(lambda.j(), 0, DeltaRmin(lambda.j())+i), v); // +offset
+		      }
+		  }
+		else
+		  {
+		    // TODO!!!
+		  }
+		return cdf_.evaluate(0, coeffs, primal, 0, 1, resolution);
+	      }
+	    else
+	      {
+		// inner generator
+		return cdf_.evaluate(0, RIndex(lambda.j(), 0, lambda.k()),
+				     primal, 0, 1, resolution);
+	      }
+	  }
+      }
+    else
+      {
+	// expand wavelet as generators of a higher scale
+	// TODO!!!
+      }
+
+    return SampledMapping<1>(); // dummy return for the compiler
+  }
+
+//   template <int d, int dT>
+//   SampledMapping<1> evaluate(const InfiniteVector<double, Index>& coeffs,
+// 			     const bool primal,
+// 			     const int resolution) const;
+
+
 }

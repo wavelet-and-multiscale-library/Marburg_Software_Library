@@ -271,5 +271,23 @@ int main()
   X.resize(3, 2);
   cout << X;
 
+  cout << "- refill X again with some values:" << endl;
+  X.set_entry(0, 0, -3);
+  X.set_entry(0, 1, 2);
+  X.set_entry(1, 0, 1);
+  X.set_entry(1, 1, -1.5);
+  X.set_entry(2, 1, 3);
+  cout << X;
+
+  x.resize(2);
+  x[0] = 2; x[1] = 3;
+  cout << "- applying X to x=" << x << " yields" << endl;
+  X.apply(x, y);
+  cout << y << endl;
+
+  cout << "- applying X^T to y=" << y << " yields" << endl;
+  X.apply_transposed(y, x);
+  cout << x << endl;
+
   return 0;
 }

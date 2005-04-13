@@ -164,6 +164,39 @@ namespace MathTL
   }
 
   template <class C>
+  template <class VECTOR>
+  void SparseMatrix<C>::apply(const VECTOR& x, VECTOR& Mx) const
+  {
+    assert(Mx.size() == rowdim_);
+    
+    for (size_type i(0); i < rowdim_; i++) {
+      C help(0);
+      if (indices_[i]) {
+	for (size_type j(1); j <= indices_[i][0]; j++)
+	  help += entries_[i][j-1] * x[indices_[i][j]];
+      }
+      Mx[i] = help;
+    }
+  }
+
+  template <class C>
+  template <class VECTOR>
+  void SparseMatrix<C>::apply_transposed(const VECTOR& x, VECTOR& Mtx) const
+  {
+    assert(Mtx.size() == coldim_);
+    
+    for (size_type i(0); i < coldim_; i++)
+      Mtx[i] = C(0);
+
+    for (size_type i(0); i < rowdim_; i++) {
+      if (indices_[i]) {
+	for (size_type j(1); j <= indices_[i][0]; j++)
+	  Mtx[indices_[i][j]] += entries_[i][j-1] * x[i];
+      }
+    }
+  }
+  
+  template <class C>
   void SparseMatrix<C>::print(std::ostream &os,
 			      const unsigned int tabwidth,
 			      const unsigned int precision) const

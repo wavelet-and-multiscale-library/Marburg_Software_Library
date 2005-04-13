@@ -83,6 +83,22 @@ namespace MathTL
     void set_entry(const size_type row, const size_type column, const C value);
 
     /*!
+      matrix-vector multiplication Mx = (*this) * x;
+      we assume that the vector Mx has the correct size and
+      is not identical to x
+    */
+    template <class VECTOR>
+    void apply(const VECTOR& x, VECTOR& Mx) const;
+
+    /*!
+      transposed matrix-vector multiplication Mtx = (*this)^T * x;
+      we assume that the vector Mtx has the correct size and
+      is not identical to x
+    */
+    template <class VECTOR>
+    void apply_transposed(const VECTOR& x, VECTOR& Mtx) const;
+
+    /*!
       stream output with user-defined tabwidth and precision
       (cf. deal.II)
     */

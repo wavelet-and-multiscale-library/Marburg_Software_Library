@@ -140,6 +140,7 @@ namespace WaveletTL
 
   protected:
     int ell1_, ell2_, ell1T_, ell2T_, ell_, ellT_;
+    DKUBiorthogonalizationMethod bio_;
 
     /*!
       an instance of the CDF basis on R
@@ -162,11 +163,17 @@ namespace WaveletTL
     Matrix<double> CRAT_; // right dual boundary generators (mirrored)
 
   private:
-    // private helper routines
-    double alpha_(const int m, const int r) const;
-    double alphaT_(const int m, const int r) const;
-    double betaL_(const int m, const int r) const;
-    double betaLT_(const int m, const int r) const;
+    void setup_Alpha();
+    void setup_AlphaT();
+
+    void setup_BetaL();
+    void setup_BetaLT();
+
+    void setup_GammaL();
+
+    void setup_CL_CLT();
+
+    void setup_CXA_CXAT();
   };
 }
 

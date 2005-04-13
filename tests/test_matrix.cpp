@@ -4,6 +4,7 @@
 #include <algebra/vector.h>
 #include <algebra/matrix_norms.h>
 #include <algebra/symmetric_matrix.h>
+#include <algebra/sparse_matrix.h>
 
 using std::cout;
 using std::endl;
@@ -251,6 +252,24 @@ int main()
   SymmetricMatrix<double>
     Sbycol(3,"1 2 4 3 5 6",false); // note the permutation!
   cout << Sbycol;
+
   
+  cout << "- a sparse default matrix:" << endl;
+  SparseMatrix<double> W;
+  cout << W;
+  
+  cout << "- an empty 2x2 matrix X:" << endl;
+  SparseMatrix<double> X(2);
+  cout << X;
+
+  cout << "- set some entries to nontrivial values:" << endl;
+  X.set_entry(0, 0, -23.0);
+  X.set_entry(1, 0, 42.0);
+  cout << X;
+
+  cout << "- after X.resize(3,2):" << endl;
+  X.resize(3, 2);
+  cout << X;
+
   return 0;
 }

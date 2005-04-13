@@ -133,6 +133,13 @@ namespace MathTL
 
   template <class C>
   inline
+  void Array1D<C>::swap(Array1D<C>& a)
+  {
+    std::swap(data_, a.data_);
+  }
+
+  template <class C>
+  inline
   std::ostream& operator << (std::ostream& os, const Array1D<C>& A)
   {
     print_vector(A, os);

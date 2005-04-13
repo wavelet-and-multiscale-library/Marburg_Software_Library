@@ -134,6 +134,11 @@ namespace MathTL
     */
     iterator end();
 
+    /*!
+      swap components of two arrays
+    */
+    void swap (Array1D<C>& a);
+
   protected:
     /*!
       internal storage is just a pointer to a C array

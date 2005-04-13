@@ -70,6 +70,7 @@ namespace WaveletTL
     setup_GammaL();
     setup_CL_CLT();
     setup_CXA_CXAT();
+    setup_Cj();
   }
 
   template <int d, int dT>
@@ -384,6 +385,11 @@ namespace WaveletTL
       }
     CLAT_.compress();
     CLAT_.mirror(CRAT_);
+  }
+
+  template <int d, int dT>
+  void DKUBasis<d, dT>::setup_Cj() {
+    // TODO!
   }
   
   template <int d, int dT>

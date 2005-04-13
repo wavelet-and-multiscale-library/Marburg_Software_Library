@@ -14,6 +14,7 @@
 #include <cmath>
 
 #include <algebra/matrix.h>
+#include <algebra/sparse_matrix.h>
 #include <utils/array1d.h>
 
 #include <Rd/cdf_utils.h>
@@ -142,9 +143,6 @@ namespace WaveletTL
     int ell1_, ell2_, ell1T_, ell2T_, ell_, ellT_;
     DKUBiorthogonalizationMethod bio_;
 
-    /*!
-      an instance of the CDF basis on R
-    */
     CDFBasis<d, dT> cdf_;
 
     Matrix<double> Alpha_, AlphaT_;
@@ -162,18 +160,18 @@ namespace WaveletTL
     Matrix<double> CLAT_; // left dual boundary generators
     Matrix<double> CRAT_; // right dual boundary generators (mirrored)
 
+    //! storage for transformation matrices on level j0
+    SparseMatrix<double> Cj_, CjT_, Cjp_, CjpT_, inv_Cj_, inv_CjT_, inv_Cjp_, inv_CjpT;
+    
   private:
     void setup_Alpha();
     void setup_AlphaT();
-
     void setup_BetaL();
     void setup_BetaLT();
-
     void setup_GammaL();
-
     void setup_CL_CLT();
-
     void setup_CXA_CXAT();
+    void setup_Cj();
   };
 }
 

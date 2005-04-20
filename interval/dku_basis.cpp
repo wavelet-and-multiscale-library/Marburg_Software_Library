@@ -68,7 +68,7 @@ namespace WaveletTL
     setup_BetaL();
     setup_BetaLT();
     setup_GammaL();
-    setup_CL_CLT();
+    setup_CX_CXT();
     setup_CXA_CXAT();
     setup_Cj();
   }
@@ -213,9 +213,11 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
-  void DKUBasis<d, dT>::setup_CL_CLT() {
+  void DKUBasis<d, dT>::setup_CX_CXT() {
     CL_.resize(dT, dT);
     CLT_.resize(dT, dT);
+    CR_.resize(dT, dT);
+    CRT_.resize(dT, dT);
 
     // setup CL and CLT
     // (offsets: entry (i,j) <-> index (i+ellT()-dT,j+ellT()-dT) )
@@ -353,6 +355,15 @@ namespace WaveletTL
       check(i, i) -= 1;
     cout << "error for CLT: " << row_sum_norm(check) << endl;
 #endif
+
+    QRDecomposition<double>(CL_).inverse(inv_CL_);
+    QRDecomposition<double>(CLT_).inverse(inv_CLT_);
+
+    CL_.mirror(CR_);
+    CLT_.mirror(CRT_);
+
+    QRDecomposition<double>(CR_).inverse(inv_CR_);
+    QRDecomposition<double>(CRT_).inverse(inv_CRT_);
   }
 
   template <int d, int dT>
@@ -389,7 +400,10 @@ namespace WaveletTL
 
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_Cj() {
-    // TODO!
+    Cj_.resize  (Deltasize(j0()), Deltasize(j0()));
+    CjT_.resize (Deltasize(j0()), Deltasize(j0()));
+    Cjp_.resize (Deltasize(j0()+1), Deltasize(j0()+1));
+    CjpT_.resize(Deltasize(j0()+1), Deltasize(j0()+1));
   }
   
   template <int d, int dT>

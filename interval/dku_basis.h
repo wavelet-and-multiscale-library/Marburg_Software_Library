@@ -92,6 +92,9 @@ namespace WaveletTL
     inline const int DeltaRTmin(const int j) const { return (1<<j)-ellT()+1-(d%2); }
     inline const int DeltaRTmax(const int j) const { return (1<<j)-ellT()+dT-(d%2); } // == DeltaRmax()
 
+    //! size of Delta_j
+    inline const int Deltasize(const int j) const { return (1<<j)-2*ell()+2*d-(d%2); }
+
     /*!
       boundary indices in \nabla_j
     */
@@ -148,7 +151,8 @@ namespace WaveletTL
     Matrix<double> Alpha_, AlphaT_;
     Matrix<double> BetaL_, BetaLT_;
     Matrix<double> GammaL_;
-    Matrix<double> CL_, CLT_;
+    Matrix<double> CL_, CLT_, inv_CL_, inv_CLT_;
+    Matrix<double> CR_, CRT_, inv_CR_, inv_CRT_;
 
     /*!
       coefficients combining (3.2.25), (3.2.26) and the biorthogonalization
@@ -156,9 +160,9 @@ namespace WaveletTL
       of restricted ones from the line)
     */
     Matrix<double> CLA_;  // left primal boundary generators
-    Matrix<double> CRA_;  // right primal boundary generators (mirrored)
+    Matrix<double> CRA_;  // right primal boundary generators
     Matrix<double> CLAT_; // left dual boundary generators
-    Matrix<double> CRAT_; // right dual boundary generators (mirrored)
+    Matrix<double> CRAT_; // right dual boundary generators
 
     //! storage for transformation matrices on level j0
     SparseMatrix<double> Cj_, CjT_, Cjp_, CjpT_, inv_Cj_, inv_CjT_, inv_Cjp_, inv_CjpT;
@@ -169,7 +173,7 @@ namespace WaveletTL
     void setup_BetaL();
     void setup_BetaLT();
     void setup_GammaL();
-    void setup_CL_CLT();
+    void setup_CX_CXT();
     void setup_CXA_CXAT();
     void setup_Cj();
   };

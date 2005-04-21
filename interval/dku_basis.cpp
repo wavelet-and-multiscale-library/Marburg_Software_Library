@@ -70,6 +70,7 @@ namespace WaveletTL
     setup_GammaL();
     setup_CX_CXT();
     setup_CXA_CXAT();
+
     setup_Cj();
   }
 
@@ -246,6 +247,9 @@ namespace WaveletTL
 	  CLT_(i, j) = S[i] * V(i, j);
 	}
       }
+
+      CL_.compress(1e-12);
+      CLT_.compress(1e-12);
     }
     
     if (bio_ == Bernstein) {
@@ -267,6 +271,8 @@ namespace WaveletTL
       Matrix<double> CLGammaLInv;
       QRDecomposition<double>(CL_ * GammaL_).inverse(CLGammaLInv);
       CLT_ = transpose(CLGammaLInv);
+      
+      CLT_.compress(1e-12);
     }
     
     if (bio_ == partialSVD) {
@@ -294,10 +300,14 @@ namespace WaveletTL
 	for (unsigned int j(0); j < dT; j++)
 	  U(i, j) /= S[i];
       CL_ = R*U;
-      
+
+      CL_.compress(1e-12);
+
       Matrix<double> CLGammaLInv;
       QRDecomposition<double>(CL_ * GammaL_).inverse(CLGammaLInv);
       CLT_ = transpose(CLGammaLInv);
+
+      CLT_.compress(1e-12);
     }
 
     if (bio_ == BernsteinSVD) {
@@ -343,9 +353,13 @@ namespace WaveletTL
 	  U(i, j) /= S[i];
       CL_ = R*U*CL_;
       
+      CL_.compress(1e-12);
+
       Matrix<double> CLGammaLInv;
       QRDecomposition<double>(CL_ * GammaL_).inverse(CLGammaLInv);
       CLT_ = transpose(CLGammaLInv);
+
+      CLT_.compress(1e-12);
     }
     
 #if 0
@@ -381,7 +395,9 @@ namespace WaveletTL
     for (int i(ell_); i <= ellT_-1; i++)
       for (int r(ellT_-dT); r <= ellT_-1; r++)
 	CLA_(i-1+ell2_, r-ellT_+dT) = CL_(r-ellT_+dT, i-ellT_+dT);
-    CLA_.compress();
+
+    CLA_.compress(1e-12);
+
     CLA_.mirror(CRA_);
 
     // setup CLAT <-> Alpha * (CLT)^T
@@ -394,16 +410,45 @@ namespace WaveletTL
 	  help += CLT_(r-ellT_+dT, m-ellT_+dT) * Alpha_(i+ell2T_-1, m-ellT_+dT);
   	CLAT_(i-1+ell2T_, r-ellT_+dT) = help;
       }
-    CLAT_.compress();
+
+    CLAT_.compress(1e-12);
+
     CLAT_.mirror(CRAT_);
   }
 
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_Cj() {
-    Cj_.resize  (Deltasize(j0()), Deltasize(j0()));
-    CjT_.resize (Deltasize(j0()), Deltasize(j0()));
-    Cjp_.resize (Deltasize(j0()+1), Deltasize(j0()+1));
-    CjpT_.resize(Deltasize(j0()+1), Deltasize(j0()+1));
+    Cj_.diagonal(Deltasize(j0()), 1.0);
+    Cj_.set_block(0, 0, CL_);
+    Cj_.set_block(Deltasize(j0())-dT, Deltasize(j0())-dT, CR_);
+
+    inv_Cj_.diagonal(Deltasize(j0()), 1.0);
+    inv_Cj_.set_block(0, 0, inv_CL_);
+    inv_Cj_.set_block(Deltasize(j0())-dT, Deltasize(j0())-dT, inv_CR_);
+
+    CjT_.diagonal(Deltasize(j0()), 1.0);
+    CjT_.set_block(0, 0, CLT_);
+    CjT_.set_block(Deltasize(j0())-dT, Deltasize(j0())-dT, CRT_);
+
+    inv_CjT_.diagonal(Deltasize(j0()), 1.0);
+    inv_CjT_.set_block(0, 0, inv_CLT_);
+    inv_CjT_.set_block(Deltasize(j0())-dT, Deltasize(j0())-dT, inv_CRT_);
+
+    Cjp_.diagonal(Deltasize(j0()+1), 1.0);
+    Cjp_.set_block(0, 0, CL_);
+    Cjp_.set_block(Deltasize(j0()+1)-dT, Deltasize(j0()+1)-dT, CR_);
+
+    inv_Cjp_.diagonal(Deltasize(j0()+1), 1.0);
+    inv_Cjp_.set_block(0, 0, inv_CL_);
+    inv_Cjp_.set_block(Deltasize(j0()+1)-dT, Deltasize(j0()+1)-dT, inv_CR_);
+
+    CjpT_.diagonal(Deltasize(j0()+1), 1.0);
+    CjpT_.set_block(0, 0, CLT_);
+    CjpT_.set_block(Deltasize(j0()+1)-dT, Deltasize(j0()+1)-dT, CRT_);
+
+    inv_CjpT_.diagonal(Deltasize(j0()+1), 1.0);
+    inv_CjpT_.set_block(0, 0, inv_CLT_);
+    inv_CjpT_.set_block(Deltasize(j0()+1)-dT, Deltasize(j0()+1)-dT, inv_CRT_);  
   }
   
   template <int d, int dT>

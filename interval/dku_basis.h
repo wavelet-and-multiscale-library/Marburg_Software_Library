@@ -165,7 +165,7 @@ namespace WaveletTL
     Matrix<double> CRAT_; // right dual boundary generators
 
     //! storage for transformation matrices on level j0
-    SparseMatrix<double> Cj_, CjT_, Cjp_, CjpT_, inv_Cj_, inv_CjT_, inv_Cjp_, inv_CjpT;
+    SparseMatrix<double> Cj_, CjT_, Cjp_, CjpT_, inv_Cj_, inv_CjT_, inv_Cjp_, inv_CjpT_;
     
   private:
     void setup_Alpha();

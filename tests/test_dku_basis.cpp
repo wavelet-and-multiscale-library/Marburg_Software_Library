@@ -15,8 +15,8 @@ int main()
   const int d = 2;
   const int dT = 4;
   typedef DKUBasis<d, dT> Basis;
-//   Basis basis; // Bernstein SVD
-  Basis basis(none);
+  Basis basis; // Bernstein SVD
+//   Basis basis(none);
   cout << "- the (" << d << "," << dT << ") basis has j0=" << basis.j0() << endl;
 
   cout << "- the default wavelet index: " << Basis::Index(&basis) << endl;

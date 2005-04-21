@@ -153,7 +153,7 @@ namespace WaveletTL
     Matrix<double> GammaL_;
     Matrix<double> CL_, CLT_, inv_CL_, inv_CLT_;
     Matrix<double> CR_, CRT_, inv_CR_, inv_CRT_;
-
+    
     /*!
       coefficients combining (3.2.25), (3.2.26) and the biorthogonalization
       (represent biorthogonalized boundary generators as linear combinations
@@ -164,8 +164,9 @@ namespace WaveletTL
     Matrix<double> CLAT_; // left dual boundary generators
     Matrix<double> CRAT_; // right dual boundary generators
 
-    //! storage for transformation matrices on level j0
-    SparseMatrix<double> Cj_, CjT_, Cjp_, CjpT_, inv_Cj_, inv_CjT_, inv_Cjp_, inv_CjpT_;
+    //! storage for transformation matrices on level j0 and j0+1
+    SparseMatrix<double> Cj_, CjT_, Cjp_, CjpT_;
+    SparseMatrix<double> inv_Cj_, inv_CjT_, inv_Cjp_, inv_CjpT_;
     
   private:
     void setup_Alpha();
@@ -175,7 +176,21 @@ namespace WaveletTL
     void setup_GammaL();
     void setup_CX_CXT();
     void setup_CXA_CXAT();
+
+    // Cj, CjT, Cjp, CjpT (5.2.5)
     void setup_Cj();
+
+    // ML, MR (3.5.2)
+    Matrix<double> ML() const;
+    Matrix<double> MR() const;
+
+    // MLTs, MRTs (3.5.6)
+    Matrix<double> MLTs() const;
+    Matrix<double> MRTs() const;
+
+    // Mj0, Mj0Ts (3.5.5)
+    SparseMatrix<double> Mj0  (const Matrix<double>& ML,   const Matrix<double>& MR  );
+    SparseMatrix<double> Mj0Ts(const Matrix<double>& MLTs, const Matrix<double>& MRTs);
   };
 }
 

@@ -26,16 +26,19 @@ int main()
   cout << "- leftmost wavelet on the coarsest level: " << basis.firstWavelet(basis.j0()) << endl;
   cout << "- rightmost wavelet on the coarsest level: " << basis.lastWavelet(basis.j0()) << endl;
 
+#if 0
   cout << "- iterating from first generator on coarsest level to last wavelet on next level:" << endl;
   Basis::Index index(basis.firstGenerator(basis.j0()));
   for (;; ++index) {
     cout << index << endl;
     if (index == basis.lastWavelet(basis.j0()+1)) break;
   }
+#endif
 
   cout << "- index of leftmost right boundary generator on scale j0: "
        << basis.DeltaRmin(basis.j0()) << endl;
 
+#if 0
   cout << "- evaluating some primal generators:" << endl;
   Basis::Index lambda(basis.firstGenerator(basis.j0()));
   for (;; ++lambda) {
@@ -43,13 +46,16 @@ int main()
     basis.evaluate(lambda, true, 5).matlab_output(cout);
     if (lambda == basis.lastGenerator(basis.j0())) break;
   }
+#endif
 
+#if 0
   cout << "- evaluating some dual generators:" << endl;
   lambda = basis.firstGenerator(basis.j0());
   for (;; ++lambda) {
     basis.evaluate(lambda, false, 6).matlab_output(cout);
     if (lambda == basis.lastGenerator(basis.j0())) break;
   }
+#endif
 
   return 0;
 }

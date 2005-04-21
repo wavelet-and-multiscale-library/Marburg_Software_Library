@@ -72,6 +72,8 @@ namespace WaveletTL
     setup_CXA_CXAT();
 
     setup_Cj();
+
+    Matrix<double> ml = ML();
   }
 
   template <int d, int dT>
@@ -142,6 +144,8 @@ namespace WaveletTL
 
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_BetaL() {
+    // setup BetaL
+    // (offset in first argument: 2*ellT()+ell1T() )
     BetaL_.resize(ell2T_-ell1T_-1, dT);
     for (int r(0); r < dT; r++)
       for (int m(2*ellT_+ell1T_); m <= 2*ellT_+ell2T_-2; m++) {
@@ -155,6 +159,8 @@ namespace WaveletTL
 
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_BetaLT() {
+    // setup BetaLT
+    // (offset in first argument: 2*ell()+ell1() )
     BetaLT_.resize(ell2_-ell1_-1, d);
     for (int r(0); r < d; r++)
       for (int m(2*ell_+ell1_); m <= 2*ell_+ell2_-2; m++) {
@@ -418,6 +424,7 @@ namespace WaveletTL
 
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_Cj() {
+    // (5.2.5)
     Cj_.diagonal(Deltasize(j0()), 1.0);
     Cj_.set_block(0, 0, CL_);
     Cj_.set_block(Deltasize(j0())-dT, Deltasize(j0())-dT, CR_);
@@ -451,6 +458,28 @@ namespace WaveletTL
     inv_CjpT_.set_block(Deltasize(j0()+1)-dT, Deltasize(j0()+1)-dT, inv_CRT_);  
   }
   
+  template <int d, int dT>
+  Matrix<double>
+  DKUBasis<d, dT>::ML() const
+  {
+    Matrix<double> ML(d+ell_+ell2_-1, d);
+
+    for (int row(0); row < d; row++)
+      ML(row, row) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
+
+    for (int row(d); row <= d+ell_+ell1_-1; row++)
+      for (int column(0); column < d; column++)
+  	ML(row, column) = 42;
+    // Hier gehts weiter, Indexfehler beheben! (Grund: AlphaT zu klein, vgl. IGPMlibexp!)
+//   	ML(row, column) = AlphaT_(row-d+ell_+ell2_-1, column) / sqrt(ldexp(1.0, 2*column+1));
+    
+//     for (int row(d+ell_+ell1_); row < d+ell_+ell2_-1; row++)
+//       for (int column(0); column < d; column++)
+// 	ML(row, column) = BetaLT_(row+ell_-2*ell_-ell1_ -d, column);
+
+    return ML;
+  }
+
   template <int d, int dT>
   SampledMapping<1>
   DKUBasis<d, dT>::evaluate(const Index& lambda,

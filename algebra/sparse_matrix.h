@@ -42,9 +42,9 @@ namespace MathTL
     typedef typename Vector<C>::size_type size_type;
 
     /*!
-      default constructor, yields zero square matrix which is empty per default
+      default constructor, yields zero square matrix
     */
-    explicit SparseMatrix(const size_type n = 0);
+    explicit SparseMatrix(const size_type n = 1);
 
     /*!
       destructor
@@ -78,9 +78,21 @@ namespace MathTL
     const C get_entry(const size_type row, const size_type column) const;
 
     /*!
-      read-write access to a matrix entry
+      write access to a matrix entry
     */
     void set_entry(const size_type row, const size_type column, const C value);
+
+    /*!
+      write access to a subblock
+    */
+    template <class MATRIX>
+    void set_block(const size_type firstrow, const size_type firstcolumn,
+		   const MATRIX& M);
+
+    /*!
+      yields an n-by-n diagonal matrix
+    */
+    void diagonal(const size_type n, const C diag);
 
     /*!
       matrix-vector multiplication Mx = (*this) * x;
@@ -132,9 +144,9 @@ namespace MathTL
     size_type coldim_;
 
     /*!
-      release memory
+      deallocate all memory
     */
-    void clear();
+    void kill();
   };
 
   /*!

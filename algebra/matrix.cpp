@@ -133,9 +133,23 @@ namespace MathTL
 
   template <class C>
   inline
+  const C Matrix<C>::get_entry(const size_type row, const size_type column) const
+  {
+    return this->operator () (row, column);
+  }
+
+  template <class C>
+  inline
   C& Matrix<C>::operator () (const size_type row, const size_type column)
   {
     return entries_[row+column*rowdim_];
+  }
+
+  template <class C>
+  inline
+  void Matrix<C>::set_entry(const size_type row, const size_type column, const C value)
+  {
+    this->operator () (row, column) = value;
   }
 
   template <class C>

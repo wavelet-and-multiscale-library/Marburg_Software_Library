@@ -137,11 +137,28 @@ namespace MathTL
 
   template <class C>
   inline
+  const C LowerTriangularMatrix<C>::get_entry(const size_type row,
+					      const size_type column) const
+  {
+    return this->operator () (row, column);
+  }
+
+  template <class C>
+  inline
   C& LowerTriangularMatrix<C>::operator () (const size_type row,
 					    const size_type column)
   {
     assert(row >= column);
     return entries_[triangle_index(row,column,rowdim_,coldim_)];
+  }
+
+  template <class C>
+  inline
+  void LowerTriangularMatrix<C>::set_entry(const size_type row,
+					   const size_type column,
+					   const C value)
+  {
+    this->operator () (row, column) = value;
   }
 
   template <class C>
@@ -295,10 +312,27 @@ namespace MathTL
 
   template <class C>
   inline
+  const C UpperTriangularMatrix<C>::get_entry(const size_type row,
+					      const size_type column) const
+  {
+    return this->operator () (row, column);
+  }
+
+  template <class C>
+  inline
   C& UpperTriangularMatrix<C>::operator () (const size_type row,
 					    const size_type column)
   {
     return LowerTriangularMatrix<C>::operator () (column, row);
+  }
+
+  template <class C>
+  inline
+  void UpperTriangularMatrix<C>::set_entry(const size_type row,
+					   const size_type column,
+					   const C value)
+  {
+    this->operator () (row, column) = value;
   }
 
   template <class C>

@@ -66,10 +66,21 @@ namespace MathTL
     const C operator () (const size_type row, const size_type column) const;
     
     /*!
+      read-only access to a matrix entry
+    */
+    const C get_entry(const size_type row, const size_type column) const;
+
+    /*!
       read-write access to a matrix entry
       (you should not use this, since it destroys the matrix structure!)
     */
     C& operator () (const size_type row, const size_type column);
+
+    /*!
+      write access to a matrix entry
+      (you should not use this, since it destroys the matrix structure!)
+    */
+    void set_entry(const size_type row, const size_type column, const C value);
 
     /*!
       equality test with another matrix

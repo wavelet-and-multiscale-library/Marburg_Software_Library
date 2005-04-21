@@ -1,5 +1,6 @@
 // implementation of MathTL::SparseMatrix inline functions
 
+#include <cassert>
 #include <iomanip>
 #include <sstream>
 
@@ -9,33 +10,33 @@ namespace MathTL
   SparseMatrix<C>::SparseMatrix(const size_type n)
     : rowdim_(n), coldim_(n)
   {
-    if (n == 0) {
-      entries_ = NULL;
-      indices_ = NULL;
-    } else {
-      entries_ = new C*[n];
-      indices_ = new size_type*[n];
-      
-      for (size_type i(0); i < n; i++) {
-	entries_[i] = NULL;
-	indices_[i] = NULL;
-      }
+    assert(n >= 1);
+
+    entries_ = new C*[n];
+    indices_ = new size_type*[n];
+    
+    assert(entries_ != NULL);
+    assert(indices_ != NULL);
+
+    for (size_type row(0); row < n; row++) {
+      entries_[row] = NULL;
+      indices_[row] = NULL;
     }
-  }
-  
-  template <class C>
-  SparseMatrix<C>::~SparseMatrix()
-  {
-    clear();
   }
 
   template <class C>
-  void SparseMatrix<C>::clear()
+  SparseMatrix<C>::~SparseMatrix()
   {
-    for (size_type i(0); i < rowdim_; i++) {
-      if (indices_[i]) {
-	delete[] indices_[i];
-	delete[] entries_[i];
+    kill();
+  }
+
+  template <class C>
+  void SparseMatrix<C>::kill()
+  {
+    for (size_type row(0); row < rowdim_; row++) {
+      if (indices_[row]) {
+	delete[] indices_[row];
+	delete[] entries_[row];
       }
     }
     delete[] indices_;
@@ -63,9 +64,9 @@ namespace MathTL
   SparseMatrix<C>::size() const
   {
     size_type nz(0);
-    for (size_type i(0); i < rowdim_; i++)
-      if (indices_[i])
-	nz += indices_[i][0];
+    for (size_type row(0); row < rowdim_; row++)
+      if (indices_[row])
+	nz += indices_[row][0];
 
     return nz;
   }
@@ -73,21 +74,22 @@ namespace MathTL
   template <class C>
   void SparseMatrix<C>::resize(const size_type rows, const size_type columns)
   {
-    clear();
+    assert(rows >= 1 && columns >= 1);
+
+    kill();
+
     rowdim_ = rows;
     coldim_ = columns;
 
-    if (rows == 0) {
-      entries_ = NULL;
-      indices_ = NULL;
-    } else {
-      entries_ = new C*[rows];
-      indices_ = new size_type*[rows];
-      
-      for (size_type i(0); i < rows; i++) {
-	entries_[i] = NULL;
-	indices_[i] = NULL;
-      }
+    entries_ = new C*[rows];
+    indices_ = new size_type*[rows];
+    
+    assert(entries_ != NULL);
+    assert(indices_ != NULL);
+
+    for (size_type row(0); row < rows; row++) {
+	entries_[row] = NULL;
+	indices_[row] = NULL;
     }
   }
 
@@ -127,8 +129,11 @@ namespace MathTL
 	  ind = 0; // redundant
 	  
 	  size_type* helpi = new size_type[indices_[row][0]+2];
-	  C*         helpd = new C        [indices_[row][0]+1]; // TODO: check pointers
+	  C*         helpd = new C        [indices_[row][0]+1];
 	  
+	  assert(helpi != NULL);
+	  assert(helpd != NULL);
+
 	  for (size_type k(1); k <= indices_[row][0]; k++)
 	    if (indices_[row][k] < column)
 	      ind = k;
@@ -155,12 +160,38 @@ namespace MathTL
     else
       {
 	indices_[row] = new size_type[2];
-	entries_[row] = new C[2]; // TODO: check pointers
+	entries_[row] = new C[1]; // TODO: check pointers
+
+	assert(indices_[row] != NULL);
+	assert(entries_[row] != NULL);
 
 	indices_[row][0] = 1;
 	indices_[row][1] = column;
 	entries_[row][0] = value;
       }
+  }
+  
+  template <class C>
+  template <class MATRIX>
+  void SparseMatrix<C>::set_block(const size_type firstrow, const size_type firstcolumn,
+				  const MATRIX& M)
+  {
+    assert(firstrow+M.row_dimension() <= row_dimension());
+    assert(firstcolumn+M.column_dimension() <= column_dimension());
+
+    // the following code can be optimized
+    for (size_type row(0); row < M.row_dimension(); row++)
+      for (size_type column(0); column < M.column_dimension(); column++)
+	set_entry(row+firstrow, column+firstcolumn, M.get_entry(row, column));
+  }
+
+  template <class C>
+  void SparseMatrix<C>::diagonal(const size_type n, const C diag)
+  {
+    resize(n, n);
+
+    for (size_type row(0); row < n; row++)
+      set_entry(row, row, diag);
   }
 
   template <class C>

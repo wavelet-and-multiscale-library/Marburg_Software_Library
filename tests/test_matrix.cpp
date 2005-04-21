@@ -289,5 +289,19 @@ int main()
   X.apply_transposed(y, x);
   cout << x << endl;
 
+  cout << "- a 2x2 sparse diagonal matrix:" << endl;
+  SparseMatrix<double> Y;
+  Y.diagonal(2, 42.0);
+  cout << Y;
+
+  cout << "- putting different subblocks into this matrix:" << endl;
+  Matrix<double> sub1(1, 1, "23");
+  SymmetricMatrix<double> sub2(1, "7");
+  LowerTriangularMatrix<double> sub3(1, 1, "-1");
+  Y.set_block(0, 1, sub1);
+  Y.set_block(1, 0, sub2);
+  Y.set_block(1, 1, sub3);
+  cout << Y;
+
   return 0;
 }

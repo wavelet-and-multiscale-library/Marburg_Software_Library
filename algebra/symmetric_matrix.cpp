@@ -43,6 +43,14 @@ namespace MathTL
 							     LowerTriangularMatrix<C>::rowdim_,
 							     LowerTriangularMatrix<C>::coldim_)];
   }
+
+  template <class C>
+  inline
+  const C SymmetricMatrix<C>::get_entry(const size_type row,
+					const size_type column) const
+  {
+    return this->operator () (row, column);
+  }
   
   template <class C>
   inline
@@ -54,6 +62,15 @@ namespace MathTL
 							     LowerTriangularMatrix<C>::coldim_)];    
   }
 
+  template <class C>
+  inline
+  void SymmetricMatrix<C>::set_entry(const size_type row,
+				     const size_type column,
+				     const C value)
+  {
+    this->operator () (row, column) = value;
+  }
+  
   template <class C>
   template <class C2>
   inline

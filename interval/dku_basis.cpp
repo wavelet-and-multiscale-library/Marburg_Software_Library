@@ -113,7 +113,8 @@ namespace WaveletTL
   void DKUBasis<d, dT>::setup_AlphaT() {
     // setup AlphaT
     // (offset in first argument: ell2()-1)
-    AlphaT_.resize(ell_+ell2_-1, d);
+//     AlphaT_.resize(ell_+ell2_-1, d); // would be too small for the computation of ML() (3.2.40)
+    AlphaT_.resize(2*ell_+2*ell2_-2, d);
     for (unsigned int m(0); m < AlphaT_.row_dimension(); m++)
       AlphaT_(m, 0) = 1.0; // (5.1.1)
     for (int r(1); r < (int)AlphaT_.column_dimension(); r++) {
@@ -133,7 +134,7 @@ namespace WaveletTL
 	  dummy += binomial(r, i) * intpower(m, i) * AlphaT_(ell2_-1, r-i); // (5.1.2)
 	AlphaT_(m+ell2_-1, r) = dummy;
       }
-      for (int m(1); m <= ell_-1; m++) {
+      for (int m(1); m <= 2*ell_+ell2_-2; m++) {
 	double dummy(0);
 	for (int i(0); i <= r; i++)
 	  dummy += binomial(r, i) * intpower(m, i) * AlphaT_(ell2_-1, r-i); // (5.1.2)
@@ -469,13 +470,11 @@ namespace WaveletTL
 
     for (int row(d); row <= d+ell_+ell1_-1; row++)
       for (int column(0); column < d; column++)
-  	ML(row, column) = 42;
-    // Hier gehts weiter, Indexfehler beheben! (Grund: AlphaT zu klein, vgl. IGPMlibexp!)
-//   	ML(row, column) = AlphaT_(row-d+ell_+ell2_-1, column) / sqrt(ldexp(1.0, 2*column+1));
+    	ML(row, column) = AlphaT_(row-d+ell_+ell2_-1, column) / sqrt(ldexp(1.0, 2*column+1));
     
-//     for (int row(d+ell_+ell1_); row < d+ell_+ell2_-1; row++)
-//       for (int column(0); column < d; column++)
-// 	ML(row, column) = BetaLT_(row+ell_-2*ell_-ell1_ -d, column);
+    for (int row(d+ell_+ell1_); row < d+ell_+ell2_-1; row++)
+      for (int column(0); column < d; column++)
+ 	ML(row, column) = BetaLT_(row+ell_-2*ell_-ell1_ -d, column);
 
     return ML;
   }

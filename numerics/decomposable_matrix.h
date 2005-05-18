@@ -28,7 +28,7 @@ namespace MathTL
       A*x=b
     or least squares problems
       min \|A*x-b\|_2
-    by the application of LU or QR factorization.
+    by the application of LU or QR factorization (m >= n).
     The factorizations is stored in place.
   */
   template <class C>
@@ -44,7 +44,7 @@ namespace MathTL
     /*!
       type of factorizations
     */
-    enum FactorizationType {
+    enum DecompositionType {
       none,
       LU,
       QR
@@ -61,6 +61,11 @@ namespace MathTL
     DecomposableMatrix(const DecomposableMatrix<C>& M);
 
     /*!
+      copy constructor from a Matrix
+    */
+    DecomposableMatrix(const Matrix<C>& M);
+
+    /*!
       row dimension
     */
     const size_type row_dimension() const;
@@ -75,23 +80,37 @@ namespace MathTL
     */
     const size_type size() const;
 
+    /*!
+      perform (or revert) decomposition
+    */
+    void decompose(DecompositionType d = LU);
+
      /*!
       stream output with user-defined tabwidth and precision
       (cf. deal.II)
     */
     void print(std::ostream& os,
-	       const unsigned int tabwidth = 5,
-	       const unsigned int precision = 2) const;
+	       const unsigned int tabwidth = 10,
+	       const unsigned int precision = 3) const;
 
  protected:
     // decomposition type
-    FactorizationType decomposed;
+    DecompositionType decomposition;
 
     // storage for row equilibration matrix entries (-> LU factorization)
     Vector<double> D;
 
     // storage for permuation matrix (-> LU factorization)
     Array1D<size_type> P;
+
+    // LU decomposition (row equilibration, row pivoting, in place (up to D and P))
+    void LU_decomposition();
+
+    // QR decomposition (in place)
+    void QR_decomposition();
+
+    // revert decomposition
+    void revert_decomposition();
   };
 
   /*!

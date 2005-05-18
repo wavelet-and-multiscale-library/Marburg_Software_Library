@@ -177,8 +177,8 @@ namespace MathTL
       (cf. deal.II)
     */
     void print(std::ostream& os,
-	       const unsigned int tabwidth = 5,
-	       const unsigned int precision = 2) const;
+	       const unsigned int tabwidth = 10,
+	       const unsigned int precision = 3) const;
 
   protected:
     /*!

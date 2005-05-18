@@ -9,8 +9,20 @@ int main()
 {
   cout << "Testing decomposable matrices ..." << endl;
 
-  DecomposableMatrix<double> M(2);
-  cout << "- a default decomposable matrix M:" << endl
+  DecomposableMatrix<double> N(2);
+  cout << "- a default decomposable matrix N:" << endl
+       << N;
+
+//   DecomposableMatrix<double> M(Matrix<double>(3, 3, "2 -1 0 -1 2 -1 0 -1 2"));
+  DecomposableMatrix<double> M(Matrix<double>(4, 3, "0 1 2 3 4 5 6 7 9 0 1 0"));
+//   DecomposableMatrix<double> M(Matrix<double>(3, 2, "0 1 2 3 4 5"));
+  cout << "- the standard matrix M_3:" << endl
+       << M;
+
+  M.decompose(DecomposableMatrix<double>::LU);
+  M.decompose(DecomposableMatrix<double>::none);
+  
+  cout << "- after decomposition and reversion:" << endl
        << M;
 
 //   typedef DecomposableMatrix<double>::size_type size_type;

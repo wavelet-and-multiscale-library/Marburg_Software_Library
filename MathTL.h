@@ -46,6 +46,7 @@
 #include <numerics/gauss_quadrature.h>
 #include <numerics/iteratsolv.h>
 #include <numerics/matrix_decomp.h>
+#include <numerics/decomposable_matrix.h>
 #include <numerics/ortho_poly.h>
 #include <numerics/quadrature.h>
 #include <numerics/recursion.h>

@@ -85,6 +85,13 @@ namespace MathTL
     */
     void decompose(DecompositionType d = LU);
 
+    /*!
+      solve the linear system A*x=b via a given decomposition
+      (x will be scaled appropriately)
+    */
+    void solve(const Vector<C>& b, Vector<C>& x,
+	       DecompositionType d = LU);
+
      /*!
       stream output with user-defined tabwidth and precision
       (cf. deal.II)

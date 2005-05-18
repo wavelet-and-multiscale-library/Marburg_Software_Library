@@ -4,6 +4,7 @@
 #include <cassert>
 #include <algorithm>
 #include <functional>
+#include <sstream>
 
 namespace MathTL
 {
@@ -26,6 +27,16 @@ namespace MathTL
 	if (initialize)
 	  *this = 0;
       }
+  }
+
+  template <class C>
+  Vector<C>::Vector(const size_type s, const char* str)
+  {
+    resize(s, false);
+
+    std::istringstream ins(str);
+    for (size_type i(0); i < s && ins.good(); i++)
+      ins >> (*this).operator () (i);
   }
 
   template <class C>

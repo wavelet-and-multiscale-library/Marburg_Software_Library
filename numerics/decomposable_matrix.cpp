@@ -86,6 +86,53 @@ namespace MathTL
   }
 
   template <class C>
+  void DecomposableMatrix<C>::solve(const Vector<C>& b, Vector<C>& x,
+				    DecompositionType d)
+  {
+    assert(d != none);
+
+    if (d != decomposition)
+      decompose(d);
+    
+    Vector<C> z(column_dimension());
+
+    switch(d)
+      {
+      case LU:
+	assert(row_dimension() == column_dimension());
+	
+	// PDAx=PDb=LUx, so we solve Lz=PDb first:
+	for (size_type i(0); i < column_dimension(); i++)
+	  {
+	    z[i] = b[P[i]] / D[P[i]];
+	    for (size_type j(0); j < i; j++)
+	      z[i] -= Matrix<C>::get_entry(P[i], j) * z[j];
+	  }
+
+	// solve Ux=z
+ 	x.resize(column_dimension());
+ 	for (size_type i(column_dimension()-1);;)
+ 	  {
+	    double xi = z[i];
+	    for (size_type j(i+1); j < column_dimension(); j++)
+	      xi -= Matrix<C>::get_entry(P[i], j) * x[j];
+	    x[i] = xi / Matrix<C>::get_entry(P[i], i);
+
+	    if (i>0)
+	      i--;
+	    else
+	      break;
+ 	  }
+
+	break;
+      case QR:
+	break;
+      default:
+	break;
+      }
+  }
+
+  template <class C>
   void DecomposableMatrix<C>::LU_decomposition()
   {
     // row equilibration

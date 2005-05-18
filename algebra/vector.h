@@ -88,6 +88,14 @@ namespace MathTL
     explicit Vector(const size_type s, const bool initialize = true);
 
     /*!
+      Construct a vector from a string holding its entries, separated
+      by a blank.
+      \param s dimension
+      \param str input string
+     */
+    Vector(const size_type s, const char* str);
+
+    /*!
       copy constructor
     */
     Vector(const Vector<C>& v);

@@ -22,7 +22,7 @@ namespace MathTL
   {
     switch(decomposition)
       {
-      case QR:
+      case QU:
 	break;
       case LU:
 	P = M.P;
@@ -68,7 +68,7 @@ namespace MathTL
   template <class C>
   void DecomposableMatrix<C>::decompose(DecompositionType d)
   {
-    if (decomposition != none)
+    if (decomposition != d || decomposition != none)
       revert_decomposition();
 
     switch(d)
@@ -76,8 +76,8 @@ namespace MathTL
       case LU:
 	LU_decomposition();
 	break;
-      case QR:
-	QR_decomposition();
+      case QU:
+	QU_decomposition();
 	break;
       case none:
       default:
@@ -125,7 +125,7 @@ namespace MathTL
  	  }
 
 	break;
-      case QR:
+      case QU:
 	break;
       default:
 	break;
@@ -183,14 +183,46 @@ namespace MathTL
   }
 
   template <class C>
-  void DecomposableMatrix<C>::QR_decomposition()
+  void DecomposableMatrix<C>::QU_decomposition()
   {
+    for (size_type k(0); k < column_dimension(); k++)
+      {
+	double sqrnorm(0);
+	for (size_type i(k); i < row_dimension(); i++)
+	  sqrnorm += Matrix<C>::get_entry(i, k) * Matrix<C>::get_entry(i, k);
+
+	double akk(Matrix<C>::get_entry(k, k));
+	double alphak = (akk == 0 ? sqrt(sqrnorm) : -akk/fabs(akk)*sqrt(sqrnorm));
+
+	Matrix<C>::set_entry(k, k, alphak);
+	for (size_type i(k+1); i < row_dimension(); i++)
+	  Matrix<C>::set_entry(i, k, Matrix<C>::get_entry(i, k) / (akk-alphak));
+
+	double vTv(1); // v_1=1 by construction
+	for (size_type i(k+1); i < row_dimension(); i++)
+	  vTv += Matrix<C>::get_entry(i, k) * Matrix<C>::get_entry(i, k);
+
+	// apply Q_v = I - 2*v*v^T/(v^Tv) to the other columns
+	for (size_type j(k+1); j < column_dimension(); j++)
+	  {
+	    double vTx(Matrix<C>::get_entry(k, j)); // v_1=1
+	    for (size_type i(k+1); i < row_dimension(); i++)
+	      vTx += Matrix<C>::get_entry(i, k) * Matrix<C>::get_entry(i, j);
+
+	    Matrix<C>::set_entry(k, j, Matrix<C>::get_entry(k, j) - 2*vTx/vTv); // v_1=1
+	    for (size_type i(k+1); i < row_dimension(); i++)
+	      Matrix<C>::set_entry(i, j, Matrix<C>::get_entry(i, j) - 2*vTx/vTv*Matrix<C>::get_entry(i, k));
+	  }
+      }
+
+    decomposition = QU;
   }
 
   template <class C>
   void DecomposableMatrix<C>::revert_decomposition()
   {
     Matrix<C> M(row_dimension(), column_dimension());
+    Vector<C> v(row_dimension(), false);
 
     switch(decomposition)
       {
@@ -211,7 +243,39 @@ namespace MathTL
 	  }
 	Matrix<C>::swap(M);
 	break;
-      case QR:
+      case QU:
+	for (size_type k(column_dimension()-1);;)
+	  {
+ 	    // copy Householder vector v
+ 	    v[0] = 1;
+ 	    for (size_type i(k+1); i < row_dimension(); i++)
+ 	      v[i-k] = Matrix<C>::get_entry(i, k);
+
+ 	    double vTv(1);
+ 	    for (size_type i(k+1); i < row_dimension(); i++)
+ 	      vTv += v[i-k]*v[i-k];
+
+	    for (size_type j(k); j < column_dimension(); j++)
+	      {
+		double vTx(Matrix<C>::get_entry(k, j)); // v_1=1
+		if (j > k)
+		  for (size_type i(k+1); i < row_dimension(); i++)
+		    vTx += v[i-k] * Matrix<C>::get_entry(i, j);
+
+		for (size_type i(k); i < row_dimension(); i++)
+		  {
+		    if (j == k && i > j ) // a_{i,j}=0
+		      Matrix<C>::set_entry(i, j, -2*vTx/vTv*v[i-k]);
+		    else // j > k || i <= j
+		      Matrix<C>::set_entry(i, j, Matrix<C>::get_entry(i, j) - 2*vTx/vTv*v[i-k]);
+		  }
+	      }
+
+	    if (k > 0)
+	      k--;
+	    else
+	      break;
+	  }
 	break;
       case none:
       default:
@@ -231,8 +295,8 @@ namespace MathTL
       {
       case LU:
 	break;
-      case QR:
-	break;
+      case QU:
+// 	break;
       case none:
       default:
 	Matrix<C>::print(os, tabwidth, precision);

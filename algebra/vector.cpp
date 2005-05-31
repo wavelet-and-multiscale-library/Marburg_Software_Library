@@ -58,8 +58,8 @@ namespace MathTL
     if (values_ != 0)
       {
 	delete [] values_;
-	values_ = 0;
-	size_ = 0;
+ 	values_ = 0;
+ 	size_ = 0;
       }
   }
   

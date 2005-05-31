@@ -20,7 +20,7 @@ int main()
   A.decompose(DecomposableMatrix<double>::LU);
   A.decompose(DecomposableMatrix<double>::none);
   
-  cout << "- after decomposition and reversion:" << endl
+  cout << "- after LU decomposition and reversion:" << endl
        << A;
 
   DecomposableMatrix<double> M(Matrix<double>(3, 3, "2 -1 0 -1 2 -1 0 -1 2"));
@@ -37,6 +37,24 @@ int main()
   B.solve(b, x);
   cout << "- solving Bx=" << b << " yields x=" << x << endl; 
 
+  A = Matrix<double>(4, 3, "2 2 1 0 0 1 1 -1 0 -2 0 1");
+  cout << "- a rectangular matrix A:" << endl
+       << A;
+
+  A.decompose(DecomposableMatrix<double>::QU);
+  A.decompose(DecomposableMatrix<double>::none);
+
+  cout << "- after QU decomposition and reversion:" << endl
+       << A;
+
+  cout << "- the standard matrix again:" << endl
+       << M;
+
+  M.decompose(DecomposableMatrix<double>::QU);
+  M.decompose(DecomposableMatrix<double>::none);
+
+  cout << "- after QU decomposition and reversion:" << endl
+       << M;
 
   return 0;
 }

@@ -47,7 +47,7 @@ namespace MathTL
     enum DecompositionType {
       none,
       LU,
-      QR
+      QU
     };
 
     /*!
@@ -114,7 +114,7 @@ namespace MathTL
     void LU_decomposition();
 
     // QR decomposition (in place)
-    void QR_decomposition();
+    void QU_decomposition();
 
     // revert decomposition
     void revert_decomposition();

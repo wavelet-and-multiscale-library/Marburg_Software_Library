@@ -18,14 +18,16 @@ namespace MathTL
   template <class C>
   inline
   Vector<C>::Vector(const size_type s, const bool initialize)
-    : values_(0), size_(s)
+    : size_(s)
   {
-    if (s > 0)
+    if (s == 0)
+      values_ = 0;
+    else
       {
 	values_ = new C[s]; // calls C()
 	
 	if (initialize)
-	  *this = 0;
+	  (*this).operator = (0);
       }
   }
 
@@ -42,9 +44,11 @@ namespace MathTL
   template <class C>
   inline
   Vector<C>::Vector(const Vector<C>& v)
-    : values_(0), size_(v.size())
+    : size_(v.size())
   {
-    if (size_ > 0)
+    if (size_ == 0)
+      values_ = 0;
+    else
       {
 	values_ = new C[size_];
 	std::copy(v.begin(), v.end(), begin());
@@ -91,8 +95,11 @@ namespace MathTL
   {
     if (s == 0)
       {
-	if (values_ != 0) delete [] values_;
-	values_ = 0;
+	if (values_ != 0)
+	  {
+	    delete [] values_;
+	    values_ = 0;
+	  }
 	size_ = 0;
       }
     else
@@ -105,7 +112,7 @@ namespace MathTL
 	  }
 
 	if (initialize)
-	  *this = 0;
+	  (*this).operator = (0);
       }
   }
 

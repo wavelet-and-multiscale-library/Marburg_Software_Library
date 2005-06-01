@@ -29,9 +29,11 @@ namespace MathTL
   template <class C>
   inline
   Array1D<C>::Array1D(const Array1D<C>& a)
-    : data_(0), size_(a.size())
+    : size_(a.size())
   {
-    if (size_ > 0)
+    if (size_ == 0)
+      data_ = 0;
+    else
       {
 	data_ = new C[size_];
 	std::copy(a.begin(), a.end(), begin());
@@ -68,7 +70,11 @@ namespace MathTL
   {
     if (s == 0)
       {
-	if (data_ != 0) delete [] data_;
+	if (data_ != 0)
+	  {
+	    delete [] data_;
+	    data_ = 0;
+	  }
 	size_ = 0;
       }
     else

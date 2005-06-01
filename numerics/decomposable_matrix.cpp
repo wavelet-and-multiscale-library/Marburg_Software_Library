@@ -42,6 +42,18 @@ namespace MathTL
   }
 
   template <class C>
+  DecomposableMatrix<C>& DecomposableMatrix<C>::operator = (const DecomposableMatrix<C>& M)
+  {
+    Matrix<C>::operator = (M);
+
+    decomposition = M.decomposition;
+    D             = M.D;
+    P             = M.P;
+
+    return *this;
+  }
+
+  template <class C>
   inline
   const typename DecomposableMatrix<C>::size_type
   DecomposableMatrix<C>::row_dimension() const

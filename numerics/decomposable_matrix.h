@@ -66,6 +66,11 @@ namespace MathTL
     DecomposableMatrix(const Matrix<C>& M);
 
     /*!
+      assignment from another matrix
+    */
+    DecomposableMatrix<C>& operator = (const DecomposableMatrix<C>& M);
+
+    /*!
       row dimension
     */
     const size_type row_dimension() const;

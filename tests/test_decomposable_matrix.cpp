@@ -56,5 +56,9 @@ int main()
   cout << "- after QU decomposition and reversion:" << endl
        << M;
 
+  b = Vector<double>(3, "3 0 -1");
+  M.solve(b, x);
+  cout << "- solving Mx=" << b << " with QU decomposition yields x=" << x << endl; 
+
   return 0;
 }

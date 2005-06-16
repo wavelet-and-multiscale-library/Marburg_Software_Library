@@ -116,16 +116,17 @@ namespace MathTL
 	// PDAx=PDb=LUx, so we solve Lz=PDb first:
 	for (size_type i(0); i < column_dimension(); i++)
 	  {
-	    z[i] = b[P[i]] / D[P[i]];
+	    double zi(b[P[i]] / D[P[i]]);
 	    for (size_type j(0); j < i; j++)
-	      z[i] -= Matrix<C>::get_entry(P[i], j) * z[j];
+	      zi -= Matrix<C>::get_entry(P[i], j) * z[j];
+	    z[i] = zi;
 	  }
 
 	// solve Ux=z
  	x.resize(column_dimension());
  	for (size_type i(column_dimension()-1);;)
  	  {
-	    double xi = z[i];
+	    double xi(z[i]);
 	    for (size_type j(i+1); j < column_dimension(); j++)
 	      xi -= Matrix<C>::get_entry(P[i], j) * x[j];
 	    x[i] = xi / Matrix<C>::get_entry(P[i], i);
@@ -138,6 +139,38 @@ namespace MathTL
 
 	break;
       case QU:
+	// z = Q^Tb
+	z = b;
+	for (size_type k(0); k < column_dimension(); k++)
+	  {
+	    double vTv(1); // v_1=1
+	    for (size_type i(k+1); i < row_dimension(); i++)
+	      vTv += Matrix<C>::get_entry(i, k) * Matrix<C>::get_entry(i, k);
+
+	    // apply Q_v = I -2*v*v^T/(v^Tv) to b
+	    double vTx(z[k]); // v_1=1
+	    for (size_type i(k+1); i < row_dimension(); i++)
+	      vTx += Matrix<C>::get_entry(i, k) * z[i];
+
+	    z[k] -= 2*vTx/vTv; // v_1=1;
+	    for (size_type i(k+1); i < row_dimension(); i++)
+	      z[i] -= 2*vTx/vTv * Matrix<C>::get_entry(i, k);
+	  }
+
+	// solve Ux = z
+ 	x.resize(column_dimension());
+	for (size_type i(column_dimension()-1);;)
+	  {
+	    double xi(z[i]);
+	    for (size_type j(i+1); j < column_dimension(); j++)
+	      xi -= Matrix<C>::get_entry(i, j) * x[j];
+	    x[i] = xi / Matrix<C>::get_entry(i, i);
+	    
+	    if (i > 0)
+	      i--;
+	    else
+	      break;
+	  }
 	break;
       default:
 	break;

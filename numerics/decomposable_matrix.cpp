@@ -113,7 +113,7 @@ namespace MathTL
       case LU:
 	assert(row_dimension() == column_dimension());
 	
-	// PDAx=PDb=LUx, so we solve Lz=PDb first:
+	// PDAx = PDb = LUx, so we solve Lz = PDb first:
 	for (size_type i(0); i < column_dimension(); i++)
 	  {
 	    double zi(b[P[i]] / D[P[i]]);
@@ -122,7 +122,7 @@ namespace MathTL
 	    z[i] = zi;
 	  }
 
-	// solve Ux=z
+	// solve Ux = z
  	x.resize(column_dimension());
  	for (size_type i(column_dimension()-1);;)
  	  {
@@ -136,7 +136,6 @@ namespace MathTL
 	    else
 	      break;
  	  }
-
 	break;
       case QU:
 	// z = Q^Tb

@@ -149,7 +149,7 @@ namespace WaveletTL
     CDFBasis<d, dT> cdf_;
 
     Matrix<double> Alpha_, AlphaT_;
-    Matrix<double> BetaL_, BetaLT_;
+    Matrix<double> BetaL_, BetaLT_, BetaR_, BetaRT_;
     Matrix<double> GammaL_;
     Matrix<double> CL_, CLT_, inv_CL_, inv_CLT_;
     Matrix<double> CR_, CRT_, inv_CR_, inv_CRT_;
@@ -173,6 +173,8 @@ namespace WaveletTL
     void setup_AlphaT();
     void setup_BetaL();
     void setup_BetaLT();
+    void setup_BetaR();
+    void setup_BetaRT();
     void setup_GammaL();
     void setup_CX_CXT();
     void setup_CXA_CXAT();

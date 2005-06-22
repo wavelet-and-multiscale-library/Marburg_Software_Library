@@ -67,13 +67,16 @@ namespace WaveletTL
     setup_AlphaT();
     setup_BetaL();
     setup_BetaLT();
+    setup_BetaR();
+    setup_BetaRT();
     setup_GammaL();
     setup_CX_CXT();
     setup_CXA_CXAT();
 
     setup_Cj();
 
-    Matrix<double> ml = ML();
+    Matrix<double> ml = ML(); // (3.5.2)
+    Matrix<double> mr = MR(); // (3.5.2)
   }
 
   template <int d, int dT>
@@ -171,6 +174,38 @@ namespace WaveletTL
 	
 	BetaLT_(m-2*ell_-ell1_, r) = help * M_SQRT1_2;
       }
+  }
+
+  template <int d, int dT>
+  void DKUBasis<d, dT>::setup_BetaR() {
+    // setup BetaR: TODO!!!
+
+// (offset in first argument: 2*ellT()+ell1T() )
+//     BetaL_.resize(ell2T_-ell1T_-1, dT);
+//     for (int r(0); r < dT; r++)
+//       for (int m(2*ellT_+ell1T_); m <= 2*ellT_+ell2T_-2; m++) {
+// 	double help(0);
+// 	for (int q((int)ceil((m-ell2T_)/2.0)); q <= ellT_-1; q++)
+// 	  help += Alpha_(q, r) * cdf_.aT().get_coefficient(MultiIndex<int, 1>(m-2*q)); // (3.2.31)
+
+// 	BetaL_(m-2*ellT_-ell1T_, r) = help * M_SQRT1_2;
+//       }
+  }
+
+  template <int d, int dT>
+  void DKUBasis<d, dT>::setup_BetaRT() {
+    // setup BetaRT: TODO!!!
+
+//     // (offset in first argument: 2*ell()+ell1() )
+//     BetaLT_.resize(ell2_-ell1_-1, d);
+//     for (int r(0); r < d; r++)
+//       for (int m(2*ell_+ell1_); m <= 2*ell_+ell2_-2; m++) {
+// 	double help(0);
+// 	for (int q((int)ceil((m-ell2_)/2.0)); q <= ell_-1; q++)
+// 	  help += AlphaT_(q, r) * cdf_.a().get_coefficient(MultiIndex<int, 1>(m-2*q)); // (3.2.31)
+	
+// 	BetaLT_(m-2*ell_-ell1_, r) = help * M_SQRT1_2;
+//       }
   }
 
   template <int d, int dT>
@@ -477,6 +512,26 @@ namespace WaveletTL
  	ML(row, column) = BetaLT_(row+ell_-2*ell_-ell1_ -d, column);
 
     return ML;
+  }
+
+  template <int d, int dT>
+  Matrix<double>
+  DKUBasis<d, dT>::MR() const
+  {
+    Matrix<double> MR(d+ell_+ell2_-1, d);
+
+    for (int row(0); row < d; row++)
+      MR(row, row) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
+
+    for (int row(d); row <= d+ell_+ell1_-1; row++)
+      for (int column(0); column < d; column++)
+	MR(row, column) = AlphaT_(row-d+ell_+ell2_-1, column) / sqrt(ldexp(1.0, 2*column+1));
+    
+    for (int row(d+ell_+ell1_); row < d+ell_+ell2_-1; row++)
+      for (int column(0); column < d; column++)
+  	MR(row, column) = BetaRT_(row+ell_-2*ell_-ell1_ -d, column);
+
+    return MR;
   }
 
   template <int d, int dT>

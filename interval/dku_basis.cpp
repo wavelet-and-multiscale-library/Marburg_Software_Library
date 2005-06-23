@@ -69,7 +69,7 @@ namespace WaveletTL
     setup_BetaLT();
     setup_BetaR();
     setup_BetaRT();
-//     setup_GammaL();
+    setup_GammaL();
 //     setup_CX_CXT();
 //     setup_CXA_CXAT();
 
@@ -247,6 +247,9 @@ namespace WaveletTL
 
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_GammaL() {
+//     const int llowT = ellT-dT;
+//     const int lupT  = ellT-1;
+
     GammaL_.resize(dT, dT);
 	
     // 1. compute the integrals
@@ -258,36 +261,46 @@ namespace WaveletTL
     // 2. compute the integrals
     //      I(nu,mu) = \int_0^\infty\phi(x-\nu)\tilde\phi(x-\mu)\,dx
     //    exactly using the z(s,t) values
-    Matrix<double> I(ell_-d+dT-1+ell2_, ellT_-1+ell2T_);
-    for (int nu(-ell2_+1); nu <= -ell1_-1; nu++)
-      for (int mu(-ell2T_+1); mu <= -ell1T_-1; mu++) {
+
+    const int I1Low = -ell2_+1;
+    const int I1Up  = ell_-d+dT-1;
+    const int I2Low = -ell2T_+1;
+    const int I2Up  = ellT_-1;
+
+    Matrix<double> I(I1Up-I1Low+1, I2Up-I2Low+1);
+    for (int nu = I1Low; nu < -ell1_; nu++)
+      for (int mu = I2Low; mu < -ell1T_; mu++) {
 	double help(0);
 	int diff(mu - nu);
 	for (int s(-ell2_+1); s <= nu; s++)
 	  help += zvalues.get_coefficient(MultiIndex<int, 2>(s, s+diff));
-	I(nu+ell2_-1, mu+ell2T_-1) = help; // (5.1.7)
+	I(-I1Low+nu, -I2Low+mu) = help; // (5.1.7)
       }
-    for (int nu(-ell2_+1); nu <= ell_-d+dT-1; nu++)
-      for (int mu(-ell2T_+1); mu <= ellT_-1; mu++) {
+    for (int nu = -I1Low; nu <= I1Up; nu++)
+      for (int mu = I2Low; mu <= I2Up; mu++) {
 	if ((nu >= -ell1_) || ((nu <= ell_-1) && (mu >= -ell1T_)))
-	  I(nu+ell2_-1, mu+ell2T_-1) = (nu == mu ? 1 : 0); // (5.1.6)
+	  I(-I1Low+nu, -I2Low+mu) = (nu == mu ? 1 : 0); // (5.1.6)
       }
 
     // 3. finally, compute the Gramian GammaL
     //    (offsets: entry (r,k) <-> index (r+ellT()-dT,k+ellT()-dT) )
-    for (int r(0); r <= d-1; r++)
-      for (int k(0); k <= dT-1; k++) {
+
+    const int AlphamLow = 1-ell2T_;
+    const int AlphaTmLow = 1-ell2_;
+
+    for (int r(0); r < d; r++)
+      for (int k(0); k < dT; k++) {
 	double help(0);
-	for (int nu(-ell2_+1); nu <= ell_-1; nu++)
-	  for (int mu(-ell2T_+1); mu <= ellT_-1; mu++)
-	    help += AlphaT_(nu+ell2_-1, r) * Alpha_(mu+ell2T_-1, k) * I(nu+ell2_-1, mu+ell2T_-1);
+	for (int nu = I1Low; nu < ell_; nu++)
+	  for (int mu = I2Low; mu <= I2Up; mu++)
+	    help += AlphaT_(-AlphaTmLow+nu, r) * Alpha_(-AlphamLow+mu, k) * I(-I1Low+nu, -I2Low+mu);
 	GammaL_(r, k) = help; // (5.1.4)
       }
     for (int r(d); r <= dT-1; r++)
       for (int k(0); k <= dT-1; k++) {
 	double help(0);
-	for (int mu(-ell2T_+1); mu <= ellT_-1; mu++)
-	  help += Alpha_(mu+ell2T_-1, k) * I(ell_-d+r+ell2_-1, mu+ell2T_-1);
+	for (int mu = I2Low; mu <= I2Up; mu++)
+	  help += Alpha_(-AlphamLow+mu, k) * I(-I1Low+ell_-d+r, -I2Low+mu);
 	GammaL_(r, k) = help; // (5.1.5)
       }
   }

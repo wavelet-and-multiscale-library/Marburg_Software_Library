@@ -104,15 +104,15 @@ namespace WaveletTL
 
     for (int r(1); r <= rUp; r++) {
       for (int m = mLow; m < 0; m++) {
-	double dummy(0);
-	for (int i(0); i <= r; i++)
+	double dummy = 0;
+	for (int i = 0; i <= r; i++)
 	  dummy += binomial(r, i) * intpower(m, i) * Alpha_(-mLow, r-i); // (5.1.2)
 	Alpha_(-mLow+m, r) = dummy;
       }
 
       for (int m = 1; m <= mUp; m++) {
-	double dummy(0);
-	for (int i(0); i <= r; i++)
+	double dummy = 0;
+	for (int i = 0; i <= r; i++)
 	  dummy += binomial(r, i) * intpower(m, i) * Alpha_(-mLow, r-i); // (5.1.2)
 	Alpha_(-mLow+m, r) = dummy;
       }
@@ -132,10 +132,10 @@ namespace WaveletTL
       AlphaT_(-mLow+m, 0) = 1.0; // (5.1.1)
 
     for (int r = 1; r <= rUp; r++) {
-      double dummy(0);
+      double dummy = 0;
       for (int k(ell1T_); k <= ell2T_; k++) {
-	double dummy1(0);
-	for (int s(0); s <= r-1; s++)
+	double dummy1 = 0;
+	for (int s = 0; s <= r-1; s++)
 	  dummy1 += binomial(r, s) * intpower(k, r-s) * AlphaT_(-mLow, s); // (5.1.3)
 	dummy += cdf_.aT().get_coefficient(MultiIndex<int, 1>(k)) * dummy1;
       }
@@ -144,15 +144,15 @@ namespace WaveletTL
 
     for (int r = 1; r <= rUp; r++) {
       for (int m = mLow; m < 0; m++) {
-	double dummy(0);
-	for (int i(0); i <= r; i++)
+	double dummy = 0;
+	for (int i = 0; i <= r; i++)
 	  dummy += binomial(r, i) * intpower(m, i) * AlphaT_(-mLow, r-i); // (5.1.2)
 	AlphaT_(-mLow+m, r) = dummy;
       }
 
       for (int m = 1; m <= mUp; m++) {
-	double dummy(0);
-	for (int i(0); i <= r; i++)
+	double dummy = 0;
+	for (int i = 0; i <= r; i++)
 	  dummy += binomial(r, i) * intpower(m, i) * AlphaT_(-mLow, r-i); // (5.1.2)
 	AlphaT_(-mLow+m, r) = dummy;
       }
@@ -162,7 +162,7 @@ namespace WaveletTL
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_BetaL() {
     // setup BetaL
-    const int mLow = 2*ellT_+ell1T_;  // start index in (3.2.41)
+    const int mLow = 2*ellT_+ell1T_;   // start index in (3.2.41)
     const int mUp  = 2*ellT_+ell2T_-2; // end index in (3.2.41)
     const int rUp  = dT-1;
 
@@ -172,7 +172,7 @@ namespace WaveletTL
 
     for (int r = 0; r <= rUp; r++)
       for (int m = mLow; m <= mUp; m++) {
-	double help(0);
+	double help = 0;
 	for (int q = (int)ceil((m-ell2T_)/2.0); q < ellT_; q++)
 	  help += Alpha_(-AlphamLow+q, r) * cdf_.aT().get_coefficient(MultiIndex<int, 1>(m-2*q)); // (3.2.31)
 
@@ -183,7 +183,7 @@ namespace WaveletTL
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_BetaLT() {
     // setup BetaLT
-    const int mLow = 2*ell_+ell1_;  // start index in (3.2.40)
+    const int mLow = 2*ell_+ell1_;   // start index in (3.2.40)
     const int mUp  = 2*ell_+ell2_-2; // end index in (3.2.40)
     const int rUp  = d-1;
 
@@ -193,7 +193,7 @@ namespace WaveletTL
 
     for (int r = 0; r <= rUp; r++)
       for (int m = mLow; m <= mUp; m++) {
-	double help(0);
+	double help = 0;
 	for (int q = (int)ceil((m-ell2_)/2.0); q < ell_; q++)
 	  help += AlphaT_(-AlphaTmLow+q, r) * cdf_.a().get_coefficient(MultiIndex<int, 1>(m-2*q)); // (3.2.31)
 	
@@ -203,34 +203,46 @@ namespace WaveletTL
 
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_BetaR() {
-    // setup BetaR: TODO!!!
+    // setup BetaR:
 
-// (offset in first argument: 2*ellT()+ell1T() )
-//     BetaL_.resize(ell2T_-ell1T_-1, dT);
-//     for (int r(0); r < dT; r++)
-//       for (int m(2*ellT_+ell1T_); m <= 2*ellT_+ell2T_-2; m++) {
-// 	double help(0);
-// 	for (int q((int)ceil((m-ell2T_)/2.0)); q <= ellT_-1; q++)
-// 	  help += Alpha_(q, r) * cdf_.aT().get_coefficient(MultiIndex<int, 1>(m-2*q)); // (3.2.31)
+    const int mLow = 2*ellT_+ell1T_;  // start index in (3.2.41)
+    const int mUp  = 2*ellT_+ell2T_-2; // end index in (3.2.41)
+    const int rUp  = dT-1;
 
-// 	BetaL_(m-2*ellT_-ell1T_, r) = help * M_SQRT1_2;
-//       }
+    const int AlphamLow = 1-ell2T_;
+
+    BetaR_.resize(mUp-mLow+1, rUp+1);
+
+    for (int r = 0; r <= rUp; r++)
+      for (int m = mLow; m <= mUp; m++) {
+	double help = 0;
+	for (int q = (int)ceil((m-ell2T_)/2.0); q < ellT_; q++)
+	  help += Alpha_(-AlphamLow+q, r) * cdf_.aT().get_coefficient(MultiIndex<int, 1>(m-2*q)); // (3.2.31)
+
+	BetaR_(-mLow+m, r) = help * M_SQRT1_2;
+      }
   }
 
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_BetaRT() {
-    // setup BetaRT: TODO!!!
+    // setup BetaRT:
 
-//     // (offset in first argument: 2*ell()+ell1() )
-//     BetaLT_.resize(ell2_-ell1_-1, d);
-//     for (int r(0); r < d; r++)
-//       for (int m(2*ell_+ell1_); m <= 2*ell_+ell2_-2; m++) {
-// 	double help(0);
-// 	for (int q((int)ceil((m-ell2_)/2.0)); q <= ell_-1; q++)
-// 	  help += AlphaT_(q, r) * cdf_.a().get_coefficient(MultiIndex<int, 1>(m-2*q)); // (3.2.31)
+    const int mLow = 2*ell_+ell1_;   // start index in (3.2.40)
+    const int mUp  = 2*ell_+ell2_-2; // end index in (3.2.40)
+    const int rUp  = d-1;
+
+    const int AlphaTmLow = 1-ell2_;
+
+    BetaRT_.resize(mUp-mLow+1, rUp+1);
+
+    for (int r = 0; r <= rUp; r++)
+      for (int m = mLow; m <= mUp; m++) {
+	double help = 0;
+	for (int q = (int)ceil((m-ell2_)/2.0); q < ell_; q++)
+	  help += AlphaT_(-AlphaTmLow+q, r) * cdf_.a().get_coefficient(MultiIndex<int, 1>(m-2*q)); // (3.2.31)
 	
-// 	BetaLT_(m-2*ell_-ell1_, r) = help * M_SQRT1_2;
-//       }
+	BetaRT_(-mLow+m, r) = help * M_SQRT1_2;
+      }
   }
 
   template <int d, int dT>

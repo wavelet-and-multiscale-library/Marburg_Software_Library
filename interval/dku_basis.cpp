@@ -69,45 +69,52 @@ namespace WaveletTL
     setup_BetaLT();
     setup_BetaR();
     setup_BetaRT();
-    setup_GammaL();
-    setup_CX_CXT();
-    setup_CXA_CXAT();
+//     setup_GammaL();
+//     setup_CX_CXT();
+//     setup_CXA_CXAT();
 
-    setup_Cj();
+//     setup_Cj();
 
-    Matrix<double> ml = ML(); // (3.5.2)
-    Matrix<double> mr = MR(); // (3.5.2)
+//     Matrix<double> ml = ML(); // (3.5.2)
+//     Matrix<double> mr = MR(); // (3.5.2)
   }
 
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_Alpha() {
-    // setup Alpha
-    // (offset in first argument: ell2T()-1)
-    Alpha_.resize(ellT_+ell2T_-1, dT);
-    for (unsigned int m(0); m < Alpha_.row_dimension(); m++)
-      Alpha_(m, 0) = 1.0; // (5.1.1)
-    for (int r(1); r < (int)Alpha_.column_dimension(); r++) {
-      double dummy(0);
+    // setup Alpha = Alpha(m, r)
+    const int mLow = 1-ell2T_;         // start index in (3.2.26)
+    const int mUp  = 2*ellT_+ell1T_-1; // end index in (3.2.41)
+    const int rUp  = dT-1;
+
+    Alpha_.resize(mUp-mLow+1, rUp+1);
+
+    for (int m = mLow; m <= mUp; m++)
+      Alpha_(-mLow+m, 0) = 1.0; // (5.1.1)
+
+    for (int r = 1; r <= rUp; r++) {
+      double dummy = 0;
       for (int k(ell1_); k <= ell2_; k++) {
-	double dummy1(0);
-	for (int s(0); s <= r-1; s++)
-	  dummy1 += binomial(r, s) * intpower(k, r-s) * Alpha_(ell2T_-1, s);
+	double dummy1 = 0;
+	for (int s = 0; s <= r-1; s++)
+	  dummy1 += binomial(r, s) * intpower(k, r-s) * Alpha_(-mLow, s);
 	dummy += cdf_.a().get_coefficient(MultiIndex<int, 1>(k)) * dummy1; // (5.1.3)
       }
-      Alpha_(ell2T_-1, r) = dummy / (ldexp(1.0, r+1) - 2.0);
+      Alpha_(-mLow, r) = dummy / (ldexp(1.0, r+1) - 2.0);
     }
-    for (int r(1); r < (int)Alpha_.column_dimension(); r++) {
-      for (int m(-ell2T_+1); m < 0; m++) {
+
+    for (int r(1); r <= rUp; r++) {
+      for (int m = mLow; m < 0; m++) {
 	double dummy(0);
 	for (int i(0); i <= r; i++)
-	  dummy += binomial(r, i) * intpower(m, i) * Alpha_(ell2T_-1, r-i); // (5.1.2)
-	Alpha_(m+ell2T_-1, r) = dummy;
+	  dummy += binomial(r, i) * intpower(m, i) * Alpha_(-mLow, r-i); // (5.1.2)
+	Alpha_(-mLow+m, r) = dummy;
       }
-      for (int m(1); m <= ellT_-1; m++) {
+
+      for (int m = 1; m <= mUp; m++) {
 	double dummy(0);
 	for (int i(0); i <= r; i++)
-	  dummy += binomial(r, i) * intpower(m, i) * Alpha_(ell2T_-1, r-i); // (5.1.2)
-	Alpha_(m+ell2T_-1, r) = dummy;
+	  dummy += binomial(r, i) * intpower(m, i) * Alpha_(-mLow, r-i); // (5.1.2)
+	Alpha_(-mLow+m, r) = dummy;
       }
     }
   }
@@ -115,33 +122,39 @@ namespace WaveletTL
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_AlphaT() {
     // setup AlphaT
-    // (offset in first argument: ell2()-1)
-//     AlphaT_.resize(ell_+ell2_-1, d); // would be too small for the computation of ML() (3.2.40)
-    AlphaT_.resize(2*ell_+2*ell2_-2, d);
-    for (unsigned int m(0); m < AlphaT_.row_dimension(); m++)
-      AlphaT_(m, 0) = 1.0; // (5.1.1)
-    for (int r(1); r < (int)AlphaT_.column_dimension(); r++) {
+    const int mLow = 1-ell2_;        // start index in (3.2.25)
+    const int mUp  = 2*ell_+ell1_-1; // end index in (3.2.40)
+    const int rUp  = d-1;
+
+    AlphaT_.resize(mUp-mLow+1, rUp+1);
+
+    for (int m = mLow; m <= mUp; m++)
+      AlphaT_(-mLow+m, 0) = 1.0; // (5.1.1)
+
+    for (int r = 1; r <= rUp; r++) {
       double dummy(0);
       for (int k(ell1T_); k <= ell2T_; k++) {
 	double dummy1(0);
 	for (int s(0); s <= r-1; s++)
-	  dummy1 += binomial(r, s) * intpower(k, r-s) * AlphaT_(ell2_-1, s); // (5.1.3)
+	  dummy1 += binomial(r, s) * intpower(k, r-s) * AlphaT_(-mLow, s); // (5.1.3)
 	dummy += cdf_.aT().get_coefficient(MultiIndex<int, 1>(k)) * dummy1;
       }
-      AlphaT_(ell2_-1, r) = dummy / (ldexp(1.0, r+1) - 2.0);
+      AlphaT_(-mLow, r) = dummy / (ldexp(1.0, r+1) - 2.0);
     }
-    for (int r(1); r < (int)AlphaT_.column_dimension(); r++) {
-      for (int m(-ell2_+1); m < 0; m++) {
+
+    for (int r = 1; r <= rUp; r++) {
+      for (int m = mLow; m < 0; m++) {
 	double dummy(0);
 	for (int i(0); i <= r; i++)
-	  dummy += binomial(r, i) * intpower(m, i) * AlphaT_(ell2_-1, r-i); // (5.1.2)
-	AlphaT_(m+ell2_-1, r) = dummy;
+	  dummy += binomial(r, i) * intpower(m, i) * AlphaT_(-mLow, r-i); // (5.1.2)
+	AlphaT_(-mLow+m, r) = dummy;
       }
-      for (int m(1); m <= 2*ell_+ell2_-2; m++) {
+
+      for (int m = 1; m <= mUp; m++) {
 	double dummy(0);
 	for (int i(0); i <= r; i++)
-	  dummy += binomial(r, i) * intpower(m, i) * AlphaT_(ell2_-1, r-i); // (5.1.2)
-	AlphaT_(m+ell2_-1, r) = dummy;
+	  dummy += binomial(r, i) * intpower(m, i) * AlphaT_(-mLow, r-i); // (5.1.2)
+	AlphaT_(-mLow+m, r) = dummy;
       }
     } 
   }

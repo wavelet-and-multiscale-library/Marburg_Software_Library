@@ -70,7 +70,7 @@ namespace WaveletTL
     setup_BetaR();
     setup_BetaRT();
     setup_GammaL();
-//     setup_CX_CXT();
+    setup_CX_CXT();
 //     setup_CXA_CXAT();
 
 //     setup_Cj();
@@ -247,10 +247,12 @@ namespace WaveletTL
 
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_GammaL() {
+    // IGPMlib reference: imask_bspline.cpp, experimental version
+
 //     const int llowT = ellT-dT;
 //     const int lupT  = ellT-1;
 
-    GammaL_.resize(dT, dT);
+    GammaL_.resize(dT, dT); // lupT-llowT+1 each
 	
     // 1. compute the integrals
     //      z(s,t) = \int_0^1\phi(x-s)\tilde\phi(x-t)\,dx
@@ -307,17 +309,22 @@ namespace WaveletTL
 
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_CX_CXT() {
-    CL_.resize(dT, dT);
-    CLT_.resize(dT, dT);
-    CR_.resize(dT, dT);
-    CRT_.resize(dT, dT);
+    // IGPMlib reference: imask_bspline.cpp, experimental version
+
+//     const int llowT = ellT_-dT;
+//     const int lupT  = ellT_-1;
+
+    CL_.resize(dT, dT);  // lupT-llowT+1 each, same offsets as GammaL
+    CLT_.resize(dT, dT); // "
+    CR_.resize(dT, dT);  // "
+    CRT_.resize(dT, dT); // "
 
     // setup CL and CLT
     // (offsets: entry (i,j) <-> index (i+ellT()-dT,j+ellT()-dT) )
     //
     if (bio_ == none) {
       for (unsigned int i(0); i < dT; i++)
-	CL_(i, i) = 1.0;
+	CL_(i, i) = 1.0; // identity matrix
       
       Matrix<double> CLGammaLInv;
       QRDecomposition<double>(CL_ * GammaL_).inverse(CLGammaLInv);

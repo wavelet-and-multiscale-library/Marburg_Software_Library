@@ -71,7 +71,7 @@ namespace WaveletTL
     setup_BetaRT();
     setup_GammaL();
     setup_CX_CXT();
-//     setup_CXA_CXAT();
+    setup_CXA_CXAT();
 
 //     setup_Cj();
 
@@ -309,7 +309,7 @@ namespace WaveletTL
 
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_CX_CXT() {
-    // IGPMlib reference: imask_bspline.cpp, experimental version
+    // IGPMlib reference: I_Mask_Bspline::EvalCL(), ::EvalCR()
 
 //     const int llowT = ellT_-dT;
 //     const int lupT  = ellT_-1;
@@ -481,33 +481,45 @@ namespace WaveletTL
 
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_CXA_CXAT() {
+    // IGPMlib reference: I_Mask_Bspline::EvalCL(), ::EvalCR()
+
+    const int llklow  = 1-ell2_;   // offset 1 in CLA (and AlphaT), see (3.2.25)
+    const int llkup   = ell_-1;
+    const int llklowT = 1-ell2T_;  // offset 1 in CLAT (and Alpha), see (3.2.26)
+    const int llkupT  = ellT_-1;
+
+    const int llow    = ell_-d;    // offset 1 in CL (and CLT), offset 2 in AlphaT
+    const int lup     = ell_-1;
+
+    const int llowT   = ellT_-dT;  // == llow, offset 2 in CLA and CLAT
+    const int lupT    = ellT_-1;
+
     // setup CLA <-> AlphaT * (CL)^T
-    // (offsets: for CLA entry (i,j) <-> index (i+1-ell2(),j+ellT()-dT) )
-    CLA_.resize(ellT_+ell2_-1, dT);
-    for (int i(1-ell2_); i <= ell_-1; i++) // the (3.2.25) bounds
-      for (int r(ellT_-dT); r <= ellT_-1; r++) {
-	double help(0);
-	for (int m(ell_-d); m <= ell_-1; m++)
-	  help += CL_(r-ellT_+dT, m-ellT_+dT) * AlphaT_(i+ell2_-1, m-ell_+d);
-	CLA_(i-1+ell2_, r-ellT_+dT) = help;
+    CLA_.resize(llkup-llklow+1, lupT-llowT+1);
+
+    for (int i = llklow; i <= llkup; i++) // the (3.2.25) bounds
+      for (int r = llowT; r <= lupT; r++) {
+	double help = 0;
+	for (int m = llow; m <= lup; m++)
+	  help += CL_(-llowT+r, -llowT+m) * AlphaT_(-llklow+i, -llow+m);
+	CLA_(-llklow+i, -llowT+r) = help;
       }
-    for (int i(ell_); i <= ellT_-1; i++)
-      for (int r(ellT_-dT); r <= ellT_-1; r++)
-	CLA_(i-1+ell2_, r-ellT_+dT) = CL_(r-ellT_+dT, i-ellT_+dT);
+    for (int i = lup+1; i <= llkup; i++)
+      for (int r = llowT; r <= lupT; r++)
+	CLA_(-llklow+i, -llowT+r) += CL_(-llowT+r, -llowT+i);
 
     CLA_.compress(1e-12);
 
     CLA_.mirror(CRA_);
 
     // setup CLAT <-> Alpha * (CLT)^T
-    // (offsets: for CLAT entry (i,j) <-> index (i+1-ell2T(),j+ellT()-dT) )
-    CLAT_.resize(ellT_+ell2T_-1, dT);
-    for (int i(1-ell2T_); i <= ellT_-1; i++) // the (3.2.26) bounds
-      for (int r(ellT_-dT); r <= ellT_-1; r++) {
-	double help(0);
-	for (int m(ellT_-dT); m <= ellT_-1; m++)
-	  help += CLT_(r-ellT_+dT, m-ellT_+dT) * Alpha_(i+ell2T_-1, m-ellT_+dT);
-  	CLAT_(i-1+ell2T_, r-ellT_+dT) = help;
+    CLAT_.resize(llkupT-llklowT+1, lupT-llowT+1);
+    for (int i = llklowT; i <= llkupT; i++) // the (3.2.26) bounds
+      for (int r = llowT; r <= lupT; r++) {
+	double help = 0;
+	for (int m = llowT; m <= lupT; m++)
+	  help += CLT_(-llowT+r, -llowT+m) * Alpha_(-llklowT+i, -llowT+m);
+  	CLAT_(-llklowT+i, -llowT+r) = help;
       }
 
     CLAT_.compress(1e-12);

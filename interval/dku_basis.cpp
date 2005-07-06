@@ -73,7 +73,7 @@ namespace WaveletTL
     setup_CX_CXT();
     setup_CXA_CXAT();
 
-//     setup_Cj();
+    setup_Cj();
 
 //     Matrix<double> ml = ML(); // (3.5.2)
 //     Matrix<double> mr = MR(); // (3.5.2)
@@ -529,6 +529,8 @@ namespace WaveletTL
 
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_Cj() {
+    // IGPMlib reference: I_Basis_Bspline_s::setup_Cj(), ::put_Mat()
+
     // (5.2.5)
     Cj_.diagonal(Deltasize(j0()), 1.0);
     Cj_.set_block(0, 0, CL_);

@@ -47,6 +47,11 @@ namespace MathTL
     explicit SparseMatrix(const size_type n = 1);
 
     /*!
+      copy constructor
+    */
+    SparseMatrix(const SparseMatrix<C>& M);
+
+    /*!
       destructor
     */
     ~SparseMatrix();
@@ -88,6 +93,11 @@ namespace MathTL
     template <class MATRIX>
     void set_block(const size_type firstrow, const size_type firstcolumn,
 		   const MATRIX& M);
+
+    /*!
+      assignment from another sparse matrix
+    */
+    SparseMatrix<C>& operator = (const SparseMatrix<C>& M);
 
     /*!
       yields an n-by-n diagonal matrix

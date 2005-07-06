@@ -267,6 +267,10 @@ int main()
   X.set_entry(1, 0, 42.0);
   cout << X;
 
+  cout <<"- test copy constructor:" << endl;
+  SparseMatrix<double> Ycopy(X);
+  cout << Ycopy;
+
   cout << "- after X.resize(3,2):" << endl;
   X.resize(3, 2);
   cout << X;

@@ -25,6 +25,34 @@ namespace MathTL
   }
 
   template <class C>
+  SparseMatrix<C>::SparseMatrix(const SparseMatrix<C>& M)
+    : rowdim_ (M.row_dimension()), coldim_(M.column_dimension())
+  {
+    entries_ = new C*[rowdim_];
+    indices_ = new size_type*[rowdim_];
+
+    assert(entries_ != NULL);
+    assert(indices_ != NULL);
+
+    for (size_type row(0); row < rowdim_; row++) {
+      if (M.indices_[row]) {
+	indices_[row] = new size_type[M.indices_[row][0]+1];
+	assert(indices_[row] != NULL);
+	for (size_type j(0); j <= M.indices_[row][0]; j++)
+	  indices_[row][j] = M.indices_[row][j];
+	
+	entries_[row] = new C[indices_[row][0]];
+	assert(entries_[row] != NULL);
+	for (size_type j(0); j < indices_[row][0]; j++)
+	  entries_[row][j] = M.entries_[row][j];
+      } else {
+	indices_[row] = NULL;
+	entries_[row] = NULL;
+      }
+    }
+  }
+
+  template <class C>
   SparseMatrix<C>::~SparseMatrix()
   {
     kill();
@@ -183,6 +211,12 @@ namespace MathTL
     for (size_type row(0); row < M.row_dimension(); row++)
       for (size_type column(0); column < M.column_dimension(); column++)
 	set_entry(row+firstrow, column+firstcolumn, M.get_entry(row, column));
+  }
+
+  template <class C>
+  SparseMatrix<C>&
+  SparseMatrix<C>::operator = (const SparseMatrix<C>& M)
+  {
   }
 
   template <class C>

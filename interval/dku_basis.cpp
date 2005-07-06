@@ -73,10 +73,11 @@ namespace WaveletTL
     setup_CX_CXT();
     setup_CXA_CXAT();
 
+    // IGPMlib reference: I_Basis_Bspline_s::Setup()
     setup_Cj();
-
     Matrix<double> ml = ML(); // (3.5.2)
     Matrix<double> mr = MR(); // (3.5.2)
+    SparseMatrix<double> mj0; Mj0(ml, mr, mj0); // (3.5.5)
   }
 
   template <int d, int dT>
@@ -625,6 +626,18 @@ namespace WaveletTL
   	MR(-llow+m, k) = BetaRT_(-BetaRToffset+m, k);
 
     return MR;
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::Mj0(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& Mj0)
+  {
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::Mj0Ts(const Matrix<double>& MLTs, const Matrix<double>& MRTs, SparseMatrix<double>& Mj0Ts)
+  {
   }
 
   template <int d, int dT>

@@ -632,6 +632,42 @@ namespace WaveletTL
   void
   DKUBasis<d, dT>::Mj0(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& Mj0)
   {
+    // IGPMlib reference: I_Basis_Bspline_s::Mj0()
+    
+    int p = (1 << j0()) - 2*ell_ - (d%2) + 1;
+    int q = (1 << j0()) - 4*ell_ - 2*(d%2) + d + 1;
+
+    const int nj  = Deltasize(j0());
+    const int njp = Deltasize(j0()+1);
+
+    Mj0.resize(njp, nj);
+
+    const int alowc = d+1;
+    const int aupc  = d+p;
+    const int alowr = d+ell_+ell1_;
+    
+    for (int i = 0; i < ML.row_dimension(); i++)
+      for (int k = 0; k < ML.column_dimension(); k++)
+	Mj0.set_entry(i, k, ML.get_entry(i, k));
+
+    for (int i = 0; i < MR.row_dimension(); i++)
+      for (int k = 0; k < MR.column_dimension(); k++)
+	Mj0.set_entry(njp-i-1, nj-k-1, MR.get_entry(i, k));
+
+    q = alowr;
+    for (int r = alowc; r <= aupc; r++)
+      {
+	p = q;
+	for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf_.a().begin());
+	     it != cdf_.a().end(); ++it)
+	  {
+	    p++;
+	    Mj0.set_entry(p-1, r-1, M_SQRT1_2 * *it); // quick hack, TODO: eliminate the "-1"
+	  }
+	q += 2;
+      }
+    
+    // after this routine: offsets in Mj0 are both llow == ell-d
   }
 
   template <int d, int dT>

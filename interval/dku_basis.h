@@ -187,12 +187,12 @@ namespace WaveletTL
     Matrix<double> MR() const;
 
     // MLTs, MRTs (3.5.6)
-    Matrix<double> MLTs() const;
-    Matrix<double> MRTs() const;
+    Matrix<double> MLTp() const;
+    Matrix<double> MRTp() const;
 
-    // Mj0, Mj0Ts (3.5.1), (3.5.5)
+    // Mj0, Mj0Tp (3.5.1), (3.5.5)
     void Mj0  (const Matrix<double>& ML,   const Matrix<double>& MR,   SparseMatrix<double>& Mj0  );
-    void Mj0Ts(const Matrix<double>& MLTs, const Matrix<double>& MRTs, SparseMatrix<double>& Mj0Ts);
+    void Mj0Tp(const Matrix<double>& MLTp, const Matrix<double>& MRTp, SparseMatrix<double>& Mj0Tp);
   };
 }
 

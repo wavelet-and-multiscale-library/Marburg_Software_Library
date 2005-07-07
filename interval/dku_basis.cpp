@@ -77,7 +77,12 @@ namespace WaveletTL
     setup_Cj();
     Matrix<double> ml = ML(); // (3.5.2)
     Matrix<double> mr = MR(); // (3.5.2)
-    SparseMatrix<double> mj0; Mj0(ml, mr, mj0); // (3.5.5)
+    SparseMatrix<double> mj0;   Mj0  (ml, mr, mj0);   // (3.5.1)
+
+    Matrix<double> mltp = MLTp(); // (3.5.6)
+//     Matrix<double> mrtp = MRTp(); // (3.5.6)
+
+//     SparseMatrix<double> mj0tp; Mj0Tp(ml, mr, mj0tp); // (3.5.5)
   }
 
   template <int d, int dT>
@@ -629,6 +634,34 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
+  Matrix<double>
+  DKUBasis<d, dT>::MLTp() const
+  {
+    // IGPMlib reference: I_Basis_Bspline_s::MLts()
+
+    const int llowT = ellT_-dT;           // the (3.5.6) bounds
+    const int lupT  = ellT_-1;
+    const int MLTup = ell2T_+2*ellT_-2;
+    const int Alphaoffset = 1-ell2T_;
+    const int BetaLoffset = 2*ellT_+ell1T_;
+
+    Matrix<double> MLTp(MLTup-llowT+1, lupT-llowT+1);
+
+    for (int row = 0; row < dT; row++)
+      MLTp(row, row) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
+
+    for (int m = ellT_; m <= 2*ellT_+ell1T_-1; m++)
+      for (int k = 0; k < d; k++)
+    	MLTp(-llowT+m, k) = Alpha_(-Alphaoffset+m, k) / sqrt(ldexp(1.0, 2*k+1));
+    
+    for (int m = 2*ellT_+ell1T_; m <= MLTup; m++)
+      for (int k = 0; k < d; k++)
+  	MLTp(-llowT+m, k) = BetaL_(-BetaLoffset+m, k);
+
+    return MLTp;
+  }
+
+  template <int d, int dT>
   void
   DKUBasis<d, dT>::Mj0(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& Mj0)
   {
@@ -646,12 +679,12 @@ namespace WaveletTL
     const int aupc  = d+p;
     const int alowr = d+ell_+ell1_;
     
-    for (int i = 0; i < ML.row_dimension(); i++)
-      for (int k = 0; k < ML.column_dimension(); k++)
+    for (int i = 0; i < (int)ML.row_dimension(); i++)
+      for (int k = 0; k < (int)ML.column_dimension(); k++)
 	Mj0.set_entry(i, k, ML.get_entry(i, k));
 
-    for (int i = 0; i < MR.row_dimension(); i++)
-      for (int k = 0; k < MR.column_dimension(); k++)
+    for (int i = 0; i < (int)MR.row_dimension(); i++)
+      for (int k = 0; k < (int)MR.column_dimension(); k++)
 	Mj0.set_entry(njp-i-1, nj-k-1, MR.get_entry(i, k));
 
     q = alowr;
@@ -672,7 +705,7 @@ namespace WaveletTL
 
   template <int d, int dT>
   void
-  DKUBasis<d, dT>::Mj0Ts(const Matrix<double>& MLTs, const Matrix<double>& MRTs, SparseMatrix<double>& Mj0Ts)
+  DKUBasis<d, dT>::Mj0Tp(const Matrix<double>& MLTp, const Matrix<double>& MRTp, SparseMatrix<double>& Mj0Tp)
   {
   }
 

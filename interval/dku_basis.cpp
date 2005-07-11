@@ -77,12 +77,11 @@ namespace WaveletTL
     setup_Cj();
     Matrix<double> ml = ML(); // (3.5.2)
     Matrix<double> mr = MR(); // (3.5.2)
-    SparseMatrix<double> mj0;   Mj0  (ml, mr, mj0);   // (3.5.1)
+    SparseMatrix<double> mj0;   Mj0  (ml,   mr,   mj0);   // (3.5.1)
 
     Matrix<double> mltp = MLTp(); // (3.5.6)
-//     Matrix<double> mrtp = MRTp(); // (3.5.6)
-
-//     SparseMatrix<double> mj0tp; Mj0Tp(ml, mr, mj0tp); // (3.5.5)
+    Matrix<double> mrtp = MRTp(); // (3.5.6)
+    SparseMatrix<double> mj0tp; Mj0Tp(mltp, mrtp, mj0tp); // (3.5.5)
   }
 
   template <int d, int dT>
@@ -662,6 +661,34 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
+  Matrix<double>
+  DKUBasis<d, dT>::MRTp() const
+  {
+    // IGPMlib reference: I_Basis_Bspline_s::MRts()
+
+    const int llowT = ellT_-dT;           // the (3.5.6) bounds
+    const int lupT  = ellT_-1;
+    const int MRTup = ell2T_+2*ellT_-2;
+    const int Alphaoffset = 1-ell2T_;
+    const int BetaLoffset = 2*ellT_+ell1T_;
+
+    Matrix<double> MRTp(MRTup-llowT+1, lupT-llowT+1);
+
+    for (int row = 0; row < dT; row++)
+      MRTp(row, row) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
+
+    for (int m = ellT_; m <= 2*ellT_+ell1T_-1; m++)
+      for (int k = 0; k < d; k++)
+    	MRTp(-llowT+m, k) = Alpha_(-Alphaoffset+m, k) / sqrt(ldexp(1.0, 2*k+1));
+    
+    for (int m = 2*ellT_+ell1T_; m <= MRTup; m++)
+      for (int k = 0; k < d; k++)
+  	MRTp(-llowT+m, k) = BetaL_(-BetaLoffset+m, k);
+
+    return MRTp;
+  }
+
+  template <int d, int dT>
   void
   DKUBasis<d, dT>::Mj0(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& Mj0)
   {
@@ -707,6 +734,41 @@ namespace WaveletTL
   void
   DKUBasis<d, dT>::Mj0Tp(const Matrix<double>& MLTp, const Matrix<double>& MRTp, SparseMatrix<double>& Mj0Tp)
   {
+    // IGPMlib reference: I_Basis_Bspline_s::Mj0ts()
+    
+    int p = (1 << j0()) - 2*ellT_ - (dT%2) + 1;
+    int q = (1 << j0()) - 4*ellT_ - 2*(dT%2) + dT + 1;
+
+    const int nj  = Deltasize(j0());
+    const int njp = Deltasize(j0()+1);
+
+    Mj0Tp.resize(njp, nj);
+
+    const int atlowc = dT+1;
+    const int atupc  = dT+p;
+    const int atlowr = dT+ellT_+ell1T_;
+    
+    for (int i = 0; i < (int)MLTp.row_dimension(); i++)
+      for (int k = 0; k < (int)MLTp.column_dimension(); k++)
+	Mj0Tp.set_entry(i, k, MLTp.get_entry(i, k));
+
+    for (int i = 0; i < (int)MRTp.row_dimension(); i++)
+      for (int k = 0; k < (int)MRTp.column_dimension(); k++)
+	Mj0Tp.set_entry(njp-i-1, nj-k-1, MRTp.get_entry(i, k));
+
+    q = atlowr;
+    for (int r = atlowc; r <= atupc; r++)
+      {
+	p = q+1;
+	for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf_.aT().begin());
+	     it != cdf_.aT().end(); ++it, p++)
+	  {
+	    Mj0Tp.set_entry(p-1, r-1, M_SQRT1_2 * *it); // quick hack, TODO: eliminate the "-1"
+	  }
+	q += 2;
+      }
+    
+    // after this routine: offsets in Mj0Tp are both llowT == ellT-dT
   }
 
   template <int d, int dT>

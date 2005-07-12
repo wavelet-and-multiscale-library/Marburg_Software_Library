@@ -74,6 +74,7 @@ namespace WaveletTL
     setup_CXA_CXAT();
 
     // IGPMlib reference: I_Basis_Bspline_s::Setup()
+
     setup_Cj();
     Matrix<double> ml = ML(); // (3.5.2)
     Matrix<double> mr = MR(); // (3.5.2)
@@ -82,6 +83,9 @@ namespace WaveletTL
     Matrix<double> mltp = MLTp(); // (3.5.6)
     Matrix<double> mrtp = MRTp(); // (3.5.6)
     SparseMatrix<double> mj0tp; Mj0Tp(mltp, mrtp, mj0tp); // (3.5.5)
+
+    // construction of the wavelet basis: initial stable completion, [DKU section 4.1]
+    SparseMatrix<double> FF; F(FF);
   }
 
   template <int d, int dT>
@@ -769,6 +773,70 @@ namespace WaveletTL
       }
     
     // after this routine: offsets in Mj0Tp are both llowT == ellT-dT
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::F(SparseMatrix<double>& FF)
+  {
+    // IGPMlib reference: I_Basis_Bspline_s::F()
+
+
+
+//     int i, r, FLowIndexc, FUpIndexc, p;
+
+//     p = (RLow(j0())) - (LUp());
+
+//     FLowIndexc = _ll+(_d%2);
+//     FUpIndexc  = FLowIndexc+p-1;
+
+//     sparse F(LLow(), RUp(j0()+1), RUp(j0())+1, RUp(j0()+1));
+
+//     for(r=1; r<=FLowIndexc-1; r++)
+// 	F.put(r+d()+LLow()-1, r+RUp(j0())) = 1.0;
+
+
+//     i=d()+_ll+(_d%2)+LLow()-1;
+
+//     for(r=FLowIndexc; r<=FUpIndexc; r++) 
+//     {
+// 	F.put(i,r+RUp(j0())) = 1.0;  
+// 	i+=2;
+//     }
+
+//     i = Nj(j0()+1)-d()+LLow()-1;
+//     for(r=(1<<j0()); r>=FUpIndexc+1;r--) 
+//     { 
+// 	F.put(i,r+RUp(j0())) = 1.0;
+// 	i--;
+//     }
+
+//     return F;
+    
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::P(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& PP)
+  {
+    // IGPMlib reference: I_Basis_Bspline_s::P()
+
+
+//     int i, k;
+
+//     sparse P(LLow(), RUp(j0()+1), LLow(), RUp(j0()+1));
+//     P.Identity(1);
+
+//     for(i=0; i<ML.rows(); i++)
+//         for(k=0; k<ML.cols(); k++)
+//             P.put(i+LLow(), k+LLow()) = ML.Ele(i, k);
+
+//     for(i=0; i<MR.rows(); i++)
+// 	for(k=0; k<MR.cols(); k++)
+// 	    P.put(RUp(j0()+1)-i, RUp(j0()+1)-k) = MR.Ele(i,k);
+
+//     return P;
+
   }
 
   template <int d, int dT>

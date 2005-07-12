@@ -193,6 +193,10 @@ namespace WaveletTL
     // Mj0, Mj0Tp (3.5.1), (3.5.5)
     void Mj0  (const Matrix<double>& ML,   const Matrix<double>& MR,   SparseMatrix<double>& Mj0  );
     void Mj0Tp(const Matrix<double>& MLTp, const Matrix<double>& MRTp, SparseMatrix<double>& Mj0Tp);
+
+    // routines for the stable completion, [DKU section 4.1]
+    void F(SparseMatrix<double>& FF); // (4.1.11), (4.1.14)
+    void P(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& PP); // (4.1.22)
   };
 }
 

@@ -698,8 +698,10 @@ namespace WaveletTL
   {
     // IGPMlib reference: I_Basis_Bspline_s::Mj0()
     
+    // TODO: enhance readability! (<-> [DKU section 3.5])
+
     int p = (1 << j0()) - 2*ell_ - (d%2) + 1;
-    int q = (1 << j0()) - 4*ell_ - 2*(d%2) + d + 1;
+    int q = (1 << j0()) - 4*ell_ - 2*(d%2) + d + 1; // this value is overwritten below
 
     const int nj  = Deltasize(j0());
     const int njp = Deltasize(j0()+1);
@@ -739,9 +741,11 @@ namespace WaveletTL
   DKUBasis<d, dT>::Mj0Tp(const Matrix<double>& MLTp, const Matrix<double>& MRTp, SparseMatrix<double>& Mj0Tp)
   {
     // IGPMlib reference: I_Basis_Bspline_s::Mj0ts()
+
+    // TODO: enhance readability! (<-> [DKU section 3.5])
     
     int p = (1 << j0()) - 2*ellT_ - (dT%2) + 1;
-    int q = (1 << j0()) - 4*ellT_ - 2*(dT%2) + dT + 1;
+    int q = (1 << j0()) - 4*ellT_ - 2*(dT%2) + dT + 1; // this value is overwritten below
 
     const int nj  = Deltasize(j0());
     const int njp = Deltasize(j0()+1);
@@ -781,38 +785,27 @@ namespace WaveletTL
   {
     // IGPMlib reference: I_Basis_Bspline_s::F()
 
+    const int FLow = ell_+(d%2);       // start column index for F_j in (4.1.14)
+    const int FUp  = (1<<j0()) - ell_; // end column index for F_j in (4.1.14)
 
-
-//     int i, r, FLowIndexc, FUpIndexc, p;
-
-//     p = (RLow(j0())) - (LUp());
-
-//     FLowIndexc = _ll+(_d%2);
-//     FUpIndexc  = FLowIndexc+p-1;
-
-//     sparse F(LLow(), RUp(j0()+1), RUp(j0())+1, RUp(j0()+1));
-
-//     for(r=1; r<=FLowIndexc-1; r++)
-// 	F.put(r+d()+LLow()-1, r+RUp(j0())) = 1.0;
-
-
-//     i=d()+_ll+(_d%2)+LLow()-1;
-
-//     for(r=FLowIndexc; r<=FUpIndexc; r++) 
-//     {
-// 	F.put(i,r+RUp(j0())) = 1.0;  
-// 	i+=2;
-//     }
-
-//     i = Nj(j0()+1)-d()+LLow()-1;
-//     for(r=(1<<j0()); r>=FUpIndexc+1;r--) 
-//     { 
-// 	F.put(i,r+RUp(j0())) = 1.0;
-// 	i--;
-//     }
-
-//     return F;
+    // (4.1.14):
+    FF.resize(Deltasize(j0()+1), 1<<j0());
+    for (int r = 1; r <= FLow-1; r++)
+      FF.set_entry(r+d-1, r-1, 1.0);
     
+    int i = d+ell_+(d%2)-1;
+    for (int r = FLow; r <= FUp; r++)
+      {
+	FF.set_entry(i, r-1, 1.0);
+	i += 2;
+      } 
+
+    i = Deltasize(j0()+1)-d-1;
+    for (int r = 1<<j0(); r >= FUp+1; r--)
+      {
+	FF.set_entry(i, r-1, 1.0);
+	i--;
+      }
   }
 
   template <int d, int dT>

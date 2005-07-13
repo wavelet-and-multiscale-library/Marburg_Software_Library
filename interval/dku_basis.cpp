@@ -86,6 +86,7 @@ namespace WaveletTL
 
     // construction of the wavelet basis: initial stable completion, [DKU section 4.1]
     SparseMatrix<double> FF; F(FF);
+    SparseMatrix<double> PP; P(ml, mr, PP);
   }
 
   template <int d, int dT>
@@ -813,23 +814,17 @@ namespace WaveletTL
   DKUBasis<d, dT>::P(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& PP)
   {
     // IGPMlib reference: I_Basis_Bspline_s::P()
+    
+    // (4.1.22)
+    PP.diagonal(Deltasize(j0()+1), 1.0);
+    
+    for (int i = 0; i < (int)ML.row_dimension(); i++)
+      for (int k = 0; k < (int)ML.column_dimension(); k++)
+	PP.set_entry(i, k, ML.get_entry(i, k));
 
-
-//     int i, k;
-
-//     sparse P(LLow(), RUp(j0()+1), LLow(), RUp(j0()+1));
-//     P.Identity(1);
-
-//     for(i=0; i<ML.rows(); i++)
-//         for(k=0; k<ML.cols(); k++)
-//             P.put(i+LLow(), k+LLow()) = ML.Ele(i, k);
-
-//     for(i=0; i<MR.rows(); i++)
-// 	for(k=0; k<MR.cols(); k++)
-// 	    P.put(RUp(j0()+1)-i, RUp(j0()+1)-k) = MR.Ele(i,k);
-
-//     return P;
-
+    for (int i = 0; i < (int)MR.row_dimension(); i++)
+      for (int k = 0; k < (int)MR.column_dimension(); k++)
+	PP.set_entry(Deltasize(j0()+1)-i-1, Deltasize(j0()+1)-k-1, MR.get_entry(i, k));
   }
 
   template <int d, int dT>

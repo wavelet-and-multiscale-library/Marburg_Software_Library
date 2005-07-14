@@ -85,8 +85,9 @@ namespace WaveletTL
     SparseMatrix<double> mj0tp; Mj0Tp(mltp, mrtp, mj0tp); // (3.5.5)
 
     // construction of the wavelet basis: initial stable completion, [DKU section 4.1]
-    SparseMatrix<double> FF; F(FF);
-    SparseMatrix<double> PP; P(ml, mr, PP);
+    SparseMatrix<double> FF; F(FF);         // (4.1.14)
+    SparseMatrix<double> PP; P(ml, mr, PP); // (4.1.22)
+    SparseMatrix<double> A, H, Hinv; GSetup(A, H, Hinv); // (4.1.1), (4.1.13)
   }
 
   template <int d, int dT>
@@ -815,7 +816,7 @@ namespace WaveletTL
   {
     // IGPMlib reference: I_Basis_Bspline_s::P()
     
-    // (4.1.22)
+    // (4.1.22):
     PP.diagonal(Deltasize(j0()+1), 1.0);
     
     for (int i = 0; i < (int)ML.row_dimension(); i++)
@@ -825,6 +826,53 @@ namespace WaveletTL
     for (int i = 0; i < (int)MR.row_dimension(); i++)
       for (int k = 0; k < (int)MR.column_dimension(); k++)
 	PP.set_entry(Deltasize(j0()+1)-i-1, Deltasize(j0()+1)-k-1, MR.get_entry(i, k));
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::GSetup(SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv)
+  {
+    // IGPMlib reference: I_Basis_Bspline_s::GSetup()
+
+    // (4.1.13):
+    A.resize(Deltasize(j0()+1), Deltasize(j0()));
+
+    for (int r = 0; r < d; r++)
+      A.set_entry(r, r, 1.0);
+
+    for (int r = d, q = d+ell_+ell1_; r < Deltasize(j0())-d; r++)
+      {
+	int p = q;
+
+	for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf_.a().begin());
+	     it != cdf_.a().end(); ++it)
+	  {
+	    p++; // hier gehts weiter, ist noch nicht korrekt
+	    A.set_entry(p, r, M_SQRT1_2 * *it);
+// 	    p++;
+	  }
+
+	q += 2;
+      }
+
+    for (int r = Deltasize(j0()+1)-d, q = Deltasize(j0())-d; r < Deltasize(j0()+1); r++, q++)
+      A.set_entry(r, q, 1.0);
+
+    cout << A;
+
+
+//     H.Redimension(Deltajp1, Deltajp1);
+//     H.Identity(1.0);
+
+//     inverseH.Redimension(Deltajp1, Deltajp1);
+//     inverseH.Identity(1.0);
+
+//     H.setindexr(_ll-_d);
+//     H.setindexc(_ll-_d);
+
+//     inverseH.setindexr(_ll-_d);
+//     inverseH.setindexc(_ll-_d);
+
   }
 
   template <int d, int dT>

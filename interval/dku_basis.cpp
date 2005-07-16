@@ -840,17 +840,31 @@ namespace WaveletTL
     for (int r = 0; r < d; r++)
       A.set_entry(r, r, 1.0);
 
+
+    cdf_.a().dump();
+    for (typename MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf_.a().begin());
+	 it != cdf_.a().end(); ++it)
+      {
+	cout << it.index() << ": " << *it << endl;
+      }
+
+//     for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf_.a().begin());
+// 	 it != cdf_.a().end(); ++it)
+//       {
+// 	cout << it.index() << ": " << *it << endl;
+//       }
+
     for (int r = d, q = d+ell_+ell1_; r < Deltasize(j0())-d; r++)
       {
 	int p = q;
 
-	for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf_.a().begin());
-	     it != cdf_.a().end(); ++it)
-	  {
-	    p++; // hier gehts weiter, ist noch nicht korrekt
-	    A.set_entry(p, r, M_SQRT1_2 * *it);
-// 	    p++;
-	  }
+// 	for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf_.a().begin());
+// 	     it != cdf_.a().end(); ++it)
+// 	  {
+// 	    p++; // hier gehts weiter, ist noch nicht korrekt
+// 	    A.set_entry(p, r, M_SQRT1_2 * *it);
+// // 	    p++;
+// 	  }
 
 	q += 2;
       }

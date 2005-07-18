@@ -36,12 +36,12 @@ namespace WaveletTL
     /*!
       reading access to the primal mask
     */
-    inline const RefinableFunction<PRIMALMASK> a() const { return a_; }
+    inline const RefinableFunction<PRIMALMASK>& a() const { return a_; }
 
     /*!
       reading access to the dual mask
     */
-    inline const RefinableFunction<DUALMASK> aT() const { return aT_; }
+    inline const RefinableFunction<DUALMASK>& aT() const { return aT_; }
 
     /*!
       reading access to the primal wavelet coefficients

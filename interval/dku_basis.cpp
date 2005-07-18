@@ -840,50 +840,16 @@ namespace WaveletTL
     for (int r = 0; r < d; r++)
       A.set_entry(r, r, 1.0);
 
-
-//     cout << "dump:" << endl;
-//     cdf_.a().dump();
-//     cout << "---------------" << endl;
-
-//     cout << cdf_.a() << endl;
-
-    cout << "Variante 1:" << endl;
-    const MultivariateLaurentPolynomial<double, 1>& poly = cdf_.a();
-    for (typename MultivariateLaurentPolynomial<double, 1>::const_iterator it(poly.begin());
- 	 it != poly.end(); ++it)
-      {
- 	cout << it.index() << ": " << *it << endl;
-      }
-    cout << "-----------" << endl;
-
-    cout << "Variante 2:" << endl;
-    for (typename MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf_.a().begin());
- 	 it != cdf_.a().end(); ++it)
-      {
- 	cout << it.index() << ": " << *it << endl;
-      }
-    cout << "-----------" << endl;
-
-
-
-
-//     for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf_.a().begin());
-// 	 it != cdf_.a().end(); ++it)
-//       {
-// 	cout << it.index() << ": " << *it << endl;
-//       }
-
     for (int r = d, q = d+ell_+ell1_; r < Deltasize(j0())-d; r++)
       {
-// 	int p = q;
+ 	int p = q;
 
-// 	for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf_.a().begin());
-// 	     it != cdf_.a().end(); ++it)
-// 	  {
-// 	    p++; // hier gehts weiter, ist noch nicht korrekt
-// 	    A.set_entry(p, r, M_SQRT1_2 * *it);
-// // 	    p++;
-// 	  }
+ 	for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf_.a().begin());
+ 	     it != cdf_.a().end(); ++it)
+ 	  {
+ 	    A.set_entry(p, r, M_SQRT1_2 * *it);
+	    p++;
+ 	  }
 
 	q += 2;
       }

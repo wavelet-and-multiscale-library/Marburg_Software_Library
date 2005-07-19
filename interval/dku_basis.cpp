@@ -85,9 +85,17 @@ namespace WaveletTL
     SparseMatrix<double> mj0tp; Mj0Tp(mltp, mrtp, mj0tp); // (3.5.5)
 
     // construction of the wavelet basis: initial stable completion, [DKU section 4.1]
+
     SparseMatrix<double> FF; F(FF);         // (4.1.14)
     SparseMatrix<double> PP; P(ml, mr, PP); // (4.1.22)
-    SparseMatrix<double> A, H, Hinv; GSetup(A, H, Hinv); // (4.1.1), (4.1.13)
+
+    SparseMatrix<double> A, H, Hinv;
+    GSetup(A, H, Hinv); // (4.1.1), (4.1.13)
+    SparseMatrix<double> Aold(A);
+    GElim (A, H, Hinv);
+
+//     A.compress(1e-10);
+//     H.compress(1e-10);
   }
 
   template <int d, int dT>
@@ -866,6 +874,107 @@ namespace WaveletTL
     Hinv.diagonal(Deltasize(j0()+1), 1.0);
 
     // offsets: ell_-d, in both arguments of H and Hinv
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::GElim(SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv)
+  {
+    // IGPMlib reference: I_Basis_Bspline_s::gelim()
+    
+    // A_j=A_j^{(0)} in (4.1.1) is a q times p matrix with
+    int       p = (1<<j0()) - 2*ell_ - (d%2) + 1;
+    const int q = 2 * p + d - 1;
+
+    SparseMatrix<double> help;
+
+    // elimination (4.1.4)ff:
+    for (int i = 1; i <= d; i++)
+      {
+	help.diagonal(Deltasize(j0()+1), 1.0);
+
+	if (i%2) // i odd
+	  {
+	  }
+	else // i even
+	  {
+	  }
+
+// 	A = help * A;
+// 	H = help * H;
+      }
+
+
+
+
+
+//     int i, k, p, q, HdLowIndexc, HdUpIndexc, row;
+
+//     int diffl, diffr;
+
+//     diffl = _llt-_l2t;
+//     diffr = _lrt-_l2t;
+
+//     p += (_d-2+(_d%2))/2;
+
+//     cout.precision(3);
+
+//     for(i=1; i<=_d; i++)                                      //Iteration
+//     {
+//         help.Identity(1.0);
+
+//         if(i%2)                                               //4.1.4 ff
+//         {
+//             HdLowIndexc = _ll+_l2+(i+1)/2;
+//             //HdUpIndexc  = HdLowIndexc+2*p-1-Z[1]%2;
+//             HdUpIndexc  = HdLowIndexc+2*p-1;
+
+//             row= AdLowIndexr+(int)ceil((i-1)/2);
+
+//             if (fabs(A.get(row+1, AdLowIndexc))<1e-10)
+//                 cerr << "*** Warning: division by zero in gelim. *** " << endl;
+            
+//             for(k=HdLowIndexc; k<=HdUpIndexc; k+=2) 
+//                 help.put(k, k+1) = -(A.get(row,   AdLowIndexc) / 
+//                                      A.get(row+1, AdLowIndexc)); 
+//         }  
+//         else
+//         {
+//             HdLowIndexc = _ll+_l2+2-(_d%2)-(i/2)+1;
+//             //HdUpIndexc  = HdLowIndexc+2*p-1-Z[1]%2;
+//             HdUpIndexc  = HdLowIndexc+2*p-1;
+
+//             row = AdUpIndexr-(int)floor((i-1)/2.0);           
+                
+//             if (fabs(A.get(row-3+diffl-diffr, AdUpIndexc-1))<1e-10)
+//                 cerr << "*** Warning: division by zero in gelim. *** " << endl;
+
+//             for(k=HdLowIndexc;k<=HdUpIndexc; k+=2)
+//                 help.put(k+1,k) = -(A.get(row-2+diffl-diffr, AdUpIndexc-1)/
+//                                     A.get(row-3+diffl-diffr, AdUpIndexc-1));
+             
+//         }
+
+//         A = help * A;
+//         H = help * H;                                         
+
+//         A.compress(1e-10);
+        
+//         if(i%2)                                        //inverse help  4.5
+//             for(k=HdLowIndexc; k<=HdUpIndexc; k+=2)   
+//                 help.put(k, k+1) *= (-1.0);     
+//         else
+//             for(k=HdLowIndexc; k<=HdUpIndexc; k+=2)   
+//                 help.put(k+1, k) *= (-1.0);
+
+//         inverseH = inverseH * help;
+//     }
+
+//     H.setindexr(LLow());
+//     H.setindexc(LLow());
+
+//     inverseH.setindexr(LLow());
+//     inverseH.setindexc(LLow());
   }
 
   template <int d, int dT>

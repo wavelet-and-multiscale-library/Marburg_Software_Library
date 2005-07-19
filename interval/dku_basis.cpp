@@ -791,6 +791,7 @@ namespace WaveletTL
     const int FUp  = (1<<j0()) - ell_; // end column index for F_j in (4.1.14)
 
     // (4.1.14):
+
     FF.resize(Deltasize(j0()+1), 1<<j0());
     for (int r = 1; r <= FLow-1; r++)
       FF.set_entry(r+d-1, r-1, 1.0);
@@ -817,6 +818,7 @@ namespace WaveletTL
     // IGPMlib reference: I_Basis_Bspline_s::P()
     
     // (4.1.22):
+
     PP.diagonal(Deltasize(j0()+1), 1.0);
     
     for (int i = 0; i < (int)ML.row_dimension(); i++)
@@ -835,6 +837,7 @@ namespace WaveletTL
     // IGPMlib reference: I_Basis_Bspline_s::GSetup()
 
     // (4.1.13):
+
     A.resize(Deltasize(j0()+1), Deltasize(j0()));
 
     for (int r = 0; r < d; r++)
@@ -857,18 +860,12 @@ namespace WaveletTL
     for (int r = Deltasize(j0()+1)-d, q = Deltasize(j0())-d; r < Deltasize(j0()+1); r++, q++)
       A.set_entry(r, q, 1.0);
 
-//     H.Redimension(Deltajp1, Deltajp1);
-//     H.Identity(1.0);
+    // prepare H, Hinv for elimination process:
 
-//     inverseH.Redimension(Deltajp1, Deltajp1);
-//     inverseH.Identity(1.0);
+    H   .diagonal(Deltasize(j0()+1), 1.0);
+    Hinv.diagonal(Deltasize(j0()+1), 1.0);
 
-//     H.setindexr(_ll-_d);
-//     H.setindexc(_ll-_d);
-
-//     inverseH.setindexr(_ll-_d);
-//     inverseH.setindexc(_ll-_d);
-
+    // offsets: ell_-d, in both arguments of H and Hinv
   }
 
   template <int d, int dT>

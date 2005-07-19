@@ -160,6 +160,12 @@ namespace MathTL
   };
 
   /*!
+    matrix-matrix multiplication M*N
+  */
+  template <class C>
+  SparseMatrix<C> operator * (const SparseMatrix<C>& M, const SparseMatrix<C>& N);
+
+  /*!
     Matlab-style stream output as a dense matrix
   */
   template <class C>

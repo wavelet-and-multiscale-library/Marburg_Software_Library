@@ -283,6 +283,27 @@ namespace MathTL
   }
   
   template <class C>
+  SparseMatrix<C> operator * (const SparseMatrix<C>& M, const SparseMatrix<C>& N)
+  {
+    assert(M.column_dimension() == N.row_dimension());
+    typedef typename SparseMatrix<C>::size_type size_type;
+
+    SparseMatrix<C> R; R.resize(M.row_dimension(), N.column_dimension());
+    for (size_type i(0); i < M.row_dimension(); i++)
+      for (size_type j(0); j < N.column_dimension(); j++)
+	{
+	  double help(0);
+	  for (size_type k(0); k < N.row_dimension(); k++)
+	    help += M.get_entry(i, k) * N.get_entry(k, j);
+
+	  if (help != 0)
+	    R.set_entry(i, j, help);
+	}
+
+    return R;
+  }
+
+  template <class C>
   inline
   std::ostream& operator << (std::ostream& os, const SparseMatrix<C>& M)
   {

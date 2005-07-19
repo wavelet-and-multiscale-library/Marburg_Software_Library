@@ -307,5 +307,23 @@ int main()
   Y.set_block(1, 1, sub3);
   cout << Y;
 
+  cout << "- a 3x2 sparse matrix F1:" << endl;
+  SparseMatrix<double> F1; F1.resize(3, 2);
+  F1.set_entry(0, 0, 1.0);
+  F1.set_entry(1, 0, 2.0);
+  F1.set_entry(1, 1, 3.0);
+  F1.set_entry(2, 1, 4.0);
+  cout << F1;
+
+  cout << "- a 2x2 sparse matrix F2:" << endl;
+  SparseMatrix<double> F2(2);
+  F2.set_entry(0, 0, 1.5);
+  F2.set_entry(1, 0, 1.0);
+  F2.set_entry(1, 1, -2.5);
+  cout << F2;
+
+  cout << "- matrix product F1*F2:" << endl
+       << F1*F2;
+
   return 0;
 }

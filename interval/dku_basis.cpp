@@ -857,9 +857,6 @@ namespace WaveletTL
     for (int r = Deltasize(j0()+1)-d, q = Deltasize(j0())-d; r < Deltasize(j0()+1); r++, q++)
       A.set_entry(r, q, 1.0);
 
-    cout << A;
-
-
 //     H.Redimension(Deltajp1, Deltajp1);
 //     H.Identity(1.0);
 

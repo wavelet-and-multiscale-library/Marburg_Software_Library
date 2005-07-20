@@ -7,18 +7,36 @@
 namespace MathTL
 {
   template <class C>
-  SparseMatrix<C>::SparseMatrix(const size_type n)
-    : rowdim_(n), coldim_(n)
+  SparseMatrix<C>::SparseMatrix(const size_type m)
+    : rowdim_(m), coldim_(m)
   {
-    assert(n >= 1);
+    assert(m >= 1);
 
-    entries_ = new C*[n];
-    indices_ = new size_type*[n];
+    entries_ = new C*[m];
+    indices_ = new size_type*[m];
     
     assert(entries_ != NULL);
     assert(indices_ != NULL);
 
-    for (size_type row(0); row < n; row++) {
+    for (size_type row(0); row < m; row++) {
+      entries_[row] = NULL;
+      indices_[row] = NULL;
+    }
+  }
+
+  template <class C>
+  SparseMatrix<C>::SparseMatrix(const size_type m, const size_type n)
+    : rowdim_(m), coldim_(n)
+  {
+    assert(m >= 1 && n >= 1);
+
+    entries_ = new C*[m];
+    indices_ = new size_type*[m];
+    
+    assert(entries_ != NULL);
+    assert(indices_ != NULL);
+
+    for (size_type row(0); row < m; row++) {
       entries_[row] = NULL;
       indices_[row] = NULL;
     }
@@ -100,22 +118,22 @@ namespace MathTL
   }
 
   template <class C>
-  void SparseMatrix<C>::resize(const size_type rows, const size_type columns)
+  void SparseMatrix<C>::resize(const size_type m, const size_type n)
   {
-    assert(rows >= 1 && columns >= 1);
+    assert(m >= 1 && n >= 1);
 
     kill();
 
-    rowdim_ = rows;
-    coldim_ = columns;
+    rowdim_ = m;
+    coldim_ = n;
 
-    entries_ = new C*[rows];
-    indices_ = new size_type*[rows];
+    entries_ = new C*[m];
+    indices_ = new size_type*[m];
     
     assert(entries_ != NULL);
     assert(indices_ != NULL);
 
-    for (size_type row(0); row < rows; row++) {
+    for (size_type row(0); row < m; row++) {
 	entries_[row] = NULL;
 	indices_[row] = NULL;
     }
@@ -217,6 +235,32 @@ namespace MathTL
   SparseMatrix<C>&
   SparseMatrix<C>::operator = (const SparseMatrix<C>& M)
   {
+    resize(M.row_dimension(), M.column_dimension);
+
+    entries_ = new C*[rowdim_];
+    indices_ = new size_type*[rowdim_];
+
+    assert(entries_ != NULL);
+    assert(indices_ != NULL);
+
+    for (size_type row(0); row < rowdim_; row++) {
+      if (M.indices_[row]) {
+	indices_[row] = new size_type[M.indices_[row][0]+1];
+	assert(indices_[row] != NULL);
+	for (size_type j(0); j <= M.indices_[row][0]; j++)
+	  indices_[row][j] = M.indices_[row][j];
+	
+	entries_[row] = new C[indices_[row][0]];
+	assert(entries_[row] != NULL);
+	for (size_type j(0); j < indices_[row][0]; j++)
+	  entries_[row][j] = M.entries_[row][j];
+      } else {
+	indices_[row] = NULL;
+	entries_[row] = NULL;
+      }
+    }
+
+    return *this;
   }
 
   template <class C>

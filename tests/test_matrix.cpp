@@ -308,7 +308,7 @@ int main()
   cout << Y;
 
   cout << "- a 3x2 sparse matrix F1:" << endl;
-  SparseMatrix<double> F1; F1.resize(3, 2);
+  SparseMatrix<double> F1(3, 2);
   F1.set_entry(0, 0, 1.0);
   F1.set_entry(1, 0, 2.0);
   F1.set_entry(1, 1, 3.0);
@@ -322,8 +322,9 @@ int main()
   F2.set_entry(1, 1, -2.5);
   cout << F2;
 
+  SparseMatrix<double> F3 = F1 * F2;
   cout << "- matrix product F1*F2:" << endl
-       << F1*F2;
+       << F3;
 
   return 0;
 }

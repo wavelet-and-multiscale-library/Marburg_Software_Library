@@ -52,6 +52,11 @@ namespace MathTL
     SparseMatrix(const SparseMatrix<C>& M);
 
     /*!
+      construct m*n rectangular zero matrix
+    */
+    SparseMatrix(const size_type row_dimension, const size_type column_dimension);
+
+    /*!
       destructor
     */
     ~SparseMatrix();

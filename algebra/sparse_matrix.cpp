@@ -235,7 +235,7 @@ namespace MathTL
   SparseMatrix<C>&
   SparseMatrix<C>::operator = (const SparseMatrix<C>& M)
   {
-    resize(M.row_dimension(), M.column_dimension);
+    resize(M.row_dimension(), M.column_dimension());
 
     entries_ = new C*[rowdim_];
     indices_ = new size_type*[rowdim_];

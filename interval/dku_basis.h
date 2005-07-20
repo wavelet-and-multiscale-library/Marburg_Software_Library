@@ -93,7 +93,7 @@ namespace WaveletTL
     inline const int DeltaRTmax(const int j) const { return (1<<j)-ellT()+dT-(d%2); } // == DeltaRmax()
 
     //! size of Delta_j
-    inline const int Deltasize(const int j) const { return (1<<j)-2*ell()+2*d-(d%2); }
+    inline const int Deltasize(const int j) const { return (1<<j)-2*ell()+2*d-(d%2)+1; }
 
     /*!
       boundary indices in \nabla_j

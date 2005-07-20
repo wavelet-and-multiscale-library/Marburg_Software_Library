@@ -886,29 +886,81 @@ namespace WaveletTL
     int       p = (1<<j0()) - 2*ell_ - (d%2) + 1;
     const int q = 2 * p + d - 1;
 
+    const int ALowc = d; // first column of A_j^{(d)} in Ahat_j^{(d)}
+    const int AUpc  = (Deltasize(j0())-1) - d; // last column
+    const int ALowr = d + ell_ + ell1_; // first row of A_j^{(d)} in Ahat_j^{(d)}
+    const int AUpr  = (Deltasize(j0()+1)-1) - (ell_-ell2_+(d%2)) - d; // last row
+
+    cout << "ALowc=" << ALowc << ", AUpc=" << AUpc << endl;
+
     SparseMatrix<double> help;
+    
+    cout << "A_j^{(0)}=" << endl << A;
 
     // elimination (4.1.4)ff:
     for (int i = 1; i <= d; i++)
       {
 	help.diagonal(Deltasize(j0()+1), 1.0);
 
-	if (i%2) // i odd
+	if (i%2) // i odd, elimination from above (4.1.4a)
 	  {
+	    const int elimrow = ALowr+(i-1)/2; // note that (i-1)/2 == ceil((i-1)/2), since i is odd
+
+	    assert(fabs(A.get_entry(elimrow+1, ALowc)) >= 1e-10);
+	    const double Uentry = -A.get_entry(elimrow, ALowc) / A.get_entry(elimrow+1, ALowc);
+	    
+	    // insert Uentry in Hhat
+	    const int HhatLow = ell_+ell2_+(i-1)/2;
+	    const int HhatUp  = HhatLow + (2*p-1);
+	    for (int k = HhatLow; k <= HhatUp; k += 2)
+	      help.set_entry(k, k+1, Uentry);
+
+	    cout << "help=" << endl << help;
 	  }
-	else // i even
+	else // i even, elimination from below (4.1.4b)
 	  {
+	    const int elimrow = AUpr-(int)floor((i-1)/2.);
+
+	    const double Lentry = -A.get_entry(elimrow, AUpc) / A.get_entry(elimrow-1, AUpc);
+
+  	    // insert Lentry in Hhat
+	    const int HhatLow = ell_+ell2_+2-(d%2)-(i/2);
+	    const int HhatUp  = HhatLow + (2*p-1);
+  	    for (int k = HhatLow; k <= HhatUp; k += 2)
+	      help.set_entry(k+1, k, Lentry);
+
+	    cout << "help=" << endl << help;
 	  }
 
-// 	A = help * A;
-// 	H = help * H;
+	A = help * A;
+ 	H = help * H;
+
+	A.compress(1e-10);
+
+	cout << "A_j^{(" << i << ")}=" << endl << A;
+	cout << "H=" << endl << H;
       }
 
 
-
-
-
 //     int i, k, p, q, HdLowIndexc, HdUpIndexc, row;
+
+//     p = (1 << j0())-_ll -_lr-(_d%2)+1;
+//     q = 2*p+_d-1;
+
+//     const int AdLowIndexc = _d+1;
+//     const int AdUpIndexc  = _d+p;            //set blocksize
+//     const int AdLowIndexr = _d + _ll + _l1 + 1;
+//     const int AdUpIndexr  = _d + _lr + _l1 + q;
+
+//     H.setindexr(1);
+//     H.setindexc(1);
+
+//     inverseH.setindexr(1);
+//     inverseH.setindexc(1);
+
+
+//     sparse help(Nj(j0()+1), Nj(j0()+1));
+//     help.Identity(1.0);
 
 //     int diffl, diffr;
 
@@ -955,6 +1007,7 @@ namespace WaveletTL
              
 //         }
 
+
 //         A = help * A;
 //         H = help * H;                                         
 
@@ -975,6 +1028,7 @@ namespace WaveletTL
 
 //     inverseH.setindexr(LLow());
 //     inverseH.setindexc(LLow());
+
   }
 
   template <int d, int dT>

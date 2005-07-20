@@ -304,7 +304,23 @@ namespace MathTL
       }
     }
   }
-  
+
+  template <class C>
+  void SparseMatrix<C>::compress(const double eta)
+  {
+    SparseMatrix<C> M(rowdim_, coldim_);
+
+    for (size_type i(0); i < rowdim_; i++) {
+      if (indices_[i]) {
+	for (size_type j(1); j <= indices_[i][0]; j++)
+	  if (fabs(entries_[i][j-1])>=eta)
+	    M.set_entry(i, indices_[i][j], entries_[i][j-1]);
+      }
+    }
+
+    this->operator = (M);
+  }
+
   template <class C>
   void SparseMatrix<C>::print(std::ostream &os,
 			      const unsigned int tabwidth,

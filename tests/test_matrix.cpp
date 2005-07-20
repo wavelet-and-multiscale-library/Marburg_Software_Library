@@ -326,5 +326,17 @@ int main()
   cout << "- matrix product F1*F2:" << endl
        << F3;
 
+  SparseMatrix<double> small(2, 2);
+  small.set_entry(0, 0, 1e-5);
+  small.set_entry(0, 1, 2e-5);
+  small.set_entry(1, 0, 3e-5);
+  small.set_entry(1, 1, -1e-5);
+  cout << "- a sparse matrix with small entries:" << endl
+       << small;
+
+  small.compress(1.5e-5);
+  cout << "- after compressing with 1.5e-5:" << endl
+       << small;
+
   return 0;
 }

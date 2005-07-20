@@ -126,6 +126,12 @@ namespace MathTL
     void apply_transposed(const VECTOR& x, VECTOR& Mtx) const;
 
     /*!
+      set all values below a threshold to zero
+      (fabs<C> should exist)
+    */
+    void compress(const double eta = 1e-16);
+
+    /*!
       stream output with user-defined tabwidth and precision
       (cf. deal.II)
     */

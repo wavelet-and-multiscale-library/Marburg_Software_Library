@@ -91,11 +91,29 @@ namespace WaveletTL
 
     SparseMatrix<double> A, H, Hinv;
     GSetup(A, H, Hinv); // (4.1.1), (4.1.13)
-    SparseMatrix<double> Aold(A);
-    GElim (A, H, Hinv);
 
-//     A.compress(1e-10);
-//     H.compress(1e-10);
+#if 0
+    SparseMatrix<double> Aold(A); // for the checks below
+#endif
+
+    GElim (A, H, Hinv); // elimination (4.1.4)ff.
+
+    A.compress(1e-10);
+    H.compress(1e-10);
+
+#if 0
+    cout << "DKUBasis(): check factorization of A:" << endl;
+    SparseMatrix<double> test1 = Aold - Hinv*A;
+    cout << "* in 1-norm: " << column_sum_norm(test1) << endl;
+    cout << "* in infty-norm: " << row_sum_norm(test1) << endl;
+
+    cout << "DKUBasis(): check that H is inverse to Hinv:" << endl;
+    SparseMatrix<double> test2 = H*Hinv;
+    for (unsigned int i = 0; i < test2.row_dimension(); i++)
+      test2.set_entry(i, i, test2.get_entry(i, i) - 1.0);
+    cout << "* in 1-norm: " << column_sum_norm(test2) << endl;
+    cout << "* in infty-norm: " << row_sum_norm(test2) << endl;
+#endif
   }
 
   template <int d, int dT>
@@ -895,7 +913,7 @@ namespace WaveletTL
 
     SparseMatrix<double> help;
     
-    // elimination (4.1.4)ff:
+    // elimination (4.1.4)ff.:
     for (int i = 1; i <= d; i++)
       {
 	help.diagonal(Deltasize(j0()+1), 1.0);

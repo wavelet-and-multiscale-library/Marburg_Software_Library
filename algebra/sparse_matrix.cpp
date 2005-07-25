@@ -341,6 +341,25 @@ namespace MathTL
 	os.precision(old_precision);
       }
   }
+
+  template <class C>
+  SparseMatrix<C> operator - (const SparseMatrix<C>& M, const SparseMatrix<C>& N)
+  {
+    assert(M.column_dimension() == N.column_dimension());
+    assert(M.row_dimension() == N.row_dimension());
+    typedef typename Matrix<C>::size_type size_type;
+
+    SparseMatrix<C> R(M.row_dimension(), M.column_dimension());
+    for (size_type i(0); i < M.row_dimension(); i++)
+      for (size_type j(0); j < M.column_dimension(); j++)
+	{
+	  const double help = M.get_entry(i, j) - N.get_entry(i, j);
+	  if (help != 0)
+	    R.set_entry(i, j, help);
+	}
+
+    return R;
+  }
   
   template <class C>
   SparseMatrix<C> operator * (const SparseMatrix<C>& M, const SparseMatrix<C>& N)
@@ -348,7 +367,7 @@ namespace MathTL
     assert(M.column_dimension() == N.row_dimension());
     typedef typename SparseMatrix<C>::size_type size_type;
 
-    SparseMatrix<C> R; R.resize(M.row_dimension(), N.column_dimension());
+    SparseMatrix<C> R(M.row_dimension(), N.column_dimension());
     for (size_type i(0); i < M.row_dimension(); i++)
       for (size_type j(0); j < N.column_dimension(); j++)
 	{

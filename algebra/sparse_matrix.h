@@ -171,6 +171,12 @@ namespace MathTL
   };
 
   /*!
+    matrix-matrix difference M-N
+  */
+  template <class C>
+  SparseMatrix<C> operator - (const SparseMatrix<C>& M, const SparseMatrix<C>& N);
+
+  /*!
     matrix-matrix multiplication M*N
   */
   template <class C>

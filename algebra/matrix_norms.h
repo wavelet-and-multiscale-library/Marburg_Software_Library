@@ -32,7 +32,7 @@ namespace MathTL
       {
 	double rowsum(0.0);
 	for (typename MATRIX::size_type j(0); j < M.column_dimension(); j++)
-	  rowsum += fabs(M(i,j));
+	  rowsum += fabs(M.get_entry(i,j));
 	r = std::max(r, rowsum);
       }
 
@@ -52,7 +52,7 @@ namespace MathTL
       {
 	double colsum(0.0);
 	for (typename MATRIX::size_type i(0); i < M.column_dimension(); i++)
-	  colsum += fabs(M(i,j));
+	  colsum += fabs(M.get_entry(i,j));
 	r = std::max(r, colsum);
       }
 
@@ -71,7 +71,7 @@ namespace MathTL
     
     for (typename MATRIX::size_type j(0); j < M.column_dimension(); j++)
       for (typename MATRIX::size_type i(0); i < M.column_dimension(); i++)
-	r += M(i,j)*M(i,j);
+	r += M.get_entry(i,j)*M.get_entry(i,j);
     
     return sqrt(r);
   }

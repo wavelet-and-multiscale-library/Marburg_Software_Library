@@ -884,23 +884,24 @@ namespace WaveletTL
     
     // A_j=A_j^{(0)} in (4.1.1) is a q times p matrix with
     int       p = (1<<j0()) - 2*ell_ - (d%2) + 1;
-    const int q = 2 * p + d - 1;
+//     const int q = 2 * p + d - 1;
 
     const int ALowc = d; // first column of A_j^{(d)} in Ahat_j^{(d)}
     const int AUpc  = (Deltasize(j0())-1) - d; // last column
     const int ALowr = d + ell_ + ell1_; // first row of A_j^{(d)} in Ahat_j^{(d)}
     const int AUpr  = (Deltasize(j0()+1)-1) - (ell_-ell2_+(d%2)) - d; // last row
 
-    cout << "ALowc=" << ALowc << ", AUpc=" << AUpc << endl;
+    p += (d-2+(d%2))/2;
 
     SparseMatrix<double> help;
     
-    cout << "A_j^{(0)}=" << endl << A;
-
     // elimination (4.1.4)ff:
     for (int i = 1; i <= d; i++)
       {
 	help.diagonal(Deltasize(j0()+1), 1.0);
+
+	const int HhatLow = (i%2 ? ell_+ell2_+(i-1)/2 : ell_+ell2_+2-(d%2)-(i/2));
+	const int HhatUp  = HhatLow + (2*p-1);
 
 	if (i%2) // i odd, elimination from above (4.1.4a)
 	  {
@@ -910,26 +911,18 @@ namespace WaveletTL
 	    const double Uentry = -A.get_entry(elimrow, ALowc) / A.get_entry(elimrow+1, ALowc);
 	    
 	    // insert Uentry in Hhat
-	    const int HhatLow = ell_+ell2_+(i-1)/2;
-	    const int HhatUp  = HhatLow + (2*p-1);
 	    for (int k = HhatLow; k <= HhatUp; k += 2)
 	      help.set_entry(k, k+1, Uentry);
-
-	    cout << "help=" << endl << help;
 	  }
 	else // i even, elimination from below (4.1.4b)
 	  {
 	    const int elimrow = AUpr-(int)floor((i-1)/2.);
 
-	    const double Lentry = -A.get_entry(elimrow, AUpc) / A.get_entry(elimrow-1, AUpc);
+	    const double Lentry = -A.get_entry(elimrow-2, AUpc-1) / A.get_entry(elimrow-3, AUpc-1);
 
   	    // insert Lentry in Hhat
-	    const int HhatLow = ell_+ell2_+2-(d%2)-(i/2);
-	    const int HhatUp  = HhatLow + (2*p-1);
   	    for (int k = HhatLow; k <= HhatUp; k += 2)
 	      help.set_entry(k+1, k, Lentry);
-
-	    cout << "help=" << endl << help;
 	  }
 
 	A = help * A;
@@ -937,98 +930,20 @@ namespace WaveletTL
 
 	A.compress(1e-10);
 
-	cout << "A_j^{(" << i << ")}=" << endl << A;
-	cout << "H=" << endl << H;
+	// invert help
+	if (i%2)
+	  {
+	    for (int k = HhatLow; k <= HhatUp; k += 2)
+	      help.set_entry(k, k+1, -help.get_entry(k, k+1));
+	  }
+	else
+	  {
+  	    for (int k = HhatLow; k <= HhatUp; k += 2)
+	      help.set_entry(k+1, k, -help.get_entry(k+1, k));
+	  }
+
+	Hinv = Hinv * help;
       }
-
-
-//     int i, k, p, q, HdLowIndexc, HdUpIndexc, row;
-
-//     p = (1 << j0())-_ll -_lr-(_d%2)+1;
-//     q = 2*p+_d-1;
-
-//     const int AdLowIndexc = _d+1;
-//     const int AdUpIndexc  = _d+p;            //set blocksize
-//     const int AdLowIndexr = _d + _ll + _l1 + 1;
-//     const int AdUpIndexr  = _d + _lr + _l1 + q;
-
-//     H.setindexr(1);
-//     H.setindexc(1);
-
-//     inverseH.setindexr(1);
-//     inverseH.setindexc(1);
-
-
-//     sparse help(Nj(j0()+1), Nj(j0()+1));
-//     help.Identity(1.0);
-
-//     int diffl, diffr;
-
-//     diffl = _llt-_l2t;
-//     diffr = _lrt-_l2t;
-
-//     p += (_d-2+(_d%2))/2;
-
-//     cout.precision(3);
-
-//     for(i=1; i<=_d; i++)                                      //Iteration
-//     {
-//         help.Identity(1.0);
-
-//         if(i%2)                                               //4.1.4 ff
-//         {
-//             HdLowIndexc = _ll+_l2+(i+1)/2;
-//             //HdUpIndexc  = HdLowIndexc+2*p-1-Z[1]%2;
-//             HdUpIndexc  = HdLowIndexc+2*p-1;
-
-//             row= AdLowIndexr+(int)ceil((i-1)/2);
-
-//             if (fabs(A.get(row+1, AdLowIndexc))<1e-10)
-//                 cerr << "*** Warning: division by zero in gelim. *** " << endl;
-            
-//             for(k=HdLowIndexc; k<=HdUpIndexc; k+=2) 
-//                 help.put(k, k+1) = -(A.get(row,   AdLowIndexc) / 
-//                                      A.get(row+1, AdLowIndexc)); 
-//         }  
-//         else
-//         {
-//             HdLowIndexc = _ll+_l2+2-(_d%2)-(i/2)+1;
-//             //HdUpIndexc  = HdLowIndexc+2*p-1-Z[1]%2;
-//             HdUpIndexc  = HdLowIndexc+2*p-1;
-
-//             row = AdUpIndexr-(int)floor((i-1)/2.0);           
-                
-//             if (fabs(A.get(row-3+diffl-diffr, AdUpIndexc-1))<1e-10)
-//                 cerr << "*** Warning: division by zero in gelim. *** " << endl;
-
-//             for(k=HdLowIndexc;k<=HdUpIndexc; k+=2)
-//                 help.put(k+1,k) = -(A.get(row-2+diffl-diffr, AdUpIndexc-1)/
-//                                     A.get(row-3+diffl-diffr, AdUpIndexc-1));
-             
-//         }
-
-
-//         A = help * A;
-//         H = help * H;                                         
-
-//         A.compress(1e-10);
-        
-//         if(i%2)                                        //inverse help  4.5
-//             for(k=HdLowIndexc; k<=HdUpIndexc; k+=2)   
-//                 help.put(k, k+1) *= (-1.0);     
-//         else
-//             for(k=HdLowIndexc; k<=HdUpIndexc; k+=2)   
-//                 help.put(k+1, k) *= (-1.0);
-
-//         inverseH = inverseH * help;
-//     }
-
-//     H.setindexr(LLow());
-//     H.setindexc(LLow());
-
-//     inverseH.setindexr(LLow());
-//     inverseH.setindexc(LLow());
-
   }
 
   template <int d, int dT>

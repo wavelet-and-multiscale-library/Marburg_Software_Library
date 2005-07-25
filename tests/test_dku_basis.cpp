@@ -57,5 +57,20 @@ int main()
   }
 #endif
 
+  cout << "* another basis:" << endl;
+
+  const int d2 = 3;
+  const int dT2 = 5;
+  DKUBasis<d2, dT2> basis2;
+
+  cout << "- the (" << d2 << "," << dT2 << ") basis has j0=" << basis2.j0() << endl;
+
+  cout << "- the default wavelet index: " << DKUBasis<d2, dT2>::Index(&basis2) << endl;
+
+  cout << "- leftmost generator on the coarsest level: " << basis2.firstGenerator(basis2.j0()) << endl;
+  cout << "- rightmost generator on the coarsest level: " << basis2.lastGenerator(basis2.j0()) << endl;
+  cout << "- leftmost wavelet on the coarsest level: " << basis2.firstWavelet(basis2.j0()) << endl;
+  cout << "- rightmost wavelet on the coarsest level: " << basis2.lastWavelet(basis2.j0()) << endl;
+
   return 0;
 }

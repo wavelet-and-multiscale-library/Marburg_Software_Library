@@ -183,6 +183,12 @@ namespace MathTL
   SparseMatrix<C> operator * (const SparseMatrix<C>& M, const SparseMatrix<C>& N);
 
   /*!
+    transpose of a matrix
+  */
+  template <class C>
+  SparseMatrix<C> transpose(const SparseMatrix<C>& M);
+
+  /*!
     Matlab-style stream output as a dense matrix
   */
   template <class C>

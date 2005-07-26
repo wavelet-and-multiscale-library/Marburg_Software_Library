@@ -341,5 +341,10 @@ int main()
   cout << "- after compressing with 1.5e-5:" << endl
        << small;
 
+  cout << "- the matrix F2 again:" << endl
+       << F2
+       << "  and its transpose:" << endl
+       << transpose(F2);
+
   return 0;
 }

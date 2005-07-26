@@ -3,6 +3,7 @@
 #include <cassert>
 #include <iomanip>
 #include <sstream>
+#include <algebra/vector.h>
 
 namespace MathTL
 {
@@ -377,6 +378,23 @@ namespace MathTL
 
 	  if (help != 0)
 	    R.set_entry(i, j, help);
+	}
+
+    return R;
+  }
+
+  template <class C>
+  SparseMatrix<C> transpose(const SparseMatrix<C>& M)
+  {
+    typedef typename SparseMatrix<C>::size_type size_type;
+
+    SparseMatrix<C> R(M.column_dimension(), M.row_dimension());
+    for (size_type i(0); i < M.row_dimension(); i++) // TODO: speedup this brute force hack
+      for (size_type j(0); j < M.column_dimension(); j++)
+	{
+	  double help(M.get_entry(i, j));
+	  if (help != 0)
+	    R.set_entry(j, i, help);
 	}
 
     return R;

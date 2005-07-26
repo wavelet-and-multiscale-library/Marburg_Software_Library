@@ -199,6 +199,7 @@ namespace WaveletTL
     void P(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& PP); // (4.1.22)
     void GSetup(SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv); // (4.1.1), (4.1.13)
     void GElim (SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv); // elimination/factorization
+    void InvertP(const SparseMatrix<double>& PP, SparseMatrix<double>& PPinv);
   };
 }
 

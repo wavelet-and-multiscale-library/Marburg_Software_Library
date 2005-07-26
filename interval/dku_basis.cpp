@@ -114,6 +114,18 @@ namespace WaveletTL
     cout << "* in 1-norm: " << column_sum_norm(test2) << endl;
     cout << "* in infty-norm: " << row_sum_norm(test2) << endl;
 #endif
+
+    SparseMatrix<double> mj1ih = PP * Hinv * FF; // (4.1.23)
+    SparseMatrix<double> PPinv; InvertP(PP, PPinv);
+
+#if 0
+    cout << "DKUBasis(): check that PPinv is inverse to PP:" << endl;
+    SparseMatrix<double> test3 = PP*PPinv;
+    for (unsigned int i = 0; i < test3.row_dimension(); i++)
+      test3.set_entry(i, i, test3.get_entry(i, i) - 1.0);
+    cout << "* in 1-norm: " << column_sum_norm(test3) << endl;
+    cout << "* in infty-norm: " << row_sum_norm(test3) << endl;
+#endif
   }
 
   template <int d, int dT>
@@ -962,6 +974,40 @@ namespace WaveletTL
 
 	Hinv = Hinv * help;
       }
+  }
+  
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::InvertP(const SparseMatrix<double>& PP, SparseMatrix<double>& PPinv)
+  {
+    // IGPMlib reference: I_Basis_Bspline_s::InverseP()
+
+    PPinv.diagonal(PP.row_dimension(), 1.0);
+
+    const int mlrsize = d+ell_+ell2_-1;
+
+    Matrix<double> ml;
+    ml.diagonal(mlrsize, 1.0);
+    for (int i = 0; i < mlrsize; i++)
+      for (int k = 0; k <= d; k++)
+	ml.set_entry(i, k, PP.get_entry(i, k));
+
+    Matrix<double> mr;
+    mr.diagonal(mlrsize, 1.0);
+    for (int i = 0; i < mlrsize; i++)
+      for (int k = 0; k <= d; k++)
+	mr.set_entry(i, mlrsize-d-1+k, PP.get_entry(PP.row_dimension()-mlrsize+i, PP.column_dimension()-d-1+k));
+
+    Matrix<double> mlinv, mrinv;
+    QRDecomposition<double>(ml).inverse(mlinv);
+    QRDecomposition<double>(mr).inverse(mrinv);
+
+    for (int i = 0; i < mlrsize; i++)
+      for (int k = 0; k <= d; k++)
+	{
+	  PPinv.set_entry(i, k, mlinv.get_entry(i, k));
+	  PPinv.set_entry(PP.row_dimension()-mlrsize+i, PP.column_dimension()-d-1+k, mrinv.get_entry(i, mlrsize-d-1+k));
+	}
   }
 
   template <int d, int dT>

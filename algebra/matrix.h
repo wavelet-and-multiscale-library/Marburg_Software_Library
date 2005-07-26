@@ -94,6 +94,11 @@ namespace MathTL
     void resize(const size_type rows, const size_type columns);
 
     /*!
+      resize the matrix, prepare an n-by-n diagonal matrix
+    */
+    void diagonal(const size_type n, const C diag);
+
+    /*!
       (estimate for the) memory consumption in bytes
     */
     const size_type memory_consumption() const;

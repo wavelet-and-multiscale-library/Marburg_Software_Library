@@ -110,6 +110,15 @@ namespace MathTL
   }
 
   template <class C>
+  void Matrix<C>::diagonal(const size_type n, const C diag)
+  {
+    resize(n, n);
+
+    for (size_type row(0); row < n; row++)
+      set_entry(row, row, diag);
+  }
+
+  template <class C>
   inline
   const typename Matrix<C>::size_type
   Matrix<C>::memory_consumption() const

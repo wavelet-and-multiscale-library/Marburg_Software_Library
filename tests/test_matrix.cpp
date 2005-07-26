@@ -53,6 +53,9 @@ int main()
   O.mirror(Q);
   cout << "- O mirrored:" << endl << Q;
 
+  Q.diagonal(4, -12.34);
+  cout << "- Q is now a diagonal matrix:" << endl << Q;
+
   Vector<double> x(3), y(2);
   x(0) = 1; x(1) = -1; x(2) = -2;
   cout << "- testing apply(), using the vector x="

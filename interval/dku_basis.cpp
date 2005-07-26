@@ -126,6 +126,61 @@ namespace WaveletTL
     cout << "* in 1-norm: " << column_sum_norm(test3) << endl;
     cout << "* in infty-norm: " << row_sum_norm(test3) << endl;
 #endif
+
+    SparseMatrix<double> BB; BT(A, BB);
+    SparseMatrix<double> help = H * PPinv;
+    SparseMatrix<double> gj0ih = transpose(BB) * help;
+    SparseMatrix<double> gj1ih = transpose(FF) * help; // (4.1.24)
+    
+#if 0
+    cout << "DKUBasis(): check initial stable completion:" << endl;
+    SparseMatrix<double> mj_initial(mj0.row_dimension(),
+				    mj0.column_dimension() + mj1ih.column_dimension());
+    for (unsigned int i = 0; i < mj0.row_dimension(); i++)
+      for (unsigned int j = 0; j < mj0.column_dimension(); j++)
+	{
+	  const double help = mj0.get_entry(i, j);
+	  if (help != 0)
+	    mj_initial.set_entry(i, j, help);
+	}
+    for (unsigned int i = 0; i < mj1ih.row_dimension(); i++)
+      for (unsigned int j = 0; j < mj1ih.column_dimension(); j++)
+	{
+	  const double help = mj1ih.get_entry(i, j);
+	  if (help != 0)
+	    mj_initial.set_entry(i, j+mj0.column_dimension(), help);
+	}
+    
+    SparseMatrix<double> gj_initial(gj0ih.row_dimension() + gj1ih.row_dimension(),
+ 				    gj0ih.column_dimension());
+
+    for (unsigned int i = 0; i < gj0ih.row_dimension(); i++)
+      for (unsigned int j = 0; j < gj0ih.column_dimension(); j++)
+	{
+	  const double help = gj0ih.get_entry(i, j);
+	  if (help != 0)
+	    gj_initial.set_entry(i, j, help);
+	}
+    for (unsigned int i = 0; i < gj1ih.row_dimension(); i++)
+      for (unsigned int j = 0; j < gj1ih.column_dimension(); j++)
+	{
+	  const double help = gj1ih.get_entry(i, j);
+	  if (help != 0)
+	    gj_initial.set_entry(i+gj0ih.row_dimension(), j, help);
+	}
+
+    SparseMatrix<double> test4 = mj_initial * gj_initial;
+    for (unsigned int i = 0; i < test4.row_dimension(); i++)
+      test4.set_entry(i, i, test4.get_entry(i, i) - 1.0);
+    cout << "* ||M_j*G_j||_1: " << column_sum_norm(test4) << endl;
+    cout << "* ||M_j*G_j||_infty: " << row_sum_norm(test4) << endl;
+
+    test4 = gj_initial * mj_initial;
+    for (unsigned int i = 0; i < test4.row_dimension(); i++)
+      test4.set_entry(i, i, test4.get_entry(i, i) - 1.0);
+    cout << "* ||G_j*M_j||_1: " << column_sum_norm(test4) << endl;
+    cout << "* ||G_j*M_j||_infty: " << row_sum_norm(test4) << endl;
+#endif
   }
 
   template <int d, int dT>
@@ -1008,6 +1063,28 @@ namespace WaveletTL
 	  PPinv.set_entry(i, k, mlinv.get_entry(i, k));
 	  PPinv.set_entry(PP.row_dimension()-mlrsize+i, PP.column_dimension()-d-1+k, mrinv.get_entry(i, mlrsize-d-1+k));
 	}
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::BT(const SparseMatrix<double>& A, SparseMatrix<double>& BB)
+  {
+    // IGPMlib reference: I_Basis_Bspline_s::Btr()
+
+    const int p = (1<<j0()) - 2*ell_ - (d%2) + 1;
+//     const int q = 2 * p + d - 1;
+
+    BB.resize(Deltasize(j0()+1), Deltasize(j0()));
+
+    for (int r = 0; r < d; r++)
+      BB.set_entry(r, r, 1.0);
+
+    const double help = 1./A.get_entry(d+ell_+ell1_+ell2_, d);
+    for (int c = d, r = d+ell_+ell1_+ell2_; c < d+p; c++, r += 2)
+      BB.set_entry(r, c, help);
+
+    for (int r = Deltasize(j0()+1)-d, c = Deltasize(j0())-d; r < Deltasize(j0()+1); r++, c++)
+      BB.set_entry(r, c, 1.0);
   }
 
   template <int d, int dT>

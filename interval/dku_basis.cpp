@@ -201,10 +201,10 @@ namespace WaveletTL
 #endif
 
     // construction of the wavelet basis: stable completion with transformations
-    SparseMatrix<double> Mj0  = transpose(inv_Cjp_)  * (mj0   * transpose(Cj_)); // (2.4.3)
-    SparseMatrix<double> Mj0T = transpose(inv_CjpT_) * (mj0tp * transpose(CjT_));
+    SparseMatrix<double> Mj0  = transpose(inv_Cjp_)  * mj0   * transpose(Cj_); // (2.4.3)
+    SparseMatrix<double> Mj0T = transpose(inv_CjpT_) * mj0tp * transpose(CjT_);
     
-#if 1
+#if 0
     cout << "DKUBasis(): check biorthogonality of Mj0, Mj0T:" << endl;
     SparseMatrix<double> test5 = transpose(Mj0) * Mj0T;
     for (unsigned int i = 0; i < test5.row_dimension(); i++)
@@ -223,7 +223,7 @@ namespace WaveletTL
     SparseMatrix<double> Mj1  = (I - (Mj0*transpose(Mj0T))) * (transpose(inv_Cjp_) * mj1ih);
     SparseMatrix<double> Mj1T = Cjp_ * transpose(gj1ih);
 
-#if 0
+#if 1
     cout << "DKUBasis(): check new stable completion:" << endl;
 
     SparseMatrix<double> mj_new(Mj0.row_dimension(),
@@ -896,11 +896,11 @@ namespace WaveletTL
       MLTp(row, row) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
 
     for (int m = ellT_; m <= 2*ellT_+ell1T_-1; m++)
-      for (int k = 0; k < d; k++)
+      for (int k = 0; k < dT; k++)
     	MLTp(-llowT+m, k) = Alpha_(-Alphaoffset+m, k) / sqrt(ldexp(1.0, 2*k+1));
     
     for (int m = 2*ellT_+ell1T_; m <= MLTup; m++)
-      for (int k = 0; k < d; k++)
+      for (int k = 0; k < dT; k++)
   	MLTp(-llowT+m, k) = BetaL_(-BetaLoffset+m, k);
 
     return MLTp;
@@ -916,7 +916,7 @@ namespace WaveletTL
     const int lupT  = ellT_-1;
     const int MRTup = ell2T_+2*ellT_-2;
     const int Alphaoffset = 1-ell2T_;
-    const int BetaLoffset = 2*ellT_+ell1T_;
+    const int BetaRoffset = 2*ellT_+ell1T_;
 
     Matrix<double> MRTp(MRTup-llowT+1, lupT-llowT+1);
 
@@ -924,12 +924,12 @@ namespace WaveletTL
       MRTp(row, row) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
 
     for (int m = ellT_; m <= 2*ellT_+ell1T_-1; m++)
-      for (int k = 0; k < d; k++)
+      for (int k = 0; k < dT; k++)
     	MRTp(-llowT+m, k) = Alpha_(-Alphaoffset+m, k) / sqrt(ldexp(1.0, 2*k+1));
     
     for (int m = 2*ellT_+ell1T_; m <= MRTup; m++)
-      for (int k = 0; k < d; k++)
-  	MRTp(-llowT+m, k) = BetaL_(-BetaLoffset+m, k);
+      for (int k = 0; k < dT; k++)
+  	MRTp(-llowT+m, k) = BetaR_(-BetaRoffset+m, k);
 
     return MRTp;
   }

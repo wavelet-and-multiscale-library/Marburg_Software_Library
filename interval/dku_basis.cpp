@@ -200,7 +200,7 @@ namespace WaveletTL
     cout << "* ||Gj*Mj-I||_infty: " << row_sum_norm(test4) << endl;
 #endif
 
-    // construction of the wavelet basis: stable completion with transformations
+    // construction of the wavelet basis: stable completion with basis transformations
     SparseMatrix<double> Mj0  = transpose(inv_Cjp_)  * mj0   * transpose(Cj_); // (2.4.3)
     SparseMatrix<double> Mj0T = transpose(inv_CjpT_) * mj0tp * transpose(CjT_);
     
@@ -322,6 +322,36 @@ namespace WaveletTL
     cout << "* ||GjT*MjT-I||_1: " << column_sum_norm(test6) << endl;
     cout << "* ||GjT*MjT-I||_infty: " << row_sum_norm(test6) << endl;
 #endif
+
+    Mj0 .compress(1e-8);
+    Mj1 .compress(1e-8);
+    Mj0T.compress(1e-8);
+    Mj1T.compress(1e-8);
+
+    // extract upper left and lower right blocks from the refinement
+
+    // compute row nr. of last nontriv. entry in the dT-th column of Mj0 (plus 1)
+    const int Mj0blockrows = (d+ell_+ell1_)+ (d+1) + (dT-(d+1))*2;
+    Mj0L_.resize(Mj0blockrows, d);
+    for (int i = 0; i < Mj0blockrows; i++)
+      for (int j = 0; j < d; j++)
+	Mj0L_.set_entry(i, j, Mj0.get_entry(i, j));
+    Mj0R_.resize(Mj0blockrows, d);
+    for (int i = 0; i < Mj0blockrows; i++)
+      for (int j = 0; j < d; j++)
+	Mj0R_.set_entry(i, j, Mj0.get_entry(Deltasize(j0()+1)-i-1, Deltasize(j0())-j-1));
+
+    // compute row nr. of last nontriv. entry in the dT-th column of Mj0T (plus 1)
+    const int Mj0Tblockrows = (dT+ellT_+ell1T_)+ (d+2*dT-1) - 2;
+    Mj0TL_.resize(Mj0Tblockrows, dT);
+    for (int i = 0; i < Mj0Tblockrows; i++)
+      for (int j = 0; j < dT; j++)
+	Mj0TL_.set_entry(i, j, Mj0T.get_entry(i, j));
+    Mj0TR_.resize(Mj0Tblockrows, dT);
+    for (int i = 0; i < Mj0Tblockrows; i++)
+      for (int j = 0; j < d; j++)
+	Mj0TR_.set_entry(i, j, Mj0T.get_entry(Deltasize(j0()+1)-i-1, Deltasize(j0())-j-1));
+
   }
 
   template <int d, int dT>

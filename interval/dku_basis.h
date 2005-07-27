@@ -167,6 +167,8 @@ namespace WaveletTL
     //! storage for transformation matrices on level j0 and j0+1
     SparseMatrix<double> Cj_, CjT_, Cjp_, CjpT_;
     SparseMatrix<double> inv_Cj_, inv_CjT_, inv_Cjp_, inv_CjpT_;
+
+    Matrix<double> Mj0L_, Mj0R_, Mj0TL_, Mj0TR_; // corner blocks of refinement matrices
     
   private:
     void setup_Alpha();

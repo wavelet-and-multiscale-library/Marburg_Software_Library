@@ -88,7 +88,7 @@ namespace WaveletTL
 
     SparseMatrix<double> FF; F(FF);         // (4.1.14)
     SparseMatrix<double> PP; P(ml, mr, PP); // (4.1.22)
-
+ 
     SparseMatrix<double> A, H, Hinv;
     GSetup(A, H, Hinv); // (4.1.1), (4.1.13)
 
@@ -97,6 +97,26 @@ namespace WaveletTL
 #endif
 
     GElim (A, H, Hinv); // elimination (4.1.4)ff.
+    SparseMatrix<double> BB; BT(A, BB); // (4.1.13)
+
+#if 0
+    cout << "DKUBasis(): check properties (4.1.15):" << endl;
+    SparseMatrix<double> test4115 = transpose(BB)*A;
+    for (unsigned int i = 0; i < test4115.row_dimension(); i++)
+      test4115.set_entry(i, i, test4115.get_entry(i, i) - 1.0);
+    cout << "* ||Bj*Ajd-I||_infty: " << row_sum_norm(test4115) << endl;
+
+    test4115 = transpose(FF)*FF;
+    for (unsigned int i = 0; i < test4115.row_dimension(); i++)
+      test4115.set_entry(i, i, test4115.get_entry(i, i) - 1.0);
+    cout << "* ||Fj^T*Fj-I||_infty: " << row_sum_norm(test4115) << endl;    
+
+    test4115 = transpose(BB)*FF;
+    cout << "* ||Bj*Fj||_infty: " << row_sum_norm(test4115) << endl;    
+
+    test4115 = transpose(FF)*A;
+    cout << "* ||Fj^T*A||_infty: " << row_sum_norm(test4115) << endl;    
+#endif
 
     A.compress(1e-10);
     H.compress(1e-10);
@@ -127,12 +147,11 @@ namespace WaveletTL
     cout << "* in infty-norm: " << row_sum_norm(test3) << endl;
 #endif
 
-    SparseMatrix<double> BB; BT(A, BB);
     SparseMatrix<double> help = H * PPinv;
     SparseMatrix<double> gj0ih = transpose(BB) * help;
     SparseMatrix<double> gj1ih = transpose(FF) * help; // (4.1.24)
     
-#if 1
+#if 0
     cout << "DKUBasis(): check initial stable completion:" << endl;
     SparseMatrix<double> mj_initial(mj0.row_dimension(),
 				    mj0.column_dimension() + mj1ih.column_dimension());
@@ -182,20 +201,29 @@ namespace WaveletTL
 #endif
 
     // construction of the wavelet basis: stable completion with transformations
-    SparseMatrix<double> Mj0  = transpose(inv_Cjp_)  * mj0   * transpose(Cj_); // (2.4.3)
-    SparseMatrix<double> Mj0T = transpose(inv_CjpT_) * mj0tp * transpose(CjT_);
+    SparseMatrix<double> Mj0  = transpose(inv_Cjp_)  * (mj0   * transpose(Cj_)); // (2.4.3)
+    SparseMatrix<double> Mj0T = transpose(inv_CjpT_) * (mj0tp * transpose(CjT_));
+    
+#if 1
+    cout << "DKUBasis(): check biorthogonality of Mj0, Mj0T:" << endl;
+    SparseMatrix<double> test5 = transpose(Mj0) * Mj0T;
+    for (unsigned int i = 0; i < test5.row_dimension(); i++)
+      test5.set_entry(i, i, test5.get_entry(i, i) - 1.0);
+    cout << "* ||Mj0^T*Mj0T-I||_1: " << column_sum_norm(test5) << endl;
+    cout << "* ||Mj0^T*Mj0T-I||_infty: " << row_sum_norm(test5) << endl;
 
-    cout << "Mj0=" << endl << Mj0 << endl;
-    cout << "Mj0T=" << endl << Mj0T << endl;
- 
+    test5 = transpose(Mj0T) * Mj0;
+    for (unsigned int i = 0; i < test5.row_dimension(); i++)
+      test5.set_entry(i, i, test5.get_entry(i, i) - 1.0);
+    cout << "* ||Mj0T^T*Mj0-I||_1: " << column_sum_norm(test5) << endl;
+    cout << "* ||Mj0T^T*Mj0-I||_infty: " << row_sum_norm(test5) << endl;
+#endif    
+
     SparseMatrix<double> I; I.diagonal(Deltasize(j0()+1), 1.0);
     SparseMatrix<double> Mj1  = (I - (Mj0*transpose(Mj0T))) * (transpose(inv_Cjp_) * mj1ih);
     SparseMatrix<double> Mj1T = Cjp_ * transpose(gj1ih);
 
-    cout << "Mj1=" << endl << Mj1 << endl;
-    cout << "Mj1T=" << endl << Mj1T << endl;
-
-#if 1
+#if 0
     cout << "DKUBasis(): check new stable completion:" << endl;
 
     SparseMatrix<double> mj_new(Mj0.row_dimension(),
@@ -234,17 +262,17 @@ namespace WaveletTL
 	    gj_new.set_entry(i+gj0_new.row_dimension(), j, help);
 	}
     
-    SparseMatrix<double> test5 = mj_new * gj_new;
-    for (unsigned int i = 0; i < test5.row_dimension(); i++)
-      test5.set_entry(i, i, test5.get_entry(i, i) - 1.0);
-    cout << "* ||M_j*G_j-I||_1: " << column_sum_norm(test5) << endl;
-    cout << "* ||M_j*G_j-I||_infty: " << row_sum_norm(test5) << endl;
+    SparseMatrix<double> test6 = mj_new * gj_new;
+    for (unsigned int i = 0; i < test6.row_dimension(); i++)
+      test6.set_entry(i, i, test6.get_entry(i, i) - 1.0);
+    cout << "* ||M_j*G_j-I||_1: " << column_sum_norm(test6) << endl;
+    cout << "* ||M_j*G_j-I||_infty: " << row_sum_norm(test6) << endl;
 
-    test5 = gj_new * mj_new;
-    for (unsigned int i = 0; i < test5.row_dimension(); i++)
-      test5.set_entry(i, i, test5.get_entry(i, i) - 1.0);
-    cout << "* ||G_j*M_j-I||_1: " << column_sum_norm(test5) << endl;
-    cout << "* ||G_j*M_j-I||_infty: " << row_sum_norm(test5) << endl;
+    test6 = gj_new * mj_new;
+    for (unsigned int i = 0; i < test6.row_dimension(); i++)
+      test6.set_entry(i, i, test6.get_entry(i, i) - 1.0);
+    cout << "* ||G_j*M_j-I||_1: " << column_sum_norm(test6) << endl;
+    cout << "* ||G_j*M_j-I||_infty: " << row_sum_norm(test6) << endl;
         
 //         sparse mjt_new = RightLeft(Mj0t, Mj1t);     // setup complete Mt_j^new
 //         sparse gjt_new = TopBottom(Tr(Mj0), Tr(Mj1));// setup complete Gt_j^new
@@ -763,7 +791,7 @@ namespace WaveletTL
     inv_CjpT_.set_block(0, 0, inv_CLT_);
     inv_CjpT_.set_block(Deltasize(j0()+1)-dT, Deltasize(j0()+1)-dT, inv_CRT_);
 
-#if 1
+#if 0
     cout << "DKUBasis: testing setup of Cj:" << endl;
     
     SparseMatrix<double> test1 = CjT_ * inv_CjT_;
@@ -999,26 +1027,27 @@ namespace WaveletTL
   {
     // IGPMlib reference: I_Basis_Bspline_s::F()
 
-    const int FLow = ell_+(d%2);       // start column index for F_j in (4.1.14)
-    const int FUp  = (1<<j0()) - ell_; // end column index for F_j in (4.1.14)
+    const int FLow = ell_+(d%2)-1;       // start column index for F_j in (4.1.14)
+    const int FUp  = (1<<j0())-1-ell_; // end column index for F_j in (4.1.14)
 
     // (4.1.14):
 
     FF.resize(Deltasize(j0()+1), 1<<j0());
-    for (int r = 1; r <= FLow-1; r++)
-      FF.set_entry(r+d-1, r-1, 1.0);
+
+    for (int r = 0; r < FLow; r++)
+      FF.set_entry(r+d, r, 1.0);
     
     int i = d+ell_+(d%2)-1;
     for (int r = FLow; r <= FUp; r++)
       {
-	FF.set_entry(i, r-1, 1.0);
+	FF.set_entry(i, r, 1.0);
 	i += 2;
       } 
 
     i = Deltasize(j0()+1)-d-1;
-    for (int r = 1<<j0(); r >= FUp+1; r--)
+    for (int r = (1<<j0())-1; r >= FUp+1; r--)
       {
-	FF.set_entry(i, r-1, 1.0);
+	FF.set_entry(i, r, 1.0);
 	i--;
       }
   }

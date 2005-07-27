@@ -190,14 +190,14 @@ namespace WaveletTL
     SparseMatrix<double> test4 = mj_initial * gj_initial;
     for (unsigned int i = 0; i < test4.row_dimension(); i++)
       test4.set_entry(i, i, test4.get_entry(i, i) - 1.0);
-    cout << "* ||M_j*G_j-I||_1: " << column_sum_norm(test4) << endl;
-    cout << "* ||M_j*G_j-I||_infty: " << row_sum_norm(test4) << endl;
+    cout << "* ||Mj*Gj-I||_1: " << column_sum_norm(test4) << endl;
+    cout << "* ||Mj*Gj-I||_infty: " << row_sum_norm(test4) << endl;
 
     test4 = gj_initial * mj_initial;
     for (unsigned int i = 0; i < test4.row_dimension(); i++)
       test4.set_entry(i, i, test4.get_entry(i, i) - 1.0);
-    cout << "* ||G_j*M_j-I||_1: " << column_sum_norm(test4) << endl;
-    cout << "* ||G_j*M_j-I||_infty: " << row_sum_norm(test4) << endl;
+    cout << "* ||Gj*Mj-I||_1: " << column_sum_norm(test4) << endl;
+    cout << "* ||Gj*Mj-I||_infty: " << row_sum_norm(test4) << endl;
 #endif
 
     // construction of the wavelet basis: stable completion with transformations
@@ -223,7 +223,7 @@ namespace WaveletTL
     SparseMatrix<double> Mj1  = (I - (Mj0*transpose(Mj0T))) * (transpose(inv_Cjp_) * mj1ih);
     SparseMatrix<double> Mj1T = Cjp_ * transpose(gj1ih);
 
-#if 1
+#if 0
     cout << "DKUBasis(): check new stable completion:" << endl;
 
     SparseMatrix<double> mj_new(Mj0.row_dimension(),
@@ -243,8 +243,8 @@ namespace WaveletTL
 	    mj_new.set_entry(i, j+Mj0.column_dimension(), help);
 	}
 
-    SparseMatrix<double> gj0_new = transpose(Mj0T); // gj0_new.compress();
-    SparseMatrix<double> gj1_new = transpose(Mj1T); // gj1_new.compress();
+    SparseMatrix<double> gj0_new = transpose(Mj0T); gj0_new.compress();
+    SparseMatrix<double> gj1_new = transpose(Mj1T); gj1_new.compress();
     SparseMatrix<double> gj_new(gj0_new.row_dimension() + gj1_new.row_dimension(),
 				gj0_new.column_dimension());
     for (unsigned int i = 0; i < gj0_new.row_dimension(); i++)
@@ -265,31 +265,62 @@ namespace WaveletTL
     SparseMatrix<double> test6 = mj_new * gj_new;
     for (unsigned int i = 0; i < test6.row_dimension(); i++)
       test6.set_entry(i, i, test6.get_entry(i, i) - 1.0);
-    cout << "* ||M_j*G_j-I||_1: " << column_sum_norm(test6) << endl;
-    cout << "* ||M_j*G_j-I||_infty: " << row_sum_norm(test6) << endl;
+    cout << "* ||Mj*Gj-I||_1: " << column_sum_norm(test6) << endl;
+    cout << "* ||Mj*Gj-I||_infty: " << row_sum_norm(test6) << endl;
 
     test6 = gj_new * mj_new;
     for (unsigned int i = 0; i < test6.row_dimension(); i++)
       test6.set_entry(i, i, test6.get_entry(i, i) - 1.0);
-    cout << "* ||G_j*M_j-I||_1: " << column_sum_norm(test6) << endl;
-    cout << "* ||G_j*M_j-I||_infty: " << row_sum_norm(test6) << endl;
+    cout << "* ||Gj*Mj-I||_1: " << column_sum_norm(test6) << endl;
+    cout << "* ||Gj*Mj-I||_infty: " << row_sum_norm(test6) << endl;
         
-//         sparse mjt_new = RightLeft(Mj0t, Mj1t);     // setup complete Mt_j^new
-//         sparse gjt_new = TopBottom(Tr(Mj0), Tr(Mj1));// setup complete Gt_j^new
-        
-//         (mjt_new*gjt_new).sparse2matrix(TG); 
-//         for (i=0; i<TG.rows(); i++)
-//             TG(i+TG.indexr(), i+TG.indexc()) -= 1.0;
-// 	if ( (TG.Norm1()>tolerance) || (TG.Norminf()>tolerance) )
-//             cout << "Test new stable completion failed, error ||Mt_j*Gt_j - I|| = " 
-//                  << TG.Norm1() << "\t" << TG.Norminf() << endl; 
-        
-//         (gjt_new*mjt_new).sparse2matrix(TG); 
-//         for (i=0; i<TG.rows(); i++)
-//             TG(i+TG.indexr(), i+TG.indexc()) -= 1.0;
-//     	if ( (TG.Norm1()>tolerance) || (TG.Norminf()>tolerance) )
-//             cout << "Test new stable completion failed, error ||Gt_j*Mt_j - I|| = "
-//                  << TG.Norm1() << "\t" << TG.Norminf() << endl;
+    SparseMatrix<double> mjt_new(Mj0T.row_dimension(),
+				 Mj0T.column_dimension() + Mj1T.column_dimension());
+    for (unsigned int i = 0; i < Mj0T.row_dimension(); i++)
+      for (unsigned int j = 0; j < Mj0T.column_dimension(); j++)
+	{
+	  const double help = Mj0T.get_entry(i, j);
+	  if (help != 0)
+	    mjt_new.set_entry(i, j, help);
+	}
+    for (unsigned int i = 0; i < Mj1T.row_dimension(); i++)
+      for (unsigned int j = 0; j < Mj1T.column_dimension(); j++)
+	{
+	  const double help = Mj1T.get_entry(i, j);
+	  if (help != 0)
+	    mjt_new.set_entry(i, j+Mj0T.column_dimension(), help);
+	}
+
+    SparseMatrix<double> gjt0_new = transpose(Mj0); gjt0_new.compress();
+    SparseMatrix<double> gjt1_new = transpose(Mj1); gjt1_new.compress();
+    SparseMatrix<double> gjt_new(gjt0_new.row_dimension() + gjt1_new.row_dimension(),
+				 gjt0_new.column_dimension());
+    for (unsigned int i = 0; i < gjt0_new.row_dimension(); i++)
+      for (unsigned int j = 0; j < gjt0_new.column_dimension(); j++)
+	{
+	  const double help = gjt0_new.get_entry(i, j);
+	  if (help != 0)
+	    gjt_new.set_entry(i, j, help);
+	}
+    for (unsigned int i = 0; i < gjt1_new.row_dimension(); i++)
+      for (unsigned int j = 0; j < gjt1_new.column_dimension(); j++)
+	{
+	  const double help = gjt1_new.get_entry(i, j);
+	  if (help != 0)
+	    gjt_new.set_entry(i+gjt0_new.row_dimension(), j, help);
+	}
+
+    test6 = mjt_new * gjt_new;
+    for (unsigned int i = 0; i < test6.row_dimension(); i++)
+      test6.set_entry(i, i, test6.get_entry(i, i) - 1.0);
+    cout << "* ||MjT*GjT-I||_1: " << column_sum_norm(test6) << endl;
+    cout << "* ||MjT*GjT-I||_infty: " << row_sum_norm(test6) << endl;
+
+    test6 = gjt_new * mjt_new;
+    for (unsigned int i = 0; i < test6.row_dimension(); i++)
+      test6.set_entry(i, i, test6.get_entry(i, i) - 1.0);
+    cout << "* ||GjT*MjT-I||_1: " << column_sum_norm(test6) << endl;
+    cout << "* ||GjT*MjT-I||_infty: " << row_sum_norm(test6) << endl;
 #endif
   }
 

@@ -132,7 +132,7 @@ namespace WaveletTL
     SparseMatrix<double> gj0ih = transpose(BB) * help;
     SparseMatrix<double> gj1ih = transpose(FF) * help; // (4.1.24)
     
-#if 0
+#if 1
     cout << "DKUBasis(): check initial stable completion:" << endl;
     SparseMatrix<double> mj_initial(mj0.row_dimension(),
 				    mj0.column_dimension() + mj1ih.column_dimension());
@@ -171,23 +171,29 @@ namespace WaveletTL
     SparseMatrix<double> test4 = mj_initial * gj_initial;
     for (unsigned int i = 0; i < test4.row_dimension(); i++)
       test4.set_entry(i, i, test4.get_entry(i, i) - 1.0);
-    cout << "* ||M_j*G_j||_1: " << column_sum_norm(test4) << endl;
-    cout << "* ||M_j*G_j||_infty: " << row_sum_norm(test4) << endl;
+    cout << "* ||M_j*G_j-I||_1: " << column_sum_norm(test4) << endl;
+    cout << "* ||M_j*G_j-I||_infty: " << row_sum_norm(test4) << endl;
 
     test4 = gj_initial * mj_initial;
     for (unsigned int i = 0; i < test4.row_dimension(); i++)
       test4.set_entry(i, i, test4.get_entry(i, i) - 1.0);
-    cout << "* ||G_j*M_j||_1: " << column_sum_norm(test4) << endl;
-    cout << "* ||G_j*M_j||_infty: " << row_sum_norm(test4) << endl;
+    cout << "* ||G_j*M_j-I||_1: " << column_sum_norm(test4) << endl;
+    cout << "* ||G_j*M_j-I||_infty: " << row_sum_norm(test4) << endl;
 #endif
 
     // construction of the wavelet basis: stable completion with transformations
-    SparseMatrix<double> Mj0  = transpose(inv_Cjp_) * mj0 * transpose(Cj_); // (2.4.3)
+    SparseMatrix<double> Mj0  = transpose(inv_Cjp_)  * mj0   * transpose(Cj_); // (2.4.3)
     SparseMatrix<double> Mj0T = transpose(inv_CjpT_) * mj0tp * transpose(CjT_);
 
+    cout << "Mj0=" << endl << Mj0 << endl;
+    cout << "Mj0T=" << endl << Mj0T << endl;
+ 
     SparseMatrix<double> I; I.diagonal(Deltasize(j0()+1), 1.0);
-    SparseMatrix<double> Mj1  = (I - Mj0*transpose(Mj0T)) * (transpose(inv_Cjp_) * mj1ih);
+    SparseMatrix<double> Mj1  = (I - (Mj0*transpose(Mj0T))) * (transpose(inv_Cjp_) * mj1ih);
     SparseMatrix<double> Mj1T = Cjp_ * transpose(gj1ih);
+
+    cout << "Mj1=" << endl << Mj1 << endl;
+    cout << "Mj1T=" << endl << Mj1T << endl;
 
 #if 1
     cout << "DKUBasis(): check new stable completion:" << endl;
@@ -231,14 +237,14 @@ namespace WaveletTL
     SparseMatrix<double> test5 = mj_new * gj_new;
     for (unsigned int i = 0; i < test5.row_dimension(); i++)
       test5.set_entry(i, i, test5.get_entry(i, i) - 1.0);
-    cout << "* ||M_j*G_j||_1: " << column_sum_norm(test5) << endl;
-    cout << "* ||M_j*G_j||_infty: " << row_sum_norm(test5) << endl;
+    cout << "* ||M_j*G_j-I||_1: " << column_sum_norm(test5) << endl;
+    cout << "* ||M_j*G_j-I||_infty: " << row_sum_norm(test5) << endl;
 
-//     test5 = gj_new * mj_new;
-//     for (unsigned int i = 0; i < test5.row_dimension(); i++)
-//       test5.set_entry(i, i, test5.get_entry(i, i) - 1.0);
-//     cout << "* ||G_j*M_j||_1: " << column_sum_norm(test5) << endl;
-//     cout << "* ||G_j*M_j||_infty: " << row_sum_norm(test5) << endl;
+    test5 = gj_new * mj_new;
+    for (unsigned int i = 0; i < test5.row_dimension(); i++)
+      test5.set_entry(i, i, test5.get_entry(i, i) - 1.0);
+    cout << "* ||G_j*M_j-I||_1: " << column_sum_norm(test5) << endl;
+    cout << "* ||G_j*M_j-I||_infty: " << row_sum_norm(test5) << endl;
         
 //         sparse mjt_new = RightLeft(Mj0t, Mj1t);     // setup complete Mt_j^new
 //         sparse gjt_new = TopBottom(Tr(Mj0), Tr(Mj1));// setup complete Gt_j^new
@@ -659,6 +665,15 @@ namespace WaveletTL
     CL_.mirror(CR_);
     CLT_.mirror(CRT_);
 
+#if 0
+    // check biorthogonality of the matrix product CR * GammaR * (CRT)^T
+    Matrix<double> GammaR; GammaL_.mirror(GammaR);
+    Matrix<double> check2(CR_ * GammaR * transpose(CRT_));
+    for (unsigned int i(0); i < check2.row_dimension(); i++)
+      check2(i, i) -= 1;
+    cout << "error for CRT: " << row_sum_norm(check2) << endl;
+#endif
+
     QRDecomposition<double>(CR_).inverse(inv_CR_);
     QRDecomposition<double>(CRT_).inverse(inv_CRT_);
   }
@@ -748,32 +763,32 @@ namespace WaveletTL
     inv_CjpT_.set_block(0, 0, inv_CLT_);
     inv_CjpT_.set_block(Deltasize(j0()+1)-dT, Deltasize(j0()+1)-dT, inv_CRT_);
 
-#if 0
+#if 1
     cout << "DKUBasis: testing setup of Cj:" << endl;
     
     SparseMatrix<double> test1 = CjT_ * inv_CjT_;
     for (unsigned int i = 0; i < test1.row_dimension(); i++)
       test1.set_entry(i, i, test1.get_entry(i, i) - 1.0);
-    cout << "* ||CjT*inv_CjT||_1: " << column_sum_norm(test1) << endl;
-    cout << "* ||CjT*inv_CjT||_infty: " << row_sum_norm(test1) << endl;
+    cout << "* ||CjT*inv_CjT-I||_1: " << column_sum_norm(test1) << endl;
+    cout << "* ||CjT*inv_CjT-I||_infty: " << row_sum_norm(test1) << endl;
     
     SparseMatrix<double> test2 = Cj_ * inv_Cj_;
     for (unsigned int i = 0; i < test2.row_dimension(); i++)
       test2.set_entry(i, i, test2.get_entry(i, i) - 1.0);
-    cout << "* ||Cj*inv_Cj||_1: " << column_sum_norm(test2) << endl;
-    cout << "* ||Cj*inv_Cj||_infty: " << row_sum_norm(test2) << endl;
+    cout << "* ||Cj*inv_Cj-I||_1: " << column_sum_norm(test2) << endl;
+    cout << "* ||Cj*inv_Cj-I||_infty: " << row_sum_norm(test2) << endl;
 
     SparseMatrix<double> test3 = CjpT_ * inv_CjpT_;
     for (unsigned int i = 0; i < test3.row_dimension(); i++)
       test3.set_entry(i, i, test3.get_entry(i, i) - 1.0);
-    cout << "* ||CjpT*inv_CjpT||_1: " << column_sum_norm(test3) << endl;
-    cout << "* ||CjpT*inv_CjpT||_infty: " << row_sum_norm(test3) << endl;
+    cout << "* ||CjpT*inv_CjpT-I||_1: " << column_sum_norm(test3) << endl;
+    cout << "* ||CjpT*inv_CjpT-I||_infty: " << row_sum_norm(test3) << endl;
     
     SparseMatrix<double> test4 = Cjp_ * inv_Cjp_;
     for (unsigned int i = 0; i < test4.row_dimension(); i++)
       test4.set_entry(i, i, test4.get_entry(i, i) - 1.0);
-    cout << "* ||Cjp*inv_Cjp||_1: " << column_sum_norm(test4) << endl;
-    cout << "* ||Cjp*inv_Cjp||_infty: " << row_sum_norm(test4) << endl;
+    cout << "* ||Cjp*inv_Cjp-I||_1: " << column_sum_norm(test4) << endl;
+    cout << "* ||Cjp*inv_Cjp-I||_infty: " << row_sum_norm(test4) << endl;
 #endif
   }
   

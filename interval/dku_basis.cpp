@@ -328,7 +328,7 @@ namespace WaveletTL
     Mj0T.compress(1e-8);
     Mj1T.compress(1e-8);
 
-    // extract upper left and lower right blocks from the refinement
+    // extract upper left and lower right blocks from the refinement matrices
 
     // compute row nr. of last nontriv. entry in the dT-th column of Mj0 (plus 1)
     const int Mj0blockrows = (d+ell_+ell1_)+ (d+1) + (dT-(d+1))*2;
@@ -352,6 +352,22 @@ namespace WaveletTL
       for (int j = 0; j < d; j++)
 	Mj0TR_.set_entry(i, j, Mj0T.get_entry(Deltasize(j0()+1)-i-1, Deltasize(j0())-j-1));
 
+    // compute number of rows and columns of the corner blocks in Mj1 (INCORRECT!!!)
+    int Mj1blockcols = 1<<j0();
+    for (; fabs(Mj1.get_entry(0, Mj1blockcols-1)) < 1e-6; Mj1blockcols--);
+    int Mj1blockrows = Deltasize(j0()+1);
+    for (; fabs(Mj1.get_entry(Mj1blockrows-1, Mj1blockcols-1)) < 1e-6; Mj1blockrows--);
+    Mj1L_.resize(Mj1blockrows, Mj1blockcols);
+    for (int i = 0; i < Mj1blockrows; i++)
+      for (int j = 0; j < Mj1blockcols; j++)
+	Mj1L_.set_entry(i, j, Mj1.get_entry(i, j));
+    Mj1R_.resize(Mj1blockrows, Mj1blockcols);
+    for (int i = 0; i < Mj1blockrows; i++)
+      for (int j = 0; j < Mj1blockcols; j++)
+	Mj1R_.set_entry(i, j, Mj1.get_entry(Deltasize(j0()+1)-i-1, (1<<j0())-j-1));
+
+    cout << "Mj1=" << endl << Mj1 << endl;
+    cout << "Mj1L=" << endl << Mj1L_ << endl;
   }
 
   template <int d, int dT>

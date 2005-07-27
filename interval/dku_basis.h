@@ -169,6 +169,7 @@ namespace WaveletTL
     SparseMatrix<double> inv_Cj_, inv_CjT_, inv_Cjp_, inv_CjpT_;
 
     Matrix<double> Mj0L_, Mj0R_, Mj0TL_, Mj0TR_; // corner blocks of refinement matrices
+    Matrix<double> Mj1L_, Mj1R_, Mj1TL_, Mj1TR_; // corner blocks of wavelet trafo matrices
     
   private:
     void setup_Alpha();

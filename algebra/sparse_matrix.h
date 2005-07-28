@@ -88,6 +88,14 @@ namespace MathTL
     const C get_entry(const size_type row, const size_type column) const;
 
     /*!
+      read access to a subblock
+    */
+    template <class MATRIX>
+    void get_block(const size_type firstrow, const size_type firstcolumn,
+		   const size_type rows, const size_type columns,
+		   MATRIX& M);
+
+    /*!
       write access to a matrix entry
     */
     void set_entry(const size_type row, const size_type column, const C value);

@@ -158,6 +158,22 @@ namespace MathTL
   }
 
   template <class C>
+  template <class MATRIX>
+  void SparseMatrix<C>::get_block(const size_type firstrow, const size_type firstcolumn,
+				  const size_type rows, const size_type columns,
+				  MATRIX& M)
+  {
+    assert(firstrow+rows <= rowdim_ && firstcolumn+columns <= coldim_);
+
+    M.resize(rows, columns);
+    for (size_type i(0); i < rows; i++) // brute force
+      for (size_type j(0); j < columns; j++)
+	{
+	  M.set_entry(i, j, get_entry(firstrow+i, firstcolumn+j));
+	}
+  }
+  
+  template <class C>
   void SparseMatrix<C>::set_entry(const size_type row, const size_type column,
  				  const C value)
   {

@@ -341,6 +341,11 @@ int main()
   cout << "- after compressing with 1.5e-5:" << endl
        << small;
 
+  Matrix<double> extract;
+  small.get_block(0, 1, 2, 1, extract);
+  cout << "- extracted a sub-block from small:" << endl
+       << extract;
+
   cout << "- the matrix F2 again:" << endl
        << F2
        << "  and its transpose:" << endl

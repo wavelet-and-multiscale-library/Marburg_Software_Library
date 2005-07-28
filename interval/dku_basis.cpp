@@ -433,6 +433,11 @@ namespace WaveletTL
 	cout << "* ||GjT*MjT-I||_infty: " << row_sum_norm(test7) << endl;
 #endif
       }
+
+    Mj0_t  = transpose(Mj0_);
+    Mj0T_t = transpose(Mj0T_);
+    Mj1_t  = transpose(Mj1_);
+    Mj1T_t = transpose(Mj1T_);
   }
 
   template <int d, int dT>

@@ -168,9 +168,9 @@ namespace WaveletTL
     SparseMatrix<double> Cj_, CjT_, Cjp_, CjpT_;
     SparseMatrix<double> inv_Cj_, inv_CjT_, inv_Cjp_, inv_CjpT_;
 
-    SparseMatrix<double> Mj0_, Mj0T_, Mj1_, Mj1T_; // refinement matrices on the coarsest level j0()
+    SparseMatrix<double> Mj0_, Mj0T_, Mj1_, Mj1T_;     // refinement matrices on the coarsest level j0()
+    SparseMatrix<double> Mj0_t, Mj0T_t, Mj1_t, Mj1T_t; // transposed versions, for performance reasons
     
-  private:
     void setup_Alpha();
     void setup_AlphaT();
     void setup_BetaL();

@@ -42,29 +42,29 @@ int main()
   else
     cout << "  ... failed!" << endl;
       
-  cout << "- perform QR decomposition of A..." << endl;
-  QRDecomposition<double> qr(A);
-  if (qr.hasFullRank())
+  cout << "- perform QU decomposition of A..." << endl;
+  QUDecomposition<double> qu(A);
+  if (qu.hasFullRank())
     cout << "  * A has full rank!" << endl;
   else
     cout << "  * A does not have full rank!" << endl;
-  cout << "  * R:" << endl;
-  UpperTriangularMatrix<double> R;
-  qr.getR(R);
-  cout << R << endl;
+  cout << "  * U:" << endl;
+  UpperTriangularMatrix<double> U;
+  qu.getU(U);
+  cout << U << endl;
   cout << "  * Q:" << endl;
   Matrix<double> Q;
-  qr.getQ(Q);
+  qu.getQ(Q);
   cout << Q << endl;
   cout << "  * check:" << endl;
-  Matrix<double> QR(banddim);
+  Matrix<double> QU(banddim);
   for (size_type i(0); i < banddim; i++)
     for (size_type j(0); j < banddim; j++)
       {
 	for (size_type k(0); k <= j; k++)
-	  QR(i,j) += Q(i,k) * R(k,j);
+	  QU(i,j) += Q(i,k) * U(k,j);
       }
-  cout << QR;
+  cout << QU;
 
   cout << "- perform SVD of A..." << endl;
   SVD<double> svd(A);
@@ -82,15 +82,15 @@ int main()
   svd.getS(S);
   cout << S << endl;
 
-  Matrix<double> U;
-  svd.getU(U);
-  for (unsigned int i(0); i < U.row_dimension(); i++)
-    for (unsigned int j(0); j < U.column_dimension(); j++)
-      U(i, j) *= S[j];
+  Matrix<double> U2;
+  svd.getU(U2);
+  for (unsigned int i(0); i < U2.row_dimension(); i++)
+    for (unsigned int j(0); j < U2.column_dimension(); j++)
+      U2(i, j) *= S[j];
   
-  cout << "  * check of A-U*S*V yields error " << row_sum_norm(Matrix<double>(A)-(U*V)) << endl;
+  cout << "  * check of A-U*S*V yields error " << row_sum_norm(Matrix<double>(A)-(U2*V)) << endl;
 
-  cout << "- check linear solver using QR decomposition:" << endl
+  cout << "- check linear solver using QU decomposition:" << endl
        << "  * a small test matrix B:" << endl;
   Matrix<double> B(3, 2, "1 1 -1 1 0 1");
   cout << B;
@@ -106,16 +106,16 @@ int main()
     }
   cout << "  * rhs vector c: " << c << endl;
   Vector<double> x;
-  QRDecomposition<double> qr2(B);
-  qr2.solve(c, x);
+  QUDecomposition<double> qu2(B);
+  qu2.solve(c, x);
   cout << "  * solve() output x: " << x << endl;
 
-  cout << "- check computation of inverses via QR decomposition:" << endl
+  cout << "- check computation of inverses via QU decomposition:" << endl
        << "  * a small test matrix M:" << endl;
   Matrix<double> M(3, 3, "1 2 3 0 1 2 0 0 1"), MInv;
   cout << M;
-  QRDecomposition<double> qr3(M);
-  qr3.inverse(MInv);
+  QUDecomposition<double> qu3(M);
+  qu3.inverse(MInv);
   cout << "  * inverse() output:" << endl << MInv;
 
   return 0;

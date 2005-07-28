@@ -30,8 +30,8 @@ namespace MathTL
 			     LowerTriangularMatrix<C>& L);
 
   /*!
-    QR decomposition, construct unitary Q and "upper triangular" R such that
-      A = QR
+    QU decomposition, construct unitary Q and "upper triangular" U such that
+      A = QU
 
     References:
       JAMA
@@ -39,30 +39,30 @@ namespace MathTL
     \param A arbitrary matrix
   */
   template <class C>
-  class QRDecomposition
+  class QUDecomposition
   {
   public:
-    //! default constructor, perform QR decomposition
-    QRDecomposition(const Matrix<C>& A);
+    //! default constructor, perform QU decomposition
+    QUDecomposition(const Matrix<C>& A);
 
     //! determine whether A has full rank
     bool hasFullRank() const;
 
-    //! return R
-    void getR(UpperTriangularMatrix<C>& R) const;
+    //! return U
+    void getU(UpperTriangularMatrix<C>& U) const;
 
     //! return Q
     void getQ(Matrix<C>& Q) const;
 
     /*!
-      After the QR decomposition, solve the linear system Ax = b,
+      After the QU decomposition, solve the linear system Ax = b,
       where we assume that b is in the range of A.
       The vector x will be resized properly
     */
     void solve(const Vector<C>& b, Vector<C>& x) const;
 
     /*!
-      After the QR decomposition, compute the inverse of A.
+      After the QU decomposition, compute the inverse of A.
     */
     void inverse(Matrix<C>& AInv) const;
 
@@ -70,9 +70,9 @@ namespace MathTL
     //! m = A.row_dimension(), n = A.column_dimension()
     typename Matrix<C>::size_type rowdim_, coldim_;
     //! storage for the decomposition
-    Matrix<C> QR_;
-    //! storage for diag(R)
-    Vector<C> Rdiag_;
+    Matrix<C> QU_;
+    //! storage for diag(U)
+    Vector<C> Udiag_;
   };
 
   //! singular value decomposition

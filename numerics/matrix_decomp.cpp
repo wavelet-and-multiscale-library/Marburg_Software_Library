@@ -39,77 +39,77 @@ namespace MathTL
 
   //
   //
-  // QR decomposition
+  // QU decomposition
 
   template <class C>
-  QRDecomposition<C>::QRDecomposition(const Matrix<C>& A)
+  QUDecomposition<C>::QUDecomposition(const Matrix<C>& A)
   {
     // initialization
     rowdim_ = A.row_dimension();
     coldim_ = A.column_dimension();
-    QR_.resize(rowdim_,coldim_);
+    QU_.resize(rowdim_,coldim_);
     typedef typename Matrix<C>::size_type size_type;
     for (size_type row(0); row < rowdim_; row++)
       for (size_type col(0); col < coldim_; col++)
-	QR_(row,col) = A(row,col);
-    Rdiag_.resize(coldim_, false);
+	QU_(row,col) = A(row,col);
+    Udiag_.resize(coldim_, false);
 
     // main loop
     for (size_type k(0); k < coldim_; k++)
       {
 	// 2-norm of k-th column
 	C nrm(0);
-	for (size_type i(k); i < rowdim_; i++) nrm = hypot(nrm,QR_(i,k));
+	for (size_type i(k); i < rowdim_; i++) nrm = hypot(nrm,QU_(i,k));
 	if (nrm != 0.0)
 	  {
 	    // construct k-th Householder vector
-            if (QR_(k,k) < 0) nrm = -nrm;
-            for (size_type i(k); i < rowdim_; i++) QR_(i,k) /= nrm;
-            QR_(k,k) += 1.0;
+            if (QU_(k,k) < 0) nrm = -nrm;
+            for (size_type i(k); i < rowdim_; i++) QU_(i,k) /= nrm;
+            QU_(k,k) += 1.0;
 
             // transformation of the remaining columns
             for (size_type j(k+1); j < coldim_; j++)
 	      {
                C s(0);
                for (size_type i(k); i < rowdim_; i++)
-		 s += QR_(i,k)*QR_(i,j);
-               s = -s/QR_(k,k);
+		 s += QU_(i,k)*QU_(i,j);
+               s = -s/QU_(k,k);
                for (size_type i(k); i < rowdim_; i++)
-		 QR_(i,j) += s*QR_(i,k);
+		 QU_(i,j) += s*QU_(i,k);
 	      }
 	  }
-	Rdiag_[k] = -nrm;
+	Udiag_[k] = -nrm;
       }
   }
 
   template <class C>
-  bool QRDecomposition<C>::hasFullRank() const
+  bool QUDecomposition<C>::hasFullRank() const
   {
     for (typename Matrix<C>::size_type j(0); j < coldim_; j++) 
       {
-	if (Rdiag_[j] == 0)
+	if (Udiag_[j] == 0)
 	  return false;
       }
     return true;
   }
 
   template <class C>
-  void QRDecomposition<C>::getR(UpperTriangularMatrix<C>& R) const
+  void QUDecomposition<C>::getU(UpperTriangularMatrix<C>& U) const
   {
-    R.resize(coldim_, coldim_);
+    U.resize(coldim_, coldim_);
     typedef typename Matrix<C>::size_type size_type;
     for (size_type i(0); i < coldim_; i++)
       for (size_type j(i); j < coldim_; j++)
 	{
 	  if (i < j)
-	    R(i,j) = QR_(i,j);
+	    U(i,j) = QU_(i,j);
 	  else
-	    R(i,j) = Rdiag_[i];
+	    U(i,j) = Udiag_[i];
 	}
   }
 
   template <class C>
-  void QRDecomposition<C>::getQ(Matrix<C>& Q) const
+  void QUDecomposition<C>::getQ(Matrix<C>& Q) const
   {
     Q.resize(rowdim_,coldim_);
     typedef typename Matrix<C>::size_type size_type;
@@ -119,14 +119,14 @@ namespace MathTL
 	Q(k,k) = 1.0;
 	for (size_type j(k); j < coldim_; j++)
 	  {
-	    if (QR_(k,k) != 0)
+	    if (QU_(k,k) != 0)
 	      {
 		C s(0);
 		for (size_type i(k); i < rowdim_; i++)
-		  s += QR_(i,k)*Q(i,j);
-		s = -s/QR_(k,k);
+		  s += QU_(i,k)*Q(i,j);
+		s = -s/QU_(k,k);
 		for (size_type i(k); i < rowdim_; i++)
-		  Q(i,j) += s*QR_(i,k);
+		  Q(i,j) += s*QU_(i,k);
 	      }
 	  }
 
@@ -138,14 +138,14 @@ namespace MathTL
   }
 
   template <class C>
-  void QRDecomposition<C>::solve(const Vector<C>& b, Vector<C>& x) const
+  void QUDecomposition<C>::solve(const Vector<C>& b, Vector<C>& x) const
   {
     x.resize(coldim_);
     Vector<C> Qtb(coldim_);
 
-    // maybe one can speed up the following code by using QR_ directly
-    UpperTriangularMatrix<double> R;
-    getR(R);
+    // maybe one can speed up the following code by using QU_ directly
+    UpperTriangularMatrix<double> U;
+    getU(U);
     Matrix<double> Q;
     getQ(Q);
     
@@ -162,8 +162,8 @@ namespace MathTL
       {
 	x[i] = Qtb[i];
 	for (size_type j(i+1); j < coldim_; j++)
-	  x[i] -= R(i, j) * x[j];
-	x[i] /= R(i, i);
+	  x[i] -= U(i, j) * x[j];
+	x[i] /= U(i, i);
 
 	if (i == 0) // unsigned!!!
 	  break;
@@ -173,14 +173,14 @@ namespace MathTL
   }
 
   template <class C>
-  void QRDecomposition<C>::inverse(Matrix<C>& AInv) const
+  void QUDecomposition<C>::inverse(Matrix<C>& AInv) const
   {
     assert(coldim_ == rowdim_);
     AInv.resize(coldim_, coldim_);
 
-    // maybe one can speed up the following code by using QR_ directly
-    UpperTriangularMatrix<double> R;
-    getR(R);
+    // maybe one can speed up the following code by using QU_ directly
+    UpperTriangularMatrix<double> U;
+    getU(U);
     Matrix<double> Q;
     getQ(Q);
 
@@ -188,13 +188,13 @@ namespace MathTL
     typedef typename Matrix<C>::size_type size_type;
     for (size_type i(0); i < coldim_; i++)
       {
-	AInv(coldim_-1, i) = Q(i, coldim_-1) / R(coldim_-1, coldim_-1);
+	AInv(coldim_-1, i) = Q(i, coldim_-1) / U(coldim_-1, coldim_-1);
 	for (size_type j(coldim_-2); j >= 0;)
 	  {
 	    double c(Q(i, j));
 	    for (size_type k(j+1); k <= coldim_-1; k++)
-	      c -= R(j, k) * AInv(k, i);
-	    AInv(j, i) = c / R(j, j);
+	      c -= U(j, k) * AInv(k, i);
+	    AInv(j, i) = c / U(j, j);
 	    
 	    if (j == 0)
 	      break;

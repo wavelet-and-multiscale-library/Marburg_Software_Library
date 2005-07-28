@@ -78,11 +78,11 @@ namespace WaveletTL
     setup_Cj();
     Matrix<double> ml = ML(); // (3.5.2)
     Matrix<double> mr = MR(); // (3.5.2)
-    SparseMatrix<double> mj0;   Mj0  (ml,   mr,   mj0);   // (3.5.1)
+    SparseMatrix<double> mj0;   setup_Mj0  (ml,   mr,   mj0);   // (3.5.1)
 
     Matrix<double> mltp = MLTp(); // (3.5.6)
     Matrix<double> mrtp = MRTp(); // (3.5.6)
-    SparseMatrix<double> mj0tp; Mj0Tp(mltp, mrtp, mj0tp); // (3.5.5)
+    SparseMatrix<double> mj0tp; setup_Mj0Tp(mltp, mrtp, mj0tp); // (3.5.5)
 
     // construction of the wavelet basis: initial stable completion, [DKU section 4.1]
 
@@ -201,18 +201,18 @@ namespace WaveletTL
 #endif
 
     // construction of the wavelet basis: stable completion with basis transformations
-    SparseMatrix<double> Mj0  = transpose(inv_Cjp_)  * mj0   * transpose(Cj_); // (2.4.3)
-    SparseMatrix<double> Mj0T = transpose(inv_CjpT_) * mj0tp * transpose(CjT_);
+    Mj0_  = transpose(inv_Cjp_)  * mj0   * transpose(Cj_); // (2.4.3)
+    Mj0T_ = transpose(inv_CjpT_) * mj0tp * transpose(CjT_);
     
 #if 0
     cout << "DKUBasis(): check biorthogonality of Mj0, Mj0T:" << endl;
-    SparseMatrix<double> test5 = transpose(Mj0) * Mj0T;
+    SparseMatrix<double> test5 = transpose(Mj0_) * Mj0T_;
     for (unsigned int i = 0; i < test5.row_dimension(); i++)
       test5.set_entry(i, i, test5.get_entry(i, i) - 1.0);
     cout << "* ||Mj0^T*Mj0T-I||_1: " << column_sum_norm(test5) << endl;
     cout << "* ||Mj0^T*Mj0T-I||_infty: " << row_sum_norm(test5) << endl;
 
-    test5 = transpose(Mj0T) * Mj0;
+    test5 = transpose(Mj0T_) * Mj0_;
     for (unsigned int i = 0; i < test5.row_dimension(); i++)
       test5.set_entry(i, i, test5.get_entry(i, i) - 1.0);
     cout << "* ||Mj0T^T*Mj0-I||_1: " << column_sum_norm(test5) << endl;
@@ -220,31 +220,36 @@ namespace WaveletTL
 #endif    
 
     SparseMatrix<double> I; I.diagonal(Deltasize(j0()+1), 1.0);
-    SparseMatrix<double> Mj1  = (I - (Mj0*transpose(Mj0T))) * (transpose(inv_Cjp_) * mj1ih);
-    SparseMatrix<double> Mj1T = Cjp_ * transpose(gj1ih);
+    Mj1_  = (I - (Mj0_*transpose(Mj0T_))) * (transpose(inv_Cjp_) * mj1ih);
+    Mj1T_ = Cjp_ * transpose(gj1ih);
 
+    Mj0_ .compress(1e-8);
+    Mj1_ .compress(1e-8);
+    Mj0T_.compress(1e-8);
+    Mj1T_.compress(1e-8);
+    
 #if 0
     cout << "DKUBasis(): check new stable completion:" << endl;
 
-    SparseMatrix<double> mj_new(Mj0.row_dimension(),
-				Mj0.column_dimension() + Mj1.column_dimension());
-    for (unsigned int i = 0; i < Mj0.row_dimension(); i++)
-      for (unsigned int j = 0; j < Mj0.column_dimension(); j++)
+    SparseMatrix<double> mj_new(Mj0_.row_dimension(),
+				Mj0_.column_dimension() + Mj1_.column_dimension());
+    for (unsigned int i = 0; i < Mj0_.row_dimension(); i++)
+      for (unsigned int j = 0; j < Mj0_.column_dimension(); j++)
 	{
-	  const double help = Mj0.get_entry(i, j);
+	  const double help = Mj0_.get_entry(i, j);
 	  if (help != 0)
 	    mj_new.set_entry(i, j, help);
 	}
-    for (unsigned int i = 0; i < Mj1.row_dimension(); i++)
-      for (unsigned int j = 0; j < Mj1.column_dimension(); j++)
+    for (unsigned int i = 0; i < Mj1_.row_dimension(); i++)
+      for (unsigned int j = 0; j < Mj1_.column_dimension(); j++)
 	{
-	  const double help = Mj1.get_entry(i, j);
+	  const double help = Mj1_.get_entry(i, j);
 	  if (help != 0)
-	    mj_new.set_entry(i, j+Mj0.column_dimension(), help);
+	    mj_new.set_entry(i, j+Mj0_.column_dimension(), help);
 	}
 
-    SparseMatrix<double> gj0_new = transpose(Mj0T); gj0_new.compress();
-    SparseMatrix<double> gj1_new = transpose(Mj1T); gj1_new.compress();
+    SparseMatrix<double> gj0_new = transpose(Mj0T_); gj0_new.compress();
+    SparseMatrix<double> gj1_new = transpose(Mj1T_); gj1_new.compress();
     SparseMatrix<double> gj_new(gj0_new.row_dimension() + gj1_new.row_dimension(),
 				gj0_new.column_dimension());
     for (unsigned int i = 0; i < gj0_new.row_dimension(); i++)
@@ -274,25 +279,25 @@ namespace WaveletTL
     cout << "* ||Gj*Mj-I||_1: " << column_sum_norm(test6) << endl;
     cout << "* ||Gj*Mj-I||_infty: " << row_sum_norm(test6) << endl;
         
-    SparseMatrix<double> mjt_new(Mj0T.row_dimension(),
-				 Mj0T.column_dimension() + Mj1T.column_dimension());
-    for (unsigned int i = 0; i < Mj0T.row_dimension(); i++)
-      for (unsigned int j = 0; j < Mj0T.column_dimension(); j++)
+    SparseMatrix<double> mjt_new(Mj0T_.row_dimension(),
+				 Mj0T_.column_dimension() + Mj1T_.column_dimension());
+    for (unsigned int i = 0; i < Mj0T_.row_dimension(); i++)
+      for (unsigned int j = 0; j < Mj0T_.column_dimension(); j++)
 	{
-	  const double help = Mj0T.get_entry(i, j);
+	  const double help = Mj0T_.get_entry(i, j);
 	  if (help != 0)
 	    mjt_new.set_entry(i, j, help);
 	}
-    for (unsigned int i = 0; i < Mj1T.row_dimension(); i++)
-      for (unsigned int j = 0; j < Mj1T.column_dimension(); j++)
+    for (unsigned int i = 0; i < Mj1T_.row_dimension(); i++)
+      for (unsigned int j = 0; j < Mj1T_.column_dimension(); j++)
 	{
-	  const double help = Mj1T.get_entry(i, j);
+	  const double help = Mj1T_.get_entry(i, j);
 	  if (help != 0)
-	    mjt_new.set_entry(i, j+Mj0T.column_dimension(), help);
+	    mjt_new.set_entry(i, j+Mj0T_.column_dimension(), help);
 	}
 
-    SparseMatrix<double> gjt0_new = transpose(Mj0); gjt0_new.compress();
-    SparseMatrix<double> gjt1_new = transpose(Mj1); gjt1_new.compress();
+    SparseMatrix<double> gjt0_new = transpose(Mj0_); gjt0_new.compress();
+    SparseMatrix<double> gjt1_new = transpose(Mj1_); gjt1_new.compress();
     SparseMatrix<double> gjt_new(gjt0_new.row_dimension() + gjt1_new.row_dimension(),
 				 gjt0_new.column_dimension());
     for (unsigned int i = 0; i < gjt0_new.row_dimension(); i++)
@@ -323,51 +328,6 @@ namespace WaveletTL
     cout << "* ||GjT*MjT-I||_infty: " << row_sum_norm(test6) << endl;
 #endif
 
-    Mj0 .compress(1e-8);
-    Mj1 .compress(1e-8);
-    Mj0T.compress(1e-8);
-    Mj1T.compress(1e-8);
-
-    // extract upper left and lower right blocks from the refinement matrices
-
-    // compute row nr. of last nontriv. entry in the dT-th column of Mj0 (plus 1)
-    const int Mj0blockrows = (d+ell_+ell1_)+ (d+1) + (dT-(d+1))*2;
-    Mj0L_.resize(Mj0blockrows, d);
-    for (int i = 0; i < Mj0blockrows; i++)
-      for (int j = 0; j < d; j++)
-	Mj0L_.set_entry(i, j, Mj0.get_entry(i, j));
-    Mj0R_.resize(Mj0blockrows, d);
-    for (int i = 0; i < Mj0blockrows; i++)
-      for (int j = 0; j < d; j++)
-	Mj0R_.set_entry(i, j, Mj0.get_entry(Deltasize(j0()+1)-i-1, Deltasize(j0())-j-1));
-
-    // compute row nr. of last nontriv. entry in the dT-th column of Mj0T (plus 1)
-    const int Mj0Tblockrows = (dT+ellT_+ell1T_)+ (d+2*dT-1) - 2;
-    Mj0TL_.resize(Mj0Tblockrows, dT);
-    for (int i = 0; i < Mj0Tblockrows; i++)
-      for (int j = 0; j < dT; j++)
-	Mj0TL_.set_entry(i, j, Mj0T.get_entry(i, j));
-    Mj0TR_.resize(Mj0Tblockrows, dT);
-    for (int i = 0; i < Mj0Tblockrows; i++)
-      for (int j = 0; j < d; j++)
-	Mj0TR_.set_entry(i, j, Mj0T.get_entry(Deltasize(j0()+1)-i-1, Deltasize(j0())-j-1));
-
-    // compute number of rows and columns of the corner blocks in Mj1 (INCORRECT!!!)
-    int Mj1blockcols = 1<<j0();
-    for (; fabs(Mj1.get_entry(0, Mj1blockcols-1)) < 1e-6; Mj1blockcols--);
-    int Mj1blockrows = Deltasize(j0()+1);
-    for (; fabs(Mj1.get_entry(Mj1blockrows-1, Mj1blockcols-1)) < 1e-6; Mj1blockrows--);
-    Mj1L_.resize(Mj1blockrows, Mj1blockcols);
-    for (int i = 0; i < Mj1blockrows; i++)
-      for (int j = 0; j < Mj1blockcols; j++)
-	Mj1L_.set_entry(i, j, Mj1.get_entry(i, j));
-    Mj1R_.resize(Mj1blockrows, Mj1blockcols);
-    for (int i = 0; i < Mj1blockrows; i++)
-      for (int j = 0; j < Mj1blockcols; j++)
-	Mj1R_.set_entry(i, j, Mj1.get_entry(Deltasize(j0()+1)-i-1, (1<<j0())-j-1));
-
-    cout << "Mj1=" << endl << Mj1 << endl;
-    cout << "Mj1L=" << endl << Mj1L_ << endl;
   }
 
   template <int d, int dT>
@@ -1013,7 +973,7 @@ namespace WaveletTL
 
   template <int d, int dT>
   void
-  DKUBasis<d, dT>::Mj0(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& Mj0)
+  DKUBasis<d, dT>::setup_Mj0(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& Mj0)
   {
     // IGPMlib reference: I_Basis_Bspline_s::Mj0()
     
@@ -1057,7 +1017,7 @@ namespace WaveletTL
 
   template <int d, int dT>
   void
-  DKUBasis<d, dT>::Mj0Tp(const Matrix<double>& MLTp, const Matrix<double>& MRTp, SparseMatrix<double>& Mj0Tp)
+  DKUBasis<d, dT>::setup_Mj0Tp(const Matrix<double>& MLTp, const Matrix<double>& MRTp, SparseMatrix<double>& Mj0Tp)
   {
     // IGPMlib reference: I_Basis_Bspline_s::Mj0ts()
 

@@ -168,8 +168,7 @@ namespace WaveletTL
     SparseMatrix<double> Cj_, CjT_, Cjp_, CjpT_;
     SparseMatrix<double> inv_Cj_, inv_CjT_, inv_Cjp_, inv_CjpT_;
 
-    Matrix<double> Mj0L_, Mj0R_, Mj0TL_, Mj0TR_; // corner blocks of refinement matrices
-    Matrix<double> Mj1L_, Mj1R_, Mj1TL_, Mj1TR_; // corner blocks of wavelet trafo matrices
+    SparseMatrix<double> Mj0_, Mj0T_, Mj1_, Mj1T_; // refinement matrices on the coarsest level j0()
     
   private:
     void setup_Alpha();
@@ -194,8 +193,8 @@ namespace WaveletTL
     Matrix<double> MRTp() const;
 
     // Mj0, Mj0Tp (3.5.1), (3.5.5)
-    void Mj0  (const Matrix<double>& ML,   const Matrix<double>& MR,   SparseMatrix<double>& Mj0  );
-    void Mj0Tp(const Matrix<double>& MLTp, const Matrix<double>& MRTp, SparseMatrix<double>& Mj0Tp);
+    void setup_Mj0  (const Matrix<double>& ML,   const Matrix<double>& MR,   SparseMatrix<double>& Mj0  );
+    void setup_Mj0Tp(const Matrix<double>& MLTp, const Matrix<double>& MRTp, SparseMatrix<double>& Mj0Tp);
 
     // routines for the stable completion, [DKU section 4.1]
     void F(SparseMatrix<double>& FF); // (4.1.11), (4.1.14)

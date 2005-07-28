@@ -1425,6 +1425,98 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
+  void
+  DKUBasis<d, dT>::decompose(const InfiniteVector<double, Index>& c,
+			     const int j0,
+			     InfiniteVector<double, Index>& v) const
+  {
+    for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
+	 it != itend; ++it)
+      {
+ 	InfiniteVector<double, Index> help;
+ 	decompose_1(it.index(), j0, help);
+ 	v += *it * help;
+      }
+  }
+  
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::decompose_t(const InfiniteVector<double, Index>& c,
+			       const int j0,
+			       InfiniteVector<double, Index>& v) const
+  {
+    for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
+	 it != itend; ++it)
+      {
+	InfiniteVector<double, Index> help;
+	decompose_t_1(it.index(), j0, help);
+	v += *it * help;
+      }
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::reconstruct(const InfiniteVector<double, Index>& c,
+			       const int j,
+			       InfiniteVector<double, Index>& v) const
+  {
+    for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
+	 it != itend; ++it)
+      {
+	InfiniteVector<double, Index> help;
+	reconstruct_1(it.index(), j, help);
+	v += *it * help;
+      }
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::reconstruct_t(const InfiniteVector<double, Index>& c,
+				 const int j,
+				 InfiniteVector<double, Index>& v) const
+  {
+    for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
+	 it != itend; ++it)
+      {
+	InfiniteVector<double, Index> help;
+	reconstruct_t_1(it.index(), j, help);
+	v += *it * help;
+      }
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::decompose_1(const Index& lambda,
+			       const int j0,
+			       InfiniteVector<double, Index>& c) const
+  {
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::decompose_t_1(const Index& lambda,
+				 const int j0,
+				 InfiniteVector<double, Index>& c) const
+  {
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::reconstruct_1(const Index& lambda,
+				 const int j,
+				 InfiniteVector<double, Index>& c) const
+  {
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::reconstruct_t_1(const Index& lambda,
+				   const int j,
+				   InfiniteVector<double, Index>& c) const
+  {
+  }
+
+  template <int d, int dT>
   SampledMapping<1>
   DKUBasis<d, dT>::evaluate(const Index& lambda,
 			    const bool primal,

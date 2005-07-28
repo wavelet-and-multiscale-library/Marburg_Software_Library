@@ -15,6 +15,7 @@
 
 #include <algebra/matrix.h>
 #include <algebra/sparse_matrix.h>
+#include <algebra/infinite_vector.h>
 #include <utils/array1d.h>
 
 #include <Rd/cdf_utils.h>
@@ -125,6 +126,86 @@ namespace WaveletTL
       last (rightmost) wavelet on scale j >= j0
     */
     Index lastWavelet(const int j) const;
+
+    //! DECOMPOSE routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+        \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
+      where the multiscale decomposition starts with the coarsest
+      generator level j0.
+     */
+    void decompose_1(const Index& lambda, const int j0,
+		     InfiniteVector<double, Index>& c) const;
+
+    //! dual DECOMPOSE routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+        \tilde\psi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
+      where the multiscale decomposition starts with the coarsest
+      generator level j0.
+     */
+    void decompose_t_1(const Index& lambda, const int j0,
+		       InfiniteVector<double, Index>& c) const;
+
+    //! DECOMPOSE routine, full version
+    /*!
+      constructs for a given coefficient set c another one v with level >= j0,
+      such that
+        \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
+    */
+    void decompose(const InfiniteVector<double, Index>& c, const int j0,
+		   InfiniteVector<double, Index>& v) const;
+
+    //! dual DECOMPOSE routine, full version
+    /*!
+      constructs for a given coefficient set c another one v with level >= j0,
+      such that
+        \sum_{\lambda}c_\lambda\tilde\psi_lambda = \sum_{\lambda'}d_{\lambda'}\tilde\psi_{\lambda'}
+    */
+    void decompose_t(const InfiniteVector<double, Index>& c, const int j0,
+		     InfiniteVector<double, Index>& v) const;
+
+    //! RECONSTRUCT routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+        \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
+      where always |\lambda'|>=j
+     */
+    void reconstruct_1(const Index& lambda, const int j,
+		       InfiniteVector<double, Index>& c) const;
+
+    //! RECONSTRUCT routine, full version
+    /*!
+      Constructs for a given coefficient set c another one v,
+      such that
+        \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
+      where always |\lambda'|>=j
+    */
+    void reconstruct(const InfiniteVector<double, Index>& c, const int j,
+		     InfiniteVector<double, Index>& v) const;
+
+    //! dual RECONSTRUCT routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+        \tilde\psi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
+      where always |\lambda'|>=j
+     */
+    void reconstruct_t_1(const Index& lambda, const int j,
+			 InfiniteVector<double, Index>& c) const;
+
+    //! dual RECONSTRUCT routine, full version
+    /*!
+      Constructs for a given coefficient set c another one v,
+      such that
+        \sum_{\lambda}c_\lambda\tilde\psi_\lambda = \sum_{\lambda'}v_{\lambda'}\tilde\psi_{\lambda'}
+      where always |\lambda'|>=j
+    */
+    void reconstruct_t(const InfiniteVector<double, Index>& c, const int j,
+		       InfiniteVector<double, Index>& v) const;
 
     /*!
       Evaluate a single primal/dual generator or wavelet \psi_\lambda

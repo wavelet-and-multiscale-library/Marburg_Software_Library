@@ -112,7 +112,7 @@ namespace WaveletTL
 
     //! RECONSTRUCT routine, full version
     /*!
-      Constructs for a given single wavelet index lambda a coefficient set d,
+      Constructs for a given coefficient set c another one d,
       such that
         \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}d_{\lambda'}\psi_{\lambda'}
       where always |\lambda'|>=j
@@ -135,7 +135,7 @@ namespace WaveletTL
 
     //! dual RECONSTRUCT routine, full version
     /*!
-      Constructs for a given single wavelet index lambda a coefficient set d,
+      Constructs for a given coefficient set c another one d,
       such that
         \sum_{\lambda}c_\lambda\tilde\psi_\lambda = \sum_{\lambda'}d_{\lambda'}\tilde\psi_{\lambda'}
       where always |\lambda'|>=j

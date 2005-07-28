@@ -26,9 +26,11 @@ int main()
   cout << "- leftmost wavelet on the coarsest level: " << basis.firstWavelet(basis.j0()) << endl;
   cout << "- rightmost wavelet on the coarsest level: " << basis.lastWavelet(basis.j0()) << endl;
 
+  typedef Basis::Index Index;
+
 #if 0
   cout << "- iterating from first generator on coarsest level to last wavelet on next level:" << endl;
-  Basis::Index index(basis.firstGenerator(basis.j0()));
+  Index index(basis.firstGenerator(basis.j0()));
   for (;; ++index) {
     cout << index << endl;
     if (index == basis.lastWavelet(basis.j0()+1)) break;
@@ -38,9 +40,17 @@ int main()
   cout << "- index of leftmost right boundary generator on scale j0: "
        << basis.DeltaRmin(basis.j0()) << endl;
 
+  InfiniteVector<double, Index> coeff;
+  coeff[basis.firstGenerator(basis.j0())] = 1.0;
+  cout << "  * a small but nontrivial coefficient set:" << endl << coeff;
+  cout << "  * result of DECOMPOSE:" << endl;
+  InfiniteVector<double,Index> wcoeff;
+  basis.decompose(coeff,1,wcoeff);
+  cout << wcoeff;
+
 #if 0
   cout << "- evaluating some primal generators:" << endl;
-  Basis::Index lambda(basis.firstGenerator(basis.j0()));
+  Index lambda(basis.firstGenerator(basis.j0()));
   for (;; ++lambda) {
     cout << lambda << endl;
     basis.evaluate(lambda, true, 5).matlab_output(cout);
@@ -72,16 +82,16 @@ int main()
 
   cout << "* yet another basis:" << endl;
 
-  const int d3 = 3;
-  const int dT3 = 7;
-  DKUBasis<d3, dT3> basis3;
+//   const int d3 = 3;
+//   const int dT3 = 7;
+//   DKUBasis<d3, dT3> basis3;
 
-  cout << "- the (" << d3 << "," << dT3 << ") basis has j0=" << basis3.j0() << endl;
-  cout << "- the default wavelet index: " << DKUBasis<d3, dT3>::Index(&basis3) << endl;
-  cout << "- leftmost generator on the coarsest level: " << basis3.firstGenerator(basis3.j0()) << endl;
-  cout << "- rightmost generator on the coarsest level: " << basis3.lastGenerator(basis3.j0()) << endl;
-  cout << "- leftmost wavelet on the coarsest level: " << basis3.firstWavelet(basis3.j0()) << endl;
-  cout << "- rightmost wavelet on the coarsest level: " << basis3.lastWavelet(basis3.j0()) << endl;
+//   cout << "- the (" << d3 << "," << dT3 << ") basis has j0=" << basis3.j0() << endl;
+//   cout << "- the default wavelet index: " << DKUBasis<d3, dT3>::Index(&basis3) << endl;
+//   cout << "- leftmost generator on the coarsest level: " << basis3.firstGenerator(basis3.j0()) << endl;
+//   cout << "- rightmost generator on the coarsest level: " << basis3.lastGenerator(basis3.j0()) << endl;
+//   cout << "- leftmost wavelet on the coarsest level: " << basis3.firstWavelet(basis3.j0()) << endl;
+//   cout << "- rightmost wavelet on the coarsest level: " << basis3.lastWavelet(basis3.j0()) << endl;
 
   return 0;
 }

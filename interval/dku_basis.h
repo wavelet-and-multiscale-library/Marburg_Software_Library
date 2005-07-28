@@ -35,11 +35,11 @@ namespace WaveletTL
   */
   enum DKUBiorthogonalizationMethod
     {
-      none,         // C_L = I
-      SVD,          // Gamma_L = U*S*V, C_L = S^{-1/2}U^T, C_L_T = S^{-1/2}V
-      Bernstein,    // transformation to Bernstein basis on [0,b]
-      partialSVD,   // partial SVD
-      BernsteinSVD  // transformation to Bernstein basis plus partial SVD
+      none,         // method #1 in IGPMlib, C_L = I
+      SVD,          // method #2 in IGPMlib, Gamma_L = U*S*V, C_L = S^{-1/2}U^T, C_L_T = S^{-1/2}V
+      Bernstein,    // method #3 in IGPMlib, transformation to Bernstein basis on [0,b]
+      partialSVD,   // method #4 in IGPMlib, partial SVD
+      BernsteinSVD  // method #5 in IGPMlib, transformation to Bernstein basis plus partial SVD
     };
 
   /*!
@@ -203,6 +203,9 @@ namespace WaveletTL
     void GElim (SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv); // elimination/factorization
     void InvertP(const SparseMatrix<double>& PP, SparseMatrix<double>& PPinv);
     void BT(const SparseMatrix<double>& A, SparseMatrix<double>& BB); // (4.1.9), (4.1.13)
+
+    // boundary wavelet modifications from [DS]
+    void modify_boundary_wavelets(SparseMatrix<double>& Mj1, SparseMatrix<double>& Mj1T);
   };
 }
 

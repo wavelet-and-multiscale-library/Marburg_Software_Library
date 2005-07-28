@@ -113,11 +113,11 @@ namespace WaveletTL
 	b[m] = (*rowit2 == mu ? facmu : 0);
       }
 	
-      // the system matrix is rectangular, but Ax=b is solvable via a QR decomposition
-      QRDecomposition<double> qr(A);
-      assert(qr.hasFullRank());
+      // the system matrix is rectangular, but Ax=b is solvable via a QU decomposition
+      QUDecomposition<double> qu(A);
+      assert(qu.hasFullRank());
       Vector<double> x;
-      qr.solve(b, x);
+      qu.solve(b, x);
       x.compress(1e-15);
 	
       // reinterpret the entries of x

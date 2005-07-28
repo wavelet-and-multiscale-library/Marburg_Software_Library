@@ -72,16 +72,16 @@ int main()
 
   cout << "* yet another basis:" << endl;
 
-//   const int d3 = 3;
-//   const int dT3 = 7;
-//   DKUBasis<d3, dT3> basis3;
+  const int d3 = 3;
+  const int dT3 = 7;
+  DKUBasis<d3, dT3> basis3;
 
-//   cout << "- the (" << d3 << "," << dT3 << ") basis has j0=" << basis3.j0() << endl;
-//   cout << "- the default wavelet index: " << DKUBasis<d3, dT3>::Index(&basis3) << endl;
-//   cout << "- leftmost generator on the coarsest level: " << basis3.firstGenerator(basis3.j0()) << endl;
-//   cout << "- rightmost generator on the coarsest level: " << basis3.lastGenerator(basis3.j0()) << endl;
-//   cout << "- leftmost wavelet on the coarsest level: " << basis3.firstWavelet(basis3.j0()) << endl;
-//   cout << "- rightmost wavelet on the coarsest level: " << basis3.lastWavelet(basis3.j0()) << endl;
+  cout << "- the (" << d3 << "," << dT3 << ") basis has j0=" << basis3.j0() << endl;
+  cout << "- the default wavelet index: " << DKUBasis<d3, dT3>::Index(&basis3) << endl;
+  cout << "- leftmost generator on the coarsest level: " << basis3.firstGenerator(basis3.j0()) << endl;
+  cout << "- rightmost generator on the coarsest level: " << basis3.lastGenerator(basis3.j0()) << endl;
+  cout << "- leftmost wavelet on the coarsest level: " << basis3.firstWavelet(basis3.j0()) << endl;
+  cout << "- rightmost wavelet on the coarsest level: " << basis3.lastWavelet(basis3.j0()) << endl;
 
   return 0;
 }

@@ -53,6 +53,11 @@ int main()
   basis.decompose(coeff, basis.j0(), wcoeff);
   cout << wcoeff;
 
+  cout << "  * RECONSTRUCT that:" << endl;
+  InfiniteVector<double,Index> rcoeff;
+  basis.reconstruct(wcoeff,basis.j0()+1,rcoeff);
+  cout << rcoeff;
+
 #if 0
   cout << "- evaluating some primal generators:" << endl;
   Index lambda(basis.firstGenerator(basis.j0()));

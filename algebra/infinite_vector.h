@@ -25,12 +25,11 @@ namespace MathTL
     arbitrarily indexed vectors
       x = (x_i)_{i\in I}
     with entries from a (scalar) class C.
-    InfiniteVector<C,I> may act as a realization of coefficient_type in the FWT.
+    InfiniteVector<C,I> may act as a realization of coefficient_type in the WaveletTL.
     
     Although internally, we will model InfiniteVector as a map<I,C>,
     the access to the vector entries takes place by a nested iterator
     class (compare the deal.II matrix classes) which is STL-compatible.
-    
   */
   template <class C, class I>
   class InfiniteVector

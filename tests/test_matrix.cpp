@@ -5,6 +5,7 @@
 #include <algebra/matrix_norms.h>
 #include <algebra/symmetric_matrix.h>
 #include <algebra/sparse_matrix.h>
+#include <algebra/infinite_vector.h>
 
 using std::cout;
 using std::endl;
@@ -337,9 +338,20 @@ int main()
   cout << "- a sparse matrix with small entries:" << endl
        << small;
 
+  InfiniteVector<double, unsigned int> v;
+  small.get_row(0, v);
+  cout << "- extracted a row from small as a sparse vector:" << endl
+       << v;
+
+  small.get_row(1, v);
+  cout << "- another row:" << endl << v;
+
   small.compress(1.5e-5);
-  cout << "- after compressing with 1.5e-5:" << endl
+  cout << "- small after compressing with 1.5e-5:" << endl
        << small;
+
+  small.get_row(1, v);
+  cout << "- extract last row again:" << endl << v;
 
   Matrix<double> extract;
   small.get_block(0, 1, 2, 1, extract);
@@ -350,6 +362,6 @@ int main()
        << F2
        << "  and its transpose:" << endl
        << transpose(F2);
-
+  
   return 0;
 }

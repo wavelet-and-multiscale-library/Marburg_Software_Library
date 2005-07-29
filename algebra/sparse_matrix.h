@@ -16,6 +16,7 @@
 #include <algebra/vector.h>
 #include <algebra/symmetric_matrix.h>
 #include <algebra/triangular_matrix.h>
+#include <algebra/infinite_vector.h>
 
 // matrix norms, for convenience
 #include <algebra/matrix_norms.h>
@@ -93,7 +94,12 @@ namespace MathTL
     template <class MATRIX>
     void get_block(const size_type firstrow, const size_type firstcolumn,
 		   const size_type rows, const size_type columns,
-		   MATRIX& M);
+		   MATRIX& M) const;
+    
+    /*!
+      read access to an entire row
+    */
+    void get_row(const size_type row, InfiniteVector<C, size_type>& v) const;
 
     /*!
       write access to a matrix entry

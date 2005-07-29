@@ -161,7 +161,7 @@ namespace MathTL
   template <class MATRIX>
   void SparseMatrix<C>::get_block(const size_type firstrow, const size_type firstcolumn,
 				  const size_type rows, const size_type columns,
-				  MATRIX& M)
+				  MATRIX& M) const
   {
     assert(firstrow+rows <= rowdim_ && firstcolumn+columns <= coldim_);
 
@@ -173,6 +173,19 @@ namespace MathTL
 	}
   }
   
+  template <class C>
+  void SparseMatrix<C>::get_row(const size_type row, InfiniteVector<C, size_type>& v) const
+  {
+    assert(row < rowdim_);
+
+    v.clear();
+    if (indices_[row])
+      {
+	for (size_type k(1); k <= indices_[row][0]; k++)
+	  v.set_coefficient(indices_[row][k], entries_[row][k-1]);
+      }
+  }
+
   template <class C>
   void SparseMatrix<C>::set_entry(const size_type row, const size_type column,
  				  const C value)

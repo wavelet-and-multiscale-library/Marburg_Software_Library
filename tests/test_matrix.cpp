@@ -338,7 +338,7 @@ int main()
   cout << "- a sparse matrix with small entries:" << endl
        << small;
 
-  InfiniteVector<double, unsigned int> v;
+  InfiniteVector<double, Vector<double>::size_type> v;
   small.get_row(0, v);
   cout << "- extracted a row from small as a sparse vector:" << endl
        << v;

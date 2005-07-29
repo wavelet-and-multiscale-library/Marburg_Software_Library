@@ -6,6 +6,7 @@
 #include <utils/tiny_tools.h>
 #include <algebra/matrix_norms.h>
 #include <algebra/triangular_matrix.h>
+#include <algebra/infinite_vector.h>
 #include <numerics/eigenvalues.h>
 #include <numerics/matrix_decomp.h>
 
@@ -1427,14 +1428,14 @@ namespace WaveletTL
   template <int d, int dT>
   void
   DKUBasis<d, dT>::decompose(const InfiniteVector<double, Index>& c,
-			     const int j0,
+			     const int jmin,
 			     InfiniteVector<double, Index>& v) const
   {
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
 	 it != itend; ++it)
       {
  	InfiniteVector<double, Index> help;
- 	decompose_1(it.index(), j0, help);
+ 	decompose_1(it.index(), jmin, help);
  	v += *it * help;
       }
   }
@@ -1442,14 +1443,14 @@ namespace WaveletTL
   template <int d, int dT>
   void
   DKUBasis<d, dT>::decompose_t(const InfiniteVector<double, Index>& c,
-			       const int j0,
+			       const int jmin,
 			       InfiniteVector<double, Index>& v) const
   {
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
 	 it != itend; ++it)
       {
 	InfiniteVector<double, Index> help;
-	decompose_t_1(it.index(), j0, help);
+	decompose_t_1(it.index(), jmin, help);
 	v += *it * help;
       }
   }
@@ -1487,15 +1488,56 @@ namespace WaveletTL
   template <int d, int dT>
   void
   DKUBasis<d, dT>::decompose_1(const Index& lambda,
-			       const int j0,
+			       const int jmin,
 			       InfiniteVector<double, Index>& c) const
   {
+    assert(jmin >= j0());
+    assert(lambda.j() >= jmin);
+
+    c.clear();
+
+    if (lambda.e() == 1) // wavelet
+      c[lambda] = 1.0; // true wavelet coefficients don't have to be modified
+    else // generator
+      {
+	if (lambda.j() == jmin)
+	  c[lambda] = 1.0;
+	else // j > jmin
+	  {
+	    // For the multiscale decomposition of psi_lambda, we have to compute
+	    // the corresponding column of the transformation matrix Gj=MjT^T,
+	    // i.e. one row of Gj^T=(Mj0T, Mj1T).
+	    
+	    // for a first hack, we only consider a special case:
+	    assert(jmin == j0());
+	    assert(lambda.j() == jmin+1);
+
+	    const int row = lambda.k() - DeltaLmin();
+	    InfiniteVector<double, Vector<double>::size_type> v;
+
+	    // compute d_{j-1}
+	    Mj1T_.get_row(row, v);
+	    for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+		 it != v.end(); ++it)
+	      c[Index(lambda.j()-1, 1, it.index(), this)] = *it;
+
+ 	    // compute c_{jmin} via recursion
+	    Mj0T_.get_row(row, v);
+	    for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+		 it != v.end(); ++it)
+	      {
+		InfiniteVector<double, Index> dhelp;
+		decompose_1(Index(lambda.j()-1, 0, DeltaLmin()+it.index(), this), jmin, dhelp);
+		c += *it * dhelp;
+	      }
+	  }
+      }
   }
 
   template <int d, int dT>
   void
   DKUBasis<d, dT>::decompose_t_1(const Index& lambda,
-				 const int j0,
+				 const int jmin,
 				 InfiniteVector<double, Index>& c) const
   {
   }

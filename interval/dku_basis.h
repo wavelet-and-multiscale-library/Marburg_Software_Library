@@ -133,9 +133,9 @@ namespace WaveletTL
       such that
         \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
       where the multiscale decomposition starts with the coarsest
-      generator level j0.
+      generator level jmin.
      */
-    void decompose_1(const Index& lambda, const int j0,
+    void decompose_1(const Index& lambda, const int jmin,
 		     InfiniteVector<double, Index>& c) const;
 
     //! dual DECOMPOSE routine, simple version
@@ -144,27 +144,27 @@ namespace WaveletTL
       such that
         \tilde\psi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
       where the multiscale decomposition starts with the coarsest
-      generator level j0.
+      generator level jmin.
      */
-    void decompose_t_1(const Index& lambda, const int j0,
+    void decompose_t_1(const Index& lambda, const int jmin,
 		       InfiniteVector<double, Index>& c) const;
 
     //! DECOMPOSE routine, full version
     /*!
-      constructs for a given coefficient set c another one v with level >= j0,
+      constructs for a given coefficient set c another one v with level >= jmin,
       such that
         \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
     */
-    void decompose(const InfiniteVector<double, Index>& c, const int j0,
+    void decompose(const InfiniteVector<double, Index>& c, const int jmin,
 		   InfiniteVector<double, Index>& v) const;
 
     //! dual DECOMPOSE routine, full version
     /*!
-      constructs for a given coefficient set c another one v with level >= j0,
+      constructs for a given coefficient set c another one v with level >= jmin,
       such that
         \sum_{\lambda}c_\lambda\tilde\psi_lambda = \sum_{\lambda'}d_{\lambda'}\tilde\psi_{\lambda'}
     */
-    void decompose_t(const InfiniteVector<double, Index>& c, const int j0,
+    void decompose_t(const InfiniteVector<double, Index>& c, const int jmin,
 		     InfiniteVector<double, Index>& v) const;
 
     //! RECONSTRUCT routine, simple version

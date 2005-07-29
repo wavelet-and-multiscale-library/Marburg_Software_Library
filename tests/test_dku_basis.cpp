@@ -41,11 +41,16 @@ int main()
        << basis.DeltaRmin(basis.j0()) << endl;
 
   InfiniteVector<double, Index> coeff;
-  coeff[basis.firstGenerator(basis.j0())] = 1.0;
+//   coeff[basis.firstGenerator(basis.j0())] = 0.0;
+//   coeff[++basis.firstGenerator(basis.j0())] = 0.0;
+  Index index(basis.firstGenerator(basis.j0()+1));
+  coeff[index] = 1.0;
+//   for (int i = 0; i <= 8; i++)
+//     coeff[++index] = 1.0;
   cout << "  * a small but nontrivial coefficient set:" << endl << coeff;
   cout << "  * result of DECOMPOSE:" << endl;
   InfiniteVector<double,Index> wcoeff;
-  basis.decompose(coeff,1,wcoeff);
+  basis.decompose(coeff, basis.j0(), wcoeff);
   cout << wcoeff;
 
 #if 0

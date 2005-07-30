@@ -113,6 +113,11 @@ namespace MathTL
   }
 
   template <class C, class I>
+  void InfiniteVector<C,I>::compress(const double eta)
+  {
+  }
+
+  template <class C, class I>
   void InfiniteVector<C,I>::add(const InfiniteVector<C,I>& v)
   {
     // the following code can be optimized (not O(N) now)

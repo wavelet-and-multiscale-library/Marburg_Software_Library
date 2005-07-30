@@ -1468,6 +1468,8 @@ namespace WaveletTL
 	reconstruct_1(it.index(), j, help);
 	v += *it * help;
       }
+
+    v.compress(1e-12);
   }
 
   template <int d, int dT>
@@ -1522,7 +1524,7 @@ namespace WaveletTL
 	      c[Index(lambda.j()-1, 1, it.index(), this)] = *it;
 
  	    // compute c_{jmin} via recursion
-	    Mj0T_.get_row(row, v);
+ 	    Mj0T_.get_row(row, v);
 	    for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
 		 it != v.end(); ++it)
 	      {
@@ -1548,6 +1550,28 @@ namespace WaveletTL
 				 const int j,
 				 InfiniteVector<double, Index>& c) const
   {
+    if (lambda.j() >= j)
+      c[lambda] += 1.0; 
+    else
+      {
+	// For the reconstruction of psi_lambda, we have to compute
+	// the corresponding column of the transformation matrix Mj=(Mj0, Mj1).
+
+	// for a first hack, we only consider a special case 
+	assert(j == j0()+1);
+	assert(lambda.j() == j0());
+
+	// reconstruct by recursion (TODO: more than one level...)
+	InfiniteVector<double, Vector<double>::size_type> v;
+	if (lambda.e() == 0)
+	  Mj0_t.get_row(lambda.k() - DeltaLmin(), v);
+ 	else
+	  Mj1_t.get_row(lambda.k(), v);
+
+	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+	     it != v.end(); ++it)
+	  c[Index(j, 0, DeltaLmin()+it.index(), this)] += *it;
+      }
   }
 
   template <int d, int dT>

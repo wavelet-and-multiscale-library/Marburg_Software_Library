@@ -1505,31 +1505,66 @@ namespace WaveletTL
 	else // j > jmin
 	  {
 	    // For the multiscale decomposition of psi_lambda, we have to compute
-	    // the corresponding column of the transformation matrix Gj=MjT^T,
-	    // i.e. one row of Gj^T=(Mj0T, Mj1T)
-	    
-	    // for a first hack, we only consider a special case:
-	    assert(jmin == j0());
-	    assert(lambda.j() == jmin+1);
+	    // the corresponding column of the transformation matrix G_{j-1}=\tilde M_{j-1}^T,
+	    // i.e. one row of G_{j-1}^T=(\tilde M_{j-1,0}, \tilde M_{j-1,1}).
 
-	    const int row = lambda.k() - DeltaLmin();
-	    InfiniteVector<double, Vector<double>::size_type> v;
+	    cout << "decompose_1 called with lambda=" << lambda << endl;
+	   
+	    const int row_in_Gjm1_t        = lambda.k() - DeltaLmin();
+	    cout << "+ row in Gjm1_t: " << row_in_Gjm1_t << endl;
 
-	    // compute d_{j-1}
-	    Mj1T_.get_row(row, v);
-	    for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
-		 it != v.end(); ++it)
-	      c[Index(lambda.j()-1, 1, it.index(), this)] = *it;
+	    const int centralrow_in_Gjm1_t = (int)ceil(Deltasize(lambda.j())/2.0)-1;
+	    const int centralrow_in_Gj0_t  = (int)ceil(Deltasize(j0()+1)/2.0)-1;
 
- 	    // compute c_{jmin} via recursion
- 	    Mj0T_.get_row(row, v);
-	    for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
-		 it != v.end(); ++it)
+// 	    const int coldiff = Deltasize(lambda.j()-1) - Deltasize(j0()  );
+// 	    const int rowdiff = Deltasize(lambda.j()  ) - Deltasize(j0()+1);
+
+	    int row_in_Gj0_t = row_in_Gjm1_t;
+	    if (row_in_Gjm1_t < centralrow_in_Gjm1_t)
 	      {
-		InfiniteVector<double, Index> dhelp;
-		decompose_1(Index(lambda.j()-1, 0, DeltaLmin()+it.index(), this), jmin, dhelp);
-		c += *it * dhelp;
+		// The generator index stems from the strictly upper half of G_{j-1}^T:
+		// we have to shift it to the left by an even (!) number to get
+		// the corresponding row in G_{j0}^T.
+// 		row_in_Gj0_t = min(row_in_Gjm1_t, centralrow_in_Gj0_t-1);
 	      }
+	    else
+	      {
+	      }
+
+
+// 	    int row_j0;
+// 	    if (row_jm1 < centralrow_jm1) // generator index stems from the strictly left half
+// 	      {
+// 		cout << "shift left:" << endl;
+// 		row_j0 = min(row_jm1, centralrow_j0 - 1); // shift left
+// 	      }
+// 	    else
+// 	      {
+// 		cout << "shift right:" << endl;
+// 		row_j0 = max(row_jm1 + Deltasize(j0()+1) - Deltasize(lambda.j()), centralrow_j0); // shift right
+// 	      }
+
+ 	    cout << "row_in_Gjm1_t=" << row_in_Gjm1_t
+		 << ", row_in_Gj0_t=" << row_in_Gj0_t << endl;
+			
+//  	    InfiniteVector<double, Vector<double>::size_type> v;
+
+//  	    // compute d_{j-1}
+//   	    Mj1T_.get_row(row_j0, v);
+//   	    for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+//   		 it != v.end(); ++it)
+//   	      c[Index(lambda.j()-1, 1, it.index() + row_jm1 - row_j0, this)] = *it;
+
+//   	    // compute c_{jmin} via recursion
+//   	    Mj0T_.get_row(row_j0, v);
+//  	    for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+//  		 it != v.end(); ++it)
+//  	      {
+//  		InfiniteVector<double, Index> dhelp;
+//  		decompose_1(Index(lambda.j()-1, 0, DeltaLmin() + it.index() + row_jm1 - row_j0, this), jmin, dhelp);
+//  		c += *it * dhelp;
+//  	      }
+
 	  }
       }
   }
@@ -1555,20 +1590,18 @@ namespace WaveletTL
 	// For the reconstruction of psi_lambda, we have to compute
 	// the corresponding column of the transformation matrix Mj=(Mj0, Mj1).
 
-	// for a first hack, we only consider a special case 
-	assert(j == j0()+1);
-	assert(lambda.j() == j0());
 
-	// reconstruct by recursion (TODO: more than one level...)
-	InfiniteVector<double, Vector<double>::size_type> v;
-	if (lambda.e() == 0)
-	  Mj0_t.get_row(lambda.k() - DeltaLmin(), v);
- 	else
-	  Mj1_t.get_row(lambda.k(), v);
 
-	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
-	     it != v.end(); ++it)
-	  c[Index(j, 0, DeltaLmin()+it.index(), this)] += *it;
+// 	// reconstruct by recursion (TODO: more than one level...)
+// 	InfiniteVector<double, Vector<double>::size_type> v;
+// 	if (lambda.e() == 0)
+// 	  Mj0_t.get_row(lambda.k() - DeltaLmin(), v);
+//  	else
+// 	  Mj1_t.get_row(lambda.k(), v);
+
+// 	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+// 	     it != v.end(); ++it)
+// 	  c[Index(j, 0, DeltaLmin()+it.index(), this)] += *it;
       }
   }
 

@@ -44,6 +44,7 @@ int main()
 //   coeff[basis.firstGenerator(basis.j0())] = 0.0;
 //   coeff[++basis.firstGenerator(basis.j0())] = 0.0;
   Index index(basis.firstGenerator(basis.j0()+1));
+  for (int i = 0; i <= 15; i++, ++index);
   coeff[index] = 1.0;
 //   for (int i = 0; i <= 8; i++)
 //     coeff[++index] = 1.0;

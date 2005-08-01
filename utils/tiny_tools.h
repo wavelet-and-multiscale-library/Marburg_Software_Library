@@ -11,6 +11,8 @@
 #define _MATHTL_TINY_TOOLS_H
 
 #include <cassert>
+#include <functional>
+#include <map>
 
 // some utility functions
 
@@ -90,5 +92,21 @@ int intpower(const I n, const J k)
 
   return r;
 }
+
+/*!
+  helper function object for thresholding within a std::map<I,C>:
+  returns true if argument is strictly less than eta in modulus
+*/
+template <class I, class C>
+class threshold_criterion
+  : public std::unary_function<I, C>
+{
+public:
+  threshold_criterion(const double eta) : eta_(eta) {}
+  bool operator() (std::pair<const I, C>& p) { return fabs(p.second) < eta_; }
+
+private:
+  const double eta_;
+};
 
 #endif

@@ -31,7 +31,7 @@ namespace MathTL
     the access to the vector entries takes place by a nested iterator
     class (compare the deal.II matrix classes) which is STL-compatible.
   */
-  template <class C, class I>
+  template <class C, class I = int>
   class InfiniteVector
     : protected std::map<I,C>
   {

@@ -71,7 +71,7 @@ int main()
   cout << "  mean value of a: " << mean_value(sa) << endl;
 
   cout << "- preparing a large random vector for the NCOARSE routine with size ";
-  InfiniteVector<float,int> v, w;
+  InfiniteVector<float> v, w;
   for (unsigned int i=0; i < 1000; i++)
     {
       v[i] = (double)rand()/(double)RAND_MAX;
@@ -97,6 +97,14 @@ int main()
     {
       cout << "  tau=" << tau << ", ||v||_{\\ell^w_\\tau}=" << v.weak_norm(tau) << endl;
     }
+
+  v.clear();
+  v[0] = 1e-10;
+  v[1] = 0.5;
+  v[2] = -1e-5;
+  cout << "- another vector v:" << endl << v;
+  v.compress(1e-2);
+  cout << "- compressing with eta=1e-2:" << endl << v;
 
   return 0;
 }

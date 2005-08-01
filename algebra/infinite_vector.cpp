@@ -117,11 +117,12 @@ namespace MathTL
   template <class C, class I>
   void InfiniteVector<C,I>::compress(const double eta)
   {
+    // a hardcore STL implementation inspired by Meyers, Effective STL:
     std::map<I,C> v;
     remove_copy_if(std::map<I,C>::begin(),
 		   std::map<I,C>::end(),
 		   std::inserter(v, v.end()),
-		   threshold_criterion<I,C>(eta)); // hardcore STL...
+		   threshold_criterion<I,C>(eta));
     std::map<I,C>::swap(v);
   }
 

@@ -1468,8 +1468,6 @@ namespace WaveletTL
 	reconstruct_1(it.index(), j, help);
 	v += *it * help;
       }
-
-    v.compress(1e-12);
   }
 
   template <int d, int dT>
@@ -1508,7 +1506,7 @@ namespace WaveletTL
 	  {
 	    // For the multiscale decomposition of psi_lambda, we have to compute
 	    // the corresponding column of the transformation matrix Gj=MjT^T,
-	    // i.e. one row of Gj^T=(Mj0T, Mj1T).
+	    // i.e. one row of Gj^T=(Mj0T, Mj1T)
 	    
 	    // for a first hack, we only consider a special case:
 	    assert(jmin == j0());

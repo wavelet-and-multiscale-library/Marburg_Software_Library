@@ -1507,64 +1507,24 @@ namespace WaveletTL
 	    // For the multiscale decomposition of psi_lambda, we have to compute
 	    // the corresponding column of the transformation matrix G_{j-1}=\tilde M_{j-1}^T,
 	    // i.e. one row of G_{j-1}^T=(\tilde M_{j-1,0}, \tilde M_{j-1,1}).
+	    
+	    InfiniteVector<double, Vector<double>::size_type> v;
 
-	    cout << "decompose_1 called with lambda=" << lambda << endl;
-	   
-	    const int row_in_Gjm1_t        = lambda.k() - DeltaLmin();
-	    cout << "+ row in Gjm1_t: " << row_in_Gjm1_t << endl;
+  	    // compute d_{j-1}
+   	    Mj1T_get_row(lambda.j() - 1, lambda.k() - DeltaLmin(), v);
+   	    for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+   		 it != v.end(); ++it)
+   	      c[Index(lambda.j()-1, 1, it.index(), this)] = *it;
 
-	    const int centralrow_in_Gjm1_t = (int)ceil(Deltasize(lambda.j())/2.0)-1;
-	    const int centralrow_in_Gj0_t  = (int)ceil(Deltasize(j0()+1)/2.0)-1;
-
-// 	    const int coldiff = Deltasize(lambda.j()-1) - Deltasize(j0()  );
-// 	    const int rowdiff = Deltasize(lambda.j()  ) - Deltasize(j0()+1);
-
-	    int row_in_Gj0_t = row_in_Gjm1_t;
-	    if (row_in_Gjm1_t < centralrow_in_Gjm1_t)
-	      {
-		// The generator index stems from the strictly upper half of G_{j-1}^T:
-		// we have to shift it to the left by an even (!) number to get
-		// the corresponding row in G_{j0}^T.
-// 		row_in_Gj0_t = min(row_in_Gjm1_t, centralrow_in_Gj0_t-1);
-	      }
-	    else
-	      {
-	      }
-
-
-// 	    int row_j0;
-// 	    if (row_jm1 < centralrow_jm1) // generator index stems from the strictly left half
-// 	      {
-// 		cout << "shift left:" << endl;
-// 		row_j0 = min(row_jm1, centralrow_j0 - 1); // shift left
-// 	      }
-// 	    else
-// 	      {
-// 		cout << "shift right:" << endl;
-// 		row_j0 = max(row_jm1 + Deltasize(j0()+1) - Deltasize(lambda.j()), centralrow_j0); // shift right
-// 	      }
-
- 	    cout << "row_in_Gjm1_t=" << row_in_Gjm1_t
-		 << ", row_in_Gj0_t=" << row_in_Gj0_t << endl;
-			
-//  	    InfiniteVector<double, Vector<double>::size_type> v;
-
-//  	    // compute d_{j-1}
-//   	    Mj1T_.get_row(row_j0, v);
-//   	    for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
-//   		 it != v.end(); ++it)
-//   	      c[Index(lambda.j()-1, 1, it.index() + row_jm1 - row_j0, this)] = *it;
-
-//   	    // compute c_{jmin} via recursion
-//   	    Mj0T_.get_row(row_j0, v);
-//  	    for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
-//  		 it != v.end(); ++it)
-//  	      {
-//  		InfiniteVector<double, Index> dhelp;
-//  		decompose_1(Index(lambda.j()-1, 0, DeltaLmin() + it.index() + row_jm1 - row_j0, this), jmin, dhelp);
-//  		c += *it * dhelp;
-//  	      }
-
+   	    // compute c_{jmin} via recursion
+   	    Mj0T_get_row(lambda.j() - 1, lambda.k() - DeltaLmin(), v);
+  	    for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+  		 it != v.end(); ++it)
+  	      {
+  		InfiniteVector<double, Index> dhelp;
+  		decompose_1(Index(lambda.j()-1, 0, DeltaLmin() + it.index(), this), jmin, dhelp);
+  		c += *it * dhelp;
+  	      }
 	  }
       }
   }
@@ -1590,18 +1550,25 @@ namespace WaveletTL
 	// For the reconstruction of psi_lambda, we have to compute
 	// the corresponding column of the transformation matrix Mj=(Mj0, Mj1).
 
+	// reconstruct by recursion
+ 	InfiniteVector<double, Vector<double>::size_type> v;
 
-
-// 	// reconstruct by recursion (TODO: more than one level...)
-// 	InfiniteVector<double, Vector<double>::size_type> v;
-// 	if (lambda.e() == 0)
-// 	  Mj0_t.get_row(lambda.k() - DeltaLmin(), v);
-//  	else
-// 	  Mj1_t.get_row(lambda.k(), v);
-
-// 	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
-// 	     it != v.end(); ++it)
-// 	  c[Index(j, 0, DeltaLmin()+it.index(), this)] += *it;
+ 	if (lambda.e() == 0)
+	  {
+	    Mj0_t_get_row(lambda.j(), lambda.k() - DeltaLmin(), v);
+	  }
+  	else
+	  {
+	    Mj1_t_get_row(lambda.j(), lambda.k(), v);
+	  }
+	
+	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+	     it != v.end(); ++it)
+	  {
+	    InfiniteVector<double, Index> dhelp;
+	    reconstruct_1(Index(lambda.j()+1, 0, DeltaLmin() + it.index(), this), j, dhelp);
+	    c += *it * dhelp;
+	  }
       }
   }
 
@@ -1610,6 +1577,382 @@ namespace WaveletTL
   DKUBasis<d, dT>::reconstruct_t_1(const Index& lambda,
 				   const int j,
 				   InfiniteVector<double, Index>& c) const
+  {
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::assemble_Mj0(const int j, SparseMatrix<double>& mj0) const
+  {
+    if (j == j0())
+      mj0 = Mj0_;
+    else
+      {
+	mj0.resize(Deltasize(j+1), Deltasize(j));
+	
+	const int rows       = Deltasize(j0()+1);
+	const int cols_left  = (int)ceil(Deltasize(j0())/2.0);
+	const int cols_right = Deltasize(j0()) - cols_left;
+	
+	// upper left block
+	for (int row = 0; row < rows; row++)
+	  for (int col = 0; col < cols_left; col++)
+	    mj0.set_entry(row, col, Mj0_.get_entry(row, col));
+
+	// lower right block
+	for (int row = 0; row < rows; row++)
+	  for (int col = 0; col < cols_right; col++)
+ 	    mj0.set_entry(Deltasize(j+1)-rows+row, Deltasize(j)-cols_right+col,
+			  Mj0_.get_entry(row, col + cols_left));
+
+	// central bands
+ 	InfiniteVector<double, Vector<double>::size_type> v;
+ 	Mj0_t.get_row(cols_left-1, v); // last column of left half
+	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+	     it != v.end(); ++it)
+	  for (int col = cols_left; col <= Deltasize(j) - cols_right - 1; col++)
+	    mj0.set_entry(it.index()+2*(col-cols_left)+2, col, *it);
+      }
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::assemble_Mj0_t(const int j, SparseMatrix<double>& mj0_t) const
+  {
+    if (j == j0())
+      mj0_t = Mj0_t;
+    else
+      {
+	mj0_t.resize(Deltasize(j), Deltasize(j+1));
+
+	const int cols        = Deltasize(j0()+1);
+	const int rows_top    = (int)ceil(Deltasize(j0())/2.0);
+	const int rows_bottom = Deltasize(j0()) - rows_top;
+	
+	// upper left block
+	for (int row = 0; row < rows_top; row++)
+	  for (int col = 0; col < cols; col++)
+	    mj0_t.set_entry(row, col, Mj0_t.get_entry(row, col));
+
+ 	// lower right block
+ 	for (int row = 0; row < rows_bottom; row++)
+ 	  for (int col = 0; col < cols; col++)
+  	    mj0_t.set_entry(Deltasize(j)-rows_bottom+row, Deltasize(j+1)-cols+col,
+			    Mj0_t.get_entry(row + rows_top, col));
+
+	// central bands
+ 	InfiniteVector<double, Vector<double>::size_type> v;
+ 	Mj0_t.get_row(rows_top-1, v); // last row of upper half
+
+	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+	     it != v.end(); ++it)
+	  for (int row = rows_top; row <= Deltasize(j) - rows_bottom - 1; row++)
+	    mj0_t.set_entry(row, it.index()+2*(row-rows_top)+2, *it);
+      }
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::assemble_Mj0T(const int j, SparseMatrix<double>& mj0T) const
+  {
+    if (j == j0())
+      mj0T = Mj0T_;
+    else
+      {
+	mj0T.resize(Deltasize(j+1), Deltasize(j));
+	
+	const int rows       = Deltasize(j0()+1);
+	const int cols_left  = (int)ceil(Deltasize(j0())/2.0);
+	const int cols_right = Deltasize(j0()) - cols_left;
+	
+	// upper left block
+	for (int row = 0; row < rows; row++)
+	  for (int col = 0; col < cols_left; col++)
+	    mj0T.set_entry(row, col, Mj0T_.get_entry(row, col));
+	
+	// lower right block
+	for (int row = 0; row < rows; row++)
+	  for (int col = 0; col < cols_right; col++)
+ 	    mj0T.set_entry(Deltasize(j+1)-rows+row, Deltasize(j)-cols_right+col,
+			   Mj0T_.get_entry(row, col + cols_left));
+	
+	// central bands
+ 	InfiniteVector<double, Vector<double>::size_type> v;
+ 	Mj0T_t.get_row(cols_left-1, v); // last column of left half
+	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+	     it != v.end(); ++it)
+	  for (int col = cols_left; col <= Deltasize(j) - cols_right - 1; col++)
+	    mj0T.set_entry(it.index()+2*(col-cols_left)+2, col, *it);
+      }
+  }
+  
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::assemble_Mj0T_t(const int j, SparseMatrix<double>& mj0T_t) const
+  {
+    if (j == j0())
+      mj0T_t = Mj0T_t;
+    else
+      {
+	mj0T_t.resize(Deltasize(j), Deltasize(j+1));
+
+	const int cols        = Deltasize(j0()+1);
+	const int rows_top    = (int)ceil(Deltasize(j0())/2.0);
+	const int rows_bottom = Deltasize(j0()) - rows_top;
+	
+	// upper left block
+	for (int row = 0; row < rows_top; row++)
+	  for (int col = 0; col < cols; col++)
+	    mj0T_t.set_entry(row, col, Mj0T_t.get_entry(row, col));
+
+ 	// lower right block
+ 	for (int row = 0; row < rows_bottom; row++)
+ 	  for (int col = 0; col < cols; col++)
+  	    mj0T_t.set_entry(Deltasize(j)-rows_bottom+row, Deltasize(j+1)-cols+col,
+			     Mj0T_t.get_entry(row + rows_top, col));
+
+	// central bands
+ 	InfiniteVector<double, Vector<double>::size_type> v;
+ 	Mj0T_t.get_row(rows_top-1, v); // last row of upper half
+
+	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+	     it != v.end(); ++it)
+	  for (int row = rows_top; row <= Deltasize(j) - rows_bottom - 1; row++)
+	    mj0T_t.set_entry(row, it.index()+2*(row-rows_top)+2, *it);
+      }
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::assemble_Mj1(const int j, SparseMatrix<double>& mj1) const
+  {
+    if (j == j0())
+      mj1 = Mj1_;
+    else
+      {
+  	mj1.resize(Deltasize(j+1), 1<<j);
+	
+ 	const int rows       = Deltasize(j0()+1);
+ 	const int cols_left  = 1<<(j0()-1);
+ 	const int cols_right = cols_left;
+	
+ 	// upper left block
+ 	for (int row = 0; row < rows; row++)
+ 	  for (int col = 0; col < cols_left; col++)
+ 	    mj1.set_entry(row, col, Mj1_.get_entry(row, col));
+
+ 	// lower right block
+ 	for (int row = 0; row < rows; row++)
+ 	  for (int col = 0; col < cols_right; col++)
+  	    mj1.set_entry(Deltasize(j+1)-rows+row, (1<<j)-cols_right+col,
+ 			  Mj1_.get_entry(row, col + cols_left));
+	
+ 	// central bands
+  	InfiniteVector<double, Vector<double>::size_type> v;
+  	Mj1_t.get_row(cols_left-1, v); // last column of left half
+ 	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+ 	     it != v.end(); ++it)
+ 	  for (int col = cols_left; col <= (1<<j) - cols_right - 1; col++)
+ 	    mj1.set_entry(it.index()+2*(col-cols_left)+2, col, *it);
+      }
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::assemble_Mj1_t(const int j, SparseMatrix<double>& mj1_t) const
+  {
+    if (j == j0())
+      mj1_t = Mj1_t;
+    else
+      {
+ 	mj1_t.resize(1<<j, Deltasize(j+1));
+
+ 	const int cols        = Deltasize(j0()+1);
+ 	const int rows_top    = 1<<(j0()-1);
+ 	const int rows_bottom = rows_top;
+	
+ 	// upper left block
+ 	for (int row = 0; row < rows_top; row++)
+ 	  for (int col = 0; col < cols; col++)
+ 	    mj1_t.set_entry(row, col, Mj1_t.get_entry(row, col));
+
+  	// lower right block
+  	for (int row = 0; row < rows_bottom; row++)
+  	  for (int col = 0; col < cols; col++)
+   	    mj1_t.set_entry((1<<j)-rows_bottom+row, Deltasize(j+1)-cols+col,
+ 			    Mj1_t.get_entry(row + rows_top, col));
+
+ 	// central bands
+  	InfiniteVector<double, Vector<double>::size_type> v;
+  	Mj1_t.get_row(rows_top-1, v); // last row of upper half
+
+ 	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+ 	     it != v.end(); ++it)
+ 	  for (int row = rows_top; row <= (1<<j) - rows_bottom - 1; row++)
+ 	    mj1_t.set_entry(row, it.index()+2*(row-rows_top)+2, *it);
+      }
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::assemble_Mj1T(const int j, SparseMatrix<double>& mj1T) const
+  {
+    if (j == j0())
+      mj1T = Mj1T_;
+    else
+      {
+ 	mj1T.resize(Deltasize(j+1), 1<<j);
+	
+ 	const int rows       = Deltasize(j0()+1);
+ 	const int cols_left  = 1<<(j0()-1);
+ 	const int cols_right = cols_left;
+	
+ 	// upper left block
+ 	for (int row = 0; row < rows; row++)
+ 	  for (int col = 0; col < cols_left; col++)
+ 	    mj1T.set_entry(row, col, Mj1T_.get_entry(row, col));
+	
+ 	// lower right block
+ 	for (int row = 0; row < rows; row++)
+ 	  for (int col = 0; col < cols_right; col++)
+  	    mj1T.set_entry(Deltasize(j+1)-rows+row, (1<<j)-cols_right+col,
+ 			   Mj1T_.get_entry(row, col + cols_left));
+	
+ 	// central bands
+  	InfiniteVector<double, Vector<double>::size_type> v;
+  	Mj1T_t.get_row(cols_left-1, v); // last column of left half
+ 	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+ 	     it != v.end(); ++it)
+ 	  for (int col = cols_left; col <= (1<<j) - cols_right - 1; col++)
+ 	    mj1T.set_entry(it.index()+2*(col-cols_left)+2, col, *it);
+      }
+  }
+  
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::assemble_Mj1T_t(const int j, SparseMatrix<double>& mj1T_t) const
+  {
+    if (j == j0())
+      mj1T_t = Mj1T_t;
+    else
+      {
+ 	mj1T_t.resize(1<<j, Deltasize(j+1));
+
+ 	const int cols        = Deltasize(j0()+1);
+ 	const int rows_top    = 1<<(j0()-1);
+ 	const int rows_bottom = rows_top;
+	
+ 	// upper left block
+ 	for (int row = 0; row < rows_top; row++)
+ 	  for (int col = 0; col < cols; col++)
+ 	    mj1T_t.set_entry(row, col, Mj1T_t.get_entry(row, col));
+
+  	// lower right block
+  	for (int row = 0; row < rows_bottom; row++)
+  	  for (int col = 0; col < cols; col++)
+   	    mj1T_t.set_entry((1<<j)-rows_bottom+row, Deltasize(j+1)-cols+col,
+ 			     Mj1T_t.get_entry(row + rows_top, col));
+
+ 	// central bands
+  	InfiniteVector<double, Vector<double>::size_type> v;
+  	Mj1T_t.get_row(rows_top-1, v); // last row of upper half
+
+ 	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+ 	     it != v.end(); ++it)
+ 	  for (int row = rows_top; row <= (1<<j) - rows_bottom - 1; row++)
+ 	    mj1T_t.set_entry(row, it.index()+2*(row-rows_top)+2, *it);
+      }
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::Mj0_get_row(const int j, const Vector<double>::size_type row,
+			       InfiniteVector<double, Vector<double>::size_type>& v) const
+  {
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::Mj0T_get_row(const int j, const Vector<double>::size_type row,
+				InfiniteVector<double, Vector<double>::size_type>& v) const
+  {
+    assert(j >= j0());
+
+    if (j == j0())
+      {
+	Mj0T_.get_row(row, v);
+      }
+    else
+      {
+      }
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::Mj1_get_row(const int j, const Vector<double>::size_type row,
+			       InfiniteVector<double, Vector<double>::size_type>& v) const
+  {
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::Mj1T_get_row(const int j, const Vector<double>::size_type row,
+				InfiniteVector<double, Vector<double>::size_type>& v) const
+  {
+    assert(j >= j0());
+
+    if (j == j0())
+      {
+	Mj1T_.get_row(row, v);
+      }
+    else
+      {
+      }
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::Mj0_t_get_row(const int j, const Vector<double>::size_type row,
+				 InfiniteVector<double, Vector<double>::size_type>& v) const
+  {
+    assert(j >= j0());
+
+    if (j == j0())
+      {
+	Mj0_t.get_row(row, v);
+      }
+    else
+      {
+      }
+  }
+  
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::Mj0T_t_get_row(const int j, const Vector<double>::size_type row,
+				  InfiniteVector<double, Vector<double>::size_type>& v) const
+  {
+  }
+  
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::Mj1_t_get_row(const int j, const Vector<double>::size_type row,
+				 InfiniteVector<double, Vector<double>::size_type>& v) const
+  {
+    assert(j >= j0());
+
+    if (j == j0())
+      {
+	Mj1_t.get_row(row, v);
+      }
+    else
+      {
+      }
+  }
+  
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::Mj1T_t_get_row(const int j, const Vector<double>::size_type row,
+				  InfiniteVector<double, Vector<double>::size_type>& v) const
   {
   }
 

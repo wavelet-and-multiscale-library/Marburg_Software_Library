@@ -207,6 +207,30 @@ namespace WaveletTL
     void reconstruct_t(const InfiniteVector<double, Index>& c, const int j,
 		       InfiniteVector<double, Index>& v) const;
 
+    //! setup the refinement matrix M_{j,0} for a given level j
+    void assemble_Mj0(const int j, SparseMatrix<double>& mj0) const;
+
+    //! setup the refinement matrix \tilde M_{j,0} for a given level j
+    void assemble_Mj0T(const int j, SparseMatrix<double>& mj0T) const;
+
+    //! setup the refinement matrix M_{j,1} for a given level j
+    void assemble_Mj1(const int j, SparseMatrix<double>& mj1) const;
+
+    //! setup the refinement matrix \tilde M_{j,1} for a given level j
+    void assemble_Mj1T(const int j, SparseMatrix<double>& mj1T) const;
+
+    //! setup the transposed refinement matrix M_{j,0} for a given level j
+    void assemble_Mj0_t(const int j, SparseMatrix<double>& mj0_t) const;
+
+    //! setup the transposed refinement matrix \tilde M_{j,0} for a given level j
+    void assemble_Mj0T_t(const int j, SparseMatrix<double>& mj0T_t) const;
+
+    //! setup the transposed refinement matrix M_{j,1} for a given level j
+    void assemble_Mj1_t(const int j, SparseMatrix<double>& mj1_t) const;
+
+    //! setup the transposed refinement matrix \tilde M_{j,1} for a given level j
+    void assemble_Mj1T_t(const int j, SparseMatrix<double>& mj1T_t) const;
+
     /*!
       Evaluate a single primal/dual generator or wavelet \psi_\lambda
       on a dyadic subgrid of [0,1].
@@ -251,6 +275,24 @@ namespace WaveletTL
 
     SparseMatrix<double> Mj0_, Mj0T_, Mj1_, Mj1T_;     // refinement matrices on the coarsest level j0()
     SparseMatrix<double> Mj0_t, Mj0T_t, Mj1_t, Mj1T_t; // transposed versions, for performance reasons
+
+    //! compute single rows of these matrices on higher levels than j0
+    void Mj0_get_row   (const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
+    void Mj0T_get_row  (const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
+    void Mj1_get_row   (const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
+    void Mj1T_get_row  (const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
+    void Mj0_t_get_row (const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
+    void Mj0T_t_get_row(const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
+    void Mj1_t_get_row (const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
+    void Mj1T_t_get_row(const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
     
     void setup_Alpha();
     void setup_AlphaT();

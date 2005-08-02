@@ -2038,10 +2038,30 @@ namespace WaveletTL
   DKUBasis<d, dT>::Mj1_t_get_row(const int j, const Vector<double>::size_type row,
 				 InfiniteVector<double, Vector<double>::size_type>& v) const
   {
-    // brute force:
-    SparseMatrix<double> mj1_t;
-    assemble_Mj1_t(j, mj1_t);
-    mj1_t.get_row(row, v);
+    if (j == j0())
+      {
+	Mj1_t.get_row(row, v);
+      }
+    else
+      {
+	const size_t rows_top = 1<<(j0()-1);
+	if (row < rows_top)
+	  {
+	    Mj1_t.get_row(row, v);
+	  }
+	else
+	  {
+	    const size_t bottom = (1<<j)-(1<<(j0()-1));
+	    if (row >= bottom)
+	      {
+		Mj1_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
+	      }
+	    else
+	      {
+		Mj1_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
+	      }
+	  }
+      }
   }
   
   template <int d, int dT>
@@ -2049,10 +2069,30 @@ namespace WaveletTL
   DKUBasis<d, dT>::Mj1T_t_get_row(const int j, const Vector<double>::size_type row,
 				  InfiniteVector<double, Vector<double>::size_type>& v) const
   {
-    // brute force:
-    SparseMatrix<double> mj1T_t;
-    assemble_Mj1T_t(j, mj1T_t);
-    mj1T_t.get_row(row, v);
+    if (j == j0())
+      {
+	Mj1T_t.get_row(row, v);
+      }
+    else
+      {
+	const size_t rows_top = 1<<(j0()-1);
+	if (row < rows_top)
+	  {
+	    Mj1T_t.get_row(row, v);
+	  }
+	else
+	  {
+	    const size_t bottom = (1<<j)-(1<<(j0()-1));
+	    if (row >= bottom)
+	      {
+		Mj1T_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
+	      }
+	    else
+	      {
+		Mj1T_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
+	      }
+	  }
+      }
   }
 
   template <int d, int dT>

@@ -34,7 +34,7 @@ namespace WaveletTL
   DKUBasis<d, dT>::lastGenerator(const int j) const
   {
     assert(j >= j0());
-    return Index(j, 0, DeltaRmax(j0()), this);
+    return Index(j, 0, DeltaRmax(j), this);
   }
 
   template <int d, int dT>
@@ -1976,10 +1976,30 @@ namespace WaveletTL
   DKUBasis<d, dT>::Mj0_t_get_row(const int j, const Vector<double>::size_type row,
 				 InfiniteVector<double, Vector<double>::size_type>& v) const
   {
-    // brute force:
-    SparseMatrix<double> mj0_t;
-    assemble_Mj0_t(j, mj0_t);
-    mj0_t.get_row(row, v);
+    if (j == j0())
+      {
+	Mj0_t.get_row(row, v);
+      }
+    else
+      {
+	const size_t rows_top = (int)ceil(Deltasize(j0())/2.0);
+	if (row < rows_top)
+	  {
+	    Mj0_t.get_row(row, v);
+	  }
+	else
+	  {
+	    const size_t bottom = Deltasize(j)-Deltasize(j0())/2;
+	    if (row >= bottom)
+	      {
+		Mj0_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
+	      }
+	    else
+	      {
+		Mj0_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
+	      }
+	  }
+      }
   }
   
   template <int d, int dT>

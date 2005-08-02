@@ -126,12 +126,12 @@ int main()
 	  InfiniteVector<double, Index> origcoeff;
 	  origcoeff[index] = 1.0;
 	  
-// 	  cout << "original index set:" << endl << origcoeff;
+//  	  cout << "original index set:" << endl << origcoeff;
 	  
 	  InfiniteVector<double, Index> wcoeff;
 	  basis.decompose(origcoeff, basis.j0(), wcoeff);
 	  
-// 	  cout << "wavelet coefficients:" << endl << wcoeff;
+//   	  cout << "wavelet coefficients:" << endl << wcoeff;
 	  
 	  InfiniteVector<double, Index> transformcoeff;
 	  basis.reconstruct(wcoeff, level, transformcoeff);

@@ -2007,10 +2007,30 @@ namespace WaveletTL
   DKUBasis<d, dT>::Mj0T_t_get_row(const int j, const Vector<double>::size_type row,
 				  InfiniteVector<double, Vector<double>::size_type>& v) const
   {
-    // brute force:
-    SparseMatrix<double> mj0T_t;
-    assemble_Mj0T_t(j, mj0T_t);
-    mj0T_t.get_row(row, v);
+    if (j == j0())
+      {
+	Mj0T_t.get_row(row, v);
+      }
+    else
+      {
+	const size_t rows_top = (int)ceil(Deltasize(j0())/2.0);
+	if (row < rows_top)
+	  {
+	    Mj0T_t.get_row(row, v);
+	  }
+	else
+	  {
+	    const size_t bottom = Deltasize(j)-Deltasize(j0())/2;
+	    if (row >= bottom)
+	      {
+		Mj0T_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
+	      }
+	    else
+	      {
+		Mj0T_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
+	      }
+	  }
+      }
   }
   
   template <int d, int dT>

@@ -175,7 +175,7 @@ namespace MathTL
   }
   
   template <class C>
-  void SparseMatrix<C>::get_row(const size_type row, InfiniteVector<C, size_type>& v) const
+  void SparseMatrix<C>::get_row(const size_type row, InfiniteVector<C, size_type>& v, const size_type offset) const
   {
     assert(row < rowdim_);
 
@@ -183,7 +183,7 @@ namespace MathTL
     if (indices_[row])
       {
 	for (size_type k(1); k <= indices_[row][0]; k++)
-	  v.set_coefficient(indices_[row][k], entries_[row][k-1]);
+	  v.set_coefficient(indices_[row][k]+offset, entries_[row][k-1]);
       }
   }
 

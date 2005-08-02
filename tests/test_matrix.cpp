@@ -343,8 +343,8 @@ int main()
   cout << "- extracted a row from small as a sparse vector:" << endl
        << v;
 
-  small.get_row(1, v);
-  cout << "- another row:" << endl << v;
+  small.get_row(1, v, 10);
+  cout << "- another row, now with offset 10:" << endl << v;
 
   small.compress(1.5e-5);
   cout << "- small after compressing with 1.5e-5:" << endl

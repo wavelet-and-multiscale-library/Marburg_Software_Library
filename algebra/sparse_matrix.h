@@ -97,9 +97,10 @@ namespace MathTL
 		   MATRIX& M) const;
     
     /*!
-      read access to an entire row
+      read access to an entire row;
+      offset leads to a shift of v (with respect to the original column indices)
     */
-    void get_row(const size_type row, InfiniteVector<C, size_type>& v) const;
+    void get_row(const size_type row, InfiniteVector<C, size_type>& v, const size_type offset = 0) const;
 
     /*!
       write access to a matrix entry

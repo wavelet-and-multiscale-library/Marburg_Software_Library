@@ -145,6 +145,36 @@ int main()
 	}
     }
 
+  for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
+    {
+      cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "
+	   << level << ":" << endl;
+      Index index(basis.firstGenerator(level));
+//      for (int i = 1; i <= 4; ++i, ++index)
+      for (;; ++index)
+	{
+	  InfiniteVector<double, Index> origcoeff;
+	  origcoeff[index] = 1.0;
+	  
+// 	  cout << "original index set:" << endl << origcoeff;
+	  
+	  InfiniteVector<double, Index> wcoeff;
+	  basis.decompose_t(origcoeff, basis.j0(), wcoeff);
+	  
+// 	  cout << "wavelet coefficients:" << endl << wcoeff;
+	  
+	  InfiniteVector<double, Index> transformcoeff;
+	  basis.reconstruct_t(wcoeff, level, transformcoeff);
+	  
+// 	  cout << "after decompose_t()+reconstruct_t():" << endl << origcoeff;
+	  
+	  cout << "* generator: " << index
+	       << ", max. error: " << linfty_norm(origcoeff-transformcoeff) << endl;
+	  
+	  if (index == basis.lastGenerator(level)) break;
+	}
+    }
+
 #if 0
 //   coeff[basis.firstGenerator(basis.j0())] = 0.0;
 //   coeff[++basis.firstGenerator(basis.j0())] = 0.0;

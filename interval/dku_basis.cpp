@@ -1535,6 +1535,42 @@ namespace WaveletTL
 				 const int jmin,
 				 InfiniteVector<double, Index>& c) const
   {
+    assert(jmin >= j0());
+    assert(lambda.j() >= jmin);
+
+    c.clear();
+
+    if (lambda.e() == 1) // wavelet
+      c[lambda] = 1.0; // true wavelet coefficients don't have to be modified
+    else // generator
+      {
+	if (lambda.j() == jmin)
+	  c[lambda] = 1.0;
+	else // j > jmin
+	  {
+	    // For the multiscale decomposition of psi_lambda, we have to compute
+	    // the corresponding column of the transformation matrix \tilde G_{j-1}=M_{j-1}^T,
+	    // i.e. one row of \tilde G_{j-1}^T=(M_{j-1,0}, M_{j-1,1}).
+	    
+	    InfiniteVector<double, Vector<double>::size_type> v;
+
+  	    // compute d_{j-1}
+   	    Mj1_get_row(lambda.j() - 1, lambda.k() - DeltaLmin(), v);
+   	    for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+   		 it != v.end(); ++it)
+   	      c[Index(lambda.j()-1, 1, it.index(), this)] = *it;
+
+   	    // compute c_{jmin} via recursion
+   	    Mj0_get_row(lambda.j() - 1, lambda.k() - DeltaLmin(), v);
+  	    for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+  		 it != v.end(); ++it)
+  	      {
+  		InfiniteVector<double, Index> dhelp;
+  		decompose_t_1(Index(lambda.j()-1, 0, DeltaLmin() + it.index(), this), jmin, dhelp);
+  		c += *it * dhelp;
+  	      }
+	  }
+      }
   }
 
   template <int d, int dT>
@@ -1578,6 +1614,33 @@ namespace WaveletTL
 				   const int j,
 				   InfiniteVector<double, Index>& c) const
   {
+    if (lambda.j() >= j)
+      c[lambda] += 1.0; 
+    else
+      {
+	// For the reconstruction of psi_lambda, we have to compute
+	// the corresponding column of the transformation matrix \tilde Mj=(\tilde Mj0, \tilde Mj1).
+
+	// reconstruct by recursion
+ 	InfiniteVector<double, Vector<double>::size_type> v;
+
+ 	if (lambda.e() == 0)
+	  {
+	    Mj0T_t_get_row(lambda.j(), lambda.k() - DeltaLmin(), v);
+	  }
+  	else
+	  {
+	    Mj1T_t_get_row(lambda.j(), lambda.k(), v);
+	  }
+	
+	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+	     it != v.end(); ++it)
+	  {
+	    InfiniteVector<double, Index> dhelp;
+	    reconstruct_t_1(Index(lambda.j()+1, 0, DeltaLmin() + it.index(), this), j, dhelp);
+	    c += *it * dhelp;
+	  }
+      }
   }
 
   template <int d, int dT>

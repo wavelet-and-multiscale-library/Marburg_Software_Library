@@ -115,26 +115,7 @@ int main()
       cout << "* j=" << level << ",  ||GjT*MjT-I||_infty: " << row_sum_norm(T) << endl;
     }
 
-#if 0
-  for (int level = basis.j0(); level <= basis.j0()+1; level++)
-    {
-      SparseMatrix<double> mj0;
-      basis.assemble_Mj0(level, mj0);
-      cout << "- the matrix Mj0 for j=" << level << ":" << endl;
-      cout << mj0;
-    }
-
-  for (int level = basis.j0(); level <= basis.j0()+1; level++)
-    {
-      SparseMatrix<double> mj0_t;
-      basis.assemble_Mj0_t(level, mj0_t);
-      cout << "- the transposed matrix Mj0 for j=" << level << ":" << endl;
-      cout << mj0_t;
-    }
-#endif
-
-#if 0
-  for (int level = basis.j0()+1; level <= basis.j0()+1; level++)
+  for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
 	   << level << ":" << endl;
@@ -163,7 +144,6 @@ int main()
 	  if (index == basis.lastGenerator(level)) break;
 	}
     }
-#endif
 
 #if 0
 //   coeff[basis.firstGenerator(basis.j0())] = 0.0;

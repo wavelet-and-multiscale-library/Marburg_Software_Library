@@ -1869,6 +1869,10 @@ namespace WaveletTL
   DKUBasis<d, dT>::Mj0_get_row(const int j, const Vector<double>::size_type row,
 			       InfiniteVector<double, Vector<double>::size_type>& v) const
   {
+    // brute force:
+    SparseMatrix<double> mj0;
+    assemble_Mj0(j, mj0);
+    mj0.get_row(row, v);
   }
 
   template <int d, int dT>
@@ -1876,15 +1880,10 @@ namespace WaveletTL
   DKUBasis<d, dT>::Mj0T_get_row(const int j, const Vector<double>::size_type row,
 				InfiniteVector<double, Vector<double>::size_type>& v) const
   {
-    assert(j >= j0());
-
-    if (j == j0())
-      {
-	Mj0T_.get_row(row, v);
-      }
-    else
-      {
-      }
+    // brute force:
+    SparseMatrix<double> mj0T;
+    assemble_Mj0T(j, mj0T);
+    mj0T.get_row(row, v);
   }
 
   template <int d, int dT>
@@ -1892,6 +1891,10 @@ namespace WaveletTL
   DKUBasis<d, dT>::Mj1_get_row(const int j, const Vector<double>::size_type row,
 			       InfiniteVector<double, Vector<double>::size_type>& v) const
   {
+    // brute force:
+    SparseMatrix<double> mj1;
+    assemble_Mj1(j, mj1);
+    mj1.get_row(row, v);
   }
 
   template <int d, int dT>
@@ -1899,15 +1902,10 @@ namespace WaveletTL
   DKUBasis<d, dT>::Mj1T_get_row(const int j, const Vector<double>::size_type row,
 				InfiniteVector<double, Vector<double>::size_type>& v) const
   {
-    assert(j >= j0());
-
-    if (j == j0())
-      {
-	Mj1T_.get_row(row, v);
-      }
-    else
-      {
-      }
+    // brute force:
+    SparseMatrix<double> mj1T;
+    assemble_Mj1T(j, mj1T);
+    mj1T.get_row(row, v);
   }
 
   template <int d, int dT>
@@ -1915,15 +1913,10 @@ namespace WaveletTL
   DKUBasis<d, dT>::Mj0_t_get_row(const int j, const Vector<double>::size_type row,
 				 InfiniteVector<double, Vector<double>::size_type>& v) const
   {
-    assert(j >= j0());
-
-    if (j == j0())
-      {
-	Mj0_t.get_row(row, v);
-      }
-    else
-      {
-      }
+    // brute force:
+    SparseMatrix<double> mj0_t;
+    assemble_Mj0_t(j, mj0_t);
+    mj0_t.get_row(row, v);
   }
   
   template <int d, int dT>
@@ -1931,6 +1924,10 @@ namespace WaveletTL
   DKUBasis<d, dT>::Mj0T_t_get_row(const int j, const Vector<double>::size_type row,
 				  InfiniteVector<double, Vector<double>::size_type>& v) const
   {
+    // brute force:
+    SparseMatrix<double> mj0T_t;
+    assemble_Mj0T_t(j, mj0T_t);
+    mj0T_t.get_row(row, v);
   }
   
   template <int d, int dT>
@@ -1938,15 +1935,10 @@ namespace WaveletTL
   DKUBasis<d, dT>::Mj1_t_get_row(const int j, const Vector<double>::size_type row,
 				 InfiniteVector<double, Vector<double>::size_type>& v) const
   {
-    assert(j >= j0());
-
-    if (j == j0())
-      {
-	Mj1_t.get_row(row, v);
-      }
-    else
-      {
-      }
+    // brute force:
+    SparseMatrix<double> mj1_t;
+    assemble_Mj1_t(j, mj1_t);
+    mj1_t.get_row(row, v);
   }
   
   template <int d, int dT>
@@ -1954,6 +1946,10 @@ namespace WaveletTL
   DKUBasis<d, dT>::Mj1T_t_get_row(const int j, const Vector<double>::size_type row,
 				  InfiniteVector<double, Vector<double>::size_type>& v) const
   {
+    // brute force:
+    SparseMatrix<double> mj1T_t;
+    assemble_Mj1T_t(j, mj1T_t);
+    mj1T_t.get_row(row, v);
   }
 
   template <int d, int dT>

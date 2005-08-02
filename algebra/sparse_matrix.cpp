@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <sstream>
 #include <algebra/vector.h>
+#include <algebra/matrix.h>
 
 namespace MathTL
 {

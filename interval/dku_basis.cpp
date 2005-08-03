@@ -330,10 +330,9 @@ namespace WaveletTL
 #endif
 
     // construction of the wavelet basis: modifications from [DS] for d odd
-    // (so that only one wavelet does not vanish at the boundary)
     if (d%2)
       {
-	modify_boundary_wavelets(Mj1_, Mj1T_);
+	DS_symmetrization(Mj1_, Mj1T_);
 #if 0
 	cout << "DKUBasis(): check [DS] symmetrization:" << endl;
 	
@@ -1385,7 +1384,7 @@ namespace WaveletTL
 
   template <int d, int dT>
   void
-  DKUBasis<d, dT>::modify_boundary_wavelets(SparseMatrix<double>& Mj1, SparseMatrix<double>& Mj1T)
+  DKUBasis<d, dT>::DS_symmetrization(SparseMatrix<double>& Mj1, SparseMatrix<double>& Mj1T)
   {
     // IGPMlib reference: I_Basis_Bspline::Modify()
 
@@ -1675,6 +1674,8 @@ namespace WaveletTL
 	     it != v.end(); ++it)
 	  for (int col = cols_left; col <= Deltasize(j) - cols_right - 1; col++)
 	    mj0.set_entry(it.index()+2*(col-cols_left)+2, col, *it);
+
+	mj0.compress();
       }
   }
 
@@ -1711,6 +1712,8 @@ namespace WaveletTL
 	     it != v.end(); ++it)
 	  for (int row = rows_top; row <= Deltasize(j) - rows_bottom - 1; row++)
 	    mj0_t.set_entry(row, it.index()+2*(row-rows_top)+2, *it);
+
+	mj0_t.compress();
       }
   }
 
@@ -1746,6 +1749,8 @@ namespace WaveletTL
 	     it != v.end(); ++it)
 	  for (int col = cols_left; col <= Deltasize(j) - cols_right - 1; col++)
 	    mj0T.set_entry(it.index()+2*(col-cols_left)+2, col, *it);
+
+	mj0T.compress();
       }
   }
   
@@ -1782,6 +1787,8 @@ namespace WaveletTL
 	     it != v.end(); ++it)
 	  for (int row = rows_top; row <= Deltasize(j) - rows_bottom - 1; row++)
 	    mj0T_t.set_entry(row, it.index()+2*(row-rows_top)+2, *it);
+
+	mj0T_t.compress();
       }
   }
 
@@ -1817,6 +1824,8 @@ namespace WaveletTL
  	     it != v.end(); ++it)
  	  for (int col = cols_left; col <= (1<<j) - cols_right - 1; col++)
  	    mj1.set_entry(it.index()+2*(col-cols_left)+2, col, *it);
+
+	mj1.compress();
       }
   }
 
@@ -1853,6 +1862,8 @@ namespace WaveletTL
  	     it != v.end(); ++it)
  	  for (int row = rows_top; row <= (1<<j) - rows_bottom - 1; row++)
  	    mj1_t.set_entry(row, it.index()+2*(row-rows_top)+2, *it);
+	
+	mj1_t.compress();
       }
   }
 
@@ -1888,6 +1899,8 @@ namespace WaveletTL
  	     it != v.end(); ++it)
  	  for (int col = cols_left; col <= (1<<j) - cols_right - 1; col++)
  	    mj1T.set_entry(it.index()+2*(col-cols_left)+2, col, *it);
+	
+	mj1T.compress();
       }
   }
   
@@ -1924,6 +1937,8 @@ namespace WaveletTL
  	     it != v.end(); ++it)
  	  for (int row = rows_top; row <= (1<<j) - rows_bottom - 1; row++)
  	    mj1T_t.set_entry(row, it.index()+2*(row-rows_top)+2, *it);
+
+	mj1T_t.compress();
       }
   }
 
@@ -1982,10 +1997,43 @@ namespace WaveletTL
       Mj1_.get_row(row, v);
     else
       {
-	// brute force:
-	SparseMatrix<double> mj1;
-	assemble_Mj1(j, mj1);
-	mj1.get_row(row, v);
+	// Due to the [DS] symmetrization, we have to be a bit careful here.
+	const size_t third = Deltasize(j0()+1)/3;
+	if (row < third)
+	  Mj1_.get_row(row, v);
+	else
+ 	  {
+	    const size_t bottom_third = Deltasize(j+1)-Deltasize(j0()+1)/3;
+	    if (row >= bottom_third)
+	      Mj1_.get_row(row+Deltasize(j0()+1)-Deltasize(j+1), v, (1<<j)-(1<<j0()));
+	    else
+	      {
+		if (row < (size_t)ceil(Deltasize(j+1)/2.0))
+		  {
+// 		    cout << "das geht noch gut" << endl;
+// 		    cout << "btw.: Zeile " << row << " <= " << (size_t)ceil(Deltasize(j+1)/2.0)-1 << endl;
+		    Mj1_.get_row(third-2+(row-third)%2, v, (row-third)/2+1);
+		  }
+		else
+		  {
+// 		    cout << "aber das nicht" << endl;
+		    InfiniteVector<double, Vector<double>::size_type> w;
+  		    Mj1_get_row(j, (Deltasize(j+1)-1)-(int)row, w);
+// 		    cout << "w=" << endl << w;
+  		    for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(w.begin());
+  			 it != w.end(); ++it)
+		      v.set_coefficient((1<<j)-1-(int)it.index(), *it);
+  		    cout << "v=" << endl << v;
+
+		    // brute force:
+		    InfiniteVector<double, Vector<double>::size_type> v2;
+		    SparseMatrix<double> mj1;
+		    assemble_Mj1(j, mj1);
+		    mj1.get_row(row, v2);
+		    cout << "v2=" << endl << v2;
+		  }
+	      }
+	  }
       }
   }
 

@@ -1932,10 +1932,15 @@ namespace WaveletTL
   DKUBasis<d, dT>::Mj0_get_row(const int j, const Vector<double>::size_type row,
 			       InfiniteVector<double, Vector<double>::size_type>& v) const
   {
-    // brute force:
-    SparseMatrix<double> mj0;
-    assemble_Mj0(j, mj0);
-    mj0.get_row(row, v);
+    if (j == j0())
+      Mj0_.get_row(row, v);
+    else
+      {
+	// brute force:
+	SparseMatrix<double> mj0;
+	assemble_Mj0(j, mj0);
+	mj0.get_row(row, v);
+      }
   }
 
   template <int d, int dT>
@@ -1943,10 +1948,15 @@ namespace WaveletTL
   DKUBasis<d, dT>::Mj0T_get_row(const int j, const Vector<double>::size_type row,
 				InfiniteVector<double, Vector<double>::size_type>& v) const
   {
-    // brute force:
-    SparseMatrix<double> mj0T;
-    assemble_Mj0T(j, mj0T);
-    mj0T.get_row(row, v);
+    if (j == j0())
+      Mj0T_.get_row(row, v);
+    else
+      {
+	// brute force:
+	SparseMatrix<double> mj0T;
+	assemble_Mj0T(j, mj0T);
+	mj0T.get_row(row, v);
+      }
   }
 
   template <int d, int dT>
@@ -1954,10 +1964,15 @@ namespace WaveletTL
   DKUBasis<d, dT>::Mj1_get_row(const int j, const Vector<double>::size_type row,
 			       InfiniteVector<double, Vector<double>::size_type>& v) const
   {
-    // brute force:
-    SparseMatrix<double> mj1;
-    assemble_Mj1(j, mj1);
-    mj1.get_row(row, v);
+    if (j == j0())
+      Mj1_.get_row(row, v);
+    else
+      {
+	// brute force:
+	SparseMatrix<double> mj1;
+	assemble_Mj1(j, mj1);
+	mj1.get_row(row, v);
+      }
   }
 
   template <int d, int dT>
@@ -1965,10 +1980,15 @@ namespace WaveletTL
   DKUBasis<d, dT>::Mj1T_get_row(const int j, const Vector<double>::size_type row,
 				InfiniteVector<double, Vector<double>::size_type>& v) const
   {
-    // brute force:
-    SparseMatrix<double> mj1T;
-    assemble_Mj1T(j, mj1T);
-    mj1T.get_row(row, v);
+    if (j == j0())
+      Mj1T_.get_row(row, v);
+    else
+      {
+	// brute force:
+	SparseMatrix<double> mj1T;
+	assemble_Mj1T(j, mj1T);
+	mj1T.get_row(row, v);
+      }
   }
 
   template <int d, int dT>
@@ -1977,27 +1997,19 @@ namespace WaveletTL
 				 InfiniteVector<double, Vector<double>::size_type>& v) const
   {
     if (j == j0())
-      {
-	Mj0_t.get_row(row, v);
-      }
+      Mj0_t.get_row(row, v);
     else
       {
 	const size_t rows_top = (int)ceil(Deltasize(j0())/2.0);
 	if (row < rows_top)
-	  {
-	    Mj0_t.get_row(row, v);
-	  }
+	  Mj0_t.get_row(row, v);
 	else
 	  {
 	    const size_t bottom = Deltasize(j)-Deltasize(j0())/2;
 	    if (row >= bottom)
-	      {
-		Mj0_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
-	      }
+	      Mj0_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
 	    else
-	      {
-		Mj0_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
-	      }
+	      Mj0_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
 	  }
       }
   }
@@ -2008,27 +2020,19 @@ namespace WaveletTL
 				  InfiniteVector<double, Vector<double>::size_type>& v) const
   {
     if (j == j0())
-      {
-	Mj0T_t.get_row(row, v);
-      }
+      Mj0T_t.get_row(row, v);
     else
       {
 	const size_t rows_top = (int)ceil(Deltasize(j0())/2.0);
 	if (row < rows_top)
-	  {
-	    Mj0T_t.get_row(row, v);
-	  }
+	  Mj0T_t.get_row(row, v);
 	else
 	  {
 	    const size_t bottom = Deltasize(j)-Deltasize(j0())/2;
 	    if (row >= bottom)
-	      {
-		Mj0T_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
-	      }
+	      Mj0T_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
 	    else
-	      {
-		Mj0T_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
-	      }
+	      Mj0T_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
 	  }
       }
   }
@@ -2039,27 +2043,19 @@ namespace WaveletTL
 				 InfiniteVector<double, Vector<double>::size_type>& v) const
   {
     if (j == j0())
-      {
-	Mj1_t.get_row(row, v);
-      }
+      Mj1_t.get_row(row, v);
     else
       {
 	const size_t rows_top = 1<<(j0()-1);
 	if (row < rows_top)
-	  {
-	    Mj1_t.get_row(row, v);
-	  }
+	  Mj1_t.get_row(row, v);
 	else
 	  {
 	    const size_t bottom = (1<<j)-(1<<(j0()-1));
 	    if (row >= bottom)
-	      {
-		Mj1_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
-	      }
+	      Mj1_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
 	    else
-	      {
-		Mj1_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
-	      }
+	      Mj1_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
 	  }
       }
   }
@@ -2070,27 +2066,19 @@ namespace WaveletTL
 				  InfiniteVector<double, Vector<double>::size_type>& v) const
   {
     if (j == j0())
-      {
-	Mj1T_t.get_row(row, v);
-      }
+      Mj1T_t.get_row(row, v);
     else
       {
 	const size_t rows_top = 1<<(j0()-1);
 	if (row < rows_top)
-	  {
-	    Mj1T_t.get_row(row, v);
-	  }
+	  Mj1T_t.get_row(row, v);
 	else
 	  {
 	    const size_t bottom = (1<<j)-(1<<(j0()-1));
 	    if (row >= bottom)
-	      {
-		Mj1T_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
-	      }
+	      Mj1T_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
 	    else
-	      {
-		Mj1T_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
-	      }
+	      Mj1T_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
 	  }
       }
   }

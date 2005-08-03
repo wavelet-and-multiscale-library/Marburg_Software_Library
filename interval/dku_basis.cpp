@@ -1936,24 +1936,17 @@ namespace WaveletTL
       Mj0_.get_row(row, v);
     else
       {
-// 	const size_t rows_top = (int)ceil(Deltasize(j0()+1)/2.0);
-// 	if (row < rows_top)
-// 	  Mj0_.get_row(row, v);
-// 	else
-// 	  {
-// 	    const size_t bottom = Deltasize(j+1)-Deltasize(j0()+1)/2;
-
-	    // brute force:
-	    SparseMatrix<double> mj0;
-	    assemble_Mj0(j, mj0);
-	    mj0.get_row(row, v);
-
-// 	    const size_t bottom = Deltasize(j)-Deltasize(j0())/2;
-// 	    if (row >= bottom)
-// 	      Mj0T_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
-// 	    else
-// 	      Mj0T_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
-//	  }
+ 	const size_t rows_top = (int)ceil(Deltasize(j0()+1)/2.0);
+ 	if (row < rows_top)
+ 	  Mj0_.get_row(row, v);
+ 	else
+ 	  {
+ 	    const size_t bottom = Deltasize(j+1)-Deltasize(j0()+1)/2;
+	    if (row >= bottom)
+	      Mj0_.get_row(row+rows_top-bottom, v, Deltasize(j)-Deltasize(j0()));
+	    else
+	      Mj0_.get_row(rows_top-2+(row-rows_top)%2, v, (row-rows_top)/2+1);
+	  }
       }
   }
 
@@ -1966,10 +1959,17 @@ namespace WaveletTL
       Mj0T_.get_row(row, v);
     else
       {
-	// brute force:
-	SparseMatrix<double> mj0T;
-	assemble_Mj0T(j, mj0T);
-	mj0T.get_row(row, v);
+ 	const size_t rows_top = (int)ceil(Deltasize(j0()+1)/2.0);
+ 	if (row < rows_top)
+ 	  Mj0T_.get_row(row, v);
+ 	else
+ 	  {
+ 	    const size_t bottom = Deltasize(j+1)-Deltasize(j0()+1)/2;
+	    if (row >= bottom)
+	      Mj0T_.get_row(row+rows_top-bottom, v, Deltasize(j)-Deltasize(j0()));
+	    else
+	      Mj0T_.get_row(rows_top-2+(row-rows_top)%2, v, (row-rows_top)/2+1);
+	  }
       }
   }
 

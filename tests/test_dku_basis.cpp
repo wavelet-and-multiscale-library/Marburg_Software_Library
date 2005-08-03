@@ -214,11 +214,14 @@ int main()
   }
 #endif
 
+
   cout << "* another basis:" << endl;
 
   const int d2 = 3;
   const int dT2 = 5;
-  DKUBasis<d2, dT2> basis2;
+  typedef DKUBasis<d2, dT2> Basis2;
+  typedef Basis2::Index Index2;
+  Basis2 basis2;
 
   cout << "- the (" << d2 << "," << dT2 << ") basis has j0=" << basis2.j0() << endl;
   cout << "- the default wavelet index: " << DKUBasis<d2, dT2>::Index(&basis2) << endl;
@@ -227,7 +230,66 @@ int main()
   cout << "- leftmost wavelet on the coarsest level: " << basis2.firstWavelet(basis2.j0()) << endl;
   cout << "- rightmost wavelet on the coarsest level: " << basis2.lastWavelet(basis2.j0()) << endl;
 
-  cout << "* yet another basis:" << endl;
+  for (int level = basis2.j0()+1; level <= basis2.j0()+2; level++)
+    {
+      cout << "- checking decompose() and reconstruct() for some/all generators on the level "
+	   << level << ":" << endl;
+      Index2 index(basis2.firstGenerator(level));
+      for (;; ++index)
+	{
+	  InfiniteVector<double, Index2> origcoeff;
+	  origcoeff[index] = 1.0;
+	  
+//  	  cout << "original index set:" << endl << origcoeff;
+	  
+	  InfiniteVector<double, Index2> wcoeff;
+	  basis2.decompose(origcoeff, basis2.j0(), wcoeff);
+	  
+//   	  cout << "wavelet coefficients:" << endl << wcoeff;
+	  
+	  InfiniteVector<double, Index2> transformcoeff;
+	  basis2.reconstruct(wcoeff, level, transformcoeff);
+	  
+// 	  cout << "after decompose()+reconstruct():" << endl << origcoeff;
+	  
+	  cout << "* generator: " << index
+	       << ", max. error: " << linfty_norm(origcoeff-transformcoeff) << endl;
+	  
+	  if (index == basis2.lastGenerator(level)) break;
+	}
+    }
+
+  for (int level = basis2.j0()+1; level <= basis2.j0()+2; level++)
+    {
+      cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "
+	   << level << ":" << endl;
+      Index2 index(basis2.firstGenerator(level));
+//      for (int i = 1; i <= 4; ++i, ++index)
+      for (;; ++index)
+	{
+	  InfiniteVector<double, Index2> origcoeff;
+	  origcoeff[index] = 1.0;
+	  
+// 	  cout << "original index set:" << endl << origcoeff;
+	  
+	  InfiniteVector<double, Index2> wcoeff;
+	  basis2.decompose_t(origcoeff, basis2.j0(), wcoeff);
+	  
+// 	  cout << "wavelet coefficients:" << endl << wcoeff;
+	  
+	  InfiniteVector<double, Index2> transformcoeff;
+	  basis2.reconstruct_t(wcoeff, level, transformcoeff);
+	  
+// 	  cout << "after decompose_t()+reconstruct_t():" << endl << origcoeff;
+	  
+	  cout << "* generator: " << index
+	       << ", max. error: " << linfty_norm(origcoeff-transformcoeff) << endl;
+	  
+	  if (index == basis2.lastGenerator(level)) break;
+	}
+    }
+
+//   cout << "* yet another basis:" << endl;
 
 //   const int d3 = 3;
 //   const int dT3 = 7;

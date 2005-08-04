@@ -1997,43 +1997,49 @@ namespace WaveletTL
       Mj1_.get_row(row, v);
     else
       {
-	// Due to the [DS] symmetrization, we have to be a bit careful here.
-	const size_t third = Deltasize(j0()+1)/3;
-	if (row < third)
-	  Mj1_.get_row(row, v);
-	else
- 	  {
-	    const size_t bottom_third = Deltasize(j+1)-Deltasize(j0()+1)/3;
-	    if (row >= bottom_third)
-	      Mj1_.get_row(row+Deltasize(j0()+1)-Deltasize(j+1), v, (1<<j)-(1<<j0()));
-	    else
-	      {
-		if (row < (size_t)ceil(Deltasize(j+1)/2.0))
-		  {
-// 		    cout << "das geht noch gut" << endl;
-// 		    cout << "btw.: Zeile " << row << " <= " << (size_t)ceil(Deltasize(j+1)/2.0)-1 << endl;
-		    Mj1_.get_row(third-2+(row-third)%2, v, (row-third)/2+1);
-		  }
-		else
-		  {
-// 		    cout << "aber das nicht" << endl;
-		    InfiniteVector<double, Vector<double>::size_type> w;
-  		    Mj1_get_row(j, (Deltasize(j+1)-1)-(int)row, w);
-// 		    cout << "w=" << endl << w;
-  		    for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(w.begin());
-  			 it != w.end(); ++it)
-		      v.set_coefficient((1<<j)-1-(int)it.index(), *it);
-  		    cout << "v=" << endl << v;
+	// brute force:
+	SparseMatrix<double> mj1;
+	assemble_Mj1(j, mj1);
+	mj1.get_row(row, v);
+	
+// 	// Due to the [DS] symmetrization, we have to be a bit careful here.
+// 	const size_t third = Deltasize(j0()+1)/3;
+// 	if (row < third)
+// 	  Mj1_.get_row(row, v);
+// 	else
+//  	  {
+// 	    const size_t bottom_third = Deltasize(j+1)-Deltasize(j0()+1)/3;
+// 	    if (row >= bottom_third)
+// 	      Mj1_.get_row(row+Deltasize(j0()+1)-Deltasize(j+1), v, (1<<j)-(1<<j0()));
+// 	    else
+// 	      {
+// 		if (row < (size_t)ceil(Deltasize(j+1)/2.0))
+// 		  {
+// // 		    cout << "das geht noch gut" << endl;
+// // 		    cout << "btw.: Zeile " << row << " <= " << (size_t)ceil(Deltasize(j+1)/2.0)-1 << endl;
+// 		    Mj1_.get_row(third-2+(row-third)%2, v, (row-third)/2+1);
+// 		  }
+// 		else
+// 		  {
+// // 		    cout << "aber das nicht" << endl;
+// 		    InfiniteVector<double, Vector<double>::size_type> w;
+//   		    Mj1_get_row(j, (Deltasize(j+1)-1)-(int)row, w);
+// // 		    cout << "w=" << endl << w;
+//   		    for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(w.begin());
+//   			 it != w.end(); ++it)
+// 		      v.set_coefficient((1<<j)-1-(int)it.index(), *it);
+//   		    cout << "v=" << endl << v;
 
-		    // brute force:
-		    InfiniteVector<double, Vector<double>::size_type> v2;
-		    SparseMatrix<double> mj1;
-		    assemble_Mj1(j, mj1);
-		    mj1.get_row(row, v2);
-		    cout << "v2=" << endl << v2;
-		  }
-	      }
-	  }
+// 		    // brute force:
+// 		    InfiniteVector<double, Vector<double>::size_type> v2;
+// 		    SparseMatrix<double> mj1;
+// 		    assemble_Mj1(j, mj1);
+// 		    mj1.get_row(row, v2);
+// 		    cout << "v2=" << endl << v2;
+// 		  }
+// 	      }
+// 	  }
+	
       }
   }
 
@@ -2046,10 +2052,31 @@ namespace WaveletTL
       Mj1T_.get_row(row, v);
     else
       {
-	// brute force:
-	SparseMatrix<double> mj1T;
-	assemble_Mj1T(j, mj1T);
-	mj1T.get_row(row, v);
+	// Due to the [DS] symmetrization, we have to be a bit careful here.
+ 	const size_t third = Deltasize(j0()+1)/3;
+ 	if (row < third)
+ 	  Mj1T_.get_row(row, v);
+ 	else
+  	  {
+ 	    const size_t bottom_third = Deltasize(j+1)-Deltasize(j0()+1)/3;
+ 	    if (row >= bottom_third)
+ 	      Mj1T_.get_row(row+Deltasize(j0()+1)-Deltasize(j+1), v, (1<<j)-(1<<j0()));
+	    else
+	      {
+// 		InfiniteVector<double, Vector<double>::size_type> waveTfilter;
+// 		Mj1T_t.get_row((1<<(j0()-1))-1, waveTfilter);
+// 		const int first_row = waveTfilter.begin().index();  // first nontrivial row in column (1<<(j0-1))-1
+// 		const int last_row  = waveTfilter.rbegin().index(); // last one
+// 		for (int col = 0; col < 1<<j; col++)
+// 		  {
+// 		  }
+
+		// brute force:
+		SparseMatrix<double> mj1T;
+		assemble_Mj1T(j, mj1T);
+		mj1T.get_row(row, v);
+	      }
+	  }
       }
   }
 

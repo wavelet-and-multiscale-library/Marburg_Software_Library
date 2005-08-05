@@ -1707,7 +1707,6 @@ namespace WaveletTL
 	// central bands
  	InfiniteVector<double, Vector<double>::size_type> v;
  	Mj0_t.get_row(rows_top-1, v); // last row of upper half
-
 	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
 	     it != v.end(); ++it)
 	  for (int row = rows_top; row <= Deltasize(j) - rows_bottom - 1; row++)
@@ -1782,7 +1781,6 @@ namespace WaveletTL
 	// central bands
  	InfiniteVector<double, Vector<double>::size_type> v;
  	Mj0T_t.get_row(rows_top-1, v); // last row of upper half
-
 	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
 	     it != v.end(); ++it)
 	  for (int row = rows_top; row <= Deltasize(j) - rows_bottom - 1; row++)
@@ -1857,7 +1855,6 @@ namespace WaveletTL
  	// central bands
   	InfiniteVector<double, Vector<double>::size_type> v;
   	Mj1_t.get_row(rows_top-1, v); // last row of upper half
-
  	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
  	     it != v.end(); ++it)
  	  for (int row = rows_top; row <= (1<<j) - rows_bottom - 1; row++)
@@ -1932,7 +1929,6 @@ namespace WaveletTL
  	// central bands
   	InfiniteVector<double, Vector<double>::size_type> v;
   	Mj1T_t.get_row(rows_top-1, v); // last row of upper half
-
  	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
  	     it != v.end(); ++it)
  	  for (int row = rows_top; row <= (1<<j) - rows_bottom - 1; row++)
@@ -2063,18 +2059,37 @@ namespace WaveletTL
  	      Mj1T_.get_row(row+Deltasize(j0()+1)-Deltasize(j+1), v, (1<<j)-(1<<j0()));
 	    else
 	      {
-// 		InfiniteVector<double, Vector<double>::size_type> waveTfilter;
-// 		Mj1T_t.get_row((1<<(j0()-1))-1, waveTfilter);
-// 		const int first_row = waveTfilter.begin().index();  // first nontrivial row in column (1<<(j0-1))-1
-// 		const int last_row  = waveTfilter.rbegin().index(); // last one
-// 		for (int col = 0; col < 1<<j; col++)
-// 		  {
-// 		  }
+ 		InfiniteVector<double, Vector<double>::size_type> waveTfilter;
+ 		Mj1T_t.get_row((1<<(j0()-1))-1, waveTfilter);
+ 		const int first_row = waveTfilter.begin().index();  // first nontrivial row in column (1<<(j0-1))-1
+ 		
+		// The row ...
+		const int last_row  = waveTfilter.rbegin().index();
+		// ... is the last nontrivial row in column (1<<(j0()-1))-1,
+		// i.e. the row last_row begins at column (1<<(j0()-1))-1, so does the row last_row-1.
+		// So the row "row" starts at column...
+		const int first_column = (1<<(j0()-1))-1+(int)floor(((int)row+1-last_row)/2.);
+
+// 		cout << "row=" << row << ", last_row=" << last_row << endl;
+// 		cout << "first_column=" << first_column << endl;
+
+		InfiniteVector<double, Vector<double>::size_type> w;
+		for (int col = first_column, filter_row = last_row-abs(row-last_row)%2;
+		     col < (1<<(j-1)) && filter_row >= first_row; col++, filter_row -= 2)
+		  w.set_coefficient(col, waveTfilter.get_coefficient(filter_row));
+
+// 		for (int col = 1<<(j-1); col <= (1<<j)-first_column-1; col++)
+// 		  w.set_coefficient(col, w.get_coefficient((1<<j)-col-1));
+
+		cout << "my row:" << endl << w << endl;
 
 		// brute force:
 		SparseMatrix<double> mj1T;
 		assemble_Mj1T(j, mj1T);
 		mj1T.get_row(row, v);
+
+		cout << "correct row:" << endl << v << endl;
+// 		cout << "first column in correct row: " << v.begin().index() << endl;
 	      }
 	  }
       }

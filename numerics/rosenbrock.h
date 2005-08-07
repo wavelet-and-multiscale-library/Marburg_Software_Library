@@ -52,21 +52,28 @@ namespace MathTL
   {
   public:
     /*!
-      enum type for the different builtin methods
+      enum type for the different builtin methods (in ascending stage order s)
 
       References:
       [Euler]  Deuflhard/Bornemann, Numerik II
       [ROS2]   Blom, Hundsdorfer, Spee, Verwer:
                A Second-Order Rosenbrock Method Applied to Photochemical Dispersion Problems,
 	       SIAM J. Sci. Comput. 20(1999), 1456-1480
+      [ROS3],
+      [RODAS3] Blom, Carmichael, Potra, Sandu, Spee, Verwer:
+               Benchmarking Stiff ODE Solvers for Atmospheric Chemistry Problems II:
+	       Rosenbrock Solvers,
+	       Atmos. Environ. 31(1997), 3459-3472
       [ROWDA3] Roche:
                Rosenbrock Methods for Differential Algebraic Equations,
                Numer. Math. 52(1988), 45-63
      */
     enum Method {
-      Euler,
-      ROS2,
-      ROWDA3
+      Euler,  // s=1, p=1, L-stable
+      ROS2,   // s=2, p=2, L-stable
+      ROS3,   // s=3, p=3, L-stable, stiffly accurate
+      ROWDA3, // s=3, p=3, L-stable
+      RODAS3  // s=4, p=3, L-stable, stiffly accurate
     };
 
     /*!

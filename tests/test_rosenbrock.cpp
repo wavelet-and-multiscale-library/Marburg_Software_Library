@@ -93,8 +93,8 @@ int main()
       olderr = err;
     }
 
-  cout << "* testing ROWDA3:" << endl;
-  Rosenbrock<Point<1>, IVP<1> > R3(Rosenbrock<Point<1>, IVP<1> >::ROWDA3);
+  cout << "* testing ROS3:" << endl;
+  Rosenbrock<Point<1>, IVP<1> > R3(Rosenbrock<Point<1>, IVP<1> >::ROS3);
   for (int expo = 0; expo <= 6; expo++)
     {
       temp = problem.u0;
@@ -112,5 +112,46 @@ int main()
 	}
       olderr = err;
     }
+
+  cout << "* testing ROWDA3:" << endl;
+  Rosenbrock<Point<1>, IVP<1> > R4(Rosenbrock<Point<1>, IVP<1> >::ROWDA3);
+  for (int expo = 0; expo <= 6; expo++)
+    {
+      temp = problem.u0;
+      int N = 1<<expo;
+      double h = 1.0/N;
+      for (int i = 1; i <= N; i++)
+	{
+	  R4.increment(problem, i*h, temp, h, result);
+	  temp = result;
+	}
+      err = fabs(result[0] - M_E);
+      if (expo > 0)
+	{
+	  cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2 << endl;
+	}
+      olderr = err;
+    }
+
+  cout << "* testing RODAS3:" << endl;
+  Rosenbrock<Point<1>, IVP<1> > R5(Rosenbrock<Point<1>, IVP<1> >::RODAS3);
+  for (int expo = 0; expo <= 6; expo++)
+    {
+      temp = problem.u0;
+      int N = 1<<expo;
+      double h = 1.0/N;
+      for (int i = 1; i <= N; i++)
+	{
+	  R5.increment(problem, i*h, temp, h, result);
+	  temp = result;
+	}
+      err = fabs(result[0] - M_E);
+      if (expo > 0)
+	{
+	  cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2 << endl;
+	}
+      olderr = err;
+    }
+
   return 0;
 }

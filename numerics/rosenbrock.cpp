@@ -18,6 +18,18 @@ namespace MathTL
 	b_.resize(2);
 	b_[0] = b_[1] = 0.5;
 	break;
+      case ROS3:
+	alpha_ = LowerTriangularMatrix<double>(3);
+	gamma_ = LowerTriangularMatrix<double>(3);
+	alpha_(1,0) = alpha_(2,0) = gamma_(0,0) = gamma_(1,1) = gamma_(2,2)
+	  = 0.43586652150845899941601945119356;
+	gamma_(1,0) = -0.19294655696029095575009695436041;
+	gamma_(2,1) = 1.74927148125794685173529749738960;
+	b_.resize(3);
+	b_(0) = -0.75457412385404315829818998646589;
+	b_(1) = 1.94100407061964420292840123379419;
+	b_(2) = -0.18642994676560104463021124732829;
+	break;
       case ROWDA3:
 	alpha_ = LowerTriangularMatrix<double>(3);
 	alpha_(1,0) = alpha_(2,0) = 0.7;
@@ -30,6 +42,21 @@ namespace MathTL
 	b_[0] = 0.3197278911564624;
 	b_[1] = 0.7714777906171382;
 	b_[2] = -0.09120568177360061;
+	break;
+      case RODAS3:
+	alpha_ = LowerTriangularMatrix<double>(4);
+	alpha_(2,0) = 1.0;
+	alpha_(3,0) = 0.75; alpha_(3,1) = -0.25; alpha_(3,2) = 0.5;
+	gamma_ = LowerTriangularMatrix<double>(4);
+	gamma_(0,0) = gamma_(1,1) = gamma_(2,2) = gamma_(3,3) = 0.5;
+	gamma_(1,0) = 1.0;
+	gamma_(2,0) = gamma_(2,1) = -0.25;
+	gamma_(3,0) = gamma_(3,1) = 1.0/12.0;
+	gamma_(3,2) = -2.0/3.0;
+	b_.resize(4);
+	b_[0] = 5.0/6.0;
+	b_[1] = b_[2] = -1.0/6.0;
+	b_[3] = 0.5;
 	break;
       case Euler:
       default:

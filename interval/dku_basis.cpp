@@ -1687,32 +1687,9 @@ namespace WaveletTL
       mj0_t = Mj0_t;
     else
       {
-	mj0_t.resize(Deltasize(j), Deltasize(j+1));
-
-	const int cols        = Deltasize(j0()+1);
-	const int rows_top    = (int)ceil(Deltasize(j0())/2.0);
-	const int rows_bottom = Deltasize(j0()) - rows_top;
-	
-	// upper left block
-	for (int row = 0; row < rows_top; row++)
-	  for (int col = 0; col < cols; col++)
-	    mj0_t.set_entry(row, col, Mj0_t.get_entry(row, col));
-
- 	// lower right block
- 	for (int row = 0; row < rows_bottom; row++)
- 	  for (int col = 0; col < cols; col++)
-  	    mj0_t.set_entry(Deltasize(j)-rows_bottom+row, Deltasize(j+1)-cols+col,
-			    Mj0_t.get_entry(row + rows_top, col));
-
-	// central bands
- 	InfiniteVector<double, Vector<double>::size_type> v;
- 	Mj0_t.get_row(rows_top-1, v); // last row of upper half
-	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
-	     it != v.end(); ++it)
-	  for (int row = rows_top; row <= Deltasize(j) - rows_bottom - 1; row++)
-	    mj0_t.set_entry(row, it.index()+2*(row-rows_top)+2, *it);
-
-	mj0_t.compress();
+	SparseMatrix<double> help;
+	assemble_Mj0(j, help);
+	mj0_t = transpose(help);
       }
   }
 
@@ -1761,32 +1738,9 @@ namespace WaveletTL
       mj0T_t = Mj0T_t;
     else
       {
-	mj0T_t.resize(Deltasize(j), Deltasize(j+1));
-
-	const int cols        = Deltasize(j0()+1);
-	const int rows_top    = (int)ceil(Deltasize(j0())/2.0);
-	const int rows_bottom = Deltasize(j0()) - rows_top;
-	
-	// upper left block
-	for (int row = 0; row < rows_top; row++)
-	  for (int col = 0; col < cols; col++)
-	    mj0T_t.set_entry(row, col, Mj0T_t.get_entry(row, col));
-
- 	// lower right block
- 	for (int row = 0; row < rows_bottom; row++)
- 	  for (int col = 0; col < cols; col++)
-  	    mj0T_t.set_entry(Deltasize(j)-rows_bottom+row, Deltasize(j+1)-cols+col,
-			     Mj0T_t.get_entry(row + rows_top, col));
-
-	// central bands
- 	InfiniteVector<double, Vector<double>::size_type> v;
- 	Mj0T_t.get_row(rows_top-1, v); // last row of upper half
-	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
-	     it != v.end(); ++it)
-	  for (int row = rows_top; row <= Deltasize(j) - rows_bottom - 1; row++)
-	    mj0T_t.set_entry(row, it.index()+2*(row-rows_top)+2, *it);
-
-	mj0T_t.compress();
+	SparseMatrix<double> help;
+	assemble_Mj0T(j, help);
+	mj0T_t = transpose(help);
       }
   }
 
@@ -1815,14 +1769,21 @@ namespace WaveletTL
   	    mj1.set_entry(Deltasize(j+1)-rows+row, (1<<j)-cols_right+col,
  			  Mj1_.get_entry(row, col + cols_left));
 	
- 	// central bands
+ 	// central bands, take care of [DS] symmetrization
   	InfiniteVector<double, Vector<double>::size_type> v;
   	Mj1_t.get_row(cols_left-1, v); // last column of left half
  	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
  	     it != v.end(); ++it)
- 	  for (int col = cols_left; col <= (1<<j) - cols_right - 1; col++)
+ 	  for (int col = cols_left; col < 1<<(j-1); col++)
  	    mj1.set_entry(it.index()+2*(col-cols_left)+2, col, *it);
 
+  	Mj1_t.get_row(cols_left, v); // first column of right half
+ 	const int offset_right = (Deltasize(j+1)-Deltasize(j0()+1))-(1<<j)+(1<<j0()); // row offset for the right half
+   	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+   	     it != v.end(); ++it)
+   	  for (int col = 1<<(j-1); col <= (1<<j) - cols_right - 1; col++)
+   	    mj1.set_entry(it.index()+offset_right+2*(col-(1<<(j-1))), col, *it);
+	
 	mj1.compress();
       }
   }
@@ -1835,32 +1796,9 @@ namespace WaveletTL
       mj1_t = Mj1_t;
     else
       {
- 	mj1_t.resize(1<<j, Deltasize(j+1));
-
- 	const int cols        = Deltasize(j0()+1);
- 	const int rows_top    = 1<<(j0()-1);
- 	const int rows_bottom = rows_top;
-	
- 	// upper left block
- 	for (int row = 0; row < rows_top; row++)
- 	  for (int col = 0; col < cols; col++)
- 	    mj1_t.set_entry(row, col, Mj1_t.get_entry(row, col));
-
-  	// lower right block
-  	for (int row = 0; row < rows_bottom; row++)
-  	  for (int col = 0; col < cols; col++)
-   	    mj1_t.set_entry((1<<j)-rows_bottom+row, Deltasize(j+1)-cols+col,
- 			    Mj1_t.get_entry(row + rows_top, col));
-
- 	// central bands
-  	InfiniteVector<double, Vector<double>::size_type> v;
-  	Mj1_t.get_row(rows_top-1, v); // last row of upper half
- 	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
- 	     it != v.end(); ++it)
- 	  for (int row = rows_top; row <= (1<<j) - rows_bottom - 1; row++)
- 	    mj1_t.set_entry(row, it.index()+2*(row-rows_top)+2, *it);
-	
-	mj1_t.compress();
+	SparseMatrix<double> help;
+	assemble_Mj1(j, help);
+	mj1_t = transpose(help);
       }
   }
 
@@ -1889,13 +1827,20 @@ namespace WaveletTL
   	    mj1T.set_entry(Deltasize(j+1)-rows+row, (1<<j)-cols_right+col,
  			   Mj1T_.get_entry(row, col + cols_left));
 	
- 	// central bands
+ 	// central bands, take care of [DS] symmetrization
   	InfiniteVector<double, Vector<double>::size_type> v;
   	Mj1T_t.get_row(cols_left-1, v); // last column of left half
  	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
  	     it != v.end(); ++it)
- 	  for (int col = cols_left; col <= (1<<j) - cols_right - 1; col++)
+ 	  for (int col = cols_left; col < 1<<(j-1); col++)
  	    mj1T.set_entry(it.index()+2*(col-cols_left)+2, col, *it);
+	
+  	Mj1T_t.get_row(cols_left, v); // first column of right half
+ 	const int offset_right = (Deltasize(j+1)-Deltasize(j0()+1))-(1<<j)+(1<<j0()); // row offset for the right half
+   	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+   	     it != v.end(); ++it)
+   	  for (int col = 1<<(j-1); col <= (1<<j) - cols_right - 1; col++)
+   	    mj1T.set_entry(it.index()+offset_right+2*(col-(1<<(j-1))), col, *it);
 	
 	mj1T.compress();
       }
@@ -1909,32 +1854,9 @@ namespace WaveletTL
       mj1T_t = Mj1T_t;
     else
       {
- 	mj1T_t.resize(1<<j, Deltasize(j+1));
-
- 	const int cols        = Deltasize(j0()+1);
- 	const int rows_top    = 1<<(j0()-1);
- 	const int rows_bottom = rows_top;
-	
- 	// upper left block
- 	for (int row = 0; row < rows_top; row++)
- 	  for (int col = 0; col < cols; col++)
- 	    mj1T_t.set_entry(row, col, Mj1T_t.get_entry(row, col));
-
-  	// lower right block
-  	for (int row = 0; row < rows_bottom; row++)
-  	  for (int col = 0; col < cols; col++)
-   	    mj1T_t.set_entry((1<<j)-rows_bottom+row, Deltasize(j+1)-cols+col,
- 			     Mj1T_t.get_entry(row + rows_top, col));
-
- 	// central bands
-  	InfiniteVector<double, Vector<double>::size_type> v;
-  	Mj1T_t.get_row(rows_top-1, v); // last row of upper half
- 	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
- 	     it != v.end(); ++it)
- 	  for (int row = rows_top; row <= (1<<j) - rows_bottom - 1; row++)
- 	    mj1T_t.set_entry(row, it.index()+2*(row-rows_top)+2, *it);
-
-	mj1T_t.compress();
+	SparseMatrix<double> help;
+	assemble_Mj1T(j, help);
+	mj1T_t = transpose(help);
       }
   }
 
@@ -2059,29 +1981,54 @@ namespace WaveletTL
  	      Mj1T_.get_row(row+Deltasize(j0()+1)-Deltasize(j+1), v, (1<<j)-(1<<j0()));
 	    else
 	      {
- 		InfiniteVector<double, Vector<double>::size_type> waveTfilter;
- 		Mj1T_t.get_row((1<<(j0()-1))-1, waveTfilter);
- 		const int first_row = waveTfilter.begin().index();  // first nontrivial row in column (1<<(j0-1))-1
+#if 0
+		// Left half of Mj1T:
+
+ 		InfiniteVector<double, Vector<double>::size_type> waveTfilter_left;
+ 		Mj1T_t.get_row((1<<(j0()-1))-1, waveTfilter_left);
+ 		const int first_row_left = waveTfilter_left.begin().index();  // first nontrivial row in column (1<<(j0-1))-1
  		
 		// The row ...
-		const int last_row  = waveTfilter.rbegin().index();
+		const int last_row_left  = waveTfilter_left.rbegin().index();
 		// ... is the last nontrivial row in column (1<<(j0()-1))-1,
-		// i.e. the row last_row begins at column (1<<(j0()-1))-1, so does the row last_row-1.
-		// So the row "row" starts at column...
-		const int first_column = (1<<(j0()-1))-1+(int)floor(((int)row+1-last_row)/2.);
-
-// 		cout << "row=" << row << ", last_row=" << last_row << endl;
-// 		cout << "first_column=" << first_column << endl;
+		// i.e. the row last_row_left begins at column (1<<(j0()-1))-1, so does the row last_row_left-1.
+		// So the row "row" starts at column ...
+		const int first_column_left = (1<<(j0()-1))-1+(int)floor(((int)row+1-last_row_left)/2.);
 
 		InfiniteVector<double, Vector<double>::size_type> w;
-		for (int col = first_column, filter_row = last_row-abs(row-last_row)%2;
-		     col < (1<<(j-1)) && filter_row >= first_row; col++, filter_row -= 2)
-		  w.set_coefficient(col, waveTfilter.get_coefficient(filter_row));
+		for (int col = first_column_left, filter_row = last_row_left-abs(row-last_row_left)%2;
+		     col < (1<<(j-1)) && filter_row >= first_row_left; col++, filter_row -= 2)
+		  w.set_coefficient(col, waveTfilter_left.get_coefficient(filter_row));
 
-// 		for (int col = 1<<(j-1); col <= (1<<j)-first_column-1; col++)
-// 		  w.set_coefficient(col, w.get_coefficient((1<<j)-col-1));
+		// Analogous strategy for the right half:
+
+		InfiniteVector<double, Vector<double>::size_type> waveTfilter_right;
+ 		Mj1T_t.get_row((1<<(j0()-1)), waveTfilter_right);
+		
+		const int offset_right = (Deltasize(j+1)-Deltasize(j0()+1))-(1<<j)+(1<<j0()); // row offset for the right half
+		const int first_row_right = waveTfilter_right.begin().index()+offset_right;
+		const int last_row_right  = waveTfilter_right.rbegin().index()+offset_right;
+
+// 		InfiniteVector<double, Vector<double>::size_type> testcol;
+// 		SparseMatrix<double> mj1T_t;
+// 		assemble_Mj1T_t(j, mj1T_t);
+// 		mj1T_t.get_row(1<<(j-1), testcol);
+// 		cout << "column 1<<(j-1)=" << (1<<(j-1)) << " of Mj1T:" << endl
+// 		     << testcol << endl;
+
+		// The rows first_row_right and first_row_right+1 end at column 1<<(j-1),
+		// so the row "row" ends at column ...
+		const int last_column_right = (1<<(j-1))+(int)floor(((int)row-first_row_right)/2.);
+		
+ 		for (int col = 1<<(j-1), filter_row = first_row_right+abs(row-first_row_right)%2;
+ 		     col <= last_column_right && filter_row <= last_row_right; col++, filter_row -= 2)
+ 		  w.set_coefficient(col, waveTfilter_right.get_coefficient(filter_row));
+		
+		cout << "row number: " << row << endl;
 
 		cout << "my row:" << endl << w << endl;
+
+		cout << "last_column_right=" << last_column_right << endl;
 
 		// brute force:
 		SparseMatrix<double> mj1T;
@@ -2090,6 +2037,7 @@ namespace WaveletTL
 
 		cout << "correct row:" << endl << v << endl;
 // 		cout << "first column in correct row: " << v.begin().index() << endl;
+#endif
 	      }
 	  }
       }

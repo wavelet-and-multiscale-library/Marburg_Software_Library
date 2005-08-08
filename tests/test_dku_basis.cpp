@@ -115,7 +115,52 @@ int main()
       cout << "* j=" << level << ",  ||GjT*MjT-I||_infty: " << row_sum_norm(T) << endl;
     }
 
-#if 0
+#if 1
+  cout << "- checking access to single rows of the M_{j,i} matrices:" << endl;
+  for (int level = basis.j0(); level <= basis.j0()+2; level++)
+    {
+      InfiniteVector<double, Vector<double>::size_type> v, w;
+      double maxerr = 0.0;
+      SparseMatrix<double> mj0, mj1, mj0T, mj1T;
+      basis.assemble_Mj0(level, mj0);
+      basis.assemble_Mj1(level, mj1);
+      basis.assemble_Mj0T(level, mj0T);
+      basis.assemble_Mj1T(level, mj1T);
+      for (size_t row = 0; row < mj0.row_dimension(); row++)
+	{
+	  mj0.get_row(row, v);
+	  basis.Mj0_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj0: " << maxerr << endl;
+      maxerr = 0.0;
+      for (size_t row = 0; row < mj1.row_dimension(); row++)
+	{
+	  mj1.get_row(row, v);
+	  basis.Mj1_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj1: " << maxerr << endl;
+      maxerr = 0.0;
+      for (size_t row = 0; row < mj1.row_dimension(); row++)
+	{
+	  mj0T.get_row(row, v);
+	  basis.Mj0T_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj0T: " << maxerr << endl;
+      maxerr = 0.0;
+      for (size_t row = 0; row < mj1.row_dimension(); row++)
+	{
+	  mj1T.get_row(row, v);
+	  basis.Mj1T_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj1T: " << maxerr << endl;
+    }
+#endif
+
+#if 1
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -147,7 +192,7 @@ int main()
     }
 #endif
 
-#if 0
+#if 1
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "
@@ -287,7 +332,52 @@ int main()
       cout << "* j=" << level << ",  ||GjT*MjT-I||_infty: " << row_sum_norm(T) << endl;
     }
 
-#if 0
+#if 1
+  cout << "- checking access to single rows of the M_{j,i} matrices:" << endl;
+  for (int level = basis2.j0(); level <= basis2.j0()+2; level++)
+    {
+      InfiniteVector<double, Vector<double>::size_type> v, w;
+      double maxerr = 0.0;
+      SparseMatrix<double> mj0, mj1, mj0T, mj1T;
+      basis2.assemble_Mj0(level, mj0);
+      basis2.assemble_Mj1(level, mj1);
+      basis2.assemble_Mj0T(level, mj0T);
+      basis2.assemble_Mj1T(level, mj1T);
+      for (size_t row = 0; row < mj0.row_dimension(); row++)
+	{
+	  mj0.get_row(row, v);
+	  basis2.Mj0_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj0: " << maxerr << endl;
+      maxerr = 0.0;
+      for (size_t row = 0; row < mj1.row_dimension(); row++)
+	{
+	  mj1.get_row(row, v);
+	  basis2.Mj1_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj1: " << maxerr << endl;
+      maxerr = 0.0;
+      for (size_t row = 0; row < mj1.row_dimension(); row++)
+	{
+	  mj0T.get_row(row, v);
+	  basis2.Mj0T_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj0T: " << maxerr << endl;
+      maxerr = 0.0;
+      for (size_t row = 0; row < mj1.row_dimension(); row++)
+	{
+	  mj1T.get_row(row, v);
+	  basis2.Mj1T_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj1T: " << maxerr << endl;
+    }
+#endif
+
+#if 1
   for (int level = basis2.j0()+1; level <= basis2.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -318,7 +408,7 @@ int main()
     }
 #endif
 
-#if 0
+#if 1
   for (int level = basis2.j0()+1; level <= basis2.j0()+2; level++)
     {
       cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "

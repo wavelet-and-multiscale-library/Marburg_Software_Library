@@ -86,12 +86,12 @@ namespace MathTL
     /*!
       read-only access to the internal indices table
     */
-    const size_type** indices() const { return indices_; }
+    size_type** indices() const { return indices_; }
 
     /*!
       read-only access to the internal entries table
     */
-    const C** entries() const { return entries_; }
+    C** entries() const { return entries_; }
 
     /*!
       read-only access to a single matrix entry

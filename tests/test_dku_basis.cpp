@@ -121,11 +121,11 @@ int main()
     {
       InfiniteVector<double, Vector<double>::size_type> v, w;
       double maxerr = 0.0;
-      SparseMatrix<double> mj0, mj1, mj0T, mj1T;
-      basis.assemble_Mj0(level, mj0);
-      basis.assemble_Mj1(level, mj1);
-      basis.assemble_Mj0T(level, mj0T);
-      basis.assemble_Mj1T(level, mj1T);
+      SparseMatrix<double> mj0, mj0_t, mj1, mj1_t, mj0T, mj0T_t, mj1T, mj1T_t;
+      basis.assemble_Mj0(level, mj0); mj0_t = transpose(mj0);
+      basis.assemble_Mj1(level, mj1); mj1_t = transpose(mj1);
+      basis.assemble_Mj0T(level, mj0T); mj0T_t = transpose(mj0T);
+      basis.assemble_Mj1T(level, mj1T); mj1T_t = transpose(mj1T);
       for (size_t row = 0; row < mj0.row_dimension(); row++)
 	{
 	  mj0.get_row(row, v);
@@ -133,6 +133,14 @@ int main()
 	  maxerr = max(maxerr, linfty_norm(v-w));
 	}
       cout << "* j=" << level << ", max. error in Mj0: " << maxerr << endl;
+      maxerr = 0.0;
+      for (size_t row = 0; row < mj0_t.row_dimension(); row++)
+	{
+	  mj0_t.get_row(row, v);
+	  basis.Mj0_t_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj0_t: " << maxerr << endl;
       maxerr = 0.0;
       for (size_t row = 0; row < mj1.row_dimension(); row++)
 	{
@@ -142,13 +150,29 @@ int main()
 	}
       cout << "* j=" << level << ", max. error in Mj1: " << maxerr << endl;
       maxerr = 0.0;
-      for (size_t row = 0; row < mj1.row_dimension(); row++)
+      for (size_t row = 0; row < mj1_t.row_dimension(); row++)
+	{
+	  mj1_t.get_row(row, v);
+	  basis.Mj1_t_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj1_t: " << maxerr << endl;
+      maxerr = 0.0;
+      for (size_t row = 0; row < mj0T.row_dimension(); row++)
 	{
 	  mj0T.get_row(row, v);
 	  basis.Mj0T_get_row(level, row, w);
 	  maxerr = max(maxerr, linfty_norm(v-w));
 	}
       cout << "* j=" << level << ", max. error in Mj0T: " << maxerr << endl;
+      maxerr = 0.0;
+      for (size_t row = 0; row < mj0T_t.row_dimension(); row++)
+	{
+	  mj0T_t.get_row(row, v);
+	  basis.Mj0T_t_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj0T_t: " << maxerr << endl;
       maxerr = 0.0;
       for (size_t row = 0; row < mj1.row_dimension(); row++)
 	{
@@ -157,6 +181,14 @@ int main()
 	  maxerr = max(maxerr, linfty_norm(v-w));
 	}
       cout << "* j=" << level << ", max. error in Mj1T: " << maxerr << endl;
+      maxerr = 0.0;
+      for (size_t row = 0; row < mj1T_t.row_dimension(); row++)
+	{
+	  mj1T_t.get_row(row, v);
+	  basis.Mj1T_t_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj1T_t: " << maxerr << endl;
     }
 #endif
 
@@ -338,11 +370,11 @@ int main()
     {
       InfiniteVector<double, Vector<double>::size_type> v, w;
       double maxerr = 0.0;
-      SparseMatrix<double> mj0, mj1, mj0T, mj1T;
-      basis2.assemble_Mj0(level, mj0);
-      basis2.assemble_Mj1(level, mj1);
-      basis2.assemble_Mj0T(level, mj0T);
-      basis2.assemble_Mj1T(level, mj1T);
+      SparseMatrix<double> mj0, mj0_t, mj1, mj1_t, mj0T, mj0T_t, mj1T, mj1T_t;
+      basis2.assemble_Mj0(level, mj0); mj0_t = transpose(mj0);
+      basis2.assemble_Mj1(level, mj1); mj1_t = transpose(mj1);
+      basis2.assemble_Mj0T(level, mj0T); mj0T_t = transpose(mj0T);
+      basis2.assemble_Mj1T(level, mj1T); mj1T_t = transpose(mj1T);
       for (size_t row = 0; row < mj0.row_dimension(); row++)
 	{
 	  mj0.get_row(row, v);
@@ -350,6 +382,14 @@ int main()
 	  maxerr = max(maxerr, linfty_norm(v-w));
 	}
       cout << "* j=" << level << ", max. error in Mj0: " << maxerr << endl;
+      maxerr = 0.0;
+      for (size_t row = 0; row < mj0_t.row_dimension(); row++)
+	{
+	  mj0_t.get_row(row, v);
+	  basis2.Mj0_t_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj0_t: " << maxerr << endl;
       maxerr = 0.0;
       for (size_t row = 0; row < mj1.row_dimension(); row++)
 	{
@@ -359,13 +399,29 @@ int main()
 	}
       cout << "* j=" << level << ", max. error in Mj1: " << maxerr << endl;
       maxerr = 0.0;
-      for (size_t row = 0; row < mj1.row_dimension(); row++)
+      for (size_t row = 0; row < mj1_t.row_dimension(); row++)
+	{
+	  mj1_t.get_row(row, v);
+	  basis2.Mj1_t_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj1_t: " << maxerr << endl;
+      maxerr = 0.0;
+      for (size_t row = 0; row < mj0T.row_dimension(); row++)
 	{
 	  mj0T.get_row(row, v);
 	  basis2.Mj0T_get_row(level, row, w);
 	  maxerr = max(maxerr, linfty_norm(v-w));
 	}
       cout << "* j=" << level << ", max. error in Mj0T: " << maxerr << endl;
+      maxerr = 0.0;
+      for (size_t row = 0; row < mj0T_t.row_dimension(); row++)
+	{
+	  mj0T_t.get_row(row, v);
+	  basis2.Mj0T_t_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj0T_t: " << maxerr << endl;
       maxerr = 0.0;
       for (size_t row = 0; row < mj1.row_dimension(); row++)
 	{
@@ -374,6 +430,14 @@ int main()
 	  maxerr = max(maxerr, linfty_norm(v-w));
 	}
       cout << "* j=" << level << ", max. error in Mj1T: " << maxerr << endl;
+      maxerr = 0.0;
+      for (size_t row = 0; row < mj1T_t.row_dimension(); row++)
+	{
+	  mj1T_t.get_row(row, v);
+	  basis2.Mj1T_t_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj1T_t: " << maxerr << endl;
     }
 #endif
 
@@ -388,20 +452,27 @@ int main()
 	  InfiniteVector<double, Index2> origcoeff;
 	  origcoeff[index] = 1.0;
 	  
-//  	  cout << "original index set:" << endl << origcoeff;
+//    	  cout << "original index set:" << endl << origcoeff;
 	  
 	  InfiniteVector<double, Index2> wcoeff;
-	  basis2.decompose(origcoeff, basis2.j0(), wcoeff);
+ 	  basis2.decompose(origcoeff, basis2.j0(), wcoeff);
+//  	  basis2.decompose(origcoeff, level-1, wcoeff);
 	  
-//   	  cout << "wavelet coefficients:" << endl << wcoeff;
+//     	  cout << "wavelet coefficients:" << endl << wcoeff;
 	  
 	  InfiniteVector<double, Index2> transformcoeff;
 	  basis2.reconstruct(wcoeff, level, transformcoeff);
 	  
-// 	  cout << "after decompose()+reconstruct():" << endl << origcoeff;
+//   	  cout << "after decompose()+reconstruct():" << endl << origcoeff;
+
+	  double error = linfty_norm(origcoeff-transformcoeff);
 	  
 	  cout << "* generator: " << index
-	       << ", max. error: " << linfty_norm(origcoeff-transformcoeff) << endl;
+	       << ", max. error: " << error << endl;
+
+// 	  if (error > 1e-3)
+// 	    cout << "original coeffs:" << endl << origcoeff << endl
+// 		 << "transformed coeffs:" << endl << transformcoeff << endl;
 	  
 	  if (index == basis2.lastGenerator(level)) break;
 	}

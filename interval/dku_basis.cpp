@@ -1430,6 +1430,7 @@ namespace WaveletTL
 			     const int jmin,
 			     InfiniteVector<double, Index>& v) const
   {
+    v.clear();
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
 	 it != itend; ++it)
       {
@@ -1445,6 +1446,7 @@ namespace WaveletTL
 			       const int jmin,
 			       InfiniteVector<double, Index>& v) const
   {
+    v.clear();
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
 	 it != itend; ++it)
       {
@@ -1460,6 +1462,7 @@ namespace WaveletTL
 			       const int j,
 			       InfiniteVector<double, Index>& v) const
   {
+    v.clear();
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
 	 it != itend; ++it)
       {
@@ -1475,6 +1478,7 @@ namespace WaveletTL
 				 const int j,
 				 InfiniteVector<double, Index>& v) const
   {
+    v.clear();
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
 	 it != itend; ++it)
       {
@@ -1496,11 +1500,11 @@ namespace WaveletTL
     c.clear();
 
     if (lambda.e() == 1) // wavelet
-      c[lambda] = 1.0; // true wavelet coefficients don't have to be modified
+      c.set_coefficient(lambda, 1.0); // true wavelet coefficients don't have to be modified
     else // generator
       {
-	if (lambda.j() == jmin)
-	  c[lambda] = 1.0;
+	if (lambda.j() == jmin) // generators on the coarsest level don't have to be modified
+	  c.set_coefficient(lambda, 1.0);
 	else // j > jmin
 	  {
 	    // For the multiscale decomposition of psi_lambda, we have to compute
@@ -1513,7 +1517,7 @@ namespace WaveletTL
    	    Mj1T_get_row(lambda.j() - 1, lambda.k() - DeltaLmin(), v);
    	    for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
    		 it != v.end(); ++it)
-   	      c[Index(lambda.j()-1, 1, it.index(), this)] = *it;
+   	      c.set_coefficient(Index(lambda.j()-1, 1, it.index(), this), *it);
 
    	    // compute c_{jmin} via recursion
    	    Mj0T_get_row(lambda.j() - 1, lambda.k() - DeltaLmin(), v);
@@ -1540,11 +1544,11 @@ namespace WaveletTL
     c.clear();
 
     if (lambda.e() == 1) // wavelet
-      c[lambda] = 1.0; // true wavelet coefficients don't have to be modified
+      c.set_coefficient(lambda, 1.0); // true wavelet coefficients don't have to be modified
     else // generator
       {
 	if (lambda.j() == jmin)
-	  c[lambda] = 1.0;
+	  c.set_coefficient(lambda, 1.0);
 	else // j > jmin
 	  {
 	    // For the multiscale decomposition of psi_lambda, we have to compute
@@ -1557,7 +1561,7 @@ namespace WaveletTL
    	    Mj1_get_row(lambda.j() - 1, lambda.k() - DeltaLmin(), v);
    	    for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
    		 it != v.end(); ++it)
-   	      c[Index(lambda.j()-1, 1, it.index(), this)] = *it;
+   	      c.set_coefficient(Index(lambda.j()-1, 1, it.index(), this), *it);
 
    	    // compute c_{jmin} via recursion
    	    Mj0_get_row(lambda.j() - 1, lambda.k() - DeltaLmin(), v);
@@ -1578,8 +1582,10 @@ namespace WaveletTL
 				 const int j,
 				 InfiniteVector<double, Index>& c) const
   {
+    c.clear();
+
     if (lambda.j() >= j)
-      c[lambda] += 1.0; 
+      c.set_coefficient(lambda, 1.0); 
     else
       {
 	// For the reconstruction of psi_lambda, we have to compute
@@ -1613,8 +1619,10 @@ namespace WaveletTL
 				   const int j,
 				   InfiniteVector<double, Index>& c) const
   {
+    c.clear();
+
     if (lambda.j() >= j)
-      c[lambda] += 1.0; 
+      c.set_coefficient(lambda, 1.0);
     else
       {
 	// For the reconstruction of psi_lambda, we have to compute
@@ -2089,7 +2097,12 @@ namespace WaveletTL
 	    if (row >= bottom)
 	      Mj1_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
 	    else
-	      Mj1_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
+	      {
+		if ((int)row < (1<<(j-1)))
+		  Mj1_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
+		else
+		  Mj1_t.get_row(1<<(j0()-1), v, Deltasize(j+1)-Deltasize(j0()+1)+2*((int)row-bottom));
+	      }
 	  }
       }
   }
@@ -2112,7 +2125,12 @@ namespace WaveletTL
 	    if (row >= bottom)
 	      Mj1T_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
 	    else
-	      Mj1T_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
+	      {
+		if ((int)row < (1<<(j-1)))
+		  Mj1T_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
+		else
+		  Mj1T_t.get_row(1<<(j0()-1), v, Deltasize(j+1)-Deltasize(j0()+1)+2*((int)row-bottom));
+	      }
 	  }
       }
   }

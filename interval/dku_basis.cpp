@@ -1927,49 +1927,52 @@ namespace WaveletTL
       {
 	v.clear();
 
- 	// brute force:
- 	SparseMatrix<double> mj1;
- 	assemble_Mj1(j, mj1);
- 	mj1.get_row(row, v);
-	
-//  	// Due to the [DS] symmetrization, we have to be a bit careful here.
-//  	const size_t third = Deltasize(j0()+1)/3;
-// 	if (row < third)
-// 	  Mj1_.get_row(row, v);
-// 	else
-//  	  {
-// 	    const size_t bottom_third = Deltasize(j+1)-Deltasize(j0()+1)/3;
-// 	    if (row >= bottom_third)
-// 	      Mj1_.get_row(row+Deltasize(j0()+1)-Deltasize(j+1), v, (1<<j)-(1<<j0()));
-// 	    else
-// 	      {
-// 		if (row < (size_t)ceil(Deltasize(j+1)/2.0))
-// 		  {
-// // 		    cout << "das geht noch gut" << endl;
-// // 		    cout << "btw.: Zeile " << row << " <= " << (size_t)ceil(Deltasize(j+1)/2.0)-1 << endl;
-// 		    Mj1_.get_row(third-2+(row-third)%2, v, (row-third)/2+1);
-// 		  }
-// 		else
-// 		  {
-// // 		    cout << "aber das nicht" << endl;
-// 		    InfiniteVector<double, Vector<double>::size_type> w;
-//   		    Mj1_get_row(j, (Deltasize(j+1)-1)-(int)row, w);
-// // 		    cout << "w=" << endl << w;
-//   		    for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(w.begin());
-//   			 it != w.end(); ++it)
-// 		      v.set_coefficient((1<<j)-1-(int)it.index(), *it);
-//   		    cout << "v=" << endl << v;
+	// Due to the [DS] symmetrization, we have to be a bit careful here.
+ 	const size_t third = Deltasize(j0()+1)/3;
+ 	if (row < third)
+ 	  Mj1_.get_row(row, v);
+ 	else
+  	  {
+ 	    const size_t bottom_third = Deltasize(j+1)-Deltasize(j0()+1)/3;
+ 	    if (row >= bottom_third)
+ 	      Mj1_.get_row(row+Deltasize(j0()+1)-Deltasize(j+1), v, (1<<j)-(1<<j0()));
+	    else
+	      {
+		// Left half of Mj1:
+		
+ 		InfiniteVector<double, Vector<double>::size_type> waveTfilter_left;
+ 		Mj1_t.get_row((1<<(j0()-1))-1, waveTfilter_left);
+ 		const int first_row_left = waveTfilter_left.begin().index();  // first nontrivial row in column (1<<(j0-1))-1
+ 		
+		// The row ...
+		const int last_row_left  = waveTfilter_left.rbegin().index();
+		// ... is the last nontrivial row in column (1<<(j0()-1))-1,
+		// i.e. the row last_row_left begins at column (1<<(j0()-1))-1, so does the row last_row_left-1.
+		// So the row "row" starts at column ...
+		const int first_column_left = (1<<(j0()-1))-1+(int)floor(((int)row+1-last_row_left)/2.);
+		
+		for (int col = first_column_left, filter_row = last_row_left-abs(row-last_row_left)%2;
+		     col < (1<<(j-1)) && filter_row >= first_row_left; col++, filter_row -= 2)
+		  v.set_coefficient(col, waveTfilter_left.get_coefficient(filter_row));
 
-// 		    // brute force:
-// 		    InfiniteVector<double, Vector<double>::size_type> v2;
-// 		    SparseMatrix<double> mj1;
-// 		    assemble_Mj1(j, mj1);
-// 		    mj1.get_row(row, v2);
-// 		    cout << "v2=" << endl << v2;
-// 		  }
-// 	      }
-// 	  }
-	
+		// Analogous strategy for the right half:
+
+		InfiniteVector<double, Vector<double>::size_type> waveTfilter_right;
+ 		Mj1_t.get_row((1<<(j0()-1)), waveTfilter_right);
+		
+		const int offset_right = (Deltasize(j+1)-Deltasize(j0()+1))-(1<<j)+(1<<j0()); // row offset for the right half
+		const int first_row_right = waveTfilter_right.begin().index()+offset_right;
+		const int last_row_right  = waveTfilter_right.rbegin().index()+offset_right;
+
+		// The rows first_row_right and first_row_right+1 end at column 1<<(j-1),
+		// so the row "row" ends at column ...
+		const int last_column_right = (1<<(j-1))+(int)floor(((int)row-first_row_right)/2.);
+		
+ 		for (int col = last_column_right, filter_row = first_row_right-offset_right+abs(row-first_row_right)%2;
+ 		     col >= 1<<(j-1) && filter_row <= last_row_right-offset_right; col--, filter_row += 2)
+ 		  v.set_coefficient(col, waveTfilter_right.get_coefficient(filter_row));
+	      }
+	  }
       }
   }
 

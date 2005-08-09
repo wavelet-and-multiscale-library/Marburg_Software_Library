@@ -1557,21 +1557,44 @@ namespace WaveletTL
 	    
 	    InfiniteVector<double, Vector<double>::size_type> v;
 
+	    typedef Vector<double>::size_type size_type;
+	    const size_type row = lambda.k() - DeltaLmin();
+
   	    // compute d_{j-1}
-   	    Mj1_get_row(lambda.j() - 1, lambda.k() - DeltaLmin(), v);
+   	    Mj1_get_row(lambda.j() - 1, row, v);
    	    for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
    		 it != v.end(); ++it)
    	      c.set_coefficient(Index(lambda.j()-1, 1, it.index(), this), *it);
 
    	    // compute c_{jmin} via recursion
-   	    Mj0_get_row(lambda.j() - 1, lambda.k() - DeltaLmin(), v);
-  	    for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
-  		 it != v.end(); ++it)
-  	      {
-  		InfiniteVector<double, Index> dhelp;
-  		decompose_t_1(Index(lambda.j()-1, 0, DeltaLmin() + it.index(), this), jmin, dhelp);
-  		c += *it * dhelp;
-  	      }
+	    size_type row_j0 = row;
+	    size_type offset = 0;
+	    if (lambda.j()-1 != j0())
+	      {
+		const size_type rows_top = (int)ceil(Deltasize(j0()+1)/2.0);
+		if (row >= rows_top)
+		  {
+		    const size_type bottom = Deltasize(lambda.j())-Deltasize(j0()+1)/2;
+		    if (row >= bottom)
+		      {
+			row_j0 = row + rows_top - bottom;
+			offset = Deltasize(lambda.j()-1) - Deltasize(j0());
+		      }
+		    else
+		      {
+			row_j0 = rows_top-2+(row-rows_top)%2;
+			offset = (row-rows_top)/2+1;
+		      }
+		  }
+	      }
+	    size_type** indices = Mj0_.indices();
+	    double** entries = Mj0_.entries();
+	    for (size_type k(1); k <= indices[row_j0][0]; k++)
+	      {
+		InfiniteVector<double, Index> dhelp;
+		decompose_t_1(Index(lambda.j()-1, 0, DeltaLmin()+indices[row_j0][k]+offset, this), jmin, dhelp);
+		c += entries[row_j0][k-1] * dhelp;
+	      }
 	  }
       }
   }
@@ -1595,13 +1618,9 @@ namespace WaveletTL
  	InfiniteVector<double, Vector<double>::size_type> v;
 
  	if (lambda.e() == 0)
-	  {
-	    Mj0_t_get_row(lambda.j(), lambda.k() - DeltaLmin(), v);
-	  }
+	  Mj0_t_get_row(lambda.j(), lambda.k() - DeltaLmin(), v);
   	else
-	  {
-	    Mj1_t_get_row(lambda.j(), lambda.k(), v);
-	  }
+	  Mj1_t_get_row(lambda.j(), lambda.k(), v);
 	
 	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
 	     it != v.end(); ++it)
@@ -1632,13 +1651,9 @@ namespace WaveletTL
  	InfiniteVector<double, Vector<double>::size_type> v;
 
  	if (lambda.e() == 0)
-	  {
-	    Mj0T_t_get_row(lambda.j(), lambda.k() - DeltaLmin(), v);
-	  }
+	  Mj0T_t_get_row(lambda.j(), lambda.k() - DeltaLmin(), v);
   	else
-	  {
-	    Mj1T_t_get_row(lambda.j(), lambda.k(), v);
-	  }
+	  Mj1T_t_get_row(lambda.j(), lambda.k(), v);
 	
 	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
 	     it != v.end(); ++it)

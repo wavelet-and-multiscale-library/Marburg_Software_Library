@@ -68,6 +68,11 @@ namespace WaveletTL
     ellT_ = ell2T<d,dT>(); // (3.2.10)
     ell_  = ellT_-(dT-d);  // (3.2.16)
 
+    ellT_l = ell2T<d,dT>() + (bc_left == Dirichlet);  // (3.2.10), complementary b.c.'s
+    ellT_r = ell2T<d,dT>() + (bc_right == Dirichlet); // (3.2.10), complementary b.c.'s
+    ell_l  = ellT_l-(dT-d); // (3.2.16)
+    ell_r  = ellT_r-(dT-d); // (3.2.16)
+
     setup_Alpha();
     setup_AlphaT();
     setup_BetaL();
@@ -447,9 +452,10 @@ namespace WaveletTL
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_Alpha() {
     // setup Alpha = (Alpha(m, r))
+    // IGPMlib reference: I_Mask_Bspline::EvalAlpha()
 
     const int mLow = 1-ell2T_;         // start index in (3.2.26)
-    const int mUp  = 2*ellT_+ell1T_-1; // end index in (3.2.41)
+    const int mUp  = 2*max(ellT_l,ellT_r)+ell1T_-1; // end index in (3.2.41)
     const int rUp  = dT-1;
 
     Alpha_.resize(mUp-mLow+1, rUp+1);
@@ -488,9 +494,10 @@ namespace WaveletTL
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_AlphaT() {
     // setup AlphaT
+    // IGPMlib reference: I_Mask_Bspline::EvalAlpha()
 
     const int mLow = 1-ell2_;        // start index in (3.2.25)
-    const int mUp  = 2*ell_+ell1_-1; // end index in (3.2.40)
+    const int mUp  = 2*max(ell_l,ell_r)+ell1_-1; // end index in (3.2.40)
     const int rUp  = d-1;
 
     AlphaT_.resize(mUp-mLow+1, rUp+1);
@@ -529,9 +536,10 @@ namespace WaveletTL
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_BetaL() {
     // setup BetaL
+    // IGPMlib reference: I_Mask_Bspline::EvalBetaL()
 
-    const int mLow = 2*ellT_+ell1T_;   // start index in (3.2.41)
-    const int mUp  = 2*ellT_+ell2T_-2; // end index in (3.2.41)
+    const int mLow = 2*ellT_l+ell1T_;   // start index in (3.2.41)
+    const int mUp  = 2*ellT_l+ell2T_-2; // end index in (3.2.41)
     const int rUp  = dT-1;
 
     const int AlphamLow = 1-ell2T_;
@@ -541,7 +549,7 @@ namespace WaveletTL
     for (int r = 0; r <= rUp; r++)
       for (int m = mLow; m <= mUp; m++) {
 	double help = 0;
-	for (int q = (int)ceil((m-ell2T_)/2.0); q < ellT_; q++)
+	for (int q = (int)ceil((m-ell2T_)/2.0); q < ellT_l; q++)
 	  help += Alpha_(-AlphamLow+q, r) * cdf_.aT().get_coefficient(MultiIndex<int, 1>(m-2*q)); // (3.2.31)
 
 	BetaL_(-mLow+m, r) = help * M_SQRT1_2;
@@ -551,9 +559,10 @@ namespace WaveletTL
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_BetaLT() {
     // setup BetaLT
+    // IGPMlib reference: I_Mask_Bspline::EvalBetaL()
 
-    const int mLow = 2*ell_+ell1_;   // start index in (3.2.40)
-    const int mUp  = 2*ell_+ell2_-2; // end index in (3.2.40)
+    const int mLow = 2*ell_l+ell1_;   // start index in (3.2.40)
+    const int mUp  = 2*ell_l+ell2_-2; // end index in (3.2.40)
     const int rUp  = d-1;
 
     const int AlphaTmLow = 1-ell2_;
@@ -563,7 +572,7 @@ namespace WaveletTL
     for (int r = 0; r <= rUp; r++)
       for (int m = mLow; m <= mUp; m++) {
 	double help = 0;
-	for (int q = (int)ceil((m-ell2_)/2.0); q < ell_; q++)
+	for (int q = (int)ceil((m-ell2_)/2.0); q < ell_l; q++)
 	  help += AlphaT_(-AlphaTmLow+q, r) * cdf_.a().get_coefficient(MultiIndex<int, 1>(m-2*q)); // (3.2.31)
 	
 	BetaLT_(-mLow+m, r) = help * M_SQRT1_2;
@@ -573,9 +582,10 @@ namespace WaveletTL
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_BetaR() {
     // setup BetaR
+    // IGPMlib reference: I_Mask_Bspline::EvalBetaR()
 
-    const int mLow = 2*ellT_+ell1T_;  // start index in (3.2.41)
-    const int mUp  = 2*ellT_+ell2T_-2; // end index in (3.2.41)
+    const int mLow = 2*ellT_r+ell1T_;  // start index in (3.2.41)
+    const int mUp  = 2*ellT_r+ell2T_-2; // end index in (3.2.41)
     const int rUp  = dT-1;
 
     const int AlphamLow = 1-ell2T_;
@@ -585,7 +595,7 @@ namespace WaveletTL
     for (int r = 0; r <= rUp; r++)
       for (int m = mLow; m <= mUp; m++) {
 	double help = 0;
-	for (int q = (int)ceil((m-ell2T_)/2.0); q < ellT_; q++)
+	for (int q = (int)ceil((m-ell2T_)/2.0); q < ellT_r; q++)
 	  help += Alpha_(-AlphamLow+q, r) * cdf_.aT().get_coefficient(MultiIndex<int, 1>(m-2*q)); // (3.2.31)
 
 	BetaR_(-mLow+m, r) = help * M_SQRT1_2;
@@ -595,9 +605,10 @@ namespace WaveletTL
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_BetaRT() {
     // setup BetaRT
+    // IGPMlib reference: I_Mask_Bspline::EvalBetaR()
 
-    const int mLow = 2*ell_+ell1_;   // start index in (3.2.40)
-    const int mUp  = 2*ell_+ell2_-2; // end index in (3.2.40)
+    const int mLow = 2*ell_r+ell1_;   // start index in (3.2.40)
+    const int mUp  = 2*ell_r+ell2_-2; // end index in (3.2.40)
     const int rUp  = d-1;
 
     const int AlphaTmLow = 1-ell2_;
@@ -607,7 +618,7 @@ namespace WaveletTL
     for (int r = 0; r <= rUp; r++)
       for (int m = mLow; m <= mUp; m++) {
 	double help = 0;
-	for (int q = (int)ceil((m-ell2_)/2.0); q < ell_; q++)
+	for (int q = (int)ceil((m-ell2_)/2.0); q < ell_r; q++)
 	  help += AlphaT_(-AlphaTmLow+q, r) * cdf_.a().get_coefficient(MultiIndex<int, 1>(m-2*q)); // (3.2.31)
 	
 	BetaRT_(-mLow+m, r) = help * M_SQRT1_2;

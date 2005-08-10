@@ -29,10 +29,11 @@ namespace WaveletTL
   /*!
     biorthogonalization methods for the DKU basis, see, e.g., [B]
 
-    The methods 'partialSVD' and 'BernsteinSVD' enable the [DKU] boundary treatment:
+    The methods 'partialSVD' and 'BernsteinSVD' enable the [DKU]/[DS] boundary treatment:
     at the boundary, exactly one generator and one wavelet does not vanish,
     which can be modified to satisfy homogeneous boundary conditions for the primal
-    basis.
+    basis. The dual basis will then be constructed to fulfil complementary boundary
+    conditions, see [DS].
   */
   enum DKUBiorthogonalizationMethod
     {
@@ -48,7 +49,7 @@ namespace WaveletTL
   */
   enum BoundaryCondition
     {
-      Dirichlet,// Dirichlet b.c., all generators and wavelets vanish
+      Dirichlet,// Dirichlet b.c., all (primal) generators and wavelets vanish
       no_b_c    // no b.c.
     };
 
@@ -89,6 +90,8 @@ namespace WaveletTL
 
     /*!
       boundary indices in \Delta_j^X and \tilde\Delta_j^X (3.2.17)
+      
+      remark: take care of Dirichlet boundary conditions!
      */
     inline const int DeltaLmin() const { return ell()-d; }
     inline const int DeltaLmax() const { return ell()-1; }
@@ -278,6 +281,7 @@ namespace WaveletTL
 
   protected:
     int ell1_, ell2_, ell1T_, ell2T_, ell_, ellT_;
+    int ell_l, ell_r, ellT_l, ellT_r;
     DKUBiorthogonalizationMethod bio_;
     BoundaryCondition bc_left_, bc_right_;
 

@@ -1512,19 +1512,83 @@ namespace WaveletTL
 	    // i.e. one row of G_{j-1}^T=(\tilde M_{j-1,0}, \tilde M_{j-1,1}).
 	    
 	    typedef Vector<double>::size_type size_type;
-	    InfiniteVector<double, size_type> v;
 
 	    const size_type row = lambda.k() - DeltaLmin();
 
   	    // compute d_{j-1}
-   	    Mj1T_get_row(lambda.j() - 1, row, v);
-   	    for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
-   		 it != v.end(); ++it)
-   	      c.set_coefficient(Index(lambda.j()-1, 1, it.index(), this), *it);
-
-   	    // compute c_{jmin} via recursion
 	    size_type row_j0 = row;
 	    size_type offset = 0;
+
+ 	    if (lambda.j()-1 == j0())
+ 	      {		
+ 		for (size_type k(0); k < Mj1T_.entries_in_row(row_j0); k++)
+ 		  c.set_coefficient(Index(j0(), 1, Mj1T_.get_nth_index(row_j0,k), this),
+				    Mj1T_.get_nth_entry(row_j0,k));
+ 	      }
+ 	    else
+	      {
+  		// Due to the [DS] symmetrization, we have to be a bit careful here.
+  		const size_t third = Deltasize(j0()+1)/3;
+  		if (row < third)
+  		  for (size_type k(0); k < Mj1T_.entries_in_row(row_j0); k++)
+  		    c.set_coefficient(Index(lambda.j()-1, 1, Mj1T_.get_nth_index(row_j0,k), this),
+  				      Mj1T_.get_nth_entry(row_j0,k));
+  		else
+		  {
+		    const size_t bottom_third = Deltasize(lambda.j())-Deltasize(j0()+1)/3;
+		    if (row >= bottom_third)
+		      {
+			row_j0 = row+Deltasize(j0()+1)-Deltasize(lambda.j());
+			offset = (1<<(lambda.j()-1))-(1<<j0());
+			for (size_type k(0); k < Mj1T_.entries_in_row(row_j0); k++)
+			  c.set_coefficient(Index(lambda.j()-1, 1, Mj1T_.get_nth_index(row_j0,k)+offset, this),
+					    Mj1T_.get_nth_entry(row_j0,k));
+		      }
+		    else
+		      {
+			// Left half of Mj1T:
+
+			InfiniteVector<double, size_type> waveTfilter_left;
+			Mj1T_t.get_row((1<<(j0()-1))-1, waveTfilter_left);
+			
+			const int first_row_left = waveTfilter_left.begin().index();  // first nontrivial row in column (1<<(j0-1))-1
+ 		
+			// The row ...
+			const int last_row_left  = waveTfilter_left.rbegin().index();
+			// ... is the last nontrivial row in column (1<<(j0()-1))-1,
+			// i.e. the row last_row_left begins at column (1<<(j0()-1))-1, so does the row last_row_left-1.
+			// So the row "row" starts at column ...
+			const int first_column_left = (1<<(j0()-1))-1+(int)floor(((int)row+1-last_row_left)/2.);
+		
+			for (int col = first_column_left, filter_row = last_row_left-abs(row-last_row_left)%2;
+			     col < (1<<(lambda.j()-2)) && filter_row >= first_row_left; col++, filter_row -= 2)
+			  c.set_coefficient(Index(lambda.j()-1, 1, col, this),
+					    waveTfilter_left.get_coefficient(filter_row));
+
+			// Analogous strategy for the right half:
+
+			InfiniteVector<double, Vector<double>::size_type> waveTfilter_right;
+			Mj1T_t.get_row((1<<(j0()-1)), waveTfilter_right);
+		
+			const int offset_right = (Deltasize(lambda.j())-Deltasize(j0()+1))-(1<<(lambda.j()-1))+(1<<j0()); // row offset for the right half
+			const int first_row_right = waveTfilter_right.begin().index()+offset_right;
+			const int last_row_right  = waveTfilter_right.rbegin().index()+offset_right;
+
+			// The rows first_row_right and first_row_right+1 end at column 1<<(lambda.j()-2),
+			// so the row "row" ends at column ...
+			const int last_column_right = (1<<(lambda.j()-2))+(int)floor(((int)row-first_row_right)/2.);
+		
+			for (int col = last_column_right, filter_row = first_row_right-offset_right+abs(row-first_row_right)%2;
+			     col >= 1<<(lambda.j()-2) && filter_row <= last_row_right-offset_right; col--, filter_row += 2)
+			  c.set_coefficient(Index(lambda.j()-1, 1, col, this),
+					    waveTfilter_right.get_coefficient(filter_row));
+		      }
+		  }	    
+	      }
+
+   	    // compute c_{jmin} via recursion
+	    row_j0 = row;
+	    offset = 0;
 	    if (lambda.j()-1 != j0())
 	      {
 		const size_type rows_top = (int)ceil(Deltasize(j0()+1)/2.0);

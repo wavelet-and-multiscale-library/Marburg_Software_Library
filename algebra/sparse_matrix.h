@@ -84,14 +84,19 @@ namespace MathTL
     void resize(const size_type rows, const size_type columns);
 
     /*!
-      read-only access to the internal indices table
+      number of nonzero entries a given row
     */
-    size_type** indices() const { return indices_; }
+    const size_type entries_in_row(const size_type row) const;
+    
+    /*!
+      read access to the column index of the n-th nontrivial element in a given row
+    */
+    const size_type get_nth_index(const size_type row, const size_type n) const;
 
     /*!
-      read-only access to the internal entries table
+      read access to the n-th nontrivial element in a given row
     */
-    C** entries() const { return entries_; }
+    const C get_nth_entry(const size_type row, const size_type n) const;
 
     /*!
       read-only access to a single matrix entry

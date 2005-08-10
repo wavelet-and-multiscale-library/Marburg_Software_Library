@@ -142,6 +142,30 @@ namespace MathTL
   }
 
   template <class C>
+  inline
+  const typename SparseMatrix<C>::size_type
+  SparseMatrix<C>::entries_in_row(const size_type row) const
+  {
+    assert(row < rowdim_);
+    return indices_[row] ? indices_[row][0] : 0;
+  }
+  
+  template <class C>
+  inline
+  const typename SparseMatrix<C>::size_type
+  SparseMatrix<C>::get_nth_index(const size_type row, const size_type n) const
+  {
+    return indices_[row][n+1];
+  }
+  
+  template <class C>
+  inline
+  const C SparseMatrix<C>::get_nth_entry(const size_type row, const size_type n) const
+  {
+    return entries_[row][n];
+  }
+  
+  template <class C>
   const C SparseMatrix<C>::get_entry(const size_type row, const size_type column) const
   {
     assert(row < rowdim_ && column < coldim_);

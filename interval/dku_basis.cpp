@@ -54,12 +54,16 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
-  DKUBasis<d, dT>::DKUBasis(DKUBiorthogonalizationMethod bio)
+  DKUBasis<d, dT>::DKUBasis(BoundaryCondition bc_left,
+			    BoundaryCondition bc_right,
+			    DKUBiorthogonalizationMethod bio)
     : ell1_(ell1<d>()),
       ell2_(ell2<d>()),
       ell1T_(ell1T<d,dT>()),
       ell2T_(ell2T<d,dT>()),
-      bio_(bio)
+      bio_(bio),
+      bc_left_(bc_left),
+      bc_right_(bc_right)
   {
     ellT_ = ell2T<d,dT>(); // (3.2.10)
     ell_  = ellT_-(dT-d);  // (3.2.16)

@@ -198,23 +198,16 @@ int main()
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
 	   << level << ":" << endl;
       Index index(basis.firstGenerator(level));
-//      for (int i = 1; i <= 4; ++i, ++index)
       for (;; ++index)
 	{
 	  InfiniteVector<double, Index> origcoeff;
 	  origcoeff[index] = 1.0;
 	  
-//  	  cout << "original index set:" << endl << origcoeff;
-	  
 	  InfiniteVector<double, Index> wcoeff;
 	  basis.decompose(origcoeff, basis.j0(), wcoeff);
 	  
-//   	  cout << "wavelet coefficients:" << endl << wcoeff;
-	  
 	  InfiniteVector<double, Index> transformcoeff;
 	  basis.reconstruct(wcoeff, level, transformcoeff);
-	  
-// 	  cout << "after decompose()+reconstruct():" << endl << origcoeff;
 	  
 	  cout << "* generator: " << index
 	       << ", max. error: " << linfty_norm(origcoeff-transformcoeff) << endl;
@@ -230,23 +223,16 @@ int main()
       cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "
 	   << level << ":" << endl;
       Index index(basis.firstGenerator(level));
-//      for (int i = 1; i <= 4; ++i, ++index)
       for (;; ++index)
 	{
 	  InfiniteVector<double, Index> origcoeff;
 	  origcoeff[index] = 1.0;
 	  
-// 	  cout << "original index set:" << endl << origcoeff;
-	  
 	  InfiniteVector<double, Index> wcoeff;
 	  basis.decompose_t(origcoeff, basis.j0(), wcoeff);
 	  
-// 	  cout << "wavelet coefficients:" << endl << wcoeff;
-	  
 	  InfiniteVector<double, Index> transformcoeff;
 	  basis.reconstruct_t(wcoeff, level, transformcoeff);
-	  
-// 	  cout << "after decompose_t()+reconstruct_t():" << endl << origcoeff;
 	  
 	  cout << "* generator: " << index
 	       << ", max. error: " << linfty_norm(origcoeff-transformcoeff) << endl;
@@ -254,27 +240,6 @@ int main()
 	  if (index == basis.lastGenerator(level)) break;
 	}
     }
-#endif
-
-
-#if 0
-//   coeff[basis.firstGenerator(basis.j0())] = 0.0;
-//   coeff[++basis.firstGenerator(basis.j0())] = 0.0;
-  Index index(basis.firstGenerator(basis.j0()+1));
-  for (int i = 0; i <= 15; i++, ++index);
-  coeff[index] = 1.0;
-//   for (int i = 0; i <= 8; i++)
-//     coeff[++index] = 1.0;
-  cout << "  * a small but nontrivial coefficient set:" << endl << coeff;
-  cout << "  * result of DECOMPOSE:" << endl;
-  InfiniteVector<double,Index> wcoeff;
-  basis.decompose(coeff, basis.j0(), wcoeff);
-  cout << wcoeff;
-
-  cout << "  * RECONSTRUCT that:" << endl;
-  InfiniteVector<double,Index> rcoeff;
-  basis.reconstruct(wcoeff,basis.j0()+1,rcoeff);
-  cout << rcoeff;
 #endif
 
 #if 0
@@ -452,18 +417,11 @@ int main()
 	  InfiniteVector<double, Index2> origcoeff;
 	  origcoeff[index] = 1.0;
 	  
-//    	  cout << "original index set:" << endl << origcoeff;
-	  
 	  InfiniteVector<double, Index2> wcoeff;
  	  basis2.decompose(origcoeff, basis2.j0(), wcoeff);
-//  	  basis2.decompose(origcoeff, level-1, wcoeff);
-	  
-//     	  cout << "wavelet coefficients:" << endl << wcoeff;
 	  
 	  InfiniteVector<double, Index2> transformcoeff;
 	  basis2.reconstruct(wcoeff, level, transformcoeff);
-	  
-//   	  cout << "after decompose()+reconstruct():" << endl << origcoeff;
 
 	  double error = linfty_norm(origcoeff-transformcoeff);
 	  
@@ -485,23 +443,16 @@ int main()
       cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "
 	   << level << ":" << endl;
       Index2 index(basis2.firstGenerator(level));
-//      for (int i = 1; i <= 4; ++i, ++index)
       for (;; ++index)
 	{
 	  InfiniteVector<double, Index2> origcoeff;
 	  origcoeff[index] = 1.0;
 	  
-// 	  cout << "original index set:" << endl << origcoeff;
-	  
 	  InfiniteVector<double, Index2> wcoeff;
 	  basis2.decompose_t(origcoeff, basis2.j0(), wcoeff);
 	  
-// 	  cout << "wavelet coefficients:" << endl << wcoeff;
-	  
 	  InfiniteVector<double, Index2> transformcoeff;
 	  basis2.reconstruct_t(wcoeff, level, transformcoeff);
-	  
-// 	  cout << "after decompose_t()+reconstruct_t():" << endl << origcoeff;
 	  
 	  cout << "* generator: " << index
 	       << ", max. error: " << linfty_norm(origcoeff-transformcoeff) << endl;

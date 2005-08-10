@@ -44,6 +44,15 @@ namespace WaveletTL
     };
 
   /*!
+    boundary condition at a given end point of [0,1]
+  */
+  enum BoundaryCondition
+    {
+      Dirichlet,// Dirichlet b.c., all generators and wavelets vanish
+      no_b_c    // no b.c.
+    };
+
+  /*!
     Template class for the wavelet bases on the interval as introduced in [DKU], [DS].
     All formulas refer to the preprint version of [DKU],
     except those explicitly denoted by [DS].
@@ -65,7 +74,9 @@ namespace WaveletTL
       constructor
       (ellT = ell2T)
     */
-    explicit DKUBasis(DKUBiorthogonalizationMethod bio = BernsteinSVD);
+    explicit DKUBasis(BoundaryCondition bc_left = no_b_c,
+		      BoundaryCondition bc_right = no_b_c,
+		      DKUBiorthogonalizationMethod bio = BernsteinSVD);
 
     //! DKU parameter ell-tilde (3.2.10)
     inline const int ellT() const { return ellT_; }
@@ -268,6 +279,7 @@ namespace WaveletTL
   protected:
     int ell1_, ell2_, ell1T_, ell2T_, ell_, ellT_;
     DKUBiorthogonalizationMethod bio_;
+    BoundaryCondition bc_left_, bc_right_;
 
     CDFBasis<d, dT> cdf_;
 

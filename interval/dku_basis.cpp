@@ -1717,19 +1717,69 @@ namespace WaveletTL
 	// the corresponding column of the transformation matrix \tilde Mj=(\tilde Mj0, \tilde Mj1).
 
 	// reconstruct by recursion
- 	InfiniteVector<double, Vector<double>::size_type> v;
-
- 	if (lambda.e() == 0)
-	  Mj0T_t_get_row(lambda.j(), lambda.k() - DeltaLmin(), v);
-  	else
-	  Mj1T_t_get_row(lambda.j(), lambda.k(), v);
+	typedef Vector<double>::size_type size_type;
 	
-	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
-	     it != v.end(); ++it)
+	const size_type row = (lambda.e() == 0 ? lambda.k() - DeltaLmin() : lambda.k());
+	
+	const SparseMatrix<double>& M = (lambda.e() == 0 ? Mj0T_t : Mj1T_t);
+	
+	size_type row_j0 = row;
+	size_type offset = 0;
+	if (lambda.e() == 0)
+	  {
+	    if (lambda.j() > j0())
+	      {
+		const size_type rows_top = (int)ceil(Deltasize(j0())/2.0);
+		if (row >= rows_top)
+		  {
+		    const size_type bottom = Deltasize(lambda.j())-Deltasize(j0())/2;
+		    if (row >= bottom)
+		      {
+			row_j0 = row+rows_top-bottom;
+			offset = Deltasize(lambda.j()+1)-Deltasize(j0()+1);
+		      }
+		    else
+		      {
+			row_j0 = rows_top-1;
+			offset = 2*(row-rows_top)+2;
+		      }
+		  }
+	      }
+	  }
+	else
+	  {
+	    if (lambda.j() > j0())
+	      {
+		const size_type rows_top = 1<<(j0()-1);
+		if (row >= rows_top)
+		  {
+		    const size_type bottom = (1<<lambda.j())-(1<<(j0()-1));
+		    if (row >= bottom)
+		      {
+			row_j0 = row+rows_top-bottom;
+			offset = Deltasize(lambda.j()+1)-Deltasize(j0()+1);
+		      }
+		    else
+		      {
+			if ((int)row < (1<<(lambda.j()-1)))
+			  {
+			    row_j0 = rows_top-1;
+			    offset = 2*(row-rows_top)+2;
+			  }
+			else
+			  {
+			    row_j0 = 1<<(j0()-1);
+			    offset = Deltasize(lambda.j()+1)-Deltasize(j0()+1)+2*((int)row-bottom);
+			  }
+		      }
+		  }
+	      }
+	  }
+	for (size_type k(0); k < M.entries_in_row(row_j0); k++)
 	  {
 	    InfiniteVector<double, Index> dhelp;
-	    reconstruct_t_1(Index(lambda.j()+1, 0, DeltaLmin() + it.index(), this), j, dhelp);
-	    c += *it * dhelp;
+	    reconstruct_t_1(Index(lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this), j, dhelp);
+	    c += M.get_nth_entry(row_j0,k) * dhelp;
 	  }
       }
   }

@@ -627,12 +627,12 @@ namespace WaveletTL
 
   template <int d, int dT>
   void DKUBasis<d, dT>::setup_GammaL() {
-    // IGPMlib reference: imask_bspline.cpp, experimental version
+    // IGPMlib reference: I_Mask_Bspline::EvalGammaL()
 
-//     const int llowT = ellT-dT;
-//     const int lupT  = ellT-1;
-
-    GammaL_.resize(dT, dT); // lupT-llowT+1 each
+    const int llowT = ellT_l-dT;
+    const int lupT  = ellT_l-1-(bc_left_ == Dirichlet);
+    
+    GammaL_.resize(llowT-lupT+1, llowT-lupT+1);
 	
     // 1. compute the integrals
     //      z(s,t) = \int_0^1\phi(x-s)\tilde\phi(x-t)\,dx
@@ -645,9 +645,9 @@ namespace WaveletTL
     //    exactly using the z(s,t) values
 
     const int I1Low = -ell2_+1;
-    const int I1Up  = ell_-d+dT-1;
+    const int I1Up  = ell_l-d+dT-1;
     const int I2Low = -ell2T_+1;
-    const int I2Up  = ellT_-1;
+    const int I2Up  = ellT_l-1;
 
     Matrix<double> I(I1Up-I1Low+1, I2Up-I2Low+1);
     for (int nu = I1Low; nu < -ell1_; nu++)
@@ -660,7 +660,7 @@ namespace WaveletTL
       }
     for (int nu = -I1Low; nu <= I1Up; nu++)
       for (int mu = I2Low; mu <= I2Up; mu++) {
-	if ((nu >= -ell1_) || ((nu <= ell_-1) && (mu >= -ell1T_)))
+	if ((nu >= -ell1_) || ((nu <= ell_l-1) && (mu >= -ell1T_)))
 	  I(-I1Low+nu, -I2Low+mu) = (nu == mu ? 1 : 0); // (5.1.6)
       }
 

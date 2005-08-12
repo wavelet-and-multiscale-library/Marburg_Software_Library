@@ -284,6 +284,7 @@ namespace WaveletTL
     int ell_l, ell_r, ellT_l, ellT_r;
     DKUBiorthogonalizationMethod bio_;
     BoundaryCondition bc_left_, bc_right_;
+    Array1D<int> Z;
 
     CDFBasis<d, dT> cdf_;
 

@@ -63,13 +63,17 @@ namespace WaveletTL
       ell2T_(ell2T<d,dT>()),
       bio_(bio),
       bc_left_(bc_left),
-      bc_right_(bc_right)
+      bc_right_(bc_right),
+      Z(2)
   {
     ellT_ = ell2T<d,dT>(); // (3.2.10)
     ell_  = ellT_-(dT-d);  // (3.2.16)
 
-    ellT_l = ell2T<d,dT>() + (bc_left == Dirichlet);  // (3.2.10), complementary b.c.'s
-    ellT_r = ell2T<d,dT>() + (bc_right == Dirichlet); // (3.2.10), complementary b.c.'s
+    Z[0] = bc_left == Dirichlet ? 1 : 0;
+    Z[1] = bc_right == Dirichlet ? 1 : 0;
+
+    ellT_l = ell2T<d,dT>()+Z[0];  // (3.2.10), complementary b.c.'s
+    ellT_r = ell2T<d,dT>()+Z[1]; // (3.2.10), complementary b.c.'s
     ell_l  = ellT_l-(dT-d); // (3.2.16)
     ell_r  = ellT_r-(dT-d); // (3.2.16)
 
@@ -630,9 +634,9 @@ namespace WaveletTL
     // IGPMlib reference: I_Mask_Bspline::EvalGammaL()
 
     const int llowT = ellT_l-dT;
-    const int lupT  = ellT_l-1-(bc_left_ == Dirichlet);
+    const int lupT  = ellT_l-1-Z[0];
     
-    GammaL_.resize(llowT-lupT+1, llowT-lupT+1);
+    GammaL_.resize(lupT-llowT+1,lupT-llowT+1);
 	
     // 1. compute the integrals
     //      z(s,t) = \int_0^1\phi(x-s)\tilde\phi(x-t)\,dx
@@ -670,20 +674,21 @@ namespace WaveletTL
     const int AlphamLow = 1-ell2T_;
     const int AlphaTmLow = 1-ell2_;
 
-    for (int r(0); r < d; r++)
+    for (int r(Z[0]); r < d; r++)
       for (int k(0); k < dT; k++) {
 	double help(0);
-	for (int nu = I1Low; nu < ell_; nu++)
+	for (int nu = I1Low; nu < ell_l; nu++)
 	  for (int mu = I2Low; mu <= I2Up; mu++)
 	    help += AlphaT_(-AlphaTmLow+nu, r) * Alpha_(-AlphamLow+mu, k) * I(-I1Low+nu, -I2Low+mu);
-	GammaL_(r, k) = help; // (5.1.4)
+ 	GammaL_(-llowT+ell_l-d-Z[0]+r, k) = help; // (5.1.4)
       }
-    for (int r(d); r <= dT-1; r++)
-      for (int k(0); k <= dT-1; k++) {
+
+    for (int r(d); r <= dT-1+Z[0]; r++)
+      for (int k(0); k < dT; k++) {
 	double help(0);
 	for (int mu = I2Low; mu <= I2Up; mu++)
-	  help += Alpha_(-AlphamLow+mu, k) * I(-I1Low+ell_-d+r, -I2Low+mu);
-	GammaL_(r, k) = help; // (5.1.5)
+	  help += Alpha_(-AlphamLow+mu, k) * I(-I1Low+ell_l-d+r-Z[0], -I2Low+mu);
+	GammaL_(-llowT+ell_l-d-Z[0]+r, k) = help; // (5.1.5)
       }
   }
 
@@ -691,19 +696,19 @@ namespace WaveletTL
   void DKUBasis<d, dT>::setup_CX_CXT() {
     // IGPMlib reference: I_Mask_Bspline::EvalCL(), ::EvalCR()
 
-//     const int llowT = ellT_-dT;
-//     const int lupT  = ellT_-1;
+    const int llowT = ellT_l-dT;
+    const int lupT  = ellT_l-1-Z[0];
 
-    CL_.resize(dT, dT);  // lupT-llowT+1 each, same offsets as GammaL
-    CLT_.resize(dT, dT); // "
-    CR_.resize(dT, dT);  // "
-    CRT_.resize(dT, dT); // "
+    CL_.resize (lupT-llowT+1, lupT-llowT+1);  
+    CLT_.resize(lupT-llowT+1, lupT-llowT+1); 
+    CR_.resize (lupT-llowT+1, lupT-llowT+1);  
+    CRT_.resize(lupT-llowT+1, lupT-llowT+1); 
 
     // setup CL and CLT
-    // (offsets: entry (i,j) <-> index (i+ellT()-dT,j+ellT()-dT) )
+    // (offsets: entry (i,j) <-> index (i+llowT,j+llowT) )
     //
     if (bio_ == none) {
-      for (unsigned int i(0); i < dT; i++)
+      for (int i(0); i < lupT-llowT+1; i++)
 	CL_(i, i) = 1.0; // identity matrix
       
       Matrix<double> CLGammaLInv;
@@ -719,9 +724,9 @@ namespace WaveletTL
       svd.getV(V);
       svd.getS(S);
       
-      for (unsigned int i(0); i < dT; i++) {
+      for (int i(0); i < lupT-llowT+1; i++) {
 	S[i] = 1.0 / sqrt(S[i]);
-	for (unsigned int j(0); j < dT; j++) {
+	for (int j(0); j < lupT-llowT+1; j++) {
 	  CL_(i, j) = S[i] * U(j, i);
 	  CLT_(i, j) = S[i] * V(i, j);
 	}
@@ -744,7 +749,7 @@ namespace WaveletTL
       for (unsigned int j(0); j < d; j++)
 	for (unsigned int k(0); k <= j; k++)
 	  CL_(k, j) = minus1power(j-k) * std::pow(b, -(int)j) * binomial(d-1, j) * binomial(j, k);
-      for (unsigned int j(d); j < dT; j++)
+      for (unsigned int j(d); j < lupT-llowT+1; j++)
 	CL_(j, j) = 1.0;
       
       Matrix<double> CLGammaLInv;
@@ -766,17 +771,17 @@ namespace WaveletTL
       QUDecomposition<double>(GammaL_).inverse(GammaLInv);
       const double a = 1.0 / GammaLInv(0, 0);
       
-      Matrix<double> R(dT, dT);
-      for (unsigned int i(0); i < dT; i++)
+      Matrix<double> R(lupT-llowT+1,lupT-llowT+1);
+      for (int i(0); i < lupT-llowT+1; i++)
 	S[i] = sqrt(S[i]);
-      for (unsigned int j(0); j < dT; j++)
+      for (int j(0); j < lupT-llowT+1; j++)
 	R(0, j) = a * V(0, j) / S[j];
-      for (unsigned int i(1); i < dT; i++)
-	for (unsigned int j(0); j < dT; j++)
+      for (int i(1); i < lupT-llowT+1; i++)
+	for (int j(0); j < lupT-llowT+1; j++)
 	  R(i, j) = U(j, i) * S[j];
       
-      for (unsigned int i(0); i < dT; i++)
-	for (unsigned int j(0); j < dT; j++)
+      for (int i(0); i < lupT-llowT+1; i++)
+	for (int j(0); j < lupT-llowT+1; j++)
 	  U(i, j) /= S[i];
       CL_ = R*U;
 
@@ -802,7 +807,7 @@ namespace WaveletTL
       for (unsigned int j(0); j < d; j++)
 	for (unsigned int k(0); k <= j; k++)
 	  CL_(k, j) = minus1power(j-k) * std::pow(b, -(int)j) * binomial(d-1, j) * binomial(j, k);
-      for (unsigned int j(d); j < dT; j++)
+      for (unsigned int j(d); j < lupT-llowT+1; j++)
 	CL_(j, j) = 1.0;
       
       Matrix<double> GammaLNew(CL_ * GammaL_);
@@ -818,17 +823,17 @@ namespace WaveletTL
       QUDecomposition<double>(GammaLNew).inverse(GammaLNewInv);
       const double a = 1.0 / GammaLNewInv(0, 0);
       
-      Matrix<double> R(dT, dT);
-      for (unsigned int i(0); i < dT; i++)
+      Matrix<double> R(lupT-llowT+1, lupT-llowT+1);
+      for (int i(0); i < lupT-llowT+1; i++)
 	S[i] = sqrt(S[i]);
-      for (unsigned int j(0); j < dT; j++)
+      for (int j(0); j < lupT-llowT+1; j++)
 	R(0, j) = a * V(0, j) / S[j];
-      for (unsigned int i(1); i < dT; i++)
-	for (unsigned int j(0); j < dT; j++)
+      for (int i(1); i < lupT-llowT+1; i++)
+	for (int j(0); j < lupT-llowT+1; j++)
 	  R(i, j) = U(j, i) * S[j];
       
-      for (unsigned int i(0); i < dT; i++)
-	for (unsigned int j(0); j < dT; j++)
+      for (int i(0); i < lupT-llowT+1; i++)
+	for (int j(0); j < lupT-llowT+1; j++)
 	  U(i, j) /= S[i];
       CL_ = R*U*CL_;
       

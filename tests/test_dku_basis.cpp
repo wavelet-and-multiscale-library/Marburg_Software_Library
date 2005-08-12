@@ -17,7 +17,13 @@ int main()
   const int dT = 4;
   typedef DKUBasis<d, dT> Basis;
   Basis basis; // Bernstein SVD
-//   Basis basis(none);
+
+//   Basis basis(false, false, none);
+//   Basis basis(false, false, WaveletTL::SVD);
+//   Basis basis(false, false, Bernstein);
+//   Basis basis(false, false, partialSVD);
+//   Basis basis(false, false, BernsteinSVD);
+
   cout << "- the (" << d << "," << dT << ") basis has j0=" << basis.j0() << endl;
 
   cout << "- the default wavelet index: " << Basis::Index(&basis) << endl;

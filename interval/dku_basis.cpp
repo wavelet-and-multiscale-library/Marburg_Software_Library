@@ -50,35 +50,36 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
-  DKUBasis<d, dT>::DKUBasis(BoundaryCondition bc_left,
-			    BoundaryCondition bc_right,
+  DKUBasis<d, dT>::DKUBasis(bool bc_left, bool bc_right,
 			    DKUBiorthogonalizationMethod bio)
     : ell1_(ell1<d>()),
       ell2_(ell2<d>()),
       ell1T_(ell1T<d,dT>()),
       ell2T_(ell2T<d,dT>()),
       bio_(bio),
-      bc_left_(bc_left),
-      bc_right_(bc_right),
-      Z(2)
+      Z(2),
+      ZT(2)
   {
     ellT_ = ell2T<d,dT>(); // (3.2.10)
     ell_  = ellT_-(dT-d);  // (3.2.16)
 
-    Z[0] = bc_left == Dirichlet ? 1 : 0;
-    Z[1] = bc_right == Dirichlet ? 1 : 0;
+    Z[0] = bc_left ? 1 : 0;
+    Z[1] = bc_right ? 1 : 0;
+    ZT[0] = 0; // no b.c. for the dual
+    ZT[1] = 0; // no b.c. for the dual
 
-    ellT_l = ell2T<d,dT>()+Z[0];  // (3.2.10), complementary b.c.'s
-    ellT_r = ell2T<d,dT>()+Z[1]; // (3.2.10), complementary b.c.'s
+    ellT_l = ell2T<d,dT>()+Z[0];  // (3.2.10)
+    ellT_r = ell2T<d,dT>()+Z[1]; // (3.2.10)
     ell_l  = ellT_l-(dT-d); // (3.2.16)
     ell_r  = ellT_r-(dT-d); // (3.2.16)
-
+    
     setup_Alpha();
     setup_AlphaT();
     setup_BetaL();
     setup_BetaLT();
     setup_BetaR();
     setup_BetaRT();
+
     setup_GammaLR();
     setup_CX_CXT();
     setup_CXA_CXAT();
@@ -610,9 +611,9 @@ namespace WaveletTL
     // IGPMlib reference: I_Mask_Bspline::EvalGammaL(), ::EvalGammaR()
 
     const int llowT = ellT_l-dT;
-    const int lupT  = ellT_l-1-Z[0];
+    const int lupT  = ellT_l-1-ZT[0];
     const int rupTh  = ellT_r-dT;
-    const int rlowTh = ellT_r-1-Z[1];
+    const int rlowTh = ellT_r-1-ZT[1];
     
     GammaL_.resize(lupT-llowT+1,lupT-llowT+1);
     GammaR_.resize(rlowTh-rupTh+1,rlowTh-rupTh+1);
@@ -708,7 +709,7 @@ namespace WaveletTL
  	double help(0);
  	for (int mu = I2Low_r; mu <= I2Up_r; mu++)
  	  help += Alpha_(-AlphamLow+mu, k) * I(-I1Low_r+ell_r-d+r-Z[1], -I2Low_r+mu);
- 	GammaL_(-rupTh+ell_r-d-Z[1]+r, -rupTh+ellT_r-dT+k) = help; // (5.1.5)
+ 	GammaR_(-rupTh+ell_r-d-Z[1]+r, -rupTh+ellT_r-dT+k) = help; // (5.1.5)
       }
   }
 
@@ -716,17 +717,20 @@ namespace WaveletTL
   void DKUBasis<d, dT>::setup_CX_CXT() {
     // IGPMlib reference: I_Mask_Bspline::EvalCL(), ::EvalCR()
 
-    const int llowT = ellT_l-dT;
-    const int lupT  = ellT_l-1-Z[0];
+    const int llowT  = ellT_l-dT;
+    const int lupT   = ellT_l-1-ZT[0];
+    const int rupTh  = ellT_r-dT;
+    const int rlowTh = ellT_r-1-ZT[1];
 
     CL_.resize (lupT-llowT+1, lupT-llowT+1);  
     CLT_.resize(lupT-llowT+1, lupT-llowT+1); 
-    CR_.resize (lupT-llowT+1, lupT-llowT+1);  
-    CRT_.resize(lupT-llowT+1, lupT-llowT+1); 
+    CR_.resize (rlowTh-rupTh+1, rlowTh-rupTh+1);  
+    CRT_.resize(rlowTh-rupTh+1, rlowTh-rupTh+1);  
 
     // setup CL and CLT
     // (offsets: entry (i,j) <-> index (i+llowT,j+llowT) )
     //
+
     if (bio_ == none) {
       for (int i(0); i < lupT-llowT+1; i++)
 	CL_(i, i) = 1.0; // identity matrix
@@ -734,6 +738,13 @@ namespace WaveletTL
       Matrix<double> CLGammaLInv;
       QUDecomposition<double>(CL_ * GammaL_).inverse(CLGammaLInv);
       CLT_ = transpose(CLGammaLInv);
+
+      for (int i(0); i < rlowTh-rupTh+1; i++)
+	CR_(i, i) = 1.0; // identity matrix
+
+      Matrix<double> CRGammaRInv;
+      QUDecomposition<double>(CR_ * GammaR_).inverse(CRGammaRInv);
+      CRT_ = transpose(CRGammaRInv);      
     }
     
     if (bio_ == SVD) {
@@ -747,13 +758,29 @@ namespace WaveletTL
       for (int i(0); i < lupT-llowT+1; i++) {
 	S[i] = 1.0 / sqrt(S[i]);
 	for (int j(0); j < lupT-llowT+1; j++) {
-	  CL_(i, j) = S[i] * U(j, i);
+	  CL_(i, j)  = S[i] * U(j, i);
 	  CLT_(i, j) = S[i] * V(i, j);
 	}
       }
 
       CL_.compress(1e-12);
       CLT_.compress(1e-12);
+      
+      MathTL::SVD<double> svd_r(GammaR_);
+      svd_r.getU(U);
+      svd_r.getV(V);
+      svd_r.getS(S);
+      
+      for (int i(0); i < rlowTh-rupTh+1; i++) {
+	S[i] = 1.0 / sqrt(S[i]);
+	for (int j(0); j < rlowTh-rupTh+1; j++) {
+	  CR_(i, j)  = S[i] * U(j, i);
+	  CRT_(i, j) = S[i] * V(i, j);
+	}
+      }
+
+      CR_.compress(1e-12);
+      CRT_.compress(1e-12);
     }
     
     if (bio_ == Bernstein) {
@@ -777,6 +804,18 @@ namespace WaveletTL
       CLT_ = transpose(CLGammaLInv);
       
       CLT_.compress(1e-12);
+
+      for (int j(0); j < d; j++)
+	for (int k(0); k <= j; k++)
+	  CR_(k, j) = minus1power(j-k) * std::pow(b, -j) * binomial(d-1, j) * binomial(j, k);
+      for (int j(d); j < rlowTh-rupTh+1; j++)
+	CR_(j, j) = 1.0;
+      
+      Matrix<double> CRGammaRInv;
+      QUDecomposition<double>(CR_ * GammaR_).inverse(CRGammaRInv);
+      CRT_ = transpose(CRGammaRInv);
+      
+      CRT_.compress(1e-12);
     }
     
     if (bio_ == partialSVD) {
@@ -812,6 +851,37 @@ namespace WaveletTL
       CLT_ = transpose(CLGammaLInv);
 
       CLT_.compress(1e-12);
+
+      MathTL::SVD<double> svd_r(GammaR_);
+      svd_r.getU(U);
+      svd_r.getV(V);
+      svd_r.getS(S);
+
+      Matrix<double> GammaRInv;
+      QUDecomposition<double>(GammaR_).inverse(GammaRInv);
+      const double a_r = 1.0 / GammaRInv(0, 0);
+      
+      R.resize(rlowTh-rupTh+1,rlowTh-rupTh+1);
+      for (int i(0); i < rlowTh-rupTh+1; i++)
+	S[i] = sqrt(S[i]);
+      for (int j(0); j < rlowTh-rupTh+1; j++)
+	R(0, j) = a_r * V(0, j) / S[j];
+      for (int i(1); i < rlowTh-rupTh+1; i++)
+	for (int j(0); j < rlowTh-rupTh+1; j++)
+	  R(i, j) = U(j, i) * S[j];
+      
+      for (int i(0); i < rlowTh-rupTh+1; i++)
+	for (int j(0); j < rlowTh-rupTh+1; j++)
+	  U(i, j) /= S[i];
+      CR_ = R*U;
+
+      CR_.compress(1e-12);
+
+      Matrix<double> CRGammaRInv;
+      QUDecomposition<double>(CR_ * GammaR_).inverse(CRGammaRInv);
+      CRT_ = transpose(CRGammaRInv);
+
+      CRT_.compress(1e-12);
     }
 
     if (bio_ == BernsteinSVD) {
@@ -864,6 +934,45 @@ namespace WaveletTL
       CLT_ = transpose(CLGammaLInv);
 
       CLT_.compress(1e-12);
+
+      for (int j(0); j < d; j++)
+	for (int k(0); k <= j; k++)
+	  CR_(k, j) = minus1power(j-k) * std::pow(b, -j) * binomial(d-1, j) * binomial(j, k);
+      for (int j(d); j < rlowTh-rupTh+1; j++)
+	CR_(j, j) = 1.0;
+
+      Matrix<double> GammaRNew(CR_ * GammaR_);
+      
+      MathTL::SVD<double> svd_r(GammaRNew);
+      svd_r.getU(U);
+      svd_r.getV(V);
+      svd_r.getS(S);
+
+      Matrix<double> GammaRNewInv;
+      QUDecomposition<double>(GammaRNew).inverse(GammaRNewInv);
+      const double a_r = 1.0 / GammaRNewInv(0, 0);
+      
+      R.resize(rlowTh-rupTh+1,rlowTh-rupTh+1);
+      for (int i(0); i < rlowTh-rupTh+1; i++)
+	S[i] = sqrt(S[i]);
+      for (int j(0); j < rlowTh-rupTh+1; j++)
+	R(0, j) = a_r * V(0, j) / S[j];
+      for (int i(1); i < rlowTh-rupTh+1; i++)
+	for (int j(0); j < rlowTh-rupTh+1; j++)
+	  R(i, j) = U(j, i) * S[j];
+      
+      for (int i(0); i < rlowTh-rupTh+1; i++)
+	for (int j(0); j < rlowTh-rupTh+1; j++)
+	  U(i, j) /= S[i];
+      CR_ = R*U*CR_;
+
+      CR_.compress(1e-12);
+
+      Matrix<double> CRGammaRInv;
+      QUDecomposition<double>(CR_ * GammaR_).inverse(CRGammaRInv);
+      CRT_ = transpose(CRGammaRInv);
+
+      CRT_.compress(1e-12);
     }
     
 #if 0
@@ -877,13 +986,9 @@ namespace WaveletTL
     QUDecomposition<double>(CL_).inverse(inv_CL_);
     QUDecomposition<double>(CLT_).inverse(inv_CLT_);
 
-    CL_.mirror(CR_);
-    CLT_.mirror(CRT_);
-
 #if 0
     // check biorthogonality of the matrix product CR * GammaR * (CRT)^T
-    Matrix<double> GammaR; GammaL_.mirror(GammaR);
-    Matrix<double> check2(CR_ * GammaR * transpose(CRT_));
+    Matrix<double> check2(CR_ * GammaR_ * transpose(CRT_));
     for (unsigned int i(0); i < check2.row_dimension(); i++)
       check2(i, i) -= 1;
     cout << "error for CRT: " << row_sum_norm(check2) << endl;
@@ -898,33 +1003,40 @@ namespace WaveletTL
     // IGPMlib reference: I_Mask_Bspline::EvalCL(), ::EvalCR()
 
     const int llklow  = 1-ell2_;   // offset 1 in CLA (and AlphaT), see (3.2.25)
-    const int llkup   = ell_-1;
+    const int llkup   = ellT_l-1;
     const int llklowT = 1-ell2T_;  // offset 1 in CLAT (and Alpha), see (3.2.26)
-    const int llkupT  = ellT_-1;
+    const int llkupT  = ellT_l-1;
 
-    const int llow    = ell_-d;    // offset 1 in CL (and CLT), offset 2 in AlphaT
-    const int lup     = ell_-1;
+    const int rlklowh  = ellT_r-1;
+    const int rlkuph   = 1-ell2_;
+    const int rlklowTh = ellT_r-1;
+    const int rlkupTh  = 1-ell2T_;
 
-    const int llowT   = ellT_-dT;  // == llow, offset 2 in CLA and CLAT
-    const int lupT    = ellT_-1;
+    const int rlowh   = ell_r-1-Z[1];
+    const int ruph    = ell_r-d;
+    const int rlowTh  = ellT_r-1-ZT[1];
+    const int rupTh   = ellT_r-dT;
+
+    const int llow    = ell_l-d;    // offset 1 in CL (and CLT), offset 2 in AlphaT
+    const int lup     = ell_l-1-Z[0];
+    const int llowT   = ellT_l-dT;  // == llow, offset 2 in CLA and CLAT
+    const int lupT    = ellT_l-1-ZT[0];
 
     // setup CLA <-> AlphaT * (CL)^T
     CLA_.resize(llkup-llklow+1, lupT-llowT+1);
 
-    for (int i = llklow; i <= llkup; i++) // the (3.2.25) bounds
+    for (int i = llklow; i <= lup+Z[0]; i++) // the (3.2.25) bounds
       for (int r = llowT; r <= lupT; r++) {
 	double help = 0;
 	for (int m = llow; m <= lup; m++)
 	  help += CL_(-llowT+r, -llowT+m) * AlphaT_(-llklow+i, -llow+m);
 	CLA_(-llklow+i, -llowT+r) = help;
       }
-    for (int i = lup+1; i <= llkup; i++)
+    for (int i = lup+std::max(1,Z[0]); i <= llkup; i++)
       for (int r = llowT; r <= lupT; r++)
 	CLA_(-llklow+i, -llowT+r) += CL_(-llowT+r, -llowT+i);
 
     CLA_.compress(1e-12);
-
-    CLA_.mirror(CRA_);
 
     // setup CLAT <-> Alpha * (CLT)^T
     CLAT_.resize(llkupT-llklowT+1, lupT-llowT+1);
@@ -938,6 +1050,18 @@ namespace WaveletTL
 
     CLAT_.compress(1e-12);
 
+//     // the same for CRA, CRAT:
+//     CRA_.resize(rlklowh-rlkuph+1,rlowTh-rupTh+1);
+//     for (int i = rlkuph; i <= rlowh+Z[1]; i++)
+//       for (int r = rlowTh; r <= rupTh; r++) {
+// 	double help = 0;
+// 	for (int m = ruph; m <= rlowh; m++)
+// 	  help += CR_(
+//       }
+
+//     CRAT_.resize(rlklowh-rlkuph+1,rlowTh-rupTh+1);
+
+    CLA_.mirror(CRA_);
     CLAT_.mirror(CRAT_);
   }
 

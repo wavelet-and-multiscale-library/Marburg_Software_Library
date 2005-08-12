@@ -32,8 +32,7 @@ namespace WaveletTL
     The methods 'partialSVD' and 'BernsteinSVD' enable the [DKU]/[DS] boundary treatment:
     at the boundary, exactly one generator and one wavelet does not vanish,
     which can be modified to satisfy homogeneous boundary conditions for the primal
-    basis. The dual basis will then be constructed to fulfil complementary boundary
-    conditions, see [DS].
+    basis.
   */
   enum DKUBiorthogonalizationMethod
     {
@@ -42,15 +41,6 @@ namespace WaveletTL
       Bernstein,    // method #3 in IGPMlib, transformation to Bernstein basis on [0,b]
       partialSVD,   // method #4 in IGPMlib, partial SVD
       BernsteinSVD  // method #5 in IGPMlib, transformation to Bernstein basis plus partial SVD
-    };
-
-  /*!
-    boundary condition at a given end point of [0,1]
-  */
-  enum BoundaryCondition
-    {
-      Dirichlet,// Dirichlet b.c., all (primal) generators and wavelets vanish
-      no_b_c    // no b.c.
     };
 
   /*!
@@ -74,9 +64,13 @@ namespace WaveletTL
     /*!
       constructor
       (ellT = ell2T)
+
+      You can toggle Dirichlet boundary conditions for the primal basis with the parameters
+      bc_left/bc_right. The dual basis will then be constructed to fulfill complementary boundary
+      conditions, see [DS].
     */
-    explicit DKUBasis(BoundaryCondition bc_left = no_b_c,
-		      BoundaryCondition bc_right = no_b_c,
+    explicit DKUBasis(bool bc_left = false,
+		      bool bc_right = false,
 		      DKUBiorthogonalizationMethod bio = BernsteinSVD);
 
     //! DKU parameter ell-tilde (3.2.10)
@@ -283,8 +277,7 @@ namespace WaveletTL
     int ell1_, ell2_, ell1T_, ell2T_, ell_, ellT_;
     int ell_l, ell_r, ellT_l, ellT_r;
     DKUBiorthogonalizationMethod bio_;
-    BoundaryCondition bc_left_, bc_right_;
-    Array1D<int> Z;
+    Array1D<int> Z, ZT;
 
     CDFBasis<d, dT> cdf_;
 

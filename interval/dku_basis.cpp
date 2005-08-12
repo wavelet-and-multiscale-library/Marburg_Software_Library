@@ -81,6 +81,7 @@ namespace WaveletTL
     setup_BetaRT();
 
     setup_GammaLR();
+
     setup_CX_CXT();
     setup_CXA_CXAT();
 
@@ -1029,7 +1030,7 @@ namespace WaveletTL
       for (int r = llowT; r <= lupT; r++) {
 	double help = 0;
 	for (int m = llow; m <= lup; m++)
-	  help += CL_(-llowT+r, -llowT+m) * AlphaT_(-llklow+i, -llow+m);
+	  help += CL_(-llowT+r, -llowT+m) * AlphaT_(-llklow+i, -llow+m+Z[0]);
 	CLA_(-llklow+i, -llowT+r) = help;
       }
     for (int i = lup+std::max(1,Z[0]); i <= llkup; i++)
@@ -1050,19 +1051,31 @@ namespace WaveletTL
 
     CLAT_.compress(1e-12);
 
-//     // the same for CRA, CRAT:
-//     CRA_.resize(rlklowh-rlkuph+1,rlowTh-rupTh+1);
-//     for (int i = rlkuph; i <= rlowh+Z[1]; i++)
-//       for (int r = rlowTh; r <= rupTh; r++) {
-// 	double help = 0;
-// 	for (int m = ruph; m <= rlowh; m++)
-// 	  help += CR_(
-//       }
+    // the same for CRA, CRAT:
+    CRA_.resize(rlklowh-rlkuph+1, rlowTh-rupTh+1);
+    for (int i = rlkuph; i <= rlowh+Z[1]; i++)
+      for (int r = rupTh; r <= rlowTh; r++) {
+ 	double help = 0;
+ 	for (int m = ruph; m <= rlowh; m++)
+	  help += CR_(-rupTh+r, -rupTh+m) * AlphaT_(-llklow+i, m-ruph+Z[1]);
+	CRA_(-rlkuph+i, -rupTh+r) = help;
+      }
+    for (int i = rlowh+std::max(1,Z[1]); i <= rlklowh; i++)
+      for (int r = rupTh; r <= rlowTh; r++)
+	CRA_(-rlkuph+i, -rupTh+r) += CR_(-rupTh+r, -rupTh+i);
 
-//     CRAT_.resize(rlklowh-rlkuph+1,rlowTh-rupTh+1);
+    CRA_.compress(1e-12);
 
-    CLA_.mirror(CRA_);
-    CLAT_.mirror(CRAT_);
+    CRAT_.resize(rlklowTh-rlkupTh+1, rlowTh-rupTh+1);
+    for (int i = rlkupTh; i <= rlklowTh; i++)
+      for (int r = rupTh; r <= rlowTh; r++) {
+	double help = 0;
+	for (int m = rupTh; m <= rlowTh; m++)
+	  help += CRT_(-rupTh+r, -rupTh+m) * Alpha_(-llklowT+i, m-rupTh);
+	CRAT_(-rlkupTh+i, -rupTh+r) = help;
+      }
+
+    CRAT_.compress(1e-12);
   }
 
   template <int d, int dT>

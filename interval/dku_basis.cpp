@@ -23,32 +23,28 @@ namespace WaveletTL
 {
   template <int d, int dT>
   typename DKUBasis<d, dT>::Index
-  DKUBasis<d, dT>::firstGenerator(const int j) const
-  {
+  DKUBasis<d, dT>::firstGenerator(const int j) const {
     assert(j >= j0());
     return Index(j, 0, DeltaLmin(), this);
   }
 
   template <int d, int dT>
   typename DKUBasis<d, dT>::Index
-  DKUBasis<d, dT>::lastGenerator(const int j) const
-  {
+  DKUBasis<d, dT>::lastGenerator(const int j) const {
     assert(j >= j0());
     return Index(j, 0, DeltaRmax(j), this);
   }
 
   template <int d, int dT>
   typename DKUBasis<d, dT>::Index
-  DKUBasis<d, dT>::firstWavelet(const int j) const
-  {
+  DKUBasis<d, dT>::firstWavelet(const int j) const {
     assert(j >= j0());
     return Index(j, 1, Nablamin(), this);
   }
-
+  
   template <int d, int dT>
   typename DKUBasis<d, dT>::Index
-  DKUBasis<d, dT>::lastWavelet(const int j) const
-  {
+  DKUBasis<d, dT>::lastWavelet(const int j) const {
     assert(j >= j0());
     return Index(j, 1, Nablamax(j), this);
   }
@@ -83,7 +79,7 @@ namespace WaveletTL
     setup_BetaLT();
     setup_BetaR();
     setup_BetaRT();
-    setup_GammaL();
+    setup_GammaLR();
     setup_CX_CXT();
     setup_CXA_CXAT();
 
@@ -170,37 +166,33 @@ namespace WaveletTL
     SparseMatrix<double> mj_initial(mj0.row_dimension(),
 				    mj0.column_dimension() + mj1ih.column_dimension());
     for (unsigned int i = 0; i < mj0.row_dimension(); i++)
-      for (unsigned int j = 0; j < mj0.column_dimension(); j++)
-	{
-	  const double help = mj0.get_entry(i, j);
-	  if (help != 0)
-	    mj_initial.set_entry(i, j, help);
-	}
+      for (unsigned int j = 0; j < mj0.column_dimension(); j++)	{
+	const double help = mj0.get_entry(i, j);
+	if (help != 0)
+	  mj_initial.set_entry(i, j, help);
+      }
     for (unsigned int i = 0; i < mj1ih.row_dimension(); i++)
-      for (unsigned int j = 0; j < mj1ih.column_dimension(); j++)
-	{
-	  const double help = mj1ih.get_entry(i, j);
-	  if (help != 0)
-	    mj_initial.set_entry(i, j+mj0.column_dimension(), help);
-	}
+      for (unsigned int j = 0; j < mj1ih.column_dimension(); j++) {
+	const double help = mj1ih.get_entry(i, j);
+	if (help != 0)
+	  mj_initial.set_entry(i, j+mj0.column_dimension(), help);
+      }
     
     SparseMatrix<double> gj_initial(gj0ih.row_dimension() + gj1ih.row_dimension(),
  				    gj0ih.column_dimension());
     for (unsigned int i = 0; i < gj0ih.row_dimension(); i++)
-      for (unsigned int j = 0; j < gj0ih.column_dimension(); j++)
-	{
-	  const double help = gj0ih.get_entry(i, j);
-	  if (help != 0)
-	    gj_initial.set_entry(i, j, help);
-	}
+      for (unsigned int j = 0; j < gj0ih.column_dimension(); j++) {
+	const double help = gj0ih.get_entry(i, j);
+	if (help != 0)
+	  gj_initial.set_entry(i, j, help);
+      }
     for (unsigned int i = 0; i < gj1ih.row_dimension(); i++)
-      for (unsigned int j = 0; j < gj1ih.column_dimension(); j++)
-	{
-	  const double help = gj1ih.get_entry(i, j);
-	  if (help != 0)
-	    gj_initial.set_entry(i+gj0ih.row_dimension(), j, help);
-	}
-
+      for (unsigned int j = 0; j < gj1ih.column_dimension(); j++) {
+	const double help = gj1ih.get_entry(i, j);
+	if (help != 0)
+	  gj_initial.set_entry(i+gj0ih.row_dimension(), j, help);
+      }
+    
     SparseMatrix<double> test4 = mj_initial * gj_initial;
     for (unsigned int i = 0; i < test4.row_dimension(); i++)
       test4.set_entry(i, i, test4.get_entry(i, i) - 1.0);
@@ -248,38 +240,34 @@ namespace WaveletTL
     SparseMatrix<double> mj_new(Mj0_.row_dimension(),
 				Mj0_.column_dimension() + Mj1_.column_dimension());
     for (unsigned int i = 0; i < Mj0_.row_dimension(); i++)
-      for (unsigned int j = 0; j < Mj0_.column_dimension(); j++)
-	{
-	  const double help = Mj0_.get_entry(i, j);
-	  if (help != 0)
-	    mj_new.set_entry(i, j, help);
-	}
+      for (unsigned int j = 0; j < Mj0_.column_dimension(); j++) {
+	const double help = Mj0_.get_entry(i, j);
+	if (help != 0)
+	  mj_new.set_entry(i, j, help);
+      }
     for (unsigned int i = 0; i < Mj1_.row_dimension(); i++)
-      for (unsigned int j = 0; j < Mj1_.column_dimension(); j++)
-	{
-	  const double help = Mj1_.get_entry(i, j);
-	  if (help != 0)
-	    mj_new.set_entry(i, j+Mj0_.column_dimension(), help);
-	}
-
+      for (unsigned int j = 0; j < Mj1_.column_dimension(); j++) {
+	const double help = Mj1_.get_entry(i, j);
+	if (help != 0)
+	  mj_new.set_entry(i, j+Mj0_.column_dimension(), help);
+      }
+    
     SparseMatrix<double> gj0_new = transpose(Mj0T_); gj0_new.compress();
     SparseMatrix<double> gj1_new = transpose(Mj1T_); gj1_new.compress();
     SparseMatrix<double> gj_new(gj0_new.row_dimension() + gj1_new.row_dimension(),
 				gj0_new.column_dimension());
     for (unsigned int i = 0; i < gj0_new.row_dimension(); i++)
-      for (unsigned int j = 0; j < gj0_new.column_dimension(); j++)
-	{
-	  const double help = gj0_new.get_entry(i, j);
-	  if (help != 0)
-	    gj_new.set_entry(i, j, help);
-	}
+      for (unsigned int j = 0; j < gj0_new.column_dimension(); j++) {
+	const double help = gj0_new.get_entry(i, j);
+	if (help != 0)
+	  gj_new.set_entry(i, j, help);
+      }
     for (unsigned int i = 0; i < gj1_new.row_dimension(); i++)
-      for (unsigned int j = 0; j < gj1_new.column_dimension(); j++)
-	{
-	  const double help = gj1_new.get_entry(i, j);
-	  if (help != 0)
-	    gj_new.set_entry(i+gj0_new.row_dimension(), j, help);
-	}
+      for (unsigned int j = 0; j < gj1_new.column_dimension(); j++) {
+	const double help = gj1_new.get_entry(i, j);
+	if (help != 0)
+	  gj_new.set_entry(i+gj0_new.row_dimension(), j, help);
+      }
     
     SparseMatrix<double> test6 = mj_new * gj_new;
     for (unsigned int i = 0; i < test6.row_dimension(); i++)
@@ -296,39 +284,35 @@ namespace WaveletTL
     SparseMatrix<double> mjt_new(Mj0T_.row_dimension(),
 				 Mj0T_.column_dimension() + Mj1T_.column_dimension());
     for (unsigned int i = 0; i < Mj0T_.row_dimension(); i++)
-      for (unsigned int j = 0; j < Mj0T_.column_dimension(); j++)
-	{
-	  const double help = Mj0T_.get_entry(i, j);
-	  if (help != 0)
-	    mjt_new.set_entry(i, j, help);
-	}
+      for (unsigned int j = 0; j < Mj0T_.column_dimension(); j++) {
+	const double help = Mj0T_.get_entry(i, j);
+	if (help != 0)
+	  mjt_new.set_entry(i, j, help);
+      }
     for (unsigned int i = 0; i < Mj1T_.row_dimension(); i++)
-      for (unsigned int j = 0; j < Mj1T_.column_dimension(); j++)
-	{
-	  const double help = Mj1T_.get_entry(i, j);
-	  if (help != 0)
-	    mjt_new.set_entry(i, j+Mj0T_.column_dimension(), help);
-	}
-
+      for (unsigned int j = 0; j < Mj1T_.column_dimension(); j++) {
+	const double help = Mj1T_.get_entry(i, j);
+	if (help != 0)
+	  mjt_new.set_entry(i, j+Mj0T_.column_dimension(), help);
+      }
+    
     SparseMatrix<double> gjt0_new = transpose(Mj0_); gjt0_new.compress();
     SparseMatrix<double> gjt1_new = transpose(Mj1_); gjt1_new.compress();
     SparseMatrix<double> gjt_new(gjt0_new.row_dimension() + gjt1_new.row_dimension(),
 				 gjt0_new.column_dimension());
     for (unsigned int i = 0; i < gjt0_new.row_dimension(); i++)
-      for (unsigned int j = 0; j < gjt0_new.column_dimension(); j++)
-	{
-	  const double help = gjt0_new.get_entry(i, j);
-	  if (help != 0)
-	    gjt_new.set_entry(i, j, help);
-	}
+      for (unsigned int j = 0; j < gjt0_new.column_dimension(); j++) {
+	const double help = gjt0_new.get_entry(i, j);
+	if (help != 0)
+	  gjt_new.set_entry(i, j, help);
+      }
     for (unsigned int i = 0; i < gjt1_new.row_dimension(); i++)
-      for (unsigned int j = 0; j < gjt1_new.column_dimension(); j++)
-	{
-	  const double help = gjt1_new.get_entry(i, j);
-	  if (help != 0)
-	    gjt_new.set_entry(i+gjt0_new.row_dimension(), j, help);
-	}
-
+      for (unsigned int j = 0; j < gjt1_new.column_dimension(); j++) {
+	const double help = gjt1_new.get_entry(i, j);
+	if (help != 0)
+	  gjt_new.set_entry(i+gjt0_new.row_dimension(), j, help);
+      }
+    
     test6 = mjt_new * gjt_new;
     for (unsigned int i = 0; i < test6.row_dimension(); i++)
       test6.set_entry(i, i, test6.get_entry(i, i) - 1.0);
@@ -352,38 +336,34 @@ namespace WaveletTL
 	SparseMatrix<double> mj_new(Mj0_.row_dimension(),
 				    Mj0_.column_dimension() + Mj1_.column_dimension());
 	for (unsigned int i = 0; i < Mj0_.row_dimension(); i++)
-	  for (unsigned int j = 0; j < Mj0_.column_dimension(); j++)
-	    {
-	      const double help = Mj0_.get_entry(i, j);
-	      if (help != 0)
-		mj_new.set_entry(i, j, help);
-	    }
+	  for (unsigned int j = 0; j < Mj0_.column_dimension(); j++) {
+	    const double help = Mj0_.get_entry(i, j);
+	    if (help != 0)
+	      mj_new.set_entry(i, j, help);
+	  }
 	for (unsigned int i = 0; i < Mj1_.row_dimension(); i++)
-	  for (unsigned int j = 0; j < Mj1_.column_dimension(); j++)
-	    {
-	      const double help = Mj1_.get_entry(i, j);
-	      if (help != 0)
-		mj_new.set_entry(i, j+Mj0_.column_dimension(), help);
-	    }
+	  for (unsigned int j = 0; j < Mj1_.column_dimension(); j++) {
+	    const double help = Mj1_.get_entry(i, j);
+	    if (help != 0)
+	      mj_new.set_entry(i, j+Mj0_.column_dimension(), help);
+	  }
 	
 	SparseMatrix<double> gj0_new = transpose(Mj0T_); gj0_new.compress();
 	SparseMatrix<double> gj1_new = transpose(Mj1T_); gj1_new.compress();
 	SparseMatrix<double> gj_new(gj0_new.row_dimension() + gj1_new.row_dimension(),
 				    gj0_new.column_dimension());
 	for (unsigned int i = 0; i < gj0_new.row_dimension(); i++)
-	  for (unsigned int j = 0; j < gj0_new.column_dimension(); j++)
-	    {
-	      const double help = gj0_new.get_entry(i, j);
-	      if (help != 0)
-		gj_new.set_entry(i, j, help);
-	    }
+	  for (unsigned int j = 0; j < gj0_new.column_dimension(); j++) {
+	    const double help = gj0_new.get_entry(i, j);
+	    if (help != 0)
+	      gj_new.set_entry(i, j, help);
+	  }
 	for (unsigned int i = 0; i < gj1_new.row_dimension(); i++)
-	  for (unsigned int j = 0; j < gj1_new.column_dimension(); j++)
-	    {
-	      const double help = gj1_new.get_entry(i, j);
-	      if (help != 0)
-		gj_new.set_entry(i+gj0_new.row_dimension(), j, help);
-	    }
+	  for (unsigned int j = 0; j < gj1_new.column_dimension(); j++) {
+	    const double help = gj1_new.get_entry(i, j);
+	    if (help != 0)
+	      gj_new.set_entry(i+gj0_new.row_dimension(), j, help);
+	  }
 	
 	SparseMatrix<double> test7 = mj_new * gj_new;
 	for (unsigned int i = 0; i < test7.row_dimension(); i++)
@@ -400,39 +380,35 @@ namespace WaveletTL
 	SparseMatrix<double> mjt_new(Mj0T_.row_dimension(),
 				     Mj0T_.column_dimension() + Mj1T_.column_dimension());
 	for (unsigned int i = 0; i < Mj0T_.row_dimension(); i++)
-	  for (unsigned int j = 0; j < Mj0T_.column_dimension(); j++)
-	    {
-	      const double help = Mj0T_.get_entry(i, j);
-	      if (help != 0)
-		mjt_new.set_entry(i, j, help);
-	    }
+	  for (unsigned int j = 0; j < Mj0T_.column_dimension(); j++) {
+	    const double help = Mj0T_.get_entry(i, j);
+	    if (help != 0)
+	      mjt_new.set_entry(i, j, help);
+	  }
 	for (unsigned int i = 0; i < Mj1T_.row_dimension(); i++)
-	  for (unsigned int j = 0; j < Mj1T_.column_dimension(); j++)
-	    {
-	      const double help = Mj1T_.get_entry(i, j);
-	      if (help != 0)
-		mjt_new.set_entry(i, j+Mj0T_.column_dimension(), help);
-	    }
+	  for (unsigned int j = 0; j < Mj1T_.column_dimension(); j++) {
+	    const double help = Mj1T_.get_entry(i, j);
+	    if (help != 0)
+	      mjt_new.set_entry(i, j+Mj0T_.column_dimension(), help);
+	  }
 	
 	SparseMatrix<double> gjt0_new = transpose(Mj0_); gjt0_new.compress();
 	SparseMatrix<double> gjt1_new = transpose(Mj1_); gjt1_new.compress();
 	SparseMatrix<double> gjt_new(gjt0_new.row_dimension() + gjt1_new.row_dimension(),
 				     gjt0_new.column_dimension());
 	for (unsigned int i = 0; i < gjt0_new.row_dimension(); i++)
-	  for (unsigned int j = 0; j < gjt0_new.column_dimension(); j++)
-	    {
-	      const double help = gjt0_new.get_entry(i, j);
-	      if (help != 0)
-		gjt_new.set_entry(i, j, help);
-	    }
+	  for (unsigned int j = 0; j < gjt0_new.column_dimension(); j++) {
+	    const double help = gjt0_new.get_entry(i, j);
+	    if (help != 0)
+	      gjt_new.set_entry(i, j, help);
+	  }
 	for (unsigned int i = 0; i < gjt1_new.row_dimension(); i++)
-	  for (unsigned int j = 0; j < gjt1_new.column_dimension(); j++)
-	    {
-	      const double help = gjt1_new.get_entry(i, j);
-	      if (help != 0)
-		gjt_new.set_entry(i+gjt0_new.row_dimension(), j, help);
-	    }
-
+	  for (unsigned int j = 0; j < gjt1_new.column_dimension(); j++) {
+	    const double help = gjt1_new.get_entry(i, j);
+	    if (help != 0)
+	      gjt_new.set_entry(i+gjt0_new.row_dimension(), j, help);
+	  }
+	
 	test7 = mjt_new * gjt_new;
 	for (unsigned int i = 0; i < test7.row_dimension(); i++)
 	  test7.set_entry(i, i, test7.get_entry(i, i) - 1.0);
@@ -630,13 +606,16 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
-  void DKUBasis<d, dT>::setup_GammaL() {
-    // IGPMlib reference: I_Mask_Bspline::EvalGammaL()
+  void DKUBasis<d, dT>::setup_GammaLR() {
+    // IGPMlib reference: I_Mask_Bspline::EvalGammaL(), ::EvalGammaR()
 
     const int llowT = ellT_l-dT;
     const int lupT  = ellT_l-1-Z[0];
+    const int rupTh  = ellT_r-dT;
+    const int rlowTh = ellT_r-1-Z[1];
     
     GammaL_.resize(lupT-llowT+1,lupT-llowT+1);
+    GammaR_.resize(rlowTh-rupTh+1,rlowTh-rupTh+1);
 	
     // 1. compute the integrals
     //      z(s,t) = \int_0^1\phi(x-s)\tilde\phi(x-t)\,dx
@@ -657,8 +636,9 @@ namespace WaveletTL
     for (int nu = I1Low; nu < -ell1_; nu++)
       for (int mu = I2Low; mu < -ell1T_; mu++) {
 	double help(0);
-	int diff(mu - nu);
-	for (int s(-ell2_+1); s <= nu; s++)
+	const int diff(mu - nu);
+	const int sLow = max(-ell2_+1,-ell2T_+1-diff);
+	for (int s(sLow); s <= nu; s++)
 	  help += zvalues.get_coefficient(MultiIndex<int, 2>(s, s+diff));
 	I(-I1Low+nu, -I2Low+mu) = help; // (5.1.7)
       }
@@ -669,7 +649,7 @@ namespace WaveletTL
       }
 
     // 3. finally, compute the Gramian GammaL
-    //    (offsets: entry (r,k) <-> index (r+ellT()-dT,k+ellT()-dT) )
+    //    (offsets: entry (r,k) <-> index (r+llowT,k+lupT) )
 
     const int AlphamLow = 1-ell2T_;
     const int AlphaTmLow = 1-ell2_;
@@ -680,7 +660,7 @@ namespace WaveletTL
 	for (int nu = I1Low; nu < ell_l; nu++)
 	  for (int mu = I2Low; mu <= I2Up; mu++)
 	    help += AlphaT_(-AlphaTmLow+nu, r) * Alpha_(-AlphamLow+mu, k) * I(-I1Low+nu, -I2Low+mu);
- 	GammaL_(-llowT+ell_l-d-Z[0]+r, k) = help; // (5.1.4)
+ 	GammaL_(-llowT+ell_l-d-Z[0]+r, k) = help; // (5.1.4); (no offset in second argument needed)
       }
 
     for (int r(d); r <= dT-1+Z[0]; r++)
@@ -688,7 +668,47 @@ namespace WaveletTL
 	double help(0);
 	for (int mu = I2Low; mu <= I2Up; mu++)
 	  help += Alpha_(-AlphamLow+mu, k) * I(-I1Low+ell_l-d+r-Z[0], -I2Low+mu);
-	GammaL_(-llowT+ell_l-d-Z[0]+r, k) = help; // (5.1.5)
+	GammaL_(-llowT+ell_l-d-Z[0]+r, k) = help; // (5.1.5); (no offset in second argument needed)
+      }
+
+    // The same for GammaR:
+
+    const int I1Low_r = -ell2_+1;
+    const int I1Up_r  = ell_r-d+dT-1;
+    const int I2Low_r = -ell2T_+1;
+    const int I2Up_r  = ellT_r-1;
+
+    I.resize(I1Up_r-I1Low_r+1, I2Up_r-I2Low_r+1);
+    for (int nu = I1Low_r; nu < -ell1_; nu++)
+      for (int mu = I2Low_r; mu < -ell1T_; mu++) {
+ 	double help(0);
+ 	const int diff(mu - nu);
+ 	const int sLow = max(-ell2_+1,-ell2T_+1-diff);
+ 	for (int s(sLow); s <= nu; s++)
+ 	  help += zvalues.get_coefficient(MultiIndex<int, 2>(s, s+diff));
+ 	I(-I1Low_r+nu, -I2Low_r+mu) = help; // (5.1.7)
+      }
+    for (int nu = -I1Low_r; nu <= I1Up_r; nu++)
+      for (int mu = I2Low_r; mu <= I2Up_r; mu++) {
+ 	if ((nu >= -ell1_) || ((nu <= ell_r-1) && (mu >= -ell1T_)))
+ 	  I(-I1Low_r+nu, -I2Low_r+mu) = (nu == mu ? 1 : 0); // (5.1.6)
+      }
+
+    for (int r(Z[1]); r < d; r++)
+      for (int k(0); k < dT; k++) {
+ 	double help(0);
+ 	for (int nu = I1Low_r; nu < ell_r; nu++)
+ 	  for (int mu = I2Low_r; mu <= I2Up_r; mu++)
+ 	    help += AlphaT_(-AlphaTmLow+nu, r) * Alpha_(-AlphamLow+mu, k) * I(-I1Low_r+nu, -I2Low_r+mu);
+  	GammaR_(-rupTh+ell_r-d-Z[1]+r, -rupTh+ellT_r-dT+k) = help; // (5.1.4)
+      }
+
+    for (int r(d); r <= dT-1+Z[1]; r++)
+      for (int k(0); k < dT; k++) {
+ 	double help(0);
+ 	for (int mu = I2Low_r; mu <= I2Up_r; mu++)
+ 	  help += Alpha_(-AlphamLow+mu, k) * I(-I1Low_r+ell_r-d+r-Z[1], -I2Low_r+mu);
+ 	GammaL_(-rupTh+ell_r-d-Z[1]+r, -rupTh+ellT_r-dT+k) = help; // (5.1.5)
       }
   }
 
@@ -746,10 +766,10 @@ namespace WaveletTL
       
       // CL_ : transformation to Bernstein polynomials (triangular)
       //   (Z_b^m)_{r,l} = (-1)^{r-1}\binom{m-1}{r}\binom{r}{l}b^{-r}, r>=l, 0 otherwise
-      for (unsigned int j(0); j < d; j++)
-	for (unsigned int k(0); k <= j; k++)
-	  CL_(k, j) = minus1power(j-k) * std::pow(b, -(int)j) * binomial(d-1, j) * binomial(j, k);
-      for (unsigned int j(d); j < lupT-llowT+1; j++)
+      for (int j(0); j < d; j++)
+	for (int k(0); k <= j; k++)
+	  CL_(k, j) = minus1power(j-k) * std::pow(b, -j) * binomial(d-1, j) * binomial(j, k);
+      for (int j(d); j < lupT-llowT+1; j++)
 	CL_(j, j) = 1.0;
       
       Matrix<double> CLGammaLInv;
@@ -804,10 +824,10 @@ namespace WaveletTL
       
       // CL_ : transformation to Bernstein polynomials (triangular)
       //   (Z_b^m)_{r,l} = (-1)^{r-1}\binom{m-1}{r}\binom{r}{l}b^{-r}, r>=l, 0 otherwise
-      for (unsigned int j(0); j < d; j++)
-	for (unsigned int k(0); k <= j; k++)
-	  CL_(k, j) = minus1power(j-k) * std::pow(b, -(int)j) * binomial(d-1, j) * binomial(j, k);
-      for (unsigned int j(d); j < lupT-llowT+1; j++)
+      for (int j(0); j < d; j++)
+	for (int k(0); k <= j; k++)
+	  CL_(k, j) = minus1power(j-k) * std::pow(b, -j) * binomial(d-1, j) * binomial(j, k);
+      for (int j(d); j < lupT-llowT+1; j++)
 	CL_(j, j) = 1.0;
       
       Matrix<double> GammaLNew(CL_ * GammaL_);
@@ -989,16 +1009,15 @@ namespace WaveletTL
   
   template <int d, int dT>
   Matrix<double>
-  DKUBasis<d, dT>::ML() const
-  {
+  DKUBasis<d, dT>::ML() const {
     // IGPMlib reference: I_Basis_Bspline_s::ML()
-
+    
     const int llow = ell_-d;           // the (3.5.2) bounds
     const int lup  = ell_-1;
     const int MLup = ell2_+2*ell_-2;
     const int AlphaToffset = 1-ell2_;
     const int BetaLToffset = 2*ell_+ell1_;
-
+    
     Matrix<double> ML(MLup-llow+1, lup-llow+1);
 
     for (int row = 0; row < d; row++)
@@ -1017,8 +1036,7 @@ namespace WaveletTL
 
   template <int d, int dT>
   Matrix<double>
-  DKUBasis<d, dT>::MR() const
-  {
+  DKUBasis<d, dT>::MR() const {
     // IGPMlib reference: I_Basis_Bspline_s::MR()
     // (remark: in this form identical to ML(), in I_Basis_Bspline_s they
     // use elll and ellr, which is identical here)
@@ -1047,8 +1065,7 @@ namespace WaveletTL
 
   template <int d, int dT>
   Matrix<double>
-  DKUBasis<d, dT>::MLTp() const
-  {
+  DKUBasis<d, dT>::MLTp() const {
     // IGPMlib reference: I_Basis_Bspline_s::MLts()
 
     const int llowT = ellT_-dT;           // the (3.5.6) bounds
@@ -1075,8 +1092,7 @@ namespace WaveletTL
 
   template <int d, int dT>
   Matrix<double>
-  DKUBasis<d, dT>::MRTp() const
-  {
+  DKUBasis<d, dT>::MRTp() const {
     // IGPMlib reference: I_Basis_Bspline_s::MRts()
 
     const int llowT = ellT_-dT;           // the (3.5.6) bounds
@@ -1103,8 +1119,7 @@ namespace WaveletTL
 
   template <int d, int dT>
   void
-  DKUBasis<d, dT>::setup_Mj0(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& Mj0)
-  {
+  DKUBasis<d, dT>::setup_Mj0(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& Mj0) {
     // IGPMlib reference: I_Basis_Bspline_s::Mj0()
     
     // TODO: enhance readability! (<-> [DKU section 3.5])
@@ -1130,25 +1145,22 @@ namespace WaveletTL
 	Mj0.set_entry(njp-i-1, nj-k-1, MR.get_entry(i, k));
 
     q = alowr;
-    for (int r = alowc; r <= aupc; r++)
-      {
-	p = q;
-	for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf_.a().begin());
-	     it != cdf_.a().end(); ++it)
-	  {
-	    p++;
-	    Mj0.set_entry(p-1, r-1, M_SQRT1_2 * *it); // quick hack, TODO: eliminate the "-1"
-	  }
-	q += 2;
+    for (int r = alowc; r <= aupc; r++) {
+      p = q;
+      for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf_.a().begin());
+	   it != cdf_.a().end(); ++it) {
+	p++;
+	Mj0.set_entry(p-1, r-1, M_SQRT1_2 * *it); // quick hack, TODO: eliminate the "-1"
       }
+      q += 2;
+    }
     
     // after this routine: offsets in Mj0 are both llow == ell-d
   }
 
   template <int d, int dT>
   void
-  DKUBasis<d, dT>::setup_Mj0Tp(const Matrix<double>& MLTp, const Matrix<double>& MRTp, SparseMatrix<double>& Mj0Tp)
-  {
+  DKUBasis<d, dT>::setup_Mj0Tp(const Matrix<double>& MLTp, const Matrix<double>& MRTp, SparseMatrix<double>& Mj0Tp) {
     // IGPMlib reference: I_Basis_Bspline_s::Mj0ts()
 
     // TODO: enhance readability! (<-> [DKU section 3.5])
@@ -1174,26 +1186,23 @@ namespace WaveletTL
 	Mj0Tp.set_entry(njp-i-1, nj-k-1, MRTp.get_entry(i, k));
 
     q = atlowr;
-    for (int r = atlowc; r <= atupc; r++)
-      {
-	p = q+1;
-	for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf_.aT().begin());
-	     it != cdf_.aT().end(); ++it, p++)
-	  {
-	    Mj0Tp.set_entry(p-1, r-1, M_SQRT1_2 * *it); // quick hack, TODO: eliminate the "-1"
-	  }
-	q += 2;
+    for (int r = atlowc; r <= atupc; r++) {
+      p = q+1;
+      for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf_.aT().begin());
+	   it != cdf_.aT().end(); ++it, p++) {
+	Mj0Tp.set_entry(p-1, r-1, M_SQRT1_2 * *it); // quick hack, TODO: eliminate the "-1"
       }
+      q += 2;
+    }
     
     // after this routine: offsets in Mj0Tp are both llowT == ellT-dT
   }
 
   template <int d, int dT>
   void
-  DKUBasis<d, dT>::F(SparseMatrix<double>& FF)
-  {
+  DKUBasis<d, dT>::F(SparseMatrix<double>& FF) {
     // IGPMlib reference: I_Basis_Bspline_s::F()
-
+    
     const int FLow = ell_+(d%2)-1;       // start column index for F_j in (4.1.14)
     const int FUp  = (1<<j0())-1-ell_; // end column index for F_j in (4.1.14)
 
@@ -1205,24 +1214,21 @@ namespace WaveletTL
       FF.set_entry(r+d, r, 1.0);
     
     int i = d+ell_+(d%2)-1;
-    for (int r = FLow; r <= FUp; r++)
-      {
-	FF.set_entry(i, r, 1.0);
-	i += 2;
-      } 
-
+    for (int r = FLow; r <= FUp; r++) {
+      FF.set_entry(i, r, 1.0);
+      i += 2;
+    } 
+    
     i = Deltasize(j0()+1)-d-1;
-    for (int r = (1<<j0())-1; r >= FUp+1; r--)
-      {
-	FF.set_entry(i, r, 1.0);
-	i--;
-      }
+    for (int r = (1<<j0())-1; r >= FUp+1; r--) {
+      FF.set_entry(i, r, 1.0);
+      i--;
+    }
   }
 
   template <int d, int dT>
   void
-  DKUBasis<d, dT>::P(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& PP)
-  {
+  DKUBasis<d, dT>::P(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& PP) {
     // IGPMlib reference: I_Basis_Bspline_s::P()
     
     // (4.1.22):
@@ -1240,8 +1246,7 @@ namespace WaveletTL
 
   template <int d, int dT>
   void
-  DKUBasis<d, dT>::GSetup(SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv)
-  {
+  DKUBasis<d, dT>::GSetup(SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv) {
     // IGPMlib reference: I_Basis_Bspline_s::GSetup()
 
     // (4.1.13):
@@ -1251,20 +1256,18 @@ namespace WaveletTL
     for (int r = 0; r < d; r++)
       A.set_entry(r, r, 1.0);
 
-    for (int r = d, q = d+ell_+ell1_; r < Deltasize(j0())-d; r++)
-      {
- 	int p = q;
+    for (int r = d, q = d+ell_+ell1_; r < Deltasize(j0())-d; r++) {
+      int p = q;
 
- 	for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf_.a().begin());
- 	     it != cdf_.a().end(); ++it)
- 	  {
- 	    A.set_entry(p, r, M_SQRT1_2 * *it);
-	    p++;
- 	  }
-
-	q += 2;
+      for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf_.a().begin());
+	   it != cdf_.a().end(); ++it) {
+	A.set_entry(p, r, M_SQRT1_2 * *it);
+	p++;
       }
-
+      
+      q += 2;
+    }
+    
     for (int r = Deltasize(j0()+1)-d, q = Deltasize(j0())-d; r < Deltasize(j0()+1); r++, q++)
       A.set_entry(r, q, 1.0);
 
@@ -1278,8 +1281,7 @@ namespace WaveletTL
 
   template <int d, int dT>
   void
-  DKUBasis<d, dT>::GElim(SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv)
-  {
+  DKUBasis<d, dT>::GElim(SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv) {
     // IGPMlib reference: I_Basis_Bspline_s::gelim()
     
     // A_j=A_j^{(0)} in (4.1.1) is a q times p matrix with
@@ -1296,62 +1298,57 @@ namespace WaveletTL
     SparseMatrix<double> help;
     
     // elimination (4.1.4)ff.:
-    for (int i = 1; i <= d; i++)
-      {
-	help.diagonal(Deltasize(j0()+1), 1.0);
-
-	const int HhatLow = (i%2 ? ell_+ell2_+(i-1)/2 : ell_+ell2_+2-(d%2)-(i/2));
-	const int HhatUp  = HhatLow + (2*p-1);
-
-	if (i%2) // i odd, elimination from above (4.1.4a)
-	  {
-	    const int elimrow = ALowr+(i-1)/2; // note that (i-1)/2 == ceil((i-1)/2), since i is odd
-
-	    assert(fabs(A.get_entry(elimrow+1, ALowc)) >= 1e-10);
-	    const double Uentry = -A.get_entry(elimrow, ALowc) / A.get_entry(elimrow+1, ALowc);
-	    
-	    // insert Uentry in Hhat
-	    for (int k = HhatLow; k <= HhatUp; k += 2)
-	      help.set_entry(k, k+1, Uentry);
-	  }
-	else // i even, elimination from below (4.1.4b)
-	  {
-	    const int elimrow = AUpr-(int)floor((i-1)/2.);
-
-	    const double Lentry = -A.get_entry(elimrow-2, AUpc-1) / A.get_entry(elimrow-3, AUpc-1);
-
-  	    // insert Lentry in Hhat
-  	    for (int k = HhatLow; k <= HhatUp; k += 2)
-	      help.set_entry(k+1, k, Lentry);
-	  }
-
-	A = help * A;
- 	H = help * H;
-
-	A.compress(1e-10);
-
-	// invert help
-	if (i%2)
-	  {
-	    for (int k = HhatLow; k <= HhatUp; k += 2)
-	      help.set_entry(k, k+1, -help.get_entry(k, k+1));
-	  }
-	else
-	  {
-  	    for (int k = HhatLow; k <= HhatUp; k += 2)
-	      help.set_entry(k+1, k, -help.get_entry(k+1, k));
-	  }
-
-	Hinv = Hinv * help;
+    for (int i = 1; i <= d; i++) {
+      help.diagonal(Deltasize(j0()+1), 1.0);
+      
+      const int HhatLow = (i%2 ? ell_+ell2_+(i-1)/2 : ell_+ell2_+2-(d%2)-(i/2));
+      const int HhatUp  = HhatLow + (2*p-1);
+      
+      if (i%2) // i odd, elimination from above (4.1.4a)
+	{
+	  const int elimrow = ALowr+(i-1)/2; // note that (i-1)/2 == ceil((i-1)/2), since i is odd
+	  
+	  assert(fabs(A.get_entry(elimrow+1, ALowc)) >= 1e-10);
+	  const double Uentry = -A.get_entry(elimrow, ALowc) / A.get_entry(elimrow+1, ALowc);
+	  
+	  // insert Uentry in Hhat
+	  for (int k = HhatLow; k <= HhatUp; k += 2)
+	    help.set_entry(k, k+1, Uentry);
+	}
+      else // i even, elimination from below (4.1.4b)
+	{
+	  const int elimrow = AUpr-(int)floor((i-1)/2.);
+	  
+	  const double Lentry = -A.get_entry(elimrow-2, AUpc-1) / A.get_entry(elimrow-3, AUpc-1);
+	  
+	  // insert Lentry in Hhat
+	  for (int k = HhatLow; k <= HhatUp; k += 2)
+	    help.set_entry(k+1, k, Lentry);
+	}
+      
+      A = help * A;
+      H = help * H;
+      
+      A.compress(1e-10);
+      
+      // invert help
+      if (i%2) {
+	for (int k = HhatLow; k <= HhatUp; k += 2)
+	  help.set_entry(k, k+1, -help.get_entry(k, k+1));
+      }	else {
+	for (int k = HhatLow; k <= HhatUp; k += 2)
+	  help.set_entry(k+1, k, -help.get_entry(k+1, k));
       }
+      
+      Hinv = Hinv * help;
+    }
   }
   
   template <int d, int dT>
   void
-  DKUBasis<d, dT>::InvertP(const SparseMatrix<double>& PP, SparseMatrix<double>& PPinv)
-  {
+  DKUBasis<d, dT>::InvertP(const SparseMatrix<double>& PP, SparseMatrix<double>& PPinv) {
     // IGPMlib reference: I_Basis_Bspline_s::InverseP()
-
+    
     PPinv.diagonal(PP.row_dimension(), 1.0);
 
     const int mlrsize = d+ell_+ell2_-1;
@@ -1373,17 +1370,15 @@ namespace WaveletTL
     QUDecomposition<double>(mr).inverse(mrinv);
 
     for (int i = 0; i < mlrsize; i++)
-      for (int k = 0; k <= d; k++)
-	{
-	  PPinv.set_entry(i, k, mlinv.get_entry(i, k));
-	  PPinv.set_entry(PP.row_dimension()-mlrsize+i, PP.column_dimension()-d-1+k, mrinv.get_entry(i, mlrsize-d-1+k));
-	}
+      for (int k = 0; k <= d; k++) {
+	PPinv.set_entry(i, k, mlinv.get_entry(i, k));
+	PPinv.set_entry(PP.row_dimension()-mlrsize+i, PP.column_dimension()-d-1+k, mrinv.get_entry(i, mlrsize-d-1+k));
+      }
   }
 
   template <int d, int dT>
   void
-  DKUBasis<d, dT>::BT(const SparseMatrix<double>& A, SparseMatrix<double>& BB)
-  {
+  DKUBasis<d, dT>::BT(const SparseMatrix<double>& A, SparseMatrix<double>& BB) {
     // IGPMlib reference: I_Basis_Bspline_s::Btr()
 
     const int p = (1<<j0()) - 2*ell_ - (d%2) + 1;
@@ -1404,8 +1399,7 @@ namespace WaveletTL
 
   template <int d, int dT>
   void
-  DKUBasis<d, dT>::DS_symmetrization(SparseMatrix<double>& Mj1, SparseMatrix<double>& Mj1T)
-  {
+  DKUBasis<d, dT>::DS_symmetrization(SparseMatrix<double>& Mj1, SparseMatrix<double>& Mj1T) {
     // IGPMlib reference: I_Basis_Bspline::Modify()
 
     SparseMatrix<double> Hj1(Deltasize(j0()+1), 1<<j0()),
@@ -1413,23 +1407,20 @@ namespace WaveletTL
 
     // copy left halves of Mj1, Mj1T, right halves are mirrored
     for (int i = 0; i < Deltasize(j0()+1); i++)
-      for (int j = 0; j < 1<<(j0()-1); j++)
-	{
-	  double help = Mj1.get_entry(i, j);
-	  if (help != 0)
-	    {
-	      Hj1.set_entry(i, j, help);
-	      Hj1.set_entry(Deltasize(j0()+1)-1-i, (1<<j0())-1-j, help);
-	    }
-	  
-	  help = Mj1T.get_entry(i, j);
-	  if (help != 0)
-	    {
-	      Hj1T.set_entry(i, j, help);
-	      Hj1T.set_entry(Deltasize(j0()+1)-1-i, (1<<j0())-1-j, help);
-	    }
+      for (int j = 0; j < 1<<(j0()-1); j++) {
+	double help = Mj1.get_entry(i, j);
+	if (help != 0) {
+	  Hj1.set_entry(i, j, help);
+	  Hj1.set_entry(Deltasize(j0()+1)-1-i, (1<<j0())-1-j, help);
 	}
-
+	
+	help = Mj1T.get_entry(i, j);
+	if (help != 0) {
+	  Hj1T.set_entry(i, j, help);
+	  Hj1T.set_entry(Deltasize(j0()+1)-1-i, (1<<j0())-1-j, help);
+	}
+      }
+    
     SparseMatrix<double> Kj = transpose(Hj1T)*Hj1; Kj.compress(1e-12);
     Matrix<double> Kj_full; Kj.get_block(0, 0, Kj.row_dimension(), Kj.column_dimension(), Kj_full);
     Matrix<double> invKj_full;
@@ -1448,75 +1439,66 @@ namespace WaveletTL
   void
   DKUBasis<d, dT>::decompose(const InfiniteVector<double, Index>& c,
 			     const int jmin,
-			     InfiniteVector<double, Index>& v) const
-  {
+			     InfiniteVector<double, Index>& v) const {
     v.clear();
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
-	 it != itend; ++it)
-      {
- 	InfiniteVector<double, Index> help;
- 	decompose_1(it.index(), jmin, help);
- 	v += *it * help;
-      }
+	 it != itend; ++it) {
+      InfiniteVector<double, Index> help;
+      decompose_1(it.index(), jmin, help);
+      v += *it * help;
+    }
   }
   
   template <int d, int dT>
   void
   DKUBasis<d, dT>::decompose_t(const InfiniteVector<double, Index>& c,
 			       const int jmin,
-			       InfiniteVector<double, Index>& v) const
-  {
+			       InfiniteVector<double, Index>& v) const {
     v.clear();
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
-	 it != itend; ++it)
-      {
-	InfiniteVector<double, Index> help;
-	decompose_t_1(it.index(), jmin, help);
-	v += *it * help;
-      }
+	 it != itend; ++it) {
+      InfiniteVector<double, Index> help;
+      decompose_t_1(it.index(), jmin, help);
+      v += *it * help;
+    }
   }
-
+  
   template <int d, int dT>
   void
   DKUBasis<d, dT>::reconstruct(const InfiniteVector<double, Index>& c,
 			       const int j,
-			       InfiniteVector<double, Index>& v) const
-  {
+			       InfiniteVector<double, Index>& v) const {
     v.clear();
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
-	 it != itend; ++it)
-      {
-	InfiniteVector<double, Index> help;
-	reconstruct_1(it.index(), j, help);
-	v += *it * help;
-      }
+	 it != itend; ++it) {
+      InfiniteVector<double, Index> help;
+      reconstruct_1(it.index(), j, help);
+      v += *it * help;
+    }
   }
 
   template <int d, int dT>
   void
   DKUBasis<d, dT>::reconstruct_t(const InfiniteVector<double, Index>& c,
 				 const int j,
-				 InfiniteVector<double, Index>& v) const
-  {
+				 InfiniteVector<double, Index>& v) const {
     v.clear();
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
-	 it != itend; ++it)
-      {
-	InfiniteVector<double, Index> help;
-	reconstruct_t_1(it.index(), j, help);
-	v += *it * help;
-      }
+	 it != itend; ++it) {
+      InfiniteVector<double, Index> help;
+      reconstruct_t_1(it.index(), j, help);
+      v += *it * help;
+    }
   }
 
   template <int d, int dT>
   void
   DKUBasis<d, dT>::decompose_1(const Index& lambda,
 			       const int jmin,
-			       InfiniteVector<double, Index>& c) const
-  {
+			       InfiniteVector<double, Index>& c) const {
     assert(jmin >= j0());
     assert(lambda.j() >= jmin);
-
+    
     c.clear();
 
     if (lambda.e() == 1) // wavelet
@@ -1539,113 +1521,99 @@ namespace WaveletTL
 	    size_type row_j0 = row;
 	    size_type offset = 0;
 
- 	    if (lambda.j()-1 == j0())
- 	      {		
- 		for (size_type k(0); k < Mj1T_.entries_in_row(row_j0); k++)
- 		  c.set_coefficient(Index(j0(), 1, Mj1T_.get_nth_index(row_j0,k), this),
+ 	    if (lambda.j()-1 == j0()) {		
+	      for (size_type k(0); k < Mj1T_.entries_in_row(row_j0); k++)
+		c.set_coefficient(Index(j0(), 1, Mj1T_.get_nth_index(row_j0,k), this),
+				  Mj1T_.get_nth_entry(row_j0,k));
+	    } else {
+	      // Due to the [DS] symmetrization, we have to be a bit careful here.
+	      const size_type third = Deltasize(j0()+1)/3;
+	      if (row < third)
+		for (size_type k(0); k < Mj1T_.entries_in_row(row_j0); k++)
+		  c.set_coefficient(Index(lambda.j()-1, 1, Mj1T_.get_nth_index(row_j0,k), this),
 				    Mj1T_.get_nth_entry(row_j0,k));
- 	      }
- 	    else
-	      {
-  		// Due to the [DS] symmetrization, we have to be a bit careful here.
-  		const size_type third = Deltasize(j0()+1)/3;
-  		if (row < third)
-  		  for (size_type k(0); k < Mj1T_.entries_in_row(row_j0); k++)
-  		    c.set_coefficient(Index(lambda.j()-1, 1, Mj1T_.get_nth_index(row_j0,k), this),
-  				      Mj1T_.get_nth_entry(row_j0,k));
-  		else
-		  {
-		    const size_type bottom_third = Deltasize(lambda.j())-Deltasize(j0()+1)/3;
-		    if (row >= bottom_third)
-		      {
-			row_j0 = row+Deltasize(j0()+1)-Deltasize(lambda.j());
-			offset = (1<<(lambda.j()-1))-(1<<j0());
-			for (size_type k(0); k < Mj1T_.entries_in_row(row_j0); k++)
-			  c.set_coefficient(Index(lambda.j()-1, 1, Mj1T_.get_nth_index(row_j0,k)+offset, this),
-					    Mj1T_.get_nth_entry(row_j0,k));
-		      }
-		    else
-		      {
-			// Left half of Mj1T:
-
-			const int col_left = (1<<(j0()-1))-1;
-
-			// The row ...
-			const int first_row_left = Mj1T_t.get_nth_index(col_left, 0);
-			// ... is the first nontrivial row in column (1<<(j0-1))-1 and the row ...
-			const int last_row_left  = Mj1T_t.get_nth_index(col_left, Mj1T_t.entries_in_row(col_left)-1);
-			// ... is the last nontrivial one,
-			// i.e. the row last_row_left begins at column (1<<(j0()-1))-1, so does the row last_row_left-1.
-			// So the row "row" starts at column ...
-			const int first_column_left = (1<<(j0()-1))-1+(int)floor(((int)row+1-last_row_left)/2.);
-		
-			for (int col = first_column_left, filter_row = last_row_left-abs(row-last_row_left)%2;
-			     col < (1<<(lambda.j()-2)) && filter_row >= first_row_left; col++, filter_row -= 2)
-			  c.set_coefficient(Index(lambda.j()-1, 1, col, this),
-					    Mj1T_t.get_nth_entry(col_left, filter_row-first_row_left));
-			
-			// Analogous strategy for the right half:
-
-			const int col_right = 1<<(j0()-1);
-		
-			const int offset_right = (Deltasize(lambda.j())-Deltasize(j0()+1))-(1<<(lambda.j()-1))+(1<<j0()); // row offset for the right half
-			const int first_row_right = Mj1T_t.get_nth_index(col_right, 0)+offset_right;
-			const int last_row_right  = Mj1T_t.get_nth_index(col_right, Mj1T_t.entries_in_row(col_right)-1)+offset_right;
-
-			// The rows first_row_right and first_row_right+1 end at column 1<<(lambda.j()-2),
-			// so the row "row" ends at column ...
-			const int last_column_right = (1<<(lambda.j()-2))+(int)floor(((int)row-first_row_right)/2.);
-		
-			for (int col = last_column_right, filter_row = first_row_right-offset_right+abs(row-first_row_right)%2;
-			     col >= 1<<(lambda.j()-2) && filter_row <= last_row_right-offset_right; col--, filter_row += 2)
-			  c.set_coefficient(Index(lambda.j()-1, 1, col, this),
-					    Mj1T_t.get_nth_entry(col_right, filter_row+offset_right-first_row_right));
-		      }
-		  }	    
-	      }
-
+	      else {
+		const size_type bottom_third = Deltasize(lambda.j())-Deltasize(j0()+1)/3;
+		if (row >= bottom_third) {
+		  row_j0 = row+Deltasize(j0()+1)-Deltasize(lambda.j());
+		  offset = (1<<(lambda.j()-1))-(1<<j0());
+		  for (size_type k(0); k < Mj1T_.entries_in_row(row_j0); k++)
+		    c.set_coefficient(Index(lambda.j()-1, 1, Mj1T_.get_nth_index(row_j0,k)+offset, this),
+				      Mj1T_.get_nth_entry(row_j0,k));
+		} else {
+		  // Left half of Mj1T:
+		  
+		  const int col_left = (1<<(j0()-1))-1;
+		  
+		  // The row ...
+		  const int first_row_left = Mj1T_t.get_nth_index(col_left, 0);
+		  // ... is the first nontrivial row in column (1<<(j0-1))-1 and the row ...
+		  const int last_row_left  = Mj1T_t.get_nth_index(col_left, Mj1T_t.entries_in_row(col_left)-1);
+		  // ... is the last nontrivial one,
+		  // i.e. the row last_row_left begins at column (1<<(j0()-1))-1, so does the row last_row_left-1.
+		  // So the row "row" starts at column ...
+		  const int first_column_left = (1<<(j0()-1))-1+(int)floor(((int)row+1-last_row_left)/2.);
+		  
+		  for (int col = first_column_left, filter_row = last_row_left-abs(row-last_row_left)%2;
+		       col < (1<<(lambda.j()-2)) && filter_row >= first_row_left; col++, filter_row -= 2)
+		    c.set_coefficient(Index(lambda.j()-1, 1, col, this),
+				      Mj1T_t.get_nth_entry(col_left, filter_row-first_row_left));
+		  
+		  // Analogous strategy for the right half:
+		  
+		  const int col_right = 1<<(j0()-1);
+		  
+		  const int offset_right = (Deltasize(lambda.j())-Deltasize(j0()+1))-(1<<(lambda.j()-1))+(1<<j0()); // row offset for the right half
+		  const int first_row_right = Mj1T_t.get_nth_index(col_right, 0)+offset_right;
+		  const int last_row_right  = Mj1T_t.get_nth_index(col_right, Mj1T_t.entries_in_row(col_right)-1)+offset_right;
+		  
+		  // The rows first_row_right and first_row_right+1 end at column 1<<(lambda.j()-2),
+		  // so the row "row" ends at column ...
+		  const int last_column_right = (1<<(lambda.j()-2))+(int)floor(((int)row-first_row_right)/2.);
+		  
+		  for (int col = last_column_right, filter_row = first_row_right-offset_right+abs(row-first_row_right)%2;
+		       col >= 1<<(lambda.j()-2) && filter_row <= last_row_right-offset_right; col--, filter_row += 2)
+		    c.set_coefficient(Index(lambda.j()-1, 1, col, this),
+				      Mj1T_t.get_nth_entry(col_right, filter_row+offset_right-first_row_right));
+		}
+	      }	    
+	    }
+	    
    	    // compute c_{jmin} via recursion
 	    row_j0 = row;
 	    offset = 0;
-	    if (lambda.j()-1 != j0())
-	      {
-		const size_type rows_top = (int)ceil(Deltasize(j0()+1)/2.0);
-		if (row >= rows_top)
-		  {
-		    const size_type bottom = Deltasize(lambda.j())-Deltasize(j0()+1)/2;
-		    if (row >= bottom)
-		      {
-			row_j0 = row + rows_top - bottom;
-			offset = Deltasize(lambda.j()-1) - Deltasize(j0());
-		      }
-		    else
-		      {
-			row_j0 = rows_top-2+(row-rows_top)%2;
-			offset = (row-rows_top)/2+1;
-		      }
-		  }
+	    if (lambda.j()-1 != j0()) {
+	      const size_type rows_top = (int)ceil(Deltasize(j0()+1)/2.0);
+	      if (row >= rows_top) {
+		const size_type bottom = Deltasize(lambda.j())-Deltasize(j0()+1)/2;
+		if (row >= bottom) {
+		  row_j0 = row + rows_top - bottom;
+		  offset = Deltasize(lambda.j()-1) - Deltasize(j0());
+		} else {
+		  row_j0 = rows_top-2+(row-rows_top)%2;
+		  offset = (row-rows_top)/2+1;
+		}
 	      }
-	    for (size_type k(0); k < Mj0T_.entries_in_row(row_j0); k++)
-	      {
-		InfiniteVector<double, Index> dhelp;
-		decompose_1(Index(lambda.j()-1, 0, DeltaLmin()+Mj0T_.get_nth_index(row_j0,k)+offset, this), jmin, dhelp);
-		c += Mj0T_.get_nth_entry(row_j0,k) * dhelp;
-	      }
+	    }
+	    for (size_type k(0); k < Mj0T_.entries_in_row(row_j0); k++) {
+	      InfiniteVector<double, Index> dhelp;
+	      decompose_1(Index(lambda.j()-1, 0, DeltaLmin()+Mj0T_.get_nth_index(row_j0,k)+offset, this), jmin, dhelp);
+	      c += Mj0T_.get_nth_entry(row_j0,k) * dhelp;
+	    }
 	  }
       }
   }
-
+  
   template <int d, int dT>
   void
   DKUBasis<d, dT>::decompose_t_1(const Index& lambda,
 				 const int jmin,
-				 InfiniteVector<double, Index>& c) const
-  {
+				 InfiniteVector<double, Index>& c) const {
     assert(jmin >= j0());
     assert(lambda.j() >= jmin);
-
+    
     c.clear();
-
+    
     if (lambda.e() == 1) // wavelet
       c.set_coefficient(lambda, 1.0); // true wavelet coefficients don't have to be modified
     else // generator
@@ -1659,763 +1627,669 @@ namespace WaveletTL
 	    // i.e. one row of \tilde G_{j-1}^T=(M_{j-1,0}, M_{j-1,1}).
 	    
 	    typedef Vector<double>::size_type size_type;
-
+	    
 	    const size_type row = lambda.k() - DeltaLmin();
-
+	    
   	    // compute d_{j-1}
 	    size_type row_j0 = row;
 	    size_type offset = 0;
-
- 	    if (lambda.j()-1 == j0())
- 	      {		
- 		for (size_type k(0); k < Mj1_.entries_in_row(row_j0); k++)
- 		  c.set_coefficient(Index(j0(), 1, Mj1_.get_nth_index(row_j0,k), this),
+	    
+ 	    if (lambda.j()-1 == j0()) {		
+	      for (size_type k(0); k < Mj1_.entries_in_row(row_j0); k++)
+		c.set_coefficient(Index(j0(), 1, Mj1_.get_nth_index(row_j0,k), this),
+				  Mj1_.get_nth_entry(row_j0,k));
+	    } else {
+	      // Due to the [DS] symmetrization, we have to be a bit careful here.
+	      const size_t third = Deltasize(j0()+1)/3;
+	      if (row < third)
+		for (size_type k(0); k < Mj1_.entries_in_row(row_j0); k++)
+		  c.set_coefficient(Index(lambda.j()-1, 1, Mj1_.get_nth_index(row_j0,k), this),
 				    Mj1_.get_nth_entry(row_j0,k));
- 	      }
- 	    else
-	      {
-  		// Due to the [DS] symmetrization, we have to be a bit careful here.
-  		const size_t third = Deltasize(j0()+1)/3;
-  		if (row < third)
-  		  for (size_type k(0); k < Mj1_.entries_in_row(row_j0); k++)
-  		    c.set_coefficient(Index(lambda.j()-1, 1, Mj1_.get_nth_index(row_j0,k), this),
-  				      Mj1_.get_nth_entry(row_j0,k));
-  		else
-		  {
-		    const size_t bottom_third = Deltasize(lambda.j())-Deltasize(j0()+1)/3;
-		    if (row >= bottom_third)
-		      {
-			row_j0 = row+Deltasize(j0()+1)-Deltasize(lambda.j());
-			offset = (1<<(lambda.j()-1))-(1<<j0());
-			for (size_type k(0); k < Mj1_.entries_in_row(row_j0); k++)
-			  c.set_coefficient(Index(lambda.j()-1, 1, Mj1_.get_nth_index(row_j0,k)+offset, this),
-					    Mj1_.get_nth_entry(row_j0,k));
-		      }
-		    else
-		      {
-			// Left half of Mj1:
-
-			const int col_left = (1<<(j0()-1))-1;
-
-			// The row ...
-			const int first_row_left = Mj1_t.get_nth_index(col_left, 0);
-			// ... is the first nontrivial row in column (1<<(j0-1))-1 and the row ...
-			const int last_row_left  = Mj1_t.get_nth_index(col_left, Mj1_t.entries_in_row(col_left)-1);
-			// ... is the last nontrivial one,
-			// i.e. the row last_row_left begins at column (1<<(j0()-1))-1, so does the row last_row_left-1.
-			// So the row "row" starts at column ...
-			const int first_column_left = (1<<(j0()-1))-1+(int)floor(((int)row+1-last_row_left)/2.);
-		
-			for (int col = first_column_left, filter_row = last_row_left-abs(row-last_row_left)%2;
-			     col < (1<<(lambda.j()-2)) && filter_row >= first_row_left; col++, filter_row -= 2)
-			  c.set_coefficient(Index(lambda.j()-1, 1, col, this),
-					    Mj1_t.get_nth_entry(col_left, filter_row-first_row_left));
-			
-			// Analogous strategy for the right half:
-
-			const int col_right = 1<<(j0()-1);
-		
-			const int offset_right = (Deltasize(lambda.j())-Deltasize(j0()+1))-(1<<(lambda.j()-1))+(1<<j0()); // row offset for the right half
-			const int first_row_right = Mj1_t.get_nth_index(col_right, 0)+offset_right;
-			const int last_row_right  = Mj1_t.get_nth_index(col_right, Mj1_t.entries_in_row(col_right)-1)+offset_right;
-
-			// The rows first_row_right and first_row_right+1 end at column 1<<(lambda.j()-2),
-			// so the row "row" ends at column ...
-			const int last_column_right = (1<<(lambda.j()-2))+(int)floor(((int)row-first_row_right)/2.);
-		
-			for (int col = last_column_right, filter_row = first_row_right-offset_right+abs(row-first_row_right)%2;
-			     col >= 1<<(lambda.j()-2) && filter_row <= last_row_right-offset_right; col--, filter_row += 2)
-			  c.set_coefficient(Index(lambda.j()-1, 1, col, this),
-					    Mj1_t.get_nth_entry(col_right, filter_row+offset_right-first_row_right));
-		      }
-		  }	    
-	      }
-
+	      else {
+		const size_t bottom_third = Deltasize(lambda.j())-Deltasize(j0()+1)/3;
+		if (row >= bottom_third) {
+		  row_j0 = row+Deltasize(j0()+1)-Deltasize(lambda.j());
+		  offset = (1<<(lambda.j()-1))-(1<<j0());
+		  for (size_type k(0); k < Mj1_.entries_in_row(row_j0); k++)
+		    c.set_coefficient(Index(lambda.j()-1, 1, Mj1_.get_nth_index(row_j0,k)+offset, this),
+				      Mj1_.get_nth_entry(row_j0,k));
+		} else {
+		  // Left half of Mj1:
+		  
+		  const int col_left = (1<<(j0()-1))-1;
+		  
+		  // The row ...
+		  const int first_row_left = Mj1_t.get_nth_index(col_left, 0);
+		  // ... is the first nontrivial row in column (1<<(j0-1))-1 and the row ...
+		  const int last_row_left  = Mj1_t.get_nth_index(col_left, Mj1_t.entries_in_row(col_left)-1);
+		  // ... is the last nontrivial one,
+		  // i.e. the row last_row_left begins at column (1<<(j0()-1))-1, so does the row last_row_left-1.
+		  // So the row "row" starts at column ...
+		  const int first_column_left = (1<<(j0()-1))-1+(int)floor(((int)row+1-last_row_left)/2.);
+		  
+		  for (int col = first_column_left, filter_row = last_row_left-abs(row-last_row_left)%2;
+		       col < (1<<(lambda.j()-2)) && filter_row >= first_row_left; col++, filter_row -= 2)
+		    c.set_coefficient(Index(lambda.j()-1, 1, col, this),
+				      Mj1_t.get_nth_entry(col_left, filter_row-first_row_left));
+		  
+		  // Analogous strategy for the right half:
+		  
+		  const int col_right = 1<<(j0()-1);
+		  
+		  const int offset_right = (Deltasize(lambda.j())-Deltasize(j0()+1))-(1<<(lambda.j()-1))+(1<<j0()); // row offset for the right half
+		  const int first_row_right = Mj1_t.get_nth_index(col_right, 0)+offset_right;
+		  const int last_row_right  = Mj1_t.get_nth_index(col_right, Mj1_t.entries_in_row(col_right)-1)+offset_right;
+		  
+		  // The rows first_row_right and first_row_right+1 end at column 1<<(lambda.j()-2),
+		  // so the row "row" ends at column ...
+		  const int last_column_right = (1<<(lambda.j()-2))+(int)floor(((int)row-first_row_right)/2.);
+		  
+		  for (int col = last_column_right, filter_row = first_row_right-offset_right+abs(row-first_row_right)%2;
+		       col >= 1<<(lambda.j()-2) && filter_row <= last_row_right-offset_right; col--, filter_row += 2)
+		    c.set_coefficient(Index(lambda.j()-1, 1, col, this),
+				      Mj1_t.get_nth_entry(col_right, filter_row+offset_right-first_row_right));
+		}
+	      }	    
+	    }
+	    
    	    // compute c_{jmin} via recursion
 	    row_j0 = row;
 	    offset = 0;
-	    if (lambda.j()-1 != j0())
-	      {
-		const size_type rows_top = (int)ceil(Deltasize(j0()+1)/2.0);
-		if (row >= rows_top)
-		  {
-		    const size_type bottom = Deltasize(lambda.j())-Deltasize(j0()+1)/2;
-		    if (row >= bottom)
-		      {
-			row_j0 = row + rows_top - bottom;
-			offset = Deltasize(lambda.j()-1) - Deltasize(j0());
-		      }
-		    else
-		      {
-			row_j0 = rows_top-2+(row-rows_top)%2;
-			offset = (row-rows_top)/2+1;
-		      }
-		  }
+	    if (lambda.j()-1 != j0()) {
+	      const size_type rows_top = (int)ceil(Deltasize(j0()+1)/2.0);
+	      if (row >= rows_top) {
+		const size_type bottom = Deltasize(lambda.j())-Deltasize(j0()+1)/2;
+		if (row >= bottom) {
+		  row_j0 = row + rows_top - bottom;
+		  offset = Deltasize(lambda.j()-1) - Deltasize(j0());
+		} else {
+		  row_j0 = rows_top-2+(row-rows_top)%2;
+		  offset = (row-rows_top)/2+1;
+		}
 	      }
-	    for (size_type k(0); k < Mj0_.entries_in_row(row_j0); k++)
-	      {
-		InfiniteVector<double, Index> dhelp;
-		decompose_t_1(Index(lambda.j()-1, 0, DeltaLmin()+Mj0_.get_nth_index(row_j0,k)+offset, this), jmin, dhelp);
-		c += Mj0_.get_nth_entry(row_j0,k) * dhelp;
-	      }
+	    }
+	    for (size_type k(0); k < Mj0_.entries_in_row(row_j0); k++) {
+	      InfiniteVector<double, Index> dhelp;
+	      decompose_t_1(Index(lambda.j()-1, 0, DeltaLmin()+Mj0_.get_nth_index(row_j0,k)+offset, this), jmin, dhelp);
+	      c += Mj0_.get_nth_entry(row_j0,k) * dhelp;
+	    }
 	  }
       }
   }
-
+  
   template <int d, int dT>
   void
   DKUBasis<d, dT>::reconstruct_1(const Index& lambda,
 				 const int j,
-				 InfiniteVector<double, Index>& c) const
-  {
+				 InfiniteVector<double, Index>& c) const {
     c.clear();
-
+    
     if (lambda.j() >= j)
       c.set_coefficient(lambda, 1.0); 
-    else
-      {
-	// For the reconstruction of psi_lambda, we have to compute
-	// the corresponding column of the transformation matrix Mj=(Mj0, Mj1).
-
-	// reconstruct by recursion
-	typedef Vector<double>::size_type size_type;
-
-	const size_type row = (lambda.e() == 0 ? lambda.k() - DeltaLmin() : lambda.k());
-
-	const SparseMatrix<double>& M = (lambda.e() == 0 ? Mj0_t : Mj1_t);
-
-	size_type row_j0 = row;
-	size_type offset = 0;
-	if (lambda.e() == 0)
-	  {
-	    if (lambda.j() > j0())
-	      {
-		const size_type rows_top = (int)ceil(Deltasize(j0())/2.0);
-		if (row >= rows_top)
-		  {
-		    const size_type bottom = Deltasize(lambda.j())-Deltasize(j0())/2;
-		    if (row >= bottom)
-		      {
-			row_j0 = row+rows_top-bottom;
-			offset = Deltasize(lambda.j()+1)-Deltasize(j0()+1);
-		      }
-		    else
-		      {
-			row_j0 = rows_top-1;
-			offset = 2*(row-rows_top)+2;
-		      }
-		  }
-	      }
+    else {
+      // For the reconstruction of psi_lambda, we have to compute
+      // the corresponding column of the transformation matrix Mj=(Mj0, Mj1).
+      
+      // reconstruct by recursion
+      typedef Vector<double>::size_type size_type;
+      
+      const size_type row = (lambda.e() == 0 ? lambda.k() - DeltaLmin() : lambda.k());
+      
+      const SparseMatrix<double>& M = (lambda.e() == 0 ? Mj0_t : Mj1_t);
+      
+      size_type row_j0 = row;
+      size_type offset = 0;
+      if (lambda.e() == 0) {
+	if (lambda.j() > j0()) {
+	  const size_type rows_top = (int)ceil(Deltasize(j0())/2.0);
+	  if (row >= rows_top) {
+	    const size_type bottom = Deltasize(lambda.j())-Deltasize(j0())/2;
+	    if (row >= bottom) {
+	      row_j0 = row+rows_top-bottom;
+	      offset = Deltasize(lambda.j()+1)-Deltasize(j0()+1);
+	    } else {
+	      row_j0 = rows_top-1;
+	      offset = 2*(row-rows_top)+2;
+	    }
 	  }
-	else
-	  {
-	    if (lambda.j() > j0())
-	      {
-		const size_type rows_top = 1<<(j0()-1);
-		if (row >= rows_top)
-		  {
-		    const size_type bottom = (1<<lambda.j())-(1<<(j0()-1));
-		    if (row >= bottom)
-		      {
-			row_j0 = row+rows_top-bottom;
-			offset = Deltasize(lambda.j()+1)-Deltasize(j0()+1);
-		      }
-		    else
-		      {
-			if ((int)row < (1<<(lambda.j()-1)))
-			  {
-			    row_j0 = rows_top-1;
-			    offset = 2*(row-rows_top)+2;
-			  }
-			else
-			  {
-			    row_j0 = 1<<(j0()-1);
-			    offset = Deltasize(lambda.j()+1)-Deltasize(j0()+1)+2*((int)row-bottom);
-			  }
-		      }
-		  }
-	      }
-	  }
-	for (size_type k(0); k < M.entries_in_row(row_j0); k++)
-	  {
-	    InfiniteVector<double, Index> dhelp;
-	    reconstruct_1(Index(lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this), j, dhelp);
-	    c += M.get_nth_entry(row_j0,k) * dhelp;
-	  }
+	}
       }
+      else {
+	if (lambda.j() > j0()) {
+	  const size_type rows_top = 1<<(j0()-1);
+	  if (row >= rows_top) {
+	    const size_type bottom = (1<<lambda.j())-(1<<(j0()-1));
+	    if (row >= bottom) {
+	      row_j0 = row+rows_top-bottom;
+	      offset = Deltasize(lambda.j()+1)-Deltasize(j0()+1);
+	    } else {
+	      if ((int)row < (1<<(lambda.j()-1))) {
+		row_j0 = rows_top-1;
+		offset = 2*(row-rows_top)+2;
+	      } else {
+		row_j0 = 1<<(j0()-1);
+		offset = Deltasize(lambda.j()+1)-Deltasize(j0()+1)+2*((int)row-bottom);
+	      }
+	    }
+	  }
+	}
+      }
+      for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
+	InfiniteVector<double, Index> dhelp;
+	reconstruct_1(Index(lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this), j, dhelp);
+	c += M.get_nth_entry(row_j0,k) * dhelp;
+      }
+    }
   }
-
+  
   template <int d, int dT>
   void
   DKUBasis<d, dT>::reconstruct_t_1(const Index& lambda,
 				   const int j,
-				   InfiniteVector<double, Index>& c) const
-  {
+				   InfiniteVector<double, Index>& c) const {
     c.clear();
-
+    
     if (lambda.j() >= j)
       c.set_coefficient(lambda, 1.0);
-    else
-      {
-	// For the reconstruction of psi_lambda, we have to compute
-	// the corresponding column of the transformation matrix \tilde Mj=(\tilde Mj0, \tilde Mj1).
-
-	// reconstruct by recursion
-	typedef Vector<double>::size_type size_type;
-	
-	const size_type row = (lambda.e() == 0 ? lambda.k() - DeltaLmin() : lambda.k());
-	
-	const SparseMatrix<double>& M = (lambda.e() == 0 ? Mj0T_t : Mj1T_t);
-	
-	size_type row_j0 = row;
-	size_type offset = 0;
-	if (lambda.e() == 0)
-	  {
-	    if (lambda.j() > j0())
-	      {
-		const size_type rows_top = (int)ceil(Deltasize(j0())/2.0);
-		if (row >= rows_top)
-		  {
-		    const size_type bottom = Deltasize(lambda.j())-Deltasize(j0())/2;
-		    if (row >= bottom)
-		      {
-			row_j0 = row+rows_top-bottom;
-			offset = Deltasize(lambda.j()+1)-Deltasize(j0()+1);
-		      }
-		    else
-		      {
-			row_j0 = rows_top-1;
-			offset = 2*(row-rows_top)+2;
-		      }
-		  }
+    else {
+      // For the reconstruction of psi_lambda, we have to compute
+      // the corresponding column of the transformation matrix \tilde Mj=(\tilde Mj0, \tilde Mj1).
+      
+      // reconstruct by recursion
+      typedef Vector<double>::size_type size_type;
+      
+      const size_type row = (lambda.e() == 0 ? lambda.k() - DeltaLmin() : lambda.k());
+      
+      const SparseMatrix<double>& M = (lambda.e() == 0 ? Mj0T_t : Mj1T_t);
+      
+      size_type row_j0 = row;
+      size_type offset = 0;
+      if (lambda.e() == 0) {
+	if (lambda.j() > j0()) {
+	  const size_type rows_top = (int)ceil(Deltasize(j0())/2.0);
+	  if (row >= rows_top) {
+	    const size_type bottom = Deltasize(lambda.j())-Deltasize(j0())/2;
+	    if (row >= bottom) {
+	      row_j0 = row+rows_top-bottom;
+	      offset = Deltasize(lambda.j()+1)-Deltasize(j0()+1);
+	    } else {
+	      row_j0 = rows_top-1;
+	      offset = 2*(row-rows_top)+2;
+	    }
+	  }
+	}
+      } else {
+	if (lambda.j() > j0()) {
+	  const size_type rows_top = 1<<(j0()-1);
+	  if (row >= rows_top) {
+	    const size_type bottom = (1<<lambda.j())-(1<<(j0()-1));
+	    if (row >= bottom) {
+	      row_j0 = row+rows_top-bottom;
+	      offset = Deltasize(lambda.j()+1)-Deltasize(j0()+1);
+	    } else {
+	      if ((int)row < (1<<(lambda.j()-1))) {
+		row_j0 = rows_top-1;
+		offset = 2*(row-rows_top)+2;
+	      } else {
+		row_j0 = 1<<(j0()-1);
+		offset = Deltasize(lambda.j()+1)-Deltasize(j0()+1)+2*((int)row-bottom);
 	      }
+	    }
 	  }
-	else
-	  {
-	    if (lambda.j() > j0())
-	      {
-		const size_type rows_top = 1<<(j0()-1);
-		if (row >= rows_top)
-		  {
-		    const size_type bottom = (1<<lambda.j())-(1<<(j0()-1));
-		    if (row >= bottom)
-		      {
-			row_j0 = row+rows_top-bottom;
-			offset = Deltasize(lambda.j()+1)-Deltasize(j0()+1);
-		      }
-		    else
-		      {
-			if ((int)row < (1<<(lambda.j()-1)))
-			  {
-			    row_j0 = rows_top-1;
-			    offset = 2*(row-rows_top)+2;
-			  }
-			else
-			  {
-			    row_j0 = 1<<(j0()-1);
-			    offset = Deltasize(lambda.j()+1)-Deltasize(j0()+1)+2*((int)row-bottom);
-			  }
-		      }
-		  }
-	      }
-	  }
-	for (size_type k(0); k < M.entries_in_row(row_j0); k++)
-	  {
-	    InfiniteVector<double, Index> dhelp;
-	    reconstruct_t_1(Index(lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this), j, dhelp);
-	    c += M.get_nth_entry(row_j0,k) * dhelp;
-	  }
+	}
       }
+      for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
+	InfiniteVector<double, Index> dhelp;
+	reconstruct_t_1(Index(lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this), j, dhelp);
+	c += M.get_nth_entry(row_j0,k) * dhelp;
+      }
+    }
   }
-
+  
   template <int d, int dT>
   void
-  DKUBasis<d, dT>::assemble_Mj0(const int j, SparseMatrix<double>& mj0) const
-  {
+  DKUBasis<d, dT>::assemble_Mj0(const int j, SparseMatrix<double>& mj0) const {
     if (j == j0())
       mj0 = Mj0_;
-    else
-      {
-	mj0.resize(Deltasize(j+1), Deltasize(j));
-	
-	const int rows       = Deltasize(j0()+1);
-	const int cols_left  = (int)ceil(Deltasize(j0())/2.0);
-	const int cols_right = Deltasize(j0()) - cols_left;
-	
-	// upper left block
-	for (int row = 0; row < rows; row++)
-	  for (int col = 0; col < cols_left; col++)
-	    mj0.set_entry(row, col, Mj0_.get_entry(row, col));
-
-	// lower right block
-	for (int row = 0; row < rows; row++)
-	  for (int col = 0; col < cols_right; col++)
- 	    mj0.set_entry(Deltasize(j+1)-rows+row, Deltasize(j)-cols_right+col,
-			  Mj0_.get_entry(row, col + cols_left));
-
-	// central bands
- 	InfiniteVector<double, Vector<double>::size_type> v;
- 	Mj0_t.get_row(cols_left-1, v); // last column of left half
-	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
-	     it != v.end(); ++it)
-	  for (int col = cols_left; col <= Deltasize(j) - cols_right - 1; col++)
-	    mj0.set_entry(it.index()+2*(col-cols_left)+2, col, *it);
-
-	mj0.compress();
-      }
+    else {
+      mj0.resize(Deltasize(j+1), Deltasize(j));
+      
+      const int rows       = Deltasize(j0()+1);
+      const int cols_left  = (int)ceil(Deltasize(j0())/2.0);
+      const int cols_right = Deltasize(j0()) - cols_left;
+      
+      // upper left block
+      for (int row = 0; row < rows; row++)
+	for (int col = 0; col < cols_left; col++)
+	  mj0.set_entry(row, col, Mj0_.get_entry(row, col));
+      
+      // lower right block
+      for (int row = 0; row < rows; row++)
+	for (int col = 0; col < cols_right; col++)
+	  mj0.set_entry(Deltasize(j+1)-rows+row, Deltasize(j)-cols_right+col,
+			Mj0_.get_entry(row, col + cols_left));
+      
+      // central bands
+      InfiniteVector<double, Vector<double>::size_type> v;
+      Mj0_t.get_row(cols_left-1, v); // last column of left half
+      for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+	   it != v.end(); ++it)
+	for (int col = cols_left; col <= Deltasize(j) - cols_right - 1; col++)
+	  mj0.set_entry(it.index()+2*(col-cols_left)+2, col, *it);
+      
+      mj0.compress();
+    }
   }
 
   template <int d, int dT>
   void
-  DKUBasis<d, dT>::assemble_Mj0_t(const int j, SparseMatrix<double>& mj0_t) const
-  {
+  DKUBasis<d, dT>::assemble_Mj0_t(const int j, SparseMatrix<double>& mj0_t) const {
     if (j == j0())
       mj0_t = Mj0_t;
-    else
-      {
-	SparseMatrix<double> help;
-	assemble_Mj0(j, help);
-	mj0_t = transpose(help);
-      }
+    else {
+      SparseMatrix<double> help;
+      assemble_Mj0(j, help);
+      mj0_t = transpose(help);
+    }
   }
 
   template <int d, int dT>
   void
-  DKUBasis<d, dT>::assemble_Mj0T(const int j, SparseMatrix<double>& mj0T) const
-  {
+  DKUBasis<d, dT>::assemble_Mj0T(const int j, SparseMatrix<double>& mj0T) const {
     if (j == j0())
       mj0T = Mj0T_;
-    else
-      {
-	mj0T.resize(Deltasize(j+1), Deltasize(j));
-	
-	const int rows       = Deltasize(j0()+1);
-	const int cols_left  = (int)ceil(Deltasize(j0())/2.0);
-	const int cols_right = Deltasize(j0()) - cols_left;
-	
-	// upper left block
-	for (int row = 0; row < rows; row++)
-	  for (int col = 0; col < cols_left; col++)
-	    mj0T.set_entry(row, col, Mj0T_.get_entry(row, col));
-	
-	// lower right block
-	for (int row = 0; row < rows; row++)
-	  for (int col = 0; col < cols_right; col++)
- 	    mj0T.set_entry(Deltasize(j+1)-rows+row, Deltasize(j)-cols_right+col,
-			   Mj0T_.get_entry(row, col + cols_left));
-	
-	// central bands
- 	InfiniteVector<double, Vector<double>::size_type> v;
- 	Mj0T_t.get_row(cols_left-1, v); // last column of left half
-	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
-	     it != v.end(); ++it)
-	  for (int col = cols_left; col <= Deltasize(j) - cols_right - 1; col++)
-	    mj0T.set_entry(it.index()+2*(col-cols_left)+2, col, *it);
-
-	mj0T.compress();
-      }
+    else {
+      mj0T.resize(Deltasize(j+1), Deltasize(j));
+      
+      const int rows       = Deltasize(j0()+1);
+      const int cols_left  = (int)ceil(Deltasize(j0())/2.0);
+      const int cols_right = Deltasize(j0()) - cols_left;
+      
+      // upper left block
+      for (int row = 0; row < rows; row++)
+	for (int col = 0; col < cols_left; col++)
+	  mj0T.set_entry(row, col, Mj0T_.get_entry(row, col));
+      
+      // lower right block
+      for (int row = 0; row < rows; row++)
+	for (int col = 0; col < cols_right; col++)
+	  mj0T.set_entry(Deltasize(j+1)-rows+row, Deltasize(j)-cols_right+col,
+			 Mj0T_.get_entry(row, col + cols_left));
+      
+      // central bands
+      InfiniteVector<double, Vector<double>::size_type> v;
+      Mj0T_t.get_row(cols_left-1, v); // last column of left half
+      for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+	   it != v.end(); ++it)
+	for (int col = cols_left; col <= Deltasize(j) - cols_right - 1; col++)
+	  mj0T.set_entry(it.index()+2*(col-cols_left)+2, col, *it);
+      
+      mj0T.compress();
+    }
   }
   
   template <int d, int dT>
   void
-  DKUBasis<d, dT>::assemble_Mj0T_t(const int j, SparseMatrix<double>& mj0T_t) const
-  {
+  DKUBasis<d, dT>::assemble_Mj0T_t(const int j, SparseMatrix<double>& mj0T_t) const {
     if (j == j0())
       mj0T_t = Mj0T_t;
-    else
-      {
-	SparseMatrix<double> help;
-	assemble_Mj0T(j, help);
-	mj0T_t = transpose(help);
-      }
+    else {
+      SparseMatrix<double> help;
+      assemble_Mj0T(j, help);
+      mj0T_t = transpose(help);
+    }
   }
 
   template <int d, int dT>
   void
-  DKUBasis<d, dT>::assemble_Mj1(const int j, SparseMatrix<double>& mj1) const
-  {
+  DKUBasis<d, dT>::assemble_Mj1(const int j, SparseMatrix<double>& mj1) const {
     if (j == j0())
       mj1 = Mj1_;
-    else
-      {
-  	mj1.resize(Deltasize(j+1), 1<<j);
-	
- 	const int rows       = Deltasize(j0()+1);
- 	const int cols_left  = 1<<(j0()-1);
- 	const int cols_right = cols_left;
-	
- 	// upper left block
- 	for (int row = 0; row < rows; row++)
- 	  for (int col = 0; col < cols_left; col++)
- 	    mj1.set_entry(row, col, Mj1_.get_entry(row, col));
-
- 	// lower right block
- 	for (int row = 0; row < rows; row++)
- 	  for (int col = 0; col < cols_right; col++)
+    else {
+      mj1.resize(Deltasize(j+1), 1<<j);
+      
+      const int rows       = Deltasize(j0()+1);
+      const int cols_left  = 1<<(j0()-1);
+      const int cols_right = cols_left;
+      
+      // upper left block
+      for (int row = 0; row < rows; row++)
+	for (int col = 0; col < cols_left; col++)
+	  mj1.set_entry(row, col, Mj1_.get_entry(row, col));
+      
+      // lower right block
+      for (int row = 0; row < rows; row++)
+	for (int col = 0; col < cols_right; col++)
   	    mj1.set_entry(Deltasize(j+1)-rows+row, (1<<j)-cols_right+col,
  			  Mj1_.get_entry(row, col + cols_left));
-	
- 	// central bands, take care of [DS] symmetrization
-  	InfiniteVector<double, Vector<double>::size_type> v;
-  	Mj1_t.get_row(cols_left-1, v); // last column of left half
- 	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
- 	     it != v.end(); ++it)
- 	  for (int col = cols_left; col < 1<<(j-1); col++)
- 	    mj1.set_entry(it.index()+2*(col-cols_left)+2, col, *it);
-
-  	Mj1_t.get_row(cols_left, v); // first column of right half
- 	const int offset_right = (Deltasize(j+1)-Deltasize(j0()+1))-(1<<j)+(1<<j0()); // row offset for the right half
-   	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
-   	     it != v.end(); ++it)
-   	  for (int col = 1<<(j-1); col <= (1<<j) - cols_right - 1; col++)
-   	    mj1.set_entry(it.index()+offset_right+2*(col-(1<<(j-1))), col, *it);
-	
-	mj1.compress();
-      }
-  }
-
-  template <int d, int dT>
-  void
-  DKUBasis<d, dT>::assemble_Mj1_t(const int j, SparseMatrix<double>& mj1_t) const
-  {
-    if (j == j0())
-      mj1_t = Mj1_t;
-    else
-      {
-	SparseMatrix<double> help;
-	assemble_Mj1(j, help);
-	mj1_t = transpose(help);
-      }
-  }
-
-  template <int d, int dT>
-  void
-  DKUBasis<d, dT>::assemble_Mj1T(const int j, SparseMatrix<double>& mj1T) const
-  {
-    if (j == j0())
-      mj1T = Mj1T_;
-    else
-      {
- 	mj1T.resize(Deltasize(j+1), 1<<j);
-	
- 	const int rows       = Deltasize(j0()+1);
- 	const int cols_left  = 1<<(j0()-1);
- 	const int cols_right = cols_left;
-	
- 	// upper left block
- 	for (int row = 0; row < rows; row++)
- 	  for (int col = 0; col < cols_left; col++)
- 	    mj1T.set_entry(row, col, Mj1T_.get_entry(row, col));
-	
- 	// lower right block
- 	for (int row = 0; row < rows; row++)
- 	  for (int col = 0; col < cols_right; col++)
-  	    mj1T.set_entry(Deltasize(j+1)-rows+row, (1<<j)-cols_right+col,
- 			   Mj1T_.get_entry(row, col + cols_left));
-	
- 	// central bands, take care of [DS] symmetrization
-  	InfiniteVector<double, Vector<double>::size_type> v;
-  	Mj1T_t.get_row(cols_left-1, v); // last column of left half
- 	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
- 	     it != v.end(); ++it)
- 	  for (int col = cols_left; col < 1<<(j-1); col++)
- 	    mj1T.set_entry(it.index()+2*(col-cols_left)+2, col, *it);
-	
-  	Mj1T_t.get_row(cols_left, v); // first column of right half
- 	const int offset_right = (Deltasize(j+1)-Deltasize(j0()+1))-(1<<j)+(1<<j0()); // row offset for the right half
-   	for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
-   	     it != v.end(); ++it)
-   	  for (int col = 1<<(j-1); col <= (1<<j) - cols_right - 1; col++)
-   	    mj1T.set_entry(it.index()+offset_right+2*(col-(1<<(j-1))), col, *it);
-	
-	mj1T.compress();
-      }
+      
+      // central bands, take care of [DS] symmetrization
+      InfiniteVector<double, Vector<double>::size_type> v;
+      Mj1_t.get_row(cols_left-1, v); // last column of left half
+      for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+	   it != v.end(); ++it)
+	for (int col = cols_left; col < 1<<(j-1); col++)
+	  mj1.set_entry(it.index()+2*(col-cols_left)+2, col, *it);
+      
+      Mj1_t.get_row(cols_left, v); // first column of right half
+      const int offset_right = (Deltasize(j+1)-Deltasize(j0()+1))-(1<<j)+(1<<j0()); // row offset for the right half
+      for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+	   it != v.end(); ++it)
+	for (int col = 1<<(j-1); col <= (1<<j) - cols_right - 1; col++)
+	  mj1.set_entry(it.index()+offset_right+2*(col-(1<<(j-1))), col, *it);
+      
+      mj1.compress();
+    }
   }
   
   template <int d, int dT>
   void
-  DKUBasis<d, dT>::assemble_Mj1T_t(const int j, SparseMatrix<double>& mj1T_t) const
-  {
+  DKUBasis<d, dT>::assemble_Mj1_t(const int j, SparseMatrix<double>& mj1_t) const {
+    if (j == j0())
+      mj1_t = Mj1_t;
+    else {
+      SparseMatrix<double> help;
+      assemble_Mj1(j, help);
+      mj1_t = transpose(help);
+    }
+  }
+
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::assemble_Mj1T(const int j, SparseMatrix<double>& mj1T) const {
+    if (j == j0())
+      mj1T = Mj1T_;
+    else {
+      mj1T.resize(Deltasize(j+1), 1<<j);
+      
+      const int rows       = Deltasize(j0()+1);
+      const int cols_left  = 1<<(j0()-1);
+      const int cols_right = cols_left;
+      
+      // upper left block
+      for (int row = 0; row < rows; row++)
+	for (int col = 0; col < cols_left; col++)
+	  mj1T.set_entry(row, col, Mj1T_.get_entry(row, col));
+      
+      // lower right block
+      for (int row = 0; row < rows; row++)
+	for (int col = 0; col < cols_right; col++)
+	  mj1T.set_entry(Deltasize(j+1)-rows+row, (1<<j)-cols_right+col,
+			 Mj1T_.get_entry(row, col + cols_left));
+      
+      // central bands, take care of [DS] symmetrization
+      InfiniteVector<double, Vector<double>::size_type> v;
+      Mj1T_t.get_row(cols_left-1, v); // last column of left half
+      for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+	   it != v.end(); ++it)
+	for (int col = cols_left; col < 1<<(j-1); col++)
+	  mj1T.set_entry(it.index()+2*(col-cols_left)+2, col, *it);
+      
+      Mj1T_t.get_row(cols_left, v); // first column of right half
+      const int offset_right = (Deltasize(j+1)-Deltasize(j0()+1))-(1<<j)+(1<<j0()); // row offset for the right half
+      for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+	   it != v.end(); ++it)
+	for (int col = 1<<(j-1); col <= (1<<j) - cols_right - 1; col++)
+	  mj1T.set_entry(it.index()+offset_right+2*(col-(1<<(j-1))), col, *it);
+      
+      mj1T.compress();
+    }
+  }
+  
+  template <int d, int dT>
+  void
+  DKUBasis<d, dT>::assemble_Mj1T_t(const int j, SparseMatrix<double>& mj1T_t) const {
     if (j == j0())
       mj1T_t = Mj1T_t;
-    else
-      {
-	SparseMatrix<double> help;
-	assemble_Mj1T(j, help);
-	mj1T_t = transpose(help);
-      }
+    else {
+      SparseMatrix<double> help;
+      assemble_Mj1T(j, help);
+      mj1T_t = transpose(help);
+    }
   }
 
   template <int d, int dT>
   void
   DKUBasis<d, dT>::Mj0_get_row(const int j, const Vector<double>::size_type row,
-			       InfiniteVector<double, Vector<double>::size_type>& v) const
-  {
+			       InfiniteVector<double, Vector<double>::size_type>& v) const {
     if (j == j0())
       Mj0_.get_row(row, v);
-    else
-      {
-	v.clear();
- 	const size_t rows_top = (int)ceil(Deltasize(j0()+1)/2.0);
- 	if (row < rows_top)
- 	  Mj0_.get_row(row, v);
- 	else
- 	  {
- 	    const size_t bottom = Deltasize(j+1)-Deltasize(j0()+1)/2;
-	    if (row >= bottom)
-	      Mj0_.get_row(row+rows_top-bottom, v, Deltasize(j)-Deltasize(j0()));
-	    else
-	      Mj0_.get_row(rows_top-2+(row-rows_top)%2, v, (row-rows_top)/2+1);
-	  }
+    else {
+      v.clear();
+      const size_t rows_top = (int)ceil(Deltasize(j0()+1)/2.0);
+      if (row < rows_top)
+	Mj0_.get_row(row, v);
+      else {
+	const size_t bottom = Deltasize(j+1)-Deltasize(j0()+1)/2;
+	if (row >= bottom)
+	  Mj0_.get_row(row+rows_top-bottom, v, Deltasize(j)-Deltasize(j0()));
+	else
+	  Mj0_.get_row(rows_top-2+(row-rows_top)%2, v, (row-rows_top)/2+1);
       }
+    }
   }
-
+  
   template <int d, int dT>
   void
   DKUBasis<d, dT>::Mj0T_get_row(const int j, const Vector<double>::size_type row,
-				InfiniteVector<double, Vector<double>::size_type>& v) const
-  {
+				InfiniteVector<double, Vector<double>::size_type>& v) const {
     if (j == j0())
       Mj0T_.get_row(row, v);
-    else
-      {
-	v.clear();
- 	const size_t rows_top = (int)ceil(Deltasize(j0()+1)/2.0);
- 	if (row < rows_top)
- 	  Mj0T_.get_row(row, v);
- 	else
- 	  {
- 	    const size_t bottom = Deltasize(j+1)-Deltasize(j0()+1)/2;
-	    if (row >= bottom)
-	      Mj0T_.get_row(row+rows_top-bottom, v, Deltasize(j)-Deltasize(j0()));
-	    else
-	      Mj0T_.get_row(rows_top-2+(row-rows_top)%2, v, (row-rows_top)/2+1);
-	  }
+    else {
+      v.clear();
+      const size_t rows_top = (int)ceil(Deltasize(j0()+1)/2.0);
+      if (row < rows_top)
+	Mj0T_.get_row(row, v);
+      else {
+	const size_t bottom = Deltasize(j+1)-Deltasize(j0()+1)/2;
+	if (row >= bottom)
+	  Mj0T_.get_row(row+rows_top-bottom, v, Deltasize(j)-Deltasize(j0()));
+	else
+	  Mj0T_.get_row(rows_top-2+(row-rows_top)%2, v, (row-rows_top)/2+1);
       }
+    }
   }
-
+  
   template <int d, int dT>
   void
   DKUBasis<d, dT>::Mj1_get_row(const int j, const Vector<double>::size_type row,
-			       InfiniteVector<double, Vector<double>::size_type>& v) const
-  {
+			       InfiniteVector<double, Vector<double>::size_type>& v) const {
     if (j == j0())
       Mj1_.get_row(row, v);
-    else
-      {
-	v.clear();
-
-	// Due to the [DS] symmetrization, we have to be a bit careful here.
- 	const size_t third = Deltasize(j0()+1)/3;
- 	if (row < third)
- 	  Mj1_.get_row(row, v);
- 	else
-  	  {
- 	    const size_t bottom_third = Deltasize(j+1)-Deltasize(j0()+1)/3;
- 	    if (row >= bottom_third)
- 	      Mj1_.get_row(row+Deltasize(j0()+1)-Deltasize(j+1), v, (1<<j)-(1<<j0()));
-	    else
-	      {
-		// Left half of Mj1:
-		
- 		InfiniteVector<double, Vector<double>::size_type> waveTfilter_left;
- 		Mj1_t.get_row((1<<(j0()-1))-1, waveTfilter_left);
- 		const int first_row_left = waveTfilter_left.begin().index();  // first nontrivial row in column (1<<(j0-1))-1
- 		
-		// The row ...
-		const int last_row_left  = waveTfilter_left.rbegin().index();
-		// ... is the last nontrivial row in column (1<<(j0()-1))-1,
-		// i.e. the row last_row_left begins at column (1<<(j0()-1))-1, so does the row last_row_left-1.
-		// So the row "row" starts at column ...
-		const int first_column_left = (1<<(j0()-1))-1+(int)floor(((int)row+1-last_row_left)/2.);
-		
-		for (int col = first_column_left, filter_row = last_row_left-abs(row-last_row_left)%2;
-		     col < (1<<(j-1)) && filter_row >= first_row_left; col++, filter_row -= 2)
-		  v.set_coefficient(col, waveTfilter_left.get_coefficient(filter_row));
-
-		// Analogous strategy for the right half:
-
-		InfiniteVector<double, Vector<double>::size_type> waveTfilter_right;
- 		Mj1_t.get_row((1<<(j0()-1)), waveTfilter_right);
-		
-		const int offset_right = (Deltasize(j+1)-Deltasize(j0()+1))-(1<<j)+(1<<j0()); // row offset for the right half
-		const int first_row_right = waveTfilter_right.begin().index()+offset_right;
-		const int last_row_right  = waveTfilter_right.rbegin().index()+offset_right;
-
-		// The rows first_row_right and first_row_right+1 end at column 1<<(j-1),
-		// so the row "row" ends at column ...
-		const int last_column_right = (1<<(j-1))+(int)floor(((int)row-first_row_right)/2.);
-		
- 		for (int col = last_column_right, filter_row = first_row_right-offset_right+abs(row-first_row_right)%2;
- 		     col >= 1<<(j-1) && filter_row <= last_row_right-offset_right; col--, filter_row += 2)
- 		  v.set_coefficient(col, waveTfilter_right.get_coefficient(filter_row));
-	      }
-	  }
+    else {
+      v.clear();
+      
+      // Due to the [DS] symmetrization, we have to be a bit careful here.
+      const size_t third = Deltasize(j0()+1)/3;
+      if (row < third)
+	Mj1_.get_row(row, v);
+      else {
+	const size_t bottom_third = Deltasize(j+1)-Deltasize(j0()+1)/3;
+	if (row >= bottom_third)
+	  Mj1_.get_row(row+Deltasize(j0()+1)-Deltasize(j+1), v, (1<<j)-(1<<j0()));
+	else {
+	  // Left half of Mj1:
+	  
+	  InfiniteVector<double, Vector<double>::size_type> waveTfilter_left;
+	  Mj1_t.get_row((1<<(j0()-1))-1, waveTfilter_left);
+	  const int first_row_left = waveTfilter_left.begin().index();  // first nontrivial row in column (1<<(j0-1))-1
+	  
+	  // The row ...
+	  const int last_row_left  = waveTfilter_left.rbegin().index();
+	  // ... is the last nontrivial row in column (1<<(j0()-1))-1,
+	  // i.e. the row last_row_left begins at column (1<<(j0()-1))-1, so does the row last_row_left-1.
+	  // So the row "row" starts at column ...
+	  const int first_column_left = (1<<(j0()-1))-1+(int)floor(((int)row+1-last_row_left)/2.);
+	  
+	  for (int col = first_column_left, filter_row = last_row_left-abs(row-last_row_left)%2;
+	       col < (1<<(j-1)) && filter_row >= first_row_left; col++, filter_row -= 2)
+	    v.set_coefficient(col, waveTfilter_left.get_coefficient(filter_row));
+	  
+	  // Analogous strategy for the right half:
+	  
+	  InfiniteVector<double, Vector<double>::size_type> waveTfilter_right;
+	  Mj1_t.get_row((1<<(j0()-1)), waveTfilter_right);
+	  
+	  const int offset_right = (Deltasize(j+1)-Deltasize(j0()+1))-(1<<j)+(1<<j0()); // row offset for the right half
+	  const int first_row_right = waveTfilter_right.begin().index()+offset_right;
+	  const int last_row_right  = waveTfilter_right.rbegin().index()+offset_right;
+	  
+	  // The rows first_row_right and first_row_right+1 end at column 1<<(j-1),
+	  // so the row "row" ends at column ...
+	  const int last_column_right = (1<<(j-1))+(int)floor(((int)row-first_row_right)/2.);
+	  
+	  for (int col = last_column_right, filter_row = first_row_right-offset_right+abs(row-first_row_right)%2;
+	       col >= 1<<(j-1) && filter_row <= last_row_right-offset_right; col--, filter_row += 2)
+	    v.set_coefficient(col, waveTfilter_right.get_coefficient(filter_row));
+	}
       }
+    }
   }
-
+  
   template <int d, int dT>
   void
   DKUBasis<d, dT>::Mj1T_get_row(const int j, const Vector<double>::size_type row,
-				InfiniteVector<double, Vector<double>::size_type>& v) const
-  {
+				InfiniteVector<double, Vector<double>::size_type>& v) const {
     if (j == j0())
       Mj1T_.get_row(row, v);
-    else
-      {
-	v.clear();
-
-	// Due to the [DS] symmetrization, we have to be a bit careful here.
- 	const size_t third = Deltasize(j0()+1)/3;
- 	if (row < third)
- 	  Mj1T_.get_row(row, v);
- 	else
-  	  {
- 	    const size_t bottom_third = Deltasize(j+1)-Deltasize(j0()+1)/3;
- 	    if (row >= bottom_third)
- 	      Mj1T_.get_row(row+Deltasize(j0()+1)-Deltasize(j+1), v, (1<<j)-(1<<j0()));
-	    else
-	      {
-		// Left half of Mj1T:
-		
- 		InfiniteVector<double, Vector<double>::size_type> waveTfilter_left;
- 		Mj1T_t.get_row((1<<(j0()-1))-1, waveTfilter_left);
- 		const int first_row_left = waveTfilter_left.begin().index();  // first nontrivial row in column (1<<(j0-1))-1
- 		
-		// The row ...
-		const int last_row_left  = waveTfilter_left.rbegin().index();
-		// ... is the last nontrivial row in column (1<<(j0()-1))-1,
-		// i.e. the row last_row_left begins at column (1<<(j0()-1))-1, so does the row last_row_left-1.
-		// So the row "row" starts at column ...
-		const int first_column_left = (1<<(j0()-1))-1+(int)floor(((int)row+1-last_row_left)/2.);
-		
-		for (int col = first_column_left, filter_row = last_row_left-abs(row-last_row_left)%2;
-		     col < (1<<(j-1)) && filter_row >= first_row_left; col++, filter_row -= 2)
-		  v.set_coefficient(col, waveTfilter_left.get_coefficient(filter_row));
-
-		// Analogous strategy for the right half:
-
-		InfiniteVector<double, Vector<double>::size_type> waveTfilter_right;
- 		Mj1T_t.get_row((1<<(j0()-1)), waveTfilter_right);
-		
-		const int offset_right = (Deltasize(j+1)-Deltasize(j0()+1))-(1<<j)+(1<<j0()); // row offset for the right half
-		const int first_row_right = waveTfilter_right.begin().index()+offset_right;
-		const int last_row_right  = waveTfilter_right.rbegin().index()+offset_right;
-
-		// The rows first_row_right and first_row_right+1 end at column 1<<(j-1),
-		// so the row "row" ends at column ...
-		const int last_column_right = (1<<(j-1))+(int)floor(((int)row-first_row_right)/2.);
-		
- 		for (int col = last_column_right, filter_row = first_row_right-offset_right+abs(row-first_row_right)%2;
- 		     col >= 1<<(j-1) && filter_row <= last_row_right-offset_right; col--, filter_row += 2)
- 		  v.set_coefficient(col, waveTfilter_right.get_coefficient(filter_row));
-	      }
-	  }
+    else {
+      v.clear();
+      
+      // Due to the [DS] symmetrization, we have to be a bit careful here.
+      const size_t third = Deltasize(j0()+1)/3;
+      if (row < third)
+	Mj1T_.get_row(row, v);
+      else {
+	const size_t bottom_third = Deltasize(j+1)-Deltasize(j0()+1)/3;
+	if (row >= bottom_third)
+	  Mj1T_.get_row(row+Deltasize(j0()+1)-Deltasize(j+1), v, (1<<j)-(1<<j0()));
+	else {
+	  // Left half of Mj1T:
+	  
+	  InfiniteVector<double, Vector<double>::size_type> waveTfilter_left;
+	  Mj1T_t.get_row((1<<(j0()-1))-1, waveTfilter_left);
+	  const int first_row_left = waveTfilter_left.begin().index();  // first nontrivial row in column (1<<(j0-1))-1
+	  
+	  // The row ...
+	  const int last_row_left  = waveTfilter_left.rbegin().index();
+	  // ... is the last nontrivial row in column (1<<(j0()-1))-1,
+	  // i.e. the row last_row_left begins at column (1<<(j0()-1))-1, so does the row last_row_left-1.
+	  // So the row "row" starts at column ...
+	  const int first_column_left = (1<<(j0()-1))-1+(int)floor(((int)row+1-last_row_left)/2.);
+	  
+	  for (int col = first_column_left, filter_row = last_row_left-abs(row-last_row_left)%2;
+	       col < (1<<(j-1)) && filter_row >= first_row_left; col++, filter_row -= 2)
+	    v.set_coefficient(col, waveTfilter_left.get_coefficient(filter_row));
+	  
+	  // Analogous strategy for the right half:
+	  
+	  InfiniteVector<double, Vector<double>::size_type> waveTfilter_right;
+	  Mj1T_t.get_row((1<<(j0()-1)), waveTfilter_right);
+	  
+	  const int offset_right = (Deltasize(j+1)-Deltasize(j0()+1))-(1<<j)+(1<<j0()); // row offset for the right half
+	  const int first_row_right = waveTfilter_right.begin().index()+offset_right;
+	  const int last_row_right  = waveTfilter_right.rbegin().index()+offset_right;
+	  
+	  // The rows first_row_right and first_row_right+1 end at column 1<<(j-1),
+	  // so the row "row" ends at column ...
+	  const int last_column_right = (1<<(j-1))+(int)floor(((int)row-first_row_right)/2.);
+	  
+	  for (int col = last_column_right, filter_row = first_row_right-offset_right+abs(row-first_row_right)%2;
+	       col >= 1<<(j-1) && filter_row <= last_row_right-offset_right; col--, filter_row += 2)
+	    v.set_coefficient(col, waveTfilter_right.get_coefficient(filter_row));
+	}
       }
+    }
   }
-
+  
   template <int d, int dT>
   void
   DKUBasis<d, dT>::Mj0_t_get_row(const int j, const Vector<double>::size_type row,
-				 InfiniteVector<double, Vector<double>::size_type>& v) const
-  {
+				 InfiniteVector<double, Vector<double>::size_type>& v) const {
     if (j == j0())
       Mj0_t.get_row(row, v);
-    else
-      {
-	const size_t rows_top = (int)ceil(Deltasize(j0())/2.0);
-	if (row < rows_top)
-	  Mj0_t.get_row(row, v);
+    else {
+      const size_t rows_top = (int)ceil(Deltasize(j0())/2.0);
+      if (row < rows_top)
+	Mj0_t.get_row(row, v);
+      else {
+	const size_t bottom = Deltasize(j)-Deltasize(j0())/2;
+	if (row >= bottom)
+	  Mj0_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
 	else
-	  {
-	    const size_t bottom = Deltasize(j)-Deltasize(j0())/2;
-	    if (row >= bottom)
-	      Mj0_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
-	    else
-	      Mj0_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
-	  }
+	  Mj0_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
       }
+    }
   }
   
   template <int d, int dT>
   void
   DKUBasis<d, dT>::Mj0T_t_get_row(const int j, const Vector<double>::size_type row,
-				  InfiniteVector<double, Vector<double>::size_type>& v) const
-  {
+				  InfiniteVector<double, Vector<double>::size_type>& v) const {
     if (j == j0())
       Mj0T_t.get_row(row, v);
-    else
-      {
-	const size_t rows_top = (int)ceil(Deltasize(j0())/2.0);
-	if (row < rows_top)
-	  Mj0T_t.get_row(row, v);
+    else {
+      const size_t rows_top = (int)ceil(Deltasize(j0())/2.0);
+      if (row < rows_top)
+	Mj0T_t.get_row(row, v);
+      else {
+	const size_t bottom = Deltasize(j)-Deltasize(j0())/2;
+	if (row >= bottom)
+	  Mj0T_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
 	else
-	  {
-	    const size_t bottom = Deltasize(j)-Deltasize(j0())/2;
-	    if (row >= bottom)
-	      Mj0T_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
-	    else
-	      Mj0T_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
-	  }
+	  Mj0T_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
       }
+    }
   }
   
   template <int d, int dT>
   void
   DKUBasis<d, dT>::Mj1_t_get_row(const int j, const Vector<double>::size_type row,
-				 InfiniteVector<double, Vector<double>::size_type>& v) const
-  {
+				 InfiniteVector<double, Vector<double>::size_type>& v) const {
     if (j == j0())
       Mj1_t.get_row(row, v);
-    else
-      {
-	const size_t rows_top = 1<<(j0()-1);
-	if (row < rows_top)
-	  Mj1_t.get_row(row, v);
-	else
-	  {
-	    const size_t bottom = (1<<j)-(1<<(j0()-1));
-	    if (row >= bottom)
-	      Mj1_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
-	    else
-	      {
-		if ((int)row < (1<<(j-1)))
-		  Mj1_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
-		else
-		  Mj1_t.get_row(1<<(j0()-1), v, Deltasize(j+1)-Deltasize(j0()+1)+2*((int)row-bottom));
-	      }
-	  }
+    else {
+      const size_t rows_top = 1<<(j0()-1);
+      if (row < rows_top)
+	Mj1_t.get_row(row, v);
+      else {
+	const size_t bottom = (1<<j)-(1<<(j0()-1));
+	if (row >= bottom)
+	  Mj1_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
+	else {
+	  if ((int)row < (1<<(j-1)))
+	    Mj1_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
+	  else
+	    Mj1_t.get_row(1<<(j0()-1), v, Deltasize(j+1)-Deltasize(j0()+1)+2*((int)row-bottom));
+	}
       }
+    }
   }
   
   template <int d, int dT>
   void
   DKUBasis<d, dT>::Mj1T_t_get_row(const int j, const Vector<double>::size_type row,
-				  InfiniteVector<double, Vector<double>::size_type>& v) const
-  {
+				  InfiniteVector<double, Vector<double>::size_type>& v) const {
     if (j == j0())
       Mj1T_t.get_row(row, v);
-    else
-      {
-	const size_t rows_top = 1<<(j0()-1);
-	if (row < rows_top)
-	  Mj1T_t.get_row(row, v);
-	else
-	  {
-	    const size_t bottom = (1<<j)-(1<<(j0()-1));
-	    if (row >= bottom)
-	      Mj1T_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
-	    else
-	      {
-		if ((int)row < (1<<(j-1)))
-		  Mj1T_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
-		else
-		  Mj1T_t.get_row(1<<(j0()-1), v, Deltasize(j+1)-Deltasize(j0()+1)+2*((int)row-bottom));
-	      }
-	  }
+    else {
+      const size_t rows_top = 1<<(j0()-1);
+      if (row < rows_top)
+	Mj1T_t.get_row(row, v);
+      else {
+	const size_t bottom = (1<<j)-(1<<(j0()-1));
+	if (row >= bottom)
+	  Mj1T_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
+	else {
+	  if ((int)row < (1<<(j-1)))
+	    Mj1T_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
+	  else
+	    Mj1T_t.get_row(1<<(j0()-1), v, Deltasize(j+1)-Deltasize(j0()+1)+2*((int)row-bottom));
+	}
       }
+    }
   }
-
+  
   template <int d, int dT>
   SampledMapping<1>
   DKUBasis<d, dT>::evaluate(const Index& lambda,

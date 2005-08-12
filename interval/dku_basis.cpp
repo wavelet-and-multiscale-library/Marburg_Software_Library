@@ -435,7 +435,7 @@ namespace WaveletTL
     // IGPMlib reference: I_Mask_Bspline::EvalAlpha()
 
     const int mLow = 1-ell2T_;         // start index in (3.2.26)
-    const int mUp  = 2*max(ellT_l,ellT_r)+ell1T_-1; // end index in (3.2.41)
+    const int mUp  = 2*std::max(ellT_l,ellT_r)+ell1T_-1; // end index in (3.2.41)
     const int rUp  = dT-1;
 
     Alpha_.resize(mUp-mLow+1, rUp+1);
@@ -477,7 +477,7 @@ namespace WaveletTL
     // IGPMlib reference: I_Mask_Bspline::EvalAlpha()
 
     const int mLow = 1-ell2_;        // start index in (3.2.25)
-    const int mUp  = 2*max(ell_l,ell_r)+ell1_-1; // end index in (3.2.40)
+    const int mUp  = 2*std::max(ell_l,ell_r)+ell1_-1; // end index in (3.2.40)
     const int rUp  = d-1;
 
     AlphaT_.resize(mUp-mLow+1, rUp+1);
@@ -637,7 +637,7 @@ namespace WaveletTL
       for (int mu = I2Low; mu < -ell1T_; mu++) {
 	double help(0);
 	const int diff(mu - nu);
-	const int sLow = max(-ell2_+1,-ell2T_+1-diff);
+	const int sLow = std::max(-ell2_+1,-ell2T_+1-diff);
 	for (int s(sLow); s <= nu; s++)
 	  help += zvalues.get_coefficient(MultiIndex<int, 2>(s, s+diff));
 	I(-I1Low+nu, -I2Low+mu) = help; // (5.1.7)
@@ -683,7 +683,7 @@ namespace WaveletTL
       for (int mu = I2Low_r; mu < -ell1T_; mu++) {
  	double help(0);
  	const int diff(mu - nu);
- 	const int sLow = max(-ell2_+1,-ell2T_+1-diff);
+ 	const int sLow = std::max(-ell2_+1,-ell2T_+1-diff);
  	for (int s(sLow); s <= nu; s++)
  	  help += zvalues.get_coefficient(MultiIndex<int, 2>(s, s+diff));
  	I(-I1Low_r+nu, -I2Low_r+mu) = help; // (5.1.7)

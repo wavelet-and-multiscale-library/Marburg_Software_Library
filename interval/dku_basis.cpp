@@ -105,14 +105,14 @@ namespace WaveletTL
     SparseMatrix<double> A, H, Hinv;
     GSetup(A, H, Hinv); // (4.1.1), (4.1.13)
 
-#if 0
+#if 1
     SparseMatrix<double> Aold(A); // for the checks below
 #endif
 
     GElim (A, H, Hinv); // elimination (4.1.4)ff.
     SparseMatrix<double> BB; BT(A, BB); // (4.1.13)
 
-#if 0
+#if 1
     cout << "DKUBasis(): check properties (4.1.15):" << endl;
     SparseMatrix<double> test4115 = transpose(BB)*A;
     for (unsigned int i = 0; i < test4115.row_dimension(); i++)
@@ -1439,13 +1439,13 @@ namespace WaveletTL
     // IGPMlib reference: I_Basis_Bspline_s::gelim()
     
     // A_j=A_j^{(0)} in (4.1.1) is a q times p matrix with
-    int       p = (1<<j0()) - 2*ell_ - (d%2) + 1;
-//     const int q = 2 * p + d - 1;
+    int       p = (1<<j0()) - ell_l - ell_r - (d%2) + 1;
+    const int q = 2 * p + d - 1;
 
     const int ALowc = d; // first column of A_j^{(d)} in Ahat_j^{(d)}
-    const int AUpc  = (Deltasize(j0())-1) - d; // last column
-    const int ALowr = d + ell_ + ell1_; // first row of A_j^{(d)} in Ahat_j^{(d)}
-    const int AUpr  = (Deltasize(j0()+1)-1) - (ell_-ell2_+(d%2)) - d; // last row
+    const int AUpc  = d + p - 1; // last column
+    const int ALowr = d + ell_l + ell1_; // first row of A_j^{(d)} in Ahat_j^{(d)}
+    const int AUpr  = d + ell_r + ell1_ + q - 1; // last row
 
     p += (d-2+(d%2))/2;
 
@@ -1455,7 +1455,7 @@ namespace WaveletTL
     for (int i = 1; i <= d; i++) {
       help.diagonal(Deltasize(j0()+1), 1.0);
       
-      const int HhatLow = (i%2 ? ell_+ell2_+(i-1)/2 : ell_+ell2_+2-(d%2)-(i/2));
+      const int HhatLow = (i%2 ? ell_l+ell2_+(i-1)/2 : ell_l+ell2_+2-(d%2)-(i/2));
       const int HhatUp  = HhatLow + (2*p-1);
       
       if (i%2) // i odd, elimination from above (4.1.4a)
@@ -1535,7 +1535,7 @@ namespace WaveletTL
   DKUBasis<d, dT>::BT(const SparseMatrix<double>& A, SparseMatrix<double>& BB) {
     // IGPMlib reference: I_Basis_Bspline_s::Btr()
 
-    const int p = (1<<j0()) - 2*ell_ - (d%2) + 1;
+    const int p = (1<<j0()) - ell_l - ell_r - (d%2) + 1;
 //     const int q = 2 * p + d - 1;
 
     BB.resize(Deltasize(j0()+1), Deltasize(j0()));
@@ -1544,7 +1544,7 @@ namespace WaveletTL
       BB.set_entry(r, r, 1.0);
 
     const double help = 1./A.get_entry(d+ell_+ell1_+ell2_, d);
-    for (int c = d, r = d+ell_+ell1_+ell2_; c < d+p; c++, r += 2)
+    for (int c = d, r = d+ell_l+ell1_+ell2_; c < d+p; c++, r += 2)
       BB.set_entry(r, c, help);
 
     for (int r = Deltasize(j0()+1)-d, c = Deltasize(j0())-d; r < Deltasize(j0()+1); r++, c++)

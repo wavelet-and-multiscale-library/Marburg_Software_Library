@@ -94,6 +94,7 @@ namespace WaveletTL
 
     Matrix<double> mltp = MLTp(); // (3.5.6)
     Matrix<double> mrtp = MRTp(); // (3.5.6)
+
     SparseMatrix<double> mj0tp; setup_Mj0Tp(mltp, mrtp, mj0tp); // (3.5.5)
 
     // construction of the wavelet basis: initial stable completion, [DKU section 4.1]
@@ -1261,7 +1262,7 @@ namespace WaveletTL
       for (int k = 0; k < dT-ZT[1]; k++)
     	MRTp(-rupTh+m, k) = Alpha_(-Alphaoffset+m, k) / sqrt(ldexp(1.0, 2*k+1));
     
-    for (int m = 2*ellT_r; m <= MRTup; m++)
+    for (int m = 2*ellT_r+ell1T_; m <= MRTup; m++)
       for (int k = 0; k < dT-ZT[1]; k++)
   	MRTp(-rupTh+m, k) = BetaR_(-BetaRoffset+m, k);
     
@@ -1275,17 +1276,19 @@ namespace WaveletTL
     
     // TODO: enhance readability! (<-> [DKU section 3.5])
 
-    int p = (1 << j0()) - 2*ell_ - (d%2) + 1;
-    int q = (1 << j0()) - 4*ell_ - 2*(d%2) + d + 1; // this value is overwritten below
+    int p = (1 << j0()) - 2*ell_l - (d%2) + 1;
+    int q = (1 << j0()) - 4*ell_l - 2*(d%2) + d + 1; // this value is overwritten below
 
     const int nj  = Deltasize(j0());
     const int njp = Deltasize(j0()+1);
 
     Mj0.resize(njp, nj);
 
+    const int diff_l = ellT_l-ell2T_;
+    const int diff_r = ellT_r-ell2T_;
     const int alowc = d+1;
-    const int aupc  = d+p;
-    const int alowr = d+ell_+ell1_;
+    const int aupc  = d+p+diff_l-diff_r;
+    const int alowr = d+ell_l+ell1_;
     
     for (int i = 0; i < (int)ML.row_dimension(); i++)
       for (int k = 0; k < (int)ML.column_dimension(); k++)
@@ -1316,8 +1319,8 @@ namespace WaveletTL
 
     // TODO: enhance readability! (<-> [DKU section 3.5])
     
-    int p = (1 << j0()) - 2*ellT_ - (dT%2) + 1;
-    int q = (1 << j0()) - 4*ellT_ - 2*(dT%2) + dT + 1; // this value is overwritten below
+    int p = (1 << j0()) - ellT_l-ellT_r - (dT%2) + 1;
+    int q = (1 << j0()) - 4*ellT_l - 2*(dT%2) + dT + 1; // this value is overwritten below
 
     const int nj  = Deltasize(j0());
     const int njp = Deltasize(j0()+1);
@@ -1326,7 +1329,7 @@ namespace WaveletTL
 
     const int atlowc = dT+1;
     const int atupc  = dT+p;
-    const int atlowr = dT+ellT_+ell1T_;
+    const int atlowr = dT+ellT_l+ell1T_;
     
     for (int i = 0; i < (int)MLTp.row_dimension(); i++)
       for (int k = 0; k < (int)MLTp.column_dimension(); k++)

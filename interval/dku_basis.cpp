@@ -1357,17 +1357,17 @@ namespace WaveletTL
   DKUBasis<d, dT>::F(SparseMatrix<double>& FF) {
     // IGPMlib reference: I_Basis_Bspline_s::F()
     
-    const int FLow = ell_+(d%2)-1;       // start column index for F_j in (4.1.14)
-    const int FUp  = (1<<j0())-1-ell_; // end column index for F_j in (4.1.14)
-
+    const int FLow = ell_l+(d%2)-1;       // start column index for F_j in (4.1.14)
+    const int FUp  = FLow+(DeltaRmin(j0())-DeltaLmax())-1; // end column index for F_j in (4.1.14)
+    
     // (4.1.14):
-
+    
     FF.resize(Deltasize(j0()+1), 1<<j0());
 
     for (int r = 0; r < FLow; r++)
       FF.set_entry(r+d, r, 1.0);
     
-    int i = d+ell_+(d%2)-1;
+    int i = d+ell_l+(d%2)-1;
     for (int r = FLow; r <= FUp; r++) {
       FF.set_entry(i, r, 1.0);
       i += 2;
@@ -1410,7 +1410,7 @@ namespace WaveletTL
     for (int r = 0; r < d; r++)
       A.set_entry(r, r, 1.0);
 
-    for (int r = d, q = d+ell_+ell1_; r < Deltasize(j0())-d; r++) {
+    for (int r = d, q = d+ell_l+ell1_; r < Deltasize(j0())-d; r++) {
       int p = q;
 
       for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf_.a().begin());

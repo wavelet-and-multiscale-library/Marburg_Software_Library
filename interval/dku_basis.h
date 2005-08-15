@@ -73,36 +73,28 @@ namespace WaveletTL
 		      bool bc_right = false,
 		      DKUBiorthogonalizationMethod bio = BernsteinSVD);
 
-    //! DKU parameter ell-tilde (3.2.10)
-    inline const int ellT() const { return ellT_; }
-
-    //! DKU abbreviation (3.2.16)
-    inline const int ell() const { return ell_; }
-
     //! coarsest possible level
     inline const int j0() const { return (int) ceil(log(ellT_+ell2T_-1.)/log(2.0)+1); }
 
     /*!
       boundary indices in \Delta_j^X and \tilde\Delta_j^X (3.2.17)
-      
-      remark: take care of Dirichlet boundary conditions!
      */
-    inline const int DeltaLmin() const { return ell()-d; }
-    inline const int DeltaLmax() const { return ell()-1; }
-    inline const int Delta0min() const { return ell(); }
-    inline const int Delta0max(const int j) const { return (1<<j)-ell()-(d%2); }
-    inline const int DeltaRmin(const int j) const { return (1<<j)-ell()+1-(d%2); }
-    inline const int DeltaRmax(const int j) const { return (1<<j)-ell()+d-(d%2); }
+    inline const int DeltaLmin() const { return ell_l-d; }
+    inline const int DeltaLmax() const { return ell_l-1-Z[0]; }
+    inline const int Delta0min() const { return DeltaLmax()+1; }
+    inline const int Delta0max(const int j) const { DeltaRmin(j)-1; }
+    inline const int DeltaRmin(const int j) const { return (1<<j)-ell1_-ell2_-(ell_r-1-Z[1]); }
+    inline const int DeltaRmax(const int j) const { return (1<<j)-ell1_-ell2_-(ell_r-d); }
 
-    inline const int DeltaLTmin() const { return ellT()-dT; } // == DeltaLmin()
-    inline const int DeltaLTmax() const { return ellT()-1; }
-    inline const int Delta0Tmin() const { return ellT(); }
-    inline const int Delta0Tmax(const int j) const { return (1<<j)-ellT()-(d%2); }
-    inline const int DeltaRTmin(const int j) const { return (1<<j)-ellT()+1-(d%2); }
-    inline const int DeltaRTmax(const int j) const { return (1<<j)-ellT()+dT-(d%2); } // == DeltaRmax()
+    inline const int DeltaLTmin() const { return ellT_l-dT; } // == DeltaLmin()
+    inline const int DeltaLTmax() const { return ellT_l-1-ZT[0]; }
+    inline const int Delta0Tmin() const { return DeltaLTmax()+1; }
+    inline const int Delta0Tmax(const int j) const { return DeltaRTmin()-1; }
+    inline const int DeltaRTmin(const int j) const { return (1<<j)-ell1_-ell2_-(ellT_r-1-ZT[1]); }
+    inline const int DeltaRTmax(const int j) const { return (1<<j)-ell1_-ell2_-(ellT_r-dT); } // == DeltaRmax()
 
     //! size of Delta_j
-    inline const int Deltasize(const int j) const { return (1<<j)-2*ell()+2*d-(d%2)+1; }
+    inline const int Deltasize(const int j) const { return DeltaRmax(j)-DeltaLmin()+1; }
 
     /*!
       boundary indices in \nabla_j

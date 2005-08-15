@@ -1165,22 +1165,22 @@ namespace WaveletTL
   DKUBasis<d, dT>::ML() const {
     // IGPMlib reference: I_Basis_Bspline_s::ML()
     
-    const int llow = ell_-d;           // the (3.5.2) bounds
-    const int lup  = ell_-1;
-    const int MLup = ell2_+2*ell_-2;
+    const int llow = ell_l-d;           // the (3.5.2) bounds
+    const int lup  = ell_l-1-Z[0];
+    const int MLup = ell2_+2*ell_l-2;
     const int AlphaToffset = 1-ell2_;
-    const int BetaLToffset = 2*ell_+ell1_;
+    const int BetaLToffset = 2*ell_l+ell1_;
     
     Matrix<double> ML(MLup-llow+1, lup-llow+1);
 
     for (int row = 0; row < d; row++)
       ML(row, row) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
 
-    for (int m = ell_; m <= 2*ell_+ell1_-1; m++)
+    for (int m = ell_l; m <= 2*ell_l+ell1_-1; m++)
       for (int k = 0; k < d; k++)
     	ML(-llow+m, k) = AlphaT_(-AlphaToffset+m, k) / sqrt(ldexp(1.0, 2*k+1));
     
-    for (int m = 2*ell_+ell1_; m <= MLup; m++)
+    for (int m = 2*ell_l+ell1_; m <= MLup; m++)
       for (int k = 0; k < d; k++)
   	ML(-llow+m, k) = BetaLT_(-BetaLToffset+m, k);
 
@@ -1191,27 +1191,25 @@ namespace WaveletTL
   Matrix<double>
   DKUBasis<d, dT>::MR() const {
     // IGPMlib reference: I_Basis_Bspline_s::MR()
-    // (remark: in this form identical to ML(), in I_Basis_Bspline_s they
-    // use elll and ellr, which is identical here)
 
-    const int llow = ell_-d;           // the (3.5.2) bounds
-    const int lup  = ell_-1;
-    const int MRup  = ell2_+2*ell_-2;
+    const int ruph  = ell_r-d;         // the (3.5.2) bounds
+    const int rlowh = ell_r-1-Z[1];
+    const int MRup  = ell2_+2*ell_r-2;
     const int AlphaToffset = 1-ell2_;
-    const int BetaRToffset = 2*ell_+ell1_;
+    const int BetaRToffset = 2*ell_r+ell1_;
 
-    Matrix<double> MR(MRup-llow+1, lup-llow+1);
+    Matrix<double> MR(MRup-ruph+1, rlowh-ruph+1);
 
     for (int row = 0; row < d; row++)
       MR(row, row) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
 
-    for (int m = ell_; m <= 2*ell_+ell1_-1; m++)
+    for (int m = ell_r; m <= 2*ell_r+ell1_-1; m++)
       for (int k = 0; k < d; k++)
-	MR(-llow+m, k) = AlphaT_(-AlphaToffset+m, k) / sqrt(ldexp(1.0, 2*k+1));
+	MR(-ruph+m, k) = AlphaT_(-AlphaToffset+m, k) / sqrt(ldexp(1.0, 2*k+1));
     
-    for (int m = 2*ell_+ell1_; m <= MRup; m++)
+    for (int m = 2*ell_r+ell1_; m <= MRup; m++)
       for (int k = 0; k < d; k++)
-  	MR(-llow+m, k) = BetaRT_(-BetaRToffset+m, k);
+  	MR(-ruph+m, k) = BetaRT_(-BetaRToffset+m, k);
 
     return MR;
   }
@@ -1221,23 +1219,23 @@ namespace WaveletTL
   DKUBasis<d, dT>::MLTp() const {
     // IGPMlib reference: I_Basis_Bspline_s::MLts()
 
-    const int llowT = ellT_-dT;           // the (3.5.6) bounds
-    const int lupT  = ellT_-1;
-    const int MLTup = ell2T_+2*ellT_-2;
+    const int llowT = ellT_l-dT;           // the (3.5.6) bounds
+    const int lupT  = ellT_l-1-ZT[0];
+    const int MLTup = ell2T_+2*ellT_l-2;
     const int Alphaoffset = 1-ell2T_;
-    const int BetaLoffset = 2*ellT_+ell1T_;
+    const int BetaLoffset = 2*ellT_l+ell1T_;
 
     Matrix<double> MLTp(MLTup-llowT+1, lupT-llowT+1);
 
-    for (int row = 0; row < dT; row++)
+    for (int row = 0; row < dT-ZT[0]; row++)
       MLTp(row, row) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
 
-    for (int m = ellT_; m <= 2*ellT_+ell1T_-1; m++)
-      for (int k = 0; k < dT; k++)
+    for (int m = lupT+1; m <= 2*ellT_l+ell1T_-1; m++)
+      for (int k = 0; k < dT-ZT[0]; k++)
     	MLTp(-llowT+m, k) = Alpha_(-Alphaoffset+m, k) / sqrt(ldexp(1.0, 2*k+1));
     
-    for (int m = 2*ellT_+ell1T_; m <= MLTup; m++)
-      for (int k = 0; k < dT; k++)
+    for (int m = 2*ellT_l+ell1T_; m <= MLTup; m++)
+      for (int k = 0; k < dT-ZT[0]; k++)
   	MLTp(-llowT+m, k) = BetaL_(-BetaLoffset+m, k);
 
     return MLTp;
@@ -1248,25 +1246,25 @@ namespace WaveletTL
   DKUBasis<d, dT>::MRTp() const {
     // IGPMlib reference: I_Basis_Bspline_s::MRts()
 
-    const int llowT = ellT_-dT;           // the (3.5.6) bounds
-    const int lupT  = ellT_-1;
-    const int MRTup = ell2T_+2*ellT_-2;
+    const int rupTh  = ellT_r-dT;         // the (3.5.6) bounds
+    const int rlowTh = ellT_r-1-ZT[1];
+    const int MRTup = ell2T_+2*ellT_r-2;
     const int Alphaoffset = 1-ell2T_;
-    const int BetaRoffset = 2*ellT_+ell1T_;
+    const int BetaRoffset = 2*ellT_r+ell1T_;
 
-    Matrix<double> MRTp(MRTup-llowT+1, lupT-llowT+1);
+    Matrix<double> MRTp(MRTup-rupTh+1, rlowTh-rupTh+1);
 
-    for (int row = 0; row < dT; row++)
+    for (int row = 0; row < dT-ZT[1]; row++)
       MRTp(row, row) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
 
-    for (int m = ellT_; m <= 2*ellT_+ell1T_-1; m++)
-      for (int k = 0; k < dT; k++)
-    	MRTp(-llowT+m, k) = Alpha_(-Alphaoffset+m, k) / sqrt(ldexp(1.0, 2*k+1));
+    for (int m = rlowTh+1; m <= 2*ellT_r+ell1T_-1; m++)
+      for (int k = 0; k < dT-ZT[1]; k++)
+    	MRTp(-rupTh+m, k) = Alpha_(-Alphaoffset+m, k) / sqrt(ldexp(1.0, 2*k+1));
     
-    for (int m = 2*ellT_+ell1T_; m <= MRTup; m++)
-      for (int k = 0; k < dT; k++)
-  	MRTp(-llowT+m, k) = BetaR_(-BetaRoffset+m, k);
-
+    for (int m = 2*ellT_r; m <= MRTup; m++)
+      for (int k = 0; k < dT-ZT[1]; k++)
+  	MRTp(-rupTh+m, k) = BetaR_(-BetaRoffset+m, k);
+    
     return MRTp;
   }
 

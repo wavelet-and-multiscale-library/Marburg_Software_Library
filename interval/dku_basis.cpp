@@ -60,9 +60,6 @@ namespace WaveletTL
       Z(2),
       ZT(2)
   {
-    ellT_ = ell2T<d,dT>(); // (3.2.10)
-    ell_  = ellT_-(dT-d);  // (3.2.16)
-
     Z[0] = bc_left ? 1 : 0;
     Z[1] = bc_right ? 1 : 0;
     ZT[0] = 0; // no b.c. for the dual
@@ -105,14 +102,14 @@ namespace WaveletTL
     SparseMatrix<double> A, H, Hinv;
     GSetup(A, H, Hinv); // (4.1.1), (4.1.13)
 
-#if 1
+#if 0
     SparseMatrix<double> Aold(A); // for the checks below
 #endif
 
     GElim (A, H, Hinv); // elimination (4.1.4)ff.
     SparseMatrix<double> BB; BT(A, BB); // (4.1.13)
 
-#if 1
+#if 0
     cout << "DKUBasis(): check properties (4.1.15):" << endl;
     SparseMatrix<double> test4115 = transpose(BB)*A;
     for (unsigned int i = 0; i < test4115.row_dimension(); i++)
@@ -1430,7 +1427,7 @@ namespace WaveletTL
     H   .diagonal(Deltasize(j0()+1), 1.0);
     Hinv.diagonal(Deltasize(j0()+1), 1.0);
 
-    // offsets: ell_-d, in both arguments of H and Hinv
+    // offsets: ell_*-d, in both arguments of H and Hinv
   }
 
   template <int d, int dT>
@@ -1505,7 +1502,7 @@ namespace WaveletTL
     
     PPinv.diagonal(PP.row_dimension(), 1.0);
 
-    const int mlrsize = d+ell_+ell2_-1;
+    const int mlrsize = d+ell_l+ell2_-1;
 
     Matrix<double> ml;
     ml.diagonal(mlrsize, 1.0);
@@ -1543,7 +1540,7 @@ namespace WaveletTL
     for (int r = 0; r < d; r++)
       BB.set_entry(r, r, 1.0);
 
-    const double help = 1./A.get_entry(d+ell_+ell1_+ell2_, d);
+    const double help = 1./A.get_entry(d+ell_l+ell1_+ell2_, d);
     for (int c = d, r = d+ell_l+ell1_+ell2_; c < d+p; c++, r += 2)
       BB.set_entry(r, c, help);
 
@@ -2450,13 +2447,15 @@ namespace WaveletTL
 			    const bool primal,
 			    const int resolution) const
   {
+    // TODO: recode and check this after implementing b.c. handling!
+
     if (lambda.e() == 0) { // generator
       if (primal) {
 	if (lambda.k() <= DeltaLTmax()) {
 	    // left boundary generator
 	    InfiniteVector<double, RIndex> coeffs;
-	    for(int i(0); i < ellT_+ell2_-1; i++) {
-	      double v(CLA_(i, lambda.k()-ellT_+dT));
+	    for(int i(0); i < ellT_l+ell2_-1; i++) {
+	      double v(CLA_(i, lambda.k()-ellT_l+dT));
 	      if (v != 0)
 		coeffs.set_coefficient(RIndex(lambda.j(), 0, i+1-ell2_), v);
 	    }
@@ -2465,10 +2464,10 @@ namespace WaveletTL
 	  if (lambda.k() >= DeltaRTmin(lambda.j())) {
 	    // right boundary generator
 	    InfiniteVector<double, RIndex> coeffs;
-	    for (int i(0); i < ellT_+ell2_-1; i++) {
+	    for (int i(0); i < ellT_l+ell2_-1; i++) {
 	      double v(CRA_(i, lambda.k()+dT-1-DeltaRmax(lambda.j())));
 	      if (v != 0)
-		coeffs.set_coefficient(RIndex(lambda.j(), 0, DeltaRmax(lambda.j())-ellT_-ell2_+2+i), v);
+		coeffs.set_coefficient(RIndex(lambda.j(), 0, DeltaRmax(lambda.j())-ellT_l-ell2_+2+i), v);
 	    }
 	    return cdf_.evaluate(0, coeffs, primal, 0, 1, resolution);
 	  } else {
@@ -2482,8 +2481,8 @@ namespace WaveletTL
 	if (lambda.k() <= DeltaLTmax()) {
 	  // left boundary generator
 	  InfiniteVector<double, RIndex> coeffs;
-	  for (int i(0); i < ellT_+ell2T_-1; i++) {
-	    double v(CLAT_(i, lambda.k()-ell_+d));
+	  for (int i(0); i < ellT_l+ell2T_-1; i++) {
+	    double v(CLAT_(i, lambda.k()-ell_l+d));
 	    if (v != 0)
 	      coeffs.set_coefficient(RIndex(lambda.j(), 0, i+1-ell2T_), v);
 	  }
@@ -2492,10 +2491,10 @@ namespace WaveletTL
 	  if (lambda.k() >= DeltaRTmin(lambda.j())) {
 	    // right boundary generator
 	    InfiniteVector<double, RIndex> coeffs;
-	    for (int i(0); i < ellT_+ell2T_-1; i++) {
+	    for (int i(0); i < ellT_l+ell2T_-1; i++) {
 	      double v(CRAT_(i, lambda.k()+dT-1-DeltaRmax(lambda.j())));
 	      if (v != 0)
-		coeffs.set_coefficient(RIndex(lambda.j(), 0, DeltaRmax(lambda.j())-ellT_-ell2_+2+i), v);
+		coeffs.set_coefficient(RIndex(lambda.j(), 0, DeltaRmax(lambda.j())-ellT_l-ell2_+2+i), v);
 	    }
 	    return cdf_.evaluate(0, coeffs, primal, 0, 1, resolution);
 	  } else {

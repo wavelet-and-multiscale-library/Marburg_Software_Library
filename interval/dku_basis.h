@@ -63,7 +63,6 @@ namespace WaveletTL
   public:
     /*!
       constructor
-      (ellT = ell2T)
 
       You can toggle Dirichlet boundary conditions for the primal basis with the parameters
       bc_left/bc_right. The dual basis will then be constructed to fulfill complementary boundary
@@ -74,7 +73,7 @@ namespace WaveletTL
 		      DKUBiorthogonalizationMethod bio = BernsteinSVD);
 
     //! coarsest possible level
-    inline const int j0() const { return (int) ceil(log(ellT_+ell2T_-1.)/log(2.0)+1); }
+    inline const int j0() const { return (int) ceil(log(ellT_l+ell2T_-1.)/log(2.0)+1); }
 
     /*!
       boundary indices in \Delta_j^X and \tilde\Delta_j^X (3.2.17)
@@ -266,7 +265,7 @@ namespace WaveletTL
 			       const int resolution) const;
 
   protected:
-    int ell1_, ell2_, ell1T_, ell2T_, ell_, ellT_;
+    int ell1_, ell2_, ell1T_, ell2T_;
     int ell_l, ell_r, ellT_l, ellT_r;
     DKUBiorthogonalizationMethod bio_;
     Array1D<int> Z, ZT;

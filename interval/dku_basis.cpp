@@ -69,7 +69,7 @@ namespace WaveletTL
     ellT_r = ell2T<d,dT>()+Z[1]; // (3.2.10)
     ell_l  = ellT_l-(dT-d); // (3.2.16)
     ell_r  = ellT_r-(dT-d); // (3.2.16)
-    
+
     setup_Alpha();
     setup_AlphaT();
     setup_BetaL();
@@ -85,8 +85,10 @@ namespace WaveletTL
     // IGPMlib reference: I_Basis_Bspline_s::Setup()
 
     setup_Cj();
+
     Matrix<double> ml = ML(); // (3.5.2)
     Matrix<double> mr = MR(); // (3.5.2)
+
     SparseMatrix<double> mj0;   setup_Mj0  (ml,   mr,   mj0);   // (3.5.1)
 
     Matrix<double> mltp = MLTp(); // (3.5.6)
@@ -102,14 +104,19 @@ namespace WaveletTL
     SparseMatrix<double> A, H, Hinv;
     GSetup(A, H, Hinv); // (4.1.1), (4.1.13)
 
-#if 0
+#if 1
     SparseMatrix<double> Aold(A); // for the checks below
+    cout << "A=" << endl << A << endl;
 #endif
 
     GElim (A, H, Hinv); // elimination (4.1.4)ff.
     SparseMatrix<double> BB; BT(A, BB); // (4.1.13)
 
-#if 0
+    cout << "Ad=" << endl << A << endl;
+    cout << "BB=" << endl << BB << endl;
+    cout << "FF=" << endl << FF << endl;
+
+#if 1
     cout << "DKUBasis(): check properties (4.1.15):" << endl;
     SparseMatrix<double> test4115 = transpose(BB)*A;
     for (unsigned int i = 0; i < test4115.row_dimension(); i++)
@@ -125,13 +132,14 @@ namespace WaveletTL
     cout << "* ||Bj*Fj||_infty: " << row_sum_norm(test4115) << endl;    
 
     test4115 = transpose(FF)*A;
+    cout << "Fj^T*A=" << endl << test4115 << endl;
     cout << "* ||Fj^T*A||_infty: " << row_sum_norm(test4115) << endl;    
 #endif
 
     A.compress(1e-10);
     H.compress(1e-10);
 
-#if 0
+#if 1
     cout << "DKUBasis(): check factorization of A:" << endl;
     SparseMatrix<double> test1 = Aold - Hinv*A;
     cout << "* in 1-norm: " << column_sum_norm(test1) << endl;
@@ -148,7 +156,7 @@ namespace WaveletTL
     SparseMatrix<double> mj1ih = PP * Hinv * FF; // (4.1.23)
     SparseMatrix<double> PPinv; InvertP(PP, PPinv);
 
-#if 0
+#if 1
     cout << "DKUBasis(): check that PPinv is inverse to PP:" << endl;
     SparseMatrix<double> test3 = PP*PPinv;
     for (unsigned int i = 0; i < test3.row_dimension(); i++)
@@ -161,7 +169,7 @@ namespace WaveletTL
     SparseMatrix<double> gj0ih = transpose(BB) * help;
     SparseMatrix<double> gj1ih = transpose(FF) * help; // (4.1.24)
     
-#if 0
+#if 1
     cout << "DKUBasis(): check initial stable completion:" << endl;
     SparseMatrix<double> mj_initial(mj0.row_dimension(),
 				    mj0.column_dimension() + mj1ih.column_dimension());
@@ -210,7 +218,7 @@ namespace WaveletTL
     Mj0_  = transpose(inv_Cjp_)  * mj0   * transpose(Cj_); // (2.4.3)
     Mj0T_ = transpose(inv_CjpT_) * mj0tp * transpose(CjT_);
     
-#if 0
+#if 1
     cout << "DKUBasis(): check biorthogonality of Mj0, Mj0T:" << endl;
     SparseMatrix<double> test5 = transpose(Mj0_) * Mj0T_;
     for (unsigned int i = 0; i < test5.row_dimension(); i++)
@@ -234,7 +242,7 @@ namespace WaveletTL
     Mj0T_.compress(1e-8);
     Mj1T_.compress(1e-8);
     
-#if 0
+#if 1
     cout << "DKUBasis(): check new stable completion:" << endl;
 
     SparseMatrix<double> mj_new(Mj0_.row_dimension(),
@@ -326,11 +334,11 @@ namespace WaveletTL
     cout << "* ||GjT*MjT-I||_infty: " << row_sum_norm(test6) << endl;
 #endif
 
-    // construction of the wavelet basis: modifications from [DS] for d odd
+    // construction of the wavelet basis: boundary modifications
     if (d%2)
       {
-	DS_symmetrization(Mj1_, Mj1T_);
-#if 0
+	boundary_modifications(Mj1_, Mj1T_);
+#if 1
 	cout << "DKUBasis(): check [DS] symmetrization:" << endl;
 	
 	SparseMatrix<double> mj_new(Mj0_.row_dimension(),
@@ -1171,16 +1179,16 @@ namespace WaveletTL
     
     Matrix<double> ML(MLup-llow+1, lup-llow+1);
 
-    for (int row = 0; row < d; row++)
-      ML(row, row) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
+    for (int row = Z[0]; row < d; row++)
+      ML(row-Z[0], row-Z[0]) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
 
     for (int m = ell_l; m <= 2*ell_l+ell1_-1; m++)
-      for (int k = 0; k < d; k++)
-    	ML(-llow+m, k) = AlphaT_(-AlphaToffset+m, k) / sqrt(ldexp(1.0, 2*k+1));
+      for (int k = Z[0]; k < d; k++)
+    	ML(-llow+m, k-Z[0]) = AlphaT_(-AlphaToffset+m, k) / sqrt(ldexp(1.0, 2*k+1));
     
     for (int m = 2*ell_l+ell1_; m <= MLup; m++)
-      for (int k = 0; k < d; k++)
-  	ML(-llow+m, k) = BetaLT_(-BetaLToffset+m, k);
+      for (int k = Z[0]; k < d; k++)
+  	ML(-llow+m, k-Z[0]) = BetaLT_(-BetaLToffset+m, k);
 
     return ML;
   }
@@ -1198,16 +1206,16 @@ namespace WaveletTL
 
     Matrix<double> MR(MRup-ruph+1, rlowh-ruph+1);
 
-    for (int row = 0; row < d; row++)
-      MR(row, row) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
+    for (int row = Z[1]; row < d; row++)
+      MR(row-Z[1], row-Z[1]) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
 
     for (int m = ell_r; m <= 2*ell_r+ell1_-1; m++)
-      for (int k = 0; k < d; k++)
-	MR(-ruph+m, k) = AlphaT_(-AlphaToffset+m, k) / sqrt(ldexp(1.0, 2*k+1));
+      for (int k = Z[1]; k < d; k++)
+	MR(-ruph+m, k-Z[1]) = AlphaT_(-AlphaToffset+m, k) / sqrt(ldexp(1.0, 2*k+1));
     
     for (int m = 2*ell_r+ell1_; m <= MRup; m++)
-      for (int k = 0; k < d; k++)
-  	MR(-ruph+m, k) = BetaRT_(-BetaRToffset+m, k);
+      for (int k = Z[1]; k < d; k++)
+  	MR(-ruph+m, k-Z[1]) = BetaRT_(-BetaRToffset+m, k);
 
     return MR;
   }
@@ -1281,11 +1289,11 @@ namespace WaveletTL
 
     Mj0.resize(njp, nj);
 
-    const int diff_l = ellT_l-ell2T_;
-    const int diff_r = ellT_r-ell2T_;
-    const int alowc = d+1;
-    const int aupc  = d+p+diff_l-diff_r;
-    const int alowr = d+ell_l+ell1_;
+    const int diff_l = ellT_l-ell2T_-Z[0];
+    const int diff_r = ellT_r-ell2T_-Z[1];
+    const int alowc = d+1-Z[0];
+    const int aupc  = d+p+diff_l-diff_r+Z[0];
+    const int alowr = d+ell_l+ell1_-2*Z[0];
     
     for (int i = 0; i < (int)ML.row_dimension(); i++)
       for (int k = 0; k < (int)ML.column_dimension(); k++)
@@ -1316,7 +1324,7 @@ namespace WaveletTL
 
     // TODO: enhance readability! (<-> [DKU section 3.5])
     
-    int p = (1 << j0()) - ellT_l-ellT_r - (dT%2) + 1;
+    int p = (1 << j0()) - ellT_l - ellT_r - (dT%2) + 1;
     int q = (1 << j0()) - 4*ellT_l - 2*(dT%2) + dT + 1; // this value is overwritten below
 
     const int nj  = Deltasize(j0());
@@ -1354,7 +1362,7 @@ namespace WaveletTL
   DKUBasis<d, dT>::F(SparseMatrix<double>& FF) {
     // IGPMlib reference: I_Basis_Bspline_s::F()
     
-    const int FLow = ell_l+(d%2)-1;       // start column index for F_j in (4.1.14)
+    const int FLow = ell_l+(d%2)-Z[0];       // start column index for F_j in (4.1.14)
     const int FUp  = FLow+(DeltaRmin(j0())-DeltaLmax())-1; // end column index for F_j in (4.1.14)
     
     // (4.1.14):
@@ -1362,17 +1370,17 @@ namespace WaveletTL
     FF.resize(Deltasize(j0()+1), 1<<j0());
 
     for (int r = 0; r < FLow; r++)
-      FF.set_entry(r+d, r, 1.0);
+      FF.set_entry(r+d-Z[0], r, 1.0);
     
-    int i = d+ell_l+(d%2)-1;
+    int i = d+ell_l+(d%2)-1-2*Z[0];
     for (int r = FLow; r <= FUp; r++) {
-      FF.set_entry(i, r, 1.0);
+      FF.set_entry(i, r-1, 1.0);
       i += 2;
     } 
     
-    i = Deltasize(j0()+1)-d-1;
-    for (int r = (1<<j0())-1; r >= FUp+1; r--) {
-      FF.set_entry(i, r, 1.0);
+    i = Deltasize(j0()+1)-d-1+Z[1];
+    for (int r = (1<<j0()); r >= FUp+1; r--) {
+      FF.set_entry(i, r-1, 1.0);
       i--;
     }
   }
@@ -1402,24 +1410,33 @@ namespace WaveletTL
 
     // (4.1.13):
 
+    // A_j=A_j^{(0)} in (4.1.1) is a q times p matrix with
+    int p = (1<<j0()) - ell_l - ell_r - (d%2) + 1 + Z[0] + Z[1];
+    int q = 2*(p-Z[0]-Z[1]) + d - 1;
+
+    const int ALowc = d - Z[0]; // first column of A_j^{(d)} in Ahat_j^{(d)}
+    const int AUpc  = ALowc + p - 1; // last column
+    const int ALowr = d + ell_l + ell1_ - 2 * Z[0]; // first row of A_j^{(d)} in Ahat_j^{(d)}
+    const int AUpr  = ALowr + q - 1; // last row
+
     A.resize(Deltasize(j0()+1), Deltasize(j0()));
 
-    for (int r = 0; r < d; r++)
+    for (int r = 0; r < d-Z[0]; r++)
       A.set_entry(r, r, 1.0);
 
-    for (int r = d, q = d+ell_l+ell1_; r < Deltasize(j0())-d; r++) {
+    for (int r = ALowc, q = ALowr; r <= AUpc; r++) {
       int p = q;
 
       for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf_.a().begin());
-	   it != cdf_.a().end(); ++it) {
-	A.set_entry(p, r, M_SQRT1_2 * *it);
-	p++;
+ 	   it != cdf_.a().end(); ++it) {
+ 	A.set_entry(p, r, M_SQRT1_2 * *it);
+  	p++;
       }
       
       q += 2;
     }
     
-    for (int r = Deltasize(j0()+1)-d, q = Deltasize(j0())-d; r < Deltasize(j0()+1); r++, q++)
+    for (int r = Deltasize(j0()+1)-1, q = Deltasize(j0())-1; q > AUpc; r--, q--)
       A.set_entry(r, q, 1.0);
 
     // prepare H, Hinv for elimination process:
@@ -1436,13 +1453,13 @@ namespace WaveletTL
     // IGPMlib reference: I_Basis_Bspline_s::gelim()
     
     // A_j=A_j^{(0)} in (4.1.1) is a q times p matrix with
-    int       p = (1<<j0()) - ell_l - ell_r - (d%2) + 1;
-    const int q = 2 * p + d - 1;
+    int p = (1<<j0()) - ell_l - ell_r - (d%2) + 1 + Z[0] + Z[1];
+    int q = 2*(p-Z[0]-Z[1]) + d - 1;
 
-    const int ALowc = d; // first column of A_j^{(d)} in Ahat_j^{(d)}
-    const int AUpc  = d + p - 1; // last column
-    const int ALowr = d + ell_l + ell1_; // first row of A_j^{(d)} in Ahat_j^{(d)}
-    const int AUpr  = d + ell_r + ell1_ + q - 1; // last row
+    const int ALowc = d - Z[0]; // first column of A_j^{(d)} in Ahat_j^{(d)}
+    const int AUpc  = ALowc + p - 1; // last column
+    const int ALowr = d + ell_l + ell1_ - 2 * Z[0]; // first row of A_j^{(d)} in Ahat_j^{(d)}
+    const int AUpr  = ALowr + q - 1; // last row
 
     p += (d-2+(d%2))/2;
 
@@ -1452,7 +1469,7 @@ namespace WaveletTL
     for (int i = 1; i <= d; i++) {
       help.diagonal(Deltasize(j0()+1), 1.0);
       
-      const int HhatLow = (i%2 ? ell_l+ell2_+(i-1)/2 : ell_l+ell2_+2-(d%2)-(i/2));
+      const int HhatLow = (i%2 ? ell_l+ell2_+(i-1)/2-2*Z[0] : ell_l+ell2_+2-(d%2)-(i/2)-2*Z[0]);
       const int HhatUp  = HhatLow + (2*p-1);
       
       if (i%2) // i odd, elimination from above (4.1.4a)
@@ -1535,22 +1552,25 @@ namespace WaveletTL
     const int p = (1<<j0()) - ell_l - ell_r - (d%2) + 1;
 //     const int q = 2 * p + d - 1;
 
+    const int llow = ell_l-d;
+
     BB.resize(Deltasize(j0()+1), Deltasize(j0()));
 
-    for (int r = 0; r < d; r++)
+    for (int r = 0; r < d-Z[0]; r++)
       BB.set_entry(r, r, 1.0);
 
     const double help = 1./A.get_entry(d+ell_l+ell1_+ell2_, d);
-    for (int c = d, r = d+ell_l+ell1_+ell2_; c < d+p; c++, r += 2)
-      BB.set_entry(r, c, help);
 
-    for (int r = Deltasize(j0()+1)-d, c = Deltasize(j0())-d; r < Deltasize(j0()+1); r++, c++)
-      BB.set_entry(r, c, 1.0);
+    for (int c = d-Z[0], r = d+ell_l+ell1_+ell2_; c < d+p+Z[1]; c++, r += 2)
+      BB.set_entry(r-2*Z[0], c, help);
+
+    for (int r = DeltaRmax(j0())-d+1+Z[1]; r <= DeltaRmax(j0()); r++)
+      BB.set_entry(-llow+r+DeltaRmax(j0()+1)-DeltaRmax(j0()), -llow+r, 1.0);
   }
 
   template <int d, int dT>
   void
-  DKUBasis<d, dT>::DS_symmetrization(SparseMatrix<double>& Mj1, SparseMatrix<double>& Mj1T) {
+  DKUBasis<d, dT>::boundary_modifications(SparseMatrix<double>& Mj1, SparseMatrix<double>& Mj1T) {
     // IGPMlib reference: I_Basis_Bspline::Modify()
 
     SparseMatrix<double> Hj1(Deltasize(j0()+1), 1<<j0()),

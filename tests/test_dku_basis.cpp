@@ -16,13 +16,15 @@ int main()
   const int d = 2;
   const int dT = 4;
   typedef DKUBasis<d, dT> Basis;
-  Basis basis; // Bernstein SVD
+//   Basis basis; // Bernstein SVD
 
 //   Basis basis(false, false, none);
 //   Basis basis(false, false, WaveletTL::SVD);
 //   Basis basis(false, false, Bernstein);
 //   Basis basis(false, false, partialSVD);
 //   Basis basis(false, false, BernsteinSVD);
+
+  Basis basis(true, true); // homogeneous b.c. for the primal generators, dual generators complementary b.c.'s
 
   cout << "- the (" << d << "," << dT << ") basis has j0=" << basis.j0() << endl;
 
@@ -121,7 +123,7 @@ int main()
       cout << "* j=" << level << ",  ||GjT*MjT-I||_infty: " << row_sum_norm(T) << endl;
     }
 
-#if 1
+#if 0
   cout << "- checking access to single rows of the M_{j,i} matrices:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+2; level++)
     {
@@ -198,7 +200,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -223,7 +225,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "
@@ -335,7 +337,7 @@ int main()
       cout << "* j=" << level << ",  ||GjT*MjT-I||_infty: " << row_sum_norm(T) << endl;
     }
 
-#if 1
+#if 0
   cout << "- checking access to single rows of the M_{j,i} matrices:" << endl;
   for (int level = basis2.j0(); level <= basis2.j0()+2; level++)
     {
@@ -412,7 +414,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis2.j0()+1; level <= basis2.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -443,7 +445,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis2.j0()+1; level <= basis2.j0()+2; level++)
     {
       cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "

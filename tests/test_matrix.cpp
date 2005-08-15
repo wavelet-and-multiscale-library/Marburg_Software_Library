@@ -311,6 +311,11 @@ int main()
   Y.set_block(1, 1, sub3);
   cout << Y;
 
+  cout << "- putting a block into this matrix in mirror mode:" << endl;
+  Matrix<double> sub4(2, 2, "1 2 3 4");
+  Y.set_block(0, 0, sub4, true);
+  cout << Y;
+
   cout << "- a 3x2 sparse matrix F1:" << endl;
   SparseMatrix<double> F1(3, 2);
   F1.set_entry(0, 0, 1.0);

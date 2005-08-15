@@ -123,11 +123,13 @@ namespace MathTL
     void set_entry(const size_type row, const size_type column, const C value);
 
     /*!
-      write access to a subblock
+      write access to a subblock;
+      if the mirror flag is set, rows and columns of the block are mirrored before writing
     */
     template <class MATRIX>
     void set_block(const size_type firstrow, const size_type firstcolumn,
-		   const MATRIX& M);
+		   const MATRIX& M,
+		   const bool mirror = false);
 
     /*!
       assignment from another sparse matrix

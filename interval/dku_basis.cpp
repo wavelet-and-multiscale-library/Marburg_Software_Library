@@ -1085,35 +1085,51 @@ namespace WaveletTL
     // (5.2.5)
     Cj_.diagonal(Deltasize(j0()), 1.0);
     Cj_.set_block(0, 0, CL_);
-    Cj_.set_block(Deltasize(j0())-dT, Deltasize(j0())-dT, CR_);
+    Cj_.set_block(Deltasize(j0())-CR_.row_dimension(),
+		  Deltasize(j0())-CR_.column_dimension(),
+		  CR_, true);
 
     inv_Cj_.diagonal(Deltasize(j0()), 1.0);
     inv_Cj_.set_block(0, 0, inv_CL_);
-    inv_Cj_.set_block(Deltasize(j0())-dT, Deltasize(j0())-dT, inv_CR_);
+    inv_Cj_.set_block(Deltasize(j0())-inv_CR_.row_dimension(),
+		      Deltasize(j0())-inv_CR_.column_dimension(),
+		      inv_CR_, true);
 
     CjT_.diagonal(Deltasize(j0()), 1.0);
     CjT_.set_block(0, 0, CLT_);
-    CjT_.set_block(Deltasize(j0())-dT, Deltasize(j0())-dT, CRT_);
+    CjT_.set_block(Deltasize(j0())-CRT_.row_dimension(),
+		   Deltasize(j0())-CRT_.column_dimension(),
+		   CRT_, true);
 
     inv_CjT_.diagonal(Deltasize(j0()), 1.0);
     inv_CjT_.set_block(0, 0, inv_CLT_);
-    inv_CjT_.set_block(Deltasize(j0())-dT, Deltasize(j0())-dT, inv_CRT_);
+    inv_CjT_.set_block(Deltasize(j0())-inv_CRT_.row_dimension(),
+		       Deltasize(j0())-inv_CRT_.column_dimension(),
+		       inv_CRT_, true);
 
     Cjp_.diagonal(Deltasize(j0()+1), 1.0);
     Cjp_.set_block(0, 0, CL_);
-    Cjp_.set_block(Deltasize(j0()+1)-dT, Deltasize(j0()+1)-dT, CR_);
+    Cjp_.set_block(Deltasize(j0()+1)-CR_.row_dimension(),
+		   Deltasize(j0()+1)-CR_.column_dimension(),
+		   CR_, true);
 
     inv_Cjp_.diagonal(Deltasize(j0()+1), 1.0);
     inv_Cjp_.set_block(0, 0, inv_CL_);
-    inv_Cjp_.set_block(Deltasize(j0()+1)-dT, Deltasize(j0()+1)-dT, inv_CR_);
+    inv_Cjp_.set_block(Deltasize(j0()+1)-inv_CR_.row_dimension(),
+		       Deltasize(j0()+1)-inv_CR_.column_dimension(),
+		       inv_CR_, true);
 
     CjpT_.diagonal(Deltasize(j0()+1), 1.0);
     CjpT_.set_block(0, 0, CLT_);
-    CjpT_.set_block(Deltasize(j0()+1)-dT, Deltasize(j0()+1)-dT, CRT_);
+    CjpT_.set_block(Deltasize(j0()+1)-CRT_.row_dimension(),
+		    Deltasize(j0()+1)-CRT_.column_dimension(),
+		    CRT_, true);
 
     inv_CjpT_.diagonal(Deltasize(j0()+1), 1.0);
     inv_CjpT_.set_block(0, 0, inv_CLT_);
-    inv_CjpT_.set_block(Deltasize(j0()+1)-dT, Deltasize(j0()+1)-dT, inv_CRT_);
+    inv_CjpT_.set_block(Deltasize(j0()+1)-inv_CRT_.row_dimension(),
+			Deltasize(j0()+1)-inv_CRT_.column_dimension(),
+			inv_CRT_, true);
 
 #if 0
     cout << "DKUBasis: testing setup of Cj:" << endl;

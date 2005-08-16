@@ -64,6 +64,8 @@ namespace WaveletTL
     Z[1] = bc_right ? 1 : 0;
     ZT[0] = 0; // no b.c. for the dual
     ZT[1] = 0; // no b.c. for the dual
+//     ZT[0] = 1-Z[0]; // does not work
+//     ZT[1] = 1-Z[1]; // does not work
 
     ellT_l = ell2T<d,dT>()+Z[0];  // (3.2.10)
     ellT_r = ell2T<d,dT>()+Z[1]; // (3.2.10)
@@ -106,15 +108,10 @@ namespace WaveletTL
 
 #if 0
     SparseMatrix<double> Aold(A); // for the checks below
-//     cout << "A=" << endl << A << endl;
 #endif
 
     GElim (A, H, Hinv); // elimination (4.1.4)ff.
     SparseMatrix<double> BB; BT(A, BB); // (4.1.13)
-
-//     cout << "Ad=" << endl << A << endl;
-//     cout << "BB=" << endl << BB << endl;
-//     cout << "FF=" << endl << FF << endl;
 
 #if 0
     cout << "DKUBasis(): check properties (4.1.15):" << endl;
@@ -134,9 +131,6 @@ namespace WaveletTL
     test4115 = transpose(FF)*A;
     cout << "* ||Fj^T*A||_infty: " << row_sum_norm(test4115) << endl;    
 #endif
-
-    A.compress(1e-10);
-    H.compress(1e-10);
 
 #if 0
     cout << "DKUBasis(): check factorization of A:" << endl;

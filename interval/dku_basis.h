@@ -66,11 +66,11 @@ namespace WaveletTL
 
       You can toggle Dirichlet boundary conditions for the primal basis with the parameters
       bc_left/bc_right. The dual basis will then be constructed to fulfill complementary boundary
-      conditions, see [DS].
+      conditions, see [DS] for details.
     */
     explicit DKUBasis(bool bc_left = false,
 		      bool bc_right = false,
-		      DKUBiorthogonalizationMethod bio = none);
+		      DKUBiorthogonalizationMethod bio = partialSVD);
 
     //! coarsest possible level
     inline const int j0() const { return (int) ceil(log(ellT_l+ell2T_-1.)/log(2.0)+1); }

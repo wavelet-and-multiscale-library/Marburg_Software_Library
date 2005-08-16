@@ -104,7 +104,7 @@ namespace WaveletTL
     SparseMatrix<double> A, H, Hinv;
     GSetup(A, H, Hinv); // (4.1.1), (4.1.13)
 
-#if 1
+#if 0
     SparseMatrix<double> Aold(A); // for the checks below
 //     cout << "A=" << endl << A << endl;
 #endif
@@ -116,7 +116,7 @@ namespace WaveletTL
 //     cout << "BB=" << endl << BB << endl;
 //     cout << "FF=" << endl << FF << endl;
 
-#if 1
+#if 0
     cout << "DKUBasis(): check properties (4.1.15):" << endl;
     SparseMatrix<double> test4115 = transpose(BB)*A;
     for (unsigned int i = 0; i < test4115.row_dimension(); i++)
@@ -138,7 +138,7 @@ namespace WaveletTL
     A.compress(1e-10);
     H.compress(1e-10);
 
-#if 1
+#if 0
     cout << "DKUBasis(): check factorization of A:" << endl;
     SparseMatrix<double> test1 = Aold - Hinv*A;
     cout << "* in 1-norm: " << column_sum_norm(test1) << endl;
@@ -155,7 +155,7 @@ namespace WaveletTL
     SparseMatrix<double> mj1ih = PP * Hinv * FF; // (4.1.23)
     SparseMatrix<double> PPinv; InvertP(PP, PPinv);
 
-#if 1
+#if 0
     cout << "DKUBasis(): check that PPinv is inverse to PP:" << endl;
     SparseMatrix<double> test3 = PP*PPinv;
     for (unsigned int i = 0; i < test3.row_dimension(); i++)
@@ -168,7 +168,7 @@ namespace WaveletTL
     SparseMatrix<double> gj0ih = transpose(BB) * help;
     SparseMatrix<double> gj1ih = transpose(FF) * help; // (4.1.24)
     
-#if 1
+#if 0
     cout << "DKUBasis(): check initial stable completion:" << endl;
     SparseMatrix<double> mj_initial(mj0.row_dimension(),
 				    mj0.column_dimension() + mj1ih.column_dimension());
@@ -217,7 +217,7 @@ namespace WaveletTL
     Mj0_  = transpose(inv_Cjp_)  * mj0   * transpose(Cj_); // (2.4.3)
     Mj0T_ = transpose(inv_CjpT_) * mj0tp * transpose(CjT_);
     
-#if 1
+#if 0
     cout << "DKUBasis(): check biorthogonality of Mj0, Mj0T:" << endl;
     SparseMatrix<double> test5 = transpose(Mj0_) * Mj0T_;
     for (unsigned int i = 0; i < test5.row_dimension(); i++)
@@ -241,7 +241,7 @@ namespace WaveletTL
     Mj0T_.compress(1e-8);
     Mj1T_.compress(1e-8);
     
-#if 1
+#if 0
     cout << "DKUBasis(): check new stable completion:" << endl;
 
     SparseMatrix<double> mj_new(Mj0_.row_dimension(),
@@ -333,100 +333,102 @@ namespace WaveletTL
     cout << "* ||GjT*MjT-I||_infty: " << row_sum_norm(test6) << endl;
 #endif
 
-    // construction of the wavelet basis: boundary modifications
-    if (d%2)
+    // construction of the wavelet basis: symmetrization for odd d
+    if (d%2 && (Z[0]==Z[1]))
       {
-	boundary_modifications(Mj1_, Mj1T_);
-#if 1
-	cout << "DKUBasis(): check [DS] symmetrization:" << endl;
+	DS_symmetrization(Mj1_, Mj1T_);
+#if 0
+	{
+	  cout << "DKUBasis(): check [DS] symmetrization:" << endl;
+	  
+	  SparseMatrix<double> mj_new(Mj0_.row_dimension(),
+				      Mj0_.column_dimension() + Mj1_.column_dimension());
+	  for (unsigned int i = 0; i < Mj0_.row_dimension(); i++)
+	    for (unsigned int j = 0; j < Mj0_.column_dimension(); j++) {
+	      const double help = Mj0_.get_entry(i, j);
+	      if (help != 0)
+		mj_new.set_entry(i, j, help);
+	    }
+	  for (unsigned int i = 0; i < Mj1_.row_dimension(); i++)
+	    for (unsigned int j = 0; j < Mj1_.column_dimension(); j++) {
+	      const double help = Mj1_.get_entry(i, j);
+	      if (help != 0)
+		mj_new.set_entry(i, j+Mj0_.column_dimension(), help);
+	    }
+	  
+	  SparseMatrix<double> gj0_new = transpose(Mj0T_); gj0_new.compress();
+	  SparseMatrix<double> gj1_new = transpose(Mj1T_); gj1_new.compress();
+	  SparseMatrix<double> gj_new(gj0_new.row_dimension() + gj1_new.row_dimension(),
+				      gj0_new.column_dimension());
+	  for (unsigned int i = 0; i < gj0_new.row_dimension(); i++)
+	    for (unsigned int j = 0; j < gj0_new.column_dimension(); j++) {
+	      const double help = gj0_new.get_entry(i, j);
+	      if (help != 0)
+		gj_new.set_entry(i, j, help);
+	    }
+	  for (unsigned int i = 0; i < gj1_new.row_dimension(); i++)
+	    for (unsigned int j = 0; j < gj1_new.column_dimension(); j++) {
+	      const double help = gj1_new.get_entry(i, j);
+	      if (help != 0)
+		gj_new.set_entry(i+gj0_new.row_dimension(), j, help);
+	    }
 	
-	SparseMatrix<double> mj_new(Mj0_.row_dimension(),
-				    Mj0_.column_dimension() + Mj1_.column_dimension());
-	for (unsigned int i = 0; i < Mj0_.row_dimension(); i++)
-	  for (unsigned int j = 0; j < Mj0_.column_dimension(); j++) {
-	    const double help = Mj0_.get_entry(i, j);
-	    if (help != 0)
-	      mj_new.set_entry(i, j, help);
-	  }
-	for (unsigned int i = 0; i < Mj1_.row_dimension(); i++)
-	  for (unsigned int j = 0; j < Mj1_.column_dimension(); j++) {
-	    const double help = Mj1_.get_entry(i, j);
-	    if (help != 0)
-	      mj_new.set_entry(i, j+Mj0_.column_dimension(), help);
-	  }
+	  SparseMatrix<double> test7 = mj_new * gj_new;
+	  for (unsigned int i = 0; i < test7.row_dimension(); i++)
+	    test7.set_entry(i, i, test7.get_entry(i, i) - 1.0);
+	  cout << "* ||Mj*Gj-I||_1: " << column_sum_norm(test7) << endl;
+	  cout << "* ||Mj*Gj-I||_infty: " << row_sum_norm(test7) << endl;
 	
-	SparseMatrix<double> gj0_new = transpose(Mj0T_); gj0_new.compress();
-	SparseMatrix<double> gj1_new = transpose(Mj1T_); gj1_new.compress();
-	SparseMatrix<double> gj_new(gj0_new.row_dimension() + gj1_new.row_dimension(),
-				    gj0_new.column_dimension());
-	for (unsigned int i = 0; i < gj0_new.row_dimension(); i++)
-	  for (unsigned int j = 0; j < gj0_new.column_dimension(); j++) {
-	    const double help = gj0_new.get_entry(i, j);
-	    if (help != 0)
-	      gj_new.set_entry(i, j, help);
-	  }
-	for (unsigned int i = 0; i < gj1_new.row_dimension(); i++)
-	  for (unsigned int j = 0; j < gj1_new.column_dimension(); j++) {
-	    const double help = gj1_new.get_entry(i, j);
-	    if (help != 0)
-	      gj_new.set_entry(i+gj0_new.row_dimension(), j, help);
-	  }
-	
-	SparseMatrix<double> test7 = mj_new * gj_new;
-	for (unsigned int i = 0; i < test7.row_dimension(); i++)
-	  test7.set_entry(i, i, test7.get_entry(i, i) - 1.0);
-	cout << "* ||Mj*Gj-I||_1: " << column_sum_norm(test7) << endl;
-	cout << "* ||Mj*Gj-I||_infty: " << row_sum_norm(test7) << endl;
-	
-	test7 = gj_new * mj_new;
-	for (unsigned int i = 0; i < test7.row_dimension(); i++)
-	  test7.set_entry(i, i, test7.get_entry(i, i) - 1.0);
-	cout << "* ||Gj*Mj-I||_1: " << column_sum_norm(test7) << endl;
-	cout << "* ||Gj*Mj-I||_infty: " << row_sum_norm(test7) << endl;
+	  test7 = gj_new * mj_new;
+	  for (unsigned int i = 0; i < test7.row_dimension(); i++)
+	    test7.set_entry(i, i, test7.get_entry(i, i) - 1.0);
+	  cout << "* ||Gj*Mj-I||_1: " << column_sum_norm(test7) << endl;
+	  cout << "* ||Gj*Mj-I||_infty: " << row_sum_norm(test7) << endl;
         
-	SparseMatrix<double> mjt_new(Mj0T_.row_dimension(),
-				     Mj0T_.column_dimension() + Mj1T_.column_dimension());
-	for (unsigned int i = 0; i < Mj0T_.row_dimension(); i++)
-	  for (unsigned int j = 0; j < Mj0T_.column_dimension(); j++) {
-	    const double help = Mj0T_.get_entry(i, j);
-	    if (help != 0)
-	      mjt_new.set_entry(i, j, help);
-	  }
-	for (unsigned int i = 0; i < Mj1T_.row_dimension(); i++)
-	  for (unsigned int j = 0; j < Mj1T_.column_dimension(); j++) {
-	    const double help = Mj1T_.get_entry(i, j);
-	    if (help != 0)
-	      mjt_new.set_entry(i, j+Mj0T_.column_dimension(), help);
-	  }
+	  SparseMatrix<double> mjt_new(Mj0T_.row_dimension(),
+				       Mj0T_.column_dimension() + Mj1T_.column_dimension());
+	  for (unsigned int i = 0; i < Mj0T_.row_dimension(); i++)
+	    for (unsigned int j = 0; j < Mj0T_.column_dimension(); j++) {
+	      const double help = Mj0T_.get_entry(i, j);
+	      if (help != 0)
+		mjt_new.set_entry(i, j, help);
+	    }
+	  for (unsigned int i = 0; i < Mj1T_.row_dimension(); i++)
+	    for (unsigned int j = 0; j < Mj1T_.column_dimension(); j++) {
+	      const double help = Mj1T_.get_entry(i, j);
+	      if (help != 0)
+		mjt_new.set_entry(i, j+Mj0T_.column_dimension(), help);
+	    }
 	
-	SparseMatrix<double> gjt0_new = transpose(Mj0_); gjt0_new.compress();
-	SparseMatrix<double> gjt1_new = transpose(Mj1_); gjt1_new.compress();
-	SparseMatrix<double> gjt_new(gjt0_new.row_dimension() + gjt1_new.row_dimension(),
-				     gjt0_new.column_dimension());
-	for (unsigned int i = 0; i < gjt0_new.row_dimension(); i++)
-	  for (unsigned int j = 0; j < gjt0_new.column_dimension(); j++) {
-	    const double help = gjt0_new.get_entry(i, j);
-	    if (help != 0)
-	      gjt_new.set_entry(i, j, help);
-	  }
-	for (unsigned int i = 0; i < gjt1_new.row_dimension(); i++)
-	  for (unsigned int j = 0; j < gjt1_new.column_dimension(); j++) {
-	    const double help = gjt1_new.get_entry(i, j);
-	    if (help != 0)
-	      gjt_new.set_entry(i+gjt0_new.row_dimension(), j, help);
-	  }
+	  SparseMatrix<double> gjt0_new = transpose(Mj0_); gjt0_new.compress();
+	  SparseMatrix<double> gjt1_new = transpose(Mj1_); gjt1_new.compress();
+	  SparseMatrix<double> gjt_new(gjt0_new.row_dimension() + gjt1_new.row_dimension(),
+				       gjt0_new.column_dimension());
+	  for (unsigned int i = 0; i < gjt0_new.row_dimension(); i++)
+	    for (unsigned int j = 0; j < gjt0_new.column_dimension(); j++) {
+	      const double help = gjt0_new.get_entry(i, j);
+	      if (help != 0)
+		gjt_new.set_entry(i, j, help);
+	    }
+	  for (unsigned int i = 0; i < gjt1_new.row_dimension(); i++)
+	    for (unsigned int j = 0; j < gjt1_new.column_dimension(); j++) {
+	      const double help = gjt1_new.get_entry(i, j);
+	      if (help != 0)
+		gjt_new.set_entry(i+gjt0_new.row_dimension(), j, help);
+	    }
 	
-	test7 = mjt_new * gjt_new;
-	for (unsigned int i = 0; i < test7.row_dimension(); i++)
-	  test7.set_entry(i, i, test7.get_entry(i, i) - 1.0);
-	cout << "* ||MjT*GjT-I||_1: " << column_sum_norm(test7) << endl;
-	cout << "* ||MjT*GjT-I||_infty: " << row_sum_norm(test7) << endl;
+	  test7 = mjt_new * gjt_new;
+	  for (unsigned int i = 0; i < test7.row_dimension(); i++)
+	    test7.set_entry(i, i, test7.get_entry(i, i) - 1.0);
+	  cout << "* ||MjT*GjT-I||_1: " << column_sum_norm(test7) << endl;
+	  cout << "* ||MjT*GjT-I||_infty: " << row_sum_norm(test7) << endl;
 
-	test7 = gjt_new * mjt_new;
-	for (unsigned int i = 0; i < test7.row_dimension(); i++)
-	  test7.set_entry(i, i, test7.get_entry(i, i) - 1.0);
-	cout << "* ||GjT*MjT-I||_1: " << column_sum_norm(test7) << endl;
-	cout << "* ||GjT*MjT-I||_infty: " << row_sum_norm(test7) << endl;
+	  test7 = gjt_new * mjt_new;
+	  for (unsigned int i = 0; i < test7.row_dimension(); i++)
+	    test7.set_entry(i, i, test7.get_entry(i, i) - 1.0);
+	  cout << "* ||GjT*MjT-I||_1: " << column_sum_norm(test7) << endl;
+	  cout << "* ||GjT*MjT-I||_infty: " << row_sum_norm(test7) << endl;
+	}
 #endif
       }
 
@@ -785,8 +787,8 @@ namespace WaveletTL
 	}
       }
 
-      CR_.compress(1e-12);
-      CRT_.compress(1e-12);
+      CR_.compress(1e-14);
+      CRT_.compress(1e-14);
     }
     
     if (bio_ == Bernstein) {
@@ -809,7 +811,7 @@ namespace WaveletTL
       QUDecomposition<double>(CL_ * GammaL_).inverse(CLGammaLInv);
       CLT_ = transpose(CLGammaLInv);
       
-      CLT_.compress(1e-12);
+      CLT_.compress(1e-14);
 
       for (int j(0); j < d; j++)
 	for (int k(0); k <= j; k++)
@@ -821,7 +823,7 @@ namespace WaveletTL
       QUDecomposition<double>(CR_ * GammaR_).inverse(CRGammaRInv);
       CRT_ = transpose(CRGammaRInv);
       
-      CRT_.compress(1e-12);
+      CRT_.compress(1e-14);
     }
     
     if (bio_ == partialSVD) {
@@ -850,13 +852,13 @@ namespace WaveletTL
 	  U(i, j) /= S[i];
       CL_ = R*U;
 
-      CL_.compress(1e-12);
+      CL_.compress(1e-14);
 
       Matrix<double> CLGammaLInv;
       QUDecomposition<double>(CL_ * GammaL_).inverse(CLGammaLInv);
       CLT_ = transpose(CLGammaLInv);
 
-      CLT_.compress(1e-12);
+      CLT_.compress(1e-14);
 
       MathTL::SVD<double> svd_r(GammaR_);
       svd_r.getU(U);
@@ -881,13 +883,13 @@ namespace WaveletTL
 	  U(i, j) /= S[i];
       CR_ = R*U;
 
-      CR_.compress(1e-12);
+      CR_.compress(1e-14);
 
       Matrix<double> CRGammaRInv;
       QUDecomposition<double>(CR_ * GammaR_).inverse(CRGammaRInv);
       CRT_ = transpose(CRGammaRInv);
 
-      CRT_.compress(1e-12);
+      CRT_.compress(1e-14);
     }
 
     if (bio_ == BernsteinSVD) {
@@ -933,13 +935,13 @@ namespace WaveletTL
 	  U(i, j) /= S[i];
       CL_ = R*U*CL_;
       
-      CL_.compress(1e-12);
+      CL_.compress(1e-14);
 
       Matrix<double> CLGammaLInv;
       QUDecomposition<double>(CL_ * GammaL_).inverse(CLGammaLInv);
       CLT_ = transpose(CLGammaLInv);
 
-      CLT_.compress(1e-12);
+      CLT_.compress(1e-14);
 
       for (int j(0); j < d; j++)
 	for (int k(0); k <= j; k++)
@@ -972,13 +974,13 @@ namespace WaveletTL
 	  U(i, j) /= S[i];
       CR_ = R*U*CR_;
 
-      CR_.compress(1e-12);
+      CR_.compress(1e-14);
 
       Matrix<double> CRGammaRInv;
       QUDecomposition<double>(CR_ * GammaR_).inverse(CRGammaRInv);
       CRT_ = transpose(CRGammaRInv);
 
-      CRT_.compress(1e-12);
+      CRT_.compress(1e-14);
     }
     
 #if 0
@@ -1454,33 +1456,19 @@ namespace WaveletTL
     const int ALowr = d + ell_l + ell1_ - 2 * Z[0]; // first row of A_j^{(d)} in Ahat_j^{(d)}
     const int AUpr  = (Deltasize(j0()+1)-1) - (d+ell_r-ell2_+(d%2)-2*Z[1]); // last row
 
-    cout << "before elimination, A=" << endl << A << endl;
-
-    cout << "ALowc=" << ALowc
-	 << ", AUpc=" << AUpc
-	 << ", ALowr=" << ALowr
-	 << ", AUpr=" << AUpr
-	 << endl;
-
     int p = AUpc-ALowc+1;
-    int q = AUpr-ALowr+1;
-
-    cout << "p=" << p << ", q=" << q << endl;
+//     int q = AUpr-ALowr+1;
 
     SparseMatrix<double> help;
     
     // elimination (4.1.4)ff.:
     for (int i = 1; i <= d; i++) {
-      cout << "i=" << i << endl;
-
       help.diagonal(Deltasize(j0()+1), 1.0);
 
       const int elimrow = i%2 ? ALowr+(i-1)/2 : AUpr-(int)floor((i-1)/2.);
-      cout << "elimrow=" << elimrow << endl;
 
       const int HhatLow = i%2 ? elimrow : ell_l+ell2_+2-(d%2)-(i/2)-2*Z[0];
       const int HhatUp  = i%2 ? HhatLow + 2*p-1+(d+(d%2))/2 : elimrow;
-      cout << "HhatLow=" << HhatLow << ", HhatUp=" << HhatUp << endl;
       
       if (i%2) // i odd, elimination from above (4.1.4a)
 	{
@@ -1504,10 +1492,8 @@ namespace WaveletTL
       A = help * A;
       H = help * H;
       
-      A.compress(1e-10);
+      A.compress(1e-14);
 
-      cout << "afterwards, A=" << endl << A << endl;
-      
       // invert help
       if (i%2) {
 	for (int k = HhatLow; k <= HhatUp; k += 2)
@@ -1582,7 +1568,7 @@ namespace WaveletTL
 
   template <int d, int dT>
   void
-  DKUBasis<d, dT>::boundary_modifications(SparseMatrix<double>& Mj1, SparseMatrix<double>& Mj1T) {
+  DKUBasis<d, dT>::DS_symmetrization(SparseMatrix<double>& Mj1, SparseMatrix<double>& Mj1T) {
     // IGPMlib reference: I_Basis_Bspline::Modify()
 
     SparseMatrix<double> Hj1(Deltasize(j0()+1), 1<<j0()),

@@ -328,8 +328,8 @@ namespace WaveletTL
     void InvertP(const SparseMatrix<double>& PP, SparseMatrix<double>& PPinv);
     void BT(const SparseMatrix<double>& A, SparseMatrix<double>& BB); // (4.1.9), (4.1.13)
 
-    // boundary generator/wavelet modifications [CTU],[DS]
-    void boundary_modifications(SparseMatrix<double>& Mj1, SparseMatrix<double>& Mj1T);
+    // wavelet symmetrization from [DS]
+    void DS_symmetrization(SparseMatrix<double>& Mj1, SparseMatrix<double>& Mj1T);
   };
 }
 

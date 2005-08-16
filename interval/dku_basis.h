@@ -70,7 +70,7 @@ namespace WaveletTL
     */
     explicit DKUBasis(bool bc_left = false,
 		      bool bc_right = false,
-		      DKUBiorthogonalizationMethod bio = BernsteinSVD);
+		      DKUBiorthogonalizationMethod bio = none);
 
     //! coarsest possible level
     inline const int j0() const { return (int) ceil(log(ellT_l+ell2T_-1.)/log(2.0)+1); }

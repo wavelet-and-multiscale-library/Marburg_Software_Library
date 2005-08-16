@@ -25,8 +25,8 @@ int main()
 //   Basis basis(false, false, BernsteinSVD);
 
 //   Basis basis(true, true); // homogeneous b.c. for the primal generators, dual generators complementary b.c.'s
-//   Basis basis(true, false);
-  Basis basis(false, true);
+  Basis basis(true, false);
+//   Basis basis(false, true);
 
   cout << "- the (" << d << "," << dT << ") basis has j0=" << basis.j0() << endl;
 
@@ -202,7 +202,7 @@ int main()
     }
 #endif
 
-#if 0
+#if 1
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -227,7 +227,7 @@ int main()
     }
 #endif
 
-#if 0
+#if 1
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "
@@ -279,8 +279,8 @@ int main()
   typedef DKUBasis<d2, dT2> Basis2;
   typedef Basis2::Index Index2;
 //   Basis2 basis2;
-//   Basis2 basis2(true, false);
-  Basis2 basis2(true, true);
+  Basis2 basis2(true, false);
+//   Basis2 basis2(true, true);
 
   cout << "- the (" << d2 << "," << dT2 << ") basis has j0=" << basis2.j0() << endl;
   cout << "- the default wavelet index: " << DKUBasis<d2, dT2>::Index(&basis2) << endl;
@@ -418,7 +418,7 @@ int main()
     }
 #endif
 
-#if 0
+#if 1
   for (int level = basis2.j0()+1; level <= basis2.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -449,7 +449,7 @@ int main()
     }
 #endif
 
-#if 0
+#if 1
   for (int level = basis2.j0()+1; level <= basis2.j0()+2; level++)
     {
       cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "

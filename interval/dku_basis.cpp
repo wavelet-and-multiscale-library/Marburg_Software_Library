@@ -763,31 +763,37 @@ namespace WaveletTL
       svd.getV(V);
       svd.getS(S);
       
-      for (int i(0); i < lupT-llowT+1; i++) {
+      for (int i(0); i < (int)GammaL_.row_dimension(); i++) {
 	S[i] = 1.0 / sqrt(S[i]);
-	for (int j(0); j < lupT-llowT+1; j++) {
+	for (int j(0); j < (int)GammaL_.row_dimension(); j++)
 	  CL_(i, j)  = S[i] * U(j, i);
-	  CLT_(i, j) = S[i] * V(i, j);
-	}
       }
 
-      CL_.compress(1e-12);
-      CLT_.compress(1e-12);
+      CL_.compress(1e-14);
+
+      Matrix<double> CLGammaLInv;
+      QUDecomposition<double>(CL_ * GammaL_).inverse(CLGammaLInv);
+      CLT_ = transpose(CLGammaLInv);
+
+      CLT_.compress(1e-14);
       
       MathTL::SVD<double> svd_r(GammaR_);
       svd_r.getU(U);
       svd_r.getV(V);
       svd_r.getS(S);
       
-      for (int i(0); i < rlowTh-rupTh+1; i++) {
+      for (int i(0); i < (int)GammaR_.row_dimension(); i++) {
 	S[i] = 1.0 / sqrt(S[i]);
-	for (int j(0); j < rlowTh-rupTh+1; j++) {
+	for (int j(0); j < (int)GammaR_.row_dimension(); j++)
 	  CR_(i, j)  = S[i] * U(j, i);
-	  CRT_(i, j) = S[i] * V(i, j);
-	}
       }
 
       CR_.compress(1e-14);
+
+      Matrix<double> CRGammaRInv;
+      QUDecomposition<double>(CR_ * GammaR_).inverse(CRGammaRInv);
+      CRT_ = transpose(CRGammaRInv);      
+
       CRT_.compress(1e-14);
     }
     

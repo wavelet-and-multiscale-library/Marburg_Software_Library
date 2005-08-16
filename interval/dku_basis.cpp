@@ -106,15 +106,15 @@ namespace WaveletTL
 
 #if 1
     SparseMatrix<double> Aold(A); // for the checks below
-    cout << "A=" << endl << A << endl;
+//     cout << "A=" << endl << A << endl;
 #endif
 
     GElim (A, H, Hinv); // elimination (4.1.4)ff.
     SparseMatrix<double> BB; BT(A, BB); // (4.1.13)
 
-    cout << "Ad=" << endl << A << endl;
-    cout << "BB=" << endl << BB << endl;
-    cout << "FF=" << endl << FF << endl;
+//     cout << "Ad=" << endl << A << endl;
+//     cout << "BB=" << endl << BB << endl;
+//     cout << "FF=" << endl << FF << endl;
 
 #if 1
     cout << "DKUBasis(): check properties (4.1.15):" << endl;
@@ -132,7 +132,6 @@ namespace WaveletTL
     cout << "* ||Bj*Fj||_infty: " << row_sum_norm(test4115) << endl;    
 
     test4115 = transpose(FF)*A;
-    cout << "Fj^T*A=" << endl << test4115 << endl;
     cout << "* ||Fj^T*A||_infty: " << row_sum_norm(test4115) << endl;    
 #endif
 
@@ -1410,14 +1409,11 @@ namespace WaveletTL
 
     // (4.1.13):
 
-    // A_j=A_j^{(0)} in (4.1.1) is a q times p matrix with
-    int p = (1<<j0()) - ell_l - ell_r - (d%2) + 1 + Z[0] + Z[1];
-    int q = 2*(p-Z[0]-Z[1]) + d - 1;
-
+    // A_j=A_j^{(0)} in (4.1.1) is a q times p matrix
     const int ALowc = d - Z[0]; // first column of A_j^{(d)} in Ahat_j^{(d)}
-    const int AUpc  = ALowc + p - 1; // last column
+    const int AUpc  = (Deltasize(j0())-1) - (d - Z[1]); // last column
     const int ALowr = d + ell_l + ell1_ - 2 * Z[0]; // first row of A_j^{(d)} in Ahat_j^{(d)}
-    const int AUpr  = ALowr + q - 1; // last row
+//     const int AUpr  = (Deltasize(j0()+1)-1) - (d+ell_r-ell2_+(d%2)-2*Z[1]); // last row
 
     A.resize(Deltasize(j0()+1), Deltasize(j0()));
 
@@ -1452,30 +1448,42 @@ namespace WaveletTL
   DKUBasis<d, dT>::GElim(SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv) {
     // IGPMlib reference: I_Basis_Bspline_s::gelim()
     
-    // A_j=A_j^{(0)} in (4.1.1) is a q times p matrix with
-    int p = (1<<j0()) - ell_l - ell_r - (d%2) + 1 + Z[0] + Z[1];
-    int q = 2*(p-Z[0]-Z[1]) + d - 1;
-
+    // A_j=A_j^{(0)} in (4.1.1) is a q times p matrix
     const int ALowc = d - Z[0]; // first column of A_j^{(d)} in Ahat_j^{(d)}
-    const int AUpc  = ALowc + p - 1; // last column
+    const int AUpc  = (Deltasize(j0())-1) - (d - Z[1]); // last column
     const int ALowr = d + ell_l + ell1_ - 2 * Z[0]; // first row of A_j^{(d)} in Ahat_j^{(d)}
-    const int AUpr  = ALowr + q - 1; // last row
+    const int AUpr  = (Deltasize(j0()+1)-1) - (d+ell_r-ell2_+(d%2)-2*Z[1]); // last row
 
-    p += (d-2+(d%2))/2;
+    cout << "before elimination, A=" << endl << A << endl;
+
+    cout << "ALowc=" << ALowc
+	 << ", AUpc=" << AUpc
+	 << ", ALowr=" << ALowr
+	 << ", AUpr=" << AUpr
+	 << endl;
+
+    int p = AUpc-ALowc+1;
+    int q = AUpr-ALowr+1;
+
+    cout << "p=" << p << ", q=" << q << endl;
 
     SparseMatrix<double> help;
     
     // elimination (4.1.4)ff.:
     for (int i = 1; i <= d; i++) {
+      cout << "i=" << i << endl;
+
       help.diagonal(Deltasize(j0()+1), 1.0);
-      
-      const int HhatLow = (i%2 ? ell_l+ell2_+(i-1)/2-2*Z[0] : ell_l+ell2_+2-(d%2)-(i/2)-2*Z[0]);
-      const int HhatUp  = HhatLow + (2*p-1);
+
+      const int elimrow = i%2 ? ALowr+(i-1)/2 : AUpr-(int)floor((i-1)/2.);
+      cout << "elimrow=" << elimrow << endl;
+
+      const int HhatLow = i%2 ? elimrow : ell_l+ell2_+2-(d%2)-(i/2)-2*Z[0];
+      const int HhatUp  = i%2 ? HhatLow + 2*p-1+(d+(d%2))/2 : elimrow;
+      cout << "HhatLow=" << HhatLow << ", HhatUp=" << HhatUp << endl;
       
       if (i%2) // i odd, elimination from above (4.1.4a)
 	{
-	  const int elimrow = ALowr+(i-1)/2; // note that (i-1)/2 == ceil((i-1)/2), since i is odd
-	  
 	  assert(fabs(A.get_entry(elimrow+1, ALowc)) >= 1e-10);
 	  const double Uentry = -A.get_entry(elimrow, ALowc) / A.get_entry(elimrow+1, ALowc);
 	  
@@ -1485,9 +1493,8 @@ namespace WaveletTL
 	}
       else // i even, elimination from below (4.1.4b)
 	{
-	  const int elimrow = AUpr-(int)floor((i-1)/2.);
-	  
-	  const double Lentry = -A.get_entry(elimrow-2, AUpc-1) / A.get_entry(elimrow-3, AUpc-1);
+	  assert(fabs(A.get_entry(elimrow-1, AUpc)) >= 1e-10);
+	  const double Lentry = -A.get_entry(elimrow, AUpc) / A.get_entry(elimrow-1, AUpc);
 	  
 	  // insert Lentry in Hhat
 	  for (int k = HhatLow; k <= HhatUp; k += 2)
@@ -1498,6 +1505,8 @@ namespace WaveletTL
       H = help * H;
       
       A.compress(1e-10);
+
+      cout << "afterwards, A=" << endl << A << endl;
       
       // invert help
       if (i%2) {

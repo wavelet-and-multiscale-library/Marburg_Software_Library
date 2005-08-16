@@ -81,7 +81,7 @@ namespace WaveletTL
     inline const int DeltaLmin() const { return ell_l-d; }
     inline const int DeltaLmax() const { return ell_l-1-Z[0]; }
     inline const int Delta0min() const { return DeltaLmax()+1; }
-    inline const int Delta0max(const int j) const { DeltaRmin(j)-1; }
+    inline const int Delta0max(const int j) const { return DeltaRmin(j)-1; }
     inline const int DeltaRmin(const int j) const { return (1<<j)-ell1_-ell2_-(ell_r-1-Z[1]); }
     inline const int DeltaRmax(const int j) const { return (1<<j)-ell1_-ell2_-(ell_r-d); }
 

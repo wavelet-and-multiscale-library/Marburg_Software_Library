@@ -1528,28 +1528,31 @@ namespace WaveletTL
     
     PPinv.diagonal(PP.row_dimension(), 1.0);
 
-    const int mlrsize = d+ell_l+ell2_-1;
+    const int msize_l = d+ell_l+ell2_-1;
+    const int msize_r = d+ell_r+ell2_-1;
 
     Matrix<double> ml;
-    ml.diagonal(mlrsize, 1.0);
-    for (int i = 0; i < mlrsize; i++)
+    ml.diagonal(msize_l, 1.0);
+    for (int i = 0; i < msize_l; i++)
       for (int k = 0; k <= d; k++)
 	ml.set_entry(i, k, PP.get_entry(i, k));
-
+    
     Matrix<double> mr;
-    mr.diagonal(mlrsize, 1.0);
-    for (int i = 0; i < mlrsize; i++)
+    mr.diagonal(msize_r, 1.0);
+    for (int i = 0; i < msize_r; i++)
       for (int k = 0; k <= d; k++)
-	mr.set_entry(i, mlrsize-d-1+k, PP.get_entry(PP.row_dimension()-mlrsize+i, PP.column_dimension()-d-1+k));
-
+	mr.set_entry(i, msize_r-d-1+k, PP.get_entry(PP.row_dimension()-msize_r+i, PP.column_dimension()-d-1+k));
+    
     Matrix<double> mlinv, mrinv;
     QUDecomposition<double>(ml).inverse(mlinv);
     QUDecomposition<double>(mr).inverse(mrinv);
 
-    for (int i = 0; i < mlrsize; i++)
-      for (int k = 0; k <= d; k++) {
+    for (int i = 0; i < msize_l; i++)
+      for (int k = 0; k <= d; k++)
 	PPinv.set_entry(i, k, mlinv.get_entry(i, k));
-	PPinv.set_entry(PP.row_dimension()-mlrsize+i, PP.column_dimension()-d-1+k, mrinv.get_entry(i, mlrsize-d-1+k));
+    for (int i = 0; i < msize_r; i++)
+      for (int k = 0; k <= d; k++) {
+	PPinv.set_entry(PP.row_dimension()-msize_r+i, PP.column_dimension()-d-1+k, mrinv.get_entry(i, msize_r-d-1+k));
       }
   }
 

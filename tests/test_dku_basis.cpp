@@ -260,10 +260,17 @@ int main()
   cout << "- evaluating some primal generators:" << endl;
   Index lambda(basis.firstGenerator(basis.j0()));
   for (;; ++lambda) {
-//   for (int i = 1; i <= 5; i++, ++lambda) {
     cout << lambda << endl;
-    basis.evaluate(lambda, true, 5).matlab_output(cout);
+    basis.evaluate(lambda, true, 6).matlab_output(cout);
     if (lambda == basis.lastGenerator(basis.j0())) break;
+  }
+
+  cout << "- evaluating some primal wavelets:" << endl;
+  lambda = basis.firstWavelet(basis.j0());
+  for (;; ++lambda) {
+    cout << lambda << endl;
+    basis.evaluate(lambda, true, 6).matlab_output(cout);
+    if (lambda == basis.lastWavelet(basis.j0())) break;
   }
 #endif
 
@@ -271,8 +278,16 @@ int main()
   cout << "- evaluating some dual generators:" << endl;
   Index lambdadual = basis.firstGenerator(basis.j0());
   for (;; ++lambdadual) {
-    basis.evaluate(lambdadual, false, 5).matlab_output(cout);
+    basis.evaluate(lambdadual, false, 6).matlab_output(cout);
     if (lambdadual == basis.lastGenerator(basis.j0())) break;
+  }
+
+  cout << "- evaluating some dual wavelets:" << endl;
+  lambdadual = basis.firstWavelet(basis.j0());
+  for (;; ++lambdadual) {
+    cout << lambdadual << endl;
+    basis.evaluate(lambdadual, false, 6).matlab_output(cout);
+    if (lambdadual == basis.lastWavelet(basis.j0())) break;
   }
 #endif
 
@@ -284,8 +299,9 @@ int main()
   typedef DKUBasis<d2, dT2> Basis2;
   typedef Basis2::Index Index2;
 //   Basis2 basis2;
-  Basis2 basis2(true, false);
-//   Basis2 basis2(true, true);
+//   Basis2 basis2(true, false);
+//   Basis2 basis2(false, true);
+  Basis2 basis2(true, true);
 
   cout << "- the (" << d2 << "," << dT2 << ") basis has j0=" << basis2.j0() << endl;
   cout << "- the default wavelet index: " << DKUBasis<d2, dT2>::Index(&basis2) << endl;
@@ -479,6 +495,25 @@ int main()
 	  if (index == basis2.lastGenerator(level)) break;
 	}
     }
+#endif
+
+#if 1
+  cout << "- evaluating some primal generators:" << endl;
+  Index2 lambda2(basis2.firstGenerator(basis2.j0()));
+  for (;; ++lambda2) {
+    cout << lambda2 << endl;
+    basis2.evaluate(lambda2, true, 5).matlab_output(cout);
+    if (lambda2 == basis2.lastGenerator(basis2.j0())) break;
+  }
+#endif
+
+#if 1
+  cout << "- evaluating some dual generators:" << endl;
+  Index2 lambdadual2 = basis2.firstGenerator(basis2.j0());
+  for (;; ++lambdadual2) {
+    basis2.evaluate(lambdadual2, false, 5).matlab_output(cout);
+    if (lambdadual2 == basis2.lastGenerator(basis2.j0())) break;
+  }
 #endif
 
 //   cout << "* yet another basis:" << endl;

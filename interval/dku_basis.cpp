@@ -2530,18 +2530,51 @@ namespace WaveletTL
  	  }
  	}
       }
-    } else {
-      // expand wavelet as generators of a higher scale
-      // TODO!!!
+    } else { // wavelet
+      InfiniteVector<double, Index> coeffs, gcoeffs;
+      coeffs[lambda] = 1.0;
+      if (primal)
+	reconstruct_1(lambda, lambda.j()+1, gcoeffs);
+      else
+	reconstruct_t_1(lambda, lambda.j()+1, gcoeffs);
+      return evaluate(gcoeffs, primal, resolution);
     }
     
     return SampledMapping<1>(); // dummy return for the compiler
   }
 
-//   template <int d, int dT>
-//   SampledMapping<1> evaluate(const InfiniteVector<double, Index>& coeffs,
-// 			     const bool primal,
-// 			     const int resolution) const;
-
-
+  template <int d, int dT>
+  SampledMapping<1>
+  DKUBasis<d, dT>::evaluate(const InfiniteVector<double, Index>& coeffs,
+			    const bool primal,
+			    const int resolution) const
+  {
+    Grid<1> grid(0, 1, 1<<resolution);
+    Array1D<double> values((1<<resolution)+1);
+    for (unsigned int i(0); i < values.size(); i++) values[i] = 0;
+    
+    if (coeffs.size() > 0) {
+      // determine maximal level
+      int jmax(0);
+      for (typename InfiniteVector<double, Index>::const_iterator it(coeffs.begin()), itend(coeffs.end());
+	   it != itend; ++it)
+	jmax = std::max(it.index().j()+it.index().e(), jmax);
+      
+      // switch to generator representation
+      InfiniteVector<double, Index> gcoeffs;
+      if (primal)
+	reconstruct(coeffs,jmax,gcoeffs);
+      else
+	reconstruct_t(coeffs,jmax,gcoeffs);
+      
+      for (typename InfiniteVector<double, Index>::const_iterator it(gcoeffs.begin()), itend(gcoeffs.end());
+	   it != itend; ++it) {
+	SampledMapping<1> help(evaluate(it.index(), primal, resolution));
+	for (unsigned int i(0); i < values.size(); i++)
+	  values[i] += *it * help.values()[i];
+      }
+    }
+    
+    return SampledMapping<1>(grid, values);
+  }
 }

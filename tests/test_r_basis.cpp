@@ -65,7 +65,7 @@ int main()
   cout << "  * a small but nontrivial coefficient set:" << endl << coeff;
   cout << "  * result of DECOMPOSE:" << endl;
   InfiniteVector<double,RIndex> wcoeff;
-  basis.decompose(coeff,1,wcoeff);
+  basis.decompose(coeff,0,wcoeff);
   cout << wcoeff;
   cout << "  * RECONSTRUCT that:" << endl;
   InfiniteVector<double,RIndex> rcoeff;
@@ -75,7 +75,7 @@ int main()
   cout << "  * again a small but nontrivial coefficient set:" << endl << coeff;
   cout << "  * result of DECOMPOSEt:" << endl;
   wcoeff.clear();
-  basis.decompose_t(coeff,1,wcoeff);
+  basis.decompose_t(coeff,0,wcoeff);
   cout << wcoeff;
   cout << "  * RECONSTRUCTt that:" << endl;
   rcoeff.clear();

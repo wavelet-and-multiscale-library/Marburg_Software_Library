@@ -2465,27 +2465,31 @@ namespace WaveletTL
 			    const bool primal,
 			    const int resolution) const
   {
-    // TODO: recode and check this after implementing b.c. handling!
+    const int llklow  = 1-ell2_;   // offset 1 in CLA (and AlphaT), see (3.2.25)
+    const int llkup   = ellT_l-1;
+
+    const int rlklowh  = ellT_r-1;
+    const int rlkuph   = 1-ell2_;
 
     if (lambda.e() == 0) { // generator
       if (primal) {
-	if (lambda.k() <= DeltaLTmax()) {
+	if (lambda.k() <= DeltaLmax()) {
 	    // left boundary generator
 	    InfiniteVector<double, RIndex> coeffs;
-	    for(int i(0); i < ellT_l+ell2_-1; i++) {
-	      double v(CLA_(i, lambda.k()-ellT_l+dT));
+	    for(int i(0); i < llkup-llklow+1; i++) {
+	      double v(CLA_(i, lambda.k()-DeltaLmin()));
 	      if (v != 0)
-		coeffs.set_coefficient(RIndex(lambda.j(), 0, i+1-ell2_), v);
+		coeffs.set_coefficient(RIndex(lambda.j(), 0, llklow+i), v);
 	    }
 	    return cdf_.evaluate(0, coeffs, primal, 0, 1, resolution);
 	} else {
-	  if (lambda.k() >= DeltaRTmin(lambda.j())) {
+	  if (lambda.k() >= DeltaRmin(lambda.j())) {
 	    // right boundary generator
 	    InfiniteVector<double, RIndex> coeffs;
-	    for (int i(0); i < ellT_l+ell2_-1; i++) {
-	      double v(CRA_(i, lambda.k()+dT-1-DeltaRmax(lambda.j())));
+	    for (int i(0); i < rlklowh-rlkuph+1; i++) {
+	      double v(CRA_(i, DeltaRmax(lambda.j())-lambda.k()));
 	      if (v != 0)
-		coeffs.set_coefficient(RIndex(lambda.j(), 0, DeltaRmax(lambda.j())-ellT_l-ell2_+2+i), v);
+		coeffs.set_coefficient(RIndex(lambda.j(), 0, DeltaRmax(lambda.j())+Z[1]-i), v);
 	    }
 	    return cdf_.evaluate(0, coeffs, primal, 0, 1, resolution);
 	  } else {
@@ -2495,32 +2499,32 @@ namespace WaveletTL
 	  }
 	}
       } else {
-	// dual
-	if (lambda.k() <= DeltaLTmax()) {
-	  // left boundary generator
-	  InfiniteVector<double, RIndex> coeffs;
-	  for (int i(0); i < ellT_l+ell2T_-1; i++) {
-	    double v(CLAT_(i, lambda.k()-ell_l+d));
-	    if (v != 0)
-	      coeffs.set_coefficient(RIndex(lambda.j(), 0, i+1-ell2T_), v);
-	  }
-	  return cdf_.evaluate(0, coeffs, primal, 0, 1, resolution);
-	} else {
-	  if (lambda.k() >= DeltaRTmin(lambda.j())) {
-	    // right boundary generator
-	    InfiniteVector<double, RIndex> coeffs;
-	    for (int i(0); i < ellT_l+ell2T_-1; i++) {
-	      double v(CRAT_(i, lambda.k()+dT-1-DeltaRmax(lambda.j())));
-	      if (v != 0)
-		coeffs.set_coefficient(RIndex(lambda.j(), 0, DeltaRmax(lambda.j())-ellT_l-ell2_+2+i), v);
-	    }
-	    return cdf_.evaluate(0, coeffs, primal, 0, 1, resolution);
-	  } else {
-	    // inner generator
-	    return cdf_.evaluate(0, RIndex(lambda.j(), 0, lambda.k()),
-				 primal, 0, 1, resolution);
-	  }
-	}
+// 	// dual
+// 	if (lambda.k() <= DeltaLTmax()) {
+// 	  // left boundary generator
+// 	  InfiniteVector<double, RIndex> coeffs;
+// 	  for (int i(0); i < ellT_l+ell2T_-1; i++) {
+// 	    double v(CLAT_(i, lambda.k()-ell_l+d));
+// 	    if (v != 0)
+// 	      coeffs.set_coefficient(RIndex(lambda.j(), 0, i+1-ell2T_), v);
+// 	  }
+// 	  return cdf_.evaluate(0, coeffs, primal, 0, 1, resolution);
+// 	} else {
+// 	  if (lambda.k() >= DeltaRTmin(lambda.j())) {
+// 	    // right boundary generator
+// 	    InfiniteVector<double, RIndex> coeffs;
+// 	    for (int i(0); i < ellT_l+ell2T_-1; i++) {
+// 	      double v(CRAT_(i, lambda.k()+dT-1-DeltaRmax(lambda.j())));
+// 	      if (v != 0)
+// 		coeffs.set_coefficient(RIndex(lambda.j(), 0, DeltaRmax(lambda.j())-ellT_l-ell2_+2+i), v);
+// 	    }
+// 	    return cdf_.evaluate(0, coeffs, primal, 0, 1, resolution);
+// 	  } else {
+// 	    // inner generator
+// 	    return cdf_.evaluate(0, RIndex(lambda.j(), 0, lambda.k()),
+// 				 primal, 0, 1, resolution);
+// 	  }
+// 	}
       }
     } else {
       // expand wavelet as generators of a higher scale

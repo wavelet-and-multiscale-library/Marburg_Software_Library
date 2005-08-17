@@ -16,7 +16,7 @@ int main()
   const int d = 2;
   const int dT = 4;
   typedef DKUBasis<d, dT> Basis;
-//   Basis basis; // Bernstein SVD
+//   Basis basis;
 
 //   Basis basis(false, false, none);
 //   Basis basis(false, false, WaveletTL::SVD);
@@ -202,7 +202,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -227,7 +227,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "
@@ -252,10 +252,11 @@ int main()
     }
 #endif
 
-#if 0
+#if 1
   cout << "- evaluating some primal generators:" << endl;
   Index lambda(basis.firstGenerator(basis.j0()));
   for (;; ++lambda) {
+//   for (int i = 1; i <= 5; i++, ++lambda) {
     cout << lambda << endl;
     basis.evaluate(lambda, true, 5).matlab_output(cout);
     if (lambda == basis.lastGenerator(basis.j0())) break;
@@ -289,6 +290,7 @@ int main()
   cout << "- leftmost wavelet on the coarsest level: " << basis2.firstWavelet(basis2.j0()) << endl;
   cout << "- rightmost wavelet on the coarsest level: " << basis2.lastWavelet(basis2.j0()) << endl;
 
+#if 0
   cout << "- checking biorthogonality of Mj<->Gj and MjT<->GjT for different levels:" << endl;
   for (int level = basis2.j0(); level <= basis2.j0()+1; level++)
     {
@@ -340,6 +342,7 @@ int main()
 	T.set_entry(i, i, T.get_entry(i, i) - 1.0);
       cout << "* j=" << level << ",  ||GjT*MjT-I||_infty: " << row_sum_norm(T) << endl;
     }
+#endif
 
 #if 0
   cout << "- checking access to single rows of the M_{j,i} matrices:" << endl;
@@ -418,7 +421,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis2.j0()+1; level <= basis2.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -449,7 +452,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis2.j0()+1; level <= basis2.j0()+2; level++)
     {
       cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "

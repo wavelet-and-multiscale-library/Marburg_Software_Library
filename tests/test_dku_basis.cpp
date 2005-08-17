@@ -51,6 +51,7 @@ int main()
   cout << "- index of leftmost right boundary generator on scale j0: "
        << basis.DeltaRmin(basis.j0()) << endl;
 
+#if 0
   cout << "- checking biorthogonality of Mj0, Mj0T for different levels:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+2; level++)
     {
@@ -72,7 +73,9 @@ int main()
 	T.set_entry(i, i, T.get_entry(i, i) - 1.0);
       cout << "* j=" << level << ",  ||Mj0T^T*Mj0-I||_infty: " << row_sum_norm(T) << endl;
     }
+#endif
 
+#if 0
   cout << "- checking biorthogonality of Mj<->Gj and MjT<->GjT for different levels:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+1; level++)
     {
@@ -124,6 +127,7 @@ int main()
 	T.set_entry(i, i, T.get_entry(i, i) - 1.0);
       cout << "* j=" << level << ",  ||GjT*MjT-I||_infty: " << row_sum_norm(T) << endl;
     }
+#endif
 
 #if 0
   cout << "- checking access to single rows of the M_{j,i} matrices:" << endl;
@@ -263,12 +267,12 @@ int main()
   }
 #endif
 
-#if 0
+#if 1
   cout << "- evaluating some dual generators:" << endl;
-  lambda = basis.firstGenerator(basis.j0());
-  for (;; ++lambda) {
-    basis.evaluate(lambda, false, 6).matlab_output(cout);
-    if (lambda == basis.lastGenerator(basis.j0())) break;
+  Index lambdadual = basis.firstGenerator(basis.j0());
+  for (;; ++lambdadual) {
+    basis.evaluate(lambdadual, false, 5).matlab_output(cout);
+    if (lambdadual == basis.lastGenerator(basis.j0())) break;
   }
 #endif
 

@@ -15,7 +15,8 @@ EXEOBJF = \
   test_dm.o\
   test_r_basis.o\
   test_dku_basis.o\
-  test_periodic.o
+  test_periodic.o\
+  test_sturm_bvp.o
 
 EXES = $(EXEOBJF:.o=)
 

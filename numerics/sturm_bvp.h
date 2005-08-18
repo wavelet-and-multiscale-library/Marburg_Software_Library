@@ -85,6 +85,62 @@ namespace MathTL
     //! right boundary condition matrix (inherited)
     void apply_B(const Point<2>& v, Point<2>& result) const;
   };
+
+  /*!
+    Simplified class for Sturm b.v.p.'s on [0,1] which uses only
+    homogeneous b.c.'s of the first (Dirichlet) or second (Neumann) kind.
+  */
+  class simpleSturmBVP
+    : public SturmBVP
+  {
+  public:
+    /*!
+      virtual destructor
+     */
+    virtual ~simpleSturmBVP ();
+    
+    /*!
+      diffusion coefficient
+    */
+    virtual double p(const double t) const = 0;
+
+    /*!
+      first derivative of the diffusion coefficient
+    */
+    virtual double p_prime(const double t) const = 0;
+
+    /*!
+      reaction coefficient
+    */
+    virtual double q(const double t) const = 0;
+
+    /*!
+      right-hand side
+    */
+    virtual double g(const double t) const = 0;
+
+    /*!
+      Dirichlet boundary conditions at 0
+    */
+    virtual bool bc_left() const = 0;
+  
+    /*!
+      Dirichlet boundary conditions at 1
+    */
+    virtual bool bc_right() const = 0;
+
+    //! left boundary condition coefficient 0 (inherited)
+    double alpha0() const { return bc_left() ? 1 : 0; }
+
+    //! left boundary condition coefficient 1 (inherited)
+    double alpha1() const { return 0;}
+
+    //! right boundary condition coefficient 0 (inherited)
+    double beta0() const { return bc_right() ? 1 : 0; }
+
+    //! right boundary condition coefficient 1 (inherited)
+    double beta1() const { return 0; }
+  };
 }
 
 #include <numerics/sturm_bvp.cpp>

@@ -39,8 +39,7 @@ namespace WaveletTL
   class SturmBilinearForm
   {
   public:
-    SturmBilinearForm(const simpleSturmBVP& bvp)
-      : bvp_(bvp), wbasis_(bvp_.bc_left(), bvp_.bc_right()) {}
+    SturmBilinearForm(const simpleSturmBVP& bvp);
     
     /*!
       evaluate the bilinear form
@@ -53,5 +52,7 @@ namespace WaveletTL
     WBASIS wbasis_;
   };
 }
+
+#include <galerkin/sturm_bf.cpp>
 
 #endif

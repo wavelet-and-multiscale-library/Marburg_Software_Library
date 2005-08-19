@@ -22,7 +22,8 @@
 #include <Rd/cdf_basis.h>
 #include <interval/dku_index.h>
 
-// for convenience, include also the evaluate() functionality:
+// for convenience, include also some functionality
+#include <interval/dku_support.h>
 #include <interval/dku_evaluate.h>
 
 using MathTL::Matrix;
@@ -214,6 +215,18 @@ namespace WaveletTL
     */
     void reconstruct_t(const InfiniteVector<double, Index>& c, const int j,
 		       InfiniteVector<double, Index>& v) const;
+
+    /*!
+      read access to the diverse refinement matrices on level j0
+    */
+    const SparseMatrix<double>& Mj0()  const { return Mj0_; }
+    const SparseMatrix<double>& Mj0T() const { return Mj0T_; }
+    const SparseMatrix<double>& Mj1()  const { return Mj1_; }
+    const SparseMatrix<double>& Mj1T() const { return Mj1T_; }
+    const SparseMatrix<double>& Mj0_transposed()  const { return Mj0_t; }
+    const SparseMatrix<double>& Mj0T_transposed() const { return Mj0T_t; }
+    const SparseMatrix<double>& Mj1_transposed()  const { return Mj1_t; }
+    const SparseMatrix<double>& Mj1T_transposed() const { return Mj1T_t; }
 
     //! setup the refinement matrix M_{j,0} for a given level j
     void assemble_Mj0(const int j, SparseMatrix<double>& mj0) const;

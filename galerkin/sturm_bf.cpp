@@ -16,6 +16,10 @@ namespace WaveletTL
     // a(u,v) = \int_0^1 [p(t)u'(t)v'(t)+q(t)u(t)v(t)] dt
 
     double r = 0;
+
+    // - compute support intersection
+    // - set up Gauss points
+    // - add all integral shares
     
     return r;
   }

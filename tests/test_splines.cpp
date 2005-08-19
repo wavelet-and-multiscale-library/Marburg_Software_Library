@@ -3,6 +3,7 @@
 #include <geometry/point.h>
 #include <geometry/grid.h>
 #include <geometry/sampled_mapping.h>
+#include <numerics/cardinal_splines.h>
 #include <numerics/splines.h>
 #include <utils/array1d.h>
 
@@ -12,8 +13,39 @@ using namespace MathTL;
 
 int main()
 {
-  cout << "Testing MathTL::Spline ..." << endl;
+  cout << "Testing MathTL::(Cardinal)Spline ..." << endl;
 
+  cout << "* some point values of the linear B-spline:" << endl;
+  for (double x = -0.5; x <= 2.5; x+=0.5) {
+    cout << "  N(" << x << ")="
+	 <<  EvaluateCardinalBSpline(2, 0, x) << endl;
+  }
+
+  cout << "* some point values of a shifted quadratic B-spline:" << endl;
+  for (double x = -0.5; x <= 3.5; x+=0.5) {
+    cout << "  N(" << x << ")="
+	 <<  EvaluateCardinalBSpline(3, 1, x) << endl;
+  }  
+
+  cout << "* some point values of the CDF function phi, d=2:" << endl;
+  for (double x = -1.5; x <= 2.5; x+=0.5) {
+    cout << "  phi(" << x << ")="
+	 <<  EvaluateCardinalBSpline_td(2, 0, 0, x) << endl;
+  }  
+  
+  cout << "* some point values of phi_{j,k}, d=2, j=1, k=0:" << endl;
+  for (double x = -1.5; x <= 2.5; x+=0.5) {
+    cout << "  phi(" << x << ")="
+	 <<  EvaluateCardinalBSpline_td(2, 1, 0, x) << endl;
+  }  
+
+  cout << "- some point values of phi_{3,4}, d=2:" << endl;
+  for (double x = 0.0; x <= 1.0; x += ldexp(1.0, -5))
+    {
+      cout << "phi(" << x << ")="
+	   << EvaluateCardinalBSpline_td(2, 3, 4, x) << endl;
+    }
+  
   cout << "* some point values of the default constant spline:" << endl;
   for (double x = -0.5; x <= 1.5; x+=0.5) {
     cout << "  N(" << x << ")="
@@ -48,6 +80,7 @@ int main()
   SampledMapping<1> sm1(Grid<1>(0.0, 3.0, 30), Spline<2>(knots, coeffs));
   sm1.matlab_output(cout);
 
+#if 0
   cout << "* writing point values of a linear spline with multiple knots to a file..." << endl;
   knots[0] =  0.0;
   knots[1] =  0.0;
@@ -63,7 +96,9 @@ int main()
   SampledMapping<1> sm2(Grid<1>(0.0, 3.0, 60), Spline<2>(knots, coeffs));
   sm2.matlab_output(fs);
   fs.close();
+#endif
 
+#if 0
   cout << "* writing point values of a cubic spline with multiple knots to a file..." << endl;
   knots.resize(7);
   knots[0] =  0.0;
@@ -82,4 +117,5 @@ int main()
   SampledMapping<1> sm3(Grid<1>(0.0, 2.0, 1000), Spline<3>(knots, coeffs));
   sm3.matlab_output(fs2);
   fs2.close();
+#endif
 }

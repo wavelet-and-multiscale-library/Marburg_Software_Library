@@ -68,6 +68,6 @@ namespace WaveletTL
 	  r += *it * evaluate(basis, derivative, it.index(), x);
       }
 
-    return r; // for the compiler
+    return r;
   }
 }

@@ -47,6 +47,11 @@ namespace WaveletTL
     double operator () (const typename WBASIS::Index& lambda,
 			const typename WBASIS::Index& nu) const;
 
+    /*!
+      read access to the basis
+    */
+    const WBASIS& basis() const { return wbasis_; }
+
   protected:
     const simpleSturmBVP& bvp_;
     WBASIS wbasis_;

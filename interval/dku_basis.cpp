@@ -67,10 +67,10 @@ namespace WaveletTL
 //     ZT[0] = 1-Z[0]; // does not work
 //     ZT[1] = 1-Z[1]; // does not work
 
-    ellT_l = ell2T<d,dT>()+Z[0];  // (3.2.10)
-    ellT_r = ell2T<d,dT>()+Z[1]; // (3.2.10)
-    ell_l  = ellT_l-(dT-d); // (3.2.16)
-    ell_r  = ellT_r-(dT-d); // (3.2.16)
+    ellTl_ = ell2T<d,dT>()+Z[0];  // (3.2.10)
+    ellTr_ = ell2T<d,dT>()+Z[1]; // (3.2.10)
+    elll_  = ellTl_-(dT-d); // (3.2.16)
+    ellr_  = ellTr_-(dT-d); // (3.2.16)
 
     setup_Alpha();
     setup_AlphaT();
@@ -438,7 +438,7 @@ namespace WaveletTL
     // IGPMlib reference: I_Mask_Bspline::EvalAlpha()
 
     const int mLow = 1-ell2T_;         // start index in (3.2.26)
-    const int mUp  = 2*std::max(ellT_l,ellT_r)+ell1T_-1; // end index in (3.2.41)
+    const int mUp  = 2*std::max(ellTl_,ellTr_)+ell1T_-1; // end index in (3.2.41)
     const int rUp  = dT-1;
 
     Alpha_.resize(mUp-mLow+1, rUp+1);
@@ -480,7 +480,7 @@ namespace WaveletTL
     // IGPMlib reference: I_Mask_Bspline::EvalAlpha()
 
     const int mLow = 1-ell2_;        // start index in (3.2.25)
-    const int mUp  = 2*std::max(ell_l,ell_r)+ell1_-1; // end index in (3.2.40)
+    const int mUp  = 2*std::max(elll_,ellr_)+ell1_-1; // end index in (3.2.40)
     const int rUp  = d-1;
 
     AlphaT_.resize(mUp-mLow+1, rUp+1);
@@ -521,8 +521,8 @@ namespace WaveletTL
     // setup BetaL
     // IGPMlib reference: I_Mask_Bspline::EvalBetaL()
 
-    const int mLow = 2*ellT_l+ell1T_;   // start index in (3.2.41)
-    const int mUp  = 2*ellT_l+ell2T_-2; // end index in (3.2.41)
+    const int mLow = 2*ellTl_+ell1T_;   // start index in (3.2.41)
+    const int mUp  = 2*ellTl_+ell2T_-2; // end index in (3.2.41)
     const int rUp  = dT-1;
 
     const int AlphamLow = 1-ell2T_;
@@ -532,7 +532,7 @@ namespace WaveletTL
     for (int r = 0; r <= rUp; r++)
       for (int m = mLow; m <= mUp; m++) {
 	double help = 0;
-	for (int q = (int)ceil((m-ell2T_)/2.0); q < ellT_l; q++)
+	for (int q = (int)ceil((m-ell2T_)/2.0); q < ellTl_; q++)
 	  help += Alpha_(-AlphamLow+q, r) * cdf_.aT().get_coefficient(MultiIndex<int, 1>(m-2*q)); // (3.2.31)
 
 	BetaL_(-mLow+m, r) = help * M_SQRT1_2;
@@ -544,8 +544,8 @@ namespace WaveletTL
     // setup BetaLT
     // IGPMlib reference: I_Mask_Bspline::EvalBetaL()
 
-    const int mLow = 2*ell_l+ell1_;   // start index in (3.2.40)
-    const int mUp  = 2*ell_l+ell2_-2; // end index in (3.2.40)
+    const int mLow = 2*elll_+ell1_;   // start index in (3.2.40)
+    const int mUp  = 2*elll_+ell2_-2; // end index in (3.2.40)
     const int rUp  = d-1;
 
     const int AlphaTmLow = 1-ell2_;
@@ -555,7 +555,7 @@ namespace WaveletTL
     for (int r = 0; r <= rUp; r++)
       for (int m = mLow; m <= mUp; m++) {
 	double help = 0;
-	for (int q = (int)ceil((m-ell2_)/2.0); q < ell_l; q++)
+	for (int q = (int)ceil((m-ell2_)/2.0); q < elll_; q++)
 	  help += AlphaT_(-AlphaTmLow+q, r) * cdf_.a().get_coefficient(MultiIndex<int, 1>(m-2*q)); // (3.2.31)
 	
 	BetaLT_(-mLow+m, r) = help * M_SQRT1_2;
@@ -567,8 +567,8 @@ namespace WaveletTL
     // setup BetaR
     // IGPMlib reference: I_Mask_Bspline::EvalBetaR()
 
-    const int mLow = 2*ellT_r+ell1T_;  // start index in (3.2.41)
-    const int mUp  = 2*ellT_r+ell2T_-2; // end index in (3.2.41)
+    const int mLow = 2*ellTr_+ell1T_;  // start index in (3.2.41)
+    const int mUp  = 2*ellTr_+ell2T_-2; // end index in (3.2.41)
     const int rUp  = dT-1;
 
     const int AlphamLow = 1-ell2T_;
@@ -578,7 +578,7 @@ namespace WaveletTL
     for (int r = 0; r <= rUp; r++)
       for (int m = mLow; m <= mUp; m++) {
 	double help = 0;
-	for (int q = (int)ceil((m-ell2T_)/2.0); q < ellT_r; q++)
+	for (int q = (int)ceil((m-ell2T_)/2.0); q < ellTr_; q++)
 	  help += Alpha_(-AlphamLow+q, r) * cdf_.aT().get_coefficient(MultiIndex<int, 1>(m-2*q)); // (3.2.31)
 
 	BetaR_(-mLow+m, r) = help * M_SQRT1_2;
@@ -590,8 +590,8 @@ namespace WaveletTL
     // setup BetaRT
     // IGPMlib reference: I_Mask_Bspline::EvalBetaR()
 
-    const int mLow = 2*ell_r+ell1_;   // start index in (3.2.40)
-    const int mUp  = 2*ell_r+ell2_-2; // end index in (3.2.40)
+    const int mLow = 2*ellr_+ell1_;   // start index in (3.2.40)
+    const int mUp  = 2*ellr_+ell2_-2; // end index in (3.2.40)
     const int rUp  = d-1;
 
     const int AlphaTmLow = 1-ell2_;
@@ -601,7 +601,7 @@ namespace WaveletTL
     for (int r = 0; r <= rUp; r++)
       for (int m = mLow; m <= mUp; m++) {
 	double help = 0;
-	for (int q = (int)ceil((m-ell2_)/2.0); q < ell_r; q++)
+	for (int q = (int)ceil((m-ell2_)/2.0); q < ellr_; q++)
 	  help += AlphaT_(-AlphaTmLow+q, r) * cdf_.a().get_coefficient(MultiIndex<int, 1>(m-2*q)); // (3.2.31)
 	
 	BetaRT_(-mLow+m, r) = help * M_SQRT1_2;
@@ -612,10 +612,10 @@ namespace WaveletTL
   void DKUBasis<d, dT>::setup_GammaLR() {
     // IGPMlib reference: I_Mask_Bspline::EvalGammaL(), ::EvalGammaR()
 
-    const int llowT = ellT_l-dT;
-    const int lupT  = ellT_l-1-ZT[0];
-    const int rupTh  = ellT_r-dT;
-    const int rlowTh = ellT_r-1-ZT[1];
+    const int llowT = ellTl_-dT;
+    const int lupT  = ellTl_-1-ZT[0];
+    const int rupTh  = ellTr_-dT;
+    const int rlowTh = ellTr_-1-ZT[1];
     
     GammaL_.resize(lupT-llowT+1,lupT-llowT+1);
     GammaR_.resize(rlowTh-rupTh+1,rlowTh-rupTh+1);
@@ -631,9 +631,9 @@ namespace WaveletTL
     //    exactly using the z(s,t) values
 
     const int I1Low = -ell2_+1;
-    const int I1Up  = ell_l-d+dT-1;
+    const int I1Up  = elll_-d+dT-1;
     const int I2Low = -ell2T_+1;
-    const int I2Up  = ellT_l-1;
+    const int I2Up  = ellTl_-1;
 
     Matrix<double> I(I1Up-I1Low+1, I2Up-I2Low+1);
     for (int nu = I1Low; nu < -ell1_; nu++)
@@ -647,7 +647,7 @@ namespace WaveletTL
       }
     for (int nu = -I1Low; nu <= I1Up; nu++)
       for (int mu = I2Low; mu <= I2Up; mu++) {
-	if ((nu >= -ell1_) || ((nu <= ell_l-1) && (mu >= -ell1T_)))
+	if ((nu >= -ell1_) || ((nu <= elll_-1) && (mu >= -ell1T_)))
 	  I(-I1Low+nu, -I2Low+mu) = (nu == mu ? 1 : 0); // (5.1.6)
       }
 
@@ -660,26 +660,26 @@ namespace WaveletTL
     for (int r(Z[0]); r < d; r++)
       for (int k(0); k < dT; k++) {
 	double help(0);
-	for (int nu = I1Low; nu < ell_l; nu++)
+	for (int nu = I1Low; nu < elll_; nu++)
 	  for (int mu = I2Low; mu <= I2Up; mu++)
 	    help += AlphaT_(-AlphaTmLow+nu, r) * Alpha_(-AlphamLow+mu, k) * I(-I1Low+nu, -I2Low+mu);
- 	GammaL_(-llowT+ell_l-d-Z[0]+r, k) = help; // (5.1.4); (no offset in second argument needed)
+ 	GammaL_(-llowT+elll_-d-Z[0]+r, k) = help; // (5.1.4); (no offset in second argument needed)
       }
 
     for (int r(d); r <= dT-1+Z[0]; r++)
       for (int k(0); k < dT; k++) {
 	double help(0);
 	for (int mu = I2Low; mu <= I2Up; mu++)
-	  help += Alpha_(-AlphamLow+mu, k) * I(-I1Low+ell_l-d+r-Z[0], -I2Low+mu);
-	GammaL_(-llowT+ell_l-d-Z[0]+r, k) = help; // (5.1.5); (no offset in second argument needed)
+	  help += Alpha_(-AlphamLow+mu, k) * I(-I1Low+elll_-d+r-Z[0], -I2Low+mu);
+	GammaL_(-llowT+elll_-d-Z[0]+r, k) = help; // (5.1.5); (no offset in second argument needed)
       }
 
     // The same for GammaR:
 
     const int I1Low_r = -ell2_+1;
-    const int I1Up_r  = ell_r-d+dT-1;
+    const int I1Up_r  = ellr_-d+dT-1;
     const int I2Low_r = -ell2T_+1;
-    const int I2Up_r  = ellT_r-1;
+    const int I2Up_r  = ellTr_-1;
 
     I.resize(I1Up_r-I1Low_r+1, I2Up_r-I2Low_r+1);
     for (int nu = I1Low_r; nu < -ell1_; nu++)
@@ -693,25 +693,25 @@ namespace WaveletTL
       }
     for (int nu = -I1Low_r; nu <= I1Up_r; nu++)
       for (int mu = I2Low_r; mu <= I2Up_r; mu++) {
- 	if ((nu >= -ell1_) || ((nu <= ell_r-1) && (mu >= -ell1T_)))
+ 	if ((nu >= -ell1_) || ((nu <= ellr_-1) && (mu >= -ell1T_)))
  	  I(-I1Low_r+nu, -I2Low_r+mu) = (nu == mu ? 1 : 0); // (5.1.6)
       }
 
     for (int r(Z[1]); r < d; r++)
       for (int k(0); k < dT; k++) {
  	double help(0);
- 	for (int nu = I1Low_r; nu < ell_r; nu++)
+ 	for (int nu = I1Low_r; nu < ellr_; nu++)
  	  for (int mu = I2Low_r; mu <= I2Up_r; mu++)
  	    help += AlphaT_(-AlphaTmLow+nu, r) * Alpha_(-AlphamLow+mu, k) * I(-I1Low_r+nu, -I2Low_r+mu);
-  	GammaR_(-rupTh+ell_r-d-Z[1]+r, -rupTh+ellT_r-dT+k) = help; // (5.1.4)
+  	GammaR_(-rupTh+ellr_-d-Z[1]+r, -rupTh+ellTr_-dT+k) = help; // (5.1.4)
       }
 
     for (int r(d); r <= dT-1+Z[1]; r++)
       for (int k(0); k < dT; k++) {
  	double help(0);
  	for (int mu = I2Low_r; mu <= I2Up_r; mu++)
- 	  help += Alpha_(-AlphamLow+mu, k) * I(-I1Low_r+ell_r-d+r-Z[1], -I2Low_r+mu);
- 	GammaR_(-rupTh+ell_r-d-Z[1]+r, -rupTh+ellT_r-dT+k) = help; // (5.1.5)
+ 	  help += Alpha_(-AlphamLow+mu, k) * I(-I1Low_r+ellr_-d+r-Z[1], -I2Low_r+mu);
+ 	GammaR_(-rupTh+ellr_-d-Z[1]+r, -rupTh+ellTr_-dT+k) = help; // (5.1.5)
       }
   }
 
@@ -719,10 +719,10 @@ namespace WaveletTL
   void DKUBasis<d, dT>::setup_CX_CXT() {
     // IGPMlib reference: I_Mask_Bspline::EvalCL(), ::EvalCR()
 
-    const int llowT  = ellT_l-dT;
-    const int lupT   = ellT_l-1-ZT[0];
-    const int rupTh  = ellT_r-dT;
-    const int rlowTh = ellT_r-1-ZT[1];
+    const int llowT  = ellTl_-dT;
+    const int lupT   = ellTl_-1-ZT[0];
+    const int rupTh  = ellTr_-dT;
+    const int rlowTh = ellTr_-1-ZT[1];
 
     CL_.resize (lupT-llowT+1, lupT-llowT+1);  
     CLT_.resize(lupT-llowT+1, lupT-llowT+1); 
@@ -1011,24 +1011,24 @@ namespace WaveletTL
     // IGPMlib reference: I_Mask_Bspline::EvalCL(), ::EvalCR()
 
     const int llklow  = 1-ell2_;   // offset 1 in CLA (and AlphaT), see (3.2.25)
-    const int llkup   = ellT_l-1;
+    const int llkup   = ellTl_-1;
     const int llklowT = 1-ell2T_;  // offset 1 in CLAT (and Alpha), see (3.2.26)
-    const int llkupT  = ellT_l-1;
+    const int llkupT  = ellTl_-1;
 
-    const int rlklowh  = ellT_r-1;
+    const int rlklowh  = ellTr_-1;
     const int rlkuph   = 1-ell2_;
-    const int rlklowTh = ellT_r-1;
+    const int rlklowTh = ellTr_-1;
     const int rlkupTh  = 1-ell2T_;
 
-    const int rlowh   = ell_r-1-Z[1];
-    const int ruph    = ell_r-d;
-    const int rlowTh  = ellT_r-1-ZT[1];
-    const int rupTh   = ellT_r-dT;
+    const int rlowh   = ellr_-1-Z[1];
+    const int ruph    = ellr_-d;
+    const int rlowTh  = ellTr_-1-ZT[1];
+    const int rupTh   = ellTr_-dT;
 
-    const int llow    = ell_l-d;    // offset 1 in CL (and CLT), offset 2 in AlphaT
-    const int lup     = ell_l-1-Z[0];
-    const int llowT   = ellT_l-dT;  // == llow, offset 2 in CLA and CLAT
-    const int lupT    = ellT_l-1-ZT[0];
+    const int llow    = elll_-d;    // offset 1 in CL (and CLT), offset 2 in AlphaT
+    const int lup     = elll_-1-Z[0];
+    const int llowT   = ellTl_-dT;  // == llow, offset 2 in CLA and CLAT
+    const int lupT    = ellTl_-1-ZT[0];
 
     // setup CLA <-> AlphaT * (CL)^T
     CLA_.resize(llkup-llklow+1, lupT-llowT+1);
@@ -1172,22 +1172,22 @@ namespace WaveletTL
   DKUBasis<d, dT>::ML() const {
     // IGPMlib reference: I_Basis_Bspline_s::ML()
     
-    const int llow = ell_l-d;           // the (3.5.2) bounds
-    const int lup  = ell_l-1-Z[0];
-    const int MLup = ell2_+2*ell_l-2;
+    const int llow = elll_-d;           // the (3.5.2) bounds
+    const int lup  = elll_-1-Z[0];
+    const int MLup = ell2_+2*elll_-2;
     const int AlphaToffset = 1-ell2_;
-    const int BetaLToffset = 2*ell_l+ell1_;
+    const int BetaLToffset = 2*elll_+ell1_;
     
     Matrix<double> ML(MLup-llow+1, lup-llow+1);
 
     for (int row = Z[0]; row < d; row++)
       ML(row-Z[0], row-Z[0]) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
 
-    for (int m = ell_l; m <= 2*ell_l+ell1_-1; m++)
+    for (int m = elll_; m <= 2*elll_+ell1_-1; m++)
       for (int k = Z[0]; k < d; k++)
     	ML(-llow+m, k-Z[0]) = AlphaT_(-AlphaToffset+m, k) / sqrt(ldexp(1.0, 2*k+1));
     
-    for (int m = 2*ell_l+ell1_; m <= MLup; m++)
+    for (int m = 2*elll_+ell1_; m <= MLup; m++)
       for (int k = Z[0]; k < d; k++)
   	ML(-llow+m, k-Z[0]) = BetaLT_(-BetaLToffset+m, k);
 
@@ -1199,22 +1199,22 @@ namespace WaveletTL
   DKUBasis<d, dT>::MR() const {
     // IGPMlib reference: I_Basis_Bspline_s::MR()
 
-    const int ruph  = ell_r-d;         // the (3.5.2) bounds
-    const int rlowh = ell_r-1-Z[1];
-    const int MRup  = ell2_+2*ell_r-2;
+    const int ruph  = ellr_-d;         // the (3.5.2) bounds
+    const int rlowh = ellr_-1-Z[1];
+    const int MRup  = ell2_+2*ellr_-2;
     const int AlphaToffset = 1-ell2_;
-    const int BetaRToffset = 2*ell_r+ell1_;
+    const int BetaRToffset = 2*ellr_+ell1_;
 
     Matrix<double> MR(MRup-ruph+1, rlowh-ruph+1);
 
     for (int row = Z[1]; row < d; row++)
       MR(row-Z[1], row-Z[1]) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
 
-    for (int m = ell_r; m <= 2*ell_r+ell1_-1; m++)
+    for (int m = ellr_; m <= 2*ellr_+ell1_-1; m++)
       for (int k = Z[1]; k < d; k++)
 	MR(-ruph+m, k-Z[1]) = AlphaT_(-AlphaToffset+m, k) / sqrt(ldexp(1.0, 2*k+1));
     
-    for (int m = 2*ell_r+ell1_; m <= MRup; m++)
+    for (int m = 2*ellr_+ell1_; m <= MRup; m++)
       for (int k = Z[1]; k < d; k++)
   	MR(-ruph+m, k-Z[1]) = BetaRT_(-BetaRToffset+m, k);
 
@@ -1226,22 +1226,22 @@ namespace WaveletTL
   DKUBasis<d, dT>::MLTp() const {
     // IGPMlib reference: I_Basis_Bspline_s::MLts()
 
-    const int llowT = ellT_l-dT;           // the (3.5.6) bounds
-    const int lupT  = ellT_l-1-ZT[0];
-    const int MLTup = ell2T_+2*ellT_l-2;
+    const int llowT = ellTl_-dT;           // the (3.5.6) bounds
+    const int lupT  = ellTl_-1-ZT[0];
+    const int MLTup = ell2T_+2*ellTl_-2;
     const int Alphaoffset = 1-ell2T_;
-    const int BetaLoffset = 2*ellT_l+ell1T_;
+    const int BetaLoffset = 2*ellTl_+ell1T_;
 
     Matrix<double> MLTp(MLTup-llowT+1, lupT-llowT+1);
 
     for (int row = 0; row < dT-ZT[0]; row++)
       MLTp(row, row) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
 
-    for (int m = lupT+1; m <= 2*ellT_l+ell1T_-1; m++)
+    for (int m = lupT+1; m <= 2*ellTl_+ell1T_-1; m++)
       for (int k = 0; k < dT-ZT[0]; k++)
     	MLTp(-llowT+m, k) = Alpha_(-Alphaoffset+m, k) / sqrt(ldexp(1.0, 2*k+1));
     
-    for (int m = 2*ellT_l+ell1T_; m <= MLTup; m++)
+    for (int m = 2*ellTl_+ell1T_; m <= MLTup; m++)
       for (int k = 0; k < dT-ZT[0]; k++)
   	MLTp(-llowT+m, k) = BetaL_(-BetaLoffset+m, k);
 
@@ -1253,22 +1253,22 @@ namespace WaveletTL
   DKUBasis<d, dT>::MRTp() const {
     // IGPMlib reference: I_Basis_Bspline_s::MRts()
 
-    const int rupTh  = ellT_r-dT;         // the (3.5.6) bounds
-    const int rlowTh = ellT_r-1-ZT[1];
-    const int MRTup = ell2T_+2*ellT_r-2;
+    const int rupTh  = ellTr_-dT;         // the (3.5.6) bounds
+    const int rlowTh = ellTr_-1-ZT[1];
+    const int MRTup = ell2T_+2*ellTr_-2;
     const int Alphaoffset = 1-ell2T_;
-    const int BetaRoffset = 2*ellT_r+ell1T_;
+    const int BetaRoffset = 2*ellTr_+ell1T_;
 
     Matrix<double> MRTp(MRTup-rupTh+1, rlowTh-rupTh+1);
 
     for (int row = 0; row < dT-ZT[1]; row++)
       MRTp(row, row) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
 
-    for (int m = rlowTh+1; m <= 2*ellT_r+ell1T_-1; m++)
+    for (int m = rlowTh+1; m <= 2*ellTr_+ell1T_-1; m++)
       for (int k = 0; k < dT-ZT[1]; k++)
     	MRTp(-rupTh+m, k) = Alpha_(-Alphaoffset+m, k) / sqrt(ldexp(1.0, 2*k+1));
     
-    for (int m = 2*ellT_r+ell1T_; m <= MRTup; m++)
+    for (int m = 2*ellTr_+ell1T_; m <= MRTup; m++)
       for (int k = 0; k < dT-ZT[1]; k++)
   	MRTp(-rupTh+m, k) = BetaR_(-BetaRoffset+m, k);
     
@@ -1282,19 +1282,19 @@ namespace WaveletTL
     
     // TODO: enhance readability! (<-> [DKU section 3.5])
 
-    int p = (1 << j0()) - 2*ell_l - (d%2) + 1;
-    int q = (1 << j0()) - 4*ell_l - 2*(d%2) + d + 1; // this value is overwritten below
+    int p = (1 << j0()) - 2*elll_ - (d%2) + 1;
+    int q = (1 << j0()) - 4*elll_ - 2*(d%2) + d + 1; // this value is overwritten below
 
     const int nj  = Deltasize(j0());
     const int njp = Deltasize(j0()+1);
 
     Mj0.resize(njp, nj);
 
-    const int diff_l = ellT_l-ell2T_-Z[0];
-    const int diff_r = ellT_r-ell2T_-Z[1];
+    const int diff_l = ellTl_-ell2T_-Z[0];
+    const int diff_r = ellTr_-ell2T_-Z[1];
     const int alowc = d+1-Z[0];
     const int aupc  = d+p+diff_l-diff_r+Z[0];
-    const int alowr = d+ell_l+ell1_-2*Z[0];
+    const int alowr = d+elll_+ell1_-2*Z[0];
     
     for (int i = 0; i < (int)ML.row_dimension(); i++)
       for (int k = 0; k < (int)ML.column_dimension(); k++)
@@ -1325,8 +1325,8 @@ namespace WaveletTL
 
     // TODO: enhance readability! (<-> [DKU section 3.5])
     
-    int p = (1 << j0()) - ellT_l - ellT_r - (dT%2) + 1;
-    int q = (1 << j0()) - 4*ellT_l - 2*(dT%2) + dT + 1; // this value is overwritten below
+    int p = (1 << j0()) - ellTl_ - ellTr_ - (dT%2) + 1;
+    int q = (1 << j0()) - 4*ellTl_ - 2*(dT%2) + dT + 1; // this value is overwritten below
 
     const int nj  = Deltasize(j0());
     const int njp = Deltasize(j0()+1);
@@ -1335,7 +1335,7 @@ namespace WaveletTL
 
     const int atlowc = dT+1;
     const int atupc  = dT+p;
-    const int atlowr = dT+ellT_l+ell1T_;
+    const int atlowr = dT+ellTl_+ell1T_;
     
     for (int i = 0; i < (int)MLTp.row_dimension(); i++)
       for (int k = 0; k < (int)MLTp.column_dimension(); k++)
@@ -1363,7 +1363,7 @@ namespace WaveletTL
   DKUBasis<d, dT>::F(SparseMatrix<double>& FF) {
     // IGPMlib reference: I_Basis_Bspline_s::F()
     
-    const int FLow = ell_l+(d%2)-Z[0];       // start column index for F_j in (4.1.14)
+    const int FLow = elll_+(d%2)-Z[0];       // start column index for F_j in (4.1.14)
     const int FUp  = FLow+(DeltaRmin(j0())-DeltaLmax())-1; // end column index for F_j in (4.1.14)
     
     // (4.1.14):
@@ -1373,7 +1373,7 @@ namespace WaveletTL
     for (int r = 0; r < FLow; r++)
       FF.set_entry(r+d-Z[0], r, 1.0);
     
-    int i = d+ell_l+(d%2)-1-2*Z[0];
+    int i = d+elll_+(d%2)-1-2*Z[0];
     for (int r = FLow; r <= FUp; r++) {
       FF.set_entry(i, r-1, 1.0);
       i += 2;
@@ -1414,8 +1414,8 @@ namespace WaveletTL
     // A_j=A_j^{(0)} in (4.1.1) is a q times p matrix
     const int ALowc = d - Z[0]; // first column of A_j^{(d)} in Ahat_j^{(d)}
     const int AUpc  = (Deltasize(j0())-1) - (d - Z[1]); // last column
-    const int ALowr = d + ell_l + ell1_ - 2 * Z[0]; // first row of A_j^{(d)} in Ahat_j^{(d)}
-//     const int AUpr  = (Deltasize(j0()+1)-1) - (d+ell_r-ell2_+(d%2)-2*Z[1]); // last row
+    const int ALowr = d + elll_ + ell1_ - 2 * Z[0]; // first row of A_j^{(d)} in Ahat_j^{(d)}
+//     const int AUpr  = (Deltasize(j0()+1)-1) - (d+ellr_-ell2_+(d%2)-2*Z[1]); // last row
 
     A.resize(Deltasize(j0()+1), Deltasize(j0()));
 
@@ -1453,8 +1453,8 @@ namespace WaveletTL
     // A_j=A_j^{(0)} in (4.1.1) is a q times p matrix
     const int ALowc = d - Z[0]; // first column of A_j^{(d)} in Ahat_j^{(d)}
     const int AUpc  = (Deltasize(j0())-1) - (d - Z[1]); // last column
-    const int ALowr = d + ell_l + ell1_ - 2 * Z[0]; // first row of A_j^{(d)} in Ahat_j^{(d)}
-    const int AUpr  = (Deltasize(j0()+1)-1) - (d+ell_r-ell2_+(d%2)-2*Z[1]); // last row
+    const int ALowr = d + elll_ + ell1_ - 2 * Z[0]; // first row of A_j^{(d)} in Ahat_j^{(d)}
+    const int AUpr  = (Deltasize(j0()+1)-1) - (d+ellr_-ell2_+(d%2)-2*Z[1]); // last row
 
     int p = AUpc-ALowc+1;
 //     int q = AUpr-ALowr+1;
@@ -1467,7 +1467,7 @@ namespace WaveletTL
 
       const int elimrow = i%2 ? ALowr+(i-1)/2 : AUpr-(int)floor((i-1)/2.);
 
-      const int HhatLow = i%2 ? elimrow : ell_l+ell2_+2-(d%2)-(i/2)-2*Z[0];
+      const int HhatLow = i%2 ? elimrow : elll_+ell2_+2-(d%2)-(i/2)-2*Z[0];
       const int HhatUp  = i%2 ? HhatLow + 2*p-1+(d+(d%2))/2 : elimrow;
       
       if (i%2) // i odd, elimination from above (4.1.4a)
@@ -1514,8 +1514,8 @@ namespace WaveletTL
     
     PPinv.diagonal(PP.row_dimension(), 1.0);
 
-    const int msize_l = d+ell_l+ell2_-1;
-    const int msize_r = d+ell_r+ell2_-1;
+    const int msize_l = d+elll_+ell2_-1;
+    const int msize_r = d+ellr_+ell2_-1;
 
     Matrix<double> ml;
     ml.diagonal(msize_l, 1.0);
@@ -1547,19 +1547,19 @@ namespace WaveletTL
   DKUBasis<d, dT>::BT(const SparseMatrix<double>& A, SparseMatrix<double>& BB) {
     // IGPMlib reference: I_Basis_Bspline_s::Btr()
 
-    const int p = (1<<j0()) - ell_l - ell_r - (d%2) + 1;
+    const int p = (1<<j0()) - elll_ - ellr_ - (d%2) + 1;
 //     const int q = 2 * p + d - 1;
 
-    const int llow = ell_l-d;
+    const int llow = elll_-d;
 
     BB.resize(Deltasize(j0()+1), Deltasize(j0()));
 
     for (int r = 0; r < d-Z[0]; r++)
       BB.set_entry(r, r, 1.0);
 
-    const double help = 1./A.get_entry(d+ell_l+ell1_+ell2_, d);
+    const double help = 1./A.get_entry(d+elll_+ell1_+ell2_, d);
 
-    for (int c = d-Z[0], r = d+ell_l+ell1_+ell2_; c < d+p+Z[1]; c++, r += 2)
+    for (int c = d-Z[0], r = d+elll_+ell1_+ell2_; c < d+p+Z[1]; c++, r += 2)
       BB.set_entry(r-2*Z[0], c, help);
 
     for (int r = DeltaRmax(j0())-d+1+Z[1]; r <= DeltaRmax(j0()); r++)
@@ -2466,13 +2466,13 @@ namespace WaveletTL
 			    const int resolution) const
   {
     const int llklow  = 1-ell2_;   // offset 1 in CLA (and AlphaT), see (3.2.25)
-    const int llkup   = ellT_l-1;
+    const int llkup   = ellTl_-1;
     const int llklowT = 1-ell2T_;  // offset 1 in CLAT (and Alpha), see (3.2.26)
-    const int llkupT  = ellT_l-1;
+    const int llkupT  = ellTl_-1;
 
-    const int rlklowh  = ellT_r-1;
+    const int rlklowh  = ellTr_-1;
     const int rlkuph   = 1-ell2_;
-    const int rlklowTh = ellT_r-1;
+    const int rlklowTh = ellTr_-1;
     const int rlkupTh  = 1-ell2T_;
 
     if (lambda.e() == 0) { // generator

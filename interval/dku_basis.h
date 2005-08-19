@@ -22,6 +22,9 @@
 #include <Rd/cdf_basis.h>
 #include <interval/dku_index.h>
 
+// for convenience, include also the evaluate() functionality:
+#include <interval/dku_evaluate.h>
+
 using MathTL::Matrix;
 
 namespace WaveletTL
@@ -73,24 +76,30 @@ namespace WaveletTL
 		      DKUBiorthogonalizationMethod bio = partialSVD);
 
     //! coarsest possible level
-    inline const int j0() const { return (int) ceil(log(ellT_l+ell2T_-1.)/log(2.0)+1); }
+    inline const int j0() const { return (int) ceil(log(ellTl_+ell2T_-1.)/log(2.0)+1); }
+
+    //! read access to some constants
+    inline const int ell_l() const { return elll_; }
+    inline const int ell_r() const { return ellr_; }
+    inline const int ellT_l() const { return ellTl_; }
+    inline const int ellT_r() const { return ellTr_; }
 
     /*!
       boundary indices in \Delta_j^X and \tilde\Delta_j^X (3.2.17)
      */
-    inline const int DeltaLmin() const { return ell_l-d; }
-    inline const int DeltaLmax() const { return ell_l-1-Z[0]; }
+    inline const int DeltaLmin() const { return elll_-d; }
+    inline const int DeltaLmax() const { return elll_-1-Z[0]; }
     inline const int Delta0min() const { return DeltaLmax()+1; }
     inline const int Delta0max(const int j) const { return DeltaRmin(j)-1; }
-    inline const int DeltaRmin(const int j) const { return (1<<j)-ell1_-ell2_-(ell_r-1-Z[1]); }
-    inline const int DeltaRmax(const int j) const { return (1<<j)-ell1_-ell2_-(ell_r-d); }
+    inline const int DeltaRmin(const int j) const { return (1<<j)-ell1_-ell2_-(ellr_-1-Z[1]); }
+    inline const int DeltaRmax(const int j) const { return (1<<j)-ell1_-ell2_-(ellr_-d); }
 
-    inline const int DeltaLTmin() const { return ellT_l-dT; } // == DeltaLmin()
-    inline const int DeltaLTmax() const { return ellT_l-1-ZT[0]; }
+    inline const int DeltaLTmin() const { return ellTl_-dT; } // == DeltaLmin()
+    inline const int DeltaLTmax() const { return ellTl_-1-ZT[0]; }
     inline const int Delta0Tmin() const { return DeltaLTmax()+1; }
     inline const int Delta0Tmax(const int j) const { return DeltaRTmin()-1; }
-    inline const int DeltaRTmin(const int j) const { return (1<<j)-ell1_-ell2_-(ellT_r-1-ZT[1]); }
-    inline const int DeltaRTmax(const int j) const { return (1<<j)-ell1_-ell2_-(ellT_r-dT); } // == DeltaRmax()
+    inline const int DeltaRTmin(const int j) const { return (1<<j)-ell1_-ell2_-(ellTr_-1-ZT[1]); }
+    inline const int DeltaRTmax(const int j) const { return (1<<j)-ell1_-ell2_-(ellTr_-dT); } // == DeltaRmax()
 
     //! size of Delta_j
     inline const int Deltasize(const int j) const { return DeltaRmax(j)-DeltaLmin()+1; }
@@ -247,6 +256,14 @@ namespace WaveletTL
 			InfiniteVector<double, Vector<double>::size_type>& v) const;
     void Mj1T_t_get_row(const int j, const Vector<double>::size_type row,
 			InfiniteVector<double, Vector<double>::size_type>& v) const;
+
+    /*!
+      read access to the boundary generator expansion coefficients
+    */
+    const Matrix<double>& CLA() const { return CLA_; }
+    const Matrix<double>& CRA() const { return CRA_; }
+    const Matrix<double>& CLAT() const { return CLAT_; }
+    const Matrix<double>& CRAT() const { return CRAT_; }
     
     /*!
       Evaluate a single primal/dual generator or wavelet \psi_\lambda
@@ -266,7 +283,7 @@ namespace WaveletTL
 
   protected:
     int ell1_, ell2_, ell1T_, ell2T_;
-    int ell_l, ell_r, ellT_l, ellT_r;
+    int elll_, ellr_, ellTl_, ellTr_;
     DKUBiorthogonalizationMethod bio_;
     Array1D<int> Z, ZT;
 

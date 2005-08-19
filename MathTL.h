@@ -40,7 +40,6 @@
 #include <geometry/point.h>
 #include <geometry/sampled_mapping.h>
 
-#include <numerics/b_splines.h>
 #include <numerics/eigenvalues.h>
 #include <numerics/gauss_data.h>
 #include <numerics/gauss_quadrature.h>
@@ -51,6 +50,7 @@
 #include <numerics/quadrature.h>
 #include <numerics/recursion.h>
 #include <numerics/rosenbrock.h>
+#include <numerics/cardinal_splines.h>
 #include <numerics/splines.h>
 
 #endif

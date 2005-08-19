@@ -2531,8 +2531,7 @@ namespace WaveletTL
  	}
       }
     } else { // wavelet
-      InfiniteVector<double, Index> coeffs, gcoeffs;
-      coeffs[lambda] = 1.0;
+      InfiniteVector<double, Index> gcoeffs;
       if (primal)
 	reconstruct_1(lambda, lambda.j()+1, gcoeffs);
       else

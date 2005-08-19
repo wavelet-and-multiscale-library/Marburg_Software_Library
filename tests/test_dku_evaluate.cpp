@@ -20,8 +20,9 @@ int main()
   Index lambda(basis.firstGenerator(basis.j0()));
 //   for (int i = 1; i <= 4; i++, ++lambda);
 //   lambda = basis.lastGenerator(basis.j0());
+  lambda = basis.firstWavelet(basis.j0());
 
-  cout << "- point values at dyadic points of the " << lambda << " generator:" << endl;
+  cout << "- point values at dyadic points of the " << lambda << " generator/wavelet:" << endl;
   basis.evaluate(lambda, true, 5).matlab_output(cout);
 
   cout << "- point values with evaluate() routine:" << endl;

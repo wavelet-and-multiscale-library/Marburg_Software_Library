@@ -1,7 +1,10 @@
 // implementation for dku_evaluate.h
 
 #include <Rd/cdf_utils.h>
+#include <algebra/infinite_vector.h>
 #include <numerics/cardinal_splines.h>
+
+using MathTL::InfiniteVector;
 
 namespace WaveletTL
 {
@@ -58,6 +61,11 @@ namespace WaveletTL
       }
     else // wavelet
       {
+	InfiniteVector<double, typename DKUBasis<d, dT>::Index> gcoeffs;
+	basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
+	for (typename InfiniteVector<double, typename DKUBasis<d, dT>::Index>::const_iterator it(gcoeffs.begin());
+	     it != gcoeffs.end(); ++it)
+	  r += *it * evaluate(basis, derivative, it.index(), x);
       }
 
     return r; // for the compiler

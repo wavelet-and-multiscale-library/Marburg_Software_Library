@@ -3,7 +3,7 @@
 #include <vector>
 #include <numerics/quadrature.h>
 #include <numerics/gauss_quadrature.h>
-#include <numerics/b_splines.h>
+#include <numerics/cardinal_splines.h>
 #include <utils/function.h>
 #include <utils/array1d.h>
 
@@ -114,7 +114,7 @@ int main()
 //       cout << "  points: " << points << ", weights: " << weights << endl;
     }
 
-  Bspline<2> N2;
+  CardinalBSpline<2> N2;
   cout << "- integrating N_2 with composite rules (should be 1):" << endl;
   for (int N(1); N <= (1<<3); N <<= 1)
     {
@@ -123,7 +123,7 @@ int main()
  	   << endl;
     }
   
-  Bspline<3> N3;
+  CardinalBSpline<3> N3;
   cout << "- integrating N_3 with composite rules (should be 1):" << endl;
   for (int N(1); N <= (1<<5); N <<= 1)
     {
@@ -132,7 +132,7 @@ int main()
  	   << endl;
     }
   
-  Bspline<4> N4;
+  CardinalBSpline<4> N4;
   cout << "- integrating N_4 with composite rules (should be 1):" << endl;
   for (int N(1); N <= (1<<5); N <<= 1)
     {

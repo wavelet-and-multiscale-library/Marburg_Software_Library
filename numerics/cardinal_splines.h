@@ -21,8 +21,8 @@ namespace MathTL
   template <int d>
   double evaluate_cardinal_BSpline(const double x)
   {
-    return (x*evaluate_cardinal_Bspline<d-1>(x)
-      + (d-x)*evaluate_cardinal_Bspline<d-1>(x-1))/(d-1);
+    return (x*evaluate_cardinal_BSpline<d-1>(x)
+      + (d-x)*evaluate_cardinal_BSpline<d-1>(x-1))/(d-1);
   }
  
   /*!
@@ -123,7 +123,7 @@ namespace MathTL
     inline double value(const Point<1>& p,
 			const unsigned int component = 0) const
     {
-      return evaluate_BSpline<d>(p(0));
+      return evaluate_cardinal_BSpline<d>(p(0));
     }
   
     /*!

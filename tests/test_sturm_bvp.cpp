@@ -6,7 +6,7 @@
 
 #include <interval/dku_index.h>
 #include <interval/dku_basis.h>
-#include <galerkin/sturm_bf.h>
+#include <galerkin/sturm_equation.h>
 
 using namespace std;
 using namespace WaveletTL;
@@ -74,16 +74,16 @@ int main()
   TestProblem<1> T;
 
   const int d  = 2;
-  const int dT = 2;
+  const int dT = 4;
   typedef DKUBasis<d,dT> Basis;
-  SturmBilinearForm<Basis> a(T);
+  SturmEquation<Basis> eq(T);
 
   typedef Basis::Index Index;
   set<Index> Lambda;
-  for (Index lambda = a.basis().firstGenerator(a.basis().j0());;++lambda)
+  for (Index lambda = eq.basis().firstGenerator(eq.basis().j0());;++lambda)
     {
       Lambda.insert(lambda);
-      if (lambda == a.basis().lastGenerator(a.basis().j0()))
+      if (lambda == eq.basis().lastWavelet(eq.basis().j0()))
 	break;
     }
 
@@ -98,9 +98,11 @@ int main()
       unsigned int j = i;
       for (; it2 != Lambda.end(); ++it2, ++j)
 	{
-	  A.set_entry(i, j, a(*it2, *it1));
+	  A.set_entry(i, j, eq.a(*it2, *it1) / eq.D(*it1) / eq.D(*it2));
 	}
     }
+
+  cout << "- stiffness matrix A=" << endl << A << endl;
   
   return 0;
 }

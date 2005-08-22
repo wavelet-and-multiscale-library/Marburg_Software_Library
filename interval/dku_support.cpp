@@ -73,4 +73,26 @@ namespace WaveletTL
 	support(basis, typename DKUBasis<d,dT>::Index(lambda.j()+1, 0, kright, &basis), dummy, k2);
       }
   }
+
+  template <int d, int dT>
+  bool intersect_supports(const DKUBasis<d, dT>& basis,
+			  const typename DKUBasis<d, dT>::Index& lambda,
+			  const typename DKUBasis<d, dT>::Index& nu,
+			  int& j, int& k1, int& k2)
+  {
+    const int j_lambda = lambda.j() + lambda.e();
+    const int j_nu     = nu.j() + nu.e();
+    j = std::max(j_lambda, j_nu);
+    int k1_lambda, k2_lambda, k1_nu, k2_nu;
+    support(basis, lambda, k1_lambda, k2_lambda);
+    support(basis, nu    , k1_nu    , k2_nu    );
+    if ((1<<(j-j_lambda))*k1_lambda < (1<<(j-j_nu))*k2_nu) {
+      if ((1<<(j-j_nu))*k1_nu < (1<<(j-j_lambda))*k2_lambda) {
+	k1 = std::max((1<<(j-j_lambda))*k1_lambda, (1<<(j-j_nu))*k1_nu);
+	k2 = std::min((1<<(j-j_lambda))*k2_lambda, (1<<(j-j_nu))*k2_nu);
+	return true;
+      }
+    }
+    return false;
+  }
 }

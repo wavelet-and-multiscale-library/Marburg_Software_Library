@@ -7,22 +7,27 @@
 // | Thorsten Raasch                                                    |
 // +--------------------------------------------------------------------+
 
-#ifndef _WAVELETTL_STURM_BILINEAR_FORM_H
-#define _WAVELETTL_STURM_BILINEAR_FORM_H
+#ifndef _WAVELETTL_STURM_EQUATION_H
+#define _WAVELETTL_STURM_EQUATION_H
 
 namespace WaveletTL
 {
   /*!
-    This class models the bilinear form
+    This class models the infinite-dimensional matrix problem
+    
+      Au = F
 
-      a(u,v) = \int_0^1 [p(t)u'(t)v'(t)+q(t)u(t)v(t)] dt
-
-    corresponding to the Sturm boundary value problem on [0,1]
+    when reformulating a Sturm boundary value problem on [0,1]
     
       -(py')'(t) + q(t)y(t) = g(t), 0 <= t <= 1 
       
     with first (Dirichlet) or second (Neumann) order b.c.'s as modeled in
-    the class simpleSturmBVP.
+    the class simpleSturmBVP.as an equivalent operator equation
+    within \ell_2 by means of a wavelet basis.
+
+    The corresponding bilinear form is
+
+      a(u,v) = \int_0^1 [p(t)u'(t)v'(t)+q(t)u(t)v(t)] dt
    
     The evaluation of a(.,.) is possible for arguments \psi_\lambda
     which stem from a wavelet basis \Psi=\{\psi_\lambda\} of the corresponding
@@ -34,23 +39,28 @@ namespace WaveletTL
     where the parameters bc_* indicate where to enforce homogeneous Dirichlet
     boundary conditions.
     Of course a natural concrete value for WBASIS is the template class DKUBasis<d,dT>.
-   */
+  */
   template <class WBASIS>
-  class SturmBilinearForm
+  class SturmEquation
   {
   public:
-    SturmBilinearForm(const simpleSturmBVP& bvp);
-    
-    /*!
-      evaluate the bilinear form
-    */
-    double operator () (const typename WBASIS::Index& lambda,
-			const typename WBASIS::Index& nu) const;
+    SturmEquation(const simpleSturmBVP& bvp);
 
     /*!
       read access to the basis
     */
     const WBASIS& basis() const { return wbasis_; }
+    
+    /*!
+      evaluate the bilinear form a
+    */
+    double a(const typename WBASIS::Index& lambda,
+	     const typename WBASIS::Index& nu) const;
+
+    /*!
+      evaluate the diagonal preconditioner D
+    */
+    double D(const typename WBASIS::Index& lambda) const;
 
   protected:
     const simpleSturmBVP& bvp_;
@@ -58,6 +68,6 @@ namespace WaveletTL
   };
 }
 
-#include <galerkin/sturm_bf.cpp>
+#include <galerkin/sturm_equation.cpp>
 
 #endif

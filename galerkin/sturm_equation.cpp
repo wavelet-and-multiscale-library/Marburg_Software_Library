@@ -1,5 +1,6 @@
 // implementation for sturm_equation.h
 
+#include <cmath>
 #include <utils/array1d.h>
 #include <numerics/gauss_data.h>
 
@@ -7,7 +8,10 @@ namespace WaveletTL
 {
   template <class WBASIS>
   SturmEquation<WBASIS>::SturmEquation(const simpleSturmBVP& bvp)
-    : bvp_(bvp), wbasis_(bvp.bc_left(), bvp.bc_right())
+//     : bvp_(bvp), wbasis_(bvp.bc_left(), bvp.bc_right())
+//    : bvp_(bvp), wbasis_(true, false)
+//     : bvp_(bvp), wbasis_(false, true)
+      : bvp_(bvp), wbasis_(false, false)
   {
   }
 
@@ -30,7 +34,7 @@ namespace WaveletTL
 
     // First we compute the support intersection of \psi_\lambda and \psi_\nu:
     int j, k1, k2;
-    bool inter(intersect_supports(wbasis_, lambda, nu, j, k1, k2));
+    bool inter = intersect_supports(wbasis_, lambda, nu, j, k1, k2);
 
     if (inter)
       {
@@ -46,28 +50,88 @@ namespace WaveletTL
 
 	// - add all integral shares
 	for (unsigned int n = 0; n < N_Gauss; n++)
-	  for (int patch = k1; patch < k2; patch++)
-	    {
-	      const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
-	      const double t = gauss_points[(patch-k1)*N_Gauss+n];
-
-	      const double pt = bvp_.p(t);
-	      if (pt != 0)
-		r += pt
-		  * evaluate(wbasis_, 1, lambda, t)
-		  * evaluate(wbasis_, 1, nu, t)
-		  * gauss_weight;
-
-	      const double qt = bvp_.q(t);
-	      if (qt != 0)
-		r += qt
-		  * evaluate(wbasis_, 0, lambda, t)
-		  * evaluate(wbasis_, 0, nu, t)
-		  * gauss_weight;
-	    }
+	  {
+	    const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
+	    for (int patch = k1; patch < k2; patch++)
+	      {
+		const double t = gauss_points[(patch-k1)*N_Gauss+n];
+		
+		const double pt = bvp_.p(t);
+		if (pt != 0)
+		  r += pt
+		    * evaluate(wbasis_, 1, lambda, t)
+		    * evaluate(wbasis_, 1, nu, t)
+		    * gauss_weight;
+		
+		const double qt = bvp_.q(t);
+		if (qt != 0)
+		  r += qt
+		    * evaluate(wbasis_, 0, lambda, t)
+		    * evaluate(wbasis_, 0, nu, t)
+		    * gauss_weight;
+	      }
+	  }
       }
 
     return r;
+  }
+
+  template <class WBASIS>
+  double
+  SturmEquation<WBASIS>::f(const typename WBASIS::Index& lambda) const
+  {
+    // f(v) = \int_0^1 g(t)v(t) dt
+
+    double r = 0;
+
+    const int j = lambda.j()+lambda.e();
+    int k1, k2;
+    support(wbasis_, lambda, k1, k2);
+
+    // Set up Gauss points and weights for a composite quadrature formula:
+    const unsigned int N_Gauss = 5;
+    const double h = ldexp(1.0, -j);
+    Array1D<double> gauss_points (N_Gauss*(k2-k1));
+    for (int patch = k1; patch < k2; patch++) // refers to 2^{-j}[patch,patch+1]
+      for (unsigned int n = 0; n < N_Gauss; n++)
+	gauss_points[(patch-k1)*N_Gauss+n] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2;
+    
+    // - add all integral shares
+    for (unsigned int n = 0; n < N_Gauss; n++)
+      {
+	const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
+	for (int patch = k1; patch < k2; patch++)
+	  {
+	    const double t = gauss_points[(patch-k1)*N_Gauss+n];
+	    
+	    const double gt = bvp_.g(t);
+	    if (gt != 0)
+	      r += gt
+		* evaluate(wbasis_, 0, lambda, t)
+		* gauss_weight;
+	  }
+      }
+    
+    return r;
+  }
+
+  template <class WBASIS>
+  void
+  SturmEquation<WBASIS>::RHS(InfiniteVector<double, typename WBASIS::Index>& coeffs,
+			     const double eta) const
+  {
+    coeffs.clear();
+
+    const int j0 = wbasis_.j0();
+    const int jmax = j0;
+
+    for (typename WBASIS::Index lambda(wbasis_.firstGenerator(j0));; ++lambda)
+      {
+	coeffs.set_coefficient(lambda, f(lambda)/D(lambda));
+  	if (lambda == wbasis_.lastGenerator(j0))
+//  	if (lambda == wbasis_.lastWavelet(jmax))
+	  break;
+      }
   }
 
   template <class WBASIS>
@@ -76,5 +140,19 @@ namespace WaveletTL
   SturmEquation<WBASIS>::D(const typename WBASIS::Index& lambda) const
   {
     return ldexp(1.0, lambda.j());
+  }
+
+  template <class WBASIS>
+  inline
+  void
+  SturmEquation<WBASIS>::rescale(InfiniteVector<double, typename WBASIS::Index>& coeffs,
+				 const int n) const
+  {
+    for (typename InfiniteVector<double, typename WBASIS::Index>::const_iterator it(coeffs.begin());
+	 it != coeffs.end(); ++it)
+      {
+	// TODO: implement an InfiniteVector::iterator to speed up this hack!
+	coeffs.set_coefficient(it.index(), *it * pow(D(it.index()), n));
+      }
   }
 }

@@ -35,8 +35,7 @@ namespace WaveletTL
 
     The methods 'partialSVD' and 'BernsteinSVD' enable the [DKU]/[DS] boundary treatment:
     at the boundary, exactly one generator and one wavelet does not vanish,
-    which can be modified to satisfy homogeneous boundary conditions for the primal
-    basis.
+    which can then be modified to satisfy homogeneous boundary conditions.
   */
   enum DKUBiorthogonalizationMethod
     {
@@ -59,7 +58,7 @@ namespace WaveletTL
     [DKU] Dahmen, Kunoth, Urban:
           Biorthogonal spline-wavelets on the interval - Stability and moment conditions
     [DS]  Dahmen, Schneider:
-          Wavelets with complementary boundary conditions - Function spaces on the cube
+          Composite Wavelet Bases for Operator Equations
   */
   template <int d, int dT>
   class DKUBasis
@@ -69,12 +68,12 @@ namespace WaveletTL
       constructor
 
       You can toggle Dirichlet boundary conditions for the primal basis with the parameters
-      bc_left/bc_right. The dual basis will then be constructed to fulfill complementary boundary
-      conditions, see [DS] for details.
+      bc_left/bc_right. This will essentially be done by neglecting the corresponding
+      boundary functions plus a modification for the boundary wavelets.
     */
     explicit DKUBasis(bool bc_left = false,
 		      bool bc_right = false,
-		      DKUBiorthogonalizationMethod bio = partialSVD);
+  		      DKUBiorthogonalizationMethod bio = partialSVD);
 
     //! coarsest possible level
     inline const int j0() const { return (int) ceil(log(ellTl_+ell2T_-1.)/log(2.0)+1); }

@@ -14,19 +14,27 @@ namespace WaveletTL
 {
   //! left support bound for a primal CDF generator
   template <int d>
-    int ell1() { return -(d/2); }
+  int ell1() { return -(d/2); }
   
   //! right support bound for a primal CDF generator
   template <int d>
-    int ell2() { return d - (d/2); }
+  int ell2() { return d - (d/2); }
   
   //! left support bound for a dual CDF generator
-  template <int d, int dt>
-    int ell1T() { return ell1<d>() - dt + 1; }
+  template <int d, int dT>
+  int ell1T() { return ell1<d>() - dT + 1; }
   
-  //! right support bound for a dual CDF function
-  template <int d, int dt>
-    int ell2T() { return ell2<d>() + dt - 1; }
+  //! right support bound for a dual CDF generator
+  template <int d, int dT>
+  int ell2T() { return ell2<d>() + dT - 1; }
+
+  //! left support bound for a primal (or dual) CDF wavelet
+  template <int d, int dT>
+  int psi_supp_left() { return -(d + dT) / 2; }
+
+  //! right support bound for a primal (or dual) CDF wavelet
+  template <int d, int dT>
+  int psi_supp_right() { return (d + dT) / 2 - 1; }
 }
 
 #endif

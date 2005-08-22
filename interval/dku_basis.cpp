@@ -438,7 +438,8 @@ namespace WaveletTL
     // IGPMlib reference: I_Mask_Bspline::EvalAlpha()
 
     const int mLow = 1-ell2T_;         // start index in (3.2.26)
-    const int mUp  = 2*std::max(ellTl_,ellTr_)+ell1T_-1; // end index in (3.2.41)
+//     const int mUp  = 2*std::max(ellTl_,ellTr_)+ell1T_-1; // end index in (3.2.41)
+    const int mUp = 2*std::max(ellTl_,ellTr_)+ell2T_-2;
     const int rUp  = dT-1;
 
     Alpha_.resize(mUp-mLow+1, rUp+1);
@@ -480,7 +481,8 @@ namespace WaveletTL
     // IGPMlib reference: I_Mask_Bspline::EvalAlpha()
 
     const int mLow = 1-ell2_;        // start index in (3.2.25)
-    const int mUp  = 2*std::max(elll_,ellr_)+ell1_-1; // end index in (3.2.40)
+//     const int mUp  = 2*std::max(elll_,ellr_)+ell1_-1; // end index in (3.2.40)
+    const int mUp  = 2*std::max(elll_,ellr_)+ell2_-2; // end index in (3.2.40)
     const int rUp  = d-1;
 
     AlphaT_.resize(mUp-mLow+1, rUp+1);
@@ -1035,16 +1037,18 @@ namespace WaveletTL
 
     for (int i = llklow; i <= lup+Z[0]; i++) // the (3.2.25) bounds
       for (int r = llowT; r <= lupT; r++) {
-	double help = 0;
-	for (int m = llow; m <= lup; m++)
-	  help += CL_(-llowT+r, -llowT+m) * AlphaT_(-llklow+i, -llow+m+Z[0]);
-	CLA_(-llklow+i, -llowT+r) = help;
+        double help = 0;
+        for (int m = llow; m <= lup; m++)
+          help += CL_(-llowT+r, -llowT+m) * AlphaT_(-llklow+i, -llow+m+Z[0]);
+        CLA_(-llklow+i, -llowT+r) = help;
       }
     for (int i = lup+std::max(1,Z[0]); i <= llkup; i++)
       for (int r = llowT; r <= lupT; r++)
-	CLA_(-llklow+i, -llowT+r) += CL_(-llowT+r, -llowT+i);
+        CLA_(-llklow+i, -llowT+r) += CL_(-llowT+r, -llowT+i);
 
     CLA_.compress(1e-12);
+
+    cout << "CLA=" << endl << CLA_ << endl;
 
     // setup CLAT <-> Alpha * (CLT)^T
     CLAT_.resize(llkupT-llklowT+1, lupT-llowT+1);
@@ -1057,6 +1061,8 @@ namespace WaveletTL
       }
 
     CLAT_.compress(1e-12);
+
+    cout << "CLAT=" << endl << CLAT_ << endl;
 
     // the same for CRA, CRAT:
     CRA_.resize(rlklowh-rlkuph+1, rlowTh-rupTh+1);
@@ -2485,6 +2491,8 @@ namespace WaveletTL
 	      if (v != 0)
 		coeffs.set_coefficient(RIndex(lambda.j(), 0, llklow+i), v);
 	    }
+	    cout << "in evaluate(), coeffs=" << endl << coeffs << endl;
+
 	    return cdf_.evaluate(0, coeffs, primal, 0, 1, resolution);
 	} else {
 	  if (lambda.k() >= DeltaRmin(lambda.j())) {

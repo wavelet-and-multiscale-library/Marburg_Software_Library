@@ -17,6 +17,7 @@ namespace WaveletTL
     
       Au = F
 
+    with preconditioned A = D^{-1}LD^{-1} and F = D^{-1}f
     when reformulating a Sturm boundary value problem on [0,1]
     
       -(py')'(t) + q(t)y(t) = g(t), 0 <= t <= 1 
@@ -25,11 +26,19 @@ namespace WaveletTL
     the class simpleSturmBVP.as an equivalent operator equation
     within \ell_2 by means of a wavelet basis.
 
-    The corresponding bilinear form is
+    The corresponding bilinear form in
+
+      L = (a(\psi_\nu,\psi_\lambda))_{\lambda,\nu}
+
+    is
 
       a(u,v) = \int_0^1 [p(t)u'(t)v'(t)+q(t)u(t)v(t)] dt
+      
+    and the right-hand side is
+ 
+      f(v) = \int_0^1 g(t)v(t) dt
    
-    The evaluation of a(.,.) is possible for arguments \psi_\lambda
+    The evaluation of a(.,.) and f is possible for arguments \psi_\lambda
     which stem from a wavelet basis \Psi=\{\psi_\lambda\} of the corresponding
     function space over [0,1].
     To achieve independence from the concrete choice of \Psi, the wavelet basis
@@ -39,6 +48,8 @@ namespace WaveletTL
     where the parameters bc_* indicate where to enforce homogeneous Dirichlet
     boundary conditions.
     Of course a natural concrete value for WBASIS is the template class DKUBasis<d,dT>.
+
+    Note that we use preconditioning
   */
   template <class WBASIS>
   class SturmEquation
@@ -52,15 +63,31 @@ namespace WaveletTL
     const WBASIS& basis() const { return wbasis_; }
     
     /*!
-      evaluate the bilinear form a
+      evaluate the (unpreconditioned) bilinear form a
     */
     double a(const typename WBASIS::Index& lambda,
 	     const typename WBASIS::Index& nu) const;
 
     /*!
+      evaluate the (unpreconditioned) right-hand side f
+    */
+    double f(const typename WBASIS::Index& lambda) const;
+
+    /*!
+      approximate the wavelet coefficient set of the preconditioned right-hand side F
+      with a prescribed \ell_2 error tolerance
+    */
+    void RHS(InfiniteVector<double, typename WBASIS::Index>& coeffs, const double eta) const;
+
+    /*!
       evaluate the diagonal preconditioner D
     */
     double D(const typename WBASIS::Index& lambda) const;
+
+    /*!
+      rescale a coefficient vector by an integer power of D, c |-> D^{n}c
+    */
+    void rescale(InfiniteVector<double, typename WBASIS::Index>& coeffs, const int n) const;
 
   protected:
     const simpleSturmBVP& bvp_;

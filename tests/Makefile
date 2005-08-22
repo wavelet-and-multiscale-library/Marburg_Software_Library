@@ -13,7 +13,7 @@ CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 EXEOBJF = \
   test_refinable.o\
   test_dm.o\
-  test_r_basis.o\
+  test_r_basis.o test_cdf_expansion.o\
   test_dku_basis.o test_dku_evaluate.o test_dku_support.o\
   test_periodic.o\
   test_sturm_bvp.o

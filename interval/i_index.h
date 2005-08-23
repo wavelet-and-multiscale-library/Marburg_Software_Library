@@ -30,13 +30,13 @@ namespace WaveletTL
       (also serves as a default constructor, but yields an invalid index then
       because the underlying interval basis must be specified to work correctly)
      */
-    IIndex();
+    IIndex(const IBASIS* basis = 0);
 
     //! copy constructor
     IIndex(const IIndex& lambda);
   
     //! constructor with specified parameters
-    IIndex(const int j, const int e, const int k);
+    IIndex(const int j, const int e, const int k, const IBASIS* basis);
     
     //! assignment
     IIndex& operator = (const IIndex& lambda);
@@ -67,9 +67,15 @@ namespace WaveletTL
     //! translation index k
     int k() const { return k_; }
 
+    //! underlying basis
+    const IBASIS* basis() const { return basis_; }
+
   protected:
     //! scale, type, translation
     int j_, e_, k_;
+
+    //! pointer to the underlying interval basis
+    const IBASIS* basis_;
   };
 
   //! stream output
@@ -91,25 +97,25 @@ namespace WaveletTL
     index of first (leftmost) generator on level j >= j0
   */
   template <class IBASIS>
-  IIndex<IBASIS> first_generator(const int j);
+  IIndex<IBASIS> first_generator(const IBASIS* basis, const int j);
 
   /*!
     index of last (rightmost) generator on level j >= j0
   */
   template <class IBASIS>
-  IIndex<IBASIS> last_generator(const int j);
+  IIndex<IBASIS> last_generator(const IBASIS* basis, const int j);
 
   /*!
     index of first (leftmost) wavelet on level j >= j0
   */
   template <class IBASIS>
-  IIndex<IBASIS> first_wavelet(const int j);
+  IIndex<IBASIS> first_wavelet(const IBASIS* basis, const int j);
 
   /*!
     index of last (rightmost) wavelet on level j >= j0
   */
   template <class IBASIS>
-  IIndex<IBASIS> last_wavelet(const int j);
+  IIndex<IBASIS> last_wavelet(const IBASIS* basis, const int j);
 }
 
 // include implementation

@@ -14,7 +14,7 @@ int main()
   cout << "Testing the DKU bases..." << endl;
 
   const int d = 2;
-  const int dT = 4;
+  const int dT = 2;
   typedef DKUBasis<d, dT> Basis;
 //   Basis basis;
 
@@ -24,8 +24,8 @@ int main()
 //   Basis basis(false, false, partialSVD);
 //   Basis basis(false, false, BernsteinSVD);
 
-//   Basis basis(true, true); // homogeneous b.c. for the primal generators, dual generators complementary b.c.'s
-  Basis basis(true, false);
+  Basis basis(true, true); // homogeneous b.c. for the primal generators, dual generators complementary b.c.'s
+//   Basis basis(true, false);
 //   Basis basis(false, true);
 
   cout << "- the (" << d << "," << dT << ") basis has j0=" << basis.j0() << endl;

@@ -10,7 +10,13 @@
 #ifndef _WAVELETTL_DS_BASIS_H
 #define _WAVELETTL_DS_BASIS_H
 
+#include <algebra/matrix.h>
+#include <algebra/sparse_matrix.h>
+#include <algebra/infinite_vector.h>
+#include <utils/array1d.h>
+
 #include <Rd/cdf_utils.h>
+#include <Rd/cdf_basis.h>
 #include <interval/i_index.h>
 
 namespace WaveletTL
@@ -32,18 +38,6 @@ namespace WaveletTL
     };
 
   /*!
-    the different possibilities for the boundary condition set Z
-    (dual b.c.: complementary)
-  */
-  enum DSZ
-    {
-      empty,  // no b.c. for the primal basis
-      Zero,   // primal b.c. at 0, no b.c. at 1
-      One,    // no b.c. at 1, primal b.c. at 1
-      ZeroOne // b.c.'s at 0 and 1
-    };
-
-  /*!
     Template class for the wavelet bases on the interval as introduced in [DS].
     All formulas refer to the preprint versions of [DS] (and [DKU], where indicated).
 
@@ -56,7 +50,7 @@ namespace WaveletTL
     [DS]  Dahmen, Schneider:
           Wavelets with complementary boundary conditions - Function spaces on the cube
   */
-  template <int d, int dT, int ellTl = d-(d/2)+dT-1, int ellTr = d-(d/2)+dT-1>
+  template <int d, int dT>
   class DSBasis
   {
   public:
@@ -67,41 +61,43 @@ namespace WaveletTL
       the left and right end of the interval [0,1]. The corresponding dual basis will then be
       constructed to fulfill the corresponding complementary boundary conditions.
     */
-    DSBasis(DSZ bc = ZeroOne, const int s = 1, const int sT = 1,
+    DSBasis(const int s0 = 1, const int s1 = 1, const int sT0 = 0, const int sT1 = 0,
 	    DSBiorthogonalizationMethod bio = none);
 
-    //! coarsest possible level, (4.20)
-    inline static const int j0() { return (int) ceil(log(std::max(ellTl,ellTr)+ell2T<d,dT>()-1.)/log(2.0)+1); }
+    //! freezing parameters, (4.11)
+    inline const int ellT_l() const { return ell2T<d,dT>() + s0 + sT0; }
+    inline const int ellT_r() const { return ell2T<d,dT>() + s1 + sT1; }
+    inline const int ell_l()  const { return ellT_l() + d - dT; }
+    inline const int ell_r()  const { return ellT_r() + d - dT; }
     
-    //! the other freezing parameter ell, (4.11)
-    inline static const int elll() { return ellTl + d - dT; }
-    inline static const int ellr() { return ellTr + d - dT; }
+    //! coarsest possible level, (4.20)
+    inline const int j0() const { return (int) ceil(log(std::max(ellT_l(),ellT_r())+ell2T<d,dT>()-1.)/log(2.0)+1); }
     
     /*!
       wavelet index class
     */
-    typedef IIndex<DSBasis<d,dT,ellTl,ellTr> > Index;
+    typedef IIndex<DSBasis<d,dT> > Index;
 
     /*!
       boundary indices in \Delta_j^X and \tilde\Delta_j^X (4.10),(4.14),(4.26)
      */
-    inline static const int DeltaLmin() { return elll() - d; }
-//     inline static const int DeltaLmax() { return elll-1-s0; }
-//     inline static const int Delta0min() { return DeltaLmax()+1; }
-//     inline static const int Delta0max(const int j) { return DeltaRmin(j)-1; }
-//     inline static const int DeltaRmin(const int j) { return (1<<j)-ell1_-ell2_-(ellr_-1-Z[1]); }
-    inline static const int DeltaRmax(const int j) { return (1<<j)-(d%2)-(ellr()-d); }
-
-    inline static const int DeltaLTmin() { return ellTl - dT; } // == DeltaLmin()
-//     inline const int DeltaLTmax() const { return ellTl_-1-ZT[0]; }
-//     inline const int Delta0Tmin() const { return DeltaLTmax()+1; }
-//     inline const int Delta0Tmax(const int j) const { return DeltaRTmin()-1; }
-//     inline const int DeltaRTmin(const int j) const { return (1<<j)-ell1_-ell2_-(ellTr_-1-ZT[1]); }
-    inline static const int DeltaRTmax(const int j) { return (1<<j)-(d%2)-(ellTr-dT); } // == DeltaRmax()
+    inline const int DeltaLmin() const { return ell_l()-d; }
+    inline const int DeltaLmax() const { return ell_l()-1-s0; }
+    inline const int Delta0min() const { return DeltaLmax()+1; }
+    inline const int Delta0max(const int j) const { return DeltaRmin(j)-1; }
+    inline const int DeltaRmin(const int j) const { return (1<<j)-(d%2)-(ell_r()-1-s1); }
+    inline const int DeltaRmax(const int j) const { return (1<<j)-(d%2)-(ell_r()-d); }
+    
+    inline const int DeltaLTmin() const { return ellT_l()-dT; } // == DeltaLmin()
+    inline const int DeltaLTmax() const { return ellT_l()-1-sT0; }
+    inline const int Delta0Tmin() const { return DeltaLTmax()+1; }
+    inline const int Delta0Tmax(const int j) const { return DeltaRTmin()-1; }
+    inline const int DeltaRTmin(const int j) const { return (1<<j)-(d%2)-(ellT_r()-1-sT1); }
+    inline const int DeltaRTmax(const int j) const { return (1<<j)-(d%2)-(ellT_r()-dT); } // == DeltaRmax()
 
     //! size of Delta_j
     inline static const int Deltasize(const int j) { return DeltaRmax(j)-DeltaLmin()+1; }
-
+    
     /*!
       boundary indices in \nabla_j
     */
@@ -109,8 +105,36 @@ namespace WaveletTL
     inline static const int Nablamax(const int j) { return (1<<j)-1; }
 
   protected:
-    // order of b.c. at 0 and 1
+    //! boundary condition orders at 0 and 1
     int s0, s1, sT0, sT1;
+
+    //! one instance of a CDF basis (for faster access to the primal and dual masks)
+    CDFBasis<d,dT> cdf;
+    
+    //! single moments \alpha_{m,r} := \int_{\mathbb R} x^r\phi(x-m)\,dx
+    const double alpha(const int m, const unsigned int r) const;
+
+    //! single moments \alphaT_{m,r} := \int_{\mathbb R} x^r\phiT(x-m)\,dx
+    const double alphaT(const int m, const unsigned int r) const;
+
+    //! refinement coeffients of left dual boundary generators
+    const double betaL(const int m, const unsigned int r) const;
+
+    //! refinement coeffients of left dual boundary generators
+    const double betaLT(const int m, const unsigned int r) const;
+
+    //! refinement coeffients of left dual boundary generators (m reversed)
+    const double betaR(const int m, const unsigned int r) const;
+
+    //! refinement coeffients of left dual boundary generators (m reversed)
+    const double betaRT(const int m, const unsigned int r) const;
+
+
+    //! compute Gramian of left and right unbiorthogonalized primal boundary functions
+    void setup_GammaLR();
+
+    //! storage for these Gramians
+    Matrix<double> GammaL, GammaR;
   };
 }
 

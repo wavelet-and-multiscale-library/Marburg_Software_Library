@@ -3,11 +3,16 @@
 namespace WaveletTL
 {
   template <class IBASIS>
-  IIndex<IBASIS>::IIndex()
+  IIndex<IBASIS>::IIndex(const IBASIS* basis)
+    : basis_(basis)
   {
-    k_ = IBASIS::DeltaLmin(); // leftmost
-    e_ = 0;                   // generator
-    j_ = IBASIS::j0();        // on the coarsest level
+    if (basis_ == 0) {
+      j_ = e_ = k_ = 0; // invalid!
+    } else {
+      k_ = basis_->DeltaLmin(); // leftmost
+      e_ = 0;                   // generator
+      j_ = basis_->j0();        // on the coarsest level
+    }
   }
   
   template <class IBASIS>
@@ -16,14 +21,17 @@ namespace WaveletTL
     j_ = lambda.j();
     e_ = lambda.e();
     k_ = lambda.k();
+    basis_ = lambda.basis();
   }
 
   template <class IBASIS>
-  IIndex<IBASIS>::IIndex(const int j, const int e, const int k)
+  IIndex<IBASIS>::IIndex(const int j, const int e, const int k,
+			 const IBASIS* basis)
   {
     j_ = j;
     e_ = e;
     k_ = k;
+    basis_ = basis;
   }
 
   template <class IBASIS>
@@ -33,6 +41,7 @@ namespace WaveletTL
     j_ = lambda.j();
     e_ = lambda.e();
     k_ = lambda.k();
+    basis_ = lambda.basis();
 
     return *this;
   }
@@ -61,7 +70,7 @@ namespace WaveletTL
   {
     switch (e_) {
     case 0:
-      if (k_ == IBASIS::DeltaRmax(j_)) {
+      if (k_ == basis->DeltaRmax(j_)) {
 	e_ = 1;
 	k_ = 0;
       }
@@ -84,31 +93,32 @@ namespace WaveletTL
   }
 
   template <class IBASIS>
-  IIndex<IBASIS> first_generator(const int j)
+  inline
+  IIndex<IBASIS> first_generator(const IBASIS* basis, const int j)
   {
-    assert(j >= IBASIS::j0());
-    return IIndex<IBASIS>(j, 0, IBASIS::DeltaLmin());
+    assert(j >= basis->j0());
+    return IIndex<IBASIS>(j, 0, basis->DeltaLmin(), basis);
   }
   
   template <class IBASIS>
-  IIndex<IBASIS> last_generator(const int j)
+  inline
+  IIndex<IBASIS> last_generator(const IBASIS* basis, const int j)
   {
-    assert(j >= IBASIS::j0());
-    return IIndex<IBASIS>(j, 0, IBASIS::DeltaRmax(j));
+    assert(j >= basis->j0());
+    return IIndex<IBASIS>(j, 0, basis->DeltaRmax(j), basis);
   }
 
   template <class IBASIS>
-  IIndex<IBASIS> first_wavelet(const int j)
+  IIndex<IBASIS> first_wavelet(const IBASIS* basis, const int j)
   {
-    assert(j >= IBASIS::j0());
-    return IIndex<IBASIS>(j, 1, IBASIS::Nablamin());
+    assert(j >= basis->j0());
+    return IIndex<IBASIS>(j, 1, basis->Nablamin(), basis);
   }
   
   template <class IBASIS>
-  IIndex<IBASIS> last_wavelet(const int j)
+  IIndex<IBASIS> last_wavelet(const IBASIS* basis, const int j)
   {
-    assert(j >= IBASIS::j0());
-    return IIndex<IBASIS>(j, 1, IBASIS::Nablamax(j));
+    assert(j >= basis->j0());
+    return IIndex<IBASIS>(j, 1, basis->Nablamax(j), basis);
   }
-
 }

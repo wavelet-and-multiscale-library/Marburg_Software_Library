@@ -653,6 +653,8 @@ namespace WaveletTL
 	  I(-I1Low+nu, -I2Low+mu) = (nu == mu ? 1 : 0); // (5.1.6)
       }
 
+    cout << "I=" << endl << I << endl;
+
     // 3. finally, compute the Gramian GammaL
     //    (offsets: entry (r,k) <-> index (r+llowT,k+lupT) )
 
@@ -675,6 +677,8 @@ namespace WaveletTL
 	  help += Alpha_(-AlphamLow+mu, k) * I(-I1Low+elll_-d+r-Z[0], -I2Low+mu);
 	GammaL_(-llowT+elll_-d-Z[0]+r, k) = help; // (5.1.5); (no offset in second argument needed)
       }
+
+    cout << "GammaL=" << endl << GammaL_ << endl;
 
     // The same for GammaR:
 

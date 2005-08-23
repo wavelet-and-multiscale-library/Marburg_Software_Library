@@ -86,7 +86,7 @@ namespace WaveletTL
   {
     // [DKU] (3.2.31)
     double result = 0;
-    for (int q = (int)ceil((m-ell2T<d,dT>())/2.0); q < ellTl; q++)
+    for (int q = (int)ceil((m-ell2T<d,dT>())/2.0); q < ellT_l(); q++)
       result += alpha(q, r) * cdf.aT().get_coefficient(MultiIndex<int,1>(m-2*q));
     return result * M_SQRT1_2;
   }
@@ -97,7 +97,7 @@ namespace WaveletTL
   {
     // [DKU] (3.2.31)
     double result = 0;
-    for (int q = (int)ceil((m-ell2<d>())/2.0); q < elll(); q++)
+    for (int q = (int)ceil((m-ell2<d>())/2.0); q < ell_l(); q++)
       result += alphaT(q, r) * cdf.a().get_coefficient(MultiIndex<int,1>(m-2*q));
     return result * M_SQRT1_2;
   }
@@ -108,7 +108,7 @@ namespace WaveletTL
   {
     // [DKU] (3.2.31)
     double result = 0;
-    for (int q = (int)ceil((m-ell2T<d,dT>())/2.0); q < ellTr; q++)
+    for (int q = (int)ceil((m-ell2T<d,dT>())/2.0); q < ellT_r(); q++)
       result += alpha(q, r) * cdf.aT().get_coefficient(MultiIndex<int,1>(m-2*q));
     return result * M_SQRT1_2;
   }
@@ -119,7 +119,7 @@ namespace WaveletTL
   {
     // [DKU] (3.2.31)
     double result = 0;
-    for (int q = (int)ceil((m-ell2<d>())/2.0); q < ellr(); q++)
+    for (int q = (int)ceil((m-ell2<d>())/2.0); q < ell_r(); q++)
       result += alphaT(q, r) * cdf.a().get_coefficient(MultiIndex<int,1>(m-2*q));
     return result * M_SQRT1_2;
   }

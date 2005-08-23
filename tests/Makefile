@@ -15,6 +15,7 @@ EXEOBJF = \
   test_dm.o\
   test_r_basis.o test_cdf_expansion.o\
   test_dku_basis.o test_dku_evaluate.o test_dku_support.o\
+  test_ds_basis.o\
   test_periodic.o\
   test_sturm_bvp.o
 

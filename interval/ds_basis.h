@@ -62,7 +62,7 @@ namespace WaveletTL
       constructed to fulfill the corresponding complementary boundary conditions.
     */
     DSBasis(const int s0 = 1, const int s1 = 1, const int sT0 = 0, const int sT1 = 0,
-	    DSBiorthogonalizationMethod bio = none);
+	    DSBiorthogonalizationMethod bio = SVD);
 
     //! freezing parameters, (4.11)
     inline const int ellT_l() const { return ell2T<d,dT>() + s0 + sT0; }
@@ -108,6 +108,9 @@ namespace WaveletTL
     //! boundary condition orders at 0 and 1
     int s0, s1, sT0, sT1;
 
+    //! the generator biorthogonalization method
+    DSBiorthogonalizationMethod bio;
+
     //! one instance of a CDF basis (for faster access to the primal and dual masks)
     CDFBasis<d,dT> cdf;
     
@@ -135,6 +138,19 @@ namespace WaveletTL
 
     //! storage for these Gramians
     Matrix<double> GammaL, GammaR;
+
+    //! setup the boundary blocks for the generator biorthogonalization
+    void setup_CX_CXT();
+
+    //! storage for these blocks
+    Matrix<double> CL, CLT, inv_CL, inv_CLT;
+    Matrix<double> CR, CRT, inv_CR, inv_CRT;
+
+    //! setup expansion coefficients w.r.t. the (restricted) CDF basis
+    void setup_CXA_CXAT();
+
+    //! storage for these coefficients
+    Matrix<double> CLA, CRA, CLAT, CRAT;
   };
 }
 

@@ -20,7 +20,7 @@ int main()
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
-//     Basis basis;
+//   Basis basis;
   Basis basis(0, 0, 1, 1);
 //   Basis basis(0, 1, 1, 0);
   

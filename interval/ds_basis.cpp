@@ -30,6 +30,18 @@ namespace WaveletTL
     setup_GammaLR();
     setup_CX_CXT();
     setup_CXA_CXAT();
+
+    // IGPMlib reference: I_Basis_Bspline_s::Setup()
+
+    setup_Cj();
+
+    Matrix<double> ml = ML(); // (3.5.2)
+    Matrix<double> mr = MR(); // (3.5.2)
+    SparseMatrix<double> mj0;   setup_Mj0  (ml,   mr,   mj0);   // (3.5.1)
+
+    Matrix<double> mltp = MLTp(); // (3.5.6)
+    Matrix<double> mrtp = MRTp(); // (3.5.6)
+    SparseMatrix<double> mj0tp; setup_Mj0Tp(mltp, mrtp, mj0tp); // (3.5.5)
   }
 
   template <int d, int dT>
@@ -167,6 +179,8 @@ namespace WaveletTL
  	  I(-I1Low+nu, -I2Low+mu) = (nu == mu ? 1 : 0); // [DKU] (5.1.6)
       }
 
+//     cout << "I=" << endl << I << endl;
+
     // 3. finally, compute the Gramian GammaL
     for (int r = s0; r < d; r++) {
       for (int k = sT0; k < dT; k++) {
@@ -192,17 +206,21 @@ namespace WaveletTL
     	GammaL(r-s0, k-sT0) = help; // [DKU] (5.1.5)
       }
 
-//     Matrix<double> Gammafull(dT);
-//     for (int r = 0; r < d; r++)
-//       for (int k = 0; k < dT; k++) {
-// 	double help = 0;
-// 	for (int nu = I1Low; nu < ell_l(); nu++)
-// 	  for (int mu = I2Low; mu <= I2Up; mu++)
-// 	    help += alphaT(nu, r) * alpha(mu, k) * I(-I1Low+nu, -I2Low+mu);
-// 	Gammafull(r, k) = help;
-//       }
-//     cout << "For testing, the full Gramian (without b.c.'s):" << endl
-// 	 << Gammafull;
+//     cout << "GammaL=" << endl << GammaL << endl;
+
+#if 0
+    Matrix<double> Gammafull(dT);
+    for (int r = 0; r < d; r++)
+      for (int k = 0; k < dT; k++) {
+ 	double help = 0;
+ 	for (int nu = I1Low; nu < ell_l(); nu++)
+ 	  for (int mu = I2Low; mu <= I2Up; mu++)
+ 	    help += alphaT(nu, r) * alpha(mu, k) * I(-I1Low+nu, -I2Low+mu);
+ 	Gammafull(r, k) = help;
+      }
+    cout << "For testing, the full Gramian (without b.c.'s):" << endl
+ 	 << Gammafull;
+#endif
 
     // The same for GammaR:
 
@@ -229,6 +247,8 @@ namespace WaveletTL
     	  help += alphaT(mu, k) * I(-I1Low+ell_r()-d-s1-sT1+r, -I2Low+mu);
     	GammaR(r-s1, k-sT1) = help; // [DKU] (5.1.5)
       }
+
+//     cout << "GammaR=" << endl << GammaR << endl;
   }
 
   template <int d, int dT>
@@ -468,7 +488,7 @@ namespace WaveletTL
 //       CRT_.compress(1e-14);
 //     }
     
-#if 1
+#if 0
     // check biorthogonality of the matrix product CL * GammaL * (CLT)^T
     cout << "GammaL=" << endl << GammaL << endl;
     cout << "CL=" << endl << CL << endl;
@@ -482,7 +502,7 @@ namespace WaveletTL
     QUDecomposition<double>(CL).inverse(inv_CL);
     QUDecomposition<double>(CLT).inverse(inv_CLT);
 
-#if 1
+#if 0
     // check biorthogonality of the matrix product CR * GammaR * (CRT)^T
     cout << "GammaR=" << endl << GammaR << endl;
     cout << "CR=" << endl << CR << endl;
@@ -511,7 +531,6 @@ namespace WaveletTL
 
 //     cout << "CLA before biorthogonalization:" << endl << CLA << endl;
     CLA = CLA * transpose(CL);
-//     cout << "CLA=" << endl << CLA << endl;
     CLA.compress(1e-12);
 
     // setup CLAT <-> Alpha * (CLT)^T
@@ -524,7 +543,6 @@ namespace WaveletTL
 
 //     cout << "CLAT before biorthogonalization:" << endl << CLAT << endl;
     CLAT = CLAT * transpose(CLT);
-//     cout << "CLAT=" << endl << CLAT << endl;
     CLAT.compress(1e-12);
 
     // the same for CRA, CRAT:
@@ -537,7 +555,6 @@ namespace WaveletTL
 
 //     cout << "CRA before biorthogonalization:" << endl << CRA << endl;
     CRA = CRA * transpose(CR);
-//     cout << "CRA=" << endl << CRA << endl;
     CRA.compress(1e-12);
 
     CRAT.resize(ellT_r()+ell2T<d,dT>()+std::max(0,d-dT+sT1-s1)-1, CRT.row_dimension());
@@ -549,7 +566,240 @@ namespace WaveletTL
 
 //     cout << "CRAT before biorthogonalization:" << endl << CRAT << endl;
     CRAT = CRAT * transpose(CRT);
-//     cout << "CRAT=" << endl << CRAT << endl;
     CRAT.compress(1e-12);
+
+#if 0
+    cout << "CLA=" << endl << CLA << endl;
+    cout << "CLAT=" << endl << CLAT << endl;
+    cout << "CRA=" << endl << CRA << endl;
+    cout << "CRAT=" << endl << CRAT << endl;
+#endif
   }
+
+  template <int d, int dT>
+  void DSBasis<d,dT>::setup_Cj() {
+    // IGPMlib reference: I_Basis_Bspline_s::setup_Cj(), ::put_Mat()
+
+    // (5.2.5)
+    Cj.diagonal(Deltasize(j0()), 1.0);
+    Cj.set_block(0, 0, CL);
+    Cj.set_block(Deltasize(j0())-CR.row_dimension(),
+		 Deltasize(j0())-CR.column_dimension(),
+		 CR, true);
+
+    inv_Cj.diagonal(Deltasize(j0()), 1.0);
+    inv_Cj.set_block(0, 0, inv_CL);
+    inv_Cj.set_block(Deltasize(j0())-inv_CR.row_dimension(),
+		     Deltasize(j0())-inv_CR.column_dimension(),
+		     inv_CR, true);
+
+    CjT.diagonal(Deltasize(j0()), 1.0);
+    CjT.set_block(0, 0, CLT);
+    CjT.set_block(Deltasize(j0())-CRT.row_dimension(),
+		   Deltasize(j0())-CRT.column_dimension(),
+		   CRT, true);
+
+    inv_CjT.diagonal(Deltasize(j0()), 1.0);
+    inv_CjT.set_block(0, 0, inv_CLT);
+    inv_CjT.set_block(Deltasize(j0())-inv_CRT.row_dimension(),
+		      Deltasize(j0())-inv_CRT.column_dimension(),
+		      inv_CRT, true);
+
+    Cjp.diagonal(Deltasize(j0()+1), 1.0);
+    Cjp.set_block(0, 0, CL);
+    Cjp.set_block(Deltasize(j0()+1)-CR.row_dimension(),
+		  Deltasize(j0()+1)-CR.column_dimension(),
+		  CR, true);
+
+    inv_Cjp.diagonal(Deltasize(j0()+1), 1.0);
+    inv_Cjp.set_block(0, 0, inv_CL);
+    inv_Cjp.set_block(Deltasize(j0()+1)-inv_CR.row_dimension(),
+		      Deltasize(j0()+1)-inv_CR.column_dimension(),
+		      inv_CR, true);
+
+    CjpT.diagonal(Deltasize(j0()+1), 1.0);
+    CjpT.set_block(0, 0, CLT);
+    CjpT.set_block(Deltasize(j0()+1)-CRT.row_dimension(),
+		   Deltasize(j0()+1)-CRT.column_dimension(),
+		   CRT, true);
+
+    inv_CjpT.diagonal(Deltasize(j0()+1), 1.0);
+    inv_CjpT.set_block(0, 0, inv_CLT);
+    inv_CjpT.set_block(Deltasize(j0()+1)-inv_CRT.row_dimension(),
+		       Deltasize(j0()+1)-inv_CRT.column_dimension(),
+		       inv_CRT, true);
+
+#if 0
+    cout << "DSBasis: testing setup of Cj:" << endl;
+
+    SparseMatrix<double> test1 = CjT * inv_CjT;
+    for (unsigned int i = 0; i < test1.row_dimension(); i++)
+      test1.set_entry(i, i, test1.get_entry(i, i) - 1.0);
+    cout << "* ||CjT*inv_CjT-I||_1: " << column_sum_norm(test1) << endl;
+    cout << "* ||CjT*inv_CjT-I||_infty: " << row_sum_norm(test1) << endl;
+
+    SparseMatrix<double> test2 = Cj * inv_Cj;
+    for (unsigned int i = 0; i < test2.row_dimension(); i++)
+      test2.set_entry(i, i, test2.get_entry(i, i) - 1.0);
+    cout << "* ||Cj*inv_Cj-I||_1: " << column_sum_norm(test2) << endl;
+    cout << "* ||Cj*inv_Cj-I||_infty: " << row_sum_norm(test2) << endl;
+
+    SparseMatrix<double> test3 = CjpT * inv_CjpT;
+    for (unsigned int i = 0; i < test3.row_dimension(); i++)
+      test3.set_entry(i, i, test3.get_entry(i, i) - 1.0);
+    cout << "* ||CjpT*inv_CjpT-I||_1: " << column_sum_norm(test3) << endl;
+    cout << "* ||CjpT*inv_CjpT-I||_infty: " << row_sum_norm(test3) << endl;
+
+    SparseMatrix<double> test4 = Cjp * inv_Cjp;
+    for (unsigned int i = 0; i < test4.row_dimension(); i++)
+      test4.set_entry(i, i, test4.get_entry(i, i) - 1.0);
+    cout << "* ||Cjp*inv_Cjp-I||_1: " << column_sum_norm(test4) << endl;
+    cout << "* ||Cjp*inv_Cjp-I||_infty: " << row_sum_norm(test4) << endl;
+#endif
+  }
+
+  template <int d, int dT>
+  Matrix<double>
+  DSBasis<d, dT>::ML() const {
+    // IGPMlib reference: I_Basis_Bspline_s::ML()
+    
+    Matrix<double> ML(d+ell_l()+ell2<d>()-1-s0, d-s0);
+
+    for (int row = s0; row < d; row++)
+      ML(row-s0, row-s0) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
+    for (int m = ell_l(); m <= 2*ell_l()+ell1<d>()-1; m++)
+      for (int k = s0; k < d; k++)
+     	ML(-ell_l()+d+m-s0, k-s0) = alphaT(m, k) / sqrt(ldexp(1.0, 2*k+1));
+    for (int m = 2*ell_l()+ell1<d>(); m <= ell2<d>()+2*ell_l()-2; m++)
+      for (int k = s0; k < d; k++)
+	ML(-ell_l()+d+m-s0, k-s0) = betaLT(m, k);
+
+    cout << "ML=" << endl << ML << endl;
+    
+    return ML;
+  }
+
+  template <int d, int dT>
+  Matrix<double>
+  DSBasis<d, dT>::MR() const {
+    // IGPMlib reference: I_Basis_Bspline_s::MR()
+
+    Matrix<double> MR(d+ell_r()+ell2<d>()-1-s1, d-s1);
+
+    for (int row = s1; row < d; row++)
+      MR(row-s1, row-s1) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
+    for (int m = ell_r(); m <= 2*ell_r()+ell1<d>()-1; m++)
+      for (int k = s1; k < d; k++)
+     	MR(-ell_r()+d+m-s1, k-s1) = alphaT(m, k) / sqrt(ldexp(1.0, 2*k+1));
+    for (int m = 2*ell_r()+ell1<d>(); m <= ell2<d>()+2*ell_r()-2; m++)
+      for (int k = s1; k < d; k++)
+	MR(-ell_r()+d+m-s1, k-s1) = betaRT(m, k);
+
+    cout << "MR=" << endl << MR << endl;
+
+    return MR;
+  }
+
+  template <int d, int dT>
+  Matrix<double>
+  DSBasis<d, dT>::MLTp() const {
+    // IGPMlib reference: I_Basis_Bspline_s::MLts()
+
+    Matrix<double> MLTp(dT+ellT_l()+ell2T<d,dT>()-1-sT0, dT-sT0);
+
+    for (int row = sT0; row < dT; row++)
+      MLTp(row-sT0, row-sT0) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
+    for (int m = ellT_l(); m <= 2*ellT_l()+ell1T<d,dT>()-1; m++)
+      for (int k = sT0; k < dT; k++)
+      	MLTp(-ellT_l()+dT+m-sT0, k-sT0) = alpha(m, k) / sqrt(ldexp(1.0, 2*k+1));
+    for (int m = 2*ellT_l()+ell1T<d,dT>(); m <= ell2T<d,dT>()+2*ellT_l()-2; m++)
+      for (int k = sT0; k < dT; k++)
+ 	MLTp(-ellT_l()+dT+m-sT0, k-sT0) = betaL(m, k);
+
+    cout << "MLTp=" << endl << MLTp << endl;
+    
+    return MLTp;
+  }
+
+  template <int d, int dT>
+  Matrix<double>
+  DSBasis<d, dT>::MRTp() const {
+    // IGPMlib reference: I_Basis_Bspline_s::MRts()
+
+    Matrix<double> MRTp(dT+ellT_r()+ell2T<d,dT>()-1-sT1, dT-sT1);
+
+    for (int row = sT1; row < dT; row++)
+      MRTp(row-sT1, row-sT1) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
+    for (int m = ellT_r(); m <= 2*ellT_r()+ell1T<d,dT>()-1; m++)
+      for (int k = sT1; k < dT; k++)
+     	MRTp(-ellT_r()+dT+m-sT1, k-sT1) = alpha(m, k) / sqrt(ldexp(1.0, 2*k+1));
+    for (int m = 2*ellT_r()+ell1T<d,dT>(); m <= ell2T<d,dT>()+2*ellT_r()-2; m++)
+      for (int k = sT1; k < dT; k++)
+	MRTp(-ellT_r()+dT+m-sT1, k-sT1) = betaR(m, k);
+  
+    cout << "MRTp=" << endl << MRTp << endl;
+ 
+    return MRTp;
+  }
+
+  template <int d, int dT>
+  void
+  DSBasis<d,dT>::setup_Mj0(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& Mj0) {
+    // IGPMlib reference: I_Basis_Bspline_s::Mj0()
+    
+    // TODO: enhance readability! (<-> [DKU section 3.5])
+
+    const int nj  = Deltasize(j0());
+    const int njp = Deltasize(j0()+1);
+    Mj0.resize(njp, nj);
+
+    for (unsigned int i = 0; i < ML.row_dimension(); i++)
+      for (unsigned int k = 0; k < ML.column_dimension(); k++)
+ 	Mj0.set_entry(i, k, ML.get_entry(i, k));
+    
+    for (unsigned int i = 0; i < MR.row_dimension(); i++)
+      for (unsigned int k = 0; k < MR.column_dimension(); k++)
+ 	Mj0.set_entry(njp-i-1, nj-k-1, MR.get_entry(i, k));
+    
+    int startrow = d+ell_l()+ell1<d>()-2*s0;
+    for (int col = d-s0; col < nj-(d-s1); col++, startrow+=2)
+      {
+	int row = startrow;
+	for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf.a().begin());
+	     it != cdf.a().end(); ++it, row++)
+	  Mj0.set_entry(row, col, M_SQRT1_2 * *it);
+      }
+
+    cout << "Mj0=" << endl << Mj0 << endl;
+  }
+  
+  template <int d, int dT>
+  void
+  DSBasis<d,dT>::setup_Mj0Tp(const Matrix<double>& MLTp, const Matrix<double>& MRTp, SparseMatrix<double>& Mj0Tp) {
+    // IGPMlib reference: I_Basis_Bspline_s::Mj0ts()
+
+    const int nj  = Deltasize(j0());
+    const int njp = Deltasize(j0()+1);
+    Mj0Tp.resize(njp, nj);
+    
+    for (unsigned int i = 0; i < MLTp.row_dimension(); i++)
+      for (unsigned int k = 0; k < MLTp.column_dimension(); k++)
+ 	Mj0Tp.set_entry(i, k, MLTp.get_entry(i, k));
+    
+    for (unsigned int i = 0; i < MRTp.row_dimension(); i++)
+      for (unsigned int k = 0; k < MRTp.column_dimension(); k++)
+ 	Mj0Tp.set_entry(njp-i-1, nj-k-1, MRTp.get_entry(i, k));
+    
+    int startrow = dT+ellT_l()+ell1T<d,dT>()-2*sT0;
+    for (int col = dT-sT0; col < nj-(dT-sT1); col++, startrow+=2)
+      {
+	int row = startrow;
+	for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf.aT().begin());
+	     it != cdf.aT().end(); ++it, row++)
+	  Mj0Tp.set_entry(row, col, M_SQRT1_2 * *it);
+      }
+
+    cout << "Mj0Tp=" << endl << Mj0Tp << endl;
+  }
+
 }

@@ -62,7 +62,7 @@ namespace WaveletTL
       constructed to fulfill the corresponding complementary boundary conditions.
     */
     DSBasis(const int s0 = 1, const int s1 = 1, const int sT0 = 0, const int sT1 = 0,
-	    DSBiorthogonalizationMethod bio = none);
+	    DSBiorthogonalizationMethod bio = partialSVD);
 
     //! freezing parameters, (4.11)
     inline const int ellT_l() const { return ell2T<d,dT>() + s0 + sT0; }
@@ -96,7 +96,7 @@ namespace WaveletTL
     inline const int DeltaRTmax(const int j) const { return (1<<j)-(d%2)-(ellT_r()-dT); } // == DeltaRmax()
 
     //! size of Delta_j
-    inline static const int Deltasize(const int j) { return DeltaRmax(j)-DeltaLmin()+1; }
+    inline const int Deltasize(const int j) { return DeltaRmax(j)-DeltaLmin()+1; }
     
     /*!
       boundary indices in \nabla_j
@@ -151,6 +151,25 @@ namespace WaveletTL
 
     //! storage for these coefficients
     Matrix<double> CLA, CRA, CLAT, CRAT;
+
+    //! generator biorthogonalization matrices on level j0 and j0+1 Cj, CjT, Cjp, CjpT (5.2.5)
+    void setup_Cj();
+
+    //! those matrices
+    SparseMatrix<double> Cj, CjT, Cjp, CjpT;
+    SparseMatrix<double> inv_Cj, inv_CjT, inv_Cjp, inv_CjpT;
+
+    //! setup refinement matrix blocks ML, MR (3.5.2)
+    Matrix<double> ML() const;
+    Matrix<double> MR() const;
+
+    //! setup refinement matrix blocks MLTs, MRTs (3.5.6)
+    Matrix<double> MLTp() const;
+    Matrix<double> MRTp() const;
+
+    //! setup refinement matrices Mj0, Mj0Tp (3.5.1), (3.5.5)
+    void setup_Mj0  (const Matrix<double>& ML,   const Matrix<double>& MR,   SparseMatrix<double>& Mj0  );
+    void setup_Mj0Tp(const Matrix<double>& MLTp, const Matrix<double>& MRTp, SparseMatrix<double>& Mj0Tp);
   };
 }
 

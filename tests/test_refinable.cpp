@@ -33,6 +33,11 @@ int main()
   cout << "  + values at a finer resolution:" << endl;
   cout << phi2.evaluate(2);
 
+  cout << "- dual mask of a CDF<2,2> function:" << endl;
+  RefinableFunction<CDFMask_dual<2,2> > phi2T;
+  for (RefinableFunction<CDFMask_dual<2,2> >::const_iterator it(phi2T.begin()); it != phi2T.end(); it++)
+    cout << "k=" << it.index() << ": " << *it << endl;  
+
   cout << "- CDF<3>, function values and first derivative, clipped to [0,1]:" << endl;
   RefinableFunction<CDFMask_primal<3> > phi3;
   cout << phi3.evaluate(2);

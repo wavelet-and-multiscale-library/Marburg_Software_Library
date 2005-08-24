@@ -21,9 +21,10 @@ int main()
   typedef Basis::Index Index;
 
 //   Basis basis; // Z={0,1}
-  Basis basis(1, 0, 0, 1); // Z={0}
+//   Basis basis(1, 0, 0, 1); // Z={0}
 //   Basis basis(0, 1, 1, 0); // Z={1}
 //   Basis basis(0, 0, 1, 1); // Z={}
+  Basis basis(0, 0, 0, 0); // should work, DKU basis without b.c.'s at all
   
   cout << "- d=" << d << ", dT=" << dT << endl;
   cout << "- ell1=" << ell1<d>() << ", ell2=" << ell2<d>()

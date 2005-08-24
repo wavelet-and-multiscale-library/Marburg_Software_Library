@@ -62,7 +62,7 @@ namespace WaveletTL
       constructed to fulfill the corresponding complementary boundary conditions.
     */
     DSBasis(const int s0 = 1, const int s1 = 1, const int sT0 = 0, const int sT1 = 0,
-	    DSBiorthogonalizationMethod bio = partialSVD);
+	    DSBiorthogonalizationMethod bio = none);
 
     //! freezing parameters, (4.11)
     inline const int ellT_l() const { return ell2T<d,dT>() + s0 + sT0; }
@@ -167,9 +167,13 @@ namespace WaveletTL
     Matrix<double> MLTp() const;
     Matrix<double> MRTp() const;
 
-    //! setup refinement matrices Mj0, Mj0Tp (3.5.1), (3.5.5)
+    //! setup initial refinement matrices Mj0, Mj0Tp (3.5.1), (3.5.5)
     void setup_Mj0  (const Matrix<double>& ML,   const Matrix<double>& MR,   SparseMatrix<double>& Mj0  );
     void setup_Mj0Tp(const Matrix<double>& MLTp, const Matrix<double>& MRTp, SparseMatrix<double>& Mj0Tp);
+
+    //! refinement matrices on the coarsest level j0 and their transposed versions
+    SparseMatrix<double> Mj0, Mj0T, Mj1, Mj1T;     
+    SparseMatrix<double> Mj0_t, Mj0T_t, Mj1_t, Mj1T_t;
   };
 }
 

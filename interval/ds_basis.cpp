@@ -288,21 +288,21 @@ namespace WaveletTL
       CRT.compress(1e-14);
     }
     
-//     if (bio_ == Bernstein) {
+//     if (bio == Bernstein) {
 //       double b(0);
 //       if (d == 2)
-// 	b = 0.7; // cf. [DKU]
+//  	b = 0.7; // cf. [DKU]
 //       else {
-// 	b = 3.6;
+//  	b = 3.6;
 //       }
       
-//       // CL_ : transformation to Bernstein polynomials (triangular)
+//       // CL : transformation to Bernstein polynomials (triangular)
 //       //   (Z_b^m)_{r,l} = (-1)^{r-1}\binom{m-1}{r}\binom{r}{l}b^{-r}, r>=l, 0 otherwise
 //       for (int j(0); j < d; j++)
-// 	for (int k(0); k <= j; k++)
-// 	  CL_(k, j) = minus1power(j-k) * std::pow(b, -j) * binomial(d-1, j) * binomial(j, k);
+//  	for (int k(0); k <= j; k++)
+//  	  CL_(k, j) = minus1power(j-k) * std::pow(b, -j) * binomial(d-1, j) * binomial(j, k);
 //       for (int j(d); j < lupT-llowT+1; j++)
-// 	CL_(j, j) = 1.0;
+//  	CL_(j, j) = 1.0;
       
 //       Matrix<double> CLGammaLInv;
 //       QUDecomposition<double>(CL_ * GammaL_).inverse(CLGammaLInv);
@@ -323,71 +323,59 @@ namespace WaveletTL
 //       CRT_.compress(1e-14);
 //     }
     
-//     if (bio_ == partialSVD) {
-//       MathTL::SVD<double> svd(GammaL_);
-//       Matrix<double> U, V;
-//       Vector<double> S;
-//       svd.getU(U);
-//       svd.getV(V);
-//       svd.getS(S);
-      
-//       Matrix<double> GammaLInv;
-//       QUDecomposition<double>(GammaL_).inverse(GammaLInv);
-//       const double a = 1.0 / GammaLInv(0, 0);
-      
-//       Matrix<double> R(lupT-llowT+1,lupT-llowT+1);
-//       for (int i(0); i < lupT-llowT+1; i++)
-// 	S[i] = sqrt(S[i]);
-//       for (int j(0); j < lupT-llowT+1; j++)
-// 	R(0, j) = a * V(0, j) / S[j];
-//       for (int i(1); i < lupT-llowT+1; i++)
-// 	for (int j(0); j < lupT-llowT+1; j++)
-// 	  R(i, j) = U(j, i) * S[j];
-      
-//       for (int i(0); i < lupT-llowT+1; i++)
-// 	for (int j(0); j < lupT-llowT+1; j++)
-// 	  U(i, j) /= S[i];
-//       CL_ = R*U;
+    if (bio == partialSVD) {
+      MathTL::SVD<double> svd(GammaL);
+      Matrix<double> U, V;
+      Vector<double> S;
+      svd.getU(U);
+      svd.getV(V);
+      svd.getS(S);
+      Matrix<double> GammaLInv;
+      QUDecomposition<double>(GammaL).inverse(GammaLInv);
+      const double a = 1.0 / GammaLInv(0, 0);
+      Matrix<double> R(GammaL.row_dimension(), GammaL.column_dimension());
+      for (unsigned int i = 0; i < R.row_dimension(); i++)
+ 	S[i] = sqrt(S[i]);
+      for (unsigned int j = 0; j < R.row_dimension(); j++)
+ 	R(0, j) = a * V(0, j) / S[j];
+      for (unsigned int i = 1; i < R.row_dimension(); i++)
+ 	for (unsigned int j = 0; j < R.row_dimension(); j++)
+ 	  R(i, j) = U(j, i) * S[j];
+      for (unsigned int i = 0; i < R.row_dimension(); i++)
+ 	for (unsigned int j = 0; j < R.row_dimension(); j++)
+ 	  U(i, j) /= S[i];
+      CL = R*U;
+      CL.compress(1e-14);
+      Matrix<double> CLGammaLInv;
+      QUDecomposition<double>(CL * GammaL).inverse(CLGammaLInv);
+      CLT = transpose(CLGammaLInv);
+      CLT.compress(1e-14);
 
-//       CL_.compress(1e-14);
-
-//       Matrix<double> CLGammaLInv;
-//       QUDecomposition<double>(CL_ * GammaL_).inverse(CLGammaLInv);
-//       CLT_ = transpose(CLGammaLInv);
-
-//       CLT_.compress(1e-14);
-
-//       MathTL::SVD<double> svd_r(GammaR_);
-//       svd_r.getU(U);
-//       svd_r.getV(V);
-//       svd_r.getS(S);
-
-//       Matrix<double> GammaRInv;
-//       QUDecomposition<double>(GammaR_).inverse(GammaRInv);
-//       const double a_r = 1.0 / GammaRInv(0, 0);
-      
-//       R.resize(rlowTh-rupTh+1,rlowTh-rupTh+1);
-//       for (int i(0); i < rlowTh-rupTh+1; i++)
-// 	S[i] = sqrt(S[i]);
-//       for (int j(0); j < rlowTh-rupTh+1; j++)
-// 	R(0, j) = a_r * V(0, j) / S[j];
-//       for (int i(1); i < rlowTh-rupTh+1; i++)
-// 	for (int j(0); j < rlowTh-rupTh+1; j++)
-// 	  R(i, j) = U(j, i) * S[j];
-      
-//       for (int i(0); i < rlowTh-rupTh+1; i++)
-// 	for (int j(0); j < rlowTh-rupTh+1; j++)
-// 	  U(i, j) /= S[i];
-//       CR_ = R*U;
-
-//       CR_.compress(1e-14);
-
-//       Matrix<double> CRGammaRInv;
-//       QUDecomposition<double>(CR_ * GammaR_).inverse(CRGammaRInv);
-//       CRT_ = transpose(CRGammaRInv);
-
-//       CRT_.compress(1e-14);
-//     }
+      MathTL::SVD<double> svd_r(GammaR);
+      svd_r.getU(U);
+      svd_r.getV(V);
+      svd_r.getS(S);
+      Matrix<double> GammaRInv;
+      QUDecomposition<double>(GammaR).inverse(GammaRInv);
+      const double a_r = 1.0 / GammaRInv(0, 0);
+      R.resize(GammaR.row_dimension(), GammaR.column_dimension());
+      for (unsigned int i = 0; i < R.row_dimension(); i++)
+	S[i] = sqrt(S[i]);
+      for (unsigned int j = 0; j < R.row_dimension(); j++)
+ 	R(0, j) = a_r * V(0, j) / S[j];
+      for (unsigned int i = 1; i < R.row_dimension(); i++)
+ 	for (unsigned int j = 0; j < R.row_dimension(); j++)
+ 	  R(i, j) = U(j, i) * S[j];
+      for (unsigned int i = 0; i < R.row_dimension(); i++)
+ 	for (unsigned int j = 0; j < R.row_dimension(); j++)
+ 	  U(i, j) /= S[i];
+      CR = R*U;
+      CR.compress(1e-14);
+      Matrix<double> CRGammaRInv;
+      QUDecomposition<double>(CR * GammaR).inverse(CRGammaRInv);
+      CRT = transpose(CRGammaRInv);
+      CRT.compress(1e-14);
+    }
 
 //     if (bio_ == BernsteinSVD) {
 //       double b(0);
@@ -480,7 +468,7 @@ namespace WaveletTL
 //       CRT_.compress(1e-14);
 //     }
     
-#if 0
+#if 1
     // check biorthogonality of the matrix product CL * GammaL * (CLT)^T
     cout << "GammaL=" << endl << GammaL << endl;
     cout << "CL=" << endl << CL << endl;
@@ -494,7 +482,7 @@ namespace WaveletTL
     QUDecomposition<double>(CL).inverse(inv_CL);
     QUDecomposition<double>(CLT).inverse(inv_CLT);
 
-#if 0
+#if 1
     // check biorthogonality of the matrix product CR * GammaR * (CRT)^T
     cout << "GammaR=" << endl << GammaR << endl;
     cout << "CR=" << endl << CR << endl;
@@ -564,5 +552,4 @@ namespace WaveletTL
 //     cout << "CRAT=" << endl << CRAT << endl;
     CRAT.compress(1e-12);
   }
-
 }

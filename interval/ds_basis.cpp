@@ -216,25 +216,27 @@ namespace WaveletTL
  	  I(-I1Low+nu, -I2Low+mu) = (nu == mu ? 1 : 0); // [DKU] (5.1.6)
       }
 
-//     cout << "I=" << endl << I << endl;
+    cout << "I=" << endl << I << endl;
 
     // 3. finally, compute the Gramian GammaL
     for (int r = s0; r < d; r++) {
+      // phiL's against phiTL's
       for (int k = sT0; k < dT; k++) {
      	double help = 0;
-     	for (int nu = I1Low; nu < ell_l(); nu++)
+     	for (int nu = I1Low; nu < ell_l()-s0; nu++)
      	  for (int mu = I2Low; mu <= I2Up; mu++)
      	    help += alphaT(nu, r) * alpha(mu, k) * I(-I1Low+nu, -I2Low+mu);
     	GammaL(r-s0, k-sT0) = help; // [DKU] (5.1.4)
       }
+      // phiL's against phiT's
       for (int k = dT; k < d+sT0-s0; k++) {
 	double help = 0;
-	for (int nu = I1Low; nu < ell_l(); nu++)
+	for (int nu = I1Low; nu < ell_l()-s0; nu++)
 	  help += alphaT(nu, r) * I(-I1Low+nu, -I2Low+ellT_l()-dT-s0-sT0+k);
 	GammaL(r-s0, k-sT0) = help; // analogous to [DKU] (5.1.4) (!)
       }
     }
-    
+    // phi's against phiTL's
     for (int r = d; r < dT+s0-sT0; r++)
       for (int k = sT0; k < dT; k++) {
     	double help = 0;
@@ -245,38 +247,26 @@ namespace WaveletTL
 
     cout << "GammaL=" << endl << GammaL << endl;
 
-#if 1
-    Matrix<double> Gammafull(dT);
-    for (int r = 0; r < d; r++)
-      for (int k = 0; k < dT; k++) {
- 	double help = 0;
- 	for (int nu = I1Low; nu < ell_l(); nu++)
- 	  for (int mu = I2Low; mu <= I2Up; mu++)
- 	    help += alphaT(nu, r) * alpha(mu, k) * I(-I1Low+nu, -I2Low+mu);
- 	Gammafull(r, k) = help;
-      }
-    cout << "For testing, the full Gramian (without b.c.'s):" << endl
- 	 << Gammafull;
-#endif
-
     // The same for GammaR:
 
     for (int r = s1; r < d; r++) {
+      // phiR's against phiTR's
       for (int k = sT1; k < dT; k++) {
      	double help = 0;
-     	for (int nu = I1Low; nu < ell_r(); nu++)
+     	for (int nu = I1Low; nu < ell_r()-s1; nu++)
      	  for (int mu = I2Low; mu <= I2Up_r; mu++)
      	    help += alphaT(nu, r) * alpha(mu, k) * I(-I1Low+nu, -I2Low+mu);
     	GammaR(r-s1, k-sT1) = help; // [DKU] (5.1.4)
       }
+      // phiR's against phiT's
       for (int k = dT; k < d+sT1-s1; k++) {
 	double help = 0;
-	for (int nu = I1Low; nu < ell_r(); nu++)
+	for (int nu = I1Low; nu < ell_r()-s1; nu++)
 	  help += alphaT(nu, r) * I(-I1Low+nu, -I2Low+ellT_r()-dT-s1-sT1+k);
 	GammaR(r-s1, k-sT1) = help; // analogous to [DKU] (5.1.4) (!)
       }
     }
-    
+    // phi's against phiTR's
     for (int r = d; r < dT+s1-sT1; r++)
       for (int k = sT1; k < dT; k++) {
     	double help = 0;
@@ -525,7 +515,7 @@ namespace WaveletTL
 //       CRT_.compress(1e-14);
 //     }
     
-#if 0
+#if 1
     // check biorthogonality of the matrix product CL * GammaL * (CLT)^T
     cout << "GammaL=" << endl << GammaL << endl;
     cout << "CL=" << endl << CL << endl;
@@ -539,7 +529,7 @@ namespace WaveletTL
     QUDecomposition<double>(CL).inverse(inv_CL);
     QUDecomposition<double>(CLT).inverse(inv_CLT);
 
-#if 0
+#if 1
     // check biorthogonality of the matrix product CR * GammaR * (CRT)^T
     cout << "GammaR=" << endl << GammaR << endl;
     cout << "CR=" << endl << CR << endl;
@@ -559,51 +549,55 @@ namespace WaveletTL
     // IGPMlib reference: I_Mask_Bspline::EvalCL(), ::EvalCR()
 
     // setup CLA <-> AlphaT * (CL)^T
-    CLA.resize(ell_l()+ell2<d>()+std::max(0,dT-d+s0-sT0)-1, CL.row_dimension());
-    for (int i = 1-ell2<d>(); i < ell_l(); i++)
+    CLA.resize(ell_l()+ell2<d>()-s0+std::max(0,dT-d+s0-sT0)-1, CL.row_dimension());
+    for (int i = 1-ell2<d>(); i < ell_l()-s0; i++)
       for (unsigned int r = s0; r < d; r++)
 	CLA(ell2<d>()-1+i, r-s0) = alphaT(i, r);
-    for (int i = ell_l(); i < ell_l()+std::max(0,dT-d+s0-sT0); i++)
-      CLA(ell2<d>()-1+i, i-ell_l()+d-s0) = 1.0;
+    for (unsigned int r = d; r < CL.row_dimension()+s0; r++)
+      CLA(ell2<d>()-1+ell_l()-s0+r-d, r-s0) = 1.0;
 
     cout << "CLA before biorthogonalization:" << endl << CLA << endl;
     CLA = CLA * transpose(CL);
     CLA.compress(1e-12);
+    cout << "CLA after biorthogonalization:" << endl << CLA << endl;
 
     // setup CLAT <-> Alpha * (CLT)^T
-    CLAT.resize(ellT_l()+ell2T<d,dT>()+std::max(0,d-dT+sT0-s0)-1, CLT.row_dimension());
-    for (int i = 1-ell2T<d,dT>(); i < ellT_l(); i++)
+    CLAT.resize(ellT_l()+ell2T<d,dT>()-sT0+std::max(0,d-dT+sT0-s0)-1, CLT.row_dimension());
+    for (int i = 1-ell2T<d,dT>(); i < ellT_l()-sT0; i++)
       for (unsigned int r = sT0; r < dT; r++)
 	CLAT(ell2T<d,dT>()-1+i, r-sT0) = alpha(i, r);
-    for (int i = ellT_l(); i < ellT_l()+std::max(0,d-dT+sT0-s0); i++)
-      CLAT(ell2T<d,dT>()-1+i, i-ellT_l()+dT-sT0) = 1.0;
+    for (unsigned int r = dT; r < CLT.row_dimension()+sT0; r++)
+      CLAT(ell2T<d,dT>()-1+ellT_l()-sT0+r-dT, r-sT0) = 1.0;
 
     cout << "CLAT before biorthogonalization:" << endl << CLAT << endl;
     CLAT = CLAT * transpose(CLT);
     CLAT.compress(1e-12);
+    cout << "CLAT after biorthogonalization:" << endl << CLAT << endl;
 
     // the same for CRA, CRAT:
-    CRA.resize(ell_r()+ell2<d>()+std::max(0,dT-d+s1-sT1)-1, CR.row_dimension());
-    for (int i = 1-ell2<d>(); i < ell_r(); i++)
+    CRA.resize(ell_r()+ell2<d>()-s1+std::max(0,dT-d+s1-sT1)-1, CR.row_dimension());
+    for (int i = 1-ell2<d>(); i < ell_r()-s1; i++)
       for (unsigned int r = s1; r < d; r++)
 	CRA(ell2<d>()-1+i, r-s1) = alphaT(i, r);
-    for (int i = ell_r(); i < ell_r()+std::max(0,dT-d+s1-sT1); i++)
-      CRA(ell2<d>()-1+i, i-ell_r()+d-s1) = 1.0;
+    for (unsigned int r = d; r < CR.row_dimension()+s1; r++)
+      CRA(ell2<d>()-1+ell_r()-s1+r-d, r-s1) = 1.0;
 
     cout << "CRA before biorthogonalization:" << endl << CRA << endl;
     CRA = CRA * transpose(CR);
     CRA.compress(1e-12);
+    cout << "CRA after biorthogonalization:" << endl << CRA << endl;
 
-    CRAT.resize(ellT_r()+ell2T<d,dT>()+std::max(0,d-dT+sT1-s1)-1, CRT.row_dimension());
-    for (int i = 1-ell2T<d,dT>(); i < ellT_r(); i++)
+    CRAT.resize(ellT_r()+ell2T<d,dT>()-sT1+std::max(0,d-dT+sT1-s1)-1, CRT.row_dimension());
+    for (int i = 1-ell2T<d,dT>(); i < ellT_r()-sT1; i++)
       for (unsigned int r = sT1; r < dT; r++)
 	CRAT(ell2T<d,dT>()-1+i, r-sT1) = alpha(i, r);
-    for (int i = ellT_r(); i < ellT_r()+std::max(0,d-dT+sT1-s1); i++)
-      CRAT(ell2T<d,dT>()-1+i, i-ellT_r()+dT-sT1) = 1.0;
+    for (unsigned int r = dT; r < CRT.row_dimension()+sT1; r++)
+      CRAT(ell2T<d,dT>()-1+ellT_r()-sT1+r-dT, r-sT1) = 1.0;
 
     cout << "CRAT before biorthogonalization:" << endl << CRAT << endl;
     CRAT = CRAT * transpose(CRT);
     CRAT.compress(1e-12);
+    cout << "CRAT after biorthogonalization:" << endl << CRAT << endl;
 
 #if 0
     cout << "CLA=" << endl << CLA << endl;

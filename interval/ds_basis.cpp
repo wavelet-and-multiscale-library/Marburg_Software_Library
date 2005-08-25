@@ -144,7 +144,7 @@ namespace WaveletTL
   DSBasis<d,dT>::betaLT(const int m, const unsigned int r) const {
     // [DKU] (3.2.31)
     double result = 0;
-    for (int q = (int)ceil((m-ell2<d>())/2.0); q < ell_l(); q++)
+    for (int q = (int)ceil((m-ell2<d>())/2.0); q < ell_l()-s0; q++)
       result += alphaT(q, r) * cdf.a().get_coefficient(MultiIndex<int,1>(m-2*q));
     return result * M_SQRT1_2;
   }
@@ -164,7 +164,7 @@ namespace WaveletTL
   DSBasis<d,dT>::betaRT(const int m, const unsigned int r) const {
     // [DKU] (3.2.31)
     double result = 0;
-    for (int q = (int)ceil((m-ell2<d>())/2.0); q < ell_r(); q++)
+    for (int q = (int)ceil((m-ell2<d>())/2.0); q < ell_r()-s1; q++)
       result += alphaT(q, r) * cdf.a().get_coefficient(MultiIndex<int,1>(m-2*q));
     return result * M_SQRT1_2;
   }
@@ -660,7 +660,7 @@ namespace WaveletTL
 		       Deltasize(j0()+1)-inv_CRT.column_dimension(),
 		       inv_CRT, true);
 
-#if 0
+#if 1
     cout << "DSBasis: testing setup of Cj:" << endl;
 
     SparseMatrix<double> test1 = CjT * inv_CjT;
@@ -694,16 +694,16 @@ namespace WaveletTL
   DSBasis<d, dT>::ML() const {
     // IGPMlib reference: I_Basis_Bspline_s::ML()
     
-    Matrix<double> ML(d+ell_l()+ell2<d>()-1-s0, d-s0);
+    Matrix<double> ML(ell_l()+d-2*s0+ell2<d>()-1, d-s0);
 
     for (int row = s0; row < d; row++)
       ML(row-s0, row-s0) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
-    for (int m = ell_l(); m <= 2*ell_l()+ell1<d>()-1; m++)
+    for (int m = ell_l()-s0; m <= 2*(ell_l()-s0)+ell1<d>()-1; m++)
       for (int k = s0; k < d; k++)
-     	ML(-ell_l()+d+m-s0, k-s0) = alphaT(m, k) / sqrt(ldexp(1.0, 2*k+1));
-    for (int m = 2*ell_l()+ell1<d>(); m <= ell2<d>()+2*ell_l()-2; m++)
+     	ML(-ell_l()+d+m, k-s0) = alphaT(m, k) / sqrt(ldexp(1.0, 2*k+1));
+    for (int m = 2*(ell_l()-s0)+ell1<d>(); m <= 2*(ell_l()-s0)+ell2<d>()-2; m++)
       for (int k = s0; k < d; k++)
-	ML(-ell_l()+d+m-s0, k-s0) = betaLT(m, k);
+	ML(-ell_l()+d+m, k-s0) = betaLT(m, k);
 
     cout << "ML=" << endl << ML << endl;
     

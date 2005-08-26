@@ -178,6 +178,109 @@ namespace WaveletTL
       test_initial.set_entry(i, i, test_initial.get_entry(i, i) - 1.0);
     cout << "* ||Gj*Mj-I||_infty: " << row_sum_norm(test_initial) << endl;
 #endif
+
+    // construction of the wavelet basis: stable completion with basis transformations
+    SparseMatrix<double> I; I.diagonal(Deltasize(j0()+1), 1.0);
+    Mj1  = (I - (Mj0*transpose(Mj0T))) * (transpose(inv_Cjp) * mj1ih);
+    Mj1T = Cjp * transpose(gj1ih);
+
+    Mj0 .compress(1e-8);
+    Mj1 .compress(1e-8);
+    Mj0T.compress(1e-8);
+    Mj1T.compress(1e-8);
+    
+#if 1
+    cout << "DSBasis(): check new stable completion:" << endl;
+    
+    SparseMatrix<double> mj_new(Mj0.row_dimension(),
+				Mj0.column_dimension() + Mj1.column_dimension());
+    for (unsigned int i = 0; i < Mj0.row_dimension(); i++)
+      for (unsigned int j = 0; j < Mj0.column_dimension(); j++) {
+	const double help = Mj0.get_entry(i, j);
+	if (help != 0)
+	  mj_new.set_entry(i, j, help);
+      }
+    for (unsigned int i = 0; i < Mj1.row_dimension(); i++)
+      for (unsigned int j = 0; j < Mj1.column_dimension(); j++) {
+	const double help = Mj1.get_entry(i, j);
+	if (help != 0)
+	  mj_new.set_entry(i, j+Mj0.column_dimension(), help);
+      }
+    
+    SparseMatrix<double> gj0_new = transpose(Mj0T); gj0_new.compress();
+    SparseMatrix<double> gj1_new = transpose(Mj1T); gj1_new.compress();
+    SparseMatrix<double> gj_new(gj0_new.row_dimension() + gj1_new.row_dimension(),
+				gj0_new.column_dimension());
+    for (unsigned int i = 0; i < gj0_new.row_dimension(); i++)
+      for (unsigned int j = 0; j < gj0_new.column_dimension(); j++) {
+	const double help = gj0_new.get_entry(i, j);
+	if (help != 0)
+	  gj_new.set_entry(i, j, help);
+      }
+    for (unsigned int i = 0; i < gj1_new.row_dimension(); i++)
+      for (unsigned int j = 0; j < gj1_new.column_dimension(); j++) {
+	const double help = gj1_new.get_entry(i, j);
+	if (help != 0)
+	  gj_new.set_entry(i+gj0_new.row_dimension(), j, help);
+      }
+    
+    SparseMatrix<double> test_new = mj_new * gj_new;
+    for (unsigned int i = 0; i < test_new.row_dimension(); i++)
+      test_new.set_entry(i, i, test_new.get_entry(i, i) - 1.0);
+    cout << "Mj*Gj-I=" << endl << test_new << endl;
+    cout << "* ||Mj*Gj-I||_infty: " << row_sum_norm(test_new) << endl;
+
+    test_new = gj_new * mj_new;
+    for (unsigned int i = 0; i < test_new.row_dimension(); i++)
+      test_new.set_entry(i, i, test_new.get_entry(i, i) - 1.0);
+    cout << "Gj*Mj-I=" << endl << test_new << endl;
+    cout << "* ||Gj*Mj-I||_infty: " << row_sum_norm(test_new) << endl;
+        
+    SparseMatrix<double> mjt_new(Mj0T.row_dimension(),
+				 Mj0T.column_dimension() + Mj1T.column_dimension());
+    for (unsigned int i = 0; i < Mj0T.row_dimension(); i++)
+      for (unsigned int j = 0; j < Mj0T.column_dimension(); j++) {
+	const double help = Mj0T.get_entry(i, j);
+	if (help != 0)
+	  mjt_new.set_entry(i, j, help);
+      }
+    for (unsigned int i = 0; i < Mj1T.row_dimension(); i++)
+      for (unsigned int j = 0; j < Mj1T.column_dimension(); j++) {
+	const double help = Mj1T.get_entry(i, j);
+	if (help != 0)
+	  mjt_new.set_entry(i, j+Mj0T.column_dimension(), help);
+      }
+    
+    SparseMatrix<double> gjt0_new = transpose(Mj0); gjt0_new.compress();
+    SparseMatrix<double> gjt1_new = transpose(Mj1); gjt1_new.compress();
+    SparseMatrix<double> gjt_new(gjt0_new.row_dimension() + gjt1_new.row_dimension(),
+				 gjt0_new.column_dimension());
+    for (unsigned int i = 0; i < gjt0_new.row_dimension(); i++)
+      for (unsigned int j = 0; j < gjt0_new.column_dimension(); j++) {
+	const double help = gjt0_new.get_entry(i, j);
+	if (help != 0)
+	  gjt_new.set_entry(i, j, help);
+      }
+    for (unsigned int i = 0; i < gjt1_new.row_dimension(); i++)
+      for (unsigned int j = 0; j < gjt1_new.column_dimension(); j++) {
+	const double help = gjt1_new.get_entry(i, j);
+	if (help != 0)
+	  gjt_new.set_entry(i+gjt0_new.row_dimension(), j, help);
+      }
+    
+    test_new = mjt_new * gjt_new;
+    for (unsigned int i = 0; i < test_new.row_dimension(); i++)
+      test_new.set_entry(i, i, test_new.get_entry(i, i) - 1.0);
+    cout << "MjT*GjT-I=" << endl << test_new << endl;
+    cout << "* ||MjT*GjT-I||_infty: " << row_sum_norm(test_new) << endl;
+
+    test_new = gjt_new * mjt_new;
+    for (unsigned int i = 0; i < test_new.row_dimension(); i++)
+      test_new.set_entry(i, i, test_new.get_entry(i, i) - 1.0);
+    cout << "GjT*MjT-I=" << endl << test_new << endl;
+    cout << "* ||GjT*MjT-I||_infty: " << row_sum_norm(test_new) << endl;
+#endif
+
   }
 
   template <int d, int dT>

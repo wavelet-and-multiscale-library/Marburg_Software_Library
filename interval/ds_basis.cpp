@@ -134,7 +134,7 @@ namespace WaveletTL
   DSBasis<d,dT>::betaL(const int m, const unsigned int r) const {
     // [DKU] (3.2.31)
     double result = 0;
-    for (int q = (int)ceil((m-ell2T<d,dT>())/2.0); q < ellT_l(); q++)
+    for (int q = (int)ceil((m-ell2T<d,dT>())/2.0); q < ellT_l()-sT0; q++)
       result += alpha(q, r) * cdf.aT().get_coefficient(MultiIndex<int,1>(m-2*q));
     return result * M_SQRT1_2;
   }
@@ -154,7 +154,7 @@ namespace WaveletTL
   DSBasis<d,dT>::betaR(const int m, const unsigned int r) const {
     // [DKU] (3.2.31)
     double result = 0;
-    for (int q = (int)ceil((m-ell2T<d,dT>())/2.0); q < ellT_r(); q++)
+    for (int q = (int)ceil((m-ell2T<d,dT>())/2.0); q < ellT_r()-sT1; q++)
       result += alpha(q, r) * cdf.aT().get_coefficient(MultiIndex<int,1>(m-2*q));
     return result * M_SQRT1_2;
   }
@@ -224,7 +224,7 @@ namespace WaveletTL
       for (int k = sT0; k < dT; k++) {
      	double help = 0;
      	for (int nu = I1Low; nu < ell_l()-s0; nu++)
-     	  for (int mu = I2Low; mu <= I2Up; mu++)
+     	  for (int mu = I2Low; mu < ellT_l()-sT0; mu++)
      	    help += alphaT(nu, r) * alpha(mu, k) * I(-I1Low+nu, -I2Low+mu);
     	GammaL(r-s0, k-sT0) = help; // [DKU] (5.1.4)
       }
@@ -240,8 +240,8 @@ namespace WaveletTL
     for (int r = d; r < dT+s0-sT0; r++)
       for (int k = sT0; k < dT; k++) {
     	double help = 0;
-    	for (int mu = I2Low; mu <= I2Up; mu++)
-    	  help += alphaT(mu, k) * I(-I1Low+ell_l()-d-s0-sT0+r, -I2Low+mu);
+    	for (int mu = I2Low; mu < ellT_l()-sT0; mu++)
+    	  help += alpha(mu, k) * I(-I1Low+ell_l()-d-s0-sT0+r, -I2Low+mu);
     	GammaL(r-s0, k-sT0) = help; // [DKU] (5.1.5)
       }
 
@@ -254,7 +254,7 @@ namespace WaveletTL
       for (int k = sT1; k < dT; k++) {
      	double help = 0;
      	for (int nu = I1Low; nu < ell_r()-s1; nu++)
-     	  for (int mu = I2Low; mu <= I2Up_r; mu++)
+     	  for (int mu = I2Low; mu < ellT_r()-sT1; mu++)
      	    help += alphaT(nu, r) * alpha(mu, k) * I(-I1Low+nu, -I2Low+mu);
     	GammaR(r-s1, k-sT1) = help; // [DKU] (5.1.4)
       }
@@ -271,7 +271,7 @@ namespace WaveletTL
       for (int k = sT1; k < dT; k++) {
     	double help = 0;
     	for (int mu = I2Low; mu <= I2Up_r; mu++)
-    	  help += alphaT(mu, k) * I(-I1Low+ell_r()-d-s1-sT1+r, -I2Low+mu);
+    	  help += alpha(mu, k) * I(-I1Low+ell_r()-d-s1-sT1+r, -I2Low+mu);
     	GammaR(r-s1, k-sT1) = help; // [DKU] (5.1.5)
       }
 
@@ -715,16 +715,16 @@ namespace WaveletTL
   DSBasis<d, dT>::MR() const {
     // IGPMlib reference: I_Basis_Bspline_s::MR()
 
-    Matrix<double> MR(d+ell_r()+ell2<d>()-1-s1, d-s1);
+    Matrix<double> MR(ell_r()+d-2*s1+ell2<d>()-1, d-s1);
 
     for (int row = s1; row < d; row++)
       MR(row-s1, row-s1) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
-    for (int m = ell_r(); m <= 2*ell_r()+ell1<d>()-1; m++)
+    for (int m = ell_r()-s1; m <= 2*(ell_r()-s1)+ell1<d>()-1; m++)
       for (int k = s1; k < d; k++)
-     	MR(-ell_r()+d+m-s1, k-s1) = alphaT(m, k) / sqrt(ldexp(1.0, 2*k+1));
-    for (int m = 2*ell_r()+ell1<d>(); m <= ell2<d>()+2*ell_r()-2; m++)
+     	MR(-ell_r()+d+m, k-s1) = alphaT(m, k) / sqrt(ldexp(1.0, 2*k+1));
+    for (int m = 2*(ell_r()-s1)+ell1<d>(); m <= 2*(ell_r()-s1)+ell2<d>()-2; m++)
       for (int k = s1; k < d; k++)
-	MR(-ell_r()+d+m-s1, k-s1) = betaRT(m, k);
+	MR(-ell_r()+d+m, k-s1) = betaRT(m, k);
 
     cout << "MR=" << endl << MR << endl;
 
@@ -736,19 +736,19 @@ namespace WaveletTL
   DSBasis<d, dT>::MLTp() const {
     // IGPMlib reference: I_Basis_Bspline_s::MLts()
 
-    Matrix<double> MLTp(dT+ellT_l()+ell2T<d,dT>()-1-sT0, dT-sT0);
+    Matrix<double> MLTp(ellT_l()+dT-2*sT0+ell2T<d,dT>()-1, dT-sT0);
 
     for (int row = sT0; row < dT; row++)
       MLTp(row-sT0, row-sT0) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
-    for (int m = ellT_l(); m <= 2*ellT_l()+ell1T<d,dT>()-1; m++)
+    for (int m = ellT_l()-sT0; m <= 2*(ellT_l()-sT0)+ell1T<d,dT>()-1; m++)
       for (int k = sT0; k < dT; k++)
-      	MLTp(-ellT_l()+dT+m-sT0, k-sT0) = alpha(m, k) / sqrt(ldexp(1.0, 2*k+1));
-    for (int m = 2*ellT_l()+ell1T<d,dT>(); m <= ell2T<d,dT>()+2*ellT_l()-2; m++)
+     	MLTp(-ellT_l()+dT+m, k-sT0) = alpha(m, k) / sqrt(ldexp(1.0, 2*k+1));
+    for (int m = 2*(ellT_l()-sT0)+ell1T<d,dT>(); m <= 2*(ellT_l()-sT0)+ell2T<d,dT>()-2; m++)
       for (int k = sT0; k < dT; k++)
- 	MLTp(-ellT_l()+dT+m-sT0, k-sT0) = betaL(m, k);
+	MLTp(-ellT_l()+dT+m, k-sT0) = betaL(m, k);
 
     cout << "MLTp=" << endl << MLTp << endl;
-    
+
     return MLTp;
   }
 
@@ -757,17 +757,17 @@ namespace WaveletTL
   DSBasis<d, dT>::MRTp() const {
     // IGPMlib reference: I_Basis_Bspline_s::MRts()
 
-    Matrix<double> MRTp(dT+ellT_r()+ell2T<d,dT>()-1-sT1, dT-sT1);
+    Matrix<double> MRTp(ellT_r()+dT-2*sT1+ell2T<d,dT>()-1, dT-sT1);
 
     for (int row = sT1; row < dT; row++)
       MRTp(row-sT1, row-sT1) = 1.0 / sqrt(ldexp(1.0, 2*row+1));
-    for (int m = ellT_r(); m <= 2*ellT_r()+ell1T<d,dT>()-1; m++)
+    for (int m = ellT_r()-sT1; m <= 2*(ellT_r()-sT1)+ell1T<d,dT>()-1; m++)
       for (int k = sT1; k < dT; k++)
-     	MRTp(-ellT_r()+dT+m-sT1, k-sT1) = alpha(m, k) / sqrt(ldexp(1.0, 2*k+1));
-    for (int m = 2*ellT_r()+ell1T<d,dT>(); m <= ell2T<d,dT>()+2*ellT_r()-2; m++)
+     	MRTp(-ellT_r()+dT+m, k-sT1) = alpha(m, k) / sqrt(ldexp(1.0, 2*k+1));
+    for (int m = 2*(ellT_r()-sT1)+ell1T<d,dT>(); m <= 2*(ellT_r()-sT1)+ell2T<d,dT>()-2; m++)
       for (int k = sT1; k < dT; k++)
-	MRTp(-ellT_r()+dT+m-sT1, k-sT1) = betaR(m, k);
-  
+	MRTp(-ellT_r()+dT+m, k-sT1) = betaR(m, k);
+
     cout << "MRTp=" << endl << MRTp << endl;
  
     return MRTp;

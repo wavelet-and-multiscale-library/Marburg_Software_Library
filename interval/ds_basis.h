@@ -174,6 +174,14 @@ namespace WaveletTL
     //! refinement matrices on the coarsest level j0 and their transposed versions
     SparseMatrix<double> Mj0, Mj0T, Mj1, Mj1T;     
     SparseMatrix<double> Mj0_t, Mj0T_t, Mj1_t, Mj1T_t;
+
+    // routines for the stable completion, [DKU section 4.1]
+    void F(SparseMatrix<double>& FF); // (4.1.11), (4.1.14)
+    void P(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& PP); // (4.1.22)
+    void GSetup(SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv); // (4.1.1), (4.1.13)
+    void GElim (SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv); // elimination/factorization
+    void InvertP(const SparseMatrix<double>& PP, SparseMatrix<double>& PPinv);
+    void BT(const SparseMatrix<double>& A, SparseMatrix<double>& BB); // (4.1.9), (4.1.13)
   };
 }
 

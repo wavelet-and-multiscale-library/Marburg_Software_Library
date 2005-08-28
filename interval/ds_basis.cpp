@@ -29,11 +29,11 @@ namespace WaveletTL
 
 #if 0
     cout << "* some moments alpha(m,r):" << endl;
-    for (unsigned int r = 1; r <= 2; r++)
+    for (unsigned int r = 1; r < d; r++)
       for (int m = -5; m <= 5; m++)
 	cout << "m=" << m << ", r=" << r << ": " << alpha(m,r) << endl;
     cout << "* some moments alphaT(m,r):" << endl;
-    for (unsigned int r = 1; r <= 2; r++)
+    for (unsigned int r = 1; r < dT; r++)
       for (int m = -5; m <= 5; m++)
 	cout << "m=" << m << ", r=" << r << ": " << alphaT(m,r) << endl;
 #endif
@@ -436,7 +436,7 @@ namespace WaveletTL
       for (int k = dT; k < d+sT0-s0; k++) {
 	double help = 0;
 	for (int nu = I1Low; nu < ell_l()-s0; nu++)
-	  help += alphaT(nu, r) * I(-I1Low+nu, -I2Low+ellT_l()-dT-s0-sT0+k);
+	  help += alphaT(nu, r) * I(-I1Low+nu, -I2Low+ellT_l()-dT-sT0+k);
 	GammaL(r-s0, k-sT0) = help; // analogous to [DKU] (5.1.4) (!)
       }
     }
@@ -445,7 +445,7 @@ namespace WaveletTL
       for (int k = sT0; k < dT; k++) {
     	double help = 0;
     	for (int mu = I2Low; mu < ellT_l()-sT0; mu++)
-    	  help += alpha(mu, k) * I(-I1Low+ell_l()-d-s0-sT0+r, -I2Low+mu);
+    	  help += alpha(mu, k) * I(-I1Low+ell_l()-d-s0+r, -I2Low+mu);
     	GammaL(r-s0, k-sT0) = help; // [DKU] (5.1.5)
       }
 
@@ -466,7 +466,7 @@ namespace WaveletTL
       for (int k = dT; k < d+sT1-s1; k++) {
 	double help = 0;
 	for (int nu = I1Low; nu < ell_r()-s1; nu++)
-	  help += alphaT(nu, r) * I(-I1Low+nu, -I2Low+ellT_r()-dT-s1-sT1+k);
+	  help += alphaT(nu, r) * I(-I1Low+nu, -I2Low+ellT_r()-dT-sT1+k);
 	GammaR(r-s1, k-sT1) = help; // analogous to [DKU] (5.1.4) (!)
       }
     }
@@ -474,8 +474,8 @@ namespace WaveletTL
     for (int r = d; r < dT+s1-sT1; r++)
       for (int k = sT1; k < dT; k++) {
     	double help = 0;
-    	for (int mu = I2Low; mu <= I2Up_r; mu++)
-    	  help += alpha(mu, k) * I(-I1Low+ell_r()-d-s1-sT1+r, -I2Low+mu);
+    	for (int mu = I2Low; mu < ellT_r()-sT1; mu++)
+    	  help += alpha(mu, k) * I(-I1Low+ell_r()-d-s1+r, -I2Low+mu);
     	GammaR(r-s1, k-sT1) = help; // [DKU] (5.1.5)
       }
 
@@ -870,25 +870,21 @@ namespace WaveletTL
     SparseMatrix<double> test1 = CjT * inv_CjT;
     for (unsigned int i = 0; i < test1.row_dimension(); i++)
       test1.set_entry(i, i, test1.get_entry(i, i) - 1.0);
-    cout << "* ||CjT*inv_CjT-I||_1: " << column_sum_norm(test1) << endl;
     cout << "* ||CjT*inv_CjT-I||_infty: " << row_sum_norm(test1) << endl;
 
     SparseMatrix<double> test2 = Cj * inv_Cj;
     for (unsigned int i = 0; i < test2.row_dimension(); i++)
       test2.set_entry(i, i, test2.get_entry(i, i) - 1.0);
-    cout << "* ||Cj*inv_Cj-I||_1: " << column_sum_norm(test2) << endl;
     cout << "* ||Cj*inv_Cj-I||_infty: " << row_sum_norm(test2) << endl;
 
     SparseMatrix<double> test3 = CjpT * inv_CjpT;
     for (unsigned int i = 0; i < test3.row_dimension(); i++)
       test3.set_entry(i, i, test3.get_entry(i, i) - 1.0);
-    cout << "* ||CjpT*inv_CjpT-I||_1: " << column_sum_norm(test3) << endl;
     cout << "* ||CjpT*inv_CjpT-I||_infty: " << row_sum_norm(test3) << endl;
 
     SparseMatrix<double> test4 = Cjp * inv_Cjp;
     for (unsigned int i = 0; i < test4.row_dimension(); i++)
       test4.set_entry(i, i, test4.get_entry(i, i) - 1.0);
-    cout << "* ||Cjp*inv_Cjp-I||_1: " << column_sum_norm(test4) << endl;
     cout << "* ||Cjp*inv_Cjp-I||_infty: " << row_sum_norm(test4) << endl;
 #endif
   }

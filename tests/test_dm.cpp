@@ -39,12 +39,19 @@ int main()
   cout << "- evaluate this at the integers:" << endl;
   cout << dm_multi2.evaluate();
 
-  cout << "- DM multivariate mask for integrals of a Haar fct. and two translated CDF fcts.:" << endl;
+  cout << "- DM multivariate mask for integrals of a Haar fct. and two translated (2,2) CDF fcts.:" << endl;
   MultivariateRefinableFunction<DMMask2<HaarMask, CDFMask_primal<2>, CDFMask_dual<2,2> >, 2> dm_multi3;
   cout << dm_multi3 << endl;
  
   cout << "- evaluate this at the integers:" << endl;
   cout << dm_multi3.evaluate();
+
+  cout << "- DM multivariate mask for integrals of a Haar fct. and two translated (3,5) CDF fcts.:" << endl;
+  MultivariateRefinableFunction<DMMask2<HaarMask, CDFMask_primal<3>, CDFMask_dual<3,5> >, 2> dm_multi4;
+  cout << dm_multi4 << endl;
+ 
+  cout << "- evaluate this at the integers:" << endl;
+  cout << dm_multi4.evaluate();
 
   return 0;
 }

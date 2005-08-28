@@ -20,10 +20,10 @@ int main()
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
-//   Basis basis; // Z={0,1}
+  Basis basis; // Z={0,1}
 //   Basis basis(1, 0, 0, 1); // Z={0}
 //   Basis basis(0, 1, 1, 0); // Z={1}
-  Basis basis(0, 0, 1, 1); // Z={}
+//   Basis basis(0, 0, 1, 1); // Z={}
 //   Basis basis(0, 0, 0, 0); // should work, DKU basis without b.c.'s at all
   
   cout << "- d=" << d << ", dT=" << dT << endl;
@@ -50,9 +50,9 @@ int main()
   typedef Basis2::Index Index2;
 
 //   Basis2 basis2; // Z={0,1}
-//   Basis2 basis2(1, 0, 0, 1); // Z={0}
+  Basis2 basis2(1, 0, 0, 1); // Z={0}
 //   Basis2 basis2(0, 1, 1, 0); // Z={1}
-  Basis2 basis2(0, 0, 1, 1); // Z={}
+//   Basis2 basis2(0, 0, 1, 1); // Z={}
 //   Basis2 basis2(0, 0, 0, 0); // should work, DKU basis without b.c.'s at all
 
   cout << "- d=" << d2 << ", dT=" << dT2 << endl;

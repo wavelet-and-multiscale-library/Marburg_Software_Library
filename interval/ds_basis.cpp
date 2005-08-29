@@ -1464,4 +1464,111 @@ namespace WaveletTL
     }
   }
 
+  template <int d, int dT>
+  void
+  DSBasis<d, dT>::assemble_Mj1(const int j, SparseMatrix<double>& mj1) const {
+    if (j == j0())
+      mj1 = Mj1;
+    else {
+      mj1.resize(Deltasize(j+1), 1<<j);
+      
+      const int rows       = Deltasize(j0()+1);
+      const int cols_left  = 1<<(j0()-1);
+      const int cols_right = cols_left;
+      
+      // upper left block
+      for (int row = 0; row < rows; row++)
+	for (int col = 0; col < cols_left; col++)
+	  mj1.set_entry(row, col, Mj1.get_entry(row, col));
+      
+      // lower right block
+      for (int row = 0; row < rows; row++)
+	for (int col = 0; col < cols_right; col++)
+  	    mj1.set_entry(Deltasize(j+1)-rows+row, (1<<j)-cols_right+col,
+ 			  Mj1.get_entry(row, col + cols_left));
+      
+      // central bands, take care of [DS] symmetrization
+      InfiniteVector<double, Vector<double>::size_type> v;
+      Mj1_t.get_row(cols_left-1, v); // last column of left half
+      for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+	   it != v.end(); ++it)
+	for (int col = cols_left; col < 1<<(j-1); col++)
+	  mj1.set_entry(it.index()+2*(col-cols_left)+2, col, *it);
+      
+      Mj1_t.get_row(cols_left, v); // first column of right half
+      const int offset_right = (Deltasize(j+1)-Deltasize(j0()+1))-(1<<j)+(1<<j0()); // row offset for the right half
+      for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+	   it != v.end(); ++it)
+	for (int col = 1<<(j-1); col <= (1<<j) - cols_right - 1; col++)
+	  mj1.set_entry(it.index()+offset_right+2*(col-(1<<(j-1))), col, *it);
+      
+      mj1.compress();
+    }
+  }
+  
+  template <int d, int dT>
+  void
+  DSBasis<d, dT>::assemble_Mj1_t(const int j, SparseMatrix<double>& mj1_t) const {
+    if (j == j0())
+      mj1_t = Mj1_t;
+    else {
+      SparseMatrix<double> help;
+      assemble_Mj1(j, help);
+      mj1_t = transpose(help);
+    }
+  }
+
+  template <int d, int dT>
+  void
+  DSBasis<d, dT>::assemble_Mj1T(const int j, SparseMatrix<double>& mj1T) const {
+    if (j == j0())
+      mj1T = Mj1T;
+    else {
+      mj1T.resize(Deltasize(j+1), 1<<j);
+      
+      const int rows       = Deltasize(j0()+1);
+      const int cols_left  = 1<<(j0()-1);
+      const int cols_right = cols_left;
+      
+      // upper left block
+      for (int row = 0; row < rows; row++)
+	for (int col = 0; col < cols_left; col++)
+	  mj1T.set_entry(row, col, Mj1T.get_entry(row, col));
+      
+      // lower right block
+      for (int row = 0; row < rows; row++)
+	for (int col = 0; col < cols_right; col++)
+	  mj1T.set_entry(Deltasize(j+1)-rows+row, (1<<j)-cols_right+col,
+			 Mj1T.get_entry(row, col + cols_left));
+      
+      // central bands, take care of [DS] symmetrization
+      InfiniteVector<double, Vector<double>::size_type> v;
+      Mj1T_t.get_row(cols_left-1, v); // last column of left half
+      for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+	   it != v.end(); ++it)
+	for (int col = cols_left; col < 1<<(j-1); col++)
+	  mj1T.set_entry(it.index()+2*(col-cols_left)+2, col, *it);
+      
+      Mj1T_t.get_row(cols_left, v); // first column of right half
+      const int offset_right = (Deltasize(j+1)-Deltasize(j0()+1))-(1<<j)+(1<<j0()); // row offset for the right half
+      for (typename InfiniteVector<double, Vector<double>::size_type>::const_iterator it(v.begin());
+	   it != v.end(); ++it)
+	for (int col = 1<<(j-1); col <= (1<<j) - cols_right - 1; col++)
+	  mj1T.set_entry(it.index()+offset_right+2*(col-(1<<(j-1))), col, *it);
+      
+      mj1T.compress();
+    }
+  }
+  
+  template <int d, int dT>
+  void
+  DSBasis<d, dT>::assemble_Mj1T_t(const int j, SparseMatrix<double>& mj1T_t) const {
+    if (j == j0())
+      mj1T_t = Mj1T_t;
+    else {
+      SparseMatrix<double> help;
+      assemble_Mj1T(j, help);
+      mj1T_t = transpose(help);
+    }
+  }
 }

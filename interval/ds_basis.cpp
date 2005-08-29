@@ -60,16 +60,16 @@ namespace WaveletTL
     
 #if 1
     cout << "DSBasis(): check biorthogonality of Mj0, Mj0T:" << endl;
-    cout << "Mj0=" << endl << Mj0 << endl << "Mj0T=" << endl << Mj0T << endl;
+//     cout << "Mj0=" << endl << Mj0 << endl << "Mj0T=" << endl << Mj0T << endl;
 
     SparseMatrix<double> testbio0 = transpose(Mj0) * Mj0T;
-    cout << "Mj0^T*Mj0T=" << endl << testbio0 << endl;
+//     cout << "Mj0^T*Mj0T=" << endl << testbio0 << endl;
     for (unsigned int i = 0; i < testbio0.row_dimension(); i++)
       testbio0.set_entry(i, i, testbio0.get_entry(i, i) - 1.0);
     cout << "* ||Mj0^T*Mj0T-I||_infty: " << row_sum_norm(testbio0) << endl;
 
     testbio0 = transpose(Mj0T) * Mj0;
-    cout << "Mj0T*Mj0^T=" << endl << testbio0 << endl;
+//     cout << "Mj0T*Mj0^T=" << endl << testbio0 << endl;
     for (unsigned int i = 0; i < testbio0.row_dimension(); i++)
       testbio0.set_entry(i, i, testbio0.get_entry(i, i) - 1.0);
     cout << "* ||Mj0T^T*Mj0-I||_infty: " << row_sum_norm(testbio0) << endl;
@@ -227,13 +227,13 @@ namespace WaveletTL
     SparseMatrix<double> test_new = mj_new * gj_new;
     for (unsigned int i = 0; i < test_new.row_dimension(); i++)
       test_new.set_entry(i, i, test_new.get_entry(i, i) - 1.0);
-    cout << "Mj*Gj-I=" << endl << test_new << endl;
+//     cout << "Mj*Gj-I=" << endl << test_new << endl;
     cout << "* ||Mj*Gj-I||_infty: " << row_sum_norm(test_new) << endl;
 
     test_new = gj_new * mj_new;
     for (unsigned int i = 0; i < test_new.row_dimension(); i++)
       test_new.set_entry(i, i, test_new.get_entry(i, i) - 1.0);
-    cout << "Gj*Mj-I=" << endl << test_new << endl;
+//     cout << "Gj*Mj-I=" << endl << test_new << endl;
     cout << "* ||Gj*Mj-I||_infty: " << row_sum_norm(test_new) << endl;
         
     SparseMatrix<double> mjt_new(Mj0T.row_dimension(),
@@ -271,13 +271,13 @@ namespace WaveletTL
     test_new = mjt_new * gjt_new;
     for (unsigned int i = 0; i < test_new.row_dimension(); i++)
       test_new.set_entry(i, i, test_new.get_entry(i, i) - 1.0);
-    cout << "MjT*GjT-I=" << endl << test_new << endl;
+//     cout << "MjT*GjT-I=" << endl << test_new << endl;
     cout << "* ||MjT*GjT-I||_infty: " << row_sum_norm(test_new) << endl;
 
     test_new = gjt_new * mjt_new;
     for (unsigned int i = 0; i < test_new.row_dimension(); i++)
       test_new.set_entry(i, i, test_new.get_entry(i, i) - 1.0);
-    cout << "GjT*MjT-I=" << endl << test_new << endl;
+//     cout << "GjT*MjT-I=" << endl << test_new << endl;
     cout << "* ||GjT*MjT-I||_infty: " << row_sum_norm(test_new) << endl;
 #endif
 
@@ -390,7 +390,7 @@ namespace WaveletTL
     MultivariateRefinableFunction<DMMask2<HaarMask, CDFMask_primal<d>, CDFMask_dual<d,dT> >,2> zmask;
     InfiniteVector<double, MultiIndex<int,2> > zvalues(zmask.evaluate());
 
-    cout << "z=" << endl << zvalues << endl;
+//     cout << "z=" << endl << zvalues << endl;
 
     // 2. compute the integrals
     //      I(nu,mu) = \int_0^\infty\phi(x-\nu)\tilde\phi(x-\mu)\,dx
@@ -420,7 +420,7 @@ namespace WaveletTL
  	  I(-I1Low+nu, -I2Low+mu) = (nu == mu ? 1 : 0); // [DKU] (5.1.6)
       }
 
-    cout << "I=" << endl << I << endl;
+//     cout << "I=" << endl << I << endl;
 
     // 3. finally, compute the Gramian GammaL
     for (int r = s0; r < d; r++) {
@@ -449,7 +449,7 @@ namespace WaveletTL
     	GammaL(r-s0, k-sT0) = help; // [DKU] (5.1.5)
       }
 
-    cout << "GammaL=" << endl << GammaL << endl;
+//     cout << "GammaL=" << endl << GammaL << endl;
 
     // The same for GammaR:
 
@@ -479,7 +479,7 @@ namespace WaveletTL
     	GammaR(r-s1, k-sT1) = help; // [DKU] (5.1.5)
       }
 
-    cout << "GammaR=" << endl << GammaR << endl;
+//     cout << "GammaR=" << endl << GammaR << endl;
   }
 
   template <int d, int dT>
@@ -721,9 +721,9 @@ namespace WaveletTL
     
 #if 1
     // check biorthogonality of the matrix product CL * GammaL * (CLT)^T
-    cout << "GammaL=" << endl << GammaL << endl;
-    cout << "CL=" << endl << CL << endl;
-    cout << "CLT=" << endl << CLT << endl;
+//     cout << "GammaL=" << endl << GammaL << endl;
+//     cout << "CL=" << endl << CL << endl;
+//     cout << "CLT=" << endl << CLT << endl;
     Matrix<double> check(CL * GammaL * transpose(CLT));
     for (unsigned int i(0); i < check.row_dimension(); i++)
       check(i, i) -= 1;
@@ -735,9 +735,9 @@ namespace WaveletTL
 
 #if 1
     // check biorthogonality of the matrix product CR * GammaR * (CRT)^T
-    cout << "GammaR=" << endl << GammaR << endl;
-    cout << "CR=" << endl << CR << endl;
-    cout << "CRT=" << endl << CRT << endl;
+//     cout << "GammaR=" << endl << GammaR << endl;
+//     cout << "CR=" << endl << CR << endl;
+//     cout << "CRT=" << endl << CRT << endl;
     Matrix<double> check2(CR * GammaR * transpose(CRT));
     for (unsigned int i(0); i < check2.row_dimension(); i++)
       check2(i, i) -= 1;
@@ -760,10 +760,10 @@ namespace WaveletTL
     for (unsigned int r = d; r < CL.row_dimension()+s0; r++)
       CLA(ell2<d>()-1+ell_l()-s0+r-d, r-s0) = 1.0;
 
-    cout << "CLA before biorthogonalization:" << endl << CLA << endl;
+//     cout << "CLA before biorthogonalization:" << endl << CLA << endl;
     CLA = CLA * transpose(CL);
     CLA.compress(1e-12);
-    cout << "CLA after biorthogonalization:" << endl << CLA << endl;
+//     cout << "CLA after biorthogonalization:" << endl << CLA << endl;
 
     // setup CLAT <-> Alpha * (CLT)^T
     CLAT.resize(ellT_l()+ell2T<d,dT>()-sT0+std::max(0,d-dT+sT0-s0)-1, CLT.row_dimension());
@@ -773,10 +773,10 @@ namespace WaveletTL
     for (unsigned int r = dT; r < CLT.row_dimension()+sT0; r++)
       CLAT(ell2T<d,dT>()-1+ellT_l()-sT0+r-dT, r-sT0) = 1.0;
 
-    cout << "CLAT before biorthogonalization:" << endl << CLAT << endl;
+//     cout << "CLAT before biorthogonalization:" << endl << CLAT << endl;
     CLAT = CLAT * transpose(CLT);
     CLAT.compress(1e-12);
-    cout << "CLAT after biorthogonalization:" << endl << CLAT << endl;
+//     cout << "CLAT after biorthogonalization:" << endl << CLAT << endl;
 
     // the same for CRA, CRAT:
     CRA.resize(ell_r()+ell2<d>()-s1+std::max(0,dT-d+s1-sT1)-1, CR.row_dimension());
@@ -786,10 +786,10 @@ namespace WaveletTL
     for (unsigned int r = d; r < CR.row_dimension()+s1; r++)
       CRA(ell2<d>()-1+ell_r()-s1+r-d, r-s1) = 1.0;
 
-    cout << "CRA before biorthogonalization:" << endl << CRA << endl;
+//     cout << "CRA before biorthogonalization:" << endl << CRA << endl;
     CRA = CRA * transpose(CR);
     CRA.compress(1e-12);
-    cout << "CRA after biorthogonalization:" << endl << CRA << endl;
+//     cout << "CRA after biorthogonalization:" << endl << CRA << endl;
 
     CRAT.resize(ellT_r()+ell2T<d,dT>()-sT1+std::max(0,d-dT+sT1-s1)-1, CRT.row_dimension());
     for (int i = 1-ell2T<d,dT>(); i < ellT_r()-sT1; i++)
@@ -798,10 +798,10 @@ namespace WaveletTL
     for (unsigned int r = dT; r < CRT.row_dimension()+sT1; r++)
       CRAT(ell2T<d,dT>()-1+ellT_r()-sT1+r-dT, r-sT1) = 1.0;
 
-    cout << "CRAT before biorthogonalization:" << endl << CRAT << endl;
+//     cout << "CRAT before biorthogonalization:" << endl << CRAT << endl;
     CRAT = CRAT * transpose(CRT);
     CRAT.compress(1e-12);
-    cout << "CRAT after biorthogonalization:" << endl << CRAT << endl;
+//     cout << "CRAT after biorthogonalization:" << endl << CRAT << endl;
 
 #if 0
     cout << "CLA=" << endl << CLA << endl;
@@ -905,7 +905,7 @@ namespace WaveletTL
       for (int k = s0; k < d; k++)
 	ML(-ell_l()+d+m, k-s0) = betaLT(m, k);
 
-    cout << "ML=" << endl << ML << endl;
+//     cout << "ML=" << endl << ML << endl;
     
     return ML;
   }
@@ -926,7 +926,7 @@ namespace WaveletTL
       for (int k = s1; k < d; k++)
 	MR(-ell_r()+d+m, k-s1) = betaRT(m, k);
 
-    cout << "MR=" << endl << MR << endl;
+//     cout << "MR=" << endl << MR << endl;
 
     return MR;
   }
@@ -947,7 +947,7 @@ namespace WaveletTL
       for (int k = sT0; k < dT; k++)
 	MLTp(-ellT_l()+dT+m, k-sT0) = betaL(m, k);
 
-    cout << "MLTp=" << endl << MLTp << endl;
+//     cout << "MLTp=" << endl << MLTp << endl;
 
     return MLTp;
   }
@@ -968,7 +968,7 @@ namespace WaveletTL
       for (int k = sT1; k < dT; k++)
 	MRTp(-ellT_r()+dT+m, k-sT1) = betaR(m, k);
 
-    cout << "MRTp=" << endl << MRTp << endl;
+//     cout << "MRTp=" << endl << MRTp << endl;
  
     return MRTp;
   }
@@ -1000,7 +1000,7 @@ namespace WaveletTL
 	Mj0.set_entry(row, col, M_SQRT1_2 * *it);
     }
 
-    cout << "Mj0=" << endl << Mj0 << endl;
+//     cout << "Mj0=" << endl << Mj0 << endl;
   }
   
   template <int d, int dT>
@@ -1028,7 +1028,7 @@ namespace WaveletTL
 	Mj0Tp.set_entry(row, col, M_SQRT1_2 * *it);
     }
     
-    cout << "Mj0Tp=" << endl << Mj0Tp << endl;
+//     cout << "Mj0Tp=" << endl << Mj0Tp << endl;
   }
 
   template <int d, int dT>
@@ -1058,7 +1058,7 @@ namespace WaveletTL
       i--;
     }
 
-    cout << "F=" << endl << FF << endl;
+//     cout << "F=" << endl << FF << endl;
   }
 
   template <int d, int dT>
@@ -1078,7 +1078,7 @@ namespace WaveletTL
       for (unsigned int k = 0; k < MR.column_dimension(); k++)
 	PP.set_entry(Deltasize(j0()+1)-i-1, Deltasize(j0()+1)-k-1, MR.get_entry(i, k));
 
-    cout << "P=" << endl << PP << endl;
+//     cout << "P=" << endl << PP << endl;
   }
 
   template <int d, int dT>
@@ -1111,7 +1111,7 @@ namespace WaveletTL
     H   .diagonal(njp, 1.0);
     Hinv.diagonal(njp, 1.0);
 
-    cout << "A=" << endl << A << endl;
+//     cout << "A=" << endl << A << endl;
   }
 
   template <int d, int dT>

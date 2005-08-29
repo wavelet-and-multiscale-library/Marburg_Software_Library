@@ -62,7 +62,7 @@ namespace WaveletTL
       constructed to fulfill the corresponding complementary boundary conditions.
     */
     DSBasis(const int s0 = 1, const int s1 = 1, const int sT0 = 0, const int sT1 = 0,
-	    DSBiorthogonalizationMethod bio = none);
+	    DSBiorthogonalizationMethod bio = SVD);
 
     //! freezing parameters, (4.11)
     inline const int ellT_l() const { return ell2T<d,dT>() + s0 + sT0; }

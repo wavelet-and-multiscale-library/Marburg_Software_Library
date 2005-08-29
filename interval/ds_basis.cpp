@@ -1462,56 +1462,67 @@ namespace WaveletTL
 				  Mj1T.get_nth_entry(row_j0,k));
 	    } else {
 	      // Due to the [DS] symmetrization, we have to be a bit careful here.
-	      const size_type third = Deltasize(j0()+1)*2/5;
-	      if (row < third)
-		for (size_type k(0); k < Mj1T.entries_in_row(row_j0); k++)
+     	      int fill_start = 0, fill_end = (1<<(lambda.j()-1))-1; // first and last column to fill up with interior filter
+	      const size_type upper_half = Deltasize(j0()+1)/2;
+	      if (row < upper_half) {
+		// read the first half of the corresponding row in Mj1T
+		for (size_type k(0); k < Mj1T.entries_in_row(row_j0) && (int)Mj1T.get_nth_index(row_j0,k) < 1<<(j0()-1); k++)
 		  c.set_coefficient(Index(lambda.j()-1, 1, Mj1T.get_nth_index(row_j0,k), this),
 				    Mj1T.get_nth_entry(row_j0,k));
+		fill_start = 1<<(j0()-1);
+		fill_end   = (1<<(lambda.j()-1))-1;
+	      }
 	      else {
-		const size_type bottom_third = Deltasize(lambda.j())-Deltasize(j0()+1)*2/5;
-		if (row >= bottom_third) {
+		const size_type bottom_half = Deltasize(lambda.j())-Deltasize(j0()+1)/2;
+		if (row >= bottom_half) {
+		  // read the second half of the corresponding row in Mj1T
 		  row_j0 = row+Deltasize(j0()+1)-Deltasize(lambda.j());
 		  offset = (1<<(lambda.j()-1))-(1<<j0());
 		  for (size_type k(0); k < Mj1T.entries_in_row(row_j0); k++)
-		    c.set_coefficient(Index(lambda.j()-1, 1, Mj1T.get_nth_index(row_j0,k)+offset, this),
-				      Mj1T.get_nth_entry(row_j0,k));
-		} else {
-		  // Left half of Mj1T:
-		  
-		  const int col_left = (1<<(j0()-1))-1;
-		  
-		  // The row ...
-		  const int first_row_left = Mj1T_t.get_nth_index(col_left, 0);
-		  // ... is the first nontrivial row in column (1<<(j0-1))-1 and the row ...
-		  const int last_row_left  = Mj1T_t.get_nth_index(col_left, Mj1T_t.entries_in_row(col_left)-1);
-		  // ... is the last nontrivial one,
-		  // i.e. the row last_row_left begins at column (1<<(j0()-1))-1, so does the row last_row_left-1.
-		  // So the row "row" starts at column ...
-		  const int first_column_left = (1<<(j0()-1))-1+(int)floor(((int)row+1-last_row_left)/2.);
-		  
-		  for (int col = first_column_left, filter_row = last_row_left-abs(row-last_row_left)%2;
-		       col < (1<<(lambda.j()-2)) && filter_row >= first_row_left; col++, filter_row -= 2)
-		    c.set_coefficient(Index(lambda.j()-1, 1, col, this),
-				      Mj1T_t.get_nth_entry(col_left, filter_row-first_row_left));
-		  
-		  // Analogous strategy for the right half:
-		  
-		  const int col_right = 1<<(j0()-1);
-		  
-		  const int offset_right = (Deltasize(lambda.j())-Deltasize(j0()+1))-(1<<(lambda.j()-1))+(1<<j0()); // row offset for the right half
-		  const int first_row_right = Mj1T_t.get_nth_index(col_right, 0)+offset_right;
-		  const int last_row_right  = Mj1T_t.get_nth_index(col_right, Mj1T_t.entries_in_row(col_right)-1)+offset_right;
-		  
-		  // The rows first_row_right and first_row_right+1 end at column 1<<(lambda.j()-2),
-		  // so the row "row" ends at column ...
-		  const int last_column_right = (1<<(lambda.j()-2))+(int)floor(((int)row-first_row_right)/2.);
-		  
-		  for (int col = last_column_right, filter_row = first_row_right-offset_right+abs(row-first_row_right)%2;
-		       col >= 1<<(lambda.j()-2) && filter_row <= last_row_right-offset_right; col--, filter_row += 2)
-		    c.set_coefficient(Index(lambda.j()-1, 1, col, this),
-				      Mj1T_t.get_nth_entry(col_right, filter_row+offset_right-first_row_right));
+		    if ((int)Mj1T.get_nth_index(row_j0,k) >= 1<<(j0()-1))
+		      c.set_coefficient(Index(lambda.j()-1, 1, Mj1T.get_nth_index(row_j0,k)+offset, this),
+					Mj1T.get_nth_entry(row_j0,k));
+		  fill_start = 0;
+		  fill_end   = (1<<(lambda.j()-1))-(1<<(j0()-1))-1;
 		}
-	      }	    
+	      }
+	      
+	      // Fill in the missing columns fron the left half of Mj1T:
+	      
+	      const int col_left = (1<<(j0()-1))-1;
+	      
+	      // The row ...
+	      const int first_row_left = Mj1T_t.get_nth_index(col_left, 0);
+	      // ... is the first nontrivial row in column (1<<(j0-1))-1 and the row ...
+	      const int last_row_left  = Mj1T_t.get_nth_index(col_left, Mj1T_t.entries_in_row(col_left)-1);
+	      // ... is the last nontrivial one,
+	      // i.e. the row last_row_left begins at column (1<<(j0()-1))-1, so does the row last_row_left-1.
+	      // So the row "row" starts at column ...
+	      const int first_column_left = (1<<(j0()-1))-1+(int)floor(((int)row+1-last_row_left)/2.);
+	      
+	      for (int col = first_column_left, filter_row = last_row_left-abs(row-last_row_left)%2;
+		   col < (1<<(lambda.j()-2)) && col <= fill_end && filter_row >= first_row_left; col++, filter_row -= 2)
+		if (col >= fill_start)
+		  c.set_coefficient(Index(lambda.j()-1, 1, col, this),
+				    Mj1T_t.get_nth_entry(col_left, filter_row-first_row_left));
+	      
+	      // Analogous strategy for the right half:
+	      
+	      const int col_right = 1<<(j0()-1);
+	      
+	      const int offset_right = (Deltasize(lambda.j())-Deltasize(j0()+1))-(1<<(lambda.j()-1))+(1<<j0()); // row offset for the right half
+	      const int first_row_right = Mj1T_t.get_nth_index(col_right, 0)+offset_right;
+	      const int last_row_right  = Mj1T_t.get_nth_index(col_right, Mj1T_t.entries_in_row(col_right)-1)+offset_right;
+	      
+	      // The rows first_row_right and first_row_right+1 end at column 1<<(lambda.j()-2),
+	      // so the row "row" ends at column ...
+	      const int last_column_right = (1<<(lambda.j()-2))+(int)floor(((int)row-first_row_right)/2.);
+	      
+	      for (int col = last_column_right, filter_row = first_row_right-offset_right+abs(row-first_row_right)%2;
+		   col >= 1<<(lambda.j()-2) && col >= fill_start && filter_row <= last_row_right-offset_right; col--, filter_row += 2)
+		if (col <= fill_end)
+		  c.set_coefficient(Index(lambda.j()-1, 1, col, this),
+				    Mj1T_t.get_nth_entry(col_right, filter_row+offset_right-first_row_right));
 	    }
 	    
    	    // compute c_{jmin} via recursion
@@ -1573,59 +1584,71 @@ namespace WaveletTL
 	      for (size_type k(0); k < Mj1.entries_in_row(row_j0); k++)
 		c.set_coefficient(Index(j0(), 1, Mj1.get_nth_index(row_j0,k), this),
 				  Mj1.get_nth_entry(row_j0,k));
-	    } else {
+	    }
+	    else {
 	      // Due to the [DS] symmetrization, we have to be a bit careful here.
-	      const size_t third = Deltasize(j0()+1)*2/5;
-	      if (row < third)
-		for (size_type k(0); k < Mj1.entries_in_row(row_j0); k++)
+	      int fill_start = 0, fill_end = (1<<(lambda.j()-1))-1; // first and last column to fill up with interior filter
+	      const size_type upper_half = Deltasize(j0()+1)/2;
+	      if (row < upper_half) {
+		// read the first half of the corresponding row in Mj1
+		for (size_type k(0); k < Mj1.entries_in_row(row_j0) && (int)Mj1.get_nth_index(row_j0,k) < 1<<(j0()-1); k++)
 		  c.set_coefficient(Index(lambda.j()-1, 1, Mj1.get_nth_index(row_j0,k), this),
 				    Mj1.get_nth_entry(row_j0,k));
+		fill_start = 1<<(j0()-1);
+		fill_end   = (1<<(lambda.j()-1))-1;
+	      }
 	      else {
-		const size_t bottom_third = Deltasize(lambda.j())-Deltasize(j0()+1)*2/5;
-		if (row >= bottom_third) {
+		const size_type bottom_half = Deltasize(lambda.j())-Deltasize(j0()+1)/2;
+		if (row >= bottom_half) {
+		  // read the second half of the corresponding row in Mj1
 		  row_j0 = row+Deltasize(j0()+1)-Deltasize(lambda.j());
 		  offset = (1<<(lambda.j()-1))-(1<<j0());
 		  for (size_type k(0); k < Mj1.entries_in_row(row_j0); k++)
-		    c.set_coefficient(Index(lambda.j()-1, 1, Mj1.get_nth_index(row_j0,k)+offset, this),
-				      Mj1.get_nth_entry(row_j0,k));
-		} else {
-		  // Left half of Mj1:
-		  
-		  const int col_left = (1<<(j0()-1))-1;
-		  
-		  // The row ...
-		  const int first_row_left = Mj1_t.get_nth_index(col_left, 0);
-		  // ... is the first nontrivial row in column (1<<(j0-1))-1 and the row ...
-		  const int last_row_left  = Mj1_t.get_nth_index(col_left, Mj1_t.entries_in_row(col_left)-1);
-		  // ... is the last nontrivial one,
-		  // i.e. the row last_row_left begins at column (1<<(j0()-1))-1, so does the row last_row_left-1.
-		  // So the row "row" starts at column ...
-		  const int first_column_left = (1<<(j0()-1))-1+(int)floor(((int)row+1-last_row_left)/2.);
-		  
-		  for (int col = first_column_left, filter_row = last_row_left-abs(row-last_row_left)%2;
-		       col < (1<<(lambda.j()-2)) && filter_row >= first_row_left; col++, filter_row -= 2)
-		    c.set_coefficient(Index(lambda.j()-1, 1, col, this),
-				      Mj1_t.get_nth_entry(col_left, filter_row-first_row_left));
-		  
-		  // Analogous strategy for the right half:
-		  
-		  const int col_right = 1<<(j0()-1);
-		  
-		  const int offset_right = (Deltasize(lambda.j())-Deltasize(j0()+1))-(1<<(lambda.j()-1))+(1<<j0()); // row offset for the right half
-		  const int first_row_right = Mj1_t.get_nth_index(col_right, 0)+offset_right;
-		  const int last_row_right  = Mj1_t.get_nth_index(col_right, Mj1_t.entries_in_row(col_right)-1)+offset_right;
-		  
-		  // The rows first_row_right and first_row_right+1 end at column 1<<(lambda.j()-2),
-		  // so the row "row" ends at column ...
-		  const int last_column_right = (1<<(lambda.j()-2))+(int)floor(((int)row-first_row_right)/2.);
-		  
-		  for (int col = last_column_right, filter_row = first_row_right-offset_right+abs(row-first_row_right)%2;
-		       col >= 1<<(lambda.j()-2) && filter_row <= last_row_right-offset_right; col--, filter_row += 2)
-		    c.set_coefficient(Index(lambda.j()-1, 1, col, this),
-				      Mj1_t.get_nth_entry(col_right, filter_row+offset_right-first_row_right));
+		    if ((int)Mj1.get_nth_index(row_j0,k) >= 1<<(j0()-1))
+		      c.set_coefficient(Index(lambda.j()-1, 1, Mj1.get_nth_index(row_j0,k)+offset, this),
+					Mj1.get_nth_entry(row_j0,k));
+		  fill_start = 0;
+		  fill_end   = (1<<(lambda.j()-1))-(1<<(j0()-1))-1;
 		}
-	      }	    
-	    }
+	      }
+	      
+	      // Left half of Mj1:
+	      
+	      const int col_left = (1<<(j0()-1))-1;
+	      
+	      // The row ...
+	      const int first_row_left = Mj1_t.get_nth_index(col_left, 0);
+	      // ... is the first nontrivial row in column (1<<(j0-1))-1 and the row ...
+	      const int last_row_left  = Mj1_t.get_nth_index(col_left, Mj1_t.entries_in_row(col_left)-1);
+	      // ... is the last nontrivial one,
+	      // i.e. the row last_row_left begins at column (1<<(j0()-1))-1, so does the row last_row_left-1.
+	      // So the row "row" starts at column ...
+	      const int first_column_left = (1<<(j0()-1))-1+(int)floor(((int)row+1-last_row_left)/2.);
+	      
+	      for (int col = first_column_left, filter_row = last_row_left-abs(row-last_row_left)%2;
+		   col < (1<<(lambda.j()-2)) && col <= fill_end && filter_row >= first_row_left; col++, filter_row -= 2)
+		if (col >= fill_start)
+		  c.set_coefficient(Index(lambda.j()-1, 1, col, this),
+				    Mj1_t.get_nth_entry(col_left, filter_row-first_row_left));
+	      
+	      // Analogous strategy for the right half:
+	      
+	      const int col_right = 1<<(j0()-1);
+	      
+	      const int offset_right = (Deltasize(lambda.j())-Deltasize(j0()+1))-(1<<(lambda.j()-1))+(1<<j0()); // row offset for the right half
+	      const int first_row_right = Mj1_t.get_nth_index(col_right, 0)+offset_right;
+	      const int last_row_right  = Mj1_t.get_nth_index(col_right, Mj1_t.entries_in_row(col_right)-1)+offset_right;
+	      
+	      // The rows first_row_right and first_row_right+1 end at column 1<<(lambda.j()-2),
+	      // so the row "row" ends at column ...
+	      const int last_column_right = (1<<(lambda.j()-2))+(int)floor(((int)row-first_row_right)/2.);
+	      
+	      for (int col = last_column_right, filter_row = first_row_right-offset_right+abs(row-first_row_right)%2;
+		   col >= 1<<(lambda.j()-2) && col >= fill_start && filter_row <= last_row_right-offset_right; col--, filter_row += 2)
+		if (col <= fill_end)
+		  c.set_coefficient(Index(lambda.j()-1, 1, col, this),
+				    Mj1_t.get_nth_entry(col_right, filter_row+offset_right-first_row_right));
+	    }	    
 	    
    	    // compute c_{jmin} via recursion
 	    row_j0 = row;

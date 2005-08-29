@@ -38,7 +38,7 @@ namespace WaveletTL
     };
 
   /*!
-    Template class for the wavelet bases on the interval as introduced in [DS].
+    Template class for the wavelet bases on the interval as introduced in [DKU] and [DS].
     All formulas refer to the preprint versions of [DS] (and [DKU], where indicated).
 
     References:
@@ -58,8 +58,12 @@ namespace WaveletTL
       constructor
       
       You can specify the order of either the primal (s) or the dual (sT) boundary conditions at
-      the left and right end of the interval [0,1]. The corresponding dual basis will then be
-      constructed to fulfill the corresponding complementary boundary conditions.
+      the left and right end of the interval [0,1]. Several combinations are possible:
+      
+      si=sTi=0  : no b.c., original [DKU] construction
+      si=s>0=sTi: primal basis with b.c., dual basis without b.c.
+      si=0<s=sTi: primal basis without b.c., dual basis with b.c.
+      si=sTi>0  : b.c. for primal and dual basis, like [CTU] (not recommended, loss of approximation order)
     */
     DSBasis(const int s0 = 1, const int s1 = 1, const int sT0 = 0, const int sT1 = 0,
 	    DSBiorthogonalizationMethod bio = SVD);
@@ -96,13 +100,37 @@ namespace WaveletTL
     inline const int DeltaRTmax(const int j) const { return (1<<j)-(d%2)-(ellT_r()-dT); } // == DeltaRmax()
 
     //! size of Delta_j
-    inline const int Deltasize(const int j) { return DeltaRmax(j)-DeltaLmin()+1; }
+    inline const int Deltasize(const int j) const { return DeltaRmax(j)-DeltaLmin()+1; }
     
     /*!
       boundary indices in \nabla_j
     */
     inline static const int Nablamin() { return 0; }
     inline static const int Nablamax(const int j) { return (1<<j)-1; }
+
+    //! setup the refinement matrix M_{j,0} for a given level j
+    void assemble_Mj0(const int j, SparseMatrix<double>& mj0) const;
+
+    //! setup the refinement matrix \tilde M_{j,0} for a given level j
+    void assemble_Mj0T(const int j, SparseMatrix<double>& mj0T) const;
+
+    //! setup the refinement matrix M_{j,1} for a given level j
+    void assemble_Mj1(const int j, SparseMatrix<double>& mj1) const;
+
+    //! setup the refinement matrix \tilde M_{j,1} for a given level j
+    void assemble_Mj1T(const int j, SparseMatrix<double>& mj1T) const;
+
+    //! setup the transposed refinement matrix M_{j,0} for a given level j
+    void assemble_Mj0_t(const int j, SparseMatrix<double>& mj0_t) const;
+
+    //! setup the transposed refinement matrix \tilde M_{j,0} for a given level j
+    void assemble_Mj0T_t(const int j, SparseMatrix<double>& mj0T_t) const;
+
+    //! setup the transposed refinement matrix M_{j,1} for a given level j
+    void assemble_Mj1_t(const int j, SparseMatrix<double>& mj1_t) const;
+
+    //! setup the transposed refinement matrix \tilde M_{j,1} for a given level j
+    void assemble_Mj1T_t(const int j, SparseMatrix<double>& mj1T_t) const;
 
   protected:
     //! boundary condition orders at 0 and 1
@@ -182,6 +210,9 @@ namespace WaveletTL
     void GElim (SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv); // elimination/factorization
     void InvertP(const SparseMatrix<double>& PP, SparseMatrix<double>& PPinv);
     void BT(const SparseMatrix<double>& A, SparseMatrix<double>& BB); // (4.1.9), (4.1.13)
+
+    // wavelet symmetrization from [DS]
+    void DS_symmetrization(SparseMatrix<double>& Mj1, SparseMatrix<double>& Mj1T);
   };
 }
 

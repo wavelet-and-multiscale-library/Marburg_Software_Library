@@ -70,7 +70,7 @@ namespace WaveletTL
   {
     switch (e_) {
     case 0:
-      if (k_ == basis->DeltaRmax(j_)) {
+      if (k_ == basis_->DeltaRmax(j_)) {
 	e_ = 1;
 	k_ = 0;
       }

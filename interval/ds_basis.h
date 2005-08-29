@@ -83,6 +83,11 @@ namespace WaveletTL
     typedef IIndex<DSBasis<d,dT> > Index;
 
     /*!
+      size_type, for convenience
+    */
+    typedef Vector<double>::size_type size_type;
+
+    /*!
       boundary indices in \Delta_j^X and \tilde\Delta_j^X (4.10),(4.14),(4.26)
      */
     inline const int DeltaLmin() const { return ell_l()-d; }
@@ -108,6 +113,86 @@ namespace WaveletTL
     inline static const int Nablamin() { return 0; }
     inline static const int Nablamax(const int j) { return (1<<j)-1; }
 
+    //! DECOMPOSE routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+        \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
+      where the multiscale decomposition starts with the coarsest
+      generator level jmin.
+     */
+    void decompose_1(const Index& lambda, const int jmin,
+		     InfiniteVector<double, Index>& c) const;
+
+    //! dual DECOMPOSE routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+        \tilde\psi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
+      where the multiscale decomposition starts with the coarsest
+      generator level jmin.
+     */
+    void decompose_t_1(const Index& lambda, const int jmin,
+		       InfiniteVector<double, Index>& c) const;
+
+    //! DECOMPOSE routine, full version
+    /*!
+      constructs for a given coefficient set c another one v with level >= jmin,
+      such that
+        \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
+    */
+    void decompose(const InfiniteVector<double, Index>& c, const int jmin,
+		   InfiniteVector<double, Index>& v) const;
+
+    //! dual DECOMPOSE routine, full version
+    /*!
+      constructs for a given coefficient set c another one v with level >= jmin,
+      such that
+        \sum_{\lambda}c_\lambda\tilde\psi_lambda = \sum_{\lambda'}d_{\lambda'}\tilde\psi_{\lambda'}
+    */
+    void decompose_t(const InfiniteVector<double, Index>& c, const int jmin,
+		     InfiniteVector<double, Index>& v) const;
+
+    //! RECONSTRUCT routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+        \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
+      where always |\lambda'|>=j
+     */
+    void reconstruct_1(const Index& lambda, const int j,
+		       InfiniteVector<double, Index>& c) const;
+
+    //! RECONSTRUCT routine, full version
+    /*!
+      Constructs for a given coefficient set c another one v,
+      such that
+        \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
+      where always |\lambda'|>=j
+    */
+    void reconstruct(const InfiniteVector<double, Index>& c, const int j,
+		     InfiniteVector<double, Index>& v) const;
+
+    //! dual RECONSTRUCT routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+        \tilde\psi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
+      where always |\lambda'|>=j
+     */
+    void reconstruct_t_1(const Index& lambda, const int j,
+			 InfiniteVector<double, Index>& c) const;
+
+    //! dual RECONSTRUCT routine, full version
+    /*!
+      Constructs for a given coefficient set c another one v,
+      such that
+        \sum_{\lambda}c_\lambda\tilde\psi_\lambda = \sum_{\lambda'}v_{\lambda'}\tilde\psi_{\lambda'}
+      where always |\lambda'|>=j
+    */
+    void reconstruct_t(const InfiniteVector<double, Index>& c, const int j,
+		       InfiniteVector<double, Index>& v) const;
+
     //! setup the refinement matrix M_{j,0} for a given level j
     void assemble_Mj0(const int j, SparseMatrix<double>& mj0) const;
 
@@ -131,6 +216,24 @@ namespace WaveletTL
 
     //! setup the transposed refinement matrix \tilde M_{j,1} for a given level j
     void assemble_Mj1T_t(const int j, SparseMatrix<double>& mj1T_t) const;
+
+    //! compute single rows of these matrices on higher levels than j0
+    void Mj0_get_row   (const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
+    void Mj0T_get_row  (const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
+    void Mj1_get_row   (const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
+    void Mj1T_get_row  (const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
+    void Mj0_t_get_row (const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
+    void Mj0T_t_get_row(const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
+    void Mj1_t_get_row (const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
+    void Mj1T_t_get_row(const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
 
   protected:
     //! boundary condition orders at 0 and 1

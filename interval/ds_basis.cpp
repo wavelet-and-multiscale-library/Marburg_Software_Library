@@ -861,10 +861,10 @@ namespace WaveletTL
     for (unsigned int r = d; r < CL.row_dimension()+s0; r++)
       CLA(ell2<d>()-1+ell_l()-s0+r-d, r-s0) = 1.0;
 
-//     cout << "CLA before biorthogonalization:" << endl << CLA << endl;
+    cout << "CLA before biorthogonalization:" << endl << CLA << endl;
     CLA = CLA * transpose(CL);
     CLA.compress(1e-12);
-//     cout << "CLA after biorthogonalization:" << endl << CLA << endl;
+    cout << "CLA after biorthogonalization:" << endl << CLA << endl;
 
     // setup CLAT <-> Alpha * (CLT)^T
     CLAT.resize(ellT_l()+ell2T<d,dT>()-sT0+std::max(0,d-dT+sT0-s0)-1, CLT.row_dimension());
@@ -874,10 +874,10 @@ namespace WaveletTL
     for (unsigned int r = dT; r < CLT.row_dimension()+sT0; r++)
       CLAT(ell2T<d,dT>()-1+ellT_l()-sT0+r-dT, r-sT0) = 1.0;
 
-//     cout << "CLAT before biorthogonalization:" << endl << CLAT << endl;
+    cout << "CLAT before biorthogonalization:" << endl << CLAT << endl;
     CLAT = CLAT * transpose(CLT);
     CLAT.compress(1e-12);
-//     cout << "CLAT after biorthogonalization:" << endl << CLAT << endl;
+    cout << "CLAT after biorthogonalization:" << endl << CLAT << endl;
 
     // the same for CRA, CRAT:
     CRA.resize(ell_r()+ell2<d>()-s1+std::max(0,dT-d+s1-sT1)-1, CR.row_dimension());

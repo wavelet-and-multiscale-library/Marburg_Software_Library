@@ -2,6 +2,7 @@
 
 #include <Rd/r_index.h>
 #include <Rd/cdf_utils.h>
+#include <numerics/cardinal_splines.h>
 
 namespace WaveletTL
 {
@@ -14,10 +15,10 @@ namespace WaveletTL
   {
     if (lambda.e() == 0) { // generator
       if (primal) {
-  	if (lambda.k() <= basis.DeltaLmax()) {
+	const Matrix<double>& CLA = basis.get_CLA();
+  	if (lambda.k() < basis.DeltaLmin()+(int)CLA.column_dimension()) {
 	  // left boundary generator
 	  InfiniteVector<double, RIndex> coeffs;
-	  const Matrix<double>& CLA = basis.get_CLA();
 	  for(unsigned int i(0); i < CLA.row_dimension(); i++) {
 	    double v(CLA(i, lambda.k()-basis.DeltaLmin()));
 	    if (v != 0)
@@ -25,10 +26,10 @@ namespace WaveletTL
 	  }
 	  return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
  	} else {
- 	  if (lambda.k() >= basis.DeltaRmin(lambda.j())) {
+	  const Matrix<double>& CRA = basis.get_CRA();
+ 	  if (lambda.k() > basis.DeltaRmax(lambda.j())-(int)CRA.column_dimension()) {
  	    // right boundary generator
  	    InfiniteVector<double, RIndex> coeffs;
-	    const Matrix<double>& CRA = basis.get_CRA();
  	    for (unsigned int i(0); i < CRA.row_dimension(); i++) {
  	      double v(CRA(i, basis.DeltaRmax(lambda.j())-lambda.k()));
  	      if (v != 0)
@@ -43,10 +44,10 @@ namespace WaveletTL
  	}
       } else {
   	// dual
-  	if (lambda.k() <= basis.DeltaLTmax()) {
+	const Matrix<double>& CLAT = basis.get_CLAT();
+  	if (lambda.k() < basis.DeltaLTmin()+(int)CLAT.column_dimension()) {
   	  // left boundary generator
   	  InfiniteVector<double, RIndex> coeffs;
-	  const Matrix<double>& CLAT = basis.get_CLAT();
   	  for (unsigned int i(0); i < CLAT.row_dimension(); i++) {
   	    double v(CLAT(i, lambda.k()-basis.DeltaLTmin()));
   	    if (v != 0)
@@ -54,10 +55,10 @@ namespace WaveletTL
   	  }
   	  return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
   	} else {
-  	  if (lambda.k() >= basis.DeltaRTmin(lambda.j())) {
+	  const Matrix<double>& CRAT = basis.get_CRAT();
+	  if (lambda.k() > basis.DeltaRTmax(lambda.j())-(int)CRAT.column_dimension()) {
   	    // right boundary generator
   	    InfiniteVector<double, RIndex> coeffs;
-	    const Matrix<double>& CRAT = basis.get_CRAT();
   	    for (unsigned int i(0); i < CRAT.row_dimension(); i++) {
   	      double v(CRAT(i, basis.DeltaRTmax(lambda.j())-lambda.k()));
   	      if (v != 0)
@@ -131,10 +132,10 @@ namespace WaveletTL
 
     if (lambda.e() == 0) // generator
       {
-	if (lambda.k() <= basis.DeltaLmax())
+	const Matrix<double>& CLA = basis.get_CLA();
+	if (lambda.k() < basis.DeltaLmin()+(int)CLA.column_dimension())
 	  {
  	    // left boundary generator
-	    const Matrix<double>& CLA = basis.get_CLA();
 	    for (unsigned int i(0); i < CLA.row_dimension(); i++)
 	      {
  		double help(CLA(i, lambda.k()-basis.DeltaLmin()));
@@ -146,10 +147,10 @@ namespace WaveletTL
 	  }
 	else
 	  {
-	    if (lambda.k() >= basis.DeltaRmin(lambda.j()))
+	    const Matrix<double>& CRA = basis.get_CRA();
+	    if (lambda.k() > basis.DeltaRmax(lambda.j())-(int)CRA.column_dimension())
 	      {
 		// right boundary generator
-		const Matrix<double>& CRA = basis.get_CRA();
 		for (unsigned int i(0); i < CRA.row_dimension(); i++)
 		  {
 		    double help(CRA(i, basis.DeltaRmax(lambda.j())-lambda.k()));

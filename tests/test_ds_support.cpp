@@ -10,8 +10,8 @@ int main()
 {
   cout << "Testing support calculation of DS generators and wavelets..." << endl;
 
-  const int d = 3;
-  const int dT = 5;
+  const int d = 2;
+  const int dT = 4;
 
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
@@ -19,14 +19,14 @@ int main()
   Basis basis;
   Index lambda(first_generator(&basis, basis.j0()));
 //   ++lambda;
-  for (int i = 1; i <= 4; i++, ++lambda);
+//   for (int i = 1; i <= 4; i++, ++lambda);
 //   lambda = last_generator(&basis, basis.j0());
 //   lambda = first_wavelet(&basis, basis.j0()+1);
 //   for (int i = 1; i <= 4; i++, ++lambda);
 //   lambda = last_wavelet(&basis, basis.j0()+1);
 
   cout << "- point values at dyadic points of the " << lambda << " generator/wavelet:" << endl;
-  evaluate(basis, lambda, true, 5).matlab_output(cout);
+  evaluate(basis, lambda, true, 6).matlab_output(cout);
 
   int k1, k2;
   support(basis, lambda, k1, k2);

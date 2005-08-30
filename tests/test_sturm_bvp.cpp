@@ -76,7 +76,7 @@ int main()
   TestProblem<1> T;
 
   const int d  = 2;
-  const int dT = 4;
+  const int dT = 2;
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
@@ -85,11 +85,11 @@ int main()
   InfiniteVector<double, Index> coeffs;
 
 #if 0
-  coeffs[eq.basis().firstGenerator(eq.basis().j0())] = 1.0;
-  coeffs[eq.basis().lastGenerator(eq.basis().j0())] = 2.0;
-  coeffs[eq.basis().firstWavelet(eq.basis().j0())] = 3.0;
-  coeffs[eq.basis().lastWavelet(eq.basis().j0())] = 4.0;
-  coeffs[eq.basis().firstWavelet(eq.basis().j0()+1)] = 5.0;
+  coeffs[first_generator(&eq.basis(), eq.basis().j0())] = 1.0;
+  coeffs[last_generator(&eq.basis(), eq.basis().j0())] = 2.0;
+  coeffs[first_wavelet(&eq.basis(), eq.basis().j0())] = 3.0;
+  coeffs[last_wavelet(&eq.basis(), eq.basis().j0())] = 4.0;
+  coeffs[first_wavelet(&eq.basis(), eq.basis().j0()+1)] = 5.0;
   cout << "- a coefficient set:" << endl
        << coeffs << endl;
   eq.rescale(coeffs, -1);
@@ -97,14 +97,14 @@ int main()
        << coeffs << endl;
 #endif
 
-//   eq.RHS(coeffs, 1e-2);
-//   cout << "- approximate coefficient set of the right-hand side:" << endl
-//        << coeffs << endl;
+  eq.RHS(coeffs, 1e-2);
+  cout << "- approximate coefficient set of the right-hand side:" << endl
+       << coeffs << endl;
 
-#if 0
+#if 1
   cout << "- check expansion of the right-hand side in the dual basis:" << endl;
   eq.rescale(coeffs, 1);
-  evaluate(eq.basis(), coeffs, false, 7).matlab_output(cout);
+  evaluate(eq.basis(), coeffs, false, 8).matlab_output(cout);
   eq.rescale(coeffs, -1);
 #endif  
 

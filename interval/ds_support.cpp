@@ -1,5 +1,6 @@
 // implementation for dku_support.h
 
+#include <algebra/matrix.h>
 #include <Rd/cdf_utils.h>
 
 namespace WaveletTL
@@ -11,18 +12,20 @@ namespace WaveletTL
   {
     if (lambda.e() == 0) // generator
       {
-	if (lambda.k() <= basis.DeltaLmax())
+	const Matrix<double>& CLA = basis.get_CLA();
+	if (lambda.k() < basis.DeltaLmin()+(int)CLA.column_dimension())
 	  {
  	    // left boundary generator
 	    k1 = 0;
-	    k2 = basis.get_CLA().row_dimension();
+	    k2 = CLA.row_dimension();
 	  }
 	else
 	  {
-	    if (lambda.k() >= basis.DeltaRmin(lambda.j()))
+	    const Matrix<double>& CRA = basis.get_CRA();
+	    if (lambda.k() > basis.DeltaRmax(lambda.j())-(int)CRA.column_dimension())
 	      {
 		// right boundary generator
-		k1 = (1<<lambda.j()) - basis.get_CRA().row_dimension();
+		k1 = (1<<lambda.j()) - CRA.row_dimension();
 		k2 = 1<<lambda.j();
 	      }
 	    else

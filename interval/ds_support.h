@@ -12,6 +12,8 @@
 
 namespace WaveletTL
 {
+  template <int d, int dT> class DSBasis;
+
   /*!
     Compute an interval 2^{-j}[k1,k2] which contains the support of a
     single primal DS generator or wavelet \psi_\lambda.

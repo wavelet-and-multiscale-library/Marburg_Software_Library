@@ -1,0 +1,183 @@
+// implementation for ds_evaluate.h
+
+#include <Rd/r_index.h>
+#include <Rd/cdf_utils.h>
+
+namespace WaveletTL
+{
+  template <int d, int dT>
+  SampledMapping<1>
+  evaluate(const DSBasis<d,dT>& basis,
+	   const typename DSBasis<d,dT>::Index& lambda,
+	   const bool primal,
+	   const int resolution)
+  {
+    if (lambda.e() == 0) { // generator
+      if (primal) {
+  	if (lambda.k() <= basis.DeltaLmax()) {
+	  // left boundary generator
+	  InfiniteVector<double, RIndex> coeffs;
+	  const Matrix<double>& CLA = basis.get_CLA();
+	  for(unsigned int i(0); i < CLA.row_dimension(); i++) {
+	    double v(CLA(i, lambda.k()-basis.DeltaLmin()));
+	    if (v != 0)
+	      coeffs.set_coefficient(RIndex(lambda.j(), 0, 1-ell2<d>()+i), v);
+	  }
+	  return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
+ 	} else {
+ 	  if (lambda.k() >= basis.DeltaRmin(lambda.j())) {
+ 	    // right boundary generator
+ 	    InfiniteVector<double, RIndex> coeffs;
+	    const Matrix<double>& CRA = basis.get_CRA();
+ 	    for (unsigned int i(0); i < CRA.row_dimension(); i++) {
+ 	      double v(CRA(i, basis.DeltaRmax(lambda.j())-lambda.k()));
+ 	      if (v != 0)
+ 		coeffs.set_coefficient(RIndex(lambda.j(), 0, (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2<d>()+i)), v);
+ 	    }
+ 	    return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
+ 	  } else {
+ 	    // inner generator
+ 	    return basis.get_CDF_basis().evaluate(0, RIndex(lambda.j(), 0, lambda.k()),
+						  primal, 0, 1, resolution);
+ 	  }
+ 	}
+      } else {
+  	// dual
+  	if (lambda.k() <= basis.DeltaLTmax()) {
+  	  // left boundary generator
+  	  InfiniteVector<double, RIndex> coeffs;
+	  const Matrix<double>& CLAT = basis.get_CLAT();
+  	  for (unsigned int i(0); i < CLAT.row_dimension(); i++) {
+  	    double v(CLAT(i, lambda.k()-basis.DeltaLTmin()));
+  	    if (v != 0)
+  	      coeffs.set_coefficient(RIndex(lambda.j(), 0, 1-ell2T<d,dT>()+i), v);
+  	  }
+  	  return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
+  	} else {
+  	  if (lambda.k() >= basis.DeltaRTmin(lambda.j())) {
+  	    // right boundary generator
+  	    InfiniteVector<double, RIndex> coeffs;
+	    const Matrix<double>& CRAT = basis.get_CRAT();
+  	    for (unsigned int i(0); i < CRAT.row_dimension(); i++) {
+  	      double v(CRAT(i, basis.DeltaRTmax(lambda.j())-lambda.k()));
+  	      if (v != 0)
+ 		coeffs.set_coefficient(RIndex(lambda.j(), 0, (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2T<d,dT>()+i)), v);
+  	    }
+  	    return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
+  	  } else {
+  	    // inner generator
+  	    return basis.get_CDF_basis().evaluate(0, RIndex(lambda.j(), 0, lambda.k()),
+						  primal, 0, 1, resolution);
+  	  }
+  	}
+      }
+    } else { // wavelet
+      InfiniteVector<double, typename DSBasis<d,dT>::Index> gcoeffs;
+      if (primal)
+ 	basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
+      else
+ 	basis.reconstruct_t_1(lambda, lambda.j()+1, gcoeffs);
+      return evaluate(basis, gcoeffs, primal, resolution);
+    }
+    
+    return SampledMapping<1>(); // dummy return for the compiler
+  }
+
+  template <int d, int dT>
+  SampledMapping<1>
+  evaluate(const DSBasis<d,dT>& basis,
+	   const InfiniteVector<double, typename DSBasis<d,dT>::Index>& coeffs,
+	   const bool primal,
+	   const int resolution)
+  {
+    Grid<1> grid(0, 1, 1<<resolution);
+    Array1D<double> values((1<<resolution)+1);
+    for (unsigned int i(0); i < values.size(); i++) values[i] = 0;
+    
+    if (coeffs.size() > 0) {
+      // determine maximal level
+      int jmax(0);
+      typedef typename DSBasis<d,dT>::Index Index;
+      for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()), itend(coeffs.end());
+ 	   it != itend; ++it)
+ 	jmax = std::max(it.index().j()+it.index().e(), jmax);
+      
+      // switch to generator representation
+      InfiniteVector<double,Index> gcoeffs;
+      if (primal)
+ 	basis.reconstruct(coeffs,jmax,gcoeffs);
+      else
+ 	basis.reconstruct_t(coeffs,jmax,gcoeffs);
+      
+      for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()), itend(gcoeffs.end());
+ 	   it != itend; ++it) {
+ 	SampledMapping<1> help(evaluate(basis, it.index(), primal, resolution));
+ 	for (unsigned int i(0); i < values.size(); i++)
+ 	  values[i] += *it * help.values()[i];
+      }
+    }
+    
+    return SampledMapping<1>(grid, values);
+  }
+
+  template <int d, int dT>
+  double evaluate(const DSBasis<d,dT>& basis, const unsigned int derivative,
+		  const typename DSBasis<d,dT>::Index& lambda,
+		  const double x)
+  {
+    assert(derivative <= 1); // we only support derivatives up to the first order
+
+    double r = 0;
+
+    if (lambda.e() == 0) // generator
+      {
+	if (lambda.k() <= basis.DeltaLmax())
+	  {
+ 	    // left boundary generator
+	    const Matrix<double>& CLA = basis.get_CLA();
+	    for (unsigned int i(0); i < CLA.row_dimension(); i++)
+	      {
+ 		double help(CLA(i, lambda.k()-basis.DeltaLmin()));
+ 		if (help != 0)
+ 		  r += help * (derivative == 0
+			       ? EvaluateCardinalBSpline_td  (d, lambda.j(), 1-ell2<d>()+i, x)
+			       : EvaluateCardinalBSpline_td_x(d, lambda.j(), 1-ell2<d>()+i, x));
+	      }
+	  }
+	else
+	  {
+	    if (lambda.k() >= basis.DeltaRmin(lambda.j()))
+	      {
+		// right boundary generator
+		const Matrix<double>& CRA = basis.get_CRA();
+		for (unsigned int i(0); i < CRA.row_dimension(); i++)
+		  {
+		    double help(CRA(i, basis.DeltaRmax(lambda.j())-lambda.k()));
+		    if (help != 0)
+		      r += help * (derivative == 0
+				   ? EvaluateCardinalBSpline_td  (d, lambda.j(), (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2<d>()+i), x)
+				   : EvaluateCardinalBSpline_td_x(d, lambda.j(), (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2<d>()+i), x));
+		  }
+	      }
+	    else
+	      {
+		r = (derivative == 0
+		     ? EvaluateCardinalBSpline_td  (d, lambda.j(), lambda.k(), x)
+		     : EvaluateCardinalBSpline_td_x(d, lambda.j(), lambda.k(), x));
+	      }
+	  }
+      }
+    else // wavelet
+      {
+	typedef typename DSBasis<d,dT>::Index Index;
+	InfiniteVector<double,Index> gcoeffs;
+	basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
+	for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin());
+	     it != gcoeffs.end(); ++it)
+	  r += *it * evaluate(basis, derivative, it.index(), x);
+      }
+    
+    return r;
+  }
+
+}

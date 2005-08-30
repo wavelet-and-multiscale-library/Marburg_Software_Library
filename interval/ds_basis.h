@@ -19,6 +19,9 @@
 #include <Rd/cdf_basis.h>
 #include <interval/i_index.h>
 
+// for convenience, include also some functionality
+#include <interval/ds_evaluate.h>
+
 namespace WaveletTL
 {
   /*!
@@ -66,6 +69,13 @@ namespace WaveletTL
       si=sTi>0  : b.c. for primal and dual basis, like [CTU] (not recommended, loss of approximation order)
     */
     DSBasis(const int s0 = 1, const int s1 = 1, const int sT0 = 0, const int sT1 = 0,
+	    DSBiorthogonalizationMethod bio = SVD);
+
+    /*!
+      alternative constructor, you can specify whether first order homogeneous Dirichlet b.c.'s
+      for the primal functions are set or not. The dual functions have free b.c.'s.
+    */
+    DSBasis(bool bc_left, bool bc_right,
 	    DSBiorthogonalizationMethod bio = SVD);
 
     //! freezing parameters, (4.11)
@@ -192,6 +202,19 @@ namespace WaveletTL
     */
     void reconstruct_t(const InfiniteVector<double, Index>& c, const int j,
 		       InfiniteVector<double, Index>& v) const;
+
+    /*!
+      read access to the internal instance of the CDF basis
+    */
+    const CDFBasis<d,dT>& get_CDF_basis() const { return cdf; }
+
+    /*!
+      read access to the boundary generator expansion coefficients
+    */
+    const Matrix<double>& get_CLA() const { return CLA; }
+    const Matrix<double>& get_CRA() const { return CRA; }
+    const Matrix<double>& get_CLAT() const { return CLAT; }
+    const Matrix<double>& get_CRAT() const { return CRAT; }
 
     //! setup the refinement matrix M_{j,0} for a given level j
     void assemble_Mj0(const int j, SparseMatrix<double>& mj0) const;

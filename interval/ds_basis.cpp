@@ -14,29 +14,22 @@
 namespace WaveletTL
 {
   template <int d, int dT>
+  DSBasis<d,dT>::DSBasis(bool bc_left, bool bc_right,
+			 DSBiorthogonalizationMethod bio)
+    : DSBasis(bc_left ? 1 : 0, bc_right ? 1 : 0, 0, 0, bio)
+  {
+  }
+  
+  template <int d, int dT>
   DSBasis<d,dT>::DSBasis(const int s0, const int s1, const int sT0, const int sT1,
 			 DSBiorthogonalizationMethod bio) {
     assert(std::max(s0,s1) < d && std::max(sT0,sT1) < dT);
-    
-//     assert(((s0 == 0 && sT0 > 0) || (s0 > 0 && sT0 == 0))
-// 	   && ((s1 == 0 && sT1 > 0) || (s1 > 0 && sT1 == 0)));
-    
+        
     this->s0 = s0;
     this->s1 = s1;
     this->sT0 = sT0;
     this->sT1 = sT1;
     this->bio = bio;
-
-#if 0
-    cout << "* some moments alpha(m,r):" << endl;
-    for (unsigned int r = 1; r < d; r++)
-      for (int m = -5; m <= 5; m++)
-	cout << "m=" << m << ", r=" << r << ": " << alpha(m,r) << endl;
-    cout << "* some moments alphaT(m,r):" << endl;
-    for (unsigned int r = 1; r < dT; r++)
-      for (int m = -5; m <= 5; m++)
-	cout << "m=" << m << ", r=" << r << ": " << alphaT(m,r) << endl;
-#endif
 
     setup_GammaLR();
     setup_CX_CXT();
@@ -58,7 +51,7 @@ namespace WaveletTL
     Mj0  = transpose(inv_Cjp)  * mj0   * transpose(Cj); // (2.4.3)
     Mj0T = transpose(inv_CjpT) * mj0tp * transpose(CjT);
     
-#if 1
+#if 0
     cout << "DSBasis(): check biorthogonality of Mj0, Mj0T:" << endl;
 //     cout << "Mj0=" << endl << Mj0 << endl << "Mj0T=" << endl << Mj0T << endl;
 
@@ -83,14 +76,14 @@ namespace WaveletTL
     SparseMatrix<double> A, H, Hinv;
     GSetup(A, H, Hinv); // (4.1.1), (4.1.13)
 
-#if 1
+#if 0
     SparseMatrix<double> Aold(A); // for the checks below
 #endif
 
     GElim (A, H, Hinv); // elimination (4.1.4)ff.
     SparseMatrix<double> BB; BT(A, BB); // (4.1.13)
 
-#if 1
+#if 0
     cout << "DSBasis(): check properties (4.1.15):" << endl;
     SparseMatrix<double> test4115 = transpose(BB)*A;
     for (unsigned int i = 0; i < test4115.row_dimension(); i++)
@@ -109,7 +102,7 @@ namespace WaveletTL
     cout << "* ||Fj^T*A||_infty: " << row_sum_norm(test4115) << endl;    
 #endif
 
-#if 1
+#if 0
     cout << "DSBasis(): check factorization of A:" << endl;
     SparseMatrix<double> testAfact = Aold - Hinv*A;
     cout << "* in infty-norm: " << row_sum_norm(testAfact) << endl;
@@ -124,7 +117,7 @@ namespace WaveletTL
     SparseMatrix<double> mj1ih = PP * Hinv * FF; // (4.1.23)
     SparseMatrix<double> PPinv; InvertP(PP, PPinv);
 
-#if 1
+#if 0
     cout << "DSBasis(): check that PPinv is inverse to PP:" << endl;
     SparseMatrix<double> testPinv = PP*PPinv;
     for (unsigned int i = 0; i < testPinv.row_dimension(); i++)
@@ -136,7 +129,7 @@ namespace WaveletTL
     SparseMatrix<double> gj0ih = transpose(BB) * help;
     SparseMatrix<double> gj1ih = transpose(FF) * help; // (4.1.24)
 
-#if 1
+#if 0
     cout << "DSBasis(): check initial stable completion:" << endl;
     SparseMatrix<double> mj_initial(mj0.row_dimension(),
 				    mj0.column_dimension() + mj1ih.column_dimension());
@@ -189,7 +182,7 @@ namespace WaveletTL
     Mj0T.compress(1e-8);
     Mj1T.compress(1e-8);
     
-#if 1
+#if 0
     cout << "DSBasis(): check new stable completion:" << endl;
     
     SparseMatrix<double> mj_new(Mj0.row_dimension(),
@@ -285,7 +278,7 @@ namespace WaveletTL
     if (d%2 && (s0 == s1 && sT0 == sT1))
       {
 	DS_symmetrization(Mj1, Mj1T);
-#if 1
+#if 0
 	{
 	  cout << "DKUBasis(): check [DS] symmetrization:" << endl;
 	  
@@ -818,7 +811,7 @@ namespace WaveletTL
 //       CRT_.compress(1e-14);
 //     }
     
-#if 1
+#if 0
     // check biorthogonality of the matrix product CL * GammaL * (CLT)^T
 //     cout << "GammaL=" << endl << GammaL << endl;
 //     cout << "CL=" << endl << CL << endl;
@@ -832,7 +825,7 @@ namespace WaveletTL
     QUDecomposition<double>(CL).inverse(inv_CL);
     QUDecomposition<double>(CLT).inverse(inv_CLT);
 
-#if 1
+#if 0
     // check biorthogonality of the matrix product CR * GammaR * (CRT)^T
 //     cout << "GammaR=" << endl << GammaR << endl;
 //     cout << "CR=" << endl << CR << endl;
@@ -963,7 +956,7 @@ namespace WaveletTL
 		       Deltasize(j0()+1)-inv_CRT.column_dimension(),
 		       inv_CRT, true);
 
-#if 1
+#if 0
     cout << "DSBasis: testing setup of Cj:" << endl;
 
     SparseMatrix<double> test1 = CjT * inv_CjT;
@@ -1076,8 +1069,7 @@ namespace WaveletTL
   void
   DSBasis<d,dT>::setup_Mj0(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& Mj0) {
     // IGPMlib reference: I_Basis_Bspline_s::Mj0()
-    
-    // TODO: enhance readability! (<-> [DKU section 3.5])
+    // cf. [DKU section 3.5]
 
     const int nj  = Deltasize(j0());
     const int njp = Deltasize(j0()+1);

@@ -5,8 +5,8 @@
 #include <numerics/sturm_bvp.h>
 #include <numerics/iteratsolv.h>
 
-#include <interval/dku_index.h>
-#include <interval/dku_basis.h>
+#include <interval/i_index.h>
+#include <interval/ds_basis.h>
 #include <galerkin/sturm_equation.h>
 
 using namespace std;
@@ -77,7 +77,7 @@ int main()
 
   const int d  = 2;
   const int dT = 4;
-  typedef DKUBasis<d,dT> Basis;
+  typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
   SturmEquation<Basis> eq(T);
@@ -97,14 +97,14 @@ int main()
        << coeffs << endl;
 #endif
 
-  eq.RHS(coeffs, 1e-2);
+//   eq.RHS(coeffs, 1e-2);
 //   cout << "- approximate coefficient set of the right-hand side:" << endl
 //        << coeffs << endl;
 
-#if 1
+#if 0
   cout << "- check expansion of the right-hand side in the dual basis:" << endl;
   eq.rescale(coeffs, 1);
-  eq.basis().evaluate(coeffs, false, 7).matlab_output(cout);
+  evaluate(eq.basis(), coeffs, false, 7).matlab_output(cout);
   eq.rescale(coeffs, -1);
 #endif  
 

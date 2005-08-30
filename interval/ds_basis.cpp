@@ -15,9 +15,14 @@ namespace WaveletTL
 {
   template <int d, int dT>
   DSBasis<d,dT>::DSBasis(bool bc_left, bool bc_right,
-			 DSBiorthogonalizationMethod bio)
-    : DSBasis(bc_left ? 1 : 0, bc_right ? 1 : 0, 0, 0, bio)
-  {
+			 DSBiorthogonalizationMethod bio) {
+    this->s0 = bc_left ? 1 : 0;
+    this->s1 = bc_right ? 1 : 0;
+    this->sT0 = 0;
+    this->sT1 = 0;
+    this->bio = bio;
+
+    setup();
   }
   
   template <int d, int dT>
@@ -31,14 +36,18 @@ namespace WaveletTL
     this->sT1 = sT1;
     this->bio = bio;
 
+    setup();
+  }
+
+  template <int d, int dT>
+  void
+  DSBasis<d,dT>::setup() {
     setup_GammaLR();
     setup_CX_CXT();
     setup_CXA_CXAT();
-
-    // IGPMlib reference: I_Basis_Bspline_s::Setup()
-
+    
     setup_Cj();
-
+    
     Matrix<double> ml = ML(); // (3.5.2)
     Matrix<double> mr = MR(); // (3.5.2)
     SparseMatrix<double> mj0;   setup_Mj0  (ml,   mr,   mj0);   // (3.5.1)

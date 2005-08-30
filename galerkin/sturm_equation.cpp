@@ -125,11 +125,11 @@ namespace WaveletTL
     const int j0 = wbasis_.j0();
     const int jmax = j0;
 
-    for (typename WBASIS::Index lambda(wbasis_.firstGenerator(j0));; ++lambda)
+    for (typename WBASIS::Index lambda(first_generator(&wbasis_, j0));; ++lambda)
       {
 	coeffs.set_coefficient(lambda, f(lambda)/D(lambda));
-  	if (lambda == wbasis_.lastGenerator(j0))
-//  	if (lambda == wbasis_.lastWavelet(jmax))
+  	if (lambda == last_generator(&wbasis_, j0))
+//  	if (lambda == last_wavelet(wbasis_, jmax))
 	  break;
       }
   }

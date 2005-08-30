@@ -67,8 +67,10 @@ namespace WaveletTL
       si=s>0=sTi: primal basis with b.c., dual basis without b.c.
       si=0<s=sTi: primal basis without b.c., dual basis with b.c.
       si=sTi>0  : b.c. for primal and dual basis, like [CTU] (not recommended, loss of approximation order)
+
+      The default basis is the original [DKU] construction without any boundary conditions.
     */
-    DSBasis(const int s0 = 1, const int s1 = 1, const int sT0 = 0, const int sT1 = 0,
+    DSBasis(const int s0 = 0, const int s1 = 0, const int sT0 = 0, const int sT1 = 0,
 	    DSBiorthogonalizationMethod bio = SVD);
 
     /*!
@@ -216,6 +218,18 @@ namespace WaveletTL
     const Matrix<double>& get_CLAT() const { return CLAT; }
     const Matrix<double>& get_CRAT() const { return CRAT; }
 
+    /*!
+      read access to the diverse refinement matrices on level j0
+    */
+    const SparseMatrix<double>& get_Mj0()  const { return Mj0; }
+    const SparseMatrix<double>& get_Mj0T() const { return Mj0T; }
+    const SparseMatrix<double>& get_Mj1()  const { return Mj1; }
+    const SparseMatrix<double>& get_Mj1T() const { return Mj1T; }
+    const SparseMatrix<double>& get_Mj0_t()  const { return Mj0_t; }
+    const SparseMatrix<double>& get_Mj0T_t() const { return Mj0T_t; }
+    const SparseMatrix<double>& get_Mj1_t()  const { return Mj1_t; }
+    const SparseMatrix<double>& get_Mj1T_t() const { return Mj1T_t; }
+
     //! setup the refinement matrix M_{j,0} for a given level j
     void assemble_Mj0(const int j, SparseMatrix<double>& mj0) const;
 
@@ -286,6 +300,8 @@ namespace WaveletTL
     //! refinement coeffients of left dual boundary generators (m reversed)
     const double betaRT(const int m, const unsigned int r) const;
 
+    //! general setup routine which is shared by the different constructors
+    void setup();
 
     //! compute Gramian of left and right unbiorthogonalized primal boundary functions
     void setup_GammaLR();

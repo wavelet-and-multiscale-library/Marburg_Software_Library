@@ -39,29 +39,29 @@ int main()
        << "]"
        << endl;
   
-//   cout << "- calculating some support intersections:" << endl;
-//   for (lambda = basis.firstGenerator(basis.j0());; ++lambda)
-//     {
-//       int j, k1, k2;
-//       support(basis, lambda, k1, k2);
-//       cout << "psi_lambda, lambda=" << lambda << " has support 2^{-"
-// 	   << lambda.j()+lambda.e()
-// 	   << "}["
-// 	   << k1
-// 	   << ","
-// 	   << k2
-// 	   << "]"
-// 	   << endl;
+  cout << "- calculating some support intersections:" << endl;
+  for (lambda = first_generator(&basis, basis.j0());; ++lambda)
+    {
+      int j, k1, k2;
+      support(basis, lambda, k1, k2);
+      cout << "psi_lambda, lambda=" << lambda << " has support 2^{-"
+	   << lambda.j()+lambda.e()
+	   << "}["
+	   << k1
+	   << ","
+	   << k2
+	   << "]"
+	   << endl;
 
-//       cout << "support intersection with first generator on level j0: ";
-//       bool inter = intersect_supports(basis, lambda, basis.firstGenerator(basis.j0()), j, k1, k2);
-//       if (inter)
-// 	cout << "2^{-" << j << "}[" << k1 << "," << k2 << "]" << endl;
-//       else
-// 	cout << "none" << endl;
+      cout << "support intersection with first generator on level j0: ";
+      bool inter = intersect_supports(basis, lambda, first_generator(&basis, basis.j0()), j, k1, k2);
+      if (inter)
+	cout << "2^{-" << j << "}[" << k1 << "," << k2 << "]" << endl;
+      else
+	cout << "none" << endl;
       
-//       if (lambda == basis.lastWavelet(basis.j0())) break;
-//     }
+      if (lambda == last_wavelet(&basis, basis.j0())) break;
+    }
 
   return 0;
 }

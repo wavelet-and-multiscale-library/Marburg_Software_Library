@@ -10,6 +10,8 @@
 #ifndef _WAVELETTL_CDF_UTILS_H
 #define _WAVELETTL_CDF_UTILS_H
 
+#include <Rd/r_index.h>
+
 namespace WaveletTL
 {
   //! left support bound for a primal CDF generator
@@ -30,11 +32,22 @@ namespace WaveletTL
 
   //! left support bound for a primal (or dual) CDF wavelet
   template <int d, int dT>
-  int psi_supp_left() { return -(d + dT) / 2; }
+  int psi_supp_left() { return -(d + dT) / 2 + 1; }
 
   //! right support bound for a primal (or dual) CDF wavelet
   template <int d, int dT>
-  int psi_supp_right() { return (d + dT) / 2 - 1; }
+  int psi_supp_right() { return (d + dT) / 2; }
+
+  /*!
+    compute support bounds of the form 2^{-j}k for a (translated and dilated)
+    CDF generator or wavelet
+    (j == lambda.j() is neglected for performance reasons)
+  */
+  template <int d, int dT>
+  void support(const RIndex& lambda, const bool primal, int& k1, int& k2) {
+    k1 = (lambda.e() == 0 ? (primal ? ell1<d>() : ell1T<d,dT>()) : psi_supp_left<d,dT>()) + lambda.k();
+    k2 = (lambda.e() == 0 ? (primal ? ell2<d>() : ell2T<d,dT>()) : psi_supp_right<d,dT>()) + lambda.k();
+  }
 }
 
 #endif

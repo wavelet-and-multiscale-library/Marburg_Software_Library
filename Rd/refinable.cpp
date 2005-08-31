@@ -32,9 +32,11 @@ namespace WaveletTL
   (const MultiIndex<unsigned int, DIMENSION>& mu,
    const int resolution) const
   {
+    assert(resolution >= 0);
+
     InfiniteVector<double, MultiIndex<int, DIMENSION> > r;
     
-    // First we calculate the values on \mathbb Z^d and write the result to r.
+    // First we calculate the values on \mathbb Z^d
 
     // compute a support cube
     int suppleft(MultivariateLaurentPolynomial<double, DIMENSION>::begin().index()[0]);

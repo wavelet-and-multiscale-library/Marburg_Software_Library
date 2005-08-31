@@ -23,6 +23,18 @@ int main()
   cout << phi.evaluate();
   cout << "  + values at a finer resolution:" << endl;
   cout << phi.evaluate(2);
+  cout << "  + evaluate() with 0-th derivative at a finer resolution:" << endl;
+  cout << phi.evaluate(MultiIndex<unsigned int, 1>(), 2);
+  cout << "  + evaluate() with 0-th derivative, j=0, k=0 at a finer resolution, clipped to [0,1]:" << endl;
+  phi.evaluate(MultiIndex<unsigned int, 1>(),
+	       0, MultiIndex<int,1>(),
+	       MultiIndex<int,1>(0), MultiIndex<int,1>(1),
+	       2).matlab_output(cout);
+  cout << "  + evaluate() with 0-th derivative, j=1, k=1 at a finer resolution, clipped to [0,1]:" << endl;
+  phi.evaluate(MultiIndex<unsigned int, 1>(),
+	       1, MultiIndex<int,1>(1),
+	       MultiIndex<int,1>(0), MultiIndex<int,1>(1),
+	       2).matlab_output(cout);
 
   cout << "- evaluate a primal CDF<2> function:" << endl;
   RefinableFunction<CDFMask_primal<2> > phi2;
@@ -31,7 +43,9 @@ int main()
   cout << "  + integer values:" << endl;
   cout << phi2.evaluate();
   cout << "  + values at a finer resolution:" << endl;
-  cout << phi2.evaluate(2);
+  cout << phi2.evaluate(2);  
+  cout << "  + evaluate() with 0-th derivative at a finer resolution:" << endl;
+  cout << phi2.evaluate(MultiIndex<unsigned int, 1>(), 2);
 
   cout << "- dual mask of a CDF<2,2> function:" << endl;
   RefinableFunction<CDFMask_dual<2,2> > phi2T;
@@ -42,6 +56,14 @@ int main()
   RefinableFunction<CDFMask_primal<3> > phi3;
   for (RefinableFunction<CDFMask_primal<3> >::const_iterator it(phi3.begin()); it != phi3.end(); it++)
     cout << "k=" << it.index() << ": " << *it << endl;  
+  cout << "  + integer values:" << endl;
+  cout << phi3.evaluate();
+  cout << "  + values at a finer resolution:" << endl;
+  cout << phi3.evaluate(2);  
+  cout << "  + evaluate() with 0-th derivative at a finer resolution:" << endl;
+  cout << phi3.evaluate(MultiIndex<unsigned int, 1>(), 2);
+  cout << "  + evaluate() with 1st derivative at a finer resolution:" << endl;
+  cout << phi3.evaluate(MultiIndex<unsigned int, 1>(1), 2);
 
   cout << "- dual CDF<3,5> mask:" << endl;
   RefinableFunction<CDFMask_dual<3,5> > phi3T;

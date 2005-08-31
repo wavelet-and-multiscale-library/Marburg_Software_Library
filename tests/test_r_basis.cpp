@@ -7,6 +7,7 @@
 #include <Rd/r_basis.h>
 #include <Rd/r_index.h>
 #include <Rd/cdf_basis.h>
+#include <Rd/cdf_utils.h>
 
 using namespace std;
 using namespace WaveletTL;
@@ -97,9 +98,11 @@ int main()
 #if 0
   cout << "- evaluating primal CDF functions: write file 'primalwavelet.m'" << endl;
   std::ofstream fs("primalwavelet.m");
-  basis2.evaluate(0, RIndex(0,1,0), true,
-		  (basis2.a().begin().index()[0]+1-basis2.aT().rbegin().index()[0])/2,
-		  (basis2.a().rbegin().index()[0]+1-basis2.aT().begin().index()[0])/2,
+  lambda = RIndex(2,1,-2);
+  int k1, k2;
+  support<2,2>(lambda, true, k1, k2);
+  basis2.evaluate(0, lambda, true,
+		  (int)floor(ldexp(1.0, -lambda.j())*k1), (int)ceil(ldexp(1.0, -lambda.j())*k2),
 		  10).matlab_output(fs);
   fs.close();
 
@@ -107,9 +110,10 @@ int main()
   CDFBasis<1, 3> basis3;
 
   fs.open("dualwavelet.m");
-  basis3.evaluate(0, RIndex(0,0,0), false,
-		  basis3.aT().begin().index()[0],
-		  basis3.aT().rbegin().index()[0],
+  lambda = RIndex(2,1,-2);
+  support<1,3>(lambda, false, k1, k2);
+  basis3.evaluate(0, lambda, false,
+		  (int)floor(ldexp(1.0, -lambda.j())*k1), (int)ceil(ldexp(1.0, -lambda.j())*k2),
 		  10).matlab_output(fs);
 #endif
 

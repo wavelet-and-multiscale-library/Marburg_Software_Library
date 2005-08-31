@@ -11,6 +11,7 @@
 #define _WAVELETTL_CDF_BASIS_H
 
 #include <Rd/cdf_mask.h>
+#include <Rd/cdf_utils.h>
 #include <Rd/r_basis.h>
 
 namespace WaveletTL

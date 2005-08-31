@@ -861,10 +861,10 @@ namespace WaveletTL
     for (unsigned int r = d; r < CL.row_dimension()+s0; r++)
       CLA(ell2<d>()-1+ell_l()-s0+r-d, r-s0) = 1.0;
 
-    cout << "CLA before biorthogonalization:" << endl << CLA << endl;
+//     cout << "CLA before biorthogonalization:" << endl << CLA << endl;
     CLA = CLA * transpose(CL);
     CLA.compress(1e-12);
-    cout << "CLA after biorthogonalization:" << endl << CLA << endl;
+//     cout << "CLA after biorthogonalization:" << endl << CLA << endl;
 
     // setup CLAT <-> Alpha * (CLT)^T
     CLAT.resize(ellT_l()+ell2T<d,dT>()-sT0+std::max(0,d-dT+sT0-s0)-1, CLT.row_dimension());
@@ -874,10 +874,10 @@ namespace WaveletTL
     for (unsigned int r = dT; r < CLT.row_dimension()+sT0; r++)
       CLAT(ell2T<d,dT>()-1+ellT_l()-sT0+r-dT, r-sT0) = 1.0;
 
-    cout << "CLAT before biorthogonalization:" << endl << CLAT << endl;
+//     cout << "CLAT before biorthogonalization:" << endl << CLAT << endl;
     CLAT = CLAT * transpose(CLT);
     CLAT.compress(1e-12);
-    cout << "CLAT after biorthogonalization:" << endl << CLAT << endl;
+//     cout << "CLAT after biorthogonalization:" << endl << CLAT << endl;
 
     // the same for CRA, CRAT:
     CRA.resize(ell_r()+ell2<d>()-s1+std::max(0,dT-d+s1-sT1)-1, CR.row_dimension());
@@ -904,11 +904,63 @@ namespace WaveletTL
     CRAT.compress(1e-12);
 //     cout << "CRAT after biorthogonalization:" << endl << CRAT << endl;
 
-#if 0
-    cout << "CLA=" << endl << CLA << endl;
-    cout << "CLAT=" << endl << CLAT << endl;
-    cout << "CRA=" << endl << CRA << endl;
-    cout << "CRAT=" << endl << CRAT << endl;
+#if 1
+    cout << "DSBasis(): check biorthogonality of CLA,CRA,CLAT,CRAT:" << endl;
+//     cout << "CLA=" << endl << CLA << endl;
+//     cout << "CLAT=" << endl << CLAT << endl;
+//     cout << "CRA=" << endl << CRA << endl;
+//     cout << "CRAT=" << endl << CRAT << endl;
+
+    // z(s,t) = \int_0^1\phi(x-s)\tilde\phi(x-t)\,dx
+    MultivariateRefinableFunction<DMMask2<HaarMask, CDFMask_primal<d>, CDFMask_dual<d,dT> >,2> zmask;
+    InfiniteVector<double, MultiIndex<int,2> > z(zmask.evaluate());
+
+//     cout << "z=" << endl << z << endl;
+
+    // I(nu,mu) = \int_0^\infty\phi(x-\nu)\tilde\phi(x-\mu)\,dx
+    InfiniteVector<double, MultiIndex<int,2> > I;
+
+    for (int nu = -ell2<d>()+1; nu < -ell1<d>(); nu++)
+      for (int mu = -ell2T<d,dT>()+1; mu < -ell1T<d,dT>(); mu++) {
+	double help = 0;
+	const int diff = mu-nu;
+	const int sLow = std::max(-ell2<d>()+1, -ell2T<d,dT>()+1-diff);
+	for (int s = sLow; s <= nu; s++)
+	  help += z.get_coefficient(MultiIndex<int,2>(s, s+diff));
+	I.set_coefficient(MultiIndex<int,2>(nu, mu), help); // [DKU] (5.1.7)
+      }
+    for (int nu = -ell2<d>()+1; nu <= std::max(ellT_l()-1, ellT_r()-1); nu++)
+      for (int mu = -ell2T<d,dT>()+1; mu <= std::max(ellT_l()-1, ellT_r()-1); mu++) {
+	if ((nu >= -ell1<d>()) || ((nu <= ell_l()-1) && (mu >= -ell1T<d,dT>())))
+ 	  I.set_coefficient(MultiIndex<int,2>(nu, mu), nu == mu ? 1 : 0); // [DKU] (5.1.6)
+      }
+
+//     cout << "I=" << endl << I << endl;
+
+    Matrix<double> test_bio(CL.row_dimension());
+    for (unsigned int i = 0; i < test_bio.row_dimension(); i++) {
+      for (unsigned int j = 0; j < test_bio.column_dimension(); j++) {
+	double help = 0;
+	for (unsigned int nu = 0; nu < CLA.row_dimension(); nu++)
+	  for (unsigned int mu = 0; mu < CLAT.row_dimension(); mu++)
+	    help += CLA(nu, i) * CLAT(mu, j) * I.get_coefficient(MultiIndex<int,2>(-ell2<d>()+1+nu, -ell2T<d,dT>()+1+mu));
+	test_bio(i, j) = help;
+      }
+      test_bio(i, i) = test_bio(i, i) - 1.0;
+    }
+    cout << "* error for left boundary: " << row_sum_norm(test_bio) << endl;
+    test_bio.resize(CR.row_dimension(), CR.row_dimension());
+    for (unsigned int i = 0; i < test_bio.row_dimension(); i++) {
+      for (unsigned int j = 0; j < test_bio.column_dimension(); j++) {
+	double help = 0;
+	for (unsigned int nu = 0; nu < CRA.row_dimension(); nu++)
+	  for (unsigned int mu = 0; mu < CRAT.row_dimension(); mu++)
+	    help += CRA(nu, i) * CRAT(mu, j) * I.get_coefficient(MultiIndex<int,2>(-ell2<d>()+1+nu, -ell2T<d,dT>()+1+mu));
+	test_bio(i, j) = help;
+      }
+      test_bio(i, i) = test_bio(i, i) - 1.0;
+    }
+    cout << "* error for right boundary: " << row_sum_norm(test_bio) << endl;
 #endif
   }
 

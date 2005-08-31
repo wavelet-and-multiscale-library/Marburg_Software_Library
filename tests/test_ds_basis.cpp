@@ -20,11 +20,11 @@ int main()
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
-//   Basis basis; // Z={0,1}
+  Basis basis(1, 1, 0, 0); // Z={0,1}
 //   Basis basis(1, 0, 0, 1); // Z={0}
 //   Basis basis(0, 1, 1, 0); // Z={1}
 //   Basis basis(0, 0, 1, 1); // Z={}
-  Basis basis(0, 0, 0, 0); // should work, DKU basis without b.c.'s at all
+//   Basis basis(0, 0, 0, 0); // should work, DKU basis without b.c.'s at all
   
   cout << "- d=" << d << ", dT=" << dT << endl;
   cout << "- ell1=" << ell1<d>() << ", ell2=" << ell2<d>()
@@ -39,7 +39,7 @@ int main()
   cout << "- leftmost wavelet on the coarsest level: " << first_wavelet(&basis, basis.j0()) << endl;
   cout << "- rightmost wavelet on the coarsest level: " << last_wavelet(&basis, basis.j0()) << endl;
 
-#if 1
+#if 0
   cout << "- checking biorthogonality of Mj0, Mj0T for different levels:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+2; level++)
     {
@@ -63,7 +63,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   cout << "- checking biorthogonality of Mj<->Gj and MjT<->GjT for different levels:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+1; level++)
     {
@@ -117,7 +117,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   cout << "- checking access to single rows of the M_{j,i} matrices:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+2; level++)
     {
@@ -194,7 +194,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -219,7 +219,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "
@@ -244,7 +244,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   cout << "- evaluating some primal generators:" << endl;
   Index lambda(first_generator(&basis, basis.j0()));
   for (;; ++lambda) {
@@ -308,7 +308,7 @@ int main()
   cout << "- leftmost wavelet on the coarsest level: " << first_wavelet(&basis2, basis2.j0()) << endl;
   cout << "- rightmost wavelet on the coarsest level: " << last_wavelet(&basis2, basis2.j0()) << endl;
 
-#if 1
+#if 0
   cout << "- checking biorthogonality of Mj0, Mj0T for different levels:" << endl;
   for (int level = basis2.j0(); level <= basis2.j0()+2; level++)
     {
@@ -332,7 +332,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   cout << "- checking biorthogonality of Mj<->Gj and MjT<->GjT for different levels:" << endl;
   for (int level = basis2.j0(); level <= basis2.j0()+1; level++)
     {
@@ -386,7 +386,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   cout << "- checking access to single rows of the M_{j,i} matrices:" << endl;
   for (int level = basis2.j0(); level <= basis2.j0()+2; level++)
     {
@@ -463,7 +463,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis2.j0()+1; level <= basis2.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -494,7 +494,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis2.j0()+1; level <= basis2.j0()+2; level++)
     {
       cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "

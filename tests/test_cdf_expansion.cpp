@@ -84,12 +84,13 @@ int main()
 //   cout << "- integration of p against psi<2,2> yields:" << endl
 //        << integrate<2,2>(p, RIndex(0,1,0)) << endl;
 
-  const int d = 3;
-  const int dT = 3;
+  const int d = 2;
+  const int dT = 4; // be sure to use a continuous dual here!
 
   InfiniteVector<double,RIndex> coeffs;
-  for (int k = -12; k <= 12; k++)
-    coeffs[RIndex(0,0,k)] = integrate<d,dT>(p,RIndex(0,0,k));
+  const int j = 1;
+  for (int k = -12*(1<<j); k <= 12*(1<<j); k++)
+    coeffs[RIndex(j,0,k)] = integrate<d,dT>(p,RIndex(j,0,k));
 
   cout << "- integrals of p against some primal generators:" << endl
        << coeffs << endl;

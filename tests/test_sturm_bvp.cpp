@@ -76,7 +76,7 @@ int main()
   TestProblem<1> T;
 
   const int d  = 2;
-  const int dT = 2;
+  const int dT = 4; // be sure to use a continuous dual here, otherwise the RHS test will fail
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
@@ -98,10 +98,10 @@ int main()
 #endif
 
   eq.RHS(coeffs, 1e-2);
+
+#if 0
   cout << "- approximate coefficient set of the right-hand side:" << endl
        << coeffs << endl;
-
-#if 1
   cout << "- check expansion of the right-hand side in the dual basis:" << endl;
   eq.rescale(coeffs, 1);
   evaluate(eq.basis(), coeffs, false, 8).matlab_output(cout);
@@ -116,7 +116,7 @@ int main()
 //   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it)
 //     cout << *it << endl;
 
-#if 0
+#if 1
   cout << "- set up (preconditioned) stiffness matrix..." << endl;
   SymmetricMatrix<double> A(Lambda.size());
 
@@ -159,7 +159,7 @@ int main()
     u.set_coefficient(it.index(), x[i]);
   
   eq.rescale(u, -1);
-  SampledMapping<1> s(eq.basis().evaluate(u, true, 7));
+  SampledMapping<1> s(evaluate(eq.basis(), u, true, 7));
   s.matlab_output(cout);
 #endif
 

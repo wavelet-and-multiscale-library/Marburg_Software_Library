@@ -78,12 +78,17 @@ int main()
   s.matlab_output(cout);
 
   const int d = 2;
-  const int dT = 2;
+  const int dT = 4; // be sure to use a continuous dual here!
 
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
-  Basis basis;
+//   Basis basis; // DKU basis without b.c.
+  Basis basis(1, 1, 0, 0); // Z={0,1}
+//   Basis basis(1, 0, 0, 1); // Z={0}
+//   Basis basis(0, 1, 1, 0); // Z={1}
+//   Basis basis(0, 0, 1, 1); // Z={}
+
   InfiniteVector<double,Index> coeffs;
 
   const int j0 = basis.j0();
@@ -91,7 +96,6 @@ int main()
   
   for (Index lambda = first_generator(&basis, j0);;++lambda)
     {
-      cout << "calculating integral against psi_lambda with lambda=" << lambda << endl;
       coeffs.set_coefficient(lambda, integrate(p,basis,lambda));
       if (lambda == last_generator(&basis, j0))
 //   	if (lambda == last_wavelet(&basis, jmax))

@@ -8,8 +8,7 @@ namespace WaveletTL
 {
   template <class WBASIS>
   SturmEquation<WBASIS>::SturmEquation(const simpleSturmBVP& bvp)
-//     : bvp_(bvp), wbasis_(bvp.bc_left(), bvp.bc_right())
-    : bvp_(bvp), wbasis_(false, false)
+    : bvp_(bvp), wbasis_(bvp.bc_left(), bvp.bc_right())
   {
   }
 
@@ -121,7 +120,7 @@ namespace WaveletTL
     coeffs.clear();
 
     const int j0 = wbasis_.j0();
-    const int jmax = j0;
+    const int jmax = j0+1;
 
     for (typename WBASIS::Index lambda(first_generator(&wbasis_, j0));; ++lambda)
       {

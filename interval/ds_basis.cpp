@@ -904,7 +904,7 @@ namespace WaveletTL
     CRAT.compress(1e-12);
 //     cout << "CRAT after biorthogonalization:" << endl << CRAT << endl;
 
-#if 1
+#if 0
     cout << "DSBasis(): check biorthogonality of CLA,CRA,CLAT,CRAT:" << endl;
 //     cout << "CLA=" << endl << CLA << endl;
 //     cout << "CLAT=" << endl << CLAT << endl;

@@ -23,7 +23,7 @@ namespace WaveletTL
       -(py')'(t) + q(t)y(t) = g(t), 0 <= t <= 1 
       
     with first (Dirichlet) or second (Neumann) order b.c.'s as modeled in
-    the class simpleSturmBVP.as an equivalent operator equation
+    the class simpleSturmBVP as an equivalent operator equation
     within \ell_2 by means of a wavelet basis.
 
     The corresponding bilinear form in
@@ -47,7 +47,7 @@ namespace WaveletTL
        WBASIS::WBASIS(const bool bc_left, const bool bc_right)
     where the parameters bc_* indicate where to enforce homogeneous Dirichlet
     boundary conditions.
-    Of course a natural concrete value for WBASIS is the template class DKUBasis<d,dT>.
+    Of course a natural concrete value for WBASIS is the template class DSBasis<d,dT>.
 
     Note that we use preconditioning
   */
@@ -75,7 +75,7 @@ namespace WaveletTL
 
     /*!
       approximate the wavelet coefficient set of the preconditioned right-hand side F
-      with a prescribed \ell_2 error tolerance
+      within a prescribed \ell_2 error tolerance
     */
     void RHS(InfiniteVector<double, typename WBASIS::Index>& coeffs, const double eta) const;
 

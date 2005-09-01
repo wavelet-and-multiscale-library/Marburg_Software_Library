@@ -27,7 +27,7 @@ namespace WaveletTL
     // WBASIS are splines with respect to a dyadic subgrid.
     // We can then apply an appropriate composite quadrature rule.
     // In the scope of WBASIS, the routines intersect_supports() and evaluate()
-    // must exist, which is the case for DKUBasis<d,dT>.
+    // must exist, which is the case for DSBasis<d,dT>.
 
     // First we compute the support intersection of \psi_\lambda and \psi_\nu:
     int j, k1, k2;
@@ -43,7 +43,7 @@ namespace WaveletTL
 	Array1D<double> gauss_points (N_Gauss*(k2-k1));
 	for (int patch = k1; patch < k2; patch++) // refers to 2^{-j}[patch,patch+1]
 	  for (unsigned int n = 0; n < N_Gauss; n++)
-	    gauss_points[(patch-k1)*N_Gauss+n] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2;
+	    gauss_points[(patch-k1)*N_Gauss+n] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
 
 	// - add all integral shares
 	for (unsigned int n = 0; n < N_Gauss; n++)
@@ -61,6 +61,7 @@ namespace WaveletTL
 		    * gauss_weight;
 		
 		const double qt = bvp_.q(t);
+
 		if (qt != 0)
 		  r += qt
 		    * evaluate(wbasis_, 0, lambda, t)
@@ -119,13 +120,14 @@ namespace WaveletTL
   {
     coeffs.clear();
 
+    // remark: for a quick hack, we use a projection of f onto a space V_{jmax}
+    // of the given multiresolution analysis
+
     const int j0 = wbasis_.j0();
     const int jmax = j0+1;
-
     for (typename WBASIS::Index lambda(first_generator(&wbasis_, j0));; ++lambda)
       {
 	coeffs.set_coefficient(lambda, f(lambda)/D(lambda));
-//   	if (lambda == last_generator(&wbasis_, j0))
   	if (lambda == last_wavelet(&wbasis_, jmax))
 	  break;
       }

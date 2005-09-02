@@ -5,10 +5,8 @@
 # | Thorsten Raasch                                                |
 # +----------------------------------------------------------------+
 
-include ../config
-
 CXX = g++
-CXXFLAGS += -I.. -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 
 EXEOBJF = \
   test_refinable.o\

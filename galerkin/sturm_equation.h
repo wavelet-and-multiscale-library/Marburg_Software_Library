@@ -56,6 +56,11 @@ namespace WaveletTL
     SturmEquation(const simpleSturmBVP& bvp);
 
     /*!
+      make template argument accessible
+    */
+    typedef WBASIS WaveletBasis;
+
+    /*!
       read access to the basis
     */
     const WBASIS& basis() const { return wbasis_; }

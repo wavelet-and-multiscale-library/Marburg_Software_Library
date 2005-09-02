@@ -5,6 +5,6 @@ For the installation of the Mathematical Template Library (MathTL)
 you only have to set the environment variable MATHTL_DIR appropriately,
 e.g., by adding the line
 
-  export MATHTL_DIR=$(HOME)/MathTL
+  export MATHTL_DIR=$HOME/MathTL
 
-to your .bashrc if the MathTL folder is located in your home directory.
+to your .bashrc if the MathTL folder is located directly in your home directory.

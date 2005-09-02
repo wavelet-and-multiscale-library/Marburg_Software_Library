@@ -5,7 +5,7 @@
 # | Thorsten Raasch                                                |
 # +----------------------------------------------------------------+
 
-MATHTL_DIR = $(HOME)/c++/MathTL
+include ../config
 
 CXX = g++
 CXXFLAGS += -I.. -I$(MATHTL_DIR) -Wall -pipe

@@ -1,0 +1,11 @@
+# +----------------------------------------------------------------+
+# | config file for MathTL - Mathematical Template Library         |
+# |                                                                |
+# | Copyright (c) 2002-2005                                        |
+# | Thorsten Raasch                                                |
+# +----------------------------------------------------------------+
+
+# customize the following settings:
+
+# MathTL directory
+MATHTL_DIR = $(HOME)/MathTL

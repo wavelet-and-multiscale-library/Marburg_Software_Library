@@ -5,8 +5,6 @@
 # | Thorsten Raasch                                                |
 # +----------------------------------------------------------------+
 
-include ../config
-
 CXX = g++
 CXXFLAGS += -I$(MATHTL_DIR) -Wall -pipe
 

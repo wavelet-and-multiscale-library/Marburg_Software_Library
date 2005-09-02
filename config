@@ -8,4 +8,4 @@
 # customize the following settings:
 
 # MathTL directory
-MATHTL_DIR = $(HOME)/MathTL
+MATHTL_DIR = $(HOME)/c++/MathTL

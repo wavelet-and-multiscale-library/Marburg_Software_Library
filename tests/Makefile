@@ -8,7 +8,7 @@
 include ../config
 
 CXX = g++
-CXXFLAGS += -I.. -I$(MATHTL_DIR) -Wall -pipe
+CXXFLAGS += -I$(MATHTL_DIR) -Wall -pipe
 
 EXEOBJF = \
   test_random.o\

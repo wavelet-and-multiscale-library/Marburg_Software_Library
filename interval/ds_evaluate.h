@@ -48,6 +48,24 @@ namespace WaveletTL
   double evaluate(const DSBasis<d,dT>& basis, const unsigned int derivative,
 		  const typename DSBasis<d,dT>::Index& lambda,
 		  const double x);
+
+  /*!
+    point evaluation of (derivatives) of a single primal DKU generator
+    or wavelet \psi_\lambda at several points simultaneously
+   */
+  template <int d, int dT>
+  void evaluate(const DSBasis<d,dT>& basis, const unsigned int derivative,
+		const typename DSBasis<d,dT>::Index& lambda,
+		const Array1D<double>& points, Array1D<double>& values);
+
+  /*!
+    point evaluation of 0-th and first derivative of a single primal DKU generator
+    or wavelet \psi_\lambda at several points simultaneously
+   */
+  template <int d, int dT>
+  void evaluate(const DSBasis<d,dT>& basis,
+		const typename DSBasis<d,dT>::Index& lambda,
+		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);
 }
 
 #include <interval/ds_evaluate.cpp>

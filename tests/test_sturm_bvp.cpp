@@ -1,7 +1,9 @@
 #include <iostream>
 #include <map>
+#include <time.h>
 
 #include <algebra/symmetric_matrix.h>
+#include <algebra/sparse_matrix.h>
 #include <numerics/sturm_bvp.h>
 #include <numerics/iteratsolv.h>
 
@@ -118,8 +120,10 @@ int main()
 
 #if 1
   cout << "- set up (preconditioned) stiffness matrix..." << endl;
-  SymmetricMatrix<double> A(Lambda.size());
-
+  clock_t tstart, tend;
+  double time;
+  tstart = clock();
+  SparseMatrix<double> A(Lambda.size());
   unsigned int i = 0;
   for (set<Index>::const_iterator it1 = Lambda.begin(); it1 != Lambda.end(); ++it1, ++i)
     {
@@ -129,17 +133,29 @@ int main()
       unsigned int j = i;
       for (; it2 != Lambda.end(); ++it2, ++j)
 	{
-	  A.set_entry(i, j, eq.a(*it2, *it1) / eq.D(*it1) / eq.D(*it2));
+	  double entry = eq.a(*it2, *it1);
+	  if (entry != 0)
+	    {
+	      entry /= eq.D(*it1)*eq.D(*it2);
+	      A.set_entry(i, j, entry);
+	      A.set_entry(j, i, entry); // symmetry
+	    }
 	}
     }
-  cout << "  ... done!" << endl;
+  tend = clock();
+  time = (double)(tend-tstart)/CLOCKS_PER_SEC;
+  cout << "  ... done, time needed: " << time << " seconds" << endl;
 //   cout << "- (preconditioned) stiffness matrix A=" << endl << A << endl;
 
+  cout << "- set up right-hand side..." << endl;
+  tstart = clock();
   Vector<double> b(coeffs.size());
   i = 0;
   for (InfiniteVector<double,Index>::const_iterator it = coeffs.begin(); it != coeffs.end(); ++it, ++i)
     b[i] = *it;
-
+  tend = clock();
+  time = (double)(tend-tstart)/CLOCKS_PER_SEC;
+  cout << "  ... done, time needed: " << time << " seconds" << endl;
   cout << "- right hand side: " << b << endl;
 
   Vector<double> x(coeffs.size()), err(coeffs.size()); x = 0;

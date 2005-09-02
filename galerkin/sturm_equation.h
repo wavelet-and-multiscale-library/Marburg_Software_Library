@@ -48,8 +48,6 @@ namespace WaveletTL
     where the parameters bc_* indicate where to enforce homogeneous Dirichlet
     boundary conditions.
     Of course a natural concrete value for WBASIS is the template class DSBasis<d,dT>.
-
-    Note that we use preconditioning
   */
   template <class WBASIS>
   class SturmEquation
@@ -63,10 +61,16 @@ namespace WaveletTL
     const WBASIS& basis() const { return wbasis_; }
     
     /*!
-      evaluate the (unpreconditioned) bilinear form a
+      evaluate the (unpreconditioned) bilinear form a;
+      you can specify the order p of the quadrature rule, i.e.,
+      (piecewise) polynomials of maximal degree p will be integrated exactly.
+      Internally, we use an m-point composite Gauss quadrature rule adapted
+      to the singular supports of the spline wavelets involved,
+      so that m = (p+1)/2;
     */
     double a(const typename WBASIS::Index& lambda,
-	     const typename WBASIS::Index& nu) const;
+	     const typename WBASIS::Index& nu,
+	     const unsigned int p = 4) const;
 
     /*!
       evaluate the (unpreconditioned) right-hand side f

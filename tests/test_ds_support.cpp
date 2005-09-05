@@ -63,5 +63,24 @@ int main()
       if (lambda == last_wavelet(&basis, basis.j0())) break;
     }
 
+  cout << "- compute all intersecting wavelet:" << endl;
+  for (lambda = first_generator(&basis, basis.j0());; ++lambda)
+    {
+      cout << "  * for lambda=" << lambda << ":" << endl;
+      typedef std::list<std::pair<Index, Support1D> > SupportList;
+      SupportList nus;
+      for (int level = basis.j0(); level <= basis.j0(); level++) {
+	intersecting_wavelets(basis, lambda, level, nus);
+	for (SupportList::const_iterator it(nus.begin()); it != nus.end(); ++it)
+	  {
+	    cout << "    nu=" << it->first 
+		 << " with support intersection "
+		 << "2^{-" << it->second.j << "}[" << it->second.k1 << "," << it->second.k2 << "]" << endl;
+	  }
+      }
+	
+      if (lambda == last_wavelet(&basis, basis.j0())) break;
+    }  
+
   return 0;
 }

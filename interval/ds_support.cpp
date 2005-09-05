@@ -80,22 +80,58 @@ namespace WaveletTL
   template <int d, int dT>
   bool intersect_supports(const DSBasis<d,dT>& basis,
 			  const typename DSBasis<d,dT>::Index& lambda,
-			  const typename DSBasis<d,dT>::Index& nu,
+			  const int m, const int a, const int b,
 			  int& j, int& k1, int& k2)
   {
     const int j_lambda = lambda.j() + lambda.e();
-    const int j_nu     = nu.j() + nu.e();
-    j = std::max(j_lambda, j_nu);
-    int k1_lambda, k2_lambda, k1_nu, k2_nu;
+    j = std::max(j_lambda, m);
+    int k1_lambda, k2_lambda;
     support(basis, lambda, k1_lambda, k2_lambda);
-    support(basis, nu    , k1_nu    , k2_nu    );
-    if ((1<<(j-j_lambda))*k1_lambda < (1<<(j-j_nu))*k2_nu) {
-      if ((1<<(j-j_nu))*k1_nu < (1<<(j-j_lambda))*k2_lambda) {
-	k1 = std::max((1<<(j-j_lambda))*k1_lambda, (1<<(j-j_nu))*k1_nu);
-	k2 = std::min((1<<(j-j_lambda))*k2_lambda, (1<<(j-j_nu))*k2_nu);
+    const int jmb = (1<<(j-m)) * b;
+    const int jjk1 = (1<<(j-j_lambda)) * k1_lambda;
+    if (jjk1 < jmb) {
+      const int jma = (1<<(j-m)) * a;
+      const int jjk2 = (1<<(j-j_lambda)) * k2_lambda;
+      if (jma < jjk2) {
+	k1 = std::max(jjk1, jma);
+	k2 = std::min(jjk2, jmb);
 	return true;
       }
     }
     return false;
+  }
+  
+  template <int d, int dT>
+  bool intersect_supports(const DSBasis<d,dT>& basis,
+			  const typename DSBasis<d,dT>::Index& lambda,
+			  const typename DSBasis<d,dT>::Index& nu,
+			  int& j, int& k1, int& k2)
+  {
+    int k1_nu, k2_nu;
+    support(basis, nu, k1_nu, k2_nu);
+    return intersect_supports(basis, lambda, nu.j()+nu.e(), k1_nu, k2_nu, j, k1, k2);
+  }
+
+  template <int d, int dT>
+  void intersecting_wavelets(const DSBasis<d,dT>& basis,
+			     const typename DSBasis<d,dT>::Index& lambda,
+			     const int j,
+			     std::list<std::pair<typename DSBasis<d,dT>::Index, Support1D> >& intersecting)
+  {
+    typedef typename DSBasis<d,dT>::Index Index;
+
+    // compute support of \psi_\lambda
+    const int j_lambda = lambda.j() + lambda.e();
+    int k1_lambda, k2_lambda;
+    support(basis, lambda, k1_lambda, k2_lambda);
+    
+    // a brute force solution
+    for (Index nu = j == basis.j0() ? first_generator(&basis, j) : first_wavelet(&basis, j);; ++nu) {
+      Support1D supp;
+      if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
+	intersecting.push_back(std::make_pair(nu, supp));
+      
+      if (nu == last_wavelet(&basis, j)) break;
+    }
   }
 }

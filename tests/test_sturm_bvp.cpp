@@ -125,13 +125,13 @@ int main()
   tstart = clock();
   SparseMatrix<double> A(Lambda.size());
   unsigned int i = 0;
-  for (set<Index>::const_iterator it1 = Lambda.begin(); it1 != Lambda.end(); ++it1, ++i)
+  for (set<Index>::const_iterator it1 = Lambda.begin(), itend = Lambda.end(); it1 != itend; ++it1, ++i)
     {
       set<Index>::const_iterator it2 = Lambda.begin();
       for (; *it2 != *it1; ++it2);
 
       unsigned int j = i;
-      for (; it2 != Lambda.end(); ++it2, ++j)
+      for (; it2 != itend; ++it2, ++j)
 	{
 	  double entry = eq.a(*it2, *it1);
 	  if (entry != 0)

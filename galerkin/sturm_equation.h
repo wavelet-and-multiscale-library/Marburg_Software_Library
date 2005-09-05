@@ -15,9 +15,8 @@ namespace WaveletTL
   /*!
     This class models the infinite-dimensional matrix problem
     
-      Au = F
+      D^{-1}AD^{-1}u = D^{-1}F
 
-    with preconditioned A = D^{-1}LD^{-1} and F = D^{-1}f
     when reformulating a Sturm boundary value problem on [0,1]
     
       -(py')'(t) + q(t)y(t) = g(t), 0 <= t <= 1 
@@ -28,7 +27,7 @@ namespace WaveletTL
 
     The corresponding bilinear form in
 
-      L = (a(\psi_\nu,\psi_\lambda))_{\lambda,\nu}
+      A = (a(\psi_\nu,\psi_\lambda))_{\lambda,\nu}
 
     is
 

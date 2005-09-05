@@ -17,7 +17,7 @@ namespace WaveletTL
   /*!
     This class models the (preconditioned) infinite-dimensional matrix problem
     
-      D^{-1}AD^{-1}u = D^{-1}F
+      Au = D^{-1}LD^{-1}u = D^{-1}F
 
     when reformulating a Sturm boundary value problem on [0,1]
     
@@ -29,7 +29,7 @@ namespace WaveletTL
 
     The corresponding bilinear form in
 
-      A = (a(\psi_\nu,\psi_\lambda))_{\lambda,\nu}
+      L = (a(\psi_\nu,\psi_\lambda))_{\lambda,\nu}
 
     is
 
@@ -91,18 +91,18 @@ namespace WaveletTL
 	     const unsigned int p = 4) const;
 
     /*!
-      Given an index set Lambda, setup the corresponding full stiffness matrix
+      given an index set Lambda, setup the corresponding  preconditioned stiffness matrix
      */
     void setup_stiffness_matrix(const std::set<typename WBASIS::Index>& Lambda,
 				SparseMatrix<double>& A_Lambda) const;
 
     /*!
-      estimate the spectral norm ||D^{-1}AD^{-1}||
+      estimate the spectral norm ||A||
     */
     double norm_A() const { return normA; }
 
     /*!
-      estimate the spectral norm ||(D^{-1}AD^{-1})^{-1}||
+      estimate the spectral norm ||A^{-1}||
     */
     double norm_Ainv() const { return normAinv; }
 
@@ -111,6 +111,12 @@ namespace WaveletTL
     */
     double f(const typename WBASIS::Index& lambda) const;
 
+    /*!
+      given an index set Lambda, setup the corresponding preconditioned right-hand side
+    */
+    void setup_righthand_side(const std::set<typename WBASIS::Index>& Lambda,
+			      Vector<double>& F_Lambda) const;
+    
     /*!
       approximate the wavelet coefficient set of the preconditioned right-hand side F
       within a prescribed \ell_2 error tolerance

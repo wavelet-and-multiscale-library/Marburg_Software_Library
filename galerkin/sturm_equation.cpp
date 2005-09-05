@@ -13,7 +13,7 @@ namespace WaveletTL
   SturmEquation<WBASIS>::SturmEquation(const simpleSturmBVP& bvp)
     : bvp_(bvp), basis_(bvp.bc_left(), bvp.bc_right())
   {
-//     cout << "SturmEquation(): estimating ||D^{-1}AD^{-1}||..." << endl;
+    // estimate ||A||
     typedef typename WBASIS::Index Index;
     std::set<Index> Lambda;
     const int j0 = basis_.j0();
@@ -29,12 +29,10 @@ namespace WaveletTL
     xk = 1;
     unsigned int iterations;
     normA = PowerIteration(A_Lambda, xk, 1e-6, 100, iterations);
-//     cout << "... done!" << endl;
 
-//     cout << "SturmEquation(): estimating ||(D^{-1}AD^{-1})^{-1}||..." << endl;
+    // estimate ||A^{-1}||
     xk = 1;
     normAinv = InversePowerIteration(A_Lambda, xk, 1e-6, 200, iterations);
-//     cout << "... done!" << endl;
   }
 
   template <class WBASIS>
@@ -163,16 +161,28 @@ namespace WaveletTL
 
   template <class WBASIS>
   void
+  SturmEquation<WBASIS>::setup_righthand_side(const std::set<typename WBASIS::Index>& Lambda,
+					      Vector<double>& F_Lambda) const {
+    F_Lambda.resize(Lambda.size());
+    unsigned int i = 0;
+    typedef typename WBASIS::Index Index;
+    for (typename std::set<Index>::const_iterator it = Lambda.begin(), itend = Lambda.end();
+	 it != itend; ++it, ++i)
+      F_Lambda[i] = f(*it)/D(*it);
+  }
+
+  template <class WBASIS>
+  void
   SturmEquation<WBASIS>::RHS(InfiniteVector<double, typename WBASIS::Index>& coeffs,
 			     const double eta) const
   {
     coeffs.clear();
 
-    // remark: for a quick hack, we use a projection of f onto a space V_{jmax}
+    // remark: for a quick hack, we use a projection of f onto a fine space V_{jmax}
     // of the given multiresolution analysis
 
     const int j0 = basis_.j0();
-    const int jmax = j0+1;
+    const int jmax = j0 + 5;
     for (typename WBASIS::Index lambda(first_generator(&basis_, j0));; ++lambda)
       {
 	coeffs.set_coefficient(lambda, f(lambda)/D(lambda));

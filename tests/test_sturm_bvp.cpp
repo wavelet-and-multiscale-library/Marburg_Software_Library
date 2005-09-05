@@ -111,8 +111,10 @@ int main()
 #endif  
 
   set<Index> Lambda;
-  for (InfiniteVector<double,Index>::const_iterator it = coeffs.begin(); it != coeffs.end(); ++it)
-    Lambda.insert(it.index());
+  for (Index lambda = first_generator(&eq.basis(), eq.basis().j0());; ++lambda) {
+    Lambda.insert(lambda);
+    if (lambda == last_wavelet(&eq.basis(), eq.basis().j0())) break;
+  }
 
 //   cout << "- set up stiffness matrix with respect to the index set Lambda=" << endl;
 //   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it)
@@ -132,16 +134,14 @@ int main()
 
   cout << "- set up right-hand side..." << endl;
   tstart = clock();
-  Vector<double> b(coeffs.size());
-  unsigned int i = 0;
-  for (InfiniteVector<double,Index>::const_iterator it = coeffs.begin(); it != coeffs.end(); ++it, ++i)
-    b[i] = *it;
+  Vector<double> b;
+  eq.setup_righthand_side(Lambda, b);
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
   cout << "- right hand side: " << b << endl;
 
-  Vector<double> x(coeffs.size()), err(coeffs.size()); x = 0;
+  Vector<double> x(Lambda.size()), err(Lambda.size()); x = 0;
   unsigned int iterations;
   CG(A, b, x, 1e-8, 100, iterations);
   
@@ -153,9 +153,9 @@ int main()
   
   cout << "- point values of the solution:" << endl;
   InfiniteVector<double,Index> u;
-  i = 0;
-  for (InfiniteVector<double,Index>::const_iterator it = coeffs.begin(); it != coeffs.end(); ++it, ++i)
-    u.set_coefficient(it.index(), x[i]);
+  unsigned int i = 0;
+  for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
+    u.set_coefficient(*it, x[i]);
   
   eq.rescale(u, -1);
   SampledMapping<1> s(evaluate(eq.basis(), u, true, 7));

@@ -65,13 +65,11 @@ namespace WaveletTL
     \psi_\nu with level |\nu|=j, such that the respective supports
     have a nontrivial intersection;
     return those intersections
-    (on the coarsest level j==j0, both generators and wavelets are used,
-    whereas for j>j0, there are only wavelets)
   */
   template <int d, int dT>
   void intersecting_wavelets(const DSBasis<d,dT>& basis,
 			     const typename DSBasis<d,dT>::Index& lambda,
-			     const int j,
+			     const int j, const bool generators,
 			     std::list<std::pair<typename DSBasis<d,dT>::Index, Support1D> >& intersecting);
 }
 

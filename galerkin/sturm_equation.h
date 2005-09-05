@@ -65,6 +65,16 @@ namespace WaveletTL
     const WBASIS& basis() const { return wbasis_; }
     
     /*!
+      evaluate the diagonal preconditioner D
+    */
+    double D(const typename WBASIS::Index& lambda) const;
+
+    /*!
+      rescale a coefficient vector by an integer power of D, c |-> D^{n}c
+    */
+    void rescale(InfiniteVector<double, typename WBASIS::Index>& coeffs, const int n) const;
+
+    /*!
       evaluate the (unpreconditioned) bilinear form a;
       you can specify the order p of the quadrature rule, i.e.,
       (piecewise) polynomials of maximal degree p will be integrated exactly.
@@ -77,6 +87,9 @@ namespace WaveletTL
 	     const unsigned int p = 4) const;
 
     /*!
+     */
+
+    /*!
       evaluate the (unpreconditioned) right-hand side f
     */
     double f(const typename WBASIS::Index& lambda) const;
@@ -86,16 +99,6 @@ namespace WaveletTL
       within a prescribed \ell_2 error tolerance
     */
     void RHS(InfiniteVector<double, typename WBASIS::Index>& coeffs, const double eta) const;
-
-    /*!
-      evaluate the diagonal preconditioner D
-    */
-    double D(const typename WBASIS::Index& lambda) const;
-
-    /*!
-      rescale a coefficient vector by an integer power of D, c |-> D^{n}c
-    */
-    void rescale(InfiniteVector<double, typename WBASIS::Index>& coeffs, const int n) const;
 
   protected:
     const simpleSturmBVP& bvp_;

@@ -115,10 +115,12 @@ namespace WaveletTL
   template <int d, int dT>
   void intersecting_wavelets(const DSBasis<d,dT>& basis,
 			     const typename DSBasis<d,dT>::Index& lambda,
-			     const int j,
+			     const int j, const bool generators,
 			     std::list<std::pair<typename DSBasis<d,dT>::Index, Support1D> >& intersecting)
   {
     typedef typename DSBasis<d,dT>::Index Index;
+
+    intersecting.clear();
 
     // compute support of \psi_\lambda
     const int j_lambda = lambda.j() + lambda.e();
@@ -126,12 +128,21 @@ namespace WaveletTL
     support(basis, lambda, k1_lambda, k2_lambda);
     
     // a brute force solution
-    for (Index nu = j == basis.j0() ? first_generator(&basis, j) : first_wavelet(&basis, j);; ++nu) {
-      Support1D supp;
-      if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
-	intersecting.push_back(std::make_pair(nu, supp));
-      
-      if (nu == last_wavelet(&basis, j)) break;
+    if (generators) {
+      assert(j == basis.j0());
+      for (Index nu = first_generator(&basis, j);; ++nu) {
+	Support1D supp;
+	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
+	  intersecting.push_back(std::make_pair(nu, supp));
+	if (nu == last_generator(&basis, j)) break;
+      }
+    } else {
+      for (Index nu = first_wavelet(&basis, j);; ++nu) {
+	Support1D supp;
+	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
+	  intersecting.push_back(std::make_pair(nu, supp));
+	if (nu == last_wavelet(&basis, j)) break;
+      }
     }
   }
 }

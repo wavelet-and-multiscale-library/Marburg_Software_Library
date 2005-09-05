@@ -16,8 +16,8 @@ namespace WaveletTL
     if (lambda.e() == 0) // generator
       {
 	r = (derivative == 0
-	     ? EvaluateCardinalBSpline_td  (d, lambda.j(), lambda.k(), x)
-	     : EvaluateCardinalBSpline_td_x(d, lambda.j(), lambda.k(), x));
+	     ? EvaluateCardinalBSpline_td<d>  (lambda.j(), lambda.k(), x)
+	     : EvaluateCardinalBSpline_td_x<d>(lambda.j(), lambda.k(), x));
       }
     else // wavelet
       {

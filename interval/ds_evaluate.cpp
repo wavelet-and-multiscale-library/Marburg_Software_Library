@@ -139,8 +139,8 @@ namespace WaveletTL
 	  double help(CLA(i, lambda.k()-basis.DeltaLmin()));
 	  if (help != 0)
 	    r += help * (derivative == 0
-			 ? EvaluateCardinalBSpline_td  (d, lambda.j(), 1-ell2<d>()+i, x)
-			 : EvaluateCardinalBSpline_td_x(d, lambda.j(), 1-ell2<d>()+i, x));
+			 ? EvaluateCardinalBSpline_td<d>  (lambda.j(), 1-ell2<d>()+i, x)
+			 : EvaluateCardinalBSpline_td_x<d>(lambda.j(), 1-ell2<d>()+i, x));
 	}
       }	else {
 	const Matrix<double>& CRA(basis.get_CRA());
@@ -150,14 +150,14 @@ namespace WaveletTL
 	    double help(CRA(i, basis.DeltaRmax(lambda.j())-lambda.k()));
 	    if (help != 0)
 	      r += help * (derivative == 0
-			   ? EvaluateCardinalBSpline_td  (d, lambda.j(), (1<<lambda.j())-(d%2)-(1-ell2<d>()+i), x)
-			   : EvaluateCardinalBSpline_td_x(d, lambda.j(), (1<<lambda.j())-(d%2)-(1-ell2<d>()+i), x));
+			   ? EvaluateCardinalBSpline_td<d>  (lambda.j(), (1<<lambda.j())-(d%2)-(1-ell2<d>()+i), x)
+			   : EvaluateCardinalBSpline_td_x<d>(lambda.j(), (1<<lambda.j())-(d%2)-(1-ell2<d>()+i), x));
 	  }
 	} else {
 	  // inner generator
 	  r = (derivative == 0
-	       ? EvaluateCardinalBSpline_td  (d, lambda.j(), lambda.k(), x)
-	       : EvaluateCardinalBSpline_td_x(d, lambda.j(), lambda.k(), x));
+	       ? EvaluateCardinalBSpline_td<d>  (lambda.j(), lambda.k(), x)
+	       : EvaluateCardinalBSpline_td_x<d>(lambda.j(), lambda.k(), x));
 	}
       }
     } else {
@@ -195,8 +195,8 @@ namespace WaveletTL
 	  if (help != 0)
 	    for (unsigned int m(0); m < points.size(); m++)
 	      values[m] += help * (derivative == 0
-				   ? EvaluateCardinalBSpline_td  (d, lambda.j(), 1-ell2<d>()+i, points[m])
-				   : EvaluateCardinalBSpline_td_x(d, lambda.j(), 1-ell2<d>()+i, points[m]));
+				   ? EvaluateCardinalBSpline_td<d>  (lambda.j(), 1-ell2<d>()+i, points[m])
+				   : EvaluateCardinalBSpline_td_x<d>(lambda.j(), 1-ell2<d>()+i, points[m]));
 	}
       }	else {
 	const Matrix<double>& CRA(basis.get_CRA());
@@ -207,15 +207,15 @@ namespace WaveletTL
 	    if (help != 0)
 	      for (unsigned int m(0); m < points.size(); m++)
 		values[m] += help * (derivative == 0
-				     ? EvaluateCardinalBSpline_td  (d, lambda.j(), (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2<d>()+i), points[m])
-				     : EvaluateCardinalBSpline_td_x(d, lambda.j(), (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2<d>()+i), points[m]));
+				     ? EvaluateCardinalBSpline_td<d>  (lambda.j(), (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2<d>()+i), points[m])
+				     : EvaluateCardinalBSpline_td_x<d>(lambda.j(), (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2<d>()+i), points[m]));
 	  }
 	} else {
 	  // inner generator
 	  for (unsigned int m(0); m < points.size(); m++)
 	    values[m] = (derivative == 0
-			 ? EvaluateCardinalBSpline_td  (d, lambda.j(), lambda.k(), points[m])
-			 : EvaluateCardinalBSpline_td_x(d, lambda.j(), lambda.k(), points[m]));
+			 ? EvaluateCardinalBSpline_td<d>  (lambda.j(), lambda.k(), points[m])
+			 : EvaluateCardinalBSpline_td_x<d>(lambda.j(), lambda.k(), points[m]));
 	}
       }
     } else {
@@ -256,8 +256,8 @@ namespace WaveletTL
 	  double help(CLA(i, lambda.k()-basis.DeltaLmin()));
 	  if (help != 0)
 	    for (unsigned int m(0); m < npoints; m++) {
-	      funcvalues[m] += help * EvaluateCardinalBSpline_td  (d, lambda.j(), 1-ell2<d>()+i, points[m]);
-	      dervalues[m]  += help * EvaluateCardinalBSpline_td_x(d, lambda.j(), 1-ell2<d>()+i, points[m]);
+	      funcvalues[m] += help * EvaluateCardinalBSpline_td<d>  (lambda.j(), 1-ell2<d>()+i, points[m]);
+	      dervalues[m]  += help * EvaluateCardinalBSpline_td_x<d>(lambda.j(), 1-ell2<d>()+i, points[m]);
 	    }
 	}
       }	else {
@@ -268,15 +268,15 @@ namespace WaveletTL
 	    double help(CRA(i, basis.DeltaRmax(lambda.j())-lambda.k()));
 	    if (help != 0)
 	      for (unsigned int m(0); m < npoints; m++) {
-		funcvalues[m] += help * EvaluateCardinalBSpline_td  (d, lambda.j(), (1<<lambda.j())-(d%2)-(1-ell2<d>()+i), points[m]);
-		dervalues[m]  += help * EvaluateCardinalBSpline_td_x(d, lambda.j(), (1<<lambda.j())-(d%2)-(1-ell2<d>()+i), points[m]);
+		funcvalues[m] += help * EvaluateCardinalBSpline_td<d>  (lambda.j(), (1<<lambda.j())-(d%2)-(1-ell2<d>()+i), points[m]);
+		dervalues[m]  += help * EvaluateCardinalBSpline_td_x<d>(lambda.j(), (1<<lambda.j())-(d%2)-(1-ell2<d>()+i), points[m]);
 	      }
 	  }
 	} else {
 	  // inner generator
 	  for (unsigned int m(0); m < npoints; m++) {
-	    funcvalues[m] = EvaluateCardinalBSpline_td  (d, lambda.j(), lambda.k(), points[m]);
-	    dervalues[m]  = EvaluateCardinalBSpline_td_x(d, lambda.j(), lambda.k(), points[m]);
+	    funcvalues[m] = EvaluateCardinalBSpline_td<d>  (lambda.j(), lambda.k(), points[m]);
+	    dervalues[m]  = EvaluateCardinalBSpline_td_x<d>(lambda.j(), lambda.k(), points[m]);
 	  }
 	}
       }

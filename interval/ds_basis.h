@@ -101,6 +101,15 @@ namespace WaveletTL
     typedef Vector<double>::size_type size_type;
 
     /*!
+      geometric type of the support sets
+    */
+    typedef struct {
+      int j;
+      int k1;
+      int k2;
+    } Support;
+
+    /*!
       boundary indices in \Delta_j^X and \tilde\Delta_j^X (4.10),(4.14),(4.26)
      */
     inline const int DeltaLmin() const { return ell_l()-d; }

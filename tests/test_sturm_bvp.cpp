@@ -99,7 +99,7 @@ int main()
        << coeffs << endl;
 #endif
 
-  eq.RHS(coeffs, 1e-2);
+  eq.RHS(1e-2, coeffs);
 
 #if 0
   cout << "- approximate coefficient set of the right-hand side:" << endl

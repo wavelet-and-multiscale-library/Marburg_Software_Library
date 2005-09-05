@@ -107,6 +107,16 @@ namespace WaveletTL
     double norm_Ainv() const { return normAinv; }
 
     /*!
+      add (a constant multiple of) the lambda-th column of A to a working coefficient set w,
+      applying the J-th truncation rule from [CDD1, Prop. 3.4]
+      (for the APPLY routine)
+    */
+    void add_column(const double factor,
+		    const typename WBASIS::Index& lambda,
+		    const int J,
+		    InfiniteVector<double, typename WBASIS::Index>& w) const;
+    
+    /*!
       evaluate the (unpreconditioned) right-hand side f
     */
     double f(const typename WBASIS::Index& lambda) const;
@@ -121,13 +131,35 @@ namespace WaveletTL
       approximate the wavelet coefficient set of the preconditioned right-hand side F
       within a prescribed \ell_2 error tolerance
     */
-    void RHS(InfiniteVector<double, typename WBASIS::Index>& coeffs, const double eta) const;
+    void RHS(const double eta, InfiniteVector<double, typename WBASIS::Index>& coeffs) const;
 
   protected:
     const simpleSturmBVP& bvp_;
     WBASIS basis_;
-
     double normA, normAinv;
+
+    // type of one block in a given column of A
+    typedef struct {
+      Array1D<typename WBASIS::Index> indices;
+      Array1D<double> entries;
+    } MatrixBlock;
+
+    // type of one column of A ((j0-1)-th entry corresponds to the generators on level j0)
+    typedef std::map<int, MatrixBlock> MatrixBlockCache;
+
+    // type of the cached columns of A
+    typedef std::map<typename WBASIS::Index,
+		     MatrixBlockCache,
+		     std::less<typename WBASIS::Index> > MatrixColumnCache;
+
+    // entry cache for A (mutable to overcome constness of add_column())
+    mutable MatrixColumnCache cache_;
+
+    // helper function to compute subblocks
+    void compute_matrix_block(const typename WBASIS::Index& lambda,
+			      const int level,
+			      MatrixBlockCache& col,
+			      typename MatrixBlockCache::iterator& hint_and_result) const;
   };
 }
 

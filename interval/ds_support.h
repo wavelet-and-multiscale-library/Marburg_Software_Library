@@ -52,15 +52,6 @@ namespace WaveletTL
 			  int& j, int& k1, int& k2);
 
   /*!
-    a type for the support intervals 2^{-j}[k1,k2] we need here
-  */
-  typedef struct {
-    int j;
-    int k1;
-    int k2;
-  } Support1D;
-
-  /*!
     For a given wavelet \psi_\lambda, compute all generators/wavelets
     \psi_\nu with level |\nu|=j, such that the respective supports
     have a nontrivial intersection;
@@ -70,7 +61,7 @@ namespace WaveletTL
   void intersecting_wavelets(const DSBasis<d,dT>& basis,
 			     const typename DSBasis<d,dT>::Index& lambda,
 			     const int j, const bool generators,
-			     std::list<std::pair<typename DSBasis<d,dT>::Index, Support1D> >& intersecting);
+			     std::list<std::pair<typename DSBasis<d,dT>::Index, typename DSBasis<d,dT>::Support> >& intersecting);
 }
 
 #include <interval/ds_support.cpp>

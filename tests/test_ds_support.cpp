@@ -67,7 +67,7 @@ int main()
   for (lambda = first_generator(&basis, basis.j0());; ++lambda)
     {
       cout << "  * for lambda=" << lambda << ":" << endl;
-      typedef std::list<std::pair<Index, Support1D> > SupportList;
+      typedef std::list<std::pair<Index, Basis::Support> > SupportList;
       SupportList nus;
       intersecting_wavelets(basis, lambda, basis.j0(), true, nus);
       for (SupportList::const_iterator it(nus.begin()); it != nus.end(); ++it) {

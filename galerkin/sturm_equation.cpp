@@ -1,6 +1,7 @@
 // implementation for sturm_equation.h
 
 #include <cmath>
+#include <algorithm>
 #include <utils/array1d.h>
 #include <algebra/vector.h>
 #include <algebra/sparse_matrix.h>
@@ -33,6 +34,28 @@ namespace WaveletTL
     // estimate ||A^{-1}||
     xk = 1;
     normAinv = InversePowerIteration(A_Lambda, xk, 1e-6, 200, iterations);
+  }
+
+  template <class WBASIS>
+  inline
+  double
+  SturmEquation<WBASIS>::D(const typename WBASIS::Index& lambda) const
+  {
+    return ldexp(1.0, lambda.j());
+  }
+
+  template <class WBASIS>
+  inline
+  void
+  SturmEquation<WBASIS>::rescale(InfiniteVector<double, typename WBASIS::Index>& coeffs,
+				 const int n) const
+  {
+    for (typename InfiniteVector<double, typename WBASIS::Index>::const_iterator it(coeffs.begin());
+	 it != coeffs.end(); ++it)
+      {
+	// TODO: implement an InfiniteVector::iterator to speed up this hack!
+	coeffs.set_coefficient(it.index(), *it * pow(D(it.index()), n));
+      }
   }
 
   template <class WBASIS>
@@ -121,6 +144,79 @@ namespace WaveletTL
   }
 
   template <class WBASIS>
+  void
+  SturmEquation<WBASIS>::add_column(const double factor,
+				    const typename WBASIS::Index& lambda,
+				    const int J,
+				    InfiniteVector<double, typename WBASIS::Index>& w) const
+  {
+    // check whether the corresponding column already exists, create it if necessary
+    typename MatrixColumnCache::iterator col_it_lb(cache_.lower_bound(lambda));
+    typename MatrixColumnCache::iterator col_it(col_it_lb);
+    if (col_it_lb == cache_.end() || cache_.key_comp()(lambda, col_it_lb->first))
+      col_it = cache_.insert(col_it_lb, typename MatrixColumnCache::value_type(lambda, MatrixBlockCache()));
+
+    MatrixBlockCache& col = col_it->second;
+
+    // traverse all necessary level blocks for the FMVM, compute them if necessary
+
+    // generator block for the coarsest level (always present)
+    int level = basis_.j0()-1;
+    typename MatrixBlockCache::iterator col_block_it_lb(col.lower_bound(level));
+    typename MatrixBlockCache::iterator col_block_it(col_block_it_lb);
+    if (col_block_it_lb == col.end() || col.key_comp()(level, col_block_it_lb->first))
+      compute_matrix_block(lambda, level, col, col_block_it);
+    MatrixBlock& col_block = col_block_it->second;
+    for (unsigned int id = 0; id < col_block.indices.size(); ++id) {
+      w.set_coefficient(col_block.indices[id],
+			w.get_coefficient(col_block.indices[id])
+			+ col_block.entries[id] * factor);
+    }
+
+    // wavelet blocks
+    for (level = std::max(basis_.j0(), lambda.j()-J);
+// 	 level <= lambda.j()+J; level++) {
+	 level <= 8; level++) {
+      col_block_it_lb = col.lower_bound(level);
+      col_block_it    = col_block_it_lb;
+      if (col_block_it_lb == col.end() || col.key_comp()(level, col_block_it_lb->first))
+	compute_matrix_block(lambda, level, col, col_block_it);
+      col_block = col_block_it->second;
+      for (unsigned int id = 0; id < col_block.indices.size(); ++id) {
+	w.set_coefficient(col_block.indices[id],
+			  w.get_coefficient(col_block.indices[id])
+			  + col_block.entries[id] * factor);
+      }
+    }
+  }
+  
+  template <class WBASIS>
+  void
+  SturmEquation<WBASIS>::compute_matrix_block(const typename WBASIS::Index& lambda,
+					      const int level,
+					      MatrixBlockCache& col,
+					      typename MatrixBlockCache::iterator& hint_and_result) const
+  {
+    typedef std::list<std::pair<typename WBASIS::Index, typename WBASIS::Support> > SupportList;
+    SupportList nus;
+    intersecting_wavelets(basis_, lambda, std::max(level, basis_.j0()), level == basis_.j0()-1, nus);
+
+    MatrixBlock block;
+    const unsigned int N = nus.size();
+    block.indices.resize(N);
+    block.entries.resize(N);
+    
+    unsigned int id = 0;
+    const double d1 = D(lambda);
+    for (typename SupportList::const_iterator it(nus.begin()); id < N; ++it, ++id) {
+      block.indices[id] = it->first;
+      block.entries[id] = a(it->first, lambda) / (d1*D(it->first));
+    }
+
+    hint_and_result = col.insert(hint_and_result, typename MatrixBlockCache::value_type(level, block));
+  }
+
+  template <class WBASIS>
   double
   SturmEquation<WBASIS>::f(const typename WBASIS::Index& lambda) const
   {
@@ -173,8 +269,8 @@ namespace WaveletTL
 
   template <class WBASIS>
   void
-  SturmEquation<WBASIS>::RHS(InfiniteVector<double, typename WBASIS::Index>& coeffs,
-			     const double eta) const
+  SturmEquation<WBASIS>::RHS(const double eta,
+			     InfiniteVector<double, typename WBASIS::Index>& coeffs) const
   {
     coeffs.clear();
 
@@ -182,34 +278,12 @@ namespace WaveletTL
     // of the given multiresolution analysis
 
     const int j0 = basis_.j0();
-    const int jmax = j0 + 5;
+    const int jmax = 8;
     for (typename WBASIS::Index lambda(first_generator(&basis_, j0));; ++lambda)
       {
 	coeffs.set_coefficient(lambda, f(lambda)/D(lambda));
   	if (lambda == last_wavelet(&basis_, jmax))
 	  break;
-      }
-  }
-
-  template <class WBASIS>
-  inline
-  double
-  SturmEquation<WBASIS>::D(const typename WBASIS::Index& lambda) const
-  {
-    return ldexp(1.0, lambda.j());
-  }
-
-  template <class WBASIS>
-  inline
-  void
-  SturmEquation<WBASIS>::rescale(InfiniteVector<double, typename WBASIS::Index>& coeffs,
-				 const int n) const
-  {
-    for (typename InfiniteVector<double, typename WBASIS::Index>::const_iterator it(coeffs.begin());
-	 it != coeffs.end(); ++it)
-      {
-	// TODO: implement an InfiniteVector::iterator to speed up this hack!
-	coeffs.set_coefficient(it.index(), *it * pow(D(it.index()), n));
       }
   }
 }

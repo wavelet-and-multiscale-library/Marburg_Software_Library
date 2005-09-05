@@ -39,9 +39,9 @@ namespace WaveletTL
   */
   template <class PROBLEM>
   void APPLY(const PROBLEM& P,
-	     const InfiniteVector<double, typename PROBLEM::WBasis::Index>& v,
-	     InfiniteVector<double, typename PROBLEM::WBasis::Index>& w,
-	     const double eta);
+	     const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
+	     const double eta,
+	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& w);
 }
 
 #include <adaptive/apply.cpp>

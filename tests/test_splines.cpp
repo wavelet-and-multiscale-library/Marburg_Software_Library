@@ -18,7 +18,7 @@ int main()
   cout << "* some point values of the linear B-spline:" << endl;
   for (double x = -0.5; x <= 2.5; x+=0.5) {
     cout << "  N(" << x << ")="
-	 <<  EvaluateCardinalBSpline(2, 0, x) << endl;
+	 <<  EvaluateCardinalBSpline<2>(0, x) << endl;
   }
 
   cout << "* some point values of a shifted quadratic B-spline:" << endl;

@@ -2,14 +2,39 @@
 
 #include <cmath>
 #include <utils/array1d.h>
+#include <algebra/vector.h>
+#include <algebra/sparse_matrix.h>
+#include <numerics/eigenvalues.h>
 #include <numerics/gauss_data.h>
 
 namespace WaveletTL
 {
   template <class WBASIS>
   SturmEquation<WBASIS>::SturmEquation(const simpleSturmBVP& bvp)
-    : bvp_(bvp), wbasis_(bvp.bc_left(), bvp.bc_right())
+    : bvp_(bvp), basis_(bvp.bc_left(), bvp.bc_right())
   {
+//     cout << "SturmEquation(): estimating ||D^{-1}AD^{-1}||..." << endl;
+    typedef typename WBASIS::Index Index;
+    std::set<Index> Lambda;
+    const int j0 = basis_.j0();
+    const int jmax = 8;
+    for (Index lambda = first_generator(&basis_, j0);; ++lambda) {
+      Lambda.insert(lambda);
+      if (lambda == last_wavelet(&basis_, jmax)) break;
+    }
+    SparseMatrix<double> A_Lambda;
+    setup_stiffness_matrix(Lambda, A_Lambda);
+
+    Vector<double> xk(Lambda.size(), false);
+    xk = 1;
+    unsigned int iterations;
+    normA = PowerIteration(A_Lambda, xk, 1e-6, 100, iterations);
+//     cout << "... done!" << endl;
+
+//     cout << "SturmEquation(): estimating ||(D^{-1}AD^{-1})^{-1}||..." << endl;
+    xk = 1;
+    normAinv = InversePowerIteration(A_Lambda, xk, 1e-6, 200, iterations);
+//     cout << "... done!" << endl;
   }
 
   template <class WBASIS>
@@ -32,7 +57,7 @@ namespace WaveletTL
 
     // First we compute the support intersection of \psi_\lambda and \psi_\nu:
     int j, k1, k2;
-    bool inter = intersect_supports(wbasis_, lambda, nu, j, k1, k2);
+    bool inter = intersect_supports(basis_, lambda, nu, j, k1, k2);
 
     if (inter)
       {
@@ -47,8 +72,8 @@ namespace WaveletTL
 	    gauss_points[id] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
 
 	// - compute point values of the integrands
-	evaluate(wbasis_, lambda, gauss_points, func1values, der1values);
-	evaluate(wbasis_, nu, gauss_points, func2values, der2values);
+	evaluate(basis_, lambda, gauss_points, func1values, der1values);
+	evaluate(basis_, nu, gauss_points, func2values, der2values);
 
 	// - add all integral shares
 	for (int patch = k1, id = 0; patch < k2; patch++)
@@ -70,6 +95,34 @@ namespace WaveletTL
   }
 
   template <class WBASIS>
+  void
+  SturmEquation<WBASIS>::setup_stiffness_matrix(const std::set<typename WBASIS::Index>& Lambda,
+						SparseMatrix<double>& A_Lambda) const {
+    A_Lambda.resize(Lambda.size(), Lambda.size());
+    unsigned int i = 0;
+    typedef typename WBASIS::Index Index;
+    for (typename std::set<Index>::const_iterator it1 = Lambda.begin(), itend = Lambda.end();
+	 it1 != itend; ++it1, ++i)
+      {
+	const double d1 = D(*it1);
+	typename std::set<Index>::const_iterator it2 = Lambda.begin();
+	for (; *it2 != *it1; ++it2);
+	unsigned int j = i;
+	for (; it2 != itend; ++it2, ++j)
+	  {
+	    const double d1d2 = d1 * D(*it2);
+	    double entry = a(*it2, *it1);
+	    if (entry != 0)
+	      {
+		entry /= d1d2;
+		A_Lambda.set_entry(i, j, entry);
+		A_Lambda.set_entry(j, i, entry); // symmetry
+	      }
+	  }
+      }
+  }
+
+  template <class WBASIS>
   double
   SturmEquation<WBASIS>::f(const typename WBASIS::Index& lambda) const
   {
@@ -79,7 +132,7 @@ namespace WaveletTL
 
     const int j = lambda.j()+lambda.e();
     int k1, k2;
-    support(wbasis_, lambda, k1, k2);
+    support(basis_, lambda, k1, k2);
 
     // Set up Gauss points and weights for a composite quadrature formula:
     const unsigned int N_Gauss = 5;
@@ -100,7 +153,7 @@ namespace WaveletTL
 	    const double gt = bvp_.g(t);
 	    if (gt != 0)
 	      r += gt
-		* evaluate(wbasis_, 0, lambda, t)
+		* evaluate(basis_, 0, lambda, t)
 		* gauss_weight;
 	  }
       }
@@ -118,12 +171,12 @@ namespace WaveletTL
     // remark: for a quick hack, we use a projection of f onto a space V_{jmax}
     // of the given multiresolution analysis
 
-    const int j0 = wbasis_.j0();
+    const int j0 = basis_.j0();
     const int jmax = j0+1;
-    for (typename WBASIS::Index lambda(first_generator(&wbasis_, j0));; ++lambda)
+    for (typename WBASIS::Index lambda(first_generator(&basis_, j0));; ++lambda)
       {
 	coeffs.set_coefficient(lambda, f(lambda)/D(lambda));
-  	if (lambda == last_wavelet(&wbasis_, jmax))
+  	if (lambda == last_wavelet(&basis_, jmax))
 	  break;
       }
   }

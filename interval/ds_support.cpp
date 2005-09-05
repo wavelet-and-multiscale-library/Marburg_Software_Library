@@ -129,7 +129,6 @@ namespace WaveletTL
     
     // a brute force solution
     if (generators) {
-      assert(j == basis.j0());
       for (Index nu = first_generator(&basis, j);; ++nu) {
 	Support1D supp;
 	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))

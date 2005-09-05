@@ -10,10 +10,12 @@
 #ifndef _WAVELETTL_STURM_EQUATION_H
 #define _WAVELETTL_STURM_EQUATION_H
 
+#include <set>
+
 namespace WaveletTL
 {
   /*!
-    This class models the infinite-dimensional matrix problem
+    This class models the (preconditioned) infinite-dimensional matrix problem
     
       D^{-1}AD^{-1}u = D^{-1}F
 
@@ -43,7 +45,9 @@ namespace WaveletTL
     To achieve independence from the concrete choice of \Psi, the wavelet basis
     class is given as a template parameter WBASIS and should provide a constructor of
     the form
+
        WBASIS::WBASIS(const bool bc_left, const bool bc_right)
+
     where the parameters bc_* indicate where to enforce homogeneous Dirichlet
     boundary conditions.
     Of course a natural concrete value for WBASIS is the template class DSBasis<d,dT>.
@@ -62,7 +66,7 @@ namespace WaveletTL
     /*!
       read access to the basis
     */
-    const WBASIS& basis() const { return wbasis_; }
+    const WBASIS& basis() const { return basis_; }
     
     /*!
       evaluate the diagonal preconditioner D
@@ -87,7 +91,20 @@ namespace WaveletTL
 	     const unsigned int p = 4) const;
 
     /*!
+      Given an index set Lambda, setup the corresponding full stiffness matrix
      */
+    void setup_stiffness_matrix(const std::set<typename WBASIS::Index>& Lambda,
+				SparseMatrix<double>& A_Lambda) const;
+
+    /*!
+      estimate the spectral norm ||D^{-1}AD^{-1}||
+    */
+    double norm_A() const { return normA; }
+
+    /*!
+      estimate the spectral norm ||(D^{-1}AD^{-1})^{-1}||
+    */
+    double norm_Ainv() const { return normAinv; }
 
     /*!
       evaluate the (unpreconditioned) right-hand side f
@@ -102,7 +119,9 @@ namespace WaveletTL
 
   protected:
     const simpleSturmBVP& bvp_;
-    WBASIS wbasis_;
+    WBASIS basis_;
+
+    double normA, normAinv;
   };
 }
 

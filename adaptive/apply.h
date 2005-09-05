@@ -32,8 +32,10 @@ namespace WaveletTL
     for s < s^*.
 
     References:
-    [BDD] Barinka/Dahlke/Dahmen:
-          Adaptive Application of Operators in Standard Representation.
+    [BDD]  Barinka/Dahlke/Dahmen:
+           Adaptive Application of Operators in Standard Representation.
+    [CDD1] Cohen/Dahmen/DeVore:
+           Adaptive Wavelet Methods for Elliptic Operator Equations - Convergence Rates
   */
   template <class PROBLEM>
   void APPLY(const PROBLEM& P,
@@ -42,6 +44,6 @@ namespace WaveletTL
 	     const double eta);
 }
 
-#include <interval/ds_evaluate.cpp>
+#include <adaptive/apply.cpp>
 
 #endif

@@ -78,7 +78,7 @@ int main()
   TestProblem<1> T;
 
   const int d  = 2;
-  const int dT = 4; // be sure to use a continuous dual here, otherwise the RHS test will fail
+  const int dT = 2; // be sure to use a continuous dual here, otherwise the RHS test will fail
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
@@ -123,25 +123,8 @@ int main()
   clock_t tstart, tend;
   double time;
   tstart = clock();
-  SparseMatrix<double> A(Lambda.size());
-  unsigned int i = 0;
-  for (set<Index>::const_iterator it1 = Lambda.begin(), itend = Lambda.end(); it1 != itend; ++it1, ++i)
-    {
-      set<Index>::const_iterator it2 = Lambda.begin();
-      for (; *it2 != *it1; ++it2);
-
-      unsigned int j = i;
-      for (; it2 != itend; ++it2, ++j)
-	{
-	  double entry = eq.a(*it2, *it1);
-	  if (entry != 0)
-	    {
-	      entry /= eq.D(*it1)*eq.D(*it2);
-	      A.set_entry(i, j, entry);
-	      A.set_entry(j, i, entry); // symmetry
-	    }
-	}
-    }
+  SparseMatrix<double> A;
+  eq.setup_stiffness_matrix(Lambda, A);
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
@@ -150,7 +133,7 @@ int main()
   cout << "- set up right-hand side..." << endl;
   tstart = clock();
   Vector<double> b(coeffs.size());
-  i = 0;
+  unsigned int i = 0;
   for (InfiniteVector<double,Index>::const_iterator it = coeffs.begin(); it != coeffs.end(); ++it, ++i)
     b[i] = *it;
   tend = clock();
@@ -178,6 +161,9 @@ int main()
   SampledMapping<1> s(evaluate(eq.basis(), u, true, 7));
   s.matlab_output(cout);
 #endif
+
+  cout << "- estimate for ||D^{-1}AD^{-1}||: " << eq.norm_A() << endl;
+  cout << "- estimate for ||(D^{-1}AD^{-1})^{-1}||: " << eq.norm_Ainv() << endl;
 
   return 0;
 }

@@ -314,7 +314,7 @@ namespace MathTL
       The vector v does not have to be initialized, it will be cleared
       at the beginning of the algorithm
     */
-    void n_coarse(const double eps, InfiniteVector<C,I>& v) const;
+    void COARSE(const double eps, InfiniteVector<C,I>& v) const;
   };
 
   /*!

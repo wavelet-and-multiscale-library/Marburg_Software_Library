@@ -295,7 +295,7 @@ namespace MathTL
   }
 
   template <class C, class I>
-  void InfiniteVector<C,I>::n_coarse(const double eps, InfiniteVector<C,I>& v) const
+  void InfiniteVector<C,I>::COARSE(const double eps, InfiniteVector<C,I>& v) const
   {
     // We use a straightforward implementation with complexity O(N*log(N)):
     // - sort my entries in modulus

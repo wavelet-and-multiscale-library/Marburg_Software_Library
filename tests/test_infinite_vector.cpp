@@ -80,16 +80,16 @@ int main()
        << " and ||v||_2=" << l2_norm(v) << endl;
 
   double eps = 0.1;
-  cout << "- NCOARSE(" << eps << ",w) yields w with ";
-  v.n_coarse(eps,w);
+  cout << "- COARSE(" << eps << ",w) yields w with ";
+  v.COARSE(eps,w);
   cout << w.size() << " entries and ||v-w||_2=" << l2_norm(v-w) << endl;
   eps = 1.0;
-  cout << "- NCOARSE(" << eps << ",w) yields w with ";
-  v.n_coarse(eps,w);
+  cout << "- COARSE(" << eps << ",w) yields w with ";
+  v.COARSE(eps,w);
   cout << w.size() << " entries and ||v-w||_2=" << l2_norm(v-w) << endl;
   eps = 10.0;
-  cout << "- NCOARSE(" << eps << ",w) yields w with ";
-  v.n_coarse(eps,w);
+  cout << "- COARSE(" << eps << ",w) yields w with ";
+  v.COARSE(eps,w);
   cout << w.size() << " entries and ||v-w||_2=" << l2_norm(v-w) << endl;
   
   cout << "- some weak \\ell_\\tau norms of v:" << endl;

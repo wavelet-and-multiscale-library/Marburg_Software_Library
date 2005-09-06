@@ -6,8 +6,8 @@
 # +----------------------------------------------------------------+
 
 CXX = g++
-# CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
-CXXFLAGS += -O3 -mcpu=pentium4 -msse3 -funroll-loops -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+# CXXFLAGS += -O3 -mcpu=pentium4 -msse3 -funroll-loops -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 
 EXEOBJF = \
   test_refinable.o\

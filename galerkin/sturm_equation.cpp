@@ -231,30 +231,30 @@ namespace WaveletTL
     // Set up Gauss points and weights for a composite quadrature formula:
     const unsigned int N_Gauss = 5;
     const double h = ldexp(1.0, -j);
-    Array1D<double> gauss_points (N_Gauss*(k2-k1));
+    Array1D<double> gauss_points (N_Gauss*(k2-k1)), vvalues;
     for (int patch = k1; patch < k2; patch++) // refers to 2^{-j}[patch,patch+1]
       for (unsigned int n = 0; n < N_Gauss; n++)
 	gauss_points[(patch-k1)*N_Gauss+n] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2;
+
+    // - compute point values of the integrand
+    evaluate(basis_, 0, lambda, gauss_points, vvalues);
     
     // - add all integral shares
-    for (unsigned int n = 0; n < N_Gauss; n++)
-      {
+    for (int patch = k1, id = 0; patch < k2; patch++)
+      for (unsigned int n = 0; n < N_Gauss; n++, id++) {
+	const double t = gauss_points[id];
 	const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
-	for (int patch = k1; patch < k2; patch++)
-	  {
-	    const double t = gauss_points[(patch-k1)*N_Gauss+n];
 	    
-	    const double gt = bvp_.g(t);
-	    if (gt != 0)
-	      r += gt
-		* evaluate(basis_, 0, lambda, t)
-		* gauss_weight;
-	  }
+	const double gt = bvp_.g(t);
+	if (gt != 0)
+	  r += gt
+	    * vvalues[id]
+	    * gauss_weight;
       }
     
     return r;
   }
-
+  
   template <class WBASIS>
   void
   SturmEquation<WBASIS>::setup_righthand_side(const std::set<typename WBASIS::Index>& Lambda,

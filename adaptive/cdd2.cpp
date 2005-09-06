@@ -35,7 +35,7 @@ namespace WaveletTL
     u_epsilon.clear();
 
     double epsilon_k = nu;
-    InfiniteVector<double,Index> f, v;
+    InfiniteVector<double,Index> f, v, Av;
     P.RHS(1e-6, f);
     while (epsilon_k > epsilon) {
       epsilon_k *= 3*pow(rho, K) / theta;
@@ -44,8 +44,10 @@ namespace WaveletTL
 //       P.RHS(eta, f);
       v = u_epsilon;
       for (int j = 1; j <= K; j++) {
-	APPLY(P, u_epsilon, eta, v);
-	v += omega * (f - v);
+ 	v.compress(1e-10);
+	APPLY(P, v, eta, Av);
+	v += omega * (f - Av);
+	cout << "||omega*(f-Av)||=" << l2_norm(omega * (f - Av)) << endl;
       }
       v.COARSE((1-theta)*epsilon_k, u_epsilon);
     } 

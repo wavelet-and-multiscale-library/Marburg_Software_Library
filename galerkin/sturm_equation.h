@@ -107,6 +107,21 @@ namespace WaveletTL
     double norm_Ainv() const { return normAinv; }
 
     /*!
+      estimate compressibility exponent s^*
+    */
+    double s_star() const {
+      return WBASIS::spline_order()-1.5; // cf. [BBCCDDU]
+    }
+
+    /*!
+      estimate the compression constants alpha_k in
+        ||A-A_k|| <= alpha_k * 2^{-s*k} <= alpha * 2^{-s*k}
+    */
+    double alpha() const {
+      return 1.0; // first quick hack, estimate the constant!
+    }
+
+    /*!
       add (a constant multiple of) the lambda-th column of A to a working coefficient set w,
       applying the J-th truncation rule from [CDD1, Prop. 3.4]
       (for the APPLY routine)
@@ -144,6 +159,8 @@ namespace WaveletTL
       Array1D<double> entries;
     } MatrixBlock;
 
+// #define _WAVELETTL_STURM_EQUATION_CACHE
+#ifdef _WAVELETTL_STURM_EQUATION_CACHE
     // type of one column of A ((j0-1)-th entry corresponds to the generators on level j0)
     typedef std::map<int, MatrixBlock> MatrixBlockCache;
 
@@ -160,6 +177,12 @@ namespace WaveletTL
 			      const int level,
 			      MatrixBlockCache& col,
 			      typename MatrixBlockCache::iterator& hint_and_result) const;
+#else
+    // helper function to compute subblocks
+    void compute_matrix_block(const typename WBASIS::Index& lambda,
+			      const int level,
+			      MatrixBlock& block) const;
+#endif
   };
 }
 

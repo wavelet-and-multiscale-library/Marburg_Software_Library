@@ -110,6 +110,11 @@ namespace WaveletTL
     } Support;
 
     /*!
+      spline order of the primal functions
+    */
+    static int spline_order() { return d; }
+
+    /*!
       boundary indices in \Delta_j^X and \tilde\Delta_j^X (4.10),(4.14),(4.26)
      */
     inline const int DeltaLmin() const { return ell_l()-d; }

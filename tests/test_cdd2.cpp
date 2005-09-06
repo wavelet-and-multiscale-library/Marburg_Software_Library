@@ -80,7 +80,7 @@ int main()
   TestProblem<1> T;
 
   const int d  = 2;
-  const int dT = 2;
+  const int dT = 4;
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
 

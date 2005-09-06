@@ -150,23 +150,29 @@ namespace WaveletTL
 				    const int J,
 				    InfiniteVector<double, typename WBASIS::Index>& w) const
   {
+#ifdef _WAVELETTL_STURM_EQUATION_CACHE
     // check whether the corresponding column already exists, create it if necessary
     typename MatrixColumnCache::iterator col_it_lb(cache_.lower_bound(lambda));
     typename MatrixColumnCache::iterator col_it(col_it_lb);
     if (col_it_lb == cache_.end() || cache_.key_comp()(lambda, col_it_lb->first))
       col_it = cache_.insert(col_it_lb, typename MatrixColumnCache::value_type(lambda, MatrixBlockCache()));
-
     MatrixBlockCache& col = col_it->second;
+#endif
 
     // traverse all necessary level blocks for the FMVM, compute them if necessary
 
     // generator block for the coarsest level (always present)
     int level = basis_.j0()-1;
+#ifdef _WAVELETTL_STURM_EQUATION_CACHE
     typename MatrixBlockCache::iterator col_block_it_lb(col.lower_bound(level));
     typename MatrixBlockCache::iterator col_block_it(col_block_it_lb);
     if (col_block_it_lb == col.end() || col.key_comp()(level, col_block_it_lb->first))
       compute_matrix_block(lambda, level, col, col_block_it);
     MatrixBlock& col_block = col_block_it->second;
+#else
+    MatrixBlock col_block;
+    compute_matrix_block(lambda, level, col_block);
+#endif
     for (unsigned int id = 0; id < col_block.indices.size(); ++id) {
       w.set_coefficient(col_block.indices[id],
 			w.get_coefficient(col_block.indices[id])
@@ -175,13 +181,17 @@ namespace WaveletTL
 
     // wavelet blocks
     for (level = std::max(basis_.j0(), lambda.j()-J);
-// 	 level <= lambda.j()+J; level++) {
-	 level <= 8; level++) {
+//  	 level <= lambda.j()+J; level++) {
+ 	 level <= 12; level++) {
+#ifdef _WAVELETTL_STURM_EQUATION_CACHE
       col_block_it_lb = col.lower_bound(level);
       col_block_it    = col_block_it_lb;
       if (col_block_it_lb == col.end() || col.key_comp()(level, col_block_it_lb->first))
 	compute_matrix_block(lambda, level, col, col_block_it);
       col_block = col_block_it->second;
+#else
+      compute_matrix_block(lambda, level, col_block);
+#endif
       for (unsigned int id = 0; id < col_block.indices.size(); ++id) {
 	w.set_coefficient(col_block.indices[id],
 			  w.get_coefficient(col_block.indices[id])
@@ -190,6 +200,7 @@ namespace WaveletTL
     }
   }
   
+#ifdef _WAVELETTL_STURM_EQUATION_CACHE
   template <class WBASIS>
   void
   SturmEquation<WBASIS>::compute_matrix_block(const typename WBASIS::Index& lambda,
@@ -215,6 +226,29 @@ namespace WaveletTL
 
     hint_and_result = col.insert(hint_and_result, typename MatrixBlockCache::value_type(level, block));
   }
+#else
+  template <class WBASIS>
+  void
+  SturmEquation<WBASIS>::compute_matrix_block(const typename WBASIS::Index& lambda,
+					      const int level,
+					      MatrixBlock& block) const
+  {
+    typedef std::list<std::pair<typename WBASIS::Index, typename WBASIS::Support> > SupportList;
+    SupportList nus;
+    intersecting_wavelets(basis_, lambda, std::max(level, basis_.j0()), level == basis_.j0()-1, nus);
+
+    const unsigned int N = nus.size();
+    block.indices.resize(N);
+    block.entries.resize(N);
+    
+    unsigned int id = 0;
+    const double d1 = D(lambda);
+    for (typename SupportList::const_iterator it(nus.begin()); id < N; ++it, ++id) {
+      block.indices[id] = it->first;
+      block.entries[id] = a(it->first, lambda) / (d1*D(it->first));
+    }
+  }
+#endif
 
   template <class WBASIS>
   double

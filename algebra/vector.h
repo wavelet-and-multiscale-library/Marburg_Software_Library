@@ -259,7 +259,7 @@ namespace MathTL
     const C operator * (const Vector<C2>& v) const;
 
     /*!
-      set all values below a threshold to zero
+      set all values with modulus strictly less than eta to zero
       (fabs<C> should exist)
     */
     void compress(const double eta = 1e-16);

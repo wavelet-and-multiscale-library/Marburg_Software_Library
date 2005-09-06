@@ -231,7 +231,7 @@ namespace MathTL
     size_t size() const;
 
     /*!
-      set all values with modulus below a threshold to zero
+      set all values with modulus strictly below a threshold to zero
       (fabs<C> should exist)
     */
     void compress(const double eta = 1e-16);

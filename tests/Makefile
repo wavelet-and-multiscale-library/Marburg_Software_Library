@@ -7,7 +7,7 @@
 
 CXX = g++
 CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
-# CXXFLAGS += -O3 -mcpu=pentium4 -msse3 -funroll-loops -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+# CXXFLAGS += -O3 -mcpu=pentium4 -msse3 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 
 EXEOBJF = \
   test_refinable.o\
@@ -15,7 +15,7 @@ EXEOBJF = \
   test_r_basis.o test_cdf_expansion.o\
   test_ds_basis.o test_ds_support.o test_ds_expansion.o\
   test_periodic.o\
-  test_sturm_bvp.o test_cdd2.o
+  test_sturm_bvp.o test_cdd2.o test_duv.o
 
 EXES = $(EXEOBJF:.o=)
 
@@ -31,6 +31,8 @@ veryclean:: clean
 
 $(EXEOBJF): %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
+#	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(EXES): %: %.o
 	$(CXX) $< -g -o $@
+#	$(CXX) $< -o $@

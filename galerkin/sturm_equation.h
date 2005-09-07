@@ -11,7 +11,7 @@
 #define _WAVELETTL_STURM_EQUATION_H
 
 #include <set>
-#include <vector>
+#include <utils/array1d.h>
 
 namespace WaveletTL
 {
@@ -157,8 +157,8 @@ namespace WaveletTL
     // type of one block in a given column of A
     class MatrixBlock {
     public:
-      std::vector<typename WBASIS::Index> indices;
-      std::vector<double> entries;
+      Array1D<typename WBASIS::Index> indices;
+      Array1D<double> entries;
     };
 
 #define _WAVELETTL_STURM_EQUATION_CACHE
@@ -173,13 +173,8 @@ namespace WaveletTL
 
     // entry cache for A (mutable to overcome constness of add_column())
     mutable MatrixColumnCache cache_;
-
-    // helper function to compute subblocks
-    void compute_matrix_block(const typename WBASIS::Index& lambda,
-			      const int level,
-			      MatrixBlockCache& col,
-			      typename MatrixBlockCache::iterator& hint_and_result) const;
 #endif
+
     // helper function to compute subblocks
     void compute_matrix_block(const typename WBASIS::Index& lambda,
 			      const int level,

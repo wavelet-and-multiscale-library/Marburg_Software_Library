@@ -167,6 +167,7 @@ int main()
   cout << "- estimate for ||(D^{-1}AD^{-1})^{-1}||: " << eq.norm_Ainv() << endl;
 #endif
 
+#if 0
   cout << "- checking add_column and the compression strategy:" << endl;
   InfiniteVector<double,Index> v, w;
   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it) {
@@ -208,6 +209,7 @@ int main()
 
     break;
   }
+#endif
 
   return 0;
 }

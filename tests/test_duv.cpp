@@ -11,7 +11,7 @@
 #include <interval/ds_basis.h>
 #include <galerkin/sturm_equation.h>
 
-#include <adaptive/cdd2.h>
+#include <adaptive/duv.h>
 
 using namespace std;
 using namespace WaveletTL;
@@ -75,7 +75,7 @@ public:
 
 int main()
 {
-  cout << "Testing adaptive wavelet-Galerkin solution of a Sturm b.v.p. with CDD2_SOLVE ..." << endl;
+  cout << "Testing adaptive wavelet-Galerkin solution of a Sturm b.v.p. with algorithms from [DUV]..." << endl;
 
   TestProblem<1> T;
 
@@ -91,7 +91,7 @@ int main()
   const double nu = problem.norm_Ainv() * l2_norm(F_eta);
 
   InfiniteVector<double, Index> u_epsilon;
-  CDD2_SOLVE(problem, nu, 1e-1, u_epsilon);
+  DUV_SOLVE_SD(problem, nu, 1e-1, u_epsilon);
   
   return 0;
 }

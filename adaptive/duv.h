@@ -7,41 +7,38 @@
 // | Thorsten Raasch                                                    |
 // +--------------------------------------------------------------------+
 
-#ifndef _WAVELETTL_CDD2_H
-#define _WAVELETTL_CDD2_H
+#ifndef _WAVELETTL_DUV_H
+#define _WAVELETTL_DUV_H
 
 #include <algebra/infinite_vector.h>
 
 namespace WaveletTL
 {
-  /*!
-    An adaptive solver for the infinite-dimensional problem
+  /*
+    Some adaptive solvers for the infinite-dimensional problem
 
       Au = F,
 
-    as developed in [CDD2] and reformulated in [S],[DFR].
-    A is assumed to be s.p.d., i.e. the simplifications on [CDD2, p.12] hold.
+    as developed in [DUV], where A is assumed to be s.p.d.
     Given the problem and a target accuracy \epsilon,
     the algorithm constructs a coefficient vector u_\epsilon, such that
     
       ||u-u_\epsilon|| <= \epsilon.
 
-    The routine has to be given an estimate of ||u|| <= nu = epsilon_0, which may be
+    The routines has to be given an estimate of ||u|| <= nu = epsilon_0, which may be
     computed beforehand like nu:=||A^{-1}||*||F||.
 
     References:
-    [CDD2] Cohen/Dahmen/DeVore,
-           Adaptive Wavelet Methods II - Beyond the Elliptic Case
-    [DFR]  Dahlke/Fornasier/Raasch,
-           Adaptive Frame Methods for Elliptic Operator Equations
-    [S]    Stevenson,
-           Adaptive Solution of Operator Equations using Wavelet Frames
+    [DUV] Dahmen/Urban/Vorloeper,
+          Adaptive Wavelet Methods - Basic Concepts and Applications to the Stokes Problem
   */
+
+  //! steepest descent
   template <class PROBLEM>
-  void CDD2_SOLVE(const PROBLEM& P, const double nu, const double epsilon,
-		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon);
+  void DUV_SOLVE_SD(const PROBLEM& P, const double nu, const double epsilon,
+		    InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon);
 }
 
-#include <adaptive/cdd2.cpp>
+#include <adaptive/duv.cpp>
 
 #endif

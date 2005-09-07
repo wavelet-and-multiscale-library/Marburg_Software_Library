@@ -29,7 +29,7 @@ namespace WaveletTL
     cout << "CDD2_SOLVE: theta=" << theta << endl;
 
     // compute minimal K such that 3*rho^K < theta
-    const int K = 50; // (int) ceil(log10(theta/3.0) / log10(rho));
+    const int K = (int) ceil(log10(theta/3.0) / log10(rho));
     cout << "CDD2_SOLVE: K=" << K << endl;
     
     u_epsilon.clear();
@@ -44,7 +44,7 @@ namespace WaveletTL
 //       P.RHS(eta, f);
       v = u_epsilon;
       for (int j = 1; j <= K; j++) {
- 	v.compress(1e-10);
+  	v.compress(1e-5);
 	APPLY(P, v, eta, Av);
 	cout << "current residual error ||f-Av||=" << l2_norm(f - Av) << endl;
 	v += omega * (f - Av);

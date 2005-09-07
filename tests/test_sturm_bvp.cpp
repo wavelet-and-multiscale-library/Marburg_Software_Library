@@ -78,7 +78,7 @@ int main()
   TestProblem<1> T;
 
   const int d  = 2;
-  const int dT = 4; // be sure to use a continuous dual here, otherwise the RHS test will fail
+  const int dT = 2; // be sure to use a continuous dual here, otherwise the RHS test will fail
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
@@ -120,7 +120,7 @@ int main()
 //   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it)
 //     cout << *it << endl;
 
-#if 1
+#if 0
   cout << "- set up (preconditioned) stiffness matrix..." << endl;
   clock_t tstart, tend;
   double time;
@@ -162,8 +162,52 @@ int main()
   s.matlab_output(cout);
 #endif
 
+#if 0
   cout << "- estimate for ||D^{-1}AD^{-1}||: " << eq.norm_A() << endl;
   cout << "- estimate for ||(D^{-1}AD^{-1})^{-1}||: " << eq.norm_Ainv() << endl;
+#endif
+
+  cout << "- checking add_column and the compression strategy:" << endl;
+  InfiniteVector<double,Index> v, w;
+  for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it) {
+    v.clear();
+    w.clear();
+    eq.add_column(1.0, *it, 99, w);
+    cout << "lambda=" << *it << endl;
+//     cout << "* result of add_column:" << endl << w << endl;
+    const int jmax = 8;
+    cout << "* checking correctness up to level " << jmax << "..." << endl;
+    for (Index nu = first_generator(&eq.basis(), eq.basis().j0());; ++nu) {
+      v.set_coefficient(nu, eq.a(nu, *it)/(eq.D(nu)*eq.D(*it)));
+      if (nu == last_wavelet(&eq.basis(), jmax)) break;
+    }
+//     cout << "  ... done, error:" << endl;
+//     InfiniteVector<double,Index> error = v - w;
+//     error.compress();
+//     cout << error << endl;
+
+    cout << "  ... done, absolute error " << linfty_norm(v-w) << endl;
+
+    break;
+  }
+
+  cout << "- check add_column for a second time to test the cache:" << endl;
+  for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it) {
+    v.clear();
+    w.clear();
+    eq.add_column(1.0, *it, 99, w);
+    cout << "lambda=" << *it << endl;
+//     cout << "* result of add_column:" << endl << w << endl;
+    const int jmax = 8;
+    cout << "* checking correctness up to level " << jmax << "..." << endl;
+    for (Index nu = first_generator(&eq.basis(), eq.basis().j0());; ++nu) {
+      v.set_coefficient(nu, eq.a(nu, *it)/(eq.D(nu)*eq.D(*it)));
+      if (nu == last_wavelet(&eq.basis(), jmax)) break;
+    }
+    cout << "  ... done, absolute error " << linfty_norm(v-w) << endl;
+
+    break;
+  }
 
   return 0;
 }

@@ -153,10 +153,16 @@ namespace WaveletTL
 #ifdef _WAVELETTL_STURM_EQUATION_CACHE
     // check whether the corresponding column already exists, create it if necessary
     typename MatrixColumnCache::iterator col_it_lb(cache_.lower_bound(lambda));
-    typename MatrixColumnCache::iterator col_it(col_it_lb);
-    if (col_it_lb == cache_.end() || cache_.key_comp()(lambda, col_it_lb->first))
-      col_it = cache_.insert(col_it_lb, typename MatrixColumnCache::value_type(lambda, MatrixBlockCache()));
-    MatrixBlockCache& col = col_it->second;
+    typename MatrixColumnCache::iterator col_it;
+    if (col_it_lb != cache_.end() && !(cache_.key_comp()(lambda, col_it_lb->first))) {
+      cout << "*** SturmEquation cache: reuse column " << lambda << " with size " << col_it_lb->second.size() << " ***" << endl;
+      col_it = col_it_lb;
+    } else {
+      typedef typename MatrixColumnCache::value_type value_type;
+      cout << "*** SturmEquation cache: insert column " << lambda << " ***" << endl;
+      col_it = cache_.insert(col_it_lb, value_type(lambda, MatrixBlockCache()));
+    }
+    MatrixBlockCache& col(col_it->second);
 #endif
 
     // traverse all necessary level blocks for the FMVM, compute them if necessary
@@ -164,11 +170,32 @@ namespace WaveletTL
     // generator block for the coarsest level (always present)
     int level = basis_.j0()-1;
 #ifdef _WAVELETTL_STURM_EQUATION_CACHE
+    cout << "*** SturmEquation cache: in column " << lambda << ", the following blocks are present:" << endl;
+    for (typename MatrixBlockCache::const_iterator it = col.begin(); it != col.end(); ++it) {
+      cout << "level=" << it->first << ", block:" << endl;
+      for (unsigned int id = 0; id < it->second.indices.size(); ++id) {
+	cout << it->second.indices[id] << ": " << it->second.entries[id] << endl;
+      }
+    }
     typename MatrixBlockCache::iterator col_block_it_lb(col.lower_bound(level));
-    typename MatrixBlockCache::iterator col_block_it(col_block_it_lb);
-    if (col_block_it_lb == col.end() || col.key_comp()(level, col_block_it_lb->first))
-      compute_matrix_block(lambda, level, col, col_block_it);
-    MatrixBlock& col_block = col_block_it->second;
+    typename MatrixBlockCache::iterator col_block_it;
+    if (col_block_it_lb != col.end() && !(col.key_comp()(level, col_block_it_lb->first))) {
+      cout << "*** SturmEquation cache: in column " << lambda << ", reuse block " << level << " ***" << endl;
+      col_block_it = col_block_it_lb;
+      cout << "*** SturmEquation cache: entries of the reused block:" << endl;
+    } else {
+      cout << "*** SturmEquation cache: in column " << lambda << ", insert block " << level << " ***" << endl;
+      typedef typename MatrixBlockCache::value_type value_type;
+      col_block_it = col.insert(col_block_it_lb, value_type(level, MatrixBlock()));
+      compute_matrix_block(lambda, level, col_block_it->second);
+      cout << "*** after inserting, size of the column cache is " << col.size() << endl;
+    }
+    MatrixBlock& col_block(col_block_it->second);
+    
+    cout << "*** SturmEquation cache: entries of the matrix block (size=" << col_block.indices.size() << "):" << endl;
+    for (unsigned int id = 0; id < col_block.indices.size(); ++id) {
+      cout << col_block.indices[id] << ": " << col_block.entries[id] << endl;
+    }
 #else
     MatrixBlock col_block;
     compute_matrix_block(lambda, level, col_block);
@@ -182,13 +209,24 @@ namespace WaveletTL
     // wavelet blocks
     for (level = std::max(basis_.j0(), lambda.j()-J);
 //  	 level <= lambda.j()+J; level++) {
- 	 level <= 12; level++) {
+ 	 level <= 8; level++) {
 #ifdef _WAVELETTL_STURM_EQUATION_CACHE
       col_block_it_lb = col.lower_bound(level);
       col_block_it    = col_block_it_lb;
-      if (col_block_it_lb == col.end() || col.key_comp()(level, col_block_it_lb->first))
-	compute_matrix_block(lambda, level, col, col_block_it);
-      col_block = col_block_it->second;
+      if (col_block_it_lb == col.end() || col.key_comp()(level, col_block_it_lb->first)) {
+	cout << "*** SturmEquation cache: in column " << lambda << ", insert block " << level << " ***" << endl;
+	typedef typename MatrixBlockCache::value_type value_type;
+	col_block_it = col.insert(col_block_it_lb, value_type(level, MatrixBlock()));
+	compute_matrix_block(lambda, level, col_block_it->second);
+	cout << "*** after inserting, size of the column cache is " << col.size() << endl;
+      } else {
+	cout << "*** SturmEquation cache: in column " << lambda << ", reuse block " << level << " ***" << endl;
+      }
+      MatrixBlock& col_block = col_block_it->second;
+      cout << "*** SturmEquation cache: entries of the matrix block (size=" << col_block.indices.size() << "):" << endl;
+      for (unsigned int id = 0; id < col_block.indices.size(); ++id) {
+	cout << col_block.indices[id] << ": " << col_block.entries[id] << endl;
+      }
 #else
       compute_matrix_block(lambda, level, col_block);
 #endif
@@ -210,7 +248,7 @@ namespace WaveletTL
   {
     typedef std::list<std::pair<typename WBASIS::Index, typename WBASIS::Support> > SupportList;
     SupportList nus;
-    intersecting_wavelets(basis_, lambda, std::max(level, basis_.j0()), level == basis_.j0()-1, nus);
+    intersecting_wavelets(basis_, lambda, std::max(level, basis_.j0()), level == (basis_.j0()-1), nus);
 
     MatrixBlock block;
     const unsigned int N = nus.size();
@@ -224,9 +262,27 @@ namespace WaveletTL
       block.entries[id] = a(it->first, lambda) / (d1*D(it->first));
     }
 
+//     cout << "*** SturmEquation cache: in compute_matrix_block, I will try to insert at level=" << level << " the block" << endl;
+//     for (unsigned int id = 0; id < block.indices.size(); ++id) {
+//       cout << block.indices[id] << ": " << block.entries[id] << endl;
+//     }
+
+//     typename MatrixBlockCache::value_type toinsert(level, block);
+//     cout << "*** SturmEquation cache: in compute_matrix_block, C++ would insert the pair (" << toinsert.first << ", block) with block" << endl;
+//     for (unsigned int id = 0; id < toinsert.second.indices.size(); ++id) {
+//       cout << toinsert.second.indices[id] << ": " << toinsert.second.entries[id] << endl;
+//     }
+
     hint_and_result = col.insert(hint_and_result, typename MatrixBlockCache::value_type(level, block));
+//     hint_and_result = col.insert(col.end(), typename MatrixBlockCache::value_type(level, block));
+
+    cout << "*** SturmEquation cache: in compute_matrix_block, inserted was the pair (" << hint_and_result->first << ", block) with block" << endl;
+    for (unsigned int id = 0; id < hint_and_result->second.indices.size(); ++id) {
+      cout << hint_and_result->second.indices[id] << ": " << hint_and_result->second.entries[id] << endl;
+    }
   }
-#else
+#endif
+
   template <class WBASIS>
   void
   SturmEquation<WBASIS>::compute_matrix_block(const typename WBASIS::Index& lambda,
@@ -235,7 +291,7 @@ namespace WaveletTL
   {
     typedef std::list<std::pair<typename WBASIS::Index, typename WBASIS::Support> > SupportList;
     SupportList nus;
-    intersecting_wavelets(basis_, lambda, std::max(level, basis_.j0()), level == basis_.j0()-1, nus);
+    intersecting_wavelets(basis_, lambda, std::max(level, basis_.j0()), level == (basis_.j0()-1), nus);
 
     const unsigned int N = nus.size();
     block.indices.resize(N);
@@ -248,7 +304,6 @@ namespace WaveletTL
       block.entries[id] = a(it->first, lambda) / (d1*D(it->first));
     }
   }
-#endif
 
   template <class WBASIS>
   double

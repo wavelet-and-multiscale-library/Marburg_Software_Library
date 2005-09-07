@@ -11,6 +11,7 @@
 #define _WAVELETTL_STURM_EQUATION_H
 
 #include <set>
+#include <vector>
 
 namespace WaveletTL
 {
@@ -154,12 +155,13 @@ namespace WaveletTL
     double normA, normAinv;
 
     // type of one block in a given column of A
-    typedef struct {
-      Array1D<typename WBASIS::Index> indices;
-      Array1D<double> entries;
-    } MatrixBlock;
+    class MatrixBlock {
+    public:
+      std::vector<typename WBASIS::Index> indices;
+      std::vector<double> entries;
+    };
 
-// #define _WAVELETTL_STURM_EQUATION_CACHE
+#define _WAVELETTL_STURM_EQUATION_CACHE
 #ifdef _WAVELETTL_STURM_EQUATION_CACHE
     // type of one column of A ((j0-1)-th entry corresponds to the generators on level j0)
     typedef std::map<int, MatrixBlock> MatrixBlockCache;
@@ -177,12 +179,11 @@ namespace WaveletTL
 			      const int level,
 			      MatrixBlockCache& col,
 			      typename MatrixBlockCache::iterator& hint_and_result) const;
-#else
+#endif
     // helper function to compute subblocks
     void compute_matrix_block(const typename WBASIS::Index& lambda,
 			      const int level,
 			      MatrixBlock& block) const;
-#endif
   };
 }
 

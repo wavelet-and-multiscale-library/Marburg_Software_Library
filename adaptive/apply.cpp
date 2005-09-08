@@ -102,7 +102,7 @@ namespace WaveletTL
 	double check = 0;
 	unsigned int k = 0;
 	for (std::list<double>::const_iterator it(vks_norm_sqr.begin()); k <= ell; ++it, ++k)
-	  check += P.alpha() * pow(2.0, -s*(J-k)) * sqrt(*it);
+	  check += P.alphak(J-k) * pow(2.0, -s*(J-k)) * sqrt(*it);
 	if (check <= eta/2.0) break;
 	J++;
       }

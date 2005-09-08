@@ -37,12 +37,10 @@ namespace WaveletTL
 	rj = f - Av;
  	cout << "current residual error: " << l2_norm(rj) << endl;
 	APPLY(P, rj, eta/5.0, Arj);
-	cout << "rj * rj = " << rj * rj << endl;
-	cout << "rj * Arj = " << rj * Arj << endl;
-	if (rj * Arj == 0)
-	  cout << "Arj=" << endl << Arj << endl;
+// 	cout << "rj * rj = " << rj * rj << endl;
+// 	cout << "rj * Arj = " << rj * Arj << endl;
 	const double alphaj = (rj * rj) / (rj * Arj);
-	cout << "descent parameter alphaj=" << alphaj << endl;
+// 	cout << "descent parameter alphaj=" << alphaj << endl;
 	v += alphaj * rj;
       }
       v.COARSE(2.0*epsilon_k/5.0, u_epsilon);

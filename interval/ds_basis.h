@@ -110,9 +110,19 @@ namespace WaveletTL
     } Support;
 
     /*!
-      spline order of the primal functions
+      critical Sobolev regularity for the primal generators/wavelets
     */
-    static int spline_order() { return d; }
+    static double primal_regularity() { return d - 0.5; }
+
+    /*!
+      number of vanishing moments for the primal wavelets
+    */
+    static unsigned int primal_vanishing_moments() { return dT; }
+
+    /*!
+      number of vanishing moments for the dual wavelets
+    */
+    static unsigned int dual_vanishing_moments() { return d; }
 
     /*!
       boundary indices in \Delta_j^X and \tilde\Delta_j^X (4.10),(4.14),(4.26)

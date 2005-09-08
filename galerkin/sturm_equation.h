@@ -52,6 +52,10 @@ namespace WaveletTL
     where the parameters bc_* indicate where to enforce homogeneous Dirichlet
     boundary conditions.
     Of course a natural concrete value for WBASIS is the template class DSBasis<d,dT>.
+
+    References:
+    [St04a] Stevenson:
+            On the compressibility of operators in wavelet coordinates
   */
   template <class WBASIS>
   class SturmEquation
@@ -92,6 +96,16 @@ namespace WaveletTL
 	     const unsigned int p = 4) const;
 
     /*!
+      evaluate the (unpreconditioned) bilinear form a;
+      you can give a hint about the support intersection
+      (see the add_column())
+    */
+    double a(const typename WBASIS::Index& lambda,
+	     const typename WBASIS::Index& nu,
+	     const typename WBASIS::Support& supp,
+	     const unsigned int p = 4) const;
+
+    /*!
       given an index set Lambda, setup the corresponding  preconditioned stiffness matrix
      */
     void setup_stiffness_matrix(const std::set<typename WBASIS::Index>& Lambda,
@@ -111,15 +125,15 @@ namespace WaveletTL
       estimate compressibility exponent s^*
     */
     double s_star() const {
-      return WBASIS::spline_order()-1.5; // cf. [BBCCDDU]
+      return 1.0 + WBASIS::primal_vanishing_moments(); // [St04a], Th. 2.3 for n=1
     }
 
     /*!
       estimate the compression constants alpha_k in
-        ||A-A_k|| <= alpha_k * 2^{-s*k} <= alpha * 2^{-s*k}
+        ||A-A_k|| <= alpha_k * 2^{-s*k}
     */
-    double alpha() const {
-      return 1.0; // first quick hack, estimate the constant!
+    double alphak(const unsigned int k) const {
+      return 0.1; // first quick hack, estimate the constants!
     }
 
     /*!

@@ -116,6 +116,49 @@ namespace WaveletTL
   }
 
   template <class WBASIS>
+  double
+  SturmEquation<WBASIS>::a(const typename WBASIS::Index& lambda,
+			   const typename WBASIS::Index& nu,
+			   const typename WBASIS::Support& supp,
+			   const unsigned int p) const
+  {
+    // a(u,v) = \int_0^1 [p(t)u'(t)v'(t)+q(t)u(t)v(t)] dt
+
+    double r = 0;
+
+    // Set up Gauss points and weights for a composite quadrature formula:
+    // (TODO: maybe use an instance of MathTL::QuadratureRule instead of computing
+    // the Gauss points and weights)
+    const unsigned int N_Gauss = (p+1)/2;
+    const double h = ldexp(1.0, -supp.j);
+    Array1D<double> gauss_points (N_Gauss*(supp.k2-supp.k1)), func1values, func2values, der1values, der2values;
+    for (int patch = supp.k1, id = 0; patch < supp.k2; patch++) // refers to 2^{-j}[patch,patch+1]
+      for (unsigned int n = 0; n < N_Gauss; n++, id++)
+	gauss_points[id] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
+    
+    // - compute point values of the integrands
+    evaluate(basis_, lambda, gauss_points, func1values, der1values);
+    evaluate(basis_, nu, gauss_points, func2values, der2values);
+    
+    // - add all integral shares
+    for (int patch = supp.k1, id = 0; patch < supp.k2; patch++)
+      for (unsigned int n = 0; n < N_Gauss; n++, id++) {
+	const double t = gauss_points[id];
+	const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
+	
+	const double pt = bvp_.p(t);
+	if (pt != 0)
+	  r += pt * der1values[id] * der2values[id] * gauss_weight;
+	
+	const double qt = bvp_.q(t);
+	if (qt != 0)
+	  r += qt * func1values[id] * func2values[id] * gauss_weight;
+      }
+    
+    return r;
+  }
+
+  template <class WBASIS>
   void
   SturmEquation<WBASIS>::setup_stiffness_matrix(const std::set<typename WBASIS::Index>& Lambda,
 						SparseMatrix<double>& A_Lambda) const {
@@ -187,7 +230,7 @@ namespace WaveletTL
     // wavelet blocks
     for (level = std::max(basis_.j0(), lambda.j()-J);
 //    	 level <= lambda.j()+J; level++) {
-   	 level <= 16; level++) {
+   	 level <= 13; level++) {
 #ifdef _WAVELETTL_STURM_EQUATION_CACHE
       col_block_it_lb = col.lower_bound(level);
       col_block_it    = col_block_it_lb;
@@ -226,7 +269,7 @@ namespace WaveletTL
     const double d1 = D(lambda);
     for (typename SupportList::const_iterator it(nus.begin()); id < N; ++it, ++id) {
       block.indices[id] = it->first;
-      block.entries[id] = a(it->first, lambda) / (d1*D(it->first));
+      block.entries[id] = a(it->first, lambda, it->second) / (d1*D(it->first));
     }
   }
 

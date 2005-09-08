@@ -243,8 +243,8 @@ namespace MathTL
       itv(v.begin()), itvend(v.end());
     for (; it != itend && itv != itvend; ++it)
       {
- 	while (itv != itvend && itv < it) ++itv;
- 	if (it == itv)
+ 	while (itv != itvend && itv.index() < it.index()) ++itv;
+ 	if (it.index() == itv.index())
  	  r += *it * *itv;
       }
 

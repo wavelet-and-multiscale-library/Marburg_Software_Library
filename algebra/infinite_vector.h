@@ -234,7 +234,7 @@ namespace MathTL
       set all values with modulus strictly below a threshold to zero
       (fabs<C> should exist)
     */
-    void compress(const double eta = 1e-16);
+    void compress(const double eta = 1e-15);
 
     /*!
       in place summation *this += v

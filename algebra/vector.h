@@ -262,7 +262,7 @@ namespace MathTL
       set all values with modulus strictly less than eta to zero
       (fabs<C> should exist)
     */
-    void compress(const double eta = 1e-16);
+    void compress(const double eta = 1e-15);
     
   protected:
     /*!

@@ -22,6 +22,8 @@ using MathTL::CG;
 /*
   different test problems with homogeneous Dirichlet b.c.'s
   1: y(t)=x*(1-x), -y''(t)=2
+  2: y(t)=exp(-100*(x-0.5)^2), -y''(t)= (200-(200x-100)^2)*exp(-100*(x-0.5)^2)
+  3: 1D example from [BBCCDDU]
  */
 template <unsigned int N>
 class TestProblem
@@ -31,6 +33,8 @@ public:
   double p(const double t) const {
     switch(N) {
     case 1:
+    case 2:
+    case 3:
       return 1;
       break;
     default:
@@ -41,6 +45,8 @@ public:
   double p_prime(const double t) const {
     switch(N) {
     case 1:
+    case 2:
+    case 3:
       return 0;
       break;
     default:
@@ -51,6 +57,8 @@ public:
   double q(const double t) const {
     switch(N) {
     case 1:
+    case 2:
+    case 3:
       return 0;
       break;
     default:
@@ -63,6 +71,11 @@ public:
     case 1:
       return 2;
       break;
+    case 2:
+      return (200.0-(200.0*t-100.0)*(200.0*t-100.0))*exp(-100.0*(t-0.5)*(t-0.5));
+      break;
+    case 3:
+      return -100*exp(5*t)*(1-(exp(5*t)-1)/(exp(5.)-1))/(exp(5.)-1)+200*exp(10*t)/((exp(5.)-1)*(exp(5.)-1))+100*(exp(5*t)-1)*exp(5*t)/((exp(5.)-1)*(exp(5.)-1));
     default:
       return 0;
       break;
@@ -91,7 +104,7 @@ int main()
   const double nu = problem.norm_Ainv() * l2_norm(F_eta);
 
   InfiniteVector<double, Index> u_epsilon;
-  DUV_SOLVE_SD(problem, nu, 1e-1, u_epsilon);
+  DUV_SOLVE_SD(problem, nu, 1e-4, u_epsilon);
   
   return 0;
 }

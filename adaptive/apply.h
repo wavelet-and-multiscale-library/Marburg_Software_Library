@@ -72,6 +72,21 @@ namespace WaveletTL
 	     const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
 	     const double eta,
 	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& w);
+
+  /*!
+    APPLY with successive COARSE
+  */
+  template <class PROBLEM>
+  void APPLY_COARSE(const PROBLEM& P,
+		    const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
+		    const double eta,
+		    InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& w,
+		    const double lambda = 0.5)
+  {
+    InfiniteVector<double, typename PROBLEM::WaveletBasis::Index> help;
+    APPLY(P, v, lambda*eta, help);
+    help.COARSE((1-lambda)*eta, w);
+  }
 }
 
 #include <adaptive/apply.cpp>

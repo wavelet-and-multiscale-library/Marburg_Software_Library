@@ -133,7 +133,7 @@ namespace WaveletTL
         ||A-A_k|| <= alpha_k * 2^{-s*k}
     */
     double alphak(const unsigned int k) const {
-      return 0.1; // first quick hack, estimate the constants!
+      return 10.0; // first quick hack, estimate the constants!
     }
 
     /*!
@@ -168,12 +168,14 @@ namespace WaveletTL
     WBASIS basis_;
     double normA, normAinv;
 
+    // right-hand side coefficients on a fine level, sorted by modulus
+    Array1D<std::pair<typename WBASIS::Index,double> > fcoeffs;
+    
     // type of one block in a given column of A
-    class MatrixBlock {
-    public:
+    typedef struct {
       Array1D<typename WBASIS::Index> indices;
       Array1D<double> entries;
-    };
+    } MatrixBlock;
 
 #define _WAVELETTL_STURM_EQUATION_CACHE
 #ifdef _WAVELETTL_STURM_EQUATION_CACHE

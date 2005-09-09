@@ -18,7 +18,7 @@ namespace WaveletTL
     typedef typename WBASIS::Index Index;
     std::set<Index> Lambda;
     const int j0 = basis_.j0();
-    const int jmax = 8;
+    const int jmax = 10;
     for (Index lambda = first_generator(&basis_, j0);; ++lambda) {
       Lambda.insert(lambda);
       if (lambda == last_wavelet(&basis_, jmax)) break;
@@ -34,6 +34,22 @@ namespace WaveletTL
     // estimate ||A^{-1}||
     xk = 1;
     normAinv = InversePowerIteration(A_Lambda, xk, 1e-6, 200, iterations);
+
+    // precompute the right-hand side on a fine level
+    InfiniteVector<double,Index> fhelp;
+    for (Index lambda(first_generator(&basis_, j0));; ++lambda)
+      {
+	fhelp.set_coefficient(lambda, f(lambda)/D(lambda));
+  	if (lambda == last_wavelet(&basis_, jmax))
+	  break;
+      }
+    // sort the coefficients into fcoeffs
+    fcoeffs.resize(fhelp.size());
+    unsigned int id(0);
+    for (typename InfiniteVector<double,Index>::const_iterator it(fhelp.begin()), itend(fhelp.end());
+	 it != itend; ++it, ++id)
+      fcoeffs[id] = std::pair<Index,double>(it.index(), *it);
+    sort(fcoeffs.begin(), fcoeffs.end(), InfiniteVector<double,Index>::decreasing_order());
   }
 
   template <class WBASIS>
@@ -229,8 +245,8 @@ namespace WaveletTL
 
     // wavelet blocks
     for (level = std::max(basis_.j0(), lambda.j()-J);
-//    	 level <= lambda.j()+J; level++) {
-   	 level <= 13; level++) {
+//       	 level <= lambda.j()+J; level++) {
+	 level <= 10; level++) {
 #ifdef _WAVELETTL_STURM_EQUATION_CACHE
       col_block_it_lb = col.lower_bound(level);
       col_block_it    = col_block_it_lb;
@@ -257,19 +273,30 @@ namespace WaveletTL
 					      const int level,
 					      MatrixBlock& block) const
   {
-    typedef std::list<std::pair<typename WBASIS::Index, typename WBASIS::Support> > SupportList;
+    typedef typename WBASIS::Index Index;
+    typedef std::list<std::pair<Index, typename WBASIS::Support> > SupportList;
     SupportList nus;
     intersecting_wavelets(basis_, lambda, std::max(level, basis_.j0()), level == (basis_.j0()-1), nus);
 
-    const unsigned int N = nus.size();
-    block.indices.resize(N);
-    block.entries.resize(N);
-    
-    unsigned int id = 0;
+    std::list<Index> indices;
+    std::list<double> entries;
     const double d1 = D(lambda);
-    for (typename SupportList::const_iterator it(nus.begin()); id < N; ++it, ++id) {
-      block.indices[id] = it->first;
-      block.entries[id] = a(it->first, lambda, it->second) / (d1*D(it->first));
+    for (typename SupportList::const_iterator it(nus.begin()); it != nus.end(); ++it) {
+      const double entry = a(it->first, lambda, it->second) / (d1*D(it->first));
+      if (fabs(entry) > 1e-14) {
+	indices.push_back(it->first);
+	entries.push_back(entry);
+      }
+    }
+
+    block.indices.resize(indices.size());
+    block.entries.resize(indices.size());
+    unsigned int id = 0;
+    typename std::list<Index>::const_iterator it1(indices.begin());
+    typename std::list<double>::const_iterator it2(entries.begin());
+    for (; it1 != indices.end(); ++it1, ++it2, ++id) {
+      block.indices[id] = *it1;
+      block.entries[id] = *it2;
     }
   }
 
@@ -325,22 +352,31 @@ namespace WaveletTL
   }
 
   template <class WBASIS>
+  inline
   void
   SturmEquation<WBASIS>::RHS(const double eta,
 			     InfiniteVector<double, typename WBASIS::Index>& coeffs) const
   {
-    coeffs.clear();
+//     fcoeffs.COARSE(eta, coeffs);
 
-    // remark: for a quick hack, we use a projection of f onto a fine space V_{jmax}
-    // of the given multiresolution analysis
 
-    const int j0 = basis_.j0();
-    const int jmax = 12;
-    for (typename WBASIS::Index lambda(first_generator(&basis_, j0));; ++lambda)
-      {
-	coeffs.set_coefficient(lambda, f(lambda)/D(lambda));
-  	if (lambda == last_wavelet(&basis_, jmax))
-	  break;
-      }
+// 	double coarsenorm(0);
+// 	double nrm(l2_norm(*this));
+// 	double bound(nrm*nrm - eps*eps);
+// 	typename std::vector<std::pair<I,C> >::iterator it(sv.begin());
+// 	do
+// 	  {
+// 	    coarsenorm += it->second * it->second;
+// 	    ++it;
+// 	  }
+// 	while ((it != sv.end()) && (coarsenorm < bound));
+// 	sv.erase(it, sv.end());
+
+// 	// insert relevant entries in v (-> insertion sort, we hope that
+// 	// the number of entries is neglectible)
+// 	for (unsigned int i(0); i < sv.size(); i++)
+// 	  v[sv[i].first] = sv[i].second;
+
+
   }
 }

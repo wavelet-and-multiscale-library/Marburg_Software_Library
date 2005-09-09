@@ -131,15 +131,15 @@ namespace WaveletTL
     
     // a brute force solution
     if (generators) {
+      Support supp;
       for (Index nu = first_generator(&basis, j);; ++nu) {
-	Support supp;
 	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
 	  intersecting.push_back(std::make_pair(nu, supp));
 	if (nu == last_generator(&basis, j)) break;
       }
     } else {
+      Support supp;
       for (Index nu = first_wavelet(&basis, j);; ++nu) {
-	Support supp;
 	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
 	  intersecting.push_back(std::make_pair(nu, supp));
 	if (nu == last_wavelet(&basis, j)) break;

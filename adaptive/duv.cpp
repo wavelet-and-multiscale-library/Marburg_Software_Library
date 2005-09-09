@@ -27,16 +27,17 @@ namespace WaveletTL
 
     double epsilon_k = nu;
     InfiniteVector<double,Index> f, rj, v, Av, Arj;
-    P.RHS(1e-6, f);
     while(epsilon_k > epsilon) {
       cout << "DUV_SOLVE: epsilon_k=" << epsilon_k << endl;
       v = u_epsilon;
       for (int j = 0; j < K; j++) {
+	cout << "size of current iterand j=" << j << ": " << v.size() << endl;
 	const double eta = pow(rho, (double)j) * epsilon_k;
-	APPLY(P, v, eta, Av);
+	P.RHS(eta, f);
+	APPLY_COARSE(P, v, eta, Av, 1.0);
 	rj = f - Av;
  	cout << "current residual error: " << l2_norm(rj) << endl;
-	APPLY(P, rj, eta/5.0, Arj);
+	APPLY_COARSE(P, rj, eta/5.0, Arj, 1.0);
 // 	cout << "rj * rj = " << rj * rj << endl;
 // 	cout << "rj * Arj = " << rj * Arj << endl;
 	const double alphaj = (rj * rj) / (rj * Arj);
@@ -44,6 +45,7 @@ namespace WaveletTL
 	v += alphaj * rj;
       }
       v.COARSE(2.0*epsilon_k/5.0, u_epsilon);
+//       u_epsilon = v;
       epsilon_k /= 2.0;
     }
   }

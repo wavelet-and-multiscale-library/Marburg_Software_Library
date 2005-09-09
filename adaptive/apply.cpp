@@ -29,7 +29,8 @@ namespace WaveletTL
       const double norm_v_sqr = l2_norm_sqr(v);
       const double norm_v = sqrt(norm_v_sqr);
       const double norm_A = P.norm_A();
-      const unsigned int q = (unsigned int) ceil(log(sqrt((double)v.size())*norm_v*norm_A*2/eta)/M_LN2);
+
+      const unsigned int q = (unsigned int) std::max(ceil(log(sqrt((double)v.size())*norm_v*norm_A*2/eta)/M_LN2), 0.);
       
 //       cout << "APPLY(): number of bins is q=" << q << endl;
 
@@ -106,7 +107,15 @@ namespace WaveletTL
 	if (check <= eta/2.0) break;
 	J++;
       }
+
 //       cout << "APPLY(): J=" << J << endl;
+//       unsigned int ncols = 0; k = 0;
+//       for (typename std::list<std::list<std::pair<Index, double> > >::const_iterator it(vks.begin());
+// 	   k <= ell; ++it, ++k)
+// 	for (typename std::list<std::pair<Index, double> >::const_iterator itk(it->begin());
+// 	     itk != it->end(); ++itk)
+// 	  ncols++;
+//       cout << "APPLY(): number of active columns: " << ncols << endl;
 
       // compute w = \sum_{k=0}^\ell A_{J-k}v_{[k]}
       k = 0;

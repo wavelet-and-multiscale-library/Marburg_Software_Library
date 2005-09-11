@@ -38,7 +38,7 @@ namespace WaveletTL
       SVD,          // method #2 in IGPMlib, Gamma_L = U*S*V, C_L = S^{-1/2}U^T, C_L_T = S^{-1/2}V
       Bernstein,    // method #3 in IGPMlib, transformation to Bernstein basis on [0,b]
       partialSVD,   // method #4 in IGPMlib, partial SVD
-      BernsteinSVD  // method #5 in IGPMlib, transformation to Bernstein basis plus partial SVD
+      BernsteinSVD  // method #5 in IGPMlib, transformation to Bernstein basis plus SVD
     };
 
   /*!
@@ -72,14 +72,14 @@ namespace WaveletTL
       The default basis is the original [DKU] construction without any boundary conditions.
     */
     DSBasis(const int s0 = 0, const int s1 = 0, const int sT0 = 0, const int sT1 = 0,
-	    DSBiorthogonalizationMethod bio = SVD);
+	    DSBiorthogonalizationMethod bio = Bernstein);
 
     /*!
       alternative constructor, you can specify whether first order homogeneous Dirichlet b.c.'s
       for the primal functions are set or not. The dual functions have free b.c.'s.
     */
     DSBasis(bool bc_left, bool bc_right,
-	    DSBiorthogonalizationMethod bio = SVD);
+	    DSBiorthogonalizationMethod bio = Bernstein);
 
     //! freezing parameters, (4.11)
     inline const int ellT_l() const { return ell2T<d,dT>() + s0 + sT0; }

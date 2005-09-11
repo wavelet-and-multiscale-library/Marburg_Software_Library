@@ -640,40 +640,40 @@ namespace WaveletTL
       CRT.compress(1e-14);
     }
     
-//     if (bio == Bernstein) {
-//       double b(0);
-//       if (d == 2)
-//  	b = 0.7; // cf. [DKU]
-//       else {
-//  	b = 3.6;
-//       }
-      
-//       // CL : transformation to Bernstein polynomials (triangular)
-//       //   (Z_b^m)_{r,l} = (-1)^{r-1}\binom{m-1}{r}\binom{r}{l}b^{-r}, r>=l, 0 otherwise
-//       for (int j(0); j < d; j++)
-//  	for (int k(0); k <= j; k++)
-//  	  CL_(k, j) = minus1power(j-k) * std::pow(b, -j) * binomial(d-1, j) * binomial(j, k);
-//       for (int j(d); j < lupT-llowT+1; j++)
-//  	CL_(j, j) = 1.0;
-      
-//       Matrix<double> CLGammaLInv;
-//       QUDecomposition<double>(CL_ * GammaL_).inverse(CLGammaLInv);
-//       CLT_ = transpose(CLGammaLInv);
-      
-//       CLT_.compress(1e-14);
+    if (bio == Bernstein) {
+      double b(0);
+      if (d == 2)
+	b = 0.7; // cf. [DKU]
+      else
+	b = 3.7;
 
-//       for (int j(0); j < d; j++)
-// 	for (int k(0); k <= j; k++)
-// 	  CR_(k, j) = minus1power(j-k) * std::pow(b, -j) * binomial(d-1, j) * binomial(j, k);
-//       for (int j(d); j < rlowTh-rupTh+1; j++)
-// 	CR_(j, j) = 1.0;
-      
-//       Matrix<double> CRGammaRInv;
-//       QUDecomposition<double>(CR_ * GammaR_).inverse(CRGammaRInv);
-//       CRT_ = transpose(CRGammaRInv);
-      
-//       CRT_.compress(1e-14);
-//     }
+      // CL corresponds to a transformation from the monomials to the Bernstein
+      // polynomials on [0,b]
+      //   P_r(x) = b^{-d+1} \binomial{d-1}{r} x^r (b-x)^{d-1-r}, r=0,...,d-1
+      //          = b^{-d+1} \binomial{d-1}{r} x^r \sum_{j=0}^{d-1-r}\binom{d-1-r}{j} b^{d-1-r-j} (-1)^j x^j
+      //          = \binomial{d-1}{r} \sum_{j=0}^{d-1-r} \binomial{d-1-r}{j} b^{-r-j} (-1)^j x^{j+r}
+      //          = \binomial{d-1}{r} \sum_{s=r}^{d-1} \binomial{d-1-r}{s-r} b^{-s} (-1)^{s-r} x^s
+      //          = \sum_{s=0}^{d-1} z_{r,s} x^s,
+      // i.e. the matrix Z of the z_{r,s} is upper triangular.
+
+      CL.diagonal(GammaL.row_dimension(), 1.0);
+      for (unsigned int j = s0; j < d; j++)
+	for (unsigned int k = s0; k <= j; k++)
+	  CL(k-s0, j-s0) = minus1power(j-k) * std::pow(b, -(int)j) * binomial(d-1, k) * binomial(d-1-k, j-k);
+      Matrix<double> CLGammaLInv;
+      QUDecomposition<double>(CL * GammaL).inverse(CLGammaLInv);
+      CLT = transpose(CLGammaLInv);
+      CLT.compress(1e-14);
+
+      CR.diagonal(GammaR.row_dimension(), 1.0);
+      for (unsigned int j = s1; j < d; j++)
+	for (unsigned int k = s1; k <= j; k++)
+	  CR(k-s1, j-s1) = minus1power(j-k) * std::pow(b, -(int)j) * binomial(d-1, k) * binomial(d-1-k, j-k);
+            Matrix<double> CRGammaRInv;
+      QUDecomposition<double>(CR * GammaR).inverse(CRGammaRInv);
+      CRT = transpose(CRGammaRInv);
+      CRT.compress(1e-14);
+    }
     
     if (bio == partialSVD) {
       MathTL::SVD<double> svd(GammaL);
@@ -729,96 +729,61 @@ namespace WaveletTL
       CRT.compress(1e-14);
     }
 
-//     if (bio_ == BernsteinSVD) {
-//       double b(0);
-//       if (d == 2)
-// 	b = 0.7; // cf. [DKU]
-//       else {
-// 	b = 3.6;
-//       }
+    if (bio == BernsteinSVD) {
+      double b(0);
+      if (d == 2)
+	b = 0.7; // cf. [DKU]
+      else
+	b = 3.7;
       
-//       // CL_ : transformation to Bernstein polynomials (triangular)
-//       //   (Z_b^m)_{r,l} = (-1)^{r-1}\binom{m-1}{r}\binom{r}{l}b^{-r}, r>=l, 0 otherwise
-//       for (int j(0); j < d; j++)
-// 	for (int k(0); k <= j; k++)
-// 	  CL_(k, j) = minus1power(j-k) * std::pow(b, -j) * binomial(d-1, j) * binomial(j, k);
-//       for (int j(d); j < lupT-llowT+1; j++)
-// 	CL_(j, j) = 1.0;
-      
-//       Matrix<double> GammaLNew(CL_ * GammaL_);
-      
-//       MathTL::SVD<double> svd(GammaLNew);
-//       Matrix<double> U, V;
-//       Vector<double> S;
-//       svd.getU(U);
-//       svd.getV(V);
-//       svd.getS(S);
-      
-//       Matrix<double> GammaLNewInv;
-//       QUDecomposition<double>(GammaLNew).inverse(GammaLNewInv);
-//       const double a = 1.0 / GammaLNewInv(0, 0);
-      
-//       Matrix<double> R(lupT-llowT+1, lupT-llowT+1);
-//       for (int i(0); i < lupT-llowT+1; i++)
-// 	S[i] = sqrt(S[i]);
-//       for (int j(0); j < lupT-llowT+1; j++)
-// 	R(0, j) = a * V(0, j) / S[j];
-//       for (int i(1); i < lupT-llowT+1; i++)
-// 	for (int j(0); j < lupT-llowT+1; j++)
-// 	  R(i, j) = U(j, i) * S[j];
-      
-//       for (int i(0); i < lupT-llowT+1; i++)
-// 	for (int j(0); j < lupT-llowT+1; j++)
-// 	  U(i, j) /= S[i];
-//       CL_ = R*U*CL_;
-      
-//       CL_.compress(1e-14);
+      // CL firstly corresponds to a transformation from the monomials to the Bernstein,
+      // see above for details
 
-//       Matrix<double> CLGammaLInv;
-//       QUDecomposition<double>(CL_ * GammaL_).inverse(CLGammaLInv);
-//       CLT_ = transpose(CLGammaLInv);
+      CL.diagonal(GammaL.row_dimension(), 1.0);
+      for (unsigned int j = s0; j < d; j++)
+	for (unsigned int k = s0; k <= j; k++)
+	  CL(k-s0, j-s0) = minus1power(j-k) * std::pow(b, -(int)j) * binomial(d-1, k) * binomial(d-1-k, j-k);
 
-//       CLT_.compress(1e-14);
-
-//       for (int j(0); j < d; j++)
-// 	for (int k(0); k <= j; k++)
-// 	  CR_(k, j) = minus1power(j-k) * std::pow(b, -j) * binomial(d-1, j) * binomial(j, k);
-//       for (int j(d); j < rlowTh-rupTh+1; j++)
-// 	CR_(j, j) = 1.0;
-
-//       Matrix<double> GammaRNew(CR_ * GammaR_);
+      Matrix<double> GammaLNew(CL * GammaL);
+      MathTL::SVD<double> svd(GammaLNew);
+      Matrix<double> U, V;
+      Vector<double> S;
+      svd.getU(U);
+      svd.getV(V);
+      svd.getS(S);
       
-//       MathTL::SVD<double> svd_r(GammaRNew);
-//       svd_r.getU(U);
-//       svd_r.getV(V);
-//       svd_r.getS(S);
+      for (unsigned int i = 0; i < GammaL.row_dimension(); i++) {
+ 	S[i] = 1.0 / sqrt(S[i]);
+ 	for (unsigned int j = 0; j < GammaL.row_dimension(); j++)
+ 	  CL(i, j)  = S[i] * U(j, i);
+      }
+      CL.compress(1e-14);
+      Matrix<double> CLGammaLInv;
+      QUDecomposition<double>(CL * GammaL).inverse(CLGammaLInv);
+      CLT = transpose(CLGammaLInv);
+      CLT.compress(1e-14);
 
-//       Matrix<double> GammaRNewInv;
-//       QUDecomposition<double>(GammaRNew).inverse(GammaRNewInv);
-//       const double a_r = 1.0 / GammaRNewInv(0, 0);
-      
-//       R.resize(rlowTh-rupTh+1,rlowTh-rupTh+1);
-//       for (int i(0); i < rlowTh-rupTh+1; i++)
-// 	S[i] = sqrt(S[i]);
-//       for (int j(0); j < rlowTh-rupTh+1; j++)
-// 	R(0, j) = a_r * V(0, j) / S[j];
-//       for (int i(1); i < rlowTh-rupTh+1; i++)
-// 	for (int j(0); j < rlowTh-rupTh+1; j++)
-// 	  R(i, j) = U(j, i) * S[j];
-      
-//       for (int i(0); i < rlowTh-rupTh+1; i++)
-// 	for (int j(0); j < rlowTh-rupTh+1; j++)
-// 	  U(i, j) /= S[i];
-//       CR_ = R*U*CR_;
+      CR.diagonal(GammaR.row_dimension(), 1.0);
+      for (unsigned int j = s1; j < d; j++)
+	for (unsigned int k = s1; k <= j; k++)
+	  CR(k-s1, j-s1) = minus1power(j-k) * std::pow(b, -(int)j) * binomial(d-1, k) * binomial(d-1-k, j-k);
 
-//       CR_.compress(1e-14);
-
-//       Matrix<double> CRGammaRInv;
-//       QUDecomposition<double>(CR_ * GammaR_).inverse(CRGammaRInv);
-//       CRT_ = transpose(CRGammaRInv);
-
-//       CRT_.compress(1e-14);
-//     }
+      Matrix<double> GammaRNew(CR * GammaR);
+      MathTL::SVD<double> svd_r(GammaRNew);
+      svd_r.getU(U);
+      svd_r.getV(V);
+      svd_r.getS(S);
+      for (unsigned int i = 0; i < GammaR.row_dimension(); i++) {
+ 	S[i] = 1.0 / sqrt(S[i]);
+ 	for (unsigned int j = 0; j < GammaR.row_dimension(); j++)
+ 	  CR(i, j)  = S[i] * U(j, i);
+      }
+      CR.compress(1e-14);
+      Matrix<double> CRGammaRInv;
+      QUDecomposition<double>(CR * GammaR).inverse(CRGammaRInv);
+      CRT = transpose(CRGammaRInv);      
+      CRT.compress(1e-14);
+    }
     
 #if 0
     // check biorthogonality of the matrix product CL * GammaL * (CLT)^T

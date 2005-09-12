@@ -653,13 +653,14 @@ namespace WaveletTL
       //          = b^{-d+1} \binomial{d-1}{r} x^r \sum_{j=0}^{d-1-r}\binom{d-1-r}{j} b^{d-1-r-j} (-1)^j x^j
       //          = \binomial{d-1}{r} \sum_{j=0}^{d-1-r} \binomial{d-1-r}{j} b^{-r-j} (-1)^j x^{j+r}
       //          = \binomial{d-1}{r} \sum_{s=r}^{d-1} \binomial{d-1-r}{s-r} b^{-s} (-1)^{s-r} x^s
+      //          = \sum_{s=r}^{d-1} \binomial{d-1}{s} \binomial{s}{r} b^{-s} (-1)^{s-r} x^s
       //          = \sum_{s=0}^{d-1} z_{r,s} x^s,
       // i.e. the matrix Z of the z_{r,s} is upper triangular.
 
       CL.diagonal(GammaL.row_dimension(), 1.0);
       for (unsigned int j = s0; j < d; j++)
 	for (unsigned int k = s0; k <= j; k++)
-	  CL(k-s0, j-s0) = minus1power(j-k) * std::pow(b, -(int)j) * binomial(d-1, k) * binomial(d-1-k, j-k);
+	  CL(k-s0, j-s0) = minus1power(j-k) * std::pow(b, -(int)j) * binomial(d-1, j) * binomial(j, k);
       Matrix<double> CLGammaLInv;
       QUDecomposition<double>(CL * GammaL).inverse(CLGammaLInv);
       CLT = transpose(CLGammaLInv);
@@ -668,8 +669,8 @@ namespace WaveletTL
       CR.diagonal(GammaR.row_dimension(), 1.0);
       for (unsigned int j = s1; j < d; j++)
 	for (unsigned int k = s1; k <= j; k++)
-	  CR(k-s1, j-s1) = minus1power(j-k) * std::pow(b, -(int)j) * binomial(d-1, k) * binomial(d-1-k, j-k);
-            Matrix<double> CRGammaRInv;
+	  CR(k-s1, j-s1) = minus1power(j-k) * std::pow(b, -(int)j) * binomial(d-1, j) * binomial(j, k);
+      Matrix<double> CRGammaRInv;
       QUDecomposition<double>(CR * GammaR).inverse(CRGammaRInv);
       CRT = transpose(CRGammaRInv);
       CRT.compress(1e-14);
@@ -742,7 +743,7 @@ namespace WaveletTL
       CL.diagonal(GammaL.row_dimension(), 1.0);
       for (unsigned int j = s0; j < d; j++)
 	for (unsigned int k = s0; k <= j; k++)
-	  CL(k-s0, j-s0) = minus1power(j-k) * std::pow(b, -(int)j) * binomial(d-1, k) * binomial(d-1-k, j-k);
+	  CL(k-s0, j-s0) = minus1power(j-k) * std::pow(b, -(int)j) * binomial(d-1, j) * binomial(j, k);
 
       Matrix<double> GammaLNew(CL * GammaL);
       MathTL::SVD<double> svd(GammaLNew);
@@ -766,7 +767,7 @@ namespace WaveletTL
       CR.diagonal(GammaR.row_dimension(), 1.0);
       for (unsigned int j = s1; j < d; j++)
 	for (unsigned int k = s1; k <= j; k++)
-	  CR(k-s1, j-s1) = minus1power(j-k) * std::pow(b, -(int)j) * binomial(d-1, k) * binomial(d-1-k, j-k);
+	  CR(k-s1, j-s1) = minus1power(j-k) * std::pow(b, -(int)j) * binomial(d-1, j) * binomial(j, k);
 
       Matrix<double> GammaRNew(CR * GammaR);
       MathTL::SVD<double> svd_r(GammaRNew);

@@ -49,7 +49,7 @@ namespace WaveletTL
     for (typename InfiniteVector<double,Index>::const_iterator it(fhelp.begin()), itend(fhelp.end());
 	 it != itend; ++it, ++id)
       fcoeffs[id] = std::pair<Index,double>(it.index(), *it);
-    sort(fcoeffs.begin(), fcoeffs.end(), InfiniteVector<double,Index>::decreasing_order());
+    sort(fcoeffs.begin(), fcoeffs.end(), typename InfiniteVector<double,Index>::decreasing_order());
   }
 
   template <class WBASIS>

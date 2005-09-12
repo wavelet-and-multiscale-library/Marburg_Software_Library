@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <set>
 #include <iostream>
 #include <algebra/infinite_vector.h>
 
@@ -105,6 +106,23 @@ int main()
   cout << "- another vector v:" << endl << v;
   v.compress(1e-2);
   cout << "- compressing with eta=1e-2:" << endl << v;
+
+  v.clear();
+  v[0] = 123;
+  v[2] = 345;
+  v[4] = -678;
+  cout << "- another vector v:" << endl << v;
+  std::set<int> supp;
+  v.support(supp);
+  cout << "- v has the support" << endl;
+  for (std::set<int>::const_iterator it = supp.begin(); it != supp.end(); ++it)
+    cout << *it << endl;
+  std::set<int> Lambda;
+  Lambda.insert(2);
+  Lambda.insert(0);
+  Lambda.insert(-1);
+  v.clip(Lambda);
+  cout << "- v clipped to an index set:" << endl << v;
 
   return 0;
 }

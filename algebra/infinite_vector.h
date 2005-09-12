@@ -10,6 +10,7 @@
 #ifndef _MATHTL_INFINITE_VECTOR_H
 #define _MATHTL_INFINITE_VECTOR_H
 
+#include <set>
 #include <map>
 #include <algorithm>
 #include <iterator>
@@ -229,6 +230,16 @@ namespace MathTL
       number of nonzero entries
     */
     size_t size() const;
+
+    /*!
+      return support of the current vector as a set
+    */
+    void support(std::set<I>& supp) const;
+    
+    /*!
+      clip the infinite vector to a given support set
+    */
+    void clip(const std::set<I>& supp);
 
     /*!
       set all values with modulus strictly below a threshold to zero

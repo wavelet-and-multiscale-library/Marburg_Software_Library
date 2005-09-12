@@ -115,6 +115,33 @@ namespace MathTL
   }
 
   template <class C, class I>
+  void
+  InfiniteVector<C,I>::support(std::set<I>& supp) const
+  {
+    supp.clear();
+    for (const_iterator it(begin()), itend(end()); it != itend; ++it)
+      supp.insert(supp.end(), it.index());
+  }
+
+  template <class C, class I>
+  void
+  InfiniteVector<C,I>::clip(const std::set<I>& supp)
+  {
+    std::map<I,C> v;
+
+    const_iterator it(begin()), itend(end());
+    typename std::set<I>::const_iterator suppit(supp.begin()), suppend(supp.end());
+    for (; it != itend && suppit != suppend; ++it)
+      {
+	while (suppit != suppend && *suppit < it.index()) ++suppit;
+	if (*suppit == it.index())
+	  v.insert(v.end(), std::pair<I,C>(it.index(), *it));
+      }
+
+    std::map<I,C>::swap(v);
+  }
+
+  template <class C, class I>
   void InfiniteVector<C,I>::compress(const double eta)
   {
     // a hardcore STL implementation inspired by Meyers, Effective STL:

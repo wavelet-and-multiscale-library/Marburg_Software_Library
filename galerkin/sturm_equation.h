@@ -133,7 +133,7 @@ namespace WaveletTL
         ||A-A_k|| <= alpha_k * 2^{-s*k}
     */
     double alphak(const unsigned int k) const {
-      return 10.0; // first quick hack, estimate the constants!
+      return 2*norm_A(); // suboptimal
     }
 
     /*!
@@ -164,6 +164,11 @@ namespace WaveletTL
       within a prescribed \ell_2 error tolerance
     */
     void RHS(const double eta, InfiniteVector<double, typename WBASIS::Index>& coeffs) const;
+
+    /*!
+      compute (or estimate) ||F||_2
+    */
+    double F_norm() const { return sqrt(fnorm_sqr); }
 
   protected:
     const simpleSturmBVP& bvp_;

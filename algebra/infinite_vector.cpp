@@ -309,20 +309,19 @@ namespace MathTL
     // in a later stage of the library!
 
     v.clear();
-    if (size() > 0)
-      {
+    if (size() > 0) {
+      if (eps == 0)
+	v = *this;
+      else {
 	// prepare vector to be sorted
 	std::vector<std::pair<I,C> > sv(size());
 	unsigned int id(0);
-	for (const_iterator it(begin()), itend(end());
-	     it != itend; ++it, ++id)
-	  {
-	    sv[id] = std::pair<I,C>(it.index(), *it); // can't use make_pair for gcc 2.95
-	  }
-	  
+	for (const_iterator it(begin()), itend(end()); it != itend; ++it, ++id)
+	  sv[id] = std::pair<I,C>(it.index(), *it); // can't use make_pair for gcc 2.95
+	
 	// sort vector (Introsort, O(N*log N))
 	sort(sv.begin(), sv.end(), decreasing_order());
-
+	
 	// insert largest in modulus entries until tolerance is reached
 	double coarsenorm(0);
 	double nrm(l2_norm(*this));
@@ -339,8 +338,9 @@ namespace MathTL
 	// insert relevant entries in v (-> insertion sort, we hope that
 	// the number of entries is neglectible)
 	for (unsigned int i(0); i < sv.size(); i++)
-	  v[sv[i].first] = sv[i].second;
+	  v.set_coefficient(sv[i].first, sv[i].second);
       }
+    }
   }
 
   template <class C, class I>

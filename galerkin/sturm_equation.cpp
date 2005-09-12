@@ -18,7 +18,7 @@ namespace WaveletTL
     typedef typename WBASIS::Index Index;
     std::set<Index> Lambda;
     const int j0 = basis_.j0();
-    const int jmax = 10;
+    int jmax = 8;
     for (Index lambda = first_generator(&basis_, j0);; ++lambda) {
       Lambda.insert(lambda);
       if (lambda == last_wavelet(&basis_, jmax)) break;
@@ -37,12 +37,17 @@ namespace WaveletTL
 
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
+    jmax = 12;
     for (Index lambda(first_generator(&basis_, j0));; ++lambda)
       {
-	fhelp.set_coefficient(lambda, f(lambda)/D(lambda));
+	const double coeff = f(lambda)/D(lambda);
+	if (fabs(coeff)>1e-15)
+	  fhelp.set_coefficient(lambda, coeff);
   	if (lambda == last_wavelet(&basis_, jmax))
 	  break;
       }
+    fnorm_sqr = l2_norm_sqr(fhelp);
+
     // sort the coefficients into fcoeffs
     fcoeffs.resize(fhelp.size());
     unsigned int id(0);
@@ -207,7 +212,8 @@ namespace WaveletTL
   SturmEquation<WBASIS>::add_column(const double factor,
 				    const typename WBASIS::Index& lambda,
 				    const int J,
-				    InfiniteVector<double, typename WBASIS::Index>& w) const
+				    InfiniteVector<double, typename WBASIS::Index>& w,
+				    const int jmax) const
   {
 #ifdef _WAVELETTL_STURM_EQUATION_CACHE
     // check whether the corresponding column already exists, create it if necessary
@@ -245,8 +251,7 @@ namespace WaveletTL
 
     // wavelet blocks
     for (level = std::max(basis_.j0(), lambda.j()-J);
-//       	 level <= lambda.j()+J; level++) {
-	 level <= 10; level++) {
+	 level <= std::min(lambda.j()+J, jmax); level++) {
 #ifdef _WAVELETTL_STURM_EQUATION_CACHE
       col_block_it_lb = col.lower_bound(level);
       col_block_it    = col_block_it_lb;
@@ -357,26 +362,15 @@ namespace WaveletTL
   SturmEquation<WBASIS>::RHS(const double eta,
 			     InfiniteVector<double, typename WBASIS::Index>& coeffs) const
   {
-//     fcoeffs.COARSE(eta, coeffs);
-
-
-// 	double coarsenorm(0);
-// 	double nrm(l2_norm(*this));
-// 	double bound(nrm*nrm - eps*eps);
-// 	typename std::vector<std::pair<I,C> >::iterator it(sv.begin());
-// 	do
-// 	  {
-// 	    coarsenorm += it->second * it->second;
-// 	    ++it;
-// 	  }
-// 	while ((it != sv.end()) && (coarsenorm < bound));
-// 	sv.erase(it, sv.end());
-
-// 	// insert relevant entries in v (-> insertion sort, we hope that
-// 	// the number of entries is neglectible)
-// 	for (unsigned int i(0); i < sv.size(); i++)
-// 	  v[sv[i].first] = sv[i].second;
-
-
+    coeffs.clear();
+    double coarsenorm(0);
+    double bound(fnorm_sqr - eta*eta);
+    typedef typename WBASIS::Index Index;
+    typename Array1D<std::pair<Index, double> >::const_iterator it(fcoeffs.begin());
+    do {
+      coarsenorm += it->second * it->second;
+      coeffs.set_coefficient(it->first, it->second);
+      ++it;
+    } while (it != fcoeffs.end() && coarsenorm < bound);
   }
 }

@@ -57,6 +57,8 @@ namespace WaveletTL
     An example of the template parameter PROBLEM is the template class
     SturmEquation<WBASIS>.
 
+    The action of APPLY can be restricted to entries below a maximal scale jmax.
+
     References:
     [B]    Barinka:
            Fast Computation Tools for Adaptive Wavelet Schemes
@@ -71,7 +73,8 @@ namespace WaveletTL
   void APPLY(const PROBLEM& P,
 	     const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
 	     const double eta,
-	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& w);
+	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& w,
+	     const int jmax = 99);
 
   /*!
     APPLY with successive COARSE
@@ -81,10 +84,11 @@ namespace WaveletTL
 		    const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
 		    const double eta,
 		    InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& w,
-		    const double lambda = 0.5)
+		    const double lambda = 0.5,
+		    const int jmax = 99)
   {
     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index> help;
-    APPLY(P, v, lambda*eta, help);
+    APPLY(P, v, lambda*eta, help, jmax);
     help.COARSE((1-lambda)*eta, w);
   }
 }

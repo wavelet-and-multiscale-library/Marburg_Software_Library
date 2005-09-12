@@ -80,14 +80,14 @@ int main()
   TestProblem<1> T;
 
   const int d  = 2;
-  const int dT = 2;
+  const int dT = 4;
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
   SturmEquation<Basis> problem(T);
 
   InfiniteVector<double, Index> F_eta;
-  problem.RHS(1e-3, F_eta);
+  problem.RHS(1e-6, F_eta);
   const double nu = problem.norm_Ainv() * l2_norm(F_eta);
 
   InfiniteVector<double, Index> u_epsilon;

@@ -138,13 +138,15 @@ namespace WaveletTL
 
     /*!
       add (a constant multiple of) the lambda-th column of A to a working coefficient set w,
-      applying the J-th truncation rule from [CDD1, Prop. 3.4]
+      applying the J-th truncation rule from [CDD1, Prop. 3.4],
+      you can also choose a fixed maximal level j_max
       (for the APPLY routine)
     */
     void add_column(const double factor,
 		    const typename WBASIS::Index& lambda,
 		    const int J,
-		    InfiniteVector<double, typename WBASIS::Index>& w) const;
+		    InfiniteVector<double, typename WBASIS::Index>& w,
+		    const int jmax = 999) const;
     
     /*!
       evaluate the (unpreconditioned) right-hand side f
@@ -170,6 +172,9 @@ namespace WaveletTL
 
     // right-hand side coefficients on a fine level, sorted by modulus
     Array1D<std::pair<typename WBASIS::Index,double> > fcoeffs;
+
+    // \ell_2 norm of the precomputed right-hand side
+    double fnorm_sqr;
     
     // type of one block in a given column of A
     typedef struct {

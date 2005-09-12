@@ -25,7 +25,8 @@ namespace WaveletTL
     cout << "CDD2_SOLVE: rho=" << rho << endl;
     
     // desired error reduction factor theta < 1/3
-    const double theta = 2.0/7.0;
+//     const double theta = 2.0/7.0;
+    const double theta = 0.333;
     cout << "CDD2_SOLVE: theta=" << theta << endl;
 
     // compute minimal K such that 3*rho^K < theta
@@ -36,15 +37,13 @@ namespace WaveletTL
 
     double epsilon_k = nu;
     InfiniteVector<double,Index> f, v, Av;
-    P.RHS(1e-6, f);
     while (epsilon_k > epsilon) {
       epsilon_k *= 3*pow(rho, K) / theta;
       cout << "CDD2_SOLVE: epsilon_k=" << epsilon_k << endl;
       const double eta = theta * epsilon_k / (6*omega*K);
-//       P.RHS(eta, f);
+      P.RHS(eta, f);
       v = u_epsilon;
       for (int j = 1; j <= K; j++) {
-  	v.compress(1e-5);
 	APPLY(P, v, eta, Av);
 	cout << "current residual error ||f-Av||=" << l2_norm(f - Av) << endl;
 	v += omega * (f - Av);

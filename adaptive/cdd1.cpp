@@ -94,15 +94,16 @@ namespace WaveletTL
     unsigned int k = 0;
     GALERKIN(P, params, F, Lambda_k, v, delta, params.q3*delta/params.c2, u_Lambda_k, jmax);
     while (true) {
+      cout << "NPROG: k=" << k << " (K=" << params.K << ")" << endl;
       NGROW(P, params, F, Lambda_k, u_Lambda_k, params.q1*delta, params.q2*delta, Lambda_kplus1, r_hat, jmax);
-      if (l2_norm(r_hat) <= params.c1*delta/20 || k == params.K) {
+      if (l2_norm(r_hat) <= params.c1*delta/20 || k == params.K || Lambda_k.size() == Lambda_kplus1.size()) {
 	u_Lambda_k.COARSE(2*delta/5, v_hat);
 	v_hat.support(Lambda_hat);
 	break;
       }
       GALERKIN(P, params, F, Lambda_kplus1, u_Lambda_k, params.q0*delta, params.q3*delta/params.c2, v_hat, jmax);
-      u_Lambda_k.swap(v_hat);
-      Lambda_k.swap(Lambda_kplus1);
+      u_Lambda_k = v_hat;
+      Lambda_k = Lambda_kplus1;
       k++;
     }
   }
@@ -193,14 +194,17 @@ namespace WaveletTL
     r.COARSE(sqrt(1-params.gamma*params.gamma)*residual_norm, pr);
     pr.support(Lambda_c);
     Lambda_tilde.clear();
-    cout << "* in NGROW, size of Lambda is " << Lambda.size() << ", size of Lambda_c is " << Lambda_c.size() << endl;
+    const unsigned int Lambdasize = Lambda.size();
+    const unsigned int Lambdacsize = Lambda_c.size();
+    cout << "* in NGROW, size of old index set Lambda is " << Lambdasize << ", size of increment set Lambda_c is " << Lambdacsize << endl;
     std::set_union(Lambda.begin(), Lambda.end(),
 		   Lambda_c.begin(), Lambda_c.end(),
-		   inserter(Lambda_tilde, Lambda_tilde.begin()));
+		   inserter(Lambda_tilde, Lambda_tilde.end()));
     cout << "... NGROW done, size of new index set: " << Lambda_tilde.size() << endl;
   }
 
   template <class PROBLEM>
+  inline
   void INRESIDUAL(const PROBLEM& P, const CDD1Parameters& params,
 		  const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& F,
 		  const set<typename PROBLEM::WaveletBasis::Index>& Lambda,
@@ -223,6 +227,7 @@ namespace WaveletTL
   }
 
   template <class PROBLEM>
+  inline
   void NRESIDUAL(const PROBLEM& P, const CDD1Parameters& params,
 		 const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& F,
 		 const set<typename PROBLEM::WaveletBasis::Index>& Lambda,

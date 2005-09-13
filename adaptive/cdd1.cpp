@@ -66,12 +66,12 @@ namespace WaveletTL
       NPROG(P, params, F, Lambda, u_epsilon, delta, v_hat, Lambda_hat, r_hat, u_bar, jmax);
       if (l2_norm(r_hat)+(params.q1+params.q2+(1+1/params.kappa)*params.q3)*delta <= params.c1*epsilon)
 	{
-	  u_epsilon = u_bar;
+	  u_epsilon.swap(u_bar);
 	  break;
 	}
       else
 	{
-	  u_epsilon = v_hat;
+	  u_epsilon.swap(v_hat);
 	}
       delta *= 0.5;
     }
@@ -102,8 +102,8 @@ namespace WaveletTL
 	break;
       }
       GALERKIN(P, params, F, Lambda_kplus1, u_Lambda_k, params.q0*delta, params.q3*delta/params.c2, v_hat, jmax);
-      u_Lambda_k = v_hat;
-      Lambda_k = Lambda_kplus1;
+      u_Lambda_k.swap(v_hat);
+      Lambda_k.swap(Lambda_kplus1);
       k++;
     }
   }
@@ -204,7 +204,6 @@ namespace WaveletTL
   }
 
   template <class PROBLEM>
-  inline
   void INRESIDUAL(const PROBLEM& P, const CDD1Parameters& params,
 		  const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& F,
 		  const set<typename PROBLEM::WaveletBasis::Index>& Lambda,
@@ -227,7 +226,6 @@ namespace WaveletTL
   }
 
   template <class PROBLEM>
-  inline
   void NRESIDUAL(const PROBLEM& P, const CDD1Parameters& params,
 		 const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& F,
 		 const set<typename PROBLEM::WaveletBasis::Index>& Lambda,

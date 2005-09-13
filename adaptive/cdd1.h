@@ -28,6 +28,8 @@ namespace WaveletTL
     
       ||u-u_epsilon|| <= epsilon.
 
+    You can specify a maximal level jmax for the internal APPLY calls.
+
     References:
     [BB+]  Barinka/Barsch/Charton/Cohen/Dahlke/Dahmen/Urban:
            Adaptive Wavelet Schemes For Elliptic Problems: Implementation and Numerical Experiments
@@ -40,7 +42,8 @@ namespace WaveletTL
    */
   template <class PROBLEM>
   void CDD1_SOLVE(const PROBLEM& P, const double epsilon,
-		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon);
+		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
+		  const int jmax = 99);
 
   /*!
     the parameters chosen or computed in the INIT phase of ALGORITHMc
@@ -73,14 +76,15 @@ namespace WaveletTL
 	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v_hat,
 	     set<typename PROBLEM::WaveletBasis::Index>& Lambda_hat,
 	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r_hat,
-	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_Lambda_k);
+	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_Lambda_k,
+	     const int jmax = 99);
 
   /*!
     GALERKIN:
     Given an approximation v to the exact Galerkin solution u_Lambda of Au = F w.r.t. the
     index set Lambda, such that ||u_Lambda-v||_2 <= delta, and a target accuracy eta,
-    compute an approximation ubar to u_Lambda which is supported on Lambda and satisfies
-    ||ubar-u_Lambda||_2 <= eta.
+    compute an approximation u_bar to u_Lambda which is supported on Lambda and satisfies
+    ||u_bar-u_Lambda||_2 <= eta.
   */
   template <class PROBLEM>
   void GALERKIN(const PROBLEM& P, const CDD1Parameters& params,
@@ -89,7 +93,8 @@ namespace WaveletTL
  		const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
  		const double delta,
 		const double eta,
- 		InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& ubar);
+ 		InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& ubar,
+		const int jmax = 99);
 
   /*!
     NGROW:
@@ -107,7 +112,8 @@ namespace WaveletTL
  	     const double xi1,
  	     const double xi2,
  	     set<typename PROBLEM::WaveletBasis::Index>& Lambda_tilde,
- 	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r);
+ 	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r,
+	     const int jmax = 99);
 
   /*!
     INRESIDUAL:
@@ -122,7 +128,8 @@ namespace WaveletTL
 		  const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
 		  const double eta1,
 		  const double eta2,
-		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r);
+		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r,
+		  const int jmax = 99);
 
   /*!
     NRESIDUAL:
@@ -140,7 +147,9 @@ namespace WaveletTL
 		 const double eta1,
 		 const double eta2,
 		 InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r,
-		 set<typename PROBLEM::WaveletBasis::Index>& Lambda_tilde);
+		 set<typename PROBLEM::WaveletBasis::Index>& Lambda_tilde,
+		 const int jmax = 99);
+  
 }
 
 #include <adaptive/cdd1.cpp>

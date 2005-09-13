@@ -4,15 +4,22 @@
 #include <set>
 #include <algorithm>
 
+#include <algebra/sparse_matrix.h>
+#include <algebra/vector.h>
+#include <numerics/iteratsolv.h>
 #include <adaptive/apply.h>
 
 using std::set;
+using MathTL::SparseMatrix;
+using MathTL::Vector;
+using MathTL::CG;
 
 namespace WaveletTL
 {
   template <class PROBLEM>
   void CDD1_SOLVE(const PROBLEM& P, const double epsilon,
-		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon)
+		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
+		  const int jmax)
   {
     // INIT, cf. [BB+] 
 
@@ -21,7 +28,7 @@ namespace WaveletTL
     params.c1 = 1.0/P.norm_Ainv();
     params.c2 = P.norm_A();
     params.kappa = params.c2/params.c1;
-    params.gamma = 0.9;
+    params.gamma = 0.8;
     params.F = P.F_norm();
 
     // determination of q=q1=q2=q3,q4 according to [CDD1, (7.23)ff]
@@ -56,7 +63,7 @@ namespace WaveletTL
     P.RHS(2*params.q2*epsilon, F);
     while (delta > sqrt(params.c1)*epsilon) { // check the additional factor c1^{1/2} in [BB+] !?
       cout << "CDD1_SOLVE: delta=" << delta << endl;
-      NPROG(P, params, F, Lambda, u_epsilon, delta, v_hat, Lambda_hat, r_hat, u_bar);
+      NPROG(P, params, F, Lambda, u_epsilon, delta, v_hat, Lambda_hat, r_hat, u_bar, jmax);
       if (l2_norm(r_hat)+(params.q1+params.q2+(1+1/params.kappa)*params.q3)*delta <= params.c1*epsilon)
 	{
 	  u_epsilon = u_bar;
@@ -79,20 +86,21 @@ namespace WaveletTL
 	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v_hat,
 	     set<typename PROBLEM::WaveletBasis::Index>& Lambda_hat,
 	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r_hat,
-	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_Lambda_k)
+	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_Lambda_k,
+	     const int jmax)
   {
     typedef typename PROBLEM::WaveletBasis::Index Index;
     set<Index> Lambda_k(Lambda), Lambda_kplus1;
     unsigned int k = 0;
-    GALERKIN(P, params, F, Lambda_k, v, delta, params.q3*delta/params.c2, u_Lambda_k);
+    GALERKIN(P, params, F, Lambda_k, v, delta, params.q3*delta/params.c2, u_Lambda_k, jmax);
     while (true) {
-      NGROW(P, params, F, Lambda_k, u_Lambda_k, params.q1*delta, params.q2*delta, Lambda_kplus1, r_hat);
+      NGROW(P, params, F, Lambda_k, u_Lambda_k, params.q1*delta, params.q2*delta, Lambda_kplus1, r_hat, jmax);
       if (l2_norm(r_hat) <= params.c1*delta/20 || k == params.K) {
 	u_Lambda_k.COARSE(2*delta/5, v_hat);
 	v_hat.support(Lambda_hat);
 	break;
       }
-      GALERKIN(P, params, F, Lambda_kplus1, u_Lambda_k, params.q0*delta, params.q3*delta/params.c2, v_hat);
+      GALERKIN(P, params, F, Lambda_kplus1, u_Lambda_k, params.q0*delta, params.q3*delta/params.c2, v_hat, jmax);
       u_Lambda_k.swap(v_hat);
       Lambda_k.swap(Lambda_kplus1);
       k++;
@@ -106,23 +114,62 @@ namespace WaveletTL
  		const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
  		const double delta,
 		const double eta,
- 		InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_bar)
+ 		InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_bar,
+		const int jmax)
   {
-    cout << "GALERKIN called..." << endl;
     typedef typename PROBLEM::WaveletBasis::Index Index;
+
+#if 0
+    // original GALERKIN version from [CDD1],[BB+]
+    cout << "GALERKIN called..." << endl;
     InfiniteVector<double,Index> r;
     u_bar = v;
     double mydelta = delta;
+    cout << "GALERKIN, internal residuals: " << endl;
     while (true) {
-      INRESIDUAL(P, params, F, Lambda, u_bar, params.c1*eta/6, params.c1*eta/6, r);
+      INRESIDUAL(P, params, F, Lambda, u_bar, params.c1*eta/6, params.c1*eta/6, r, jmax);
       const double inresidual_norm = l2_norm(r);
+      cout << inresidual_norm << " ";
+      cout.flush();
       if (eta >= std::min(params.theta_bar*mydelta, inresidual_norm/params.c1+eta/3)) {
 	cout << "... GALERKIN done, norm of internal residual: " << inresidual_norm << endl;
 	break;
       }
-      u_bar += 1/params.c2 * r;
+//       u_bar += 1/params.c2 * r; // original [CDD1] relaxation parameter
+      u_bar += 2/(params.c2+1/params.c1) * r; // optimal relaxation parameter
       mydelta *= params.theta_bar;
     }
+#else
+    // conjugate gradient version (no theory for its complexity available yet)
+    cout << "GALERKIN called..." << endl;
+    
+    u_bar.clear();
+    if (Lambda.size() > 0) {
+      // setup A_Lambda and f_Lambda
+      SparseMatrix<double> A_Lambda;
+      P.setup_stiffness_matrix(Lambda, A_Lambda);
+      Vector<double> F_Lambda;
+      P.setup_righthand_side(Lambda, F_Lambda);
+      
+      // setup initial approximation xk
+      Vector<double> xk(Lambda.size());
+      unsigned int id = 0;
+      for (typename set<Index>::const_iterator it = Lambda.begin(), itend = Lambda.end();
+	   it != itend; ++it, ++id)
+	xk[id] = v.get_coefficient(*it);
+      
+      unsigned int iterations = 0;
+      CG(A_Lambda, F_Lambda, xk, eta, 150, iterations);
+      cout << "... GALERKIN done, " << iterations << " CG iterations needed" << endl;
+      
+      id = 0;
+      for (typename set<Index>::const_iterator it = Lambda.begin(), itend = Lambda.end();
+	   it != itend; ++it, ++id)
+	u_bar.set_coefficient(*it, xk[id]);
+    } else {
+      cout << "... GALERKIN done, no CG iteration needed" << endl;
+    }
+#endif
   }
 
   template <class PROBLEM>
@@ -133,12 +180,13 @@ namespace WaveletTL
  	     const double xi1,
  	     const double xi2,
  	     set<typename PROBLEM::WaveletBasis::Index>& Lambda_tilde,
- 	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r)
+ 	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r,
+	     const int jmax)
   {
     cout << "NGROW called..." << endl;
     typedef typename PROBLEM::WaveletBasis::Index Index;
     set<Index> Lambda_c;
-    NRESIDUAL(P, params, F, Lambda, u_bar, xi1, xi2, r, Lambda_c);
+    NRESIDUAL(P, params, F, Lambda, u_bar, xi1, xi2, r, Lambda_c, jmax);
     const double residual_norm = l2_norm(r);
     cout << "* in NGROW, current residual norm is " << residual_norm << endl;
     InfiniteVector<double,Index> pr;
@@ -159,13 +207,14 @@ namespace WaveletTL
 		  const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
 		  const double eta1,
 		  const double eta2,
-		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r)
+		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r,
+		  const int jmax)
   {
     typedef typename PROBLEM::WaveletBasis::Index Index;
     InfiniteVector<double,Index> w, g(F);
 
     // TODO: speed up the following two lines
-    APPLY(P, v, eta1, w);
+    APPLY(P, v, eta1, w, jmax);
     w.clip(Lambda);
 
     g.clip(Lambda);
@@ -181,11 +230,12 @@ namespace WaveletTL
 		 const double eta1,
 		 const double eta2,
 		 InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r,
-		 set<typename PROBLEM::WaveletBasis::Index>& Lambda_tilde)
+		 set<typename PROBLEM::WaveletBasis::Index>& Lambda_tilde,
+		 const int jmax)
   {
     typedef typename PROBLEM::WaveletBasis::Index Index;
     InfiniteVector<double,Index> w;
-    APPLY(P, v, eta1, w);
+    APPLY(P, v, eta1, w, jmax);
     F.COARSE(eta2, r);
     r -= w;
     r.support(Lambda_tilde);

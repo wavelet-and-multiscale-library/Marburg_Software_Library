@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 // +--------------------------------------------------------------------+
-// | This file is part of FrameTL - the Wavelet Template Library      |
+// | This file is part of FrameTL - the Wavelet Template Library        |
 // |                                                                    |
 // | Copyright (c) 2002-2005                                            |
 // | Manuel Werner                                                      |

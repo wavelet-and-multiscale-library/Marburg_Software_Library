@@ -52,20 +52,21 @@ namespace WaveletTL
     double F;
     double q0, q1, q2, q3, q4;
     unsigned int K;
-    double theta, thetabar;
+    double theta, theta_bar;
   } CDD1Parameters;
   
   /*!
     NPROG:
     Given an approximation v (the support of which is contained in Lambda)
     to the exact Galerkin solution u of Au = F with
-    ||u-v||_2 <= delta, compute a new approximation v_hat supported in Lambdahat,
+    ||u-v||_2 <= delta, compute a new approximation v_hat supported in Lambda_hat,
     such that ||u-v_hat||_2 <= delta/2.
-    An approximate residual rhat as well as the last iterand ubar before the final thresholding
+    An approximate residual r_hat as well as the last iterand ubar before the final thresholding
     are also returned.
    */
   template <class PROBLEM>
   void NPROG(const PROBLEM& P, const CDD1Parameters& params,
+	     const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& F,
 	     const set<typename PROBLEM::WaveletBasis::Index>& Lambda,
 	     const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
 	     const double delta,
@@ -83,6 +84,7 @@ namespace WaveletTL
   */
   template <class PROBLEM>
   void GALERKIN(const PROBLEM& P, const CDD1Parameters& params,
+		const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& F,
 		const set<typename PROBLEM::WaveletBasis::Index>& Lambda,
  		const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
  		const double delta,
@@ -94,16 +96,17 @@ namespace WaveletTL
     Given a set Lambda, an initial approximation ubar (supported in Lambda) to the
     Galerkin solutin u_Lambda of Au = F, calculate an approximate residual r with
       ||r-r_Lambda||_2 <= xi_1 + xi_2 + c_2 * ||ubar-u_Lambda||_2
-    and a new index set LambdaTilde\supset Lambda as small as possible such that
-      ||P_{LambdaTilde\setminus Lambda}r||_2 >= gamma * ||r||_2
+    and a new index set Lambda_tilde\supset Lambda as small as possible such that
+      ||P_{Lambda_tilde\setminus Lambda}r||_2 >= gamma * ||r||_2
   */
   template <class PROBLEM>
   void NGROW(const PROBLEM& P, const CDD1Parameters& params,
+	     const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& F,
 	     const set<typename PROBLEM::WaveletBasis::Index>& Lambda,
  	     const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& ubar,
  	     const double xi1,
  	     const double xi2,
- 	     set<typename PROBLEM::WaveletBasis::Index>& LambdaTilde,
+ 	     set<typename PROBLEM::WaveletBasis::Index>& Lambda_tilde,
  	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r);
 
   /*!
@@ -114,11 +117,30 @@ namespace WaveletTL
   */
   template <class PROBLEM>
   void INRESIDUAL(const PROBLEM& P, const CDD1Parameters& params,
+		  const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& F,
 		  const set<typename PROBLEM::WaveletBasis::Index>& Lambda,
 		  const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
 		  const double eta1,
 		  const double eta2,
 		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r);
+
+  /*!
+    NRESIDUAL:
+    Given an index set Lambda, an approximation v to the exact Galerkin solution
+    u_Lambda of Au = F, calculate an approximate residual r (not necessarily supported
+    in J\Lambda), such that
+      ||r - r_Lambda||_2 <= eta_1 + eta_2 + c_2 * ||v-u_Lambda||_2
+    The routine also returns the support set Lambda_tilde of the approximate residual r.
+  */
+  template <class PROBLEM>
+  void NRESIDUAL(const PROBLEM& P, const CDD1Parameters& params,
+		 const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& F,
+		 const set<typename PROBLEM::WaveletBasis::Index>& Lambda,
+		 const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
+		 const double eta1,
+		 const double eta2,
+		 InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r,
+		 set<typename PROBLEM::WaveletBasis::Index>& Lambda_tilde);
 }
 
 #include <adaptive/cdd1.cpp>

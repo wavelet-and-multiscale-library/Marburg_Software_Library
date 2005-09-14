@@ -42,8 +42,8 @@ namespace WaveletTL
   /*!
     Decide whether the supports of two generators/wavelets \psi_\lambda and
     \psi_\nu have an intersection of positive measure and compute it
-    in the form 2^{-j}[k1,k2]. If the return value is false, k1 and k2 will
-    have no meaningful value for performance reasons.
+    in the form 2^{-j}[k1,k2]. If the return value is false, j, k1 and k2 will
+    have no meaningful values, for performance reasons.
   */
   template <int d, int dT>
   bool intersect_supports(const DSBasis<d,dT>& basis,
@@ -62,6 +62,20 @@ namespace WaveletTL
 			     const typename DSBasis<d,dT>::Index& lambda,
 			     const int j, const bool generators,
 			     std::list<std::pair<typename DSBasis<d,dT>::Index, typename DSBasis<d,dT>::Support> >& intersecting);
+
+  /*!
+    Decide whether the support of a given (primal) generator/wavelet \psi_\lambda
+    intersects the singular support of another (primal) generator/wavelet \psi_\nu.
+    If this is the case, return true and the intersection of \supp\psi_\lambda
+    and \supp\psi_\nu in the form 2^{-j}[k1,k2].
+    Otherwise, return false (in this case, j, k1 and k2 will have
+    no meaningful values, for performance reasons).
+  */
+  template <int d, int dT>
+  bool intersect_singular_support(const DSBasis<d,dT>& basis,
+				  const typename DSBasis<d,dT>::Index& lambda,
+				  const typename DSBasis<d,dT>::Index& nu,
+				  int& j, int& k1, int& k2);
 }
 
 #include <interval/ds_support.cpp>

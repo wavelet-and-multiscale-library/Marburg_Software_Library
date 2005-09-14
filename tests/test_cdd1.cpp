@@ -92,7 +92,7 @@ int main()
   TestProblem<3> T;
 
   const int d  = 2;
-  const int dT = 2;
+  const int dT = 4;
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
@@ -103,7 +103,7 @@ int main()
 //   const double nu = problem.norm_Ainv() * l2_norm(F_eta);
 
   InfiniteVector<double, Index> u_epsilon;
-  CDD1_SOLVE(problem, 1e-4, u_epsilon);
+  CDD1_SOLVE(problem, 1e-4, u_epsilon, 12);
   
   return 0;
 }

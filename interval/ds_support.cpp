@@ -89,16 +89,19 @@ namespace WaveletTL
     support(basis, lambda, k1_lambda, k2_lambda);
     const int jmb = (1<<(j-m)) * b;
     const int jjk1 = (1<<(j-j_lambda)) * k1_lambda;
-    if (jjk1 < jmb) {
+    if (jjk1 >= jmb)
+      return false;
+    else {
       const int jma = (1<<(j-m)) * a;
       const int jjk2 = (1<<(j-j_lambda)) * k2_lambda;
-      if (jma < jjk2) {
+      if (jma >= jjk2)
+	return false;
+      else {
 	k1 = std::max(jjk1, jma);
 	k2 = std::min(jjk2, jmb);
-	return true;
       }
     }
-    return false;
+    return true;
   }
   
   template <int d, int dT>
@@ -145,5 +148,51 @@ namespace WaveletTL
 	if (nu == last_wavelet(&basis, j)) break;
       }
     }
+  }
+
+  template <int d, int dT>
+  bool intersect_singular_support(const DSBasis<d,dT>& basis,
+				  const typename DSBasis<d,dT>::Index& lambda,
+				  const typename DSBasis<d,dT>::Index& nu,
+				  int& j, int& k1, int& k2)
+  {
+    const int j_lambda = lambda.j() + lambda.e();
+    const int j_nu = nu.j() + nu.e();
+
+    if (j_lambda < j_nu)
+      return intersect_singular_support(basis, nu, lambda, j, k1, k2);
+    else {
+      // We can assume that j_lambda >= j_nu, i.e., the support of psi_lambda determines the
+      // granularity of the support intersection
+
+      int k1_lambda, k2_lambda, k1_nu, k2_nu;
+      support(basis, lambda, k1_lambda, k2_lambda);
+      support(basis, nu, k1_nu, k2_nu);
+
+      // first exclude the case that supp(psi_lambda) and supp(psi_nu) do not intersect at all
+      const int k2_nu_help = (1<<(j_lambda-j_nu)) * k2_nu;
+      if (k1_lambda >= k2_nu_help)
+	return false; // supp(psi_lambda) is completely right of supp(psi_nu)
+      else {
+	const int k1_nu_help = (1<<(j_lambda-j_nu)) * k1_nu;
+	if (k2_lambda <= k1_nu_help)
+	  return false; // supp(psi_lambda) is completely left of supp(psi_nu)
+	else {
+	  if (k1_lambda >= k1_nu_help && k2_lambda <= k2_nu_help) {
+	    // subset criterion, necessary for supp(psi_lambda) not hitting singsupp(psi_nu)
+	    
+	    // determine largest integer n, such that 2^{-j}k1_lambda >= 2^{-j_nu}n
+	    // (we know that n < k2_nu)
+	    const int n = (int) floor(ldexp(1.0, j_nu-j_lambda) * k1_lambda);
+	    if (k2_lambda <= (1<<(j_lambda-j_nu)) * (n+1))
+	      return false; // 2^{-j_nu}k2_lambda <= 2^{-j}(n+1), i.e., no singuar support intersection
+	  }
+	  j = j_lambda;
+	  k1 = std::max(k1_lambda, k1_nu_help);
+	  k2 = std::min(k2_lambda, k2_nu_help);
+	}
+      }
+    }
+    return true;
   }
 }

@@ -25,9 +25,12 @@ int main()
 //   for (int i = 1; i <= 4; i++, ++lambda);
 //   lambda = last_wavelet(&basis, basis.j0()+1);
 
+#if 0
   cout << "- point values at dyadic points of the " << lambda << " generator/wavelet:" << endl;
   evaluate(basis, lambda, true, 6).matlab_output(cout);
+#endif
 
+#if 0
   int k1, k2;
   support(basis, lambda, k1, k2);
   cout << "- support of psi_lambda is 2^{-"
@@ -38,7 +41,9 @@ int main()
        << k2
        << "]"
        << endl;
+#endif
   
+#if 0
   cout << "- calculating some support intersections:" << endl;
   for (lambda = first_generator(&basis, basis.j0());; ++lambda)
     {
@@ -62,7 +67,9 @@ int main()
       
       if (lambda == last_wavelet(&basis, basis.j0())) break;
     }
+#endif
 
+#if 0
   cout << "- compute all intersecting wavelets:" << endl;
   for (lambda = first_generator(&basis, basis.j0());; ++lambda)
     {
@@ -85,7 +92,50 @@ int main()
       }
       
       if (lambda == last_wavelet(&basis, basis.j0())) break;
-    }  
+    }
+#endif  
+
+  cout << "- checking intersection of singular supports:" << endl;
+  for (lambda = first_generator(&basis, basis.j0()+2);; ++lambda)
+    {
+      int j, k1, k2;
+      support(basis, lambda, k1, k2);
+      cout << "psi_lambda, lambda=" << lambda << " has the support 2^{-"
+	   << lambda.j()+lambda.e()
+	   << "}["
+	   << k1
+	   << ","
+	   << k2
+	   << "]"
+	   << endl;
+      
+      int k1_0, k2_0;
+      support(basis, first_generator(&basis, basis.j0()), k1_0, k2_0);
+      cout << "* first generator on level j0 has the support 2^{-"
+	   << basis.j0()
+	   << "}["
+	   << k1_0
+	   << ","
+	   << k2_0
+	   << "]"
+	   << endl;
+
+      cout << "* support intersection with first generator on level j0         : ";
+      bool inter = intersect_supports(basis, lambda, first_generator(&basis, basis.j0()), j, k1, k2);
+      if (inter)
+	cout << "2^{-" << j << "}[" << k1 << "," << k2 << "]" << endl;
+      else
+	cout << "none" << endl;
+
+      cout << "* singular support intersection with first generator on level j0: ";
+      inter = intersect_singular_support(basis, lambda, first_generator(&basis, basis.j0()), j, k1, k2);
+      if (inter)
+	cout << "2^{-" << j << "}[" << k1 << "," << k2 << "]" << endl;
+      else
+	cout << "none" << endl;
+
+      if (lambda == last_wavelet(&basis, basis.j0()+2)) break;
+    }
 
   return 0;
 }

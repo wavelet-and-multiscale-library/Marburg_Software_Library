@@ -11,57 +11,153 @@
 #define _FRAMETL_PARAMETRIZATION_H
 
 #include <iostream>
+#include <geometry/point.h>
+#include <utils/array1d.h>
+#include <utils/function.h>
+#include <algebra/vector.h>
+
 using std::cout;
 using std::endl;
+using MathTL::Point;
+using MathTL::Array1D;
+using MathTL::Function;
+using MathTL::Vector;
 
-namespace Frame_TL
+namespace FrameTL
 {
+  /*!
+    This class models parametrizations for arbitrary quadrangles in \mathbb R^2.
+    It's crucial functionality is to map a single point, lying in (0,1)^2 to a
+    point in the quadrangle and vice versa. The involved mapping explicitely looks like:
 
+        k(s,t) := (1-s)*(1-t)b_00 + s*(1-t)b_10 + (1-s)*t*b_01 + s*t*b_11,
+
+    where the b_ij are the vertices of the qudrangle at hand.
+    
+   */
   class LinearBezierMapping
   {
+
   public:
     /*!
-     */
-    LinearBezierMapping () {};
-    /*
-    igpm::vector b_00;
-    igpm::vector b_01;
-    igpm::vector b_10;
-	igpm::vector b_11;
-
-	igpm::vector bgen_00;
-	igpm::vector bgen_01;
-	igpm::vector bgen_10;
-	igpm::vector bgen_11;
-	
-	//equal(!)
-	igpm::vector d_ds_d_dt_kappa_r;
-	igpm::vector d_dt_d_ds_kappa_r;
-	
-	igpm::vector min_b00_plus_b10;
-	igpm::vector min_b00_plus_b01;
-	
-	double cos_rot_angle;
-	double sin_rot_angle;
-	double rot_angle;
-	double shearing_param;
-	double scaleX;
-	double scaleY;
-	
-	bool signumOfdetDKappa;
-	
-public:
-	
-	igpm::vector get_b_00() const { return b_00; };
-	igpm::vector get_b_10() const { return b_10; };
-	igpm::vector get_b_01() const { return b_01; };
-	igpm::vector get_b_11() const { return b_11; };
-	
+      default constructor:
     */
+    LinearBezierMapping ();
+   
+    /*!
+      copy constructor
+     */
+    LinearBezierMapping (const LinearBezierMapping&);
 
-  }
+    /*!
+      constructor for initialization of the four vertices
+     */
+    LinearBezierMapping (const Point<2> &, const Point<2> &,
+			 const Point<2> &, const Point<2> &);
+
+    /*!
+      assignment
+    */
+    LinearBezierMapping& operator = (const LinearBezierMapping& x);
+
+    /*!
+      setup routine, called by preceding constructor,
+      sets up generic qudrangle, needed for beeingable to invert the mapping.
+      idea: by appropriate shifting rotation and shearing, the qudrangle can be
+      transformed into another qudrangle for which it is clear how its parametrization
+      be inverted.
+     */
+    void setup ();
+
+    /*!
+      access to vertices
+    */
+    const Point<2>& get_b_00() const;
+    const Point<2>& get_b_10() const;
+    const Point<2>& get_b_01() const;
+    const Point<2>& get_b_11() const;
+    
+    const unsigned short int get_sgn_det_D() const;
+
+    /*!
+      maps a  point
+     */
+    void mapPoint(Point<2>&, const Point<2>&) const;
+
+    /*!
+      inverse mapping
+     */
+    void mapPointInv(Point<2>&, const Point<2>&) const;
+
+    /*!
+      det( D (mapPoint(x,y)) )
+     */
+    const double det_D(const Point<2>&) const;
+    
+    /*!
+      |det( D (mapPoint(x,y)) )|
+     */
+    const double abs_Det_D(const Point<2>&) const;
+
+    /*!
+      \partial/\partial x (det(D kappa))(s,t)
+     */
+    const double d_x_det_D(const Point<2,double>&) const;
+
+    /*!
+     \partial/\partial y (det(D kappa))(s,t)
+     */
+    const double d_y_det_D(const Point<2,double>&) const;
+   
+    /*!
+      \partial / \partial_dim \kappa^(direc)
+    */    
+    const double d_dim_kappa_direc(const bool& dim, const bool& direc,
+				   const Point<2>&) const;
+
+  protected:
+    //vertices of the quadrangle to parametrize
+    Point<2> b_00;
+    Point<2> b_10;
+    Point<2> b_01;
+    Point<2> b_11;
+
+  private:
+    //vertices of generic qudrangle, needed for inverting this mapping,
+    //initialized in constructor
+    Point<2> b_gen_00;
+    Point<2> b_gen_10;
+    Point<2> b_gen_01;
+    Point<2> b_gen_11;
+
+    Vector<double> d_ds_d_dt_kappa_r;
+    Vector<double> d_dt_d_ds_kappa_r;
+
+    Vector<double> min_b00_plus_b10;
+    Vector<double> min_b00_plus_b01;
+
+    //some quantities, worth storing to prevent dispensable recomutation
+    double cos_rot_angle;
+    double sin_rot_angle;
+    double rot_angle;
+    double shearing_param;
+    double scaleX;
+    double scaleY;
+    
+    //signum of det( D (mapPoint(x,y) ) )
+    //identical for all (x,y)!
+    bool sgn_det_D;
+
+  };
+
+  /*!
+    stream output for LinearBezierMapping
+   */
+  std::ostream& operator << (std::ostream& os, const LinearBezierMapping & kappa);
+
 }
+
 // include implementation
-#include <parametrization.cpp>
+#include "parametrization.cpp"
 
 #endif

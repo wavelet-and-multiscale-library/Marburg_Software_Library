@@ -153,6 +153,51 @@ namespace WaveletTL
   template <int d, int dT>
   bool intersect_singular_support(const DSBasis<d,dT>& basis,
 				  const typename DSBasis<d,dT>::Index& lambda,
+				  const int m, const int a, const int b,
+				  int& j, int& k1, int& k2)
+  {
+    const int j_lambda = lambda.j() + lambda.e();
+    
+    if (j_lambda < m) {
+      // granularity of support intersection is m
+      return intersect_supports(basis, lambda, m, a, b, j, k1, k2);
+    } else {
+      // Here j_lambda >= m, i.e., the support of psi_lambda determines the
+      // granularity of the support intersection
+      
+      int k1_lambda, k2_lambda;
+      support(basis, lambda, k1_lambda, k2_lambda);
+      
+      // first exclude the case that supp(psi_lambda) and 2^{-m}[a,b] do not intersect at all
+      const int b_help = (1<<(j_lambda-m)) * b;
+      if (k1_lambda >= b_help)
+	return false; // supp(psi_lambda) is completely right of 2^{-m}[a,b]
+      else {
+	const int a_help = (1<<(j_lambda-m)) * a;
+	if (k2_lambda <= a_help)
+	  return false; // supp(psi_lambda) is completely left of 2^{-m}[a,b]
+	else {
+	  if (k1_lambda >= a_help && k2_lambda <= b_help) {
+	    // subset criterion, necessary for supp(psi_lambda) not hitting singsupp(2^{-m}[a,b])
+	    
+	    // determine largest integer n, such that 2^{-j}k1_lambda >= 2^{-m}n
+	    // (we know that n < b)
+	    const int n = (int) floor(ldexp(1.0, m-j_lambda) * k1_lambda);
+	    if (k2_lambda <= (1<<(j_lambda-m)) * (n+1))
+	      return false; // 2^{-m}k2_lambda <= 2^{-j}(n+1), i.e., no singuar support intersection
+	  }
+	  j = j_lambda;
+	  k1 = std::max(k1_lambda, a_help);
+	  k2 = std::min(k2_lambda, b_help);
+	}
+      }
+    }
+    return true;
+  }
+
+  template <int d, int dT>
+  bool intersect_singular_support(const DSBasis<d,dT>& basis,
+				  const typename DSBasis<d,dT>::Index& lambda,
 				  const typename DSBasis<d,dT>::Index& nu,
 				  int& j, int& k1, int& k2)
   {
@@ -161,38 +206,43 @@ namespace WaveletTL
 
     if (j_lambda < j_nu)
       return intersect_singular_support(basis, nu, lambda, j, k1, k2);
-    else {
-      // We can assume that j_lambda >= j_nu, i.e., the support of psi_lambda determines the
-      // granularity of the support intersection
 
-      int k1_lambda, k2_lambda, k1_nu, k2_nu;
-      support(basis, lambda, k1_lambda, k2_lambda);
-      support(basis, nu, k1_nu, k2_nu);
+    int k1_nu, k2_nu;
+    support(basis, nu, k1_nu, k2_nu);
+    return intersect_singular_support(basis, lambda, j_nu, k1_nu, k2_nu, j, k1, k2);
+  }
 
-      // first exclude the case that supp(psi_lambda) and supp(psi_nu) do not intersect at all
-      const int k2_nu_help = (1<<(j_lambda-j_nu)) * k2_nu;
-      if (k1_lambda >= k2_nu_help)
-	return false; // supp(psi_lambda) is completely right of supp(psi_nu)
-      else {
-	const int k1_nu_help = (1<<(j_lambda-j_nu)) * k1_nu;
-	if (k2_lambda <= k1_nu_help)
-	  return false; // supp(psi_lambda) is completely left of supp(psi_nu)
-	else {
-	  if (k1_lambda >= k1_nu_help && k2_lambda <= k2_nu_help) {
-	    // subset criterion, necessary for supp(psi_lambda) not hitting singsupp(psi_nu)
-	    
-	    // determine largest integer n, such that 2^{-j}k1_lambda >= 2^{-j_nu}n
-	    // (we know that n < k2_nu)
-	    const int n = (int) floor(ldexp(1.0, j_nu-j_lambda) * k1_lambda);
-	    if (k2_lambda <= (1<<(j_lambda-j_nu)) * (n+1))
-	      return false; // 2^{-j_nu}k2_lambda <= 2^{-j}(n+1), i.e., no singuar support intersection
-	  }
-	  j = j_lambda;
-	  k1 = std::max(k1_lambda, k1_nu_help);
-	  k2 = std::min(k2_lambda, k2_nu_help);
-	}
+  template <int d, int dT>
+  void relevant_wavelets(const DSBasis<d,dT>& basis,
+			 const typename DSBasis<d,dT>::Index& lambda,
+			 const int j, const bool generators,
+			 std::list<std::pair<typename DSBasis<d,dT>::Index, typename DSBasis<d,dT>::Support> >& relevant)
+  {
+    typedef typename DSBasis<d,dT>::Index Index;
+    typedef typename DSBasis<d,dT>::Support Support;
+    
+    relevant.clear();
+
+    // compute support of \psi_\lambda
+    const int j_lambda = lambda.j() + lambda.e();
+    int k1_lambda, k2_lambda;
+    support(basis, lambda, k1_lambda, k2_lambda);
+    
+    // a brute force solution
+    if (generators) {
+      Support supp;
+      for (Index nu = first_generator(&basis, j);; ++nu) {
+	if (intersect_singular_support(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
+	  relevant.push_back(std::make_pair(nu, supp));
+	if (nu == last_generator(&basis, j)) break;
+      }
+    } else {
+      Support supp;
+      for (Index nu = first_wavelet(&basis, j);; ++nu) {
+	if (intersect_singular_support(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
+	  relevant.push_back(std::make_pair(nu, supp));
+	if (nu == last_wavelet(&basis, j)) break;
       }
     }
-    return true;
   }
 }

@@ -250,8 +250,9 @@ namespace WaveletTL
     }
 
     // wavelet blocks
+    const int maxlevel = std::min(lambda.j()+J, jmax);
     for (level = std::max(basis_.j0(), lambda.j()-J);
-	 level <= std::min(lambda.j()+J, jmax); level++) {
+	 level <= maxlevel; level++) {
 #ifdef _WAVELETTL_STURM_EQUATION_CACHE
       col_block_it_lb = col.lower_bound(level);
       col_block_it    = col_block_it_lb;
@@ -281,27 +282,19 @@ namespace WaveletTL
     typedef typename WBASIS::Index Index;
     typedef std::list<std::pair<Index, typename WBASIS::Support> > SupportList;
     SupportList nus;
-    intersecting_wavelets(basis_, lambda, std::max(level, basis_.j0()), level == (basis_.j0()-1), nus);
 
-    std::list<Index> indices;
-    std::list<double> entries;
+    // compute all wavelets on level j, such that supp(psi_lambda) has a nontrivial intersection
+    // with singsupp(psi_nu), cf. [St04, Compressibility of operators in wavelet coordinates]
+    relevant_wavelets(basis_, lambda, std::max(level, basis_.j0()), level == (basis_.j0()-1), nus);
+    
+    block.indices.resize(nus.size());
+    block.entries.resize(nus.size());
     const double d1 = D(lambda);
-    for (typename SupportList::const_iterator it(nus.begin()); it != nus.end(); ++it) {
-      const double entry = a(it->first, lambda, it->second) / (d1*D(it->first));
-      if (fabs(entry) > 1e-14) {
-	indices.push_back(it->first);
-	entries.push_back(entry);
-      }
-    }
-
-    block.indices.resize(indices.size());
-    block.entries.resize(indices.size());
     unsigned int id = 0;
-    typename std::list<Index>::const_iterator it1(indices.begin());
-    typename std::list<double>::const_iterator it2(entries.begin());
-    for (; it1 != indices.end(); ++it1, ++it2, ++id) {
-      block.indices[id] = *it1;
-      block.entries[id] = *it2;
+    for(typename SupportList::const_iterator it(nus.begin()), itend(nus.end()); it != itend; ++it, ++id) {
+      const double entry = a(it->first, lambda, it->second) / (d1*D(it->first));
+      block.indices[id] = it->first;
+      block.entries[id] = entry;
     }
   }
 

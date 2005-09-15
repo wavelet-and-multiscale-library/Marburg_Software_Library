@@ -15,6 +15,7 @@
 #include <utils/array1d.h>
 #include <utils/function.h>
 #include <algebra/vector.h>
+#include <algebra/matrix.h>
 
 using std::cout;
 using std::endl;
@@ -22,6 +23,7 @@ using MathTL::Point;
 using MathTL::Array1D;
 using MathTL::Function;
 using MathTL::Vector;
+using MathTL::Matrix;
 
 namespace FrameTL
 {
@@ -56,7 +58,7 @@ namespace FrameTL
 			 const Point<2> &, const Point<2> &);
 
     /*!
-      assignment
+      assignment operator
     */
     LinearBezierMapping& operator = (const LinearBezierMapping& x);
 
@@ -73,14 +75,18 @@ namespace FrameTL
       access to vertices
     */
     const Point<2>& get_b_00() const;
-    const Point<2>& get_b_10() const;
     const Point<2>& get_b_01() const;
+    const Point<2>& get_b_10() const;
     const Point<2>& get_b_11() const;
     
+    /*!
+      signum of det( D (mapPoint(x,y) ) )
+      identical for all (x,y)!
+     */
     const unsigned short int get_sgn_det_D() const;
 
     /*!
-      maps a  point
+      maps a point
      */
     void mapPoint(Point<2>&, const Point<2>&) const;
 
@@ -102,12 +108,12 @@ namespace FrameTL
     /*!
       \partial/\partial x (det(D kappa))(s,t)
      */
-    const double d_x_det_D(const Point<2,double>&) const;
+    const double d_x_det_D(const Point<2>&) const;
 
     /*!
      \partial/\partial y (det(D kappa))(s,t)
      */
-    const double d_y_det_D(const Point<2,double>&) const;
+    const double d_y_det_D(const Point<2>&) const;
    
     /*!
       \partial / \partial_dim \kappa^(direc)
@@ -117,9 +123,9 @@ namespace FrameTL
 
   protected:
     //vertices of the quadrangle to parametrize
-    Point<2> b_00;
-    Point<2> b_10;
+    Point<2> b_00;    
     Point<2> b_01;
+    Point<2> b_10;    
     Point<2> b_11;
 
   private:
@@ -153,7 +159,112 @@ namespace FrameTL
   /*!
     stream output for LinearBezierMapping
    */
-  std::ostream& operator << (std::ostream& os, const LinearBezierMapping & kappa);
+  std::ostream& operator << (std::ostream&, const LinearBezierMapping&);
+
+
+
+
+
+
+  /*!
+    This class models parametrizations for patches forming
+    cuboids in \mathbb R^d.
+    This mapping is of the simple form
+
+    k( point ) = A * point + b, where A \in \mathbb K^{d x d} and b \in \mathbb K^d.
+
+
+   */
+  template <unsigned int DIM>
+  class AffinLinearMapping
+  {
+  public:
+
+    /*!
+      size type (cf. STL containers)
+    */
+    typedef size_t size_type;
+
+    /*!
+      default constructor:
+    */
+    AffinLinearMapping();
+   
+    /*!
+      copy constructor
+     */
+    AffinLinearMapping (const AffinLinearMapping&);
+
+    /*!
+      constructor for initialization of the four vertices
+     */
+    AffinLinearMapping (const Matrix<double> &, const Vector<double> &);
+
+    /*!
+      assignment operator
+    */
+    AffinLinearMapping& operator = (const AffinLinearMapping&);
+
+    const Matrix<double>& get_A() const;
+    const Vector<double>& get_b() const;
+
+   /*!
+      signum of det( D (mapPoint(x,y) ) )
+      identical for all (x,y)!
+     */
+    const unsigned short int get_sgn_det_D() const;
+
+    /*!
+      maps a point
+     */
+    void mapPoint(Point<DIM>&, const Point<DIM>&) const;
+
+    /*!
+      inverse mapping
+     */
+    void mapPointInv(Point<DIM>&, const Point<DIM>&) const;
+    /*!
+      det( D (mapPoint(x,y)) )
+     */
+    const double det_D(const Point<DIM>&) const;
+    
+    /*!
+      |det( D (mapPoint(x,y)) )|
+     */
+    const double abs_Det_D(const Point<DIM>&) const;
+
+    /*!
+      \partial/\partial x (det(D kappa))(s,t)
+     */
+    const double d_x_det_D(const Point<DIM>&) const;
+
+    /*!
+     \partial/\partial y (det(D kappa))(s,t)
+     */
+    const double d_y_det_D(const Point<DIM>&) const;
+   
+    /*!
+      \partial / \partial_dim \kappa^(direc)
+    */    
+    const double d_dim_kappa_direc(const bool& dim, const bool& direc,
+				   const Point<DIM>&) const;
+   
+  protected:
+    Matrix<double> A;
+    Vector<double> b;
+
+  private:
+    //signum of det( D (mapPoint(x,y) ) )
+    //identical for all (x,y)!
+    bool sgn_det_D;
+
+  };
+
+  /*!
+    stream output for AffinLinearMapping
+  */
+  template <unsigned int DIM>
+  std::ostream& operator << (std::ostream&, const AffinLinearMapping<DIM>&);
 
 }
 

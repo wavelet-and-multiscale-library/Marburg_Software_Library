@@ -6,22 +6,27 @@
 #include <misc.cpp>
 
 using MathTL::Matrix;
+using std::swap;
 
 namespace FrameTL
 {
 
-
+//################### LinearBezierMapping ###################
+  
+  inline
   LinearBezierMapping::LinearBezierMapping ()
   {
   }
 
+  inline
   LinearBezierMapping:: LinearBezierMapping (const LinearBezierMapping& kappa)
-    : b_00(kappa.get_b_00()),  b_10(kappa.get_b_10()),
-      b_01(kappa.get_b_10()),  b_11(kappa.get_b_11())
+    : b_00(kappa.get_b_00()),  b_01(kappa.get_b_01()),
+      b_10(kappa.get_b_10()),  b_11(kappa.get_b_11())
   {
     setup();
   }
 
+  inline
   LinearBezierMapping:: LinearBezierMapping (const Point<2> & _b_00, const Point<2> & _b_01,
 					     const Point<2> & _b_10, const Point<2> & _b_11)
     : b_00(_b_00),  b_01(_b_01), b_10(_b_10),  b_11(_b_11)
@@ -29,9 +34,9 @@ namespace FrameTL
     setup();
   }
 
+  inline
   void LinearBezierMapping::setup ()
   {
-
 
     d_ds_d_dt_kappa_r.resize(2);
     d_dt_d_ds_kappa_r.resize(2);
@@ -39,7 +44,6 @@ namespace FrameTL
     d_ds_d_dt_kappa_r(0) = b_00(0) - b_01(0) - b_10(0) + b_11(0);
     d_ds_d_dt_kappa_r(1) = b_00(1) - b_01(1) - b_10(1) + b_11(1);
     d_dt_d_ds_kappa_r = d_ds_d_dt_kappa_r;
-
 	
     min_b00_plus_b10.resize(2);
     min_b00_plus_b01.resize(2);
@@ -68,15 +72,18 @@ namespace FrameTL
     //setup the generic quadrangle belonging to the parametrized patch,
     //we do this once and for all to be able to invert the bezier mapping
 	
+    b_gen_00(0) = 0;
+    b_gen_00(0) = 1;
+
     b_gen_01(0)  = b_01(0) - b_00(0);
     b_gen_01(1)  = b_01(1) - b_00(1);
-    cout << "b_gen_01 = " << b_gen_01 << endl;
+
     b_gen_10(0)  = b_10(0) - b_00(0);
     b_gen_10(1)  = b_10(1) - b_00(1);
 	
     b_gen_11(0)  = b_11(0) - b_00(0);
     b_gen_11(1)  = b_11(1) - b_00(1);
-cout << "bgen11 = " << b_gen_11 << endl;
+
     //rotate the coordinate system in such a way that b_01 lies ion the second axis.
     Matrix<double> R(2,2);
 
@@ -85,7 +92,7 @@ cout << "bgen11 = " << b_gen_11 << endl;
       {
 	//rotation angle
 	rot_angle = atan(b_gen_01(0) / b_gen_01(1));
-	cout << "a =" << rot_angle << endl; 
+
 	cos_rot_angle = cos(rot_angle);
 	sin_rot_angle = sqrt(1 - cos(rot_angle)*cos(rot_angle));
 	R(0,0) = cos_rot_angle;
@@ -100,7 +107,6 @@ cout << "bgen11 = " << b_gen_11 << endl;
 
       }
  
-cout << "bgen11 = " << b_gen_11 << endl;
     //rescale the second coordinate by 1/b_01(2) ==> b_01 = (0,1)^T
     if ( b_gen_01(1) != 0)
       {
@@ -129,35 +135,36 @@ cout << "bgen11 = " << b_gen_11 << endl;
 	R(1,0) = shearing_param;
 	R(1,1) = 1;
 	b_gen_00 = apply(R, b_gen_00);
-	b_gen_01 = apply(R, b_gen_01);
-	b_gen_10 = apply(R, b_gen_10);
-	b_gen_11 = apply(R, b_gen_11);
+ 	b_gen_01 = apply(R, b_gen_01);
+ 	b_gen_10 = apply(R, b_gen_10);
+ 	b_gen_11 = apply(R, b_gen_11);
       }	
-
 //     cout << b_gen_00[0] << " " <<  b_gen_00[1] << endl
 // 	 << b_gen_01[0] << " " <<  b_gen_01[1] << endl
 // 	 << b_gen_10[0] << " " <<  b_gen_10[1] << endl
 // 	 << b_gen_11[0] << " " <<  b_gen_11[1] << endl;
 
-
   }
 
-
+  inline
   const Point<2>& LinearBezierMapping::get_b_00() const
   {
     return b_00;
   }
   
+  inline
   const Point<2>& LinearBezierMapping::get_b_10() const
   {
     return b_10;
   }
-  
+
+  inline
   const Point<2>& LinearBezierMapping::get_b_01() const
   {
     return b_01;
   }
 
+  inline
   const Point<2>& LinearBezierMapping::get_b_11() const
   {
     return b_11;
@@ -166,7 +173,7 @@ cout << "bgen11 = " << b_gen_11 << endl;
   inline
   const unsigned short int LinearBezierMapping::get_sgn_det_D() const
   {
-    return 1;
+    return sgn_det_D;
   }
   
   inline
@@ -274,38 +281,216 @@ cout << "bgen11 = " << b_gen_11 << endl;
     pc(1) = t;
   }
 
-  const double LinearBezierMapping::det_D(const Point<2>&) const
+  inline
+  const double LinearBezierMapping::det_D(const Point<2>& p) const
   {
+    return (p(1) * d_ds_d_dt_kappa_r(0) + min_b00_plus_b10(0)) * 
+      (p(0) * d_ds_d_dt_kappa_r(1) + min_b00_plus_b01(1)) -
+      (p(1) * d_ds_d_dt_kappa_r(1) + min_b00_plus_b10(1)) *
+      (p(0) * d_ds_d_dt_kappa_r(0) + min_b00_plus_b01(0));
     
   }
-    
-  const double LinearBezierMapping::abs_Det_D(const Point<2>&) const
+  inline    
+  const double LinearBezierMapping::abs_Det_D(const Point<2>& p) const
   {
-
+    return fabs(det_D(p));
   }
 
-  const double LinearBezierMapping::d_x_det_D(const Point<2,double>&) const
+  inline
+  const double LinearBezierMapping::d_x_det_D(const Point<2,double>& p) const
   {
-
+    return (p(1) * d_ds_d_dt_kappa_r(0) + min_b00_plus_b10(0)) * d_ds_d_dt_kappa_r(1)
+      -
+      (p(1) * d_ds_d_dt_kappa_r(1) + min_b00_plus_b10(1)) *  d_ds_d_dt_kappa_r(0);
   }
 
-  const double LinearBezierMapping::d_y_det_D(const Point<2,double>&) const
+  inline
+  const double LinearBezierMapping::d_y_det_D(const Point<2,double>& p) const
   {
-    
+    return d_dt_d_ds_kappa_r(0) * (p(0) * d_ds_d_dt_kappa_r(1) + min_b00_plus_b01(1))
+      -
+      d_dt_d_ds_kappa_r(1) * (p(0) * d_ds_d_dt_kappa_r(0) + min_b00_plus_b01(0));
   }
    
+  inline
   const double LinearBezierMapping::d_dim_kappa_direc(const bool& dim, const bool& direc,
-						      const Point<2>&) const
+						      const Point<2>& p) const
   {
-
+    return dim ? p(0) * d_ds_d_dt_kappa_r(direc ? 1 : 0) + min_b00_plus_b01(direc ? 1 : 0) : 
+      p(1) * d_ds_d_dt_kappa_r(direc ? 1 : 0) + min_b00_plus_b10(direc ? 1 : 0);
   }
 
-//  template <unsigned int DIM, class VALUE>
-//   inline
-//   std::ostream& operator << (std::ostream& os, const Point<DIM, VALUE>& p)
-//   {
-//     print_vector(p, os);
-//     return os;
-//   }
+   LinearBezierMapping&
+   LinearBezierMapping::operator = (const LinearBezierMapping& x)
+   {
+     b_00 = x.b_00;
+     b_01 = x.b_01;
+     b_10 = x.b_10;
+     b_11 = x.b_11;
+     
+     setup();
+
+     return *this;
+   }
+
+  inline
+  std::ostream& operator << (std::ostream& os, const LinearBezierMapping& p)
+  {
+    
+    os << "b_00=" << p.get_b_00() << endl
+    << "b_01=" << p.get_b_01() << endl
+    << "b_10=" << p.get_b_10() << endl
+    << "b_11=" << p.get_b_11();
+    
+    return os;
+  }
+  
+  //################### AffinLinearMapping ###################
+ 
+ template <unsigned int DIM>
+  inline
+  AffinLinearMapping<DIM>::AffinLinearMapping ()
+  {
+  }
+
+  template<unsigned int DIM>
+  inline
+  AffinLinearMapping<DIM>::AffinLinearMapping (const AffinLinearMapping<DIM>& kappa)
+    : A(kappa.get_A()), b(kappa.get_b())
+  {
+    Point<DIM> p;//p equals origin is assumed!!
+    sgn_det_D = (int) ( det_D(p) / det_D(p) );
+  }
+
+  template <unsigned int DIM>
+  inline
+  AffinLinearMapping<DIM>::AffinLinearMapping (const Matrix<double>& _A,
+					       const Vector<double>& _b)
+    : A(_A), b(_b)
+  {
+    Point<DIM> p;//p equals origin is assumed!!
+    sgn_det_D = (int) ( det_D(p) / det_D(p) );
+  }
+  
+  template <unsigned int DIM>
+  inline
+  AffinLinearMapping<DIM>& AffinLinearMapping<DIM>::operator = (const AffinLinearMapping& kappa)
+  {
+    A = kappa.get_A();
+    b = kappa.get_b();
+    
+    Point<DIM> p;//p equals origin is assumed!!
+    sgn_det_D = (int) ( det_D(p) / det_D(p) );
+
+    return *this;
+  }
+
+  template <unsigned int DIM>
+  inline
+  const Matrix<double>& AffinLinearMapping<DIM>::get_A() const
+  {
+    return A;
+  }
+  
+  template <unsigned int DIM>
+  inline
+  const Vector<double>&  AffinLinearMapping<DIM>::get_b() const
+  {
+    return b;
+  }
+  
+  template <unsigned int DIM>
+  inline
+  const unsigned short int AffinLinearMapping<DIM>::get_sgn_det_D() const
+  {
+    return sgn_det_D;
+  }
+
+  template <unsigned int DIM>
+  inline
+  void  AffinLinearMapping<DIM>::mapPoint(Point<DIM>& pp,
+					  const Point<DIM>& pc) const
+  {
+    pp = add(apply(A,pc),b);
+  }
+  
+  template <unsigned int DIM>
+  inline
+  void  AffinLinearMapping<DIM>::mapPointInv(Point<DIM>& pc,
+					     const Point<DIM>& pp) const
+  {
+    assert(DIM == 1 || DIM == 2);
+    switch (DIM)
+      {
+      case 1:
+	pc  =  sub(pp,b);
+	pc *= 1.0/A(0,0);
+	return;
+      case 2:
+	Matrix<double> A_Inv_m_detA(2,2);
+	A_Inv_m_detA(0,0) =  A(1,1);
+	A_Inv_m_detA(1,0) = -A(0,1);
+	A_Inv_m_detA(0,1) = -A(1,0);
+	A_Inv_m_detA(1,1) =  A(0,0);
+	pc  =  apply(A_Inv_m_detA,sub(pp,b));
+	pc /=  A(0,0)*A(1,1) - A(1,0)*A(0,1);
+	return;
+      };
+  }
+  
+  template <unsigned int DIM>
+  inline
+  const double  AffinLinearMapping<DIM>::det_D(const Point<DIM>& p) const
+  {
+    assert(DIM == 1 || DIM == 2);
+    switch (DIM)
+      {
+      case 1:
+	return A(0,0);
+      case 2:
+	return  A(0,0)*A(1,1) - A(1,0)*A(0,1);
+      };
+  }
+  
+  template <unsigned int DIM>
+  inline
+  const double AffinLinearMapping<DIM>::abs_Det_D(const Point<DIM>&) const
+  {
+    assert(DIM == 2);
+    return  fabs(det_D(p));
+  }
+  
+  template <unsigned int DIM>
+  inline
+  const double  AffinLinearMapping<DIM>::d_x_det_D(const Point<DIM>&) const
+  {
+    return 0;
+  }
+  
+  template <unsigned int DIM>
+  inline
+  const double  AffinLinearMapping<DIM>::d_y_det_D(const Point<DIM>&) const
+  {
+    return 0;
+  }
+  
+  template <unsigned int DIM>
+  inline
+  const double  AffinLinearMapping<DIM>::d_dim_kappa_direc(const bool& dim,
+							   const bool& direc,
+							   const Point<DIM>&) const
+  {
+    return 0;
+  }
+
+  template <unsigned int DIM>
+  std::ostream& operator << (std::ostream& os, const AffinLinearMapping<DIM>& kappa)
+  {
+    os << "A = " << endl
+       << kappa.get_A() << endl
+       << "b = " << endl
+       << kappa.get_b();
+    return os;
+}
 
 }

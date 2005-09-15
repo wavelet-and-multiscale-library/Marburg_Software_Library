@@ -311,14 +311,23 @@ namespace FrameTL
       -
       d_dt_d_ds_kappa_r(1) * (p(0) * d_ds_d_dt_kappa_r(0) + min_b00_plus_b01(0));
   }
-   
+
   inline
-  const double LinearBezierMapping::d_dim_kappa_direc(const bool& dim, const bool& direc,
-						      const Point<2>& p) const
+  const double LinearBezierMapping::d_dim_kappa_direc( const unsigned short int& dim,
+						       const unsigned short int& direc,
+						       const Point<2>& p) const
   {
-    return dim ? p(0) * d_ds_d_dt_kappa_r(direc ? 1 : 0) + min_b00_plus_b01(direc ? 1 : 0) : 
-      p(1) * d_ds_d_dt_kappa_r(direc ? 1 : 0) + min_b00_plus_b10(direc ? 1 : 0);
+    return (dim==1) ? p(0) * d_ds_d_dt_kappa_r((direc==1) ? 1 : 0) + min_b00_plus_b01((direc==1) ? 1 : 0) : 
+      p(1) * d_ds_d_dt_kappa_r((direc==1) ? 1 : 0) + min_b00_plus_b10((direc==1) ? 1 : 0);
   }
+
+//   inline
+//   const double LinearBezierMapping::d_dim_kappa_direc(const bool& dim, const bool& direc,
+// 						      const Point<2>& p) const
+//   {
+//     return dim ? p(0) * d_ds_d_dt_kappa_r(direc ? 1 : 0) + min_b00_plus_b01(direc ? 1 : 0) : 
+//       p(1) * d_ds_d_dt_kappa_r(direc ? 1 : 0) + min_b00_plus_b10(direc ? 1 : 0);
+//   }
 
    LinearBezierMapping&
    LinearBezierMapping::operator = (const LinearBezierMapping& x)
@@ -454,9 +463,8 @@ namespace FrameTL
   
   template <unsigned int DIM>
   inline
-  const double AffinLinearMapping<DIM>::abs_Det_D(const Point<DIM>&) const
+  const double AffinLinearMapping<DIM>::abs_Det_D(const Point<DIM>& p) const
   {
-    assert(DIM == 2);
     return  fabs(det_D(p));
   }
   
@@ -476,14 +484,15 @@ namespace FrameTL
   
   template <unsigned int DIM>
   inline
-  const double  AffinLinearMapping<DIM>::d_dim_kappa_direc(const bool& dim,
-							   const bool& direc,
-							   const Point<DIM>&) const
+  const double AffinLinearMapping<DIM>::d_dim_kappa_direc(const unsigned short int& dim,
+							  const unsigned short int& direc,
+							  const Point<DIM>& p) const
   {
     return 0;
   }
 
   template <unsigned int DIM>
+  inline
   std::ostream& operator << (std::ostream& os, const AffinLinearMapping<DIM>& kappa)
   {
     os << "A = " << endl

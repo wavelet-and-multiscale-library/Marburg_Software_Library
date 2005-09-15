@@ -1,4 +1,8 @@
 // some helper routines
+
+#ifndef _MISC_CPP
+#define _MISC_CPP
+
 #include <math.h>
 #include <cmath>
 
@@ -64,3 +68,4 @@ namespace FrameTL
     return res;
   }
 }
+#endif

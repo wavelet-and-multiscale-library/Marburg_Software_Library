@@ -28,6 +28,64 @@ using MathTL::Matrix;
 namespace FrameTL
 {
   /*!
+    Abstract base class for parametrization of single patches forming
+    a bounded domain in \matbb R.
+   */
+  template <unsigned int DIM_m, unsigned int DIM_d>
+  class Parametrization
+  {
+  public:
+    /*!
+      virtual destructor
+     */
+    virtual ~Parametrization () {};
+
+    /*!
+      signum of det( D (mapPoint(x,y) ) )
+      identical for all (x,y)!
+     */
+    virtual const unsigned short int get_sgn_det_D() const = 0;
+
+    /*!
+      maps a point
+     */
+    virtual void mapPoint(Point<DIM_d>&, const Point<DIM_m>&) const = 0;
+
+    /*!
+      inverse mapping
+     */
+    virtual void mapPointInv(Point<DIM_m>&, const Point<DIM_d>&) const = 0;
+
+    /*!
+      det( D (mapPoint(x,y)) )
+     */
+    virtual const double det_D(const Point<DIM_m>&) const = 0;
+    
+    /*!
+      |det( D (mapPoint(x,y)) )|
+     */
+    virtual const double abs_Det_D(const Point<DIM_m>&) const = 0;
+
+    /*!
+      \partial/\partial x (det(D kappa))(s,t)
+     */
+    virtual const double d_x_det_D(const Point<DIM_m>&) const = 0;
+
+    /*!
+     \partial/\partial y (det(D kappa))(s,t)
+     */
+    virtual const double d_y_det_D(const Point<DIM_m>&) const = 0;
+   
+    /*!
+      \partial / \partial_dim \kappa^(direc)
+    */    
+    virtual const double d_dim_kappa_direc(const unsigned short int& dim,
+					   const unsigned short int& direc,
+					   const Point<DIM_m>&) const = 0;
+
+  };
+
+  /*!
     This class models parametrizations for arbitrary quadrangles in \mathbb R^2.
     It's crucial functionality is to map a single point, lying in (0,1)^2 to a
     point in the quadrangle and vice versa. The involved mapping explicitely looks like:
@@ -37,10 +95,16 @@ namespace FrameTL
     where the b_ij are the vertices of the qudrangle at hand.
     
    */
-  class LinearBezierMapping
+  class LinearBezierMapping : public Parametrization<2,2>
   {
 
   public:
+
+    /*!
+      pureyl virtual destructor
+     */
+    ~LinearBezierMapping () {};
+    
     /*!
       default constructor:
     */
@@ -118,7 +182,8 @@ namespace FrameTL
     /*!
       \partial / \partial_dim \kappa^(direc)
     */    
-    const double d_dim_kappa_direc(const bool& dim, const bool& direc,
+    const double d_dim_kappa_direc(const unsigned short int& dim,
+				   const unsigned short int& direc,
 				   const Point<2>&) const;
 
   protected:
@@ -176,7 +241,7 @@ namespace FrameTL
 
    */
   template <unsigned int DIM>
-  class AffinLinearMapping
+  class AffinLinearMapping : public Parametrization<DIM,DIM>
   {
   public:
 
@@ -184,6 +249,11 @@ namespace FrameTL
       size type (cf. STL containers)
     */
     typedef size_t size_type;
+
+    /*!
+      pureyl virtual destructor
+     */
+    ~AffinLinearMapping () {};
 
     /*!
       default constructor:
@@ -246,7 +316,8 @@ namespace FrameTL
     /*!
       \partial / \partial_dim \kappa^(direc)
     */    
-    const double d_dim_kappa_direc(const bool& dim, const bool& direc,
+    const double d_dim_kappa_direc(const unsigned short int& dim,
+				   const unsigned short int& direc,
 				   const Point<DIM>&) const;
    
   protected:

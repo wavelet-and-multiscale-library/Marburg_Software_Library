@@ -1,19 +1,24 @@
 
 #include <iostream>
 #include "parametrization.h"
+#include <misc.cpp>
+#include <time.h> 
 
 using std::cout;
 using std::endl;
 
+
 using FrameTL::LinearBezierMapping;
 using FrameTL::AffinLinearMapping;
+
+using namespace FrameTL;
 
 int main()
 {
   
-  cout << "Hello World, Frame software is alive again :-)!" << endl;
+  cout << "Testing class Parametrization and its generations..." << endl;
   LinearBezierMapping k_1(Point<2>(-0.5,-1),Point<2>(-0.5,0),
-			Point<2>(1,-1), Point<2>(1,0));
+			  Point<2>(1,-1), Point<2>(1,0));
 
   Matrix<double> A(2,2);
   A(0,0) = 2.3;
@@ -41,19 +46,27 @@ int main()
 //   cout << "in the meantime = " << tmp << endl;
 //   b.mapPointInv(pc, tmp);
 //   cout << "after = " << pc << endl;
-
+   
+   clock_t tstart, tend;
+   double time;
+   
+   tstart = clock();
+   Point<2> pc(0.5, 0.75);
+   Matrix<double> R(2,2);
+   R(0,0) = 1.;
+   R(1,1) = 1.;
    for (int i = 0; i <= 1<<J; i++)
      {
-       for (int j= 0; j<= 1<<J; j++)
-	 {
-// 	   Point<2> pc(i*dx, j*dx);
-// 	   cout << k_1 << endl;
-// 	   cout << "###########################" << endl;
-// 	   cout << "before = " << pc << endl;
-// 	   k_1.mapPoint(tmp,pc);
-// 	   cout << "in the meantime = " << tmp << endl;
-// 	   k_1.mapPointInv(pc, tmp);
-// 	   cout << "after = " << pc << endl;
+     for (int j= 0; j<= 1<<J; j++)
+	 { 
+	   Point<2> pc(i*dx, j*dx);
+	   cout << k_1 << endl;
+	   cout << "###########################" << endl;
+	   cout << "before = " << pc << endl;
+	   k_1.mapPoint(tmp,pc);
+	   cout << "in the meantime = " << tmp << endl;
+	   k_1.mapPointInv(pc, tmp);
+	   cout << "after = " << pc << endl;
 	   
 // 	   Point<2> pc(i*dx, j*dx);
 // 	   cout << k_2 << endl;
@@ -73,10 +86,12 @@ int main()
 // 	   k_3.mapPoint(tmp_1,pc);
 // 	   cout << "in the meantime = " << tmp_1 << endl;
 // 	   k_3.mapPointInv(pc, tmp_1);
-// 	   cout << "after = " << pc << endl;
+//	   cout << "after = " << pc << endl;
 
 	 }
-     } 
-   
+     }
+     tend = clock();
+     time = (double)(tend-tstart)/CLOCKS_PER_SEC;
+     cout << "cpu time = " << time << "s" << endl;
   return 0;
 }

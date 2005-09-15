@@ -12,6 +12,12 @@
 
 #include <iostream>
 
+#include <algebra/infinite_vector.h>
+
+#include <interval/i_index.h>
+
+using MathTL::InfiniteVector;
+
 namespace WaveletTL
 {
   /*!
@@ -19,64 +25,127 @@ namespace WaveletTL
     The template parameters provide the biorthogonal masks of a refinable function
     on the real line.
     If the second template parameter is omitted, we assume that the given refinable
-    function induces an orthonormal wavelet basis.
+    function induces an orthonormal wavelet basis (i.e. a biorthogonal one where the dual
+    basis is just the primal one).
+
+    The periodized scaling functions (and analogously the wavelets) look like
+
+      phi^per_{j,k}(x) = \sum_{l\in\mathbb Z} phi_{j,k}(x+l)
 
     A univariate mask should have at least the signature of a LaurentPolynomial<double>,
-    i.e., have the usual iterator classes.
+    i.e., have the usual iterator classes. Typical examples are the Haar or the CDF masks.
+
+    References:
+    [D] Daubechies,
+        Ten Lectures On Wavelets, pp. 304ff
   */
   template <class PRIMALMASK, class DUALMASK = PRIMALMASK>
-    class PeriodicBasis
-    {
-      public:
-      /*!
-	Wavelet index class for periodic wavelet bases on [0,1]
-       */
-      class Index
-      {
-	public:
-	//! default constructor: yields unscaled generator index
-	Index() : j_(0), e_(0), k_(0) {}
-	
-	//! copy constructor
-	Index(const Index& lambda);
-	
-	//! constructor with specified parameters
-	Index(const int j, const int e, const int k);
-	
-	//! assignment
-	Index& operator = (const Index& lambda);
+  class PeriodicBasis
+  {
+  public:
+    //! default constructor
+    PeriodicBasis();
+    
+    //! coarsest possible level, this is always zero
+    inline const int j0() const { return 0; }
 
-	//! check equality
-	bool operator == (const Index& lambda) const;
+    //! wavelet index class
+    typedef IIndex<PeriodicBasis<PRIMALMASK,DUALMASK> > Index;
 
-	//! check non-equality
-	inline bool operator != (const Index& lambda) const
-	{ return !(*this == lambda); }
-	
-	//! preincrement
-	Index& operator ++ ();
+    //! bounds for the generator indices
+    inline const int DeltaLmin() const { return 0; }
+    inline const int DeltaRmax(const int j) const { return (1<<j) - 1; }
 
-	//! scale j
-	inline int j() const { return j_; }
-	
-	//! type e (e=0: generator, e=1: wavelet)
-	inline int e() const { return e_; }
-	
-	//! translation index k
-	inline int k() const { return k_; }
+    //! bounds for the wavelet indices
+    inline const int Nablamin() const { return 0; }
+    inline const int Nablamax(const int j) const { return (1<<j) - 1; }
+    
+    //! size of Delta_j
+    inline const int Deltasize(const int j) const { 1<<j; }
+    
+    //! DECOMPOSE routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+        \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
+      where the multiscale decomposition starts with the coarsest
+      generator level jmin.
+     */
+    void decompose_1(const Index& lambda, const int jmin,
+		     InfiniteVector<double, Index>& c) const;
 
-	//! lexicographic order <
-	bool operator < (const Index& lambda) const;
-	
-	//! lexicographic order <=
-	bool operator <= (const Index& lambda) const
-	{ return (*this < lambda || *this == lambda); }
+    //! dual DECOMPOSE routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+        \tilde\psi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
+      where the multiscale decomposition starts with the coarsest
+      generator level jmin.
+     */
+    void decompose_t_1(const Index& lambda, const int jmin,
+		       InfiniteVector<double, Index>& c) const;
 
-	protected:
-	//! scale, type, geometric location
-	int j_, e_, k_;
-      };
-    };
+    //! DECOMPOSE routine, full version
+    /*!
+      constructs for a given coefficient set c another one v with level >= jmin,
+      such that
+        \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
+    */
+    void decompose(const InfiniteVector<double, Index>& c, const int jmin,
+		   InfiniteVector<double, Index>& v) const;
+
+    //! dual DECOMPOSE routine, full version
+    /*!
+      constructs for a given coefficient set c another one v with level >= jmin,
+      such that
+        \sum_{\lambda}c_\lambda\tilde\psi_lambda = \sum_{\lambda'}d_{\lambda'}\tilde\psi_{\lambda'}
+    */
+    void decompose_t(const InfiniteVector<double, Index>& c, const int jmin,
+		     InfiniteVector<double, Index>& v) const;
+
+    //! RECONSTRUCT routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+        \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
+      where always |\lambda'|>=j
+     */
+    void reconstruct_1(const Index& lambda, const int j,
+		       InfiniteVector<double, Index>& c) const;
+
+    //! RECONSTRUCT routine, full version
+    /*!
+      Constructs for a given coefficient set c another one v,
+      such that
+        \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
+      where always |\lambda'|>=j
+    */
+    void reconstruct(const InfiniteVector<double, Index>& c, const int j,
+		     InfiniteVector<double, Index>& v) const;
+
+    //! dual RECONSTRUCT routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+        \tilde\psi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
+      where always |\lambda'|>=j
+     */
+    void reconstruct_t_1(const Index& lambda, const int j,
+			 InfiniteVector<double, Index>& c) const;
+
+    //! dual RECONSTRUCT routine, full version
+    /*!
+      Constructs for a given coefficient set c another one v,
+      such that
+        \sum_{\lambda}c_\lambda\tilde\psi_\lambda = \sum_{\lambda'}v_{\lambda'}\tilde\psi_{\lambda'}
+      where always |\lambda'|>=j
+    */
+    void reconstruct_t(const InfiniteVector<double, Index>& c, const int j,
+		       InfiniteVector<double, Index>& v) const;
+
+  protected:
+
+  };
 }
 
 // include implementation

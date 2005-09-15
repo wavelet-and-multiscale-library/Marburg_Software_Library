@@ -19,7 +19,7 @@ namespace WaveletTL
   /*!
     A (template) wavelet index class for bases on [0,1] like those from [DKU],[DS].
     We require the template parameter class IBASIS to provide the routines
-    j0(), DeltaLmin() and DeltaRmax(j).
+    j0(), DeltaLmin(), DeltaRmax(j), Nablamin() and Nablamax(j).
   */
   template <class IBASIS>
   class IIndex

@@ -147,8 +147,8 @@ namespace WaveletTL
     /*!
       boundary indices in \nabla_j
     */
-    inline static const int Nablamin() { return 0; }
-    inline static const int Nablamax(const int j) { return (1<<j)-1; }
+    inline const int Nablamin() const { return 0; }
+    inline const int Nablamax(const int j) const { return (1<<j)-1; }
 
     //! DECOMPOSE routine, simple version
     /*!

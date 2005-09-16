@@ -19,14 +19,22 @@ namespace WaveletTL
     boundary conditions.
   */
   template <class BASIS1, class BASIS2>
-  class TPBasis
+  class TensorProductBasis
   {
   public:
+    //! default constructor
+    TensorProductBasis();
+
+    //! coarsest possible level j0
+    inline const int j0() const { return j0_; }    
 
   protected:
-    // instances of the 1D bases
-    BASIS1 basis1;
-    BASIS2 basis2;
+    //! coarsest possible level j0
+    int j0_;
+
+    //! instances of the two 1D bases
+    BASIS1 basis1_;
+    BASIS2 basis2_;
   };
 }
 

@@ -46,7 +46,7 @@ namespace WaveletTL
     inline const int j0() const { return j0_; }
 
     //! wavelet index class
-    typedef IIndex<PeriodicBasis<RBASIS> > Index;
+    typedef IntervalIndex<PeriodicBasis<RBASIS> > Index;
 
     //! bounds for the generator indices
     inline const int DeltaLmin() const { return 0; }

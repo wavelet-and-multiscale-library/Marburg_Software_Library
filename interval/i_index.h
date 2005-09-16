@@ -17,12 +17,13 @@ using std::endl;
 namespace WaveletTL
 {
   /*!
-    A (template) wavelet index class for bases on [0,1] like those from [DKU],[DS].
+    A (template) wavelet index class for bases on [0,1] like periodic wavelet bases
+    or those from [DKU],[DS] (see template class DSBasis).
     We require the template parameter class IBASIS to provide the routines
     j0(), DeltaLmin(), DeltaRmax(j), Nablamin() and Nablamax(j).
   */
   template <class IBASIS>
-  class IIndex
+  class IntervalIndex
   {
   public:
     /*!
@@ -30,32 +31,32 @@ namespace WaveletTL
       (also serves as a default constructor, but yields an invalid index then
       because the underlying interval basis must be specified to work correctly)
      */
-    IIndex(const IBASIS* basis = 0);
+    IntervalIndex(const IBASIS* basis = 0);
 
     //! copy constructor
-    IIndex(const IIndex& lambda);
+    IntervalIndex(const IntervalIndex& lambda);
   
     //! constructor with specified parameters
-    IIndex(const int j, const int e, const int k, const IBASIS* basis);
+    IntervalIndex(const int j, const int e, const int k, const IBASIS* basis);
     
     //! assignment
-    IIndex& operator = (const IIndex& lambda);
+    IntervalIndex& operator = (const IntervalIndex& lambda);
 
     //! check equality
-    bool operator == (const IIndex& lambda) const;
+    bool operator == (const IntervalIndex& lambda) const;
 
     //! check non-equality
-    inline bool operator != (const IIndex& lambda) const
+    inline bool operator != (const IntervalIndex& lambda) const
     { return !(*this == lambda); }
 
     //! preincrement
-    IIndex& operator ++ ();
+    IntervalIndex& operator ++ ();
     
     //! lexicographic order <
-    bool operator < (const IIndex& lambda) const;
+    bool operator < (const IntervalIndex& lambda) const;
 
     //! lexicographic order <=
-    bool operator <= (const IIndex& lambda) const
+    bool operator <= (const IntervalIndex& lambda) const
     { return (*this < lambda || *this == lambda); }
 
     //! scale j
@@ -80,7 +81,7 @@ namespace WaveletTL
 
   //! stream output
   template <class IBASIS>
-  inline std::ostream& operator << (std::ostream& os, const IIndex<IBASIS>& lambda)
+  inline std::ostream& operator << (std::ostream& os, const IntervalIndex<IBASIS>& lambda)
   {
     using namespace std;
     os << "("
@@ -97,25 +98,25 @@ namespace WaveletTL
     index of first (leftmost) generator on level j >= j0
   */
   template <class IBASIS>
-  IIndex<IBASIS> first_generator(const IBASIS* basis, const int j);
+  IntervalIndex<IBASIS> first_generator(const IBASIS* basis, const int j);
 
   /*!
     index of last (rightmost) generator on level j >= j0
   */
   template <class IBASIS>
-  IIndex<IBASIS> last_generator(const IBASIS* basis, const int j);
+  IntervalIndex<IBASIS> last_generator(const IBASIS* basis, const int j);
 
   /*!
     index of first (leftmost) wavelet on level j >= j0
   */
   template <class IBASIS>
-  IIndex<IBASIS> first_wavelet(const IBASIS* basis, const int j);
+  IntervalIndex<IBASIS> first_wavelet(const IBASIS* basis, const int j);
 
   /*!
     index of last (rightmost) wavelet on level j >= j0
   */
   template <class IBASIS>
-  IIndex<IBASIS> last_wavelet(const IBASIS* basis, const int j);
+  IntervalIndex<IBASIS> last_wavelet(const IBASIS* basis, const int j);
 }
 
 // include implementation

@@ -93,7 +93,7 @@ namespace WaveletTL
     /*!
       wavelet index class
     */
-    typedef IIndex<DSBasis<d,dT> > Index;
+    typedef IntervalIndex<DSBasis<d,dT> > Index;
 
     /*!
       size_type, for convenience

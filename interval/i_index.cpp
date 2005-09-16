@@ -3,7 +3,7 @@
 namespace WaveletTL
 {
   template <class IBASIS>
-  IIndex<IBASIS>::IIndex(const IBASIS* basis)
+  IntervalIndex<IBASIS>::IntervalIndex(const IBASIS* basis)
     : basis_(basis)
   {
     if (basis_ == 0) {
@@ -16,7 +16,7 @@ namespace WaveletTL
   }
   
   template <class IBASIS>
-  IIndex<IBASIS>::IIndex(const IIndex<IBASIS>& lambda)
+  IntervalIndex<IBASIS>::IntervalIndex(const IntervalIndex<IBASIS>& lambda)
   {
     j_ = lambda.j();
     e_ = lambda.e();
@@ -25,7 +25,7 @@ namespace WaveletTL
   }
 
   template <class IBASIS>
-  IIndex<IBASIS>::IIndex(const int j, const int e, const int k,
+  IntervalIndex<IBASIS>::IntervalIndex(const int j, const int e, const int k,
 			 const IBASIS* basis)
   {
     j_ = j;
@@ -35,8 +35,8 @@ namespace WaveletTL
   }
 
   template <class IBASIS>
-  IIndex<IBASIS>&
-  IIndex<IBASIS>::operator = (const IIndex<IBASIS>& lambda)
+  IntervalIndex<IBASIS>&
+  IntervalIndex<IBASIS>::operator = (const IntervalIndex<IBASIS>& lambda)
   {
     j_ = lambda.j();
     e_ = lambda.e();
@@ -48,7 +48,7 @@ namespace WaveletTL
 
   template <class IBASIS>
   bool
-  IIndex<IBASIS>::operator == (const IIndex<IBASIS>& lambda) const
+  IntervalIndex<IBASIS>::operator == (const IntervalIndex<IBASIS>& lambda) const
   {
     return (j_ == lambda.j() &&
 	    e_ == lambda.e() &&
@@ -57,7 +57,7 @@ namespace WaveletTL
 
   template <class IBASIS>
   bool
-  IIndex<IBASIS>::operator < (const IIndex<IBASIS>& lambda) const
+  IntervalIndex<IBASIS>::operator < (const IntervalIndex<IBASIS>& lambda) const
   {
     return (j_ < lambda.j() ||
 	    (j_ == lambda.j() && e_ < lambda.e()) ||
@@ -65,8 +65,8 @@ namespace WaveletTL
   }
 
   template <class IBASIS>
-  IIndex<IBASIS>&
-  IIndex<IBASIS>::operator ++ ()
+  IntervalIndex<IBASIS>&
+  IntervalIndex<IBASIS>::operator ++ ()
   {
     switch (e_) {
     case 0:
@@ -94,31 +94,31 @@ namespace WaveletTL
 
   template <class IBASIS>
   inline
-  IIndex<IBASIS> first_generator(const IBASIS* basis, const int j)
+  IntervalIndex<IBASIS> first_generator(const IBASIS* basis, const int j)
   {
     assert(j >= basis->j0());
-    return IIndex<IBASIS>(j, 0, basis->DeltaLmin(), basis);
+    return IntervalIndex<IBASIS>(j, 0, basis->DeltaLmin(), basis);
   }
   
   template <class IBASIS>
   inline
-  IIndex<IBASIS> last_generator(const IBASIS* basis, const int j)
+  IntervalIndex<IBASIS> last_generator(const IBASIS* basis, const int j)
   {
     assert(j >= basis->j0());
-    return IIndex<IBASIS>(j, 0, basis->DeltaRmax(j), basis);
+    return IntervalIndex<IBASIS>(j, 0, basis->DeltaRmax(j), basis);
   }
 
   template <class IBASIS>
-  IIndex<IBASIS> first_wavelet(const IBASIS* basis, const int j)
+  IntervalIndex<IBASIS> first_wavelet(const IBASIS* basis, const int j)
   {
     assert(j >= basis->j0());
-    return IIndex<IBASIS>(j, 1, basis->Nablamin(), basis);
+    return IntervalIndex<IBASIS>(j, 1, basis->Nablamin(), basis);
   }
   
   template <class IBASIS>
-  IIndex<IBASIS> last_wavelet(const IBASIS* basis, const int j)
+  IntervalIndex<IBASIS> last_wavelet(const IBASIS* basis, const int j)
   {
     assert(j >= basis->j0());
-    return IIndex<IBASIS>(j, 1, basis->Nablamax(j), basis);
+    return IntervalIndex<IBASIS>(j, 1, basis->Nablamax(j), basis);
   }
 }

@@ -4,6 +4,7 @@
 
 #include <Rd/haar_mask.h>
 #include <Rd/cdf_mask.h>
+#include <Rd/daubechies_mask.h>
 #include <Rd/refinable.h>
 
 using namespace std;
@@ -70,6 +71,7 @@ int main()
   for (RefinableFunction<CDFMask_dual<3,5> >::const_iterator it(phi3T.begin()); it != phi3T.end(); it++)
     cout << "k=" << it.index() << ": " << *it << endl;  
 
+#if 0
   cout << "- CDF<3>, function values and first derivative, clipped to [0,1]:" << endl;
   cout << phi3.evaluate(2);
   cout << phi3.evaluate(MultiIndex<unsigned int, 1>(1), 2);
@@ -79,7 +81,9 @@ int main()
 	       1, MultiIndex<int, 1>(1),
 	       MultiIndex<int, 1>(0), MultiIndex<int, 1>(1),
 	       2).matlab_output(cout);
+#endif
 
+#if 0
   cout << "- the CDF<3> function phi_{0,0}, clipped to [-2,2]:" << endl;
   phi3.evaluate(MultiIndex<unsigned int, 1>(),
 		0, MultiIndex<int, 1>(0),
@@ -100,7 +104,9 @@ int main()
 		1, MultiIndex<int, 1>(1),
 		MultiIndex<int, 1>(-2), MultiIndex<int, 1>(2),
 		2).matlab_output(cout);
+#endif
 
+#if 0
   cout << "- calculating moments of a CDF<2> function:" << endl;
   for (unsigned int n(0); n <= 9; n++)
     {
@@ -113,6 +119,12 @@ int main()
    	cout << "0";
       cout << ")" << endl;
     }
+#endif
   
+  cout << "- Daubechies<2> mask:" << endl;
+  RefinableFunction<DaubechiesMask<2> > dau2;
+  for (RefinableFunction<DaubechiesMask<2> >::const_iterator it(dau2.begin()); it != dau2.end(); it++)
+    cout << "k=" << it.index() << ": " << *it << endl;  
+
   return 0;
 }

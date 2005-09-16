@@ -1,5 +1,5 @@
 #include <iostream>
-#include <Rd/haar_mask.h>
+#include <Rd/daubechies_mask.h>
 #include <Rd/r_basis.h>
 #include <Rd/cdf_basis.h>
 #include <interval/periodic.h>
@@ -11,7 +11,7 @@ int main()
 {
   cout << "Testing periodic wavelet bases ..." << endl;
 
-  typedef PeriodicBasis<RBasis<HaarMask> > Basis;
+  typedef PeriodicBasis<RBasis<DaubechiesMask<3> > > Basis;
   typedef Basis::Index Index;
   Basis basis;
 

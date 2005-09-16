@@ -9,7 +9,7 @@ using std::endl;
 
 
 using FrameTL::LinearBezierMapping;
-using FrameTL::AffinLinearMapping;
+using FrameTL::AffineLinearMapping;
 
 using namespace FrameTL;
 
@@ -21,18 +21,18 @@ int main()
 			  Point<2>(1,-1), Point<2>(1,0));
 
   Matrix<double> A(2,2);
-  A(0,0) = 2.3;
-  A(1,1) = -0.21;
+  A(0,0) = 2.1;
+  A(1,1) = 1.1;
   Vector<double> b(2);
-  b(0) = -1.9;
-  b(1) = 5.78;
-  AffinLinearMapping<2> k_2 (A,b);
+  b(0) = .0;
+  b(1) = .0;
+  AffineLinearMapping<2> k_2 (A,b);
 
   Matrix<double> AA(1,1);
   AA(0,0) = 2.3;
   Vector<double> bb(1);
   bb(0) = -1.9;
-  AffinLinearMapping<1> k_3 (AA,bb);
+  AffineLinearMapping<1> k_3 (AA,bb);
 
 
   const int J = 3;
@@ -60,13 +60,13 @@ int main()
      for (int j= 0; j<= 1<<J; j++)
 	 { 
 	   Point<2> pc(i*dx, j*dx);
-	   cout << k_1 << endl;
-	   cout << "###########################" << endl;
-	   cout << "before = " << pc << endl;
+	   //cout << k_1 << endl;
+	   //cout << "###########################" << endl;
+	   //cout << "before = " << pc << endl;
 	   k_1.mapPoint(tmp,pc);
-	   cout << "in the meantime = " << tmp << endl;
+	   //cout << "in the meantime = " << tmp << endl;
 	   k_1.mapPointInv(pc, tmp);
-	   cout << "after = " << pc << endl;
+	   //cout << "after = " << pc << endl;
 	   
 // 	   Point<2> pc(i*dx, j*dx);
 // 	   cout << k_2 << endl;
@@ -93,5 +93,9 @@ int main()
      tend = clock();
      time = (double)(tend-tstart)/CLOCKS_PER_SEC;
      cout << "cpu time = " << time << "s" << endl;
+
+     Point<2> testP(1.0,2.0);
+     cout << "in patch = " << k_2.point_in_patch(testP) << endl;
+     
   return 0;
 }

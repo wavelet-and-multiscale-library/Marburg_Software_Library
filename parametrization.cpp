@@ -206,7 +206,7 @@ namespace FrameTL
     R(0,1) = -sin_rot_angle ;
     R(1,0) = -R(0,1) ;
     R(1,1) = cos_rot_angle;
-    
+
     //apply the rotation
     pc = apply(R, pc);
 
@@ -341,6 +341,30 @@ namespace FrameTL
 
      return *this;
    }
+  
+  inline
+  const bool LinearBezierMapping::point_in_patch(const Point<2>& p) const
+  {
+    //make sure to walk through the vertices counter clockwise!!!
+    unsigned short int res = 
+      pos_wrt_line(p, b_00, b_10);
+    if (res == 0)
+      return false;
+    res = 
+      pos_wrt_line(p, b_10, b_11);
+    if (res == 0)
+      return false;
+    res = 
+      pos_wrt_line(p, b_11, b_01);
+    if (res == 0)
+      return false;
+    res = 
+      pos_wrt_line(p, b_01, b_00);
+    if (res == 0)
+      return false;
+
+    return true;
+  }
 
   inline
   std::ostream& operator << (std::ostream& os, const LinearBezierMapping& p)
@@ -354,36 +378,41 @@ namespace FrameTL
     return os;
   }
   
-  //################### AffinLinearMapping ###################
+  //################### AffineLinearMapping ###################
  
- template <unsigned int DIM>
+  template <unsigned int DIM>
   inline
-  AffinLinearMapping<DIM>::AffinLinearMapping ()
+  AffineLinearMapping<DIM>::AffineLinearMapping ()
   {
   }
 
   template<unsigned int DIM>
   inline
-  AffinLinearMapping<DIM>::AffinLinearMapping (const AffinLinearMapping<DIM>& kappa)
+  AffineLinearMapping<DIM>::AffineLinearMapping (const AffineLinearMapping<DIM>& kappa)
     : A(kappa.get_A()), b(kappa.get_b())
   {
     Point<DIM> p;//p equals origin is assumed!!
     sgn_det_D = (int) ( det_D(p) / det_D(p) );
+    
+    //setup();
   }
 
   template <unsigned int DIM>
   inline
-  AffinLinearMapping<DIM>::AffinLinearMapping (const Matrix<double>& _A,
+  AffineLinearMapping<DIM>::AffineLinearMapping (const Matrix<double>& _A,
 					       const Vector<double>& _b)
     : A(_A), b(_b)
   {
     Point<DIM> p;//p equals origin is assumed!!
     sgn_det_D = (int) ( det_D(p) / det_D(p) );
+    
+    //setup();
+    //cout << "pV = " << patchVertices << endl;
   }
   
   template <unsigned int DIM>
   inline
-  AffinLinearMapping<DIM>& AffinLinearMapping<DIM>::operator = (const AffinLinearMapping& kappa)
+  AffineLinearMapping<DIM>& AffineLinearMapping<DIM>::operator = (const AffineLinearMapping& kappa)
   {
     A = kappa.get_A();
     b = kappa.get_b();
@@ -391,33 +420,35 @@ namespace FrameTL
     Point<DIM> p;//p equals origin is assumed!!
     sgn_det_D = (int) ( det_D(p) / det_D(p) );
 
+    //setup();
+
     return *this;
   }
 
   template <unsigned int DIM>
   inline
-  const Matrix<double>& AffinLinearMapping<DIM>::get_A() const
+  const Matrix<double>& AffineLinearMapping<DIM>::get_A() const
   {
     return A;
   }
   
   template <unsigned int DIM>
   inline
-  const Vector<double>&  AffinLinearMapping<DIM>::get_b() const
+  const Vector<double>&  AffineLinearMapping<DIM>::get_b() const
   {
     return b;
   }
   
   template <unsigned int DIM>
   inline
-  const unsigned short int AffinLinearMapping<DIM>::get_sgn_det_D() const
+  const unsigned short int AffineLinearMapping<DIM>::get_sgn_det_D() const
   {
     return sgn_det_D;
   }
 
   template <unsigned int DIM>
   inline
-  void  AffinLinearMapping<DIM>::mapPoint(Point<DIM>& pp,
+  void  AffineLinearMapping<DIM>::mapPoint(Point<DIM>& pp,
 					  const Point<DIM>& pc) const
   {
     pp = add(apply(A,pc),b);
@@ -425,7 +456,7 @@ namespace FrameTL
   
   template <unsigned int DIM>
   inline
-  void  AffinLinearMapping<DIM>::mapPointInv(Point<DIM>& pc,
+  void  AffineLinearMapping<DIM>::mapPointInv(Point<DIM>& pc,
 					     const Point<DIM>& pp) const
   {
     assert(DIM == 1 || DIM == 2);
@@ -449,7 +480,7 @@ namespace FrameTL
   
   template <unsigned int DIM>
   inline
-  const double  AffinLinearMapping<DIM>::det_D(const Point<DIM>& p) const
+  const double  AffineLinearMapping<DIM>::det_D(const Point<DIM>& p) const
   {
     assert(DIM == 1 || DIM == 2);
     switch (DIM)
@@ -463,28 +494,28 @@ namespace FrameTL
   
   template <unsigned int DIM>
   inline
-  const double AffinLinearMapping<DIM>::abs_Det_D(const Point<DIM>& p) const
+  const double AffineLinearMapping<DIM>::abs_Det_D(const Point<DIM>& p) const
   {
     return  fabs(det_D(p));
   }
   
   template <unsigned int DIM>
   inline
-  const double  AffinLinearMapping<DIM>::d_x_det_D(const Point<DIM>&) const
+  const double  AffineLinearMapping<DIM>::d_x_det_D(const Point<DIM>&) const
   {
     return 0;
   }
   
   template <unsigned int DIM>
   inline
-  const double  AffinLinearMapping<DIM>::d_y_det_D(const Point<DIM>&) const
+  const double  AffineLinearMapping<DIM>::d_y_det_D(const Point<DIM>&) const
   {
     return 0;
   }
   
   template <unsigned int DIM>
   inline
-  const double AffinLinearMapping<DIM>::d_dim_kappa_direc(const unsigned short int& dim,
+  const double AffineLinearMapping<DIM>::d_dim_kappa_direc(const unsigned short int& dim,
 							  const unsigned short int& direc,
 							  const Point<DIM>& p) const
   {
@@ -493,7 +524,48 @@ namespace FrameTL
 
   template <unsigned int DIM>
   inline
-  std::ostream& operator << (std::ostream& os, const AffinLinearMapping<DIM>& kappa)
+  const bool AffineLinearMapping<DIM>::point_in_patch(const Point<DIM>& p) const
+  {  
+    Point<DIM> pc;
+    mapPointInv(pc,p);
+    for (unsigned int i = 0; i < DIM; i++)
+      {
+	if (! (.0 <= pc(i) && pc(i) <= 1. ) )
+	  return false;
+      }
+        return true;
+  }
+
+//   template <unsigned int DIM>
+//   inline
+//   void AffineLinearMapping<DIM>::setup()
+//   {
+//     Point<DIM> cubeVertex;
+//     patchVertices.resize(DIM+1);
+//     for (unsigned int i = 0; i < DIM+1; i++)
+//       {
+// 	if (i!=0)
+// 	  cubeVertex(i-1) = 1;
+// 	mapPoint(patchVertices[i], cubeVertex);
+// 	if (i!=0)
+// 	cubeVertex(i-1) = 0;
+//       }
+
+//     patchOrthonBase.resize(DIM);
+//     for (unsigned int i = 0; i < DIM; i++)
+//       {
+// 	Point<DIM> p = patchVertices[i+1] - patchVertices[0]; 
+// 	norms[i] = norm2(p);
+// 	p /= norms[i];
+// 	patchOrthonBase[i] = p;
+//       }
+//     cout << patchOrthonBase << endl;
+
+//   }
+
+  template <unsigned int DIM>
+  inline
+  std::ostream& operator << (std::ostream& os, const AffineLinearMapping<DIM>& kappa)
   {
     os << "A = " << endl
        << kappa.get_A() << endl

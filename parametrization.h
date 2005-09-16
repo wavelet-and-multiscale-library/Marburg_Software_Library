@@ -83,6 +83,15 @@ namespace FrameTL
 					   const unsigned short int& direc,
 					   const Point<DIM_m>&) const = 0;
 
+    /*!
+      checks whether a special point lies in the patch repreented by this
+      parametrization
+     */
+    virtual const bool point_in_patch(const Point<DIM_d>&) const = 0;
+
+//     virtual friend std::ostream operator << (std::ostream&,
+// 				      const Parametrization<DIM_M, DIM_d>&) const = 0;
+    
   };
 
   /*!
@@ -185,6 +194,11 @@ namespace FrameTL
     const double d_dim_kappa_direc(const unsigned short int& dim,
 				   const unsigned short int& direc,
 				   const Point<2>&) const;
+    /*!
+      checks whether a special point lies in the patch repreented by this
+      parametrization
+     */
+    const bool point_in_patch(const Point<2>&) const;
 
   protected:
     //vertices of the quadrangle to parametrize
@@ -241,7 +255,7 @@ namespace FrameTL
 
    */
   template <unsigned int DIM>
-  class AffinLinearMapping : public Parametrization<DIM,DIM>
+  class AffineLinearMapping : public Parametrization<DIM, DIM>
   {
   public:
 
@@ -253,27 +267,27 @@ namespace FrameTL
     /*!
       pureyl virtual destructor
      */
-    ~AffinLinearMapping () {};
+    ~AffineLinearMapping () {};
 
     /*!
       default constructor:
     */
-    AffinLinearMapping();
+    AffineLinearMapping();
    
     /*!
       copy constructor
      */
-    AffinLinearMapping (const AffinLinearMapping&);
+    AffineLinearMapping (const AffineLinearMapping&);
 
     /*!
       constructor for initialization of the four vertices
      */
-    AffinLinearMapping (const Matrix<double> &, const Vector<double> &);
+    AffineLinearMapping (const Matrix<double> &, const Vector<double> &);
 
     /*!
       assignment operator
     */
-    AffinLinearMapping& operator = (const AffinLinearMapping&);
+    AffineLinearMapping& operator = (const AffineLinearMapping&);
 
     const Matrix<double>& get_A() const;
     const Vector<double>& get_b() const;
@@ -319,23 +333,41 @@ namespace FrameTL
     const double d_dim_kappa_direc(const unsigned short int& dim,
 				   const unsigned short int& direc,
 				   const Point<DIM>&) const;
+    /*!
+      checks whether a special point lies in the patch repreented by this
+      parametrization
+     */
+    const bool point_in_patch(const Point<DIM>&) const;
+
+    /*!
+      stream output for AffineLinearMapping
+    */
+    //    friend std::ostream& operator << (std::ostream&, const AffineLinearMapping<DIM>&);
+    
    
   protected:
+    /*!
+     */
+    void setup();
+
     Matrix<double> A;
     Vector<double> b;
+
+    Array1D< Point<DIM> > patchVertices;
+    Array1D< Point<DIM> > patchOrthonBase;
+    Array1D<double> norms;
 
   private:
     //signum of det( D (mapPoint(x,y) ) )
     //identical for all (x,y)!
     bool sgn_det_D;
-
   };
 
   /*!
-    stream output for AffinLinearMapping
+    stream output for AffineLinearMapping
   */
   template <unsigned int DIM>
-  std::ostream& operator << (std::ostream&, const AffinLinearMapping<DIM>&);
+  std::ostream& operator << (std::ostream&, const AffineLinearMapping<DIM>&);
 
 }
 

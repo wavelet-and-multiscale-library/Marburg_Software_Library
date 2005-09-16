@@ -88,7 +88,7 @@ namespace WaveletTL
     inline const int ell_r()  const { return ellT_r() + d - dT; }
     
     //! coarsest possible level, (4.20)
-    inline const int j0() const { return (int) ceil(log(std::max(ellT_l(),ellT_r())+ell2T<d,dT>()-1.)/log(2.0)+1); }
+    inline const int j0() const { return j0_; }
     
     /*!
       wavelet index class
@@ -298,6 +298,9 @@ namespace WaveletTL
 			InfiniteVector<double, Vector<double>::size_type>& v) const;
 
   protected:
+    //! coarsest possible level
+    int j0_;
+
     //! boundary condition orders at 0 and 1
     int s0, s1, sT0, sT1;
 

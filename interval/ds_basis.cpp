@@ -42,6 +42,8 @@ namespace WaveletTL
   template <int d, int dT>
   void
   DSBasis<d,dT>::setup() {
+    j0_ = (int) ceil(log(std::max(ellT_l(),ellT_r())+ell2T<d,dT>()-1.)/M_LN2+1);
+
     setup_GammaLR();
     setup_CX_CXT();
     setup_CXA_CXAT();

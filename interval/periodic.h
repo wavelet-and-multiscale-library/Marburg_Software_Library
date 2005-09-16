@@ -21,36 +21,32 @@ using MathTL::InfiniteVector;
 namespace WaveletTL
 {
   /*!
-    Template class for a periodic, biorthogonal wavelet basis on the unit interval [0,1].
-    The template parameters provide the biorthogonal masks of a refinable function
-    on the real line.
-    If the second template parameter is omitted, we assume that the given refinable
-    function induces an orthonormal wavelet basis (i.e. a biorthogonal one where the dual
-    basis is just the primal one).
+    Template class for a periodic, biorthogonal wavelet basis on the unit interval [0,1],
+    derived from a biorthogonal wavelet basis on R (which is specified as a
+    template parameter).
 
     The periodized scaling functions (and analogously the wavelets) look like
 
       phi^per_{j,k}(x) = \sum_{l\in\mathbb Z} phi_{j,k}(x+l)
 
-    A univariate mask should have at least the signature of a LaurentPolynomial<double>,
-    i.e., have the usual iterator classes. Typical examples are the Haar or the CDF masks.
-
     References:
     [D] Daubechies,
         Ten Lectures On Wavelets, pp. 304ff
   */
-  template <class PRIMALMASK, class DUALMASK = PRIMALMASK>
+  template <class RBASIS>
   class PeriodicBasis
   {
   public:
     //! default constructor
     PeriodicBasis();
     
-    //! coarsest possible level, this is always zero
-    inline const int j0() const { return 0; }
+    /*!
+      coarsest possible level j0
+    */
+    inline const int j0() const { return j0_; }
 
     //! wavelet index class
-    typedef IIndex<PeriodicBasis<PRIMALMASK,DUALMASK> > Index;
+    typedef IIndex<PeriodicBasis<RBASIS> > Index;
 
     //! bounds for the generator indices
     inline const int DeltaLmin() const { return 0; }
@@ -61,7 +57,7 @@ namespace WaveletTL
     inline const int Nablamax(const int j) const { return (1<<j) - 1; }
     
     //! size of Delta_j
-    inline const int Deltasize(const int j) const { 1<<j; }
+    inline const int Deltasize(const int j) const { return 1<<j; }
     
     //! DECOMPOSE routine, simple version
     /*!
@@ -144,7 +140,11 @@ namespace WaveletTL
 		       InfiniteVector<double, Index>& v) const;
 
   protected:
+    //! an instance of the corresponding basis on R
+    RBASIS rbasis;
 
+    //! coarsest possible level
+    int j0_;
   };
 }
 

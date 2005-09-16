@@ -34,9 +34,9 @@ veryclean:: clean
 	rm -f *~
 
 $(EXEOBJF): %.o: %.cpp
-#	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
+#	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(EXES): %: %.o
-#	$(CXX) $< -g -o $@
-	$(CXX) $< -o $@
+	$(CXX) $< -g -o $@
+#	$(CXX) $< -o $@

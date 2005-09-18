@@ -199,6 +199,32 @@ namespace WaveletTL
 
     // entry cache for A (mutable to overcome constness of add_column())
     mutable MatrixColumnCache cache_;
+
+    // A short remark on the organization of the internal entry cache:
+    // Since there are two routines accessing the cache, add_column() and
+    // setup_stiffness_matrix(), the latter accessing single entries,
+    // we decide against the caching of blocks for add_column().
+    // To store which blocks have already been computed, we utilize a second
+    // cache.
+
+    // type of one column of the "visited blocks"-cache
+    // (the value field contains the number of nontrivial entries per block)
+    typedef std::map<typename WBASIS::Index, unsigned int> ColumnBlocks;
+
+    // type of the cache for the "visited blocks"-cache
+    typedef std::map<typename WBASIS::Index, ColumnBlocks> ColumnBlocksCache;
+
+    // blocks cache for A (mutable to overcome the constness of add_column())
+    mutable ColumnBlocksCache blocks_cache;
+
+    // type of one column in the entry cache of A
+    typedef std::map<typename WBASIS::Index, double> Column;
+    
+    // type of the entry cache of A
+    typedef std::map<typename WBASIS::Index, Column> ColumnCache;
+    
+    // entries cache for A (mutable to overcome the constness of add_column())
+    mutable ColumnCache entries_cache;
 #endif
 
     // helper function to compute subblocks

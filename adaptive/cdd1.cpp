@@ -141,7 +141,7 @@ namespace WaveletTL
       mydelta *= params.theta_bar;
     }
 #else
-    // conjugate gradient version (no theory for its complexity available yet)
+    // conjugate gradient version (no theory for its complexity available yet, but very fast)
     cout << "GALERKIN called..." << endl;
     
     u_bar.clear();
@@ -151,7 +151,8 @@ namespace WaveletTL
       P.setup_stiffness_matrix(Lambda, A_Lambda);
       Vector<double> F_Lambda;
       P.setup_righthand_side(Lambda, F_Lambda);
-      
+      cout << "... GALERKIN: stiffness matrix and right-hand side set up, iterating ..." << endl;
+
       // setup initial approximation xk
       Vector<double> xk(Lambda.size());
       unsigned int id = 0;

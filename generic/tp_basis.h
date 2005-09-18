@@ -10,6 +10,8 @@
 #ifndef _WAVELETTL_TP_BASIS_H
 #define _WAVELETTL_TP_BASIS_H
 
+#include <generic/tp_index.h>
+
 namespace WaveletTL
 {
   /*!
@@ -27,6 +29,15 @@ namespace WaveletTL
 
     //! coarsest possible level j0
     inline const int j0() const { return j0_; }    
+
+    //! wavelet index class
+    typedef TensorProductIndex<BASIS1,BASIS2> Index;
+
+    //! read access to the first basis
+    const BASIS1& basis1() const { return basis1_; }
+
+    //! read access to the second basis
+    const BASIS2& basis2() const { return basis2_; }
 
   protected:
     //! coarsest possible level j0

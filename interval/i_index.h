@@ -46,7 +46,7 @@ namespace WaveletTL
     bool operator == (const IntervalIndex& lambda) const;
 
     //! check non-equality
-    inline bool operator != (const IntervalIndex& lambda) const
+    bool operator != (const IntervalIndex& lambda) const
     { return !(*this == lambda); }
 
     //! preincrement
@@ -81,7 +81,7 @@ namespace WaveletTL
 
   //! stream output
   template <class IBASIS>
-  inline std::ostream& operator << (std::ostream& os, const IntervalIndex<IBASIS>& lambda)
+  std::ostream& operator << (std::ostream& os, const IntervalIndex<IBASIS>& lambda)
   {
     using namespace std;
     os << "("

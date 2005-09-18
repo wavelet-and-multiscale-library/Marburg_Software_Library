@@ -60,10 +60,10 @@ namespace WaveletTL
   IntervalIndex<IBASIS>::operator < (const IntervalIndex<IBASIS>& lambda) const
   {
     return (j_ < lambda.j() ||
-	    (j_ == lambda.j() && e_ < lambda.e()) ||
-	    (j_ == lambda.j() && e_ == lambda.e() && k_ < lambda.k()));
+	    (j_ == lambda.j() && (e_ < lambda.e() ||
+				  (e_ == lambda.e() && k_ < lambda.k()))));
   }
-
+  
   template <class IBASIS>
   IntervalIndex<IBASIS>&
   IntervalIndex<IBASIS>::operator ++ ()
@@ -109,6 +109,7 @@ namespace WaveletTL
   }
 
   template <class IBASIS>
+  inline
   IntervalIndex<IBASIS> first_wavelet(const IBASIS* basis, const int j)
   {
     assert(j >= basis->j0());
@@ -116,6 +117,7 @@ namespace WaveletTL
   }
   
   template <class IBASIS>
+  inline
   IntervalIndex<IBASIS> last_wavelet(const IBASIS* basis, const int j)
   {
     assert(j >= basis->j0());

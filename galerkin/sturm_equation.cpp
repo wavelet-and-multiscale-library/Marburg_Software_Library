@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <algorithm>
+#include <list>
 #include <utils/array1d.h>
 #include <algebra/vector.h>
 #include <algebra/sparse_matrix.h>
@@ -184,26 +185,27 @@ namespace WaveletTL
   SturmEquation<WBASIS>::setup_stiffness_matrix(const std::set<typename WBASIS::Index>& Lambda,
 						SparseMatrix<double>& A_Lambda) const {
     A_Lambda.resize(Lambda.size(), Lambda.size());
-    unsigned int i = 0;
+    typedef typename SparseMatrix<double>::size_type size_type;
+    size_type row = 0;
     typedef typename WBASIS::Index Index;
     for (typename std::set<Index>::const_iterator it1 = Lambda.begin(), itend = Lambda.end();
-	 it1 != itend; ++it1, ++i)
+	 it1 != itend; ++it1, ++row)
       {
 	const double d1 = D(*it1);
-	typename std::set<Index>::const_iterator it2 = Lambda.begin();
-	for (; *it2 != *it1; ++it2);
-	unsigned int j = i;
-	for (; it2 != itend; ++it2, ++j)
-	  {
-	    const double d1d2 = d1 * D(*it2);
-	    double entry = a(*it2, *it1);
-	    if (entry != 0)
-	      {
-		entry /= d1d2;
-		A_Lambda.set_entry(i, j, entry);
-		A_Lambda.set_entry(j, i, entry); // symmetry
-	      }
+	std::list<size_type> indices;
+	std::list<double> entries;
+
+	size_type column = 0;
+	for (typename std::set<Index>::const_iterator it2 = Lambda.begin();
+	     it2 != itend; ++it2, ++column) {
+	  double entry = a(*it2, *it1); // TODO: use block cache here instead of re-calculating entries!
+	  if (entry != 0) {
+	    indices.push_back(column);
+	    entries.push_back(entry / (d1 * D(*it2)));
 	  }
+	}
+
+	A_Lambda.set_row(row, indices, entries);
       }
   }
 
@@ -272,7 +274,7 @@ namespace WaveletTL
       }
     }
   }
-  
+
   template <class WBASIS>
   void
   SturmEquation<WBASIS>::compute_matrix_block(const typename WBASIS::Index& lambda,

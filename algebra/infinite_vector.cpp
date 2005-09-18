@@ -60,7 +60,6 @@ namespace MathTL
   }
 
   template <class C, class I>
-  inline
   C& InfiniteVector<C,I>::operator [] (const I& index)
   {
     // efficient add-or-update, cf. Meyers, Effective STL

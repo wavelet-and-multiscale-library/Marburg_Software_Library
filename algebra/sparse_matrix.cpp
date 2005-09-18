@@ -3,6 +3,7 @@
 #include <cassert>
 #include <iomanip>
 #include <sstream>
+#include <algorithm>
 #include <algebra/vector.h>
 #include <algebra/matrix.h>
 
@@ -271,7 +272,42 @@ namespace MathTL
 	entries_[row][0] = value;
       }
   }
-  
+
+  template <class C>
+  void
+  SparseMatrix<C>::set_row(const size_type row,
+			   const std::list<size_type>& indices,
+			   const std::list<C>& entries)
+  {
+    assert(row < rowdim_);
+    assert(indices.size() == entries.size());
+    
+    if (indices_[row]) {
+      delete[] indices_[row];
+      delete[] entries_[row];
+    }
+
+    if (indices.size() > 0) {
+      indices_[row] = new size_type[indices.size()+1];
+      assert(indices_[row] != NULL);
+      indices_[row][0] = indices.size();
+      size_type id = 1;
+      for (typename std::list<size_type>::const_iterator it(indices.begin()), itend(indices.end());
+	   it != itend; ++it, ++id)
+	indices_[row][id] = *it;
+      
+      entries_[row] = new C[indices_[row][0]];
+      assert(entries_[row] != NULL);
+      id = 0;
+      for (typename std::list<C>::const_iterator it(entries.begin()), itend(entries.end());
+	   it != itend; ++it, ++id)
+	entries_[row][id] = *it;
+    } else {
+      entries_[row] = NULL;
+      indices_[row] = NULL;
+    }
+  }
+
   template <class C>
   template <class MATRIX>
   void SparseMatrix<C>::set_block(const size_type firstrow, const size_type firstcolumn,

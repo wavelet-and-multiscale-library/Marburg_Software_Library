@@ -11,6 +11,7 @@
 #define _MATHTL_SPARSE_MATRIX_H
 
 #include <iostream>
+#include <list>
 
 #include <utils/array1d.h>
 #include <algebra/vector.h>
@@ -115,12 +116,23 @@ namespace MathTL
       read access to an entire row;
       offset leads to a shift of v (with respect to the original column indices)
     */
-    void get_row(const size_type row, InfiniteVector<C, size_type>& v, const size_type offset = 0) const;
+    void get_row(const size_type row,
+		 InfiniteVector<C, size_type>& v,
+		 const size_type offset = 0) const;
 
     /*!
       write access to a matrix entry
     */
     void set_entry(const size_type row, const size_type column, const C value);
+
+    /*!
+      write access to a complete row
+      (this std::list version is especially suitable for situations where the nonzero
+      pattern is not a priorily known)
+    */
+    void set_row(const size_type row,
+		 const std::list<size_type>& indices,
+		 const std::list<C>& entries);
 
     /*!
       write access to a subblock;

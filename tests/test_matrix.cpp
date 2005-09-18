@@ -1,4 +1,5 @@
 #include <iostream>
+#include <list>
 #include <algebra/matrix.h>
 #include <algebra/triangular_matrix.h>
 #include <algebra/vector.h>
@@ -350,6 +351,14 @@ int main()
 
   small.get_row(1, v, 10);
   cout << "- another row, now with offset 10:" << endl << v;
+
+  std::list<size_t> indices;
+  std::list<double> entries;
+  indices.push_back(1);
+  entries.push_back(-2.7);
+  small.set_row(0, indices, entries);
+  cout << "- the matrix small after setting the first row:" << endl
+       << small;
 
   small.compress(1.5e-5);
   cout << "- small after compressing with 1.5e-5:" << endl

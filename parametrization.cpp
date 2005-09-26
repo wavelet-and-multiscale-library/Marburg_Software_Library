@@ -13,6 +13,9 @@ namespace FrameTL
 
 //################### LinearBezierMapping ###################
   
+
+  const string LinearBezierMapping::className = "LinearBezierMapping";
+
   inline
   LinearBezierMapping::LinearBezierMapping ()
   {
@@ -367,6 +370,21 @@ namespace FrameTL
   }
 
   inline
+  const string LinearBezierMapping::toString() const
+  {
+    std::stringstream strs;
+ 
+    strs << className << ":" << endl
+	 << "b_00=" << b_00 << endl
+	 << "b_01=" << b_01 << endl
+	 << "b_10=" << b_10 << endl
+	 << "b_11=" << b_11;
+ 
+    return strs.str();
+
+  }
+
+  inline
   std::ostream& operator << (std::ostream& os, const LinearBezierMapping& p)
   {
     
@@ -379,6 +397,9 @@ namespace FrameTL
   }
   
   //################### AffineLinearMapping ###################
+
+  template <unsigned int DIM>
+  const string AffineLinearMapping<DIM>::className = "AffineLinearMapping";
  
   template <unsigned int DIM>
   inline
@@ -562,6 +583,22 @@ namespace FrameTL
 //     cout << patchOrthonBase << endl;
 
 //   }
+
+  template <unsigned int DIM>
+  inline
+  const string AffineLinearMapping<DIM>::toString() const
+  {
+    std::stringstream strs;
+ 
+    strs << className << ":" << endl
+	 << "A = " << endl
+	 << A << endl
+	 << "b = " << endl
+	 << b;
+
+    return strs.str();
+  }
+
 
   template <unsigned int DIM>
   inline

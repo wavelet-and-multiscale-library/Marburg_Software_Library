@@ -17,8 +17,8 @@ int main()
 {
   
   cout << "Testing class Parametrization and its generations..." << endl;
-  LinearBezierMapping k_1(Point<2>(-0.5,-1),Point<2>(-0.5,0),
-			  Point<2>(1,-1), Point<2>(1,0));
+  LinearBezierMapping k_1(Point<2>(-0.2,-1),Point<2>(-0.5,0),
+			  Point<2>(1,-1.1), Point<2>(1.5,0));
 
   Matrix<double> A(2,2);
   A(0,0) = 2.1;
@@ -97,5 +97,31 @@ int main()
      Point<2> testP(1.0,2.0);
      cout << "in patch = " << k_2.point_in_patch(testP) << endl;
      
-  return 0;
+
+     cout << k_1.det_D(testP) << endl;
+     cout << k_1.abs_Det_D(testP) << endl;
+     cout << k_1.d_x_det_D(testP) << endl;
+     cout << k_1.d_y_det_D(testP) << endl;
+     cout << k_1.d_dim_kappa_direc(0,1,testP) << endl;
+     
+     cout << "##################" << endl;
+     
+     cout << k_2.det_D(testP) << endl;
+     cout << k_2.abs_Det_D(testP) << endl;
+     cout << k_2.d_x_det_D(testP) << endl;
+     cout << k_2.d_y_det_D(testP) << endl;
+     cout << k_2.d_dim_kappa_direc(0,1,testP) << endl;
+     
+     cout << "##################" << endl;
+
+     Point<1> testP1D(1.);
+
+     cout << k_3.det_D(testP1D) << endl;
+     cout << k_3.abs_Det_D(testP1D) << endl;
+     cout << k_3.d_x_det_D(testP1D) << endl;
+     cout << k_3.d_y_det_D(testP1D) << endl;
+     cout << k_3.d_dim_kappa_direc(0,1,testP1D) << endl;
+
+
+     return 0;
 }

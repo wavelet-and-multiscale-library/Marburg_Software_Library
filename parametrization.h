@@ -11,14 +11,22 @@
 #define _FRAMETL_PARAMETRIZATION_H
 
 #include <iostream>
+#include <string>
+#include <sstream>
+
 #include <geometry/point.h>
 #include <utils/array1d.h>
 #include <utils/function.h>
 #include <algebra/vector.h>
 #include <algebra/matrix.h>
 
+
+
 using std::cout;
 using std::endl;
+using std::string;
+using std::stringstream;
+
 using MathTL::Point;
 using MathTL::Array1D;
 using MathTL::Function;
@@ -88,6 +96,12 @@ namespace FrameTL
       parametrization
      */
     virtual const bool point_in_patch(const Point<DIM_d>&) const = 0;
+
+    /*!
+      returns a string representation of this object
+     */
+    virtual const string toString() const = 0;
+
 
 //     virtual friend std::ostream operator << (std::ostream&,
 // 				      const Parametrization<DIM_M, DIM_d>&) const = 0;
@@ -200,7 +214,16 @@ namespace FrameTL
      */
     const bool point_in_patch(const Point<2>&) const;
 
-  protected:
+    /*!
+      returns a string representation of this object
+     */
+    const string toString() const;
+
+    /*!
+      static field to store the name of the class
+     */
+    static const string className;
+
     //vertices of the quadrangle to parametrize
     Point<2> b_00;    
     Point<2> b_01;
@@ -239,11 +262,6 @@ namespace FrameTL
     stream output for LinearBezierMapping
    */
   std::ostream& operator << (std::ostream&, const LinearBezierMapping&);
-
-
-
-
-
 
   /*!
     This class models parametrizations for patches forming
@@ -340,10 +358,14 @@ namespace FrameTL
     const bool point_in_patch(const Point<DIM>&) const;
 
     /*!
-      stream output for AffineLinearMapping
-    */
-    //    friend std::ostream& operator << (std::ostream&, const AffineLinearMapping<DIM>&);
-    
+      returns a string representation of this object
+     */
+    const string toString() const;
+
+    /*!
+      static field to store the name of the class
+     */
+    static const string className;
    
   protected:
     /*!

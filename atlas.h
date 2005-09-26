@@ -72,7 +72,7 @@ namespace FrameTL
       sets parametrization of patch p by to kappa, overwrites a possible
       existing one for patch p
      */
-    void set_chart(const int p, const Parametrization<DIM_m, DIM_d>& kappa);
+    void set_chart(const unsigned int p, Parametrization<DIM_m, DIM_d>& kappa);
 
     /*!
       access to total number of patches
@@ -95,9 +95,14 @@ namespace FrameTL
     const SymmetricMatrix<bool>& get_adjacency_matrix() const;
 
     /*!
+      returns adjacency matrix
+     */
+    void set_adjacency_matrix(const SymmetricMatrix<bool>&);
+
+    /*!
       collects those patches, p is contained in
      */
-    const Array1D<unsigned int>& get_circumjacent (const Point<DIM_d>& p);
+    const Array1D<unsigned int> get_circumjacent (const Point<DIM_d>& p);
 
   protected:
     /*!

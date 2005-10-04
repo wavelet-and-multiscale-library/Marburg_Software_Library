@@ -15,31 +15,12 @@ namespace WaveletTL
   SturmEquation<WBASIS>::SturmEquation(const simpleSturmBVP& bvp)
     : bvp_(bvp), basis_(bvp.bc_left(), bvp.bc_right())
   {
-    // estimate ||A||
-    // (TODO: shift this into a separate method)
-    typedef typename WBASIS::Index Index;
-    std::set<Index> Lambda;
-    const int j0 = basis_.j0();
-    int jmax = 8;
-    for (Index lambda = first_generator(&basis_, j0);; ++lambda) {
-      Lambda.insert(lambda);
-      if (lambda == last_wavelet(&basis_, jmax)) break;
-    }
-    SparseMatrix<double> A_Lambda;
-    setup_stiffness_matrix(*this, Lambda, A_Lambda);
-
-    Vector<double> xk(Lambda.size(), false);
-    xk = 1;
-    unsigned int iterations;
-    normA = PowerIteration(A_Lambda, xk, 1e-6, 100, iterations);
-
-    // estimate ||A^{-1}||
-    xk = 1;
-    normAinv = InversePowerIteration(A_Lambda, xk, 1e-6, 200, iterations);
+    typedef typename WaveletBasis::Index Index;
 
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
-    jmax = 12;
+    const int j0   = basis().j0();
+    const int jmax = 15;
     for (Index lambda(first_generator(&basis_, j0));; ++lambda)
       {
 	const double coeff = f(lambda)/D(lambda);
@@ -101,10 +82,10 @@ namespace WaveletTL
 
     // First we compute the support intersection of \psi_\lambda and \psi_\nu:
     typedef typename WBASIS::Support Support;
-    Support supp;
-    bool inter = intersect_supports(basis_, lambda, nu, supp);
 
-    if (inter)
+    Support supp;
+
+    if (intersect_supports(basis_, lambda, nu, supp))
       {
 	// Set up Gauss points and weights for a composite quadrature formula:
 	// (TODO: maybe use an instance of MathTL::QuadratureRule instead of computing
@@ -127,16 +108,70 @@ namespace WaveletTL
 	    const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
 	    
 	    const double pt = bvp_.p(t);
- 	    if (pt != 0)
+  	    if (pt != 0)
 	      r += pt * der1values[id] * der2values[id] * gauss_weight;
 	    
 	    const double qt = bvp_.q(t);
- 	    if (qt != 0)
+  	    if (qt != 0)
 	      r += qt * func1values[id] * func2values[id] * gauss_weight;
 	  }
       }
 
     return r;
+  }
+
+  template <class WBASIS>
+  double
+  SturmEquation<WBASIS>::norm_A() const
+  {
+    static double normA = 0.0;
+    
+    if (normA == 0.0) {
+      typedef typename WaveletBasis::Index Index;
+      std::set<Index> Lambda;
+      const int j0 = basis().j0();
+      const int jmax = 8;
+      for (Index lambda = first_generator(&basis(), j0);; ++lambda) {
+	Lambda.insert(lambda);
+	if (lambda == last_wavelet(&basis(), jmax)) break;
+      }
+      SparseMatrix<double> A_Lambda;
+      setup_stiffness_matrix(*this, Lambda, A_Lambda);
+      
+      Vector<double> xk(Lambda.size(), false);
+      xk = 1;
+      unsigned int iterations;
+      normA = PowerIteration(A_Lambda, xk, 1e-6, 100, iterations);
+    }
+
+    return normA;
+  }
+   
+  template <class WBASIS>
+  double
+  SturmEquation<WBASIS>::norm_Ainv() const
+  {
+    static double normAinv = 0.0;
+    
+    if (normAinv == 0.0) {
+      typedef typename WaveletBasis::Index Index;
+      std::set<Index> Lambda;
+      const int j0 = basis().j0();
+      const int jmax = 8;
+      for (Index lambda = first_generator(&basis(), j0);; ++lambda) {
+	Lambda.insert(lambda);
+	if (lambda == last_wavelet(&basis(), jmax)) break;
+      }
+      SparseMatrix<double> A_Lambda;
+      setup_stiffness_matrix(*this, Lambda, A_Lambda);
+      
+      Vector<double> xk(Lambda.size(), false);
+      xk = 1;
+      unsigned int iterations;
+      normAinv = InversePowerIteration(A_Lambda, xk, 1e-6, 200, iterations);
+    }
+
+    return normAinv;
   }
 
   template <class WBASIS>

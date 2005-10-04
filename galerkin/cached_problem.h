@@ -49,6 +49,16 @@ namespace WaveletTL
       */
       double a(const typename WaveletBasis::Index& lambda,
 	       const typename WaveletBasis::Index& nu) const;
+
+      /*!
+	estimate the spectral norm ||A||
+      */
+      double norm_A() const;
+      
+      /*!
+	estimate the spectral norm ||A^{-1}||
+      */
+      double norm_Ainv() const;
       
     protected:
       // type of one column in the entry cache of A

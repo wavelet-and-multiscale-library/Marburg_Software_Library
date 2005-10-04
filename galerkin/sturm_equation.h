@@ -84,6 +84,11 @@ namespace WaveletTL
       differential operators are local
     */
     static bool local_operator() { return true; }
+
+    /*!
+      order of the operator
+    */
+    static int operator_order() { return 1; }
     
     /*!
       evaluate the diagonal preconditioner D
@@ -110,12 +115,12 @@ namespace WaveletTL
     /*!
       estimate the spectral norm ||A||
     */
-    double norm_A() const { return normA; }
+    double norm_A() const;
 
     /*!
       estimate the spectral norm ||A^{-1}||
     */
-    double norm_Ainv() const { return normAinv; }
+    double norm_Ainv() const;
 
     /*!
       estimate compressibility exponent s^*
@@ -157,7 +162,6 @@ namespace WaveletTL
   protected:
     const simpleSturmBVP& bvp_;
     WBASIS basis_;
-    double normA, normAinv;
 
     // right-hand side coefficients on a fine level, sorted by modulus
     Array1D<std::pair<typename WBASIS::Index,double> > fcoeffs;

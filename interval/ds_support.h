@@ -100,6 +100,19 @@ namespace WaveletTL
   template <int d, int dT>
   bool intersect_singular_support(const DSBasis<d,dT>& basis,
 				  const typename DSBasis<d,dT>::Index& lambda,
+				  const typename DSBasis<d,dT>::Index& nu);
+
+  /*!
+    Decide whether the support of a given (primal) generator/wavelet \psi_\lambda
+    intersects the singular support of another (primal) generator/wavelet \psi_\nu.
+    If this is the case, return true and the intersection of \supp\psi_\lambda
+    and \supp\psi_\nu in the form 2^{-j}[k1,k2].
+    Otherwise, return false (in this case, j, k1 and k2 will have
+    no meaningful values, for performance reasons).
+  */
+  template <int d, int dT>
+  bool intersect_singular_support(const DSBasis<d,dT>& basis,
+				  const typename DSBasis<d,dT>::Index& lambda,
 				  const typename DSBasis<d,dT>::Index& nu,
 				  int& j, int& k1, int& k2);
 

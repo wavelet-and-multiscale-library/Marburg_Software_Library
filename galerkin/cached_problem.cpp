@@ -1,5 +1,9 @@
 // implementation for cached_problem.h
 
+#include <cmath>
+#include <algebra/vector.h>
+#include <numerics/eigenvalues.h>
+
 namespace WaveletTL
 {
   template <class PROBLEM>
@@ -45,5 +49,59 @@ namespace WaveletTL
       r = it->second;
     
     return r;
+  }
+
+  template <class PROBLEM>
+  double
+  CachedProblem<PROBLEM>::norm_A() const
+  {
+    static double normA = 0.0;
+    
+    if (normA == 0.0) {
+      typedef typename WaveletBasis::Index Index;
+      std::set<Index> Lambda;
+      const int j0 = basis().j0();
+      const int jmax = 8;
+      for (Index lambda = first_generator(&basis(), j0);; ++lambda) {
+	Lambda.insert(lambda);
+	if (lambda == last_wavelet(&basis(), jmax)) break;
+      }
+      SparseMatrix<double> A_Lambda;
+      setup_stiffness_matrix(*this, Lambda, A_Lambda);
+      
+      Vector<double> xk(Lambda.size(), false);
+      xk = 1;
+      unsigned int iterations;
+      normA = PowerIteration(A_Lambda, xk, 1e-6, 100, iterations);
+    }
+
+    return normA;
+  }
+   
+  template <class PROBLEM>
+  double
+  CachedProblem<PROBLEM>::norm_Ainv() const
+  {
+    static double normAinv = 0.0;
+    
+    if (normAinv == 0.0) {
+      typedef typename WaveletBasis::Index Index;
+      std::set<Index> Lambda;
+      const int j0 = basis().j0();
+      const int jmax = 8;
+      for (Index lambda = first_generator(&basis(), j0);; ++lambda) {
+	Lambda.insert(lambda);
+	if (lambda == last_wavelet(&basis(), jmax)) break;
+      }
+      SparseMatrix<double> A_Lambda;
+      setup_stiffness_matrix(*this, Lambda, A_Lambda);
+      
+      Vector<double> xk(Lambda.size(), false);
+      xk = 1;
+      unsigned int iterations;
+      normAinv = InversePowerIteration(A_Lambda, xk, 1e-6, 200, iterations);
+    }
+
+    return normAinv;
   }
 }

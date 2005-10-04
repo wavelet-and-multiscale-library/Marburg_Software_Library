@@ -191,8 +191,8 @@ namespace WaveletTL
       if (lambda.k() < basis.DeltaLmin()+(int)CLA.column_dimension()) {
 	// left boundary generator
 	for (unsigned int i(0); i < CLA.row_dimension(); i++) {
-	  double help(CLA(i, lambda.k()-basis.DeltaLmin()));
-	  if (help != 0)
+	  const double help(CLA(i, lambda.k()-basis.DeltaLmin()));
+// 	  if (help != 0)
 	    for (unsigned int m(0); m < points.size(); m++)
 	      values[m] += help * (derivative == 0
 				   ? EvaluateCardinalBSpline_td<d>  (lambda.j(), 1-ell2<d>()+i, points[m])
@@ -203,8 +203,8 @@ namespace WaveletTL
 	if (lambda.k() > basis.DeltaRmax(lambda.j())-(int)CRA.column_dimension()) {
 	  // right boundary generator
 	  for (unsigned int i(0); i < CRA.row_dimension(); i++) {
-	    double help(CRA(i, basis.DeltaRmax(lambda.j())-lambda.k()));
-	    if (help != 0)
+	    const double help(CRA(i, basis.DeltaRmax(lambda.j())-lambda.k()));
+// 	    if (help != 0)
 	      for (unsigned int m(0); m < points.size(); m++)
 		values[m] += help * (derivative == 0
 				     ? EvaluateCardinalBSpline_td<d>  (lambda.j(), (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2<d>()+i), points[m])
@@ -253,8 +253,8 @@ namespace WaveletTL
       if (lambda.k() < basis.DeltaLmin()+(int)CLA.column_dimension()) {
 	// left boundary generator
 	for (unsigned int i(0); i < CLA.row_dimension(); i++) {
-	  double help(CLA(i, lambda.k()-basis.DeltaLmin()));
-	  if (help != 0)
+	  const double help(CLA(i, lambda.k()-basis.DeltaLmin()));
+// 	  if (help != 0)
 	    for (unsigned int m(0); m < npoints; m++) {
 	      funcvalues[m] += help * EvaluateCardinalBSpline_td<d>  (lambda.j(), 1-ell2<d>()+i, points[m]);
 	      dervalues[m]  += help * EvaluateCardinalBSpline_td_x<d>(lambda.j(), 1-ell2<d>()+i, points[m]);
@@ -265,8 +265,8 @@ namespace WaveletTL
 	if (lambda.k() > basis.DeltaRmax(lambda.j())-(int)CRA.column_dimension()) {
 	  // right boundary generator
 	  for (unsigned int i(0); i < CRA.row_dimension(); i++) {
-	    double help(CRA(i, basis.DeltaRmax(lambda.j())-lambda.k()));
-	    if (help != 0)
+	    const double help(CRA(i, basis.DeltaRmax(lambda.j())-lambda.k()));
+// 	    if (help != 0)
 	      for (unsigned int m(0); m < npoints; m++) {
 		funcvalues[m] += help * EvaluateCardinalBSpline_td<d>  (lambda.j(), (1<<lambda.j())-(d%2)-(1-ell2<d>()+i), points[m]);
 		dervalues[m]  += help * EvaluateCardinalBSpline_td_x<d>(lambda.j(), (1<<lambda.j())-(d%2)-(1-ell2<d>()+i), points[m]);

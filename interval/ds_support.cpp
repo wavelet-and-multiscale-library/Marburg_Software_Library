@@ -248,6 +248,16 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
+  inline
+  bool intersect_singular_support(const DSBasis<d,dT>& basis,
+				  const typename DSBasis<d,dT>::Index& lambda,
+				  const typename DSBasis<d,dT>::Index& nu)
+  {
+    int j, k1, k2;
+    return intersect_singular_support(basis, lambda, nu, j, k1, k2);
+  }
+
+  template <int d, int dT>
   void relevant_wavelets(const DSBasis<d,dT>& basis,
 			 const typename DSBasis<d,dT>::Index& lambda,
 			 const int j, const bool generators,

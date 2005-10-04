@@ -251,6 +251,40 @@ namespace WaveletTL
   void relevant_wavelets(const DSBasis<d,dT>& basis,
 			 const typename DSBasis<d,dT>::Index& lambda,
 			 const int j, const bool generators,
+			 std::list<typename DSBasis<d,dT>::Index>& relevant)
+  {
+    typedef typename DSBasis<d,dT>::Index Index;
+    typedef typename DSBasis<d,dT>::Support Support;
+    
+    relevant.clear();
+
+    // compute support of \psi_\lambda
+    const int j_lambda = lambda.j() + lambda.e();
+    int k1_lambda, k2_lambda;
+    support(basis, lambda, k1_lambda, k2_lambda);
+    
+    // a brute force solution
+    if (generators) {
+      Support supp;
+      for (Index nu = first_generator(&basis, j);; ++nu) {
+	if (intersect_singular_support(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
+	  relevant.push_back(nu);
+	if (nu == last_generator(&basis, j)) break;
+      }
+    } else {
+      Support supp;
+      for (Index nu = first_wavelet(&basis, j);; ++nu) {
+	if (intersect_singular_support(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
+	  relevant.push_back(nu);
+	if (nu == last_wavelet(&basis, j)) break;
+      }
+    }
+  }
+
+  template <int d, int dT>
+  void relevant_wavelets(const DSBasis<d,dT>& basis,
+			 const typename DSBasis<d,dT>::Index& lambda,
+			 const int j, const bool generators,
 			 std::list<std::pair<typename DSBasis<d,dT>::Index, typename DSBasis<d,dT>::Support> >& relevant)
   {
     typedef typename DSBasis<d,dT>::Index Index;

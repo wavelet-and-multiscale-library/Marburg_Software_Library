@@ -107,6 +107,17 @@ namespace WaveletTL
     For a given wavelet \psi_\lambda, compute all generators/wavelets
     \psi_\nu with level |\nu|=j, such that \supp\psi_\nu has a nontrivial
     intersection with \singsupp\psi_\lambda.
+  */
+  template <int d, int dT>
+  void relevant_wavelets(const DSBasis<d,dT>& basis,
+			 const typename DSBasis<d,dT>::Index& lambda,
+			 const int j, const bool generators,
+			 std::list<typename DSBasis<d,dT>::Index>& relevant);
+
+  /*!
+    For a given wavelet \psi_\lambda, compute all generators/wavelets
+    \psi_\nu with level |\nu|=j, such that \supp\psi_\nu has a nontrivial
+    intersection with \singsupp\psi_\lambda.
     The support intersections \supp\psi_\lambda\cap\supp\psi_\nu are returned
     in a list.
   */

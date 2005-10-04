@@ -51,7 +51,7 @@ namespace WaveletTL
 			     const int J,
 			     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& w,
 			     const int jmax = 999,
-			     const CompressionStrategy strategy = CDD1);
+			     const CompressionStrategy strategy = St04a);
 }
 
 #include <adaptive/compression.cpp>

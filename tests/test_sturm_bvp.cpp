@@ -120,13 +120,13 @@ int main()
 //   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it)
 //     cout << *it << endl;
 
-#if 0
+#if 1
   cout << "- set up (preconditioned) stiffness matrix..." << endl;
   clock_t tstart, tend;
   double time;
   tstart = clock();
   SparseMatrix<double> A;
-  eq.setup_stiffness_matrix(Lambda, A);
+  setup_stiffness_matrix(eq, Lambda, A);
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;

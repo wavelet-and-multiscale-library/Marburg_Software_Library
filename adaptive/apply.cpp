@@ -4,6 +4,8 @@
 #include <list>
 #include <map>
 
+#include <adaptive/compression.h>
+
 using MathTL::Array1D;
 
 namespace WaveletTL
@@ -127,7 +129,7 @@ namespace WaveletTL
 	for (typename std::list<std::pair<Index, double> >::const_iterator itk(it->begin());
 	     itk != it->end(); ++itk) {
 // 	  cout << "APPLY(): requesting column " << itk->first << " with J-k=" << J-k << endl;
-	  P.add_column(itk->second, itk->first, J-k, w, jmax);
+	  add_compressed_column(P, itk->second, itk->first, J-k, w, jmax);
 	}
       }
     }

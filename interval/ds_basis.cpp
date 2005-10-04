@@ -14,8 +14,8 @@
 namespace WaveletTL
 {
   template <int d, int dT>
-  DSBasis<d,dT>::DSBasis(bool bc_left, bool bc_right,
-			 DSBiorthogonalizationMethod bio) {
+  DSBasis<d,dT>::DSBasis(const bool bc_left, const bool bc_right,
+			 const DSBiorthogonalizationMethod bio) {
     this->s0 = bc_left ? 1 : 0;
     this->s1 = bc_right ? 1 : 0;
     this->sT0 = 0;
@@ -27,7 +27,7 @@ namespace WaveletTL
   
   template <int d, int dT>
   DSBasis<d,dT>::DSBasis(const int s0, const int s1, const int sT0, const int sT1,
-			 DSBiorthogonalizationMethod bio) {
+			 const DSBiorthogonalizationMethod bio) {
     assert(std::max(s0,s1) < d && std::max(sT0,sT1) < dT);
         
     this->s0 = s0;

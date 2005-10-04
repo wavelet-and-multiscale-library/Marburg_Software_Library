@@ -148,7 +148,7 @@ namespace WaveletTL
     if (Lambda.size() > 0) {
       // setup A_Lambda and f_Lambda
       SparseMatrix<double> A_Lambda;
-      P.setup_stiffness_matrix(Lambda, A_Lambda);
+      setup_stiffness_matrix(P, Lambda, A_Lambda);
       Vector<double> F_Lambda;
       P.setup_righthand_side(Lambda, F_Lambda);
       cout << "... GALERKIN: stiffness matrix and right-hand side set up, iterating ..." << endl;

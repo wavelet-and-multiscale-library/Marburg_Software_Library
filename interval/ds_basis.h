@@ -72,14 +72,14 @@ namespace WaveletTL
       The default basis is the original [DKU] construction without any boundary conditions.
     */
     DSBasis(const int s0 = 0, const int s1 = 0, const int sT0 = 0, const int sT1 = 0,
-	    DSBiorthogonalizationMethod bio = Bernstein);
+	    const DSBiorthogonalizationMethod bio = Bernstein);
 
     /*!
       alternative constructor, you can specify whether first order homogeneous Dirichlet b.c.'s
       for the primal functions are set or not. The dual functions have free b.c.'s.
     */
-    DSBasis(bool bc_left, bool bc_right,
-	    DSBiorthogonalizationMethod bio = Bernstein);
+    DSBasis(const bool bc_left, const bool bc_right,
+	    const DSBiorthogonalizationMethod bio = Bernstein);
 
     //! freezing parameters, (4.11)
     inline const int ellT_l() const { return ell2T<d,dT>() + s0 + sT0; }

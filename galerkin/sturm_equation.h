@@ -13,6 +13,8 @@
 #include <set>
 #include <utils/array1d.h>
 
+#include <galerkin/galerkin_utils.h>
+
 namespace WaveletTL
 {
   /*!
@@ -74,6 +76,16 @@ namespace WaveletTL
     const WBASIS& basis() const { return basis_; }
     
     /*!
+      space dimension of the problem
+    */
+    static int space_dimension() { return 1; }
+
+    /*!
+      differential operators are local
+    */
+    static bool local_operator() { return true; }
+    
+    /*!
       evaluate the diagonal preconditioner D
     */
     double D(const typename WBASIS::Index& lambda) const;
@@ -94,22 +106,6 @@ namespace WaveletTL
     double a(const typename WBASIS::Index& lambda,
 	     const typename WBASIS::Index& nu,
 	     const unsigned int p = 4) const;
-
-    /*!
-      evaluate the (unpreconditioned) bilinear form a;
-      you can give a hint about the support intersection
-      (see the add_column())
-    */
-    double a(const typename WBASIS::Index& lambda,
-	     const typename WBASIS::Index& nu,
-	     const typename WBASIS::Support& supp,
-	     const unsigned int p = 4) const;
-
-    /*!
-      given an index set Lambda, setup the corresponding  preconditioned stiffness matrix
-     */
-    void setup_stiffness_matrix(const std::set<typename WBASIS::Index>& Lambda,
-				SparseMatrix<double>& A_Lambda) const;
 
     /*!
       estimate the spectral norm ||A||
@@ -136,18 +132,6 @@ namespace WaveletTL
       return 2*norm_A(); // suboptimal
     }
 
-    /*!
-      add (a constant multiple of) the lambda-th column of A to a working coefficient set w,
-      applying the J-th truncation rule from [CDD1, Prop. 3.4],
-      you can also choose a fixed maximal level j_max
-      (for the APPLY routine)
-    */
-    void add_column(const double factor,
-		    const typename WBASIS::Index& lambda,
-		    const int J,
-		    InfiniteVector<double, typename WBASIS::Index>& w,
-		    const int jmax = 999) const;
-    
     /*!
       evaluate the (unpreconditioned) right-hand side f
     */
@@ -180,57 +164,6 @@ namespace WaveletTL
 
     // \ell_2 norm of the precomputed right-hand side
     double fnorm_sqr;
-    
-    // type of one block in a given column of A
-    typedef struct {
-      Array1D<typename WBASIS::Index> indices;
-      Array1D<double> entries;
-    } MatrixBlock;
-
-#define _WAVELETTL_STURM_EQUATION_CACHE
-#ifdef _WAVELETTL_STURM_EQUATION_CACHE
-    // type of one column of A ((j0-1)-th entry corresponds to the generators on level j0)
-    typedef std::map<int, MatrixBlock> MatrixBlockCache;
-
-    // type of the cached columns of A
-    typedef std::map<typename WBASIS::Index,
-		     MatrixBlockCache,
-		     std::less<typename WBASIS::Index> > MatrixColumnCache;
-
-    // entry cache for A (mutable to overcome constness of add_column())
-    mutable MatrixColumnCache cache_;
-
-    // A short remark on the organization of the internal entry cache:
-    // Since there are two routines accessing the cache, add_column() and
-    // setup_stiffness_matrix(), the latter accessing single entries,
-    // we decide against the caching of blocks for add_column().
-    // To store which blocks have already been computed, we utilize a second
-    // cache.
-
-    // type of one column of the "visited blocks"-cache
-    // (the value field contains the number of nontrivial entries per block)
-    typedef std::map<typename WBASIS::Index, unsigned int> ColumnBlocks;
-
-    // type of the cache for the "visited blocks"-cache
-    typedef std::map<typename WBASIS::Index, ColumnBlocks> ColumnBlocksCache;
-
-    // blocks cache for A (mutable to overcome the constness of add_column())
-    mutable ColumnBlocksCache blocks_cache;
-
-    // type of one column in the entry cache of A
-    typedef std::map<typename WBASIS::Index, double> Column;
-    
-    // type of the entry cache of A
-    typedef std::map<typename WBASIS::Index, Column> ColumnCache;
-    
-    // entries cache for A (mutable to overcome the constness of add_column())
-    mutable ColumnCache entries_cache;
-#endif
-
-    // helper function to compute subblocks
-    void compute_matrix_block(const typename WBASIS::Index& lambda,
-			      const int level,
-			      MatrixBlock& block) const;
   };
 }
 

@@ -42,15 +42,26 @@ namespace WaveletTL
   /*!
     Decide whether the supports of two generators/wavelets \psi_\lambda and
     \psi_\nu have an intersection of positive measure and compute it
-    in the form 2^{-j}[k1,k2]. If the return value is false, j, k1 and k2 will
-    have no meaningful values, for performance reasons.
+    in the form 2^{-j}[k1,k2]. If the return value is false, the computed
+    support intersection will have no meaningful values, for performance reasons.
   */
   template <int d, int dT>
   bool intersect_supports(const DSBasis<d,dT>& basis,
 			  const typename DSBasis<d,dT>::Index& lambda,
 			  const typename DSBasis<d,dT>::Index& nu,
-			  int& j, int& k1, int& k2);
+			  typename DSBasis<d,dT>::Support& supp);
 
+  /*!
+    For a given wavelet \psi_\lambda, compute all generators/wavelets
+    \psi_\nu with level |\nu|=j, such that the respective supports
+    have a nontrivial intersection
+  */
+  template <int d, int dT>
+  void intersecting_wavelets(const DSBasis<d,dT>& basis,
+			     const typename DSBasis<d,dT>::Index& lambda,
+			     const int j, const bool generators,
+			     std::list<typename DSBasis<d,dT>::Index>& intersecting);
+  
   /*!
     For a given wavelet \psi_\lambda, compute all generators/wavelets
     \psi_\nu with level |\nu|=j, such that the respective supports

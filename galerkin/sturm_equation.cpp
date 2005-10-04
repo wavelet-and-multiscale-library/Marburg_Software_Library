@@ -16,6 +16,7 @@ namespace WaveletTL
     : bvp_(bvp), basis_(bvp.bc_left(), bvp.bc_right())
   {
     // estimate ||A||
+    // (TODO: shift this into a separate method)
     typedef typename WBASIS::Index Index;
     std::set<Index> Lambda;
     const int j0 = basis_.j0();
@@ -25,7 +26,7 @@ namespace WaveletTL
       if (lambda == last_wavelet(&basis_, jmax)) break;
     }
     SparseMatrix<double> A_Lambda;
-    setup_stiffness_matrix(Lambda, A_Lambda);
+    setup_stiffness_matrix(*this, Lambda, A_Lambda);
 
     Vector<double> xk(Lambda.size(), false);
     xk = 1;
@@ -99,8 +100,9 @@ namespace WaveletTL
     // must exist, which is the case for DSBasis<d,dT>.
 
     // First we compute the support intersection of \psi_\lambda and \psi_\nu:
-    int j, k1, k2;
-    bool inter = intersect_supports(basis_, lambda, nu, j, k1, k2);
+    typedef typename WBASIS::Support Support;
+    Support supp;
+    bool inter = intersect_supports(basis_, lambda, nu, supp);
 
     if (inter)
       {
@@ -108,9 +110,9 @@ namespace WaveletTL
 	// (TODO: maybe use an instance of MathTL::QuadratureRule instead of computing
 	// the Gauss points and weights)
 	const unsigned int N_Gauss = (p+1)/2;
-	const double h = ldexp(1.0, -j);
-	Array1D<double> gauss_points (N_Gauss*(k2-k1)), func1values, func2values, der1values, der2values;
-	for (int patch = k1, id = 0; patch < k2; patch++) // refers to 2^{-j}[patch,patch+1]
+	const double h = ldexp(1.0, -supp.j);
+	Array1D<double> gauss_points (N_Gauss*(supp.k2-supp.k1)), func1values, func2values, der1values, der2values;
+	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++) // refers to 2^{-j}[patch,patch+1]
 	  for (unsigned int n = 0; n < N_Gauss; n++, id++)
 	    gauss_points[id] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
 
@@ -119,185 +121,22 @@ namespace WaveletTL
 	evaluate(basis_, nu, gauss_points, func2values, der2values);
 
 	// - add all integral shares
-	for (int patch = k1, id = 0; patch < k2; patch++)
+	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++)
 	  for (unsigned int n = 0; n < N_Gauss; n++, id++) {
 	    const double t = gauss_points[id];
 	    const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
 	    
 	    const double pt = bvp_.p(t);
-	    if (pt != 0)
+ 	    if (pt != 0)
 	      r += pt * der1values[id] * der2values[id] * gauss_weight;
 	    
 	    const double qt = bvp_.q(t);
-	    if (qt != 0)
+ 	    if (qt != 0)
 	      r += qt * func1values[id] * func2values[id] * gauss_weight;
 	  }
       }
 
     return r;
-  }
-
-  template <class WBASIS>
-  double
-  SturmEquation<WBASIS>::a(const typename WBASIS::Index& lambda,
-			   const typename WBASIS::Index& nu,
-			   const typename WBASIS::Support& supp,
-			   const unsigned int p) const
-  {
-    // a(u,v) = \int_0^1 [p(t)u'(t)v'(t)+q(t)u(t)v(t)] dt
-
-    double r = 0;
-
-    // Set up Gauss points and weights for a composite quadrature formula:
-    // (TODO: maybe use an instance of MathTL::QuadratureRule instead of computing
-    // the Gauss points and weights)
-    const unsigned int N_Gauss = (p+1)/2;
-    const double h = ldexp(1.0, -supp.j);
-    Array1D<double> gauss_points (N_Gauss*(supp.k2-supp.k1)), func1values, func2values, der1values, der2values;
-    for (int patch = supp.k1, id = 0; patch < supp.k2; patch++) // refers to 2^{-j}[patch,patch+1]
-      for (unsigned int n = 0; n < N_Gauss; n++, id++)
-	gauss_points[id] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
-    
-    // - compute point values of the integrands
-    evaluate(basis_, lambda, gauss_points, func1values, der1values);
-    evaluate(basis_, nu, gauss_points, func2values, der2values);
-    
-    // - add all integral shares
-    for (int patch = supp.k1, id = 0; patch < supp.k2; patch++)
-      for (unsigned int n = 0; n < N_Gauss; n++, id++) {
-	const double t = gauss_points[id];
-	const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
-	
-	const double pt = bvp_.p(t);
-	if (pt != 0)
-	  r += pt * der1values[id] * der2values[id] * gauss_weight;
-	
-	const double qt = bvp_.q(t);
-	if (qt != 0)
-	  r += qt * func1values[id] * func2values[id] * gauss_weight;
-      }
-    
-    return r;
-  }
-
-  template <class WBASIS>
-  void
-  SturmEquation<WBASIS>::setup_stiffness_matrix(const std::set<typename WBASIS::Index>& Lambda,
-						SparseMatrix<double>& A_Lambda) const {
-    A_Lambda.resize(Lambda.size(), Lambda.size());
-    typedef typename SparseMatrix<double>::size_type size_type;
-    size_type row = 0;
-    typedef typename WBASIS::Index Index;
-    for (typename std::set<Index>::const_iterator it1 = Lambda.begin(), itend = Lambda.end();
-	 it1 != itend; ++it1, ++row)
-      {
-	const double d1 = D(*it1);
-	std::list<size_type> indices;
-	std::list<double> entries;
-
-	size_type column = 0;
-	for (typename std::set<Index>::const_iterator it2 = Lambda.begin();
-	     it2 != itend; ++it2, ++column) {
-	  double entry = a(*it2, *it1); // TODO: use block cache here instead of re-calculating entries!
-	  if (entry != 0) {
-	    indices.push_back(column);
-	    entries.push_back(entry / (d1 * D(*it2)));
-	  }
-	}
-
-	A_Lambda.set_row(row, indices, entries);
-      }
-  }
-
-  template <class WBASIS>
-  void
-  SturmEquation<WBASIS>::add_column(const double factor,
-				    const typename WBASIS::Index& lambda,
-				    const int J,
-				    InfiniteVector<double, typename WBASIS::Index>& w,
-				    const int jmax) const
-  {
-#ifdef _WAVELETTL_STURM_EQUATION_CACHE
-    // check whether the corresponding column already exists, create it if necessary
-    typename MatrixColumnCache::iterator col_it_lb(cache_.lower_bound(lambda));
-    typename MatrixColumnCache::iterator col_it(col_it_lb);
-    if (col_it_lb == cache_.end() || cache_.key_comp()(lambda, col_it_lb->first)) {
-      typedef typename MatrixColumnCache::value_type value_type;
-      col_it = cache_.insert(col_it_lb, value_type(lambda, MatrixBlockCache()));
-    }
-    MatrixBlockCache& col(col_it->second);
-#endif
-
-    // traverse all necessary level blocks for the FMVM, compute them if necessary
-
-    // generator block for the coarsest level (always present)
-    int level = basis_.j0()-1;
-#ifdef _WAVELETTL_STURM_EQUATION_CACHE
-    typename MatrixBlockCache::iterator col_block_it_lb(col.lower_bound(level));
-    typename MatrixBlockCache::iterator col_block_it(col_block_it_lb);
-    if (col_block_it_lb == col.end() || col.key_comp()(level, col_block_it_lb->first)) {
-      typedef typename MatrixBlockCache::value_type value_type;
-      col_block_it = col.insert(col_block_it_lb, value_type(level, MatrixBlock()));
-      compute_matrix_block(lambda, level, col_block_it->second);
-    }
-    MatrixBlock& col_block(col_block_it->second);
-#else
-    MatrixBlock col_block;
-    compute_matrix_block(lambda, level, col_block);
-#endif
-    for (unsigned int id = 0; id < col_block.indices.size(); ++id) {
-      w.set_coefficient(col_block.indices[id],
-			w.get_coefficient(col_block.indices[id])
-			+ col_block.entries[id] * factor);
-    }
-
-    // wavelet blocks
-    const int maxlevel = std::min(lambda.j()+J, jmax);
-    for (level = std::max(basis_.j0(), lambda.j()-J);
-	 level <= maxlevel; level++) {
-#ifdef _WAVELETTL_STURM_EQUATION_CACHE
-      col_block_it_lb = col.lower_bound(level);
-      col_block_it    = col_block_it_lb;
-      if (col_block_it_lb == col.end() || col.key_comp()(level, col_block_it_lb->first)) {
-	typedef typename MatrixBlockCache::value_type value_type;
-	col_block_it = col.insert(col_block_it_lb, value_type(level, MatrixBlock()));
-	compute_matrix_block(lambda, level, col_block_it->second);
-      }
-      MatrixBlock& col_block = col_block_it->second;
-#else
-      compute_matrix_block(lambda, level, col_block);
-#endif
-      for (unsigned int id = 0; id < col_block.indices.size(); ++id) {
-	w.set_coefficient(col_block.indices[id],
-			  w.get_coefficient(col_block.indices[id])
-			  + col_block.entries[id] * factor);
-      }
-    }
-  }
-
-  template <class WBASIS>
-  void
-  SturmEquation<WBASIS>::compute_matrix_block(const typename WBASIS::Index& lambda,
-					      const int level,
-					      MatrixBlock& block) const
-  {
-    typedef typename WBASIS::Index Index;
-    typedef std::list<std::pair<Index, typename WBASIS::Support> > SupportList;
-    SupportList nus;
-
-    // compute all wavelets on level j, such that supp(psi_lambda) has a nontrivial intersection
-    // with singsupp(psi_nu), cf. [St04, Compressibility of operators in wavelet coordinates]
-    relevant_wavelets(basis_, lambda, std::max(level, basis_.j0()), level == (basis_.j0()-1), nus);
-    
-    block.indices.resize(nus.size());
-    block.entries.resize(nus.size());
-    const double d1 = D(lambda);
-    unsigned int id = 0;
-    for(typename SupportList::const_iterator it(nus.begin()), itend(nus.end()); it != itend; ++it, ++id) {
-      const double entry = a(it->first, lambda, it->second) / (d1*D(it->first));
-      block.indices[id] = it->first;
-      block.entries[id] = entry;
-    }
   }
 
   template <class WBASIS>

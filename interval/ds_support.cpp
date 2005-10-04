@@ -108,11 +108,12 @@ namespace WaveletTL
   bool intersect_supports(const DSBasis<d,dT>& basis,
 			  const typename DSBasis<d,dT>::Index& lambda,
 			  const typename DSBasis<d,dT>::Index& nu,
-			  int& j, int& k1, int& k2)
+			  typename DSBasis<d,dT>::Support& supp)
   {
     int k1_nu, k2_nu;
     support(basis, nu, k1_nu, k2_nu);
-    return intersect_supports(basis, lambda, nu.j()+nu.e(), k1_nu, k2_nu, j, k1, k2);
+    return intersect_supports(basis, lambda, nu.j()+nu.e(), k1_nu, k2_nu,
+			      supp.j, supp.k1, supp.k2);
   }
 
   template <int d, int dT>
@@ -145,6 +146,40 @@ namespace WaveletTL
       for (Index nu = first_wavelet(&basis, j);; ++nu) {
 	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
 	  intersecting.push_back(std::make_pair(nu, supp));
+	if (nu == last_wavelet(&basis, j)) break;
+      }
+    }
+  }
+
+  template <int d, int dT>
+  void intersecting_wavelets(const DSBasis<d,dT>& basis,
+			     const typename DSBasis<d,dT>::Index& lambda,
+			     const int j, const bool generators,
+			     std::list<typename DSBasis<d,dT>::Index>& intersecting)
+  {
+    typedef typename DSBasis<d,dT>::Index Index;
+    typedef typename DSBasis<d,dT>::Support Support;
+
+    intersecting.clear();
+
+    // compute support of \psi_\lambda
+    const int j_lambda = lambda.j() + lambda.e();
+    int k1_lambda, k2_lambda;
+    support(basis, lambda, k1_lambda, k2_lambda);
+    
+    // a brute force solution
+    if (generators) {
+      Support supp;
+      for (Index nu = first_generator(&basis, j);; ++nu) {
+	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
+	  intersecting.push_back(nu);
+	if (nu == last_generator(&basis, j)) break;
+      }
+    } else {
+      Support supp;
+      for (Index nu = first_wavelet(&basis, j);; ++nu) {
+	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
+	  intersecting.push_back(nu);
 	if (nu == last_wavelet(&basis, j)) break;
       }
     }

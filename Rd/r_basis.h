@@ -34,6 +34,21 @@ namespace WaveletTL
     typedef RIndex Index;
 
     /*!
+      critical Sobolev regularity for the primal generators/wavelets
+    */
+    static double primal_regularity() { return PRIMALMASK::regularity(); }
+
+    /*!
+      number of vanishing moments for the primal wavelets
+    */
+    static unsigned int primal_vanishing_moments() { return DUALMASK::strang_fix_order(); }
+
+    /*!
+      number of vanishing moments for the dual wavelets
+    */
+    static unsigned int dual_vanishing_moments() { return PRIMALMASK::strang_fix_order(); }
+
+    /*!
       reading access to the primal mask
     */
     inline const RefinableFunction<PRIMALMASK>& a() const { return a_; }

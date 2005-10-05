@@ -29,6 +29,16 @@ namespace WaveletTL
   {
   public:
     CDFMask_primal();
+
+    /*!
+      Strang-Fix order, i.e., degree of polynomial reproduction (+1)
+    */
+    static unsigned int strang_fix_order() { return d; }
+
+    /*!
+      critical Sobolev regularity
+    */
+    static double regularity() { return d - 0.5; }
   };
 
   /*!
@@ -43,6 +53,18 @@ namespace WaveletTL
   {
   public:
     CDFMask_dual();
+
+    /*!
+      Strang-Fix order, i.e., degree of polynomial reproduction (+1)
+    */
+    static unsigned int strang_fix_order() { return dT; }
+
+    /*!
+      critical Sobolev regularity
+      (at least a crude lower estimate, this routine will only cf. [CDF])
+
+    */
+    static double regularity() { return 1.0; }
   };
 }
 

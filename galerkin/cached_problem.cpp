@@ -60,11 +60,11 @@ namespace WaveletTL
     if (normA == 0.0) {
       typedef typename WaveletBasis::Index Index;
       std::set<Index> Lambda;
-      const int j0 = basis().j0();
+      const int j0 = PROBLEM::basis().j0();
       const int jmax = 8;
-      for (Index lambda = first_generator(&basis(), j0);; ++lambda) {
+      for (Index lambda = first_generator(&PROBLEM::basis(), j0);; ++lambda) {
 	Lambda.insert(lambda);
-	if (lambda == last_wavelet(&basis(), jmax)) break;
+	if (lambda == last_wavelet(&PROBLEM::basis(), jmax)) break;
       }
       SparseMatrix<double> A_Lambda;
       setup_stiffness_matrix(*this, Lambda, A_Lambda);
@@ -87,11 +87,11 @@ namespace WaveletTL
     if (normAinv == 0.0) {
       typedef typename WaveletBasis::Index Index;
       std::set<Index> Lambda;
-      const int j0 = basis().j0();
+      const int j0 = PROBLEM::basis().j0();
       const int jmax = 8;
-      for (Index lambda = first_generator(&basis(), j0);; ++lambda) {
+      for (Index lambda = first_generator(&PROBLEM::basis(), j0);; ++lambda) {
 	Lambda.insert(lambda);
-	if (lambda == last_wavelet(&basis(), jmax)) break;
+	if (lambda == last_wavelet(&PROBLEM::basis(), jmax)) break;
       }
       SparseMatrix<double> A_Lambda;
       setup_stiffness_matrix(*this, Lambda, A_Lambda);

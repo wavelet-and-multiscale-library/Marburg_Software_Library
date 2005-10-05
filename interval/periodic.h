@@ -12,6 +12,7 @@
 
 #include <iostream>
 
+#include <algebra/vector.h>
 #include <algebra/infinite_vector.h>
 
 #include <interval/i_index.h>
@@ -40,13 +41,34 @@ namespace WaveletTL
     //! default constructor
     PeriodicBasis();
     
-    /*!
-      coarsest possible level j0
-    */
+    //! coarsest possible level j0
     inline const int j0() const { return j0_; }
 
     //! wavelet index class
     typedef IntervalIndex<PeriodicBasis<RBASIS> > Index;
+
+    //! size_type, for convenience
+    typedef Vector<double>::size_type size_type;
+
+    /*!
+      geometric type of the support sets
+      (note that if k1 > k2, the support consists of two intervals instead of one)
+    */
+    typedef struct {
+      int j;
+      int k1;
+      int k2;
+    } Support;
+
+    /*!
+      number of vanishing moments for the primal wavelets
+    */
+    static inline unsigned int primal_vanishing_moments() { return RBASIS::primal_vanishing_moments(); }
+
+    /*!
+      number of vanishing moments for the dual wavelets
+    */
+    static inline unsigned int dual_vanishing_moments() { return RBASIS::dual_vanishing_moments(); }
 
     //! bounds for the generator indices
     inline const int DeltaLmin() const { return 0; }

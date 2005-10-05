@@ -53,6 +53,11 @@ int main()
   for (RefinableFunction<CDFMask_dual<2,2> >::const_iterator it(phi2T.begin()); it != phi2T.end(); it++)
     cout << "k=" << it.index() << ": " << *it << endl;  
 
+  cout << "- dual mask of a CDF<2,4> function:" << endl;
+  RefinableFunction<CDFMask_dual<2,4> > phi24T;
+  for (RefinableFunction<CDFMask_dual<2,4> >::const_iterator it(phi24T.begin()); it != phi24T.end(); it++)
+    cout << "k=" << it.index() << ": " << *it << endl;  
+
   cout << "- primal CDF<3> mask:" << endl;
   RefinableFunction<CDFMask_primal<3> > phi3;
   for (RefinableFunction<CDFMask_primal<3> >::const_iterator it(phi3.begin()); it != phi3.end(); it++)

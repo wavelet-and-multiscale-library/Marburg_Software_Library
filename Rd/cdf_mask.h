@@ -47,7 +47,7 @@ namespace WaveletTL
     [CDF] Cohen, Daubechies, Feauveau: Biorthogonal bases of compactly supported wavelets,
           Comm. Pure Appl. Math. 45(1992), 485--560.
   */
-  template <int d, int dt>
+  template <int d, int dT>
   class CDFMask_dual
     : public virtual MultivariateLaurentPolynomial<double, 1>
   {

@@ -28,7 +28,7 @@ namespace MathTL
       A*x=b
     or least squares problems
       min \|A*x-b\|_2
-    by the application of LU or QR factorization (m >= n).
+    by the application of LU or QU factorization (m >= n).
     The factorizations is stored in place.
   */
   template <class C>

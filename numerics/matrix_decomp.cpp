@@ -332,4 +332,15 @@ namespace MathTL
     V.resize(rowdim_,coldim_);
     V = V_;
   }
+
+  template <class C>
+  Hessenberg<C>::Hessenberg(const Matrix<C>& A)
+    : Matrix<C>(A)
+  {
+    assert(A.row_dimension() == A.column_dimension());
+
+    // TODO: implement this!
+
+    cout << "after Hessenberg():" << endl << *this;
+  }
 }

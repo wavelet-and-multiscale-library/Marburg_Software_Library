@@ -111,6 +111,20 @@ namespace MathTL
     //! storage for diag(S)
     Vector<C> Sdiag_;
   };
+
+  /*!
+    Convert a given matrix A into Hessenberg form B=U^T*A*U, where U is orthogonal.
+    We do not store the U-matrix, since this routine is the main ingredient
+    in the numerical solution of the nonsymmetric eigenvalue problem.
+  */
+  template <class C>
+  class Hessenberg
+    : public Matrix<C>
+  {
+  public:
+    //! default constructor, perform the Hessenberg transformation
+    Hessenberg(const Matrix<C>& A);
+  };
 }
 
 #include <numerics/matrix_decomp.cpp>

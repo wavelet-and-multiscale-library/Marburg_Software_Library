@@ -118,5 +118,10 @@ int main()
   qu3.inverse(MInv);
   cout << "  * inverse() output:" << endl << MInv;
 
+  Matrix<double> C(3, 3, "1 2 3 4 5 6 7 8 9");
+  cout << "- a matrix C=" << endl << C;
+
+  Hessenberg<double> H(C);
+
   return 0;
 }

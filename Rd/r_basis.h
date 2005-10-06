@@ -41,12 +41,12 @@ namespace WaveletTL
     /*!
       number of vanishing moments for the primal wavelets
     */
-    static unsigned int primal_vanishing_moments() { return DUALMASK::strang_fix_order(); }
+    static unsigned int primal_vanishing_moments() { return DUALMASK::Strang_Fix_order(); }
 
     /*!
       number of vanishing moments for the dual wavelets
     */
-    static unsigned int dual_vanishing_moments() { return PRIMALMASK::strang_fix_order(); }
+    static unsigned int dual_vanishing_moments() { return PRIMALMASK::Strang_Fix_order(); }
 
     /*!
       reading access to the primal mask

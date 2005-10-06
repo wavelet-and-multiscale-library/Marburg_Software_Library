@@ -33,7 +33,7 @@ namespace WaveletTL
     /*!
       Strang-Fix order, i.e., degree of polynomial reproduction (+1)
     */
-    static unsigned int strang_fix_order() { return d; }
+    static unsigned int Strang_Fix_order() { return d; }
 
     /*!
       critical Sobolev regularity
@@ -57,7 +57,7 @@ namespace WaveletTL
     /*!
       Strang-Fix order, i.e., degree of polynomial reproduction (+1)
     */
-    static unsigned int strang_fix_order() { return dT; }
+    static unsigned int Strang_Fix_order() { return dT; }
 
     /*!
       critical Sobolev regularity

@@ -13,7 +13,7 @@ CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -fast -mcpu=7450 -faltivec -funroll-loops -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 
 EXEOBJF = \
-  test_refinable.o\
+  test_refinable.o test_regularity.o\
   test_dm.o\
   test_r_basis.o test_cdf_expansion.o\
   test_ds_basis.o test_ds_support.o test_ds_expansion.o\

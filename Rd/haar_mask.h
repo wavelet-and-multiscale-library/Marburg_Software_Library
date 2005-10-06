@@ -28,6 +28,16 @@ namespace WaveletTL
       set_coefficient(MultiIndex<int, 1>(0), 1);
       set_coefficient(MultiIndex<int, 1>(1), 1);
     }
+
+    /*!
+      Strang-Fix order, i.e., degree of polynomial reproduction (+1)
+    */
+    static unsigned int Strang_Fix_order() { return 1; }
+
+    /*!
+      critical Sobolev regularity
+    */
+    static double regularity() { return 0.5; }
   };
 }
 

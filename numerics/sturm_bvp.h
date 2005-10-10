@@ -90,14 +90,14 @@ namespace MathTL
     Simplified class for Sturm b.v.p.'s on [0,1] which uses only
     homogeneous b.c.'s of the first (Dirichlet) or second (Neumann) kind.
   */
-  class simpleSturmBVP
+  class SimpleSturmBVP
     : public SturmBVP
   {
   public:
     /*!
       virtual destructor
      */
-    virtual ~simpleSturmBVP ();
+    virtual ~SimpleSturmBVP ();
     
     /*!
       diffusion coefficient
@@ -151,13 +151,13 @@ namespace MathTL
 
        y(0) = y(1), y'(0) = y'(1)
   */
-  class periodicSturmBVP
+  class PeriodicSturmBVP
   {
   public:
     /*!
       virtual destructor
      */
-    virtual ~periodicSturmBVP ();
+    virtual ~PeriodicSturmBVP ();
     
     /*!
       diffusion coefficient

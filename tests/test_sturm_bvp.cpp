@@ -27,10 +27,10 @@ public:
 /*
   the same problem
     -y''=1, y(0)=y(1)=0
-  now as simpleSturmBVP
+  now as SimpleSturmBVP
  */
 class TestProblem2
-  : public simpleSturmBVP
+  : public SimpleSturmBVP
 {
 public:
   bool bc_left() const { return true; }

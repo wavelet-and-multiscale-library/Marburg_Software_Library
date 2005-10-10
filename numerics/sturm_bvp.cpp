@@ -32,12 +32,12 @@ namespace MathTL
   }
 
   inline
-  simpleSturmBVP::~simpleSturmBVP()
+  SimpleSturmBVP::~SimpleSturmBVP()
   {
   }
 
   inline
-  periodicSturmBVP::~periodicSturmBVP()
+  PeriodicSturmBVP::~PeriodicSturmBVP()
   {
   }
 }

@@ -214,18 +214,6 @@ namespace WaveletTL
   }
   
   template <class WBASIS>
-  void
-  SturmEquation<WBASIS>::setup_righthand_side(const std::set<typename WBASIS::Index>& Lambda,
-					      Vector<double>& F_Lambda) const {
-    F_Lambda.resize(Lambda.size());
-    unsigned int i = 0;
-    typedef typename WBASIS::Index Index;
-    for (typename std::set<Index>::const_iterator it = Lambda.begin(), itend = Lambda.end();
-	 it != itend; ++it, ++i)
-      F_Lambda[i] = f(*it)/D(*it);
-  }
-
-  template <class WBASIS>
   inline
   void
   SturmEquation<WBASIS>::RHS(const double eta,

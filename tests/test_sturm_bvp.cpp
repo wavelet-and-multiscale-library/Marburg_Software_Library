@@ -135,7 +135,7 @@ int main()
   cout << "- set up right-hand side..." << endl;
   tstart = clock();
   Vector<double> b;
-  eq.setup_righthand_side(Lambda, b);
+  setup_righthand_side(eq, Lambda, b);
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;

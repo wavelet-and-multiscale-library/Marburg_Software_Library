@@ -143,12 +143,6 @@ namespace WaveletTL
     double f(const typename WBASIS::Index& lambda) const;
 
     /*!
-      given an index set Lambda, setup the corresponding preconditioned right-hand side
-    */
-    void setup_righthand_side(const std::set<typename WBASIS::Index>& Lambda,
-			      Vector<double>& F_Lambda) const;
-    
-    /*!
       approximate the wavelet coefficient set of the preconditioned right-hand side F
       within a prescribed \ell_2 error tolerance
     */

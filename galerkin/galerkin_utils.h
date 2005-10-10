@@ -17,13 +17,22 @@
 namespace WaveletTL
 {
   /*!
-    Setup the (sparse) stiffness matrix for a given problem and a given active
+    Setup the (sparse, preconditioned) stiffness matrix for a given problem and a given active
     index set Lambda.
   */
   template <class PROBLEM>
-    void setup_stiffness_matrix(const PROBLEM& P,
-				const std::set<typename PROBLEM::WaveletBasis::Index>& Lambda,
-				SparseMatrix<double>& A_Lambda); 
+  void setup_stiffness_matrix(const PROBLEM& P,
+			      const std::set<typename PROBLEM::WaveletBasis::Index>& Lambda,
+			      SparseMatrix<double>& A_Lambda); 
+  
+  /*!
+    Setup the (preconditioned) right-hand side for a given problem and a given active
+    index set Lambda.
+  */
+  template <class PROBLEM>
+  void setup_righthand_side(const PROBLEM& P,
+			    const std::set<typename PROBLEM::WaveletBasis::Index>& Lambda,
+			    Vector<double>& F_Lambda); 
 }
 
 #include <galerkin/galerkin_utils.cpp>

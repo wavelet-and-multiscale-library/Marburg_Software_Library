@@ -12,7 +12,7 @@
 namespace WaveletTL
 {
   template <class WBASIS>
-  SturmEquation<WBASIS>::SturmEquation(const simpleSturmBVP& bvp)
+  SturmEquation<WBASIS>::SturmEquation(const SimpleSturmBVP& bvp)
     : bvp_(bvp), basis_(bvp.bc_left(), bvp.bc_right())
   {
     typedef typename WaveletBasis::Index Index;

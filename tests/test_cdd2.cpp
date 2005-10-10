@@ -16,7 +16,7 @@
 using namespace std;
 using namespace WaveletTL;
 
-using MathTL::simpleSturmBVP;
+using MathTL::SimpleSturmBVP;
 using MathTL::CG;
 
 /*
@@ -25,7 +25,7 @@ using MathTL::CG;
  */
 template <unsigned int N>
 class TestProblem
-  : public simpleSturmBVP
+  : public SimpleSturmBVP
 {
 public:
   double p(const double t) const {

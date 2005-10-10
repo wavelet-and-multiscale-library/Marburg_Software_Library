@@ -27,7 +27,7 @@ namespace WaveletTL
       -(py')'(t) + q(t)y(t) = g(t), 0 <= t <= 1 
       
     with first (Dirichlet) or second (Neumann) order b.c.'s as modeled in
-    the class simpleSturmBVP as an equivalent operator equation
+    the class SimpleSturmBVP as an equivalent operator equation
     within \ell_2 by means of a wavelet basis.
 
     The corresponding bilinear form in
@@ -63,7 +63,7 @@ namespace WaveletTL
   class SturmEquation
   {
   public:
-    SturmEquation(const simpleSturmBVP& bvp);
+    SturmEquation(const SimpleSturmBVP& bvp);
 
     /*!
       make template argument accessible
@@ -154,7 +154,7 @@ namespace WaveletTL
     double F_norm() const { return sqrt(fnorm_sqr); }
 
   protected:
-    const simpleSturmBVP& bvp_;
+    const SimpleSturmBVP& bvp_;
     WBASIS basis_;
 
     // right-hand side coefficients on a fine level, sorted by modulus

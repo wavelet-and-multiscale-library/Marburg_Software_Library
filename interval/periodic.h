@@ -61,6 +61,11 @@ namespace WaveletTL
     } Support;
 
     /*!
+      critical Sobolev regularity for the primal generators/wavelets
+    */
+    static inline double primal_regularity() { RBASIS::primal_regularity(); }
+
+    /*!
       number of vanishing moments for the primal wavelets
     */
     static inline unsigned int primal_vanishing_moments() { return RBASIS::primal_vanishing_moments(); }

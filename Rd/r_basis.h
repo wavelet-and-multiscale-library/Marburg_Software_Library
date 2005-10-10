@@ -36,17 +36,17 @@ namespace WaveletTL
     /*!
       critical Sobolev regularity for the primal generators/wavelets
     */
-    static double primal_regularity() { return PRIMALMASK::regularity(); }
+    static inline double primal_regularity() { return PRIMALMASK::regularity(); }
 
     /*!
       number of vanishing moments for the primal wavelets
     */
-    static unsigned int primal_vanishing_moments() { return DUALMASK::Strang_Fix_order(); }
+    static inline unsigned int primal_vanishing_moments() { return DUALMASK::Strang_Fix_order(); }
 
     /*!
       number of vanishing moments for the dual wavelets
     */
-    static unsigned int dual_vanishing_moments() { return PRIMALMASK::Strang_Fix_order(); }
+    static inline unsigned int dual_vanishing_moments() { return PRIMALMASK::Strang_Fix_order(); }
 
     /*!
       reading access to the primal mask

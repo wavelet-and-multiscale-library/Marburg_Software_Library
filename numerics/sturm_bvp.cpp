@@ -35,4 +35,9 @@ namespace MathTL
   simpleSturmBVP::~simpleSturmBVP()
   {
   }
+
+  inline
+  periodicSturmBVP::~periodicSturmBVP()
+  {
+  }
 }

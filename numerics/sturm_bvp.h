@@ -141,6 +141,44 @@ namespace MathTL
     //! right boundary condition coefficient 1 (inherited)
     double beta1() const { return 0; }
   };
+
+  /*!
+    Base class for a (real valued) Sturm boundary value problem on [0,1]
+    
+      -(py')'(t) + q(t)y(t) = g(t), 0 <= t <= 1 
+      
+    with periodic boundary conditions
+
+       y(0) = y(1), y'(0) = y'(1)
+  */
+  class periodicSturmBVP
+  {
+  public:
+    /*!
+      virtual destructor
+     */
+    virtual ~periodicSturmBVP ();
+    
+    /*!
+      diffusion coefficient
+    */
+    virtual double p(const double t) const = 0;
+
+    /*!
+      first derivative of the diffusion coefficient
+    */
+    virtual double p_prime(const double t) const = 0;
+
+    /*!
+      reaction coefficient
+    */
+    virtual double q(const double t) const = 0;
+
+    /*!
+      right-hand side
+    */
+    virtual double g(const double t) const = 0;
+  };
 }
 
 #include <numerics/sturm_bvp.cpp>

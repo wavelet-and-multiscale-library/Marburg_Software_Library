@@ -123,4 +123,18 @@ namespace WaveletTL
     assert(j >= basis->j0());
     return IntervalIndex<IBASIS>(j, 1, basis->Nablamax(j), basis);
   }
+
+  template <class IBASIS>
+  inline
+  IntervalIndex<IBASIS> first_index(const IBASIS* basis, const int j, const int e)
+  {
+    return (e == 0 ? first_generator(basis, j) : first_wavelet(basis, j));
+  }
+  
+  template <class IBASIS>
+  inline
+  IntervalIndex<IBASIS> last_index(const IBASIS* basis, const int j, const int e)
+  {
+    return (e == 0 ? last_generator(basis, j) : last_wavelet(basis, j));
+  }
 }

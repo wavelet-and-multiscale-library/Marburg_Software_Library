@@ -39,13 +39,41 @@ namespace WaveletTL
   {
     // We want to have (j,e,k) < (j',e',k') iff
     //   j<j' or (j=j' and (e<e' or (e=e' and k<k')),
-    // where e and k are lexicographically ordered vectors
+    // where e and k are already lexicographically ordered vectors, respectively
     return (j() < lambda.j() ||
 	    (j() == lambda.j() && ((index1().e() < lambda.index1().e() ||
 				    (index1().e() == lambda.index1().e() && index2().e() < lambda.index2().e())) ||
 				   ((index1().e() == lambda.index1().e() && index2().e() == lambda.index2().e()) &&
 				    (index1().k() < lambda.index1().k() ||
 				     (index1().k() == lambda.index1().k() && index2().k() < lambda.index2().k()))))));
+  }
+
+  template <class BASIS1, class BASIS2>
+  TensorProductIndex<BASIS1,BASIS2>&
+  TensorProductIndex<BASIS1,BASIS2>::operator ++ ()
+  {
+    if (index2() == last_index(&basis_->basis2(), j(), index2().e())) {
+      if (index1() == last_index(&basis_->basis1(), j(), index1().e())) {
+	if (index2() == last_wavelet(&basis_->basis2(), j())) {
+ 	  if (index1() == last_wavelet(&basis_->basis1(), j())) {
+ 	    index1_ = first_generator(&basis_->basis1(), j()+1); // increments j
+	    index2_ = first_wavelet(&basis_->basis2(), j()); // no generators on higher scales
+	  } else {
+	    ++index1_;
+	    index2_ = first_generator(&basis_->basis2(), j());
+	  }
+	} else {
+	  ++index2_;
+	  index1_ = first_index(&basis_->basis1(), j(), index1().e());
+	}
+      } else {
+	++index1_;
+	index2_ = first_index(&basis_->basis2(), j(), index2().e());
+      }
+    } else
+      ++index2_;
+    
+    return *this;
   }
 
   template <class BASIS1, class BASIS2>

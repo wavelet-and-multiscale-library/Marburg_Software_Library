@@ -54,6 +54,9 @@ namespace WaveletTL
     inline bool operator != (const TensorProductIndex& lambda) const
     { return !(*this == lambda); }
     
+    //! preincrement
+    TensorProductIndex& operator ++ ();
+
     //! lexicographic order <
     bool operator < (const TensorProductIndex& lambda) const;
 

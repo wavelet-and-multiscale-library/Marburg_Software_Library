@@ -117,6 +117,20 @@ namespace WaveletTL
   */
   template <class IBASIS>
   IntervalIndex<IBASIS> last_wavelet(const IBASIS* basis, const int j);
+
+  /*!
+    index of first function with type e
+    (mainly for TensorProductBasis)
+  */
+  template <class IBASIS>
+  IntervalIndex<IBASIS> first_index(const IBASIS* basis, const int j, const int e);
+
+  /*!
+    index of last function with type e
+    (mainly for TensorProductBasis)
+  */
+  template <class IBASIS>
+  IntervalIndex<IBASIS> last_index(const IBASIS* basis, const int j, const int e);
 }
 
 // include implementation

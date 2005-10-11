@@ -32,7 +32,7 @@ namespace WaveletTL
       {
  	InfiniteVector<double, Index> help;
  	decompose_1(it.index(), j0, help);
- 	d += *it * help;
+ 	d.add(*it, help);
       }
   }
   
@@ -47,7 +47,7 @@ namespace WaveletTL
       {
 	InfiniteVector<double, Index> help;
 	decompose_t_1(it.index(), j0, help);
-	d += *it * help;
+	d.add(*it, help);
       }
   }
 
@@ -62,7 +62,7 @@ namespace WaveletTL
       {
 	InfiniteVector<double, Index> help;
 	reconstruct_1(it.index(), j, help);
-	d += *it * help;
+	d.add(*it, help);
       }
   }
 
@@ -77,7 +77,7 @@ namespace WaveletTL
       {
 	InfiniteVector<double, Index> help;
 	reconstruct_t_1(it.index(), j, help);
-	d += *it * help;
+	d.add(*it, help);
       }
   }
 
@@ -123,7 +123,7 @@ namespace WaveletTL
  	      {
  		InfiniteVector<double, Index> d;
  		decompose_1(Index(lambda.j()-1, 0, l), j0, d);
- 		c += M_SQRT1_2 * aT().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*l)) * d;
+ 		c.add(M_SQRT1_2 * aT().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*l)), d);
  	      }
 	  }
       }
@@ -171,7 +171,7 @@ namespace WaveletTL
 	      {
 		InfiniteVector<double, Index> d;
 		decompose_t_1(Index(lambda.j()-1, 0, l), j0, d);
-		c += M_SQRT1_2 * a().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*l)) * d;
+		c.add(M_SQRT1_2 * a().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*l)), d);
 	      }
 	  }
       }
@@ -203,7 +203,7 @@ namespace WaveletTL
  	      {
  		InfiniteVector<double, Index> d;
  		reconstruct_1(Index(lambda.j()+1, 0, l), j, d);
- 		c += M_SQRT1_2 * a().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k())) * d;
+ 		c.add(M_SQRT1_2 * a().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k())), d);
  	      }
  	  }
  	else
@@ -212,7 +212,7 @@ namespace WaveletTL
  	      {
  		InfiniteVector<double, Index> d;
  		reconstruct_1(Index(lambda.j()+1, 0, l), j, d);
- 		c += M_SQRT1_2 * b().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k())) * d;
+ 		c.add(M_SQRT1_2 * b().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k())), d);
  	      }
 	  }
       }
@@ -244,7 +244,7 @@ namespace WaveletTL
  	      {
  		InfiniteVector<double, Index> d;
  		reconstruct_t_1(Index(lambda.j()+1, 0, l), j, d);
- 		c += M_SQRT1_2 * aT().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k())) * d;
+ 		c.add(M_SQRT1_2 * aT().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k())), d);
  	      }
  	  }
  	else
@@ -253,7 +253,7 @@ namespace WaveletTL
  	      {
  		InfiniteVector<double, Index> d;
  		reconstruct_t_1(Index(lambda.j()+1, 0, l), j, d);
- 		c += M_SQRT1_2 * bT().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k())) * d;
+ 		c.add(M_SQRT1_2 * bT().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k())), d);
  	      }
 	  }
       }

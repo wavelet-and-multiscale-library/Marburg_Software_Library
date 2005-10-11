@@ -1401,7 +1401,7 @@ namespace WaveletTL
 	 it != itend; ++it) {
       InfiniteVector<double, Index> help;
       decompose_1(it.index(), jmin, help);
-      v += *it * help;
+      v.add(*it, help);
     }
   }
   
@@ -1415,7 +1415,7 @@ namespace WaveletTL
 	 it != itend; ++it) {
       InfiniteVector<double, Index> help;
       decompose_t_1(it.index(), jmin, help);
-      v += *it * help;
+      v.add(*it, help);
     }
   }
   
@@ -1429,7 +1429,7 @@ namespace WaveletTL
 	 it != itend; ++it) {
       InfiniteVector<double, Index> help;
       reconstruct_1(it.index(), j, help);
-      v += *it * help;
+      v.add(*it, help);
     }
   }
 
@@ -1443,7 +1443,7 @@ namespace WaveletTL
 	 it != itend; ++it) {
       InfiniteVector<double, Index> help;
       reconstruct_t_1(it.index(), j, help);
-      v += *it * help;
+      v.add(*it, help);
     }
   }
 
@@ -1565,7 +1565,7 @@ namespace WaveletTL
 	    for (size_type k(0); k < Mj0T.entries_in_row(row_j0); k++) {
 	      InfiniteVector<double, Index> dhelp;
 	      decompose_1(Index(lambda.j()-1, 0, DeltaLmin()+Mj0T.get_nth_index(row_j0,k)+offset, this), jmin, dhelp);
-	      c += Mj0T.get_nth_entry(row_j0,k) * dhelp;
+	      c.add(Mj0T.get_nth_entry(row_j0,k), dhelp);
 	    }
 	  }
       }
@@ -1690,7 +1690,7 @@ namespace WaveletTL
 	    for (size_type k(0); k < Mj0.entries_in_row(row_j0); k++) {
 	      InfiniteVector<double, Index> dhelp;
 	      decompose_t_1(Index(lambda.j()-1, 0, DeltaLmin()+Mj0.get_nth_index(row_j0,k)+offset, this), jmin, dhelp);
-	      c += Mj0.get_nth_entry(row_j0,k) * dhelp;
+	      c.add(Mj0.get_nth_entry(row_j0,k), dhelp);
 	    }
 	  }
       }
@@ -1756,7 +1756,7 @@ namespace WaveletTL
       for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
 	InfiniteVector<double, Index> dhelp;
 	reconstruct_1(Index(lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this), j, dhelp);
-	c += M.get_nth_entry(row_j0,k) * dhelp;
+	c.add(M.get_nth_entry(row_j0,k), dhelp);
       }
     }
   }
@@ -1820,7 +1820,7 @@ namespace WaveletTL
       for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
 	InfiniteVector<double, Index> dhelp;
 	reconstruct_t_1(Index(lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this), j, dhelp);
-	c += M.get_nth_entry(row_j0,k) * dhelp;
+	c.add(M.get_nth_entry(row_j0,k), dhelp);
       }
     }
   }

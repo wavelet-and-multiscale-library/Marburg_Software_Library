@@ -124,5 +124,11 @@ int main()
   v.clip(Lambda);
   cout << "- v clipped to an index set:" << endl << v;
 
+  v.add_coefficient(0, 1.5);
+  cout << "- added something to the first coefficient of v:" << endl << v;
+
+  v.add_coefficient(2, -345);
+  cout << "- added something to the second coefficient of v:" << endl << v;
+
   return 0;
 }

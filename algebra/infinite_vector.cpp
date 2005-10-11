@@ -81,7 +81,23 @@ namespace MathTL
 	!std::map<I,C>::key_comp()(index,it->first))
       it->second = value;
     else
-      std::map<I,C>::insert(typename std::map<I,C>::value_type(index, value));
+      std::map<I,C>::insert(it, typename std::map<I,C>::value_type(index, value));
+  }
+
+  template <class C, class I>
+  void InfiniteVector<C,I>::add_coefficient(const I& index, const C increment)
+  {
+    // efficient add-or-update, cf. Meyers, Effective STL
+    typename std::map<I,C>::iterator it(lower_bound(index));
+    if (it != std::map<I,C>::end() &&
+	!std::map<I,C>::key_comp()(index, it->first)) {
+      // we already have a nontrivial coefficient
+      if ((it->second += increment) == 0)
+	std::map<I,C>::erase(it);
+    } else {
+      // insert the increment as new coefficient
+      std::map<I,C>::insert(it, typename std::map<I,C>::value_type(index, increment));
+    }
   }
 
   template <class C, class I>

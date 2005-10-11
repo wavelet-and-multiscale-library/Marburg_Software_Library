@@ -248,6 +248,11 @@ namespace MathTL
     void compress(const double eta = 1e-15);
 
     /*!
+      add a value to a vector entry
+    */
+    void add_coefficient(const I& index, const C increment);
+
+    /*!
       in place summation *this += v
     */
     void add(const InfiniteVector<C,I>& v);

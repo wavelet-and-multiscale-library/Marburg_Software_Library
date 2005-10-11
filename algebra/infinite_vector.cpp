@@ -199,7 +199,7 @@ namespace MathTL
 	      }
 	    else
 	      {
-		const C value(*it+*itv);
+		const C value(*it + *itv);
 		if (value != C(0)) {
 		  hint2 = help.insert(hint, std::pair<I,C>(itv.index(), value));
 		  hint = hint2;
@@ -243,6 +243,61 @@ namespace MathTL
   template <class C, class I>
   void InfiniteVector<C,I>::add(const C s, const InfiniteVector<C,I>& v)
   {
+#if 1
+    std::map<I,C> help;
+
+    // The following O(N) algorithm is adapted from the STL algorithm set_union(),
+    // cf. stl_algo.h ...
+
+    typename InfiniteVector<C,I>::const_iterator it(begin()), itend(end()),
+      itv(v.begin()), itvend(v.end());
+    typename std::map<I,C>::iterator hint(help.begin()), hint2(help.begin());
+
+    while (it != itend && itv != itvend)
+      {
+	if (it.index() < itv.index())
+	  {
+	    hint2 = help.insert(hint, std::pair<I,C>(it.index(), *it));
+	    hint = hint2;
+	    ++it;
+	  }
+	else
+	  {
+	    if (itv.index() < it.index())
+	      {
+		hint2 = help.insert(hint, std::pair<I,C>(itv.index(), s * *itv));
+		hint = hint2;
+		++itv;
+	      }
+	    else
+	      {
+		const C value(*it + s * *itv);
+		if (value != C(0)) {
+		  hint2 = help.insert(hint, std::pair<I,C>(itv.index(), value));
+		  hint = hint2;
+		}
+		++it;
+		++itv;
+	      }
+	  }
+      }
+
+    while (it != itend)
+      {
+	hint2 = help.insert(hint, std::pair<I,C>(it.index(), *it));
+	hint = hint2;
+	++it;
+      }
+
+    while (itv != itvend)
+      {
+	hint2 = help.insert(hint, std::pair<I,C>(itv.index(), s * *itv));
+	hint = hint2;
+	++itv;
+      }
+
+    std::map<I,C>::swap(help);
+#else
     // the following code can be optimized (not O(N) now)
     typename InfiniteVector<C,I>::const_iterator itv(v.begin()), itvend(v.end());
     for (; itv != itvend; ++itv)
@@ -253,11 +308,67 @@ namespace MathTL
 	else
 	  std::map<I,C>::erase(itv.index());
       }
+#endif
   }
    
   template <class C, class I>
   void InfiniteVector<C,I>::sadd(const C s, const InfiniteVector<C,I>& v)
   {
+#if 1
+    std::map<I,C> help;
+
+    // The following O(N) algorithm is adapted from the STL algorithm set_union(),
+    // cf. stl_algo.h ...
+
+    typename InfiniteVector<C,I>::const_iterator it(begin()), itend(end()),
+      itv(v.begin()), itvend(v.end());
+    typename std::map<I,C>::iterator hint(help.begin()), hint2(help.begin());
+
+    while (it != itend && itv != itvend)
+      {
+	if (it.index() < itv.index())
+	  {
+	    hint2 = help.insert(hint, std::pair<I,C>(it.index(), s * *it));
+	    hint = hint2;
+	    ++it;
+	  }
+	else
+	  {
+	    if (itv.index() < it.index())
+	      {
+		hint2 = help.insert(hint, std::pair<I,C>(itv.index(), *itv));
+		hint = hint2;
+		++itv;
+	      }
+	    else
+	      {
+		const C value(s * *it + *itv);
+		if (value != C(0)) {
+		  hint2 = help.insert(hint, std::pair<I,C>(itv.index(), value));
+		  hint = hint2;
+		}
+		++it;
+		++itv;
+	      }
+	  }
+      }
+
+    while (it != itend)
+      {
+	hint2 = help.insert(hint, std::pair<I,C>(it.index(), s * *it));
+	hint = hint2;
+	++it;
+      }
+
+    while (itv != itvend)
+      {
+	hint2 = help.insert(hint, std::pair<I,C>(itv.index(), *itv));
+	hint = hint2;
+	++itv;
+      }
+
+    std::map<I,C>::swap(help);
+#else
     // the following code can be optimized (not O(N) now)
     typename InfiniteVector<C,I>::const_iterator itv(v.begin()), itvend(v.end());
     for (; itv != itvend; ++itv)
@@ -268,6 +379,7 @@ namespace MathTL
 	else
 	  std::map<I,C>::erase(itv.index());
       }
+#endif
   }
 
   template <class C, class I>
@@ -295,6 +407,61 @@ namespace MathTL
   template <class C, class I>
   void InfiniteVector<C,I>::subtract(const InfiniteVector<C,I>& v)
   {
+#if 1
+    std::map<I,C> help;
+
+    // The following O(N) algorithm is adapted from the STL algorithm set_union(),
+    // cf. stl_algo.h ...
+
+    typename InfiniteVector<C,I>::const_iterator it(begin()), itend(end()),
+      itv(v.begin()), itvend(v.end());
+    typename std::map<I,C>::iterator hint(help.begin()), hint2(help.begin());
+
+    while (it != itend && itv != itvend)
+      {
+	if (it.index() < itv.index())
+	  {
+	    hint2 = help.insert(hint, std::pair<I,C>(it.index(), *it));
+	    hint = hint2;
+	    ++it;
+	  }
+	else
+	  {
+	    if (itv.index() < it.index())
+	      {
+		hint2 = help.insert(hint, std::pair<I,C>(itv.index(), - *itv));
+		hint = hint2;
+		++itv;
+	      }
+	    else
+	      {
+		const C value(*it - *itv);
+		if (value != C(0)) {
+		  hint2 = help.insert(hint, std::pair<I,C>(itv.index(), value));
+		  hint = hint2;
+		}
+		++it;
+		++itv;
+	      }
+	  }
+      }
+
+    while (it != itend)
+      {
+	hint2 = help.insert(hint, std::pair<I,C>(it.index(), *it));
+	hint = hint2;
+	++it;
+      }
+
+    while (itv != itvend)
+      {
+	hint2 = help.insert(hint, std::pair<I,C>(itv.index(), - *itv));
+	hint = hint2;
+	++itv;
+      }
+
+    std::map<I,C>::swap(help);
+#else
     // the following code can be optimized (not O(N) now)
     typename InfiniteVector<C,I>::const_iterator itv(v.begin()), itvend(v.end());
     for (; itv != itvend; ++itv)
@@ -305,6 +472,7 @@ namespace MathTL
 	else
 	  std::map<I,C>::erase(itv.index());
       }
+#endif
   }
 
   template <class C, class I>

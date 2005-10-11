@@ -63,7 +63,7 @@ namespace WaveletTL
     /*!
       critical Sobolev regularity for the primal generators/wavelets
     */
-    static inline double primal_regularity() { RBASIS::primal_regularity(); }
+    static inline double primal_regularity() { return RBASIS::primal_regularity(); }
 
     /*!
       number of vanishing moments for the primal wavelets

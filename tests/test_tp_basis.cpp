@@ -6,6 +6,9 @@
 
 #include <interval/ds_basis.h>
 #include <generic/tp_basis.h>
+#include <Rd/haar_mask.h>
+#include <Rd/r_basis.h>
+#include <interval/periodic.h>
 
 using namespace std;
 using namespace WaveletTL;
@@ -14,6 +17,7 @@ int main()
 {
   cout << "Testing tensor product wavelet bases..." << endl;
 
+#if 1
   typedef DSBasis<2,2> Basis1;
   typedef Basis1::Index Index1;
 
@@ -25,6 +29,19 @@ int main()
   Basis basis;
   
   cout << "* a tensor product of 2 DSBasis<2,2> bases:" << endl;
+#else
+  typedef PeriodicBasis<RBasis<HaarMask> > Basis1;
+  typedef Basis1::Index Index1;
+
+  typedef PeriodicBasis<RBasis<HaarMask> > Basis2;
+  typedef Basis2::Index Index2;
+
+  typedef TensorProductBasis<Basis1,Basis2> Basis;
+  typedef Basis::Index Index;
+  Basis basis;
+
+  cout << "* a tensor product of 2 Haar bases:" << endl;
+#endif
 
   cout << "- j0=" << basis.j0() << endl;
   cout << "- the default wavelet index: " << Index() << endl;
@@ -33,7 +50,7 @@ int main()
   cout << "- first wavelet on the coarsest level: " << first_wavelet(&basis, basis.j0()) << endl;
   cout << "- last wavelet on the coarsest level: " << last_wavelet(&basis, basis.j0()) << endl;
 
-#if 1
+#if 0
   cout << "- testing iterator functionality:" << endl;
   for (Index index(first_generator(&basis, basis.j0()));; ++index) {
     cout << index << endl;
@@ -41,7 +58,7 @@ int main()
   }
 #endif
 
-#if 0
+#if 1
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -49,19 +66,23 @@ int main()
       Index index(first_generator(&basis, level));
       for (;; ++index)
 	{
-	  cout << "* generator: " << index << endl;
+ 	  InfiniteVector<double, Index> origcoeff;
+ 	  origcoeff[index] = 1.0;
+	  
+// 	  cout << "* original coeffs:" << endl << origcoeff;
 
-// 	  InfiniteVector<double, Index> origcoeff;
-// 	  origcoeff[index] = 1.0;
+ 	  InfiniteVector<double, Index> wcoeff;
+ 	  basis.decompose(origcoeff, basis.j0(), wcoeff);
 	  
-// 	  InfiniteVector<double, Index> wcoeff;
-// 	  basis.decompose(origcoeff, basis.j0(), wcoeff);
+// 	  cout << "* after decompose():" << endl << wcoeff;
+
+ 	  InfiniteVector<double, Index> transformcoeff;
+ 	  basis.reconstruct(wcoeff, level, transformcoeff);
 	  
-// 	  InfiniteVector<double, Index> transformcoeff;
-// 	  basis.reconstruct(wcoeff, level, transformcoeff);
-	  
-// 	  cout << "* generator: " << index
-// 	       << ", max. error: " << linfty_norm(origcoeff-transformcoeff) << endl;
+// 	  cout << "* after reconstruct():" << endl << transformcoeff;
+
+ 	  cout << "* generator: " << index
+ 	       << ", max. error: " << linfty_norm(origcoeff-transformcoeff) << endl;
 	  
 	  if (index == last_generator(&basis, level)) break;
 	}

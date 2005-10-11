@@ -45,9 +45,7 @@ namespace WaveletTL
 	      for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());
 		   it != itend; ++it) {
 		const double entry = P.a(*it, lambda) / (d1*P.D(*it));
-		w.set_coefficient(*it,
-				  w.get_coefficient(*it)
-				  + entry * factor);
+		w.add_coefficient(*it, entry * factor);
 	      }
 	    }
 	}
@@ -86,9 +84,7 @@ namespace WaveletTL
 		if (abs(lambda.j()-level) <= J/((double) P.space_dimension()) ||
 		    intersect_singular_support(P.basis(), lambda, *it)) {
 		  const double entry = P.a(*it, lambda) / (d1*P.D(*it));
-		  w.set_coefficient(*it,
-				    w.get_coefficient(*it)
-				    + entry * factor);
+		  w.add_coefficient(*it, entry * factor);
 		}
  	    }
 	}

@@ -62,8 +62,14 @@ namespace WaveletTL
     //! scale j
     int j() const { return j_; }
 
+    //! type index type
+    typedef int type_type;
+
     //! type e
     int e() const { return e_; }
+
+    //! translation index type
+    typedef int translation_type;
 
     //! translation index k
     int k() const { return k_; }

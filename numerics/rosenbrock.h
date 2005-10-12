@@ -16,7 +16,7 @@
 namespace MathTL
 {
   /*!
-    The following class models an arbitrary s-stage Rosenbrock-type method
+    The following class models an s-stage Rosenbrock-type method
     for the numerical solution of (abstract) nonautonomous initial value
     problems of the form
 
@@ -45,7 +45,13 @@ namespace MathTL
 
     class IVP
     {
+      void apply_f(const double t, const VECTOR& v, VECTOR& result) const;
+      void apply_ft(const double t, const VECTOR& v, VECTOR& result) const;
+      void solve_jacobian(const double t, const VECTOR& v, const double tau,
+			  VECTOR& result) const;
     }
+
+    The methods under consideration provide embedded lower order error estimators.
   */
   template <class VECTOR, class IVP>
   class Rosenbrock
@@ -89,6 +95,15 @@ namespace MathTL
 		   const double tau,
 		   VECTOR& u_mplus1) const;
     
+    /*!
+      increment function u^{(m)} -> u^{(m+1)},
+      also returns a local error estimator
+    */
+    void increment(const IVP& ivp,
+		   const double t_m, const VECTOR& u_m,
+		   const double tau,
+		   VECTOR& u_mplus1,
+		   VECTOR& error_estimate) const;
   protected:
     /*!
       the Rosenbrock coefficients

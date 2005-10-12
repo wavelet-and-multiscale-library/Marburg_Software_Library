@@ -14,7 +14,7 @@ EXEOBJF = \
   test_vector.o test_infinite_vector.o test_vectorspeed.o test_matrix.o\
   test_function.o test_polynomial.o test_laurent_polynomial.o\
   test_iteratsolv.o test_eigenvalues.o test_decomp.o test_decomposable_matrix.o\
-  test_ortho_poly.o test_quadrature.o test_gauss_quadrature.o\
+  test_ortho_poly.o test_quadrature.o test_gauss_quadrature.o test_extrapolation.o\
   test_recursion.o\
   test_grid.o test_sampled_mapping.o\
   test_splines.o\

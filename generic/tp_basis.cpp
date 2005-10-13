@@ -13,10 +13,10 @@ namespace WaveletTL
   TensorProductBasis<BASIS1,BASIS2>::decompose(const InfiniteVector<double, Index>& c,
 					       const int j0,
 					       InfiniteVector<double, Index>& d) const {
+    InfiniteVector<double, Index> help;
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
 	 it != itend; ++it) {
-      InfiniteVector<double, Index> help;
-      decompose_1(it.index(), j0, help);
+      decompose_1(it.index(), j0, help); // calls help.clear() first
       d.add(*it, help);
     }
   }
@@ -26,10 +26,10 @@ namespace WaveletTL
   TensorProductBasis<BASIS1,BASIS2>::decompose_t(const InfiniteVector<double, Index>& c,
 						 const int j0,
 						 InfiniteVector<double, Index>& d) const {
+    InfiniteVector<double, Index> help;
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
 	 it != itend; ++it) {
-      InfiniteVector<double, Index> help;
-      decompose_t_1(it.index(), j0, help);
+      decompose_t_1(it.index(), j0, help); // calls help.clear() first
       d.add(*it, help);
     }
   }

@@ -1397,10 +1397,10 @@ namespace WaveletTL
 			     const int jmin,
 			     InfiniteVector<double, Index>& v) const {
     v.clear();
+    InfiniteVector<double, Index> help;
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
 	 it != itend; ++it) {
-      InfiniteVector<double, Index> help;
-      decompose_1(it.index(), jmin, help);
+      decompose_1(it.index(), jmin, help); // calls help.clear() first
       v.add(*it, help);
     }
   }
@@ -1411,10 +1411,10 @@ namespace WaveletTL
 			       const int jmin,
 			       InfiniteVector<double, Index>& v) const {
     v.clear();
+    InfiniteVector<double, Index> help;
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
 	 it != itend; ++it) {
-      InfiniteVector<double, Index> help;
-      decompose_t_1(it.index(), jmin, help);
+      decompose_t_1(it.index(), jmin, help); // calls help.clear() first
       v.add(*it, help);
     }
   }

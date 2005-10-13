@@ -89,4 +89,28 @@ int main()
     }
 #endif
   
+#if 1
+  for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
+    {
+      cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "
+	   << level << ":" << endl;
+      Index index(first_generator(&basis, level));
+      for (;; ++index)
+	{
+	  InfiniteVector<double, Index> origcoeff;
+	  origcoeff[index] = 1.0;
+	  
+	  InfiniteVector<double, Index> wcoeff;
+	  basis.decompose_t(origcoeff, basis.j0(), wcoeff);
+	  
+	  InfiniteVector<double, Index> transformcoeff;
+	  basis.reconstruct_t(wcoeff, level, transformcoeff);
+	  
+	  cout << "* generator: " << index
+	       << ", max. error: " << linfty_norm(origcoeff-transformcoeff) << endl;
+	  
+	  if (index == last_generator(&basis, level)) break;
+	}
+    }
+#endif
 }

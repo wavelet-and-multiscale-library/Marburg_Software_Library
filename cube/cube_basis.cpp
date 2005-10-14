@@ -103,8 +103,8 @@ namespace WaveletTL
 		 it2 != it2end; ++it2) {
 	      InfiniteVector<double,Index> d;
 	      decompose_1(Index(it1.index().j(),
-				Index::type_type(it1.index().e(), it2.index().e()),
-				Index::translation_type(it1.index().k(), it2.index().k()),
+				typename Index::type_type(it1.index().e(), it2.index().e()),
+				typename Index::translation_type(it1.index().k(), it2.index().k()),
 				this),
 			  j0, d);
 	      c.add(*it1 * *it2, d);
@@ -218,8 +218,8 @@ namespace WaveletTL
 	       it2 != it2end; ++it2) {
 	    InfiniteVector<double,Index> d;
 	    reconstruct_1(Index(it1.index().j(),
-				Index::type_type(it1.index().e(), it2.index().e()),
-				Index::translation_type(it1.index().k(), it2.index().k()),
+				typename Index::type_type(it1.index().e(), it2.index().e()),
+				typename Index::translation_type(it1.index().k(), it2.index().k()),
 				this),
 			  j, d);
 	    c.add(*it1 * *it2, d);

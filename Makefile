@@ -20,4 +20,4 @@ veryclean:: clean
 	cd tests; $(MAKE) veryclean
 
 countlines::
-	wc -l Rd/*.{h,cpp} interval/*.{h,cpp} galerkin/*.{h,cpp} adaptive/*.{h,cpp} tests/*.cpp
+	wc -l Rd/*.{h,cpp} interval/*.{h,cpp} galerkin/*.{h,cpp} adaptive/*.{h,cpp} generic/*.{h,cpp} cube/*.{h,cpp} tests/*.cpp

@@ -19,7 +19,7 @@ EXEOBJF = \
   test_ds_basis.o test_ds_support.o test_ds_expansion.o\
   test_periodic.o\
   test_sturm_bvp.o test_cdd1.o test_cdd2.o test_duv.o\
-  test_tp_basis.o
+  test_tp_basis.o test_cube_basis.o
 
 EXES = $(EXEOBJF:.o=)
 

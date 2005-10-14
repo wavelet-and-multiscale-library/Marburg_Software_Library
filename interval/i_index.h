@@ -60,19 +60,19 @@ namespace WaveletTL
     { return (*this < lambda || *this == lambda); }
 
     //! scale j
-    int j() const { return j_; }
+    const int j() const { return j_; }
 
     //! type index type
     typedef int type_type;
 
     //! type e
-    int e() const { return e_; }
+    const type_type& e() const { return e_; }
 
     //! translation index type
     typedef int translation_type;
 
     //! translation index k
-    int k() const { return k_; }
+    const translation_type& k() const { return k_; }
 
     //! underlying basis
     const IBASIS* basis() const { return basis_; }

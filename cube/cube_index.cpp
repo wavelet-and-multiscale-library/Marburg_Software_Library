@@ -57,9 +57,9 @@ namespace WaveletTL
   {
     bool eplusplus = false;
     for (int i = DIM-1; i >= 0; i--) {
-      int last_index = (e_[i] == 0
-			? basis_->bases()[i]->DeltaRmax(j_)
-			: basis_->bases()[i]->Nablamax(j_));
+      const int last_index = (e_[i] == 0
+			      ? basis_->bases()[i]->DeltaRmax(j_)
+			      : basis_->bases()[i]->Nablamax(j_));
       if (k_[i] == last_index) {
 	k_[i] = (e_[i] == 0
 		 ? basis_->bases()[i]->DeltaLmin()
@@ -83,7 +83,7 @@ namespace WaveletTL
 	}
       }
      
-      if (!jplusplus)
+      if (!jplusplus) // then choose lowest translation index k=k(j,e)
 	for (unsigned int i = 0; i < DIM; i++)
 	  k_[i] = (e_[i] == 0
 		   ? basis_->bases()[i]->DeltaLmin()
@@ -92,6 +92,7 @@ namespace WaveletTL
 
     if (jplusplus) {
       ++j_;
+      // choose lowest type e=(0,...,0,1) and lowest translation index k=k(j,e)
       for (unsigned int i = 0; i < DIM-1; i++) {
 	e_[i] = 0;
 	k_[i] = basis_->bases()[i]->DeltaLmin();

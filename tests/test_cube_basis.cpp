@@ -14,7 +14,7 @@ int main()
 {
   cout << "Testing wavelet bases on the cube..." << endl;
 
-  typedef DSBasis<2,2> Basis1D;
+  typedef DSBasis<3,3> Basis1D;
   typedef CubeBasis<Basis1D> Basis;
   typedef Basis::Index Index;
   Basis basis;
@@ -29,7 +29,7 @@ int main()
   cout << "- first wavelet on the coarsest level: " << first_wavelet(&basis, basis.j0()) << endl;
   cout << "- last wavelet on the coarsest level: " << last_wavelet(&basis, basis.j0()) << endl;
 
-#if 1
+#if 0
   cout << "- testing iterator functionality:" << endl;
   for (Index index(first_generator(&basis, basis.j0()));; ++index) {
     cout << index << endl;
@@ -37,7 +37,7 @@ int main()
   }
 #endif
 
-#if 0
+#if 1
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -48,12 +48,12 @@ int main()
  	  InfiniteVector<double, Index> origcoeff;
  	  origcoeff[index] = 1.0;
 	  
-// 	  cout << "* original coeffs:" << endl << origcoeff;
+//  	  cout << "* original coeffs:" << endl << origcoeff;
 
  	  InfiniteVector<double, Index> wcoeff;
  	  basis.decompose(origcoeff, basis.j0(), wcoeff);
 	  
-// 	  cout << "* after decompose():" << endl << wcoeff;
+//  	  cout << "* after decompose():" << endl << wcoeff;
 
  	  InfiniteVector<double, Index> transformcoeff;
  	  basis.reconstruct(wcoeff, level, transformcoeff);

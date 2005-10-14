@@ -29,7 +29,7 @@ int main()
   cout << "- first wavelet on the coarsest level: " << first_wavelet(&basis, basis.j0()) << endl;
   cout << "- last wavelet on the coarsest level: " << last_wavelet(&basis, basis.j0()) << endl;
 
-#if 0
+#if 1
   cout << "- testing iterator functionality:" << endl;
   for (Index index(first_generator(&basis, basis.j0()));; ++index) {
     cout << index << endl;

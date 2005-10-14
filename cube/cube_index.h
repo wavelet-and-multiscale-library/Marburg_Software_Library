@@ -61,8 +61,8 @@ namespace WaveletTL
     inline bool operator != (const CubeIndex& lambda) const
     { return !(*this == lambda); }
     
-//     //! preincrement
-//     TensorProductIndex& operator ++ ();
+    //! preincrement
+    CubeIndex& operator ++ ();
 
     //! lexicographic order <
     bool operator < (const CubeIndex& lambda) const;

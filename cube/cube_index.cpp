@@ -52,6 +52,58 @@ namespace WaveletTL
   }
 
   template <class IBASIS, unsigned int DIM>
+  CubeIndex<IBASIS,DIM>&
+  CubeIndex<IBASIS,DIM>::operator ++ ()
+  {
+    bool eplusplus = false;
+    for (int i = DIM-1; i >= 0; i--) {
+      int last_index = (e_[i] == 0
+			? basis_->bases()[i]->DeltaRmax(j_)
+			: basis_->bases()[i]->Nablamax(j_));
+      if (k_[i] == last_index) {
+	k_[i] = (e_[i] == 0
+		 ? basis_->bases()[i]->DeltaLmin()
+		 : basis_->bases()[i]->Nablamin());
+	eplusplus = (i == 0);
+      } else {
+	++k_[i];
+	break;
+      }
+    }
+
+    bool jplusplus = false;
+    if (eplusplus) {
+      for (int i = DIM-1; i >= 0; i--) {
+	if (e_[i] == 1) {
+ 	  e_[i] = 0;
+ 	  jplusplus = (i == 0);
+	} else {
+	  ++e_[i];
+	  break;
+	}
+      }
+     
+      if (!jplusplus)
+	for (unsigned int i = 0; i < DIM; i++)
+	  k_[i] = (e_[i] == 0
+		   ? basis_->bases()[i]->DeltaLmin()
+		   : basis_->bases()[i]->Nablamin());
+    }
+
+    if (jplusplus) {
+      ++j_;
+      for (unsigned int i = 0; i < DIM-1; i++) {
+	e_[i] = 0;
+	k_[i] = basis_->bases()[i]->DeltaLmin();
+      }
+      e_[DIM-1] = 1;
+      k_[DIM-1] = basis_->bases()[DIM-1]->Nablamin();
+    }
+    
+    return *this;
+  }
+
+  template <class IBASIS, unsigned int DIM>
   CubeIndex<IBASIS,DIM>
   first_generator(const CubeBasis<IBASIS,DIM>* basis, const int j)
   {

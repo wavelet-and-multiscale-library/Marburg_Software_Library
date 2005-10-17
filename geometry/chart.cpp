@@ -1,51 +1,23 @@
 // implementation for chart.h
 
 #include <cassert>
+#include <sstream>
 
 namespace MathTL
 {
-  template <unsigned int DIM>
-  inline
-  void
-  IdentityMapping<DIM>::map_point(const Point<DIM>& x, Point<DIM>& y) const {
-    y = x;
-  }
-    
-  template <unsigned int DIM>
-  inline
-  void
-  IdentityMapping<DIM>::map_point_inv(const Point<DIM>& x, Point<DIM>& y) const {
-    y = x;
+  template <unsigned int DIM_d, unsigned int DIM_m>
+  std::ostream& operator << (std::ostream& s, const Chart<DIM_d,DIM_m>& c)
+  {
+    s << c.to_string();
+    return s;
   }
 
   template <unsigned int DIM>
-  inline
-  const double
-  IdentityMapping<DIM>::Gram_factor(const Point<DIM>&) const {
-    return 1.0;
-  }
-
-  template <unsigned int DIM>
-  inline
-  const double
-  IdentityMapping<DIM>::Gram_D_factor(const unsigned int i, const Point<DIM>& x) const {
-    return 0.0;
-  }
-
-  template <unsigned int DIM>
-  inline
-  const double
-  IdentityMapping<DIM>::Dkappa_inv(const unsigned int i, const unsigned int j,
-				   const Point<DIM>& x) const {
-    return (i == j ? 1.0 : 0.0);
-  }
-  
-  template <unsigned int DIM>
-  const bool
-  IdentityMapping<DIM>::in_patch(const Point<DIM>& x) const {
-    for (unsigned int i = 0; i < DIM; i++)
-      if (x[i] < 0.0 || x[i] > 1.0) return false;
-    return true;
+  AffineLinearMapping<DIM>::AffineLinearMapping()
+    : A_(DIM, DIM), A_inv(DIM, DIM), det_A(1.0), b_()
+  {
+    A_.diagonal(DIM, 1.0);
+    A_inv.diagonal(DIM, 1.0);
   }
 
   template <unsigned int DIM>
@@ -115,5 +87,18 @@ namespace MathTL
     for (unsigned int i = 0; i < DIM; i++)
       if (y[i] < 0 || y[i] > 1) return false;
     return true;
+  }
+
+  template <unsigned int DIM>
+  const string
+  AffineLinearMapping<DIM>::to_string() const {
+    std::stringstream strs;
+ 
+    strs << "A =" << endl
+	 << A()
+	 << "b = "
+	 << b() << endl;
+
+    return strs.str();
   }
 }

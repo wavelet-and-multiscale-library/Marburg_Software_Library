@@ -13,8 +13,8 @@ int main()
 {
   cout << "Testing some charts:" << endl;
 
-  cout << "* the identity mapping..." << endl;
-  IdentityMapping<2> kappa_0;
+  AffineLinearMapping<2> kappa_0;
+  cout << "* the identity mapping: " << endl << kappa_0;
   Point<2> x(1.0, 2.0), y;
   kappa_0.map_point(x, y);
   cout << "  x=" << x << " is mapped to y=" << y << endl;
@@ -24,8 +24,7 @@ int main()
   Matrix<double> A(2, 2, "2 0 1 -4");
   Point<2> b(0, 1);
   AffineLinearMapping<2> kappa_1(A, b);
-  cout << "* affine linear map with A=" << endl << A
-       << "  and b=" << b << ":" << endl;
+  cout << "* affine linear map: " << endl << kappa_1;
   kappa_1.map_point(x, y);
   cout << "  x=" << x << " is mapped to y=" << y << endl;
   kappa_1.map_point_inv(y, x);

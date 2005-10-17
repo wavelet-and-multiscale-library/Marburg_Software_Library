@@ -11,9 +11,12 @@
 #define _MATHTL_CHART_H
 
 #include <iostream>
+#include <string>
 #include <algebra/matrix.h>
 #include <algebra/vector.h>
 #include <geometry/point.h>
+
+using std::string;
 
 namespace MathTL
 {
@@ -22,7 +25,7 @@ namespace MathTL
       kappa: (0,1)^d -> R^m
     of single "patches" in R^m.
    */
-  template <unsigned int DIM_d, unsigned int DIM_m>
+  template <unsigned int DIM_d, unsigned int DIM_m = DIM_d>
   class Chart
   {
   public:
@@ -64,25 +67,21 @@ namespace MathTL
       parametrization
     */
     virtual const bool in_patch(const Point<DIM_m>& x) const = 0;
+
+    /*!
+      returns a string representation of this object
+     */
+    virtual const string to_string() const = 0;
   };
   
+  /*!
+    stream output for arbitrary charts
+  */
+  template <unsigned int DIM_d, unsigned int DIM_m>
+  std::ostream& operator << (std::ostream& s, const Chart<DIM_d,DIM_m>&);
+
   //
   // Some examples:
-
-  //! identity mapping
-  template <unsigned int DIM>
-  class IdentityMapping
-    : public Chart<DIM,DIM>
-  {
-  public:
-    void map_point(const Point<DIM>&, Point<DIM>&) const;
-    void map_point_inv(const Point<DIM>&, Point<DIM>&) const;
-    const double Gram_factor(const Point<DIM>&) const;
-    const double Gram_D_factor(const unsigned int i, const Point<DIM>& x) const;
-    const double Dkappa_inv(const unsigned int i, const unsigned int j,
-			    const Point<DIM>& x) const;
-    const bool in_patch(const Point<DIM>& x) const;
-  };
 
   /*!
     affine linear mapping y = A*x+b
@@ -92,6 +91,9 @@ namespace MathTL
     : public Chart<DIM,DIM>
   {
   public:
+    //! default constructor, yields the identity mapping
+    AffineLinearMapping();
+
     //! constructor from A and b (dimensions should fit)
     AffineLinearMapping(const Matrix<double>& A, const Point<DIM>& b);
 
@@ -102,6 +104,8 @@ namespace MathTL
     const double Dkappa_inv(const unsigned int i, const unsigned int j,
 			    const Point<DIM>& x) const;
     const bool in_patch(const Point<DIM>& x) const;
+
+    const string to_string() const;
 
     //! read access to A
     const Matrix<double>& A() const { return A_; }

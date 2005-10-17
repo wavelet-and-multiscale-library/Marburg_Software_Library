@@ -1,7 +1,11 @@
 // implementation for chart.h
 
+#include <iostream>
 #include <cassert>
 #include <sstream>
+
+using std::cout;
+using std::endl;
 
 namespace MathTL
 {

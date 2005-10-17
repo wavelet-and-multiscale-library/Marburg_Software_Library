@@ -16,6 +16,8 @@ using std::endl;
 
 #include <utils/multiindex.h>
 
+using MathTL::MultiIndex;
+
 namespace WaveletTL
 {
   // forward declaration

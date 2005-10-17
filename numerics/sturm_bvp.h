@@ -28,7 +28,7 @@ namespace MathTL
     one has a nontrivial determinant R_0y_1*R_1y_2-R_1y_1*R_0y_2 != 0.
   */
   class SturmBVP
-    : public BVP<2>
+    : public TwoPointBVP<2>
   {
   public:
     /*!

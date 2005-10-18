@@ -20,21 +20,21 @@ using MathTL::MultiIndex;
 
 namespace WaveletTL
 {
-  // forward declaration
+  // forward declaration for CubeBasis
   template <class IBASIS, unsigned int DIM>
   class CubeBasis;
 
   /*!
     An index class for tensor product wavelet bases over the d-dimensional
-    unit cube [0,1]^d.
+    unit cube [0,1]^d (or mapped versions thereof).
   */
-  template <class IBASIS, unsigned int DIM>
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS = CubeBasis<IBASIS,DIM> >
   class CubeIndex
   {
   public:
     //! type index type
     typedef MultiIndex<unsigned int,DIM> type_type;
-
+    
     //! translation index type
     typedef MultiIndex<int,DIM> translation_type;
 
@@ -43,7 +43,7 @@ namespace WaveletTL
       (also serves as a default constructor, but yields an invalid index pair
       in this case, because the underlying bases must be specified to work correctly)
      */
-    CubeIndex(const CubeBasis<IBASIS,DIM>* basis = 0);
+    CubeIndex(const CUBEBASIS* basis = 0);
 
     /*!
       constructor with given j,e,k
@@ -51,7 +51,7 @@ namespace WaveletTL
     CubeIndex(const int j,
 	      const type_type& e,
 	      const translation_type& k,
-	      const CubeBasis<IBASIS,DIM>* basis);
+	      const CUBEBASIS* basis);
 
     //! copy constructor
     CubeIndex(const CubeIndex& lambda);
@@ -84,7 +84,7 @@ namespace WaveletTL
 
   protected:
     //! pointer to the underlying basis
-    const CubeBasis<IBASIS,DIM>* basis_;
+    const CUBEBASIS* basis_;
 
     //! scale
     int j_;
@@ -97,9 +97,9 @@ namespace WaveletTL
   };
 
   //! stream output
-  template <class IBASIS, unsigned int DIM>
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
   inline std::ostream& operator << (std::ostream& os,
- 				    const CubeIndex<IBASIS,DIM>& lambda)
+ 				    const CubeIndex<IBASIS,DIM,CUBEBASIS>& lambda)
   {
     using namespace std;
     os << "("
@@ -115,30 +115,30 @@ namespace WaveletTL
   /*!
     index of first generator on level j >= j0
   */
-  template <class IBASIS, unsigned int DIM>
-  CubeIndex<IBASIS,DIM>
-  first_generator(const CubeBasis<IBASIS,DIM>* basis, const int j);
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  CubeIndex<IBASIS,DIM,CUBEBASIS>
+  first_generator(const CUBEBASIS* basis, const int j);
 
   /*!
     index of last generator on level j >= j0
   */
-  template <class IBASIS, unsigned int DIM>
-  CubeIndex<IBASIS,DIM>
-  last_generator(const CubeBasis<IBASIS,DIM>* basis, const int j);
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  CubeIndex<IBASIS,DIM,CUBEBASIS>
+  last_generator(const CUBEBASIS* basis, const int j);
 
   /*!
     index of first wavelet on level j >= j0
   */
-  template <class IBASIS, unsigned int DIM>
-  CubeIndex<IBASIS,DIM>
-  first_wavelet(const CubeBasis<IBASIS,DIM>* basis, const int j);
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  CubeIndex<IBASIS,DIM,CUBEBASIS>
+  first_wavelet(const CUBEBASIS* basis, const int j);
   
   /*!
     index of last wavelet on level j >= j0
   */
-  template <class IBASIS, unsigned int DIM>
-  CubeIndex<IBASIS,DIM>
-  last_wavelet(const CubeBasis<IBASIS,DIM>* basis, const int j);
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  CubeIndex<IBASIS,DIM,CUBEBASIS>
+  last_wavelet(const CUBEBASIS* basis, const int j);
 }
 
 #include <cube/cube_index.cpp>

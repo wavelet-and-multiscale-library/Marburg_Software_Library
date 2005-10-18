@@ -50,7 +50,7 @@ namespace WaveletTL
     inline const int j0() const { return j0_; }
 
     //! wavelet index class
-    typedef CubeIndex<IBASIS,DIM> Index;
+    typedef CubeIndex<IBASIS,DIM,CubeBasis<IBASIS,DIM> > Index;
 
     //! read access to the bases
     const FixedArray1D<IBASIS*,DIM> bases() const { return bases_; }

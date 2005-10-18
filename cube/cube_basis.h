@@ -10,12 +10,15 @@
 #ifndef _WAVELETTL_CUBE_BASIS_H
 #define _WAVELETTL_CUBE_BASIS_H
 
+#include <list>
+
 #include <algebra/vector.h>
 #include <algebra/infinite_vector.h>
 #include <utils/fixed_array1d.h>
 #include <utils/multiindex.h>
-
 #include <cube/cube_index.h>
+
+using std::list;
 
 namespace WaveletTL
 {
@@ -31,6 +34,14 @@ namespace WaveletTL
   public:
     //! default constructor (no b.c.'s)
     CubeBasis();
+
+    /*!
+      constructor with specified boundary condition orders
+      i-th direction at x=0 <-> index 2*i
+      i-th direction at x=1 <-> index 2*i+1
+    */
+    CubeBasis(const FixedArray1D<int,2*DIM>& s,
+	      const FixedArray1D<int,2*DIM>& sT);
 
     //! destructor
     ~CubeBasis();
@@ -128,7 +139,13 @@ namespace WaveletTL
     //! coarsest possible level j0
     int j0_;
 
-    //! the instances of the 1D bases
+    /*!
+      the instances of the 1D bases (in general, we will of course
+      need strictly less than DIM instances)
+    */
+    list<IBASIS*> bases_infact;
+
+    //! for faster access, all relevant pointers to the 1D bases
     FixedArray1D<IBASIS*,DIM> bases_;
   };
 }

@@ -3,6 +3,7 @@
 #include <algebra/infinite_vector.h>
 #include <algebra/sparse_matrix.h>
 #include <utils/array1d.h>
+#include <utils/fixed_array1d.h>
 
 #include <interval/ds_basis.h>
 #include <cube/cube_basis.h>
@@ -14,11 +15,21 @@ int main()
 {
   cout << "Testing wavelet bases on the cube..." << endl;
 
-  typedef DSBasis<3,3> Basis1D;
+  typedef DSBasis<2,2> Basis1D;
   typedef CubeBasis<Basis1D> Basis;
   typedef Basis::Index Index;
-  Basis basis;
-  
+//   Basis basis;
+  FixedArray1D<int,4> s, sT;
+  s[0] = 1;
+  s[1] = 1;
+  s[2] = 1;
+  s[3] = 1;
+  sT[0] = 0;
+  sT[1] = 0;
+  sT[2] = 0;
+  sT[3] = 0;
+  Basis basis(s, sT);
+
   cout << "* a 2D cube basis of DSBasis<2,2> bases:" << endl;
 
   cout << "- j0=" << basis.j0() << endl;

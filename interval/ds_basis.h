@@ -124,6 +124,18 @@ namespace WaveletTL
     */
     static unsigned int dual_vanishing_moments() { return d; }
 
+    //! read access to the primal b.c. order at x=0
+    const int get_s0() const { return s0; }
+
+    //! read access to the primal b.c. order at x=1
+    const int get_s1() const { return s1; }
+
+    //! read access to the primal b.c. order at x=0
+    const int get_sT0() const { return sT0; }
+
+    //! read access to the primal b.c. order at x=0
+    const int get_sT1() const { return sT1; }
+
     /*!
       boundary indices in \Delta_j^X and \tilde\Delta_j^X (4.10),(4.14),(4.26)
      */

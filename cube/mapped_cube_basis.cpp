@@ -98,7 +98,11 @@ namespace WaveletTL
 	typedef typename IBASIS::Index IIndex;
 	FixedArray1D<InfiniteVector<double,IIndex>,DIM_d> coeffs;
 	for (unsigned int i = 0; i < DIM_d; i++)
-	  bases_[i]->decompose_1(IIndex(lambda.j(), lambda.e()[i], lambda.k()[i], bases_[i]), lambda.j()-1, coeffs[i]);
+	  CubeBasis<IBASIS,DIM_d>::bases_[i]->decompose_1(IIndex(lambda.j(),
+								 lambda.e()[i],
+								 lambda.k()[i],
+								 CubeBasis<IBASIS,DIM_d>::bases_[i]),
+							  lambda.j()-1, coeffs[i]);
 	
   	if (DIM_d == 2) {
 	  // directly add all tensor product wavelets needed
@@ -179,7 +183,11 @@ namespace WaveletTL
 	typedef typename IBASIS::Index IIndex;
 	FixedArray1D<InfiniteVector<double,IIndex>,DIM_d> coeffs;
 	for (unsigned int i = 0; i < DIM_d; i++)
-	  bases_[i]->decompose_t_1(IIndex(lambda.j(), lambda.e()[i], lambda.k()[i], bases_[i]), lambda.j()-1, coeffs[i]);
+	  CubeBasis<IBASIS,DIM_d>::bases_[i]->decompose_t_1(IIndex(lambda.j(),
+								   lambda.e()[i],
+								   lambda.k()[i],
+								   CubeBasis<IBASIS,DIM_d>::bases_[i]),
+							    lambda.j()-1, coeffs[i]);
 	
   	if (DIM_d == 2) {
 	  // directly add all tensor product wavelets needed
@@ -254,7 +262,11 @@ namespace WaveletTL
       typedef typename IBASIS::Index IIndex;
       FixedArray1D<InfiniteVector<double,IIndex>,DIM_d> coeffs;
       for (unsigned int i = 0; i < DIM_d; i++)
-	bases_[i]->reconstruct_1(IIndex(lambda.j(), lambda.e()[i], lambda.k()[i], bases_[i]), lambda.j()+1, coeffs[i]);
+	CubeBasis<IBASIS,DIM_d>::bases_[i]->reconstruct_1(IIndex(lambda.j(),
+								 lambda.e()[i],
+								 lambda.k()[i],
+								 bases_[i]),
+							  lambda.j()+1, coeffs[i]);
       
       if (DIM_d == 2) {
 	// directly add all tensor product wavelets needed
@@ -325,7 +337,11 @@ namespace WaveletTL
       typedef typename IBASIS::Index IIndex;
       FixedArray1D<InfiniteVector<double,IIndex>,DIM_d> coeffs;
       for (unsigned int i = 0; i < DIM_d; i++)
-	bases_[i]->reconstruct_t_1(IIndex(lambda.j(), lambda.e()[i], lambda.k()[i], bases_[i]), lambda.j()+1, coeffs[i]);
+	CubeBasis<IBASIS,DIM_d>::bases_[i]->reconstruct_t_1(IIndex(lambda.j(),
+								   lambda.e()[i],
+								   lambda.k()[i],
+								   CubeBasis<IBASIS,DIM_d>::bases_[i]),
+							    lambda.j()+1, coeffs[i]);
       
       if (DIM_d == 2) {
 	// directly add all tensor product wavelets needed

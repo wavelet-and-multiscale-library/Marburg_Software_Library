@@ -47,6 +47,64 @@ int main()
   cout << "  x=" << x2 << " is mapped to y=" << y2 << endl;
   kappa_2.map_point_inv(y2, x2);
   cout << "  y=" << y2 << " is mapped back to x=" << x2 << endl;
+  //############## tests Manuel ###############
+  cout << "Testing class LinearBezierMapping..." << endl;
+  cout << endl;
+  LinearBezierMapping k_1(Point<2>(-0.2,-1),Point<2>(-0.5,0),
+  			  Point<2>(1,-1.1), Point<2>(1.5,0));
+  //LinearBezierMapping k_1(Point<2>(-0.2,-1),Point<2>(-0.2,0),
+  //Point<2>(1,-1), Point<2>(1,0));
 
+
+  clock_t tstart, tend;
+  double time;
+  
+  const int J = 4;
+  const double dx = 1.0 / (1<<J);
+  Point<2> tmp;
+  tstart = clock();
+  Point<2> pc(0.5, 0.75);
+  Matrix<double> R(2,2);
+  R(0,0) = 1.;
+  R(1,1) = 1.;
+  for (int i = 0; i <= 1<<J; i++)
+    {
+      for (int j= 0; j<= 1<<J; j++)
+	{ 
+	  Point<2> pc(i*dx, j*dx);
+	  //cout << k_1 << endl;
+	  //cout << "###########################" << endl;
+	  cout << "before = " << pc << endl;
+	  k_1.map_point(pc,tmp);
+	  cout << "in the meantime = " << tmp << endl;
+	  k_1.map_point_inv(tmp,pc);
+	  cout << "after = " << pc << endl;
+	  cout << endl;
+	  
+	  // 	   Point<2> pc(i*dx, j*dx);
+	  // 	   cout << k_2 << endl;
+	  // 	   cout << "###########################" << endl;
+	  // 	   cout << "before = " << pc << endl;
+	  // 	   k_2.mapPoint(tmp,pc);
+	  // 	   cout << "in the meantime = " << tmp << endl;
+	  // 	   k_2.mapPointInv(pc, tmp);
+	  // 	   cout << "after = " << pc << endl;
+	  
+	  // 	   if (j != 0)
+	  // 	     continue;
+	  // 	   Point<1> pc(i*dx);
+	  // 	   cout << k_3 << endl;
+	  // 	   cout << "###########################" << endl;
+	  // 	   cout << "before = " << pc << endl;
+	  // 	   k_3.mapPoint(tmp_1,pc);
+	  // 	   cout << "in the meantime = " << tmp_1 << endl;
+	  // 	   k_3.mapPointInv(pc, tmp_1);
+	  //	   cout << "after = " << pc << endl;
+	  
+	}
+    }
+  tend = clock();
+  time = (double)(tend-tstart)/CLOCKS_PER_SEC;
+  cout << "cpu time = " << time << "s" << endl;
   return 0;
 }

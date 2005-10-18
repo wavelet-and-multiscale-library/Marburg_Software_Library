@@ -18,4 +18,9 @@ int main()
   ZeroFunction<2>(2).vector_value(Point<2>(42.0, -1.5), y);
   cout << "- vector-valued ZeroFunction<2> at (x,y)=(42.0, -1.5): "
        << y << endl;
+
+  Vector<double> z(2, "1 3.5");
+  ConstantFunction<2>(z).vector_value(Point<2>(42.0, -1.5), y);
+  cout << "- vector-valued constant function at (x,y)=(42.0, -1.5): "
+       << y << endl;
 }

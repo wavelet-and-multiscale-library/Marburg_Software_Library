@@ -23,7 +23,7 @@ namespace MathTL
   /*!
     Base class for scalar or vector-valued functions on \mathbb R^d
 
-    (this function model is essetially compatible to that of the deal.II
+    (this function model is essentially compatible to that of the deal.II
     library, version 5)
    */
   template <unsigned int DIM, class VALUE = double>
@@ -89,29 +89,32 @@ namespace MathTL
     : public Function<DIM, VALUE>
   {
   public:
-    /*!
-      default constructor, one component (scalar-valued) by default
-    */
     ZeroFunction(const unsigned int n_components = 1);
-
-    /*!
-      virtual (!) destructor
-    */
     virtual ~ZeroFunction();
-
-    /*!
-      evaluate one component of the zero function
-     */
     VALUE value(const Point<DIM>& p,
 		const unsigned int component = 0) const;
-
-    /*!
-      evaluate the zero function
-    */
     void vector_value(const Point<DIM> &p,
 		      Vector<VALUE>& values) const;
   };
-  
+
+  /*!
+    constant function
+  */
+  template <unsigned int DIM, class VALUE = double>
+  class ConstantFunction
+    : public Function<DIM, VALUE>
+  {
+  public:
+    ConstantFunction(const Vector<VALUE>& value);
+    virtual ~ConstantFunction();
+    VALUE value(const Point<DIM>& p,
+		const unsigned int component = 0) const;
+    void vector_value(const Point<DIM> &p,
+		      Vector<VALUE>& values) const;
+  protected:
+    //! the value
+    Vector<VALUE> c;
+  };
 }
 
 // implementations of inline functions

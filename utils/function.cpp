@@ -53,8 +53,36 @@ namespace MathTL
   void ZeroFunction<DIM, VALUE>::vector_value(const Point<DIM> &p,
 					      Vector<VALUE>& values) const
   {
-    for (unsigned int i(0);
-	 i < Function<DIM, VALUE>::n_components; i++)
-      values[i] = value(p, i);
+    values = 0;
   }
+
+  template <unsigned int DIM, class VALUE>
+  inline
+  ConstantFunction<DIM, VALUE>::ConstantFunction(const Vector<VALUE>& value)
+    : Function<DIM, VALUE>(value.size()), c(value)
+  {
+  }
+  
+  template <unsigned int DIM, class VALUE>
+  inline
+  ConstantFunction<DIM, VALUE>::~ConstantFunction()
+  {
+  } 
+  
+  template <unsigned int DIM, class VALUE>
+  inline
+  VALUE ConstantFunction<DIM, VALUE>::value(const Point<DIM>& p,
+					    const unsigned int component) const
+  {
+    return c[component];
+  }
+
+  template <unsigned int DIM, class VALUE>
+  inline
+  void ConstantFunction<DIM, VALUE>::vector_value(const Point<DIM> &p,
+						  Vector<VALUE>& values) const
+  {
+    values = c;
+  }
+
 }

@@ -21,7 +21,7 @@ EXEOBJF = \
   test_rosenbrock.o\
   test_differences.o\
   test_multiindex.o test_multi_lp.o\
-  test_sturm_bvp.o\
+  test_sturm_bvp.o test_bvp.o\
   test_chart.o test_atlas.o
 
 EXES = $(EXEOBJF:.o=)

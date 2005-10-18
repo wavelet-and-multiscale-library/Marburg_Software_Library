@@ -4,14 +4,18 @@
 // | This file is part of MathTL - the Mathematical Template Library    |
 // |                                                                    |
 // | Copyright (c) 2002-2005                                            |
-// | Thorsten Raasch                                                    |
+// | Thorsten Raasch, Manuel Werner                                     |
 // +--------------------------------------------------------------------+
 
-#ifndef _MATHTL_IVP_H
-#define _MATHTL_IVP_H
+#ifndef _MATHTL_BVP_H
+#define _MATHTL_BVP_H
 
 #include <geometry/point.h>
+#include <geometry/atlas.h>
 #include <algebra/matrix.h>
+#include <utils/array1d.h>
+#include <utils/fixed_array1d.h>
+#include <utils/function.h>
 
 namespace MathTL
 {
@@ -51,36 +55,86 @@ namespace MathTL
   };
 
   /*!
-    Abstract base class for a two--dimensional second-order elliptic
+    Base class for a symmetric, second-order elliptic
     boundary value problem in divergence form over some domain
-    Omega in R^d with boundary Gamma=dOmega (reaction-diffusion),
+    Omega in R^d with boundary Gamma=dOmega,
     with homogeneous Dirichlet/Neumann/Robin boundary conditions
 
-      div(a(x)grad u(x)) + q(x)u(x) = f(x) in Omega
-      u(x)     = 0 on Gamma_D
-      du/dn(x) = 0 on Gamma_N
+      -div(a(x)grad u(x)) + q(x)u(x) = f(x) in Omega
+                                u(x) = 0 on Gamma_D
+                            du/dn(x) = 0 on Gamma\Gamma_D
 
     The entire problem of course depends on an atlas of Omega,
-    which is given as a template parameter ATLAS. The atlas is
-    responsible for the specification of the various boundary conditions
-    on Gamma. However, the instance of ATLAS will be accessed only when it
+    which is given as a template parameter ATLAS.
+    For each patch kappa_i(\Box) of the atlas, you have to specify
+    2*d Dirichlet boundary condition orders
+    (0 <-> no b.c., 1 <-> Dirichlet b.c.).
+    However, the instance of ATLAS will be accessed only when it
     comes to a discretization, e.g., in a wavelet-Galerkin scheme.
     For examples concerning atlas, cf. geometry/atlas.h
   */
-  template <class ATLAS>
+  template <unsigned int DIM, class ATLAS = Atlas<DIM> >
   class EllipticBVP
   {
   public:
     /*!
-      default constructor
+      constructor with a given atlas, boundary conditions
+      and scalar coefficients
     */
-    EllipticBVP(const ATLAS& atlas);
+    EllipticBVP(const ATLAS* atlas,
+		const Array1D<FixedArray1D<int,2*DIM> >& bc,
+		const Function<DIM>* a,
+		const Function<DIM>* q,
+		const Function<DIM>* f);
 
     //! virtual destructor
     virtual ~EllipticBVP();
+
+    /*!
+      diffusion coefficient a
+     */
+    const double a(const Point<DIM>& x) const
+    {
+      return a_->value(x);
+    }
+
+    /*!
+      reaction coefficient q
+    */
+    const double q(const Point<DIM>& x) const
+    {
+      return q_->value(x);
+    }
+
+    /*!
+      right-hand side f
+    */
+    const double f(const Point<DIM>& x) const
+    {
+      return f_->value(x);
+    }
+
   protected:
-    //! reference to the underlying atlas
-    const ATLAS& atlas_;
+    //! pointer to the underlying atlas
+    const ATLAS* atlas_;
+
+    //! flag for deletion of the atlas
+    bool delete_atlas;
+
+    //! boundary conditions
+    Array1D<FixedArray1D<int,2*DIM> > bc_;
+
+    //! flag for deletion of the functions
+    bool delete_functions;
+    
+    //! diffusion coefficient
+    const Function<DIM>* a_;
+
+    //! reaction coefficient
+    const Function<DIM>* q_;
+    
+    //! right-hand side
+    const Function<DIM>* f_;
   };
 }
 

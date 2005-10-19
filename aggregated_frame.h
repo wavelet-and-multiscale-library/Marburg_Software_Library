@@ -50,7 +50,7 @@ namespace FrameTL
     /*!
       destructor
      */
-    //~AggregatedFrame();
+    ~AggregatedFrame();
 
     /*!
       constructor
@@ -62,23 +62,18 @@ namespace FrameTL
     /*!
       access to the local bases on the i-ht patch
      */
-    const MappedCubeBasis<IBASIS, DIM_d, DIM_m>&
+    const MappedCubeBasis<IBASIS, DIM_d, DIM_m>*
     get_local_basis(const unsigned int i);
-
 
   protected:
     //! pointer to the underlying atlas
     const Atlas<DIM_d, DIM_m>* atlas_;
 
-   //! flag for deletion of the atlas
-    bool delete_atlas;
-
     //! boundary conditions
     Array1D<FixedArray1D<int,2*DIM_d> > bc_;
 
   private:
-    Array1D<MappedCubeBasis<IBASIS, DIM_d, DIM_m> > lifted_bases;
-
+    Array1D<MappedCubeBasis<IBASIS, DIM_d, DIM_m>* > lifted_bases;
 
   };
 

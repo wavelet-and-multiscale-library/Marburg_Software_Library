@@ -66,6 +66,7 @@ namespace MathTL
 
     /*!
       evaluate the function
+      (values should be of appropriate size)
     */
     virtual void vector_value(const Point<DIM> &p,
 			      Vector<VALUE>& values) const = 0;

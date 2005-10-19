@@ -92,15 +92,15 @@ namespace MathTL
     // Due to the representation of the Laplacian in polar coordinates,
     // we have to calculate
     //   -d^2/dr^2 s(r,phi) - 1/r * d/dr s(r,phi) - 1/r^2 * d^2/dphi^2 s(r,phi)
+    // Since u(r,phi)=r^{1/omega}sin(phi/omega) is harmonic, this reduces to
+    //   -zeta''(r)*u(r,phi)+2*zeta'(r)u_r(r,phi)+1/r*zeta'(r)u(r,phi)
 
-    const double zeta_r = zeta(r);
     const double zeta_prime_r = zeta_prime(r);
     const double zeta_primeprime_r = zeta_primeprime(r);
 
     return
-      ((-zeta_primeprime_r*omega*omega*r*r-2*zeta_prime_r*omega*r-zeta_r*(1-omega)) * pow(r, 1/omega-2) / (omega*omega)
-       - 1/r * (zeta_prime_r*omega*r+zeta_r) * pow(r, 1/omega-1) / omega
-       + 1/(r*r) * zeta_r * pow(r, 1/omega) / (omega*omega))
+      -(zeta_primeprime_r+zeta_prime_r/r*(1+2/omega))
+      * pow(r, 1/omega)
       * sin(theta/omega);
 #else
     // code from Markus Juergens' diploma thesis

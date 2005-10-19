@@ -19,6 +19,8 @@
 #include <cube/cube_index.h>
 
 using std::list;
+using MathTL::FixedArray1D;
+using MathTL::InfiniteVector;
 
 namespace WaveletTL
 {

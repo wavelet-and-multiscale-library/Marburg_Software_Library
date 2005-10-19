@@ -14,6 +14,9 @@
 #include <cube/cube_basis.h>
 #include <cube/cube_index.h>
 
+using WaveletTL::CubeBasis;
+using MathTL::Chart;
+
 namespace WaveletTL
 {
   /*!

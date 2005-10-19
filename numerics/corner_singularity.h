@@ -74,6 +74,58 @@ namespace MathTL
     double zeta(const double r) const;
   };
 
+  /*!
+    This class models
+      -\Delta s(x),
+    where s(x) is the corner singularity function from above.
+  */
+  class CornerSingularityRHS
+    : public Function<2>
+  {
+  public:
+    /*!
+      constructor from a corner x0,
+      a starting angle theta0 (times pi, against positive x-axis)
+      and an inner angle omega (times pi);
+    */
+    CornerSingularityRHS(const Point<2>& x0,
+			 const double theta0,
+			 const double omega,
+			 const double r0 = 0.01,
+			 const double r1 = 0.99);
+    
+    //! destructor
+    virtual ~CornerSingularityRHS() {}
+
+    //! point value at x
+    double value(const Point<2>& x, const unsigned int component = 0) const;
+
+    //! vector-valued value at x (for compatibility with Function)
+    void vector_value(const Point<2>& p, Vector<double>& values) const;
+    
+  protected:
+    //! corner
+    Point<2> x0;
+
+    //! starting angle
+    double theta0;
+
+    //! inner angle
+    double omega;
+
+    //! cutoff parameters
+    double r0, r1;
+
+    //! the cutoff function
+    double zeta(const double r) const;
+
+    //! first derivative of the cutoff function
+    double zeta_prime(const double r) const;
+
+    //! second derivative of the cutoff function
+    double zeta_primeprime(const double r) const;
+  };
+
 }
 
 // implementations of inline functions

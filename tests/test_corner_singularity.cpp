@@ -24,5 +24,15 @@ int main()
   fs.close();
   cout << "  ...done, see file corner.m!" << endl;
 
+  CornerSingularityRHS rhs(origin, 0.5, 1.5);
+  cout << "- Matlab output of the corner singularity on a 2D grid..." << endl;
+  SampledMapping<2> h_rhs(grid, rhs);
+  std::ofstream fs_rhs("corner_rhs.m");
+  h_rhs.matlab_output(fs_rhs);
+  fs_rhs << "surf(x,y,z)" << endl;
+  fs_rhs.close();
+  cout << "  ...done, see file corner_rhs.m!" << endl;
+
+
   return 0;
 }

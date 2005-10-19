@@ -35,7 +35,7 @@ int main()
   AffineLinearMapping<1> k_3 (AA,bb);
 
 
-  const int J = 3;
+  const int J = 1;
   const double dx = 1.0 / (1<<J);
 
    Point<2> tmp;
@@ -62,12 +62,12 @@ int main()
 	   Point<2> pc(i*dx, j*dx);
 	   //cout << k_1 << endl;
 	   //cout << "###########################" << endl;
-	   //cout << "before = " << pc << endl;
+	   cout << "before = " << pc << endl;
 	   k_1.mapPoint(tmp,pc);
-	   //cout << "in the meantime = " << tmp << endl;
+	   cout << "in the meantime = " << tmp << endl;
 	   k_1.mapPointInv(pc, tmp);
-	   //cout << "after = " << pc << endl;
-	   
+	   cout << "after = " << pc << endl;
+	   cout << endl;
 // 	   Point<2> pc(i*dx, j*dx);
 // 	   cout << k_2 << endl;
 // 	   cout << "###########################" << endl;

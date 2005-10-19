@@ -76,7 +76,7 @@ namespace FrameTL
     //we do this once and for all to be able to invert the bezier mapping
 	
     b_gen_00(0) = 0;
-    b_gen_00(0) = 1;
+    b_gen_00(0) = 0;
 
     b_gen_01(0)  = b_01(0) - b_00(0);
     b_gen_01(1)  = b_01(1) - b_00(1);
@@ -142,10 +142,10 @@ namespace FrameTL
  	b_gen_10 = apply(R, b_gen_10);
  	b_gen_11 = apply(R, b_gen_11);
       }	
-//     cout << b_gen_00[0] << " " <<  b_gen_00[1] << endl
-// 	 << b_gen_01[0] << " " <<  b_gen_01[1] << endl
-// 	 << b_gen_10[0] << " " <<  b_gen_10[1] << endl
-// 	 << b_gen_11[0] << " " <<  b_gen_11[1] << endl;
+    cout << b_gen_00[0] << " " <<  b_gen_00[1] << endl
+	 << b_gen_01[0] << " " <<  b_gen_01[1] << endl
+	 << b_gen_10[0] << " " <<  b_gen_10[1] << endl
+	 << b_gen_11[0] << " " <<  b_gen_11[1] << endl;
 
   }
 

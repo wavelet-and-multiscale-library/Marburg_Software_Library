@@ -13,7 +13,9 @@ CXXFLAGS += -O2 -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -fast -mcpu=7450 -faltivec -funroll-loops -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 
 EXEOBJF = \
-  test_parametrization.o test_atlas.o
+  test_parametrization.o test_atlas.o test_frame_index.o \
+  test_aggregated_frame.o
+
 
 EXES = $(EXEOBJF:.o=)
 

@@ -107,6 +107,11 @@ namespace MathTL
 
     const string to_string() const;
 
+    /*!
+      static field to store the name of the class
+     */
+    static const string className;
+
     //! read access to A
     const Matrix<double>& A() const { return A_; }
     
@@ -187,7 +192,12 @@ namespace MathTL
     const bool in_patch(const Point<2>& x) const;
     
     const string to_string() const;
-    
+   
+    /*!
+      static field to store the name of the class
+    */
+    static const string className;
+
     //vertices of the quadrangle to parametrize
     Point<2> b_00;    
     Point<2> b_01;
@@ -195,6 +205,17 @@ namespace MathTL
     Point<2> b_11;
 
   private:
+    //the following two routines are helpers that are only of interest
+    //in this special 2D BezierMapping case!
+    //only for the special case of LinearBezierMapping
+    const double det_DKappa(const Point<2>& p) const;
+
+    //partial derivative with respect to i-th component
+    //of j-th component of Kappa
+    const double partial_i_Kappa_j(const unsigned int i,
+				   const unsigned int j,
+				   const Point<2>& x) const;
+
     //vertices of generic qudrangle, needed for inverting this mapping,
     //initialized in constructor
     Point<2> b_gen_00;
@@ -219,6 +240,7 @@ namespace MathTL
     //signum of det( D (mapPoint(x,y) ) )
     //identical for all (x,y)!
     bool sgn_det_D;
+
 
   };
 }

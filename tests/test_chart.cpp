@@ -47,6 +47,8 @@ int main()
   cout << "  x=" << x2 << " is mapped to y=" << y2 << endl;
   kappa_2.map_point_inv(y2, x2);
   cout << "  y=" << y2 << " is mapped back to x=" << x2 << endl;
+
+  cout << kappa_2 << endl;
   //############## tests Manuel ###############
   cout << "Testing class LinearBezierMapping..." << endl;
   cout << endl;
@@ -59,7 +61,7 @@ int main()
   clock_t tstart, tend;
   double time;
   
-  const int J = 4;
+  const int J = 3;
   const double dx = 1.0 / (1<<J);
   Point<2> tmp;
   tstart = clock();
@@ -106,5 +108,13 @@ int main()
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "cpu time = " << time << "s" << endl;
+  cout << "Gram_factor = " << k_1.Gram_factor(pc) << endl;
+  cout << "Gram_D_factor = " << k_1.Gram_D_factor(1,pc) << endl;
+  cout << "Dkappa_inv " << k_1.Dkappa_inv(1,0,pc) << endl;
+  Point<2> p(1, 0);
+  cout << "in_patch " << k_1.in_patch(p) << endl;
+
+  cout << k_1 << endl;
+
   return 0;
 }

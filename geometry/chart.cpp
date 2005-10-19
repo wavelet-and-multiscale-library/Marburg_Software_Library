@@ -9,6 +9,10 @@ using std::endl;
 
 namespace MathTL
 {
+
+  template <unsigned int DIM>
+  const string AffineLinearMapping<DIM>::className = "AffineLinearMapping";
+
   template <unsigned int DIM_d, unsigned int DIM_m>
   std::ostream& operator << (std::ostream& s, const Chart<DIM_d,DIM_m>& c)
   {
@@ -98,7 +102,7 @@ namespace MathTL
   AffineLinearMapping<DIM>::to_string() const {
     std::stringstream strs;
  
-    strs << "A =" << endl
+    strs << className << ":" << endl << "A =" << endl
 	 << A()
 	 << "b = "
 	 << b() << endl;
@@ -108,6 +112,8 @@ namespace MathTL
 
 
 //################### LinearBezierMapping ###################
+  const string LinearBezierMapping::className = "LinearBezierMapping";
+
   inline
   LinearBezierMapping::LinearBezierMapping ()
   {
@@ -162,7 +168,7 @@ namespace MathTL
     //get the signum of det (D kappa),
     //this is the same for each point since det (D kappa) is
     //continuous and never equals zero!!
-    //sgn_det_D = (int) (det_D(Point<2>(0,0)) / det_D(Point<2>(0,0)));
+    sgn_det_D = (int) (det_DKappa(Point<2>(0,0)) / det_DKappa(Point<2>(0,0)));
 
     //setup the generic quadrangle belonging to the parametrized patch,
     //we do this once and for all to be able to invert the bezier mapping
@@ -354,7 +360,7 @@ namespace MathTL
     //if this is not the case we obtain coordPatch(1) != 0 and
     //the role of the variables has to reversed
    
-
+    bool swapped_var = 0;
     if (! (0 == pp(0)) )
       {
 	i=0;
@@ -362,9 +368,8 @@ namespace MathTL
 	//do nothing else		
       }
     else
-      //ATTENTION: THERE IS STILL A LITTLE BUG!!!! at this point
-      
       {
+	swapped_var = 1;
 	i = 1;
 	j = 0;
 	cout << "swapping coordinates in inverse linear bezier mapping" << endl;
@@ -395,15 +400,33 @@ namespace MathTL
 
     s = pc(0) / (1 + t * h2);
 
-    pc(0) = s;
-    pc(1) = t;
+    if (swapped_var) {
+      pc(0) = t;
+      pc(1) = s;
+    }
+    else {
+      pc(0) = s;
+      pc(1) = t;
+    }
   }
 
 
   inline
+  const double LinearBezierMapping::det_DKappa(const Point<2>& p) const
+  {
+    return (p(1) * d_ds_d_dt_kappa_r(0) + min_b00_plus_b10(0)) * 
+      (p(0) * d_ds_d_dt_kappa_r(1) + min_b00_plus_b01(1)) -
+      (p(1) * d_ds_d_dt_kappa_r(1) + min_b00_plus_b10(1)) *
+      (p(0) * d_ds_d_dt_kappa_r(0) + min_b00_plus_b01(0));
+    
+  }
+
+  inline
   const double LinearBezierMapping::Gram_factor(const Point<2>& p) const
   {
-    return 0.0;
+    //anyway: ((det ((D Kappa)^T) * D Kappa))^1/2)^1/2 = | det D Kappa |^1/2
+    //in the square case
+    return sqrt(fabs(det_DKappa(p)));
     
   }
 
@@ -411,25 +434,111 @@ namespace MathTL
   const double LinearBezierMapping::Gram_D_factor(const unsigned int i,
 						  const Point<2>& p) const
   {
-    return 0.0;
+    double partial_i_det_DKappa = 0.0;
+
+    switch(i) {
+    case 0:
+        partial_i_det_DKappa = (p(1) * d_ds_d_dt_kappa_r(0) + min_b00_plus_b10(0)) * d_ds_d_dt_kappa_r(1)
+	 -
+	 (p(1) * d_ds_d_dt_kappa_r(1) + min_b00_plus_b10(1)) *  d_ds_d_dt_kappa_r(0);
+      break;
+    case 1:
+       partial_i_det_DKappa = d_dt_d_ds_kappa_r(0) * (p(0) * d_ds_d_dt_kappa_r(1) + min_b00_plus_b01(1))
+      -
+      d_dt_d_ds_kappa_r(1) * (p(0) * d_ds_d_dt_kappa_r(0) + min_b00_plus_b01(0));
+      break;
+    };
+    
+    return 0.5 * Gram_factor(p) * sgn_det_D * partial_i_det_DKappa;
+    
+    
+    
+    
+  }
+  //(dim = i, j = direc)
+  inline
+  const double LinearBezierMapping::partial_i_Kappa_j(const unsigned int i, const unsigned int j,
+						      const Point<2>& p) const
+  {
+    return (i==1) ? p(0) * d_ds_d_dt_kappa_r((j==1) ? 1 : 0) + min_b00_plus_b01((j==1) ? 1 : 0) : 
+      p(1) * d_ds_d_dt_kappa_r((j==1) ? 1 : 0) + min_b00_plus_b10((j==1) ? 1 : 0);
     
   }
 
   inline
   const double LinearBezierMapping::Dkappa_inv(const unsigned int i, const unsigned int j,
-						const Point<2>& x) const
+					       const Point<2>& x) const
   {
-    return 0.0;
-    
+    if (i==0 && j==0)
+      return partial_i_Kappa_j(1,1,x)/det_DKappa(x);
+    if (i==0 && j==1)
+     return -partial_i_Kappa_j(1,0,x)/det_DKappa(x);
+    if (i==1 && j==0)
+     return -partial_i_Kappa_j(0,1,x)/det_DKappa(x);
+    if (i==1 && j==1)
+      return partial_i_Kappa_j(0,0,x)/det_DKappa(x);
+
+    //dummy
+    return 0;
+
   }
 
- const bool LinearBezierMapping::in_patch(const Point<2>& x) const
- {
-   return 0;
- }
-
-  const string LinearBezierMapping::to_string() const
+  /*!
+    Checks whether p lies left of right of or on the line specified by the
+    Points p1 and p2. This line is oriented by the vector starting in p1 and
+    ending in p2.
+    returning 0 means RIGHT OF LINE
+    returning 1 means LEFT OF LINE
+    returning 2 means ON LINE
+   */
+  template <unsigned int DIM>
+  inline
+  const unsigned short int pos_wrt_line (const Point<DIM> p,
+					 const Point<DIM>& p1, const Point<DIM>&  p2)
   {
-    return 0;
+    double d = (p(1)-p1(1)) * (p2(0)-p1(0)) - (p(0)-p1(0)) * (p2(1)-p1(1));
+    
+    if( d > 0.0 )
+      return 1;
+    else if (d < 0.0)
+      return 0;
+    else
+      return 2;
+  }
+
+  const bool LinearBezierMapping::in_patch(const Point<2>& x) const
+  {
+        //make sure to walk through the vertices counter clockwise!!!
+    unsigned short int res = 
+      pos_wrt_line(x, b_00, b_10);
+    if (res == 0)
+      return false;
+    res = 
+      pos_wrt_line(x, b_10, b_11);
+    if (res == 0)
+      return false;
+    res = 
+      pos_wrt_line(x, b_11, b_01);
+    if (res == 0)
+      return false;
+    res = 
+      pos_wrt_line(x, b_01, b_00);
+    if (res == 0)
+      return false;
+
+    return true;;
+  }
+  
+  const string LinearBezierMapping::to_string() const
+  {   
+    std::stringstream strs;
+ 
+    strs << className << ":" << endl
+	 << "b_00=" << b_00 << endl
+	 << "b_01=" << b_01 << endl
+	 << "b_10=" << b_10 << endl
+	 << "b_11=" << b_11;
+ 
+    return strs.str();
   }
 }

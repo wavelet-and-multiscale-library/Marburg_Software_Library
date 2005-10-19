@@ -8,8 +8,8 @@ namespace MathTL
   {
   }
 
-  template <unsigned int DIM, class ATLAS>
-  EllipticBVP<DIM,ATLAS>::EllipticBVP(const ATLAS* atlas,
+  template <unsigned int DIM>
+  EllipticBVP<DIM>::EllipticBVP(const Atlas<DIM>* atlas,
 				      const Array1D<FixedArray1D<int,2*DIM> >& bc,
 				      const Function<DIM>* a,
 				      const Function<DIM>* q,
@@ -18,8 +18,8 @@ namespace MathTL
   {
   }
   
-  template <unsigned int DIM, class ATLAS>
-  EllipticBVP<DIM,ATLAS>::~EllipticBVP()
+  template <unsigned int DIM>
+  EllipticBVP<DIM>::~EllipticBVP()
   {
     if (delete_atlas) delete atlas_;
     if (delete_functions) {

@@ -73,7 +73,7 @@ namespace MathTL
     comes to a discretization, e.g., in a wavelet-Galerkin scheme.
     For examples concerning atlas, cf. geometry/atlas.h
   */
-  template <unsigned int DIM, class ATLAS = Atlas<DIM> >
+  template <unsigned int DIM>
   class EllipticBVP
   {
   public:
@@ -81,7 +81,7 @@ namespace MathTL
       constructor with a given atlas, boundary conditions
       and scalar coefficients
     */
-    EllipticBVP(const ATLAS* atlas,
+    EllipticBVP(const Atlas<DIM>* atlas,
 		const Array1D<FixedArray1D<int,2*DIM> >& bc,
 		const Function<DIM>* a,
 		const Function<DIM>* q,
@@ -116,7 +116,7 @@ namespace MathTL
 
   protected:
     //! pointer to the underlying atlas
-    const ATLAS* atlas_;
+    const Atlas<DIM>* atlas_;
 
     //! flag for deletion of the atlas
     bool delete_atlas;

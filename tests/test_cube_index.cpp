@@ -16,13 +16,23 @@ int main()
   cout << "Testing wavelet bases on the cube..." << endl;
 
   typedef DSBasis<2,2> Basis1D;
-  typedef CubeBasis<Basis1D> Basis;
-  typedef Basis::Index Index;
-  
+  typedef CubeBasis<Basis1D,1> Basis;
 
-  Basis basis;
-  CubeIndex<Basis1D,2> index(&basis);
-  for (int i = 0; i < 255; i++) 
+  
+  //to specify primal boundary the conditions
+  FixedArray1D<int,2*1> bound_1_1D;
+  bound_1_1D[0] = 1;
+  bound_1_1D[1] = 1;
+
+  //dual boundary conditions
+  FixedArray1D<int,2*1> bound_1T_1D;
+  bound_1T_1D[0] = 0;
+  bound_1T_1D[1] = 0;
+
+  Basis basis(bound_1_1D, bound_1T_1D);
+
+  CubeIndex<Basis1D,1> index(&basis);
+  for (int i = 0; i < 64; i++) 
     {
       cout << index << endl;
       ++index;

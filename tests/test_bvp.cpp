@@ -24,13 +24,12 @@ int main()
   bchelp[0] = bc;
 
   /*
-    the Poisson equation on the unit square [0,1]^2
+    the Poisson equation on any domain
       -Delta u = 1 on Omega
-             u = 0 on Gamma=dOmega
- */
+  */
   ConstantFunction<2> one(Vector<double>(1, "1.0"));
   ZeroFunction<2> zero;
-  EllipticBVP<2> bvp(&A, bchelp, &one, &zero, &one);
+  EllipticBVP<2> bvp(&one, &zero, &one);
   cout << bvp.a(Point<2>(1.0, 2.9)) << endl;
   cout << bvp.q(Point<2>(1.0, 2.9)) << endl;
   cout << bvp.f(Point<2>(1.0, 2.9)) << endl;

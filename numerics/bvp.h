@@ -57,38 +57,27 @@ namespace MathTL
   /*!
     Base class for a symmetric, second-order elliptic
     boundary value problem in divergence form over some domain
-    Omega in R^d with boundary Gamma=dOmega,
-    with homogeneous Dirichlet/Neumann/Robin boundary conditions
+    Omega in R^d with boundary Gamma=dOmega
 
       -div(a(x)grad u(x)) + q(x)u(x) = f(x) in Omega
-                                u(x) = 0 on Gamma_D
-                            du/dn(x) = 0 on Gamma\Gamma_D
 
-    The entire problem of course depends on an atlas of Omega,
-    which is given as a template parameter ATLAS.
-    For each patch kappa_i(\Box) of the atlas, you have to specify
-    2*d Dirichlet boundary condition orders
-    (0 <-> no b.c., 1 <-> Dirichlet b.c.).
-    However, the instance of ATLAS will be accessed only when it
-    comes to a discretization, e.g., in a wavelet-Galerkin scheme.
-    For examples concerning atlas, cf. geometry/atlas.h
+    with some boundary conditions (Dirichlet, Neumann, Robin).
+    However, we only specify the parameters a, q and f in this class
+    and postpone the boundary condition treatment to the
+    discretization process. It will be implicitly assumed that
+    the wavelet bases or frames used in a wavelet-Galerkin scheme
+    fulfill the appropriate boundary conditions.
   */
   template <unsigned int DIM>
   class EllipticBVP
   {
   public:
     /*!
-      constructor with a given atlas, boundary conditions
-      and scalar coefficients
+      constructor with given (scalar) coefficients
     */
-    EllipticBVP(const Atlas<DIM>* atlas,
-		const Array1D<FixedArray1D<int,2*DIM> >& bc,
-		const Function<DIM>* a,
+    EllipticBVP(const Function<DIM>* a,
 		const Function<DIM>* q,
 		const Function<DIM>* f);
-
-    //! virtual destructor
-    virtual ~EllipticBVP();
 
     /*!
       diffusion coefficient a
@@ -115,18 +104,6 @@ namespace MathTL
     }
 
   protected:
-    //! pointer to the underlying atlas
-    const Atlas<DIM>* atlas_;
-
-    //! flag for deletion of the atlas
-    bool delete_atlas;
-
-    //! boundary conditions
-    Array1D<FixedArray1D<int,2*DIM> > bc_;
-
-    //! flag for deletion of the functions
-    bool delete_functions;
-    
     //! diffusion coefficient
     const Function<DIM>* a_;
 

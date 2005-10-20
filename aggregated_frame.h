@@ -10,11 +10,15 @@
 #ifndef _FRAMETL_AGGREGATED_FRAME_H
 #define _FRAMETL_AGGREGATED_FRAME_H
 
+#include <list>
+
 #include <geometry/chart.h>
 #include <cube/mapped_cube_basis.h>
 #include <geometry/atlas.h>
 #include <utils/fixed_array1d.h>
 #include <utils/array1d.h>
+
+using std::list;
 
 using WaveletTL::MappedCubeBasis;
 using MathTL::Atlas;
@@ -60,20 +64,36 @@ namespace FrameTL
 		    const Array1D<FixedArray1D<int,2*DIM_d> >&);
 
     /*!
-      access to the local bases on the i-ht patch
+      access to the local bases
      */
-    const MappedCubeBasis<IBASIS, DIM_d, DIM_m>*
-    get_local_basis(const unsigned int i);
+    const Array1D<MappedCubeBasis<IBASIS, DIM_d, DIM_m>* > bases() const
+    {
+      return lifted_bases;
+    }
 
   protected:
     //! pointer to the underlying atlas
     const Atlas<DIM_d, DIM_m>* atlas_;
 
-    //! boundary conditions
+    //! primal boundary conditions
     Array1D<FixedArray1D<int,2*DIM_d> > bc_;
 
+    //! dual boundary conditions
+    Array1D<FixedArray1D<int,2*DIM_d> > bcT_;
+
   private:
+
+    /*!
+      collection of mapped cube bases together forming
+      the aggregated frame
+     */
     Array1D<MappedCubeBasis<IBASIS, DIM_d, DIM_m>* > lifted_bases;
+
+    /*!
+      the instances of the mapped cube bases 
+    */
+    list<MappedCubeBasis<IBASIS, DIM_d, DIM_m>*> bases_infact;
+
 
   };
 

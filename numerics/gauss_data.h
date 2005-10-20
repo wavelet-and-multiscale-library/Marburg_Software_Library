@@ -13,7 +13,7 @@
 /*!
   Gauss(-Legendre) points and weights, computed up to machine accuracy
 */
-static const double GaussPoints[][10] = {
+static double GaussPoints[][10] = {
   {+0.0},
   {-0.5773502691896258,  // -sqrt(3)/3
    +0.5773502691896258}, // +sqrt(3)/3
@@ -71,7 +71,7 @@ static const double GaussPoints[][10] = {
    +0.9739065285171717}
 };
 
-static const double GaussWeights[][10] = {
+static double GaussWeights[][10] = {
   {+1.0},
   {+0.5,
    +0.5},

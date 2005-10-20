@@ -438,15 +438,15 @@ namespace MathTL
   {
     assert(a <= b);
 
-    double r(0);
+    double r = 0;
 
-    if(quadrature)
+    if (quadrature)
       {
 	const unsigned int N = (unsigned int)ceil((degree()+1)/2.0); // ensures 2*N-1>=degree()
 
-	for(unsigned int i(0); i < N; i++)
-	  r += GaussWeights[N-1][i] * value((a+b + (b-a)*GaussPoints[N-1][i])/2.0);
-      
+ 	for(unsigned int i(0); i < N; i++)
+    	  r += GaussWeights[N-1][i] * value((a+b + (b-a)*GaussPoints[N-1][i])/2.0);
+	
 	r *= b-a;
       }
     else

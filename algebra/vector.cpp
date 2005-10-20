@@ -33,6 +33,7 @@ namespace MathTL
 
   template <class C>
   Vector<C>::Vector(const size_type s, const char* str)
+    : values_(0), size_(0)
   {
     resize(s, false);
 

@@ -30,9 +30,18 @@ int main()
   ConstantFunction<2> one(Vector<double>(1, "1.0"));
   ZeroFunction<2> zero;
   EllipticBVP<2> bvp(&one, &zero, &one);
+
   cout << bvp.a(Point<2>(1.0, 2.9)) << endl;
   cout << bvp.q(Point<2>(1.0, 2.9)) << endl;
   cout << bvp.f(Point<2>(1.0, 2.9)) << endl;
+
+  /*
+    the same equation
+   */
+  PoissonBVP<2> poisson(&one);
+  cout << poisson.a(Point<2>(1.0, 2.9)) << endl;
+  cout << poisson.q(Point<2>(1.0, 2.9)) << endl;
+  cout << poisson.f(Point<2>(1.0, 2.9)) << endl;
 
   return 0;
 }

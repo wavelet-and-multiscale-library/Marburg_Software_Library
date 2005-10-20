@@ -82,7 +82,7 @@ namespace MathTL
     /*!
       diffusion coefficient a
      */
-    const double a(const Point<DIM>& x) const
+    virtual const double a(const Point<DIM>& x) const
     {
       return a_->value(x);
     }
@@ -90,7 +90,7 @@ namespace MathTL
     /*!
       reaction coefficient q
     */
-    const double q(const Point<DIM>& x) const
+    virtual const double q(const Point<DIM>& x) const
     {
       return q_->value(x);
     }
@@ -98,11 +98,11 @@ namespace MathTL
     /*!
       right-hand side f
     */
-    const double f(const Point<DIM>& x) const
+    virtual const double f(const Point<DIM>& x) const
     {
       return f_->value(x);
     }
-
+    
   protected:
     //! diffusion coefficient
     const Function<DIM>* a_;
@@ -113,6 +113,32 @@ namespace MathTL
     //! right-hand side
     const Function<DIM>* f_;
   };
+
+  /*!
+    The Poisson equation on a d-dimensional domain
+      -Delta u(x) = f(x)
+  */
+  template <unsigned int DIM>
+  class PoissonBVP
+    : public EllipticBVP<DIM>
+  {
+  public:
+    /*!
+      constructor with given right-hand side
+    */
+    PoissonBVP(const Function<DIM>* f);
+
+    /*!
+      diffusion coefficient a
+     */
+    const double a(const Point<DIM>& x) const { return 1.0; }
+
+    /*!
+      reaction coefficient q
+    */
+    const double q(const Point<DIM>& x) const { return 0.0; }
+  };
+
 }
 
 #include <numerics/bvp.cpp>

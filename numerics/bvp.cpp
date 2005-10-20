@@ -15,4 +15,10 @@ namespace MathTL
     : a_(a), q_(q), f_(f)
   {
   }
+
+  template <unsigned int DIM>
+  PoissonBVP<DIM>::PoissonBVP(const Function<DIM>* f)
+    : EllipticBVP<DIM>(f, f, f)
+  {
+  }
 }

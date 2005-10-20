@@ -14,7 +14,7 @@ CXXFLAGS += -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 
 EXEOBJF = \
   test_parametrization.o test_atlas.o test_frame_index.o \
-  test_aggregated_frame.o
+  test_aggregated_frame.o test_elliptic_equation.o
 
 
 EXES = $(EXEOBJF:.o=)

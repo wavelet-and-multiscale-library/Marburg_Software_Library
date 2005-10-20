@@ -17,6 +17,7 @@
 #include <geometry/atlas.h>
 #include <utils/fixed_array1d.h>
 #include <utils/array1d.h>
+#include "frame_index.h"
 
 using std::list;
 
@@ -24,6 +25,8 @@ using WaveletTL::MappedCubeBasis;
 using MathTL::Atlas;
 using MathTL::Array1D;
 using MathTL::FixedArray1D;
+
+using FrameTL::FrameIndex;
 
 using namespace WaveletTL;
 
@@ -46,7 +49,7 @@ namespace FrameTL
     2*d boundary conditions.
 
   */
-  template<class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  template<class IBASIS, unsigned int DIM_d, unsigned int DIM_m = DIM_d>
   class AggregatedFrame
   {
   public:    
@@ -62,6 +65,11 @@ namespace FrameTL
     AggregatedFrame(const Atlas<DIM_d, DIM_m>*,
 		    const Array1D<FixedArray1D<int,2*DIM_d> >&,
 		    const Array1D<FixedArray1D<int,2*DIM_d> >&);
+
+    /*!
+      frame index class
+    */
+    typedef FrameIndex<IBASIS, DIM_d, DIM_m> Index;
 
     /*!
       access to the local bases

@@ -23,6 +23,10 @@ using WaveletTL::CubeBasis;
 
 namespace FrameTL
 {
+  //forward declaration of class AggregatedFrame
+  template<class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  class AggregatedFrame;
+
   /*!
     This class represents (tensor product) multilevel indices.
     The spatial dimension is passed as template parameter. Such a frame index

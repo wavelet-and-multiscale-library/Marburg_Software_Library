@@ -460,9 +460,8 @@ namespace MathTL
   const double LinearBezierMapping::partial_i_Kappa_j(const unsigned int i, const unsigned int j,
 						      const Point<2>& p) const
   {
-    return (i==1) ? p(0) * d_ds_d_dt_kappa_r((j==1) ? 1 : 0) + min_b00_plus_b01((j==1) ? 1 : 0) : 
-      p(1) * d_ds_d_dt_kappa_r((j==1) ? 1 : 0) + min_b00_plus_b10((j==1) ? 1 : 0);
-    
+    return (i==1) ? p(0) * d_ds_d_dt_kappa_r(j) + min_b00_plus_b01(j) : 
+      p(1) * d_ds_d_dt_kappa_r(j) + min_b00_plus_b10(j);
   }
 
   inline

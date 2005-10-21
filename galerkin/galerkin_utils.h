@@ -13,6 +13,10 @@
 #include <set>
 
 #include <algebra/sparse_matrix.h>
+#include <algebra/vector.h>
+
+using MathTL::SparseMatrix;
+using MathTL::Vector;
 
 namespace WaveletTL
 {

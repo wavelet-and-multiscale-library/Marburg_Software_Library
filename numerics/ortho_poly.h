@@ -39,6 +39,9 @@ namespace MathTL
   class OrthogonalPolynomial
   {
   public:
+    //! virtual destructor
+    virtual ~OrthogonalPolynomial() {}
+
     /*!
       the coefficients a_k
     */

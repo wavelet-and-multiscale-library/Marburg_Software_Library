@@ -26,6 +26,8 @@ namespace MathTL
   class Recursion
   {
   public:
+    virtual ~Recursion() {}
+
     virtual double a(const unsigned int k) const = 0;
     virtual double b(const unsigned int k) const = 0;
     virtual double c(const unsigned int k) const = 0;

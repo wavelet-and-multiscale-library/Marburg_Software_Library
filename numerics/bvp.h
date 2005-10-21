@@ -80,6 +80,11 @@ namespace MathTL
 		const Function<DIM>* f);
 
     /*!
+      virtual destructor
+    */
+    virtual ~EllipticBVP() {}
+
+    /*!
       diffusion coefficient a
      */
     virtual const double a(const Point<DIM>& x) const

@@ -143,9 +143,17 @@ namespace FrameTL
 //     */
 //     double F_norm() const { return sqrt(fnorm_sqr); }
 
-//   protected:
-//     const SimpleSturmBVP& bvp_;
-//     WBASIS basis_;
+   protected:
+    
+    /*!
+      corresponding elliptic boundary value problem
+     */
+    const EllipticBVP<DIM> ell_bvp_;
+
+    /*!
+      underlying frame
+     */
+    const AggregatedFrame<IBASIS,DIM>* frame_;
 
 //     // right-hand side coefficients on a fine level, sorted by modulus
 //     Array1D<std::pair<typename WBASIS::Index,double> > fcoeffs;
@@ -153,6 +161,23 @@ namespace FrameTL
 //     // \ell_2 norm of the precomputed right-hand side
 //     double fnorm_sqr;
 
+  private:
+
+    /*!
+      helper routines for a (.. , ..). Entries in diagonal and non-diagonal
+      blocks of the stiffness matrix have to be treated differently.
+     */
+    double a_same_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
+			  const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
+			  const unsigned int p = 4) const;
+
+    /*!
+      helper routines for a (.. , ..). Entries in diagonal and non-diagonal
+      blocks of the stiffness matrix have to be treated differently.
+     */
+    double a_different_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
+			       const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
+			       const unsigned int p = 4) const;
 
   };
 }

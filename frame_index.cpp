@@ -135,8 +135,22 @@
        )
       );
    }
-   
 
+   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+   FrameIndex<IBASIS,DIM_d,DIM_m>
+   FrameIndex<IBASIS,DIM_d,DIM_m>::first_element(const int j, const unsigned int p)
+   {
+     ;
+   }
+
+   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+   FrameIndex<IBASIS,DIM_d,DIM_m>
+   FrameIndex<IBASIS,DIM_d,DIM_m>::last_element(const int j, const unsigned int p)
+   {
+     ;
+   }
+   
+   
    template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
    inline
    std::ostream&

@@ -12,7 +12,7 @@
 
 #include <iostream>
 #include <cube/cube_index.h>
-#include "aggregated_frame.h"
+#include <aggregated_frame.h>
 
 using std::cout;
 using std::endl;
@@ -24,15 +24,15 @@ using WaveletTL::CubeBasis;
 namespace FrameTL
 {
   //forward declaration of class AggregatedFrame
-  template<class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
-  class AggregatedFrame;
+//   template<class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+//   class AggregatedFrame;
 
   /*!
     This class represents (tensor product) multilevel indices.
     The spatial dimension is passed as template parameter. Such a frame index
     mainly consists of a CubeIndex and the respective patchnumber.
    */
-  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m = DIM_d>
   class FrameIndex
   {
 
@@ -100,6 +100,20 @@ namespace FrameTL
     //! access to underlying frame
     const AggregatedFrame<IBASIS,DIM_d,DIM_m>* get_frame() const
     { return frame_; }
+
+    /*!
+      index of first wavelet on level j >= j0
+      on patch p
+    */
+    static FrameIndex<IBASIS,DIM_d,DIM_m>
+    first_element(const int j, const unsigned int p);
+    
+    /*!
+      index of last wavelet on level j >= j0
+      on patch p
+    */
+    static FrameIndex<IBASIS,DIM_d,DIM_m>
+    last_element(const int j, const unsigned int p);
 
   protected:
 

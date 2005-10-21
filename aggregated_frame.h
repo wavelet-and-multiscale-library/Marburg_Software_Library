@@ -17,7 +17,7 @@
 #include <geometry/atlas.h>
 #include <utils/fixed_array1d.h>
 #include <utils/array1d.h>
-#include "frame_index.h"
+#include <frame_index.h>
 
 using std::list;
 
@@ -26,17 +26,19 @@ using MathTL::Atlas;
 using MathTL::Array1D;
 using MathTL::FixedArray1D;
 
-using FrameTL::FrameIndex;
-
-using namespace WaveletTL;
+//using namespace WaveletTL;
 
 namespace FrameTL
 {
+  //forward declaration of class AggregatedFrame
+  template<class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  class FrameIndex;
+
   /*!
     Class for frames on d-dimensional manifolds in R^m.
     The construction principle of these is the following:
     Write the domain or manifold as an overlapping union
-    of subdomains (patch), each of them being the smooth
+    of subdomains (patches), each of them being the smooth
     parametric image of a reference domain, i.e., the
     d-dimensional hypercube. By lifting a wavelet basis
     on the reference domain to the subdomains and taking
@@ -44,7 +46,7 @@ namespace FrameTL
     
     The manifold is given by an appropriate Atlas. The
     corresponding reference bases, respectively their
-    lifted versions, are then be internally constructed.
+    lifted versions, are then internally constructed.
     For each lifted cube, the user may specify
     2*d boundary conditions.
 

@@ -29,9 +29,9 @@ namespace WaveletTL
 	  // active row indices nu have to fulfill ||nu|-|lambda|| <= J/d and
 	  // the supports of psi_lambda and psi_nu have to intersect
 	  
-	  const int maxlevel = std::min(lambda.j()+J/P.space_dimension(), jmax);
+	  const int maxlevel = std::min(lambda.j()+(J/P.space_dimension()), jmax);
 	  IntersectingList nus;
-	  for (int level = std::max(P.basis().j0()-1, lambda.j()-J/P.space_dimension());
+	  for (int level = std::max(P.basis().j0()-1, lambda.j()-(J/P.space_dimension()));
 	       level <= maxlevel; level++)
 	    {
 	      // compute all wavelets on level j, such that supp(psi_lambda) and supp(psi_nu) intersect

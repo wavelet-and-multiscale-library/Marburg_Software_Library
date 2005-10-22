@@ -18,6 +18,9 @@
 #include <utils/multiindex.h>
 #include <cube/cube_index.h>
 
+// for convenience, include also some functionality
+#include <cube/cube_support.h>
+
 using std::list;
 using MathTL::FixedArray1D;
 using MathTL::InfiniteVector;
@@ -25,7 +28,8 @@ using MathTL::InfiniteVector;
 namespace WaveletTL
 {
   /*!
-    Template class for wavelet bases on the d-dimensional (hyper)cube [0,1]^d.
+    Template class for tensor product wavelet bases on the
+    d-dimensional (hyper)cube [0,1]^d.
     For each of the 2*d facets, you can specify the orders s_i, sT_i
     of the Dirichlet boundary conditions of the primal and dual basis
     in the normal direction (this is tailored for the DSBasis constructor...).
@@ -45,8 +49,18 @@ namespace WaveletTL
     CubeBasis(const FixedArray1D<int,2*DIM>& s,
 	      const FixedArray1D<int,2*DIM>& sT);
 
+    /*!
+      constructor with specified Dirichlet boundary conditions for
+      the primal functions, the dual functions will be constructed to
+      fulfill free b.c.'s
+    */
+    CubeBasis(const FixedArray1D<bool,2*DIM>& bc);
+
     //! destructor
     ~CubeBasis();
+
+    //! interval basis
+    typedef IBASIS IntervalBasis;
 
     //! coarsest possible level j0
     inline const int j0() const { return j0_; }
@@ -56,6 +70,15 @@ namespace WaveletTL
 
     //! read access to the bases
     const FixedArray1D<IBASIS*,DIM> bases() const { return bases_; }
+
+    /*!
+      geometric type of the support sets
+    */
+    typedef struct {
+      int j;
+      int a[DIM];
+      int b[DIM];
+    } Support;
 
     //! DECOMPOSE routine, simple version
     /*!

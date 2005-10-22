@@ -86,7 +86,7 @@ namespace WaveletTL
     static bool local_operator() { return true; }
 
     /*!
-      order of the operator
+      (half) order t of the operator
     */
     static int operator_order() { return 1; }
     
@@ -160,7 +160,7 @@ namespace WaveletTL
     // right-hand side coefficients on a fine level, sorted by modulus
     Array1D<std::pair<typename WBASIS::Index,double> > fcoeffs;
 
-    // \ell_2 norm of the precomputed right-hand side
+    // (squared) \ell_2 norm of the precomputed right-hand side
     double fnorm_sqr;
   };
 }

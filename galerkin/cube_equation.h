@@ -11,9 +11,14 @@
 #define _WAVELETTL_CUBE_EQUATION_H
 
 #include <set>
+#include <utils/fixed_array1d.h>
 #include <utils/array1d.h>
+#include <numerics/bvp.h>
 
 #include <galerkin/galerkin_utils.h>
+
+using MathTL::FixedArray1D;
+using MathTL::EllipticBVP;
 
 namespace WaveletTL
 {
@@ -54,46 +59,51 @@ namespace WaveletTL
     where bc indicates the enforcement of homogeneous Dirichlet boundary conditions (true).
     A natural concrete value for CUBEBASIS is the CubeBasis<DSBasis<d,dT> >.
   */
-  template <unsigned int DIM, class IBASIS, class CUBEBASIS>
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
   class CubeEquation
   {
   public:
-//     SturmEquation(const SimpleSturmBVP& bvp);
+    /*!
+      constructor from a boundary value problem and specified b.c.'s
+    */
+    CubeEquation(const EllipticBVP<DIM>& bvp,
+		 const FixedArray1D<bool,2*DIM>& bc);
 
-//     /*!
-//       make template argument accessible
-//     */
-//     typedef WBASIS WaveletBasis;
+    /*!
+      make template argument accessible
+    */
+    typedef CUBEBASIS WaveletBasis;
 
-//     /*!
-//       read access to the basis
-//     */
-//     const WBASIS& basis() const { return basis_; }
+    /*!
+      read access to the basis
+    */
+    const CUBEBASIS& basis() const { return basis_; }
     
-//     /*!
-//       space dimension of the problem
-//     */
-//     static int space_dimension() { return 1; }
+    /*!
+      space dimension of the problem
+    */
+    static int space_dimension() { return DIM; }
 
-//     /*!
-//       differential operators are local
-//     */
-//     static bool local_operator() { return true; }
+    /*!
+      differential operators are local
+    */
+    static bool local_operator() { return true; }
 
-//     /*!
-//       order of the operator
-//     */
-//     static int operator_order() { return 1; }
+    /*!
+      (half) order t of the operator
+    */
+    static int operator_order() { return 1; }
     
-//     /*!
-//       evaluate the diagonal preconditioner D
-//     */
-//     double D(const typename WBASIS::Index& lambda) const;
+    /*!
+      evaluate the diagonal preconditioner D
+    */
+    double D(const typename WaveletBasis::Index& lambda) const;
 
-//     /*!
-//       rescale a coefficient vector by an integer power of D, c |-> D^{n}c
-//     */
-//     void rescale(InfiniteVector<double, typename WBASIS::Index>& coeffs, const int n) const;
+    /*!
+      rescale a coefficient vector by an integer power of D, c |-> D^{n}c
+    */
+    void rescale(InfiniteVector<double,typename WaveletBasis::Index>& coeffs,
+		 const int n) const;
 
 //     /*!
 //       evaluate the (unpreconditioned) bilinear form a;
@@ -132,31 +142,32 @@ namespace WaveletTL
 //       return 2*norm_A(); // suboptimal
 //     }
 
-//     /*!
-//       evaluate the (unpreconditioned) right-hand side f
-//     */
-//     double f(const typename WBASIS::Index& lambda) const;
+    /*!
+      evaluate the (unpreconditioned) right-hand side f
+    */
+    double f(const typename WaveletBasis::Index& lambda) const;
 
-//     /*!
-//       approximate the wavelet coefficient set of the preconditioned right-hand side F
-//       within a prescribed \ell_2 error tolerance
-//     */
-//     void RHS(const double eta, InfiniteVector<double, typename WBASIS::Index>& coeffs) const;
+    /*!
+      approximate the wavelet coefficient set of the preconditioned right-hand side F
+      within a prescribed \ell_2 error tolerance
+    */
+    void RHS(const double eta,
+	     InfiniteVector<double,typename WaveletBasis::Index>& coeffs) const;
 
 //     /*!
 //       compute (or estimate) ||F||_2
 //     */
 //     double F_norm() const { return sqrt(fnorm_sqr); }
 
-//   protected:
-//     const SimpleSturmBVP& bvp_;
-//     WBASIS basis_;
+  protected:
+    const EllipticBVP<DIM>& bvp_;
+    CUBEBASIS basis_;
 
-//     // right-hand side coefficients on a fine level, sorted by modulus
-//     Array1D<std::pair<typename WBASIS::Index,double> > fcoeffs;
+    // right-hand side coefficients on a fine level, sorted by modulus
+    Array1D<std::pair<typename WaveletBasis::Index,double> > fcoeffs;
 
-//     // \ell_2 norm of the precomputed right-hand side
-//     double fnorm_sqr;
+    // (squared) \ell_2 norm of the precomputed right-hand side
+    double fnorm_sqr;
   };
 }
 

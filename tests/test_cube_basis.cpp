@@ -124,7 +124,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   cout << "- evaluating a primal generator..." << endl;
   Index lambda(first_generator<Basis1D,2,Basis>(&basis, basis.j0()));
   for (;; ++lambda) {

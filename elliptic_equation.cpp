@@ -128,9 +128,14 @@ namespace FrameTL
 
     //    WaveletTL::support<IBASIS,DIM,MAPPEDCUBEBASIS>(*(frame_->bases()[p]), lambda_c, supp);
     WaveletTL::support<IBASIS,DIM,CUBEBASIS>(*(frame_->bases()[p]), lambda_c, supp);
+    cout << supp.j << endl;
+    for (int i = 0; i < DIM; i++)
+      cout << (supp.a)[i] << " " << (supp.b)[i] << endl;
+
+
 
     // setup Gauss points and weights for a composite quadrature formula:
-    const int N_Gauss = 5;
+    const int N_Gauss = 2;
     const double h = ldexp(1.0, -supp.j); // granularity for the quadrature
     FixedArray1D<Array1D<double>,DIM> gauss_points, gauss_weights, v_values;
     for (unsigned int i = 0; i < DIM; i++) {
@@ -150,13 +155,16 @@ namespace FrameTL
 // 	   << gauss_points[i] << " and weights " << gauss_weights[i] << endl;
 
     // compute the point values of the integrand (where we use that it is a tensor product)
-    for (unsigned int i = 0; i < DIM; i++)
+    for (unsigned int i = 0; i < DIM; i++) {
       WaveletTL::evaluate(*(frame_->bases()[p]->bases()[i]), 0,
 	       typename IBASIS::Index(lambda.j(),
 				      lambda.e()[i],
 				      lambda.k()[i],
 				      frame_->bases()[p]->bases()[i]),
 	       gauss_points[i], v_values[i]);
+      cout << v_values[i] << endl;
+      cout << "#########################" << endl;
+    }
 
     // iterate over all points and sum up the integral shares
     int index[DIM]; // current multiindex for the point values
@@ -169,9 +177,11 @@ namespace FrameTL
     while (true) {
       for (unsigned int i = 0; i < DIM; i++)
 	x[i] = gauss_points[i][index[i]];
-      
+      //cout << x << endl;
       frame_->atlas()->charts()[p]->map_point(x,x_patch);
+      //cout << x_patch << endl;
       double share = ell_bvp_.f(x_patch) * frame_->atlas()->charts()[p]->Gram_factor(x);
+      //cout << "Gram = " << frame_->atlas()->charts()[p]->Gram_factor(x) << endl;
       for (unsigned int i = 0; i < DIM; i++)
 	share *= gauss_weights[i][index[i]] * v_values[i][index[i]];
       r += share;

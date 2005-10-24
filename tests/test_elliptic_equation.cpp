@@ -2,6 +2,7 @@
 #include <iostream>
 #include <time.h> 
 #include <interval/ds_basis.h>
+#include <numerics/corner_singularity.h>
 #include "elliptic_equation.h"
 
 
@@ -13,6 +14,7 @@ using FrameTL::AggregatedFrame;
 using MathTL::EllipticBVP;
 using MathTL::PoissonBVP;
 using MathTL::ConstantFunction;
+using MathTL::CornerSingularityRHS;
 
 using namespace FrameTL;
 using namespace MathTL;
@@ -27,21 +29,23 @@ int main()
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 2.0;
+  A(0,0) = 1.0;
   A(1,1) = 1.0;
   Point<2> b;
-  b[0] = -1.0;
-  b[1] = -1.0;
+  b[0] = .0;
+  b[1] = .0;
   AffineLinearMapping<2> affineP(A,b);
   //##############################
 
   //##############################
   LinearBezierMapping bezierP(Point<2>(-1.,-1),Point<2>(-1.,1),
-			      Point<2>(1.,-1.), Point<2>(1,0));
+			      Point<2>(0.,-1.), Point<2>(0,1.));
   //##############################
   Array1D<Chart<DIM,DIM>* > charts(2);
   charts[0] = &affineP;
-  charts[1] = &bezierP;
+  charts[1] = &affineP;
+  //charts[1] = &bezierP;
+  
 
   SymmetricMatrix<bool> adj(2);
   adj(0,0) = 1;
@@ -103,20 +107,50 @@ int main()
   value[0] = 1;
   
   ConstantFunction<DIM> const_fun(value);
+  Point<2> origin;
+  origin[0] = 0.0;
+  origin[1] = 0.0;
+
+  CornerSingularityRHS singRhs(origin, 0.5 * M_PI, 1.5);
+  
+  //PoissonBVP<DIM> poisson(&singRhs);
   PoissonBVP<DIM> poisson(&const_fun);
 
   EllipticEquation<Basis1D,DIM> discrete_poisson(poisson, &frame);
 
   FrameIndex<Basis1D,2,2> ind = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame,4);
 
-  for (FrameIndex<Basis1D,2,2> ind = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, 5);
-       ind <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, 5); ++ind) 
+  double max_val = 0.0;
+  double tmp = 0.0;
+  int c = 0;
+  int d = 0;
+
+  for (FrameIndex<Basis1D,2,2> ind = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, 3);
+       ind <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, 4); ++ind) 
     {
-      cout << "evaluation of discrete right hand side at  " 
-	   << endl << ind << endl << "results in: "
-	   << discrete_poisson.f(ind) << endl;
+      
+      if (ind.p() != 0)
+	continue;
+
+      tmp = discrete_poisson.f(ind);
+
+      if (c == 0)
+	max_val = discrete_poisson.f(ind);
+      else {
+	if (tmp > max_val)
+	  max_val = tmp;
+      }
+      c++;
+      if (fabs(1.0/(1<<ind.j())*tmp) > 1.0e-14) {
+	cout << "evaluation of discrete right hand side at  " 
+	     << ind << " results in: "
+	     << ldexp(1.0,-ind.j()) * tmp << endl;
+	d++;
+      }
       
     }
-   
+  cout << "d= " << d << endl;
+  cout << "maximum = " << max_val << endl;
+
   return 0;
 }

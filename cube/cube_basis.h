@@ -20,6 +20,7 @@
 
 // for convenience, include also some functionality
 #include <cube/cube_support.h>
+#include <cube/cube_evaluate.h>
 
 using std::list;
 using MathTL::FixedArray1D;

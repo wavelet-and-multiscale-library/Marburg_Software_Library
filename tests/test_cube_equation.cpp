@@ -45,8 +45,17 @@ int main()
   cout << "- after rescaling with D^{-1}:" << endl
        << coeffs << endl;
 #endif
+  
+  eq.RHS(1e-2, coeffs);
 
-//   eq.RHS(1e-2, coeffs);
+#if 1
+  cout << "- approximate coefficient set of the right-hand side:" << endl
+       << coeffs << endl;
+  cout << "- check expansion of the right-hand side in the dual basis:" << endl;
+  eq.rescale(coeffs, 1);
+//   evaluate(eq.basis(), coeffs, false, 8).matlab_output(cout);
+//   eq.rescale(coeffs, -1);
+#endif  
 
   return 0;
 }

@@ -30,6 +30,7 @@ namespace FrameTL
     for (unsigned int  i = 0; i < (atlas_->charts()).size(); ++i)
       lifted_bases[i] = new MappedCubeBasis<IBASIS,DIM_d,DIM_m>((atlas_->charts())[i],bc[i],bcT[i]);
     
+    j0_ = lifted_bases[0]->j0();
   }
 
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
@@ -38,6 +39,7 @@ namespace FrameTL
     for (unsigned int  i = 0; i < (atlas_->charts()).size(); ++i)
       delete lifted_bases[i];          
   }
+
 
 //   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
 //   inline

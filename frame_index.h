@@ -24,8 +24,8 @@ using WaveletTL::CubeBasis;
 namespace FrameTL
 {
   //forward declaration of class AggregatedFrame
-//   template<class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
-//   class AggregatedFrame;
+  template<class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  class AggregatedFrame;
 
   /*!
     This class represents (tensor product) multilevel indices.
@@ -78,6 +78,9 @@ namespace FrameTL
     //! preincrement
     FrameIndex& operator ++ ();
 
+    //! assignment
+    FrameIndex& operator = (const FrameIndex&);
+
     //! lexicographic order <
     bool operator < (const FrameIndex& lambda) const;
 
@@ -100,20 +103,6 @@ namespace FrameTL
     //! access to underlying frame
     const AggregatedFrame<IBASIS,DIM_d,DIM_m>* get_frame() const
     { return frame_; }
-
-    /*!
-      index of first wavelet on level j >= j0
-      on patch p
-    */
-    static FrameIndex<IBASIS,DIM_d,DIM_m>
-    first_element(const int j, const unsigned int p);
-    
-    /*!
-      index of last wavelet on level j >= j0
-      on patch p
-    */
-    static FrameIndex<IBASIS,DIM_d,DIM_m>
-    last_element(const int j, const unsigned int p);
 
   protected:
 
@@ -143,6 +132,39 @@ namespace FrameTL
    */
   template <class IBASIS, unsigned int DIM>
   std::ostream& operator << (std::ostream&, const FrameIndex<IBASIS, DIM_d, DIM_m>&);
+
+  /*!
+    index of first generator on level j >= j0
+    on patch p
+  */
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+  FrameIndex<IBASIS,DIM_d,DIM_m>
+  first_generator(const int j);
+
+  /*!
+    index of last generator on level j >= j0
+    on patch p
+  */
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+  FrameIndex<IBASIS,DIM_d,DIM_m>
+  last_generator(const FRAME* frame,const int j);
+
+    
+  /*!
+    index of first wavelet on level j >= j0
+    on patch p
+  */
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+  FrameIndex<IBASIS,DIM_d,DIM_m>
+  first_wavelet(const FRAME* frame, const int j);
+    
+  /*!
+    index of last wavelet on level j >= j0
+    on patch p
+  */
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+  FrameIndex<IBASIS,DIM_d,DIM_m>
+  last_wavelet(const FRAME* frame, const int j);
 
 
 }

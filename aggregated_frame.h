@@ -81,6 +81,17 @@ namespace FrameTL
       return lifted_bases;
     }
 
+
+    /*!
+      coarsest level
+     */
+    const int j0() const { return j0_; }
+
+    /*!
+      access to underlying atlas
+     */
+    const Atlas<DIM_d, DIM_m>* atlas() const { return atlas_;  }
+
   protected:
     //! pointer to the underlying atlas
     const Atlas<DIM_d, DIM_m>* atlas_;
@@ -90,6 +101,9 @@ namespace FrameTL
 
     //! dual boundary conditions
     Array1D<FixedArray1D<int,2*DIM_d> > bcT_;
+
+    //! coarsest possible level j0
+    int j0_;
 
   private:
 

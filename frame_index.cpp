@@ -114,6 +114,20 @@
    }
 
    template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+   FrameIndex<IBASIS, DIM_d, DIM_m>&
+   FrameIndex<IBASIS, DIM_d, DIM_m>::operator = (const FrameIndex& lambda)
+   {
+     j_ = lambda.j();
+     e_ = lambda.e();
+     p_ = lambda.p();
+     k_ = lambda.k();
+     frame_ = lambda.frame();
+     
+     return *this;
+   }
+
+
+   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
    inline
    bool
    FrameIndex<IBASIS, DIM_d, DIM_m>::operator < (const FrameIndex& lambda) const
@@ -136,18 +150,66 @@
       );
    }
 
-   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+
+   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
    FrameIndex<IBASIS,DIM_d,DIM_m>
-   FrameIndex<IBASIS,DIM_d,DIM_m>::first_element(const int j, const unsigned int p)
+   first_generator(const FRAME* frame, const int j)
    {
-     ;
+     assert(j >= frame->j0());
+     
+     typename FrameIndex<IBASIS,DIM_d,DIM_m>::type_type e;//== 0
+     typename FrameIndex<IBASIS,DIM_d,DIM_m>::translation_type k;
+     for (unsigned int i = 0; i < DIM_d; i++)
+       k[i] = WaveletTL::first_generator<IBASIS>(frame->bases()[0]->bases()[i], j).k();
+     
+     return FrameIndex<IBASIS,DIM_d,DIM_m>(frame, j, e, 0, k);
+   }
+   
+   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+   FrameIndex<IBASIS,DIM_d,DIM_m>
+   last_generator(const FRAME* frame, const int j)
+   {
+     assert(j >= frame->j0());
+
+     typename FrameIndex<IBASIS,DIM_d,DIM_m>::type_type e;//== 0
+     typename FrameIndex<IBASIS,DIM_d,DIM_m>::translation_type k;
+     for (unsigned int i = 0; i < DIM_d; i++)
+       k[i] = WaveletTL::last_generator<IBASIS>(frame->bases()[0]->bases()[i], j).k();
+
+     return FrameIndex<IBASIS,DIM_d,DIM_m>(frame, j, e, frame->bases().size()-1, k); 
    }
 
-   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
    FrameIndex<IBASIS,DIM_d,DIM_m>
-   FrameIndex<IBASIS,DIM_d,DIM_m>::last_element(const int j, const unsigned int p)
+   first_wavelet(const FRAME* frame, const int j)
    {
-     ;
+     assert(j >= frame->j0());
+
+     typename FrameIndex<IBASIS,DIM_d,DIM_m>::type_type e;//== 0
+     typename FrameIndex<IBASIS,DIM_d,DIM_m>::translation_type k; 
+     for (unsigned int i = 0; i < DIM_d-1; i++)
+       k[i] = WaveletTL::first_generator<IBASIS>(frame->bases()[0]->bases()[i], j).k();
+
+     k[DIM_d-1] = WaveletTL::first_wavelet<IBASIS>(frame->bases()[0]->bases()[DIM_d-1], j).k();
+     e[DIM_d-1] = 1;
+
+     return FrameIndex<IBASIS,DIM_d,DIM_m>(frame, j, e, 0, k); 
+   }
+
+   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+   FrameIndex<IBASIS,DIM_d,DIM_m>
+   last_wavelet(const FRAME* frame, const int j)
+   {
+     assert(j >= frame->j0());
+     
+     typename FrameIndex<IBASIS,DIM_d,DIM_m>::type_type e;//== 0
+     typename FrameIndex<IBASIS,DIM_d,DIM_m>::translation_type k; 
+     for (unsigned int i = 0; i < DIM_d; i++) {
+       k[i] = WaveletTL::last_wavelet<IBASIS>(frame->bases()[0]->bases()[i], j).k();
+       e[i] = 1;
+     }
+          
+     return FrameIndex<IBASIS,DIM_d,DIM_m>(frame, j, e, frame->bases().size()-1, k); 
    }
    
    

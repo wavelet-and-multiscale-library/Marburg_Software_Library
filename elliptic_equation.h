@@ -127,10 +127,10 @@ namespace FrameTL
 //       return 2*norm_A(); // suboptimal
 //     }
 
-//     /*!
-//       evaluate the (unpreconditioned) right-hand side f
-//     */
-//     double f(const typename WBASIS::Index& lambda) const;
+    /*!
+      evaluate the (unpreconditioned) right-hand side f
+    */
+    double f(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda) const;
 
 //     /*!
 //       approximate the wavelet coefficient set of the preconditioned right-hand side F

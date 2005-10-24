@@ -94,7 +94,7 @@ int main()
   cout << Lshaped << endl;
 
   typedef DSBasis<2,2> Basis1D;
-
+  typedef AggregatedFrame<Basis1D,2,2> Frame2D;
 
   //finally a frame can be constructed
   AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT);
@@ -106,6 +106,17 @@ int main()
   PoissonBVP<DIM> poisson(&const_fun);
 
   EllipticEquation<Basis1D,DIM> discrete_poisson(poisson, &frame);
-  
+
+  FrameIndex<Basis1D,2,2> ind = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame,4);
+
+  for (FrameIndex<Basis1D,2,2> ind = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, 5);
+       ind <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, 5); ++ind) 
+    {
+      cout << "evaluation of discrete right hand side at  " 
+	   << endl << ind << endl << "results in: "
+	   << discrete_poisson.f(ind) << endl;
+      
+    }
+   
   return 0;
 }

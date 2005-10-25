@@ -78,6 +78,18 @@ namespace MathTL
     SampledMapping<DIM>& operator = (const SampledMapping<DIM>& sm);
 
     /*!
+      pointwise in-place summation *this += s
+      of two sampled mappings over the same grid
+    */
+    void add(const SampledMapping<DIM>& s);
+    
+    /*!
+      pointwise in-place summation *this += alpha * s
+      of two sampled mappings over the same grid
+    */
+    void add(const double alpha, const SampledMapping<DIM>& s);
+
+    /*!
       Matlab output of the sampled mapping onto a stream
     */
     void matlab_output(std::ostream& os) const;
@@ -135,6 +147,18 @@ namespace MathTL
       assignment operator
     */
     SampledMapping<1>& operator = (const SampledMapping<1>& sm);
+
+    /*!
+      pointwise in-place summation *this += s
+      of two sampled mappings over the same grid
+    */
+    void add(const SampledMapping<1>& s);
+    
+    /*!
+      pointwise in-place summation *this += alpha * s
+      of two sampled mappings over the same grid
+    */
+    void add(const double alpha, const SampledMapping<1>& s);
 
     /*!
       reading access to the function values
@@ -202,6 +226,23 @@ namespace MathTL
       assignment operator
     */
     SampledMapping<2>& operator = (const SampledMapping<2>& sm);
+
+    /*!
+      pointwise in-place summation *this += s
+      of two sampled mappings over the same grid
+    */
+    void add(const SampledMapping<2>& s);
+    
+    /*!
+      pointwise in-place summation *this += alpha * s
+      of two sampled mappings over the same grid
+    */
+    void add(const double alpha, const SampledMapping<2>& s);
+
+    /*!
+      reading access to the function values
+    */
+    inline const Matrix<double>& values() const { return values_; }
 
     /*!
       Matlab output of the sampled mapping onto a stream

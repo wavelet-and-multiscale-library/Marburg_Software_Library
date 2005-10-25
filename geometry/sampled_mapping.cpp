@@ -49,6 +49,22 @@ namespace MathTL
     values_ = sm.values_;
     return *this;
   }
+  
+  void
+  SampledMapping<1>::add(const SampledMapping<1>& s)
+  {
+    assert(values_.size() == s.values_.size());
+    for (unsigned int i = 0; i < values_.size(); i++)
+      values_[i] += s.values_[i];
+  }
+
+  void
+  SampledMapping<1>::add(const double alpha, const SampledMapping<1>& s)
+  {
+    assert(values_.size() == s.values_.size());
+    for (unsigned int i = 0; i < values_.size(); i++)
+      values_[i] += alpha * s.values_[i];
+  }
 
   void
   SampledMapping<1>::matlab_output(std::ostream& os) const
@@ -109,6 +125,26 @@ namespace MathTL
     Grid<2>::operator = (sm);
     values_ = sm.values_;
     return *this;
+  }
+
+  void
+  SampledMapping<2>::add(const SampledMapping<2>& s)
+  {
+    assert(values_.row_dimension() == s.values_.row_dimension()
+	   && values_.column_dimension() == s.values_.column_dimension());
+    for (unsigned int m(0); m < values_.row_dimension(); m++)
+      for (unsigned int n(0); n < values_.column_dimension(); n++)
+	values_(m,n) += s.values_(m,n); // Matrix does not (yet) have an add() method
+  }
+
+  void
+  SampledMapping<2>::add(const double alpha, const SampledMapping<2>& s)
+  {
+    assert(values_.row_dimension() == s.values_.row_dimension()
+	   && values_.column_dimension() == s.values_.column_dimension());
+    for (unsigned int m(0); m < values_.row_dimension(); m++)
+      for (unsigned int n(0); n < values_.column_dimension(); n++)
+	values_(m,n) += alpha * s.values_(m,n); // Matrix does not (yet) have an add() method
   }
 
   void

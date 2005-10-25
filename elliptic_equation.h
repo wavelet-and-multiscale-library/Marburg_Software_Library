@@ -57,7 +57,7 @@ namespace FrameTL
     /*!
       constructor
      */
-    EllipticEquation(const EllipticBVP<DIM>& ell_bvp,
+    EllipticEquation(const EllipticBVP<DIM>* ell_bvp,
 		     const AggregatedFrame<IBASIS,DIM>* frame);
     /*!
       read access to the frame
@@ -148,7 +148,7 @@ namespace FrameTL
     /*!
       corresponding elliptic boundary value problem
      */
-    const EllipticBVP<DIM> ell_bvp_;
+    const EllipticBVP<DIM>* ell_bvp_;
 
     /*!
       underlying frame
@@ -169,7 +169,7 @@ namespace FrameTL
      */
     double a_same_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
 			  const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-			  const unsigned int p = 4) const;
+			  const unsigned int q_order = 4) const;
 
     /*!
       helper routines for a (.. , ..). Entries in diagonal and non-diagonal
@@ -177,7 +177,7 @@ namespace FrameTL
      */
     double a_different_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
 			       const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-			       const unsigned int p = 4) const;
+			       const unsigned int q_order = 4) const;
 
   };
 }

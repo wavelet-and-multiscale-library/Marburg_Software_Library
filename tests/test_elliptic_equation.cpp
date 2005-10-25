@@ -4,6 +4,7 @@
 #include <interval/ds_basis.h>
 #include <numerics/corner_singularity.h>
 #include "elliptic_equation.h"
+#include <algebra/sparse_matrix.h>
 
 
 using std::cout;
@@ -15,6 +16,7 @@ using MathTL::EllipticBVP;
 using MathTL::PoissonBVP;
 using MathTL::ConstantFunction;
 using MathTL::CornerSingularityRHS;
+using MathTL::SparseMatrix;
 
 using namespace FrameTL;
 using namespace MathTL;
@@ -116,15 +118,39 @@ int main()
   //PoissonBVP<DIM> poisson(&singRhs);
   PoissonBVP<DIM> poisson(&const_fun);
 
-  EllipticEquation<Basis1D,DIM> discrete_poisson(poisson, &frame);
+  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame);
 
-  FrameIndex<Basis1D,2,2> ind = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame,4);
+  FrameIndex<Basis1D,2,2> ind = FrameTL::first_wavelet<Basis1D,2,2,Frame2D>(&frame,3);
 
-  double max_val = 0.0;
-  double tmp = 0.0;
-  int c = 0;
-  int d = 0;
+   double max_val = 0.0;
+   double tmp = 0.0;
+   int c = 0;
+   int d = 0;
 
+   cout.precision(12);
+#if 1
+   SparseMatrix<double> stiff(450,450);
+   int i = 0, j;
+   for (FrameIndex<Basis1D,2,2> ind1 = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, 3);
+	ind1 <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, 3); ++ind1)
+     {
+       j=0;
+       for (FrameIndex<Basis1D,2,2> ind2 = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, 3);
+	    ind2 <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, 3); ++ind2)
+	 {
+	   //cout << i << " " << j << endl;
+	   cout << ind2 << endl;
+	   stiff.set_entry(j,j,discrete_poisson.a(ind2,ind2,1));
+	   //int level = 
+	   double dd = (1.0 / (1<<(2*ind.j()))) * stiff.get_entry(j,j);
+	   cout << "a results in: " << dd << endl;
+	   j++;
+	 }
+       i++;
+     }
+#endif
+
+#if 0
   for (FrameIndex<Basis1D,2,2> ind = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, 3);
        ind <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, 4); ++ind) 
     {
@@ -149,7 +175,10 @@ int main()
       }
       
     }
-  cout << "d= " << d << endl;
+#endif
+
+
+ 
   cout << "maximum = " << max_val << endl;
 
   return 0;

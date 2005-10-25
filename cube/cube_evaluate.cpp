@@ -8,7 +8,11 @@ namespace WaveletTL
 			       const bool primal,
 			       const int resolution)
   {
-    
+    Grid<DIM> grid(Point<DIM>(0), Point<DIM>(1), 1<<resolution);
+//     Grid<1> grid(0, 1, 1<<resolution);
+//     Array1D<double> values((1<<resolution)+1);
+
+  
     return SampledMapping<DIM>(); // dummy return for the compiler
   }
 

@@ -21,7 +21,7 @@ int main()
   PoissonBVP<2> poisson(&rhs);
 
   const int d  = 2;
-  const int dT = 2; // be sure to use a continuous dual here, otherwise the RHS test will fail
+  const int dT = 4; // be sure to use a continuous dual here, otherwise the RHS test will fail
   typedef DSBasis<d,dT> Basis1D;
   typedef CubeBasis<Basis1D,2> CBasis;
   typedef CBasis::Index Index;
@@ -53,7 +53,7 @@ int main()
        << coeffs << endl;
   cout << "- check expansion of the right-hand side in the dual basis:" << endl;
   eq.rescale(coeffs, 1);
-//   evaluate(eq.basis(), coeffs, false, 8).matlab_output(cout);
+//   evaluate<Basis1D,2>(eq.basis(), coeffs, false, 8).matlab_output(cout);
 //   eq.rescale(coeffs, -1);
 #endif  
 

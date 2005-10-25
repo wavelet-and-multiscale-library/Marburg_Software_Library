@@ -124,13 +124,13 @@ int main()
     }
 #endif
 
-#if 0
+#if 1
   cout << "- evaluating a primal generator..." << endl;
   Index lambda(first_generator<Basis1D,2,Basis>(&basis, basis.j0()));
   for (;; ++lambda) {
     cout << lambda << endl;
-    evaluate<Basis1D>(basis, lambda, true, 6).matlab_output(cout);
-    if (lambda == last_generator<Basis1D,2,Basis>(&basis, basis.j0())) break;
+    evaluate<Basis1D,2>(basis, lambda, true, 6).matlab_output(cout);
+    if (lambda == first_generator<Basis1D,2,Basis>(&basis, basis.j0())) break;
   }
   
 //   cout << "- evaluating some primal wavelets:" << endl;

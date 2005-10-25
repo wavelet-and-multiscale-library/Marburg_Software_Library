@@ -62,11 +62,60 @@ namespace WaveletTL
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
   double
+  CubeEquation<IBASIS,DIM,CUBEBASIS>::a(const typename WaveletBasis::Index& lambda,
+					const typename WaveletBasis::Index& nu,
+					const unsigned int p) const
+  {
+    // a(u,v) = \int_Omega [a(x)grad u(x)grad v(x)+q(x)u(x)v(x)] dx
+
+    double r = 0;
+
+
+//     // First we compute the support intersection of \psi_\lambda and \psi_\nu:
+//     typedef typename WBASIS::Support Support;
+
+//     Support supp;
+
+//     if (intersect_supports(basis_, lambda, nu, supp))
+//       {
+// 	// Set up Gauss points and weights for a composite quadrature formula:
+// 	// (TODO: maybe use an instance of MathTL::QuadratureRule instead of computing
+// 	// the Gauss points and weights)
+// 	const unsigned int N_Gauss = (p+1)/2;
+// 	const double h = ldexp(1.0, -supp.j);
+// 	Array1D<double> gauss_points (N_Gauss*(supp.k2-supp.k1)), func1values, func2values, der1values, der2values;
+// 	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++) // refers to 2^{-j}[patch,patch+1]
+// 	  for (unsigned int n = 0; n < N_Gauss; n++, id++)
+// 	    gauss_points[id] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
+
+// 	// - compute point values of the integrands
+// 	evaluate(basis_, lambda, gauss_points, func1values, der1values);
+// 	evaluate(basis_, nu, gauss_points, func2values, der2values);
+
+// 	// - add all integral shares
+// 	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++)
+// 	  for (unsigned int n = 0; n < N_Gauss; n++, id++) {
+// 	    const double t = gauss_points[id];
+// 	    const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
+	    
+// 	    const double pt = bvp_.p(t);
+//   	    if (pt != 0)
+// 	      r += pt * der1values[id] * der2values[id] * gauss_weight;
+	    
+// 	    const double qt = bvp_.q(t);
+//   	    if (qt != 0)
+// 	      r += qt * func1values[id] * func2values[id] * gauss_weight;
+// 	  }
+//       }
+
+    return r;
+  }
+  
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  double
   CubeEquation<IBASIS,DIM,CUBEBASIS>::f(const typename WaveletBasis::Index& lambda) const
   {
     // f(v) = \int_0^1 g(t)v(t) dt
-
-//     cout << "f() called with lambda=" << lambda << endl;
 
     double r = 0;
 
@@ -89,10 +138,6 @@ namespace WaveletTL
 	    = h*GaussWeights[N_Gauss-1][n];
 	}
     }
-//     cout << "f(), Gauss points and weights set up:" << endl;
-//     for (unsigned int i = 0; i < DIM; i++)
-//       cout << "i=" << i << " with points "
-// 	   << gauss_points[i] << " and weights " << gauss_weights[i] << endl;
 
     // compute the point values of the integrand (where we use that it is a tensor product)
     for (unsigned int i = 0; i < DIM; i++)

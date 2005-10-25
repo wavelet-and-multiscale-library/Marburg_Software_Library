@@ -41,11 +41,11 @@ namespace WaveletTL
 
     is
 
-      a(u,v) = \int_Omega [a(x)grad u(x)grad v(x)+q(x)u(x)v(x)] dt
+      a(u,v) = \int_Omega [a(x)grad u(x)grad v(x)+q(x)u(x)v(x)] dx
       
     and the right-hand side is
  
-      F(v) = \int_0^1 f(t)v(t) dt
+      F(v) = \int_0^1 f(x)v(x) dx
    
     The evaluation of a(.,.) and f is possible for arguments \psi_\lambda
     which stem from a wavelet basis \Psi=\{\psi_\lambda\} of the corresponding
@@ -105,17 +105,17 @@ namespace WaveletTL
     void rescale(InfiniteVector<double,typename WaveletBasis::Index>& coeffs,
 		 const int n) const;
 
-//     /*!
-//       evaluate the (unpreconditioned) bilinear form a;
-//       you can specify the order p of the quadrature rule, i.e.,
-//       (piecewise) polynomials of maximal degree p will be integrated exactly.
-//       Internally, we use an m-point composite Gauss quadrature rule adapted
-//       to the singular supports of the spline wavelets involved,
-//       so that m = (p+1)/2;
-//     */
-//     double a(const typename WBASIS::Index& lambda,
-// 	     const typename WBASIS::Index& nu,
-// 	     const unsigned int p = 4) const;
+    /*!
+      evaluate the (unpreconditioned) bilinear form a;
+      you can specify the order p of the quadrature rule, i.e.,
+      (piecewise) polynomials of maximal degree p will be integrated exactly.
+      Internally, we use an m-point composite tensor product Gauss rule adapted
+      to the singular supports of the spline wavelets involved,
+      so that m = (p+1)/2;
+    */
+    double a(const typename WaveletBasis::Index& lambda,
+	     const typename WaveletBasis::Index& nu,
+	     const unsigned int p = 4) const;
 
 //     /*!
 //       estimate the spectral norm ||A||
@@ -154,10 +154,10 @@ namespace WaveletTL
     void RHS(const double eta,
 	     InfiniteVector<double,typename WaveletBasis::Index>& coeffs) const;
 
-//     /*!
-//       compute (or estimate) ||F||_2
-//     */
-//     double F_norm() const { return sqrt(fnorm_sqr); }
+    /*!
+      compute (or estimate) ||F||_2
+    */
+    double F_norm() const { return sqrt(fnorm_sqr); }
 
   protected:
     const EllipticBVP<DIM>& bvp_;

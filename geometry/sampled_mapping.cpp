@@ -12,6 +12,13 @@ namespace MathTL
   {
   }
 
+  SampledMapping<1>::SampledMapping(const Grid<1>& grid)
+    : Grid<1>(grid), values_(grid.size())
+  {
+    for (unsigned int i = 0; i < grid.size(); i++)
+      values_[i] = 0;
+  }
+
   SampledMapping<1>::SampledMapping(const Grid<1>& grid, const Array1D<double>& values)
     : Grid<1>(grid), values_(values)
   {
@@ -84,6 +91,12 @@ namespace MathTL
   SampledMapping<2>::SampledMapping(const SampledMapping<2>& sm)
     : Grid<2>(sm), values_(sm.values_)
   {
+  }
+
+  SampledMapping<2>::SampledMapping(const Grid<2>& grid)
+    : Grid<2>(grid)
+  {
+    values_.resize(gridx_.row_dimension(), gridx_.column_dimension());
   }
 
   SampledMapping<2>::SampledMapping(const Grid<2>& grid, const Matrix<double>& values)

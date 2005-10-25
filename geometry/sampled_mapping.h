@@ -44,6 +44,11 @@ namespace MathTL
     SampledMapping(const SampledMapping<DIM>& sm);
 
     /*!
+      constructor from a given grid, yields zero function
+    */
+    SampledMapping(const Grid<DIM>& grid);
+
+    /*!
       constructor from a given grid and given values
     */
     SampledMapping(const Grid<DIM>& grid, const Array1D<double>& values);
@@ -113,6 +118,11 @@ namespace MathTL
       copy constructor
     */
     SampledMapping(const SampledMapping<1>& sm);
+
+    /*!
+      constructor from a given grid, yields zero function
+    */
+    SampledMapping(const Grid<1>& grid);
 
     /*!
       constructor from a given grid and given values
@@ -191,6 +201,11 @@ namespace MathTL
       copy constructor
     */
     SampledMapping(const SampledMapping<2>& sm);
+
+    /*!
+      constructor from a given grid, yields zero function
+    */
+    SampledMapping(const Grid<2>& grid);
 
     /*!
       constructor from a given grid and given values

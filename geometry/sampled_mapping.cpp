@@ -24,15 +24,22 @@ namespace MathTL
       values_[n] = f.value(Point<1>(grid_[n]));
   }
   
-  SampledMapping<1>::SampledMapping(const MultiIndex<int, 1>& a,
-				    const MultiIndex<int, 1>& b,
-				    const InfiniteVector<double, MultiIndex<int, 1> >& values,
+  SampledMapping<1>::SampledMapping(const MultiIndex<int,1>& a,
+				    const MultiIndex<int,1>& b,
+				    const InfiniteVector<double, MultiIndex<int,1> >& values,
 				    const int resolution)
     : Grid<1>(a[0], b[0], (1<<resolution)*(b[0]-a[0]))
   {
     values_.resize(Grid<1>::size());
     for (int k(a[0]<<resolution), n(0); k <= (b[0]<<resolution); k++, n++)
-      values_[n] = values.get_coefficient(MultiIndex<int, 1>(k));
+      values_[n] = values.get_coefficient(MultiIndex<int,1>(k));
+  }
+
+  SampledMapping<1>::SampledMapping(const Point<1>& a,
+				    const Point<1>& b,
+				    const FixedArray1D<Array1D<double>,1>& values)
+    : Grid<1>(a[0], b[0], values[0].size()-1), values_(values[0])
+  {
   }
   
   SampledMapping<1>& 
@@ -77,11 +84,23 @@ namespace MathTL
 	values_(m,n) = f.value(Point<2>(gridx_(m,n), gridy_(m,n)));
   }
   
-  SampledMapping<2>::SampledMapping(const MultiIndex<int, 2>& a,
-				    const MultiIndex<int, 2>& b,
-				    const InfiniteVector<double, MultiIndex<int, 2> >& values,
+  SampledMapping<2>::SampledMapping(const MultiIndex<int,2>& a,
+				    const MultiIndex<int,2>& b,
+				    const InfiniteVector<double, MultiIndex<int,2> >& values,
 				    const int resolution)
   {
+    // TODO: implement this
+  }
+
+  SampledMapping<2>::SampledMapping(const Point<2>& a,
+				    const Point<2>& b,
+				    const FixedArray1D<Array1D<double>,2>& values)
+    : Grid<2>(a, b, values[0].size()-1, values[1].size()-1),
+      values_(values[0].size(), values[1].size())
+  {
+    for (unsigned int m(0); m < values_.row_dimension(); m++)
+      for (unsigned int n(0); n < values_.column_dimension(); n++)
+	values_(m,n) = values[0][m] * values[1][n];
   }
 
   SampledMapping<2>&

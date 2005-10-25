@@ -12,10 +12,12 @@
 
 #include <iostream>
 
+#include <geometry/point.h>
 #include <geometry/grid.h>
 #include <utils/array1d.h>
 #include <utils/function.h>
 #include <utils/multiindex.h>
+#include <utils/fixed_array1d.h>
 #include <algebra/matrix.h>
 #include <algebra/infinite_vector.h>
 
@@ -61,6 +63,16 @@ namespace MathTL
 		   const int resolution);
 
     /*!
+      constructor from given tensor product values on a uniform subgrid
+      of the cuboid <a,b>,
+      the number of grid points in the i-th direction is taken from the length
+      of the i-th component array of 'values'
+    */
+    SampledMapping(const Point<DIM>& a,
+		   const Point<DIM>& b,
+		   const FixedArray1D<Array1D<double>,DIM>& values);
+
+    /*!
       assignment operator
     */
     SampledMapping<DIM>& operator = (const SampledMapping<DIM>& sm);
@@ -103,10 +115,21 @@ namespace MathTL
     /*!
       constructor from given values on 2^{-resolution}\mathbb Z, clipped to [a,b]
     */
-    SampledMapping(const MultiIndex<int, 1>& a,
-		   const MultiIndex<int, 1>& b,
+    SampledMapping(const MultiIndex<int,1>& a,
+		   const MultiIndex<int,1>& b,
 		   const InfiniteVector<double, MultiIndex<int, 1> >& values,
 		   const int resolution);
+
+    /*!
+      constructor from given tensor product values on a uniform subgrid
+      of the cuboid <a,b>, a,b integer vectors,
+      the number of grid points in the i-th direction is taken from the length
+      of the i-th component array of 'values'
+      (this constructor does not make much sense in 1 space dimension...)
+    */
+    SampledMapping(const Point<1>& a,
+		   const Point<1>& b,
+		   const FixedArray1D<Array1D<double>,1>& values);
 
     /*!
       assignment operator
@@ -164,6 +187,16 @@ namespace MathTL
 		   const MultiIndex<int, 2>& b,
 		   const InfiniteVector<double, MultiIndex<int, 2> >& values,
 		   const int resolution);
+
+    /*!
+      constructor from given tensor product values on a uniform subgrid
+      of the cuboid <a,b>, a,b integer vectors,
+      the number of grid points in the i-th direction is taken from the length
+      of the i-th component array of 'values'
+    */
+    SampledMapping(const Point<2>& a,
+		   const Point<2>& b,
+		   const FixedArray1D<Array1D<double>,2>& values);
 
     /*!
       assignment operator

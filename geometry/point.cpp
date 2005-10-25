@@ -23,7 +23,7 @@ namespace MathTL
   Point<DIM, VALUE>::Point(const VALUE x)
   {
     for (unsigned int i = 0; i < DIM; i++)
-      values[i] = x;
+      Tensor<1,DIM,VALUE>::values[i] = x;
   }
 
   template <unsigned int DIM, class VALUE>
@@ -31,8 +31,8 @@ namespace MathTL
   Point<DIM, VALUE>::Point(const VALUE x, const VALUE y)
   {
     assert(DIM == 2);
-    this->values[0] = x;
-    this->values[1] = y;
+    Tensor<1,DIM,VALUE>::values[0] = x;
+    Tensor<1,DIM,VALUE>::values[1] = y;
   }
 
   template <unsigned int DIM, class VALUE>
@@ -40,16 +40,16 @@ namespace MathTL
   Point<DIM, VALUE>::Point(const VALUE x, const VALUE y, const VALUE z)
   {
     assert(DIM == 3);
-    this->values[0] = x;
-    this->values[1] = y;
-    this->values[2] = z;
+    Tensor<1,DIM,VALUE>::values[0] = x;
+    Tensor<1,DIM,VALUE>::values[1] = y;
+    Tensor<1,DIM,VALUE>::values[2] = z;
   }
 
   template <unsigned int DIM, class VALUE>
   Point<DIM, VALUE>& Point<DIM, VALUE>::operator = (const VALUE x)
   {
     for (unsigned int i = 0; i < DIM; i++)
-      values[i] = x;
+      Tensor<1,DIM,VALUE>::values[i] = x;
     return *this;
   }
 
@@ -72,7 +72,7 @@ namespace MathTL
   const VALUE Point<DIM, VALUE>::operator () (const size_type i) const
   {
     assert(i < DIM);
-    return this->values[i];
+    return Tensor<1,DIM,VALUE>::values[i];
   }
 
   template <unsigned int DIM, class VALUE>
@@ -80,7 +80,7 @@ namespace MathTL
   VALUE& Point<DIM, VALUE>::operator () (const size_type i)
   {
     assert(i < DIM);
-    return this->values[i];
+    return Tensor<1,DIM,VALUE>::values[i];
   }
 
   template <unsigned int DIM, class VALUE>

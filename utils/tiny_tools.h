@@ -82,7 +82,7 @@ inline int minus1power(const int k)
   return (k%2==0 ? 1 : -1);
 }
 
-//! integer power n^k, 0^0=1
+//! integer power n^k, 0^0=1, k >= 0
 template <class I, class J>
 int intpower(const I n, const J k)
 {

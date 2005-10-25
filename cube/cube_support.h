@@ -32,8 +32,8 @@ namespace WaveletTL
     representing the intersection of the support cubes
     corresponding to the indices lambda and mu.
     Function returns true if a nontrivial intersection
-    exists, false otherwise. In the latter case supp
-    is left unchanged.
+    exists, false otherwise. In the latter case 'supp'
+    has no meaningful value.
   */
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
   bool intersect_supports_(const CUBEBASIS& basis,

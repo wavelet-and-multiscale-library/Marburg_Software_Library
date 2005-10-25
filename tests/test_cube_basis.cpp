@@ -19,7 +19,7 @@ int main()
   typedef DSBasis<2,2> Basis1D;
   typedef CubeBasis<Basis1D> Basis;
   typedef Basis::Index Index;
-#if 1
+#if 0
   Basis basis;
 #else
 //   FixedArray1D<int,4> s, sT;
@@ -34,7 +34,7 @@ int main()
 //   Basis basis(s, sT);
   FixedArray1D<bool,4> bc;
   bc[0] = bc[1] = true;
-  bc[2] = bc[3] = false;
+  bc[2] = bc[3] = true;
   Basis basis(bc);
 #endif
 
@@ -127,7 +127,7 @@ int main()
 
 #if 1
   cout << "- evaluating a primal generator..." << endl;
-  Index lambda(++first_generator<Basis1D,2,Basis>(&basis, basis.j0()));
+  Index lambda(first_generator<Basis1D,2,Basis>(&basis, basis.j0()));
   std::ofstream psistream("cube_wavelet.m");
   evaluate<Basis1D,2>(basis, lambda, true, 6).matlab_output(psistream);
   psistream.close();

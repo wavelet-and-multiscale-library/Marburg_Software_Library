@@ -46,8 +46,8 @@ namespace WaveletTL
 //       cout << supp_mu.j << " " << supp_mu.a[i] << " " << supp_mu.b[i] << endl;
 
 
-    //determine integration granularity
-    //and adjust granularities if necessary
+    // determine integration granularity
+    // and adjust granularities if necessary
     const int max_j = std::max(supp_lambda.j,supp_mu.j);
     if (supp_lambda.j > supp_mu.j) {
       for (unsigned int i = 0; i < DIM; i++) {      
@@ -57,29 +57,23 @@ namespace WaveletTL
     }
     else if (supp_lambda.j < supp_mu.j){
       for (unsigned int i = 0; i < DIM; i++) {      
-	supp_mu.a[i] *= 1 << (supp_mu.j-supp_lambda.j);
-	supp_mu.b[i] *= 1 << (supp_mu.j-supp_lambda.j);
+	supp_lambda.a[i] *= 1 << (supp_mu.j-supp_lambda.j);
+	supp_lambda.b[i] *= 1 << (supp_mu.j-supp_lambda.j);
       }
     }
     
-    typename CUBEBASIS::Support supp_intersect;
-    supp_intersect.j = max_j;
+    supp.j = max_j;
     for (unsigned int i = 0; i < DIM; i++) {
-      supp_intersect.a[i] = std::max(supp_lambda.a[i],supp_mu.a[i]);
-      supp_intersect.b[i] = std::min(supp_lambda.b[i],supp_mu.b[i]);
+      supp.a[i] = std::max(supp_lambda.a[i],supp_mu.a[i]);
+      supp.b[i] = std::min(supp_lambda.b[i],supp_mu.b[i]);
       //cout << supp_intersect.a[i] << " " << supp_intersect.b[i] << endl;
       
-      if (supp_intersect.a[i] >= supp_intersect.b[i])
+      if (supp.a[i] >= supp.b[i])
 	return false;
     }
-
-    supp.j = supp_intersect.j;
-    for (unsigned int i = 0; i < DIM; i++) {
-      supp.a[i] = supp_intersect.a[i];
-      supp.b[i] = supp_intersect.b[i];
-    }
+    
     return true;
- 
+  
   }
 
 }

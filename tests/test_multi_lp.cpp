@@ -35,10 +35,12 @@ int main()
   
   cout << "- evaluating p at some (nontrivial) points:" << endl;
   Point<2> x(1, 1);
-  cout << "p(" << x << ")=" << p.value(x) << endl;
+  double px = p.value(x);
+  cout << "p(" << x << ")=" << px << endl;
+
   Point<2> y(2, -3);
-  cout << "p(" << y << ")=" << p.value(y) << endl;
-//   cout << p.value(Point<2>(2, -3)) << endl; // gcc 2.95 does not like this
+  double py = p.value(y);
+  cout << "p(" << y << ")=" << py << endl;
 
   cout << "- algebraic functionality:" << endl;
   q += p;

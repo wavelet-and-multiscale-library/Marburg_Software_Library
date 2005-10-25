@@ -140,5 +140,4 @@ int main()
   psistream2.close();
   cout << "  ...done, see file cube_wavelet2.m!" << endl;
 #endif
-
 }

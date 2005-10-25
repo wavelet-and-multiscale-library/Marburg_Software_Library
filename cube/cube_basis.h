@@ -70,7 +70,7 @@ namespace WaveletTL
     typedef CubeIndex<IBASIS,DIM,CubeBasis<IBASIS,DIM> > Index;
 
     //! read access to the bases
-    const FixedArray1D<IBASIS*,DIM> bases() const { return bases_; }
+    const FixedArray1D<IBASIS*,DIM>& bases() const { return bases_; }
 
     /*!
       geometric type of the support sets

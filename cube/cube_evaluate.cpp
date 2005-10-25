@@ -1,5 +1,8 @@
 // implementation for cube_evaluate.h
 
+#include <utils/array1d.h>
+#include <utils/fixed_array1d.h>
+
 namespace WaveletTL
 {
   template <class IBASIS, unsigned int DIM>
@@ -8,12 +11,17 @@ namespace WaveletTL
 			       const bool primal,
 			       const int resolution)
   {
-    Grid<DIM> grid(Point<DIM>(0), Point<DIM>(1), 1<<resolution);
-//     Grid<1> grid(0, 1, 1<<resolution);
-//     Array1D<double> values((1<<resolution)+1);
-
-  
-    return SampledMapping<DIM>(); // dummy return for the compiler
+    FixedArray1D<Array1D<double>,DIM> values; // point values of the factors within psi_lambda
+    for (unsigned int i = 0; i < DIM; i++)
+      values[i] = evaluate(*(basis.bases()[i]),
+			   typename IBASIS::Index(lambda.j(),
+						  lambda.e()[i],
+						  lambda.k()[i],
+						  basis.bases()[i]),
+			   primal,
+			   resolution).values();
+    
+    return SampledMapping<DIM>(Point<DIM>(0), Point<DIM>(1), values);
   }
 
 }

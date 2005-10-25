@@ -112,7 +112,7 @@ namespace WaveletTL
       
       for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()), itend(gcoeffs.end());
  	   it != itend; ++it) {
- 	SampledMapping<1> help(evaluate(basis, it.index(), primal, resolution));
+ 	SampledMapping<1> help(evaluate(basis, it.index(), primal, resolution)); // TODO: implement algebraic stuff for SampledMapping...
  	for (unsigned int i(0); i < values.size(); i++)
  	  values[i] += *it * help.values()[i];
       }

@@ -5,7 +5,7 @@
 # | Thorsten Raasch                                                |
 # +----------------------------------------------------------------+
 
-CXX = g++-2.95
+CXX = g++
 #CXXFLAGS += -I$(MATHTL_DIR) -Wall -pipe
 CXXFLAGS += -O2 -I$(MATHTL_DIR) -Wall -pipe
 

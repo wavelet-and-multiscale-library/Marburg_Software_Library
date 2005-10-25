@@ -12,10 +12,11 @@ using MathTL::Grid;
 namespace WaveletTL
 {
   template <class IBASIS, unsigned int DIM>
-  SampledMapping<DIM> evaluate(const CubeBasis<IBASIS,DIM>& basis,
-			       const typename CubeBasis<IBASIS,DIM>::Index& lambda,
-			       const bool primal,
-			       const int resolution)
+  SampledMapping<DIM>
+  evaluate(const CubeBasis<IBASIS,DIM>& basis,
+	   const typename CubeBasis<IBASIS,DIM>::Index& lambda,
+	   const bool primal,
+	   const int resolution)
   {
     FixedArray1D<Array1D<double>,DIM> values; // point values of the factors within psi_lambda
     for (unsigned int i = 0; i < DIM; i++)
@@ -26,15 +27,17 @@ namespace WaveletTL
 						  basis.bases()[i]),
 			   primal,
 			   resolution).values();
-    
-    return SampledMapping<DIM>(Point<DIM>(0), Point<DIM>(1), values);
+   
+    SampledMapping<DIM> result(Point<DIM>(0), Point<DIM>(1), values);
+    return result; // gcc 2.95 does not like these two lines melted into one
   }
-
+  
   template <class IBASIS, unsigned int DIM>
-  SampledMapping<DIM> evaluate(const CubeBasis<IBASIS,DIM>& basis,
-			       const InfiniteVector<double, typename CubeBasis<IBASIS,DIM>::Index>& coeffs,
-			       const bool primal,
-			       const int resolution)
+  SampledMapping<DIM>
+  evaluate(const CubeBasis<IBASIS,DIM>& basis,
+	   const InfiniteVector<double, typename CubeBasis<IBASIS,DIM>::Index>& coeffs,
+	   const bool primal,
+	   const int resolution)
   {
     Grid<DIM> grid(Point<DIM>(0), Point<DIM>(1), 1<<resolution);
     SampledMapping<DIM> result(grid); // zero

@@ -91,6 +91,7 @@ namespace MathTL
 
     /*!
       set point to a real number, this is only allowed for DIM==1
+      (also for implicit conversion)
     */
     Point<DIM, VALUE>& operator = (const VALUE x);
 

@@ -75,7 +75,7 @@ namespace MathTL
     Point(const Tensor<1, DIM, VALUE>&);
 
     /*!
-      constructor from a real number, this is only allowed for DIM==1
+      constructor from a single real number, sets all coordinates to this number
     */
     explicit Point(const VALUE x);
 
@@ -90,7 +90,7 @@ namespace MathTL
     Point(const VALUE x, const VALUE y, const VALUE z);
 
     /*!
-      set point to a real number, this is only allowed for DIM==1
+      set all coordinates to a real number
       (also for implicit conversion)
     */
     Point<DIM, VALUE>& operator = (const VALUE x);

@@ -22,8 +22,8 @@ namespace MathTL
   inline
   Point<DIM, VALUE>::Point(const VALUE x)
   {
-    assert(DIM == 1);
-    this->values[0] = x;
+    for (unsigned int i = 0; i < DIM; i++)
+      values[i] = x;
   }
 
   template <unsigned int DIM, class VALUE>
@@ -48,8 +48,8 @@ namespace MathTL
   template <unsigned int DIM, class VALUE>
   Point<DIM, VALUE>& Point<DIM, VALUE>::operator = (const VALUE x)
   {
-    assert(DIM == 1);
-    this->values[0] = x;
+    for (unsigned int i = 0; i < DIM; i++)
+      values[i] = x;
     return *this;
   }
 

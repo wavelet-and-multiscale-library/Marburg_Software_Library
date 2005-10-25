@@ -91,16 +91,14 @@ namespace WaveletTL
 	   const bool primal,
 	   const int resolution)
   {
-    Grid<1> grid(0, 1, 1<<resolution);
-    Array1D<double> values((1<<resolution)+1);
-    for (unsigned int i(0); i < values.size(); i++) values[i] = 0;
-    
+    SampledMapping<1> result(Grid<1>(0, 1, 1<<resolution)); // zero
+        
     if (coeffs.size() > 0) {
       // determine maximal level
       int jmax(0);
       typedef typename DSBasis<d,dT>::Index Index;
-      for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()), itend(coeffs.end());
- 	   it != itend; ++it)
+      for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
+	     itend(coeffs.end()); it != itend; ++it)
  	jmax = std::max(it.index().j()+it.index().e(), jmax);
       
       // switch to generator representation
@@ -110,15 +108,12 @@ namespace WaveletTL
       else
  	basis.reconstruct_t(coeffs,jmax,gcoeffs);
       
-      for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()), itend(gcoeffs.end());
- 	   it != itend; ++it) {
- 	SampledMapping<1> help(evaluate(basis, it.index(), primal, resolution)); // TODO: implement algebraic stuff for SampledMapping...
- 	for (unsigned int i(0); i < values.size(); i++)
- 	  values[i] += *it * help.values()[i];
-      }
+      for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
+	     itend(gcoeffs.end()); it != itend; ++it)
+	result.add(*it, evaluate(basis, it.index(), primal, resolution));
     }
     
-    return SampledMapping<1>(grid, values);
+    return result;
   }
 
   template <int d, int dT>

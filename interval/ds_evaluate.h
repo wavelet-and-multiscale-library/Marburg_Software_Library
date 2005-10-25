@@ -15,6 +15,7 @@
 #include <interval/ds_basis.h>
 
 using MathTL::SampledMapping;
+using MathTL::InfiniteVector;
 
 namespace WaveletTL
 {

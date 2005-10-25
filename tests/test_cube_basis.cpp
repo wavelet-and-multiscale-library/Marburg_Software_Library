@@ -131,15 +131,14 @@ int main()
   std::ofstream psistream("cube_wavelet.m");
   evaluate<Basis1D,2>(basis, lambda, true, 6).matlab_output(psistream);
   psistream.close();
-  cout << "  ...done, see file psistream.m!" << endl;
+  cout << "  ...done, see file cube_wavelet.m!" << endl;
   
-//   cout << "- evaluating some primal wavelets:" << endl;
-//   lambda = first_wavelet(&basis, basis.j0());
-//   for (;; ++lambda) {
-//     cout << lambda << endl;
-//     evaluate(basis, lambda, true, 6).matlab_output(cout);
-//     if (lambda == last_wavelet(&basis, basis.j0())) break;
-//   }
+  cout << "- evaluating a primal wavelet:" << endl;
+  lambda = ++first_wavelet<Basis1D,2,Basis>(&basis, basis.j0());
+  std::ofstream psistream2("cube_wavelet2.m");
+  evaluate<Basis1D,2>(basis, lambda, true, 6).matlab_output(psistream2);
+  psistream2.close();
+  cout << "  ...done, see file cube_wavelet2.m!" << endl;
 #endif
 
 }

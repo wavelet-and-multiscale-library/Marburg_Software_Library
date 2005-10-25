@@ -15,6 +15,7 @@
 #include <cube/cube_basis.h>
 
 using MathTL::SampledMapping;
+using MathTL::InfiniteVector;
 
 namespace WaveletTL
 {
@@ -22,11 +23,21 @@ namespace WaveletTL
 
   /*!
     Evaluate a single primal/dual generator or wavelet \psi_\lambda
-    on a dyadic subgrid of [0,1]^2.
+    on a dyadic subgrid of [0,1]^d.
   */
   template <class IBASIS, unsigned int DIM>
   SampledMapping<DIM> evaluate(const CubeBasis<IBASIS,DIM>& basis,
 			       const typename CubeBasis<IBASIS,DIM>::Index& lambda,
+			       const bool primal,
+			       const int resolution);
+
+  /*!
+    Evaluate an arbitrary linear combination of primal/dual wavelets
+    on a dyadic subgrid of [0,1]^d.
+  */
+  template <class IBASIS, unsigned int DIM>
+  SampledMapping<DIM> evaluate(const CubeBasis<IBASIS,DIM>& basis,
+			       const InfiniteVector<double, typename CubeBasis<IBASIS,DIM>::Index>& coeffs,
 			       const bool primal,
 			       const int resolution);
 }

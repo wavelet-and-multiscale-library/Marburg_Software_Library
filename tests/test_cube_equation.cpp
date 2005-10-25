@@ -1,10 +1,12 @@
 #include <iostream>
+#include <fstream>
 
 #include <algebra/vector.h>
 #include <algebra/infinite_vector.h>
 #include <utils/function.h>
 #include <utils/fixed_array1d.h>
 #include <numerics/bvp.h>
+#include <geometry/sampled_mapping.h>
 
 #include <interval/ds_basis.h>
 #include <cube/cube_basis.h>
@@ -46,15 +48,19 @@ int main()
        << coeffs << endl;
 #endif
   
-  eq.RHS(1e-2, coeffs);
+  eq.RHS(1e-4, coeffs);
 
-#if 1
-  cout << "- approximate coefficient set of the right-hand side:" << endl
-       << coeffs << endl;
+#if 0
+//   cout << "- approximate coefficient set of the right-hand side:" << endl
+//        << coeffs << endl;
   cout << "- check expansion of the right-hand side in the dual basis:" << endl;
   eq.rescale(coeffs, 1);
-//   evaluate<Basis1D,2>(eq.basis(), coeffs, false, 8).matlab_output(cout);
-//   eq.rescale(coeffs, -1);
+  SampledMapping<2> S(evaluate<Basis1D,2>(eq.basis(), coeffs, false, 6));
+  std::ofstream rhs_stream("constant_rhs.m");
+  S.matlab_output(rhs_stream);
+  rhs_stream.close();
+  cout << "  ...done, see file 'constant_rhs.m'" << endl;
+  eq.rescale(coeffs, -1);
 #endif  
 
   return 0;

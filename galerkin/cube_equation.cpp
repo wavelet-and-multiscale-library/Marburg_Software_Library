@@ -86,7 +86,7 @@ namespace WaveletTL
 	  gauss_points[i][(patch-supp.a[i])*N_Gauss+n]
 	    = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
 	  gauss_weights[i][(patch-supp.a[i])*N_Gauss+n]
-	    = GaussWeights[N_Gauss-1][n];
+	    = h*GaussWeights[N_Gauss-1][n];
 	}
     }
 //     cout << "f(), Gauss points and weights set up:" << endl;

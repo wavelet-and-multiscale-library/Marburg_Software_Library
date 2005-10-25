@@ -2,6 +2,12 @@
 
 #include <utils/array1d.h>
 #include <utils/fixed_array1d.h>
+#include <geometry/point.h>
+#include <geometry/grid.h>
+#include <geometry/sampled_mapping.h>
+
+using MathTL::Point;
+using MathTL::Grid;
 
 namespace WaveletTL
 {
@@ -24,4 +30,20 @@ namespace WaveletTL
     return SampledMapping<DIM>(Point<DIM>(0), Point<DIM>(1), values);
   }
 
+  template <class IBASIS, unsigned int DIM>
+  SampledMapping<DIM> evaluate(const CubeBasis<IBASIS,DIM>& basis,
+			       const InfiniteVector<double, typename CubeBasis<IBASIS,DIM>::Index>& coeffs,
+			       const bool primal,
+			       const int resolution)
+  {
+    Grid<DIM> grid(Point<DIM>(0), Point<DIM>(1), 1<<resolution);
+    SampledMapping<DIM> result(grid); // zero
+    
+    typedef typename CubeBasis<IBASIS,DIM>::Index Index;
+    for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
+	   itend(coeffs.end()); it != itend; ++it)
+      result.add(*it, evaluate(basis, it.index(), primal, resolution));
+
+    return result;
+  }
 }

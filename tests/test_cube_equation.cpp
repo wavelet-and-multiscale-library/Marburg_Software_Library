@@ -112,8 +112,8 @@ int main()
   // choose another rhs
   myRHS rhs;
   poisson.set_f(&rhs);
-  CubeEquation<Basis1D,2,CBasis> eq_test(&poisson, bc); // TODO: implement something like CubeEquation::set_rhs()
-  eq_test.RHS(1e-4, coeffs);
+  eq.set_bvp(&poisson);
+  eq.RHS(1e-4, coeffs);
   
 #if 1
   cout << "- set up (preconditioned) stiffness matrix..." << endl;
@@ -121,7 +121,7 @@ int main()
   double time;
   tstart = clock();
   SparseMatrix<double> A;
-  setup_stiffness_matrix(eq_test, Lambda, A);
+  setup_stiffness_matrix(eq, Lambda, A);
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
@@ -130,7 +130,7 @@ int main()
   cout << "- set up right-hand side..." << endl;
   tstart = clock();
   Vector<double> b;
-  setup_righthand_side(eq_test, Lambda, b);
+  setup_righthand_side(eq, Lambda, b);
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
@@ -152,8 +152,8 @@ int main()
   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
     u.set_coefficient(*it, x[i]);
   
-  eq_test.rescale(u, -1);
-  SampledMapping<2> s(evaluate(eq_test.basis(), u, true, 6));
+  eq.rescale(u, -1);
+  SampledMapping<2> s(evaluate(eq.basis(), u, true, 6));
 //   std::ofstream u_Lambda_stream("u_lambda.m");
 //   s.matlab_output(u_Lambda_stream);
 //   u_Lambda_stream.close();

@@ -7,9 +7,16 @@ namespace WaveletTL
 						   const FixedArray1D<bool,2*DIM>& bc)
     : bvp_(bvp), basis_(bc)
   {
+    compute_rhs();
+  }
+
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  void
+  CubeEquation<IBASIS,DIM,CUBEBASIS>::compute_rhs()
+  {
+    cout << "CubeEquation(): precompute right-hand side..." << endl;
+
     typedef typename WaveletBasis::Index Index;
-    
-    cout << "CubeEquation() setup ..." << endl;
 
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
@@ -17,7 +24,6 @@ namespace WaveletTL
     const int jmax = 6; // for a first quick hack
     for (Index lambda(first_generator<IBASIS,DIM,CUBEBASIS>(&basis_, j0));; ++lambda)
       {
-// 	cout << "CubeEquation() setup, integration of psi_lambda, lambda=" << lambda << endl;
 	const double coeff = f(lambda)/D(lambda);
 	if (fabs(coeff)>1e-15)
 	  fhelp.set_coefficient(lambda, coeff);
@@ -26,9 +32,10 @@ namespace WaveletTL
       }
     fnorm_sqr = l2_norm_sqr(fhelp);
 
-    cout << "CubeEquation() setup, all integrals for right-hand side computed" << endl;
+    cout << "... done, all integrals for right-hand side computed" << endl;
 
     // sort the coefficients into fcoeffs
+    fcoeffs.resize(0); // clear eventual old values
     fcoeffs.resize(fhelp.size());
     unsigned int id(0);
     for (typename InfiniteVector<double,Index>::const_iterator it(fhelp.begin()), itend(fhelp.end());
@@ -270,4 +277,13 @@ namespace WaveletTL
       ++it;
     } while (it != fcoeffs.end() && coarsenorm < bound);
   }
+
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  void
+  CubeEquation<IBASIS,DIM,CUBEBASIS>::set_bvp(const EllipticBVP<DIM>* bvp)
+  {
+    bvp_ = bvp;
+    compute_rhs();
+  }
+
 }

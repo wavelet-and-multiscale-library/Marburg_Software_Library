@@ -159,12 +159,20 @@ namespace WaveletTL
     */
     double F_norm() const { return sqrt(fnorm_sqr); }
 
+    /*!
+      set the boundary value problem
+    */
+    void set_bvp(const EllipticBVP<DIM>*);
+
   protected:
     const EllipticBVP<DIM>* bvp_;
     CUBEBASIS basis_;
 
     // right-hand side coefficients on a fine level, sorted by modulus
     Array1D<std::pair<typename WaveletBasis::Index,double> > fcoeffs;
+
+    // precompute the right-hand side
+    void compute_rhs();
 
     // (squared) \ell_2 norm of the precomputed right-hand side
     double fnorm_sqr;

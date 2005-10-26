@@ -17,6 +17,14 @@ namespace MathTL
   }
 
   template <unsigned int DIM>
+  void
+  EllipticBVP<DIM>::set_f(const Function<DIM>* f)
+  {
+    f_ = f;
+  }
+
+
+  template <unsigned int DIM>
   PoissonBVP<DIM>::PoissonBVP(const Function<DIM>* f)
     : EllipticBVP<DIM>(f, f, f)
   {

@@ -107,6 +107,11 @@ namespace MathTL
     {
       return f_->value(x);
     }
+
+    /*!
+      set the right-hand side to another function
+    */
+    void set_f(const Function<DIM>* f);
     
   protected:
     //! diffusion coefficient

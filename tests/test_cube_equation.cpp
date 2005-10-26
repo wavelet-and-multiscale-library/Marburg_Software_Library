@@ -85,7 +85,7 @@ int main()
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
-//   cout << "- (preconditioned) stiffness matrix A=" << endl << A << endl;
+  cout << "- (preconditioned) stiffness matrix A=" << endl << A << endl;
 
 //   cout << "- set up right-hand side..." << endl;
 //   tstart = clock();

@@ -15,6 +15,27 @@ namespace FrameTL
   }
 
   template <class IBASIS, unsigned int DIM>
+  double 
+  EllipticEquation<IBASIS,DIM>::D(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda) const
+  {
+    return ldexp(1.0,lambda.j());
+  }
+
+  template <class IBASIS, unsigned int DIM>
+  void
+  EllipticEquation<IBASIS,DIM>::rescale(InfiniteVector<double,
+					typename AggregatedFrame<IBASIS,DIM>::Index>& coeffs,
+					const int n) const
+  {
+    for (typename InfiniteVector<double,typename AggregatedFrame<IBASIS,DIM>::Index>::const_iterator it(coeffs.begin());
+	 it != coeffs.end(); ++it)
+      {
+	// TODO: implement an InfiniteVector::iterator to speed up this hack!
+	coeffs.set_coefficient(it.index(), *it * pow(D(it.index()), n));
+      }
+  }
+
+  template <class IBASIS, unsigned int DIM>
   double
   EllipticEquation<IBASIS,DIM>::a_same_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
 					       const typename AggregatedFrame<IBASIS,DIM>::Index& mu,
@@ -38,14 +59,14 @@ namespace FrameTL
 					       mu.e(),
 					       mu.k(),frame_->bases()[p]);
 
-    bool b = WaveletTL::intersect_supports_<IBASIS,DIM,CUBEBASIS>
+    bool b = WaveletTL::intersect_supports<IBASIS,DIM,CUBEBASIS>
       (
        *(frame_->bases()[p]), lambda_c, mu_c, supp_intersect
        );
     
-//     cout << "b =  " << b << endl;
-//     for (unsigned int i = 0; i< DIM; i++)
-//       cout << supp_intersect.j << " " << supp_intersect.a[i] << " " << supp_intersect.b[i] << endl;
+    //    cout << "b =  " << b << endl;
+//      for (unsigned int i = 0; i< DIM; i++)
+//        cout << supp_intersect.j << " " << supp_intersect.a[i] << " " << supp_intersect.b[i] << endl;
     
     if (! b)
       return 0.0;
@@ -53,7 +74,7 @@ namespace FrameTL
     const int N_Gauss = q_order;
     //cout << "N_Gauss = " << N_Gauss << endl;
     const double h = ldexp(1.0, -supp_intersect.j); // granularity for the quadrature
-    cout << "h=" << h << endl;
+    //cout << "h=" << h << endl;
     FixedArray1D<Array1D<double>,DIM> gauss_points, gauss_weights,
       wav_values_lambda, wav_der_values_lambda, wav_values_mu, wav_der_values_mu;
 
@@ -98,7 +119,8 @@ namespace FrameTL
 						 mu.e()[i],
 						 mu.k()[i],
 						 frame_->bases()[p]->bases()[i]),
-			  gauss_points[i], wav_der_values_mu[i]);   
+			  gauss_points[i], wav_der_values_mu[i]);
+      //cout << wav_der_values_mu[i] << endl;
     }
 
     int index[DIM]; // current multiindex for the point values
@@ -110,9 +132,14 @@ namespace FrameTL
 
     //loop over all quadrature knots
     while (true) {
+//       for (int i = 0; i< DIM; i++)
+// 	cout << index[i] << endl;
+//       cout << "------" << endl;
       for (unsigned int i = 0; i < DIM; i++)
 	x[i] = gauss_points[i][index[i]];
 
+//       cout << x << endl;
+//       cout << "---------" << endl;
       frame_->atlas()->charts()[p]->map_point(x,x_patch);
       double sq_gram = frame_->atlas()->charts()[p]->Gram_factor(x);
 
@@ -137,6 +164,9 @@ namespace FrameTL
 	t2 *= wav_der_values_lambda[s][index[s]];
 	t3 *= wav_der_values_mu[s][index[s]];
 
+// 	cout << "t1 = " << t1 << " t2 = " << t2 << " t3 = " << t3
+// 	     << " t4 = " << t4 << " t5 = " << t5 << endl;
+
 	//cout << "Dg= " << frame_->atlas()->charts()[p]->Gram_D_factor(s,x) << endl;
 	//cout << "sq_g= " << sq_gram << endl;
 	//cout << "a= " << ell_bvp_->a(x_patch) << endl;
@@ -144,21 +174,26 @@ namespace FrameTL
 
 	//for first part of the integral: \int_\Omega <a \Nabla u,\Nabla v> dx
 	values1[s] = ell_bvp_->a(x_patch) *
-	  (t2*sq_gram - t4*frame_->atlas()->charts()[p]->Gram_D_factor(s,x)) / (sq_gram*sq_gram);
+	  (t2*sq_gram - (t4*frame_->atlas()->charts()[p]->Gram_D_factor(s,x))) / (sq_gram*sq_gram);
 	values2[s] =
-	  (t3*sq_gram - t5*frame_->atlas()->charts()[p]->Gram_D_factor(s,x)) / (sq_gram*sq_gram);
+	  (t3*sq_gram - (t5*frame_->atlas()->charts()[p]->Gram_D_factor(s,x))) / (sq_gram*sq_gram);
 
       }//end for s
 
       Vector<double> tmp_values1(DIM);
       Vector<double> tmp_values2(DIM);
+
+//       cout << "a = " << values1 << endl;
+//       cout << "a = " << values2 << endl;
       
+
       for (unsigned int i1 = 0; i1 < DIM; i1++)
 	for (unsigned int i2 = 0; i2 < DIM; i2++) {
 	  //cout << frame_->atlas()->charts()[p]->Dkappa_inv(i2, i1, x) << endl;
 	  tmp_values1[i1] += values1[i2]*frame_->atlas()->charts()[p]->Dkappa_inv(i2, i1, x);
 	  tmp_values2[i1] += values2[i2]*frame_->atlas()->charts()[p]->Dkappa_inv(i2, i1, x);
 	}
+      //cout << tmp_values1 << endl;
       //cout << "#########" << endl;
       //compute innerproduct
       double t = (tmp_values1 * tmp_values2) * (sq_gram*sq_gram) ;
@@ -167,7 +202,7 @@ namespace FrameTL
       t += ell_bvp_->q(x_patch) * t4 * t5;
       
       t *= t1;
-      //cout << "t1 " << t1 << endl;
+      //cout << "t " << t << endl;
       
       r += t;
 

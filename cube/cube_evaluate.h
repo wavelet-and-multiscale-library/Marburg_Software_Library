@@ -20,7 +20,7 @@ using MathTL::InfiniteVector;
 namespace WaveletTL
 {
   template <class IBASIS, unsigned int DIM> class CubeBasis;
-
+    
   /*!
     Evaluate a single primal/dual generator or wavelet \psi_\lambda
     on a dyadic subgrid of [0,1]^d.
@@ -30,7 +30,7 @@ namespace WaveletTL
 			       const typename CubeBasis<IBASIS,DIM>::Index& lambda,
 			       const bool primal,
 			       const int resolution);
-
+    
   /*!
     Evaluate an arbitrary linear combination of primal/dual wavelets
     on a dyadic subgrid of [0,1]^d.

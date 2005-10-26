@@ -21,7 +21,7 @@ namespace WaveletTL
     Compute an interval 2^{-j}[k1,k2] which contains the support of a
     single primal DS generator or wavelet \psi_\lambda.
     (j == lambda.j()+lambda.e() is neglected for performance reasons)
-   */
+  */
   template <int d, int dT>
   void support(const DSBasis<d,dT>& basis,
 	       const typename DSBasis<d,dT>::Index& lambda,
@@ -50,7 +50,7 @@ namespace WaveletTL
 			  const typename DSBasis<d,dT>::Index& lambda,
 			  const typename DSBasis<d,dT>::Index& nu,
 			  typename DSBasis<d,dT>::Support& supp);
-
+  
   /*!
     For a given wavelet \psi_\lambda, compute all generators/wavelets
     \psi_\nu with level |\nu|=j, such that the respective supports

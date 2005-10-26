@@ -21,12 +21,12 @@ namespace WaveletTL
     InfiniteVector<double,Index> fhelp;
     const int j0   = basis().j0();
     const int jmax = 15;
-    for (Index lambda(first_generator(&basis_, j0));; ++lambda)
+    for (Index lambda(basis_.first_generator(j0));; ++lambda)
       {
 	const double coeff = f(lambda)/D(lambda);
 	if (fabs(coeff)>1e-15)
 	  fhelp.set_coefficient(lambda, coeff);
-  	if (lambda == last_wavelet(&basis_, jmax))
+  	if (lambda == basis_.last_wavelet(jmax))
 	  break;
       }
     fnorm_sqr = l2_norm_sqr(fhelp);

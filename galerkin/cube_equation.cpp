@@ -22,12 +22,12 @@ namespace WaveletTL
     InfiniteVector<double,Index> fhelp;
     const int j0   = basis().j0();
     const int jmax = 6; // for a first quick hack
-    for (Index lambda(first_generator<IBASIS,DIM,CUBEBASIS>(&basis_, j0));; ++lambda)
+    for (Index lambda(basis_.first_generator(j0));; ++lambda)
       {
 	const double coeff = f(lambda)/D(lambda);
 	if (fabs(coeff)>1e-15)
 	  fhelp.set_coefficient(lambda, coeff);
-  	if (lambda == last_wavelet<IBASIS,DIM,CUBEBASIS>(&basis_, jmax))
+  	if (lambda == basis_.last_wavelet(jmax))
 	  break;
       }
     fnorm_sqr = l2_norm_sqr(fhelp);
@@ -81,7 +81,7 @@ namespace WaveletTL
     typedef typename CUBEBASIS::Support Support;
     Support supp;
     
-    if (intersect_supports<IBASIS,DIM,CUBEBASIS>(basis_, lambda, mu, supp))
+    if (intersect_supports(basis_, lambda, mu, supp))
       {
 	// setup Gauss points and weights for a composite quadrature formula:
 	const int N_Gauss = (p+1)/2;
@@ -202,7 +202,7 @@ namespace WaveletTL
 
     // first compute supp(psi_lambda)
     typename CUBEBASIS::Support supp;
-    support<IBASIS,DIM,CUBEBASIS>(basis_, lambda, supp);
+    support(basis_, lambda, supp);
 
     // setup Gauss points and weights for a composite quadrature formula:
     const int N_Gauss = 5;
@@ -292,7 +292,7 @@ namespace WaveletTL
   {
     // notation from [St04a]
     const int t = operator_order();
-    const int n = space_dimension();
+    const int n = DIM;
     const int dT = WaveletBasis::primal_vanishing_moments();
     const double gamma = WaveletBasis::primal_regularity();
     
@@ -309,10 +309,10 @@ namespace WaveletTL
       typedef typename WaveletBasis::Index Index;
       std::set<Index> Lambda;
       const int j0 = basis().j0();
-      const int jmax = 8;
-      for (Index lambda = first_generator(&basis(), j0);; ++lambda) {
+      const int jmax = j0+1;
+      for (Index lambda = basis().first_generator(j0);; ++lambda) {
 	Lambda.insert(lambda);
-	if (lambda == last_wavelet(&basis(), jmax)) break;
+	if (lambda == basis().last_wavelet(jmax)) break;
       }
       SparseMatrix<double> A_Lambda;
       setup_stiffness_matrix(*this, Lambda, A_Lambda);
@@ -334,10 +334,10 @@ namespace WaveletTL
       typedef typename WaveletBasis::Index Index;
       std::set<Index> Lambda;
       const int j0 = basis().j0();
-      const int jmax = 8;
-      for (Index lambda = first_generator(&basis(), j0);; ++lambda) {
+      const int jmax = j0+1;
+      for (Index lambda = basis().first_generator(j0);; ++lambda) {
 	Lambda.insert(lambda);
-	if (lambda == last_wavelet(&basis(), jmax)) break;
+	if (lambda == basis().last_wavelet(jmax)) break;
       }
       SparseMatrix<double> A_Lambda;
       setup_stiffness_matrix(*this, Lambda, A_Lambda);

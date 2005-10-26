@@ -30,7 +30,7 @@ namespace WaveletTL
       constructor with given interval basis
       (also serves as a default constructor, but yields an invalid index then
       because the underlying interval basis must be specified to work correctly)
-     */
+    */
     IntervalIndex(const IBASIS* basis = 0);
 
     //! copy constructor

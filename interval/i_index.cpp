@@ -26,7 +26,7 @@ namespace WaveletTL
 
   template <class IBASIS>
   IntervalIndex<IBASIS>::IntervalIndex(const int j, const int e, const int k,
-			 const IBASIS* basis)
+				       const IBASIS* basis)
   {
     j_ = j;
     e_ = e;

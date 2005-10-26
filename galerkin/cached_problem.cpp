@@ -8,7 +8,7 @@ namespace WaveletTL
 {
   template <class PROBLEM>
   CachedProblem<PROBLEM>::CachedProblem(const PROBLEM& P)
-    : PROBLEM(P)
+    : PROBLEM(P), normA(0), normAinv(0)
   {
   }
 
@@ -55,16 +55,16 @@ namespace WaveletTL
   double
   CachedProblem<PROBLEM>::norm_A() const
   {
-    static double normA = 0.0;
-    
     if (normA == 0.0) {
+      cout << "CachedProblem()::norm_A() called..." << endl;
+
       typedef typename WaveletBasis::Index Index;
       std::set<Index> Lambda;
       const int j0 = PROBLEM::basis().j0();
-      const int jmax = 8;
-      for (Index lambda = first_generator(&PROBLEM::basis(), j0);; ++lambda) {
+      const int jmax = j0;
+      for (Index lambda = PROBLEM::basis().first_generator(j0);; ++lambda) {
 	Lambda.insert(lambda);
-	if (lambda == last_wavelet(&PROBLEM::basis(), jmax)) break;
+	if (lambda == PROBLEM::basis().last_wavelet(jmax)) break;
       }
       SparseMatrix<double> A_Lambda;
       setup_stiffness_matrix(*this, Lambda, A_Lambda);
@@ -73,6 +73,8 @@ namespace WaveletTL
       xk = 1;
       unsigned int iterations;
       normA = PowerIteration(A_Lambda, xk, 1e-6, 100, iterations);
+
+      cout << "... done!" << endl;
     }
 
     return normA;
@@ -82,16 +84,16 @@ namespace WaveletTL
   double
   CachedProblem<PROBLEM>::norm_Ainv() const
   {
-    static double normAinv = 0.0;
-    
     if (normAinv == 0.0) {
+      cout << "CachedProblem()::norm_Ainv() called..." << endl;
+
       typedef typename WaveletBasis::Index Index;
       std::set<Index> Lambda;
       const int j0 = PROBLEM::basis().j0();
-      const int jmax = 8;
-      for (Index lambda = first_generator(&PROBLEM::basis(), j0);; ++lambda) {
+      const int jmax = j0;
+      for (Index lambda = PROBLEM::basis().first_generator(j0);; ++lambda) {
 	Lambda.insert(lambda);
-	if (lambda == last_wavelet(&PROBLEM::basis(), jmax)) break;
+	if (lambda == PROBLEM::basis().last_wavelet(jmax)) break;
       }
       SparseMatrix<double> A_Lambda;
       setup_stiffness_matrix(*this, Lambda, A_Lambda);
@@ -100,6 +102,8 @@ namespace WaveletTL
       xk = 1;
       unsigned int iterations;
       normAinv = InversePowerIteration(A_Lambda, xk, 1e-6, 200, iterations);
+
+      cout << "... done!" << endl;
     }
 
     return normAinv;

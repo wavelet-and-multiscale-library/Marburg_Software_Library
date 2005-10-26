@@ -51,7 +51,7 @@ namespace WaveletTL
     which stem from a wavelet basis \Psi=\{\psi_\lambda\} of the corresponding
     function space over Omega.
     To achieve independence from the concrete choice of \Psi, the wavelet basis
-    class is given as a template parameter WBASIS and should provide a constructor of
+    class is given as a template parameter CUBEBASIS. It should have a constructor of
     the form
 
        CUBEBASIS::CUBEBASIS(const FixedArray1D<bool,2*DIM>& bc);
@@ -177,7 +177,7 @@ namespace WaveletTL
     double fnorm_sqr;
 
     // estimates for ||A|| and ||A^{-1}||
-    double normA, normAinv;
+    mutable double normA, normAinv;
   };
 }
 

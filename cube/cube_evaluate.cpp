@@ -26,11 +26,11 @@ namespace WaveletTL
 						  basis.bases()[i]),
 			   primal,
 			   resolution).values();
-   
+      
     SampledMapping<DIM> result(Point<DIM>(0), Point<DIM>(1), values);
     return result; // gcc 2.95 does not like these two lines melted into one
   }
-  
+    
   template <class IBASIS, unsigned int DIM>
   SampledMapping<DIM>
   evaluate(const CubeBasis<IBASIS,DIM>& basis,
@@ -40,12 +40,12 @@ namespace WaveletTL
   {
     Grid<DIM> grid(Point<DIM>(0), Point<DIM>(1), 1<<resolution);
     SampledMapping<DIM> result(grid); // zero
-    
+      
     typedef typename CubeBasis<IBASIS,DIM>::Index Index;
     for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
 	   itend(coeffs.end()); it != itend; ++it)
       result.add(*it, evaluate(basis, it.index(), primal, resolution));
-
+      
     return result;
   }
 }

@@ -69,6 +69,9 @@ namespace WaveletTL
       
       // entries cache for A (mutable to overcome the constness of add_column())
       mutable ColumnCache entries_cache;
+
+      // estimates for ||A|| and ||A^{-1}||
+      mutable double normA, normAinv;
     };
 }
 

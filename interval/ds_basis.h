@@ -47,12 +47,12 @@ namespace WaveletTL
 
     References:
     [B]   Barsch:
-          Adaptive Multiskalenverfahren fuer elliptische partielle Dgln. - Realisierung,
-	  Umsetzung und numerische Ergebnisse
+    Adaptive Multiskalenverfahren fuer elliptische partielle Dgln. - Realisierung,
+    Umsetzung und numerische Ergebnisse
     [DKU] Dahmen, Kunoth, Urban:
-          Biorthogonal spline-wavelets on the interval - Stability and moment conditions
+    Biorthogonal spline-wavelets on the interval - Stability and moment conditions
     [DS]  Dahmen, Schneider:
-          Wavelets with complementary boundary conditions - Function spaces on the cube
+    Wavelets with complementary boundary conditions - Function spaces on the cube
   */
   template <int d, int dT>
   class DSBasis
@@ -138,7 +138,7 @@ namespace WaveletTL
 
     /*!
       boundary indices in \Delta_j^X and \tilde\Delta_j^X (4.10),(4.14),(4.26)
-     */
+    */
     inline const int DeltaLmin() const { return ell_l()-d; }
     inline const int DeltaLmax() const { return ell_l()-1-s0; }
     inline const int Delta0min() const { return DeltaLmax()+1; }
@@ -162,14 +162,26 @@ namespace WaveletTL
     inline const int Nablamin() const { return 0; }
     inline const int Nablamax(const int j) const { return (1<<j)-1; }
 
+    //! index of first (leftmost) generator on level j >= j0
+    Index first_generator(const int j) const;
+
+    //! index of last (rightmost) generator on level j >= j0
+    Index last_generator(const int j) const;
+
+    //! index of first (leftmost) wavelet on level j >= j0
+    Index first_wavelet(const int j) const;
+
+    //! index of last (rightmost) wavelet on level j >= j0
+    Index last_wavelet(const int j) const;
+
     //! DECOMPOSE routine, simple version
     /*!
       Constructs for a given single wavelet index lambda a coefficient set c,
       such that
-        \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
+      \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
       where the multiscale decomposition starts with the coarsest
       generator level jmin.
-     */
+    */
     void decompose_1(const Index& lambda, const int jmin,
 		     InfiniteVector<double, Index>& c) const;
 
@@ -177,10 +189,10 @@ namespace WaveletTL
     /*!
       Constructs for a given single wavelet index lambda a coefficient set c,
       such that
-        \tilde\psi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
+      \tilde\psi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
       where the multiscale decomposition starts with the coarsest
       generator level jmin.
-     */
+    */
     void decompose_t_1(const Index& lambda, const int jmin,
 		       InfiniteVector<double, Index>& c) const;
 
@@ -188,7 +200,7 @@ namespace WaveletTL
     /*!
       constructs for a given coefficient set c another one v with level >= jmin,
       such that
-        \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
+      \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
     */
     void decompose(const InfiniteVector<double, Index>& c, const int jmin,
 		   InfiniteVector<double, Index>& v) const;
@@ -197,7 +209,7 @@ namespace WaveletTL
     /*!
       constructs for a given coefficient set c another one v with level >= jmin,
       such that
-        \sum_{\lambda}c_\lambda\tilde\psi_lambda = \sum_{\lambda'}d_{\lambda'}\tilde\psi_{\lambda'}
+      \sum_{\lambda}c_\lambda\tilde\psi_lambda = \sum_{\lambda'}d_{\lambda'}\tilde\psi_{\lambda'}
     */
     void decompose_t(const InfiniteVector<double, Index>& c, const int jmin,
 		     InfiniteVector<double, Index>& v) const;
@@ -206,9 +218,9 @@ namespace WaveletTL
     /*!
       Constructs for a given single wavelet index lambda a coefficient set c,
       such that
-        \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
+      \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
       where always |\lambda'|>=j
-     */
+    */
     void reconstruct_1(const Index& lambda, const int j,
 		       InfiniteVector<double, Index>& c) const;
 
@@ -216,7 +228,7 @@ namespace WaveletTL
     /*!
       Constructs for a given coefficient set c another one v,
       such that
-        \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
+      \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
       where always |\lambda'|>=j
     */
     void reconstruct(const InfiniteVector<double, Index>& c, const int j,
@@ -226,9 +238,9 @@ namespace WaveletTL
     /*!
       Constructs for a given single wavelet index lambda a coefficient set c,
       such that
-        \tilde\psi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
+      \tilde\psi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
       where always |\lambda'|>=j
-     */
+    */
     void reconstruct_t_1(const Index& lambda, const int j,
 			 InfiniteVector<double, Index>& c) const;
 
@@ -236,7 +248,7 @@ namespace WaveletTL
     /*!
       Constructs for a given coefficient set c another one v,
       such that
-        \sum_{\lambda}c_\lambda\tilde\psi_\lambda = \sum_{\lambda'}v_{\lambda'}\tilde\psi_{\lambda'}
+      \sum_{\lambda}c_\lambda\tilde\psi_\lambda = \sum_{\lambda'}v_{\lambda'}\tilde\psi_{\lambda'}
       where always |\lambda'|>=j
     */
     void reconstruct_t(const InfiniteVector<double, Index>& c, const int j,

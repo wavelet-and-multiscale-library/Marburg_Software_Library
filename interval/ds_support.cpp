@@ -15,7 +15,7 @@ namespace WaveletTL
 	const Matrix<double>& CLA = basis.get_CLA();
 	if (lambda.k() < basis.DeltaLmin()+(int)CLA.column_dimension())
 	  {
- 	    // left boundary generator
+	    // left boundary generator
 	    k1 = 0;
 	    k2 = CLA.row_dimension();
 	  }
@@ -134,15 +134,14 @@ namespace WaveletTL
     support(basis, lambda, k1_lambda, k2_lambda);
     
     // a brute force solution
+    Support supp;
     if (generators) {
-      Support supp;
       for (Index nu = first_generator(&basis, j);; ++nu) {
 	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
 	  intersecting.push_back(std::make_pair(nu, supp));
 	if (nu == last_generator(&basis, j)) break;
       }
     } else {
-      Support supp;
       for (Index nu = first_wavelet(&basis, j);; ++nu) {
 	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
 	  intersecting.push_back(std::make_pair(nu, supp));
@@ -168,15 +167,14 @@ namespace WaveletTL
     support(basis, lambda, k1_lambda, k2_lambda);
     
     // a brute force solution
+    Support supp;
     if (generators) {
-      Support supp;
       for (Index nu = first_generator(&basis, j);; ++nu) {
 	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
 	  intersecting.push_back(nu);
 	if (nu == last_generator(&basis, j)) break;
       }
     } else {
-      Support supp;
       for (Index nu = first_wavelet(&basis, j);; ++nu) {
 	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
 	  intersecting.push_back(nu);

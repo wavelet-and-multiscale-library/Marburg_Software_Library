@@ -16,7 +16,7 @@ namespace WaveletTL
     if (lambda.e() == 0) { // generator
       if (primal) {
 	const Matrix<double>& CLA = basis.get_CLA();
-  	if (lambda.k() < basis.DeltaLmin()+(int)CLA.column_dimension()) {
+	if (lambda.k() < basis.DeltaLmin()+(int)CLA.column_dimension()) {
 	  // left boundary generator
 	  InfiniteVector<double, RIndex> coeffs;
 	  for(unsigned int i(0); i < CLA.row_dimension(); i++) {
@@ -25,59 +25,59 @@ namespace WaveletTL
 	      coeffs.set_coefficient(RIndex(lambda.j(), 0, 1-ell2<d>()+i), v);
 	  }
 	  return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
- 	} else {
+	} else {
 	  const Matrix<double>& CRA = basis.get_CRA();
- 	  if (lambda.k() > basis.DeltaRmax(lambda.j())-(int)CRA.column_dimension()) {
- 	    // right boundary generator
- 	    InfiniteVector<double, RIndex> coeffs;
- 	    for (unsigned int i(0); i < CRA.row_dimension(); i++) {
- 	      double v(CRA(i, basis.DeltaRmax(lambda.j())-lambda.k()));
- 	      if (v != 0)
- 		coeffs.set_coefficient(RIndex(lambda.j(), 0, (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2<d>()+i)), v);
- 	    }
- 	    return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
- 	  } else {
- 	    // inner generator
- 	    return basis.get_CDF_basis().evaluate(0, RIndex(lambda.j(), 0, lambda.k()),
+	  if (lambda.k() > basis.DeltaRmax(lambda.j())-(int)CRA.column_dimension()) {
+	    // right boundary generator
+	    InfiniteVector<double, RIndex> coeffs;
+	    for (unsigned int i(0); i < CRA.row_dimension(); i++) {
+	      double v(CRA(i, basis.DeltaRmax(lambda.j())-lambda.k()));
+	      if (v != 0)
+		coeffs.set_coefficient(RIndex(lambda.j(), 0, (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2<d>()+i)), v);
+	    }
+	    return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
+	  } else {
+	    // inner generator
+	    return basis.get_CDF_basis().evaluate(0, RIndex(lambda.j(), 0, lambda.k()),
 						  primal, 0, 1, resolution);
- 	  }
- 	}
+	  }
+	}
       } else {
-  	// dual
+	// dual
 	const Matrix<double>& CLAT = basis.get_CLAT();
-  	if (lambda.k() < basis.DeltaLTmin()+(int)CLAT.column_dimension()) {
-  	  // left boundary generator
-  	  InfiniteVector<double, RIndex> coeffs;
-  	  for (unsigned int i(0); i < CLAT.row_dimension(); i++) {
-  	    double v(CLAT(i, lambda.k()-basis.DeltaLTmin()));
-  	    if (v != 0)
-  	      coeffs.set_coefficient(RIndex(lambda.j(), 0, 1-ell2T<d,dT>()+i), v);
-  	  }
-  	  return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
-  	} else {
+	if (lambda.k() < basis.DeltaLTmin()+(int)CLAT.column_dimension()) {
+	  // left boundary generator
+	  InfiniteVector<double, RIndex> coeffs;
+	  for (unsigned int i(0); i < CLAT.row_dimension(); i++) {
+	    double v(CLAT(i, lambda.k()-basis.DeltaLTmin()));
+	    if (v != 0)
+	      coeffs.set_coefficient(RIndex(lambda.j(), 0, 1-ell2T<d,dT>()+i), v);
+	  }
+	  return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
+	} else {
 	  const Matrix<double>& CRAT = basis.get_CRAT();
 	  if (lambda.k() > basis.DeltaRTmax(lambda.j())-(int)CRAT.column_dimension()) {
-  	    // right boundary generator
-  	    InfiniteVector<double, RIndex> coeffs;
-  	    for (unsigned int i(0); i < CRAT.row_dimension(); i++) {
-  	      double v(CRAT(i, basis.DeltaRTmax(lambda.j())-lambda.k()));
-  	      if (v != 0)
- 		coeffs.set_coefficient(RIndex(lambda.j(), 0, (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2T<d,dT>()+i)), v);
-  	    }
-  	    return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
-  	  } else {
-  	    // inner generator
-  	    return basis.get_CDF_basis().evaluate(0, RIndex(lambda.j(), 0, lambda.k()),
+	    // right boundary generator
+	    InfiniteVector<double, RIndex> coeffs;
+	    for (unsigned int i(0); i < CRAT.row_dimension(); i++) {
+	      double v(CRAT(i, basis.DeltaRTmax(lambda.j())-lambda.k()));
+	      if (v != 0)
+		coeffs.set_coefficient(RIndex(lambda.j(), 0, (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2T<d,dT>()+i)), v);
+	    }
+	    return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
+	  } else {
+	    // inner generator
+	    return basis.get_CDF_basis().evaluate(0, RIndex(lambda.j(), 0, lambda.k()),
 						  primal, 0, 1, resolution);
-  	  }
-  	}
+	  }
+	}
       }
     } else { // wavelet
       InfiniteVector<double, typename DSBasis<d,dT>::Index> gcoeffs;
       if (primal)
- 	basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
+	basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
       else
- 	basis.reconstruct_t_1(lambda, lambda.j()+1, gcoeffs);
+	basis.reconstruct_t_1(lambda, lambda.j()+1, gcoeffs);
       return evaluate(basis, gcoeffs, primal, resolution);
     }
     
@@ -99,14 +99,14 @@ namespace WaveletTL
       typedef typename DSBasis<d,dT>::Index Index;
       for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
 	     itend(coeffs.end()); it != itend; ++it)
- 	jmax = std::max(it.index().j()+it.index().e(), jmax);
+	jmax = std::max(it.index().j()+it.index().e(), jmax);
       
       // switch to generator representation
       InfiniteVector<double,Index> gcoeffs;
       if (primal)
- 	basis.reconstruct(coeffs,jmax,gcoeffs);
+	basis.reconstruct(coeffs,jmax,gcoeffs);
       else
- 	basis.reconstruct_t(coeffs,jmax,gcoeffs);
+	basis.reconstruct_t(coeffs,jmax,gcoeffs);
       
       for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
 	     itend(gcoeffs.end()); it != itend; ++it)
@@ -187,11 +187,11 @@ namespace WaveletTL
 	// left boundary generator
 	for (unsigned int i(0); i < CLA.row_dimension(); i++) {
 	  const double help(CLA(i, lambda.k()-basis.DeltaLmin()));
-// 	  if (help != 0)
-	    for (unsigned int m(0); m < points.size(); m++)
-	      values[m] += help * (derivative == 0
-				   ? EvaluateCardinalBSpline_td<d>  (lambda.j(), 1-ell2<d>()+i, points[m])
-				   : EvaluateCardinalBSpline_td_x<d>(lambda.j(), 1-ell2<d>()+i, points[m]));
+	  // 	  if (help != 0)
+	  for (unsigned int m(0); m < points.size(); m++)
+	    values[m] += help * (derivative == 0
+				 ? EvaluateCardinalBSpline_td<d>  (lambda.j(), 1-ell2<d>()+i, points[m])
+				 : EvaluateCardinalBSpline_td_x<d>(lambda.j(), 1-ell2<d>()+i, points[m]));
 	}
       }	else {
 	const Matrix<double>& CRA(basis.get_CRA());
@@ -199,11 +199,11 @@ namespace WaveletTL
 	  // right boundary generator
 	  for (unsigned int i(0); i < CRA.row_dimension(); i++) {
 	    const double help(CRA(i, basis.DeltaRmax(lambda.j())-lambda.k()));
-// 	    if (help != 0)
-	      for (unsigned int m(0); m < points.size(); m++)
-		values[m] += help * (derivative == 0
-				     ? EvaluateCardinalBSpline_td<d>  (lambda.j(), (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2<d>()+i), points[m])
-				     : EvaluateCardinalBSpline_td_x<d>(lambda.j(), (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2<d>()+i), points[m]));
+	    // 	    if (help != 0)
+	    for (unsigned int m(0); m < points.size(); m++)
+	      values[m] += help * (derivative == 0
+				   ? EvaluateCardinalBSpline_td<d>  (lambda.j(), (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2<d>()+i), points[m])
+				   : EvaluateCardinalBSpline_td_x<d>(lambda.j(), (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2<d>()+i), points[m]));
 	  }
 	} else {
 	  // inner generator
@@ -249,11 +249,11 @@ namespace WaveletTL
 	// left boundary generator
 	for (unsigned int i(0); i < CLA.row_dimension(); i++) {
 	  const double help(CLA(i, lambda.k()-basis.DeltaLmin()));
-// 	  if (help != 0)
-	    for (unsigned int m(0); m < npoints; m++) {
-	      funcvalues[m] += help * EvaluateCardinalBSpline_td<d>  (lambda.j(), 1-ell2<d>()+i, points[m]);
-	      dervalues[m]  += help * EvaluateCardinalBSpline_td_x<d>(lambda.j(), 1-ell2<d>()+i, points[m]);
-	    }
+	  // 	  if (help != 0)
+	  for (unsigned int m(0); m < npoints; m++) {
+	    funcvalues[m] += help * EvaluateCardinalBSpline_td<d>  (lambda.j(), 1-ell2<d>()+i, points[m]);
+	    dervalues[m]  += help * EvaluateCardinalBSpline_td_x<d>(lambda.j(), 1-ell2<d>()+i, points[m]);
+	  }
 	}
       }	else {
 	const Matrix<double>& CRA(basis.get_CRA());
@@ -261,11 +261,11 @@ namespace WaveletTL
 	  // right boundary generator
 	  for (unsigned int i(0); i < CRA.row_dimension(); i++) {
 	    const double help(CRA(i, basis.DeltaRmax(lambda.j())-lambda.k()));
-// 	    if (help != 0)
-	      for (unsigned int m(0); m < npoints; m++) {
-		funcvalues[m] += help * EvaluateCardinalBSpline_td<d>  (lambda.j(), (1<<lambda.j())-(d%2)-(1-ell2<d>()+i), points[m]);
-		dervalues[m]  += help * EvaluateCardinalBSpline_td_x<d>(lambda.j(), (1<<lambda.j())-(d%2)-(1-ell2<d>()+i), points[m]);
-	      }
+	    // 	    if (help != 0)
+	    for (unsigned int m(0); m < npoints; m++) {
+	      funcvalues[m] += help * EvaluateCardinalBSpline_td<d>  (lambda.j(), (1<<lambda.j())-(d%2)-(1-ell2<d>()+i), points[m]);
+	      dervalues[m]  += help * EvaluateCardinalBSpline_td_x<d>(lambda.j(), (1<<lambda.j())-(d%2)-(1-ell2<d>()+i), points[m]);
+	    }
 	  }
 	} else {
 	  // inner generator

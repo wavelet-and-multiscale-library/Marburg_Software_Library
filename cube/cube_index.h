@@ -20,10 +20,8 @@ using MathTL::MultiIndex;
 
 namespace WaveletTL
 {
-  // forward declaration for CubeBasis
-  template <class IBASIS, unsigned int DIM>
-  class CubeBasis;
-
+  template <class IBASIS, unsigned int DIM> class CubeBasis;
+  
   /*!
     An index class for tensor product wavelet bases over the d-dimensional
     unit cube [0,1]^d (or mapped versions thereof).
@@ -42,7 +40,7 @@ namespace WaveletTL
       constructor with a given cube basis
       (also serves as a default constructor, but yields an invalid index pair
       in this case, because the underlying bases must be specified to work correctly)
-     */
+    */
     CubeIndex(const CUBEBASIS* basis = 0);
 
     /*!
@@ -99,7 +97,7 @@ namespace WaveletTL
   //! stream output
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
   inline std::ostream& operator << (std::ostream& os,
- 				    const CubeIndex<IBASIS,DIM,CUBEBASIS>& lambda)
+				    const CubeIndex<IBASIS,DIM,CUBEBASIS>& lambda)
   {
     using namespace std;
     os << "("

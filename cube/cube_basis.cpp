@@ -15,7 +15,7 @@ namespace WaveletTL
       bases_[i] = b;
     j0_ = bases_[0]->j0();
   }
-
+  
   template <class IBASIS, unsigned int DIM>
   CubeBasis<IBASIS,DIM>::CubeBasis(const FixedArray1D<int,2*DIM>& s,
 				   const FixedArray1D<int,2*DIM>& sT) {
@@ -38,10 +38,10 @@ namespace WaveletTL
       }
       bases_[i] = b;
     }
-
+    
     j0_ = bases_[0]->j0();
   }
-
+  
   template <class IBASIS, unsigned int DIM>
   CubeBasis<IBASIS,DIM>::CubeBasis(const FixedArray1D<bool,2*DIM>& bc) {
     for (unsigned int i = 0; i < DIM; i++) {
@@ -71,6 +71,74 @@ namespace WaveletTL
     for (typename list<IBASIS*>::const_iterator it(bases_infact.begin());
 	 it != bases_infact.end(); ++it)
       delete *it;
+  }
+
+  template <class IBASIS, unsigned int DIM>
+  typename CubeBasis<IBASIS,DIM>::Index
+  CubeBasis<IBASIS,DIM>::first_generator(const int j) const
+  {
+    assert(j >= j0());
+
+    typename Index::type_type e;
+    typename Index::translation_type k;
+    for (unsigned int i = 0; i < DIM; i++) {
+      typename IBASIS::Index lambda(bases()[i]->first_generator(j));
+      k[i] = lambda.k();
+    }
+    
+    return Index(j, e, k, this);
+  }
+
+  template <class IBASIS, unsigned int DIM>
+  typename CubeBasis<IBASIS,DIM>::Index
+  CubeBasis<IBASIS,DIM>::last_generator(const int j) const
+  {
+    assert(j >= j0());
+
+    typename Index::type_type e;
+    typename Index::translation_type k;
+    for (unsigned int i = 0; i < DIM; i++) {
+      typename IBASIS::Index lambda(bases()[i]->last_generator(j));
+      k[i] = lambda.k();
+    }
+
+    return Index(j, e, k, this);
+  }
+
+  template <class IBASIS, unsigned int DIM>
+  typename CubeBasis<IBASIS,DIM>::Index
+  CubeBasis<IBASIS,DIM>::first_wavelet(const int j) const
+  {
+    assert(j >= j0());
+    
+    typename Index::type_type e;
+    typename Index::translation_type k;
+    for (unsigned int i = 0; i < DIM-1; i++) {
+      typename IBASIS::Index lambda(bases()[i]->first_generator(j));
+      k[i] = lambda.k();
+    }
+    typename IBASIS::Index lambda(bases()[DIM-1]->first_wavelet(j));
+    k[DIM-1] = lambda.k();
+    e[DIM-1] = 1;
+
+    return Index(j, e, k, this);
+  }
+
+  template <class IBASIS, unsigned int DIM>
+  typename CubeBasis<IBASIS,DIM>::Index
+  CubeBasis<IBASIS,DIM>::last_wavelet(const int j) const
+  {
+    assert(j >= j0());
+    
+    typename Index::type_type e;
+    typename Index::translation_type k;
+    for (unsigned int i = 0; i < DIM; i++) {
+      typename IBASIS::Index lambda(bases()[i]->last_wavelet(j));
+      k[i] = lambda.k();
+      e[i] = 1;
+    }
+
+    return Index(j, e, k, this);
   }
 
   template <class IBASIS, unsigned int DIM>
@@ -137,17 +205,17 @@ namespace WaveletTL
     if (lambda.e() == zero) {
       // a generator on a (possibly) fine level
       if (lambda.j() == j0) {
-  	// generators from the coarsest level can be copied
-  	c.set_coefficient(lambda, 1.0);
+	// generators from the coarsest level can be copied
+	c.set_coefficient(lambda, 1.0);
       } else {
-  	// j>j0, perform multiscale decomposition
+	// j>j0, perform multiscale decomposition
 	
 	typedef typename IBASIS::Index IIndex;
 	FixedArray1D<InfiniteVector<double,IIndex>,DIM> coeffs;
 	for (unsigned int i = 0; i < DIM; i++)
 	  bases_[i]->decompose_1(IIndex(lambda.j(), lambda.e()[i], lambda.k()[i], bases_[i]), lambda.j()-1, coeffs[i]);
 	
-  	if (DIM == 2) {
+	if (DIM == 2) {
 	  // directly add all tensor product wavelets needed
 	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(coeffs[0].begin()), it1end(coeffs[0].end());
 	       it1 != it1end; ++it1)
@@ -218,17 +286,17 @@ namespace WaveletTL
     if (lambda.e() == zero) {
       // a generator on a (possibly) fine level
       if (lambda.j() == j0) {
-  	// generators from the coarsest level can be copied
-  	c.set_coefficient(lambda, 1.0);
+	// generators from the coarsest level can be copied
+	c.set_coefficient(lambda, 1.0);
       } else {
-  	// j>j0, perform multiscale decomposition
+	// j>j0, perform multiscale decomposition
 	
 	typedef typename IBASIS::Index IIndex;
 	FixedArray1D<InfiniteVector<double,IIndex>,DIM> coeffs;
 	for (unsigned int i = 0; i < DIM; i++)
 	  bases_[i]->decompose_t_1(IIndex(lambda.j(), lambda.e()[i], lambda.k()[i], bases_[i]), lambda.j()-1, coeffs[i]);
 	
-  	if (DIM == 2) {
+	if (DIM == 2) {
 	  // directly add all tensor product wavelets needed
 	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(coeffs[0].begin()), it1end(coeffs[0].end());
 	       it1 != it1end; ++it1)
@@ -236,10 +304,10 @@ namespace WaveletTL
 		 it2 != it2end; ++it2) {
 	      InfiniteVector<double,Index> d;
 	      decompose_t_1(Index(it1.index().j(),
-				typename Index::type_type(it1.index().e(), it2.index().e()),
-				typename Index::translation_type(it1.index().k(), it2.index().k()),
-				this),
-			  j0, d);
+				  typename Index::type_type(it1.index().e(), it2.index().e()),
+				  typename Index::translation_type(it1.index().k(), it2.index().k()),
+				  this),
+			    j0, d);
 	      c.add(*it1 * *it2, d);
 	    }
 	} else {
@@ -382,10 +450,10 @@ namespace WaveletTL
 	       it2 != it2end; ++it2) {
 	    InfiniteVector<double,Index> d;
 	    reconstruct_t_1(Index(it1.index().j(),
-				typename Index::type_type(it1.index().e(), it2.index().e()),
-				typename Index::translation_type(it1.index().k(), it2.index().k()),
-				this),
-			  j, d);
+				  typename Index::type_type(it1.index().e(), it2.index().e()),
+				  typename Index::translation_type(it1.index().k(), it2.index().k()),
+				  this),
+			    j, d);
 	    c.add(*it1 * *it2, d);
 	  }
       } else {
@@ -428,5 +496,4 @@ namespace WaveletTL
       }
     }
   }
-
 }

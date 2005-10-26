@@ -31,7 +31,7 @@ int main()
 
   Basis basis(bound_1_1D, bound_1T_1D);
 
-  CubeIndex<Basis1D,1> index(&basis);
+  CubeIndex<Basis1D,1,Basis> index(&basis);
   for (int i = 0; i < 64; i++) 
     {
       cout << index << endl;

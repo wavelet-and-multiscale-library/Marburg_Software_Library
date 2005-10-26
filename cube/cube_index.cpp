@@ -18,9 +18,9 @@ namespace WaveletTL
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
   CubeIndex<IBASIS,DIM,CUBEBASIS>::CubeIndex(const int j,
-				   const type_type& e,
-				   const translation_type& k,
-				   const CUBEBASIS* basis)
+					     const type_type& e,
+					     const translation_type& k,
+					     const CUBEBASIS* basis)
     : basis_(basis), j_(j), e_(e), k_(k)
   {
   }
@@ -75,8 +75,8 @@ namespace WaveletTL
     if (eplusplus) {
       for (int i = DIM-1; i >= 0; i--) {
 	if (e_[i] == 1) {
- 	  e_[i] = 0;
- 	  jplusplus = (i == 0);
+	  e_[i] = 0;
+	  jplusplus = (i == 0);
 	} else {
 	  ++e_[i];
 	  break;

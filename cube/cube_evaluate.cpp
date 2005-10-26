@@ -6,8 +6,7 @@
 #include <geometry/grid.h>
 #include <geometry/sampled_mapping.h>
 
-using MathTL::Point;
-using MathTL::Grid;
+using namespace MathTL;
 
 namespace WaveletTL
 {

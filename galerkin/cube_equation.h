@@ -117,30 +117,29 @@ namespace WaveletTL
 	     const typename WaveletBasis::Index& nu,
 	     const unsigned int p = 4) const;
 
-//     /*!
-//       estimate the spectral norm ||A||
-//     */
-//     double norm_A() const;
+    /*!
+      estimate the spectral norm ||A||
+    */
+    double norm_A() const;
 
-//     /*!
-//       estimate the spectral norm ||A^{-1}||
-//     */
-//     double norm_Ainv() const;
+    /*!
+      estimate the spectral norm ||A^{-1}||
+    */
+    double norm_Ainv() const;
 
-//     /*!
-//       estimate compressibility exponent s^*
-//     */
-//     double s_star() const {
-//       return 1.0 + WBASIS::primal_vanishing_moments(); // [St04a], Th. 2.3 for n=1
-//     }
-
-//     /*!
-//       estimate the compression constants alpha_k in
-//         ||A-A_k|| <= alpha_k * 2^{-s*k}
-//     */
-//     double alphak(const unsigned int k) const {
-//       return 2*norm_A(); // suboptimal
-//     }
+    /*!
+      estimate compressibility exponent s^*
+      (we assume that the coefficients a(x),q(x) are smooth)
+    */
+    double s_star() const;
+    
+    /*!
+      estimate the compression constants alpha_k in
+        ||A-A_k|| <= alpha_k * 2^{-s*k}
+    */
+    double alphak(const unsigned int k) const {
+      return 2*norm_A(); // suboptimal
+    }
 
     /*!
       evaluate the (unpreconditioned) right-hand side f
@@ -176,6 +175,9 @@ namespace WaveletTL
 
     // (squared) \ell_2 norm of the precomputed right-hand side
     double fnorm_sqr;
+
+    // estimates for ||A|| and ||A^{-1}||
+    double normA, normAinv;
   };
 }
 

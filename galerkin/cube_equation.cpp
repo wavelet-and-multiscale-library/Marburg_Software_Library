@@ -5,7 +5,7 @@ namespace WaveletTL
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
   CubeEquation<IBASIS,DIM,CUBEBASIS>::CubeEquation(const EllipticBVP<DIM>* bvp,
 						   const FixedArray1D<bool,2*DIM>& bc)
-    : bvp_(bvp), basis_(bc)
+    : bvp_(bvp), basis_(bc), normA(0.0), normAinv(0.0)
   {
     compute_rhs();
   }
@@ -284,6 +284,71 @@ namespace WaveletTL
   {
     bvp_ = bvp;
     compute_rhs();
+  }
+
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  double
+  CubeEquation<IBASIS,DIM,CUBEBASIS>::s_star() const
+  {
+    // notation from [St04a]
+    const int t = operator_order();
+    const int n = space_dimension();
+    const int dT = WaveletBasis::primal_vanishing_moments();
+    const double gamma = WaveletBasis::primal_regularity();
+    
+    return (n == 1
+	    ? t+dT // [St04a], Th. 2.3 for n=1
+	    : std::min((t+dT)/(double)n, (gamma-t)/(n-1.))); // [St04a, Th. 2.3]
+  }
+
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  double
+  CubeEquation<IBASIS,DIM,CUBEBASIS>::norm_A() const
+  {
+    if (normA == 0.0) {
+      typedef typename WaveletBasis::Index Index;
+      std::set<Index> Lambda;
+      const int j0 = basis().j0();
+      const int jmax = 8;
+      for (Index lambda = first_generator(&basis(), j0);; ++lambda) {
+	Lambda.insert(lambda);
+	if (lambda == last_wavelet(&basis(), jmax)) break;
+      }
+      SparseMatrix<double> A_Lambda;
+      setup_stiffness_matrix(*this, Lambda, A_Lambda);
+      
+      Vector<double> xk(Lambda.size(), false);
+      xk = 1;
+      unsigned int iterations;
+      normA = PowerIteration(A_Lambda, xk, 1e-6, 100, iterations);
+    }
+
+    return normA;
+  }
+   
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  double
+  CubeEquation<IBASIS,DIM,CUBEBASIS>::norm_Ainv() const
+  {
+    if (normAinv == 0.0) {
+      typedef typename WaveletBasis::Index Index;
+      std::set<Index> Lambda;
+      const int j0 = basis().j0();
+      const int jmax = 8;
+      for (Index lambda = first_generator(&basis(), j0);; ++lambda) {
+	Lambda.insert(lambda);
+	if (lambda == last_wavelet(&basis(), jmax)) break;
+      }
+      SparseMatrix<double> A_Lambda;
+      setup_stiffness_matrix(*this, Lambda, A_Lambda);
+      
+      Vector<double> xk(Lambda.size(), false);
+      xk = 1;
+      unsigned int iterations;
+      normAinv = InversePowerIteration(A_Lambda, xk, 1e-6, 200, iterations);
+    }
+
+    return normAinv;
   }
 
 }

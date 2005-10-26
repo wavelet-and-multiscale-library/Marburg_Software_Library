@@ -63,58 +63,124 @@ namespace WaveletTL
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
   double
   CubeEquation<IBASIS,DIM,CUBEBASIS>::a(const typename WaveletBasis::Index& lambda,
-					const typename WaveletBasis::Index& nu,
+					const typename WaveletBasis::Index& mu,
 					const unsigned int p) const
   {
     // a(u,v) = \int_Omega [a(x)grad u(x)grad v(x)+q(x)u(x)v(x)] dx
 
     double r = 0;
 
-    // first decide whether the supports of psi_lambda and psi_nu intersect
+    // first decide whether the supports of psi_lambda and psi_mu intersect
     typedef typename CUBEBASIS::Support Support;
     Support supp;
     
-    if (intersect_supports<IBASIS,DIM,CUBEBASIS>(basis_, lambda, nu, supp))
+    if (intersect_supports<IBASIS,DIM,CUBEBASIS>(basis_, lambda, mu, supp))
       {
+	// setup Gauss points and weights for a composite quadrature formula:
+	const int N_Gauss = (p+1)/2;
+	const double h = ldexp(1.0, -supp.j); // granularity for the quadrature
+	FixedArray1D<Array1D<double>,DIM> gauss_points, gauss_weights;
+	for (unsigned int i = 0; i < DIM; i++) {
+	  gauss_points[i].resize(N_Gauss*(supp.b[i]-supp.a[i]));
+	  gauss_weights[i].resize(N_Gauss*(supp.b[i]-supp.a[i]));
+	  for (int patch = supp.a[i]; patch < supp.b[i]; patch++)
+	    for (int n = 0; n < N_Gauss; n++) {
+	      gauss_points[i][(patch-supp.a[i])*N_Gauss+n]
+		= h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
+	      gauss_weights[i][(patch-supp.a[i])*N_Gauss+n]
+		= h*GaussWeights[N_Gauss-1][n];
+	    }
+	}
+	
+	// compute point values of the integrand (where we use that it is a tensor product)
+	FixedArray1D<Array1D<double>,DIM>
+	  psi_lambda_values,     // values of the components of psi_lambda at gauss_points[i]
+	  psi_mu_values,         // -"-, for psi_mu
+	  psi_lambda_der_values, // values of the 1st deriv. of the components of psi_lambda gauss_points[i]
+	  psi_mu_der_values;     // -"-, for psi_mu
+	for (unsigned int i = 0; i < DIM; i++) {
+	  evaluate(*basis_.bases()[i], 0,
+		   typename IBASIS::Index(lambda.j(),
+					  lambda.e()[i],
+					  lambda.k()[i],
+					  basis_.bases()[i]),
+		   gauss_points[i], psi_lambda_values[i]);
+	  evaluate(*basis_.bases()[i], 1,
+		   typename IBASIS::Index(lambda.j(),
+					  lambda.e()[i],
+					  lambda.k()[i],
+					  basis_.bases()[i]),
+		   gauss_points[i], psi_lambda_der_values[i]);
+	  evaluate(*basis_.bases()[i], 0,
+		   typename IBASIS::Index(mu.j(),
+					  mu.e()[i],
+					  mu.k()[i],
+					  basis_.bases()[i]),
+		   gauss_points[i], psi_mu_values[i]);
+	  evaluate(*basis_.bases()[i], 1,
+		   typename IBASIS::Index(mu.j(),
+					  mu.e()[i],
+					  mu.k()[i],
+					  basis_.bases()[i]),
+		   gauss_points[i], psi_mu_der_values[i]);
+	}
+	
+	// iterate over all points and sum up the integral shares
+	int index[DIM]; // current multiindex for the point values
+	for (unsigned int i = 0; i < DIM; i++)
+	  index[i] = 0;
+	
+	Point<DIM> x;
+	double grad_psi_lambda[DIM], grad_psi_mu[DIM], weights;
+	while (true) {
+	  for (unsigned int i = 0; i < DIM; i++)
+	    x[i] = gauss_points[i][index[i]];
+
+	  // product of current Gauss weights
+	  weights = 1.0;
+	  for (unsigned int i = 0; i < DIM; i++)
+	    weights *= gauss_weights[i][index[i]];
+
+	  // compute the share a(x)(grad psi_lambda)(x)(grad psi_mu)(x)
+	  for (unsigned int i = 0; i < DIM; i++) {
+	    grad_psi_lambda[i] = 1.0;
+	    grad_psi_mu[i] = 1.0;
+	    for (unsigned int s = 0; s < DIM; s++) {
+	      if (i == s) {
+		grad_psi_lambda[i] *= psi_lambda_der_values[i][index[i]];
+		grad_psi_mu[i]     *= psi_mu_der_values[i][index[i]];
+	      } else {
+		grad_psi_lambda[i] *= psi_lambda_values[s][index[s]];
+		grad_psi_lambda[i] *= psi_mu_values[s][index[s]];
+	      }
+	    }
+	  }
+	  double share = 0;
+	  for (unsigned int i = 0; i < DIM; i++)
+	    share += grad_psi_lambda[i]*grad_psi_mu[i];
+	  r += bvp_->a(x) * weights * share;
+
+	  // compute the share q(x)psi_lambda(x)psi_mu(x)
+	  share = bvp_->q(x) * weights;
+	  for (unsigned int i = 0; i < DIM; i++)
+	    share *= psi_lambda_values[i][index[i]] * psi_mu_values[i][index[i]];
+	  r += share;
+
+	  // "++index"
+	  bool exit = false;
+	  for (unsigned int i = 0; i < DIM; i++) {
+	    if (index[i] == N_Gauss*(supp.b[i]-supp.a[i])-1) {
+	      index[i] = 0;
+	      exit = (i == DIM-1);
+	    } else {
+	      index[i]++;
+	      break;
+	    }
+	  }
+	  if (exit) break;
+	}
+	
       }
-						
-
-//     // First we compute the support intersection of \psi_\lambda and \psi_\nu:
-//     typedef typename WBASIS::Support Support;
-
-//     Support supp;
-
-//     if (intersect_supports(basis_, lambda, nu, supp))
-//       {
-// 	// Set up Gauss points and weights for a composite quadrature formula:
-// 	// (TODO: maybe use an instance of MathTL::QuadratureRule instead of computing
-// 	// the Gauss points and weights)
-// 	const unsigned int N_Gauss = (p+1)/2;
-// 	const double h = ldexp(1.0, -supp.j);
-// 	Array1D<double> gauss_points (N_Gauss*(supp.k2-supp.k1)), func1values, func2values, der1values, der2values;
-// 	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++) // refers to 2^{-j}[patch,patch+1]
-// 	  for (unsigned int n = 0; n < N_Gauss; n++, id++)
-// 	    gauss_points[id] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
-
-// 	// - compute point values of the integrands
-// 	evaluate(basis_, lambda, gauss_points, func1values, der1values);
-// 	evaluate(basis_, nu, gauss_points, func2values, der2values);
-
-// 	// - add all integral shares
-// 	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++)
-// 	  for (unsigned int n = 0; n < N_Gauss; n++, id++) {
-// 	    const double t = gauss_points[id];
-// 	    const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
-	    
-// 	    const double pt = bvp_.p(t);
-//   	    if (pt != 0)
-// 	      r += pt * der1values[id] * der2values[id] * gauss_weight;
-	    
-// 	    const double qt = bvp_.q(t);
-//   	    if (qt != 0)
-// 	      r += qt * func1values[id] * func2values[id] * gauss_weight;
-// 	  }
-//       }
 
     return r;
   }

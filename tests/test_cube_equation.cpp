@@ -33,7 +33,7 @@ int main()
   FixedArray1D<bool,4> bc;
   bc[0] = bc[1] = bc[2] = bc[3] = true;
 
-  CubeEquation<Basis1D,2,CBasis> eq(poisson, bc);
+  CubeEquation<Basis1D,2,CBasis> eq(&poisson, bc);
 
   InfiniteVector<double, Index> coeffs;
 

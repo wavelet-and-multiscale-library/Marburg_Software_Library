@@ -36,10 +36,10 @@ namespace WaveletTL
     has no meaningful value.
   */
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
-  bool intersect_supports_(const CUBEBASIS& basis,
-			   const typename CUBEBASIS::Index& lambda,
-			   const typename CUBEBASIS::Index& mu,
-			   typename CUBEBASIS::Support& supp);
+  bool intersect_supports(const CUBEBASIS& basis,
+			  const typename CUBEBASIS::Index& lambda,
+			  const typename CUBEBASIS::Index& mu,
+			  typename CUBEBASIS::Support& supp);
 }
     
 #include <cube/cube_support.cpp>

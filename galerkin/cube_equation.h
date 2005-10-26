@@ -66,7 +66,7 @@ namespace WaveletTL
     /*!
       constructor from a boundary value problem and specified b.c.'s
     */
-    CubeEquation(const EllipticBVP<DIM>& bvp,
+    CubeEquation(const EllipticBVP<DIM>* bvp,
 		 const FixedArray1D<bool,2*DIM>& bc);
 
     /*!
@@ -160,7 +160,7 @@ namespace WaveletTL
     double F_norm() const { return sqrt(fnorm_sqr); }
 
   protected:
-    const EllipticBVP<DIM>& bvp_;
+    const EllipticBVP<DIM>* bvp_;
     CUBEBASIS basis_;
 
     // right-hand side coefficients on a fine level, sorted by modulus

@@ -3,7 +3,7 @@
 namespace WaveletTL
 {
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
-  CubeEquation<IBASIS,DIM,CUBEBASIS>::CubeEquation(const EllipticBVP<DIM>& bvp,
+  CubeEquation<IBASIS,DIM,CUBEBASIS>::CubeEquation(const EllipticBVP<DIM>* bvp,
 						   const FixedArray1D<bool,2*DIM>& bc)
     : bvp_(bvp), basis_(bc)
   {
@@ -70,6 +70,14 @@ namespace WaveletTL
 
     double r = 0;
 
+    // first decide whether the supports of psi_lambda and psi_nu intersect
+    typedef typename CUBEBASIS::Support Support;
+    Support supp;
+    
+    if (intersect_supports<IBASIS,DIM,CUBEBASIS>(basis_, lambda, nu, supp))
+      {
+      }
+						
 
 //     // First we compute the support intersection of \psi_\lambda and \psi_\nu:
 //     typedef typename WBASIS::Support Support;
@@ -157,7 +165,7 @@ namespace WaveletTL
     while (true) {
       for (unsigned int i = 0; i < DIM; i++)
 	x[i] = gauss_points[i][index[i]];
-      double share = bvp_.f(x);
+      double share = bvp_->f(x);
       for (unsigned int i = 0; i < DIM; i++)
 	share *= gauss_weights[i][index[i]] * v_values[i][index[i]];
       r += share;

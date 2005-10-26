@@ -33,7 +33,7 @@ namespace MathTL
       {
 	for (unsigned int column(0); column < M.column_dimension(); column++)
 	  {
-	    os << M(row, column);
+	    os << M.get_entry(row, column);
 	    if (column < M.column_dimension()-1)
 	      os << " ";
 	  }

@@ -4,6 +4,7 @@
 #include <utils/fixed_array1d.h>
 
 using MathTL::multi_degree;
+using MathTL::FixedArray1D;
 
 namespace WaveletTL
 {

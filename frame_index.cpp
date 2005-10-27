@@ -7,13 +7,24 @@
  {
 
    template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
-   FrameIndex<IBASIS, DIM_d, DIM_m>::FrameIndex()
+   FrameIndex<IBASIS, DIM_d, DIM_m>::FrameIndex(const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame)
+     : frame_(frame)
    {
+     if (frame_ == 0) {
+       j_ = 0; // invalid (e and k are initialized by zero automatically)
+       p_ = 0;
+     } else {
+       j_ = frame_->j0(); // coarsest level;
+       // e_ is zero by default: generator
+       p_ = 0;
+       for (unsigned int i = 0; i < DIM_d; i++)
+	 k_[i] = WaveletTL::first_generator<IBASIS>(frame_->bases()[0]->bases()[i], j_).k();
+     }
    }
 
    template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
    FrameIndex<IBASIS, DIM_d, DIM_m>::FrameIndex(const FrameIndex& ind)
-     : frame_(ind.get_frame()), j_(ind.j()), e_(ind.e()), p_(ind.p()), k_(ind.k())
+     : frame_(ind.frame()), j_(ind.j()), e_(ind.e()), p_(ind.p()), k_(ind.k())
    {
    }
 
@@ -75,7 +86,7 @@
 
      bool eplusplus = false;
      if (pplusplus) {
-       eplusplus = (p_ < num_patches-1) ? 0 : 1;
+       eplusplus = !(p_ < num_patches-1);
        p_ = (p_ < num_patches-1) ? p_+1 : 0;
      }
      else return *this;
@@ -132,7 +143,8 @@
    bool
    FrameIndex<IBASIS, DIM_d, DIM_m>::operator < (const FrameIndex& lambda) const
    {
-     return (j_ < lambda.j() ||
+
+     return j_ < lambda.j() ||
       (
        j_ == lambda.j() &&
        (
@@ -140,13 +152,13 @@
 	(
 	 e_ == lambda.e() &&
 	 (
-	  p_ < lambda.p()) ||
-	 (
-	  p_ == lambda.p() && k_ < lambda.k()
+	  p_ < lambda.p() ||
+	  (
+	   p_ == lambda.p() && k_ < lambda.k()
+	  )
 	  )
 	 )
 	)
-       )
       );
    }
 
@@ -205,7 +217,7 @@
      typename FrameIndex<IBASIS,DIM_d,DIM_m>::type_type e;//== 0
      typename FrameIndex<IBASIS,DIM_d,DIM_m>::translation_type k; 
      for (unsigned int i = 0; i < DIM_d; i++) {
-       k[i] = WaveletTL::last_wavelet<IBASIS>(frame->bases()[0]->bases()[i], j).k();
+       k[i] = WaveletTL::last_wavelet<IBASIS>(frame->bases()[frame->bases().size()-1]->bases()[i], j).k();
        e[i] = 1;
      }
           

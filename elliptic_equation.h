@@ -59,6 +59,12 @@ namespace FrameTL
      */
     EllipticEquation(const EllipticBVP<DIM>* ell_bvp,
 		     const AggregatedFrame<IBASIS,DIM>* frame);
+
+    /*!
+      make template argument accessible
+    */
+    typedef AggregatedFrame<IBASIS,DIM> Frame;
+
     /*!
       read access to the frame
     */
@@ -132,16 +138,22 @@ namespace FrameTL
     */
     double f(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda) const;
 
-//     /*!
-//       approximate the wavelet coefficient set of the preconditioned right-hand side F
-//       within a prescribed \ell_2 error tolerance
-//     */
-//     void RHS(const double eta, InfiniteVector<double, typename WBASIS::Index>& coeffs) const;
+    /*!
+      approximate the wavelet coefficient set of the preconditioned right-hand side F
+      within a prescribed \ell_2 error tolerance
+    */
+    void RHS(const double eta, InfiniteVector<double, 
+	     typename AggregatedFrame<IBASIS,DIM>::Index>& coeffs) const;
 
 //     /*!
 //       compute (or estimate) ||F||_2
 //     */
 //     double F_norm() const { return sqrt(fnorm_sqr); }
+
+    /*!
+      set the boundary value problem
+    */
+    void set_bvp(const EllipticBVP<DIM>*);
 
    protected:
     
@@ -178,6 +190,16 @@ namespace FrameTL
     double a_different_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
 			       const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
 			       const unsigned int q_order = 4) const;
+
+    // precompute the right-hand side
+    void compute_rhs();
+
+    // right-hand side coefficients on a fine level, sorted by modulus
+    Array1D<std::pair<typename AggregatedFrame<IBASIS,DIM>::Index,double> > fcoeffs;
+
+    // (squared) \ell_2 norm of the precomputed right-hand side
+    double fnorm_sqr;
+
 
   };
 }

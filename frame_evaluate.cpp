@@ -43,7 +43,33 @@ namespace FrameTL
 	   const bool primal,
 	   const int resolution)
   {
-    return 0;
+
+    Array1D<SampledMapping<DIM_d> > result(frame.n_p());
+
+    for (unsigned int i = 0; i < frame.n_p(); i++) {
+      result[i] = SampledMapping<DIM_d>(*(frame.atlas()->charts()[i]),resolution);// all zero
+    }
+
+    typedef typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index Index;
+    for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
+ 	  itend(coeffs.end()); it != itend; ++it) {
+      result[it.index().p()].add(*it, evaluate(frame, it.index(), primal, resolution));
+    }
+
+
+
+
+
+
+//     Grid<DIM> grid(Point<DIM>(0), Point<DIM>(1), 1<<resolution);
+//     SampledMapping<DIM> result(grid); // zero
+    
+//     typedef typename CubeBasis<IBASIS,DIM>::Index Index;
+//     for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
+// 	   itend(coeffs.end()); it != itend; ++it)
+//       result.add(*it, evaluate(basis, it.index(), primal, resolution));
+
+    return result;
   }
 
 }

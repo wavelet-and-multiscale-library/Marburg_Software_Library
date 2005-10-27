@@ -81,11 +81,15 @@ namespace FrameTL
       return lifted_bases;
     }
 
-
     /*!
       coarsest level
      */
     const int j0() const { return j0_; }
+
+    /*!
+      number of patches
+     */
+    const unsigned int n_p() const { return lifted_bases.size(); }
 
     /*!
       access to underlying atlas

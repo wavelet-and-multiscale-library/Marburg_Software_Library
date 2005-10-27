@@ -18,8 +18,11 @@ using std::cout;
 using std::endl;
 
 using WaveletTL::CubeIndex;
-using WaveletTL::CubeBasis;
 
+
+#include <utils/multiindex.h>
+
+using MathTL::MultiIndex;
 
 namespace FrameTL
 {
@@ -46,7 +49,7 @@ namespace FrameTL
     /*!
       default constructor
     */
-    FrameIndex();
+    FrameIndex(const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame = 0);
 
     /*!
       copy constructor
@@ -101,7 +104,7 @@ namespace FrameTL
     const unsigned int p() const { return p_; }
 
     //! access to underlying frame
-    const AggregatedFrame<IBASIS,DIM_d,DIM_m>* get_frame() const
+    const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame() const
     { return frame_; }
 
   protected:
@@ -115,7 +118,8 @@ namespace FrameTL
     int j_;
     
     //! type
-    MultiIndex<unsigned int,DIM_d> e_;
+    //MultiIndex<unsigned int,DIM_d> e_;
+    type_type e_;
 
     /*!
       patchnumber
@@ -123,7 +127,8 @@ namespace FrameTL
     unsigned int p_;
 
     //! translation
-    MultiIndex<int,DIM_d> k_;
+    //MultiIndex<int,DIM_d> k_;
+    translation_type k_;
     
   };
 
@@ -139,7 +144,7 @@ namespace FrameTL
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
   FrameIndex<IBASIS,DIM_d,DIM_m>
-  first_generator(const int j);
+  first_generator(const FRAME* frame, const int j);
 
   /*!
     index of last generator on level j >= j0

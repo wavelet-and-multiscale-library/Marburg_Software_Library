@@ -90,7 +90,7 @@ int main()
 {
   cout << "Testing adaptive wavelet-Galerkin solution of a Sturm b.v.p. with CDD1_SOLVE ..." << endl;
 
-  TestProblem<1> T;
+  TestProblem<3> T;
 
   const int d  = 3;
   const int dT = 3;

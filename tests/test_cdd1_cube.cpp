@@ -46,8 +46,8 @@ int main()
 {
   cout << "Testing adaptive wavelet-Galerkin solution of a Poisson problem on the cube with CDD1_SOLVE ..." << endl;
 
-  const int d  = 3;
-  const int dT = 3;
+  const int d  = 2;
+  const int dT = 2;
   typedef DSBasis<d,dT> Basis1D;
   typedef CubeBasis<Basis1D,2> Basis;
   typedef Basis::Index Index;
@@ -62,7 +62,9 @@ int main()
   CachedProblem<Problem> cproblem(problem);
 
   InfiniteVector<double, Index> u_epsilon;
-  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 5);
+  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 8);
+//   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 10);
+//   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 6, CDD1);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon);
   
   return 0;

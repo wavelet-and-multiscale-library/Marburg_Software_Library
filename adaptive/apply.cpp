@@ -15,9 +15,10 @@ namespace WaveletTL
 	     const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
 	     const double eta,
 	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& w,
-	     const int jmax)
+	     const int jmax,
+	     const CompressionStrategy strategy)
   {
-//     cout << "APPLY called, with v=" << endl << v << endl;
+    cout << "APPLY called..." << endl;
 
     typedef typename PROBLEM::WaveletBasis::Index Index;
 
@@ -63,6 +64,7 @@ namespace WaveletTL
 	     it != bins[bin].end(); ++it, ++id)
 	  v_binned[id] = *it;
 
+//       cout << "* in APPLY, all " << q+1 << " bins have been set up" << endl;
 //       cout << "APPLY(): the glued bins:" << endl;
 //       for (unsigned int i = 0; i < v_binned.size(); i++)
 //  	cout << v_binned[i].first << ", " << v_binned[i].second << endl;
@@ -78,7 +80,7 @@ namespace WaveletTL
       unsigned int id = 0, k = 0;
       double error_sqr = norm_v_sqr;
       typename std::list<std::list<std::pair<Index, double> > > vks;
-      typename std::list<double> vks_norm_sqr;
+      typename std::list<double> vks_norm;
       while (true) {
 	// setup the k-th segment v_{[k]}
 	std::list<std::pair<Index, double> > vk;
@@ -90,38 +92,39 @@ namespace WaveletTL
 	  vk_norm_sqr += help;
 	}
 	vks.push_back(vk);
-	vks_norm_sqr.push_back(vk_norm_sqr);
+	vks_norm.push_back(sqrt(vk_norm_sqr));
 
 	if (error_sqr <= threshold || id >= v.size()) break; // in this case, ell=k
 	k++;
       }
       const unsigned int ell = k;
-//       cout << "APPLY(): all v_{[k]} set up, 0<=k<=ell=" << ell << endl;
-
+//       cout << "* in APPLY, all segments v_{[k]} have been set up, 0<=k<=ell=" << ell << endl;
+      
       // compute the smallest J >= ell, such that
       //   \sum_{k=0}^{\ell} alpha_{J-k}*2^{-s(J-k)}*||v_{[k]}|| <= eta/2
       unsigned int J = ell;
       const double s = P.s_star();
-//       cout << "APPLY(): s=" << s << endl;
+//       cout << "* in APPLY, s=" << s << endl;
       while (true) {
+// 	cout << "* in APPLY, checking J=" << J << "..." << endl;
 	double check = 0;
 	unsigned int k = 0;
-	for (std::list<double>::const_iterator it(vks_norm_sqr.begin()); k <= ell; ++it, ++k)
-	  check += P.alphak(J-k) * pow(2.0, -s*(J-k)) * sqrt(*it);
+	for (std::list<double>::const_iterator it(vks_norm.begin()); k <= ell; ++it, ++k)
+	  check += P.alphak(J-k) * pow(ldexp(1.0,J-k),-s) * (*it);
 	if (check <= eta/2.0) break;
 	J++;
       }
 
 //       cout << "APPLY(): J=" << J << endl;
-//       unsigned int ncols = 0; k = 0;
-//       for (typename std::list<std::list<std::pair<Index, double> > >::const_iterator it(vks.begin());
-//  	   k <= ell; ++it, ++k)
-//  	for (typename std::list<std::pair<Index, double> >::const_iterator itk(it->begin());
-//  	     itk != it->end(); ++itk)
-//  	  ncols++;
-//       cout << "APPLY(): number of active columns: " << ncols << endl;
-
+      unsigned int ncols = 0; k = 0;
+      for (typename std::list<std::list<std::pair<Index, double> > >::const_iterator it(vks.begin());
+  	   k <= ell; ++it, ++k)
+  	for (typename std::list<std::pair<Index, double> >::const_iterator itk(it->begin());
+  	     itk != it->end(); ++itk)
+  	  ncols++;
+      
       // compute w = \sum_{k=0}^\ell A_{J-k}v_{[k]}
+//       cout << "* in APPLY, collect all " << ncols << " active columns..." << endl;
       k = 0;
       for (typename std::list<std::list<std::pair<Index, double> > >::const_iterator it(vks.begin());
 	   k <= ell; ++it, ++k) {
@@ -129,9 +132,11 @@ namespace WaveletTL
 	for (typename std::list<std::pair<Index, double> >::const_iterator itk(it->begin());
 	     itk != it->end(); ++itk) {
 // 	  cout << "APPLY(): requesting column " << itk->first << " with J-k=" << J-k << endl;
-	  add_compressed_column(P, itk->second, itk->first, J-k, w, jmax);
+	  add_compressed_column(P, itk->second, itk->first, J-k, w, jmax, strategy);
 	}
       }
+
+      cout << "... APPLY done!" << endl;
     }
   }  
 }

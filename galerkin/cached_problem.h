@@ -60,6 +60,14 @@ namespace WaveletTL
       */
       double norm_Ainv() const;
       
+      /*!
+	estimate the compression constants alpha_k in
+        ||A-A_k|| <= alpha_k * 2^{-s*k}
+      */
+      double alphak(const unsigned int k) const {
+	return 2*norm_A(); // suboptimal
+      }
+
     protected:
       // type of one column in the entry cache of A
       typedef std::map<typename WaveletBasis::Index, double> Column;

@@ -12,6 +12,7 @@
 
 #include <set>
 #include <algebra/infinite_vector.h>
+#include <adaptive/compression.h>
 
 using std::set;
 
@@ -43,7 +44,8 @@ namespace WaveletTL
   template <class PROBLEM>
   void CDD1_SOLVE(const PROBLEM& P, const double epsilon,
 		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
-		  const int jmax = 99);
+		  const int jmax = 99,
+		  const CompressionStrategy strategy = St04a);
 
   /*!
     the parameters chosen or computed in the INIT phase of ALGORITHMc
@@ -77,7 +79,8 @@ namespace WaveletTL
 	     set<typename PROBLEM::WaveletBasis::Index>& Lambda_hat,
 	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r_hat,
 	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_Lambda_k,
-	     const int jmax = 99);
+	     const int jmax = 99,
+	     const CompressionStrategy strategy = St04a);
 
   /*!
     GALERKIN:
@@ -94,7 +97,8 @@ namespace WaveletTL
  		const double delta,
 		const double eta,
  		InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& ubar,
-		const int jmax = 99);
+		const int jmax = 99,
+		const CompressionStrategy strategy = St04a);
 
   /*!
     NGROW:
@@ -113,7 +117,8 @@ namespace WaveletTL
  	     const double xi2,
  	     set<typename PROBLEM::WaveletBasis::Index>& Lambda_tilde,
  	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r,
-	     const int jmax = 99);
+	     const int jmax = 99,
+	     const CompressionStrategy strategy = St04a);
 
   /*!
     INRESIDUAL:
@@ -129,7 +134,8 @@ namespace WaveletTL
 		  const double eta1,
 		  const double eta2,
 		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r,
-		  const int jmax = 99);
+		  const int jmax = 99,
+		  const CompressionStrategy strategy = St04a);
 
   /*!
     NRESIDUAL:
@@ -148,8 +154,8 @@ namespace WaveletTL
 		 const double eta2,
 		 InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r,
 		 set<typename PROBLEM::WaveletBasis::Index>& Lambda_tilde,
-		 const int jmax = 99);
-  
+		 const int jmax = 99,
+		 const CompressionStrategy strategy = St04a);
 }
 
 #include <adaptive/cdd1.cpp>

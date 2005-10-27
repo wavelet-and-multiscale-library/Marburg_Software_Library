@@ -1,6 +1,7 @@
 // implementation for cube_support.h
 
 #include <utils/multiindex.h>
+#include <utils/fixed_array1d.h>
 
 using MathTL::multi_degree;
 
@@ -76,11 +77,94 @@ namespace WaveletTL
 			     std::list<typename CubeBasis<IBASIS,DIM>::Index>& intersecting)
   {
     typedef typename CubeBasis<IBASIS,DIM>::Index Index;
-    typedef typename CubeBasis<IBASIS,DIM>::Support Support;
 
     intersecting.clear();
-      
+
+#if 1
+    // the set of intersecting wavelets is a cartesian product from d sets from the 1D case,
+    // so we only have to compute the relevant 1D indices
+    typedef typename IBASIS::Index Index1D;
+    FixedArray1D<std::list<Index1D>,DIM>
+      intersecting_1d_generators, intersecting_1d_wavelets;
+
+    for (unsigned int i = 0; i < DIM; i++) {
+      intersecting_wavelets(*basis.bases()[i],
+			    Index1D(lambda.j(),
+				    lambda.e()[i],
+				    lambda.k()[i],
+				    basis.bases()[i]),
+			    j, true, intersecting_1d_generators[i]);
+      if (!(generators))
+	intersecting_wavelets(*basis.bases()[i],
+			      Index1D(lambda.j(),
+				      lambda.e()[i],
+				      lambda.k()[i],
+				      basis.bases()[i]),
+			      j, false, intersecting_1d_wavelets[i]);
+    }
+
+    // generate all relevant tensor product indices with either e=(0,...,0) or e!=(0,...,0)
+    typedef std::list<FixedArray1D<Index1D,DIM> > list_type;
+    list_type indices;
+    FixedArray1D<Index1D,DIM> helpindex;
+    if (DIM > 1 || (DIM == 1 && generators)) {
+      for (typename std::list<Index1D>::const_iterator it(intersecting_1d_generators[0].begin()),
+	     itend(intersecting_1d_generators[0].end());
+	   it != itend; ++it) {
+	helpindex[0] = *it;
+	indices.push_back(helpindex);
+      }
+    }
+    if (!(generators)) {
+      for (typename std::list<Index1D>::const_iterator it(intersecting_1d_wavelets[0].begin()),
+	     itend(intersecting_1d_wavelets[0].end());
+	   it != itend; ++it) {
+	helpindex[0] = *it;
+	indices.push_back(helpindex);
+      }
+    }
+    for (unsigned int i = 1; i < DIM; i++) {
+      list_type sofar;
+      sofar.swap(indices);
+      for (typename list_type::const_iterator itready(sofar.begin()), itreadyend(sofar.end());
+	   itready != itreadyend; ++itready) {
+	helpindex = *itready;
+	unsigned int esum = 0;
+	for (unsigned int k = 0; k < i; k++)
+	  esum += helpindex[i].e();
+	if (generators || i < DIM-1 || (i == DIM-1 && esum > 0)) {
+	  for (typename std::list<Index1D>::const_iterator it(intersecting_1d_generators[i].begin()),
+		 itend(intersecting_1d_generators[i].end());
+	       it != itend; ++it) {
+	    helpindex[i] = *it;
+	    indices.push_back(helpindex);
+	  }
+	}
+	if (!(generators)) {
+	  for (typename std::list<Index1D>::const_iterator it(intersecting_1d_wavelets[i].begin()),
+		 itend(intersecting_1d_wavelets[i].end());
+	       it != itend; ++it) {
+	    helpindex[i] = *it;
+	    indices.push_back(helpindex);
+	  }
+	}
+      }
+    }
+
+    // compose the results
+    typename Index::type_type help_e;
+    typename Index::translation_type help_k;
+    for (typename list_type::const_iterator it(indices.begin()), itend(indices.end());
+	 it != itend; ++it) {
+      for (unsigned int i = 0; i < DIM; i++) {
+	help_e[i] = (*it)[i].e();
+	help_k[i] = (*it)[i].k();
+      }
+      intersecting.push_back(Index(j, help_e, help_k, &basis));
+    }
+#else
     // a brute force solution
+    typedef typename CubeBasis<IBASIS,DIM>::Support Support;
     Support supp;
     if (generators) {
       for (Index mu = first_generator<IBASIS,DIM>(&basis, j);; ++mu) {
@@ -94,14 +178,25 @@ namespace WaveletTL
 	  intersecting.push_back(mu);
 	if (mu == last_wavelet<IBASIS,DIM>(&basis, j)) break;
       }
-    }      
+    }
+#endif      
   }
     
   template <class IBASIS, unsigned int DIM>
   bool intersect_singular_support(const CubeBasis<IBASIS,DIM>& basis,
 				  const typename CubeBasis<IBASIS,DIM>::Index& lambda,
-				  const typename CubeBasis<IBASIS,DIM>::Index& nu)
+				  const typename CubeBasis<IBASIS,DIM>::Index& mu)
   {
-    return true; // TODO: implement this!
+    // we have intersection of the singular supports if and only if
+    // one of the components have this property in one dimension
+    typedef typename IBASIS::Index Index1D;
+    for (unsigned int i = 0; i < DIM; i++) {
+      if (intersect_singular_support
+	  (*basis.bases()[i],
+	   Index1D(lambda.j(), lambda.e()[i], lambda.k()[i], basis.bases()[i]),
+	   Index1D(mu.j(), mu.e()[i], mu.k()[i], basis.bases()[i])))
+	return true;
+    }
+    return false;
   }
 }

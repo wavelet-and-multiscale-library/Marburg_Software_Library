@@ -19,7 +19,8 @@ namespace WaveletTL
   template <class PROBLEM>
   void CDD1_SOLVE(const PROBLEM& P, const double epsilon,
 		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
-		  const int jmax)
+		  const int jmax,
+		  const CompressionStrategy strategy)
   {
     // INIT, cf. [BB+] 
 
@@ -63,7 +64,7 @@ namespace WaveletTL
     P.RHS(2*params.q2*epsilon, F);
     while (delta > sqrt(params.c1)*epsilon) { // check the additional factor c1^{1/2} in [BB+] !?
       cout << "CDD1_SOLVE: delta=" << delta << endl;
-      NPROG(P, params, F, Lambda, u_epsilon, delta, v_hat, Lambda_hat, r_hat, u_bar, jmax);
+      NPROG(P, params, F, Lambda, u_epsilon, delta, v_hat, Lambda_hat, r_hat, u_bar, jmax, strategy);
       if (l2_norm(r_hat)+(params.q1+params.q2+(1+1/params.kappa)*params.q3)*delta <= params.c1*epsilon)
 	{
 	  u_epsilon.swap(u_bar);
@@ -87,21 +88,22 @@ namespace WaveletTL
 	     set<typename PROBLEM::WaveletBasis::Index>& Lambda_hat,
 	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r_hat,
 	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_Lambda_k,
-	     const int jmax)
+	     const int jmax,
+	     const CompressionStrategy strategy)
   {
     typedef typename PROBLEM::WaveletBasis::Index Index;
     set<Index> Lambda_k(Lambda), Lambda_kplus1;
     unsigned int k = 0;
-    GALERKIN(P, params, F, Lambda_k, v, delta, params.q3*delta/params.c2, u_Lambda_k, jmax);
+    GALERKIN(P, params, F, Lambda_k, v, delta, params.q3*delta/params.c2, u_Lambda_k, jmax, strategy);
     while (true) {
       cout << "NPROG: k=" << k << " (K=" << params.K << ")" << endl;
-      NGROW(P, params, F, Lambda_k, u_Lambda_k, params.q1*delta, params.q2*delta, Lambda_kplus1, r_hat, jmax);
+      NGROW(P, params, F, Lambda_k, u_Lambda_k, params.q1*delta, params.q2*delta, Lambda_kplus1, r_hat, jmax, strategy);
       if (l2_norm(r_hat) <= params.c1*delta/20 || k == params.K || Lambda_k.size() == Lambda_kplus1.size()) {
 	u_Lambda_k.COARSE(2*delta/5, v_hat);
 	v_hat.support(Lambda_hat);
 	break;
       }
-      GALERKIN(P, params, F, Lambda_kplus1, u_Lambda_k, params.q0*delta, params.q3*delta/params.c2, v_hat, jmax);
+      GALERKIN(P, params, F, Lambda_kplus1, u_Lambda_k, params.q0*delta, params.q3*delta/params.c2, v_hat, jmax, strategy);
       u_Lambda_k.swap(v_hat);
       Lambda_k.swap(Lambda_kplus1);
       k++;
@@ -116,7 +118,8 @@ namespace WaveletTL
  		const double delta,
 		const double eta,
  		InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_bar,
-		const int jmax)
+		const int jmax,
+		const CompressionStrategy strategy)
   {
     typedef typename PROBLEM::WaveletBasis::Index Index;
 
@@ -128,7 +131,7 @@ namespace WaveletTL
     double mydelta = delta;
     cout << "GALERKIN, internal residuals: " << endl;
     while (true) {
-      INRESIDUAL(P, params, F, Lambda, u_bar, params.c1*eta/6, params.c1*eta/6, r, jmax);
+      INRESIDUAL(P, params, F, Lambda, u_bar, params.c1*eta/6, params.c1*eta/6, r, jmax, strategy);
       const double inresidual_norm = l2_norm(r);
       cout << inresidual_norm << " ";
       cout.flush();
@@ -183,12 +186,13 @@ namespace WaveletTL
  	     const double xi2,
  	     set<typename PROBLEM::WaveletBasis::Index>& Lambda_tilde,
  	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r,
-	     const int jmax)
+	     const int jmax,
+	     const CompressionStrategy strategy)
   {
     cout << "NGROW called..." << endl;
     typedef typename PROBLEM::WaveletBasis::Index Index;
     set<Index> Lambda_c;
-    NRESIDUAL(P, params, F, Lambda, u_bar, xi1, xi2, r, Lambda_c, jmax);
+    NRESIDUAL(P, params, F, Lambda, u_bar, xi1, xi2, r, Lambda_c, jmax, strategy);
     const double residual_norm = l2_norm(r);
     cout << "* in NGROW, current residual norm is " << residual_norm << endl;
     InfiniteVector<double,Index> pr;
@@ -212,13 +216,14 @@ namespace WaveletTL
 		  const double eta1,
 		  const double eta2,
 		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r,
-		  const int jmax)
+		  const int jmax,
+		  const CompressionStrategy strategy)
   {
     typedef typename PROBLEM::WaveletBasis::Index Index;
     InfiniteVector<double,Index> w, g(F);
 
     // TODO: speed up the following two lines
-    APPLY(P, v, eta1, w, jmax);
+    APPLY(P, v, eta1, w, jmax, strategy);
     w.clip(Lambda);
 
     g.clip(Lambda);
@@ -235,11 +240,12 @@ namespace WaveletTL
 		 const double eta2,
 		 InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r,
 		 set<typename PROBLEM::WaveletBasis::Index>& Lambda_tilde,
-		 const int jmax)
+		 const int jmax,
+		 const CompressionStrategy strategy)
   {
     typedef typename PROBLEM::WaveletBasis::Index Index;
     InfiniteVector<double,Index> w;
-    APPLY(P, v, eta1, w, jmax);
+    APPLY(P, v, eta1, w, jmax, strategy);
     F.COARSE(eta2, r);
     r -= w;
     r.support(Lambda_tilde);

@@ -22,6 +22,7 @@ using namespace MathTL;
 /*
   Some test problems for the Poisson equation on the cube with homogeneous Dirichlet b.c.'s:
   1: u(x,y) = x(1-x)y(1-y), -Delta u(x,y) = 2(x(1-x)+y(1-y))
+  2: y(x,y) = exp(-100*((x-0.5)^2+(y-0.5)^2), -Delta u(x,y)= (400-(200x-100)^2-(200y-100)^2)*u(x,y)
 */
 template <unsigned int N>
 class TestRHS
@@ -31,6 +32,11 @@ public:
   virtual ~TestRHS() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
     switch(N) {
+    case 2:
+      return
+	(400-(200*p[0]-100)*(200*p[0]-100)-(200*p[1]-100)*(200*p[1]-100))
+	* exp(-100*((p[0]-0.5)*(p[0]-0.5)+(p[1]-0.5)*(p[1]-0.5)));
+      break;
     case 1:
     default:
       return 2*(p[0]*(1-p[0])+p[1]*(1-p[1]));
@@ -52,7 +58,7 @@ int main()
   typedef CubeBasis<Basis1D,2> Basis;
   typedef Basis::Index Index;
 
-  TestRHS<1> rhs;
+  TestRHS<2> rhs;
   PoissonBVP<2> poisson(&rhs);
 
   FixedArray1D<bool,4> bc;
@@ -62,7 +68,7 @@ int main()
   CachedProblem<Problem> cproblem(problem);
 
   InfiniteVector<double, Index> u_epsilon;
-  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 8);
+  CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 6);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 10);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 6, CDD1);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon);

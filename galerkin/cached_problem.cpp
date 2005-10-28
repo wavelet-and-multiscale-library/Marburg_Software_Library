@@ -61,7 +61,7 @@ namespace WaveletTL
       typedef typename WaveletBasis::Index Index;
       std::set<Index> Lambda;
       const int j0 = PROBLEM::basis().j0();
-      const int jmax = j0;
+      const int jmax = j0+1;
       for (Index lambda = PROBLEM::basis().first_generator(j0);; ++lambda) {
 	Lambda.insert(lambda);
 	if (lambda == PROBLEM::basis().last_wavelet(jmax)) break;
@@ -90,7 +90,7 @@ namespace WaveletTL
       typedef typename WaveletBasis::Index Index;
       std::set<Index> Lambda;
       const int j0 = PROBLEM::basis().j0();
-      const int jmax = j0;
+      const int jmax = j0+1;
       for (Index lambda = PROBLEM::basis().first_generator(j0);; ++lambda) {
 	Lambda.insert(lambda);
 	if (lambda == PROBLEM::basis().last_wavelet(jmax)) break;

@@ -73,9 +73,12 @@ namespace WaveletTL
       else
 	{
 	  u_epsilon.swap(v_hat);
+	  Lambda.swap(Lambda_hat);
 	}
       delta *= 0.5;
     }
+
+    cout << "CDD1_SOLVE: done!" << endl;
   }
 
   template <class PROBLEM>
@@ -108,6 +111,7 @@ namespace WaveletTL
       Lambda_k.swap(Lambda_kplus1);
       k++;
     }
+    cout << "NPROG: done" << endl;
   }
 
   template <class PROBLEM>

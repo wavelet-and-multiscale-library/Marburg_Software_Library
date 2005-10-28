@@ -114,24 +114,35 @@ namespace FrameTL
     double norm_A() const;
     
     /*!
-      estimate the spectral norm ||A^{-1}||
+      returns spectral norm ||A^{-1}||
+      estimate for ||A^{-1}|| has to be
+      externally computed and to be set
+      during initialization of the program.
+      We assume this because ||A^{-1}|| quantity is hardly
+      available in the frame case and
+      quite complicated eigenvalue/eigenvector
+      methods have to applied that are not implemented so
+      far.
     */
-    double norm_Ainv() const;
+    double norm_Ainv() const { return normAinv; };
 
-//     /*!
-//       estimate compressibility exponent s^*
-//     */
-//     double s_star() const {
-//       return 1.0 + WBASIS::primal_vanishing_moments(); // [St04a], Th. 2.3 for n=1
-//     }
+    /*!
+      sets estimate for ||A^{-1}||
+    */
+    double set_Ainv(const int nAinv) const { normAinv = nAinv; };
 
-//     /*!
-//       estimate the compression constants alpha_k in
-//         ||A-A_k|| <= alpha_k * 2^{-s*k}
-//     */
-//     double alphak(const unsigned int k) const {
-//       return 2*norm_A(); // suboptimal
-//     }
+    /*!
+      estimate compressibility exponent s^*
+    */
+    double s_star() const;
+
+    /*!
+      estimate the compression constants alpha_k in
+        ||A-A_k|| <= alpha_k * 2^{-s*k}
+    */
+    double alphak(const unsigned int k) const {
+      return 2*norm_A(); // suboptimal
+    }
 
     /*!
       evaluate the (unpreconditioned) right-hand side f
@@ -145,10 +156,10 @@ namespace FrameTL
     void RHS(const double eta, InfiniteVector<double, 
 	     typename AggregatedFrame<IBASIS,DIM>::Index>& coeffs) const;
 
-//     /*!
-//       compute (or estimate) ||F||_2
-//     */
-//     double F_norm() const { return sqrt(fnorm_sqr); }
+    /*!
+      compute (or estimate) ||F||_2
+    */
+    double F_norm() const { return sqrt(fnorm_sqr); }
 
     /*!
       set the boundary value problem
@@ -166,12 +177,6 @@ namespace FrameTL
       underlying frame
      */
     const AggregatedFrame<IBASIS,DIM>* frame_;
-
-//     // right-hand side coefficients on a fine level, sorted by modulus
-//     Array1D<std::pair<typename WBASIS::Index,double> > fcoeffs;
-
-//     // \ell_2 norm of the precomputed right-hand side
-//     double fnorm_sqr;
 
   private:
 
@@ -200,6 +205,12 @@ namespace FrameTL
     // (squared) \ell_2 norm of the precomputed right-hand side
     double fnorm_sqr;
 
+    // reminder: This keyword can only be applied to non-static
+    // and non-const data members of a class. If a data member is declared mutable,
+    // then it is legal to assign a value to this data member from
+    // a const member function.
+    // estimates for ||A|| and ||A^{-1}||
+    mutable double normA, normAinv;
 
   };
 }

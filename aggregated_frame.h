@@ -82,6 +82,19 @@ namespace FrameTL
     }
 
     /*!
+      geometric type of the support sets.
+      support is only implicitly given by the
+      support of the corresponding wavelet on the
+      hypercube and the respective patch chart.
+    */
+    typedef struct {
+      int j;
+      int a[DIM];
+      int b[DIM];
+      const Chart<DIM_d,DIM_m>* ch;
+    } Support;
+
+    /*!
       coarsest level
      */
     const int j0() const { return j0_; }

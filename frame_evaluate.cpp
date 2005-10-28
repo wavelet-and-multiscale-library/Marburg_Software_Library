@@ -56,19 +56,6 @@ namespace FrameTL
       result[it.index().p()].add(*it, evaluate(frame, it.index(), primal, resolution));
     }
 
-
-
-
-
-
-//     Grid<DIM> grid(Point<DIM>(0), Point<DIM>(1), 1<<resolution);
-//     SampledMapping<DIM> result(grid); // zero
-    
-//     typedef typename CubeBasis<IBASIS,DIM>::Index Index;
-//     for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
-// 	   itend(coeffs.end()); it != itend; ++it)
-//       result.add(*it, evaluate(basis, it.index(), primal, resolution));
-
     return result;
   }
 

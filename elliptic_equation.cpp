@@ -31,7 +31,8 @@ namespace FrameTL
 					typename AggregatedFrame<IBASIS,DIM>::Index>& coeffs,
 					const int n) const
   {
-    for (typename InfiniteVector<double,typename AggregatedFrame<IBASIS,DIM>::Index>::const_iterator it(coeffs.begin());
+    typedef AggregatedFrame<IBASIS,DIM> Frame;
+    for (typename InfiniteVector<double, typename Frame::Index>::const_iterator it(coeffs.begin());
 	 it != coeffs.end(); ++it)
       {
 	// TODO: implement an InfiniteVector::iterator to speed up this hack!
@@ -261,6 +262,48 @@ namespace FrameTL
     //the cases lambda.p() == nu.p() and lambda.p() != nu.p() have
     //to be treated seperately
     return lambda.p() == nu.p() ? a_same_patches(lambda, nu, p) : a_different_patches(lambda, nu, p);
+  }
+
+  template <class IBASIS, unsigned int DIM>
+  double
+  EllipticEquation<IBASIS,DIM>::norm_A() const
+  {
+    if (normA == 0.0) {
+      typedef typename AggregatedFrame<IBASIS,DIM>::Index Index;
+      std::set<Index> Lambda;
+      const int j0 = frame->j0();
+      const int jmax = j0+1;
+      for (Index lambda = FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0);; ++lambda) {
+	Lambda.insert(lambda);
+	if (lambda == FrameTL::last_wavelet<IBASIS,DIM,DIM,Frame>(frame_,jmax)) break;
+      }
+      SparseMatrix<double> A_Lambda;
+      setup_stiffness_matrix(*this, Lambda, A_Lambda);
+      
+      Vector<double> xk(Lambda.size(), false);
+      xk = 1;
+      unsigned int iterations;
+      normA = PowerIteration(A_Lambda, xk, 1e-6, 100, iterations);
+    }
+
+    return normA;
+  }
+
+  template <class IBASIS, unsigned int DIM>
+  double
+  EllipticEquation<IBASIS,DIM>::s_star() const
+  {
+    // notation from [St04a]
+    const int t = operator_order();
+    const int n = DIM;
+    const int dT = frame_->bases()[0]->primal_vanishing_moments(); // we assume to have the same 'kind'
+                                                                   // of wavelets on each patch, so use
+                                                                   // patch 0 as reference case
+    const double gamma = frame_->bases()[0]->primal_regularity();
+    
+    return (n == 1
+	    ? t+dT // [St04a], Th. 2.3 for n=1
+	    : std::min((t+dT)/(double)n, (gamma-t)/(n-1.))); // [St04a, Th. 2.3]
   }
 
   template <class IBASIS, unsigned int DIM>

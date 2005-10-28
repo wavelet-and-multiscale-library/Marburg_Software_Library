@@ -9,7 +9,6 @@ using std::endl;
 
 namespace MathTL
 {
-
   template <unsigned int DIM>
   const string AffineLinearMapping<DIM>::className = "AffineLinearMapping";
 

@@ -3,6 +3,7 @@
 #include <cassert>
 #include <algorithm>
 #include <algebra/vector.h>
+#include <algebra/polynomial.h>
 
 namespace MathTL
 {
@@ -116,19 +117,23 @@ namespace MathTL
 
     R r(0);
     
-    // Horner scheme for a shifted Laurent polynomial
-    if (!InfiniteVector<R,int>::empty())
-      r = *rbegin();
-    for (const_reverse_iterator it(rbegin()); it != rend();)
-      {
- 	for (int i((it++).index()); i > it.index(); i--)
- 	  r *= x;
- 	r += *it;
-      }
+    if (!InfiniteVector<R,int>::empty()) {
+      // shift the Laurent polynomial
+      const int startindex = begin().index();
+      Vector<R> coeffs(rbegin().index()-begin().index()+1);
+      for (const_iterator it(begin()), itend(end()); it != itend; ++it)
+	coeffs[it.index()-startindex] = *it;
+      
+      // Horner scheme
+      for (unsigned n(coeffs.size()-1); n > 0; n--)
+	coeffs[n-1] += x*coeffs[n];
 
-     // shift back
-    for (int i(begin().index()); i < 0; i++)
-      r /= x;
+      r = coeffs[0];
+
+      // shift back
+      for (int i(begin().index()); i < 0; i++)
+	r /= x;
+    }
 
     return r;
   }

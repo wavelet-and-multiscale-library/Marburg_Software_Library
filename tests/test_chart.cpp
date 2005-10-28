@@ -49,6 +49,7 @@ int main()
   cout << "  y=" << y2 << " is mapped back to x=" << x2 << endl;
 
   cout << kappa_2 << endl;
+
   //############## tests Manuel ###############
   cout << "Testing class LinearBezierMapping..." << endl;
   cout << endl;

@@ -335,12 +335,6 @@ namespace MathTL
   {
     resize(M.row_dimension(), M.column_dimension());
 
-    entries_ = new C*[rowdim_];
-    indices_ = new size_type*[rowdim_];
-
-    assert(entries_ != NULL);
-    assert(indices_ != NULL);
-
     for (size_type row(0); row < rowdim_; row++) {
       if (M.indices_[row]) {
 	indices_[row] = new size_type[M.indices_[row][0]+1];

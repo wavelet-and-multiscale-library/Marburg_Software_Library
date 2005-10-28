@@ -1,5 +1,6 @@
 #include <iostream>
 #include <list>
+#include <string>
 #include <algebra/matrix.h>
 #include <algebra/triangular_matrix.h>
 #include <algebra/vector.h>
@@ -332,7 +333,8 @@ int main()
   F2.set_entry(1, 1, -2.5);
   cout << F2;
 
-  SparseMatrix<double> F3; F3 = F1 * F2; // to check operator =
+  SparseMatrix<double> F3;
+  F3 = F1 * F2;
   cout << "- matrix product F1*F2:" << endl
        << F3;
 

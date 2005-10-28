@@ -6,8 +6,8 @@
 # +----------------------------------------------------------------+
 
 CXX = g++
-#CXXFLAGS += -I$(MATHTL_DIR) -Wall -pipe
-CXXFLAGS += -O2 -I$(MATHTL_DIR) -Wall -pipe
+CXXFLAGS += -I$(MATHTL_DIR) -Wall -pipe
+#CXXFLAGS += -O2 -I$(MATHTL_DIR) -Wall -pipe
 
 EXEOBJF = \
   test_random.o\

@@ -505,13 +505,17 @@ namespace MathTL
 
     C r(0);
     
-    typename InfiniteVector<C,I>::const_iterator it(begin()), itend(end()),
-      itv(v.begin()), itvend(v.end());
-    for (; it != itend && itv != itvend; ++it)
+    for (typename InfiniteVector<C,I>::const_iterator
+	   it(begin()),
+	   itend(end()),
+	   itv(v.begin()),
+	   itvend(v.end());
+	 it != itend && itv != itvend; ++it)
       {
  	while (itv != itvend && itv.index() < it.index()) ++itv;
- 	if (it.index() == itv.index())
- 	  r += *it * *itv;
+	if (itv != itvend)
+	  if (it.index() == itv.index())
+	    r += *it * *itv;
       }
 
     return r;

@@ -97,6 +97,8 @@ namespace MathTL
     //! constructor from A and b (dimensions should fit)
     AffineLinearMapping(const Matrix<double>& A, const Point<DIM>& b);
 
+    virtual ~AffineLinearMapping() {}
+
     void map_point(const Point<DIM>&, Point<DIM>&) const;
     void map_point_inv(const Point<DIM>&, Point<DIM>&) const;
     const double Gram_factor(const Point<DIM>&) const;
@@ -138,16 +140,11 @@ namespace MathTL
   {
 
   public:
-
-    /*!
-      pureyl virtual destructor
-     */
-    ~LinearBezierMapping () {};
-    
     /*!
       default constructor:
     */
     LinearBezierMapping ();
+
     /*!
       copy constructor
      */
@@ -159,6 +156,11 @@ namespace MathTL
     LinearBezierMapping (const Point<2> &, const Point<2> &,
 			 const Point<2> &, const Point<2> &);
 
+    /*!
+      virtual destructor
+     */
+    ~LinearBezierMapping () {};
+    
     /*!
       assignment operator
     */

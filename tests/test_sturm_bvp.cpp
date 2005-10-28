@@ -78,7 +78,7 @@ int main()
   TestProblem<1> T;
 
   const int d  = 2;
-  const int dT = 4; // be sure to use a continuous dual here, otherwise the RHS test will fail
+  const int dT = 2; // be sure to use a continuous dual here, otherwise the RHS test will fail
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
 

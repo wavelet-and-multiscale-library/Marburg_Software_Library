@@ -82,28 +82,28 @@ namespace FrameTL
     return res;
   }
   
-  /*!
-    Checks whether p lies left of right of or on the line specified by the
-    Points p1 and p2. This line is oriented by the vector starting in p1 and
-    ending in p2.
-    returning 0 means RIGHT OF LINE
-    returning 1 means LEFT OF LINE
-    returning 2 means ON LINE
-   */
-  template <unsigned int DIM>
-  inline
-  const unsigned short int pos_wrt_line (const Point<DIM> p,
-					 const Point<DIM>& p1, const Point<DIM>&  p2)
-  {
-    double d = (p(1)-p1(1)) * (p2(0)-p1(0)) - (p(0)-p1(0)) * (p2(1)-p1(1));
+//   /*!
+//     Checks whether p lies left of right of or on the line specified by the
+//     Points p1 and p2. This line is oriented by the vector starting in p1 and
+//     ending in p2.
+//     returning 0 means RIGHT OF LINE
+//     returning 1 means LEFT OF LINE
+//     returning 2 means ON LINE
+//    */
+//   template <unsigned int DIM>
+//   inline
+//   const unsigned short int pos_wrt_line (const Point<DIM> p,
+// 					 const Point<DIM>& p1, const Point<DIM>&  p2)
+//   {
+//     double d = (p(1)-p1(1)) * (p2(0)-p1(0)) - (p(0)-p1(0)) * (p2(1)-p1(1));
     
-    if( d > 0.0 )
-      return 1;
-    else if (d < 0.0)
-      return 0;
-    else
-      return 2;
-  }
+//     if( d > 0.0 )
+//       return 1;
+//     else if (d < 0.0)
+//       return 0;
+//     else
+//       return 2;
+//   }
 
   /*!
     computes l_2 inner product

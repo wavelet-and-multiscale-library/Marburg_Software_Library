@@ -12,6 +12,8 @@
 #include <cube/cube_basis.h>
 #include <cube/cube_index.h>
 #include <galerkin_frame_utils.h>
+#include <frame_support.h>
+
 
 using std::cout;
 using std::endl;
@@ -146,6 +148,7 @@ int main()
    Basis basis(bcn);
  
    FrameIndex<Basis1D,2,2> index = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0()); 
+
    SampledMapping<2> wav_out = FrameTL::evaluate(frame,index,1,5);
 
    std::ofstream ofs("wav_out.m");
@@ -209,7 +212,11 @@ int main()
    matlab_output(ofs5,U);
    ofs5.close();
 
-
+   //########## testing runtime type information functionality #############
+   //FrameTL::intersect_supports<Basis1D,2,2>(frame, index, index);
+   FrameIndex<Basis1D,2,2> index2 = FrameTL::last_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0()); 
+   //discrete_poisson.a(index,index2,3);
+   //#######################################################################
 
   return 0;
 }

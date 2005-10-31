@@ -18,6 +18,17 @@ using MathTL::EllipticBVP;
 
 namespace FrameTL
 {
+
+  /*!
+    quadrature strategies for computation of
+    stiffness matrix entries
+  */
+  enum QuadratureStrategy
+    {
+      Composite,
+      SplineInterpolation
+    };
+
   /*!
     This class models the (preconditioned) infinite-dimensional matrix problem
     
@@ -58,7 +69,8 @@ namespace FrameTL
       constructor
      */
     EllipticEquation(const EllipticBVP<DIM>* ell_bvp,
-		     const AggregatedFrame<IBASIS,DIM>* frame);
+		     const AggregatedFrame<IBASIS,DIM>* frame,
+		     const QuadratureStrategy qsrtat = Composite);
 
     /*!
       make template argument accessible
@@ -211,6 +223,8 @@ namespace FrameTL
     // a const member function.
     // estimates for ||A|| and ||A^{-1}||
     mutable double normA, normAinv;
+
+    QuadratureStrategy qstrat_; 
 
   };
 }

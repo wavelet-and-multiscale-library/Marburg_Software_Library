@@ -1,9 +1,9 @@
 // implementation for elliptic_equation.h
 
 #include <numerics/gauss_data.h>
-#include <cube/cube_basis.h>
-#include <cube/cube_support.h>
 #include <frame_index.h>
+#include <frame_support.h>
+//#include <cube/cube_support.h>
 
 using WaveletTL::CubeBasis;
 
@@ -12,8 +12,9 @@ namespace FrameTL
 
   template <class IBASIS, unsigned int DIM>
   EllipticEquation<IBASIS,DIM>::EllipticEquation(const EllipticBVP<DIM>* ell_bvp,
-						 const AggregatedFrame<IBASIS,DIM>* frame)
-    : ell_bvp_(ell_bvp), frame_(frame)
+						 const AggregatedFrame<IBASIS,DIM>* frame,
+						 QuadratureStrategy qstrat)
+    : ell_bvp_(ell_bvp), frame_(frame), qstrat_(qstrat_)
   {
     compute_rhs();
   }
@@ -246,9 +247,20 @@ namespace FrameTL
   template <class IBASIS, unsigned int DIM>
   double
   EllipticEquation<IBASIS,DIM>::a_different_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
-						    const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-						    const unsigned int p) const
+						    const typename AggregatedFrame<IBASIS,DIM>::Index& mu,
+						    const unsigned int q) const
   {
+
+    typedef WaveletTL::CubeBasis<IBASIS,DIM> CUBEBASIS;
+ 
+    typename CUBEBASIS::Support supp_lambda;
+    typename CUBEBASIS::Support supp_mu;
+     
+
+
+    //const unsigned int N = 4;
+    //bool b = intersect_supports<IBASIS,2,2>(*frame_, lambda, mu, supp_lambda, supp_mu);
+
     return 0.0;
   }
 
@@ -259,9 +271,11 @@ namespace FrameTL
 				  const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
 				  const unsigned int p) const
   {
+    
     //the cases lambda.p() == nu.p() and lambda.p() != nu.p() have
     //to be treated seperately
     return lambda.p() == nu.p() ? a_same_patches(lambda, nu, p) : a_different_patches(lambda, nu, p);
+    
   }
 
   template <class IBASIS, unsigned int DIM>

@@ -49,26 +49,28 @@ namespace MathTL
   SparseMatrix<C>::SparseMatrix(const SparseMatrix<C>& M)
     : rowdim_ (M.row_dimension()), coldim_(M.column_dimension())
   {
-    entries_ = new C*[rowdim_];
-    indices_ = new size_type*[rowdim_];
-
-    assert(entries_ != NULL);
-    assert(indices_ != NULL);
-
-    for (size_type row(0); row < rowdim_; row++) {
-      if (M.indices_[row]) {
-	indices_[row] = new size_type[M.indices_[row][0]+1];
-	assert(indices_[row] != NULL);
-	for (size_type j(0); j <= M.indices_[row][0]; j++)
-	  indices_[row][j] = M.indices_[row][j];
-	
-	entries_[row] = new C[indices_[row][0]];
-	assert(entries_[row] != NULL);
-	for (size_type j(0); j < indices_[row][0]; j++)
-	  entries_[row][j] = M.entries_[row][j];
-      } else {
-	indices_[row] = NULL;
-	entries_[row] = NULL;
+    if (this != &M) {
+      entries_ = new C*[rowdim_];
+      indices_ = new size_type*[rowdim_];
+      
+      assert(entries_ != NULL);
+      assert(indices_ != NULL);
+      
+      for (size_type row(0); row < rowdim_; row++) {
+	if (M.indices_[row]) {
+	  indices_[row] = new size_type[M.indices_[row][0]+1];
+	  assert(indices_[row] != NULL);
+	  for (size_type j(0); j <= M.indices_[row][0]; j++)
+	    indices_[row][j] = M.indices_[row][j];
+	  
+	  entries_[row] = new C[indices_[row][0]];
+	  assert(entries_[row] != NULL);
+	  for (size_type j(0); j < indices_[row][0]; j++)
+	    entries_[row][j] = M.entries_[row][j];
+	} else {
+	  indices_[row] = NULL;
+	  entries_[row] = NULL;
+	}
       }
     }
   }
@@ -76,7 +78,11 @@ namespace MathTL
   template <class C>
   SparseMatrix<C>::~SparseMatrix()
   {
+//     cout << "~SparseMatrix() called for matrix" << endl;
+//     cout << *this << endl;
+//     cout << "indices_[0]=" << indices_[0] << endl;
     kill();
+//     cout << "... done!" << endl;
   }
 
   template <class C>
@@ -130,15 +136,15 @@ namespace MathTL
     rowdim_ = m;
     coldim_ = n;
 
-    entries_ = new C*[m];
     indices_ = new size_type*[m];
+    entries_ = new C*[m];
     
-    assert(entries_ != NULL);
     assert(indices_ != NULL);
+    assert(entries_ != NULL);
 
     for (size_type row(0); row < m; row++) {
-	entries_[row] = NULL;
-	indices_[row] = NULL;
+      indices_[row] = NULL;
+      entries_[row] = NULL;
     }
   }
 
@@ -333,22 +339,24 @@ namespace MathTL
   SparseMatrix<C>&
   SparseMatrix<C>::operator = (const SparseMatrix<C>& M)
   {
-    resize(M.row_dimension(), M.column_dimension());
-
-    for (size_type row(0); row < rowdim_; row++) {
-      if (M.indices_[row]) {
-	indices_[row] = new size_type[M.indices_[row][0]+1];
-	assert(indices_[row] != NULL);
-	for (size_type j(0); j <= M.indices_[row][0]; j++)
-	  indices_[row][j] = M.indices_[row][j];
-	
-	entries_[row] = new C[indices_[row][0]];
-	assert(entries_[row] != NULL);
-	for (size_type j(0); j < indices_[row][0]; j++)
-	  entries_[row][j] = M.entries_[row][j];
-      } else {
-	indices_[row] = NULL;
-	entries_[row] = NULL;
+    if (this != &M) {
+      resize(M.row_dimension(), M.column_dimension());
+      
+      for (size_type row(0); row < rowdim_; row++) {
+	if (M.indices_[row]) {
+	  indices_[row] = new size_type[M.indices_[row][0]+1];
+	  assert(indices_[row] != NULL);
+	  for (size_type j(0); j <= M.indices_[row][0]; j++)
+	    indices_[row][j] = M.indices_[row][j];
+	  
+	  entries_[row] = new C[indices_[row][0]];
+	  assert(entries_[row] != NULL);
+	  for (size_type j(0); j < indices_[row][0]; j++)
+	    entries_[row][j] = M.entries_[row][j];
+	} else {
+	  indices_[row] = NULL;
+	  entries_[row] = NULL;
+	}
       }
     }
 

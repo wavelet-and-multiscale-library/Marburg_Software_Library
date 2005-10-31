@@ -11,6 +11,14 @@ namespace WaveletTL
   }
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  CubeEquation<IBASIS,DIM,CUBEBASIS>::CubeEquation(const CubeEquation& eq)
+    : bvp_(eq.bvp_), basis_(eq.basis_),
+      fcoeffs(eq.fcoeffs), fnorm_sqr(eq.fnorm_sqr),
+      normA(eq.normA), normAinv(eq.normAinv)
+  {
+  }
+
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
   void
   CubeEquation<IBASIS,DIM,CUBEBASIS>::compute_rhs()
   {
@@ -21,7 +29,7 @@ namespace WaveletTL
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
     const int j0   = basis().j0();
-    const int jmax = 7; // for a first quick hack
+    const int jmax = 6; // for a first quick hack
     for (Index lambda(basis_.first_generator(j0));; ++lambda)
       {
 	const double coeff = f(lambda)/D(lambda);
@@ -32,7 +40,7 @@ namespace WaveletTL
       }
     fnorm_sqr = l2_norm_sqr(fhelp);
 
-    cout << "... done, all integrals for right-hand side computed" << endl;
+    cout << "... done, sort the entries in modulus..." << endl;
 
     // sort the coefficients into fcoeffs
     fcoeffs.resize(0); // clear eventual old values
@@ -42,6 +50,7 @@ namespace WaveletTL
 	 it != itend; ++it, ++id)
       fcoeffs[id] = std::pair<Index,double>(it.index(), *it);
     sort(fcoeffs.begin(), fcoeffs.end(), typename InfiniteVector<double,Index>::decreasing_order());
+    cout << "... done, all integrals for right-hand side computed!" << endl;
   }
   
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>

@@ -30,18 +30,53 @@ namespace WaveletTL
     used within the APPLY routine.
   */
   template <class PROBLEM>
-    class CachedProblem: public PROBLEM
+    class CachedProblem
     {
     public:
       /*!
-	default constructor
+	constructor from an uncached problem
       */
-      CachedProblem(const PROBLEM& P);
+      CachedProblem(const PROBLEM* P);
       
       /*!
 	make wavelet basis type accessible
       */
       typedef typename PROBLEM::WaveletBasis WaveletBasis;
+
+      /*!
+	read access to the basis
+      */
+      const WaveletBasis& basis() const { return problem->basis(); }
+      
+      /*!
+	space dimension of the problem
+      */
+      static int space_dimension() { return PROBLEM::space_dimension(); }
+      
+      /*!
+	locality of the operator
+      */
+      static bool local_operator() { return PROBLEM::local_operator(); }
+      
+      /*!
+	(half) order t of the operator
+      */
+      static int operator_order() { return PROBLEM::operator_order(); }
+      
+      /*!
+	evaluate the diagonal preconditioner D
+      */
+      double D(const typename WaveletBasis::Index& lambda) const {
+	return problem->D(lambda);
+      }
+      
+      /*!
+	rescale a coefficient vector by an integer power of D, c |-> D^{n}c
+      */
+      void rescale(InfiniteVector<double,typename WaveletBasis::Index>& coeffs,
+		   const int n) const {
+	problem->rescale(coeffs, n);
+      }
 
       /*!
 	evaluate the (unpreconditioned) bilinear form a
@@ -59,16 +94,48 @@ namespace WaveletTL
 	estimate the spectral norm ||A^{-1}||
       */
       double norm_Ainv() const;
-      
+
+      /*!
+	estimate compressibility exponent s^*
+	(we assume that the coefficients a(x),q(x) are smooth)
+      */
+      double s_star() const {
+	return problem->s_star();
+      }
+    
       /*!
 	estimate the compression constants alpha_k in
         ||A-A_k|| <= alpha_k * 2^{-s*k}
       */
       double alphak(const unsigned int k) const {
-	return 2*norm_A(); // suboptimal
+ 	return 2*norm_A(); // pessimistic
       }
 
+      /*!
+	evaluate the (unpreconditioned) right-hand side f
+      */
+      double f(const typename WaveletBasis::Index& lambda) const {
+	return problem->f(lambda);
+      }
+
+      /*!
+	approximate the wavelet coefficient set of the preconditioned right-hand side F
+	within a prescribed \ell_2 error tolerance
+      */
+      void RHS(const double eta,
+	       InfiniteVector<double,typename WaveletBasis::Index>& coeffs) const {
+	problem->RHS(eta, coeffs);
+      }
+      
+      /*!
+	compute (or estimate) ||F||_2
+      */
+      double F_norm() const { return problem->F_norm(); }
+      
     protected:
+      //! the underlying (uncached) problem
+      const PROBLEM* problem;
+
       // type of one column in the entry cache of A
       typedef std::map<typename WaveletBasis::Index, double> Column;
       

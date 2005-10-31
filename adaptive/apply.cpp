@@ -109,7 +109,7 @@ namespace WaveletTL
       cout << "* in APPLY, s=" << s << endl;
       while (true) {
 //  	cout << "* in APPLY, checking J=" << J << "..." << endl;
-	double check = 0;
+	double check = 0.0;
 	unsigned int k = 0;
 	for (std::list<double>::const_iterator it(vks_norm.begin()); k <= ell; ++it, ++k)
 	  check += P.alphak(J-k) * pow(ldexp(1.0,J-k),-s) * (*it);
@@ -118,12 +118,12 @@ namespace WaveletTL
       }
       cout << "* in APPLY, J=" << J << endl;
 
-      unsigned int ncols = 0; k = 0;
-      for (typename std::list<std::list<std::pair<Index, double> > >::const_iterator it(vks.begin());
-  	   k <= ell; ++it, ++k)
-  	for (typename std::list<std::pair<Index, double> >::const_iterator itk(it->begin());
-  	     itk != it->end(); ++itk)
-  	  ncols++;
+//       unsigned int ncols = 0; k = 0;
+//       for (typename std::list<std::list<std::pair<Index, double> > >::const_iterator it(vks.begin());
+//   	   k <= ell; ++it, ++k)
+//   	for (typename std::list<std::pair<Index, double> >::const_iterator itk(it->begin());
+//   	     itk != it->end(); ++itk)
+//   	  ncols++;
       
       // compute w = \sum_{k=0}^\ell A_{J-k}v_{[k]}
 //       cout << "* in APPLY, collect all " << ncols << " active columns..." << endl;

@@ -22,6 +22,8 @@ using MathTL::EllipticBVP;
 
 namespace WaveletTL
 {
+  template <class IBASIS, unsigned int DIM> class CubeBasis;
+
   /*!
     This class models the (preconditioned) infinite-dimensional matrix problem
     
@@ -59,7 +61,7 @@ namespace WaveletTL
     where bc indicates the enforcement of homogeneous Dirichlet boundary conditions (true).
     A natural concrete value for CUBEBASIS is the CubeBasis<DSBasis<d,dT> >.
   */
-  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS = CubeBasis<IBASIS,DIM> >
   class CubeEquation
   {
   public:
@@ -68,6 +70,11 @@ namespace WaveletTL
     */
     CubeEquation(const EllipticBVP<DIM>* bvp,
 		 const FixedArray1D<bool,2*DIM>& bc);
+
+    /*!
+      copy constructor
+    */
+    CubeEquation(const CubeEquation&);
 
     /*!
       make template argument accessible

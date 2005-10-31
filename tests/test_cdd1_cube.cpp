@@ -52,23 +52,23 @@ int main()
 {
   cout << "Testing adaptive wavelet-Galerkin solution of a Poisson problem on the cube with CDD1_SOLVE ..." << endl;
 
-  const int d  = 2;
-  const int dT = 2;
+  const int d  = 3;
+  const int dT = 3;
   typedef DSBasis<d,dT> Basis1D;
   typedef CubeBasis<Basis1D,2> Basis;
   typedef Basis::Index Index;
 
-  TestRHS<2> rhs;
+  TestRHS<1> rhs;
   PoissonBVP<2> poisson(&rhs);
 
   FixedArray1D<bool,4> bc;
   bc[0] = bc[1] = bc[2] = bc[3] = true;
   typedef CubeEquation<Basis1D,2,Basis> Problem;
   Problem problem(&poisson, bc);
-  CachedProblem<Problem> cproblem(problem);
+  CachedProblem<Problem> cproblem(&problem);
 
   InfiniteVector<double, Index> u_epsilon;
-  CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 6);
+  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 7);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 10);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 6, CDD1);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon);

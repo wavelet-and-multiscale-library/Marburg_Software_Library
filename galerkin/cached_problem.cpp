@@ -7,8 +7,8 @@
 namespace WaveletTL
 {
   template <class PROBLEM>
-  CachedProblem<PROBLEM>::CachedProblem(const PROBLEM& P)
-    : PROBLEM(P), normA(0), normAinv(0)
+  CachedProblem<PROBLEM>::CachedProblem(const PROBLEM* P)
+    : problem(P), normA(0.0), normAinv(0.0)
   {
   }
 
@@ -40,8 +40,8 @@ namespace WaveletTL
 	col.key_comp()(nu, lb->first))
       {
 	// compute the entry ...
-	r = PROBLEM::a(lambda, nu);
-	// ... and insert it in the cache
+	r = problem->a(lambda, nu);
+	// ... and insert it into the cache
 	typedef typename Column::value_type value_type;
 	it = col.insert(lb, value_type(nu, r));
       }
@@ -60,11 +60,11 @@ namespace WaveletTL
 
       typedef typename WaveletBasis::Index Index;
       std::set<Index> Lambda;
-      const int j0 = PROBLEM::basis().j0();
+      const int j0 = problem->basis().j0();
       const int jmax = j0+1;
-      for (Index lambda = PROBLEM::basis().first_generator(j0);; ++lambda) {
+      for (Index lambda = problem->basis().first_generator(j0);; ++lambda) {
 	Lambda.insert(lambda);
-	if (lambda == PROBLEM::basis().last_wavelet(jmax)) break;
+	if (lambda == problem->basis().last_wavelet(jmax)) break;
       }
       SparseMatrix<double> A_Lambda;
       setup_stiffness_matrix(*this, Lambda, A_Lambda);
@@ -89,11 +89,11 @@ namespace WaveletTL
 
       typedef typename WaveletBasis::Index Index;
       std::set<Index> Lambda;
-      const int j0 = PROBLEM::basis().j0();
+      const int j0 = problem->basis().j0();
       const int jmax = j0+1;
-      for (Index lambda = PROBLEM::basis().first_generator(j0);; ++lambda) {
+      for (Index lambda = problem->basis().first_generator(j0);; ++lambda) {
 	Lambda.insert(lambda);
-	if (lambda == PROBLEM::basis().last_wavelet(jmax)) break;
+	if (lambda == problem->basis().last_wavelet(jmax)) break;
       }
       SparseMatrix<double> A_Lambda;
       setup_stiffness_matrix(*this, Lambda, A_Lambda);

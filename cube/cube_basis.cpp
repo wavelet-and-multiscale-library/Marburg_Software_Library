@@ -15,7 +15,7 @@ namespace WaveletTL
       bases_[i] = b;
     j0_ = bases_[0]->j0();
   }
-  
+
   template <class IBASIS, unsigned int DIM>
   CubeBasis<IBASIS,DIM>::CubeBasis(const FixedArray1D<int,2*DIM>& s,
 				   const FixedArray1D<int,2*DIM>& sT) {

@@ -18,7 +18,7 @@ namespace WaveletTL
 	     const int jmax,
 	     const CompressionStrategy strategy)
   {
-    cout << "APPLY called..." << endl;
+//     cout << "APPLY called..." << endl;
 
     typedef typename PROBLEM::WaveletBasis::Index Index;
 
@@ -106,7 +106,7 @@ namespace WaveletTL
       //   \sum_{k=0}^{\ell} alpha_{J-k}*2^{-s(J-k)}*||v_{[k]}|| <= (1-theta) * eta
       unsigned int J = ell;
       const double s = P.s_star();
-      cout << "* in APPLY, s=" << s << endl;
+//       cout << "* in APPLY, s=" << s << endl;
       while (true) {
 //  	cout << "* in APPLY, checking J=" << J << "..." << endl;
 	double check = 0.0;
@@ -116,7 +116,7 @@ namespace WaveletTL
 	if (check <= (1-theta)*eta) break;
 	J++;
       }
-      cout << "* in APPLY, J=" << J << endl;
+//       cout << "* in APPLY, J=" << J << endl;
 
 //       unsigned int ncols = 0; k = 0;
 //       for (typename std::list<std::list<std::pair<Index, double> > >::const_iterator it(vks.begin());

@@ -65,10 +65,16 @@ int main()
   bc[0] = bc[1] = bc[2] = bc[3] = true;
   typedef CubeEquation<Basis1D,2,Basis> Problem;
   Problem problem(&poisson, bc);
-  CachedProblem<Problem> cproblem(&problem);
+//   CachedProblem<Problem> cproblem(&problem);
+//   CachedProblem<Problem> cproblem(&problem, 19.9458,    6.86045); // d=2, dT=2
+//   CachedProblem<Problem> cproblem(&problem, 29.8173,   25.6728 ); // d=2, dT=4
+  CachedProblem<Problem> cproblem(&problem, 8.50996, 6443.75   ); // d=3, dT=3
+  cout << "* estimate for normA: " << cproblem.norm_A() << endl;
+  cout << "* estimate for normAinv: " << cproblem.norm_Ainv() << endl;
 
   InfiniteVector<double, Index> u_epsilon;
-  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 7);
+  CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 6);
+//   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 7);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 10);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 6, CDD1);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon);

@@ -92,21 +92,25 @@ int main()
 
   TestProblem<3> T;
 
-  const int d  = 2;
-  const int dT = 2;
+  const int d  = 3;
+  const int dT = 3;
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
   SturmEquation<Basis> problem(T);
-  CachedProblem<SturmEquation<Basis> > cproblem(&problem);
-
-//   InfiniteVector<double, Index> F_eta;
-//   problem.RHS(1e-6, F_eta);
-//   const double nu = problem.norm_Ainv() * l2_norm(F_eta);
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem);
+  CachedProblem<SturmEquation<Basis> > cproblem(&problem, 12.2508, 6.41001); // d=2, dT=2
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 15.6711, 25.9767); // d=2, dT=4
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 6.73618, 45.5762); // d=3, dT=3
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 13.5193, 103.532); // d=3, dT=5
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 38.4615, 251.849); // d=3, dT=7
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 5.84624, 532.085); // d=4, dT=4
+  cout << "* estimate for normA: " << cproblem.norm_A() << endl;
+  cout << "* estimate for normAinv: " << cproblem.norm_Ainv() << endl;
 
   InfiniteVector<double, Index> u_epsilon;
-  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 8);
-//   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 12);
+//   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 8);
+  CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 12);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon);
   
   return 0;

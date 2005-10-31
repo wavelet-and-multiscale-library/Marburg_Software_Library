@@ -7,8 +7,10 @@
 namespace WaveletTL
 {
   template <class PROBLEM>
-  CachedProblem<PROBLEM>::CachedProblem(const PROBLEM* P)
-    : problem(P), normA(0.0), normAinv(0.0)
+  CachedProblem<PROBLEM>::CachedProblem(const PROBLEM* P,
+					const double estnormA,
+					const double estnormAinv)
+    : problem(P), normA(estnormA), normAinv(estnormAinv)
   {
   }
 

@@ -34,9 +34,13 @@ namespace WaveletTL
     {
     public:
       /*!
-	constructor from an uncached problem
+	constructor from an uncached problem,
+	you can specify the estimates for ||A|| and ||A^{-1}||
+	(if zero, CachedProblem will compute the estimates)
       */
-      CachedProblem(const PROBLEM* P);
+      CachedProblem(const PROBLEM* P,
+		    const double normA = 0.0,
+		    const double normAinv = 0.0);
       
       /*!
 	make wavelet basis type accessible

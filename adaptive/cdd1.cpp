@@ -75,7 +75,8 @@ namespace WaveletTL
 	  u_epsilon.swap(v_hat);
 	  Lambda.swap(Lambda_hat);
 	}
-      delta *= 0.5;
+      delta *= 0.5; // orginal
+//       delta *= 0.1; // tuned
     }
 
     cout << "CDD1_SOLVE: done!" << endl;

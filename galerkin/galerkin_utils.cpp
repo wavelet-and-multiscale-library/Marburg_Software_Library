@@ -24,11 +24,13 @@ namespace WaveletTL
 	for (typename std::set<Index>::const_iterator it2(Lambda.begin());
 	     it2 != itend; ++it2, ++column)
 	  {
-	    double entry = P.a(*it2, *it1);
-	    if (entry != 0) {
-	      indices.push_back(column);
-	      entries.push_back(entry / (d1 * P.D(*it2)));
-	    }
+// 	    if (intersect_singular_support(P.basis(), *it1, *it2)) {
+	      double entry = P.a(*it2, *it1);
+	      if (entry != 0) {
+		indices.push_back(column);
+		entries.push_back(entry / (d1 * P.D(*it2)));
+	      }
+// 	    }
 	  }
 	
 	A_Lambda.set_row(row, indices, entries);

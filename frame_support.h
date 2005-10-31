@@ -17,12 +17,10 @@
 #include <geometry/point.h>
 #include <cube/cube_basis.h>
 
-using namespace WaveletTL;
+using WaveletTL::CubeBasis;
 
 namespace FrameTL
 {
-
-  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m> class AggregatedFrame;
 
   /*!
   */
@@ -33,10 +31,6 @@ namespace FrameTL
 			  typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda,
 			  typename CubeBasis<IBASIS,DIM_d>::Support& supp_mu);
 
-// 0 = no intersection
-// 1 = infinitely many intersection points (= overlapping edges on a straight line)
-// 2 = single intersection point, but at least one knot involved
-// 3 = single intersection point in the inner of both line segments
   /*!
     tests wether the line segments defined by the points
     A and B as well as C and D intersect.

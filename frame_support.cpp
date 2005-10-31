@@ -35,8 +35,8 @@ namespace FrameTL
   intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 		     const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 		     const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu,
-		     typename CubeBasis<IBASIS,DIM>::Support& supp_lambda,
-		     typename CubeBasis<IBASIS,DIM>::Support& supp_mu)
+		     typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda,
+		     typename CubeBasis<IBASIS,DIM_d>::Support& supp_mu)
   {
     // both charts are LinearBezierMappings
     if ( typeid(*frame.atlas()->charts()[lambda.p()]) ==
@@ -44,6 +44,7 @@ namespace FrameTL
 	 typeid(*frame.atlas()->charts()[mu.p()])     == 
 	 typeid(LinearBezierMapping))
       {
+
 
 	typedef WaveletTL::CubeBasis<IBASIS,DIM_d> CUBEBASIS;
 	
@@ -60,7 +61,6 @@ namespace FrameTL
   
 	const double dx1 = 1.0 / (1 << supp_lambda.j);
 	const double dx2 = 1.0 / (1 << supp_mu.j);
-
 
 	FixedArray1D<Point<2>,4 > poly1;
 	FixedArray1D<Point<2>,4 > poly2;
@@ -80,7 +80,7 @@ namespace FrameTL
 	frame.atlas()->charts()[mu.p()]->map_point(Point<2>(supp_mu.a[0]*dx2,supp_mu.b[1]*dx2), poly2[2]);
 	frame.atlas()->charts()[mu.p()]->map_point(Point<2>(supp_mu.b[0]*dx2,supp_mu.b[1]*dx2), poly2[3]);
 
- 
+
  	bool result;
  	Point<DIM_m> p11;
  	Point<DIM_m> p12;
@@ -93,7 +93,7 @@ namespace FrameTL
  	  result = true;
  	  p11 = poly1[i-1];
  	  p12 = poly1[i];
- 	  for (unsigned int j = 2; j <= 4; j++) {
+ 	  for (unsigned int j = 1; j <= 3; j++) {
  	    tmp = edgesIntersect(p11, p12, poly2[j-1], poly2[j]);
  	    if (tmp == 1)
  	      countspez++;
@@ -112,7 +112,7 @@ namespace FrameTL
 	
 	p11 = poly1[3];
 	p12 = poly1[0];
-	for (unsigned int j = 2; j <= 4; j++) {
+	for (unsigned int j = 1; j <= 3; j++) {
 	  tmp = edgesIntersect(p11, p12, poly2[j-1], poly2[j]);
 	  if (tmp == 1)
 	    countspez++;
@@ -138,7 +138,7 @@ namespace FrameTL
 	tmp = 0;
 	
 	//loop over all points knots of the second polygon
-	for (unsigned int i = 1; i <= 4; i++) {
+	for (unsigned int i = 0; i <= 3; i++) {
 		
 	  result = true;
 	  tmp = FrameTL::pos_wrt_line(poly2[i], poly1[3], poly1[0]);
@@ -149,7 +149,7 @@ namespace FrameTL
 	    continue;
 	  }
 		
-	  for (unsigned int j = 2; j<= 4 ; j++) {
+	  for (unsigned int j = 1; j<= 3 ; j++) {
 	    tmp = FrameTL::pos_wrt_line(poly2[i], poly1[j-1], poly1[j]);
 	    if (tmp == 1)
 	      countspez++;
@@ -166,7 +166,7 @@ namespace FrameTL
 	
 	//the same with swapped order of the 
 	//loop over all points knots of the second polygon
-	for (unsigned int i = 1; i <= 4; i++) {
+	for (unsigned int i = 0; i <= 3; i++) {
 		
 	  result = true;
 	  tmp = FrameTL::pos_wrt_line(poly1[i], poly2[3], poly2[0]);
@@ -177,7 +177,7 @@ namespace FrameTL
 	    continue;
 	  }
 		
-	  for (unsigned int j = 2; j<= 4 ; j++) {
+	  for (unsigned int j = 1; j<= 3 ; j++) {
 	    tmp = FrameTL::pos_wrt_line(poly1[i], poly2[j-1], poly2[j]);
 	    if (tmp == 1)
 	      countspez++;
@@ -193,8 +193,6 @@ namespace FrameTL
 	}//end outer for
 
 	return false;
-
-
       }
     else return false;
   }

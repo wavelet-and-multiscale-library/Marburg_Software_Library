@@ -30,7 +30,7 @@ namespace FrameTL
 	      entries.push_back(entry / (d1 * P.D(*it2)));
 	    }
 	  }
-	
+	cout << "row = " << row << endl;
 	A_Lambda.set_row(row, indices, entries);
       }
   }

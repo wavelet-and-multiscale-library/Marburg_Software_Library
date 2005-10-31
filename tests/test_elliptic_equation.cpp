@@ -56,22 +56,27 @@ int main()
   //##############################
 
   //##############################
-  LinearBezierMapping bezierP(Point<2>(-1.4,-1),Point<2>(-1.,1),
-			      Point<2>(0.,-1.), Point<2>(0,1.));
+  LinearBezierMapping bezierP(Point<2>(-1.,-1.),Point<2>(-1.,1.),
+			      Point<2>(0.,-1.), Point<2>(0.,1.));
+
+  LinearBezierMapping bezierP2(Point<2>(-1.,-1.),Point<2>(-1.,0.),
+			      Point<2>(1.,-1.), Point<2>(1.,0.));
+
   //##############################
-  Array1D<Chart<DIM,DIM>* > charts(1);
-  charts[0] = &affineP;
-  //charts[1] = &affineP;
+  Array1D<Chart<DIM,DIM>* > charts(2);
   charts[0] = &bezierP;
+  //charts[1] = &affineP;
+  charts[1] = &bezierP2;
   
 
-  SymmetricMatrix<bool> adj(1);
+  SymmetricMatrix<bool> adj(2);
   adj(0,0) = 1;
-  // adj(1,1) = 1;
-  //adj(1,0) = 1;
+  adj(1,1) = 1;
+  adj(1,0) = 1;
+  adj(0,1) = 1;
 
   //to specify primal boundary the conditions
-  Array1D<FixedArray1D<int,2*DIM> > bc(1);
+  Array1D<FixedArray1D<int,2*DIM> > bc(2);
 
   //primal boundary conditions for first patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_1;
@@ -89,10 +94,10 @@ int main()
   bound_2[2] = 1;
   bound_2[3] = 1;
 
-  //bc[1] = bound_2;
+  bc[1] = bound_2;
 
 //to specify primal boundary the conditions
-  Array1D<FixedArray1D<int,2*DIM> > bcT(1);
+  Array1D<FixedArray1D<int,2*DIM> > bcT(2);
 
   //dual boundary conditions for first patch
   FixedArray1D<int,2*DIM> bound_3;
@@ -110,7 +115,7 @@ int main()
   bound_4[2] = 0;
   bound_4[3] = 0;
  
-  //bcT[1] = bound_4;
+  bcT[1] = bound_4;
 
   Atlas<DIM,DIM> Lshaped(charts,adj);  
   cout << Lshaped << endl;
@@ -128,8 +133,8 @@ int main()
 
   CornerSingularityRHS singRhs(origin, 0.5 * M_PI, 1.5);
   
-  //PoissonBVP<DIM> poisson(&singRhs);
-  PoissonBVP<DIM> poisson(&const_fun);
+  PoissonBVP<DIM> poisson(&singRhs);
+  //PoissonBVP<DIM> poisson(&const_fun);
 
   EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame);
 
@@ -195,7 +200,8 @@ int main()
    cout << "perfrming CG algorithm to solve projected problem..." << endl;
    Vector<double> xk(Lambda.size()), err(Lambda.size()); xk = 0;
    unsigned int iter= 0;
-   CG(stiff, rh, xk, 0.0001, 200, iter);
+   //CG(stiff, rh, xk, 0.0001, 200, iter);
+   Richardson(stiff, rh, xk, 0.05, 0.01, 300, iter);
    
    cout << "performing output..." << endl;
 
@@ -214,7 +220,7 @@ int main()
 
    //########## testing runtime type information functionality #############
    //FrameTL::intersect_supports<Basis1D,2,2>(frame, index, index);
-   FrameIndex<Basis1D,2,2> index2 = FrameTL::last_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0()); 
+   //FrameIndex<Basis1D,2,2> index2 = FrameTL::last_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0()); 
    //discrete_poisson.a(index,index2,3);
    //#######################################################################
 

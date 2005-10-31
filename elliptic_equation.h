@@ -118,7 +118,7 @@ namespace FrameTL
     */
     double a(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
 	     const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-	     const unsigned int p = 4) const;
+	     const unsigned int p = 2) const;
 
     /*!
       estimate the spectral norm ||A||

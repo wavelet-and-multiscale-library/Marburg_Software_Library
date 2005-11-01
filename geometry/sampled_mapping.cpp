@@ -49,6 +49,50 @@ namespace MathTL
   {
   }
   
+  SampledMapping<1>::SampledMapping(const Chart<1>& ch,
+				    const FixedArray1D<Array1D<double>,1>& values,
+				    const unsigned int resolution)
+  {
+    const unsigned int n_points = (1 << resolution)+1;
+    const double h = 1.0 / (n_points-1);
+    
+    Point<1> x;
+    Point<1> x_patch;
+    
+    grid_.resize(n_points);
+
+    for (unsigned int i = 0; i < n_points; i++) {
+      x[0] = h*i;
+      ch.map_point(x,x_patch);  
+      grid_[i] = x_patch[0];
+    }
+    
+    for (unsigned int i = 0; i < n_points; i++)
+      values_[i] = values[0][i] / ch.Gram_factor(x);    
+  }
+
+  SampledMapping<1>::SampledMapping(const Chart<1>& ch,
+				    const unsigned int resolution)
+
+  {
+    const unsigned int n_points = (1 << resolution)+1;
+    const double h = 1.0 / (n_points-1);
+    
+    Point<1> x;
+    Point<1> x_patch;
+    
+    grid_.resize(n_points);
+
+    for (unsigned int i = 0; i < n_points; i++) {
+      x[0] = h*i;
+      ch.map_point(x,x_patch);  
+      grid_[i] = x_patch[0];
+    }
+    
+    for (unsigned int i = 0; i < grid_.size(); i++)
+      values_[i] = 0;
+  }
+
   SampledMapping<1>& 
   SampledMapping<1>::operator = (const SampledMapping<1>& sm)
   {
@@ -132,6 +176,75 @@ namespace MathTL
 	values_(m,n) = values[0][m] * values[1][n];
   }
 
+  SampledMapping<2>::SampledMapping(const Chart<2>& ch,
+				    const FixedArray1D<Array1D<double>,2>& values,
+				    const unsigned int resolution)
+  {
+
+    const unsigned int  n_points = (1 << resolution)+1;
+    const double h = 1.0 / (n_points-1);
+    
+    Point<2> x;
+    Point<2> x_patch;
+    
+    gridx_.resize(n_points,n_points);
+    gridy_.resize(n_points,n_points);
+
+    values_.resize(n_points,n_points);
+
+    // setup grid
+    for (unsigned int i = 0; i < n_points; i++) {
+      x[0] = h*i;
+     for (unsigned int j = 0; j < n_points; j++) {
+       x[1] = h*j;
+       ch.map_point(x,x_patch);
+       gridx_.set_entry(i,j,x_patch[0]);
+       gridy_.set_entry(i,j,x_patch[1]);
+       values_.set_entry(i,j,(values[0][i] * values[1][j]) / ch.Gram_factor(x));
+     }
+    }
+
+//      values_.resize(n_points,n_points);
+//      // setup values
+//      for (unsigned int i = 0; i < n_points; i++) {
+//        x[0] = h*i;
+//        for (unsigned int j = 0; j < n_points; j++) {
+// 	 x[1] = h*j;
+// 	 values_.set_entry(i,j,(values[0][i] * values[1][j]) / ch.Gram_factor(x));
+//        }
+//      }
+  }
+
+  SampledMapping<2>::SampledMapping(const Chart<2>& ch,
+				    const unsigned int resolution)
+
+  {
+    
+    const unsigned int  n_points = (1 << resolution)+1;
+    const double h = 1.0 / (n_points-1);
+    
+    Point<2> x;
+    Point<2> x_patch;
+    
+    gridx_.resize(n_points,n_points);
+    gridy_.resize(n_points,n_points);
+    
+    // setup grid
+    for (unsigned int i = 0; i < n_points; i++) {
+      x[0] = h*i;
+      for (unsigned int j = 0; j < n_points; j++) {
+	x[1] = h*j;
+	ch.map_point(x,x_patch);
+	gridx_.set_entry(i,j,x_patch[0]);
+	gridy_.set_entry(i,j,x_patch[1]);
+      }
+    }
+
+    values_.resize(gridx_.row_dimension(), gridx_.column_dimension());    
+    
+  }
+
+
   SampledMapping<2>&
   SampledMapping<2>::operator = (const SampledMapping<2>& sm)
   {
@@ -169,5 +282,19 @@ namespace MathTL
     os << ";"
        << std::endl;
   }
+
+  template <unsigned int DIM>
+  void matlab_output(std::ostream& os,
+		     const Array1D<SampledMapping<DIM> >& values)
+  {
+    for (unsigned int i = 0; i < values.size(); i++) {
+      values[i].matlab_output(os);
+      os << "hold on" << std::endl
+	 << "surf(x,y,z)" << std::endl;
+      if (i == values.size()-1)
+	os << "hold off" << std::endl;
+    }
+  }
+
   
 }

@@ -413,10 +413,10 @@ namespace MathTL
   inline
   const double LinearBezierMapping::det_DKappa(const Point<2>& p) const
   {
-    return (p(1) * d_ds_d_dt_kappa_r(0) + min_b00_plus_b10(0)) * 
-      (p(0) * d_ds_d_dt_kappa_r(1) + min_b00_plus_b01(1)) -
-      (p(1) * d_ds_d_dt_kappa_r(1) + min_b00_plus_b10(1)) *
-      (p(0) * d_ds_d_dt_kappa_r(0) + min_b00_plus_b01(0));
+    return (p[1] * d_ds_d_dt_kappa_r[0] + min_b00_plus_b10[0]) * 
+      (p[0] * d_ds_d_dt_kappa_r[1] + min_b00_plus_b01[1]) -
+      (p[1] * d_ds_d_dt_kappa_r[1] + min_b00_plus_b10[1]) *
+      (p[0] * d_ds_d_dt_kappa_r[0] + min_b00_plus_b01[0]);
     
   }
 
@@ -437,30 +437,27 @@ namespace MathTL
 
     switch(i) {
     case 0:
-        partial_i_det_DKappa = (p(1) * d_ds_d_dt_kappa_r(0) + min_b00_plus_b10(0)) * d_ds_d_dt_kappa_r(1)
+        partial_i_det_DKappa = (p[1] * d_ds_d_dt_kappa_r[0] + min_b00_plus_b10[0]) * d_ds_d_dt_kappa_r[1]
 	 -
-	 (p(1) * d_ds_d_dt_kappa_r(1) + min_b00_plus_b10(1)) *  d_ds_d_dt_kappa_r(0);
+	 (p[1] * d_ds_d_dt_kappa_r[1] + min_b00_plus_b10[1]) *  d_ds_d_dt_kappa_r[0];
       break;
     case 1:
-       partial_i_det_DKappa = d_dt_d_ds_kappa_r(0) * (p(0) * d_ds_d_dt_kappa_r(1) + min_b00_plus_b01(1))
+       partial_i_det_DKappa = d_dt_d_ds_kappa_r[0] * (p[0] * d_ds_d_dt_kappa_r[1] + min_b00_plus_b01[1])
       -
-      d_dt_d_ds_kappa_r(1) * (p(0) * d_ds_d_dt_kappa_r(0) + min_b00_plus_b01(0));
+      d_dt_d_ds_kappa_r[1] * (p[0] * d_ds_d_dt_kappa_r[0] + min_b00_plus_b01[0]);
       break;
     };
-    
-    return 0.5 * Gram_factor(p) * sgn_det_D * partial_i_det_DKappa;
-    
-    
-    
-    
+ 
+    return 0.5 * (1.0 / Gram_factor(p)) * sgn_det_D * partial_i_det_DKappa;
+   
   }
   //(dim = i, j = direc)
   inline
   const double LinearBezierMapping::partial_i_Kappa_j(const unsigned int i, const unsigned int j,
 						      const Point<2>& p) const
   {
-    return (i==1) ? p(0) * d_ds_d_dt_kappa_r(j) + min_b00_plus_b01(j) : 
-      p(1) * d_ds_d_dt_kappa_r(j) + min_b00_plus_b10(j);
+    return (i==1) ? p[0] * d_ds_d_dt_kappa_r[j] + min_b00_plus_b01[j] : 
+      p[1] * d_ds_d_dt_kappa_r[j] + min_b00_plus_b10[j];
   }
 
   inline
@@ -491,7 +488,7 @@ namespace MathTL
    */
   template <unsigned int DIM>
   inline
-  const unsigned short int pos_wrt_line (const Point<DIM> p,
+  unsigned short int pos_wrt_line (const Point<DIM>& p,
 					 const Point<DIM>& p1, const Point<DIM>&  p2)
   {
     double d = (p(1)-p1(1)) * (p2(0)-p1(0)) - (p(0)-p1(0)) * (p2(1)-p1(1));
@@ -506,7 +503,7 @@ namespace MathTL
 
   const bool LinearBezierMapping::in_patch(const Point<2>& x) const
   {
-        //make sure to walk through the vertices counter clockwise!!!
+    //make sure to walk through the vertices counter clockwise!!!
     unsigned short int res = 
       pos_wrt_line(x, b_00, b_10);
     if (res == 0)

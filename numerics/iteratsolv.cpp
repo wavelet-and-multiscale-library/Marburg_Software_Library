@@ -18,8 +18,9 @@ namespace MathTL
 
 	A.apply(xk, rk);
 	rk -= b;
-
+	//cout << "error = " << error << endl;
 	error = l2_norm(rk);
+	cout << "error = " << error << endl;
       }
   }
 

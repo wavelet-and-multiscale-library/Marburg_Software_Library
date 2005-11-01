@@ -21,6 +21,9 @@
 #include <algebra/matrix.h>
 #include <algebra/infinite_vector.h>
 
+#include <geometry/chart.h>
+
+
 namespace MathTL
 {
   /*!
@@ -76,6 +79,25 @@ namespace MathTL
     SampledMapping(const Point<DIM>& a,
 		   const Point<DIM>& b,
 		   const FixedArray1D<Array1D<double>,DIM>& values);
+
+    /*!
+       a dyadic subgrid of the hypercube is mapped by 
+       a chart 'ch'. so we end up with a dyadic subgrid
+       of a mapped hypercube. 'values' are the corresponding
+       function values.
+    */
+    SampledMapping(const Chart<DIM>& ch,
+		   const FixedArray1D<Array1D<double>,DIM>& values,
+		   const unsigned int resolution);
+
+    /*!
+       a dyadic subgrid of the hypercube is mapped by 
+       a chart 'ch'. so we end up with a dyadic subgrid
+       of a mapped hypercube. the function values are
+       initialized with zero.
+    */
+    SampledMapping(const Chart<DIM>& ch,
+		   const unsigned int resolution);
 
     /*!
       assignment operator
@@ -152,6 +174,25 @@ namespace MathTL
     SampledMapping(const Point<1>& a,
 		   const Point<1>& b,
 		   const FixedArray1D<Array1D<double>,1>& values);
+
+    /*!
+       a dyadic subgrid of the hypercube is mapped by 
+       a chart 'ch'. so we end up with a dyadic subgrid
+       of a mapped hypercube. 'values' are the corresponding
+       function values.
+    */
+    SampledMapping(const Chart<1>& ch,
+		   const FixedArray1D<Array1D<double>,1>& values,
+		   const unsigned int resolution);
+
+    /*!
+       a dyadic subgrid of the hypercube is mapped by 
+       a chart 'ch'. so we end up with a dyadic subgrid
+       of a mapped hypercube. the function values are
+       initialized with zero.
+    */
+    SampledMapping(const Chart<1>& ch,
+		   const unsigned int resolution);
 
     /*!
       assignment operator
@@ -238,6 +279,26 @@ namespace MathTL
 		   const FixedArray1D<Array1D<double>,2>& values);
 
     /*!
+       a dyadic subgrid of the hypercube is mapped by 
+       a chart 'ch'. so we end up with a dyadic subgrid
+       of a mapped hypercube. 'values' are the corresponding
+       function values.
+    */
+    SampledMapping(const Chart<2>& ch,
+		   const FixedArray1D<Array1D<double>,2>& values,
+		   const unsigned int resolution);
+
+    /*!
+       a dyadic subgrid of the hypercube is mapped by 
+       a chart 'ch'. so we end up with a dyadic subgrid
+       of a mapped hypercube. the function values are
+       initialized with zero.
+    */
+    SampledMapping(const Chart<2>& ch,
+		   const unsigned int resolution);
+
+
+    /*!
       assignment operator
     */
     SampledMapping<2>& operator = (const SampledMapping<2>& sm);
@@ -270,6 +331,17 @@ namespace MathTL
     */
     Matrix<double> values_;
   };
+
+  /*!
+    
+  */
+  template <unsigned int DIM>
+  void matlab_output(std::ostream& os,
+		     const Array1D<SampledMapping<DIM> >& values);
+
+
+
+
 }
 
 #include "geometry/sampled_mapping.cpp"

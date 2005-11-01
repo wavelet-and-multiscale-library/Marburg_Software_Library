@@ -76,12 +76,14 @@ namespace MathTL
   void InfiniteVector<C,I>::set_coefficient(const I& index, const C value)
   {
     typename std::map<I,C>::iterator it(lower_bound(index));
-
     if (it != std::map<I,C>::end() &&
-	!std::map<I,C>::key_comp()(index,it->first))
+	!std::map<I,C>::key_comp()(index,it->first)) {
       it->second = value;
-    else
+    }
+    else {
       std::map<I,C>::insert(it, typename std::map<I,C>::value_type(index, value));
+      //std::map<I,C>::insert(typename std::map<I,C>::value_type(index, value));
+    }
   }
 
   template <class C, class I>

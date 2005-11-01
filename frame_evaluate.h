@@ -23,6 +23,18 @@ namespace FrameTL
   //template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m> class AggregatedFrame;
 
   /*!
+    Evaluate a single primal/dual generator or wavelet \psi_lambda
+    on a dyadic grid of the patch given by 'patch'.
+  */
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  SampledMapping<DIM_d>
+  evaluate(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+	   const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+	   const unsigned int patch,
+	   const bool primal,
+	   const int resolution);
+  
+  /*!
     Evaluate a single primal/dual generator or wavelet \psi_\lambda
     on a dyadic subgrid of its corresponding patch.
   */

@@ -22,6 +22,22 @@ using WaveletTL::CubeBasis;
 namespace FrameTL
 {
 
+
+  /*!
+  */
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  bool in_support(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+		  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+		  const Point<DIM_m>& p);
+
+  /*!
+  */
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  bool in_support(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+		  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+		  typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda,
+		  const Point<DIM_m>& p);
+
   /*!
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>

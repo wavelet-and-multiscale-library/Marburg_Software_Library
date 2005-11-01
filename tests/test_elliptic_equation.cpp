@@ -59,7 +59,7 @@ int main()
   LinearBezierMapping bezierP(Point<2>(-1.,-1.),Point<2>(-1.,1.),
 			      Point<2>(0.,-1.), Point<2>(0.,1.));
 
-  LinearBezierMapping bezierP2(Point<2>(-1.,-1.),Point<2>(-1.,0.),
+  LinearBezierMapping bezierP2(Point<2>(-0.7,-1.),Point<2>(-0.7,0.),
 			      Point<2>(1.,-1.), Point<2>(1.,0.));
 
   //##############################
@@ -133,8 +133,8 @@ int main()
 
   CornerSingularityRHS singRhs(origin, 0.5 * M_PI, 1.5);
   
-  PoissonBVP<DIM> poisson(&singRhs);
-  //PoissonBVP<DIM> poisson(&const_fun);
+  //PoissonBVP<DIM> poisson(&singRhs);
+  PoissonBVP<DIM> poisson(&const_fun);
 
   EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame);
 
@@ -183,25 +183,28 @@ int main()
    matlab_output(ofs4,S);
    ofs4.close();
    //###############################################   
-
+#if 1
    typedef Frame2D::Index Index;
    set<Index> Lambda;
    for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, frame.j0()); ++lambda)
      Lambda.insert(lambda);
 
-   cout << "setting up full stiffness matrix..." << endl;
-   SparseMatrix<double> stiff;
-   FrameTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
    cout << "setting up full right hand side..." << endl;
    Vector<double> rh;
    FrameTL::setup_righthand_side(discrete_poisson, Lambda, rh);
+   //cout << rh << endl;
+
+   cout << "setting up full stiffness matrix..." << endl;
+   SparseMatrix<double> stiff;
+   FrameTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
 
    cout << "perfrming CG algorithm to solve projected problem..." << endl;
    Vector<double> xk(Lambda.size()), err(Lambda.size()); xk = 0;
    unsigned int iter= 0;
+   
    //CG(stiff, rh, xk, 0.0001, 200, iter);
-   Richardson(stiff, rh, xk, 0.05, 0.01, 300, iter);
+   Richardson(stiff, rh, xk, 0.01, 0.0001, 1000, iter);
    
    cout << "performing output..." << endl;
 
@@ -212,7 +215,7 @@ int main()
 
    discrete_poisson.rescale(u,-1);
 
-   Array1D<SampledMapping<2> > U = FrameTL::evaluate<Basis1D,2>(frame, u, true, 6);// expand in dual basis
+   Array1D<SampledMapping<2> > U = FrameTL::evaluate<Basis1D,2>(frame, u, true, 6);//expand in primal basis
 
    std::ofstream ofs5("approx_solution_out.m");
    matlab_output(ofs5,U);
@@ -223,6 +226,30 @@ int main()
    //FrameIndex<Basis1D,2,2> index2 = FrameTL::last_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0()); 
    //discrete_poisson.a(index,index2,3);
    //#######################################################################
+#endif
 
+#if 0
+  MultiIndex<unsigned int, 2> e1;
+  e1[0] = 0;
+  e1[1] = 0;
+  MultiIndex<int, 2> k1;
+  k1[0] = 1;
+  k1[1] = 1;
+
+  MultiIndex<unsigned int, 2> e2;
+  e2[0] = 0;
+  e2[1] = 0;
+  MultiIndex<int, 2> k2;
+  k2[0] = 1;
+  k2[1] = 1;
+
+  unsigned int p1 = 1, p2 = 0;
+  int j2 = 3;
+
+
+  FrameIndex<Basis1D,2,2> la(&frame,j2,e1,p1,k1);
+  FrameIndex<Basis1D,2,2> mu(&frame,j2,e2,p2,k2);
+  cout << "val  " << discrete_poisson.a(la,mu,2) << endl;
+#endif
   return 0;
 }

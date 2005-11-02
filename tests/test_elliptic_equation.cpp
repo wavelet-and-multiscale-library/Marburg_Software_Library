@@ -11,7 +11,8 @@
 #include <frame_evaluate.h>
 #include <cube/cube_basis.h>
 #include <cube/cube_index.h>
-#include <galerkin_frame_utils.h>
+//#include <galerkin_frame_utils.h>
+#include <galerkin/galerkin_utils.h>
 #include <frame_support.h>
 
 
@@ -44,37 +45,47 @@ int main()
   typedef DSBasis<2,2> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
   typedef CubeBasis<Basis1D> Basis;
+  typedef Frame2D::Index Index;
+
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 1.0;
+  A(0,0) = 2.0;
   A(1,1) = 1.0;
   Point<2> b;
-  b[0] = .0;
-  b[1] = .0;
+  b[0] = -1.;
+  b[1] = -1.;
   AffineLinearMapping<2> affineP(A,b);
+
+  Matrix<double> A2(DIM,DIM);
+  A2(0,0) = 1.0;
+  A2(1,1) = 2.0;
+  Point<2> b2;
+  b2[0] = -1.;
+  b2[1] = -1.;
+  AffineLinearMapping<2> affineP2(A2,b2);
   //##############################
 
   //##############################
   LinearBezierMapping bezierP(Point<2>(-1.,-1.),Point<2>(-1.,1.),
-			      Point<2>(0.,-1.), Point<2>(0.,1.));
-
-  LinearBezierMapping bezierP2(Point<2>(-0.7,-1.),Point<2>(-0.7,0.),
-			      Point<2>(1.,-1.), Point<2>(1.,0.));
-
+ 			      Point<2>(0.,-1.), Point<2>(0.,1.));
+  
+  LinearBezierMapping bezierP2(Point<2>(-1.,-1.),Point<2>(-1.,0.),
+			       Point<2>(1.,-1.), Point<2>(1.,0.));
+ 
   //##############################
   Array1D<Chart<DIM,DIM>* > charts(2);
-  charts[0] = &bezierP;
-  //charts[1] = &affineP;
-  charts[1] = &bezierP2;
-  
-
+  //charts[0] = &bezierP;
+  charts[0] = &affineP;
+  //charts[1] = &bezierP2;
+  charts[1] = &affineP2;
+ 
   SymmetricMatrix<bool> adj(2);
   adj(0,0) = 1;
   adj(1,1) = 1;
   adj(1,0) = 1;
   adj(0,1) = 1;
-
+  
   //to specify primal boundary the conditions
   Array1D<FixedArray1D<int,2*DIM> > bc(2);
 
@@ -131,125 +142,143 @@ int main()
   origin[0] = 0.0;
   origin[1] = 0.0;
 
-  CornerSingularityRHS singRhs(origin, 0.5 * M_PI, 1.5);
+  CornerSingularityRHS singRhs(origin, 0.5, 1.5);
   
-  //PoissonBVP<DIM> poisson(&singRhs);
-  PoissonBVP<DIM> poisson(&const_fun);
+  PoissonBVP<DIM> poisson(&singRhs);
+  //PoissonBVP<DIM> poisson(&const_fun);
 
   EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame);
+  
+  double tmp = 0.0;
+  int c = 0;
+  int d = 0;
+  
+  cout.precision(12);
+  
+  InfiniteVector<double,Frame2D::Index> rhs;
+  Vector<double> v(225);
+  
+  FixedArray1D<bool,4> bcn;
+  bcn[0] = bcn[1] = true;
+  bcn[2] = bcn[3] = true;
+  Basis basis(bcn);
+  
 
-   double tmp = 0.0;
-   int c = 0;
-   int d = 0;
+  Point<2> x1;
+  x1[0] = -1;
+  x1[1] = -1;
 
-   cout.precision(12);
+  Point<2> x2;
+  x2[0] = 1;
+  x2[1] = 1;
 
-   InfiniteVector<double,Frame2D::Index> rhs;
-   Vector<double> v(225);
+  Grid<2> grid(x1,x2,128);
+  SampledMapping<2> rhsOut (grid,singRhs);
 
-   FixedArray1D<bool,4> bcn;
-   bcn[0] = bcn[1] = true;
-   bcn[2] = bcn[3] = true;
-   Basis basis(bcn);
- 
-   FrameIndex<Basis1D,2,2> index = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0()); 
+  std::ofstream ofs_si("si_rhs_out.m");
+  rhsOut.matlab_output(ofs_si);
+  ofs_si.close();
 
-   SampledMapping<2> wav_out = FrameTL::evaluate(frame,index,1,5);
 
-   std::ofstream ofs("wav_out.m");
-   wav_out.matlab_output(ofs);
-   ofs.close();
+  FrameIndex<Basis1D,2,2> index = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0()); 
+  
+  SampledMapping<2> wav_out = FrameTL::evaluate(frame,index,1,5);
 
-   Array1D<SampledMapping<2> > expansion_out = FrameTL::evaluate(frame,rhs,1,5);
-
-   std::ofstream ofs2("expan_out.m");
-   expansion_out[0].matlab_output(ofs2);
-   ofs2.close();
-
-   std::ofstream ofs3("full_expan_out.m");
-   matlab_output(ofs3,expansion_out);
-   ofs3.close();
-   
-   //###############################################
-   // testing correctness of routine for
-   // computation of right hand side
-   
-   
-   cout << "++++++++++++++++++++++" << endl;
-   cout << rhs << endl;
-
-   Array1D<SampledMapping<2> > S = FrameTL::evaluate<Basis1D,2>(frame, rhs, false, 5);// expand in dual basis
-   std::ofstream ofs4("rhs_out.m");
-   matlab_output(ofs4,S);
-   ofs4.close();
-   //###############################################   
+  std::ofstream ofs("wav_out.m");
+  wav_out.matlab_output(ofs);
+  ofs.close();
+  
+  Array1D<SampledMapping<2> > expansion_out = FrameTL::evaluate(frame,rhs, 1, 5);
+  
+  std::ofstream ofs2("expan_out.m");
+  expansion_out[0].matlab_output(ofs2);
+  ofs2.close();
+  
+  std::ofstream ofs3("full_expan_out.m");
+  matlab_output(ofs3,expansion_out);
+  ofs3.close();
+  
+  //###############################################
+  // testing correctness of routine for
+  // computation of right hand side
+  
+  
+  cout << "++++++++++++++++++++++" << endl;
+  cout << rhs << endl;
+  
+  Array1D<SampledMapping<2> > S = FrameTL::evaluate<Basis1D,2>(frame, rhs, false, 5);// expand in dual basis
+  std::ofstream ofs4("rhs_out.m");
+  matlab_output(ofs4,S);
+  ofs4.close();
+  //###############################################   
+  //############### 2D galerkin scheme test ##################
 #if 1
-   typedef Frame2D::Index Index;
-   set<Index> Lambda;
-   for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
-      lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, frame.j0()); ++lambda)
-     Lambda.insert(lambda);
 
-   cout << "setting up full right hand side..." << endl;
-   Vector<double> rh;
-   FrameTL::setup_righthand_side(discrete_poisson, Lambda, rh);
-   //cout << rh << endl;
-
-   cout << "setting up full stiffness matrix..." << endl;
-   SparseMatrix<double> stiff;
-   FrameTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
-
-   cout << "perfrming CG algorithm to solve projected problem..." << endl;
-   Vector<double> xk(Lambda.size()), err(Lambda.size()); xk = 0;
-   unsigned int iter= 0;
-   
-   //CG(stiff, rh, xk, 0.0001, 200, iter);
-   Richardson(stiff, rh, xk, 0.01, 0.0001, 1000, iter);
-   
-   cout << "performing output..." << endl;
-
-   InfiniteVector<double,Frame2D::Index> u;
-   unsigned int i = 0;
-   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
+  set<Index> Lambda;
+  for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
+       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, frame.j0()); ++lambda)
+    Lambda.insert(lambda);
+  
+  cout << "setting up full right hand side..." << endl;
+  Vector<double> rh;
+  WaveletTL::setup_righthand_side(discrete_poisson, Lambda, rh);
+  //cout << rh << endl;
+  
+  cout << "setting up full stiffness matrix..." << endl;
+  SparseMatrix<double> stiff;
+  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
+  
+  cout << "performing iterative scheme to solve projected problem..." << endl;
+  Vector<double> xk(Lambda.size()), err(Lambda.size()); xk = 0;
+  unsigned int iter= 0;
+  
+  //CG(stiff, rh, xk, 0.0001, 1000, iter);
+  Richardson(stiff, rh, xk, 0.03, 0.0001, 2000, iter);
+  
+  cout << "performing output..." << endl;
+  
+  InfiniteVector<double,Frame2D::Index> u;
+  unsigned int i = 0;
+  for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
     u.set_coefficient(*it, xk[i]);
-
+  
    discrete_poisson.rescale(u,-1);
 
    Array1D<SampledMapping<2> > U = FrameTL::evaluate<Basis1D,2>(frame, u, true, 6);//expand in primal basis
-
+   
    std::ofstream ofs5("approx_solution_out.m");
    matlab_output(ofs5,U);
    ofs5.close();
-
+   
    //########## testing runtime type information functionality #############
    //FrameTL::intersect_supports<Basis1D,2,2>(frame, index, index);
    //FrameIndex<Basis1D,2,2> index2 = FrameTL::last_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0()); 
    //discrete_poisson.a(index,index2,3);
    //#######################################################################
 #endif
-
+   //################# end 2D galerkin scheme test ###################
 #if 0
-  MultiIndex<unsigned int, 2> e1;
-  e1[0] = 0;
-  e1[1] = 0;
-  MultiIndex<int, 2> k1;
-  k1[0] = 1;
-  k1[1] = 1;
+   MultiIndex<unsigned int, 2> e1;
+   e1[0] = 0;
+   e1[1] = 0;
+   MultiIndex<int, 2> k1;
+   k1[0] = 1;
+   k1[1] = 1;
+   
+   MultiIndex<unsigned int, 2> e2;
+   e2[0] = 0;
+   e2[1] = 0;
+   MultiIndex<int, 2> k2;
+   k2[0] = 1;
+   k2[1] = 1;
+   
+   unsigned int p1 = 1, p2 = 0;
+   int j2 = 3;
+   
 
-  MultiIndex<unsigned int, 2> e2;
-  e2[0] = 0;
-  e2[1] = 0;
-  MultiIndex<int, 2> k2;
-  k2[0] = 1;
-  k2[1] = 1;
-
-  unsigned int p1 = 1, p2 = 0;
-  int j2 = 3;
-
-
-  FrameIndex<Basis1D,2,2> la(&frame,j2,e1,p1,k1);
-  FrameIndex<Basis1D,2,2> mu(&frame,j2,e2,p2,k2);
-  cout << "val  " << discrete_poisson.a(la,mu,2) << endl;
+   FrameIndex<Basis1D,2,2> la(&frame,j2,e1,p1,k1);
+   FrameIndex<Basis1D,2,2> mu(&frame,j2,e2,p2,k2);
+   cout << "val  " << discrete_poisson.a(la,mu,2) << endl;
 #endif
-  return 0;
+   return 0;
 }

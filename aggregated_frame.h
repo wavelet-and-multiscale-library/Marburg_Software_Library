@@ -68,6 +68,14 @@ namespace FrameTL
 		    const Array1D<FixedArray1D<int,2*DIM_d> >&,
 		    const Array1D<FixedArray1D<int,2*DIM_d> >&);
 
+//     /*!
+//       constructor with specified Dirichlet boundary conditions for
+//       the primal functions, the dual functions will be constructed to
+//       fulfill free b.c.'s
+//     */
+//     AggregatedFrame(const Atlas<DIM_d, DIM_m>*,
+// 		    const FixedArray1D<bool,2*DIM>& bc);
+
     /*!
       frame index class
     */

@@ -65,6 +65,12 @@ namespace FrameTL
   {
   public:
 
+//     /*!
+//       constructor from a boundary value problem and specified b.c.'s
+//     */
+//     EllipticEquation(const EllipticBVP<DIM>* bvp,
+// 		     const FixedArray1D<bool,2*DIM>& bc);
+
     /*!
       constructor
      */
@@ -76,6 +82,11 @@ namespace FrameTL
       make template argument accessible
     */
     typedef AggregatedFrame<IBASIS,DIM> Frame;
+
+    /*!
+      make template argument accessible
+    */
+    typedef typename Frame::Index Index;
 
     /*!
       read access to the frame

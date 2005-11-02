@@ -22,6 +22,7 @@ namespace FrameTL
 
     double d = (p(1)-p1(1)) * (p2(0)-p1(0)) - (p(0)-p1(0)) * (p2(1)-p1(1));
     
+    //cout << "d = " << d << endl;    
     if( d > 0.0 )
       return 1;
     else if (d < 0.0)
@@ -38,20 +39,35 @@ namespace FrameTL
 		  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 		  const Point<DIM_m>& p)
   {
+
+    typedef WaveletTL::CubeBasis<IBASIS,DIM_d> CUBEBASIS;
+	
+    typename CUBEBASIS::Support supp_lambda;
+    
+    typename CubeBasis<IBASIS,DIM_d>::Index lambda_c(lambda.j(),
+						     lambda.e(),
+						     lambda.k(),frame.bases()[lambda.p()]);
+    
+    WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[lambda.p()], lambda_c, supp_lambda);
+    
+    const double dx = 1.0 / (1 << supp_lambda.j);
+    
+    if ( (typeid(*frame.atlas()->charts()[lambda.p()]) ==
+	  typeid(AffineLinearMapping<1>))
+	 )
+      {
+	Point<DIM_d> a;
+	Point<DIM_d> b;
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx), a);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx), b);
+	
+	return (a[0] <= p[0]) && (p[0] <= b[0]);
+	
+      }
+
     if ( typeid(*frame.atlas()->charts()[lambda.p()]) ==
 	 typeid(LinearBezierMapping))
       {
-	typedef WaveletTL::CubeBasis<IBASIS,DIM_d> CUBEBASIS;
-	
-	typename CUBEBASIS::Support supp_lambda;
-	
-	typename CubeBasis<IBASIS,DIM_d>::Index lambda_c(lambda.j(),
-							 lambda.e(),
-							 lambda.k(),frame.bases()[lambda.p()]);
-
-	WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[lambda.p()], lambda_c, supp_lambda);
-	  
-	const double dx = 1.0 / (1 << supp_lambda.j);
 	
 	FixedArray1D<Point<2>,4 > poly;
 
@@ -83,7 +99,7 @@ namespace FrameTL
 	if (res == 0)
 	  return false;
 	
-	return true;;
+	return true;
 
       }
     return true;
@@ -97,22 +113,43 @@ namespace FrameTL
 		  typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda,
 		  const Point<DIM_m>& p)
   {
-    if ( typeid(*frame.atlas()->charts()[lambda.p()]) ==
-	 typeid(LinearBezierMapping))
+
+    if ( (typeid(*frame.atlas()->charts()[lambda.p()]) ==
+	  typeid(AffineLinearMapping<1>))
+	 )
       {
 	const double dx = 1.0 / (1 << supp_lambda.j);
+	Point<DIM_d> a;
+	Point<DIM_d> b;
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx), a);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx), b);
+	
+	return (a[0] <= p[0]) && (p[0] <= b[0]);
+	
+      }
+    
+    if ( (typeid(*frame.atlas()->charts()[lambda.p()]) ==
+	  typeid(LinearBezierMapping))
+	 ||
+	 (typeid(*frame.atlas()->charts()[lambda.p()]) ==
+	  typeid(AffineLinearMapping<2>))
+	 )
+      {
+	assert ( DIM_d == 2 && DIM_m == 2 );
+	
+	const double dx = 1.0 / (1 << supp_lambda.j);
 
-	FixedArray1D<Point<2>,4 > poly;
+	FixedArray1D<Point<DIM_m>,4 > poly;
 
 	// map the knots of the unit cube to patch
 	// 0 -- 00
 	// 1 -- 10
 	// 2 -- 11
 	// 3 -- 01
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<2>(supp_lambda.a[0]*dx,supp_lambda.a[1]*dx), poly[0]);
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<2>(supp_lambda.b[0]*dx,supp_lambda.a[1]*dx), poly[1]);
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<2>(supp_lambda.b[0]*dx,supp_lambda.b[1]*dx), poly[2]);
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<2>(supp_lambda.a[0]*dx,supp_lambda.b[1]*dx), poly[3]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx,supp_lambda.a[1]*dx), poly[0]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx,supp_lambda.a[1]*dx), poly[1]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx,supp_lambda.b[1]*dx), poly[2]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx,supp_lambda.b[1]*dx), poly[3]);
 
 	//make sure to walk through the vertices counter clockwise!!!
 	unsigned short int res = 
@@ -146,47 +183,81 @@ namespace FrameTL
 		     typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda,
 		     typename CubeBasis<IBASIS,DIM_d>::Support& supp_mu)
   {
-    // both charts are LinearBezierMappings
+
+
+    typedef WaveletTL::CubeBasis<IBASIS,DIM_d> CUBEBASIS;
+    
+    typename CubeBasis<IBASIS,DIM_d>::Index lambda_c(lambda.j(),
+						     lambda.e(),
+						     lambda.k(),frame.bases()[lambda.p()]);
+    
+    typename CubeBasis<IBASIS,DIM_d>::Index mu_c(mu.j(),
+						 mu.e(),
+						 mu.k(),frame.bases()[mu.p()]);
+    
+    WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[lambda.p()], lambda_c, supp_lambda);
+    WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[mu.p()], mu_c, supp_mu);
+    
+    const double dx1 = 1.0 / (1 << supp_lambda.j);
+    const double dx2 = 1.0 / (1 << supp_mu.j);
+
+
     if ( typeid(*frame.atlas()->charts()[lambda.p()]) ==
-	 typeid(LinearBezierMapping) &&
+	 typeid(AffineLinearMapping<1>) &&
 	 typeid(*frame.atlas()->charts()[mu.p()])     == 
-	 typeid(LinearBezierMapping))
+	 typeid(AffineLinearMapping<1>) )
+      {
+	assert ( DIM_d == 1 );
+	
+	Point<DIM_d> a;
+	Point<DIM_d> b;
+
+	Point<DIM_d> c;
+	Point<DIM_d> d;
+
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx1), a);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx1), b);
+
+	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.a[0]*dx2), c);
+	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.b[0]*dx2), d);
+
+	return (a[0] < d[0]) && (b[0] > c[0]);
+
+      }
+
+    // both charts are LinearBezierMappings
+    if ( ( typeid(*frame.atlas()->charts()[lambda.p()]) ==
+	   typeid(LinearBezierMapping) &&
+	   typeid(*frame.atlas()->charts()[mu.p()])     == 
+	   typeid(LinearBezierMapping) )
+	 ||
+	 ( typeid(*frame.atlas()->charts()[lambda.p()]) ==
+	   typeid(AffineLinearMapping<2>) &&
+	   typeid(*frame.atlas()->charts()[mu.p()])     == 
+	   typeid(AffineLinearMapping<2>)
+	   )
+	 )
       {
 
+	assert ( DIM_d == 2 && DIM_m == 2);
 
-	typedef WaveletTL::CubeBasis<IBASIS,DIM_d> CUBEBASIS;
-	
-	typename CubeBasis<IBASIS,DIM_d>::Index lambda_c(lambda.j(),
-							 lambda.e(),
-							 lambda.k(),frame.bases()[lambda.p()]);
-	
-	typename CubeBasis<IBASIS,DIM_d>::Index mu_c(mu.j(),
-						     mu.e(),
-						     mu.k(),frame.bases()[mu.p()]);
-
-	WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[lambda.p()], lambda_c, supp_lambda);
-	WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[mu.p()], mu_c, supp_mu);
-  
-	const double dx1 = 1.0 / (1 << supp_lambda.j);
-	const double dx2 = 1.0 / (1 << supp_mu.j);
-
-	FixedArray1D<Point<2>,4 > poly1;
-	FixedArray1D<Point<2>,4 > poly2;
+	FixedArray1D<Point<DIM_m>,4 > poly1;
+	FixedArray1D<Point<DIM_m>,4 > poly2;
 
 	// map the knots of the unit cube to patch
 	// 0 -- 00
 	// 1 -- 10
 	// 2 -- 11
 	// 3 -- 01
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<2>(supp_lambda.a[0]*dx1,supp_lambda.a[1]*dx1), poly1[0]);
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<2>(supp_lambda.b[0]*dx1,supp_lambda.a[1]*dx1), poly1[1]);
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<2>(supp_lambda.b[0]*dx1,supp_lambda.b[1]*dx1), poly1[2]);
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<2>(supp_lambda.a[0]*dx1,supp_lambda.b[1]*dx1), poly1[3]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx1,supp_lambda.a[1]*dx1), poly1[0]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx1,supp_lambda.a[1]*dx1), poly1[1]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx1,supp_lambda.b[1]*dx1), poly1[2]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx1,supp_lambda.b[1]*dx1), poly1[3]);
 
-	frame.atlas()->charts()[mu.p()]->map_point(Point<2>(supp_mu.a[0]*dx2,supp_mu.a[1]*dx2), poly2[0]);
-	frame.atlas()->charts()[mu.p()]->map_point(Point<2>(supp_mu.b[0]*dx2,supp_mu.a[1]*dx2), poly2[1]);
-	frame.atlas()->charts()[mu.p()]->map_point(Point<2>(supp_mu.b[0]*dx2,supp_mu.b[1]*dx2), poly2[2]);
-	frame.atlas()->charts()[mu.p()]->map_point(Point<2>(supp_mu.a[0]*dx2,supp_mu.b[1]*dx2), poly2[3]);
+	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.a[0]*dx2,supp_mu.a[1]*dx2), poly2[0]);
+	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.b[0]*dx2,supp_mu.a[1]*dx2), poly2[1]);
+	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.b[0]*dx2,supp_mu.b[1]*dx2), poly2[2]);
+	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.a[0]*dx2,supp_mu.b[1]*dx2), poly2[3]);
 
 //  	for (int i = 0; i < 4; i++)
 //  	  cout << "i=" << i << " " << poly1[i] << endl;

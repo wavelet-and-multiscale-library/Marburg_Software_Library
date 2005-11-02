@@ -262,7 +262,7 @@ namespace FrameTL
     typename CUBEBASIS::Support supp_lambda;
     typename CUBEBASIS::Support supp_mu;
 
-    const int N = 3;
+    const int N = 2;
 
     bool b = intersect_supports<IBASIS,DIM,DIM>(*frame_, lambda, mu, supp_lambda, supp_mu);
  //    for (unsigned int i = 0; i < DIM; i++)

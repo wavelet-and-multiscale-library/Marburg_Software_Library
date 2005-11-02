@@ -40,9 +40,22 @@ namespace FrameTL
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   SampledMapping<DIM_d> evaluate(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
-			       const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
-			       const bool primal,
-			       const int resolution);
+				 const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+				 const bool primal,
+				 const int resolution);
+
+  /*!
+    Evaluate linear combination of  primal/dual generators or wavelets
+    on a dyadic subgrid of a special patch. The index vector is assumed
+    to contain indices belonging to this patch only!!
+  */
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  SampledMapping<DIM_d> evaluate_single_patch(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+				 const InfiniteVector<double,
+				 typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& coeffs,
+				 const bool primal,
+				 const int resolution);
+
 
   /*!
     Evaluate an arbitrary linear combination of primal/dual wavelets

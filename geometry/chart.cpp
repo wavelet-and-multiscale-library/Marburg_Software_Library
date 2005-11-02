@@ -368,10 +368,11 @@ namespace MathTL
       }
     else
       {
+	cout << "pp(0) = " << pp(0)  << endl;
 	swapped_var = 1;
 	i = 1;
 	j = 0;
-	cout << "swapping coordinates in inverse linear bezier mapping" << endl;
+	//cout << "swapping coordinates in inverse linear bezier mapping" << endl;
 	//swap coordinates
 	tmp = pc(0);
 	pc(0) = pc(1);
@@ -387,8 +388,15 @@ namespace MathTL
 	t = pc(1) / h1;
 	//s = xcube / (1 - t + t*bgen_11[i]);
 	s = pc(0) / (1 + t * h2);
-	pc(0) = s;
-	pc(1) = t;
+	
+	if (swapped_var) {
+	  pc(0) = t;
+	  pc(1) = s;
+	}
+	else {
+	  pc(0) = s;
+	  pc(1) = t;
+	}
 	return;
       }
 	

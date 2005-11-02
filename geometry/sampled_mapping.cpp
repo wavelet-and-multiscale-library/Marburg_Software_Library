@@ -65,10 +65,9 @@ namespace MathTL
       x[0] = h*i;
       ch.map_point(x,x_patch);  
       grid_[i] = x_patch[0];
+      values_[i] = values[0][i] / ch.Gram_factor(x);
     }
-    
-    for (unsigned int i = 0; i < n_points; i++)
-      values_[i] = values[0][i] / ch.Gram_factor(x);    
+      
   }
 
   SampledMapping<1>::SampledMapping(const Chart<1>& ch,
@@ -235,6 +234,7 @@ namespace MathTL
       for (unsigned int j = 0; j < n_points; j++) {
 	x[1] = h*j;
 	ch.map_point(x,x_patch);
+	//cout << "i=" << x_patch[0] << " j= " << x_patch[1] << endl;
 	gridx_.set_entry(i,j,x_patch[0]);
 	gridy_.set_entry(i,j,x_patch[1]);
       }
@@ -291,7 +291,7 @@ namespace MathTL
       values[i].matlab_output(os);
       os << "hold on" << std::endl
 	 << "surf(x,y,z)" << std::endl;
-      if (i == values.size()-1)
+      if (i == (values.size()-1))
 	os << "hold off" << std::endl;
     }
   }

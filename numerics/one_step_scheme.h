@@ -40,7 +40,7 @@ namespace MathTL
       increment function u^{(m)} -> u^{(m+1)},
       also returns a local error estimator
     */
-    virtual void increment(const AbstractIVP<VECTOR>* ivp,
+    virtual void increment(const AbstractIVP<VECTOR>& ivp,
 			   const double t_m, const VECTOR& u_m,
 			   const double tau,
 			   VECTOR& u_mplus1,

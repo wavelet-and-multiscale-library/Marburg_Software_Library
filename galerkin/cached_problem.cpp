@@ -60,7 +60,7 @@ namespace WaveletTL
     if (normA == 0.0) {
       cout << "CachedProblem()::norm_A() called..." << endl;
 
-      typedef typename WaveletBasis::Index Index;
+      typedef typename PROBLEM::WaveletBasis::Index Index;
       std::set<Index> Lambda;
       const int j0 = problem->basis().j0();
       const int jmax = j0+1;

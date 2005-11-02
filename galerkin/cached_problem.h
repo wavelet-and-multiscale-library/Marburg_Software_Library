@@ -48,6 +48,11 @@ namespace WaveletTL
       typedef typename PROBLEM::WaveletBasis WaveletBasis;
 
       /*!
+	wavelet index class
+      */
+      typedef typename WaveletBasis::Index Index;
+
+      /*!
 	read access to the basis
       */
       const WaveletBasis& basis() const { return problem->basis(); }

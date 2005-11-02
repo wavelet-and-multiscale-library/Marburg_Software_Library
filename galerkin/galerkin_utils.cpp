@@ -4,7 +4,7 @@ namespace WaveletTL
 {
   template <class PROBLEM>
   void setup_stiffness_matrix(const PROBLEM& P,
-			      const std::set<typename PROBLEM::WaveletBasis::Index>& Lambda,
+			      const std::set<typename PROBLEM::Index>& Lambda,
 			      SparseMatrix<double>& A_Lambda)
   {
     A_Lambda.resize(Lambda.size(), Lambda.size());
@@ -12,7 +12,7 @@ namespace WaveletTL
     typedef typename SparseMatrix<double>::size_type size_type;
 
     size_type row = 0;
-    typedef typename PROBLEM::WaveletBasis::Index Index;
+    typedef typename PROBLEM::Index Index;
     for (typename std::set<Index>::const_iterator it1(Lambda.begin()), itend(Lambda.end());
 	 it1 != itend; ++it1, ++row)
       {
@@ -39,7 +39,7 @@ namespace WaveletTL
 
   template <class PROBLEM>
   void setup_righthand_side(const PROBLEM& P,
-			    const std::set<typename PROBLEM::WaveletBasis::Index>& Lambda,
+			    const std::set<typename PROBLEM::Index>& Lambda,
 			    Vector<double>& F_Lambda)
   {
     F_Lambda.resize(Lambda.size());
@@ -47,7 +47,7 @@ namespace WaveletTL
     typedef typename SparseMatrix<double>::size_type size_type;
 
     size_type row = 0;
-    typedef typename PROBLEM::WaveletBasis::Index Index;
+    typedef typename PROBLEM::Index Index;
     for (typename std::set<Index>::const_iterator it(Lambda.begin()), itend(Lambda.end());
 	 it != itend; ++it, ++row)
       F_Lambda[row] = P.f(*it)/P.D(*it);

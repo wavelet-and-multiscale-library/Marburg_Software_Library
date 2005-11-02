@@ -82,6 +82,11 @@ namespace WaveletTL
     typedef CUBEBASIS WaveletBasis;
 
     /*!
+      wavelet index class
+    */
+    typedef typename WaveletBasis::Index Index;
+
+    /*!
       read access to the basis
     */
     const CUBEBASIS& basis() const { return basis_; }

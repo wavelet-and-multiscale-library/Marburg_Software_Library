@@ -71,6 +71,11 @@ namespace WaveletTL
     typedef WBASIS WaveletBasis;
 
     /*!
+      wavelet index class
+    */
+    typedef typename WaveletBasis::Index Index;
+
+    /*!
       read access to the basis
     */
     const WBASIS& basis() const { return basis_; }

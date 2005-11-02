@@ -26,7 +26,7 @@ namespace WaveletTL
   */
   template <class PROBLEM>
   void setup_stiffness_matrix(const PROBLEM& P,
-			      const std::set<typename PROBLEM::WaveletBasis::Index>& Lambda,
+			      const std::set<typename PROBLEM::Index>& Lambda,
 			      SparseMatrix<double>& A_Lambda); 
   
   /*!
@@ -35,7 +35,7 @@ namespace WaveletTL
   */
   template <class PROBLEM>
   void setup_righthand_side(const PROBLEM& P,
-			    const std::set<typename PROBLEM::WaveletBasis::Index>& Lambda,
+			    const std::set<typename PROBLEM::Index>& Lambda,
 			    Vector<double>& F_Lambda); 
 }
 

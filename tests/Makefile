@@ -19,7 +19,7 @@ EXEOBJF = \
   test_recursion.o\
   test_grid.o test_sampled_mapping.o\
   test_splines.o\
-  test_rosenbrock.o\
+  test_one_step_scheme.o test_rosenbrock.o\
   test_differences.o\
   test_multiindex.o test_multi_lp.o\
   test_sturm_bvp.o test_bvp.o\

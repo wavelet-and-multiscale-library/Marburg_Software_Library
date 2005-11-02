@@ -61,6 +61,32 @@ namespace MathTL
     virtual void solve_jacobian(const double t, const Point<DIM>& v, const double tau,
 				Point<DIM>& result) const = 0;
   };
+
+  /*!
+    Abstract base class for general initial value problems
+    
+      u'(t) = f(t, u(t)),   0 < t <= T
+      u(0) = u_0
+
+    where u:[0,T]->V.
+    
+    The signature of AbstractIVP is designed to be used in (derivations of) the
+    class OneStepScheme.
+  */
+  template <class VECTOR>
+  class AbstractIVP
+  {
+  public:
+    /*!
+      initial value
+    */
+    VECTOR u0;
+
+    /*!
+      virtual destructor
+    */
+    virtual ~AbstractIVP() = 0;
+  };
 }
 
 #include <numerics/ivp.cpp>

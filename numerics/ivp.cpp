@@ -3,8 +3,12 @@
 namespace MathTL
 {
   template <unsigned int DIM>
-  inline
   IVP<DIM>::~IVP()
+  {
+  }
+
+  template <class VECTOR>
+  AbstractIVP<VECTOR>::~AbstractIVP()
   {
   }
 }

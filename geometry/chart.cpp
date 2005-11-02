@@ -368,7 +368,6 @@ namespace MathTL
       }
     else
       {
-	cout << "pp(0) = " << pp(0)  << endl;
 	swapped_var = 1;
 	i = 1;
 	j = 0;

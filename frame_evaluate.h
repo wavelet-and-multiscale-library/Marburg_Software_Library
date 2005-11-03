@@ -20,53 +20,99 @@ using FrameTL::AggregatedFrame;
 
 namespace FrameTL
 {
-  //template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m> class AggregatedFrame;
 
-  /*!
-    Evaluate a single primal/dual generator or wavelet \psi_lambda
-    on a dyadic grid of the patch given by 'patch'.
-  */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
-  SampledMapping<DIM_d>
-  evaluate(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
-	   const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
-	   const unsigned int patch,
-	   const bool primal,
-	   const int resolution);
-  
-  /*!
-    Evaluate a single primal/dual generator or wavelet \psi_\lambda
-    on a dyadic subgrid of its corresponding patch.
-  */
-  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
-  SampledMapping<DIM_d> evaluate(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
-				 const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
-				 const bool primal,
-				 const int resolution);
+  class EvaluateFrame
+  {
 
-  /*!
-    Evaluate linear combination of  primal/dual generators or wavelets
-    on a dyadic subgrid of a special patch. The index vector is assumed
-    to contain indices belonging to this patch only!!
-  */
-  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
-  SampledMapping<DIM_d> evaluate_single_patch(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
-				 const InfiniteVector<double,
-				 typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& coeffs,
-				 const bool primal,
-				 const int resolution);
-
-
-  /*!
-    Evaluate an arbitrary linear combination of primal/dual wavelets
-    on a dyadic subgrid of each patch.
-  */
-  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
-  Array1D<SampledMapping<DIM_d> > evaluate(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
-					   const InfiniteVector<double,
-					   typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& coeffs,
+  public:    
+    /*!
+      Evaluate a single primal/dual generator or wavelet \psi_lambda
+      on a dyadic grid of the patch given by 'patch'.
+    */
+    virtual SampledMapping<DIM_d> evaluate(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+					   const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+					   const unsigned int patch,
 					   const bool primal,
-					   const int resolution);
+					   const int resolution) const = 0;
+    
+    /*!
+      Evaluate a single primal/dual generator or wavelet \psi_\lambda
+      on a dyadic subgrid of its corresponding patch.
+    */
+    virtual SampledMapping<DIM_d> evaluate(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+					   const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+					   const bool primal,
+					   const int resolution) const = 0;
+    
+    /*!
+      Evaluate an arbitrary linear combination of primal/dual wavelets
+      on a dyadic subgrid of each patch.
+    */
+    virtual Array1D<SampledMapping<DIM_d> > evaluate(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+						     const InfiniteVector<double,
+						     typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& coeffs,
+						     const bool primal,
+						     const int resolution) const = 0;
+    
+  };
+
+  template <class IBASIS>
+  class EvaluateFrame<IBASIS,1,1>
+  {
+  public:
+
+    SampledMapping<1>
+    evaluate(const AggregatedFrame<IBASIS,1,1>& frame,
+	     const typename AggregatedFrame<IBASIS,1,1>::Index& lambda,
+	     const unsigned int patch,
+	     const bool primal,
+	     const int resolution) const;
+
+    SampledMapping<1>
+    evaluate(const AggregatedFrame<IBASIS,1,1>& frame,
+	     const typename AggregatedFrame<IBASIS,1,1>::Index& lambda,
+	     const bool primal,
+	     const int resolution) const;
+    
+    Array1D<SampledMapping<1> >
+    evaluate(const AggregatedFrame<IBASIS,1,1>& frame,
+	     const InfiniteVector<double,
+	     typename AggregatedFrame<IBASIS,1,1>::Index>& coeffs,
+	     const bool primal,
+	     const int resolution) const;
+
+
+  };
+  
+  template <class IBASIS>
+  class EvaluateFrame<IBASIS,2,2>
+  {
+  public:
+
+    SampledMapping<2>
+    evaluate(const AggregatedFrame<IBASIS,2,2>& frame,
+	     const typename AggregatedFrame<IBASIS,2,2>::Index& lambda,
+	     const unsigned int patch,
+	     const bool primal,
+	     const int resolution) const;
+
+    SampledMapping<2>
+    evaluate(const AggregatedFrame<IBASIS,2,2>& frame,
+	     const typename AggregatedFrame<IBASIS,2,2>::Index& lambda,
+	     const bool primal,
+	     const int resolution) const;
+    
+    Array1D<SampledMapping<2> >
+    evaluate(const AggregatedFrame<IBASIS,2,2>& frame,
+	     const InfiniteVector<double,
+	     typename AggregatedFrame<IBASIS,2,2>::Index>& coeffs,
+	     const bool primal,
+	     const int resolution) const;
+
+
+  };
+
 }
 
 #include <frame_evaluate.cpp>

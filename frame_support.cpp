@@ -69,17 +69,17 @@ namespace FrameTL
 	 typeid(LinearBezierMapping))
       {
 	
-	FixedArray1D<Point<2>,4 > poly;
+	FixedArray1D<Point<DIM_d>,4 > poly;
 
 	// map the knots of the unit cube to patch
 	// 0 -- 00
 	// 1 -- 10
 	// 2 -- 11
 	// 3 -- 01
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<2>(supp_lambda.a[0]*dx,supp_lambda.a[1]*dx), poly[0]);
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<2>(supp_lambda.b[0]*dx,supp_lambda.a[1]*dx), poly[1]);
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<2>(supp_lambda.b[0]*dx,supp_lambda.b[1]*dx), poly[2]);
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<2>(supp_lambda.a[0]*dx,supp_lambda.b[1]*dx), poly[3]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx,supp_lambda.a[1]*dx), poly[0]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx,supp_lambda.a[1]*dx), poly[1]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx,supp_lambda.b[1]*dx), poly[2]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx,supp_lambda.b[1]*dx), poly[3]);
 
 	//make sure to walk through the vertices counter clockwise!!!
 	unsigned short int res = 
@@ -321,8 +321,7 @@ namespace FrameTL
 	if (countspez >= 2) {
 	  return true;
 	}
-	
-	
+		
 	//remaining case: qudrangles contain each other
 	countspez = 0;
 	tmp = 0;

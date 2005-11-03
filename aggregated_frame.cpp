@@ -38,8 +38,7 @@ namespace FrameTL
   {
     for (unsigned int  i = 0; i < (atlas_->charts()).size(); ++i)
       delete lifted_bases[i];          
-  }
-
+  }  
 
 //   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
 //   inline

@@ -139,8 +139,8 @@ int main()
 
   Singularity1D<double> sing1D;
   
-  PoissonBVP<DIM> poisson(&const_fun);
-  //PoissonBVP<DIM> poisson(&sing1D);
+  //PoissonBVP<DIM> poisson(&const_fun);
+  PoissonBVP<DIM> poisson(&sing1D);
 
   EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame);
   
@@ -167,8 +167,17 @@ int main()
   
   cout << "setting up full stiffness matrix..." << endl;
   SparseMatrix<double> stiff;
+  
+  clock_t tstart, tend;
+  double time;
+  tstart = clock();
+  
   WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
   
+  tend = clock();
+  time = (double)(tend-tstart)/CLOCKS_PER_SEC;
+  cout << "  ... done, time needed: " << time << " seconds" << endl;
+
   unsigned int iter= 0;
   Vector<double> x(Lambda.size()); x = 1;
   double lmax = PowerIteration(stiff, x, 0.01, 1000, iter);

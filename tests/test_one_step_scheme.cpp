@@ -1,3 +1,4 @@
+#include <cmath>
 #include <iostream>
 #include <numerics/ivp.h>
 #include <numerics/one_step_scheme.h>
@@ -7,7 +8,6 @@
 using std::cout;
 using std::endl;
 using namespace MathTL;
-
 
 /*
   The Dahlquist standard problem
@@ -35,85 +35,6 @@ private:
   double lambda_;
 };
 
-//   cout << "* testing ROS2:" << endl;
-//   Rosenbrock<Point<1>, IVP<1> > R2(Rosenbrock<Point<1>, IVP<1> >::ROS2);
-//   for (int expo = 0; expo <= 6; expo++)
-//     {
-//       temp = problem.u0;
-//       int N = 1<<expo;
-//       double h = 1.0/N;
-//       for (int i = 1; i <= N; i++)
-// 	{
-// 	  R2.increment(problem, i*h, temp, h, result);
-// 	  temp = result;
-// 	}
-//       err = fabs(result[0] - M_E);
-//       if (expo > 0)
-// 	{
-// 	  cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2 << endl;
-// 	}
-//       olderr = err;
-//     }
-
-//   cout << "* testing ROS3:" << endl;
-//   Rosenbrock<Point<1>, IVP<1> > R3(Rosenbrock<Point<1>, IVP<1> >::ROS3);
-//   for (int expo = 0; expo <= 6; expo++)
-//     {
-//       temp = problem.u0;
-//       int N = 1<<expo;
-//       double h = 1.0/N;
-//       for (int i = 1; i <= N; i++)
-// 	{
-// 	  R3.increment(problem, i*h, temp, h, result);
-// 	  temp = result;
-// 	}
-//       err = fabs(result[0] - M_E);
-//       if (expo > 0)
-// 	{
-// 	  cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2 << endl;
-// 	}
-//       olderr = err;
-//     }
-
-//   cout << "* testing ROWDA3:" << endl;
-//   Rosenbrock<Point<1>, IVP<1> > R4(Rosenbrock<Point<1>, IVP<1> >::ROWDA3);
-//   for (int expo = 0; expo <= 6; expo++)
-//     {
-//       temp = problem.u0;
-//       int N = 1<<expo;
-//       double h = 1.0/N;
-//       for (int i = 1; i <= N; i++)
-// 	{
-// 	  R4.increment(problem, i*h, temp, h, result);
-// 	  temp = result;
-// 	}
-//       err = fabs(result[0] - M_E);
-//       if (expo > 0)
-// 	{
-// 	  cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2 << endl;
-// 	}
-//       olderr = err;
-//     }
-
-//   cout << "* testing RODAS3:" << endl;
-//   Rosenbrock<Point<1>, IVP<1> > R5(Rosenbrock<Point<1>, IVP<1> >::RODAS3);
-//   for (int expo = 0; expo <= 6; expo++)
-//     {
-//       temp = problem.u0;
-//       int N = 1<<expo;
-//       double h = 1.0/N;
-//       for (int i = 1; i <= N; i++)
-// 	{
-// 	  R5.increment(problem, i*h, temp, h, result);
-// 	  temp = result;
-// 	}
-//       err = fabs(result[0] - M_E);
-//       if (expo > 0)
-// 	{
-// 	  cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2 << endl;
-// 	}
-//       olderr = err;
-//     }
 
 int main()
 {
@@ -132,13 +53,16 @@ int main()
     temp = problem.u0;
     int N = 1<<expo;
     double h = 1.0/N;
+    double err_est = 0;
     for (int i = 1; i <= N; i++) {
       scheme->increment(problem, i*h, temp, h, result, error_estimate);
+      err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
     }
     err = fabs(result[0] - M_E);
     if (expo > 0) {
-      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2 << endl;
+      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
+	   << ", max. of local error estimate " << err_est << endl;
     }
     olderr = err;
   }
@@ -151,13 +75,16 @@ int main()
     temp = problem.u0;
     int N = 1<<expo;
     double h = 1.0/N;
+    double err_est = 0;
     for (int i = 1; i <= N; i++) {
       scheme->increment(problem, i*h, temp, h, result, error_estimate);
+      err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
     }
     err = fabs(result[0] - M_E);
     if (expo > 0) {
-      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2 << endl;
+      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
+	   << ", max. of local error estimate " << err_est << endl;
     }
     olderr = err;
   }
@@ -170,13 +97,16 @@ int main()
     temp = problem.u0;
     int N = 1<<expo;
     double h = 1.0/N;
+    double err_est = 0;
     for (int i = 1; i <= N; i++) {
       scheme->increment(problem, i*h, temp, h, result, error_estimate);
+      err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
     }
     err = fabs(result[0] - M_E);
     if (expo > 0) {
-      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2 << endl;
+      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
+	   << ", max. of local error estimate " << err_est << endl;
     }
     olderr = err;
   }
@@ -189,13 +119,16 @@ int main()
     temp = problem.u0;
     int N = 1<<expo;
     double h = 1.0/N;
+    double err_est = 0;
     for (int i = 1; i <= N; i++) {
       scheme->increment(problem, i*h, temp, h, result, error_estimate);
+      err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
     }
     err = fabs(result[0] - M_E);
     if (expo > 0) {
-      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2 << endl;
+      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
+	   << ", max. of local error estimate " << err_est << endl;
     }
     olderr = err;
   }
@@ -208,13 +141,16 @@ int main()
     temp = problem.u0;
     int N = 1<<expo;
     double h = 1.0/N;
+    double err_est = 0;
     for (int i = 1; i <= N; i++) {
       scheme->increment(problem, i*h, temp, h, result, error_estimate);
+      err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
     }
     err = fabs(result[0] - M_E);
     if (expo > 0) {
-      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2 << endl;
+      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
+	   << ", max. of local error estimate " << err_est << endl;
     }
     olderr = err;
   }

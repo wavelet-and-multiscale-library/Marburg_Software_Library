@@ -173,12 +173,6 @@ namespace MathTL
     default:
       break;
     }
-
-    cout << "ExplicitRungeKuttaScheme():" << endl;
-    cout << "A =" << endl << A;
-    cout << "b = " << b << endl;
-    cout << "bhat = " << bhat << endl;
-    cout << "c = " << c << endl;
   }
   
   template <class VECTOR>
@@ -197,6 +191,7 @@ namespace MathTL
       k[i].resize(d);
     Vector<double> temp(d);
 
+    // solve stage equations
     ivp.apply_f(t_m+c[0]*tau, u_m, tolerance/s, k[0]);
     for (unsigned int i = 1; i < s; i++) {
       temp = u_m;
@@ -205,9 +200,14 @@ namespace MathTL
       ivp.apply_f(t_m+c[i]*tau, temp, tolerance/s, k[i]);
     }
     
+    // solution at t_m+tau
     u_mplus1 = u_m;
     for (unsigned int i = 0; i < s; i++)
       u_mplus1.add(tau*bhat[i], k[i]);
+
+    // error estimate
+    error_estimate = 0;
+    for (unsigned int i = 0; i < s; i++)
+      error_estimate.add(tau*(bhat[i]-b[i]), k[i]);
   }
-  
 }

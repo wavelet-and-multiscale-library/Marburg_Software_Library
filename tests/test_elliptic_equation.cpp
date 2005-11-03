@@ -19,6 +19,7 @@
 using std::cout;
 using std::endl;
 
+using FrameTL::EvaluateFrame;
 using FrameTL::EllipticEquation;
 using FrameTL::AggregatedFrame;
 using MathTL::EllipticBVP;
@@ -35,6 +36,8 @@ using namespace FrameTL;
 using namespace MathTL;
 using namespace WaveletTL;
 
+//#define TWO_DIMENSIONS
+
 int main()
 {
   
@@ -47,6 +50,7 @@ int main()
   typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
 
+  EvaluateFrame<Basis1D,2,2> evalObj;
 
   //##############################  
   Matrix<double> A(DIM,DIM);
@@ -182,13 +186,13 @@ int main()
 
   FrameIndex<Basis1D,2,2> index = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0()); 
   
-  SampledMapping<2> wav_out = FrameTL::evaluate(frame,index,1,5);
+  SampledMapping<2> wav_out = evalObj.evaluate(frame,index,1,5);
 
   std::ofstream ofs("wav_out.m");
   wav_out.matlab_output(ofs);
   ofs.close();
   
-  Array1D<SampledMapping<2> > expansion_out = FrameTL::evaluate(frame,rhs, 1, 5);
+  Array1D<SampledMapping<2> > expansion_out = evalObj.evaluate(frame,rhs, 1, 5);
   
   std::ofstream ofs2("expan_out.m");
   expansion_out[0].matlab_output(ofs2);
@@ -205,8 +209,8 @@ int main()
   
   cout << "++++++++++++++++++++++" << endl;
   cout << rhs << endl;
-  
-  Array1D<SampledMapping<2> > S = FrameTL::evaluate<Basis1D,2>(frame, rhs, false, 5);// expand in dual basis
+
+  Array1D<SampledMapping<2> > S = evalObj.evaluate(frame, rhs, false, 5);// expand in dual basis
   std::ofstream ofs4("rhs_out.m");
   matlab_output(ofs4,S);
   ofs4.close();
@@ -228,12 +232,16 @@ int main()
   SparseMatrix<double> stiff;
   WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
   
+  unsigned int iter= 0;
+  Vector<double> x(Lambda.size()); x = 1;
+  double lmax = PowerIteration(stiff, x, 0.01, 1000, iter);
+  cout << "lmax = " << lmax << endl;
+
   cout << "performing iterative scheme to solve projected problem..." << endl;
   Vector<double> xk(Lambda.size()), err(Lambda.size()); xk = 0;
-  unsigned int iter= 0;
   
   //CG(stiff, rh, xk, 0.0001, 1000, iter);
-  Richardson(stiff, rh, xk, 0.03, 0.0001, 2000, iter);
+  Richardson(stiff, rh, xk, 2. / lmax - 0.001, 0.0001, 2000, iter);
   
   cout << "performing output..." << endl;
   
@@ -244,7 +252,7 @@ int main()
   
    discrete_poisson.rescale(u,-1);
 
-   Array1D<SampledMapping<2> > U = FrameTL::evaluate<Basis1D,2>(frame, u, true, 6);//expand in primal basis
+   Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u, true, 6);//expand in primal basis
    
    std::ofstream ofs5("approx_solution_out.m");
    matlab_output(ofs5,U);

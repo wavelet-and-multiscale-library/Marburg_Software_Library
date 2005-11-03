@@ -1,9 +1,9 @@
 #include <cmath>
 #include <iostream>
-#include <numerics/ivp.h>
-#include <numerics/one_step_scheme.h>
-#include <numerics/runge_kutta.h>
 #include <algebra/vector.h>
+#include <numerics/ivp.h>
+#include <numerics/runge_kutta.h>
+#include <numerics/w_method.h>
 
 using std::cout;
 using std::endl;

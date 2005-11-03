@@ -24,10 +24,10 @@ namespace MathTL
 
     The numerical method solves the following s linear stage equations:
 
-      (I-\tau*\gamma_{i,i}*J)(k_i+\sum_{j=1}^{i-1}\frac{\gamma_{i,j}}{\gamma_{i,i}}k_j)
-        = F(t_m+\tau*\alpha_i, u^{(m)}+\tau*\sum_{j=1}^{i-1}\alpha_{i,j}k_j)
-	  + \sum_{j=1}^{i-1}\frac{\gamma_{i,j}}{\gamma_{i,i}}k_j
-	  + \tau*\gamma_i*\partial_tF(t_m,u^{(m)})
+      (I-\tau*\gamma_{i,i}*J)(k_i + \sum_{j=1}^{i-1}\frac{\gamma_{i,j}}{\gamma_{i,i}}k_j)
+        = F(t_m+\tau*\alpha_i, u^{(m)}+\tau * \sum_{j=1}^{i-1}\alpha_{i,j} * k_j)
+	  + \sum_{j=1}^{i-1} \frac{\gamma_{i,j}}{\gamma_{i,i}} * k_j
+	  + \tau * \gamma_i * \partial_tF(t_m,u^{(m)})
 	  
     Here \alpha_i = \sum_{j=1}^i\alpha_{i,j}, \gamma_i = \sum_{j=1}^i\gamma_{i,j}.
     J is the exact Jacobian F_u(t_n, u_n) or an approximation of it.

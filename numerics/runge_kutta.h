@@ -12,6 +12,7 @@
 
 #include <algebra/vector.h>
 #include <algebra/triangular_matrix.h>
+#include <numerics/one_step_scheme.h>
 
 namespace MathTL
 {

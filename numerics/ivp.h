@@ -86,6 +86,13 @@ namespace MathTL
       virtual destructor
     */
     virtual ~AbstractIVP() = 0;
+
+    /*!
+      apply the right--hand side f to (t,v),
+      up to some tolerance (in the ||.||_2 norm)
+    */
+    virtual void apply_f(const double t, const VECTOR& v, const double tolerance,
+			 VECTOR& result) const = 0;
   };
 }
 

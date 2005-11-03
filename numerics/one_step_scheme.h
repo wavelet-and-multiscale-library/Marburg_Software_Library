@@ -26,6 +26,11 @@ namespace MathTL
     of u(t_m) for a given time sequence 0=t_0<t_1<...
     Additionally, the increment function has to provide some local error
     estimator.
+
+    Since the one-step scheme may also be used in an infinite-dimensional
+    setting, it is possible to specify a tolerance parameter (which controls
+    the overall spatial error introduced by the evaluations of the
+    right-hand side).
   */
   template <class VECTOR>
   class OneStepScheme
@@ -44,7 +49,8 @@ namespace MathTL
 			   const double t_m, const VECTOR& u_m,
 			   const double tau,
 			   VECTOR& u_mplus1,
-			   VECTOR& error_estimate) const = 0;
+			   VECTOR& error_estimate,
+			   const double tolerance = 1e-2) const = 0;
   };
 }
 

@@ -87,6 +87,7 @@ namespace MathTL
   }
 
   template <unsigned int DIM>
+  inline
   const bool
   AffineLinearMapping<DIM>::in_patch(const Point<DIM>& x) const {
     Point<DIM> y;
@@ -508,6 +509,7 @@ namespace MathTL
       return 2;
   }
 
+  inline
   const bool LinearBezierMapping::in_patch(const Point<2>& x) const
   {
     //make sure to walk through the vertices counter clockwise!!!

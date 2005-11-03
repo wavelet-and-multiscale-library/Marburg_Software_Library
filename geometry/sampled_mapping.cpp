@@ -61,6 +61,8 @@ namespace MathTL
     
     grid_.resize(n_points);
 
+    values_.resize(n_points);
+
     for (unsigned int i = 0; i < n_points; i++) {
       x[0] = h*i;
       ch.map_point(x,x_patch);  
@@ -81,15 +83,14 @@ namespace MathTL
     Point<1> x_patch;
     
     grid_.resize(n_points);
+    values_.resize(n_points);
 
     for (unsigned int i = 0; i < n_points; i++) {
       x[0] = h*i;
       ch.map_point(x,x_patch);  
       grid_[i] = x_patch[0];
-    }
-    
-    for (unsigned int i = 0; i < grid_.size(); i++)
       values_[i] = 0;
+    } 
   }
 
   SampledMapping<1>& 
@@ -287,13 +288,29 @@ namespace MathTL
   void matlab_output(std::ostream& os,
 		     const Array1D<SampledMapping<DIM> >& values)
   {
-    for (unsigned int i = 0; i < values.size(); i++) {
-      values[i].matlab_output(os);
-      os << "hold on" << std::endl
-	 << "surf(x,y,z)" << std::endl;
-      if (i == (values.size()-1))
-	os << "hold off" << std::endl;
+    switch (DIM) {
+    case 1: {
+      for (unsigned int i = 0; i < values.size(); i++) {
+	values[i].matlab_output(os);
+	os << "hold on" << std::endl
+	   << "plot(x,y)" << std::endl;
+	if (i == (values.size()-1))
+	  os << "hold off" << std::endl;
+      }
+      break;
     }
+    case 2: {
+      for (unsigned int i = 0; i < values.size(); i++) {
+	values[i].matlab_output(os);
+	os << "hold on" << std::endl
+	   << "surf(x,y,z)" << std::endl;
+	if (i == (values.size()-1))
+	  os << "hold off" << std::endl;
+      }
+      break;
+    }      
+    }// end switch
+
   }
 
   

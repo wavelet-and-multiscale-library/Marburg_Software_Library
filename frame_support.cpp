@@ -393,6 +393,8 @@ namespace FrameTL
   bool intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu,
+			  typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda,
+			  typename CubeBasis<IBASIS,DIM_d>::Support& supp_mu,
 			  FixedArray1D<Array1D<double>,DIM_d >& supp_intersect)
   {    
 
@@ -417,14 +419,17 @@ namespace FrameTL
     typename CUBEBASIS::Index mu_c(mu.j(),
 				   mu.e(),
 				   mu.k(),frame.bases()[mu.p()]);
-    
-    typename CUBEBASIS::Support supp_lambda;
-    typename CUBEBASIS::Support supp_mu;
-
-
+ 
     WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[lambda.p()], lambda_c, supp_lambda);
     WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[mu.p()], mu_c, supp_mu);
     
+
+
+//     for (unsigned int i = 0; i < DIM_d; i++) 
+//       cout << supp_lambda.a[i] << " " << supp_lambda.b[i] << " " << supp_lambda.j << endl;
+//     for (unsigned int i = 0; i < DIM_d; i++)
+//       cout << supp_mu.a[i] << " " << supp_mu.b[i] << " " << supp_mu.j << endl;
+
     const unsigned int n_points_la = (1 << supp_lambda.j)+1;
     const unsigned int n_points_mu = (1 << supp_mu.j)+1;
 
@@ -449,6 +454,9 @@ namespace FrameTL
     frame.atlas()->charts()[mu.p()]->map_point(x,x_patch);
     frame.atlas()->charts()[lambda.p()]->map_point_inv(x_patch,y1);
     
+ //    cout << y0 << " " << y1 << endl;
+
+
     FixedArray1D<FixedArray1D<double,2>,DIM_d > hyperCube_intersect;
     for (unsigned int i = 0; i < DIM_d; i++) {
       assert ( y0[i] <= y1[i] );
@@ -456,10 +464,17 @@ namespace FrameTL
       hyperCube_intersect[i][0] = std::max(supp_lambda.a[i]*dx1,y0[i]);
       hyperCube_intersect[i][1] = std::min(supp_lambda.b[i]*dx1,y1[i]);
       
+ 
       if ( hyperCube_intersect[i][0] >= hyperCube_intersect[i][1]  )
 	return false;
+
+      
     }
-  
+
+//     for (unsigned int i = 0; i < DIM_d; i++) {
+//       cout << "i = " << i << " intersect_cube[i] = " << hyperCube_intersect[i] << endl;
+//     }
+    
     // the bool is alway just a dummy
     // we just need some kind of a sorted list
     FixedArray1D<map<double,bool>, DIM_d> irregular_grid;

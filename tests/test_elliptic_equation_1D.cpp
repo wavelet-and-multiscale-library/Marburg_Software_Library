@@ -142,7 +142,8 @@ int main()
   //PoissonBVP<DIM> poisson(&const_fun);
   PoissonBVP<DIM> poisson(&sing1D);
 
-  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame);
+  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
+  //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
   
   double tmp = 0.0;
   int c = 0;
@@ -152,11 +153,13 @@ int main()
   
   //############### 1D galerkin scheme test ##################
 #if 1
-
+  
+  int z = 0;
   set<Index> Lambda;
   for (Index lambda = FrameTL::first_generator<Basis1D,1,1,Frame1D>(&frame, frame.j0());
        lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+2); ++lambda) {
     cout << lambda << endl;
+    cout << z++ << endl;
     Lambda.insert(lambda);
   }
 
@@ -186,9 +189,53 @@ int main()
   cout << "performing iterative scheme to solve projected problem..." << endl;
   Vector<double> xk(Lambda.size()); xk = 0;
 
-  CG(stiff, rh, xk, 0.0001, 1000, iter);
+ double alpha_n = 0.07;
+
+  Vector<double> resid(xk.size());
+  Vector<double> help(xk.size());
+  for (int i = 0; i < 1000; i++) {
+    stiff.apply(xk,help);
+    resid = rh - help;
+    cout << sqrt((resid*resid)) << endl;
+    stiff.apply(resid,help);
+    alpha_n = (resid * resid) * (1.0 / (resid * help));
+    resid *= alpha_n;
+    xk = xk + resid;
+  }
+
+//   for (int i = 0; i < 125 ; i++) 
+//     for (int j = 0; j < 125 ; j++) {
+//       if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
+// 	cout << stiff.get_entry(i,j) << endl;
+// 	cout << stiff.get_entry(j,i) << endl;
+// 	cout << "i = " << i << " j = " << j << endl;
+// 	//abort();
+// 	cout << "#######################" << endl;
+//       }
+//     } 
+
+   MultiIndex<unsigned int, 1> e1;
+   e1[0] = 0;
+   MultiIndex<int, 2> k1;
+   k1[0] = 1;
+   
+   MultiIndex<unsigned int, 1> e2;
+   e2[0] = 1;
+   MultiIndex<int, 2> k2;
+   k2[0] = 1;
+   
+   unsigned int p1 = 0, p2 = 0;
+   int j2 = 3;
+
+   //  FrameIndex<Basis1D,1,1> la(&frame,j2,e1,p1,k1);
+   //FrameIndex<Basis1D,1,1> mu(&frame,j2,e2,p2,k2);
+
+//    cout << "val  " << discrete_poisson.a(la,mu,2) << endl;
+//    cout << "val  " << discrete_poisson.a(mu,la,2) << endl;
+
+  //CG(stiff, rh, xk, 0.0001, 1000, iter);
   //Richardson(stiff, rh, xk, 2. / lmax, 0.0001, 1000, iter);
-  
+  //Richardson(stiff, rh, xk, 0.07, 0.0001, 2000, iter);  
   cout << "performing output..." << endl;
   
   InfiniteVector<double,Index> u;

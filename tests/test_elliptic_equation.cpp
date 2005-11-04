@@ -148,10 +148,10 @@ int main()
 
   CornerSingularityRHS singRhs(origin, 0.5, 1.5);
   
-  PoissonBVP<DIM> poisson(&singRhs);
-  //PoissonBVP<DIM> poisson(&const_fun);
+  //PoissonBVP<DIM> poisson(&singRhs);
+  PoissonBVP<DIM> poisson(&const_fun);
 
-  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame);
+  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   
   double tmp = 0.0;
   int c = 0;
@@ -247,7 +247,7 @@ int main()
   cout << "lmax = " << lmax << endl;
 
   x = 1;
-  double lmin = InversePowerIteration(stiff, x, 0.01, 1000, iter);
+  //double lmin = InversePowerIteration(stiff, x, 0.01, 1000, iter);
   
 
 
@@ -255,7 +255,21 @@ int main()
   Vector<double> xk(Lambda.size()), err(Lambda.size()); xk = 0;
   
   //CG(stiff, rh, xk, 0.0001, 1000, iter);
-  Richardson(stiff, rh, xk, 2. / lmax - 0.01, 0.0001, 2000, iter);
+  //Richardson(stiff, rh, xk, 2. / lmax - 0.01, 0.0001, 2000, iter);
+  double alpha_n = 2. / lmax - 0.001;
+  
+  Vector<double> resid(xk.size());
+  Vector<double> help(xk.size());
+  for (int i = 0; i < 1500; i++) {
+    stiff.apply(xk,help);
+    resid = rh - help;
+    cout << sqrt((resid*resid)) << endl;
+    stiff.apply(resid,help);
+    alpha_n = (resid * resid) * (1.0 / (resid * help));
+    resid *= alpha_n;
+    xk = xk + resid;
+  }
+
   
   cout << "performing output..." << endl;
   
@@ -271,7 +285,7 @@ int main()
    std::ofstream ofs5("approx_solution_out.m");
    matlab_output(ofs5,U);
    ofs5.close();
-   cout << "lmin = " << lmin << endl;
+   //cout << "lmin = " << lmin << endl;
    //########## testing runtime type information functionality #############
    //FrameTL::intersect_supports<Basis1D,2,2>(frame, index, index);
    //FrameIndex<Basis1D,2,2> index2 = FrameTL::last_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0()); 
@@ -279,7 +293,7 @@ int main()
    //#######################################################################
 #endif
    //################# end 2D galerkin scheme test ###################
-#if 0
+#if 1
    MultiIndex<unsigned int, 2> e1;
    e1[0] = 0;
    e1[1] = 0;

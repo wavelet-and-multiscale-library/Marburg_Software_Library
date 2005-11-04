@@ -4,10 +4,12 @@
 #include <utils/fixed_array1d.h>
 #include <typeinfo>
 #include <cube/cube_support.h>
+#include <map>
 
 using namespace WaveletTL;
 
 using std::type_info;
+using std::map;
 
 namespace FrameTL
 {
@@ -44,9 +46,9 @@ namespace FrameTL
 	
     typename CUBEBASIS::Support supp_lambda;
     
-    typename CubeBasis<IBASIS,DIM_d>::Index lambda_c(lambda.j(),
-						     lambda.e(),
-						     lambda.k(),frame.bases()[lambda.p()]);
+    typename CUBEBASIS::Index lambda_c(lambda.j(),
+				       lambda.e(),
+				       lambda.k(),frame.bases()[lambda.p()]);
     
     WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[lambda.p()], lambda_c, supp_lambda);
     
@@ -386,6 +388,122 @@ namespace FrameTL
     else return false;
   }
  
+
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  bool intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu,
+			  FixedArray1D<Array1D<double>,DIM_d >& supp_intersect)
+  {    
+
+    // template parameter DIM_d has to be specified when
+    // the typeid shall really contain the information that an
+    // affine mapping is used
+//     assert ( typeid(frame.atlas()->charts()[lambda.p()])
+// 	     ==  typeid(AffineLinearMapping<DIM_d>)
+// 	     &&
+// 	     typeid(frame.atlas()->charts()[mu.p()])
+// 	     ==  typeid(AffineLinearMapping<DIM_d>));
+
+    // WE ALSO ASSUME THAT THE MATRIX 'A' OF THE CHART IS A DIAGONAL ONE
+    // WITH POSITIVE ENTRIES ONLY
+
+    typedef WaveletTL::CubeBasis<IBASIS,DIM_d> CUBEBASIS;
+    
+    typename CUBEBASIS::Index lambda_c(lambda.j(),
+				       lambda.e(),
+				       lambda.k(),frame.bases()[lambda.p()]);
+    
+    typename CUBEBASIS::Index mu_c(mu.j(),
+				   mu.e(),
+				   mu.k(),frame.bases()[mu.p()]);
+    
+    typename CUBEBASIS::Support supp_lambda;
+    typename CUBEBASIS::Support supp_mu;
+
+
+    WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[lambda.p()], lambda_c, supp_lambda);
+    WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[mu.p()], mu_c, supp_mu);
+    
+    const unsigned int n_points_la = (1 << supp_lambda.j)+1;
+    const unsigned int n_points_mu = (1 << supp_mu.j)+1;
+
+    const double dx1 = 1.0 / (n_points_la-1);
+    const double dx2 = 1.0 / (n_points_mu-1);
+
+    Point<DIM_d> x;
+    Point<DIM_d> x_patch;
+    Point<DIM_d> y0;
+    Point<DIM_d> y1;
+    
+    for (unsigned int i = 0; i < DIM_d; i++)
+      x[i] = supp_mu.a[i] * dx2;
+      
+    frame.atlas()->charts()[mu.p()]->map_point(x,x_patch);
+    frame.atlas()->charts()[lambda.p()]->map_point_inv(x_patch,y0);
+  
+    for (unsigned int i = 0; i < DIM_d; i++) {
+      x[i] = supp_mu.b[i] * dx2;
+    }
+    
+    frame.atlas()->charts()[mu.p()]->map_point(x,x_patch);
+    frame.atlas()->charts()[lambda.p()]->map_point_inv(x_patch,y1);
+    
+    FixedArray1D<FixedArray1D<double,2>,DIM_d > hyperCube_intersect;
+    for (unsigned int i = 0; i < DIM_d; i++) {
+      assert ( y0[i] <= y1[i] );
+    
+      hyperCube_intersect[i][0] = std::max(supp_lambda.a[i]*dx1,y0[i]);
+      hyperCube_intersect[i][1] = std::min(supp_lambda.b[i]*dx1,y1[i]);
+      
+      if ( hyperCube_intersect[i][0] >= hyperCube_intersect[i][1]  )
+	return false;
+    }
+  
+    // the bool is alway just a dummy
+    // we just need some kind of a sorted list
+    FixedArray1D<map<double,bool>, DIM_d> irregular_grid;
+
+    // collect gridpoints for all directions,
+    // we have to do this for both patches
+    
+    for (unsigned int i = 0; i < DIM_d; i++) {
+      for (int k = supp_lambda.a[i]; k <= supp_lambda.b[i]; k++) {
+	double d = k*dx1;
+	if ( hyperCube_intersect[i][0] <= d && d <= hyperCube_intersect[i][1])
+	  irregular_grid[i][d] = 1;
+      }
+    }
+    
+    // lower left corner of support cube
+    for (unsigned int j = 0; j < DIM_d; j++) {
+      x[j] = supp_mu.a[j]*dx2;
+    }
+    
+    // second patch
+    for (unsigned int i = 0; i < DIM_d; i++) {
+      for (int k = supp_mu.a[i]; k <= supp_mu.b[i]; k++) {
+	x[i] = k*dx2;
+	frame.atlas()->charts()[mu.p()]->map_point(x,x_patch);
+	frame.atlas()->charts()[lambda.p()]->map_point_inv(x_patch,y0);
+	if ( hyperCube_intersect[i][0] <= y0[i] &&
+	     y0[i] <= hyperCube_intersect[i][1])
+	  irregular_grid[i][y0[i]] = 1;
+      }
+      x[i] = supp_mu.a[i]*dx2;
+    }
+
+    for (unsigned int i = 0; i < DIM_d; i++) {
+      supp_intersect[i].resize(irregular_grid[i].size());
+      unsigned int j = 0;
+      for (map<double,bool>::const_iterator it = irregular_grid[i].begin();
+	   it != irregular_grid[i].end(); it++) {
+	supp_intersect[i][j] = it->first;
+	j++;
+      }
+    }
+    return true;
+  }
 
 
   template <unsigned int DIM>

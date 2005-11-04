@@ -24,6 +24,8 @@ namespace FrameTL
 
 
   /*!
+    checks wether Point 'p' lies in the support of
+    the wavelet \psi_\lambda
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   bool in_support(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
@@ -31,6 +33,10 @@ namespace FrameTL
 		  const Point<DIM_m>& p);
 
   /*!
+    checks wether Point 'p' lies in the support of
+    the wavelet \psi_\lambda, when the support of the
+    corresponding cube wavelet is already known and
+    thus the latter is passed as an argument
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   bool in_support(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
@@ -39,6 +45,10 @@ namespace FrameTL
 		  const Point<DIM_m>& p);
 
   /*!
+    checks wether the support of the wavelet frame elements intersect,
+    also the supports of the corresponding cube wavelets are returned
+    in 'supp_lambda' and 'supp_mu'.
+    
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   bool intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
@@ -46,6 +56,24 @@ namespace FrameTL
 			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu,
 			  typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda,
 			  typename CubeBasis<IBASIS,DIM_d>::Support& supp_mu);
+
+  /*!
+    THIS ROUTINE IS INTENDED FOR THE SPECIAL CASE OF TRIVIAL
+    PARAMETRIZATIONS NAMELY AFFINE LINEAR MAPPINGS 'A x + B' WITH 'A' BEEING
+    A DIAGONAL MATRIX.
+    The function checks wether two wavelets intersect and returns
+    an irregualar partition of the support intersection pulled back
+    to the unit cube by the chart corresponding to \psi_\lambda.
+    This is at all needed to be able to exactly comoute the entries
+    of the stiffness matrix for the above case of very simple patch
+    parametrizations.
+  */
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  bool intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu,
+			  FixedArray1D<Array1D<double>,DIM_d >& supp_intersect);
+
 
   /*!
     tests wether the line segments defined by the points

@@ -26,6 +26,7 @@ namespace FrameTL
   enum QuadratureStrategy
     {
       Composite,
+      TrivialAffine,
       SplineInterpolation
     };
 

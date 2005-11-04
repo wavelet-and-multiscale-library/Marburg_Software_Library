@@ -12,6 +12,7 @@
 
 #include <algebra/triangular_matrix.h>
 #include <algebra/vector.h>
+#include <numerics/w_method.h>
 
 namespace MathTL
 {
@@ -30,6 +31,12 @@ namespace MathTL
     : public WMethod<VECTOR>
   {
   public:
+    /*!
+      constructor for one of the builtin ROW-methods, cf. w_method.h for details
+    */
+    ROWMethod(const typename WMethod<VECTOR>::Method method,
+	      const WMethodStageEquationSolver<VECTOR>& stage_equation_solver);
+
     /*!
       virtual destructor
     */

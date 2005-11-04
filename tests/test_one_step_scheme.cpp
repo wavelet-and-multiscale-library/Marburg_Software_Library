@@ -2,8 +2,10 @@
 #include <iostream>
 #include <algebra/vector.h>
 #include <numerics/ivp.h>
+#include <numerics/one_step_scheme.h>
 #include <numerics/runge_kutta.h>
 #include <numerics/w_method.h>
+#include <numerics/row_method.h>
 
 using std::cout;
 using std::endl;
@@ -46,7 +48,7 @@ int main()
 
   cout << "* testing RK12:" << endl;
   ExplicitRungeKuttaScheme<V> rk12(ExplicitRungeKuttaScheme<V>::RK12);
-  ExplicitRungeKuttaScheme<V>* scheme = &rk12;
+  OneStepScheme<V>* scheme = &rk12;
   Vector<double> temp(1), result(1), error_estimate(1);
   double err, olderr = 0;
   for (int expo = 0; expo <= 6; expo++) {
@@ -154,6 +156,28 @@ int main()
     }
     olderr = err;
   }
+
+//   cout << "* testing ROS2:" << endl;
+//   ROWMethod<V> ros2(WMethod<V>::ROS2);
+//   scheme = &ros2;
+//   olderr = 0;
+//   for (int expo = 0; expo <= 6; expo++) {
+//     temp = problem.u0;
+//     int N = 1<<expo;
+//     double h = 1.0/N;
+//     double err_est = 0;
+//     for (int i = 1; i <= N; i++) {
+//       scheme->increment(problem, i*h, temp, h, result, error_estimate);
+//       err_est = std::max(err_est, l2_norm(error_estimate));
+//       temp = result;
+//     }
+//     err = fabs(result[0] - M_E);
+//     if (expo > 0) {
+//       cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
+// 	   << ", max. of local error estimate " << err_est << endl;
+//     }
+//     olderr = err;
+//   }
 
   return 0;
 }

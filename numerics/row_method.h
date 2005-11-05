@@ -24,18 +24,17 @@ namespace MathTL
       u'(t) = F(t, u(t)), u(0) = u_0.
 
     Essentially, a ROW-method is a W-method with T = F_v(t_m,u^{(m)}) and
-    g = F_t(t_m,u^{(m)}. Please read w_method.h for details.
+    g = F_t(t_m,u^{(m)}, see w_method.h for details.
   */
   template <class VECTOR>
   class ROWMethod
-    : public WMethod<VECTOR>
+    : public WMethod<VECTOR>, public WMethodStageEquationHelper<VECTOR>
   {
   public:
     /*!
       constructor for one of the builtin ROW-methods, cf. w_method.h for details
     */
-    ROWMethod(const typename WMethod<VECTOR>::Method method,
-	      const WMethodStageEquationSolver<VECTOR>& stage_equation_solver);
+    ROWMethod(const typename WMethod<VECTOR>::Method method);
 
     /*!
       virtual destructor
@@ -43,34 +42,34 @@ namespace MathTL
     virtual ~ROWMethod() {}
 
     /*!
-      increment function u^{(m)} -> u^{(m+1)},
-      also returns a local error estimator
+      (adaptive) solver for one of the systems (I-\alpha*T)x=y,
+      inherited from WMethodStageEquationHelper
     */
-    void increment(const AbstractIVP<VECTOR>& ivp,
-		   const double t_m,
-		   const VECTOR& u_m,
-		   const double tau,
-		   VECTOR& u_mplus1,
-		   VECTOR& error_estimate,
-		   const double tolerance = 1e-2) const;
+    void solve_W_stage_equation(const AbstractIVP<VECTOR>* ivp,
+				const double t,
+				const VECTOR& v,
+				const double alpha,
+				const VECTOR& y,
+				const double tolerance,
+				VECTOR& x) const
+    {
+      // use the exact jacobian
+      ivp->solve_ROW_stage_equation(t, v, alpha, y, tolerance, x);
+    }
 
     /*!
-      (adaptive) solver for one of the systems (I-\alpha*T)x=y
+      Approximation of the temporal derivative f_t(t_m,u^{(m)}),
+      inherited from WMethodStageEquationHelper
     */
-    void solve_stage_equation(const AbstractIVP<VECTOR>& ivp,
-			      const double alpha,
-			      const VECTOR& y,
-			      const double tolerance,
-			      VECTOR& x) const;
-    
-    /*!
-      evaluate the vector g (an approximation of F_t(t_m,u^{(m)}))
-    */
-    void g(const AbstractIVP<VECTOR>& ivp,
-	   const double t_m,
-	   const VECTOR& u_m,
-	   const double tolerance,
-	   VECTOR& result) const;
+    void approximate_ft(const AbstractIVP<VECTOR>* ivp,
+			const double t,
+			const VECTOR& v,
+			const double tolerance,
+			VECTOR& result) const
+    {
+      // use the exact derivative f_t
+      ivp->evaluate_ft(t, v, tolerance, result);
+    }
   };
 }
 

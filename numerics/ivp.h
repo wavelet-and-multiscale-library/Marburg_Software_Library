@@ -40,13 +40,13 @@ namespace MathTL
     virtual ~IVP ();
     
     /*!
-      apply the right--hand side f to (t,v)
+      evaluate the right--hand side f at (t,v)
     */
     virtual void apply_f(const double t, const Point<DIM>& v,
 			 Point<DIM>& result) const = 0;
 
     /*!
-      apply the partial derivative f_t to (t,v)
+      evaluate the partial derivative f_t at (t,v)
     */
     virtual void apply_ft(const double t, const Point<DIM>& v,
 			  Point<DIM>& result) const = 0;
@@ -71,7 +71,7 @@ namespace MathTL
     where u:[0,T]->V.
     
     The signature of AbstractIVP is designed to be used in (derivations of) the
-    class OneStepScheme.
+    class OneStepScheme, especially for Runge-Kutta and linearly implicit methods.
   */
   template <class VECTOR>
   class AbstractIVP
@@ -88,11 +88,39 @@ namespace MathTL
     virtual ~AbstractIVP() = 0;
 
     /*!
-      apply the right--hand side f to (t,v),
-      up to some tolerance (in the ||.||_2 norm)
+      evaluate the right--hand side f at (t,v),
+      up to some tolerance (w.r.t. the ||.||_2 norm)
     */
-    virtual void apply_f(const double t, const VECTOR& v, const double tolerance,
-			 VECTOR& result) const = 0;
+    virtual void evaluate_f(const double t,
+			    const VECTOR& v,
+			    const double tolerance,
+			    VECTOR& result) const = 0;
+
+    /*!
+      evaluate the derivative f_t at (t,v),
+      up to some tolerance (w.r.t. the ||.||_2 norm)
+    */
+    virtual void evaluate_ft(const double t,
+			     const VECTOR& v,
+			     const double tolerance,
+			     VECTOR& result) const = 0;
+
+    /*!
+      Up to a given tolerance (w.r.t. the ||.||_2 norm), solve the special
+      linear system 
+      
+        (I-\alpha*J)x = y,
+      
+      where J = \partial_v f(t,v) is the (exact) Jacobian of f.
+      This routine will primarily be used to solve the stage equations of
+      an ROW-method.
+    */
+    virtual void solve_ROW_stage_equation(const double t,
+					  const VECTOR& v,
+					  const double alpha,
+					  const VECTOR& y,
+					  const double tolerancs,
+					  VECTOR& result) const = 0;
   };
 }
 

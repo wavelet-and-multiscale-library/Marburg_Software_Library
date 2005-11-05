@@ -51,7 +51,7 @@ namespace MathTL
     /*!
       increment function + local error estimation
     */
-    void increment(const AbstractIVP<VECTOR>& ivp,
+    void increment(const AbstractIVP<VECTOR>* ivp,
 		   const double t_m, const VECTOR& u_m,
 		   const double tau,
 		   VECTOR& u_mplus1,

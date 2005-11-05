@@ -27,10 +27,31 @@ public:
     u0.resize(1); u0[0] = 1;
   }
 
-  void apply_f(const double t, const Vector<double>& v, const double tolerance,
-	       Vector<double>& result) const
+  void evaluate_f(const double t,
+		  const Vector<double>& v,
+		  const double tolerance,
+		  Vector<double>& result) const
   {
     result[0] = lambda_ * v[0];
+  }
+
+  void evaluate_ft(const double t,
+		   const Vector<double>& v,
+		   const double tolerance,
+		   Vector<double>& result) const
+  {
+    result = 0;
+  }
+
+  void solve_ROW_stage_equation(const double t,
+				const Vector<double>& v,
+				const double alpha,
+				const Vector<double>& y,
+				const double tolerancs,
+				Vector<double>& result) const
+  {
+    // Jv=lambda*v -> (I-alpha*J)x=(1-alpha*lambda)x
+    result[0] = y[0] / (1 - alpha*lambda_);
   }
 
 private:
@@ -57,7 +78,7 @@ int main()
     double h = 1.0/N;
     double err_est = 0;
     for (int i = 1; i <= N; i++) {
-      scheme->increment(problem, i*h, temp, h, result, error_estimate);
+      scheme->increment(&problem, i*h, temp, h, result, error_estimate);
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
     }
@@ -79,7 +100,7 @@ int main()
     double h = 1.0/N;
     double err_est = 0;
     for (int i = 1; i <= N; i++) {
-      scheme->increment(problem, i*h, temp, h, result, error_estimate);
+      scheme->increment(&problem, i*h, temp, h, result, error_estimate);
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
     }
@@ -101,7 +122,7 @@ int main()
     double h = 1.0/N;
     double err_est = 0;
     for (int i = 1; i <= N; i++) {
-      scheme->increment(problem, i*h, temp, h, result, error_estimate);
+      scheme->increment(&problem, i*h, temp, h, result, error_estimate);
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
     }
@@ -123,7 +144,7 @@ int main()
     double h = 1.0/N;
     double err_est = 0;
     for (int i = 1; i <= N; i++) {
-      scheme->increment(problem, i*h, temp, h, result, error_estimate);
+      scheme->increment(&problem, i*h, temp, h, result, error_estimate);
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
     }
@@ -145,7 +166,7 @@ int main()
     double h = 1.0/N;
     double err_est = 0;
     for (int i = 1; i <= N; i++) {
-      scheme->increment(problem, i*h, temp, h, result, error_estimate);
+      scheme->increment(&problem, i*h, temp, h, result, error_estimate);
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
     }
@@ -157,27 +178,49 @@ int main()
     olderr = err;
   }
 
-//   cout << "* testing ROS2:" << endl;
-//   ROWMethod<V> ros2(WMethod<V>::ROS2);
-//   scheme = &ros2;
-//   olderr = 0;
-//   for (int expo = 0; expo <= 6; expo++) {
-//     temp = problem.u0;
-//     int N = 1<<expo;
-//     double h = 1.0/N;
-//     double err_est = 0;
-//     for (int i = 1; i <= N; i++) {
-//       scheme->increment(problem, i*h, temp, h, result, error_estimate);
-//       err_est = std::max(err_est, l2_norm(error_estimate));
-//       temp = result;
-//     }
-//     err = fabs(result[0] - M_E);
-//     if (expo > 0) {
-//       cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
-// 	   << ", max. of local error estimate " << err_est << endl;
-//     }
-//     olderr = err;
-//   }
+  cout << "* testing ROS2:" << endl;
+  ROWMethod<V> ros2(WMethod<V>::ROS2);
+  scheme = &ros2;
+  olderr = 0;
+  for (int expo = 0; expo <= 6; expo++) {
+    temp = problem.u0;
+    int N = 1<<expo;
+    double h = 1.0/N;
+    double err_est = 0;
+    for (int i = 1; i <= N; i++) {
+      scheme->increment(&problem, i*h, temp, h, result, error_estimate);
+      err_est = std::max(err_est, l2_norm(error_estimate));
+      temp = result;
+    }
+    err = fabs(result[0] - M_E);
+    if (expo > 0) {
+      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
+	   << ", max. of local error estimate " << err_est << endl;
+    }
+    olderr = err;
+  }
+
+  cout << "* testing ROWDA3:" << endl;
+  ROWMethod<V> rowda3(WMethod<V>::ROWDA3);
+  scheme = &rowda3;
+  olderr = 0;
+  for (int expo = 0; expo <= 6; expo++) {
+    temp = problem.u0;
+    int N = 1<<expo;
+    double h = 1.0/N;
+    double err_est = 0;
+    for (int i = 1; i <= N; i++) {
+      scheme->increment(&problem, i*h, temp, h, result, error_estimate);
+      err_est = std::max(err_est, l2_norm(error_estimate));
+      temp = result;
+    }
+    err = fabs(result[0] - M_E);
+    if (expo > 0) {
+      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
+	   << ", max. of local error estimate " << err_est << endl;
+    }
+    olderr = err;
+  }
 
   return 0;
 }

@@ -177,37 +177,39 @@ namespace MathTL
   
   template <class VECTOR>
   void
-  ExplicitRungeKuttaScheme<VECTOR>::increment(const AbstractIVP<VECTOR>& ivp,
+  ExplicitRungeKuttaScheme<VECTOR>::increment(const AbstractIVP<VECTOR>* ivp,
 					      const double t_m, const VECTOR& u_m,
 					      const double tau,
 					      VECTOR& u_mplus1,
 					      VECTOR& error_estimate,
 					      const double tolerance) const
   {
-    const unsigned int d = u_m.size();
-    const unsigned int s = c.size();
-    Array1D<Vector<double> > k(s);
-    for (unsigned int i = 0; i < s; i++)
-      k[i].resize(d);
-    Vector<double> temp(d);
+    const unsigned int stages = c.size(); // for readability
+
+    Array1D<VECTOR> k(stages);
+    k[0] = u_m; k[0] = 0; // to set the dimensiona correctly
+    for (unsigned int i = 1; i < stages; i++)
+      k[i] = k[0];
+
+    VECTOR temp;
 
     // solve stage equations
-    ivp.apply_f(t_m+c[0]*tau, u_m, tolerance/s, k[0]);
-    for (unsigned int i = 1; i < s; i++) {
+    ivp->evaluate_f(t_m+c[0]*tau, u_m, tolerance/stages, k[0]);
+    for (unsigned int i = 1; i < stages; i++) {
       temp = u_m;
       for (unsigned int j = 0; j < i; j++)
 	temp.add(tau*A(i,j), k[j]);
-      ivp.apply_f(t_m+c[i]*tau, temp, tolerance/s, k[i]);
+      ivp->evaluate_f(t_m+c[i]*tau, temp, tolerance/stages, k[i]);
     }
     
     // solution at t_m+tau
     u_mplus1 = u_m;
-    for (unsigned int i = 0; i < s; i++)
+    for (unsigned int i = 0; i < stages; i++)
       u_mplus1.add(tau*bhat[i], k[i]);
 
     // error estimate
     error_estimate = 0;
-    for (unsigned int i = 0; i < s; i++)
+    for (unsigned int i = 0; i < stages; i++)
       error_estimate.add(tau*(bhat[i]-b[i]), k[i]);
   }
 }

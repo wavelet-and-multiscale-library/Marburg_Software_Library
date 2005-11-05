@@ -173,7 +173,7 @@ namespace MathTL
     Vector<C>& operator = (const C c);
 
     /*!
-      assignment from another vector
+      assignment from another vector (may change the dimension)
     */
     Vector<C>& operator = (const Vector<C>& v);
 

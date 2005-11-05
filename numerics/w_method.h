@@ -16,27 +16,51 @@
 namespace MathTL
 {
   /*!
-    Abstract helper class for (adaptive) solvers of the W- or ROW-method stage equations
+    Abstract helper class for (adaptive) solvers of the W-(or ROW-) method
+    stage equations
+
       (I-alpha*T)x=y.
-    
-    For the finite-dimensional setting, we specify an ROW solver in row_method.h.
+      
+    In a W-method, one replaces the exact Jacobian J=f_v(t,v) by an maybe crude
+    approximation T. The derivative f_t(t,v) will also be approximated by a vector
+    g (often even by zero).
+
+    In practice, it is possible (but not necessary) to make the concrete instance
+    of AbstractIVP under consideration also a descendant from this helper class.
+    For example, the class ROWMethod uses a special WMethodStageEquationHelper
+    class, see row_method.h for details.
   */
   template <class VECTOR>
-  class WMethodStageEquationSolver
+  class WMethodStageEquationHelper
   {
   public:
     //! purely virtual destructor
-    virtual ~WMethodStageEquationSolver() = 0;
+    virtual ~WMethodStageEquationHelper() = 0;
     
     /*!
       (adaptive) solver for one of the systems (I-\alpha*T)x=y,
-      implicitly this also specifies the approximation T to the Jacobian F_v(t_m,u^{(m)})
+      implicitly this also specifies the approximation T to the
+      Jacobian f_v(t,v)
     */
-    virtual void solve_stage_equation(const AbstractIVP<VECTOR>& ivp,
-				      const double alpha,
-				      const VECTOR& y,
-				      const double tolerance,
-				      VECTOR& x) const = 0;
+    virtual void solve_W_stage_equation(const AbstractIVP<VECTOR>* ivp,
+					const double t,
+					const VECTOR& v,
+					const double alpha,
+					const VECTOR& y,
+					const double tolerance,
+					VECTOR& x) const = 0;
+
+    /*!
+      Approximation of the temporal derivative f_t(t,v)
+      (up to some tolerance w.r.t. ||.||_2, often denoted as g).
+      In practice, g will often be chosen as zero, for stability reasons
+      (reducing the overall consistency order of the W-method).
+    */
+    virtual void approximate_ft(const AbstractIVP<VECTOR>* ivp,
+				const double t,
+				const VECTOR& v,
+				const double tolerance,
+				VECTOR& result) const = 0;
   };
   
   /*!
@@ -44,18 +68,18 @@ namespace MathTL
     method (a W-method) for the numerical solution of
     (abstract) nonautonomous initial value problems of the form
 
-      u'(t) = F(t, u(t)), u(0) = u_0.
+      u'(t) = f(t, u(t)), u(0) = u_0.
 
     The numerical method solves the following s linear stage equations:
 
       (I-\tau*\gamma_{i,i}*T)(k_i + \sum_{j=1}^{i-1}\frac{\gamma_{i,j}}{\gamma_{i,i}}k_j)
-        = F(t_m+\tau*\alpha_i, u^{(m)}+\tau * \sum_{j=1}^{i-1}\alpha_{i,j} * k_j)
+        = f(t_m + \tau * \alpha_i, u^{(m)} + \tau * \sum_{j=1}^{i-1}\alpha_{i,j} * k_j)
 	  + \sum_{j=1}^{i-1} \frac{\gamma_{i,j}}{\gamma_{i,i}} * k_j
 	  + \tau * \gamma_i * g
 	  
     Here \alpha_i = \sum_{j=1}^{i-1}\alpha_{i,j}, \gamma_i = \sum_{j=1}^i\gamma_{i,j}.
-    T is the exact Jacobian F_u(t_m,u^{(m)}) (ROW-method) or an approximation of it (W-method).
-    g is the exact derivative F_t(t_m,u^{(m)}) (ROW-method) or an approximation of it (W-method).
+    T is the exact Jacobian f_v(t_m,u^{(m)}) (ROW-method) or an approximation of it (W-method).
+    g is the exact derivative f_t(t_m,u^{(m)}) (ROW-method) or an approximation of it (W-method).
     In a general W-method, one will often choose g=0.
     The value at the new time node t_{m+1}=t_m+\tau is then determined by
 
@@ -83,16 +107,20 @@ namespace MathTL
       [ROS2]   Blom, Hundsdorfer, Spee, Verwer:
                A Second-Order Rosenbrock Method Applied to Photochemical Dispersion Problems,
 	       SIAM J. Sci. Comput. 20(1999), 1456-1480
+      [ROWDA3] Roche:
+               Rosenbrock Methods for Differential Algebraic Equations,
+               Numer. Math. 52(1988), 45-63
      */
     enum Method {
       ROS2,   // s=2, p=2, L-stable
+      ROWDA3, // s=3, p=3, L-stable
     };
 
     /*!
       constructor from some builtin methods and a given stage equation solver
     */
     WMethod(const Method method,
-	    const WMethodStageEquationSolver<VECTOR>& stage_equation_solver);
+	    const WMethodStageEquationHelper<VECTOR>* stage_equation_solver);
     
     /*!
       virtual destructor
@@ -103,22 +131,13 @@ namespace MathTL
       increment function u^{(m)} -> u^{(m+1)},
       also returns a local error estimator
     */
-    void increment(const AbstractIVP<VECTOR>& ivp,
+    void increment(const AbstractIVP<VECTOR>* ivp,
 		   const double t_m,
 		   const VECTOR& u_m,
 		   const double tau,
 		   VECTOR& u_mplus1,
 		   VECTOR& error_estimate,
 		   const double tolerance = 1e-2) const;
-    
-    /*!
-      evaluate the vector g (an approximation of F_t(t_m,u^{(m)}))
-    */
-    virtual void g(const AbstractIVP<VECTOR>& ivp,
-		   const double t_m,
-		   const VECTOR& u_m,
-		   const double tolerance,
-		   VECTOR& result) const = 0;
     
   protected:
     //! (alpha_{i,j})
@@ -139,8 +158,8 @@ namespace MathTL
     //! coefficients for the lower order embedded scheme (bhat_i)
     Vector<double> bhat;
 
-    //! instance of the stage equation solver
-    const WMethodStageEquationSolver<VECTOR>& stage_equation_solver;
+    //! instance of the stage equation helper
+    const WMethodStageEquationHelper<VECTOR>* stage_equation_helper;
   };
 }
 

@@ -67,7 +67,7 @@ namespace MathTL
   inline
   const double
   AffineLinearMapping<DIM>::Gram_factor(const Point<DIM>& x) const {
-    return fabs(det_A);
+    return sqrt(fabs(det_A));
   }
 
   template <unsigned int DIM>

@@ -54,8 +54,8 @@ namespace FrameTL
   bool intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu,
-			  typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda,
-			  typename CubeBasis<IBASIS,DIM_d>::Support& supp_mu);
+			  const typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda,
+			  const typename CubeBasis<IBASIS,DIM_d>::Support& supp_mu);
 
   /*!
     THIS ROUTINE IS INTENDED FOR THE SPECIAL CASE OF TRIVIAL
@@ -72,8 +72,8 @@ namespace FrameTL
   bool intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu,
-			  typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda,
-			  typename CubeBasis<IBASIS,DIM_d>::Support& supp_mu,
+			  const typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda,
+			  const typename CubeBasis<IBASIS,DIM_d>::Support& supp_mu,
 			  FixedArray1D<Array1D<double>,DIM_d >& supp_intersect);
 
 

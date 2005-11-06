@@ -148,10 +148,11 @@ int main()
 
   CornerSingularityRHS singRhs(origin, 0.5, 1.5);
   
-  //PoissonBVP<DIM> poisson(&singRhs);
-  PoissonBVP<DIM> poisson(&const_fun);
+  PoissonBVP<DIM> poisson(&singRhs);
+  //PoissonBVP<DIM> poisson(&const_fun);
 
-  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
+  //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
+  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
   
   double tmp = 0.0;
   int c = 0;
@@ -270,7 +271,18 @@ int main()
     xk = xk + resid;
   }
 
-  
+  for (int i = 0; i < 125 ; i++) 
+    for (int j = 0; j < 125 ; j++) {
+      if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
+	cout << stiff.get_entry(i,j) << endl;
+	cout << stiff.get_entry(j,i) << endl;
+	cout << "i = " << i << " j = " << j << endl;
+	cout << "#######################" << endl;
+	//abort();
+      }
+    }
+
+
   cout << "performing output..." << endl;
   
   InfiniteVector<double,Frame2D::Index> u;

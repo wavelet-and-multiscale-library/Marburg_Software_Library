@@ -125,9 +125,24 @@ namespace FrameTL
 	Point<DIM_d> b;
 	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx), a);
 	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx), b);
-	
+
 	return (a[0] <= p[0]) && (p[0] <= b[0]);
 	
+      }
+
+    // just to get a better performance in the 
+    if ( (typeid(*frame.atlas()->charts()[lambda.p()]) ==
+	  typeid(AffineLinearMapping<2>))
+	 )
+      {
+	const double dx = 1.0 / (1 << supp_lambda.j);
+	Point<DIM_d> a;
+	Point<DIM_d> b;
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx,supp_lambda.a[1]*dx), a);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx,supp_lambda.b[1]*dx), b);
+
+	return (a[0] <= p[0] && p[0] <= b[0]) && (a[1] <= p[1] && p[1] <= b[1]);
+
       }
     
     if ( (typeid(*frame.atlas()->charts()[lambda.p()]) ==
@@ -187,18 +202,18 @@ namespace FrameTL
   {
 
 
-    typedef WaveletTL::CubeBasis<IBASIS,DIM_d> CUBEBASIS;
+//     typedef WaveletTL::CubeBasis<IBASIS,DIM_d> CUBEBASIS;
     
-    typename CubeBasis<IBASIS,DIM_d>::Index lambda_c(lambda.j(),
-						     lambda.e(),
-						     lambda.k(),frame.bases()[lambda.p()]);
+//     typename CubeBasis<IBASIS,DIM_d>::Index lambda_c(lambda.j(),
+// 						     lambda.e(),
+// 						     lambda.k(),frame.bases()[lambda.p()]);
     
-    typename CubeBasis<IBASIS,DIM_d>::Index mu_c(mu.j(),
-						 mu.e(),
-						 mu.k(),frame.bases()[mu.p()]);
+//     typename CubeBasis<IBASIS,DIM_d>::Index mu_c(mu.j(),
+// 						 mu.e(),
+// 						 mu.k(),frame.bases()[mu.p()]);
     
-    WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[lambda.p()], lambda_c, supp_lambda);
-    WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[mu.p()], mu_c, supp_mu);
+//     WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[lambda.p()], lambda_c, supp_lambda);
+//     WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[mu.p()], mu_c, supp_mu);
     
     const double dx1 = 1.0 / (1 << supp_lambda.j);
     const double dx2 = 1.0 / (1 << supp_mu.j);
@@ -410,18 +425,18 @@ namespace FrameTL
     // WE ALSO ASSUME THAT THE MATRIX 'A' OF THE CHART IS A DIAGONAL ONE
     // WITH POSITIVE ENTRIES ONLY
 
-    typedef WaveletTL::CubeBasis<IBASIS,DIM_d> CUBEBASIS;
+//     typedef WaveletTL::CubeBasis<IBASIS,DIM_d> CUBEBASIS;
     
-    typename CUBEBASIS::Index lambda_c(lambda.j(),
-				       lambda.e(),
-				       lambda.k(),frame.bases()[lambda.p()]);
+//     typename CUBEBASIS::Index lambda_c(lambda.j(),
+// 				       lambda.e(),
+// 				       lambda.k(),frame.bases()[lambda.p()]);
     
-    typename CUBEBASIS::Index mu_c(mu.j(),
-				   mu.e(),
-				   mu.k(),frame.bases()[mu.p()]);
+//     typename CUBEBASIS::Index mu_c(mu.j(),
+// 				   mu.e(),
+// 				   mu.k(),frame.bases()[mu.p()]);
  
-    WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[lambda.p()], lambda_c, supp_lambda);
-    WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[mu.p()], mu_c, supp_mu);
+//     WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[lambda.p()], lambda_c, supp_lambda);
+//     WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[mu.p()], mu_c, supp_mu);
     
 
 

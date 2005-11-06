@@ -12,10 +12,14 @@
 #include <cube/cube_index.h>
 #include <galerkin/galerkin_utils.h>
 #include <frame_support.h>
+#include <frame_index.h>
+
 
 using std::cout;
 using std::endl;
 
+
+using FrameTL::FrameIndex;
 using FrameTL::EllipticEquation;
 using FrameTL::EvaluateFrame;
 using FrameTL::AggregatedFrame;
@@ -142,8 +146,8 @@ int main()
   //PoissonBVP<DIM> poisson(&const_fun);
   PoissonBVP<DIM> poisson(&sing1D);
 
-  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
-  //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
+  //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
+  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
   
   double tmp = 0.0;
   int c = 0;
@@ -203,35 +207,37 @@ int main()
     xk = xk + resid;
   }
 
-//   for (int i = 0; i < 125 ; i++) 
-//     for (int j = 0; j < 125 ; j++) {
-//       if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
-// 	cout << stiff.get_entry(i,j) << endl;
-// 	cout << stiff.get_entry(j,i) << endl;
-// 	cout << "i = " << i << " j = " << j << endl;
-// 	//abort();
-// 	cout << "#######################" << endl;
-//       }
-//     } 
+  for (int i = 0; i < 125 ; i++) 
+    for (int j = 0; j < 125 ; j++) {
+      if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
+	cout << stiff.get_entry(i,j) << endl;
+	cout << stiff.get_entry(j,i) << endl;
+	cout << "i = " << i << " j = " << j << endl;
+	//abort();
+	cout << "#######################" << endl;
+      }
+    } 
 
    MultiIndex<unsigned int, 1> e1;
    e1[0] = 0;
-   MultiIndex<int, 2> k1;
-   k1[0] = 1;
+   MultiIndex<int, 1> k1;
+   k1[0] = 2;
    
    MultiIndex<unsigned int, 1> e2;
-   e2[0] = 1;
-   MultiIndex<int, 2> k2;
+   e2[0] = 0;
+   MultiIndex<int, 1> k2;
    k2[0] = 1;
    
-   unsigned int p1 = 0, p2 = 0;
+   unsigned int p1 = 0, p2 = 1;
    int j2 = 3;
 
-   //  FrameIndex<Basis1D,1,1> la(&frame,j2,e1,p1,k1);
-   //FrameIndex<Basis1D,1,1> mu(&frame,j2,e2,p2,k2);
+   FrameIndex<Basis1D,1,1> la(&frame,j2,e1,p1,k1);
+   FrameIndex<Basis1D,1,1> mu(&frame,j2,e2,p2,k2);
 
-//    cout << "val  " << discrete_poisson.a(la,mu,2) << endl;
-//    cout << "val  " << discrete_poisson.a(mu,la,2) << endl;
+   cout << la << mu << endl;
+
+   cout << "val  " << discrete_poisson.a(la,mu,1) << endl;
+   cout << "val  " << discrete_poisson.a(mu,la,1) << endl;
 
   //CG(stiff, rh, xk, 0.0001, 1000, iter);
   //Richardson(stiff, rh, xk, 2. / lmax, 0.0001, 1000, iter);

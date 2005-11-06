@@ -251,9 +251,40 @@ namespace FrameTL
     typename AggregatedFrame<IBASIS,DIM>::Index tmp_ind;
 
     typedef WaveletTL::CubeBasis<IBASIS,DIM> CUBEBASIS;
+  
+    typename CUBEBASIS::Index lambda_c(lambda.j(),
+				       lambda.e(),
+				       lambda.k(),frame_->bases()[lambda.p()]);
+    
+    typename CUBEBASIS::Index mu_c(mu.j(),
+				   mu.e(),
+				   mu.k(),frame_->bases()[mu.p()]);
  
     typename CUBEBASIS::Support supp_lambda;
     typename CUBEBASIS::Support supp_mu;
+
+    WaveletTL::support<IBASIS,DIM>(*frame_->bases()[lambda.p()], lambda_c, supp_lambda);
+    WaveletTL::support<IBASIS,DIM>(*frame_->bases()[mu.p()], mu_c, supp_mu);
+
+//     for (unsigned int i = 0; i < DIM; i++) 
+//       cout << supp_lambda.a[i] << " " << supp_lambda.b[i] << " " << supp_lambda.j << endl;
+//     for (unsigned int i = 0; i < DIM; i++)
+//       cout << supp_mu.a[i] << " " << supp_mu.b[i] << " " << supp_mu.j << endl;
+
+
+    typename CUBEBASIS::Support tmp_supp;
+
+    // swap indices and supports if necessary
+    if (supp_mu.j > supp_lambda.j) {
+      tmp_ind = lambda;
+      lambda = mu;
+      mu = tmp_ind;
+
+      tmp_supp = supp_lambda;
+      supp_lambda = supp_mu;
+      supp_mu = tmp_supp;
+    }
+
     FixedArray1D<Array1D<double>,DIM > irregular_grid;
 
     const int N_Gauss = q;
@@ -284,19 +315,6 @@ namespace FrameTL
     
     if ( !b )
       return 0.0;
-
-    typename CUBEBASIS::Support tmp_supp;
-
-    // swap indices and supports if necessary
-    if (supp_mu.j > supp_lambda.j) {
-      tmp_ind = lambda;
-      lambda = mu;
-      mu = tmp_ind;
-
-      tmp_supp = supp_lambda;
-      supp_lambda = supp_mu;
-      supp_mu = tmp_supp;
-    }
 
 
     typedef typename IBASIS::Index Index1D;
@@ -353,15 +371,18 @@ namespace FrameTL
 	for (unsigned int i = 0; i < DIM; i++) {
 	  x[i] = gauss_points[i][index[i]];
 	}
-	//cout << x << endl;
+	//cout << "x = " << x  << endl;
 	frame_->atlas()->charts()[lambda.p()]->map_point(x,x_patch);
+	//cout << "x_patch = " << x_patch  << endl;
 	if ( in_support(*frame_,mu, supp_mu, x_patch) )
 	  {
 	    frame_->atlas()->charts()[mu.p()]->map_point_inv(x_patch,y);
-
+	    //cout << "y = " << y  << endl;
 	  
 	    double sq_gram_la = frame_->atlas()->charts()[lambda.p()]->Gram_factor(x);
 	    double sq_gram_mu = frame_->atlas()->charts()[mu.p()]->Gram_factor(y);
+
+	    //cout << "sqgramla = " << sq_gram_la <<  " sqgrammu = " << sq_gram_mu << endl;
 
 	    double weight=1., psi_lambda=1., psi_mu=1.;
 	    for (unsigned int i = 0; i < DIM; i++) {
@@ -406,13 +427,18 @@ namespace FrameTL
 
 	    for (unsigned int i1 = 0; i1 < DIM; i1++)
 	      for (unsigned int i2 = 0; i2 < DIM; i2++) {
+// 		cout << frame_->atlas()->charts()[lambda.p()]->Dkappa_inv(i2, i1, x) << endl
+// 		     << frame_->atlas()->charts()[mu.p()]->Dkappa_inv(i2, i1, y) << endl;
 		tmp_values1[i1] += values1[i2]*frame_->atlas()->charts()[lambda.p()]->Dkappa_inv(i2, i1, x);
 		tmp_values2[i1] += values2[i2]*frame_->atlas()->charts()[mu.p()]->Dkappa_inv(i2, i1, y);
 	      }
 
+	   
+
 	    r += ((tmp_values1 * tmp_values2) * (sq_gram_la*sq_gram_la) +
 		  ell_bvp_->q(x_patch) * psi_lambda * (psi_mu/sq_gram_mu) * sq_gram_la) * weight;
 
+	   
 	  }
 	// "++index"
 	bool exit = false;
@@ -434,7 +460,7 @@ namespace FrameTL
     case Composite: {
       
       const double h = ldexp(1.0, -std::max(supp_lambda.j,supp_mu.j));// granularity for the quadrature
-      const int N = 10;
+      const int N = 3;
       
       for (unsigned int i = 0; i < DIM; i++) {
 	gauss_points[i].resize(N * N_Gauss*(supp_lambda.b[i]-supp_lambda.a[i]));
@@ -637,7 +663,7 @@ namespace FrameTL
     WaveletTL::support<IBASIS,DIM>(*(frame_->bases()[p]), lambda_c, supp);
 
     // setup Gauss points and weights for a composite quadrature formula:
-    const int N_Gauss = 2;
+    const int N_Gauss = 6;
     const double h = ldexp(1.0, -supp.j); // granularity for the quadrature
     FixedArray1D<Array1D<double>,DIM> gauss_points, gauss_weights, v_values;
     for (unsigned int i = 0; i < DIM; i++) {

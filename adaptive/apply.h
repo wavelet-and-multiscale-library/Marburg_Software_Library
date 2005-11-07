@@ -30,30 +30,10 @@ namespace WaveletTL
 
       ||A-A_k|| <= alpha_k * 2^{-ks} <= alpha * 2^{-ks}
 
-    for s < s^*.
-
-    The template argument PROBLEM should provide the routine
-
-      void add_column(const double factor,
-                      const typename PROBLEM::WaveletBasis::Index& lambda,
-		      const int J,
-                      InfiniteVector<double,typename PROBLEM::WaveletBasis::Index>& w) const
-
-    which realizes the compression strategy from [CDD1] for the lambda-th column
-    of the stiffness matrix A, with compression parameter J, i.e.,
-    adds a constant multiple of the compressed column to the vector w.
-    The background for this responsibility is that for integral equations,
-    both a compression in scale and space has to be performed, while
-    for differential equations, only a compression in scale is needed,
-    see [CDD1, Prop. 3.4]. Since the algorithm APPLY has to stay as generic as
-    possible, the concrete compression strategy should be performed in
-    the concrete problem class.
-    Moreover, the class PROBLEM has to provide the routines
+    for s < s^*. The class PROBLEM has to provide these parameters as routines
 
       double s_star() const
-      double alpha() const
-
-    to model the compressibility (constants) of A.
+      double alphak(const unsigned int) const
 
     An example of the template parameter PROBLEM is the template class
     SturmEquation<WBASIS>.

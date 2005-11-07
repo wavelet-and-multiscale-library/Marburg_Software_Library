@@ -30,6 +30,10 @@ namespace WaveletTL
     from [CDD1, Prop. 3.4] or [St04a, Th. 2.3 and Th. 3.3]
     It is also possible to specify a fixed maximal level jmax.
 
+    For integral equations, both a compression in scale and space has to be performed, while
+    for differential equations, only a compression in scale is needed,
+    see [CDD1, Prop. 3.4].
+
     The compressible matrix A should provide the unpreconditioned bilinear form a
     and the diagonal preconditioner D.
     The problem class PROBLEM should indicate via a function local(), whether the

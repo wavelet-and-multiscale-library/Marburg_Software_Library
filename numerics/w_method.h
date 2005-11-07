@@ -107,13 +107,20 @@ namespace MathTL
       [ROS2]   Blom, Hundsdorfer, Spee, Verwer:
                A Second-Order Rosenbrock Method Applied to Photochemical Dispersion Problems,
 	       SIAM J. Sci. Comput. 20(1999), 1456-1480
+      [ROS3],
+      [RODAS3] Blom, Carmichael, Potra, Sandu, Spee, Verwer:
+               Benchmarking Stiff ODE Solvers for Atmospheric Chemistry Problems II:
+	       Rosenbrock Solvers,
+	       Atmos. Environ. 31(1997), 3459-3472
       [ROWDA3] Roche:
                Rosenbrock Methods for Differential Algebraic Equations,
                Numer. Math. 52(1988), 45-63
      */
     enum Method {
-      ROS2,   // s=2, p=2, L-stable
-      ROWDA3, // s=3, p=3, L-stable
+      ROS2,      // s=2, p=2, L-stable
+      ROWDA3,    // s=3, p=3, L-stable
+      ROS3,      // s=3, p=3, L-stable
+      RODAS3     // s=4, p=3, L-stable, stiffly accurate
     };
 
     /*!
@@ -138,6 +145,11 @@ namespace MathTL
 		   VECTOR& u_mplus1,
 		   VECTOR& error_estimate,
 		   const double tolerance = 1e-2) const;
+
+    /*!
+      consistency/convergence order
+    */
+    int order() const { return p; }
     
   protected:
     //! (alpha_{i,j})
@@ -160,6 +172,9 @@ namespace MathTL
 
     //! instance of the stage equation helper
     const WMethodStageEquationHelper<VECTOR>* stage_equation_helper;
+
+    //! consistency order
+    int p;
   };
 }
 

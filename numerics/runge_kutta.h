@@ -58,6 +58,11 @@ namespace MathTL
 		   VECTOR& error_estimate,
 		   const double tolerance = 1e-2) const;
 
+    /*!
+      consistency/convergence order p
+    */
+    int order() const { return p; }
+
   protected:
     /*!
       "first same as last" flag
@@ -73,6 +78,9 @@ namespace MathTL
 
     //! weight vectors
     Vector<double> b, bhat;
+
+    //! consistency
+    int p;
   };
 }
 

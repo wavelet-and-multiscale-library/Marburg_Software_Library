@@ -10,6 +10,8 @@
 #ifndef _MATHTL_ONESTEPSCHEME_H
 #define _MATHTL_ONESTEPSCHEME_H
 
+#include <list>
+#include <map>
 #include <numerics/ivp.h>
 
 namespace MathTL
@@ -51,7 +53,38 @@ namespace MathTL
 			   VECTOR& u_mplus1,
 			   VECTOR& error_estimate,
 			   const double tolerance = 1e-2) const = 0;
+
+    /*!
+      consistency/convergence order of the scheme
+    */
+    virtual int order() const = 0;
   };
+
+  /*!
+    type of the approximate solution returned by the adaptive IVP solver
+  */
+  template <class VECTOR>
+  class IVPSolution
+  {
+  public:
+    std::list<double> t;
+    std::list<VECTOR> u;
+  };
+
+  /*!
+    Solve a given initial value problem on [0,T] adaptively with a given one-step scheme.
+    You have to specify a maximal stepwidth tau_max and a factor q which limits the
+    increase of the stepwidth when the error estimator is too small.
+    The algorithm returns the time step sequence and the solution.
+  */
+  template <class VECTOR>
+  void solve_IVP(const AbstractIVP<VECTOR>* ivp,
+		 const OneStepScheme<VECTOR>* scheme,
+		 const double T,
+		 const double tolerance,
+		 const double q,
+		 const double tau_max,
+		 IVPSolution<VECTOR>& result);
 }
 
 #include <numerics/one_step_scheme.cpp>

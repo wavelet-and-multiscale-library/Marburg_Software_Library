@@ -15,6 +15,7 @@ namespace MathTL
       b = Vector<double>(2, "1 0");
       bhat = Vector<double>(2, "0.5 0.5");
       c = Vector<double>(2, "0 1");
+      p = 2;
       break;
     case RK23:
       fsal = false;
@@ -22,6 +23,7 @@ namespace MathTL
       b = Vector<double>(3, "0 1 0");
       bhat.resize(3); bhat[0] = bhat[2] = 1./6; bhat[1] = 2./3;
       c = Vector<double>(3, "0 0.5 1");
+      p = 3;
       break;
     case Fehlberg34:
       fsal = true;
@@ -37,6 +39,7 @@ namespace MathTL
       b[1] = b[2] = 1./3;
       c[1] = c[2] = 0.5;
       c[3] = c[4] = 1.0;
+      p = 4;
       break;
     case DoPri45:
       fsal = true;
@@ -75,6 +78,7 @@ namespace MathTL
       c[3] = 4./5;
       c[4] = 8./9;
       c[5] = c[6] = 1;
+      p = 5;
       break;
     case DoPri78:
       fsal = true;
@@ -169,6 +173,7 @@ namespace MathTL
       c[9] = 13./20;
       c[10] = 1201146811./1299019798.;
       c[11] = c[12] = 1.;
+      p = 8;
       break;
     default:
       break;
@@ -208,7 +213,7 @@ namespace MathTL
       u_mplus1.add(tau*bhat[i], k[i]);
 
     // error estimate
-    error_estimate = 0;
+    error_estimate = u_m; error_estimate = 0; // ensures correct size
     for (unsigned int i = 0; i < stages; i++)
       error_estimate.add(tau*(bhat[i]-b[i]), k[i]);
   }

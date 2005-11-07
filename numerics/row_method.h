@@ -42,7 +42,7 @@ namespace MathTL
     virtual ~ROWMethod() {}
 
     /*!
-      (adaptive) solver for one of the systems (I-\alpha*T)x=y,
+      (adaptive) solver for one of the systems (alpha*I-T)x=y,
       inherited from WMethodStageEquationHelper
     */
     void solve_W_stage_equation(const AbstractIVP<VECTOR>* ivp,

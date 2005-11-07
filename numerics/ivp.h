@@ -54,11 +54,11 @@ namespace MathTL
     /*!
       solve the special linear system
       
-        (I-\tau*J)u = v,
+        (alpha*I-J)u = v,
       
       where J = \partial_v f(t,v) is the Jacobian of f
     */
-    virtual void solve_jacobian(const double t, const Point<DIM>& v, const double tau,
+    virtual void solve_jacobian(const double t, const Point<DIM>& v, const double alpha,
 				Point<DIM>& result) const = 0;
   };
 
@@ -109,7 +109,7 @@ namespace MathTL
       Up to a given tolerance (w.r.t. the ||.||_2 norm), solve the special
       linear system 
       
-        (I-\alpha*J)x = y,
+        (alpha*I-J)x = y,
       
       where J = \partial_v f(t,v) is the (exact) Jacobian of f.
       This routine will primarily be used to solve the stage equations of

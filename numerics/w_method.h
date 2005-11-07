@@ -19,7 +19,7 @@ namespace MathTL
     Abstract helper class for (adaptive) solvers of the W-(or ROW-) method
     stage equations
 
-      (I-alpha*T)x=y.
+      (alpha*I-T)x=y.
       
     In a W-method, one replaces the exact Jacobian J=f_v(t,v) by an maybe crude
     approximation T. The derivative f_t(t,v) will also be approximated by a vector
@@ -38,7 +38,7 @@ namespace MathTL
     virtual ~WMethodStageEquationHelper() = 0;
     
     /*!
-      (adaptive) solver for one of the systems (I-\alpha*T)x=y,
+      (adaptive) solver for one of the systems (alpha*I-T)x=y,
       implicitly this also specifies the approximation T to the
       Jacobian f_v(t,v)
     */
@@ -72,18 +72,34 @@ namespace MathTL
 
     The numerical method solves the following s linear stage equations:
 
+      ((\tau*\gamma_{i,i})^{-1}I - T) u_i
+        = f(t_m + \tau * \alpha_i, u^{(m)} + \sum_{j=1}^{i-1} a_{i,j} * u_j)
+	  + \sum_{j=1}^{i-1} \frac{c_{i,j}}{\tau} * u_j
+	  + \tau * \gamma_i * g
+	  
+    This form arises when reformulating the original stage equations
+
       (I-\tau*\gamma_{i,i}*T)(k_i + \sum_{j=1}^{i-1}\frac{\gamma_{i,j}}{\gamma_{i,i}}k_j)
         = f(t_m + \tau * \alpha_i, u^{(m)} + \tau * \sum_{j=1}^{i-1}\alpha_{i,j} * k_j)
 	  + \sum_{j=1}^{i-1} \frac{\gamma_{i,j}}{\gamma_{i,i}} * k_j
 	  + \tau * \gamma_i * g
-	  
-    Here \alpha_i = \sum_{j=1}^{i-1}\alpha_{i,j}, \gamma_i = \sum_{j=1}^i\gamma_{i,j}.
+
+    by introducing the new variables u_i=\sum_{j=1}^{i-1}\gamma_{i,j}k_j,
+    C=(c_{i,j})=diag(Gamma)^{-1}-Gamma^{-1}, A=(a_{i,j})=(alpha_{i,j})Gamma^{-1}.
+    After this transformation, quite a few multiplications can be saved.
+    The original stages and the new solution can be recovered via
+
+      k_i = 1/gamma_{i,i}*u_i - \sum_{j=1}^{i-1}c_{i,j}u_j
+
+      u^{(m+1)} = u^{(m)} + \tau * \sum_{i=1}^s b_i*k_i
+                = u^{(m)} + \sum_{i=1}^s m_i*u_i,
+
+    where (m_1,...,m_s)=(b_1,...,b_s)*Gamma^{-1}.
+    The values gamma_{i,i} are stored in the diagonal of C.
+    We assume that \alpha_i = \sum_{j=1}^{i-1}\alpha_{i,j}, \gamma_i = \sum_{j=1}^i\gamma_{i,j}.
     T is the exact Jacobian f_v(t_m,u^{(m)}) (ROW-method) or an approximation of it (W-method).
     g is the exact derivative f_t(t_m,u^{(m)}) (ROW-method) or an approximation of it (W-method).
     In a general W-method, one will often choose g=0.
-    The value at the new time node t_{m+1}=t_m+\tau is then determined by
-
-      u^{(m+1)} = u^{(m)} + \tau * \sum_{i=1}^s b_i*k_i
 
     The template parameter VECTOR stands for an element of the Hilbert/Banach space X
     under consideration. For finite-dimensional problems, this will almost always
@@ -104,23 +120,29 @@ namespace MathTL
       enum type for the different builtin methods
 
       References:
-      [ROS2]   Blom, Hundsdorfer, Spee, Verwer:
-               A Second-Order Rosenbrock Method Applied to Photochemical Dispersion Problems,
-	       SIAM J. Sci. Comput. 20(1999), 1456-1480
-      [ROS3],
+      [GRK4T]  Kaps, Rentrop:
+               Generalized Runge-Kutta methods of order four with stepsize control
+	       for stiff ordinary differential equations,
+	       Numer. Math. 33(1979), 55-68
       [RODAS3] Blom, Carmichael, Potra, Sandu, Spee, Verwer:
                Benchmarking Stiff ODE Solvers for Atmospheric Chemistry Problems II:
 	       Rosenbrock Solvers,
 	       Atmos. Environ. 31(1997), 3459-3472
+      [ROS2]   Blom, Hundsdorfer, Spee, Verwer:
+               A Second-Order Rosenbrock Method Applied to Photochemical Dispersion Problems,
+	       SIAM J. Sci. Comput. 20(1999), 1456-1480
+      [ROS3],
       [ROWDA3] Roche:
                Rosenbrock Methods for Differential Algebraic Equations,
                Numer. Math. 52(1988), 45-63
      */
     enum Method {
+      GRK4T,     // s=4, p=4
+      RODAS3,    // s=4, p=3, L-stable, stiffly accurate
       ROS2,      // s=2, p=2, L-stable
-      ROWDA3,    // s=3, p=3, L-stable
       ROS3,      // s=3, p=3, L-stable
-      RODAS3     // s=4, p=3, L-stable, stiffly accurate
+      ROWDA3,    // s=3, p=3, L-stable
+      RS,        // s=3, p=2, L-stable
     };
 
     /*!
@@ -152,19 +174,19 @@ namespace MathTL
     int order() const { return p; }
     
   protected:
-    //! (alpha_{i,j})
-    LowerTriangularMatrix<double> alpha_matrix;
+    //! A=(a_{i,j})
+    LowerTriangularMatrix<double> A;
 
-    //! (gamma_{i,j})
-    LowerTriangularMatrix<double> gamma_matrix;
+    //! C=(c_{i,j})
+    LowerTriangularMatrix<double> C;
 
-    //! (b_i)
+    //! b=(b_i)
     Vector<double> b;
 
-    //! (alpha_i), for convenience
+    //! (alpha_i)
     Vector<double> alpha_vector;
 
-    //! (gamma_i), for convenience
+    //! (gamma_i)
     Vector<double> gamma_vector;
 
     //! coefficients for the lower order embedded scheme (bhat_i)

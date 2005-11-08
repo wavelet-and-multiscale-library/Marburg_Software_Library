@@ -10,8 +10,8 @@ DEBUGMODE = on
 
 CXX = g++
 #CXXFLAGS += -ftemplate-depth-20 # add this for gcc-2.95
-#CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
-CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+#CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -funroll-loops -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O2 -march=pentium4 -msse2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -march=pentium4 -msse3 -funroll-loops -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
@@ -26,7 +26,8 @@ EXEOBJF = \
   test_periodic.o\
   test_sturm_bvp.o test_cdd1.o test_cdd1_cube.o test_cdd2.o test_duv.o\
   test_tp_basis.o test_cube_basis.o test_mapped_cube_basis.o\
-  test_cube_index.o test_cube_equation.o
+  test_cube_index.o test_cube_equation.o\
+  test_lin_par_equation.o
 
 EXES = $(EXEOBJF:.o=)
 

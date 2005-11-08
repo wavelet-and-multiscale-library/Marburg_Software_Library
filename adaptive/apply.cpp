@@ -119,13 +119,14 @@ namespace WaveletTL
 	   const CompressionStrategy strategy)
   {
     double zeta = 2.*epsilon;
+    double l2n = 0;
     do {
       zeta /= 2.;
       P.RHS (zeta/2., tilde_r);
       InfiniteVector<double, typename PROBLEM::Index> help;
       APPLY(P, w, zeta/2., help, jmax, strategy);
       tilde_r -= help;
-      double l2n = l2_norm(tilde_r);
+      l2n = l2_norm(tilde_r);
       nu = l2n + zeta;
     }
     while ( (nu > epsilon) && (zeta > delta*l2n) );

@@ -19,7 +19,7 @@ namespace WaveletTL
        u(0) = u_0
 
     where -A: \ell_{2,D} -> \ell_{2,D^{-1}} is a positive isomorphism
-    and f: (0,T] -> \ell_{2,D^{-1}}.
+    and f: (0,T] -> \ell_{2,D^{-1}}, D being a diagonal preconditioner (see below).
     An equation of this form arises when equivalently reformulating
     a problem of the analogous form
 
@@ -29,8 +29,15 @@ namespace WaveletTL
     with isomorphism -B: H -> H' and right-hand side g: (0,T] -> H'
     by means of a biorthogonal wavelet basis Psi=\{\psi_\lambda\},
     setting F(t,v):=<G(t,v^\top\Psi),\tilde\Psi> for all v in \ell_{2,D}.
+    
+    The (unpreconditioned) stiffness matrix
 
+      -A = (a(\psi_\lambda',\psi_\lambda))_{\lambda,\lambda'}
+
+    is modeled in the template parameter class ELLIPTIC_EQ.
+    
   */
+  template <class ELLIPTIC_EQ>
   class LinearParabolicEquation
   {
   public:

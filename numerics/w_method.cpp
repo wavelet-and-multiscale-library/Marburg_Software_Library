@@ -42,17 +42,17 @@ namespace MathTL
 	alpha_vector[2] = alpha_vector[3]
 	  = 0.8802083333333334e+00;
 
- 	b.resize(4); // corresponds to Bi in [HW]
- 	b[0] = 0.3957503746640777e+01;
-	b[1] = 0.4624892388363313e+01;
-	b[2] = 0.6174772638750108e+00;
-	b[3] = 0.1282612945269037e+01;
+ 	m.resize(4); // corresponds to Bi in [HW] (the m_i in the [HW II] book)
+ 	m[0] = 0.3957503746640777e+01;
+	m[1] = 0.4624892388363313e+01;
+	m[2] = 0.6174772638750108e+00;
+	m[3] = 0.1282612945269037e+01;
 
- 	bhat.resize(4);
-	bhat[0] = b[0] - 0.2302155402932996e+01;
-	bhat[1] = b[1] - 0.3073634485392623e+01;
-	bhat[2] = b[2] + 0.8732808018045032e+00;
-	bhat[3] = b[3] + 0.1282612945269037e+01;
+ 	e.resize(4);
+	e[0] = 0.2302155402932996e+01;
+	e[1] = 0.3073634485392623e+01;
+	e[2] = -0.8732808018045032e+00;
+	e[3] = -0.1282612945269037e+01;
 
 	p = 4;
 	break;
@@ -81,11 +81,11 @@ namespace MathTL
  	break;
       case ROS2:
 	A.resize(2,2); // corresponds to the [HW] notation
-	A(1,0) = 2 / (1 + M_SQRT1_2);
-
+	A(1,0) = 2 / (2 + M_SQRT2);
+	
 	C.resize(2,2); // corresponds to the [HW] notation
-	C(0,0) = C(1,1) = 1 + M_SQRT1_2;
-	C(1,0) = 2 / (1 + M_SQRT1_2);
+	C(0,0) = C(1,1) = 1 + M_SQRT1_2; // = gamma
+	C(1,0) = -4 / (2 + M_SQRT2);
 	
 	gamma_vector.resize(2);
 	gamma_vector[0] = 1 + M_SQRT1_2;
@@ -94,11 +94,12 @@ namespace MathTL
 	alpha_vector.resize(2);
 	alpha_vector[1] = 1.0;
 
- 	b.resize(2);
- 	b[0] = b[1] = 0.5;
+ 	m.resize(2);
+ 	m[0] = 3 / (2 + M_SQRT2);
+	m[1] = 1 / (2 + M_SQRT2);
 
- 	bhat.resize(2);
- 	bhat[0] = 1.0;
+ 	e.resize(2);
+	e[0] = e[1] = 1 / (2 + M_SQRT2);
 
  	p = 2;
  	break;
@@ -172,7 +173,7 @@ namespace MathTL
   {
     const unsigned int stages = A.row_dimension(); // for readability
 
-    Array1D<VECTOR> k(stages), u(stages);
+    Array1D<VECTOR> u(stages);
     u[0] = u_m; u[0] = 0; // ensures correct size
     for (unsigned int i = 1; i < stages; i++)
       u[i] = u[0];
@@ -194,28 +195,22 @@ namespace MathTL
       for (unsigned int j(0); j < i; j++)
 	rhs.add(C(i,j)/tau, u[j]);
       
-      ivp->evaluate_ft(t_m, u_m, tolerance/stages, help);
+      stage_equation_helper->approximate_ft(ivp, t_m, u_m, tolerance/stages, help);
       rhs.add(tau*gamma_vector[i], help);
       
       // solve i-th stage equation
       // (\tau*\gamma_{i,i})^{-1}I - T) u_i = rhs
-      ivp->solve_ROW_stage_equation(t_m, u_m, 1./(tau*C(i,i)), rhs, tolerance/stages, u[i]);
-
-      // deduce original stage solutions
-      //   k_i = 1/gamma_{i,i}*u_i - \sum_{j=1}^{i-1}c_{i,j}u_j
-      k[i] = u[i]; k[i].scale(1./C(i,i));
-      for (unsigned int j = 0; j < i; j++)
-	k[i].add(-C(i,j), u[j]);
+      stage_equation_helper->solve_W_stage_equation(ivp, t_m, u_m, 1./(tau*C(i,i)), rhs, tolerance/stages, u[i]);
     }
     
     // update u^{(m)} -> u^{(m+1)} by the k_i
     u_mplus1 = u_m;
     for (unsigned int i(0); i < stages; i++)
-      u_mplus1.add(tau*b[i], k[i]);
+      u_mplus1.add(m[i], u[i]);
     
     // error estimate
     error_estimate = u_m; error_estimate = 0; // ensures correct size
     for (unsigned int i = 0; i < stages; i++)
-      error_estimate.add(tau*(b[i]-bhat[i]), k[i]);
+      error_estimate.add(e[i], u[i]);
   }
 }

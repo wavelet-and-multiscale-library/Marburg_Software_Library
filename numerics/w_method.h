@@ -79,12 +79,12 @@ namespace MathTL
 	  
     This form arises when reformulating the original stage equations
 
-      (I-\tau*\gamma_{i,i}*T)(k_i + \sum_{j=1}^{i-1}\frac{\gamma_{i,j}}{\gamma_{i,i}}k_j)
-        = f(t_m + \tau * \alpha_i, u^{(m)} + \tau * \sum_{j=1}^{i-1}\alpha_{i,j} * k_j)
-	  + \sum_{j=1}^{i-1} \frac{\gamma_{i,j}}{\gamma_{i,i}} * k_j
+      (I-\tau*\gamma_{i,i}*T)k_i
+        = f(t_m + \tau * \alpha_i, u^{(m)} + \tau * \sum_{j=1}^{i-1} \alpha_{i,j} * k_j)
+	  + \tau * T\sum_{j=1}^{i-1} \gamma_{i,j} * k_j
 	  + \tau * \gamma_i * g
 
-    by introducing the new variables u_i=\sum_{j=1}^{i-1}\gamma_{i,j}k_j,
+    by introducing the new variables u_i=\tau\sum_{j=1}^{i-1}\gamma_{i,j}k_j,
     C=(c_{i,j})=diag(Gamma)^{-1}-Gamma^{-1}, A=(a_{i,j})=(alpha_{i,j})Gamma^{-1}.
     After this transformation, quite a few multiplications can be saved.
     The original stages and the new solution can be recovered via
@@ -180,17 +180,17 @@ namespace MathTL
     //! C=(c_{i,j})
     LowerTriangularMatrix<double> C;
 
-    //! b=(b_i)
-    Vector<double> b;
+    //! m=(m_i)
+    Vector<double> m;
+
+    //! coefficients for the lower order error estimator e=(e_i)
+    Vector<double> e;
 
     //! (alpha_i)
     Vector<double> alpha_vector;
 
     //! (gamma_i)
     Vector<double> gamma_vector;
-
-    //! coefficients for the lower order embedded scheme (bhat_i)
-    Vector<double> bhat;
 
     //! instance of the stage equation helper
     const WMethodStageEquationHelper<VECTOR>* stage_equation_helper;

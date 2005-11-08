@@ -58,13 +58,26 @@ namespace FrameTL
 			  const typename CubeBasis<IBASIS,DIM_d>::Support& supp_mu);
 
   /*!
+    checks wether the support of the wavelet frame elements intersect,
+    also the supports of the corresponding cube wavelets are returned
+    in 'supp_lambda' and 'supp_mu'.
+    
+  */
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  bool intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu,
+			  const typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda);
+
+
+  /*!
     THIS ROUTINE IS INTENDED FOR THE SPECIAL CASE OF TRIVIAL
     PARAMETRIZATIONS NAMELY AFFINE LINEAR MAPPINGS 'A x + B' WITH 'A' BEEING
     A DIAGONAL MATRIX.
     The function checks wether two wavelets intersect and returns
     an irregualar partition of the support intersection pulled back
     to the unit cube by the chart corresponding to \psi_\lambda.
-    This is at all needed to be able to exactly comoute the entries
+    This is at all needed to be able to exactly compute the entries
     of the stiffness matrix for the above case of very simple patch
     parametrizations.
   */
@@ -76,6 +89,30 @@ namespace FrameTL
 			  const typename CubeBasis<IBASIS,DIM_d>::Support& supp_mu,
 			  FixedArray1D<Array1D<double>,DIM_d >& supp_intersect);
 
+
+  /*!
+    For a given wavelet frame element \psi_\lambda, compute all generators/wavelets
+    \psi_\nu with level |\nu|=j, such that the respective supports
+    have a nontrivial intersection
+  */
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  void intersecting_wavelets(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+			     const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+			     const int j, const bool generators,
+			     std::list<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& intersecting);
+
+  /*!
+    Decide whether the support of a given (primal) generator/wavelet \psi_\lambda
+    intersects the singular support of another (primal) generator/wavelet \psi_\nu.
+    If this is the case, return true and the intersection of \supp\psi_\lambda
+    and \supp\psi_\nu in the form 2^{-j}[k1,k2].
+    Otherwise, return false (in this case, j, k1 and k2 will have
+    no meaningful values, for performance reasons).
+  */
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  bool intersect_singular_support(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+				  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+				  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& nu);
 
   /*!
     tests wether the line segments defined by the points

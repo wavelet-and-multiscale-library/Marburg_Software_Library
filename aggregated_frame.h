@@ -117,6 +117,21 @@ namespace FrameTL
      */
     const Atlas<DIM_d, DIM_m>* atlas() const { return atlas_;  }
 
+    /*!
+      critical Sobolev regularity for the primal generators/wavelets
+    */
+    static double primal_regularity() { return IBASIS::primal_regularity(); }
+    
+    /*!
+      number of vanishing moments for the primal wavelets
+    */
+    static unsigned int primal_vanishing_moments() { return IBASIS::primal_vanishing_moments(); }
+
+    /*!
+      number of vanishing moments for the dual wavelets
+    */
+    static unsigned int dual_vanishing_moments() { return IBASIS::dual_vanishing_moments(); }
+
   protected:
     //! pointer to the underlying atlas
     const Atlas<DIM_d, DIM_m>* atlas_;

@@ -89,20 +89,16 @@ namespace FrameTL
     const unsigned int p = lambda.p();
      
     typedef WaveletTL::CubeBasis<IBASIS,DIM> CUBEBASIS;
- 
+    typedef typename CUBEBASIS::Index CubeIndex;
+
     typename CUBEBASIS::Support supp_intersect;
     
-    typename CubeBasis<IBASIS,DIM>::Index lambda_c(lambda.j(),
-						   lambda.e(),
-						   lambda.k(),frame_->bases()[p]);
-
-    typename CubeBasis<IBASIS,DIM>::Index mu_c(mu.j(),
-					       mu.e(),
-					       mu.k(),frame_->bases()[p]);
-
     bool b = WaveletTL::intersect_supports<IBASIS,DIM>
       (
-       *(frame_->bases()[p]), lambda_c, mu_c, supp_intersect
+       *(frame_->bases()[p]), 
+       CubeIndex(lambda.j(), lambda.e(), lambda.k(), frame_->bases()[p]),
+       CubeIndex(mu.j(), mu.e(), mu.k(), frame_->bases()[p]),
+       supp_intersect
        );
     
     if (! b)
@@ -251,26 +247,23 @@ namespace FrameTL
     typename AggregatedFrame<IBASIS,DIM>::Index tmp_ind;
 
     typedef WaveletTL::CubeBasis<IBASIS,DIM> CUBEBASIS;
-  
-    typename CUBEBASIS::Index lambda_c(lambda.j(),
-				       lambda.e(),
-				       lambda.k(),frame_->bases()[lambda.p()]);
-    
-    typename CUBEBASIS::Index mu_c(mu.j(),
-				   mu.e(),
-				   mu.k(),frame_->bases()[mu.p()]);
+
+    typedef typename CUBEBASIS::Index CubeIndex;
  
     typename CUBEBASIS::Support supp_lambda;
     typename CUBEBASIS::Support supp_mu;
 
-    WaveletTL::support<IBASIS,DIM>(*frame_->bases()[lambda.p()], lambda_c, supp_lambda);
-    WaveletTL::support<IBASIS,DIM>(*frame_->bases()[mu.p()], mu_c, supp_mu);
-
-//     for (unsigned int i = 0; i < DIM; i++) 
-//       cout << supp_lambda.a[i] << " " << supp_lambda.b[i] << " " << supp_lambda.j << endl;
-//     for (unsigned int i = 0; i < DIM; i++)
-//       cout << supp_mu.a[i] << " " << supp_mu.b[i] << " " << supp_mu.j << endl;
-
+    WaveletTL::support<IBASIS,DIM>(*frame_->bases()[lambda.p()], 
+				   CubeIndex(lambda.j(),
+					     lambda.e(),
+					     lambda.k(),
+					     frame_->bases()[lambda.p()]),
+				   supp_lambda);
+    WaveletTL::support<IBASIS,DIM>(*frame_->bases()[mu.p()],
+				   CubeIndex(mu.j(),
+					     mu.e(),
+					     mu.k(),frame_->bases()[mu.p()]),
+				   supp_mu);
 
     typename CUBEBASIS::Support tmp_supp;
 
@@ -289,7 +282,7 @@ namespace FrameTL
 
     const int N_Gauss = q;
 
-    bool b;
+    bool b = 0;
     switch ( qstrat_ ) {
     case SplineInterpolation: {
     

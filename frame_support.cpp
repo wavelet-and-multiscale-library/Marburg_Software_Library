@@ -199,22 +199,7 @@ namespace FrameTL
 		     const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu,
 		     typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda,
 		     typename CubeBasis<IBASIS,DIM_d>::Support& supp_mu)
-  {
-
-
-//     typedef WaveletTL::CubeBasis<IBASIS,DIM_d> CUBEBASIS;
-    
-//     typename CubeBasis<IBASIS,DIM_d>::Index lambda_c(lambda.j(),
-// 						     lambda.e(),
-// 						     lambda.k(),frame.bases()[lambda.p()]);
-    
-//     typename CubeBasis<IBASIS,DIM_d>::Index mu_c(mu.j(),
-// 						 mu.e(),
-// 						 mu.k(),frame.bases()[mu.p()]);
-    
-//     WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[lambda.p()], lambda_c, supp_lambda);
-//     WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[mu.p()], mu_c, supp_mu);
-    
+  {    
     const double dx1 = 1.0 / (1 << supp_lambda.j);
     const double dx2 = 1.0 / (1 << supp_mu.j);
 
@@ -275,18 +260,6 @@ namespace FrameTL
 	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.b[0]*dx2,supp_mu.a[1]*dx2), poly2[1]);
 	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.b[0]*dx2,supp_mu.b[1]*dx2), poly2[2]);
 	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.a[0]*dx2,supp_mu.b[1]*dx2), poly2[3]);
-
-//  	for (int i = 0; i < 4; i++)
-//  	  cout << "i=" << i << " " << poly1[i] << endl;
-
-//  	for (int i = 0; i < 4; i++)
-//  	  cout << "i=" << i << " " << poly2[i] << endl;
-
-// 	double a1 = poly1[0][0], b1 = poly1[2][0], a2 = poly1[0][1], b2 = poly1[2][1];
-
-// 	double v1 = poly2[0][0], w1 = poly2[2][0], v2 = poly2[0][1], w2 = poly2[2][1];
-
-// 	cout << "res must be " << ((a1 < w1 && b1 > v1) && (a2 < w2 && b2 > v2)) << endl;
 
  	bool result;
  	Point<DIM_m> p11;
@@ -403,6 +376,201 @@ namespace FrameTL
     else return false;
   }
  
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  bool intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu,
+			  const typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda)
+  {
+    
+    typedef WaveletTL::CubeBasis<IBASIS,DIM_d> CUBEBASIS;
+    typedef typename CUBEBASIS::Index CubeIndex;
+    typename CUBEBASIS::Support supp_mu;
+
+    WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[mu.p()], 
+				     CubeIndex(mu.j(),
+					       mu.e(),
+					       mu.k(),
+					       frame.bases()[mu.p()]),
+				     supp_mu);
+    
+    const double dx1 = 1.0 / (1 << supp_lambda.j);
+    const double dx2 = 1.0 / (1 << supp_mu.j);
+
+
+    //cout << supp_mu.a[0] << " " << supp_mu.b[0] << " " << supp_mu.j << endl;
+
+    if ( typeid(*frame.atlas()->charts()[lambda.p()]) ==
+	 typeid(AffineLinearMapping<1>) &&
+	 typeid(*frame.atlas()->charts()[mu.p()])     == 
+	 typeid(AffineLinearMapping<1>) )
+      {
+	assert ( DIM_d == 1 );
+	
+	Point<DIM_d> a;
+	Point<DIM_d> b;
+
+	Point<DIM_d> c;
+	Point<DIM_d> d;
+
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx1), a);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx1), b);
+
+	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.a[0]*dx2), c);
+	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.b[0]*dx2), d);
+
+	return (a[0] < d[0]) && (b[0] > c[0]);
+
+      }
+
+    // both charts are LinearBezierMappings
+    if ( ( typeid(*frame.atlas()->charts()[lambda.p()]) ==
+	   typeid(LinearBezierMapping) &&
+	   typeid(*frame.atlas()->charts()[mu.p()])     == 
+	   typeid(LinearBezierMapping) )
+	 ||
+	 ( typeid(*frame.atlas()->charts()[lambda.p()]) ==
+	   typeid(AffineLinearMapping<2>) &&
+	   typeid(*frame.atlas()->charts()[mu.p()])     == 
+	   typeid(AffineLinearMapping<2>)
+	   )
+	 )
+      {
+
+	assert ( DIM_d == 2 && DIM_m == 2);
+
+	FixedArray1D<Point<DIM_m>,4 > poly1;
+	FixedArray1D<Point<DIM_m>,4 > poly2;
+
+	// map the knots of the unit cube to patch
+	// 0 -- 00
+	// 1 -- 10
+	// 2 -- 11
+	// 3 -- 01
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx1,supp_lambda.a[1]*dx1), poly1[0]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx1,supp_lambda.a[1]*dx1), poly1[1]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx1,supp_lambda.b[1]*dx1), poly1[2]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx1,supp_lambda.b[1]*dx1), poly1[3]);
+
+	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.a[0]*dx2,supp_mu.a[1]*dx2), poly2[0]);
+	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.b[0]*dx2,supp_mu.a[1]*dx2), poly2[1]);
+	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.b[0]*dx2,supp_mu.b[1]*dx2), poly2[2]);
+	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.a[0]*dx2,supp_mu.b[1]*dx2), poly2[3]);
+
+ 	bool result;
+ 	Point<DIM_m> p11;
+ 	Point<DIM_m> p12;
+	
+ 	unsigned short int tmp = 0;
+ 	int countspez = 0;
+	
+ 	//check, if two arbritrary edges of the quadrangle intersect
+ 	for (unsigned int i = 1; i <= 3; i++) {	
+ 	  result = true;
+ 	  p11 = poly1[i-1];
+ 	  p12 = poly1[i];
+ 	  for (unsigned int j = 1; j <= 3; j++) {
+ 	    tmp = edgesIntersect(p11, p12, poly2[j-1], poly2[j]);
+ 	    if (tmp == 1)
+ 	      countspez++;
+ 	    if (tmp == 3) {
+ 	      return true;
+ 	    }
+ 	  }
+		
+ 	  tmp = edgesIntersect(p11, p12, poly2[3], poly2[0]); 
+ 	  if (tmp == 1)
+ 	    countspez++;
+ 	  if (tmp == 3)
+ 	    return true;
+	
+ 	}//end outer for
+	
+	p11 = poly1[3];
+	p12 = poly1[0];
+	for (unsigned int j = 1; j <= 3; j++) {
+	  tmp = edgesIntersect(p11, p12, poly2[j-1], poly2[j]);
+	  if (tmp == 1)
+	    countspez++;
+	  if (tmp == 3)
+	    return true;	
+	}
+	tmp = edgesIntersect(p11, p12, poly2[3], poly2[0]);
+	if (tmp == 1)
+	  countspez++;
+	if (tmp == 3)
+	  return true;
+		
+	//if control reaches this point, then no 'ordinary intersection' exists
+	//ATTENTION!!!! But sufficient so far.
+	//this is only correct in case of convex polygons!!!!!!!
+	if (countspez >= 2) {
+	  return true;
+	}
+		
+	//remaining case: qudrangles contain each other
+	countspez = 0;
+	tmp = 0;
+	
+	//loop over all points knots of the second polygon
+	for (unsigned int i = 0; i <= 3; i++) {
+		
+	  result = true;
+	  tmp = FrameTL::pos_wrt_line(poly2[i], poly1[3], poly1[0]);
+	  if (tmp == 1)
+	    countspez++;
+	  if (tmp == 0 || tmp ==2) {
+	    result = false;
+	    continue;
+	  }
+		
+	  for (unsigned int j = 1; j<= 3 ; j++) {
+	    tmp = FrameTL::pos_wrt_line(poly2[i], poly1[j-1], poly1[j]);
+	    if (tmp == 1)
+	      countspez++;
+	    if (tmp == 0 || tmp ==2) {
+	      result = false;
+	      break;
+	    }
+	  }//end inner for
+		
+	  if (result)
+	    return result;
+
+	}//end outer for
+	
+	//the same with swapped order of the 
+	//loop over all points knots of the second polygon
+	for (unsigned int i = 0; i <= 3; i++) {
+		
+	  result = true;
+	  tmp = FrameTL::pos_wrt_line(poly1[i], poly2[3], poly2[0]);
+	  if (tmp == 1)
+	    countspez++;
+	  if (tmp == 0 || tmp ==2) {
+	    result = false;
+	    continue;
+	  }
+		
+	  for (unsigned int j = 1; j<= 3 ; j++) {
+	    tmp = FrameTL::pos_wrt_line(poly1[i], poly2[j-1], poly2[j]);
+	    if (tmp == 1)
+	      countspez++;
+	    if (tmp == 0 || tmp ==2) {
+	      result = false;
+	      break;
+	    }
+	  }//end inner for
+		
+	  if (result)
+	    return result;
+
+	}//end outer for
+
+	return false;
+      }
+    else return false;
+  }
 
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   bool intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
@@ -424,21 +592,6 @@ namespace FrameTL
 
     // WE ALSO ASSUME THAT THE MATRIX 'A' OF THE CHART IS A DIAGONAL ONE
     // WITH POSITIVE ENTRIES ONLY
-
-//     typedef WaveletTL::CubeBasis<IBASIS,DIM_d> CUBEBASIS;
-    
-//     typename CUBEBASIS::Index lambda_c(lambda.j(),
-// 				       lambda.e(),
-// 				       lambda.k(),frame.bases()[lambda.p()]);
-    
-//     typename CUBEBASIS::Index mu_c(mu.j(),
-// 				   mu.e(),
-// 				   mu.k(),frame.bases()[mu.p()]);
- 
-//     WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[lambda.p()], lambda_c, supp_lambda);
-//     WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[mu.p()], mu_c, supp_mu);
-    
-
 
 //     for (unsigned int i = 0; i < DIM_d; i++) 
 //       cout << supp_lambda.a[i] << " " << supp_lambda.b[i] << " " << supp_lambda.j << endl;
@@ -536,8 +689,105 @@ namespace FrameTL
   }
 
 
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  void intersecting_wavelets (const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+			      const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+			      const int j, const bool generators,
+			      std::list<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& intersecting)
+  {
+
+    typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> Frame;
+    typedef typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index Index;
+
+    typedef typename CubeBasis<IBASIS,DIM_d>::Index CubeIndex;
+    
+    typename CubeBasis<IBASIS,DIM_d>::Support supp_lambda;
+    
+    WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[lambda.p()], 
+				     CubeIndex(lambda.j(),
+					       lambda.e(),
+					       lambda.k(),
+					       frame.bases()[lambda.p()]),
+				     supp_lambda);
+    
+    //cout << supp_lambda.a[0] << " " << supp_lambda.b[0] << " " << supp_lambda.j << endl;
+
+    std::list<CubeIndex> intersect_same_cube;
+    WaveletTL::intersecting_wavelets<IBASIS,DIM_d>(*(frame.bases()[lambda.p()]),
+						   CubeIndex(lambda.j(),
+							     lambda.e(),
+							     lambda.k(),
+							     frame.bases()[lambda.p()]),
+						   j, false,
+						   intersect_same_cube);
+#if 1
+    // ################ brute force approach ##################
+    std::list<typename Frame::Index> intersect_same;
+
+    // create list of FrameIndices
+    for (typename std::list<CubeIndex>::const_iterator  it = intersect_same_cube.begin();
+	 it != intersect_same_cube.end(); ++it) {
+      intersecting.push_back( FrameIndex<IBASIS,DIM_d,DIM_m>(&frame,*it,lambda.p()) );
+    }
+
+    std::list<typename Frame::Index> intersect_diff;
+
+    if ( j == frame.j0() ) {
+      for (Index ind = FrameTL::first_generator<IBASIS,DIM_d,DIM_m,Frame>(&frame, j);
+	 ind <= FrameTL::last_generator<IBASIS,DIM_d,DIM_m,Frame>(&frame, j); ++ind)
+	{
+	  if ( (lambda.p() != ind.p()) &&
+	       frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(),ind.p()) && 
+	       FrameTL::intersect_supports<IBASIS,DIM_d,DIM_m>(frame,lambda,ind,supp_lambda) )
+	    intersect_diff.push_back(ind);
+	}
+      
+    }
+    else {
+      for (Index ind = FrameTL::first_wavelet<IBASIS,DIM_d,DIM_m,Frame>(&frame, j);
+	   ind <= FrameTL::last_wavelet<IBASIS,DIM_d,DIM_m,Frame>(&frame, j); ++ind)
+	{
+	  if ( (lambda.p() != ind.p()) &&
+	       frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(),ind.p()) && 
+	       FrameTL::intersect_supports<IBASIS,DIM_d,DIM_m>(frame,lambda,ind,supp_lambda) )
+	    intersect_diff.push_back(ind);
+	}
+    }
+    intersecting.merge(intersect_diff);
+#else
+    
+#endif
+  }
+  
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  bool intersect_singular_support(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+				  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+				  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& nu)
+  {
+    switch (lambda.p() == nu.p()) {
+    case 0:
+      // different patches
+      // TODO
+      return true;
+    case 1:
+      // same patches
+      return WaveletTL::intersect_singular_support<IBASIS,IM_d>
+	(
+	 frame.bases()[lambda.p()],
+	 typename CubeBasis<IBASIS,DIM_d>::Index(lambda.j(),
+						 lambda.e(),
+						 lambda.k(),
+						 frame.bases()[lambda.p()]),
+	 typename CubeBasis<IBASIS,DIM_d>::Index(mu.j(),
+						 mu.e(),
+						 mu.k(),
+						 frame.bases()[mu.p()])
+	 );
+    }
+  }
+
   template <unsigned int DIM>
-  inline int edgesIntersect  (const Point<DIM>& A, const Point<DIM>& B,
+  inline int edgesIntersect (const Point<DIM>& A, const Point<DIM>& B,
 			      const Point<DIM>& C, const Point<DIM>& D) {
     
     // so far only the 2D case is implemented

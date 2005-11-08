@@ -92,7 +92,15 @@ namespace FrameTL
     /*!
       read access to the frame
     */
-    const AggregatedFrame<IBASIS,DIM>*& frame() const { return fame; }
+    const AggregatedFrame<IBASIS,DIM>& frame() const { return *frame_; }
+
+    /*!
+      read access to the frame but with a somewhat weird
+      function name.
+      this is just a first hack to be able to use
+      routines in WaveletTL's compression.h
+    */
+    const AggregatedFrame<IBASIS,DIM>& basis() const { return *frame_; }
     
     /*!
       space dimension of the problem

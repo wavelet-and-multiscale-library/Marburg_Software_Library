@@ -156,7 +156,7 @@ int main()
   cout.precision(12);
   
   //############### 1D galerkin scheme test ##################
-#if 1
+#if 0
   
   int z = 0;
   set<Index> Lambda;
@@ -218,27 +218,6 @@ int main()
       }
     } 
 
-   MultiIndex<unsigned int, 1> e1;
-   e1[0] = 0;
-   MultiIndex<int, 1> k1;
-   k1[0] = 2;
-   
-   MultiIndex<unsigned int, 1> e2;
-   e2[0] = 0;
-   MultiIndex<int, 1> k2;
-   k2[0] = 1;
-   
-   unsigned int p1 = 0, p2 = 1;
-   int j2 = 3;
-
-   FrameIndex<Basis1D,1,1> la(&frame,j2,e1,p1,k1);
-   FrameIndex<Basis1D,1,1> mu(&frame,j2,e2,p2,k2);
-
-   cout << la << mu << endl;
-
-   cout << "val  " << discrete_poisson.a(la,mu,1) << endl;
-   cout << "val  " << discrete_poisson.a(mu,la,1) << endl;
-
   //CG(stiff, rh, xk, 0.0001, 1000, iter);
   //Richardson(stiff, rh, xk, 2. / lmax, 0.0001, 1000, iter);
   //Richardson(stiff, rh, xk, 0.07, 0.0001, 2000, iter);  
@@ -260,6 +239,39 @@ int main()
   ofs5.close();
    
 #endif
+
+
+   MultiIndex<unsigned int, 1> e1;
+   e1[0] = 0;
+   MultiIndex<int, 1> k1;
+   k1[0] = 2;
+   
+   MultiIndex<unsigned int, 1> e2;
+   e2[0] = 0;
+   MultiIndex<int, 1> k2;
+   k2[0] = 1;
+   
+   unsigned int p1 = 0, p2 = 1;
+   int j2 = 3;
+
+   FrameIndex<Basis1D,1,1> la(&frame,j2,e1,p1,k1);
+   FrameIndex<Basis1D,1,1> mu(&frame,j2,e2,p2,k2);
+
+//    cout << la << mu << endl;
+
+//    cout << "val  " << discrete_poisson.a(la,mu,1) << endl;
+//    cout << "val  " << discrete_poisson.a(mu,la,1) << endl;
+
+   std::list<Index> intersecting;
+   FrameTL::intersecting_wavelets<Basis1D,1,1>(frame, la, 4, false, intersecting);
+
+   cout << intersecting.size() << endl;
+
+   for (std::list<Index>::const_iterator  it = intersecting.begin();
+	it != intersecting.end(); ++it) {
+     cout << *it << endl;
+   }
+
 
    return 0;
 

@@ -6,8 +6,8 @@
 # +----------------------------------------------------------------+
 
 CXX = g++
-#CXXFLAGS += -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
-CXXFLAGS += -O2 -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+CXXFLAGS += -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+#CXXFLAGS += -O2 -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O4 -mcpu=pentium4 -msse3 -funroll-loops -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O4 -mcpu=pentium4 -msse3 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -fast -mcpu=7450 -faltivec -funroll-loops -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
@@ -15,7 +15,7 @@ CXXFLAGS += -O2 -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 EXEOBJF = \
   test_frame_index.o \
   test_aggregated_frame.o test_elliptic_equation.o test_frame_evaluate.o\
-  test_frame_support.o test_elliptic_equation_1D.o
+  test_frame_support.o test_elliptic_equation_1D.o test_steepest_descent.o
 
 
 EXES = $(EXEOBJF:.o=)

@@ -151,8 +151,8 @@ int main()
   PoissonBVP<DIM> poisson(&singRhs);
   //PoissonBVP<DIM> poisson(&const_fun);
 
-  //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
-  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
+  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
+  //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
   
   double tmp = 0.0;
   int c = 0;
@@ -185,7 +185,7 @@ int main()
   ofs_si.close();
 
 
-  FrameIndex<Basis1D,2,2> index = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0()); 
+  FrameIndex<Basis1D,2,2> index = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
   
   SampledMapping<2> wav_out = evalObj.evaluate(frame,index,1,5);
 
@@ -217,7 +217,7 @@ int main()
   ofs4.close();
   //###############################################   
   //############### 2D galerkin scheme test ##################
-#if 1
+#if 0
 
   set<Index> Lambda;
   for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
@@ -305,6 +305,7 @@ int main()
    //#######################################################################
 #endif
    //################# end 2D galerkin scheme test ###################
+
 #if 1
    MultiIndex<unsigned int, 2> e1;
    e1[0] = 0;
@@ -328,5 +329,17 @@ int main()
    FrameIndex<Basis1D,2,2> mu(&frame,j2,e2,p2,k2);
    cout << "val  " << discrete_poisson.a(la,mu,2) << endl;
 #endif
+
+   std::list<Index> intersecting;
+   FrameTL::intersecting_wavelets<Basis1D,2,2>(frame, la, 4, false, intersecting);
+
+   cout << intersecting.size() << endl;
+
+   for (std::list<Index>::const_iterator  it = intersecting.begin();
+	it != intersecting.end(); ++it) {
+     cout << *it << endl;
+   }
+
+
    return 0;
 }

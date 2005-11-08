@@ -57,33 +57,38 @@ namespace MathTL
 	p = 4;
 	break;
       case RODAS3:
-// 	alpha_matrix.resize(4,4);
-// 	alpha_matrix(2,0) = 1.0;
-// 	alpha_matrix(3,0) = 0.75;
-// 	alpha_matrix(3,1) = -0.25;
-// 	alpha_matrix(3,2) = 0.5;
-// 	gamma_matrix.resize(4,4);
-// 	gamma_matrix(0,0) = gamma_matrix(1,1)
-// 	  = gamma_matrix(2,2) = gamma_matrix(3,3) = 0.5;
-// 	gamma_matrix(1,0) = 1.0;
-// 	gamma_matrix(2,0) = gamma_matrix(2,1) = -0.25;
-// 	gamma_matrix(3,0) = gamma_matrix(3,1) = 1.0/12.0;
-// 	gamma_matrix(3,2) = -2.0/3.0;
-// 	b.resize(4);
-// 	b[0] = 5.0/6.0;
-// 	b[1] = b[2] = -1.0/6.0;
-// 	b[3] = 0.5;
-// 	bhat.resize(4);
-// 	bhat[0] = 0.75;
-// 	bhat[1] = -0.25;
-// 	bhat[2] = 0.5;
-// 	p = 3;
+	A.resize(4,4);
+	A(2,0) = A(3,0) = 2.0;
+	A(3,2) = 1.0;
+
+	C.resize(4,4);
+	C(0,0) = C(1,1) = C(2,2) = C(3,3) = 0.5; // = gamma
+	C(1,0) = 4.0;
+	C(2,0) = C(3,0) = 1.0;
+	C(2,1) = C(3,1) = -1.0;
+	C(3,2) = -8.0/3.0;
+	
+	gamma_vector.resize(4);
+	gamma_vector[0] = 0.5;
+	gamma_vector[1] = 1.5;
+
+	alpha_vector.resize(4);
+	alpha_vector[2] = alpha_vector[3] = 1.0;
+
+ 	m.resize(4);
+	m[0] = 2.;
+	m[2] = m[3] = 1.0;
+
+ 	e.resize(4);
+	e[3] = 1.0;
+
+ 	p = 3;
  	break;
       case ROS2:
-	A.resize(2,2); // corresponds to the [HW] notation
+	A.resize(2,2);
 	A(1,0) = 2 / (2 + M_SQRT2);
 	
-	C.resize(2,2); // corresponds to the [HW] notation
+	C.resize(2,2);
 	C(0,0) = C(1,1) = 1 + M_SQRT1_2; // = gamma
 	C(1,0) = -4 / (2 + M_SQRT2);
 	
@@ -103,63 +108,69 @@ namespace MathTL
 
  	p = 2;
  	break;
-//       case ROS3:
-// 	alpha_matrix.resize(3,3);
-// 	gamma_matrix.resize(3,3);
-// 	alpha_matrix(1,0) = alpha_matrix(2,0)
-// 	  = gamma_matrix(0,0) = gamma_matrix(1,1) = gamma_matrix(2,2)
-// 	  = 0.43586652150845899941601945119356;
-// 	gamma_matrix(1,0) = -0.19294655696029095575009695436041;
-// 	gamma_matrix(2,1) = 1.74927148125794685173529749738960;
-// 	b.resize(3);
-// 	b[0] = -0.75457412385404315829818998646589;
-// 	b[1] = 1.94100407061964420292840123379419;
-// 	b[2] = -0.18642994676560104463021124732829;
-// 	bhat.resize(3);
-// 	bhat[0] = -1.53358745784149585370766523913002;
-// 	bhat[1] = 2.81745131148625772213931745457622;
-// 	bhat[2] = -0.28386385364476186843165221544619;
-// 	p = 3;
-// 	break;
-//       case ROWDA3:
-// 	alpha_matrix.resize(3,3);
-// 	alpha_matrix(1,0) = alpha_matrix(2,0) = 0.7;
-// 	gamma_matrix.resize(3,3);
-// 	gamma_matrix(0,0) = gamma_matrix(1,1)
-// 	  = gamma_matrix(2,2) = 0.435866521508459;
-// 	gamma_matrix(1,0) = 0.1685887625570998;
-// 	gamma_matrix(2,0) = 4.943922277836421;
-// 	gamma_matrix(2,1) = 1.0;
-// 	b.resize(3);
-// 	b[0] = 0.3197278911564624;
-// 	b[1] = 0.7714777906171382;
-// 	b[2] = -0.09120568177360061;
-// 	bhat.resize(3);
-// 	bhat[0] = 0.926163587124091;
-// 	bhat[1] = 0.073836412875909;
-// 	p = 3;
-// 	break;
+      case ROS3:
+	A.resize(3,3);
+	A(1,0) = A(2,0) = 1.0;
+
+	C.resize(3,3);
+	C(0,0) = C(1,1) = C(2,2) = 0.43586652150845899941601945119356; // = gamma
+	C(1,0) = -1.0156171083877702091975600115544914;
+	C(2,0) = 4.0759956452537699824805835358065385;
+	C(2,1) = 9.2076794298330791242156818474001883;
+
+	gamma_vector.resize(3);
+	gamma_vector[0] = .43586652150845899941601945119356;
+	gamma_vector[1] = .24291996454816804366592249683315;
+	gamma_vector[2] = 2.18513800276640585115131694858316;
+
+	alpha_vector.resize(3);
+	alpha_vector[1] = alpha_vector[2] = .43586652150845899941601945119356;
+
+	m.resize(3);
+	m[0] = 1.0;
+	m[1] = 6.1697947043828245592553615689728652;
+	m[2] = -.42772256543218573326238373806511718;
+
+	e.resize(3);
+	e[0] = 0.5;
+	e[1] = -2.9079558716805469821718236208016638;
+	e[2] = .22354069897811569627360909276198390;
+
+ 	p = 3;
+ 	break;
+      case ROWDA3:
+	A.resize(3,3);
+	A(1,0) = A(2,0) = 1.6059962522264972810030329434237128;
+
+	C.resize(3,3);
+	C(0,0) = C(1,1) = C(2,2) = 0.435866521508459; // = gamma
+	C(1,0) = .88740444110022637192938576568447141;
+	C(2,0) = 23.987479717241899735266914145517441;
+	C(2,1) = 5.2637223717664389241008661915179357;
+
+	gamma_vector.resize(3);
+	gamma_vector[0] = .43586652150;
+	gamma_vector[1] = .6044552840570998;
+	gamma_vector[2] = 6.379788799336421;
+
+	alpha_vector.resize(3);
+	alpha_vector[1] = alpha_vector[2] = 0.7;
+
+	m.resize(3);
+	m[0] = 2.2367270453655677993222954788155933;
+	m[1] = 2.2500677310226296985367412611749105;
+	m[2] = -.20925140444309304448380305345383128;
+
+	e.resize(3);
+	e[0] = .1773708776809320419636338468173019;
+	e[1] = 2.0806662990846894958960573746516369;
+	e[2] = -.20925140444309304448380305345383128;
+
+ 	p = 3;
+ 	break;
       default:
 	break;
       }
-
-//     const unsigned int stages = alpha_matrix.row_dimension();
-    
-//     alpha_vector.resize(stages);
-//     for (unsigned int i = 0; i < stages; i++) {
-//       double help = 0;
-//       for (unsigned int j = 0; j < i; j++)
-// 	help += alpha_matrix(i,j);
-//       alpha_vector[i] = help; // alpha_i = sum_{j=1}^{i-1} alpha_{i,j}
-//     }
-    
-//     gamma_vector.resize(stages);
-//     for (unsigned int i = 0; i < stages; i++) {
-//       double help = 0;
-//       for (unsigned int j = 0; j <= i; j++)
-// 	help += gamma_matrix(i,j);
-//       gamma_vector[i] = help; // gamma_i = sum_{j=1}^i gamma_{i,j}
-//     }
   }
   
   template <class VECTOR>

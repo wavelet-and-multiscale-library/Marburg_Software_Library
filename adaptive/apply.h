@@ -74,6 +74,22 @@ namespace WaveletTL
     APPLY(P, v, lambda*eta, help, jmax, strategy);
     help.COARSE((1-lambda)*eta, w);
   }
+  
+  /*!
+    Adaptive computation of approxiamte residual
+   !!!!!!! ADD COMMENT !!!!!!!
+  */
+  template <class PROBLEM>
+  void RES(const PROBLEM& P,
+	   const InfiniteVector<double, typename PROBLEM::Index>& w,
+	   const double xi,
+	   const double delta,
+	   const double epsilon,
+	   const int jmax,
+	   InfiniteVector<double, typename PROBLEM::Index>& tilde_r,
+	   double& nu,
+	   const CompressionStrategy strategy = St04a);
+
 }
 
 #include <adaptive/apply.cpp>

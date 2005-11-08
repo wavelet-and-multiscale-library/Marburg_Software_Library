@@ -106,4 +106,30 @@ namespace WaveletTL
       }
     }
   }  
+
+  template <class PROBLEM>
+  void RES(const PROBLEM& P,
+	   const InfiniteVector<double, typename PROBLEM::Index>& w,
+	   const double xi,
+	   const double delta,
+	   const double epsilon,
+	   const int jmax,
+	   InfiniteVector<double, typename PROBLEM::Index>& tilde_r,
+	   double& nu,
+	   const CompressionStrategy strategy)
+  {
+    double zeta = 2.*epsilon;
+    do {
+      zeta /= 2.;
+      P.RHS (zeta/2., tilde_r);
+      InfiniteVector<double, typename PROBLEM::Index> help;
+      APPLY(P, w, zeta/2., help, jmax, strategy);
+      tilde_r -= help;
+      double l2n = l2_norm(tilde_r);
+      nu = l2n + zeta;
+    }
+    while ( (nu > epsilon) && (zeta > delta*l2n) );
+  }
+
+
 }

@@ -78,6 +78,7 @@ namespace WaveletTL
 	basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
       else
 	basis.reconstruct_t_1(lambda, lambda.j()+1, gcoeffs);
+
       return evaluate(basis, gcoeffs, primal, resolution);
     }
     
@@ -92,7 +93,7 @@ namespace WaveletTL
 	   const int resolution)
   {
     SampledMapping<1> result(Grid<1>(0, 1, 1<<resolution)); // zero
-        
+   
     if (coeffs.size() > 0) {
       // determine maximal level
       int jmax(0);
@@ -100,14 +101,14 @@ namespace WaveletTL
       for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
 	     itend(coeffs.end()); it != itend; ++it)
 	jmax = std::max(it.index().j()+it.index().e(), jmax);
-      
+
       // switch to generator representation
       InfiniteVector<double,Index> gcoeffs;
       if (primal)
 	basis.reconstruct(coeffs,jmax,gcoeffs);
       else
 	basis.reconstruct_t(coeffs,jmax,gcoeffs);
-      
+
       for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
 	     itend(gcoeffs.end()); it != itend; ++it)
 	result.add(*it, evaluate(basis, it.index(), primal, resolution));

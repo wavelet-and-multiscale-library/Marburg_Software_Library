@@ -32,7 +32,7 @@ namespace WaveletTL
 	      }
 // 	    }
 	  }
-	
+	cout << "doing row " << row << endl;
 	A_Lambda.set_row(row, indices, entries);
       }
   }

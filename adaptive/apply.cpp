@@ -12,13 +12,13 @@ namespace WaveletTL
 {
   template <class PROBLEM>
   void APPLY(const PROBLEM& P,
-	     const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
+	     const InfiniteVector<double, typename PROBLEM::Index>& v,
 	     const double eta,
-	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& w,
+	     InfiniteVector<double, typename PROBLEM::Index>& w,
 	     const int jmax,
 	     const CompressionStrategy strategy)
   {
-    typedef typename PROBLEM::WaveletBasis::Index Index;
+    typedef typename PROBLEM::Index Index;
 
     w.clear();
 

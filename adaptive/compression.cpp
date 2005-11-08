@@ -9,14 +9,14 @@ namespace WaveletTL
   void
   add_compressed_column(const PROBLEM& P,
 			const double factor,
-			const typename PROBLEM::WaveletBasis::Index& lambda,
+			const typename PROBLEM::Index& lambda,
 			const int J,
-			InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& w,
+			InfiniteVector<double, typename PROBLEM::Index>& w,
 			const int jmax,
 			const CompressionStrategy strategy)
   {
     typedef typename PROBLEM::WaveletBasis WaveletBasis;
-    typedef typename WaveletBasis::Index Index;
+    typedef typename PROBLEM::Index Index;
     typedef typename WaveletBasis::Support Support;
     typedef std::list<Index> IntersectingList;
     

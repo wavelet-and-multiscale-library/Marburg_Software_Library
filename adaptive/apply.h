@@ -52,9 +52,9 @@ namespace WaveletTL
   */
   template <class PROBLEM>
   void APPLY(const PROBLEM& P,
-	     const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
+	     const InfiniteVector<double, typename PROBLEM::Index>& v,
 	     const double eta,
-	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& w,
+	     InfiniteVector<double, typename PROBLEM::Index>& w,
 	     const int jmax = 99,
 	     const CompressionStrategy strategy = St04a);
 
@@ -63,14 +63,14 @@ namespace WaveletTL
   */
   template <class PROBLEM>
   void APPLY_COARSE(const PROBLEM& P,
-		    const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
+		    const InfiniteVector<double, typename PROBLEM::Index>& v,
 		    const double eta,
-		    InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& w,
+		    InfiniteVector<double, typename PROBLEM::Index>& w,
 		    const double lambda = 0.5,
 		    const int jmax = 99,
 		    const CompressionStrategy strategy = St04a)
   {
-    InfiniteVector<double, typename PROBLEM::WaveletBasis::Index> help;
+    InfiniteVector<double, typename PROBLEM::Index> help;
     APPLY(P, v, lambda*eta, help, jmax, strategy);
     help.COARSE((1-lambda)*eta, w);
   }

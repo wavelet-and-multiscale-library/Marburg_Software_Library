@@ -14,6 +14,7 @@
 #include <frame_support.h>
 #include <frame_index.h>
 #include <steepest_descent.h>
+#include <galerkin/cached_problem.h>
 
 using std::cout;
 using std::endl;
@@ -29,6 +30,7 @@ using MathTL::SparseMatrix;
 using MathTL::InfiniteVector;
 using WaveletTL::CubeBasis;
 using WaveletTL::CubeIndex;
+using WaveletTL::CachedProblem;
 
 using namespace std;
 using namespace FrameTL;
@@ -148,13 +150,20 @@ int main()
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
 
+  discrete_poisson.set_norm_A(10.);
+  discrete_poisson.set_Ainv(10.);
+
+  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 10.0, 0.5);
+
   const double epsilon = 0.01;
 
   InfiniteVector<double, Index> u_epsilon;
 
-  steepest_descent_SOLVE(discrete_poisson, epsilon, u_epsilon);
+  steepest_descent_SOLVE(problem, epsilon, u_epsilon);
+  cout << "steepest descent done" << endl;
 
-  discrete_poisson.rescale(u_epsilon,-1);
+  //discrete_poisson.rescale(u_epsilon,-1);
+  problem.rescale(u_epsilon,-1);
 
   EvaluateFrame<Basis1D,1,1> evalObj;
 

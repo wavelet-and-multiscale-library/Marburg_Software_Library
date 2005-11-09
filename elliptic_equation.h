@@ -85,6 +85,12 @@ namespace FrameTL
     typedef AggregatedFrame<IBASIS,DIM> Frame;
 
     /*!
+      dummy typedef to be compatible with WaveletTL
+      routines
+     */
+    typedef AggregatedFrame<IBASIS,DIM> WaveletBasis;
+    
+    /*!
       make template argument accessible
     */
     typedef typename Frame::Index Index;
@@ -138,7 +144,7 @@ namespace FrameTL
     */
     double a(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
 	     const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-	     const unsigned int p = 2) const;
+	     const unsigned int p = 1) const;
 
     /*!
       estimate the spectral norm ||A||
@@ -159,9 +165,13 @@ namespace FrameTL
     double norm_Ainv() const { return normAinv; };
 
     /*!
+      sets estimate for ||A||
+    */
+    void set_norm_A(const double _normA) { normA = _normA; }
+    /*!
       sets estimate for ||A^{-1}||
     */
-    double set_Ainv(const int nAinv) const { normAinv = nAinv; };
+    void set_Ainv(const double nAinv) { normAinv = nAinv; };
 
     /*!
       estimate compressibility exponent s^*

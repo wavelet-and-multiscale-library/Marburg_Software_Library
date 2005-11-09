@@ -634,9 +634,7 @@ namespace FrameTL
       
  
       if ( hyperCube_intersect[i][0] >= hyperCube_intersect[i][1]  )
-	return false;
-
-      
+	return false;      
     }
 
 //     for (unsigned int i = 0; i < DIM_d; i++) {
@@ -695,6 +693,7 @@ namespace FrameTL
 			      const int j, const bool generators,
 			      std::list<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& intersecting)
   {
+    intersecting.erase(intersecting.begin(),intersecting.end());
 
     typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> Frame;
     typedef typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index Index;
@@ -718,7 +717,7 @@ namespace FrameTL
 							     lambda.e(),
 							     lambda.k(),
 							     frame.bases()[lambda.p()]),
-						   j, false,
+						   j, generators,
 						   intersect_same_cube);
 #if 1
     // ################ brute force approach ##################
@@ -732,7 +731,7 @@ namespace FrameTL
 
     std::list<typename Frame::Index> intersect_diff;
 
-    if ( j == frame.j0() ) {
+    if ( generators ) {
       for (Index ind = FrameTL::first_generator<IBASIS,DIM_d,DIM_m,Frame>(&frame, j);
 	 ind <= FrameTL::last_generator<IBASIS,DIM_d,DIM_m,Frame>(&frame, j); ++ind)
 	{
@@ -754,6 +753,16 @@ namespace FrameTL
 	}
     }
     intersecting.merge(intersect_diff);
+//     intersecting.unique();
+//     intersecting.sort();
+     
+    //    cout << lambda << endl;
+//     for (typename std::list<Index>::const_iterator  it = intersecting.begin();
+// 	 it != intersecting.end(); ++it) {
+//       cout << *it << endl;
+//     }
+//     cout << "###############" << endl;
+
 #else
     
 #endif
@@ -762,28 +771,31 @@ namespace FrameTL
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   bool intersect_singular_support(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 				  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
-				  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& nu)
+				  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu)
   {
-    switch (lambda.p() == nu.p()) {
+    switch (lambda.p() == mu.p()) {
     case 0:
       // different patches
       // TODO
       return true;
     case 1:
       // same patches
-      return WaveletTL::intersect_singular_support<IBASIS,IM_d>
-	(
-	 frame.bases()[lambda.p()],
-	 typename CubeBasis<IBASIS,DIM_d>::Index(lambda.j(),
-						 lambda.e(),
-						 lambda.k(),
-						 frame.bases()[lambda.p()]),
-	 typename CubeBasis<IBASIS,DIM_d>::Index(mu.j(),
-						 mu.e(),
-						 mu.k(),
-						 frame.bases()[mu.p()])
-	 );
+      return true;
+//       return WaveletTL::intersect_singular_support<IBASIS,DIM_d>
+// 	(
+// 	 *frame.bases()[lambda.p()],
+// 	 typename CubeBasis<IBASIS,DIM_d>::Index(lambda.j(),
+// 						 lambda.e(),
+// 						 lambda.k(),
+// 						 frame.bases()[lambda.p()]),
+// 	 typename CubeBasis<IBASIS,DIM_d>::Index(mu.j(),
+// 						 mu.e(),
+// 						 mu.k(),
+// 						 frame.bases()[mu.p()])
+// 	 );
     }
+    // dummy
+    return true;
   }
 
   template <unsigned int DIM>

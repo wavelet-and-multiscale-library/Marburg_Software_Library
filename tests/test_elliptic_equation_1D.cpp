@@ -68,7 +68,7 @@ int main()
   
   const int DIM = 1;
 
-  typedef DSBasis<2,2> Basis1D;
+  typedef DSBasis<3,5> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
@@ -156,7 +156,7 @@ int main()
   cout.precision(12);
   
   //############### 1D galerkin scheme test ##################
-#if 0
+#if 1
   
   int z = 0;
   set<Index> Lambda;
@@ -197,7 +197,7 @@ int main()
 
   Vector<double> resid(xk.size());
   Vector<double> help(xk.size());
-  for (int i = 0; i < 1000; i++) {
+  for (int i = 0; i < 3000; i++) {
     stiff.apply(xk,help);
     resid = rh - help;
     cout << sqrt((resid*resid)) << endl;
@@ -232,7 +232,7 @@ int main()
 
   EvaluateFrame<Basis1D,1,1> evalObj;
 
-  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u, true, 7);//expand in primal basis
+  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u, true, 8);//expand in primal basis
 
   std::ofstream ofs5("approx_solution_1D_out.m");
   matlab_output(ofs5,U);
@@ -241,36 +241,36 @@ int main()
 #endif
 
 
-   MultiIndex<unsigned int, 1> e1;
-   e1[0] = 0;
-   MultiIndex<int, 1> k1;
-   k1[0] = 2;
+//    MultiIndex<unsigned int, 1> e1;
+//    e1[0] = 0;
+//    MultiIndex<int, 1> k1;
+//    k1[0] = 2;
    
-   MultiIndex<unsigned int, 1> e2;
-   e2[0] = 0;
-   MultiIndex<int, 1> k2;
-   k2[0] = 1;
+//    MultiIndex<unsigned int, 1> e2;
+//    e2[0] = 0;
+//    MultiIndex<int, 1> k2;
+//    k2[0] = 1;
    
-   unsigned int p1 = 0, p2 = 1;
-   int j2 = 3;
+//    unsigned int p1 = 0, p2 = 1;
+//    int j2 = 3;
 
-   FrameIndex<Basis1D,1,1> la(&frame,j2,e1,p1,k1);
-   FrameIndex<Basis1D,1,1> mu(&frame,j2,e2,p2,k2);
+//    FrameIndex<Basis1D,1,1> la(&frame,j2,e1,p1,k1);
+//    FrameIndex<Basis1D,1,1> mu(&frame,j2,e2,p2,k2);
 
-//    cout << la << mu << endl;
+// //    cout << la << mu << endl;
 
-//    cout << "val  " << discrete_poisson.a(la,mu,1) << endl;
-//    cout << "val  " << discrete_poisson.a(mu,la,1) << endl;
+// //    cout << "val  " << discrete_poisson.a(la,mu,1) << endl;
+// //    cout << "val  " << discrete_poisson.a(mu,la,1) << endl;
 
-   std::list<Index> intersecting;
-   FrameTL::intersecting_wavelets<Basis1D,1,1>(frame, la, 4, false, intersecting);
+//    std::list<Index> intersecting;
+//    FrameTL::intersecting_wavelets<Basis1D,1,1>(frame, la, 4, false, intersecting);
 
-   cout << intersecting.size() << endl;
+//    cout << intersecting.size() << endl;
 
-   for (std::list<Index>::const_iterator  it = intersecting.begin();
-	it != intersecting.end(); ++it) {
-     cout << *it << endl;
-   }
+//    for (std::list<Index>::const_iterator  it = intersecting.begin();
+// 	it != intersecting.end(); ++it) {
+//      cout << *it << endl;
+//    }
 
 
    return 0;

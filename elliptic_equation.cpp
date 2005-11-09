@@ -17,7 +17,7 @@ namespace FrameTL
 						 QuadratureStrategy qstrat)
     : ell_bvp_(ell_bvp), frame_(frame), qstrat_(qstrat)
   {
-    //compute_rhs();
+    compute_rhs();
   }
 
   template <class IBASIS, unsigned int DIM>
@@ -92,7 +92,7 @@ namespace FrameTL
     typedef typename CUBEBASIS::Index CubeIndex;
 
     typename CUBEBASIS::Support supp_intersect;
-    
+ 
     bool b = WaveletTL::intersect_supports<IBASIS,DIM>
       (
        *(frame_->bases()[p]), 
@@ -296,20 +296,20 @@ namespace FrameTL
 //       cout << "intersect = " << b << endl;
 //       cout << "dim = " << i << " " << irregular_grid[i] << endl;
 //     }
+      
+      if ( !b )
+	return 0.0;
       break;
     }
     case Composite: {
       
-      b = intersect_supports<IBASIS,DIM,DIM>(*frame_, lambda, mu, supp_lambda, supp_mu);
-
+      //b = intersect_supports<IBASIS,DIM,DIM>(*frame_, lambda, mu, supp_lambda, supp_mu);
+      //if ( !b )
+      //  return 0.0;
       break;
     }
     }
     
-    if ( !b )
-      return 0.0;
-
-
     typedef typename IBASIS::Index Index1D;
     
     FixedArray1D<IBASIS*,DIM> bases1D_lambda = frame_->bases()[lambda.p()]->bases();
@@ -596,7 +596,7 @@ namespace FrameTL
     if (normA == 0.0) {
       typedef typename AggregatedFrame<IBASIS,DIM>::Index Index;
       std::set<Index> Lambda;
-      const int j0 = frame->j0();
+      const int j0 = frame_->j0();
       const int jmax = j0+1;
       for (Index lambda = FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0);; ++lambda) {
 	Lambda.insert(lambda);
@@ -628,7 +628,7 @@ namespace FrameTL
     
     return (n == 1
 	    ? t+dT // [St04a], Th. 2.3 for n=1
-	    : std::min((t+dT)/(double)n, (gamma-t)/(n-1.))); // [St04a, Th. 2.3]
+	    : std::min((t+dT)/(double)n, (gamma-t)/1./*(n-1.)*/)); // [St04a, Th. 2.3]
   }
 
   template <class IBASIS, unsigned int DIM>

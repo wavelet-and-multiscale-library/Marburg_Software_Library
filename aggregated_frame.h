@@ -68,14 +68,6 @@ namespace FrameTL
 		    const Array1D<FixedArray1D<int,2*DIM_d> >&,
 		    const Array1D<FixedArray1D<int,2*DIM_d> >&);
 
-//     /*!
-//       constructor with specified Dirichlet boundary conditions for
-//       the primal functions, the dual functions will be constructed to
-//       fulfill free b.c.'s
-//     */
-//     AggregatedFrame(const Atlas<DIM_d, DIM_m>*,
-// 		    const FixedArray1D<bool,2*DIM>& bc);
-
     /*!
       frame index class
     */
@@ -131,6 +123,18 @@ namespace FrameTL
       number of vanishing moments for the dual wavelets
     */
     static unsigned int dual_vanishing_moments() { return IBASIS::dual_vanishing_moments(); }
+
+    //! index of first generator on level j >= j0
+    Index first_generator(const int j) const;
+      
+    //! index of last generator on level j >= j0
+    Index last_generator(const int j) const;
+      
+    //! index of first wavelet on level j >= j0
+    Index first_wavelet(const int j) const;
+      
+    //! index of last wavelet on level j >= j0
+    Index last_wavelet(const int j) const;
 
   protected:
     //! pointer to the underlying atlas

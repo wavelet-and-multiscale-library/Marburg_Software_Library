@@ -68,7 +68,7 @@ int main()
   
   const int DIM = 1;
 
-  typedef DSBasis<3,5> Basis1D;
+  typedef DSBasis<2,2> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
@@ -146,8 +146,8 @@ int main()
   //PoissonBVP<DIM> poisson(&const_fun);
   PoissonBVP<DIM> poisson(&sing1D);
 
-  //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
-  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
+  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
+  //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
   
   double tmp = 0.0;
   int c = 0;
@@ -161,7 +161,7 @@ int main()
   int z = 0;
   set<Index> Lambda;
   for (Index lambda = FrameTL::first_generator<Basis1D,1,1,Frame1D>(&frame, frame.j0());
-       lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+2); ++lambda) {
+       lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+3); ++lambda) {
     cout << lambda << endl;
     cout << z++ << endl;
     Lambda.insert(lambda);
@@ -237,6 +237,8 @@ int main()
   std::ofstream ofs5("approx_solution_1D_out.m");
   matlab_output(ofs5,U);
   ofs5.close();
+
+  cout << "  ... done, time needed: " << time << " seconds" << endl;
    
 #endif
 

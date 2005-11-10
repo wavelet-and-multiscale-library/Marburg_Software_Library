@@ -121,7 +121,7 @@ namespace FrameTL
     /*!
       order of the operator
     */
-    static int operator_order() { return 2; }
+    static int operator_order() { return 1; }
     
     /*!
       evaluate the diagonal preconditioner D

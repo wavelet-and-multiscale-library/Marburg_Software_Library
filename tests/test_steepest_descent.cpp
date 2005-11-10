@@ -38,17 +38,17 @@ using namespace MathTL;
 using namespace WaveletTL;
 
 
-  /*!
-    special function with steep gradients
-    near the right end of the interval
-  */
+/*!
+  special function with steep gradients
+  near the right end of the interval
+*/
 template<class VALUE = double>
-class Singularity1D
+class Singularity1D_RHS
   : public Function<1, VALUE>
 {
 public:
-  Singularity1D() {};
-  virtual ~Singularity1D() {};
+  Singularity1D_RHS() {};
+  virtual ~Singularity1D_RHS() {};
   VALUE value(const Point<1>& p,
 	      const unsigned int component = 0) const
   {
@@ -61,11 +61,35 @@ public:
   
 };
 
+/*!
+  special function with steep gradients
+  near the right end of the interval
+*/
+template<class VALUE = double>
+class Singularity1D
+  : public Function<1, VALUE>
+{
+public:
+  Singularity1D() {};
+  virtual ~Singularity1D() {};
+  VALUE value(const Point<1>& p,
+	      const unsigned int component = 0) const
+  {
+    double res = 1.0 / (exp(5.) - 1.0);
+    res = (exp(5.*p[0]) - 1.0) * res;
+    return  (4.0 * res * (1.0 - res));
+  }
+  
+  void vector_value(const Point<1> &p,
+		    Vector<VALUE>& values) const { ; }
+  
+};
+
 
 int main()
 {
   
-  cout << "Testing class EllipticEquation..." << endl;
+  cout << "testing steepest descent in 1D..." << endl;
   
   const int DIM = 1;
 
@@ -76,7 +100,7 @@ int main()
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 0.75;
+  A(0,0) = 1.;
   Point<1> b;
   b[0] = 0.;
   AffineLinearMapping<1> affineP(A,b);
@@ -142,13 +166,14 @@ int main()
   value[0] = 1;
   ConstantFunction<DIM> const_fun(value);
 
-  Singularity1D<double> sing1D;
+  Singularity1D_RHS<double> sing1D;
+  Singularity1D<double> exactSolution1D;
   
   //PoissonBVP<DIM> poisson(&const_fun);
   PoissonBVP<DIM> poisson(&sing1D);
 
-  //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
-  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
+  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
+  //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
 
   discrete_poisson.set_norm_A(10.);
   discrete_poisson.set_Ainv(10.);
@@ -159,7 +184,21 @@ int main()
 
   InfiniteVector<double, Index> u_epsilon;
 
+  clock_t tstart, tend;
+  double time;
+  tstart = clock();
+
   steepest_descent_SOLVE(problem, epsilon, u_epsilon);
+ //  for (unsigned int i = 0; i < 50*20;i++)
+//     for (Index ind = FrameTL::first_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0());
+// 	 ind <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+2); ++ind)
+//       {
+// 	;
+//       }
+  tend = clock();
+  time = (double)(tend-tstart)/CLOCKS_PER_SEC;
+  cout << "  ... done, time needed: " << time << " seconds" << endl;
+
   cout << "steepest descent done" << endl;
 
   //discrete_poisson.rescale(u_epsilon,-1);
@@ -169,9 +208,15 @@ int main()
 
   Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u_epsilon, true, 10);//expand in primal basis
 
+  Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u_epsilon, exactSolution1D, 10);
+
   std::ofstream ofs5("approx_sol_steep_1D_out.m");
   matlab_output(ofs5,U);
   ofs5.close();
+
+  std::ofstream ofs6("error_steep_1D_out.m");
+  matlab_output(ofs6,Error);
+  ofs6.close();
 
 
   return 0;

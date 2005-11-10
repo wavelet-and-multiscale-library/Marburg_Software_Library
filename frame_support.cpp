@@ -709,6 +709,28 @@ namespace FrameTL
 					       frame.bases()[lambda.p()]),
 				     supp_lambda);
     
+#if 0
+    // test
+    std::list<Index> intersect_du;
+    typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> Frame;
+    typedef typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index Index;
+    if ( generators ) {
+      for (Index ind = frame.first_generator(j);
+	 ind <= frame.last_generator(j); ++ind)
+	{
+	  //intersect_du.push_back(ind);
+	}
+      
+    }
+    else {
+      for (Index ind = frame.first_wavelet(j);
+	   ind <= frame.last_wavelet(j); ++ind)
+	{
+	  //intersect_du.push_back(ind);
+	}
+    }
+    //end test
+#endif
     //cout << supp_lambda.a[0] << " " << supp_lambda.b[0] << " " << supp_lambda.j << endl;
 
     std::list<CubeIndex> intersect_same_cube;
@@ -719,7 +741,7 @@ namespace FrameTL
 							     frame.bases()[lambda.p()]),
 						   j, generators,
 						   intersect_same_cube);
-#if 1
+
     // ################ brute force approach ##################
     std::list<typename Frame::Index> intersect_same;
 
@@ -735,10 +757,11 @@ namespace FrameTL
       for (Index ind = FrameTL::first_generator<IBASIS,DIM_d,DIM_m,Frame>(&frame, j);
 	 ind <= FrameTL::last_generator<IBASIS,DIM_d,DIM_m,Frame>(&frame, j); ++ind)
 	{
-	  if ( (lambda.p() != ind.p()) &&
-	       frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(),ind.p()) && 
-	       FrameTL::intersect_supports<IBASIS,DIM_d,DIM_m>(frame,lambda,ind,supp_lambda) )
-	    intersect_diff.push_back(ind);
+// 	  if ( (lambda.p() != ind.p()) &&
+// 	       frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(),ind.p()) && 
+// 	       FrameTL::intersect_supports<IBASIS,DIM_d,DIM_m>(frame,lambda,ind,supp_lambda) )
+// 	    intersect_diff.push_back(ind);
+	  intersecting.push_back(ind);
 	}
       
     }
@@ -746,15 +769,17 @@ namespace FrameTL
       for (Index ind = FrameTL::first_wavelet<IBASIS,DIM_d,DIM_m,Frame>(&frame, j);
 	   ind <= FrameTL::last_wavelet<IBASIS,DIM_d,DIM_m,Frame>(&frame, j); ++ind)
 	{
-	  if ( (lambda.p() != ind.p()) &&
-	       frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(),ind.p()) && 
-	       FrameTL::intersect_supports<IBASIS,DIM_d,DIM_m>(frame,lambda,ind,supp_lambda) )
-	    intersect_diff.push_back(ind);
+// 	  if ( (lambda.p() != ind.p()) &&
+// 	       frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(),ind.p()) && 
+// 	       FrameTL::intersect_supports<IBASIS,DIM_d,DIM_m>(frame,lambda,ind,supp_lambda) )
+// 	    intersect_diff.push_back(ind);
+	  intersecting.push_back(ind);
 	}
     }
-    intersecting.merge(intersect_diff);
+    intersecting.unique();
+    //intersecting.merge(intersect_diff);
 //     intersecting.unique();
-//     intersecting.sort();
+     intersecting.sort();
      
     //    cout << lambda << endl;
 //     for (typename std::list<Index>::const_iterator  it = intersecting.begin();
@@ -763,9 +788,7 @@ namespace FrameTL
 //     }
 //     cout << "###############" << endl;
 
-#else
-    
-#endif
+
   }
   
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
@@ -773,6 +796,9 @@ namespace FrameTL
 				  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 				  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu)
   {
+
+    return true;
+
     switch (lambda.p() == mu.p()) {
     case 0:
       // different patches
@@ -780,19 +806,19 @@ namespace FrameTL
       return true;
     case 1:
       // same patches
-      return true;
-//       return WaveletTL::intersect_singular_support<IBASIS,DIM_d>
-// 	(
-// 	 *frame.bases()[lambda.p()],
-// 	 typename CubeBasis<IBASIS,DIM_d>::Index(lambda.j(),
-// 						 lambda.e(),
-// 						 lambda.k(),
-// 						 frame.bases()[lambda.p()]),
-// 	 typename CubeBasis<IBASIS,DIM_d>::Index(mu.j(),
-// 						 mu.e(),
-// 						 mu.k(),
-// 						 frame.bases()[mu.p()])
-// 	 );
+      //      return true;
+      return WaveletTL::intersect_singular_support<IBASIS,DIM_d>
+	(
+	 *frame.bases()[lambda.p()],
+	 typename CubeBasis<IBASIS,DIM_d>::Index(lambda.j(),
+						 lambda.e(),
+						 lambda.k(),
+						 frame.bases()[lambda.p()]),
+	 typename CubeBasis<IBASIS,DIM_d>::Index(mu.j(),
+						 mu.e(),
+						 mu.k(),
+						 frame.bases()[mu.p()])
+	 );
     }
     // dummy
     return true;

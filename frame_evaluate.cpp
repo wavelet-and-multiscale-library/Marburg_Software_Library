@@ -51,9 +51,9 @@ namespace FrameTL
  template <class IBASIS>
  SampledMapping<1>
  EvaluateFrame<IBASIS,1,1>::evaluate(const AggregatedFrame<IBASIS,1,1>& frame,
-					     const typename AggregatedFrame<IBASIS,1,1>::Index& lambda,
-					     const bool primal,
-					     const int resolution) const
+				     const typename AggregatedFrame<IBASIS,1,1>::Index& lambda,
+				     const bool primal,
+				     const int resolution) const
  {
  
    FixedArray1D<Array1D<double>,1> values; // point values of the factors within psi_lambda
@@ -77,10 +77,10 @@ namespace FrameTL
   template <class IBASIS>
   Array1D<SampledMapping<1> >
   EvaluateFrame<IBASIS,1,1>::evaluate(const AggregatedFrame<IBASIS,1,1>& frame,
-	   const InfiniteVector<double,
-	   typename AggregatedFrame<IBASIS,1,1>::Index>& coeffs,
-	   const bool primal,
-	   const int resolution) const
+				      const InfiniteVector<double,
+				      typename AggregatedFrame<IBASIS,1,1>::Index>& coeffs,
+				      const bool primal,
+				      const int resolution) const
   {
 
     Array1D<SampledMapping<1> > result(frame.n_p());
@@ -94,19 +94,37 @@ namespace FrameTL
  	  itend(coeffs.end()); it != itend; ++it) {
      
       for (unsigned int i = 0; i < frame.n_p(); i++) {
-	if ( frame.atlas()->get_adjacency_matrix().get_entry(i,it.index().p()) ) {
-	  if ( i == it.index().p())
-	    result[i].add(*it, evaluate(frame, it.index(), primal, resolution));
-	  else
+	if ( i == it.index().p())
+	  result[i].add(*it, evaluate(frame, it.index(), primal, resolution));
+	else
+	  if ( frame.atlas()->get_adjacency_matrix().get_entry(i,it.index().p()) )
 	    result[i].add(*it, evaluate(frame, it.index(), i, primal, resolution));	  
-	}
       }
+      
     }
 
     return result;
   }
 
-  
+  template <class IBASIS>
+  Array1D<SampledMapping<1> >
+  EvaluateFrame<IBASIS,1,1>::evaluate_difference(const AggregatedFrame<IBASIS,1,1>& frame,
+						 const InfiniteVector<double,
+						 typename AggregatedFrame<IBASIS,1,1>::Index>& coeffs,
+						 const Function<1>& f,
+						 const int resolution) const
+  {
+    Array1D<SampledMapping<1> > result(frame.n_p());
+
+    result = evaluate(frame, coeffs, true, resolution);
+
+    for (unsigned int i = 0; i < frame.n_p(); i++) {
+      result[i].add(-1.,SampledMapping<1>(result[i],f)); // SampledMapping<1> extends Grid<1> --> all fine
+    }
+    return result;
+  }
+
+  //################################## 2D case starts here ######################################  
   template <class IBASIS>
   SampledMapping<2>
   EvaluateFrame<IBASIS,2,2> ::evaluate(const AggregatedFrame<IBASIS,2,2>& frame,
@@ -191,10 +209,10 @@ namespace FrameTL
   template <class IBASIS>
   Array1D<SampledMapping<2> >
   EvaluateFrame<IBASIS,2,2>::evaluate(const AggregatedFrame<IBASIS,2,2>& frame,
-	   const InfiniteVector<double,
-	   typename AggregatedFrame<IBASIS,2,2>::Index>& coeffs,
-	   const bool primal,
-	   const int resolution) const
+				      const InfiniteVector<double,
+				      typename AggregatedFrame<IBASIS,2,2>::Index>& coeffs,
+				      const bool primal,
+				      const int resolution) const
   {
 
     Array1D<SampledMapping<2> > result(frame.n_p());
@@ -208,17 +226,35 @@ namespace FrameTL
  	  itend(coeffs.end()); it != itend; ++it) {
      
       for (unsigned int i = 0; i < frame.n_p(); i++) {
-	if ( frame.atlas()->get_adjacency_matrix().get_entry(i,it.index().p()) ) {
-	  if ( i == it.index().p()) {
-	    result[i].add(*it, evaluate(frame, it.index(), primal, resolution));
-	  }
-	  else
-	    result[i].add(*it, evaluate(frame, it.index(), i, primal, resolution));
+	if ( i == it.index().p()) {
+	  result[i].add(*it, evaluate(frame, it.index(), primal, resolution));
 	}
+	else
+	  if ( frame.atlas()->get_adjacency_matrix().get_entry(i,it.index().p()) )
+	    result[i].add(*it, evaluate(frame, it.index(), i, primal, resolution));
       }
     }
 
     return result;
   }
 
+  template <class IBASIS>
+  Array1D<SampledMapping<2> >
+  EvaluateFrame<IBASIS,2,2>::evaluate_difference(const AggregatedFrame<IBASIS,2,2>& frame,
+						 const InfiniteVector<double,
+						 typename AggregatedFrame<IBASIS,2,2>::Index>& coeffs,
+						 const Function<2>& f,
+						 const int resolution) const
+  {
+    Array1D<SampledMapping<2> > result(frame.n_p());
+
+    result = evaluate(frame, coeffs, true, resolution);
+
+    for (unsigned int i = 0; i < frame.n_p(); i++) {
+      result[i].add(-1.,SampledMapping<2>(result[i],f)); // SampledMapping<2> extends Grid<2> --> all fine
+    }
+    return result;
+    
+  }
+  
 }

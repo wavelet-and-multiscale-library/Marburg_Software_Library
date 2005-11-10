@@ -54,7 +54,7 @@ namespace FrameTL
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
     const int j0   = frame_->j0();
-    const int jmax = 6; // for a first quick hack
+    const int jmax = 3; // for a first quick hack
     for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
       {
 	const double coeff = f(lambda)/D(lambda);
@@ -303,9 +303,9 @@ namespace FrameTL
     }
     case Composite: {
       
-      //b = intersect_supports<IBASIS,DIM,DIM>(*frame_, lambda, mu, supp_lambda, supp_mu);
-      //if ( !b )
-      //  return 0.0;
+      b = intersect_supports<IBASIS,DIM,DIM>(*frame_, lambda, mu, supp_lambda, supp_mu);
+      if ( !b )
+        return 0.0;
       break;
     }
     }
@@ -628,7 +628,7 @@ namespace FrameTL
     
     return (n == 1
 	    ? t+dT // [St04a], Th. 2.3 for n=1
-	    : std::min((t+dT)/(double)n, (gamma-t)/1./*(n-1.)*/)); // [St04a, Th. 2.3]
+	    : std::min((t+dT)/(double)n, (gamma-t)/(n-1.))); // [St04a, Th. 2.3]
   }
 
   template <class IBASIS, unsigned int DIM>

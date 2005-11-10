@@ -40,7 +40,7 @@ namespace FrameTL
       Evaluate a single primal/dual generator or wavelet \psi_\lambda
       on a dyadic subgrid of its corresponding patch.
     */
-    virtual SampledMapping<DIM_d> evaluate(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+   virtual SampledMapping<DIM_d> evaluate(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 					   const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 					   const bool primal,
 					   const int resolution) const = 0;
@@ -54,6 +54,17 @@ namespace FrameTL
 						     typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& coeffs,
 						     const bool primal,
 						     const int resolution) const = 0;
+
+    /*!
+      Evaluates the difference between the function given by the expansion coefficients
+      'coeffs' and the function f
+    */
+    virtual Array1D<SampledMapping<DIM_d> > evaluate_difference(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+								const InfiniteVector<double,
+								typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& coeffs,
+								const Function<DIM_m>& f,
+								const int resolution) const = 0;
+
     
   };
 
@@ -82,6 +93,12 @@ namespace FrameTL
 	     const bool primal,
 	     const int resolution) const;
 
+    Array1D<SampledMapping<1> >
+    evaluate_difference(const AggregatedFrame<IBASIS,1,1>& frame,
+			const InfiniteVector<double,
+			typename AggregatedFrame<IBASIS,1,1>::Index>& coeffs,
+			const Function<1>& f,
+			const int resolution) const;
 
   };
   
@@ -109,6 +126,13 @@ namespace FrameTL
 	     typename AggregatedFrame<IBASIS,2,2>::Index>& coeffs,
 	     const bool primal,
 	     const int resolution) const;
+
+    Array1D<SampledMapping<2> >
+    evaluate_difference(const AggregatedFrame<IBASIS,2,2>& frame,
+			const InfiniteVector<double,
+			typename AggregatedFrame<IBASIS,2,2>::Index>& coeffs,
+			const Function<2>& f,
+			const int resolution) const;
 
 
   };

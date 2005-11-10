@@ -15,7 +15,8 @@ CXXFLAGS += -O2 -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 EXEOBJF = \
   test_frame_index.o \
   test_aggregated_frame.o test_elliptic_equation.o test_frame_evaluate.o\
-  test_frame_support.o test_elliptic_equation_1D.o test_steepest_descent.o
+  test_frame_support.o test_elliptic_equation_1D.o test_steepest_descent.o\
+  test_steepest_descent_2D.o
 
 
 EXES = $(EXEOBJF:.o=)

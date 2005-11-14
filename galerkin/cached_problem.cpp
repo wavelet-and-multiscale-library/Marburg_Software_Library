@@ -52,6 +52,101 @@ namespace WaveletTL
     
     return r;
   }
+  
+  template <class PROBLEM>
+  void
+  CachedProblem<PROBLEM>::add_level (const Index& lambda,
+				     InfiniteVector<double, Index>& w, const int j,
+				     const double factor,
+				     const int J,
+				     const CompressionStrategy strategy) const
+  {
+    if (problem->local_operator()) {
+      typedef std::list<Index> IntersectingList;
+
+      typename StructureCache::iterator col_lb(stiffStructure.lower_bound(lambda));
+      typename StructureCache::iterator col_it(col_lb);
+
+      if (col_lb == stiffStructure.end() ||
+	  stiffStructure.key_comp()(lambda,col_lb->first))
+	{
+	  // insert a new column
+	  typedef typename StructureCache::value_type value_type;
+	  col_it = stiffStructure.insert(col_lb, value_type(lambda, IndexCache()));
+	}
+
+      IndexCache& col(col_it->second);
+      
+      // check wether the level has already been calculated
+      typename IndexCache::iterator lb(col.lower_bound(j));
+      typename IndexCache::iterator it(lb);
+      if (lb == col.end() ||
+	  col.key_comp()(j, lb->first))
+	{
+	  IntersectingList nus;
+	  // structure an indices for this level have to be
+	  // computed
+	  intersecting_wavelets(basis(), lambda,
+				std::max(j, basis().j0()),
+				j == (basis().j0()-1),
+				nus);
+	  
+	  // add the new Indices to our StructureCache
+	  typedef typename IndexCache::value_type value_type;
+	  it = col.insert(lb, value_type(j, nus));
+
+	  // do the rest of the job
+	  const double d1 = problem->D(lambda);
+	  if (strategy == St04a) {
+	    for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());
+		 it != itend; ++it) {
+	      if (abs(lambda.j()-j) <= J/((double) problem->space_dimension()) ||
+		  intersect_singular_support(problem->basis(), lambda, *it)) {
+		const double entry = a(*it, lambda) / (d1*problem->D(*it));
+		w.add_coefficient(*it, entry * factor);
+	      }
+	    }
+	  }
+	  else if (strategy == CDD1) {
+	    for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());
+		 it != itend; ++it) {
+	      const double entry = a(*it, lambda) / (d1*problem->D(*it));
+	      w.add_coefficient(*it, entry * factor);
+	    }
+	  }
+
+	}
+      else {
+	// level already exists --> extract level from cache
+	const IntersectingList& nus = it->second;
+
+	// do the rest of the job
+	const double d1 = problem->D(lambda);
+	if (strategy == St04a) {
+	  for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());
+	       it != itend; ++it) {
+	    if (abs(lambda.j()-j) <= J/((double) problem->space_dimension()) ||
+		intersect_singular_support(problem->basis(), lambda, *it)) {
+	      const double entry = a(*it, lambda) / (d1*problem->D(*it));
+	      w.add_coefficient(*it, entry * factor);
+	    }
+	  }
+	}
+	else if (strategy == CDD1) {
+	  for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());
+	       it != itend; ++it) {
+	    const double entry = a(*it, lambda) / (d1*problem->D(*it));
+	    w.add_coefficient(*it, entry * factor);
+	  }
+	  
+	}
+      }// end else
+    }// end if local operator
+    else {
+      // TODO
+    }
+  }
+
 
   template <class PROBLEM>
   double

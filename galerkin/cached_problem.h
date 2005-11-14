@@ -11,6 +11,9 @@
 #define _WAVELETTL_CACHED_PROBLEM_H
 
 #include <map>
+#include <algebra/infinite_vector.h>
+
+using MathTL::InfiniteVector;
 
 namespace WaveletTL
 {
@@ -141,6 +144,15 @@ namespace WaveletTL
       */
       double F_norm() const { return problem->F_norm(); }
       
+      /*!
+	w += factor * (stiffness matrix entries of in column lambda on level j)
+      */
+      void add_level (const Index& lambda,
+		      InfiniteVector<double, Index>& w, const int j,
+		      const double factor,
+		      const int J,
+		      const CompressionStrategy strategy = St04a) const;
+
     protected:
       //! the underlying (uncached) problem
       const PROBLEM* problem;
@@ -153,6 +165,14 @@ namespace WaveletTL
       
       // entries cache for A (mutable to overcome the constness of add_column())
       mutable ColumnCache entries_cache;
+
+      // Index cache for compression strategy
+      typedef map<int, std::list<typename WaveletBasis::Index> > IndexCache;
+
+      typedef map<typename WaveletBasis::Index, IndexCache> StructureCache;
+
+      // levelwise Index cache for each stiffness matrix column
+      mutable StructureCache stiffStructure;
 
       // estimates for ||A|| and ||A^{-1}||
       mutable double normA, normAinv;

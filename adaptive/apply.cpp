@@ -21,7 +21,6 @@ namespace WaveletTL
     typedef typename PROBLEM::Index Index;
 
     w.clear();
-
     // Binary Binning variant of APPLY from [S],[B]
     // Remark: it is possible to perform binary binning without actually assembling
     // the bins, however, in this first version we do setup the bins to avoid
@@ -43,7 +42,6 @@ namespace WaveletTL
  	const unsigned int i = std::min(q, (unsigned int)floor(-log(fabs(*it)/norm_v)/M_LN2));
 	bins[i].push_back(std::make_pair(it.index(), *it));
       }
-
       // glue all the bins together
       Array1D<std::pair<Index, double> > v_binned(v.size());
       for (unsigned int bin = 0, id = 0; bin <= q; bin++)
@@ -94,7 +92,8 @@ namespace WaveletTL
 	if (check <= (1-theta)*eta) break;
 	J++;
       }
-      
+
+
       // compute w = \sum_{k=0}^\ell A_{J-k}v_{[k]}
       k = 0;
       for (typename std::list<std::list<std::pair<Index, double> > >::const_iterator it(vks.begin());
@@ -119,12 +118,19 @@ namespace WaveletTL
 	   const CompressionStrategy strategy)
   {
     double zeta = 2.*epsilon;
-    double l2n = 0;
+
+    double l2n = 0.;
+
     do {
       zeta /= 2.;
       P.RHS (zeta/2., tilde_r);
+      //cout << tilde_r << endl;
       InfiniteVector<double, typename PROBLEM::Index> help;
+      //cout << w << endl;
+      //cout << "zeta halbe = " << zeta/2. << endl;
+      //cout << "before aply in RES " << endl;
       APPLY(P, w, zeta/2., help, jmax, strategy);
+      //cout << "after apply in RES " << endl;
       tilde_r -= help;
       l2n = l2_norm(tilde_r);
       nu = l2n + zeta;

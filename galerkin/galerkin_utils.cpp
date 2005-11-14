@@ -25,7 +25,11 @@ namespace WaveletTL
 	     it2 != itend; ++it2, ++column)
 	  {
 // 	    if (intersect_singular_support(P.basis(), *it1, *it2)) {
-	      double entry = P.a(*it2, *it1);
+	    double entry = P.a(*it2, *it1);
+// 	    if (! entry == 0.) {
+// 	      cout << *it2 <<  " " << *it1 << endl; 
+// 	      cout << entry << endl;
+// 	    }
 	      if (entry != 0) {
 		indices.push_back(column);
 		entries.push_back(entry / (d1 * P.D(*it2)));

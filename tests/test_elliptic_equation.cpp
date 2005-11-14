@@ -217,18 +217,18 @@ int main()
   ofs4.close();
   //###############################################   
   //############### 2D galerkin scheme test ##################
-#if 0
+#if 1
 
   set<Index> Lambda;
   for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
-       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, frame.j0()); ++lambda)
+       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, frame.j0()+1); ++lambda)
     Lambda.insert(lambda);
   
   cout << "setting up full right hand side..." << endl;
   Vector<double> rh;
   WaveletTL::setup_righthand_side(discrete_poisson, Lambda, rh);
   //cout << rh << endl;
-  
+  //abort();
   cout << "setting up full stiffness matrix..." << endl;
   SparseMatrix<double> stiff;
 
@@ -261,7 +261,7 @@ int main()
   
   Vector<double> resid(xk.size());
   Vector<double> help(xk.size());
-  for (int i = 0; i < 1500; i++) {
+  for (int i = 0; i < 500; i++) {
     stiff.apply(xk,help);
     resid = rh - help;
     cout << sqrt((resid*resid)) << endl;
@@ -292,6 +292,7 @@ int main()
   
    discrete_poisson.rescale(u,-1);
 
+
    Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u, true, 6);//expand in primal basis
    
    std::ofstream ofs5("approx_solution_out.m");
@@ -306,7 +307,9 @@ int main()
 #endif
    //################# end 2D galerkin scheme test ###################
 
-#if 1
+  cout << "  ... done, time needed: " << time << " seconds" << endl;
+
+#if 0
    MultiIndex<unsigned int, 2> e1;
    e1[0] = 0;
    e1[1] = 0;
@@ -330,15 +333,15 @@ int main()
    cout << "val  " << discrete_poisson.a(la,mu,2) << endl;
 #endif
 
-   std::list<Index> intersecting;
-   FrameTL::intersecting_wavelets<Basis1D,2,2>(frame, la, 4, false, intersecting);
+//    std::list<Index> intersecting;
+//    FrameTL::intersecting_wavelets<Basis1D,2,2>(frame, la, 4, false, intersecting);
 
-   cout << intersecting.size() << endl;
+//    cout << intersecting.size() << endl;
 
-   for (std::list<Index>::const_iterator  it = intersecting.begin();
-	it != intersecting.end(); ++it) {
-     cout << *it << endl;
-   }
+//    for (std::list<Index>::const_iterator  it = intersecting.begin();
+// 	it != intersecting.end(); ++it) {
+//      cout << *it << endl;
+//    }
 
 
    return 0;

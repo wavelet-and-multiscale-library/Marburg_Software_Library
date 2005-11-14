@@ -12,9 +12,11 @@
 
 #include <aggregated_frame.h>
 #include <numerics/bvp.h>
+#include <adaptive/compression.h>
 
 using FrameTL::AggregatedFrame;
 using MathTL::EllipticBVP;
+using WaveletTL::CompressionStrategy;
 
 namespace FrameTL
 {
@@ -144,7 +146,7 @@ namespace FrameTL
     */
     double a(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
 	     const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-	     const unsigned int p = 1) const;
+	     const unsigned int p = 2) const;
 
     /*!
       estimate the spectral norm ||A||
@@ -207,6 +209,15 @@ namespace FrameTL
       set the boundary value problem
     */
     void set_bvp(const EllipticBVP<DIM>*);
+
+    /*!
+      w += factor * (stiffness matrix entries of in column lambda on level j)
+    */
+    void add_level (const Index& lambda,
+		    InfiniteVector<double, Index>& w, const int j,
+		    const double factor,
+		    const int J,
+		    const CompressionStrategy strategy = St04a) const;
 
    protected:
     

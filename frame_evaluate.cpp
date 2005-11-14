@@ -224,7 +224,7 @@ namespace FrameTL
     typedef typename AggregatedFrame<IBASIS,2,2>::Index Index;
     for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
  	  itend(coeffs.end()); it != itend; ++it) {
-     
+
       for (unsigned int i = 0; i < frame.n_p(); i++) {
 	if ( i == it.index().p()) {
 	  result[i].add(*it, evaluate(frame, it.index(), primal, resolution));

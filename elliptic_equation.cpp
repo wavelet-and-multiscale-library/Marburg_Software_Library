@@ -54,7 +54,7 @@ namespace FrameTL
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
     const int j0   = frame_->j0();
-    const int jmax = 3; // for a first quick hack
+    const int jmax = 7; // for a first quick hack
     for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
       {
 	const double coeff = f(lambda)/D(lambda);
@@ -180,43 +180,38 @@ namespace FrameTL
 	psi_lambda *= wav_values_lambda[i][index[i]];
 	psi_mu *= wav_values_mu[i][index[i]];
       }
+      
+      if ( !(psi_lambda == 0. || psi_mu == 0.) ) {
 
-      for (unsigned int s = 0; s < DIM; s++) {
-	double psi_der_lambda=1., psi_der_mu=1.;
+	for (unsigned int s = 0; s < DIM; s++) {
+	  double psi_der_lambda=1., psi_der_mu=1.;
+	  psi_der_lambda = (psi_lambda / wav_values_lambda[s][index[s]]) * wav_der_values_lambda[s][index[s]];
+	  psi_der_mu = (psi_mu / wav_values_mu[s][index[s]]) * wav_der_values_mu[s][index[s]];
 
-	for (unsigned int i = 0; i < s; i++) {
-	  psi_der_lambda *= wav_values_lambda[i][index[i]];
-	  psi_der_mu *= wav_values_mu[i][index[i]];
+	  // for first part of the integral: \int_\Omega <a \Nabla u,\Nabla v> dx
+	  double tmp = frame_->atlas()->charts()[p]->Gram_D_factor(s,x);
+	  values1[s] = ell_bvp_->a(x_patch) *
+	    (psi_der_lambda*sq_gram - (psi_lambda*tmp)) / (sq_gram*sq_gram);
+	  values2[s] =
+	    (psi_der_mu*sq_gram - (psi_mu*tmp)) / (sq_gram*sq_gram);
+
+	}//end for s
+	
+	double t = 0.;
+	for (unsigned int i1 = 0; i1 < DIM; i1++) {
+	  double d1 = 0.;
+	  double d2 = 0.;
+	  for (unsigned int i2 = 0; i2 < DIM; i2++) {
+	    double tmp = frame_->atlas()->charts()[p]->Dkappa_inv(i2, i1, x);
+	    d1 += values1[i2]*tmp;
+	    d2 += values2[i2]*tmp;
+	  }
+	  t += d1 * d2;
 	}
-	for (unsigned int i = s+1; i < DIM; i++) {
-	  psi_der_lambda *= wav_values_lambda[i][index[i]];
-	  psi_der_mu *= wav_values_mu[i][index[i]];
-	}
-	psi_der_lambda *= wav_der_values_lambda[s][index[s]];
-	psi_der_mu *= wav_der_values_mu[s][index[s]];
-
-	// for first part of the integral: \int_\Omega <a \Nabla u,\Nabla v> dx
-	double tmp = frame_->atlas()->charts()[p]->Gram_D_factor(s,x);
-	values1[s] = ell_bvp_->a(x_patch) *
-	  (psi_der_lambda*sq_gram - (psi_lambda*tmp)) / (sq_gram*sq_gram);
-	values2[s] =
-	  (psi_der_mu*sq_gram - (psi_mu*tmp)) / (sq_gram*sq_gram);
-
-      }//end for s
-
-      Vector<double> tmp_values1(DIM);
-      Vector<double> tmp_values2(DIM);
-
-      for (unsigned int i1 = 0; i1 < DIM; i1++)
-	for (unsigned int i2 = 0; i2 < DIM; i2++) {
-	  double tmp = frame_->atlas()->charts()[p]->Dkappa_inv(i2, i1, x);
-	  tmp_values1[i1] += values1[i2]*tmp;
-	  tmp_values2[i1] += values2[i2]*tmp;
-	}
-
-      r += ((tmp_values1 * tmp_values2) * (sq_gram*sq_gram) + ell_bvp_->q(x_patch) * psi_lambda * psi_mu)
-	* weights;
-
+	r += (t * (sq_gram*sq_gram) + ell_bvp_->q(x_patch) * psi_lambda * psi_mu)
+	  * weights;
+	
+      }
       // "++index"
       bool exit = false;
       for (unsigned int i = 0; i < DIM; i++) {
@@ -229,6 +224,7 @@ namespace FrameTL
 	}
       }
       if (exit) break;
+	
     }//end while
 
     return r;
@@ -385,67 +381,58 @@ namespace FrameTL
 					     Index1D(mu.j(), mu.e()[i], mu.k()[i], bases1D_mu[i]), y[i]);
 
 	    }
-      
-	    Vector<double> values1(DIM);
-	    Vector<double> values2(DIM);
 
-	    for (unsigned int s = 0; s < DIM; s++) {
-	      double psi_der_lambda=1., psi_der_mu=1.;
-	      for (unsigned int i = 0; i < s; i++) {
-		psi_der_lambda *= wav_values_lambda[i][index[i]];
-		psi_der_mu *= WaveletTL::evaluate(*(bases1D_mu[i]), 0,
-						  Index1D(mu.j(), mu.e()[i], mu.k()[i], bases1D_mu[i]), y[i]);
-	      }
-	      for (unsigned int i = s+1; i < DIM; i++) {
-		psi_der_lambda *= wav_values_lambda[i][index[i]];
-		psi_der_mu *= WaveletTL::evaluate(*(bases1D_mu[i]), 0,
-						  Index1D(mu.j(), mu.e()[i], mu.k()[i], bases1D_mu[i]), y[i]);
-	      }
-	      psi_der_lambda *= wav_der_values_lambda[s][index[s]];
-	      psi_der_mu *= WaveletTL::evaluate(*(bases1D_mu[s]), 1,
-						Index1D(mu.j(), mu.e()[s], mu.k()[s], bases1D_mu[s]), y[s]);
+	    if ( !(psi_lambda == 0.|| psi_mu == 0.) ) {
+	            
+	      Vector<double> values1(DIM);
+	      Vector<double> values2(DIM);
+
+	      for (unsigned int s = 0; s < DIM; s++) {
+		double psi_der_lambda=1., psi_der_mu=1.;
+		psi_der_lambda = (psi_lambda / wav_values_lambda[s][index[s]]) * wav_der_values_lambda[s][index[s]];
+
+		psi_der_mu = (psi_mu / WaveletTL::evaluate(*(bases1D_mu[s]), 0,
+							   Index1D(mu.j(), mu.e()[s], mu.k()[s], bases1D_mu[s]), y[s])
+			      ) * WaveletTL::evaluate(*(bases1D_mu[s]), 1,
+						      Index1D(mu.j(), mu.e()[s], mu.k()[s], bases1D_mu[s]), y[s]);
 	    
-	      values1[s] = ell_bvp_->a(x_patch) *
-		(psi_der_lambda*sq_gram_la - (psi_lambda*frame_->atlas()->charts()[lambda.p()]->Gram_D_factor(s,x)))
-		/ (sq_gram_la*sq_gram_la);
-	      values2[s] =
-		(psi_der_mu*sq_gram_mu - (psi_mu*frame_->atlas()->charts()[mu.p()]->Gram_D_factor(s,y)))
-		/ (sq_gram_mu*sq_gram_mu);
+		values1[s] = ell_bvp_->a(x_patch) *
+		  (psi_der_lambda*sq_gram_la - (psi_lambda*frame_->atlas()->charts()[lambda.p()]->Gram_D_factor(s,x)))
+		  / (sq_gram_la*sq_gram_la);
+		values2[s] =
+		  (psi_der_mu*sq_gram_mu - (psi_mu*frame_->atlas()->charts()[mu.p()]->Gram_D_factor(s,y)))
+		  / (sq_gram_mu*sq_gram_mu);
 	
-	    } // end loop s
-      
+	      } // end loop s
 
-	    Vector<double> tmp_values1(DIM);
-	    Vector<double> tmp_values2(DIM);
-
-	    for (unsigned int i1 = 0; i1 < DIM; i1++)
-	      for (unsigned int i2 = 0; i2 < DIM; i2++) {
-// 		cout << frame_->atlas()->charts()[lambda.p()]->Dkappa_inv(i2, i1, x) << endl
-// 		     << frame_->atlas()->charts()[mu.p()]->Dkappa_inv(i2, i1, y) << endl;
-		tmp_values1[i1] += values1[i2]*frame_->atlas()->charts()[lambda.p()]->Dkappa_inv(i2, i1, x);
-		tmp_values2[i1] += values2[i2]*frame_->atlas()->charts()[mu.p()]->Dkappa_inv(i2, i1, y);
+	      double tmp = 0.;
+	      for (unsigned int i1 = 0; i1 < DIM; i1++) {
+		double d1 = 0.;
+		double d2 = 0.;
+		for (unsigned int i2 = 0; i2 < DIM; i2++) {
+		  d1 += values1[i2]*frame_->atlas()->charts()[lambda.p()]->Dkappa_inv(i2, i1, x);
+		  d2 += values2[i2]*frame_->atlas()->charts()[mu.p()]->Dkappa_inv(i2, i1, y);
+		}
+		tmp += d1 * d2;
 	      }
 
-	   
-
-	    r += ((tmp_values1 * tmp_values2) * (sq_gram_la*sq_gram_la) +
-		  ell_bvp_->q(x_patch) * psi_lambda * (psi_mu/sq_gram_mu) * sq_gram_la) * weight;
-
-	   
+	      r += (tmp * (sq_gram_la*sq_gram_la) +
+		    ell_bvp_->q(x_patch) * psi_lambda * (psi_mu/sq_gram_mu) * sq_gram_la) * weight;
+	    }
+	    // "++index"
+	    bool exit = false;
+	    for (unsigned int i = 0; i < DIM; i++) {
+	      if (index[i] ==  N_Gauss*(irregular_grid[i].size()-1)-1) {
+		index[i] = 0;
+		exit = (i == DIM-1);
+	      } else {
+		index[i]++;
+		break;
+	      }
+	    }
+	    if (exit) break;
 	  }
-	// "++index"
-	bool exit = false;
-	for (unsigned int i = 0; i < DIM; i++) {
-	  if (index[i] ==  N_Gauss*(irregular_grid[i].size()-1)-1) {
-	    index[i] = 0;
-	    exit = (i == DIM-1);
-	  } else {
-	    index[i]++;
-	    break;
-	  }
-	}
-	if (exit) break;
-      }
+      }// end while
       return r;
 
     }// end case TrivialAffine
@@ -511,48 +498,43 @@ namespace FrameTL
 					     Index1D(mu.j(), mu.e()[i], mu.k()[i], bases1D_mu[i]), y[i]);
 
 	    }
-      
-	    Vector<double> values1(DIM);
-	    Vector<double> values2(DIM);
+      	    if ( !(psi_lambda == 0.|| psi_mu == 0.) ) {
+	            
+	      Vector<double> values1(DIM);
+	      Vector<double> values2(DIM);
 
-	    for (unsigned int s = 0; s < DIM; s++) {
-	      double psi_der_lambda=1., psi_der_mu=1.;
-	      for (unsigned int i = 0; i < s; i++) {
-		psi_der_lambda *= wav_values_lambda[i][index[i]];
-		psi_der_mu *= WaveletTL::evaluate(*(bases1D_mu[i]), 0,
-						  Index1D(mu.j(), mu.e()[i], mu.k()[i], bases1D_mu[i]), y[i]);
-	      }
-	      for (unsigned int i = s+1; i < DIM; i++) {
-		psi_der_lambda *= wav_values_lambda[i][index[i]];
-		psi_der_mu *= WaveletTL::evaluate(*(bases1D_mu[i]), 0,
-						  Index1D(mu.j(), mu.e()[i], mu.k()[i], bases1D_mu[i]), y[i]);
-	      }
-	      psi_der_lambda *= wav_der_values_lambda[s][index[s]];
-	      psi_der_mu *= WaveletTL::evaluate(*(bases1D_mu[s]), 1,
-						Index1D(mu.j(), mu.e()[s], mu.k()[s], bases1D_mu[s]), y[s]);
+	      for (unsigned int s = 0; s < DIM; s++) {
+		double psi_der_lambda=1., psi_der_mu=1.;
+		psi_der_lambda = (psi_lambda / wav_values_lambda[s][index[s]]) * wav_der_values_lambda[s][index[s]];
+
+		psi_der_mu = (psi_mu / WaveletTL::evaluate(*(bases1D_mu[s]), 0,
+							   Index1D(mu.j(), mu.e()[s], mu.k()[s], bases1D_mu[s]), y[s])
+			      ) * WaveletTL::evaluate(*(bases1D_mu[s]), 1,
+						      Index1D(mu.j(), mu.e()[s], mu.k()[s], bases1D_mu[s]), y[s]);
 	    
-	      values1[s] = ell_bvp_->a(x_patch) *
-		(psi_der_lambda*sq_gram_la - (psi_lambda*frame_->atlas()->charts()[lambda.p()]->Gram_D_factor(s,x)))
-		/ (sq_gram_la*sq_gram_la);
-	      values2[s] =
-		(psi_der_mu*sq_gram_mu - (psi_mu*frame_->atlas()->charts()[mu.p()]->Gram_D_factor(s,y)))
-		/ (sq_gram_mu*sq_gram_mu);
+		values1[s] = ell_bvp_->a(x_patch) *
+		  (psi_der_lambda*sq_gram_la - (psi_lambda*frame_->atlas()->charts()[lambda.p()]->Gram_D_factor(s,x)))
+		  / (sq_gram_la*sq_gram_la);
+		values2[s] =
+		  (psi_der_mu*sq_gram_mu - (psi_mu*frame_->atlas()->charts()[mu.p()]->Gram_D_factor(s,y)))
+		  / (sq_gram_mu*sq_gram_mu);
 	
-	    } // end loop s
+	      } // end loop s
       
-
-	    Vector<double> tmp_values1(DIM);
-	    Vector<double> tmp_values2(DIM);
-
-	    for (unsigned int i1 = 0; i1 < DIM; i1++)
-	      for (unsigned int i2 = 0; i2 < DIM; i2++) {
-		tmp_values1[i1] += values1[i2]*frame_->atlas()->charts()[lambda.p()]->Dkappa_inv(i2, i1, x);
-		tmp_values2[i1] += values2[i2]*frame_->atlas()->charts()[mu.p()]->Dkappa_inv(i2, i1, y);
+	      double tmp = 0.;
+	      for (unsigned int i1 = 0; i1 < DIM; i1++) {
+		double d1 = 0.;
+		double d2 = 0.;
+		for (unsigned int i2 = 0; i2 < DIM; i2++) {
+		  d1 += values1[i2]*frame_->atlas()->charts()[lambda.p()]->Dkappa_inv(i2, i1, x);
+		  d2 += values2[i2]*frame_->atlas()->charts()[mu.p()]->Dkappa_inv(i2, i1, y);
+		}
+		tmp += d1 * d2;
 	      }
-
-	    r += ((tmp_values1 * tmp_values2) * (sq_gram_la*sq_gram_la) +
-		  ell_bvp_->q(x_patch) * psi_lambda * (psi_mu/sq_gram_mu) * sq_gram_la) * weight;
-
+	      
+	      r += (tmp * (sq_gram_la*sq_gram_la) +
+		    ell_bvp_->q(x_patch) * psi_lambda * (psi_mu/sq_gram_mu) * sq_gram_la) * weight;
+	    }
 	  }
 	// "++index"
 	bool exit = false;
@@ -628,7 +610,7 @@ namespace FrameTL
     
     return (n == 1
 	    ? t+dT // [St04a], Th. 2.3 for n=1
-	    : std::min((t+dT)/(double)n, (gamma-t)/(n-1.))); // [St04a, Th. 2.3]
+	    : std::min((t+dT)/(double)n, (gamma-t)/1./*(n-1.)*/)); // [St04a, Th. 2.3]
   }
 
   template <class IBASIS, unsigned int DIM>
@@ -744,5 +726,47 @@ namespace FrameTL
     compute_rhs();
   }
 
+  template <class IBASIS, unsigned int DIM>
+  void
+  EllipticEquation<IBASIS,DIM>::add_level (const Index& lambda,
+					   InfiniteVector<double, Index>& w, const int j,
+					   const double factor,
+					   const int J,
+					   const CompressionStrategy strategy) const
+  {
+    typedef std::list<Index> IntersectingList;
+    IntersectingList nus;
+    if (strategy == CDD1) {
+      // compute all wavelets on level j, such that supp(psi_lambda) and supp(psi_nu) intersect
+      intersecting_wavelets(basis(), lambda,
+			    std::max(j, basis().j0()),
+			    j == (basis().j0()-1),
+			    nus);
+      
+      // traverse the matrix block and update the result
+      const double d1 = D(lambda);
+      for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());
+	   it != itend; ++it) {
+	const double entry = a(*it, lambda) / (d1*D(*it));
+	w.add_coefficient(*it, entry * factor);
+      }
+    }
+    else if (strategy == St04a) {
+      // compute all wavelets on level j, such that supp(psi_lambda) and supp(psi_nu) intersect
+      intersecting_wavelets(basis(), lambda,
+			    std::max(j, basis().j0()),
+			    j == (basis().j0()-1),
+			    nus);
+      // traverse the matrix block and update the result
+      const double d1 = D(lambda);
+      for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());
+	   it != itend; ++it)
+	if (abs(lambda.j()-j) <= J/((double) space_dimension()) ||
+	    intersect_singular_support(basis(), lambda, *it)) {
+	  const double entry = a(*it, lambda) / (d1*D(*it));
+	  w.add_coefficient(*it, entry * factor);
+	}
+    }
+  }
   
 }

@@ -14,12 +14,13 @@ namespace FrameTL
 			      InfiniteVector<double, typename PROBLEM::Index>& u_epsilon)
   {
     unsigned int loops = 0;
-    const int jmax = 3;
+    const int jmax = 7;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
     double kappa     = P.norm_A()/a_inv;
     double omega_i   = a_inv*P.F_norm();
+    cout << "a_inv = " << a_inv << endl;
     cout << "omega_i = " << omega_i << endl;
     double delta     = 1./(5.*kappa+a_inv);
     cout << "delta = " << delta << endl;
@@ -62,16 +63,21 @@ namespace FrameTL
       while ( nu_i > omega_i/((1+3.*mu)*a_inv)) {
 	InfiniteVector<double, Index> z_i;
 	cout << "apply tol = " << delta*l2_norm(tilde_r) << endl;
+	//cout << tilde_r << endl;
 	APPLY(P, tilde_r, delta*l2_norm(tilde_r), z_i, jmax, CDD1);
+	//cout << z_i << endl;
 	cout << "after apply " << endl; 
+	cout << " norm = " << l2_norm_sqr(tilde_r) << endl;
 	//APPLY_COARSE(P, tilde_r, delta*l2_norm(tilde_r), z_i, 0.000001, jmax, CDD1);
 	w += (l2_norm_sqr(tilde_r)/(z_i*tilde_r))*tilde_r;
+
+
 	cout << "xi = " << xi_i << endl;
 	RES(P, w, xi_i, delta, omega_i/((1+3.*mu)*a_inv), jmax,
 	    tilde_r, nu_i, CDD1);
 	cout << "loop: " << ++loops << " nu = " << nu_i << endl;
 	cout << "active indices: " << w.size() << endl;
-	if (loops==20) {
+	if (loops==800) {
 	  u_epsilon = w;
 	  return;
 	}

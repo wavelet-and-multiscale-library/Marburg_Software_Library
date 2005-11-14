@@ -100,7 +100,7 @@ int main()
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 1.;
+  A(0,0) = 0.75;
   Point<1> b;
   b[0] = 0.;
   AffineLinearMapping<1> affineP(A,b);
@@ -178,7 +178,7 @@ int main()
   discrete_poisson.set_norm_A(10.);
   discrete_poisson.set_Ainv(10.);
 
-  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 10.0, 0.5);
+  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 10.0, 10.);
 
   const double epsilon = 0.01;
 
@@ -189,6 +189,7 @@ int main()
   tstart = clock();
 
   steepest_descent_SOLVE(problem, epsilon, u_epsilon);
+  //steepest_descent_SOLVE(discrete_poisson, epsilon, u_epsilon);
  //  for (unsigned int i = 0; i < 50*20;i++)
 //     for (Index ind = FrameTL::first_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0());
 // 	 ind <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+2); ++ind)
@@ -201,8 +202,8 @@ int main()
 
   cout << "steepest descent done" << endl;
 
-  //discrete_poisson.rescale(u_epsilon,-1);
-  problem.rescale(u_epsilon,-1);
+  discrete_poisson.rescale(u_epsilon,-1);
+  //problem.rescale(u_epsilon,-1);
 
   EvaluateFrame<Basis1D,1,1> evalObj;
 

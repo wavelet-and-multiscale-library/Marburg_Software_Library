@@ -718,7 +718,7 @@ namespace FrameTL
       for (Index ind = frame.first_generator(j);
 	 ind <= frame.last_generator(j); ++ind)
 	{
-	  //intersect_du.push_back(ind);
+	  intersecting.push_back(ind);
 	}
       
     }
@@ -726,13 +726,13 @@ namespace FrameTL
       for (Index ind = frame.first_wavelet(j);
 	   ind <= frame.last_wavelet(j); ++ind)
 	{
-	  //intersect_du.push_back(ind);
+	  intersecting.push_back(ind);
 	}
     }
     //end test
 #endif
     //cout << supp_lambda.a[0] << " " << supp_lambda.b[0] << " " << supp_lambda.j << endl;
-
+#if 1
     std::list<CubeIndex> intersect_same_cube;
     WaveletTL::intersecting_wavelets<IBASIS,DIM_d>(*(frame.bases()[lambda.p()]),
 						   CubeIndex(lambda.j(),
@@ -757,11 +757,11 @@ namespace FrameTL
       for (Index ind = FrameTL::first_generator<IBASIS,DIM_d,DIM_m,Frame>(&frame, j);
 	 ind <= FrameTL::last_generator<IBASIS,DIM_d,DIM_m,Frame>(&frame, j); ++ind)
 	{
-// 	  if ( (lambda.p() != ind.p()) &&
-// 	       frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(),ind.p()) && 
-// 	       FrameTL::intersect_supports<IBASIS,DIM_d,DIM_m>(frame,lambda,ind,supp_lambda) )
-// 	    intersect_diff.push_back(ind);
-	  intersecting.push_back(ind);
+	  if ( (lambda.p() != ind.p()) &&
+	       frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(),ind.p()) && 
+	       FrameTL::intersect_supports<IBASIS,DIM_d,DIM_m>(frame,lambda,ind,supp_lambda) )
+	    intersect_diff.push_back(ind);
+	  
 	}
       
     }
@@ -769,17 +769,17 @@ namespace FrameTL
       for (Index ind = FrameTL::first_wavelet<IBASIS,DIM_d,DIM_m,Frame>(&frame, j);
 	   ind <= FrameTL::last_wavelet<IBASIS,DIM_d,DIM_m,Frame>(&frame, j); ++ind)
 	{
-// 	  if ( (lambda.p() != ind.p()) &&
-// 	       frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(),ind.p()) && 
-// 	       FrameTL::intersect_supports<IBASIS,DIM_d,DIM_m>(frame,lambda,ind,supp_lambda) )
-// 	    intersect_diff.push_back(ind);
-	  intersecting.push_back(ind);
+	  if ( (lambda.p() != ind.p()) &&
+	       frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(),ind.p()) && 
+	       FrameTL::intersect_supports<IBASIS,DIM_d,DIM_m>(frame,lambda,ind,supp_lambda) )
+	    intersect_diff.push_back(ind);
 	}
     }
-    intersecting.unique();
-    //intersecting.merge(intersect_diff);
+    //   intersecting.unique();
+    intersecting.merge(intersect_diff);
+#endif
 //     intersecting.unique();
-     intersecting.sort();
+//     intersecting.sort();
      
     //    cout << lambda << endl;
 //     for (typename std::list<Index>::const_iterator  it = intersecting.begin();

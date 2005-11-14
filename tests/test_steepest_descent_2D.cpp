@@ -199,7 +199,7 @@ int main()
   matlab_output(ofs6,Error);
   ofs6.close();
 
-
+  problem.add_level(frame.first_generator(3),u_epsilon,3,1.);
 
   return 0;
 

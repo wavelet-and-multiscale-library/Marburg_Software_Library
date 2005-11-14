@@ -207,9 +207,9 @@ int main()
 
   EvaluateFrame<Basis1D,1,1> evalObj;
 
-  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u_epsilon, true, 10);//expand in primal basis
+  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u_epsilon, true, 12);//expand in primal basis
 
-  Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u_epsilon, exactSolution1D, 10);
+  Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u_epsilon, exactSolution1D, 12);
 
   std::ofstream ofs5("approx_sol_steep_1D_out.m");
   matlab_output(ofs5,U);

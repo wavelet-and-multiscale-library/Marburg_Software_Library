@@ -54,7 +54,7 @@ namespace FrameTL
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
     const int j0   = frame_->j0();
-    const int jmax = 7; // for a first quick hack
+    const int jmax = 11; // for a first quick hack
     for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
       {
 	const double coeff = f(lambda)/D(lambda);
@@ -638,7 +638,7 @@ namespace FrameTL
     WaveletTL::support<IBASIS,DIM>(*(frame_->bases()[p]), lambda_c, supp);
 
     // setup Gauss points and weights for a composite quadrature formula:
-    const int N_Gauss = 6;
+    const int N_Gauss = 4;
     const double h = ldexp(1.0, -supp.j); // granularity for the quadrature
     FixedArray1D<Array1D<double>,DIM> gauss_points, gauss_weights, v_values;
     for (unsigned int i = 0; i < DIM; i++) {

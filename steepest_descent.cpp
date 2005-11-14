@@ -2,7 +2,7 @@
 
 #include <cmath>
 #include <set>
-
+#include <utils/plot_tools.h>
 #include <adaptive/apply.h>
 
 using std::set;
@@ -14,7 +14,7 @@ namespace FrameTL
 			      InfiniteVector<double, typename PROBLEM::Index>& u_epsilon)
   {
     unsigned int loops = 0;
-    const int jmax = 7;
+    const int jmax = 11;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
@@ -51,6 +51,12 @@ namespace FrameTL
     cout << "K = " << K << endl;
     cout << "M = " << M << endl;
 
+    map<double,double> log_10_residual_norms;
+    map<double,double> degrees_of_freedom;
+    map<double,double> asymptotic;
+    
+    bool exit = 0;
+
     for (unsigned int i = 1; i < K; i++) {
       //omega_i *= 0.000001;/*beta;*/
       omega_i *= beta;
@@ -58,36 +64,50 @@ namespace FrameTL
       cout << "xi = " << xi_i << endl;
       double nu_i = 0.;
       RES(P, w, xi_i, delta, omega_i/((1+3.*mu)*a_inv), jmax,
-	  tilde_r, nu_i, CDD1);
+	  tilde_r, nu_i, St04a);
       //cout << tilde_r << endl;
       while ( nu_i > omega_i/((1+3.*mu)*a_inv)) {
 	InfiniteVector<double, Index> z_i;
 	cout << "apply tol = " << delta*l2_norm(tilde_r) << endl;
 	//cout << tilde_r << endl;
-	APPLY(P, tilde_r, delta*l2_norm(tilde_r), z_i, jmax, CDD1);
+	//APPLY(P, tilde_r, delta*l2_norm(tilde_r), z_i, jmax, St04a);
 	//cout << z_i << endl;
-	cout << "after apply " << endl; 
-	cout << " norm = " << l2_norm_sqr(tilde_r) << endl;
-	//APPLY_COARSE(P, tilde_r, delta*l2_norm(tilde_r), z_i, 0.000001, jmax, CDD1);
+	APPLY_COARSE(P, tilde_r, delta*l2_norm(tilde_r), z_i, 0.000001, jmax, St04a);
 	w += (l2_norm_sqr(tilde_r)/(z_i*tilde_r))*tilde_r;
-
+	degrees_of_freedom[loops] = w.size();
 
 	cout << "xi = " << xi_i << endl;
 	RES(P, w, xi_i, delta, omega_i/((1+3.*mu)*a_inv), jmax,
-	    tilde_r, nu_i, CDD1);
+	    tilde_r, nu_i, St04a);
 	cout << "loop: " << ++loops << " nu = " << nu_i << endl;
+	asymptotic[log10( (double)w.size() )] = log10(l2_norm_sqr(tilde_r));
+	log_10_residual_norms[loops] = log10(l2_norm_sqr(tilde_r));
 	cout << "active indices: " << w.size() << endl;
-	if (loops==800) {
+	if (loops==500) {
 	  u_epsilon = w;
-	  return;
+	  exit = true;
+	  break;
 	}
       }
+      if (exit)
+	break;
       InfiniteVector<double, Index> tmp;
       w.COARSE(((3.*mu*omega_i)/(1+3.*mu)),tmp);
       w = tmp;
     }
+
+    std::ofstream os1("residual_norms.m");
+    matlab_output(log_10_residual_norms,os1);
+    os1.close();
     
-    //condition number
+    std::ofstream os2("degrees_of_freedom.m");
+    matlab_output(degrees_of_freedom,os2);
+    os2.close();
+
+    std::ofstream os3("asymptotic.m");
+    matlab_output(asymptotic,os3);
+    os3.close();
+    
 
   }
 }

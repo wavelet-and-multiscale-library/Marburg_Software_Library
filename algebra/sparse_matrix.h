@@ -183,6 +183,11 @@ namespace MathTL
 	       const unsigned int tabwidth = 5,
 	       const unsigned int precision = 2) const;
 
+    /*!
+      write matlab sparse matrix format.
+    */
+    void matlab_output (char *file, char *Matrixname, int binary) const;
+
   protected:
     /*!
       storage for the matrix entries,

@@ -3,9 +3,13 @@
 #include <cassert>
 #include <iomanip>
 #include <sstream>
+#include <fstream>
+#include <iostream>
 #include <algorithm>
 #include <algebra/vector.h>
 #include <algebra/matrix.h>
+
+using namespace std;
 
 namespace MathTL
 {
@@ -441,6 +445,110 @@ namespace MathTL
 	os.precision(old_precision);
       }
   }
+
+  template <class C>
+  void SparseMatrix<C>::matlab_output (char *file, char *Matrixname, int binary) const
+  {
+    if (binary)
+      {
+	unsigned int i,j;
+
+	char Filename[200];
+
+	Filename[0] = '\x0';
+
+	strcat(Filename, file);
+	strcat(Filename, ".m");
+
+	std::ofstream m_file(Filename);
+
+
+	Filename[0] = '\x0';
+
+	strcat(Filename, file);
+	strcat(Filename, ".bin");
+
+	std::ofstream bin_file(Filename);
+
+  
+	m_file << "fid_vector=fopen('" << file 
+	       << ".bin', 'r');" << endl
+	       << "n=fread(fid_vector, 1, 'int');" << endl 
+	       << "m=fread(fid_vector, 1, 'int');" << endl
+	       << "l=fread(fid_vector, 1, 'int');" << endl
+	       << "i=fread(fid_vector, l, 'int');" << endl
+	       << "j=fread(fid_vector, l, 'int');" << endl
+	       << "s=fread(fid_vector, l, 'double');" << endl
+	       << Matrixname << "=sparse(i,j,s,n,m);" << endl
+	       << "fclose(fid_vector);" << endl;
+
+	int r=row_dimension(), c=column_dimension(), l=size();
+
+	bin_file.write((char*)(&r), sizeof(int));
+	bin_file.write((char*)(&c), sizeof(int));
+	bin_file.write((char*)(&l), sizeof(int));
+
+	for (i=0; i<row_dimension(); i++)
+	  {
+	    if (indices_[i])
+	      {
+		int ii=i+1;
+	       
+		for (j=1; j<=indices_[i][0]; j++)
+		  bin_file.write((char*)(&ii), sizeof(int));
+	      }
+	  }   
+
+	for (i=0; i<row_dimension(); i++)
+	  {
+	    if (indices_[i])
+	      {               
+		for (j=1; j<=indices_[i][0]; j++)
+		  {
+                    int jj=indices_[i][j]+1;
+                    bin_file.write((char*)(&jj), sizeof(int));
+		  }
+	      }
+	  }   
+
+        for (i=0; i<row_dimension(); i++)
+	  {
+            if (indices_[i])
+	      bin_file.write((char*)(entries_[i]), indices_[i][0]*sizeof(C));
+	  }   
+      }
+  else
+  {
+    unsigned int i;
+	 
+    char *Filename = new char[200];
+    Filename[0] = '\x0';
+	 
+    strcat(Filename, file);
+    strcat(Filename, ".m");
+	 
+    std::ofstream s;
+    s.open(Filename);
+	 
+    delete[] Filename;
+	 
+	 
+    s.setf(ios_base::scientific, ios_base::fixed);
+    s.precision(12);
+	 
+    s << Matrixname << "=sparse(" << row_dimension() << "," << column_dimension() << ");" << endl;
+	
+    for (i=0; i<row_dimension(); i++) {
+      if (indices_[i]) {
+	for (size_type k(1); k <= indices_[i][0]; k++) {
+	  s << Matrixname << "(" << i+1 << "," << indices_[i][k]+1 << ")="
+	    << entries_[i][k-1] << ";" << endl;
+	}
+      }
+    }   
+  }
+}
+  
 
   template <class C>
   SparseMatrix<C> operator - (const SparseMatrix<C>& M, const SparseMatrix<C>& N)

@@ -142,18 +142,18 @@ namespace MathTL
     d_ds_d_dt_kappa_r.resize(2);
     d_dt_d_ds_kappa_r.resize(2);
 
-    d_ds_d_dt_kappa_r(0) = b_00(0) - b_01(0) - b_10(0) + b_11(0);
-    d_ds_d_dt_kappa_r(1) = b_00(1) - b_01(1) - b_10(1) + b_11(1);
+    d_ds_d_dt_kappa_r[0] = b_00[0] - b_01[0] - b_10[0] + b_11[0];
+    d_ds_d_dt_kappa_r[1] = b_00[1] - b_01[1] - b_10[1] + b_11[1];
     d_dt_d_ds_kappa_r = d_ds_d_dt_kappa_r;
 	
     min_b00_plus_b10.resize(2);
     min_b00_plus_b01.resize(2);
 
-    min_b00_plus_b10(0) = b_10(0) - b_00(0);
-    min_b00_plus_b10(1) = b_10(1) - b_00(1);
+    min_b00_plus_b10[0] = b_10[0] - b_00[0];
+    min_b00_plus_b10[1] = b_10[1] - b_00[1];
 	
-    min_b00_plus_b01(0) = b_01(0) - b_00(0);
-    min_b00_plus_b01(1) = b_01(1) - b_00(1);
+    min_b00_plus_b01[0] = b_01[0] - b_00[0];
+    min_b00_plus_b01[1] = b_01[1] - b_00[1];
 	
     rot_angle = 0;
 	
@@ -173,26 +173,26 @@ namespace MathTL
     //setup the generic quadrangle belonging to the parametrized patch,
     //we do this once and for all to be able to invert the bezier mapping
 	
-    b_gen_00(0) = 0;
-    b_gen_00(0) = 0;
+    b_gen_00[0] = 0;
+    b_gen_00[0] = 0;
 
-    b_gen_01(0)  = b_01(0) - b_00(0);
-    b_gen_01(1)  = b_01(1) - b_00(1);
+    b_gen_01[0]  = b_01[0] - b_00[0];
+    b_gen_01[1]  = b_01[1] - b_00[1];
 
-    b_gen_10(0)  = b_10(0) - b_00(0);
-    b_gen_10(1)  = b_10(1) - b_00(1);
+    b_gen_10[0]  = b_10[0] - b_00[0];
+    b_gen_10[1]  = b_10[1] - b_00[1];
 	
-    b_gen_11(0)  = b_11(0) - b_00(0);
-    b_gen_11(1)  = b_11(1) - b_00(1);
+    b_gen_11[0]  = b_11[0] - b_00[0];
+    b_gen_11[1]  = b_11[1] - b_00[1];
 
     //rotate the coordinate system in such a way that b_01 lies ion the second axis.
     Matrix<double> R(2,2);
 
     //rotate the whole quadrangle
-    if (! (b_gen_01(0) == 0.0) )
+    if (! (b_gen_01[0] == 0.0) )
       {
 	//rotation angle
-	rot_angle = atan(b_gen_01(0) / b_gen_01(1));
+	rot_angle = atan(b_gen_01[0] / b_gen_01[1]);
 	//cout << "rot_angle = " << rot_angle << endl;
 
 	cos_rot_angle = cos(rot_angle);
@@ -217,28 +217,28 @@ namespace MathTL
       }
 
     //rescale the second coordinate by 1/b_01(2) ==> b_01 = (0,1)^T
-    if ( b_gen_01(1) != 0)
+    if ( b_gen_01[1] != 0)
       {
-	scaleY = 1.0 / b_gen_01(1);
-	b_gen_00(1) *= scaleY;
-	b_gen_01(1) *= scaleY;
-	b_gen_10(1) *= scaleY;
-	b_gen_11(1) *= scaleY;	
+	scaleY = 1.0 / b_gen_01[1];
+	b_gen_00[1] *= scaleY;
+	b_gen_01[1] *= scaleY;
+	b_gen_10[1] *= scaleY;
+	b_gen_11[1] *= scaleY;	
       }
     //rescale the first coordinate by 1/b_10(1) ==> b_10(1) = 1
-    if ( b_gen_10(0) != 0)
+    if ( b_gen_10[0] != 0)
       {
-	scaleX = 1.0 / b_gen_10(0);
-	b_gen_00(0) *= scaleX;
-	b_gen_01(0) *= scaleX;
-	b_gen_10(0) *= scaleX;
-	b_gen_11(0) *= scaleX;
+	scaleX = 1.0 / b_gen_10[0];
+	b_gen_00[0] *= scaleX;
+	b_gen_01[0] *= scaleX;
+	b_gen_10[0] *= scaleX;
+	b_gen_11[0] *= scaleX;
       }
   
     //finally apply a shearing so that b_10 = (1,0)^T
-    if ( b_gen_10(1) != 0)
+    if ( b_gen_10[1] != 0)
       {
-	shearing_param = -b_gen_10(1);
+	shearing_param = -b_gen_10[1];
 	R(0,0) = 1;
 	R(0,1) = 0;
 	R(1,0) = shearing_param;
@@ -298,26 +298,26 @@ namespace MathTL
   inline
   void LinearBezierMapping::map_point(const Point<2>& pc, Point<2>& pp) const
   {    
-    double t1 = 1-pc(0);
-    double t2 = 1-pc(1);
+    double t1 = 1-pc[0];
+    double t2 = 1-pc[1];
     double t3 = t1*t2;
-    double t4 = pc(0)*t2;
-    double t5 = t1*pc(1);
-    t1 = pc(0)*pc(1);
+    double t4 = pc[0]*t2;
+    double t5 = t1*pc[1];
+    t1 = pc[0]*pc[1];
 	
-    pp(0)= t3*b_00(0) + t4*b_10(0) +  t5*b_01(0) + t1*b_11(0);
-    pp(1)= t3*b_00(1) + t4*b_10(1) +  t5*b_01(1) + t1*b_11(1);
+    pp[0]= t3*b_00[0] + t4*b_10[0] +  t5*b_01[0] + t1*b_11[0];
+    pp[1]= t3*b_00[1] + t4*b_10[1] +  t5*b_01[1] + t1*b_11[1];
   }
 
   inline
   void LinearBezierMapping::map_point_inv(const Point<2>& pp, Point<2>& pc) const
   {
-    pc(0) = pp(0);
-    pc(1) = pp(1);
+    pc[0] = pp[0];
+    pc[1] = pp[1];
     
     //shift the quadrangle so that b_00 lies in the origin.
-    pc(0) -= b_00(0);
-    pc(1) -= b_00(1);
+    pc[0] -= b_00[0];
+    pc[1] -= b_00[1];
 
     //rotate the coordinate system in such a way that b_01 lies ion the second axis
     Matrix<double> R(2,2);
@@ -332,10 +332,10 @@ namespace MathTL
     pc = tmpP;
 
     //rescale the second coordinate by 1/b_01(2) ==> b_01 = (0,1)^T
-    pc(1) *= scaleY;
+    pc[1] *= scaleY;
     
     //rescale the first coordinate by 1/b_10(1) ==> b_10(1) = 1
-    pc(0) *= scaleX;
+    pc[0] *= scaleX;
 	
     //finally apply a shearing so that b_10 = (1,0)^T
     R(0,0) = 1;
@@ -346,10 +346,10 @@ namespace MathTL
     R.apply(pc,tmpP);
     pc = tmpP;
 
-    if (0 == pc(0) && 0 == pc(1)) {
+    if (0 == pc[0] && 0 == pc[1]) {
 
-      pc(0) = 0;
-      pc(1) = 0;
+      pc[0] = 0;
+      pc[1] = 0;
       return;
     }
     double s = 0, t = 0;
@@ -361,7 +361,7 @@ namespace MathTL
     //the role of the variables has to reversed
    
     bool swapped_var = 0;
-    if (! (0 == pp(0)) )
+    if (! (0 == pp[0]) )
       {
 	i=0;
 	j=1;
@@ -374,46 +374,46 @@ namespace MathTL
 	j = 0;
 	//cout << "swapping coordinates in inverse linear bezier mapping" << endl;
 	//swap coordinates
-	tmp = pc(0);
-	pc(0) = pc(1);
-	pc(1)= tmp;
+	tmp = pc[0];
+	pc[0] = pc[1];
+	pc[1]= tmp;
       }
-    double h1 = 1 + pc(0)*(b_gen_11(j)-1);
-    double h2 = b_gen_11(i) - 1;
-    double h3 = h1 / h2 - pc(1);
+    double h1 = 1 + pc[0]*(b_gen_11[j]-1);
+    double h2 = b_gen_11[i] - 1;
+    double h3 = h1 / h2 - pc[1];
     double h4  = h3 * h3;
 		
-    if (b_gen_11(i) == 1)
+    if (b_gen_11[i] == 1)
       {
-	t = pc(1) / h1;
+	t = pc[1] / h1;
 	//s = xcube / (1 - t + t*bgen_11[i]);
-	s = pc(0) / (1 + t * h2);
+	s = pc[0] / (1 + t * h2);
 	
 	if (swapped_var) {
-	  pc(0) = t;
-	  pc(1) = s;
+	  pc[0] = t;
+	  pc[1] = s;
 	}
 	else {
-	  pc(0) = s;
-	  pc(1) = t;
+	  pc[0] = s;
+	  pc[1] = t;
 	}
 	return;
       }
 	
-    if (b_gen_11(i) > 1)
-      t = -0.5 * h3 + sqrt(0.25 * h4 + pc(1)/h2);
+    if (b_gen_11[i] > 1)
+      t = -0.5 * h3 + sqrt(0.25 * h4 + pc[1]/h2);
     else
-      t = -0.5 * h3 - sqrt(0.25 * h4 + pc(1)/h2);
+      t = -0.5 * h3 - sqrt(0.25 * h4 + pc[1]/h2);
 
-    s = pc(0) / (1 + t * h2);
+    s = pc[0] / (1 + t * h2);
 
     if (swapped_var) {
-      pc(0) = t;
-      pc(1) = s;
+      pc[0] = t;
+      pc[1] = s;
     }
     else {
-      pc(0) = s;
-      pc(1) = t;
+      pc[0] = s;
+      pc[1] = t;
     }
   }
 
@@ -472,14 +472,26 @@ namespace MathTL
   const double LinearBezierMapping::Dkappa_inv(const unsigned int i, const unsigned int j,
 					       const Point<2>& x) const
   {
-    if (i==0 && j==0)
+
+    switch ((i << 1) + j) {
+    case 0: // i == 0 && j == 0
       return partial_i_Kappa_j(1,1,x)/det_DKappa(x);
-    if (i==0 && j==1)
-     return -partial_i_Kappa_j(1,0,x)/det_DKappa(x);
-    if (i==1 && j==0)
-     return -partial_i_Kappa_j(0,1,x)/det_DKappa(x);
-    if (i==1 && j==1)
+    case 1: // i == 0 && j == 1
+      return -partial_i_Kappa_j(1,0,x)/det_DKappa(x);
+    case 2: // i == 1 && j == 0
+      return -partial_i_Kappa_j(0,1,x)/det_DKappa(x);
+    case 3: // i == 1 && j == 1
       return partial_i_Kappa_j(0,0,x)/det_DKappa(x);
+    }
+
+//     if (i==0 && j==0)
+//       return partial_i_Kappa_j(1,1,x)/det_DKappa(x);
+//     if (i==0 && j==1)
+//      return -partial_i_Kappa_j(1,0,x)/det_DKappa(x);
+//     if (i==1 && j==0)
+//      return -partial_i_Kappa_j(0,1,x)/det_DKappa(x);
+//     if (i==1 && j==1)
+//       return partial_i_Kappa_j(0,0,x)/det_DKappa(x);
 
     //dummy
     return 0;

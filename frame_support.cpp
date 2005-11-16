@@ -5,6 +5,7 @@
 #include <typeinfo>
 #include <cube/cube_support.h>
 #include <map>
+#include <time.h>
 
 using namespace WaveletTL;
 
@@ -37,6 +38,7 @@ namespace FrameTL
   /*!
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  inline
   bool in_support(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 		  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 		  const Point<DIM_m>& p)
@@ -110,6 +112,7 @@ namespace FrameTL
   /*!
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  inline
   bool in_support(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 		  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 		  typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda,
@@ -193,6 +196,7 @@ namespace FrameTL
   }
 
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  inline
   bool
   intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 		     const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
@@ -377,6 +381,7 @@ namespace FrameTL
   }
  
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  inline
   bool intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu,
@@ -573,6 +578,7 @@ namespace FrameTL
   }
 
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  inline
   bool intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu,
@@ -686,13 +692,18 @@ namespace FrameTL
     return true;
   }
 
+  static double time;
 
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  inline
   void intersecting_wavelets (const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 			      const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 			      const int j, const bool generators,
 			      std::list<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& intersecting)
   {
+//     clock_t tstart, tend;
+//     tstart = clock();
+
     intersecting.erase(intersecting.begin(),intersecting.end());
 
     typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> Frame;
@@ -787,11 +798,15 @@ namespace FrameTL
 //       cout << *it << endl;
 //     }
 //     cout << "###############" << endl;
+//      tend = clock();
+//      time += (double)(tend-tstart)/CLOCKS_PER_SEC;
+//     cout << "  ... done, time needed: " << time << " seconds" << endl;
 
 
   }
   
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  inline
   bool intersect_singular_support(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 				  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 				  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu)
@@ -825,7 +840,8 @@ namespace FrameTL
   }
 
   template <unsigned int DIM>
-  inline int edgesIntersect (const Point<DIM>& A, const Point<DIM>& B,
+  inline
+  int edgesIntersect (const Point<DIM>& A, const Point<DIM>& B,
 			      const Point<DIM>& C, const Point<DIM>& D) {
     
     // so far only the 2D case is implemented

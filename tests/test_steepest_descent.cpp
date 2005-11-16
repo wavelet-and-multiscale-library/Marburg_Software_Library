@@ -93,7 +93,7 @@ int main()
   
   const int DIM = 1;
 
-  typedef DSBasis<2,2> Basis1D;
+  typedef DSBasis<2,4> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;

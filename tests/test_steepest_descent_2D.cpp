@@ -158,8 +158,8 @@ int main()
   EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
 
-  discrete_poisson.set_norm_A(10.);
-  discrete_poisson.set_Ainv(10.);
+  discrete_poisson.set_norm_A(21.);
+  discrete_poisson.set_Ainv(1.0/0.096084);
 
   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 10.0, 0.5);
 

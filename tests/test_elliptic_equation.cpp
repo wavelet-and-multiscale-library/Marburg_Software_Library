@@ -79,10 +79,10 @@ int main()
  
   //##############################
   Array1D<Chart<DIM,DIM>* > charts(2);
-  //charts[0] = &bezierP;
-  charts[0] = &affineP;
-  //charts[1] = &bezierP2;
-  charts[1] = &affineP2;
+  charts[0] = &bezierP;
+  //charts[0] = &affineP;
+  charts[1] = &bezierP2;
+  //charts[1] = &affineP2;
  
   SymmetricMatrix<bool> adj(2);
   adj(0,0) = 1;
@@ -151,8 +151,8 @@ int main()
   PoissonBVP<DIM> poisson(&singRhs);
   //PoissonBVP<DIM> poisson(&const_fun);
 
-  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
-  //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
+  //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
+  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
   
   double tmp = 0.0;
   int c = 0;
@@ -221,7 +221,7 @@ int main()
 
   set<Index> Lambda;
   for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
-       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, frame.j0()+1); ++lambda)
+       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, frame.j0()); ++lambda)
     Lambda.insert(lambda);
   
   cout << "setting up full right hand side..." << endl;
@@ -241,6 +241,8 @@ int main()
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
+
+  stiff.matlab_output("stiff_2D_out", "stiff",1);
   
   unsigned int iter= 0;
   Vector<double> x(Lambda.size()); x = 1;

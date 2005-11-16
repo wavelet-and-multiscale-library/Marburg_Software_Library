@@ -14,7 +14,7 @@ namespace FrameTL
 			      InfiniteVector<double, typename PROBLEM::Index>& u_epsilon)
   {
     unsigned int loops = 0;
-    const int jmax = 11;
+    const int jmax = 3;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
@@ -83,7 +83,7 @@ namespace FrameTL
 	asymptotic[log10( (double)w.size() )] = log10(l2_norm_sqr(tilde_r));
 	log_10_residual_norms[loops] = log10(l2_norm_sqr(tilde_r));
 	cout << "active indices: " << w.size() << endl;
-	if (loops==500) {
+	if (loops==2000) {
 	  u_epsilon = w;
 	  exit = true;
 	  break;
@@ -91,9 +91,9 @@ namespace FrameTL
       }
       if (exit)
 	break;
-      InfiniteVector<double, Index> tmp;
-      w.COARSE(((3.*mu*omega_i)/(1+3.*mu)),tmp);
-      w = tmp;
+//       InfiniteVector<double, Index> tmp;
+//       w.COARSE(((3.*mu*omega_i)/(1+3.*mu)),tmp);
+//       w = tmp;
     }
 
     std::ofstream os1("residual_norms.m");

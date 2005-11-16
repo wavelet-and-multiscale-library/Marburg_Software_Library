@@ -24,7 +24,8 @@ namespace FrameTL
   double 
   EllipticEquation<IBASIS,DIM>::D(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda) const
   {
-    return ldexp(1.0,lambda.j());
+    //return ldexp(1.0,lambda.j());
+    return 1 << lambda.j();
   }
 
   template <class IBASIS, unsigned int DIM>
@@ -54,7 +55,7 @@ namespace FrameTL
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
     const int j0   = frame_->j0();
-    const int jmax = 11; // for a first quick hack
+    const int jmax = 3; // for a first quick hack
     for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
       {
 	const double coeff = f(lambda)/D(lambda);
@@ -106,7 +107,8 @@ namespace FrameTL
 
     const int N_Gauss = q_order;
     //cout << "N_Gauss = " << N_Gauss << endl;
-    const double h = ldexp(1.0, -supp_intersect.j); // granularity for the quadrature
+    //const double h = ldexp(1.0, -supp_intersect.j); // granularity for the quadrature
+    const double h = 1.0 / (1 << supp_intersect.j);
     //cout << "h=" << h << endl;
     FixedArray1D<Array1D<double>,DIM> gauss_points, gauss_weights,
       wav_values_lambda, wav_der_values_lambda, wav_values_mu, wav_der_values_mu;
@@ -439,8 +441,9 @@ namespace FrameTL
 
     case Composite: {
       
-      const double h = ldexp(1.0, -std::max(supp_lambda.j,supp_mu.j));// granularity for the quadrature
-      const int N = 3;
+      //const double h = ldexp(1.0, -std::max(supp_lambda.j,supp_mu.j));// granularity for the quadrature
+      const double h = 1.0 / (1 << std::max(supp_lambda.j,supp_mu.j));// granularity for the quadrature
+      const int N = 2;
       
       for (unsigned int i = 0; i < DIM; i++) {
 	gauss_points[i].resize(N * N_Gauss*(supp_lambda.b[i]-supp_lambda.a[i]));
@@ -638,8 +641,9 @@ namespace FrameTL
     WaveletTL::support<IBASIS,DIM>(*(frame_->bases()[p]), lambda_c, supp);
 
     // setup Gauss points and weights for a composite quadrature formula:
-    const int N_Gauss = 4;
-    const double h = ldexp(1.0, -supp.j); // granularity for the quadrature
+    const int N_Gauss = 6;
+    //const double h = ldexp(1.0, -supp.j); // granularity for the quadrature
+    const double h = 1.0 / (1 << supp.j); // granularity for the quadrature
     FixedArray1D<Array1D<double>,DIM> gauss_points, gauss_weights, v_values;
     for (unsigned int i = 0; i < DIM; i++) {
       gauss_points[i].resize(N_Gauss*(supp.b[i]-supp.a[i]));

@@ -16,8 +16,8 @@ namespace WaveletTL
 
   template <class PROBLEM>
   double
-  CachedProblem<PROBLEM>::a(const typename WaveletBasis::Index& lambda,
-			    const typename WaveletBasis::Index& nu) const
+  CachedProblem<PROBLEM>::a(const Index& lambda,
+			    const Index& nu) const
   {
     // first check whether the lambda-th column already exists in the cache
     typename ColumnCache::iterator col_lb(entries_cache.lower_bound(lambda));
@@ -155,7 +155,6 @@ namespace WaveletTL
     if (normA == 0.0) {
       cout << "CachedProblem()::norm_A() called..." << endl;
 
-      typedef typename PROBLEM::WaveletBasis::Index Index;
       std::set<Index> Lambda;
       const int j0 = problem->basis().j0();
       const int jmax = j0+1;
@@ -184,7 +183,6 @@ namespace WaveletTL
     if (normAinv == 0.0) {
       cout << "CachedProblem()::norm_Ainv() called..." << endl;
 
-      typedef typename WaveletBasis::Index Index;
       std::set<Index> Lambda;
       const int j0 = problem->basis().j0();
       const int jmax = j0+1;

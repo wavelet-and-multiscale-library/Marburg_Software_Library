@@ -98,12 +98,12 @@ namespace WaveletTL
     /*!
       evaluate the diagonal preconditioner D
     */
-    double D(const typename WBASIS::Index& lambda) const;
+    double D(const Index& lambda) const;
 
     /*!
       rescale a coefficient vector by an integer power of D, c |-> D^{n}c
     */
-    void rescale(InfiniteVector<double, typename WBASIS::Index>& coeffs, const int n) const;
+    void rescale(InfiniteVector<double,Index>& coeffs, const int n) const;
 
     /*!
       evaluate the (unpreconditioned) bilinear form a;
@@ -113,8 +113,8 @@ namespace WaveletTL
       to the singular supports of the spline wavelets involved,
       so that m = (p+1)/2;
     */
-    double a(const typename WBASIS::Index& lambda,
-	     const typename WBASIS::Index& nu,
+    double a(const Index& lambda,
+	     const Index& nu,
 	     const unsigned int p = 4) const;
 
     /*!
@@ -145,13 +145,13 @@ namespace WaveletTL
     /*!
       evaluate the (unpreconditioned) right-hand side f
     */
-    double f(const typename WBASIS::Index& lambda) const;
+    double f(const Index& lambda) const;
 
     /*!
       approximate the wavelet coefficient set of the preconditioned right-hand side F
       within a prescribed \ell_2 error tolerance
     */
-    void RHS(const double eta, InfiniteVector<double, typename WBASIS::Index>& coeffs) const;
+    void RHS(const double eta, InfiniteVector<double,Index>& coeffs) const;
 
     /*!
       compute (or estimate) ||F||_2
@@ -163,7 +163,7 @@ namespace WaveletTL
     WBASIS basis_;
 
     // right-hand side coefficients on a fine level, sorted by modulus
-    Array1D<std::pair<typename WBASIS::Index,double> > fcoeffs;
+    Array1D<std::pair<Index,double> > fcoeffs;
 
     // (squared) \ell_2 norm of the precomputed right-hand side
     double fnorm_sqr;

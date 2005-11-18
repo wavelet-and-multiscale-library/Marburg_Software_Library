@@ -10,6 +10,7 @@
 #include <interval/i_index.h>
 #include <interval/ds_basis.h>
 #include <galerkin/sturm_equation.h>
+#include <galerkin/cached_problem.h>
 
 #include <adaptive/cdd2.h>
 
@@ -85,13 +86,14 @@ int main()
   typedef Basis::Index Index;
 
   SturmEquation<Basis> problem(T);
+  CachedProblem<SturmEquation<Basis> > cproblem(&problem);
 
   InfiniteVector<double, Index> F_eta;
-  problem.RHS(1e-6, F_eta);
-  const double nu = problem.norm_Ainv() * l2_norm(F_eta);
+  cproblem.RHS(1e-6, F_eta);
+  const double nu = cproblem.norm_Ainv() * l2_norm(F_eta);
 
   InfiniteVector<double, Index> u_epsilon;
-  CDD2_SOLVE(problem, nu, 1e-1, u_epsilon);
+  CDD2_SOLVE(cproblem, nu, 1e-1, u_epsilon);
   
   return 0;
 }

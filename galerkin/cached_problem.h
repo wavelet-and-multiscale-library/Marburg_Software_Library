@@ -4,7 +4,7 @@
 // | This file is part of WaveletTL - the Wavelet Template Library      |
 // |                                                                    |
 // | Copyright (c) 2002-2005                                            |
-// | Thorsten Raasch                                                    |
+// | Thorsten Raasch, Manuel Werner                                     |
 // +--------------------------------------------------------------------+
 
 #ifndef _WAVELETTL_CACHED_PROBLEM_H
@@ -12,6 +12,7 @@
 
 #include <map>
 #include <algebra/infinite_vector.h>
+#include <adaptive/compression.h>
 
 using MathTL::InfiniteVector;
 
@@ -53,8 +54,8 @@ namespace WaveletTL
       /*!
 	wavelet index class
       */
-      typedef typename WaveletBasis::Index Index;
-
+      typedef typename PROBLEM::Index Index;
+      
       /*!
 	read access to the basis
       */
@@ -78,14 +79,14 @@ namespace WaveletTL
       /*!
 	evaluate the diagonal preconditioner D
       */
-      double D(const typename WaveletBasis::Index& lambda) const {
+      double D(const Index& lambda) const {
 	return problem->D(lambda);
       }
       
       /*!
 	rescale a coefficient vector by an integer power of D, c |-> D^{n}c
       */
-      void rescale(InfiniteVector<double,typename WaveletBasis::Index>& coeffs,
+      void rescale(InfiniteVector<double,Index>& coeffs,
 		   const int n) const {
 	problem->rescale(coeffs, n);
       }
@@ -94,8 +95,8 @@ namespace WaveletTL
 	evaluate the (unpreconditioned) bilinear form a
 	(cached)
       */
-      double a(const typename WaveletBasis::Index& lambda,
-	       const typename WaveletBasis::Index& nu) const;
+      double a(const Index& lambda,
+	       const Index& nu) const;
 
       /*!
 	estimate the spectral norm ||A||
@@ -126,7 +127,7 @@ namespace WaveletTL
       /*!
 	evaluate the (unpreconditioned) right-hand side f
       */
-      double f(const typename WaveletBasis::Index& lambda) const {
+      double f(const Index& lambda) const {
 	return problem->f(lambda);
       }
 
@@ -135,7 +136,7 @@ namespace WaveletTL
 	within a prescribed \ell_2 error tolerance
       */
       void RHS(const double eta,
-	       InfiniteVector<double,typename WaveletBasis::Index>& coeffs) const {
+	       InfiniteVector<double, Index>& coeffs) const {
 	problem->RHS(eta, coeffs);
       }
       
@@ -145,7 +146,7 @@ namespace WaveletTL
       double F_norm() const { return problem->F_norm(); }
       
       /*!
-	w += factor * (stiffness matrix entries of in column lambda on level j)
+	w += factor * (stiffness matrix entries in column lambda on level j)
       */
       void add_level (const Index& lambda,
 		      InfiniteVector<double, Index>& w, const int j,
@@ -158,18 +159,18 @@ namespace WaveletTL
       const PROBLEM* problem;
 
       // type of one column in the entry cache of A
-      typedef std::map<typename WaveletBasis::Index, double> Column;
+      typedef std::map<Index, double> Column;
       
       // type of the entry cache of A
-      typedef std::map<typename WaveletBasis::Index, Column> ColumnCache;
+      typedef std::map<Index, Column> ColumnCache;
       
       // entries cache for A (mutable to overcome the constness of add_column())
       mutable ColumnCache entries_cache;
 
       // Index cache for compression strategy
-      typedef map<int, std::list<typename WaveletBasis::Index> > IndexCache;
+      typedef map<int, std::list<Index> > IndexCache;
 
-      typedef map<typename WaveletBasis::Index, IndexCache> StructureCache;
+      typedef map<Index, IndexCache> StructureCache;
 
       // levelwise Index cache for each stiffness matrix column
       mutable StructureCache stiffStructure;

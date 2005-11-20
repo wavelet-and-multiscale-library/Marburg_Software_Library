@@ -28,6 +28,15 @@ namespace WaveletTL
   double integrate(const Function<1>* f,
 		   const DSBasis<d,dT>& basis,
 		   const typename DSBasis<d,dT>::Index& lambda);
+
+  /*!
+    helper function, integrate two primal DS generators or wavelets
+    against each other (for the Gramian)
+  */
+  template <int d, int dT>
+  double integrate(const DSBasis<d,dT>& basis,
+		   const typename DSBasis<d,dT>::Index& lambda,
+		   const typename DSBasis<d,dT>::Index& mu);
   
   /*!
     For a given function, compute all integrals w.r.t. the primal

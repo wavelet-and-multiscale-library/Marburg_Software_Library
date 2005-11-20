@@ -93,5 +93,18 @@ int main()
   SampledMapping<1> shat(Grid<1>(0.0, 1.0, 10), hat);
   shat.matlab_output(cout);
   
+  InfiniteVector<double,Index> dual_coeffs;
+  expand(&hat, basis, false, j0, dual_coeffs);
+  cout << "- (approx.) expansion coefficients of the hat function in the primal basis:" << endl
+       << dual_coeffs;
+  
+  cout << "- pointwise error:" << endl;
+  SampledMapping<1> s3(evaluate(basis, dual_coeffs, true, 5));
+  error.resize(s3.points().size());
+  for (unsigned int i = 0; i < error.size(); i++)
+    error[i] = fabs(s3.values()[i]-hat.value(Point<1>(s3.points()[i])));
+  cout << error << endl;
+  cout << "(max. error: " << linfty_norm(error) << ")" << endl;
+
   return 0;
 }

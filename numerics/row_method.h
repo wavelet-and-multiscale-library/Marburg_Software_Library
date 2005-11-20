@@ -17,8 +17,9 @@
 namespace MathTL
 {
   /*!
-    The following class is an abstract base for an s-stage Rosenbrock-Wanner method
-    (ROW-method) for the numerical solution of (abstract)
+    The following class is an abstract base for an s-stage
+    Rosenbrock-Wanner (ROW-) method
+    for the numerical solution of (abstract)
     nonautonomous initial value problems of the form
 
       u'(t) = F(t, u(t)), u(0) = u_0.

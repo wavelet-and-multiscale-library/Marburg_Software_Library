@@ -185,7 +185,7 @@ namespace MathTL
     const unsigned int stages = A.row_dimension(); // for readability
 
     Array1D<VECTOR> u(stages);
-    u[0] = u_m; u[0] = 0; // ensures correct size
+    u[0] = u_m; u[0].scale(0.0); // ensures correct size
     for (unsigned int i = 1; i < stages; i++)
       u[i] = u[0];
 
@@ -220,7 +220,7 @@ namespace MathTL
       u_mplus1.add(m[i], u[i]);
     
     // error estimate
-    error_estimate = u_m; error_estimate = 0; // ensures correct size
+    error_estimate = u_m; error_estimate.scale(0.0); // ensures correct size
     for (unsigned int i = 0; i < stages; i++)
       error_estimate.add(e[i], u[i]);
   }

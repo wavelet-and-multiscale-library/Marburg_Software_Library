@@ -12,6 +12,8 @@
 
 #include <algebra/triangular_matrix.h>
 #include <algebra/vector.h>
+#include <numerics/ivp.h>
+#include <numerics/one_step_scheme.h>
 
 namespace MathTL
 {

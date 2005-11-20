@@ -111,7 +111,7 @@ int main()
 		2).matlab_output(cout);
 #endif
 
-#if 0
+#if 1
   cout << "- calculating moments of a CDF<2> function:" << endl;
   for (unsigned int n(0); n <= 9; n++)
     {

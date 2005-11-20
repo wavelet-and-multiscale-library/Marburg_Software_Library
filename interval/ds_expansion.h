@@ -1,0 +1,51 @@
+// -*- c++ -*-
+
+// +--------------------------------------------------------------------+
+// | This file is part of WaveletTL - the Wavelet Template Library      |
+// |                                                                    |
+// | Copyright (c) 2002-2005                                            |
+// | Thorsten Raasch                                                    |
+// +--------------------------------------------------------------------+
+
+#ifndef _WAVELETTL_DS_EXPANSION_H
+#define _WAVELETTL_DS_EXPANSION_H
+
+#include <algebra/infinite_vector.h>
+#include <interval/ds_basis.h>
+
+using MathTL::SampledMapping;
+using MathTL::InfiniteVector;
+
+namespace WaveletTL
+{
+  template <int d, int dT> class DSBasis;
+
+  /*!
+    helper function, integrate a smooth function f against a
+    primal DS generator or wavelet
+  */
+  template <int d, int dT>
+  double integrate(const Function<1>* f,
+		   const DSBasis<d,dT>& basis,
+		   const typename DSBasis<d,dT>::Index& lambda);
+  
+  /*!
+    For a given function, compute all integrals w.r.t. the primal
+    or dual generators/wavelets \psi_\lambda with |\lambda|\le jmax.
+    When integrating against the primal functions, the integrand has to be smooth
+    to be accurately reproduced by the dual basis.
+    For integration against dual functions, we integrate against the primal ones
+    instead and multiply the coefficients with the inverse of the primal gramian.
+  */
+  template <int d, int dT>
+  void
+  expand(const Function<1>* f,
+	 const DSBasis<d,dT>& basis,
+	 const bool primal,
+	 const int jmax,
+	 InfiniteVector<double, typename DSBasis<d,dT>::Index>& coeffs);
+}
+
+#include <interval/ds_expansion.cpp>
+
+#endif

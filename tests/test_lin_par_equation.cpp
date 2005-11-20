@@ -11,6 +11,7 @@
 
 #include <interval/i_index.h>
 #include <interval/ds_basis.h>
+#include <interval/ds_expansion.h>
 #include <galerkin/sturm_equation.h>
 #include <galerkin/cached_problem.h>
 #include <parabolic/lin_par_equation.h>
@@ -90,14 +91,32 @@ public:
   bool bc_right() const { return true; }
 };
 
+class Hat
+  : public Function<1>
+{
+  public:
+  inline double value(const Point<1>& p,
+		      const unsigned int component = 0) const
+  {
+    return std::max(0.0,0.5-abs(p[0]-0.5));
+  }
+  
+  void vector_value(const Point<1> &p,
+		    Vector<double>& values) const
+  {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
 int main()
 {
   cout << "Testing linear parabolic equations..." << endl;
 
   TestProblem<0> T;
   
-  const int d  = 2;
-  const int dT = 2;
+  const int d  = 3;
+  const int dT = 3;
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
   typedef SturmEquation<Basis> EllipticEquation;
@@ -105,35 +124,43 @@ int main()
 
   EllipticEquation elliptic(T);
 //   CachedProblem<EllipticEquation> celliptic(&elliptic);
-  CachedProblem<EllipticEquation> celliptic(&elliptic, 12.2508, 6.41001); // d=2, dT=2
+//   CachedProblem<EllipticEquation> celliptic(&elliptic, 12.2508, 6.41001); // d=2, dT=2
+  CachedProblem<SturmEquation<Basis> > celliptic(&elliptic, 6.73618, 45.5762); // d=3, dT=3
 
+  Hat hat;
   V u0;
-  u0.set_coefficient(Index(3,0,4, &celliptic.basis()), 1.0); // an inner hat fct.
+  expand(&hat, celliptic.basis(), false, celliptic.basis().j0()+2, u0);
+  u0.compress(1e-14);
+  cout << "* expansion coefficients of hat function u0=" << endl << u0;
 
   LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0);
   
   cout << "* testing ROS2:" << endl;
   ROWMethod<V> ros2(WMethod<V>::ROS2);
-//   scheme = &ros2;
-//   olderr = 0;
+  OneStepScheme<V>* scheme = &ros2;
+  V temp, result, error_estimate;
+  double err, olderr = 0;
+
+  olderr = 0;
 //   for (int expo = 0; expo <= 6; expo++) {
-//     temp = problem.u0;
-//     int N = 1<<expo;
-//     double h = 1.0/N;
-//     double err_est = 0;
-//     for (int i = 1; i <= N; i++) {
-//       scheme->increment(&problem, i*h, temp, h, result, error_estimate);
-//       err_est = std::max(err_est, l2_norm(error_estimate));
-//       temp = result;
-//     }
+  for (int expo = 2; expo <= 2; expo++) {
+    temp = parabolic.u0;
+    
+    int N = 1<<expo;
+    double h = 1.0/N;
+    double err_est = 0;
+    for (int i = 1; i <= N; i++) {
+      cout << "---------------- before increment() -----------------------" << endl;
+      scheme->increment(&parabolic, i*h, temp, h, result, error_estimate, 1e-1);
+      cout << "---------------- after increment() -----------------------" << endl;
+      err_est = std::max(err_est, l2_norm(error_estimate));
+      temp = result;
+    }
 //     err = fabs(result[0] - problem.exact_solution(1.0));
 //     if (expo > 0) {
-//       cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
-// 	   << ", max. of local error estimate " << err_est << endl;
+    cout << "h=" << h << ", max. of local error estimate " << err_est << endl;
 //     }
 //     olderr = err;
-//   }
-
-
+  }
   return 0;
 }

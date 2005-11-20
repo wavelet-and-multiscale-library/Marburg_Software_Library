@@ -46,6 +46,9 @@ namespace WaveletTL
     - When integration against dual functions is specified,
       we integrate against the primal ones instead and multiply the resulting
       coefficients with the inverse of the primal gramian.
+
+    Maybe a thresholding of the returned coefficients is helpful (e.g. for
+    expansions of spline functions).
   */
   template <int d, int dT>
   void

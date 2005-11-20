@@ -57,8 +57,8 @@ int main()
   SampledMapping<1> s(Grid<1>(-1.0, 1.0, 10), p);
   s.matlab_output(cout);
 
-  const int d = 2;
-  const int dT = 4; // be sure to use a continuous dual here!
+  const int d = 3;
+  const int dT = 3; // be sure to use a continuous dual here!
 
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
@@ -94,12 +94,12 @@ int main()
   shat.matlab_output(cout);
   
   InfiniteVector<double,Index> dual_coeffs;
-  expand(&hat, basis, false, j0, dual_coeffs);
+  expand(&hat, basis, false, j0+2, dual_coeffs);
   cout << "- (approx.) expansion coefficients of the hat function in the primal basis:" << endl
        << dual_coeffs;
   
   cout << "- pointwise error:" << endl;
-  SampledMapping<1> s3(evaluate(basis, dual_coeffs, true, 5));
+  SampledMapping<1> s3(evaluate(basis, dual_coeffs, true, 7));
   error.resize(s3.points().size());
   for (unsigned int i = 0; i < error.size(); i++)
     error[i] = fabs(s3.values()[i]-hat.value(Point<1>(s3.points()[i])));

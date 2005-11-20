@@ -136,6 +136,7 @@ namespace WaveletTL
     void RHS(const double eta,
 	     InfiniteVector<double, Index>& coeffs) const {
       coeffs = y; // dirty
+      T->rescale(coeffs, -1);
     }
     
     /*!

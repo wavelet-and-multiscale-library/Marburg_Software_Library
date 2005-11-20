@@ -192,7 +192,7 @@ namespace MathTL
     const unsigned int stages = c.size(); // for readability
 
     Array1D<VECTOR> k(stages);
-    k[0] = u_m; k[0] = 0; // to set the dimensiona correctly
+    k[0] = u_m; k[0].scale(0.0); // to set the dimensiona correctly
     for (unsigned int i = 1; i < stages; i++)
       k[i] = k[0];
 
@@ -213,7 +213,7 @@ namespace MathTL
       u_mplus1.add(tau*bhat[i], k[i]);
 
     // error estimate
-    error_estimate = u_m; error_estimate = 0; // ensures correct size
+    error_estimate = u_m; error_estimate.scale(0.0); // ensures correct size
     for (unsigned int i = 0; i < stages; i++)
       error_estimate.add(tau*(bhat[i]-b[i]), k[i]);
   }

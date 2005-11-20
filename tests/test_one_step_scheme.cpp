@@ -73,7 +73,7 @@ int main()
   
   typedef Vector<double> V;
 
-  Dahlquist problem(-20.0);
+  Dahlquist problem(-5.0);
 
 #if 1
   cout << "- checking consistency of the builtin one-step schemes:" << endl;

@@ -73,15 +73,8 @@ int main()
 
   const int j0 = basis.j0();
 //   const int jmax = j0;
-  
-  for (Index lambda = first_generator(&basis, j0);;++lambda)
-    {
-      coeffs.set_coefficient(lambda, integrate(&p,basis,lambda));
-      if (lambda == last_generator(&basis, j0))
-//   	if (lambda == last_wavelet(&basis, jmax))
-	break;
-    }
-  
+
+  expand(&p, basis, true, j0, coeffs);
   cout << "- integrals of p against all primal generators on level j0:" << endl
        << coeffs << endl;
 

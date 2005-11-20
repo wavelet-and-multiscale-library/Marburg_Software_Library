@@ -32,10 +32,11 @@ namespace WaveletTL
   /*!
     For a given function, compute all integrals w.r.t. the primal
     or dual generators/wavelets \psi_\lambda with |\lambda|\le jmax.
-    When integrating against the primal functions, the integrand has to be smooth
-    to be accurately reproduced by the dual basis.
-    For integration against dual functions, we integrate against the primal ones
-    instead and multiply the coefficients with the inverse of the primal gramian.
+    - When integrating against the primal functions, the integrand has to be smooth
+      to be accurately reproduced by the dual basis.
+    - When integration against dual functions is specified,
+      we integrate against the primal ones instead and multiply the resulting
+      coefficients with the inverse of the primal gramian.
   */
   template <int d, int dT>
   void

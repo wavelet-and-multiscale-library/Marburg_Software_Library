@@ -50,5 +50,17 @@ namespace WaveletTL
 	 const int jmax,
 	 InfiniteVector<double, typename DSBasis<d,dT>::Index>& coeffs)
   {
+    typedef typename DSBasis<d,dT>::Index Index;
+    const int j0 = basis.j0();
+
+    for (Index lambda = first_generator(&basis, j0);;++lambda)
+      {
+	coeffs.set_coefficient(lambda, integrate(f, basis, lambda));
+	if (lambda == last_wavelet(&basis, jmax))
+	  break;
+      }
+
+    if (!primal) {
+    }
   }
 }

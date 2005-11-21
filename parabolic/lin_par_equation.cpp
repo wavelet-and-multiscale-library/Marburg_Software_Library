@@ -49,9 +49,11 @@ namespace WaveletTL
     result.clear();
     InfiniteVector<double,Index> w(v);
     elliptic->rescale(w, 1); // w = Dv
-    APPLY(*elliptic, w, tolerance, result, 10, St04a); // yields -D^{-1}AD^{-1}w
+    APPLY(*elliptic, w, tolerance, result, 8, St04a); // yields -D^{-1}AD^{-1}w
     elliptic->rescale(result, 1);
     result.scale(-1.0);
+
+    
     // no source term, for the moment
   }
   
@@ -77,7 +79,7 @@ namespace WaveletTL
 			     InfiniteVector<double,Index>& result) const
   {
     LinParEqROWStageEquationHelper<ELLIPTIC_EQ> helper(alpha, elliptic, y);
-    CDD1_SOLVE(helper, tolerance, result, 12); // D^{-1}(alpha*I-T)D^{-1}*Dx = D^{-1}y    
+    CDD1_SOLVE(helper, tolerance, result, 8); // D^{-1}(alpha*I-T)D^{-1}*Dx = D^{-1}y    
     elliptic->rescale(result, -1); // Dx -> x
   }
 }

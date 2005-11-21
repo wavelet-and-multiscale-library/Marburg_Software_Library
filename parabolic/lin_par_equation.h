@@ -195,8 +195,9 @@ namespace WaveletTL
     typedef typename ELLIPTIC_EQ::Index Index;
 
     /*!
-      constructor from a helper object for the stiffness matrix
-      and a given initial value u0 in ell_2
+      constructor from a helper object for the stiffness matrix,
+      a given initial value u0 in ell_2
+      and a driving function g
      */
     LinearParabolicEquation(const ELLIPTIC_EQ* elliptic,
 			    const InfiniteVector<double,Index>& u0);

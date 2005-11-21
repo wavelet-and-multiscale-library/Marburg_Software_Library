@@ -1,13 +1,17 @@
 #include <iostream>
 #include <fstream>
 #include <set>
+#include <list>
 
 #include <algebra/symmetric_matrix.h>
 #include <algebra/sparse_matrix.h>
+#include <algebra/matrix.h>
 #include <numerics/sturm_bvp.h>
 #include <numerics/iteratsolv.h>
 #include <numerics/w_method.h>
 #include <numerics/row_method.h>
+#include <geometry/grid.h>
+#include <geometry/sampled_mapping.h>
 
 #include <interval/i_index.h>
 #include <interval/ds_basis.h>
@@ -109,32 +113,52 @@ class Hat
   }
 };
 
+class Haar
+  : public Function<1>
+{
+  public:
+  inline double value(const Point<1>& p,
+		      const unsigned int component = 0) const
+  {
+    return abs(p[0]-0.5)<=0.25 ? 1.0 : 0.0;
+  }
+  
+  void vector_value(const Point<1> &p,
+		    Vector<double>& values) const
+  {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
 int main()
 {
   cout << "Testing linear parabolic equations..." << endl;
 
-  TestProblem<0> T;
+  TestProblem<0> testproblem;
   
-  const int d  = 3;
-  const int dT = 3;
+  const int d  = 2;
+  const int dT = 2;
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
   typedef SturmEquation<Basis> EllipticEquation;
   typedef InfiniteVector<double,Index> V;
 
-  EllipticEquation elliptic(T);
+  EllipticEquation elliptic(testproblem);
 //   CachedProblem<EllipticEquation> celliptic(&elliptic);
-//   CachedProblem<EllipticEquation> celliptic(&elliptic, 12.2508, 6.41001); // d=2, dT=2
-  CachedProblem<SturmEquation<Basis> > celliptic(&elliptic, 6.73618, 45.5762); // d=3, dT=3
+  CachedProblem<EllipticEquation> celliptic(&elliptic, 12.2508, 6.41001); // d=2, dT=2
+//   CachedProblem<SturmEquation<Basis> > celliptic(&elliptic, 6.73618, 45.5762); // d=3, dT=3
 
-  Hat hat;
+//   Hat hat;
+  Haar hat;
   V u0;
-  expand(&hat, celliptic.basis(), false, celliptic.basis().j0()+2, u0);
+  expand(&hat, celliptic.basis(), false, celliptic.basis().j0()+4, u0);
   u0.compress(1e-14);
   cout << "* expansion coefficients of hat function u0=" << endl << u0;
 
   LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0);
   
+#if 0
   cout << "* testing ROS2:" << endl;
   ROWMethod<V> ros2(WMethod<V>::ROS2);
   OneStepScheme<V>* scheme = &ros2;
@@ -162,5 +186,44 @@ int main()
 //     }
 //     olderr = err;
   }
+#endif
+
+#if 1
+  const double T = 1.0;
+  const double q = 10.0;
+//   const double TOL = 1e-2;
+  const double TOL = 1e-1;
+  const double tau_max = 1.0;
+
+  IVPSolution<V> result_adaptive;
+  
+  cout << "* testing ROS2 (adaptive)..." << endl;
+  ROWMethod<V> ros2_adaptive(WMethod<V>::ROS2);
+  solve_IVP(&parabolic, &ros2_adaptive, T,
+	    TOL, q, tau_max, result_adaptive);
+
+  const int resolution = 10;
+  Grid<1> gx(0.0, 1.0, 1<<resolution);
+  Array1D<double> points(result_adaptive.t.size());
+  std::copy(result_adaptive.t.begin(), result_adaptive.t.end(), points.begin());
+  Grid<1> gt(points);
+  Grid<2> grid(gt, gx);
+  Matrix<double> values((1<<resolution)+1, result_adaptive.t.size());
+  
+  unsigned int i(0);
+  for (std::list<V>::const_iterator ui(result_adaptive.u.begin());
+       ui != result_adaptive.u.end(); ++ui, ++i) {
+    SampledMapping<1> temp(evaluate(celliptic.basis(), *ui, true, resolution));
+    for (unsigned int k(0); k < values.row_dimension(); k++)
+      values.set_entry(k, i, temp.values()[k]);
+  }
+  SampledMapping<2> result(grid, values);
+ 
+  std::ofstream resultstream("lin_par_result.m");
+  result.matlab_output(resultstream);
+  resultstream.close();
+ 
+#endif
+
   return 0;
 }

@@ -83,7 +83,7 @@ namespace WaveletTL
     /*!
       space dimension of the problem
     */
-    static int space_dimension() { return 1; }
+    static const int space_dimension() { return 1; }
 
     /*!
       differential operators are local

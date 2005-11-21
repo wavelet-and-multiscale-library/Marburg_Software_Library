@@ -46,14 +46,14 @@ namespace WaveletTL
 
     params.K = (unsigned int) floor(log(20 * params.kappa) / fabs(log(params.theta))) + 1;
 
-    cout << "CDD1_SOLVE parameters:" << endl;
-    cout << "c1=" << params.c1 << ", c2=" << params.c2 << ", kappa=" << params.kappa << endl;
-    cout << "gamma=" << params.gamma << endl;
-    cout << "F=" << params.F << endl;
-    cout << "q0=" << params.q0 << ", q1=" << params.q1 << ", q2=" << params.q2
-	 << ", q3=" << params.q3 << ", q4=" << params.q4 << endl;
-    cout << "theta=" << params.theta << ", theta_bar=" << params.theta_bar << endl;
-    cout << "K=" << params.K << endl;
+//     cout << "CDD1_SOLVE parameters:" << endl;
+//     cout << "c1=" << params.c1 << ", c2=" << params.c2 << ", kappa=" << params.kappa << endl;
+//     cout << "gamma=" << params.gamma << endl;
+//     cout << "F=" << params.F << endl;
+//     cout << "q0=" << params.q0 << ", q1=" << params.q1 << ", q2=" << params.q2
+// 	 << ", q3=" << params.q3 << ", q4=" << params.q4 << endl;
+//     cout << "theta=" << params.theta << ", theta_bar=" << params.theta_bar << endl;
+//     cout << "K=" << params.K << endl;
 
     typedef typename PROBLEM::WaveletBasis::Index Index;
     set<Index> Lambda, Lambda_hat;
@@ -63,7 +63,7 @@ namespace WaveletTL
     InfiniteVector<double,Index> v_hat, r_hat, u_bar, F;
     P.RHS(2*params.q2*epsilon, F);
     while (delta > sqrt(params.c1)*epsilon) { // check the additional factor c1^{1/2} in [BB+] !?
-      cout << "CDD1_SOLVE: delta=" << delta << endl;
+//       cout << "CDD1_SOLVE: delta=" << delta << endl;
       NPROG(P, params, F, Lambda, u_epsilon, delta, v_hat, Lambda_hat, r_hat, u_bar, jmax, strategy);
       if (l2_norm(r_hat)+(params.q1+params.q2+(1+1/params.kappa)*params.q3)*delta <= params.c1*epsilon)
 	{
@@ -79,7 +79,7 @@ namespace WaveletTL
 //       delta *= 0.1; // tuned
     }
 
-    cout << "CDD1_SOLVE: done!" << endl;
+//     cout << "CDD1_SOLVE: done!" << endl;
   }
 
   template <class PROBLEM>
@@ -100,7 +100,7 @@ namespace WaveletTL
     unsigned int k = 0;
     GALERKIN(P, params, F, Lambda_k, v, delta, params.q3*delta/params.c2, u_Lambda_k, jmax, strategy);
     while (true) {
-      cout << "NPROG: k=" << k << " (K=" << params.K << ")" << endl;
+//       cout << "NPROG: k=" << k << " (K=" << params.K << ")" << endl;
       NGROW(P, params, F, Lambda_k, u_Lambda_k, params.q1*delta, params.q2*delta, Lambda_kplus1, r_hat, jmax, strategy);
       if (l2_norm(r_hat) <= params.c1*delta/20 || k == params.K || Lambda_k.size() == Lambda_kplus1.size()) {
 	u_Lambda_k.COARSE(2*delta/5, v_hat);
@@ -112,7 +112,7 @@ namespace WaveletTL
       Lambda_k.swap(Lambda_kplus1);
       k++;
     }
-    cout << "NPROG: done" << endl;
+//     cout << "NPROG: done" << endl;
   }
 
   template <class PROBLEM>
@@ -150,7 +150,7 @@ namespace WaveletTL
     }
 #else
     // conjugate gradient version (no theory for its complexity available yet, but very fast)
-    cout << "GALERKIN called..." << endl;
+//     cout << "GALERKIN called..." << endl;
     
     u_bar.clear();
     if (Lambda.size() > 0) {
@@ -159,7 +159,7 @@ namespace WaveletTL
       setup_stiffness_matrix(P, Lambda, A_Lambda);
       Vector<double> F_Lambda;
       setup_righthand_side(P, Lambda, F_Lambda);
-      cout << "... GALERKIN: stiffness matrix and right-hand side set up, iterating ..." << endl;
+//       cout << "... GALERKIN: stiffness matrix and right-hand side set up, iterating ..." << endl;
 
       // setup initial approximation xk
       Vector<double> xk(Lambda.size());
@@ -170,14 +170,14 @@ namespace WaveletTL
       
       unsigned int iterations = 0;
       CG(A_Lambda, F_Lambda, xk, eta, 150, iterations);
-      cout << "... GALERKIN done, " << iterations << " CG iterations needed" << endl;
+//       cout << "... GALERKIN done, " << iterations << " CG iterations needed" << endl;
       
       id = 0;
       for (typename set<Index>::const_iterator it = Lambda.begin(), itend = Lambda.end();
 	   it != itend; ++it, ++id)
 	u_bar.set_coefficient(*it, xk[id]);
     } else {
-      cout << "... GALERKIN done, no CG iteration needed" << endl;
+//       cout << "... GALERKIN done, no CG iteration needed" << endl;
     }
 #endif
   }
@@ -194,23 +194,23 @@ namespace WaveletTL
 	     const int jmax,
 	     const CompressionStrategy strategy)
   {
-    cout << "NGROW called..." << endl;
+//     cout << "NGROW called..." << endl;
     typedef typename PROBLEM::WaveletBasis::Index Index;
     set<Index> Lambda_c;
     NRESIDUAL(P, params, F, Lambda, u_bar, xi1, xi2, r, Lambda_c, jmax, strategy);
     const double residual_norm = l2_norm(r);
-    cout << "* in NGROW, current residual norm is " << residual_norm << endl;
+//     cout << "* in NGROW, current residual norm is " << residual_norm << endl;
     InfiniteVector<double,Index> pr;
     r.COARSE(sqrt(1-params.gamma*params.gamma)*residual_norm, pr);
     pr.support(Lambda_c);
     Lambda_tilde.clear();
     const unsigned int Lambdasize = Lambda.size();
     const unsigned int Lambdacsize = Lambda_c.size();
-    cout << "* in NGROW, size of old index set Lambda is " << Lambdasize << ", size of increment set Lambda_c is " << Lambdacsize << endl;
+//     cout << "* in NGROW, size of old index set Lambda is " << Lambdasize << ", size of increment set Lambda_c is " << Lambdacsize << endl;
     std::set_union(Lambda.begin(), Lambda.end(),
 		   Lambda_c.begin(), Lambda_c.end(),
 		   inserter(Lambda_tilde, Lambda_tilde.end()));
-    cout << "... NGROW done, size of new index set: " << Lambda_tilde.size() << endl;
+//     cout << "... NGROW done, size of new index set: " << Lambda_tilde.size() << endl;
   }
 
   template <class PROBLEM>

@@ -39,5 +39,11 @@ int main()
   Grid<2> equi(Point<2>(0.0, 0.0), Point<2>(1.0, 1.0), 2, 4);
   equi.matlab_output(cout);
 
+  cout << "- a 2D tensor product grid from 2 1D grids:" << endl;
+  Grid<1> gx(points);
+  Grid<1> gy(0.0, 1.0, 4);
+  Grid<2> tensor(gx, gy);
+  tensor.matlab_output(cout);
+
   return 0;
 }

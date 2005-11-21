@@ -112,6 +112,11 @@ namespace MathTL
     Grid(const Matrix<double>& gridx, const Matrix<double>& gridy);
 
     /*!
+      construct a 2D tensor product grid from two 1D Grids
+    */
+    Grid(const Grid<1>& gridx, const Grid<1>& gridy);
+
+    /*!
       construct an equidistant 2D grid with (N_x+1)*(N_y+1) points
     */
     Grid(const Point<2>& a, const Point<2>& b,

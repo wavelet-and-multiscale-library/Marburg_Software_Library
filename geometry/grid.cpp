@@ -37,6 +37,18 @@ namespace MathTL
     : gridx_(gridx), gridy_(gridy)
   {
   }
+
+  Grid<2>::Grid(const Grid<1>& gridx, const Grid<1>& gridy)
+    : gridx_(gridy.points().size(), gridx.points().size()),
+      gridy_(gridy.points().size(), gridx.points().size())
+  {
+    for (unsigned int n_x(0); n_x < gridx.points().size(); n_x++)
+      for (unsigned int n_y(0); n_y < gridy.points().size(); n_y++)
+	{
+	  gridx_(n_y, n_x) = gridx.points()[n_x];
+	  gridy_(n_y, n_x) = gridy.points()[n_y];
+	}
+  }
   
   Grid<2>::Grid(const Point<2>& a, const Point<2>& b,
 		const unsigned int N_x, const unsigned int N_y)

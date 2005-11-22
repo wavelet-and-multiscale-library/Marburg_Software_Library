@@ -197,10 +197,11 @@ namespace WaveletTL
     /*!
       constructor from a helper object for the stiffness matrix,
       a given initial value u0 in ell_2
-      and a driving function g
+      and a driving term f which is constant in time
      */
     LinearParabolicEquation(const ELLIPTIC_EQ* elliptic,
-			    const InfiniteVector<double,Index>& u0);
+			    const InfiniteVector<double,Index>& u0,
+			    const InfiniteVector<double,Index>& f);
 
     /*!
       evaluate the right-hand side F(t,v)=Av+f(t) up to a prescribed tolerance
@@ -231,6 +232,8 @@ namespace WaveletTL
   protected:
     //! pointer to the elliptic subproblem helper
     const ELLIPTIC_EQ* elliptic;
+
+    InfiniteVector<double,Index> f_;
   };
 }
 

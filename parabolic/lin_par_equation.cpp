@@ -32,8 +32,9 @@ namespace WaveletTL
   template <class ELLIPTIC_EQ>
   LinearParabolicEquation<ELLIPTIC_EQ>
   ::LinearParabolicEquation(const ELLIPTIC_EQ* helper,
-			    const InfiniteVector<double,Index>& initial)
-    : elliptic(helper)
+			    const InfiniteVector<double,Index>& initial,
+			    const InfiniteVector<double,Index>& f)
+    : elliptic(helper), f_(f)
   {
     AbstractIVP<InfiniteVector<double,Index> >::u0 = initial;
   }
@@ -53,8 +54,7 @@ namespace WaveletTL
     elliptic->rescale(result, 1);
     result.scale(-1.0);
 
-    
-    // no source term, for the moment
+    result.add(f_);
   }
   
   template <class ELLIPTIC_EQ>

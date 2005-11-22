@@ -204,8 +204,8 @@ namespace WaveletTL
     r.COARSE(sqrt(1-params.gamma*params.gamma)*residual_norm, pr);
     pr.support(Lambda_c);
     Lambda_tilde.clear();
-    const unsigned int Lambdasize = Lambda.size();
-    const unsigned int Lambdacsize = Lambda_c.size();
+//     const unsigned int Lambdasize = Lambda.size();
+//     const unsigned int Lambdacsize = Lambda_c.size();
 //     cout << "* in NGROW, size of old index set Lambda is " << Lambdasize << ", size of increment set Lambda_c is " << Lambdacsize << endl;
     std::set_union(Lambda.begin(), Lambda.end(),
 		   Lambda_c.begin(), Lambda_c.end(),

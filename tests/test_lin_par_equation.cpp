@@ -131,6 +131,24 @@ class Haar
   }
 };
 
+class constant_f
+  : public Function<1>
+{
+  public:
+  inline double value(const Point<1>& p,
+		      const unsigned int component = 0) const
+  {
+    return M_PI*M_PI*sin(M_PI*p[0]);
+  }
+  
+  void vector_value(const Point<1> &p,
+		    Vector<double>& values) const
+  {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
 int main()
 {
   cout << "Testing linear parabolic equations..." << endl;
@@ -152,11 +170,16 @@ int main()
 //   Hat hat;
   Haar hat;
   V u0;
-  expand(&hat, celliptic.basis(), false, celliptic.basis().j0()+4, u0);
+  expand(&hat, celliptic.basis(), false, celliptic.basis().j0()+5, u0);
   u0.compress(1e-14);
   cout << "* expansion coefficients of hat function u0=" << endl << u0;
+ 
+  constant_f cf;
+  V f;
+//   expand(&cf, celliptic.basis(), false, celliptic.basis().j0()+4, f);
+  f.compress(1e-14);
 
-  LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0);
+  LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, f);
   
 #if 0
   cout << "* testing ROS2:" << endl;

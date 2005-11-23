@@ -15,6 +15,7 @@
 #include <algebra/matrix.h>
 #include <algebra/vector.h>
 #include <geometry/point.h>
+#include <utils/fixed_array1d.h>
 
 using std::string;
 
@@ -69,6 +70,10 @@ namespace MathTL
     virtual const bool in_patch(const Point<DIM_m>& x) const = 0;
 
     /*!
+    */
+    virtual const double a_i(const int i) const = 0;    
+
+    /*!
       returns a string representation of this object
      */
     virtual const string to_string() const = 0;
@@ -106,6 +111,9 @@ namespace MathTL
     const double Dkappa_inv(const unsigned int i, const unsigned int j,
 			    const Point<DIM>& x) const;
     const bool in_patch(const Point<DIM>& x) const;
+    
+    const double a_i(const int i) const { return A_(i,i); };
+
 
     const string to_string() const;
 
@@ -124,6 +132,53 @@ namespace MathTL
     Matrix<double> A_, A_inv;
     double det_A;
     Point<DIM> b_;
+  };
+
+  /*!
+   */
+  template <unsigned int DIM>
+  class SimpleAffineLinearMapping
+    : public Chart<DIM,DIM>
+  {
+    public:
+    virtual ~SimpleAffineLinearMapping() {};
+
+
+     //! default constructor, yields the identity mapping
+    SimpleAffineLinearMapping();
+
+    //! constructor from A and b (dimensions should fit)
+    SimpleAffineLinearMapping(const FixedArray1D<double,DIM>& A, const Point<DIM>& b);
+
+    void map_point(const Point<DIM>&, Point<DIM>&) const;
+    void map_point_inv(const Point<DIM>&, Point<DIM>&) const;
+    const double Gram_factor(const Point<DIM>&) const;
+    const double Gram_D_factor(const unsigned int i, const Point<DIM>& x) const;
+    const double Dkappa_inv(const unsigned int i, const unsigned int j,
+			    const Point<DIM>& x) const;
+    const bool in_patch(const Point<DIM>& x) const;
+
+    const double a_i(const int i) const { return A_[i]; };
+
+    const string to_string() const;
+
+    /*!
+      static field to store the name of the class
+     */
+    static const string className;
+
+    //! read access to A
+    const FixedArray1D<double,DIM>& A() const { return A_; }
+    
+    //! read access to b
+    const Point<DIM>& b() const { return b_; }
+
+  protected:
+    FixedArray1D<double,DIM> A_, A_inv;
+    double det_A;
+    Point<DIM> b_;
+    
+    
   };
 
   /*!
@@ -192,6 +247,8 @@ namespace MathTL
     const double Dkappa_inv(const unsigned int i, const unsigned int j,
 			    const Point<2>& x) const;
     const bool in_patch(const Point<2>& x) const;
+
+    const double a_i(const int i) const { return 0.; };
     
     const string to_string() const;
    

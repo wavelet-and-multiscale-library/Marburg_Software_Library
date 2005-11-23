@@ -109,8 +109,94 @@ namespace MathTL
 
     return strs.str();
   }
+//################### SimpleAffineLinear ###################
+  template <unsigned int DIM>
+  const string SimpleAffineLinearMapping<DIM>::className = "SimpleAffineLinearMapping";
+  
+  template <unsigned int DIM>
+  SimpleAffineLinearMapping<DIM>::SimpleAffineLinearMapping()
+    : det_A(1.0), b_()
+  {
+  }
 
+  template <unsigned int DIM>
+  SimpleAffineLinearMapping<DIM>::SimpleAffineLinearMapping(
+							    const FixedArray1D<double,DIM>& A,
+							    const Point<DIM>& b
+							    )
+    : A_(A), b_(b)
+  {
+    det_A = 1.;
+    for (unsigned int i = 0; i < DIM; i++) {
+      det_A *= A_[i];
+      A_inv[i] = 1./A_[i];
+    }
+  }
 
+  template <unsigned int DIM>
+  inline
+  void
+  SimpleAffineLinearMapping<DIM>::map_point(const Point<DIM>& x, Point<DIM>& y) const {
+    for (unsigned int i = 0; i< DIM; i++)
+      y[i] = A_[i] * x[i] + b_[i];
+  }
+    
+  template <unsigned int DIM>
+  inline
+  void
+  SimpleAffineLinearMapping<DIM>::map_point_inv(const Point<DIM>& x, Point<DIM>& y) const {
+    for (unsigned int i = 0; i< DIM; i++)
+      y[i] = A_inv[i] * (x[i]-b_[i]);
+  }
+
+  template <unsigned int DIM>
+  inline
+  const double
+  SimpleAffineLinearMapping<DIM>::Gram_factor(const Point<DIM>& x) const {
+    return sqrt(fabs(det_A));
+  }
+
+  template <unsigned int DIM>
+  inline
+  const double
+  SimpleAffineLinearMapping<DIM>::Gram_D_factor(const unsigned int i, const Point<DIM>& x) const {
+    return 0.0;
+  }
+  
+  template <unsigned int DIM>
+  inline
+  const double
+  SimpleAffineLinearMapping<DIM>::Dkappa_inv(const unsigned int i, const unsigned int j,
+				       const Point<DIM>& x) const
+  {
+    if (i != j)
+      return 0.;
+    return A_inv[i];
+  }
+
+  template <unsigned int DIM>
+  inline
+  const bool
+  SimpleAffineLinearMapping<DIM>::in_patch(const Point<DIM>& x) const {
+    Point<DIM> y;
+    map_point_inv(x, y);
+    for (unsigned int i = 0; i < DIM; i++)
+      if (y[i] < 0 || y[i] > 1) return false;
+    return true;
+  }
+
+  template <unsigned int DIM>
+  const string
+  SimpleAffineLinearMapping<DIM>::to_string() const {
+    std::stringstream strs;
+ 
+    strs << className << ":" << endl << "A =" << endl
+	 << A()
+	 << "b = "
+	 << b() << endl;
+
+    return strs.str();
+  }
 //################### LinearBezierMapping ###################
   const string LinearBezierMapping::className = "LinearBezierMapping";
 

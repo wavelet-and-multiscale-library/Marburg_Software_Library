@@ -12,6 +12,7 @@
 #include <galerkin/sturm_equation.h>
 #include <galerkin/cached_problem.h>
 
+#define _WAVELETTL_CDD1_VERBOSITY 1
 #include <adaptive/cdd1.h>
 
 using namespace std;
@@ -90,7 +91,7 @@ int main()
 {
   cout << "Testing adaptive wavelet-Galerkin solution of a Sturm b.v.p. with CDD1_SOLVE ..." << endl;
 
-  TestProblem<3> T;
+  TestProblem<2> T;
 
   const int d  = 3;
   const int dT = 3;
@@ -98,8 +99,8 @@ int main()
   typedef Basis::Index Index;
 
   SturmEquation<Basis> problem(T);
-//   CachedProblem<SturmEquation<Basis> > cproblem(&problem);
-  CachedProblem<SturmEquation<Basis> > cproblem(&problem, 12.2508, 6.41001); // d=2, dT=2
+  CachedProblem<SturmEquation<Basis> > cproblem(&problem);
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 12.2508, 6.41001); // d=2, dT=2
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 15.6711, 25.9767); // d=2, dT=4
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 6.73618, 45.5762); // d=3, dT=3
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 13.5193, 103.532); // d=3, dT=5

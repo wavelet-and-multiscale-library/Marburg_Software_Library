@@ -13,6 +13,7 @@
 #include <galerkin/cached_problem.h>
 #include <galerkin/cube_equation.h>
 
+#define _WAVELETTL_CDD1_VERBOSITY 1
 #include <adaptive/cdd1.h>
 
 using namespace std;
@@ -22,7 +23,8 @@ using namespace MathTL;
 /*
   Some test problems for the Poisson equation on the cube with homogeneous Dirichlet b.c.'s:
   1: u(x,y) = x(1-x)y(1-y), -Delta u(x,y) = 2(x(1-x)+y(1-y))
-  2: y(x,y) = exp(-100*((x-0.5)^2+(y-0.5)^2), -Delta u(x,y)= (400-(200x-100)^2-(200y-100)^2)*u(x,y)
+  2: u(x,y) = exp(-50*((x-0.5)^2+(y-0.5)^2)), -Delta u(x,y)= (200-(100x-50)^2-(100y-50)^2)*u(x,y)
+  3: u(x,y) = x(1-x)^2y^2(1-y), -Delta u(x,y)= 4*(1-x)*y^2*(1-y)-2*x*y^2*(1-y)-2*x*(1-x)^2*(1-y)+4*x*(1-x)^2*y
 */
 template <unsigned int N>
 class TestRHS
@@ -34,8 +36,15 @@ public:
     switch(N) {
     case 2:
       return
-	(400-(200*p[0]-100)*(200*p[0]-100)-(200*p[1]-100)*(200*p[1]-100))
-	* exp(-100*((p[0]-0.5)*(p[0]-0.5)+(p[1]-0.5)*(p[1]-0.5)));
+	(200.-(100.*p[0]-50.)*(100.*p[0]-50.)-(100.*p[1]-50.)*(100.*p[1]-50.))
+	* exp(-50.*((p[0]-0.5)*(p[0]-0.5)+(p[1]-0.5)*(p[1]-0.5)));
+      break;
+    case 3:
+      return
+	4*(1-p[0])*p[1]*p[1]*(1-p[1])
+	- 2*p[0]*p[1]*p[1]*(1-p[1])
+	- 2*p[0]*(1-p[0])*(1-p[0])*(1-p[1])
+	+ 4*p[0]*(1-p[0])*(1-p[0])*p[1];
       break;
     case 1:
     default:
@@ -58,7 +67,7 @@ int main()
   typedef CubeBasis<Basis1D,2> Basis;
   typedef Basis::Index Index;
 
-  TestRHS<1> rhs;
+  TestRHS<3> rhs;
   PoissonBVP<2> poisson(&rhs);
 
   FixedArray1D<bool,4> bc;
@@ -66,15 +75,16 @@ int main()
   typedef CubeEquation<Basis1D,2,Basis> Problem;
   Problem problem(&poisson, bc);
 //   CachedProblem<Problem> cproblem(&problem);
-//   CachedProblem<Problem> cproblem(&problem, 19.9458,    6.86045); // d=2, dT=2
-//   CachedProblem<Problem> cproblem(&problem, 29.8173,   25.6728 ); // d=2, dT=4
-  CachedProblem<Problem> cproblem(&problem, 8.50996, 6443.75   ); // d=3, dT=3
+  CachedProblem<Problem> cproblem(&problem, 19.97  ,    6.86044); // d=2, dT=2
+//   CachedProblem<Problem> cproblem(&problem, 29.8173,   25.6677 ); // d=2, dT=4
+//   CachedProblem<Problem> cproblem(&problem, 8.51622, 10000); //6311.51   ); // d=3, dT=3 
   cout << "* estimate for normA: " << cproblem.norm_A() << endl;
   cout << "* estimate for normAinv: " << cproblem.norm_Ainv() << endl;
 
   InfiniteVector<double, Index> u_epsilon;
-  CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 6);
-//   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 7);
+
+//   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 6);
+  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 7);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 10);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 6, CDD1);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon);

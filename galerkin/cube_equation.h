@@ -94,7 +94,7 @@ namespace WaveletTL
     /*!
       space dimension of the problem
     */
-    static int space_dimension() { return DIM; }
+    static const int space_dimension = DIM;
 
     /*!
       differential operators are local

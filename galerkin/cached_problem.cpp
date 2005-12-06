@@ -100,7 +100,7 @@ namespace WaveletTL
 	  if (strategy == St04a) {
 	    for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());
 		 it != itend; ++it) {
-	      if (abs(lambda.j()-j) <= J/((double) problem->space_dimension()) ||
+	      if (abs(lambda.j()-j) <= J/((double) problem->space_dimension) ||
 		  intersect_singular_support(problem->basis(), lambda, *it)) {
 		const double entry = a(*it, lambda) / (d1*problem->D(*it));
 		w.add_coefficient(*it, entry * factor);
@@ -125,7 +125,7 @@ namespace WaveletTL
 	if (strategy == St04a) {
 	  for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());
 	       it != itend; ++it) {
-	    if (abs(lambda.j()-j) <= J/((double) problem->space_dimension()) ||
+	    if (abs(lambda.j()-j) <= J/((double) problem->space_dimension) ||
 		intersect_singular_support(problem->basis(), lambda, *it)) {
 	      const double entry = a(*it, lambda) / (d1*problem->D(*it));
 	      w.add_coefficient(*it, entry * factor);
@@ -165,10 +165,17 @@ namespace WaveletTL
       SparseMatrix<double> A_Lambda;
       setup_stiffness_matrix(*this, Lambda, A_Lambda);
       
+#if 1
+      double help;
+      unsigned int iterations;
+      LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
+      normAinv = 1./help;
+#else
       Vector<double> xk(Lambda.size(), false);
       xk = 1;
       unsigned int iterations;
       normA = PowerIteration(A_Lambda, xk, 1e-6, 100, iterations);
+#endif
 
       cout << "... done!" << endl;
     }
@@ -193,10 +200,17 @@ namespace WaveletTL
       SparseMatrix<double> A_Lambda;
       setup_stiffness_matrix(*this, Lambda, A_Lambda);
       
+#if 1
+      double help;
+      unsigned int iterations;
+      LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
+      normAinv = 1./help;
+#else
       Vector<double> xk(Lambda.size(), false);
       xk = 1;
       unsigned int iterations;
       normAinv = InversePowerIteration(A_Lambda, xk, 1e-6, 200, iterations);
+#endif
 
       cout << "... done!" << endl;
     }

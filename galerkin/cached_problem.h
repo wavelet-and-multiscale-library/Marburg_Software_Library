@@ -64,7 +64,7 @@ namespace WaveletTL
       /*!
 	space dimension of the problem
       */
-      static int space_dimension() { return PROBLEM::space_dimension(); }
+      static const int space_dimension = PROBLEM::space_dimension;
       
       /*!
 	locality of the operator

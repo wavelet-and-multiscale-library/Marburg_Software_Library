@@ -57,7 +57,7 @@ namespace WaveletTL
     /*!
       space dimension of the problem
     */
-    static int space_dimension() { return ELLIPTIC_EQ::space_dimension(); }
+    static const int space_dimension = ELLIPTIC_EQ::space_dimension;
     
     /*!
       locality of the operator
@@ -195,6 +195,11 @@ namespace WaveletTL
     typedef typename ELLIPTIC_EQ::Index Index;
 
     /*!
+      space dimension of the problem
+    */
+    static const int space_dimension = ELLIPTIC_EQ::space_dimension;
+    
+    /*!
       constructor from a helper object for the stiffness matrix,
       a given initial value u0 in ell_2
       and a driving term f which is constant in time
@@ -202,6 +207,15 @@ namespace WaveletTL
     LinearParabolicEquation(const ELLIPTIC_EQ* elliptic,
 			    const InfiniteVector<double,Index>& u0,
 			    const InfiniteVector<double,Index>& f);
+
+    /*!
+      constructor from a helper object for the stiffness matrix,
+      a given initial value u0 in ell_2
+      and a driving term f
+     */
+    LinearParabolicEquation(const ELLIPTIC_EQ* elliptic,
+			    const InfiniteVector<double,Index>& u0,
+			    const Function<space_dimension>* f);
 
     /*!
       evaluate the right-hand side F(t,v)=Av+f(t) up to a prescribed tolerance

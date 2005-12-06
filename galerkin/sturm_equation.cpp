@@ -138,10 +138,17 @@ namespace WaveletTL
       SparseMatrix<double> A_Lambda;
       setup_stiffness_matrix(*this, Lambda, A_Lambda);
       
+#if 1
+      double help;
+      unsigned int iterations;
+      LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
+      normAinv = 1./help;
+#else
       Vector<double> xk(Lambda.size(), false);
       xk = 1;
       unsigned int iterations;
       normA = PowerIteration(A_Lambda, xk, 1e-6, 100, iterations);
+#endif
     }
 
     return normA;
@@ -164,11 +171,18 @@ namespace WaveletTL
       }
       SparseMatrix<double> A_Lambda;
       setup_stiffness_matrix(*this, Lambda, A_Lambda);
-      
+
+#if 1
+      double help;
+      unsigned int iterations;
+      LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
+      normAinv = 1./help;
+#else
       Vector<double> xk(Lambda.size(), false);
       xk = 1;
       unsigned int iterations;
       normAinv = InversePowerIteration(A_Lambda, xk, 1e-6, 200, iterations);
+#endif
     }
 
     return normAinv;

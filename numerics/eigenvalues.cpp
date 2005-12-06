@@ -357,7 +357,7 @@ namespace MathTL
     double change = 2*tol;
 
     for (k = 1; k <= maxit && fabs(gamma[k-1])>1e-14 && change > tol; k++) {
-//       cout << "k=" << k << endl;
+      cout << "Lanczos iteration, k=" << k << endl;
       qkold = qk; qk = dk; qk.scale(1./gamma[k-1]);
 //       cout << "q^{(" << k << ")}=" << qk << endl;
       A.apply(qk, dk); // d^{(k)}=Aq^{(k)}

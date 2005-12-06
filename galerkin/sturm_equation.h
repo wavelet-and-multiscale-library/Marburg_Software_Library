@@ -167,6 +167,9 @@ namespace WaveletTL
 
     // (squared) \ell_2 norm of the precomputed right-hand side
     double fnorm_sqr;
+
+    // estimates for ||A|| and ||A^{-1}||
+    mutable double normA, normAinv;
   };
 }
 

@@ -13,7 +13,7 @@ namespace WaveletTL
 {
   template <class WBASIS>
   SturmEquation<WBASIS>::SturmEquation(const SimpleSturmBVP& bvp)
-    : bvp_(bvp), basis_(bvp.bc_left(), bvp.bc_right())
+    : bvp_(bvp), basis_(bvp.bc_left(), bvp.bc_right()), normA(0.0), normAinv(0.0)
   {
     typedef typename WaveletBasis::Index Index;
 
@@ -124,8 +124,6 @@ namespace WaveletTL
   double
   SturmEquation<WBASIS>::norm_A() const
   {
-    static double normA = 0.0;
-    
     if (normA == 0.0) {
       typedef typename WaveletBasis::Index Index;
       std::set<Index> Lambda;
@@ -158,8 +156,6 @@ namespace WaveletTL
   double
   SturmEquation<WBASIS>::norm_Ainv() const
   {
-    static double normAinv = 0.0;
-    
     if (normAinv == 0.0) {
       typedef typename WaveletBasis::Index Index;
       std::set<Index> Lambda;

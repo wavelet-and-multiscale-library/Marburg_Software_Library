@@ -12,6 +12,7 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <time.h>
 
 namespace MathTL
 {

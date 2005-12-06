@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <time.h>
 #include "MathTL.h"
 
 using std::cout;
@@ -20,8 +21,17 @@ int main()
   cout << "- a (symmetric) band matrix A:" << endl
        << A;
   
+  cout << "- exact eigenvalues of A:" << endl;
+  for (unsigned int i(0); i < banddim; i++)
+    cout << 2-2*cos((i+1)*M_PI/(banddim+1)) << " "; // siehe Numerik-Uebungen...
+  cout << endl;
+  
   Vector<double> xk(banddim, false), err(banddim, false);
-  xk = 1;
+
+  srand(time(0)); // !
+
+  for (unsigned int i(0); i < xk.size(); i++) xk[i] = random_double();
+//   xk = 1;
   cout << "- calculating the maximal eigenvalue of A ..." << endl;
   unsigned int iterations;
   double lambda = PowerIteration(A, xk, 1e-6, 100, iterations);
@@ -33,14 +43,26 @@ int main()
        << "  with \\|A*xk-lambdak*xk\\|_\\infty=" << linfty_norm(err) << endl;
   
   cout << "- calculating the minimal eigenvalue of A ..." << endl;
-  xk = 1;
-  lambda = 1./InversePowerIteration(A, xk, 1e-6, 200, iterations);
+  for (unsigned int i(0); i < xk.size(); i++) xk[i] = random_double();
+//   xk = 1;
+  lambda = InversePowerIteration(A, xk, 1e-6, 200, iterations);
   A.apply(xk, err);
   err.add(-lambda, xk);
   cout << "  ... yields (after " << iterations << " iterations) lambda=" << lambda
        << ", corresponding (1-normalized) eigenvector:" << endl
        << xk << endl
        << "  with \\|A^{-1}*xk-lambdak*xk\\|_\\infty=" << linfty_norm(err) << endl;
+
+  cout << "- calculating the minimal eigenvalue again, with spectral shift lambda=0.05 ..." << endl;
+  for (unsigned int i(0); i < xk.size(); i++) xk[i] = random_double();
+//   xk = 1;
+  lambda = InversePowerIteration(A, xk, 0.05, 1e-6, 200, iterations);
+  A.apply(xk, err);
+  err.add(-lambda, xk);
+  cout << "  ... yields (after " << iterations << " iterations) lambda=" << lambda
+       << ", corresponding (1-normalized) eigenvector:" << endl
+       << xk << endl
+       << "  with \\|A^{-1}*xk-lambdak*xk\\|_\\infty=" << linfty_norm(err) << endl;  
 
   cout << "- spectral condition number of A (with CondSymm()): "
        << CondSymm(A) << endl;
@@ -65,6 +87,12 @@ int main()
       cout << "  vector " << i+1 << " has \\|A*x_i-lambda_i*x_i\\|_\\infty="
  	   << linfty_norm(err) << endl;
      }
-  
+
+  cout << "- Lanczos iteration for A:" << endl;
+  double lambdamin, lambdamax;
+  LanczosIteration(A, 1e-5, lambdamin, lambdamax, iterations);
+  cout << "  lambdamin=" << lambdamin << ", lambdamax=" << lambdamax
+       << ", " << iterations << " iterations needed" << endl;
+
   return 0;
 }

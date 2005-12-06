@@ -38,6 +38,26 @@ namespace MathTL
   }
 
   /*!
+    maximum norm, also returns index where it occurs
+   */
+  template <class VECTOR>
+  const double linfty_norm(const VECTOR& v, unsigned int& i)
+  {
+    double r(0.0);
+    unsigned int j = 0;
+
+    for (typename VECTOR::const_iterator it(v.begin()), itend(v.end());
+	 it != itend; ++it, ++j) {
+      if (fabs(*it) > r) {
+	r = std::max(fabs(*it), r);
+	i = j;
+      }
+    }
+    
+    return r;
+  }
+
+  /*!
     l_1 norm
   */
   template <class VECTOR>

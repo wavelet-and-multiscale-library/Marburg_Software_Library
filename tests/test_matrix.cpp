@@ -7,6 +7,7 @@
 #include <algebra/matrix_norms.h>
 #include <algebra/symmetric_matrix.h>
 #include <algebra/sparse_matrix.h>
+#include <algebra/tridiagonal_matrix.h>
 #include <algebra/infinite_vector.h>
 
 using std::cout;
@@ -379,5 +380,40 @@ int main()
        << "  and its transpose:" << endl
        << transpose(F2);
   
+  cout << "- a tridiagonal default matrix:" << endl;
+  TridiagonalMatrix<double> T1;
+  cout << T1;
+
+  cout << "- an empty 4x4 tridiagonal matrix T2:" << endl;
+  TridiagonalMatrix<double> T2(4);
+  cout << T2;
+
+  cout << "- set some entries to nontrivial values:" << endl;
+  T2.set_entry(0, 0, 1.0);
+  T2.set_entry(1, 1, 2.0);
+  T2.set_entry(2, 2, 3.0);
+  T2.set_entry(3, 3, 4.0);
+  T2.set_entry(0, 1, -1.0);
+  T2.set_entry(1, 2, -2.0);
+  T2.set_entry(2, 3, -3.0);
+  T2.set_entry(1, 0, -3.5);
+  T2.set_entry(2, 1, -2.5);
+  T2.set_entry(3, 2, -1.5);
+  cout << T2;
+
+  cout <<"- test copy constructor:" << endl;
+  TridiagonalMatrix<double> T2copy(T2);
+  cout << T2copy;
+
+  x.resize(4); y.resize(4);
+  x[0] = x[1] = x[2] = x[3] = 1;
+  cout << "- applying T2 to x=" << x << " yields" << endl;
+  T2.apply(x, y);
+  cout << y << endl;
+
+  cout << "- applying T2^T to x=" << x << " yields" << endl;
+  T2.apply_transposed(x, y);
+  cout << y << endl;
+
   return 0;
 }

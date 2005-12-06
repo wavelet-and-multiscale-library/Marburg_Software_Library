@@ -2,8 +2,11 @@
 #include <cmath>
 #include <algebra/vector.h>
 #include <algebra/atra.h>
+#include <algebra/shifted_matrix.h>
+#include <algebra/symmetric_matrix.h>
 #include <numerics/iteratsolv.h>
 #include <utils/tiny_tools.h>
+#include <utils/random.h>
 
 namespace MathTL
 {
@@ -38,34 +41,41 @@ namespace MathTL
   }
   
   template <class VECTOR, class MATRIX>
+  inline
   double InversePowerIteration(const MATRIX &A, VECTOR &xk,
  			       const double tol, const unsigned int maxit,
 			       unsigned int &iterations)
   {
-    double lambdak(0), error = 2.0 * tol;
-    
-    assert(xk.size() == A.row_dimension());
-//     xk.resize(A.row_dimension(), false);
-//     xk = 1;
+    return InversePowerIteration(A, xk, 0, tol, maxit, iterations);
+  }
 
-    VECTOR yk(xk.size(),false);
-    yk = 1; // initial value for CG iteration
+  template <class VECTOR, class MATRIX>
+  double InversePowerIteration(const MATRIX& A, VECTOR& zk, const double lambda,
+			       const double tol, const unsigned int maxit, unsigned int &iterations)
+  {
+    double lambdak(lambda), error = 2.0 * tol, diff;
     
-    VECTOR zk(xk.size(), false), diff(xk.size(), false);
-    unsigned int it, CGits;
-    
-    CG(A, xk, yk, tol, 200, CGits);
-    
-    for (it = 1; it < maxit && (error > tol); it++)
+    assert(zk.size() == A.row_dimension());
+
+    ShiftedMatrix<MATRIX> ATilde(A, lambda);
+    VECTOR qk(zk.size(), false);
+
+    for (iterations = 1; iterations < maxit && error > tol; iterations++)
       {
- 	xk = yk; xk.scale(1./l2_norm(yk));
- 	CG(A, xk, yk, tol/100.0, 200, CGits);
- 	lambdak = xk * yk;
- 	diff = yk; diff.add(-lambdak, xk);
- 	error = l2_norm(diff) / abs(lambdak);
+	unsigned int ik, CGits;
+	diff = lambdak;
+	qk = zk; qk.scale(1./linfty_norm(zk, ik)); // ||qk||_infty=1
+//  	if (iterations > 3) ATilde.set_lambda(lambdak);
+ 	CG(ATilde, qk, zk, tol, 200, CGits); // be cautious in the non-symmetric case...
+//   	lambdak += qk[ik]/zk[ik];
+  	lambdak = lambda + qk[ik]/zk[ik];
+	diff -= lambdak;
+	error = fabs(diff);
+// 	cout << "# inverse power iteration, after iteration " << iterations
+// 	     << ", lambdak=" << lambdak << ", difference " << error << endl;
       }
-    
-    xk.scale(1.0/l1_norm(xk));
+
+    zk.scale(1./linfty_norm(zk));
 
     return lambdak;
   }
@@ -126,8 +136,8 @@ namespace MathTL
 	    for (size_type j = 0; j < i; j++) {
 	      ehelp[j] = 0.0;
 	    }
-
-	// Apply similarity transformation to remaining columns.
+	    
+	    // Apply similarity transformation to remaining columns.
 	    for (size_type j(0); j < i; j++) {
 	      f = evals[j];
 	      evecs(j,i) = f;
@@ -306,7 +316,7 @@ namespace MathTL
  	  evecs(j,k) = p;
  	}
       }
-  }
+    }
   } 
 
   template <class MATRIX>
@@ -324,5 +334,65 @@ namespace MathTL
   double CondNonSymm(const MATRIX& A, double tol, unsigned int maxit)
   {
     return sqrt(CondSymm(AtrA<MATRIX>(A), tol, maxit));
+  }
+
+  template <class MATRIX>
+  void LanczosIteration(const MATRIX& A, const double tol,
+			double& lambdamin, double& lambdamax, unsigned int& k)
+  {
+    assert(A.row_dimension() == A.column_dimension());
+    const unsigned int n = A.row_dimension();
+
+    const unsigned int maxiter = 50;
+    Array1D<double> alpha(maxiter), gamma(maxiter+1);
+
+    Vector<double> dk(n); // start vector d^{(0)}
+    for (unsigned int i(0); i < dk.size(); i++) dk[i] = random_double();
+//     cout << "d^{(0)}=" << dk << endl;
+    gamma[0] = l2_norm(dk);
+//     cout << "gamma_{0}=" << gamma[0] << endl;
+    Vector<double> qk(n), qkold(n);
+//     cout << "q^{(0)}=" << qk << endl;
+
+    double change = 2*tol;
+
+    for (k = 1; k <= maxiter && fabs(gamma[k-1])>1e-14 && change > tol; k++) {
+//       cout << "k=" << k << endl;
+      qkold = qk; qk = dk; qk.scale(1./gamma[k-1]);
+//       cout << "q^{(" << k << ")}=" << qk << endl;
+      A.apply(qk, dk); // d^{(k)}=Aq^{(k)}
+      alpha[k-1] = qk * dk;
+//       cout << "alpha_{" << k-1 << "}=" << alpha[k-1] << endl;
+      dk.add(-alpha[k-1], qk);
+      dk.add(-gamma[k-1], qkold);
+//       cout << "d^{(" << k << ")}=" << dk << endl;
+      gamma[k] = l2_norm(dk);
+//       cout << "gamma_{" << k << "}=" << gamma[k] << endl;
+
+      SymmetricMatrix<double> M(k);
+      for (unsigned int i = 0; i < k; i++) {
+ 	M.set_entry(i, i, alpha[i]);
+ 	if (i > 0)   M.set_entry(i, i-1, gamma[i]);
+ 	if (i < k-1) M.set_entry(i, i+1, gamma[i+1]);
+      }
+
+//       cout << "Mk=" << endl;
+//       cout << M;
+
+      Matrix<double> evecs;
+      Vector<double> evals;
+      SymmEigenvalues(M, evals, evecs);
+
+//       cout << "eigenvalues of M_{" << k << "}: " << evals << endl;
+
+      if (k > 2)
+	change = std::max(fabs((lambdamin-evals[0])/lambdamin),
+			  fabs((lambdamax-evals[k-1])/lambdamax));
+      
+      if (k >= 2) {
+	lambdamin = evals[0];
+	lambdamax = evals[k-1];
+      }
+    }
   }
 }

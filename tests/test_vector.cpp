@@ -54,6 +54,10 @@ int main()
        << ", ||x||_1 = " << l1_norm(v)
        << ", ||x||_infinity = " << linfty_norm(v) << endl;
 
+  unsigned int vi = 777;
+  linfty_norm(v, vi);
+  cout << "- ||x||_infinity is realized at index " << vi << endl;
+
   cout << "- external arithmetic functionality:" << endl;
   Vector<double> a(dim), b(dim);
   a(1) = 23; a(2) = 10; b(1) = -1.5; b(2) = 3; b(4) = 8;

@@ -90,7 +90,7 @@ int main()
 
   cout << "- Lanczos iteration for A:" << endl;
   double lambdamin, lambdamax;
-  LanczosIteration(A, 1e-5, lambdamin, lambdamax, iterations);
+  LanczosIteration(A, 1e-5, lambdamin, lambdamax, 100, iterations);
   cout << "  lambdamin=" << lambdamin << ", lambdamax=" << lambdamax
        << ", " << iterations << " iterations needed" << endl;
 

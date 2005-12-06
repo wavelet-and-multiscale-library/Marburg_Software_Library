@@ -338,13 +338,13 @@ namespace MathTL
 
   template <class MATRIX>
   void LanczosIteration(const MATRIX& A, const double tol,
-			double& lambdamin, double& lambdamax, unsigned int& k)
+			double& lambdamin, double& lambdamax,
+			const unsigned int maxit, unsigned int& k)
   {
     assert(A.row_dimension() == A.column_dimension());
     const unsigned int n = A.row_dimension();
 
-    const unsigned int maxiter = 50;
-    Array1D<double> alpha(maxiter), gamma(maxiter+1);
+    Array1D<double> alpha(maxit), gamma(maxit+1);
 
     Vector<double> dk(n); // start vector d^{(0)}
     for (unsigned int i(0); i < dk.size(); i++) dk[i] = random_double();
@@ -356,7 +356,7 @@ namespace MathTL
 
     double change = 2*tol;
 
-    for (k = 1; k <= maxiter && fabs(gamma[k-1])>1e-14 && change > tol; k++) {
+    for (k = 1; k <= maxit && fabs(gamma[k-1])>1e-14 && change > tol; k++) {
 //       cout << "k=" << k << endl;
       qkold = qk; qk = dk; qk.scale(1./gamma[k-1]);
 //       cout << "q^{(" << k << ")}=" << qk << endl;

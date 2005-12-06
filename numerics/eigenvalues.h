@@ -67,7 +67,8 @@ namespace MathTL
    */
   template <class MATRIX>
   void LanczosIteration(const MATRIX& A, const double tol,
-			double& lambdamin, double& lambdamax, unsigned int &iterations);
+			double& lambdamin, double& lambdamax,
+			const unsigned int maxit, unsigned int &iterations);
 
   //! solve symmetric eigenvalue problem
   /*!

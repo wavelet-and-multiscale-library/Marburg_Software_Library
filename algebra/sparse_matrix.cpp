@@ -533,7 +533,7 @@ namespace MathTL
     delete[] Filename;
 	 
 	 
-    s.setf(ios_base::scientific, ios_base::fixed);
+    s.setf(std::ios_base::scientific, std::ios_base::fixed);
     s.precision(12);
 	 
     s << Matrixname << "=sparse(" << row_dimension() << "," << column_dimension() << ");" << endl;

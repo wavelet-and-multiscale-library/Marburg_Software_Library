@@ -9,8 +9,6 @@
 #include <algebra/vector.h>
 #include <algebra/matrix.h>
 
-using namespace std;
-
 namespace MathTL
 {
   template <class C>
@@ -532,8 +530,7 @@ namespace MathTL
 	 
     delete[] Filename;
 	 
-	 
-    s.setf(std::ios_base::scientific, std::ios_base::fixed);
+    s.setf(std::ios::scientific, std::ios::fixed);
     s.precision(12);
 	 
     s << Matrixname << "=sparse(" << row_dimension() << "," << column_dimension() << ");" << endl;

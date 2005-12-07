@@ -12,11 +12,19 @@
 namespace WaveletTL
 {
   template <class WBASIS>
-  SturmEquation<WBASIS>::SturmEquation(const SimpleSturmBVP& bvp)
+  SturmEquation<WBASIS>::SturmEquation(const SimpleSturmBVP& bvp,
+				       const bool precompute_f)
     : bvp_(bvp), basis_(bvp.bc_left(), bvp.bc_right()), normA(0.0), normAinv(0.0)
   {
-    typedef typename WaveletBasis::Index Index;
+    if (precompute_f) precompute_rhs();
+  }
 
+  template <class WBASIS>
+  void
+  SturmEquation<WBASIS>::precompute_rhs() const
+  {
+    typedef typename WaveletBasis::Index Index;
+    
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
     const int j0   = basis().j0();
@@ -26,11 +34,11 @@ namespace WaveletTL
 	const double coeff = f(lambda)/D(lambda);
 	if (fabs(coeff)>1e-15)
 	  fhelp.set_coefficient(lambda, coeff);
-  	if (lambda == basis_.last_wavelet(jmax))
+	if (lambda == basis_.last_wavelet(jmax))
 	  break;
       }
     fnorm_sqr = l2_norm_sqr(fhelp);
-
+    
     // sort the coefficients into fcoeffs
     fcoeffs.resize(fhelp.size());
     unsigned int id(0);
@@ -38,6 +46,8 @@ namespace WaveletTL
 	 it != itend; ++it, ++id)
       fcoeffs[id] = std::pair<Index,double>(it.index(), *it);
     sort(fcoeffs.begin(), fcoeffs.end(), typename InfiniteVector<double,Index>::decreasing_order());
+    
+    rhs_precomputed = true;
   }
 
   template <class WBASIS>
@@ -229,6 +239,8 @@ namespace WaveletTL
   SturmEquation<WBASIS>::RHS(const double eta,
 			     InfiniteVector<double, typename WBASIS::Index>& coeffs) const
   {
+    if (!rhs_precomputed) precompute_rhs();
+
     coeffs.clear();
     double coarsenorm(0);
     double bound(fnorm_sqr - eta*eta);

@@ -162,24 +162,53 @@ int main()
   typedef SturmEquation<Basis> EllipticEquation;
   typedef InfiniteVector<double,Index> V;
 
-  EllipticEquation elliptic(testproblem);
+  EllipticEquation elliptic(testproblem, false); // do not precompute the dummy rhs
+
 //   CachedProblem<EllipticEquation> celliptic(&elliptic);
   CachedProblem<EllipticEquation> celliptic(&elliptic, 12.2508, 6.41001); // d=2, dT=2
 //   CachedProblem<SturmEquation<Basis> > celliptic(&elliptic, 6.73618, 45.5762); // d=3, dT=3
 
-//   Hat hat;
-  Haar hat;
-  V u0;
-  expand(&hat, celliptic.basis(), false, celliptic.basis().j0()+5, u0);
-  u0.compress(1e-14);
-  cout << "* expansion coefficients of hat function u0=" << endl << u0;
- 
-  constant_f cf;
-  V f;
-//   expand(&cf, celliptic.basis(), false, celliptic.basis().j0()+4, f);
-  f.compress(1e-14);
+  // handle different test cases:
+  // 1: u0 = hat function, f(t)=0
+  // 2: u0 = haar function, f(t)=0
+  // 3: u0 = 0, f(t) = pi^2*sin(pi*x)
 
+#define _TESTCASE 3
+
+  V u0;
+
+#if _TESTCASE == 1
+  Hat hat;
+  expand(&hat, celliptic.basis(), false, celliptic.basis().j0()+5, u0); 
+#endif
+  
+#if _TESTCASE == 2
+  Haar haar;
+  expand(&haar, celliptic.basis(), false, celliptic.basis().j0()+5, u0); 
+#endif
+
+#if _TESTCASE == 3
+  // do nothing, u0=0
+#endif
+
+  u0.compress(1e-14);
+//   cout << "* expansion coefficients of u0=" << endl << u0;
+ 
+#if _TESTCASE == 1
+  LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0);
+#endif
+
+#if _TESTCASE == 2
+  LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0);
+#endif
+
+#if _TESTCASE == 3
+  V f;
+  constant_f cf;
+  expand(&cf, celliptic.basis(), false, 8, f);
+  f.compress(1e-14);
   LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, f);
+#endif
   
 #if 0
   cout << "* testing ROS2:" << endl;

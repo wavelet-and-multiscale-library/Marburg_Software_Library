@@ -12,9 +12,11 @@
 
 #include <algebra/infinite_vector.h>
 #include <numerics/ivp.h>
+#include <utils/function.h>
 
 using MathTL::InfiniteVector;
 using MathTL::AbstractIVP;
+using MathTL::Function;
 
 namespace WaveletTL
 {
@@ -203,20 +205,20 @@ namespace WaveletTL
       constructor from a helper object for the stiffness matrix,
       a given initial value u0 in ell_2
       and a driving term f which is constant in time
-     */
+    */
     LinearParabolicEquation(const ELLIPTIC_EQ* elliptic,
-			    const InfiniteVector<double,Index>& u0,
+ 			    const InfiniteVector<double,Index>& u0,
 			    const InfiniteVector<double,Index>& f);
 
     /*!
       constructor from a helper object for the stiffness matrix,
       a given initial value u0 in ell_2
-      and a driving term f
-     */
+      and a time-dependent driving term f
+    */
     LinearParabolicEquation(const ELLIPTIC_EQ* elliptic,
 			    const InfiniteVector<double,Index>& u0,
-			    const Function<space_dimension>* f);
-
+			    Function<ELLIPTIC_EQ::space_dimension>* f = 0);
+    
     /*!
       evaluate the right-hand side F(t,v)=Av+f(t) up to a prescribed tolerance
     */
@@ -247,7 +249,8 @@ namespace WaveletTL
     //! pointer to the elliptic subproblem helper
     const ELLIPTIC_EQ* elliptic;
 
-    InfiniteVector<double,Index> f_;
+    InfiniteVector<double,Index> constant_f_;
+    Function<space_dimension>* f_;
   };
 }
 

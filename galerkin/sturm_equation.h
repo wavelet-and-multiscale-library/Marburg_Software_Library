@@ -63,7 +63,8 @@ namespace WaveletTL
   class SturmEquation
   {
   public:
-    SturmEquation(const SimpleSturmBVP& bvp);
+    SturmEquation(const SimpleSturmBVP& bvp,
+		  const bool precompute_rhs = true);
 
     /*!
       make template argument accessible
@@ -162,11 +163,20 @@ namespace WaveletTL
     const SimpleSturmBVP& bvp_;
     WBASIS basis_;
 
+    // flag whether right-hand side has already been precomputed
+    mutable bool rhs_precomputed;
+    
+    /*!
+      precomputation of the right-hand side
+      (constness is not nice but necessary to have RHS a const function)
+    */
+    void precompute_rhs() const;
+
     // right-hand side coefficients on a fine level, sorted by modulus
-    Array1D<std::pair<Index,double> > fcoeffs;
+    mutable Array1D<std::pair<Index,double> > fcoeffs;
 
     // (squared) \ell_2 norm of the precomputed right-hand side
-    double fnorm_sqr;
+    mutable double fnorm_sqr;
 
     // estimates for ||A|| and ||A^{-1}||
     mutable double normA, normAinv;

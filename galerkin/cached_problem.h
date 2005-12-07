@@ -168,9 +168,9 @@ namespace WaveletTL
       mutable ColumnCache entries_cache;
 
       // Index cache for compression strategy
-      typedef map<int, std::list<Index> > IndexCache;
+      typedef std::map<int, std::list<Index> > IndexCache;
 
-      typedef map<Index, IndexCache> StructureCache;
+      typedef std::map<Index, IndexCache> StructureCache;
 
       // levelwise Index cache for each stiffness matrix column
       mutable StructureCache stiffStructure;

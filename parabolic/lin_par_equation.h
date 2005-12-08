@@ -208,7 +208,8 @@ namespace WaveletTL
     */
     LinearParabolicEquation(const ELLIPTIC_EQ* elliptic,
  			    const InfiniteVector<double,Index>& u0,
-			    const InfiniteVector<double,Index>& f);
+			    const InfiniteVector<double,Index>& f,
+			    const int jmax = 10);
 
     /*!
       constructor from a helper object for the stiffness matrix,
@@ -217,7 +218,8 @@ namespace WaveletTL
     */
     LinearParabolicEquation(const ELLIPTIC_EQ* elliptic,
 			    const InfiniteVector<double,Index>& u0,
-			    Function<ELLIPTIC_EQ::space_dimension>* f = 0);
+			    Function<ELLIPTIC_EQ::space_dimension>* f = 0,
+			    const int jmax = 10);
     
     /*!
       evaluate the right-hand side F(t,v)=Av+f(t) up to a prescribed tolerance
@@ -251,6 +253,9 @@ namespace WaveletTL
 
     InfiniteVector<double,Index> constant_f_;
     Function<space_dimension>* f_;
+
+    //! maximal level
+    const int jmax_;
   };
 }
 

@@ -33,8 +33,9 @@ namespace WaveletTL
   LinearParabolicEquation<ELLIPTIC_EQ>
   ::LinearParabolicEquation(const ELLIPTIC_EQ* helper,
 			    const InfiniteVector<double,Index>& initial,
-			    const InfiniteVector<double,Index>& f)
-    : elliptic(helper), constant_f_(f), f_(0)
+			    const InfiniteVector<double,Index>& f,
+			    const int jmax)
+    : elliptic(helper), constant_f_(f), f_(0), jmax_(jmax)
   {
     AbstractIVP<InfiniteVector<double,Index> >::u0 = initial;
   }
@@ -43,8 +44,9 @@ namespace WaveletTL
   LinearParabolicEquation<ELLIPTIC_EQ>
   ::LinearParabolicEquation(const ELLIPTIC_EQ* helper,
 			    const InfiniteVector<double,Index>& initial,
-			    Function<ELLIPTIC_EQ::space_dimension>* f)
-    : elliptic(helper), constant_f_(), f_(f)
+			    Function<ELLIPTIC_EQ::space_dimension>* f,
+			    const int jmax)
+    : elliptic(helper), constant_f_(), f_(f), jmax_(jmax)
   {
     AbstractIVP<InfiniteVector<double,Index> >::u0 = initial;
   }
@@ -60,7 +62,7 @@ namespace WaveletTL
     result.clear();
     InfiniteVector<double,Index> w(v);
     elliptic->rescale(w, 1); // w = Dv
-    APPLY(*elliptic, w, tolerance, result, 8, St04a); // yields -D^{-1}AD^{-1}w
+    APPLY(*elliptic, w, tolerance, result, jmax_, St04a); // yields -D^{-1}AD^{-1}w
     elliptic->rescale(result, 1);
     result.scale(-1.0); // result = -D(-D^{-1}AD^{-1}Dv) = Av
 
@@ -72,7 +74,7 @@ namespace WaveletTL
     if (f_ != 0) {
       f_->set_time(t);
       w.clear();
-      expand(f_, elliptic->basis(), false, 8, w);
+      expand(f_, elliptic->basis(), false, jmax_, w);
       result.add(w);
     }
   }
@@ -92,9 +94,9 @@ namespace WaveletTL
       const double h = 1e-6;
       InfiniteVector<double,Index> fhelp;
       f_->set_time(t);
-      expand(f_, elliptic->basis(), false, 8, fhelp);
+      expand(f_, elliptic->basis(), false, jmax_, fhelp);
       f_->set_time(t+h);
-      expand(f_, elliptic->basis(), false, 8, result);
+      expand(f_, elliptic->basis(), false, jmax_, result);
       result.add(-1., fhelp);
       result.scale(1./h);
     }
@@ -111,7 +113,7 @@ namespace WaveletTL
 			     InfiniteVector<double,Index>& result) const
   {
     LinParEqROWStageEquationHelper<ELLIPTIC_EQ> helper(alpha, elliptic, y);
-    CDD1_SOLVE(helper, tolerance, result, 8); // D^{-1}(alpha*I-T)D^{-1}*Dx = D^{-1}y    
+    CDD1_SOLVE(helper, tolerance, result, jmax_); // D^{-1}(alpha*I-T)D^{-1}*Dx = D^{-1}y    
     elliptic->rescale(result, -1); // Dx -> x
   }
 }

@@ -18,6 +18,8 @@
 #include <interval/ds_expansion.h>
 #include <galerkin/sturm_equation.h>
 #include <galerkin/cached_problem.h>
+
+#define _WAVELETTL_CDD1_VERBOSITY 0
 #include <parabolic/lin_par_equation.h>
 
 using namespace std;
@@ -131,19 +133,49 @@ class Haar
   }
 };
 
-class constant_f
-  : public Function<1>
-{
-  public:
-  inline double value(const Point<1>& p,
-		      const unsigned int component = 0) const
-  {
+class constant_f : public Function<1> {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
     return M_PI*M_PI*sin(M_PI*p[0]);
   }
   
-  void vector_value(const Point<1> &p,
-		    Vector<double>& values) const
-  {
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
+class rhs_4 : public Function<1> {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    return -5*p[0]+9*p[0]*p[0]+2*p[0]*p[0]*p[0]+6*get_time()-12*get_time()*p[0]; // Maple...
+  }
+  
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
+class exact_solution_3 : public Function<1> {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    return (1-exp(-M_PI*M_PI*get_time()))*sin(M_PI*p[0]);
+  }
+  
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
+class exact_solution_4 : public Function<1> {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    return get_time()*p[0]*(1-p[0])*(1-p[0])*(1-p[0]) + (1-get_time())*p[0]*p[0]*p[0]*(1-p[0]);
+  }
+  
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
     values.resize(1, false);
     values[0] = value(p);
   }
@@ -168,46 +200,80 @@ int main()
   CachedProblem<EllipticEquation> celliptic(&elliptic, 12.2508, 6.41001); // d=2, dT=2
 //   CachedProblem<SturmEquation<Basis> > celliptic(&elliptic, 6.73618, 45.5762); // d=3, dT=3
 
+  const int jmax = 8;
+
   // handle different test cases:
   // 1: u0 = hat function, f(t)=0
   // 2: u0 = haar function, f(t)=0
-  // 3: u0 = 0, f(t) = pi^2*sin(pi*x)
+  // 3: u0 = 0, f(t,x) = pi^2*sin(pi*x), u(t,x)=(1-exp(-pi^2*t))*sin(pi*x)
+  // 4: u(t,x)=t*x*(1-x)^3+(1-t)*x^3*(1-x), f(t,x)=u_t(t,x)-u_{xx}(t,x)
 
 #define _TESTCASE 3
+
+  //
+  //
+  // setup exact solution (if available)
+
+#if _TESTCASE == 3
+  exact_solution_3 uexact;
+#endif
+
+#if _TESTCASE == 4
+  exact_solution_4 uexact;
+#endif
+
+  //
+  //
+  // setup initial value u0
 
   V u0;
 
 #if _TESTCASE == 1
   Hat hat;
-  expand(&hat, celliptic.basis(), false, celliptic.basis().j0()+5, u0); 
+  expand(&hat, celliptic.basis(), false, jmax, u0); 
 #endif
   
 #if _TESTCASE == 2
   Haar haar;
-  expand(&haar, celliptic.basis(), false, celliptic.basis().j0()+5, u0); 
+  expand(&haar, celliptic.basis(), false, jmax, u0); 
 #endif
 
 #if _TESTCASE == 3
   // do nothing, u0=0
 #endif
 
+#if _TESTCASE == 4
+  uexact.set_time(0);
+  expand(&uexact, celliptic.basis(), false, jmax, u0);
+#endif
+
   u0.compress(1e-14);
 //   cout << "* expansion coefficients of u0=" << endl << u0;
  
+  //
+  //
+  // setup driving term f
+
 #if _TESTCASE == 1
-  LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0);
+  LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, 0, jmax);
 #endif
 
 #if _TESTCASE == 2
-  LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0);
+  LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, 0, jmax);
 #endif
 
 #if _TESTCASE == 3
   V f;
   constant_f cf;
-  expand(&cf, celliptic.basis(), false, 8, f);
+  expand(&cf, celliptic.basis(), false, jmax, f);
   f.compress(1e-14);
-  LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, f);
+//   LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, f, jmax);
+  LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, &cf, jmax);
+#endif
+
+#if _TESTCASE == 4
+  rhs_4 f4;
+  LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, &f4, jmax);
 #endif
   
 #if 0
@@ -241,15 +307,17 @@ int main()
 #endif
 
 #if 1
+  // einzelner Testlauf, gibt Plot der Iterierten aus
+
   const double T = 1.0;
   const double q = 10.0;
 //   const double TOL = 1e-2;
-  const double TOL = 1e-1;
+  const double TOL = 1e-2;
   const double tau_max = 1.0;
 
   IVPSolution<V> result_adaptive;
   
-  cout << "* testing ROS2 (adaptive)..." << endl;
+  cout << "* testing ROS2 (adaptive, single run)..." << endl;
   ROWMethod<V> ros2_adaptive(WMethod<V>::ROS2);
   solve_IVP(&parabolic, &ros2_adaptive, T,
 	    TOL, q, tau_max, result_adaptive);
@@ -274,7 +342,76 @@ int main()
   std::ofstream resultstream("lin_par_result.m");
   result.matlab_output(resultstream);
   resultstream.close();
- 
+#endif
+
+#if 0
+  // mehrere Testlaeufe mit einem Problem, verschiedene Toleranzen
+
+  const double T = 1.0;
+  const double q = 10.0;
+  const double tau_max = 1.0;
+
+  std::list<double> numberofsteps;
+  std::list<double> errors;
+
+  cout << "* testing ROS2 (adaptive, several tolerances)..." << endl;
+  for (int expo = 2; expo <= 8; expo++) { // 2^{-6}=0.015625, 2^{-8}=3.9e-3, 2^{-10}=9.77e-4
+    const double TOL = ldexp(1.0, -expo);
+
+    IVPSolution<V> result_adaptive;
+
+    cout << "  TOL=" << TOL << endl;
+
+    // adaptive solution of u'=Au+f
+    ROWMethod<V> ros2_adaptive(WMethod<V>::ROS2);
+    solve_IVP(&parabolic, &ros2_adaptive, T,
+	      TOL, q, tau_max, result_adaptive);
+
+#if _TESTCASE == 3 || _TESTCASE == 4
+    // compute maximal ell_2 error of the coefficients
+    double errhelp = 0;
+    std::list<double>::const_iterator ti(result_adaptive.t.begin());
+    for (std::list<V>::const_iterator ui(result_adaptive.u.begin());
+	 ui != result_adaptive.u.end(); ++ui, ++ti) {
+      V uexact_coeffs;
+      uexact.set_time(*ti);
+      expand(&uexact, celliptic.basis(), false, jmax, uexact_coeffs);
+      cout << "  ell_2 error at t=" << *ti << ": " << l2_norm(*ui - uexact_coeffs) << endl;
+      errhelp = std::max(errhelp, l2_norm(*ui - uexact_coeffs));
+    }
+    errors.push_back(errhelp);
+    numberofsteps.push_back(result_adaptive.t.size());
+#endif
+
+#if _TESTCASE == 1 || _TESTCASE == 2
+    // quick hack: use TOL
+    errors.push_back(TOL);
+    numberofsteps.push_back(result_adaptive.t.size());
+#endif
+  }
+
+  std::ofstream resultstream("work_precision.m");
+
+  resultstream << "errors=[";
+  for (std::list<double>::const_iterator it = errors.begin();
+       it != errors.end(); ++it) {
+    resultstream << log10(*it);
+    if (it != errors.end())
+      resultstream << " ";
+  }
+  resultstream << "];" << endl;
+
+  resultstream << "N=[";
+  for (std::list<double>::const_iterator it = numberofsteps.begin();
+       it != numberofsteps.end(); ++it) {
+    resultstream << log10(*it);
+    if (it != numberofsteps.end())
+      resultstream << " ";
+  }
+  resultstream << "];" << endl;
+
+  resultstream.close();
+
 #endif
 
   return 0;

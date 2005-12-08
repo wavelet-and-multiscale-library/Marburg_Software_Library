@@ -144,7 +144,7 @@ namespace WaveletTL
 
       Vector<double> x(b);
       unsigned int iterations;
-      CG(A_Lambda, b, x, 1e-12, 100, iterations);
+      CG(A_Lambda, b, x, 1e-12, 200, iterations);
   
       coeffs.clear();
       row = 0;

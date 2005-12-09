@@ -97,37 +97,27 @@ public:
   bool bc_right() const { return true; }
 };
 
-class Hat
-  : public Function<1>
+class Hat : public Function<1>
 {
-  public:
-  inline double value(const Point<1>& p,
-		      const unsigned int component = 0) const
-  {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
     return std::max(0.0,0.5-abs(p[0]-0.5));
   }
   
-  void vector_value(const Point<1> &p,
-		    Vector<double>& values) const
-  {
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
     values.resize(1, false);
     values[0] = value(p);
   }
 };
 
-class Haar
-  : public Function<1>
+class Haar : public Function<1>
 {
-  public:
-  inline double value(const Point<1>& p,
-		      const unsigned int component = 0) const
-  {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
     return abs(p[0]-0.5)<=0.25 ? 1.0 : 0.0;
   }
   
-  void vector_value(const Point<1> &p,
-		    Vector<double>& values) const
-  {
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
     values.resize(1, false);
     values[0] = value(p);
   }
@@ -157,6 +147,18 @@ public:
   }
 };
 
+class rhs_5 : public Function<1> {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    return p[0]*(1-p[0])+2*get_time();
+  }
+  
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
 class exact_solution_3 : public Function<1> {
 public:
   inline double value(const Point<1>& p, const unsigned int component = 0) const {
@@ -173,6 +175,18 @@ class exact_solution_4 : public Function<1> {
 public:
   inline double value(const Point<1>& p, const unsigned int component = 0) const {
     return get_time()*p[0]*(1-p[0])*(1-p[0])*(1-p[0]) + (1-get_time())*p[0]*p[0]*p[0]*(1-p[0]);
+  }
+  
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
+class exact_solution_5 : public Function<1> {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    return get_time()*p[0]*(1-p[0]);
   }
   
   void vector_value(const Point<1> &p, Vector<double>& values) const {
@@ -207,8 +221,9 @@ int main()
   // 2: u0 = haar function, f(t)=0
   // 3: u0 = 0, f(t,x) = pi^2*sin(pi*x), u(t,x)=(1-exp(-pi^2*t))*sin(pi*x)
   // 4: u(t,x)=t*x*(1-x)^3+(1-t)*x^3*(1-x), f(t,x)=u_t(t,x)-u_{xx}(t,x)
+  // 5: u(t,x)=t*x*(1-x)
 
-#define _TESTCASE 3
+#define _TESTCASE 5
 
   //
   //
@@ -220,6 +235,10 @@ int main()
 
 #if _TESTCASE == 4
   exact_solution_4 uexact;
+#endif
+
+#if _TESTCASE == 5
+  exact_solution_5 uexact;
 #endif
 
   //
@@ -245,6 +264,10 @@ int main()
 #if _TESTCASE == 4
   uexact.set_time(0);
   expand(&uexact, celliptic.basis(), false, jmax, u0);
+#endif
+
+#if _TESTCASE == 5
+  // do nothing, u0=0
 #endif
 
   u0.compress(1e-14);
@@ -274,6 +297,11 @@ int main()
 #if _TESTCASE == 4
   rhs_4 f4;
   LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, &f4, jmax);
+#endif
+  
+#if _TESTCASE == 5
+  rhs_5 f5;
+  LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, &f5, jmax);
 #endif
   
 #if 0
@@ -306,7 +334,7 @@ int main()
   }
 #endif
 
-#if 1
+#if 0
   // einzelner Testlauf, gibt Plot der Iterierten aus
 
   const double T = 1.0;
@@ -320,7 +348,7 @@ int main()
   cout << "* testing ROS2 (adaptive, single run)..." << endl;
   ROWMethod<V> ros2_adaptive(WMethod<V>::ROS2);
   solve_IVP(&parabolic, &ros2_adaptive, T,
-	    TOL, q, tau_max, result_adaptive);
+	    TOL, 0, q, tau_max, result_adaptive);
 
   const int resolution = 10;
   Grid<1> gx(0.0, 1.0, 1<<resolution);
@@ -344,11 +372,11 @@ int main()
   resultstream.close();
 #endif
 
-#if 0
+#if 1
   // mehrere Testlaeufe mit einem Problem, verschiedene Toleranzen
 
   const double T = 1.0;
-  const double q = 10.0;
+  const double q = 5.0;
   const double tau_max = 1.0;
 
   std::list<double> numberofsteps;
@@ -365,9 +393,9 @@ int main()
     // adaptive solution of u'=Au+f
     ROWMethod<V> ros2_adaptive(WMethod<V>::ROS2);
     solve_IVP(&parabolic, &ros2_adaptive, T,
-	      TOL, q, tau_max, result_adaptive);
+	      TOL, 0, q, tau_max, result_adaptive);
 
-#if _TESTCASE == 3 || _TESTCASE == 4
+#if _TESTCASE == 3 || _TESTCASE == 4 || _TESTCASE == 5
     // compute maximal ell_2 error of the coefficients
     double errhelp = 0;
     std::list<double>::const_iterator ti(result_adaptive.t.begin());

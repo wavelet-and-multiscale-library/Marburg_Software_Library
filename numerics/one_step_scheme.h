@@ -76,12 +76,16 @@ namespace MathTL
     You have to specify a maximal stepwidth tau_max and a factor q which limits the
     increase of the stepwidth when the error estimator is too small.
     The algorithm returns the time step sequence and the solution.
+
+    Both absolute and relative tolerances can be specified, a step is accepted when
+      ||y-yhat|| <= atol + max(||u_m||,||u_{m+1}||) * rtol
   */
   template <class VECTOR>
   void solve_IVP(const AbstractIVP<VECTOR>* ivp,
 		 const OneStepScheme<VECTOR>* scheme,
 		 const double T,
-		 const double tolerance,
+		 const double atol,
+		 const double rtol,
 		 const double q,
 		 const double tau_max,
 		 IVPSolution<VECTOR>& result);

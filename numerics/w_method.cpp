@@ -201,17 +201,17 @@ namespace MathTL
       help = u_m;
       for (unsigned int j(0); j < i; j++)
   	help.add(A(i,j), u[j]);
-      ivp->evaluate_f(t_m+tau*alpha_vector[i], help, tolerance/stages, rhs);
+      ivp->evaluate_f(t_m+tau*alpha_vector[i], help, tolerance/(3*stages), rhs);
       
       for (unsigned int j(0); j < i; j++)
 	rhs.add(C(i,j)/tau, u[j]);
       
-      stage_equation_helper->approximate_ft(ivp, t_m, u_m, tolerance/stages, help);
+      stage_equation_helper->approximate_ft(ivp, t_m, u_m, tolerance/(3*stages), help);
       rhs.add(tau*gamma_vector[i], help);
       
       // solve i-th stage equation
       // (\tau*\gamma_{i,i})^{-1}I - T) u_i = rhs
-      stage_equation_helper->solve_W_stage_equation(ivp, t_m, u_m, 1./(tau*C(i,i)), rhs, tolerance/stages, u[i]);
+      stage_equation_helper->solve_W_stage_equation(ivp, t_m, u_m, 1./(tau*C(i,i)), rhs, tolerance/(3*stages), u[i]);
     }
     
     // update u^{(m)} -> u^{(m+1)} by the k_i

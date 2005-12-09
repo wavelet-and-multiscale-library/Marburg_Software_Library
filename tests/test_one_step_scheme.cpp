@@ -73,9 +73,9 @@ int main()
   
   typedef Vector<double> V;
 
-  Dahlquist problem(-5.0);
+  Dahlquist problem(5.0);
 
-#if 1
+#if 0
   cout << "- checking consistency of the builtin one-step schemes:" << endl;
 
   cout << "* testing RK12:" << endl;
@@ -304,30 +304,63 @@ int main()
   cout << "- checking adaptive solution of the Dahlquist test problem:" << endl;
 
   const double T = 1.0;
-  const double q = 10.0;
-  const double TOL = 1e-2;
+  const double q = 5.0;
+  const double TOL = 1e-10;
   const double tau_max = 1.0;
 
-  cout << "* testing RK12..." << endl;
-  ExplicitRungeKuttaScheme<V> rk12_adaptive(ExplicitRungeKuttaScheme<V>::RK12);
-  IVPSolution<V> result_adaptive;
-  solve_IVP(&problem, &rk12_adaptive, T,
-	    TOL, q, tau_max, result_adaptive);
+  cout << "* TOL=" << TOL << endl;
 
+  double errhelp;
+  std::list<double>::const_iterator ti;
+  IVPSolution<V> result_adaptive;
+
+//   cout << "* testing RK12..." << endl;
+//   ExplicitRungeKuttaScheme<V> rk12_adaptive(ExplicitRungeKuttaScheme<V>::RK12);
+//   solve_IVP(&problem, &rk12_adaptive, T,
+// 	    TOL, 0, q, tau_max, result_adaptive);
+
+//   errhelp = 0;
+//   ti = result_adaptive.t.begin();
+//   for (std::list<V>::const_iterator ui(result_adaptive.u.begin());
+//        ui != result_adaptive.u.end(); ++ui, ++ti) {
+//     cout << "  absolute error at t=" << *ti << ": " << fabs((*ui)[0] - problem.exact_solution(*ti)) << endl;
+//   }
+  
   cout << "* testing DoPri45..." << endl;
   ExplicitRungeKuttaScheme<V> dopri45_adaptive(ExplicitRungeKuttaScheme<V>::DoPri45);
   solve_IVP(&problem, &dopri45_adaptive, T,
-	    TOL, q, tau_max, result_adaptive);
+	    TOL, 0, q, tau_max, result_adaptive);
 
-  cout << "* testing ROS2..." << endl;
-  ROWMethod<V> ros2_adaptive(WMethod<V>::ROS2);
-  solve_IVP(&problem, &ros2_adaptive, T,
-	    TOL, q, tau_max, result_adaptive);
+  errhelp = 0;
+  ti = result_adaptive.t.begin();
+  for (std::list<V>::const_iterator ui(result_adaptive.u.begin());
+       ui != result_adaptive.u.end(); ++ui, ++ti) {
+    cout << "  absolute error at t=" << *ti << ": " << fabs((*ui)[0] - problem.exact_solution(*ti)) << endl;
+  }
   
-  cout << "* testing ROS3..." << endl;
-  ROWMethod<V> ros3_adaptive(WMethod<V>::ROS3);
-  solve_IVP(&problem, &ros3_adaptive, T,
-	    TOL, q, tau_max, result_adaptive);
+//   cout << "* testing ROS2..." << endl;
+//   ROWMethod<V> ros2_adaptive(WMethod<V>::ROS2);
+//   solve_IVP(&problem, &ros2_adaptive, T,
+// 	    TOL, 0, q, tau_max, result_adaptive);
+  
+//   errhelp = 0;
+//   ti = result_adaptive.t.begin();
+//   for (std::list<V>::const_iterator ui(result_adaptive.u.begin());
+//        ui != result_adaptive.u.end(); ++ui, ++ti) {
+//     cout << "  absolute error at t=" << *ti << ": " << fabs((*ui)[0] - problem.exact_solution(*ti)) << endl;
+//   }
+  
+//   cout << "* testing ROS3..." << endl;
+//   ROWMethod<V> ros3_adaptive(WMethod<V>::ROS3);
+//   solve_IVP(&problem, &ros3_adaptive, T,
+// 	    TOL, 0, q, tau_max, result_adaptive);
+  
+//   errhelp = 0;
+//   ti = result_adaptive.t.begin();
+//   for (std::list<V>::const_iterator ui(result_adaptive.u.begin());
+//        ui != result_adaptive.u.end(); ++ui, ++ti) {
+//     cout << "  absolute error at t=" << *ti << ": " << fabs((*ui)[0] - problem.exact_solution(*ti)) << endl;
+//   }
   
 #endif
 

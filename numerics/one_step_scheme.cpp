@@ -23,7 +23,7 @@ namespace MathTL
 		 const double tau_max,
 		 IVPSolution<VECTOR>& result)
   {
-#if 0
+#if 1
     // IVP solver a la Hairer/Wanner
     result.t.clear();
     result.u.clear();
@@ -34,10 +34,14 @@ namespace MathTL
     unsigned int m = 0;
     result.t.push_back(t_m);
     result.u.push_back(u_m);
+
+#if _MATHTL_ONESTEPSCHEME_VERBOSITY >= 1
     cout << "t_{" << m << "}=" << t_m << " accepted!" << endl;
+#endif
+
     m++;
     
-    const double rho = 0.5; // safety factor
+    const double rho = 0.8; // safety factor
     
     double tau_m = (T - t_m)/10.0; // first crude guess for the time stepsize (TODO...)
     
@@ -51,12 +55,13 @@ namespace MathTL
 	const double u_m_norm = linfty_norm(u_m);
 	const double u_mplus1_norm = linfty_norm(u_mplus1);
 	const double maxnorm = std::max(u_m_norm, u_mplus1_norm);
-	double errest = 0;
-	for (typename VECTOR::const_iterator it(error_estimate.begin());
-	     it != error_estimate.end(); ++it)
-	  errest += ((*it * *it)/((atol+maxnorm*rtol)*(atol+maxnorm*rtol)));
-	errest = sqrt(errest / error_estimate.size());
-	
+ 	double errest = 0;
+//  	for (typename VECTOR::const_iterator it(error_estimate.begin());
+// 	     it != error_estimate.end(); ++it)
+// 	  errest += ((*it * *it)/((atol+maxnorm*rtol)*(atol+maxnorm*rtol)));
+// 	errest = sqrt(errest / error_estimate.size());
+	errest = linfty_norm(error_estimate) / (atol+maxnorm*rtol);
+
 	// estimate new stepsize
 	double tau = std::min(tau_max, tau_m * std::min(q, rho*pow(1./errest, 1./(scheme->order()+1))));
 	
@@ -68,7 +73,9 @@ namespace MathTL
 	    u_m = u_mplus1;
 	    result.u.push_back(u_m);
 	    
+#if _MATHTL_ONESTEPSCHEME_VERBOSITY >= 1
 	    cout << "t_{" << m << "}=" << t_m << " accepted!" << endl;
+#endif
 	    
 	    tau_m = std::min(tau, T-t_m);
 	    
@@ -77,7 +84,11 @@ namespace MathTL
 	else
 	  {
 	    // reject the time step
+
+#if _MATHTL_ONESTEPSCHEME_VERBOSITY >= 1
 	    cout << "t_{" << m << "}=" << t_m+tau_m << " rejected!" << endl;
+#endif
+
 	    tau_m = tau;
 	  }
       }
@@ -93,7 +104,11 @@ namespace MathTL
     unsigned int m = 0;
     result.t.push_back(t_m);
     result.u.push_back(u_m);
+
+#if _MATHTL_ONESTEPSCHEME_VERBOSITY >= 1
     cout << "t_{" << m << "}=" << t_m << " accepted!" << endl;
+#endif
+
     m++;
     
     const double rho = 0.8; // safety factor
@@ -109,7 +124,7 @@ namespace MathTL
 	double tau = std::min(pow(rho*atol/l2_norm(error_estimate),1./(scheme->order()+1))*tau_m,
 			      std::min(q*tau_m,tau_max));
 	
-	if (l2_norm(error_estimate) <= atol) // + std::max(linfty_norm(u_m), linfty_norm(u_mplus1)) * rtol)
+	if (linfty_norm(error_estimate) <= atol) // + std::max(linfty_norm(u_m), linfty_norm(u_mplus1)) * rtol)
 	  {
 	    // accept the time step
 	    t_m += tau_m;
@@ -117,7 +132,9 @@ namespace MathTL
 	    u_m = u_mplus1;
 	    result.u.push_back(u_m);
 
+#if _MATHTL_ONESTEPSCHEME_VERBOSITY >= 1
 	    cout << "t_{" << m << "}=" << t_m << " accepted!" << endl;
+#endif
 	    
 	    tau_m = std::min(tau, T-t_m);
 
@@ -126,7 +143,11 @@ namespace MathTL
 	else
 	  {
 	    // reject the time step
+
+#if _MATHTL_ONESTEPSCHEME_VERBOSITY >= 1
 	    cout << "t_{" << m << "}=" << t_m+tau_m << " rejected!" << endl;
+#endif
+
 	    tau_m = tau;
 	  }
       }

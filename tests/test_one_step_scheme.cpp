@@ -4,7 +4,10 @@
 #include <map>
 #include <algebra/vector.h>
 #include <numerics/ivp.h>
+
+#define _MATHTL_ONESTEPSCHEME_VERBOSITY 0
 #include <numerics/one_step_scheme.h>
+
 #include <numerics/runge_kutta.h>
 #include <numerics/w_method.h>
 #include <numerics/row_method.h>
@@ -65,6 +68,77 @@ public:
 private:
   double lambda_;
 };
+
+/*
+  Arenstorf orbit
+
+    y_1'' = y_1 + 2*y_2' - mu'*(y_1+mu)/D_1 - mu*(y_1-mu')/D_2
+    y_2'' = y_2 - 2*y_1' - mu'*y_2/D_1 - mu*y_2/D_2
+
+  where
+
+    D_1 = ((y_1+mu)^2+y_2^2)^{3/2},
+    D_2 = ((y_1-mu')^2+y_2^2)^{3/2},
+    mu = 0.012277471, mu' = 1 - mu
+
+  With initial values y_1(0)=0.994, y_1'(0) = y_2(0) = 0 and
+  y_2'(0) = -2.00158510637908252240537862224, the solution is
+  periodic, x_end = 17.0652165601579625588917206249
+ */
+class Arenstorf
+  : public AbstractIVP<Vector<double> >
+{
+public:
+  Arenstorf()
+  {
+    u0.resize(4);
+    u0[0] = 0.994;
+    u0[1] = u0[2] = 0;
+    u0[3] = -2.00158510637908252240537862224;
+  }
+
+  void evaluate_f(const double t,
+		  const Vector<double>& v,
+		  const double tolerance,
+		  Vector<double>& result) const
+  {
+    const double mu = 0.012277471;
+
+    result[0] = v[1];
+    result[1] = v[0] + 2*v[3]
+      - (1-mu)*(v[0]+mu)/pow((v[0]+mu)*(v[0]+mu)+v[2]*v[2], 1.5)
+      - mu*(v[0]-1+mu)/pow((v[0]-1+mu)*(v[0]-1+mu)+v[2]*v[2], 1.5);
+    result[2] = v[3];
+    result[3] = v[2] - 2*v[1]
+      - (1-mu)*v[2]/pow((v[0]+mu)*(v[0]+mu)+v[2]*v[2], 1.5)
+      - mu*v[2]/pow((v[0]-1+mu)*(v[0]-1+mu)+v[2]*v[2], 1.5);
+  }
+
+  void evaluate_ft(const double t,
+		   const Vector<double>& v,
+		   const double tolerance,
+		   Vector<double>& result) const
+  {
+    result = 0;
+  }
+
+  void solve_ROW_stage_equation(const double t,
+				const Vector<double>& v,
+				const double alpha,
+				const Vector<double>& y,
+				const double tolerancs,
+				Vector<double>& result) const
+  {
+//     // Jv=lambda*v -> (alpha*I-J)x=(alpha-lambda)x
+//     result[0] = y[0] / (alpha - lambda_);
+  }
+
+  double period() const { return 17.0652165601579625588917206249; }
+
+private:
+  double lambda_;
+};
+
 
 
 int main()
@@ -300,7 +374,7 @@ int main()
   }
 #endif
 
-#if 1
+#if 0
   cout << "- checking adaptive solution of the Dahlquist test problem:" << endl;
 
   const double T = 1.0;
@@ -337,6 +411,19 @@ int main()
        ui != result_adaptive.u.end(); ++ui, ++ti) {
     cout << "  absolute error at t=" << *ti << ": " << fabs((*ui)[0] - problem.exact_solution(*ti)) << endl;
   }
+
+  cout << "* testing DoPri78..." << endl;
+  ExplicitRungeKuttaScheme<V> dopri78_adaptive(ExplicitRungeKuttaScheme<V>::DoPri78);
+  solve_IVP(&problem, &dopri78_adaptive, T,
+	    TOL, 0, q, tau_max, result_adaptive);
+
+  errhelp = 0;
+  ti = result_adaptive.t.begin();
+  for (std::list<V>::const_iterator ui(result_adaptive.u.begin());
+       ui != result_adaptive.u.end(); ++ui, ++ti) {
+    cout << "  absolute error at t=" << *ti << ": " << fabs((*ui)[0] - problem.exact_solution(*ti)) << endl;
+  }
+
   
 //   cout << "* testing ROS2..." << endl;
 //   ROWMethod<V> ros2_adaptive(WMethod<V>::ROS2);
@@ -363,6 +450,82 @@ int main()
 //   }
   
 #endif
+
+#if 1
+  cout << "- checking adaptive solution of the Arenstorf orbit problem:" << endl;
+
+  Arenstorf problem2;
+
+  const double T2 = problem2.period();
+  const double q2 = 5.0;
+  const double TOL2 = 1e-13;
+  const double tau_max2 = 1.0;
+
+  cout << "* TOL=" << TOL2 << endl;
+
+  double errhelp2;
+  std::list<double>::const_iterator ti2;
+  IVPSolution<V> result_adaptive2;
+
+//   cout << "* testing RK12..." << endl;
+//   ExplicitRungeKuttaScheme<V> rk12_adaptive2(ExplicitRungeKuttaScheme<V>::RK12);
+//   solve_IVP(&problem2, &rk12_adaptive2, T2,
+// 	    TOL2, 0, q2, tau_max2, result_adaptive2);
+//   cout << "  ... done: " << result_adaptive2.u.size() << " time steps needed," << endl;
+//   cout << "  initial value at T=0: "
+//        << problem2.u0 << endl
+//        << "  solution at  T=" << T2 << ": "
+//        << *(result_adaptive2.u.rbegin())
+//        << ", absolute error " << linfty_norm(problem2.u0 - *(result_adaptive2.u.rbegin())) << endl;
+  
+  cout << "* testing DoPri45..." << endl;
+  ExplicitRungeKuttaScheme<V> dopri45_adaptive2(ExplicitRungeKuttaScheme<V>::DoPri45);
+  solve_IVP(&problem2, &dopri45_adaptive2, T2,
+ 	    TOL2, 0, q2, tau_max2, result_adaptive2);
+  cout << "  ... done: " << result_adaptive2.u.size() << " time steps needed," << endl;
+  cout << "  initial value at T=0: "
+       << problem2.u0 << endl
+       << "  solution at  T=" << T2 << ": "
+       << *(result_adaptive2.u.rbegin())
+       << ", absolute error " << linfty_norm(problem2.u0 - *(result_adaptive2.u.rbegin())) << endl;
+  
+  cout << "* testing DoPri78..." << endl;
+  ExplicitRungeKuttaScheme<V> dopri78_adaptive2(ExplicitRungeKuttaScheme<V>::DoPri78);
+  solve_IVP(&problem2, &dopri78_adaptive2, T2,
+	    TOL2, 0, q2, tau_max2, result_adaptive2);
+  cout << "  ... done: " << result_adaptive2.u.size() << " time steps needed," << endl;
+  cout << "  initial value at T=0: "
+       << problem2.u0 << endl
+       << "  solution at  T=" << T2 << ": "
+       << *(result_adaptive2.u.rbegin())
+       << ", absolute error " << linfty_norm(problem2.u0 - *(result_adaptive2.u.rbegin())) << endl;
+
+//   cout << "* testing ROS2..." << endl;
+//   ROWMethod<V> ros2_adaptive(WMethod<V>::ROS2);
+//   solve_IVP(&problem, &ros2_adaptive, T,
+// 	    TOL, 0, q, tau_max, result_adaptive);
+  
+//   errhelp = 0;
+//   ti = result_adaptive.t.begin();
+//   for (std::list<V>::const_iterator ui(result_adaptive.u.begin());
+//        ui != result_adaptive.u.end(); ++ui, ++ti) {
+//     cout << "  absolute error at t=" << *ti << ": " << fabs((*ui)[0] - problem.exact_solution(*ti)) << endl;
+//   }
+  
+//   cout << "* testing ROS3..." << endl;
+//   ROWMethod<V> ros3_adaptive(WMethod<V>::ROS3);
+//   solve_IVP(&problem, &ros3_adaptive, T,
+// 	    TOL, 0, q, tau_max, result_adaptive);
+  
+//   errhelp = 0;
+//   ti = result_adaptive.t.begin();
+//   for (std::list<V>::const_iterator ui(result_adaptive.u.begin());
+//        ui != result_adaptive.u.end(); ++ui, ++ti) {
+//     cout << "  absolute error at t=" << *ti << ": " << fabs((*ui)[0] - problem.exact_solution(*ti)) << endl;
+//   }
+  
+#endif
+
 
   return 0;
 }

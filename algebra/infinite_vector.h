@@ -14,6 +14,7 @@
 #include <map>
 #include <algorithm>
 #include <iterator>
+#include <utils/array1d.h>
 
 // external functionality, for convenience:
 #include <algebra/vector_norms.h>
@@ -261,6 +262,10 @@ namespace MathTL
       in place summation *this += s*v
     */
     void add(const C s, const InfiniteVector<C,I>& v);
+
+    /*!
+    */
+    void sadd(const C s, const std::list<I>& v, const Array1D<double>& values);
     
     /*!
       in place summation *this = s*(*this) + v
@@ -331,6 +336,14 @@ namespace MathTL
       at the beginning of the algorithm
     */
     void COARSE(const double eps, InfiniteVector<C,I>& v) const;
+    
+//     /*!
+//       Computes v such that \|*this-v\|_{\ell_2}\le\epsilon;
+//       In contrast to the usual coarse routine, here the 
+//       This routine is a suggestion from Rob Stevenson.
+//     */
+//     void COARSE(const double eps, InfiniteVector<C,I>& v) const;
+
   };
 
   /*!

@@ -8,6 +8,7 @@
 #include <algebra/matrix.h>
 #include <numerics/sturm_bvp.h>
 #include <numerics/iteratsolv.h>
+#define _MATHTL_ONESTEPSCHEME_VERBOSITY 1
 #include <numerics/w_method.h>
 #include <numerics/row_method.h>
 #include <geometry/grid.h>
@@ -214,16 +215,16 @@ int main()
   CachedProblem<EllipticEquation> celliptic(&elliptic, 12.2508, 6.41001); // d=2, dT=2
 //   CachedProblem<SturmEquation<Basis> > celliptic(&elliptic, 6.73618, 45.5762); // d=3, dT=3
 
-  const int jmax = 8;
+  const int jmax = 10;
 
   // handle different test cases:
   // 1: u0 = hat function, f(t)=0
   // 2: u0 = haar function, f(t)=0
   // 3: u0 = 0, f(t,x) = pi^2*sin(pi*x), u(t,x)=(1-exp(-pi^2*t))*sin(pi*x)
   // 4: u(t,x)=t*x*(1-x)^3+(1-t)*x^3*(1-x), f(t,x)=u_t(t,x)-u_{xx}(t,x)
-  // 5: u(t,x)=t*x*(1-x)
+  // 5: u(t,x)=t*x*(1-x), f(t,x) = x*(1-x)+2*t
 
-#define _TESTCASE 5
+#define _TESTCASE 3
 
   //
   //
@@ -383,7 +384,7 @@ int main()
   std::list<double> errors;
 
   cout << "* testing ROS2 (adaptive, several tolerances)..." << endl;
-  for (int expo = 2; expo <= 8; expo++) { // 2^{-6}=0.015625, 2^{-8}=3.9e-3, 2^{-10}=9.77e-4
+  for (int expo = 10; expo <= 12; expo++) { // 2^{-6}=0.015625, 2^{-8}=3.9e-3, 2^{-10}=9.77e-4
     const double TOL = ldexp(1.0, -expo);
 
     IVPSolution<V> result_adaptive;

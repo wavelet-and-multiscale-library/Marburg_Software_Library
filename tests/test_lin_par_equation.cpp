@@ -160,6 +160,18 @@ public:
   }
 };
 
+class rhs_6 : public Function<1> {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    return 2;
+  }
+  
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
 class exact_solution_3 : public Function<1> {
 public:
   inline double value(const Point<1>& p, const unsigned int component = 0) const {
@@ -196,6 +208,18 @@ public:
   }
 };
 
+class exact_solution_6 : public Function<1> {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    return p[0]*(1-p[0]);
+  }
+  
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
 int main()
 {
   cout << "Testing linear parabolic equations..." << endl;
@@ -223,6 +247,7 @@ int main()
   // 3: u0 = 0, f(t,x) = pi^2*sin(pi*x), u(t,x)=(1-exp(-pi^2*t))*sin(pi*x)
   // 4: u(t,x)=t*x*(1-x)^3+(1-t)*x^3*(1-x), f(t,x)=u_t(t,x)-u_{xx}(t,x)
   // 5: u(t,x)=t*x*(1-x), f(t,x) = x*(1-x)+2*t
+  // 6: u(t,x)=x*(1-x), f(t,x) = 2
 
 #define _TESTCASE 3
 
@@ -240,6 +265,10 @@ int main()
 
 #if _TESTCASE == 5
   exact_solution_5 uexact;
+#endif
+
+#if _TESTCASE == 6
+  exact_solution_6 uexact;
 #endif
 
   //
@@ -269,6 +298,11 @@ int main()
 
 #if _TESTCASE == 5
   // do nothing, u0=0
+#endif
+
+#if _TESTCASE == 6
+  uexact.set_time(0);
+  expand(&uexact, celliptic.basis(), false, jmax, u0);
 #endif
 
   u0.compress(1e-14);
@@ -303,6 +337,11 @@ int main()
 #if _TESTCASE == 5
   rhs_5 f5;
   LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, &f5, jmax);
+#endif
+  
+#if _TESTCASE == 6
+  rhs_6 f6;
+  LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, &f6, jmax);
 #endif
   
 #if 0
@@ -383,8 +422,8 @@ int main()
   std::list<double> numberofsteps;
   std::list<double> errors;
 
-  cout << "* testing ROS2 (adaptive, several tolerances)..." << endl;
-  for (int expo = 10; expo <= 12; expo++) { // 2^{-6}=0.015625, 2^{-8}=3.9e-3, 2^{-10}=9.77e-4
+  cout << "* testing linear-implicit scheme (adaptive, several tolerances)..." << endl;
+  for (int expo = 10; expo <= 15; expo++) { // 2^{-6}=0.015625, 2^{-8}=3.9e-3, 2^{-10}=9.77e-4
     const double TOL = ldexp(1.0, -expo);
 
     IVPSolution<V> result_adaptive;
@@ -392,11 +431,13 @@ int main()
     cout << "  TOL=" << TOL << endl;
 
     // adaptive solution of u'=Au+f
-    ROWMethod<V> ros2_adaptive(WMethod<V>::ROS2);
-    solve_IVP(&parabolic, &ros2_adaptive, T,
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
+    ROWMethod<V> row_adaptive(WMethod<V>::GRK4T);
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROWDA3);
+    solve_IVP(&parabolic, &row_adaptive, T,
 	      TOL, 0, q, tau_max, result_adaptive);
 
-#if _TESTCASE == 3 || _TESTCASE == 4 || _TESTCASE == 5
+#if _TESTCASE == 3 || _TESTCASE == 4 || _TESTCASE == 5 || _TESTCASE == 6
     // compute maximal ell_2 error of the coefficients
     double errhelp = 0;
     std::list<double>::const_iterator ti(result_adaptive.t.begin());

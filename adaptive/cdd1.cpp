@@ -64,7 +64,7 @@ namespace WaveletTL
 
     InfiniteVector<double,Index> v_hat, r_hat, u_bar, F;
     P.RHS(2*params.q2*epsilon, F);
-    while (delta > sqrt(params.c1)*epsilon) { // check the additional factor c1^{1/2} in [BB+] !?
+    while (delta > epsilon) { // sqrt(params.c1)*epsilon) { // check the additional factor c1^{1/2} in [BB+] !?
 #if _WAVELETTL_CDD1_VERBOSITY >= 1
       cout << "CDD1_SOLVE: delta=" << delta << endl;
 #endif

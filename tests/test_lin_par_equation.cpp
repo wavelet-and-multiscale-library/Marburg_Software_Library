@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <set>
 #include <list>
 
@@ -172,6 +173,19 @@ public:
   }
 };
 
+class rhs_7 : public Function<1> {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    return (176-40*p[0]-8*get_time()-(120-200*p[0]-40*get_time())*(120-200*p[0]-40*get_time()))
+      * exp(-100*(p[0]-0.6+0.2*get_time())*(p[0]-0.6+0.2*get_time()));
+  }
+  
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
 class exact_solution_3 : public Function<1> {
 public:
   inline double value(const Point<1>& p, const unsigned int component = 0) const {
@@ -220,6 +234,18 @@ public:
   }
 };
 
+class exact_solution_7 : public Function<1> {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    return exp(-100*(p[0]-0.6+0.2*get_time())*(p[0]-0.6+0.2*get_time()));
+  }
+  
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
 int main()
 {
   cout << "Testing linear parabolic equations..." << endl;
@@ -239,7 +265,7 @@ int main()
   CachedProblem<EllipticEquation> celliptic(&elliptic, 12.2508, 6.41001); // d=2, dT=2
 //   CachedProblem<SturmEquation<Basis> > celliptic(&elliptic, 6.73618, 45.5762); // d=3, dT=3
 
-  const int jmax = 10;
+  const int jmax = 7;
 
   // handle different test cases:
   // 1: u0 = hat function, f(t)=0
@@ -248,6 +274,7 @@ int main()
   // 4: u(t,x)=t*x*(1-x)^3+(1-t)*x^3*(1-x), f(t,x)=u_t(t,x)-u_{xx}(t,x)
   // 5: u(t,x)=t*x*(1-x), f(t,x) = x*(1-x)+2*t
   // 6: u(t,x)=x*(1-x), f(t,x) = 2
+  // 7: u(t,x)=exp(-100*(x-0.6+0.2*t)^2), f(t,x)=(176-40x-8t-(120-200x-40t)^2)*u(t,x)
 
 #define _TESTCASE 3
 
@@ -269,6 +296,10 @@ int main()
 
 #if _TESTCASE == 6
   exact_solution_6 uexact;
+#endif
+
+#if _TESTCASE == 7
+  exact_solution_7 uexact;
 #endif
 
   //
@@ -305,6 +336,16 @@ int main()
   expand(&uexact, celliptic.basis(), false, jmax, u0);
 #endif
 
+#if _TESTCASE == 7
+  uexact.set_time(0);
+  expand(&uexact, celliptic.basis(), false, jmax, u0);
+#endif
+
+#if _TESTCASE == 8
+  uexact.set_time(0);
+  expand(&uexact, celliptic.basis(), false, jmax, u0);
+#endif
+
   u0.compress(1e-14);
 //   cout << "* expansion coefficients of u0=" << endl << u0;
  
@@ -323,8 +364,8 @@ int main()
 #if _TESTCASE == 3
   V f;
   constant_f cf;
-  expand(&cf, celliptic.basis(), false, jmax, f);
-  f.compress(1e-14);
+//   expand(&cf, celliptic.basis(), true, jmax, f);
+//   f.compress(1e-14);
 //   LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, f, jmax);
   LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, &cf, jmax);
 #endif
@@ -342,6 +383,11 @@ int main()
 #if _TESTCASE == 6
   rhs_6 f6;
   LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, &f6, jmax);
+#endif
+  
+#if _TESTCASE == 7
+  rhs_7 f7;
+  LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, &f7, jmax);
 #endif
   
 #if 0
@@ -375,55 +421,117 @@ int main()
 #endif
 
 #if 0
+  // einzelner Testlauf mit konstanter Schrittweite, Ausgabe der ell_2-Fehler
+  cout << "* testing linearly-implicit scheme (with constant stepsizes):" << endl;
+
+  ROWMethod<V> method(WMethod<V>::ROS2);
+  OneStepScheme<V>* scheme = &method;
+  IVPSolution<V> results;
+
+  V temp, result, error_estimate;
+
+  for (int expo = 14; expo <= 14; expo++) {
+    temp = parabolic.u0;
+
+    const int resolution = 10;
+    SampledMapping<1> u0_plot(evaluate(celliptic.basis(), temp, true, resolution));
+
+//     std::ofstream resultstream;
+//     resultstream.open("u0.m");
+//     u0_plot.matlab_output(resultstream);
+//     resultstream.close();
+    
+    int N = 1<<expo;
+    double h = 1.0/N;
+    cout << "  h = " << h << ":" << endl;
+
+    results.t.push_back(0);
+    results.u.push_back(temp);
+
+    for (int i = 1; i <= N; i++) {
+//       cout << "---------------- before increment() -----------------------" << endl;
+
+      scheme->increment(&parabolic, (i-1)*h, temp, h, result, error_estimate, 1e-5);
+      results.t.push_back(i*h);
+      results.u.push_back(result);
+
+//       ostringstream output_filename;
+//       output_filename << "u" << i << ".m";
+//       resultstream.open(output_filename.str().c_str());
+//       SampledMapping<1> ui_plot(evaluate(celliptic.basis(), temp, true, resolution));
+//       ui_plot.matlab_output(resultstream);
+//       resultstream.close();
+
+//       cout << "---------------- after increment() -----------------------" << endl;
+
+      V uexact_coeffs;
+      uexact.set_time(i*h);
+      expand(&uexact, celliptic.basis(), false, jmax, uexact_coeffs);
+      cout << "  ell_2 error at t=" << i*h << ": " << l2_norm(result - uexact_coeffs) << endl;
+      temp = result;
+    }
+  }
+#endif
+
+#if 1
   // einzelner Testlauf, gibt Plot der Iterierten aus
 
   const double T = 1.0;
   const double q = 10.0;
-//   const double TOL = 1e-2;
-  const double TOL = 1e-2;
+  const double TOL = 1e-4;
   const double tau_max = 1.0;
 
   IVPSolution<V> result_adaptive;
   
-  cout << "* testing ROS2 (adaptive, single run)..." << endl;
+  cout << "* testing linearly implicit scheme (adaptive, single run)..." << endl;
   ROWMethod<V> ros2_adaptive(WMethod<V>::ROS2);
   solve_IVP(&parabolic, &ros2_adaptive, T,
 	    TOL, 0, q, tau_max, result_adaptive);
 
-  const int resolution = 10;
+  const int resolution = 12;
   Grid<1> gx(0.0, 1.0, 1<<resolution);
   Array1D<double> points(result_adaptive.t.size());
   std::copy(result_adaptive.t.begin(), result_adaptive.t.end(), points.begin());
   Grid<1> gt(points);
   Grid<2> grid(gt, gx);
   Matrix<double> values((1<<resolution)+1, result_adaptive.t.size());
+  Matrix<double> errvalues(values);
   
   unsigned int i(0);
+  std::list<double>::const_iterator ti(result_adaptive.t.begin());
   for (std::list<V>::const_iterator ui(result_adaptive.u.begin());
-       ui != result_adaptive.u.end(); ++ui, ++i) {
+       ui != result_adaptive.u.end(); ++ui, ++ti, ++i) {
     SampledMapping<1> temp(evaluate(celliptic.basis(), *ui, true, resolution));
-    for (unsigned int k(0); k < values.row_dimension(); k++)
+    uexact.set_time(*ti);
+    for (unsigned int k(0); k < values.row_dimension(); k++) {
       values.set_entry(k, i, temp.values()[k]);
+      errvalues.set_entry(k, i, temp.values()[k] - uexact.value(Point<1>(k*ldexp(1.0,-resolution))));
+    }
   }
   SampledMapping<2> result(grid, values);
+  SampledMapping<2> errorplot(grid, errvalues);
  
   std::ofstream resultstream("lin_par_result.m");
   result.matlab_output(resultstream);
   resultstream.close();
+
+  resultstream.open("lin_par_error.m");
+  errorplot.matlab_output(resultstream);
+  resultstream.close();
 #endif
 
-#if 1
+#if 0
   // mehrere Testlaeufe mit einem Problem, verschiedene Toleranzen
 
   const double T = 1.0;
-  const double q = 5.0;
+  const double q = 4.0;
   const double tau_max = 1.0;
 
   std::list<double> numberofsteps;
   std::list<double> errors;
 
   cout << "* testing linear-implicit scheme (adaptive, several tolerances)..." << endl;
-  for (int expo = 10; expo <= 15; expo++) { // 2^{-6}=0.015625, 2^{-8}=3.9e-3, 2^{-10}=9.77e-4
+  for (int expo = 10; expo <= 10; expo++) { // 2^{-6}=0.015625, 2^{-8}=3.9e-3, 2^{-10}=9.77e-4
     const double TOL = ldexp(1.0, -expo);
 
     IVPSolution<V> result_adaptive;
@@ -431,13 +539,14 @@ int main()
     cout << "  TOL=" << TOL << endl;
 
     // adaptive solution of u'=Au+f
-//     ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
-    ROWMethod<V> row_adaptive(WMethod<V>::GRK4T);
+    ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
+//     ROWMethod<V> row_adaptive(WMethod<V>::GRK4T);
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROWDA3);
     solve_IVP(&parabolic, &row_adaptive, T,
 	      TOL, 0, q, tau_max, result_adaptive);
 
-#if _TESTCASE == 3 || _TESTCASE == 4 || _TESTCASE == 5 || _TESTCASE == 6
+#if _TESTCASE >= 3
     // compute maximal ell_2 error of the coefficients
     double errhelp = 0;
     std::list<double>::const_iterator ti(result_adaptive.t.begin());

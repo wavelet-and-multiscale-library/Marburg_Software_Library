@@ -94,19 +94,19 @@ namespace WaveletTL
     }
     
     /*!
-      estimate the spectral norm ||A||
+      estimate the spectral norm ||alpha*D^{-2}-A|| from above
     */
     double norm_A() const
     {
-      return T->norm_A(); // dirty
+      return 1 + alpha * T->norm_A();
     }
       
     /*!
-      estimate the spectral norm ||A^{-1}||
+      estimate the spectral norm ||(alpha*D^{-2}-A)^{-1}|| from above
     */
     double norm_Ainv() const
     {
-      return T->norm_Ainv(); // dirty
+      return 1./(1 + alpha / T->norm_Ainv());
     }
     
     /*!

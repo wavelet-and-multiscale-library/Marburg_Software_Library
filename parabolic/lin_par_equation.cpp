@@ -66,6 +66,9 @@ namespace WaveletTL
     elliptic->rescale(result, 1);
     result.scale(-1.0); // result = -D(-D^{-1}AD^{-1}Dv) = Av
 
+    // multiply with inverse primal gramian
+
+
     // add constant driving term (if present)
     if (!constant_f_.empty())
       result.add(constant_f_);
@@ -74,7 +77,8 @@ namespace WaveletTL
     if (f_ != 0) {
       f_->set_time(t);
       w.clear();
-      expand(f_, elliptic->basis(), false, jmax_, w);
+//       expand(f_, elliptic->basis(), false, jmax_, w); // expand in the primal basis
+      expand(f_, elliptic->basis(), true, jmax_, w); // expand in the dual (!) basis
       result.add(w);
     }
   }
@@ -94,9 +98,11 @@ namespace WaveletTL
       const double h = 1e-6;
       InfiniteVector<double,Index> fhelp;
       f_->set_time(t);
-      expand(f_, elliptic->basis(), false, jmax_, fhelp);
+//       expand(f_, elliptic->basis(), false, jmax_, fhelp); // expand in the primal basis
+      expand(f_, elliptic->basis(), true, jmax_, fhelp); // expand in the dual (!) basis
       f_->set_time(t+h);
-      expand(f_, elliptic->basis(), false, jmax_, result);
+//       expand(f_, elliptic->basis(), false, jmax_, result);
+      expand(f_, elliptic->basis(), true, jmax_, result);
       result.add(-1., fhelp);
       result.scale(1./h);
     }

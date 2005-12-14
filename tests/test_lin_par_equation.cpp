@@ -4,12 +4,14 @@
 #include <set>
 #include <list>
 
+#define _MATHTL_ONESTEPSCHEME_VERBOSITY 1
+#define _WAVELETTL_CDD1_VERBOSITY 0
+
 #include <algebra/symmetric_matrix.h>
 #include <algebra/sparse_matrix.h>
 #include <algebra/matrix.h>
 #include <numerics/sturm_bvp.h>
 #include <numerics/iteratsolv.h>
-#define _MATHTL_ONESTEPSCHEME_VERBOSITY 1
 #include <numerics/w_method.h>
 #include <numerics/row_method.h>
 #include <geometry/grid.h>
@@ -21,7 +23,6 @@
 #include <galerkin/sturm_equation.h>
 #include <galerkin/cached_problem.h>
 
-#define _WAVELETTL_CDD1_VERBOSITY 0
 #include <parabolic/lin_par_equation.h>
 
 using namespace std;
@@ -265,7 +266,7 @@ int main()
   CachedProblem<EllipticEquation> celliptic(&elliptic, 12.2508, 6.41001); // d=2, dT=2
 //   CachedProblem<SturmEquation<Basis> > celliptic(&elliptic, 6.73618, 45.5762); // d=3, dT=3
 
-  const int jmax = 7;
+  const int jmax = 6;
 
   // handle different test cases:
   // 1: u0 = hat function, f(t)=0
@@ -364,10 +365,11 @@ int main()
 #if _TESTCASE == 3
   V f;
   constant_f cf;
-//   expand(&cf, celliptic.basis(), true, jmax, f);
-//   f.compress(1e-14);
-//   LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, f, jmax);
-  LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, &cf, jmax);
+//   expand(&cf, celliptic.basis(), false, jmax, f);
+  expand(&cf, celliptic.basis(), true, jmax, f);
+  f.compress(1e-14);
+  LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, f, jmax);
+//   LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, &cf, jmax);
 #endif
 
 #if _TESTCASE == 4
@@ -392,8 +394,9 @@ int main()
   
 #if 0
   cout << "* testing ROS2:" << endl;
-  ROWMethod<V> ros2(WMethod<V>::ROS2);
-  OneStepScheme<V>* scheme = &ros2;
+  ROWMethod<V> row(WMethod<V>::ROS2);
+  row.set_preprocessor(&parabolic);
+  OneStepScheme<V>* scheme = &row;
   V temp, result, error_estimate;
   double err, olderr = 0;
 
@@ -425,21 +428,22 @@ int main()
   cout << "* testing linearly-implicit scheme (with constant stepsizes):" << endl;
 
   ROWMethod<V> method(WMethod<V>::ROS2);
+  method.set_preprocessor(&parabolic);
   OneStepScheme<V>* scheme = &method;
   IVPSolution<V> results;
 
   V temp, result, error_estimate;
 
-  for (int expo = 14; expo <= 14; expo++) {
+  for (int expo = 10; expo <= 10; expo++) {
     temp = parabolic.u0;
 
     const int resolution = 10;
     SampledMapping<1> u0_plot(evaluate(celliptic.basis(), temp, true, resolution));
 
-//     std::ofstream resultstream;
-//     resultstream.open("u0.m");
-//     u0_plot.matlab_output(resultstream);
-//     resultstream.close();
+    std::ofstream resultstream;
+    resultstream.open("u0.m");
+    u0_plot.matlab_output(resultstream);
+    resultstream.close();
     
     int N = 1<<expo;
     double h = 1.0/N;
@@ -455,12 +459,12 @@ int main()
       results.t.push_back(i*h);
       results.u.push_back(result);
 
-//       ostringstream output_filename;
-//       output_filename << "u" << i << ".m";
-//       resultstream.open(output_filename.str().c_str());
-//       SampledMapping<1> ui_plot(evaluate(celliptic.basis(), temp, true, resolution));
-//       ui_plot.matlab_output(resultstream);
-//       resultstream.close();
+      ostringstream output_filename;
+      output_filename << "u" << i << ".m";
+      resultstream.open(output_filename.str().c_str());
+      SampledMapping<1> ui_plot(evaluate(celliptic.basis(), temp, true, resolution));
+      ui_plot.matlab_output(resultstream);
+      resultstream.close();
 
 //       cout << "---------------- after increment() -----------------------" << endl;
 
@@ -473,22 +477,24 @@ int main()
   }
 #endif
 
-#if 1
+#if 0
   // einzelner Testlauf, gibt Plot der Iterierten aus
 
   const double T = 1.0;
   const double q = 10.0;
-  const double TOL = 1e-4;
+  const double TOL = 1e-6;
   const double tau_max = 1.0;
 
   IVPSolution<V> result_adaptive;
   
   cout << "* testing linearly implicit scheme (adaptive, single run)..." << endl;
-  ROWMethod<V> ros2_adaptive(WMethod<V>::ROS2);
-  solve_IVP(&parabolic, &ros2_adaptive, T,
+//   ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
+  ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
+  row_adaptive.set_preprocessor(&parabolic);
+  solve_IVP(&parabolic, &row_adaptive, T,
 	    TOL, 0, q, tau_max, result_adaptive);
 
-  const int resolution = 12;
+  const int resolution = 10;
   Grid<1> gx(0.0, 1.0, 1<<resolution);
   Array1D<double> points(result_adaptive.t.size());
   std::copy(result_adaptive.t.begin(), result_adaptive.t.end(), points.begin());
@@ -524,14 +530,14 @@ int main()
   // mehrere Testlaeufe mit einem Problem, verschiedene Toleranzen
 
   const double T = 1.0;
-  const double q = 4.0;
+  const double q = 10.0;
   const double tau_max = 1.0;
 
   std::list<double> numberofsteps;
   std::list<double> errors;
 
   cout << "* testing linear-implicit scheme (adaptive, several tolerances)..." << endl;
-  for (int expo = 10; expo <= 10; expo++) { // 2^{-6}=0.015625, 2^{-8}=3.9e-3, 2^{-10}=9.77e-4
+  for (int expo = 10; expo <= 16; expo++) { // 2^{-6}=0.015625, 2^{-8}=3.9e-3, 2^{-10}=9.77e-4
     const double TOL = ldexp(1.0, -expo);
 
     IVPSolution<V> result_adaptive;
@@ -539,8 +545,8 @@ int main()
     cout << "  TOL=" << TOL << endl;
 
     // adaptive solution of u'=Au+f
-    ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
-//     ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
+    ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
 //     ROWMethod<V> row_adaptive(WMethod<V>::GRK4T);
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROWDA3);
     solve_IVP(&parabolic, &row_adaptive, T,

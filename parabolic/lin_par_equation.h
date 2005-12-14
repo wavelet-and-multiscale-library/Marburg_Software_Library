@@ -13,6 +13,8 @@
 #include <algebra/infinite_vector.h>
 #include <numerics/ivp.h>
 #include <utils/function.h>
+#include <galerkin/gramian.h>
+#include <galerkin/cached_problem.h>
 
 using MathTL::InfiniteVector;
 using MathTL::AbstractIVP;
@@ -26,6 +28,8 @@ namespace WaveletTL
 
       D^{-1}(alpha*I-T)D^{-1}*Dx = D^{-1}y    
 
+    (after multiplication with the Gramian, see implementation)
+
     The class has the minimal signature to be used within the APPLY routine
     or within adaptive solvers like CDD1.
   */
@@ -34,11 +38,12 @@ namespace WaveletTL
   {
   public:
     /*!
-      constructor from alpha, T and y
+      constructor from alpha, T, the Gramian and y
     */
     LinParEqROWStageEquationHelper
     (const double alpha,
      const ELLIPTIC_EQ* T,
+     const CachedProblem<IntervalGramian<typename ELLIPTIC_EQ::WaveletBasis> >& G,
      const InfiniteVector<double, typename ELLIPTIC_EQ::Index>& y);
     
     /*!
@@ -90,7 +95,9 @@ namespace WaveletTL
     double a(const Index& lambda,
 	     const Index& nu) const
     {
-      return (lambda == nu ? alpha : 0.) + T->a(lambda, nu);
+      return alpha * G.a(lambda, nu) + T->a(lambda, nu);
+
+//       return (lambda == nu ? alpha : 0.) + T->a(lambda, nu);
     }
     
     /*!
@@ -98,7 +105,7 @@ namespace WaveletTL
     */
     double norm_A() const
     {
-      return 1 + alpha * T->norm_A();
+      return T->norm_A(); // dirty!
     }
       
     /*!
@@ -106,7 +113,7 @@ namespace WaveletTL
     */
     double norm_Ainv() const
     {
-      return 1./(1 + alpha / T->norm_Ainv());
+      return T->norm_Ainv(); // dirty!
     }
     
     /*!
@@ -158,6 +165,7 @@ namespace WaveletTL
   protected:
     const double alpha;
     const ELLIPTIC_EQ* T;
+    const CachedProblem<IntervalGramian<typename ELLIPTIC_EQ::WaveletBasis> >& G;
     const InfiniteVector<double, typename ELLIPTIC_EQ::Index> y;
   };
 
@@ -188,7 +196,8 @@ namespace WaveletTL
   */
   template <class ELLIPTIC_EQ>
   class LinearParabolicEquation
-    : public AbstractIVP<InfiniteVector<double, typename ELLIPTIC_EQ::Index> >
+    : public AbstractIVP<InfiniteVector<double, typename ELLIPTIC_EQ::Index> >,
+      public WMethodPreprocessRHSHelper<InfiniteVector<double, typename ELLIPTIC_EQ::Index> >
   {
   public:
     /*!
@@ -247,9 +256,26 @@ namespace WaveletTL
 				  const double tolerance,
 				  InfiniteVector<double,Index>& result) const;
 
+    /*!
+      preprocess the right-hand side share from the previous steps
+      (cf. w_method.h for details)
+    */
+    void preprocess_rhs_share(InfiniteVector<double,Index>& wbeforeandafter,
+			      const double tolerance) const
+    {
+      InfiniteVector<double,Index> help(wbeforeandafter);
+      APPLY(GC, help, tolerance, wbeforeandafter, jmax_, St04a);
+    }
+    
   protected:
     //! pointer to the elliptic subproblem helper
     const ELLIPTIC_EQ* elliptic;
+
+    //! Gramian
+    IntervalGramian<typename ELLIPTIC_EQ::WaveletBasis> G;
+
+    //! cached Gramian
+    CachedProblem<IntervalGramian<typename ELLIPTIC_EQ::WaveletBasis> > GC;
 
     InfiniteVector<double,Index> constant_f_;
     Function<space_dimension>* f_;

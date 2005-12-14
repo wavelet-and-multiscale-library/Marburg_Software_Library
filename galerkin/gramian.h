@@ -147,9 +147,18 @@ namespace WaveletTL
     */
     double F_norm() const { return l2_norm(y_); }
 
+    /*!
+      set right-hand side y
+    */
+    void set_rhs(const InfiniteVector<double, typename WBASIS::Index>& y) const {
+      y_ = y;
+    }
+
   protected:
     const WBASIS& basis_;
-    const InfiniteVector<double, typename WBASIS::Index> y_;
+    
+    // rhs, mutable to have 'const' method
+    mutable InfiniteVector<double, typename WBASIS::Index> y_;
     
     // estimates for ||A|| and ||A^{-1}||
     mutable double normA, normAinv;

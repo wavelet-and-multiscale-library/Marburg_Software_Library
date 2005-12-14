@@ -154,11 +154,13 @@ namespace WaveletTL
   CachedProblem<PROBLEM>::norm_A() const
   {
     if (normA == 0.0) {
+#if _WAVELETTL_CACHEDPROBLEM_VERBOSITY >= 1
       cout << "CachedProblem()::norm_A() called..." << endl;
+#endif
 
       std::set<Index> Lambda;
       const int j0 = problem->basis().j0();
-      const int jmax = j0+1;
+      const int jmax = j0+2;
       for (Index lambda = problem->basis().first_generator(j0);; ++lambda) {
 	Lambda.insert(lambda);
 	if (lambda == problem->basis().last_wavelet(jmax)) break;
@@ -178,7 +180,9 @@ namespace WaveletTL
       normA = PowerIteration(A_Lambda, xk, 1e-6, 100, iterations);
 #endif
 
+#if _WAVELETTL_CACHEDPROBLEM_VERBOSITY >= 1
       cout << "... done!" << endl;
+#endif
     }
 
     return normA;
@@ -189,11 +193,13 @@ namespace WaveletTL
   CachedProblem<PROBLEM>::norm_Ainv() const
   {
     if (normAinv == 0.0) {
+#if _WAVELETTL_CACHEDPROBLEM_VERBOSITY >= 1
       cout << "CachedProblem()::norm_Ainv() called..." << endl;
+#endif
 
       std::set<Index> Lambda;
       const int j0 = problem->basis().j0();
-      const int jmax = j0+1;
+      const int jmax = j0+2;
       for (Index lambda = problem->basis().first_generator(j0);; ++lambda) {
 	Lambda.insert(lambda);
 	if (lambda == problem->basis().last_wavelet(jmax)) break;
@@ -213,7 +219,9 @@ namespace WaveletTL
       normAinv = InversePowerIteration(A_Lambda, xk, 1e-6, 200, iterations);
 #endif
 
+#if _WAVELETTL_CACHEDPROBLEM_VERBOSITY >= 1
       cout << "... done!" << endl;
+#endif
     }
 
     return normAinv;

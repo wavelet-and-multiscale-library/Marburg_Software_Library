@@ -10,8 +10,9 @@ namespace WaveletTL
   ::LinParEqROWStageEquationHelper
   (const double a,
    const ELLIPTIC_EQ* elliptic,
+   const CachedProblem<IntervalGramian<typename ELLIPTIC_EQ::WaveletBasis> >& GC,
    const InfiniteVector<double, typename ELLIPTIC_EQ::Index>& z)
-    : alpha(a), T(elliptic), y(z)
+    : alpha(a), T(elliptic), G(GC), y(z)
   {
   }
   
@@ -24,9 +25,17 @@ namespace WaveletTL
 	       const int J,
 	       const CompressionStrategy strategy) const
   {
+    // Gramian part, we have to take care of the preconditioning factors
+    InfiniteVector<double,Index> g;
+    G.add_level(lambda, g, j, factor * alpha/T->D(lambda), J, strategy);
+    rescale(g, -1);
+    w.add(g);
+    
     T->add_level(lambda, w, j, factor, J, strategy);
-    if (lambda.j() == j)
-      w.add_coefficient(lambda, alpha*factor/(T->D(lambda)*T->D(lambda)));
+
+//     G.add_level(lambda, w, j, factor * alpha/(T->D(lambda)*T->D(lambda))
+//     if (lambda.j() == j)
+//       w.add_coefficient(lambda, alpha*factor/(T->D(lambda)*T->D(lambda)));
   }
 
   template <class ELLIPTIC_EQ>
@@ -35,7 +44,8 @@ namespace WaveletTL
 			    const InfiniteVector<double,Index>& initial,
 			    const InfiniteVector<double,Index>& f,
 			    const int jmax)
-    : elliptic(helper), constant_f_(f), f_(0), jmax_(jmax)
+    : elliptic(helper), G(helper->basis(), InfiniteVector<double,Index>()),
+      GC(&G), constant_f_(f), f_(0), jmax_(jmax)
   {
     AbstractIVP<InfiniteVector<double,Index> >::u0 = initial;
   }
@@ -46,7 +56,8 @@ namespace WaveletTL
 			    const InfiniteVector<double,Index>& initial,
 			    Function<ELLIPTIC_EQ::space_dimension>* f,
 			    const int jmax)
-    : elliptic(helper), constant_f_(), f_(f), jmax_(jmax)
+    : elliptic(helper), G(helper->basis(), InfiniteVector<double,Index>()),
+      GC(&G), constant_f_(), f_(f), jmax_(jmax)
   {
     AbstractIVP<InfiniteVector<double,Index> >::u0 = initial;
   }
@@ -60,15 +71,18 @@ namespace WaveletTL
 	       InfiniteVector<double,Index>& result) const
   {
     result.clear();
-    InfiniteVector<double,Index> w(v);
+    InfiniteVector<double,Index> w(v), temp;
     elliptic->rescale(w, 1); // w = Dv
-    APPLY(*elliptic, w, tolerance, result, jmax_, St04a); // yields -D^{-1}AD^{-1}w
-    elliptic->rescale(result, 1);
-    result.scale(-1.0); // result = -D(-D^{-1}AD^{-1}Dv) = Av
+    APPLY(*elliptic, w, tolerance, temp, jmax_, St04a); // yields -D^{-1}AD^{-1}w
+    elliptic->rescale(temp, 1);
+    temp.scale(-1.0); // result = -D(-D^{-1}AD^{-1}Dv) = Av
 
-    // multiply with inverse primal gramian
+//     // multiply with inverse primal gramian (i.e., switch from dual to primal basis)
+//     G.set_rhs(temp);
+//     CDD1_SOLVE(GC, tolerance, result, jmax_);
 
-
+    result = temp;
+    
     // add constant driving term (if present)
     if (!constant_f_.empty())
       result.add(constant_f_);
@@ -118,7 +132,12 @@ namespace WaveletTL
 			     const double tolerance,
 			     InfiniteVector<double,Index>& result) const
   {
-    LinParEqROWStageEquationHelper<ELLIPTIC_EQ> helper(alpha, elliptic, y);
+//     // multiply everything with the Gramian
+//     InfiniteVector<double,Index> Gy;
+//     APPLY(GC, y, tolerance, Gy, jmax_, St04a);
+//     LinParEqROWStageEquationHelper<ELLIPTIC_EQ> helper(alpha, elliptic, GC, Gy);
+
+    LinParEqROWStageEquationHelper<ELLIPTIC_EQ> helper(alpha, elliptic, GC, y);
     CDD1_SOLVE(helper, tolerance, result, jmax_); // D^{-1}(alpha*I-T)D^{-1}*Dx = D^{-1}y    
     elliptic->rescale(result, -1); // Dx -> x
   }

@@ -374,12 +374,12 @@ int main()
   }
 #endif
 
-#if 0
+#if 1
   cout << "- checking adaptive solution of the Dahlquist test problem:" << endl;
 
   const double T = 1.0;
   const double q = 5.0;
-  const double TOL = 1e-10;
+  const double TOL = 1e-7;
   const double tau_max = 1.0;
 
   cout << "* TOL=" << TOL << endl;
@@ -451,7 +451,7 @@ int main()
   
 #endif
 
-#if 1
+#if 0
   cout << "- checking adaptive solution of the Arenstorf orbit problem:" << endl;
 
   Arenstorf problem2;

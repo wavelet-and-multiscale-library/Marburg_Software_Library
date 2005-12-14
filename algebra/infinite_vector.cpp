@@ -313,10 +313,10 @@ namespace MathTL
 #endif
   }
   
-  template <class C, class I>
-  void
-  InfiniteVector<C,I>::sadd(const C s, const std::list<I>& v, const Array1D<double>& values)
-  {
+//   template <class C, class I>
+//   void
+//   InfiniteVector<C,I>::sadd(const C s, const std::list<I>& v, const Array1D<double>& values)
+//   {
     // std::map<I,C> help;
 
 //     // The following O(N) algorithm is adapted from the STL algorithm set_union(),
@@ -356,7 +356,7 @@ namespace MathTL
 //       }
 
 
-  }
+//   }
 
 
   template <class C, class I>

@@ -263,9 +263,9 @@ namespace MathTL
     */
     void add(const C s, const InfiniteVector<C,I>& v);
 
-    /*!
-    */
-    void sadd(const C s, const std::list<I>& v, const Array1D<double>& values);
+//     /*!
+//     */
+//     void sadd(const C s, const std::list<I>& v, const Array1D<double>& values);
     
     /*!
       in place summation *this = s*(*this) + v

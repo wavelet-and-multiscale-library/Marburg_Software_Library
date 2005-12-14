@@ -110,6 +110,11 @@ namespace WaveletTL
     } Support;
 
     /*!
+      space dimension of the underlying domain
+    */
+    static const int space_dimension = 1;
+
+    /*!
       critical Sobolev regularity for the primal generators/wavelets
     */
     static double primal_regularity() { return d - 0.5; }

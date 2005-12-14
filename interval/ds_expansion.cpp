@@ -8,6 +8,9 @@
 #include <algebra/vector.h>
 #include <numerics/gauss_data.h>
 #include <numerics/iteratsolv.h>
+#include <galerkin/gramian.h>
+#include <galerkin/cached_problem.h>
+#include <adaptive/cdd1.h>
 
 namespace WaveletTL
 {
@@ -112,45 +115,52 @@ namespace WaveletTL
       }
       
       // setup Gramian A_Lambda
-      SparseMatrix<double> A_Lambda(Lambda.size());
-      typedef typename SparseMatrix<double>::size_type size_type;     
-      size_type row = 0;
-      for (typename std::set<Index>::const_iterator it1(Lambda.begin()), itend(Lambda.end());
-	   it1 != itend; ++it1, ++row)
-	{
-	  std::list<size_type> indices;
-	  std::list<double> entries;
+//       SparseMatrix<double> A_Lambda(Lambda.size());
+//       typedef typename SparseMatrix<double>::size_type size_type;     
+//       size_type row = 0;
+//       for (typename std::set<Index>::const_iterator it1(Lambda.begin()), itend(Lambda.end());
+// 	   it1 != itend; ++it1, ++row)
+// 	{
+// 	  std::list<size_type> indices;
+// 	  std::list<double> entries;
 	  
-	  size_type column = 0;
-	  for (typename std::set<Index>::const_iterator it2(Lambda.begin());
-	     it2 != itend; ++it2, ++column)
-	    {
-	      double entry = integrate(basis, *it2, *it1);
+// 	  size_type column = 0;
+// 	  for (typename std::set<Index>::const_iterator it2(Lambda.begin());
+// 	     it2 != itend; ++it2, ++column)
+// 	    {
+// 	      double entry = integrate(basis, *it2, *it1);
 
-	      if (entry != 0) {
-		indices.push_back(column);
-		entries.push_back(entry);
-	      }
-	    }
-	  A_Lambda.set_row(row, indices, entries);
-	} 
+// 	      if (entry != 0) {
+// 		indices.push_back(column);
+// 		entries.push_back(entry);
+// 	      }
+// 	    }
+// 	  A_Lambda.set_row(row, indices, entries);
+// 	} 
 
-      // solve A_Lambda*x = b
-      Vector<double> b(Lambda.size());
-      row = 0;
-      for (typename std::set<Index>::const_iterator it(Lambda.begin()), itend(Lambda.end());
-	   it != itend; ++it, ++row)
-	b[row] = coeffs.get_coefficient(*it);
+      IntervalGramian<DSBasis<d,dT> > G(basis, coeffs);
+      CachedProblem<IntervalGramian<DSBasis<d,dT> > > GC(&G);
 
-      Vector<double> x(b);
-      unsigned int iterations;
-      CG(A_Lambda, b, x, 1e-12, 200, iterations);
+//       // solve A_Lambda*x = b
+//       Vector<double> b(Lambda.size());
+//       row = 0;
+//       for (typename std::set<Index>::const_iterator it(Lambda.begin()), itend(Lambda.end());
+// 	   it != itend; ++it, ++row)
+// 	b[row] = coeffs.get_coefficient(*it);
+
+//       Vector<double> x(b);
+//       unsigned int iterations;
+//       CG(A_Lambda, b, x, 1e-12, 200, iterations);
   
-      coeffs.clear();
-      row = 0;
-      for (typename std::set<Index>::const_iterator it(Lambda.begin()), itend(Lambda.end());
-	   it != itend; ++it, ++row)
-	coeffs.set_coefficient(*it, x[row]);
+//       coeffs.clear();
+//       row = 0;
+//       for (typename std::set<Index>::const_iterator it(Lambda.begin()), itend(Lambda.end());
+// 	   it != itend; ++it, ++row)
+// 	coeffs.set_coefficient(*it, x[row]);
+
+      InfiniteVector<double, typename DSBasis<d,dT>::Index> x;
+      CDD1_SOLVE(GC, 1e-6, x, jmax);
+      coeffs.swap(x);
     }
   }
 }

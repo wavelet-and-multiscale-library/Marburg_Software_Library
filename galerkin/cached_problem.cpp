@@ -3,6 +3,7 @@
 #include <cmath>
 #include <algebra/vector.h>
 #include <numerics/eigenvalues.h>
+#include <galerkin/galerkin_utils.h>
 
 namespace WaveletTL
 {

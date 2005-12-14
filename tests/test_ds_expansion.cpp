@@ -8,6 +8,8 @@
 #include <interval/ds_basis.h>
 #include <interval/ds_expansion.h>
 
+#include <galerkin/gramian.h>
+
 using namespace std;
 using namespace WaveletTL;
 
@@ -72,7 +74,7 @@ int main()
   InfiniteVector<double,Index> coeffs;
 
   const int j0 = basis.j0();
-//   const int jmax = j0;
+  const int jmax = 10;
 
   expand(&p, basis, true, j0, coeffs);
   cout << "- integrals of p against all primal generators on level j0:" << endl
@@ -94,17 +96,17 @@ int main()
   shat.matlab_output(cout);
   
   InfiniteVector<double,Index> dual_coeffs;
-  expand(&hat, basis, false, j0+2, dual_coeffs);
-  cout << "- (approx.) expansion coefficients of the hat function in the primal basis:" << endl
-       << dual_coeffs;
+  expand(&hat, basis, false, jmax, dual_coeffs);
+//   cout << "- (approx.) expansion coefficients of the hat function in the primal basis:" << endl
+//        << dual_coeffs;
   
   cout << "- pointwise error:" << endl;
-  SampledMapping<1> s3(evaluate(basis, dual_coeffs, true, 7));
+  SampledMapping<1> s3(evaluate(basis, dual_coeffs, true, jmax+1));
   error.resize(s3.points().size());
   for (unsigned int i = 0; i < error.size(); i++)
     error[i] = fabs(s3.values()[i]-hat.value(Point<1>(s3.points()[i])));
   cout << error << endl;
   cout << "(max. error: " << linfty_norm(error) << ")" << endl;
-
+  
   return 0;
 }

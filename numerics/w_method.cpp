@@ -12,7 +12,7 @@ namespace MathTL
   template <class VECTOR>
   WMethod<VECTOR>::WMethod(const Method method,
 			   const WMethodStageEquationHelper<VECTOR>* s)
-    : stage_equation_helper(s)
+    : stage_equation_helper(s), preprocessor(0)
   {
     switch(method)
       {
@@ -202,10 +202,14 @@ namespace MathTL
       for (unsigned int j(0); j < i; j++)
   	help.add(A(i,j), u[j]);
       ivp->evaluate_f(t_m+tau*alpha_vector[i], help, tolerance/(3*stages), rhs);
-      
-      for (unsigned int j(0); j < i; j++)
-	rhs.add(C(i,j)/tau, u[j]);
-      
+
+      if (preprocessor == 0) {
+	for (unsigned int j(0); j < i; j++)
+	  rhs.add(C(i,j)/tau, u[j]);
+      } else {
+	// TODO: insert action of the preprocessor here!
+      }
+	
       stage_equation_helper->approximate_ft(ivp, t_m, u_m, tolerance/(3*stages), help);
       rhs.add(tau*gamma_vector[i], help);
       

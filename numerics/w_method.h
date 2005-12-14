@@ -64,6 +64,29 @@ namespace MathTL
 				const double tolerance,
 				VECTOR& result) const = 0;
   };
+
+  /*!
+    Helper class for preprocessing the vector
+      w:=\sum_{j=1}^{i-1} \frac{c_{i,j}}{\tau} * u_j
+    by, e.g., a linear transformation.
+    Nontrivial instances of this class are needed when it comes to
+    a discretization of PDEs with biorthogonal wavelet bases. There the
+    vector w has to be multiplied with the Gramian <Psi,Psi>.
+  */
+  template <class VECTOR>
+  class WMethodPreprocessRHSHelper
+  {
+  public:
+    //! purely virtual destructor
+    virtual ~WMethodPreprocessRHSHelper() = 0;
+
+    //! preprocess the vector w
+    virtual void preprocess_rhs_share(const VECTOR& wbefore,
+				      VECTOR& wafter) const
+    {
+      wafter = wbefore; // default behaviour: do nothing
+    }
+  };
   
   /*!
     The following class is an abstract base for an s-stage linearly implicit
@@ -196,6 +219,9 @@ namespace MathTL
 
     //! instance of the stage equation helper
     const WMethodStageEquationHelper<VECTOR>* stage_equation_helper;
+
+    //! instance of the RHS preprocessor
+    WMethodPreprocessRHSHelper<VECTOR>* preprocessor;
 
     //! consistency order
     int p;

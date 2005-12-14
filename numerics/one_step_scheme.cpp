@@ -45,7 +45,7 @@ namespace MathTL
 
     // guess the initial time stepsize (cf. Hairer/Wanner, p. 169)
     double u0_norm = linfty_norm(ivp->u0);
-    VECTOR yp0;
+    VECTOR yp0(ivp->u0);
     ivp->evaluate_f(0, ivp->u0, atol, yp0); // initial slope
     double ft0u0_norm = linfty_norm(yp0);
     double tau0 = (u0_norm < 1e-5 || ft0u0_norm < 1e-5)

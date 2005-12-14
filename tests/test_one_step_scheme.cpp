@@ -5,7 +5,7 @@
 #include <algebra/vector.h>
 #include <numerics/ivp.h>
 
-#define _MATHTL_ONESTEPSCHEME_VERBOSITY 0
+#define _MATHTL_ONESTEPSCHEME_VERBOSITY 1
 #include <numerics/one_step_scheme.h>
 
 #include <numerics/runge_kutta.h>

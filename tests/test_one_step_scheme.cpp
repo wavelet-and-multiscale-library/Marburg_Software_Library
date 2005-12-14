@@ -374,7 +374,7 @@ int main()
   }
 #endif
 
-#if 1
+#if 0
   cout << "- checking adaptive solution of the Dahlquist test problem:" << endl;
 
   const double T = 1.0;
@@ -451,19 +451,18 @@ int main()
   
 #endif
 
-#if 0
+#if 1
   cout << "- checking adaptive solution of the Arenstorf orbit problem:" << endl;
 
   Arenstorf problem2;
 
   const double T2 = problem2.period();
   const double q2 = 5.0;
-  const double TOL2 = 1e-13;
+  const double TOL2 = 1e-5;
   const double tau_max2 = 1.0;
 
   cout << "* TOL=" << TOL2 << endl;
 
-  double errhelp2;
   std::list<double>::const_iterator ti2;
   IVPSolution<V> result_adaptive2;
 

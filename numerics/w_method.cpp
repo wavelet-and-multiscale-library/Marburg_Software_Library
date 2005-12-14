@@ -10,6 +10,11 @@ namespace MathTL
   }
 
   template <class VECTOR>
+  WMethodPreprocessRHSHelper<VECTOR>::~WMethodPreprocessRHSHelper()
+  {
+  }
+
+  template <class VECTOR>
   WMethod<VECTOR>::WMethod(const Method method,
 			   const WMethodStageEquationHelper<VECTOR>* s)
     : stage_equation_helper(s), preprocessor(0)
@@ -201,21 +206,25 @@ namespace MathTL
       help = u_m;
       for (unsigned int j(0); j < i; j++)
   	help.add(A(i,j), u[j]);
-      ivp->evaluate_f(t_m+tau*alpha_vector[i], help, tolerance/(3*stages), rhs);
+      ivp->evaluate_f(t_m+tau*alpha_vector[i], help, tolerance/(4*stages), rhs);
 
-      if (preprocessor == 0) {
+      if (preprocessor == 0) { // no preprocessing necessary
 	for (unsigned int j(0); j < i; j++)
 	  rhs.add(C(i,j)/tau, u[j]);
       } else {
-	// TODO: insert action of the preprocessor here!
+	help.scale(0.0);
+	for (unsigned int j(0); j < i; j++)
+	  help.add(C(i,j)/tau, u[j]);
+	preprocessor->preprocess_rhs_share(help, tolerance/(4*stages));
+	rhs.add(help);
       }
 	
-      stage_equation_helper->approximate_ft(ivp, t_m, u_m, tolerance/(3*stages), help);
+      stage_equation_helper->approximate_ft(ivp, t_m, u_m, tolerance/(4*stages), help);
       rhs.add(tau*gamma_vector[i], help);
       
       // solve i-th stage equation
       // (\tau*\gamma_{i,i})^{-1}I - T) u_i = rhs
-      stage_equation_helper->solve_W_stage_equation(ivp, t_m, u_m, 1./(tau*C(i,i)), rhs, tolerance/(3*stages), u[i]);
+      stage_equation_helper->solve_W_stage_equation(ivp, t_m, u_m, 1./(tau*C(i,i)), rhs, tolerance/(4*stages), u[i]);
     }
     
     // update u^{(m)} -> u^{(m+1)} by the k_i

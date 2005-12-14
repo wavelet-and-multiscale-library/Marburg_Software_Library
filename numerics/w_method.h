@@ -80,11 +80,10 @@ namespace MathTL
     //! purely virtual destructor
     virtual ~WMethodPreprocessRHSHelper() = 0;
 
-    //! preprocess the vector w
-    virtual void preprocess_rhs_share(const VECTOR& wbefore,
-				      VECTOR& wafter) const
-    {
-      wafter = wbefore; // default behaviour: do nothing
+    //! preprocess the vector w (up to the current tolerance)
+    virtual void preprocess_rhs_share(VECTOR& wbeforeandafter,
+				      const double tolerance) const
+    { // default behaviour: do nothing
     }
   };
   
@@ -197,6 +196,13 @@ namespace MathTL
       consistency/convergence order
     */
     int order() const { return p; }
+
+    /*!
+      set preprocessor for the right-hand side
+    */
+    void set_preprocessor(WMethodPreprocessRHSHelper<VECTOR>* pp) {
+      preprocessor = pp;
+    }
     
   protected:
     //! A=(a_{i,j})

@@ -114,6 +114,7 @@ namespace WaveletTL
       normAinv = InversePowerIteration(A_Lambda, xk, 1e-6, 200, iterations);
 #endif
     }
-    
+
+    return normAinv;
   }
 }

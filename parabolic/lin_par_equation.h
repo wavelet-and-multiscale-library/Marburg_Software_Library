@@ -213,7 +213,7 @@ namespace WaveletTL
     /*!
       constructor from a helper object for the stiffness matrix,
       a given initial value u0 in ell_2
-      and a driving term f which is constant in time
+      and a driving term f (coeffs. w.r.t. the dual basis) which is constant in time
     */
     LinearParabolicEquation(const ELLIPTIC_EQ* elliptic,
  			    const InfiniteVector<double,Index>& u0,

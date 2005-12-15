@@ -253,8 +253,8 @@ int main()
 
   TestProblem<0> testproblem;
   
-  const int d  = 2;
-  const int dT = 2;
+  const int d  = 3;
+  const int dT = 3;
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
   typedef SturmEquation<Basis> EllipticEquation;
@@ -263,10 +263,10 @@ int main()
   EllipticEquation elliptic(testproblem, false); // do not precompute the dummy rhs
 
 //   CachedProblem<EllipticEquation> celliptic(&elliptic);
-  CachedProblem<EllipticEquation> celliptic(&elliptic, 12.2508, 6.41001); // d=2, dT=2
-//   CachedProblem<SturmEquation<Basis> > celliptic(&elliptic, 6.73618, 45.5762); // d=3, dT=3
+//   CachedProblem<EllipticEquation> celliptic(&elliptic, 12.2508, 6.41001); // d=2, dT=2
+  CachedProblem<SturmEquation<Basis> > celliptic(&elliptic, 6.73618, 45.5762); // d=3, dT=3
 
-  const int jmax = 6;
+  const int jmax = 8;
 
   // handle different test cases:
   // 1: u0 = hat function, f(t)=0
@@ -482,7 +482,7 @@ int main()
 
   const double T = 1.0;
   const double q = 10.0;
-  const double TOL = 1e-6;
+  const double TOL = 1e-5;
   const double tau_max = 1.0;
 
   IVPSolution<V> result_adaptive;
@@ -526,7 +526,7 @@ int main()
   resultstream.close();
 #endif
 
-#if 0
+#if 1
   // mehrere Testlaeufe mit einem Problem, verschiedene Toleranzen
 
   const double T = 1.0;
@@ -537,8 +537,9 @@ int main()
   std::list<double> errors;
 
   cout << "* testing linear-implicit scheme (adaptive, several tolerances)..." << endl;
-  for (int expo = 10; expo <= 16; expo++) { // 2^{-6}=0.015625, 2^{-8}=3.9e-3, 2^{-10}=9.77e-4
-    const double TOL = ldexp(1.0, -expo);
+  for (int expo = 2; expo <= 7; expo++) { // 2^{-6}=0.015625, 2^{-8}=3.9e-3, 2^{-10}=9.77e-4
+//     const double TOL = ldexp(1.0, -expo);
+    const double TOL = pow(10.0, -(double)expo);
 
     IVPSolution<V> result_adaptive;
 
@@ -546,9 +547,10 @@ int main()
 
     // adaptive solution of u'=Au+f
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
-    ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
 //     ROWMethod<V> row_adaptive(WMethod<V>::GRK4T);
-//     ROWMethod<V> row_adaptive(WMethod<V>::ROWDA3);
+    ROWMethod<V> row_adaptive(WMethod<V>::ROWDA3);
+    row_adaptive.set_preprocessor(&parabolic);
     solve_IVP(&parabolic, &row_adaptive, T,
 	      TOL, 0, q, tau_max, result_adaptive);
 

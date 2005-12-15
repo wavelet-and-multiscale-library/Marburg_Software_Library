@@ -86,6 +86,16 @@ int main()
   cout << "- after compress():" << endl
        << tocompress << endl;
 
+  Vector<double> z(4, "1 2 3 4");
+  cout << "- a vector z=" << z << endl;
+  Vector<double> omega(4, "1 2 3 4");
+  const double atol = 1;
+  const double rtol = 0;
+  cout << "  ... z has weighted root mean square norm ("
+       << "atol=" << atol << ", rtol=" << rtol << ") "
+       << z.wrmsqr_norm(atol, rtol, omega, omega) << endl;
+
+
 
 //   cout << endl;
 //   cout << "- testing the sparse (map) representation of vectors:" << endl;

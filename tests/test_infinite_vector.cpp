@@ -130,5 +130,22 @@ int main()
   v.add_coefficient(2, -345);
   cout << "- added something to the second coefficient of v:" << endl << v;
 
+  v.clear();
+  v[0] = 1;
+  v[1] = 2;
+  v[2] = 3;
+  v[3] = 4;
+  w.clear();
+  w[0] = 1;
+  w[1] = -1;
+  w[2] = -1;
+  w[3] = 1;
+  const double atol = 1;
+  const double rtol = 1;
+  cout << "- vectors v=" << endl << v << "  and w=" << endl << w;
+  cout << "  weighted root mean square norm of v ("
+       << "atol=" << atol << ", rtol=" << rtol << "): "
+       << v.wrmsqr_norm(atol, rtol, w, w) << endl;
+ 
   return 0;
 }

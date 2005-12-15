@@ -480,7 +480,7 @@ int main()
   cout << "* testing DoPri45..." << endl;
   ExplicitRungeKuttaScheme<V> dopri45_adaptive2(ExplicitRungeKuttaScheme<V>::DoPri45);
   solve_IVP(&problem2, &dopri45_adaptive2, T2,
- 	    TOL2, 0, q2, tau_max2, result_adaptive2);
+ 	    TOL2, TOL2, q2, tau_max2, result_adaptive2);
   cout << "  ... done: " << result_adaptive2.u.size() << " time steps needed," << endl;
   cout << "  initial value at T=0: "
        << problem2.u0 << endl
@@ -491,7 +491,7 @@ int main()
   cout << "* testing DoPri78..." << endl;
   ExplicitRungeKuttaScheme<V> dopri78_adaptive2(ExplicitRungeKuttaScheme<V>::DoPri78);
   solve_IVP(&problem2, &dopri78_adaptive2, T2,
-	    TOL2, 0, q2, tau_max2, result_adaptive2);
+	    TOL2, TOL2, q2, tau_max2, result_adaptive2);
   cout << "  ... done: " << result_adaptive2.u.size() << " time steps needed," << endl;
   cout << "  initial value at T=0: "
        << problem2.u0 << endl

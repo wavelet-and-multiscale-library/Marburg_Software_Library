@@ -263,6 +263,16 @@ namespace MathTL
       (fabs<C> should exist)
     */
     void compress(const double eta = 1e-15);
+
+    /*!
+      weighted root mean square norm
+        ||x||_{v,w} = (1/n * sum_i |x_i|^2 / (atol+max(|v_i|,|w_i|)*rtol)^2)^{1/2}
+      
+      (this has to be modeled as a member function, since partial specialization
+      of template functions is not allowed in C++)
+    */
+    const double wrmsqr_norm(const double atol, const double rtol,
+			     const Vector<C>& v, const Vector<C>& w) const;
     
   protected:
     /*!

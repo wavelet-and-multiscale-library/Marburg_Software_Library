@@ -662,6 +662,24 @@ namespace MathTL
   }
 
   template <class C, class I>
+  const double
+  InfiniteVector<C,I>::wrmsqr_norm(const double atol, const double rtol,
+				   const InfiniteVector<C,I>& v, const InfiniteVector<C,I>& w) const
+  {
+    double result = 0;
+    
+    for (const_iterator it(begin()), itend(end());
+ 	 it != itend; ++it)
+      {
+  	const double help = *it / (atol + rtol * std::max(fabs(v.get_coefficient(it.index())),
+							  fabs(w.get_coefficient(it.index()))));
+  	result += help * help;
+      }
+
+    return result == 0 ? 0 : sqrt(result/size());
+  }
+
+  template <class C, class I>
   inline
   InfiniteVector<C,I>::const_iterator::
   const_iterator(const typename std::map<I,C>::const_iterator& entry)

@@ -53,7 +53,7 @@ namespace MathTL
 
     // TODO: approximate ypp
     
-    double tau_m = std::min(tau_max, tau0); // 100*tau0);
+    double tau_m = std::min(tau_max, 100*tau0);
     
     VECTOR u_mplus1, error_estimate;
     bool done = false;
@@ -76,16 +76,18 @@ namespace MathTL
 	scheme->increment(ivp, t_m, u_m, tau_m, u_mplus1, error_estimate);
 
 	// compute an error estimator
-	const double u_m_norm = linfty_norm(u_m);
-	const double u_mplus1_norm = linfty_norm(u_mplus1);
-	const double maxnorm = std::max(u_m_norm, u_mplus1_norm);
- 	double errest = 0;
- 	for (typename VECTOR::const_iterator it(error_estimate.begin());
-	     it != error_estimate.end(); ++it)
-	  errest += ((*it * *it)/((atol+maxnorm*rtol)*(atol+maxnorm*rtol)));
+// 	const double u_m_norm = linfty_norm(u_m);
+// 	const double u_mplus1_norm = linfty_norm(u_mplus1);
+// 	const double maxnorm = std::max(u_m_norm, u_mplus1_norm);
+//  	double errest = 0;
+//  	for (typename VECTOR::const_iterator it(error_estimate.begin());
+// 	     it != error_estimate.end(); ++it)
+// 	  errest += ((*it * *it)/((atol+maxnorm*rtol)*(atol+maxnorm*rtol)));
 	
-	errest = sqrt(errest / error_estimate.size());
+// 	errest = sqrt(errest / error_estimate.size());
 //  	errest = linfty_norm(error_estimate) / (atol+maxnorm*rtol); // not good
+
+	double errest = error_estimate.wrmsqr_norm(atol, rtol, u_m, u_mplus1);
 
  	// estimate new stepsize
 	fac = std::max(fac2, std::min(fac1, pow(errest, 1./scheme->order()) / rho));

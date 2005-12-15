@@ -344,8 +344,17 @@ namespace MathTL
 //     */
 //     void COARSE(const double eps, InfiniteVector<C,I>& v) const;
 
+    /*!
+      weighted root mean square norm
+        ||x||_{v,w} = (1/n * sum_i |x_i|^2 / (atol+max(|v_i|,|w_i|)*rtol)^2)^{1/2}
+      
+      (this has to be modeled as a member function, since partial specialization
+      of template functions is not allowed in C++)
+    */
+    const double wrmsqr_norm(const double atol, const double rtol,
+			     const InfiniteVector<C,I>& v, const InfiniteVector<C,I>& w) const;
   };
-
+  
   /*!
     sum of two infinite vectors
     (you should avoid using this operator, since it requires one vector

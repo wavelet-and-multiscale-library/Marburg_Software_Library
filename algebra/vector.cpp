@@ -221,6 +221,25 @@ namespace MathTL
   }
 
   template <class C>
+  const double
+  Vector<C>::wrmsqr_norm(const double atol, const double rtol,
+			 const Vector<C>& v, const Vector<C>& w) const
+  {
+    assert(size() == w.size());
+
+    double result = 0;
+    
+    for (const_iterator it(begin()), itv (v.begin()), itw(w.begin()), itend(end());
+	 it != itend; ++it, ++itv, ++itw)
+      {
+	const double help = *it / (atol + rtol * std::max(*itv, *itw));
+	result += help * help;
+      }
+
+    return result == 0 ? 0 : sqrt(result/size());
+  }
+  
+  template <class C>
   template <class C2>
   bool Vector<C>::operator == (const Vector<C2>& v) const
   {

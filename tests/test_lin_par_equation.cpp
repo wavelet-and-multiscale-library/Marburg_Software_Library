@@ -187,6 +187,22 @@ public:
   }
 };
 
+class rhs_8 : public Function<1> {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    return cos(M_PI*get_time())*M_PI*p[0]
+      -3*cos(M_PI*get_time())*M_PI*p[0]*p[0]
+      +2*cos(M_PI*get_time())*M_PI*p[0]*p[0]*p[0]
+      +6*sin(M_PI*get_time())-12*sin(M_PI*get_time())*p[0]
+      -6*p[0]+12*p[0]*p[0];
+  }
+  
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
 class exact_solution_3 : public Function<1> {
 public:
   inline double value(const Point<1>& p, const unsigned int component = 0) const {
@@ -247,6 +263,18 @@ public:
   }
 };
 
+class exact_solution_8 : public Function<1> {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    return sin(M_PI*get_time())*p[0]*(1-p[0])*(1-p[0])*(1-p[0])+(1-sin(M_PI*get_time()))*p[0]*p[0]*p[0]*(1-p[0]);
+  }
+  
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
 int main()
 {
   cout << "Testing linear parabolic equations..." << endl;
@@ -276,8 +304,9 @@ int main()
   // 5: u(t,x)=t*x*(1-x), f(t,x) = x*(1-x)+2*t
   // 6: u(t,x)=x*(1-x), f(t,x) = 2
   // 7: u(t,x)=exp(-100*(x-0.6+0.2*t)^2), f(t,x)=(176-40x-8t-(120-200x-40t)^2)*u(t,x)
+  // 8: u(t,x)=sin(pi*t)*x*(1-x)^3+(1-sin(pi*t))*x^3*(1-x), f=u_t-u_{xx}
 
-#define _TESTCASE 3
+#define _TESTCASE 8
 
   //
   //
@@ -301,6 +330,10 @@ int main()
 
 #if _TESTCASE == 7
   exact_solution_7 uexact;
+#endif
+
+#if _TESTCASE == 8
+  exact_solution_8 uexact;
 #endif
 
   //
@@ -390,6 +423,11 @@ int main()
 #if _TESTCASE == 7
   rhs_7 f7;
   LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, &f7, jmax);
+#endif
+  
+#if _TESTCASE == 8
+  rhs_8 f8;
+  LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, &f8, jmax);
 #endif
   
 #if 0
@@ -482,7 +520,7 @@ int main()
 
   const double T = 1.0;
   const double q = 10.0;
-  const double TOL = 1e-5;
+  const double TOL = 1e-4;
   const double tau_max = 1.0;
 
   IVPSolution<V> result_adaptive;
@@ -537,9 +575,9 @@ int main()
   std::list<double> errors;
 
   cout << "* testing linear-implicit scheme (adaptive, several tolerances)..." << endl;
-  for (int expo = 2; expo <= 7; expo++) { // 2^{-6}=0.015625, 2^{-8}=3.9e-3, 2^{-10}=9.77e-4
-//     const double TOL = ldexp(1.0, -expo);
-    const double TOL = pow(10.0, -(double)expo);
+  for (int expo = 6; expo <= 16; expo++) { // 2^{-6}=0.015625, 2^{-8}=3.9e-3, 2^{-10}=9.77e-4
+    const double TOL = ldexp(1.0, -expo);
+//     const double TOL = pow(10.0, -(double)expo);
 
     IVPSolution<V> result_adaptive;
 
@@ -547,9 +585,9 @@ int main()
 
     // adaptive solution of u'=Au+f
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
-//     ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
+    ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
 //     ROWMethod<V> row_adaptive(WMethod<V>::GRK4T);
-    ROWMethod<V> row_adaptive(WMethod<V>::ROWDA3);
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROWDA3);
     row_adaptive.set_preprocessor(&parabolic);
     solve_IVP(&parabolic, &row_adaptive, T,
 	      TOL, 0, q, tau_max, result_adaptive);

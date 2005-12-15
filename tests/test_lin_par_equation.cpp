@@ -177,7 +177,7 @@ public:
 class rhs_7 : public Function<1> {
 public:
   inline double value(const Point<1>& p, const unsigned int component = 0) const {
-    return (176-40*p[0]-8*get_time()-(120-200*p[0]-40*get_time())*(120-200*p[0]-40*get_time()))
+    return (224-40*p[0]-8*get_time()-(120-200*p[0]-40*get_time())*(120-200*p[0]-40*get_time()))
       * exp(-100*(p[0]-0.6+0.2*get_time())*(p[0]-0.6+0.2*get_time()));
   }
   
@@ -303,10 +303,10 @@ int main()
   // 4: u(t,x)=t*x*(1-x)^3+(1-t)*x^3*(1-x), f(t,x)=u_t(t,x)-u_{xx}(t,x)
   // 5: u(t,x)=t*x*(1-x), f(t,x) = x*(1-x)+2*t
   // 6: u(t,x)=x*(1-x), f(t,x) = 2
-  // 7: u(t,x)=exp(-100*(x-0.6+0.2*t)^2), f(t,x)=(176-40x-8t-(120-200x-40t)^2)*u(t,x)
+  // 7: u(t,x)=exp(-100*(x-0.6+0.2*t)^2), f(t,x)=(224-40x-8t-(120-200x-40t)^2)*u(t,x)
   // 8: u(t,x)=sin(pi*t)*x*(1-x)^3+(1-sin(pi*t))*x^3*(1-x), f=u_t-u_{xx}
 
-#define _TESTCASE 8
+#define _TESTCASE 7
 
   //
   //
@@ -584,8 +584,8 @@ int main()
     cout << "  TOL=" << TOL << endl;
 
     // adaptive solution of u'=Au+f
-//     ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
-    ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
+    ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
 //     ROWMethod<V> row_adaptive(WMethod<V>::GRK4T);
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROWDA3);
     row_adaptive.set_preprocessor(&parabolic);

@@ -4,6 +4,8 @@
 #include <set>
 #include <list>
 
+#include <time.h>
+
 #define _MATHTL_ONESTEPSCHEME_VERBOSITY 1
 #define _WAVELETTL_CDD1_VERBOSITY 0
 
@@ -573,6 +575,7 @@ int main()
 
   std::list<double> numberofsteps;
   std::list<double> errors;
+  std::list<double> wallclocktimes;
 
   cout << "* testing linear-implicit scheme (adaptive, several tolerances)..." << endl;
   for (int expo = 6; expo <= 16; expo++) { // 2^{-6}=0.015625, 2^{-8}=3.9e-3, 2^{-10}=9.77e-4
@@ -589,8 +592,11 @@ int main()
 //     ROWMethod<V> row_adaptive(WMethod<V>::GRK4T);
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROWDA3);
     row_adaptive.set_preprocessor(&parabolic);
+
+    clock_t tstart =  clock();
     solve_IVP(&parabolic, &row_adaptive, T,
 	      TOL, 0, q, tau_max, result_adaptive);
+    clock_t tend = clock();
 
 #if _TESTCASE >= 3
     // compute maximal ell_2 error of the coefficients
@@ -606,6 +612,7 @@ int main()
     }
     errors.push_back(errhelp);
     numberofsteps.push_back(result_adaptive.t.size());
+    wallclocktimes.push_back((double)(tend-tstart)/CLOCKS_PER_SEC);
 #endif
 
 #if _TESTCASE == 1 || _TESTCASE == 2
@@ -637,6 +644,25 @@ int main()
 
   resultstream.close();
 
+  resultstream.open("time_precision.m");
+
+  resultstream << "errors=[";
+  for (std::list<double>::const_iterator it = errors.begin();
+       it != errors.end(); ++it) {
+    resultstream << log10(*it);
+    if (it != errors.end())
+      resultstream << " ";
+  }
+  resultstream << "];" << endl;
+
+  resultstream << "times=[";
+  for (std::list<double>::const_iterator it = wallclocktimes.begin();
+       it != wallclocktimes.end(); ++it) {
+    resultstream << log10(*it);
+    if (it != numberofsteps.end())
+      resultstream << " ";
+  }
+  resultstream << "];" << endl;
 #endif
 
   return 0;

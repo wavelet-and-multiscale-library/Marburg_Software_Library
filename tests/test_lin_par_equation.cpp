@@ -321,7 +321,7 @@ int main()
   // 8: u(t,x)=sin(pi*t)*x*(1-x)^3+(1-sin(pi*t))*x^3*(1-x), f=u_t-u_{xx}
   // 9: u0 = haar function, f(t)=chi_{[0,1/2)}
 
-#define _TESTCASE 3
+#define _TESTCASE 7
 
   //
   //
@@ -615,9 +615,9 @@ int main()
     cout << "  TOL=" << TOL << endl;
 
     // adaptive solution of u'=Au+f
-//     ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
+    ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
-    ROWMethod<V> row_adaptive(WMethod<V>::GRK4T);
+//     ROWMethod<V> row_adaptive(WMethod<V>::GRK4T);
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROWDA3);
     row_adaptive.set_preprocessor(&parabolic);
 
@@ -687,7 +687,7 @@ int main()
   for (std::list<double>::const_iterator it = wallclocktimes.begin();
        it != wallclocktimes.end(); ++it) {
     resultstream << log10(*it);
-    if (it != numberofsteps.end())
+    if (it != wallclocktimes.end())
       resultstream << " ";
   }
   resultstream << "];" << endl;

@@ -321,7 +321,7 @@ int main()
   // 8: u(t,x)=sin(pi*t)*x*(1-x)^3+(1-sin(pi*t))*x^3*(1-x), f=u_t-u_{xx}
   // 9: u0 = haar function, f(t)=chi_{[0,1/2)}
 
-#define _TESTCASE 9
+#define _TESTCASE 3
 
   //
   //
@@ -535,7 +535,7 @@ int main()
   }
 #endif
 
-#if 1
+#if 0
   // einzelner Testlauf, gibt Plot der Iterierten aus
 
   const double T = 1.0;
@@ -594,7 +594,7 @@ int main()
 
 #endif
 
-#if 0
+#if 1
   // mehrere Testlaeufe mit einem Problem, verschiedene Toleranzen
 
   const double T = 1.0;
@@ -606,7 +606,7 @@ int main()
   std::list<double> wallclocktimes;
 
   cout << "* testing linear-implicit scheme (adaptive, several tolerances)..." << endl;
-  for (int expo = 6; expo <= 16; expo++) { // 2^{-6}=0.015625, 2^{-8}=3.9e-3, 2^{-10}=9.77e-4
+  for (int expo = 6; expo <= 18; expo++) { // 2^{-6}=0.015625, 2^{-8}=3.9e-3, 2^{-10}=9.77e-4
     const double TOL = ldexp(1.0, -expo);
 //     const double TOL = pow(10.0, -(double)expo);
 
@@ -615,9 +615,9 @@ int main()
     cout << "  TOL=" << TOL << endl;
 
     // adaptive solution of u'=Au+f
-    ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
-//     ROWMethod<V> row_adaptive(WMethod<V>::GRK4T);
+    ROWMethod<V> row_adaptive(WMethod<V>::GRK4T);
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROWDA3);
     row_adaptive.set_preprocessor(&parabolic);
 

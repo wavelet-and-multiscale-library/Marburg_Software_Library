@@ -205,6 +205,18 @@ public:
   }
 };
 
+class rhs_9 : public Function<1> {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    return (get_time() < 0.5 ? 1.0 : 0);
+  }
+  
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
 class exact_solution_3 : public Function<1> {
 public:
   inline double value(const Point<1>& p, const unsigned int component = 0) const {
@@ -307,8 +319,9 @@ int main()
   // 6: u(t,x)=x*(1-x), f(t,x) = 2
   // 7: u(t,x)=exp(-100*(x-0.6+0.2*t)^2), f(t,x)=(224-40x-8t-(120-200x-40t)^2)*u(t,x)
   // 8: u(t,x)=sin(pi*t)*x*(1-x)^3+(1-sin(pi*t))*x^3*(1-x), f=u_t-u_{xx}
+  // 9: u0 = haar function, f(t)=chi_{[0,1/2)}
 
-#define _TESTCASE 7
+#define _TESTCASE 9
 
   //
   //
@@ -349,7 +362,7 @@ int main()
   expand(&hat, celliptic.basis(), false, jmax, u0); 
 #endif
   
-#if _TESTCASE == 2
+#if _TESTCASE == 2 || _TESTCASE == 9
   Haar haar;
   expand(&haar, celliptic.basis(), false, jmax, u0); 
 #endif
@@ -430,6 +443,11 @@ int main()
 #if _TESTCASE == 8
   rhs_8 f8;
   LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, &f8, jmax);
+#endif
+  
+#if _TESTCASE == 9
+  rhs_9 f9;
+  LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, &f9, jmax);
 #endif
   
 #if 0
@@ -517,7 +535,7 @@ int main()
   }
 #endif
 
-#if 0
+#if 1
   // einzelner Testlauf, gibt Plot der Iterierten aus
 
   const double T = 1.0;
@@ -528,8 +546,8 @@ int main()
   IVPSolution<V> result_adaptive;
   
   cout << "* testing linearly implicit scheme (adaptive, single run)..." << endl;
-//   ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
-  ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
+  ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
+//   ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
   row_adaptive.set_preprocessor(&parabolic);
   solve_IVP(&parabolic, &row_adaptive, T,
 	    TOL, 0, q, tau_max, result_adaptive);
@@ -541,32 +559,42 @@ int main()
   Grid<1> gt(points);
   Grid<2> grid(gt, gx);
   Matrix<double> values((1<<resolution)+1, result_adaptive.t.size());
+#if _TESTCASE >= 3 && _TESTCASE <= 8
   Matrix<double> errvalues(values);
-  
+#endif  
+
   unsigned int i(0);
   std::list<double>::const_iterator ti(result_adaptive.t.begin());
   for (std::list<V>::const_iterator ui(result_adaptive.u.begin());
        ui != result_adaptive.u.end(); ++ui, ++ti, ++i) {
     SampledMapping<1> temp(evaluate(celliptic.basis(), *ui, true, resolution));
+#if _TESTCASE >= 3 && _TESTCASE <= 8
     uexact.set_time(*ti);
+#endif
     for (unsigned int k(0); k < values.row_dimension(); k++) {
       values.set_entry(k, i, temp.values()[k]);
+#if _TESTCASE >= 3 && _TESTCASE <= 8
       errvalues.set_entry(k, i, temp.values()[k] - uexact.value(Point<1>(k*ldexp(1.0,-resolution))));
+#endif
     }
   }
   SampledMapping<2> result(grid, values);
-  SampledMapping<2> errorplot(grid, errvalues);
  
   std::ofstream resultstream("lin_par_result.m");
   result.matlab_output(resultstream);
   resultstream.close();
+
+#if _TESTCASE >= 3 && _TESTCASE <= 8
+  SampledMapping<2> errorplot(grid, errvalues);
 
   resultstream.open("lin_par_error.m");
   errorplot.matlab_output(resultstream);
   resultstream.close();
 #endif
 
-#if 1
+#endif
+
+#if 0
   // mehrere Testlaeufe mit einem Problem, verschiedene Toleranzen
 
   const double T = 1.0;

@@ -56,6 +56,7 @@ namespace WaveletTL
   SturmEquation<WBASIS>::D(const typename WBASIS::Index& lambda) const
   {
     return ldexp(1.0, lambda.j());
+//     return sqrt(a(lambda, lambda));
   }
 
   template <class WBASIS>

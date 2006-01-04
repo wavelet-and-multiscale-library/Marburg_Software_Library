@@ -91,7 +91,7 @@ int main()
 {
   cout << "Testing adaptive wavelet-Galerkin solution of a Sturm b.v.p. with CDD1_SOLVE ..." << endl;
 
-  TestProblem<2> T;
+  TestProblem<3> T;
 
   const int d  = 3;
   const int dT = 3;
@@ -100,18 +100,22 @@ int main()
 
   SturmEquation<Basis> problem(T);
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem);
-//   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 12.2509,   6.41001); // d=2, dT=2
-//   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 15.6751,  25.9767 ); // d=2, dT=4
-  CachedProblem<SturmEquation<Basis> > cproblem(&problem,  6.7774,  45.576  ); // d=3, dT=3
-//   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 13.5193, 103.532  ); // d=3, dT=5
-//   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 38.4615, 251.849  ); // d=3, dT=7
-//   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  5.8466, 532.085  ); // d=4, dT=4
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.34801,  13.3113 ); // d=2, dT=2 (diag-precond.)
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 12.2509 ,   6.41001); // d=2, dT=2 (2^j-precond.)
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  3.04627,  52.2117 ); // d=2, dT=4 (diag-precond.)
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 15.6751 ,  25.9767 ); // d=2, dT=4 (2^j-precond.)
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.12054, 209.511  ); // d=3, dT=3 (diag-precond.)
+  CachedProblem<SturmEquation<Basis> > cproblem(&problem,  6.7774 ,  45.576  ); // d=3, dT=3 (2^j-precond.)
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.92919, 581.862  ); // d=3, dT=5 (diag-precond.)
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 13.5193 , 103.532  ); // d=3, dT=5 (2^j-precond.)
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 38.4615 , 251.849  ); // d=3, dT=7
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  5.8466 , 532.085  ); // d=4, dT=4
   cout << "* estimate for normA: " << cproblem.norm_A() << endl;
   cout << "* estimate for normAinv: " << cproblem.norm_Ainv() << endl;
 
   InfiniteVector<double, Index> u_epsilon;
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 8);
-  CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 12);
+  CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 10);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon);
   
   return 0;

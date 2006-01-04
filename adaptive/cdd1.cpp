@@ -22,6 +22,19 @@ namespace WaveletTL
 		  const int jmax,
 		  const CompressionStrategy strategy)
   {
+    // start with zero guess
+    CDD1_SOLVE(P, epsilon,
+	       InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>(),
+	       u_epsilon, jmax, strategy);
+  }
+  
+  template <class PROBLEM>
+  void CDD1_SOLVE(const PROBLEM& P, const double epsilon,
+		  const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& guess,
+		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
+		  const int jmax,
+		  const CompressionStrategy strategy)
+  {
     // INIT, cf. [BB+] 
 
     CDD1Parameters params;
@@ -59,9 +72,10 @@ namespace WaveletTL
 
     typedef typename PROBLEM::WaveletBasis::Index Index;
     set<Index> Lambda, Lambda_hat;
-    u_epsilon.clear();
+//     u_epsilon.clear();
+    u_epsilon = guess;
     double delta = params.F;
-
+    
     InfiniteVector<double,Index> v_hat, r_hat, u_bar, F;
     P.RHS(2*params.q2*epsilon, F);
     while (delta > epsilon) { // sqrt(params.c1)*epsilon) { // check the additional factor c1^{1/2} in [BB+] !?

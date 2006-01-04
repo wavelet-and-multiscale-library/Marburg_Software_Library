@@ -217,6 +217,18 @@ public:
   }
 };
 
+class rhs_10 : public Function<1> {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    return ((get_time() < 0.5 && p[0] >= 0.25 && p[0] <= 0.75) ? 1.0 : 0);
+  }
+  
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
 class exact_solution_3 : public Function<1> {
 public:
   inline double value(const Point<1>& p, const unsigned int component = 0) const {
@@ -295,8 +307,8 @@ int main()
 
   TestProblem<0> testproblem;
   
-  const int d  = 3;
-  const int dT = 3;
+  const int d  = 2;
+  const int dT = 2;
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
   typedef SturmEquation<Basis> EllipticEquation;
@@ -305,8 +317,8 @@ int main()
   EllipticEquation elliptic(testproblem, false); // do not precompute the dummy rhs
 
 //   CachedProblem<EllipticEquation> celliptic(&elliptic);
-//   CachedProblem<EllipticEquation> celliptic(&elliptic, 12.2508, 6.41001); // d=2, dT=2
-  CachedProblem<SturmEquation<Basis> > celliptic(&elliptic, 6.73618, 45.5762); // d=3, dT=3
+  CachedProblem<EllipticEquation> celliptic(&elliptic, 12.2508, 6.41001); // d=2, dT=2
+//   CachedProblem<SturmEquation<Basis> > celliptic(&elliptic, 6.73618, 45.5762); // d=3, dT=3
 
   const int jmax = 8;
 
@@ -320,8 +332,9 @@ int main()
   // 7: u(t,x)=exp(-100*(x-0.6+0.2*t)^2), f(t,x)=(224-40x-8t-(120-200x-40t)^2)*u(t,x)
   // 8: u(t,x)=sin(pi*t)*x*(1-x)^3+(1-sin(pi*t))*x^3*(1-x), f=u_t-u_{xx}
   // 9: u0 = haar function, f(t)=chi_{[0,1/2)}
+  // 10: u0 = 0, f(t)=chi_{[0,1/2)}(t)*chi_{[1/4,3/4]}(x)
 
-#define _TESTCASE 7
+#define _TESTCASE 10
 
   //
   //
@@ -367,7 +380,7 @@ int main()
   expand(&haar, celliptic.basis(), false, jmax, u0); 
 #endif
 
-#if _TESTCASE == 3
+#if _TESTCASE == 3 || _TESTCASE == 10
   // do nothing, u0=0
 #endif
 
@@ -448,6 +461,11 @@ int main()
 #if _TESTCASE == 9
   rhs_9 f9;
   LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, &f9, jmax);
+#endif
+  
+#if _TESTCASE == 10
+  rhs_10 f10;
+  LinearParabolicEquation<CachedProblem<EllipticEquation> > parabolic(&celliptic, u0, &f10, jmax);
 #endif
   
 #if 0
@@ -535,7 +553,7 @@ int main()
   }
 #endif
 
-#if 0
+#if 1
   // einzelner Testlauf, gibt Plot der Iterierten aus
 
   const double T = 1.0;
@@ -594,7 +612,7 @@ int main()
 
 #endif
 
-#if 1
+#if 0
   // mehrere Testlaeufe mit einem Problem, verschiedene Toleranzen
 
   const double T = 1.0;
@@ -626,7 +644,7 @@ int main()
 	      TOL, 0, q, tau_max, result_adaptive);
     clock_t tend = clock();
 
-#if _TESTCASE >= 3
+#if _TESTCASE >= 3 && _TESTCASE <= 8
     // compute maximal ell_2 error of the coefficients
     double errhelp = 0;
     std::list<double>::const_iterator ti(result_adaptive.t.begin());
@@ -643,7 +661,7 @@ int main()
     wallclocktimes.push_back((double)(tend-tstart)/CLOCKS_PER_SEC);
 #endif
 
-#if _TESTCASE == 1 || _TESTCASE == 2
+#if _TESTCASE == 1 || _TESTCASE == 2 || _TESTCASE >= 9
     // quick hack: use TOL
     errors.push_back(TOL);
     numberofsteps.push_back(result_adaptive.t.size());

@@ -46,6 +46,16 @@ namespace WaveletTL
 		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
 		  const int jmax = 99,
 		  const CompressionStrategy strategy = St04a);
+  /*!
+    the routine ALGORITHMc from [BB+],
+    with a given initial guess for u_epsilon
+   */
+  template <class PROBLEM>
+  void CDD1_SOLVE(const PROBLEM& P, const double epsilon,
+		  const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& guess,
+		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
+		  const int jmax = 99,
+		  const CompressionStrategy strategy = St04a);
 
   /*!
     the parameters chosen or computed in the INIT phase of ALGORITHMc

@@ -70,6 +70,62 @@ private:
 };
 
 /*
+  The circle u(t)=(cos(t),sin(t)) with
+    u' = [0 -1; 1 0]*u(t), u(0) = [1 0]'
+  
+  So f(t,u)=lambda*u, f_t(t,u)=0 and f_u(t,u)=lambda*I.
+ */
+class Circle
+  : public AbstractIVP<Vector<double> >
+{
+public:
+  Circle()
+  {
+    u0.resize(2); u0[0] = 1; u0[1] = 0;
+  }
+
+  void evaluate_f(const double t,
+		  const Vector<double>& v,
+		  const double tolerance,
+		  Vector<double>& result) const
+  {
+    result[0] = -v[1];
+    result[1] = v[0];
+  }
+
+  void evaluate_ft(const double t,
+		   const Vector<double>& v,
+		   const double tolerance,
+		   Vector<double>& result) const
+  {
+    result = 0;
+  }
+
+  void solve_ROW_stage_equation(const double t,
+				const Vector<double>& v,
+				const double alpha,
+				const Vector<double>& y,
+				const double tolerancs,
+				Vector<double>& result) const
+  {
+    const double det_alphaIminusA = alpha*alpha + 1.0;
+    result[0] = (alpha*y[0] - y[1]) / det_alphaIminusA;
+    result[1] = (y[0] + alpha*y[1]) / det_alphaIminusA;
+  }
+
+  // exact solution
+  void exact_solution(const double t, Vector<double>& y) const
+  {
+    y.resize(2);
+    y[0] = cos(t);
+    y[1] = sin(t);
+  }
+
+private:
+  double lambda_;
+};
+
+/*
   Arenstorf orbit
 
     y_1'' = y_1 + 2*y_2' - mu'*(y_1+mu)/D_1 - mu*(y_1-mu')/D_2
@@ -147,17 +203,19 @@ int main()
   
   typedef Vector<double> V;
 
-  Dahlquist problem(5.0);
+//   Dahlquist problem(5.0);
+  Circle problem;
 
-#if 0
+#if 1
   cout << "- checking consistency of the builtin one-step schemes:" << endl;
 
   cout << "* testing RK12:" << endl;
   ExplicitRungeKuttaScheme<V> rk12(ExplicitRungeKuttaScheme<V>::RK12);
   OneStepScheme<V>* scheme = &rk12;
-  Vector<double> temp(1), result(1), error_estimate(1);
+//   Vector<double> temp(1), result(1), error_estimate(1);
+  Vector<double> temp(2), result(2), error_estimate(2), exact(2);
   double err, olderr = 0;
-  for (int expo = 0; expo <= 6; expo++) {
+  for (int expo = 0; expo <= 10; expo++) {
     temp = problem.u0;
     int N = 1<<expo;
     double h = 1.0/N;
@@ -167,7 +225,8 @@ int main()
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
     }
-    err = fabs(result[0] - problem.exact_solution(1.0));
+    problem.exact_solution(1.0, exact);
+    err = linfty_norm(result - exact);
     if (expo > 0) {
       cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
 	   << ", max. of local error estimate " << err_est << endl;
@@ -175,99 +234,103 @@ int main()
     olderr = err;
   }
   
-  cout << "* testing RK23:" << endl;
-  ExplicitRungeKuttaScheme<V> rk23(ExplicitRungeKuttaScheme<V>::RK23);
-  scheme = &rk23;
-  olderr = 0;
-  for (int expo = 0; expo <= 6; expo++) {
-    temp = problem.u0;
-    int N = 1<<expo;
-    double h = 1.0/N;
-    double err_est = 0;
-    for (int i = 1; i <= N; i++) {
-      scheme->increment(&problem, i*h, temp, h, result, error_estimate);
-      err_est = std::max(err_est, l2_norm(error_estimate));
-      temp = result;
-    }
-    err = fabs(result[0] - problem.exact_solution(1.0));
-    if (expo > 0) {
-      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
-	   << ", max. of local error estimate " << err_est << endl;
-    }
-    olderr = err;
-  }
+//   cout << "* testing RK23:" << endl;
+//   ExplicitRungeKuttaScheme<V> rk23(ExplicitRungeKuttaScheme<V>::RK23);
+//   scheme = &rk23;
+//   olderr = 0;
+//   for (int expo = 0; expo <= 10; expo++) {
+//     temp = problem.u0;
+//     int N = 1<<expo;
+//     double h = 1.0/N;
+//     double err_est = 0;
+//     for (int i = 1; i <= N; i++) {
+//       scheme->increment(&problem, i*h, temp, h, result, error_estimate);
+//       err_est = std::max(err_est, l2_norm(error_estimate));
+//       temp = result;
+//     }
+//     problem.exact_solution(1.0, exact);
+//     err = linfty_norm(result - exact);
+//     if (expo > 0) {
+//       cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
+// 	   << ", max. of local error estimate " << err_est << endl;
+//     }
+//     olderr = err;
+//   }
   
-  cout << "* testing Fehlberg34:" << endl;
-  ExplicitRungeKuttaScheme<V> fb34(ExplicitRungeKuttaScheme<V>::Fehlberg34);
-  scheme = &fb34;
-  olderr = 0;
-  for (int expo = 0; expo <= 6; expo++) {
-    temp = problem.u0;
-    int N = 1<<expo;
-    double h = 1.0/N;
-    double err_est = 0;
-    for (int i = 1; i <= N; i++) {
-      scheme->increment(&problem, i*h, temp, h, result, error_estimate);
-      err_est = std::max(err_est, l2_norm(error_estimate));
-      temp = result;
-    }
-    err = fabs(result[0] - problem.exact_solution(1.0));
-    if (expo > 0) {
-      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
-	   << ", max. of local error estimate " << err_est << endl;
-    }
-    olderr = err;
-  }
+//   cout << "* testing Fehlberg34:" << endl;
+//   ExplicitRungeKuttaScheme<V> fb34(ExplicitRungeKuttaScheme<V>::Fehlberg34);
+//   scheme = &fb34;
+//   olderr = 0;
+//   for (int expo = 0; expo <= 10; expo++) {
+//     temp = problem.u0;
+//     int N = 1<<expo;
+//     double h = 1.0/N;
+//     double err_est = 0;
+//     for (int i = 1; i <= N; i++) {
+//       scheme->increment(&problem, i*h, temp, h, result, error_estimate);
+//       err_est = std::max(err_est, l2_norm(error_estimate));
+//       temp = result;
+//     }
+//     problem.exact_solution(1.0, exact);
+//     err = linfty_norm(result - exact);
+//     if (expo > 0) {
+//       cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
+// 	   << ", max. of local error estimate " << err_est << endl;
+//     }
+//     olderr = err;
+//   }
 
-  cout << "* testing DoPri45:" << endl;
-  ExplicitRungeKuttaScheme<V> dopri45(ExplicitRungeKuttaScheme<V>::DoPri45);
-  scheme = &dopri45;
-  olderr = 0;
-  for (int expo = 0; expo <= 6; expo++) {
-    temp = problem.u0;
-    int N = 1<<expo;
-    double h = 1.0/N;
-    double err_est = 0;
-    for (int i = 1; i <= N; i++) {
-      scheme->increment(&problem, i*h, temp, h, result, error_estimate);
-      err_est = std::max(err_est, l2_norm(error_estimate));
-      temp = result;
-    }
-    err = fabs(result[0] - problem.exact_solution(1.0));
-    if (expo > 0) {
-      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
-	   << ", max. of local error estimate " << err_est << endl;
-    }
-    olderr = err;
-  }
+//   cout << "* testing DoPri45:" << endl;
+//   ExplicitRungeKuttaScheme<V> dopri45(ExplicitRungeKuttaScheme<V>::DoPri45);
+//   scheme = &dopri45;
+//   olderr = 0;
+//   for (int expo = 0; expo <= 10; expo++) {
+//     temp = problem.u0;
+//     int N = 1<<expo;
+//     double h = 1.0/N;
+//     double err_est = 0;
+//     for (int i = 1; i <= N; i++) {
+//       scheme->increment(&problem, i*h, temp, h, result, error_estimate);
+//       err_est = std::max(err_est, l2_norm(error_estimate));
+//       temp = result;
+//     }
+//     problem.exact_solution(1.0, exact);
+//     err = linfty_norm(result - exact);
+//     if (expo > 0) {
+//       cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
+// 	   << ", max. of local error estimate " << err_est << endl;
+//     }
+//     olderr = err;
+//   }
 
-  cout << "* testing DoPri78:" << endl;
-  ExplicitRungeKuttaScheme<V> dopri78(ExplicitRungeKuttaScheme<V>::DoPri78);
-  scheme = &dopri78;
-  olderr = 0;
-  for (int expo = 0; expo <= 6; expo++) {
-    temp = problem.u0;
-    int N = 1<<expo;
-    double h = 1.0/N;
-    double err_est = 0;
-    for (int i = 1; i <= N; i++) {
-      scheme->increment(&problem, i*h, temp, h, result, error_estimate);
-      err_est = std::max(err_est, l2_norm(error_estimate));
-      temp = result;
-    }
-    err = fabs(result[0] - problem.exact_solution(1.0));
-    if (expo > 0) {
-      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
-	   << ", max. of local error estimate " << err_est << endl;
-    }
-    olderr = err;
-  }
+//   cout << "* testing DoPri78:" << endl;
+//   ExplicitRungeKuttaScheme<V> dopri78(ExplicitRungeKuttaScheme<V>::DoPri78);
+//   scheme = &dopri78;
+//   olderr = 0;
+//   for (int expo = 0; expo <= 10; expo++) {
+//     temp = problem.u0;
+//     int N = 1<<expo;
+//     double h = 1.0/N;
+//     double err_est = 0;
+//     for (int i = 1; i <= N; i++) {
+//       scheme->increment(&problem, i*h, temp, h, result, error_estimate);
+//       err_est = std::max(err_est, l2_norm(error_estimate));
+//       temp = result;
+//     }
+//     problem.exact_solution(1.0, exact);
+//     err = linfty_norm(result - exact);
+//     if (expo > 0) {
+//       cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
+// 	   << ", max. of local error estimate " << err_est << endl;
+//     }
+//     olderr = err;
+//   }
 
   cout << "* testing ROS2:" << endl;
   ROWMethod<V> ros2(WMethod<V>::ROS2);
   scheme = &ros2;
   olderr = 0;
-  for (int expo = 0; expo <= 6; expo++) {
+  for (int expo = 0; expo <= 10; expo++) {
     temp = problem.u0;
     int N = 1<<expo;
     double h = 1.0/N;
@@ -277,7 +340,8 @@ int main()
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
     }
-    err = fabs(result[0] - problem.exact_solution(1.0));
+    problem.exact_solution(1.0, exact);
+    err = linfty_norm(result - exact);
     if (expo > 0) {
       cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
 	   << ", max. of local error estimate " << err_est << endl;
@@ -289,7 +353,7 @@ int main()
   ROWMethod<V> rowda3(WMethod<V>::ROWDA3);
   scheme = &rowda3;
   olderr = 0;
-  for (int expo = 0; expo <= 6; expo++) {
+  for (int expo = 0; expo <= 10; expo++) {
     temp = problem.u0;
     int N = 1<<expo;
     double h = 1.0/N;
@@ -299,7 +363,8 @@ int main()
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
     }
-    err = fabs(result[0] - problem.exact_solution(1.0));
+    problem.exact_solution(1.0, exact);
+    err = linfty_norm(result - exact);
     if (expo > 0) {
       cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
 	   << ", max. of local error estimate " << err_est << endl;
@@ -311,7 +376,7 @@ int main()
   ROWMethod<V> ros3(WMethod<V>::ROS3);
   scheme = &ros3;
   olderr = 0;
-  for (int expo = 0; expo <= 6; expo++) {
+  for (int expo = 0; expo <= 10; expo++) {
     temp = problem.u0;
     int N = 1<<expo;
     double h = 1.0/N;
@@ -321,7 +386,8 @@ int main()
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
     }
-    err = fabs(result[0] - problem.exact_solution(1.0));
+    problem.exact_solution(1.0, exact);
+    err = linfty_norm(result - exact);
     if (expo > 0) {
       cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
 	   << ", max. of local error estimate " << err_est << endl;
@@ -333,7 +399,7 @@ int main()
   ROWMethod<V> rodas3(WMethod<V>::RODAS3);
   scheme = &rodas3;
   olderr = 0;
-  for (int expo = 0; expo <= 6; expo++) {
+  for (int expo = 0; expo <= 10; expo++) {
     temp = problem.u0;
     int N = 1<<expo;
     double h = 1.0/N;
@@ -343,7 +409,8 @@ int main()
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
     }
-    err = fabs(result[0] - problem.exact_solution(1.0));
+    problem.exact_solution(1.0, exact);
+    err = linfty_norm(result - exact);
     if (expo > 0) {
       cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
 	   << ", max. of local error estimate " << err_est << endl;
@@ -355,7 +422,7 @@ int main()
   ROWMethod<V> grk4t(WMethod<V>::GRK4T);
   scheme = &grk4t;
   olderr = 0;
-  for (int expo = 0; expo <= 6; expo++) {
+  for (int expo = 0; expo <= 10; expo++) {
     temp = problem.u0;
     int N = 1<<expo;
     double h = 1.0/N;
@@ -365,7 +432,54 @@ int main()
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
     }
-    err = fabs(result[0] - problem.exact_solution(1.0));
+    problem.exact_solution(1.0, exact);
+    err = linfty_norm(result - exact);
+    if (expo > 0) {
+      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
+	   << ", max. of local error estimate " << err_est << endl;
+    }
+    olderr = err;
+  }
+
+  cout << "* testing ROS3P:" << endl;
+  ROWMethod<V> ros3p(WMethod<V>::ROS3P);
+  scheme = &ros3p;
+  olderr = 0;
+  for (int expo = 0; expo <= 10; expo++) {
+    temp = problem.u0;
+    int N = 1<<expo;
+    double h = 1.0/N;
+    double err_est = 0;
+    for (int i = 1; i <= N; i++) {
+      scheme->increment(&problem, i*h, temp, h, result, error_estimate);
+      err_est = std::max(err_est, l2_norm(error_estimate));
+      temp = result;
+    }
+    problem.exact_solution(1.0, exact);
+    err = linfty_norm(result - exact);
+    if (expo > 0) {
+      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
+	   << ", max. of local error estimate " << err_est << endl;
+    }
+    olderr = err;
+  }
+
+  cout << "* testing RODASP:" << endl;
+  ROWMethod<V> rodasp(WMethod<V>::RODASP);
+  scheme = &rodasp;
+  olderr = 0;
+  for (int expo = 0; expo <= 10; expo++) {
+    temp = problem.u0;
+    int N = 1<<expo;
+    double h = 1.0/N;
+    double err_est = 0;
+    for (int i = 1; i <= N; i++) {
+      scheme->increment(&problem, i*h, temp, h, result, error_estimate);
+      err_est = std::max(err_est, l2_norm(error_estimate));
+      temp = result;
+    }
+    problem.exact_solution(1.0, exact);
+    err = linfty_norm(result - exact);
     if (expo > 0) {
       cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
 	   << ", max. of local error estimate " << err_est << endl;
@@ -449,9 +563,20 @@ int main()
 //     cout << "  absolute error at t=" << *ti << ": " << fabs((*ui)[0] - problem.exact_solution(*ti)) << endl;
 //   }
   
+  cout << "* testing ROS3P..." << endl;
+  ROWMethod<V> ros3p_adaptive(WMethod<V>::ROS3P);
+  solve_IVP(&problem, &ros3p_adaptive, T,
+	    TOL, 0, q, tau_max, result_adaptive);
+
+  errhelp = 0;
+  ti = result_adaptive.t.begin();
+  for (std::list<V>::const_iterator ui(result_adaptive.u.begin());
+       ui != result_adaptive.u.end(); ++ui, ++ti) {
+    cout << "  absolute error at t=" << *ti << ": " << fabs((*ui)[0] - problem.exact_solution(*ti)) << endl;
+  }
 #endif
 
-#if 1
+#if 0
   cout << "- checking adaptive solution of the Arenstorf orbit problem:" << endl;
 
   Arenstorf problem2;
@@ -522,6 +647,17 @@ int main()
 //        ui != result_adaptive.u.end(); ++ui, ++ti) {
 //     cout << "  absolute error at t=" << *ti << ": " << fabs((*ui)[0] - problem.exact_solution(*ti)) << endl;
 //   }
+
+//   cout << "* testing ROS3P..." << endl;
+//   ROWMethod<V> ros3p_adaptive2(WMethod<V>::ROS3P);
+//   solve_IVP(&problem2, &ros3p_adaptive2, T2,
+// 	    TOL2, TOL2, q2, tau_max2, result_adaptive2);
+//   cout << "  ... done: " << result_adaptive2.u.size() << " time steps needed," << endl;
+//   cout << "  initial value at T=0: "
+//        << problem2.u0 << endl
+//        << "  solution at  T=" << T2 << ": "
+//        << *(result_adaptive2.u.rbegin())
+//        << ", absolute error " << linfty_norm(problem2.u0 - *(result_adaptive2.u.rbegin())) << endl;
   
 #endif
 

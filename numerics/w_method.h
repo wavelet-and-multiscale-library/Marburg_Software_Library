@@ -148,6 +148,7 @@ namespace MathTL
                Generalized Runge-Kutta methods of order four with stepsize control
 	       for stiff ordinary differential equations,
 	       Numer. Math. 33(1979), 55-68
+      [ROS3],
       [RODAS3] Blom, Carmichael, Potra, Sandu, Spee, Verwer:
                Benchmarking Stiff ODE Solvers for Atmospheric Chemistry Problems II:
 	       Rosenbrock Solvers,
@@ -155,18 +156,24 @@ namespace MathTL
       [ROS2]   Blom, Hundsdorfer, Spee, Verwer:
                A Second-Order Rosenbrock Method Applied to Photochemical Dispersion Problems,
 	       SIAM J. Sci. Comput. 20(1999), 1456-1480
-      [ROS3],
       [ROWDA3] Roche:
                Rosenbrock Methods for Differential Algebraic Equations,
                Numer. Math. 52(1988), 45-63
+      [ROS3P]  Lang, Verwer:
+               ROS3P - An accurate third-order Rosenbrock solver designed for parabolic problems,
+	       BIT 41(2001), 731--738
+      [RODASP] Steinebach:
+               Order-reduction of ROW-methods for DAEs and method of lines applications
+	       Technical report 1741, TH Darmstadt, 1995
      */
     enum Method {
       GRK4T,     // s=4, p=4
-      RODAS3,    // s=4, p=3, L-stable, stiffly accurate
+      RODAS3,    // s=4, p=3, index 1, L-stable, stiffly accurate
       ROS2,      // s=2, p=2, L-stable
       ROS3,      // s=3, p=3, L-stable
-      ROWDA3,    // s=3, p=3, L-stable
-      RS,        // s=3, p=2, L-stable
+      ROWDA3,    // s=3, p=3, index 1, L-stable
+      ROS3P,     // s=3, p=3, index 1, PDEs
+      RODASP     // s=6, p=4, index 1, PDEs, L-stable, stiffly accurate
     };
 
     /*!

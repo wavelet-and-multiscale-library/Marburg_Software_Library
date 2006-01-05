@@ -3,7 +3,7 @@
 // +--------------------------------------------------------------------+
 // | This file is part of MathTL - the Mathematical Template Library    |
 // |                                                                    |
-// | Copyright (c) 2002-2005                                            |
+// | Copyright (c) 2002-2006                                            |
 // | Thorsten Raasch, Manuel Werner                                     |
 // +--------------------------------------------------------------------+
 

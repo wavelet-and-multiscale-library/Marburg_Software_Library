@@ -1,8 +1,10 @@
+// -*- c++ -*-
+
 // +--------------------------------------------------------------------+
 // | This file is part of MathTL - the Mathematical Template Library    |
 // |                                                                    |
-// | Copyright (c) 2002-2005                                            |
-// | Thorsten Raasch                                                    |
+// | Copyright (c) 2002-2006                                            |
+// | Thorsten Raasch, Manuel Werner                                     |
 // +--------------------------------------------------------------------+
 
 #ifndef _MATHTL_VECTOR_NORMS_H

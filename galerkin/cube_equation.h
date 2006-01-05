@@ -3,7 +3,7 @@
 // +--------------------------------------------------------------------+
 // | This file is part of WaveletTL - the Wavelet Template Library      |
 // |                                                                    |
-// | Copyright (c) 2002-2005                                            |
+// | Copyright (c) 2002-2006                                            |
 // | Thorsten Raasch, Manuel Werner                                     |
 // +--------------------------------------------------------------------+
 

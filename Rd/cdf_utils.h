@@ -3,8 +3,8 @@
 // +--------------------------------------------------------------------+
 // | This file is part of WaveletTL - the Wavelet Template Library      |
 // |                                                                    |
-// | Copyright (c) 2002-2005                                            |
-// | Thorsten Raasch                                                    |
+// | Copyright (c) 2002-2006                                            |
+// | Thorsten Raasch, Manuel Werner                                     |
 // +--------------------------------------------------------------------+
 
 #ifndef _WAVELETTL_CDF_UTILS_H

@@ -20,7 +20,7 @@ namespace WaveletTL
   template <int d, int dT>
   void
   PBasis<d,dT>::setup() {
-    j0_ = 3; // for the moment     
+    j0_ = (int) ceil(log((double)d)/M_LN2); // for the moment
   }
 
 }

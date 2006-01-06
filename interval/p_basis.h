@@ -10,6 +10,8 @@
 #ifndef _WAVELETTL_P_BASIS_H
 #define _WAVELETTL_P_BASIS_H
 
+#include <interval/i_index.h>
+
 namespace WaveletTL
 {
   /*!
@@ -18,9 +20,20 @@ namespace WaveletTL
     The primal generators are exactly those B-splines associated with the
     Schoenberg knot sequence
 
-      t_{-d+1} = ... = t_0 = 0
-      t_k = k * 2^{-j}, 1 <= k <= 2^j-1
-      t_{2^j} = ... = t_{2^j+d-1} = 1
+      t^j_{-d+1} = ... = t_0 = 0          (knot with multiplicity d at x=0)
+      t^j_k = k * 2^{-j}, 1 <= k <= 2^j-1
+      t^j_{2^j} = ... = t_{2^j+d-1} = 1   (knot with multiplicity d at x=1)
+
+    i.e.
+
+      phi_{j,k}(x) = (t^j_{k+d}-t^j_k)[t^j_k,...,t^j_{k+d}](t-x)^{d-1}_+
+
+    with supp(phi_{j,k}(x) = [t^j_k, t^j_{k+d}].
+    In other words, we have exactly
+
+     d-1     left boundary splines  (k=-d+1,...,-1),
+     2^j-d+1 inner splines          (k=0,...,2^j-d),
+     d-1     right boundary splines (k=2^j-d+1,...,2^j-1)
 
     References:
     [P] Primbs:
@@ -46,6 +59,18 @@ namespace WaveletTL
 
     //! coarsest possible level
     inline const int j0() const { return j0_; }
+
+    //! wavelet index class
+    typedef IntervalIndex<PBasis<d,dT> > Index;
+    
+    //! extremal generator indices
+    inline const int DeltaLmin() const { return 1-d; }
+    inline const int DeltaRmax(const int j) const { return (1<<j)-1; }
+
+    //! boundary indices in \nabla_j
+    inline const int Nablamin() const { return 0; }
+    inline const int Nablamax(const int j) const { return (1<<j)-1; }
+
 
   protected:
     //! coarsest possible level

@@ -1,5 +1,7 @@
 // implementation for i_index.h
 
+#include <cassert>
+
 namespace WaveletTL
 {
   template <class IBASIS>

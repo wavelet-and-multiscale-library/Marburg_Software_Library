@@ -33,7 +33,7 @@ namespace MathTL {
     gray,
 //     hot,
 //     hsv,
-//     jet,
+    jet,
 //     lines,
 //     pink,
 //     prism,

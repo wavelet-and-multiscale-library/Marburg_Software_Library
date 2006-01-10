@@ -10,31 +10,48 @@
 #ifndef _MATHTL_PLOT_TOOLS_H
 #define _MATHTL_PLOT_TOOLS_H
 
-#include<map>
-#include<geometry/sampled_mapping.h>
+#include <iostream>
+#include <map>
 
 using std::map;
 
 namespace MathTL {
 
   void matlab_output(const map<double,double>& log_10_residual_norms,
-		     std::ostream& os)
-  {
-    Array1D<double> x(log_10_residual_norms.size());
-    Array1D<double> values(log_10_residual_norms.size());
-    
-    map<double,double>::const_iterator it = log_10_residual_norms.begin();
-    unsigned int i = 0;
-    for (; it != log_10_residual_norms.end(); it++) {
-      x[i] = it->first;
-      values[i] = it->second;
-      i++;
-    }
+		     std::ostream& os);
 
-    Grid<1> grid(x);
-    SampledMapping<1> s_out(grid,values);
-    s_out.matlab_output(os);
-    
-  }
+  /*!
+    enum type for the builtin Matlab color maps
+  */
+  enum MatlabColorMap {
+//     autumn,
+//     bone,
+//     colorcube,
+//     cool,
+//     copper,
+//     flag,
+    gray,
+//     hot,
+//     hsv,
+//     jet,
+//     lines,
+//     pink,
+//     prism,
+//     spring,
+//     summer,
+//     white,
+//     winter
+  };
+  
+  /*!
+    for a given x in [-1,1] and a given Matlab colormap,
+    compute the corresponding RGB values
+  */
+  void get_color(const double x,
+		 const MatlabColorMap colormap,
+		 double& red, double& green, double& blue);
 }
+
+#include <utils/plot_tools.cpp>
+
 #endif

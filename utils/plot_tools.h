@@ -22,6 +22,7 @@ namespace MathTL {
 
   /*!
     enum type for the builtin Matlab color maps
+    (only two are currently implemented)
   */
   enum MatlabColorMap {
 //     autumn,

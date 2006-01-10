@@ -3,6 +3,7 @@
 #include <Rd/r_basis.h>
 #include <Rd/cdf_basis.h>
 #include <interval/periodic.h>
+#include <interval/i_indexplot.h>
 
 using namespace std;
 using namespace WaveletTL;
@@ -22,7 +23,7 @@ int main()
   cout << "- leftmost wavelet on the coarsest level: " << first_wavelet(&basis, basis.j0()) << endl;
   cout << "- rightmost wavelet on the coarsest level: " << last_wavelet(&basis, basis.j0()) << endl;
 
-#if 1
+#if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -47,7 +48,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "
@@ -75,7 +76,7 @@ int main()
 
   // ---------------------------------------------------------------------------
 
-  cout << "* another periodic basis:" << endl;
+  cout << "* a periodic CDF basis:" << endl;
 
   typedef PeriodicBasis<CDFBasis<2, 2> > Basis2;
   typedef Basis2::Index Index2;
@@ -88,7 +89,7 @@ int main()
   cout << "- leftmost wavelet on the coarsest level: " << first_wavelet(&basis2, basis2.j0()) << endl;
   cout << "- rightmost wavelet on the coarsest level: " << last_wavelet(&basis2, basis2.j0()) << endl;
 
-#if 1
+#if 0
   for (int level = basis2.j0()+1; level <= basis2.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -113,7 +114,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis2.j0()+1; level <= basis2.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -138,6 +139,20 @@ int main()
 	  if (index == last_generator(&basis2, level)) break;
 	}
     }
+#endif
+
+#if 1
+  cout << "- create some test index set..." << endl;
+  InfiniteVector<double, Index2> gcoeffs, coeffs;
+  gcoeffs[first_generator(&basis2, basis2.j0()+1)] = 1.0;
+  cout << "* original coefficient set:" << endl
+       << gcoeffs << endl;
+
+  basis2.decompose(gcoeffs, basis2.j0(), coeffs);
+  cout << "* coefficient set in multiscale representation:" << endl
+       << coeffs << endl;
+
+  plot_indices(&basis2, coeffs, basis2.j0()+2, cout);
 #endif
 
   return 0;

@@ -167,6 +167,9 @@ namespace WaveletTL
     inline const int Nablamin() const { return 0; }
     inline const int Nablamax(const int j) const { return (1<<j)-1; }
 
+    //! size of Nabla_j
+    inline const int Nablasize(const int j) const { return 1<<j; }
+
     //! index of first (leftmost) generator on level j >= j0
     Index first_generator(const int j) const;
 

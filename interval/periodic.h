@@ -86,6 +86,9 @@ namespace WaveletTL
     //! size of Delta_j
     inline const int Deltasize(const int j) const { return 1<<j; }
     
+    //! size of Nabla_j
+    inline const int Nablasize(const int j) const { return 1<<j; }
+
     //! DECOMPOSE routine, simple version
     /*!
       Constructs for a given single wavelet index lambda a coefficient set c,

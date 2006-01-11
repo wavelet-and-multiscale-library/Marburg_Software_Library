@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <interval/i_index.h>
+#include <utils/plot_tools.h>
 #include <algebra/infinite_vector.h>
 
 using MathTL::InfiniteVector;
@@ -30,7 +31,8 @@ namespace WaveletTL
   void plot_indices(const IBASIS* basis,
 		    const InfiniteVector<double, typename IBASIS::Index>& coeffs,
 		    const int jmax,
-		    std::ostream& os);
+		    std::ostream& os,
+		    MathTL::MatlabColorMap colormap = jet);
 }
 
 // include implementation

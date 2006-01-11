@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <Rd/daubechies_mask.h>
 #include <Rd/r_basis.h>
 #include <Rd/cdf_basis.h>
@@ -144,15 +145,19 @@ int main()
 #if 1
   cout << "- create some test index set..." << endl;
   InfiniteVector<double, Index2> gcoeffs, coeffs;
-  gcoeffs[first_generator(&basis2, basis2.j0()+1)] = 1.0;
+  gcoeffs[++(++first_generator(&basis2, basis2.j0()+3))] = 1.0;
   cout << "* original coefficient set:" << endl
        << gcoeffs << endl;
 
   basis2.decompose(gcoeffs, basis2.j0(), coeffs);
   cout << "* coefficient set in multiscale representation:" << endl
        << coeffs << endl;
-
-  plot_indices(&basis2, coeffs, basis2.j0()+2, cout);
+  
+  cout << "* plotting the coefficient set..." << endl;
+  std::ofstream fs("coefficient_plot.m");
+  plot_indices(&basis2, coeffs, basis2.j0()+2, fs);
+  fs.close();
+  cout << "  ...done!" << endl;
 #endif
 
   return 0;

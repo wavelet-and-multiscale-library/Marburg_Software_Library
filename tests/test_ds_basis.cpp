@@ -6,6 +6,7 @@
 
 #include <Rd/cdf_utils.h>
 #include <interval/ds_basis.h>
+#include <interval/i_indexplot.h>
 
 using namespace std;
 using namespace WaveletTL;
@@ -278,6 +279,25 @@ int main()
     if (lambdadual == last_wavelet(&basis, basis.j0())) break;
   }
 #endif
+
+#if 1
+  cout << "- create some test index set..." << endl;
+  InfiniteVector<double, Index> gplotcoeffs, plotcoeffs;
+  gplotcoeffs[++(++first_generator(&basis, basis.j0()+3))] = 1.0;
+  cout << "* original coefficient set:" << endl
+       << gplotcoeffs;
+
+  basis.decompose(gplotcoeffs, basis.j0(), plotcoeffs);
+  cout << "* coefficient set in multiscale representation:" << endl
+       << plotcoeffs;
+  
+  cout << "* plotting the coefficient set..." << endl;
+  std::ofstream plotstream("coefficient_plot.m");
+  plot_indices(&basis, plotcoeffs, basis.j0()+2, plotstream, cool);
+  plotstream.close();
+  cout << "  ...done!" << endl << endl;
+#endif
+
 
   // ---------------------------------------------------------------------------
 

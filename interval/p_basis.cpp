@@ -1,6 +1,7 @@
 // implementation for p_basis.h
 
 #include <cassert>
+#include <cmath>
 
 namespace WaveletTL
 {

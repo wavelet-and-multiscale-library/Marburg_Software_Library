@@ -293,7 +293,7 @@ int main()
   
   cout << "* plotting the coefficient set..." << endl;
   std::ofstream plotstream("coefficient_plot.m");
-  plot_indices(&basis, plotcoeffs, 10, plotstream, cool);
+  plot_indices(&basis, plotcoeffs, 10, plotstream, "cool", true, -5);
   plotstream.close();
   cout << "  ...done!" << endl << endl;
 #endif
@@ -328,7 +328,7 @@ int main()
   cout << "- leftmost wavelet on the coarsest level: " << first_wavelet(&basis2, basis2.j0()) << endl;
   cout << "- rightmost wavelet on the coarsest level: " << last_wavelet(&basis2, basis2.j0()) << endl;
 
-#if 1
+#if 0
   cout << "- checking biorthogonality of Mj0, Mj0T for different levels:" << endl;
   for (int level = basis2.j0(); level <= basis2.j0()+2; level++)
     {
@@ -352,7 +352,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   cout << "- checking biorthogonality of Mj<->Gj and MjT<->GjT for different levels:" << endl;
   for (int level = basis2.j0(); level <= basis2.j0()+1; level++)
     {

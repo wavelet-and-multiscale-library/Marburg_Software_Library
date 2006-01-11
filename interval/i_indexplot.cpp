@@ -7,30 +7,36 @@ namespace WaveletTL
 		    const InfiniteVector<double, typename IBASIS::Index>& coeffs,
 		    const int jmax,
 		    std::ostream& os,
-		    MathTL::MatlabColorMap colormap)
+		    const char* colormap,
+		    bool colorbar,
+		    const double a)
   {
     typedef typename IBASIS::Index Index;
     
     const int j0 = basis->j0();
     const double maxnorm = linfty_norm(coeffs);
-
+    
     // first plot all generator coefficients on the coarsest level
     const int n_generators = basis->Deltasize(j0);
     const double h0 = 1./n_generators;
     for (int i = 0; i < n_generators; i++) {
       double x = i * h0;
       double y = j0-0.5;
-      double red, green, blue;
       const double c = coeffs.get_coefficient(Index(j0,0,basis->DeltaLmin()+i,basis));
-      if (c == 0)
-	red = green = blue = 1.0;
-      else
-	MathTL::get_color(-1+2*fabs(c)/maxnorm, colormap, red, green, blue);
-      
-      os << "rectangle('position',["
-	 << x << "," << y << "," << h0 << "," << 1.0 << "],"
-  	 << "'LineWidth',0.125,"
-	 << "'FaceColor',[" << red << "," << green << "," << blue << "])" << endl;
+      if (c == 0) {
+	// draw an empty rectangle
+	os << "rectangle('position',["
+	   << x << "," << y << "," << h0 << "," << 1.0 << "],"
+	   << "'LineWidth',0.125,"
+	   << "'FaceColor',[1.0,1.0,1.0])" << endl;
+      } else {
+	// draw a patch (to have Matlab manage the colormap)
+ 	os << "patch("
+	   << "[" << x << ";" << x+h0 << ";" << x+h0 << ";" << x << "],"
+	   << "[" << y << ";" << y << ";" << y+1 << ";" << y+1 << "],"
+	   << std::max(log10(fabs(c)/maxnorm),a)
+	   << ")" << endl;
+      }
     }
 
     // plot some empty boxes above level 7
@@ -46,30 +52,53 @@ namespace WaveletTL
       const int n_wavelets = basis->Nablasize(j);
       const double hj = 1./n_wavelets;
       for (int i = 0; i < n_wavelets; i++) {
-	double x = i * hj;
-	double y = j+0.5;
-	double red, green, blue;
-	const double c = coeffs.get_coefficient(Index(j,1,basis->Nablamin()+i,basis));
-	if (c == 0)
-	  red = green = blue = 1.0;
-	else
-	  MathTL::get_color(-1+2*fabs(c)/maxnorm, colormap, red, green, blue);
-	
-	if (c != 0 || j <= 6)
-	  os << "rectangle('position',["
-	     << x << "," << y << "," << hj << "," << 1.0 << "],"
-	     << "'LineWidth',0.125,"
-	     << "'FaceColor',[" << red << "," << green << "," << blue << "])" << endl;
+ 	double x = i * hj;
+ 	double y = j+0.5;
+ 	const double c = coeffs.get_coefficient(Index(j,1,basis->Nablamin()+i,basis));
+ 	if (c == 0) {
+	  if (j <= 6) {
+	    // draw an empty rectangle
+	    os << "rectangle('position',["
+	       << x << "," << y << "," << hj << "," << 1.0 << "],"
+	       << "'LineWidth',0.125,"
+	       << "'FaceColor',[1.0,1.0,1.0])" << endl;
+	  }
+	} else {
+	  // draw a patch
+	  os << "patch("
+	     << "[" << x << ";" << x+hj << ";" << x+hj << ";" << x << "],"
+	     << "[" << y << ";" << y << ";" << y+1 << ";" << y+1 << "],"
+	     << std::max(log10(fabs(c)/maxnorm),a)
+	     << ")" << endl;
+	}
       }
     }
-
-    // set y axis
+    
+    // set y axis limits
     os << "set(gca,'YLim',[" << j0-0.5 << " " << jmax+0.5 << "])" << endl;
+
+    // set axis labels
+    os << "xlabel 'k'" << endl
+       << "ylabel 'level j'" << endl;
+    
+    // turn off x ticks
+    os << "set(gca,'XTick',[])" << endl;
+
+    // set colormap
+    os << "colormap " << colormap << endl;
+    
+    // set color axis limits
+    os << "set(gca,'CLim',[" << a << " 0])" << endl;
 
     // set the y-tick marks
     os << "set(gca,'YTick',[";
     for (int j = j0; j <= jmax+1; j++)
       os << j << " ";
     os << "])" << endl;
+
+    // plot a colorbar (or not)
+    if (colorbar) {
+      os << "colorbar" << endl;
+    }
   }
 }

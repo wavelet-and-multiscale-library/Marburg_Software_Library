@@ -28,7 +28,7 @@ namespace MathTL {
 //     autumn,
 //     bone,
 //     colorcube,
-//     cool,
+    cool,
 //     copper,
 //     flag,
     gray,

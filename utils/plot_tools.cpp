@@ -37,8 +37,11 @@ namespace MathTL
 //       break;
 //     case colorcube:
 //       break;
-//     case cool:
-//       break;
+    case cool:
+      red   = (x+1.0)/2.0;
+      green = 1.0-red;
+      blue  = 1.0;
+      break;
 //     case copper:
 //       break;
 //     case flag:

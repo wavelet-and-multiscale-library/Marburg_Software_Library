@@ -73,11 +73,18 @@
 			       ? ((frame_->bases()[p_])->bases())[i]->DeltaRmax(j_)
 			       : ((frame_->bases()[p_])->bases())[i]->Nablamax(j_));
        if (k_[i] == last_index) {
-	 k_[i] = (e_[i] == 0
-		  ? ((frame_->bases()[p_])->bases())[i]->DeltaLmin()
-		  : ((frame_->bases()[p_])->bases())[i]->Nablamin());
-	 //eplusplus = (i == 0);
 	 pplusplus = (i == 0);
+	 if (pplusplus) {
+	   k_[i] = (e_[i] == 0
+		    ? ((frame_->bases()[(p_ < num_patches-1) ? p_+1 : 0])->bases())[i]->DeltaLmin()
+		    : ((frame_->bases()[(p_ < num_patches-1) ? p_+1 : 0])->bases())[i]->Nablamin());
+	 }
+	 else 
+	   k_[i] = (e_[i] == 0
+		    ? ((frame_->bases()[p_])->bases())[i]->DeltaLmin()
+		    : ((frame_->bases()[p_])->bases())[i]->Nablamin());
+	 //eplusplus = (i == 0);
+	 //pplusplus = (i == 0);
        } else {
 	 ++k_[i];
 	 break;

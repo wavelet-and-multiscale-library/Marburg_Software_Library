@@ -112,7 +112,8 @@ namespace FrameTL
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   bool intersect_singular_support(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 				  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
-				  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& nu);
+				  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& nu
+				  /*,const FixedArray1D<double,DIM_m>& irregular_grid*/);
 
   /*!
     tests wether the line segments defined by the points

@@ -65,7 +65,13 @@ namespace FrameTL
 								const Function<DIM_m>& f,
 								const int resolution) const = 0;
 
-    
+
+    virtual double  L_2_error(const AggregatedFrame<IBASIS,1,1>& frame,
+			      const InfiniteVector<double,
+			      typename AggregatedFrame<IBASIS,1,1>::Index>& coeffs,
+			      const Function<1>& f,
+			      const int resolution,
+			      const double a, const double b) const;
   };
 
   template <class IBASIS>
@@ -99,6 +105,16 @@ namespace FrameTL
 			typename AggregatedFrame<IBASIS,1,1>::Index>& coeffs,
 			const Function<1>& f,
 			const int resolution) const;
+
+    double
+    L_2_error(const AggregatedFrame<IBASIS,1,1>& frame,
+	      const InfiniteVector<double,
+	      typename AggregatedFrame<IBASIS,1,1>::Index>& coeffs,
+	      const Function<1>& f,
+	      const int resolution,
+	      const double a, const double b) const;
+
+
 
   };
   
@@ -134,6 +150,14 @@ namespace FrameTL
 			const Function<2>& f,
 			const int resolution) const;
 
+
+    double
+    L_2_error(const AggregatedFrame<IBASIS,2,2>& frame,
+	      const InfiniteVector<double,
+	      typename AggregatedFrame<IBASIS,2,2>::Index>& coeffs,
+	      const Function<2>& f,
+	      const int resolution,
+	      const double a, const double b) const;
 
   };
 

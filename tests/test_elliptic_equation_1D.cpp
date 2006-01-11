@@ -37,22 +37,72 @@ using namespace MathTL;
 using namespace WaveletTL;
 
 
-  /*!
-    special function with steep gradients
-    near the right end of the interval
-  */
+//   /*!
+//     special function with steep gradients
+//     near the right end of the interval
+//   */
+// template<class VALUE = double>
+// class Singularity1D
+//   : public Function<1, VALUE>
+// {
+// public:
+//   Singularity1D() {};
+//   virtual ~Singularity1D() {};
+//   VALUE value(const Point<1>& p,
+// 	      const unsigned int component = 0) const
+//   {
+//     return  -100*exp(5*p[0])*(1-(exp(5*p[0])-1)/(exp(5.)-1))/(exp(5.)-1)+200*exp(10*p[0]) / 
+//       ((exp(5.)-1)*(exp(5.)-1))+100*(exp(5*p[0])-1)*exp(5*p[0])/((exp(5.)-1)*(exp(5.)-1));
+//   }
+  
+//   void vector_value(const Point<1> &p,
+// 		    Vector<VALUE>& values) const { ; }
+  
+// };
+
+
+/*!
+*/
 template<class VALUE = double>
-class Singularity1D
+class Singularity1D_RHS_2
   : public Function<1, VALUE>
 {
 public:
-  Singularity1D() {};
-  virtual ~Singularity1D() {};
+  Singularity1D_RHS_2() {};
+  virtual ~Singularity1D_RHS_2() {};
   VALUE value(const Point<1>& p,
 	      const unsigned int component = 0) const
   {
-    return  -100*exp(5*p[0])*(1-(exp(5*p[0])-1)/(exp(5.)-1))/(exp(5.)-1)+200*exp(10*p[0]) / 
-      ((exp(5.)-1)*(exp(5.)-1))+100*(exp(5*p[0])-1)*exp(5*p[0])/((exp(5.)-1)*(exp(5.)-1));
+    return -sin(3.*M_PI*p[0])*9.*M_PI*M_PI - 4.;
+  }
+  
+  void vector_value(const Point<1> &p,
+		    Vector<VALUE>& values) const { ; }
+  
+};
+
+/*!
+  special function with steep gradients
+  near the right end of the interval
+*/
+template<class VALUE = double>
+class Singularity1D_2
+  : public Function<1, VALUE>
+{
+public:
+  Singularity1D_2() {};
+  virtual ~Singularity1D_2() {};
+  VALUE value(const Point<1>& p,
+	      const unsigned int component = 0) const
+  {
+    if (0. <= p[0] && p[0] < 0.5)
+      return -sin(3.*M_PI*p[0]) + 2.*p[0]*p[0];
+
+    if (0.5 <= p[0] && p[0] <= 1.0)
+      return -sin(3.*M_PI*p[0]) + 2.*(1-p[0])*(1-p[0]);
+
+    return 0.;
+
   }
   
   void vector_value(const Point<1> &p,
@@ -75,21 +125,34 @@ int main()
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 0.75;
+  A(0,0) = 1.;
   Point<1> b;
   b[0] = 0.;
   AffineLinearMapping<1> affineP(A,b);
   
   Matrix<double> A2(DIM,DIM);
-  A2(0,0) = 0.75;
+  A2(0,0) = 0.7;
   Point<1> b2;
-  b2[0] = 0.25;
+  b2[0] = 1.0-A2.get_entry(0,0);
   AffineLinearMapping<1> affineP2(A2,b2);
+
+  FixedArray1D<double,1> A3;
+  A3[0] = 0.75;
+  SimpleAffineLinearMapping<1> simpleaffine1(A3,b);
+  
+  FixedArray1D<double,1> A4;
+  A4[0] = 0.75;
+  SimpleAffineLinearMapping<1> simpleaffine2(A4,b2);
+
+
   //##############################
   
   Array1D<Chart<DIM,DIM>* > charts(2);
   charts[0] = &affineP;
   charts[1] = &affineP2;
+
+  //charts[0] = &simpleaffine1;
+  //charts[1] = &simpleaffine2;
   
   SymmetricMatrix<bool> adj(2);
   adj(0,0) = 1;
@@ -141,7 +204,8 @@ int main()
   value[0] = 1;
   ConstantFunction<DIM> const_fun(value);
 
-  Singularity1D<double> sing1D;
+  Singularity1D_2<double> exactSolution;
+  Singularity1D_RHS_2<double> sing1D;
   
   //PoissonBVP<DIM> poisson(&const_fun);
   PoissonBVP<DIM> poisson(&sing1D);
@@ -157,11 +221,10 @@ int main()
   
   //############### 1D galerkin scheme test ##################
 #if 1
-  
   int z = 0;
   set<Index> Lambda;
   for (Index lambda = FrameTL::first_generator<Basis1D,1,1,Frame1D>(&frame, frame.j0());
-       lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+8); ++lambda) {
+       lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+7); ++lambda) {
     cout << lambda << endl;
     cout << z++ << endl;
     Lambda.insert(lambda);
@@ -202,26 +265,28 @@ int main()
 
   Vector<double> resid(xk.size());
   Vector<double> help(xk.size());
-  for (int i = 0; i < 3000; i++) {
+  for (int i = 0; i < 2000; i++) {
     stiff.apply(xk,help);
     resid = rh - help;
     cout << sqrt((resid*resid)) << endl;
     stiff.apply(resid,help);
     alpha_n = (resid * resid) * (1.0 / (resid * help));
+    cout  << alpha_n << endl;
     resid *= alpha_n;
+    //resid *= 0.3;
     xk = xk + resid;
   }
 
-  for (int i = 0; i < 125 ; i++) 
-    for (int j = 0; j < 125 ; j++) {
-      if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
-	cout << stiff.get_entry(i,j) << endl;
-	cout << stiff.get_entry(j,i) << endl;
-	cout << "i = " << i << " j = " << j << endl;
-	//abort();
-	cout << "#######################" << endl;
-      }
-    } 
+//   for (int i = 0; i < 1015 ; i++) 
+//     for (int j = 0; j < 1015 ; j++) {
+//       if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
+// 	cout << stiff.get_entry(i,j) << endl;
+// 	cout << stiff.get_entry(j,i) << endl;
+// 	cout << "i = " << i << " j = " << j << endl;
+// 	abort();
+// 	cout << "#######################" << endl;
+//       }
+//     } 
 
   //CG(stiff, rh, xk, 0.0001, 1000, iter);
   //Richardson(stiff, rh, xk, 2. / lmax, 0.0001, 1000, iter);
@@ -237,11 +302,21 @@ int main()
 
   EvaluateFrame<Basis1D,1,1> evalObj;
 
-  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u, true, 10);//expand in primal basis
+  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u, true, 11);//expand in primal basis
+  Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u, exactSolution, 11);
+
+  double L2err = evalObj.L_2_error(frame, u, exactSolution, 7, 0.0, 1.0);
+
+  cout << "L_2 error = " << L2err << endl;
 
   std::ofstream ofs5("approx_solution_1D_out.m");
   matlab_output(ofs5,U);
   ofs5.close();
+
+  std::ofstream ofs6("error_1D_out.m");
+  matlab_output(ofs6,Error);
+  ofs6.close();
+
 
   cout << "  ... done, time needed: " << time << " seconds" << endl;
    

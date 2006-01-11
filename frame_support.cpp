@@ -405,10 +405,14 @@ namespace FrameTL
 
     //cout << supp_mu.a[0] << " " << supp_mu.b[0] << " " << supp_mu.j << endl;
 
-    if ( typeid(*frame.atlas()->charts()[lambda.p()]) ==
-	 typeid(AffineLinearMapping<1>) &&
-	 typeid(*frame.atlas()->charts()[mu.p()])     == 
-	 typeid(AffineLinearMapping<1>) )
+    if ( (typeid(*frame.atlas()->charts()[lambda.p()]) ==
+	  typeid(AffineLinearMapping<1>) &&
+	  typeid(*frame.atlas()->charts()[mu.p()])     == 
+	  typeid(AffineLinearMapping<1>)) ||
+	 (typeid(*frame.atlas()->charts()[lambda.p()]) ==
+	  typeid(SimpleAffineLinearMapping<1>) &&
+	  typeid(*frame.atlas()->charts()[mu.p()])     == 
+	  typeid(SimpleAffineLinearMapping<1>)) )
       {
 	assert ( DIM_d == 1 );
 	
@@ -427,18 +431,42 @@ namespace FrameTL
 	return (a[0] < d[0]) && (b[0] > c[0]);
 
       }
+#if 1
+    if ( (typeid(*frame.atlas()->charts()[lambda.p()]) ==
+	  typeid(AffineLinearMapping<2>) &&
+	  typeid(*frame.atlas()->charts()[mu.p()])     == 
+	  typeid(AffineLinearMapping<2>)
+	  ||
+	  (typeid(*frame.atlas()->charts()[lambda.p()]) ==
+	   typeid(SimpleAffineLinearMapping<2>) &&
+	   typeid(*frame.atlas()->charts()[mu.p()])     == 
+	   typeid(SimpleAffineLinearMapping<2>)))
+	 )
+      {
+	const Chart<DIM_d,DIM_m>* chart_la = frame.atlas()->charts()[lambda.p()];
+	const Chart<DIM_d,DIM_m>* chart_mu = frame.atlas()->charts()[mu.p()];
+	
+	Point<DIM_m> a_la, b_la, a_mu, b_mu;
 
-    // both charts are LinearBezierMappings
+	chart_la->map_point(Point<DIM_d>(supp_lambda.a[0]*dx1,supp_lambda.a[1]*dx1), a_la);
+	chart_la->map_point(Point<DIM_d>(supp_lambda.b[0]*dx1,supp_lambda.b[1]*dx1), b_la);
+	
+	chart_mu->map_point(Point<DIM_d>(supp_mu.a[0]*dx2,supp_mu.a[1]*dx2), a_mu);
+	chart_mu->map_point(Point<DIM_d>(supp_mu.b[0]*dx2,supp_mu.b[1]*dx2), b_mu);
+
+	return (a_la[0] < b_mu[0] && b_la[0] > a_mu[0]) && (a_la[1] < b_mu[1] && b_la[1] > a_mu[1]);
+      }
+#endif
     if ( ( typeid(*frame.atlas()->charts()[lambda.p()]) ==
 	   typeid(LinearBezierMapping) &&
 	   typeid(*frame.atlas()->charts()[mu.p()])     == 
 	   typeid(LinearBezierMapping) )
-	 ||
+	 /* ||
 	 ( typeid(*frame.atlas()->charts()[lambda.p()]) ==
 	   typeid(AffineLinearMapping<2>) &&
 	   typeid(*frame.atlas()->charts()[mu.p()])     == 
 	   typeid(AffineLinearMapping<2>)
-	   )
+	   )*/
 	 )
       {
 
@@ -447,20 +475,23 @@ namespace FrameTL
 	FixedArray1D<Point<DIM_m>,4 > poly1;
 	FixedArray1D<Point<DIM_m>,4 > poly2;
 
+	const Chart<DIM_d,DIM_m>* chart_la = frame.atlas()->charts()[lambda.p()];
+	const Chart<DIM_d,DIM_m>* chart_mu = frame.atlas()->charts()[mu.p()];
+
 	// map the knots of the unit cube to patch
 	// 0 -- 00
 	// 1 -- 10
 	// 2 -- 11
 	// 3 -- 01
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx1,supp_lambda.a[1]*dx1), poly1[0]);
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx1,supp_lambda.a[1]*dx1), poly1[1]);
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx1,supp_lambda.b[1]*dx1), poly1[2]);
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx1,supp_lambda.b[1]*dx1), poly1[3]);
+	chart_la->map_point(Point<DIM_d>(supp_lambda.a[0]*dx1,supp_lambda.a[1]*dx1), poly1[0]);
+	chart_la->map_point(Point<DIM_d>(supp_lambda.b[0]*dx1,supp_lambda.a[1]*dx1), poly1[1]);
+	chart_la->map_point(Point<DIM_d>(supp_lambda.b[0]*dx1,supp_lambda.b[1]*dx1), poly1[2]);
+	chart_la->map_point(Point<DIM_d>(supp_lambda.a[0]*dx1,supp_lambda.b[1]*dx1), poly1[3]);
 
-	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.a[0]*dx2,supp_mu.a[1]*dx2), poly2[0]);
-	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.b[0]*dx2,supp_mu.a[1]*dx2), poly2[1]);
-	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.b[0]*dx2,supp_mu.b[1]*dx2), poly2[2]);
-	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.a[0]*dx2,supp_mu.b[1]*dx2), poly2[3]);
+	chart_mu->map_point(Point<DIM_d>(supp_mu.a[0]*dx2,supp_mu.a[1]*dx2), poly2[0]);
+	chart_mu->map_point(Point<DIM_d>(supp_mu.b[0]*dx2,supp_mu.a[1]*dx2), poly2[1]);
+	chart_mu->map_point(Point<DIM_d>(supp_mu.b[0]*dx2,supp_mu.b[1]*dx2), poly2[2]);
+	chart_mu->map_point(Point<DIM_d>(supp_mu.a[0]*dx2,supp_mu.b[1]*dx2), poly2[3]);
 
  	bool result;
  	Point<DIM_m> p11;
@@ -614,19 +645,22 @@ namespace FrameTL
     Point<DIM_d> x_patch;
     Point<DIM_d> y0;
     Point<DIM_d> y1;
+
+    const Chart<DIM_d,DIM_m>* chart_la = frame.atlas()->charts()[lambda.p()];
+    const Chart<DIM_d,DIM_m>* chart_mu = frame.atlas()->charts()[mu.p()];
     
     for (unsigned int i = 0; i < DIM_d; i++)
       x[i] = supp_mu.a[i] * dx2;
       
-    frame.atlas()->charts()[mu.p()]->map_point(x,x_patch);
-    frame.atlas()->charts()[lambda.p()]->map_point_inv(x_patch,y0);
+    chart_mu->map_point(x,x_patch);
+    chart_la->map_point_inv(x_patch,y0);
   
     for (unsigned int i = 0; i < DIM_d; i++) {
       x[i] = supp_mu.b[i] * dx2;
     }
     
-    frame.atlas()->charts()[mu.p()]->map_point(x,x_patch);
-    frame.atlas()->charts()[lambda.p()]->map_point_inv(x_patch,y1);
+    chart_mu->map_point(x,x_patch);
+    chart_la->map_point_inv(x_patch,y1);
     
  //    cout << y0 << " " << y1 << endl;
 
@@ -671,8 +705,8 @@ namespace FrameTL
     for (unsigned int i = 0; i < DIM_d; i++) {
       for (int k = supp_mu.a[i]; k <= supp_mu.b[i]; k++) {
 	x[i] = k*dx2;
-	frame.atlas()->charts()[mu.p()]->map_point(x,x_patch);
-	frame.atlas()->charts()[lambda.p()]->map_point_inv(x_patch,y0);
+	chart_mu->map_point(x,x_patch);
+	chart_la->map_point_inv(x_patch,y0);
 	if ( hyperCube_intersect[i][0] <= y0[i] &&
 	     y0[i] <= hyperCube_intersect[i][1])
 	  irregular_grid[i][y0[i]] = 1;
@@ -692,7 +726,7 @@ namespace FrameTL
     return true;
   }
 
-  static double time;
+  static double time = 0;
 
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   inline
@@ -701,13 +735,15 @@ namespace FrameTL
 			      const int j, const bool generators,
 			      std::list<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& intersecting)
   {
-//     clock_t tstart, tend;
-//     tstart = clock();
+//      clock_t tstart, tend;
+//      tstart = clock();
+
+//    cout << "getting level " << j << " gen = " << generators << endl;
 
     intersecting.erase(intersecting.begin(),intersecting.end());
 
     typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> Frame;
-    typedef typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index Index;
+    typedef typename Frame::Index Index;
 
     typedef typename CubeBasis<IBASIS,DIM_d>::Index CubeIndex;
     
@@ -744,31 +780,33 @@ namespace FrameTL
 #endif
     //cout << supp_lambda.a[0] << " " << supp_lambda.b[0] << " " << supp_lambda.j << endl;
 #if 1
-    std::list<CubeIndex> intersect_same_cube;
-    WaveletTL::intersecting_wavelets<IBASIS,DIM_d>(*(frame.bases()[lambda.p()]),
-						   CubeIndex(lambda.j(),
-							     lambda.e(),
-							     lambda.k(),
-							     frame.bases()[lambda.p()]),
-						   j, generators,
-						   intersect_same_cube);
+//     std::list<CubeIndex> intersect_same_cube;
+//     WaveletTL::intersecting_wavelets<IBASIS,DIM_d>(*(frame.bases()[lambda.p()]),
+// 						   CubeIndex(lambda.j(),
+// 							     lambda.e(),
+// 							     lambda.k(),
+// 							     frame.bases()[lambda.p()]),
+// 						   j, generators,
+// 						   intersect_same_cube);
 
-    // ################ brute force approach ##################
-    std::list<typename Frame::Index> intersect_same;
+//     // ################ brute force approach ##################
+//     std::list<typename Frame::Index> intersect_same;
 
-    // create list of FrameIndices
-    for (typename std::list<CubeIndex>::const_iterator  it = intersect_same_cube.begin();
-	 it != intersect_same_cube.end(); ++it) {
-      intersecting.push_back( FrameIndex<IBASIS,DIM_d,DIM_m>(&frame,*it,lambda.p()) );
-    }
+// //     // create list of FrameIndices
+//      for (typename std::list<CubeIndex>::const_iterator  it = intersect_same_cube.begin();
+//  	 it != intersect_same_cube.end(); ++it) {
+//        intersecting.push_back( FrameIndex<IBASIS,DIM_d,DIM_m>(&frame,*it,lambda.p()) );
+//        cout << *it << endl;
+//      }
 
     std::list<typename Frame::Index> intersect_diff;
 
     if ( generators ) {
+
       for (Index ind = FrameTL::first_generator<IBASIS,DIM_d,DIM_m,Frame>(&frame, j);
 	 ind <= FrameTL::last_generator<IBASIS,DIM_d,DIM_m,Frame>(&frame, j); ++ind)
 	{
-	  if ( (lambda.p() != ind.p()) &&
+	  if ( /*(lambda.p() != ind.p()) &&*/
 	       frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(),ind.p()) && 
 	       FrameTL::intersect_supports<IBASIS,DIM_d,DIM_m>(frame,lambda,ind,supp_lambda) )
 	    intersect_diff.push_back(ind);
@@ -776,31 +814,32 @@ namespace FrameTL
 	}
       
     }
-    else {
+    else {      
       for (Index ind = FrameTL::first_wavelet<IBASIS,DIM_d,DIM_m,Frame>(&frame, j);
 	   ind <= FrameTL::last_wavelet<IBASIS,DIM_d,DIM_m,Frame>(&frame, j); ++ind)
 	{
-	  if ( (lambda.p() != ind.p()) &&
+	  
+	  if ( /*(lambda.p() != ind.p()) &&*/
 	       frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(),ind.p()) && 
 	       FrameTL::intersect_supports<IBASIS,DIM_d,DIM_m>(frame,lambda,ind,supp_lambda) )
 	    intersect_diff.push_back(ind);
 	}
     }
-    //   intersecting.unique();
+    //    intersecting.unique();
     intersecting.merge(intersect_diff);
 #endif
 //     intersecting.unique();
 //     intersecting.sort();
-     
-    //    cout << lambda << endl;
+//     cout << "########" << endl;
+//     cout << lambda << endl;
 //     for (typename std::list<Index>::const_iterator  it = intersecting.begin();
 // 	 it != intersecting.end(); ++it) {
 //       cout << *it << endl;
 //     }
-//     cout << "###############" << endl;
-//      tend = clock();
-//      time += (double)(tend-tstart)/CLOCKS_PER_SEC;
-//     cout << "  ... done, time needed: " << time << " seconds" << endl;
+//      cout << "###############" << endl;
+//       tend = clock();
+//       time += (double)(tend-tstart)/CLOCKS_PER_SEC;
+//      cout << "  ... done, time needed: " << time << " seconds" << endl;
 
 
   }
@@ -809,34 +848,57 @@ namespace FrameTL
   inline
   bool intersect_singular_support(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 				  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
-				  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu)
+				  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu
+				  /*,const FixedArray1D<double,DIM_m>& irregular_grid*/)
   {
-
-    return true;
-
-    switch (lambda.p() == mu.p()) {
-    case 0:
-      // different patches
-      // TODO
+    //######### let us restrict ourselves to the SimpleAffineLinearMapping case ############
+    typedef typename IBASIS::Index Index_1D;
+    if (lambda.p() == mu.p())
+      for (unsigned int i = 0; i < DIM_d; i++) {
+	
+	if ( intersect_singular_support(*frame.bases()[lambda.p()]->bases()[i],
+					Index_1D(lambda.j(),lambda.e()[i],lambda.k()[i],
+						 frame.bases()[lambda.p()]->bases()[i]),
+					Index_1D(mu.j(),mu.e()[i],mu.k()[i],
+						 frame.bases()[mu.p()]->bases()[i]))
+	     )
+	  return true;
+      }
+    else {
+      // still TODO
       return true;
-    case 1:
-      // same patches
-      //      return true;
-      return WaveletTL::intersect_singular_support<IBASIS,DIM_d>
-	(
-	 *frame.bases()[lambda.p()],
-	 typename CubeBasis<IBASIS,DIM_d>::Index(lambda.j(),
-						 lambda.e(),
-						 lambda.k(),
-						 frame.bases()[lambda.p()]),
-	 typename CubeBasis<IBASIS,DIM_d>::Index(mu.j(),
-						 mu.e(),
-						 mu.k(),
-						 frame.bases()[mu.p()])
-	 );
     }
-    // dummy
-    return true;
+    
+    
+
+    //######################################################################################
+    
+
+//     return true;
+
+//     switch (lambda.p() == mu.p()) {
+//     case 0:
+//       // different patches
+//       // TODO
+//       return true;
+//     case 1:
+//       // same patches
+//       //      return true;
+//       return WaveletTL::intersect_singular_support<IBASIS,DIM_d>
+// 	(
+// 	 *frame.bases()[lambda.p()],
+// 	 typename CubeBasis<IBASIS,DIM_d>::Index(lambda.j(),
+// 						 lambda.e(),
+// 						 lambda.k(),
+// 						 frame.bases()[lambda.p()]),
+// 	 typename CubeBasis<IBASIS,DIM_d>::Index(mu.j(),
+// 						 mu.e(),
+// 						 mu.k(),
+// 						 frame.bases()[mu.p()])
+// 	 );
+//     }
+//     // dummy
+//     return true;
   }
 
   template <unsigned int DIM>

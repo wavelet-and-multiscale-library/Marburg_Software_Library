@@ -77,13 +77,29 @@ int main()
   LinearBezierMapping bezierP2(Point<2>(-1.,-1.),Point<2>(-1.,0.),
 			       Point<2>(1.,-1.), Point<2>(1.,0.));
  
+
+
+  FixedArray1D<double,2> A3;
+  A3[0] = 1.;
+  A3[1] = 2.;
+  SimpleAffineLinearMapping<2> simpleaffine1(A3,b);
+  
+  FixedArray1D<double,2> A4;
+  A4[0] = 2.;
+  A4[1] = 1.;
+  SimpleAffineLinearMapping<2> simpleaffine2(A4,b2);
+
+
   //##############################
   Array1D<Chart<DIM,DIM>* > charts(2);
-  charts[0] = &bezierP;
+  //charts[0] = &bezierP;
   //charts[0] = &affineP;
-  charts[1] = &bezierP2;
+  //charts[1] = &bezierP2;
   //charts[1] = &affineP2;
  
+  charts[0] = &simpleaffine1;
+  charts[1] = &simpleaffine2;
+
   SymmetricMatrix<bool> adj(2);
   adj(0,0) = 1;
   adj(1,1) = 1;
@@ -147,12 +163,13 @@ int main()
   origin[1] = 0.0;
 
   CornerSingularityRHS singRhs(origin, 0.5, 1.5);
+  CornerSingularity sing2D(origin, 0.5, 1.5);
   
   PoissonBVP<DIM> poisson(&singRhs);
   //PoissonBVP<DIM> poisson(&const_fun);
 
-  //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
-  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
+  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
+  //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
   
   double tmp = 0.0;
   int c = 0;
@@ -221,7 +238,7 @@ int main()
 
   set<Index> Lambda;
   for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
-       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, frame.j0()); ++lambda)
+       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, frame.j0()+1); ++lambda)
     Lambda.insert(lambda);
   
   cout << "setting up full right hand side..." << endl;
@@ -252,8 +269,6 @@ int main()
   x = 1;
   //double lmin = InversePowerIteration(stiff, x, 0.01, 1000, iter);
   
-
-
   cout << "performing iterative scheme to solve projected problem..." << endl;
   Vector<double> xk(Lambda.size()), err(Lambda.size()); xk = 0;
   
@@ -263,7 +278,7 @@ int main()
   
   Vector<double> resid(xk.size());
   Vector<double> help(xk.size());
-  for (int i = 0; i < 500; i++) {
+  for (int i = 0; i < 2000; i++) {
     stiff.apply(xk,help);
     resid = rh - help;
     cout << sqrt((resid*resid)) << endl;
@@ -292,58 +307,64 @@ int main()
   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
     u.set_coefficient(*it, xk[i]);
   
-   discrete_poisson.rescale(u,-1);
-
-
-   Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u, true, 6);//expand in primal basis
-   
-   std::ofstream ofs5("approx_solution_out.m");
-   matlab_output(ofs5,U);
-   ofs5.close();
-   //cout << "lmin = " << lmin << endl;
-   //########## testing runtime type information functionality #############
-   //FrameTL::intersect_supports<Basis1D,2,2>(frame, index, index);
-   //FrameIndex<Basis1D,2,2> index2 = FrameTL::last_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0()); 
-   //discrete_poisson.a(index,index2,3);
-   //#######################################################################
+  discrete_poisson.rescale(u,-1);
+  
+  
+//   Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u, true, 6);//expand in primal basis
+  
+//   std::ofstream ofs5("approx_solution_out.m");
+//   matlab_output(ofs5,U);
+//   ofs5.close();
+  
+  cout << "computing L_2 error..." << endl;
+  double L2err = evalObj.L_2_error(frame, u, sing2D, 5, 0.0, 1.0);
+  cout << "...done L_2 error = " << L2err  << endl;
+  
+  
+  //cout << "lmin = " << lmin << endl;
+  //########## testing runtime type information functionality #############
+  //FrameTL::intersect_supports<Basis1D,2,2>(frame, index, index);
+  //FrameIndex<Basis1D,2,2> index2 = FrameTL::last_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0()); 
+  //discrete_poisson.a(index,index2,3);
+  //#######################################################################
 #endif
-   //################# end 2D galerkin scheme test ###################
-
+  //################# end 2D galerkin scheme test ###################
+  
   cout << "  ... done, time needed: " << time << " seconds" << endl;
-
+  
 #if 0
-   MultiIndex<unsigned int, 2> e1;
-   e1[0] = 0;
-   e1[1] = 0;
-   MultiIndex<int, 2> k1;
-   k1[0] = 1;
-   k1[1] = 1;
+  MultiIndex<unsigned int, 2> e1;
+  e1[0] = 0;
+  e1[1] = 0;
+  MultiIndex<int, 2> k1;
+  k1[0] = 1;
+  k1[1] = 1;
+  
+  MultiIndex<unsigned int, 2> e2;
+  e2[0] = 0;
+  e2[1] = 0;
+  MultiIndex<int, 2> k2;
+  k2[0] = 1;
+  k2[1] = 1;
    
-   MultiIndex<unsigned int, 2> e2;
-   e2[0] = 0;
-   e2[1] = 0;
-   MultiIndex<int, 2> k2;
-   k2[0] = 1;
-   k2[1] = 1;
-   
-   unsigned int p1 = 1, p2 = 0;
-   int j2 = 3;
+  unsigned int p1 = 1, p2 = 0;
+  int j2 = 3;
    
 
-   FrameIndex<Basis1D,2,2> la(&frame,j2,e1,p1,k1);
-   FrameIndex<Basis1D,2,2> mu(&frame,j2,e2,p2,k2);
-   cout << "val  " << discrete_poisson.a(la,mu,2) << endl;
+  FrameIndex<Basis1D,2,2> la(&frame,j2,e1,p1,k1);
+  FrameIndex<Basis1D,2,2> mu(&frame,j2,e2,p2,k2);
+  cout << "val  " << discrete_poisson.a(la,mu,2) << endl;
 #endif
 
-//    std::list<Index> intersecting;
-//    FrameTL::intersecting_wavelets<Basis1D,2,2>(frame, la, 4, false, intersecting);
+  //    std::list<Index> intersecting;
+  //    FrameTL::intersecting_wavelets<Basis1D,2,2>(frame, la, 4, false, intersecting);
 
-//    cout << intersecting.size() << endl;
+  //    cout << intersecting.size() << endl;
 
-//    for (std::list<Index>::const_iterator  it = intersecting.begin();
-// 	it != intersecting.end(); ++it) {
-//      cout << *it << endl;
-//    }
+  //    for (std::list<Index>::const_iterator  it = intersecting.begin();
+  // 	it != intersecting.end(); ++it) {
+  //      cout << *it << endl;
+  //    }
 
 
    return 0;

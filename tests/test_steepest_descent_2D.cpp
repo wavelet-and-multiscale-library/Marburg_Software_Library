@@ -14,8 +14,10 @@
 #include <numerics/corner_singularity.h>
 #include <frame_support.h>
 #include <frame_index.h>
-#include <steepest_descent.h>
+//#include <steepest_descent.h>
 #include <galerkin/cached_problem.h>
+//#include <richardson_CDD2.h>
+#include <richardson.h>
 
 using std::cout;
 using std::endl;
@@ -73,6 +75,9 @@ int main()
   AffineLinearMapping<2> affineP2(A2,b2);
   //##############################
 
+
+
+
   //##############################
   LinearBezierMapping bezierP(Point<2>(-1.,-1.),Point<2>(-1.,1.),
  			      Point<2>(0.,-1.), Point<2>(0.,1.));
@@ -80,12 +85,26 @@ int main()
   LinearBezierMapping bezierP2(Point<2>(-1.,-1.),Point<2>(-1.,0.),
 			       Point<2>(1.,-1.), Point<2>(1.,0.));
  
+
+  FixedArray1D<double,2> A3;
+  A3[0] = 1.;
+  A3[1] = 2.;
+  SimpleAffineLinearMapping<2> simpleaffine1(A3,b);
+  
+  FixedArray1D<double,2> A4;
+  A4[0] = 2.;
+  A4[1] = 1.;
+  SimpleAffineLinearMapping<2> simpleaffine2(A4,b2);
+
   //##############################
   Array1D<Chart<DIM,DIM>* > charts(2);
   //charts[0] = &bezierP;
   charts[0] = &affineP;
   //charts[1] = &bezierP2;
   charts[1] = &affineP2;
+
+  //charts[0] = &simpleaffine1;
+  //charts[1] = &simpleaffine2;
  
   SymmetricMatrix<bool> adj(2);
   adj(0,0) = 1;
@@ -161,7 +180,7 @@ int main()
   discrete_poisson.set_norm_A(21.);
   discrete_poisson.set_Ainv(1.0/0.096084);
 
-  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 10.0, 0.5);
+  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0048, 1.0/0.01);
 
   const double epsilon = 0.01;
 
@@ -171,7 +190,10 @@ int main()
   double time;
   tstart = clock();
 
-  steepest_descent_SOLVE(problem, epsilon, u_epsilon);
+  //steepest_descent_SOLVE(problem, epsilon, u_epsilon);
+  //richardson_SOLVE_CDD2(problem, epsilon, u_epsilon);
+  richardson_SOLVE(problem, epsilon, u_epsilon);
+  //  steepest_descent_SOLVE(discrete_poisson, epsilon, u_epsilon);
  //  for (unsigned int i = 0; i < 50*20;i++)
 //     for (Index ind = FrameTL::first_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0());
 // 	 ind <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+2); ++ind)
@@ -187,19 +209,23 @@ int main()
   //discrete_poisson.rescale(u_epsilon,-1);
   problem.rescale(u_epsilon,-1);
 
-  Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u_epsilon, true, 6);//expand in primal basis
+  //  Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u_epsilon, true, 6);//expand in primal basis
+  
+  cout << "done plotting approximate solution" << endl;
 
-  Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(frame, u_epsilon, sing2D, 6);
+  //  Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(frame, u_epsilon, sing2D, 6);
 
-  std::ofstream ofs5("approx_sol_steep_2D_out.m");
-  matlab_output(ofs5,U);
-  ofs5.close();
+  cout << "done plotting pointwise error" << endl;
 
-  std::ofstream ofs6("error_steep_2D_out.m");
-  matlab_output(ofs6,Error);
-  ofs6.close();
+//   std::ofstream ofs5("approx_sol_steep_2D_out.m");
+//   matlab_output(ofs5,U);
+//   ofs5.close();
 
-  problem.add_level(frame.first_generator(3),u_epsilon,3,1.);
+//   std::ofstream ofs6("error_steep_2D_out.m");
+//   matlab_output(ofs6,Error);
+//   ofs6.close();
+
+  //  problem.add_level(frame.first_generator(3),u_epsilon,3,1.);
 
   return 0;
 

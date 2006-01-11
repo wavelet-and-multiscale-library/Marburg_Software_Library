@@ -13,13 +13,42 @@
 #include <aggregated_frame.h>
 #include <numerics/bvp.h>
 #include <adaptive/compression.h>
+#include <interval/i_index.h>
 
 using FrameTL::AggregatedFrame;
 using MathTL::EllipticBVP;
 using WaveletTL::CompressionStrategy;
+using WaveletTL::IntervalIndex;
 
 namespace FrameTL
 {
+
+  template <class IBASIS>
+  class Index1D
+  {
+
+  public:
+    Index1D (const IntervalIndex<IBASIS>& ind,
+	     const unsigned int p, const unsigned int dir,
+	     const unsigned int der);
+
+    bool operator < (const Index1D<IBASIS>& lambda) const;
+    bool operator == (const Index1D<IBASIS>& lambda) const;
+    bool operator != (const Index1D<IBASIS>& lambda) const;
+    bool operator <= (const Index1D<IBASIS>& lambda) const;
+
+    IntervalIndex<IBASIS> index() const { return ind_; };
+    unsigned int derivative() const { return der_; };
+    unsigned int p() const { return p_; };
+    unsigned int direction() const { return dir_; };
+
+  protected:
+    IntervalIndex<IBASIS> ind_;
+    unsigned int p_;
+    unsigned int dir_;
+    unsigned int der_;
+
+  };
 
   /*!
     quadrature strategies for computation of
@@ -108,12 +137,12 @@ namespace FrameTL
       this is just a first hack to be able to use
       routines in WaveletTL's compression.h
     */
-    const AggregatedFrame<IBASIS,DIM>& basis() const { return *frame_; }
-    
+    const AggregatedFrame<IBASIS,DIM>& basis() const { return *frame_; }  
+
     /*!
       space dimension of the problem
     */
-    static int space_dimension() { return DIM; }
+    static const int space_dimension = DIM;
 
     /*!
       differential operators are local
@@ -231,6 +260,21 @@ namespace FrameTL
      */
     const AggregatedFrame<IBASIS,DIM>* frame_;
 
+
+    //####################
+    typedef std::map<Index1D<IBASIS>,double > Column1D;
+    typedef std::map<Index1D<IBASIS>,Column1D> One_D_IntegralCache;
+    
+    /*!
+      cache for one dimensional integrals
+      ONLY USED TOGETHER WITH TrivialAffine QUADRATURE RULE OPTION
+     */
+    mutable One_D_IntegralCache one_d_integrals;
+    
+    
+
+    //####################
+
   private:
 
     /*!
@@ -240,6 +284,13 @@ namespace FrameTL
     double a_same_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
 			  const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
 			  const unsigned int q_order = 4) const;
+
+    /*!
+     */
+    double integrate(const Index1D<IBASIS>& lambda,
+		     const Index1D<IBASIS>& mu,
+		     const FixedArray1D<Array1D<double>,DIM >& irregular_grid,
+		     const int N_Gauss) const;
 
     /*!
       helper routines for a (.. , ..). Entries in diagonal and non-diagonal
@@ -252,8 +303,16 @@ namespace FrameTL
     // precompute the right-hand side
     void compute_rhs();
 
+    // precompute diagonal of stiffness matrix
+    void compute_diagonal();
+
+
     // right-hand side coefficients on a fine level, sorted by modulus
     Array1D<std::pair<typename AggregatedFrame<IBASIS,DIM>::Index,double> > fcoeffs;
+
+    // right-hand side coefficients on a fine level, sorted by modulus
+    InfiniteVector<double,typename AggregatedFrame<IBASIS,DIM>::Index> stiff_diagonal;
+
 
     // (squared) \ell_2 norm of the precomputed right-hand side
     double fnorm_sqr;

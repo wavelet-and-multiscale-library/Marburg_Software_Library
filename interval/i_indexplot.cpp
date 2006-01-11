@@ -21,12 +21,11 @@ namespace WaveletTL
       double x = i * h0;
       double y = j0-0.5;
       double red, green, blue;
-      MathTL::MatlabColorMap colormap = jet;
       const double c = coeffs.get_coefficient(Index(j0,0,basis->DeltaLmin()+i,basis));
       if (c == 0)
 	red = green = blue = 1.0;
       else
-	MathTL::get_color(c/maxnorm, colormap, red, green, blue);
+	MathTL::get_color(-1+2*fabs(c)/maxnorm, colormap, red, green, blue);
       
       os << "rectangle('position',["
 	 << x << "," << y << "," << h0 << "," << 1.0 << "],"
@@ -34,6 +33,14 @@ namespace WaveletTL
 	 << "'FaceColor',[" << red << "," << green << "," << blue << "])" << endl;
     }
 
+    // plot some empty boxes above level 7
+    for (int j = 7; j <= jmax; j++) {
+      os << "rectangle('position',["
+	 << 0.0 << "," << j+0.5 << "," << 1.0 << "," << 1.0 << "],"
+	 << "'LineWidth',0.125,"
+	 << "'FaceColor',[1.0,1.0,1.0])" << endl;
+    }
+    
     // plot the wavelet coefficients
     for (int j = j0; j <= jmax; j++) {
       const int n_wavelets = basis->Nablasize(j);
@@ -46,13 +53,23 @@ namespace WaveletTL
 	if (c == 0)
 	  red = green = blue = 1.0;
 	else
-	  MathTL::get_color(c/maxnorm, colormap, red, green, blue);
+	  MathTL::get_color(-1+2*fabs(c)/maxnorm, colormap, red, green, blue);
 	
-	os << "rectangle('position',["
-	   << x << "," << y << "," << hj << "," << 1.0 << "],"
- 	   << "'LineWidth',0.125,"
-	   << "'FaceColor',[" << red << "," << green << "," << blue << "])" << endl;
+	if (c != 0 || j <= 6)
+	  os << "rectangle('position',["
+	     << x << "," << y << "," << hj << "," << 1.0 << "],"
+	     << "'LineWidth',0.125,"
+	     << "'FaceColor',[" << red << "," << green << "," << blue << "])" << endl;
       }
     }
+
+    // set y axis
+    os << "set(gca,'YLim',[" << j0-0.5 << " " << jmax+0.5 << "])" << endl;
+
+    // set the y-tick marks
+    os << "set(gca,'YTick',[";
+    for (int j = j0; j <= jmax+1; j++)
+      os << j << " ";
+    os << "])" << endl;
   }
 }

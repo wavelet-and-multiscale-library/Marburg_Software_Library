@@ -32,7 +32,7 @@ namespace WaveletTL
 		    const InfiniteVector<double, typename IBASIS::Index>& coeffs,
 		    const int jmax,
 		    std::ostream& os,
-		    MathTL::MatlabColorMap colormap = jet);
+		    MathTL::MatlabColorMap colormap = cool);
 }
 
 // include implementation

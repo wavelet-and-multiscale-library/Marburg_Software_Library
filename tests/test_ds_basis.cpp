@@ -195,7 +195,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -220,7 +220,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "
@@ -283,7 +283,7 @@ int main()
 #if 1
   cout << "- create some test index set..." << endl;
   InfiniteVector<double, Index> gplotcoeffs, plotcoeffs;
-  gplotcoeffs[++(++first_generator(&basis, basis.j0()+3))] = 1.0;
+  gplotcoeffs[++(++first_generator(&basis, basis.j0()+5))] = 1.0;
   cout << "* original coefficient set:" << endl
        << gplotcoeffs;
 
@@ -293,7 +293,7 @@ int main()
   
   cout << "* plotting the coefficient set..." << endl;
   std::ofstream plotstream("coefficient_plot.m");
-  plot_indices(&basis, plotcoeffs, basis.j0()+2, plotstream, cool);
+  plot_indices(&basis, plotcoeffs, 10, plotstream, cool);
   plotstream.close();
   cout << "  ...done!" << endl << endl;
 #endif
@@ -483,7 +483,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis2.j0()+1; level <= basis2.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -514,7 +514,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis2.j0()+1; level <= basis2.j0()+2; level++)
     {
       cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "

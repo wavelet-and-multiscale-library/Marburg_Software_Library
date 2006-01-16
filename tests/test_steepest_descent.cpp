@@ -41,53 +41,52 @@ using namespace MathTL;
 using namespace WaveletTL;
 
 
-// /*!
-// */
-// template<class VALUE = double>
-// class Singularity1D_RHS_2
-//   : public Function<1, VALUE>
-// {
-// public:
-//   Singularity1D_RHS_2() {};
-//   virtual ~Singularity1D_RHS_2() {};
-//   VALUE value(const Point<1>& p,
-// 	      const unsigned int component = 0) const
-//   {
-//     return -sin(3.*M_PI*p[0])*(9.*M_PI*M_PI) - 4.;
-//   }
+/*!
+  special function with steep gradients
+  near the right end of the interval
+*/
+template<class VALUE = double>
+class Singularity1D_RHS
+  : public Function<1, VALUE>
+{
+public:
+  Singularity1D_RHS() {};
+  virtual ~Singularity1D_RHS() {};
+  VALUE value(const Point<1>& p,
+	      const unsigned int component = 0) const
+  {
+    return  -100*exp(5*p[0])*(1-(exp(5*p[0])-1)/(exp(5.)-1))/(exp(5.)-1)+200*exp(10*p[0]) / 
+      ((exp(5.)-1)*(exp(5.)-1))+100*(exp(5*p[0])-1)*exp(5*p[0])/((exp(5.)-1)*(exp(5.)-1));
+  }
   
-//   void vector_value(const Point<1> &p,
-// 		    Vector<VALUE>& values) const { ; }
+  void vector_value(const Point<1> &p,
+		    Vector<VALUE>& values) const { ; }
   
-// };
+};
 
-// /*!
-// */
-// template<class VALUE = double>
-// class Singularity1D_2
-//   : public Function<1, VALUE>
-// {
-// public:
-//   Singularity1D_2() {};
-//   virtual ~Singularity1D_2() {};
-//   VALUE value(const Point<1>& p,
-// 	      const unsigned int component = 0) const
-//   {
+/*!
+  special function with steep gradients
+  near the right end of the interval
+*/
+template<class VALUE = double>
+class Singularity1D
+  : public Function<1, VALUE>
+{
+public:
+  Singularity1D() {};
+  virtual ~Singularity1D() {};
+  VALUE value(const Point<1>& p,
+	      const unsigned int component = 0) const
+  {
+    double res = 1.0 / (exp(5.) - 1.0);
+    res = (exp(5.*p[0]) - 1.0) * res;
+    return  (4.0 * res * (1.0 - res));
+  }
   
-//     if ((0. <= p[0]) && (p[0] < 0.5))
-//       return -sin(3.*M_PI*p[0]) + 2.*(p[0]*p[0]);
-
-//     if ((0.5 <= p[0]) && (p[0] <= 1.0))
-//       return -sin(3.*M_PI*p[0]) + 2.*((1-p[0])*(1-p[0]));
-
-//     return 0.;
-
-//   }
+  void vector_value(const Point<1> &p,
+		    Vector<VALUE>& values) const { ; }
   
-//   void vector_value(const Point<1> &p,
-// 		    Vector<VALUE>& values) const { ; }
-  
-// };
+};
 
 int main()
 {
@@ -103,7 +102,7 @@ int main()
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 1.;
+  A(0,0) = 0.7;
   Point<1> b;
   b[0] = 0.;
   AffineLinearMapping<1> affineP(A,b);
@@ -125,22 +124,22 @@ int main()
 
   //##############################
   
-  Array1D<Chart<DIM,DIM>* > charts(1);
+  Array1D<Chart<DIM,DIM>* > charts(2);
   charts[0] = &affineP;
-  //charts[1] = &affineP2;
+  charts[1] = &affineP2;
   
   //charts[0] = &simlpeaffine1;
   //charts[1] = &simlpeaffine2;
 
 
-  SymmetricMatrix<bool> adj(1);
+  SymmetricMatrix<bool> adj(2);
   adj(0,0) = 1;
-//   adj(1,1) = 1;
-//   adj(1,0) = 1;
-//   adj(0,1) = 1;
+  adj(1,1) = 1;
+  adj(1,0) = 1;
+  adj(0,1) = 1;
   
   //to specify primal boundary the conditions
-  Array1D<FixedArray1D<int,2*DIM> > bc(1);
+  Array1D<FixedArray1D<int,2*DIM> > bc(2);
   
   //primal boundary conditions for first patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_1;
@@ -154,10 +153,10 @@ int main()
   bound_2[0] = 1;
   bound_2[1] = 1;
   
-  //bc[1] = bound_2;
+  bc[1] = bound_2;
 
 //to specify primal boundary the conditions
-  Array1D<FixedArray1D<int,2*DIM> > bcT(1);
+  Array1D<FixedArray1D<int,2*DIM> > bcT(2);
 
   //dual boundary conditions for first patch
   FixedArray1D<int,2*DIM> bound_3;
@@ -171,7 +170,7 @@ int main()
   bound_4[0] = 0;
   bound_4[1] = 0;
  
-  //bcT[1] = bound_4;
+  bcT[1] = bound_4;
 
   Atlas<DIM,DIM> Lshaped(charts,adj);  
   cout << Lshaped << endl;
@@ -217,18 +216,18 @@ int main()
   //  discrete_poisson.set_Ainv(1.0/(1.0e-3*0.672));
 
 
-  const double epsilon = 0.01;
+  const double epsilon = 0.00005;
 
   InfiniteVector<double, Index> u_epsilon;
 
   clock_t tstart, tend;
   double time;
   tstart = clock();
-  for (Index ind = FrameTL::first_generator<Basis1D,1,1,Frame1D>(&frame, frame.j0());
-       ind <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+2); ++ind)
-    {
-      cout << ind << endl;
-    }
+//   for (Index ind = FrameTL::first_generator<Basis1D,1,1,Frame1D>(&frame, frame.j0());
+//        ind <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+2); ++ind)
+//     {
+//       cout << ind << endl;
+//     }
 
   steepest_descent_SOLVE(problem, epsilon, u_epsilon);
   //richardson_SOLVE_CDD2(problem, epsilon, u_epsilon);

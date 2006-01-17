@@ -91,7 +91,7 @@ public:
     cout << "a_inv = " << a_inv << endl;
     cout << "omega_i = " << omega_i << endl;
     //double delta     = 1./(5.*kappa+a_inv);
-    double delta = 0.9;
+    double delta = 1;
     cout << "delta = " << delta << endl;
     //const double A = 1 + delta;
     const double A = 1.;
@@ -146,16 +146,15 @@ public:
       RES(P, w, xi_i, delta, omega_i/((1+3.*mu)*a_inv), jmax,
 	  tilde_r, nu_i, CDD1);
 
-
       while ( nu_i > omega_i/((1+3.*mu)*a_inv)) {
 	InfiniteVector<double, Index> z_i;
 	//APPLY(P, tilde_r, delta*l2_norm(tilde_r), z_i, jmax, CDD1);
 
-	tend = clock();
-	time = (double)(tend-tstart)/CLOCKS_PER_SEC;
+// 	tend = clock();
+// 	time = (double)(tend-tstart)/CLOCKS_PER_SEC;
 	APPLY_COARSE(P, tilde_r, delta*l2_norm(tilde_r), z_i, 0.00000001, jmax, CDD1);
-	acctime += ((double)(tend-tstart)/CLOCKS_PER_SEC - time);
-	cout << "time = " << acctime  << endl;
+// 	acctime += ((double)(tend-tstart)/CLOCKS_PER_SEC - time);
+// 	cout << "time = " << acctime  << endl;
 	
 	double d = ((tilde_r*tilde_r)/(z_i*tilde_r));
 	w += d*tilde_r;
@@ -221,7 +220,7 @@ public:
 // 	  matlab_output(ofs6,Error);
 // 	  ofs6.close();
 
-	if (tmp < 0.005 || loops == 300) {
+	if (tmp < 0.01 || loops == 300) {
 	  u_epsilon = w;
 	  exit = true;
 	  break;

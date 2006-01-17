@@ -111,7 +111,7 @@ namespace FrameTL
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
     const int j0   = frame_->j0();
-    const int jmax = 7; // for a first quick hack
+    const int jmax = 10; // for a first quick hack
     for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
       {
 	const double coeff = f(lambda)/D(lambda);
@@ -145,7 +145,7 @@ namespace FrameTL
 
     // precompute the right-hand side on a fine level
     const int j0   = frame_->j0();
-    const int jmax = 7;  // for a first quick hack
+    const int jmax = 10;  // for a first quick hack
     for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
       {
 	stiff_diagonal.set_coefficient(lambda, sqrt(a(lambda,lambda)));

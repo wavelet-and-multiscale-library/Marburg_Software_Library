@@ -82,7 +82,7 @@ public:
     Singularity1D_2<double> exactSolution1D;
 
     unsigned int loops = 0;
-    const int jmax = 7;
+    const int jmax = 10;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
@@ -90,11 +90,11 @@ public:
     double omega_i   = a_inv*P.F_norm();
     cout << "a_inv = " << a_inv << endl;
     cout << "omega_i = " << omega_i << endl;
-    double delta     = 1./(5.*kappa+a_inv);
-    //double delta = 0.5;
+    //double delta     = 1./(5.*kappa+a_inv);
+    double delta = 0.9;
     cout << "delta = " << delta << endl;
-    const double A = 1 + delta;
-    //const double A = 1.;
+    //const double A = 1 + delta;
+    const double A = 1.;
     //const double C = 1.0 / ((1 - ((kappa*(delta*delta+2.*delta)+a_inv*delta)/((1-delta)*(1-delta))))
     //			    * (((1-delta)*(1-delta))/(a_inv)));
     const double C = 1.0;
@@ -102,8 +102,8 @@ public:
     const double B = C * (A*A);
     cout << "B = " << B << endl;
     //double lambda = (kappa-1)/(kappa+1) + P.norm_A()*std::max(3.*A*A*B,C*(1./(1-delta)))*delta;
-    double lambda = ((kappa-1)/(kappa+1)+1.)/2.;
-    //double lambda = 0.94;
+    //double lambda = ((kappa-1)/(kappa+1)+1.)/2.;
+    double lambda = 0.6;
     cout << "lambda = " << lambda << endl;
     const double C3 = B;
     cout << "C3 = " << C3 << endl;
@@ -135,7 +135,6 @@ public:
     tstart = clock();
 
     EvaluateFrame<Basis1D,1,1> evalObj;
-
 
     double acctime = 0;
 
@@ -174,7 +173,7 @@ public:
 	double tmp = l2_norm(tilde_r);
 	double tmp1 = log10(tmp);
 	cout << "residual norm = " << tmp << endl;
-	//asymptotic[log10( (double)w.size() )] = tmp1;
+	asymptotic[log10( (double)w.size() )] = tmp1;
 	log_10_residual_norms[loops] = tmp1;
 
 	u_epsilon = w;
@@ -250,9 +249,9 @@ public:
       //     matlab_output(degrees_of_freedom,os2);
       //     os2.close();
       
-      //     std::ofstream os3("asymptotic.m");
-      //     matlab_output(asymptotic,os3);
-      //     os3.close();
+          std::ofstream os3("asymptotic.m");
+          matlab_output(asymptotic,os3);
+          os3.close();
       
       //     std::ofstream os4("time_asymptotic.m");
       //     matlab_output(time_asymptotic,os4);

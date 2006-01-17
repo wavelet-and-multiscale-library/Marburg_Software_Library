@@ -12,7 +12,7 @@ CXXFLAGS += -O3 -mcpu=pentium4 -msse3 -funroll-loops -I$(FRAMETL_DIR) -I$(WAVELE
 #CXXFLAGS += -O4 -mcpu=pentium4 -msse3 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -fast -mcpu=7450 -faltivec -funroll-loops -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 
-EXEOBJF = test_steepest_descent.o test_richardson_CDD2.o
+EXEOBJF = test_steepest_descent.o test_richardson_CDD2.o test_richardson.o
 #	  test_elliptic_equation.o test_richardson_CDD2.o\
 #  test_richardson.o test_elliptic_equation_1D.o test_steepest_descent_2D.o\
   #test_frame_index.o \

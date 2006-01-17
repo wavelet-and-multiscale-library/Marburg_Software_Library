@@ -24,7 +24,7 @@ namespace MathTL
     Special version of tensors of rank 1 on the Euclidean space
     \mathbb R^d, i.e., vectors of dimension DIM.
   */
-  template <unsigned int DIM, class VALUE = double>
+  template <unsigned int DIM, class VALUE>
   class Tensor<1, DIM, VALUE>
   {
   public:

@@ -110,7 +110,7 @@ public:
 
     double mu        = 1.0001; //shall be > 1
     //beta in (0,1)
-    double beta      = 0.5;
+    double beta      = 0.6;
     //let K be such that beta^K * omega <= epsilon
     unsigned int K   = (int) (log(epsilon/omega_i) / log(beta) + 1);
     //let M be such that lambda^M <= ((1-delta) / (1+delta)) * (beta / ((1+3*mu)*kappa))

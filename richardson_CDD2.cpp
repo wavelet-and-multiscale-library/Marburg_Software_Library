@@ -78,7 +78,7 @@ public:
 //     CornerSingularity sing2D(origin, 0.5, 1.5);
 //     CornerSingularityRHS singRhs(origin, 0.5, 1.5);
      
-    const int jmax = 7;
+    const int jmax = 10;
 
     double nu = P.norm_Ainv()*P.F_norm();
     cout << "nu = " << nu << endl;

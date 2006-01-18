@@ -117,26 +117,48 @@ namespace WaveletTL
 	   double& nu,
 	   const CompressionStrategy strategy)
   {
-    double zeta = 2.*epsilon;
-
+    unsigned int k = 0;
+    double zeta = 2.*xi;
+    //double zeta = 2.*epsilon;
     double l2n = 0.;
 
-    do {
-      zeta /= 2.;
-      P.RHS (zeta/2., tilde_r);
-      //cout << tilde_r << endl;
+    its++;
+
+    if (its > 10) {
       InfiniteVector<double, typename PROBLEM::Index> help;
-      //cout << w << endl;
-      //cout << "zeta halbe = " << zeta/2. << endl;
-      //cout << "before aply in RES " << endl;
-      APPLY(P, w, zeta/2., help, jmax, strategy);
-      //cout << "after apply in RES " << endl;
+      zeta *= 1.0 / (1 << 6);
+      P.RHS (zeta/2., tilde_r);
+      cout << "zeta half = " << zeta/2. << endl;
+      APPLY_COARSE(P, w, zeta/2., help, 0.00000001, jmax, strategy);
       tilde_r -= help;
       l2n = l2_norm(tilde_r);
       nu = l2n + zeta;
     }
-    while ( (nu > epsilon) && (zeta > delta*l2n) );
+    else
+      {
+	do {
+	  zeta /= 2.;
+	  P.RHS (zeta/2., tilde_r);
+	  //cout << tilde_r << endl;
+	  InfiniteVector<double, typename PROBLEM::Index> help;
+	  //cout << w << endl;
+	  cout << "zeta halbe = " << zeta/2. << endl;
+	  //cout << "before aply in RES " << endl;
+	  //APPLY(P, w, zeta/2., help, jmax, strategy);
+	  cout << ++k << "calls of APPlY in RES" << endl;
+	  APPLY_COARSE(P, w, zeta/2., help, 0.00000001, jmax, strategy);
+	  //cout << "after apply in RES " << endl;
+	  tilde_r -= help;
+	  l2n = l2_norm(tilde_r);
+	  nu = l2n + zeta;
+	  //cout << "zeta = " << zeta << endl;
+	  //cout << delta*l2n << endl;
+	  //cout << "delta = " << delta << endl;
+	  //if(k == 10)
+	  //	break;
+	}
+	while ( (nu > epsilon) && (zeta > delta*l2n) );
+      }
   }
-
 
 }

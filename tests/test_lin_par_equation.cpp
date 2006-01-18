@@ -307,8 +307,8 @@ int main()
 
   TestProblem<0> testproblem;
   
-  const int d  = 2;
-  const int dT = 2;
+  const int d  = 3;
+  const int dT = 3;
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
   typedef SturmEquation<Basis> EllipticEquation;
@@ -317,8 +317,8 @@ int main()
   EllipticEquation elliptic(testproblem, false); // do not precompute the dummy rhs
 
 //   CachedProblem<EllipticEquation> celliptic(&elliptic);
-  CachedProblem<EllipticEquation> celliptic(&elliptic, 12.2508, 6.41001); // d=2, dT=2
-//   CachedProblem<SturmEquation<Basis> > celliptic(&elliptic, 6.73618, 45.5762); // d=3, dT=3
+//   CachedProblem<EllipticEquation> celliptic(&elliptic, 12.2508, 6.41001); // d=2, dT=2
+  CachedProblem<SturmEquation<Basis> > celliptic(&elliptic, 6.73618, 45.5762); // d=3, dT=3
 
   const int jmax = 8;
 
@@ -334,7 +334,7 @@ int main()
   // 9: u0 = haar function, f(t)=chi_{[0,1/2)}
   // 10: u0 = 0, f(t)=chi_{[0,1/2)}(t)*chi_{[1/4,3/4]}(x)
 
-#define _TESTCASE 10
+#define _TESTCASE 3
 
   //
   //
@@ -553,7 +553,7 @@ int main()
   }
 #endif
 
-#if 1
+#if 0
   // einzelner Testlauf, gibt Plot der Iterierten aus
 
   const double T = 1.0;
@@ -612,7 +612,7 @@ int main()
 
 #endif
 
-#if 0
+#if 1
   // mehrere Testlaeufe mit einem Problem, verschiedene Toleranzen
 
   const double T = 1.0;
@@ -633,7 +633,8 @@ int main()
     cout << "  TOL=" << TOL << endl;
 
     // adaptive solution of u'=Au+f
-    ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
+    ROWMethod<V> row_adaptive(WMethod<V>::ROS3P);
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
 //     ROWMethod<V> row_adaptive(WMethod<V>::GRK4T);
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROWDA3);

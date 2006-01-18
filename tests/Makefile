@@ -8,8 +8,10 @@
 #DEBUGMODE = on
 DEBUGMODE = off
 
-CXX = icpc
-#CXX = g++
+# choose between GNU or Intel compiler
+#CXX = icpc
+CXX = g++
+
 #CXXFLAGS += -ftemplate-depth-20 # add this for gcc-2.95
 #CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe

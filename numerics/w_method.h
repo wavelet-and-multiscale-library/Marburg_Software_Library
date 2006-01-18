@@ -162,6 +162,9 @@ namespace MathTL
       [ROS3P]  Lang, Verwer:
                ROS3P - An accurate third-order Rosenbrock solver designed for parabolic problems,
 	       BIT 41(2001), 731--738
+      [ROS3Pw] Rang, Angermann:
+               Creating new Rosenbrock methods with Maple,
+               Mathematik-Bericht 2003/5, Institut fuer Mathematik, TU Clausthal
       [RODASP] Steinebach:
                Order-reduction of ROW-methods for DAEs and method of lines applications
 	       Technical report 1741, TH Darmstadt, 1995
@@ -172,7 +175,8 @@ namespace MathTL
       ROS2,      // s=2, p=2, L-stable
       ROS3,      // s=3, p=3, L-stable
       ROWDA3,    // s=3, p=3, index 1, L-stable
-      ROS3P,     // s=3, p=3, index 1, PDEs
+      ROS3P,     // s=3, p=3, index 1, nonlinear PDEs
+      ROS3Pw,    // s=3, p=3, index 1, PDEs
       RODASP     // s=6, p=4, index 1, PDEs, L-stable, stiffly accurate
     };
 

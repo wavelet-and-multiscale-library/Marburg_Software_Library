@@ -248,17 +248,17 @@ int main()
 
   EvaluateFrame<Basis1D,1,1> evalObj;
 
-  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u_epsilon, true, 11);//expand in primal basis
-  cout << "...finished plotting approximate solution" << endl;
-  Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u_epsilon, exactSolution1D, 11);
-  cout << "...finished plotting error" << endl;
-  std::ofstream ofs5("approx_sol_steep_1D_out.m");
-  matlab_output(ofs5,U);
-  ofs5.close();
+//   Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u_epsilon, true, 11);//expand in primal basis
+//   cout << "...finished plotting approximate solution" << endl;
+//   Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u_epsilon, exactSolution1D, 11);
+//   cout << "...finished plotting error" << endl;
+//   std::ofstream ofs5("approx_sol_steep_1D_out.m");
+//   matlab_output(ofs5,U);
+//   ofs5.close();
 
-  std::ofstream ofs6("error_steep_1D_out.m");
-  matlab_output(ofs6,Error);
-  ofs6.close();
+//   std::ofstream ofs6("error_steep_1D_out.m");
+//   matlab_output(ofs6,Error);
+//   ofs6.close();
 
 
   // compute infinite vectors of 1D indices, one for each patch

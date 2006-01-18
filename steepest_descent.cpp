@@ -73,7 +73,7 @@ public:
 //     origin[0] = 0.0;
 //     origin[1] = 0.0;
     
-//     CornerSingularity sing2D(origin, 0.5, 1.5);
+//     CornerSingularity sing2D(or0igin, 0.5, 1.5);
 //     CornerSingularityRHS singRhs(origin, 0.5, 1.5);
 
 //    typedef DSBasis<2,2> Basis1D;
@@ -82,16 +82,19 @@ public:
     Singularity1D_2<double> exactSolution1D;
 
     unsigned int loops = 0;
-    const int jmax = 10;
+    const int jmax = 9;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
-    double kappa     = P.norm_A()*a_inv;
+    //double a_inv = 1.;
+    //double kappa     = P.norm_A()*a_inv;
+    double kappa     = 1.;
     double omega_i   = a_inv*P.F_norm();
+    //double omega_i   = 50;
     cout << "a_inv = " << a_inv << endl;
     cout << "omega_i = " << omega_i << endl;
     //double delta     = 1./(5.*kappa+a_inv);
-    double delta = 1;
+    double delta = 1.;
     cout << "delta = " << delta << endl;
     //const double A = 1 + delta;
     const double A = 1.;
@@ -109,14 +112,15 @@ public:
     cout << "C3 = " << C3 << endl;
 
     double mu        = 1.0001; //shall be > 1
+    //double mu        = 1./3.; //shall be > 1
     //beta in (0,1)
-    double beta      = 0.6;
+    double beta      = 0.9;
     //let K be such that beta^K * omega <= epsilon
     unsigned int K   = (int) (log(epsilon/omega_i) / log(beta) + 1);
     //let M be such that lambda^M <= ((1-delta) / (1+delta)) * (beta / ((1+3*mu)*kappa))
-    int M            = std::max((int) ((log( ((1-delta)/(1+delta)) * (beta / ((1+3.0*mu)*kappa)) )
-    			       / log(lambda)) + 1),1);
-    //int M = 1;   
+    //int M            = std::max((int) ((log( ((1-delta)/(1+delta)) * (beta / ((1+3.0*mu)*kappa)) )
+    //			       / log(lambda)) + 1),1);
+    int M = 1;   
 
     InfiniteVector<double, Index> w, tilde_r;
     
@@ -220,7 +224,13 @@ public:
 // 	  matlab_output(ofs6,Error);
 // 	  ofs6.close();
 
-	if (tmp < 0.01 || loops == 300) {
+	if (loops % 10 == 0) {
+          std::ofstream os3("asymptotic.m");
+          matlab_output(asymptotic,os3);
+          os3.close();
+	}
+
+	if (tmp < 0.0001 || loops == 300) {
 	  u_epsilon = w;
 	  exit = true;
 	  break;

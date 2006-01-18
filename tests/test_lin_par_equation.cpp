@@ -334,7 +334,7 @@ int main()
   // 9: u0 = haar function, f(t)=chi_{[0,1/2)}
   // 10: u0 = 0, f(t)=chi_{[0,1/2)}(t)*chi_{[1/4,3/4]}(x)
 
-#define _TESTCASE 3
+#define _TESTCASE 8
 
   //
   //
@@ -634,10 +634,12 @@ int main()
 
     // adaptive solution of u'=Au+f
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
-    ROWMethod<V> row_adaptive(WMethod<V>::ROS3P);
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROS3P);
+    ROWMethod<V> row_adaptive(WMethod<V>::ROS3Pw);
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
 //     ROWMethod<V> row_adaptive(WMethod<V>::GRK4T);
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROWDA3);
+//     ROWMethod<V> row_adaptive(WMethod<V>::RODASP);
     row_adaptive.set_preprocessor(&parabolic);
 
     clock_t tstart =  clock();

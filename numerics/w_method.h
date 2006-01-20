@@ -144,30 +144,32 @@ namespace MathTL
       enum type for the different builtin methods
 
       References:
-      [GRK4T]  Kaps, Rentrop:
-               Generalized Runge-Kutta methods of order four with stepsize control
-	       for stiff ordinary differential equations,
-	       Numer. Math. 33(1979), 55-68
+      [GRK4T]   Kaps, Rentrop:
+                Generalized Runge-Kutta methods of order four with stepsize control
+	        for stiff ordinary differential equations,
+	        Numer. Math. 33(1979), 55-68
       [ROS3],
-      [RODAS3] Blom, Carmichael, Potra, Sandu, Spee, Verwer:
-               Benchmarking Stiff ODE Solvers for Atmospheric Chemistry Problems II:
-	       Rosenbrock Solvers,
-	       Atmos. Environ. 31(1997), 3459-3472
-      [ROS2]   Blom, Hundsdorfer, Spee, Verwer:
-               A Second-Order Rosenbrock Method Applied to Photochemical Dispersion Problems,
-	       SIAM J. Sci. Comput. 20(1999), 1456-1480
-      [ROWDA3] Roche:
-               Rosenbrock Methods for Differential Algebraic Equations,
-               Numer. Math. 52(1988), 45-63
-      [ROS3P]  Lang, Verwer:
-               ROS3P - An accurate third-order Rosenbrock solver designed for parabolic problems,
-	       BIT 41(2001), 731--738
-      [ROS3Pw] Rang, Angermann:
-               Creating new Rosenbrock methods with Maple,
-               Mathematik-Bericht 2003/5, Institut fuer Mathematik, TU Clausthal
-      [RODASP] Steinebach:
-               Order-reduction of ROW-methods for DAEs and method of lines applications
-	       Technical report 1741, TH Darmstadt, 1995
+      [RODAS3]  Blom, Carmichael, Potra, Sandu, Spee, Verwer:
+                Benchmarking Stiff ODE Solvers for Atmospheric Chemistry Problems II:
+	        Rosenbrock Solvers,
+	        Atmos. Environ. 31(1997), 3459-3472
+      [ROS2]    Blom, Hundsdorfer, Spee, Verwer:
+                A Second-Order Rosenbrock Method Applied to Photochemical Dispersion Problems,
+	        SIAM J. Sci. Comput. 20(1999), 1456-1480
+      [ROWDA3]  Roche:
+                Rosenbrock Methods for Differential Algebraic Equations,
+                Numer. Math. 52(1988), 45-63
+      [ROS3P]   Lang, Verwer:
+                ROS3P - An accurate third-order Rosenbrock solver designed for parabolic problems,
+	        BIT 41(2001), 731--738
+      [ROS3Pw]  Rang, Angermann:
+                Creating new Rosenbrock methods with Maple,
+                Mathematik-Bericht 2003/5, Institut fuer Mathematik, TU Clausthal
+      [ROSI2P2] Rang, Angermann:
+                New Rosenbrock methods of order 3 for PDAEs of index 2
+      [RODASP]  Steinebach:
+                Order-reduction of ROW-methods for DAEs and method of lines applications
+	        Technical report 1741, TH Darmstadt, 1995
      */
     enum Method {
       GRK4T,     // s=4, p=4
@@ -177,6 +179,7 @@ namespace MathTL
       ROWDA3,    // s=3, p=3, index 1, L-stable
       ROS3P,     // s=3, p=3, index 1, nonlinear PDEs
       ROS3Pw,    // s=3, p=3, index 1, PDEs
+      ROSI2P2,   // s=4, p=3, index 2, L-stable, PDEs, stiffly accurate
       RODASP     // s=6, p=4, index 1, PDEs, L-stable, stiffly accurate
     };
 

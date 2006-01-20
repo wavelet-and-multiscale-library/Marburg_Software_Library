@@ -487,6 +487,29 @@ int main()
     olderr = err;
   }
 
+  cout << "* testing ROSI2P2:" << endl;
+  ROWMethod<V> rosi2p2(WMethod<V>::ROSI2P2);
+  scheme = &rosi2p2;
+  olderr = 0;
+  for (int expo = 0; expo <= 10; expo++) {
+    temp = problem.u0;
+    int N = 1<<expo;
+    double h = 1.0/N;
+    double err_est = 0;
+    for (int i = 1; i <= N; i++) {
+      scheme->increment(&problem, i*h, temp, h, result, error_estimate);
+      err_est = std::max(err_est, l2_norm(error_estimate));
+      temp = result;
+    }
+    problem.exact_solution(1.0, exact);
+    err = linfty_norm(result - exact);
+    if (expo > 0) {
+      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
+	   << ", max. of local error estimate " << err_est << endl;
+    }
+    olderr = err;
+  }
+
   cout << "* testing RODASP:" << endl;
   ROWMethod<V> rodasp(WMethod<V>::RODASP);
   scheme = &rodasp;

@@ -635,7 +635,8 @@ int main()
     // adaptive solution of u'=Au+f
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROS3P);
-    ROWMethod<V> row_adaptive(WMethod<V>::ROS3Pw);
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROS3Pw);
+    ROWMethod<V> row_adaptive(WMethod<V>::ROSI2P2);
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
 //     ROWMethod<V> row_adaptive(WMethod<V>::GRK4T);
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROWDA3);

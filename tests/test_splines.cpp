@@ -121,10 +121,15 @@ int main()
 #endif
 
   cout << "- testing some Schoenberg splines:" << endl;
-  cout << "* some point values of the first--order constant spline:" << endl;
+  cout << "* some point values of the 0-th first-order spline:" << endl;
   for (double x = -0.5; x <= 1.5; x+=0.1) {
     cout << "  N_{0,1}(" << x << ")="
 	 <<  EvaluateSchoenbergBSpline<1>(0,x) << endl;
+  }
+  cout << "* some point values of the (-1)-th second-order spline:" << endl;
+  for (double x = -0.5; x <= 1.5; x+=0.1) {
+    cout << "  N_{-1,2}(" << x << ")="
+	 <<  EvaluateSchoenbergBSpline<2>(-1,x) << endl;
   }
 
 }

@@ -30,24 +30,29 @@ namespace MathTL
     evaluate a Schoenberg B-spline N_{k,d}(x)
   */
   template <int d>
-    double EvaluateSchoenbergBSpline(const int k, const double x)
-    {
-      return 0; // TODO: implement recursion
-    }
+  double EvaluateSchoenbergBSpline(const int k, const double x)
+  {
+    double r(0);
+    
+    // take care of the multiple knot t_{-d+1} = ... = t_0
+    double diff = std::max(0,k+d-1) - std::max(0,k);
+    if (diff > 0) r += (x - std::max(0,k)) * EvaluateSchoenbergBSpline<d-1>(k, x) / diff;
+    diff = std::max(0,k+d) - std::max(0,k+1);
+    if (diff > 0) r += (std::max(0,k+d) - x) * EvaluateSchoenbergBSpline<d-1>(k+1, x) / diff;
+    
+    return r;
+  }
   
   /*!
     evaluate an arbitrary Schoenberg B-spline N_{k,1}(x) = \chi_{[t^0_k,t^0_{k+1})}
   */
   template <>
-    inline
-    double EvaluateSchoenbergBSpline<1>(const int k, const double x)
-    {
-      return (x >= std::max(0,k) && x < std::max(0,k+1) ? 1.0 : 0.0);
-    }
+  inline
+  double EvaluateSchoenbergBSpline<1>(const int k, const double x)
+  {
+    return (x >= std::max(0,k) && x < std::max(0,k+1) ? 1.0 : 0.0);
+  }
   
-
-
-
 
 /*   template <int d> */
 /*   double evaluate_Bspline(const Array1D<double>& knots, const unsigned int j, const double x) */

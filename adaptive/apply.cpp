@@ -106,6 +106,8 @@ namespace WaveletTL
     }
   }  
 
+  static int its = 0; // DIRTY HACK, REMOVE THIS SOON!!!
+
   template <class PROBLEM>
   void RES(const PROBLEM& P,
 	   const InfiniteVector<double, typename PROBLEM::Index>& w,

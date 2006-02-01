@@ -10,7 +10,10 @@
 #ifndef _WAVELETTL_P_BASIS_H
 #define _WAVELETTL_P_BASIS_H
 
+#include <algebra/matrix.h>
 #include <interval/i_index.h>
+
+using MathTL::Matrix;
 
 namespace WaveletTL
 {
@@ -71,7 +74,6 @@ namespace WaveletTL
     inline const int Nablamin() const { return 0; }
     inline const int Nablamax(const int j) const { return (1<<j)-1; }
 
-
   protected:
     //! coarsest possible level
     int j0_;
@@ -81,6 +83,12 @@ namespace WaveletTL
 
     //! general setup routine which is shared by the different constructors
     void setup();
+
+    //! boundary blocks in Mj0
+    Matrix<double> ML_, MR_;
+
+    //! boundary blocks in Mj0T
+    Matrix<double> MLT_, MRT_;
   };
 }
 

@@ -59,10 +59,17 @@ namespace MathTL
   inline
   double EvaluateCardinalBSpline_x(const int k, const double x)
   {
-    if (d == 1)
-      return 0.;
-    else
-      return EvaluateCardinalBSpline<d-1>(k, x) - EvaluateCardinalBSpline<d-1>(k+1, x);
+    return EvaluateCardinalBSpline<d-1>(k, x) - EvaluateCardinalBSpline<d-1>(k+1, x);
+  }
+  
+  /*!
+    evaluate the first derivative N_1'(x-k) of a shifted cardinal B-spline
+  */
+  template <>
+  inline
+  double EvaluateCardinalBSpline_x<1>(const int k, const double x)
+  {
+    return 0.;
   }
   
   /*!

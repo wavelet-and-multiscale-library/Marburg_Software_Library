@@ -131,5 +131,15 @@ int main()
     cout << "  N_{-1,2}(" << x << ")="
 	 <<  EvaluateSchoenbergBSpline<2>(-1,x) << endl;
   }
+  cout << "* some point values of its derivative:" << endl;
+  for (double x = -0.5; x <= 1.5; x+=0.1) {
+    cout << "  N_{-1,2}'(" << x << ")="
+	 <<  EvaluateSchoenbergBSpline_x<2>(-1,x) << endl;
+  }
+  cout << "* some point values of the derivative of N_{0,2}:" << endl;
+  for (double x = -0.5; x <= 1.5; x+=0.1) {
+    cout << "  N_{0,2}'(" << x << ")="
+	 <<  EvaluateSchoenbergBSpline_x<2>(0,x) << endl;
+  }
 
 }

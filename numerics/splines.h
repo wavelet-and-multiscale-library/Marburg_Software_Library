@@ -18,7 +18,7 @@
 namespace MathTL
 {
   /*!
-    evaluate a B-spline N_{j,d}(x) via recursion
+    evaluate an arbitrary B-spline N_{j,d}(x) via recursion
   */
   template <int d>
   double evaluate_Bspline(const Array1D<double>& knots, const unsigned int j, const double x)
@@ -35,7 +35,7 @@ namespace MathTL
   }
 
   /*!
-    evaluate a B-spline N_{j,1}(x) = \chi_{[t_j,t_{j+1})}
+    evaluate an arbitrary B-spline N_{j,1}(x) = \chi_{[t_j,t_{j+1})}
   */
   template <>
   inline

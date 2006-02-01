@@ -1,0 +1,222 @@
+// -*- c++ -*-
+
+// +--------------------------------------------------------------------+
+// | This file is part of MathTL - the Mathematical Template Library    |
+// |                                                                    |
+// | Copyright (c) 2002-2006                                            |
+// | Thorsten Raasch, Manuel Werner                                     |
+// +--------------------------------------------------------------------+
+
+#ifndef _MATHTL_SCHOENBERG_SPLINES_H
+#define _MATHTL_SCHOENBERG_SPLINES_H
+
+#include <cmath>
+#include <utils/function.h>
+
+namespace MathTL
+{
+  /*
+    The following routines provide the pointwise evaluation of
+    d-th order Schoenberg B-splines N_{k,d}, k >= -d+1,
+    which use the special knot sequence
+
+      t^0_{-d+1} = ... = t^0_0 = 0          (knot with multiplicity d at x=0)
+      t^0_k = k, k >= 1
+
+    i.e., t^0_k = max(0,k) for k >= -d+1.
+  */
+
+  /*!
+    evaluate a Schoenberg B-spline N_{k,d}(x)
+  */
+  template <int d>
+    double EvaluateSchoenbergBSpline(const int k, const double x)
+    {
+      return 0; // TODO: implement recursion
+    }
+  
+  /*!
+    evaluate an arbitrary Schoenberg B-spline N_{k,1}(x) = \chi_{[t^0_k,t^0_{k+1})}
+  */
+  template <>
+    inline
+    double EvaluateSchoenbergBSpline<1>(const int k, const double x)
+    {
+      return (x >= std::max(0,k) && x < std::max(0,k+1) ? 1.0 : 0.0);
+    }
+  
+
+
+
+
+/*   template <int d> */
+/*   double evaluate_Bspline(const Array1D<double>& knots, const unsigned int j, const double x) */
+/*   { */
+/*     double r(0); */
+
+/*     // take care of multiple knots */
+/*     double diff = knots[j+d-1] - knots[j]; */
+/*     if (diff > 0) r += (x - knots[j]) * evaluate_Bspline<d-1>(knots, j, x) / diff; */
+/*     diff = knots[j+d] - knots[j+1]; */
+/*     if (diff > 0) r += (knots[j+d] - x) * evaluate_Bspline<d-1>(knots, j+1, x) / diff; */
+    
+/*     return r; */
+/*   } */
+
+/*   /\*! */
+/*     evaluate an arbitrary B-spline N_{j,1}(x) = \chi_{[t_j,t_{j+1})} */
+/*   *\/ */
+/*   template <> */
+/*   inline */
+/*   double evaluate_Bspline<1>(const Array1D<double>& knots, const unsigned int j, const double x) */
+/*   { */
+/*     return (x >= knots[j] && x < knots[j+1] ? 1.0 : 0.0); */
+/*   } */
+
+
+
+
+
+
+/*   /\*! */
+/*     evaluate a primal CDF function */
+/*       phi_{j,k}(x) = 2^{j/2}N_d(2^jx-k+d/2) */
+/*   *\/ */
+/*   template <int d> */
+/*   inline */
+/*   double EvaluateCardinalBSpline_td(const int j, const int k, const double x) */
+/*   { */
+/*     const double factor(ldexp(1.0, j)); */
+/*     return sqrt(factor) * EvaluateCardinalBSpline<d>(k, factor * x + d/2); */
+/*   } */
+  
+/*   /\*! */
+/*     evaluate the first derivative N_d'(x-k) of a shifted cardinal B-spline */
+/*   *\/ */
+/*   template <int d> */
+/*   inline */
+/*   double EvaluateCardinalBSpline_x(const int k, const double x) */
+/*   { */
+/*     if (d == 1) */
+/*       return 0.; */
+/*     else */
+/*       return EvaluateCardinalBSpline<d-1>(k, x) - EvaluateCardinalBSpline<d-1>(k+1, x); */
+/*   } */
+  
+/*   /\*! */
+/*     evaluate the first derivative of a primal CDF function */
+/*       phi_{j,k}'(x) = 2^{j/2}N_d(2^jx-k+d/2) */
+/*   *\/ */
+/*   template <int d> */
+/*   inline */
+/*   double EvaluateCardinalBSpline_td_x(const int j, const int k, const double x) */
+/*   { */
+/*     const double factor(ldexp(1.0, j)); */
+/*     return factor * sqrt(factor) * EvaluateCardinalBSpline_x<d>(k, factor * x + d/2); */
+/*   } */
+
+/*   /\*! */
+/*     evaluate a shifted cardinal B-spline N_d(x-k) via recursion */
+/*     (remark: only use this version if the spline order d is unknown at compile time) */
+/*   *\/ */
+/*   double EvaluateCardinalBSpline(const int d, const int k, const double x) */
+/*   { */
+/*     if (x < k) */
+/*       return 0.; */
+/*     else */
+/*       { */
+/* 	if (x >= k+d) */
+/* 	  return 0.; */
+/* 	else */
+/* 	  { */
+/* 	    /\* we know that x\in\supp N_d(.-k) *\/ */
+/* 	    if (d == 1) */
+/* 	      return 1.; */
+/* 	    else */
+/* 	      { */
+/* 		/\* hard-encode case d=2 *\/ */
+/* 		if (d == 2) */
+/* 		  { */
+/* 		    if (x < k+1) */
+/* 		      return x-k; */
+/* 		    else */
+/* 		      return 2.-(x-k); */
+/* 		  } */
+/* 		else */
+/* 		  return ((x-k) * EvaluateCardinalBSpline(d-1, k, x) */
+/* 			  + (k+d-x) * EvaluateCardinalBSpline(d-1, k+1, x)) / (d-1); */
+/* 	      } */
+/* 	  } */
+/*       } */
+/*   } */
+  
+/*   /\*! */
+/*     evaluate a primal CDF function */
+/*       phi_{j,k}(x) = 2^{j/2}N_d(2^jx-k+d/2) */
+/*   *\/ */
+/*   inline double EvaluateCardinalBSpline_td(const int d, const int j, const int k, const double x) */
+/*   { */
+/*     const double factor(ldexp(1.0, j)); */
+/*     return sqrt(factor) * EvaluateCardinalBSpline(d, k, factor * x + d/2); */
+/*   } */
+  
+/*   /\*! */
+/*     evaluate the first derivative N_d'(x-k) of a shifted cardinal B-spline */
+/*   *\/ */
+/*   inline double EvaluateCardinalBSpline_x(const int d, const int k, const double x) */
+/*   { */
+/*     if (d == 1) */
+/*       return 0.; */
+/*     else */
+/*       return EvaluateCardinalBSpline(d-1, k, x) - EvaluateCardinalBSpline(d-1, k+1, x); */
+/*   } */
+  
+/*   /\*! */
+/*     evaluate the first derivative of a primal CDF function */
+/*       phi_{j,k}'(x) = 2^{j/2}N_d(2^jx-k+d/2) */
+/*   *\/ */
+/*   inline double EvaluateCardinalBSpline_td_x(const int d, const int j, const int k, const double x) */
+/*   { */
+/*     const double factor(ldexp(1.0, j)); */
+/*     return factor * sqrt(factor) * EvaluateCardinalBSpline_x(d, k, factor * x + d/2); */
+/*   } */
+
+/*   /\*! */
+/*     cardinal B-spline N_d(x) as Function object */
+/*   *\/ */
+/*   template <int d> */
+/*   class CardinalBSpline : public Function<1> */
+/*   { */
+/*   public: */
+/*     /\*! */
+/*       default constructor: B-splines are real-valued */
+/*     *\/ */
+/*     CardinalBSpline() : Function<1>(1) {} */
+
+/*     /\*! */
+/*       virtual destructor */
+/*     *\/ */
+/*     virtual ~CardinalBSpline() {} */
+
+/*     /\*! */
+/*       value of a B-spline */
+/*     *\/ */
+/*     inline double value(const Point<1>& p, */
+/* 			const unsigned int component = 0) const */
+/*     { */
+/*       return EvaluateCardinalBSpline<d>(0, p(0)); */
+/*     } */
+  
+/*     /\*! */
+/*       value of a B-spline */
+/*     *\/ */
+/*     void vector_value(const Point<1> &p, */
+/* 		      Vector<double>& values) const */
+/*     { */
+/*       values.resize(1, false); */
+/*       values[0] = value(p); */
+/*     } */
+/*   }; */
+}
+
+#endif

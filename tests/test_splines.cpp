@@ -5,6 +5,7 @@
 #include <geometry/sampled_mapping.h>
 #include <numerics/cardinal_splines.h>
 #include <numerics/splines.h>
+#include <numerics/schoenberg_splines.h>
 #include <utils/array1d.h>
 
 using std::cout;
@@ -118,4 +119,12 @@ int main()
   sm3.matlab_output(fs2);
   fs2.close();
 #endif
+
+  cout << "- testing some Schoenberg splines:" << endl;
+  cout << "* some point values of the first--order constant spline:" << endl;
+  for (double x = -0.5; x <= 1.5; x+=0.1) {
+    cout << "  N_{0,1}(" << x << ")="
+	 <<  EvaluateSchoenbergBSpline<1>(0,x) << endl;
+  }
+
 }

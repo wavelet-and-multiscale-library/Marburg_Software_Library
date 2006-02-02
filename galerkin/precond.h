@@ -11,8 +11,10 @@
 #define _WAVELETTL_PRECOND_H
 
 #include <algebra/infinite_vector.h>
+#include <algebra/infinite_matrix.h>
 
 using MathTL::InfiniteVector;
+using MathTL::InfiniteDiagonalMatrix;
 
 namespace WaveletTL
 {
@@ -35,12 +37,14 @@ namespace WaveletTL
   */
   template <class PROBLEM>
   class DiagonalPreconditioner
+    : public WaveletGalerkinPreconditioner<PROBLEM>,
+      public InfiniteDiagonalMatrix<double, typename PROBLEM::Index>
   {
   public:
     /*!
       evaluate the diagonal preconditioner D
     */
-    virtual double D(const typename PROBLEM::Index& lambda) const = 0;
+    virtual double diag(const typename PROBLEM::Index& lambda) const = 0;
 
     /*!
       apply preconditioner

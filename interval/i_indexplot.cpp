@@ -24,28 +24,29 @@ namespace WaveletTL
       double y = j0-0.5;
       const double c = coeffs.get_coefficient(Index(j0,0,basis->DeltaLmin()+i,basis));
       if (c == 0) {
-	// draw an empty rectangle
-	os << "rectangle('position',["
-	   << x << "," << y << "," << h0 << "," << 1.0 << "],"
-	   << "'LineWidth',0.125,"
-	   << "'FaceColor',[1.0,1.0,1.0])" << endl;
+// 	// draw an empty rectangle
+// 	os << "rectangle('position',["
+// 	   << x << "," << y << "," << h0 << "," << 1.0 << "],"
+// 	   << "'LineWidth',0.125,"
+// 	   << "'FaceColor',[1.0,1.0,1.0])" << endl;
       } else {
 	// draw a patch (to have Matlab manage the colormap)
  	os << "patch("
 	   << "[" << x << ";" << x+h0 << ";" << x+h0 << ";" << x << "],"
 	   << "[" << y << ";" << y << ";" << y+1 << ";" << y+1 << "],"
 	   << std::max(log10(fabs(c)/maxnorm),a)
+	   << ",'EdgeColor','none'"
 	   << ")" << endl;
       }
     }
 
-    // plot some empty boxes above level 7
-    for (int j = 7; j <= jmax; j++) {
-      os << "rectangle('position',["
-	 << 0.0 << "," << j+0.5 << "," << 1.0 << "," << 1.0 << "],"
-	 << "'LineWidth',0.125,"
-	 << "'FaceColor',[1.0,1.0,1.0])" << endl;
-    }
+//     // plot some empty boxes above level 7
+//     for (int j = 7; j <= jmax; j++) {
+//       os << "rectangle('position',["
+// 	 << 0.0 << "," << j+0.5 << "," << 1.0 << "," << 1.0 << "],"
+// 	 << "'LineWidth',0.125,"
+// 	 << "'FaceColor',[1.0,1.0,1.0])" << endl;
+//     }
     
     // plot the wavelet coefficients
     for (int j = j0; j <= jmax; j++) {
@@ -57,11 +58,11 @@ namespace WaveletTL
  	const double c = coeffs.get_coefficient(Index(j,1,basis->Nablamin()+i,basis));
  	if (c == 0) {
 	  if (j <= 6) {
-	    // draw an empty rectangle
-	    os << "rectangle('position',["
-	       << x << "," << y << "," << hj << "," << 1.0 << "],"
-	       << "'LineWidth',0.125,"
-	       << "'FaceColor',[1.0,1.0,1.0])" << endl;
+// 	    // draw an empty rectangle
+// 	    os << "rectangle('position',["
+// 	       << x << "," << y << "," << hj << "," << 1.0 << "],"
+// 	       << "'LineWidth',0.125,"
+// 	       << "'FaceColor',[1.0,1.0,1.0])" << endl;
 	  }
 	} else {
 	  // draw a patch
@@ -69,6 +70,7 @@ namespace WaveletTL
 	     << "[" << x << ";" << x+hj << ";" << x+hj << ";" << x << "],"
 	     << "[" << y << ";" << y << ";" << y+1 << ";" << y+1 << "],"
 	     << std::max(log10(fabs(c)/maxnorm),a)
+ 	     << ",'EdgeColor','none'"
 	     << ")" << endl;
 	}
       }

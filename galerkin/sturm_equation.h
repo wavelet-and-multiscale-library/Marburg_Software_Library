@@ -14,6 +14,7 @@
 #include <utils/array1d.h>
 
 #include <galerkin/galerkin_utils.h>
+#include <galerkin/precond.h>
 
 namespace WaveletTL
 {

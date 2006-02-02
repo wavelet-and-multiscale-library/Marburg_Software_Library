@@ -77,7 +77,7 @@ namespace WaveletTL
     }
     
     // set y axis limits
-    os << "set(gca,'YLim',[" << j0-0.5 << " " << jmax+0.5 << "])" << endl;
+    os << "set(gca,'YLim',[" << j0-0.5 << " " << jmax+1.5 << "])" << endl;
 
     // set axis labels
     os << "xlabel 'k'" << endl

@@ -445,6 +445,15 @@ namespace MathTL
   }
 
   template <class C, class I>
+  void InfiniteVector<C,I>::scale(const InfiniteDiagonalMatrix<C,I>* D, const int k)
+  {
+    for (typename std::map<I,C>::iterator it(std::map<I,C>::begin()),
+	   itend(std::map<I,C>::end());
+	 it != itend; ++it)
+      it->second *= pow(D->diag(it->first), k);
+  }
+
+  template <class C, class I>
   inline
   InfiniteVector<C,I>& InfiniteVector<C,I>::operator += (const InfiniteVector<C,I>& v)
   {

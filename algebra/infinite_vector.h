@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <iterator>
 #include <utils/array1d.h>
+#include <algebra/infinite_matrix.h>
 
 // external functionality, for convenience:
 #include <algebra/vector_norms.h>
@@ -278,6 +279,11 @@ namespace MathTL
     */
     void scale(const C s);
 
+    /*!
+      in place scaling with a diagonal matrix, *this = D^k (*this)
+    */
+    void scale(const InfiniteDiagonalMatrix<C,I>* D, const int k = 1);
+    
     /*!
       in place summation
     */

@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <cmath>
 #include <set>
 #include <iostream>
 #include <algebra/infinite_vector.h>
@@ -6,6 +7,16 @@
 using std::cout;
 using std::endl;
 using namespace MathTL;
+
+class Squares
+  : public InfiniteDiagonalMatrix<float>
+{
+public:
+  double diag(const int& i) const
+  {
+    return pow(i,2);
+  }
+};
 
 int main()
 {
@@ -146,6 +157,10 @@ int main()
   cout << "  weighted root mean square norm of v ("
        << "atol=" << atol << ", rtol=" << rtol << "): "
        << v.wrmsqr_norm(atol, rtol, w, w) << endl;
- 
+
+  Squares S;
+  w.scale(&S);
+  cout << "w weighted with an instance of Squares: " << endl << w;
+  
   return 0;
 }

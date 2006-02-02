@@ -18,7 +18,7 @@ namespace MathTL
   /*
     The following routines provide the pointwise evaluation of
     d-th order Schoenberg B-splines N_{k,d}, k >= -d+1,
-    which use the special knot sequence
+    which use the special infinite knot sequence
 
       t^0_{-d+1} = ... = t^0_0 = 0          (knot with multiplicity d at x=0)
       t^0_k = k, k >= 1
@@ -27,7 +27,7 @@ namespace MathTL
   */
 
   /*!
-    evaluate a Schoenberg B-spline N_{k,d}(x)
+    evaluate an arbitrary Schoenberg B-spline N_{k,d}(x)
   */
   template <int d>
   double EvaluateSchoenbergBSpline(const int k, const double x)

@@ -70,7 +70,7 @@ namespace MathTL
   
   template <class C>
   inline
-  const typename Vector<C>::size_type
+  typename Vector<C>::size_type
   Vector<C>::size() const
   {
     return size_;
@@ -78,7 +78,7 @@ namespace MathTL
 
   template <class C>
   inline
-  const typename Vector<C>::size_type
+  typename Vector<C>::size_type
   Vector<C>::memory_consumption() const
   {
     return sizeof(*this) + size_*sizeof(C);
@@ -221,7 +221,7 @@ namespace MathTL
   }
 
   template <class C>
-  const double
+  double
   Vector<C>::wrmsqr_norm(const double atol, const double rtol,
 			 const Vector<C>& v, const Vector<C>& w) const
   {
@@ -386,6 +386,22 @@ namespace MathTL
   void swap(Vector<C>& v1, Vector<C>& v2)
   {
     v1.swap(v2);
+  }
+
+  template <class C, class C2>
+  Vector<C> operator + (const Vector<C>& v1, const Vector<C2>& v2)
+  {
+    Vector<C> r(v1);
+    r += v2;
+    return r;
+  }
+
+  template <class C, class C2>
+  Vector<C> operator - (const Vector<C>& v1, const Vector<C2>& v2)
+  {
+    Vector<C> r(v1);
+    r -= v2;
+    return r;
   }
 
   template <class C>

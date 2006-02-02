@@ -66,7 +66,7 @@ int main()
   const double dx = 1.0 / (1<<J);
   Point<2> tmp;
   tstart = clock();
-  Point<2> pc(0.5, 0.75);
+  Point<2> pc0(0.5, 0.75);
   Matrix<double> R(2,2);
   R(0,0) = 1.;
   R(1,1) = 1.;
@@ -109,9 +109,9 @@ int main()
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "cpu time = " << time << "s" << endl;
-  cout << "Gram_factor = " << k_1.Gram_factor(pc) << endl;
-  cout << "Gram_D_factor = " << k_1.Gram_D_factor(1,pc) << endl;
-  cout << "Dkappa_inv " << k_1.Dkappa_inv(1,0,pc) << endl;
+  cout << "Gram_factor = " << k_1.Gram_factor(pc0) << endl;
+  cout << "Gram_D_factor = " << k_1.Gram_D_factor(1,pc0) << endl;
+  cout << "Dkappa_inv " << k_1.Dkappa_inv(1,0,pc0) << endl;
   Point<2> p(1, 0);
   cout << "in_patch " << k_1.in_patch(p) << endl;
 

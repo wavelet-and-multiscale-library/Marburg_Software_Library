@@ -7,10 +7,13 @@
 
 # choose between GNU or Intel compiler
 CXX = g++
-# CXX = icpc
+#CXX = icpc
 
 CXXFLAGS += -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O2 -I$(MATHTL_DIR) -Wall -pipe
+
+# disable some annoying warnings of icpc
+#CXXFLAGS += -wd383 -wd981
 
 EXEOBJF = \
   test_random.o\

@@ -108,12 +108,12 @@ namespace MathTL
     /*!
       size/dimension of the vector
     */
-    const size_type size() const;
+    size_type size() const;
 
     /*!
       (estimate for the) memory consumption in bytes
     */
-    const size_type memory_consumption() const;
+    size_type memory_consumption() const;
 
     /*!
       return true if dimension is zero
@@ -271,8 +271,8 @@ namespace MathTL
       (this has to be modeled as a member function, since partial specialization
       of template functions is not allowed in C++)
     */
-    const double wrmsqr_norm(const double atol, const double rtol,
-			     const Vector<C>& v, const Vector<C>& w) const;
+    double wrmsqr_norm(const double atol, const double rtol,
+		       const Vector<C>& v, const Vector<C>& w) const;
     
   protected:
     /*!
@@ -298,12 +298,7 @@ namespace MathTL
     to be copied. Use += or add() instead!)
    */
   template <class C, class C2>
-  Vector<C> operator + (const Vector<C>& v1, const Vector<C2>& v2)
-  {
-    Vector<C> r(v1);
-    r += v2;
-    return r;
-  }
+  Vector<C> operator + (const Vector<C>& v1, const Vector<C2>& v2);
 
   /*!
     difference of two vectors
@@ -311,12 +306,7 @@ namespace MathTL
     to be copied. Use -= or sadd() instead!)
    */
   template <class C, class C2>
-  Vector<C> operator - (const Vector<C>& v1, const Vector<C2>& v2)
-  {
-    Vector<C> r(v1);
-    r -= v2;
-    return r;
-  }
+  Vector<C> operator - (const Vector<C>& v1, const Vector<C2>& v2);
 
   /*!
     stream output for vectors

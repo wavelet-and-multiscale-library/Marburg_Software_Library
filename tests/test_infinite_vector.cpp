@@ -86,7 +86,7 @@ int main()
   InfiniteVector<float> v, w;
   for (unsigned int i=0; i < 1000; i++)
     {
-      v[i] = (double)rand()/(double)RAND_MAX;
+      v[i] = (float)rand()/(double)RAND_MAX;
     }
   cout << v.size()
        << " and ||v||_2=" << l2_norm(v) << endl;

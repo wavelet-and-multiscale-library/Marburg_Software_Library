@@ -47,11 +47,59 @@ namespace WaveletTL
     virtual double diag(const typename PROBLEM::Index& lambda) const = 0;
 
     /*!
-      apply preconditioner
+      apply preconditioner, x = D^{-1}y
     */
     void apply_preconditioner(const InfiniteVector<double, typename PROBLEM::Index>& y,
 			      InfiniteVector<double, typename PROBLEM::Index>& x) const;
   };
+
+  /*!
+    Fully diagonal preconditioner based on (NE) for the energy space, i.e.,
+      D=diag(2^{t|lambda|})
+  */
+  template <class PROBLEM>
+  class DiagonalDyadicPreconditioner
+    : public DiagonalPreconditioner<PROBLEM>
+  {
+  public:
+    /*!
+      default constructor, takes the exponent t
+    */
+    DiagonalDyadicPreconditioner(const double expo) : t(expo) {}
+
+    /*!
+      evaluate the diagonal preconditioner D
+    */
+    double diag(const typename PROBLEM::Index& lambda) const { return ldexp(1.0, t*lambda.j()); }
+
+  protected:
+    //! exponent t
+    double t;
+  };
+
+//   /*!
+//     Fully diagonal preconditioner using the energy norms D=sqrt(diag(A)), i.e.,
+//     D depends on a given unpreconditioned problem
+//   */
+//   template <class PROBLEM>
+//   class DiagonalEnergyNormPreconditioner
+//     : public DiagonalPreconditioner<PROBLEM>
+//   {
+//   public:
+//     /*!
+//       default constructor, takes a given problem
+//     */
+//     DiagonalEnergyNormPreconditioner(const PROBLEM* p) : problem(p) {}
+    
+//     /*!
+//       evaluate the diagonal preconditioner D
+//     */
+//     double diag(const typename PROBLEM::Index& lambda) const { return sqrt(problem.a(lambda,lambda)); }
+    
+//   protected:
+//     //! an instance of the problem
+//     const PROBLEM* problem;
+//   };
 }
 
 #include <galerkin/precond.cpp>

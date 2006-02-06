@@ -14,7 +14,17 @@ class Squares
 public:
   double diag(const int& i) const
   {
-    return pow(i,2);
+    return i*i;
+  }
+};
+
+class SquaresPlusOne
+  : public InfiniteDiagonalMatrix<float>
+{
+public:
+  double diag(const int& i) const
+  {
+    return i*i+1.;
   }
 };
 
@@ -161,6 +171,10 @@ int main()
   Squares S;
   w.scale(&S);
   cout << "w weighted with an instance of Squares: " << endl << w;
+
+  SquaresPlusOne S1;
+  w.scale(&S1, -1);
+  cout << "w weighted with an instance of SquaresPlusOne, exponent -1: " << endl << w;
   
   return 0;
 }

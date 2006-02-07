@@ -37,6 +37,7 @@ namespace WaveletTL
   template <class PROBLEM>
   class CachedProblem
     : public WaveletNEPreconditioner<typename PROBLEM::Index>
+//     : public EnergyNormPreconditioner<typename PROBLEM::Index>
   {
   public:
     /*!

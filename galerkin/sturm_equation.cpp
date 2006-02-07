@@ -67,6 +67,15 @@ namespace WaveletTL
 //   }
   
   template <class WBASIS>
+  inline
+  double
+  SturmEquation<WBASIS>::a(const typename WBASIS::Index& lambda,
+			   const typename WBASIS::Index& nu) const
+  {
+    return a(lambda, nu, 4);
+  }
+
+  template <class WBASIS>
   double
   SturmEquation<WBASIS>::a(const typename WBASIS::Index& lambda,
 			   const typename WBASIS::Index& nu,

@@ -63,6 +63,7 @@ namespace WaveletTL
   template <class WBASIS>
   class SturmEquation
     : public WaveletNEPreconditioner<typename WBASIS::Index>
+//     : public EnergyNormPreconditioner<typename WBASIS::Index>
   {
   public:
     SturmEquation(const SimpleSturmBVP& bvp,
@@ -105,6 +106,13 @@ namespace WaveletTL
     double D(const Index& lambda) const;
 
     /*!
+      evaluate the (unpreconditioned) bilinear form a
+      (inherited from EnergyNormPreconditioner)
+    */
+    double a(const Index& lambda,
+	     const Index& nu) const;
+
+    /*!
       evaluate the (unpreconditioned) bilinear form a;
       you can specify the order p of the quadrature rule, i.e.,
       (piecewise) polynomials of maximal degree p will be integrated exactly.
@@ -114,7 +122,7 @@ namespace WaveletTL
     */
     double a(const Index& lambda,
 	     const Index& nu,
-	     const unsigned int p = 4) const;
+	     const unsigned int p) const;
 
     /*!
       estimate the spectral norm ||A||

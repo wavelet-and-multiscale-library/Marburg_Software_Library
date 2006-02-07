@@ -1,5 +1,7 @@
 // implementation for precond.h
 
+#include <cmath>
+
 namespace WaveletTL
 {
   template <class INDEX>
@@ -43,5 +45,12 @@ namespace WaveletTL
   {
     return pow(ldexp(1.0, lambda.j()), operator_order());
   }
-  
+
+  template <class INDEX>
+  inline
+  double
+  EnergyNormPreconditioner<INDEX>::diag(const INDEX& lambda) const
+  {
+    return sqrt(a(lambda, lambda));
+  };
 }

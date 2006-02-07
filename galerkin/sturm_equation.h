@@ -62,6 +62,7 @@ namespace WaveletTL
   */
   template <class WBASIS>
   class SturmEquation
+    : public WaveletNEPreconditioner<typename WBASIS::Index>
   {
   public:
     SturmEquation(const SimpleSturmBVP& bvp,
@@ -94,8 +95,9 @@ namespace WaveletTL
 
     /*!
       (half) order t of the operator
+      (inherited from WaveletNEPreconditioner)
     */
-    static int operator_order() { return 1; }
+    double operator_order() const { return 1.; }
     
     /*!
       evaluate the diagonal preconditioner D
@@ -103,10 +105,17 @@ namespace WaveletTL
     double D(const Index& lambda) const;
 
     /*!
-      rescale a coefficient vector by an integer power of D, c |-> D^{n}c
+      provide left preconditioner P
+      (cf. precond.h, for solving P^{-1}Ax=P^{-1}b instead of Ax=b)
     */
-    void rescale(InfiniteVector<double,Index>& coeffs, const int n) const;
-
+    const InfinitePreconditioner<Index>* left_preconditioner();
+    
+    /*!
+      provide right preconditioner Q
+      (cf. precond.h, for solving AQ^{-1}y=b and x=Q^{-1}y instead of Ax=b)
+    */
+    const InfinitePreconditioner<Index>* right_preconditioner();
+    
     /*!
       evaluate the (unpreconditioned) bilinear form a;
       you can specify the order p of the quadrature rule, i.e.,

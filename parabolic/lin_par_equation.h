@@ -15,6 +15,7 @@
 #include <utils/function.h>
 #include <galerkin/gramian.h>
 #include <galerkin/cached_problem.h>
+#include <galerkin/precond.h>
 
 using MathTL::InfiniteVector;
 using MathTL::AbstractIVP;
@@ -35,6 +36,7 @@ namespace WaveletTL
   */
   template <class ELLIPTIC_EQ>
   class LinParEqROWStageEquationHelper
+    : public WaveletNEPreconditioner<typename ELLIPTIC_EQ::Index>
   {
   public:
     /*!
@@ -74,20 +76,12 @@ namespace WaveletTL
     /*!
       (half) order t of the operator
     */
-    static int operator_order() { return ELLIPTIC_EQ::operator_order(); }
+    double operator_order() const { return T->operator_order(); }
 
     /*!
       evaluate the diagonal preconditioner D
     */
     double D(const Index& lambda) const { return T->D(lambda); }
-    
-    /*!
-      rescale a coefficient vector by an integer power of D, c |-> D^{n}c
-    */
-    void rescale(InfiniteVector<double,Index>& coeffs,
-		 const int n) const {
-      T->rescale(coeffs, n);
-    }
     
     /*!
       evaluate the (unpreconditioned) bilinear form a
@@ -145,7 +139,7 @@ namespace WaveletTL
     void RHS(const double eta,
 	     InfiniteVector<double, Index>& coeffs) const {
       coeffs = y; // dirty
-      T->rescale(coeffs, -1);
+      coeffs.scale(T, -1);
     }
     
     /*!

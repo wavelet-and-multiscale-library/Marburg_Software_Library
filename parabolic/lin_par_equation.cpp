@@ -28,7 +28,7 @@ namespace WaveletTL
     // Gramian part, we have to take care of the preconditioning factors
     InfiniteVector<double,Index> g;
     G.add_level(lambda, g, j, factor * alpha/T->D(lambda), J, strategy);
-    rescale(g, -1);
+    g.scale(this, -1);
     w.add(g);
     
     T->add_level(lambda, w, j, factor, J, strategy);
@@ -72,9 +72,9 @@ namespace WaveletTL
   {
     result.clear();
     InfiniteVector<double,Index> w(v), temp;
-    elliptic->rescale(w, 1); // w = Dv
+    w.scale(elliptic, 1); // w = Dv
     APPLY(*elliptic, w, tolerance, temp, jmax_, St04a); // yields -D^{-1}AD^{-1}w
-    elliptic->rescale(temp, 1);
+    temp.scale(elliptic, 1);
     temp.scale(-1.0); // result = -D(-D^{-1}AD^{-1}Dv) = Av
 
 //     // multiply with inverse primal gramian (i.e., switch from dual to primal basis)
@@ -139,6 +139,6 @@ namespace WaveletTL
 
     LinParEqROWStageEquationHelper<ELLIPTIC_EQ> helper(alpha, elliptic, GC, y);
     CDD1_SOLVE(helper, tolerance, result, jmax_); // D^{-1}(alpha*I-T)D^{-1}*Dx = D^{-1}y    
-    elliptic->rescale(result, -1); // Dx -> x
+    result.scale(elliptic, -1); // Dx -> x
   }
 }

@@ -2,15 +2,26 @@
 
 namespace WaveletTL
 {
-  template <class PROBLEM>
+  template <class INDEX>
+  InfinitePreconditioner<INDEX>::~InfinitePreconditioner() {}
+  
+  template <class INDEX>
   inline
   void
-  DiagonalPreconditioner<PROBLEM>::apply_preconditioner
-  (const InfiniteVector<double, typename PROBLEM::Index>& y,
-   InfiniteVector<double, typename PROBLEM::Index>& x) const
+  FullyDiagonalPreconditioner<INDEX>::apply_preconditioner
+  (const InfiniteVector<double,INDEX>& y,
+   InfiniteVector<double,INDEX>& x) const
   {
     x = y;
-    x.scale(*this, -1);
+    x.scale(this, -1);
   };
-
+  
+  template <class INDEX>
+  inline
+  double
+  WaveletNEPreconditioner<INDEX>::diag(const INDEX& lambda) const
+  {
+    return pow(ldexp(1.0, lambda.j()), operator_order());
+  }
+  
 }

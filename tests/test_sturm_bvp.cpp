@@ -157,7 +157,7 @@ int main()
   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
     u.set_coefficient(*it, x[i]);
   
-  eq.rescale(u, -1);
+  u.scale(&eq, -1);
   SampledMapping<1> s(evaluate(eq.basis(), u, true, 7));
   s.matlab_output(cout);
 #endif
@@ -210,6 +210,9 @@ int main()
     break;
   }
 #endif
+
+  InfiniteVector<double,Index> coeffsp;
+  eq.left_preconditioner()->apply_preconditioner(coeffs,coeffsp);
 
   return 0;
 }

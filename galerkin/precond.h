@@ -19,64 +19,87 @@ using MathTL::InfiniteDiagonalMatrix;
 namespace WaveletTL
 {
   /*!
-    Base class for preconditioners in wavelet-Galerkin schemes
+    Base class for preconditioners of infinite linear systems Ax=b, i.e.,
+    for those arising in wavelet-Galerkin discretizations of PDEs
+
+    The class will be used to model both preconditioning
+    - from the left  (solve P^{-1}Ax=P^{-1}b instead of Ax=b), and
+    - from the right (solve AQ^{-1}y=b and x=Q^{-1}y instead of Ax=b)
+
+    Preconditioners in wavelet-Galerkin schemes should have the property
+    that P^{-1} and Q^{-1} preserve the active support sets, at least for
+    the proper wavelet coefficients (e!=0). In other words, the preconditioner
+    should behave like a diagonal matrix for rows corresponding to
+    wavelet coefficients. For fully diagonal preconditioners,
+    this is of course no problem. However, in the case of a special treatment of
+    the "generator blocks" in the stiffness matrix, an application
+    of P^{-1} or Q^{-1} might introduce additional generator coefficients
+    which were not yet present in the argument vector.
+
+    [B] M. Benzi:
+        Preconditioning Techniques for Large Linear Systems: A Survey
+        J. Comput. Phys. 182(2002), 418-477
    */
-  template <class PROBLEM>
-  class WaveletGalerkinPreconditioner
+  template <class INDEX>
+  class InfinitePreconditioner
   {
   public:
     /*!
-      apply the preconditioner to a given vector y, i.e., solve Px = y
+      purely virtual destructor
     */
-    virtual void apply_preconditioner(const InfiniteVector<double, typename PROBLEM::Index>& y,
-				      InfiniteVector<double, typename PROBLEM::Index>& x) const = 0;
-  };
+    virtual ~InfinitePreconditioner() = 0;
 
+    /*!
+      Apply the preconditioner to a given vector y, i.e., solve Px = y.
+      At least the active proper wavelet coefficients (e!=0) should be preserved.
+    */
+    virtual void apply_preconditioner(const InfiniteVector<double,INDEX>& y,
+				      InfiniteVector<double,INDEX>& x) const = 0;
+  };
+  
   /*!
-    Base class for fully diagonal preconditioners P=D^{-1}, D=diag(d_i)
+    Base class for fully diagonal preconditioners P=D=diag(d_i).
+    In fact, this class can be derived from InfiniteDiagonalMatrix,
+    making the fast routine InfiniteVector::scale() accessible.
   */
-  template <class PROBLEM>
-  class DiagonalPreconditioner
-    : public WaveletGalerkinPreconditioner<PROBLEM>,
-      public InfiniteDiagonalMatrix<double, typename PROBLEM::Index>
+  template <class INDEX>
+  class FullyDiagonalPreconditioner
+    : public InfinitePreconditioner<INDEX>,
+      public InfiniteDiagonalMatrix<double,INDEX>
   {
   public:
     /*!
       evaluate the diagonal preconditioner D
     */
-    virtual double diag(const typename PROBLEM::Index& lambda) const = 0;
+    virtual double diag(const INDEX& lambda) const = 0;
 
     /*!
-      apply preconditioner, x = D^{-1}y
+      apply preconditioner, x = P^{-1}y = D^{-1}y
     */
-    void apply_preconditioner(const InfiniteVector<double, typename PROBLEM::Index>& y,
-			      InfiniteVector<double, typename PROBLEM::Index>& x) const;
+    void apply_preconditioner(const InfiniteVector<double,INDEX>& y,
+			      InfiniteVector<double,INDEX>& x) const;
   };
-
+  
   /*!
-    Fully diagonal preconditioner based on (NE) for the energy space, i.e.,
-      D=diag(2^{t|lambda|})
+    When using wavelet-Galerkin schemes, any differential or integral operator
+    of order 2t induces a natural diagonal preconditioner D=diag(2^{t|lambda|}),
+    which is modeled by this class.
   */
-  template <class PROBLEM>
-  class DiagonalDyadicPreconditioner
-    : public DiagonalPreconditioner<PROBLEM>
+  template <class INDEX>
+  class WaveletNEPreconditioner
+    : public FullyDiagonalPreconditioner<INDEX>
   {
-  public:
     /*!
-      default constructor, takes the exponent t
-    */
-    DiagonalDyadicPreconditioner(const double expo) : t(expo) {}
+      (half) operator order t
+     */
+    virtual double operator_order() const = 0;
 
     /*!
       evaluate the diagonal preconditioner D
     */
-    double diag(const typename PROBLEM::Index& lambda) const { return ldexp(1.0, t*lambda.j()); }
-
-  protected:
-    //! exponent t
-    double t;
+    double diag(const INDEX& lambda) const;
   };
-
+  
 //   /*!
 //     Fully diagonal preconditioner using the energy norms D=sqrt(diag(A)), i.e.,
 //     D depends on a given unpreconditioned problem

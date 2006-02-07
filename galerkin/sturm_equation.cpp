@@ -59,18 +59,25 @@ namespace WaveletTL
 //     return sqrt(a(lambda, lambda));
   }
 
+//   template <class WBASIS>
+//   double
+//   SturmEquation<WBASIS>::diag(const typename WBASIS::Index& lambda) const
+//   {
+//     return ldexp(1.0, lambda.j());
+//   }
+  
   template <class WBASIS>
-  inline
-  void
-  SturmEquation<WBASIS>::rescale(InfiniteVector<double, typename WBASIS::Index>& coeffs,
-				 const int n) const
+  const InfinitePreconditioner<typename WBASIS::Index>*
+  SturmEquation<WBASIS>::left_preconditioner()
   {
-    for (typename InfiniteVector<double, typename WBASIS::Index>::const_iterator it(coeffs.begin());
-	 it != coeffs.end(); ++it)
-      {
-	// TODO: implement an InfiniteVector::iterator to speed up this hack!
-	coeffs.set_coefficient(it.index(), *it * pow(D(it.index()), n));
-      }
+    return this;
+  }
+    
+  template <class WBASIS>
+  const InfinitePreconditioner<typename WBASIS::Index>*
+  SturmEquation<WBASIS>::right_preconditioner()
+  {
+    return this;
   }
 
   template <class WBASIS>

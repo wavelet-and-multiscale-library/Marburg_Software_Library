@@ -4,6 +4,26 @@ namespace WaveletTL
 {
   template <class INDEX>
   InfinitePreconditioner<INDEX>::~InfinitePreconditioner() {}
+
+  template <class INDEX>
+  inline
+  void
+  InfiniteSymmetricPreconditioner<INDEX>::apply_left_preconditioner
+  (const InfiniteVector<double,INDEX>& y,
+   InfiniteVector<double,INDEX>& x) const
+  {
+    apply_preconditioner(y, x);
+  }
+    
+  template <class INDEX>
+  inline
+  void
+  InfiniteSymmetricPreconditioner<INDEX>::apply_right_preconditioner
+  (const InfiniteVector<double,INDEX>& y,
+   InfiniteVector<double,INDEX>& x) const
+  {
+    apply_preconditioner(y, x);
+  }
   
   template <class INDEX>
   inline

@@ -67,20 +67,6 @@ namespace WaveletTL
 //   }
   
   template <class WBASIS>
-  const InfinitePreconditioner<typename WBASIS::Index>*
-  SturmEquation<WBASIS>::left_preconditioner()
-  {
-    return this;
-  }
-    
-  template <class WBASIS>
-  const InfinitePreconditioner<typename WBASIS::Index>*
-  SturmEquation<WBASIS>::right_preconditioner()
-  {
-    return this;
-  }
-
-  template <class WBASIS>
   double
   SturmEquation<WBASIS>::a(const typename WBASIS::Index& lambda,
 			   const typename WBASIS::Index& nu,

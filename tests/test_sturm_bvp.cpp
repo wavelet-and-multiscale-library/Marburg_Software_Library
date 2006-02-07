@@ -211,8 +211,8 @@ int main()
   }
 #endif
 
-  InfiniteVector<double,Index> coeffsp;
-  eq.left_preconditioner()->apply_preconditioner(coeffs,coeffsp);
+//   InfiniteVector<double,Index> coeffsp;
+//   eq.left_preconditioner()->apply_preconditioner(coeffs,coeffsp);
 
   return 0;
 }

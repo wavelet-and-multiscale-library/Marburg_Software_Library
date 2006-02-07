@@ -105,18 +105,6 @@ namespace WaveletTL
     double D(const Index& lambda) const;
 
     /*!
-      provide left preconditioner P
-      (cf. precond.h, for solving P^{-1}Ax=P^{-1}b instead of Ax=b)
-    */
-    const InfinitePreconditioner<Index>* left_preconditioner();
-    
-    /*!
-      provide right preconditioner Q
-      (cf. precond.h, for solving AQ^{-1}y=b and x=Q^{-1}y instead of Ax=b)
-    */
-    const InfinitePreconditioner<Index>* right_preconditioner();
-    
-    /*!
       evaluate the (unpreconditioned) bilinear form a;
       you can specify the order p of the quadrature rule, i.e.,
       (piecewise) polynomials of maximal degree p will be integrated exactly.

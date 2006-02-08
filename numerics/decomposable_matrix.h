@@ -37,7 +37,7 @@ namespace MathTL
   {
   public:
     /*!
-      type of indexes and size type (cf. STL containers)
+      type of indices and size type (cf. STL containers)
      */
     typedef typename Vector<C>::size_type size_type;
 

@@ -58,12 +58,28 @@ namespace WaveletTL
      InfiniteVector<double,INDEX>& x) const = 0;
     
     /*!
+      Reverse the left preconditioner, i.e., compute y = Px.
+      At least the active proper wavelet coefficients (e!=0) should be preserved.
+    */
+    virtual void reverse_left_preconditioner
+    (const InfiniteVector<double,INDEX>& x,
+     InfiniteVector<double,INDEX>& y) const = 0;
+    
+    /*!
       Apply the right preconditioner to a given vector y, i.e., solve Qx = y.
       At least the active proper wavelet coefficients (e!=0) should be preserved.
     */
     virtual void apply_right_preconditioner
     (const InfiniteVector<double,INDEX>& y,
      InfiniteVector<double,INDEX>& x) const = 0;
+
+    /*!
+      Reverse the right preconditioner, i.e., compute y = Qx.
+      At least the active proper wavelet coefficients (e!=0) should be preserved.
+    */
+    virtual void reverse_right_preconditioner
+    (const InfiniteVector<double,INDEX>& x,
+     InfiniteVector<double,INDEX>& y) const = 0;
   };
   
   /*!
@@ -81,11 +97,22 @@ namespace WaveletTL
 				   InfiniteVector<double,INDEX>& x) const;
     
     /*!
-      Apply the right preconditioner to a given vector y, i.e., solve Px = y.
-      At least the active proper wavelet coefficients (e!=0) should be preserved.
+      Apply the right preconditioner to a given vector y, i.e., solve Qx = y.
     */
     void apply_right_preconditioner(const InfiniteVector<double,INDEX>& y,
 				    InfiniteVector<double,INDEX>& x) const;
+    
+    /*!
+      Reverse the left preconditioner, i.e., compute y = Px.
+    */
+    void reverse_left_preconditioner(const InfiniteVector<double,INDEX>& x,
+				     InfiniteVector<double,INDEX>& y) const;
+    
+    /*!
+      Reverse the right preconditioner, i.e., compute y = Qx.
+    */
+    void reverse_right_preconditioner(const InfiniteVector<double,INDEX>& x,
+				      InfiniteVector<double,INDEX>& y) const;
     
     /*!
       Apply the preconditioner to a given vector y, i.e., solve Px = y.
@@ -93,6 +120,13 @@ namespace WaveletTL
     */
     virtual void apply_preconditioner(const InfiniteVector<double,INDEX>& y,
 				      InfiniteVector<double,INDEX>& x) const = 0;
+
+    /*!
+      Reverse the preconditioner, i.e., compute y = Px.
+      At least the active proper wavelet coefficients (e!=0) should be preserved.
+    */
+    virtual void reverse_preconditioner(const InfiniteVector<double,INDEX>& x,
+					InfiniteVector<double,INDEX>& y) const = 0;
   };
   
   /*!
@@ -116,6 +150,12 @@ namespace WaveletTL
     */
     void apply_preconditioner(const InfiniteVector<double,INDEX>& y,
 			      InfiniteVector<double,INDEX>& x) const;
+
+    /*!
+      reverse preconditioner, y=Px=Qx=Dx
+    */
+    void reverse_preconditioner(const InfiniteVector<double,INDEX>& x,
+				InfiniteVector<double,INDEX>& y) const;
   };
   
   /*!

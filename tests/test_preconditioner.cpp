@@ -24,7 +24,7 @@ int main()
   S.set_entry(3, 2, -1.0);
   cout << "- the standard matrix:" << endl << S;
 
-  JacobiPreconditioner<double,TridiagonalMatrix<double> > JP(S);
+  JacobiPreconditioner<TridiagonalMatrix<double>,Vector<double> > JP(S);
   Vector<double> x(4, "1 2 3 4"), y;
   JP.apply_preconditioner(x, y);
   cout << "- applying the Jacobi preconditioner to x=" << x << " yields y=P^{-1}x=" << y << endl;

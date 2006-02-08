@@ -30,14 +30,14 @@ namespace MathTL
         Preconditioning Techniques for Large Linear Systems: A Survey
         J. Comput. Phys. 182(2002), 418-477
    */
-  template <class C>
+  template <class VECTOR>
   class Preconditioner
   {
   public:
     /*!
       type of indices and size type (cf. STL containers)
     */
-    typedef typename Vector<C>::size_type size_type;
+    typedef typename VECTOR::size_type size_type;
 
     /*!
       purely virtual destructor
@@ -57,26 +57,66 @@ namespace MathTL
     /*!
       apply P, i.e., reverse the preconditioning
     */
-    virtual void apply(const Vector<C>& x, Vector<C>& Px) const = 0;
+    virtual void apply(const VECTOR& x, VECTOR& Px) const = 0;
 
     /*!
       apply P^{-1}, i.e., perform the preconditioning
     */
-    virtual void apply_preconditioner(const Vector<C>& Px, Vector<C>& x) const = 0;
+    virtual void apply_preconditioner(const VECTOR& Px, VECTOR& x) const = 0;
   };
 
   /*!
-    As an example class, provide the Jacobi preconditioner, i.e., P=diag(A).
+    Identity matrix as a preconditioner
   */
-  template <class C, class MATRIX>
-  class JacobiPreconditioner
-    : public Preconditioner<C>
+  template <class MATRIX, class VECTOR>
+  class IdentityPreconditioner
+    : public Preconditioner<VECTOR>
   {
   public:
     /*!
       type of indices and size type (cf. STL containers)
     */
-    typedef typename Vector<C>::size_type size_type;
+    typedef typename VECTOR::size_type size_type;
+
+    /*!
+      default constructor, takes the matrix A as input parameter
+    */
+    IdentityPreconditioner(const MATRIX& A);
+
+    /*!
+      row dimension
+    */
+    const size_type row_dimension() const { return A.row_dimension(); }
+
+    /*!
+      apply P, i.e., reverse the preconditioning
+    */
+    void apply(const VECTOR& x, VECTOR& Px) const;
+
+    /*!
+      apply P^{-1}, i.e., perform the preconditioning
+    */
+    void apply_preconditioner(const VECTOR& Px, VECTOR& x) const;
+
+  protected:
+    /*!
+      pointer to the matrix class under consideration
+    */
+    const MATRIX& A;
+  };
+
+  /*!
+    As a nontrivial example class, provide the Jacobi preconditioner, i.e., P=diag(A).
+  */
+  template <class MATRIX, class VECTOR>
+  class JacobiPreconditioner
+    : public Preconditioner<VECTOR>
+  {
+  public:
+    /*!
+      type of indices and size type (cf. STL containers)
+    */
+    typedef typename VECTOR::size_type size_type;
 
     /*!
       default constructor, takes the matrix A as input parameter
@@ -91,12 +131,12 @@ namespace MathTL
     /*!
       apply P, i.e., reverse the preconditioning
     */
-    void apply(const Vector<C>& x, Vector<C>& Px) const;
+    void apply(const VECTOR& x, VECTOR& Px) const;
 
     /*!
       apply P^{-1}, i.e., perform the preconditioning
     */
-    void apply_preconditioner(const Vector<C>& Px, Vector<C>& x) const;
+    void apply_preconditioner(const VECTOR& Px, VECTOR& x) const;
 
   protected:
     /*!

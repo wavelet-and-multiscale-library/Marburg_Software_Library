@@ -1,5 +1,7 @@
 // implementation of iterative solvers
 
+#include <numerics/preconditioner.h>
+
 namespace MathTL
 {
   template <class VECTOR, class MATRIX>
@@ -18,9 +20,7 @@ namespace MathTL
 
 	A.apply(xk, rk);
 	rk -= b;
-	//cout << "error = " << error << endl;
 	error = l2_norm(rk);
-	cout << "error = " << error << endl;
       }
   }
 
@@ -144,37 +144,79 @@ namespace MathTL
   }
 
   template <class VECTOR, class MATRIX>
+  inline
   bool CG(const MATRIX &A, const VECTOR &b, VECTOR &xk,
 	  const double tol, const unsigned int maxiter, unsigned int& iterations)
   {
-    iterations = 0;
+    IdentityPreconditioner<MATRIX,VECTOR> I(A);
+    return PCG(A, b, I, xk, tol, maxiter, iterations);
+
+//     iterations = 0;
     
-    VECTOR gk(A.row_dimension(), false),
-      dk(A.row_dimension(), false),
-      Adk(A.row_dimension(), false);
+//     VECTOR gk(A.row_dimension(), false),
+//       dk(A.row_dimension(), false),
+//       Adk(A.row_dimension(), false);
     
-    // first residual
-    A.apply(xk, gk);
-    gk -= b; // gk = A*xk-b
+//     // first residual
+//     A.apply(xk, gk);
+//     gk -= b; // gk = A*xk-b
     
-    // first direction
-    dk = gk;
-    dk.scale(-1.0); // dk = -gk
+//     // first direction
+//     dk = gk;
+//     dk.scale(-1.0); // dk = -gk
     
-    double error = l2_norm(gk);
-    for (iterations = 1; error > tol && iterations <= maxiter; iterations++)
+//     double error = l2_norm(gk);
+//     for (iterations = 1; error > tol && iterations <= maxiter; iterations++)
+//       {
+// 	const double denom = gk * gk;
+// 	A.apply(dk, Adk);
+// 	const double alpha = denom / (dk * Adk);
+// 	xk.add(alpha, dk);
+// 	gk.add(alpha, Adk);
+// 	error = l2_norm(gk);
+// 	const double beta = (gk * gk) / denom;
+// 	dk *= beta; 
+// 	dk -= gk;
+//       }
+    
+//     return (iterations <= maxiter);
+  }
+
+  template <class VECTOR, class MATRIX, class PREC>
+  bool PCG(const MATRIX &A, const VECTOR &b, const PREC& P, VECTOR &xk,
+	   const double tol, const unsigned int maxiter, unsigned int& iterations)
+  {
+    // see: "Templates for the Solution of Linear Systems: Building Blocks for Iterative Methods"
+
+    VECTOR rk(A.row_dimension(), false),
+      zk(A.row_dimension(), false),
+      pk(A.row_dimension(), false),
+      Apk(A.row_dimension(), false);
+
+    // first (negative) residual
+    A.apply(xk, rk);
+    rk.subtract(b);
+    const double normr0 = l2_norm_sqr(rk);
+    double normrk = normr0, rhok, oldrhok;
+    for (iterations = 1; normrk/normr0 > tol*tol && iterations <= maxiter; iterations++)
       {
-	const double denom = gk * gk;
-	A.apply(dk, Adk);
-	const double alpha = denom / (dk * Adk);
-	xk.add(alpha, dk);
-	gk.add(alpha, Adk);
-	error = l2_norm(gk);
-	const double beta = (gk * gk) / denom;
-	dk *= beta; 
-	dk -= gk;
+	P.apply_preconditioner(rk, zk);
+	rhok = rk * zk;
+
+	if (iterations == 1) // TODO: shift this case upwards!
+	  pk = zk;
+	else
+	  pk.sadd(rhok/oldrhok, zk);
+
+	A.apply(pk, Apk);
+	const double alpha = rhok/(pk*Apk);
+	xk.add(-alpha,  pk);
+	rk.add(-alpha, Apk);
+	normrk = l2_norm_sqr(rk);
+
+	oldrhok = rhok;
       }
-    
+
     return (iterations <= maxiter);
   }
 }

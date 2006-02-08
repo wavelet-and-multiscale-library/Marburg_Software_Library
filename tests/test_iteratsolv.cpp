@@ -112,5 +112,17 @@ int main()
        << "  with \\|A*xk-b\\|_\\infty=" << linfty_norm(err)
        << " after " << iterations << " iterations." << endl;
 
+  xk = 0; xk(0) = 1;
+//   IdentityPreconditioner<SymmetricMatrix<double>,Vector<double> > P(A);
+  JacobiPreconditioner<SymmetricMatrix<double>,Vector<double> > P(A);
+  cout << "- PCG iteration ..." << endl;
+  PCG(A, b, P, xk, 1e-8, maxiter, iterations);
+  A.apply(xk, err);
+  err -= b;
+  cout << "  ... yields a solution xk=" << endl
+       << xk << endl
+       << "  with \\|A*xk-b\\|_\\infty=" << linfty_norm(err)
+       << " after " << iterations << " iterations." << endl;
+  
   return 0;
 }

@@ -63,6 +63,7 @@
 #include <numerics/multi_differences.h>
 #include <numerics/one_step_scheme.h>
 #include <numerics/ortho_poly.h>
+#include <numerics/preconditioner.h>
 #include <numerics/quadrature.h>
 #include <numerics/recursion.h>
 #include <numerics/rosenbrock.h>

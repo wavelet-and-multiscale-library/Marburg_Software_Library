@@ -14,7 +14,7 @@
 // 
 // VECTOR: arbitrary vector class, should implement the operators +, -, * (scalar mult.)
 // MATRIX: matrix class
-// PREC:   preconditioner, we again require APPLY(const VECTOR&, VECTOR&)
+// PREC:   preconditioner, we require apply_preconditioner(const VECTOR&, VECTOR&)
 
 namespace FLAT
 {
@@ -108,6 +108,21 @@ namespace FLAT
   template <class VECTOR, class MATRIX>
   bool CG(const MATRIX &A, const VECTOR &b, VECTOR &xk,
 	  const double tol, const unsigned int maxiter, unsigned int& iterations);
+
+  //! preconditioned conjugate gradient iteration
+  /*!
+    classical preconditioned conjugate gradient iteration
+    \param A s.p.d. matrix
+    \param b right-hand side vector
+    \param P (left, s.p.d.) preconditioner
+    \param xk starting vector and solution
+    \param tol stopping tolerance
+    \param iterations number of cg iterations
+    \return convergence within <maxiter> iterations
+  */
+  template <class VECTOR, class MATRIX, class PREC>
+  bool PCG(const MATRIX &A, const VECTOR &b, const PREC& P, VECTOR &xk,
+	   const double tol, const unsigned int maxiter, unsigned int& iterations);
 }
 
 #include <numerics/iteratsolv.cpp>

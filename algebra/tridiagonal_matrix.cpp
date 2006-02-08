@@ -1,5 +1,7 @@
 // implementation for tridiagonal_matrix.h
 
+#include <iomanip>
+
 namespace MathTL
 {
   template <class C>

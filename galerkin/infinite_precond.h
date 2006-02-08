@@ -7,8 +7,8 @@
 // | Thorsten Raasch, Manuel Werner                                     |
 // +--------------------------------------------------------------------+
 
-#ifndef _WAVELETTL_PRECOND_H
-#define _WAVELETTL_PRECOND_H
+#ifndef _WAVELETTL_INFINITE_PRECOND_H
+#define _WAVELETTL_INFINITE_PRECOND_H
 
 #include <algebra/infinite_vector.h>
 #include <algebra/infinite_matrix.h>
@@ -201,6 +201,6 @@ namespace WaveletTL
   };
 }
 
-#include <galerkin/precond.cpp>
+#include <galerkin/infinite_precond.cpp>
 
 #endif

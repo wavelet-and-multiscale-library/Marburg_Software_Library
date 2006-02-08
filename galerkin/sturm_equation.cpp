@@ -59,13 +59,6 @@ namespace WaveletTL
 //     return sqrt(a(lambda, lambda));
   }
 
-//   template <class WBASIS>
-//   double
-//   SturmEquation<WBASIS>::diag(const typename WBASIS::Index& lambda) const
-//   {
-//     return ldexp(1.0, lambda.j());
-//   }
-  
   template <class WBASIS>
   inline
   double

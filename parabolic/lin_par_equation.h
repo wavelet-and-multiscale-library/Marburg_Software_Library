@@ -15,7 +15,7 @@
 #include <utils/function.h>
 #include <galerkin/gramian.h>
 #include <galerkin/cached_problem.h>
-#include <galerkin/precond.h>
+#include <galerkin/infinite_precond.h>
 
 using MathTL::InfiniteVector;
 using MathTL::AbstractIVP;

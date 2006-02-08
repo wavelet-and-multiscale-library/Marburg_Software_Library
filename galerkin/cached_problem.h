@@ -13,17 +13,17 @@
 #include <map>
 #include <algebra/infinite_vector.h>
 #include <adaptive/compression.h>
-#include <galerkin/precond.h>
+#include <galerkin/infinite_precond.h>
 
 using MathTL::InfiniteVector;
 
 namespace WaveletTL
 {
   /*!
-    This class provides a cache layer for generic (preconditioned)
+    This class provides a cache layer for generic (preconditioned, cf. precond.h)
     infinite-dimensional matrix problems of the form
     
-      Au = D^{-1}LD^{-1}u = D^{-1}F.
+      Au = P^{-1}LQ^{-1}u = P^{-1}F.
 
     The operator equation is not assumed to be induced by a local operator,
     i.e., the cache class should also work in the case of integral operators.

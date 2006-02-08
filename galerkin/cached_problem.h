@@ -13,7 +13,7 @@
 #include <map>
 #include <algebra/infinite_vector.h>
 #include <adaptive/compression.h>
-#include <galerkin/infinite_precond.h>
+#include <galerkin/infinite_preconditioner.h>
 
 using MathTL::InfiniteVector;
 

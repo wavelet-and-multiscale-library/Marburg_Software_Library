@@ -14,7 +14,7 @@
 #include <utils/array1d.h>
 
 #include <galerkin/galerkin_utils.h>
-#include <galerkin/infinite_precond.h>
+#include <galerkin/infinite_preconditioner.h>
 
 namespace WaveletTL
 {

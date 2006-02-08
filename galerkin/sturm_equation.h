@@ -21,15 +21,16 @@ namespace WaveletTL
   /*!
     This class models the (preconditioned) infinite-dimensional matrix problem
     
-      Au = D^{-1}LD^{-1}u = D^{-1}F
+      Au = P^{-1}LQ^{-1}u = P^{-1}F
 
     when reformulating a Sturm boundary value problem on [0,1]
     
       -(py')'(t) + q(t)y(t) = g(t), 0 <= t <= 1 
       
-    with first (Dirichlet) or second (Neumann) order b.c.'s as modeled in
-    the class SimpleSturmBVP as an equivalent operator equation
-    within \ell_2 by means of a wavelet basis.
+    with first (Dirichlet) or second (Neumann) order b.c.'s
+    (as modeled in the class SimpleSturmBVP)
+    as an equivalent operator equation within \ell_2 by means of a
+    wavelet basis.
 
     The corresponding bilinear form in
 
@@ -46,6 +47,9 @@ namespace WaveletTL
     The evaluation of a(.,.) and f is possible for arguments \psi_\lambda
     which stem from a wavelet basis \Psi=\{\psi_\lambda\} of the corresponding
     function space over [0,1].
+    The preconditioners P and Q can either be fully diagonal (P=Q=D)
+    or quasi-diagonal (Cholesky decomposition of the "generator block" in L).
+
     To achieve independence from the concrete choice of \Psi, the wavelet basis
     class is given as a template parameter WBASIS and should provide a constructor of
     the form
@@ -62,8 +66,8 @@ namespace WaveletTL
   */
   template <class WBASIS>
   class SturmEquation
-    : public WaveletNEPreconditioner<typename WBASIS::Index>
-//     : public EnergyNormPreconditioner<typename WBASIS::Index>
+    : public FullyDiagonalDyadicPreconditioner<typename WBASIS::Index>
+//     : public FullyDiagonalEnergyNormPreconditioner<typename WBASIS::Index>
   {
   public:
     SturmEquation(const SimpleSturmBVP& bvp,

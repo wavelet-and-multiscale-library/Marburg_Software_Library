@@ -36,7 +36,7 @@ namespace WaveletTL
   */
   template <class ELLIPTIC_EQ>
   class LinParEqROWStageEquationHelper
-    : public WaveletNEPreconditioner<typename ELLIPTIC_EQ::Index>
+    : public FullyDiagonalDyadicPreconditioner<typename ELLIPTIC_EQ::Index>
   {
   public:
     /*!

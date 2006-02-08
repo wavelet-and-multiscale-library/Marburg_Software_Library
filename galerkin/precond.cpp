@@ -72,7 +72,7 @@ namespace WaveletTL
   template <class INDEX>
   inline
   double
-  WaveletNEPreconditioner<INDEX>::diag(const INDEX& lambda) const
+  FullyDiagonalDyadicPreconditioner<INDEX>::diag(const INDEX& lambda) const
   {
     return pow(ldexp(1.0, lambda.j()), operator_order());
   }
@@ -80,7 +80,7 @@ namespace WaveletTL
   template <class INDEX>
   inline
   double
-  EnergyNormPreconditioner<INDEX>::diag(const INDEX& lambda) const
+  FullyDiagonalEnergyNormPreconditioner<INDEX>::diag(const INDEX& lambda) const
   {
     return sqrt(a(lambda, lambda));
   };

@@ -164,7 +164,7 @@ namespace WaveletTL
     D=diag(2^{t|lambda|}), which is modeled by this class.
   */
   template <class INDEX>
-  class WaveletNEPreconditioner
+  class FullyDiagonalDyadicPreconditioner
     : public FullyDiagonalPreconditioner<INDEX>
   {
   public:
@@ -184,7 +184,7 @@ namespace WaveletTL
     energy norms d_lambda=||psi_lambda||_A=sqrt(a(psi_lambda,psi_lambda)).
   */
   template <class INDEX>
-  class EnergyNormPreconditioner
+  class FullyDiagonalEnergyNormPreconditioner
     : public FullyDiagonalPreconditioner<INDEX>
   {
   public:

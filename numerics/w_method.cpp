@@ -351,6 +351,21 @@ namespace MathTL
   
   template <class VECTOR>
   void
+  WMethod<VECTOR>::transform_coefficients(const LowerTriangularMatrix<double>& Alpha,
+					  const LowerTriangularMatrix<double>& Gamma,
+					  const Vector<double>& b,
+					  const Vector<double>& bhat,
+					  LowerTriangularMatrix<double>& A,
+					  LowerTriangularMatrix<double>& C,
+					  Vector<double>& m,
+					  Vector<double>& e,
+					  Vector<double>& alpha_vector,
+					  Vector<double>& gamma_vector)
+  {
+  }
+
+  template <class VECTOR>
+  void
   WMethod<VECTOR>::increment(const AbstractIVP<VECTOR>* ivp,
 			     const double t_m, const VECTOR& u_m,
 			     const double tau,

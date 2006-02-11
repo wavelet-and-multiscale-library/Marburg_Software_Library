@@ -206,7 +206,7 @@ int main()
 //   Dahlquist problem(5.0);
   Circle problem;
 
-#if 1
+#if 0
   cout << "- checking consistency of the builtin one-step schemes:" << endl;
 
   cout << "* testing RK12:" << endl;
@@ -707,6 +707,19 @@ int main()
   
 #endif
 
+#if 1
+  cout << "- checking the transform_coefficients() routine:" << endl;
+  LowerTriangularMatrix<double> Alpha, Gamma, A, C;
+  Vector<double> b, bhat, m, e, alpha_vector, gamma_vector;
+  unsigned int s;
+
+  cout << "* ROS2:" << endl;
+  s = 2;
+  Alpha.resize(2, 2);
+  cout << "Alpha=" << endl << Alpha;
+
+  ROWMethod<V>::transform_coefficients(Alpha, Gamma, b, bhat, A, C, m, e, alpha_vector, gamma_vector);
+#endif
 
   return 0;
 }

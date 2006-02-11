@@ -218,6 +218,21 @@ namespace MathTL
       preprocessor = pp;
     }
     
+    /*!
+      helper function to compute the data {A, C, m, e, alpha_vector, gamma_vector}
+      from the original data {Alpha, Gamma, b, bhat}
+    */
+    static void transform_coefficients(const LowerTriangularMatrix<double>& Alpha,
+				       const LowerTriangularMatrix<double>& Gamma,
+				       const Vector<double>& b,
+				       const Vector<double>& bhat,
+				       LowerTriangularMatrix<double>& A,
+				       LowerTriangularMatrix<double>& C,
+				       Vector<double>& m,
+				       Vector<double>& e,
+				       Vector<double>& alpha_vector,
+				       Vector<double>& gamma_vector);
+
   protected:
     //! A=(a_{i,j})
     LowerTriangularMatrix<double> A;

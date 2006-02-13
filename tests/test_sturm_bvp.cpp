@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <map>
 #include <time.h>
 
@@ -77,8 +78,8 @@ int main()
 
   TestProblem<1> T;
 
-  const int d  = 2;
-  const int dT = 2; // be sure to use a continuous dual here, otherwise the RHS test will fail
+  const int d  = 3;
+  const int dT = 3; // be sure to use a continuous dual here, otherwise the RHS test will fail
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
@@ -111,17 +112,18 @@ int main()
 #endif  
 
   set<Index> Lambda;
+  const int jmax = 8; // eq.basis().j0()+3;
   for (Index lambda = first_generator(&eq.basis(), eq.basis().j0());; ++lambda) {
     Lambda.insert(lambda);
-    if (lambda == last_wavelet(&eq.basis(), eq.basis().j0())) break;
+    if (lambda == last_wavelet(&eq.basis(), jmax)) break;
   }
-
-//   cout << "- set up stiffness matrix with respect to the index set Lambda=" << endl;
-//   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it)
-//     cout << *it << endl;
+  
+  //   cout << "- set up stiffness matrix with respect to the index set Lambda=" << endl;
+  //   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it)
+  //     cout << *it << endl;
 
 #if 1
-  cout << "- set up (preconditioned) stiffness matrix..." << endl;
+  cout << "- set up (preconditioned) stiffness matrix (j0=" << eq.basis().j0() << ",jmax=" << jmax << ")..." << endl;
   clock_t tstart, tend;
   double time;
   tstart = clock();
@@ -131,6 +133,13 @@ int main()
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
 //   cout << "- (preconditioned) stiffness matrix A=" << endl << A << endl;
+
+//   cout << "- writing A to the file stiffmat.m ..." << endl;
+//   std::ofstream Astream("stiffmat.m");
+//   Astream << "A=";
+//   print_matrix(A, Astream);
+//   Astream << ";" << endl;
+//   cout << "  ... done!" << endl;
 
   cout << "- set up right-hand side..." << endl;
   tstart = clock();

@@ -1,4 +1,4 @@
-// implementation for precond.h
+// implementation for infinite_preconditioner.h
 
 #include <cmath>
 

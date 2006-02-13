@@ -197,7 +197,7 @@ namespace MathTL
     A.apply(xk, rk);
     rk.subtract(b);
     const double normr0 = l2_norm_sqr(rk);
-    double normrk = normr0, rhok, oldrhok;
+    double normrk = normr0, rhok = 0, oldrhok = 0;
     for (iterations = 1; normrk/normr0 > tol*tol && iterations <= maxiter; iterations++)
       {
 	P.apply_preconditioner(rk, zk);

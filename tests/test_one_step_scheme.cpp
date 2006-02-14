@@ -711,14 +711,62 @@ int main()
   cout << "- checking the transform_coefficients() routine:" << endl;
   LowerTriangularMatrix<double> Alpha, Gamma, A, C;
   Vector<double> b, bhat, m, e, alpha_vector, gamma_vector;
+  double gamma;
   unsigned int s;
 
   cout << "* ROS2:" << endl;
   s = 2;
-  Alpha.resize(2, 2);
+  Alpha.resize(s, s);
+  Alpha.set_entry(1, 0, 1.0);
   cout << "Alpha=" << endl << Alpha;
+  Gamma.resize(s, s);
+  gamma = 1.0+M_SQRT1_2;
+  Gamma.set_entry(0, 0, gamma);
+  Gamma.set_entry(1, 0, -2*gamma);
+  Gamma.set_entry(1, 1, gamma);
+  cout << "Gamma=" << endl << Gamma;
+  b.resize(s);
+  b[0] = b[1] = 0.5;
+  cout << "b=" << b << endl;
+  bhat.resize(s);
+  bhat[0] = 1.0;
+  cout << "bhat=" << bhat << endl;
+  ROWMethod<V>::check_order_conditions(Alpha, Gamma, b, bhat);
 
-  ROWMethod<V>::transform_coefficients(Alpha, Gamma, b, bhat, A, C, m, e, alpha_vector, gamma_vector);
+  cout << "* RODAS3:" << endl;
+  s = 4;
+  Alpha.resize(s, s);
+  Alpha.set_entry(2, 0, 1.0);
+  Alpha.set_entry(3, 0, 3./4.);
+  Alpha.set_entry(3, 1, -1./4.);
+  Alpha.set_entry(3, 2, 1./2.);
+  cout << "Alpha=" << endl << Alpha;
+  Gamma.resize(s, s);
+  gamma = 0.5;
+  Gamma.set_entry(0, 0, gamma);
+  Gamma.set_entry(1, 0, 1.0);
+  Gamma.set_entry(1, 1, gamma);
+  Gamma.set_entry(2, 0, -0.25);
+  Gamma.set_entry(2, 1, -0.25);
+  Gamma.set_entry(2, 2, gamma);
+  Gamma.set_entry(3, 0, 1./12.);
+  Gamma.set_entry(3, 1, 1./12.);
+  Gamma.set_entry(3, 2, -2./3.);
+  Gamma.set_entry(3, 3, gamma);
+  cout << "Gamma=" << endl << Gamma;
+  b.resize(s);
+  b[0] = 5./6.;
+  b[1] = b[2] = -1./6.;
+  b[3] = 0.5;
+  cout << "b=" << b << endl;
+  bhat.resize(s);
+  bhat[0] = 3./4.;
+  bhat[1] = -1./4.;
+  bhat[2] = 1./2.;
+  cout << "bhat=" << bhat << endl;
+  ROWMethod<V>::check_order_conditions(Alpha, Gamma, b, bhat);
+
+//   ROWMethod<V>::transform_coefficients(Alpha, Gamma, b, bhat, A, C, m, e, alpha_vector, gamma_vector);
 #endif
 
   return 0;

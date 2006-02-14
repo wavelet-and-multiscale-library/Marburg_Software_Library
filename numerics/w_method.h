@@ -233,6 +233,15 @@ namespace MathTL
 				       Vector<double>& alpha_vector,
 				       Vector<double>& gamma_vector);
 
+    /*!
+      helper function to check the algebraic order conditions of a (RO)W-method
+    */
+    static void check_order_conditions(const LowerTriangularMatrix<double>& Alpha,
+				       const LowerTriangularMatrix<double>& Gamma,
+				       const Vector<double>& b,
+				       const Vector<double>& bhat,
+				       const bool wmethod=false);
+
   protected:
     //! A=(a_{i,j})
     LowerTriangularMatrix<double> A;

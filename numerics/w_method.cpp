@@ -1,6 +1,10 @@
 // implementation for w_method.h
 
 #include <cmath>
+#include <iostream>
+
+using std::cout;
+using std::endl;
 
 namespace MathTL
 {
@@ -362,6 +366,103 @@ namespace MathTL
 					  Vector<double>& alpha_vector,
 					  Vector<double>& gamma_vector)
   {
+    const unsigned int s = Alpha.row_dimension();
+
+    alpha_vector.resize(s, true);
+    for (unsigned int i = 0; i < s; i++) {
+      double alphai = 0;
+      for (unsigned int j = 0; j < i; j++) alphai += Alpha.get_entry(i, j);
+      alpha_vector[i] = alphai;
+    }
+
+    gamma_vector.resize(s, true);
+    for (unsigned int i = 0; i < s; i++) {
+      double gammai = 0;
+      for (unsigned int j = 0; j < i; j++) gammai += Gamma.get_entry(i, j);
+      gamma_vector[i] = gammai;
+    }
+  }
+
+  template <class VECTOR>
+  void
+  WMethod<VECTOR>::check_order_conditions(const LowerTriangularMatrix<double>& Alpha,
+					  const LowerTriangularMatrix<double>& Gamma,
+					  const Vector<double>& b,
+					  const Vector<double>& bhat,
+					  const bool wmethod)
+  {
+    cout << "* checking algebraic order conditions for a ROW method:" << endl;
+
+    const unsigned int s = Alpha.row_dimension();
+    double help, gamma = Gamma.get_entry(0,0);
+
+    LowerTriangularMatrix<double> Beta(s, s);
+    for (unsigned int i = 0; i < s; i++)
+      for (unsigned int j = 0; j < i; j++)
+	Beta.set_entry(i, j, Alpha.get_entry(i, j) + Gamma.get_entry(i, j));
+
+    Vector<double> alpha_vector(s);
+    for (unsigned int i = 0; i < s; i++) {
+      double alphai = 0;
+      for (unsigned int j = 0; j < i; j++) alphai += Alpha.get_entry(i, j);
+      alpha_vector[i] = alphai;
+    }
+    cout << "  alpha_vector=" << alpha_vector << endl;
+
+    Vector<double> gamma_vector(s);
+    for (unsigned int i = 0; i < s; i++) {
+      double gammai = 0;
+      for (unsigned int j = 0; j < i; j++) gammai += Gamma.get_entry(i, j);
+      gamma_vector[i] = gammai;
+    }
+    cout << "  gamma_vector=" << gamma_vector << endl;
+
+    Vector<double> beta_vector(alpha_vector+gamma_vector);
+    cout << "  beta_vector=" << beta_vector << endl;
+
+    cout << "  (A1)  (sum_i b_i)-1=";
+    help = 0;
+    for (unsigned int i = 0; i < s; i++) help += b[i];
+    cout << help-1 << endl;
+
+    cout << "  (A2)  (sum_i b_i beta_i)-(1/2-gamma)=";
+    help = 0;
+    for (unsigned int i = 0; i < s; i++) help += b[i] * beta_vector[i];
+    cout << help-(0.5-gamma) << endl;
+
+    cout << "  (A3a) (sum_i b_i alpha_i^2)-1/3=";
+    help = 0;
+    for (unsigned int i = 0; i < s; i++) help += b[i] * alpha_vector[i] * alpha_vector[i];
+    cout << help-1./3. << endl;
+
+    cout << "  (A3b) (sum_{i,j} b_i beta_{i,j} beta_j)-(1/6-gamma+gamma^2)=";
+    help = 0;
+    for (unsigned int i = 0; i < s; i++)
+      for (unsigned int j = 0; j < i; j++)
+	help += b[i] * Beta.get_entry(i,j) * beta_vector[j];
+    cout << help-1./6.+gamma-gamma*gamma << endl;
+
+    cout << "  (A1)  (sum_i bhat_i)-1=";
+    help = 0;
+    for (unsigned int i = 0; i < s; i++) help += bhat[i];
+    cout << help-1 << endl;
+
+    cout << "  (A2)  (sum_i bhat_i beta_i)-(0.5-gamma)=";
+    help = 0;
+    for (unsigned int i = 0; i < s; i++) help += bhat[i] * beta_vector[i];
+    cout << help-(0.5-gamma) << endl;
+
+    cout << "  (A3a) (sum_i bhat_i alpha_i^2)-1/3=";
+    help = 0;
+    for (unsigned int i = 0; i < s; i++) help += bhat[i] * alpha_vector[i] * alpha_vector[i];
+    cout << help-1./3. << endl;
+
+    cout << "  (A3b) (sum_{i,j} bhat_i beta_{i,j} beta_j)-(1/6-gamma+gamma^2)=";
+    help = 0;
+    for (unsigned int i = 0; i < s; i++)
+      for (unsigned int j = 0; j < i; j++)
+	help += bhat[i] * Beta.get_entry(i,j) * beta_vector[j];
+    cout << help-1./6.+gamma-gamma*gamma << endl;
   }
 
   template <class VECTOR>

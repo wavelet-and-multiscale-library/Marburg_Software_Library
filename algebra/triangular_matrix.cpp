@@ -189,6 +189,21 @@ namespace MathTL
   }
 
   template <class C>
+  void
+  LowerTriangularMatrix<C>::inverse(LowerTriangularMatrix<C>& MInv) const
+  {
+    assert(rowdim_ == coldim_);
+    MInv.resize(rowdim_, coldim_);
+    for (typename LowerTriangularMatrix<C>::size_type i(0); i < rowdim_; i++) {
+      for (typename LowerTriangularMatrix<C>::size_type j(0); j < i; j++) {
+
+	// TODO: DO SOMETHING HERE!!!
+
+      }
+    }
+  }
+  
+  template <class C>
   template <class VECTOR>
   void LowerTriangularMatrix<C>::apply(const VECTOR& x, VECTOR& Mx) const
   {

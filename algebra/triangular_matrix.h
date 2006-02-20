@@ -131,6 +131,11 @@ namespace MathTL
     LowerTriangularMatrix<C>& operator = (const LowerTriangularMatrix<C>& M);
 
     /*!
+      compute the inverse of *this (if possible), M will be properly scaled
+    */
+    void inverse(LowerTriangularMatrix<C>& MInv) const;
+    
+    /*!
       matrix-vector multiplication Mx = (*this) * x;
       we assume that the vector Mx has the correct size and
       is not identical to x

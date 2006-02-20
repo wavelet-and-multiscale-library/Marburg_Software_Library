@@ -142,6 +142,13 @@ int main()
   L.apply_transposed(x,y);
   cout << y << endl;
 
+  cout << "- a lower triangular matrix, again:" << endl;
+  cout << Lbyrow;
+  LowerTriangularMatrix<double> Linv;
+  Lbyrow.inverse(Linv);
+  cout << "- the inverse of that matrix:" << endl;
+  cout << Linv;
+
   cout << "- an upper triangular default matrix:" << endl;
   UpperTriangularMatrix<double> Rdefault;
   cout << Rdefault;

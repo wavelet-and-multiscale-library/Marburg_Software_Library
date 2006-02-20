@@ -381,6 +381,8 @@ namespace MathTL
       for (unsigned int j = 0; j < i; j++) gammai += Gamma.get_entry(i, j);
       gamma_vector[i] = gammai;
     }
+
+    
   }
 
   template <class VECTOR>

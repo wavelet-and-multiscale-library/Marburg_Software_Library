@@ -23,8 +23,54 @@ namespace MathTL
 			   const WMethodStageEquationHelper<VECTOR>* s)
     : stage_equation_helper(s), preprocessor(0)
   {
+    LowerTriangularMatrix<double> Alpha, Gamma;
+    Vector<double> b, bhat;
+    double gamma;
+
     switch(method)
       {
+      case ROS2:
+	Alpha.resize(2,2);
+	Alpha.set_entry(1, 0, 1.0);
+
+	Gamma.resize(2,2);
+	gamma = 1.0 + M_SQRT1_2;
+	Gamma.set_entry(0, 0, gamma);
+	Gamma.set_entry(1, 0, -2*gamma);
+	Gamma.set_entry(1, 1, gamma);
+	
+	b.resize(2);
+	b[0] = b[1] = 0.5;
+
+	bhat.resize(2);
+	bhat[0] = 1.0;
+
+	transform_coefficients(Alpha, Gamma, b, bhat,
+			       A, C, m, e, alpha_vector, gamma_vector);
+
+//   	A.resize(2,2);
+//   	A(1,0) = 2 / (2 + M_SQRT2);
+	
+//  	C.resize(2,2);
+//  	C(0,0) = C(1,1) = 1 + M_SQRT1_2; // = gamma
+//  	C(1,0) = -4 / (2 + M_SQRT2);
+	
+//  	gamma_vector.resize(2);
+//  	gamma_vector[0] = 1 + M_SQRT1_2;
+//  	gamma_vector[1] = -1 - M_SQRT1_2;
+
+//  	alpha_vector.resize(2);
+//  	alpha_vector[1] = 1.0;
+
+//    	m.resize(2);
+//    	m[0] = 3 / (2 + M_SQRT2);
+//   	m[1] = 1 / (2 + M_SQRT2);
+
+//   	e.resize(2);
+//  	e[0] = e[1] = 1 / (2 + M_SQRT2);
+
+ 	p = 2;
+ 	break;
       case GRK4T:
 	A.resize(4,4); // corresponds to the [HW] notation
 	A(1,0) = 0.2000000000000000e+01;
@@ -92,30 +138,6 @@ namespace MathTL
 	e[3] = 1.0;
 
  	p = 3;
- 	break;
-      case ROS2:
-	A.resize(2,2);
-	A(1,0) = 2 / (2 + M_SQRT2);
-	
-	C.resize(2,2);
-	C(0,0) = C(1,1) = 1 + M_SQRT1_2; // = gamma
-	C(1,0) = -4 / (2 + M_SQRT2);
-	
-	gamma_vector.resize(2);
-	gamma_vector[0] = 1 + M_SQRT1_2;
-	gamma_vector[1] = -1 - M_SQRT1_2;
-
-	alpha_vector.resize(2);
-	alpha_vector[1] = 1.0;
-
- 	m.resize(2);
- 	m[0] = 3 / (2 + M_SQRT2);
-	m[1] = 1 / (2 + M_SQRT2);
-
- 	e.resize(2);
-	e[0] = e[1] = 1 / (2 + M_SQRT2);
-
- 	p = 2;
  	break;
       case ROS3:
 	A.resize(3,3);
@@ -383,7 +405,27 @@ namespace MathTL
     }
 
     Gamma.inverse(C);
+    A.resize(s, s);
+    A = Alpha * C; // A = Alpha * Gamma^{-1}
+
+    m.resize(s, false);
+    C.apply_transposed(b, m); // m^T = b^T * Gamma^{-1}
+
+    e.resize(s, true);
+    C.apply_transposed(bhat, e);
+    e.sadd(-1.0, m); // e = m-mhat
+
     C.scale(-1.0);
+    for (unsigned int i = 0; i < s; i++)
+      C.set_entry(i, i, Gamma.get_entry(0,0)); // gamma
+
+    cout << "* coefficients after transform_coefficients():" << endl;
+    cout << "alpha_vector=" << alpha_vector << endl;
+    cout << "gamma_vector=" << gamma_vector << endl;
+    cout << "A=" << endl << A;
+    cout << "C=" << endl << C;
+    cout << "m=" << m << endl;
+    cout << "e=" << e << endl;
   }
 
   template <class VECTOR>

@@ -206,7 +206,7 @@ int main()
 //   Dahlquist problem(5.0);
   Circle problem;
 
-#if 0
+#if 1
   cout << "- checking consistency of the builtin one-step schemes:" << endl;
 
   cout << "* testing RK12:" << endl;
@@ -731,12 +731,8 @@ int main()
   bhat.resize(s);
   bhat[0] = 1.0;
   cout << "bhat=" << bhat << endl;
-//   ROWMethod<V>::check_order_conditions(Alpha, Gamma, b, bhat);
+  ROWMethod<V>::check_order_conditions(Alpha, Gamma, b, bhat);
   ROWMethod<V>::transform_coefficients(Alpha, Gamma, b, bhat, A, C, m, e, alpha_vector, gamma_vector);
-
-  cout << "alpha_vector=" << alpha_vector << endl;
-  cout << "gamma_vector=" << gamma_vector << endl;
-  cout << "C=" << endl << C;
 
   cout << "* RODAS3:" << endl;
   s = 4;
@@ -770,11 +766,9 @@ int main()
   bhat[2] = 1./2.;
   cout << "bhat=" << bhat << endl;
 
-//   ROWMethod<V>::check_order_conditions(Alpha, Gamma, b, bhat);
+  ROWMethod<V>::check_order_conditions(Alpha, Gamma, b, bhat);
   ROWMethod<V>::transform_coefficients(Alpha, Gamma, b, bhat, A, C, m, e, alpha_vector, gamma_vector);
 
-  cout << "alpha_vector=" << alpha_vector << endl;
-  cout << "gamma_vector=" << gamma_vector << endl;
 #endif
 
   return 0;

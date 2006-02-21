@@ -267,6 +267,26 @@ namespace MathTL
   }
 
   template <class C>
+  LowerTriangularMatrix<C> operator * (const LowerTriangularMatrix<C>& M,
+				       const LowerTriangularMatrix<C>& N)
+  {
+    assert(M.column_dimension() == N.row_dimension());
+    typedef typename LowerTriangularMatrix<C>::size_type size_type;
+    
+    LowerTriangularMatrix<C> R(M.row_dimension(), N.column_dimension());
+    for (size_type i(0); i < M.row_dimension(); i++)
+      for (size_type j(0); j <= i && j < N.column_dimension(); j++)
+	{
+	  double help(0);
+	  for (size_type k(j); k <= i && k < N.row_dimension(); k++)
+	    help += M.get_entry(i, k) * N.get_entry(k, j);
+	  R.set_entry(i, j, help);
+	}
+
+    return R;
+  }
+
+  template <class C>
   inline
   std::ostream& operator << (std::ostream& os, const LowerTriangularMatrix<C>& M)
   {

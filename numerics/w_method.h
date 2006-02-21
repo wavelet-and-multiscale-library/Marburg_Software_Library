@@ -220,7 +220,8 @@ namespace MathTL
     
     /*!
       helper function to compute the data {A, C, m, e, alpha_vector, gamma_vector}
-      from the original data {Alpha, Gamma, b, bhat}
+      from the original data {Alpha, Gamma, b, bhat},
+      cf. Hairer/Wanner II.
     */
     static void transform_coefficients(const LowerTriangularMatrix<double>& Alpha,
 				       const LowerTriangularMatrix<double>& Gamma,

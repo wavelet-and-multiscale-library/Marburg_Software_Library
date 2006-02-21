@@ -198,6 +198,15 @@ namespace MathTL
   };
 
   /*!
+    matrix-matrix multiplication M*N
+    (note that also rectangular lower triangular matrices are closed
+    under matrix multiplication)
+  */
+  template <class C>
+  LowerTriangularMatrix<C> operator * (const LowerTriangularMatrix<C>& M,
+				       const LowerTriangularMatrix<C>& N);
+  
+  /*!
     Matlab-style stream output for lower triangular matrices
   */
   template <class C>

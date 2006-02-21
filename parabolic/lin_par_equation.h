@@ -12,6 +12,7 @@
 
 #include <algebra/infinite_vector.h>
 #include <numerics/ivp.h>
+#include <numerics/w_method.h>
 #include <utils/function.h>
 #include <galerkin/gramian.h>
 #include <galerkin/cached_problem.h>
@@ -20,6 +21,7 @@
 using MathTL::InfiniteVector;
 using MathTL::AbstractIVP;
 using MathTL::Function;
+using MathTL::WMethodPreprocessRHSHelper;
 
 namespace WaveletTL
 {
@@ -220,9 +222,9 @@ namespace WaveletTL
       and a time-dependent driving term f
     */
     LinearParabolicEquation(const ELLIPTIC_EQ* elliptic,
-			    const InfiniteVector<double,Index>& u0,
-			    Function<ELLIPTIC_EQ::space_dimension>* f = 0,
-			    const int jmax = 10);
+ 			    const InfiniteVector<double,Index>& u0,
+ 			    Function<ELLIPTIC_EQ::space_dimension>* f = 0,
+ 			    const int jmax = 10);
     
     /*!
       evaluate the right-hand side F(t,v)=Av+f(t) up to a prescribed tolerance

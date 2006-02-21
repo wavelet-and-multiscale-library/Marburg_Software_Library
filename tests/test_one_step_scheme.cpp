@@ -736,6 +736,7 @@ int main()
 
   cout << "alpha_vector=" << alpha_vector << endl;
   cout << "gamma_vector=" << gamma_vector << endl;
+  cout << "C=" << endl << C;
 
   cout << "* RODAS3:" << endl;
   s = 4;

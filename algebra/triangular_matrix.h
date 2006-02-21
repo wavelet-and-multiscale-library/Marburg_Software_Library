@@ -131,6 +131,11 @@ namespace MathTL
     LowerTriangularMatrix<C>& operator = (const LowerTriangularMatrix<C>& M);
 
     /*!
+      in place scaling *this *= s
+    */
+    void scale(const C s);
+
+    /*!
       compute the inverse of *this (if possible), M will be properly scaled
     */
     void inverse(LowerTriangularMatrix<C>& MInv) const;

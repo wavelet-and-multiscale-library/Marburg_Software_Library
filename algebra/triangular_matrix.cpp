@@ -189,6 +189,14 @@ namespace MathTL
   }
 
   template <class C>
+  inline
+  void
+  LowerTriangularMatrix<C>::scale(const C s)
+  {
+    entries_.scale(s);
+  }
+  
+  template <class C>
   void
   LowerTriangularMatrix<C>::inverse(LowerTriangularMatrix<C>& MInv) const
   {

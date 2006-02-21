@@ -382,7 +382,8 @@ namespace MathTL
       gamma_vector[i] = gammai;
     }
 
-    
+    Gamma.inverse(C);
+    C.scale(-1.0);
   }
 
   template <class VECTOR>

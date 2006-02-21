@@ -53,6 +53,9 @@ int main()
   N = O;
   cout << "- N=O:" << endl << N;
 
+  O.scale(-2.0);
+  cout << "- O scaled by -2.0:" << endl << O;
+
   Matrix<double> Q;
   O.mirror(Q);
   cout << "- O mirrored:" << endl << Q;

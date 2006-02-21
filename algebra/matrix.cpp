@@ -213,6 +213,13 @@ namespace MathTL
   }
 
   template <class C>
+  inline
+  void Matrix<C>::scale(const C s)
+  {
+    entries_.scale(s);
+  }
+
+  template <class C>
   template <class VECTOR>
   void Matrix<C>::apply(const VECTOR& x, VECTOR& Mx) const
   {

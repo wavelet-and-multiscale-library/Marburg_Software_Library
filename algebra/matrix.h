@@ -156,6 +156,11 @@ namespace MathTL
     void mirror (Matrix<C>& M) const;
     
     /*!
+      in place scaling *this *= s
+    */
+    void scale(const C s);
+
+    /*!
       matrix-vector multiplication Mx = (*this) * x;
       we assume that the vector Mx has the correct size and
       is not identical to x

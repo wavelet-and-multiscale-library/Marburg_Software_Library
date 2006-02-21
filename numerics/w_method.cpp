@@ -85,6 +85,32 @@ namespace MathTL
 	
  	p = 3;
  	break;
+      case ROS3P:
+	Alpha.resize(3,3);
+	Alpha.set_entry(1, 0, 1.);
+	Alpha.set_entry(2, 0, 1.);
+
+	Gamma.resize(3,3);
+	gamma = 0.5 + sqrt(3.)/6.;
+	Gamma.set_entry(0, 0, gamma);
+	Gamma.set_entry(1, 0, -1.);
+	Gamma.set_entry(1, 1, gamma);
+	Gamma.set_entry(2, 0, -gamma);
+	Gamma.set_entry(2, 1, 0.5-2*gamma);
+	Gamma.set_entry(2, 2, gamma);
+
+	b.resize(3);
+	b[0] = 2./3.;
+	b[2] = 1./3.;
+
+	bhat.resize(3);
+	bhat[0] = bhat[1] = bhat[2] = 1./3.;
+
+	transform_coefficients(Alpha, Gamma, b, bhat,
+			       A, C, m, e, alpha_vector, gamma_vector);
+
+	p = 3;
+	break;
       case GRK4T:
 	A.resize(4,4); // corresponds to the [HW] notation
 	A(1,0) = 0.2000000000000000e+01;
@@ -185,36 +211,6 @@ namespace MathTL
 
  	p = 3;
  	break;
-      case ROS3P:
-	A.resize(3, 3);
-	A(1,0) = A(2,0) = 1.267949192431123;
-
-	C.resize(3, 3);
-	C(0,0) = C(1,1) = C(2,2) = 0.5 + sqrt(3.0)/6.0; // = gamma
-	C(1,0) = -1.607695154586736;
-	C(2,0) = -3.464101615137755;
-	C(2,1) = -1.732050807568877;
-
-	gamma_vector.resize(3);
-	gamma_vector[0] = 0.5 + sqrt(3.0)/6.0;
-	gamma_vector[1] = -0.2113248654051871;
-	gamma_vector[2] = -1.077350269189626;
-
-	alpha_vector.resize(3);
-	alpha_vector[1] = alpha_vector[2] = 1.0;
-
-	m.resize(3);
- 	m[0] = 2.0;
- 	m[1] = 0.5773502691896258;
- 	m[2] = 0.4226497308103742;
-
-	e.resize(3);
- 	e[0] = m[0] - 2.22649730810374243; // value from KARDOS (paper: 2.113248654051871)
- 	e[1] = m[1] - 1.42264973081037426; // value from KARDOS (paper: 1.0              )
- 	e[2] = m[2] - 0.4226497308103742;
-
-	p = 3;
-	break;
       case ROS3Pw:
 	A.resize(3, 3);
 	A(1,0) = 2.0;

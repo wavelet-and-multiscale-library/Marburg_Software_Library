@@ -349,6 +349,29 @@ int main()
     olderr = err;
   }
 
+  cout << "* testing RODAS3:" << endl;
+  ROWMethod<V> rodas3(WMethod<V>::RODAS3);
+  scheme = &rodas3;
+  olderr = 0;
+  for (int expo = 0; expo <= 10; expo++) {
+    temp = problem.u0;
+    int N = 1<<expo;
+    double h = 1.0/N;
+    double err_est = 0;
+    for (int i = 1; i <= N; i++) {
+      scheme->increment(&problem, i*h, temp, h, result, error_estimate);
+      err_est = std::max(err_est, l2_norm(error_estimate));
+      temp = result;
+    }
+    problem.exact_solution(1.0, exact);
+    err = linfty_norm(result - exact);
+    if (expo > 0) {
+      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
+	   << ", max. of local error estimate " << err_est << endl;
+    }
+    olderr = err;
+  }
+
   cout << "* testing ROWDA3:" << endl;
   ROWMethod<V> rowda3(WMethod<V>::ROWDA3);
   scheme = &rowda3;
@@ -375,29 +398,6 @@ int main()
   cout << "* testing ROS3:" << endl;
   ROWMethod<V> ros3(WMethod<V>::ROS3);
   scheme = &ros3;
-  olderr = 0;
-  for (int expo = 0; expo <= 10; expo++) {
-    temp = problem.u0;
-    int N = 1<<expo;
-    double h = 1.0/N;
-    double err_est = 0;
-    for (int i = 1; i <= N; i++) {
-      scheme->increment(&problem, i*h, temp, h, result, error_estimate);
-      err_est = std::max(err_est, l2_norm(error_estimate));
-      temp = result;
-    }
-    problem.exact_solution(1.0, exact);
-    err = linfty_norm(result - exact);
-    if (expo > 0) {
-      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
-	   << ", max. of local error estimate " << err_est << endl;
-    }
-    olderr = err;
-  }
-
-  cout << "* testing RODAS3:" << endl;
-  ROWMethod<V> rodas3(WMethod<V>::RODAS3);
-  scheme = &rodas3;
   olderr = 0;
   for (int expo = 0; expo <= 10; expo++) {
     temp = problem.u0;

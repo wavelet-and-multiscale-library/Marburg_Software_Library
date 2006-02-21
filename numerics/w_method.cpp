@@ -47,29 +47,43 @@ namespace MathTL
 
 	transform_coefficients(Alpha, Gamma, b, bhat,
 			       A, C, m, e, alpha_vector, gamma_vector);
-
-//   	A.resize(2,2);
-//   	A(1,0) = 2 / (2 + M_SQRT2);
 	
-//  	C.resize(2,2);
-//  	C(0,0) = C(1,1) = 1 + M_SQRT1_2; // = gamma
-//  	C(1,0) = -4 / (2 + M_SQRT2);
-	
-//  	gamma_vector.resize(2);
-//  	gamma_vector[0] = 1 + M_SQRT1_2;
-//  	gamma_vector[1] = -1 - M_SQRT1_2;
-
-//  	alpha_vector.resize(2);
-//  	alpha_vector[1] = 1.0;
-
-//    	m.resize(2);
-//    	m[0] = 3 / (2 + M_SQRT2);
-//   	m[1] = 1 / (2 + M_SQRT2);
-
-//   	e.resize(2);
-//  	e[0] = e[1] = 1 / (2 + M_SQRT2);
-
  	p = 2;
+ 	break;
+      case RODAS3:
+	Alpha.resize(4,4);
+	Alpha.set_entry(2, 0,  1.);
+	Alpha.set_entry(3, 0,  3./4.);
+	Alpha.set_entry(3, 1, -1./4.);
+	Alpha.set_entry(3, 2,  1./2.);
+
+	Gamma.resize(4,4);
+	gamma = 0.5;
+	Gamma.set_entry(0, 0, gamma);
+	Gamma.set_entry(1, 0,  1.);
+	Gamma.set_entry(1, 1, gamma);
+	Gamma.set_entry(2, 0, -1./4.);
+	Gamma.set_entry(2, 1, -1./4.);
+	Gamma.set_entry(2, 2, gamma);
+	Gamma.set_entry(3, 0,  1./12.);
+	Gamma.set_entry(3, 1,  1./12.);
+	Gamma.set_entry(3, 2, -2./3.);
+	Gamma.set_entry(3, 3, gamma);
+
+	b.resize(4);
+	b[0] = 5./6.;
+	b[1] = b[2] = -1./6.;
+	b[3] = 1./2.;
+	
+	bhat.resize(4);
+	bhat[0] =  3./4.;
+	bhat[1] = -1./4.;
+	bhat[2] = 1./2.;
+
+	transform_coefficients(Alpha, Gamma, b, bhat,
+			       A, C, m, e, alpha_vector, gamma_vector);
+	
+ 	p = 3;
  	break;
       case GRK4T:
 	A.resize(4,4); // corresponds to the [HW] notation
@@ -111,34 +125,6 @@ namespace MathTL
 
 	p = 4;
 	break;
-      case RODAS3:
-	A.resize(4,4);
-	A(2,0) = A(3,0) = 2.0;
-	A(3,2) = 1.0;
-
-	C.resize(4,4);
-	C(0,0) = C(1,1) = C(2,2) = C(3,3) = 0.5; // = gamma
-	C(1,0) = 4.0;
-	C(2,0) = C(3,0) = 1.0;
-	C(2,1) = C(3,1) = -1.0;
-	C(3,2) = -8.0/3.0;
-	
-	gamma_vector.resize(4);
-	gamma_vector[0] = 0.5;
-	gamma_vector[1] = 1.5;
-
-	alpha_vector.resize(4);
-	alpha_vector[2] = alpha_vector[3] = 1.0;
-
- 	m.resize(4);
-	m[0] = 2.;
-	m[2] = m[3] = 1.0;
-
- 	e.resize(4);
-	e[3] = 1.0;
-
- 	p = 3;
- 	break;
       case ROS3:
 	A.resize(3,3);
 	A(1,0) = A(2,0) = 1.0;
@@ -419,13 +405,13 @@ namespace MathTL
     for (unsigned int i = 0; i < s; i++)
       C.set_entry(i, i, Gamma.get_entry(0,0)); // gamma
 
-    cout << "* coefficients after transform_coefficients():" << endl;
-    cout << "alpha_vector=" << alpha_vector << endl;
-    cout << "gamma_vector=" << gamma_vector << endl;
-    cout << "A=" << endl << A;
-    cout << "C=" << endl << C;
-    cout << "m=" << m << endl;
-    cout << "e=" << e << endl;
+//     cout << "* coefficients after transform_coefficients():" << endl;
+//     cout << "alpha_vector=" << alpha_vector << endl;
+//     cout << "gamma_vector=" << gamma_vector << endl;
+//     cout << "A=" << endl << A;
+//     cout << "C=" << endl << C;
+//     cout << "m=" << m << endl;
+//     cout << "e=" << e << endl;
   }
 
   template <class VECTOR>

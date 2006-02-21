@@ -441,9 +441,9 @@ int main()
     olderr = err;
   }
 
-  cout << "* testing GRK4T:" << endl;
-  ROWMethod<V> grk4t(WMethod<V>::GRK4T);
-  scheme = &grk4t;
+  cout << "* testing ROS3Pw:" << endl;
+  ROWMethod<V> ros3pw(WMethod<V>::ROS3Pw);
+  scheme = &ros3pw;
   olderr = 0;
   for (int expo = 0; expo <= 10; expo++) {
     temp = problem.u0;
@@ -464,9 +464,9 @@ int main()
     olderr = err;
   }
 
-  cout << "* testing ROS3Pw:" << endl;
-  ROWMethod<V> ros3pw(WMethod<V>::ROS3Pw);
-  scheme = &ros3pw;
+  cout << "* testing GRK4T:" << endl;
+  ROWMethod<V> grk4t(WMethod<V>::GRK4T);
+  scheme = &grk4t;
   olderr = 0;
   for (int expo = 0; expo <= 10; expo++) {
     temp = problem.u0;

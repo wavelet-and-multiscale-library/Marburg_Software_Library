@@ -194,11 +194,13 @@ namespace MathTL
   {
     assert(rowdim_ == coldim_);
     MInv.resize(rowdim_, coldim_);
-    for (typename LowerTriangularMatrix<C>::size_type i(0); i < rowdim_; i++) {
-      for (typename LowerTriangularMatrix<C>::size_type j(0); j < i; j++) {
-
-	// TODO: DO SOMETHING HERE!!!
-
+    for (typename LowerTriangularMatrix<C>::size_type j(0); j < rowdim_; j++) {
+      // j-th column of M^{-1} solves Mx=e_j
+      for (typename LowerTriangularMatrix<C>::size_type i(j); i < rowdim_; i++) {
+	double help = i == j ? 1.0 : 0.0;
+	for (typename LowerTriangularMatrix<C>::size_type k(0); k < i; k++)
+	  help -= get_entry(i, k) * MInv.get_entry(k, j);
+	MInv.set_entry(i, j, help/get_entry(i, i));
       }
     }
   }

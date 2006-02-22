@@ -541,9 +541,55 @@ int main()
     olderr = err;
   }
 
+  cout << "* testing ROSI2PW:" << endl;
+  ROWMethod<V> rosi2pw(WMethod<V>::ROSI2PW);
+  scheme = &rosi2pw;
+  olderr = 0;
+  for (int expo = 0; expo <= 10; expo++) {
+    temp = problem.u0;
+    int N = 1<<expo;
+    double h = 1.0/N;
+    double err_est = 0;
+    for (int i = 1; i <= N; i++) {
+      scheme->increment(&problem, i*h, temp, h, result, error_estimate);
+      err_est = std::max(err_est, l2_norm(error_estimate));
+      temp = result;
+    }
+    problem.exact_solution(1.0, exact);
+    err = linfty_norm(result - exact);
+    if (expo > 0) {
+      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
+	   << ", max. of local error estimate " << err_est << endl;
+    }
+    olderr = err;
+  }
+
   cout << "* testing GRK4T:" << endl;
   ROWMethod<V> grk4t(WMethod<V>::GRK4T);
   scheme = &grk4t;
+  olderr = 0;
+  for (int expo = 0; expo <= 10; expo++) {
+    temp = problem.u0;
+    int N = 1<<expo;
+    double h = 1.0/N;
+    double err_est = 0;
+    for (int i = 1; i <= N; i++) {
+      scheme->increment(&problem, i*h, temp, h, result, error_estimate);
+      err_est = std::max(err_est, l2_norm(error_estimate));
+      temp = result;
+    }
+    problem.exact_solution(1.0, exact);
+    err = linfty_norm(result - exact);
+    if (expo > 0) {
+      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
+	   << ", max. of local error estimate " << err_est << endl;
+    }
+    olderr = err;
+  }
+
+  cout << "* testing RODAS:" << endl;
+  ROWMethod<V> rodas(WMethod<V>::RODAS);
+  scheme = &rodas;
   olderr = 0;
   for (int expo = 0; expo <= 10; expo++) {
     temp = problem.u0;

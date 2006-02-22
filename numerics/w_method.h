@@ -165,8 +165,12 @@ namespace MathTL
       [ROS3Pw]  Rang, Angermann:
                 Creating new Rosenbrock methods with Maple,
                 Mathematik-Bericht 2003/5, Institut fuer Mathematik, TU Clausthal
-      [ROSI2P2] Rang, Angermann:
+      [ROSI2P2],
+      [ROSI2PW] Rang, Angermann:
                 New Rosenbrock methods of order 3 for PDAEs of index 2
+      [RODAS]   Hairer, Wanner:
+                Solving Ordinairy Differential Equations II
+		Springer Series in Computational Mathematics, Springer 1991
       [RODASP]  Steinebach:
                 Order-reduction of ROW-methods for DAEs and method of lines applications
 	        Technical report 1741, TH Darmstadt, 1995
@@ -180,6 +184,8 @@ namespace MathTL
       ROS3P,     // s=3, p=3, index 1, nonlinear PDEs
       ROS3Pw,    // s=3, p=3, index 1, PDEs
       ROSI2P2,   // s=4, p=3, index 2, L-stable, PDEs, stiffly accurate
+      ROSI2PW,   // s=4, p=3, index 2, L-stable, PDEs, stiffly accurate, W-method
+      RODAS,     // s=6, p=4
       RODASP     // s=6, p=4, index 1, PDEs, L-stable, stiffly accurate
     };
 

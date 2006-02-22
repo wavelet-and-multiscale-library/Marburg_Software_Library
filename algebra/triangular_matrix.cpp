@@ -405,6 +405,13 @@ namespace MathTL
   }
 
   template <class C>
+  void
+  UpperTriangularMatrix<C>::inverse(UpperTriangularMatrix<C>& MInv) const
+  {
+    LowerTriangularMatrix<C>::inverse(MInv);
+  }
+
+  template <class C>
   template <class VECTOR>
   void UpperTriangularMatrix<C>::apply(const VECTOR& x, VECTOR& Mx) const
   {

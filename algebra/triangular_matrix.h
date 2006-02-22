@@ -312,6 +312,11 @@ namespace MathTL
     UpperTriangularMatrix<C>& operator = (const UpperTriangularMatrix<C>& M);
 
     /*!
+      compute the inverse of *this (if possible), M will be properly scaled
+    */
+    void inverse(UpperTriangularMatrix<C>& MInv) const;
+    
+    /*!
       matrix-vector multiplication Mx = (*this) * x;
       we assume that the vector Mx has the correct size and
       is not identical to x
@@ -332,8 +337,8 @@ namespace MathTL
       (cf. deal.II)
     */
     void print(std::ostream& os,
-	       const unsigned int tabwidth = 5,
-	       const unsigned int precision = 2) const;
+	       const unsigned int tabwidth = 10,
+	       const unsigned int precision = 3) const;
   };
 
   /*!

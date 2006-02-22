@@ -168,6 +168,13 @@ int main()
   UpperTriangularMatrix<double> Rbycol(4,4,"1 2 5 3 6 8 4 7 9 10", false);
   cout << Rbycol;
 
+  cout << "- an upper triangular matrix, again:" << endl;
+  cout << Rbyrow;
+  UpperTriangularMatrix<double> Rinv;
+  Rbyrow.inverse(Rinv);
+  cout << "- the inverse of that matrix:" << endl;
+  cout << Rinv;
+  
   cout << "- testing apply(), using the vector ";
   R = Rbyrow;
   x.resize(R.column_dimension());

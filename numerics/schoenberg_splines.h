@@ -84,7 +84,6 @@ namespace MathTL
   {
     return 0.;
   }
-
 }
 
 #endif

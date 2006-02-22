@@ -60,9 +60,10 @@ public:
   }
 
   // exact solution
-  double exact_solution(const double t) const
+  void exact_solution(const double t, Vector<double>& y) const
   {
-    return exp(lambda_*t);
+    y.resize(1);
+    y[0] = exp(lambda_*t);
   }
 
 private:
@@ -203,7 +204,7 @@ int main()
   
   typedef Vector<double> V;
 
-//   Dahlquist problem(5.0);
+//   Dahlquist problem(-1.0);
   Circle problem;
 
 #if 1
@@ -212,8 +213,10 @@ int main()
   cout << "* testing RK12:" << endl;
   ExplicitRungeKuttaScheme<V> rk12(ExplicitRungeKuttaScheme<V>::RK12);
   OneStepScheme<V>* scheme = &rk12;
-//   Vector<double> temp(1), result(1), error_estimate(1);
-  Vector<double> temp(2), result(2), error_estimate(2), exact(2);
+  
+  unsigned int dimension = problem.u0.size();
+
+  Vector<double> temp(dimension), result(dimension), error_estimate(dimension), exact(dimension);
   double err, olderr = 0;
   for (int expo = 0; expo <= 10; expo++) {
     temp = problem.u0;
@@ -464,9 +467,9 @@ int main()
     olderr = err;
   }
 
-  cout << "* testing GRK4T:" << endl;
-  ROWMethod<V> grk4t(WMethod<V>::GRK4T);
-  scheme = &grk4t;
+  cout << "* testing ROSI2P2:" << endl;
+  ROWMethod<V> rosi2p2(WMethod<V>::ROSI2P2);
+  scheme = &rosi2p2;
   olderr = 0;
   for (int expo = 0; expo <= 10; expo++) {
     temp = problem.u0;
@@ -487,9 +490,9 @@ int main()
     olderr = err;
   }
 
-  cout << "* testing ROSI2P2:" << endl;
-  ROWMethod<V> rosi2p2(WMethod<V>::ROSI2P2);
-  scheme = &rosi2p2;
+  cout << "* testing GRK4T:" << endl;
+  ROWMethod<V> grk4t(WMethod<V>::GRK4T);
+  scheme = &grk4t;
   olderr = 0;
   for (int expo = 0; expo <= 10; expo++) {
     temp = problem.u0;

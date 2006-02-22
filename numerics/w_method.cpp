@@ -117,7 +117,7 @@ namespace MathTL
 	Alpha.set_entry(2, 0, 0.7);
 	
 	Gamma.resize(3,3);
-	gamma = 0.435866521508459; // gamma^3-3*gamma^2+1.5*gamma-1/6=0
+	gamma = 0.43586652150845899941601945119356; // gamma^3-3*gamma^2+1.5*gamma-1/6=0
 	Gamma.set_entry(0, 0, gamma);
 	Gamma.set_entry(1, 0, 0.1685887625570998);
 	Gamma.set_entry(1, 1, gamma);
@@ -140,7 +140,7 @@ namespace MathTL
  	p = 3;
  	break;
       case ROS3:
-	gamma = 0.43586652150845899941601945119356;
+	gamma = 0.43586652150845899941601945119356; // gamma^3-3*gamma^2+1.5*gamma-1/6=0
 
 	Alpha.resize(3,3);
 	Alpha.set_entry(1, 0, gamma);
@@ -198,6 +198,44 @@ namespace MathTL
 
 	p = 3;
 	break;
+      case ROSI2P2:
+	gamma = 0.43586652150845899941601945119356; // gamma^3-3*gamma^2+1.5*gamma-1/6=0
+
+	Alpha.resize(4,4);
+	Alpha.set_entry(1, 0, 0.5);
+	Alpha.set_entry(2, 0, -0.51983699657507165);
+	Alpha.set_entry(2, 1,  1.5198369965750715);
+	Alpha.set_entry(3, 0, -0.51983699657507165);
+	Alpha.set_entry(3, 1,  1.5198369965750715);
+
+	Gamma.resize(4,4);
+	Gamma.set_entry(0, 0, gamma);
+	Gamma.set_entry(1, 0, -0.5);
+	Gamma.set_entry(1, 1, gamma);
+	Gamma.set_entry(2, 0, -0.40164172503011392);
+	Gamma.set_entry(2, 1,  1.174271852697665);
+	Gamma.set_entry(2, 2, gamma);
+	Gamma.set_entry(3, 0,  1.1865036632417383);
+	Gamma.set_entry(3, 1, -1.5198369965750715);
+	Gamma.set_entry(3, 2, -0.10253318817512568);
+	Gamma.set_entry(3, 3, gamma);
+
+	b.resize(4);
+	b[0] = 2./3.;
+	b[2] = -0.10253318817512568;
+	b[3] =  0.435866521508459;
+
+	bhat.resize(4);
+	bhat[0] = -0.95742384859111473;
+	bhat[1] =  2.9148476971822297;
+	bhat[2] =  0.5;
+	bhat[3] = -1.4574238485911146;
+	
+	transform_coefficients(Alpha, Gamma, b, bhat,
+			       A, C, m, e, alpha_vector, gamma_vector);
+	
+	p = 3;
+	break;
       case GRK4T:
 	A.resize(4,4); // corresponds to the [HW] notation
 	A(1,0) = 0.2000000000000000e+01;
@@ -237,44 +275,6 @@ namespace MathTL
 	e[3] = -0.1282612945269037e+01;
 
 	p = 4;
-	break;
-      case ROSI2P2:
-	A.resize(4, 4);
-	A(1,0) = 1.1471401801395208583740694410249945;
-	A(2,0) = A(3,0) = 2.8073481882113693332824866652646868;
-	A(2,1) = A(3,1) = 3.4869321720676717327473832256985810;
-
-	C.resize(4, 4);
-	C(0,0) = C(1,1) = C(2,2) = C(3,3) = 0.435866521508459; // = gamma
-	C(1,0) = -2.6318611857810647303948702434825206;
-	C(2,0) = 4.9763899772763885632912331747576574;
-	C(2,1) = 6.1810410213404087633412229944896951;
-	C(3,0) = -1.7610501843453821713374862992580516;
-	C(3,1) = -6.5459726524397267670895179210815921;
-	C(3,2) = -.53970623642499863333452367389003477;
-
-	gamma_vector.resize(4);
-	gamma_vector[0] = 0.435866521508459;
-	gamma_vector[1] = -.064133478491541;
-	gamma_vector[2] = 1.20849664917601008;
-	gamma_vector[3] = 0;
-
-	alpha_vector.resize(4);
-	alpha_vector[1] = 0.5;
-	alpha_vector[2] = alpha_vector[3] = 1.0;
-
-	m.resize(4);
- 	m[0] = 2.8073481882113693715204926699153677;
- 	m[1] = 3.4869321720676717327473832256985683;
- 	m[3] = 1.0;
-
-	e.resize(4);
- 	e[0] = m[0] - .42008425852292655788762545663619380;
- 	e[1] = m[1] + 5.9432993417113165134888839405798920;
- 	e[2] = m[2] -.36055943994037335072305837983299927;
-	e[3] = m[3] + 3.3437389124248899500298002490946025;
-
-	p = 3;
 	break;
       case RODASP:
 	A.resize(6, 6);

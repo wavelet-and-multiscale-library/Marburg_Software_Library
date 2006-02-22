@@ -71,6 +71,56 @@ private:
 };
 
 /*
+  IVP for u(t)=1/sqrt(t+1)
+    u'(t) = -u(t)^3/2, u(0) = 1
+  
+  So f(t,u)=-u^3/2, f_t(t,u)=0 and f_u(t,u)=-3/2*u^2.
+ */
+class SquareRoot
+  : public AbstractIVP<Vector<double> >
+{
+public:
+  SquareRoot()
+  {
+    u0.resize(1); u0[0] = 1;
+  }
+
+  void evaluate_f(const double t,
+		  const Vector<double>& v,
+		  const double tolerance,
+		  Vector<double>& result) const
+  {
+    result[0] = -v[0]*v[0]*v[0]/2.0;
+  }
+
+  void evaluate_ft(const double t,
+		   const Vector<double>& v,
+		   const double tolerance,
+		   Vector<double>& result) const
+  {
+    result = 0;
+  }
+
+  void solve_ROW_stage_equation(const double t,
+				const Vector<double>& v,
+				const double alpha,
+				const Vector<double>& y,
+				const double tolerancs,
+				Vector<double>& result) const
+  {
+    // Jx=-3/2*v^2*x -> (alpha*I-J)x=(alpha+3/2*v^2)x
+    result[0] = y[0] / (alpha+3./2.*v[0]*v[0]);
+  }
+
+  // exact solution
+  void exact_solution(const double t, Vector<double>& y) const
+  {
+    y.resize(1);
+    y[0] = 1./sqrt(t+1.);
+  }
+};
+
+/*
   The circle u(t)=(cos(t),sin(t)) with
     u' = [0 -1; 1 0]*u(t), u(0) = [1 0]'
   
@@ -205,7 +255,8 @@ int main()
   typedef Vector<double> V;
 
 //   Dahlquist problem(-1.0);
-  Circle problem;
+  SquareRoot problem;
+//   Circle problem;
 
 #if 1
   cout << "- checking consistency of the builtin one-step schemes:" << endl;

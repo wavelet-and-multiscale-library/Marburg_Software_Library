@@ -278,6 +278,8 @@ namespace MathTL
 	break;
       case RODASP:
 	A.resize(6, 6);
+
+	// values from KARDOS:
 	A(1,0) =   3.0000000000000000;
 	A(2,0) =   1.8310367935359999;
 	A(2,1) =   0.4955183967600000;
@@ -297,6 +299,8 @@ namespace MathTL
 	C.resize(6, 6);
  	C(0,0) = C(1,1) = C(2,2) = C(3,3)
 	  = C(4,4) = C(5,5) = 0.25; // = gamma
+
+	// values from KARDOS:
 	C(1,0) = -12.0000000000000000;
 	C(2,0) =  -8.7917951740800000;
 	C(2,1) =  -2.2078655870400000;
@@ -314,13 +318,16 @@ namespace MathTL
 	C(5,4) =  -5.7142857142399999;
 
 	gamma_vector.resize(6);
-	gamma_vector[0] =  0.2500000000000000;
-	gamma_vector[1] = -0.5000000000000000;
-	gamma_vector[2] = -0.0235040000000000;
-	gamma_vector[3] = -0.0362000000000000;
-	gamma_vector[4] =  0.0;
-	gamma_vector[5] =  0.0;
 
+	// values from KARDOS:
+	gamma_vector[0] =  0.2500000000000000 - C(0,0);
+	gamma_vector[1] = -0.5000000000000000 - C(0,0);
+	gamma_vector[2] = -0.0235040000000000 - C(0,0);
+	gamma_vector[3] = -0.0362000000000000 - C(0,0);
+	gamma_vector[4] =  0.0                - C(0,0);
+	gamma_vector[5] =  0.0                - C(0,0);
+
+	// values from KARDOS:
 	alpha_vector.resize(6);
 	alpha_vector[0] = 0.0;
 	alpha_vector[1] = 0.75;
@@ -329,6 +336,7 @@ namespace MathTL
 	alpha_vector[4] = 1.0;
 	alpha_vector[5] = 1.0;
 
+	// values from KARDOS:
 	m.resize(6);
 	m[0] =  -7.1704549641649322;
 	m[1] =  -4.7416366720441925;

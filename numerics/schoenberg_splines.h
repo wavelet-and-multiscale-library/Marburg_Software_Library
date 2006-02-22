@@ -12,10 +12,11 @@
 
 #include <cmath>
 #include <utils/function.h>
+#include <numerics/splines.h>
 
 namespace MathTL
 {
-  /*
+  /*!
     The following routines provide the pointwise evaluation of
     d-th order Schoenberg B-splines N_{k,d}, k >= -d+1,
     which use the special infinite knot sequence
@@ -25,7 +26,22 @@ namespace MathTL
 
     i.e., t^0_k = max(0,k) for k >= -d+1.
   */
-
+  template <int d>
+  class SchoenbergKnotSequence
+    : public KnotSequence
+  {
+  public:
+    /*
+      index of the first knot
+    */
+    int k0() const { return -d+1; }
+    
+    /*!
+      compute the k-th knot
+    */
+    double knot(const int k) const { return std::max(0,k); }
+  };
+  
   /*!
     evaluate an arbitrary Schoenberg B-spline N_{k,d}(x)
   */

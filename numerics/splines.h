@@ -125,6 +125,43 @@ namespace MathTL
     */
     Array1D<double> coeffs_;
   };
+
+  /*!
+    abstract base class for (semi)infinite knot sequences in Z
+      t_{k0} <= ... <= t_k <= t_{k+1} <= ...
+    for splines the support of which overlaps [0,\infty)
+  */
+  class KnotSequence
+  {
+  public:
+    virtual ~KnotSequence() = 0;
+    
+    /*
+      index of the first knot
+     */
+    virtual int k0() const = 0;
+    
+    /*!
+      compute the k-th knot
+    */
+    virtual double knot(const int k) const = 0;
+  };
+
+  KnotSequence::~KnotSequence() {}
+
+  /*!
+    Given a (semi)infinite knot sequence in Z
+      t_{k0} <= ... <= t_k <= t_{k+1} <= ...
+    with t_k = k for k >= 0, such that the knot sequence
+    (t_j)_j is a subset of ((1/2)*t_j)_j,
+    we know that the corresponding d-th order B-splines fulfill a
+    refinement relation of the form
+      N_{k0+k,d}(x) = \sum_{n=0}^{2(1-k0)-1} m_{n,k} N_{k0+n,d}(2x), 0<=k<=-1-k0
+
+    TODO: write this routine...
+  */
 }
+
+#include <numerics/splines.cpp>
 
 #endif

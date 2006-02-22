@@ -12,9 +12,29 @@
 
 #include <cmath>
 #include <utils/function.h>
+#include <numerics/splines.h>
 
 namespace MathTL
 {
+  /*!
+    (semi)infinite knot sequence for cardinal splines supported in [0,\infty)
+  */
+  template <int d>
+  class CardinalKnotSequence
+    : public KnotSequence
+  {
+  public:
+    /*
+      index of the first knot
+    */
+    int k0() const { return -d+1; }
+    
+    /*!
+      compute the k-th knot
+    */
+    double knot(const int k) const { return k; }
+  };
+
   /*!
     evaluate a shifted cardinal B-spline N_d(x-k) via recursion
   */

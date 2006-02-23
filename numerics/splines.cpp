@@ -8,6 +8,8 @@ namespace MathTL
   void
   compute_spline_refinement_matrix(const KnotSequence* knots, Matrix<double>& M)
   {
+    // generalization of Lemma 3.16 from [P]
+
     const int k0 = knots->k0();
 
     Matrix<double> B1(d-1-k0, -k0);

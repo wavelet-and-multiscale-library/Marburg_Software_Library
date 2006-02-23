@@ -78,6 +78,11 @@ namespace MathTL
       N_{k0+k,d}(x) = \sum_{n=0}^{d-2-k0} m_{n,k} N_{k0+n,d}(2x), 0<=k<=-1-k0
 
     This routine computes the matrix M=(m_{n,k})_{n,k} for n=0..d-2-k0, k=0..-1-k0.
+
+    References:
+    [P] Primbs:
+        Stabile biorthogonale Wavelet-Basen auf dem Intervall,
+	Ph.D. dissertation, Univ. Duisburg-Essen, 2006
   */
   template <int d>
   void

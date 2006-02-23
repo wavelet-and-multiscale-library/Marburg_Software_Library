@@ -212,19 +212,27 @@ namespace WaveletTL
       and a driving term f (coeffs. w.r.t. the dual basis) which is constant in time
     */
     LinearParabolicEquation(const ELLIPTIC_EQ* elliptic,
- 			    const InfiniteVector<double,Index>& u0,
-			    const InfiniteVector<double,Index>& f,
-			    const int jmax = 10);
+   			    const InfiniteVector<double,Index>& u0,
+  			    const InfiniteVector<double,Index>& f,
+  			    const int jmax = 10);
 
     /*!
       constructor from a helper object for the stiffness matrix,
       a given initial value u0 in ell_2
       and a time-dependent driving term f
+
+      (gcc 2.95 requires implementation of this constructor already in the *.h file!?)
     */
-    LinearParabolicEquation(const ELLIPTIC_EQ* elliptic,
- 			    const InfiniteVector<double,Index>& u0,
- 			    Function<ELLIPTIC_EQ::space_dimension>* f = 0,
- 			    const int jmax = 10);
+    LinearParabolicEquation(const ELLIPTIC_EQ* ellipt,
+  			    const MathTL::InfiniteVector<double,Index>& initial,
+  			    MathTL::Function<ELLIPTIC_EQ::space_dimension,double>* f = 0,
+ 			    const int jmax = 10)
+      : elliptic(ellipt),
+ 	G(ellipt->basis(), MathTL::InfiniteVector<double,typename ELLIPTIC_EQ::Index>()),
+ 	GC(&G), constant_f_(), f_(f), jmax_(jmax)
+    {
+      AbstractIVP<InfiniteVector<double,typename ELLIPTIC_EQ::Index> >::u0 = initial;
+    }
     
     /*!
       evaluate the right-hand side F(t,v)=Av+f(t) up to a prescribed tolerance

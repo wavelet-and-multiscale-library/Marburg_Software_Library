@@ -37,31 +37,19 @@ namespace WaveletTL
 //     if (lambda.j() == j)
 //       w.add_coefficient(lambda, alpha*factor/(T->D(lambda)*T->D(lambda)));
   }
-
+  
   template <class ELLIPTIC_EQ>
   LinearParabolicEquation<ELLIPTIC_EQ>
   ::LinearParabolicEquation(const ELLIPTIC_EQ* helper,
-			    const InfiniteVector<double,Index>& initial,
-			    const InfiniteVector<double,Index>& f,
-			    const int jmax)
-    : elliptic(helper), G(helper->basis(), InfiniteVector<double,Index>()),
+ 			    const InfiniteVector<double,typename ELLIPTIC_EQ::Index>& initial,
+ 			    const InfiniteVector<double,typename ELLIPTIC_EQ::Index>& f,
+ 			    const int jmax)
+    : elliptic(helper), G(helper->basis(), InfiniteVector<double,typename ELLIPTIC_EQ::Index>()),
       GC(&G), constant_f_(f), f_(0), jmax_(jmax)
   {
-    AbstractIVP<InfiniteVector<double,Index> >::u0 = initial;
+    AbstractIVP<InfiniteVector<double,typename ELLIPTIC_EQ::Index> >::u0 = initial;
   }
-  
-  template <class ELLIPTIC_EQ>
-  LinearParabolicEquation<ELLIPTIC_EQ>
-  ::LinearParabolicEquation(const ELLIPTIC_EQ* helper,
-			    const InfiniteVector<double,Index>& initial,
-			    Function<ELLIPTIC_EQ::space_dimension>* f,
-			    const int jmax)
-    : elliptic(helper), G(helper->basis(), InfiniteVector<double,Index>()),
-      GC(&G), constant_f_(), f_(f), jmax_(jmax)
-  {
-    AbstractIVP<InfiniteVector<double,Index> >::u0 = initial;
-  }
-  
+
   template <class ELLIPTIC_EQ>
   void
   LinearParabolicEquation<ELLIPTIC_EQ>

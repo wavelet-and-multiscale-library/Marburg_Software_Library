@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <numerics/schoenberg_splines.h>
 
 namespace WaveletTL
 {
@@ -21,21 +22,27 @@ namespace WaveletTL
   template <int d, int dT>
   void
   PBasis<d,dT>::setup() {
+
+    // setup the refinement matrix block for the "real" primal boundary B-splines,
+    // obey the block structure (3.15)
+    MathTL::SchoenbergKnotSequence<d> sknots;
+    Matrix<double> ML_0;
+    MathTL::compute_spline_refinement_matrix<d>(&sknots, ML_0);
+
+    ML_.resize(3*dT+2*d-5, d+dT-2);
+    ML_.set_block(0, 0, ML_0);
+    for (int k = d; k <= d+dT-2; k++)
+      for (int n = 2*k-d; n <= 2*k; n++)
+	ML_.set_entry(n-1,k-1,cdf.a().get_coefficient(MultiIndex<int,1>(-(d/2)+n+d-2*k)));
+    
     // for simplicity, we do not implement a generic setup here
     // but only setup the parameters for several important special cases from [P]
-
     switch(d) {
     case 2:
       switch(dT) {
       case 2:
 	j0_ = 2;
 	if (s0 == 0) {
-	  ML_.resize(5,2);
-	  ML_(0,0) = 1.0;
-	  ML_(1,0) = ML_(1,1) = 0.5;
-	  ML_(2,1) = 1.0;
-	  ML_(3,1) = 0.5;
-
 	  MLT_.resize(5,2);
 	  MLT_(0,0) =  5./4.;
 	  MLT_(0,1) = -1./8.;
@@ -50,16 +57,6 @@ namespace WaveletTL
       case 4:
 	j0_ = 3;
 	if (s0 == 0) {
-	  ML_.resize(11,4);
-	  ML_(0,0) = 1.0;
-	  ML_(1,0) = ML_(1,1) = 0.5;
-	  ML_(2,1) = 1.0;
-	  ML_(3,1) = ML_(3,2) = 0.5;
-	  ML_(4,2) = 1.0;
-	  ML_(5,2) = ML_(5,3) = 0.5;
-	  ML_(6,3) = 1.0;
-	  ML_(7,3) = 0.5;
-
 	  MLT_.resize(11,4);
 	  MLT_( 0,0) =   93./ 64 ;
 	  MLT_( 0,1) = -241./768.;
@@ -106,16 +103,6 @@ namespace WaveletTL
       case 3:
 	j0_ = 3;
 	if (s0 == 0) {
-	  ML_.resize(10,4);
-	  ML_(0,0) = 1.0;
-	  ML_(1,0) = ML_(1,1) = 0.5;
-	  ML_(2,1) = 0.75;
-	  ML_(2,2) = ML_(3,1) = 0.25;
-	  ML_(3,2) = ML_(4,2) = 0.75;
-	  ML_(4,3) = ML_(5,2) = 0.25;
-	  ML_(5,3) = ML_(6,3) = 0.75;
-	  ML_(7,3) = 0.25;
-
 	  MLT_.resize(10,4);
 	  MLT_(0,0) =    3./  2.;
 	  MLT_(0,1) = - 35./ 96.;
@@ -150,19 +137,19 @@ namespace WaveletTL
       case 5:
 	j0_ = 4;
 	if (s0 == 0) {
-	  ML_.resize(16,6);
- 	  ML_( 0,0) = 1.0;
- 	  ML_( 1,0) = ML_( 1,1) = 0.5;
-	  ML_( 2,1) = 0.75;
- 	  ML_( 2,2) = ML_( 3,1) = 0.25;
- 	  ML_( 3,2) = ML_( 4,2) = 0.75;
- 	  ML_( 4,3) = ML_( 5,2) = 0.25;
- 	  ML_( 5,3) = ML_( 6,3) = 0.75;
-	  ML_( 6,4) = ML_( 7,3) = 0.25;
-	  ML_( 7,4) = ML_( 8,4) = 0.75;
-	  ML_( 8,5) = ML_( 9,4) = 0.25;
-	  ML_( 9,5) = ML_(10,5) = 0.75;
-	  ML_(11,5) = 0.25;
+// 	  ML_.resize(16,6);
+//  	  ML_( 0,0) = 1.0;
+//  	  ML_( 1,0) = ML_( 1,1) = 0.5;
+// 	  ML_( 2,1) = 0.75;
+//  	  ML_( 2,2) = ML_( 3,1) = 0.25;
+//  	  ML_( 3,2) = ML_( 4,2) = 0.75;
+//  	  ML_( 4,3) = ML_( 5,2) = 0.25;
+//  	  ML_( 5,3) = ML_( 6,3) = 0.75;
+// 	  ML_( 6,4) = ML_( 7,3) = 0.25;
+// 	  ML_( 7,4) = ML_( 8,4) = 0.75;
+// 	  ML_( 8,5) = ML_( 9,4) = 0.25;
+// 	  ML_( 9,5) = ML_(10,5) = 0.75;
+// 	  ML_(11,5) = 0.25;
 
 	  MLT_.resize(16,6);
 	  MLT_( 0,0) =       5./     3.;

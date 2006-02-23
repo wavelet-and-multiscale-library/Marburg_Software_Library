@@ -11,6 +11,8 @@
 #define _WAVELETTL_P_BASIS_H
 
 #include <algebra/matrix.h>
+#include <Rd/cdf_utils.h>
+#include <Rd/cdf_basis.h>
 #include <interval/i_index.h>
 
 using MathTL::Matrix;
@@ -40,7 +42,7 @@ namespace WaveletTL
 
     References:
     [P] Primbs:
-        Biorthogonale Wavelet-Basen auf dem Intervall
+        Stabile biorthogonale Wavelet-Basen auf dem Intervall
 	Dissertation, Univ. Duisburg-Essen, 2006
   */
   template <int d, int dT>
@@ -83,6 +85,9 @@ namespace WaveletTL
 
     //! general setup routine which is shared by the different constructors
     void setup();
+
+    //! one instance of a CDF basis (for faster access to the primal and dual masks)
+    CDFBasis<d,dT> cdf;
 
     //! boundary blocks in Mj0
     Matrix<double> ML_, MR_;

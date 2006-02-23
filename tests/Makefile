@@ -5,8 +5,8 @@
 # | Thorsten Raasch, Manuel Werner                                 |
 # +----------------------------------------------------------------+
 
-#DEBUGMODE = on
-DEBUGMODE = off
+DEBUGMODE = on
+#DEBUGMODE = off
 
 # choose between GNU or Intel compiler
 CXX = g++
@@ -14,8 +14,8 @@ CXX = g++
 #CXX = g++-2.95
 
 #CXXFLAGS += -ftemplate-depth-40 # add this for gcc-2.95
-#CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
-CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+#CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -funroll-loops -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O2 -march=pentium4 -msse2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe

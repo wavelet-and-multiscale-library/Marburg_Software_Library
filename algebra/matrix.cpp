@@ -175,6 +175,26 @@ namespace MathTL
   }
 
   template <class C>
+  template <class MATRIX>
+  void Matrix<C>::set_block(const size_type firstrow, const size_type firstcolumn,
+			    const MATRIX& M, const bool mirror)
+  {
+    assert(firstrow+M.row_dimension() <= row_dimension());
+    assert(firstcolumn+M.column_dimension() <= column_dimension());
+
+    for (size_type row(0); row < M.row_dimension(); row++)
+      for (size_type column(0); column < M.column_dimension(); column++)
+	{
+	  if (mirror)
+	    set_entry(firstrow+M.row_dimension()-1-row,
+		      firstcolumn+M.column_dimension()-1-column,
+		      M.get_entry(row, column));
+	  else
+	    set_entry(row+firstrow, column+firstcolumn, M.get_entry(row, column));
+	}
+  }
+
+  template <class C>
   template <class C2>
   bool Matrix<C>::operator == (const Matrix<C2>& M) const
   {

@@ -9,6 +9,7 @@
 DEBUGMODE = off
 
 # choose between GNU or Intel compiler
+CXX = g++
 #CXX = icpc
 #CXX = g++-2.95
 

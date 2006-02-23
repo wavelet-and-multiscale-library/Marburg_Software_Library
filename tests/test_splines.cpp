@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <algebra/matrix.h>
 #include <geometry/point.h>
 #include <geometry/grid.h>
 #include <geometry/sampled_mapping.h>
@@ -142,4 +143,21 @@ int main()
 	 <<  EvaluateSchoenbergBSpline_x<2>(0,x) << endl;
   }
 
+  const int d = 3;
+
+  SchoenbergKnotSequence<d> sknots;
+  cout << "- (begin of) the Schoenberg knot sequence for d=" << d << ":" << endl;
+  for (int k = sknots.k0(); k <= 3; k++)
+    cout << "  t_{" << k << "}=" << sknots.knot(k) << endl;
+
+  cout << "- some point values of the (-1)-th Schoenberg spline of order d=" << d << ":" << endl;
+  for (double x = -0.5; x <= 1.5; x+=0.1) {
+    cout << "  N_{-1," << d << "}(" << x << ")="
+	 <<  evaluate_Bspline<d>(&sknots,-1,x) << endl;
+  }
+  
+  Matrix<double> M;
+  compute_spline_refinement_matrix<d>(&sknots, M);
+  cout << "- refinement matrix for the Schoenberg boundary splines (d=" << d << "):" << endl
+       << M;
 }

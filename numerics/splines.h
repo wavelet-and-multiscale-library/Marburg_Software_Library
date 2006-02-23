@@ -14,9 +14,76 @@
 #include <iostream>
 #include <utils/array1d.h>
 #include <utils/function.h>
+#include <algebra/matrix.h>
 
 namespace MathTL
 {
+  /*!
+    abstract base class for (semi)infinite knot sequences in Z
+      t_{k0} <= ... <= t_k <= t_{k+1} <= ...
+    for splines the support of which overlaps [0,\infty)
+  */
+  class KnotSequence
+  {
+  public:
+    virtual ~KnotSequence() = 0;
+    
+    /*
+      index of the first knot
+     */
+    virtual int k0() const = 0;
+    
+    /*!
+      compute the k-th knot
+    */
+    virtual double knot(const int k) const = 0;
+  };
+
+  KnotSequence::~KnotSequence() {}
+
+  /*!
+    evaluate an arbitrary B-spline N_{j,d}(x) via recursion
+  */
+  template <int d>
+  double evaluate_Bspline(const KnotSequence* knots, const int j, const double x)
+  {
+    double r(0);
+
+    // take care of multiple knots
+    double diff = knots->knot(j+d-1) - knots->knot(j);
+    if (diff > 0) r += (x - knots->knot(j)) * evaluate_Bspline<d-1>(knots, j, x) / diff;
+    diff = knots->knot(j+d) - knots->knot(j+1);
+    if (diff > 0) r += (knots->knot(j+d) - x) * evaluate_Bspline<d-1>(knots, j+1, x) / diff;
+    
+    return r;
+  }
+  
+  /*!
+    evaluate an arbitrary B-spline N_{j,1}(x) = \chi_{[t_j,t_{j+1})}
+  */
+  template <>
+  inline
+  double evaluate_Bspline<1>(const KnotSequence* knots, const int j, const double x)
+  {
+    return (x >= knots->knot(j) && x < knots->knot(j+1) ? 1.0 : 0.0);
+  }
+
+  /*!
+    Given a (semi)infinite knot sequence in Z
+      t_{k0} <= ... <= t_k <= t_{k+1} <= ...
+    with t_k = k for k >= 0, such that the knot sequence
+    (t_j)_j is a subset of ((1/2)*t_j)_j,
+    we know that the corresponding d-th order B-splines fulfill a
+    refinement relation of the form
+      N_{k0+k,d}(x) = \sum_{n=0}^{d-2-k0} m_{n,k} N_{k0+n,d}(2x), 0<=k<=-1-k0
+
+    This routine computes the matrix M=(m_{n,k})_{n,k} for n=0..d-2-k0, k=0..-1-k0.
+  */
+  template <int d>
+  void
+  compute_spline_refinement_matrix(const KnotSequence* knots, Matrix<double>& M);
+
+
   /*!
     evaluate an arbitrary B-spline N_{j,d}(x) via recursion
   */
@@ -125,41 +192,6 @@ namespace MathTL
     */
     Array1D<double> coeffs_;
   };
-
-  /*!
-    abstract base class for (semi)infinite knot sequences in Z
-      t_{k0} <= ... <= t_k <= t_{k+1} <= ...
-    for splines the support of which overlaps [0,\infty)
-  */
-  class KnotSequence
-  {
-  public:
-    virtual ~KnotSequence() = 0;
-    
-    /*
-      index of the first knot
-     */
-    virtual int k0() const = 0;
-    
-    /*!
-      compute the k-th knot
-    */
-    virtual double knot(const int k) const = 0;
-  };
-
-  KnotSequence::~KnotSequence() {}
-
-  /*!
-    Given a (semi)infinite knot sequence in Z
-      t_{k0} <= ... <= t_k <= t_{k+1} <= ...
-    with t_k = k for k >= 0, such that the knot sequence
-    (t_j)_j is a subset of ((1/2)*t_j)_j,
-    we know that the corresponding d-th order B-splines fulfill a
-    refinement relation of the form
-      N_{k0+k,d}(x) = \sum_{n=0}^{2(1-k0)-1} m_{n,k} N_{k0+n,d}(2x), 0<=k<=-1-k0
-
-    TODO: write this routine...
-  */
 }
 
 #include <numerics/splines.cpp>

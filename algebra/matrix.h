@@ -51,9 +51,14 @@ namespace MathTL
     Matrix(const SymmetricMatrix<C>& M);
     
     /*!
-      copy constructor from triangular matrices
+      copy constructor from a lower triangular matrix
     */
     Matrix(const LowerTriangularMatrix<C>& M);
+    
+    /*!
+      copy constructor from an upper triangular matrix
+    */
+    Matrix(const UpperTriangularMatrix<C>& M);
     
     /*!
       construct m*n rectangular matrix

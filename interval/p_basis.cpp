@@ -23,11 +23,12 @@ namespace WaveletTL
   void
   PBasis<d,dT>::setup() {
 
-    // setup the refinement matrix block for the "real" primal boundary B-splines,
-    // obey the block structure (3.15)
+    // setup the refinement matrix block for all "real" primal boundary B-splines,
+    // obeying the block structure (3.15)
+    // (ignoring the current values of s0 and s1
     MathTL::SchoenbergKnotSequence<d> sknots;
     Matrix<double> ML_0;
-    MathTL::compute_spline_refinement_matrix<d>(&sknots, ML_0);
+    MathTL::compute_Bspline_refinement_matrix<d>(&sknots, ML_0);
 
     ML_.resize(3*dT+2*d-5, d+dT-2);
     ML_.set_block(0, 0, ML_0);
@@ -35,6 +36,14 @@ namespace WaveletTL
       for (int n = 2*k-d; n <= 2*k; n++)
 	ML_.set_entry(n-1,k-1,cdf.a().get_coefficient(MultiIndex<int,1>(-(d/2)+n+d-2*k)));
     
+    // compute the Gramian of all primal boundary B-splines
+    // TODO!
+
+
+   
+
+
+
     // for simplicity, we do not implement a generic setup here
     // but only setup the parameters for several important special cases from [P]
     switch(d) {

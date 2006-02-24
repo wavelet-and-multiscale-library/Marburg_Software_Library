@@ -145,7 +145,11 @@ int main()
 
   const int d = 3;
 
+  CardinalKnotSequence<d> cknots;
   SchoenbergKnotSequence<d> sknots;
+  cout << "- (begin of) the cardinal knot sequence for d=" << d << ":" << endl;
+  for (int k = cknots.k0(); k <= 3; k++)
+    cout << "  t_{" << k << "}=" << cknots.knot(k) << endl;
   cout << "- (begin of) the Schoenberg knot sequence for d=" << d << ":" << endl;
   for (int k = sknots.k0(); k <= 3; k++)
     cout << "  t_{" << k << "}=" << sknots.knot(k) << endl;
@@ -157,6 +161,9 @@ int main()
   }
   
   Matrix<double> M;
+  compute_spline_refinement_matrix<d>(&cknots, M);
+  cout << "- refinement matrix for the cardinal boundary splines (d=" << d << "):" << endl
+       << M;
   compute_spline_refinement_matrix<d>(&sknots, M);
   cout << "- refinement matrix for the Schoenberg boundary splines (d=" << d << "):" << endl
        << M;

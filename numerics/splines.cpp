@@ -6,7 +6,7 @@ namespace MathTL
 {
   template <int d>
   void
-  compute_spline_refinement_matrix(const KnotSequence* knots, Matrix<double>& M)
+  compute_Bspline_refinement_matrix(const KnotSequence* knots, Matrix<double>& M)
   {
     // generalization of Lemma 3.16 from [P]
 

@@ -161,10 +161,10 @@ int main()
   }
   
   Matrix<double> M;
-  compute_spline_refinement_matrix<d>(&cknots, M);
-  cout << "- refinement matrix for the cardinal boundary splines (d=" << d << "):" << endl
+  compute_Bspline_refinement_matrix<d>(&cknots, M);
+  cout << "- refinement matrix for the cardinal boundary B-splines (d=" << d << "):" << endl
        << M;
-  compute_spline_refinement_matrix<d>(&sknots, M);
-  cout << "- refinement matrix for the Schoenberg boundary splines (d=" << d << "):" << endl
+  compute_Bspline_refinement_matrix<d>(&sknots, M);
+  cout << "- refinement matrix for the Schoenberg boundary B-splines (d=" << d << "):" << endl
        << M;
 }

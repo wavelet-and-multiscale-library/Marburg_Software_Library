@@ -73,20 +73,20 @@ namespace MathTL
       t_{k0} <= ... <= t_k <= t_{k+1} <= ...
     with t_k = k for k >= 0, such that the knot sequence
     (t_j)_j is a subset of ((1/2)*t_j)_j,
-    we know that the corresponding d-th order B-splines fulfill a
+    we know that the corresponding d-th order B-splines N_{k,d} fulfill a
     refinement relation of the form
       N_{k0+k,d}(x) = \sum_{n=0}^{d-2-k0} m_{n,k} N_{k0+n,d}(2x), 0<=k<=-1-k0
 
-    This routine computes the matrix M=(m_{n,k})_{n,k} for n=0..d-2-k0, k=0..-1-k0.
+    This routine computes the refinement matrix M=(m_{n,k})_{n,k} for n=0..d-2-k0, k=0..-1-k0.
 
     References:
     [P] Primbs:
         Stabile biorthogonale Wavelet-Basen auf dem Intervall,
-	Ph.D. dissertation, Univ. Duisburg-Essen, 2006
+	Dissertation, Univ. Duisburg-Essen, 2006
   */
   template <int d>
   void
-  compute_spline_refinement_matrix(const KnotSequence* knots, Matrix<double>& M);
+  compute_Bspline_refinement_matrix(const KnotSequence* knots, Matrix<double>& M);
 
 
   /*!

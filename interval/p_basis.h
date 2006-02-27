@@ -31,14 +31,22 @@ namespace WaveletTL
 
     i.e.
 
-      phi_{j,k}(x) = (t^j_{k+d}-t^j_k)[t^j_k,...,t^j_{k+d}](t-x)^{d-1}_+
+      B_{j,k}(x) = (t^j_{k+d}-t^j_k)[t^j_k,...,t^j_{k+d}](t-x)^{d-1}_+
 
-    with supp(phi_{j,k}(x) = [t^j_k, t^j_{k+d}].
+    with supp(B_{j,k}(x) = [t^j_k, t^j_{k+d}].
     In other words, we have exactly
 
      d-1     left boundary splines  (k=-d+1,...,-1),
      2^j-d+1 inner splines          (k=0,...,2^j-d),
      d-1     right boundary splines (k=2^j-d+1,...,2^j-1)
+
+    Since the primal CDF generators are centered around floor(d/2)=-ell_1,
+    we perform an index shift by ell_1, i.e., we use the generators
+ 
+      phi_{j,k}(x) = 2^{j/2} B_{j,k-ell_1}
+
+    So, if no boundary conditions are imposed, the index of the leftmost generator
+    will be 1-d+floor(d/2).
 
     References:
     [P] Primbs:
@@ -69,13 +77,13 @@ namespace WaveletTL
     typedef IntervalIndex<PBasis<d,dT> > Index;
     
     //! extremal generator indices
-    inline const int DeltaLmin() const { return 1-d; }
-    inline const int DeltaRmax(const int j) const { return (1<<j)-1; }
+    inline const int DeltaLmin() const { return 1-d-ell1<d>(); }
+    inline const int DeltaRmax(const int j) const { return (1<<j)-1-ell1<d>(); }
 
     //! boundary indices in \nabla_j
     inline const int Nablamin() const { return 0; }
     inline const int Nablamax(const int j) const { return (1<<j)-1; }
-
+    
   protected:
     //! coarsest possible level
     int j0_;
@@ -89,7 +97,13 @@ namespace WaveletTL
     //! one instance of a CDF basis (for faster access to the primal and dual masks)
     CDFBasis<d,dT> cdf;
 
-    //! boundary blocks in Mj0
+    //! single CDF moments \alpha_{m,r} := \int_{\mathbb R} x^r\phi(x-m)\,dx
+    const double alpha(const int m, const unsigned int r) const;
+
+     //! refinement coeffients of left dual boundary generators
+    const double betaL(const int m, const unsigned int r) const;
+
+   //! boundary blocks in Mj0
     Matrix<double> ML_, MR_;
 
     //! boundary blocks in Mj0T

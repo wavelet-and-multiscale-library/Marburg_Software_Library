@@ -3,6 +3,8 @@
 #include <cassert>
 #include <cmath>
 #include <numerics/schoenberg_splines.h>
+#include <algebra/triangular_matrix.h>
+#include <utils/tiny_tools.h>
 
 namespace WaveletTL
 {
@@ -22,6 +24,25 @@ namespace WaveletTL
   template <int d, int dT>
   void
   PBasis<d,dT>::setup() {
+    // For simplicity, we do not implement a generic setup here
+    // but only setup the parameters for several important special cases from [P].
+    // Namely, we restrict the setting to the case d=2+s0, where no "additional"
+    // interior dual generators have to be constructed. In a later version of
+    // this class, we will fix this.
+
+    
+    // setup j0
+    switch(d) {
+    case 2:
+      j0_ = 3;
+      break;
+    case 3:
+      j0_ = 4;
+      break;
+    default:
+      j0_ = 0;
+      break;
+    }
 
     // setup the refinement matrix block for all "real" primal boundary B-splines,
     // obeying the block structure (3.15)
@@ -36,221 +57,93 @@ namespace WaveletTL
       for (int n = 2*k-d; n <= 2*k; n++)
 	ML_.set_entry(n-1,k-1,cdf.a().get_coefficient(MultiIndex<int,1>(-(d/2)+n+d-2*k)));
     
-    // compute the Gramian of all primal boundary B-splines
-    // TODO!
+    // setup the expansion coefficients of the dual generators w.r.t. the truncated
+    // dual CDF generators
+    // see [P, Bem. 4.2]
+    MathTL::LowerTriangularMatrix<double> D1(dT, dT), D2(dT, dT), D3(dT, dT);
+    for (unsigned int r = 0; r < dT; r++)
+      for (unsigned int i = 0; i <= r; i++)
+ 	D1.set_entry(r, i, binomial(r, i) * alpha(0, r-i)); // can be speeded up a bit...
+    
+    for (unsigned int i = 0; i < dT; i++)
+      for (unsigned int n = 0; n <= i; n++)
+	D2.set_entry(i, n, minus1power(n) * binomial(i, n) * intpower(-ell1T<d,dT>()-1, i-n));
 
-
-   
-
-
-
-    // for simplicity, we do not implement a generic setup here
-    // but only setup the parameters for several important special cases from [P]
-    switch(d) {
-    case 2:
-      switch(dT) {
-      case 2:
-	j0_ = 2;
-	if (s0 == 0) {
-	  MLT_.resize(5,2);
-	  MLT_(0,0) =  5./4.;
-	  MLT_(0,1) = -1./8.;
-	  MLT_(1,0) =  3./2.;
-	  MLT_(1,1) =  1./4.;
-	  MLT_(2,0) = -3./4.;
-	  MLT_(2,1) = 13./8.;
-	  MLT_(3,1) =  1./2.;
-	  MLT_(4,1) = -1./4.;
-	}
-	break;
-      case 4:
-	j0_ = 3;
-	if (s0 == 0) {
-	  MLT_.resize(11,4);
-	  MLT_( 0,0) =   93./ 64 ;
-	  MLT_( 0,1) = -241./768.;
-	  MLT_( 0,2) =   41./384.;
-	  MLT_( 0,3) = -  5./256.;
-	  MLT_( 1,0) =   35./ 32.;
-	  MLT_( 1,1) =  241./384.;
-	  MLT_( 1,2) = - 41./192.;
-	  MLT_( 1,3) =    5./128.;
-	  MLT_( 2,0) = -  5./ 16.;
-	  MLT_( 2,1) =  245./192.;
-	  MLT_( 2,2) = - 13./ 96.;
-	  MLT_( 2,3) =    1./ 64.;
-	  MLT_( 3,0) = - 15./ 32.;
-	  MLT_( 3,1) =  105./128.;
-	  MLT_( 3,2) =   31./ 64.;
-	  MLT_( 3,3) = -  9./128.;
-	  MLT_( 4,0) =   15./ 64.;
-	  MLT_( 4,1) = - 93./256.;
-	  MLT_( 4,2) =  187./128.;
-	  MLT_( 4,3) = - 67./256.;
-	  MLT_( 5,1) = -  3./ 32.;
-	  MLT_( 5,2) =   19./ 32.;
-	  MLT_( 5,3) =   19./ 32.;
-	  MLT_( 6,1) =    3./ 64.;
-	  MLT_( 6,2) = -  1./  4.;
-	  MLT_( 6,3) =   45./ 32.;
-	  MLT_( 7,2) = -  3./ 32.;
-	  MLT_( 7,3) =   19./ 32.;
-	  MLT_( 8,2) =    3./ 64.;
-	  MLT_( 8,3) = -  1./  4.;
-	  MLT_( 9,3) = -  3./ 32.;
-	  MLT_(10,3) =    3./ 64.;
-	}
-	break;
-      case 6:
-	j0_ = 3;
-      default:
-	break;
+    D3.set_entry(0, 0, 1.0); // the only nontrivial value for n=0
+    for (unsigned int n = 1; n < dT; n++)
+      for (unsigned int l = 1; l <= n; l++) {
+	double help = 0;
+	for (unsigned int k = 0; k < n; k++)
+	  help += binomial(n, k) * D3.get_entry(k, l-1);
+	D3.set_entry(n, l, help);
       }
-      break;
-    case 3:
-      switch(dT) {
-      case 3:
-	j0_ = 3;
-	if (s0 == 0) {
-	  MLT_.resize(10,4);
-	  MLT_(0,0) =    3./  2.;
-	  MLT_(0,1) = - 35./ 96.;
-	  MLT_(0,2) =   53./576.;
-	  MLT_(0,3) = -  1./ 64.;
-	  MLT_(1,0) =    1.;
-	  MLT_(1,1) =   35./ 48.;
-	  MLT_(1,2) = - 53./288.;
-	  MLT_(1,3) =    1./ 32.;
-	  MLT_(2,0) = -  3./  4.;
-	  MLT_(2,1) =   71./ 32.;
-	  MLT_(2,2) = - 53./192.;
-	  MLT_(2,3) =    3./ 64.;
-	  MLT_(3,0) =    1./  4.;
-	  MLT_(3,1) = - 11./ 96.;
-	  MLT_(3,2) =  689./576.;
-	  MLT_(3,3) = - 13./ 64.;
-	  MLT_(4,1) = - 45./ 64.;
-	  MLT_(4,2) =  213./128.;
-	  MLT_(4,3) = - 37./128.;
-	  MLT_(5,1) =   15./ 64.;
-	  MLT_(5,2) = - 39./128.;
-	  MLT_(5,3) =  183./128.;
-	  MLT_(6,2) = -  9./ 32.;
-	  MLT_(6,3) =   45./ 32.;
-	  MLT_(7,2) =    3./ 32.;
-	  MLT_(7,3) = -  7./ 32.;
-	  MLT_(8,3) = -  9./ 32.;
-	  MLT_(9,3) =    3./ 32.;
-	}
-	break;
-      case 5:
-	j0_ = 4;
-	if (s0 == 0) {
-// 	  ML_.resize(16,6);
-//  	  ML_( 0,0) = 1.0;
-//  	  ML_( 1,0) = ML_( 1,1) = 0.5;
-// 	  ML_( 2,1) = 0.75;
-//  	  ML_( 2,2) = ML_( 3,1) = 0.25;
-//  	  ML_( 3,2) = ML_( 4,2) = 0.75;
-//  	  ML_( 4,3) = ML_( 5,2) = 0.25;
-//  	  ML_( 5,3) = ML_( 6,3) = 0.75;
-// 	  ML_( 6,4) = ML_( 7,3) = 0.25;
-// 	  ML_( 7,4) = ML_( 8,4) = 0.75;
-// 	  ML_( 8,5) = ML_( 9,4) = 0.25;
-// 	  ML_( 9,5) = ML_(10,5) = 0.75;
-// 	  ML_(11,5) = 0.25;
 
-	  MLT_.resize(16,6);
-	  MLT_( 0,0) =       5./     3.;
-	  MLT_( 0,1) = -  2359./  3840.;
-	  MLT_( 0,2) =  101909./345600.;
-	  MLT_( 0,3) = - 17611./115200.;
-	  MLT_( 0,4) =    3119./ 57600.;
-	  MLT_( 0,5) = -    61./  6912.;
-	  MLT_( 1,0) =       2./     3.;
-	  MLT_( 1,1) =    2359./  1920.;
-	  MLT_( 1,2) = -101909./172800.;
-	  MLT_( 1,3) =   17611./ 57600.;
-	  MLT_( 1,4) = -  3119./ 28800.;
-	  MLT_( 1,5) =      61./  3456.;
-	  MLT_( 2,0) = -     1./     2.;
-	  MLT_( 2,1) =    2503./  1280.;
-	  MLT_( 2,2) = - 18413./115200.;
-	  MLT_( 2,3) =    1027./ 38400.;
-	  MLT_( 2,4) = -    83./ 19200.;
-	  MLT_( 2,5) =       1./  2304.;
-	  MLT_( 3,0) =       1./     6.;
-	  MLT_( 3,1) = -  1243./  3840.;
-	  MLT_( 3,2) =  573353./345600.;
-	  MLT_( 3,3) = - 79687./115200.;
-	  MLT_( 3,4) =   13223./ 57600.;
-	  MLT_( 3,5) = -   253./  6912.;
-	  MLT_( 4,1) = -    77./   256.;
-	  MLT_( 4,2) =    2583./  2560.;
-	  MLT_( 4,3) =     789./  2560.;
-	  MLT_( 4,4) = -   181./  1280.;
-	  MLT_( 4,5) =      19./   768.;
-	  MLT_( 5,1) = -    21./   256.; 
-	  MLT_( 5,2) =     399./  2560.;
-	  MLT_( 5,3) =    2877./  2560.;
-	  MLT_( 5,4) = -   333./  1280.;
-	  MLT_( 5,5) =       9./   256.;
-	  MLT_( 6,1) =     105./   512.;
-	  MLT_( 6,2) = -   547./  1024.;
-	  MLT_( 6,3) =    1523./  1024.;
-	  MLT_( 6,4) = -    79./   512.;
-	  MLT_( 6,5) =      43./   512.;
-	  MLT_( 7,1) = -    35./   512.;
-	  MLT_( 7,2) =     129./  1024.;
-	  MLT_( 7,3) = -   145./  1024.; 
-	  MLT_( 7,4) =     709./   512.;
-	  MLT_( 7,5) = -   587./  1536.;
-	  MLT_( 8,2) =      15./   256.;
-	  MLT_( 8,3) = -    97./   256.;
-	  MLT_( 8,4) =     175./   128.;
-	  MLT_( 8,5) = -    13./   128.;
-	  MLT_( 9,2) = -     5./   256.;
-	  MLT_( 9,3) =      19./   256.;
-	  MLT_( 9,4) = -    13./   128.;
-	  MLT_( 9,5) =     175./   128.;
-	  MLT_(10,3) =      15./   256.;
-	  MLT_(10,4) = -    97./   256.; 
-	  MLT_(10,5) =     175./   128.;
-	  MLT_(11,3) = -     5./   256.;
-	  MLT_(11,4) =      19./   256.; 
-	  MLT_(11,5) = -    13./   128.;
-	  MLT_(12,4) =      15./   256.;
-	  MLT_(12,5) = -    97./   256.;
-	  MLT_(13,4) = -     5./   256.;
-	  MLT_(13,5) =      19./   256.;
-	  MLT_(14,5) =      15./   256.;
-	  MLT_(15,5) = -     5./   256.;
-	}
-	break;
-      case 7:
-	j0_ = 4;
-      default:
-	break;
-      }
-      break;
-    case 4:
-      switch(dT) {
-      case 6:
-	j0_ = 4;
-	break;
-      case 8:
-	j0_ = 5;
-	break;
-      default:
-	break;
-      }
-      break;
-    default:
-      break;
-    }
+    MathTL::LowerTriangularMatrix<double> DTilde = D1 * D2 * D3;
+    MathTL::LowerTriangularMatrix<double> DTildeInv; DTilde.inverse(DTildeInv);
+
+    cout << "D1=" << endl << D1;
+    cout << "D2=" << endl << D2;
+    cout << "D3=" << endl << D3;
+    cout << "DTilde=" << endl << DTilde;
+
+    MLT_.resize(3*dT+d-3, dT);
+    MathTL::Matrix<double> muT(3*dT+d-3, dT), JdT(dT, dT);
+    for (unsigned int n = 0; n < dT; n++)
+      JdT.set_entry(n, dT-n-1, 1.0);
+    cout << "JdT=" << endl << JdT;
+    
+    Matrix<double> D0;
+    D0.diagonal(3*dT+d-3, 1.0);
+    D0.set_block(0, 0, JdT * transpose(Matrix<double>(DTilde)));
+    cout << "D0=" << endl << D0;
+
+    for (unsigned int n = 0; n < dT; n++)
+      muT.set_entry(n, n, ldexp(1.0, -n));
+    for (unsigned int n = dT; n < 3*dT+d-3; n++)
+      for (unsigned int k = 0; k < dT; k++)
+	muT.set_entry(n, k, betaL(n+ell2<d>()-2, k)); // corrects a misprint in [P]
+    cout << "muT=" << endl << muT;
+    
+    MLT_ = D0 * muT * transpose(Matrix<double>(DTildeInv)) * JdT;
+//     MLT_.scale(256.0);
 
     cout << "ML=" << endl << ML_;
     cout << "MLT=" << endl << MLT_;
+  }
+
+  template <int d, int dT>
+  const double
+  PBasis<d,dT>::alpha(const int m, const unsigned int r) const {
+    double result = 0;
+    if (r == 0)
+      return 1; // [DKU] (5.1.1)
+    else {
+      if (m == 0) {
+	// [DKU] (5.1.3)
+	for (int k = ell1<d>(); k <= ell2<d>(); k++) {
+	  double help = 0;
+	  for (unsigned int s = 0; s < r; s++)
+	    help += binomial(r, s) * intpower(k, r-s) * alpha(0, s);
+	  result += cdf.a().get_coefficient(MultiIndex<int,1>(k)) * help;
+	}
+	result /= ldexp(1.0, r+1) - 2.0;
+      } else {
+	// [DKU] (5.1.2)
+	for (unsigned int i = 0; i <= r; i++)
+	  result += binomial(r, i) * intpower(m, i) * alpha(0, r-i);
+      }
+    }
+    return result;
+  }
+  
+  template <int d, int dT>
+  const double
+  PBasis<d,dT>::betaL(const int m, const unsigned int r) const {
+    // [DKU] (3.2.31)
+    double result = 0;
+    for (int q = (int)ceil((m-ell2T<d,dT>())/2.0); q < -ell1T<d,dT>(); q++)
+      result += alpha(q, r) * cdf.aT().get_coefficient(MultiIndex<int,1>(m-2*q));
+    return result;
   }
 
 }

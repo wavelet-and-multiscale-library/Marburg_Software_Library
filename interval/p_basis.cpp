@@ -5,6 +5,7 @@
 #include <numerics/schoenberg_splines.h>
 #include <algebra/triangular_matrix.h>
 #include <utils/tiny_tools.h>
+#include <interval/boundary_gramian.h>
 
 namespace WaveletTL
 {
@@ -57,9 +58,8 @@ namespace WaveletTL
       for (int n = 2*k-d; n <= 2*k; n++)
 	ML_.set_entry(n-1,k-1,cdf.a().get_coefficient(MultiIndex<int,1>(-(d/2)+n+d-2*k)));
     
-    // setup the expansion coefficients of the dual generators w.r.t. the truncated
-    // dual CDF generators
-    // see [P, Bem. 4.2]
+    // setup the expansion coefficients of the unbiorthogonalized dual generators
+    // w.r.t. the truncated CDF generators, see [P, Bem. 4.2]
     MathTL::LowerTriangularMatrix<double> D1(dT, dT), D2(dT, dT), D3(dT, dT);
     for (unsigned int r = 0; r < dT; r++)
       for (unsigned int i = 0; i <= r; i++)
@@ -105,10 +105,12 @@ namespace WaveletTL
     cout << "muT=" << endl << muT;
     
     MLT_ = D0 * muT * transpose(Matrix<double>(DTildeInv)) * JdT;
-//     MLT_.scale(256.0);
+    MLT_.compress(1e-10);
 
     cout << "ML=" << endl << ML_;
     cout << "MLT=" << endl << MLT_;
+
+    // biorthogonalization of the generators
   }
 
   template <int d, int dT>

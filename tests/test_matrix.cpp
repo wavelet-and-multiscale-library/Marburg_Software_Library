@@ -9,6 +9,7 @@
 #include <algebra/sparse_matrix.h>
 #include <algebra/tridiagonal_matrix.h>
 #include <algebra/infinite_vector.h>
+#include <algebra/kronecker_matrix.h>
 
 using std::cout;
 using std::endl;

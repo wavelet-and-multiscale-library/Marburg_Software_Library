@@ -439,6 +439,10 @@ int main()
   cout << "- a matrix M2=" << endl << M2;
   KroneckerMatrix<double,MATRIX,MATRIX> K(M1,M2);
   cout << "- Kronecker product of M1 and M2:" << endl << K;
+  
+  Matrix<double> KM(K);
+  cout << "- Kronecker product of M1 and M2 as a Matrix<double> again:"
+       << endl << KM;
 
   return 0;
 }

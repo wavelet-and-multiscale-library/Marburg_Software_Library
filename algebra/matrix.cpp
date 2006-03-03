@@ -57,7 +57,20 @@ namespace MathTL
 	  this->operator () (i, j) = M(i, j);
 	}
   }
-    
+
+  template <class C>
+  template <class MATRIX1, class MATRIX2>
+  Matrix<C>::Matrix(const KroneckerMatrix<C,MATRIX1,MATRIX2>& M)
+    : entries_(M.row_dimension()*M.column_dimension()),
+      rowdim_(M.row_dimension()), coldim_(M.column_dimension())
+  {
+    for (size_type i(0); i < rowdim_; i++)
+      for (size_type j(0); j < coldim_; j++)
+	{
+	  this->operator () (i, j) = M(i, j);
+	}
+  }
+  
   template <class C>
   inline
   Matrix<C>::Matrix(const size_type row_dimension,

@@ -14,6 +14,7 @@
 #include <algebra/vector.h>
 #include <algebra/symmetric_matrix.h>
 #include <algebra/triangular_matrix.h>
+#include <algebra/kronecker_matrix.h>
 
 // matrix norms, for convenience
 #include <algebra/matrix_norms.h>
@@ -59,6 +60,12 @@ namespace MathTL
       copy constructor from an upper triangular matrix
     */
     Matrix(const UpperTriangularMatrix<C>& M);
+    
+    /*!
+      copy constructor from a Kronecker matrix
+    */
+    template <class MATRIX1, class MATRIX2>
+    Matrix(const KroneckerMatrix<C,MATRIX1,MATRIX2>& M);
     
     /*!
       construct m*n rectangular matrix

@@ -58,6 +58,8 @@ namespace WaveletTL
       for (int n = 2*k-d; n <= 2*k; n++)
 	ML_.set_entry(n-1,k-1,cdf.a().get_coefficient(MultiIndex<int,1>(-(d/2)+n+d-2*k)));
     
+    cout << "ML=" << endl << ML_;
+
     // setup the expansion coefficients of the unbiorthogonalized dual generators
     // w.r.t. the truncated CDF generators, see [P, Bem. 4.2]
     MathTL::LowerTriangularMatrix<double> D1(dT, dT), D2(dT, dT), D3(dT, dT);
@@ -80,37 +82,39 @@ namespace WaveletTL
 
     MathTL::LowerTriangularMatrix<double> DTilde = D1 * D2 * D3;
     MathTL::LowerTriangularMatrix<double> DTildeInv; DTilde.inverse(DTildeInv);
-
-    cout << "D1=" << endl << D1;
-    cout << "D2=" << endl << D2;
-    cout << "D3=" << endl << D3;
-    cout << "DTilde=" << endl << DTilde;
+//     cout << "D1=" << endl << D1;
+//     cout << "D2=" << endl << D2;
+//     cout << "D3=" << endl << D3;
+//     cout << "DTilde=" << endl << DTilde;
 
     MLT_.resize(3*dT+d-3, dT);
     MathTL::Matrix<double> muT(3*dT+d-3, dT), JdT(dT, dT);
     for (unsigned int n = 0; n < dT; n++)
       JdT.set_entry(n, dT-n-1, 1.0);
-    cout << "JdT=" << endl << JdT;
+//     cout << "JdT=" << endl << JdT;
     
     Matrix<double> D0;
     D0.diagonal(3*dT+d-3, 1.0);
     D0.set_block(0, 0, JdT * transpose(Matrix<double>(DTilde)));
-    cout << "D0=" << endl << D0;
+//     cout << "D0=" << endl << D0;
 
     for (unsigned int n = 0; n < dT; n++)
       muT.set_entry(n, n, ldexp(1.0, -n));
     for (unsigned int n = dT; n < 3*dT+d-3; n++)
       for (unsigned int k = 0; k < dT; k++)
 	muT.set_entry(n, k, betaL(n+ell2<d>()-2, k)); // corrects a misprint in [P]
-    cout << "muT=" << endl << muT;
+//     cout << "muT=" << endl << muT;
     
     MLT_ = D0 * muT * transpose(Matrix<double>(DTildeInv)) * JdT;
     MLT_.compress(1e-10);
 
-    cout << "ML=" << endl << ML_;
     cout << "MLT=" << endl << MLT_;
 
-    // biorthogonalization of the generators
+    // for the biorthogonalization of the generators,
+    // compute the gramian matrix of the primal and dual boundary generators
+    compute_biorthogonal_boundary_gramian
+      <CDFMask_primal<d>,CDFMask_dual<d,dT> >(ML_, MLT_, GammaL);
+    cout << "GammaL=" << endl << GammaL;    
   }
 
   template <int d, int dT>

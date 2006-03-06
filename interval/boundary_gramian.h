@@ -35,7 +35,9 @@ namespace WaveletTL
          phi_{0,-l1T-m}(2.)
          .
          .
-         phi_{0,l2T-2*l1T+2*m-2}(2.))  
+         phi_{0,l2T-2*l1T+2*m-2}(2.))
+	 
+    We assume that MLT is larger than ML, but has the same number of columns.
   */
   template <class MASK1, class MASK2>
   void

@@ -108,6 +108,9 @@ namespace WaveletTL
 
     //! boundary blocks in Mj0T
     Matrix<double> MLT_, MRT_;
+
+    //! Gramian matrices for the left and right generators (primal against unbiorth. dual)
+    Matrix<double> GammaL, GammaR;
   };
 }
 

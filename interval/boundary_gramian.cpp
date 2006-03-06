@@ -1,5 +1,7 @@
 // implementation for boundary_gramian.h
 
+#include <numerics/matrix_decomp.h>
+
 namespace WaveletTL
 {
   template <class MASK1, class MASK2>
@@ -23,5 +25,34 @@ namespace WaveletTL
     //               = 1/2 * (kron(ATilde^T, A^T)*col(GammaL) + col(B^T*BTilde))
     // i.e. the vector col(GammaL) solves the linear equation
     //   (I-1/2*kron(ATilde^T, A^T)) * col(GammaL) = 1/2*col(B^T*BTilde).
+
+    const unsigned int n = ML.column_dimension(); // for readability
+    Matrix<double> A(n, n), B(MLT.row_dimension()-n, n);
+    ML.get_block(0, 0, n, n, A);
+    ML.get_block(n, 0, ML.row_dimension()-n, n, B); // here we need the default param. of get_block()
+    Matrix<double> AT(n, n), BT(MLT.row_dimension()-n, n);
+    MLT.get_block(0, 0, n, n, AT);
+    MLT.get_block(n, 0, MLT.row_dimension()-n, n, BT);
+//     cout << "A=" << endl << A;
+//     cout << "B=" << endl << B;
+//     cout << "AT=" << endl << AT;
+//     cout << "BT=" << endl << BT;
+
+    Matrix<double> H(KroneckerMatrix<double,Matrix<double>,Matrix<double> >
+		     (transpose(AT), transpose(A)));
+    H.scale(0.5);
+    Matrix<double> I; I.diagonal(n*n, 1.0);
+    Matrix<double> S = I - H;
+//     cout << "S=" << endl << S;
+
+    Matrix<double> R(transpose(B)*BT);
+    R.scale(0.5);
+    Vector<double> b;
+    R.col(b);
+//     cout << "b=" << b << endl;
+
+    Vector<double> x;
+    MathTL::QUDecomposition<double>(S).solve(b, x);
+    GammaL.decol(x, n);
   }
 }

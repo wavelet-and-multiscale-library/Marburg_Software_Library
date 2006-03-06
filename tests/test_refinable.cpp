@@ -71,6 +71,11 @@ int main()
   cout << "  + evaluate() with 1st derivative at a finer resolution:" << endl;
   cout << phi3.evaluate(MultiIndex<unsigned int, 1>(1), 2);
 
+  cout << "- dual CDF<3,3> mask:" << endl;
+  RefinableFunction<CDFMask_dual<3,3> > phi3T0;
+  for (RefinableFunction<CDFMask_dual<3,3> >::const_iterator it(phi3T0.begin()); it != phi3T0.end(); it++)
+    cout << "k=" << it.index() << ": " << *it << endl;  
+
   cout << "- dual CDF<3,5> mask:" << endl;
   RefinableFunction<CDFMask_dual<3,5> > phi3T;
   for (RefinableFunction<CDFMask_dual<3,5> >::const_iterator it(phi3T.begin()); it != phi3T.end(); it++)

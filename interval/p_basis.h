@@ -46,8 +46,8 @@ namespace WaveletTL
       phi_{j,k}(x) = 2^{j/2} B_{j,k-ell_1}
 
     So, if no boundary conditions are imposed, the index of the leftmost generator
-    will be 1-d+floor(d/2).
-
+    will be 1-d+floor(d/2). See default constructor for possible b.c.'s
+    
     References:
     [P] Primbs:
         Stabile biorthogonale Wavelet-Basen auf dem Intervall
@@ -60,15 +60,16 @@ namespace WaveletTL
     /*!
       constructor
       
-      You can specify the order of either the primal (s) or the dual (sT) boundary conditions at
-      the left and right end of the interval [0,1]. Several combinations are possible:
-      
-      si=sTi=0  : no b.c.
-      si=s>0=sTi: primal basis with b.c., dual basis without b.c.
-      si=0<s=sTi: primal basis without b.c., dual basis with b.c.
-      si=sTi>0  : b.c. for primal and dual basis, like [CTU] (not recommended, loss of approximation order)
+      At the moment, you may (only) specify the order of the primal (s) boundary conditions
+      at the left and right end of the interval [0,1].
+      For technical reasons (easing the setup of the dual generators),
+      only the values si >= d-2 are currently implemented.
+      In other words, linear spline wavelets may or may not fulfill Dirichlet b.c.'s.
+      Higher order wavelet bases will always fulfill b.c.'s of order at least d-2.
+      The dual wavelet basis will have no b.c.'s in either case and can reproduce the
+      full range of polynomials of order dT.
     */
-    PBasis(const int s0 = 0, const int s1 = 0, const int sT0 = 0, const int sT1 = 0);
+    PBasis(const int s0 = 0, const int s1 = 0);
 
     //! coarsest possible level
     inline const int j0() const { return j0_; }
@@ -77,8 +78,8 @@ namespace WaveletTL
     typedef IntervalIndex<PBasis<d,dT> > Index;
     
     //! extremal generator indices
-    inline const int DeltaLmin() const { return 1-d-ell1<d>(); }
-    inline const int DeltaRmax(const int j) const { return (1<<j)-1-ell1<d>(); }
+    inline const int DeltaLmin() const { return 1-d-ell1<d>()+s0; }
+    inline const int DeltaRmax(const int j) const { return (1<<j)-1-ell1<d>()-s1; }
 
     //! boundary indices in \nabla_j
     inline const int Nablamin() const { return 0; }
@@ -89,7 +90,7 @@ namespace WaveletTL
     int j0_;
 
     //! boundary condition orders at 0 and 1
-    int s0, s1, sT0, sT1;
+    int s0, s1;
 
     //! general setup routine which is shared by the different constructors
     void setup();

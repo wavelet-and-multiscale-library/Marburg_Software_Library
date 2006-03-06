@@ -38,8 +38,8 @@ namespace WaveletTL
 //     cout << "AT=" << endl << AT;
 //     cout << "BT=" << endl << BT;
 
-    Matrix<double> H(KroneckerMatrix<double,Matrix<double>,Matrix<double> >
-		     (transpose(AT), transpose(A)));
+    KroneckerMatrix<double,Matrix<double>,Matrix<double> > K(transpose(AT), transpose(A));
+    Matrix<double> H(K);
     H.scale(0.5);
     Matrix<double> I; I.diagonal(n*n, 1.0);
     Matrix<double> S = I - H;

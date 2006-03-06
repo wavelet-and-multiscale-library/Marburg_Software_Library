@@ -70,6 +70,12 @@ namespace MathTL
 	  this->operator () (i, j) = M(i, j);
 	}
   }
+
+  template <class C>
+  Matrix<C>::Matrix(const Vector<C>& v)
+    : entries_(v), rowdim_(v.size()), coldim_(1)
+  {
+  }
   
   template <class C>
   inline
@@ -134,7 +140,43 @@ namespace MathTL
     rowdim_ = rows;
     coldim_ = columns;
   }
+  
+  template <class C>
+  void Matrix<C>::reshape(const size_type m)
+  {
+    assert((row_dimension()*column_dimension())%m == 0);
+    coldim_ = (row_dimension()*column_dimension())/m;
+    rowdim_ = m;
+  }
+  
+  template <class C>
+  inline
+  void Matrix<C>::reshape(Vector<C>& v) const
+  {
+    v = entries_;
+  }
 
+  template <class C>
+  void Matrix<C>::col(Vector<C>& v) const
+  {
+    v.resize(entries_.size());
+    size_type i = 0;
+    for (size_type col(0); col < column_dimension(); col++)
+      for (size_type row(0); row < row_dimension(); row++, i++)
+	v[i] = get_entry(row, col);
+  }
+
+  template <class C>
+  void Matrix<C>::decol(const Vector<C>& v, const size_type rows)
+  {
+    assert(v.size()%rows == 0);
+    resize(rows, v.size()/rows);
+    size_type i = 0;
+    for (size_type col(0); col < column_dimension(); col++)
+      for (size_type row(0); row < row_dimension(); row++, i++)
+	set_entry(row, col, v[i]);
+  }
+    
   template <class C>
   void Matrix<C>::diagonal(const size_type n, const C diag)
   {
@@ -173,6 +215,22 @@ namespace MathTL
     return this->operator () (row, column);
   }
 
+  template <class C>
+  template <class MATRIX>
+  void Matrix<C>::get_block(const size_type firstrow, const size_type firstcolumn,
+			    const size_type rows, const size_type columns,
+			    MATRIX& M, const bool resizeM) const
+  {
+    assert(firstrow+rows <= rowdim_ && firstcolumn+columns <= coldim_);
+    
+    if (resizeM) M.resize(rows, columns);
+    for (size_type i(0); i < rows; i++) // brute force
+      for (size_type j(0); j < columns; j++)
+	{
+	  M.set_entry(i, j, get_entry(firstrow+i, firstcolumn+j));
+	}
+  }
+  
   template <class C>
   inline
   C& Matrix<C>::operator () (const size_type row, const size_type column)

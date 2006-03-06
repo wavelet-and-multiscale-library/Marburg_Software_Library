@@ -444,5 +444,21 @@ int main()
   cout << "- Kronecker product of M1 and M2 as a Matrix<double> again:"
        << endl << KM;
 
+  Vector<double> w(3, "1 2 3");
+  Matrix<double> wMatrix(w);
+  cout << "- construct a matrix from a vector:" << endl
+       << wMatrix;
+  wMatrix.reshape(1);
+  cout << "- reshape this matrix:" << endl
+       << wMatrix;
+
+  M = Matrix<double>(2, 2, "1 3 2 4");
+  cout << "- another matrix M=" << endl << M;
+  Vector<double> colM; M.col(colM);
+  cout << "- col(M)=" << colM << endl;
+  M.resize(45,67);
+  M.decol(colM, 2);
+  cout << "- decol(col(M))=" << endl << M;
+
   return 0;
 }

@@ -11,6 +11,13 @@ namespace MathTL
   }
 
   template <class C, class MATRIX1, class MATRIX2>
+  KroneckerMatrix<C,MATRIX1,MATRIX2>::KroneckerMatrix
+  (const KroneckerMatrix<C,MATRIX1,MATRIX2>& M)
+    : A(M.A), B(M.B)
+  {
+  }
+
+  template <class C, class MATRIX1, class MATRIX2>
   inline
   const typename KroneckerMatrix<C,MATRIX1,MATRIX2>::size_type
   KroneckerMatrix<C,MATRIX1,MATRIX2>::row_dimension() const

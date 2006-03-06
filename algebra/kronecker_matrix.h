@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <algebra/vector.h>
+#include <algebra/matrix.h>
 
 // matrix norms, for convenience
 #include <algebra/matrix_norms.h>

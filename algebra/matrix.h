@@ -68,6 +68,11 @@ namespace MathTL
     Matrix(const KroneckerMatrix<C,MATRIX1,MATRIX2>& M);
     
     /*!
+      copy constructor from a (column) vector
+    */
+    Matrix(const Vector<C>& v);
+
+    /*!
       construct m*n rectangular matrix
     */
     Matrix(const size_type row_dimension, const size_type column_dimension);
@@ -106,6 +111,30 @@ namespace MathTL
     void resize(const size_type rows, const size_type columns);
 
     /*!
+      Matlab reshape functionality: rearrange the entries
+      with a given number of rows
+      (#rows should divide m*n...)
+    */
+    void reshape(const size_type rows);
+
+    /*!
+      Matlab reshape functionality: rearrange the entries
+      as a column vector
+    */
+    void reshape(Vector<C>& v) const;
+    
+    /*!
+      glue all columns together
+    */
+    void col(Vector<C>& v) const;
+
+    /*!
+      reverse the col() call, with #rows rows
+      (#rows should divide v.size()...)
+    */
+    void decol(const Vector<C>& v, const size_type rows);
+    
+    /*!
       resize the matrix, prepare an n-by-n diagonal matrix
     */
     void diagonal(const size_type n, const C diag);
@@ -130,6 +159,14 @@ namespace MathTL
     */
     const C get_entry(const size_type row, const size_type column) const;
 
+    /*!
+      read access to a subblock
+    */
+    template <class MATRIX>
+    void get_block(const size_type firstrow, const size_type firstcolumn,
+		   const size_type rows, const size_type columns,
+		   MATRIX& M, const bool resizeM = false) const;
+    
     /*!
       read-write access to a matrix entry
     */

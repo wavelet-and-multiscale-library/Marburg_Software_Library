@@ -52,7 +52,7 @@ namespace WaveletTL
 
     // The total number of (left) boundary generators is always exactly dT
     // (to be able reproduce all polynomials by the dual generators)
-    ML_.resize(3*dT+2*d-5, dT); // TODO: adjust the number of rows!!!
+    ML_.resize(3*dT+s0-1, dT);
     ML_.set_block(0, 0, ML_0);
 //     for (int k = d; k <= d+dT-2; k++)
 //       for (int n = 2*k-d; n <= 2*k; n++)

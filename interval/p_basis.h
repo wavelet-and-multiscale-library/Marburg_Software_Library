@@ -133,6 +133,13 @@ namespace WaveletTL
     //! setup initial refinement matrices Mj0, Mj0Tp [DKU, (3.5.1), (3.5.5)]
     void setup_Mj0  (const Matrix<double>& ML,   const Matrix<double>& MR,   SparseMatrix<double>& Mj0  );
     void setup_Mj0Tp(const Matrix<double>& MLTp, const Matrix<double>& MRTp, SparseMatrix<double>& Mj0Tp);
+
+    //! generator biorthogonalization matrices on level j0 and j0+1 CjT, CjpT (5.2.5)
+    void setup_Cj();
+
+    //! those matrices
+    SparseMatrix<double> CjT, CjpT;
+    SparseMatrix<double> inv_CjT, inv_CjpT;
   };
 }
 

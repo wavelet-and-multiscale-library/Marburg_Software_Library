@@ -74,6 +74,10 @@ namespace WaveletTL
     //! coarsest possible level
     inline const int j0() const { return j0_; }
 
+    //! freezing parameters
+    inline const int ellT_l() const { return -ell1T<d,dT>()+s0+2-d; }
+    inline const int ellT_r() const { return -ell1T<d,dT>()+s1+2-d; }
+    
     //! wavelet index class
     typedef IntervalIndex<PBasis<d,dT> > Index;
     

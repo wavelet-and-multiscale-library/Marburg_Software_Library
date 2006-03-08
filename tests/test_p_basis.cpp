@@ -14,10 +14,10 @@ int main()
   typedef PBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
-//   Basis basis(0, 0); // no b.c.'s
+  Basis basis(0, 0); // no b.c.'s
 //   Basis basis(1, 0); // complementary b.c. at x=0
 //   Basis basis(0, 1); // complementary b.c. at x=1
-  Basis basis(1, 1); // complementary b.c.'s
+//   Basis basis(1, 1); // complementary b.c.'s
 
   cout << "- d=" << d << ", dT=" << dT << endl;
   cout << "- the (" << d << "," << dT << ") basis has j0=" << basis.j0() << endl;

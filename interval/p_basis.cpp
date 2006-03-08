@@ -45,71 +45,38 @@ namespace WaveletTL
 
     // setup the refinement matrix block for all "real" primal boundary B-splines,
     // obeying the block structure (3.15)
-    // (ignoring the current values of s0 and s1)
+    // (ignoring the current values of s0 (and s1))
     MathTL::SchoenbergKnotSequence<d> sknots;
     Matrix<double> ML_0;
     MathTL::compute_Bspline_refinement_matrix<d>(&sknots, ML_0);
-
+    
     // The total number of (left) boundary generators is always exactly dT
-    // (to be able reproduce all polynomials by the dual generators)
+    // (to be able reproduce all polynomials by the dual generators).
     ML_.resize(3*dT+s0-1, dT);
-    ML_.set_block(0, 0, ML_0);
-//     for (int k = d; k <= d+dT-2; k++)
-//       for (int n = 2*k-d; n <= 2*k; n++)
-// 	ML_.set_entry(n-1,k-1,cdf.a().get_coefficient(MultiIndex<int,1>(-(d/2)+n+d-2*k)));
+    for (int column = s0; column < d-1; column++)
+      for (int row = s0; row < 2*(d-1); row++)
+	ML_.set_entry(row-s0, column-s0, ML_0.get_entry(row,column));
+    
+    for (int k = d; k <= dT+s0; k++)
+      for (int n = 2*k-d; n <= 2*k; n++)
+ 	ML_.set_entry(n-1-s0,k-1-s0,cdf.a().get_coefficient(MultiIndex<int,1>(-(d/2)+n+d-2*k)));
     
     cout << "ML=" << endl << ML_;
 
-//     // setup the expansion coefficients of the unbiorthogonalized dual generators
-//     // w.r.t. the truncated CDF generators, see [P, Bem. 4.2]
-//     MathTL::LowerTriangularMatrix<double> D1(dT, dT), D2(dT, dT), D3(dT, dT);
-//     for (unsigned int r = 0; r < dT; r++)
-//       for (unsigned int i = 0; i <= r; i++)
-//  	D1.set_entry(r, i, binomial(r, i) * alpha(0, r-i)); // can be speeded up a bit...
+    // setup the expansion coefficients of the unbiorthogonalized dual generators
+    // w.r.t. the truncated CDF generators, see [DKU, Lemma 3.1] for the specific value ...
+    const int ellT = -ell1T<d,dT>()+s0+2-d;
+    Matrix<double> MLTp(3*dT+s0-1, dT);
+    for (unsigned int r = 0; r < dT; r++) {
+      MLTp.set_entry(r, r, ldexp(1.0, -r));
+      for (int m = ellT; m <= 2*ellT+ell1T<d,dT>()-1; m++)
+	MLTp.set_entry(dT+m-ellT, r, alpha(m, r));
+      for (int m = 2*ellT+ell1T<d,dT>(); m <= 2*ellT+ell2T<d,dT>()-2; m++)
+	MLTp.set_entry(dT+m-ellT, r, betaL(m, r));
+    }
     
-//     for (unsigned int i = 0; i < dT; i++)
-//       for (unsigned int n = 0; n <= i; n++)
-// 	D2.set_entry(i, n, minus1power(n) * binomial(i, n) * intpower(-ell1T<d,dT>()-1, i-n));
-
-//     D3.set_entry(0, 0, 1.0); // the only nontrivial value for n=0
-//     for (unsigned int n = 1; n < dT; n++)
-//       for (unsigned int l = 1; l <= n; l++) {
-// 	double help = 0;
-// 	for (unsigned int k = 0; k < n; k++)
-// 	  help += binomial(n, k) * D3.get_entry(k, l-1);
-// 	D3.set_entry(n, l, help);
-//       }
-
-//     MathTL::LowerTriangularMatrix<double> DTilde = D1 * D2 * D3;
-//     MathTL::LowerTriangularMatrix<double> DTildeInv; DTilde.inverse(DTildeInv);
-//     cout << "D1=" << endl << D1;
-//     cout << "D2=" << endl << D2;
-//     cout << "D3=" << endl << D3;
-//     cout << "DTilde=" << endl << DTilde;
-
-//     MLT_.resize(3*dT+d-3, dT);
-//     MathTL::Matrix<double> muT(3*dT+d-3, dT), JdT(dT, dT);
-//     for (unsigned int n = 0; n < dT; n++)
-//       JdT.set_entry(n, dT-n-1, 1.0);
-// //     cout << "JdT=" << endl << JdT;
-    
-//     Matrix<double> D0;
-//     D0.diagonal(3*dT+d-3, 1.0);
-//     D0.set_block(0, 0, JdT * transpose(Matrix<double>(DTilde)));
-// //     cout << "D0=" << endl << D0;
-
-//     for (unsigned int n = 0; n < dT; n++)
-//       muT.set_entry(n, n, ldexp(1.0, -n));
-//     for (unsigned int n = dT; n < 3*dT+d-3; n++)
-//       for (unsigned int k = 0; k < dT; k++)
-// 	muT.set_entry(n, k, betaL(n+ell2<d>()-2, k)); // corrects a misprint in [P]? (-1 -> -2)
-// //     cout << "muT=" << endl << muT;
-    
-//     MLT_ = D0 * muT * transpose(Matrix<double>(DTildeInv)) * JdT;
-//     MLT_.compress(1e-10);
-
-//     cout << "MLT=" << endl << MLT_;
-
+    cout << "MLTp=" << endl << MLTp;
+        
 // //     // for the biorthogonalization of the generators,
 // //     // compute the gramian matrix of the primal and dual boundary generators
 // //     compute_biorthogonal_boundary_gramian
@@ -147,7 +114,7 @@ namespace WaveletTL
   PBasis<d,dT>::betaL(const int m, const unsigned int r) const {
     // [DKU] (3.2.31)
     double result = 0;
-    for (int q = (int)ceil((m-ell2T<d,dT>())/2.0); q < -ell1T<d,dT>(); q++)
+    for (int q = (int)ceil((m-ell2T<d,dT>())/2.0); q < ellT_l(); q++)
       result += alpha(q, r) * cdf.aT().get_coefficient(MultiIndex<int,1>(m-2*q));
     return result;
   }

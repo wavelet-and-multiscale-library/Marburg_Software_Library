@@ -11,6 +11,7 @@
 #define _WAVELETTL_P_BASIS_H
 
 #include <algebra/matrix.h>
+#include <algebra/sparse_matrix.h>
 #include <Rd/cdf_utils.h>
 #include <Rd/cdf_basis.h>
 #include <interval/i_index.h>
@@ -77,6 +78,8 @@ namespace WaveletTL
     //! freezing parameters
     inline const int ellT_l() const { return -ell1T<d,dT>()+s0+2-d; }
     inline const int ellT_r() const { return -ell1T<d,dT>()+s1+2-d; }
+    inline const int ell_l()  const { return ellT_l() + d - dT; }
+    inline const int ell_r()  const { return ellT_r() + d - dT; }
     
     //! wavelet index class
     typedef IntervalIndex<PBasis<d,dT> > Index;
@@ -84,6 +87,9 @@ namespace WaveletTL
     //! extremal generator indices
     inline const int DeltaLmin() const { return 1-d-ell1<d>()+s0; }
     inline const int DeltaRmax(const int j) const { return (1<<j)-1-ell1<d>()-s1; }
+    
+    //! size of Delta_j
+    inline const int Deltasize(const int j) const { return DeltaRmax(j)-DeltaLmin()+1; }
 
     //! boundary indices in \nabla_j
     inline const int Nablamin() const { return 0; }
@@ -108,7 +114,10 @@ namespace WaveletTL
      //! refinement coeffients of left dual boundary generators
     const double betaL(const int m, const unsigned int r) const;
 
-   //! boundary blocks in Mj0
+    //! refinement coeffients of left dual boundary generators (m reversed)
+    const double betaR(const int m, const unsigned int r) const;
+
+    //! boundary blocks in Mj0
     Matrix<double> ML_, MR_;
 
     //! boundary blocks in Mj0T
@@ -116,6 +125,14 @@ namespace WaveletTL
 
     //! Gramian matrices for the left and right generators (primal against unbiorth. dual)
     Matrix<double> GammaL, GammaR;
+
+    //! refinement matrices on the coarsest level j0 and their transposed versions
+    SparseMatrix<double> Mj0, Mj0T, Mj1, Mj1T;
+    SparseMatrix<double> Mj0_t, Mj0T_t, Mj1_t, Mj1T_t;
+
+    //! setup initial refinement matrices Mj0, Mj0Tp [DKU, (3.5.1), (3.5.5)]
+    void setup_Mj0  (const Matrix<double>& ML,   const Matrix<double>& MR,   SparseMatrix<double>& Mj0  );
+    void setup_Mj0Tp(const Matrix<double>& MLTp, const Matrix<double>& MRTp, SparseMatrix<double>& Mj0Tp);
   };
 }
 

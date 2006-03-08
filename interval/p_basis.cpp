@@ -56,32 +56,54 @@ namespace WaveletTL
     for (int column = s0; column < d-1; column++)
       for (int row = s0; row < 2*(d-1); row++)
 	ML_.set_entry(row-s0, column-s0, ML_0.get_entry(row,column));
-    
     for (int k = d; k <= dT+s0; k++)
       for (int n = 2*k-d; n <= 2*k; n++)
  	ML_.set_entry(n-1-s0,k-1-s0,cdf.a().get_coefficient(MultiIndex<int,1>(-(d/2)+n+d-2*k)));
-    
     cout << "ML=" << endl << ML_;
 
+    MR_.resize(3*dT+s1-1, dT);
+    for (int column = s1; column < d-1; column++)
+      for (int row = s1; row < 2*(d-1); row++)
+	MR_.set_entry(row-s1, column-s1, ML_0.get_entry(row,column));
+    for (int k = d; k <= dT+s1; k++)
+      for (int n = 2*k-d; n <= 2*k; n++)
+ 	MR_.set_entry(n-1-s1,k-1-s1,cdf.a().get_coefficient(MultiIndex<int,1>(-(d/2)+n+d-2*k)));
+    cout << "MR=" << endl << MR_;
+
+    setup_Mj0(ML_, MR_, Mj0); // [DKU, (3.5.1)]
+
     // setup the expansion coefficients of the unbiorthogonalized dual generators
-    // w.r.t. the truncated CDF generators, see [DKU, Lemma 3.1] for the specific value ...
-    const int ellT = -ell1T<d,dT>()+s0+2-d;
+    // w.r.t. the truncated CDF generators, see [DKU, Lemma 3.1]
     Matrix<double> MLTp(3*dT+s0-1, dT);
     for (unsigned int r = 0; r < dT; r++) {
       MLTp.set_entry(r, r, ldexp(1.0, -r));
-      for (int m = ellT; m <= 2*ellT+ell1T<d,dT>()-1; m++)
-	MLTp.set_entry(dT+m-ellT, r, alpha(m, r));
-      for (int m = 2*ellT+ell1T<d,dT>(); m <= 2*ellT+ell2T<d,dT>()-2; m++)
-	MLTp.set_entry(dT+m-ellT, r, betaL(m, r));
+      for (int m = ellT_l(); m <= 2*ellT_l()+ell1T<d,dT>()-1; m++)
+	MLTp.set_entry(dT+m-ellT_l(), r, alpha(m, r));
+      for (int m = 2*ellT_l()+ell1T<d,dT>(); m <= 2*ellT_l()+ell2T<d,dT>()-2; m++)
+	MLTp.set_entry(dT+m-ellT_l(), r, betaL(m, r));
     }
-    
     cout << "MLTp=" << endl << MLTp;
         
-// //     // for the biorthogonalization of the generators,
-// //     // compute the gramian matrix of the primal and dual boundary generators
-// //     compute_biorthogonal_boundary_gramian
-// //       <CDFMask_primal<d>,CDFMask_dual<d,dT> >(ML_, MLT_, GammaL);
-// //     cout << "GammaL=" << endl << GammaL;    
+    Matrix<double> MRTp(3*dT+s1-1, dT);
+    for (unsigned int r = 0; r < dT; r++) {
+      MRTp.set_entry(r, r, ldexp(1.0, -r));
+      for (int m = ellT_r(); m <= 2*ellT_r()+ell1T<d,dT>()-1; m++)
+	MRTp.set_entry(dT+m-ellT_r(), r, alpha(m, r));
+      for (int m = 2*ellT_r()+ell1T<d,dT>(); m <= 2*ellT_r()+ell2T<d,dT>()-2; m++)
+	MRTp.set_entry(dT+m-ellT_r(), r, betaR(m, r));
+    }
+    cout << "MRTp=" << endl << MRTp;
+        
+    // for the biorthogonalization of the generators,
+    // compute the gramian matrix of the primal and dual boundary generators
+    compute_biorthogonal_boundary_gramian
+      <CDFMask_primal<d>,CDFMask_dual<d,dT> >(ML_, MLTp, GammaL);
+    cout << "GammaL=" << endl << GammaL;
+
+    compute_biorthogonal_boundary_gramian
+      <CDFMask_primal<d>,CDFMask_dual<d,dT> >(MR_, MRTp, GammaR);
+    cout << "GammaR=" << endl << GammaR;
+   
   }
 
   template <int d, int dT>
@@ -119,4 +141,42 @@ namespace WaveletTL
     return result;
   }
 
+  template <int d, int dT>
+  const double
+  PBasis<d,dT>::betaR(const int m, const unsigned int r) const {
+    // [DKU] (3.2.31)
+    double result = 0;
+    for (int q = (int)ceil((m-ell2T<d,dT>())/2.0); q < ellT_r(); q++)
+      result += alpha(q, r) * cdf.aT().get_coefficient(MultiIndex<int,1>(m-2*q));
+    return result;
+  }
+
+  template <int d, int dT>
+  void
+  PBasis<d,dT>::setup_Mj0(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& Mj0) {
+    // IGPMlib reference: I_Basis_Bspline_s::Mj0()
+    // cf. [DKU section 3.5]
+
+    const int nj  = Deltasize(j0());
+    const int njp = Deltasize(j0()+1);
+    Mj0.resize(njp, nj);
+
+    for (unsigned int i = 0; i < ML.row_dimension(); i++)
+      for (unsigned int k = 0; k < ML.column_dimension(); k++)
+	Mj0.set_entry(i, k, ML.get_entry(i, k));
+    
+    for (unsigned int i = 0; i < MR.row_dimension(); i++)
+      for (unsigned int k = 0; k < MR.column_dimension(); k++)
+	Mj0.set_entry(njp-i-1, nj-k-1, MR.get_entry(i, k));
+    
+    int startrow = d+ell_l()+ell1<d>()-2*s0;
+    for (int col = d-s0; col < nj-(d-s1); col++, startrow+=2) {
+      int row = startrow;
+      for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf.a().begin());
+	   it != cdf.a().end(); ++it, row++)
+	Mj0.set_entry(row, col, *it);
+    }
+    
+    cout << "Mj0=" << endl << Mj0 << endl;
+  }
 }

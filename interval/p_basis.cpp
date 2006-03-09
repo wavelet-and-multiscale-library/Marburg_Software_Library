@@ -143,7 +143,7 @@ namespace WaveletTL
     SparseMatrix<double> BB; BT(A, BB); // [DKU, (4.1.13)]
 
 #if 1
-    cout << "DSBasis(): check properties (4.1.15):" << endl;
+    cout << "PBasis(): check properties (4.1.15):" << endl;
     SparseMatrix<double> test4115 = transpose(BB)*A;
     for (unsigned int i = 0; i < test4115.row_dimension(); i++)
       test4115.set_entry(i, i, test4115.get_entry(i, i) - 1.0);
@@ -162,11 +162,11 @@ namespace WaveletTL
 #endif
 
 #if 1
-    cout << "DSBasis(): check factorization of A:" << endl;
+    cout << "PBasis(): check factorization of A:" << endl;
     SparseMatrix<double> testAfact = Aold - Hinv*A;
     cout << "* in infty-norm: " << row_sum_norm(testAfact) << endl;
 
-    cout << "DSBasis(): check that H is inverse to Hinv:" << endl;
+    cout << "PBasis(): check that H is inverse to Hinv:" << endl;
     SparseMatrix<double> testHinv = H*Hinv;
     for (unsigned int i = 0; i < testHinv.row_dimension(); i++)
       testHinv.set_entry(i, i, testHinv.get_entry(i, i) - 1.0);
@@ -177,7 +177,7 @@ namespace WaveletTL
     SparseMatrix<double> PPinv; InvertP(PP, PPinv);
 
 #if 1
-    cout << "DSBasis(): check that PPinv is inverse to PP:" << endl;
+    cout << "PBasis(): check that PPinv is inverse to PP:" << endl;
     SparseMatrix<double> testPinv = PP*PPinv;
     for (unsigned int i = 0; i < testPinv.row_dimension(); i++)
       testPinv.set_entry(i, i, testPinv.get_entry(i, i) - 1.0);
@@ -189,7 +189,7 @@ namespace WaveletTL
     SparseMatrix<double> gj1ih = transpose(FF) * help; // (4.1.24)
 
 #if 1
-    cout << "DSBasis(): check initial stable completion:" << endl;
+    cout << "PBasis(): check initial stable completion:" << endl;
     SparseMatrix<double> mj_initial(Mj0.row_dimension(),
 				    Mj0.column_dimension() + mj1ih.column_dimension());
     for (unsigned int i = 0; i < Mj0.row_dimension(); i++)

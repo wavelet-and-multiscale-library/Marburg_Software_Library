@@ -591,13 +591,18 @@ namespace WaveletTL
     //     int q = lastrow-firstrow+1;
 
     SparseMatrix<double> help;
+
+//     cout << "A=" << endl << A;
     
     // elimination (4.1.4)ff.:
     for (int i = 1; i <= d; i++) {
       help.diagonal(Deltasize(j0()+1), 1.0);
 
+      // index of the entry in the first column of A_j^{(i)} (w.r.t. Ahat_j^{(i)})
       const int elimrow = i%2 ? firstrow+(i-1)/2 : lastrow-(int)floor((i-1)/2.);
+//       cout << "elimrow=" << elimrow << endl;
 
+      // TODO: use Miriam's factorization technique!
       const int HhatLow = i%2 ? elimrow : ell_l()+ell2<d>()+2-(d%2)-(i/2)-2*s0;
       const int HhatUp  = i%2 ? HhatLow + 2*p-1+(d+(d%2))/2 : elimrow;
       
@@ -620,10 +625,14 @@ namespace WaveletTL
 	    help.set_entry(k+1, k, Lentry);
 	}
       
+//       cout << "help=" << endl << help;
+
       A = help * A;
       H = help * H;
       
       A.compress(1e-14);
+
+//       cout << "A=" << endl << A;
 
       // invert help
       if (i%2) {

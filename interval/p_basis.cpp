@@ -30,8 +30,8 @@ namespace WaveletTL
     // interior dual generators have to be constructed. In a later version of
     // this class, we will fix this.
 
-    j0_ = (int) ceil(log(std::max(ellT_l(),ellT_r())+ell2T<d,dT>()-1.)/M_LN2+1);
-
+    j0_ = (int) ceil(log(ell2T<d,dT>()-ell1T<d,dT>()+std::max(s0,s1)+1.-d)/M_LN2+1);
+    
     // setup the refinement matrix block for all "real" primal boundary B-splines,
     // obeying the block structure (3.15)
     // (ignoring the current values of s0 (and s1))
@@ -99,7 +99,7 @@ namespace WaveletTL
     setup_Cj();
     Mj0T = transpose(inv_CjpT) * mj0tp * transpose(CjT); // [DKU, (2.4.3)]
 
-#if 1
+#if 0
     cout << "PBasis(): check biorthogonality of Mj0, Mj0T:" << endl;
 //     cout << "Mj0=" << endl << Mj0 << endl << "Mj0T=" << endl << Mj0T << endl;
 
@@ -263,7 +263,7 @@ namespace WaveletTL
  		       Deltasize(j0()+1)-inv_CRT.column_dimension(),
  		       inv_CRT, true);
 
-#if 0
+#if 1
     cout << "PBasis: testing setup of Cj:" << endl;
 
     SparseMatrix<double> test1 = CjT * inv_CjT;

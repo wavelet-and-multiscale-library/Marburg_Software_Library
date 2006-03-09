@@ -30,7 +30,14 @@ namespace WaveletTL
     // interior dual generators have to be constructed. In a later version of
     // this class, we will fix this.
 
+#if 1
+    // choose j0 s.th. the supports of the dual boundary generators do not overlap
     j0_ = (int) ceil(log(ell2T<d,dT>()-ell1T<d,dT>()+std::max(s0,s1)+1.-d)/M_LN2+1);
+#else
+    // choose j0 s.th. the supports of the primal boundary generators do not overlap
+    // the supports of the dual boundary generators from the other endpoint
+    j0_ = (int) ceil(log(ell2T<d,dT>()-ell1T<d,dT>()+2*std::max(s0,s1)+dT-d+1.)/M_LN2);
+#endif
     
     // setup the refinement matrix block for all "real" primal boundary B-splines,
     // obeying the block structure (3.15)
@@ -99,21 +106,24 @@ namespace WaveletTL
     setup_Cj();
     Mj0T = transpose(inv_CjpT) * mj0tp * transpose(CjT); // [DKU, (2.4.3)]
 
-#if 0
+    Mj0.scale(M_SQRT1_2);
+    Mj0T.scale(M_SQRT1_2);
+
+#if 1
     cout << "PBasis(): check biorthogonality of Mj0, Mj0T:" << endl;
 //     cout << "Mj0=" << endl << Mj0 << endl << "Mj0T=" << endl << Mj0T << endl;
 
     SparseMatrix<double> testbio0 = transpose(Mj0) * Mj0T;
 //     cout << "Mj0^T*Mj0T=" << endl << testbio0 << endl;
     for (unsigned int i = 0; i < testbio0.row_dimension(); i++)
-      testbio0.set_entry(i, i, testbio0.get_entry(i, i) - 2.0);
-    cout << "* ||Mj0^T*Mj0T-2*I||_infty: " << row_sum_norm(testbio0) << endl;
+      testbio0.set_entry(i, i, testbio0.get_entry(i, i) - 1.0);
+    cout << "* ||Mj0^T*Mj0T-I||_infty: " << row_sum_norm(testbio0) << endl;
 
     testbio0 = transpose(Mj0T) * Mj0;
     //     cout << "Mj0T*Mj0^T=" << endl << testbio0 << endl;
     for (unsigned int i = 0; i < testbio0.row_dimension(); i++)
-      testbio0.set_entry(i, i, testbio0.get_entry(i, i) - 2.0);
-    cout << "* ||Mj0T^T*Mj0-2*I||_infty: " << row_sum_norm(testbio0) << endl;
+      testbio0.set_entry(i, i, testbio0.get_entry(i, i) - 1.0);
+    cout << "* ||Mj0T^T*Mj0-I||_infty: " << row_sum_norm(testbio0) << endl;
 #endif    
 
 

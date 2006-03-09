@@ -86,6 +86,10 @@ namespace WaveletTL
     
     //! extremal generator indices
     inline const int DeltaLmin() const { return 1-d-ell1<d>()+s0; }
+    inline const int DeltaLmax() const { return -ell1<d>(); }
+    inline const int Delta0min() const { return DeltaLmax()+1; }
+    inline const int Delta0max(const int j) const { return DeltaRmin(j)-1; }
+    inline const int DeltaRmin(const int j) const { return (1<<j)-(d%2)-(ell_r()-1-s1); }
     inline const int DeltaRmax(const int j) const { return (1<<j)-1-ell1<d>()-s1; }
     
     //! size of Delta_j
@@ -140,6 +144,14 @@ namespace WaveletTL
     //! those matrices
     SparseMatrix<double> CjT, CjpT;
     SparseMatrix<double> inv_CjT, inv_CjpT;
+
+    // routines for the stable completion, cf. [DKU section 4.1]
+    void F(SparseMatrix<double>& FF); // (4.1.11), (4.1.14)
+    void P(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& PP); // (4.1.22)
+    void GSetup(SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv); // (4.1.1), (4.1.13)
+    void GElim (SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv); // elimination/factorization
+    void InvertP(const SparseMatrix<double>& PP, SparseMatrix<double>& PPinv);
+    void BT(const SparseMatrix<double>& A, SparseMatrix<double>& BB); // (4.1.9), (4.1.13)
   };
 }
 

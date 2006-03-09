@@ -1234,7 +1234,7 @@ namespace WaveletTL
       for (unsigned int k = 0; k < MR.column_dimension(); k++)
 	PP.set_entry(Deltasize(j0()+1)-i-1, Deltasize(j0()+1)-k-1, MR.get_entry(i, k));
 
-    //     cout << "P=" << endl << PP << endl;
+//     cout << "P=" << endl << PP << endl;
   }
 
   template <int d, int dT>

@@ -149,6 +149,11 @@ namespace MathTL
     SparseMatrix<C>& operator = (const SparseMatrix<C>& M);
 
     /*!
+      in place scaling *this *= s
+    */
+    void scale(const C s);
+
+    /*!
       yields an n-by-n diagonal matrix
     */
     void diagonal(const size_type n, const C diag);

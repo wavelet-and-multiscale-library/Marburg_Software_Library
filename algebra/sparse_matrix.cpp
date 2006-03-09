@@ -366,6 +366,17 @@ namespace MathTL
   }
 
   template <class C>
+  void SparseMatrix<C>::scale(const C s)
+  {
+    for (size_type i(0); i < rowdim_; i++) {
+      if (indices_[i]) {
+	for (size_type j(1); j <= indices_[i][0]; j++)
+	  entries_[i][j-1] *= s;
+      }
+    }
+  }
+  
+  template <class C>
   void SparseMatrix<C>::diagonal(const size_type n, const C diag)
   {
     resize(n, n);

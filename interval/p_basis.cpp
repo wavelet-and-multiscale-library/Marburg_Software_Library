@@ -98,28 +98,24 @@ namespace WaveletTL
       <CDFMask_primal<d>,CDFMask_dual<d,dT> >(MR_, MRTp, GammaR);
     cout << "GammaR=" << endl << GammaR;
 
-    ML_.scale(M_SQRT1_2);
-    MR_.scale(M_SQRT1_2);
     setup_Mj0(ML_, MR_, Mj0); // [DKU, (3.5.1)]
     Mj0.compress(1e-8);
-//     ML_.scale(M_SQRT2);
-//     MR_.scale(M_SQRT2);
     
-    MLTp.scale(M_SQRT1_2);
-    MRTp.scale(M_SQRT1_2);
     SparseMatrix<double> mj0tp; setup_Mj0Tp(MLTp, MRTp, mj0tp); // [DKU, (3.5.5)]
     mj0tp.compress(1e-8);
-//     MLTp.scale(M_SQRT2);
-//     MRTp.scale(M_SQRT2);
     
     // biorthogonalize the generators
     setup_Cj();
     Mj0T = transpose(inv_CjpT) * mj0tp * transpose(CjT); // [DKU, (2.4.3)]
     Mj0T.compress(1e-8);
 
-//     Mj0T.scale(M_SQRT2);
-//     cout << "Mj0T (unscaled)=" << endl << Mj0T;
-//     Mj0T.scale(M_SQRT1_2);
+    Mj0.scale(M_SQRT2);
+    cout << "Mj0 (without SQRT1_2)=" << endl << Mj0;
+    Mj0.scale(M_SQRT1_2);
+
+    Mj0T.scale(M_SQRT2);
+    cout << "Mj0T (without SQRT1_2)=" << endl << Mj0T;
+    Mj0T.scale(M_SQRT1_2);
 
 #if 1
     cout << "PBasis(): check biorthogonality of Mj0, Mj0T:" << endl;
@@ -151,8 +147,9 @@ namespace WaveletTL
 #endif
 
     GElim (A, H, Hinv); // elimination [DKU, (4.1.4)ff.]
-    SparseMatrix<double> BB; BT(A, BB); // [DKU, (4.1.13)]
-
+    SparseMatrix<double> BB; double binv = BT(A, BB); // [DKU, (4.1.13)]
+    cout << "b^{-1}=" << binv << endl;
+    
 #if 1
     cout << "PBasis(): check properties (4.1.15):" << endl;
     SparseMatrix<double> test4115 = transpose(BB)*A;
@@ -185,15 +182,16 @@ namespace WaveletTL
 #endif
 
     SparseMatrix<double> mj1ih = PP * Hinv * FF; // [DKU, (4.1.23)]
-    cout << "PP=" << endl << PP;
-    cout << "Hinv=" << endl << Hinv;
-    cout << "mj1ih=" << endl << mj1ih;
+    mj1ih.scale(M_SQRT1_2); // [P, Prop. 5.6]
+//     cout << "PP=" << endl << PP;
+//     cout << "Hinv=" << endl << Hinv;
+//     cout << "mj1ih=" << endl << mj1ih;
 
     SparseMatrix<double> PPinv; InvertP(PP, PPinv);
 
     SparseMatrix<double> help = H * PPinv;
-    SparseMatrix<double> gj0ih = transpose(BB) * help;
-    SparseMatrix<double> gj1ih = transpose(FF) * help; // (4.1.24)
+    SparseMatrix<double> gj0ih = transpose(BB) * help; gj0ih.scale(M_SQRT2); // [P, Prop. 5.6]
+    SparseMatrix<double> gj1ih = transpose(FF) * help; gj1ih.scale(M_SQRT2); // [DKU, (4.1.24)], [P, Prop. 5.6]
 
 #if 1
     cout << "PBasis(): check initial stable completion:" << endl;
@@ -249,11 +247,18 @@ namespace WaveletTL
     Mj0T.compress(1e-8);
     Mj1T.compress(1e-8);
 
-//     cout << "Mj1=" << endl << Mj1;
-//     cout << "Mj1T=" << endl << Mj1T;
+    // adjust scaling factor for the interior wavelets, cf. [P, p.]
+    const double scaling_factor = minus1power(d+1)*2*binv;
+    Mj1 .scale(scaling_factor);
+    Mj1T.scale(1./scaling_factor);
+    
+    Mj1.scale(M_SQRT2);
+    cout << "Mj1 (without SQRT1_2)=" << endl << Mj1;
+    Mj1.scale(M_SQRT1_2);
 
-    // TODO: adjust scaling factor for the interior wavelets, cf. [P, p.]
-    // The exact factor is (-1)^{d+1}*2/b
+    Mj1T.scale(M_SQRT2);
+    cout << "Mj1T (without SQRT1_2)=" << endl << Mj1T;
+    Mj1T.scale(M_SQRT1_2);
 
 #if 1
     cout << "PBasis(): check new stable completion:" << endl;
@@ -416,8 +421,10 @@ namespace WaveletTL
       int row = startrow;
       for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf.a().begin());
 	   it != cdf.a().end(); ++it, row++)
-	Mj0.set_entry(row, col, M_SQRT1_2 * *it);
+	Mj0.set_entry(row, col, *it);
     }
+
+    Mj0.scale(M_SQRT1_2);
     
 //     cout << "Mj0=" << endl << Mj0 << endl;
   }
@@ -444,9 +451,11 @@ namespace WaveletTL
       int row = startrow;
       for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf.aT().begin());
 	   it != cdf.aT().end(); ++it, row++)
-	Mj0Tp.set_entry(row, col, M_SQRT1_2 * *it);
+	Mj0Tp.set_entry(row, col, *it);
     }
     
+    Mj0Tp.scale(M_SQRT1_2);
+
 //     cout << "Mj0Tp=" << endl << Mj0Tp << endl;
   }
 
@@ -513,29 +522,25 @@ namespace WaveletTL
   PBasis<d, dT>::F(SparseMatrix<double>& FF) {
     // IGPMlib reference: I_Basis_Bspline_s::F()
     
-    const int FLow = ell_l()-s0+(d%2);       // start column index for F_j in (4.1.14)
-    const int FUp  = FLow+(DeltaRmin(j0())-DeltaLmax())-1; // end column index for F_j in (4.1.14)
+    const int FLow = ell2<d>()-1;      // first column of F_j in Fhat_j [P, p. 113]
+    const int FUp  = FLow+(1<<j0())-d; // last column of F_j in Fhat_j
     
     // (4.1.14):
     
     FF.resize(Deltasize(j0()+1), 1<<j0());
 
     for (int r = 0; r < FLow; r++)
-      FF.set_entry(r+d-s0, r, 1.0);
+      FF.set_entry(r+d-1, r, 1.0);
     
-    int i = d+ell_l()+(d%2)-1-2*s0;
-    for (int r = FLow; r <= FUp; r++) {
-      FF.set_entry(i, r-1, 1.0);
-      i += 2;
-    } 
+    int i = d-2+ell2<d>();
+    for (int col = FLow; col <= FUp; col++, i+=2)
+      FF.set_entry(i, col, 1.0);
     
-    i = Deltasize(j0()+1)-d-1+s1;
-    for (int r = (1<<j0()); r >= FUp+1; r--) {
-      FF.set_entry(i, r-1, 1.0);
-      i--;
-    }
+    i = Deltasize(j0()+1)-d;
+    for (int col = (1<<j0())-1; col >= FUp+1; col--, i--)
+      FF.set_entry(i, col, 1.0);
 
-//     cout << "F=" << endl << FF << endl;
+    cout << "F=" << endl << FF << endl;
   }
 
   template <int d, int dT>
@@ -577,8 +582,8 @@ namespace WaveletTL
       int row = startrow;
       for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf.a().begin());
 	   it != cdf.a().end(); ++it, row++) {
- 	A.set_entry(row, col, M_SQRT1_2 * *it);
-// 	A.set_entry(row, col, *it);
+//  	A.set_entry(row, col, M_SQRT1_2 * *it);
+ 	A.set_entry(row, col, *it);
       }
     }
     
@@ -676,7 +681,7 @@ namespace WaveletTL
 
 
   template <int d, int dT>
-  void
+  double
   PBasis<d, dT>::BT(const SparseMatrix<double>& A, SparseMatrix<double>& BB) {
     // IGPMlib reference: I_Basis_Bspline_s::Btr()
     
@@ -695,6 +700,8 @@ namespace WaveletTL
 
     for (int r = DeltaRmax(j0())-d+1+s1; r <= DeltaRmax(j0()); r++)
       BB.set_entry(-llow+r+DeltaRmax(j0()+1)-DeltaRmax(j0()), -llow+r, 1.0);
+
+    return help;
   }
 
   template <int d, int dT>

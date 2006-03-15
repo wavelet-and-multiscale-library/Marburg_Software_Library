@@ -102,16 +102,24 @@ namespace WaveletTL
     MR_.scale(M_SQRT1_2);
     setup_Mj0(ML_, MR_, Mj0); // [DKU, (3.5.1)]
     Mj0.compress(1e-8);
-
+//     ML_.scale(M_SQRT2);
+//     MR_.scale(M_SQRT2);
+    
     MLTp.scale(M_SQRT1_2);
     MRTp.scale(M_SQRT1_2);
     SparseMatrix<double> mj0tp; setup_Mj0Tp(MLTp, MRTp, mj0tp); // [DKU, (3.5.5)]
     mj0tp.compress(1e-8);
+//     MLTp.scale(M_SQRT2);
+//     MRTp.scale(M_SQRT2);
     
     // biorthogonalize the generators
     setup_Cj();
     Mj0T = transpose(inv_CjpT) * mj0tp * transpose(CjT); // [DKU, (2.4.3)]
     Mj0T.compress(1e-8);
+
+//     Mj0T.scale(M_SQRT2);
+//     cout << "Mj0T (unscaled)=" << endl << Mj0T;
+//     Mj0T.scale(M_SQRT1_2);
 
 #if 1
     cout << "PBasis(): check biorthogonality of Mj0, Mj0T:" << endl;
@@ -177,6 +185,10 @@ namespace WaveletTL
 #endif
 
     SparseMatrix<double> mj1ih = PP * Hinv * FF; // [DKU, (4.1.23)]
+    cout << "PP=" << endl << PP;
+    cout << "Hinv=" << endl << Hinv;
+    cout << "mj1ih=" << endl << mj1ih;
+
     SparseMatrix<double> PPinv; InvertP(PP, PPinv);
 
     SparseMatrix<double> help = H * PPinv;
@@ -227,7 +239,7 @@ namespace WaveletTL
 #endif
 
     // construction of the wavelet basis: stable completion with basis transformations
-    // (cf. DSBasis, here we have Cjp=I)
+    // (cf. DSBasis, here we have the special case Cj=Cjp=I)
     SparseMatrix<double> I; I.diagonal(Deltasize(j0()+1), 1.0);
     Mj1  = (I - (Mj0*transpose(Mj0T))) * mj1ih;
     Mj1T = transpose(gj1ih);
@@ -239,6 +251,9 @@ namespace WaveletTL
 
 //     cout << "Mj1=" << endl << Mj1;
 //     cout << "Mj1T=" << endl << Mj1T;
+
+    // TODO: adjust scaling factor for the interior wavelets, cf. [P, p.]
+    // The exact factor is (-1)^{d+1}*2/b
 
 #if 1
     cout << "PBasis(): check new stable completion:" << endl;
@@ -534,11 +549,11 @@ namespace WaveletTL
     
     for (unsigned int i = 0; i < ML.row_dimension(); i++)
       for (int k = 0; k < d-s0; k++)
-	PP.set_entry(i, k, ML.get_entry(i, k));
+ 	PP.set_entry(i, k, ML.get_entry(i, k));
 
     for (unsigned int i = 0; i < MR.row_dimension(); i++)
       for (int k = 0; k < d-s1; k++)
-	PP.set_entry(Deltasize(j0()+1)-i-1, Deltasize(j0()+1)-k-1, MR.get_entry(i, k));
+ 	PP.set_entry(Deltasize(j0()+1)-i-1, Deltasize(j0()+1)-k-1, MR.get_entry(i, k));
 
 //     cout << "P=" << endl << PP << endl;
   }
@@ -562,7 +577,8 @@ namespace WaveletTL
       int row = startrow;
       for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf.a().begin());
 	   it != cdf.a().end(); ++it, row++) {
-	A.set_entry(row, col, M_SQRT1_2 * *it);
+ 	A.set_entry(row, col, M_SQRT1_2 * *it);
+// 	A.set_entry(row, col, *it);
       }
     }
     
@@ -587,12 +603,11 @@ namespace WaveletTL
     const int firstrow = d+ell_l()+ell1<d>()-2*s0; // first row of A_j^{(d)} in Ahat_j^{(d)}
     const int lastrow  = (Deltasize(j0()+1)-1)-(d+ell_r()-ell2<d>()+(d%2)-2*s1); // last row
     
-    int p = lastcol-firstcol+1;
     //     int q = lastrow-firstrow+1;
 
     SparseMatrix<double> help;
 
-//     cout << "A=" << endl << A;
+    cout << "A=" << endl << A;
     
     // elimination (4.1.4)ff.:
     for (int i = 1; i <= d; i++) {
@@ -600,11 +615,23 @@ namespace WaveletTL
 
       // index of the entry in the first column of A_j^{(i)} (w.r.t. Ahat_j^{(i)})
       const int elimrow = i%2 ? firstrow+(i-1)/2 : lastrow-(int)floor((i-1)/2.);
-//       cout << "elimrow=" << elimrow << endl;
+      cout << "i%2=" << i%2 << ", elimrow=" << elimrow << endl;
 
-      // TODO: use Miriam's factorization technique!
+#if 1
+      // [P] factorization, p. 112
+      
+      const int HhatLow = i%2 ? d-((i+1)/2)%2 : d+1-(i/2)%2;
+//       const int HhatLow = i%2 ? firstrow+((i-1)/2)%2: firstrow+ell2<d>()-ell1<d>()-1;
+      const int HhatUp  = i%2
+	? Deltasize(j0()+1)-d-abs((d%2)-((i+1)/2)%2)
+	: Deltasize(j0()+1)-d-abs((d%2)-(i/2)%2);
+//       const int HhatUp  = i%2 ? lastrow-ell2<d>()+ell1<d>()+2 : lastrow;
+#else
+      // [DKU] factorization (does not work correctly!)
+      int p = lastcol-firstcol+1;
       const int HhatLow = i%2 ? elimrow : ell_l()+ell2<d>()+2-(d%2)-(i/2)-2*s0;
       const int HhatUp  = i%2 ? HhatLow + 2*p-1+(d+(d%2))/2 : elimrow;
+#endif
       
       if (i%2) // i odd, elimination from above (4.1.4a)
 	{
@@ -625,14 +652,14 @@ namespace WaveletTL
 	    help.set_entry(k+1, k, Lentry);
 	}
       
-//       cout << "help=" << endl << help;
+      cout << "help=" << endl << help;
 
       A = help * A;
       H = help * H;
       
       A.compress(1e-14);
 
-//       cout << "A=" << endl << A;
+      cout << "A=" << endl << A;
 
       // invert help
       if (i%2) {

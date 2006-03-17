@@ -351,6 +351,8 @@ namespace WaveletTL
     //     cout << "GjT*MjT-I=" << endl << test_new << endl;
     cout << "* ||GjT*MjT-I||_infty: " << row_sum_norm(test_new) << endl;
 #endif
+
+    // TODO: [DS]-like symmetrization
   }
 
   template <int d, int dT>
@@ -540,7 +542,7 @@ namespace WaveletTL
     for (int col = (1<<j0())-1; col >= FUp+1; col--, i--)
       FF.set_entry(i, col, 1.0);
 
-    cout << "F=" << endl << FF << endl;
+//     cout << "F=" << endl << FF << endl;
   }
 
   template <int d, int dT>
@@ -560,7 +562,7 @@ namespace WaveletTL
       for (int k = 0; k < d-1-s1; k++)
  	PP.set_entry(Deltasize(j0()+1)-i-1, Deltasize(j0()+1)-k-1, MR.get_entry(i, k));
 
-    cout << "P=" << endl << PP << endl;
+//     cout << "P=" << endl << PP << endl;
   }
 
   template <int d, int dT>

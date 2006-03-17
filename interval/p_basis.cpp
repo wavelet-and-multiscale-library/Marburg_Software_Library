@@ -523,24 +523,24 @@ namespace WaveletTL
     // IGPMlib reference: I_Basis_Bspline_s::F()
     
     const int FLow = ell2<d>()-1;      // first column of F_j in Fhat_j [P, p. 113]
-    const int FUp  = FLow+(1<<j0())-d; // last column of F_j in Fhat_j
+    const int FUp  = (1<<j0())+ell1<d>(); // last column of F_j in Fhat_j
     
     // (4.1.14):
     
     FF.resize(Deltasize(j0()+1), 1<<j0());
 
     for (int r = 0; r < FLow; r++)
-      FF.set_entry(r+d-1, r, 1.0);
+      FF.set_entry(r+d-1-s0, r, 1.0);
     
-    int i = d-2+ell2<d>();
+    int i = d-2+ell2<d>()-s0;
     for (int col = FLow; col <= FUp; col++, i+=2)
       FF.set_entry(i, col, 1.0);
     
-    i = Deltasize(j0()+1)-d;
+    i = Deltasize(j0()+1)-d+s1;
     for (int col = (1<<j0())-1; col >= FUp+1; col--, i--)
       FF.set_entry(i, col, 1.0);
 
-//     cout << "F=" << endl << FF << endl;
+    cout << "F=" << endl << FF << endl;
   }
 
   template <int d, int dT>
@@ -553,14 +553,14 @@ namespace WaveletTL
     PP.diagonal(Deltasize(j0()+1), 1.0);
     
     for (unsigned int i = 0; i < ML.row_dimension(); i++)
-      for (int k = 0; k < d-1; k++)
+      for (int k = 0; k < d-1-s0; k++)
  	PP.set_entry(i, k, ML.get_entry(i, k));
 
     for (unsigned int i = 0; i < MR.row_dimension(); i++)
-      for (int k = 0; k < d-1; k++)
+      for (int k = 0; k < d-1-s1; k++)
  	PP.set_entry(Deltasize(j0()+1)-i-1, Deltasize(j0()+1)-k-1, MR.get_entry(i, k));
 
-//     cout << "P=" << endl << PP << endl;
+    cout << "P=" << endl << PP << endl;
   }
 
   template <int d, int dT>
@@ -574,11 +574,11 @@ namespace WaveletTL
     const int njp = Deltasize(j0()+1);
     A.resize(njp, nj);
 
-    for (int row = 0; row < d-1; row++)
+    for (int row = 0; row < d-1-s0; row++)
       A.set_entry(row, row, 1.0);
     
-    int startrow = d-1;
-    for (int col = d-1; col <= nj-d; col++, startrow+=2) {
+    int startrow = d-1-s0;
+    for (int col = d-1-s0; col <= nj-d+s1; col++, startrow+=2) {
       int row = startrow;
       for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf.a().begin());
  	   it != cdf.a().end(); ++it, row++) {
@@ -586,7 +586,7 @@ namespace WaveletTL
       }
     }
     
-    for (int row = njp-1, col = nj-1; col >= nj-d+1; row--, col--)
+    for (int row = njp-1, col = nj-1; col >= nj-d+s1+1; row--, col--)
       A.set_entry(row, col, 1.0);
 
     // prepare H, Hinv for elimination process:
@@ -601,14 +601,14 @@ namespace WaveletTL
   PBasis<d, dT>::GElim(SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv) {
     // IGPMlib reference: I_Basis_Bspline_s::gelim()
     
-    const int firstcol = d-1; // first column of A_j^{(d)} in Ahat_j^{(d)}
-    const int lastcol  = Deltasize(j0())-d; // last column
-    const int firstrow = d-1; // first row of A_j^{(d)} in Ahat_j^{(d)}
-    const int lastrow  = Deltasize(j0()+1)-d; // last row
+    const int firstcol = d-1-s0; // first column of A_j^{(d)} in Ahat_j^{(d)}
+    const int lastcol  = Deltasize(j0())-d+s1; // last column
+    const int firstrow = d-1-s0; // first row of A_j^{(d)} in Ahat_j^{(d)}
+    const int lastrow  = Deltasize(j0()+1)-d+s1; // last row
     
     SparseMatrix<double> help;
 
-    cout << "A=" << endl << A;
+//     cout << "A=" << endl << A;
     
     // elimination (4.1.4)ff.:
     for (int i = 1; i <= d; i++) {
@@ -618,21 +618,11 @@ namespace WaveletTL
       const int elimrow = i%2 ? firstrow+(i-1)/2 : lastrow-(int)floor((i-1)/2.);
 //       cout << "i%2=" << i%2 << ", elimrow=" << elimrow << endl;
 
-#if 1
-      // [P] factorization, p. 112
-      
-      const int HhatLow = i%2 ? d-((i+1)/2)%2 : d+1-(i/2)%2;
-//       const int HhatLow = i%2 ? firstrow+((i-1)/2)%2: firstrow+ell2<d>()-ell1<d>()-1;
+      // factorization [P, p. 112]      
+      const int HhatLow = i%2 ? d-s0-((i+1)/2)%2 : d-s0+1-(d%2)-(i/2)%2;
       const int HhatUp  = i%2
-	? Deltasize(j0()+1)-d-abs((d%2)-((i+1)/2)%2)
-	: Deltasize(j0()+1)-d-abs((d%2)-(i/2)%2);
-//       const int HhatUp  = i%2 ? lastrow-ell2<d>()+ell1<d>()+2 : lastrow;
-#else
-      // [DKU] factorization (does not work correctly!)
-      int p = lastcol-firstcol+1;
-      const int HhatLow = i%2 ? elimrow : ell_l()+ell2<d>()+2-(d%2)-(i/2)-2*s0;
-      const int HhatUp  = i%2 ? HhatLow + 2*p-1+(d+(d%2))/2 : elimrow;
-#endif
+	? Deltasize(j0()+1)-d+s1-abs((d%2)-((i+1)/2)%2)
+	: Deltasize(j0()+1)-d+s1-abs((d%2)-(i/2)%2);
       
       if (i%2) // i odd, elimination from above (4.1.4a)
 	{
@@ -685,16 +675,16 @@ namespace WaveletTL
     const int njp = Deltasize(j0()+1);
     BB.resize(njp,nj);
 
-    for (int r = 0; r < d-1; r++)
+    for (int r = 0; r < d-1-s0; r++)
       BB.set_entry(r, r, 1.0);
 
-    const double binv = 1./A.get_entry(d-1+ell2<d>(), d-1);
+    const double binv = 1./A.get_entry(d-1-s0+ell2<d>(), d-1-s0);
 
-    int i = d-1+ell2<d>();
-    for (int col = d-1; col <= nj-d; col++, i+=2)
-      BB.set_entry(i, col, 1.0);
+    int i = d-1-s0+ell2<d>();
+    for (int col = d-1-s0; col <= nj-d+s1; col++, i+=2)
+      BB.set_entry(i, col, binv);
 
-    for (int row = njp-1, col = nj-1; col >= nj-d+1; row--, col--)
+    for (int row = njp-1, col = nj-1; col >= nj-d+s1+1; row--, col--)
       BB.set_entry(row, col, 1.0);
 
 //     cout << "BThat=" << endl << BB;

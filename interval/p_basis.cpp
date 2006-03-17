@@ -540,7 +540,7 @@ namespace WaveletTL
     for (int col = (1<<j0())-1; col >= FUp+1; col--, i--)
       FF.set_entry(i, col, 1.0);
 
-    cout << "F=" << endl << FF << endl;
+//     cout << "F=" << endl << FF << endl;
   }
 
   template <int d, int dT>
@@ -553,11 +553,11 @@ namespace WaveletTL
     PP.diagonal(Deltasize(j0()+1), 1.0);
     
     for (unsigned int i = 0; i < ML.row_dimension(); i++)
-      for (int k = 0; k < d-s0; k++)
+      for (int k = 0; k < d-1; k++)
  	PP.set_entry(i, k, ML.get_entry(i, k));
 
     for (unsigned int i = 0; i < MR.row_dimension(); i++)
-      for (int k = 0; k < d-s1; k++)
+      for (int k = 0; k < d-1; k++)
  	PP.set_entry(Deltasize(j0()+1)-i-1, Deltasize(j0()+1)-k-1, MR.get_entry(i, k));
 
 //     cout << "P=" << endl << PP << endl;
@@ -574,20 +574,19 @@ namespace WaveletTL
     const int njp = Deltasize(j0()+1);
     A.resize(njp, nj);
 
-    for (int row = 0; row < d-s0; row++)
+    for (int row = 0; row < d-1; row++)
       A.set_entry(row, row, 1.0);
     
-    int startrow = d+ell_l()+ell1<d>()-2*s0;
-    for (int col = d-s0; col < nj-(d-s1); col++, startrow+=2) {
+    int startrow = d-1;
+    for (int col = d-1; col <= nj-d; col++, startrow+=2) {
       int row = startrow;
       for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf.a().begin());
-	   it != cdf.a().end(); ++it, row++) {
-//  	A.set_entry(row, col, M_SQRT1_2 * *it);
- 	A.set_entry(row, col, *it);
+ 	   it != cdf.a().end(); ++it, row++) {
+  	A.set_entry(row, col, *it);
       }
     }
     
-    for (int row = njp-1, col = nj-1; col > nj-1-(d-s1); row--, col--)
+    for (int row = njp-1, col = nj-1; col >= nj-d+1; row--, col--)
       A.set_entry(row, col, 1.0);
 
     // prepare H, Hinv for elimination process:
@@ -602,14 +601,11 @@ namespace WaveletTL
   PBasis<d, dT>::GElim(SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv) {
     // IGPMlib reference: I_Basis_Bspline_s::gelim()
     
-    // A_j=A_j^{(0)} in (4.1.1) is a q times p matrix
-    const int firstcol = d-s0; // first column of A_j^{(d)} in Ahat_j^{(d)}
-    const int lastcol  = (Deltasize(j0())-1)-(d-s1); // last column
-    const int firstrow = d+ell_l()+ell1<d>()-2*s0; // first row of A_j^{(d)} in Ahat_j^{(d)}
-    const int lastrow  = (Deltasize(j0()+1)-1)-(d+ell_r()-ell2<d>()+(d%2)-2*s1); // last row
+    const int firstcol = d-1; // first column of A_j^{(d)} in Ahat_j^{(d)}
+    const int lastcol  = Deltasize(j0())-d; // last column
+    const int firstrow = d-1; // first row of A_j^{(d)} in Ahat_j^{(d)}
+    const int lastrow  = Deltasize(j0()+1)-d; // last row
     
-    //     int q = lastrow-firstrow+1;
-
     SparseMatrix<double> help;
 
     cout << "A=" << endl << A;
@@ -620,7 +616,7 @@ namespace WaveletTL
 
       // index of the entry in the first column of A_j^{(i)} (w.r.t. Ahat_j^{(i)})
       const int elimrow = i%2 ? firstrow+(i-1)/2 : lastrow-(int)floor((i-1)/2.);
-      cout << "i%2=" << i%2 << ", elimrow=" << elimrow << endl;
+//       cout << "i%2=" << i%2 << ", elimrow=" << elimrow << endl;
 
 #if 1
       // [P] factorization, p. 112
@@ -657,14 +653,14 @@ namespace WaveletTL
 	    help.set_entry(k+1, k, Lentry);
 	}
       
-      cout << "help=" << endl << help;
+//       cout << "help=" << endl << help;
 
       A = help * A;
       H = help * H;
       
       A.compress(1e-14);
 
-      cout << "A=" << endl << A;
+//       cout << "A=" << endl << A;
 
       // invert help
       if (i%2) {
@@ -685,23 +681,25 @@ namespace WaveletTL
   PBasis<d, dT>::BT(const SparseMatrix<double>& A, SparseMatrix<double>& BB) {
     // IGPMlib reference: I_Basis_Bspline_s::Btr()
     
-    const int p = (1<<j0()) - ell_l() - ell_r() - (d%2) + 1;
-    const int llow = ell_l()-d;
-    
-    BB.resize(Deltasize(j0()+1), Deltasize(j0()));
+    const int nj  = Deltasize(j0());
+    const int njp = Deltasize(j0()+1);
+    BB.resize(njp,nj);
 
-    for (int r = 0; r < d-s0; r++)
+    for (int r = 0; r < d-1; r++)
       BB.set_entry(r, r, 1.0);
 
-    const double help = 1./A.get_entry(d+ell_l()+ell1<d>()+ell2<d>(), d);
+    const double binv = 1./A.get_entry(d-1+ell2<d>(), d-1);
 
-    for (int c = d-s0, r = d+ell_l()+ell1<d>()+ell2<d>(); c < d+p+s1; c++, r += 2)
-      BB.set_entry(r-2*s0, c, help);
+    int i = d-1+ell2<d>();
+    for (int col = d-1; col <= nj-d; col++, i+=2)
+      BB.set_entry(i, col, 1.0);
 
-    for (int r = DeltaRmax(j0())-d+1+s1; r <= DeltaRmax(j0()); r++)
-      BB.set_entry(-llow+r+DeltaRmax(j0()+1)-DeltaRmax(j0()), -llow+r, 1.0);
+    for (int row = njp-1, col = nj-1; col >= nj-d+1; row--, col--)
+      BB.set_entry(row, col, 1.0);
 
-    return help;
+//     cout << "BThat=" << endl << BB;
+
+    return binv;
   }
 
   template <int d, int dT>

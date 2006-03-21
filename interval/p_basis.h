@@ -17,6 +17,9 @@
 #include <Rd/cdf_basis.h>
 #include <interval/i_index.h>
 
+// for convenience, include also some functionality
+#include <interval/p_support.h>
+
 using MathTL::Vector;
 using MathTL::Matrix;
 
@@ -88,6 +91,13 @@ namespace WaveletTL
     
     //! size_type, for convenience
     typedef Vector<double>::size_type size_type;
+
+    //! geometric type of the support sets
+    typedef struct {
+      int j;
+      int k1;
+      int k2;
+    } Support;
 
     //! extremal generator indices
     inline const int DeltaLmin() const { return 1-d-ell1<d>()+s0; }

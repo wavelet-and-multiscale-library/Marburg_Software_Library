@@ -1076,4 +1076,279 @@ namespace WaveletTL
     }
   }
 
+  template <int d, int dT>
+  void
+  PBasis<d, dT>::Mj0_get_row(const int j, const Vector<double>::size_type row,
+			      InfiniteVector<double, Vector<double>::size_type>& v) const {
+    if (j == j0())
+      Mj0.get_row(row, v);
+    else {
+      v.clear();
+      const size_t rows_top = (int)ceil(Deltasize(j0()+1)/2.0);
+      if (row < rows_top)
+	Mj0.get_row(row, v);
+      else {
+	const size_t bottom = Deltasize(j+1)-Deltasize(j0()+1)/2;
+	typedef Vector<double>::size_type size_type;
+	if (row >= bottom)
+	  Mj0.get_row(row+rows_top-bottom, v, Deltasize(j)-Deltasize(j0()));
+	else
+	  Mj0.get_row(rows_top-2+(row-rows_top)%2, v, (row-rows_top)/2+1);
+      }
+    }
+  }
+  
+  template <int d, int dT>
+  void
+  PBasis<d, dT>::Mj0T_get_row(const int j, const Vector<double>::size_type row,
+			       InfiniteVector<double, Vector<double>::size_type>& v) const {
+    if (j == j0())
+      Mj0T.get_row(row, v);
+    else {
+      v.clear();
+      const size_t rows_top = (int)ceil(Deltasize(j0()+1)/2.0);
+      if (row < rows_top)
+	Mj0T.get_row(row, v);
+      else {
+	const size_t bottom = Deltasize(j+1)-Deltasize(j0()+1)/2;
+	if (row >= bottom)
+	  Mj0T.get_row(row+rows_top-bottom, v, Deltasize(j)-Deltasize(j0()));
+	else
+	  Mj0T.get_row(rows_top-2+(row-rows_top)%2, v, (row-rows_top)/2+1);
+      }
+    }
+  }
+  
+  template <int d, int dT>
+  void
+  PBasis<d, dT>::Mj1_get_row(const int j, const Vector<double>::size_type row,
+			      InfiniteVector<double, Vector<double>::size_type>& v) const {
+    if (j == j0())
+      Mj1.get_row(row, v);
+    else {
+      v.clear();
+      
+      // Due to the [DS] symmetrization, we have to be a bit careful here.
+      int fill_start = 0, fill_end = (1<<j)-1; // first and last column to fill up with interior filter
+      const size_type upper_half = Deltasize(j0()+1)/2;
+      if (row < upper_half) {
+	// read the first half of the corresponding row in Mj1
+	const size_type row_j0 = row;
+	for (size_type k = 0; k < Mj1.entries_in_row(row_j0) && (int)Mj1.get_nth_index(row_j0,k) < 1<<(j0()-1); k++)
+	  v.set_coefficient(Mj1.get_nth_index(row_j0,k),
+			    Mj1.get_nth_entry(row_j0,k));
+	fill_start = 1<<(j0()-1);
+	fill_end   = (1<<j)-1;
+      }
+      else {
+	const size_type bottom_half = Deltasize(j+1)-Deltasize(j0()+1)/2;
+	if (row >= bottom_half) {
+	  // read the second half of the corresponding row in Mj1
+	  const size_type row_j0 = row+Deltasize(j0()+1)-Deltasize(j+1);
+	  for (size_type k = 0; k < Mj1.entries_in_row(row_j0); k++)
+	    if ((int)Mj1.get_nth_index(row_j0,k) >= 1<<(j0()-1))
+	      v.set_coefficient(Mj1.get_nth_index(row_j0,k)+(1<<j)-(1<<j0()),
+				Mj1.get_nth_entry(row_j0,k));
+	  fill_start = 0;
+	  fill_end   = (1<<j)-(1<<(j0()-1))-1;
+	}
+      }
+      
+      // Fill in the missing columns from the left half...
+
+      InfiniteVector<double, Vector<double>::size_type> waveTfilter_left;
+      Mj1_t.get_row((1<<(j0()-1))-1, waveTfilter_left);
+      const int first_row_left = waveTfilter_left.begin().index();  // first nontrivial row in column (1<<(j0-1))-1
+      
+      // The row ...
+      const int last_row_left  = waveTfilter_left.rbegin().index();
+      // ... is the last nontrivial row in column (1<<(j0()-1))-1,
+      // i.e. the row last_row_left begins at column (1<<(j0()-1))-1, so does the row last_row_left-1.
+      // So the row "row" starts at column ...
+      const int first_column_left = (1<<(j0()-1))-1+(int)floor(((int)row+1-last_row_left)/2.);
+      
+      for (int col = first_column_left, filter_row = last_row_left-abs(row-last_row_left)%2;
+	   col < (1<<(j-1)) && col <= fill_end && filter_row >= first_row_left; col++, filter_row -= 2)
+	if (col >= fill_start)
+	  v.set_coefficient(col, waveTfilter_left.get_coefficient(filter_row));
+      
+      // Analogous strategy for the right half:
+      
+      InfiniteVector<double, Vector<double>::size_type> waveTfilter_right;
+      Mj1_t.get_row((1<<(j0()-1)), waveTfilter_right);
+      
+      const int offset_right = (Deltasize(j+1)-Deltasize(j0()+1))-(1<<j)+(1<<j0()); // row offset for the right half
+      const int first_row_right = waveTfilter_right.begin().index()+offset_right;
+      const int last_row_right  = waveTfilter_right.rbegin().index()+offset_right;
+      
+      // The rows first_row_right and first_row_right+1 end at column 1<<(j-1),
+      // so the row "row" ends at column ...
+      const int last_column_right = (1<<(j-1))+(int)floor(((int)row-first_row_right)/2.);
+      
+      for (int col = last_column_right, filter_row = first_row_right-offset_right+abs(row-first_row_right)%2;
+	   col >= 1<<(j-1) && col >= fill_start && filter_row <= last_row_right-offset_right; col--, filter_row += 2)
+	if (col <= fill_end)
+	  v.set_coefficient(col, waveTfilter_right.get_coefficient(filter_row));
+    }
+  }
+  
+  template <int d, int dT>
+  void
+  PBasis<d, dT>::Mj1T_get_row(const int j, const Vector<double>::size_type row,
+			       InfiniteVector<double, Vector<double>::size_type>& v) const {
+    if (j == j0())
+      Mj1T.get_row(row, v);
+    else {
+      v.clear();
+      
+      int fill_start = 0, fill_end = (1<<j)-1; // first and last column to fill up with interior filter
+      const size_type upper_half = Deltasize(j0()+1)/2;
+      if (row < upper_half) {
+	// read the first half of the corresponding row in Mj1
+	const size_type row_j0 = row;
+	for (size_type k = 0; k < Mj1T.entries_in_row(row_j0) && (int)Mj1T.get_nth_index(row_j0,k) < 1<<(j0()-1); k++)
+	  v.set_coefficient(Mj1T.get_nth_index(row_j0,k),
+			    Mj1T.get_nth_entry(row_j0,k));
+	fill_start = 1<<(j0()-1);
+	fill_end   = (1<<j)-1;
+      }
+      else {
+	const size_type bottom_half = Deltasize(j+1)-Deltasize(j0()+1)/2;
+	if (row >= bottom_half) {
+	  // read the second half of the corresponding row in Mj1
+	  const size_type row_j0 = row+Deltasize(j0()+1)-Deltasize(j+1);
+	  for (size_type k = 0; k < Mj1T.entries_in_row(row_j0); k++)
+	    if ((int)Mj1T.get_nth_index(row_j0,k) >= 1<<(j0()-1))
+	      v.set_coefficient(Mj1T.get_nth_index(row_j0,k)+(1<<j)-(1<<j0()),
+				Mj1T.get_nth_entry(row_j0,k));
+	  fill_start = 0;
+	  fill_end   = (1<<j)-(1<<(j0()-1))-1;
+	}
+      }
+
+      // Fill in the missing columns from the left half...
+
+      InfiniteVector<double, Vector<double>::size_type> waveTfilter_left;
+      Mj1T_t.get_row((1<<(j0()-1))-1, waveTfilter_left);
+      const int first_row_left = waveTfilter_left.begin().index();  // first nontrivial row in column (1<<(j0-1))-1
+
+      // The row ...
+      const int last_row_left  = waveTfilter_left.rbegin().index();
+      // ... is the last nontrivial row in column (1<<(j0()-1))-1,
+      // i.e. the row last_row_left begins at column (1<<(j0()-1))-1, so does the row last_row_left-1.
+      // So the row "row" starts at column ...
+      const int first_column_left = (1<<(j0()-1))-1+(int)floor(((int)row+1-last_row_left)/2.);
+      
+      for (int col = first_column_left, filter_row = last_row_left-abs(row-last_row_left)%2;
+	   col < (1<<(j-1)) && col <= fill_end && filter_row >= first_row_left; col++, filter_row -= 2)
+	if (col >= fill_start)
+	  v.set_coefficient(col, waveTfilter_left.get_coefficient(filter_row));
+      
+      // Analogous strategy for the right half:
+      
+      InfiniteVector<double, Vector<double>::size_type> waveTfilter_right;
+      Mj1T_t.get_row((1<<(j0()-1)), waveTfilter_right);
+      
+      const int offset_right = (Deltasize(j+1)-Deltasize(j0()+1))-(1<<j)+(1<<j0()); // row offset for the right half
+      const int first_row_right = waveTfilter_right.begin().index()+offset_right;
+      const int last_row_right  = waveTfilter_right.rbegin().index()+offset_right;
+      
+      // The rows first_row_right and first_row_right+1 end at column 1<<(j-1),
+      // so the row "row" ends at column ...
+      const int last_column_right = (1<<(j-1))+(int)floor(((int)row-first_row_right)/2.);
+      
+      for (int col = last_column_right, filter_row = first_row_right-offset_right+abs(row-first_row_right)%2;
+	   col >= 1<<(j-1) && col >= fill_start && filter_row <= last_row_right-offset_right; col--, filter_row += 2)
+	if (col <= fill_end)
+	  v.set_coefficient(col, waveTfilter_right.get_coefficient(filter_row));
+    }
+  }
+  
+  template <int d, int dT>
+  void
+  PBasis<d, dT>::Mj0_t_get_row(const int j, const Vector<double>::size_type row,
+				InfiniteVector<double, Vector<double>::size_type>& v) const {
+    if (j == j0())
+      Mj0_t.get_row(row, v);
+    else {
+      const size_t rows_top = (int)ceil(Deltasize(j0())/2.0);
+      if (row < rows_top)
+	Mj0_t.get_row(row, v);
+      else {
+	const size_t bottom = Deltasize(j)-Deltasize(j0())/2;
+	if (row >= bottom)
+	  Mj0_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
+	else
+	  Mj0_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
+      }
+    }
+  }
+  
+  template <int d, int dT>
+  void
+  PBasis<d, dT>::Mj0T_t_get_row(const int j, const Vector<double>::size_type row,
+				 InfiniteVector<double, Vector<double>::size_type>& v) const {
+    if (j == j0())
+      Mj0T_t.get_row(row, v);
+    else {
+      const size_t rows_top = (int)ceil(Deltasize(j0())/2.0);
+      if (row < rows_top)
+	Mj0T_t.get_row(row, v);
+      else {
+	const size_t bottom = Deltasize(j)-Deltasize(j0())/2;
+	if (row >= bottom)
+	  Mj0T_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
+	else
+	  Mj0T_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
+      }
+    }
+  }
+  
+  template <int d, int dT>
+  void
+  PBasis<d, dT>::Mj1_t_get_row(const int j, const Vector<double>::size_type row,
+				InfiniteVector<double, Vector<double>::size_type>& v) const {
+    if (j == j0())
+      Mj1_t.get_row(row, v);
+    else {
+      const size_t rows_top = 1<<(j0()-1);
+      if (row < rows_top)
+	Mj1_t.get_row(row, v);
+      else {
+	const size_t bottom = (1<<j)-(1<<(j0()-1));
+	if (row >= bottom)
+	  Mj1_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
+	else {
+	  if ((int)row < (1<<(j-1)))
+	    Mj1_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
+	  else
+	    Mj1_t.get_row(1<<(j0()-1), v, Deltasize(j+1)-Deltasize(j0()+1)+2*((int)row-bottom));
+	}
+      }
+    }
+  }
+  
+  template <int d, int dT>
+  void
+  PBasis<d, dT>::Mj1T_t_get_row(const int j, const Vector<double>::size_type row,
+				 InfiniteVector<double, Vector<double>::size_type>& v) const {
+    if (j == j0())
+      Mj1T_t.get_row(row, v);
+    else {
+      const size_t rows_top = 1<<(j0()-1);
+      if (row < rows_top)
+	Mj1T_t.get_row(row, v);
+      else {
+	const size_t bottom = (1<<j)-(1<<(j0()-1));
+	if (row >= bottom)
+	  Mj1T_t.get_row(row+rows_top-bottom, v, Deltasize(j+1)-Deltasize(j0()+1));
+	else {
+	  if ((int)row < (1<<(j-1)))
+	    Mj1T_t.get_row(rows_top-1, v, 2*(row-rows_top)+2);
+	  else
+	    Mj1T_t.get_row(1<<(j0()-1), v, Deltasize(j+1)-Deltasize(j0()+1)+2*((int)row-bottom));
+	}
+      }
+    }
+  }
 }

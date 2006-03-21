@@ -51,7 +51,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   cout << "- checking biorthogonality of Mj<->Gj and MjT<->GjT for different levels:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+1; level++)
     {
@@ -102,6 +102,83 @@ int main()
       for (unsigned int i = 0; i < T.row_dimension(); i++)
 	T.set_entry(i, i, T.get_entry(i, i) - 1.0);
       cout << "* j=" << level << ",  ||GjT*MjT-I||_infty: " << row_sum_norm(T) << endl;
+    }
+#endif
+
+#if 0
+  cout << "- checking access to single rows of the M_{j,i} matrices:" << endl;
+  for (int level = basis.j0(); level <= basis.j0()+2; level++)
+    {
+      InfiniteVector<double, Vector<double>::size_type> v, w;
+      double maxerr = 0.0;
+      SparseMatrix<double> mj0, mj0_t, mj1, mj1_t, mj0T, mj0T_t, mj1T, mj1T_t;
+      basis.assemble_Mj0(level, mj0); mj0_t = transpose(mj0);
+      basis.assemble_Mj1(level, mj1); mj1_t = transpose(mj1);
+      basis.assemble_Mj0T(level, mj0T); mj0T_t = transpose(mj0T);
+      basis.assemble_Mj1T(level, mj1T); mj1T_t = transpose(mj1T);
+      for (size_t row = 0; row < mj0.row_dimension(); row++)
+	{
+	  mj0.get_row(row, v);
+	  basis.Mj0_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj0: " << maxerr << endl;
+      maxerr = 0.0;
+      for (size_t row = 0; row < mj0_t.row_dimension(); row++)
+	{
+	  mj0_t.get_row(row, v);
+	  basis.Mj0_t_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj0_t: " << maxerr << endl;
+      maxerr = 0.0;
+      for (size_t row = 0; row < mj1.row_dimension(); row++)
+	{
+	  mj1.get_row(row, v);
+	  basis.Mj1_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj1: " << maxerr << endl;
+      maxerr = 0.0;
+      for (size_t row = 0; row < mj1_t.row_dimension(); row++)
+	{
+	  mj1_t.get_row(row, v);
+	  basis.Mj1_t_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj1_t: " << maxerr << endl;
+      maxerr = 0.0;
+      for (size_t row = 0; row < mj0T.row_dimension(); row++)
+	{
+	  mj0T.get_row(row, v);
+	  basis.Mj0T_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj0T: " << maxerr << endl;
+      maxerr = 0.0;
+      for (size_t row = 0; row < mj0T_t.row_dimension(); row++)
+	{
+	  mj0T_t.get_row(row, v);
+	  basis.Mj0T_t_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj0T_t: " << maxerr << endl;
+      maxerr = 0.0;
+      for (size_t row = 0; row < mj1.row_dimension(); row++)
+	{
+	  mj1T.get_row(row, v);
+	  basis.Mj1T_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj1T: " << maxerr << endl;
+      maxerr = 0.0;
+      for (size_t row = 0; row < mj1T_t.row_dimension(); row++)
+	{
+	  mj1T_t.get_row(row, v);
+	  basis.Mj1T_t_get_row(level, row, w);
+	  maxerr = max(maxerr, linfty_norm(v-w));
+	}
+      cout << "* j=" << level << ", max. error in Mj1T_t: " << maxerr << endl;
     }
 #endif
 

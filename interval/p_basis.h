@@ -10,12 +10,14 @@
 #ifndef _WAVELETTL_P_BASIS_H
 #define _WAVELETTL_P_BASIS_H
 
+#include <algebra/vector.h>
 #include <algebra/matrix.h>
 #include <algebra/sparse_matrix.h>
 #include <Rd/cdf_utils.h>
 #include <Rd/cdf_basis.h>
 #include <interval/i_index.h>
 
+using MathTL::Vector;
 using MathTL::Matrix;
 
 namespace WaveletTL
@@ -84,6 +86,9 @@ namespace WaveletTL
     //! wavelet index class
     typedef IntervalIndex<PBasis<d,dT> > Index;
     
+    //! size_type, for convenience
+    typedef Vector<double>::size_type size_type;
+
     //! extremal generator indices
     inline const int DeltaLmin() const { return 1-d-ell1<d>()+s0; }
     inline const int DeltaLmax() const { return -ell1<d>(); }
@@ -135,6 +140,23 @@ namespace WaveletTL
     //! setup the transposed refinement matrix \tilde M_{j,1} for a given level j
     void assemble_Mj1T_t(const int j, SparseMatrix<double>& mj1T_t) const;
 
+    //! compute single rows of these matrices on higher levels than j0
+    void Mj0_get_row   (const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
+    void Mj0T_get_row  (const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
+    void Mj1_get_row   (const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
+    void Mj1T_get_row  (const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
+    void Mj0_t_get_row (const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
+    void Mj0T_t_get_row(const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
+    void Mj1_t_get_row (const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
+    void Mj1T_t_get_row(const int j, const Vector<double>::size_type row,
+			InfiniteVector<double, Vector<double>::size_type>& v) const;
   protected:
     //! coarsest possible level
     int j0_;

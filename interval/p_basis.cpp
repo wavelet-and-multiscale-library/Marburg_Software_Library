@@ -1351,4 +1351,439 @@ namespace WaveletTL
       }
     }
   }
+
+  template <int d, int dT>
+  void
+  PBasis<d, dT>::decompose(const InfiniteVector<double, Index>& c,
+			    const int jmin,
+			    InfiniteVector<double, Index>& v) const {
+    v.clear();
+    InfiniteVector<double, Index> help;
+    for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
+	 it != itend; ++it) {
+      decompose_1(it.index(), jmin, help); // calls help.clear() first
+      v.add(*it, help);
+    }
+  }
+  
+  template <int d, int dT>
+  void
+  PBasis<d, dT>::decompose_t(const InfiniteVector<double, Index>& c,
+			      const int jmin,
+			      InfiniteVector<double, Index>& v) const {
+    v.clear();
+    InfiniteVector<double, Index> help;
+    for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
+	 it != itend; ++it) {
+      decompose_t_1(it.index(), jmin, help); // calls help.clear() first
+      v.add(*it, help);
+    }
+  }
+  
+  template <int d, int dT>
+  void
+  PBasis<d, dT>::reconstruct(const InfiniteVector<double, Index>& c,
+			      const int j,
+			      InfiniteVector<double, Index>& v) const {
+    v.clear();
+    for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
+	 it != itend; ++it) {
+      InfiniteVector<double, Index> help;
+      reconstruct_1(it.index(), j, help);
+      v.add(*it, help);
+    }
+  }
+
+  template <int d, int dT>
+  void
+  PBasis<d, dT>::reconstruct_t(const InfiniteVector<double, Index>& c,
+				const int j,
+				InfiniteVector<double, Index>& v) const {
+    v.clear();
+    for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
+	 it != itend; ++it) {
+      InfiniteVector<double, Index> help;
+      reconstruct_t_1(it.index(), j, help);
+      v.add(*it, help);
+    }
+  }
+
+  template <int d, int dT>
+  void
+  PBasis<d, dT>::decompose_1(const Index& lambda,
+			      const int jmin,
+			      InfiniteVector<double, Index>& c) const {
+    assert(jmin >= j0());
+    assert(lambda.j() >= jmin);
+    
+    c.clear();
+
+    if (lambda.e() == 1) // wavelet
+      c.set_coefficient(lambda, 1.0); // true wavelet coefficients don't have to be modified
+    else // generator
+      {
+	if (lambda.j() == jmin) // generators on the coarsest level don't have to be modified
+	  c.set_coefficient(lambda, 1.0);
+	else // j > jmin
+	  {
+	    // For the multiscale decomposition of psi_lambda, we have to compute
+	    // the corresponding column of the transformation matrix G_{j-1}=\tilde M_{j-1}^T,
+	    // i.e. one row of G_{j-1}^T=(\tilde M_{j-1,0}, \tilde M_{j-1,1}).
+	    
+	    typedef Vector<double>::size_type size_type;
+
+	    const size_type row = lambda.k() - DeltaLmin();
+
+	    // compute d_{j-1}
+	    size_type row_j0 = row;
+	    size_type offset = 0;
+
+	    if (lambda.j()-1 == j0()) {		
+	      for (size_type k(0); k < Mj1T.entries_in_row(row_j0); k++)
+		c.set_coefficient(Index(j0(), 1, Mj1T.get_nth_index(row_j0,k), this),
+				  Mj1T.get_nth_entry(row_j0,k));
+	    } else {
+	      // Due to the [DS] symmetrization, we have to be a bit careful here.
+	      int fill_start = 0, fill_end = (1<<(lambda.j()-1))-1; // first and last column to fill up with interior filter
+	      const size_type upper_half = Deltasize(j0()+1)/2;
+	      if (row < upper_half) {
+		// read the first half of the corresponding row in Mj1T
+		for (size_type k(0); k < Mj1T.entries_in_row(row_j0) && (int)Mj1T.get_nth_index(row_j0,k) < 1<<(j0()-1); k++)
+		  c.set_coefficient(Index(lambda.j()-1, 1, Mj1T.get_nth_index(row_j0,k), this),
+				    Mj1T.get_nth_entry(row_j0,k));
+		fill_start = 1<<(j0()-1);
+		fill_end   = (1<<(lambda.j()-1))-1;
+	      }
+	      else {
+		const size_type bottom_half = Deltasize(lambda.j())-Deltasize(j0()+1)/2;
+		if (row >= bottom_half) {
+		  // read the second half of the corresponding row in Mj1T
+		  row_j0 = row+Deltasize(j0()+1)-Deltasize(lambda.j());
+		  offset = (1<<(lambda.j()-1))-(1<<j0());
+		  for (size_type k(0); k < Mj1T.entries_in_row(row_j0); k++)
+		    if ((int)Mj1T.get_nth_index(row_j0,k) >= 1<<(j0()-1))
+		      c.set_coefficient(Index(lambda.j()-1, 1, Mj1T.get_nth_index(row_j0,k)+offset, this),
+					Mj1T.get_nth_entry(row_j0,k));
+		  fill_start = 0;
+		  fill_end   = (1<<(lambda.j()-1))-(1<<(j0()-1))-1;
+		}
+	      }
+	      
+	      // Fill in the missing columns fron the left half of Mj1T:
+	      
+	      const int col_left = (1<<(j0()-1))-1;
+	      
+	      // The row ...
+	      const int first_row_left = Mj1T_t.get_nth_index(col_left, 0);
+	      // ... is the first nontrivial row in column (1<<(j0-1))-1 and the row ...
+	      const int last_row_left  = Mj1T_t.get_nth_index(col_left, Mj1T_t.entries_in_row(col_left)-1);
+	      // ... is the last nontrivial one,
+	      // i.e. the row last_row_left begins at column (1<<(j0()-1))-1, so does the row last_row_left-1.
+	      // So the row "row" starts at column ...
+	      const int first_column_left = (1<<(j0()-1))-1+(int)floor(((int)row+1-last_row_left)/2.);
+	      
+	      for (int col = first_column_left, filter_row = last_row_left-abs(row-last_row_left)%2;
+		   col < (1<<(lambda.j()-2)) && col <= fill_end && filter_row >= first_row_left; col++, filter_row -= 2)
+		if (col >= fill_start)
+		  c.set_coefficient(Index(lambda.j()-1, 1, col, this),
+				    Mj1T_t.get_nth_entry(col_left, filter_row-first_row_left));
+	      
+	      // Analogous strategy for the right half:
+	      
+	      const int col_right = 1<<(j0()-1);
+	      
+	      const int offset_right = (Deltasize(lambda.j())-Deltasize(j0()+1))-(1<<(lambda.j()-1))+(1<<j0()); // row offset for the right half
+	      const int first_row_right = Mj1T_t.get_nth_index(col_right, 0)+offset_right;
+	      const int last_row_right  = Mj1T_t.get_nth_index(col_right, Mj1T_t.entries_in_row(col_right)-1)+offset_right;
+	      
+	      // The rows first_row_right and first_row_right+1 end at column 1<<(lambda.j()-2),
+	      // so the row "row" ends at column ...
+	      const int last_column_right = (1<<(lambda.j()-2))+(int)floor(((int)row-first_row_right)/2.);
+	      
+	      for (int col = last_column_right, filter_row = first_row_right-offset_right+abs(row-first_row_right)%2;
+		   col >= 1<<(lambda.j()-2) && col >= fill_start && filter_row <= last_row_right-offset_right; col--, filter_row += 2)
+		if (col <= fill_end)
+		  c.set_coefficient(Index(lambda.j()-1, 1, col, this),
+				    Mj1T_t.get_nth_entry(col_right, filter_row+offset_right-first_row_right));
+	    }
+	    
+	    // compute c_{jmin} via recursion
+	    row_j0 = row;
+	    offset = 0;
+	    if (lambda.j()-1 != j0()) {
+	      const size_type rows_top = (int)ceil(Deltasize(j0()+1)/2.0);
+	      if (row >= rows_top) {
+		const size_type bottom = Deltasize(lambda.j())-Deltasize(j0()+1)/2;
+		if (row >= bottom) {
+		  row_j0 = row + rows_top - bottom;
+		  offset = Deltasize(lambda.j()-1) - Deltasize(j0());
+		} else {
+		  row_j0 = rows_top-2+(row-rows_top)%2;
+		  offset = (row-rows_top)/2+1;
+		}
+	      }
+	    }
+	    for (size_type k(0); k < Mj0T.entries_in_row(row_j0); k++) {
+	      InfiniteVector<double, Index> dhelp;
+	      decompose_1(Index(lambda.j()-1, 0, DeltaLmin()+Mj0T.get_nth_index(row_j0,k)+offset, this), jmin, dhelp);
+	      c.add(Mj0T.get_nth_entry(row_j0,k), dhelp);
+	    }
+	  }
+      }
+  }
+  
+  template <int d, int dT>
+  void
+  PBasis<d, dT>::decompose_t_1(const Index& lambda,
+				const int jmin,
+				InfiniteVector<double, Index>& c) const {
+    assert(jmin >= j0());
+    assert(lambda.j() >= jmin);
+    
+    c.clear();
+    
+    if (lambda.e() == 1) // wavelet
+      c.set_coefficient(lambda, 1.0); // true wavelet coefficients don't have to be modified
+    else // generator
+      {
+	if (lambda.j() == jmin)
+	  c.set_coefficient(lambda, 1.0);
+	else // j > jmin
+	  {
+	    // For the multiscale decomposition of psi_lambda, we have to compute
+	    // the corresponding column of the transformation matrix \tilde G_{j-1}=M_{j-1}^T,
+	    // i.e. one row of \tilde G_{j-1}^T=(M_{j-1,0}, M_{j-1,1}).
+	    
+	    typedef Vector<double>::size_type size_type;
+	    
+	    const size_type row = lambda.k() - DeltaLmin();
+	    
+	    // compute d_{j-1}
+	    size_type row_j0 = row;
+	    size_type offset = 0;
+	    
+	    if (lambda.j()-1 == j0()) {		
+	      for (size_type k(0); k < Mj1.entries_in_row(row_j0); k++)
+		c.set_coefficient(Index(j0(), 1, Mj1.get_nth_index(row_j0,k), this),
+				  Mj1.get_nth_entry(row_j0,k));
+	    }
+	    else {
+	      // Due to the [DS] symmetrization, we have to be a bit careful here.
+	      int fill_start = 0, fill_end = (1<<(lambda.j()-1))-1; // first and last column to fill up with interior filter
+	      const size_type upper_half = Deltasize(j0()+1)/2;
+	      if (row < upper_half) {
+		// read the first half of the corresponding row in Mj1
+		for (size_type k(0); k < Mj1.entries_in_row(row_j0) && (int)Mj1.get_nth_index(row_j0,k) < 1<<(j0()-1); k++)
+		  c.set_coefficient(Index(lambda.j()-1, 1, Mj1.get_nth_index(row_j0,k), this),
+				    Mj1.get_nth_entry(row_j0,k));
+		fill_start = 1<<(j0()-1);
+		fill_end   = (1<<(lambda.j()-1))-1;
+	      }
+	      else {
+		const size_type bottom_half = Deltasize(lambda.j())-Deltasize(j0()+1)/2;
+		if (row >= bottom_half) {
+		  // read the second half of the corresponding row in Mj1
+		  row_j0 = row+Deltasize(j0()+1)-Deltasize(lambda.j());
+		  offset = (1<<(lambda.j()-1))-(1<<j0());
+		  for (size_type k(0); k < Mj1.entries_in_row(row_j0); k++)
+		    if ((int)Mj1.get_nth_index(row_j0,k) >= 1<<(j0()-1))
+		      c.set_coefficient(Index(lambda.j()-1, 1, Mj1.get_nth_index(row_j0,k)+offset, this),
+					Mj1.get_nth_entry(row_j0,k));
+		  fill_start = 0;
+		  fill_end   = (1<<(lambda.j()-1))-(1<<(j0()-1))-1;
+		}
+	      }
+	      
+	      // Left half of Mj1:
+	      
+	      const int col_left = (1<<(j0()-1))-1;
+	      
+	      // The row ...
+	      const int first_row_left = Mj1_t.get_nth_index(col_left, 0);
+	      // ... is the first nontrivial row in column (1<<(j0-1))-1 and the row ...
+	      const int last_row_left  = Mj1_t.get_nth_index(col_left, Mj1_t.entries_in_row(col_left)-1);
+	      // ... is the last nontrivial one,
+	      // i.e. the row last_row_left begins at column (1<<(j0()-1))-1, so does the row last_row_left-1.
+	      // So the row "row" starts at column ...
+	      const int first_column_left = (1<<(j0()-1))-1+(int)floor(((int)row+1-last_row_left)/2.);
+	      
+	      for (int col = first_column_left, filter_row = last_row_left-abs(row-last_row_left)%2;
+		   col < (1<<(lambda.j()-2)) && col <= fill_end && filter_row >= first_row_left; col++, filter_row -= 2)
+		if (col >= fill_start)
+		  c.set_coefficient(Index(lambda.j()-1, 1, col, this),
+				    Mj1_t.get_nth_entry(col_left, filter_row-first_row_left));
+	      
+	      // Analogous strategy for the right half:
+	      
+	      const int col_right = 1<<(j0()-1);
+	      
+	      const int offset_right = (Deltasize(lambda.j())-Deltasize(j0()+1))-(1<<(lambda.j()-1))+(1<<j0()); // row offset for the right half
+	      const int first_row_right = Mj1_t.get_nth_index(col_right, 0)+offset_right;
+	      const int last_row_right  = Mj1_t.get_nth_index(col_right, Mj1_t.entries_in_row(col_right)-1)+offset_right;
+	      
+	      // The rows first_row_right and first_row_right+1 end at column 1<<(lambda.j()-2),
+	      // so the row "row" ends at column ...
+	      const int last_column_right = (1<<(lambda.j()-2))+(int)floor(((int)row-first_row_right)/2.);
+	      
+	      for (int col = last_column_right, filter_row = first_row_right-offset_right+abs(row-first_row_right)%2;
+		   col >= 1<<(lambda.j()-2) && col >= fill_start && filter_row <= last_row_right-offset_right; col--, filter_row += 2)
+		if (col <= fill_end)
+		  c.set_coefficient(Index(lambda.j()-1, 1, col, this),
+				    Mj1_t.get_nth_entry(col_right, filter_row+offset_right-first_row_right));
+	    }	    
+	    
+	    // compute c_{jmin} via recursion
+	    row_j0 = row;
+	    offset = 0;
+	    if (lambda.j()-1 != j0()) {
+	      const size_type rows_top = (int)ceil(Deltasize(j0()+1)/2.0);
+	      if (row >= rows_top) {
+		const size_type bottom = Deltasize(lambda.j())-Deltasize(j0()+1)/2;
+		if (row >= bottom) {
+		  row_j0 = row + rows_top - bottom;
+		  offset = Deltasize(lambda.j()-1) - Deltasize(j0());
+		} else {
+		  row_j0 = rows_top-2+(row-rows_top)%2;
+		  offset = (row-rows_top)/2+1;
+		}
+	      }
+	    }
+	    for (size_type k(0); k < Mj0.entries_in_row(row_j0); k++) {
+	      InfiniteVector<double, Index> dhelp;
+	      decompose_t_1(Index(lambda.j()-1, 0, DeltaLmin()+Mj0.get_nth_index(row_j0,k)+offset, this), jmin, dhelp);
+	      c.add(Mj0.get_nth_entry(row_j0,k), dhelp);
+	    }
+	  }
+      }
+  }
+  
+  template <int d, int dT>
+  void
+  PBasis<d, dT>::reconstruct_1(const Index& lambda,
+				const int j,
+				InfiniteVector<double, Index>& c) const {
+    c.clear();
+    
+    if (lambda.j() >= j)
+      c.set_coefficient(lambda, 1.0); 
+    else {
+      // For the reconstruction of psi_lambda, we have to compute
+      // the corresponding column of the transformation matrix Mj=(Mj0, Mj1).
+      
+      // reconstruct by recursion
+      typedef Vector<double>::size_type size_type;
+      
+      const size_type row = (lambda.e() == 0 ? lambda.k() - DeltaLmin() : lambda.k());
+      
+      const SparseMatrix<double>& M = (lambda.e() == 0 ? Mj0_t : Mj1_t);
+      
+      size_type row_j0 = row;
+      size_type offset = 0;
+      if (lambda.e() == 0) {
+	if (lambda.j() > j0()) {
+	  const size_type rows_top = (int)ceil(Deltasize(j0())/2.0);
+	  if (row >= rows_top) {
+	    const size_type bottom = Deltasize(lambda.j())-Deltasize(j0())/2;
+	    if (row >= bottom) {
+	      row_j0 = row+rows_top-bottom;
+	      offset = Deltasize(lambda.j()+1)-Deltasize(j0()+1);
+	    } else {
+	      row_j0 = rows_top-1;
+	      offset = 2*(row-rows_top)+2;
+	    }
+	  }
+	}
+      }
+      else {
+	if (lambda.j() > j0()) {
+	  const size_type rows_top = 1<<(j0()-1);
+	  if (row >= rows_top) {
+	    const size_type bottom = (1<<lambda.j())-(1<<(j0()-1));
+	    if (row >= bottom) {
+	      row_j0 = row+rows_top-bottom;
+	      offset = Deltasize(lambda.j()+1)-Deltasize(j0()+1);
+	    } else {
+	      if ((int)row < (1<<(lambda.j()-1))) {
+		row_j0 = rows_top-1;
+		offset = 2*(row-rows_top)+2;
+	      } else {
+		row_j0 = 1<<(j0()-1);
+		offset = Deltasize(lambda.j()+1)-Deltasize(j0()+1)+2*((int)row-bottom);
+	      }
+	    }
+	  }
+	}
+      }
+      for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
+	InfiniteVector<double, Index> dhelp;
+	reconstruct_1(Index(lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this), j, dhelp);
+	c.add(M.get_nth_entry(row_j0,k), dhelp);
+      }
+    }
+  }
+
+  template <int d, int dT>
+  void
+  PBasis<d, dT>::reconstruct_t_1(const Index& lambda,
+				  const int j,
+				  InfiniteVector<double, Index>& c) const {
+    c.clear();
+    
+    if (lambda.j() >= j)
+      c.set_coefficient(lambda, 1.0);
+    else {
+      // For the reconstruction of psi_lambda, we have to compute
+      // the corresponding column of the transformation matrix \tilde Mj=(\tilde Mj0, \tilde Mj1).
+      
+      // reconstruct by recursion
+      typedef Vector<double>::size_type size_type;
+      
+      const size_type row = (lambda.e() == 0 ? lambda.k() - DeltaLmin() : lambda.k());
+      
+      const SparseMatrix<double>& M = (lambda.e() == 0 ? Mj0T_t : Mj1T_t);
+      
+      size_type row_j0 = row;
+      size_type offset = 0;
+      if (lambda.e() == 0) {
+	if (lambda.j() > j0()) {
+	  const size_type rows_top = (int)ceil(Deltasize(j0())/2.0);
+	  if (row >= rows_top) {
+	    const size_type bottom = Deltasize(lambda.j())-Deltasize(j0())/2;
+	    if (row >= bottom) {
+	      row_j0 = row+rows_top-bottom;
+	      offset = Deltasize(lambda.j()+1)-Deltasize(j0()+1);
+	    } else {
+	      row_j0 = rows_top-1;
+	      offset = 2*(row-rows_top)+2;
+	    }
+	  }
+	}
+      } else {
+	if (lambda.j() > j0()) {
+	  const size_type rows_top = 1<<(j0()-1);
+	  if (row >= rows_top) {
+	    const size_type bottom = (1<<lambda.j())-(1<<(j0()-1));
+	    if (row >= bottom) {
+	      row_j0 = row+rows_top-bottom;
+	      offset = Deltasize(lambda.j()+1)-Deltasize(j0()+1);
+	    } else {
+	      if ((int)row < (1<<(lambda.j()-1))) {
+		row_j0 = rows_top-1;
+		offset = 2*(row-rows_top)+2;
+	      } else {
+		row_j0 = 1<<(j0()-1);
+		offset = Deltasize(lambda.j()+1)-Deltasize(j0()+1)+2*((int)row-bottom);
+	      }
+	    }
+	  }
+	}
+      }
+      for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
+	InfiniteVector<double, Index> dhelp;
+	reconstruct_t_1(Index(lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this), j, dhelp);
+	c.add(M.get_nth_entry(row_j0,k), dhelp);
+      }
+    }
+  }
+
 }

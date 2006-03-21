@@ -152,6 +152,9 @@ namespace WaveletTL
     void GElim (SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv); // elimination/factorization
     void InvertP(const SparseMatrix<double>& PP, SparseMatrix<double>& PPinv);
     double BT(const SparseMatrix<double>& A, SparseMatrix<double>& BB); // (4.1.9), (4.1.13)
+
+    // wavelet symmetrization from [DS]
+    void DS_symmetrization(SparseMatrix<double>& Mj1, SparseMatrix<double>& Mj1T);
   };
 }
 

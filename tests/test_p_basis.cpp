@@ -27,7 +27,7 @@ int main()
   cout << "- leftmost wavelet on the coarsest level: " << first_wavelet(&basis, basis.j0()) << endl;
   cout << "- rightmost wavelet on the coarsest level: " << last_wavelet(&basis, basis.j0()) << endl;
 
-#if 0
+#if 1
   cout << "- checking biorthogonality of Mj0, Mj0T for different levels:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+2; level++)
     {

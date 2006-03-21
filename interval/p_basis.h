@@ -111,6 +111,30 @@ namespace WaveletTL
     const SparseMatrix<double>& get_Mj1_t()  const { return Mj1_t; }
     const SparseMatrix<double>& get_Mj1T_t() const { return Mj1T_t; }
 
+    //! setup the refinement matrix M_{j,0} for a given level j
+    void assemble_Mj0(const int j, SparseMatrix<double>& mj0) const;
+
+    //! setup the refinement matrix \tilde M_{j,0} for a given level j
+    void assemble_Mj0T(const int j, SparseMatrix<double>& mj0T) const;
+
+    //! setup the refinement matrix M_{j,1} for a given level j
+    void assemble_Mj1(const int j, SparseMatrix<double>& mj1) const;
+
+    //! setup the refinement matrix \tilde M_{j,1} for a given level j
+    void assemble_Mj1T(const int j, SparseMatrix<double>& mj1T) const;
+
+    //! setup the transposed refinement matrix M_{j,0} for a given level j
+    void assemble_Mj0_t(const int j, SparseMatrix<double>& mj0_t) const;
+
+    //! setup the transposed refinement matrix \tilde M_{j,0} for a given level j
+    void assemble_Mj0T_t(const int j, SparseMatrix<double>& mj0T_t) const;
+
+    //! setup the transposed refinement matrix M_{j,1} for a given level j
+    void assemble_Mj1_t(const int j, SparseMatrix<double>& mj1_t) const;
+
+    //! setup the transposed refinement matrix \tilde M_{j,1} for a given level j
+    void assemble_Mj1T_t(const int j, SparseMatrix<double>& mj1T_t) const;
+
   protected:
     //! coarsest possible level
     int j0_;

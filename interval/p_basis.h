@@ -99,6 +99,18 @@ namespace WaveletTL
     inline const int Nablamin() const { return 0; }
     inline const int Nablamax(const int j) const { return (1<<j)-1; }
     
+    /*!
+      read access to the diverse refinement matrices on level j0
+    */
+    const SparseMatrix<double>& get_Mj0()  const { return Mj0; }
+    const SparseMatrix<double>& get_Mj0T() const { return Mj0T; }
+    const SparseMatrix<double>& get_Mj1()  const { return Mj1; }
+    const SparseMatrix<double>& get_Mj1T() const { return Mj1T; }
+    const SparseMatrix<double>& get_Mj0_t()  const { return Mj0_t; }
+    const SparseMatrix<double>& get_Mj0T_t() const { return Mj0T_t; }
+    const SparseMatrix<double>& get_Mj1_t()  const { return Mj1_t; }
+    const SparseMatrix<double>& get_Mj1T_t() const { return Mj1T_t; }
+
   protected:
     //! coarsest possible level
     int j0_;

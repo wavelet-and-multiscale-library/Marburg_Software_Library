@@ -446,6 +446,11 @@ namespace WaveletTL
 	}
 #endif
       }
+
+    Mj0_t  = transpose(Mj0);
+    Mj0T_t = transpose(Mj0T);
+    Mj1_t  = transpose(Mj1);
+    Mj1T_t = transpose(Mj1T);
   }
 
   template <int d, int dT>

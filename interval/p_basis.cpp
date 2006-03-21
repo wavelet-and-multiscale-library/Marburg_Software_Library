@@ -55,7 +55,7 @@ namespace WaveletTL
     for (int k = d; k <= dT+s0; k++)
       for (int n = 2*k-d; n <= 2*k; n++)
  	ML_.set_entry(n-1-s0,k-1-s0,cdf.a().get_coefficient(MultiIndex<int,1>(-(d/2)+n+d-2*k)));
-    cout << "ML=" << endl << ML_;
+//     cout << "ML=" << endl << ML_;
 
     MR_.resize(3*dT+s1-1, dT);
     for (int column = s1; column < d-1; column++)
@@ -64,7 +64,7 @@ namespace WaveletTL
     for (int k = d; k <= dT+s1; k++)
       for (int n = 2*k-d; n <= 2*k; n++)
  	MR_.set_entry(n-1-s1,k-1-s1,cdf.a().get_coefficient(MultiIndex<int,1>(-(d/2)+n+d-2*k)));
-    cout << "MR=" << endl << MR_;
+//     cout << "MR=" << endl << MR_;
 
     // setup the expansion coefficients of the unbiorthogonalized dual generators
     // w.r.t. the truncated CDF generators, see [DKU, Lemma 3.1]
@@ -76,7 +76,7 @@ namespace WaveletTL
       for (int m = 2*ellT_l()+ell1T<d,dT>(); m <= 2*ellT_l()+ell2T<d,dT>()-2; m++)
 	MLTp.set_entry(dT+m-ellT_l(), r, betaL(m, r));
     }
-    cout << "MLTp=" << endl << MLTp;
+//     cout << "MLTp=" << endl << MLTp;
         
     Matrix<double> MRTp(3*dT+s1-1, dT);
     for (unsigned int r = 0; r < dT; r++) {
@@ -86,17 +86,17 @@ namespace WaveletTL
       for (int m = 2*ellT_r()+ell1T<d,dT>(); m <= 2*ellT_r()+ell2T<d,dT>()-2; m++)
 	MRTp.set_entry(dT+m-ellT_r(), r, betaR(m, r));
     }
-    cout << "MRTp=" << endl << MRTp;
+//     cout << "MRTp=" << endl << MRTp;
 
     // for the biorthogonalization of the generators,
     // compute the gramian matrix of the primal and dual boundary generators
     compute_biorthogonal_boundary_gramian
       <CDFMask_primal<d>,CDFMask_dual<d,dT> >(ML_, MLTp, GammaL);
-    cout << "GammaL=" << endl << GammaL;
+//     cout << "GammaL=" << endl << GammaL;
 
     compute_biorthogonal_boundary_gramian
       <CDFMask_primal<d>,CDFMask_dual<d,dT> >(MR_, MRTp, GammaR);
-    cout << "GammaR=" << endl << GammaR;
+//     cout << "GammaR=" << endl << GammaR;
 
     setup_Mj0(ML_, MR_, Mj0); // [DKU, (3.5.1)]
     Mj0.compress(1e-8);
@@ -109,15 +109,15 @@ namespace WaveletTL
     Mj0T = transpose(inv_CjpT) * mj0tp * transpose(CjT); // [DKU, (2.4.3)]
     Mj0T.compress(1e-8);
 
-    Mj0.scale(M_SQRT2);
-    cout << "Mj0 (without SQRT1_2)=" << endl << Mj0;
-    Mj0.scale(M_SQRT1_2);
+//     Mj0.scale(M_SQRT2);
+//     cout << "Mj0 (without SQRT1_2)=" << endl << Mj0;
+//     Mj0.scale(M_SQRT1_2);
 
-    Mj0T.scale(M_SQRT2);
-    cout << "Mj0T (without SQRT1_2)=" << endl << Mj0T;
-    Mj0T.scale(M_SQRT1_2);
+//     Mj0T.scale(M_SQRT2);
+//     cout << "Mj0T (without SQRT1_2)=" << endl << Mj0T;
+//     Mj0T.scale(M_SQRT1_2);
 
-#if 1
+#if 0
     cout << "PBasis(): check biorthogonality of Mj0, Mj0T:" << endl;
 //     cout << "Mj0=" << endl << Mj0 << endl << "Mj0T=" << endl << Mj0T << endl;
 
@@ -142,15 +142,15 @@ namespace WaveletTL
     SparseMatrix<double> A, H, Hinv;
     GSetup(A, H, Hinv); // [DKU, (4.1.1), (4.1.13)]
 
-#if 1
+#if 0
     SparseMatrix<double> Aold(A); // for the checks below
 #endif
 
     GElim (A, H, Hinv); // elimination [DKU, (4.1.4)ff.]
     SparseMatrix<double> BB; double binv = BT(A, BB); // [DKU, (4.1.13)]
-    cout << "b^{-1}=" << binv << endl;
+//     cout << "b^{-1}=" << binv << endl;
     
-#if 1
+#if 0
     cout << "PBasis(): check properties (4.1.15):" << endl;
     SparseMatrix<double> test4115 = transpose(BB)*A;
     for (unsigned int i = 0; i < test4115.row_dimension(); i++)
@@ -169,7 +169,7 @@ namespace WaveletTL
     cout << "* ||Fj^T*A||_infty: " << row_sum_norm(test4115) << endl;    
 #endif
 
-#if 1
+#if 0
     cout << "PBasis(): check factorization of A:" << endl;
     SparseMatrix<double> testAfact = Aold - Hinv*A;
     cout << "* in infty-norm: " << row_sum_norm(testAfact) << endl;
@@ -193,7 +193,7 @@ namespace WaveletTL
     SparseMatrix<double> gj0ih = transpose(BB) * help; gj0ih.scale(M_SQRT2); // [P, Prop. 5.6]
     SparseMatrix<double> gj1ih = transpose(FF) * help; gj1ih.scale(M_SQRT2); // [DKU, (4.1.24)], [P, Prop. 5.6]
 
-#if 1
+#if 0
     cout << "PBasis(): check initial stable completion:" << endl;
     SparseMatrix<double> mj_initial(Mj0.row_dimension(),
 				    Mj0.column_dimension() + mj1ih.column_dimension());
@@ -252,15 +252,15 @@ namespace WaveletTL
     Mj1 .scale(scaling_factor);
     Mj1T.scale(1./scaling_factor);
     
-    Mj1.scale(M_SQRT2);
-    cout << "Mj1 (without SQRT1_2)=" << endl << Mj1;
-    Mj1.scale(M_SQRT1_2);
+//     Mj1.scale(M_SQRT2);
+//     cout << "Mj1 (without SQRT1_2)=" << endl << Mj1;
+//     Mj1.scale(M_SQRT1_2);
 
-    Mj1T.scale(M_SQRT2);
-    cout << "Mj1T (without SQRT1_2)=" << endl << Mj1T;
-    Mj1T.scale(M_SQRT1_2);
+//     Mj1T.scale(M_SQRT2);
+//     cout << "Mj1T (without SQRT1_2)=" << endl << Mj1T;
+//     Mj1T.scale(M_SQRT1_2);
 
-#if 1
+#if 0
     cout << "PBasis(): check new stable completion:" << endl;
     
     SparseMatrix<double> mj_new(Mj0.row_dimension(),
@@ -356,7 +356,7 @@ namespace WaveletTL
     if (d%2 && s0 == s1)
       {
 	DS_symmetrization(Mj1, Mj1T);
-#if 1
+#if 0
 	{
 	  cout << "PBasis(): check [DS] symmetrization:" << endl;
 	  
@@ -601,7 +601,7 @@ namespace WaveletTL
  		       Deltasize(j0()+1)-inv_CRT.column_dimension(),
  		       inv_CRT, true);
 
-#if 1
+#if 0
     cout << "PBasis: testing setup of Cj:" << endl;
 
     SparseMatrix<double> test1 = CjT * inv_CjT;
@@ -826,7 +826,7 @@ namespace WaveletTL
 	PPinv.set_entry(PP.row_dimension()-msize_r+i, PP.column_dimension()-d-1+k, mrinv.get_entry(i, msize_r-d-1+k));
       }
 
-#if 1
+#if 0
     cout << "PBasis(): check that PPinv is inverse to PP:" << endl;
     SparseMatrix<double> testPinv = PP*PPinv;
 //     cout << "  PP*PPinv=" << endl << testPinv;

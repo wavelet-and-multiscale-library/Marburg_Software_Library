@@ -308,7 +308,7 @@ int main()
   TestProblem<0> testproblem;
   
   const int d  = 3;
-  const int dT = 3;
+  const int dT = 5;
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
   typedef SturmEquation<Basis> EllipticEquation;
@@ -320,7 +320,7 @@ int main()
 //   CachedProblem<EllipticEquation> celliptic(&elliptic, 12.2508, 6.41001); // d=2, dT=2
   CachedProblem<SturmEquation<Basis> > celliptic(&elliptic, 6.73618, 45.5762); // d=3, dT=3
 
-  const int jmax = 8;
+  const int jmax = 10;
 
   // handle different test cases:
   // 1: u0 = hat function, f(t)=0
@@ -334,7 +334,7 @@ int main()
   // 9: u0 = haar function, f(t)=chi_{[0,1/2)}
   // 10: u0 = 0, f(t)=chi_{[0,1/2)}(t)*chi_{[1/4,3/4]}(x)
 
-#define _TESTCASE 8
+#define _TESTCASE 3
 
   //
   //

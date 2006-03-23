@@ -20,7 +20,6 @@ namespace WaveletTL
     setup();
   }
 
-
   template <int d, int dT>
   void
   PBasis<d,dT>::setup() {

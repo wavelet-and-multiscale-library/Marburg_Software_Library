@@ -320,7 +320,7 @@ int main()
 //   CachedProblem<EllipticEquation> celliptic(&elliptic, 12.2508, 6.41001); // d=2, dT=2
   CachedProblem<SturmEquation<Basis> > celliptic(&elliptic, 6.73618, 45.5762); // d=3, dT=3
 
-  const int jmax = 10;
+  const int jmax = 9;
 
   // handle different test cases:
   // 1: u0 = hat function, f(t)=0

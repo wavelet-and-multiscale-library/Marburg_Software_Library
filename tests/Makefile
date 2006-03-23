@@ -5,15 +5,32 @@
 # | Thorsten Raasch, Manuel Werner                                 |
 # +----------------------------------------------------------------+
 
-# choose between GNU or Intel compiler
-CXX = g++
-#CXX = icpc
+# choose between GNU/Intel/Portland Group compiler
+COMPILER = gnu
+#COMPILER = intel
+#COMPILER = pgi
 
+ifeq ($(COMPILER),gnu)
+CXX = g++
+CXXFLAGS += -I$(MATHTL_DIR) -Wall -pipe
+#CXXFLAGS += -O2 -I$(MATHTL_DIR) -Wall -pipe
+endif
+
+ifeq ($(COMPILER),intel)
+CXX = icpc
 CXXFLAGS += -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O2 -I$(MATHTL_DIR) -Wall -pipe
 
 # disable some annoying warnings of icpc
-#CXXFLAGS += -wd383 -wd981
+CXXFLAGS += -wd383 -wd981
+endif
+
+ifeq ($(COMPILER),pgi)
+CXX = pgCC
+CXXFLAGS += -I$(MATHTL_DIR)
+#CXXFLAGS += -O2 -I$(MATHTL_DIR)
+#CXXFLAGS += -fastsse -I$(MATHTL_DIR)
+endif
 
 EXEOBJF = \
   test_random.o\

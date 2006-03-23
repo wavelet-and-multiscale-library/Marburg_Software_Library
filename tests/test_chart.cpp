@@ -1,4 +1,5 @@
 #include <iostream>
+#include <time.h>
 #include <geometry/chart.h>
 #include <geometry/point.h>
 #include <algebra/matrix.h>

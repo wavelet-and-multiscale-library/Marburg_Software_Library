@@ -50,6 +50,30 @@ namespace WaveletTL
 			  const typename PBasis<d,dT>::Index& lambda,
 			  const typename PBasis<d,dT>::Index& nu,
 			  typename PBasis<d,dT>::Support& supp);
+
+  /*!
+    For a given wavelet \psi_\lambda, compute all generators/wavelets
+    \psi_\nu with level |\nu|=j, such that the respective supports
+    have a nontrivial intersection
+  */
+  template <int d, int dT>
+  void intersecting_wavelets(const PBasis<d,dT>& basis,
+			     const typename PBasis<d,dT>::Index& lambda,
+			     const int j, const bool generators,
+			     std::list<typename PBasis<d,dT>::Index>& intersecting);
+  
+  /*!
+    For a given wavelet \psi_\lambda, compute all generators/wavelets
+    \psi_\nu with level |\nu|=j, such that the respective supports
+    have a nontrivial intersection;
+    return those intersections
+  */
+  template <int d, int dT>
+  void intersecting_wavelets(const PBasis<d,dT>& basis,
+			     const typename PBasis<d,dT>::Index& lambda,
+			     const int j, const bool generators,
+			     std::list<std::pair<typename PBasis<d,dT>::Index, typename PBasis<d,dT>::Support> >& intersecting);
+
 }
 
 #include <interval/p_support.cpp>

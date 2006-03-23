@@ -44,5 +44,31 @@ int main()
   }
 #endif
   
+#if 1
+  cout << "- calculating some support intersections:" << endl;
+  for (Index lambda = first_generator(&basis, basis.j0());; ++lambda)
+    {
+      Support supp;
+      support(basis, lambda, supp.k1, supp.k2);
+      cout << "psi_lambda, lambda=" << lambda << " has support 2^{-"
+	   << lambda.j()+lambda.e()
+	   << "}["
+	   << supp.k1
+	   << ","
+	   << supp.k2
+	   << "]"
+	   << endl;
+
+      cout << "support intersection with first generator on level j0: ";
+      bool inter = intersect_supports(basis, lambda, first_generator(&basis, basis.j0()), supp);
+      if (inter)
+	cout << "2^{-" << supp.j << "}[" << supp.k1 << "," << supp.k2 << "]" << endl;
+      else
+	cout << "none" << endl;
+      
+      if (lambda == last_wavelet(&basis, basis.j0())) break;
+    }
+#endif
+
   return 0;
 }

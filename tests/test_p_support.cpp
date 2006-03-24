@@ -96,6 +96,49 @@ int main()
     }
 #endif  
 
+#if 1
+  cout << "- checking intersection of singular supports:" << endl;
+  for (Index lambda = first_generator(&basis, basis.j0()+2);; ++lambda)
+    {
+      Support supp;
+      support(basis, lambda, supp.k1, supp.k2);
+      cout << "psi_lambda, lambda=" << lambda << " has the support 2^{-"
+	   << lambda.j()+lambda.e()
+	   << "}["
+	   << supp.k1
+	   << ","
+	   << supp.k2
+	   << "]"
+	   << endl;
+      
+      Support supp_0;
+      support(basis, first_generator(&basis, basis.j0()), supp_0.k1, supp_0.k2);
+      cout << "* first generator on level j0 has the support 2^{-"
+	   << basis.j0()
+	   << "}["
+	   << supp_0.k1
+	   << ","
+	   << supp_0.k2
+	   << "]"
+	   << endl;
+
+      cout << "* support intersection with first generator on level j0         : ";
+      bool inter = intersect_supports(basis, lambda, first_generator(&basis, basis.j0()), supp);
+      if (inter)
+	cout << "2^{-" << supp.j << "}[" << supp.k1 << "," << supp.k2 << "]" << endl;
+      else
+	cout << "none" << endl;
+
+      cout << "* singular support intersection with first generator on level j0: ";
+      inter = intersect_singular_support(basis, lambda, first_generator(&basis, basis.j0()), supp.j, supp.k1, supp.k2);
+      if (inter)
+	cout << "2^{-" << supp.j << "}[" << supp.k1 << "," << supp.k2 << "]" << endl;
+      else
+	cout << "none" << endl;
+
+      if (lambda == last_wavelet(&basis, basis.j0()+2)) break;
+    }
+#endif
 
   return 0;
 }

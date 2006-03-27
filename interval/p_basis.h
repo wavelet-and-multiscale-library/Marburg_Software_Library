@@ -19,6 +19,7 @@
 
 // for convenience, include also some functionality
 #include <interval/p_support.h>
+#include <interval/p_evaluate.h>
 
 using MathTL::Vector;
 using MathTL::Matrix;

@@ -57,26 +57,25 @@ int main()
   SampledMapping<1> s(Grid<1>(-1.0, 1.0, 10), p);
   s.matlab_output(cout);
 
-//   const int d = 3;
-//   const int dT = 3; // be sure to use a continuous dual here!
+  const int d = 2;
+  const int dT = 2; // be sure to use a continuous dual here!
 
-//   typedef DSBasis<d,dT> Basis;
-//   typedef Basis::Index Index;
+  typedef PBasis<d,dT> Basis;
+  typedef Basis::Index Index;
 
-// //   Basis basis; // DKU basis without b.c.
-//   Basis basis(1, 1, 0, 0); // Z={0,1}
-// //   Basis basis(1, 0, 0, 1); // Z={0}
-// //   Basis basis(0, 1, 1, 0); // Z={1}
-// //   Basis basis(0, 0, 1, 1); // Z={}
+  Basis basis(0, 0); // no b.c.'s
+//   Basis basis(1, 0); // complementary b.c. at x=0
+//   Basis basis(0, 1); // complementary b.c. at x=1
+//   Basis basis(1, 1); // complementary b.c.'s
 
-//   InfiniteVector<double,Index> coeffs;
+  InfiniteVector<double,Index> coeffs;
 
-//   const int j0 = basis.j0();
-//   const int jmax = 10;
+  const int j0 = basis.j0();
+  const int jmax = 10;
 
-//   expand(&p, basis, true, j0, coeffs);
-//   cout << "- integrals of p against all primal generators on level j0:" << endl
-//        << coeffs << endl;
+  expand(&p, basis, true, j0, coeffs);
+  cout << "- integrals of p against all primal generators on level j0:" << endl
+       << coeffs << endl;
 
 //   cout << "- evaluation of this linear combination of dual generators yields the pointwise error on [-1,1]:" << endl;
 //   SampledMapping<1> s2(evaluate(basis, coeffs, false, 5));

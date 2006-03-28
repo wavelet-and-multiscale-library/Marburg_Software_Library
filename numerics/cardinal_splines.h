@@ -94,7 +94,7 @@ namespace MathTL
   
   /*!
     evaluate the first derivative of a primal CDF function
-      phi_{j,k}'(x) = 2^{j/2}N_d(2^jx-k+d/2)
+      phi_{j,k}'(x) = 2^{3*j/2}N_d'(2^jx-k+d/2)
   */
   template <int d>
   inline

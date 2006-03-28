@@ -68,6 +68,18 @@ namespace MathTL
   {
     return (x >= std::max(0,k) && x < std::max(0,k+1) ? 1.0 : 0.0);
   }
+
+  /*!
+    evaluate a primal [P] function
+      phi_{j,k}(x) = 2^{j/2}N_{k-d/2,d}(2^jx)
+  */
+  template <int d>
+  inline
+  double EvaluateSchoenbergBSpline_td(const int j, const int k, const double x)
+  {
+    const double factor(ldexp(1.0, j));
+    return sqrt(factor) * EvaluateSchoenbergBSpline<d>(k-(d/2), factor * x);
+  }
   
   /*!
     evaluate the first derivative N_{k,d}'(x) of an arbitrary Schoenberg B-spline
@@ -100,6 +112,19 @@ namespace MathTL
   {
     return 0.;
   }
+
+  /*!
+    evaluate the first derivative of a primal [P] function
+      phi_{j,k}'(x) = 2^{3*j/2}N_{k-d/2,d}'(2^jx)
+  */
+  template <int d>
+  inline
+  double EvaluateSchoenbergBSpline_td_x(const int j, const int k, const double x)
+  {
+    const double factor(ldexp(1.0, j));
+    return factor * sqrt(factor) * EvaluateSchoenbergBSpline_x<d>(k-(d/2), factor * x);
+  }
+
 }
 
 #endif

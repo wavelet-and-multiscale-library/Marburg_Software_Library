@@ -97,6 +97,9 @@ namespace WaveletTL
       <CDFMask_primal<d>,CDFMask_dual<d,dT> >(MR_, MRTp, GammaR);
 //     cout << "GammaR=" << endl << GammaR;
 
+    setup_CXT();
+    setup_CXAT();
+
     setup_Mj0(ML_, MR_, Mj0); // [DKU, (3.5.1)]
     Mj0.compress(1e-8);
     
@@ -559,28 +562,61 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
+  void
+  PBasis<d,dT>::setup_CXT()
+  {
+    // IGPMlib reference: I_Mask_Bspline::EvalCL(), ::EvalCR()
+
+    Matrix<double> CLGammaLInv;
+    QUDecomposition<double>(GammaL).inverse(CLGammaLInv);
+    CLT = transpose(CLGammaLInv);
+    
+    Matrix<double> CRGammaRInv;
+    QUDecomposition<double>(GammaR).inverse(CRGammaRInv);
+    CRT = transpose(CRGammaRInv);
+    
+    QUDecomposition<double>(CLT).inverse(inv_CLT);
+    QUDecomposition<double>(CRT).inverse(inv_CRT);
+  }
+
+  template <int d, int dT>
+  void PBasis<d,dT>::setup_CXAT() {
+    // IGPMlib reference: I_Mask_Bspline::EvalCL(), ::EvalCR()
+
+    // setup CLAT <-> Alpha * (CLT)^T
+    CLAT.resize(ellT_l()+ell2T<d,dT>()-1, dT);
+    for (int i = 1-ell2T<d,dT>(); i <= ellT_l()-1; i++)
+      for (unsigned int r = 0; r < dT; r++)
+  	CLAT(ell2T<d,dT>()-1+i, r) = alpha(i, r);
+
+//     cout << "CLAT before biorthogonalization:" << endl << CLAT << endl;
+    CLAT = CLAT * transpose(CLT);
+    CLAT.compress(1e-12);
+//     cout << "CLAT after biorthogonalization:" << endl << CLAT << endl;
+
+    // the same for CRAT:
+    CRAT.resize(ellT_r()+ell2T<d,dT>()-1, dT);
+    for (int i = 1-ell2T<d,dT>(); i <= ellT_r()-1; i++)
+      for (unsigned int r = 0; r < dT; r++)
+ 	CRAT(ell2T<d,dT>()-1+i, r) = alpha(i, r);
+
+//     cout << "CRAT before biorthogonalization:" << endl << CRAT << endl;
+    CRAT = CRAT * transpose(CRT);
+    CRAT.compress(1e-12);
+//     cout << "CRAT after biorthogonalization:" << endl << CRAT << endl;
+  }
+
+  template <int d, int dT>
   void PBasis<d,dT>::setup_Cj() {
     // IGPMlib reference: I_Basis_Bspline_s::setup_Cj(), ::put_Mat()
 
     // [DKU (5.2.5)]
 
-    Matrix<double> CLGammaLInv;
-    QUDecomposition<double>(GammaL).inverse(CLGammaLInv);
-    Matrix<double> CLT = transpose(CLGammaLInv);
-    
-    Matrix<double> CRGammaRInv;
-    QUDecomposition<double>(GammaR).inverse(CRGammaRInv);
-    Matrix<double> CRT = transpose(CRGammaRInv);
-    
     CjT.diagonal(Deltasize(j0()), 1.0);
     CjT.set_block(0, 0, CLT);
     CjT.set_block(Deltasize(j0())-CRT.row_dimension(),
  		  Deltasize(j0())-CRT.column_dimension(),
  		  CRT, true);
-
-    Matrix<double> inv_CLT, inv_CRT;
-    QUDecomposition<double>(CLT).inverse(inv_CLT);
-    QUDecomposition<double>(CRT).inverse(inv_CRT);
 
     inv_CjT.diagonal(Deltasize(j0()), 1.0);
     inv_CjT.set_block(0, 0, inv_CLT);

@@ -58,7 +58,7 @@ int main()
   s.matlab_output(cout);
 
   const int d = 2;
-  const int dT = 2; // be sure to use a continuous dual here!
+  const int dT = 4; // be sure to use a continuous dual here!
 
   typedef PBasis<d,dT> Basis;
   typedef Basis::Index Index;
@@ -77,13 +77,13 @@ int main()
   cout << "- integrals of p against all primal generators on level j0:" << endl
        << coeffs << endl;
 
-//   cout << "- evaluation of this linear combination of dual generators yields the pointwise error on [-1,1]:" << endl;
-//   SampledMapping<1> s2(evaluate(basis, coeffs, false, 5));
-//   Vector<double> error(s2.points().size());
-//   for (unsigned int i = 0; i < error.size(); i++)
-//     error[i] = fabs(s2.values()[i]-p.value(Point<1>(s2.points()[i])));
-//   cout << error << endl;
-//   cout << "(max. error: " << linfty_norm(error) << ")" << endl;
+  cout << "- evaluation of this linear combination of dual generators yields the pointwise error on [-1,1]:" << endl;
+  SampledMapping<1> s2(evaluate(basis, coeffs, false, 5));
+  Vector<double> error(s2.points().size());
+  for (unsigned int i = 0; i < error.size(); i++)
+    error[i] = fabs(s2.values()[i]-p.value(Point<1>(s2.points()[i])));
+  cout << error << endl;
+  cout << "(max. error: " << linfty_norm(error) << ")" << endl;
   
 //   cout << endl;
 

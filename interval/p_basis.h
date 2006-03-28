@@ -108,6 +108,9 @@ namespace WaveletTL
     inline const int DeltaRmin(const int j) const { return (1<<j)-(d%2)-(ell_r()-1-s1); }
     inline const int DeltaRmax(const int j) const { return (1<<j)-1-ell1<d>()-s1; }
 
+    inline const int DeltaLTmin() const { return ellT_l()-dT; } // == DeltaLmin()
+    inline const int DeltaRTmax(const int j) const { return (1<<j)-(d%2)-(ellT_r()-dT); } // == DeltaRmax()
+
     //! size of Delta_j
     inline const int Deltasize(const int j) const { return DeltaRmax(j)-DeltaLmin()+1; }
 
@@ -196,6 +199,13 @@ namespace WaveletTL
 		       InfiniteVector<double, Index>& v) const;
 
     /*!
+      read access to the boundary generator expansion coefficients
+      (CLA == CRA == I)
+    */
+    const Matrix<double>& get_CLAT() const { return CLAT; }
+    const Matrix<double>& get_CRAT() const { return CRAT; }
+
+    /*!
       read access to the diverse refinement matrices on level j0
     */
     const SparseMatrix<double>& get_Mj0()  const { return Mj0; }
@@ -279,6 +289,12 @@ namespace WaveletTL
     //! Gramian matrices for the left and right generators (primal against unbiorth. dual)
     Matrix<double> GammaL, GammaR;
 
+    //! setup the boundary blocks for the dual biorthogonalized generators
+    void setup_CXT();
+
+    //! storage for these blocks
+    Matrix<double> CLT, inv_CLT, CRT, inv_CRT;
+
     //! refinement matrices on the coarsest level j0 and their transposed versions
     SparseMatrix<double> Mj0, Mj0T, Mj1, Mj1T;
     SparseMatrix<double> Mj0_t, Mj0T_t, Mj1_t, Mj1T_t;
@@ -286,6 +302,12 @@ namespace WaveletTL
     //! setup initial refinement matrices Mj0, Mj0Tp [DKU, (3.5.1), (3.5.5)]
     void setup_Mj0  (const Matrix<double>& ML,   const Matrix<double>& MR,   SparseMatrix<double>& Mj0  );
     void setup_Mj0Tp(const Matrix<double>& MLTp, const Matrix<double>& MRTp, SparseMatrix<double>& Mj0Tp);
+
+    //! setup expansion coefficients w.r.t. the (restricted) dual CDF basis
+    void setup_CXAT();
+
+    //! storage for these coefficients
+    Matrix<double> CLAT, CRAT;
 
     //! generator biorthogonalization matrices on level j0 and j0+1 CjT, CjpT (5.2.5)
     void setup_Cj();

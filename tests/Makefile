@@ -12,6 +12,7 @@ COMPILER = gnu
 
 ifeq ($(COMPILER),gnu)
 CXX = g++
+#CXX = g++-2.95
 CXXFLAGS += -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O2 -I$(MATHTL_DIR) -Wall -pipe
 endif

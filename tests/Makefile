@@ -15,7 +15,12 @@ COMPILER = gnu
 
 ifeq ($(COMPILER),gnu)
 CXX = g++
-#CXXFLAGS += -ftemplate-depth-40 # add this for gcc-2.95
+#CXX = g++-2.95
+
+ifeq ($(CXX),g++-2.95)
+CXXFLAGS += -ftemplate-depth-40
+endif
+
 CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe

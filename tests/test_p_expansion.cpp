@@ -57,16 +57,16 @@ int main()
   SampledMapping<1> s(Grid<1>(-1.0, 1.0, 10), p);
   s.matlab_output(cout);
 
-  const int d = 2;
-  const int dT = 4; // be sure to use a continuous dual here!
+  const int d = 3;
+  const int dT = 3; // be sure to use a continuous dual here!
 
   typedef PBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
-  Basis basis(0, 0); // no b.c.'s
+//   Basis basis(0, 0); // no b.c.'s
 //   Basis basis(1, 0); // complementary b.c. at x=0
 //   Basis basis(0, 1); // complementary b.c. at x=1
-//   Basis basis(1, 1); // complementary b.c.'s
+  Basis basis(1, 1); // complementary b.c.'s
 
   InfiniteVector<double,Index> coeffs;
 
@@ -78,7 +78,7 @@ int main()
        << coeffs << endl;
 
   cout << "- evaluation of this linear combination of dual generators yields the pointwise error on [-1,1]:" << endl;
-  SampledMapping<1> s2(evaluate(basis, coeffs, false, 5));
+  SampledMapping<1> s2(evaluate(basis, coeffs, false, 6));
   Vector<double> error(s2.points().size());
   for (unsigned int i = 0; i < error.size(); i++)
     error[i] = fabs(s2.values()[i]-p.value(Point<1>(s2.points()[i])));

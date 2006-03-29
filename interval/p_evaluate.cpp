@@ -46,30 +46,30 @@ namespace WaveletTL
  	// dual
  	const Matrix<double>& CLAT = basis.get_CLAT();
  	if (lambda.k() < basis.DeltaLTmin()+(int)CLAT.column_dimension()) {
-// 	  // left boundary generator
-// 	  InfiniteVector<double, RIndex> coeffs;
-// 	  for (unsigned int i(0); i < CLAT.row_dimension(); i++) {
-// 	    double v(CLAT(i, lambda.k()-basis.DeltaLTmin()));
-// 	    if (v != 0)
-// 	      coeffs.set_coefficient(RIndex(lambda.j(), 0, 1-ell2T<d,dT>()+i), v);
-// 	  }
-// 	  return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
+ 	  // left boundary generator
+ 	  InfiniteVector<double, RIndex> coeffs;
+ 	  for (unsigned int i(0); i < CLAT.row_dimension(); i++) {
+ 	    double v(CLAT(i, lambda.k()-basis.DeltaLTmin()));
+ 	    if (v != 0)
+ 	      coeffs.set_coefficient(RIndex(lambda.j(), 0, 1-ell2T<d,dT>()+i), v);
+ 	  }
+ 	  return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
  	} else {
  	  const Matrix<double>& CRAT = basis.get_CRAT();
-// 	  if (lambda.k() > basis.DeltaRTmax(lambda.j())-(int)CRAT.column_dimension()) {
-// 	    // right boundary generator
-// 	    InfiniteVector<double, RIndex> coeffs;
-// 	    for (unsigned int i(0); i < CRAT.row_dimension(); i++) {
-// 	      double v(CRAT(i, basis.DeltaRTmax(lambda.j())-lambda.k()));
-// 	      if (v != 0)
-// 		coeffs.set_coefficient(RIndex(lambda.j(), 0, (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2T<d,dT>()+i)), v);
-// 	    }
-// 	    return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
-// 	  } else {
-// 	    // inner generator
-// 	    return basis.get_CDF_basis().evaluate(0, RIndex(lambda.j(), 0, lambda.k()),
-// 						  primal, 0, 1, resolution);
-// 	  }
+ 	  if (lambda.k() > basis.DeltaRTmax(lambda.j())-(int)CRAT.column_dimension()) {
+ 	    // right boundary generator
+ 	    InfiniteVector<double, RIndex> coeffs;
+ 	    for (unsigned int i(0); i < CRAT.row_dimension(); i++) {
+ 	      double v(CRAT(i, basis.DeltaRTmax(lambda.j())-lambda.k()));
+ 	      if (v != 0)
+ 		coeffs.set_coefficient(RIndex(lambda.j(), 0, (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2T<d,dT>()+i)), v);
+ 	    }
+ 	    return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
+ 	  } else {
+ 	    // inner generator
+ 	    return basis.get_CDF_basis().evaluate(0, RIndex(lambda.j(), 0, lambda.k()),
+ 						  primal, 0, 1, resolution);
+ 	  }
  	}
       }
     } else { // wavelet
@@ -128,9 +128,18 @@ namespace WaveletTL
 
     if (lambda.e() == 0) {
       // generator
+
+      // mirror if necessary
+      int k(lambda.k());
+      double y(x);
+      if (k > (1<<lambda.j())-ell1<d>()-d) {
+ 	k = (1<<lambda.j())-d-k-2*ell1<d>();
+ 	y = 1-x;
+      }
+
       r = (derivative == 0
-	   ? EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), x)
-	   : EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), lambda.k(), x));
+	   ? EvaluateSchoenbergBSpline_td<d>  (lambda.j(), k, y)
+	   : EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), k, y));
     } else {
       // wavelet
       typedef typename PBasis<d,dT>::Index Index;
@@ -158,10 +167,17 @@ namespace WaveletTL
 
     if (lambda.e() == 0) {
       // generator
-      for (unsigned int m(0); m < points.size(); m++)
-	values[m] = (derivative == 0
-		     ? EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), points[m])
-		     : EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), lambda.k(), points[m]));
+      if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) {
+	for (unsigned int m(0); m < points.size(); m++)
+	  values[m] = (derivative == 0
+		       ? EvaluateSchoenbergBSpline_td<d>  (lambda.j(), (1<<lambda.j())-d-k-2*ell1<d>(), 1-points[m])
+		       : EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), (1<<lambda.j())-d-k-2*ell1<d>(), 1-points[m]));
+      } else {
+	for (unsigned int m(0); m < points.size(); m++)
+	  values[m] = (derivative == 0
+		       ? EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), points[m])
+		       : EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), lambda.k(), points[m]));
+      }
     } else {
       // wavelet
       typedef typename PBasis<d,dT>::Index Index;
@@ -193,9 +209,16 @@ namespace WaveletTL
 
     if (lambda.e() == 0) {
       // generator
-      for (unsigned int m(0); m < npoints; m++) {
-	funcvalues[m] = EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), points[m]);
-	dervalues[m]  = EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), lambda.k(), points[m]);
+      if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) {
+	for (unsigned int m(0); m < npoints; m++)
+	  values[m] = (derivative == 0
+		       ? EvaluateSchoenbergBSpline_td<d>  (lambda.j(), (1<<lambda.j())-d-k-2*ell1<d>(), 1-points[m])
+		       : EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), (1<<lambda.j())-d-k-2*ell1<d>(), 1-points[m]));
+      } else {
+	for (unsigned int m(0); m < npoints; m++) {
+	  funcvalues[m] = EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), points[m]);
+	  dervalues[m]  = EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), lambda.k(), points[m]);
+	}
       }
     } else {
       // wavelet

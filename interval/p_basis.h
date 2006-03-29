@@ -198,6 +198,9 @@ namespace WaveletTL
     void reconstruct_t(const InfiniteVector<double, Index>& c, const int j,
 		       InfiniteVector<double, Index>& v) const;
 
+    //! read access to the internal instance of the CDF basis
+    const CDFBasis<d,dT>& get_CDF_basis() const { return cdf; }
+
     /*!
       read access to the boundary generator expansion coefficients
       (CLA == CRA == I)
@@ -205,9 +208,7 @@ namespace WaveletTL
     const Matrix<double>& get_CLAT() const { return CLAT; }
     const Matrix<double>& get_CRAT() const { return CRAT; }
 
-    /*!
-      read access to the diverse refinement matrices on level j0
-    */
+    //! read access to the diverse refinement matrices on level j0
     const SparseMatrix<double>& get_Mj0()  const { return Mj0; }
     const SparseMatrix<double>& get_Mj0T() const { return Mj0T; }
     const SparseMatrix<double>& get_Mj1()  const { return Mj1; }

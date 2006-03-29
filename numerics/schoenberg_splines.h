@@ -49,12 +49,27 @@ namespace MathTL
   double EvaluateSchoenbergBSpline(const int k, const double x)
   {
     double r(0);
-    
+
     // take care of the multiple knot t_{-d+1} = ... = t_0
-    double diff = std::max(0,k+d-1) - std::max(0,k);
-    if (diff > 0) r += (x - std::max(0,k)) * EvaluateSchoenbergBSpline<d-1>(k, x) / diff;
-    diff = std::max(0,k+d) - std::max(0,k+1);
-    if (diff > 0) r += (std::max(0,k+d) - x) * EvaluateSchoenbergBSpline<d-1>(k+1, x) / diff;
+#if 0
+    const double diff1 = std::max(0,k+d-1) - std::max(0,k);
+    if (diff1 > 0) r += (x - std::max(0,k)) * EvaluateSchoenbergBSpline<d-1>(k, x) / diff1;
+
+    const double diff2 = std::max(0,k+d) - std::max(0,k+1);
+    if (diff2 > 0) r += (std::max(0,k+d) - x) * EvaluateSchoenbergBSpline<d-1>(k+1, x) / diff2;
+#else
+    if (k <= 0)
+      {
+	const double diff1 = std::max(0,k+d-1);
+	if (diff1 > 0) r += x * EvaluateSchoenbergBSpline<d-1>(k, x) / diff1;
+	
+	const double diff2 = std::max(0,k+d) - std::max(0,k+1);
+	if (diff2 > 0) r += (std::max(0,k+d) - x) * EvaluateSchoenbergBSpline<d-1>(k+1, x) / diff2;
+      }
+    else
+      return ((x-k) * EvaluateSchoenbergBSpline<d-1>(k, x)
+	      +(k+d-x) * EvaluateSchoenbergBSpline<d-1>(k+1, x)) / (d - 1);
+#endif
     
     return r;
   }
@@ -66,7 +81,14 @@ namespace MathTL
   inline
   double EvaluateSchoenbergBSpline<1>(const int k, const double x)
   {
+#if 0
     return (x >= std::max(0,k) && x < std::max(0,k+1) ? 1.0 : 0.0);
+#else
+    if (k <= 0)
+      return (x >= 0 && x < std::max(0,k+1) ? 1.0 : 0.0);
+    else
+      return (x >= k && x < k+1 ? 1.0 : 0.0);
+#endif
   }
 
   /*!

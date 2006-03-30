@@ -21,6 +21,14 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
+  PBasis<d,dT>::PBasis(const bool bc_left, const bool bc_right) {
+    this->s0 = bc_left ? 1 : 0;
+    this->s1 = bc_right ? 1 : 0;
+
+    setup();
+  }
+
+  template <int d, int dT>
   inline
   typename PBasis<d,dT>::Index
   PBasis<d,dT>::first_generator(const int j) const

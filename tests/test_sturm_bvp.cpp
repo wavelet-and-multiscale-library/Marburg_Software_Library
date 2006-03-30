@@ -10,6 +10,7 @@
 
 #include <interval/i_index.h>
 #include <interval/ds_basis.h>
+#include <interval/p_basis.h>
 #include <galerkin/sturm_equation.h>
 
 using namespace std;
@@ -80,7 +81,8 @@ int main()
 
   const int d  = 3;
   const int dT = 3; // be sure to use a continuous dual here, otherwise the RHS test will fail
-  typedef DSBasis<d,dT> Basis;
+//   typedef DSBasis<d,dT> Basis;
+  typedef PBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
   SturmEquation<Basis> eq(T);

@@ -662,7 +662,7 @@ int main()
     }
     errors.push_back(errhelp);
     numberofsteps.push_back(result_adaptive.t.size());
-    wallclocktimes.push_back((double)(tend-tstart)/CLOCKS_PER_SEC);
+    wallclocktimes.push_back((double)(tend-tstart)/ (double)CLOCKS_PER_SEC);
 #endif
 
 #if _TESTCASE == 1 || _TESTCASE == 2 || _TESTCASE >= 9

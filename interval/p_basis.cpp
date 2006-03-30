@@ -21,6 +21,42 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
+  inline
+  typename PBasis<d,dT>::Index
+  PBasis<d,dT>::first_generator(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 0, DeltaLmin(), this);
+  }
+  
+  template <int d, int dT>
+  inline
+  typename PBasis<d,dT>::Index
+  PBasis<d,dT>::last_generator(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 0, DeltaRmax(j), this);
+  }
+
+  template <int d, int dT>
+  inline
+  typename PBasis<d,dT>::Index
+  PBasis<d,dT>::first_wavelet(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 1, Nablamin(), this);
+  }
+  
+  template <int d, int dT>
+  inline
+  typename PBasis<d,dT>::Index
+  PBasis<d,dT>::last_wavelet(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 1, Nablamax(j), this);
+  }
+
+  template <int d, int dT>
   void
   PBasis<d,dT>::setup() {
     // For simplicity, we do not implement a fully generic setup here

@@ -100,6 +100,18 @@ namespace WaveletTL
       int k2;
     } Support;
 
+    //! space dimension of the underlying domain
+    static const int space_dimension = 1;
+
+    //! critical Sobolev regularity for the primal generators/wavelets
+    static double primal_regularity() { return d - 0.5; }
+
+    //! number of vanishing moments for the primal wavelets
+    static unsigned int primal_vanishing_moments() { return dT; }
+
+    //! number of vanishing moments for the dual wavelets
+    static unsigned int dual_vanishing_moments() { return d; }
+
     //! extremal generator indices
     inline const int DeltaLmin() const { return 1-d-ell1<d>()+s0; }
     inline const int DeltaLmax() const { return -ell1<d>(); }
@@ -117,7 +129,22 @@ namespace WaveletTL
     //! boundary indices in \nabla_j
     inline const int Nablamin() const { return 0; }
     inline const int Nablamax(const int j) const { return (1<<j)-1; }
+
+    //! size of Nabla_j
+    inline const int Nablasize(const int j) const { return 1<<j; }
     
+    //! index of first (leftmost) generator on level j >= j0
+    Index first_generator(const int j) const;
+
+    //! index of last (rightmost) generator on level j >= j0
+    Index last_generator(const int j) const;
+
+    //! index of first (leftmost) wavelet on level j >= j0
+    Index first_wavelet(const int j) const;
+
+    //! index of last (rightmost) wavelet on level j >= j0
+    Index last_wavelet(const int j) const;
+
     //! DECOMPOSE routine, simple version
     /*!
       Constructs for a given single wavelet index lambda a coefficient set c,

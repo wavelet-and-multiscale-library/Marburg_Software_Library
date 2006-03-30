@@ -71,7 +71,7 @@ int main()
   InfiniteVector<double,Index> coeffs;
 
   const int j0 = basis.j0();
-  const int jmax = 10;
+  const int jmax = 8;
 
   expand(&p, basis, true, j0, coeffs);
   cout << "- integrals of p against all primal generators on level j0:" << endl
@@ -85,25 +85,25 @@ int main()
   cout << error << endl;
   cout << "(max. error: " << linfty_norm(error) << ")" << endl;
   
-//   cout << endl;
+  cout << endl;
 
-//   Hat hat;
-//   cout << "- sample values of the hat function:" << endl;
-//   SampledMapping<1> shat(Grid<1>(0.0, 1.0, 10), hat);
-//   shat.matlab_output(cout);
+  Hat hat;
+  cout << "- sample values of the hat function:" << endl;
+  SampledMapping<1> shat(Grid<1>(0.0, 1.0, 10), hat);
+  shat.matlab_output(cout);
   
-//   InfiniteVector<double,Index> dual_coeffs;
-//   expand(&hat, basis, false, jmax, dual_coeffs);
-// //   cout << "- (approx.) expansion coefficients of the hat function in the primal basis:" << endl
-// //        << dual_coeffs;
+  InfiniteVector<double,Index> dual_coeffs;
+  expand(&hat, basis, false, jmax, dual_coeffs);
+//   cout << "- (approx.) expansion coefficients of the hat function in the primal basis:" << endl
+//        << dual_coeffs;
   
-//   cout << "- pointwise error:" << endl;
-//   SampledMapping<1> s3(evaluate(basis, dual_coeffs, true, jmax+1));
-//   error.resize(s3.points().size());
-//   for (unsigned int i = 0; i < error.size(); i++)
-//     error[i] = fabs(s3.values()[i]-hat.value(Point<1>(s3.points()[i])));
-//   cout << error << endl;
-//   cout << "(max. error: " << linfty_norm(error) << ")" << endl;
+  cout << "- pointwise error:" << endl;
+  SampledMapping<1> s3(evaluate(basis, dual_coeffs, true, jmax+1));
+  error.resize(s3.points().size());
+  for (unsigned int i = 0; i < error.size(); i++)
+    error[i] = fabs(s3.values()[i]-hat.value(Point<1>(s3.points()[i])));
+  cout << error << endl;
+  cout << "(max. error: " << linfty_norm(error) << ")" << endl;
   
   return 0;
 }

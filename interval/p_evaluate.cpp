@@ -2,6 +2,7 @@
 
 #include <Rd/r_index.h>
 #include <Rd/cdf_utils.h>
+#include <utils/array1d.h>
 #include <numerics/schoenberg_splines.h>
 
 namespace WaveletTL
@@ -15,33 +16,11 @@ namespace WaveletTL
   {
     if (lambda.e() == 0) { // generator
       if (primal) {
-// 	const Matrix<double>& CLA = basis.get_CLA();
-// 	if (lambda.k() < basis.DeltaLmin()+(int)CLA.column_dimension()) {
-// 	  // left boundary generator
-// 	  InfiniteVector<double, RIndex> coeffs;
-// 	  for(unsigned int i(0); i < CLA.row_dimension(); i++) {
-// 	    double v(CLA(i, lambda.k()-basis.DeltaLmin()));
-// 	    if (v != 0)
-// 	      coeffs.set_coefficient(RIndex(lambda.j(), 0, 1-ell2<d>()+i), v);
-// 	  }
-// 	  return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
-// 	} else {
-// 	  const Matrix<double>& CRA = basis.get_CRA();
-// 	  if (lambda.k() > basis.DeltaRmax(lambda.j())-(int)CRA.column_dimension()) {
-// 	    // right boundary generator
-// 	    InfiniteVector<double, RIndex> coeffs;
-// 	    for (unsigned int i(0); i < CRA.row_dimension(); i++) {
-// 	      double v(CRA(i, basis.DeltaRmax(lambda.j())-lambda.k()));
-// 	      if (v != 0)
-// 		coeffs.set_coefficient(RIndex(lambda.j(), 0, (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2<d>()+i)), v);
-// 	    }
-// 	    return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
-// 	  } else {
-// 	    // inner generator
-// 	    return basis.get_CDF_basis().evaluate(0, RIndex(lambda.j(), 0, lambda.k()),
-// 						  primal, 0, 1, resolution);
-// 	  }
-// 	}
+	Grid<1> grid(0, 1, 1<<resolution);
+ 	MathTL::Array1D<double> values((1<<resolution)+1);
+ 	for (unsigned int i(0); i < values.size(); i++)
+	  values[i] = evaluate(basis, 0, lambda, i*ldexp(1.0,-resolution));
+	return SampledMapping<1>(grid, values);
       } else {
  	// dual
  	const Matrix<double>& CLAT = basis.get_CLAT();

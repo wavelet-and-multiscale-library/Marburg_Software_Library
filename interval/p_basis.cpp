@@ -592,7 +592,7 @@ namespace WaveletTL
 //     cout << "CLAT before biorthogonalization:" << endl << CLAT << endl;
     CLAT = CLAT * transpose(CLT);
     CLAT.compress(1e-12);
-    cout << "CLAT after biorthogonalization:" << endl << CLAT << endl;
+//     cout << "CLAT after biorthogonalization:" << endl << CLAT << endl;
 
     // the same for CRAT:
     CRAT.resize(ellT_r()+ell2T<d,dT>()-1, dT);
@@ -603,7 +603,7 @@ namespace WaveletTL
 //     cout << "CRAT before biorthogonalization:" << endl << CRAT << endl;
     CRAT = CRAT * transpose(CRT);
     CRAT.compress(1e-12);
-    cout << "CRAT after biorthogonalization:" << endl << CRAT << endl;
+//     cout << "CRAT after biorthogonalization:" << endl << CRAT << endl;
   }
 
   template <int d, int dT>

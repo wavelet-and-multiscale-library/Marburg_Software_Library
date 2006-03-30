@@ -128,18 +128,19 @@ namespace WaveletTL
 
     if (lambda.e() == 0) {
       // generator
-
-      // mirror if necessary
-      int k(lambda.k());
-      double y(x);
-      if (k > (1<<lambda.j())-ell1<d>()-d) {
- 	k = (1<<lambda.j())-d-k-2*ell1<d>();
- 	y = 1-x;
+      if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) {
+	r = (derivative == 0
+	     ? EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
+						 (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
+						 1-x)
+	     : -EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
+						  (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
+						  1-x));
+      } else {
+	r = (derivative == 0
+	     ? EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), x)
+	     : EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), lambda.k(), x));
       }
-
-      r = (derivative == 0
-	   ? EvaluateSchoenbergBSpline_td<d>  (lambda.j(), k, y)
-	   : EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), k, y));
     } else {
       // wavelet
       typedef typename PBasis<d,dT>::Index Index;
@@ -170,13 +171,21 @@ namespace WaveletTL
       if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) {
 	for (unsigned int m(0); m < points.size(); m++)
 	  values[m] = (derivative == 0
-		       ? EvaluateSchoenbergBSpline_td<d>  (lambda.j(), (1<<lambda.j())-d-k-2*ell1<d>(), 1-points[m])
-		       : EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), (1<<lambda.j())-d-k-2*ell1<d>(), 1-points[m]));
+		       ? EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
+							   (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
+							   1-points[m])
+		       : -EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
+							    (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
+							    1-points[m]));
       } else {
 	for (unsigned int m(0); m < points.size(); m++)
 	  values[m] = (derivative == 0
-		       ? EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), points[m])
-		       : EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), lambda.k(), points[m]));
+		       ? EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
+							   lambda.k(),
+							   points[m])
+		       : EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
+							   lambda.k(),
+							   points[m]));
       }
     } else {
       // wavelet
@@ -210,14 +219,22 @@ namespace WaveletTL
     if (lambda.e() == 0) {
       // generator
       if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) {
-	for (unsigned int m(0); m < npoints; m++)
-	  values[m] = (derivative == 0
-		       ? EvaluateSchoenbergBSpline_td<d>  (lambda.j(), (1<<lambda.j())-d-k-2*ell1<d>(), 1-points[m])
-		       : EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), (1<<lambda.j())-d-k-2*ell1<d>(), 1-points[m]));
+	for (unsigned int m(0); m < npoints; m++) {
+	  funcvalues[m] = EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
+							    (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
+							    1-points[m]);
+	  dervalues[m]  = -EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
+							     (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
+							     1-points[m]);
+	}
       } else {
 	for (unsigned int m(0); m < npoints; m++) {
-	  funcvalues[m] = EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), points[m]);
-	  dervalues[m]  = EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), lambda.k(), points[m]);
+	  funcvalues[m] = EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
+							    lambda.k(),
+							    points[m]);
+	  dervalues[m]  = EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
+							    lambda.k(), 
+							    points[m]);
 	}
       }
     } else {

@@ -293,10 +293,12 @@ namespace WaveletTL
     Mj0T.compress(1e-8);
     Mj1T.compress(1e-8);
 
+#if 0
     // adjust scaling factor for the interior wavelets, cf. [P, p.]
     const double scaling_factor = minus1power(d+1)*2*binv;
     Mj1 .scale(scaling_factor);
     Mj1T.scale(1./scaling_factor);
+#endif
     
 //     Mj1.scale(M_SQRT2);
 //     cout << "Mj1 (without SQRT1_2)=" << endl << Mj1;

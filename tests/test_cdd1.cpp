@@ -94,8 +94,8 @@ int main()
 
   TestProblem<3> T;
 
-  const int d  = 3;
-  const int dT = 5;
+  const int d  = 2;
+  const int dT = 2;
 //   typedef DSBasis<d,dT> Basis;
   typedef PBasis<d,dT> Basis;
   typedef Basis::Index Index;

@@ -58,7 +58,8 @@ namespace WaveletTL
   double
   CubeEquation<IBASIS,DIM,CUBEBASIS>::D(const typename WaveletBasis::Index& lambda) const
   {
-    return ldexp(1.0, lambda.j());
+//     return ldexp(1.0, lambda.j());
+    return sqrt(a(lambda, lambda));
   }
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>

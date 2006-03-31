@@ -9,6 +9,7 @@
 
 #include <interval/i_index.h>
 #include <interval/ds_basis.h>
+#include <interval/p_basis.h>
 #include <cube/cube_basis.h>
 #include <galerkin/cached_problem.h>
 #include <galerkin/cube_equation.h>
@@ -61,9 +62,10 @@ int main()
 {
   cout << "Testing adaptive wavelet-Galerkin solution of a Poisson problem on the cube with CDD1_SOLVE ..." << endl;
 
-  const int d  = 3;
-  const int dT = 3;
-  typedef DSBasis<d,dT> Basis1D;
+  const int d  = 2;
+  const int dT = 2;
+//   typedef DSBasis<d,dT> Basis1D;
+  typedef PBasis<d,dT> Basis1D;
   typedef CubeBasis<Basis1D,2> Basis;
   typedef Basis::Index Index;
 
@@ -75,16 +77,25 @@ int main()
   typedef CubeEquation<Basis1D,2,Basis> Problem;
   Problem problem(&poisson, bc);
 //   CachedProblem<Problem> cproblem(&problem);
-  CachedProblem<Problem> cproblem(&problem, 19.97  ,    6.86044); // d=2, dT=2
+
+  // initialization with some precomputed DSBasis eigenvalue bounds:
+//   CachedProblem<Problem> cproblem(&problem, 19.97  ,    6.86044); // d=2, dT=2
 //   CachedProblem<Problem> cproblem(&problem, 29.8173,   25.6677 ); // d=2, dT=4
 //   CachedProblem<Problem> cproblem(&problem, 8.51622, 10000); //6311.51   ); // d=3, dT=3 
+
+  // initialization with some precomputed PBasis eigenvalue bounds:
+  CachedProblem<Problem> cproblem(&problem, 10.6941, 3.4127); // d=2, dT=2
+//   CachedProblem<Problem> cproblem(&problem, ); // d=2, dT=4
+//   CachedProblem<Problem> cproblem(&problem, ); // d=3, dT=3
+//   CachedProblem<Problem> cproblem(&problem, ); // d=3, dT=5
+
   cout << "* estimate for normA: " << cproblem.norm_A() << endl;
   cout << "* estimate for normAinv: " << cproblem.norm_Ainv() << endl;
 
   InfiniteVector<double, Index> u_epsilon;
 
-//   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 6);
-  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 7);
+  CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 6);
+//   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 7);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 10);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 6, CDD1);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon);

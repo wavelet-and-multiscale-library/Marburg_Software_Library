@@ -118,6 +118,18 @@ namespace WaveletTL
     //! number of vanishing moments for the dual wavelets
     static unsigned int dual_vanishing_moments() { return d; }
 
+    //! read access to the primal b.c. order at x=0
+    const int get_s0() const { return s0; }
+
+    //! read access to the primal b.c. order at x=1
+    const int get_s1() const { return s1; }
+
+    //! read access to the primal b.c. order at x=0
+    const int get_sT0() const { return 0; }
+
+    //! read access to the primal b.c. order at x=0
+    const int get_sT1() const { return 0; }
+
     //! extremal generator indices
     inline const int DeltaLmin() const { return 1-d-ell1<d>()+s0; }
     inline const int DeltaLmax() const { return -ell1<d>(); }

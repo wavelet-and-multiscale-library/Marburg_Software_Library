@@ -8,8 +8,8 @@ int main()
 {
   cout << "Testing wavelet bases from [P] ..." << endl;
 
-  const int d = 2;
-  const int dT = 2;
+  const int d = 3;
+  const int dT = 3;
 
   typedef PBasis<d,dT> Basis;
   typedef Basis::Index Index;
@@ -230,6 +230,22 @@ int main()
 	  if (index == last_generator(&basis, level)) break;
 	}
     }
+#endif
+
+#if 0
+  cout << "- evaluating some primal generators:" << endl;
+  for (Index lambda(first_generator(&basis, basis.j0()));; ++lambda) {
+    cout << lambda << endl;
+    evaluate(basis, lambda, true, 6).matlab_output(cout);
+    if (lambda == last_generator(&basis, basis.j0())) break;
+  }
+  
+  cout << "- evaluating some primal wavelets:" << endl;
+  for (Index lambda = first_wavelet(&basis, basis.j0());; ++lambda) {
+    cout << lambda << endl;
+    evaluate(basis, lambda, true, 6).matlab_output(cout);
+    if (lambda == last_wavelet(&basis, basis.j0())) break;
+  }
 #endif
 
   return 0;

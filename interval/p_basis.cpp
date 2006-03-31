@@ -115,7 +115,7 @@ namespace WaveletTL
     for (unsigned int r = 0; r < dT; r++) {
       MLTp.set_entry(r, r, ldexp(1.0, -r));
       for (int m = ellT_l(); m <= 2*ellT_l()+ell1T<d,dT>()-1; m++)
-	MLTp.set_entry(dT+m-ellT_l(), r, alpha(m, r));
+	MLTp.set_entry(dT+m-ellT_l(), r, alpha(m, r)*ldexp(1.0, -r));
       for (int m = 2*ellT_l()+ell1T<d,dT>(); m <= 2*ellT_l()+ell2T<d,dT>()-2; m++)
 	MLTp.set_entry(dT+m-ellT_l(), r, betaL(m, r));
     }
@@ -125,7 +125,7 @@ namespace WaveletTL
     for (unsigned int r = 0; r < dT; r++) {
       MRTp.set_entry(r, r, ldexp(1.0, -r));
       for (int m = ellT_r(); m <= 2*ellT_r()+ell1T<d,dT>()-1; m++)
-	MRTp.set_entry(dT+m-ellT_r(), r, alpha(m, r));
+	MRTp.set_entry(dT+m-ellT_r(), r, alpha(m, r)*ldexp(1.0, -r));
       for (int m = 2*ellT_r()+ell1T<d,dT>(); m <= 2*ellT_r()+ell2T<d,dT>()-2; m++)
 	MRTp.set_entry(dT+m-ellT_r(), r, betaR(m, r));
     }
@@ -193,8 +193,12 @@ namespace WaveletTL
 #endif
 
     GElim (A, H, Hinv); // elimination [DKU, (4.1.4)ff.]
+#if 1
+    SparseMatrix<double> BB; BT(A, BB); // [DKU, (4.1.13)]
+#else
     SparseMatrix<double> BB; double binv = BT(A, BB); // [DKU, (4.1.13)]
 //     cout << "b^{-1}=" << binv << endl;
+#endif
     
 #if 0
     cout << "PBasis(): check properties (4.1.15):" << endl;
@@ -228,10 +232,10 @@ namespace WaveletTL
 #endif
 
     SparseMatrix<double> mj1ih = PP * Hinv * FF; // [DKU, (4.1.23)]
+//     cout << "mj1ih (without SQRT1_2):" << endl << mj1ih;
     mj1ih.scale(M_SQRT1_2); // [P, Prop. 5.6]
 //     cout << "PP=" << endl << PP;
 //     cout << "Hinv=" << endl << Hinv;
-//     cout << "mj1ih=" << endl << mj1ih;
 
     SparseMatrix<double> PPinv; InvertP(PP, PPinv);
 
@@ -255,7 +259,8 @@ namespace WaveletTL
 	if (help != 0)
 	  mj_initial.set_entry(i, j+Mj0.column_dimension(), help);
       }
-    
+    cout << "Mj=" << endl << mj_initial;
+
     SparseMatrix<double> gj_initial(gj0ih.row_dimension() + gj1ih.row_dimension(),
 				    gj0ih.column_dimension());
     for (unsigned int i = 0; i < gj0ih.row_dimension(); i++)
@@ -270,6 +275,7 @@ namespace WaveletTL
 	if (help != 0)
 	  gj_initial.set_entry(i+gj0ih.row_dimension(), j, help);
       }
+    cout << "Gj=" << endl << gj_initial;
     
     SparseMatrix<double> test_initial = mj_initial * gj_initial;
     for (unsigned int i = 0; i < test_initial.row_dimension(); i++)
@@ -294,7 +300,7 @@ namespace WaveletTL
     Mj1T.compress(1e-8);
 
 #if 0
-    // adjust scaling factor for the interior wavelets, cf. [P, p.]
+    // adjust interior wavelets, such that they correspond to the CDF ones, cf. [P, pp. 121-123]
     const double scaling_factor = minus1power(d+1)*2*binv;
     Mj1 .scale(scaling_factor);
     Mj1T.scale(1./scaling_factor);
@@ -795,11 +801,12 @@ namespace WaveletTL
     for (int i = 1; i <= d; i++) {
       help.diagonal(Deltasize(j0()+1), 1.0);
 
-      // index of the entry in the first column of A_j^{(i)} (w.r.t. Ahat_j^{(i)})
+      // row index of the entry in the first column of A_j^{(i)} (w.r.t. Ahat_j^{(i)})
       const int elimrow = i%2 ? firstrow+(i-1)/2 : lastrow-(int)floor((i-1)/2.);
 //       cout << "i%2=" << i%2 << ", elimrow=" << elimrow << endl;
 
       // factorization [P, p. 112]      
+//       const int HhatLow = i%2 ? d-s0-((i+1)/2)%2 : d-s0+1-(d%2)-(i/2)%2;
       const int HhatLow = i%2 ? d-s0-((i+1)/2)%2 : d-s0+1-(d%2)-(i/2)%2;
       const int HhatUp  = i%2
 	? Deltasize(j0()+1)-d+s1-abs((d%2)-((i+1)/2)%2)
@@ -824,7 +831,7 @@ namespace WaveletTL
 	    help.set_entry(k+1, k, Lentry);
 	}
       
-//       cout << "help=" << endl << help;
+//       cout << "Hfactor=" << endl << help;
 
       A = help * A;
       H = help * H;
@@ -844,6 +851,9 @@ namespace WaveletTL
       
       Hinv = Hinv * help;
     }
+
+//     cout << "finally, H=" << endl << H;
+//     cout << "finally, Hinv=" << endl << Hinv;
   }
 
 

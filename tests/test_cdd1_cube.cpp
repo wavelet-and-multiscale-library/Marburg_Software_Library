@@ -62,8 +62,8 @@ int main()
 {
   cout << "Testing adaptive wavelet-Galerkin solution of a Poisson problem on the cube with CDD1_SOLVE ..." << endl;
 
-  const int d  = 2;
-  const int dT = 2;
+  const int d  = 3;
+  const int dT = 3;
 //   typedef DSBasis<d,dT> Basis1D;
   typedef PBasis<d,dT> Basis1D;
   typedef CubeBasis<Basis1D,2> Basis;
@@ -89,17 +89,17 @@ int main()
 //   CachedProblem<Problem> cproblem(&problem, 37.9188 ,  14.6577); // d=2, dT=4 (2^j-precond.)
 //   CachedProblem<Problem> cproblem(&problem,  4.45301,  213.333); // d=2, dT=4 (diag. precond.)
 //   CachedProblem<Problem> cproblem(&problem,  2.35701,  80.8879); // d=3, dT=3 (2^j-precond.)
-//   CachedProblem<Problem> cproblem(&problem,  4.91237,  23.5086); // d=3, dT=3 (diag. precond.)
+  CachedProblem<Problem> cproblem(&problem,  4.91237,  23.5086); // d=3, dT=3 (diag. precond.)
 //   CachedProblem<Problem> cproblem(&problem,  2.4999 ,  67.5863); // d=3, dT=5 (2^j-precond., not exact)
 
 //   cout << "* estimate for normA: " << cproblem.norm_A() << endl;
 //   cout << "* estimate for normAinv: " << cproblem.norm_Ainv() << endl;
-  cout << "* estimate for normA: " << problem.norm_A() << endl;
-  cout << "* estimate for normAinv: " << problem.norm_Ainv() << endl;
+//   cout << "* estimate for normA: " << problem.norm_A() << endl;
+//   cout << "* estimate for normAinv: " << problem.norm_Ainv() << endl;
 
   InfiniteVector<double, Index> u_epsilon;
 
-//   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 6);
+  CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 6);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 7);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 10);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 6, CDD1);

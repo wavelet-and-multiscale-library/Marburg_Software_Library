@@ -8,8 +8,8 @@ int main()
 {
   cout << "Testing wavelet bases from [P] ..." << endl;
 
-  const int d = 2;
-  const int dT = 4;
+  const int d = 3;
+  const int dT = 3;
 
   typedef PBasis<d,dT> Basis;
   typedef Basis::Index Index;
@@ -51,7 +51,7 @@ int main()
     }
 #endif
 
-#if 0
+#if 1
   cout << "- checking biorthogonality of Mj<->Gj and MjT<->GjT for different levels:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+1; level++)
     {
@@ -105,7 +105,7 @@ int main()
     }
 #endif
 
-#if 0
+#if 1
   cout << "- checking access to single rows of the M_{j,i} matrices:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+2; level++)
     {

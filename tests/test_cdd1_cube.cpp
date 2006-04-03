@@ -87,8 +87,9 @@ int main()
 //   CachedProblem<Problem> cproblem(&problem, 10.6941 ,   3.4127); // d=2, dT=2 (2^j-precond.)
 //   CachedProblem<Problem> cproblem(&problem,  2.77329,  11.1314); // d=2, dT=2 (diag. precond.)
 //   CachedProblem<Problem> cproblem(&problem, 37.9188 ,  14.6577); // d=2, dT=4 (2^j-precond.)
-//   CachedProblem<Problem> cproblem(&problem,  4.33118, 119.458 ); // d=2, dT=4 (diag. precond.)
+//   CachedProblem<Problem> cproblem(&problem,  4.45301,  213.333); // d=2, dT=4 (diag. precond.)
 //   CachedProblem<Problem> cproblem(&problem,  2.35701,  80.8879); // d=3, dT=3 (2^j-precond.)
+//   CachedProblem<Problem> cproblem(&problem,  4.91237,  23.5086); // d=3, dT=3 (diag. precond.)
 //   CachedProblem<Problem> cproblem(&problem,  2.4999 ,  67.5863); // d=3, dT=5 (2^j-precond., not exact)
 
 //   cout << "* estimate for normA: " << cproblem.norm_A() << endl;

@@ -120,17 +120,23 @@ int main()
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 10.4367 ,  6.65203); // d=2, dT=2 (2^j-precond.)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  3.04627, 52.2118 ); // d=2, dT=4 (diag-precond.)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 21.4112 , 26.105  ); // d=2, dT=4 (2^j-precond.)
-//   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  1.88912, 26.2107 ); // d=3, dT=3 (diag-precond.)
-  CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.37738, 26.1895 ); // d=3, dT=3 (2^j-precond.)
+  CachedProblem<SturmEquation<Basis> > cproblem(&problem,  1.88912, 26.2107 ); // d=3, dT=3 (diag-precond.)
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.37738, 26.1895 ); // d=3, dT=3 (2^j-precond.)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.09306, 104.014 ); // d=3, dT=5 (diag-precond.)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.7267 , 104.003 ); // d=3, dT=5 (2^j-precond.)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.74156, 104.014 ); // d=3, dT=7 (diag-precond.)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  4.59928, 104.003 ); // d=3, dT=7 (2^j-precond.)
-  cout << "* estimate for normA: " << cproblem.norm_A() << endl;
-  cout << "* estimate for normAinv: " << cproblem.norm_Ainv() << endl;
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  3.51683, 415.266 ); // d=3, dT=9 (diag-precond.)
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 11.0267 , 415.261 ); // d=3, dT=9 (2^j-precond.)
+
+//   cout << "* estimate for normA: " << cproblem.norm_A() << endl;
+//   cout << "* estimate for normAinv: " << cproblem.norm_Ainv() << endl;
+//   cout << "* estimate for normA: " << problem.norm_A() << endl;
+//   cout << "* estimate for normAinv: " << problem.norm_Ainv() << endl;
 
   InfiniteVector<double, Index> u_epsilon;
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 12);
+//   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 20);
   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 10);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon);
   

@@ -1,5 +1,7 @@
 // implementation for p_support.h
 
+#include <Rd/cdf_utils.h>
+
 namespace WaveletTL
 {
   template <int d, int dT>
@@ -15,6 +17,26 @@ namespace WaveletTL
       }
     else // wavelet
       {
+#if 1
+	// cf. [P, p. 125]
+	if (lambda.k() < (d+dT)/2-1) {
+	  // left boundary wavelet
+	  k1 = 0;
+	  k2 = 2*(d+dT)-4;
+	} else {
+	  if ((1<<lambda.j())-lambda.k() <= (d+dT)/2-1) {
+	    // right boundary wavelet
+	    k1 = (1<<(lambda.j()+1))-(2*(d+dT)-4);
+	    k2 = 1<<(lambda.j()+1);
+	  } else {
+	    // interior wavelet (CDF)
+	    k1 = 2*(lambda.k()-(d+dT)/2+1);
+	    k2 = k1+2*(d+dT)-2;
+	  }
+	}
+#else
+	// old code:
+
 	// To determine which generators would be necessary to create the
 	// wavelet in question, we mimic a reconstruct_1() call:
 	
@@ -52,9 +74,10 @@ namespace WaveletTL
 	int dummy;
 	support(basis, typename PBasis<d,dT>::Index(lambda.j()+1, 0, kleft, &basis), k1, dummy);
 	support(basis, typename PBasis<d,dT>::Index(lambda.j()+1, 0, kright, &basis), dummy, k2);
+#endif
       }
   }
-
+  
   template <int d, int dT>
   bool intersect_supports(const PBasis<d,dT>& basis,
 			  const typename PBasis<d,dT>::Index& lambda,

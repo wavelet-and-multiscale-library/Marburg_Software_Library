@@ -88,9 +88,11 @@ int main()
 //   CachedProblem<Problem> cproblem(&problem,  2.77329,  11.1314); // d=2, dT=2 (diag. precond.)
 //   CachedProblem<Problem> cproblem(&problem, 37.9188 ,  14.6577); // d=2, dT=4 (2^j-precond.)
 //   CachedProblem<Problem> cproblem(&problem,  4.45301,  213.333); // d=2, dT=4 (diag. precond.)
+//   CachedProblem<Problem> cproblem(&problem,  7.15276, 9044.08 ); // d=2, dT=6 (diag. precond.)
 //   CachedProblem<Problem> cproblem(&problem,  2.35701,  80.8879); // d=3, dT=3 (2^j-precond.)
   CachedProblem<Problem> cproblem(&problem,  4.91237,  23.5086); // d=3, dT=3 (diag. precond.)
 //   CachedProblem<Problem> cproblem(&problem,  2.4999 ,  67.5863); // d=3, dT=5 (2^j-precond., not exact)
+//   CachedProblem<Problem> cproblem(&problem,  5.49044, 124.85  ); // d=3, dT=5 (diag. precond.)
 
 //   cout << "* estimate for normA: " << cproblem.norm_A() << endl;
 //   cout << "* estimate for normAinv: " << cproblem.norm_Ainv() << endl;

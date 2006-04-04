@@ -10,8 +10,8 @@ int main()
 {
   cout << "Testing support calculation of [P] generators and wavelets..." << endl;
 
-  const int d = 2;
-  const int dT = 2;
+  const int d = 3;
+  const int dT = 3;
 
   typedef PBasis<d,dT> Basis;
   typedef Basis::Index Index;
@@ -83,7 +83,7 @@ int main()
 	     << " with support intersection "
 	     << "2^{-" << it->second.j << "}[" << it->second.k1 << "," << it->second.k2 << "]" << endl;
       }
-      for (int level = basis.j0(); level <= basis.j0()+1; level++) {
+      for (int level = basis.j0(); level <= basis.j0()+2; level++) {
 	intersecting_wavelets(basis, lambda, level, false, nus);
 	for (SupportList::const_iterator it(nus.begin()); it != nus.end(); ++it) {
 	  cout << "    nu=" << it->first 

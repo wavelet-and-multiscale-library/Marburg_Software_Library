@@ -94,8 +94,8 @@ int main()
 
   TestProblem<3> T;
 
-  const int d  = 3;
-  const int dT = 3;
+  const int d  = 2;
+  const int dT = 2;
 //   typedef DSBasis<d,dT> Basis;
   typedef PBasis<d,dT> Basis;
   typedef Basis::Index Index;
@@ -116,11 +116,11 @@ int main()
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  5.8466 , 532.085  ); // d=4, dT=4
 
   // initialization with some precomputed PBasis eigenvalue bounds:
-//   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.3612 , 13.3116 ); // d=2, dT=2 (diag-precond.)
+  CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.3612 , 13.3116 ); // d=2, dT=2 (diag-precond.)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 10.4367 ,  6.65203); // d=2, dT=2 (2^j-precond.)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  3.04627, 52.2118 ); // d=2, dT=4 (diag-precond.)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 21.4112 , 26.105  ); // d=2, dT=4 (2^j-precond.)
-  CachedProblem<SturmEquation<Basis> > cproblem(&problem,  1.88912, 26.2107 ); // d=3, dT=3 (diag-precond.)
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  1.88912, 26.2107 ); // d=3, dT=3 (diag-precond.)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.37738, 26.1895 ); // d=3, dT=3 (2^j-precond.)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.09306, 104.014 ); // d=3, dT=5 (diag-precond.)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.7267 , 104.003 ); // d=3, dT=5 (2^j-precond.)
@@ -136,6 +136,7 @@ int main()
 
   InfiniteVector<double, Index> u_epsilon;
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 12);
+//   CDD1_SOLVE(cproblem, 1e-10, u_epsilon, 18);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 20);
   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 10);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon);

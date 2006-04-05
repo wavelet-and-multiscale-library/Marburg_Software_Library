@@ -501,6 +501,98 @@ namespace WaveletTL
 #endif
       }
 
+    // After the overall setup, we try to reduce j0 by one,
+    // resulting in much better condition numbers:
+    SparseMatrix<double> Mj0_reduced(Deltasize(j0_), Deltasize(j0_-1));
+    for (int col = 0; col < Deltasize(j0_-1)/2; col++)
+      for (int row = 0; row < Deltasize(j0_); row++)
+	Mj0_reduced.set_entry(row, col, Mj0.get_entry(row, col));
+    for (int col = Deltasize(j0_-1)/2; col < Deltasize(j0_-1); col++)
+      for (int row = 0; row < Deltasize(j0_); row++)
+	Mj0_reduced.set_entry(row, col, Mj0.get_entry(row+(1<<j0_), col+(1<<(j0_-1))));
+
+//     cout << "Mj0:" << endl << Mj0;
+//     cout << "Mj0 reduced:" << endl << Mj0_reduced;
+
+    SparseMatrix<double> Mj1_reduced(Deltasize(j0_), 1<<(j0_-1));
+    for (int col = 0; col < 1<<(j0_-2); col++)
+      for (int row = 0; row < Deltasize(j0_); row++)
+	Mj1_reduced.set_entry(row, col, Mj1.get_entry(row, col));
+    for (int col = 1<<(j0_-2); col < 1<<(j0_-1); col++)
+      for (int row = 0; row < Deltasize(j0_); row++)
+	Mj1_reduced.set_entry(row, col, Mj1.get_entry(row+(1<<j0_), col+(1<<(j0_-1))));
+
+//     cout << "Mj1:" << endl << Mj1;
+//     cout << "Mj1 reduced:" << endl << Mj1_reduced;
+
+    SparseMatrix<double> Mj0T_reduced(Deltasize(j0_), Deltasize(j0_-1));
+    for (int col = 0; col < Deltasize(j0_-1)/2; col++)
+      for (int row = 0; row < Deltasize(j0_); row++)
+	Mj0T_reduced.set_entry(row, col, Mj0T.get_entry(row, col));
+    for (int col = Deltasize(j0_-1)/2; col < Deltasize(j0_-1); col++)
+      for (int row = 0; row < Deltasize(j0_); row++)
+	Mj0T_reduced.set_entry(row, col, Mj0T.get_entry(row+(1<<j0_), col+(1<<(j0_-1))));
+
+//     cout << "Mj0T:" << endl << Mj0T;
+//     cout << "Mj0T reduced:" << endl << Mj0T_reduced;
+
+    SparseMatrix<double> Mj1T_reduced(Deltasize(j0_), 1<<(j0_-1));
+    for (int col = 0; col < 1<<(j0_-2); col++)
+      for (int row = 0; row < Deltasize(j0_); row++)
+	Mj1T_reduced.set_entry(row, col, Mj1T.get_entry(row, col));
+    for (int col = 1<<(j0_-2); col < 1<<(j0_-1); col++)
+      for (int row = 0; row < Deltasize(j0_); row++)
+	Mj1T_reduced.set_entry(row, col, Mj1T.get_entry(row+(1<<j0_), col+(1<<(j0_-1))));
+    
+//     cout << "Mj1T:" << endl << Mj1T;
+//     cout << "Mj1T reduced:" << endl << Mj1T_reduced;
+
+    // try to reduce j0:
+    SparseMatrix<double> mj_reduced(Mj0_reduced.row_dimension(),
+				    Mj0_reduced.column_dimension() + Mj1_reduced.column_dimension());
+    for (unsigned int i = 0; i < Mj0_reduced.row_dimension(); i++)
+      for (unsigned int j = 0; j < Mj0_reduced.column_dimension(); j++) {
+	const double help = Mj0_reduced.get_entry(i, j);
+	if (help != 0)
+	  mj_reduced.set_entry(i, j, help);
+      }
+    for (unsigned int i = 0; i < Mj1_reduced.row_dimension(); i++)
+      for (unsigned int j = 0; j < Mj1_reduced.column_dimension(); j++) {
+	const double help = Mj1_reduced.get_entry(i, j);
+	if (help != 0)
+	  mj_reduced.set_entry(i, j+Mj0_reduced.column_dimension(), help);
+      }
+    
+    SparseMatrix<double> gj0_reduced = transpose(Mj0T_reduced);
+    SparseMatrix<double> gj1_reduced = transpose(Mj1T_reduced);
+    SparseMatrix<double> gj_reduced(gj0_reduced.row_dimension() + gj1_reduced.row_dimension(),
+				    gj0_reduced.column_dimension());
+    for (unsigned int i = 0; i < gj0_reduced.row_dimension(); i++)
+      for (unsigned int j = 0; j < gj0_reduced.column_dimension(); j++) {
+	const double help = gj0_reduced.get_entry(i, j);
+	if (help != 0)
+	  gj_reduced.set_entry(i, j, help);
+      }
+    for (unsigned int i = 0; i < gj1_reduced.row_dimension(); i++)
+      for (unsigned int j = 0; j < gj1_reduced.column_dimension(); j++) {
+	const double help = gj1_reduced.get_entry(i, j);
+	if (help != 0)
+	  gj_reduced.set_entry(i+gj0_reduced.row_dimension(), j, help);
+      }
+    
+    SparseMatrix<double> test_reduced = mj_reduced * gj_reduced;
+    for (unsigned int i = 0; i < test_reduced.row_dimension(); i++)
+      test_reduced.set_entry(i, i, test_reduced.get_entry(i, i) - 1.0);
+//     cout << "* for the reduced system, ||Mj*Gj-I||_infty: " << row_sum_norm(test_reduced) << endl;
+
+    if (row_sum_norm(test_reduced) < 1e-10) {
+      Mj0  = Mj0_reduced;
+      Mj0T = Mj0T_reduced;
+      Mj1  = Mj1_reduced;
+      Mj1T = Mj1T_reduced;
+      j0_--;
+    }
+
     Mj0_t  = transpose(Mj0);
     Mj0T_t = transpose(Mj0T);
     Mj1_t  = transpose(Mj1);

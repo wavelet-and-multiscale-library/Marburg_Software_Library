@@ -105,7 +105,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   cout << "- checking access to single rows of the M_{j,i} matrices:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+2; level++)
     {

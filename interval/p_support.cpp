@@ -135,7 +135,50 @@ namespace WaveletTL
     int k1_lambda, k2_lambda;
     support(basis, lambda, k1_lambda, k2_lambda);
     
-    // a brute force solution
+#if 1
+    // new code
+    Support supp;
+    if (generators) {
+      // the rightmost generator on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k+ell2) > a  but  2^{-j}(k-1+ell2) <= a,
+      // so that ...
+      const int firstk = std::max(basis.DeltaLmin(), (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda-ell2<d>())+1);
+      
+      // the leftmost generator on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k+ell1) < b  but  2^{-j}(k+1+ell1) >= b,
+      // so that ...
+      const int lastk  = std::min(basis.DeltaRmax(j), (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda-ell1<d>())-1);
+      
+      Index nu(j, 0, firstk, &basis);
+      for (int k = firstk; k <= lastk; k++, ++nu) {
+	intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2);
+	intersecting.push_back(std::make_pair(nu, supp));
+      }
+    } else {
+      // if the left boundary wavelets are not involved, then
+      // the rightmost wavelet on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k+(d+dT)/2) > a  but  2^{-j}(k-1+(d+dT)/2) <= a,
+      // so that ...
+      const int firstk = (ldexp(1.0,j-j_lambda)*k1_lambda < d+dT-2
+			  ? 0
+			  : (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda-(d+dT)/2)+1);
+
+      // if the right boundary wavelets are not involved, then
+      // the leftmost wavelet on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k-(d+dT)/2+1) < b  but  2^{-j}(k-(d+dT)/2+2) >= a,
+      // so that ...
+      const int lastk = (ldexp(1.0,-j_lambda)*k2_lambda > 1 - ldexp(1.0,-j)*(d+dT-2)
+			 ? (1<<j)-1
+			 : (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda+(d+dT)/2)-2);
+
+      Index nu(j, 1, firstk, &basis);
+      for (int k = firstk; k <= lastk; k++, ++nu) {
+	intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2);
+	intersecting.push_back(std::make_pair(nu, supp));
+      }
+    }
+#else
+    // old code, a brute force solution
     Support supp;
     if (generators) {
       for (Index nu = first_generator(&basis, j);; ++nu) {
@@ -150,6 +193,7 @@ namespace WaveletTL
 	if (nu == last_wavelet(&basis, j)) break;
       }
     }
+#endif
   }
 
   template <int d, int dT>
@@ -168,6 +212,43 @@ namespace WaveletTL
     int k1_lambda, k2_lambda;
     support(basis, lambda, k1_lambda, k2_lambda);
     
+#if 1
+    // new code
+    if (generators) {
+      // the rightmost generator on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k+ell2) > a  but  2^{-j}(k-1+ell2) <= a,
+      // so that ...
+      const int firstk = std::max(basis.DeltaLmin(), (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda-ell2<d>())+1);
+      
+      // the leftmost generator on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k+ell1) < b  but  2^{-j}(k+1+ell1) >= b,
+      // so that ...
+      const int lastk  = std::min(basis.DeltaRmax(j), (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda-ell1<d>())-1);
+
+      for (int k = firstk; k <= lastk; k++)
+	intersecting.push_back(Index(j, 0, k, &basis));
+      
+    } else {
+      // if the left boundary wavelets are not involved, then
+      // the rightmost wavelet on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k+(d+dT)/2) > a  but  2^{-j}(k-1+(d+dT)/2) <= a,
+      // so that ...
+      const int firstk = (ldexp(1.0,j-j_lambda)*k1_lambda < d+dT-2
+			  ? 0
+			  : (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda-(d+dT)/2)+1);
+
+      // if the right boundary wavelets are not involved, then
+      // the leftmost wavelet on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k-(d+dT)/2+1) < b  but  2^{-j}(k-(d+dT)/2+2) >= a,
+      // so that ...
+      const int lastk = (ldexp(1.0,-j_lambda)*k2_lambda > 1 - ldexp(1.0,-j)*(d+dT-2)
+			 ? (1<<j)-1
+			 : (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda+(d+dT)/2)-2);
+
+      for (int k = firstk; k <= lastk; k++)
+	intersecting.push_back(Index(j, 1, k, &basis));
+    }
+#else
     // old code, a brute force solution
     Support supp;
     if (generators) {
@@ -183,65 +264,8 @@ namespace WaveletTL
 	if (nu == last_wavelet(&basis, j)) break;
       }
     }
+#endif
 
-    // recalculate all intersecting wavelets, now with new code
-    if (generators) {
-      // the rightmost generator on the level j, s.th. its support intersects [a,b], fulfills
-      //   2^{-j}(k+ell2) > a  but  2^{-j}(k-1+ell2) <= a,
-      // so that ...
-      const int firstk = std::max(basis.DeltaLmin(), (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda-ell2<d>())+1);
-      if (firstk != intersecting.begin()->k()) {
-	cout << "something went wrong in intersecting_wavelets(), generator part: "
-	     << "lambda=" << lambda << " with support "
-	     << "2^{-" << j_lambda << "}[" << k1_lambda << "," << k2_lambda << "]"
-	     << ", firstk=" << firstk << ", correct k=" << intersecting.begin()->k() << endl;
-	abort();
-      }
-      
-      // the leftmost generator on the level j, s.th. its support intersects [a,b], fulfills
-      //   2^{-j}(k+ell1) < b  but  2^{-j}(k+1+ell1) >= b,
-      // so that ...
-      const int lastk  = std::min(basis.DeltaRmax(j), (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda-ell1<d>())-1);
-      if (lastk != intersecting.rbegin()->k()) {
-	cout << "something went wrong in intersecting_wavelets(), generator part: "
-	     << "lambda=" << lambda << " with support "
-	     << "2^{-" << j_lambda << "}[" << k1_lambda << "," << k2_lambda << "]"
-	     << ", lastk=" << firstk << ", correct k=" << intersecting.rbegin()->k() << endl;
-	abort();
-      }
-    } else {
-      // if the left boundary wavelets are not involved, then
-      // the rightmost wavelet on the level j, s.th. its support intersects [a,b], fulfills
-      //   2^{-j}(k+(d+dT)/2) > a  but  2^{-j}(k-1+(d+dT)/2) <= a,
-      // so that ...
-      const int firstk = (ldexp(1.0,j-j_lambda)*k1_lambda < d+dT-2
-			  ? 0
-			  : (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda-(d+dT)/2)+1);
-      
-      if (firstk != intersecting.begin()->k()) {
- 	cout << "something went wrong in intersecting_wavelets(), wavelet part: "
- 	     << "lambda=" << lambda << " with support "
- 	     << "2^{-" << j_lambda << "}[" << k1_lambda << "," << k2_lambda << "]"
- 	     << ", firstk=" << firstk << ", correct k=" << intersecting.begin()->k() << endl;
- 	abort();
-      }
-
-      // if the right boundary wavelets are not involved, then
-      // the leftmost wavelet on the level j, s.th. its support intersects [a,b], fulfills
-      //   2^{-j}(k-(d+dT)/2+1) < b  but  2^{-j}(k-(d+dT)/2+2) >= a,
-      // so that ...
-      const int lastk = (ldexp(1.0,-j_lambda)*k2_lambda > 1 - ldexp(1.0,-j)*(d+dT-2)
-			 ? (1<<j)-1
-			 : (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda+(d+dT)/2)-2);
-      
-      if (lastk != intersecting.rbegin()->k()) {
- 	cout << "something went wrong in intersecting_wavelets(), wavelet part: "
- 	     << "lambda=" << lambda << " with support "
- 	     << "2^{-" << j_lambda << "}[" << k1_lambda << "," << k2_lambda << "]"
- 	     << ", lastk=" << lastk << ", correct k=" << intersecting.rbegin()->k() << endl;
- 	abort();
-      }
-    }
   }
 
   template <int d, int dT>
@@ -290,6 +314,7 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
+  inline
   bool intersect_singular_support(const PBasis<d,dT>& basis,
 				  const typename PBasis<d,dT>::Index& lambda,
 				  const typename PBasis<d,dT>::Index& nu,
@@ -300,7 +325,7 @@ namespace WaveletTL
 
     if (j_lambda < j_nu)
       return intersect_singular_support(basis, nu, lambda, j, k1, k2);
-
+    
     int k1_nu, k2_nu;
     support(basis, nu, k1_nu, k2_nu);
     return intersect_singular_support(basis, lambda, j_nu, k1_nu, k2_nu, j, k1, k2);

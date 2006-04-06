@@ -13,6 +13,7 @@
 #include <cmath>
 #include <utils/function.h>
 #include <numerics/splines.h>
+#include <numerics/cardinal_splines.h>
 
 namespace MathTL
 {
@@ -89,6 +90,16 @@ namespace MathTL
     else
       return (x >= k && x < k+1 ? 1.0 : 0.0);
 #endif
+  }
+
+  /*!
+    evaluate an arbitrary Schoenberg B-spline N_{k,2}(x) = \chi_{[0,infty)}(x) * N_2(x)
+  */
+  template <>
+  inline
+  double EvaluateSchoenbergBSpline<2>(const int k, const double x)
+  {
+    return (x < 0 ? 0 : EvaluateCardinalBSpline<2>(k, x));
   }
 
   /*!

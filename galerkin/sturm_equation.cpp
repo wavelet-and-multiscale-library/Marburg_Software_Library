@@ -55,8 +55,8 @@ namespace WaveletTL
   double
   SturmEquation<WBASIS>::D(const typename WBASIS::Index& lambda) const
   {
-//     return ldexp(1.0, lambda.j());
-    return sqrt(a(lambda, lambda));
+    return ldexp(1.0, lambda.j());
+//     return sqrt(a(lambda, lambda));
 //     return lambda.e() == 0 ? 1.0 : ldexp(1.0, lambda.j()); // do not scale the generators
 //     return lambda.e() == 0 ? 1.0 : sqrt(a(lambda, lambda)); // do not scale the generators
   }

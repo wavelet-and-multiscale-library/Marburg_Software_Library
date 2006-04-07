@@ -22,9 +22,9 @@ ifeq ($(CXX),g++-2.95)
 CXXFLAGS += -ftemplate-depth-40
 endif
 
-CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+#CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
-#CXXFLAGS += -O3 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+CXXFLAGS += -O3 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -funroll-loops -fomit-frame-pointer -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -msse -funroll-loops -fomit-frame-pointer -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -msse2 -funroll-loops -fomit-frame-pointer -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
@@ -65,10 +65,11 @@ EXEOBJF2 = \
   test_p_basis.o test_p_support.o test_p_expansion.o\
   test_periodic.o\
 
-# set 3 of test programs: wavelet bases on higher-dimensional domains ((mapped) cube, tensor prod.)
+# set 3 of test programs: wavelet bases on higher-dim. domains ((mapped) cube, tensor prod., L-domain)
 EXEOBJF3 = \
   test_cube_index.o test_cube_basis.o test_mapped_cube_basis.o\
-  test_tp_basis.o 
+  test_tp_basis.o\
+  test_lshaped_basis.o
 
 # set 4 of test programs: adaptive wavelet schemes for elliptic equations
 EXEOBJF4 = \

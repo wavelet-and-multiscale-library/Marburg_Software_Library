@@ -160,7 +160,7 @@ namespace MathTL
 	  }
       }
     
-    swap(new_coeffs);
+    Vector<C>::swap(new_coeffs);
 
     // no trimming necessary
   }
@@ -226,7 +226,7 @@ namespace MathTL
 	std::copy(Vector<C>::begin(), Vector<C>::end(), help.begin());
 	help.add(p);
       }
-    swap(help);
+    Vector<C>::swap(help);
 
     trim();
   }
@@ -245,7 +245,7 @@ namespace MathTL
 	std::copy(Vector<C>::begin(), Vector<C>::end(), help.begin());
 	help.add(s, p); // help <- help + s*p
       }
-    swap(help);
+    Vector<C>::swap(help);
 
     trim();
   }
@@ -264,7 +264,7 @@ namespace MathTL
 	std::copy(Vector<C>::begin(), Vector<C>::end(), help.begin());
 	help.sadd(s, p); // help <- s*help + p
       }
-    swap(help);
+    Vector<C>::swap(help);
 
     trim();
   }
@@ -298,7 +298,7 @@ namespace MathTL
 	std::copy(Vector<C>::begin(), Vector<C>::end(), help.begin());
 	help.add(C(-1), p);
       }
-    swap(help);
+    Vector<C>::swap(help);
 
     trim();
   }
@@ -352,7 +352,7 @@ namespace MathTL
       for (unsigned int m(0); m <= p.degree(); m++)
 	coeffs[n+m] += Vector<C>::operator [] (n) * p.get_coefficient(m);
 
-    swap(coeffs);
+    Vector<C>::swap(coeffs);
 
     trim(); // for safety
   }
@@ -480,7 +480,7 @@ namespace MathTL
 	Vector<C> trimmed(std::max(1u, deg+1));
 	for (unsigned int i(0); i < trimmed.size(); i++)
 	  trimmed[i] = get_coefficient(i);
-	swap(trimmed);
+	Vector<C>::swap(trimmed);
       }
   }
 

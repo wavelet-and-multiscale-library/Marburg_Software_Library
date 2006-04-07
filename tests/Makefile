@@ -13,6 +13,8 @@ COMPILER = gnu
 ifeq ($(COMPILER),gnu)
 CXX = g++
 #CXX = g++-2.95
+#CXX = $(HOME)/gcc-4.1.0/bin/g++
+
 CXXFLAGS += -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O2 -I$(MATHTL_DIR) -Wall -pipe
 endif

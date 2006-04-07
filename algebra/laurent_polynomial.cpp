@@ -248,7 +248,7 @@ namespace MathTL
       for (const_iterator itp(p.begin()), itpend(p.end()); itp != itpend; ++itp)
 	coeffs[it.index()+itp.index()] += *it * *itp;
 
-    swap(coeffs);    
+    InfiniteVector<R,int>::swap(coeffs);    
   }
 
   template <class R>

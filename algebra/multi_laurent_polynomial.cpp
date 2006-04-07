@@ -255,7 +255,7 @@ namespace MathTL
 	  coeffs.set_coefficient(index, coeffs.get_coefficient(index) + (*it * *itp));
 	}
     
-    swap(coeffs);    
+    InfiniteVector<R, MultiIndex<int, DIMENSION> >::swap(coeffs);    
   }
 
   template <class R, unsigned int DIMENSION>

@@ -69,7 +69,7 @@ EXEOBJF2 = \
 EXEOBJF3 = \
   test_cube_index.o test_cube_basis.o test_mapped_cube_basis.o\
   test_tp_basis.o\
-  test_lshaped_basis.o
+  test_ldomain_basis.o
 
 # set 4 of test programs: adaptive wavelet schemes for elliptic equations
 EXEOBJF4 = \

@@ -22,11 +22,11 @@ namespace WaveletTL
 	if (lambda.k() < (d+dT)/2-1) {
 	  // left boundary wavelet
 	  k1 = 0;
-	  k2 = 2*(d+dT)-4;
+	  k2 = 2*(d+dT)-2; // overestimate, TODO
 	} else {
 	  if ((1<<lambda.j())-lambda.k() <= (d+dT)/2-1) {
 	    // right boundary wavelet
-	    k1 = (1<<(lambda.j()+1))-(2*(d+dT)-4);
+	    k1 = (1<<(lambda.j()+1))-(2*(d+dT)-2); // overestimate, TODO
 	    k2 = 1<<(lambda.j()+1);
 	  } else {
 	    // interior wavelet (CDF)

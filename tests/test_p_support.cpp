@@ -23,8 +23,8 @@ int main()
   Basis basis(1, 1); // complementary b.c.'s
 
 #if 1
-  for (int level = basis.j0(); level <= basis.j0(); level++) {
-    cout << "- computing the supports of all generators on level j=" << level << ":" << endl;
+  for (int level = basis.j0(); level <= basis.j0()+1; level++) {
+    cout << "- computing the supports of all generators and wavelets on level j=" << level << ":" << endl;
     
     Index lambda(first_generator(&basis, level));
     for (;; ++lambda) {
@@ -39,12 +39,12 @@ int main()
 	   << "]"
 	   << endl;
       
-      if (lambda == last_generator(&basis, level)) break;
+      if (lambda == last_wavelet(&basis, level)) break;
     }
   }
 #endif
   
-#if 1
+#if 0
   cout << "- calculating some support intersections:" << endl;
   for (Index lambda = first_generator(&basis, basis.j0());; ++lambda)
     {
@@ -70,7 +70,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   cout << "- compute all intersecting wavelets:" << endl;
   for (Index lambda = first_generator(&basis, basis.j0());; ++lambda)
     {
@@ -96,7 +96,7 @@ int main()
     }
 #endif  
 
-#if 1
+#if 0
   cout << "- checking intersection of singular supports:" << endl;
   for (Index lambda = first_generator(&basis, basis.j0()+2);; ++lambda)
     {

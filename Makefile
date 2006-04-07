@@ -10,6 +10,21 @@ all:: tests
 tests::
 	cd tests; $(MAKE)
 
+tests1::
+	cd tests; $(MAKE) tests1
+
+tests2::
+	cd tests; $(MAKE) tests2
+
+tests3::
+	cd tests; $(MAKE) tests3
+
+tests4::
+	cd tests; $(MAKE) tests4
+
+tests5::
+	cd tests; $(MAKE) tests5
+
 doc::
 	cd doc; $(MAKE)
 

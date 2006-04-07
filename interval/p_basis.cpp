@@ -75,10 +75,12 @@ namespace WaveletTL
 
 #if 1
     // choose j0 s.th. the supports of the dual boundary generators do not overlap
+    // (at the end of the setup, j0 may be reduced by one, see below)
     j0_ = (int) ceil(log(ell2T<d,dT>()-ell1T<d,dT>()+std::max(s0,s1)+1.-d)/M_LN2+1);
 #else
     // choose j0 s.th. the supports of the primal boundary generators do not overlap
     // the supports of the dual boundary generators from the other endpoint
+    // (at the end of the setup, j0 may be reduced by one, see below)
     j0_ = (int) ceil(log(ell2T<d,dT>()-ell1T<d,dT>()+2*std::max(s0,s1)+dT-d+1.)/M_LN2);
 #endif
     
@@ -194,6 +196,9 @@ namespace WaveletTL
 
     GElim (A, H, Hinv); // elimination [DKU, (4.1.4)ff.]
 #if 1
+    // choose this branch if you don't want the interior wavelets to be the CDF ones
+    // (in that case, the Riesz constants improve, but the condition numbers for
+    // the Poisson equation will deteriorate)
     SparseMatrix<double> BB; BT(A, BB); // [DKU, (4.1.13)]
 #else
     SparseMatrix<double> BB; double binv = BT(A, BB); // [DKU, (4.1.13)]
@@ -301,6 +306,7 @@ namespace WaveletTL
 
 #if 0
     // adjust interior wavelets, such that they correspond to the CDF ones, cf. [P, pp. 121-123]
+    // (if you want to enable this, binv should have been computed, see some lines above)
     const double scaling_factor = minus1power(d+1)*2*binv;
     Mj1 .scale(scaling_factor);
     Mj1T.scale(1./scaling_factor);
@@ -563,21 +569,19 @@ namespace WaveletTL
 	  mj_reduced.set_entry(i, j+Mj0_reduced.column_dimension(), help);
       }
     
-    SparseMatrix<double> gj0_reduced = transpose(Mj0T_reduced);
-    SparseMatrix<double> gj1_reduced = transpose(Mj1T_reduced);
-    SparseMatrix<double> gj_reduced(gj0_reduced.row_dimension() + gj1_reduced.row_dimension(),
-				    gj0_reduced.column_dimension());
-    for (unsigned int i = 0; i < gj0_reduced.row_dimension(); i++)
-      for (unsigned int j = 0; j < gj0_reduced.column_dimension(); j++) {
-	const double help = gj0_reduced.get_entry(i, j);
+    SparseMatrix<double> gj_reduced(Mj0T_reduced.column_dimension() + Mj1T_reduced.column_dimension(),
+				    Mj0T_reduced.row_dimension());
+    for (unsigned int i = 0; i < Mj0T_reduced.column_dimension(); i++)
+      for (unsigned int j = 0; j < Mj0T_reduced.row_dimension(); j++) {
+	const double help = Mj0T_reduced.get_entry(j, i);
 	if (help != 0)
 	  gj_reduced.set_entry(i, j, help);
       }
-    for (unsigned int i = 0; i < gj1_reduced.row_dimension(); i++)
-      for (unsigned int j = 0; j < gj1_reduced.column_dimension(); j++) {
-	const double help = gj1_reduced.get_entry(i, j);
+    for (unsigned int i = 0; i < Mj1T_reduced.column_dimension(); i++)
+      for (unsigned int j = 0; j < Mj1T_reduced.row_dimension(); j++) {
+	const double help = Mj1T_reduced.get_entry(j, i);
 	if (help != 0)
-	  gj_reduced.set_entry(i+gj0_reduced.row_dimension(), j, help);
+	  gj_reduced.set_entry(i+Mj0T_reduced.column_dimension(), j, help);
       }
     
     SparseMatrix<double> test_reduced = mj_reduced * gj_reduced;

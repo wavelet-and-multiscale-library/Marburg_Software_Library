@@ -16,13 +16,18 @@ int main()
   const int dT = 2;
 
   typedef DSBasis<d,dT> Basis1D;
-  LDomainBasis<Basis1D> basis;
+  typedef LDomainBasis<Basis1D> Basis;
+  Basis basis;
+
+  typedef Basis::Index Index;
 
   // the following output has to be checked manually...
-  for (LDomainIndex<Basis1D> index(&basis);
-       index.j() < basis.j0()+3;)
-    {
-      cout << index << endl;
-      ++index;
-    }
+  for (Index lambda(first_generator<Basis1D>(&basis, basis.j0()));; ++lambda) {
+    cout << lambda << endl;
+//     if (lambda.j() == 4) break;
+//     if (lambda == last_generator<Basis1D>(&basis, basis.j0())) break;
+//     if (lambda == first_wavelet<Basis1D>(&basis, basis.j0())) break;
+    if (lambda == last_wavelet<Basis1D>(&basis, basis.j0()+1)) break;
+  }
+	 
 }

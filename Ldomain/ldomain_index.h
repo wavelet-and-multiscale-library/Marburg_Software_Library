@@ -42,8 +42,32 @@ namespace WaveletTL
     */
     LDomainIndex(const LDomainBasis<IBASIS>* basis = 0);
 
+    //! constructor with given j,e,p,k
+    LDomainIndex(const int j,
+		 const type_type& e,
+		 const int p,
+		 const translation_type& k,
+		 const LDomainBasis<IBASIS>* basis);
+
+    //! copy constructor
+    LDomainIndex(const LDomainIndex& lambda);
+  
+    //! check equality
+    bool operator == (const LDomainIndex& lambda) const;
+    
+    //! check non-equality
+    inline bool operator != (const LDomainIndex& lambda) const
+    { return !(*this == lambda); }
+    
     //! preincrement
     LDomainIndex& operator ++ ();
+
+    //! lexicographic order <
+    bool operator < (const LDomainIndex& lambda) const;
+
+    //! lexicographic order <=
+    bool operator <= (const LDomainIndex& lambda) const
+    { return (*this < lambda || *this == lambda); }
 
     //! scale j
     const int j() const { return j_; }
@@ -93,7 +117,33 @@ namespace WaveletTL
     return os;
   }
 
+  /*!
+    index of first generator on level j >= j0
+  */
+  template <class IBASIS>
+  LDomainIndex<IBASIS>
+  first_generator(const LDomainBasis<IBASIS>* basis, const int j);
 
+  /*!
+    index of last generator on level j >= j0
+  */
+  template <class IBASIS>
+  LDomainIndex<IBASIS>
+  last_generator(const LDomainBasis<IBASIS>* basis, const int j);
+
+  /*!
+    index of first wavelet on level j >= j0
+  */
+  template <class IBASIS>
+  LDomainIndex<IBASIS>
+  first_wavelet(const LDomainBasis<IBASIS>* basis, const int j);
+  
+  /*!
+    index of last wavelet on level j >= j0
+  */
+  template <class IBASIS>
+  LDomainIndex<IBASIS>
+  last_wavelet(const LDomainBasis<IBASIS>* basis, const int j);
 }
 
 #include <Ldomain/ldomain_index.cpp>

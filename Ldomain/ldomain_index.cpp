@@ -17,6 +17,32 @@ namespace WaveletTL
   }
 
   template <class IBASIS>
+  LDomainIndex<IBASIS>::LDomainIndex(const int j,
+				     const type_type& e,
+				     const int p,
+				     const translation_type& k,
+				     const LDomainBasis<IBASIS>* basis)
+    : basis_(basis), j_(j), e_(e), p_(p), k_(k)
+  {
+  }
+
+  template <class IBASIS>
+  LDomainIndex<IBASIS>::LDomainIndex(const LDomainIndex& lambda)
+    : basis_(lambda.basis_), j_(lambda.j_), e_(lambda.e_), p_(lambda.p_), k_(lambda.k_)
+  {
+  }
+
+  template <class IBASIS>
+  bool
+  LDomainIndex<IBASIS>::operator == (const LDomainIndex& lambda) const
+  {
+    return (j_ == lambda.j() &&
+	    e_ == lambda.e() &&
+	    p_ == lambda.p() &&
+	    k_ == lambda.k());
+  }
+
+  template <class IBASIS>
   LDomainIndex<IBASIS>&
   LDomainIndex<IBASIS>::operator ++ ()
   {
@@ -202,4 +228,88 @@ namespace WaveletTL
     return *this;
   }
 
+  template <class IBASIS>
+  bool
+  LDomainIndex<IBASIS>::operator < (const LDomainIndex& lambda) const
+  {
+    // standard lexicographic order on (j,e,p,k),
+    // we assume that e and k are already lexicographically ordered (cf. MultiIndex)
+    return (j_ < lambda.j() ||
+	    (j_ == lambda.j() &&
+	     (e_ < lambda.e() ||
+	      (e_ == lambda.e() &&
+	       (p_ < lambda.p() ||
+		(p_ == lambda.p() && k_ < lambda.k()
+		 )
+		)
+	       )
+	      )
+	     )
+	    );
+  }
+  
+  template <class IBASIS>
+  LDomainIndex<IBASIS>
+  first_generator(const LDomainBasis<IBASIS>* basis, const int j)
+  {
+    assert(j >= basis->j0());
+
+    typename LDomainIndex<IBASIS>::type_type e;
+
+    // setup lowest translation index for e=(0,0), p=0
+    typename LDomainIndex<IBASIS>::translation_type k;
+    k[0] = basis->basis00().DeltaLmin();
+    k[1] = basis->basis10().DeltaLmin()+1;
+    
+    return LDomainIndex<IBASIS>(j, e, 0, k, basis);
+  }
+
+  template <class IBASIS>
+  LDomainIndex<IBASIS>
+  last_generator(const LDomainBasis<IBASIS>* basis, const int j)
+  {
+    assert(j >= basis->j0());
+
+    typename LDomainIndex<IBASIS>::type_type e;
+
+    // setup highest translation index for e=(0,0), p=4
+    typename LDomainIndex<IBASIS>::translation_type k; // k[0]=0 by convention
+    k[1] = basis->basis00().DeltaRmax(j);
+    
+    return LDomainIndex<IBASIS>(j, e, 4, k, basis);
+  }
+
+  template <class IBASIS>
+  LDomainIndex<IBASIS>
+  first_wavelet(const LDomainBasis<IBASIS>* basis, const int j)
+  {
+    assert(j >= basis->j0());
+
+    typename LDomainIndex<IBASIS>::type_type e;
+    e[1] = 1;
+
+    // setup lowest translation index for e=(0,1), p=0
+    typename LDomainIndex<IBASIS>::translation_type k;
+    k[0] = basis->basis00().DeltaLmin();
+    k[1] = basis->basis10().Nablamin();
+    
+    return LDomainIndex<IBASIS>(j, e, 0, k, basis);
+  }
+
+  template <class IBASIS>
+  LDomainIndex<IBASIS>
+  last_wavelet(const LDomainBasis<IBASIS>* basis, const int j)
+  {
+    assert(j >= basis->j0());
+    
+    typename LDomainIndex<IBASIS>::type_type e;
+    e[0] = e[1] = 1;
+
+    // setup highest translation index for e=(1,1), p=2
+    typename LDomainIndex<IBASIS>::translation_type k;
+    k[0] = basis->basis10().DeltaRmax(j);
+    k[1] = basis->basis00().DeltaRmax(j);
+    
+    return LDomainIndex<IBASIS>(j, e, 2, k, basis);
+  }
 }

@@ -18,12 +18,11 @@ int main()
   typedef DSBasis<d,dT> Basis1D;
   LDomainBasis<Basis1D> basis;
 
-  LDomainIndex<Basis1D> index;
-  cout << index << endl;
-
-//   for (int i = 0; i < 64; i++) 
-//     {
-//       cout << index << endl;
-//       ++index;
-//     }
+  // the following output has to be checked manually...
+  for (LDomainIndex<Basis1D> index(&basis);
+       index.j() < basis.j0()+3;)
+    {
+      cout << index << endl;
+      ++index;
+    }
 }

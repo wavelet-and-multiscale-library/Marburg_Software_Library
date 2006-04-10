@@ -42,6 +42,9 @@ namespace WaveletTL
     */
     LDomainIndex(const LDomainBasis<IBASIS>* basis = 0);
 
+    //! preincrement
+    LDomainIndex& operator ++ ();
+
     //! scale j
     const int j() const { return j_; }
 
@@ -53,7 +56,6 @@ namespace WaveletTL
 
     //! translation index k
     const translation_type& k() const { return k_; }
-
 
   protected:
     //! pointer to the underlying basis

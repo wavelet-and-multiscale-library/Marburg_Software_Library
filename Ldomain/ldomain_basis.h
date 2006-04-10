@@ -41,6 +41,9 @@ namespace WaveletTL
     //! interval basis
     typedef IBASIS IntervalBasis;
 
+    //! coarsest possible level j0
+    inline const int j0() const { return basis00_.j0(); }
+    
     //! wavelet index class
     typedef LDomainIndex<IBASIS> Index;
 
@@ -53,9 +56,14 @@ namespace WaveletTL
     //! number of vanishing moments for the dual wavelets
     static unsigned int dual_vanishing_moments() { return IBASIS::dual_vanishing_moments(); }
 
+    //! read access to the three 1D bases
+    const IntervalBasis& basis00() const { return basis00_; }
+    const IntervalBasis& basis01() const { return basis01_; }
+    const IntervalBasis& basis10() const { return basis10_; }
+
   protected:
-    //! the two interval wavelet bases involved
-    IntervalBasis basis01, basis10;
+    //! the three interval wavelet bases involved
+    IntervalBasis basis00_, basis01_, basis10_;
   };
 }
 

@@ -4,8 +4,9 @@ namespace WaveletTL
 {
   template <class IBASIS>
   LDomainBasis<IBASIS>::LDomainBasis()
-    : basis01(true, false),
-      basis10(false, true)
+    : basis00_(true, true),
+      basis01_(true, false),
+      basis10_(false, true)
   {
   }
 

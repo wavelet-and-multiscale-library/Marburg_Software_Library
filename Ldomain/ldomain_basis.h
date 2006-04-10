@@ -27,7 +27,7 @@ namespace WaveletTL
 {
   /*!
     Template class for composite wavelet bases over the L-shaped domain
-      [-1,1]^2 \ (0,1]^2
+      (-1,1)^2 \ (0,1)^2
     with homogeneous b.c.'s for the primal basis and free b.c.'s for the
     dual basis.
   */

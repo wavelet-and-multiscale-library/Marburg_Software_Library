@@ -23,7 +23,19 @@ namespace WaveletTL
   template <class IBASIS> class LDomainBasis;
   
   /*!
-    An index class for wavelet bases of the L-shaped domain in R^2
+    An index class for composite wavelet bases of the L-shaped domain in R^2.
+    In fact, this is essentially a lexicographically ordered multiindex (j,e,p,k), with
+    * scale j
+    * type e ((0,0),(0,1),(1,0) or (1,1))
+    * (logical) patch p (0<=p<=4)
+    * translation index k
+
+    The logical patches are:
+      p=0 (-1,0)x( 0,1)
+      p=1 (-1,0)x(-1,0)
+      p=2 ( 0,1)x(-1,0)
+      p=3 (-1,0)x  {0}
+      p=4   {0} x(-1,0)
   */
   template <class IBASIS>
   class LDomainIndex

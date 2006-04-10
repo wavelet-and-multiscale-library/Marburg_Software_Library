@@ -16,6 +16,18 @@ int main()
   const int dT = 2;
 
   typedef DSBasis<d,dT> Basis1D;
-  LDomainBasis<Basis1D> basis;
+  typedef LDomainBasis<Basis1D> Basis;
+  Basis basis;
+
+  typedef Basis::Index Index;
+
+#if 1
+  cout << "- evaluating a primal generator..." << endl;
+  Index lambda(first_generator<Basis1D>(&basis, basis.j0()));
+  std::ofstream psistream("Ldomain_wavelet.m");
+  matlab_output(psistream, evaluate<Basis1D>(basis, lambda, true, 6));
+  psistream.close();
+  cout << "  ...done, see file cube_wavelet.m!" << endl;
+#endif
 
 }

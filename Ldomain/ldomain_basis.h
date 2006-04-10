@@ -19,6 +19,10 @@
 
 #include <Ldomain/ldomain_index.h>
 
+// for convenience, include also some functionality
+// #include <Ldomain/ldomain_support.h>
+#include <Ldomain/ldomain_evaluate.h>
+
 using std::list;
 using MathTL::FixedArray1D;
 using MathTL::InfiniteVector;

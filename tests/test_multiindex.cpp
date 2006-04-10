@@ -91,7 +91,7 @@ int main()
 
   typedef MultiIndex<unsigned int, 2> MI;
   cout << "- all 2-indices with degree 4:" << endl;
-  set<MI> degree4(degree_indices<2>(4));
+  set<MI> degree4(degree_indices<unsigned int, 2>(4));
   for (set<MI>::const_iterator it(degree4.begin()); it != degree4.end(); ++it)
     cout << *it << endl;
 

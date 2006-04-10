@@ -74,22 +74,25 @@ namespace MathTL
 
   /*!
     degree of a multiindex \alpha\in\mathbb N^d
+    (I should be "int" or "unsigned int")
   */
-  template <unsigned int DIMENSION>
-  unsigned int multi_degree(const MultiIndex<unsigned int, DIMENSION>& alpha);
+  template <class I, unsigned int DIMENSION>
+  unsigned int multi_degree(const MultiIndex<I, DIMENSION>& alpha);
 
   /*!
     faculty of a multiindex \alpha\in\mathbb N^d
+    (I should be "int" or "unsigned int")
   */
-  template <unsigned int DIMENSION>
-  unsigned int multi_faculty(const MultiIndex<unsigned int, DIMENSION>& alpha);
+  template <class I, unsigned int DIMENSION>
+  unsigned int multi_faculty(const MultiIndex<I, DIMENSION>& alpha);
 
   /*!
     \beta-th power of a multiindex \alpha
+    (I should be "int" or "unsigned int")
   */
   template <class I, unsigned int DIMENSION>
   int multi_power(const MultiIndex<I, DIMENSION>& alpha,
-		  const MultiIndex<unsigned int, DIMENSION>& beta);
+		  const MultiIndex<I, DIMENSION>& beta);
   
   /*!
     binomial \beta over \alpha of two multiindices
@@ -100,9 +103,10 @@ namespace MathTL
 
   /*!
     Compute all multiindices \alpha\in\mathbb N^d with degree |\alpha|=k
+    (I should be "int" or "unsigned int")
   */
-  template <unsigned int DIMENSION>
-  std::set<MultiIndex<unsigned int, DIMENSION> >
+  template <class I, unsigned int DIMENSION>
+  std::set<MultiIndex<I, DIMENSION> >
   degree_indices(const unsigned int k);  
   
   //! stream output

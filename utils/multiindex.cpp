@@ -84,14 +84,14 @@ namespace MathTL
     return r;
   }
 
-  template <unsigned int DIMENSION>
-  std::set<MultiIndex<unsigned int, DIMENSION> >
+  template <class I, unsigned int DIMENSION>
+  std::set<MultiIndex<I, DIMENSION> >
   degree_indices(const unsigned int k)
   {
-    typedef std::set<MultiIndex<unsigned int, DIMENSION> > set_type;
+    typedef std::set<MultiIndex<I, DIMENSION> > set_type;
     set_type r;
 
-    MultiIndex<unsigned int, DIMENSION> alpha;
+    MultiIndex<I, DIMENSION> alpha;
     r.insert(alpha);
     for (unsigned int i(1); i <= k; i++)
       {
@@ -112,8 +112,8 @@ namespace MathTL
     return r;
   }
 
-  template <unsigned int DIMENSION>
-  unsigned int multi_degree(const MultiIndex<unsigned int, DIMENSION>& alpha)
+  template <class I, unsigned int DIMENSION>
+  unsigned int multi_degree(const MultiIndex<I, DIMENSION>& alpha)
   {
     unsigned int r(alpha[0]);
     for (unsigned int i(1); i < DIMENSION; i++)
@@ -121,8 +121,8 @@ namespace MathTL
     return r;
   }
 
-  template<unsigned int DIMENSION>
-  unsigned int multi_faculty(const MultiIndex<unsigned int, DIMENSION>& alpha)
+  template<class I, unsigned int DIMENSION>
+  unsigned int multi_faculty(const MultiIndex<I, DIMENSION>& alpha)
   {
     unsigned int r(faculty(alpha[0]));
     for (unsigned int i(1); i < DIMENSION; i++)
@@ -132,7 +132,7 @@ namespace MathTL
 
   template <class I, unsigned int DIMENSION>
   int multi_power(const MultiIndex<I, DIMENSION>& alpha,
-		  const MultiIndex<unsigned int, DIMENSION>& beta)
+		  const MultiIndex<I, DIMENSION>& beta)
   {
     int r(intpower(alpha[0], beta[0]));
     for (unsigned int i(1); i < DIMENSION; i++)

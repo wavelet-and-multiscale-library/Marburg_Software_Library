@@ -10,7 +10,7 @@ using namespace WaveletTL;
 
 int main()
 {
-  cout << "Testing wavelet bases on the L-shaped domain..." << endl;
+  cout << "Testing the L-shaped domain wavelet index class ..." << endl;
 
   const int d  = 2;
   const int dT = 2;
@@ -18,4 +18,12 @@ int main()
   typedef DSBasis<d,dT> Basis1D;
   LDomainBasis<Basis1D> basis;
 
+  LDomainIndex<Basis1D> index;
+  cout << index << endl;
+
+//   for (int i = 0; i < 64; i++) 
+//     {
+//       cout << index << endl;
+//       ++index;
+//     }
 }

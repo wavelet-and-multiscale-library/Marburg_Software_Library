@@ -31,14 +31,14 @@ namespace WaveletTL
   {
   public:
     //! type index type
-    typedef MultiIndex<unsigned int,DIM> type_type;
+    typedef MultiIndex<int,DIM> type_type;
     
     //! translation index type
     typedef MultiIndex<int,DIM> translation_type;
 
     /*!
       constructor with a given cube basis
-      (also serves as a default constructor, but yields an invalid index pair
+      (also serves as a default constructor, but yields an invalid index
       in this case, because the underlying bases must be specified to work correctly)
     */
     CubeIndex(const CUBEBASIS* basis = 0);
@@ -88,7 +88,7 @@ namespace WaveletTL
     int j_;
     
     //! type
-    MultiIndex<unsigned int,DIM> e_;
+    MultiIndex<int,DIM> e_;
 
     //! translation
     MultiIndex<int,DIM> k_;

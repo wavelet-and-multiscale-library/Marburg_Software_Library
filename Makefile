@@ -7,6 +7,13 @@
 
 all:: tests
 
+# Currently, there are 5 sets of test programs, cf. tests/Makefile:
+# set 1: stuff on R and R^d
+# set 2: wavelet bases on the interval ([DS],[P],periodic)
+# set 3: wavelet bases on higher-dim. domains ((mapped) cube, tensor prod., L-domain)
+# set 4: adaptive wavelet schemes for elliptic equations
+# set 5: adaptive wavelet schemes for parabolic equations
+
 tests::
 	cd tests; $(MAKE)
 

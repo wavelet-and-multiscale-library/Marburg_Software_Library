@@ -16,7 +16,8 @@
 #include <algebra/infinite_vector.h>
 #include <utils/fixed_array1d.h>
 #include <utils/multiindex.h>
-#include <cube/cube_evaluate.h>
+
+#include <Ldomain/ldomain_index.h>
 
 using std::list;
 using MathTL::FixedArray1D;
@@ -34,6 +35,27 @@ namespace WaveletTL
   class LDomainBasis
   {
   public:
+    //! default constructor
+    LDomainBasis();
+
+    //! interval basis
+    typedef IBASIS IntervalBasis;
+
+    //! wavelet index class
+    typedef LDomainIndex<IBASIS> Index;
+
+    //! critical Sobolev regularity for the primal generators/wavelets
+    static double primal_regularity() { return IBASIS::primal_regularity(); }
+    
+    //! number of vanishing moments for the primal wavelets
+    static unsigned int primal_vanishing_moments() { return IBASIS::primal_vanishing_moments(); }
+
+    //! number of vanishing moments for the dual wavelets
+    static unsigned int dual_vanishing_moments() { return IBASIS::dual_vanishing_moments(); }
+
+  protected:
+    //! the two interval wavelet bases involved
+    IntervalBasis basis01, basis10;
   };
 }
 

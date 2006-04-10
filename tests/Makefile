@@ -22,9 +22,13 @@ ifeq ($(CXX),g++-2.95)
 CXXFLAGS += -ftemplate-depth-40
 endif
 
-#CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+#ifeq ($(CXX),$(HOME)/gcc-4.1.0/bin/g++)
+LDFLAGS += -Xlinker -rpath -Xlinker $(HOME)/gcc-4.1.0/lib
+#endif
+
+CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
-CXXFLAGS += -O3 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+#CXXFLAGS += -O3 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -ffast-math -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -funroll-loops -fomit-frame-pointer -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -msse -funroll-loops -fomit-frame-pointer -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
@@ -73,7 +77,7 @@ EXEOBJF2 = \
 EXEOBJF3 = \
   test_cube_index.o test_cube_basis.o test_mapped_cube_basis.o\
   test_tp_basis.o\
-  test_ldomain_basis.o
+  test_ldomain_index.o test_ldomain_basis.o
 
 # set 4 of test programs: adaptive wavelet schemes for elliptic equations
 EXEOBJF4 = \
@@ -119,9 +123,9 @@ endif
 
 $(EXES1): %: %.o
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $< -g -o $@
+	$(CXX) $(LDFLAGS) $< -g -o $@
 else
-	$(CXX) $< -o $@
+	$(CXX) $(LDFLAGS) $< -o $@
 endif
 
 $(EXEOBJF2): %.o: %.cpp
@@ -133,9 +137,9 @@ endif
 
 $(EXES2): %: %.o
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $< -g -o $@
+	$(CXX) $(LDFLAGS) $< -g -o $@
 else
-	$(CXX) $< -o $@
+	$(CXX) $(LDFLAGS) $< -o $@
 endif
 
 $(EXEOBJF3): %.o: %.cpp
@@ -147,9 +151,9 @@ endif
 
 $(EXES3): %: %.o
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $< -g -o $@
+	$(CXX) $(LDFLAGS) $< -g -o $@
 else
-	$(CXX) $< -o $@
+	$(CXX) $(LDFLAGS) $< -o $@
 endif
 
 $(EXEOBJF4): %.o: %.cpp
@@ -161,9 +165,9 @@ endif
 
 $(EXES4): %: %.o
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $< -g -o $@
+	$(CXX) $(LDFLAGS) $< -g -o $@
 else
-	$(CXX) $< -o $@
+	$(CXX) $(LDFLAGS) $< -o $@
 endif
 
 $(EXEOBJF5): %.o: %.cpp
@@ -175,7 +179,7 @@ endif
 
 $(EXES5): %: %.o
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $< -g -o $@
+	$(CXX) $(LDFLAGS) $< -g -o $@
 else
-	$(CXX) $< -o $@
+	$(CXX) $(LDFLAGS) $< -o $@
 endif

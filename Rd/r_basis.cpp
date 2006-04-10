@@ -275,13 +275,13 @@ namespace WaveletTL
       }
     
     return (primal
-	    ? a().evaluate(MultiIndex<unsigned int, 1>(derivative),
+	    ? a().evaluate(MultiIndex<int, 1>(derivative),
 			   lambda.j(),
 			   MultiIndex<int, 1>(lambda.k()),
 			   MultiIndex<int, 1>(A),
 			   MultiIndex<int, 1>(B),
 			   resolution)
- 	    : aT().evaluate(MultiIndex<unsigned int, 1>(derivative),
+ 	    : aT().evaluate(MultiIndex<int, 1>(derivative),
 			    lambda.j(),
 			    MultiIndex<int, 1>(lambda.k()),
 			    MultiIndex<int, 1>(A),

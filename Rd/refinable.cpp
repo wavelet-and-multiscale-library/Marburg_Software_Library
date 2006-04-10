@@ -22,14 +22,14 @@ namespace WaveletTL
   MultivariateRefinableFunction<MASK, DIMENSION>::evaluate
   (const int resolution) const
   {
-    return evaluate(MultiIndex<unsigned int, DIMENSION>(),
+    return evaluate(MultiIndex<int, DIMENSION>(),
 		    resolution);
   }
 
   template <class MASK, unsigned int DIMENSION>
   InfiniteVector<double, MultiIndex<int, DIMENSION> >
   MultivariateRefinableFunction<MASK, DIMENSION>::evaluate
-  (const MultiIndex<unsigned int, DIMENSION>& mu,
+  (const MultiIndex<int, DIMENSION>& mu,
    const int resolution) const
   {
     assert(resolution >= 0);
@@ -77,10 +77,10 @@ namespace WaveletTL
       unsigned int degmu(multi_degree(mu)), facmu(multi_faculty(mu));
 	
       // we also collect all \nu\in\mathbb N^d, such that |\nu|\le\mu|
-      std::set<MultiIndex<unsigned int, DIMENSION> > nus;
+      std::set<MultiIndex<int, DIMENSION> > nus;
       for (unsigned int degnu(0); degnu <= degmu; degnu++) {
-	std::set<MultiIndex<unsigned int, DIMENSION> > sofar(nus);
-	std::set<MultiIndex<unsigned int, DIMENSION> > plus(degree_indices<DIMENSION>(degnu));
+	std::set<MultiIndex<int, DIMENSION> > sofar(nus);
+	std::set<MultiIndex<int, DIMENSION> > plus(degree_indices<int, DIMENSION>(degnu));
 	std::set_union(sofar.begin(), sofar.end(),
 		       plus.begin(), plus.end(),
 		       inserter(nus, nus.begin()));
@@ -104,7 +104,7 @@ namespace WaveletTL
 	// b[m] = 0;
       }
 	
-      typename std::set<MultiIndex<unsigned int, DIMENSION> >::const_iterator rowit2;
+      typename std::set<MultiIndex<int, DIMENSION> >::const_iterator rowit2;
       for (rowit2 = nus.begin(), m = indices.size(); rowit2 != nus.end(); ++rowit2, m++) {
 	// (3.23)
 	unsigned int degnu(multi_degree(*rowit2));
@@ -175,7 +175,7 @@ namespace WaveletTL
   template <class MASK, unsigned int DIMENSION>
   SampledMapping<DIMENSION>
   MultivariateRefinableFunction<MASK, DIMENSION>::evaluate
-  (const MultiIndex<unsigned int, DIMENSION>& mu,
+  (const MultiIndex<int, DIMENSION>& mu,
    const int j,
    const MultiIndex<int, DIMENSION>& k,
    const MultiIndex<int, DIMENSION>& a,
@@ -198,7 +198,7 @@ namespace WaveletTL
   template <class MASK, unsigned int DIMENSION>
   double
   MultivariateRefinableFunction<MASK, DIMENSION>::moment
-  (const MultiIndex<unsigned int, DIMENSION>& alpha) const
+  (const MultiIndex<int, DIMENSION>& alpha) const
   {
     double r(1.0);
     
@@ -208,14 +208,14 @@ namespace WaveletTL
 	r = 0.0;
 
 	// collect all multiindices \beta, such that (0,...,0)\le\beta\le\alpha
-	std::set<MultiIndex<unsigned int, DIMENSION> > indices
-	  (cuboid_indices<unsigned int, DIMENSION>(MultiIndex<unsigned int, DIMENSION>(), alpha));
+	std::set<MultiIndex<int, DIMENSION> > indices
+	  (cuboid_indices<int, DIMENSION>(MultiIndex<int, DIMENSION>(), alpha));
 	indices.erase(alpha);
 
-	for (typename std::set<MultiIndex<unsigned int, DIMENSION> >::const_iterator it(indices.begin());
+	for (typename std::set<MultiIndex<int, DIMENSION> >::const_iterator it(indices.begin());
 	     it != indices.end(); ++it)
 	  {
-	    MultiIndex<unsigned int, DIMENSION> alphaminusbeta;
+	    MultiIndex<int, DIMENSION> alphaminusbeta;
 	    for (unsigned int i(0); i < DIMENSION; i++)
 	      alphaminusbeta[i] = alpha[i] - (*it)[i];
 	    

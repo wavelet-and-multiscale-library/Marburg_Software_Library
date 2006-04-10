@@ -86,7 +86,7 @@ namespace WaveletTL
     assert(lambda.j() >= j0);
     c.clear();
 
-    static MultiIndex<unsigned int,DIM_d> zero;
+    static MultiIndex<int,DIM_d> zero;
     if (lambda.e() == zero) {
       // a generator on a (possibly) fine level
       if (lambda.j() == j0) {

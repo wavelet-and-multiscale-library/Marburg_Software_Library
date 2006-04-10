@@ -58,7 +58,7 @@ namespace WaveletTL
       We assume that the derivative of \phi is zero at the boundary of its support (!)
     */
     InfiniteVector<double, MultiIndex<int, DIMENSION> >
-    evaluate(const MultiIndex<unsigned int, DIMENSION>& mu,
+    evaluate(const MultiIndex<int, DIMENSION>& mu,
 	     const int resolution = 0) const;
 
     /*!
@@ -72,7 +72,7 @@ namespace WaveletTL
       We assume that \partial^\mu\phi is zero at the boundary of its support.
     */
     SampledMapping<DIMENSION>
-    evaluate(const MultiIndex<unsigned int, DIMENSION>& mu,
+    evaluate(const MultiIndex<int, DIMENSION>& mu,
 	     const int j,
 	     const MultiIndex<int, DIMENSION>& k,
 	     const MultiIndex<int, DIMENSION>& a,
@@ -88,7 +88,7 @@ namespace WaveletTL
       [BBDK] Barinka, Barsch, Dahlke, Konik:
              Some Remarks on Quadrature Formulae for Refinable Functions and Wavelets
     */
-    double moment(const MultiIndex<unsigned int, DIMENSION>& alpha) const;
+    double moment(const MultiIndex<int, DIMENSION>& alpha) const;
   };
 
   /*!

@@ -24,6 +24,8 @@ endif
 
 #ifeq ($(CXX),$(HOME)/gcc-4.1.0/bin/g++)
 LDFLAGS += -Xlinker -rpath -Xlinker $(HOME)/gcc-4.1.0/lib
+#else
+LDFLAGS =
 #endif
 
 CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe

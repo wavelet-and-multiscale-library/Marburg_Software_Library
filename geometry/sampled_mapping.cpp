@@ -169,11 +169,11 @@ namespace MathTL
 				    const Point<2>& b,
 				    const FixedArray1D<Array1D<double>,2>& values)
     : Grid<2>(a, b, values[0].size()-1, values[1].size()-1),
-      values_(values[0].size(), values[1].size())
+      values_(values[1].size(), values[0].size())
   {
     for (unsigned int m(0); m < values_.row_dimension(); m++)
       for (unsigned int n(0); n < values_.column_dimension(); n++)
-	values_(m,n) = values[0][m] * values[1][n];
+	values_(m,n) = values[1][m] * values[0][n];
   }
 
   SampledMapping<2>::SampledMapping(const Chart<2>& ch,

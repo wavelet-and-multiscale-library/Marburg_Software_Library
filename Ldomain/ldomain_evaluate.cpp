@@ -180,29 +180,49 @@ namespace WaveletTL
 	break;
       }
     } else {
-      // psi_lambda is a wavelet. Here the situation is more complicated
-      // due to the nonlocal biorthogonalization procedure.
+      // psi_lambda is a wavelet. We leave this delicate case to the wavelet transform routines...
+      InfiniteVector<double, Index> gcoeffs;
+      if (primal)
+ 	basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
+      else
+ 	basis.reconstruct_t_1(lambda, lambda.j()+1, gcoeffs);
+      
+      return evaluate(basis, gcoeffs, primal, resolution);
     }
     
     return r;
   }
     
-//   template <class IBASIS>
-//   Array1D<SampledMapping<2> >
-//   evaluate(const LDomainBasis<IBASIS>& basis,
-// 	   const InfiniteVector<double, typename LDomainBasis<IBASIS>::Index>& coeffs,
-// 	   const bool primal,
-// 	   const int resolution)
-//   {
-//     Grid<2> grid(Point<2>(0), Point<2>(1), 1<<resolution);
-//     SampledMapping<2> result(grid); // zero
-      
-//     typedef typename LDomainBasis<IBASIS,DIM>::Index Index;
-//     for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
-// 	   itend(coeffs.end()); it != itend; ++it)
-//       result.add(*it, evaluate(basis, it.index(), primal, resolution));
-      
-//     return result;
-//   }
+  template <class IBASIS>
+  Array1D<SampledMapping<2> >
+  evaluate(const LDomainBasis<IBASIS>& basis,
+ 	   const InfiniteVector<double, typename LDomainBasis<IBASIS>::Index>& coeffs,
+ 	   const bool primal,
+ 	   const int resolution)
+  {
+    // first prepare an empty plot
+    FixedArray1D<Array1D<double>,2> values;
+    values[0].resize((1<<resolution)+1);
+    values[1].resize((1<<resolution)+1);
+    for (int i = 0; i <= 1<<resolution; i++) {
+      values[0][i] = values[1][i] = 0;
+    }
+    Array1D<SampledMapping<2> > result(3);
+    result[0] = SampledMapping<2>(Point<2>(-1, 0), Point<2>(0,1), values);
+    result[1] = SampledMapping<2>(Point<2>(-1,-1), Point<2>(0,0), values);
+    result[2] = SampledMapping<2>(Point<2>( 0,-1), Point<2>(1,0), values);
+          
+    // add all plots of the single functions
+    typedef typename LDomainBasis<IBASIS>::Index Index;
+    for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
+ 	   itend(coeffs.end()); it != itend; ++it) {
+      Array1D<SampledMapping<2> > temp(evaluate(basis, it.index(), primal, resolution));
+      result[0].add(*it, temp[0]);
+      result[1].add(*it, temp[1]);
+      result[2].add(*it, temp[2]);
+    }
+    
+    return result;
+  }
 
 }

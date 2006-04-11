@@ -65,6 +65,46 @@ namespace WaveletTL
     const IntervalBasis& basis01() const { return basis01_; }
     const IntervalBasis& basis10() const { return basis10_; }
 
+    //! RECONSTRUCT routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+      \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
+      where always |\lambda'|>=j
+    */
+    void reconstruct_1(const Index& lambda, const int j,
+		       InfiniteVector<double, Index>& c) const;
+
+    //! RECONSTRUCT routine, full version
+    /*!
+      Constructs for a given coefficient set c another one v,
+      such that
+      \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
+      where always |\lambda'|>=j
+    */
+    void reconstruct(const InfiniteVector<double, Index>& c, const int j,
+		     InfiniteVector<double, Index>& v) const;
+
+    //! dual RECONSTRUCT routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+      \tilde\psi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
+      where always |\lambda'|>=j
+    */
+    void reconstruct_t_1(const Index& lambda, const int j,
+			 InfiniteVector<double, Index>& c) const;
+
+    //! dual RECONSTRUCT routine, full version
+    /*!
+      Constructs for a given coefficient set c another one v,
+      such that
+      \sum_{\lambda}c_\lambda\tilde\psi_\lambda = \sum_{\lambda'}v_{\lambda'}\tilde\psi_{\lambda'}
+      where always |\lambda'|>=j
+    */
+    void reconstruct_t(const InfiniteVector<double, Index>& c, const int j,
+		       InfiniteVector<double, Index>& v) const;
+
   protected:
     //! the three interval wavelet bases involved
     IntervalBasis basis00_, basis01_, basis10_;

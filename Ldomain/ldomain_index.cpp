@@ -52,7 +52,7 @@ namespace WaveletTL
       // determine last possible translation index into the i-th direction,
       // this will in general depend on the current patch number
       int last_index = 0;
-      if (e_[i] == 0) { // generator
+      if (e_[i] == 0) { // generator in the i-th direction
 	switch(p_) {
 	case 0:
 	  last_index = (i == 0
@@ -78,7 +78,9 @@ namespace WaveletTL
 			: basis_->basis00().DeltaRmax(j_));
 	  break;
 	}
-      } else { // wavelet, maximal translation index is independent from the patch number
+      } else {
+	// wavelet in the i-th direction,
+	// the maximal translation index is independent from the patch number
 	last_index = basis_->basis00().Nablamax(j_);
       }
 
@@ -130,19 +132,19 @@ namespace WaveletTL
       case 2:
 	if (e_[1] == 1) {
 	  if (e_[0] == 0)
-	    p_ = 4;
+	    p_ = 4; // there are no (0,1) wavelets on the interface 3
 	  else
-	    eplusplus = true; // no (1,1) wavelets on the interfaces
+	    eplusplus = true; // there are no (1,1) wavelets on the interfaces
 	} else p_ = 3;
 	break;
       case 3:
 	if (e_[0] == 1)
-	  eplusplus = true;
+	  eplusplus = true; // there are no (1,*) wavelets on the interface 4
 	else
 	  p_ = 4;
 	break;
       case 4:
-	eplusplus = true;
+	eplusplus = true; // highest patch number reached
 	break;
       }
 

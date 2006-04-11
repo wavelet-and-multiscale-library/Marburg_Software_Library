@@ -22,7 +22,6 @@ namespace WaveletTL
       values[0].resize((1<<resolution)+1); // values in x-direction
       values[1].resize((1<<resolution)+1); // values in y-direction
 
-      // patch 0
       switch (lambda.p()) {
       case 0:
 	// psi_lambda completely lives on patch 0
@@ -200,7 +199,9 @@ namespace WaveletTL
  	   const bool primal,
  	   const int resolution)
   {
-    // first prepare an empty plot
+//     cout << "evaluate() called with coeffs=" << endl << coeffs << endl;
+
+    // first prepare a plot of the zero function
     FixedArray1D<Array1D<double>,2> values;
     values[0].resize((1<<resolution)+1);
     values[1].resize((1<<resolution)+1);

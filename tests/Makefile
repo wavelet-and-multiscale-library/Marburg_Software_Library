@@ -22,11 +22,11 @@ ifeq ($(CXX),g++-2.95)
 CXXFLAGS += -ftemplate-depth-40
 endif
 
-#ifeq ($(CXX),$(HOME)/gcc-4.1.0/bin/g++)
+ifeq ($(CXX),$(HOME)/gcc-4.1.0/bin/g++)
 LDFLAGS += -Xlinker -rpath -Xlinker $(HOME)/gcc-4.1.0/lib
-#else
+else
 LDFLAGS =
-#endif
+endif
 
 CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe

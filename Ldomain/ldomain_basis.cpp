@@ -1,5 +1,7 @@
 // implementation for ldomain_basis.h
 
+#include <cmath>
+
 namespace WaveletTL
 {
   template <class IBASIS>
@@ -54,7 +56,7 @@ namespace WaveletTL
       //   Mj1 = (I-Mj0*(Mj0T^T))*Mj1c
       //       = Mj1c - Mj0*(Mj0T^T)*Mj1c
         
-      InfiniteVector<double,IIndex> gcoeffs0, gcoeffs1;
+      InfiniteVector<double,IIndex> gcoeffs0, gcoeffs1, gcoeffs2;
 
       const int ecode(lambda.e()[0]+2*lambda.e()[1]);
 
@@ -93,7 +95,7 @@ namespace WaveletTL
 					3,
 					typename Index::translation_type(it1.index().k(), 0),
 					this),
-				  *it1 * *it2);
+				  *it1 * *it2 * M_SQRT2); // don't forget the factor!
 	      } else {
 		// patch generator
 		c.add_coefficient(Index(lambda.j()+1,
@@ -126,7 +128,7 @@ namespace WaveletTL
 					3,
 					typename Index::translation_type(it1.index().k(), 0),
 					this),
-				  *it1 * *it2);
+				  *it1 * *it2 * M_SQRT2); // don't forget the factor!
 	      } else {
 		// patch generator
 		c.add_coefficient(Index(lambda.j()+1,
@@ -162,6 +164,56 @@ namespace WaveletTL
 	    }
 	  break;
 	case 4:
+	  // psic_lambda decomposes into two tensor products of a generator and a wavelet,
+	  // on patches 1 and 2
+	  basis01().reconstruct_1(IIndex(lambda.j(), 0, basis01().DeltaRmax(lambda.j()), &basis01()),
+				  lambda.j()+1, gcoeffs0);
+	  basis10().reconstruct_1(IIndex(lambda.j(), 0, basis10().DeltaLmin(), &basis10()),
+				  lambda.j()+1, gcoeffs1);
+	  basis01().reconstruct_1(IIndex(lambda.j(), 1, lambda.k()[1], &basis01()),
+				  lambda.j()+1, gcoeffs2);
+	  
+	  // add the tensor product generators needed to construct psic_lambda
+	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(gcoeffs0.begin()),
+		 it1end(gcoeffs0.end());
+	       it1 != it1end; ++it1)
+	    for (typename InfiniteVector<double,IIndex>::const_iterator it2(gcoeffs2.begin()),
+		   it2end(gcoeffs2.end());
+		 it2 != it2end; ++it2) {
+	      if (it1.index().k() == basis01().DeltaRmax(lambda.j()+1)) {
+		// interface generator
+		c.add_coefficient(Index(lambda.j()+1,
+					typename Index::type_type(),
+					4,
+					typename Index::translation_type(0, it2.index().k()),
+					this),
+				  *it1 * *it2 * M_SQRT2);
+	      } else {
+		// patch generator
+		c.add_coefficient(Index(lambda.j()+1,
+					typename Index::type_type(),
+					1,
+					typename Index::translation_type(it1.index().k(), it2.index().k()),
+					this),
+				  *it1 * *it2);
+	      }
+	    }
+ 	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(gcoeffs1.begin()),
+ 		 it1end(gcoeffs1.end());
+ 	       it1 != it1end; ++it1)
+ 	    for (typename InfiniteVector<double,IIndex>::const_iterator it2(gcoeffs2.begin()),
+ 		   it2end(gcoeffs2.end());
+ 		 it2 != it2end; ++it2) {
+ 	      if (it1.index().k() > basis10().DeltaLmin()) {
+ 		// patch generator (interface generators already processed above)
+ 		c.add_coefficient(Index(lambda.j()+1,
+ 					typename Index::type_type(),
+ 					2,
+ 					typename Index::translation_type(it1.index().k(), it2.index().k()),
+ 					this),
+ 				  *it1 * *it2);
+ 	      }
+ 	    }
 	  break;
 	} // end switch(lambda.p())
 	

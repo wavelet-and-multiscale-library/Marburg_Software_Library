@@ -33,7 +33,12 @@ int main()
 
 #if 1
   Index lambda(first_generator<Basis1D>(&basis, basis.j0()));
-  for (int i = 0; i < 273; i++, ++lambda);
+//   for (; lambda.p() < 1; ++lambda);
+  for (; lambda.e()[0] != 0 || lambda.e()[1] != 1; ++lambda);
+
+//   for (int i = 0; i < 155; i++, ++lambda); // one of the generators on patch 4
+//   for (int i = 0; i < 330; i++, ++lambda); // one of the (0,1)-wavelets on patch 4
+//   for (int i = 0; i < 334; i++, ++lambda);
   cout << "- evaluating a primal generator lambda=" << lambda << " ..." << endl;
   std::ofstream psistream("Ldomain_wavelet.m");
   matlab_output(psistream, evaluate<Basis1D>(basis, lambda, true, 6));

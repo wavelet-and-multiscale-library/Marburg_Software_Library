@@ -57,6 +57,7 @@ namespace WaveletTL
       //       = Mj1c - Mj0*(Mj0T^T)*Mj1c
         
       InfiniteVector<double,IIndex> gcoeffs0, gcoeffs1, gcoeffs2;
+      InfiniteVector<double,Index> psic; // psi_lambda^check
 
       const int ecode(lambda.e()[0]+2*lambda.e()[1]);
 
@@ -90,20 +91,20 @@ namespace WaveletTL
 		 it2 != it2end; ++it2) {
 	      if (it2.index().k() == basis10().DeltaLmin()) {
 		// interface generator
-		c.add_coefficient(Index(lambda.j()+1,
-					typename Index::type_type(),
+		psic.add_coefficient(Index(lambda.j()+1,
+					   typename Index::type_type(),
 					3,
-					typename Index::translation_type(it1.index().k(), 0),
-					this),
-				  *it1 * *it2 * M_SQRT2); // don't forget the factor!
+					   typename Index::translation_type(it1.index().k(), 0),
+					   this),
+				     *it1 * *it2); // no factor!
 	      } else {
 		// patch generator
-		c.add_coefficient(Index(lambda.j()+1,
-					typename Index::type_type(),
-					0,
-					typename Index::translation_type(it1.index().k(), it2.index().k()),
-					this),
-				  *it1 * *it2);
+		psic.add_coefficient(Index(lambda.j()+1,
+					   typename Index::type_type(),
+					   0,
+					   typename Index::translation_type(it1.index().k(), it2.index().k()),
+					   this),
+				     *it1 * *it2);
 	      }
 	    }
 	  break;
@@ -123,20 +124,20 @@ namespace WaveletTL
 		 it2 != it2end; ++it2) {
 	      if (it2.index().k() == basis01().DeltaRmax(lambda.j()+1)) {
 		// interface generator
-		c.add_coefficient(Index(lambda.j()+1,
-					typename Index::type_type(),
-					3,
-					typename Index::translation_type(it1.index().k(), 0),
-					this),
-				  *it1 * *it2 * M_SQRT2); // don't forget the factor!
+		psic.add_coefficient(Index(lambda.j()+1,
+					   typename Index::type_type(),
+					   3,
+					   typename Index::translation_type(it1.index().k(), 0),
+					   this),
+				     *it1 * *it2); // no factor!
 	      } else {
 		// patch generator
-		c.add_coefficient(Index(lambda.j()+1,
-					typename Index::type_type(),
-					1,
-					typename Index::translation_type(it1.index().k(), it2.index().k()),
-					this),
-				  *it1 * *it2);
+		psic.add_coefficient(Index(lambda.j()+1,
+					   typename Index::type_type(),
+					   1,
+					   typename Index::translation_type(it1.index().k(), it2.index().k()),
+					   this),
+				     *it1 * *it2);
 	      }
 	    }
 	  break;
@@ -155,12 +156,12 @@ namespace WaveletTL
 		   it2end(gcoeffs1.end());
 		 it2 != it2end; ++it2) {
 	      // (always!) a patch generator
-	      c.add_coefficient(Index(lambda.j()+1,
-				      typename Index::type_type(),
-				      2,
-				      typename Index::translation_type(it1.index().k(), it2.index().k()),
-				      this),
-				*it1 * *it2);
+	      psic.add_coefficient(Index(lambda.j()+1,
+					 typename Index::type_type(),
+					 2,
+					 typename Index::translation_type(it1.index().k(), it2.index().k()),
+					 this),
+				   *it1 * *it2);
 	    }
 	  break;
 	case 4:
@@ -182,20 +183,20 @@ namespace WaveletTL
 		 it2 != it2end; ++it2) {
 	      if (it1.index().k() == basis01().DeltaRmax(lambda.j()+1)) {
 		// interface generator
-		c.add_coefficient(Index(lambda.j()+1,
-					typename Index::type_type(),
-					4,
-					typename Index::translation_type(0, it2.index().k()),
-					this),
-				  *it1 * *it2 * M_SQRT2);
+		psic.add_coefficient(Index(lambda.j()+1,
+					   typename Index::type_type(),
+					   4,
+					   typename Index::translation_type(0, it2.index().k()),
+					   this),
+				     *it1 * *it2); // no factor!
 	      } else {
 		// patch generator
-		c.add_coefficient(Index(lambda.j()+1,
-					typename Index::type_type(),
-					1,
-					typename Index::translation_type(it1.index().k(), it2.index().k()),
-					this),
-				  *it1 * *it2);
+		psic.add_coefficient(Index(lambda.j()+1,
+					   typename Index::type_type(),
+					   1,
+					   typename Index::translation_type(it1.index().k(), it2.index().k()),
+					   this),
+				     *it1 * *it2);
 	      }
 	    }
  	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(gcoeffs1.begin()),
@@ -206,12 +207,12 @@ namespace WaveletTL
  		 it2 != it2end; ++it2) {
  	      if (it1.index().k() > basis10().DeltaLmin()) {
  		// patch generator (interface generators already processed above)
- 		c.add_coefficient(Index(lambda.j()+1,
- 					typename Index::type_type(),
- 					2,
- 					typename Index::translation_type(it1.index().k(), it2.index().k()),
- 					this),
- 				  *it1 * *it2);
+ 		psic.add_coefficient(Index(lambda.j()+1,
+					   typename Index::type_type(),
+					   2,
+					   typename Index::translation_type(it1.index().k(), it2.index().k()),
+					   this),
+				     *it1 * *it2);
  	      }
  	    }
 	  break;
@@ -222,6 +223,11 @@ namespace WaveletTL
 	// (1,1)-wavelet
 	break;
       }
+
+      cout << "psic=" << endl << psic << endl;
+
+      // compute c from psic
+      c.swap(psic); // TODO: implement biorthogonalization
     }
   }
   

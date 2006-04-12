@@ -32,8 +32,13 @@ namespace WaveletTL
   /*!
     Template class for composite wavelet bases over the L-shaped domain
       (-1,1)^2 \ (0,1)^2
-    with homogeneous b.c.'s for the primal basis and free b.c.'s for the
-    dual basis.
+    such that the primal basis fulfills homogeneous Dirichlet b.c.'s on the outer
+    domain boundary, the dual basis fulfills free b.c.'s.
+
+    References:
+    [DS] Dahmen, Schneider:
+         Composite Wavelet Bases for Operator Equations
+	 Math. Comput. 68 (1999), 1533-1567
   */
   template <class IBASIS>
   class LDomainBasis

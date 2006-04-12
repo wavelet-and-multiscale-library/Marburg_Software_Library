@@ -16,7 +16,7 @@ int main()
   const int d  = 2;
   const int dT = 2;
 
-//   typedef DSBasis<d,dT> Basis1D; // remember to set partialSVD/BernsteinSVD biorthogonalization here!
+//   typedef DSBasis<d,dT> Basis1D; // remember to set partialSVD/BernsteinSVD biorthogonalization here! (why, comment this...)
   typedef PBasis<d,dT> Basis1D;
   typedef LDomainBasis<Basis1D> Basis;
   Basis basis;
@@ -34,7 +34,14 @@ int main()
 #if 1
   Index lambda(first_generator<Basis1D>(&basis, basis.j0()));
 //   for (; lambda.p() < 1; ++lambda);
-  for (; lambda.e()[0] != 0 || lambda.e()[1] != 1; ++lambda);
+//   for (; lambda.e()[0] != 0 || lambda.e()[1] != 1; ++lambda);
+//   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 1); ++lambda);
+//   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 1 && lambda.k()[1] == 7); ++lambda);
+//   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 2); ++lambda);
+//   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 2 && lambda.k()[1] == 7); ++lambda);
+//   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 4); ++lambda);
+//   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 4 && lambda.k()[1] == 6); ++lambda);
+  for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 4 && lambda.k()[1] == 7); ++lambda);
 
 //   for (int i = 0; i < 155; i++, ++lambda); // one of the generators on patch 4
 //   for (int i = 0; i < 330; i++, ++lambda); // one of the (0,1)-wavelets on patch 4

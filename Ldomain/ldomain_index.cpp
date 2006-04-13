@@ -11,8 +11,8 @@ namespace WaveletTL
     } else {
       j_ = basis_->j0(); // coarsest level;
       // e_ is zero by default: generator
-      k_[0] = basis->basis00().DeltaLmin();
-      k_[1] = basis->basis10().DeltaLmin()+1;
+      k_[0] = basis->basis1d().DeltaLmin();
+      k_[1] = k_[0]+1;
     }
   }
 
@@ -49,71 +49,55 @@ namespace WaveletTL
     // decide whether the patch number has to be increased
     bool pplusplus = false;
     for (int i = 1; i >= 0; i--) {
-      // determine last possible translation index into the i-th direction,
+      // determine the highest possible translation index into the i-th direction,
       // this will in general depend on the current patch number
       int last_index = 0;
       if (e_[i] == 0) { // generator in the i-th direction
 	switch(p_) {
 	case 0:
-	  last_index = (i == 0
-			? basis_->basis00().DeltaRmax(j_)
-			: basis_->basis10().DeltaRmax(j_));
-	  break;
 	case 1:
-	  last_index = basis_->basis01().DeltaRmax(j_)-1; // independent from i
-	  break;
 	case 2:
-	  last_index = (i == 0
-			? basis_->basis10().DeltaRmax(j_)
-			: basis_->basis00().DeltaRmax(j_));
+	  last_index = basis_->basis1d().DeltaRmax(j_)-1;
 	  break;
 	case 3:
 	  last_index = (i == 0
-			? basis_->basis00().DeltaRmax(j_)
+			? basis_->basis1d().DeltaRmax(j_)-1
 			: 0); // by convention
 	  break;
 	case 4:
 	  last_index = (i == 0
 			? 0 // by convention
-			: basis_->basis00().DeltaRmax(j_));
+			: basis_->basis1d().DeltaRmax(j_)-1);
 	  break;
 	}
       } else {
 	// wavelet in the i-th direction,
 	// the maximal translation index is independent from the patch number
-	last_index = basis_->basis00().Nablamax(j_);
+	last_index = basis_->basis1d().Nablamax(j_); // should be (1<<j)-1
       }
 
       if (k_[i] == last_index) {
-	// set k_[i] to the lowest possible translation index
+	// reset k_[i] to the lowest possible translation index
 	if (e_[i] == 0) { // generator, 
 	  switch(p_) {
 	  case 0:
-	    k_[i] = (i == 0
-		     ? basis_->basis00().DeltaLmin()
-		     : basis_->basis10().DeltaLmin()+1);
-	    break;
 	  case 1:
-	    k_[i] = basis_->basis01().DeltaLmin(); // independent from i
-	    break;
 	  case 2:
-	    k_[i] = (i == 0
-		     ? basis_->basis10().DeltaLmin()+1
-		     : basis_->basis00().DeltaLmin());
+	    k_[i] = basis_->basis1d().DeltaLmin()+1;
 	    break;
 	  case 3:
 	    k_[i] = (i == 0
-		     ? basis_->basis00().DeltaLmin()
+		     ? basis_->basis1d().DeltaLmin()+1
 		     : 0); // by convention
 	    break;
 	  case 4:
 	    k_[i] = (i == 0
 		     ? 0 // by convention
-		     : basis_->basis00().DeltaLmin());
+		     : basis_->basis1d().DeltaLmin()+1);
 	    break;
 	  }
 	} else { // wavelet, minimal translation index is independent from the patch number
-	  k_[i] = basis_->basis00().Nablamin();
+	  k_[i] = basis_->basis1d().Nablamin(); // should be 0
 	}
 	pplusplus = (i == 0);
       } else {
@@ -151,32 +135,25 @@ namespace WaveletTL
       if (!eplusplus) { // then choose lowest translation index k=k(j,e,p)
 	switch(p_) { // we know that p_>0
 	case 1:
-	  k_[0] = (e_[0] == 0
-		   ? basis_->basis01().DeltaLmin()
-		   : basis_->basis01().Nablamin());
-	  k_[1] = (e_[1] == 0
-		   ? basis_->basis01().DeltaLmin()
-		   : basis_->basis01().Nablamin());
-	  break;
 	case 2:
 	  k_[0] = (e_[0] == 0
-		   ? basis_->basis10().DeltaLmin()+1
-		   : basis_->basis10().Nablamin());
+		   ? basis_->basis1d().DeltaLmin()+1
+		   : basis_->basis1d().Nablamin());
 	  k_[1] = (e_[1] == 0
-		   ? basis_->basis00().DeltaLmin()
-		   : basis_->basis00().Nablamin());
+		   ? basis_->basis1d().DeltaLmin()+1
+		   : basis_->basis1d().Nablamin());
 	  break;
 	case 3:
 	  k_[0] = (e_[0] == 0
-		   ? basis_->basis00().DeltaLmin()
-		   : basis_->basis00().Nablamin());
+		   ? basis_->basis1d().DeltaLmin()+1
+		   : basis_->basis1d().Nablamin());
 	  k_[1] = 0; // by convention;
 	  break;
 	case 4:
 	  k_[0] = 0; // by convention
 	  k_[1] = (e_[1] == 0
-		   ? basis_->basis00().DeltaLmin()
-		   : basis_->basis00().Nablamin());
+		   ? basis_->basis1d().DeltaLmin()+1
+		   : basis_->basis1d().Nablamin());
 	}
       }
     } else return *this;
@@ -203,11 +180,11 @@ namespace WaveletTL
 
 	// ... and lowest translation index k = k(j,e,0)
 	k_[0] = (e_[0] == 0
-		 ? basis_->basis00().DeltaLmin()
-		 : basis_->basis00().Nablamin());
+		 ? basis_->basis1d().DeltaLmin()+1
+		 : basis_->basis1d().Nablamin());
 	k_[1] = (e_[1] == 0
-		 ? basis_->basis10().DeltaLmin()+1
-		 : basis_->basis10().Nablamin());
+		 ? basis_->basis1d().DeltaLmin()+1
+		 : basis_->basis1d().Nablamin());
       }
 
     } else return *this;
@@ -223,8 +200,8 @@ namespace WaveletTL
       p_ = 0;
       
       // ... and lowest translation index k = k(j,(0,1),0)
-      k_[0] = basis_->basis00().DeltaLmin();
-      k_[1] = basis_->basis10().Nablamin();
+      k_[0] = basis_->basis1d().DeltaLmin()+1;
+      k_[1] = basis_->basis1d().Nablamin();
     }
     
     return *this;
@@ -260,8 +237,7 @@ namespace WaveletTL
 
     // setup lowest translation index for e=(0,0), p=0
     typename LDomainIndex<IBASIS>::translation_type k;
-    k[0] = basis->basis00().DeltaLmin();
-    k[1] = basis->basis10().DeltaLmin()+1;
+    k[0] = k[1] = basis->basis1d().DeltaLmin()+1;
     
     return LDomainIndex<IBASIS>(j, e, 0, k, basis);
   }
@@ -276,7 +252,7 @@ namespace WaveletTL
 
     // setup highest translation index for e=(0,0), p=4
     typename LDomainIndex<IBASIS>::translation_type k; // k[0]=0 by convention
-    k[1] = basis->basis00().DeltaRmax(j);
+    k[1] = basis->basis1d().DeltaRmax(j)-1;
     
     return LDomainIndex<IBASIS>(j, e, 4, k, basis);
   }
@@ -292,8 +268,8 @@ namespace WaveletTL
 
     // setup lowest translation index for e=(0,1), p=0
     typename LDomainIndex<IBASIS>::translation_type k;
-    k[0] = basis->basis00().DeltaLmin();
-    k[1] = basis->basis10().Nablamin();
+    k[0] = basis->basis1d().DeltaLmin()+1;
+    k[1] = basis->basis1d().Nablamin();
     
     return LDomainIndex<IBASIS>(j, e, 0, k, basis);
   }
@@ -309,8 +285,7 @@ namespace WaveletTL
 
     // setup highest translation index for e=(1,1), p=2
     typename LDomainIndex<IBASIS>::translation_type k;
-    k[0] = basis->basis10().DeltaRmax(j);
-    k[1] = basis->basis00().DeltaRmax(j);
+    k[0] = k[1] = basis->basis1d().Nablamax(j);
     
     return LDomainIndex<IBASIS>(j, e, 2, k, basis);
   }

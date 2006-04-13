@@ -6,9 +6,7 @@ namespace WaveletTL
 {
   template <class IBASIS>
   LDomainBasis<IBASIS>::LDomainBasis()
-    : basis00_(true, true),
-      basis01_(true, false),
-      basis10_(false, true)
+    : basis1d_(false, false)
   {
   }
 
@@ -63,166 +61,169 @@ namespace WaveletTL
 
       switch(ecode) {
       case 0:
-	// generator
-	break;
+ 	// generator
+ 	break;
       case 1:
-	// (1,0)-wavelet
-	break;
+ 	// (1,0)-wavelet
+ 	break;
       case 2:
-	// (0,1)-wavelet
+ 	// (0,1)-wavelet
 	
-	// First treat the identity part of the biorthogonalization equation, i.e.,
-	// compute the generator coefficients of the initial stable completion:
+ 	// First treat the identity part of the biorthogonalization equation, i.e.,
+ 	// compute the generator coefficients of the initial stable completion
+	//   Mj1c = (I-Mj0*<Theta_{j+1},Lambda_j^tilde>^T)*Mj1
+	// So, the wavelets which use one of the nonvaninshing boundary generators
+	// will be modified to be zero at the endpoints.
 
-	switch(lambda.p()) {
-	case 0:
-	  // psic_lambda is a tensor product of a generator and a wavelet on patch 0
-	  basis00().reconstruct_1(IIndex(lambda.j(), 0, lambda.k()[0], &basis00()),
-				  lambda.j()+1, gcoeffs0);
-	  basis10().reconstruct_1(IIndex(lambda.j(), 1, lambda.k()[1], &basis10()),
-				  lambda.j()+1, gcoeffs1);
+// 	switch(lambda.p()) {
+// 	case 0:
+// 	  // psic_lambda is a tensor product of a generator and a wavelet on patch 0
+// 	  basis00().reconstruct_1(IIndex(lambda.j(), 0, lambda.k()[0], &basis00()),
+// 				  lambda.j()+1, gcoeffs0);
+// 	  basis10().reconstruct_1(IIndex(lambda.j(), 1, lambda.k()[1], &basis10()),
+// 				  lambda.j()+1, gcoeffs1);
 
-	  // add the tensor product generators needed to construct psic_lambda
-	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(gcoeffs0.begin()),
-		 it1end(gcoeffs0.end());
-	       it1 != it1end; ++it1)
-	    for (typename InfiniteVector<double,IIndex>::const_iterator it2(gcoeffs1.begin()),
-		   it2end(gcoeffs1.end());
-		 it2 != it2end; ++it2) {
-	      if (it2.index().k() == basis10().DeltaLmin()) {
-		// interface generator
-		psic.add_coefficient(Index(lambda.j()+1,
-					   typename Index::type_type(),
-					3,
-					   typename Index::translation_type(it1.index().k(), 0),
-					   this),
-				     *it1 * *it2); // no factor!
-	      } else {
-		// patch generator
-		psic.add_coefficient(Index(lambda.j()+1,
-					   typename Index::type_type(),
-					   0,
-					   typename Index::translation_type(it1.index().k(), it2.index().k()),
-					   this),
-				     *it1 * *it2);
-	      }
-	    }
-	  break;
-	case 1:
-	  // psic_lambda is a tensor product of a generator and a wavelet on patch 1
-	  basis01().reconstruct_1(IIndex(lambda.j(), 0, lambda.k()[0], &basis01()),
-				  lambda.j()+1, gcoeffs0);
-	  basis01().reconstruct_1(IIndex(lambda.j(), 1, lambda.k()[1], &basis01()),
-				  lambda.j()+1, gcoeffs1);
+// 	  // add the tensor product generators needed to construct psic_lambda
+// 	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(gcoeffs0.begin()),
+// 		 it1end(gcoeffs0.end());
+// 	       it1 != it1end; ++it1)
+// 	    for (typename InfiniteVector<double,IIndex>::const_iterator it2(gcoeffs1.begin()),
+// 		   it2end(gcoeffs1.end());
+// 		 it2 != it2end; ++it2) {
+// 	      if (it2.index().k() == basis10().DeltaLmin()) {
+// 		// interface generator
+// 		psic.add_coefficient(Index(lambda.j()+1,
+// 					   typename Index::type_type(),
+// 					3,
+// 					   typename Index::translation_type(it1.index().k(), 0),
+// 					   this),
+// 				     *it1 * *it2); // no factor!
+// 	      } else {
+// 		// patch generator
+// 		psic.add_coefficient(Index(lambda.j()+1,
+// 					   typename Index::type_type(),
+// 					   0,
+// 					   typename Index::translation_type(it1.index().k(), it2.index().k()),
+// 					   this),
+// 				     *it1 * *it2);
+// 	      }
+// 	    }
+// 	  break;
+// 	case 1:
+// 	  // psic_lambda is a tensor product of a generator and a wavelet on patch 1
+// 	  basis01().reconstruct_1(IIndex(lambda.j(), 0, lambda.k()[0], &basis01()),
+// 				  lambda.j()+1, gcoeffs0);
+// 	  basis01().reconstruct_1(IIndex(lambda.j(), 1, lambda.k()[1], &basis01()),
+// 				  lambda.j()+1, gcoeffs1);
 
-	  // add the tensor product generators needed to construct psic_lambda
-	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(gcoeffs0.begin()),
-		 it1end(gcoeffs0.end());
-	       it1 != it1end; ++it1)
-	    for (typename InfiniteVector<double,IIndex>::const_iterator it2(gcoeffs1.begin()),
-		   it2end(gcoeffs1.end());
-		 it2 != it2end; ++it2) {
-	      if (it2.index().k() == basis01().DeltaRmax(lambda.j()+1)) {
-		// interface generator
-		psic.add_coefficient(Index(lambda.j()+1,
-					   typename Index::type_type(),
-					   3,
-					   typename Index::translation_type(it1.index().k(), 0),
-					   this),
-				     *it1 * *it2); // no factor!
-	      } else {
-		// patch generator
-		psic.add_coefficient(Index(lambda.j()+1,
-					   typename Index::type_type(),
-					   1,
-					   typename Index::translation_type(it1.index().k(), it2.index().k()),
-					   this),
-				     *it1 * *it2);
-	      }
-	    }
-	  break;
-	case 2:
-	  // psic_lambda is a tensor product of a generator and a wavelet on patch 2
-	  basis10().reconstruct_1(IIndex(lambda.j(), 0, lambda.k()[0], &basis10()),
-				  lambda.j()+1, gcoeffs0);
-	  basis00().reconstruct_1(IIndex(lambda.j(), 1, lambda.k()[1], &basis00()),
-				  lambda.j()+1, gcoeffs1);
+// 	  // add the tensor product generators needed to construct psic_lambda
+// 	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(gcoeffs0.begin()),
+// 		 it1end(gcoeffs0.end());
+// 	       it1 != it1end; ++it1)
+// 	    for (typename InfiniteVector<double,IIndex>::const_iterator it2(gcoeffs1.begin()),
+// 		   it2end(gcoeffs1.end());
+// 		 it2 != it2end; ++it2) {
+// 	      if (it2.index().k() == basis01().DeltaRmax(lambda.j()+1)) {
+// 		// interface generator
+// 		psic.add_coefficient(Index(lambda.j()+1,
+// 					   typename Index::type_type(),
+// 					   3,
+// 					   typename Index::translation_type(it1.index().k(), 0),
+// 					   this),
+// 				     *it1 * *it2); // no factor!
+// 	      } else {
+// 		// patch generator
+// 		psic.add_coefficient(Index(lambda.j()+1,
+// 					   typename Index::type_type(),
+// 					   1,
+// 					   typename Index::translation_type(it1.index().k(), it2.index().k()),
+// 					   this),
+// 				     *it1 * *it2);
+// 	      }
+// 	    }
+// 	  break;
+// 	case 2:
+// 	  // psic_lambda is a tensor product of a generator and a wavelet on patch 2
+// 	  basis10().reconstruct_1(IIndex(lambda.j(), 0, lambda.k()[0], &basis10()),
+// 				  lambda.j()+1, gcoeffs0);
+// 	  basis00().reconstruct_1(IIndex(lambda.j(), 1, lambda.k()[1], &basis00()),
+// 				  lambda.j()+1, gcoeffs1);
 
-	  // add the tensor product generators needed to construct psic_lambda
-	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(gcoeffs0.begin()),
-		 it1end(gcoeffs0.end());
-	       it1 != it1end; ++it1)
-	    for (typename InfiniteVector<double,IIndex>::const_iterator it2(gcoeffs1.begin()),
-		   it2end(gcoeffs1.end());
-		 it2 != it2end; ++it2) {
-	      // (always!) a patch generator
-	      psic.add_coefficient(Index(lambda.j()+1,
-					 typename Index::type_type(),
-					 2,
-					 typename Index::translation_type(it1.index().k(), it2.index().k()),
-					 this),
-				   *it1 * *it2);
-	    }
-	  break;
-	case 4:
-	  // psic_lambda decomposes into two tensor products of a generator and a wavelet,
-	  // on patches 1 and 2
-	  basis01().reconstruct_1(IIndex(lambda.j(), 0, basis01().DeltaRmax(lambda.j()), &basis01()),
-				  lambda.j()+1, gcoeffs0);
-	  basis10().reconstruct_1(IIndex(lambda.j(), 0, basis10().DeltaLmin(), &basis10()),
-				  lambda.j()+1, gcoeffs1);
-	  basis01().reconstruct_1(IIndex(lambda.j(), 1, lambda.k()[1], &basis01()),
-				  lambda.j()+1, gcoeffs2);
+// 	  // add the tensor product generators needed to construct psic_lambda
+// 	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(gcoeffs0.begin()),
+// 		 it1end(gcoeffs0.end());
+// 	       it1 != it1end; ++it1)
+// 	    for (typename InfiniteVector<double,IIndex>::const_iterator it2(gcoeffs1.begin()),
+// 		   it2end(gcoeffs1.end());
+// 		 it2 != it2end; ++it2) {
+// 	      // (always!) a patch generator
+// 	      psic.add_coefficient(Index(lambda.j()+1,
+// 					 typename Index::type_type(),
+// 					 2,
+// 					 typename Index::translation_type(it1.index().k(), it2.index().k()),
+// 					 this),
+// 				   *it1 * *it2);
+// 	    }
+// 	  break;
+// 	case 4:
+// 	  // psic_lambda decomposes into two tensor products of a generator and a wavelet,
+// 	  // on patches 1 and 2
+// 	  basis01().reconstruct_1(IIndex(lambda.j(), 0, basis01().DeltaRmax(lambda.j()), &basis01()),
+// 				  lambda.j()+1, gcoeffs0);
+// 	  basis10().reconstruct_1(IIndex(lambda.j(), 0, basis10().DeltaLmin(), &basis10()),
+// 				  lambda.j()+1, gcoeffs1);
+// 	  basis01().reconstruct_1(IIndex(lambda.j(), 1, lambda.k()[1], &basis01()),
+// 				  lambda.j()+1, gcoeffs2);
 	  
-	  // add the tensor product generators needed to construct psic_lambda
-	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(gcoeffs0.begin()),
-		 it1end(gcoeffs0.end());
-	       it1 != it1end; ++it1)
-	    for (typename InfiniteVector<double,IIndex>::const_iterator it2(gcoeffs2.begin()),
-		   it2end(gcoeffs2.end());
-		 it2 != it2end; ++it2) {
-	      if (it1.index().k() == basis01().DeltaRmax(lambda.j()+1)) {
-		// interface generator
-		psic.add_coefficient(Index(lambda.j()+1,
-					   typename Index::type_type(),
-					   4,
-					   typename Index::translation_type(0, it2.index().k()),
-					   this),
-				     *it1 * *it2); // no factor!
-	      } else {
-		// patch generator
-		psic.add_coefficient(Index(lambda.j()+1,
-					   typename Index::type_type(),
-					   1,
-					   typename Index::translation_type(it1.index().k(), it2.index().k()),
-					   this),
-				     *it1 * *it2);
-	      }
-	    }
- 	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(gcoeffs1.begin()),
- 		 it1end(gcoeffs1.end());
- 	       it1 != it1end; ++it1)
- 	    for (typename InfiniteVector<double,IIndex>::const_iterator it2(gcoeffs2.begin()),
- 		   it2end(gcoeffs2.end());
- 		 it2 != it2end; ++it2) {
- 	      if (it1.index().k() > basis10().DeltaLmin()) {
- 		// patch generator (interface generators already processed above)
- 		psic.add_coefficient(Index(lambda.j()+1,
-					   typename Index::type_type(),
-					   2,
-					   typename Index::translation_type(it1.index().k(), it2.index().k()),
-					   this),
-				     *it1 * *it2);
- 	      }
- 	    }
-	  break;
-	} // end switch(lambda.p())
+// 	  // add the tensor product generators needed to construct psic_lambda
+// 	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(gcoeffs0.begin()),
+// 		 it1end(gcoeffs0.end());
+// 	       it1 != it1end; ++it1)
+// 	    for (typename InfiniteVector<double,IIndex>::const_iterator it2(gcoeffs2.begin()),
+// 		   it2end(gcoeffs2.end());
+// 		 it2 != it2end; ++it2) {
+// 	      if (it1.index().k() == basis01().DeltaRmax(lambda.j()+1)) {
+// 		// interface generator
+// 		psic.add_coefficient(Index(lambda.j()+1,
+// 					   typename Index::type_type(),
+// 					   4,
+// 					   typename Index::translation_type(0, it2.index().k()),
+// 					   this),
+// 				     *it1 * *it2); // no factor!
+// 	      } else {
+// 		// patch generator
+// 		psic.add_coefficient(Index(lambda.j()+1,
+// 					   typename Index::type_type(),
+// 					   1,
+// 					   typename Index::translation_type(it1.index().k(), it2.index().k()),
+// 					   this),
+// 				     *it1 * *it2);
+// 	      }
+// 	    }
+//  	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(gcoeffs1.begin()),
+//  		 it1end(gcoeffs1.end());
+//  	       it1 != it1end; ++it1)
+//  	    for (typename InfiniteVector<double,IIndex>::const_iterator it2(gcoeffs2.begin()),
+//  		   it2end(gcoeffs2.end());
+//  		 it2 != it2end; ++it2) {
+//  	      if (it1.index().k() > basis10().DeltaLmin()) {
+//  		// patch generator (interface generators already processed above)
+//  		psic.add_coefficient(Index(lambda.j()+1,
+// 					   typename Index::type_type(),
+// 					   2,
+// 					   typename Index::translation_type(it1.index().k(), it2.index().k()),
+// 					   this),
+// 				     *it1 * *it2);
+//  	      }
+//  	    }
+// 	  break;
+// 	} // end switch(lambda.p())
 	
-	break;
-      case 3:
-	// (1,1)-wavelet
-	break;
-      }
+// 	break;
+//       case 3:
+// 	// (1,1)-wavelet
+// 	break;
+//       }
 
       cout << "psic=" << endl << psic << endl;
 

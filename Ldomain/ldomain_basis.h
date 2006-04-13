@@ -32,8 +32,8 @@ namespace WaveletTL
   /*!
     Template class for composite wavelet bases over the L-shaped domain
       (-1,1)^2 \ (0,1)^2
-    such that the primal basis fulfills homogeneous Dirichlet b.c.'s on the outer
-    domain boundary, the dual basis fulfills free b.c.'s.
+    such that the primal and the dual basis fulfill homogeneous Dirichlet b.c.'s
+    on the outer domain boundary.
 
     References:
     [DS] Dahmen, Schneider:
@@ -51,7 +51,7 @@ namespace WaveletTL
     typedef IBASIS IntervalBasis;
 
     //! coarsest possible level j0
-    inline const int j0() const { return basis00_.j0(); }
+    inline const int j0() const { return basis1d_.j0(); }
     
     //! wavelet index class
     typedef LDomainIndex<IBASIS> Index;
@@ -65,10 +65,8 @@ namespace WaveletTL
     //! number of vanishing moments for the dual wavelets
     static unsigned int dual_vanishing_moments() { return IBASIS::dual_vanishing_moments(); }
 
-    //! read access to the three 1D bases
-    const IntervalBasis& basis00() const { return basis00_; }
-    const IntervalBasis& basis01() const { return basis01_; }
-    const IntervalBasis& basis10() const { return basis10_; }
+    //! read access to the underlying 1D basis
+    const IntervalBasis& basis1d() const { return basis1d_; }
 
     //! RECONSTRUCT routine, simple version
     /*!
@@ -111,8 +109,8 @@ namespace WaveletTL
 		       InfiniteVector<double, Index>& v) const;
 
   protected:
-    //! the three interval wavelet bases involved
-    IntervalBasis basis00_, basis01_, basis10_;
+    //! the interval wavelet basis
+    IntervalBasis basis1d_;
   };
 }
 

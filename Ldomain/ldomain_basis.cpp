@@ -42,7 +42,7 @@ namespace WaveletTL
 				      const int j,
 				      InfiniteVector<double, Index>& c) const {
     typedef typename IBASIS::Index IIndex;
-
+    
     if (lambda.j() >= j) {
       // then we can just copy psi_lambda
       c.add_coefficient(lambda, 1.0);
@@ -53,12 +53,12 @@ namespace WaveletTL
       // will cause much more effort due to the biorthogonalization equation
       //   Mj1 = (I-Mj0*(Mj0T^T))*Mj1c
       //       = Mj1c - Mj0*(Mj0T^T)*Mj1c
-        
+      
       InfiniteVector<double,IIndex> gcoeffs0, gcoeffs1, gcoeffs2;
       InfiniteVector<double,Index> psic; // psi_lambda^check
-
+      
       const int ecode(lambda.e()[0]+2*lambda.e()[1]);
-
+      
       switch(ecode) {
       case 0:
  	// generator
@@ -74,8 +74,8 @@ namespace WaveletTL
 	//   Mj1c = (I-Mj0*<Theta_{j+1},Lambda_j^tilde>^T)*Mj1
 	// So, the wavelets which use one of the nonvaninshing boundary generators
 	// will be modified to be zero at the endpoints.
-
-// 	switch(lambda.p()) {
+	
+//  	switch(lambda.p()) {
 // 	case 0:
 // 	  // psic_lambda is a tensor product of a generator and a wavelet on patch 0
 // 	  basis00().reconstruct_1(IIndex(lambda.j(), 0, lambda.k()[0], &basis00()),
@@ -219,14 +219,14 @@ namespace WaveletTL
 // 	  break;
 // 	} // end switch(lambda.p())
 	
-// 	break;
-//       case 3:
-// 	// (1,1)-wavelet
-// 	break;
-//       }
-
+ 	break;
+      case 3:
+ 	// (1,1)-wavelet
+ 	break;
+      }
+      
       cout << "psic=" << endl << psic << endl;
-
+      
       // compute c from psic
       c.swap(psic); // TODO: implement biorthogonalization
     }

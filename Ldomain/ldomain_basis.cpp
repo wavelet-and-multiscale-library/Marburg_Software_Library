@@ -11,6 +11,39 @@ namespace WaveletTL
   }
 
   template <class IBASIS>
+  const SparseMatrix<double>&
+  LDomainBasis<IBASIS>::get_Mj0 (const int j) const {
+    // check whether the j-th matrix already exists in the cache
+    typename MatrixCache::iterator matrix_lb(Mj0_cache.lower_bound(j));
+    typename MatrixCache::iterator matrix_it(matrix_lb);
+    if (matrix_lb == Mj0_cache.end() ||
+	Mj0_cache.key_comp()(j, matrix_lb->first))
+      {
+	// insert a new matrix into the cache
+ 	typedef typename MatrixCache::value_type value_type;
+	SparseMatrix<double> Mj0;
+ 	matrix_it = Mj0_cache.insert(matrix_lb, value_type(j, Mj0));
+      }
+    
+    return matrix_it->second;
+  }
+  
+  template <class IBASIS>
+  const SparseMatrix<double>&
+  LDomainBasis<IBASIS>::get_Mj0T (const int j) const {
+  }
+
+  template <class IBASIS>
+  const SparseMatrix<double>&
+  LDomainBasis<IBASIS>::get_Mj1 (const int j) const {
+  }
+
+  template <class IBASIS>
+  const SparseMatrix<double>&
+  LDomainBasis<IBASIS>::get_Mj1T  (const int j) const {
+  }
+
+  template <class IBASIS>
   void
   LDomainBasis<IBASIS>::reconstruct(const InfiniteVector<double, Index>& c,
 				    const int j,
@@ -53,6 +86,8 @@ namespace WaveletTL
       // will cause much more effort due to the biorthogonalization equation
       //   Mj1 = (I-Mj0*(Mj0T^T))*Mj1c
       //       = Mj1c - Mj0*(Mj0T^T)*Mj1c
+      // and the specific structure of the initial stable completion
+      //   Mj1c = tensor product of factors (I-Mj0*(sqrt(2)*e_1 cut(Mj0T^T) sqrt(2)*e_n))*Mj1
       
       InfiniteVector<double,IIndex> gcoeffs0, gcoeffs1, gcoeffs2;
       InfiniteVector<double,Index> psic; // psi_lambda^check

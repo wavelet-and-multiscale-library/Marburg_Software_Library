@@ -11,9 +11,11 @@
 #define _WAVELETTL_LDOMAIN_BASIS_H
 
 #include <list>
+#include <map>
 
 #include <algebra/vector.h>
 #include <algebra/infinite_vector.h>
+#include <algebra/sparse_matrix.h>
 #include <utils/fixed_array1d.h>
 #include <utils/multiindex.h>
 
@@ -26,6 +28,7 @@
 using std::list;
 using MathTL::FixedArray1D;
 using MathTL::InfiniteVector;
+using MathTL::SparseMatrix;
 
 namespace WaveletTL
 {
@@ -68,6 +71,16 @@ namespace WaveletTL
     //! read access to the underlying 1D basis
     const IntervalBasis& basis1d() const { return basis1d_; }
 
+    /*!
+      The following routines provide read access to the diverse refinement matrices
+      on a level j >= j0. The row and column indices follow the less<Index> ordering.
+      Those matrices will be collected in an internal cache to provide faster access.
+    */
+    const SparseMatrix<double>& get_Mj0  (const int j) const;
+    const SparseMatrix<double>& get_Mj0T (const int j) const;
+    const SparseMatrix<double>& get_Mj1  (const int j) const;
+    const SparseMatrix<double>& get_Mj1T (const int j) const;
+
     //! RECONSTRUCT routine, simple version
     /*!
       Constructs for a given single wavelet index lambda a coefficient set c,
@@ -109,8 +122,12 @@ namespace WaveletTL
 		       InfiniteVector<double, Index>& v) const;
 
   protected:
-    //! the interval wavelet basis
+    //! the interval 1d wavelet basis
     IntervalBasis basis1d_;
+
+    //! caches for the diverse refinement matrices
+    typedef std::map<int,SparseMatrix<double> > MatrixCache;
+    mutable MatrixCache Mj0_cache, Mj0T_cache, Mj1_cache, Mj1T_cache;
   };
 }
 

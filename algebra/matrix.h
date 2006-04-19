@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <algebra/vector.h>
+#include <algebra/matrix_block.h>
 #include <algebra/symmetric_matrix.h>
 #include <algebra/triangular_matrix.h>
 #include <algebra/kronecker_matrix.h>
@@ -29,6 +30,7 @@ namespace MathTL
   */
   template <class C>
   class Matrix
+    : public MatrixBlock<C>
   {
   public:
     /*!

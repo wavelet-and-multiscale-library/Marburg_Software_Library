@@ -41,6 +41,30 @@ namespace WaveletTL
     
     j0_ = bases_[0]->j0();
   }
+
+  template <class IBASIS, unsigned int DIM>
+  CubeBasis<IBASIS,DIM>::CubeBasis(const FixedArray1D<int,2*DIM>& s) {
+    for (unsigned int i = 0; i < DIM; i++) {
+      // check whether the corresponding 1d basis already exists
+      IBASIS* b = 0;
+      for (typename list<IBASIS*>::const_iterator it(bases_infact.begin());
+	   it != bases_infact.end(); ++it) {
+	if ((*it)->get_s0() == s[2*i]
+	    && (*it)->get_s1() == s[2*i+1]) {
+	  b = *it;
+	  break;
+	}
+      }
+      if (b == 0) {
+	b = new IBASIS(s[2*i], s[2*i+1]);
+	bases_infact.push_back(b);
+      }
+      bases_[i] = b;
+    }
+    
+    j0_ = bases_[0]->j0();
+  }
+
   
   template <class IBASIS, unsigned int DIM>
   CubeBasis<IBASIS,DIM>::CubeBasis(const FixedArray1D<bool,2*DIM>& bc) {

@@ -124,20 +124,20 @@ namespace WaveletTL
     //double zeta = 2.*epsilon;
     double l2n = 0.;
 
-    its++;
+//     its++;
 
-    if (its > 10) {
-      InfiniteVector<double, typename PROBLEM::Index> help;
-      zeta *= 1.0 / (1 << 6);
-      P.RHS (zeta/2., tilde_r);
-      cout << "zeta half = " << zeta/2. << endl;
-      APPLY_COARSE(P, w, zeta/2., help, 0.00000001, jmax, strategy);
-      tilde_r -= help;
-      l2n = l2_norm(tilde_r);
-      nu = l2n + zeta;
-    }
-    else
-      {
+//     if (its > 100) {
+//       InfiniteVector<double, typename PROBLEM::Index> help;
+//       zeta *= 1.0 / (1 << 9);
+//       P.RHS (zeta/2., tilde_r);
+//       cout << "zeta half = " << zeta/2. << endl;
+//       APPLY_COARSE(P, w, zeta/2., help, 0.00000001, jmax, strategy);
+//       tilde_r -= help;
+//       l2n = l2_norm(tilde_r);
+//       nu = l2n + zeta;
+//     }
+//    else
+//      {
 	do {
 	  zeta /= 2.;
 	  P.RHS (zeta/2., tilde_r);
@@ -159,8 +159,8 @@ namespace WaveletTL
 	  //if(k == 10)
 	  //	break;
 	}
-	while ( (nu > epsilon) && (zeta > delta*l2n) );
-      }
+ 	while ( (nu > epsilon) && (zeta > delta*l2n) );
+	//}
   }
 
 }

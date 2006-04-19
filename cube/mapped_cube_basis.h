@@ -54,6 +54,15 @@ namespace WaveletTL
 		    const FixedArray1D<int,2*DIM_d>& s,
 		    const FixedArray1D<int,2*DIM_d>& sT);
 
+    /*!
+      constructor with a chart and specified boundary condition orders
+      i-th direction at x=0 <-> index 2*i
+      i-th direction at x=1 <-> index 2*i+1
+    */
+    MappedCubeBasis(const Chart<DIM_d,DIM_m>* kappa,
+		    const FixedArray1D<int,2*DIM_d>& s);
+
+
     //! destructor
     ~MappedCubeBasis();
 

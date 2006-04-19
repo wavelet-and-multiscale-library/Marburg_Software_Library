@@ -51,6 +51,14 @@ namespace WaveletTL
 	      const FixedArray1D<int,2*DIM>& sT);
 
     /*!
+      constructor with specified boundary condition orders
+      i-th direction at x=0 <-> index 2*i
+      i-th direction at x=1 <-> index 2*i+1
+    */
+    CubeBasis(const FixedArray1D<int,2*DIM>& s);
+
+
+    /*!
       constructor with specified Dirichlet boundary conditions for
       the primal functions, the dual functions will be constructed to
       fulfill free b.c.'s

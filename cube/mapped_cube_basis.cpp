@@ -20,6 +20,14 @@ namespace WaveletTL
   }
 
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  MappedCubeBasis<IBASIS,DIM_d,DIM_m>::MappedCubeBasis(const Chart<DIM_d,DIM_m>* kappa,
+						       const FixedArray1D<int,2*DIM_d>& s)
+    : CubeBasis<IBASIS,DIM_d>(s), kappa_(kappa), delete_kappa(false)
+  {
+  }
+
+
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   MappedCubeBasis<IBASIS,DIM_d,DIM_m>::~MappedCubeBasis()
   {
     if (delete_kappa)

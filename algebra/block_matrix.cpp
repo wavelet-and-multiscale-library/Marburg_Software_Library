@@ -66,9 +66,9 @@ namespace MathTL
       {
  	for (typename BlockMatrix<C>::size_type i(0); i < M.column_blocks(); ++i)
 	  for (typename BlockMatrix<C>::size_type j(0); j < M.row_blocks(); ++j) {
-	    os << "block (" << i << "," << j << "):" << endl;
+	    os << "block (" << i << "," << j << "):" << std::endl;
 	    if (M.get_block(i, j)==0)
-	      os << "ZERO" << endl;
+	      os << "ZERO" << std::endl;
 	    else
 	      M.get_block(i, j)->print(os);
 	  }

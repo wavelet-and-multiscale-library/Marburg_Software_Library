@@ -36,20 +36,40 @@ namespace MathTL
     //! default constructor, yields a zero (nxn)-block (each 1x1) matrix, empty per default
     explicit BlockMatrix(const size_type n = 0);
 
-    //! row dimension
+    //! constructor for (mxn) block (each 1x1) matrices, empty per default
+    BlockMatrix(const size_type block_rows, const size_type block_columns);
+
+    //! destructor (all subblocks will be deleted)
+    ~BlockMatrix();
+    
+    //! (overall) row dimension
     const size_type row_dimension() const { return rowdim_; }
     
-    //! column dimension
+    //! (overall) column dimension
     const size_type column_dimension() const { return coldim_; }
 
-    //! number of blocks in row direction (horizontal)
-    const size_type row_blocks() const;
+    //! number of "block rows", i.e., blocks in column direction (vertical)
+    const size_type block_rows() const;
 
-    //! number of blocks in column direction (vertical)
-    const size_type column_blocks() const;
+    //! number of "block columns", i.e., blocks in row direction (horizontal)
+    const size_type block_columns() const;
 
-    //! get matrix block
-    const MatrixBlock<C>* get_block(const size_type row, const size_type column) const;
+    //! get a single matrix block
+    const MatrixBlock<C>* get_block(const size_type block_row, const size_type block_column) const;
+
+    /*!
+      Set a single matrix block. Note that the old block will be deleted, and ~BlockMatrix() will
+      delete this block!
+      Be sure to resize the corresponding row/column block properly before or after this call.
+      (this is necessary to have zero row/column blocks without having to allocate them)
+    */
+    void set_block(const size_type row, const size_type column, MatrixBlock<C>* block);
+    
+    //! resize a row block (i.e., its number of rows)
+    void resize_block_row(const size_type block_row, const size_type rows);
+
+    //! resize a block column (i.e., its number of columns)
+    void resize_block_column(const size_type block_row, const size_type columns);
 
     //! return true if matrix is empty (cf. STL containers)
     bool empty() const;
@@ -66,12 +86,12 @@ namespace MathTL
     //! pointers to the blocks
     Array1D<MatrixBlock<C>*> blocks;
 
-    //! column dimensions of the blocks in row direction (horizontal)
-    Array1D<size_type> row_blocks_columns;
-
-    //! row dimensions of the blocks in column direction (vertical)
-    Array1D<size_type> column_blocks_rows;
+    //! row dimensions of the block rows
+    Array1D<size_type> block_rows_rows;
     
+    //! column dimensions of the block columns
+    Array1D<size_type> block_columns_columns;
+
     //! (overall) row dimension
     size_type rowdim_;
 

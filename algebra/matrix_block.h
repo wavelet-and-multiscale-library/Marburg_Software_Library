@@ -36,6 +36,20 @@ namespace MathTL
     //! column dimension
     virtual const size_type column_dimension() const = 0;
 
+    /*!
+      matrix-vector multiplication Mx = (*this) * x;
+      we assume that the vector Mx has the correct size and
+      is not identical to x
+    */
+    virtual void apply(const Vector<C>& x, Vector<C>& Mx) const = 0;
+    
+    /*!
+      transposed matrix-vector multiplication Mtx = (*this)^T * x;
+      we assume that the vector Mtx has the correct size and
+      is not identical to x
+    */
+    virtual void apply_transposed(const Vector<C>& x, Vector<C>& Mtx) const = 0;
+    
     //! print block onto a stream
     virtual void print(std::ostream& os,
 		       const unsigned int tabwidth = 10,

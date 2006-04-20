@@ -75,6 +75,20 @@ namespace MathTL
     bool empty() const;
 
     /*!
+      matrix-vector multiplication Mx = (*this) * x;
+      we assume that the vector Mx has the correct size and
+      is not identical to x
+    */
+    void apply(const Vector<C>& x, Vector<C>& Mx) const;
+
+    /*!
+      transposed matrix-vector multiplication Mtx = (*this)^T * x;
+      we assume that the vector Mtx has the correct size and
+      is not identical to x
+    */
+    void apply_transposed(const Vector<C>& x, Vector<C>& Mtx) const;
+    
+    /*!
       stream output with user-defined tabwidth and precision
       (cf. deal.II)
     */
@@ -97,6 +111,9 @@ namespace MathTL
 
     //! (overall) column dimension
     size_type coldim_;
+
+    //! (re)calculate overall row and column dimensions
+    void calculate_size();
   };
 
   /*!

@@ -339,6 +339,20 @@ namespace MathTL
   }
 
   template <class C>
+  void Matrix<C>::apply(const Vector<C>& x, Vector<C>& Mx) const
+  {
+    assert(Mx.size() == rowdim_);
+    
+    for (typename Matrix<C>::size_type i(0); i < rowdim_; i++)
+      {
+	Mx[i] = 0;
+	for (typename Matrix<C>::size_type j(0);
+	     j < coldim_; j++)
+	  Mx[i] += this->operator () (i, j) * x[j];
+      }
+  }
+
+  template <class C>
   template <class VECTOR>
   void Matrix<C>::apply_transposed(const VECTOR& x, VECTOR& Mtx) const
   {
@@ -353,6 +367,20 @@ namespace MathTL
       }
   }
 
+  template <class C>
+  void Matrix<C>::apply_transposed(const Vector<C>& x, Vector<C>& Mtx) const
+  {
+    assert(Mtx.size() == coldim_);
+    
+    for (typename Matrix<C>::size_type i(0); i < coldim_; i++)
+      {
+	Mtx[i] = 0;
+	for (typename Matrix<C>::size_type j(0);
+	     j < rowdim_; j++)
+	  Mtx[i] += this->operator () (j, i) * x[j];
+      }
+  }
+  
   template <class C>
   inline
   void Matrix<C>::compress(const double eta)

@@ -228,6 +228,9 @@ namespace MathTL
     template <class VECTOR>
     void apply(const VECTOR& x, VECTOR& Mx) const;
 
+    //! special version for Vector<C> (requirement from MatrixBlock)
+    void apply(const Vector<C>& x, Vector<C>& Mx) const;
+
     /*!
       transposed matrix-vector multiplication Mtx = (*this)^T * x;
       we assume that the vector Mtx has the correct size and
@@ -236,6 +239,9 @@ namespace MathTL
     template <class VECTOR>
     void apply_transposed(const VECTOR& x, VECTOR& Mtx) const;
 
+    //! special version for Vector<C> (requirement from MatrixBlock)
+    void apply_transposed(const Vector<C>& x, Vector<C>& Mtx) const;
+    
     /*!
       set all values with modulus below a threshold to zero
       (fabs<C> should exist)

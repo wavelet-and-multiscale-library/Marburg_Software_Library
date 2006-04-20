@@ -106,7 +106,7 @@ namespace WaveletTL
     }
   }  
 
-  static int its = 0; // DIRTY HACK, REMOVE THIS SOON!!!
+//   static int its = 0; // DIRTY HACK, REMOVE THIS SOON!!!
 
   template <class PROBLEM>
   void RES(const PROBLEM& P,

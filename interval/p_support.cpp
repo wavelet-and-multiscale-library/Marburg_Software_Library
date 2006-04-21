@@ -25,7 +25,7 @@ namespace WaveletTL
 	  // left boundary wavelet
 	  k1 = 0;
  	  // hard code special case
- 	  if ( d==3 && dT==3 ) {
+ 	  if ( (d==3 && dT==3) &&  ((basis.get_s0()==1) && (basis.get_s1()==1)) ) {
 	    k2 = 8;
  	  }
  	  else
@@ -34,7 +34,7 @@ namespace WaveletTL
 	  if ((1<<lambda.j())-lambda.k() <= (d+dT)/2-1) {
 	    // right boundary wavelet
 	    // hard code special case
-	    if ( d==3 && dT==3 ) {
+	    if ( (d==3 && dT==3) &&  ((basis.get_s0()==1) && (basis.get_s1()==1)) ) {
 	      k1 = (1<<(lambda.j()+1)) - 8;
  	    }
  	    else

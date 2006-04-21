@@ -53,7 +53,20 @@ namespace WaveletTL
 
     //! copy constructor
     CubeIndex(const CubeIndex& lambda);
-  
+
+
+    /*!
+      constructor.
+      We always assume to have a lexicographical ordering for the elements in the wavelet bases, w.r.t.
+      the tuple ( j , e , k ).
+      According to this ordering there exists a mapping from the totality of wavelet indices into
+      the nonnegative integers. This routine creates an index from the given number corresponding
+      to this ordering.
+    */
+    CubeIndex(const unsigned int number,
+	      const CUBEBASIS* basis);
+
+
     //! check equality
     bool operator == (const CubeIndex& lambda) const;
     
@@ -79,6 +92,14 @@ namespace WaveletTL
 
     //! translation index k
     const translation_type& k() const { return k_; }
+
+    /*!
+      inverse of constructor
+      'CubeIndex(const unsigned int number,
+                 const CUBEBASIS* basis)'
+    */
+    const unsigned int number() const;
+ 
 
   protected:
     //! pointer to the underlying basis

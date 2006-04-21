@@ -36,7 +36,7 @@ namespace WaveletTL
 	      }
 // 	    }
 	  }
-	//	cout << "setup_stiffness_matrix(): doing row " << row << " of " << Lambda.size() << endl;
+	cout << "setup_stiffness_matrix(): doing row " << row << " of " << Lambda.size() << endl;
 	A_Lambda.set_row(row, indices, entries);
       }
   }

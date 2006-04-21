@@ -15,7 +15,7 @@ namespace WaveletTL
       e_ = 0;                   // generator
       j_ = basis_->j0();        // on the coarsest level
       
-      if (! ((e_ == 0) && j > basis_->j0()))
+      if (! ((e_ == 0) && j_ > basis_->j0()))
 	set_number();
     }
   }
@@ -40,7 +40,7 @@ namespace WaveletTL
     e_ = e;
     k_ = k;
     basis_ = basis;
-    if (! ((e_ == 0) && j > basis_->j0()))
+    if (! ((e_ == 0) && j_ > basis_->j0()))
       set_number();
   }
 

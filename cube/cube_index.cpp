@@ -28,7 +28,7 @@ namespace WaveletTL
     : basis_(basis), j_(j), e_(e), k_(k)
   {
     type_type gen_type;
-    if (! ((e_ == gen_type) && j > basis_->j0()))
+    if (! ((e_ == gen_type) && j_ > basis_->j0()))
       set_number();
   }
 

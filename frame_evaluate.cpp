@@ -71,7 +71,7 @@ namespace FrameTL
     for (unsigned int i = 0; i < n_points; i++) {
       x[0] = h*i;
       frame.atlas()->charts()[patch]->map_point(x,x_patch);
-      if ( in_support(frame, lambda, x_patch) ) {
+      if (in_support(frame, lambda, x_patch)) {
 	frame.atlas()->charts()[lambda.p()]->map_point_inv(x_patch,y);
 	double wav_val = WaveletTL::evaluate(*(frame.bases()[lambda.p()]->bases()[0]), 0,
 					     typename IBASIS::Index(lambda.j(),
@@ -125,6 +125,7 @@ namespace FrameTL
 				      const int resolution) const
   {
 
+
     Array1D<SampledMapping<1> > result(frame.n_p());
 
     for (unsigned int i = 0; i < frame.n_p(); i++) {      
@@ -136,11 +137,15 @@ namespace FrameTL
  	  itend(coeffs.end()); it != itend; ++it) {
      
       for (unsigned int i = 0; i < frame.n_p(); i++) {
-	if ( i == it.index().p())
+	if ( i == it.index().p()) {
 	  result[i].add(*it, evaluate(frame, it.index(), primal, resolution));
+	  //	  cout << "1111111" << endl;
+	}
 	else
-	  if ( frame.atlas()->get_adjacency_matrix().get_entry(i,it.index().p()) )
-	    result[i].add(*it, evaluate(frame, it.index(), i, primal, resolution));	  
+	  if ( frame.atlas()->get_adjacency_matrix().get_entry(i,it.index().p()) ) {
+	    result[i].add(*it, evaluate(frame, it.index(), i, primal, resolution));
+	    //	    cout << "22222" << endl;
+	  }  
       }
       
     }

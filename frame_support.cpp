@@ -51,9 +51,10 @@ namespace FrameTL
     typename CUBEBASIS::Index lambda_c(lambda.j(),
 				       lambda.e(),
 				       lambda.k(),frame.bases()[lambda.p()]);
-    
+
+   
     WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[lambda.p()], lambda_c, supp_lambda);
-    
+
     const double dx = 1.0 / (1 << supp_lambda.j);
     
     if ( (typeid(*frame.atlas()->charts()[lambda.p()]) ==
@@ -64,7 +65,6 @@ namespace FrameTL
 	Point<DIM_d> b;
 	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx), a);
 	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx), b);
-	
 	return (a[0] <= p[0]) && (p[0] <= b[0]);
 	
       }
@@ -635,11 +635,8 @@ namespace FrameTL
 //     for (unsigned int i = 0; i < DIM_d; i++)
 //       cout << supp_mu.a[i] << " " << supp_mu.b[i] << " " << supp_mu.j << endl;
 
-    const unsigned int n_points_la = (1 << supp_lambda.j)+1;
-    const unsigned int n_points_mu = (1 << supp_mu.j)+1;
-
-    const double dx1 = 1.0 / (n_points_la-1);
-    const double dx2 = 1.0 / (n_points_mu-1);
+    const double dx1 = 1.0 / (1 << supp_lambda.j);
+    const double dx2 = 1.0 / (1 << supp_mu.j);
 
     Point<DIM_d> x;
     Point<DIM_d> x_patch;
@@ -658,32 +655,37 @@ namespace FrameTL
     for (unsigned int i = 0; i < DIM_d; i++) {
       x[i] = supp_mu.b[i] * dx2;
     }
+
     
     chart_mu->map_point(x,x_patch);
     chart_la->map_point_inv(x_patch,y1);
     
  //    cout << y0 << " " << y1 << endl;
 
-
+    // compute lower left and upper right corner of intersecting cube
     FixedArray1D<FixedArray1D<double,2>,DIM_d > hyperCube_intersect;
     for (unsigned int i = 0; i < DIM_d; i++) {
       assert ( y0[i] <= y1[i] );
-    
+//       cout << supp_lambda.a[i]*dx1 << " " << y0[i] << endl;
+//       cout << supp_lambda.b[i]*dx1 << " " << y1[i] << endl;
       hyperCube_intersect[i][0] = std::max(supp_lambda.a[i]*dx1,y0[i]);
       hyperCube_intersect[i][1] = std::min(supp_lambda.b[i]*dx1,y1[i]);
       
- 
+
       if ( hyperCube_intersect[i][0] >= hyperCube_intersect[i][1]  )
 	return false;      
     }
 
-//     for (unsigned int i = 0; i < DIM_d; i++) {
-//       cout << "i = " << i << " intersect_cube[i] = " << hyperCube_intersect[i] << endl;
-//     }
-    
+#if 0
+    for (unsigned int i = 0; i < DIM_d; i++) {
+      cout << "i = " << i << " intersect_cube[i] = " << hyperCube_intersect[i] << endl;
+    }
+#endif    
     // the bool is alway just a dummy
     // we just need some kind of a sorted list
-    FixedArray1D<map<double,bool>, DIM_d> irregular_grid;
+    //FixedArray1D<map<double,bool>, DIM_d> irregular_grid;
+    FixedArray1D<list<double>, DIM_d> irregular_grid;
+    FixedArray1D<list<double>, DIM_d> irregular_grid_tmp;
 
     // collect gridpoints for all directions,
     // we have to do this for both patches
@@ -691,8 +693,12 @@ namespace FrameTL
     for (unsigned int i = 0; i < DIM_d; i++) {
       for (int k = supp_lambda.a[i]; k <= supp_lambda.b[i]; k++) {
 	double d = k*dx1;
-	if ( hyperCube_intersect[i][0] <= d && d <= hyperCube_intersect[i][1])
-	  irregular_grid[i][d] = 1;
+
+	if ( hyperCube_intersect[i][0] <= d && d <= hyperCube_intersect[i][1]) {
+	  irregular_grid[i].push_back(d);
+	  // 	  cout << "inserting " << d << endl;
+	  //cout << "in " << irregular_grid[i][d] << endl;
+	}
       }
     }
     
@@ -705,28 +711,43 @@ namespace FrameTL
     for (unsigned int i = 0; i < DIM_d; i++) {
       for (int k = supp_mu.a[i]; k <= supp_mu.b[i]; k++) {
 	x[i] = k*dx2;
+	//	cout << "x[i] = " << x[i] << endl;
 	chart_mu->map_point(x,x_patch);
 	chart_la->map_point_inv(x_patch,y0);
-	if ( hyperCube_intersect[i][0] <= y0[i] &&
-	     y0[i] <= hyperCube_intersect[i][1])
-	  irregular_grid[i][y0[i]] = 1;
+	//	cout << "y0[i] = " << y0[i] << endl;
+	if ( hyperCube_intersect[i][0] <= y0[i] &&  y0[i] <= hyperCube_intersect[i][1]){
+	  //cout << "in2 " << irregular_grid[i][y0[i]] << endl;
+	  irregular_grid[i].push_back(y0[i]);
+	  //cout << "inserting " << y0[i] << endl;
+	}
       }
       x[i] = supp_mu.a[i]*dx2;
+      irregular_grid[i].sort();    
+      
+      double old = -1.;
+      for (list<double>::const_iterator it = irregular_grid[i].begin();
+	   it != irregular_grid[i].end(); ++it) {
+	if (! (fabs(old-*it) < 1.0e-13))
+	  irregular_grid_tmp[i].push_back(*it);
+	old = *it;
+      }
+
     }
 
+
     for (unsigned int i = 0; i < DIM_d; i++) {
-      supp_intersect[i].resize(irregular_grid[i].size());
+      supp_intersect[i].resize(irregular_grid_tmp[i].size());
       unsigned int j = 0;
-      for (map<double,bool>::const_iterator it = irregular_grid[i].begin();
-	   it != irregular_grid[i].end(); it++) {
-	supp_intersect[i][j] = it->first;
+      for (list<double>::const_iterator it = irregular_grid_tmp[i].begin();
+	   it != irregular_grid_tmp[i].end(); ++it) {
+	supp_intersect[i][j] = *it;
 	j++;
       }
     }
     return true;
   }
 
-  static double time = 0;
+  //  static double time = 0;
 
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   inline

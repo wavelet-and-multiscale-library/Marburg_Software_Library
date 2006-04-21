@@ -41,7 +41,7 @@ namespace FrameTL
 
   public:
     //! type index type
-    typedef MultiIndex<unsigned int,DIM_d> type_type;
+    typedef MultiIndex<int,DIM_d> type_type;
     
     //! translation index type
     typedef MultiIndex<int,DIM_d> translation_type;

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <time.h> 
 #include <interval/ds_basis.h>
+#include <interval/p_basis.h>
 #include <numerics/corner_singularity.h>
 #include "elliptic_equation.h"
 #include <algebra/sparse_matrix.h>
@@ -45,7 +46,8 @@ int main()
   
   const int DIM = 2;
 
-  typedef DSBasis<2,2> Basis1D;
+  //typedef DSBasis<3,3> Basis1D;
+  typedef PBasis<2,2> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
   typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
@@ -62,8 +64,8 @@ int main()
   AffineLinearMapping<2> affineP(A,b);
 
   Matrix<double> A2(DIM,DIM);
-  A2(0,0) = 1.0;
-  A2(1,1) = 2.0;
+  A2(0,0) = 1.;
+  A2(1,1) = 2.;
   Point<2> b2;
   b2[0] = -1.;
   b2[1] = -1.;
@@ -93,12 +95,12 @@ int main()
   //##############################
   Array1D<Chart<DIM,DIM>* > charts(2);
   //charts[0] = &bezierP;
-  //charts[0] = &affineP;
+  charts[0] = &affineP;
   //charts[1] = &bezierP2;
-  //charts[1] = &affineP2;
+  charts[1] = &affineP2;
  
-  charts[0] = &simpleaffine1;
-  charts[1] = &simpleaffine2;
+//   charts[0] = &simpleaffine1;
+//   charts[1] = &simpleaffine2;
 
   SymmetricMatrix<bool> adj(2);
   adj(0,0) = 1;
@@ -152,7 +154,8 @@ int main()
   cout << Lshaped << endl;
 
   //finally a frame can be constructed
-  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT);
+  //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT);
+  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc);
 
   Vector<double> value(1);
   value[0] = 1;
@@ -194,52 +197,54 @@ int main()
   x2[0] = 1;
   x2[1] = 1;
 
-  Grid<2> grid(x1,x2,128);
-  SampledMapping<2> rhsOut (grid,singRhs);
+//   Grid<2> grid(x1,x2,128);
+//   SampledMapping<2> rhsOut (grid,singRhs);
 
-  std::ofstream ofs_si("si_rhs_out.m");
-  rhsOut.matlab_output(ofs_si);
-  ofs_si.close();
+//   std::ofstream ofs_si("si_rhs_out.m");
+//   rhsOut.matlab_output(ofs_si);
+//   ofs_si.close();
 
 
-  FrameIndex<Basis1D,2,2> index = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
+//   FrameIndex<Basis1D,2,2> index = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
   
-  SampledMapping<2> wav_out = evalObj.evaluate(frame,index,1,5);
+//   SampledMapping<2> wav_out = evalObj.evaluate(frame,index,1,5);
 
-  std::ofstream ofs("wav_out.m");
-  wav_out.matlab_output(ofs);
-  ofs.close();
+//   std::ofstream ofs("wav_out.m");
+//   wav_out.matlab_output(ofs);
+//   ofs.close();
   
-  Array1D<SampledMapping<2> > expansion_out = evalObj.evaluate(frame,rhs, 1, 5);
+//   Array1D<SampledMapping<2> > expansion_out = evalObj.evaluate(frame,rhs, 1, 5);
   
-  std::ofstream ofs2("expan_out.m");
-  expansion_out[0].matlab_output(ofs2);
-  ofs2.close();
+//   std::ofstream ofs2("expan_out.m");
+//   expansion_out[0].matlab_output(ofs2);
+//   ofs2.close();
   
-  std::ofstream ofs3("full_expan_out.m");
-  matlab_output(ofs3,expansion_out);
-  ofs3.close();
+//   std::ofstream ofs3("full_expan_out.m");
+//   matlab_output(ofs3,expansion_out);
+//   ofs3.close();
   
   //###############################################
   // testing correctness of routine for
   // computation of right hand side
   
   
-  cout << "++++++++++++++++++++++" << endl;
-  cout << rhs << endl;
+//   cout << "++++++++++++++++++++++" << endl;
+//   cout << rhs << endl;
 
-  Array1D<SampledMapping<2> > S = evalObj.evaluate(frame, rhs, false, 5);// expand in dual basis
-  std::ofstream ofs4("rhs_out.m");
-  matlab_output(ofs4,S);
-  ofs4.close();
+//   Array1D<SampledMapping<2> > S = evalObj.evaluate(frame, rhs, false, 5);// expand in dual basis
+//   std::ofstream ofs4("rhs_out.m");
+//   matlab_output(ofs4,S);
+//   ofs4.close();
   //###############################################   
   //############### 2D galerkin scheme test ##################
 #if 1
 
   set<Index> Lambda;
   for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
-       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, frame.j0()+1); ++lambda)
+      lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, frame.j0()+1); ++lambda) {
     Lambda.insert(lambda);
+    cout << lambda << endl;
+  }
   
   cout << "setting up full right hand side..." << endl;
   Vector<double> rh;
@@ -259,11 +264,12 @@ int main()
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
 
-  stiff.matlab_output("stiff_2D_out", "stiff",1);
+  stiff.matlab_output("stiff_2D_out", "stiff",1);  
   
   unsigned int iter= 0;
   Vector<double> x(Lambda.size()); x = 1;
-  double lmax = PowerIteration(stiff, x, 0.01, 1000, iter);
+  //double lmax = PowerIteration(stiff, x, 0.01, 1000, iter);
+  double lmax = 1;
   cout << "lmax = " << lmax << endl;
 
   x = 1;
@@ -278,24 +284,24 @@ int main()
   
   Vector<double> resid(xk.size());
   Vector<double> help(xk.size());
-  for (int i = 0; i < 2000; i++) {
+  for (int i = 0; i < 500;i++) {
     stiff.apply(xk,help);
     resid = rh - help;
-    cout << sqrt((resid*resid)) << endl;
+    cout << "i = " << i << " " << sqrt(resid*resid) << endl;
     stiff.apply(resid,help);
     alpha_n = (resid * resid) * (1.0 / (resid * help));
     resid *= alpha_n;
     xk = xk + resid;
   }
 
-  for (int i = 0; i < 125 ; i++) 
-    for (int j = 0; j < 125 ; j++) {
+  for (int i = 0; i < 512; i++) 
+    for (int j = 0; j < 512; j++) {
       if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
 	cout << stiff.get_entry(i,j) << endl;
 	cout << stiff.get_entry(j,i) << endl;
 	cout << "i = " << i << " j = " << j << endl;
 	cout << "#######################" << endl;
-	//abort();
+	abort();
       }
     }
 
@@ -307,19 +313,85 @@ int main()
   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
     u.set_coefficient(*it, xk[i]);
   
-  discrete_poisson.rescale(u,-1);
+  u.scale(&discrete_poisson,-1);
   
   
-//   Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u, true, 6);//expand in primal basis
+  Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u, true, 6);//expand in primal basis
   
-//   std::ofstream ofs5("approx_solution_out.m");
-//   matlab_output(ofs5,U);
-//   ofs5.close();
+  std::ofstream ofs5("approx_solution_out.m");
+  matlab_output(ofs5,U);
+  ofs5.close();
   
-  cout << "computing L_2 error..." << endl;
-  double L2err = evalObj.L_2_error(frame, u, sing2D, 5, 0.0, 1.0);
-  cout << "...done L_2 error = " << L2err  << endl;
+//   cout << "computing L_2 error..." << endl;
+//   double L2err = evalObj.L_2_error(frame, u, sing2D, 5, 0.0, 1.0);
+//   cout << "...done L_2 error = " << L2err  << endl;
   
+
+#if 0
+  char filename1[50];
+  u.clear();
+  Lambda.clear();
+  int l = 0;
+  for (Index lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
+       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, frame.j0()); ++lambda) {
+
+    if (l != 193) {
+      l++;
+      continue;
+    }
+
+    Index mu = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
+   
+    
+    cout << "result = " << discrete_poisson.a(lambda,mu) << endl;
+
+    typedef WaveletTL::CubeBasis<Basis1D,DIM> CUBEBASIS;
+    
+    typedef CUBEBASIS::Index CubeIndex;
+    
+    CUBEBASIS::Support supp_lambda;
+    
+    WaveletTL::support<Basis1D,DIM>(*frame.bases()[lambda.p()], 
+				    CubeIndex(lambda.j(),
+					      lambda.e(),
+					      lambda.k(),
+					      frame.bases()[lambda.p()]),
+				    supp_lambda);
+    
+
+
+
+    double dx = 1./(1 << supp_lambda.j);
+//     cout << "l= " << l << " lambda:" << endl;
+//     for (unsigned int i = 0; i < 2; i++) {
+//       cout << "a_lambda = " << supp_lambda.a[i]*dx <<  " b= " << supp_lambda.b[i]*dx << " p = " << lambda.p() << endl;
+//       cout << "a_mu = " << supp_mu.a[i]*dx <<  " b= " << supp_mu.b[i]*dx << " p = " << mu.p() << endl;
+//     }    
+    
+//     if (l != 14) {
+//       l++;
+//       continue;
+//     }
+
+    cout << lambda << endl;
+    cout << "##################" << endl;
+    u.set_coefficient(lambda, 1);
+    
+    Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u, true, 7);//expand in primal basis
+    sprintf(filename1, "%s%d%s", "wav_", l, ".m");
+    
+    
+    std::ofstream ofs5(filename1);
+    matlab_output(ofs5,U);
+    ofs5.close();
+
+    u.clear();
+    ++l;
+
+  }
+#endif
+
+
   
   //cout << "lmin = " << lmin << endl;
   //########## testing runtime type information functionality #############

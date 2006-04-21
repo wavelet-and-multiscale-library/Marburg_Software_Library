@@ -62,10 +62,18 @@ namespace FrameTL
     ~AggregatedFrame();
 
     /*!
-      constructor
+      constructor,
+      sets primal and dual boundary conditions
      */
     AggregatedFrame(const Atlas<DIM_d, DIM_m>*,
 		    const Array1D<FixedArray1D<int,2*DIM_d> >&,
+		    const Array1D<FixedArray1D<int,2*DIM_d> >&);
+
+    /*!
+      constructor,
+      sets primal boundary conditions only
+     */
+    AggregatedFrame(const Atlas<DIM_d, DIM_m>*,
 		    const Array1D<FixedArray1D<int,2*DIM_d> >&);
 
     /*!

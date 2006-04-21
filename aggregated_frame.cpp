@@ -31,8 +31,23 @@ namespace FrameTL
       lifted_bases[i] = new MappedCubeBasis<IBASIS,DIM_d,DIM_m>((atlas_->charts())[i],bc[i],bcT[i]);
     
     j0_ = lifted_bases[0]->j0();
-    cout << j0_ << endl;
+    cout << "minimal level = " << j0_ << endl;
   }
+
+  template<class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  AggregatedFrame<IBASIS,DIM_d,DIM_m>::AggregatedFrame(const Atlas<DIM_d, DIM_m>* atlas,
+						       const Array1D<FixedArray1D<int,2*DIM_d> >& bc)
+    : atlas_(atlas), bc_(bc)
+  {
+    lifted_bases.resize((atlas_->charts()).size());
+
+    for (unsigned int  i = 0; i < (atlas_->charts()).size(); ++i)
+      lifted_bases[i] = new MappedCubeBasis<IBASIS,DIM_d,DIM_m>((atlas_->charts())[i],bc[i]);
+    
+    j0_ = lifted_bases[0]->j0();
+    cout << "minimal level = " << j0_ << endl;
+  }
+
 
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   AggregatedFrame<IBASIS,DIM_d,DIM_m>::~AggregatedFrame()

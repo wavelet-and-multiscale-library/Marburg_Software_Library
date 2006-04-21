@@ -2,6 +2,7 @@
 #include <iostream>
 #include <time.h> 
 #include <interval/ds_basis.h>
+#include <interval/p_basis.h>
 #include "elliptic_equation.h"
 #include <algebra/sparse_matrix.h>
 #include <algebra/infinite_vector.h>
@@ -14,6 +15,7 @@
 #include <frame_support.h>
 #include <frame_index.h>
 #include <steepest_descent.h>
+//#include <steepest_descent_basis.h>
 //#include <richardson_CDD2.h>
 #include <galerkin/cached_problem.h>
 #include <utils/plot_tools.h>
@@ -91,14 +93,20 @@ public:
 int main()
 {
   
+
+
+
+
   cout << "testing steepest descent in 1D..." << endl;
   
   const int DIM = 1;
 
-  typedef DSBasis<2,2> Basis1D;
+  //typedef DSBasis<3,3> Basis1D;
+  typedef PBasis<3,3> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
+
 
   //##############################  
   Matrix<double> A(DIM,DIM);
@@ -176,7 +184,8 @@ int main()
   cout << Lshaped << endl;
 
   //finally a frame can be constructed
-  Frame1D frame(&Lshaped, bc, bcT);
+  //Frame1D frame(&Lshaped, bc, bcT);
+  Frame1D frame(&Lshaped, bc);
 
   Vector<double> value(1);
   value[0] = 1;
@@ -199,13 +208,20 @@ int main()
 
 
   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 2.13, 1.0/0.0038);
-  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 2.47, 1.0/0.0751);
+  //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 2.47, 1.0/0.0751);
+  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.3076, 1.0/0.1);
   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.032, 1.0/(1.0e-3*0.672));
   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.032, 1.0/0.01);
 
+
+  // p basis d = 2 dt = 2
+  discrete_poisson.set_norm_A(3.3076);
+  discrete_poisson.set_Ainv(1.0/0.1);
+  
+
   // d = 2 dt = 2
-  discrete_poisson.set_norm_A(2.47);
-  discrete_poisson.set_Ainv(1.0/0.0751);
+//   discrete_poisson.set_norm_A(2.47);
+//   discrete_poisson.set_Ainv(1.0/0.0751);
 
   // d = 3 dt = 3
   //discrete_poisson.set_norm_A(2.13);
@@ -220,6 +236,54 @@ int main()
 
   InfiniteVector<double, Index> u_epsilon;
 
+#if 0
+  
+  //la = (5,(1),0,(23))
+  //nu = (4,(0),1,(4))
+
+  //d=dt=3
+  MultiIndex<unsigned int,1> e1;
+  e1[0] = 1;
+  MultiIndex<int,1> k1;
+  k1[0] = 23;
+
+  MultiIndex<unsigned int,1> e2;
+  e2[0] = 0;
+  MultiIndex<int,1> k2;
+  k2[0] = 4;
+
+  Index ind_1(&frame, 5, e1, 0, k1);
+  Index ind_2(&frame, 4, e2, 1, k2);
+ 
+  //d=dt=2
+//   MultiIndex<unsigned int,1> e1;
+//   e1[0] = 1;
+//   MultiIndex<int,1> k1;
+//   k1[0] = 11;
+
+//   MultiIndex<unsigned int,1> e2;
+//   e2[0] = 0;
+//   MultiIndex<int,1> k2;
+//   k2[0] = 4;
+
+//   Index ind_1(&frame, 6, e1, 1, k1);
+//   Index ind_2(&frame, 3, e2, 0, k2);
+
+  map<double,double> integral_values;
+
+  cout.precision(12);
+
+  for (unsigned int i = 0; i < 300; i++) {
+    double d = discrete_poisson.a_quad(ind_1, ind_2, 2, i+1);
+    cout << "Result = " << d << endl;
+    integral_values[i+1] = fabs(d);
+  }
+
+  std::ofstream os3("integral_values.m");
+  matlab_output(integral_values,os3);
+  os3.close();
+#endif
+
   clock_t tstart, tend;
   double time;
   tstart = clock();
@@ -230,6 +294,7 @@ int main()
 //     }
 
   steepest_descent_SOLVE(problem, epsilon, u_epsilon);
+  //  steepest_descent_SOLVE_basis(problem, epsilon, u_epsilon);
   //richardson_SOLVE_CDD2(problem, epsilon, u_epsilon);
   //CDD1_SOLVE(problem, epsilon, u_epsilon, 7, CDD1);
 
@@ -241,47 +306,50 @@ int main()
 
   cout << "steepest descent done" << endl;
 
-
-
-  discrete_poisson.rescale(u_epsilon,-1);
-  //problem.rescale(u_epsilon,-1);
+  u_epsilon.scale(&discrete_poisson,-1);
 
   EvaluateFrame<Basis1D,1,1> evalObj;
 
-//   Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u_epsilon, true, 11);//expand in primal basis
-//   cout << "...finished plotting approximate solution" << endl;
-//   Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u_epsilon, exactSolution1D, 11);
-//   cout << "...finished plotting error" << endl;
-//   std::ofstream ofs5("approx_sol_steep_1D_out.m");
-//   matlab_output(ofs5,U);
-//   ofs5.close();
+  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u_epsilon, true, 11);//expand in primal basis
+  cout << "...finished plotting approximate solution" << endl;
+  Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u_epsilon, exactSolution1D, 11);
+  cout << "...finished plotting error" << endl;
 
-//   std::ofstream ofs6("error_steep_1D_out.m");
-//   matlab_output(ofs6,Error);
-//   ofs6.close();
+  std::ofstream ofs5("approx_sol_steep_1D_out.m");
+  matlab_output(ofs5,U);
+  ofs5.close();
+
+  std::ofstream ofs6("error_steep_1D_out.m");
+  matlab_output(ofs6,Error);
+  ofs6.close();
 
 
   // compute infinite vectors of 1D indices, one for each patch
   // and plot them
+#if 0
   typedef Basis1D::Index Index1D;
 
   FixedArray1D<InfiniteVector<double, Index1D>, 2> indices;
-
-  Basis1D intBas;
-  
+ 
   InfiniteVector<double, Index>::const_iterator it = u_epsilon.begin();
   for (; it!= u_epsilon.end(); ++it) {
-    //cout << it.index() << endl;
+    //cout << *it << endl;
     Index ind(it.index());
-    indices[ind.p()].set_coefficient(Index1D(ind.j(),ind.e()[0],ind.k()[0],&intBas), *it);
+    //cout << "level = " << ind.j() << endl;
+    indices[ind.p()].set_coefficient(Index1D(ind.j(),ind.e()[0],ind.k()[0],
+					     frame.bases()[0]->bases()[0]), *it);
+  
+    //cout << log10(fabs(*it)) << endl;
   }
 
   std::ofstream ofs7("indices_patch_0.m");
-  WaveletTL::plot_indices<Basis1D>(&intBas, indices[0], 10, ofs7);
+  WaveletTL::plot_indices<Basis1D>(frame.bases()[0]->bases()[0], indices[0], 13, ofs7, "jet", true, -8);
 
-//   std::ofstream ofs8("indices_patch_1.m");
-//   WaveletTL::plot_indices<Basis1D>(&intBas, indices[1], 10, ofs8);
 
+
+  std::ofstream ofs8("indices_patch_1.m");
+  WaveletTL::plot_indices<Basis1D>(frame.bases()[1]->bases()[0], indices[1], 13, ofs8, "jet", true, -8);
+#endif
 
   return 0;
 

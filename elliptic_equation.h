@@ -15,10 +15,13 @@
 #include <adaptive/compression.h>
 #include <interval/i_index.h>
 
+#include <galerkin/infinite_preconditioner.h>
+
 using FrameTL::AggregatedFrame;
 using MathTL::EllipticBVP;
 using WaveletTL::CompressionStrategy;
 using WaveletTL::IntervalIndex;
+using WaveletTL::FullyDiagonalEnergyNormPreconditioner;
 
 namespace FrameTL
 {
@@ -94,6 +97,8 @@ namespace FrameTL
   */
   template <class IBASIS, unsigned int DIM>
   class EllipticEquation
+  //  : public FullyDiagonalDyadicPreconditioner<typename AggregatedFrame<IBASIS,DIM>::Index>
+    : public FullyDiagonalEnergyNormPreconditioner<typename AggregatedFrame<IBASIS,DIM>::Index>
   {
   public:
 
@@ -132,6 +137,12 @@ namespace FrameTL
     const AggregatedFrame<IBASIS,DIM>& frame() const { return *frame_; }
 
     /*!
+      get the boundary value problem
+    */
+    const EllipticBVP<DIM>&  get_bvp() const { return *ell_bvp_; }
+
+
+    /*!
       read access to the frame but with a somewhat weird
       function name.
       this is just a first hack to be able to use
@@ -167,15 +178,27 @@ namespace FrameTL
 
     /*!
       evaluate the (unpreconditioned) bilinear form a;
+    */
+    double a(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
+	     const typename AggregatedFrame<IBASIS,DIM>::Index& nu) const;
+
+    /*!
+    */
+    double a_quad(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
+		  const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
+		  const unsigned int p, const unsigned int N) const;
+
+    /*!
+      evaluate the (unpreconditioned) bilinear form a;
       you can specify the order p of the quadrature rule, i.e.,
       (piecewise) polynomials of maximal degree p will be integrated exactly.
       Internally, we use an m-point composite Gauss quadrature rule adapted
       to the singular supports of the spline wavelets involved,
       so that m = (p+1)/2;
     */
-    double a(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
-	     const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-	     const unsigned int p = 2) const;
+//     double a(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
+// 	     const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
+// 	     const unsigned int p = 2) const;
 
     /*!
       estimate the spectral norm ||A||
@@ -214,8 +237,7 @@ namespace FrameTL
         ||A-A_k|| <= alpha_k * 2^{-s*k}
     */
     double alphak(const unsigned int k) const {
-      cout << "bla" << endl;
-      return 0.0000001*pow(2,(-k));//*norm_A(); // suboptimal
+      return pow(2,(-k))*norm_A(); // suboptimal
     }
 
     /*!
@@ -239,6 +261,7 @@ namespace FrameTL
       set the boundary value problem
     */
     void set_bvp(const EllipticBVP<DIM>*);
+
 
     /*!
       w += factor * (stiffness matrix entries of in column lambda on level j)
@@ -284,7 +307,7 @@ namespace FrameTL
      */
     double a_same_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
 			  const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-			  const unsigned int q_order = 4) const;
+			  const unsigned int q_order = 2) const;
 
     /*!
      */
@@ -299,7 +322,12 @@ namespace FrameTL
      */
     double a_different_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
 			       const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-			       const unsigned int q_order = 4) const;
+			       const unsigned int q_order = 2, const unsigned int rank = 1) const;
+
+
+    double a_different_patches_adaptive(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
+					const typename AggregatedFrame<IBASIS,DIM>::Index& nu) const;
+
 
     // precompute the right-hand side
     void compute_rhs();

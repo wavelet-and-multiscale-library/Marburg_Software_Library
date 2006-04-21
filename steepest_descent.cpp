@@ -67,30 +67,30 @@ public:
   void steepest_descent_SOLVE(const PROBLEM& P,  const double epsilon,
 			      InfiniteVector<double, typename PROBLEM::Index>& u_epsilon)
   {
-    typedef DSBasis<2,2> Basis1D;
+    //typedef DSBasis<3,3> Basis1D;
+    typedef PBasis<3,3> Basis1D;
 
-//     Point<2> origin;
-//     origin[0] = 0.0;
-//     origin[1] = 0.0;
+    Point<2> origin;
+    origin[0] = 0.0;
+    origin[1] = 0.0;
     
-//     CornerSingularity sing2D(or0igin, 0.5, 1.5);
-//     CornerSingularityRHS singRhs(origin, 0.5, 1.5);
+    CornerSingularity sing2D(origin, 0.5, 1.5);
+    CornerSingularityRHS singRhs(origin, 0.5, 1.5);
 
-//    typedef DSBasis<2,2> Basis1D;
+
 
 //    Singularity1D_RHS_2<double> sing1D;
-    Singularity1D_2<double> exactSolution1D;
+//    Singularity1D_2<double> exactSolution1D;
 
     unsigned int loops = 0;
-    const int jmax = 9;
+    const int jmax = 5;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
-    //double a_inv = 1.;
     //double kappa     = P.norm_A()*a_inv;
     double kappa     = 1.;
     double omega_i   = a_inv*P.F_norm();
-    //double omega_i   = 50;
+    //double omega_i   = 1;
     cout << "a_inv = " << a_inv << endl;
     cout << "omega_i = " << omega_i << endl;
     //double delta     = 1./(5.*kappa+a_inv);
@@ -105,8 +105,8 @@ public:
     const double B = C * (A*A);
     cout << "B = " << B << endl;
     //double lambda = (kappa-1)/(kappa+1) + P.norm_A()*std::max(3.*A*A*B,C*(1./(1-delta)))*delta;
-    //double lambda = ((kappa-1)/(kappa+1)+1.)/2.;
-    double lambda = 0.6;
+    double lambda = ((kappa-1)/(kappa+1)+1.)/2.;
+    //double lambda = 0.99;
     cout << "lambda = " << lambda << endl;
     const double C3 = B;
     cout << "C3 = " << C3 << endl;
@@ -122,7 +122,7 @@ public:
     //			       / log(lambda)) + 1),1);
     int M = 1;   
 
-    InfiniteVector<double, Index> w, tilde_r;
+    InfiniteVector<double, Index> w, tilde_r, help, f, Av;
     
     cout << "K = " << K << endl;
     cout << "M = " << M << endl;
@@ -138,12 +138,11 @@ public:
     clock_t tstart, tend;
     tstart = clock();
 
-    EvaluateFrame<Basis1D,1,1> evalObj;
+    //EvaluateFrame<Basis1D,1,1> evalObj;
 
-    double acctime = 0;
+    //double acctime = 0;
 
     for (unsigned int i = 1; i < K; i++) {
-      //omega_i *= 0.000001;/*beta;*/
       omega_i *= beta;
       double xi_i = omega_i / ((1+3.0*mu)*C3*M);
       double nu_i = 0.;
@@ -157,6 +156,7 @@ public:
 // 	tend = clock();
 // 	time = (double)(tend-tstart)/CLOCKS_PER_SEC;
 	APPLY_COARSE(P, tilde_r, delta*l2_norm(tilde_r), z_i, 0.00000001, jmax, CDD1);
+	//APPLY(P, tilde_r, delta*l2_norm(tilde_r), z_i, jmax, CDD1);
 // 	acctime += ((double)(tend-tstart)/CLOCKS_PER_SEC - time);
 // 	cout << "time = " << acctime  << endl;
 	
@@ -164,6 +164,9 @@ public:
 	w += d*tilde_r;
 	cout << "descent param = " << d << endl;
 	++loops;
+ 	P.RHS(0.00001,f);
+ 	APPLY_COARSE(P, w, 0.00001, Av, 0.00000001, jmax, CDD1);
+ 	help = f-Av;
 	//degrees_of_freedom[loops] = w.size();
 
 	RES(P, w, xi_i, delta, omega_i/((1+3.*mu)*a_inv), jmax,
@@ -173,31 +176,38 @@ public:
 	     << nu_i << " epsilon = " << omega_i/((1+3.*mu)*a_inv) << endl;
 	cout << "xi: " << xi_i << endl; 
 	  
-	double tmp = l2_norm(tilde_r);
+	//double tmp = l2_norm(tilde_r);
+	double tmp = l2_norm(help);
 	double tmp1 = log10(tmp);
 	cout << "residual norm = " << tmp << endl;
 	asymptotic[log10( (double)w.size() )] = tmp1;
 	log_10_residual_norms[loops] = tmp1;
 
-	u_epsilon = w;
-	P.rescale(u_epsilon,-1);
+	//u_epsilon = w;
+	//P.rescale(u_epsilon,-1);
+
 	//double L2err = evalObj.L_2_error(P.basis(), u_epsilon, exactSolution1D, 7, 0.0, 1.0);
 	//log_10_L2_error[loops] = log10(L2err);
 	//cout << "L_2 error = " << L2err << endl;
 
-	//tend = clock();
-	//time = (double)(tend-tstart)/CLOCKS_PER_SEC;
-	//time_asymptotic[log10(time)] = tmp1;
+	tend = clock();
+	time = (double)(tend-tstart)/CLOCKS_PER_SEC;
+	time_asymptotic[log10(time)] = tmp1;
 	cout << "active indices: " << w.size() << endl;
-// 	if (loops % 10 == 0) {
-// 	  std::ofstream os3("steep1D_asymptotic.m");
-// 	  matlab_output(asymptotic,os3);
-// 	  os3.close();
+	if (loops % 5 == 0) {
+	  std::ofstream os3("steep2D_asymptotic331904.m");
+	  matlab_output(asymptotic,os3);
+	  os3.close();
+	  
+	  std::ofstream os4("steep2D_time_asymptotic331904.m");
+	  matlab_output(time_asymptotic,os4);
+	  os4.close();
+
 
 // 	  std::ofstream os4("steep_1D_L2_errors.m");
 // 	  matlab_output(log_10_L2_error,os4);
 // 	  os4.close();
-//      }
+     }
 
 // 	if (loops == 1 || loops == 5 || loops == 10 || loops == 20 || loops == 40 || loops == 55){
 // 	  u_epsilon = w;
@@ -224,13 +234,17 @@ public:
 // 	  matlab_output(ofs6,Error);
 // 	  ofs6.close();
 
-	if (loops % 10 == 0) {
-          std::ofstream os3("asymptotic.m");
-          matlab_output(asymptotic,os3);
-          os3.close();
-	}
+// 	if (loops % 5 == 0) {
+//           std::ofstream os3("steep_asymptotic_2D_3001.m");
+//           matlab_output(asymptotic,os3);
+//           os3.close();
 
-	if (tmp < 0.0001 || loops == 300) {
+// 	  std::ofstream os4("time_asymptotic_steep_2D_3001.m");
+// 	  matlab_output(time_asymptotic,os4);
+// 	  os4.close();
+// 	}
+
+	if (tmp < 1.0e-8 || loops == 3000) {
 	  u_epsilon = w;
 	  exit = true;
 	  break;
@@ -250,21 +264,19 @@ public:
       //       w = tmp;
       
       
-    std::ofstream os1("residual_norms_steep.m");
-    matlab_output(log_10_residual_norms,os1);
-    os1.close();
+//     std::ofstream os1("residual_norms_steep.m");
+//     matlab_output(log_10_residual_norms,os1);
+//     os1.close();
       
-      //     std::ofstream os2("degrees_of_freedom.m");
-      //     matlab_output(degrees_of_freedom,os2);
-      //     os2.close();
+    //     std::ofstream os2("degrees_of_freedom.m");
+    //     matlab_output(degrees_of_freedom,os2);
+    //     os2.close();
       
-          std::ofstream os3("asymptotic.m");
-          matlab_output(asymptotic,os3);
-          os3.close();
+//     std::ofstream os3("asymptotic.m");
+//     matlab_output(asymptotic,os3);
+//     os3.close();
       
-      //     std::ofstream os4("time_asymptotic.m");
-      //     matlab_output(time_asymptotic,os4);
-      //     os4.close();    
+    
       
   }
 }

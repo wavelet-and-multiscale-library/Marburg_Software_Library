@@ -254,7 +254,7 @@ int main()
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
 
-  cout << "steepest descent done" << endl;
+  cout << "CDD2 done" << endl;
 
   discrete_poisson.rescale(u_epsilon,-1);
   //problem.rescale(u_epsilon,-1);

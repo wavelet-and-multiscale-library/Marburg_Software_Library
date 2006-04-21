@@ -2,6 +2,7 @@
 #include <iostream>
 #include <time.h> 
 #include <interval/ds_basis.h>
+#include <interval/p_basis.h>
 #include "elliptic_equation.h"
 #include <algebra/sparse_matrix.h>
 #include <algebra/infinite_vector.h>
@@ -118,7 +119,8 @@ int main()
   
   const int DIM = 1;
 
-  typedef DSBasis<2,2> Basis1D;
+  //typedef DSBasis<3,3> Basis1D;
+  typedef PBasis<3,3> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
@@ -131,7 +133,7 @@ int main()
   AffineLinearMapping<1> affineP(A,b);
   
   Matrix<double> A2(DIM,DIM);
-  A2(0,0) = 0.7;
+  A2(0,0) = 0.8;
   Point<1> b2;
   b2[0] = 1.0-A2.get_entry(0,0);
   AffineLinearMapping<1> affineP2(A2,b2);
@@ -147,18 +149,18 @@ int main()
 
   //##############################
   
-  Array1D<Chart<DIM,DIM>* > charts(2);
+  Array1D<Chart<DIM,DIM>* > charts(1);
   charts[0] = &affineP;
-  charts[1] = &affineP2;
+  //charts[1] = &affineP2;
 
   //charts[0] = &simpleaffine1;
   //charts[1] = &simpleaffine2;
   
-  SymmetricMatrix<bool> adj(2);
+  SymmetricMatrix<bool> adj(1);
   adj(0,0) = 1;
-  adj(1,1) = 1;
-  adj(1,0) = 1;
-  adj(0,1) = 1;
+//   adj(1,1) = 1;
+//   adj(1,0) = 1;
+//   adj(0,1) = 1;
   
   //to specify primal boundary the conditions
   Array1D<FixedArray1D<int,2*DIM> > bc(2);
@@ -166,13 +168,13 @@ int main()
   //primal boundary conditions for first patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_1;
   bound_1[0] = 1;
-  bound_1[1] = 1;
+  bound_1[1] = 2;
 
   bc[0] = bound_1;
 
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
-  bound_2[0] = 1;
+  bound_2[0] = 2;
   bound_2[1] = 1;
 
   bc[1] = bound_2;
@@ -198,7 +200,8 @@ int main()
   cout << Lshaped << endl;
 
   //finally a frame can be constructed
-  Frame1D frame(&Lshaped, bc, bcT);
+  //Frame1D frame(&Lshaped, bc, bcT);
+  Frame1D frame(&Lshaped, bc);
 
   Vector<double> value(1);
   value[0] = 1;
@@ -221,10 +224,11 @@ int main()
   
   //############### 1D galerkin scheme test ##################
 #if 1
+
   int z = 0;
   set<Index> Lambda;
   for (Index lambda = FrameTL::first_generator<Basis1D,1,1,Frame1D>(&frame, frame.j0());
-       lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+7); ++lambda) {
+       lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+2); ++lambda) {
     cout << lambda << endl;
     cout << z++ << endl;
     Lambda.insert(lambda);
@@ -232,7 +236,7 @@ int main()
 
   cout << "setting up full right hand side..." << endl;
   Vector<double> rh;
-  WaveletTL::setup_righthand_side(discrete_poisson, Lambda, rh);
+  //WaveletTL::setup_righthand_side(discrete_poisson, Lambda, rh);
   //cout << rh << endl;
   
   cout << "setting up full stiffness matrix..." << endl;
@@ -242,7 +246,7 @@ int main()
   double time;
   tstart = clock();
   
-  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
+  //WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
   
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
@@ -250,43 +254,42 @@ int main()
 
   stiff.matlab_output("stiff_out", "stiff",1);
 
-
-  
-
-  unsigned int iter= 0;
-  Vector<double> x(Lambda.size()); x = 1;
-  double lmax = PowerIteration(stiff, x, 0.01, 1000, iter);
-  cout << "lmax = " << lmax << endl;
+//   unsigned int iter= 0;
+//   Vector<double> x(Lambda.size()); x = 1;
+//   double lmax = PowerIteration(stiff, x, 0.01, 1000, iter);
+//   cout << "lmax = " << lmax << endl;
 
   cout << "performing iterative scheme to solve projected problem..." << endl;
   Vector<double> xk(Lambda.size()); xk = 0;
 
- double alpha_n = 0.07;
 
-  Vector<double> resid(xk.size());
-  Vector<double> help(xk.size());
-  for (int i = 0; i < 2000; i++) {
-    stiff.apply(xk,help);
-    resid = rh - help;
-    cout << sqrt((resid*resid)) << endl;
-    stiff.apply(resid,help);
-    alpha_n = (resid * resid) * (1.0 / (resid * help));
-    cout  << alpha_n << endl;
-    resid *= alpha_n;
-    //resid *= 0.3;
-    xk = xk + resid;
-  }
-
-//   for (int i = 0; i < 1015 ; i++) 
-//     for (int j = 0; j < 1015 ; j++) {
+//   for (int i = 0; i < 30 ; i++) 
+//     for (int j = 0; j < 30 ; j++) {
 //       if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
 // 	cout << stiff.get_entry(i,j) << endl;
 // 	cout << stiff.get_entry(j,i) << endl;
 // 	cout << "i = " << i << " j = " << j << endl;
-// 	abort();
+// 	//abort();
 // 	cout << "#######################" << endl;
 //       }
 //     } 
+
+  double alpha_n = 0.07;
+  Vector<double> resid(xk.size());
+  Vector<double> help(xk.size());
+//   for (int i = 0; i < 2000; i++) {
+//     stiff.apply(xk,help);
+//     resid = rh - help;
+//     cout << ".loop = " << i << " " << " res = " << sqrt((resid*resid)) << endl;
+//     stiff.apply(resid,help);
+//     alpha_n = (resid * resid) * (1.0 / (resid * help));
+//     //cout  << alpha_n << endl;
+//     resid *= alpha_n;
+//     //resid *= 0.3;
+//     xk = xk + resid;
+//   }
+
+
 
   //CG(stiff, rh, xk, 0.0001, 1000, iter);
   //Richardson(stiff, rh, xk, 2. / lmax, 0.0001, 1000, iter);
@@ -298,16 +301,16 @@ int main()
   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
     u.set_coefficient(*it, xk[i]);
   
-  discrete_poisson.rescale(u,-1);
+  u.scale(&discrete_poisson,-1);
 
-  EvaluateFrame<Basis1D,1,1> evalObj;
+   EvaluateFrame<Basis1D,1,1> evalObj;
 
-  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u, true, 11);//expand in primal basis
-  Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u, exactSolution, 11);
+   Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u, true, 11);//expand in primal basis
+   Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u, exactSolution, 11);
 
-  double L2err = evalObj.L_2_error(frame, u, exactSolution, 7, 0.0, 1.0);
+  //double L2err = evalObj.L_2_error(frame, u, exactSolution, 7, 0.0, 1.0);
 
-  cout << "L_2 error = " << L2err << endl;
+  //cout << "L_2 error = " << L2err << endl;
 
   std::ofstream ofs5("approx_solution_1D_out.m");
   matlab_output(ofs5,U);
@@ -320,6 +323,59 @@ int main()
 
   cout << "  ... done, time needed: " << time << " seconds" << endl;
    
+#endif
+	  
+  
+#if 1
+  char filename1[50];
+  u.clear();
+  Lambda.clear();
+  int l = 0;
+  for (Index lambda = FrameTL::first_generator<Basis1D,1,1,Frame1D>(&frame, frame.j0());
+       lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+1); ++lambda) {
+
+
+    typedef WaveletTL::CubeBasis<Basis1D,DIM> CUBEBASIS;
+    
+    typedef CUBEBASIS::Index CubeIndex;
+    
+    CUBEBASIS::Support supp_lambda;
+    
+    WaveletTL::support<Basis1D,DIM>(*frame.bases()[lambda.p()], 
+				    CubeIndex(lambda.j(),
+					      lambda.e(),
+					      lambda.k(),
+					      frame.bases()[lambda.p()]),
+				    supp_lambda);
+    
+    double dx = 1./(1 << supp_lambda.j);
+    cout << "l= " << l << " lambda:" << endl;
+    for (unsigned int i = 0; i < 1; i++) {
+      cout << "j = " << supp_lambda.j << endl;
+      cout << "a = " << supp_lambda.a[i]*dx <<  " b= " << supp_lambda.b[i]*dx << " p = " << lambda.p() << endl;
+    }    
+    
+//     if (l != 14) {
+//       l++;
+//       continue;
+//     }
+
+    cout << lambda << endl;
+    cout << "##################" << endl;
+    u.set_coefficient(lambda, 1);
+    
+    Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u, true, 11);//expand in primal basis
+    sprintf(filename1, "%s%d%s", "wav_1D_", l, ".m");
+    
+    
+    std::ofstream ofs5(filename1);
+    matlab_output(ofs5,U);
+    ofs5.close();
+
+    u.clear();
+    ++l;
+
+  }
 #endif
 
 

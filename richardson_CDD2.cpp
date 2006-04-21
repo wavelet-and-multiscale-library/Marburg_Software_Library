@@ -67,7 +67,8 @@ public:
   void richardson_SOLVE_CDD2(const PROBLEM& P, const double epsilon,
 			InfiniteVector<double, typename PROBLEM::Index>& u_epsilon)
   {
-    typedef DSBasis<2,2> Basis1D;
+    //typedef DSBasis<2,2> Basis1D;
+    typedef PBasis<2,2> Basis1D;
     //     Singularity1D_RHS_2<double> sing1D;
     //     Singularity1D_2<double> exactSolution1D;
      
@@ -78,23 +79,29 @@ public:
 //     CornerSingularity sing2D(origin, 0.5, 1.5);
 //     CornerSingularityRHS singRhs(origin, 0.5, 1.5);
      
-    const int jmax = 10;
+    const int jmax = 7;
 
     double nu = P.norm_Ainv()*P.F_norm();
+    //double nu = 50;
     cout << "nu = " << nu << endl;
     typedef typename PROBLEM::Index Index;
 
     // compute optimal relaxation parameter omega
-    //const double omega = 2.0 / (P.norm_A() + 1.0/P.norm_Ainv());
+    const double omega = 2.0 / (P.norm_A() + 1.0/P.norm_Ainv());
     //const double omega = 2.0/5.0048-0.01;//0.337721577225;//0.476369621181
-    const double omega = 0.52;
+    //const double omega = 0.2;//that was the bad alpha estimate
+    //const double omega = 0.1;// 2D good one
     //const double omega = 2.0/10;
     //const double omega = 2.0/100;
     cout << "CDD2_SOLVE: omega=" << omega << endl;
 
     // compute spectral norm rho
-    const double cond_A = P.norm_A() * P.norm_Ainv();
+    double cond_A = P.norm_A() * P.norm_Ainv();
+    //double cond_A = 100;
+    cout << "cond A = " << cond_A << endl;
+    //cond_A = 32.8823;
     const double rho = (cond_A-1.) / (cond_A+1.);
+    //const double rho = 0.92;
     cout << "CDD2_SOLVE: rho=" << rho << endl;
     
     // desired error reduction factor theta < 1/3
@@ -104,7 +111,7 @@ public:
 
     // compute minimal K such that 3*rho^K < theta
     const int K = (int) ceil(log(theta/2.0) / log(rho))+1;
-    //const int K = 100;
+    //const int K = 488;
     cout << "CDD2_SOLVE: K=" << K << endl;
     
     u_epsilon.clear();
@@ -120,7 +127,7 @@ public:
     bool exit = 0;
     unsigned int loops = 0;
 
-    InfiniteVector<double,Index> f, v, Av, res, help, help2;
+    InfiniteVector<double,Index> f, v, Av, resid, help, help2;
 
     unsigned int innerloop = 0;
 
@@ -138,32 +145,43 @@ public:
 
     double tmp = 0;
     double tmp1 = 0;
-    while (nu > epsilon) {
- 
+    //while (nu > epsilon) {
+    while (true) {
       for (int j = 1; j <= K; j++) {
-
-
 	//APPLY(P, v, pow(rho,j)*nu/(2.0*omega*K), Av, jmax,  CDD1);
 	double eta = 0;
 	if (innerloop == 0)
-	  eta = pow(rho,j)*nu/(2.0*omega*K);
+	  eta = pow(rho,K)*nu/(2.0*omega*K);
 	else
-	  eta = d;
+	  eta = pow(rho,K)*nu/(2.0*omega*K);
 	P.RHS(eta, f);
-	cout << "CDD2_SOLVE: eta = " << pow(rho,j)*nu/(2.0*omega*K) << endl;
+	cout << "CDD2_SOLVE: eta = " << pow(rho,K)*nu/(2.0*omega*K) << endl;
+	//tend = clock();
+	//time = (double)(tend-tstart)/CLOCKS_PER_SEC;
+	//APPLY_COARSE(P, v, eta, Av, 0.00000001, jmax, CDD1);
+	//tend = clock(); 
+	//acctime += ((double)(tend-tstart)/CLOCKS_PER_SEC - time);
+	//cout << "time = " << acctime  << endl;
+
+	APPLY(P, v, eta, Av, jmax, CDD1);
+
+	resid = f-Av;
+
+	tmp = l2_norm(resid);
+ 	tmp1 = log10(tmp);
+	
 	tend = clock();
+
+// 	P.RHS(0.00001,f);
+// 	APPLY_COARSE(P, v, 0.00001, Av, 0.00000001, jmax, CDD1);
+// 	help = f - Av;
+// 	tmp = l2_norm(help);
+// 	tmp1 = log10(tmp);
 	time = (double)(tend-tstart)/CLOCKS_PER_SEC;
-	APPLY_COARSE(P, v, eta, Av, 0.00000001, jmax, CDD1);
-	tend = clock();
-	acctime += ((double)(tend-tstart)/CLOCKS_PER_SEC - time);
-	cout << "time = " << acctime  << endl;
+	time_asymptotic[log10(time)] = tmp1;
 
-	//APPLY(P, v, eta, Av, jmax, CDD1);
-
-	res = f - Av;
-	tmp = l2_norm(res);
-	tmp1 = log10(tmp);
 	cout << "current residual error ||f-Av||=" << tmp << endl;
+
 	loops++;
 	//########### aswymptotics ###############
 	// 	if (j == K) {
@@ -181,14 +199,14 @@ public:
 	//  	    break;
 	//	}  
 	//	}
-	// 	if (v.size() != 0)
-	// 	  asymptotic[log10( (double)v.size() )] = tmp1;
+	if (v.size() != 0)
+	  asymptotic[log10( (double)v.size() )] = tmp1;
 	//########################################
 
-	v += omega * res;
+	v += omega * resid;
 
-	 u_epsilon = v;
-	 P.rescale(u_epsilon,-1);
+	u_epsilon = v;
+	u_epsilon.scale(&P,-1);
 
 	//	if ((loops < 20) || loops % 10 == 0) {
 	//	  u_epsilon = v;
@@ -198,29 +216,32 @@ public:
 	// 	  log_10_L2_error[loops] = log10(L2err);
 	//cout << "L_2 error = " << L2err << endl;
 	//	}
-	//asymptotic[log10( (double)v.size() )] = tmp1;
+	asymptotic[log10( (double)v.size() )] = tmp1;
 	log_10_residual_norms[loops] = tmp1;
 
 	cout << "active indices: " << v.size() << endl;
 	cout << "loop: " << loops << endl;
-	// 	if (loops % 10 == 0) {
-	// 	  std::ofstream os3("richCDD2_2D_asymptotic.m");
-	// 	  matlab_output(asymptotic,os3);
-	// 	  os3.close();
+	if (loops % 5 == 0) {
+	  std::ofstream os3("rich_asymptotic_2D_3101.m");
+	  matlab_output(asymptotic,os3);
+	  os3.close();
 
-	// 	  std::ofstream os4("richCDD2_2D_L2_errors.m");
-	// 	  matlab_output(log_10_L2_error,os4);
-	// 	  os4.close();
-	// 	}
- 	if (tmp < 0.004 || loops == 300) {
+	  std::ofstream os4("time_asymptotic_rich_2D_good_alpha_3101.m");
+	  matlab_output(time_asymptotic,os4);
+	  os4.close();
+	  // 	  std::ofstream os4("richCDD2_2D_L2_errors.m");
+	  // 	  matlab_output(log_10_L2_error,os4);
+	  // 	  os4.close();
+	}
+ 	if ((tmp < 0.0001 || loops == 4000) && innerloop) {
  	  u_epsilon = v;
   	  exit = true;
   	  break;
   	}
-	// 	if (innerloop >= 1) {
-	// 	  //u_epsilon = v;
-	//   	  break;
-	// 	}
+	if (innerloop >= 0) {
+	  //u_epsilon = v;
+	  break;
+	}
 
 
 	// 	if (((loops % 10 == 0) && loops <= 100) || loops % 100 == 0){
@@ -277,9 +298,9 @@ public:
     //     matlab_output(degrees_of_freedom,os2);
     //     os2.close();
 
-    //     std::ofstream os3("richCDD2_asymptotic.m");
-    //     matlab_output(asymptotic,os3);
-    //     os3.close();
+    std::ofstream os3("richCDD2_asymptotic.m");
+    matlab_output(asymptotic,os3);
+    os3.close();
 
     std::ofstream os4("time_asymptotic_rich.m");
     matlab_output(time_asymptotic,os4);
@@ -287,8 +308,6 @@ public:
 
 
   }
-
-
     
 
 }

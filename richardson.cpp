@@ -27,7 +27,7 @@ namespace FrameTL
 //      CornerSingularity sing2D(origin, 0.5, 1.5);
 //      CornerSingularityRHS singRhs(origin, 0.5, 1.5);
 
-    const unsigned int jmax = 10;
+    const unsigned int jmax = 4;
 
     const double nu = P.norm_Ainv()*P.F_norm();
     typedef typename PROBLEM::Index Index;
@@ -77,13 +77,13 @@ namespace FrameTL
     while (epsilon_k > epsilon) {
       epsilon_k *= 3*pow(rho, K) / theta;
       cout << "CDD2_SOLVE: epsilon_k=" << epsilon_k << endl;
-      //double eta = theta * epsilon_k / (6*omega*K);
+      double eta = theta * epsilon_k / (6*omega*K);
       P.RHS(eta, f);
       //cout << f << endl;
       //v = u_epsilon;
       cout << "eta= " << eta << endl;
-      for (int j = 1; j <= K; j++) {
-        eta = pow(rho,j) * epsilon_k / (6*omega*K);
+      for (int j = 1; j <= 1; j++) {
+        //eta = pow(rho,j) * epsilon_k / (6*omega*K);
 	cout << "CDD2_SOLVE: eta=" << eta << endl;
 	//APPLY(P, v, 0.000001/*eta*/, Av, jmax,  CDD1);
 	//P.RHS(eta, f);
@@ -94,15 +94,15 @@ namespace FrameTL
 
 	++loops;
 
-	if ( loops == 1 || loops == 2 || loops == 4 || loops == 6 || loops == 8
-	     || loops == 10 || (loops % 20 == 0)) {
-	  u_epsilon = v;
-	  P.rescale(u_epsilon,-1);
-	  //cout << "computing L_2 error..." << endl;
-	  //double L2err = evalObj.L_2_error(P.basis(), u_epsilon, sing2D, 5, 0.0, 1.0);
-	  //log_10_L2_error[loops] = log10(L2err);
-	  //cout << "L_2 error = " << L2err << endl;
-	}
+// 	if ( loops == 1 || loops == 2 || loops == 4 || loops == 6 || loops == 8
+// 	     || loops == 10 || (loops % 20 == 0)) {
+// 	  u_epsilon = v;
+// 	  P.rescale(u_epsilon,-1);
+// 	  //cout << "computing L_2 error..." << endl;
+// 	  //double L2err = evalObj.L_2_error(P.basis(), u_epsilon, sing2D, 5, 0.0, 1.0);
+// 	  //log_10_L2_error[loops] = log10(L2err);
+// 	  //cout << "L_2 error = " << L2err << endl;
+// 	}
 
 	double tmp1 = log10(tmp);
 	asymptotic[log10( (double)v.size() )] = tmp1;
@@ -114,14 +114,17 @@ namespace FrameTL
 	cout << "active indices: " << v.size() << endl;
 	cout << "loop: " << loops << endl;
 
-	std::ofstream os3("rich_orig_2D_asymptotic.m");
+	std::ofstream os3("rich_orig_2D_asymptotic_3101.m");
 	matlab_output(asymptotic,os3);
 	os3.close();
 	
-	std::ofstream os4("rich_orig_2D_L2_errors.m");
-	matlab_output(log_10_L2_error,os4);
-	os4.close();
+// 	std::ofstream os4("rich_orig_2D_L2_errors.m");
+// 	matlab_output(log_10_L2_error,os4);
+// 	os4.close();
 	
+	std::ofstream os5("rich_orig_2D_time_asymptotic3101.m");
+	matlab_output(asymptotic,os5);
+	os5.close();
 
 	if (tmp < 0.004 || loops == 400) {
 	  u_epsilon = v;

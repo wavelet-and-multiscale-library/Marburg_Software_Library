@@ -2,7 +2,8 @@
 #include <iostream>
 #include <time.h> 
 #include <interval/ds_basis.h>
-#include "elliptic_equation.h"
+#include <interval/p_basis.h>
+#include <elliptic_equation.h>
 #include <algebra/sparse_matrix.h>
 #include <algebra/infinite_vector.h>
 #include <numerics/iteratsolv.h>
@@ -14,10 +15,10 @@
 #include <numerics/corner_singularity.h>
 #include <frame_support.h>
 #include <frame_index.h>
-//#include <steepest_descent.h>
+#include <steepest_descent.h>
 #include <galerkin/cached_problem.h>
 //#include <richardson_CDD2.h>
-#include <richardson.h>
+//#include <richardson.h>
 
 using std::cout;
 using std::endl;
@@ -50,7 +51,8 @@ int main()
 
   const int DIM = 2;
 
-  typedef DSBasis<2,2> Basis1D;
+  //typedef DSBasis<2,2> Basis1D;
+  typedef PBasis<3,3> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
   typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
@@ -158,7 +160,8 @@ int main()
   cout << Lshaped << endl;
 
   //finally a frame can be constructed
-  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT);
+  //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT);
+  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc);
 
   Vector<double> value(1);
   value[0] = 1;
@@ -177,12 +180,13 @@ int main()
   EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
 
-  discrete_poisson.set_norm_A(21.);
-  discrete_poisson.set_Ainv(1.0/0.096084);
+  discrete_poisson.set_norm_A(6.99614824235842);
+  discrete_poisson.set_Ainv(1.0/0.1);
 
-  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0048, 1.0/0.01);
+  // CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0048, 1.0/0.01);
+  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 6.99614824235842, 1.0/0.1);
 
-  const double epsilon = 0.01;
+  const double epsilon = 0.000001;
 
   InfiniteVector<double, Index> u_epsilon;
 
@@ -190,9 +194,9 @@ int main()
   double time;
   tstart = clock();
 
-  //steepest_descent_SOLVE(problem, epsilon, u_epsilon);
+  steepest_descent_SOLVE(problem, epsilon, u_epsilon);
   //richardson_SOLVE_CDD2(problem, epsilon, u_epsilon);
-  richardson_SOLVE(problem, epsilon, u_epsilon);
+  //richardson_SOLVE(problem, epsilon, u_epsilon);
   //  steepest_descent_SOLVE(discrete_poisson, epsilon, u_epsilon);
  //  for (unsigned int i = 0; i < 50*20;i++)
 //     for (Index ind = FrameTL::first_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0());
@@ -207,9 +211,9 @@ int main()
   cout << "steepest descent done" << endl;
 
   //discrete_poisson.rescale(u_epsilon,-1);
-  problem.rescale(u_epsilon,-1);
+  u_epsilon.scale(&problem,-1);
 
-  //  Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u_epsilon, true, 6);//expand in primal basis
+    Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u_epsilon, true, 6);//expand in primal basis
   
   cout << "done plotting approximate solution" << endl;
 
@@ -217,9 +221,9 @@ int main()
 
   cout << "done plotting pointwise error" << endl;
 
-//   std::ofstream ofs5("approx_sol_steep_2D_out.m");
-//   matlab_output(ofs5,U);
-//   ofs5.close();
+  std::ofstream ofs5("approx_sol_steep_2D_out.m");
+  matlab_output(ofs5,U);
+  ofs5.close();
 
 //   std::ofstream ofs6("error_steep_2D_out.m");
 //   matlab_output(ofs6,Error);

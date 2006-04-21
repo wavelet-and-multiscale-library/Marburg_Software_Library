@@ -1847,8 +1847,8 @@ namespace WaveletTL
   template <int d, int dT>
   void
   PBasis<d, dT>::reconstruct_1(const Index& lambda,
-				const int j,
-				InfiniteVector<double, Index>& c) const {
+			       const int j,
+			       InfiniteVector<double, Index>& c) const {
     c.clear();
     
     if (lambda.j() >= j)

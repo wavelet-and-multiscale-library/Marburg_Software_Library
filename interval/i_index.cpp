@@ -14,6 +14,9 @@ namespace WaveletTL
       k_ = basis_->DeltaLmin(); // leftmost
       e_ = 0;                   // generator
       j_ = basis_->j0();        // on the coarsest level
+      
+      if (! ((e_ == 0) && j > basis_->j0()))
+	set_number();
     }
   }
   
@@ -24,6 +27,9 @@ namespace WaveletTL
     e_ = lambda.e();
     k_ = lambda.k();
     basis_ = lambda.basis();
+    if (! ((e_ == 0) && j_ > basis_->j0()))
+      set_number();
+
   }
 
   template <class IBASIS>
@@ -34,6 +40,47 @@ namespace WaveletTL
     e_ = e;
     k_ = k;
     basis_ = basis;
+    if (! ((e_ == 0) && j > basis_->j0()))
+      set_number();
+  }
+
+
+  template <class IBASIS>
+  IntervalIndex<IBASIS>::IntervalIndex(const unsigned int num,
+				       const IBASIS* basis)
+  :  basis_(basis)
+  {
+    num_ = num; 
+    
+    // to be decreased successively
+    unsigned int act_num = num_;
+    int j = basis_->j0();
+    unsigned int tmp2 = 0;
+
+    // determine the level of the index
+    while (true) {
+      unsigned int tmp = basis_->Deltasize(j);
+      if (tmp > num)
+	break;
+      tmp2 = tmp;
+      j++;
+    }
+    if (j == basis_->j0()) {
+      j_ = j;
+      e_ = 0;
+    }
+    else {
+      j_ = j-1;
+      e_ = 1;
+    }
+
+    act_num -= tmp2;
+
+    if (e_ == 0)
+      k_ = basis_->DeltaLmin() + act_num;
+    else
+      k_ = basis_->Nablamin()  + act_num;
+ 
   }
 
   template <class IBASIS>
@@ -44,6 +91,7 @@ namespace WaveletTL
     e_ = lambda.e();
     k_ = lambda.k();
     basis_ = lambda.basis();
+    num_ = lambda.number();
 
     return *this;
   }
@@ -90,9 +138,31 @@ namespace WaveletTL
     default:
       break;
     }
-    
+    //set_number();
+    num_++;
     return *this;
   }
+
+  template <class IBASIS>
+  void
+  IntervalIndex<IBASIS>::set_number()
+  {
+    unsigned int result = 0;
+
+    // determine how many wavelets there are on all the levels
+    // below the level of this index
+    if (e_ == 1)
+      result = basis_->Deltasize(j_);
+
+    // count the wavelets that belong to the same level,
+    // whose indices are smaller than this index,
+    if (e_ == 0)
+      result += k_ - basis_->DeltaLmin();
+    else
+      result += k_ - basis_->Nablamin();
+    num_ = result;
+  }
+
 
   template <class IBASIS>
   inline
@@ -139,4 +209,35 @@ namespace WaveletTL
   {
     return (e == 0 ? last_generator(basis, j) : last_wavelet(basis, j));
   }
+
+  template <class IBASIS>
+  inline
+  unsigned int first_generator_num(const IBASIS* basis)
+  {
+    return first_generator<IBASIS>(basis, basis->j0()).number();
+  }
+  
+  template <class IBASIS>
+  inline
+  unsigned int last_generator_num(const IBASIS* basis)
+  {
+    return last_generator<IBASIS>(basis, basis->j0()).number();
+  }
+
+  template <class IBASIS>
+  inline
+  unsigned int first_wavelet_num(const IBASIS* basis, const int j)
+  {
+    assert(j >= basis->j0());
+    return first_wavelet<IBASIS>(basis, j).number();
+  }
+  
+  template <class IBASIS>
+  inline
+  unsigned int last_wavelet_num(const IBASIS* basis, const int j)
+  {
+    assert(j >= basis->j0());
+    return last_wavelet<IBASIS>(basis, j).number();
+  }
+
 }

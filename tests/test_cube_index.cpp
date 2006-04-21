@@ -6,7 +6,9 @@
 #include <utils/fixed_array1d.h>
 
 #include <interval/ds_basis.h>
+
 #include <interval/p_basis.h>
+#include <interval/i_index.h>
 #include <cube/cube_basis.h>
 
 using namespace std;
@@ -43,16 +45,43 @@ int main()
       ++index;
     }
 
+  typedef Basis1D::Index Index1D;
+  
+  Basis1D basis1D(bound_1_1D[0], bound_1_1D[1]);
+
   unsigned int i = 0;
-  for (CubeIndex<Basis1D,1> lambda(first_generator<Basis1D,1,Basis>(&basis, basis.j0()));; ++lambda) {
+  for (Index1D<Basis1D> lambda(first_generator<Basis1D>(&basis1D, basis1D.j0()));; ++lambda) {
     cout << "-----------------------------------------" << endl;
     cout << lambda << " number  = " << lambda.number() << endl;
-    cout << " index  = " << CubeIndex<Basis1D,1>(i, &basis) << endl;
-     if (! (CubeIndex<Basis1D,1>(i, &basis) == lambda))
+    cout << " index  = " << IntervalIndex<Basis1D>(i, &basis1D) << endl;
+    if (! (Index1D<Basis1D>(i, &basis1D) == lambda))
       abort();
     i++;
-    if (lambda == last_wavelet<Basis1D,1,Basis>(&basis, basis.j0()+2)) break;
+    if (lambda == last_wavelet<Basis1D>(&basis1D, basis1D.j0()+2)) break;
   }
+
+
+  for (int j = basis1D.j0(); j < basis1D.j0()+5; j++ ) {
+    if (j == basis1D.j0()) {
+      cout << "number of first generator on coarstest level = " << first_generator_num<Basis1D>(&basis1D) << endl;
+      cout << "number of last generator on coarstest level = " << last_generator_num<Basis1D>(&basis1D) << endl;
+    }
+    
+    cout << "number of first wavelet on level " << j << " = " << first_wavelet_num<Basis1D>(&basis1D, j) << endl;
+    cout << "number of last wavelet on level " << j << " = " << last_wavelet_num<Basis1D>(&basis1D, j) << endl;   
+    
+  }
+
+//   unsigned int i = 0;
+//   for (CubeIndex<Basis1D,1> lambda(first_generator<Basis1D,1,Basis>(&basis, basis.j0()));; ++lambda) {
+//     cout << "-----------------------------------------" << endl;
+//     cout << lambda << " number  = " << lambda.number() << endl;
+//     cout << " index  = " << CubeIndex<Basis1D,1>(i, &basis) << endl;
+//      if (! (CubeIndex<Basis1D,1>(i, &basis) == lambda))
+//       abort();
+//     i++;
+//     if (lambda == last_wavelet<Basis1D,1,Basis>(&basis, basis.j0()+2)) break;
+//   }
 
 #else
 
@@ -90,7 +119,19 @@ int main()
     if (! (CubeIndex<Basis1D,2>(i, &basis2) == lambda))
       abort();
     i++;
-    if (lambda == last_wavelet<Basis1D,2,Basis2>(&basis2, basis2.j0()+3)) break;
+    if (lambda == last_wavelet<Basis1D,2,Basis2>(&basis2, basis2.j0())) break;
   }
+
+  for (int j = basis2.j0(); j < basis2.j0()+5; j++ ) {
+    if (j == basis2.j0()) {
+      cout << "number of first generator on coarstest level = " << first_generator_num<Basis1D,2,Basis2>(&basis2) << endl;
+      cout << "number of last generator on coarstest level = " << last_generator_num<Basis1D,2,Basis2>(&basis2) << endl;
+    }
+    
+    cout << "number of first wavelet on level " << j << " = " << first_wavelet_num<Basis1D,2,Basis2>(&basis2, j) << endl;
+    cout << "number of last wavelet on level " << j << " = " << last_wavelet_num<Basis1D,2,Basis2>(&basis2, j) << endl;   
+    
+  }
+
 #endif
 }

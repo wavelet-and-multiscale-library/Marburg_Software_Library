@@ -38,6 +38,9 @@ namespace WaveletTL
   
     //! constructor with specified parameters
     IntervalIndex(const int j, const int e, const int k, const IBASIS* basis);
+
+    //! constructor with specified number
+    IntervalIndex(const unsigned int num, const IBASIS* basis);
     
     //! assignment
     IntervalIndex& operator = (const IntervalIndex& lambda);
@@ -74,12 +77,27 @@ namespace WaveletTL
     //! translation index k
     const translation_type& k() const { return k_; }
 
+    //! number num_
+    const unsigned int number() const { return num_; }
+
     //! underlying basis
     const IBASIS* basis() const { return basis_; }
 
   protected:
+    
+    /*!
+      inverse of constructor
+      'IntervalIndex(const unsigned int number,
+                     const IBASIS* basis)'
+    */
+    void set_number();
+    
     //! scale, type, translation
     int j_, e_, k_;
+    
+    //! number of the index (not for generators on level j > j0)
+    unsigned int num_;
+    
 
     //! pointer to the underlying interval basis
     const IBASIS* basis_;
@@ -137,6 +155,34 @@ namespace WaveletTL
   */
   template <class IBASIS>
   IntervalIndex<IBASIS> last_index(const IBASIS* basis, const int j, const int e);
+
+  /*!
+    number of first (leftmost) generator on level j0
+  */
+  template <class IBASIS>
+  unsigned int first_generator_num(const IBASIS* basis);
+
+  /*!
+    number of last (rightmost) generator on level j0
+  */
+  template <class IBASIS>
+  unsigned int last_generator_num(const IBASIS* basis);
+
+  /*!
+    number of first (leftmost) wavelet on level j >= j0
+  */
+  template <class IBASIS>
+  unsigned int first_wavelet_num(const IBASIS* basis, const int j);
+
+  /*!
+    number of last (rightmost) wavelet on level j >= j0
+  */
+  template <class IBASIS>
+  unsigned int last_wavelet_num(const IBASIS* basis, const int j);
+
+
+
+
 }
 
 // include implementation

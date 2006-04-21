@@ -13,6 +13,10 @@ namespace WaveletTL
       // e_ is zero by default: generator
       for (unsigned int i = 0; i < DIM; i++)
 	k_[i] = basis_->bases()[i]->DeltaLmin();
+
+      type_type gen_type;
+      if (! ((e_ == gen_type) && j_ > basis_->j0()))
+	set_number();
     }
   }
 
@@ -23,12 +27,15 @@ namespace WaveletTL
 					     const CUBEBASIS* basis)
     : basis_(basis), j_(j), e_(e), k_(k)
   {
+    type_type gen_type;
+    if (! ((e_ == gen_type) && j > basis_->j0()))
+      set_number();
   }
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
   CubeIndex<IBASIS,DIM,CUBEBASIS>::CubeIndex(const CubeIndex& lambda)
-    : basis_(lambda.basis_), j_(lambda.j_), e_(lambda.e_), k_(lambda.k_)
-  {
+    : basis_(lambda.basis_), j_(lambda.j_), e_(lambda.e_), k_(lambda.k_), num_(lambda.num_)
+  {  
   }
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
@@ -36,11 +43,12 @@ namespace WaveletTL
 					     const CUBEBASIS* basis)
     : basis_(basis)
   {
-    // to be decreased successively
-    unsigned int act_num = num;
+    num_ = num; 
 
-    const unsigned int j0 = basis_->j0();
-    unsigned int j = j0;
+    // to be decreased successively
+    unsigned int act_num = num_;
+
+    int j = basis_->j0();
 
     unsigned int tmp2 = 0;
 
@@ -56,7 +64,7 @@ namespace WaveletTL
       tmp2 = tmp;
       j++;
     }
-    if (j == j0) {
+    if (j == basis_->j0()) {
       j_ = j;
       gen = 1;
     }
@@ -185,6 +193,9 @@ namespace WaveletTL
   CubeIndex<IBASIS,DIM,CUBEBASIS>&
   CubeIndex<IBASIS,DIM,CUBEBASIS>::operator ++ ()
   {
+    // set_number();
+    num_++;
+
     bool eplusplus = false;
     for (int i = DIM-1; i >= 0; i--) {
       const int last_index = (e_[i] == 0
@@ -235,8 +246,8 @@ namespace WaveletTL
   }
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
-  const unsigned int 
-  CubeIndex<IBASIS,DIM,CUBEBASIS>::number() const
+  void
+  CubeIndex<IBASIS,DIM,CUBEBASIS>::set_number()
   {
     unsigned int result = 0;
     bool gen = 1;
@@ -316,7 +327,7 @@ namespace WaveletTL
       }
       result += tmp;
     }
-    return result;
+    num_ = result;
   }
 
 
@@ -387,4 +398,36 @@ namespace WaveletTL
 
     return CubeIndex<IBASIS,DIM,CUBEBASIS>(j, e, k, basis);
   }
+
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  const unsigned int
+  first_generator_num(const CUBEBASIS* basis)
+  {
+    return first_generator<IBASIS,DIM,CUBEBASIS>(basis, basis->j0()).number();
+  }
+
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  const unsigned int
+  last_generator_num(const CUBEBASIS* basis)
+  {
+    return last_generator<IBASIS,DIM,CUBEBASIS>(basis, basis->j0()).number();
+  }
+
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  const unsigned int
+  first_wavelet_num(const CUBEBASIS* basis, const int j)
+  {
+    assert(j >= basis->j0());
+    return first_wavelet<IBASIS,DIM,CUBEBASIS>(basis, j).number();
+  }
+
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  const unsigned int
+  last_wavelet_num(const CUBEBASIS* basis, const int j)
+  {
+    assert(j >= basis->j0());
+    return last_wavelet<IBASIS,DIM,CUBEBASIS>(basis, j).number();
+  }
+
+
 }

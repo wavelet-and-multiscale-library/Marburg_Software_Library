@@ -62,6 +62,7 @@ namespace WaveletTL
       According to this ordering there exists a mapping from the totality of wavelet indices into
       the nonnegative integers. This routine creates an index from the given number corresponding
       to this ordering.
+      This constructor cannot be used for generators on levels j > j0.
     */
     CubeIndex(const unsigned int number,
 	      const CUBEBASIS* basis);
@@ -93,15 +94,17 @@ namespace WaveletTL
     //! translation index k
     const translation_type& k() const { return k_; }
 
+    const unsigned int number() const { return num_; }
+
+  protected:
+
     /*!
       inverse of constructor
       'CubeIndex(const unsigned int number,
                  const CUBEBASIS* basis)'
     */
-    const unsigned int number() const;
- 
-
-  protected:
+    void set_number();
+    
     //! pointer to the underlying basis
     const CUBEBASIS* basis_;
 
@@ -113,6 +116,10 @@ namespace WaveletTL
 
     //! translation
     MultiIndex<int,DIM> k_;
+
+    //! number of the index, only for the elements of a wavelet bases
+    unsigned int num_;
+
   };
 
   //! stream output
@@ -158,6 +165,35 @@ namespace WaveletTL
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
   CubeIndex<IBASIS,DIM,CUBEBASIS>
   last_wavelet(const CUBEBASIS* basis, const int j);
+
+  /*!
+    number of first generator on level j0
+  */
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  const unsigned int
+  first_generator_num(const CUBEBASIS* basis);
+
+  /*!
+    number of last generator on level j0
+  */
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  const unsigned int
+  last_generator_num(const CUBEBASIS* basis);
+
+  /*!
+    number of first wavelet on level j >= j0
+  */
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  const unsigned int
+  first_wavelet_num(const CUBEBASIS* basis, const int j);
+  
+  /*!
+    number of last wavelet on level j >= j0
+  */
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  const unsigned int
+  last_wavelet_num(const CUBEBASIS* basis, const int j);
+
 }
 
 #include <cube/cube_index.cpp>

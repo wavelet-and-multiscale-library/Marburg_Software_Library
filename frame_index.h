@@ -70,6 +70,13 @@ namespace FrameTL
 	       const type_type& e,
 	       const unsigned int patch,	       
 	       const translation_type& k);
+
+    /*!
+      constructor
+    */
+    FrameIndex(const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame,
+	       const unsigned int num);
+
     
     //! check equality
     bool operator == (const FrameIndex& lambda) const;
@@ -103,11 +110,20 @@ namespace FrameTL
     //! access to patchnumber
     const unsigned int p() const { return p_; }
 
+    const unsigned int number() const { return num_; }
+
     //! access to underlying frame
     const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame() const
     { return frame_; }
 
   protected:
+    
+    /*!
+      inverse of constructor
+      'FrameIndex(const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame,
+                  const unsigned int num)'
+    */
+    void set_number();
 
     /*!
       pointer to corresponding frame
@@ -130,6 +146,8 @@ namespace FrameTL
     //MultiIndex<int,DIM_d> k_;
     translation_type k_;
     
+    unsigned int num_;
+
   };
 
   /*!
@@ -170,6 +188,38 @@ namespace FrameTL
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
   FrameIndex<IBASIS,DIM_d,DIM_m>
   last_wavelet(const FRAME* frame, const int j);
+
+  /*!
+    number of first generator on level j0
+    on patch p
+  */
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+  unsigned int
+  first_generator_num(const FRAME* frame);
+
+  /*!
+    number of last generator on level j0
+    on patch p
+  */
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+  unsigned int
+  last_generator_num(const FRAME* frame);
+    
+  /*!
+    number of first wavelet on level j >= j0
+    on patch p
+  */
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+  unsigned int
+  first_wavelet_num(const FRAME* frame, const int j);
+    
+  /*!
+    index of last wavelet on level j >= j0
+    on patch p
+  */
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+  unsigned int
+  last_wavelet_num(const FRAME* frame, const int j);
 
 
 }

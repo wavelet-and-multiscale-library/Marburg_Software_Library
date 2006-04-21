@@ -39,6 +39,7 @@ namespace FrameTL
 						       const Array1D<FixedArray1D<int,2*DIM_d> >& bc)
     : atlas_(atlas), bc_(bc)
   {
+    
     lifted_bases.resize((atlas_->charts()).size());
 
     for (unsigned int  i = 0; i < (atlas_->charts()).size(); ++i)

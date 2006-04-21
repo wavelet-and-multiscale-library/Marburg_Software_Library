@@ -50,11 +50,11 @@ int main()
   Basis1D basis1D(bound_1_1D[0], bound_1_1D[1]);
 
   unsigned int i = 0;
-  for (Index1D<Basis1D> lambda(first_generator<Basis1D>(&basis1D, basis1D.j0()));; ++lambda) {
+  for (Index1D lambda(first_generator<Basis1D>(&basis1D, basis1D.j0()));; ++lambda) {
     cout << "-----------------------------------------" << endl;
     cout << lambda << " number  = " << lambda.number() << endl;
     cout << " index  = " << IntervalIndex<Basis1D>(i, &basis1D) << endl;
-    if (! (Index1D<Basis1D>(i, &basis1D) == lambda))
+    if (! (Index1D(i, &basis1D) == lambda))
       abort();
     i++;
     if (lambda == last_wavelet<Basis1D>(&basis1D, basis1D.j0()+2)) break;

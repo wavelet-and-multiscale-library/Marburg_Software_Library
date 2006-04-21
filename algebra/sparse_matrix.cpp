@@ -129,6 +129,13 @@ namespace MathTL
   }
 
   template <class C>
+  inline
+  bool SparseMatrix<C>::empty() const
+  {
+    return row_dimension()*column_dimension()==0;
+  }
+  
+  template <class C>
   void SparseMatrix<C>::resize(const size_type m, const size_type n)
   {
     assert(m >= 1 && n >= 1);

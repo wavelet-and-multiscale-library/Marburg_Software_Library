@@ -46,8 +46,8 @@ namespace MathTL
   KroneckerMatrix<C,MATRIX1,MATRIX2>::operator () (const size_type row,
 						   const size_type column) const
   {
-    return A(row / B.row_dimension(), column / B.column_dimension())
-      * B(row % B.row_dimension(), column % B.column_dimension());
+    return A.get_entry(row / B.row_dimension(), column / B.column_dimension())
+      * B.get_entry(row % B.row_dimension(), column % B.column_dimension());
   }
 
   template <class C, class MATRIX1, class MATRIX2>

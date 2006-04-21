@@ -82,6 +82,11 @@ namespace MathTL
     const size_type size() const;
 
     /*!
+      return true if matrix is empty (cf. STL containers)
+    */
+    bool empty() const;
+
+    /*!
       resize matrix and initialize with zero
     */
     void resize(const size_type rows, const size_type columns);

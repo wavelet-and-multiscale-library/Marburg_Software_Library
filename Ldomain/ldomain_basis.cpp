@@ -1,6 +1,10 @@
 // implementation for ldomain_basis.h
 
 #include <cmath>
+#include <iostream>
+
+using std::cout;
+using std::endl;
 
 namespace WaveletTL
 {
@@ -11,7 +15,7 @@ namespace WaveletTL
   }
 
   template <class IBASIS>
-  const SparseMatrix<double>&
+  const BlockMatrix<double>&
   LDomainBasis<IBASIS>::get_Mj0 (const int j) const {
     // check whether the j-th matrix already exists in the cache
     typename MatrixCache::iterator matrix_lb(Mj0_cache.lower_bound(j));
@@ -19,27 +23,81 @@ namespace WaveletTL
     if (matrix_lb == Mj0_cache.end() ||
 	Mj0_cache.key_comp()(j, matrix_lb->first))
       {
-	// insert a new matrix into the cache
- 	typedef typename MatrixCache::value_type value_type;
-	SparseMatrix<double> Mj0;
+	cout << "LDomainBasis::get_Mj0() cache miss" << endl;
+
+	// compute Mj0 and insert it into the cache
+	BlockMatrix<double> Mj0(5, 5);
+	typedef typename MatrixCache::value_type value_type;
  	matrix_it = Mj0_cache.insert(matrix_lb, value_type(j, Mj0));
+	
+	const unsigned int Deltaj   = basis1d().Deltasize(j);
+	const unsigned int Deltajp1 = basis1d().Deltasize(j+1);
+
+	// row/column 0 <-> patch 0
+	matrix_it->second.resize_block_row   (0, (Deltajp1-2)*(Deltajp1-2));
+ 	matrix_it->second.resize_block_column(0, (Deltaj-2)*(Deltaj-2));
+	
+ 	// row/column 1 <-> patch 1
+ 	matrix_it->second.resize_block_row   (1, (Deltajp1-2)*(Deltajp1-2));
+ 	matrix_it->second.resize_block_column(1, (Deltaj-2)*(Deltaj-2));
+	
+ 	// row/column 2 <-> patch 2
+ 	matrix_it->second.resize_block_row   (2, (Deltajp1-2)*(Deltajp1-2));
+ 	matrix_it->second.resize_block_column(2, (Deltaj-2)*(Deltaj-2));
+	
+ 	// row/column 3 <-> interface 3
+ 	matrix_it->second.resize_block_row   (3, Deltajp1-2);
+ 	matrix_it->second.resize_block_column(3, Deltaj-2);
+	
+ 	// row/column 4 <-> interface 4
+ 	matrix_it->second.resize_block_row   (4, Deltajp1-2);
+ 	matrix_it->second.resize_block_column(4, Deltaj-2);
+
+ 	// prepare 1d matrices
+ 	SparseMatrix<double> Mj0_1d; basis1d().assemble_Mj0(j, Mj0_1d);
+ 	SparseMatrix<double> Mj0_1d_interior(Mj0_1d.row_dimension()-2, Mj0_1d.column_dimension()-2);
+ 	for (unsigned int row = 0; row < Mj0_1d_interior.row_dimension(); row++)
+ 	  for (unsigned int column = 0; column < Mj0_1d_interior.column_dimension(); column++)
+ 	    Mj0_1d_interior.set_entry(row, column, Mj0_1d.get_entry(row+1, column+1));
+	SparseMatrix<double> Mj0_1d_left(Mj0_1d.row_dimension()-2, 1);
+ 	for (unsigned int row = 0; row < Mj0_1d_left.row_dimension(); row++)
+	  Mj0_1d_left.set_entry(row, 0, Mj0_1d.get_entry(row+1, 0));
+	SparseMatrix<double> Mj0_1d_right(Mj0_1d.row_dimension()-2, 1);
+ 	for (unsigned int row = 0; row < Mj0_1d_right.row_dimension(); row++)
+	  Mj0_1d_right.set_entry(row, 0, Mj0_1d.get_entry(row+1, Mj0_1d.column_dimension()-1));
+	
+ 	// patch generators decompose only into themselves
+	for (int patch = 0; patch <= 2; patch++)
+	  matrix_it->second.set_block(patch, patch,
+				      new KroneckerMatrix<double,SparseMatrix<double>,SparseMatrix<double> >
+				      (Mj0_1d_interior, Mj0_1d_interior));
+	
+	// interface generators decompose into themselves and patch generators from the neighboring patches
+	// (TODO)
+// 	matrix_it->second.set_block(0, 3,
+// 				    new KroneckerMatrix<double,SparseMatrix<double>,SparseMatrix<double> >
+// 				    ());
+      }
+    else
+      {
+	cout << "LDomainBasis::get_Mj0() cache hit" << endl;
       }
     
     return matrix_it->second;
   }
   
   template <class IBASIS>
-  const SparseMatrix<double>&
+  const BlockMatrix<double>&
   LDomainBasis<IBASIS>::get_Mj0T (const int j) const {
   }
 
   template <class IBASIS>
-  const SparseMatrix<double>&
+  const BlockMatrix<double>&
   LDomainBasis<IBASIS>::get_Mj1 (const int j) const {
   }
 
   template <class IBASIS>
-  const SparseMatrix<double>&
+  const BlockMatrix<double>&
   LDomainBasis<IBASIS>::get_Mj1T  (const int j) const {
   }
 

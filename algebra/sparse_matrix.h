@@ -15,6 +15,7 @@
 
 #include <utils/array1d.h>
 #include <algebra/vector.h>
+#include <algebra/matrix_block.h>
 #include <algebra/symmetric_matrix.h>
 #include <algebra/triangular_matrix.h>
 #include <algebra/infinite_vector.h>
@@ -36,6 +37,7 @@ namespace MathTL
   */
   template <class C>
   class SparseMatrix
+    : public MatrixBlock<C>
   {
   public:
     /*!
@@ -166,6 +168,9 @@ namespace MathTL
     template <class VECTOR>
     void apply(const VECTOR& x, VECTOR& Mx) const;
 
+    //! special version for Vector<C> (requirement from MatrixBlock)
+    void apply(const Vector<C>& x, Vector<C>& Mx) const;
+
     /*!
       transposed matrix-vector multiplication Mtx = (*this)^T * x;
       we assume that the vector Mtx has the correct size and
@@ -174,6 +179,9 @@ namespace MathTL
     template <class VECTOR>
     void apply_transposed(const VECTOR& x, VECTOR& Mtx) const;
 
+    //! special version for Vector<C> (requirement from MatrixBlock)
+    void apply_transposed(const Vector<C>& x, Vector<C>& Mtx) const;
+    
     /*!
       set all values with modulus below a threshold to zero
       (fabs<C> should exist)

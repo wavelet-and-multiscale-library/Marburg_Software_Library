@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <algebra/vector.h>
+#include <algebra/matrix_block.h>
 #include <algebra/matrix.h>
 
 // matrix norms, for convenience
@@ -29,64 +30,55 @@ namespace MathTL
   */
   template <class C, class MATRIX1, class MATRIX2>
   class KroneckerMatrix
+    : public MatrixBlock<C>
   {
   public:
-    /*!
-      type of indexes and size type (cf. STL containers)
-     */
+    //! type of indexes and size type (cf. STL containers)
     typedef typename Vector<C>::size_type size_type;
     
-    /*!
-      default constructor from A and B
-    */
+    //! default constructor from A and B
     explicit KroneckerMatrix(const MATRIX1& A, const MATRIX2& B);
     
-    /*!
-      copy constructor
-    */
+    //! copy constructor
     KroneckerMatrix(const KroneckerMatrix<C,MATRIX1,MATRIX2>& M);
 
-    /*!
-      row dimension
-    */
+    //! row dimension
     const size_type row_dimension() const;
 
-    /*!
-      column dimension
-    */
+    //! column dimension
     const size_type column_dimension() const;
 
-    /*!
-      return true if matrix is empty (cf. STL containers)
-    */
+    //! return true if matrix is empty (cf. STL containers)
     bool empty() const;
 
-    /*!
-      read-only access to a matrix entry
-    */
+    //! read-only access to a matrix entry
     const C operator () (const size_type row, const size_type column) const;
 
-    /*!
-      read-only access to a matrix entry
-    */
+    //! read-only access to a matrix entry
     const C get_entry(const size_type row, const size_type column) const;
 
-//     /*!
-//       matrix-vector multiplication Mx = (*this) * x;
-//       we assume that the vector Mx has the correct size and
-//       is not identical to x
-//     */
-//     template <class VECTOR>
-//     void apply(const VECTOR& x, VECTOR& Mx) const;
+    /*!
+      matrix-vector multiplication Mx = (*this) * x;
+      we assume that the vector Mx has the correct size and
+      is not identical to x
+    */
+    template <class VECTOR>
+    void apply(const VECTOR& x, VECTOR& Mx) const;
 
-//     /*!
-//       transposed matrix-vector multiplication Mtx = (*this)^T * x;
-//       we assume that the vector Mtx has the correct size and
-//       is not identical to x
-//     */
-//     template <class VECTOR>
-//     void apply_transposed(const VECTOR& x, VECTOR& Mtx) const;
+    //! special version for Vector<C> (requirement from MatrixBlock)
+    void apply(const Vector<C>& x, Vector<C>& Mx) const;
 
+    /*!
+      transposed matrix-vector multiplication Mtx = (*this)^T * x;
+      we assume that the vector Mtx has the correct size and
+      is not identical to x
+    */
+    template <class VECTOR>
+    void apply_transposed(const VECTOR& x, VECTOR& Mtx) const;
+
+    //! special version for Vector<C> (requirement from MatrixBlock)
+    void apply_transposed(const Vector<C>& x, Vector<C>& Mtx) const;
+    
     /*!
       stream output with user-defined tabwidth and precision
       (cf. deal.II)

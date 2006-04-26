@@ -39,6 +39,14 @@ int main()
 //     cout << "* j=" << level << ", Mj0=" << endl << Mj0 << endl;
     const BlockMatrix<double>& dummy = basis.get_Mj0(level); // should yield a cache hit
   } 
+
+  cout << "- checking setup of Mj0T for different levels:" << endl;
+  for (int level = basis.j0(); level <= basis.j0()+2; level++) {
+    cout << "* j=" << level << endl;
+    const BlockMatrix<double>& Mj0T = basis.get_Mj0T(level); // should yield a cache miss
+//     cout << "* j=" << level << ", Mj0T=" << endl << Mj0T << endl;
+    const BlockMatrix<double>& dummy = basis.get_Mj0T(level); // should yield a cache hit
+  } 
 #endif
 
 #if 0

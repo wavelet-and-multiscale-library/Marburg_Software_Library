@@ -74,8 +74,8 @@ namespace FrameTL
     /*!
       constructor
     */
-    FrameIndex(const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame,
-	       const unsigned int num);
+    FrameIndex(const int num,
+	       const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame);
 
     
     //! check equality
@@ -110,21 +110,21 @@ namespace FrameTL
     //! access to patchnumber
     const unsigned int p() const { return p_; }
 
-    const unsigned int number() const { return num_; }
+    const int number() const { return num_; }
 
     //! access to underlying frame
     const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame() const
     { return frame_; }
 
-  protected:
-    
     /*!
       inverse of constructor
       'FrameIndex(const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame,
-                  const unsigned int num)'
+      const unsigned int num)'
     */
     void set_number();
 
+  protected:
+    
     /*!
       pointer to corresponding frame
      */
@@ -146,7 +146,7 @@ namespace FrameTL
     //MultiIndex<int,DIM_d> k_;
     translation_type k_;
     
-    unsigned int num_;
+    int num_;
 
   };
 
@@ -194,7 +194,7 @@ namespace FrameTL
     on patch p
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
-  unsigned int
+  int
   first_generator_num(const FRAME* frame);
 
   /*!
@@ -202,7 +202,7 @@ namespace FrameTL
     on patch p
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
-  unsigned int
+  int
   last_generator_num(const FRAME* frame);
     
   /*!
@@ -210,7 +210,7 @@ namespace FrameTL
     on patch p
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
-  unsigned int
+  int
   first_wavelet_num(const FRAME* frame, const int j);
     
   /*!
@@ -218,7 +218,7 @@ namespace FrameTL
     on patch p
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
-  unsigned int
+  int
   last_wavelet_num(const FRAME* frame, const int j);
 
 

@@ -823,14 +823,15 @@ namespace FrameTL
     std::list<typename Frame::Index> intersect_diff;
 
     if ( generators ) {
-
+      
       for (Index ind = FrameTL::first_generator<IBASIS,DIM_d,DIM_m,Frame>(&frame, j);
 	 ind <= FrameTL::last_generator<IBASIS,DIM_d,DIM_m,Frame>(&frame, j); ++ind)
 	{
 	  if ( /*(lambda.p() != ind.p()) &&*/
 	       frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(),ind.p()) && 
-	       FrameTL::intersect_supports<IBASIS,DIM_d,DIM_m>(frame,lambda,ind,supp_lambda) )
+	       FrameTL::intersect_supports<IBASIS,DIM_d,DIM_m>(frame,lambda,ind,supp_lambda) ){
 	    intersect_diff.push_back(ind);
+	  }
 	  
 	}
       
@@ -842,8 +843,9 @@ namespace FrameTL
 	  
 	  if ( /*(lambda.p() != ind.p()) &&*/
 	       frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(),ind.p()) && 
-	       FrameTL::intersect_supports<IBASIS,DIM_d,DIM_m>(frame,lambda,ind,supp_lambda) )
+	       FrameTL::intersect_supports<IBASIS,DIM_d,DIM_m>(frame,lambda,ind,supp_lambda) ) {
 	    intersect_diff.push_back(ind);
+	  }
 	}
     }
     //    intersecting.unique();
@@ -890,7 +892,7 @@ namespace FrameTL
       return true;
     }
     
-    
+    return true;
 
     //######################################################################################
     

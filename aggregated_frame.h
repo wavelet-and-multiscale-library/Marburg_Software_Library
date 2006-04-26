@@ -67,14 +67,16 @@ namespace FrameTL
      */
     AggregatedFrame(const Atlas<DIM_d, DIM_m>*,
 		    const Array1D<FixedArray1D<int,2*DIM_d> >&,
-		    const Array1D<FixedArray1D<int,2*DIM_d> >&);
+		    const Array1D<FixedArray1D<int,2*DIM_d> >&,
+		    const int);
 
     /*!
       constructor,
       sets primal boundary conditions only
      */
     AggregatedFrame(const Atlas<DIM_d, DIM_m>*,
-		    const Array1D<FixedArray1D<int,2*DIM_d> >&);
+		    const Array1D<FixedArray1D<int,2*DIM_d> >&,
+		    const int);
 
     /*!
       frame index class
@@ -118,6 +120,11 @@ namespace FrameTL
     const Atlas<DIM_d, DIM_m>* atlas() const { return atlas_;  }
 
     /*!
+      access to collection of wavelet frame indices
+     */
+    const Array1D<Index> indices() const { return indices_; }
+
+    /*!
       critical Sobolev regularity for the primal generators/wavelets
     */
     static double primal_regularity() { return IBASIS::primal_regularity(); }
@@ -144,6 +151,9 @@ namespace FrameTL
     //! index of last wavelet on level j >= j0
     Index last_wavelet(const int j) const;
 
+    //! set finest possible level
+    void set_jmax(const int jmax) { jmax_ = jmax; }
+
   protected:
     //! pointer to the underlying atlas
     const Atlas<DIM_d, DIM_m>* atlas_;
@@ -157,6 +167,8 @@ namespace FrameTL
     //! coarsest possible level j0
     int j0_;
 
+    Array1D<Index> indices_;
+
   private:
 
     /*!
@@ -169,6 +181,9 @@ namespace FrameTL
       the instances of the mapped cube bases 
     */
     list<MappedCubeBasis<IBASIS, DIM_d, DIM_m>*> bases_infact;
+
+    //! finest possible level
+    int jmax_;
 
 
   };

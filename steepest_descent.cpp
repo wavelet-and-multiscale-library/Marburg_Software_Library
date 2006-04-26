@@ -9,8 +9,7 @@
 
 using std::set;
 
-namespace FrameTL
-{
+namespace FrameTL{
 
 /*!
 */
@@ -67,7 +66,7 @@ public:
   void steepest_descent_SOLVE(const PROBLEM& P,  const double epsilon,
 			      InfiniteVector<double, typename PROBLEM::Index>& u_epsilon)
   {
-    //typedef DSBasis<3,3> Basis1D;
+    //typedef DSBasis<2,2> Basis1D;
     typedef PBasis<3,3> Basis1D;
 
     Point<2> origin;
@@ -83,30 +82,30 @@ public:
 //    Singularity1D_2<double> exactSolution1D;
 
     unsigned int loops = 0;
-    const int jmax = 5;
+    const int jmax = 10;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
-    //double kappa     = P.norm_A()*a_inv;
-    double kappa     = 1.;
-    double omega_i   = a_inv*P.F_norm();
+    double kappa     = P.norm_A()*a_inv;
+    //double kappa     = 1.;
+    double omega_i   = 0.01*a_inv*P.F_norm();
     //double omega_i   = 1;
     cout << "a_inv = " << a_inv << endl;
     cout << "omega_i = " << omega_i << endl;
-    //double delta     = 1./(5.*kappa+a_inv);
-    double delta = 1.;
+    double delta     = 1./(5.*kappa+a_inv);
+    //double delta = 1.;
     cout << "delta = " << delta << endl;
-    //const double A = 1 + delta;
-    const double A = 1.;
+    const double A = 1 + delta;
+    //const double A = 1.;
     //const double C = 1.0 / ((1 - ((kappa*(delta*delta+2.*delta)+a_inv*delta)/((1-delta)*(1-delta))))
     //			    * (((1-delta)*(1-delta))/(a_inv)));
     const double C = 1.0;
     cout << "C = " << C << endl;
     const double B = C * (A*A);
     cout << "B = " << B << endl;
-    //double lambda = (kappa-1)/(kappa+1) + P.norm_A()*std::max(3.*A*A*B,C*(1./(1-delta)))*delta;
-    double lambda = ((kappa-1)/(kappa+1)+1.)/2.;
-    //double lambda = 0.99;
+    double lambda = (kappa-1)/(kappa+1) + P.norm_A()*std::max(3.*A*A*B,C*(1./(1-delta)))*delta;
+    //double lambda = ((kappa-1)/(kappa+1)+1.)/2.;
+    //double lambda = 0.9;
     cout << "lambda = " << lambda << endl;
     const double C3 = B;
     cout << "C3 = " << C3 << endl;
@@ -118,9 +117,9 @@ public:
     //let K be such that beta^K * omega <= epsilon
     unsigned int K   = (int) (log(epsilon/omega_i) / log(beta) + 1);
     //let M be such that lambda^M <= ((1-delta) / (1+delta)) * (beta / ((1+3*mu)*kappa))
-    //int M            = std::max((int) ((log( ((1-delta)/(1+delta)) * (beta / ((1+3.0*mu)*kappa)) )
-    //			       / log(lambda)) + 1),1);
-    int M = 1;   
+    int M            = std::max((int) ((log( ((1-delta)/(1+delta)) * (beta / ((1+3.0*mu)*kappa)) )
+    			       / log(lambda)) + 1),1);
+    //int M = 1;   
 
     InfiniteVector<double, Index> w, tilde_r, help, f, Av;
     
@@ -146,32 +145,34 @@ public:
       omega_i *= beta;
       double xi_i = omega_i / ((1+3.0*mu)*C3*M);
       double nu_i = 0.;
+
       RES(P, w, xi_i, delta, omega_i/((1+3.*mu)*a_inv), jmax,
-	  tilde_r, nu_i, CDD1);
+	  tilde_r, nu_i, CDD1); 
 
       while ( nu_i > omega_i/((1+3.*mu)*a_inv)) {
+
 	InfiniteVector<double, Index> z_i;
 	//APPLY(P, tilde_r, delta*l2_norm(tilde_r), z_i, jmax, CDD1);
 
 // 	tend = clock();
 // 	time = (double)(tend-tstart)/CLOCKS_PER_SEC;
-	APPLY_COARSE(P, tilde_r, delta*l2_norm(tilde_r), z_i, 0.00000001, jmax, CDD1);
-	//APPLY(P, tilde_r, delta*l2_norm(tilde_r), z_i, jmax, CDD1);
+	APPLY_COARSE(P, tilde_r,delta*l2_norm(tilde_r), z_i, 0.00001, jmax, CDD1);
+	//APPLY(P, tilde_r, .0/*delta*l2_norm(tilde_r)*/, z_i, jmax, CDD1);
+	//cout << z_i << endl;
 // 	acctime += ((double)(tend-tstart)/CLOCKS_PER_SEC - time);
 // 	cout << "time = " << acctime  << endl;
-	
 	double d = ((tilde_r*tilde_r)/(z_i*tilde_r));
 	w += d*tilde_r;
 	cout << "descent param = " << d << endl;
 	++loops;
- 	P.RHS(0.00001,f);
- 	APPLY_COARSE(P, w, 0.00001, Av, 0.00000001, jmax, CDD1);
+ 	P.RHS(.0,f);
+ 	//APPLY_COARSE(P, w, 0.0000000001, Av, 0.000000001, jmax, CDD1);
+	APPLY(P, w, .0, Av, jmax, CDD1);
  	help = f-Av;
 	//degrees_of_freedom[loops] = w.size();
 
 	RES(P, w, xi_i, delta, omega_i/((1+3.*mu)*a_inv), jmax,
 	    tilde_r, nu_i, CDD1);
-
 	cout << "loop: " << loops << " nu = " 
 	     << nu_i << " epsilon = " << omega_i/((1+3.*mu)*a_inv) << endl;
 	cout << "xi: " << xi_i << endl; 
@@ -182,7 +183,6 @@ public:
 	cout << "residual norm = " << tmp << endl;
 	asymptotic[log10( (double)w.size() )] = tmp1;
 	log_10_residual_norms[loops] = tmp1;
-
 	//u_epsilon = w;
 	//P.rescale(u_epsilon,-1);
 
@@ -244,7 +244,7 @@ public:
 // 	  os4.close();
 // 	}
 
-	if (tmp < 1.0e-8 || loops == 3000) {
+	if (tmp < 1.0e-4 || loops == 3000) {
 	  u_epsilon = w;
 	  exit = true;
 	  break;

@@ -9,10 +9,11 @@
    template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
    FrameIndex<IBASIS, DIM_d, DIM_m>::FrameIndex(const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame)
      : frame_(frame)
-   {
+   {  
      if (frame_ == 0) {
        j_ = 0; // invalid (e and k are initialized by zero automatically)
        p_ = 0;
+       num_ = -1;
      } else {
        j_ = frame_->j0(); // coarsest level;
        // e_ is zero by default: generator
@@ -20,30 +21,28 @@
        for (unsigned int i = 0; i < DIM_d; i++)
 	 k_[i] = WaveletTL::first_generator<IBASIS>(frame_->bases()[0]->bases()[i], j_).k();
 
-       set_number();
+       num_ = -1;
 
      }
    }
 
    template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
    FrameIndex<IBASIS, DIM_d, DIM_m>::FrameIndex(const FrameIndex& ind)
-     : frame_(ind.frame()), j_(ind.j()), e_(ind.e()), p_(ind.p()), k_(ind.k())
+     : frame_(ind.frame()), j_(ind.j()), e_(ind.e()), p_(ind.p()), k_(ind.k()), num_(ind.number())
    {
-     set_number();
    }
 
    template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
    FrameIndex<IBASIS, DIM_d, DIM_m>::FrameIndex(const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame,
 						const CubeIndex<IBASIS,DIM_d>& c,
 						const int p)
-     : frame_(frame), j_(c.j()), e_(c.e()), p_(p), k_(c.k())
+     : frame_(frame), j_(c.j()), e_(c.e()), p_(p), k_(c.k()), num_(-1)
    {
-     set_number();
    }
 
    template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
-   FrameIndex<IBASIS, DIM_d, DIM_m>::FrameIndex(const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame,
-						const unsigned int num)
+   FrameIndex<IBASIS, DIM_d, DIM_m>::FrameIndex(const int num,
+						const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame)
      : frame_(frame)
    {
      num_ = num; 
@@ -51,19 +50,19 @@
      unsigned int n_p = frame_->n_p();
 
      // to be decreased successively
-     unsigned int act_num = num_;
+     int act_num = num_;
 
      int j = frame_->j0();
 
-     unsigned int tmp2 = 0;
+     int tmp2 = 0;
 
      bool gen = 0;
 
      // determine the level of the index
      while (true) {
-       unsigned int tmp = 0;
+       int tmp = 0;
        for (unsigned int p = 0; p < n_p; p++) {
-	 unsigned int tmp3 = 1;
+	 int tmp3 = 1;
 	 for (unsigned int i = 0; i < DIM_d; i++)
 	   tmp3 *= ((frame_->bases()[p])->bases())[i]->Deltasize(j);
 	 tmp += tmp3;
@@ -85,7 +84,7 @@
      tmp2 = 0;
 
      // determine the type of the index 
-     unsigned int tmp2_old = 0;
+     int tmp2_old = 0;
      if (gen)
        e_ = type_type();
      else {
@@ -94,9 +93,9 @@
        bool exit = 0;
        // loop over types
        while (true) {
-	 unsigned int tmp = 0;
+	 int tmp = 0;
 	 for (unsigned int p = 0; p < n_p; p++) {
-	   unsigned int tmp3 = 1;
+	   int tmp3 = 1;
 	   for (unsigned int i = 0; i < DIM_d; i++) { 
 	     if (type[i] == 0)
 	       tmp3 *= ((frame_->bases()[p])->bases())[i]->Deltasize(j_);
@@ -137,7 +136,7 @@
      // determine the patchnumber of this index
      unsigned int p = 0;
      for ( ; p < n_p; p++) {
-       unsigned int tmp = 1;
+       int tmp = 1;
        for (unsigned int i = 0; i < DIM_d; i++) { 
 	 if (e_[i] == 0)
 	   tmp *= ((frame_->bases()[p])->bases())[i]->Deltasize(j_);
@@ -168,7 +167,7 @@
      
      act_num += 1;
      for (unsigned int i = 0; i < DIM_d; i++) {
-       unsigned int tmp = 0;
+       int tmp = 0;
        if (act_num <= tmp2) {
 	 if (e_[i] == 0)
 	   k_[i] = ((frame_->bases()[p_])->bases())[i]->DeltaLmin();
@@ -211,9 +210,8 @@
 				      const unsigned int p,
 				      const translation_type& k)
 
-     : frame_(frame), j_(j), e_(e), p_(p), k_(k)
+     : frame_(frame), j_(j), e_(e), p_(p), k_(k), num_(-1)
    {
-     set_number();
    }
 
    template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
@@ -232,8 +230,9 @@
    FrameIndex<IBASIS, DIM_d, DIM_m>&
    FrameIndex<IBASIS, DIM_d, DIM_m>::operator ++ ()
    {
-     //set_number();//  for testing
-     num_++;
+
+     if (num_ > -1)
+       ++num_;
      
      const unsigned int num_patches = (frame_->bases()).size();
      assert(0 <= p_ && p_ < num_patches);
@@ -307,9 +306,12 @@
   void
   FrameIndex<IBASIS, DIM_d, DIM_m>::set_number()
   {
+    type_type gen_type;
+    assert( e_ != gen_type || j_ == frame_->j0() );
+
     unsigned int n_p = frame_->n_p();
 
-    unsigned int result = 0;
+    int result = 0;
     bool gen = 1;
 
     // check if wavelet is a generator
@@ -325,7 +327,7 @@
     if (! gen) {
       result = 0;
       for (unsigned int p = 0; p < n_p; p++) {
-	unsigned int tmp = 1;
+	int tmp = 1;
 	for (unsigned int i = 0; i < DIM_d; i++)
 	  tmp *= ((frame_->bases()[p])->bases())[i]->Deltasize(j_);
 	result += tmp;
@@ -342,7 +344,7 @@
       // loop over all ''smaller'' types
       while (type < e_) {
 	for (unsigned int p = 0; p < n_p; p++) {
-	  unsigned int tmp = 1;
+	  int tmp = 1;
 	  for (unsigned int i = 0; i < DIM_d; i++) {
 	    if (type[i] == 0)
 	      tmp *= ((frame_->bases()[p])->bases())[i]->Deltasize(j_);
@@ -372,7 +374,7 @@
     // now we are on the right level and on the right type.
     // next we have to go to right patch
     for (unsigned int p = 0; p < p_ ; p++) {
-      unsigned int tmp = 1;
+      int tmp = 1;
       for (unsigned int i = 0; i < DIM_d; i++) {
 	if (e_[i] == 0)
 	  tmp *= ((frame_->bases()[p])->bases())[i]->Deltasize(j_);
@@ -386,7 +388,7 @@
     // on the same patch, whose indices are smaller than this index,
     // add the result to res
     for (unsigned int i = 0; i < DIM_d; i++) {
-      unsigned int tmp = 1;
+      int tmp = 1;
       if (e_[i] == 0) {
 	if (k_[i] == ((frame_->bases()[p_])->bases())[i]->DeltaLmin())
 	  continue;
@@ -422,7 +424,8 @@
      p_ = lambda.p();
      k_ = lambda.k();
      frame_ = lambda.frame();
-     
+     num_ = lambda.number();
+
      return *this;
    }
 
@@ -475,7 +478,7 @@
      typename FrameIndex<IBASIS,DIM_d,DIM_m>::type_type e;//== 0
      typename FrameIndex<IBASIS,DIM_d,DIM_m>::translation_type k;
      for (unsigned int i = 0; i < DIM_d; i++)
-       k[i] = WaveletTL::last_generator<IBASIS>(frame->bases()[0]->bases()[i], j).k();
+       k[i] = WaveletTL::last_generator<IBASIS>(frame->bases()[frame->n_p()-1]->bases()[i], j).k();
 
      return FrameIndex<IBASIS,DIM_d,DIM_m>(frame, j, e, frame->bases().size()-1, k); 
    }
@@ -515,31 +518,39 @@
 
 
    template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
-   unsigned int
+   int
    first_generator_num(const FRAME* frame)
    {
-     return first_generator<IBASIS,DIM_d,DIM_m>(frame, frame->j0()).number();
+     FrameIndex<IBASIS,DIM_d,DIM_m> ind(first_generator<IBASIS,DIM_d,DIM_m>(frame, frame->j0()));
+     ind.set_number();
+     return ind.number();
    }
    
    template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
-   unsigned int
+   int
    last_generator_num(const FRAME* frame)
    {
-     return last_generator<IBASIS,DIM_d,DIM_m>(frame, frame->j0()).number();
+     FrameIndex<IBASIS,DIM_d,DIM_m> ind(last_generator<IBASIS,DIM_d,DIM_m>(frame, frame->j0()));
+     ind.set_number();
+     return ind.number();
    }
 
    template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
-   unsigned int
+   int
    first_wavelet_num(const FRAME* frame, const int j)
    {
-     return first_wavelet<IBASIS,DIM_d,DIM_m>(frame, j).number();
+     FrameIndex<IBASIS,DIM_d,DIM_m> ind(first_wavelet<IBASIS,DIM_d,DIM_m>(frame, j));
+     ind.set_number();
+     return ind.number();
    }
 
    template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
-   unsigned int
+   int
    last_wavelet_num(const FRAME* frame, const int j)
    {
-     return last_wavelet<IBASIS,DIM_d,DIM_m>(frame, j).number();
+     FrameIndex<IBASIS,DIM_d,DIM_m> ind(last_wavelet<IBASIS,DIM_d,DIM_m>(frame, j));
+     ind.set_number();
+     return ind.number();
    }
 
    
@@ -556,7 +567,7 @@
 	<< lambda.p()
 	<< ","
 	<< lambda.k()
-	<< ")";
+	<< ")" << " number = " << lambda.number(); 
     return os;
 
    }

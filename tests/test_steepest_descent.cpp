@@ -101,7 +101,7 @@ int main()
   
   const int DIM = 1;
 
-  //typedef DSBasis<3,3> Basis1D;
+  //typedef DSBasis<2,2> Basis1D;
   typedef PBasis<3,3> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
@@ -110,13 +110,13 @@ int main()
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 0.7;
+  A(0,0) = 0.8;
   Point<1> b;
   b[0] = 0.;
   AffineLinearMapping<1> affineP(A,b);
   
   Matrix<double> A2(DIM,DIM);
-  A2(0,0) = 0.7;
+  A2(0,0) = 0.8;
   Point<1> b2;
   b2[0] = 1-A2.get_entry(0,0);
   AffineLinearMapping<1> affineP2(A2,b2);
@@ -152,13 +152,13 @@ int main()
   //primal boundary conditions for first patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_1;
   bound_1[0] = 1;
-  bound_1[1] = 1;
+  bound_1[1] = 2;
   
   bc[0] = bound_1;
   
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
-  bound_2[0] = 1;
+  bound_2[0] = 2;
   bound_2[1] = 1;
   
   bc[1] = bound_2;
@@ -184,8 +184,8 @@ int main()
   cout << Lshaped << endl;
 
   //finally a frame can be constructed
-  //Frame1D frame(&Lshaped, bc, bcT);
-  Frame1D frame(&Lshaped, bc);
+  //Frame1D frame(&Lshaped, bc, bcT, 8);
+  Frame1D frame(&Lshaped, bc, 6);
 
   Vector<double> value(1);
   value[0] = 1;
@@ -209,14 +209,20 @@ int main()
 
   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 2.13, 1.0/0.0038);
   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 2.47, 1.0/0.0751);
-  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.3076, 1.0/0.1);
+  //  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.3076, 1.0/0.1);
+  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 4.19, 1.0/0.146);
   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.032, 1.0/(1.0e-3*0.672));
   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.032, 1.0/0.01);
 
 
   // p basis d = 2 dt = 2
-  discrete_poisson.set_norm_A(3.3076);
-  discrete_poisson.set_Ainv(1.0/0.1);
+//   discrete_poisson.set_norm_A(3.3076);
+//   discrete_poisson.set_Ainv(1.0/0.1);
+
+
+  // p basis d = 3 dt = 3
+  discrete_poisson.set_norm_A(4.19);
+  discrete_poisson.set_Ainv(1.0/0.146);
   
 
   // d = 2 dt = 2

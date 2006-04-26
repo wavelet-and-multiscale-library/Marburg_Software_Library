@@ -68,7 +68,7 @@ public:
 			InfiniteVector<double, typename PROBLEM::Index>& u_epsilon)
   {
     //typedef DSBasis<2,2> Basis1D;
-    typedef PBasis<2,2> Basis1D;
+    typedef PBasis<3,3> Basis1D;
     //     Singularity1D_RHS_2<double> sing1D;
     //     Singularity1D_2<double> exactSolution1D;
      
@@ -79,7 +79,7 @@ public:
 //     CornerSingularity sing2D(origin, 0.5, 1.5);
 //     CornerSingularityRHS singRhs(origin, 0.5, 1.5);
      
-    const int jmax = 7;
+    const int jmax = 5;
 
     double nu = P.norm_Ainv()*P.F_norm();
     //double nu = 50;
@@ -87,8 +87,8 @@ public:
     typedef typename PROBLEM::Index Index;
 
     // compute optimal relaxation parameter omega
-    const double omega = 2.0 / (P.norm_A() + 1.0/P.norm_Ainv());
-    //const double omega = 2.0/5.0048-0.01;//0.337721577225;//0.476369621181
+    //const double omega = 2.0 / (P.norm_A() + 1.0/P.norm_Ainv());
+    const double omega = 2.0/5.0048-0.01;//0.337721577225;//0.476369621181
     //const double omega = 0.2;//that was the bad alpha estimate
     //const double omega = 0.1;// 2D good one
     //const double omega = 2.0/10;

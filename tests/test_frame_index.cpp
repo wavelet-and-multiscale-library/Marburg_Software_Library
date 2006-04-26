@@ -115,7 +115,7 @@ int main()
 
   //a frame has finally been constructed
   //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT);
-  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc);
+  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, 6);
 
   FrameIndex<Basis1D,2,2> ind1(&frame,j2,e2,p2,k2);
   cout << "one index:" << endl
@@ -150,7 +150,7 @@ int main()
   cout << "##################################################" << endl;
   int i = 0;
   for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
-       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, frame.j0()+4); ++lambda) {
+       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, frame.j0()+2); ++lambda) {
 //     if (!((i == 97) || (i == 98))) {
 //       ++i;
 //       continue;
@@ -159,7 +159,7 @@ int main()
     FrameIndex<Basis1D,2,2> mu(lambda);
     cout << lambda << " number  = " << mu.number() << endl;
 
-    if (! (FrameIndex<Basis1D,2,2>(&frame, i) == lambda))
+    if (! (FrameIndex<Basis1D,2,2>(i, &frame) == lambda))
       abort();
     cout << "-----------------------------------------" << endl;
     i++;
@@ -235,7 +235,7 @@ int main()
 
   //a frame has finally been constructed
   //AggregatedFrame<Basis1D, 1, 1> frame1D(&interv, bc_1D, bcT_1D);
-  AggregatedFrame<Basis1D, 1, 1> frame1D(&interv, bc_1D);
+  AggregatedFrame<Basis1D, 1, 1> frame1D(&interv, bc_1D, 6);
 
 
   MultiIndex<unsigned int, 1> e;

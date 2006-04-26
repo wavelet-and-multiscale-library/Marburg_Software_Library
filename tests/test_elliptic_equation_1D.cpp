@@ -11,7 +11,9 @@
 #include <frame_evaluate.h>
 #include <cube/cube_basis.h>
 #include <cube/cube_index.h>
+#include <adaptive/apply.h>
 #include <galerkin/galerkin_utils.h>
+#include <galerkin/cached_problem.h>
 #include <frame_support.h>
 #include <frame_index.h>
 
@@ -127,7 +129,7 @@ int main()
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 1.;
+  A(0,0) = 0.8;
   Point<1> b;
   b[0] = 0.;
   AffineLinearMapping<1> affineP(A,b);
@@ -149,18 +151,18 @@ int main()
 
   //##############################
   
-  Array1D<Chart<DIM,DIM>* > charts(1);
+  Array1D<Chart<DIM,DIM>* > charts(2);
   charts[0] = &affineP;
-  //charts[1] = &affineP2;
+  charts[1] = &affineP2;
 
   //charts[0] = &simpleaffine1;
   //charts[1] = &simpleaffine2;
   
-  SymmetricMatrix<bool> adj(1);
+  SymmetricMatrix<bool> adj(2);
   adj(0,0) = 1;
-//   adj(1,1) = 1;
-//   adj(1,0) = 1;
-//   adj(0,1) = 1;
+  adj(1,1) = 1;
+  adj(1,0) = 1;
+  adj(0,1) = 1;
   
   //to specify primal boundary the conditions
   Array1D<FixedArray1D<int,2*DIM> > bc(2);
@@ -201,7 +203,7 @@ int main()
 
   //finally a frame can be constructed
   //Frame1D frame(&Lshaped, bc, bcT);
-  Frame1D frame(&Lshaped, bc);
+  Frame1D frame(&Lshaped, bc, 6);
 
   Vector<double> value(1);
   value[0] = 1;
@@ -216,6 +218,8 @@ int main()
   EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
   
+  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 4.19, 1.0/0.146);
+
   double tmp = 0.0;
   int c = 0;
   int d = 0;
@@ -228,16 +232,20 @@ int main()
   int z = 0;
   set<Index> Lambda;
   for (Index lambda = FrameTL::first_generator<Basis1D,1,1,Frame1D>(&frame, frame.j0());
-       lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+2); ++lambda) {
+       lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+1); ++lambda) {
     cout << lambda << endl;
     cout << z++ << endl;
     Lambda.insert(lambda);
   }
 
+  
+
+
   cout << "setting up full right hand side..." << endl;
   Vector<double> rh;
-  //WaveletTL::setup_righthand_side(discrete_poisson, Lambda, rh);
-  //cout << rh << endl;
+  WaveletTL::setup_righthand_side(discrete_poisson, Lambda, rh);
+  
+  cout << rh << endl;
   
   cout << "setting up full stiffness matrix..." << endl;
   SparseMatrix<double> stiff;
@@ -246,7 +254,7 @@ int main()
   double time;
   tstart = clock();
   
-  //WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
+  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
   
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
@@ -277,17 +285,17 @@ int main()
   double alpha_n = 0.07;
   Vector<double> resid(xk.size());
   Vector<double> help(xk.size());
-//   for (int i = 0; i < 2000; i++) {
-//     stiff.apply(xk,help);
-//     resid = rh - help;
-//     cout << ".loop = " << i << " " << " res = " << sqrt((resid*resid)) << endl;
-//     stiff.apply(resid,help);
-//     alpha_n = (resid * resid) * (1.0 / (resid * help));
-//     //cout  << alpha_n << endl;
-//     resid *= alpha_n;
-//     //resid *= 0.3;
-//     xk = xk + resid;
-//   }
+  for (int i = 0; i < 500; i++) {
+    stiff.apply(xk,help);
+    resid = rh - help;
+    cout << ".loop = " << i << " " << " res = " << sqrt((resid*resid)) << endl;
+    stiff.apply(resid,help);
+    alpha_n = (resid * resid) * (1.0 / (resid * help));
+    //cout  << alpha_n << endl;
+    resid *= alpha_n;
+    //resid *= 0.3;
+    xk = xk + resid;
+  }
 
 
 
@@ -303,15 +311,20 @@ int main()
   
   u.scale(&discrete_poisson,-1);
 
-   EvaluateFrame<Basis1D,1,1> evalObj;
+  InfiniteVector<double,Index> Au;
+  APPLY(problem, u, .0, Au, 4, CDD1);
+  cout << "u = " << u.size() << endl;
+  cout << "Au size = " << Au.size() << " " << Au << endl;
 
-   Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u, true, 11);//expand in primal basis
-   Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u, exactSolution, 11);
-
+  EvaluateFrame<Basis1D,1,1> evalObj;
+  
+  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u, true, 11);//expand in primal basis
+  Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u, exactSolution, 11);
+  
   //double L2err = evalObj.L_2_error(frame, u, exactSolution, 7, 0.0, 1.0);
-
+  
   //cout << "L_2 error = " << L2err << endl;
-
+  
   std::ofstream ofs5("approx_solution_1D_out.m");
   matlab_output(ofs5,U);
   ofs5.close();
@@ -326,7 +339,7 @@ int main()
 #endif
 	  
   
-#if 1
+#if 0
   char filename1[50];
   u.clear();
   Lambda.clear();

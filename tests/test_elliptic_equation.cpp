@@ -155,7 +155,7 @@ int main()
 
   //finally a frame can be constructed
   //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT);
-  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc);
+  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, 6);
 
   Vector<double> value(1);
   value[0] = 1;

@@ -52,7 +52,7 @@ int main()
   const int DIM = 2;
 
   //typedef DSBasis<2,2> Basis1D;
-  typedef PBasis<3,3> Basis1D;
+  typedef PBasis<2,2> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
   typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
@@ -161,7 +161,7 @@ int main()
 
   //finally a frame can be constructed
   //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT);
-  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc);
+  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, 6);
 
   Vector<double> value(1);
   value[0] = 1;

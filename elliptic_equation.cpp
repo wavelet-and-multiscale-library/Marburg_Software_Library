@@ -115,7 +115,7 @@ namespace FrameTL
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
     const int j0   = frame_->j0();
-    const int jmax = 4; // for a first quick hack
+    const int jmax = 10; // for a first quick hack
     for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
       {
 	const double coeff = f(lambda)/D(lambda);
@@ -149,7 +149,7 @@ namespace FrameTL
 
     // precompute the right-hand side on a fine level
     const int j0   = frame_->j0();
-    const int jmax = 4;  // for a first quick hack
+    const int jmax = 10;  // for a first quick hack
     for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
       {
 	stiff_diagonal.set_coefficient(lambda, sqrt(a(lambda,lambda)));
@@ -611,7 +611,7 @@ namespace FrameTL
 	gauss_points[i].resize(N * N_Gauss*(supp_lambda.b[i]-supp_lambda.a[i]));
 	gauss_weights[i].resize(N * N_Gauss*(supp_lambda.b[i]-supp_lambda.a[i]));
  	for (int patch = supp_lambda.a[i]; patch < supp_lambda.b[i]; patch++)
- 	  for (int m = 0; m < N; m++)
+ 	  for (unsigned int m = 0; m < N; m++)
 	    for (int n = 0; n < N_Gauss; n++) {
  	      gauss_points[i][ N*(patch-supp_lambda.a[i])*N_Gauss + m*N_Gauss+n ]
 		= h*( 1.0/(2.*N)*(GaussPoints[N_Gauss-1][n]+1+2.0*m)+patch);
@@ -704,7 +704,7 @@ namespace FrameTL
 	// "++index"
 	bool exit = false;
 	for (unsigned int i = 0; i < DIM; i++) {
-	  if (index[i] == N * N_Gauss * (supp_lambda.b[i]-supp_lambda.a[i]) - 1) {
+	  if (index[i] == (int) N * N_Gauss * (supp_lambda.b[i]-supp_lambda.a[i]) - 1) {
 	    index[i] = 0;
 	    exit = (i == DIM-1);
 	  } else {
@@ -1500,10 +1500,10 @@ namespace FrameTL
       if (exit) break;
     }
 
-#if 1
+#if 0
     return r;
 #endif
-#if 0
+#if 1
     assert(DIM == 1);
     double tmp = 1;
     Point<DIM> p1;

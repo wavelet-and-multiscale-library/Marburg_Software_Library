@@ -99,8 +99,8 @@ namespace FrameTL
     */
     typedef struct {
       int j;
-      int a[DIM];
-      int b[DIM];
+      int a[DIM_d];
+      int b[DIM_d];
       const Chart<DIM_d,DIM_m>* ch;
     } Support;
 

@@ -153,7 +153,7 @@ namespace FrameTL
   /*!
     stream output for FrameIndex
    */
-  template <class IBASIS, unsigned int DIM>
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   std::ostream& operator << (std::ostream&, const FrameIndex<IBASIS, DIM_d, DIM_m>&);
 
   /*!

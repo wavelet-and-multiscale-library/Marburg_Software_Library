@@ -270,7 +270,7 @@ namespace FrameTL
 		    InfiniteVector<double, Index>& w, const int j,
 		    const double factor,
 		    const int J,
-		    const CompressionStrategy strategy = St04a) const;
+		    const CompressionStrategy strategy) const;
 
    protected:
     

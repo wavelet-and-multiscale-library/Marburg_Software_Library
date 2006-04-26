@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <cmath>
+#include <interval/i_index.h>
 
  namespace FrameTL
  {
@@ -20,7 +21,7 @@
        p_ = 0;
        for (unsigned int i = 0; i < DIM_d; i++)
 	 k_[i] = WaveletTL::first_generator<IBASIS>(frame_->bases()[0]->bases()[i], j_).k();
-
+       
        num_ = -1;
 
      }

@@ -4,7 +4,7 @@
 #include <numerics/gauss_data.h>
 #include <frame_index.h>
 #include <frame_support.h>
-#include <cuba.h>
+//#include <cuba.h>
 
 //#include <cube/cube_support.h>
 
@@ -1326,22 +1326,22 @@ namespace FrameTL
 //        printf("SUAVE RESULT:\t%.8f +- %.8f\tp = %.3f\n",
 // 	      integral[comp], error[comp], prob[comp]);
   
-    cout.precision(12);
-    Cuhre(NDIM, NCOMP, MultiDimIntegrand,
-	  EPSREL, EPSABS, VERBOSE | LAST, MINEVAL, MAXEVAL,
-	  KEY,
-	  &nregions, &neval, &fail, integral, error, prob);
+//     cout.precision(12);
+//     Cuhre(NDIM, NCOMP, MultiDimIntegrand,
+// 	  EPSREL, EPSABS, VERBOSE | LAST, MINEVAL, MAXEVAL,
+// 	  KEY,
+// 	  &nregions, &neval, &fail, integral, error, prob);
     
-    cout << "+++++++++++++++++++++++++++++++++++++" << endl;
+//     cout << "+++++++++++++++++++++++++++++++++++++" << endl;
     
-    r += integral[0];
+//     r += integral[0];
     
-    printf("CUHRE RESULT:\tnregions %d\tneval %d\tfail %d\n",
-	   nregions, neval, fail);
-    for( comp = 0; comp < NCOMP; ++comp ) {
-      printf("CUHRE RESULT:\t%.8f +- %.8f\tp = %.3f\n",
-	     integral[comp], error[comp], prob[comp]); 
-    }
+//     printf("CUHRE RESULT:\tnregions %d\tneval %d\tfail %d\n",
+// 	   nregions, neval, fail);
+//     for( comp = 0; comp < NCOMP; ++comp ) {
+//       printf("CUHRE RESULT:\t%.8f +- %.8f\tp = %.3f\n",
+// 	     integral[comp], error[comp], prob[comp]); 
+//     }
     
   //     }
 //     }
@@ -1545,7 +1545,7 @@ namespace FrameTL
   void
   EllipticEquation<IBASIS,DIM>::set_bvp(const EllipticBVP<DIM>* bvp)
   {
-    bvp_ = bvp;
+    ell_bvp_ = bvp;
     compute_diagonal();
     compute_rhs();
 

@@ -5,9 +5,11 @@
 namespace MathTL
 {
   template <class C, class MATRIX1, class MATRIX2>
-  KroneckerMatrix<C,MATRIX1,MATRIX2>::KroneckerMatrix(const MATRIX1& A_, const MATRIX2& B_)
+  KroneckerMatrix<C,MATRIX1,MATRIX2>::KroneckerMatrix(const MATRIX1& A_, const MATRIX2& B_,
+						      const double factor)
     : A(A_), B(B_)
   {
+    A.scale(factor);
   }
 
   template <class C, class MATRIX1, class MATRIX2>

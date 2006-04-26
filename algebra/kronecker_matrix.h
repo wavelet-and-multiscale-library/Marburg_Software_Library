@@ -37,7 +37,8 @@ namespace MathTL
     typedef typename Vector<C>::size_type size_type;
     
     //! default constructor from A and B
-    explicit KroneckerMatrix(const MATRIX1& A, const MATRIX2& B);
+    explicit KroneckerMatrix(const MATRIX1& A, const MATRIX2& B,
+			     const double factor = 1.0);
     
     //! copy constructor
     KroneckerMatrix(const KroneckerMatrix<C,MATRIX1,MATRIX2>& M);

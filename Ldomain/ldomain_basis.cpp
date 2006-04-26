@@ -33,25 +33,17 @@ namespace WaveletTL
 	const unsigned int Deltaj   = basis1d().Deltasize(j);
 	const unsigned int Deltajp1 = basis1d().Deltasize(j+1);
 
-	// row/column 0 <-> patch 0
-	matrix_it->second.resize_block_row   (0, (Deltajp1-2)*(Deltajp1-2));
- 	matrix_it->second.resize_block_column(0, (Deltaj-2)*(Deltaj-2));
+	// row/column 0,1,2 <-> patches 0,1,2
+	for (unsigned int patch = 0; patch <= 2; patch++) {
+	  matrix_it->second.resize_block_row   (patch, (Deltajp1-2)*(Deltajp1-2));
+	  matrix_it->second.resize_block_column(patch, (Deltaj-2)*(Deltaj-2));
+	}
 	
- 	// row/column 1 <-> patch 1
- 	matrix_it->second.resize_block_row   (1, (Deltajp1-2)*(Deltajp1-2));
- 	matrix_it->second.resize_block_column(1, (Deltaj-2)*(Deltaj-2));
-	
- 	// row/column 2 <-> patch 2
- 	matrix_it->second.resize_block_row   (2, (Deltajp1-2)*(Deltajp1-2));
- 	matrix_it->second.resize_block_column(2, (Deltaj-2)*(Deltaj-2));
-	
- 	// row/column 3 <-> interface 3
- 	matrix_it->second.resize_block_row   (3, Deltajp1-2);
- 	matrix_it->second.resize_block_column(3, Deltaj-2);
-	
- 	// row/column 4 <-> interface 4
- 	matrix_it->second.resize_block_row   (4, Deltajp1-2);
- 	matrix_it->second.resize_block_column(4, Deltaj-2);
+ 	// row/column 3,4 <-> interface 3,4
+	for (unsigned int patch = 3; patch <= 4; patch++) {
+	  matrix_it->second.resize_block_row   (patch, Deltajp1-2);
+	  matrix_it->second.resize_block_column(patch, Deltaj-2);
+	}
 
  	// prepare 1d matrices
  	SparseMatrix<double> Mj0_1d; basis1d().assemble_Mj0(j, Mj0_1d);
@@ -65,6 +57,7 @@ namespace WaveletTL
 	SparseMatrix<double> Mj0_1d_right(Mj0_1d.row_dimension()-2, 1);
  	for (unsigned int row = 0; row < Mj0_1d_right.row_dimension(); row++)
 	  Mj0_1d_right.set_entry(row, 0, Mj0_1d.get_entry(row+1, Mj0_1d.column_dimension()-1));
+	SparseMatrix<double> Mj0_1d_left_top(1, 1); Mj0_1d_left_top.set_entry(0, 0, Mj0_1d.get_entry(0, 0));
 	
  	// patch generators decompose only into themselves
 	for (int patch = 0; patch <= 2; patch++)
@@ -73,10 +66,25 @@ namespace WaveletTL
 				      (Mj0_1d_interior, Mj0_1d_interior));
 	
 	// interface generators decompose into themselves and patch generators from the neighboring patches
-	// (TODO)
-// 	matrix_it->second.set_block(0, 3,
-// 				    new KroneckerMatrix<double,SparseMatrix<double>,SparseMatrix<double> >
-// 				    ());
+ 	matrix_it->second.set_block(0, 3,
+ 				    new KroneckerMatrix<double,SparseMatrix<double>,SparseMatrix<double> >
+ 				    (Mj0_1d_interior, Mj0_1d_left));
+ 	matrix_it->second.set_block(1, 3,
+ 				    new KroneckerMatrix<double,SparseMatrix<double>,SparseMatrix<double> >
+ 				    (Mj0_1d_interior, Mj0_1d_right));
+ 	matrix_it->second.set_block(3, 3,
+ 				    new KroneckerMatrix<double,SparseMatrix<double>,SparseMatrix<double> >
+ 				    (Mj0_1d_left_top, Mj0_1d_interior));
+
+ 	matrix_it->second.set_block(1, 4,
+ 				    new KroneckerMatrix<double,SparseMatrix<double>,SparseMatrix<double> >
+ 				    (Mj0_1d_right, Mj0_1d_interior));
+ 	matrix_it->second.set_block(2, 4,
+ 				    new KroneckerMatrix<double,SparseMatrix<double>,SparseMatrix<double> >
+ 				    (Mj0_1d_left, Mj0_1d_interior));
+ 	matrix_it->second.set_block(4, 4,
+ 				    new KroneckerMatrix<double,SparseMatrix<double>,SparseMatrix<double> >
+ 				    (Mj0_1d_left_top, Mj0_1d_interior));
       }
     else
       {

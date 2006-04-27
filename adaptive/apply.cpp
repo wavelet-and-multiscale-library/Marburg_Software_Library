@@ -50,7 +50,6 @@ namespace WaveletTL
 	  v_binned[id] = *it;
 
       const double theta = 0.5;
-
       // setup the segments v_{[0]},...,v_{[\ell]},
       // \ell being the smallest number such that
       //   ||A||*||v-\sum_{k=0}^\ell v_{[k]}|| <= theta * eta
@@ -74,12 +73,10 @@ namespace WaveletTL
 	}
 	vks.push_back(vk);
 	vks_norm.push_back(sqrt(vk_norm_sqr));
-
 	if (error_sqr <= threshold || id >= v.size()) break; // in this case, ell=k
 	k++;
       }
       const unsigned int ell = k;
-      
       // compute the smallest J >= ell, such that
       //   \sum_{k=0}^{\ell} alpha_{J-k}*2^{-s(J-k)}*||v_{[k]}|| <= (1-theta) * eta
       unsigned int J = ell;
@@ -93,20 +90,21 @@ namespace WaveletTL
 	J++;
       }
 
-
       // compute w = \sum_{k=0}^\ell A_{J-k}v_{[k]}
       k = 0;
+      unsigned int z = 0;
       for (typename std::list<std::list<std::pair<Index, double> > >::const_iterator it(vks.begin());
 	   k <= ell; ++it, ++k) {
 	for (typename std::list<std::pair<Index, double> >::const_iterator itk(it->begin());
 	     itk != it->end(); ++itk) {
 	  add_compressed_column(P, itk->second, itk->first, J-k, w, jmax, strategy);
+	  z++;
 	}
       }
     }
   }  
 
-//   static int its = 0; // DIRTY HACK, REMOVE THIS SOON!!!
+  //  static int its = 0; // DIRTY HACK, REMOVE THIS SOON!!!
 
   template <class PROBLEM>
   void RES(const PROBLEM& P,
@@ -124,11 +122,11 @@ namespace WaveletTL
     //double zeta = 2.*epsilon;
     double l2n = 0.;
 
-//     its++;
+//      its++;
 
-//     if (its > 100) {
+//     if (its > 10) {
 //       InfiniteVector<double, typename PROBLEM::Index> help;
-//       zeta *= 1.0 / (1 << 9);
+//       zeta *= 1.0 / (1 << 6);
 //       P.RHS (zeta/2., tilde_r);
 //       cout << "zeta half = " << zeta/2. << endl;
 //       APPLY_COARSE(P, w, zeta/2., help, 0.00000001, jmax, strategy);
@@ -146,9 +144,9 @@ namespace WaveletTL
 	  //cout << w << endl;
 	  cout << "zeta halbe = " << zeta/2. << endl;
 	  //cout << "before aply in RES " << endl;
-	  //APPLY(P, w, zeta/2., help, jmax, strategy);
+	  //APPLY(P, w, .0/*zeta/2.*/, help, jmax, strategy);
 	  cout << ++k << "calls of APPlY in RES" << endl;
-	  APPLY_COARSE(P, w, zeta/2., help, 0.00000001, jmax, strategy);
+	  APPLY_COARSE(P, w, zeta/2., help, 0.000001, jmax, strategy);
 	  //cout << "after apply in RES " << endl;
 	  tilde_r -= help;
 	  l2n = l2_norm(tilde_r);
@@ -158,8 +156,9 @@ namespace WaveletTL
 	  //cout << "delta = " << delta << endl;
 	  //if(k == 10)
 	  //	break;
+	  //cout << "NU = " << nu << "  EPS = " << epsilon << " ZETA = " << zeta << " " << "  DELTA*L2N = " << delta*l2n << endl;
 	}
- 	while ( (nu > epsilon) && (zeta > delta*l2n) );
+  	while ( (nu > epsilon) && (zeta > delta*l2n) );
 	//}
   }
 

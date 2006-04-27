@@ -14,9 +14,7 @@ namespace WaveletTL
       k_ = basis_->DeltaLmin(); // leftmost
       e_ = 0;                   // generator
       j_ = basis_->j0();        // on the coarsest level
-      
-      if (! ((e_ == 0) && j_ > basis_->j0()))
-	set_number();
+      num_ = -1;
     }
   }
   
@@ -27,9 +25,7 @@ namespace WaveletTL
     e_ = lambda.e();
     k_ = lambda.k();
     basis_ = lambda.basis();
-    if (! ((e_ == 0) && j_ > basis_->j0()))
-      set_number();
-
+    num_ = lambda.number();
   }
 
   template <class IBASIS>
@@ -40,26 +36,25 @@ namespace WaveletTL
     e_ = e;
     k_ = k;
     basis_ = basis;
-    if (! ((e_ == 0) && j_ > basis_->j0()))
-      set_number();
+    num_ = -1;
   }
 
 
   template <class IBASIS>
-  IntervalIndex<IBASIS>::IntervalIndex(const unsigned int num,
+  IntervalIndex<IBASIS>::IntervalIndex(const int num,
 				       const IBASIS* basis)
   :  basis_(basis)
   {
     num_ = num; 
     
     // to be decreased successively
-    unsigned int act_num = num_;
+    int act_num = num_;
     int j = basis_->j0();
-    unsigned int tmp2 = 0;
+    int tmp2 = 0;
 
     // determine the level of the index
     while (true) {
-      unsigned int tmp = basis_->Deltasize(j);
+      int tmp = basis_->Deltasize(j);
       if (tmp > num)
 	break;
       tmp2 = tmp;
@@ -118,6 +113,9 @@ namespace WaveletTL
   IntervalIndex<IBASIS>&
   IntervalIndex<IBASIS>::operator ++ ()
   {
+    if (num_ > -1)
+      num_++;
+
     switch (e_) {
     case 0:
       if (k_ == basis_->DeltaRmax(j_)) {
@@ -138,8 +136,7 @@ namespace WaveletTL
     default:
       break;
     }
-    //set_number();
-    num_++;
+
     return *this;
   }
 
@@ -147,7 +144,9 @@ namespace WaveletTL
   void
   IntervalIndex<IBASIS>::set_number()
   {
-    unsigned int result = 0;
+    assert( e_ != 0 || j_ == basis_->j0() );
+
+    int result = 0;
 
     // determine how many wavelets there are on all the levels
     // below the level of this index
@@ -212,32 +211,42 @@ namespace WaveletTL
 
   template <class IBASIS>
   inline
-  unsigned int first_generator_num(const IBASIS* basis)
+  int first_generator_num(const IBASIS* basis)
   {
-    return first_generator<IBASIS>(basis, basis->j0()).number();
+    IntervalIndex<IBASIS> ind(first_generator<IBASIS>(basis, basis->j0()));
+    ind.set_number();
+    return ind.number();
   }
   
   template <class IBASIS>
   inline
-  unsigned int last_generator_num(const IBASIS* basis)
+  int last_generator_num(const IBASIS* basis)
   {
-    return last_generator<IBASIS>(basis, basis->j0()).number();
+    IntervalIndex<IBASIS> ind(last_generator<IBASIS>(basis, basis->j0()));
+    ind.set_number();
+    return ind.number();
+
   }
 
   template <class IBASIS>
   inline
-  unsigned int first_wavelet_num(const IBASIS* basis, const int j)
+  int first_wavelet_num(const IBASIS* basis, const int j)
   {
     assert(j >= basis->j0());
-    return first_wavelet<IBASIS>(basis, j).number();
+    IntervalIndex<IBASIS> ind(first_wavelet<IBASIS>(basis, j));
+    ind.set_number();
+    return ind.number();
+
   }
   
   template <class IBASIS>
   inline
-  unsigned int last_wavelet_num(const IBASIS* basis, const int j)
+  int last_wavelet_num(const IBASIS* basis, const int j)
   {
     assert(j >= basis->j0());
-    return last_wavelet<IBASIS>(basis, j).number();
+    IntervalIndex<IBASIS> ind(last_wavelet<IBASIS>(basis, j));
+    ind.set_number();
+    return ind.number();
   }
 
 }

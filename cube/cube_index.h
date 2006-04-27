@@ -64,9 +64,11 @@ namespace WaveletTL
       to this ordering.
       This constructor cannot be used for generators on levels j > j0.
     */
-    CubeIndex(const unsigned int number,
+    CubeIndex(const int number,
 	      const CUBEBASIS* basis);
 
+    //! assignment
+    CubeIndex& operator = (const CubeIndex& lambda);
 
     //! check equality
     bool operator == (const CubeIndex& lambda) const;
@@ -94,9 +96,10 @@ namespace WaveletTL
     //! translation index k
     const translation_type& k() const { return k_; }
 
-    const unsigned int number() const { return num_; }
+    //! underlying basis
+    const CUBEBASIS* basis() const { return basis_; }
 
-  protected:
+    const int number() const { return num_; }
 
     /*!
       inverse of constructor
@@ -104,6 +107,8 @@ namespace WaveletTL
                  const CUBEBASIS* basis)'
     */
     void set_number();
+
+  protected:
     
     //! pointer to the underlying basis
     const CUBEBASIS* basis_;
@@ -118,7 +123,7 @@ namespace WaveletTL
     MultiIndex<int,DIM> k_;
 
     //! number of the index, only for the elements of a wavelet bases
-    unsigned int num_;
+    int num_;
 
   };
 
@@ -170,28 +175,28 @@ namespace WaveletTL
     number of first generator on level j0
   */
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
-  const unsigned int
+  const int
   first_generator_num(const CUBEBASIS* basis);
 
   /*!
     number of last generator on level j0
   */
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
-  const unsigned int
+  const int
   last_generator_num(const CUBEBASIS* basis);
 
   /*!
     number of first wavelet on level j >= j0
   */
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
-  const unsigned int
+  const int
   first_wavelet_num(const CUBEBASIS* basis, const int j);
   
   /*!
     number of last wavelet on level j >= j0
   */
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
-  const unsigned int
+  const int
   last_wavelet_num(const CUBEBASIS* basis, const int j);
 
 }

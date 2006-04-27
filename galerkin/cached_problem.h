@@ -152,23 +152,19 @@ namespace WaveletTL
   protected:
     //! the underlying (uncached) problem
     const PROBLEM* problem;
+   
+    // type of one block in one column of stiffness matrix  A
+    typedef std::map<Index, double> Block;
     
     // type of one column in the entry cache of A
-    typedef std::map<Index, double> Column;
+    // the key codes the level, that data are the entries
+    typedef std::map<int, Block> Column;
     
     // type of the entry cache of A
     typedef std::map<Index, Column> ColumnCache;
-    
+
     // entries cache for A (mutable to overcome the constness of add_column())
     mutable ColumnCache entries_cache;
-    
-    // Index cache for compression strategy
-    typedef std::map<int, std::list<Index> > IndexCache;
-    
-    typedef std::map<Index, IndexCache> StructureCache;
-    
-    // levelwise Index cache for each stiffness matrix column
-    mutable StructureCache stiffStructure;
     
     // estimates for ||A|| and ||A^{-1}||
     mutable double normA, normAinv;

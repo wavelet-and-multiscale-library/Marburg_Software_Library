@@ -13,10 +13,8 @@ namespace WaveletTL
       // e_ is zero by default: generator
       for (unsigned int i = 0; i < DIM; i++)
 	k_[i] = basis_->bases()[i]->DeltaLmin();
-
-      type_type gen_type;
-      if (! ((e_ == gen_type) && j_ > basis_->j0()))
-	set_number();
+      
+      num_ = -1;
     }
   }
 
@@ -25,38 +23,35 @@ namespace WaveletTL
 					     const type_type& e,
 					     const translation_type& k,
 					     const CUBEBASIS* basis)
-    : basis_(basis), j_(j), e_(e), k_(k)
+    : basis_(basis), j_(j), e_(e), k_(k), num_(-1)
   {
-    type_type gen_type;
-    if (! ((e_ == gen_type) && j_ > basis_->j0()))
-      set_number();
   }
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
   CubeIndex<IBASIS,DIM,CUBEBASIS>::CubeIndex(const CubeIndex& lambda)
     : basis_(lambda.basis_), j_(lambda.j_), e_(lambda.e_), k_(lambda.k_), num_(lambda.num_)
-  {  
+  { 
   }
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
-  CubeIndex<IBASIS,DIM,CUBEBASIS>::CubeIndex(const unsigned int num,
+  CubeIndex<IBASIS,DIM,CUBEBASIS>::CubeIndex(const int num,
 					     const CUBEBASIS* basis)
     : basis_(basis)
   {
     num_ = num; 
 
     // to be decreased successively
-    unsigned int act_num = num_;
+    int act_num = num_;
 
     int j = basis_->j0();
 
-    unsigned int tmp2 = 0;
+    int tmp2 = 0;
 
     bool gen = 0;
 
     // determine the level of the index
     while (true) {
-      unsigned int tmp = 1;
+      int tmp = 1;
       for (unsigned int i = 0; i < DIM; i++)
 	tmp *= (basis_->bases()[i])->Deltasize(j);
       if (tmp > num)
@@ -76,7 +71,7 @@ namespace WaveletTL
     tmp2 = 0;
 
     // determine the type of the index 
-    unsigned int tmp2_old = 0;
+    int tmp2_old = 0;
     if (gen)
       e_ = type_type();
     else {
@@ -85,7 +80,7 @@ namespace WaveletTL
       bool exit = 0;
       // loop over types
       while (true) {
-	unsigned int tmp = 1;
+	int tmp = 1;
 	for (unsigned int i = 0; i < DIM; i++) {
 	  if (type[i] == 0)
 	    tmp *= (basis_->bases()[i])->Deltasize(j_);
@@ -132,7 +127,7 @@ namespace WaveletTL
 
     act_num += 1;
     for (unsigned int i = 0; i < DIM; i++) {
-      unsigned int tmp = 0;
+      int tmp = 0;
       if (act_num <= tmp2) {
  	if (e_[i] == 0)
 	  k_[i] = (basis_->bases()[i])->DeltaLmin();
@@ -168,6 +163,19 @@ namespace WaveletTL
     }
   }
     
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  CubeIndex<IBASIS,DIM,CUBEBASIS>&
+  CubeIndex<IBASIS,DIM,CUBEBASIS>::operator = (const CubeIndex<IBASIS,DIM,CUBEBASIS>& lambda)
+  {
+    j_ = lambda.j();
+    e_ = lambda.e();
+    k_ = lambda.k();
+    basis_ = lambda.basis();
+    num_ = lambda.number();
+
+    return *this;
+  }
+
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
   bool
@@ -193,8 +201,8 @@ namespace WaveletTL
   CubeIndex<IBASIS,DIM,CUBEBASIS>&
   CubeIndex<IBASIS,DIM,CUBEBASIS>::operator ++ ()
   {
-    // set_number();
-    num_++;
+    if (num_ > -1)
+      num_++;
 
     bool eplusplus = false;
     for (int i = DIM-1; i >= 0; i--) {
@@ -249,7 +257,10 @@ namespace WaveletTL
   void
   CubeIndex<IBASIS,DIM,CUBEBASIS>::set_number()
   {
-    unsigned int result = 0;
+    type_type gen_type;
+    assert( e_ != gen_type || j_ == basis_->j0() );
+
+    int result = 0;
     bool gen = 1;
 
     // check if wavelet is a generator
@@ -277,7 +288,7 @@ namespace WaveletTL
       bool exit = 0;
       // loop over all ''smaller'' types
       while (type < e_) {
-	unsigned int tmp = 1;
+	int tmp = 1;
 	for (unsigned int i = 0; i < DIM; i++) {
 	  if (type[i] == 0)
 	    tmp *= (basis_->bases()[i])->Deltasize(j_);
@@ -305,7 +316,7 @@ namespace WaveletTL
     // whose indices are smaller than this index,
     // add the result to res
     for (unsigned int i = 0; i < DIM; i++) {
-      unsigned int tmp = 1;
+      int tmp = 1;
       if (e_[i] == 0) {
 	if (k_[i] == (basis_->bases()[i])->DeltaLmin())
 	  continue;
@@ -400,33 +411,44 @@ namespace WaveletTL
   }
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
-  const unsigned int
+  const int
   first_generator_num(const CUBEBASIS* basis)
   {
-    return first_generator<IBASIS,DIM,CUBEBASIS>(basis, basis->j0()).number();
+    CubeIndex<IBASIS,DIM,CUBEBASIS> ind(first_generator<IBASIS,DIM,CUBEBASIS>(basis, basis->j0()));
+    ind.set_number();
+    return ind.number();
   }
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
-  const unsigned int
+  const int
   last_generator_num(const CUBEBASIS* basis)
   {
-    return last_generator<IBASIS,DIM,CUBEBASIS>(basis, basis->j0()).number();
+    CubeIndex<IBASIS,DIM,CUBEBASIS> ind(last_generator<IBASIS,DIM,CUBEBASIS>(basis, basis->j0()));
+    ind.set_number();
+    return ind.number();
+
   }
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
-  const unsigned int
+  const int
   first_wavelet_num(const CUBEBASIS* basis, const int j)
   {
     assert(j >= basis->j0());
-    return first_wavelet<IBASIS,DIM,CUBEBASIS>(basis, j).number();
+    CubeIndex<IBASIS,DIM,CUBEBASIS> ind(first_wavelet<IBASIS,DIM,CUBEBASIS>(basis, j));
+    ind.set_number();
+    return ind.number();
+
   }
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
-  const unsigned int
+  const int 
   last_wavelet_num(const CUBEBASIS* basis, const int j)
   {
     assert(j >= basis->j0());
-    return last_wavelet<IBASIS,DIM,CUBEBASIS>(basis, j).number();
+    CubeIndex<IBASIS,DIM,CUBEBASIS> ind(last_wavelet<IBASIS,DIM,CUBEBASIS>(basis, j));
+    ind.set_number();
+    return ind.number();
+
   }
 
 

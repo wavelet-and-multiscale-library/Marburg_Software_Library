@@ -20,7 +20,7 @@ int main()
 //   Basis basis(0, 0); // no b.c.'s
 //   Basis basis(1, 0); // complementary b.c. at x=0
 //   Basis basis(0, 1); // complementary b.c. at x=1
-  Basis basis(1, 1); // complementary b.c.'s
+  Basis basis(1, 2); // complementary b.c.'s
 
 #if 1
   for (int level = basis.j0(); level <= basis.j0()+1; level++) {

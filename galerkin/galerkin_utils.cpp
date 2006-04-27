@@ -7,6 +7,7 @@ namespace WaveletTL
 			      const std::set<typename PROBLEM::Index>& Lambda,
 			      SparseMatrix<double>& A_Lambda)
   {
+    cout << "entering comp of stiff " << endl;
     A_Lambda.resize(Lambda.size(), Lambda.size());
     
     typedef typename SparseMatrix<double>::size_type size_type;
@@ -16,7 +17,7 @@ namespace WaveletTL
     for (typename std::set<Index>::const_iterator it1(Lambda.begin()), itend(Lambda.end());
 	 it1 != itend; ++it1, ++row)
       {
-	const double d1 = P.D(*it1);
+	//const double d1 = P.D(*it1);
 	std::list<size_type> indices;
 	std::list<double> entries;
 
@@ -32,13 +33,14 @@ namespace WaveletTL
 // 	    }
 	      if (entry != 0) {
 		indices.push_back(column);
-		entries.push_back(entry / (d1 * P.D(*it2)));
+		entries.push_back(entry /* / (d1 * P.D(*it2))*/);
 	      }
 // 	    }
 	  }
 	cout << "setup_stiffness_matrix(): doing row " << row << " of " << Lambda.size() << endl;
 	A_Lambda.set_row(row, indices, entries);
       }
+    cout << "exiting comp of stiff " << endl;
   }
 
   template <class PROBLEM>

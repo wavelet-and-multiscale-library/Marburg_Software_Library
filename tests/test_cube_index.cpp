@@ -19,14 +19,14 @@ int main()
   cout << "Testing wavelet bases on the cube..." << endl;
 
   //typedef DSBasis<3,3> Basis1D;
-  typedef PBasis<3,3> Basis1D;
+  typedef PBasis<2,2> Basis1D;
 
 #if 1
   typedef CubeBasis<Basis1D,1> Basis;
   
   //primal boundary conditions
   FixedArray1D<int,2*1> bound_1_1D;
-  bound_1_1D[0] = 2;
+  bound_1_1D[0] = 1;
   bound_1_1D[1] = 1;
 
   //dual boundary conditions

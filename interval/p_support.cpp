@@ -24,21 +24,27 @@ namespace WaveletTL
 	if (lambda.k() < (d+dT)/2-1) {
 	  // left boundary wavelet
 	  k1 = 0;
+
  	  // hard code special case
- 	  if ( (d==3 && dT==3) &&  ((basis.get_s0()==1) && (basis.get_s1()==1)) ) {
-	    k2 = 8;
- 	  }
- 	  else
-	    k2 = 2*(d+dT)-2; // overestimate, TODO
+//  	  if ( (d==3 && dT==3) &&  ((basis.get_s0()==1) && (basis.get_s1()==1)) ) {
+// 	    k2 = 8;
+//  	  }
+//  	  else
+
+	  k2 = 2*(d+dT)-2; // overestimate, TODO
+
 	} else {
 	  if ((1<<lambda.j())-lambda.k() <= (d+dT)/2-1) {
 	    // right boundary wavelet
+
 	    // hard code special case
-	    if ( (d==3 && dT==3) &&  ((basis.get_s0()==1) && (basis.get_s1()==1)) ) {
-	      k1 = (1<<(lambda.j()+1)) - 8;
- 	    }
- 	    else
-	      k1 = (1<<(lambda.j()+1))-(2*(d+dT)-2); // overestimate, TODO
+// 	    if ( (d==3 && dT==3) &&  ((basis.get_s0()==1) && (basis.get_s1()==1)) ) {
+// 	      k1 = (1<<(lambda.j()+1)) - 8;
+//  	    }
+//  	    else
+
+	    k1 = (1<<(lambda.j()+1))-(2*(d+dT)-2); // overestimate, TODO
+
 	    k2 = 1<<(lambda.j()+1);
 	  } else {
 	    // interior wavelet (CDF)

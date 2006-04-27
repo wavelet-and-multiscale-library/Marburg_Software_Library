@@ -43,6 +43,9 @@ namespace MathTL
     //! copy constructor
     KroneckerMatrix(const KroneckerMatrix<C,MATRIX1,MATRIX2>& M);
 
+    //! clone the Kronecker matrix (requirement from MatrixBlock)
+    MatrixBlock<C>* clone() const;
+
     //! row dimension
     const size_type row_dimension() const;
 

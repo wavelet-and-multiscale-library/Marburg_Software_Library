@@ -49,6 +49,9 @@ namespace MathTL
       is not identical to x
     */
     virtual void apply_transposed(const Vector<C>& x, Vector<C>& Mtx) const = 0;
+
+    //! clone the matrix block
+    virtual MatrixBlock<C>* clone() const = 0;
     
     //! print block onto a stream
     virtual void print(std::ostream& os,

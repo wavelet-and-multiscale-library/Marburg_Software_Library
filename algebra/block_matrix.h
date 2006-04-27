@@ -39,9 +39,15 @@ namespace MathTL
     //! constructor for (mxn) block (each 1x1) matrices, empty per default
     BlockMatrix(const size_type block_rows, const size_type block_columns);
 
+    //! copy constructor
+    BlockMatrix(const BlockMatrix<C>&);
+
     //! destructor (all subblocks will be deleted)
     ~BlockMatrix();
     
+    //! clone the block matrix (requirement from MatrixBlock)
+    MatrixBlock<C>* clone() const;
+
     //! (overall) row dimension
     const size_type row_dimension() const { return rowdim_; }
     

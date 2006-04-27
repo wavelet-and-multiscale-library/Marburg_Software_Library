@@ -20,6 +20,13 @@ namespace MathTL
   }
 
   template <class C, class MATRIX1, class MATRIX2>
+  MatrixBlock<C>*
+  KroneckerMatrix<C,MATRIX1,MATRIX2>::clone() const
+  {
+    return new KroneckerMatrix<C,MATRIX1,MATRIX2>(*this);
+  }
+
+  template <class C, class MATRIX1, class MATRIX2>
   inline
   const typename KroneckerMatrix<C,MATRIX1,MATRIX2>::size_type
   KroneckerMatrix<C,MATRIX1,MATRIX2>::row_dimension() const

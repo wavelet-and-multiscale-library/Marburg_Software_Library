@@ -92,6 +92,9 @@ namespace MathTL
 	   const char* str,
 	   const bool byrow = true);
 
+    //! clone the matrix (requirement from MatrixBlock)
+    MatrixBlock<C>* clone() const;
+
     /*!
       row dimension
     */

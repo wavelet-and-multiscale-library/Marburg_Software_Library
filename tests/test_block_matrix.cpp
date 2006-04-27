@@ -31,6 +31,12 @@ int main()
   M.resize_block_column(1, Mblock->column_dimension());
   cout << "- the same block matrix M after 2 * set_block(0,*,*):" << endl << M;
 
+  BlockMatrix<double>* Mcopy = new BlockMatrix<double>(M);
+  BlockMatrix<double>* Mcopy2 = new BlockMatrix<double>(*Mcopy);
+  delete Mcopy;
+  cout << "- testing copy constructor:" << endl << (*Mcopy2);
+  delete Mcopy2;
+
   Vector<double> x(5, "1 2 3 4 5"), y(2);
   M.apply(x, y);
   cout << "- a vector x=" << x << ", Mx=" << y << endl;

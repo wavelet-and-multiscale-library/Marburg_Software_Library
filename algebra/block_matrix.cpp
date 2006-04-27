@@ -32,12 +32,35 @@ namespace MathTL
   }
 
   template <class C>
+  BlockMatrix<C>::BlockMatrix(const BlockMatrix<C>& M)
+    : blocks(M.block_rows_rows.size()*M.block_columns_columns.size()),
+      block_rows_rows(M.block_rows_rows),
+      block_columns_columns(M.block_columns_columns)
+  {
+    for (size_type i = 0; i < block_rows(); i++)
+      for (size_type j = 0; j < block_columns(); j++) {
+	if (M.blocks[i*block_columns()+j])
+	  blocks[i*block_columns()+j] = M.blocks[i*block_columns()+j]->clone();
+	else
+	  blocks[i*block_columns()+j] = 0;
+      }
+    calculate_size();
+  }
+  
+  template <class C>
   BlockMatrix<C>::~BlockMatrix()
   {
     for (size_type i = 0; i < block_rows()*block_columns(); i++) {
       if (blocks[i])
 	delete blocks[i];
     } 
+  }
+
+  template <class C>
+  MatrixBlock<C>*
+  BlockMatrix<C>::clone() const
+  {
+    return new BlockMatrix<C>(*this);
   }
 
   template <class C>

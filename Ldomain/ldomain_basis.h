@@ -73,6 +73,9 @@ namespace WaveletTL
     //! read access to the underlying 1D basis
     const IntervalBasis& basis1d() const { return basis1d_; }
 
+    //! size of Delta_j
+    const int Deltasize(const int j) const;
+
     /*!
       The following routines provide read access to the diverse refinement matrices
       on a level j >= j0. The row and column indices follow the less<Index> ordering.
@@ -80,8 +83,9 @@ namespace WaveletTL
     */
     const BlockMatrix<double>& get_Mj0  (const int j) const;
     const BlockMatrix<double>& get_Mj0T (const int j) const;
-    const BlockMatrix<double>& get_Mj1  (const int j) const;
-    const BlockMatrix<double>& get_Mj1T (const int j) const;
+    const BlockMatrix<double>& get_Mj1c (const int j) const;
+//     const BlockMatrix<double>& get_Mj1  (const int j) const;
+//     const BlockMatrix<double>& get_Mj1T (const int j) const;
 
     //! RECONSTRUCT routine, simple version
     /*!
@@ -129,7 +133,7 @@ namespace WaveletTL
 
     //! caches for the diverse refinement matrices
     typedef std::map<int,BlockMatrix<double> > MatrixCache;
-    mutable MatrixCache Mj0_cache, Mj0T_cache, Mj1_cache, Mj1T_cache;
+    mutable MatrixCache Mj0_cache, Mj0T_cache, Mj1c_cache;
   };
 }
 

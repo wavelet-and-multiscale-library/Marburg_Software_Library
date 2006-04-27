@@ -49,12 +49,12 @@ int main()
   } 
 #endif
 
-#if 0
+#if 1
   Index lambda(first_generator<Basis1D>(&basis, basis.j0()));
 //   for (; !(lambda.p() == 1); ++lambda);
 //   for (; !(lambda.p() == 2); ++lambda);
-//   for (; !(lambda.p() == 3); ++lambda);
-  for (; !(lambda.p() == 4); ++lambda);
+  for (; !(lambda.p() == 3); ++lambda);
+//   for (; !(lambda.p() == 4); ++lambda);
 //   for (; lambda.e()[0] != 0 || lambda.e()[1] != 1; ++lambda);
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 1); ++lambda);
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 1 && lambda.k()[1] == 7); ++lambda);
@@ -72,6 +72,11 @@ int main()
   matlab_output(psistream, evaluate<Basis1D>(basis, lambda, true, 6));
   psistream.close();
   cout << "  ...done, see file Ldomain_wavelet.m!" << endl;
+
+  InfiniteVector<double, Index> gcoeffs;
+  basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
+  cout << "- generator coefficients of lambda on a higher scale:"
+       << endl << gcoeffs << endl;
 #endif
 
 }

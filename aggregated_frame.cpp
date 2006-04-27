@@ -120,7 +120,7 @@ namespace FrameTL
     typename FrameIndex<IBASIS,DIM_d,DIM_m>::type_type e;//== 0
     typename FrameIndex<IBASIS,DIM_d,DIM_m>::translation_type k;
     for (unsigned int i = 0; i < DIM_d; i++)
-      k[i] = WaveletTL::last_generator<IBASIS>(bases()[0]->bases()[i], j).k();
+      k[i] = WaveletTL::last_generator<IBASIS>(bases()[bases().size()-1]->bases()[i], j).k();
 
     return FrameIndex<IBASIS,DIM_d,DIM_m>(this, j, e, bases().size()-1, k); 
   }

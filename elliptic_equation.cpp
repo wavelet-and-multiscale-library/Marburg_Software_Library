@@ -115,7 +115,7 @@ namespace FrameTL
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
     const int j0   = frame_->j0();
-    const int jmax = 10; // for a first quick hack
+    const int jmax = 4; // for a first quick hack
     for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
       {
 	const double coeff = f(lambda)/D(lambda);
@@ -149,7 +149,7 @@ namespace FrameTL
 
     // precompute the right-hand side on a fine level
     const int j0   = frame_->j0();
-    const int jmax = 10;  // for a first quick hack
+    const int jmax = 4;  // for a first quick hack
     for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
       {
 	stiff_diagonal.set_coefficient(lambda, sqrt(a(lambda,lambda)));
@@ -323,7 +323,8 @@ namespace FrameTL
   EllipticEquation<IBASIS,DIM>:: integrate(const Index1D<IBASIS>& lambda,
 					   const Index1D<IBASIS>& mu,
 					   const FixedArray1D<Array1D<double>,DIM >& irregular_grid,
-					   const int N_Gauss) const
+					   const int N_Gauss,
+					   const int dir) const
   {
     
     double res = 0;
@@ -367,8 +368,8 @@ namespace FrameTL
 	    //	    	    cout << "gw = " << gauss_weights[ k*N_Gauss+n  ] << endl;
  	  }
 	
-	IBASIS* basis1D_lambda = frame_->bases()[lambda.p()]->bases()[0];// 0 because interval bases are all the same
-	IBASIS* basis1D_mu     = frame_->bases()[mu.p()]->bases()[0];
+	IBASIS* basis1D_lambda = frame_->bases()[lambda.p()]->bases()[dir];// IMPORTANT: choose 1D basis of right direction !!!!!
+	IBASIS* basis1D_mu     = frame_->bases()[mu.p()]->bases()[dir];
 	
 	const Chart<DIM>* chart_la = frame_->atlas()->charts()[lambda.p()];
 	const Chart<DIM>* chart_mu = frame_->atlas()->charts()[mu.p()];
@@ -546,7 +547,7 @@ namespace FrameTL
 			     );
 
 
-	  t *= integrate(i1, i2, irregular_grid, N_Gauss);
+	  t *= integrate(i1, i2, irregular_grid, N_Gauss, j);
 	  
  	}
 
@@ -563,7 +564,7 @@ namespace FrameTL
 			     mu.p(),j,0
 			     );
 
- 	  t *= integrate(i1, i2, irregular_grid, N_Gauss);
+ 	  t *= integrate(i1, i2, irregular_grid, N_Gauss, j);
 
 	}
 	Index1D<IBASIS> i1(IntervalIndex<IBASIS> (
@@ -578,7 +579,7 @@ namespace FrameTL
 			   mu.p(),i,1
 			     );
 
-	t *= integrate(i1, i2, irregular_grid, N_Gauss);
+	t *= integrate(i1, i2, irregular_grid, N_Gauss, i);
 
 	t *= 1./(chart_la->a_i(i) * chart_mu->a_i(i));
 	
@@ -1500,10 +1501,10 @@ namespace FrameTL
       if (exit) break;
     }
 
-#if 0
+#if 1
     return r;
 #endif
-#if 1
+#if 0
     assert(DIM == 1);
     double tmp = 1;
     Point<DIM> p1;

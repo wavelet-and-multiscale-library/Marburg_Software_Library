@@ -129,7 +129,7 @@ int main()
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 0.8;
+  A(0,0) = 1.;
   Point<1> b;
   b[0] = 0.;
   AffineLinearMapping<1> affineP(A,b);
@@ -151,21 +151,21 @@ int main()
 
   //##############################
   
-  Array1D<Chart<DIM,DIM>* > charts(2);
+  Array1D<Chart<DIM,DIM>* > charts(1);
   charts[0] = &affineP;
-  charts[1] = &affineP2;
+  //charts[1] = &affineP2;
 
   //charts[0] = &simpleaffine1;
   //charts[1] = &simpleaffine2;
   
-  SymmetricMatrix<bool> adj(2);
+  SymmetricMatrix<bool> adj(1);
   adj(0,0) = 1;
-  adj(1,1) = 1;
-  adj(1,0) = 1;
-  adj(0,1) = 1;
+//   adj(1,1) = 1;
+//   adj(1,0) = 1;
+//   adj(0,1) = 1;
   
   //to specify primal boundary the conditions
-  Array1D<FixedArray1D<int,2*DIM> > bc(2);
+  Array1D<FixedArray1D<int,2*DIM> > bc(1);
 
   //primal boundary conditions for first patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_1;
@@ -179,7 +179,7 @@ int main()
   bound_2[0] = 2;
   bound_2[1] = 1;
 
-  bc[1] = bound_2;
+  //bc[1] = bound_2;
 
 //to specify primal boundary the conditions
   Array1D<FixedArray1D<int,2*DIM> > bcT(2);
@@ -232,7 +232,7 @@ int main()
   int z = 0;
   set<Index> Lambda;
   for (Index lambda = FrameTL::first_generator<Basis1D,1,1,Frame1D>(&frame, frame.j0());
-       lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+1); ++lambda) {
+       lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()); ++lambda) {
     cout << lambda << endl;
     cout << z++ << endl;
     Lambda.insert(lambda);
@@ -254,7 +254,7 @@ int main()
   double time;
   tstart = clock();
   
-  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
+  WaveletTL::setup_stiffness_matrix(problem/*discrete_poisson*/, Lambda, stiff);
   
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
@@ -311,10 +311,10 @@ int main()
   
   u.scale(&discrete_poisson,-1);
 
-  InfiniteVector<double,Index> Au;
-  APPLY(problem, u, .0, Au, 4, CDD1);
-  cout << "u = " << u.size() << endl;
-  cout << "Au size = " << Au.size() << " " << Au << endl;
+//   InfiniteVector<double,Index> Au;
+//   APPLY(problem, u, .0, Au, 4, CDD1);
+//   cout << "u = " << u.size() << endl;
+//   cout << "Au size = " << Au.size() << " " << Au << endl;
 
   EvaluateFrame<Basis1D,1,1> evalObj;
   
@@ -339,7 +339,7 @@ int main()
 #endif
 	  
   
-#if 0
+#if 1
   char filename1[50];
   u.clear();
   Lambda.clear();

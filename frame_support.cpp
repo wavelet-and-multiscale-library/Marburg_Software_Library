@@ -681,9 +681,9 @@ namespace FrameTL
       cout << "i = " << i << " intersect_cube[i] = " << hyperCube_intersect[i] << endl;
     }
 #endif    
-    // the bool is alway just a dummy
+
     // we just need some kind of a sorted list
-    //FixedArray1D<map<double,bool>, DIM_d> irregular_grid;
+    // FixedArray1D<map<double,bool>, DIM_d> irregular_grid;
     FixedArray1D<list<double>, DIM_d> irregular_grid;
     FixedArray1D<list<double>, DIM_d> irregular_grid_tmp;
 
@@ -696,7 +696,7 @@ namespace FrameTL
 
 	if ( hyperCube_intersect[i][0] <= d && d <= hyperCube_intersect[i][1]) {
 	  irregular_grid[i].push_back(d);
-	  // 	  cout << "inserting " << d << endl;
+	  //cout << "inserting " << d << endl;
 	  //cout << "in " << irregular_grid[i][d] << endl;
 	}
       }

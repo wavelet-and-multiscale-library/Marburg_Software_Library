@@ -307,14 +307,14 @@ namespace FrameTL
      */
     double a_same_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
 			  const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-			  const unsigned int q_order = 2) const;
+			  const unsigned int q_order = 3) const;
 
     /*!
      */
     double integrate(const Index1D<IBASIS>& lambda,
 		     const Index1D<IBASIS>& mu,
 		     const FixedArray1D<Array1D<double>,DIM >& irregular_grid,
-		     const int N_Gauss) const;
+		     const int N_Gauss, const int dir) const;
 
     /*!
       helper routines for a (.. , ..). Entries in diagonal and non-diagonal
@@ -322,7 +322,7 @@ namespace FrameTL
      */
     double a_different_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
 			       const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-			       const unsigned int q_order = 2, const unsigned int rank = 1) const;
+			       const unsigned int q_order = 3, const unsigned int rank = 1) const;
 
 
     double a_different_patches_adaptive(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,

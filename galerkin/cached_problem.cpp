@@ -75,10 +75,9 @@ namespace WaveletTL
 				j == (basis().j0()-1),
 				nus);
 	  // compute entries
-	  const double d1 = problem->D(nu);
 	  for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());
 	       it != itend; ++it) {
-	    const double entry = problem->a(*it, nu) / (d1*problem->D(*it));
+	    const double entry = problem->a(*it, nu);
 	    typedef typename Block::value_type value_type_block;
 	    if (entry != 0.) {
 	      block.insert(block.end(), value_type_block(*it, entry));
@@ -166,22 +165,22 @@ namespace WaveletTL
 		 it != itend; ++it) {
 	      if (abs(lambda.j()-j) <= J/((double) problem->space_dimension) ||
 		  intersect_singular_support(problem->basis(), lambda, *it)) {
-		const double entry = problem->a(*it, lambda) / (d1*problem->D(*it));
+		const double entry = problem->a(*it, lambda);
 		typedef typename Block::value_type value_type_block;
 
 		block.insert(block.end(), value_type_block(*it, entry));
-		w.add_coefficient(*it, entry * factor);
+		w.add_coefficient(*it, (entry / (d1*problem->D(*it))) * factor);
 	      }
 	    }
 	  }
 	  else if (strategy == CDD1) {
 	    for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());
 		 it != itend; ++it) {
-	      const double entry = problem->a(*it, lambda) / (d1*problem->D(*it));
+	      const double entry = problem->a(*it, lambda);
 	      typedef typename Block::value_type value_type_block;
 	      if (entry != 0.)
 		block.insert(block.end(), value_type_block(*it, entry));
-	      w.add_coefficient(*it, entry * factor);
+	      w.add_coefficient(*it, (entry / (d1 * problem->D(*it))) * factor);
 	    }
 	  }
 	}
@@ -189,20 +188,21 @@ namespace WaveletTL
 	// level already exists --> extract level from cache
 	Block& block(it->second);
 	    
+	const double d1 = problem->D(lambda);
 	// do the rest of the job
 	if (strategy == St04a) {
 	  for (typename Block::const_iterator it(block.begin()), itend(block.end());
 	       it != itend; ++it) {
 	    if (abs(lambda.j()-j) <= J/((double) problem->space_dimension) ||
 		intersect_singular_support(problem->basis(), lambda, it->first)) {
-	      w.add_coefficient(it->first, it->second * factor);
+	      w.add_coefficient(it->first, (it->second / (d1*problem->D(it->first))) * factor);
 	    }
 	  }
 	}
 	else if (strategy == CDD1) {
 	  for (typename Block::const_iterator it(block.begin()), itend(block.end());
 	       it != itend; ++it) {
-	    w.add_coefficient(it->first, it->second  * factor);
+	    w.add_coefficient(it->first, (it->second / (d1 * problem->D(it->first)))  * factor);
 	  }
 	}
       }// end else

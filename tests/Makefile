@@ -27,6 +27,7 @@ test_elliptic_equation_1D.o\
 test_steepest_descent.o\
 test_elliptic_equation.o\
 test_multiplicative_Schwarz.o\
+test_multiplicative_Schwarz_1D.o\
 #test_elliptic_equation.o\
 #test_composite_quadrature.o\
 #test_multiplicative_Schwarz.o \

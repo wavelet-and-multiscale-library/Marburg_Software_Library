@@ -60,6 +60,12 @@ namespace MathTL
     //! number of "block columns", i.e., blocks in row direction (horizontal)
     const size_type block_columns() const;
 
+    //! row dimension of a given block row
+    const size_type block_row_dimension(const size_type block_row) const;
+    
+    //! column dimension of a given block column
+    const size_type block_column_dimension(const size_type block_column) const;
+    
     //! get a single matrix block
     const MatrixBlock<C>* get_block(const size_type block_row, const size_type block_column) const;
 
@@ -121,6 +127,13 @@ namespace MathTL
     //! (re)calculate overall row and column dimensions
     void calculate_size();
   };
+
+  /*!
+    matrix-matrix multiplication of block matrices M*N
+    (we assume that the number of blocks as well as their sizes fit)
+  */
+  template <class C>
+  BlockMatrix<C> operator * (const BlockMatrix<C>& M, const BlockMatrix<C>& N);
 
   /*!
     stream output for block matrices

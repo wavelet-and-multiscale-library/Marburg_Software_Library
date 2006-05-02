@@ -97,7 +97,23 @@ namespace MathTL
   {
     return block_columns_columns.size();
   }
-  
+
+  template <class C>
+  inline
+  const typename BlockMatrix<C>::size_type
+  BlockMatrix<C>::block_row_dimension(const size_type block_row) const
+  {
+    return block_rows_rows[block_row];
+  }
+
+  template <class C>
+  inline
+  const typename BlockMatrix<C>::size_type
+  BlockMatrix<C>::block_column_dimension(const size_type block_column) const
+  {
+    return block_columns_columns[block_column];
+  }
+
   template <class C>
   inline
   const MatrixBlock<C>*
@@ -202,6 +218,35 @@ namespace MathTL
       }
       offset += Mtx_block.size();
     }    
+  }
+  
+  template <class C>
+  BlockMatrix<C>
+  operator * (const BlockMatrix<C>& M, const BlockMatrix<C>& N)
+  {
+    assert(M.block_columns() == N.block_rows());
+    typedef typename BlockMatrix<C>::size_type size_type;
+
+    BlockMatrix<C> R(M.block_rows(), N.block_columns());
+    for (size_type i(0); i < M.block_rows(); i++)
+      R.resize_block_row(i, M.block_row_dimension(i));
+    for (size_type j(0); j < N.block_columns(); j++)
+      R.resize_block_column(j, N.block_column_dimension(j));
+
+    for (size_type i(0); i < M.block_rows(); i++)
+      for (size_type j(0); j < N.block_columns(); j++)
+ 	{
+	  // 
+
+// 	  double help(0);
+// 	  for (size_type k(0); k < N.row_dimension(); k++)
+// 	    help += M.get_entry(i, k) * N.get_entry(k, j);
+
+// 	  if (help != 0)
+// 	    R.set_entry(i, j, help);
+ 	}
+    
+    return R;
   }
 
   template <class C>

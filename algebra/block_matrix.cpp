@@ -236,7 +236,26 @@ namespace MathTL
     for (size_type i(0); i < M.block_rows(); i++)
       for (size_type j(0); j < N.block_columns(); j++)
  	{
-	  // 
+	  // first decide whether any block has to be inserted
+	  MatrixBlock<C>* B = 0;
+	  for (size_type k(0); k < N.block_rows(); k++) {
+	    if (M.get_block(i, k) && N.get_block(k, j)) {
+	      B = M.get_block(i, k)->clone();
+	      break;
+	    }
+	  }
+	  
+	  if (B) {
+	    // create an empty block matrix
+
+	    delete B;
+	    
+// 	    for (size_type k(0); k < N.block_rows(); k++) {
+// 	      if (M.get_block(i, k) && N.get_block(k, j)) {
+// 	      }
+// 	    }
+	  }
+
 
 // 	  double help(0);
 // 	  for (size_type k(0); k < N.row_dimension(); k++)

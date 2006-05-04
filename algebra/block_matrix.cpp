@@ -1,5 +1,7 @@
 // implementation for block_matrix.h
 
+#include <algebra/sparse_matrix.h>
+
 namespace MathTL
 {
   template <class C>
@@ -237,32 +239,24 @@ namespace MathTL
       for (size_type j(0); j < N.block_columns(); j++)
  	{
 	  // first decide whether any block has to be inserted
-	  MatrixBlock<C>* B = 0;
+	  SparseMatrix<C>* B = 0;
 	  for (size_type k(0); k < N.block_rows(); k++) {
 	    if (M.get_block(i, k) && N.get_block(k, j)) {
-	      B = M.get_block(i, k)->clone();
+	      B = new SparseMatrix<C>(M.get_block(i, k)->row_dimension(),
+				      N.get_block(k, j)->column_dimension());
 	      break;
 	    }
 	  }
 	  
 	  if (B) {
-	    // create an empty block matrix
+ 	    for (size_type k(0); k < N.block_rows(); k++) {
+ 	      if (M.get_block(i, k) && N.get_block(k, j)) {
+		// TODO: B += M(i,k)*N(k,j)
+ 	      }
+ 	    }
 
-	    delete B;
-	    
-// 	    for (size_type k(0); k < N.block_rows(); k++) {
-// 	      if (M.get_block(i, k) && N.get_block(k, j)) {
-// 	      }
-// 	    }
+	    R.set_block(i, j, B);
 	  }
-
-
-// 	  double help(0);
-// 	  for (size_type k(0); k < N.row_dimension(); k++)
-// 	    help += M.get_entry(i, k) * N.get_entry(k, j);
-
-// 	  if (help != 0)
-// 	    R.set_entry(i, j, help);
  	}
     
     return R;

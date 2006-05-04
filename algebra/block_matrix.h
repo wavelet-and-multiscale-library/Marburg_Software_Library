@@ -131,6 +131,9 @@ namespace MathTL
   /*!
     matrix-matrix multiplication of block matrices M*N
     (we assume that the number of blocks as well as their sizes fit)
+    
+    In the first quick implementation, a block matrix of SparseMatrix blocks
+    is returned, independent from the block types in M and N.
   */
   template <class C>
   BlockMatrix<C> operator * (const BlockMatrix<C>& M, const BlockMatrix<C>& N);

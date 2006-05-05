@@ -31,7 +31,7 @@ int main()
   cout << "- first wavelet on the coarsest level: " << first_wavelet<Basis1D>(&basis, basis.j0()) << endl;
   cout << "- last wavelet on the coarsest level: " << last_wavelet<Basis1D>(&basis, basis.j0()) << endl;
 
-#if 1
+#if 0
   cout << "- checking setup of Mj0 for different levels:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+2; level++) {
     cout << "* j=" << level << endl;
@@ -50,6 +50,16 @@ int main()
 #endif
 
 #if 1
+  cout << "- checking setup of Mj1c_1d for different levels:" << endl;
+  for (int level = basis.j0(); level <= basis.j0()+2; level++) {
+    cout << "* j=" << level << endl;
+    const SparseMatrix<double>& Mj1c_1d = basis.get_Mj1c_1d(level); // should yield a cache miss
+//     cout << "* j=" << level << ", Mj1c_1d=" << endl << Mj1c_1d << endl;
+    const SparseMatrix<double>& dummy = basis.get_Mj1c_1d(level); // should yield a cache hit
+  } 
+#endif
+
+#if 0
   Index lambda(first_generator<Basis1D>(&basis, basis.j0()));
 //   for (; !(lambda.p() == 1); ++lambda);
 //   for (; !(lambda.p() == 2); ++lambda);

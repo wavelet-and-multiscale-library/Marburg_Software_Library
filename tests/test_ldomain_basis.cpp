@@ -49,7 +49,7 @@ int main()
   } 
 #endif
 
-#if 1
+#if 0
   cout << "- checking setup of Mj1c_1d for different levels:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+2; level++) {
     cout << "* j=" << level << endl;
@@ -58,6 +58,17 @@ int main()
     const SparseMatrix<double>& dummy = basis.get_Mj1c_1d(level); // should yield a cache hit
   } 
 #endif
+
+#if 1
+  cout << "- checking setup of Mj1c for different levels:" << endl;
+  for (int level = basis.j0(); level <= basis.j0()+2; level++) {
+    cout << "* j=" << level << endl;
+    const BlockMatrix<double>& Mj1c_01 = basis.get_Mj1c_01(level); // should yield a cache miss
+    cout << "* j=" << level << ", Mj1c_01=" << endl << Mj1c_01 << endl;
+    const BlockMatrix<double>& dummy = basis.get_Mj1c_01(level); // should yield a cache hit
+  } 
+#endif
+
 
 #if 0
   Index lambda(first_generator<Basis1D>(&basis, basis.j0()));

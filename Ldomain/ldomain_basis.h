@@ -77,14 +77,16 @@ namespace WaveletTL
     const int Deltasize(const int j) const;
 
     /*!
-      The following routines provide read access to the diverse refinement matrices
+      The following routines provide read access to the diverse refinement (sub)matrices
       on a level j >= j0. The row and column indices follow the less<Index> ordering.
       Those matrices will be collected in an internal cache to provide faster access.
     */
-    const BlockMatrix<double>& get_Mj0  (const int j) const;
-    const BlockMatrix<double>& get_Mj0T (const int j) const;
+    const BlockMatrix<double>&  get_Mj0     (const int j) const;
+    const BlockMatrix<double>&  get_Mj0T    (const int j) const;
     const SparseMatrix<double>& get_Mj1c_1d (const int j) const; // initial stable completion in 1D
-//     const BlockMatrix<double>& get_Mj1c (const int j) const;
+    const BlockMatrix<double>&  get_Mj1c_01 (const int j) const;
+    const BlockMatrix<double>&  get_Mj1c_10 (const int j) const;
+    const BlockMatrix<double>&  get_Mj1c_11 (const int j) const;
 //     const BlockMatrix<double>& get_Mj1  (const int j) const;
 //     const BlockMatrix<double>& get_Mj1T (const int j) const;
 

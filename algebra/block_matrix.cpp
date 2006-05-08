@@ -300,11 +300,14 @@ namespace MathTL
 	   << std::endl;
  	for (typename BlockMatrix<C>::size_type i(0); i < M.block_rows(); ++i)
 	  for (typename BlockMatrix<C>::size_type j(0); j < M.block_columns(); ++j) {
-	    os << "block (" << i << "," << j << "):" << std::endl;
+	    os << "block (" << i << "," << j << ")";
 	    if (M.get_block(i, j)==0)
-	      os << "ZERO" << std::endl;
-	    else
+	      os << ":" << std::endl << "ZERO" << std::endl;
+	    else {
+	      os << ", size is (" << M.get_block(i, j)->row_dimension()
+		 << "x" << M.get_block(i, j)->column_dimension() << "):" << std::endl;
 	      M.get_block(i, j)->print(os);
+	    }
 	  }
       }
     

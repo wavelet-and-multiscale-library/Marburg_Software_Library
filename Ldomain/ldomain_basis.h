@@ -136,7 +136,8 @@ namespace WaveletTL
 
     //! caches for the diverse refinement matrices
     typedef std::map<int,BlockMatrix<double> > MatrixCache;
-    mutable MatrixCache Mj0_cache, Mj0T_cache, Mj1c_cache;
+    mutable MatrixCache Mj0_cache, Mj0T_cache,
+      Mj1c_01_cache, Mj1c_10_cache, Mj1c_11_cache;
 
     typedef std::map<int,SparseMatrix<double> > Matrix1DCache;
     mutable Matrix1DCache Mj1c_1d_cache;

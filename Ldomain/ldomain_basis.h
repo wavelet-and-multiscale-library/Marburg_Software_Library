@@ -73,9 +73,6 @@ namespace WaveletTL
     //! read access to the underlying 1D basis
     const IntervalBasis& basis1d() const { return basis1d_; }
 
-    //! size of Delta_j
-    const int Deltasize(const int j) const;
-
     /*!
       The following routines provide read access to the diverse refinement (sub)matrices
       on a level j >= j0. The row and column indices follow the less<Index> ordering.

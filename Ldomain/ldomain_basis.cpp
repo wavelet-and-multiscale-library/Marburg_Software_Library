@@ -15,13 +15,6 @@ namespace WaveletTL
   }
 
   template <class IBASIS>
-  const int
-  LDomainBasis<IBASIS>::Deltasize(const int j) const
-  {
-    
-  }
-
-  template <class IBASIS>
   const BlockMatrix<double>&
   LDomainBasis<IBASIS>::get_Mj0 (const int j) const {
     // check whether the j-th matrix already exists in the cache
@@ -377,6 +370,56 @@ namespace WaveletTL
     return matrix_it->second;
   }
 
+  template <class IBASIS>
+  const BlockMatrix<double>&
+  LDomainBasis<IBASIS>::get_Mj1c_11 (const int j) const {
+    // check whether the j-th matrix already exists in the cache
+    typename MatrixCache::iterator matrix_lb(Mj1c_11_cache.lower_bound(j));
+    typename MatrixCache::iterator matrix_it(matrix_lb);
+    if (matrix_lb == Mj1c_11_cache.end() ||
+	Mj1c_11_cache.key_comp()(j, matrix_lb->first))
+      {
+	cout << "LDomainBasis::get_Mj1c_11() cache miss" << endl;
+
+ 	// compute Mj1c_11 and insert it into the cache
+ 	BlockMatrix<double> Mj1c_11(5, 3);
+ 	typedef typename MatrixCache::value_type value_type;
+  	matrix_it = Mj1c_11_cache.insert(matrix_lb, value_type(j, Mj1c_11));
+	
+ 	const unsigned int Deltajp1 = basis1d().Deltasize(j+1);
+
+ 	// row/column 0,1,2 <-> patches 0,1,2
+ 	for (unsigned int patch = 0; patch <= 2; patch++) {
+ 	  matrix_it->second.resize_block_row   (patch, (Deltajp1-2)*(Deltajp1-2));
+ 	  matrix_it->second.resize_block_column(patch, 1<<(2*j));
+ 	}
+	
+  	// row 3/4 <-> interface 3,4
+ 	for (unsigned int patch = 3; patch <= 4; patch++) {
+ 	  matrix_it->second.resize_block_row   (patch, Deltajp1-2);
+ 	}
+
+ 	// prepare 1d matrices
+	const SparseMatrix<double>& Mj1c_1d = get_Mj1c_1d(j);
+	SparseMatrix<double> Mj1c_1d_interior(Deltajp1-2, 1<<j);
+ 	for (unsigned int row = 0; row < Deltajp1-2; row++)
+ 	  for (int column = 0; column < 1<<j; column++)
+ 	    Mj1c_1d_interior.set_entry(row, column, Mj1c_1d.get_entry(row+1, column));	
+	
+   	// patch wavelets decompose only into themselves
+  	for (int patch = 0; patch <= 2; patch++)
+  	  matrix_it->second.set_block(patch, patch,
+  				      new KroneckerMatrix<double,SparseMatrix<double>,SparseMatrix<double> >
+  				      (Mj1c_1d_interior, Mj1c_1d_interior));
+      }
+    else
+      {
+	cout << "LDomainBasis::get_Mj1c_11() cache hit" << endl;
+      }
+    
+    return matrix_it->second;
+  }
+  
 //   template <class IBASIS>
 //   const BlockMatrix<double>&
 //   LDomainBasis<IBASIS>::get_Mj1 (const int j) const {

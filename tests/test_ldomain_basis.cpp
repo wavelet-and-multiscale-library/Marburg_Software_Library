@@ -59,8 +59,8 @@ int main()
   } 
 #endif
 
-#if 1
-  cout << "- checking setup of Mj1c for different levels:" << endl;
+#if 0
+  cout << "- checking setup of Mj1c_01 for different levels:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+2; level++) {
     cout << "* j=" << level << endl;
     const BlockMatrix<double>& Mj1c_01 = basis.get_Mj1c_01(level); // should yield a cache miss
@@ -69,6 +69,15 @@ int main()
   } 
 #endif
 
+#if 1
+  cout << "- checking setup of Mj1c_10 for different levels:" << endl;
+  for (int level = basis.j0(); level <= basis.j0()+2; level++) {
+    cout << "* j=" << level << endl;
+    const BlockMatrix<double>& Mj1c_10 = basis.get_Mj1c_10(level); // should yield a cache miss
+    cout << "* j=" << level << ", Mj1c_10=" << endl << Mj1c_10 << endl;
+    const BlockMatrix<double>& dummy = basis.get_Mj1c_10(level); // should yield a cache hit
+  } 
+#endif
 
 #if 0
   Index lambda(first_generator<Basis1D>(&basis, basis.j0()));

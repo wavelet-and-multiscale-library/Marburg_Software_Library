@@ -48,7 +48,7 @@ int main()
   const int DIM = 2;
 
   //typedef DSBasis<3,3> Basis1D;
-  typedef PBasis<3,3> Basis1D;
+  typedef PBasis<2,2> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
   typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
@@ -117,14 +117,14 @@ int main()
   bound_1[0] = 1;
   bound_1[1] = 1;
   bound_1[2] = 1;
-  bound_1[3] = 2;
+  bound_1[3] = 1;
 
   bc[0] = bound_1;
 
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
   bound_2[0] = 1;
-  bound_2[1] = 2;
+  bound_2[1] = 1;
   bound_2[2] = 1;
   bound_2[3] = 1;
 
@@ -262,7 +262,7 @@ int main()
   double time;
   tstart = clock();
 
-  WaveletTL::setup_stiffness_matrix(problem/*discrete_poisson*/, Lambda, stiff);
+  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
 
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;

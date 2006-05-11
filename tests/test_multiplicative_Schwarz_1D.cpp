@@ -15,7 +15,8 @@
 #include <frame_support.h>
 #include <frame_index.h>
 //#include <steepest_descent.h>
-#include <multiplicative_Schwarz.h>
+//#include <multiplicative_Schwarz.h>
+#include <additive_Schwarz.h>
 //#include <steepest_descent_basis.h>
 //#include <richardson_CDD2.h>
 #include <galerkin/cached_problem.h>
@@ -100,13 +101,26 @@ int main()
   const int DIM = 1;
 
   //typedef DSBasis<2,2> Basis1D;
-  typedef PBasis<2,2> Basis1D;
+  typedef PBasis<3,3> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
 
 
   //##############################  
+//   Matrix<double> A(DIM,DIM);
+//   A(0,0) = 0.8;
+//   Point<1> b;
+//   b[0] = 0.;
+//   AffineLinearMapping<1> affineP(A,b);
+  
+//   Matrix<double> A2(DIM,DIM);
+//   A2(0,0) = 0.8;
+//   Point<1> b2;
+//   b2[0] = 1-A2.get_entry(0,0);
+//   AffineLinearMapping<1> affineP2(A2,b2);
+
+  //######### Three Patches ######  
   Matrix<double> A(DIM,DIM);
   A(0,0) = 0.8;
   Point<1> b;
@@ -114,69 +128,91 @@ int main()
   AffineLinearMapping<1> affineP(A,b);
   
   Matrix<double> A2(DIM,DIM);
-  A2(0,0) = 0.8;
+  A2(0,0) = 0.002;
   Point<1> b2;
-  b2[0] = 1-A2.get_entry(0,0);
+  b2[0] = 0.5-0.001;
   AffineLinearMapping<1> affineP2(A2,b2);
-
-
-  FixedArray1D<double,1> A3;
-  A3[0] = 0.75;
-  SimpleAffineLinearMapping<1> simlpeaffine1(A3,b);
   
-  FixedArray1D<double,1> A4;
-  A4[0] = 0.75;
-  SimpleAffineLinearMapping<1> simlpeaffine2(A4,b2);
+  Matrix<double> A3(DIM,DIM);
+  A3(0,0) = 0.8;
+  Point<1> b3;
+  b3[0] = 1-A3.get_entry(0,0);
+  AffineLinearMapping<1> affineP3(A3,b3);
+
+  //##############################  
+
+//   FixedArray1D<double,1> A3;
+//   A3[0] = 0.75;
+//   SimpleAffineLinearMapping<1> simlpeaffine1(A3,b);
+  
+//   FixedArray1D<double,1> A4;
+//   A4[0] = 0.75;
+//   SimpleAffineLinearMapping<1> simlpeaffine2(A4,b2);
 
   //##############################
   
-  Array1D<Chart<DIM,DIM>* > charts(2);
+  Array1D<Chart<DIM,DIM>* > charts(3);
   charts[0] = &affineP;
   charts[1] = &affineP2;
+  charts[2] = &affineP3;
   
   //charts[0] = &simlpeaffine1;
   //charts[1] = &simlpeaffine2;
 
 
-  SymmetricMatrix<bool> adj(2);
+  SymmetricMatrix<bool> adj(3);
   adj(0,0) = 1;
   adj(1,1) = 1;
   adj(1,0) = 1;
   adj(0,1) = 1;
+
+  adj(2,2) = 1;
+  adj(2,0) = 1;
+  adj(2,1) = 1;
+  adj(0,2) = 1;
+  adj(1,2) = 1;
+
   
   //to specify primal boundary the conditions
-  Array1D<FixedArray1D<int,2*DIM> > bc(2);
+  Array1D<FixedArray1D<int,2*DIM> > bc(3);
   
   //primal boundary conditions for first patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_1;
   bound_1[0] = 1;
-  bound_1[1] = 1;
+  bound_1[1] = 2;
   
   bc[0] = bound_1;
   
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
-  bound_2[0] = 1;
-  bound_2[1] = 1;
+  bound_2[0] = 2;
+  bound_2[1] = 2;
   
   bc[1] = bound_2;
 
-//to specify primal boundary the conditions
-  Array1D<FixedArray1D<int,2*DIM> > bcT(2);
-
-  //dual boundary conditions for first patch
   FixedArray1D<int,2*DIM> bound_3;
-  bound_3[0] = 0;
-  bound_3[1] = 0;
+  bound_3[0] = 2;
+  bound_3[1] = 1;
+  
+  bc[2] = bound_3;
 
-  bcT[0] = bound_3;
 
-  //dual boundary conditions for second patch
-  FixedArray1D<int,2*DIM> bound_4;
-  bound_4[0] = 0;
-  bound_4[1] = 0;
+// //to specify primal boundary the conditions
+//   Array1D<FixedArray1D<int,2*DIM> > bcT(2);
+
+//   //dual boundary conditions for first patch
+//   FixedArray1D<int,2*DIM> bound_3;
+//   bound_3[0] = 0;
+//   bound_3[1] = 0;
+
+//   bcT[0] = bound_3;
+
+//   //dual boundary conditions for second patch
+//   FixedArray1D<int,2*DIM> bound_4;
+//   bound_4[0] = 0;
+//   bound_4[1] = 0;
  
-  bcT[1] = bound_4;
+//   bcT[1] = bound_4;
 
   Atlas<DIM,DIM> Lshaped(charts,adj);  
   cout << Lshaped << endl;
@@ -297,7 +333,8 @@ int main()
 //       cout << ind << endl;
 //     }
 
-  multiplicative_Schwarz_SOLVE(problem, epsilon, u_epsilon);
+  //multiplicative_Schwarz_SOLVE(problem, epsilon, u_epsilon);
+  additive_Schwarz_SOLVE(problem, epsilon, u_epsilon);
   //steepest_descent_SOLVE(problem, epsilon, u_epsilon);
   //  steepest_descent_SOLVE_basis(problem, epsilon, u_epsilon);
   //richardson_SOLVE_CDD2(problem, epsilon, u_epsilon);

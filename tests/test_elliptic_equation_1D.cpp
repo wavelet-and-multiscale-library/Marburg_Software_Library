@@ -254,7 +254,7 @@ int main()
   double time;
   tstart = clock();
   
-  WaveletTL::setup_stiffness_matrix(problem/*discrete_poisson*/, Lambda, stiff);
+  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
   
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;

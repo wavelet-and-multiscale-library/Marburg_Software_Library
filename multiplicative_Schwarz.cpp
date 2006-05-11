@@ -68,7 +68,7 @@ public:
 				     InfiniteVector<double, typename PROBLEM::Index>& u_epsilon)
   {
     //typedef DSBasis<2,2> Basis1D;
-    typedef PBasis<2,2> Basis1D;	
+    typedef PBasis<3,3> Basis1D;	
 
     Point<2> origin;
     origin[0] = 0.0;
@@ -80,7 +80,7 @@ public:
 
 
     unsigned int loops = 0;
-    const int jmax = 15;
+    const int jmax = 10;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
@@ -101,13 +101,16 @@ public:
     clock_t tstart, tend;
     tstart = clock();
 
-    EvaluateFrame<Basis1D,2,2> evalObj;
+    EvaluateFrame<Basis1D,1,1> evalObj;
 
     double eta = 1.;
 
+
+    const double alpha = 0.9;
+
     unsigned int global_iterations = 0;
     double tmp = 5.;
-    while (tmp > 1.0e-11) {
+    while (tmp > 1.0e-3) {
 
       //approximate residual
       P.RHS(eta, f);
@@ -126,7 +129,7 @@ public:
       double tmp1 = log10(tmp);
       if (u_k.size() != 0)
 	asymptotic[log10( (double)u_k.size() )] = tmp1;
-      std::ofstream os3("steep_asymptotic_33_2D_2704.m");
+      std::ofstream os3("steep_asymptotic_33_2D_1105.m");
       matlab_output(asymptotic,os3);
       os3.close();
 
@@ -182,6 +185,7 @@ public:
 	help.set_coefficient(*it, xk[id]);
 
       u_k_1_2 = u_k + help;
+      //u_k = u_k + alpha*help;
 
 
 
@@ -253,6 +257,7 @@ public:
 	help.set_coefficient(*it, yk[id]);
 
       u_k = u_k_1_2 + help;
+      //u_k = u_k + alpha*help;
 
       global_iterations++;
 
@@ -261,6 +266,8 @@ public:
 
 
       u_epsilon = u_k;
+
+      cout << ++loops << " loops completed" << endl;
 
 //       if (global_iterations % 1 == 0) {
 // 	u_epsilon = u_k;

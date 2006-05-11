@@ -15,6 +15,13 @@ namespace WaveletTL
   }
 
   template <class IBASIS>
+  const int
+  LDomainBasis<IBASIS>::Deltasize(const int j) const {
+    const unsigned int Deltaj = basis1d().Deltasize(j);
+    return 3*(Deltaj-2)*(Deltaj-2)+2*(Deltaj-2);
+  }
+  
+  template <class IBASIS>
   const BlockMatrix<double>&
   LDomainBasis<IBASIS>::get_Mj0 (const int j) const {
     // check whether the j-th matrix already exists in the cache
@@ -478,21 +485,17 @@ namespace WaveletTL
       
       const int ecode(lambda.e()[0]+2*lambda.e()[1]);
       
-      const unsigned int Deltaj   = basis1d().Deltasize(lambda.j());
-      const unsigned int Deltajp1 = basis1d().Deltasize(lambda.j()+1);
-      
       if (ecode == 0) {
 	// generator
 
 	// compute the corresponding column of Mj0
 	const BlockMatrix<double>& Mj0 = get_Mj0(lambda.j());
-	Vector<double> unitvector(3*(Deltaj-2)*(Deltaj-2)+2*(Deltaj-2)),
-	  generators(3*(Deltajp1-2)*(Deltajp1-2)+2*(Deltajp1-2));
+	Vector<double> unitvector(Deltasize(lambda.j())), generators(Deltasize(lambda.j()+1));
 	unsigned int id = 0;
 	for (Index mu = first_generator(this, lambda.j()); mu != lambda; ++mu) id++;
  	unitvector[id] = 1.0;
   	Mj0.apply(unitvector, generators);
-
+	
 	// collect all relevant generators from the scale |lambda|+1
 	id = 0;
 	for (Index mu = first_generator(this, lambda.j()+1); id < generators.size(); id++, ++mu) {

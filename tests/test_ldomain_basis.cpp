@@ -79,7 +79,7 @@ int main()
   } 
 #endif
 
-#if 1
+#if 0
   cout << "- checking setup of Mj1c_11 for different levels:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+2; level++) {
     cout << "* j=" << level << endl;
@@ -89,7 +89,7 @@ int main()
   } 
 #endif
 
-#if 0
+#if 1
   Index lambda(first_generator<Basis1D>(&basis, basis.j0()));
 //   for (; !(lambda.p() == 1); ++lambda);
 //   for (; !(lambda.p() == 2); ++lambda);
@@ -116,7 +116,13 @@ int main()
   InfiniteVector<double, Index> gcoeffs;
   basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
   cout << "- generator coefficients of lambda on a higher scale:"
-       << endl << gcoeffs << endl;
+       << endl << gcoeffs;
+  cout << "- evaluating this linear combination..." << endl;
+  std::ofstream psi2stream("Ldomain_wavelet2.m");
+  matlab_output(psi2stream, evaluate<Basis1D>(basis, gcoeffs, true, 6));
+  psi2stream.close();
+  cout << "  ...done, see file Ldomain_wavelet2.m!" << endl;
+  
 #endif
 
 }

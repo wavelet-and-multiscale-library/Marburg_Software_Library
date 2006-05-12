@@ -20,6 +20,28 @@ namespace WaveletTL
     const unsigned int Deltaj = basis1d().Deltasize(j);
     return 3*(Deltaj-2)*(Deltaj-2)+2*(Deltaj-2);
   }
+
+  template <class IBASIS>
+  const int
+  LDomainBasis<IBASIS>::Nabla01size(const int j) const {
+    const unsigned int Deltaj = basis1d().Deltasize(j);
+    return 42;
+  }
+  
+  template <class IBASIS>
+  const int
+  LDomainBasis<IBASIS>::Nabla10size(const int j) const {
+    const unsigned int Deltaj = basis1d().Deltasize(j);
+    return 42;
+  }
+  
+  template <class IBASIS>
+  const int
+  LDomainBasis<IBASIS>::Nabla11size(const int j) const {
+    const unsigned int Deltaj = basis1d().Deltasize(j);
+    return 42;
+  }
+  
   
   template <class IBASIS>
   const BlockMatrix<double>&
@@ -506,15 +528,33 @@ namespace WaveletTL
 	  }
 	}
       } else {
+	if (ecode == 1) {
+	  // (1,0)-wavelet
+	  
+	  // compute the corresponding column of Mj1c_10
+	  const BlockMatrix<double>& Mj1c_10 = get_Mj1c_10(lambda.j());
 
-      
-//       InfiniteVector<double,IIndex> gcoeffs0, gcoeffs1, gcoeffs2;
-//       InfiniteVector<double,Index> psic; // psi_lambda^check
+	} else {
+	  if (ecode == 2) {
+	    // (0,1)-wavelet
+	    
+	    // compute the corresponding column of Mj1c_01
+	    const BlockMatrix<double>& Mj1c_01 = get_Mj1c_01(lambda.j());
+	    Vector<double> unitvector(Nabla01size(lambda.j())),
+	      generators(Deltasize(lambda.j()+1));
+	    unsigned int id = 0;
+	    for (Index mu = first_generator(this, lambda.j()); mu != lambda; ++mu) id++;
+	    unitvector[id] = 1.0;
+	    Mj1c_01.apply(unitvector, generators);
 
-      
-//       // compute c from psic
-//       c.swap(psic); // TODO: implement biorthogonalization
+	  } else {
+	    // (1,1)-wavelet
 
+	    // compute the corresponding column of Mj1c_10
+	    const BlockMatrix<double>& Mj1c_11 = get_Mj1c_11(lambda.j());
+
+	  }
+	}
       }
 
 
@@ -523,23 +563,6 @@ namespace WaveletTL
 
 
 
-
-
-      
-//       switch(ecode) {
-//       case 0:
-//  	// generator
-	
-// 	// collect all relevant generators from the scale |lambda|+1
-	
-
-//  	break;
-//       case 1:
-//  	// (1,0)-wavelet
-//  	break;
-//       case 2:
-//  	// (0,1)-wavelet
-	
 //  	// First treat the identity part of the biorthogonalization equation, i.e.,
 //  	// compute the generator coefficients of the initial stable completion
 // 	//   Mj1c = (I-Mj0*<Theta_{j+1},Lambda_j^tilde>^T)*Mj1

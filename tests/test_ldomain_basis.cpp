@@ -93,8 +93,8 @@ int main()
   Index lambda(first_generator<Basis1D>(&basis, basis.j0()));
 //   for (; !(lambda.p() == 1); ++lambda);
 //   for (; !(lambda.p() == 2); ++lambda);
-  for (; !(lambda.p() == 3); ++lambda);
-//   for (; !(lambda.p() == 4); ++lambda);
+//   for (; !(lambda.p() == 3); ++lambda);
+  for (; !(lambda.p() == 4); ++lambda);
 //   for (; lambda.e()[0] != 0 || lambda.e()[1] != 1; ++lambda);
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 1); ++lambda);
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 1 && lambda.k()[1] == 7); ++lambda);
@@ -107,7 +107,7 @@ int main()
 //   for (int i = 0; i < 155; i++, ++lambda); // one of the generators on patch 4
 //   for (int i = 0; i < 330; i++, ++lambda); // one of the (0,1)-wavelets on patch 4
 //   for (int i = 0; i < 334; i++, ++lambda);
-  cout << "- evaluating a primal generator lambda=" << lambda << " ..." << endl;
+  cout << "- evaluating a primal wavelet lambda=" << lambda << " ..." << endl;
   std::ofstream psistream("Ldomain_wavelet.m");
   matlab_output(psistream, evaluate<Basis1D>(basis, lambda, true, 6));
   psistream.close();

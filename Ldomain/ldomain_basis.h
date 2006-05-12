@@ -76,6 +76,11 @@ namespace WaveletTL
     //! size of Delta_j
     const int Deltasize(const int j) const;
 
+    //! sizes of the different wavelet index sets
+    const int Nabla01size(const int j) const;
+    const int Nabla10size(const int j) const;
+    const int Nabla11size(const int j) const;
+
     /*!
       The following routines provide read access to the diverse refinement (sub)matrices
       on a level j >= j0. The row and column indices follow the less<Index> ordering.

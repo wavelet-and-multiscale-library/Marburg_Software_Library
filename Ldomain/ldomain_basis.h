@@ -23,7 +23,7 @@
 #include <Ldomain/ldomain_index.h>
 
 // for convenience, include also some functionality
-// #include <Ldomain/ldomain_support.h>
+#include <Ldomain/ldomain_support.h>
 #include <Ldomain/ldomain_evaluate.h>
 
 using std::list;
@@ -61,8 +61,17 @@ namespace WaveletTL
     //! wavelet index class
     typedef LDomainIndex<IBASIS> Index;
 
+    //! geometric type of the support sets
+    typedef struct {
+      int j;
+      int xmin[3];
+      int xmax[3];
+      int ymin[3];
+      int ymax[3];
+    } Support;
+
     //! critical Sobolev regularity for the primal generators/wavelets
-    static double primal_regularity() { return IBASIS::primal_regularity(); }
+    static double primal_regularity() { return IBASIS::primal_regularity(); } // dirty, we should use max(1.5,~) instead
     
     //! number of vanishing moments for the primal wavelets
     static unsigned int primal_vanishing_moments() { return IBASIS::primal_vanishing_moments(); }

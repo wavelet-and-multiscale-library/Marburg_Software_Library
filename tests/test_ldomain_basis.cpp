@@ -103,7 +103,7 @@ int main()
   }
 #endif
 
-#if 1
+#if 0
   Index lambda(first_generator<Basis1D>(&basis, basis.j0()));
 //   for (; !(lambda.p() == 1); ++lambda);
 //   for (; !(lambda.p() == 2); ++lambda);
@@ -139,7 +139,29 @@ int main()
   matlab_output(psi2stream, evaluate<Basis1D>(basis, gcoeffs, true, 6));
   psi2stream.close();
   cout << "  ...done, see file Ldomain_wavelet2.m!" << endl;
-  
+#endif
+
+#if 1
+  Index mu(first_generator<Basis1D>(&basis, basis.j0()));
+
+  cout << "- for mu=" << mu << ", the support of psi_mu looks as follows:" << endl;
+  Basis::Support supp;
+  support(basis, mu, supp);
+
+  cout << "  patch 0: 2^{-" << supp.j << "}"
+       << "[" << supp.xmin[0] << "," << supp.xmax[0]
+       << "]x[" << supp.ymin[0] << "," << supp.ymax[0] << "]"
+       << endl;
+
+  cout << "  patch 1: 2^{-" << supp.j << "}"
+       << "[" << supp.xmin[1] << "," << supp.xmax[1]
+       << "]x[" << supp.ymin[1] << "," << supp.ymax[1] << "]"
+       << endl;
+
+  cout << "  patch 2: 2^{-" << supp.j << "}"
+       << "[" << supp.xmin[2] << "," << supp.xmax[2]
+       << "]x[" << supp.ymin[2] << "," << supp.ymax[2] << "]"
+       << endl;
 #endif
 
 }

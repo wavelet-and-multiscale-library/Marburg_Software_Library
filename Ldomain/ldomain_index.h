@@ -151,6 +151,15 @@ namespace WaveletTL
   first_wavelet(const LDomainBasis<IBASIS>* basis, const int j);
   
   /*!
+    index of first wavelet with a given type on level j >= j0
+  */
+  template <class IBASIS>
+  LDomainIndex<IBASIS>
+  first_wavelet(const LDomainBasis<IBASIS>* basis,
+		const int j,
+		const typename LDomainIndex<IBASIS>::type_type& e);
+  
+  /*!
     index of last wavelet on level j >= j0
   */
   template <class IBASIS>

@@ -25,23 +25,21 @@ namespace WaveletTL
   const int
   LDomainBasis<IBASIS>::Nabla01size(const int j) const {
     const unsigned int Deltaj = basis1d().Deltasize(j);
-    return 42;
+    return 3*(Deltaj-2)*(1<<j)+(1<<j);
   }
   
   template <class IBASIS>
   const int
   LDomainBasis<IBASIS>::Nabla10size(const int j) const {
     const unsigned int Deltaj = basis1d().Deltasize(j);
-    return 42;
+    return 3*(Deltaj-2)*(1<<j)+(1<<j);
   }
   
   template <class IBASIS>
   const int
   LDomainBasis<IBASIS>::Nabla11size(const int j) const {
-    const unsigned int Deltaj = basis1d().Deltasize(j);
-    return 42;
+    return 3*(1<<(2*j));
   }
-  
   
   template <class IBASIS>
   const BlockMatrix<double>&
@@ -296,13 +294,13 @@ namespace WaveletTL
  	  for (int column = 0; column < 1<<j; column++)
  	    Mj1c_1d_interior.set_entry(row, column, Mj1c_1d.get_entry(row+1, column));	
 	
-   	// patch wavelets decompose only into themselves
+   	// patch wavelets decompose only into patch generators
   	for (int patch = 0; patch <= 2; patch++)
   	  matrix_it->second.set_block(patch, patch,
   				      new KroneckerMatrix<double,SparseMatrix<double>,SparseMatrix<double> >
   				      (Mj0_1d_interior, Mj1c_1d_interior));
 	
- 	// interface generators decompose into themselves and patch generators from the neighboring patches
+  	// interface generators decompose into themselves and patch generators from the neighboring patches
   	matrix_it->second.set_block(1, 3,
   				    new KroneckerMatrix<double,SparseMatrix<double>,SparseMatrix<double> >
   				    (Mj0_1d_right, Mj1c_1d_interior, M_SQRT1_2));
@@ -505,221 +503,92 @@ namespace WaveletTL
       // and the specific structure of the initial stable completion
       //   Mj1c = tensor product of factors (I-Mj0*(sqrt(2)*e_1 cut(Mj0T^T) sqrt(2)*e_n))*Mj1
       
+      // storage for the corresponding column of Mj1
+      Vector<double> generators(Deltasize(lambda.j()+1));
+
       const int ecode(lambda.e()[0]+2*lambda.e()[1]);
-      
       if (ecode == 0) {
 	// generator
 
 	// compute the corresponding column of Mj0
 	const BlockMatrix<double>& Mj0 = get_Mj0(lambda.j());
-	Vector<double> unitvector(Deltasize(lambda.j())), generators(Deltasize(lambda.j()+1));
+	Vector<double> unitvector(Deltasize(lambda.j()));
 	unsigned int id = 0;
 	for (Index mu = first_generator(this, lambda.j()); mu != lambda; ++mu) id++;
  	unitvector[id] = 1.0;
-  	Mj0.apply(unitvector, generators);
-	
-	// collect all relevant generators from the scale |lambda|+1
-	id = 0;
-	for (Index mu = first_generator(this, lambda.j()+1); id < generators.size(); id++, ++mu) {
-	  InfiniteVector<double, Index> d;
-	  if (fabs(generators[id]) > 1e-12) {
-	    reconstruct_1(mu, j, d);
-	    c.add(generators[id], d);
-	  }
-	}
+  	Mj0.apply(unitvector, generators);	
       } else {
 	if (ecode == 1) {
 	  // (1,0)-wavelet
 	  
 	  // compute the corresponding column of Mj1c_10
 	  const BlockMatrix<double>& Mj1c_10 = get_Mj1c_10(lambda.j());
-
+	  Vector<double> unitvector(Nabla10size(lambda.j()));
+	  unsigned int id = 0;
+	  typename Index::type_type e;
+	  e[0] = 1;
+	  for (Index mu = first_wavelet(this, lambda.j(), e); mu != lambda; ++mu) id++;
+ 	  unitvector[id] = 1.0;
+ 	  Mj1c_10.apply(unitvector, generators);
 	} else {
 	  if (ecode == 2) {
 	    // (0,1)-wavelet
 	    
 	    // compute the corresponding column of Mj1c_01
-	    const BlockMatrix<double>& Mj1c_01 = get_Mj1c_01(lambda.j());
-	    Vector<double> unitvector(Nabla01size(lambda.j())),
-	      generators(Deltasize(lambda.j()+1));
-	    unsigned int id = 0;
-	    for (Index mu = first_generator(this, lambda.j()); mu != lambda; ++mu) id++;
-	    unitvector[id] = 1.0;
-	    Mj1c_01.apply(unitvector, generators);
-
+ 	    const BlockMatrix<double>& Mj1c_01 = get_Mj1c_01(lambda.j());
+ 	    Vector<double> unitvector(Nabla01size(lambda.j()));
+ 	    unsigned int id = 0;
+ 	    for (Index mu = first_wavelet(this, lambda.j()); mu != lambda; ++mu) id++;
+ 	    unitvector[id] = 1.0;
+ 	    Mj1c_01.apply(unitvector, generators);
 	  } else {
 	    // (1,1)-wavelet
 
-	    // compute the corresponding column of Mj1c_10
-	    const BlockMatrix<double>& Mj1c_11 = get_Mj1c_11(lambda.j());
-
+	    // compute the corresponding column of Mj1c_11
+ 	    const BlockMatrix<double>& Mj1c_11 = get_Mj1c_11(lambda.j());
+	    
+ 	    Vector<double> unitvector(Nabla11size(lambda.j()));
+ 	    unsigned int id = 0;
+	    typename Index::type_type e;
+	    e[0] = e[1] = 1;
+	    for (Index mu = first_wavelet(this, lambda.j(), e); mu != lambda; ++mu) id++;
+ 	    unitvector[id] = 1.0;
+ 	    Mj1c_11.apply(unitvector, generators);
 	  }
 	}
       }
 
+      // Now that the corresponding column of Mj1 has been computed, we collect
+      // all relevant generators from the scale |lambda|+1
+      // (this is the identity part of the biorthogonalization equation)
+      unsigned int id = 0;
+      for (Index mu = first_generator(this, lambda.j()+1); id < generators.size(); id++, ++mu) {
+	InfiniteVector<double, Index> d;
+	if (fabs(generators[id]) > 1e-12) {
+	  reconstruct_1(mu, j, d);
+	  c.add(generators[id], d);
+	}
+      }
 
+      if (ecode > 0) {
+ 	// second part of the biorthogonalization equation,
+ 	// compute the corresponding column of Mj0*Mj0T^T*Mj1c
+	const BlockMatrix<double>& Mj0  = get_Mj0 (lambda.j());
+	const BlockMatrix<double>& Mj0T = get_Mj0T(lambda.j());
+	Vector<double> help(Deltasize(lambda.j()));
+	Mj0T.apply_transposed(generators, help);
+	Mj0.apply(help, generators);
 
-
-
-
-
-//  	// First treat the identity part of the biorthogonalization equation, i.e.,
-//  	// compute the generator coefficients of the initial stable completion
-// 	//   Mj1c = (I-Mj0*<Theta_{j+1},Lambda_j^tilde>^T)*Mj1
-// 	// So, the wavelets which use one of the nonvaninshing boundary generators
-// 	// will be modified to be zero at the endpoints.
-	
-//  	switch(lambda.p()) {
-// 	case 0:
-// 	  // psic_lambda is a tensor product of a generator and a wavelet on patch 0
-// 	  basis00().reconstruct_1(IIndex(lambda.j(), 0, lambda.k()[0], &basis00()),
-// 				  lambda.j()+1, gcoeffs0);
-// 	  basis10().reconstruct_1(IIndex(lambda.j(), 1, lambda.k()[1], &basis10()),
-// 				  lambda.j()+1, gcoeffs1);
-
-// 	  // add the tensor product generators needed to construct psic_lambda
-// 	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(gcoeffs0.begin()),
-// 		 it1end(gcoeffs0.end());
-// 	       it1 != it1end; ++it1)
-// 	    for (typename InfiniteVector<double,IIndex>::const_iterator it2(gcoeffs1.begin()),
-// 		   it2end(gcoeffs1.end());
-// 		 it2 != it2end; ++it2) {
-// 	      if (it2.index().k() == basis10().DeltaLmin()) {
-// 		// interface generator
-// 		psic.add_coefficient(Index(lambda.j()+1,
-// 					   typename Index::type_type(),
-// 					3,
-// 					   typename Index::translation_type(it1.index().k(), 0),
-// 					   this),
-// 				     *it1 * *it2); // no factor!
-// 	      } else {
-// 		// patch generator
-// 		psic.add_coefficient(Index(lambda.j()+1,
-// 					   typename Index::type_type(),
-// 					   0,
-// 					   typename Index::translation_type(it1.index().k(), it2.index().k()),
-// 					   this),
-// 				     *it1 * *it2);
-// 	      }
-// 	    }
-// 	  break;
-// 	case 1:
-// 	  // psic_lambda is a tensor product of a generator and a wavelet on patch 1
-// 	  basis01().reconstruct_1(IIndex(lambda.j(), 0, lambda.k()[0], &basis01()),
-// 				  lambda.j()+1, gcoeffs0);
-// 	  basis01().reconstruct_1(IIndex(lambda.j(), 1, lambda.k()[1], &basis01()),
-// 				  lambda.j()+1, gcoeffs1);
-
-// 	  // add the tensor product generators needed to construct psic_lambda
-// 	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(gcoeffs0.begin()),
-// 		 it1end(gcoeffs0.end());
-// 	       it1 != it1end; ++it1)
-// 	    for (typename InfiniteVector<double,IIndex>::const_iterator it2(gcoeffs1.begin()),
-// 		   it2end(gcoeffs1.end());
-// 		 it2 != it2end; ++it2) {
-// 	      if (it2.index().k() == basis01().DeltaRmax(lambda.j()+1)) {
-// 		// interface generator
-// 		psic.add_coefficient(Index(lambda.j()+1,
-// 					   typename Index::type_type(),
-// 					   3,
-// 					   typename Index::translation_type(it1.index().k(), 0),
-// 					   this),
-// 				     *it1 * *it2); // no factor!
-// 	      } else {
-// 		// patch generator
-// 		psic.add_coefficient(Index(lambda.j()+1,
-// 					   typename Index::type_type(),
-// 					   1,
-// 					   typename Index::translation_type(it1.index().k(), it2.index().k()),
-// 					   this),
-// 				     *it1 * *it2);
-// 	      }
-// 	    }
-// 	  break;
-// 	case 2:
-// 	  // psic_lambda is a tensor product of a generator and a wavelet on patch 2
-// 	  basis10().reconstruct_1(IIndex(lambda.j(), 0, lambda.k()[0], &basis10()),
-// 				  lambda.j()+1, gcoeffs0);
-// 	  basis00().reconstruct_1(IIndex(lambda.j(), 1, lambda.k()[1], &basis00()),
-// 				  lambda.j()+1, gcoeffs1);
-
-// 	  // add the tensor product generators needed to construct psic_lambda
-// 	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(gcoeffs0.begin()),
-// 		 it1end(gcoeffs0.end());
-// 	       it1 != it1end; ++it1)
-// 	    for (typename InfiniteVector<double,IIndex>::const_iterator it2(gcoeffs1.begin()),
-// 		   it2end(gcoeffs1.end());
-// 		 it2 != it2end; ++it2) {
-// 	      // (always!) a patch generator
-// 	      psic.add_coefficient(Index(lambda.j()+1,
-// 					 typename Index::type_type(),
-// 					 2,
-// 					 typename Index::translation_type(it1.index().k(), it2.index().k()),
-// 					 this),
-// 				   *it1 * *it2);
-// 	    }
-// 	  break;
-// 	case 4:
-// 	  // psic_lambda decomposes into two tensor products of a generator and a wavelet,
-// 	  // on patches 1 and 2
-// 	  basis01().reconstruct_1(IIndex(lambda.j(), 0, basis01().DeltaRmax(lambda.j()), &basis01()),
-// 				  lambda.j()+1, gcoeffs0);
-// 	  basis10().reconstruct_1(IIndex(lambda.j(), 0, basis10().DeltaLmin(), &basis10()),
-// 				  lambda.j()+1, gcoeffs1);
-// 	  basis01().reconstruct_1(IIndex(lambda.j(), 1, lambda.k()[1], &basis01()),
-// 				  lambda.j()+1, gcoeffs2);
-	  
-// 	  // add the tensor product generators needed to construct psic_lambda
-// 	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(gcoeffs0.begin()),
-// 		 it1end(gcoeffs0.end());
-// 	       it1 != it1end; ++it1)
-// 	    for (typename InfiniteVector<double,IIndex>::const_iterator it2(gcoeffs2.begin()),
-// 		   it2end(gcoeffs2.end());
-// 		 it2 != it2end; ++it2) {
-// 	      if (it1.index().k() == basis01().DeltaRmax(lambda.j()+1)) {
-// 		// interface generator
-// 		psic.add_coefficient(Index(lambda.j()+1,
-// 					   typename Index::type_type(),
-// 					   4,
-// 					   typename Index::translation_type(0, it2.index().k()),
-// 					   this),
-// 				     *it1 * *it2); // no factor!
-// 	      } else {
-// 		// patch generator
-// 		psic.add_coefficient(Index(lambda.j()+1,
-// 					   typename Index::type_type(),
-// 					   1,
-// 					   typename Index::translation_type(it1.index().k(), it2.index().k()),
-// 					   this),
-// 				     *it1 * *it2);
-// 	      }
-// 	    }
-//  	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(gcoeffs1.begin()),
-//  		 it1end(gcoeffs1.end());
-//  	       it1 != it1end; ++it1)
-//  	    for (typename InfiniteVector<double,IIndex>::const_iterator it2(gcoeffs2.begin()),
-//  		   it2end(gcoeffs2.end());
-//  		 it2 != it2end; ++it2) {
-//  	      if (it1.index().k() > basis10().DeltaLmin()) {
-//  		// patch generator (interface generators already processed above)
-//  		psic.add_coefficient(Index(lambda.j()+1,
-// 					   typename Index::type_type(),
-// 					   2,
-// 					   typename Index::translation_type(it1.index().k(), it2.index().k()),
-// 					   this),
-// 				     *it1 * *it2);
-//  	      }
-//  	    }
-// 	  break;
-// 	} // end switch(lambda.p())
-	
-//  	break;
-//       case 3:
-//  	// (1,1)-wavelet
-//  	break;
-//       }
-
-
+	// collect all relevant generators from the scale |lambda+1|
+	unsigned int id = 0;
+	for (Index mu = first_generator(this, lambda.j()+1); id < generators.size(); id++, ++mu) {
+	  InfiniteVector<double, Index> d;
+	  if (fabs(generators[id]) > 1e-12) {
+	    reconstruct_1(mu, j, d);
+	    c.add(-generators[id], d);
+	  }
+	}
+      }
     }
   }
   

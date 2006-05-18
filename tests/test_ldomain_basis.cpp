@@ -89,13 +89,28 @@ int main()
   } 
 #endif
 
+#if 0
+  cout << "- checking index set sizes for different levels:" << endl;
+  for (int level = basis.j0(); level <= basis.j0()+2; level++) {
+    cout << "*   Deltasize(" << level << ")=" << basis.Deltasize(level) << endl;
+    cout << "  Nabla01size(" << level << ")=" << basis.Nabla01size(level) << endl;
+    cout << "  Nabla10size(" << level << ")=" << basis.Nabla10size(level) << endl;
+    cout << "  Nabla11size(" << level << ")=" << basis.Nabla11size(level) << endl;
+    cout << "  ------------------" << endl;
+    cout << "  sum           ="
+	 << basis.Deltasize(level)+basis.Nabla01size(level)+basis.Nabla10size(level)+basis.Nabla11size(level)
+	 << endl;
+  }
+#endif
+
 #if 1
   Index lambda(first_generator<Basis1D>(&basis, basis.j0()));
 //   for (; !(lambda.p() == 1); ++lambda);
 //   for (; !(lambda.p() == 2); ++lambda);
 //   for (; !(lambda.p() == 3); ++lambda);
-  for (; !(lambda.p() == 4); ++lambda);
-//   for (; lambda.e()[0] != 0 || lambda.e()[1] != 1; ++lambda);
+//   for (; !(lambda.p() == 4); ++lambda);
+
+  for (; lambda.e()[0] != 0 || lambda.e()[1] != 1; ++lambda);
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 1); ++lambda);
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 1 && lambda.k()[1] == 7); ++lambda);
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 2); ++lambda);
@@ -103,6 +118,8 @@ int main()
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 4); ++lambda);
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 4 && lambda.k()[1] == 6); ++lambda);
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 4 && lambda.k()[1] == 7); ++lambda);
+
+//   for (; lambda.e()[0] != 1 || lambda.e()[1] != 0; ++lambda);
 
 //   for (int i = 0; i < 155; i++, ++lambda); // one of the generators on patch 4
 //   for (int i = 0; i < 330; i++, ++lambda); // one of the (0,1)-wavelets on patch 4

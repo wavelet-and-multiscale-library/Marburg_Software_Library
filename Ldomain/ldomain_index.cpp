@@ -276,6 +276,15 @@ namespace WaveletTL
 
   template <class IBASIS>
   LDomainIndex<IBASIS>
+  first_wavelet(const LDomainBasis<IBASIS>* basis,
+		const int j,
+		const typename LDomainIndex<IBASIS>::type_type& e)
+  {
+    return first_wavelet<IBASIS>(basis, j);
+  }
+  
+  template <class IBASIS>
+  LDomainIndex<IBASIS>
   last_wavelet(const LDomainBasis<IBASIS>* basis, const int j)
   {
     assert(j >= basis->j0());

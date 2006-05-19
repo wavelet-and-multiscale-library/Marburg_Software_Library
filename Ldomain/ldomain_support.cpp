@@ -160,6 +160,44 @@ namespace WaveletTL
 
     } else {
       // wavelet
+
+      supp.j = lambda.j()+1;
+
+      // compute the expansion coefficients of psi_lambda w.r.t. the
+      // generators of the next higher scale, then aggregating all the supports
+      // (of course, this is a brute force solution...)
+      InfiniteVector<double, Index> gcoeffs;
+      basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
+      
+      typedef typename LDomainBasis<IBASIS>::Support Support;
+      Support tempsupp;
+
+      for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
+	     itend(gcoeffs.end()); it != itend; ++it)
+	{
+	  // compute supp(psi_mu)
+	  support(basis, it.index(), tempsupp);
+	  
+	  // for each patch p, update the corresponding support estimate
+	  for (int p = 0; p <= 2; p++) {
+	    if (tempsupp.xmin[p] >= 0) {
+	      // a nontrivial new support share, we have to do something
+	      if (supp.xmin[p] == -1) {
+		// previous support estimate was "empty", we have to insert a nontrivial new one
+		supp.xmin[p] = tempsupp.xmin[p];
+		supp.xmax[p] = tempsupp.xmax[p];
+		supp.ymin[p] = tempsupp.ymin[p];
+		supp.ymax[p] = tempsupp.ymax[p];
+	      } else {
+		// previous support estimate was nontrivial, we have to compute a new one
+		supp.xmin[p] = std::min(supp.xmin[p], tempsupp.xmin[p]);
+		supp.xmax[p] = std::max(supp.xmax[p], tempsupp.xmax[p]);
+		supp.ymin[p] = std::min(supp.ymin[p], tempsupp.ymin[p]);
+		supp.ymax[p] = std::max(supp.ymax[p], tempsupp.ymax[p]);
+	      }
+	    }
+	  }
+	}
     }
   }
 }

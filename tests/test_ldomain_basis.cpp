@@ -143,6 +143,12 @@ int main()
 
 #if 1
   Index mu(first_generator<Basis1D>(&basis, basis.j0()));
+//   for (; !(mu.p() == 1); ++mu);
+//   for (; !(mu.p() == 2); ++mu);
+//   for (; !(mu.p() == 3); ++mu);
+  for (; !(mu.p() == 4); ++mu);
+
+  for (int i = 0; i < 2; i++, ++mu);
 
   cout << "- for mu=" << mu << ", the support of psi_mu looks as follows:" << endl;
   Basis::Support supp;

@@ -52,7 +52,7 @@ int main()
   const int DIM = 2;
 
   //typedef DSBasis<2,2> Basis1D;
-  typedef PBasis<2,2> Basis1D;
+  typedef PBasis<3,3> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
   typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
@@ -122,7 +122,7 @@ int main()
   bound_1[0] = 1;
   bound_1[1] = 1;
   bound_1[2] = 1;
-  bound_1[3] = 1;
+  bound_1[3] = 2;
 
   bc[0] = bound_1;
 
@@ -130,7 +130,7 @@ int main()
   FixedArray1D<int,2*DIM> bound_2;
   bound_2[0] = 1;
   bound_2[1] = 1;
-  bound_2[2] = 1;
+  bound_2[2] = 2;
   bound_2[3] = 1;
 
   bc[1] = bound_2;

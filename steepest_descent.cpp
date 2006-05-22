@@ -82,30 +82,30 @@ public:
 //    Singularity1D_2<double> exactSolution1D;
 
     unsigned int loops = 0;
-    const int jmax = 10;
+    const int jmax = 6;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
     double kappa     = P.norm_A()*a_inv;
     //double kappa     = 1.;
-    double omega_i   = 0.01*a_inv*P.F_norm();
+    double omega_i   = a_inv*P.F_norm();
     //double omega_i   = 1;
     cout << "a_inv = " << a_inv << endl;
     cout << "omega_i = " << omega_i << endl;
-    double delta     = 1./(5.*kappa+a_inv);
-    //double delta = 1.;
+    //double delta     = 1./(5.*kappa+a_inv);
+    double delta = 1.;
     cout << "delta = " << delta << endl;
-    const double A = 1 + delta;
-    //const double A = 1.;
+    //const double A = 1 + delta;
+    const double A = 1.;
     //const double C = 1.0 / ((1 - ((kappa*(delta*delta+2.*delta)+a_inv*delta)/((1-delta)*(1-delta))))
     //			    * (((1-delta)*(1-delta))/(a_inv)));
     const double C = 1.0;
     cout << "C = " << C << endl;
     const double B = C * (A*A);
     cout << "B = " << B << endl;
-    double lambda = (kappa-1)/(kappa+1) + P.norm_A()*std::max(3.*A*A*B,C*(1./(1-delta)))*delta;
+    //double lambda = (kappa-1)/(kappa+1) + P.norm_A()*std::max(3.*A*A*B,C*(1./(1-delta)))*delta;
     //double lambda = ((kappa-1)/(kappa+1)+1.)/2.;
-    //double lambda = 0.9;
+    double lambda = 0.95;
     cout << "lambda = " << lambda << endl;
     const double C3 = B;
     cout << "C3 = " << C3 << endl;
@@ -154,14 +154,11 @@ public:
 	InfiniteVector<double, Index> z_i;
 	//APPLY(P, tilde_r, delta*l2_norm(tilde_r), z_i, jmax, CDD1);
 
-// 	tend = clock();
-// 	time = (double)(tend-tstart)/CLOCKS_PER_SEC;
 	APPLY_COARSE(P, tilde_r,delta*l2_norm(tilde_r), z_i, 0.00001, jmax, CDD1);
 	//APPLY(P, tilde_r, .0/*delta*l2_norm(tilde_r)*/, z_i, jmax, CDD1);
-	//cout << z_i << endl;
-// 	acctime += ((double)(tend-tstart)/CLOCKS_PER_SEC - time);
-// 	cout << "time = " << acctime  << endl;
+
 	double d = ((tilde_r*tilde_r)/(z_i*tilde_r));
+
 	w += d*tilde_r;
 	cout << "descent param = " << d << endl;
 	++loops;
@@ -194,12 +191,12 @@ public:
 	time = (double)(tend-tstart)/CLOCKS_PER_SEC;
 	time_asymptotic[log10(time)] = tmp1;
 	cout << "active indices: " << w.size() << endl;
-	if (loops % 5 == 0) {
-	  std::ofstream os3("steep2D_asymptotic331904.m");
+	if (loops % 1 == 0) {
+	  std::ofstream os3("steep2D_asymptotic332205.m");
 	  matlab_output(asymptotic,os3);
 	  os3.close();
 	  
-	  std::ofstream os4("steep2D_time_asymptotic331904.m");
+	  std::ofstream os4("steep2D_time_asymptotic332205.m");
 	  matlab_output(time_asymptotic,os4);
 	  os4.close();
 
@@ -244,7 +241,7 @@ public:
 // 	  os4.close();
 // 	}
 
-	if (tmp < 1.0e-4 || loops == 3000) {
+	if (tmp < 0.0005 || loops == 3000) {
 	  u_epsilon = w;
 	  exit = true;
 	  break;

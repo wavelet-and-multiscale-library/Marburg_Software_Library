@@ -77,7 +77,7 @@ public:
     CornerSingularity sing2D(origin, 0.5, 1.5);
     CornerSingularityRHS singRhs(origin, 0.5, 1.5);
 
-    const int jmax = 10;
+    const int jmax = 6;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
@@ -93,21 +93,24 @@ public:
     map<double,double> time_asymptotic;
     map<double,double> log_10_L2_error;
 
-    bool exit = 0;
-    double time = 0;
-    clock_t tstart, tend;
-    tstart = clock();
+    EvaluateFrame<Basis1D,2,2> evalObj;
 
-    EvaluateFrame<Basis1D,1,1> evalObj;
-
-    double eta = 1.;
+    double eta = 2;
 
     const int number_patches = P.basis().n_p();
 
-    const double alpha = 0.5;
+    //const double alpha = 0.35;//pbasis 1D 3 3, 0.7x0.7
+    const double alpha = 0.2;
 
     unsigned int global_iterations = 0;
     double tmp = 5.;
+
+    bool exit = 0;
+    double time = 0;
+
+    clock_t tstart, tend;
+    tstart = clock();
+
     while (tmp > 0.0005) {
 
       cout << "reentering global loop " << endl;
@@ -122,15 +125,28 @@ public:
       P.RHS(0., f);
       APPLY(P, u_k, 0., help, jmax, CDD1);
       r_exact = f - help;
-      
+
+
       tmp = l2_norm(r_exact);
       cout << "residual norm = " << tmp  << endl;
       double tmp1 = log10(tmp);
+
+      tend = clock();
+      time = (double)(tend-tstart)/CLOCKS_PER_SEC;
+      time_asymptotic[log10(time)] = tmp1;
+
+
       if (u_k.size() != 0)
 	asymptotic[log10( (double)u_k.size() )] = tmp1;
-      std::ofstream os3("steep_asymptotic_33_2D_1105.m");
+      //std::ofstream os3("add_schwarz_asymptotic_33_1D_1905.m");
+      std::ofstream os3("add_schwarz_asymptotic_33_2D_1905.m");
       matlab_output(asymptotic,os3);
       os3.close();
+
+      //std::ofstream os4("add_schwarz_time_asymptotic_33_1D_1905.m");
+      std::ofstream os4("add_schwarz_time_asymptotic_33_2D_1905.m");
+      matlab_output(time_asymptotic,os4);
+      os4.close();
 
       // setup local index set
       set<Index> Lambda;
@@ -196,30 +212,36 @@ public:
       
       eta *= 0.85;
       
+      
       u_epsilon = u_k;
       
       cout << global_iterations <<" loops completed" << endl;
       
-//       if (global_iterations % 1 == 0) {
-// 	u_epsilon = u_k;
-// 	u_epsilon.scale(&P,-1);
-// 	char filename1[50];
-// 	char filename2[50];
+      if (tmp < 0.0009) {
+	u_epsilon = u_k;
+	u_epsilon.scale(&P,-1);
+	char filename1[50];
+	char filename2[50];
 	
-// 	sprintf(filename1, "%s%d%s%d%s", "approx_sol_steep22_2D_out_", loops, "_nactive_", u_k.size(),".m");
-// 	sprintf(filename2, "%s%d%s%d%s", "error_steep_2D_out_", loops, "_nactive_", u_k.size(),".m");
-// 	cout << "...plotting approximate solution" << endl;
-// 	Array1D<SampledMapping<2> > U = evalObj.evaluate(P.basis(), u_epsilon, true, 5);//expand in primal basis
+	sprintf(filename1, "%s%d%s%d%s", "approx_sol_add_schwarz33_2D_out_", global_iterations, "_nactive_", u_k.size(),".m");
+	sprintf(filename2, "%s%d%s%d%s", "error_add_schwarz_2D_out_", global_iterations, "_nactive_", u_k.size(),".m");
+	cout << "...plotting approximate solution" << endl;
+	Array1D<SampledMapping<2> > U = evalObj.evaluate(P.basis(), u_epsilon, true, 6);//expand in primal basis
 	
-// 	std::ofstream ofs5(filename1);
-// 	matlab_output(ofs5,U);
-// 	ofs5.close();
+	std::ofstream ofs5(filename1);
+	matlab_output(ofs5,U);
+	ofs5.close();
 
 
 
-// // 	Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(P.basis(), u_epsilon, exactSolution1D, 6);
-// // 	cout << "...plotting error" << endl;
-//       }
+	Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(P.basis(), u_epsilon, sing2D, 6);
+ 	cout << "...plotting error" << endl;
+	std::ofstream ofs6(filename2);
+	matlab_output(ofs6, Error);
+	ofs6.close();
+	
+	
+      }
   }
 
  

@@ -108,6 +108,19 @@ int main()
 
 
   //##############################  
+  Matrix<double> A(DIM,DIM);
+  A(0,0) = 0.7;
+  Point<1> b;
+  b[0] = 0.;
+  AffineLinearMapping<1> affineP(A,b);
+  
+  Matrix<double> A2(DIM,DIM);
+  A2(0,0) = 0.7;
+  Point<1> b2;
+  b2[0] = 1-A2.get_entry(0,0);
+  AffineLinearMapping<1> affineP2(A2,b2);
+
+  //######### Three Patches ######  
 //   Matrix<double> A(DIM,DIM);
 //   A(0,0) = 0.8;
 //   Point<1> b;
@@ -115,29 +128,16 @@ int main()
 //   AffineLinearMapping<1> affineP(A,b);
   
 //   Matrix<double> A2(DIM,DIM);
-//   A2(0,0) = 0.8;
+//   A2(0,0) = 0.002;
 //   Point<1> b2;
-//   b2[0] = 1-A2.get_entry(0,0);
+//   b2[0] = 0.5-0.001;
 //   AffineLinearMapping<1> affineP2(A2,b2);
-
-  //######### Three Patches ######  
-  Matrix<double> A(DIM,DIM);
-  A(0,0) = 0.8;
-  Point<1> b;
-  b[0] = 0.;
-  AffineLinearMapping<1> affineP(A,b);
   
-  Matrix<double> A2(DIM,DIM);
-  A2(0,0) = 0.002;
-  Point<1> b2;
-  b2[0] = 0.5-0.001;
-  AffineLinearMapping<1> affineP2(A2,b2);
-  
-  Matrix<double> A3(DIM,DIM);
-  A3(0,0) = 0.8;
-  Point<1> b3;
-  b3[0] = 1-A3.get_entry(0,0);
-  AffineLinearMapping<1> affineP3(A3,b3);
+//   Matrix<double> A3(DIM,DIM);
+//   A3(0,0) = 0.8;
+//   Point<1> b3;
+//   b3[0] = 1-A3.get_entry(0,0);
+//   AffineLinearMapping<1> affineP3(A3,b3);
 
   //##############################  
 
@@ -151,30 +151,30 @@ int main()
 
   //##############################
   
-  Array1D<Chart<DIM,DIM>* > charts(3);
+  Array1D<Chart<DIM,DIM>* > charts(2);
   charts[0] = &affineP;
   charts[1] = &affineP2;
-  charts[2] = &affineP3;
+  //charts[2] = &affineP3;
   
   //charts[0] = &simlpeaffine1;
   //charts[1] = &simlpeaffine2;
 
 
-  SymmetricMatrix<bool> adj(3);
+  SymmetricMatrix<bool> adj(2);
   adj(0,0) = 1;
   adj(1,1) = 1;
   adj(1,0) = 1;
   adj(0,1) = 1;
 
-  adj(2,2) = 1;
-  adj(2,0) = 1;
-  adj(2,1) = 1;
-  adj(0,2) = 1;
-  adj(1,2) = 1;
+//   adj(2,2) = 1;
+//   adj(2,0) = 1;
+//   adj(2,1) = 1;
+//   adj(0,2) = 1;
+//   adj(1,2) = 1;
 
   
   //to specify primal boundary the conditions
-  Array1D<FixedArray1D<int,2*DIM> > bc(3);
+  Array1D<FixedArray1D<int,2*DIM> > bc(2);
   
   //primal boundary conditions for first patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_1;
@@ -186,7 +186,7 @@ int main()
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
   bound_2[0] = 2;
-  bound_2[1] = 2;
+  bound_2[1] = 1;
   
   bc[1] = bound_2;
 
@@ -194,7 +194,7 @@ int main()
   bound_3[0] = 2;
   bound_3[1] = 1;
   
-  bc[2] = bound_3;
+  //bc[2] = bound_3;
 
 
 // //to specify primal boundary the conditions

@@ -15,7 +15,8 @@
 #include <numerics/corner_singularity.h>
 #include <frame_support.h>
 #include <frame_index.h>
-#include <multiplicative_Schwarz.h>
+//#include <multiplicative_Schwarz.h>
+#include <additive_Schwarz.h>
 #include <galerkin/cached_problem.h>
 
 using std::cout;
@@ -191,7 +192,8 @@ int main()
   double time;
   tstart = clock();
 
-  multiplicative_Schwarz_SOLVE(problem, epsilon, u_epsilon);
+  //multiplicative_Schwarz_SOLVE(problem, epsilon, u_epsilon);
+  additive_Schwarz_SOLVE(problem, epsilon, u_epsilon);
 
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
@@ -210,11 +212,11 @@ int main()
 
 
 
-  std::ofstream ofs5("approx_sol_steep_2D_out.m");
+  std::ofstream ofs5("approx_sol_add_schwarz_2D_out.m");
   matlab_output(ofs5,U);
   ofs5.close();
 
-  std::ofstream ofs6("error_steep_2D_out.m");
+  std::ofstream ofs6("error_add_schwarz_2D_out.m");
   matlab_output(ofs6,Error);
   ofs6.close();
 

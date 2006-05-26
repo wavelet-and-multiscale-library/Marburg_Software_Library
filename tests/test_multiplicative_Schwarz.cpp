@@ -17,6 +17,7 @@
 #include <frame_index.h>
 //#include <multiplicative_Schwarz.h>
 #include <additive_Schwarz.h>
+//#include <additive_Schwarz_SD.h>
 #include <galerkin/cached_problem.h>
 
 using std::cout;
@@ -194,6 +195,7 @@ int main()
 
   //multiplicative_Schwarz_SOLVE(problem, epsilon, u_epsilon);
   additive_Schwarz_SOLVE(problem, epsilon, u_epsilon);
+  //additive_Schwarz_SD_SOLVE(problem, epsilon, u_epsilon);
 
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;

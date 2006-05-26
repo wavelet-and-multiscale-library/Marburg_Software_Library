@@ -82,7 +82,7 @@ public:
 //    Singularity1D_2<double> exactSolution1D;
 
     unsigned int loops = 0;
-    const int jmax = 6;
+    const int jmax = 5;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
@@ -133,7 +133,7 @@ public:
     map<double,double> log_10_L2_error;
 
     bool exit = 0;
-    double time = 0;
+    double time = 0.;
     clock_t tstart, tend;
     tstart = clock();
 
@@ -188,15 +188,17 @@ public:
 	//cout << "L_2 error = " << L2err << endl;
 
 	tend = clock();
-	time = (double)(tend-tstart)/CLOCKS_PER_SEC;
+	
+	time += ((double) (tend-tstart))/((double) CLOCKS_PER_SEC);
+	
 	time_asymptotic[log10(time)] = tmp1;
 	cout << "active indices: " << w.size() << endl;
 	if (loops % 1 == 0) {
-	  std::ofstream os3("steep2D_asymptotic332205.m");
+	  std::ofstream os3("steep2D_asymptotic332305.m");
 	  matlab_output(asymptotic,os3);
 	  os3.close();
 	  
-	  std::ofstream os4("steep2D_time_asymptotic332205.m");
+	  std::ofstream os4("steep2D_time_asymptotic332305.m");
 	  matlab_output(time_asymptotic,os4);
 	  os4.close();
 
@@ -206,7 +208,11 @@ public:
 // 	  os4.close();
      }
 
-// 	if (loops == 1 || loops == 5 || loops == 10 || loops == 20 || loops == 40 || loops == 55){
+	tstart = clock();
+
+// 	if (loops == 1 || loops == 2 || loops == 3 || loops == 4 || loops == 5 || loops == 6 ||
+// 	    loops == 7 || loops == 8 || loops == 9 || loops == 10 || loops == 11 || loops == 12
+// 	    loops == 20 || loops == 25 || loops == 30 || loops == 35 || loops == 40 || loops == 60){
 // 	  u_epsilon = w;
 // 	  P.rescale(u_epsilon,-1);
 // 	  char filename1[50];
@@ -232,16 +238,16 @@ public:
 // 	  ofs6.close();
 
 // 	if (loops % 5 == 0) {
-//           std::ofstream os3("steep_asymptotic_2D_3001.m");
+//           std::ofstream os3("steep_asymptotic_2D_2205.m");
 //           matlab_output(asymptotic,os3);
 //           os3.close();
 
-// 	  std::ofstream os4("time_asymptotic_steep_2D_3001.m");
+// 	  std::ofstream os4("time_asymptotic_steep_2D_2205.m");
 // 	  matlab_output(time_asymptotic,os4);
 // 	  os4.close();
 // 	}
 
-	if (tmp < 0.0005 || loops == 3000) {
+	if (tmp < 1.0e-6 || loops == 3000) {
 	  u_epsilon = w;
 	  exit = true;
 	  break;

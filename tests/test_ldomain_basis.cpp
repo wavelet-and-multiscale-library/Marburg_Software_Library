@@ -141,36 +141,4 @@ int main()
   cout << "  ...done, see file Ldomain_wavelet2.m!" << endl;
 #endif
 
-#if 1
-  Index mu(first_generator<Basis1D>(&basis, basis.j0()));
-//   for (; !(mu.p() == 1); ++mu);
-//   for (; !(mu.p() == 2); ++mu);
-//   for (; !(mu.p() == 3); ++mu);
-//   for (; !(mu.p() == 4); ++mu);
-
-//   for (; mu.e()[0] != 0 || mu.e()[1] != 1; ++mu);
-  for (; !(mu.e()[0] == 0 && mu.e()[1] == 1 && mu.p() == 1); ++mu);
-
-  for (int i = 0; i < 3; i++, ++mu);
-
-  cout << "- for mu=" << mu << ", the support of psi_mu looks as follows:" << endl;
-  Basis::Support supp;
-  support(basis, mu, supp);
-
-  cout << "  patch 0: 2^{-" << supp.j << "}"
-       << "[" << supp.xmin[0] << "," << supp.xmax[0]
-       << "]x[" << supp.ymin[0] << "," << supp.ymax[0] << "]"
-       << endl;
-
-  cout << "  patch 1: 2^{-" << supp.j << "}"
-       << "[" << supp.xmin[1] << "," << supp.xmax[1]
-       << "]x[" << supp.ymin[1] << "," << supp.ymax[1] << "]"
-       << endl;
-
-  cout << "  patch 2: 2^{-" << supp.j << "}"
-       << "[" << supp.xmin[2] << "," << supp.xmax[2]
-       << "]x[" << supp.ymin[2] << "," << supp.ymax[2] << "]"
-       << endl;
-#endif
-
 }

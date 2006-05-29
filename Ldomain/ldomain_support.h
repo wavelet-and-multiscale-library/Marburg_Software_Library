@@ -25,6 +25,29 @@ namespace WaveletTL
   void support(const LDomainBasis<IBASIS>& basis,
 	       const typename LDomainBasis<IBASIS>::Index& lambda,
 	       typename LDomainBasis<IBASIS>::Support& supp);
+
+  /*!
+    Compute the support intersection of two wavelets psi_lambda, psi_mu.
+    Function returns true if a nontrivial intersection
+    exists, false otherwise. In the latter case 'supp'
+    has no meaningful value.
+  */
+  template <class IBASIS>
+  bool intersect_supports(const LDomainBasis<IBASIS>& basis,
+			  const typename LDomainBasis<IBASIS>::Index& lambda,
+			  const typename LDomainBasis<IBASIS>::Index& mu,
+			  typename LDomainBasis<IBASIS>::Support& supp);
+
+  /*!
+    For a given wavelet \psi_\lambda, compute all generators/wavelets
+    \psi_\nu with level |\nu|=j, such that the respective supports
+    have a nontrivial intersection
+  */
+  template <class IBASIS>
+  void intersecting_wavelets(const LDomainBasis<IBASIS>& basis,
+			     const typename LDomainBasis<IBASIS>::Index& lambda,
+			     const int j, const bool generators,
+			     std::list<typename LDomainBasis<IBASIS>::Index>& intersecting);
 }
 
 #include <Ldomain/ldomain_support.cpp>

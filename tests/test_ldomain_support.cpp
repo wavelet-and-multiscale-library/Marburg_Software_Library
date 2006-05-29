@@ -33,7 +33,7 @@ int main()
   cout << "- last wavelet on the coarsest level: " << last_wavelet<Basis1D>(&basis, basis.j0()) << endl;
 #endif
 
-#if 1
+#if 0
   Index mu(first_generator<Basis1D>(&basis, basis.j0()));
 //   for (; !(mu.p() == 1); ++mu);
 //   for (; !(mu.p() == 2); ++mu);
@@ -69,7 +69,7 @@ int main()
   Index eta(first_generator<Basis1D>(&basis, basis.j0()));
 //   for (; !(eta.p() == 1); ++eta);
 //   for (; !(eta.p() == 2); ++eta);
-//   for (; !(eta.p() == 3); ++eta);
+  for (; !(eta.p() == 3); ++eta);
 //   for (; !(eta.p() == 4); ++eta);
 
 //   for (; eta.e()[0] != 0 || eta.e()[1] != 1; ++eta);
@@ -96,7 +96,7 @@ int main()
        << "]x[" << supp_eta.ymin[2] << "," << supp_eta.ymax[2] << "]"
        << endl;
 
-  Index nu(first_generator<Basis1D>(&basis, basis.j0()));
+  Index nu(first_generator<Basis1D>(&basis, basis.j0()+1));
 //   for (; !(nu.p() == 1); ++nu);
 //   for (; !(nu.p() == 2); ++nu);
 //   for (; !(nu.p() == 3); ++nu);
@@ -105,6 +105,7 @@ int main()
 //   for (; nu.e()[0] != 0 || nu.e()[1] != 1; ++nu);
 //   for (; !(nu.e()[0] == 0 && nu.e()[1] == 1 && nu.p() == 1); ++nu);
 
+  for (int i = 0; i < 2; i++, ++nu);
 //   for (int i = 0; i < 3; i++, ++nu);
 
   cout << "- for nu=" << nu << ", the support of psi_nu looks as follows:" << endl;
@@ -125,6 +126,29 @@ int main()
        << "[" << supp_nu.xmin[2] << "," << supp_nu.xmax[2]
        << "]x[" << supp_nu.ymin[2] << "," << supp_nu.ymax[2] << "]"
        << endl;
+
+  Basis::Support supp_intersect;
+  bool inter = intersect_supports(basis, eta, nu, supp_intersect);
+  cout << "- support intersection of psi_eta and psi_nu:" << endl;
+  if (inter) {
+    cout << "  patch 0: 2^{-" << supp_intersect.j << "}"
+	 << "[" << supp_intersect.xmin[0] << "," << supp_intersect.xmax[0]
+	 << "]x[" << supp_intersect.ymin[0] << "," << supp_intersect.ymax[0] << "]"
+	 << endl;
+    
+    cout << "  patch 1: 2^{-" << supp_intersect.j << "}"
+	 << "[" << supp_intersect.xmin[1] << "," << supp_intersect.xmax[1]
+	 << "]x[" << supp_intersect.ymin[1] << "," << supp_intersect.ymax[1] << "]"
+	 << endl;
+    
+    cout << "  patch 2: 2^{-" << supp_intersect.j << "}"
+	 << "[" << supp_intersect.xmin[2] << "," << supp_intersect.xmax[2]
+	 << "]x[" << supp_intersect.ymin[2] << "," << supp_intersect.ymax[2] << "]"
+	 << endl;
+  } else {
+    cout << "  no!" << endl;
+  }
+
 #endif
 
 }

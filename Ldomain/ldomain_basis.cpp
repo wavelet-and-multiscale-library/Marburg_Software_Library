@@ -50,7 +50,7 @@ namespace WaveletTL
     if (matrix_lb == Mj0_cache.end() ||
 	Mj0_cache.key_comp()(j, matrix_lb->first))
       {
-	cout << "LDomainBasis::get_Mj0() cache miss" << endl;
+// 	cout << "LDomainBasis::get_Mj0() cache miss" << endl;
 
 	// compute Mj0 and insert it into the cache
 	BlockMatrix<double> Mj0(5, 5);
@@ -115,7 +115,7 @@ namespace WaveletTL
       }
     else
       {
-	cout << "LDomainBasis::get_Mj0() cache hit" << endl;
+// 	cout << "LDomainBasis::get_Mj0() cache hit" << endl;
       }
     
     return matrix_it->second;
@@ -130,7 +130,7 @@ namespace WaveletTL
     if (matrix_lb == Mj0T_cache.end() ||
 	Mj0T_cache.key_comp()(j, matrix_lb->first))
       {
-	cout << "LDomainBasis::get_Mj0T() cache miss" << endl;
+// 	cout << "LDomainBasis::get_Mj0T() cache miss" << endl;
 
 	// compute Mj0T and insert it into the cache
 	BlockMatrix<double> Mj0T(5, 5);
@@ -195,7 +195,7 @@ namespace WaveletTL
       }
     else
       {
-	cout << "LDomainBasis::get_Mj0T() cache hit" << endl;
+// 	cout << "LDomainBasis::get_Mj0T() cache hit" << endl;
       }
     
     return matrix_it->second;
@@ -210,7 +210,7 @@ namespace WaveletTL
     if (matrix_lb == Mj1c_1d_cache.end() ||
 	Mj1c_1d_cache.key_comp()(j, matrix_lb->first))
       {
-	cout << "LDomainBasis::get_Mj1c_1d() cache miss" << endl;
+// 	cout << "LDomainBasis::get_Mj1c_1d() cache miss" << endl;
 
 	// compute Mj1c_1d and insert it into the cache, it is
 	//   Mj1c = (I-Mj0*<Theta_{j+1},Lambdatilde>^T)Mj1
@@ -235,7 +235,7 @@ namespace WaveletTL
       }
     else
       {
-	cout << "LDomainBasis::get_Mj1c_1d() cache hit" << endl;
+// 	cout << "LDomainBasis::get_Mj1c_1d() cache hit" << endl;
       }
 
     return matrix_it->second;
@@ -250,7 +250,7 @@ namespace WaveletTL
     if (matrix_lb == Mj1c_01_cache.end() ||
 	Mj1c_01_cache.key_comp()(j, matrix_lb->first))
       {
-	cout << "LDomainBasis::get_Mj1c_01() cache miss" << endl;
+// 	cout << "LDomainBasis::get_Mj1c_01() cache miss" << endl;
 
  	// compute Mj1c_01 and insert it into the cache
  	BlockMatrix<double> Mj1c_01(5, 4);
@@ -313,7 +313,7 @@ namespace WaveletTL
       }
     else
       {
-	cout << "LDomainBasis::get_Mj1c_01() cache hit" << endl;
+// 	cout << "LDomainBasis::get_Mj1c_01() cache hit" << endl;
       }
     
     return matrix_it->second;
@@ -328,7 +328,7 @@ namespace WaveletTL
     if (matrix_lb == Mj1c_10_cache.end() ||
 	Mj1c_10_cache.key_comp()(j, matrix_lb->first))
       {
-	cout << "LDomainBasis::get_Mj1c_10() cache miss" << endl;
+// 	cout << "LDomainBasis::get_Mj1c_10() cache miss" << endl;
 
  	// compute Mj1c_10 and insert it into the cache
  	BlockMatrix<double> Mj1c_10(5, 4);
@@ -391,7 +391,7 @@ namespace WaveletTL
       }
     else
       {
-	cout << "LDomainBasis::get_Mj1c_10() cache hit" << endl;
+// 	cout << "LDomainBasis::get_Mj1c_10() cache hit" << endl;
       }
     
     return matrix_it->second;
@@ -406,7 +406,7 @@ namespace WaveletTL
     if (matrix_lb == Mj1c_11_cache.end() ||
 	Mj1c_11_cache.key_comp()(j, matrix_lb->first))
       {
-	cout << "LDomainBasis::get_Mj1c_11() cache miss" << endl;
+// 	cout << "LDomainBasis::get_Mj1c_11() cache miss" << endl;
 
  	// compute Mj1c_11 and insert it into the cache
  	BlockMatrix<double> Mj1c_11(5, 3);
@@ -441,7 +441,7 @@ namespace WaveletTL
       }
     else
       {
-	cout << "LDomainBasis::get_Mj1c_11() cache hit" << endl;
+// 	cout << "LDomainBasis::get_Mj1c_11() cache hit" << endl;
       }
     
     return matrix_it->second;
@@ -526,13 +526,13 @@ namespace WaveletTL
 	  Vector<double> unitvector(Nabla10size(lambda.j()));
 	  unsigned int id = 0;
 	  typename Index::type_type e;
-	  e[0] = 1;
+	  e[0] = 1; // e = (1,0)
 	  for (Index mu = first_wavelet(this, lambda.j(), e); mu != lambda; ++mu) id++;
  	  unitvector[id] = 1.0;
  	  Mj1c_10.apply(unitvector, generators);
 	} else {
-	  if (ecode == 2) {
-	    // (0,1)-wavelet
+ 	  if (ecode == 2) {
+ 	    // (0,1)-wavelet
 	    
 	    // compute the corresponding column of Mj1c_01
  	    const BlockMatrix<double>& Mj1c_01 = get_Mj1c_01(lambda.j());
@@ -550,7 +550,7 @@ namespace WaveletTL
  	    Vector<double> unitvector(Nabla11size(lambda.j()));
  	    unsigned int id = 0;
 	    typename Index::type_type e;
-	    e[0] = e[1] = 1;
+	    e[0] = e[1] = 1; // e = (1,1)
 	    for (Index mu = first_wavelet(this, lambda.j(), e); mu != lambda; ++mu) id++;
  	    unitvector[id] = 1.0;
  	    Mj1c_11.apply(unitvector, generators);
@@ -597,6 +597,7 @@ namespace WaveletTL
   LDomainBasis<IBASIS>::reconstruct_t_1(const Index& lambda,
 					const int j,
 					InfiniteVector<double, Index>& c) const {
+    // not implemented (yet)
   }
 
 }

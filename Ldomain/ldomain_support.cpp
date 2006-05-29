@@ -11,7 +11,7 @@ namespace WaveletTL
 
     // by convention, we initialize the support with an "empty" set
     for (int p = 0; p <= 2; p++) {
-      supp.xmin[p] = supp.xmax[p] = supp.ymin[p] = supp.ymax[p] = -1;
+      supp.xmin[p] = -1;
     }
     
     const int ecode = lambda.e()[0]+2*lambda.e()[1];
@@ -199,6 +199,7 @@ namespace WaveletTL
 	  }
 	}
     }
+
   }
 
   template <class IBASIS>
@@ -246,13 +247,13 @@ namespace WaveletTL
 	    
 	    r = true;
 	  } else {
-	    supp.xmin[p] = supp.xmax[p] = supp.ymin[p] = supp.ymax[p] = -1;
+	    supp.xmin[p] = -1;
 	  }
 	} else {
-	  supp.xmin[p] = supp.xmax[p] = supp.ymin[p] = supp.ymax[p] = -1;
+	  supp.xmin[p] = -1;
 	}
       } else {
-	supp.xmin[p] = supp.xmax[p] = supp.ymin[p] = supp.ymax[p] = -1;
+	supp.xmin[p] = -1;
       }
     }
     
@@ -265,5 +266,22 @@ namespace WaveletTL
 			     const int j, const bool generators,
 			     std::list<typename LDomainBasis<IBASIS>::Index>& intersecting)
   {
+    // a brute force solution
+    typedef typename LDomainBasis<IBASIS>::Index Index;
+    typedef typename LDomainBasis<IBASIS>::Support Support;
+    Support supp;
+    if (generators) {
+      for (Index mu = first_generator<IBASIS>(&basis, j);; ++mu) {
+	if (intersect_supports(basis, lambda, mu, supp))
+	  intersecting.push_back(mu);
+	if (mu == last_generator<IBASIS>(&basis, j)) break;
+      }
+    } else {
+      for (Index mu = first_wavelet<IBASIS>(&basis, j);; ++mu) {
+	if (intersect_supports(basis, lambda, mu, supp))
+	  intersecting.push_back(mu);
+	if (mu == last_wavelet<IBASIS>(&basis, j)) break;
+      }
+    }
   }
 }

@@ -65,7 +65,7 @@ int main()
        << endl;
 #endif
 
-#if 1
+#if 0
   Index eta(first_generator<Basis1D>(&basis, basis.j0()));
 //   for (; !(eta.p() == 1); ++eta);
 //   for (; !(eta.p() == 2); ++eta);
@@ -149,6 +149,29 @@ int main()
     cout << "  no!" << endl;
   }
 
+#endif
+
+#if 1
+  cout << "- compute all intersecting wavelets:" << endl;
+  for (Index lambda = first_generator(&basis, basis.j0());; ++lambda)
+    {
+      cout << "  * for lambda=" << lambda << ":" << endl;
+      typedef std::list<Index> SupportList;
+      SupportList nus;
+      intersecting_wavelets(basis, lambda, basis.j0(), true, nus);
+      for (SupportList::const_iterator it(nus.begin()); it != nus.end(); ++it) {
+  	cout << "    nu=" << *it << endl;
+      }
+      for (int level = basis.j0(); level <= basis.j0()+1; level++) {
+	nus.clear();
+	intersecting_wavelets(basis, lambda, level, false, nus);
+  	for (SupportList::const_iterator it(nus.begin()); it != nus.end(); ++it) {
+  	  cout << "    nu=" << *it << endl;
+  	}
+      }
+      
+      if (lambda == last_wavelet(&basis, basis.j0())) break;
+    }
 #endif
 
 }

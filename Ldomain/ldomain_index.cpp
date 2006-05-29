@@ -278,9 +278,36 @@ namespace WaveletTL
   LDomainIndex<IBASIS>
   first_wavelet(const LDomainBasis<IBASIS>* basis,
 		const int j,
-		const typename LDomainIndex<IBASIS>::type_type& e)
+		const typename LDomainIndex<IBASIS>::type_type& ewish)
   {
-    return first_wavelet<IBASIS>(basis, j);
+    assert(j >= basis->j0());
+
+    typename LDomainIndex<IBASIS>::type_type e(ewish);
+    
+    // setup lowest translation index appropriately
+    typename LDomainIndex<IBASIS>::translation_type k;
+    const int ecode(e[0]+2*e[1]);
+    if (ecode == 0) {
+      // e = (0,0)
+      k[0] = k[1] = basis->basis1d().DeltaLmin()+1;
+    } else {
+      if (ecode == 1) {
+	// e = (1,0)
+	k[0] = basis->basis1d().Nablamin();
+	k[1] = basis->basis1d().DeltaLmin()+1;
+      } else {
+	if (ecode == 2) {
+	  // e = (0,1)
+	  k[0] = basis->basis1d().DeltaLmin()+1;
+	  k[1] = basis->basis1d().Nablamin();
+	} else {
+	  // e = (1,1)
+	  k[0] = k[1] = basis->basis1d().Nablamin();
+	}
+      }
+    }
+    
+    return LDomainIndex<IBASIS>(j, e, 0, k, basis);
   }
   
   template <class IBASIS>

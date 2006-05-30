@@ -10,7 +10,8 @@
 #include <geometry/sampled_mapping.h>
 
 #include <interval/ds_basis.h>
-#include <cube/cube_basis.h>
+#include <interval/p_basis.h>
+#include <Ldomain/ldomain_basis.h>
 #include <galerkin/ldomain_equation.h>
 
 using namespace std;
@@ -52,6 +53,18 @@ public:
 int main()
 {
   cout << "Testing wavelet-Galerkin solution of an elliptic equation on the L-shaped domain ..." << endl;
+
+  const int d  = 2;
+  const int dT = 2;
+//   typedef DSBasis<d,dT> Basis1D;
+  typedef PBasis<d,dT> Basis1D;
+  typedef LDomainBasis<Basis1D> LBasis;
+  typedef LBasis::Index Index;
+
+  ConstantFunction<2> constant_rhs(Vector<double>(1, "1.0"));
+  PoissonBVP<2> poisson(&constant_rhs);
+
+  LDomainEquation<Basis1D> eq(&poisson);
 
 
   return 0;

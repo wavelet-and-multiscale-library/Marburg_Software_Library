@@ -16,6 +16,7 @@
 #include <numerics/bvp.h>
 
 #include <galerkin/galerkin_utils.h>
+#include <galerkin/infinite_preconditioner.h>
 
 using MathTL::FixedArray1D;
 using MathTL::EllipticBVP;
@@ -58,12 +59,14 @@ namespace WaveletTL
   */
   template <class IBASIS>
   class LDomainEquation
+    : public FullyDiagonalDyadicPreconditioner<typename LDomainBasis<IBASIS>::Index>
+//     : public FullyDiagonalEnergyNormPreconditioner<typename LDomainBasis<IBASIS>::Index>
   {
   public:
     /*!
       constructor from a boundary value problem and specified b.c.'s
     */
-    LDomainEquation(const EllipticBVP<DIM>* bvp);
+    LDomainEquation(const EllipticBVP<2>* bvp);
 
     /*!
       copy constructor
@@ -98,7 +101,7 @@ namespace WaveletTL
     /*!
       (half) order t of the operator
     */
-    static int operator_order() { return 1; }
+    double operator_order() const { return 1.; }
     
     /*!
       evaluate the diagonal preconditioner D
@@ -106,10 +109,11 @@ namespace WaveletTL
     double D(const typename WaveletBasis::Index& lambda) const;
 
     /*!
-      rescale a coefficient vector by an integer power of D, c |-> D^{n}c
+      evaluate the (unpreconditioned) bilinear form a
+      (inherited from EnergyNormPreconditioner)
     */
-    void rescale(InfiniteVector<double,typename WaveletBasis::Index>& coeffs,
-		 const int n) const;
+    double a(const typename WaveletBasis::Index& lambda,
+	     const typename WaveletBasis::Index& nu) const;
 
     /*!
       evaluate the (unpreconditioned) bilinear form a;
@@ -167,10 +171,10 @@ namespace WaveletTL
     /*!
       set the boundary value problem
     */
-    void set_bvp(const EllipticBVP<DIM>*);
+    void set_bvp(const EllipticBVP<2>*);
 
   protected:
-    const EllipticBVP<DIM>* bvp_;
+    const EllipticBVP<2>* bvp_;
     WaveletBasis basis_;
 
     // right-hand side coefficients on a fine level, sorted by modulus

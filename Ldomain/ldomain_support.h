@@ -48,6 +48,16 @@ namespace WaveletTL
 			     const typename LDomainBasis<IBASIS>::Index& lambda,
 			     const int j, const bool generators,
 			     std::list<typename LDomainBasis<IBASIS>::Index>& intersecting);
+
+  /*!
+    Decide whether the support of a given (primal) generator/wavelet \psi_\lambda
+    intersects the singular support of another (primal) generator/wavelet \psi_\nu.
+  */
+  template <class IBASIS>
+  bool intersect_singular_support(const LDomainBasis<IBASIS>& basis,
+				  const typename LDomainBasis<IBASIS>::Index& lambda,
+				  const typename LDomainBasis<IBASIS>::Index& nu);
+
 }
 
 #include <Ldomain/ldomain_support.cpp>

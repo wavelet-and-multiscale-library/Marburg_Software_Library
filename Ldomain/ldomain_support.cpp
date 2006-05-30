@@ -284,4 +284,14 @@ namespace WaveletTL
       }
     }
   }
+
+  template <class IBASIS>
+  bool intersect_singular_support(const LDomainBasis<IBASIS>& basis,
+				  const typename LDomainBasis<IBASIS>::Index& lambda,
+				  const typename LDomainBasis<IBASIS>::Index& mu)
+  {
+    // we cheat a bit here: we return true if already the supports intersect (overestimate)
+    return intersect_support(basis, lambda, mu);
+  }
+
 }

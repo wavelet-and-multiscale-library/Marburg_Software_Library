@@ -57,10 +57,6 @@ namespace WaveletTL
   /*!
     Decide whether the support of a given (primal) generator/wavelet \psi_\lambda
     intersects the singular support of another (primal) generator/wavelet \psi_\nu.
-    If this is the case, return true and the intersection of \supp\psi_\lambda
-    and \supp\psi_\nu in the form 2^{-j}[k1,k2].
-    Otherwise, return false (in this case, j, k1 and k2 will have
-    no meaningful values, for performance reasons).
   */
   template <class IBASIS, unsigned int DIM>
   bool intersect_singular_support(const CubeBasis<IBASIS,DIM>& basis,

@@ -27,6 +27,18 @@ namespace WaveletTL
 	       typename LDomainBasis<IBASIS>::Support& supp);
 
   /*!
+    Compute the support intersection of a wavelet psi_lambda with the
+    support of another wavelet psi_mu.
+    Function returns true if a nontrivial intersection
+    exists, false otherwise. In the latter case 'supp'
+    has no meaningful value.
+  */
+  template <class IBASIS>
+  bool intersect_supports(const LDomainBasis<IBASIS>& basis,
+			  const typename LDomainBasis<IBASIS>::Index& lambda,
+			  const typename LDomainBasis<IBASIS>::Support& supp_mu,
+			  typename LDomainBasis<IBASIS>::Support& supp);
+  /*!
     Compute the support intersection of two wavelets psi_lambda, psi_mu.
     Function returns true if a nontrivial intersection
     exists, false otherwise. In the latter case 'supp'

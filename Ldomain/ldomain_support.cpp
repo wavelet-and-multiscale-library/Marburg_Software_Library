@@ -204,18 +204,17 @@ namespace WaveletTL
 
   template <class IBASIS>
   bool intersect_supports(const LDomainBasis<IBASIS>& basis,
-			  const typename LDomainBasis<IBASIS>::Index& lambda1,
-			  const typename LDomainBasis<IBASIS>::Index& lambda2,
+			  const typename LDomainBasis<IBASIS>::Index& lambda,
+			  const typename LDomainBasis<IBASIS>::Support& supp2,
 			  typename LDomainBasis<IBASIS>::Support& supp)
   {
     typedef typename LDomainBasis<IBASIS>::Support Support;
 
-    Support supp1, supp2;
-    support(basis, lambda1, supp1);
-    support(basis, lambda2, supp2);
-
+    Support supp1;
+    support(basis, lambda, supp1);
+    
     bool r = false;
-
+    
     supp.j = std::max(supp1.j, supp2.j);
     const int diff1 = supp.j-supp1.j;
     const int diff2 = supp.j-supp2.j;
@@ -259,6 +258,20 @@ namespace WaveletTL
     
     return r;
   }
+
+  template <class IBASIS>
+  bool intersect_supports(const LDomainBasis<IBASIS>& basis,
+			  const typename LDomainBasis<IBASIS>::Index& lambda1,
+			  const typename LDomainBasis<IBASIS>::Index& lambda2,
+			  typename LDomainBasis<IBASIS>::Support& supp)
+  {
+    typedef typename LDomainBasis<IBASIS>::Support Support;
+
+    Support supp2;
+    support(basis, lambda2, supp2);
+
+    return intersect_supports(basis, lambda1, supp2, supp);
+  }
   
   template <class IBASIS>
   void intersecting_wavelets(const LDomainBasis<IBASIS>& basis,
@@ -266,25 +279,30 @@ namespace WaveletTL
 			     const int j, const bool generators,
 			     std::list<typename LDomainBasis<IBASIS>::Index>& intersecting)
   {
-    // a brute force solution
     typedef typename LDomainBasis<IBASIS>::Index Index;
     typedef typename LDomainBasis<IBASIS>::Support Support;
-    Support supp;
+
+    Support supp, supp_lambda;
+    support(basis, lambda, supp_lambda);
+    
+    // a brute force solution
     if (generators) {
+      Index last_gen(last_generator<IBASIS>(&basis, j));
       for (Index mu = first_generator<IBASIS>(&basis, j);; ++mu) {
-	if (intersect_supports(basis, lambda, mu, supp))
+	if (intersect_supports(basis, mu, supp_lambda, supp))
 	  intersecting.push_back(mu);
-	if (mu == last_generator<IBASIS>(&basis, j)) break;
+	if (mu == last_gen) break;
       }
     } else {
+      Index last_wav(last_wavelet<IBASIS>(&basis, j));
       for (Index mu = first_wavelet<IBASIS>(&basis, j);; ++mu) {
-	if (intersect_supports(basis, lambda, mu, supp))
+	if (intersect_supports(basis, mu, supp_lambda, supp))
 	  intersecting.push_back(mu);
-	if (mu == last_wavelet<IBASIS>(&basis, j)) break;
+	if (mu == last_wav) break;
       }
     }
   }
-
+  
   template <class IBASIS>
   bool intersect_singular_support(const LDomainBasis<IBASIS>& basis,
 				  const typename LDomainBasis<IBASIS>::Index& lambda,

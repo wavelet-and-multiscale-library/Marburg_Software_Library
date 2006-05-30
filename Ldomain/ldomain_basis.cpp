@@ -42,6 +42,104 @@ namespace WaveletTL
   }
   
   template <class IBASIS>
+  typename LDomainBasis<IBASIS>::Index
+  LDomainBasis<IBASIS>::first_generator(const int j) const
+  {
+    assert(j >= j0());
+
+    typename Index::type_type e;
+
+    // setup lowest translation index for e=(0,0), p=0
+    typename Index::translation_type k;
+    k[0] = k[1] = basis1d().DeltaLmin()+1;
+    
+    return Index(j, e, 0, k, this);
+  }
+
+  template <class IBASIS>
+  typename LDomainBasis<IBASIS>::Index
+  LDomainBasis<IBASIS>::last_generator(const int j) const
+  {
+    assert(j >= j0());
+
+    typename Index::type_type e;
+
+    // setup highest translation index for e=(0,0), p=4
+    typename Index::translation_type k; // k[0]=0 by convention
+    k[1] = basis1d().DeltaRmax(j)-1;
+    
+    return Index(j, e, 4, k, this);
+  }
+
+  template <class IBASIS>
+  typename LDomainBasis<IBASIS>::Index
+  LDomainBasis<IBASIS>::first_wavelet(const int j) const
+  {
+    assert(j >= j0());
+
+    typename Index::type_type e;
+    e[1] = 1;
+
+    // setup lowest translation index for e=(0,1), p=0
+    typename Index::translation_type k;
+    k[0] = basis1d().DeltaLmin()+1;
+    k[1] = basis1d().Nablamin();
+    
+    return Index(j, e, 0, k, this);
+  }
+
+  template <class IBASIS>
+  typename LDomainBasis<IBASIS>::Index
+  LDomainBasis<IBASIS>::first_wavelet(const int j, const typename Index::type_type& ewish) const
+  {
+    assert(j >= j0());
+    
+    typename Index::type_type e(ewish);
+    
+    // setup lowest translation index appropriately
+    typename Index::translation_type k;
+    const int ecode(e[0]+2*e[1]);
+    if (ecode == 0) {
+      // e = (0,0)
+      k[0] = k[1] = basis1d().DeltaLmin()+1;
+    } else {
+      if (ecode == 1) {
+	// e = (1,0)
+	k[0] = basis1d().Nablamin();
+	k[1] = basis1d().DeltaLmin()+1;
+      } else {
+	if (ecode == 2) {
+	  // e = (0,1)
+	  k[0] = basis1d().DeltaLmin()+1;
+	  k[1] = basis1d().Nablamin();
+	} else {
+	  // e = (1,1)
+	  k[0] = k[1] = basis1d().Nablamin();
+	}
+      }
+    }
+    
+    return Index(j, e, 0, k, this);
+
+  }
+
+  template <class IBASIS>
+  typename LDomainBasis<IBASIS>::Index
+  LDomainBasis<IBASIS>::last_wavelet(const int j) const
+  {
+    assert(j >= j0());
+    
+    typename Index<IBASIS>::type_type e;
+    e[0] = e[1] = 1;
+
+    // setup highest translation index for e=(1,1), p=2
+    typename Index<IBASIS>::translation_type k;
+    k[0] = k[1] = basis1d().Nablamax(j);
+    
+    return Index(j, e, 2, k, this);
+  }
+
+  template <class IBASIS>
   const BlockMatrix<double>&
   LDomainBasis<IBASIS>::get_Mj0 (const int j) const {
     // check whether the j-th matrix already exists in the cache
@@ -514,7 +612,7 @@ namespace WaveletTL
 	const BlockMatrix<double>& Mj0 = get_Mj0(lambda.j());
 	Vector<double> unitvector(Deltasize(lambda.j()));
 	unsigned int id = 0;
-	for (Index mu = first_generator(this, lambda.j()); mu != lambda; ++mu) id++;
+	for (Index mu = first_generator(lambda.j()); mu != lambda; ++mu) id++;
  	unitvector[id] = 1.0;
   	Mj0.apply(unitvector, generators);	
       } else {
@@ -527,7 +625,7 @@ namespace WaveletTL
 	  unsigned int id = 0;
 	  typename Index::type_type e;
 	  e[0] = 1; // e = (1,0)
-	  for (Index mu = first_wavelet(this, lambda.j(), e); mu != lambda; ++mu) id++;
+	  for (Index mu = first_wavelet(lambda.j(), e); mu != lambda; ++mu) id++;
  	  unitvector[id] = 1.0;
  	  Mj1c_10.apply(unitvector, generators);
 	} else {
@@ -538,7 +636,7 @@ namespace WaveletTL
  	    const BlockMatrix<double>& Mj1c_01 = get_Mj1c_01(lambda.j());
  	    Vector<double> unitvector(Nabla01size(lambda.j()));
  	    unsigned int id = 0;
- 	    for (Index mu = first_wavelet(this, lambda.j()); mu != lambda; ++mu) id++;
+ 	    for (Index mu = first_wavelet(lambda.j()); mu != lambda; ++mu) id++;
  	    unitvector[id] = 1.0;
  	    Mj1c_01.apply(unitvector, generators);
 	  } else {
@@ -551,7 +649,7 @@ namespace WaveletTL
  	    unsigned int id = 0;
 	    typename Index::type_type e;
 	    e[0] = e[1] = 1; // e = (1,1)
-	    for (Index mu = first_wavelet(this, lambda.j(), e); mu != lambda; ++mu) id++;
+	    for (Index mu = first_wavelet(lambda.j(), e); mu != lambda; ++mu) id++;
  	    unitvector[id] = 1.0;
  	    Mj1c_11.apply(unitvector, generators);
 	  }
@@ -562,7 +660,7 @@ namespace WaveletTL
       // all relevant generators from the scale |lambda|+1
       // (this is the identity part of the biorthogonalization equation)
       unsigned int id = 0;
-      for (Index mu = first_generator(this, lambda.j()+1); id < generators.size(); id++, ++mu) {
+      for (Index mu = first_generator(lambda.j()+1); id < generators.size(); id++, ++mu) {
 	InfiniteVector<double, Index> d;
 	if (fabs(generators[id]) > 1e-12) {
 	  reconstruct_1(mu, j, d);
@@ -581,7 +679,7 @@ namespace WaveletTL
 
 	// collect all relevant generators from the scale |lambda+1|
 	unsigned int id = 0;
-	for (Index mu = first_generator(this, lambda.j()+1); id < generators.size(); id++, ++mu) {
+	for (Index mu = first_generator(lambda.j()+1); id < generators.size(); id++, ++mu) {
 	  InfiniteVector<double, Index> d;
 	  if (fabs(generators[id]) > 1e-12) {
 	    reconstruct_1(mu, j, d);

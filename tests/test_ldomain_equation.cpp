@@ -7,6 +7,7 @@
 #include <utils/function.h>
 #include <utils/fixed_array1d.h>
 #include <numerics/bvp.h>
+#include <numerics/corner_singularity.h>
 #include <geometry/sampled_mapping.h>
 
 #include <interval/ds_basis.h>
@@ -17,38 +18,6 @@
 using namespace std;
 using namespace MathTL;
 using namespace WaveletTL;
-
-/*
-  A test problem for the Poisson equation on the cube with homogeneous Dirichlet b.c.'s:
-    -Delta u(x,y) = 2(x(1-x)+y(1-y))
-  with exact solution
-    u(x,y) = x(1-x)y(1-y)
-*/
-class myRHS
-  : public Function<2,double>
-{
-public:
-  virtual ~myRHS() {};
-  double value(const Point<2>& p, const unsigned int component = 0) const {
-    return 2*(p[0]*(1-p[0])+p[1]*(1-p[1]));
-  }
-  void vector_value(const Point<2>& p, Vector<double>& values) const {
-    values[0] = value(p);
-  }
-};
-
-class mySolution
-  : public Function<2,double>
-{
-public:
-  virtual ~mySolution() {};
-  double value(const Point<2>& p, const unsigned int component = 0) const {
-    return p[0]*(1-p[0])*p[1]*(1-p[1]);
-  }
-  void vector_value(const Point<2>& p, Vector<double>& values) const {
-    values[0] = value(p);
-  }
-};
 
 int main()
 {
@@ -61,11 +30,14 @@ int main()
   typedef LDomainBasis<Basis1D> LBasis;
   typedef LBasis::Index Index;
 
-  ConstantFunction<2> constant_rhs(Vector<double>(1, "1.0"));
-  PoissonBVP<2> poisson(&constant_rhs);
+  CornerSingularity    u_sing(Point<2>(0,0), 0.5, 1.5);
+  CornerSingularityRHS f_sing(Point<2>(0,0), 0.5, 1.5);
+  PoissonBVP<2> poisson(&f_sing);
 
   LDomainEquation<Basis1D> eq(&poisson);
 
+  InfiniteVector<double, Index> coeffs;
+  eq.RHS(1e-8, coeffs);
 
   return 0;
 }

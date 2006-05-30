@@ -104,6 +104,21 @@ namespace WaveletTL
 //     const BlockMatrix<double>& get_Mj1  (const int j) const;
 //     const BlockMatrix<double>& get_Mj1T (const int j) const;
 
+    //! index of first generator on level j >= j0
+    Index first_generator(const int j) const;
+      
+    //! index of last generator on level j >= j0
+    Index last_generator(const int j) const;
+      
+    //! index of first wavelet on level j >= j0
+    Index first_wavelet(const int j) const;
+      
+    //! index of first wavelet on level j >= j0 with type e
+    Index first_wavelet(const int j, const typename Index::type_type& e) const;
+
+    //! index of last wavelet on level j >= j0
+    Index last_wavelet(const int j) const;
+
     //! RECONSTRUCT routine, simple version
     /*!
       Constructs for a given single wavelet index lambda a coefficient set c,

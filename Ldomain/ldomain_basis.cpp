@@ -129,11 +129,11 @@ namespace WaveletTL
   {
     assert(j >= j0());
     
-    typename Index<IBASIS>::type_type e;
+    typename Index::type_type e;
     e[0] = e[1] = 1;
 
     // setup highest translation index for e=(1,1), p=2
-    typename Index<IBASIS>::translation_type k;
+    typename Index::translation_type k;
     k[0] = k[1] = basis1d().Nablamax(j);
     
     return Index(j, e, 2, k, this);

@@ -48,6 +48,9 @@ namespace MathTL
     //! clone the block matrix (requirement from MatrixBlock)
     MatrixBlock<C>* clone() const;
 
+    //! transpose the block matrix (requirement from MatrixBlock)
+    MatrixBlock<C>* clone_transposed() const;
+
     //! (overall) row dimension
     const size_type row_dimension() const { return rowdim_; }
     
@@ -137,6 +140,12 @@ namespace MathTL
   */
   template <class C>
   BlockMatrix<C> operator * (const BlockMatrix<C>& M, const BlockMatrix<C>& N);
+
+  /*!
+    transpose of a block matrix
+  */
+  template <class C>
+  BlockMatrix<C> transpose(const BlockMatrix<C>& M);
 
   /*!
     stream output for block matrices

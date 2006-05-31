@@ -53,6 +53,9 @@ namespace MathTL
     //! clone the matrix block
     virtual MatrixBlock<C>* clone() const = 0;
 
+    //! get a transposed version of the matrix block
+    virtual MatrixBlock<C>* clone_transposed() const = 0;
+
     //! print block onto a stream
     virtual void print(std::ostream& os,
 		       const unsigned int tabwidth = 10,

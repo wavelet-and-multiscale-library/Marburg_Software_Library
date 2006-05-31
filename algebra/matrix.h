@@ -95,6 +95,9 @@ namespace MathTL
     //! clone the matrix (requirement from MatrixBlock)
     MatrixBlock<C>* clone() const;
 
+    //! transpose the matrix (requirement from MatrixBlock)
+    MatrixBlock<C>* clone_transposed() const;
+
     /*!
       row dimension
     */

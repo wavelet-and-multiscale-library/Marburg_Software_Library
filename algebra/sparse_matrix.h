@@ -68,6 +68,9 @@ namespace MathTL
     //! clone the sparse matrix (requirement from MatrixBlock)
     MatrixBlock<C>* clone() const;
 
+    //! transpose the sparse matrix (requirement from MatrixBlock)
+    MatrixBlock<C>* clone_transposed() const;
+
     /*!
       row dimension
     */

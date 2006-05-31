@@ -117,6 +117,13 @@ namespace MathTL
   }
 
   template <class C>
+  MatrixBlock<C>*
+  Matrix<C>::clone_transposed() const
+  {
+    return new Matrix<C>(transpose(*this));
+  }
+
+  template <class C>
   inline
   const typename Matrix<C>::size_type
   Matrix<C>::row_dimension() const

@@ -46,6 +46,9 @@ namespace MathTL
     //! clone the Kronecker matrix (requirement from MatrixBlock)
     MatrixBlock<C>* clone() const;
 
+    //! transpose the Kronecker matrix (requirement from MatrixBlock)
+    MatrixBlock<C>* clone_transposed() const;
+
     //! row dimension
     const size_type row_dimension() const;
 

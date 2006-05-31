@@ -108,6 +108,13 @@ namespace MathTL
   }
 
   template <class C>
+  MatrixBlock<C>*
+  SparseMatrix<C>::clone_transposed() const
+  {
+    return new SparseMatrix<C>(transpose(*this));
+  }
+
+  template <class C>
   inline
   const typename SparseMatrix<C>::size_type
   SparseMatrix<C>::row_dimension() const

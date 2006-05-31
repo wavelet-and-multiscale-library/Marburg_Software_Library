@@ -66,6 +66,13 @@ namespace MathTL
   }
 
   template <class C>
+  MatrixBlock<C>*
+  BlockMatrix<C>::clone_transposed() const
+  {
+    return new BlockMatrix<C>(transpose(*this));
+  }
+
+  template <class C>
   void
   BlockMatrix<C>::calculate_size()
   {
@@ -275,6 +282,29 @@ namespace MathTL
 	  }
  	}
     
+    return R;
+  }
+
+  template <class C>
+  BlockMatrix<C> transpose(const BlockMatrix<C>& M)
+  {
+    typedef typename BlockMatrix<C>::size_type size_type;
+
+    BlockMatrix<C> R(M.block_columns(), M.block_rows());
+    for (size_type block_row(0); block_row < M.block_rows(); block_row++) {
+      R.resize_block_column(block_row, M.block_row_dimension(block_row));
+    }
+    for (size_type block_column(0); block_column < M.block_columns(); block_column++) {
+      R.resize_block_row(block_column, M.block_column_dimension(block_column));
+    }
+
+    for (size_type block_row(0); block_row < M.block_rows(); block_row++)
+      for (size_type block_column(0); block_column < M.block_columns(); block_column++) {
+	if (M.get_block(block_row, block_column)) {
+	  R.set_block(block_column, block_row, M.get_block(block_row, block_column)->clone_transposed());
+	}
+      }
+
     return R;
   }
 

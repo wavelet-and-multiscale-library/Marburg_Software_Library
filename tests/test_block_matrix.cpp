@@ -41,10 +41,7 @@ int main()
   M.apply(x, y);
   cout << "- a vector x=" << x << ", Mx=" << y << endl;
 
-  MatrixBlock<double>* MT = M.clone_transposed();
-  cout << "- M^T:" << endl;
-  MT->print(cout);
-  delete MT;
+  cout << "- M^T:" << endl << transpose(M);
 
   x.resize(2);
   x[0] = 1;

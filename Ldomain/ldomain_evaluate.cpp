@@ -200,8 +200,6 @@ namespace WaveletTL
  	   const bool primal,
  	   const int resolution)
   {
-//     cout << "evaluate() called with coeffs=" << endl << coeffs << endl;
-
     // first prepare a plot of the zero function
     FixedArray1D<Array1D<double>,2> values;
     values[0].resize((1<<resolution)+1);

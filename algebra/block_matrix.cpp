@@ -258,21 +258,21 @@ namespace MathTL
 	  if (B) {
 	    // compute the block as a dense matrix (faster)
 	    Matrix<double> T(B->row_dimension(), B->column_dimension());
- 	    for (size_type k(0); k < N.block_rows(); k++) {
- 	      if (M.get_block(i, k) && N.get_block(k, j)) {
+  	    for (size_type k(0); k < N.block_rows(); k++) {
+  	      if (M.get_block(i, k) && N.get_block(k, j)) {
 		// T += M(i,k)*N(k,j) columnwise
-		Vector<double> x(B->column_dimension()),
-		  y(N.get_block(k, j)->row_dimension()),
-		  z(B->row_dimension());
-		for (size_type ell(0); ell < B->column_dimension(); ell++) {
-		  x.scale(0.0); x[ell] = 1.0;
-		  N.get_block(k, j)->apply(x, y);
-		  M.get_block(i, k)->apply(y, z);
-		  for (size_type m(0); m < B->row_dimension(); m++)
-		    T.set_entry(m, ell, T.get_entry(m, ell) + z[ell]);
-		}
- 	      }
- 	    }
+ 		Vector<double> x(B->column_dimension()),
+ 		  y(N.get_block(k, j)->row_dimension()),
+ 		  z(B->row_dimension());
+ 		for (size_type ell(0); ell < B->column_dimension(); ell++) {
+ 		  x.scale(0.0); x[ell] = 1.0;
+ 		  N.get_block(k, j)->apply(x, y);
+ 		  M.get_block(i, k)->apply(y, z);
+ 		  for (size_type m(0); m < B->row_dimension(); m++)
+ 		    T.set_entry(m, ell, T.get_entry(m, ell) + z[m]);
+ 		}
+  	      }
+  	    }
 
 	    // copy the computed block into the final matrix
 	    if (row_sum_norm(T) > 1e-14) {
@@ -304,7 +304,7 @@ namespace MathTL
 	  R.set_block(block_column, block_row, M.get_block(block_row, block_column)->clone_transposed());
 	}
       }
-
+    
     return R;
   }
 

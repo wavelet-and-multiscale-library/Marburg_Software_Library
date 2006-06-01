@@ -63,7 +63,7 @@ int main()
   B.set_block(1, 1, B11);  
   Matrix<double>* B12 = new Matrix<double>(1, 1, "6");
   B.set_block(1, 2, B12);  
-  cout << " - a BlockMatrix B:" << endl << B;
+  cout << "- a BlockMatrix B:" << endl << B;
 //   Matrix<double>* C00 = new Matrix<double>(1, 1, "1");
 //   C.set_block(0, 0, C00);  
   Matrix<double>* C01 = new Matrix<double>(1, 1, "2");
@@ -82,8 +82,39 @@ int main()
   C.set_block(2, 1, C21);  
   Matrix<double>* C22 = new Matrix<double>(1, 1, "9");
   C.set_block(2, 2, C22);  
-  cout << " - a BlockMatrix C:" << endl << C;
+  cout << "- a BlockMatrix C:" << endl << C;
   cout << "- B*C=" << endl << B*C;
+
+  BlockMatrix<double> X(2,3), Y(3,2);
+  Matrix<double>* X00 = new Matrix<double>(1, 1, "1");
+  X.set_block(0, 0, X00);  
+  Matrix<double>* X01 = new Matrix<double>(1, 2, "2 3");
+  X.set_block(0, 1, X01);  
+  Matrix<double>* X02 = new Matrix<double>(1, 3, "4 5 6");
+  X.set_block(0, 2, X02);  
+  Matrix<double>* X10 = new Matrix<double>(2, 1, "7 13");
+  X.set_block(1, 0, X10);  
+  Matrix<double>* X11 = new Matrix<double>(2, 2, "8 9 14 15");
+  X.set_block(1, 1, X11);  
+  Matrix<double>* X12 = new Matrix<double>(2, 3, "10 11 12 16 17 18");
+  X.set_block(1, 2, X12);  
+  cout << "- a BlockMatrix X:" << endl << X;
+
+  Matrix<double>* Y00 = new Matrix<double>(1, 1, "1");
+  Y.set_block(0, 0, Y00);   
+  Matrix<double>* Y01 = new Matrix<double>(1, 2, "2 3");
+  Y.set_block(0, 1, Y01);  
+  Matrix<double>* Y10 = new Matrix<double>(2, 1, "4 7");
+  Y.set_block(1, 0, Y10);  
+  Matrix<double>* Y11 = new Matrix<double>(2, 2, "5 6 8 9");
+  Y.set_block(1, 1, Y11);  
+  Matrix<double>* Y20 = new Matrix<double>(3, 1, "10 13 16");
+  Y.set_block(2, 0, Y20);  
+  Matrix<double>* Y21 = new Matrix<double>(3, 2, "11 12 14 15 17 18");
+  Y.set_block(2, 1, Y21);  
+
+  cout << "- another BlockMatrix Y:" << endl << Y;
+  cout << "- X*Y=" << endl << X*Y;
 
   return 0;
 }

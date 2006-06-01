@@ -300,42 +300,6 @@ namespace WaveletTL
   }
 
   template <class IBASIS>
-  const BlockMatrix<double>&
-  LDomainBasis<IBASIS>::get_Mj0Mj0TT (const int j) const {
-    // check whether the j-th matrix already exists in the cache
-    typename MatrixCache::iterator matrix_lb(Mj0Mj0TT_cache.lower_bound(j));
-    typename MatrixCache::iterator matrix_it(matrix_lb);
-    if (matrix_lb == Mj0Mj0TT_cache.end() ||
-	Mj0Mj0TT_cache.key_comp()(j, matrix_lb->first))
-      {
- 	cout << "LDomainBasis::get_Mj0Mj0TT() cache miss" << endl;
-
-	BlockMatrix<double> Mj0TT(transpose(get_Mj0T(j)));
-	cout << "dimensions of Mj0TT: "
-	     << Mj0TT.row_dimension() << "x" << Mj0TT.column_dimension() << endl;
-
-	BlockMatrix<double> Mj0(get_Mj0(j));
-	cout << "dimensions of Mj0: "
-	     << Mj0.row_dimension() << "x" << Mj0.column_dimension() << endl;
-
-	// compute Mj0*Mj0T^T and insert it into the cache
-	BlockMatrix<double> Mj0Mj0TT(Mj0*Mj0TT);
-	
-	cout << "overall dimensions of the inserted matrix: "
-	     << Mj0Mj0TT.row_dimension() << "x" << Mj0Mj0TT.column_dimension() << endl;
-
-	typedef typename MatrixCache::value_type value_type;
- 	matrix_it = Mj0Mj0TT_cache.insert(matrix_lb, value_type(j, Mj0Mj0TT));
-      }
-    else
-      {
-// 	cout << "LDomainBasis::get_Mj0Mj0TT() cache hit" << endl;
-      }
-    
-    return matrix_it->second;
-  }
-
-  template <class IBASIS>
   const SparseMatrix<double>&
   LDomainBasis<IBASIS>::get_Mj1c_1d (const int j) const {
     // check whether the j-th matrix already exists in the cache
@@ -697,11 +661,9 @@ namespace WaveletTL
       if (ecode > 0) {
  	// second part of the biorthogonalization equation,
  	// compute the corresponding column of Mj0*Mj0T^T*Mj1c
-	Vector<double> help(Deltasize(lambda.j()+1));
-// 	get_Mj0T(lambda.j()).apply_transposed(generators, help);
-// 	get_Mj0 (lambda.j()).apply(help, generators);
- 	get_Mj0Mj0TT(lambda.j()).apply(generators, help);
- 	generators.swap(help);
+	Vector<double> help(Deltasize(lambda.j()));
+ 	get_Mj0T(lambda.j()).apply_transposed(generators, help);
+ 	get_Mj0 (lambda.j()).apply(help, generators);
 
  	// collect all relevant generators from the scale |lambda+1|
  	unsigned int id = 0;

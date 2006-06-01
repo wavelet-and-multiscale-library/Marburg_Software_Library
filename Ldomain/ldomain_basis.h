@@ -97,7 +97,6 @@ namespace WaveletTL
     */
     const BlockMatrix<double>&  get_Mj0      (const int j) const;
     const BlockMatrix<double>&  get_Mj0T     (const int j) const;
-    const BlockMatrix<double>&  get_Mj0Mj0TT (const int j) const;
     const SparseMatrix<double>& get_Mj1c_1d  (const int j) const; // initial stable completion in 1D
     const BlockMatrix<double>&  get_Mj1c_01  (const int j) const;
     const BlockMatrix<double>&  get_Mj1c_10  (const int j) const;
@@ -164,7 +163,7 @@ namespace WaveletTL
 
     //! caches for the diverse refinement matrices
     typedef std::map<int,BlockMatrix<double> > MatrixCache;
-    mutable MatrixCache Mj0_cache, Mj0T_cache, Mj0Mj0TT_cache,
+    mutable MatrixCache Mj0_cache, Mj0T_cache,
       Mj1c_01_cache, Mj1c_10_cache, Mj1c_11_cache;
 
     typedef std::map<int,SparseMatrix<double> > Matrix1DCache;

@@ -1901,10 +1901,18 @@ namespace WaveletTL
 	  }
 	}
       }
-      for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
-	InfiniteVector<double, Index> dhelp;
-	reconstruct_1(Index(lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this), j, dhelp);
-	c.add(M.get_nth_entry(row_j0,k), dhelp);
+
+      if (lambda.j()+1 >= j) {
+	for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
+	  c.add_coefficient(Index(lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this),
+			    M.get_nth_entry(row_j0,k));
+	}
+      } else {
+	for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
+	  InfiniteVector<double, Index> dhelp;
+	  reconstruct_1(Index(lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this), j, dhelp);
+	  c.add(M.get_nth_entry(row_j0,k), dhelp);
+	}
       }
     }
   }
@@ -1965,10 +1973,18 @@ namespace WaveletTL
 	  }
 	}
       }
-      for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
-	InfiniteVector<double, Index> dhelp;
-	reconstruct_t_1(Index(lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this), j, dhelp);
-	c.add(M.get_nth_entry(row_j0,k), dhelp);
+
+      if (lambda.j()+1 >= j) {
+	for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
+	  c.add_coefficient(Index(lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this),
+			    M.get_nth_entry(row_j0,k));
+	}
+      } else {
+	for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
+	  InfiniteVector<double, Index> dhelp;
+	  reconstruct_t_1(Index(lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this), j, dhelp);
+	  c.add(M.get_nth_entry(row_j0,k), dhelp);
+	}
       }
     }
   }

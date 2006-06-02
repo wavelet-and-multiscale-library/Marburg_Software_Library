@@ -118,13 +118,20 @@ namespace WaveletTL
 		M_SQRT1_2 * bT().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*l));
 
  	    // compute c_{j_0} via recursion
- 	    for (int l((int)ceil((lambda.k()-aTend)/2.0));
- 		 l <= (int)floor((lambda.k()-aTbegin)/2.0); l++)
- 	      {
- 		InfiniteVector<double, Index> d;
- 		decompose_1(Index(lambda.j()-1, 0, l), j0, d);
- 		c.add(M_SQRT1_2 * aT().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*l)), d);
- 	      }
+	    if (lambda.j() == j0-1) {
+	      for (int l((int)ceil((lambda.k()-aTend)/2.0));
+		   l <= (int)floor((lambda.k()-aTbegin)/2.0); l++) {
+		c.add_coefficient(Index(lambda.j()-1, 0, l),
+				  M_SQRT1_2 * aT().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*l)));
+	      }
+	    } else {
+	      for (int l((int)ceil((lambda.k()-aTend)/2.0));
+		   l <= (int)floor((lambda.k()-aTbegin)/2.0); l++) {
+		InfiniteVector<double, Index> d;
+		decompose_1(Index(lambda.j()-1, 0, l), j0, d);
+		c.add(M_SQRT1_2 * aT().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*l)), d);
+	      }
+	    }
 	  }
       }
   }
@@ -166,13 +173,20 @@ namespace WaveletTL
 		M_SQRT1_2 * b().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*l));
 	    
 	    // compute c_{j_0} via recursion
-	    for (int l((int)ceil((lambda.k()-aend)/2.0));
-		 l <= (int)floor((lambda.k()-abegin)/2.0); l++)
-	      {
+	    if (lambda.j() == j0-1) {
+	      for (int l((int)ceil((lambda.k()-aend)/2.0));
+		   l <= (int)floor((lambda.k()-abegin)/2.0); l++) {
+		c.add_coefficient(Index(lambda.j()-1, 0, l),
+				  M_SQRT1_2 * a().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*l)));
+	      }
+	    } else {
+	      for (int l((int)ceil((lambda.k()-aend)/2.0));
+		   l <= (int)floor((lambda.k()-abegin)/2.0); l++) {
 		InfiniteVector<double, Index> d;
 		decompose_t_1(Index(lambda.j()-1, 0, l), j0, d);
 		c.add(M_SQRT1_2 * a().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*l)), d);
 	      }
+	    }
 	  }
       }
   }

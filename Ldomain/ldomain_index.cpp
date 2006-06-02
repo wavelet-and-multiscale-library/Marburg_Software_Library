@@ -233,36 +233,41 @@ namespace WaveletTL
   {
     const int ecode(e()[0]+2*e()[1]);
     
+    const int DeltaLmin = basis_->basis1d().DeltaLmin();
+    const int Nablamin  = basis_->basis1d().Nablamin();
+    const int Deltasize = basis_->basis1d().Deltasize(j());
+    const int Nablasize = basis_->basis1d().Nablasize(j());
+
     switch(ecode) {
     case 0: // e=(0,0)
       switch(p()) {
       case 0:
 	return
-	  (k()[0]-(basis_->basis1d().DeltaLmin()+1))*(basis_->basis1d().Deltasize(j())-2)
-	  + (k()[1]-basis_->basis1d().DeltaLmin()-1);
+	  (k()[0]-DeltaLmin-1)*(Deltasize-2)
+	  + (k()[1]-DeltaLmin-1);
 	break;
       case 1:
 	return
-	  (basis_->basis1d().Deltasize(j())-2)*(basis_->basis1d().Deltasize(j())-2)
-	  + (k()[0]-(basis_->basis1d().DeltaLmin()+1))*(basis_->basis1d().Deltasize(j())-2)
-	  + (k()[1]-basis_->basis1d().DeltaLmin()-1);
+	  (Deltasize-2)*(Deltasize-2)
+	  + (k()[0]-DeltaLmin-1)*(Deltasize-2)
+	  + (k()[1]-DeltaLmin-1);
 	break;
       case 2:
 	return
-	  2*(basis_->basis1d().Deltasize(j())-2)*(basis_->basis1d().Deltasize(j())-2)
-	  + (k()[0]-(basis_->basis1d().DeltaLmin()+1))*(basis_->basis1d().Deltasize(j())-2)
-	  + (k()[1]-basis_->basis1d().DeltaLmin()-1);
+	  2*(Deltasize-2)*(Deltasize-2)
+	  + (k()[0]-DeltaLmin-1)*(Deltasize-2)
+	  + (k()[1]-DeltaLmin-1);
 	break;
       case 3:
 	return
-	  3*(basis_->basis1d().Deltasize(j())-2)*(basis_->basis1d().Deltasize(j())-2)
-	  + (k()[0]-basis_->basis1d().DeltaLmin()-1);
+	  3*(Deltasize-2)*(Deltasize-2)
+	  + (k()[0]-DeltaLmin-1);
 	break;
       case 4:
 	return
-	  3*(basis_->basis1d().Deltasize(j())-2)*(basis_->basis1d().Deltasize(j())-2)
-	  + (basis_->basis1d().Deltasize(j())-2)
-	  + (k()[1]-basis_->basis1d().DeltaLmin()-1);
+	  3*(Deltasize-2)*(Deltasize-2)
+	  + (Deltasize-2)
+	  + (k()[1]-DeltaLmin-1);
 	break;
       default:
 	return 42; // for the compiler, this will never happen
@@ -274,31 +279,31 @@ namespace WaveletTL
 	return
 	  basis_->Deltasize(j())
 	  + basis_->Nabla01size(j())
-	  + (k()[0]-basis_->basis1d().Nablamin())*(basis_->basis1d().Deltasize(j())-2)
-	  + (k()[1]-basis_->basis1d().DeltaLmin()-1);
+	  + (k()[0]-Nablamin)*(Deltasize-2)
+	  + (k()[1]-DeltaLmin-1);
 	break;
       case 1:
 	return
 	  basis_->Deltasize(j())
 	  + basis_->Nabla01size(j())
-	  + (basis_->basis1d().Deltasize(j())-2)*basis_->basis1d().Nablasize(j())
-	  + (k()[0]-basis_->basis1d().Nablamin())*(basis_->basis1d().Deltasize(j())-2)
-	  + (k()[1]-basis_->basis1d().DeltaLmin()-1);
+	  + (Deltasize-2)*Nablasize
+	  + (k()[0]-Nablamin)*(Deltasize-2)
+	  + (k()[1]-DeltaLmin-1);
 	break;
       case 2:
 	return
 	  basis_->Deltasize(j())
 	  + basis_->Nabla01size(j())
-	  + 2*(basis_->basis1d().Deltasize(j())-2)*basis_->basis1d().Nablasize(j())
-	  + (k()[0]-basis_->basis1d().Nablamin())*(basis_->basis1d().Deltasize(j())-2)
-	  + (k()[1]-basis_->basis1d().DeltaLmin()-1);
+	  + 2*(Deltasize-2)*Nablasize
+	  + (k()[0]-Nablamin)*(Deltasize-2)
+	  + (k()[1]-DeltaLmin-1);
 	break;
       case 3:
 	return
 	  basis_->Deltasize(j())
 	  + basis_->Nabla01size(j())
-	  + 3*(basis_->basis1d().Deltasize(j())-2)*basis_->basis1d().Nablasize(j())
-	  + (k()[0]-basis_->basis1d().Nablamin());
+	  + 3*(Deltasize-2)*Nablasize
+	  + (k()[0]-Nablamin);
 	break;
       default:
 	return 42; // for the compiler, this will never happen
@@ -309,28 +314,28 @@ namespace WaveletTL
       case 0:
 	return
 	  basis_->Deltasize(j())
-	  + (k()[0]-(basis_->basis1d().DeltaLmin()+1))*basis_->basis1d().Nablasize(j())
-	  + (k()[1]-basis_->basis1d().Nablamin());
+	  + (k()[0]-DeltaLmin-1)*Nablasize
+	  + (k()[1]-Nablamin);
 	break;
       case 1:
 	return
 	  basis_->Deltasize(j())
-	  + (basis_->basis1d().Deltasize(j())-2)*basis_->basis1d().Nablasize(j())
-	  + (k()[0]-(basis_->basis1d().DeltaLmin()+1))*basis_->basis1d().Nablasize(j())
-	  + (k()[1]-basis_->basis1d().Nablamin());
+	  + (Deltasize-2)*Nablasize
+	  + (k()[0]-DeltaLmin-1)*Nablasize
+	  + (k()[1]-Nablamin);
 	break;
       case 2:
 	return
 	  basis_->Deltasize(j())
-	  + 2*(basis_->basis1d().Deltasize(j())-2)*basis_->basis1d().Nablasize(j())
-	  + (k()[0]-(basis_->basis1d().DeltaLmin()+1))*basis_->basis1d().Nablasize(j())
-	  + (k()[1]-basis_->basis1d().Nablamin());
+	  + 2*(Deltasize-2)*Nablasize
+	  + (k()[0]-DeltaLmin-1)*Nablasize
+	  + (k()[1]-Nablamin);
 	break;
       case 4:
 	return
 	  basis_->Deltasize(j())
-	  + 3*(basis_->basis1d().Deltasize(j())-2)*basis_->basis1d().Nablasize(j())
-	  + (k()[1]-basis_->basis1d().Nablamin());
+	  + 3*(Deltasize-2)*Nablasize
+	  + (k()[1]-Nablamin);
 	break;
       default:
 	return 42; // for the compiler, this will never happen
@@ -342,33 +347,33 @@ namespace WaveletTL
 	  basis_->Deltasize(j())
 	  + basis_->Nabla01size(j())
 	  + basis_->Nabla10size(j())
-	  + (k()[0]-basis_->basis1d().Nablamin())*basis_->basis1d().Nablasize(j())
-	  + (k()[1]-basis_->basis1d().Nablamin());
+	  + (k()[0]-Nablamin)*Nablasize
+	  + (k()[1]-Nablamin);
 	break;
       case 1:
 	return
 	  basis_->Deltasize(j())
 	  + basis_->Nabla01size(j())
 	  + basis_->Nabla10size(j())
-	  + basis_->basis1d().Nablasize(j())*basis_->basis1d().Nablasize(j())
-	  + (k()[0]-basis_->basis1d().Nablamin())*basis_->basis1d().Nablasize(j())
-	  + (k()[1]-basis_->basis1d().Nablamin());
+	  + Nablasize*Nablasize
+	  + (k()[0]-Nablamin)*Nablasize
+	  + (k()[1]-Nablamin);
 	break;
       case 2:
 	return
 	  basis_->Deltasize(j())
 	  + basis_->Nabla01size(j())
 	  + basis_->Nabla10size(j())
-	  + 2*basis_->basis1d().Nablasize(j())*basis_->basis1d().Nablasize(j())
-	  + (k()[0]-basis_->basis1d().Nablamin())*basis_->basis1d().Nablasize(j())
-	  + (k()[1]-basis_->basis1d().Nablamin());
+	  + 2*Nablasize*Nablasize
+	  + (k()[0]-Nablamin)*Nablasize
+	  + (k()[1]-Nablamin);
 	break;
       default:
 	return 42; // for the compiler, this will never happen
       }
       break;
     default:
-      return 42;
+      return 42; // for the compiler, this will never happen
     }
   }
   

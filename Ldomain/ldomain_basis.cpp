@@ -579,7 +579,7 @@ namespace WaveletTL
 				      InfiniteVector<double, Index>& c) const {
     typedef typename IBASIS::Index IIndex;
 
-    clock_t tstart, tend;
+    clock_t tstart, tend, tmiddle1, tmiddle2;
 
     if (lambda.j() >= j) {
       // then we can just copy psi_lambda
@@ -688,7 +688,7 @@ namespace WaveletTL
       }
 
       tend = clock();
-      cout << "* in reconstruct_1(), time needed to compute the corresponding column of Mj1: "
+      cout << "* in reconstruct_1(), time needed for the column of Mj1: "
 	   << (double)(tend-tstart)/CLOCKS_PER_SEC
 	   << "s" << endl;
 
@@ -698,16 +698,20 @@ namespace WaveletTL
       // all relevant generators from the scale |lambda|+1
       // (this is the identity part of the biorthogonalization equation)
       unsigned int id = 0;
-      for (Index mu = first_generator(lambda.j()+1); id < generators.size(); id++, ++mu) {
-	if (fabs(generators[id]) > 1e-12) {
+      if (lambda.j()+1 >= j) {
+	for (Index mu = first_generator(lambda.j()+1); id < generators.size(); id++, ++mu) {
+	  c.add_coefficient(mu, generators[id]);
+	}
+      } else {
+	for (Index mu = first_generator(lambda.j()+1); id < generators.size(); id++, ++mu) {
 	  InfiniteVector<double, Index> d;
 	  reconstruct_1(mu, j, d);
 	  c.add(generators[id], d);
 	}
       }
-
+      
       tend = clock();
-      cout << "* in reconstruct_1(), time needed to compute identity part: "
+      cout << "* in reconstruct_1(), time needed for the I part       : "
 	   << (double)(tend-tstart)/CLOCKS_PER_SEC
 	   << "s" << endl;
 
@@ -718,22 +722,35 @@ namespace WaveletTL
  	// compute the corresponding column of Mj0*Mj0T^T*Mj1c
 	Vector<double> help(Deltasize(lambda.j()));
  	get_Mj0T(lambda.j()).apply_transposed(generators, help);
+	tmiddle1 = clock();
+	
  	get_Mj0 (lambda.j()).apply(help, generators);
+	tmiddle2 = clock();
 
  	// collect all relevant generators from the scale |lambda+1|
  	unsigned int id = 0;
- 	for (Index mu = first_generator(lambda.j()+1); id < generators.size(); id++, ++mu) {
-  	  if (fabs(generators[id]) > 1e-12) {
- 	    InfiniteVector<double, Index> d;
- 	    reconstruct_1(mu, j, d);
- 	    c.add(-generators[id], d);
-  	  }
+	if (lambda.j()+1 >= j) {
+	  for (Index mu = first_generator(lambda.j()+1); id < generators.size(); id++, ++mu) {
+	    c.add_coefficient(mu, generators[id]);
+	  }
+	} else {
+	  for (Index mu = first_generator(lambda.j()+1); id < generators.size(); id++, ++mu) {
+	    InfiniteVector<double, Index> d;
+	    reconstruct_1(mu, j, d);
+	    c.add(-generators[id], d);
+	  }
  	}
       }
 
       tend = clock();
-      cout << "* in reconstruct_1(), time needed to compute biorth. part: "
-	   << (double)(tend-tstart)/CLOCKS_PER_SEC
+      cout << "* in reconstruct_1(), time needed to apply Mj0T^T      : "
+	   << (double)(tmiddle1-tstart)/CLOCKS_PER_SEC
+	   << "s" << endl;
+      cout << "* in reconstruct_1(), time needed to apply Mj0         : "
+	   << (double)(tmiddle2-tmiddle1)/CLOCKS_PER_SEC
+	   << "s" << endl;
+      cout << "* in reconstruct_1(), time needed for the bio. part    : "
+	   << (double)(tend-tmiddle2)/CLOCKS_PER_SEC
 	   << "s" << endl;
 
     }

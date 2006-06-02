@@ -199,21 +199,31 @@ namespace WaveletTL
 
 	if (lambda.e() == 0)
 	  {
- 	    for (int l(2*lambda.k()+abegin); l <= 2*lambda.k()+aend; l++)
- 	      {
- 		InfiniteVector<double, Index> d;
- 		reconstruct_1(Index(lambda.j()+1, 0, l), j, d);
- 		c.add(M_SQRT1_2 * a().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k())), d);
- 	      }
+	    if (lambda.j()+1>=j) {
+	      for (int l(2*lambda.k()+abegin); l <= 2*lambda.k()+aend; l++)
+		c[Index(lambda.j()+1, 0, l)]
+		  += M_SQRT1_2 * a().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k()));
+	    } else {
+	      for (int l(2*lambda.k()+abegin); l <= 2*lambda.k()+aend; l++) {
+		InfiniteVector<double, Index> d;
+		reconstruct_1(Index(lambda.j()+1, 0, l), j, d);
+		c.add(M_SQRT1_2 * a().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k())), d);
+	      }
+	    }
  	  }
  	else
  	  {
- 	    for (int l(2*lambda.k()+bbegin); l <= 2*lambda.k()+bend; l++)
- 	      {
- 		InfiniteVector<double, Index> d;
- 		reconstruct_1(Index(lambda.j()+1, 0, l), j, d);
- 		c.add(M_SQRT1_2 * b().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k())), d);
+	    if (lambda.j()+1>=j) {
+	      for (int l(2*lambda.k()+bbegin); l <= 2*lambda.k()+bend; l++)
+		c[Index(lambda.j()+1, 0, l)]
+		  += M_SQRT1_2 * b().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k()));
+	    } else {
+	      for (int l(2*lambda.k()+bbegin); l <= 2*lambda.k()+bend; l++) {
+		InfiniteVector<double, Index> d;
+		reconstruct_1(Index(lambda.j()+1, 0, l), j, d);
+		c.add(M_SQRT1_2 * b().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k())), d);
  	      }
+	    }
 	  }
       }
   }
@@ -240,25 +250,37 @@ namespace WaveletTL
 	    
 	if (lambda.e() == 0)
 	  {
- 	    for (int l(2*lambda.k()+aTbegin); l <= 2*lambda.k()+aTend; l++)
- 	      {
+	    if (lambda.j()+1>=j) {
+	      for (int l(2*lambda.k()+aTbegin); l <= 2*lambda.k()+aTend; l++) {
+		c[Index(lambda.j()+1, 0, l)]
+		  += M_SQRT1_2 * aT().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k()));
+	      }
+	    } else {
+	      for (int l(2*lambda.k()+aTbegin); l <= 2*lambda.k()+aTend; l++) {
  		InfiniteVector<double, Index> d;
  		reconstruct_t_1(Index(lambda.j()+1, 0, l), j, d);
  		c.add(M_SQRT1_2 * aT().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k())), d);
  	      }
+	    }
  	  }
  	else
  	  {
- 	    for (int l(2*lambda.k()+bTbegin); l <= 2*lambda.k()+bTend; l++)
- 	      {
+	    if (lambda.j()+1>=j) {
+	      for (int l(2*lambda.k()+bTbegin); l <= 2*lambda.k()+bTend; l++) {
+		c[Index(lambda.j()+1, 0, l)]
+		  += M_SQRT1_2 * bT().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k()));
+	      }
+	    } else {
+	      for (int l(2*lambda.k()+bTbegin); l <= 2*lambda.k()+bTend; l++) {
  		InfiniteVector<double, Index> d;
  		reconstruct_t_1(Index(lambda.j()+1, 0, l), j, d);
  		c.add(M_SQRT1_2 * bT().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k())), d);
  	      }
+	    }
 	  }
       }
   }
-
+  
   template <class PRIMALMASK, class DUALMASK>
   SampledMapping<1>
   RBasis<PRIMALMASK, DUALMASK>::evaluate(const unsigned int derivative,

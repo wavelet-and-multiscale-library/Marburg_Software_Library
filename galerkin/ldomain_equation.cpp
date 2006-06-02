@@ -1,6 +1,7 @@
 // implementation for ldomain_equation.h
 
 #include <cmath>
+#include <time.h>
 #include <utils/fixed_array1d.h>
 #include <numerics/gauss_data.h>
 
@@ -43,10 +44,22 @@ namespace WaveletTL
     // compute the generator expansion of lambda
     InfiniteVector<double, Index> gcoeffs;
     const int level = lambda.j()+ (lambda.e()[0]==1 || lambda.e()[1]==1 ? 1 : 0);
+    
+    clock_t tstart = clock();
     basis_.reconstruct_1(lambda, level, gcoeffs);
+    clock_t tend = clock();
+//     cout << "... in f(), time needed for reconstruct_1(): "
+// 	 << (double)(tend-tstart)/CLOCKS_PER_SEC
+// 	 << "s" << endl;
 
-    const int N_Gauss = 5; // number of Gauss points in x- and y-direction (per sing. supp. subpatch)
-    const double h = ldexp(1.0, -level); // granularity for the quadrature
+
+
+
+
+//     const int N_Gauss = 5; // number of Gauss points in x- and y-direction (per sing. supp. subpatch)
+//     const double h = ldexp(1.0, -level); // granularity for the quadrature
+
+
 
     // iterate through the involved generators and collect the point evaluations
 //     for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),

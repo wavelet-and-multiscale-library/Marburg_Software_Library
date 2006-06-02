@@ -83,6 +83,7 @@ int main()
   basis.reconstruct_t(wcoeff,2,rcoeff);
   cout << rcoeff;
 
+#if 0
   cout << "- evaluating some primal and dual CDF functions:" << endl;
   CDFBasis<2, 2> basis2;
   lambda = RIndex(1,0,2);
@@ -94,6 +95,7 @@ int main()
   evalcoeffs[RIndex(1,0,2)] = 1.0;
   evalcoeffs[RIndex(0,1,0)] = 1.0;
   basis2.evaluate(0, evalcoeffs, true, -2, 2, 2).matlab_output(cout);
+#endif
 
 #if 0
   cout << "- evaluating primal CDF functions: write file 'primalwavelet.m'" << endl;

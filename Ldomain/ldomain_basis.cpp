@@ -1,6 +1,7 @@
 // implementation for ldomain_basis.h
 
 #include <cmath>
+#include <time.h>
 #include <iostream>
 
 using std::cout;
@@ -577,11 +578,16 @@ namespace WaveletTL
 				      const int j,
 				      InfiniteVector<double, Index>& c) const {
     typedef typename IBASIS::Index IIndex;
-    
+
+    clock_t tstart, tend;
+
     if (lambda.j() >= j) {
       // then we can just copy psi_lambda
       c.add_coefficient(lambda, 1.0);
     } else {
+
+      cout << "LDomainBasis::reconstruct_1() nontrivially called with lambda=" << lambda << endl;
+
       // For the reconstruction of psi_lambda, we have to compute
       // the corresponding column of the transformation matrix Mj=(Mj0, Mj1).
       // For the left half (generators), this is comparatively easy. The wavelet case
@@ -594,6 +600,8 @@ namespace WaveletTL
       // storage for the corresponding column of Mj1
       Vector<double> generators(Deltasize(lambda.j()+1));
 
+      tstart = clock();
+
       const int ecode(lambda.e()[0]+2*lambda.e()[1]);
       if (ecode == 0) {
 	// generator
@@ -601,8 +609,16 @@ namespace WaveletTL
 	// compute the corresponding column of Mj0
 	const BlockMatrix<double>& Mj0 = get_Mj0(lambda.j());
 	Vector<double> unitvector(Deltasize(lambda.j()));
-	unsigned int id = 0;
-	for (Index mu = first_generator(lambda.j()); mu != lambda; ++mu) id++;
+	int id = lambda.number();
+#if 0
+	// check the number
+	int idcheck = 0;
+	for (Index mu = first_generator(lambda.j()); mu != lambda; ++mu) idcheck++;
+	if (id != idcheck) {
+	  cout << "in LDomainBasis::reconstruct_1(), id != idcheck!" << endl;
+	  abort();
+	}
+#endif
  	unitvector[id] = 1.0;
   	Mj0.apply(unitvector, generators);	
       } else {
@@ -612,12 +628,20 @@ namespace WaveletTL
 	  // compute the corresponding column of Mj1c_10
 	  const BlockMatrix<double>& Mj1c_10 = get_Mj1c_10(lambda.j());
 	  Vector<double> unitvector(Nabla10size(lambda.j()));
-	  unsigned int id = 0;
 	  typename Index::type_type e;
 	  e[0] = 1; // e = (1,0)
-	  for (Index mu = first_wavelet(lambda.j(), e); mu != lambda; ++mu) id++;
+	  int id = lambda.number()-first_wavelet(lambda.j(),e).number();
+#if 0
+	  // check the number
+	  int idcheck = 0;
+	  for (Index mu = first_wavelet(lambda.j(), e); mu != lambda; ++mu) idcheck++;
+	  if (id != idcheck) {
+	    cout << "in LDomainBasis::reconstruct_1(), id != idcheck!" << endl;
+	    abort();
+	  }
+#endif
  	  unitvector[id] = 1.0;
- 	  Mj1c_10.apply(unitvector, generators);
+ 	  Mj1c_10.apply(unitvector, generators);	  
 	} else {
  	  if (ecode == 2) {
  	    // (0,1)-wavelet
@@ -625,9 +649,17 @@ namespace WaveletTL
 	    // compute the corresponding column of Mj1c_01
  	    const BlockMatrix<double>& Mj1c_01 = get_Mj1c_01(lambda.j());
  	    Vector<double> unitvector(Nabla01size(lambda.j()));
- 	    unsigned int id = 0;
- 	    for (Index mu = first_wavelet(lambda.j()); mu != lambda; ++mu) id++;
- 	    unitvector[id] = 1.0;
+	    int id = lambda.number()-first_wavelet(lambda.j()).number();
+#if 0
+	    // check the number
+	    int idcheck = 0;
+	    for (Index mu = first_wavelet(lambda.j()); mu != lambda; ++mu) idcheck++;
+	    if (id != idcheck) {
+	      cout << "in LDomainBasis::reconstruct_1(), id != idcheck!" << endl;
+	      abort();
+	    }
+#endif
+	    unitvector[id] = 1.0;
  	    Mj1c_01.apply(unitvector, generators);
 	  } else {
 	    // (1,1)-wavelet
@@ -636,15 +668,31 @@ namespace WaveletTL
  	    const BlockMatrix<double>& Mj1c_11 = get_Mj1c_11(lambda.j());
 	    
  	    Vector<double> unitvector(Nabla11size(lambda.j()));
- 	    unsigned int id = 0;
+	    
 	    typename Index::type_type e;
 	    e[0] = e[1] = 1; // e = (1,1)
-	    for (Index mu = first_wavelet(lambda.j(), e); mu != lambda; ++mu) id++;
+	    int id = lambda.number()-first_wavelet(lambda.j(),e).number();
+#if 0
+	  // check the number
+	    int idcheck = 0;
+	    for (Index mu = first_wavelet(lambda.j(), e); mu != lambda; ++mu) idcheck++;
+	    if (id != idcheck) {
+	      cout << "in LDomainBasis::reconstruct_1(), id != idcheck!" << endl;
+	      abort();
+	    }
+#endif
  	    unitvector[id] = 1.0;
  	    Mj1c_11.apply(unitvector, generators);
 	  }
 	}
       }
+
+      tend = clock();
+      cout << "* in reconstruct_1(), time needed to compute the corresponding column of Mj1: "
+	   << (double)(tend-tstart)/CLOCKS_PER_SEC
+	   << "s" << endl;
+
+      tstart = clock();
 
       // Now that the corresponding column of Mj1 has been computed, we collect
       // all relevant generators from the scale |lambda|+1
@@ -657,6 +705,13 @@ namespace WaveletTL
 	  c.add(generators[id], d);
 	}
       }
+
+      tend = clock();
+      cout << "* in reconstruct_1(), time needed to compute identity part: "
+	   << (double)(tend-tstart)/CLOCKS_PER_SEC
+	   << "s" << endl;
+
+      tstart = clock();
 
       if (ecode > 0) {
  	// second part of the biorthogonalization equation,
@@ -675,6 +730,12 @@ namespace WaveletTL
   	  }
  	}
       }
+
+      tend = clock();
+      cout << "* in reconstruct_1(), time needed to compute biorth. part: "
+	   << (double)(tend-tstart)/CLOCKS_PER_SEC
+	   << "s" << endl;
+
     }
   }
   

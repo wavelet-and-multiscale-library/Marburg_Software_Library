@@ -21,6 +21,7 @@ int main()
 
   typedef Basis::Index Index;
 
+#if 0
   // the following output has to be checked manually...
   for (Index lambda(first_generator<Basis1D>(&basis, basis.j0()));; ++lambda) {
     cout << lambda << endl;
@@ -29,5 +30,20 @@ int main()
 //     if (lambda == first_wavelet<Basis1D>(&basis, basis.j0())) break;
     if (lambda == last_wavelet<Basis1D>(&basis, basis.j0()+1)) break;
   }
+#endif
+
+#if 1
+  cout << "- testing the number() routine:" << endl;
+  int no = 0;
+  for (Index lambda(basis.first_generator(basis.j0()));; ++lambda, ++no) {
+    int number = lambda.number();
+    cout << "lambda=" << lambda << " has the number " << number;
+    if (number == no)
+      cout << " (OK)" << endl;
+    else
+      cout << " (NO!!! I expect number=" << no << " here!)" << endl;
+    if (lambda == basis.last_wavelet(basis.j0())) break;
+  }
+#endif
 	 
 }

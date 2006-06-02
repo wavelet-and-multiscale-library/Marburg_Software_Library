@@ -93,6 +93,16 @@ namespace WaveletTL
     //! translation index k
     const translation_type& k() const { return k_; }
 
+    /*!
+      By construction, the overall wavelet index set is ordered, so that
+      there exists a bijective mapping into the positive integers.
+      This routine returns the "number" of the current index, starting with 0
+      for the first generator on the coarsest level. If the current index is a
+      generator on a higher level j, the number 0 corresponds to the first generator
+      on the level j.
+    */
+    const int number() const;
+    
   protected:
     //! pointer to the underlying basis
     const LDomainBasis<IBASIS>* basis_;

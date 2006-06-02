@@ -225,7 +225,7 @@ namespace WaveletTL
     assert(lambda.j() >= j0);
     c.clear();
 
-    static MultiIndex<unsigned int,DIM> zero;
+    static typename Index::type_type zero;
     if (lambda.e() == zero) {
       // a generator on a (possibly) fine level
       if (lambda.j() == j0) {
@@ -306,7 +306,7 @@ namespace WaveletTL
     assert(lambda.j() >= j0);
     c.clear();
 
-    static MultiIndex<unsigned int,DIM> zero;
+    static typename Index::type_type zero;
     if (lambda.e() == zero) {
       // a generator on a (possibly) fine level
       if (lambda.j() == j0) {
@@ -395,20 +395,33 @@ namespace WaveletTL
       for (unsigned int i = 0; i < DIM; i++)
 	bases_[i]->reconstruct_1(IIndex(lambda.j(), lambda.e()[i], lambda.k()[i], bases_[i]), lambda.j()+1, coeffs[i]);
       
-      if (DIM == 2) {
+      if (DIM == 2) { // TODO: template specialization here!!!
 	// directly add all tensor product wavelets needed
-	for (typename InfiniteVector<double,IIndex>::const_iterator it1(coeffs[0].begin()), it1end(coeffs[0].end());
-	     it1 != it1end; ++it1)
-	  for (typename InfiniteVector<double,IIndex>::const_iterator it2(coeffs[1].begin()), it2end(coeffs[1].end());
-	       it2 != it2end; ++it2) {
-	    InfiniteVector<double,Index> d;
-	    reconstruct_1(Index(it1.index().j(),
-				typename Index::type_type(it1.index().e(), it2.index().e()),
-				typename Index::translation_type(it1.index().k(), it2.index().k()),
-				this),
-			  j, d);
-	    c.add(*it1 * *it2, d);
-	  }
+ 	if (lambda.j()+1 >= j) {
+	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(coeffs[0].begin()), it1end(coeffs[0].end());
+	       it1 != it1end; ++it1)
+	    for (typename InfiniteVector<double,IIndex>::const_iterator it2(coeffs[1].begin()), it2end(coeffs[1].end());
+		 it2 != it2end; ++it2) {
+	      c.add_coefficient(Index(lambda.j()+1,
+				      typename Index::type_type(it1.index().e(), it2.index().e()),
+				      typename Index::translation_type(it1.index().k(), it2.index().k()),
+				      this),
+				*it1 * *it2);
+	    }
+ 	} else {
+	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(coeffs[0].begin()), it1end(coeffs[0].end());
+	       it1 != it1end; ++it1)
+	    for (typename InfiniteVector<double,IIndex>::const_iterator it2(coeffs[1].begin()), it2end(coeffs[1].end());
+		 it2 != it2end; ++it2) {
+	      InfiniteVector<double,Index> d;
+	      reconstruct_1(Index(lambda.j()+1,
+				  typename Index::type_type(it1.index().e(), it2.index().e()),
+				  typename Index::translation_type(it1.index().k(), it2.index().k()),
+				  this),
+			    j, d);
+	      c.add(*it1 * *it2, d);
+	    }
+ 	}
       } else {
 	// prepare all tensor product wavelet indices needed (+values)
 	typedef std::list<std::pair<FixedArray1D<IIndex,DIM>,double> > list_type;
@@ -436,15 +449,27 @@ namespace WaveletTL
 	// write results into c
 	typename Index::type_type help_e;
 	typename Index::translation_type help_k;
-	for (typename list_type::const_iterator it(indices.begin()), itend(indices.end());
-	     it != itend; ++it) {
-	  InfiniteVector<double,Index> d;
-	  for (unsigned int i = 0; i < DIM; i++) {
-	    help_e[i] = it->first[i].e();
-	    help_k[i] = it->first[i].k();
+ 	if (lambda.j()+1 >= j) {
+	  for (typename list_type::const_iterator it(indices.begin()), itend(indices.end());
+	       it != itend; ++it) {
+	    for (unsigned int i = 0; i < DIM; i++) {
+	      help_e[i] = it->first[i].e();
+	      help_k[i] = it->first[i].k();
+	    }
+	    c.add_coefficient(Index(lambda.j()+1, help_e, help_k, this),
+			      it->second);
 	  }
-	  reconstruct_1(Index(it->first[0].j(), help_e, help_k, this), j, d);
-	  c.add(it->second, d);
+	} else {
+	  for (typename list_type::const_iterator it(indices.begin()), itend(indices.end());
+	       it != itend; ++it) {
+	    InfiniteVector<double,Index> d;
+	    for (unsigned int i = 0; i < DIM; i++) {
+	      help_e[i] = it->first[i].e();
+	      help_k[i] = it->first[i].k();
+	    }
+	    reconstruct_1(Index(lambda.j()+1, help_e, help_k, this), j, d);
+	    c.add(it->second, d);
+	  }
 	}
       }
     }
@@ -468,18 +493,31 @@ namespace WaveletTL
       
       if (DIM == 2) {
 	// directly add all tensor product wavelets needed
-	for (typename InfiniteVector<double,IIndex>::const_iterator it1(coeffs[0].begin()), it1end(coeffs[0].end());
-	     it1 != it1end; ++it1)
-	  for (typename InfiniteVector<double,IIndex>::const_iterator it2(coeffs[1].begin()), it2end(coeffs[1].end());
-	       it2 != it2end; ++it2) {
-	    InfiniteVector<double,Index> d;
-	    reconstruct_t_1(Index(it1.index().j(),
-				  typename Index::type_type(it1.index().e(), it2.index().e()),
-				  typename Index::translation_type(it1.index().k(), it2.index().k()),
-				  this),
-			    j, d);
-	    c.add(*it1 * *it2, d);
-	  }
+ 	if (lambda.j()+1 >= j) {
+	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(coeffs[0].begin()), it1end(coeffs[0].end());
+	       it1 != it1end; ++it1)
+	    for (typename InfiniteVector<double,IIndex>::const_iterator it2(coeffs[1].begin()), it2end(coeffs[1].end());
+		 it2 != it2end; ++it2) {
+	      c.add_coefficient(Index(lambda.j()+1,
+				      typename Index::type_type(it1.index().e(), it2.index().e()),
+				      typename Index::translation_type(it1.index().k(), it2.index().k()),
+				      this),
+				*it1 * *it2);
+	    }
+	} else {
+	  for (typename InfiniteVector<double,IIndex>::const_iterator it1(coeffs[0].begin()), it1end(coeffs[0].end());
+	       it1 != it1end; ++it1)
+	    for (typename InfiniteVector<double,IIndex>::const_iterator it2(coeffs[1].begin()), it2end(coeffs[1].end());
+		 it2 != it2end; ++it2) {
+	      InfiniteVector<double,Index> d;
+	      reconstruct_t_1(Index(lambda.j()+1,
+				    typename Index::type_type(it1.index().e(), it2.index().e()),
+				    typename Index::translation_type(it1.index().k(), it2.index().k()),
+				    this),
+			      j, d);
+	      c.add(*it1 * *it2, d);
+	    }
+	}
       } else {
 	// prepare all tensor product wavelet indices needed (+values)
 	typedef std::list<std::pair<FixedArray1D<IIndex,DIM>,double> > list_type;
@@ -507,15 +545,27 @@ namespace WaveletTL
 	// write results into c
 	typename Index::type_type help_e;
 	typename Index::translation_type help_k;
-	for (typename list_type::const_iterator it(indices.begin()), itend(indices.end());
-	     it != itend; ++it) {
-	  InfiniteVector<double,Index> d;
-	  for (unsigned int i = 0; i < DIM; i++) {
-	    help_e[i] = it->first[i].e();
-	    help_k[i] = it->first[i].k();
+ 	if (lambda.j()+1 >= j) {
+	  for (typename list_type::const_iterator it(indices.begin()), itend(indices.end());
+	       it != itend; ++it) {
+	    for (unsigned int i = 0; i < DIM; i++) {
+	      help_e[i] = it->first[i].e();
+	      help_k[i] = it->first[i].k();
+	    }
+	    c.add_coefficient(Index(lambda.j()+1, help_e, help_k, this),
+			      it->second);
 	  }
-	  reconstruct_t_1(Index(it->first[0].j(), help_e, help_k, this), j, d);
-	  c.add(it->second, d);
+	} else {
+	  for (typename list_type::const_iterator it(indices.begin()), itend(indices.end());
+	       it != itend; ++it) {
+	    InfiniteVector<double,Index> d;
+	    for (unsigned int i = 0; i < DIM; i++) {
+	      help_e[i] = it->first[i].e();
+	      help_k[i] = it->first[i].k();
+	    }
+	    reconstruct_t_1(Index(lambda.j()+1, help_e, help_k, this), j, d);
+	    c.add(it->second, d);
+	  }
 	}
       }
     }

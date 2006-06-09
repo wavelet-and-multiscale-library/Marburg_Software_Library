@@ -54,7 +54,16 @@ I faculty (const I n)
   return r;
 }
 
-//! binomial coefficient
+/*!
+  binomial coefficient n over k
+  By convention, we have
+
+   (0) = 1
+   (0)
+
+   (n) = 0 for n < k
+   (k)
+ */
 inline int binomial (const int n, const int k)
 {
   assert (k >= 0);

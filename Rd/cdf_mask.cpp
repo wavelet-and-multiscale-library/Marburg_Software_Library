@@ -1,6 +1,7 @@
 // implementation for cdf_mask.h
 
 #include <cmath>
+#include <Rd/cdf_utils.h>
 #include <algebra/polynomial.h>
 #include <utils/tiny_tools.h>
 #include <utils/multiindex.h>
@@ -17,10 +18,10 @@ namespace WaveletTL
     // So in z-notation, the mask of the primal generators is just
     //   a(z) = (1+z)^d * z^{-floor(d/2)},
     // the coefficients of which can be calculated in closed form (faster):
-    for (int k(- (int)d/2); k <= ceil((int)d/2.); k++)
+    for (int k(ell1<d>()); k <= ell2<d>(); k++)
       set_coefficient(MultiIndex<int, 1>(k), ldexp(1., 1 - d) * binomial(d, k + d/2));
   }
-
+  
   template <int d, int dt>
   CDFMask_dual<d, dt>::CDFMask_dual()
   {
@@ -29,6 +30,8 @@ namespace WaveletTL
     assert((d%2) == (dt%2));
     
     // Construct the mask of the dual generator, cf. [CDF] for details.
+#if 0
+    // (old version)
     Polynomial<double> u, uh1, uh2, uh2a(1), uh3;
     
     // uh1 = z
@@ -55,5 +58,22 @@ namespace WaveletTL
     
     for (unsigned int k(0); k <= u.degree(); k++)
       set_coefficient(MultiIndex<int, 1>((int)k - d/2 - dt + 1), u.get_coefficient(k));
+#else
+    // use explicit formula from [P]
+    for (int k(ell1T<d,dt>()); k <= ell2T<d,dt>(); k++) {
+      double help = 0;
+      for (int n = 0; n <= (d+dt)/2-1; n++)
+	for (int ell = 0; ell <= 2*n; ell++)
+	  help +=
+	    ldexp(1.0, 1-dt-2*n) // typo in [P]
+	    * minus1power(n+ell)
+	    * binomial(dt, k+dt/2-ell+n)
+	    * binomial((d+dt)/2-1+n, n)
+	    * binomial(2*n, ell);
+      
+      set_coefficient(MultiIndex<int, 1>(k), help);
+    }
+#endif
+	   
   }
 }

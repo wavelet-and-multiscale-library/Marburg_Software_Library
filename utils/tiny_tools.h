@@ -61,16 +61,14 @@ I faculty (const I n)
    (0) = 1
    (0)
 
-   (n) = 0 for n < k
+   (n) = 0 for n < k or k < 0
    (k)
  */
 inline int binomial (const int n, const int k)
 {
-  assert (k >= 0);
-  
   int r(1);
   
-  if (k > n)
+  if (k > n || k < 0)
     return 0;
   
   if (k == 0)

@@ -44,9 +44,9 @@ using namespace MathTL;
 using namespace WaveletTL;
 
 
-int main()
+int main(int argc, char* argv[])
 {
-  
+ 
   cout << "testing multiplicative schwarz algorithm in 2D..." << endl;
 
   const int DIM = 2;

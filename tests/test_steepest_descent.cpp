@@ -313,6 +313,27 @@ int main()
   cout << "steepest descent done" << endl;
 
   u_epsilon.scale(&discrete_poisson,-1);
+  
+  
+  const int size = u_epsilon.size();
+  Coefficient coeff_array[size];
+
+  // time load uncritical:
+  for (int i = 0; i< 10000; i++)
+    to_array<Index>(u_epsilon, coeff_array);
+  for (int i = 0; i < size; i++) {
+    cout << coeff_array[i].num << "  " << coeff_array[i].val << endl;
+  }
+  
+  int count = size;
+  array_to_map (coeff_array, &frame, u_epsilon, count);
+  
+  u_epsilon.merge(u_epsilon);
+
+  InfiniteVector<double, Index>::const_iterator it = u_epsilon.begin();
+  for (; it != u_epsilon.end(); it++) {
+    cout << it.index() << " " << *it << endl;
+  }
 
   EvaluateFrame<Basis1D,1,1> evalObj;
 

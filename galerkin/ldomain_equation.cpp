@@ -45,9 +45,13 @@ namespace WaveletTL
     InfiniteVector<double, Index> gcoeffs;
     const int level = lambda.j()+ (lambda.e()[0]==1 || lambda.e()[1]==1 ? 1 : 0);
     
-    clock_t tstart = clock();
+//     clock_t tstart = clock();
     basis_.reconstruct_1(lambda, level, gcoeffs);
-    clock_t tend = clock();
+//     clock_t tend = clock();
+
+
+
+
 //     cout << "... in f(), time needed for reconstruct_1(): "
 // 	 << (double)(tend-tstart)/CLOCKS_PER_SEC
 // 	 << "s" << endl;

@@ -12,6 +12,8 @@
 
 #include <interval/ds_basis.h>
 #include <interval/p_basis.h>
+
+#define _WAVELETTL_LDOMAINBASIS_VERBOSITY 1
 #include <Ldomain/ldomain_basis.h>
 #include <galerkin/ldomain_equation.h>
 

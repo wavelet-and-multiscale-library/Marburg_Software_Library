@@ -579,14 +579,18 @@ namespace WaveletTL
 				      InfiniteVector<double, Index>& c) const {
     typedef typename IBASIS::Index IIndex;
 
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
     clock_t tstart, tend, tmiddle1, tmiddle2;
+#endif
 
     if (lambda.j() >= j) {
       // then we can just copy psi_lambda
       c.add_coefficient(lambda, 1.0);
     } else {
 
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
       cout << "LDomainBasis::reconstruct_1() nontrivially called with lambda=" << lambda << endl;
+#endif
 
       // For the reconstruction of psi_lambda, we have to compute
       // the corresponding column of the transformation matrix Mj=(Mj0, Mj1).
@@ -600,7 +604,9 @@ namespace WaveletTL
       // storage for the corresponding column of Mj1
       Vector<double> generators(Deltasize(lambda.j()+1));
 
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
       tstart = clock();
+#endif
 
       const int ecode(lambda.e()[0]+2*lambda.e()[1]);
       if (ecode == 0) {
@@ -687,12 +693,14 @@ namespace WaveletTL
 	}
       }
 
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
       tend = clock();
       cout << "* in reconstruct_1(), time needed for the column of Mj1: "
 	   << (double)(tend-tstart)/CLOCKS_PER_SEC
 	   << "s" << endl;
 
       tstart = clock();
+#endif
 
       // Now that the corresponding column of Mj1 has been computed, we collect
       // all relevant generators from the scale |lambda|+1
@@ -710,22 +718,28 @@ namespace WaveletTL
 	}
       }
       
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
       tend = clock();
       cout << "* in reconstruct_1(), time needed for the I part       : "
 	   << (double)(tend-tstart)/CLOCKS_PER_SEC
 	   << "s" << endl;
 
       tstart = clock();
+#endif
 
       if (ecode > 0) {
  	// second part of the biorthogonalization equation,
  	// compute the corresponding column of Mj0*Mj0T^T*Mj1c
 	Vector<double> help(Deltasize(lambda.j()));
  	get_Mj0T(lambda.j()).apply_transposed(generators, help);
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
 	tmiddle1 = clock();
+#endif
 	
  	get_Mj0 (lambda.j()).apply(help, generators);
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
 	tmiddle2 = clock();
+#endif
 
  	// collect all relevant generators from the scale |lambda+1|
  	unsigned int id = 0;
@@ -742,6 +756,7 @@ namespace WaveletTL
  	}
       }
 
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
       tend = clock();
       cout << "* in reconstruct_1(), time needed to apply Mj0T^T      : "
 	   << (double)(tmiddle1-tstart)/CLOCKS_PER_SEC
@@ -752,7 +767,7 @@ namespace WaveletTL
       cout << "* in reconstruct_1(), time needed for the bio. part    : "
 	   << (double)(tend-tmiddle2)/CLOCKS_PER_SEC
 	   << "s" << endl;
-
+#endif
     }
   }
   

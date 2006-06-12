@@ -5,8 +5,8 @@
 # | Thorsten Raasch, Manuel Werner                                 |
 # +----------------------------------------------------------------+
 
-#DEBUGMODE = on
-DEBUGMODE = off
+DEBUGMODE = on
+#DEBUGMODE = off
 
 # choose between GNU/Intel/Portland Group compiler
 COMPILER = gnu
@@ -17,6 +17,7 @@ ifeq ($(COMPILER),gnu)
 CXX = g++
 #CXX = g++-2.95
 #CXX = $(HOME)/gcc-4.1.0/bin/g++
+#CXX = $(HOME)/gcc-4.1.1/bin/g++
 
 ifeq ($(CXX),g++-2.95)
 CXXFLAGS += -ftemplate-depth-40
@@ -25,7 +26,11 @@ endif
 ifeq ($(CXX),$(HOME)/gcc-4.1.0/bin/g++)
 LDFLAGS += -Xlinker -rpath -Xlinker $(HOME)/gcc-4.1.0/lib
 else
+ifeq ($(CXX),$(HOME)/gcc-4.1.1/bin/g++)
+LDFLAGS += -Xlinker -rpath -Xlinker $(HOME)/gcc-4.1.1/lib
+else
 LDFLAGS =
+endif
 endif
 
 CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe

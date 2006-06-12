@@ -51,8 +51,7 @@ namespace WaveletTL
     typename Index::type_type e;
 
     // setup lowest translation index for e=(0,0), p=0
-    typename Index::translation_type k;
-    k[0] = k[1] = basis1d().DeltaLmin()+1;
+    typename Index::translation_type k(basis1d().DeltaLmin()+1, basis1d().DeltaLmin()+1);
     
     return Index(j, e, 0, k, this);
   }
@@ -66,8 +65,7 @@ namespace WaveletTL
     typename Index::type_type e;
 
     // setup highest translation index for e=(0,0), p=4
-    typename Index::translation_type k; // k[0]=0 by convention
-    k[1] = basis1d().DeltaRmax(j)-1;
+    typename Index::translation_type k(0, basis1d().DeltaRmax(j)-1);
     
     return Index(j, e, 4, k, this);
   }
@@ -78,13 +76,10 @@ namespace WaveletTL
   {
     assert(j >= j0());
 
-    typename Index::type_type e;
-    e[1] = 1;
+    typename Index::type_type e(0, 1);
 
     // setup lowest translation index for e=(0,1), p=0
-    typename Index::translation_type k;
-    k[0] = basis1d().DeltaLmin()+1;
-    k[1] = basis1d().Nablamin();
+    typename Index::translation_type k(basis1d().DeltaLmin()+1, basis1d().Nablamin());
     
     return Index(j, e, 0, k, this);
   }
@@ -130,12 +125,10 @@ namespace WaveletTL
   {
     assert(j >= j0());
     
-    typename Index::type_type e;
-    e[0] = e[1] = 1;
+    typename Index::type_type e(1, 1);
 
     // setup highest translation index for e=(1,1), p=2
-    typename Index::translation_type k;
-    k[0] = k[1] = basis1d().Nablamax(j);
+    typename Index::translation_type k(basis1d().Nablamax(j), basis1d().Nablamax(j));
     
     return Index(j, e, 2, k, this);
   }
@@ -615,9 +608,9 @@ namespace WaveletTL
 	// compute the corresponding column of Mj0
 	const BlockMatrix<double>& Mj0 = get_Mj0(lambda.j());
 	Vector<double> unitvector(Deltasize(lambda.j()));
-	int id = lambda.number();
 #if 0
 	// check the number
+	int id = lambda.number();
 	int idcheck = 0;
 	for (Index mu = first_generator(lambda.j()); mu != lambda; ++mu) idcheck++;
 	if (id != idcheck) {
@@ -625,7 +618,7 @@ namespace WaveletTL
 	  abort();
 	}
 #endif
- 	unitvector[id] = 1.0;
+ 	unitvector[lambda.number()] = 1.0;
   	Mj0.apply(unitvector, generators);	
       } else {
 	if (ecode == 1) {
@@ -634,11 +627,10 @@ namespace WaveletTL
 	  // compute the corresponding column of Mj1c_10
 	  const BlockMatrix<double>& Mj1c_10 = get_Mj1c_10(lambda.j());
 	  Vector<double> unitvector(Nabla10size(lambda.j()));
-	  typename Index::type_type e;
-	  e[0] = 1; // e = (1,0)
-	  int id = lambda.number()-first_wavelet(lambda.j(),e).number();
+	  typename Index::type_type e(1, 0);
 #if 0
 	  // check the number
+	  int id = lambda.number()-first_wavelet(lambda.j(),e).number();
 	  int idcheck = 0;
 	  for (Index mu = first_wavelet(lambda.j(), e); mu != lambda; ++mu) idcheck++;
 	  if (id != idcheck) {
@@ -646,7 +638,7 @@ namespace WaveletTL
 	    abort();
 	  }
 #endif
- 	  unitvector[id] = 1.0;
+ 	  unitvector[lambda.number()-first_wavelet(lambda.j(),e).number()] = 1.0;
  	  Mj1c_10.apply(unitvector, generators);	  
 	} else {
  	  if (ecode == 2) {
@@ -655,9 +647,9 @@ namespace WaveletTL
 	    // compute the corresponding column of Mj1c_01
  	    const BlockMatrix<double>& Mj1c_01 = get_Mj1c_01(lambda.j());
  	    Vector<double> unitvector(Nabla01size(lambda.j()));
-	    int id = lambda.number()-first_wavelet(lambda.j()).number();
 #if 0
 	    // check the number
+	    int id = lambda.number()-first_wavelet(lambda.j()).number();
 	    int idcheck = 0;
 	    for (Index mu = first_wavelet(lambda.j()); mu != lambda; ++mu) idcheck++;
 	    if (id != idcheck) {
@@ -665,7 +657,7 @@ namespace WaveletTL
 	      abort();
 	    }
 #endif
-	    unitvector[id] = 1.0;
+	    unitvector[lambda.number()-first_wavelet(lambda.j()).number()] = 1.0;
  	    Mj1c_01.apply(unitvector, generators);
 	  } else {
 	    // (1,1)-wavelet
@@ -675,11 +667,10 @@ namespace WaveletTL
 	    
  	    Vector<double> unitvector(Nabla11size(lambda.j()));
 	    
-	    typename Index::type_type e;
-	    e[0] = e[1] = 1; // e = (1,1)
-	    int id = lambda.number()-first_wavelet(lambda.j(),e).number();
+	    typename Index::type_type e(1, 1);
 #if 0
 	  // check the number
+	    int id = lambda.number()-first_wavelet(lambda.j(),e).number();
 	    int idcheck = 0;
 	    for (Index mu = first_wavelet(lambda.j(), e); mu != lambda; ++mu) idcheck++;
 	    if (id != idcheck) {
@@ -687,7 +678,7 @@ namespace WaveletTL
 	      abort();
 	    }
 #endif
- 	    unitvector[id] = 1.0;
+ 	    unitvector[lambda.number()-first_wavelet(lambda.j(),e).number()] = 1.0;
  	    Mj1c_11.apply(unitvector, generators);
 	  }
 	}
@@ -707,11 +698,11 @@ namespace WaveletTL
       // (this is the identity part of the biorthogonalization equation)
       unsigned int id = 0;
       if (lambda.j()+1 >= j) {
-	for (Index mu = first_generator(lambda.j()+1); id < generators.size(); id++, ++mu) {
+	for (Index mu(first_generator(lambda.j()+1)); id < generators.size(); id++, ++mu) {
 	  c.add_coefficient(mu, generators[id]);
 	}
       } else {
-	for (Index mu = first_generator(lambda.j()+1); id < generators.size(); id++, ++mu) {
+	for (Index mu(first_generator(lambda.j()+1)); id < generators.size(); id++, ++mu) {
 	  InfiniteVector<double, Index> d;
 	  reconstruct_1(mu, j, d);
 	  c.add(generators[id], d);
@@ -744,11 +735,11 @@ namespace WaveletTL
  	// collect all relevant generators from the scale |lambda+1|
  	unsigned int id = 0;
 	if (lambda.j()+1 >= j) {
-	  for (Index mu = first_generator(lambda.j()+1); id < generators.size(); id++, ++mu) {
+	  for (Index mu(first_generator(lambda.j()+1)); id < generators.size(); id++, ++mu) {
 	    c.add_coefficient(mu, generators[id]);
 	  }
 	} else {
-	  for (Index mu = first_generator(lambda.j()+1); id < generators.size(); id++, ++mu) {
+	  for (Index mu(first_generator(lambda.j()+1)); id < generators.size(); id++, ++mu) {
 	    InfiniteVector<double, Index> d;
 	    reconstruct_1(mu, j, d);
 	    c.add(-generators[id], d);

@@ -44,92 +44,55 @@ namespace WaveletTL
     // compute the generator expansion of lambda
     InfiniteVector<double, Index> gcoeffs;
     const int level = lambda.j()+ (lambda.e()[0]==1 || lambda.e()[1]==1 ? 1 : 0);
-    
-//     clock_t tstart = clock();
     basis_.reconstruct_1(lambda, level, gcoeffs);
-//     clock_t tend = clock();
 
-
-
-
-//     cout << "... in f(), time needed for reconstruct_1(): "
-// 	 << (double)(tend-tstart)/CLOCKS_PER_SEC
-// 	 << "s" << endl;
-
-
-
-
-
+//     // iterate through the involved generators and collect the point evaluations
 //     const int N_Gauss = 5; // number of Gauss points in x- and y-direction (per sing. supp. subpatch)
 //     const double h = ldexp(1.0, -level); // granularity for the quadrature
 
-
-
-    // iterate through the involved generators and collect the point evaluations
+//     typename LDomainBasis<IBASIS>::Support supp;
 //     for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
-// 	   itend(gcoeffs.end()); it != itend; ++it)
+//  	   itend(gcoeffs.end()); it != itend; ++it)
 //       {
-// 	int xmin, xmax, ymin, ymax;
 // 	FixedArray1D<Array1D<double>,2> gauss_points, gauss_weights, v_values;
 
-// 	// point values on patch 0 [-1,0]x[ 0,1]: relevant generators live on patches 0 or 3
+// 	// compute the support of the generator corresponding to it.index()
+//  	support(basis_, it.index(), supp);
 
-// 	// compute the support bounds
-// 	switch (it.index().p()) {
-// 	case 0:
-// 	  // patch generator
-// 	  support(basis_.basis1d(),
-// 		  typename IBASIS::Index(it.index().j(),
-// 					 0,
-// 					 it.index().k()[0],
-// 					 &basis_.basis1d()),
-// 		  xmin, xmax);
-	  
-// 	  support(basis_.basis1d(),
-// 		  typename IBASIS::Index(it.index().j(),
-// 					 0,
-// 					 it.index().k()[1],
-// 					 &basis_.basis1d()),
-// 		  ymin, ymax);
-// 	  break;
-// 	case 3:
-// 	  // interface generator
-// 	  support(basis_.basis1d(),
-// 		  typename IBASIS::Index(it.index().j(),
-// 					 0,
-// 					 it.index().k()[0],
-// 					 &basis_.basis1d()),
-// 		  xmin, xmax);
-	  
-// 	  support(basis_.basis1d(),
-// 		  typename IBASIS::Index(it.index().j(),
-// 					 0,
-// 					 basis_.basis1d().DeltaLmin(),
-// 					 &basis_.basis1d()),
-// 		  ymin, ymax);
-// 	  break;
+// 	// per patch, collect all point values
+// 	for (int p = 0; p <= 3; p++) {
+// 	  if (supp.xmin[p] != -1) {
+// 	    // prepare Gauss points in x direction
+// 	    gauss_points [0].resize(N_Gauss*(supp.xmax[p]-supp.xmin[p]));
+// 	    gauss_weights[0].resize(N_Gauss*(supp.xmax[p]-supp.xmin[p]));
+// 	    for (int subpatch = supp.xmin[p]; subpatch < supp.xmax[p]; subpatch++)
+// 	      for (int n = 0; n < N_Gauss; n++) {
+// 		gauss_points[0][(subpatch-supp.xmin[p])*N_Gauss+n]
+// 		  = h*(2*subpatch+1+GaussPoints[N_Gauss-1][n])/2.;
+// 		gauss_weights[0][(subpatch-supp.xmin[p])*N_Gauss+n]
+// 		  = h*GaussWeights[N_Gauss-1][n];
+// 	      }
+
+// 	    // prepare Gauss points in y direction
+// 	    gauss_points [1].resize(N_Gauss*(supp.ymax[p]-supp.ymin[p]));
+// 	    gauss_weights[1].resize(N_Gauss*(supp.ymax[p]-supp.ymin[p]));
+// 	    for (int subpatch = supp.ymin[p]; subpatch < supp.ymax[p]; subpatch++)
+// 	      for (int n = 0; n < N_Gauss; n++) {
+// 		gauss_points[1][(subpatch-supp.ymin[p])*N_Gauss+n]
+// 		  = h*(2*subpatch+1+GaussPoints[N_Gauss-1][n])/2.;
+// 		gauss_weights[1][(subpatch-supp.ymin[p])*N_Gauss+n]
+// 		  = h*GaussWeights[N_Gauss-1][n];
+// 	      }
+
+
+// 	  }
 // 	}
 
-// 	// setup Gauss points and weights for the composite quadrature formula:
-// 	gauss_points [0].resize(N_Gauss*(xmax-xmin));
-// 	gauss_weights[0].resize(N_Gauss*(xmax-xmin));
-// 	for (int subpatch = xmin; subpatch < xmax; subpatch++)
-// 	  for (int n = 0; n < N_Gauss; n++) {
-// 	    gauss_points[0][(subpatch-xmin)*N_Gauss+n]
-// 	      = h*(2*subpatch+1+GaussPoints[N_Gauss-1][n])/2.;
-// 	    gauss_weights[0][(subpatch-xmin)*N_Gauss+n]
-// 	      = h*GaussWeights[N_Gauss-1][n];
-// 	  }
+// 	r += 0;
+//       }
 
-// 	gauss_points [1].resize(N_Gauss*(ymax-ymin));
-// 	gauss_weights[1].resize(N_Gauss*(ymax-ymin));
-// 	for (int subpatch = ymin; subpatch < ymax; subpatch++)
-// 	  for (int n = 0; n < N_Gauss; n++) {
-// 	    gauss_points[1][(subpatch-ymin)*N_Gauss+n]
-// 	      = h*(2*subpatch+1+GaussPoints[N_Gauss-1][n])/2.;
-// 	    gauss_weights[1][(subpatch-ymin)*N_Gauss+n]
-// 	      = h*GaussWeights[N_Gauss-1][n];
-// 	  }
+    return r;
+
 	
 // 	// point values on patch 1 [-1,0]x[-1,0]: relevant generators live on patches 1, 3 or 4
 // 	switch (it.index().p()) {
@@ -243,8 +206,6 @@ namespace WaveletTL
 // 	  break;
 // 	}
 //      }
-
-    return r;
   }
 
 //     // compute the point values of the integrand (where we use that it is a tensor product)

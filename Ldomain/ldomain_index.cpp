@@ -386,8 +386,8 @@ namespace WaveletTL
     typename LDomainIndex<IBASIS>::type_type e;
 
     // setup lowest translation index for e=(0,0), p=0
-    typename LDomainIndex<IBASIS>::translation_type k;
-    k[0] = k[1] = basis->basis1d().DeltaLmin()+1;
+    typename LDomainIndex<IBASIS>::translation_type k(basis->basis1d().DeltaLmin()+1,
+						      basis->basis1d().DeltaLmin()+1);
     
     return LDomainIndex<IBASIS>(j, e, 0, k, basis);
   }
@@ -401,8 +401,7 @@ namespace WaveletTL
     typename LDomainIndex<IBASIS>::type_type e;
 
     // setup highest translation index for e=(0,0), p=4
-    typename LDomainIndex<IBASIS>::translation_type k; // k[0]=0 by convention
-    k[1] = basis->basis1d().DeltaRmax(j)-1;
+    typename LDomainIndex<IBASIS>::translation_type k(0, basis->basis1d().DeltaRmax(j)-1);
     
     return LDomainIndex<IBASIS>(j, e, 4, k, basis);
   }
@@ -413,13 +412,11 @@ namespace WaveletTL
   {
     assert(j >= basis->j0());
 
-    typename LDomainIndex<IBASIS>::type_type e;
-    e[1] = 1;
+    typename LDomainIndex<IBASIS>::type_type e(0, 1);
 
     // setup lowest translation index for e=(0,1), p=0
-    typename LDomainIndex<IBASIS>::translation_type k;
-    k[0] = basis->basis1d().DeltaLmin()+1;
-    k[1] = basis->basis1d().Nablamin();
+    typename LDomainIndex<IBASIS>::translation_type k(basis->basis1d().DeltaLmin()+1,
+						      basis->basis1d().Nablamin());
     
     return LDomainIndex<IBASIS>(j, e, 0, k, basis);
   }
@@ -466,12 +463,11 @@ namespace WaveletTL
   {
     assert(j >= basis->j0());
     
-    typename LDomainIndex<IBASIS>::type_type e;
-    e[0] = e[1] = 1;
+    typename LDomainIndex<IBASIS>::type_type e(1, 1);
 
     // setup highest translation index for e=(1,1), p=2
-    typename LDomainIndex<IBASIS>::translation_type k;
-    k[0] = k[1] = basis->basis1d().Nablamax(j);
+    typename LDomainIndex<IBASIS>::translation_type k(basis->basis1d().Nablamax(j),
+						      basis->basis1d().Nablamax(j));
     
     return LDomainIndex<IBASIS>(j, e, 2, k, basis);
   }

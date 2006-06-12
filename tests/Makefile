@@ -14,11 +14,16 @@ ifeq ($(COMPILER),gnu)
 CXX = g++
 #CXX = g++-2.95
 #CXX = $(HOME)/gcc-4.1.0/bin/g++
+#CXX = $(HOME)/gcc-4.1.1/bin/g++
 
 ifeq ($(CXX),$(HOME)/gcc-4.1.0/bin/g++)
 LDFLAGS += -Xlinker -rpath -Xlinker $(HOME)/gcc-4.1.0/lib
 else
+ifeq ($(CXX),$(HOME)/gcc-4.1.1/bin/g++)
+LDFLAGS += -Xlinker -rpath -Xlinker $(HOME)/gcc-4.1.1/lib
+else
 LDFLAGS =
+endif
 endif
 
 CXXFLAGS += -I$(MATHTL_DIR) -Wall -pipe

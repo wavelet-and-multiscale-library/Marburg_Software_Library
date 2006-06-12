@@ -438,7 +438,22 @@ int main()
   cout << "- a matrix M1=" << endl << M1;
   cout << "- a matrix M2=" << endl << M2;
   KroneckerMatrix<double,MATRIX,MATRIX> K(M1,M2);
-  cout << "- Kronecker product of M1 and M2:" << endl << K;
+  cout << "- Kronecker product K of M1 and M2:" << endl << K;
+
+  x.resize(6); x[3] = 1;
+  K.apply(x, y);
+  cout << "- K applied to x=" << x << " yields Kx=" << y << endl;
+  x.resize(6); x[4] = 1;
+  K.apply(x, y);
+  cout << "- K applied to x=" << x << " yields Kx=" << y << endl;
+
+  y.resize(6);
+  x.resize(4); x[0] = 1;
+  K.apply_transposed(x, y);
+  cout << "- K^T applied to x=" << x << " yields (K^T)x=" << y << endl;
+  x.resize(4); x[1] = 1;
+  K.apply_transposed(x, y);
+  cout << "- K^T applied to x=" << x << " yields (K^T)x=" << y << endl;
   
   Matrix<double> KM(K);
   cout << "- Kronecker product of M1 and M2 as a Matrix<double> again:"

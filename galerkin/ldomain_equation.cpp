@@ -46,216 +46,175 @@ namespace WaveletTL
     const int level = lambda.j()+ (lambda.e()[0]==1 || lambda.e()[1]==1 ? 1 : 0);
     basis_.reconstruct_1(lambda, level, gcoeffs);
 
-//     // iterate through the involved generators and collect the point evaluations
-//     const int N_Gauss = 5; // number of Gauss points in x- and y-direction (per sing. supp. subpatch)
-//     const double h = ldexp(1.0, -level); // granularity for the quadrature
+    // iterate through the involved generators and collect the point evaluations
+    const int N_Gauss = 5; // number of Gauss points in x- and y-direction (per sing. supp. subpatch)
+    const double h = ldexp(1.0, -level); // granularity for the quadrature
 
-//     typename LDomainBasis<IBASIS>::Support supp;
-//     for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
-//  	   itend(gcoeffs.end()); it != itend; ++it)
-//       {
-// 	FixedArray1D<Array1D<double>,2> gauss_points, gauss_weights, v_values;
+    typename LDomainBasis<IBASIS>::Support supp;
+    for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
+  	   itend(gcoeffs.end()); it != itend; ++it)
+      {
+ 	FixedArray1D<Array1D<double>,2> gauss_points, gauss_weights, v_values;
+	Array1D<double> psi_mu_0_values, psi_mu_1_values;
 
-// 	// compute the support of the generator corresponding to it.index()
-//  	support(basis_, it.index(), supp);
+ 	// compute the support of the generator corresponding to mu=it.index()
+  	support(basis_, it.index(), supp);
 
-// 	// per patch, collect all point values
-// 	for (int p = 0; p <= 3; p++) {
-// 	  if (supp.xmin[p] != -1) {
-// 	    // prepare Gauss points in x direction
-// 	    gauss_points [0].resize(N_Gauss*(supp.xmax[p]-supp.xmin[p]));
-// 	    gauss_weights[0].resize(N_Gauss*(supp.xmax[p]-supp.xmin[p]));
-// 	    for (int subpatch = supp.xmin[p]; subpatch < supp.xmax[p]; subpatch++)
-// 	      for (int n = 0; n < N_Gauss; n++) {
-// 		gauss_points[0][(subpatch-supp.xmin[p])*N_Gauss+n]
-// 		  = h*(2*subpatch+1+GaussPoints[N_Gauss-1][n])/2.;
-// 		gauss_weights[0][(subpatch-supp.xmin[p])*N_Gauss+n]
-// 		  = h*GaussWeights[N_Gauss-1][n];
-// 	      }
+ 	// per patch, collect all point values
+ 	for (int p = 0; p <= 2; p++) {
+ 	  if (supp.xmin[p] != -1) { // psi_mu is nontrivial on patch p
+ 	    // prepare Gauss points and weights in x direction
+ 	    gauss_points [0].resize(N_Gauss*(supp.xmax[p]-supp.xmin[p]));
+  	    gauss_weights[0].resize(N_Gauss*(supp.xmax[p]-supp.xmin[p]));
+ 	    for (int subpatch = supp.xmin[p]; subpatch < supp.xmax[p]; subpatch++)
+ 	      for (int n = 0; n < N_Gauss; n++) {
+		gauss_points[0][(subpatch-supp.xmin[p])*N_Gauss+n]
+		  = h*(2*subpatch+1+GaussPoints[N_Gauss-1][n])/2.;
+		gauss_weights[0][(subpatch-supp.xmin[p])*N_Gauss+n]
+		  = h*GaussWeights[N_Gauss-1][n];
+	      }
 
-// 	    // prepare Gauss points in y direction
-// 	    gauss_points [1].resize(N_Gauss*(supp.ymax[p]-supp.ymin[p]));
-// 	    gauss_weights[1].resize(N_Gauss*(supp.ymax[p]-supp.ymin[p]));
-// 	    for (int subpatch = supp.ymin[p]; subpatch < supp.ymax[p]; subpatch++)
-// 	      for (int n = 0; n < N_Gauss; n++) {
-// 		gauss_points[1][(subpatch-supp.ymin[p])*N_Gauss+n]
-// 		  = h*(2*subpatch+1+GaussPoints[N_Gauss-1][n])/2.;
-// 		gauss_weights[1][(subpatch-supp.ymin[p])*N_Gauss+n]
-// 		  = h*GaussWeights[N_Gauss-1][n];
-// 	      }
+	    // prepare Gauss points and weights in y direction
+	    gauss_points [1].resize(N_Gauss*(supp.ymax[p]-supp.ymin[p]));
+	    gauss_weights[1].resize(N_Gauss*(supp.ymax[p]-supp.ymin[p]));
+	    for (int subpatch = supp.ymin[p]; subpatch < supp.ymax[p]; subpatch++)
+	      for (int n = 0; n < N_Gauss; n++) {
+		gauss_points[1][(subpatch-supp.ymin[p])*N_Gauss+n]
+		  = h*(2*subpatch+1+GaussPoints[N_Gauss-1][n])/2.;
+		gauss_weights[1][(subpatch-supp.ymin[p])*N_Gauss+n]
+		  = h*GaussWeights[N_Gauss-1][n];
+	      }
 
+	    // evaluate the two Kronecker components of psi_mu
+	    bool work_to_do = false;
+	    switch (it.index().p()) {
+	    case 0:
+	    case 1:
+	    case 2:
+	      // psi_lambda completely lives on patch 0/1/2,
+	      // this can only happen if p == it.index().p()
+	      assert(p == it.index().p());
+	      
+	      evaluate(basis_.basis1d(), 0,
+		       typename IBASIS::Index(it.index().j(),
+					      0,
+					      it.index().k()[0],
+					      &basis_.basis1d()),
+		       gauss_points[0], psi_mu_0_values);
+	      
+	      evaluate(basis_.basis1d(), 0,
+		       typename IBASIS::Index(it.index().j(),
+					      0,
+					      it.index().k()[1],
+					      &basis_.basis1d()),
+		       gauss_points[1], psi_mu_1_values);
+	      work_to_do = true;
+	      break;
+	    case 3:
+	      // psi_lambda lives on patches 0 and 1
+	      if (p == 0) {
+		evaluate(basis_.basis1d(), 0,
+			 typename IBASIS::Index(it.index().j(),
+						0,
+						it.index().k()[0],
+						&basis_.basis1d()),
+			 gauss_points[0], psi_mu_0_values);
+		
+		evaluate(basis_.basis1d(), 0,
+			 typename IBASIS::Index(it.index().j(),
+						0,
+						basis_.basis1d().DeltaLmin(),
+						&basis_.basis1d()),
+			 gauss_points[1], psi_mu_1_values);
+		work_to_do = true;
+	      } else {
+		assert(p == 1);
+		
+		evaluate(basis_.basis1d(), 0,
+			 typename IBASIS::Index(it.index().j(),
+						0,
+						it.index().k()[0],
+						&basis_.basis1d()),
+			 gauss_points[0], psi_mu_0_values);
+		
+		evaluate(basis_.basis1d(), 0,
+			 typename IBASIS::Index(it.index().j(),
+						0,
+						basis_.basis1d().DeltaRmax(it.index().j()),
+						&basis_.basis1d()),
+			 gauss_points[1], psi_mu_1_values);
+		work_to_do = true;
+	      }
+	      break;
+	    case 4:
+	      // psi_lambda lives on patches 1 and 2
+	      if (p == 1) {
+		evaluate(basis_.basis1d(), 0,
+			 typename IBASIS::Index(it.index().j(),
+						0,
+						basis_.basis1d().DeltaRmax(it.index().j()),
+						&basis_.basis1d()),
+			 gauss_points[0], psi_mu_0_values);
+		
+		evaluate(basis_.basis1d(), 0,
+			 typename IBASIS::Index(it.index().j(),
+						0,
+						it.index().k()[1],
+						&basis_.basis1d()),
+			 gauss_points[1], psi_mu_1_values);
+		work_to_do = true;
+	      } else {
+		assert(p == 2);
+		
+		evaluate(basis_.basis1d(), 0,
+			 typename IBASIS::Index(it.index().j(),
+						0,
+						basis_.basis1d().DeltaLmin(),
+						&basis_.basis1d()),
+			 gauss_points[0], psi_mu_0_values);
+		
+		evaluate(basis_.basis1d(), 0,
+			 typename IBASIS::Index(it.index().j(),
+						0,
+						it.index().k()[1],
+						&basis_.basis1d()),
+			 gauss_points[1], psi_mu_1_values);
+		work_to_do = true;
+	      }
+	      break;
+	    default:
+	      break;
+	    }
+	    
+	    // determine weight factor (interface generators have to be scaled)
+	    const double psi_mu_factor = it.index().p() <= 2 ? 1.0 : M_SQRT1_2;
+	    
+	    if (work_to_do) {
+	      // Now we know that on patch p, the generator psi_mu is nontrivial.
+	      // We have to collect all the integral shares:
 
-// 	  }
-// 	}
+	      Point<2> x;
+	      for (unsigned int i0 = 0; i0 < gauss_points[0].size(); i0++) {
+		x[0] = gauss_points[0][i0] - (p == 2 ? 0 : 1); // apply chart
+		for (unsigned int i1 = 0; i1 < gauss_points[1].size(); i1++) {
+		  x[1] = gauss_points[1][i1] - (p == 0 ? 0 : 1); // apply chart
+		  r += bvp_->f(x)
+		    * gauss_weights[0][i0]
+		    * gauss_weights[1][i1]
+		    * psi_mu_0_values[i0]
+		    * psi_mu_1_values[i1]
+		    * psi_mu_factor;
+		}
+	      }
+	    }
+	  }
+ 	}
+      }
 
-// 	r += 0;
-//       }
+    cout << "LDomainEquation::f() result is r=" << r << endl;
 
     return r;
-
-	
-// 	// point values on patch 1 [-1,0]x[-1,0]: relevant generators live on patches 1, 3 or 4
-// 	switch (it.index().p()) {
-// 	case 1:
-// 	  // patch generator
-
-// 	  // compute support bounds
-// 	  support(basis_.basis1d(),
-// 		  typename IBASIS::Index(it.index().j(),
-// 					 0,
-// 					 it.index().k()[0],
-// 					 &basis_.basis1d()),
-// 		  xmin,
-// 		  xmax);
-	  
-// 	  support(basis_.basis1d(),
-// 		  typename IBASIS::Index(it.index().j(),
-// 					 0,
-// 					 it.index().k()[1],
-// 					 &basis_.basis1d()),
-// 		  ymin,
-// 		  ymax);
-	  
-// 	  break;
-// 	case 3:
-// 	  // interface generator
-
-// 	  // compute support bounds
-// 	  support(basis_.basis1d(),
-// 		  typename IBASIS::Index(it.index().j(),
-// 					 0,
-// 					 it.index().k()[0],
-// 					 &basis_.basis1d()),
-// 		  xmin,
-// 		  xmax);
-	  
-// 	  support(basis_.basis1d(),
-// 		  typename IBASIS::Index(it.index().j(),
-// 					 0,
-// 					 basis_.basis1d().DeltaRmax(it.index().j()),
-// 					 &basis_.basis1d()),
-// 		  ymin,
-// 		  ymax);
-	  
-// 	  break;
-// 	case 4:
-// 	  // interface generator
-
-// 	  // compute support bounds
-// 	  support(basis_.basis1d(),
-// 		  typename IBASIS::Index(it.index().j(),
-// 					 0,
-// 					 basis_.basis1d().DeltaRmax(it.index().j()),
-// 					 &basis_.basis1d()),
-// 		  xmin,
-// 		  xmax);
-	  
-// 	  support(basis_.basis1d(),
-// 		  typename IBASIS::Index(it.index().j(),
-// 					 0,
-// 					 it.index().k()[1],
-// 					 &basis_.basis1d()),
-// 		  ymin,
-// 		  ymax);
-	  
-// 	  break;
-// 	}
-
-// 	// point values on patch 2 [ 0,1]x[-1,0]: relevant generators live on patches 2 or 4
-// 	switch (it.index().p()) {
-// 	case 2:
-// 	  // patch generator
-
-// 	  // compute support bounds
-// 	  support(basis_.basis1d(),
-// 		  typename IBASIS::Index(it.index().j(),
-// 					 0,
-// 					 it.index().k()[0],
-// 					 &basis_.basis1d()),
-// 		  xmin,
-// 		  xmax);
-	  
-// 	  support(basis_.basis1d(),
-// 		  typename IBASIS::Index(it.index().j(),
-// 					 0,
-// 					 it.index().k()[1],
-// 					 &basis_.basis1d()),
-// 		  ymin,
-// 		  ymax);
-	  
-// 	  break;
-// 	case 4:
-// 	  // interface generator
-
-// 	  // compute support bounds
-// 	  support(basis_.basis1d(),
-// 		  typename IBASIS::Index(it.index().j(),
-// 					 0,
-// 					 basis_.basis1d().DeltaLmin(),
-// 					 &basis_.basis1d()),
-// 		  xmin,
-// 		  xmax);
-	  
-// 	  support(basis_.basis1d(),
-// 		  typename IBASIS::Index(it.index().j(),
-// 					 0,
-// 					 it.index().k()[1],
-// 					 &basis_.basis1d()),
-// 		  ymin,
-// 		  ymax);
-// 	  break;
-// 	}
-//      }
   }
-
-//     // compute the point values of the integrand (where we use that it is a tensor product)
-//     for (unsigned int i = 0; i < DIM; i++)
-//       evaluate(*basis_.bases()[i], 0,
-// 	       typename IBASIS::Index(lambda.j(),
-// 				      lambda.e()[i],
-// 				      lambda.k()[i],
-// 				      basis_.bases()[i]),
-// 	       gauss_points[i], v_values[i]);
-
-//     // iterate over all points and sum up the integral shares
-//     int index[DIM]; // current multiindex for the point values
-//     for (unsigned int i = 0; i < DIM; i++)
-//       index[i] = 0;
-    
-//     Point<DIM> x;
-//     while (true) {
-//       for (unsigned int i = 0; i < DIM; i++)
-// 	x[i] = gauss_points[i][index[i]];
-//       double share = bvp_->f(x);
-//       for (unsigned int i = 0; i < DIM; i++)
-// 	share *= gauss_weights[i][index[i]] * v_values[i][index[i]];
-//       r += share;
-
-//       // "++index"
-//       bool exit = false;
-//       for (unsigned int i = 0; i < DIM; i++) {
-// 	if (index[i] == N_Gauss*(supp.b[i]-supp.a[i])-1) {
-// 	  index[i] = 0;
-// 	  exit = (i == DIM-1);
-// 	} else {
-// 	  index[i]++;
-// 	  break;
-// 	}
-//       }
-//       if (exit) break;
-//     }
-
-
-
-
-
-
-
-
-
-
-
-
 
   template <class IBASIS>
   void

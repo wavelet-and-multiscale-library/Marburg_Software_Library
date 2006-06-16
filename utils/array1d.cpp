@@ -68,25 +68,24 @@ namespace MathTL
   template <class C>
   void Array1D<C>::resize(const size_type s)
   {
+    cout << "Array1D::resize() called" << endl;
+
     if (s == 0)
       {
-	if (data_ != 0)
-	  {
-	    delete [] data_;
-	    data_ = 0;
-	  }
+	if (data_ != 0) {
+	  delete [] data_;
+	  data_ = 0;
+	}
 	size_ = 0;
       }
     else
       {
-	if (size_ != s)
-	  {
-	    if (data_ != 0) delete [] data_;
-	    data_ = new C[s]; // calls C()
-	    size_ = s;
-	  }
+	if (size_ != s) {
+	  if (data_ != 0) delete [] data_;
+	  data_ = new C[s]; // calls C()
+	  size_ = s;
+	}
       }
-
   }
 
   template <class C>

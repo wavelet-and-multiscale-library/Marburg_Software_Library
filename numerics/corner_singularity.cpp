@@ -83,11 +83,6 @@ namespace MathTL
     if (theta < 0) theta += 2.0 * M_PI;
     if (theta >= omega * M_PI) return 0.0;
 
-    // Due to the representation of the Laplacian in polar coordinates,
-    // we have to calculate
-    //   -d^2/dr^2 s(r,phi) - 1/r * d/dr s(r,phi) - 1/r^2 * d^2/dphi^2 s(r,phi)
-
-
 #if 1
     // Due to the representation of the Laplacian in polar coordinates,
     // we have to calculate

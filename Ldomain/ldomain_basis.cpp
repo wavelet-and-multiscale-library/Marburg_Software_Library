@@ -581,7 +581,7 @@ namespace WaveletTL
       c.add_coefficient(lambda, 1.0);
     } else {
 
-#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
       cout << "LDomainBasis::reconstruct_1() nontrivially called with lambda=" << lambda << endl;
 #endif
 
@@ -597,7 +597,7 @@ namespace WaveletTL
       // storage for the corresponding column of Mj1
       Vector<double> generators(Deltasize(lambda.j()+1));
 
-#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
       tstart = clock();
 #endif
 
@@ -684,7 +684,7 @@ namespace WaveletTL
 	}
       }
 
-#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
       tend = clock();
       cout << "* in reconstruct_1(), time needed for the column of Mj1: "
 	   << (double)(tend-tstart)/CLOCKS_PER_SEC
@@ -709,7 +709,7 @@ namespace WaveletTL
 	}
       }
       
-#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
       tend = clock();
       cout << "* in reconstruct_1(), time needed for the I part       : "
 	   << (double)(tend-tstart)/CLOCKS_PER_SEC
@@ -720,15 +720,15 @@ namespace WaveletTL
 
       if (ecode > 0) {
  	// second part of the biorthogonalization equation,
- 	// compute the corresponding column of Mj0*Mj0T^T*Mj1c
+ 	// compute the corresponding column of -Mj0*Mj0T^T*Mj1c
 	Vector<double> help(Deltasize(lambda.j()));
  	get_Mj0T(lambda.j()).apply_transposed(generators, help);
-#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
 	tmiddle1 = clock();
 #endif
 	
  	get_Mj0 (lambda.j()).apply(help, generators);
-#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
 	tmiddle2 = clock();
 #endif
 
@@ -736,7 +736,7 @@ namespace WaveletTL
  	unsigned int id = 0;
 	if (lambda.j()+1 >= j) {
 	  for (Index mu(first_generator(lambda.j()+1)); id < generators.size(); id++, ++mu) {
-	    c.add_coefficient(mu, generators[id]);
+	    c.add_coefficient(mu, -generators[id]);
 	  }
 	} else {
 	  for (Index mu(first_generator(lambda.j()+1)); id < generators.size(); id++, ++mu) {
@@ -747,7 +747,7 @@ namespace WaveletTL
  	}
       }
 
-#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
       tend = clock();
       cout << "* in reconstruct_1(), time needed to apply Mj0T^T      : "
 	   << (double)(tmiddle1-tstart)/CLOCKS_PER_SEC

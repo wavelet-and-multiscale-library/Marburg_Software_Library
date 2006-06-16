@@ -51,15 +51,17 @@ namespace WaveletTL
     const double h = ldexp(1.0, -level); // granularity for the quadrature
 
     typename LDomainBasis<IBASIS>::Support supp;
+    FixedArray1D<Array1D<double>,2> gauss_points, gauss_weights, v_values;
+    Array1D<double> psi_mu_0_values, psi_mu_1_values;
+    
     for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
   	   itend(gcoeffs.end()); it != itend; ++it)
       {
- 	FixedArray1D<Array1D<double>,2> gauss_points, gauss_weights, v_values;
-	Array1D<double> psi_mu_0_values, psi_mu_1_values;
+	cout << "LDomainEquation::f(), consider involved generator " << it.index() << endl;
 
  	// compute the support of the generator corresponding to mu=it.index()
   	support(basis_, it.index(), supp);
-
+	
  	// per patch, collect all point values
  	for (int p = 0; p <= 2; p++) {
  	  if (supp.xmin[p] != -1) { // psi_mu is nontrivial on patch p
@@ -86,7 +88,6 @@ namespace WaveletTL
 	      }
 
 	    // evaluate the two Kronecker components of psi_mu
-	    bool work_to_do = false;
 	    switch (it.index().p()) {
 	    case 0:
 	    case 1:
@@ -96,90 +97,85 @@ namespace WaveletTL
 	      assert(p == it.index().p());
 	      
 	      evaluate(basis_.basis1d(), 0,
-		       typename IBASIS::Index(it.index().j(),
+		       typename IBASIS::Index(level,
 					      0,
 					      it.index().k()[0],
 					      &basis_.basis1d()),
 		       gauss_points[0], psi_mu_0_values);
 	      
 	      evaluate(basis_.basis1d(), 0,
-		       typename IBASIS::Index(it.index().j(),
+		       typename IBASIS::Index(level,
 					      0,
 					      it.index().k()[1],
 					      &basis_.basis1d()),
 		       gauss_points[1], psi_mu_1_values);
-	      work_to_do = true;
 	      break;
 	    case 3:
 	      // psi_lambda lives on patches 0 and 1
 	      if (p == 0) {
 		evaluate(basis_.basis1d(), 0,
-			 typename IBASIS::Index(it.index().j(),
+			 typename IBASIS::Index(level,
 						0,
 						it.index().k()[0],
 						&basis_.basis1d()),
 			 gauss_points[0], psi_mu_0_values);
 		
 		evaluate(basis_.basis1d(), 0,
-			 typename IBASIS::Index(it.index().j(),
+			 typename IBASIS::Index(level,
 						0,
 						basis_.basis1d().DeltaLmin(),
 						&basis_.basis1d()),
 			 gauss_points[1], psi_mu_1_values);
-		work_to_do = true;
 	      } else {
 		assert(p == 1);
 		
 		evaluate(basis_.basis1d(), 0,
-			 typename IBASIS::Index(it.index().j(),
+			 typename IBASIS::Index(level,
 						0,
 						it.index().k()[0],
 						&basis_.basis1d()),
 			 gauss_points[0], psi_mu_0_values);
 		
 		evaluate(basis_.basis1d(), 0,
-			 typename IBASIS::Index(it.index().j(),
+			 typename IBASIS::Index(level,
 						0,
-						basis_.basis1d().DeltaRmax(it.index().j()),
+						basis_.basis1d().DeltaRmax(level),
 						&basis_.basis1d()),
 			 gauss_points[1], psi_mu_1_values);
-		work_to_do = true;
 	      }
 	      break;
 	    case 4:
 	      // psi_lambda lives on patches 1 and 2
 	      if (p == 1) {
 		evaluate(basis_.basis1d(), 0,
-			 typename IBASIS::Index(it.index().j(),
+			 typename IBASIS::Index(level,
 						0,
-						basis_.basis1d().DeltaRmax(it.index().j()),
+						basis_.basis1d().DeltaRmax(level),
 						&basis_.basis1d()),
 			 gauss_points[0], psi_mu_0_values);
 		
 		evaluate(basis_.basis1d(), 0,
-			 typename IBASIS::Index(it.index().j(),
+			 typename IBASIS::Index(level,
 						0,
 						it.index().k()[1],
 						&basis_.basis1d()),
 			 gauss_points[1], psi_mu_1_values);
-		work_to_do = true;
 	      } else {
 		assert(p == 2);
 		
 		evaluate(basis_.basis1d(), 0,
-			 typename IBASIS::Index(it.index().j(),
+			 typename IBASIS::Index(level,
 						0,
 						basis_.basis1d().DeltaLmin(),
 						&basis_.basis1d()),
 			 gauss_points[0], psi_mu_0_values);
 		
 		evaluate(basis_.basis1d(), 0,
-			 typename IBASIS::Index(it.index().j(),
+			 typename IBASIS::Index(level,
 						0,
 						it.index().k()[1],
 						&basis_.basis1d()),
 			 gauss_points[1], psi_mu_1_values);
-		work_to_do = true;
 	      }
 	      break;
 	    default:
@@ -189,30 +185,38 @@ namespace WaveletTL
 	    // determine weight factor (interface generators have to be scaled)
 	    const double psi_mu_factor = it.index().p() <= 2 ? 1.0 : M_SQRT1_2;
 	    
-	    if (work_to_do) {
-	      // Now we know that on patch p, the generator psi_mu is nontrivial.
-	      // We have to collect all the integral shares:
+	    // determine chart action
+	    const double xoffset = (p == 2 ? 0 : -1);
+	    const double yoffset = (p == 0 ? 0 : -1);
+	    
+	    // Now we know that on patch p, the generator psi_mu is nontrivial.
+	    // We have to collect all the integral shares:
+	    
+	    Point<2> x;
+	    for (unsigned int i0 = 0; i0 < gauss_points[0].size(); i0++) {
+	      x[0] = gauss_points[0][i0] + xoffset; // apply chart
 
-	      Point<2> x;
-	      for (unsigned int i0 = 0; i0 < gauss_points[0].size(); i0++) {
-		x[0] = gauss_points[0][i0] - (p == 2 ? 0 : 1); // apply chart
-		for (unsigned int i1 = 0; i1 < gauss_points[1].size(); i1++) {
-		  x[1] = gauss_points[1][i1] - (p == 0 ? 0 : 1); // apply chart
-		  r += bvp_->f(x)
-		    * gauss_weights[0][i0]
-		    * gauss_weights[1][i1]
-		    * psi_mu_0_values[i0]
-		    * psi_mu_1_values[i1]
-		    * psi_mu_factor;
-		}
+	      const double temp = *it * gauss_weights[0][i0] * psi_mu_0_values[i0] * psi_mu_factor;
+// 	      cout << "* temp=" << temp << endl;
+
+	      for (unsigned int i1 = 0; i1 < gauss_points[1].size(); i1++) {
+		x[1] = gauss_points[1][i1] + yoffset; // apply chart
+		
+		r += gauss_weights[1][i1]
+		  * psi_mu_1_values[i1]
+		  * temp
+		  * bvp_->f(x);
+		
+// 		cout << "* added " << bvp_->f(x) << "*" << gauss_weights[1][i1] << "*" << psi_mu_1_values[i1] << "*" << temp
+// 		     << "=" <<  bvp_->f(x) * gauss_weights[1][i1] * psi_mu_1_values[i1] * temp << endl;
 	      }
 	    }
 	  }
  	}
       }
-
+    
     cout << "LDomainEquation::f() result is r=" << r << endl;
-
+    
     return r;
   }
 
@@ -229,7 +233,7 @@ namespace WaveletTL
     for (Index lambda(basis_.first_generator(j0));; ++lambda)
       {
 	const double coeff = f(lambda)/D(lambda);
-	if (fabs(coeff)>1e-15)
+// 	if (fabs(coeff)>1e-15)
 	  fhelp.set_coefficient(lambda, coeff);
   	if (lambda == basis_.last_wavelet(jmax))
 	  break;

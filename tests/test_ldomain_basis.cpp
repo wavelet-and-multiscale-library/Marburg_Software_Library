@@ -103,14 +103,17 @@ int main()
   }
 #endif
 
-#if 0
-  Index lambda(first_generator<Basis1D>(&basis, basis.j0()));
+#if 1
+//   Index lambda(first_generator<Basis1D>(&basis, basis.j0()));
+//   Index lambda(first_wavelet<Basis1D>(&basis, basis.j0()));
+  Index lambda(2, MultiIndex<int,2>(0,1), 0, MultiIndex<int,2>(3,0), &basis);
+
 //   for (; !(lambda.p() == 1); ++lambda);
 //   for (; !(lambda.p() == 2); ++lambda);
 //   for (; !(lambda.p() == 3); ++lambda);
 //   for (; !(lambda.p() == 4); ++lambda);
 
-  for (; lambda.e()[0] != 0 || lambda.e()[1] != 1; ++lambda);
+//   for (; lambda.e()[0] != 0 || lambda.e()[1] != 1; ++lambda);
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 1); ++lambda);
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 1 && lambda.k()[1] == 7); ++lambda);
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 2); ++lambda);
@@ -124,21 +127,26 @@ int main()
 //   for (int i = 0; i < 155; i++, ++lambda); // one of the generators on patch 4
 //   for (int i = 0; i < 330; i++, ++lambda); // one of the (0,1)-wavelets on patch 4
 //   for (int i = 0; i < 334; i++, ++lambda);
-  cout << "- evaluating a primal wavelet lambda=" << lambda << " ..." << endl;
-  std::ofstream psistream("Ldomain_wavelet.m");
-  matlab_output(psistream, evaluate<Basis1D>(basis, lambda, true, 6));
-  psistream.close();
-  cout << "  ...done, see file Ldomain_wavelet.m!" << endl;
+//   for (int i = 0; i < 6; i++, ++lambda);
+
+//   cout << "- evaluating a primal wavelet lambda=" << lambda << " ..." << endl;
+//   std::ofstream psistream("Ldomain_wavelet.m");
+//   matlab_output(psistream, evaluate<Basis1D>(basis, lambda, true, 6));
+//   psistream.close();
+//   cout << "  ...done, see file Ldomain_wavelet.m!" << endl;
+
 
   InfiniteVector<double, Index> gcoeffs;
   basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
-  cout << "- generator coefficients of lambda on a higher scale:"
+  cout << "- generator coefficients of lambda=" << lambda << " on a higher scale " << lambda.j()+1 << ":"
        << endl << gcoeffs;
-  cout << "- evaluating this linear combination..." << endl;
-  std::ofstream psi2stream("Ldomain_wavelet2.m");
-  matlab_output(psi2stream, evaluate<Basis1D>(basis, gcoeffs, true, 6));
-  psi2stream.close();
-  cout << "  ...done, see file Ldomain_wavelet2.m!" << endl;
+
+
+//   cout << "- evaluating this linear combination..." << endl;
+//   std::ofstream psi2stream("Ldomain_wavelet2.m");
+//   matlab_output(psi2stream, evaluate<Basis1D>(basis, gcoeffs, true, 6));
+//   psi2stream.close();
+//   cout << "  ...done, see file Ldomain_wavelet2.m!" << endl;
 #endif
 
 }

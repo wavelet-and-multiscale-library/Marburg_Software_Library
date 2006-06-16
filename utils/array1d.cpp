@@ -68,8 +68,6 @@ namespace MathTL
   template <class C>
   void Array1D<C>::resize(const size_type s)
   {
-    cout << "Array1D::resize() called" << endl;
-
     if (s == 0)
       {
 	if (data_ != 0) {

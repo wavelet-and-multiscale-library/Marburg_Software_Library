@@ -89,9 +89,12 @@ namespace MathTL
 	
 	for (size_type Acol(0), xrow(0); Acol < A.column_dimension(); Acol++) {
 	  C helpA(A.get_entry(Arow, Acol));
-	  if (helpA != 0)
+	  if (helpA != 0) {
 	    for (size_type Bcol(0); Bcol < B.column_dimension(); Bcol++, xrow++)
 	      help += helpA * B.get_entry(Brow, Bcol) * x[xrow];
+	  } else {
+	    xrow += B.column_dimension(); // !
+	  }
 	}
 	
 	Mx[Mxrow] = help;
@@ -103,16 +106,19 @@ namespace MathTL
   KroneckerMatrix<C,MATRIX1,MATRIX2>::apply(const Vector<C>& x, Vector<C>& Mx) const
   {
     assert(Mx.size() == row_dimension());
-    
+
     for (size_type Arow(0), Mxrow(0); Arow < A.row_dimension(); Arow++)
       for (size_type Brow(0); Brow < B.row_dimension(); Brow++, Mxrow++) {
 	C help(0);
 	
 	for (size_type Acol(0), xrow(0); Acol < A.column_dimension(); Acol++) {
 	  C helpA(A.get_entry(Arow, Acol));
-	  if (helpA != 0)
+	  if (helpA != 0) {
 	    for (size_type Bcol(0); Bcol < B.column_dimension(); Bcol++, xrow++)
 	      help += helpA * B.get_entry(Brow, Bcol) * x[xrow];
+	  } else {
+	    xrow += B.column_dimension(); // !
+	  }
 	}
 	
 	Mx[Mxrow] = help;
@@ -132,9 +138,12 @@ namespace MathTL
 	
 	for (size_type Arow(0), xrow(0); Arow < A.row_dimension(); Arow++) {
 	  C helpA(A.get_entry(Arow, Acol));
-	  if (helpA != 0)
+	  if (helpA != 0) {
 	    for (size_type Brow(0); Brow < B.row_dimension(); Brow++, xrow++)
 	      help += helpA * B.get_entry(Brow, Bcol) * x[xrow];
+	  } else {
+	    xrow += B.row_dimension(); // !
+	  }
 	}
 	
 	Mtx[Mtxrow] = help;
@@ -153,9 +162,12 @@ namespace MathTL
 	
 	for (size_type Arow(0), xrow(0); Arow < A.row_dimension(); Arow++) {
 	  C helpA(A.get_entry(Arow, Acol));
-	  if (helpA != 0)
+	  if (helpA != 0) {
 	    for (size_type Brow(0); Brow < B.row_dimension(); Brow++, xrow++)
 	      help += helpA * B.get_entry(Brow, Bcol) * x[xrow];
+	  } else {
+	    xrow += B.row_dimension(); // !
+	  }
 	}
 	
 	Mtx[Mtxrow] = help;

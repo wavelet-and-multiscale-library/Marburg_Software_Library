@@ -174,6 +174,10 @@ namespace MathTL
 	x_blocks[block_column][j] = x[offset+j];
       offset += block_columns_columns[block_column];
     }
+
+//     cout << "in BlockMatrix::apply(), we have x_blocks as follows:" << endl;
+//     for (size_type i(0); i < block_columns(); i++)
+//       cout << "x_blocks[" << i << "]=" << x_blocks[i] << endl;
     
     // calculate the blocks of Mx
     offset = 0;
@@ -186,6 +190,14 @@ namespace MathTL
 	if (get_block(block_row, block_column)) {
 	  Mx_block.scale(0);
 	  get_block(block_row, block_column)->apply(x_blocks[block_column], Mx_block);
+
+// 	  cout << "in BlockMatrix::apply(), for block_row=" << block_row
+// 	       << " and block_column=" << block_column
+// 	       << ", we have x_blocks[" << block_column << "]=" << x_blocks[block_column] << endl
+// 	       << ", get_block(" << block_row << "," << block_column << ")=" << endl;
+// 	  get_block(block_row,block_column)->print(cout);
+// 	  cout << "and Mx_block=" << Mx_block << endl;
+	  
 	  for (size_type i = 0; i < m; i++)
 	    Mx[i+offset] += Mx_block[i];
 	}

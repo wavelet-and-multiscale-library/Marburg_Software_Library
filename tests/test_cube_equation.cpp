@@ -121,15 +121,10 @@ int main()
   double time;
   tstart = clock();
   SparseMatrix<double> A;
-// <<<<<<< test_cube_equation.cpp
-//   setup_stiffness_matrix(eq_test, Lambda, A);
+  setup_stiffness_matrix(eq, Lambda, A);
 //   std::ofstream ofs("stiff_out.m");
 //   print_matrix(A,ofs);
 //   ofs.close();
-// =======
-//   setup_stiffness_matrix(eq, Lambda, A);
-// >>>>>>> 1.11
-  setup_stiffness_matrix(eq, Lambda, A);
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;

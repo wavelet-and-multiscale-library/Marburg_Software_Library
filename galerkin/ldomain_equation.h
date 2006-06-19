@@ -123,7 +123,7 @@ namespace WaveletTL
       so that m = (p+1)/2;
     */
     double a(const Index& lambda, const Index& nu,
-	     const unsigned int p = 4) const;
+	     const unsigned int p) const; // p=4
 
     /*!
       estimate the spectral norm ||A||

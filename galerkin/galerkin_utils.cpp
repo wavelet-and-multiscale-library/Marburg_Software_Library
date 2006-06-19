@@ -21,6 +21,7 @@ namespace WaveletTL
 	std::list<double> entries;
 
 	size_type column = 0;
+	cout << "setup_stiffness_matrix(): doing row " << row << " of " << Lambda.size() << endl;
 	for (typename std::set<Index>::const_iterator it2(Lambda.begin());
 	     it2 != itend; ++it2, ++column)
 	  {
@@ -36,7 +37,6 @@ namespace WaveletTL
 	      }
 // 	    }
 	  }
-	cout << "setup_stiffness_matrix(): doing row " << row << " of " << Lambda.size() << endl;
 	A_Lambda.set_row(row, indices, entries);
       }
   }

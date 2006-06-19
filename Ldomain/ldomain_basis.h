@@ -63,7 +63,7 @@ namespace WaveletTL
 
     //! geometric type of the support sets
     typedef struct {
-      int j;
+      int j;       // granularity
       int xmin[3];
       int xmax[3];
       int ymin[3];

@@ -572,7 +572,7 @@ namespace WaveletTL
 				      InfiniteVector<double, Index>& c) const {
     typedef typename IBASIS::Index IIndex;
 
-#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
     clock_t tstart, tend, tmiddle1, tmiddle2;
 #endif
 
@@ -581,7 +581,7 @@ namespace WaveletTL
       c.add_coefficient(lambda, 1.0);
     } else {
 
-#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
       cout << "LDomainBasis::reconstruct_1() nontrivially called with lambda=" << lambda << endl;
 #endif
 
@@ -602,6 +602,7 @@ namespace WaveletTL
 #endif
 
       const int ecode(lambda.e()[0]+2*lambda.e()[1]);
+      
       if (ecode == 0) {
 	// generator
 

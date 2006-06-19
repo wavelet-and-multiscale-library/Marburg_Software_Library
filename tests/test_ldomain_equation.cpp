@@ -13,7 +13,7 @@
 #include <interval/ds_basis.h>
 #include <interval/p_basis.h>
 
-#define _WAVELETTL_LDOMAINBASIS_VERBOSITY 2
+// #define _WAVELETTL_LDOMAINBASIS_VERBOSITY 1
 #include <Ldomain/ldomain_basis.h>
 #include <galerkin/ldomain_equation.h>
 
@@ -40,6 +40,17 @@ int main()
 
   InfiniteVector<double, Index> coeffs;
   eq.RHS(1e-8, coeffs);
+
+  set<Index> Lambda;
+  for (Index lambda = eq.basis().first_generator(eq.basis().j0());; ++lambda) {
+    Lambda.insert(lambda);
+    if (lambda == eq.basis().last_wavelet(eq.basis().j0()+1)) break;
+  }
+
+  cout << "- set up stiffness matrix with respect to the index set Lambda=" << endl;
+  for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it)
+    cout << *it << endl;
+
 
   return 0;
 }

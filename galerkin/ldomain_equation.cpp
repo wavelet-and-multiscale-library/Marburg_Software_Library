@@ -37,7 +37,7 @@ namespace WaveletTL
   {
     // f(v) = \int_0^1 g(t)v(t) dt
 
-    cout << "LDomainEquation::f() called with lambda=" << lambda << endl;
+//     cout << "LDomainEquation::f() called with lambda=" << lambda << endl;
 
     double r = 0;
 
@@ -57,7 +57,7 @@ namespace WaveletTL
     for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
   	   itend(gcoeffs.end()); it != itend; ++it)
       {
-	cout << "LDomainEquation::f(), consider involved generator " << it.index() << endl;
+// 	cout << "LDomainEquation::f(), consider involved generator " << it.index() << endl;
 
  	// compute the support of the generator corresponding to mu=it.index()
   	support(basis_, it.index(), supp);
@@ -197,25 +197,23 @@ namespace WaveletTL
 	      x[0] = gauss_points[0][i0] + xoffset; // apply chart
 
 	      const double temp = *it * gauss_weights[0][i0] * psi_mu_0_values[i0] * psi_mu_factor;
-// 	      cout << "* temp=" << temp << endl;
-
-	      for (unsigned int i1 = 0; i1 < gauss_points[1].size(); i1++) {
-		x[1] = gauss_points[1][i1] + yoffset; // apply chart
-		
-		r += gauss_weights[1][i1]
-		  * psi_mu_1_values[i1]
-		  * temp
-		  * bvp_->f(x);
-		
-// 		cout << "* added " << bvp_->f(x) << "*" << gauss_weights[1][i1] << "*" << psi_mu_1_values[i1] << "*" << temp
-// 		     << "=" <<  bvp_->f(x) * gauss_weights[1][i1] * psi_mu_1_values[i1] * temp << endl;
+	      
+	      if (temp != 0) {
+		for (unsigned int i1 = 0; i1 < gauss_points[1].size(); i1++) {
+		  x[1] = gauss_points[1][i1] + yoffset; // apply chart
+		  
+		  r += gauss_weights[1][i1]
+		    * psi_mu_1_values[i1]
+		    * temp
+		    * bvp_->f(x);
+		}
 	      }
 	    }
 	  }
  	}
       }
     
-    cout << "LDomainEquation::f() result is r=" << r << endl;
+//     cout << "LDomainEquation::f() result is r=" << r << endl;
     
     return r;
   }
@@ -229,7 +227,8 @@ namespace WaveletTL
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
     const int j0   = basis().j0();
-    const int jmax = 5; // for a first quick hack
+//     const int jmax = 5; // for a first quick hack
+    const int jmax = j0; // for a first quick hack
     for (Index lambda(basis_.first_generator(j0));; ++lambda)
       {
 	const double coeff = f(lambda)/D(lambda);

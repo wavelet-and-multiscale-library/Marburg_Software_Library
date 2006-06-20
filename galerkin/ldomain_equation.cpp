@@ -51,7 +51,7 @@ namespace WaveletTL
     double r = 0;
 
     // first compute the support intersection of psi_lambda1 and psi_lambda2
-    typename LDomainBasis<IBASIS>::Support supp, supp1, supp1cap2;
+    typename LDomainBasis<IBASIS>::Support supp;
     if (intersect_supports(basis_, lambda1, lambda2, supp)) {
       // compute the generator expansions of psi_lambda1 and psi_lambda2
       InfiniteVector<double, Index> gcoeffs1, gcoeffs2;
@@ -70,6 +70,7 @@ namespace WaveletTL
 	psi_mu2_0_values, psi_mu2_1_values,     // point values of the two Kronecker factors of psi_mu2
 	psi_mu2_0_x_values, psi_mu2_1_x_values; // point values of the derivatives
 
+      typename LDomainBasis<IBASIS>::Support supp1, supp1cap2;
       for (typename InfiniteVector<double,Index>::const_iterator it1(gcoeffs1.begin()),
 	     itend1(gcoeffs1.end()); it1 != itend1; ++it1) {
  	// compute the support of the generator corresponding to mu1=it1.index()
@@ -321,7 +322,6 @@ namespace WaveletTL
 		const double xoffset = (p == 2 ? 0 : -1);
 		const double yoffset = (p == 0 ? 0 : -1);
 
-
 		// Now we know that on patch p, the generator psi_mu is nontrivial.
 		// We have to collect all the integral shares:
 		
@@ -332,11 +332,11 @@ namespace WaveletTL
 
 		  for (unsigned int i1 = 0; i1 < gauss_points1.size(); i1++) {
 		    x[1] = gauss_points1[i1] + yoffset; // apply chart
+		    const double temp2 = gauss_weights1[i1] * temp;
 		    
 		    // compute the share a(x)(grad psi_mu1)(x)(grad psi_mu2)(x)
 		    r += bvp_->a(x)
-		      * temp
-		      * gauss_weights1[i1]
+		      * temp2
 		      * ((psi_mu1_0_x_values[i0] // d/dx1 psi_mu1 * d/dx1 psi_mu2
 			  * psi_mu1_1_values[i1]
 			  * psi_mu2_0_x_values[i0]
@@ -348,8 +348,7 @@ namespace WaveletTL
 		    
 		    // compute the share q(x)psi_mu1(x)psi_mu2(x)
 		    r += bvp_->q(x)
-		      * temp
-		      * gauss_weights1[i1]
+		      * temp2
 		      * psi_mu1_0_values[i0]
 		      * psi_mu1_1_values[i1]
 		      * psi_mu2_0_values[i0]

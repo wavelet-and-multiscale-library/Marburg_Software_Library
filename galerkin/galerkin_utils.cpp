@@ -21,7 +21,9 @@ namespace WaveletTL
 	std::list<double> entries;
 
 	size_type column = 0;
+#if _WAVELETTL_GALERKINUTILS_VERBOSITY >= 1
 	cout << "setup_stiffness_matrix(): doing row " << row << " of " << Lambda.size() << endl;
+#endif
 	for (typename std::set<Index>::const_iterator it2(Lambda.begin());
 	     it2 != itend; ++it2, ++column)
 	  {

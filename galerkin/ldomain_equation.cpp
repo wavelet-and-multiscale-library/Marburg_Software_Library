@@ -328,16 +328,15 @@ namespace WaveletTL
 		Point<2> x;
 		for (unsigned int i0 = 0; i0 < gauss_points0.size(); i0++) {
 		  x[0] = gauss_points0[i0] + xoffset; // apply chart
+		  const double temp = gauss_weights0[i0] * psi_mu1_factor * psi_mu2_factor * *it1 * *it2;
 
 		  for (unsigned int i1 = 0; i1 < gauss_points1.size(); i1++) {
 		    x[1] = gauss_points1[i1] + yoffset; // apply chart
 		    
 		    // compute the share a(x)(grad psi_mu1)(x)(grad psi_mu2)(x)
 		    r += bvp_->a(x)
-		      * gauss_weights0[i0]
+		      * temp
 		      * gauss_weights1[i1]
-		      * psi_mu1_factor
-		      * psi_mu2_factor
 		      * ((psi_mu1_0_x_values[i0] // d/dx1 psi_mu1 * d/dx1 psi_mu2
 			  * psi_mu1_1_values[i1]
 			  * psi_mu2_0_x_values[i0]
@@ -345,22 +344,16 @@ namespace WaveletTL
 			 + (psi_mu1_0_values[i0] // d/dx2 psi_mu1 * d/dx2 psi_mu2
 			    * psi_mu1_1_x_values[i1]
 			    * psi_mu2_0_values[i0]
-			    * psi_mu2_1_x_values[i1]))
-		      * *it1
-		      * *it2;
+			    * psi_mu2_1_x_values[i1]));
 		    
 		    // compute the share q(x)psi_mu1(x)psi_mu2(x)
 		    r += bvp_->q(x)
-		      * gauss_weights0[i0]
+		      * temp
 		      * gauss_weights1[i1]
-		      * psi_mu1_factor
-		      * psi_mu2_factor
 		      * psi_mu1_0_values[i0]
 		      * psi_mu1_1_values[i1]
 		      * psi_mu2_0_values[i0]
-		      * psi_mu2_1_values[i1]
-		      * *it1
-		      * *it2;
+		      * psi_mu2_1_values[i1];
  		  }
 		}
 	      }

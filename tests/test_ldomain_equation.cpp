@@ -16,6 +16,8 @@
 
 // #define _WAVELETTL_LDOMAINBASIS_VERBOSITY 1
 #include <Ldomain/ldomain_basis.h>
+
+// #define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
 #include <galerkin/ldomain_equation.h>
 
 using namespace std;
@@ -84,7 +86,7 @@ int main()
   set<Index> Lambda;
   for (Index lambda = eq.basis().first_generator(eq.basis().j0());; ++lambda) {
     Lambda.insert(lambda);
-    if (lambda == eq.basis().last_wavelet(eq.basis().j0()+1)) break;
+    if (lambda == eq.basis().last_wavelet(eq.basis().j0())) break;
   }
 
 //   cout << "- set up stiffness matrix with respect to the index set Lambda=" << endl;
@@ -98,34 +100,52 @@ int main()
 
   SparseMatrix<double> A;
   setup_stiffness_matrix(eq, Lambda, A);
-//   std::ofstream ofs("stiff_out.m");
-//   print_matrix(A,ofs);
-//   ofs.close();
+#if 0
+  std::ofstream ofs("stiff_out.m");
+  ofs << "M=";
+  print_matrix(A,ofs);
+  ofs.close();
+#endif
 
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
 //   cout << "- (preconditioned) stiffness matrix A=" << endl << A << endl;
 
-//   cout << "- set up right-hand side..." << endl;
-//   tstart = clock();
-//   Vector<double> b;
-//   setup_righthand_side(eq, Lambda, b);
-//   tend = clock();
-//   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
-//   cout << "  ... done, time needed: " << time << " seconds" << endl;
-// //   cout << "- right hand side: " << b << endl;
+  cout << "- set up right-hand side..." << endl;
+  tstart = clock();
+  Vector<double> b;
+  setup_righthand_side(eq, Lambda, b);
+  tend = clock();
+  time = (double)(tend-tstart)/CLOCKS_PER_SEC;
+  cout << "  ... done, time needed: " << time << " seconds" << endl;
+//   cout << "- right hand side: " << b << endl;
 
-//   Vector<double> x(Lambda.size()), err(Lambda.size()); x = 0;
-//   unsigned int iterations;
-//   CG(A, b, x, 1e-8, 100, iterations);
+  Vector<double> x(Lambda.size()), err(Lambda.size()); x = 0;
+  unsigned int iterations;
+  CG(A, b, x, 1e-8, 100, iterations);
   
 // //   cout << "- solution coefficients: " << x;
-//   cout << " with residual (infinity) norm ";
-//   A.apply(x, err);
-//   err -= b;
-//   cout << linfty_norm(err) << endl;
+  cout << " with residual (infinity) norm ";
+  A.apply(x, err);
+  err -= b;
+  cout << linfty_norm(err) << endl;
 
+  cout << "- point values of the solution:" << endl;
+  InfiniteVector<double,Index> u;
+  unsigned int i = 0;
+  for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
+    u.set_coefficient(*it, x[i]);
+
+  u.scale(&eq, -1);
+  Array1D<SampledMapping<2> > s(evaluate(eq.basis(), u, true, 6));
+  std::ofstream u_Lambda_stream("u_lambda.m");
+  matlab_output(u_Lambda_stream, s);
+  u_Lambda_stream.close();
+  cout << "  ... done, see file 'u_lambda.m'" << endl;
+//   mySolution u_Lambda;
+//   s.add(-1.0, SampledMapping<2>(s, u_Lambda));
+//   cout << "  ... done, pointwise error: " << row_sum_norm(s.values()) << endl;
 
   return 0;
 }

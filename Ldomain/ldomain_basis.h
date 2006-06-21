@@ -70,6 +70,9 @@ namespace WaveletTL
       int ymax[3];
     } Support;
 
+    //! compute the support of psi_lambda, using the internal cache
+    void support(const Index& lambda, Support& supp) const;
+    
     //! critical Sobolev regularity for the primal generators/wavelets
     static double primal_regularity() { return IBASIS::primal_regularity(); } // dirty, we should use max(1.5,~) instead
     
@@ -168,6 +171,10 @@ namespace WaveletTL
 
     typedef std::map<int,SparseMatrix<double> > Matrix1DCache;
     mutable Matrix1DCache Mj1c_1d_cache;
+
+    //! support cache
+    typedef std::map<Index,Support> SupportCache;
+    mutable SupportCache supp_cache;
   };
 }
 

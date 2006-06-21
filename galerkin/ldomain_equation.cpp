@@ -562,6 +562,7 @@ namespace WaveletTL
     InfiniteVector<double,Index> fhelp;
     const int j0   = basis().j0();
 //     const int jmax = 5; // for a first quick hack
+//     const int jmax = j0; // for a first quick hack
     const int jmax = j0; // for a first quick hack
     for (Index lambda(basis_.first_generator(j0));; ++lambda)
       {

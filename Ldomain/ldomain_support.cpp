@@ -3,32 +3,34 @@
 namespace WaveletTL
 {
   template <class IBASIS>
+  inline
   void support(const LDomainBasis<IBASIS>& basis,
 	       const typename LDomainBasis<IBASIS>::Index& lambda,
 	       typename LDomainBasis<IBASIS>::Support& supp)
   {
+#if 1
+    basis.support(lambda, supp);
+#else
+    // the following code has moved to LDomainBasis
+
     typedef typename LDomainBasis<IBASIS>::Index Index;
 
-    // by convention, we initialize the support with an "empty" set
-    for (int p = 0; p <= 2; p++) {
-      supp.xmin[p] = -1;
-    }
-    
     const int ecode = lambda.e()[0]+2*lambda.e()[1];
+    const int lambdaj = lambda.j();
 
     if (ecode == 0) {
       // psi_lambda is a generator. Here we know by construction of the
       // composite basis that per patch, psi_lambda looks like a single
       // tensor product of 1D generators (possibly weighted by a factor).
 
-      supp.j = lambda.j();
-
+      supp.j = lambdaj;
+      
       switch (lambda.p()) {
       case 0:
  	// psi_lambda completely lives on patch 0
 
 	support(basis.basis1d(),
-		typename IBASIS::Index(lambda.j(),
+		typename IBASIS::Index(lambdaj,
 				       0,
 				       lambda.k()[0],
 				       &basis.basis1d()),
@@ -36,19 +38,21 @@ namespace WaveletTL
 		supp.xmax[0]);
 	
 	support(basis.basis1d(),
-		typename IBASIS::Index(lambda.j(),
+		typename IBASIS::Index(lambdaj,
 				       0,
 				       lambda.k()[1],
 				       &basis.basis1d()),
 		supp.ymin[0],
 		supp.ymax[0]);
+
+	supp.xmin[1] = supp.xmin[2] = -1;
 
  	break;
       case 1:
  	// psi_lambda completely lives on patch 1
 
 	support(basis.basis1d(),
-		typename IBASIS::Index(lambda.j(),
+		typename IBASIS::Index(lambdaj,
 				       0,
 				       lambda.k()[0],
 				       &basis.basis1d()),
@@ -56,19 +60,21 @@ namespace WaveletTL
 		supp.xmax[1]);
 
 	support(basis.basis1d(),
-		typename IBASIS::Index(lambda.j(),
+		typename IBASIS::Index(lambdaj,
 				       0,
 				       lambda.k()[1],
 				       &basis.basis1d()),
 		supp.ymin[1],
 		supp.ymax[1]);
 
+	supp.xmin[0] = supp.xmin[2] = -1;
+
 	break;
       case 2:
  	// psi_lambda completely lives on patch 2
 
 	support(basis.basis1d(),
-		typename IBASIS::Index(lambda.j(),
+		typename IBASIS::Index(lambdaj,
 				       0,
 				       lambda.k()[0],
 				       &basis.basis1d()),
@@ -76,19 +82,21 @@ namespace WaveletTL
 		supp.xmax[2]);
 
 	support(basis.basis1d(),
-		typename IBASIS::Index(lambda.j(),
+		typename IBASIS::Index(lambdaj,
 				       0,
 				       lambda.k()[1],
 				       &basis.basis1d()),
 		supp.ymin[2],
 		supp.ymax[2]);
 
+	supp.xmin[0] = supp.xmin[1] = -1;
+
  	break;
       case 3:
   	// psi_lambda lives on patches 0 and 1
 	
 	support(basis.basis1d(),
-		typename IBASIS::Index(lambda.j(),
+		typename IBASIS::Index(lambdaj,
 				       0,
 				       lambda.k()[0],
 				       &basis.basis1d()),
@@ -96,7 +104,7 @@ namespace WaveletTL
 		supp.xmax[0]);
 
 	support(basis.basis1d(),
-		typename IBASIS::Index(lambda.j(),
+		typename IBASIS::Index(lambdaj,
 				       0,
 				       basis.basis1d().DeltaLmin(),
 				       &basis.basis1d()),
@@ -104,7 +112,7 @@ namespace WaveletTL
 		supp.ymax[0]);
 
 	support(basis.basis1d(),
-		typename IBASIS::Index(lambda.j(),
+		typename IBASIS::Index(lambdaj,
 				       0,
 				       lambda.k()[0],
 				       &basis.basis1d()),
@@ -112,27 +120,29 @@ namespace WaveletTL
 		supp.xmax[1]);
 
 	support(basis.basis1d(),
-		typename IBASIS::Index(lambda.j(),
+		typename IBASIS::Index(lambdaj,
 				       0,
-				       basis.basis1d().DeltaRmax(lambda.j()),
+				       basis.basis1d().DeltaRmax(lambdaj),
 				       &basis.basis1d()),
 		supp.ymin[1],
 		supp.ymax[1]);
+
+	supp.xmin[2] = -1;
 
 	break;
       case 4:
  	// psi_lambda lives on patches 1 and 2
 
 	support(basis.basis1d(),
-		typename IBASIS::Index(lambda.j(),
+		typename IBASIS::Index(lambdaj,
 				       0,
-				       basis.basis1d().DeltaRmax(lambda.j()),
+				       basis.basis1d().DeltaRmax(lambdaj),
 				       &basis.basis1d()),
 		supp.xmin[1],
 		supp.xmax[1]);
 
 	support(basis.basis1d(),
-		typename IBASIS::Index(lambda.j(),
+		typename IBASIS::Index(lambdaj,
 				       0,
 				       lambda.k()[1],
 				       &basis.basis1d()),
@@ -140,7 +150,7 @@ namespace WaveletTL
 		supp.ymax[1]);
 
 	support(basis.basis1d(),
-		typename IBASIS::Index(lambda.j(),
+		typename IBASIS::Index(lambdaj,
 				       0,
 				       basis.basis1d().DeltaLmin(),
 				       &basis.basis1d()),
@@ -148,12 +158,14 @@ namespace WaveletTL
 		supp.xmax[2]);
 
 	support(basis.basis1d(),
-		typename IBASIS::Index(lambda.j(),
+		typename IBASIS::Index(lambdaj,
 				       0,
 				       lambda.k()[1],
 				       &basis.basis1d()),
 		supp.ymin[2],
 		supp.ymax[2]);
+
+	supp.xmin[0] = -1;
 
 	break;
       }
@@ -161,16 +173,21 @@ namespace WaveletTL
     } else {
       // wavelet
 
-      supp.j = lambda.j()+1;
+      supp.j = lambdaj+1;
 
       // compute the expansion coefficients of psi_lambda w.r.t. the
       // generators of the next higher scale, then aggregating all the supports
       // (of course, this is a brute force solution...)
       InfiniteVector<double, Index> gcoeffs;
-      basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
+      basis.reconstruct_1(lambda, lambdaj+1, gcoeffs);
       
       typedef typename LDomainBasis<IBASIS>::Support Support;
       Support tempsupp;
+
+      // initialize the support with an "empty" set
+      for (int p = 0; p <= 2; p++) {
+	supp.xmin[p] = -1;
+      }
 
       for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
 	     itend(gcoeffs.end()); it != itend; ++it)
@@ -180,7 +197,7 @@ namespace WaveletTL
 	  
 	  // for each patch p, update the corresponding support estimate
 	  for (int p = 0; p <= 2; p++) {
-	    if (tempsupp.xmin[p] >= 0) {
+	    if (tempsupp.xmin[p] != -1) {
 	      // a nontrivial new support share, we have to do something
 	      if (supp.xmin[p] == -1) {
 		// previous support estimate was "empty", we have to insert a nontrivial new one
@@ -199,7 +216,7 @@ namespace WaveletTL
 	  }
 	}
     }
-
+#endif
   }
 
   template <class IBASIS>

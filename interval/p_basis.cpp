@@ -650,6 +650,52 @@ namespace WaveletTL
 
   template <int d, int dT>
   void
+  PBasis<d,dT>::support(const Index& lambda, int& k1, int& k2) const {
+    if (lambda.e() == 0) // generator
+      {
+	// phi_{j,k}(x) = 2^{j/2} B_{j,k-ell_1}
+	k1 = std::max(0, lambda.k() + ell1<d>());
+	k2 = std::min(1<<lambda.j(), lambda.k() + ell2<d>());
+      }
+    else // wavelet
+      {
+	// cf. [P, p. 125]
+	if (lambda.k() < (d+dT)/2-1) {
+	  // left boundary wavelet
+	  k1 = 0;
+
+ 	  // hard code special case
+//  	  if ( (d==3 && dT==3) &&  ((basis.get_s0()==1) && (basis.get_s1()==1)) ) {
+// 	    k2 = 8;
+//  	  }
+//  	  else
+
+	  k2 = 2*(d+dT)-2; // overestimate, TODO
+
+	} else {
+	  if ((1<<lambda.j())-lambda.k() <= (d+dT)/2-1) {
+	    // right boundary wavelet
+
+	    // hard code special case
+// 	    if ( (d==3 && dT==3) &&  ((basis.get_s0()==1) && (basis.get_s1()==1)) ) {
+// 	      k1 = (1<<(lambda.j()+1)) - 8;
+//  	    }
+//  	    else
+
+	    k1 = (1<<(lambda.j()+1))-(2*(d+dT)-2); // overestimate, TODO
+
+	    k2 = 1<<(lambda.j()+1);
+	  } else {
+	    // interior wavelet (CDF)
+	    k1 = 2*(lambda.k()-(d+dT)/2+1);
+	    k2 = k1+2*(d+dT)-2;
+	  }
+	}
+      }
+  }
+  
+  template <int d, int dT>
+  void
   PBasis<d,dT>::setup_Mj0(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& Mj0) {
     // IGPMlib reference: I_Basis_Bspline_s::Mj0()
     // cf. [DKU section 3.5]

@@ -106,6 +106,13 @@ namespace WaveletTL
       int k2;
     } Support;
 
+    /*!
+      Compute an interval 2^{-j}[k1,k2] which contains the support of a
+      single primal [P] generator or wavelet \psi_\lambda.
+      (j == lambda.j()+lambda.e() is neglected for performance reasons)
+    */
+    void support(const Index& lambda, int& k1, int& k2) const;
+
     //! space dimension of the underlying domain
     static const int space_dimension = 1;
 

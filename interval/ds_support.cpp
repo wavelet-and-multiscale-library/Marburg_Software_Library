@@ -6,10 +6,15 @@
 namespace WaveletTL
 {
   template <int d, int dT>
+  inline
   void support(const DSBasis<d,dT>& basis,
 	       const typename DSBasis<d,dT>::Index& lambda,
 	       int& k1, int& k2)
   {
+#if 1
+    basis.support(lambda, k1, k2);
+#else
+    // the following code has moved to DSBasis:
     if (lambda.e() == 0) // generator
       {
 	const Matrix<double>& CLA = basis.get_CLA();
@@ -75,6 +80,7 @@ namespace WaveletTL
 	support(basis, typename DSBasis<d,dT>::Index(lambda.j()+1, 0, kleft, &basis), k1, dummy);
 	support(basis, typename DSBasis<d,dT>::Index(lambda.j()+1, 0, kright, &basis), dummy, k2);
       }
+#endif
   }
 
   template <int d, int dT>

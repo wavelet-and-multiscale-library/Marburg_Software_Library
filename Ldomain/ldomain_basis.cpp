@@ -134,6 +134,198 @@ namespace WaveletTL
   }
 
   template <class IBASIS>
+  void
+  LDomainBasis<IBASIS>::support(const Index& lambda, Support& supp) const
+  {
+    const int ecode = lambda.e()[0]+2*lambda.e()[1];
+    const int lambdaj = lambda.j();
+    
+    if (ecode == 0) {
+      // psi_lambda is a generator. Here we know by construction of the
+      // composite basis that per patch, psi_lambda looks like a single
+      // tensor product of 1D generators (possibly weighted by a factor).
+      
+      supp.j = lambdaj;
+      
+      switch (lambda.p()) {
+      case 0:
+ 	// psi_lambda completely lives on patch 0
+
+	basis1d().support(typename IBASIS::Index(lambdaj,
+						 0,
+						 lambda.k()[0],
+						 &basis1d()),
+			  supp.xmin[0],
+			  supp.xmax[0]);
+	
+	basis1d().support(typename IBASIS::Index(lambdaj,
+						 0,
+						 lambda.k()[1],
+						 &basis1d()),
+			  supp.ymin[0],
+			  supp.ymax[0]);
+	
+	supp.xmin[1] = supp.xmin[2] = -1;
+
+ 	break;
+      case 1:
+ 	// psi_lambda completely lives on patch 1
+
+	basis1d().support(typename IBASIS::Index(lambdaj,
+						 0,
+						 lambda.k()[0],
+						 &basis1d()),
+			  supp.xmin[1],
+			  supp.xmax[1]);
+	
+	basis1d().support(typename IBASIS::Index(lambdaj,
+						 0,
+						 lambda.k()[1],
+						 &basis1d()),
+			  supp.ymin[1],
+			  supp.ymax[1]);
+	
+	supp.xmin[0] = supp.xmin[2] = -1;
+
+	break;
+      case 2:
+ 	// psi_lambda completely lives on patch 2
+
+	basis1d().support(typename IBASIS::Index(lambdaj,
+						 0,
+						 lambda.k()[0],
+						 &basis1d()),
+			  supp.xmin[2],
+			  supp.xmax[2]);
+	
+	basis1d().support(typename IBASIS::Index(lambdaj,
+						 0,
+						 lambda.k()[1],
+						 &basis1d()),
+			  supp.ymin[2],
+			  supp.ymax[2]);
+	
+	supp.xmin[0] = supp.xmin[1] = -1;
+
+ 	break;
+      case 3:
+  	// psi_lambda lives on patches 0 and 1
+	
+	basis1d().support(typename IBASIS::Index(lambdaj,
+						 0,
+						 lambda.k()[0],
+						 &basis1d()),
+			  supp.xmin[0],
+			  supp.xmax[0]);
+
+	basis1d().support(typename IBASIS::Index(lambdaj,
+						 0,
+						 basis1d().DeltaLmin(),
+						 &basis1d()),
+			  supp.ymin[0],
+			  supp.ymax[0]);
+	
+	basis1d().support(typename IBASIS::Index(lambdaj,
+						 0,
+						 lambda.k()[0],
+						 &basis1d()),
+			  supp.xmin[1],
+			  supp.xmax[1]);
+	
+	basis1d().support(typename IBASIS::Index(lambdaj,
+						 0,
+						 basis1d().DeltaRmax(lambdaj),
+						 &basis1d()),
+			  supp.ymin[1],
+			  supp.ymax[1]);
+	
+	supp.xmin[2] = -1;
+	
+	break;
+      case 4:
+ 	// psi_lambda lives on patches 1 and 2
+
+	basis1d().support(typename IBASIS::Index(lambdaj,
+						 0,
+						 basis1d().DeltaRmax(lambdaj),
+						 &basis1d()),
+			  supp.xmin[1],
+			  supp.xmax[1]);
+	
+	basis1d().support(typename IBASIS::Index(lambdaj,
+						 0,
+						 lambda.k()[1],
+						 &basis1d()),
+			  supp.ymin[1],
+			  supp.ymax[1]);
+	
+	basis1d().support(typename IBASIS::Index(lambdaj,
+						 0,
+						 basis1d().DeltaLmin(),
+						 &basis1d()),
+			  supp.xmin[2],
+			  supp.xmax[2]);
+	
+	basis1d().support(typename IBASIS::Index(lambdaj,
+						 0,
+						 lambda.k()[1],
+						 &basis1d()),
+			  supp.ymin[2],
+			  supp.ymax[2]);
+	
+	supp.xmin[0] = -1;
+	
+	break;
+      }
+
+    } else {
+      // wavelet
+
+      supp.j = lambdaj+1;
+
+      // compute the expansion coefficients of psi_lambda w.r.t. the
+      // generators of the next higher scale, then aggregating all the supports
+      // (of course, this is a brute force solution...)
+      InfiniteVector<double, Index> gcoeffs;
+      reconstruct_1(lambda, lambdaj+1, gcoeffs);
+      
+      Support tempsupp;
+
+      // initialize the support with an "empty" set
+      for (int p = 0; p <= 2; p++) {
+	supp.xmin[p] = -1;
+      }
+
+      for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
+	     itend(gcoeffs.end()); it != itend; ++it)
+	{
+	  // compute supp(psi_mu)
+	  support(it.index(), tempsupp);
+	  
+	  // for each patch p, update the corresponding support estimate
+	  for (int p = 0; p <= 2; p++) {
+	    if (tempsupp.xmin[p] != -1) {
+	      // a nontrivial new support share, we have to do something
+	      if (supp.xmin[p] == -1) {
+		// previous support estimate was "empty", we have to insert a nontrivial new one
+		supp.xmin[p] = tempsupp.xmin[p];
+		supp.xmax[p] = tempsupp.xmax[p];
+		supp.ymin[p] = tempsupp.ymin[p];
+		supp.ymax[p] = tempsupp.ymax[p];
+	      } else {
+		// previous support estimate was nontrivial, we have to compute a new one
+		supp.xmin[p] = std::min(supp.xmin[p], tempsupp.xmin[p]);
+		supp.xmax[p] = std::max(supp.xmax[p], tempsupp.xmax[p]);
+		supp.ymin[p] = std::min(supp.ymin[p], tempsupp.ymin[p]);
+		supp.ymax[p] = std::max(supp.ymax[p], tempsupp.ymax[p]);
+	      }
+	    }
+	  }
+	}
+    }
+  }
+  
+  template <class IBASIS>
   const BlockMatrix<double>&
   LDomainBasis<IBASIS>::get_Mj0 (const int j) const {
     // check whether the j-th matrix already exists in the cache
@@ -576,7 +768,9 @@ namespace WaveletTL
     clock_t tstart, tend, tmiddle1, tmiddle2;
 #endif
 
-    if (lambda.j() >= j) {
+    const int lambdaj = lambda.j();
+
+    if (lambdaj >= j) {
       // then we can just copy psi_lambda
       c.add_coefficient(lambda, 1.0);
     } else {
@@ -595,7 +789,7 @@ namespace WaveletTL
       //   Mj1c = tensor product of factors (I-Mj0*(sqrt(2)*e_1 cut(Mj0T^T) sqrt(2)*e_n))*Mj1
       
       // storage for the corresponding column of Mj1
-      Vector<double> generators(Deltasize(lambda.j()+1));
+      Vector<double> generators(Deltasize(lambdaj+1));
 
 #if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
       tstart = clock();
@@ -607,13 +801,13 @@ namespace WaveletTL
 	// generator
 
 	// compute the corresponding column of Mj0
-	const BlockMatrix<double>& Mj0 = get_Mj0(lambda.j());
-	Vector<double> unitvector(Deltasize(lambda.j()));
+	const BlockMatrix<double>& Mj0 = get_Mj0(lambdaj);
+	Vector<double> unitvector(Deltasize(lambdaj));
 #if 0
 	// check the number
 	int id = lambda.number();
 	int idcheck = 0;
-	for (Index mu = first_generator(lambda.j()); mu != lambda; ++mu) idcheck++;
+	for (Index mu = first_generator(lambdaj); mu != lambda; ++mu) idcheck++;
 	if (id != idcheck) {
 	  cout << "in LDomainBasis::reconstruct_1(), id != idcheck!" << endl;
 	  abort();
@@ -626,60 +820,60 @@ namespace WaveletTL
 	  // (1,0)-wavelet
 	  
 	  // compute the corresponding column of Mj1c_10
-	  const BlockMatrix<double>& Mj1c_10 = get_Mj1c_10(lambda.j());
-	  Vector<double> unitvector(Nabla10size(lambda.j()));
-	  typename Index::type_type e(1, 0);
+	  const BlockMatrix<double>& Mj1c_10 = get_Mj1c_10(lambdaj);
+	  Vector<double> unitvector(Nabla10size(lambdaj));
+	  const typename Index::type_type e(1, 0);
 #if 0
 	  // check the number
-	  int id = lambda.number()-first_wavelet(lambda.j(),e).number();
+	  int id = lambda.number()-first_wavelet(lambdaj,e).number();
 	  int idcheck = 0;
-	  for (Index mu = first_wavelet(lambda.j(), e); mu != lambda; ++mu) idcheck++;
+	  for (Index mu = first_wavelet(lambdaj, e); mu != lambda; ++mu) idcheck++;
 	  if (id != idcheck) {
 	    cout << "in LDomainBasis::reconstruct_1(), id != idcheck!" << endl;
 	    abort();
 	  }
 #endif
- 	  unitvector[lambda.number()-first_wavelet(lambda.j(),e).number()] = 1.0;
+ 	  unitvector[lambda.number()-first_wavelet(lambdaj,e).number()] = 1.0;
  	  Mj1c_10.apply(unitvector, generators);	  
 	} else {
  	  if (ecode == 2) {
  	    // (0,1)-wavelet
 	    
 	    // compute the corresponding column of Mj1c_01
- 	    const BlockMatrix<double>& Mj1c_01 = get_Mj1c_01(lambda.j());
- 	    Vector<double> unitvector(Nabla01size(lambda.j()));
+ 	    const BlockMatrix<double>& Mj1c_01 = get_Mj1c_01(lambdaj);
+ 	    Vector<double> unitvector(Nabla01size(lambdaj));
 #if 0
 	    // check the number
-	    int id = lambda.number()-first_wavelet(lambda.j()).number();
+	    int id = lambda.number()-first_wavelet(lambdaj).number();
 	    int idcheck = 0;
-	    for (Index mu = first_wavelet(lambda.j()); mu != lambda; ++mu) idcheck++;
+	    for (Index mu = first_wavelet(lambdaj); mu != lambda; ++mu) idcheck++;
 	    if (id != idcheck) {
 	      cout << "in LDomainBasis::reconstruct_1(), id != idcheck!" << endl;
 	      abort();
 	    }
 #endif
-	    unitvector[lambda.number()-first_wavelet(lambda.j()).number()] = 1.0;
+	    unitvector[lambda.number()-first_wavelet(lambdaj).number()] = 1.0;
  	    Mj1c_01.apply(unitvector, generators);
 	  } else {
 	    // (1,1)-wavelet
 
 	    // compute the corresponding column of Mj1c_11
- 	    const BlockMatrix<double>& Mj1c_11 = get_Mj1c_11(lambda.j());
+ 	    const BlockMatrix<double>& Mj1c_11 = get_Mj1c_11(lambdaj);
 	    
- 	    Vector<double> unitvector(Nabla11size(lambda.j()));
+ 	    Vector<double> unitvector(Nabla11size(lambdaj));
 	    
-	    typename Index::type_type e(1, 1);
+	    const typename Index::type_type e(1, 1);
 #if 0
 	  // check the number
-	    int id = lambda.number()-first_wavelet(lambda.j(),e).number();
+	    int id = lambda.number()-first_wavelet(lambdaj,e).number();
 	    int idcheck = 0;
-	    for (Index mu = first_wavelet(lambda.j(), e); mu != lambda; ++mu) idcheck++;
+	    for (Index mu = first_wavelet(lambdaj, e); mu != lambda; ++mu) idcheck++;
 	    if (id != idcheck) {
 	      cout << "in LDomainBasis::reconstruct_1(), id != idcheck!" << endl;
 	      abort();
 	    }
 #endif
- 	    unitvector[lambda.number()-first_wavelet(lambda.j(),e).number()] = 1.0;
+ 	    unitvector[lambda.number()-first_wavelet(lambdaj,e).number()] = 1.0;
  	    Mj1c_11.apply(unitvector, generators);
 	  }
 	}
@@ -698,12 +892,12 @@ namespace WaveletTL
       // all relevant generators from the scale |lambda|+1
       // (this is the identity part of the biorthogonalization equation)
       unsigned int id = 0;
-      if (lambda.j()+1 >= j) {
-	for (Index mu(first_generator(lambda.j()+1)); id < generators.size(); id++, ++mu) {
+      if (lambdaj+1 >= j) {
+	for (Index mu(first_generator(lambdaj+1)); id < generators.size(); id++, ++mu) {
 	  c.add_coefficient(mu, generators[id]);
 	}
       } else {
-	for (Index mu(first_generator(lambda.j()+1)); id < generators.size(); id++, ++mu) {
+	for (Index mu(first_generator(lambdaj+1)); id < generators.size(); id++, ++mu) {
 	  InfiniteVector<double, Index> d;
 	  reconstruct_1(mu, j, d);
 	  c.add(generators[id], d);
@@ -722,25 +916,25 @@ namespace WaveletTL
       if (ecode > 0) {
  	// second part of the biorthogonalization equation,
  	// compute the corresponding column of -Mj0*Mj0T^T*Mj1c
-	Vector<double> help(Deltasize(lambda.j()));
- 	get_Mj0T(lambda.j()).apply_transposed(generators, help);
+	Vector<double> help(Deltasize(lambdaj));
+ 	get_Mj0T(lambdaj).apply_transposed(generators, help);
 #if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
 	tmiddle1 = clock();
 #endif
 	
- 	get_Mj0 (lambda.j()).apply(help, generators);
+ 	get_Mj0 (lambdaj).apply(help, generators);
 #if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
 	tmiddle2 = clock();
 #endif
 
  	// collect all relevant generators from the scale |lambda+1|
  	unsigned int id = 0;
-	if (lambda.j()+1 >= j) {
-	  for (Index mu(first_generator(lambda.j()+1)); id < generators.size(); id++, ++mu) {
+	if (lambdaj+1 >= j) {
+	  for (Index mu(first_generator(lambdaj+1)); id < generators.size(); id++, ++mu) {
 	    c.add_coefficient(mu, -generators[id]);
 	  }
 	} else {
-	  for (Index mu(first_generator(lambda.j()+1)); id < generators.size(); id++, ++mu) {
+	  for (Index mu(first_generator(lambdaj+1)); id < generators.size(); id++, ++mu) {
 	    InfiniteVector<double, Index> d;
 	    reconstruct_1(mu, j, d);
 	    c.add(-generators[id], d);

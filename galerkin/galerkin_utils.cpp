@@ -28,7 +28,7 @@ namespace WaveletTL
 	     it2 != itend; ++it2, ++column)
 	  {
 // 	    if (intersect_singular_support(P.basis(), *it1, *it2)) {
-	    double entry = P.a(*it2, *it1);
+	    const double entry = P.a(*it2, *it1);
 // 	    if (! entry == 0.) {
 // 	      cout << *it2 <<  " " << *it1 << endl; 
 // 	      cout << entry << endl;

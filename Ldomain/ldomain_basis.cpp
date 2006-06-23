@@ -336,7 +336,7 @@ namespace WaveletTL
 
 #if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
 	supp_misses++;
-	if ((supp_hits+supp_misses)%100000 == 0)
+	if ((supp_hits+supp_misses)%1000000 == 0)
 	  {
 	    cout << "[LdomainBasis support cache (hits/misses/total/hit ratio): ("
 		 << supp_hits << "/"
@@ -362,7 +362,7 @@ namespace WaveletTL
 	
 #if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
 	supp_hits++;
-	if ((supp_hits+supp_misses)%100000 == 0)
+	if ((supp_hits+supp_misses)%1000000 == 0)
 	  {
 	    cout << "[LdomainBasis support cache (hits/misses/total/hit ratio): ("
 		 << supp_hits << "/"

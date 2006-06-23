@@ -365,6 +365,70 @@ namespace WaveletTL
 
   template <class IBASIS>
   double
+  LDomainEquation<IBASIS>::norm_A() const
+  {
+    if (normA == 0.0) {
+      typedef typename WaveletBasis::Index Index;
+      std::set<Index> Lambda;
+      const int j0 = basis().j0();
+      const int jmax = j0+1; // the bigger the more precise...
+      for (Index lambda = basis().first_generator(j0);; ++lambda) {
+	Lambda.insert(lambda);
+	if (lambda == basis().last_wavelet(jmax)) break;
+      }
+      SparseMatrix<double> A_Lambda;
+      setup_stiffness_matrix(*this, Lambda, A_Lambda);
+      
+#if 1
+      double help;
+      unsigned int iterations;
+      LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
+      normAinv = 1./help;
+#else
+      Vector<double> xk(Lambda.size(), false);
+      xk = 1;
+      unsigned int iterations;
+      normA = PowerIteration(A_Lambda, xk, 1e-6, 100, iterations);
+#endif
+    }
+
+    return normA;
+  }
+   
+  template <class IBASIS>
+  double
+  LDomainEquation<IBASIS>::norm_Ainv() const
+  {
+    if (normAinv == 0.0) {
+      typedef typename WaveletBasis::Index Index;
+      std::set<Index> Lambda;
+      const int j0 = basis().j0();
+      const int jmax = j0+1;  // the bigger the more precise...
+      for (Index lambda = basis().first_generator(j0);; ++lambda) {
+	Lambda.insert(lambda);
+	if (lambda == basis().last_wavelet(jmax)) break;
+      }
+      SparseMatrix<double> A_Lambda;
+      setup_stiffness_matrix(*this, Lambda, A_Lambda);
+      
+#if 1
+      double help;
+      unsigned int iterations;
+      LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
+      normAinv = 1./help;
+#else
+      Vector<double> xk(Lambda.size(), false);
+      xk = 1;
+      unsigned int iterations;
+      normAinv = InversePowerIteration(A_Lambda, xk, 1e-6, 200, iterations);
+#endif
+    }
+
+    return normAinv;
+  }
+  
+  template <class IBASIS>
+  double
   LDomainEquation<IBASIS>::f(const Index& lambda) const
   {
     // f(v) = \int_0^1 g(t)v(t) dt

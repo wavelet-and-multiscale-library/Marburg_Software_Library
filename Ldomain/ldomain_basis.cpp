@@ -13,8 +13,10 @@ namespace WaveletTL
   LDomainBasis<IBASIS>::LDomainBasis()
     : basis1d_(false, false)
   {
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
     supp_hits = 0;
     supp_misses = 0;
+#endif
   }
 
   template <class IBASIS>

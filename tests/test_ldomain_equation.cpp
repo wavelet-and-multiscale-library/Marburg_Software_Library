@@ -14,7 +14,7 @@
 #include <interval/ds_basis.h>
 #include <interval/p_basis.h>
 
-// #define _WAVELETTL_LDOMAINBASIS_VERBOSITY 1
+#define _WAVELETTL_LDOMAINBASIS_VERBOSITY 1
 #include <Ldomain/ldomain_basis.h>
 
 // #define _WAVELETTL_GALERKINUTILS_VERBOSITY 1

@@ -175,6 +175,7 @@ namespace WaveletTL
     //! support cache
     typedef std::map<Index,Support> SupportCache;
     mutable SupportCache supp_cache;
+    mutable unsigned long supp_hits, supp_misses;
   };
 }
 

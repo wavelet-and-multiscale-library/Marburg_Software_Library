@@ -39,12 +39,12 @@ endif
 endif
 
 #CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
-#CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -ffast-math -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -funroll-loops -fomit-frame-pointer -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -msse -funroll-loops -fomit-frame-pointer -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
-CXXFLAGS += -O3 -msse2 -funroll-loops -fomit-frame-pointer -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+#CXXFLAGS += -O3 -msse2 -funroll-loops -fomit-frame-pointer -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -msse2 -ffast-math -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -mtune=opteron -msse2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O2 -march=pentium4 -msse2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe

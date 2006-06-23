@@ -27,15 +27,13 @@ namespace WaveletTL
   template <class IBASIS>
   const int
   LDomainBasis<IBASIS>::Nabla01size(const int j) const {
-    const unsigned int Deltaj = basis1d().Deltasize(j);
-    return 3*(Deltaj-2)*(1<<j)+(1<<j);
+    return (3*basis1d().Deltasize(j)-5)*(1<<j);
   }
   
   template <class IBASIS>
   const int
   LDomainBasis<IBASIS>::Nabla10size(const int j) const {
-    const unsigned int Deltaj = basis1d().Deltasize(j);
-    return 3*(Deltaj-2)*(1<<j)+(1<<j);
+    return (3*basis1d().Deltasize(j)-5)*(1<<j);
   }
   
   template <class IBASIS>
@@ -336,8 +334,8 @@ namespace WaveletTL
 	
 	supp_it = supp_cache.insert(supp_lb, value_type(lambda, supp));
 
-	supp_misses++;
 #if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
+	supp_misses++;
 	if ((supp_hits+supp_misses)%100000 == 0)
 	  {
 	    cout << "[LdomainBasis support cache (hits/misses/total/hit ratio): ("
@@ -354,16 +352,16 @@ namespace WaveletTL
     else
       {
 	// cache hit, copy the precomputed support
- 	supp.j = supp_it->second.j;
-	for (unsigned int i = 0; i < 3; i++) {
-	  supp.xmin[i] = supp_it->second.xmin[i];
-	  supp.xmax[i] = supp_it->second.xmax[i];
-	  supp.ymin[i] = supp_it->second.ymin[i];
-	  supp.ymax[i] = supp_it->second.ymax[i];
-	}
+  	supp.j = supp_it->second.j;
+  	for (unsigned int i = 0; i < 3; i++) {
+  	  supp.xmin[i] = supp_it->second.xmin[i];
+  	  supp.xmax[i] = supp_it->second.xmax[i];
+  	  supp.ymin[i] = supp_it->second.ymin[i];
+  	  supp.ymax[i] = supp_it->second.ymax[i];
+  	}
 	
-	supp_hits++;
 #if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
+	supp_hits++;
 	if ((supp_hits+supp_misses)%100000 == 0)
 	  {
 	    cout << "[LdomainBasis support cache (hits/misses/total/hit ratio): ("

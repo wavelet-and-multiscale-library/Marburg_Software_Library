@@ -16,6 +16,8 @@ namespace WaveletTL
 #if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
     supp_hits = 0;
     supp_misses = 0;
+    Mj1_hits = 0;
+    Mj1_misses = 0;
 #endif
   }
 
@@ -818,196 +820,242 @@ namespace WaveletTL
 				      InfiniteVector<double, Index>& c) const {
     typedef typename IBASIS::Index IIndex;
 
-#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
-    clock_t tstart, tend, tmiddle1, tmiddle2;
-#endif
-
     const int lambdaj = lambda.j();
 
     if (lambdaj >= j) {
       // then we can just copy psi_lambda
       c.add_coefficient(lambda, 1.0);
     } else {
+      // check whether the column of Mj1 already exists in the cache
+      typename Mj1Cache::iterator Mj1_lb(Mj1_cache.lower_bound(lambda));
+      typename Mj1Cache::iterator Mj1_it(Mj1_lb);
+      if (Mj1_lb == Mj1_cache.end() ||
+	  Mj1_cache.key_comp()(lambda, Mj1_lb->first))
+	{
+	  // compute the column and insert it into the cache
+	  typedef typename Mj1Cache::value_type value_type;
 
 #if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
-      cout << "LDomainBasis::reconstruct_1() nontrivially called with lambda=" << lambda << endl;
+	  clock_t tstart, tend, tmiddle1, tmiddle2;
 #endif
-
-      // For the reconstruction of psi_lambda, we have to compute
-      // the corresponding column of the transformation matrix Mj=(Mj0, Mj1).
-      // For the left half (generators), this is comparatively easy. The wavelet case
-      // will cause much more effort due to the biorthogonalization equation
-      //   Mj1 = (I-Mj0*(Mj0T^T))*Mj1c
-      //       = Mj1c - Mj0*(Mj0T^T)*Mj1c
-      // and the specific structure of the initial stable completion
-      //   Mj1c = tensor product of factors (I-Mj0*(sqrt(2)*e_1 cut(Mj0T^T) sqrt(2)*e_n))*Mj1
-      
-      // storage for the corresponding column of Mj1
-      Vector<double> generators(Deltasize(lambdaj+1));
-
-#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
-      tstart = clock();
-#endif
-
-      const int ecode(lambda.e()[0]+2*lambda.e()[1]);
-      
-      if (ecode == 0) {
-	// generator
-
-	// compute the corresponding column of Mj0
-	const BlockMatrix<double>& Mj0 = get_Mj0(lambdaj);
-	Vector<double> unitvector(Deltasize(lambdaj));
-#if 0
-	// check the number
-	int id = lambda.number();
-	int idcheck = 0;
-	for (Index mu = first_generator(lambdaj); mu != lambda; ++mu) idcheck++;
-	if (id != idcheck) {
-	  cout << "in LDomainBasis::reconstruct_1(), id != idcheck!" << endl;
-	  abort();
-	}
-#endif
- 	unitvector[lambda.number()] = 1.0;
-  	Mj0.apply(unitvector, generators);	
-      } else {
-	if (ecode == 1) {
-	  // (1,0)-wavelet
 	  
-	  // compute the corresponding column of Mj1c_10
-	  const BlockMatrix<double>& Mj1c_10 = get_Mj1c_10(lambdaj);
-	  Vector<double> unitvector(Nabla10size(lambdaj));
-	  const typename Index::type_type e(1, 0);
-#if 0
-	  // check the number
-	  int id = lambda.number()-first_wavelet(lambdaj,e).number();
-	  int idcheck = 0;
-	  for (Index mu = first_wavelet(lambdaj, e); mu != lambda; ++mu) idcheck++;
-	  if (id != idcheck) {
-	    cout << "in LDomainBasis::reconstruct_1(), id != idcheck!" << endl;
-	    abort();
-	  }
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
+	  cout << "LDomainBasis::reconstruct_1() nontrivially called with lambda=" << lambda << endl;
 #endif
- 	  unitvector[lambda.number()-first_wavelet(lambdaj,e).number()] = 1.0;
- 	  Mj1c_10.apply(unitvector, generators);	  
-	} else {
- 	  if (ecode == 2) {
- 	    // (0,1)-wavelet
+	  
+	  // For the reconstruction of psi_lambda, we have to compute
+	  // the corresponding column of the transformation matrix Mj=(Mj0, Mj1).
+	  // For the left half (generators), this is comparatively easy. The wavelet case
+	  // will cause much more effort due to the biorthogonalization equation
+	  //   Mj1 = (I-Mj0*(Mj0T^T))*Mj1c
+	  //       = Mj1c - Mj0*(Mj0T^T)*Mj1c
+	  // and the specific structure of the initial stable completion
+	  //   Mj1c = tensor product of factors (I-Mj0*(sqrt(2)*e_1 cut(Mj0T^T) sqrt(2)*e_n))*Mj1
+	  
+	  // storage for the corresponding column of Mj1
+	  Vector<double> generators(Deltasize(lambdaj+1));
+	  
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
+	  tstart = clock();
+#endif
+	  
+	  const int ecode(lambda.e()[0]+2*lambda.e()[1]);
+	  
+	  if (ecode == 0) {
+	    // generator
 	    
-	    // compute the corresponding column of Mj1c_01
- 	    const BlockMatrix<double>& Mj1c_01 = get_Mj1c_01(lambdaj);
- 	    Vector<double> unitvector(Nabla01size(lambdaj));
+	    // compute the corresponding column of Mj0
+	    const BlockMatrix<double>& Mj0 = get_Mj0(lambdaj);
+	    Vector<double> unitvector(Deltasize(lambdaj));
 #if 0
 	    // check the number
-	    int id = lambda.number()-first_wavelet(lambdaj).number();
+	    int id = lambda.number();
 	    int idcheck = 0;
-	    for (Index mu = first_wavelet(lambdaj); mu != lambda; ++mu) idcheck++;
+	    for (Index mu = first_generator(lambdaj); mu != lambda; ++mu) idcheck++;
 	    if (id != idcheck) {
 	      cout << "in LDomainBasis::reconstruct_1(), id != idcheck!" << endl;
 	      abort();
 	    }
 #endif
-	    unitvector[lambda.number()-first_wavelet(lambdaj).number()] = 1.0;
- 	    Mj1c_01.apply(unitvector, generators);
+	    unitvector[lambda.number()] = 1.0;
+	    Mj0.apply(unitvector, generators);	
 	  } else {
-	    // (1,1)-wavelet
-
-	    // compute the corresponding column of Mj1c_11
- 	    const BlockMatrix<double>& Mj1c_11 = get_Mj1c_11(lambdaj);
-	    
- 	    Vector<double> unitvector(Nabla11size(lambdaj));
-	    
-	    const typename Index::type_type e(1, 1);
+	    if (ecode == 1) {
+	      // (1,0)-wavelet
+	      
+	      // compute the corresponding column of Mj1c_10
+	      const BlockMatrix<double>& Mj1c_10 = get_Mj1c_10(lambdaj);
+	      Vector<double> unitvector(Nabla10size(lambdaj));
+	      const typename Index::type_type e(1, 0);
 #if 0
-	  // check the number
-	    int id = lambda.number()-first_wavelet(lambdaj,e).number();
-	    int idcheck = 0;
-	    for (Index mu = first_wavelet(lambdaj, e); mu != lambda; ++mu) idcheck++;
-	    if (id != idcheck) {
-	      cout << "in LDomainBasis::reconstruct_1(), id != idcheck!" << endl;
-	      abort();
+	      // check the number
+	      int id = lambda.number()-first_wavelet(lambdaj,e).number();
+	      int idcheck = 0;
+	      for (Index mu = first_wavelet(lambdaj, e); mu != lambda; ++mu) idcheck++;
+	      if (id != idcheck) {
+		cout << "in LDomainBasis::reconstruct_1(), id != idcheck!" << endl;
+		abort();
+	      }
+#endif
+	      unitvector[lambda.number()-first_wavelet(lambdaj,e).number()] = 1.0;
+	      Mj1c_10.apply(unitvector, generators);	  
+	    } else {
+	      if (ecode == 2) {
+		// (0,1)-wavelet
+		
+		// compute the corresponding column of Mj1c_01
+		const BlockMatrix<double>& Mj1c_01 = get_Mj1c_01(lambdaj);
+		Vector<double> unitvector(Nabla01size(lambdaj));
+#if 0
+		// check the number
+		int id = lambda.number()-first_wavelet(lambdaj).number();
+		int idcheck = 0;
+		for (Index mu = first_wavelet(lambdaj); mu != lambda; ++mu) idcheck++;
+		if (id != idcheck) {
+		  cout << "in LDomainBasis::reconstruct_1(), id != idcheck!" << endl;
+		  abort();
+		}
+#endif
+		unitvector[lambda.number()-first_wavelet(lambdaj).number()] = 1.0;
+		Mj1c_01.apply(unitvector, generators);
+	      } else {
+		// (1,1)-wavelet
+		
+		// compute the corresponding column of Mj1c_11
+		const BlockMatrix<double>& Mj1c_11 = get_Mj1c_11(lambdaj);
+		
+		Vector<double> unitvector(Nabla11size(lambdaj));
+		
+		const typename Index::type_type e(1, 1);
+#if 0
+		// check the number
+		int id = lambda.number()-first_wavelet(lambdaj,e).number();
+		int idcheck = 0;
+		for (Index mu = first_wavelet(lambdaj, e); mu != lambda; ++mu) idcheck++;
+		if (id != idcheck) {
+		  cout << "in LDomainBasis::reconstruct_1(), id != idcheck!" << endl;
+		  abort();
+		}
+#endif
+		unitvector[lambda.number()-first_wavelet(lambdaj,e).number()] = 1.0;
+		Mj1c_11.apply(unitvector, generators);
+	      }
+	    }
+	  }
+	  
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
+	  tend = clock();
+	  cout << "* in reconstruct_1(), time needed for the column of Mj1: "
+	       << (double)(tend-tstart)/CLOCKS_PER_SEC
+	       << "s" << endl;
+	  
+	  tstart = clock();
+#endif
+	  
+	  // Now that the corresponding column of Mj1 has been computed, we collect
+	  // all relevant generators from the scale |lambda|+1
+	  // (this is the identity part of the biorthogonalization equation)
+	  unsigned int id = 0;
+	  if (lambdaj+1 >= j) {
+	    for (Index mu(first_generator(lambdaj+1)); id < generators.size(); id++, ++mu) {
+	      c.add_coefficient(mu, generators[id]);
+	    }
+	  } else {
+	    for (Index mu(first_generator(lambdaj+1)); id < generators.size(); id++, ++mu) {
+	      InfiniteVector<double, Index> d;
+	      reconstruct_1(mu, j, d);
+	      c.add(generators[id], d);
+	    }
+	  }
+	  
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
+	  tend = clock();
+	  cout << "* in reconstruct_1(), time needed for the I part       : "
+	       << (double)(tend-tstart)/CLOCKS_PER_SEC
+	       << "s" << endl;
+	  
+	  tstart = clock();
+#endif
+	  
+	  if (ecode > 0) {
+	    // second part of the biorthogonalization equation,
+	    // compute the corresponding column of -Mj0*Mj0T^T*Mj1c
+	    Vector<double> help(Deltasize(lambdaj));
+	    get_Mj0T(lambdaj).apply_transposed(generators, help);
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
+	    tmiddle1 = clock();
+#endif
+	    
+	    get_Mj0 (lambdaj).apply(help, generators);
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
+	    tmiddle2 = clock();
+#endif
+	    
+	    // collect all relevant generators from the scale |lambda+1|
+	    unsigned int id = 0;
+	    if (lambdaj+1 >= j) {
+	      for (Index mu(first_generator(lambdaj+1)); id < generators.size(); id++, ++mu) {
+		c.add_coefficient(mu, -generators[id]);
+	      }
+	    } else {
+	      for (Index mu(first_generator(lambdaj+1)); id < generators.size(); id++, ++mu) {
+		InfiniteVector<double, Index> d;
+		reconstruct_1(mu, j, d);
+		c.add(-generators[id], d);
+	      }
+	    }
+	  }
+	  
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
+	  tend = clock();
+	  cout << "* in reconstruct_1(), time needed to apply Mj0T^T      : "
+	       << (double)(tmiddle1-tstart)/CLOCKS_PER_SEC
+	       << "s" << endl;
+	  cout << "* in reconstruct_1(), time needed to apply Mj0         : "
+	       << (double)(tmiddle2-tmiddle1)/CLOCKS_PER_SEC
+	       << "s" << endl;
+	  cout << "* in reconstruct_1(), time needed for the bio. part    : "
+	       << (double)(tend-tmiddle2)/CLOCKS_PER_SEC
+	       << "s" << endl;
+#endif
+	  
+	  Mj1_it = Mj1_cache.insert(Mj1_lb, value_type(lambda, c));
+
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
+	  Mj1_misses++;
+	  if ((Mj1_hits+Mj1_misses)%10000 == 0)
+	    {
+	      cout << "[LdomainBasis Mj1 cache (hits/misses/total/hit ratio): ("
+		   << Mj1_hits << "/"
+		   << Mj1_misses << "/"
+		   << Mj1_hits+Mj1_misses << "/"
+		   << (double) Mj1_hits/(Mj1_hits+Mj1_misses)
+		   << ")"
+		   << "]"
+		   << endl;
 	    }
 #endif
- 	    unitvector[lambda.number()-first_wavelet(lambdaj,e).number()] = 1.0;
- 	    Mj1c_11.apply(unitvector, generators);
-	  }
 	}
-      }
-
-#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
-      tend = clock();
-      cout << "* in reconstruct_1(), time needed for the column of Mj1: "
-	   << (double)(tend-tstart)/CLOCKS_PER_SEC
-	   << "s" << endl;
-
-      tstart = clock();
-#endif
-
-      // Now that the corresponding column of Mj1 has been computed, we collect
-      // all relevant generators from the scale |lambda|+1
-      // (this is the identity part of the biorthogonalization equation)
-      unsigned int id = 0;
-      if (lambdaj+1 >= j) {
-	for (Index mu(first_generator(lambdaj+1)); id < generators.size(); id++, ++mu) {
-	  c.add_coefficient(mu, generators[id]);
-	}
-      } else {
-	for (Index mu(first_generator(lambdaj+1)); id < generators.size(); id++, ++mu) {
-	  InfiniteVector<double, Index> d;
-	  reconstruct_1(mu, j, d);
-	  c.add(generators[id], d);
-	}
-      }
-      
-#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
-      tend = clock();
-      cout << "* in reconstruct_1(), time needed for the I part       : "
-	   << (double)(tend-tstart)/CLOCKS_PER_SEC
-	   << "s" << endl;
-
-      tstart = clock();
-#endif
-
-      if (ecode > 0) {
- 	// second part of the biorthogonalization equation,
- 	// compute the corresponding column of -Mj0*Mj0T^T*Mj1c
-	Vector<double> help(Deltasize(lambdaj));
- 	get_Mj0T(lambdaj).apply_transposed(generators, help);
-#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
-	tmiddle1 = clock();
-#endif
+      else
+	{
+	  // cache hit, copy the precomputed column
+	  c = Mj1_it->second;
 	
- 	get_Mj0 (lambdaj).apply(help, generators);
-#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
-	tmiddle2 = clock();
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
+	  Mj1_hits++;
+	  if ((Mj1_hits+Mj1_misses)%10000 == 0)
+	    {
+	      cout << "[LdomainBasis Mj1 cache (hits/misses/total/hit ratio): ("
+		   << Mj1_hits << "/"
+		   << Mj1_misses << "/"
+		   << Mj1_hits+Mj1_misses << "/"
+		   << (double) Mj1_hits/(Mj1_hits+Mj1_misses)
+		   << ")"
+		   << "]"
+		   << endl;
+	    }
 #endif
-
- 	// collect all relevant generators from the scale |lambda+1|
- 	unsigned int id = 0;
-	if (lambdaj+1 >= j) {
-	  for (Index mu(first_generator(lambdaj+1)); id < generators.size(); id++, ++mu) {
-	    c.add_coefficient(mu, -generators[id]);
-	  }
-	} else {
-	  for (Index mu(first_generator(lambdaj+1)); id < generators.size(); id++, ++mu) {
-	    InfiniteVector<double, Index> d;
-	    reconstruct_1(mu, j, d);
-	    c.add(-generators[id], d);
-	  }
- 	}
-      }
-
-#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 2
-      tend = clock();
-      cout << "* in reconstruct_1(), time needed to apply Mj0T^T      : "
-	   << (double)(tmiddle1-tstart)/CLOCKS_PER_SEC
-	   << "s" << endl;
-      cout << "* in reconstruct_1(), time needed to apply Mj0         : "
-	   << (double)(tmiddle2-tmiddle1)/CLOCKS_PER_SEC
-	   << "s" << endl;
-      cout << "* in reconstruct_1(), time needed for the bio. part    : "
-	   << (double)(tend-tmiddle2)/CLOCKS_PER_SEC
-	   << "s" << endl;
-#endif
+	}
     }
   }
   

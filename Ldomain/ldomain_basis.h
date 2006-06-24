@@ -172,6 +172,10 @@ namespace WaveletTL
     typedef std::map<int,SparseMatrix<double> > Matrix1DCache;
     mutable Matrix1DCache Mj1c_1d_cache;
 
+    typedef std::map<Index,InfiniteVector<double,Index> > Mj1Cache;
+    mutable Mj1Cache Mj1_cache;
+    mutable unsigned long Mj1_hits, Mj1_misses;
+
     //! support cache
     typedef std::map<Index,Support> SupportCache;
     mutable SupportCache supp_cache;

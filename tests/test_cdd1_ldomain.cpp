@@ -13,11 +13,10 @@
 #include <interval/p_basis.h>
 
 #define _WAVELETTL_LDOMAINBASIS_VERBOSITY 1
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
+
 #include <Ldomain/ldomain_basis.h>
-
 #include <galerkin/cached_problem.h>
-
-// #define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
 #include <galerkin/ldomain_equation.h>
 
 using namespace std;
@@ -62,8 +61,8 @@ int main()
 
   const int d  = 2;
   const int dT = 2;
-//   typedef DSBasis<d,dT> Basis1D;
-  typedef PBasis<d,dT> Basis1D;
+  typedef DSBasis<d,dT> Basis1D;
+//   typedef PBasis<d,dT> Basis1D;
 
   typedef LDomainBasis<Basis1D> LBasis;
   typedef LBasis::Index Index;
@@ -94,10 +93,11 @@ int main()
   //   CachedProblem<Problem> cproblem(&problem,  2.4999 ,  67.5863); // d=3, dT=5 (2^j-precond., not exact)
   //   CachedProblem<Problem> cproblem(&problem,  5.49044, 124.85  ); // d=3, dT=5 (diag. precond.)
 
-//   cout << "* estimate for normA: " << cproblem.norm_A() << endl;
-//   cout << "* estimate for normAinv: " << cproblem.norm_Ainv() << endl;
-  cout << "* estimate for normA: " << problem.norm_A() << endl;
-  cout << "* estimate for normAinv: " << problem.norm_Ainv() << endl;
+  double normA = problem.norm_A();
+  double normAinv = problem.norm_Ainv();
+
+  cout << "* estimate for normA: " << normA << endl;
+  cout << "* estimate for normAinv: " << normAinv << endl;
 
 //   InfiniteVector<double, Index> u_epsilon;
 

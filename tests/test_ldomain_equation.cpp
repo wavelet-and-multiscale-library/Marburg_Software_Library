@@ -17,7 +17,7 @@
 #define _WAVELETTL_LDOMAINBASIS_VERBOSITY 1
 #include <Ldomain/ldomain_basis.h>
 
-// #define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
 #include <galerkin/ldomain_equation.h>
 
 using namespace std;
@@ -61,10 +61,10 @@ int main()
 {
   cout << "Testing wavelet-Galerkin solution of an elliptic equation on the L-shaped domain ..." << endl;
 
-  const int d  = 2;
-  const int dT = 2;
-//   typedef DSBasis<d,dT> Basis1D;
-  typedef PBasis<d,dT> Basis1D;
+  const int d  = 3;
+  const int dT = 3;
+  typedef DSBasis<d,dT> Basis1D;
+//   typedef PBasis<d,dT> Basis1D;
   typedef LDomainBasis<Basis1D> LBasis;
   typedef LBasis::Index Index;
 
@@ -131,6 +131,7 @@ int main()
   err -= b;
   cout << linfty_norm(err) << endl;
 
+#if 1
   cout << "- point values of the solution:" << endl;
   InfiniteVector<double,Index> u;
   unsigned int i = 0;
@@ -146,6 +147,7 @@ int main()
 //   mySolution u_Lambda;
 //   s.add(-1.0, SampledMapping<2>(s, u_Lambda));
 //   cout << "  ... done, pointwise error: " << row_sum_norm(s.values()) << endl;
+#endif
 
   return 0;
 }

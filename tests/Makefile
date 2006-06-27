@@ -14,9 +14,9 @@ COMPILER = gnu
 #COMPILER = pgi
 
 ifeq ($(COMPILER),gnu)
-CXX = g++
+#CXX = g++
 #CXX = g++-2.95
-#CXX = $(HOME)/gcc-4.1.0/bin/g++
+CXX = $(HOME)/gcc-4.1.0/bin/g++
 #CXX = $(HOME)/gcc-4.1.1/bin/g++
 #CXX = $(HOME)/gcc-4.2-20060610/bin/g++
 
@@ -25,10 +25,12 @@ CXXFLAGS += -ftemplate-depth-40
 endif
 
 ifeq ($(CXX),$(HOME)/gcc-4.1.0/bin/g++)
-LDFLAGS += -Xlinker -rpath -Xlinker $(HOME)/gcc-4.1.0/lib
+#LDFLAGS += -Xlinker -rpath -Xlinker $(HOME)/gcc-4.1.0/lib
+LDFLAGS += -Xlinker -rpath -Xlinker $(HOME)/gcc-4.1.0/lib64
 else
 ifeq ($(CXX),$(HOME)/gcc-4.1.1/bin/g++)
-LDFLAGS += -Xlinker -rpath -Xlinker $(HOME)/gcc-4.1.1/lib
+#LDFLAGS += -Xlinker -rpath -Xlinker $(HOME)/gcc-4.1.1/lib
+LDFLAGS += -Xlinker -rpath -Xlinker $(HOME)/gcc-4.1.1/lib64
 else
 ifeq ($(CXX),$(HOME)/gcc-4.2-20060610/bin/g++)
 LDFLAGS += -Xlinker -rpath -Xlinker $(HOME)/gcc-4.2-20060610/lib
@@ -38,15 +40,16 @@ endif
 endif
 endif
 
-CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+#CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
-#CXXFLAGS += -O3 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+CXXFLAGS += -O3 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -ffast-math -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -funroll-loops -fomit-frame-pointer -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -msse -funroll-loops -fomit-frame-pointer -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -msse2 -funroll-loops -fomit-frame-pointer -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -msse2 -ffast-math -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -mtune=opteron -msse2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+#CXXFLAGS += -O3 -mtune=opteron -msse2 -ffast-math -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O2 -march=pentium4 -msse2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -march=pentium4 -msse2 -funroll-loops -fomit-frame-pointer -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O4 -march=pentium4 -msse3 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe

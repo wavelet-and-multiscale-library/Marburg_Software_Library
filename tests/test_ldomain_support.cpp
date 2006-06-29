@@ -33,7 +33,7 @@ int main()
   cout << "- last wavelet on the coarsest level: " << last_wavelet<Basis1D>(&basis, basis.j0()) << endl;
 #endif
 
-#if 0
+#if 1
   Index mu(first_generator<Basis1D>(&basis, basis.j0()));
 //   for (; !(mu.p() == 1); ++mu);
 //   for (; !(mu.p() == 2); ++mu);
@@ -65,7 +65,7 @@ int main()
        << endl;
 #endif
 
-#if 0
+#if 1
   Index eta(first_generator<Basis1D>(&basis, basis.j0()));
 //   for (; !(eta.p() == 1); ++eta);
 //   for (; !(eta.p() == 2); ++eta);

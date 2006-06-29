@@ -67,5 +67,17 @@ int main()
     cout << "  yi=" << yi << endl;
   }
   
+  for (unsigned int m = 0; m <= 1; m++) {
+    cout << "* some point values from the first derivative of the " << m << "-th cubic Hermite interpolant:" << endl;
+    
+    for (unsigned int i = 0; i <= n; i++) {
+      xi[i] = -1.5 + i*(1.5-(-1.5))/(double)n;
+      yi[i] = EvaluateHermiteSpline_x(m, xi[i]);
+    }
+    
+    cout << "  xi=" << xi << endl;
+    cout << "  yi=" << yi << endl;
+  }
+  
   return 0;
 }

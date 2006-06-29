@@ -40,8 +40,8 @@ endif
 endif
 endif
 
-#CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
-CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+#CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -ffast-math -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -funroll-loops -fomit-frame-pointer -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
@@ -82,10 +82,11 @@ EXEOBJF1 = \
   test_refinable.o test_regularity.o test_dm.o\
   test_r_basis.o test_cdf_expansion.o
 
-# set 2 of test programs: wavelet bases on the interval ([DS],[P],periodic)
+# set 2 of test programs: wavelet bases on the interval ([DS],[P],[JL],periodic)
 EXEOBJF2 = \
   test_ds_basis.o test_ds_support.o test_ds_expansion.o\
   test_p_basis.o test_p_support.o test_p_expansion.o\
+  test_jl_basis.o\
   test_periodic.o\
 
 # set 3 of test programs: wavelet bases on general higher-dim. domains ((mapped) cube, tensor prod.)

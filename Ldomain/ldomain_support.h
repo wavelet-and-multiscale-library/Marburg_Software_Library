@@ -28,16 +28,6 @@ namespace WaveletTL
 	       typename LDomainBasis<IBASIS>::Support& supp);
 
   /*!
-    Compute a set which contains the support of a single primal generator
-    or wavelet psi_lambda. Also compute the generator expansion coefficients of psi_lambda.
-  */
-  template <class IBASIS>
-  void support(const LDomainBasis<IBASIS>& basis,
-	       const typename LDomainBasis<IBASIS>::Index& lambda,
-	       typename LDomainBasis<IBASIS>::Support& supp,
-	       MathTL::InfiniteVector<double,typename LDomainBasis<IBASIS>::Index>& gcoeffs);
-  
-  /*!
     Compute the support intersection of a wavelet psi_lambda with the
     support of another wavelet psi_mu.
     Function returns true if a nontrivial intersection
@@ -49,21 +39,6 @@ namespace WaveletTL
 			  const typename LDomainBasis<IBASIS>::Index& lambda,
 			  const typename LDomainBasis<IBASIS>::Support& supp_mu,
 			  typename LDomainBasis<IBASIS>::Support& supp);
-
-  /*!
-    Compute the support intersection of a wavelet psi_lambda with the
-    support of another wavelet psi_mu.
-    Function returns true if a nontrivial intersection
-    exists, false otherwise. In the latter case 'supp'
-    has no meaningful value.
-    Also compute the generator expansion coefficients of psi_lambda.
-  */
-  template <class IBASIS>
-  bool intersect_supports(const LDomainBasis<IBASIS>& basis,
-			  const typename LDomainBasis<IBASIS>::Index& lambda,
-			  const typename LDomainBasis<IBASIS>::Support& supp_mu,
-			  typename LDomainBasis<IBASIS>::Support& supp,
-			  MathTL::InfiniteVector<double,typename LDomainBasis<IBASIS>::Index>& gcoeffs);
 
   /*!
     Compute the support intersection of two wavelets psi_lambda, psi_mu.
@@ -76,21 +51,6 @@ namespace WaveletTL
 			  const typename LDomainBasis<IBASIS>::Index& lambda,
 			  const typename LDomainBasis<IBASIS>::Index& mu,
 			  typename LDomainBasis<IBASIS>::Support& supp);
-
-  /*!
-    Compute the support intersection of two wavelets psi_lambda1, psi_lambda2.
-    Function returns true if a nontrivial intersection
-    exists, false otherwise. In the latter case 'supp'
-    has no meaningful value.
-    Also compute the generator expansion coefficients of psi_lambda1, psi_mu2.
-  */
-  template <class IBASIS>
-  bool intersect_supports(const LDomainBasis<IBASIS>& basis,
-			  const typename LDomainBasis<IBASIS>::Index& lambda1,
-			  const typename LDomainBasis<IBASIS>::Index& lambda2,
-			  typename LDomainBasis<IBASIS>::Support& supp,
-			  MathTL::InfiniteVector<double,typename LDomainBasis<IBASIS>::Index>& gcoeffs1,
-			  MathTL::InfiniteVector<double,typename LDomainBasis<IBASIS>::Index>& gcoeffs2);
 
   /*!
     For a given wavelet \psi_\lambda, compute all generators/wavelets

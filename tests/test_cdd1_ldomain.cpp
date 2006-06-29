@@ -59,10 +59,10 @@ int main()
 {
   cout << "Testing adaptive wavelet-Galerkin solution of a Poisson problem on the L-shaped domain with CDD1_SOLVE ..." << endl;
 
-  const int d  = 3;
-  const int dT = 3;
-  typedef DSBasis<d,dT> Basis1D;
-//   typedef PBasis<d,dT> Basis1D;
+  const int d  = 2;
+  const int dT = 2;
+//   typedef DSBasis<d,dT> Basis1D;
+  typedef PBasis<d,dT> Basis1D;
 
   typedef LDomainBasis<Basis1D> LBasis;
   typedef LBasis::Index Index;

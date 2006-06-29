@@ -73,9 +73,6 @@ namespace WaveletTL
     //! compute the support of psi_lambda, using the internal cache
     void support(const Index& lambda, Support& supp) const;
     
-    //! compute the support of psi_lambda, also return the generator expansion coefficients
-    void support(const Index& lambda, Support& supp, InfiniteVector<double,Index>& gcoeffs) const;
-    
     //! critical Sobolev regularity for the primal generators/wavelets
     static double primal_regularity() { return IBASIS::primal_regularity(); } // dirty, we should use max(1.5,~) instead
     

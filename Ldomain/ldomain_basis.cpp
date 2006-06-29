@@ -178,8 +178,7 @@ namespace WaveletTL
 			      supp.ymin[0],
 			      supp.ymax[0]);
 	    
-	    supp.xmin[1] = supp.xmax[1] = supp.ymin[1] = supp.ymax[1] = 0;
-	    supp.xmin[2] = supp.xmax[2] = supp.ymin[2] = supp.ymax[2] = 0;
+	    supp.xmin[1] = supp.xmin[2] = -1;
 	    
 	    break;
 	  case 1:
@@ -199,8 +198,7 @@ namespace WaveletTL
 			      supp.ymin[1],
 			      supp.ymax[1]);
 	    
-	    supp.xmin[0] = supp.xmax[0] = supp.ymin[0] = supp.ymax[0] = 0;
-	    supp.xmin[2] = supp.xmax[2] = supp.ymin[2] = supp.ymax[2] = 0;
+	    supp.xmin[0] = supp.xmin[2] = -1;
 	    
 	    break;
 	  case 2:
@@ -220,8 +218,7 @@ namespace WaveletTL
 			      supp.ymin[2],
 			      supp.ymax[2]);
 	    
-	    supp.xmin[0] = supp.xmax[0] = supp.ymin[0] = supp.ymax[0] = 0;
-	    supp.xmin[1] = supp.xmax[1] = supp.ymin[1] = supp.ymax[1] = 0;
+	    supp.xmin[0] = supp.xmin[1] = -1;
 	    
 	    break;
 	  case 3:
@@ -255,7 +252,7 @@ namespace WaveletTL
 			      supp.ymin[1],
 			      supp.ymax[1]);
 	    
-	    supp.xmin[2] = supp.xmax[2] = supp.ymin[2] = supp.ymax[2] = 0;
+	    supp.xmin[2] = -1;
 	    
 	    break;
 	  case 4:
@@ -289,7 +286,7 @@ namespace WaveletTL
 			      supp.ymin[2],
 			      supp.ymax[2]);
 	    
-	    supp.xmin[0] = supp.xmax[0] = supp.ymin[0] = supp.ymax[0] = 0;
+	    supp.xmin[0] = -1;
 	    
 	    break;
 	  }
@@ -308,7 +305,7 @@ namespace WaveletTL
 	  
 	  // initialize the support with an "empty" set
 	  for (int p = 0; p <= 2; p++) {
-	    supp.xmin[p] = supp.xmax[p] = supp.ymin[p] = supp.ymax[p] = 0;
+	    supp.xmin[p] = -1;
 	  }
 	  
 	  for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
@@ -319,9 +316,9 @@ namespace WaveletTL
 	      
 	      // for each patch p, update the corresponding support estimate
 	      for (int p = 0; p <= 2; p++) {
-		if (tempsupp.xmax[p] != 0) {
+		if (tempsupp.xmin[p] != -1) {
 		  // a nontrivial new support share, we have to do something
-		  if (supp.xmax[p] == 0) {
+		  if (supp.xmin[p] == -1) {
 		    // previous support estimate was "empty", we have to insert a nontrivial new one
 		    supp.xmin[p] = tempsupp.xmin[p];
 		    supp.xmax[p] = tempsupp.xmax[p];
@@ -382,20 +379,6 @@ namespace WaveletTL
 	  }
 #endif
       }  
-  }
-  
-  template <class IBASIS>
-  void
-  LDomainBasis<IBASIS>::support(const Index& lambda, Support& supp, InfiniteVector<double,Index>& gcoeffs) const
-  {
-    gcoeffs.clear();
-    if (lambda.e()[0]+2*lambda.e()[1] == 0) {
-      gcoeffs.set_coefficient(lambda, 1.0);
-    } else {
-      reconstruct_1(lambda, lambda.j()+1, gcoeffs);
-    }
-    
-    support(lambda, supp);
   }
   
   template <class IBASIS>

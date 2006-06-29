@@ -45,8 +45,7 @@ namespace WaveletTL
 		supp.ymin[0],
 		supp.ymax[0]);
 
-	supp.xmin[1] = supp.xmax[1] = supp.ymin[1] = supp.ymax[1] = 0;
-	supp.xmin[2] = supp.xmax[2] = supp.ymin[2] = supp.ymax[2] = 0;
+	supp.xmin[1] = supp.xmin[2] = -1;
 
  	break;
       case 1:
@@ -68,8 +67,7 @@ namespace WaveletTL
 		supp.ymin[1],
 		supp.ymax[1]);
 
-	supp.xmin[0] = supp.xmax[0] = supp.ymin[0] = supp.ymax[0] = 0;
-	supp.xmin[2] = supp.xmax[2] = supp.ymin[2] = supp.ymax[2] = 0;
+	supp.xmin[0] = supp.xmin[2] = -1;
 
 	break;
       case 2:
@@ -91,8 +89,7 @@ namespace WaveletTL
 		supp.ymin[2],
 		supp.ymax[2]);
 
-	supp.xmin[0] = supp.xmax[0] = supp.ymin[0] = supp.ymax[0] = 0;
-	supp.xmin[1] = supp.xmax[1] = supp.ymin[1] = supp.ymax[1] = 0;
+	supp.xmin[0] = supp.xmin[1] = -1;
 
  	break;
       case 3:
@@ -130,7 +127,7 @@ namespace WaveletTL
 		supp.ymin[1],
 		supp.ymax[1]);
 
-	supp.xmin[2] = supp.xmax[2] = supp.ymin[2] = supp.ymax[2] = 0;
+	supp.xmin[2] = -1;
 
 	break;
       case 4:
@@ -168,7 +165,7 @@ namespace WaveletTL
 		supp.ymin[2],
 		supp.ymax[2]);
 
-	supp.xmin[0] = supp.xmax[0] = supp.ymin[0] = supp.ymax[0] = 0;
+	supp.xmin[0] = -1;
 
 	break;
       }
@@ -189,7 +186,7 @@ namespace WaveletTL
 
       // initialize the support with an "empty" set
       for (int p = 0; p <= 2; p++) {
-	supp.xmin[p] = supp.xmax[p] = supp.ymin[p] = supp.ymax[p] = 0;
+	supp.xmin[p] = -1;
       }
 
       for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
@@ -200,9 +197,9 @@ namespace WaveletTL
 	  
 	  // for each patch p, update the corresponding support estimate
 	  for (int p = 0; p <= 2; p++) {
-	    if (tempsupp.xmax[p] != 0) {
+	    if (tempsupp.xmin[p] != -1) {
 	      // a nontrivial new support share, we have to do something
-	      if (supp.xmax[p] == 0) {
+	      if (supp.xmin[p] == -1) {
 		// previous support estimate was "empty", we have to insert a nontrivial new one
 		supp.xmin[p] = tempsupp.xmin[p];
 		supp.xmax[p] = tempsupp.xmax[p];
@@ -223,14 +220,6 @@ namespace WaveletTL
   }
 
   template <class IBASIS>
-  void support(const LDomainBasis<IBASIS>& basis,
-	       const typename LDomainBasis<IBASIS>::Index& lambda,
-	       typename LDomainBasis<IBASIS>::Support& supp,
-	       MathTL::InfiniteVector<double,typename LDomainBasis<IBASIS>::Index>& gcoeffs) {
-    basis.support(lambda, supp, gcoeffs);
-  }
-
-  template <class IBASIS>
   bool intersect_supports(const LDomainBasis<IBASIS>& basis,
 			  const typename LDomainBasis<IBASIS>::Index& lambda,
 			  const typename LDomainBasis<IBASIS>::Support& supp2,
@@ -248,85 +237,39 @@ namespace WaveletTL
     const int diff2 = supp.j-supp2.j;
     
     for (int p = 0; p <= 2; p++) {
-      const int xmin1 = supp1.xmin[p] << diff1;
-      const int xmax1 = supp1.xmax[p] << diff1;
-      const int xmin2 = supp2.xmin[p] << diff2;
-      const int xmax2 = supp2.xmax[p] << diff2;
-      
-      if (xmin1 < xmax2 && xmax1 > xmin2) {
-	// nontrivial intersection in x direction
+      if (supp1.xmin[p] != -1 && supp2.xmin[p] != -1) {
+	// intersection of two nontrivial sets on patch p
+
+	const int xmin1 = supp1.xmin[p] << diff1;
+	const int xmax1 = supp1.xmax[p] << diff1;
+	const int xmin2 = supp2.xmin[p] << diff2;
+	const int xmax2 = supp2.xmax[p] << diff2;
 	
-	const int ymin1 = supp1.ymin[p] << diff1;
-	const int ymax1 = supp1.ymax[p] << diff1;
-	const int ymin2 = supp2.ymin[p] << diff2;
-	const int ymax2 = supp2.ymax[p] << diff2;
-	
-	if (ymin1 < ymax2 && ymax1 > ymin2) {
-	  // nontrivial intersection in y direction
+	if (xmin1 < xmax2 && xmax1 > xmin2) {
+	  // nontrivial intersection in x direction
+
+	  const int ymin1 = supp1.ymin[p] << diff1;
+	  const int ymax1 = supp1.ymax[p] << diff1;
+	  const int ymin2 = supp2.ymin[p] << diff2;
+	  const int ymax2 = supp2.ymax[p] << diff2;
 	  
-	  supp.xmin[p] = std::max(xmin1, xmin2);
-	  supp.xmax[p] = std::min(xmax1, xmax2);
-	  supp.ymin[p] = std::max(ymin1, ymin2);
-	  supp.ymax[p] = std::min(ymax1, ymax2);
-	  
-	  r = true;
+	  if (ymin1 < ymax2 && ymax1 > ymin2) {
+	    // nontrivial intersection in y direction
+
+	    supp.xmin[p] = std::max(xmin1, xmin2);
+	    supp.xmax[p] = std::min(xmax1, xmax2);
+	    supp.ymin[p] = std::max(ymin1, ymin2);
+	    supp.ymax[p] = std::min(ymax1, ymax2);
+	    
+	    r = true;
+	  } else {
+	    supp.xmin[p] = -1;
+	  }
 	} else {
-	  supp.xmin[p] = supp.xmax[p] = supp.ymin[p] = supp.ymax[p] = 0;
+	  supp.xmin[p] = -1;
 	}
       } else {
-	supp.xmin[p] = supp.xmax[p] = supp.ymin[p] = supp.ymax[p] = 0;
-      }
-    }
-    
-    return r;
-  }
-
-  template <class IBASIS>
-  bool intersect_supports(const LDomainBasis<IBASIS>& basis,
-			  const typename LDomainBasis<IBASIS>::Index& lambda,
-			  const typename LDomainBasis<IBASIS>::Support& supp2,
-			  typename LDomainBasis<IBASIS>::Support& supp,
-			  MathTL::InfiniteVector<double,typename LDomainBasis<IBASIS>::Index>& gcoeffs)
-  {
-    typedef typename LDomainBasis<IBASIS>::Support Support;
-
-    Support supp1;
-    support(basis, lambda, supp1, gcoeffs);
-    
-    bool r = false;
-    
-    supp.j = std::max(supp1.j, supp2.j);
-    const int diff1 = supp.j-supp1.j;
-    const int diff2 = supp.j-supp2.j;
-    
-    for (int p = 0; p <= 2; p++) {
-      const int xmin1 = supp1.xmin[p] << diff1;
-      const int xmax1 = supp1.xmax[p] << diff1;
-      const int xmin2 = supp2.xmin[p] << diff2;
-      const int xmax2 = supp2.xmax[p] << diff2;
-      
-      if (xmin1 < xmax2 && xmax1 > xmin2) {
-	// nontrivial intersection in x direction
-	
-	const int ymin1 = supp1.ymin[p] << diff1;
-	const int ymax1 = supp1.ymax[p] << diff1;
-	const int ymin2 = supp2.ymin[p] << diff2;
-	const int ymax2 = supp2.ymax[p] << diff2;
-	
-	if (ymin1 < ymax2 && ymax1 > ymin2) {
-	  // nontrivial intersection in y direction
-	  
-	  supp.xmin[p] = std::max(xmin1, xmin2);
-	  supp.xmax[p] = std::min(xmax1, xmax2);
-	  supp.ymin[p] = std::max(ymin1, ymin2);
-	  supp.ymax[p] = std::min(ymax1, ymax2);
-	  
-	  r = true;
-	} else {
-	  supp.xmin[p] = supp.xmax[p] = supp.ymin[p] = supp.ymax[p] = 0;
-	}
-      } else {
-	supp.xmin[p] = supp.xmax[p] = supp.ymin[p] = supp.ymax[p] = 0;
+	supp.xmin[p] = -1;
       }
     }
     
@@ -345,22 +288,6 @@ namespace WaveletTL
     support(basis, lambda2, supp2);
 
     return intersect_supports(basis, lambda1, supp2, supp);
-  }
-  
-  template <class IBASIS>
-  bool intersect_supports(const LDomainBasis<IBASIS>& basis,
-			  const typename LDomainBasis<IBASIS>::Index& lambda1,
-			  const typename LDomainBasis<IBASIS>::Index& lambda2,
-			  typename LDomainBasis<IBASIS>::Support& supp,
-			  MathTL::InfiniteVector<double,typename LDomainBasis<IBASIS>::Index>& gcoeffs1,
-			  MathTL::InfiniteVector<double,typename LDomainBasis<IBASIS>::Index>& gcoeffs2)
-  {
-    typedef typename LDomainBasis<IBASIS>::Support Support;
-    
-    Support supp2;
-    support(basis, lambda2, supp2, gcoeffs2);
-
-    return intersect_supports(basis, lambda1, supp2, supp, gcoeffs1);
   }
   
   template <class IBASIS>

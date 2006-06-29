@@ -64,6 +64,33 @@ namespace MathTL
 
     return (1-x)*b20+x*b21;
   }
+
+  /*!
+    point evaluation of the i-th cubic Hermite basic interpolatory spline
+      i=0 : s(0)=1, s'(0)=0
+      i!=0: s(0)=0, s'(0)=1
+  */
+  double EvaluateHermiteSpline(const int i, const double x) {
+    if (i == 0) {
+      // phi_0, Bezier coefficients are {0,0,1,1,1,0,0}
+      if (x <= -1 || x >= 1) {
+	return 0;
+      } else {
+	return (x <= 0
+		? EvaluateBernsteinPolynomial(0, 0, 1, 1, x+1.0)
+		: EvaluateBernsteinPolynomial(1, 1, 0, 0, x));
+      }
+    } else {
+      // phi_1, Bezier coefficients are {0,0,-1/3,0,1/3,0,0}
+      if (x <= -1 || x >= 1) {
+	return 0;
+      } else {
+	return (x <= 0
+		? EvaluateBernsteinPolynomial(0, 0, -1./3., 0, x+1.0)
+		: EvaluateBernsteinPolynomial(0, 1./3., 0, 0, x));
+      }
+    }
+  }
 }
 
 #include <numerics/bezier.cpp>

@@ -14,9 +14,9 @@ COMPILER = gnu
 #COMPILER = pgi
 
 ifeq ($(COMPILER),gnu)
-#CXX = g++
+CXX = g++
 #CXX = g++-2.95
-CXX = $(HOME)/gcc-4.1.0/bin/g++
+#CXX = $(HOME)/gcc-4.1.0/bin/g++
 #CXX = $(HOME)/gcc-4.1.1/bin/g++
 #CXX = $(HOME)/gcc-4.2-20060610/bin/g++
 

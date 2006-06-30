@@ -126,7 +126,7 @@ namespace WaveletTL
 	k_++;
       break;
     case 1:
-      if (k_ == (1<<j_)-1) {
+      if (k_ == basis_->Nablamax(j_)) {
 	j_++;
 	k_ = 0;
       }
@@ -136,10 +136,10 @@ namespace WaveletTL
     default:
       break;
     }
-
+    
     return *this;
   }
-
+  
   template <class IBASIS>
   void
   IntervalIndex<IBASIS>::set_number()

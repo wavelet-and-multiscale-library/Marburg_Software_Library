@@ -14,9 +14,9 @@ COMPILER = gnu
 #COMPILER = pgi
 
 ifeq ($(COMPILER),gnu)
-CXX = g++
+#CXX = g++
 #CXX = g++-2.95
-#CXX = $(HOME)/gcc-4.1.0/bin/g++
+CXX = $(HOME)/gcc-4.1.0/bin/g++
 #CXX = $(HOME)/gcc-4.1.1/bin/g++
 #CXX = $(HOME)/gcc-4.2-20060610/bin/g++
 
@@ -86,8 +86,8 @@ EXEOBJF1 = \
 EXEOBJF2 = \
   test_ds_basis.o test_ds_support.o test_ds_expansion.o\
   test_p_basis.o test_p_support.o test_p_expansion.o\
-  test_jl_basis.o\
-  test_periodic.o\
+  test_jl_basis.o test_jl_support.o\
+  test_periodic.o
 
 # set 3 of test programs: wavelet bases on general higher-dim. domains ((mapped) cube, tensor prod.)
 EXEOBJF3 = \

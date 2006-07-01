@@ -39,7 +39,7 @@ int main()
   }
 #endif
   
-#if 0
+#if 1
   cout << "- calculating some support intersections:" << endl;
   for (Index lambda = first_generator(&basis, basis.j0());; ++lambda)
     {
@@ -65,7 +65,7 @@ int main()
     }
 #endif
 
-#if 0
+#if 1
   cout << "- compute all intersecting wavelets:" << endl;
   for (Index lambda = first_generator(&basis, basis.j0());; ++lambda)
     {

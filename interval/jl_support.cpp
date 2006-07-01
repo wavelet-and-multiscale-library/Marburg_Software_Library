@@ -40,64 +40,59 @@ namespace WaveletTL
       }
   }
   
-//   template <int d, int dT>
-//   bool intersect_supports(const PBasis<d,dT>& basis,
-// 			  const typename PBasis<d,dT>::Index& lambda,
-// 			  const int m, const int a, const int b,
-// 			  int& j, int& k1, int& k2)
-//   {
-//     const int j_lambda = lambda.j() + lambda.e();
-//     j = std::max(j_lambda, m);
-//     int k1_lambda, k2_lambda;
-//     support(basis, lambda, k1_lambda, k2_lambda);
-//     const int jmb = (1<<(j-m)) * b;
-//     const int jjk1 = (1<<(j-j_lambda)) * k1_lambda;
-//     if (jjk1 >= jmb)
-//       return false;
-//     else {
-//       const int jma = (1<<(j-m)) * a;
-//       const int jjk2 = (1<<(j-j_lambda)) * k2_lambda;
-//       if (jma >= jjk2)
-// 	return false;
-//       else {
-// 	k1 = std::max(jjk1, jma);
-// 	k2 = std::min(jjk2, jmb);
-//       }
-//     }
-//     return true;
-//   }
+  bool intersect_supports(const JLBasis& basis,
+ 			  const Index& lambda,
+ 			  const int m, const int a, const int b,
+ 			  int& j, int& k1, int& k2)
+  {
+    const int j_lambda = lambda.j() + lambda.e();
+    j = std::max(j_lambda, m);
+    int k1_lambda, k2_lambda;
+    support(basis, lambda, k1_lambda, k2_lambda);
+    const int jmb = (1<<(j-m)) * b;
+    const int jjk1 = (1<<(j-j_lambda)) * k1_lambda;
+    if (jjk1 >= jmb)
+      return false;
+    else {
+      const int jma = (1<<(j-m)) * a;
+      const int jjk2 = (1<<(j-j_lambda)) * k2_lambda;
+      if (jma >= jjk2)
+ 	return false;
+      else {
+ 	k1 = std::max(jjk1, jma);
+ 	k2 = std::min(jjk2, jmb);
+      }
+    }
+    return true;
+  }
   
-//   template <int d, int dT>
-//   inline
-//   bool intersect_supports(const PBasis<d,dT>& basis,
-// 			  const typename PBasis<d,dT>::Index& lambda,
-// 			  const typename PBasis<d,dT>::Index& nu,
-// 			  typename PBasis<d,dT>::Support& supp)
-//   {
-//     int k1_nu, k2_nu;
-//     support(basis, nu, k1_nu, k2_nu);
-//     return intersect_supports(basis, lambda, nu.j()+nu.e(), k1_nu, k2_nu,
-// 			      supp.j, supp.k1, supp.k2);
-//   }
+   inline
+   bool intersect_supports(const JLBasis& basis,
+			   const Index& lambda,
+			   const Index& nu,
+			   JLBasis::Support& supp)
+   {
+     int k1_nu, k2_nu;
+     support(basis, nu, k1_nu, k2_nu);
+     return intersect_supports(basis, lambda, nu.j()+nu.e(), k1_nu, k2_nu,
+			       supp.j, supp.k1, supp.k2);
+   }
+  
+  void intersecting_wavelets(const JLBasis& basis,
+			     const Index& lambda,
+			     const int j, const bool generators,
+			     std::list<std::pair<Index, JLBasis::Support> >& intersecting)
+  {
+    typedef JLBasis::Support Support;
 
-//   template <int d, int dT>
-//   void intersecting_wavelets(const PBasis<d,dT>& basis,
-// 			     const typename PBasis<d,dT>::Index& lambda,
-// 			     const int j, const bool generators,
-// 			     std::list<std::pair<typename PBasis<d,dT>::Index,
-// 			     typename PBasis<d,dT>::Support> >& intersecting)
-//   {
-//     typedef typename PBasis<d,dT>::Index Index;
-//     typedef typename PBasis<d,dT>::Support Support;
+    intersecting.clear();
 
-//     intersecting.clear();
-
-//     // compute support of \psi_\lambda
-//     const int j_lambda = lambda.j() + lambda.e();
-//     int k1_lambda, k2_lambda;
-//     support(basis, lambda, k1_lambda, k2_lambda);
+    // compute support of \psi_\lambda
+    const int j_lambda = lambda.j() + lambda.e();
+    int k1_lambda, k2_lambda;
+    support(basis, lambda, k1_lambda, k2_lambda);
     
-// #if 1
+#if 0
 //     // new code
 //     Support supp;
 //     if (generators) {
@@ -139,40 +134,38 @@ namespace WaveletTL
 // 	intersecting.push_back(std::make_pair(nu, supp));
 //       }
 //     }
-// #else
-//     // old code, a brute force solution
-//     Support supp;
-//     if (generators) {
-//       for (Index nu = first_generator(&basis, j);; ++nu) {
-// 	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
-// 	  intersecting.push_back(std::make_pair(nu, supp));
-// 	if (nu == last_generator(&basis, j)) break;
-//       }
-//     } else {
-//       for (Index nu = first_wavelet(&basis, j);; ++nu) {
-// 	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
-// 	  intersecting.push_back(std::make_pair(nu, supp));
-// 	if (nu == last_wavelet(&basis, j)) break;
-//       }
-//     }
-// #endif
-//   }
+#else
+    // old code, a brute force solution
+    Support supp;
+    if (generators) {
+      for (Index nu = first_generator(&basis, j);; ++nu) {
+ 	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
+ 	  intersecting.push_back(std::make_pair(nu, supp));
+ 	if (nu == last_generator(&basis, j)) break;
+      }
+    } else {
+      for (Index nu = first_wavelet(&basis, j);; ++nu) {
+ 	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
+ 	  intersecting.push_back(std::make_pair(nu, supp));
+ 	if (nu == last_wavelet(&basis, j)) break;
+      }
+    }
+#endif
+  }
 
-//   template <int d, int dT>
-//   void intersecting_wavelets(const PBasis<d,dT>& basis,
-// 			     const typename PBasis<d,dT>::Index& lambda,
-// 			     const int j, const bool generators,
-// 			     std::list<typename PBasis<d,dT>::Index>& intersecting)
-//   {
-//     typedef typename PBasis<d,dT>::Index Index;
-//     typedef typename PBasis<d,dT>::Support Support;
+  void intersecting_wavelets(const JLBasis& basis,
+ 			     const Index& lambda,
+ 			     const int j, const bool generators,
+ 			     std::list<Index>& intersecting)
+  {
+    typedef JLBasis::Support Support;
 
-//     intersecting.clear();
+    intersecting.clear();
 
-//     // compute support of \psi_\lambda
-//     const int j_lambda = lambda.j() + lambda.e();
-//     int k1_lambda, k2_lambda;
-//     support(basis, lambda, k1_lambda, k2_lambda);
+    // compute support of \psi_\lambda
+    const int j_lambda = lambda.j() + lambda.e();
+    int k1_lambda, k2_lambda;
+    support(basis, lambda, k1_lambda, k2_lambda);
     
 // #if 1
 //     // new code
@@ -211,24 +204,23 @@ namespace WaveletTL
 // 	intersecting.push_back(Index(j, 1, k, &basis));
 //     }
 // #else
-//     // old code, a brute force solution
-//     Support supp;
-//     if (generators) {
-//       for (Index nu = first_generator(&basis, j);; ++nu) {
-// 	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
-// 	  intersecting.push_back(nu);
-// 	if (nu == last_generator(&basis, j)) break;
-//       }
-//     } else {
-//       for (Index nu = first_wavelet(&basis, j);; ++nu) {
-// 	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
-// 	  intersecting.push_back(nu);
-// 	if (nu == last_wavelet(&basis, j)) break;
-//       }
-//     }
+    // old code, a brute force solution
+    Support supp;
+    if (generators) {
+      for (Index nu = first_generator(&basis, j);; ++nu) {
+ 	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
+ 	  intersecting.push_back(nu);
+ 	if (nu == last_generator(&basis, j)) break;
+      }
+    } else {
+      for (Index nu = first_wavelet(&basis, j);; ++nu) {
+ 	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
+ 	  intersecting.push_back(nu);
+ 	if (nu == last_wavelet(&basis, j)) break;
+      }
+    }
 // #endif
-
-//   }
+  }
 
 //   template <int d, int dT>
 //   bool intersect_singular_support(const PBasis<d,dT>& basis,

@@ -15,9 +15,6 @@
 #include <algebra/sparse_matrix.h>
 #include <interval/i_index.h>
 
-// for convenience, include also some functionality
-// #include <interval/jl_evaluate.h>
-
 using MathTL::Vector;
 using MathTL::Matrix;
 

@@ -39,7 +39,7 @@ int main()
   }
 #endif
   
-#if 1
+#if 0
   cout << "- calculating some support intersections:" << endl;
   for (Index lambda = first_generator(&basis, basis.j0());; ++lambda)
     {
@@ -54,14 +54,14 @@ int main()
 	   << "]"
 	   << endl;
 
-      cout << "support intersection with first generator on level j0: ";
-      bool inter = intersect_supports(basis, lambda, first_generator(&basis, basis.j0()), supp);
+      cout << "support intersection with first generator on level j0+1: ";
+      bool inter = intersect_supports(basis, lambda, first_generator(&basis, basis.j0()+1), supp);
       if (inter)
 	cout << "2^{-" << supp.j << "}[" << supp.k1 << "," << supp.k2 << "]" << endl;
       else
 	cout << "none" << endl;
       
-      if (lambda == last_wavelet(&basis, basis.j0())) break;
+      if (lambda == last_wavelet(&basis, basis.j0()+1)) break;
     }
 #endif
 

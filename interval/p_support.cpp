@@ -120,12 +120,12 @@ namespace WaveletTL
     // new code
     Support supp;
     if (generators) {
-      // the rightmost generator on the level j, s.th. its support intersects [a,b], fulfills
+      // the leftmost generator on the level j, s.th. its support intersects [a,b], fulfills
       //   2^{-j}(k+ell2) > a  but  2^{-j}(k-1+ell2) <= a,
       // so that ...
       const int firstk = std::max(basis.DeltaLmin(), (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda-ell2<d>())+1);
       
-      // the leftmost generator on the level j, s.th. its support intersects [a,b], fulfills
+      // the rightmost generator on the level j, s.th. its support intersects [a,b], fulfills
       //   2^{-j}(k+ell1) < b  but  2^{-j}(k+1+ell1) >= b,
       // so that ...
       const int lastk  = std::min(basis.DeltaRmax(j), (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda-ell1<d>())-1);
@@ -137,7 +137,7 @@ namespace WaveletTL
       }
     } else {
       // if the left boundary wavelets are not involved, then
-      // the rightmost wavelet on the level j, s.th. its support intersects [a,b], fulfills
+      // the leftmost wavelet on the level j, s.th. its support intersects [a,b], fulfills
       //   2^{-j}(k+(d+dT)/2) > a  but  2^{-j}(k-1+(d+dT)/2) <= a,
       // so that ...
       const int firstk = (ldexp(1.0,j-j_lambda)*k1_lambda < d+dT-1 // overestimate, TODO!
@@ -145,7 +145,7 @@ namespace WaveletTL
 			  : (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda-(d+dT)/2)+1);
 
       // if the right boundary wavelets are not involved, then
-      // the leftmost wavelet on the level j, s.th. its support intersects [a,b], fulfills
+      // the rightmost wavelet on the level j, s.th. its support intersects [a,b], fulfills
       //   2^{-j}(k-(d+dT)/2+1) < b  but  2^{-j}(k-(d+dT)/2+2) >= a,
       // so that ...
       const int lastk = (ldexp(1.0,-j_lambda)*k2_lambda > 1 - ldexp(1.0,-j)*(d+dT-1) // overestimate, TODO!
@@ -196,12 +196,12 @@ namespace WaveletTL
 #if 1
     // new code
     if (generators) {
-      // the rightmost generator on the level j, s.th. its support intersects [a,b], fulfills
+      // the leftmost generator on the level j, s.th. its support intersects [a,b], fulfills
       //   2^{-j}(k+ell2) > a  but  2^{-j}(k-1+ell2) <= a,
       // so that ...
       const int firstk = std::max(basis.DeltaLmin(), (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda-ell2<d>())+1);
       
-      // the leftmost generator on the level j, s.th. its support intersects [a,b], fulfills
+      // the rightmost generator on the level j, s.th. its support intersects [a,b], fulfills
       //   2^{-j}(k+ell1) < b  but  2^{-j}(k+1+ell1) >= b,
       // so that ...
       const int lastk  = std::min(basis.DeltaRmax(j), (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda-ell1<d>())-1);

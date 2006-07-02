@@ -120,7 +120,7 @@ namespace WaveletTL
     case 0:
       if (k_ == basis_->DeltaRmax(j_)) {
 	e_ = 1;
-	k_ = 0;
+	k_ = basis_->Nablamin();
       }
       else
 	k_++;

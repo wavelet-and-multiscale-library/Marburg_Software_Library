@@ -66,17 +66,17 @@ namespace WaveletTL
     return true;
   }
   
-   inline
-   bool intersect_supports(const JLBasis& basis,
-			   const Index& lambda,
-			   const Index& nu,
-			   JLBasis::Support& supp)
-   {
-     int k1_nu, k2_nu;
-     support(basis, nu, k1_nu, k2_nu);
-     return intersect_supports(basis, lambda, nu.j()+nu.e(), k1_nu, k2_nu,
-			       supp.j, supp.k1, supp.k2);
-   }
+  inline
+  bool intersect_supports(const JLBasis& basis,
+			  const Index& lambda,
+			  const Index& nu,
+			  JLBasis::Support& supp)
+  {
+    int k1_nu, k2_nu;
+    support(basis, nu, k1_nu, k2_nu);
+    return intersect_supports(basis, lambda, nu.j()+nu.e(), k1_nu, k2_nu,
+			      supp.j, supp.k1, supp.k2);
+  }
   
   void intersecting_wavelets(const JLBasis& basis,
 			     const Index& lambda,
@@ -92,48 +92,78 @@ namespace WaveletTL
     int k1_lambda, k2_lambda;
     support(basis, lambda, k1_lambda, k2_lambda);
     
-#if 0
-//     // new code
-//     Support supp;
-//     if (generators) {
-//       // the rightmost generator on the level j, s.th. its support intersects [a,b], fulfills
-//       //   2^{-j}(k+ell2) > a  but  2^{-j}(k-1+ell2) <= a,
-//       // so that ...
-//       const int firstk = std::max(basis.DeltaLmin(), (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda-ell2<d>())+1);
-      
-//       // the leftmost generator on the level j, s.th. its support intersects [a,b], fulfills
-//       //   2^{-j}(k+ell1) < b  but  2^{-j}(k+1+ell1) >= b,
-//       // so that ...
-//       const int lastk  = std::min(basis.DeltaRmax(j), (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda-ell1<d>())-1);
-      
-//       Index nu(j, 0, firstk, &basis);
-//       for (int k = firstk; k <= lastk; k++, ++nu) {
-// 	intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2);
-// 	intersecting.push_back(std::make_pair(nu, supp));
-//       }
-//     } else {
-//       // if the left boundary wavelets are not involved, then
-//       // the rightmost wavelet on the level j, s.th. its support intersects [a,b], fulfills
-//       //   2^{-j}(k+(d+dT)/2) > a  but  2^{-j}(k-1+(d+dT)/2) <= a,
-//       // so that ...
-//       const int firstk = (ldexp(1.0,j-j_lambda)*k1_lambda < d+dT-1 // overestimate, TODO!
-// 			  ? 0
-// 			  : (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda-(d+dT)/2)+1);
+#if 1
+    // new code
+    Support supp;
+    if (generators) {
+      // last index of phi_0-like generators
+      const int first_half = (1<<lambda.j())-basis.get_s1();
 
-//       // if the right boundary wavelets are not involved, then
-//       // the leftmost wavelet on the level j, s.th. its support intersects [a,b], fulfills
-//       //   2^{-j}(k-(d+dT)/2+1) < b  but  2^{-j}(k-(d+dT)/2+2) >= a,
-//       // so that ...
-//       const int lastk = (ldexp(1.0,-j_lambda)*k2_lambda > 1 - ldexp(1.0,-j)*(d+dT-1) // overestimate, TODO!
-// 			 ? (1<<j)-1
-// 			 : (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda+(d+dT)/2)-2);
+      // the leftmost generator (of type phi_0) on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k+1) > a  but  2^{-j}k <= a,
+      // so that ...
+      const int firstk0 = std::max(basis.DeltaLmin(), (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda-1)+1);
+      
+      // the rightmost generator (of type phi_0) on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k-1) < b  but  2^{-j}k >= b,
+      // so that ...
+      const int lastk0  = std::min(first_half, (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda+1)-1);
+      
+      // the leftmost generator (of type phi_1) on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k-first_half) > a  but  2^{-j}(k-first_half-1) <= a,
+      // so that ...
+      const int firstk1 = std::max(first_half+1, (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda)+first_half+1);
+      
+      // the rightmost generator (of type phi_1) on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k-first_half-2) < b  but  2^{-j}(k-first_half-3) >= b,
+      // so that ...
+      const int lastk1  = std::min(basis.DeltaRmax(j), (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda)+first_half+1);
 
-//       Index nu(j, 1, firstk, &basis);
-//       for (int k = firstk; k <= lastk; k++, ++nu) {
-// 	intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2);
-// 	intersecting.push_back(std::make_pair(nu, supp));
-//       }
-//     }
+      Index nu(j, 0, firstk0, &basis);
+      for (int k = firstk0; k <= lastk0; k++, ++nu) {
+ 	intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2);
+ 	intersecting.push_back(std::make_pair(nu, supp));
+      }
+      nu = Index(j, 0, firstk1, &basis);
+      for (int k = firstk1; k <= lastk1; k++, ++nu) {
+ 	intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2);
+ 	intersecting.push_back(std::make_pair(nu, supp));
+      }
+    } else {
+      // last index of psi_0-like wavelets
+      const int first_half = (1<<lambda.j())-1;
+
+      // the leftmost wavelet (of type psi_0) on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k+1) > a  but  2^{-j}k <= a,
+      // so that ...
+      const int firstk0 = std::max(1, (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda-1)+1);
+      
+      // the rightmost wavelet (of type psi_0) on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k-1) < b  but  2^{-j}k >= b,
+      // so that ...
+      const int lastk0  = std::min(first_half, (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda+1)-1);
+      
+      // the leftmost wavelet (of type psi_1) on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k-first_half) > a  but  2^{-j}(k-first_half-1) <= a,
+      // so that ...
+      const int firstk1 = std::max(first_half+1, (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda)+first_half+1);
+      
+      // the rightmost generator (of type phi_1) on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k-first_half-2) < b  but  2^{-j}(k-first_half-3) >= b,
+      // so that ...
+      const int lastk1  = std::min(basis.Nablamax(j), (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda)+first_half+1);
+
+      Index nu(j, 1, firstk0, &basis);
+      for (int k = firstk0; k <= lastk0; k++, ++nu) {
+ 	intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2);
+ 	intersecting.push_back(std::make_pair(nu, supp));
+      }
+      nu = Index(j, 1, firstk1, &basis);
+      for (int k = firstk1; k <= lastk1; k++, ++nu) {
+ 	intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2);
+ 	intersecting.push_back(std::make_pair(nu, supp));
+      }
+    }
 #else
     // old code, a brute force solution
     Support supp;
@@ -166,44 +196,66 @@ namespace WaveletTL
     const int j_lambda = lambda.j() + lambda.e();
     int k1_lambda, k2_lambda;
     support(basis, lambda, k1_lambda, k2_lambda);
-    
-// #if 1
-//     // new code
-//     if (generators) {
-//       // the rightmost generator on the level j, s.th. its support intersects [a,b], fulfills
-//       //   2^{-j}(k+ell2) > a  but  2^{-j}(k-1+ell2) <= a,
-//       // so that ...
-//       const int firstk = std::max(basis.DeltaLmin(), (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda-ell2<d>())+1);
+        
+#if 1
+    // new code
+    if (generators) {
+      const int first_half = (1<<lambda.j())-basis.get_s1();
+
+      // the leftmost generator (of type phi_0) on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k+1) > a  but  2^{-j}k <= a,
+      // so that ...
+      const int firstk0 = std::max(basis.DeltaLmin(), (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda-1)+1);
       
-//       // the leftmost generator on the level j, s.th. its support intersects [a,b], fulfills
-//       //   2^{-j}(k+ell1) < b  but  2^{-j}(k+1+ell1) >= b,
-//       // so that ...
-//       const int lastk  = std::min(basis.DeltaRmax(j), (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda-ell1<d>())-1);
+      // the rightmost generator (of type phi_0) on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k-1) < b  but  2^{-j}k >= b,
+      // so that ...
+      const int lastk0  = std::min(first_half, (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda+1)-1);
 
-//       for (int k = firstk; k <= lastk; k++)
-// 	intersecting.push_back(Index(j, 0, k, &basis));
+      // the leftmost generator (of type phi_1) on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k-first_half) > a  but  2^{-j}(k-first_half-1) <= a,
+      // so that ...
+      const int firstk1 = std::max(first_half+1, (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda)+first_half+1);
       
-//     } else {
-//       // if the left boundary wavelets are not involved, then
-//       // the rightmost wavelet on the level j, s.th. its support intersects [a,b], fulfills
-//       //   2^{-j}(k+(d+dT)/2) > a  but  2^{-j}(k-1+(d+dT)/2) <= a,
-//       // so that ...
-//       const int firstk = (ldexp(1.0,j-j_lambda)*k1_lambda < d+dT-1 // overestimate, TODO!
-// 			  ? 0
-// 			  : (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda-(d+dT)/2)+1);
+      // the rightmost generator (of type phi_1) on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k-first_half-2) < b  but  2^{-j}(k-first_half-3) >= b,
+      // so that ...
+      const int lastk1  = std::min(basis.DeltaRmax(j), (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda)+first_half+1);
 
-//       // if the right boundary wavelets are not involved, then
-//       // the leftmost wavelet on the level j, s.th. its support intersects [a,b], fulfills
-//       //   2^{-j}(k-(d+dT)/2+1) < b  but  2^{-j}(k-(d+dT)/2+2) >= a,
-//       // so that ...
-//       const int lastk = (ldexp(1.0,-j_lambda)*k2_lambda > 1 - ldexp(1.0,-j)*(d+dT-1) // overestimate, TODO!
-// 			 ? (1<<j)-1
-// 			 : (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda+(d+dT)/2)-2);
+      for (int k = firstk0; k <= lastk0; k++)
+ 	intersecting.push_back(Index(j, 0, k, &basis));
+      for (int k = firstk1; k <= lastk1; k++)
+ 	intersecting.push_back(Index(j, 0, k, &basis));
+    } else {
+      // last index of psi_0-like wavelets
+      const int first_half = (1<<lambda.j())-1;
+      
+      // the leftmost wavelet (of type psi_0) on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k+1) > a  but  2^{-j}k <= a,
+      // so that ...
+      const int firstk0 = std::max(1, (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda-1)+1);
+      
+      // the rightmost wavelet (of type psi_0) on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k-1) < b  but  2^{-j}k >= b,
+      // so that ...
+      const int lastk0  = std::min(first_half, (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda+1)-1);
+      
+      // the leftmost wavelet (of type psi_1) on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k-first_half) > a  but  2^{-j}(k-first_half-1) <= a,
+      // so that ...
+      const int firstk1 = std::max(first_half+1, (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda)+first_half+1);
+      
+      // the rightmost generator (of type phi_1) on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k-first_half-2) < b  but  2^{-j}(k-first_half-3) >= b,
+      // so that ...
+      const int lastk1  = std::min(basis.Nablamax(j), (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda)+first_half+1);
 
-//       for (int k = firstk; k <= lastk; k++)
-// 	intersecting.push_back(Index(j, 1, k, &basis));
-//     }
-// #else
+      for (int k = firstk0; k <= lastk0; k++)
+ 	intersecting.push_back(Index(j, 1, k, &basis));
+      for (int k = firstk1; k <= lastk1; k++)
+ 	intersecting.push_back(Index(j, 1, k, &basis));
+    }
+#else
     // old code, a brute force solution
     Support supp;
     if (generators) {
@@ -219,7 +271,7 @@ namespace WaveletTL
  	if (nu == last_wavelet(&basis, j)) break;
       }
     }
-// #endif
+#endif
   }
 
 //   template <int d, int dT>

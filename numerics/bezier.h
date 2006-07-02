@@ -10,6 +10,8 @@
 #ifndef _MATHTL_BEZIER_H
 #define _MATHTL_BEZIER_H
 
+#include <cmath>
+
 namespace MathTL
 {
   /*!
@@ -122,6 +124,14 @@ namespace MathTL
   }
 
   /*!
+    evaluate a translated and dilated version of the i-th cubic Hermite interpolant
+  */
+  double EvaluateHermiteSpline_td(const int i, const int j, const int k, const double x) {
+    const double factor(ldexp(1.0, j));
+    return sqrt(factor) * EvaluateHermiteSpline(i, factor * x - k);
+  }
+  
+  /*!
     point evaluation of the first derivative of the i-th cubic Hermite basic interpolatory spline
       i=0 : s(0)=1, s'(0)=0
       i!=0: s(0)=0, s'(0)=1
@@ -148,6 +158,14 @@ namespace MathTL
     }
   }
 
+  /*!
+    evaluate the first derivative of a translated and dilated version of the i-th cubic Hermite interpolant
+  */
+  double EvaluateHermiteSpline_td_x(const int i, const int j, const int k, const double x) {
+    const double factor(ldexp(1.0, j));
+    return factor * sqrt(factor) * EvaluateHermiteSpline_x(i, factor * x - k);
+  }
+  
 }
 
 #include <numerics/bezier.cpp>

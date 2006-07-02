@@ -27,14 +27,14 @@ namespace WaveletTL
   	// dual (unknown at the moment)
       }
     } else { // wavelet
-//       InfiniteVector<double, JLBasis::Index> gcoeffs;
-//       assert(primal);
-//       if (primal)
-//   	basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
+      InfiniteVector<double, JLBasis::Index> gcoeffs;
+      assert(primal);
+      if (primal)
+   	basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
 //       else
 //   	basis.reconstruct_t_1(lambda, lambda.j()+1, gcoeffs);
 
-//       return evaluate(basis, gcoeffs, primal, resolution);
+      return evaluate(basis, gcoeffs, primal, resolution);
     }
     
     return SampledMapping<1>(); // dummy return for the compiler
@@ -48,25 +48,26 @@ namespace WaveletTL
   {
     SampledMapping<1> result(Grid<1>(0, 1, 1<<resolution)); // zero
    
-//     if (coeffs.size() > 0) {
-//       // determine maximal level
-//       int jmax(0);
-//       typedef typename PBasis<d,dT>::Index Index;
-//       for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
-// 	     itend(coeffs.end()); it != itend; ++it)
-// 	jmax = std::max(it.index().j()+it.index().e(), jmax);
+    if (coeffs.size() > 0) {
+      // determine maximal level
+      int jmax(0);
+      typedef JLBasis::Index Index;
+      for (InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
+ 	     itend(coeffs.end()); it != itend; ++it)
+ 	jmax = std::max(it.index().j()+it.index().e(), jmax);
 
-//       // switch to generator representation
-//       InfiniteVector<double,Index> gcoeffs;
-//       if (primal)
-// 	basis.reconstruct(coeffs,jmax,gcoeffs);
+      // switch to generator representation
+      InfiniteVector<double,Index> gcoeffs;
+      assert(primal);
+      if (primal)
+ 	basis.reconstruct(coeffs,jmax,gcoeffs);
 //       else
 // 	basis.reconstruct_t(coeffs,jmax,gcoeffs);
 
-//       for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
-// 	     itend(gcoeffs.end()); it != itend; ++it)
-// 	result.add(*it, evaluate(basis, it.index(), primal, resolution));
-//     }
+      for (InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
+ 	     itend(gcoeffs.end()); it != itend; ++it)
+ 	result.add(*it, evaluate(basis, it.index(), primal, resolution));
+    }
     
     return result;
   }
@@ -99,12 +100,12 @@ namespace WaveletTL
       }
     } else {
       // wavelet
-//       typedef typename PBasis<d,dT>::Index Index;
-//       InfiniteVector<double,Index> gcoeffs;
-//       basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
-//       for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin());
-//  	   it != gcoeffs.end(); ++it)
-//  	r += *it * evaluate(basis, derivative, it.index(), x);
+      typedef JLBasis::Index Index;
+      InfiniteVector<double,Index> gcoeffs;
+      basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
+      for (InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin());
+  	   it != gcoeffs.end(); ++it)
+  	r += *it * evaluate(basis, derivative, it.index(), x);
     }
     
     return r;

@@ -12,11 +12,13 @@
 
 #include <algebra/vector.h>
 #include <algebra/matrix.h>
+#include <algebra/infinite_vector.h>
 #include <algebra/sparse_matrix.h>
 #include <interval/i_index.h>
 
 using MathTL::Vector;
 using MathTL::Matrix;
+using MathTL::InfiniteVector;
 
 namespace WaveletTL
 {
@@ -71,6 +73,15 @@ namespace WaveletTL
       int k2;
     } Support;
 
+    //! space dimension of the underlying domain
+    static const int space_dimension = 1;
+
+    //! critical Sobolev regularity for the primal generators/wavelets
+    static double primal_regularity() { return 3.5; }
+
+    //! number of vanishing moments for the primal wavelets
+    static unsigned int primal_vanishing_moments() { return 2; }
+
     //! read access to the primal b.c. order at x=0
     const int get_s0() const { return s0; }
 
@@ -90,6 +101,86 @@ namespace WaveletTL
 
     //! size of Nabla_j
     inline const int Nablasize(const int j) const { return 1<<(j+1); }
+
+    //! DECOMPOSE routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+      \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
+      where the multiscale decomposition starts with the coarsest
+      generator level jmin.
+    */
+    void decompose_1(const Index& lambda, const int jmin,
+		     InfiniteVector<double, Index>& c) const;
+
+    //! dual DECOMPOSE routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+      \tilde\psi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
+      where the multiscale decomposition starts with the coarsest
+      generator level jmin.
+    */
+    void decompose_t_1(const Index& lambda, const int jmin,
+		       InfiniteVector<double, Index>& c) const;
+
+    //! DECOMPOSE routine, full version
+    /*!
+      constructs for a given coefficient set c another one v with level >= jmin,
+      such that
+      \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
+    */
+    void decompose(const InfiniteVector<double, Index>& c, const int jmin,
+		   InfiniteVector<double, Index>& v) const;
+
+    //! dual DECOMPOSE routine, full version
+    /*!
+      constructs for a given coefficient set c another one v with level >= jmin,
+      such that
+      \sum_{\lambda}c_\lambda\tilde\psi_lambda = \sum_{\lambda'}d_{\lambda'}\tilde\psi_{\lambda'}
+    */
+    void decompose_t(const InfiniteVector<double, Index>& c, const int jmin,
+		     InfiniteVector<double, Index>& v) const;
+
+    //! RECONSTRUCT routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+      \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
+      where always |\lambda'|>=j
+    */
+    void reconstruct_1(const Index& lambda, const int j,
+		       InfiniteVector<double, Index>& c) const;
+
+    //! RECONSTRUCT routine, full version
+    /*!
+      Constructs for a given coefficient set c another one v,
+      such that
+      \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
+      where always |\lambda'|>=j
+    */
+    void reconstruct(const InfiniteVector<double, Index>& c, const int j,
+		     InfiniteVector<double, Index>& v) const;
+
+    //! dual RECONSTRUCT routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+      \tilde\psi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
+      where always |\lambda'|>=j
+    */
+    void reconstruct_t_1(const Index& lambda, const int j,
+			 InfiniteVector<double, Index>& c) const;
+
+    //! dual RECONSTRUCT routine, full version
+    /*!
+      Constructs for a given coefficient set c another one v,
+      such that
+      \sum_{\lambda}c_\lambda\tilde\psi_\lambda = \sum_{\lambda'}v_{\lambda'}\tilde\psi_{\lambda'}
+      where always |\lambda'|>=j
+    */
+    void reconstruct_t(const InfiniteVector<double, Index>& c, const int j,
+		       InfiniteVector<double, Index>& v) const;
 
   protected:
     //! coarsest possible level

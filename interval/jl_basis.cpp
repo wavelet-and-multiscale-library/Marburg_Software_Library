@@ -12,6 +12,13 @@ namespace WaveletTL
     setup();
   }
   
+  JLBasis::JLBasis(const bool bc_left, const bool bc_right) {
+    this->s0 = bc_left ? 1 : 0;
+    this->s1 = bc_right ? 1 : 0;
+
+    setup();
+  }
+
   void
   JLBasis::setup() {
     j0_ = 1;

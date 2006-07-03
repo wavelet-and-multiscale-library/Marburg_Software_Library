@@ -58,6 +58,12 @@ namespace WaveletTL
     */
     JLBasis(const int s0 = 1, const int s1 = 1);
 
+    /*!
+      alternative constructor, you can specify whether first order homogeneous Dirichlet b.c.'s
+      for the primal functions are set or not. The dual functions have free b.c.'s
+    */
+    JLBasis(const bool bc_left, const bool bc_right);
+
     //! coarsest possible level
     inline const int j0() const { return j0_; }
 

@@ -147,6 +147,7 @@ int main()
 
   // initialization with some precomputed JLBasis eigenvalue bounds:
   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 1.5753, 4.50639); // (2^j-precond.)
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 1.5753, 2.3546 ); // (diag-precond.)
 
 //   double normA = problem.norm_A();
 //   double normAinv = problem.norm_Ainv();
@@ -156,7 +157,7 @@ int main()
 
   InfiniteVector<double, Index> u_epsilon;
   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 12);
-//   CDD1_SOLVE(cproblem, 1e-10, u_epsilon, 18);
+//   CDD1_SOLVE(cproblem, 1e-10, u_epsilon, 20);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 20);
 //   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 10);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 10);

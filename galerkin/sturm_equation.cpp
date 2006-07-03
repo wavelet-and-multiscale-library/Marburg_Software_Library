@@ -67,7 +67,7 @@ namespace WaveletTL
   SturmEquation<WBASIS>::a(const typename WBASIS::Index& lambda,
 			   const typename WBASIS::Index& nu) const
   {
-    return a(lambda, nu, 4);
+    return a(lambda, nu, 8); // TODO: work in spline degree of psi_lambda, psi_nu?
   }
 
   template <class WBASIS>
@@ -205,7 +205,7 @@ namespace WaveletTL
     support(basis_, lambda, k1, k2);
 
     // Set up Gauss points and weights for a composite quadrature formula:
-    const unsigned int N_Gauss = 5;
+    const unsigned int N_Gauss = 7;
     const double h = ldexp(1.0, -j);
     Array1D<double> gauss_points (N_Gauss*(k2-k1)), vvalues;
     for (int patch = k1; patch < k2; patch++) // refers to 2^{-j}[patch,patch+1]

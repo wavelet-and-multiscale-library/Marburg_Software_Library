@@ -111,104 +111,102 @@ namespace WaveletTL
     return r;
   }
   
-//   template <int d, int dT>
-//   void
-//   evaluate(const PBasis<d,dT>& basis, const unsigned int derivative,
-// 	   const typename PBasis<d,dT>::Index& lambda,
-// 	   const Array1D<double>& points, Array1D<double>& values)
-//   {
-//     assert(derivative <= 1); // we only support derivatives up to the first order
+  void
+  evaluate(const JLBasis& basis, const unsigned int derivative,
+ 	   const JLBasis::Index& lambda,
+ 	   const Array1D<double>& points, Array1D<double>& values)
+  {
+    assert(derivative <= 1); // we only support derivatives up to the first order
 
-//     values.resize(points.size());
-//     for (unsigned int i(0); i < values.size(); i++)
-//       values[i] = 0;
+    values.resize(points.size());
+    for (unsigned int i(0); i < values.size(); i++)
+      values[i] = 0;
 
-//     if (lambda.e() == 0) {
-//       // generator
-//       if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) {
-// 	for (unsigned int m(0); m < points.size(); m++)
-// 	  values[m] = (derivative == 0
-// 		       ? EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
-// 							   (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
-// 							   1-points[m])
-// 		       : -EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
-// 							    (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
-// 							    1-points[m]));
-//       } else {
-// 	for (unsigned int m(0); m < points.size(); m++)
-// 	  values[m] = (derivative == 0
-// 		       ? EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
-// 							   lambda.k(),
-// 							   points[m])
-// 		       : EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
-// 							   lambda.k(),
-// 							   points[m]));
-//       }
-//     } else {
-//       // wavelet
-//       typedef typename PBasis<d,dT>::Index Index;
-//       InfiniteVector<double,Index> gcoeffs;
-//       basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
-//       Array1D<double> help(points.size());
-//       for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin());
-// 	   it != gcoeffs.end(); ++it)
-// 	{
-// 	  evaluate(basis, derivative, it.index(), points, help);
-// 	  for (unsigned int i = 0; i < points.size(); i++)
-// 	    values[i] += *it * help[i];
-// 	}
-//     }
-//   }
+    if (lambda.e() == 0) {
+      // generator
 
-//   template <int d, int dT>
-//   void evaluate(const PBasis<d,dT>& basis,
-// 		const typename PBasis<d,dT>::Index& lambda,
-// 		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues)
-//   {
-//     const unsigned int npoints(points.size());
-//     funcvalues.resize(npoints);
-//     dervalues.resize(npoints);
-//     for (unsigned int i(0); i < npoints; i++) {
-//       funcvalues[i] = 0;
-//       dervalues[i] = 0;
-//     }
+      // phi_{j,s0},...,phi_{j,2^j-s1}             <-> 2^{j/2}phi_0(2^j*x-k), k=s0,...,s^j-s1
+      // phi_{j,2^j-s1+1},...,phi_{j,2^{j+1}-s1+1} <-> 2^{j/2}phi_1(2^j*x-k), k=0,...,2^j
+      
+      const int first_half = (1<<lambda.j())-basis.get_s1();
+      if (lambda.k() <= first_half) {
+	// use phi_0
+	for (unsigned int m(0); m < points.size(); m++)
+	  values[m] = (derivative == 0
+		       ? MathTL::EvaluateHermiteSpline_td  (0, lambda.j(), lambda.k(), points[m])
+		       : MathTL::EvaluateHermiteSpline_td_x(0, lambda.j(), lambda.k(), points[m]));
+      } else {
+	// use phi_1
+	for (unsigned int m(0); m < points.size(); m++)
+	  values[m] = (derivative == 0
+		       ? MathTL::EvaluateHermiteSpline_td  (1, lambda.j(), lambda.k()-first_half-1, points[m])
+		       : MathTL::EvaluateHermiteSpline_td_x(1, lambda.j(), lambda.k()-first_half-1, points[m]));
+      }
+    } else {
+      // wavelet
 
-//     if (lambda.e() == 0) {
-//       // generator
-//       if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) {
-// 	for (unsigned int m(0); m < npoints; m++) {
-// 	  funcvalues[m] = EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
-// 							    (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
-// 							    1-points[m]);
-// 	  dervalues[m]  = -EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
-// 							     (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
-// 							     1-points[m]);
-// 	}
-//       } else {
-// 	for (unsigned int m(0); m < npoints; m++) {
-// 	  funcvalues[m] = EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
-// 							    lambda.k(),
-// 							    points[m]);
-// 	  dervalues[m]  = EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
-// 							    lambda.k(), 
-// 							    points[m]);
-// 	}
-//       }
-//     } else {
-//       // wavelet
-//       typedef typename PBasis<d,dT>::Index Index;
-//       InfiniteVector<double,Index> gcoeffs;
-//       basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
-//       Array1D<double> help1, help2;
-//       for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin());
-// 	   it != gcoeffs.end(); ++it)
-// 	{
-// 	  evaluate(basis, it.index(), points, help1, help2);
-// 	  for (unsigned int i = 0; i < npoints; i++) {
-// 	    funcvalues[i] += *it * help1[i];
-// 	    dervalues[i]  += *it * help2[i];
-// 	  }
-// 	}
-//     }
-//   }
+      typedef JLBasis::Index Index;
+      InfiniteVector<double,Index> gcoeffs;
+      basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
+      Array1D<double> help(points.size());
+      for (InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin());
+ 	   it != gcoeffs.end(); ++it)
+ 	{
+ 	  evaluate(basis, derivative, it.index(), points, help);
+ 	  for (unsigned int i = 0; i < points.size(); i++)
+ 	    values[i] += *it * help[i];
+ 	}
+    }
+  }
+  
+  void evaluate(const JLBasis& basis,
+ 		const JLBasis::Index& lambda,
+ 		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues)
+  {
+    const unsigned int npoints(points.size());
+    funcvalues.resize(npoints);
+    dervalues.resize(npoints);
+    for (unsigned int i(0); i < npoints; i++) {
+      funcvalues[i] = 0;
+      dervalues[i] = 0;
+    }
+
+    if (lambda.e() == 0) {
+      // generator
+
+      // phi_{j,s0},...,phi_{j,2^j-s1}             <-> 2^{j/2}phi_0(2^j*x-k), k=s0,...,s^j-s1
+      // phi_{j,2^j-s1+1},...,phi_{j,2^{j+1}-s1+1} <-> 2^{j/2}phi_1(2^j*x-k), k=0,...,2^j
+      
+      const int first_half = (1<<lambda.j())-basis.get_s1();
+      if (lambda.k() <= first_half) {
+	// use phi_0
+	for (unsigned int m(0); m < npoints; m++) {
+	  funcvalues[m] = MathTL::EvaluateHermiteSpline_td  (0, lambda.j(), lambda.k(), points[m]);
+	  dervalues[m]  = MathTL::EvaluateHermiteSpline_td_x(0, lambda.j(), lambda.k(), points[m]);
+	}
+      } else {
+	// use phi_1
+	for (unsigned int m(0); m < npoints; m++) {
+	  funcvalues[m] = MathTL::EvaluateHermiteSpline_td  (1, lambda.j(), lambda.k()-first_half-1, points[m]);
+	  dervalues[m]  = MathTL::EvaluateHermiteSpline_td_x(1, lambda.j(), lambda.k()-first_half-1, points[m]);
+	}
+      }
+    } else {
+      // wavelet
+
+      typedef JLBasis::Index Index;
+      InfiniteVector<double,Index> gcoeffs;
+      basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
+      Array1D<double> help1, help2;
+      for (InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin());
+ 	   it != gcoeffs.end(); ++it)
+ 	{
+ 	  evaluate(basis, it.index(), points, help1, help2);
+ 	  for (unsigned int i = 0; i < npoints; i++) {
+ 	    funcvalues[i] += *it * help1[i];
+ 	    dervalues[i]  += *it * help2[i];
+ 	  }
+	}
+    }
+  }
 }

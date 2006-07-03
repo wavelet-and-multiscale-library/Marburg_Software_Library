@@ -17,6 +17,38 @@ namespace WaveletTL
     j0_ = 1;
   }
   
+  inline
+  JLBasis::Index
+  JLBasis::first_generator(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 0, DeltaLmin(), this);
+  }
+  
+  inline
+  JLBasis::Index
+  JLBasis::last_generator(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 0, DeltaRmax(j), this);
+  }
+  
+  inline
+  JLBasis::Index
+  JLBasis::first_wavelet(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 1, Nablamin(), this);
+  }
+  
+  inline
+  JLBasis::Index
+  JLBasis::last_wavelet(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 1, Nablamax(j), this);
+  }
+
   void
   JLBasis::reconstruct(const InfiniteVector<double, Index>& c,
 		       const int j,
@@ -46,13 +78,88 @@ namespace WaveletTL
 	if (lambda.k() <= first_half) {
 	  // type phi_0
 	  // phi_0(x) = 1/2*phi_0(2*x+1)+phi_0(2*x)+1/2*phi_0(2*x-1)+3/4*phi_1(2*x+1)-3/4*phi_1(2*x-1)
-	  
-	  // TODO!!!
+	  const int offset = (1<<(lambda.j()+1))-get_s1()+1;
+
+	  for (int m = 2*lambda.k()-1; m <= 2*lambda.k()+1; m++) {
+	    switch (m-2*lambda.k()) {
+	    case -1:
+	      if (m >= get_s0() && m < offset) {
+		InfiniteVector<double, Index> dhelp;
+		reconstruct_1(Index(lambda.j()+1, 0, m, this), j, dhelp);
+		c.add(0.5*M_SQRT1_2, dhelp);
+	      }
+	      if (m >= 0 && m+offset <= DeltaRmax(lambda.j()+1)) {
+		InfiniteVector<double, Index> dhelp;
+		reconstruct_1(Index(lambda.j()+1, 0, offset+m, this), j, dhelp);
+		c.add(0.75*M_SQRT1_2, dhelp);
+	      }
+	      break;
+	    case 0:
+	      if (m >= get_s0() && m < offset) {
+		InfiniteVector<double, Index> dhelp;
+		reconstruct_1(Index(lambda.j()+1, 0, m, this), j, dhelp);
+		c.add(M_SQRT1_2, dhelp);
+	      }
+	      break;
+	    case 1:
+	      if (m >= get_s0() && m < offset) {
+		InfiniteVector<double, Index> dhelp;
+		reconstruct_1(Index(lambda.j()+1, 0, m, this), j, dhelp);
+		c.add(0.5*M_SQRT1_2, dhelp);
+	      }
+	      if (m >= 0 && m+offset <= DeltaRmax(lambda.j()+1)) {
+		InfiniteVector<double, Index> dhelp;
+		reconstruct_1(Index(lambda.j()+1, 0, offset+m, this), j, dhelp);
+		c.add(-0.75*M_SQRT1_2, dhelp);
+	      }
+	      break;
+	    default:
+	      break;
+	    }
+	  }
 	} else {
 	  // type phi_1
-	  // phi_1(x) = -1/8*phi_0(2*x+1)+1/8*phi_0(2*x-1)-1/8*phi_1(2*x+1)+1/2*phi_1(2*x)-1/8*phi_1(2*x+1)
+	  // phi_1(x) = -1/8*phi_0(2*x+1)+1/8*phi_0(2*x-1)-1/8*phi_1(2*x+1)+1/2*phi_1(2*x)-1/8*phi_1(2*x-1)
 	  
-	  // TODO!!!
+	  const int offset = (1<<(lambda.j()+1))-get_s1()+1;
+	  const int lambdak = lambda.k()-first_half-1;
+	  for (int m = 2*lambdak-1; m <= 2*lambdak+1; m++) {
+	    switch (m-2*lambdak) {
+	    case -1:
+	      if (m >= get_s0() && m < offset) {
+		InfiniteVector<double, Index> dhelp;
+		reconstruct_1(Index(lambda.j()+1, 0, m, this), j, dhelp);
+		c.add(-0.125*M_SQRT1_2, dhelp);
+	      }
+	      if (m >= 0 && m+offset <= DeltaRmax(lambda.j()+1)) {
+		InfiniteVector<double, Index> dhelp;
+		reconstruct_1(Index(lambda.j()+1, 0, offset+m, this), j, dhelp);
+		c.add(-0.125*M_SQRT1_2, dhelp);
+	      }
+	      break;
+	    case 0:
+	      if (m >= 0 && m+offset <= DeltaRmax(lambda.j()+1)) {
+		InfiniteVector<double, Index> dhelp;
+		reconstruct_1(Index(lambda.j()+1, 0, offset+m, this), j, dhelp);
+		c.add(0.5*M_SQRT1_2, dhelp);
+	      }
+	      break;
+	    case 1:
+	      if (m >= get_s0() && m < offset) {
+		InfiniteVector<double, Index> dhelp;
+		reconstruct_1(Index(lambda.j()+1, 0, m, this), j, dhelp);
+		c.add(0.125*M_SQRT1_2, dhelp);
+	      }
+	      if (m >= 0 && m+offset <= DeltaRmax(lambda.j()+1)) {
+		InfiniteVector<double, Index> dhelp;
+		reconstruct_1(Index(lambda.j()+1, 0, offset+m, this), j, dhelp);
+		c.add(-0.125*M_SQRT1_2, dhelp);
+	      }
+	      break;
+	    default:
+	      break;
+	    }
+	  }
 	}
       } else {
 	// wavelet

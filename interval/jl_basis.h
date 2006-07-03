@@ -102,6 +102,18 @@ namespace WaveletTL
     //! size of Nabla_j
     inline const int Nablasize(const int j) const { return 1<<(j+1); }
 
+    //! index of first (leftmost) generator on level j >= j0
+    Index first_generator(const int j) const;
+
+    //! index of last (rightmost) generator on level j >= j0
+    Index last_generator(const int j) const;
+
+    //! index of first (leftmost) wavelet on level j >= j0
+    Index first_wavelet(const int j) const;
+
+    //! index of last (rightmost) wavelet on level j >= j0
+    Index last_wavelet(const int j) const;
+
     //! DECOMPOSE routine, simple version
     /*!
       Constructs for a given single wavelet index lambda a coefficient set c,

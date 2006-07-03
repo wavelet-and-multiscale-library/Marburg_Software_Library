@@ -10,12 +10,14 @@
 #ifndef _WAVELETTL_JL_EVALUATE_H
 #define _WAVELETTL_JL_EVALUATE_H
 
+#include <utils/array1d.h>
 #include <geometry/sampled_mapping.h>
 #include <algebra/infinite_vector.h>
 #include <interval/jl_basis.h>
 
 using MathTL::SampledMapping;
 using MathTL::InfiniteVector;
+using MathTL::Array1D;
 
 namespace WaveletTL
 {
@@ -38,30 +40,28 @@ namespace WaveletTL
 			     const int resolution);
 
   /*!
-    point evaluation of (derivatives) of a single primal [P] generator
+    point evaluation of (derivatives) of a single primal [JL] generator
     or wavelet \psi_\lambda
   */
   double evaluate(const JLBasis& basis, const unsigned int derivative,
 		  const JLBasis::Index& lambda,
 		  const double x);
 
-/*   /\*! */
-/*     point evaluation of (derivatives) of a single primal [P] generator */
-/*     or wavelet \psi_\lambda at several points simultaneously */
-/*   *\/ */
-/*   template <int d, int dT> */
-/*   void evaluate(const PBasis<d,dT>& basis, const unsigned int derivative, */
-/* 		const typename PBasis<d,dT>::Index& lambda, */
-/* 		const Array1D<double>& points, Array1D<double>& values); */
+  /*!
+    point evaluation of (derivatives) of a single primal [JL] generator
+    or wavelet \psi_\lambda at several points simultaneously
+  */
+  void evaluate(const JLBasis& basis, const unsigned int derivative,
+		const JLBasis::Index& lambda,
+		const Array1D<double>& points, Array1D<double>& values);
 
-/*   /\*! */
-/*     point evaluation of 0-th and first derivative of a single primal [P] generator */
-/*     or wavelet \psi_\lambda at several points simultaneously */
-/*   *\/ */
-/*   template <int d, int dT> */
-/*   void evaluate(const PBasis<d,dT>& basis, */
-/* 		const typename PBasis<d,dT>::Index& lambda, */
-/* 		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues); */
+  /*!
+    point evaluation of 0-th and first derivative of a single primal [JL] generator
+    or wavelet \psi_\lambda at several points simultaneously
+  */
+  void evaluate(const JLBasis& basis,
+		const JLBasis::Index& lambda,
+		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);
 }
 
 #include <interval/jl_evaluate.cpp>

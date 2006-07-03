@@ -11,6 +11,10 @@
 #include <interval/i_index.h>
 #include <interval/ds_basis.h>
 #include <interval/p_basis.h>
+#include <interval/jl_basis.h>
+#include <interval/jl_support.h>
+#include <interval/jl_evaluate.h>
+
 #include <galerkin/sturm_equation.h>
 
 using namespace std;
@@ -79,10 +83,11 @@ int main()
 
   TestProblem<1> T;
 
-  const int d  = 3;
-  const int dT = 3; // be sure to use a continuous dual here, otherwise the RHS test will fail
+//   const int d  = 3;
+//   const int dT = 3; // be sure to use a continuous dual here, otherwise the RHS test will fail
 //   typedef DSBasis<d,dT> Basis;
-  typedef PBasis<d,dT> Basis;
+//   typedef PBasis<d,dT> Basis;
+  typedef JLBasis Basis;
   typedef Basis::Index Index;
 
   SturmEquation<Basis> eq(T);
@@ -114,7 +119,7 @@ int main()
 #endif  
 
   set<Index> Lambda;
-  const int jmax = 8; // eq.basis().j0()+3;
+  const int jmax = 5; // eq.basis().j0()+3;
   for (Index lambda = first_generator(&eq.basis(), eq.basis().j0());; ++lambda) {
     Lambda.insert(lambda);
     if (lambda == last_wavelet(&eq.basis(), jmax)) break;
@@ -136,12 +141,12 @@ int main()
   cout << "  ... done, time needed: " << time << " seconds" << endl;
 //   cout << "- (preconditioned) stiffness matrix A=" << endl << A << endl;
 
-//   cout << "- writing A to the file stiffmat.m ..." << endl;
-//   std::ofstream Astream("stiffmat.m");
-//   Astream << "A=";
-//   print_matrix(A, Astream);
-//   Astream << ";" << endl;
-//   cout << "  ... done!" << endl;
+  cout << "- writing A to the file stiffmat.m ..." << endl;
+  std::ofstream Astream("stiffmat.m");
+  Astream << "A=";
+  print_matrix(A, Astream);
+  Astream << ";" << endl;
+  cout << "  ... done!" << endl;
 
   cout << "- set up right-hand side..." << endl;
   tstart = clock();
@@ -154,7 +159,7 @@ int main()
 
   Vector<double> x(Lambda.size()), err(Lambda.size()); x = 0;
   unsigned int iterations;
-  CG(A, b, x, 1e-8, 100, iterations);
+  CG(A, b, x, 1e-8, 200, iterations);
   
   cout << "- solution coefficients: " << x;
   cout << " with residual (infinity) norm ";

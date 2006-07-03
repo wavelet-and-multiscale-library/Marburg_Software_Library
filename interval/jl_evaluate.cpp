@@ -85,18 +85,22 @@ namespace WaveletTL
 
       // phi_{j,s0},...,phi_{j,2^j-s1}             <-> 2^{j/2}phi_0(2^j*x-k), k=s0,...,s^j-s1
       // phi_{j,2^j-s1+1},...,phi_{j,2^{j+1}-s1+1} <-> 2^{j/2}phi_1(2^j*x-k), k=0,...,2^j
-      
       const int first_half = (1<<lambda.j())-basis.get_s1();
       if (lambda.k() <= first_half) {
 	// use phi_0
-	r = (derivative == 0
+	const double phi_0_factor = sqrt(5./24.);
+	r = phi_0_factor
+	  * (derivative == 0
 	     ? MathTL::EvaluateHermiteSpline_td  (0, lambda.j(), lambda.k(), x)
 	     : MathTL::EvaluateHermiteSpline_td_x(0, lambda.j(), lambda.k(), x));
       } else {
 	// use phi_1
-	r = (derivative == 0
-	     ? MathTL::EvaluateHermiteSpline_td  (1, lambda.j(), lambda.k()-first_half-1, x)
-	     : MathTL::EvaluateHermiteSpline_td_x(1, lambda.j(), lambda.k()-first_half-1, x));
+	const int lambdak = lambda.k()-first_half-1;
+	const double phi_1_factor = sqrt(15./8.);
+	r = phi_1_factor
+	  * (derivative == 0
+	     ? MathTL::EvaluateHermiteSpline_td  (1, lambda.j(), lambdak, x)
+	     : MathTL::EvaluateHermiteSpline_td_x(1, lambda.j(), lambdak, x));
       }
     } else {
       // wavelet
@@ -131,16 +135,20 @@ namespace WaveletTL
       const int first_half = (1<<lambda.j())-basis.get_s1();
       if (lambda.k() <= first_half) {
 	// use phi_0
+	const double phi_0_factor = sqrt(5./24.);
 	for (unsigned int m(0); m < points.size(); m++)
-	  values[m] = (derivative == 0
-		       ? MathTL::EvaluateHermiteSpline_td  (0, lambda.j(), lambda.k(), points[m])
-		       : MathTL::EvaluateHermiteSpline_td_x(0, lambda.j(), lambda.k(), points[m]));
+	  values[m] = phi_0_factor
+	    * (derivative == 0
+	       ? MathTL::EvaluateHermiteSpline_td  (0, lambda.j(), lambda.k(), points[m])
+	       : MathTL::EvaluateHermiteSpline_td_x(0, lambda.j(), lambda.k(), points[m]));
       } else {
 	// use phi_1
+	const double phi_1_factor = sqrt(15./8.);
 	for (unsigned int m(0); m < points.size(); m++)
-	  values[m] = (derivative == 0
-		       ? MathTL::EvaluateHermiteSpline_td  (1, lambda.j(), lambda.k()-first_half-1, points[m])
-		       : MathTL::EvaluateHermiteSpline_td_x(1, lambda.j(), lambda.k()-first_half-1, points[m]));
+	  values[m] = phi_1_factor
+	    * (derivative == 0
+	       ? MathTL::EvaluateHermiteSpline_td  (1, lambda.j(), lambda.k()-first_half-1, points[m])
+	       : MathTL::EvaluateHermiteSpline_td_x(1, lambda.j(), lambda.k()-first_half-1, points[m]));
       }
     } else {
       // wavelet
@@ -180,15 +188,21 @@ namespace WaveletTL
       const int first_half = (1<<lambda.j())-basis.get_s1();
       if (lambda.k() <= first_half) {
 	// use phi_0
+	const double phi_0_factor = sqrt(5./24.);
 	for (unsigned int m(0); m < npoints; m++) {
-	  funcvalues[m] = MathTL::EvaluateHermiteSpline_td  (0, lambda.j(), lambda.k(), points[m]);
-	  dervalues[m]  = MathTL::EvaluateHermiteSpline_td_x(0, lambda.j(), lambda.k(), points[m]);
+	  funcvalues[m] = phi_0_factor
+	    * MathTL::EvaluateHermiteSpline_td  (0, lambda.j(), lambda.k(), points[m]);
+	  dervalues[m]  = phi_0_factor
+	    * MathTL::EvaluateHermiteSpline_td_x(0, lambda.j(), lambda.k(), points[m]);
 	}
       } else {
 	// use phi_1
+	const double phi_1_factor = sqrt(15./8.);
 	for (unsigned int m(0); m < npoints; m++) {
-	  funcvalues[m] = MathTL::EvaluateHermiteSpline_td  (1, lambda.j(), lambda.k()-first_half-1, points[m]);
-	  dervalues[m]  = MathTL::EvaluateHermiteSpline_td_x(1, lambda.j(), lambda.k()-first_half-1, points[m]);
+	  funcvalues[m] = phi_1_factor
+	    * MathTL::EvaluateHermiteSpline_td  (1, lambda.j(), lambda.k()-first_half-1, points[m]);
+	  dervalues[m]  = phi_1_factor
+	    * MathTL::EvaluateHermiteSpline_td_x(1, lambda.j(), lambda.k()-first_half-1, points[m]);
 	}
       }
     } else {

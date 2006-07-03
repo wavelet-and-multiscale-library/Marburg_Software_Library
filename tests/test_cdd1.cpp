@@ -14,7 +14,7 @@
 #include <interval/jl_support.h>
 #include <interval/jl_evaluate.h>
 
-#define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
 
 #include <galerkin/sturm_equation.h>
 #include <galerkin/cached_problem.h>
@@ -145,14 +145,17 @@ int main()
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  3.51683, 415.266 ); // d=3, dT=9 (diag-precond.)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 11.0267 , 415.261 ); // d=3, dT=9 (2^j-precond.)
 
-  double normA = problem.norm_A();
-  double normAinv = problem.norm_Ainv();
+  // initialization with some precomputed JLBasis eigenvalue bounds:
+  CachedProblem<SturmEquation<Basis> > cproblem(&problem, 1.5753, 4.50639); // (2^j-precond.)
 
-  cout << "* estimate for normA: " << normA << endl;
-  cout << "* estimate for normAinv: " << normAinv << endl;
+//   double normA = problem.norm_A();
+//   double normAinv = problem.norm_Ainv();
 
-//   InfiniteVector<double, Index> u_epsilon;
-//   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 12);
+//   cout << "* estimate for normA: " << normA << endl;
+//   cout << "* estimate for normAinv: " << normAinv << endl;
+
+  InfiniteVector<double, Index> u_epsilon;
+  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 12);
 //   CDD1_SOLVE(cproblem, 1e-10, u_epsilon, 18);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 20);
 //   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 10);

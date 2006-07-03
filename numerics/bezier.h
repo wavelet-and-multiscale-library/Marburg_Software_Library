@@ -24,11 +24,12 @@ namespace MathTL
   template <int d>
   double EvaluateBernsteinPolynomial(const int k, const double x)
   {
-    return
-      (1-x) * EvaluateBernsteinPolynomial<d-1>(k,  x)
-      + x   * EvaluateBernsteinPolynomial<d-1>(k-1,x);
+    return ((k < 0 || k > d)
+	    ? 0
+	    : (1-x) * EvaluateBernsteinPolynomial<d-1>(k,  x)
+	    + x   * EvaluateBernsteinPolynomial<d-1>(k-1,x));
   }
-
+  
   /*!
     evaluation of B_{k,0}(x)
   */
@@ -93,7 +94,7 @@ namespace MathTL
 				       const double b2, const double b3,
 				       const double x)
   {
-    return EvaluateBernsteinPolynomial(b1-b0, b2-b1, b3-b2, x);
+    return 3*EvaluateBernsteinPolynomial(b1-b0, b2-b1, b3-b2, x);
   }
 
   /*!

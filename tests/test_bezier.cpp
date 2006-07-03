@@ -11,7 +11,7 @@ int main()
 {
   cout << "Testing Bezier stuff from MathTL:: ..." << endl;
 
-  const unsigned int n = 20;
+  const unsigned int n = 50;
 
 #if 0
   const int d = 3;

@@ -128,7 +128,7 @@ namespace WaveletTL
     case 1:
       if (k_ == basis_->Nablamax(j_)) {
 	j_++;
-	k_ = 0;
+	k_ = basis_->Nablamin();
       }
       else
 	k_++;

@@ -45,7 +45,7 @@ int main()
   for (Index lambda = first_wavelet(&basis, basis.j0());; ++lambda) {
     cout << lambda << endl;
     evaluate(basis, lambda, true, 6).matlab_output(cout);
-    if (lambda == last_wavelet(&basis, basis.j0())) break;
+    if (lambda == last_wavelet(&basis, basis.j0()+1)) break;
   }
 #endif
 

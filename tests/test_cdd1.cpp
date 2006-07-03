@@ -10,6 +10,12 @@
 #include <interval/i_index.h>
 #include <interval/ds_basis.h>
 #include <interval/p_basis.h>
+#include <interval/jl_basis.h>
+#include <interval/jl_support.h>
+#include <interval/jl_evaluate.h>
+
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
+
 #include <galerkin/sturm_equation.h>
 #include <galerkin/cached_problem.h>
 
@@ -94,10 +100,14 @@ int main()
 
   TestProblem<3> T;
 
+#if 0
   const int d  = 3;
   const int dT = 3;
 //   typedef DSBasis<d,dT> Basis;
   typedef PBasis<d,dT> Basis;
+#else
+  typedef JLBasis Basis;
+#endif
   typedef Basis::Index Index;
 
   SturmEquation<Basis> problem(T);
@@ -121,7 +131,7 @@ int main()
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  3.04627, 52.2118 ); // d=2, dT=4 (diag-precond.)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 21.4112 , 26.105  ); // d=2, dT=4 (2^j-precond.)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  1.88912, 26.2107 ); // d=3, dT=3 (diag-precond.)
-  CachedProblem<SturmEquation<Basis> > cproblem(&problem,  1.87567, 6.78415 ); // d=3, dT=3 (diag-precond.&j0-reduction)
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  1.87567, 6.78415 ); // d=3, dT=3 (diag-precond.&j0-reduction)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.37738, 26.1895 ); // d=3, dT=3 (2^j-precond.)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.36044, 6.73983 ); // d=3, dT=3 (2^j-precond.&j0-reduction)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.09306, 104.014 ); // d=3, dT=5 (diag-precond.)
@@ -135,13 +145,14 @@ int main()
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  3.51683, 415.266 ); // d=3, dT=9 (diag-precond.)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 11.0267 , 415.261 ); // d=3, dT=9 (2^j-precond.)
 
-//   cout << "* estimate for normA: " << cproblem.norm_A() << endl;
-//   cout << "* estimate for normAinv: " << cproblem.norm_Ainv() << endl;
-//   cout << "* estimate for normA: " << problem.norm_A() << endl;
-//   cout << "* estimate for normAinv: " << problem.norm_Ainv() << endl;
+  double normA = problem.norm_A();
+  double normAinv = problem.norm_Ainv();
 
-  InfiniteVector<double, Index> u_epsilon;
-  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 12);
+  cout << "* estimate for normA: " << normA << endl;
+  cout << "* estimate for normAinv: " << normAinv << endl;
+
+//   InfiniteVector<double, Index> u_epsilon;
+//   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 12);
 //   CDD1_SOLVE(cproblem, 1e-10, u_epsilon, 18);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 20);
 //   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 10);

@@ -6,6 +6,7 @@ namespace WaveletTL
 	       const Index& lambda,
 	       int& k1, int& k2)
   {
+    // we use supp(phi_i)=supp(psi_i)=[-1,1]
     if (lambda.e() == 0) // generator
       {
 	// phi_{j,s0},...,phi_{j,2^j-s1}             <-> 2^{j/2}phi_0(2^j*x-k), k=s0,...,s^j-s1

@@ -6,8 +6,11 @@
 #include <utils/fixed_array1d.h>
 
 #include <interval/ds_basis.h>
-
 #include <interval/p_basis.h>
+#include <interval/jl_basis.h>
+#include <interval/jl_support.h>
+#include <interval/jl_evaluate.h>
+
 #include <interval/i_index.h>
 #include <cube/cube_basis.h>
 
@@ -16,12 +19,13 @@ using namespace WaveletTL;
 
 int main()
 {
-  cout << "Testing wavelet bases on the cube..." << endl;
+  cout << "Testing the index class of wavelet bases on the cube..." << endl;
 
-  //typedef DSBasis<3,3> Basis1D;
-  typedef PBasis<2,2> Basis1D;
+//   typedef DSBasis<3,3> Basis1D;
+//   typedef PBasis<2,2> Basis1D;
+  typedef JLBasis Basis1D;
 
-#if 1
+#if 0
   typedef CubeBasis<Basis1D,1> Basis;
   
   //primal boundary conditions
@@ -39,6 +43,7 @@ int main()
   //Basis basis;
  
   CubeIndex<Basis1D,1,Basis> index(&basis);
+  cout << "* the first 64 indices:" << endl;
   for (int i = 0; i < 64; i++) 
     {
       cout << index << endl;
@@ -52,6 +57,7 @@ int main()
   unsigned int i = 0;
   for (Index1D lambda(first_generator<Basis1D>(&basis1D, basis1D.j0()));; ++lambda) {
     cout << "-----------------------------------------" << endl;
+    lambda.set_number();
     cout << lambda << " number  = " << lambda.number() << endl;
     cout << " index  = " << IntervalIndex<Basis1D>(i, &basis1D) << endl;
     if (! (Index1D(i, &basis1D) == lambda))
@@ -63,8 +69,8 @@ int main()
 
   for (int j = basis1D.j0(); j < basis1D.j0()+5; j++ ) {
     if (j == basis1D.j0()) {
-      cout << "number of first generator on coarstest level = " << first_generator_num<Basis1D>(&basis1D) << endl;
-      cout << "number of last generator on coarstest level = " << last_generator_num<Basis1D>(&basis1D) << endl;
+      cout << "number of first generator on coarsest level = " << first_generator_num<Basis1D>(&basis1D) << endl;
+      cout << "number of last generator on coarsest level = " << last_generator_num<Basis1D>(&basis1D) << endl;
     }
     
     cout << "number of first wavelet on level " << j << " = " << first_wavelet_num<Basis1D>(&basis1D, j) << endl;
@@ -114,6 +120,7 @@ int main()
   unsigned int i = 0;
   for (CubeIndex<Basis1D,2> lambda(first_generator<Basis1D,2,Basis2>(&basis2, basis2.j0()));; ++lambda) {
     cout << "-----------------------------------------" << endl;
+    lambda.set_number();
     cout << lambda << " number  = " << lambda.number() << endl;
     cout << " index  = " << CubeIndex<Basis1D,2>(i, &basis2) << endl;
     if (! (CubeIndex<Basis1D,2>(i, &basis2) == lambda))

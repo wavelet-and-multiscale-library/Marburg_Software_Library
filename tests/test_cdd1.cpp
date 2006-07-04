@@ -156,7 +156,8 @@ int main()
 //   cout << "* estimate for normAinv: " << normAinv << endl;
 
   InfiniteVector<double, Index> u_epsilon;
-  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 12);
+//   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 12);
+  CDD1_SOLVE(cproblem, 1e-5, u_epsilon, 20);
 //   CDD1_SOLVE(cproblem, 1e-10, u_epsilon, 20);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 20);
 //   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 10);

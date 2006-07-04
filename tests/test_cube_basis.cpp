@@ -7,7 +7,12 @@
 #include <utils/fixed_array1d.h>
 
 #include <interval/ds_basis.h>
+#include <interval/jl_basis.h>
+#include <interval/jl_support.h>
+#include <interval/jl_evaluate.h>
+
 #include <cube/cube_basis.h>
+#include <cube/cube_support.h>
 
 using namespace std;
 using namespace WaveletTL;
@@ -16,8 +21,16 @@ int main()
 {
   cout << "Testing wavelet bases on the cube..." << endl;
 
+#if 0
   typedef DSBasis<2,2> Basis1D;
+  cout << "* a 2D cube basis of DSBasis<2,2> bases:" << endl;
+#else
+  typedef JLBasis Basis1D;
+  cout << "* a 2D cube basis of JLBasis bases:" << endl;
+#endif
+
   typedef CubeBasis<Basis1D> Basis;
+
   typedef Basis::Index Index;
 #if 0
   Basis basis;
@@ -38,8 +51,6 @@ int main()
   Basis basis(bc);
 #endif
 
-  cout << "* a 2D cube basis of DSBasis<2,2> bases:" << endl;
-
   cout << "- j0=" << basis.j0() << endl;
   cout << "- the default wavelet index: " << Index() << endl;
   cout << "- the default wavelet index w.r.t. the cube basis: " << Index(&basis) << endl;
@@ -48,7 +59,7 @@ int main()
   cout << "- first wavelet on the coarsest level: " << first_wavelet<Basis1D,2,Basis>(&basis, basis.j0()) << endl;
   cout << "- last wavelet on the coarsest level: " << last_wavelet<Basis1D,2,Basis>(&basis, basis.j0()) << endl;
 
-#if 0
+#if 1
   cout << "- testing iterator functionality:" << endl;
   for (Index lambda(first_generator<Basis1D,2,Basis>(&basis, basis.j0()));; ++lambda) {
     cout << lambda << endl;
@@ -56,11 +67,12 @@ int main()
   }
 #endif
 
-#if 0
+#if 1
   cout << "- testing calculation of supports:" << endl;
   Basis::Support supp;
   for (Index lambda(first_generator<Basis1D,2,Basis>(&basis, basis.j0()));; ++lambda) {
-    support<Basis1D,2,Basis>(basis, lambda, supp);
+//     support<Basis1D,2,Basis>(basis, lambda, supp);
+    support(basis, lambda, supp);
     cout << lambda << " has support 2^{-" << supp.j << "}"
 	 << "[" << supp.a[0] << "," << supp.b[0]
 	 << "]x[" << supp.a[1] << "," << supp.b[1] << "]"
@@ -69,7 +81,7 @@ int main()
   }  
 #endif
 
-#if 1
+#if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -100,7 +112,7 @@ int main()
     }
 #endif
   
-#if 1
+#if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "

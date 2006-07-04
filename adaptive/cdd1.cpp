@@ -46,16 +46,16 @@ namespace WaveletTL
     params.F = P.F_norm();
 
     // determination of q=q1=q2=q3,q4 according to [CDD1, (7.23)ff]
-    params.q4 = 1 / (20 * params.kappa);
-    const double A = params.c1 / (20 * (3 + params.c1 / params.c2));
+    params.q4 = 1. / (20. * params.kappa);
+    const double A = params.c1 / (20. * (3. + params.c1 / params.c2));
     const double B = params.c2 * (0.1 - params.q4 * sqrt(params.kappa));
-    const double C = params.q4 / (1 / params.c2 + 6 * (params.gamma + 1) / (params.gamma * params.c1));
+    const double C = params.q4 / (1 / params.c2 + 6. * (params.gamma + 1.) / (params.gamma * params.c1));
     params.q1 = params.q2 = params.q3 = std::min(A, std::min(B, C));
 
     params.q0 = sqrt(params.kappa) + params.q3/params.c2;
 
-    params.theta = sqrt(1 - params.c1 * params.gamma * params.gamma / (4 * params.c2));
-    params.theta_bar = 1 - 1 / (6 * params.kappa);
+    params.theta = sqrt(1 - params.c1 * params.gamma * params.gamma / (4. * params.c2));
+    params.theta_bar = 1 - 1. / (6. * params.kappa);
 
     params.K = (unsigned int) floor(log(20 * params.kappa) / fabs(log(params.theta))) + 1;
 
@@ -83,7 +83,7 @@ namespace WaveletTL
       cout << "CDD1_SOLVE: delta=" << delta << endl;
 #endif
       NPROG(P, params, F, Lambda, u_epsilon, delta, v_hat, Lambda_hat, r_hat, u_bar, jmax, strategy);
-      if (l2_norm(r_hat)+(params.q1+params.q2+(1+1/params.kappa)*params.q3)*delta <= params.c1*epsilon)
+      if (l2_norm(r_hat)+(params.q1+params.q2+(1+1./params.kappa)*params.q3)*delta <= params.c1*epsilon)
 	{
 	  u_epsilon.swap(u_bar);
 	  break;
@@ -124,8 +124,8 @@ namespace WaveletTL
       cout << "NPROG: k=" << k << " (K=" << params.K << ")" << endl;
 #endif
       NGROW(P, params, F, Lambda_k, u_Lambda_k, params.q1*delta, params.q2*delta, Lambda_kplus1, r_hat, jmax, strategy);
-      if (l2_norm(r_hat) <= params.c1*delta/20 || k == params.K || Lambda_k.size() == Lambda_kplus1.size()) {
-	u_Lambda_k.COARSE(2*delta/5, v_hat);
+      if (l2_norm(r_hat) <= params.c1*delta/20. || k == params.K || Lambda_k.size() == Lambda_kplus1.size()) {
+	u_Lambda_k.COARSE(2.*delta/5., v_hat);
 	v_hat.support(Lambda_hat);
 	break;
       }
@@ -160,16 +160,16 @@ namespace WaveletTL
     double mydelta = delta;
     cout << "GALERKIN, internal residuals: " << endl;
     while (true) {
-      INRESIDUAL(P, params, F, Lambda, u_bar, params.c1*eta/6, params.c1*eta/6, r, jmax, strategy);
+      INRESIDUAL(P, params, F, Lambda, u_bar, params.c1*eta/6., params.c1*eta/6., r, jmax, strategy);
       const double inresidual_norm = l2_norm(r);
       cout << inresidual_norm << " ";
       cout.flush();
-      if (eta >= std::min(params.theta_bar*mydelta, inresidual_norm/params.c1+eta/3)) {
+      if (eta >= std::min(params.theta_bar*mydelta, inresidual_norm/params.c1+eta/3.)) {
 	cout << "... GALERKIN done, norm of internal residual: " << inresidual_norm << endl;
 	break;
       }
 //       u_bar += 1/params.c2 * r; // original [CDD1] relaxation parameter
-      u_bar += 2/(params.c2+1/params.c1) * r; // optimal relaxation parameter
+      u_bar += 2./(params.c2+1./params.c1) * r; // optimal relaxation parameter
       mydelta *= params.theta_bar;
     }
 #else

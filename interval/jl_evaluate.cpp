@@ -83,6 +83,9 @@ namespace WaveletTL
     if (lambda.e() == 0) {
       // generator
 
+      assert(lambda.k() >= basis.DeltaLmin());
+      assert(lambda.k() <= basis.DeltaRmax(lambda.j()));
+
       // phi_{j,s0},...,phi_{j,2^j-s1}             <-> 2^{j/2}phi_0(2^j*x-k), k=s0,...,s^j-s1
       // phi_{j,2^j-s1+1},...,phi_{j,2^{j+1}-s1+1} <-> 2^{j/2}phi_1(2^j*x-k), k=0,...,2^j
       const int first_half = (1<<lambda.j())-basis.get_s1();
@@ -104,6 +107,10 @@ namespace WaveletTL
       }
     } else {
       // wavelet
+
+      assert(lambda.k() >= basis.Nablamin());
+      assert(lambda.k() <= basis.Nablamax(lambda.j()));
+
       typedef JLBasis::Index Index;
       InfiniteVector<double,Index> gcoeffs;
       basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
@@ -129,6 +136,9 @@ namespace WaveletTL
     if (lambda.e() == 0) {
       // generator
 
+      assert(lambda.k() >= basis.DeltaLmin());
+      assert(lambda.k() <= basis.DeltaRmax(lambda.j()));
+
       // phi_{j,s0},...,phi_{j,2^j-s1}             <-> 2^{j/2}phi_0(2^j*x-k), k=s0,...,s^j-s1
       // phi_{j,2^j-s1+1},...,phi_{j,2^{j+1}-s1+1} <-> 2^{j/2}phi_1(2^j*x-k), k=0,...,2^j
       
@@ -152,6 +162,9 @@ namespace WaveletTL
       }
     } else {
       // wavelet
+
+      assert(lambda.k() >= basis.Nablamin());
+      assert(lambda.k() <= basis.Nablamax(lambda.j()));
 
       typedef JLBasis::Index Index;
       InfiniteVector<double,Index> gcoeffs;
@@ -182,6 +195,9 @@ namespace WaveletTL
     if (lambda.e() == 0) {
       // generator
 
+      assert(lambda.k() >= basis.DeltaLmin());
+      assert(lambda.k() <= basis.DeltaRmax(lambda.j()));
+
       // phi_{j,s0},...,phi_{j,2^j-s1}             <-> 2^{j/2}phi_0(2^j*x-k), k=s0,...,s^j-s1
       // phi_{j,2^j-s1+1},...,phi_{j,2^{j+1}-s1+1} <-> 2^{j/2}phi_1(2^j*x-k), k=0,...,2^j
       
@@ -207,6 +223,9 @@ namespace WaveletTL
       }
     } else {
       // wavelet
+
+      assert(lambda.k() >= basis.Nablamin());
+      assert(lambda.k() <= basis.Nablamax(lambda.j()));
 
       typedef JLBasis::Index Index;
       InfiniteVector<double,Index> gcoeffs;

@@ -10,6 +10,12 @@
 #include <interval/i_index.h>
 #include <interval/ds_basis.h>
 #include <interval/p_basis.h>
+#include <interval/jl_basis.h>
+#include <interval/jl_support.h>
+#include <interval/jl_evaluate.h>
+
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
+
 #include <cube/cube_basis.h>
 #include <galerkin/cached_problem.h>
 #include <galerkin/cube_equation.h>
@@ -62,10 +68,14 @@ int main()
 {
   cout << "Testing adaptive wavelet-Galerkin solution of a Poisson problem on the cube with CDD1_SOLVE ..." << endl;
 
+#if 0
   const int d  = 3;
   const int dT = 3;
 //   typedef DSBasis<d,dT> Basis1D;
   typedef PBasis<d,dT> Basis1D;
+#else
+  typedef JLBasis Basis1D;
+#endif
   typedef CubeBasis<Basis1D,2> Basis;
   typedef Basis::Index Index;
 
@@ -90,18 +100,24 @@ int main()
 //   CachedProblem<Problem> cproblem(&problem,  4.45301,  213.333); // d=2, dT=4 (diag. precond.)
 //   CachedProblem<Problem> cproblem(&problem,  7.15276, 9044.08 ); // d=2, dT=6 (diag. precond.)
 //   CachedProblem<Problem> cproblem(&problem,  2.35701,  80.8879); // d=3, dT=3 (2^j-precond.)
-  CachedProblem<Problem> cproblem(&problem,  4.91237,  23.5086); // d=3, dT=3 (diag. precond.)
+//   CachedProblem<Problem> cproblem(&problem,  4.91237,  23.5086); // d=3, dT=3 (diag. precond.)
 //   CachedProblem<Problem> cproblem(&problem,  2.4999 ,  67.5863); // d=3, dT=5 (2^j-precond., not exact)
 //   CachedProblem<Problem> cproblem(&problem,  5.49044, 124.85  ); // d=3, dT=5 (diag. precond.)
 
-//   cout << "* estimate for normA: " << cproblem.norm_A() << endl;
-//   cout << "* estimate for normAinv: " << cproblem.norm_Ainv() << endl;
-//   cout << "* estimate for normA: " << problem.norm_A() << endl;
-//   cout << "* estimate for normAinv: " << problem.norm_Ainv() << endl;
+  // initialization with some precomputed JLBasis eigenvalue bounds:
+//   CachedProblem<Problem> cproblem(&problem, 0.3, 400); // (2^j-precond.)
+//   CachedProblem<Problem> cproblem(&problem, 0.328494, 385.552); // (2^j-precond.)
+//   CachedProblem<Problem> cproblem(&problem, 2.65769, 6.16906); // (diag. precond.)
 
-  InfiniteVector<double, Index> u_epsilon;
+  double normA = problem.norm_A();
+  double normAinv = problem.norm_Ainv();
 
-  CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 5);
+  cout << "* estimate for normA: " << normA << endl;
+  cout << "* estimate for normAinv: " << normAinv << endl;
+
+//   InfiniteVector<double, Index> u_epsilon;
+
+//   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 4);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 7);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 10);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 6, CDD1);

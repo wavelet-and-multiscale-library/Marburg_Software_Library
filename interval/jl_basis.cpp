@@ -57,6 +57,32 @@ namespace WaveletTL
   }
 
   void
+  JLBasis::decompose(const InfiniteVector<double, Index>& c,
+		     const int jmin,
+		     InfiniteVector<double, Index>& v) const {
+    v.clear();
+    InfiniteVector<double, Index> help;
+    for (InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
+	 it != itend; ++it) {
+      decompose_1(it.index(), jmin, help); // calls help.clear() first
+      v.add(*it, help);
+    }
+  }
+  
+  void
+  JLBasis::decompose_t(const InfiniteVector<double, Index>& c,
+		       const int jmin,
+		       InfiniteVector<double, Index>& v) const {
+    v.clear();
+    InfiniteVector<double, Index> help;
+    for (InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
+	 it != itend; ++it) {
+      decompose_t_1(it.index(), jmin, help); // calls help.clear() first
+      v.add(*it, help);
+    }
+  }
+  
+  void
   JLBasis::reconstruct(const InfiniteVector<double, Index>& c,
 		       const int j,
 		       InfiniteVector<double, Index>& v) const {
@@ -69,6 +95,33 @@ namespace WaveletTL
     }
   }
   
+  void
+  JLBasis::reconstruct_t(const InfiniteVector<double, Index>& c,
+			 const int j,
+			 InfiniteVector<double, Index>& v) const {
+    v.clear();
+    for (InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
+	 it != itend; ++it) {
+      InfiniteVector<double, Index> help;
+      reconstruct_t_1(it.index(), j, help);
+      v.add(*it, help);
+    }
+  }
+
+  void
+  JLBasis::decompose_1(const Index& lambda,
+		       const int jmin,
+		       InfiniteVector<double, Index>& c) const {
+    // dummy routine at the moment
+  }
+
+  void
+  JLBasis::decompose_t_1(const Index& lambda,
+		       const int jmin,
+		       InfiniteVector<double, Index>& c) const {
+    // dummy routine at the moment
+  }
+
   void
   JLBasis::reconstruct_1(const Index& lambda,
 			 const int j,
@@ -265,4 +318,10 @@ namespace WaveletTL
     }
   }
   
+  void
+  JLBasis::reconstruct_t_1(const Index& lambda,
+			 const int j,
+			 InfiniteVector<double, Index>& c) const {
+    // dummy routine at the moment
+  }
 }

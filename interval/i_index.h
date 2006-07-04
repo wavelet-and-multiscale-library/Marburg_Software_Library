@@ -181,9 +181,6 @@ namespace WaveletTL
   template <class IBASIS>
   int last_wavelet_num(const IBASIS* basis, const int j);
 
-
-
-
 }
 
 // include implementation

@@ -10,6 +10,12 @@
 #include <geometry/sampled_mapping.h>
 
 #include <interval/ds_basis.h>
+#include <interval/jl_basis.h>
+#include <interval/jl_support.h>
+#include <interval/jl_evaluate.h>
+
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
+
 #include <cube/cube_basis.h>
 #include <galerkin/cube_equation.h>
 
@@ -56,9 +62,13 @@ int main()
   ConstantFunction<2> constant_rhs(Vector<double>(1, "1.0"));
   PoissonBVP<2> poisson(&constant_rhs);
 
+#if 0
   const int d  = 2;
   const int dT = 2; // be sure to use a continuous dual here, otherwise the RHS test will fail
   typedef DSBasis<d,dT> Basis1D;
+#else
+  typedef JLBasis Basis1D;
+#endif
   typedef CubeBasis<Basis1D,2> CBasis;
   typedef CBasis::Index Index;
 
@@ -102,9 +112,9 @@ int main()
   set<Index> Lambda;
   for (Index lambda = first_generator<Basis1D,2,CBasis>(&eq.basis(), eq.basis().j0());; ++lambda) {
     Lambda.insert(lambda);
-    if (lambda == last_wavelet<Basis1D,2,CBasis>(&eq.basis(), eq.basis().j0()+1)) break;
+    if (lambda == last_wavelet<Basis1D,2,CBasis>(&eq.basis(), eq.basis().j0()+2)) break;
   }
-
+  
 //   cout << "- set up stiffness matrix with respect to the index set Lambda=" << endl;
 //   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it)
 //     cout << *it << endl;
@@ -122,9 +132,14 @@ int main()
   tstart = clock();
   SparseMatrix<double> A;
   setup_stiffness_matrix(eq, Lambda, A);
-//   std::ofstream ofs("stiff_out.m");
-//   print_matrix(A,ofs);
-//   ofs.close();
+  A.compress(1e-15);
+  cout << "  output in file \"stiff_out.m\"..." << endl;
+  std::ofstream ofs("stiff_out.m");
+  ofs << "A=";
+  print_matrix(A, ofs);
+  ofs << ";" << endl;
+  ofs.close();
+  cout << "  ...done!" << endl;
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;

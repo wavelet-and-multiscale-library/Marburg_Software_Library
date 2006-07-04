@@ -127,7 +127,7 @@ namespace WaveletTL
     */
     double a(const typename WaveletBasis::Index& lambda,
 	     const typename WaveletBasis::Index& nu,
-	     const unsigned int p = 4) const;
+	     const unsigned int p = 8) const;
 
     /*!
       estimate the spectral norm ||A||

@@ -36,8 +36,8 @@ namespace WaveletTL
   */
   template <class PROBLEM>
   class CachedProblem
-//     : public FullyDiagonalDyadicPreconditioner<typename PROBLEM::Index>
-    : public FullyDiagonalEnergyNormPreconditioner<typename PROBLEM::Index>
+    : public FullyDiagonalDyadicPreconditioner<typename PROBLEM::Index>
+//     : public FullyDiagonalEnergyNormPreconditioner<typename PROBLEM::Index>
   {
   public:
     /*!

@@ -1,5 +1,7 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <string>
 
 #include <algebra/infinite_vector.h>
 #include <algebra/sparse_matrix.h>
@@ -67,20 +69,6 @@ int main()
   }
 #endif
 
-#if 1
-  cout << "- testing calculation of supports:" << endl;
-  Basis::Support supp;
-  for (Index lambda(first_generator<Basis1D,2,Basis>(&basis, basis.j0()));; ++lambda) {
-//     support<Basis1D,2,Basis>(basis, lambda, supp);
-    support(basis, lambda, supp);
-    cout << lambda << " has support 2^{-" << supp.j << "}"
-	 << "[" << supp.a[0] << "," << supp.b[0]
-	 << "]x[" << supp.a[1] << "," << supp.b[1] << "]"
-	 << endl;
-    if (lambda == last_wavelet<Basis1D,2,Basis>(&basis, basis.j0()+1)) break;
-  }  
-#endif
-
 #if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
@@ -140,6 +128,8 @@ int main()
 #if 0
   cout << "- evaluating a primal generator..." << endl;
   Index lambda(first_generator<Basis1D,2,Basis>(&basis, basis.j0()));
+  for (int i = 1; i <= 6; i++, ++lambda);
+  cout << "  (lambda=" << lambda << " )" << endl;
   std::ofstream psistream("cube_wavelet.m");
   evaluate<Basis1D,2>(basis, lambda, true, 6).matlab_output(psistream);
   psistream.close();
@@ -151,5 +141,18 @@ int main()
   evaluate<Basis1D,2>(basis, lambda, true, 6).matlab_output(psistream2);
   psistream2.close();
   cout << "  ...done, see file cube_wavelet2.m!" << endl;
+#endif
+
+#if 0
+  cout << "- evaluating a whole lot of primal generators/wavelets..." << endl;
+  Index mu(basis.first_generator(basis.j0()));
+  for (int i = 1; i <= 64; i++, ++mu) {
+    cout << "  * mu=" << mu << endl;
+    ostringstream os;
+    os << "cube_wavelet_" << mu << ".m";
+    ofstream psistream(os.str().c_str());
+    evaluate<Basis1D,2>(basis, mu, true, 6).matlab_output(psistream);
+    psistream.close();
+  }
 #endif
 }

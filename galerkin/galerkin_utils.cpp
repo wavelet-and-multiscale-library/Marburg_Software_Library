@@ -22,18 +22,20 @@ namespace WaveletTL
 
 	size_type column = 0;
 #if _WAVELETTL_GALERKINUTILS_VERBOSITY >= 1
-	cout << "setup_stiffness_matrix(): doing row " << row << " of " << Lambda.size() << endl;
+	cout << "setup_stiffness_matrix(): doing row " << row << " of " << Lambda.size()
+	     << " (wavelet index " << *it1 << ")" << endl;
 #endif
 	for (typename std::set<Index>::const_iterator it2(Lambda.begin());
 	     it2 != itend; ++it2, ++column)
 	  {
 // 	    if (intersect_singular_support(P.basis(), *it1, *it2)) {
 	    const double entry = P.a(*it2, *it1);
-// 	    if (! entry == 0.) {
-// 	      cout << *it2 <<  " " << *it1 << endl; 
-// 	      cout << entry << endl;
-// 	    }
-	      if (entry != 0) {
+#if _WAVELETTL_GALERKINUTILS_VERBOSITY >= 2
+ 	    if (entry != 0) {
+ 	      cout << " column: " << *it2 <<  ", value " << entry << endl;
+ 	    }
+#endif
+	    if (entry != 0) {
 		indices.push_back(column);
 		entries.push_back(entry / (d1 * P.D(*it2)));
 	      }

@@ -126,13 +126,13 @@ int main()
     if (! (CubeIndex<Basis1D,2>(i, &basis2) == lambda))
       abort();
     i++;
-    if (lambda == last_wavelet<Basis1D,2,Basis2>(&basis2, basis2.j0())) break;
+    if (lambda == last_wavelet<Basis1D,2,Basis2>(&basis2, basis2.j0()+1)) break;
   }
-
+  
   for (int j = basis2.j0(); j < basis2.j0()+5; j++ ) {
     if (j == basis2.j0()) {
-      cout << "number of first generator on coarstest level = " << first_generator_num<Basis1D,2,Basis2>(&basis2) << endl;
-      cout << "number of last generator on coarstest level = " << last_generator_num<Basis1D,2,Basis2>(&basis2) << endl;
+      cout << "number of first generator on coarsest level = " << first_generator_num<Basis1D,2,Basis2>(&basis2) << endl;
+      cout << "number of last generator on coarsest level = " << last_generator_num<Basis1D,2,Basis2>(&basis2) << endl;
     }
     
     cout << "number of first wavelet on level " << j << " = " << first_wavelet_num<Basis1D,2,Basis2>(&basis2, j) << endl;

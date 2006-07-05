@@ -55,6 +55,38 @@ public:
   }
 };
 
+/*
+  Another test problem:
+    -Delta u(x,y) = 2*pi^2*sin(pi*x)*sin(pi*y)
+  with exact solution
+    u(x,y) = sin(pi*x)*sin(pi*y)
+*/
+class myRHS2
+  : public Function<2,double>
+{
+public:
+  virtual ~myRHS2() {};
+  double value(const Point<2>& p, const unsigned int component = 0) const {
+    return 2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1]);
+  }
+  void vector_value(const Point<2>& p, Vector<double>& values) const {
+    values[0] = value(p);
+  }
+};
+
+class mySolution2
+  : public Function<2,double>
+{
+public:
+  virtual ~mySolution2() {};
+  double value(const Point<2>& p, const unsigned int component = 0) const {
+    return sin(M_PI*p[0])*sin(M_PI*p[1]);
+  }
+  void vector_value(const Point<2>& p, Vector<double>& values) const {
+    values[0] = value(p);
+  }
+};
+
 int main()
 {
   cout << "Testing wavelet-Galerkin solution of an elliptic equation on the cube ..." << endl;
@@ -120,7 +152,8 @@ int main()
 //     cout << *it << endl;
 
   // choose another rhs
-  myRHS rhs;
+  myRHS2 rhs;
+//   myRHS rhs;
   poisson.set_f(&rhs);
   eq.set_bvp(&poisson);
   eq.RHS(1e-4, coeffs);
@@ -176,7 +209,9 @@ int main()
 //   s.matlab_output(u_Lambda_stream);
 //   u_Lambda_stream.close();
 //   cout << "  ... done, see file 'u_lambda.m'" << endl;
-  mySolution u_Lambda;
+
+//   mySolution u_Lambda;
+  mySolution2 u_Lambda;
   s.add(-1.0, SampledMapping<2>(s, u_Lambda));
   cout << "  ... done, pointwise error: " << row_sum_norm(s.values()) << endl;
 #endif

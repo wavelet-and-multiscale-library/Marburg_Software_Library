@@ -155,6 +155,7 @@ namespace WaveletTL
 #if 0
     // original GALERKIN version from [CDD1],[BB+]
     cout << "GALERKIN called..." << endl;
+
     InfiniteVector<double,Index> r;
     u_bar = v;
     double mydelta = delta;
@@ -178,12 +179,22 @@ namespace WaveletTL
 #if _WAVELETTL_CDD1_VERBOSITY >= 1
     cout << "GALERKIN called..." << endl;
 #endif
+#if _WAVELETTL_CDD1_VERBOSITY >= 2
+      cout << "... with Lambda=" << endl;
+      for (typename set<Index>::const_iterator it = Lambda.begin(), itend = Lambda.end();
+	   it != itend; ++it) {
+	cout << *it << endl;
+      }
+#endif
     
     u_bar.clear();
     if (Lambda.size() > 0) {
       // setup A_Lambda and f_Lambda
       SparseMatrix<double> A_Lambda;
       setup_stiffness_matrix(P, Lambda, A_Lambda);
+#if _WAVELETTL_CDD1_VERBOSITY >= 2
+      cout << "... GALERKIN: A_Lambda=" << endl << A_Lambda;
+#endif
       Vector<double> F_Lambda;
       setup_righthand_side(P, Lambda, F_Lambda);
 #if _WAVELETTL_CDD1_VERBOSITY >= 1
@@ -239,6 +250,13 @@ namespace WaveletTL
 #if _WAVELETTL_CDD1_VERBOSITY >= 1
     cout << "* NGROW: current residual norm is " << residual_norm << endl;
 #endif
+
+    if (residual_norm > 1000) {
+      cout << "* NGROW: residual norm is greater than 1000, some debugging output:" << endl;
+      cout << "u_bar=" << endl << u_bar << endl;
+      cout << "xi1=" << xi1 << ", xi2=" << xi2 << endl;
+      abort();
+    }
 
     InfiniteVector<double,Index> pr;
     r.COARSE(sqrt(1-params.gamma*params.gamma)*residual_norm, pr);

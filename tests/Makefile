@@ -14,9 +14,9 @@ COMPILER = gnu
 #COMPILER = pgi
 
 ifeq ($(COMPILER),gnu)
-#CXX = g++
+CXX = g++
 #CXX = g++-2.95
-CXX = $(HOME)/gcc-4.1.0/bin/g++
+#CXX = $(HOME)/gcc-4.1.0/bin/g++
 #CXX = $(HOME)/gcc-4.1.1/bin/g++
 #CXX = $(HOME)/gcc-4.2-20060610/bin/g++
 
@@ -41,9 +41,9 @@ endif
 endif
 
 #CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
-#CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
-CXXFLAGS += -O3 -ffast-math -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+#CXXFLAGS += -O3 -ffast-math -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -funroll-loops -fomit-frame-pointer -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -msse -funroll-loops -fomit-frame-pointer -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -msse2 -funroll-loops -fomit-frame-pointer -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
@@ -91,7 +91,7 @@ EXEOBJF2 = \
 
 # set 3 of test programs: wavelet bases on general higher-dim. domains ((mapped) cube, tensor prod.)
 EXEOBJF3 = \
-  test_cube_index.o test_cube_basis.o test_mapped_cube_basis.o\
+  test_cube_index.o test_cube_support.o test_cube_basis.o test_mapped_cube_basis.o\
   test_tp_basis.o
 
 # set 4 of test programs: wavelet bases on the L-domain

@@ -88,6 +88,7 @@ namespace WaveletTL
     FixedArray1D<std::list<Index1D>,DIM>
       intersecting_1d_generators, intersecting_1d_wavelets;
 
+    // prepare all intersecting wavelets and generators in the i-th coordinate direction
     for (unsigned int i = 0; i < DIM; i++) {
       intersecting_wavelets(*basis.bases()[i],
 			    Index1D(lambda.j(),
@@ -108,6 +109,7 @@ namespace WaveletTL
     typedef std::list<FixedArray1D<Index1D,DIM> > list_type;
     list_type indices;
     FixedArray1D<Index1D,DIM> helpindex;
+
     if (DIM > 1 || (DIM == 1 && generators)) {
       for (typename std::list<Index1D>::const_iterator it(intersecting_1d_generators[0].begin()),
 	     itend(intersecting_1d_generators[0].end());
@@ -132,8 +134,8 @@ namespace WaveletTL
 	helpindex = *itready;
 	unsigned int esum = 0;
 	for (unsigned int k = 0; k < i; k++)
-	  esum += helpindex[i].e();
-	if (generators || i < DIM-1 || (i == DIM-1 && esum > 0)) {
+	  esum += helpindex[k].e();
+	if (generators || (i < DIM-1 || (i == (DIM-1) && esum > 0))) {
 	  for (typename std::list<Index1D>::const_iterator it(intersecting_1d_generators[i].begin()),
 		 itend(intersecting_1d_generators[i].end());
 	       it != itend; ++it) {

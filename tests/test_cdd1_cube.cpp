@@ -14,7 +14,7 @@
 #include <interval/jl_support.h>
 #include <interval/jl_evaluate.h>
 
-#define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
 
 #include <cube/cube_basis.h>
 #include <galerkin/cached_problem.h>
@@ -79,7 +79,7 @@ int main()
   typedef CubeBasis<Basis1D,2> Basis;
   typedef Basis::Index Index;
 
-  TestRHS<3> rhs;
+  TestRHS<1> rhs;
   PoissonBVP<2> poisson(&rhs);
 
   FixedArray1D<bool,4> bc;
@@ -107,17 +107,18 @@ int main()
   // initialization with some precomputed JLBasis eigenvalue bounds:
 //   CachedProblem<Problem> cproblem(&problem, 0.3, 400); // (2^j-precond.)
 //   CachedProblem<Problem> cproblem(&problem, 0.328494, 385.552); // (2^j-precond.)
-//   CachedProblem<Problem> cproblem(&problem, 2.65769, 6.16906); // (diag. precond.)
+  CachedProblem<Problem> cproblem(&problem, 2.65769, 6.16906); // (diag. precond.)
 
-  double normA = problem.norm_A();
-  double normAinv = problem.norm_Ainv();
+//   double normA = problem.norm_A();
+//   double normAinv = problem.norm_Ainv();
 
-  cout << "* estimate for normA: " << normA << endl;
-  cout << "* estimate for normAinv: " << normAinv << endl;
+//   cout << "* estimate for normA: " << normA << endl;
+//   cout << "* estimate for normAinv: " << normAinv << endl;
 
-//   InfiniteVector<double, Index> u_epsilon;
+  InfiniteVector<double, Index> u_epsilon;
 
-//   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 4);
+//   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 5);
+  CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 6);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 7);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 10);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 6, CDD1);

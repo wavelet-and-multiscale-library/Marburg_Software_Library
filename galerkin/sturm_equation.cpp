@@ -67,7 +67,7 @@ namespace WaveletTL
   SturmEquation<WBASIS>::a(const typename WBASIS::Index& lambda,
 			   const typename WBASIS::Index& nu) const
   {
-    return a(lambda, nu, 8); // TODO: work in spline degree of psi_lambda, psi_nu?
+    return a(lambda, nu, WBASIS::primal_polynomial_degree()*WBASIS::primal_polynomial_degree());
   }
 
   template <class WBASIS>

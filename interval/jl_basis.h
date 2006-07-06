@@ -86,6 +86,9 @@ namespace WaveletTL
     //! critical Sobolev regularity for the primal generators/wavelets
     static double primal_regularity() { return 3.5; }
 
+    //! degree of polynomial reproduction for the primal generators/wavelets
+    static unsigned int primal_polynomial_degree() { return 4; }
+
     //! number of vanishing moments for the primal wavelets
     static unsigned int primal_vanishing_moments() { return 2; }
 

@@ -119,7 +119,7 @@ int main()
   coeffs[first_wavelet<Basis1D,2,CBasis>(&eq.basis(), eq.basis().j0()+1)] = 5.0;
   cout << "- a coefficient set:" << endl
        << coeffs << endl;
-  eq.rescale(coeffs, -1);
+  coeffs.scale(&eq, -1);
   cout << "- after rescaling with D^{-1}:" << endl
        << coeffs << endl;
 #endif
@@ -130,7 +130,7 @@ int main()
 //   cout << "- approximate coefficient set of the right-hand side:" << endl
 //        << coeffs << endl;
   cout << "- check expansion of the right-hand side in the dual basis:" << endl;
-  eq.rescale(coeffs, 1);
+  coeffs.scale(&eq, 1);
   SampledMapping<2> S(evaluate<Basis1D,2>(eq.basis(), coeffs, false, 6));
 //   std::ofstream rhs_stream("constant_rhs.m");
 //   S.matlab_output(rhs_stream);
@@ -138,7 +138,7 @@ int main()
 //   cout << "  ... done, see file 'constant_rhs.m'" << endl;
   S.add(-1.0, SampledMapping<2>(S, constant_rhs));
   cout << "  ... done, pointwise error: " << row_sum_norm(S.values()) << endl;
-  eq.rescale(coeffs, -1);
+  coeffs.scale(&eq, -1);
 #endif  
 
   set<Index> Lambda;
@@ -203,7 +203,7 @@ int main()
   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
     u.set_coefficient(*it, x[i]);
   
-  eq.rescale(u, -1);
+  u.scale(&eq, -1);
   SampledMapping<2> s(evaluate(eq.basis(), u, true, 6));
 //   std::ofstream u_Lambda_stream("u_lambda.m");
 //   s.matlab_output(u_Lambda_stream);

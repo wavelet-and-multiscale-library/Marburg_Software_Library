@@ -64,19 +64,13 @@ namespace WaveletTL
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
   inline
-  void
-  CubeEquation<IBASIS,DIM,CUBEBASIS>::rescale
-  (InfiniteVector<double,typename WaveletBasis::Index>& coeffs,
-   const int n) const
+  double
+  CubeEquation<IBASIS,DIM,CUBEBASIS>::a(const typename WaveletBasis::Index& lambda,
+					const typename WaveletBasis::Index& mu) const
   {
-    for (typename InfiniteVector<double,typename WaveletBasis::Index>::const_iterator it(coeffs.begin());
-	 it != coeffs.end(); ++it)
-      {
-	// TODO: implement an InfiniteVector::iterator to speed up this hack!
-	coeffs.set_coefficient(it.index(), *it * pow(D(it.index()), n));
-      }
+    return a(lambda, mu, IBASIS::primal_polynomial_degree()*IBASIS::primal_polynomial_degree());
   }
-
+  
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
   double
   CubeEquation<IBASIS,DIM,CUBEBASIS>::a(const typename WaveletBasis::Index& lambda,
@@ -301,7 +295,7 @@ namespace WaveletTL
   CubeEquation<IBASIS,DIM,CUBEBASIS>::s_star() const
   {
     // notation from [St04a]
-    const int t = operator_order();
+    const double t = operator_order();
     const int n = DIM;
     const int dT = WaveletBasis::primal_vanishing_moments();
     const double gamma = WaveletBasis::primal_regularity();

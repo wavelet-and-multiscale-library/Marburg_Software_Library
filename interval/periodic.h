@@ -66,14 +66,14 @@ namespace WaveletTL
     static inline double primal_regularity() { return RBASIS::primal_regularity(); }
 
     /*!
+      degree of polynomial reproduction for the primal generators/wavelets
+    */
+    static unsigned int primal_polynomial_degree() { return RBASIS::primal_polynomial_degree(); }
+
+    /*!
       number of vanishing moments for the primal wavelets
     */
     static inline unsigned int primal_vanishing_moments() { return RBASIS::primal_vanishing_moments(); }
-
-    /*!
-      number of vanishing moments for the dual wavelets
-    */
-    static inline unsigned int dual_vanishing_moments() { return RBASIS::dual_vanishing_moments(); }
 
     //! bounds for the generator indices
     inline const int DeltaLmin() const { return 0; }

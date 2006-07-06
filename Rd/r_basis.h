@@ -39,14 +39,15 @@ namespace WaveletTL
     static inline double primal_regularity() { return PRIMALMASK::regularity(); }
 
     /*!
+      degree of polynomial reproduction for the primal generators/wavelets
+      == number of vanishing moments for the dual wavelets
+    */
+    static unsigned int primal_polynomial_degree() { return DUALMASK::Strang_Fix_order(); }
+
+    /*!
       number of vanishing moments for the primal wavelets
     */
     static inline unsigned int primal_vanishing_moments() { return DUALMASK::Strang_Fix_order(); }
-
-    /*!
-      number of vanishing moments for the dual wavelets
-    */
-    static inline unsigned int dual_vanishing_moments() { return PRIMALMASK::Strang_Fix_order(); }
 
     /*!
       reading access to the primal mask

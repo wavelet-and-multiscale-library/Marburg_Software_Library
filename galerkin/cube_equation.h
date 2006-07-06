@@ -16,6 +16,7 @@
 #include <numerics/bvp.h>
 
 #include <galerkin/galerkin_utils.h>
+#include <galerkin/infinite_preconditioner.h>
 
 using MathTL::FixedArray1D;
 using MathTL::EllipticBVP;
@@ -63,6 +64,8 @@ namespace WaveletTL
   */
   template <class IBASIS, unsigned int DIM, class CUBEBASIS = CubeBasis<IBASIS,DIM> >
   class CubeEquation
+    : public FullyDiagonalDyadicPreconditioner<typename CUBEBASIS::Index>
+//     : public FullyDiagonalEnergyNormPreconditioner<typename CUBEBASIS::Index>
   {
   public:
     /*!
@@ -103,8 +106,9 @@ namespace WaveletTL
 
     /*!
       (half) order t of the operator
+      (inherited from FullyDiagonalEnergyNormPreconditioner)
     */
-    static int operator_order() { return 1; }
+    double operator_order() const { return 1.; }
     
     /*!
       evaluate the diagonal preconditioner D
@@ -112,10 +116,11 @@ namespace WaveletTL
     double D(const typename WaveletBasis::Index& lambda) const;
 
     /*!
-      rescale a coefficient vector by an integer power of D, c |-> D^{n}c
+      evaluate the (unpreconditioned) bilinear form a
+      (inherited from FullyDiagonalEnergyNormPreconditioner)
     */
-    void rescale(InfiniteVector<double,typename WaveletBasis::Index>& coeffs,
-		 const int n) const;
+    double a(const Index& lambda,
+	     const Index& nu) const;
 
     /*!
       evaluate the (unpreconditioned) bilinear form a;
@@ -127,7 +132,7 @@ namespace WaveletTL
     */
     double a(const typename WaveletBasis::Index& lambda,
 	     const typename WaveletBasis::Index& nu,
-	     const unsigned int p = 8) const;
+	     const unsigned int p) const;
 
     /*!
       estimate the spectral norm ||A||

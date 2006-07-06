@@ -100,7 +100,7 @@ namespace WaveletTL
 
     /*!
       (half) order t of the operator
-      (inherited from WaveletNEPreconditioner)
+      (inherited from FullyDiagonalEnergyNormPreconditioner)
     */
     double operator_order() const { return 1.; }
     
@@ -111,7 +111,7 @@ namespace WaveletTL
 
     /*!
       evaluate the (unpreconditioned) bilinear form a
-      (inherited from EnergyNormPreconditioner)
+      (inherited from FullyDiagonalEnergyNormPreconditioner)
     */
     double a(const Index& lambda,
 	     const Index& nu) const;

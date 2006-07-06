@@ -76,11 +76,11 @@ namespace WaveletTL
     //! critical Sobolev regularity for the primal generators/wavelets
     static double primal_regularity() { return IBASIS::primal_regularity(); } // dirty, we should use max(1.5,~) instead
     
+    //! degree of polynomial reproduction for the primal generators/wavelets
+    static unsigned int primal_polynomial_degree() { return IBASIS::primal_polynomial_degree(); }
+
     //! number of vanishing moments for the primal wavelets
     static unsigned int primal_vanishing_moments() { return IBASIS::primal_vanishing_moments(); }
-
-    //! number of vanishing moments for the dual wavelets
-    static unsigned int dual_vanishing_moments() { return IBASIS::dual_vanishing_moments(); }
 
     //! read access to the underlying 1D basis
     const IntervalBasis& basis1d() const { return basis1d_; }

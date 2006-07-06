@@ -127,14 +127,14 @@ namespace WaveletTL
     static double primal_regularity() { return d - 0.5; }
 
     /*!
+      degree of polynomial reproduction for the primal generators/wavelets
+    */
+    static unsigned int primal_polynomial_degree() { return d; }
+
+    /*!
       number of vanishing moments for the primal wavelets
     */
     static unsigned int primal_vanishing_moments() { return dT; }
-
-    /*!
-      number of vanishing moments for the dual wavelets
-    */
-    static unsigned int dual_vanishing_moments() { return d; }
 
     //! read access to the primal b.c. order at x=0
     const int get_s0() const { return s0; }

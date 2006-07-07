@@ -88,7 +88,7 @@ namespace MathTL
 
     for (typename MATRIX::size_type i(0); i < M.row_dimension(); i++)
       for (typename MATRIX::size_type j(0); j < M.column_dimension(); j++)
-	r = std::max(r, M.get_entry(i,j));
+	r = std::max(r, fabs(M.get_entry(i,j)));
     
     return r;
   }

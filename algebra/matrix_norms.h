@@ -78,6 +78,21 @@ namespace MathTL
     return sqrt(r);
   }
 
+  /*!
+    maximum absolute entry value of a matrix
+   */
+  template <class MATRIX>
+  const double maximum_norm(const MATRIX& M)
+  {
+    double r(0.0);
+
+    for (typename MATRIX::size_type i(0); i < M.row_dimension(); i++)
+      for (typename MATRIX::size_type j(0); j < M.column_dimension(); j++)
+	r = std::max(r, M.get_entry(i,j));
+    
+    return r;
+  }
+  
 }
 
 #endif

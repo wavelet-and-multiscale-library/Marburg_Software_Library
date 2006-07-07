@@ -101,6 +101,12 @@ namespace MathTL
     }
 
     /*!
+      flag to indicate whether all coefficients are constants
+      (speeds up quadrature a bit)
+    */
+    virtual const bool constant_coefficients() const = 0;
+    
+    /*!
       right-hand side f
     */
     virtual const double f(const Point<DIM>& x) const
@@ -147,6 +153,11 @@ namespace MathTL
       reaction coefficient q
     */
     const double q(const Point<DIM>& x) const { return 0.0; }
+
+    /*!
+      flag for constant coefficients
+    */
+    const bool constant_coefficients() const { return true; }
   };
 
 }

@@ -68,7 +68,7 @@ int main()
 {
   cout << "Testing adaptive wavelet-Galerkin solution of a Poisson problem on the cube with CDD1_SOLVE ..." << endl;
 
-#if 1
+#if 0
   const int d  = 3;
   const int dT = 3;
 //   typedef DSBasis<d,dT> Basis1D;
@@ -79,7 +79,7 @@ int main()
   typedef CubeBasis<Basis1D,2> Basis;
   typedef Basis::Index Index;
 
-  TestRHS<1> rhs;
+  TestRHS<2> rhs;
   PoissonBVP<2> poisson(&rhs);
 
   FixedArray1D<bool,4> bc;
@@ -100,14 +100,14 @@ int main()
 //   CachedProblem<Problem> cproblem(&problem,  4.45301,  213.333); // d=2, dT=4 (diag. precond.)
 //   CachedProblem<Problem> cproblem(&problem,  7.15276, 9044.08 ); // d=2, dT=6 (diag. precond.)
 //   CachedProblem<Problem> cproblem(&problem,  2.35701,  80.8879); // d=3, dT=3 (2^j-precond.)
-  CachedProblem<Problem> cproblem(&problem,  4.91237,  23.5086); // d=3, dT=3 (diag. precond.)
+//   CachedProblem<Problem> cproblem(&problem,  4.91237,  23.5086); // d=3, dT=3 (diag. precond.)
 //   CachedProblem<Problem> cproblem(&problem,  2.4999 ,  67.5863); // d=3, dT=5 (2^j-precond., not exact)
 //   CachedProblem<Problem> cproblem(&problem,  5.49044, 124.85  ); // d=3, dT=5 (diag. precond.)
 
   // initialization with some precomputed JLBasis eigenvalue bounds:
 //   CachedProblem<Problem> cproblem(&problem, 0.3, 400); // (2^j-precond.)
 //   CachedProblem<Problem> cproblem(&problem, 0.328494, 385.552); // (2^j-precond.)
-//   CachedProblem<Problem> cproblem(&problem, 2.65769, 6.16906); // (diag. precond.)
+  CachedProblem<Problem> cproblem(&problem, 2.65769, 6.16906); // (diag. precond.)
 
 //   double normA = problem.norm_A();
 //   double normAinv = problem.norm_Ainv();
@@ -117,9 +117,9 @@ int main()
 
   InfiniteVector<double, Index> u_epsilon;
 
-//   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 5);
-//   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 6);
-  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 7);
+  CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 5);
+//   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 6);
+//   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 7);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 10);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 6, CDD1);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon);

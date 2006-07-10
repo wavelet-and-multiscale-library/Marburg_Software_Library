@@ -142,53 +142,105 @@ namespace WaveletTL
 	  index[i] = 0;
 	
 	Point<DIM> x;
+	const double ax = bvp_->constant_coefficients() ? bvp_->a(x) : 0.0;
+	const double qx = bvp_->constant_coefficients() ? bvp_->q(x) : 0.0;
 	double grad_psi_lambda[DIM], grad_psi_mu[DIM], weights;
-	while (true) {
-	  for (unsigned int i = 0; i < DIM; i++)
-	    x[i] = gauss_points[i][index[i]];
-
-	  // product of current Gauss weights
-	  weights = 1.0;
-	  for (unsigned int i = 0; i < DIM; i++)
-	    weights *= gauss_weights[i][index[i]];
-
-	  // compute the share a(x)(grad psi_lambda)(x)(grad psi_mu)(x)
-	  for (unsigned int i = 0; i < DIM; i++) {
-	    grad_psi_lambda[i] = 1.0;
-	    grad_psi_mu[i] = 1.0;
-	    for (unsigned int s = 0; s < DIM; s++) {
-	      if (i == s) {
-		grad_psi_lambda[i] *= psi_lambda_der_values[i][index[i]];
-		grad_psi_mu[i]     *= psi_mu_der_values[i][index[i]];
-	      } else {
-		grad_psi_lambda[i] *= psi_lambda_values[s][index[s]];
-		grad_psi_lambda[i] *= psi_mu_values[s][index[s]];
+	if (bvp_->constant_coefficients()) {
+	  while (true) {
+	    for (unsigned int i = 0; i < DIM; i++)
+	      x[i] = gauss_points[i][index[i]];
+	    
+	    // product of current Gauss weights
+	    weights = 1.0;
+	    for (unsigned int i = 0; i < DIM; i++)
+	      weights *= gauss_weights[i][index[i]];
+	    
+	    // compute the share a(x)(grad psi_lambda)(x)(grad psi_mu)(x)
+	    for (unsigned int i = 0; i < DIM; i++) {
+	      grad_psi_lambda[i] = 1.0;
+	      grad_psi_mu[i] = 1.0;
+	      for (unsigned int s = 0; s < DIM; s++) {
+		if (i == s) {
+		  grad_psi_lambda[i] *= psi_lambda_der_values[i][index[i]];
+		  grad_psi_mu[i]     *= psi_mu_der_values[i][index[i]];
+		} else {
+		  grad_psi_lambda[i] *= psi_lambda_values[s][index[s]];
+		  grad_psi_lambda[i] *= psi_mu_values[s][index[s]];
+		}
 	      }
 	    }
-	  }
-	  double share = 0;
-	  for (unsigned int i = 0; i < DIM; i++)
-	    share += grad_psi_lambda[i]*grad_psi_mu[i];
-	  r += bvp_->a(x) * weights * share;
-
-	  // compute the share q(x)psi_lambda(x)psi_mu(x)
-	  share = bvp_->q(x) * weights;
-	  for (unsigned int i = 0; i < DIM; i++)
-	    share *= psi_lambda_values[i][index[i]] * psi_mu_values[i][index[i]];
-	  r += share;
-
-	  // "++index"
-	  bool exit = false;
-	  for (unsigned int i = 0; i < DIM; i++) {
-	    if (index[i] == N_Gauss*(supp.b[i]-supp.a[i])-1) {
-	      index[i] = 0;
-	      exit = (i == DIM-1);
-	    } else {
-	      index[i]++;
-	      break;
+	    double share = 0;
+	    for (unsigned int i = 0; i < DIM; i++)
+	      share += grad_psi_lambda[i]*grad_psi_mu[i];
+ 	    r += ax * weights * share;
+	    
+	    // compute the share q(x)psi_lambda(x)psi_mu(x)
+ 	    share = qx * weights;
+	    for (unsigned int i = 0; i < DIM; i++)
+	      share *= psi_lambda_values[i][index[i]] * psi_mu_values[i][index[i]];
+	    r += share;
+	    
+	    // "++index"
+	    bool exit = false;
+	    for (unsigned int i = 0; i < DIM; i++) {
+	      if (index[i] == N_Gauss*(supp.b[i]-supp.a[i])-1) {
+		index[i] = 0;
+		exit = (i == DIM-1);
+	      } else {
+		index[i]++;
+		break;
+	      }
 	    }
+	    if (exit) break;
 	  }
-	  if (exit) break;
+	} else {
+	  while (true) {
+	    for (unsigned int i = 0; i < DIM; i++)
+	      x[i] = gauss_points[i][index[i]];
+	    
+	    // product of current Gauss weights
+	    weights = 1.0;
+	    for (unsigned int i = 0; i < DIM; i++)
+	      weights *= gauss_weights[i][index[i]];
+	    
+	    // compute the share a(x)(grad psi_lambda)(x)(grad psi_mu)(x)
+	    for (unsigned int i = 0; i < DIM; i++) {
+	      grad_psi_lambda[i] = 1.0;
+	      grad_psi_mu[i] = 1.0;
+	      for (unsigned int s = 0; s < DIM; s++) {
+		if (i == s) {
+		  grad_psi_lambda[i] *= psi_lambda_der_values[i][index[i]];
+		  grad_psi_mu[i]     *= psi_mu_der_values[i][index[i]];
+		} else {
+		  grad_psi_lambda[i] *= psi_lambda_values[s][index[s]];
+		  grad_psi_lambda[i] *= psi_mu_values[s][index[s]];
+		}
+	      }
+	    }
+	    double share = 0;
+	    for (unsigned int i = 0; i < DIM; i++)
+	      share += grad_psi_lambda[i]*grad_psi_mu[i];
+	    r += bvp_->a(x) * weights * share;
+	    
+	    // compute the share q(x)psi_lambda(x)psi_mu(x)
+	    share = bvp_->q(x) * weights;
+	    for (unsigned int i = 0; i < DIM; i++)
+	      share *= psi_lambda_values[i][index[i]] * psi_mu_values[i][index[i]];
+	    r += share;
+	    
+	    // "++index"
+	    bool exit = false;
+	    for (unsigned int i = 0; i < DIM; i++) {
+	      if (index[i] == N_Gauss*(supp.b[i]-supp.a[i])-1) {
+		index[i] = 0;
+		exit = (i == DIM-1);
+	      } else {
+		index[i]++;
+		break;
+	      }
+	    }
+	    if (exit) break;
+	  }
 	}
 	
       }
@@ -313,7 +365,7 @@ namespace WaveletTL
       typedef typename WaveletBasis::Index Index;
       std::set<Index> Lambda;
       const int j0 = basis().j0();
-      const int jmax = j0+4;
+      const int jmax = j0+3;
       for (Index lambda = basis().first_generator(j0);; ++lambda) {
 	Lambda.insert(lambda);
 	if (lambda == basis().last_wavelet(jmax)) break;
@@ -345,7 +397,7 @@ namespace WaveletTL
       typedef typename WaveletBasis::Index Index;
       std::set<Index> Lambda;
       const int j0 = basis().j0();
-      const int jmax = j0+4;
+      const int jmax = j0+3;
       for (Index lambda = basis().first_generator(j0);; ++lambda) {
 	Lambda.insert(lambda);
 	if (lambda == basis().last_wavelet(jmax)) break;

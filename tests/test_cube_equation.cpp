@@ -7,9 +7,11 @@
 #include <utils/function.h>
 #include <utils/fixed_array1d.h>
 #include <numerics/bvp.h>
+#include <numerics/bezier.h>
 #include <geometry/sampled_mapping.h>
 
 #include <interval/ds_basis.h>
+#include <interval/p_basis.h>
 #include <interval/jl_basis.h>
 #include <interval/jl_support.h>
 #include <interval/jl_evaluate.h>
@@ -24,63 +26,65 @@ using namespace MathTL;
 using namespace WaveletTL;
 
 /*
-  A test problem for the Poisson equation on the cube with homogeneous Dirichlet b.c.'s:
-    -Delta u(x,y) = 2(x(1-x)+y(1-y))
-  with exact solution
-    u(x,y) = x(1-x)y(1-y)
+  Some test problem for the Poisson equation on the cube with homogeneous Dirichlet b.c.'s:
+  1: -Delta u(x,y) = 2(x(1-x)+y(1-y)), u(x,y) = x(1-x)y(1-y)
+  2: -Delta u(x,y) = 2*pi^2*sin(pi*x)*sin(pi*y), u(x,y) = sin(pi*x)*sin(pi*y)
+  3: u cubic Hermite interpolant
 */
+template <unsigned int N>
 class myRHS
   : public Function<2,double>
 {
 public:
   virtual ~myRHS() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
-    return 2*(p[0]*(1-p[0])+p[1]*(1-p[1]));
+    switch(N) {
+    case 1:
+      return 2*(p[0]*(1-p[0])+p[1]*(1-p[1]));
+      break;
+    case 2:
+      return 2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1]);
+      break;
+    case 3:
+      return
+	-((p[0]<=0.5 ? 24-96*p[0] : 96*p[0]-72)
+	  * (p[1]<=0.5 ? 4*p[1]*p[1]*(3-4*p[1]) : (2-2*p[1])*(2-2*p[1])*(4*p[1]-1))
+	  +(p[0]<=0.5 ? 4*p[0]*p[0]*(3-4*p[0]) : (2-2*p[0])*(2-2*p[0])*(4*p[0]-1))
+	  * (p[1]<=0.5 ? 24-96*p[1] : 96*p[1]-72));
+      break;
+    default:
+      return 1;
+      break;
+    }
   }
   void vector_value(const Point<2>& p, Vector<double>& values) const {
     values[0] = value(p);
   }
 };
 
+template <unsigned int N>
 class mySolution
   : public Function<2,double>
 {
 public:
   virtual ~mySolution() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
-    return p[0]*(1-p[0])*p[1]*(1-p[1]);
-  }
-  void vector_value(const Point<2>& p, Vector<double>& values) const {
-    values[0] = value(p);
-  }
-};
-
-/*
-  Another test problem:
-    -Delta u(x,y) = 2*pi^2*sin(pi*x)*sin(pi*y)
-  with exact solution
-    u(x,y) = sin(pi*x)*sin(pi*y)
-*/
-class myRHS2
-  : public Function<2,double>
-{
-public:
-  virtual ~myRHS2() {};
-  double value(const Point<2>& p, const unsigned int component = 0) const {
-    return 2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1]);
-  }
-  void vector_value(const Point<2>& p, Vector<double>& values) const {
-    values[0] = value(p);
-  }
-};
-
-class mySolution2
-  : public Function<2,double>
-{
-public:
-  virtual ~mySolution2() {};
-  double value(const Point<2>& p, const unsigned int component = 0) const {
-    return sin(M_PI*p[0])*sin(M_PI*p[1]);
+    switch(N) {
+    case 1:
+      return p[0]*(1-p[0])*p[1]*(1-p[1]);
+      break;
+    case 2:
+      return sin(M_PI*p[0])*sin(M_PI*p[1]);
+      break;
+    case 3:
+      return
+	(p[0]<=0.5 ? 4*p[0]*p[0]*(3-4*p[0]) : (2-2*p[0])*(2-2*p[0])*(4*p[0]-1))
+	* (p[1]<=0.5 ? 4*p[1]*p[1]*(3-4*p[1]) : (2-2*p[1])*(2-2*p[1])*(4*p[1]-1));
+      break;
+    default:
+      return 0;
+      break;
+    }
   }
   void vector_value(const Point<2>& p, Vector<double>& values) const {
     values[0] = value(p);
@@ -95,9 +99,10 @@ int main()
   PoissonBVP<2> poisson(&constant_rhs);
 
 #if 0
-  const int d  = 2;
-  const int dT = 2; // be sure to use a continuous dual here, otherwise the RHS test will fail
-  typedef DSBasis<d,dT> Basis1D;
+  const int d  = 3;
+  const int dT = 3; // be sure to use a continuous dual here, otherwise the RHS test will fail
+//   typedef DSBasis<d,dT> Basis1D;
+  typedef PBasis<d,dT> Basis1D;
 #else
   typedef JLBasis Basis1D;
 #endif
@@ -144,7 +149,7 @@ int main()
   set<Index> Lambda;
   for (Index lambda = first_generator<Basis1D,2,CBasis>(&eq.basis(), eq.basis().j0());; ++lambda) {
     Lambda.insert(lambda);
-    if (lambda == last_wavelet<Basis1D,2,CBasis>(&eq.basis(), eq.basis().j0()+2)) break;
+    if (lambda == last_wavelet<Basis1D,2,CBasis>(&eq.basis(), eq.basis().j0()+1)) break;
   }
   
 //   cout << "- set up stiffness matrix with respect to the index set Lambda=" << endl;
@@ -152,8 +157,8 @@ int main()
 //     cout << *it << endl;
 
   // choose another rhs
-  myRHS2 rhs;
-//   myRHS rhs;
+  const unsigned int N = 2;
+  myRHS<N> rhs;
   poisson.set_f(&rhs);
   eq.set_bvp(&poisson);
   eq.RHS(1e-4, coeffs);
@@ -166,13 +171,15 @@ int main()
   SparseMatrix<double> A;
   setup_stiffness_matrix(eq, Lambda, A);
   A.compress(1e-15);
-  cout << "  output in file \"stiff_out.m\"..." << endl;
-  std::ofstream ofs("stiff_out.m");
-  ofs << "A=";
-  print_matrix(A, ofs);
-  ofs << ";" << endl;
-  ofs.close();
-  cout << "  ...done!" << endl;
+
+//   cout << "  output in file \"stiff_out.m\"..." << endl;
+//   std::ofstream ofs("stiff_out.m");
+//   ofs << "A=";
+//   print_matrix(A, ofs);
+//   ofs << ";" << endl;
+//   ofs.close();
+//   cout << "  ...done!" << endl;
+
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
@@ -205,16 +212,28 @@ int main()
   
   u.scale(&eq, -1);
   SampledMapping<2> s(evaluate(eq.basis(), u, true, 6));
-//   std::ofstream u_Lambda_stream("u_lambda.m");
-//   s.matlab_output(u_Lambda_stream);
-//   u_Lambda_stream.close();
-//   cout << "  ... done, see file 'u_lambda.m'" << endl;
+  std::ofstream u_Lambda_stream("u_lambda.m");
+  s.matlab_output(u_Lambda_stream);
+  u_Lambda_stream.close();
+  cout << "  ... done, see file 'u_lambda.m'" << endl;
 
-//   mySolution u_Lambda;
-  mySolution2 u_Lambda;
+  mySolution<N> u_Lambda;
   s.add(-1.0, SampledMapping<2>(s, u_Lambda));
-  cout << "  ... done, pointwise error: " << row_sum_norm(s.values()) << endl;
-#endif
+  std::ofstream u_Lambda_error_stream("u_lambda_error.m");
+  s.matlab_output(u_Lambda_error_stream);
+  u_Lambda_error_stream.close();
+  cout << "  ... done, see file 'u_lambda_error.m', pointwise maximal error: " << maximum_norm(s.values()) << endl;
+  
+//   SampledMapping<2> sexact(s, u_Lambda);
+//   std::ofstream u_exact_stream("u_exact.m");
+//   sexact.matlab_output(u_exact_stream);
+//   u_exact_stream.close();
 
+//   SampledMapping<2> srhs(s, rhs);
+//   std::ofstream rhs_stream("rhs.m");
+//   srhs.matlab_output(rhs_stream);
+//   rhs_stream.close();
+#endif
+  
   return 0;
 }

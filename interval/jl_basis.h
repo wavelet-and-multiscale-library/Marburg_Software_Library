@@ -40,8 +40,11 @@ namespace WaveletTL
       psi_{j,1},...,psi_{j,2^j-1}     <-> 2^{j/2}psi_0(2^j*x-k), k=1,...,2^j-1
       psi_{j,2^j},...,psi_{j,2^{j+1}} <-> 2^{j/2}psi_1(2^j*x-k), k=0,...,2^j
 
-    see [JL] for their definition. Note that both the generators and wavelets are scaled,
+    see [JL] for their definition.
+
+    Note that in [JL], both the generators and wavelets are scaled,
     so that ||psi_lambda'||_{L_2(0,1)}=1 holds for all indices lambda.
+    Here (for the moment) we do not scale them.
 
     References:
     [JL] Jia/Liu:

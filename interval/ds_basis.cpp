@@ -13,71 +13,67 @@
 
 namespace WaveletTL
 {
-  template <int d, int dT>
-  DSBasis<d,dT>::DSBasis(const bool bc_left, const bool bc_right,
-			 const DSBiorthogonalizationMethod bio) {
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  DSBasis<d,dT,BIO>::DSBasis(const bool bc_left, const bool bc_right) {
     this->s0 = bc_left ? 1 : 0;
     this->s1 = bc_right ? 1 : 0;
     this->sT0 = 0;
     this->sT1 = 0;
-    this->bio = bio;
 
     setup();
   }
   
-  template <int d, int dT>
-  DSBasis<d,dT>::DSBasis(const int s0, const int s1, const int sT0, const int sT1,
-			 const DSBiorthogonalizationMethod bio) {
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  DSBasis<d,dT,BIO>::DSBasis(const int s0, const int s1, const int sT0, const int sT1) {
     assert(std::max(s0,s1) < d && std::max(sT0,sT1) < dT);
         
     this->s0 = s0;
     this->s1 = s1;
     this->sT0 = sT0;
     this->sT1 = sT1;
-    this->bio = bio;
 
     setup();
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   inline
-  typename DSBasis<d,dT>::Index
-  DSBasis<d,dT>::first_generator(const int j) const
+  typename DSBasis<d,dT,BIO>::Index
+  DSBasis<d,dT,BIO>::first_generator(const int j) const
   {
     assert(j >= j0());
     return Index(j, 0, DeltaLmin(), this);
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   inline
-  typename DSBasis<d,dT>::Index
-  DSBasis<d,dT>::last_generator(const int j) const
+  typename DSBasis<d,dT,BIO>::Index
+  DSBasis<d,dT,BIO>::last_generator(const int j) const
   {
     assert(j >= j0());
     return Index(j, 0, DeltaRmax(j), this);
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   inline
-  typename DSBasis<d,dT>::Index
-  DSBasis<d,dT>::first_wavelet(const int j) const
+  typename DSBasis<d,dT,BIO>::Index
+  DSBasis<d,dT,BIO>::first_wavelet(const int j) const
   {
     assert(j >= j0());
     return Index(j, 1, Nablamin(), this);
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   inline
-  typename DSBasis<d,dT>::Index
-  DSBasis<d,dT>::last_wavelet(const int j) const
+  typename DSBasis<d,dT,BIO>::Index
+  DSBasis<d,dT,BIO>::last_wavelet(const int j) const
   {
     assert(j >= j0());
     return Index(j, 1, Nablamax(j), this);
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d,dT>::setup() {
+  DSBasis<d,dT,BIO>::setup() {
     j0_ = (int) ceil(log(std::max(ellT_l(),ellT_r())+ell2T<d,dT>()-1.)/M_LN2+1);
 
     setup_GammaLR();
@@ -422,9 +418,9 @@ namespace WaveletTL
     Mj1T_t = transpose(Mj1T);
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   const double
-  DSBasis<d,dT>::alpha(const int m, const unsigned int r) const {
+  DSBasis<d,dT,BIO>::alpha(const int m, const unsigned int r) const {
     double result = 0;
     if (r == 0)
       return 1; // [DKU] (5.1.1)
@@ -447,9 +443,9 @@ namespace WaveletTL
     return result;
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   const double
-  DSBasis<d,dT>::alphaT(const int m, const unsigned int r) const {
+  DSBasis<d,dT,BIO>::alphaT(const int m, const unsigned int r) const {
     double result = 0;
     if (r == 0)
       return 1; // [DKU] (5.1.1)
@@ -472,9 +468,9 @@ namespace WaveletTL
     return result;
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   const double
-  DSBasis<d,dT>::betaL(const int m, const unsigned int r) const {
+  DSBasis<d,dT,BIO>::betaL(const int m, const unsigned int r) const {
     // [DKU] (3.2.31)
     double result = 0;
     for (int q = (int)ceil((m-ell2T<d,dT>())/2.0); q < ellT_l()-sT0; q++)
@@ -482,9 +478,9 @@ namespace WaveletTL
     return result * M_SQRT1_2;
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   const double
-  DSBasis<d,dT>::betaLT(const int m, const unsigned int r) const {
+  DSBasis<d,dT,BIO>::betaLT(const int m, const unsigned int r) const {
     // [DKU] (3.2.31)
     double result = 0;
     for (int q = (int)ceil((m-ell2<d>())/2.0); q < ell_l()-s0; q++)
@@ -492,9 +488,9 @@ namespace WaveletTL
     return result * M_SQRT1_2;
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   const double
-  DSBasis<d,dT>::betaR(const int m, const unsigned int r) const {
+  DSBasis<d,dT,BIO>::betaR(const int m, const unsigned int r) const {
     // [DKU] (3.2.31)
     double result = 0;
     for (int q = (int)ceil((m-ell2T<d,dT>())/2.0); q < ellT_r()-sT1; q++)
@@ -502,9 +498,9 @@ namespace WaveletTL
     return result * M_SQRT1_2;
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   const double
-  DSBasis<d,dT>::betaRT(const int m, const unsigned int r) const {
+  DSBasis<d,dT,BIO>::betaRT(const int m, const unsigned int r) const {
     // [DKU] (3.2.31)
     double result = 0;
     for (int q = (int)ceil((m-ell2<d>())/2.0); q < ell_r()-s1; q++)
@@ -512,9 +508,9 @@ namespace WaveletTL
     return result * M_SQRT1_2;
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d,dT>::setup_GammaLR() {
+  DSBasis<d,dT,BIO>::setup_GammaLR() {
     // IGPMlib reference: I_Mask_Bspline::EvalGammaL(), ::EvalGammaR()
 
     const unsigned int GammaLsize = std::max(d-s0, dT-sT0);
@@ -621,9 +617,9 @@ namespace WaveletTL
     //     cout << "GammaR=" << endl << GammaR << endl;
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d,dT>::setup_CX_CXT()
+  DSBasis<d,dT,BIO>::setup_CX_CXT()
   {
     // IGPMlib reference: I_Mask_Bspline::EvalCL(), ::EvalCR()
 
@@ -632,7 +628,7 @@ namespace WaveletTL
     CR.resize(GammaR.row_dimension(), GammaR.column_dimension());
     CRT.resize(GammaR.row_dimension(), GammaR.column_dimension());
 
-    if (bio == none) {
+    if (BIO == none) {
       CL.diagonal(GammaL.row_dimension(), 1.0);
       Matrix<double> CLGammaLInv;
       QUDecomposition<double>(GammaL).inverse(CLGammaLInv);
@@ -644,7 +640,7 @@ namespace WaveletTL
       CRT = transpose(CRGammaRInv);      
     }
     
-    if (bio == SVD) {
+    if (BIO == SVD) {
       MathTL::SVD<double> svd(GammaL);
       Matrix<double> U, V;
       Vector<double> S;
@@ -678,7 +674,7 @@ namespace WaveletTL
       CRT.compress(1e-14);
     }
     
-    if (bio == Bernstein) {
+    if (BIO == Bernstein) {
       double b(0);
       if (d == 2)
 	b = 0.7; // cf. [DKU]
@@ -714,7 +710,7 @@ namespace WaveletTL
       CRT.compress(1e-14);
     }
     
-    if (bio == partialSVD) {
+    if (BIO == partialSVD) {
       MathTL::SVD<double> svd(GammaL);
       Matrix<double> U, V;
       Vector<double> S;
@@ -768,7 +764,7 @@ namespace WaveletTL
       CRT.compress(1e-14);
     }
 
-    if (bio == BernsteinSVD) {
+    if (BIO == BernsteinSVD) {
       double b(0);
       if (d == 2)
 	b = 0.7; // cf. [DKU]
@@ -853,8 +849,8 @@ namespace WaveletTL
     QUDecomposition<double>(CRT).inverse(inv_CRT);
   }
 
-  template <int d, int dT>
-  void DSBasis<d,dT>::setup_CXA_CXAT() {
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  void DSBasis<d,dT,BIO>::setup_CXA_CXAT() {
     // IGPMlib reference: I_Mask_Bspline::EvalCL(), ::EvalCR()
 
     // setup CLA <-> AlphaT * (CL)^T
@@ -968,8 +964,8 @@ namespace WaveletTL
 #endif
   }
 
-  template <int d, int dT>
-  void DSBasis<d,dT>::setup_Cj() {
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  void DSBasis<d,dT,BIO>::setup_Cj() {
     // IGPMlib reference: I_Basis_Bspline_s::setup_Cj(), ::put_Mat()
 
     // (5.2.5)
@@ -1046,9 +1042,9 @@ namespace WaveletTL
 #endif
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   Matrix<double>
-  DSBasis<d, dT>::ML() const {
+  DSBasis<d,dT,BIO>::ML() const {
     // IGPMlib reference: I_Basis_Bspline_s::ML()
     
     Matrix<double> ML(ell_l()+d-2*s0+ell2<d>()-1, d-s0);
@@ -1067,9 +1063,9 @@ namespace WaveletTL
     return ML;
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   Matrix<double>
-  DSBasis<d, dT>::MR() const {
+  DSBasis<d,dT,BIO>::MR() const {
     // IGPMlib reference: I_Basis_Bspline_s::MR()
 
     Matrix<double> MR(ell_r()+d-2*s1+ell2<d>()-1, d-s1);
@@ -1088,9 +1084,9 @@ namespace WaveletTL
     return MR;
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   Matrix<double>
-  DSBasis<d, dT>::MLTp() const {
+  DSBasis<d,dT,BIO>::MLTp() const {
     // IGPMlib reference: I_Basis_Bspline_s::MLts()
 
     Matrix<double> MLTp(ellT_l()+dT-2*sT0+ell2T<d,dT>()-1, dT-sT0);
@@ -1109,9 +1105,9 @@ namespace WaveletTL
     return MLTp;
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   Matrix<double>
-  DSBasis<d, dT>::MRTp() const {
+  DSBasis<d,dT,BIO>::MRTp() const {
     // IGPMlib reference: I_Basis_Bspline_s::MRts()
 
     Matrix<double> MRTp(ellT_r()+dT-2*sT1+ell2T<d,dT>()-1, dT-sT1);
@@ -1130,9 +1126,9 @@ namespace WaveletTL
     return MRTp;
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d,dT>::support(const Index& lambda, int& k1, int& k2) const {
+  DSBasis<d,dT,BIO>::support(const Index& lambda, int& k1, int& k2) const {
     if (lambda.e() == 0) // generator
       {
 	const Matrix<double>& CLA = get_CLA();
@@ -1198,9 +1194,9 @@ namespace WaveletTL
       }
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d,dT>::setup_Mj0(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& Mj0) {
+  DSBasis<d,dT,BIO>::setup_Mj0(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& Mj0) {
     // IGPMlib reference: I_Basis_Bspline_s::Mj0()
     // cf. [DKU section 3.5]
 
@@ -1227,9 +1223,9 @@ namespace WaveletTL
     //     cout << "Mj0=" << endl << Mj0 << endl;
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d,dT>::setup_Mj0Tp(const Matrix<double>& MLTp, const Matrix<double>& MRTp, SparseMatrix<double>& Mj0Tp) {
+  DSBasis<d,dT,BIO>::setup_Mj0Tp(const Matrix<double>& MLTp, const Matrix<double>& MRTp, SparseMatrix<double>& Mj0Tp) {
     // IGPMlib reference: I_Basis_Bspline_s::Mj0ts()
 
     const int nj  = Deltasize(j0());
@@ -1255,9 +1251,9 @@ namespace WaveletTL
     //     cout << "Mj0Tp=" << endl << Mj0Tp << endl;
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::F(SparseMatrix<double>& FF) {
+  DSBasis<d,dT,BIO>::F(SparseMatrix<double>& FF) {
     // IGPMlib reference: I_Basis_Bspline_s::F()
     
     const int FLow = ell_l()-s0+(d%2);       // start column index for F_j in (4.1.14)
@@ -1285,9 +1281,9 @@ namespace WaveletTL
     //     cout << "F=" << endl << FF << endl;
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::P(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& PP) {
+  DSBasis<d,dT,BIO>::P(const Matrix<double>& ML, const Matrix<double>& MR, SparseMatrix<double>& PP) {
     // IGPMlib reference: I_Basis_Bspline_s::P()
     
     // (4.1.22):
@@ -1305,9 +1301,9 @@ namespace WaveletTL
 //     cout << "P=" << endl << PP << endl;
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::GSetup(SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv) {
+  DSBasis<d,dT,BIO>::GSetup(SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv) {
     // IGPMlib reference: I_Basis_Bspline_s::GSetup()
 
     // (4.1.13):
@@ -1338,9 +1334,9 @@ namespace WaveletTL
     //     cout << "A=" << endl << A << endl;
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::GElim(SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv) {
+  DSBasis<d,dT,BIO>::GElim(SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv) {
     // IGPMlib reference: I_Basis_Bspline_s::gelim()
     
     // A_j=A_j^{(0)} in (4.1.1) is a q times p matrix
@@ -1400,9 +1396,9 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::BT(const SparseMatrix<double>& A, SparseMatrix<double>& BB) {
+  DSBasis<d,dT,BIO>::BT(const SparseMatrix<double>& A, SparseMatrix<double>& BB) {
     // IGPMlib reference: I_Basis_Bspline_s::Btr()
     
     const int p = (1<<j0()) - ell_l() - ell_r() - (d%2) + 1;
@@ -1422,9 +1418,9 @@ namespace WaveletTL
       BB.set_entry(-llow+r+DeltaRmax(j0()+1)-DeltaRmax(j0()), -llow+r, 1.0);
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::InvertP(const SparseMatrix<double>& PP, SparseMatrix<double>& PPinv) {
+  DSBasis<d,dT,BIO>::InvertP(const SparseMatrix<double>& PP, SparseMatrix<double>& PPinv) {
     // IGPMlib reference: I_Basis_Bspline_s::InverseP()
     
     PPinv.diagonal(PP.row_dimension(), 1.0);
@@ -1457,9 +1453,9 @@ namespace WaveletTL
       }
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::DS_symmetrization(SparseMatrix<double>& Mj1, SparseMatrix<double>& Mj1T) {
+  DSBasis<d,dT,BIO>::DS_symmetrization(SparseMatrix<double>& Mj1, SparseMatrix<double>& Mj1T) {
     // IGPMlib reference: I_Basis_Bspline::Modify()
     
     SparseMatrix<double> Hj1(Deltasize(j0()+1), 1<<j0()),
@@ -1495,9 +1491,9 @@ namespace WaveletTL
     Mj1T = Hj1T;
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::decompose(const InfiniteVector<double, Index>& c,
+  DSBasis<d,dT,BIO>::decompose(const InfiniteVector<double, Index>& c,
 			    const int jmin,
 			    InfiniteVector<double, Index>& v) const {
     v.clear();
@@ -1509,9 +1505,9 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::decompose_t(const InfiniteVector<double, Index>& c,
+  DSBasis<d,dT,BIO>::decompose_t(const InfiniteVector<double, Index>& c,
 			      const int jmin,
 			      InfiniteVector<double, Index>& v) const {
     v.clear();
@@ -1523,9 +1519,9 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::reconstruct(const InfiniteVector<double, Index>& c,
+  DSBasis<d,dT,BIO>::reconstruct(const InfiniteVector<double, Index>& c,
 			      const int j,
 			      InfiniteVector<double, Index>& v) const {
     v.clear();
@@ -1537,9 +1533,9 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::reconstruct_t(const InfiniteVector<double, Index>& c,
+  DSBasis<d,dT,BIO>::reconstruct_t(const InfiniteVector<double, Index>& c,
 				const int j,
 				InfiniteVector<double, Index>& v) const {
     v.clear();
@@ -1551,9 +1547,9 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::decompose_1(const Index& lambda,
+  DSBasis<d,dT,BIO>::decompose_1(const Index& lambda,
 			      const int jmin,
 			      InfiniteVector<double, Index>& c) const {
     assert(jmin >= j0());
@@ -1675,9 +1671,9 @@ namespace WaveletTL
       }
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::decompose_t_1(const Index& lambda,
+  DSBasis<d,dT,BIO>::decompose_t_1(const Index& lambda,
 				const int jmin,
 				InfiniteVector<double, Index>& c) const {
     assert(jmin >= j0());
@@ -1800,9 +1796,9 @@ namespace WaveletTL
       }
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::reconstruct_1(const Index& lambda,
+  DSBasis<d,dT,BIO>::reconstruct_1(const Index& lambda,
 				const int j,
 				InfiniteVector<double, Index>& c) const {
     c.clear();
@@ -1873,9 +1869,9 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::reconstruct_t_1(const Index& lambda,
+  DSBasis<d,dT,BIO>::reconstruct_t_1(const Index& lambda,
 				  const int j,
 				  InfiniteVector<double, Index>& c) const {
     c.clear();
@@ -1945,9 +1941,9 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::assemble_Mj0(const int j, SparseMatrix<double>& mj0) const {
+  DSBasis<d,dT,BIO>::assemble_Mj0(const int j, SparseMatrix<double>& mj0) const {
     if (j == j0())
       mj0 = Mj0;
     else {
@@ -1980,9 +1976,9 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::assemble_Mj0_t(const int j, SparseMatrix<double>& mj0_t) const {
+  DSBasis<d,dT,BIO>::assemble_Mj0_t(const int j, SparseMatrix<double>& mj0_t) const {
     if (j == j0())
       mj0_t = Mj0_t;
     else {
@@ -1992,9 +1988,9 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::assemble_Mj0T(const int j, SparseMatrix<double>& mj0T) const {
+  DSBasis<d,dT,BIO>::assemble_Mj0T(const int j, SparseMatrix<double>& mj0T) const {
     if (j == j0())
       mj0T = Mj0T;
     else {
@@ -2027,9 +2023,9 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::assemble_Mj0T_t(const int j, SparseMatrix<double>& mj0T_t) const {
+  DSBasis<d,dT,BIO>::assemble_Mj0T_t(const int j, SparseMatrix<double>& mj0T_t) const {
     if (j == j0())
       mj0T_t = Mj0T_t;
     else {
@@ -2039,9 +2035,9 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::assemble_Mj1(const int j, SparseMatrix<double>& mj1) const {
+  DSBasis<d,dT,BIO>::assemble_Mj1(const int j, SparseMatrix<double>& mj1) const {
     if (j == j0())
       mj1 = Mj1;
     else {
@@ -2081,9 +2077,9 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::assemble_Mj1_t(const int j, SparseMatrix<double>& mj1_t) const {
+  DSBasis<d,dT,BIO>::assemble_Mj1_t(const int j, SparseMatrix<double>& mj1_t) const {
     if (j == j0())
       mj1_t = Mj1_t;
     else {
@@ -2093,9 +2089,9 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::assemble_Mj1T(const int j, SparseMatrix<double>& mj1T) const {
+  DSBasis<d,dT,BIO>::assemble_Mj1T(const int j, SparseMatrix<double>& mj1T) const {
     if (j == j0())
       mj1T = Mj1T;
     else {
@@ -2135,9 +2131,9 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::assemble_Mj1T_t(const int j, SparseMatrix<double>& mj1T_t) const {
+  DSBasis<d,dT,BIO>::assemble_Mj1T_t(const int j, SparseMatrix<double>& mj1T_t) const {
     if (j == j0())
       mj1T_t = Mj1T_t;
     else {
@@ -2147,9 +2143,9 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::Mj0_get_row(const int j, const Vector<double>::size_type row,
+  DSBasis<d,dT,BIO>::Mj0_get_row(const int j, const Vector<double>::size_type row,
 			      InfiniteVector<double, Vector<double>::size_type>& v) const {
     if (j == j0())
       Mj0.get_row(row, v);
@@ -2169,9 +2165,9 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::Mj0T_get_row(const int j, const Vector<double>::size_type row,
+  DSBasis<d,dT,BIO>::Mj0T_get_row(const int j, const Vector<double>::size_type row,
 			       InfiniteVector<double, Vector<double>::size_type>& v) const {
     if (j == j0())
       Mj0T.get_row(row, v);
@@ -2190,9 +2186,9 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::Mj1_get_row(const int j, const Vector<double>::size_type row,
+  DSBasis<d,dT,BIO>::Mj1_get_row(const int j, const Vector<double>::size_type row,
 			      InfiniteVector<double, Vector<double>::size_type>& v) const {
     if (j == j0())
       Mj1.get_row(row, v);
@@ -2263,9 +2259,9 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::Mj1T_get_row(const int j, const Vector<double>::size_type row,
+  DSBasis<d,dT,BIO>::Mj1T_get_row(const int j, const Vector<double>::size_type row,
 			       InfiniteVector<double, Vector<double>::size_type>& v) const {
     if (j == j0())
       Mj1T.get_row(row, v);
@@ -2335,9 +2331,9 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::Mj0_t_get_row(const int j, const Vector<double>::size_type row,
+  DSBasis<d,dT,BIO>::Mj0_t_get_row(const int j, const Vector<double>::size_type row,
 				InfiniteVector<double, Vector<double>::size_type>& v) const {
     if (j == j0())
       Mj0_t.get_row(row, v);
@@ -2355,9 +2351,9 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::Mj0T_t_get_row(const int j, const Vector<double>::size_type row,
+  DSBasis<d,dT,BIO>::Mj0T_t_get_row(const int j, const Vector<double>::size_type row,
 				 InfiniteVector<double, Vector<double>::size_type>& v) const {
     if (j == j0())
       Mj0T_t.get_row(row, v);
@@ -2375,9 +2371,9 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::Mj1_t_get_row(const int j, const Vector<double>::size_type row,
+  DSBasis<d,dT,BIO>::Mj1_t_get_row(const int j, const Vector<double>::size_type row,
 				InfiniteVector<double, Vector<double>::size_type>& v) const {
     if (j == j0())
       Mj1_t.get_row(row, v);
@@ -2399,9 +2395,9 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  DSBasis<d, dT>::Mj1T_t_get_row(const int j, const Vector<double>::size_type row,
+  DSBasis<d,dT,BIO>::Mj1T_t_get_row(const int j, const Vector<double>::size_type row,
 				 InfiniteVector<double, Vector<double>::size_type>& v) const {
     if (j == j0())
       Mj1T_t.get_row(row, v);

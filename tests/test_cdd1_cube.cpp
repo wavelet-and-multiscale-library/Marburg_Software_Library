@@ -79,7 +79,7 @@ int main()
   typedef CubeBasis<Basis1D,2> Basis;
   typedef Basis::Index Index;
 
-  TestRHS<2> rhs;
+  TestRHS<1> rhs;
   PoissonBVP<2> poisson(&rhs);
 
   FixedArray1D<bool,4> bc;
@@ -117,8 +117,8 @@ int main()
 
   InfiniteVector<double, Index> u_epsilon;
 
-  CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 5);
-//   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 6);
+//   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 5);
+  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 6);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 7);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 10);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 6, CDD1);

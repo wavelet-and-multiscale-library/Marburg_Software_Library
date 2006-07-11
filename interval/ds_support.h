@@ -12,19 +12,20 @@
 
 #include <list>
 #include <set>
+#include <interval/ds_bio.h>
 
 namespace WaveletTL
 {
-  template <int d, int dT> class DSBasis;
+  template <int d, int dT, DSBiorthogonalizationMethod BIO> class DSBasis;
 
   /*!
     Compute an interval 2^{-j}[k1,k2] which contains the support of a
     single primal DS generator or wavelet \psi_\lambda.
     (j == lambda.j()+lambda.e() is neglected for performance reasons)
   */
-  template <int d, int dT>
-  void support(const DSBasis<d,dT>& basis,
-	       const typename DSBasis<d,dT>::Index& lambda,
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  void support(const DSBasis<d,dT,BIO>& basis,
+	       const typename DSBasis<d,dT,BIO>::Index& lambda,
 	       int& k1, int& k2);
 
   /*!
@@ -33,9 +34,9 @@ namespace WaveletTL
     and compute it in the form 2^{-j}[k1,k2]. If the return value is false,
     k1 and k2 will have no meaningful value for performance reasons.
   */
-  template <int d, int dT>
-  bool intersect_supports(const DSBasis<d,dT>& basis,
-			  const typename DSBasis<d,dT>::Index& lambda,
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  bool intersect_supports(const DSBasis<d,dT,BIO>& basis,
+			  const typename DSBasis<d,dT,BIO>::Index& lambda,
 			  const int m, const int a, const int b,
 			  int& j, int& k1, int& k2);
   
@@ -45,22 +46,22 @@ namespace WaveletTL
     in the form 2^{-j}[k1,k2]. If the return value is false, the computed
     support intersection will have no meaningful values, for performance reasons.
   */
-  template <int d, int dT>
-  bool intersect_supports(const DSBasis<d,dT>& basis,
-			  const typename DSBasis<d,dT>::Index& lambda,
-			  const typename DSBasis<d,dT>::Index& nu,
-			  typename DSBasis<d,dT>::Support& supp);
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  bool intersect_supports(const DSBasis<d,dT,BIO>& basis,
+			  const typename DSBasis<d,dT,BIO>::Index& lambda,
+			  const typename DSBasis<d,dT,BIO>::Index& nu,
+			  typename DSBasis<d,dT,BIO>::Support& supp);
   
   /*!
     For a given wavelet \psi_\lambda, compute all generators/wavelets
     \psi_\nu with level |\nu|=j, such that the respective supports
     have a nontrivial intersection
   */
-  template <int d, int dT>
-  void intersecting_wavelets(const DSBasis<d,dT>& basis,
-			     const typename DSBasis<d,dT>::Index& lambda,
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  void intersecting_wavelets(const DSBasis<d,dT,BIO>& basis,
+			     const typename DSBasis<d,dT,BIO>::Index& lambda,
 			     const int j, const bool generators,
-			     std::list<typename DSBasis<d,dT>::Index>& intersecting);
+			     std::list<typename DSBasis<d,dT,BIO>::Index>& intersecting);
   
   /*!
     For a given wavelet \psi_\lambda, compute all generators/wavelets
@@ -68,11 +69,12 @@ namespace WaveletTL
     have a nontrivial intersection;
     return those intersections
   */
-  template <int d, int dT>
-  void intersecting_wavelets(const DSBasis<d,dT>& basis,
-			     const typename DSBasis<d,dT>::Index& lambda,
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  void intersecting_wavelets(const DSBasis<d,dT,BIO>& basis,
+			     const typename DSBasis<d,dT,BIO>::Index& lambda,
 			     const int j, const bool generators,
-			     std::list<std::pair<typename DSBasis<d,dT>::Index, typename DSBasis<d,dT>::Support> >& intersecting);
+			     std::list<std::pair<typename DSBasis<d,dT,BIO>::Index,
+			     typename DSBasis<d,dT,BIO>::Support> >& intersecting);
 
   /*!
     Decide whether the support of a given (primal) generator/wavelet \psi_\lambda
@@ -83,9 +85,9 @@ namespace WaveletTL
     no meaningful values, for performance reasons).
     The routine should only be called in the case lambda.j()+lambda.e() >= m.
   */
-  template <int d, int dT>
-  bool intersect_singular_support(const DSBasis<d,dT>& basis,
-				  const typename DSBasis<d,dT>::Index& lambda,
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  bool intersect_singular_support(const DSBasis<d,dT,BIO>& basis,
+				  const typename DSBasis<d,dT,BIO>::Index& lambda,
 				  const int m, const int a, const int b,
 				  int& j, int& k1, int& k2);
 
@@ -97,10 +99,10 @@ namespace WaveletTL
     Otherwise, return false (in this case, j, k1 and k2 will have
     no meaningful values, for performance reasons).
   */
-  template <int d, int dT>
-  bool intersect_singular_support(const DSBasis<d,dT>& basis,
-				  const typename DSBasis<d,dT>::Index& lambda,
-				  const typename DSBasis<d,dT>::Index& nu);
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  bool intersect_singular_support(const DSBasis<d,dT,BIO>& basis,
+				  const typename DSBasis<d,dT,BIO>::Index& lambda,
+				  const typename DSBasis<d,dT,BIO>::Index& nu);
 
   /*!
     Decide whether the support of a given (primal) generator/wavelet \psi_\lambda
@@ -110,10 +112,10 @@ namespace WaveletTL
     Otherwise, return false (in this case, j, k1 and k2 will have
     no meaningful values, for performance reasons).
   */
-  template <int d, int dT>
-  bool intersect_singular_support(const DSBasis<d,dT>& basis,
-				  const typename DSBasis<d,dT>::Index& lambda,
-				  const typename DSBasis<d,dT>::Index& nu,
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  bool intersect_singular_support(const DSBasis<d,dT,BIO>& basis,
+				  const typename DSBasis<d,dT,BIO>::Index& lambda,
+				  const typename DSBasis<d,dT,BIO>::Index& nu,
 				  int& j, int& k1, int& k2);
 
   /*!
@@ -121,11 +123,11 @@ namespace WaveletTL
     \psi_\nu with level |\nu|=j, such that \supp\psi_\nu has a nontrivial
     intersection with \singsupp\psi_\lambda.
   */
-  template <int d, int dT>
-  void relevant_wavelets(const DSBasis<d,dT>& basis,
-			 const typename DSBasis<d,dT>::Index& lambda,
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  void relevant_wavelets(const DSBasis<d,dT,BIO>& basis,
+			 const typename DSBasis<d,dT,BIO>::Index& lambda,
 			 const int j, const bool generators,
-			 std::list<typename DSBasis<d,dT>::Index>& relevant);
+			 std::list<typename DSBasis<d,dT,BIO>::Index>& relevant);
 
   /*!
     For a given wavelet \psi_\lambda, compute all generators/wavelets
@@ -134,11 +136,12 @@ namespace WaveletTL
     The support intersections \supp\psi_\lambda\cap\supp\psi_\nu are returned
     in a list.
   */
-  template <int d, int dT>
-  void relevant_wavelets(const DSBasis<d,dT>& basis,
-			 const typename DSBasis<d,dT>::Index& lambda,
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  void relevant_wavelets(const DSBasis<d,dT,BIO>& basis,
+			 const typename DSBasis<d,dT,BIO>::Index& lambda,
 			 const int j, const bool generators,
-			 std::list<std::pair<typename DSBasis<d,dT>::Index, typename DSBasis<d,dT>::Support> >& relevant);
+			 std::list<std::pair<typename DSBasis<d,dT,BIO>::Index,
+			 typename DSBasis<d,dT,BIO>::Support> >& relevant);
 }
 
 #include <interval/ds_support.cpp>

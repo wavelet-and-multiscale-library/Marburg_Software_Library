@@ -18,7 +18,8 @@ int main()
   const int d = 2;
   const int dT = 2;
 
-  typedef DSBasis<d,dT> Basis;
+//   typedef DSBasis<d,dT> Basis;
+  typedef DSBasis<d,dT,Bernstein> Basis;
   typedef Basis::Index Index;
 
   Basis basis(1, 1, 0, 0); // Z={0,1}

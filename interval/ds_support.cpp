@@ -5,10 +5,10 @@
 
 namespace WaveletTL
 {
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   inline
-  void support(const DSBasis<d,dT>& basis,
-	       const typename DSBasis<d,dT>::Index& lambda,
+  void support(const DSBasis<d,dT,BIO>& basis,
+	       const typename DSBasis<d,dT,BIO>::Index& lambda,
 	       int& k1, int& k2)
   {
 #if 1
@@ -77,15 +77,15 @@ namespace WaveletTL
 	const size_type kright = basis.DeltaLmin() + Mj1_t.get_nth_index(row_j0,Mj1_t.entries_in_row(row_j0)-1) + offset;
 	
 	int dummy;
-	support(basis, typename DSBasis<d,dT>::Index(lambda.j()+1, 0, kleft, &basis), k1, dummy);
-	support(basis, typename DSBasis<d,dT>::Index(lambda.j()+1, 0, kright, &basis), dummy, k2);
+	support(basis, typename DSBasis<d,dT,BIO>::Index(lambda.j()+1, 0, kleft, &basis), k1, dummy);
+	support(basis, typename DSBasis<d,dT,BIO>::Index(lambda.j()+1, 0, kright, &basis), dummy, k2);
       }
 #endif
   }
 
-  template <int d, int dT>
-  bool intersect_supports(const DSBasis<d,dT>& basis,
-			  const typename DSBasis<d,dT>::Index& lambda,
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  bool intersect_supports(const DSBasis<d,dT,BIO>& basis,
+			  const typename DSBasis<d,dT,BIO>::Index& lambda,
 			  const int m, const int a, const int b,
 			  int& j, int& k1, int& k2)
   {
@@ -110,11 +110,11 @@ namespace WaveletTL
     return true;
   }
   
-  template <int d, int dT>
-  bool intersect_supports(const DSBasis<d,dT>& basis,
-			  const typename DSBasis<d,dT>::Index& lambda,
-			  const typename DSBasis<d,dT>::Index& nu,
-			  typename DSBasis<d,dT>::Support& supp)
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  bool intersect_supports(const DSBasis<d,dT,BIO>& basis,
+			  const typename DSBasis<d,dT,BIO>::Index& lambda,
+			  const typename DSBasis<d,dT,BIO>::Index& nu,
+			  typename DSBasis<d,dT,BIO>::Support& supp)
   {
     int k1_nu, k2_nu;
     support(basis, nu, k1_nu, k2_nu);
@@ -122,15 +122,15 @@ namespace WaveletTL
 			      supp.j, supp.k1, supp.k2);
   }
 
-  template <int d, int dT>
-  void intersecting_wavelets(const DSBasis<d,dT>& basis,
-			     const typename DSBasis<d,dT>::Index& lambda,
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  void intersecting_wavelets(const DSBasis<d,dT,BIO>& basis,
+			     const typename DSBasis<d,dT,BIO>::Index& lambda,
 			     const int j, const bool generators,
-			     std::list<std::pair<typename DSBasis<d,dT>::Index,
-			     typename DSBasis<d,dT>::Support> >& intersecting)
+			     std::list<std::pair<typename DSBasis<d,dT,BIO>::Index,
+			     typename DSBasis<d,dT,BIO>::Support> >& intersecting)
   {
-    typedef typename DSBasis<d,dT>::Index Index;
-    typedef typename DSBasis<d,dT>::Support Support;
+    typedef typename DSBasis<d,dT,BIO>::Index Index;
+    typedef typename DSBasis<d,dT,BIO>::Support Support;
 
     intersecting.clear();
 
@@ -156,14 +156,14 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT>
-  void intersecting_wavelets(const DSBasis<d,dT>& basis,
-			     const typename DSBasis<d,dT>::Index& lambda,
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  void intersecting_wavelets(const DSBasis<d,dT,BIO>& basis,
+			     const typename DSBasis<d,dT,BIO>::Index& lambda,
 			     const int j, const bool generators,
-			     std::list<typename DSBasis<d,dT>::Index>& intersecting)
+			     std::list<typename DSBasis<d,dT,BIO>::Index>& intersecting)
   {
-    typedef typename DSBasis<d,dT>::Index Index;
-    typedef typename DSBasis<d,dT>::Support Support;
+    typedef typename DSBasis<d,dT,BIO>::Index Index;
+    typedef typename DSBasis<d,dT,BIO>::Support Support;
 
     intersecting.clear();
 
@@ -189,9 +189,9 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT>
-  bool intersect_singular_support(const DSBasis<d,dT>& basis,
-				  const typename DSBasis<d,dT>::Index& lambda,
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  bool intersect_singular_support(const DSBasis<d,dT,BIO>& basis,
+				  const typename DSBasis<d,dT,BIO>::Index& lambda,
 				  const int m, const int a, const int b,
 				  int& j, int& k1, int& k2)
   {
@@ -234,10 +234,10 @@ namespace WaveletTL
     return true;
   }
 
-  template <int d, int dT>
-  bool intersect_singular_support(const DSBasis<d,dT>& basis,
-				  const typename DSBasis<d,dT>::Index& lambda,
-				  const typename DSBasis<d,dT>::Index& nu,
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  bool intersect_singular_support(const DSBasis<d,dT,BIO>& basis,
+				  const typename DSBasis<d,dT,BIO>::Index& lambda,
+				  const typename DSBasis<d,dT,BIO>::Index& nu,
 				  int& j, int& k1, int& k2)
   {
     const int j_lambda = lambda.j() + lambda.e();
@@ -251,24 +251,24 @@ namespace WaveletTL
     return intersect_singular_support(basis, lambda, j_nu, k1_nu, k2_nu, j, k1, k2);
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   inline
-  bool intersect_singular_support(const DSBasis<d,dT>& basis,
-				  const typename DSBasis<d,dT>::Index& lambda,
-				  const typename DSBasis<d,dT>::Index& nu)
+  bool intersect_singular_support(const DSBasis<d,dT,BIO>& basis,
+				  const typename DSBasis<d,dT,BIO>::Index& lambda,
+				  const typename DSBasis<d,dT,BIO>::Index& nu)
   {
     int j, k1, k2;
     return intersect_singular_support(basis, lambda, nu, j, k1, k2);
   }
 
-  template <int d, int dT>
-  void relevant_wavelets(const DSBasis<d,dT>& basis,
-			 const typename DSBasis<d,dT>::Index& lambda,
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  void relevant_wavelets(const DSBasis<d,dT,BIO>& basis,
+			 const typename DSBasis<d,dT,BIO>::Index& lambda,
 			 const int j, const bool generators,
-			 std::list<typename DSBasis<d,dT>::Index>& relevant)
+			 std::list<typename DSBasis<d,dT,BIO>::Index>& relevant)
   {
-    typedef typename DSBasis<d,dT>::Index Index;
-    typedef typename DSBasis<d,dT>::Support Support;
+    typedef typename DSBasis<d,dT,BIO>::Index Index;
+    typedef typename DSBasis<d,dT,BIO>::Support Support;
     
     relevant.clear();
 
@@ -295,14 +295,15 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT>
-  void relevant_wavelets(const DSBasis<d,dT>& basis,
-			 const typename DSBasis<d,dT>::Index& lambda,
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  void relevant_wavelets(const DSBasis<d,dT,BIO>& basis,
+			 const typename DSBasis<d,dT,BIO>::Index& lambda,
 			 const int j, const bool generators,
-			 std::list<std::pair<typename DSBasis<d,dT>::Index, typename DSBasis<d,dT>::Support> >& relevant)
+			 std::list<std::pair<typename DSBasis<d,dT,BIO>::Index,
+			 typename DSBasis<d,dT,BIO>::Support> >& relevant)
   {
-    typedef typename DSBasis<d,dT>::Index Index;
-    typedef typename DSBasis<d,dT>::Support Support;
+    typedef typename DSBasis<d,dT,BIO>::Index Index;
+    typedef typename DSBasis<d,dT,BIO>::Support Support;
     
     relevant.clear();
 

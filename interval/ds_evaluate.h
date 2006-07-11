@@ -19,15 +19,15 @@ using MathTL::InfiniteVector;
 
 namespace WaveletTL
 {
-  template <int d, int dT> class DSBasis;
+  template <int d, int dT, DSBiorthogonalizationMethod BIO> class DSBasis;
 
   /*!
     Evaluate a single primal/dual generator or wavelet \psi_\lambda
     on a dyadic subgrid of [0,1].
   */
-  template <int d, int dT>
-  SampledMapping<1> evaluate(const DSBasis<d,dT>& basis,
-			     const typename DSBasis<d,dT>::Index& lambda,
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  SampledMapping<1> evaluate(const DSBasis<d,dT,BIO>& basis,
+			     const typename DSBasis<d,dT,BIO>::Index& lambda,
 			     const bool primal,
 			     const int resolution);
   
@@ -35,9 +35,9 @@ namespace WaveletTL
     Evaluate an arbitrary linear combination of primal or dual
     wavelets on a dyadic subgrid of [0,1].
   */
-  template <int d, int dT>
-  SampledMapping<1> evaluate(const DSBasis<d,dT>& basis,
-			     const InfiniteVector<double, typename DSBasis<d,dT>::Index>& coeffs,
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  SampledMapping<1> evaluate(const DSBasis<d,dT,BIO>& basis,
+			     const InfiniteVector<double, typename DSBasis<d,dT,BIO>::Index>& coeffs,
 			     const bool primal,
 			     const int resolution);
 
@@ -45,27 +45,27 @@ namespace WaveletTL
     point evaluation of (derivatives) of a single primal DKU generator
     or wavelet \psi_\lambda
   */
-  template <int d, int dT>
-  double evaluate(const DSBasis<d,dT>& basis, const unsigned int derivative,
-		  const typename DSBasis<d,dT>::Index& lambda,
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  double evaluate(const DSBasis<d,dT,BIO>& basis, const unsigned int derivative,
+		  const typename DSBasis<d,dT,BIO>::Index& lambda,
 		  const double x);
 
   /*!
     point evaluation of (derivatives) of a single primal DKU generator
     or wavelet \psi_\lambda at several points simultaneously
   */
-  template <int d, int dT>
-  void evaluate(const DSBasis<d,dT>& basis, const unsigned int derivative,
-		const typename DSBasis<d,dT>::Index& lambda,
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  void evaluate(const DSBasis<d,dT,BIO>& basis, const unsigned int derivative,
+		const typename DSBasis<d,dT,BIO>::Index& lambda,
 		const Array1D<double>& points, Array1D<double>& values);
 
   /*!
     point evaluation of 0-th and first derivative of a single primal DKU generator
     or wavelet \psi_\lambda at several points simultaneously
   */
-  template <int d, int dT>
-  void evaluate(const DSBasis<d,dT>& basis,
-		const typename DSBasis<d,dT>::Index& lambda,
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  void evaluate(const DSBasis<d,dT,BIO>& basis,
+		const typename DSBasis<d,dT,BIO>::Index& lambda,
 		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);
 }
 

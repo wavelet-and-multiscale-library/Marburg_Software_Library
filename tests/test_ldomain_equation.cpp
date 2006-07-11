@@ -63,7 +63,7 @@ int main()
 
   const int d  = 2;
   const int dT = 2;
-//   typedef DSBasis<d,dT> Basis1D;
+//   typedef DSBasis<d,dT,BernsteinSVD> Basis1D;
   typedef PBasis<d,dT> Basis1D;
   typedef LDomainBasis<Basis1D> LBasis;
   typedef LBasis::Index Index;

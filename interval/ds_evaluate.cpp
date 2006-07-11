@@ -6,10 +6,10 @@
 
 namespace WaveletTL
 {
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   SampledMapping<1>
-  evaluate(const DSBasis<d,dT>& basis,
-	   const typename DSBasis<d,dT>::Index& lambda,
+  evaluate(const DSBasis<d,dT,BIO>& basis,
+	   const typename DSBasis<d,dT,BIO>::Index& lambda,
 	   const bool primal,
 	   const int resolution)
   {
@@ -73,7 +73,7 @@ namespace WaveletTL
 	}
       }
     } else { // wavelet
-      InfiniteVector<double, typename DSBasis<d,dT>::Index> gcoeffs;
+      InfiniteVector<double, typename DSBasis<d,dT,BIO>::Index> gcoeffs;
       if (primal)
 	basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
       else
@@ -85,10 +85,10 @@ namespace WaveletTL
     return SampledMapping<1>(); // dummy return for the compiler
   }
 
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   SampledMapping<1>
-  evaluate(const DSBasis<d,dT>& basis,
-	   const InfiniteVector<double, typename DSBasis<d,dT>::Index>& coeffs,
+  evaluate(const DSBasis<d,dT,BIO>& basis,
+	   const InfiniteVector<double, typename DSBasis<d,dT,BIO>::Index>& coeffs,
 	   const bool primal,
 	   const int resolution)
   {
@@ -97,7 +97,7 @@ namespace WaveletTL
     if (coeffs.size() > 0) {
       // determine maximal level
       int jmax(0);
-      typedef typename DSBasis<d,dT>::Index Index;
+      typedef typename DSBasis<d,dT,BIO>::Index Index;
       for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
 	     itend(coeffs.end()); it != itend; ++it)
 	jmax = std::max(it.index().j()+it.index().e(), jmax);
@@ -117,9 +117,9 @@ namespace WaveletTL
     return result;
   }
 
-  template <int d, int dT>
-  double evaluate(const DSBasis<d,dT>& basis, const unsigned int derivative,
-		  const typename DSBasis<d,dT>::Index& lambda,
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  double evaluate(const DSBasis<d,dT,BIO>& basis, const unsigned int derivative,
+		  const typename DSBasis<d,dT,BIO>::Index& lambda,
 		  const double x)
   {
     assert(derivative <= 1); // we only support derivatives up to the first order
@@ -158,7 +158,7 @@ namespace WaveletTL
       }
     } else {
       // wavelet
-      typedef typename DSBasis<d,dT>::Index Index;
+      typedef typename DSBasis<d,dT,BIO>::Index Index;
       InfiniteVector<double,Index> gcoeffs;
       basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
       for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin());
@@ -169,10 +169,10 @@ namespace WaveletTL
     return r;
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
-  evaluate(const DSBasis<d,dT>& basis, const unsigned int derivative,
-	   const typename DSBasis<d,dT>::Index& lambda,
+  evaluate(const DSBasis<d,dT,BIO>& basis, const unsigned int derivative,
+	   const typename DSBasis<d,dT,BIO>::Index& lambda,
 	   const Array1D<double>& points, Array1D<double>& values)
   {
     assert(derivative <= 1); // we only support derivatives up to the first order
@@ -216,7 +216,7 @@ namespace WaveletTL
       }
     } else {
       // wavelet
-      typedef typename DSBasis<d,dT>::Index Index;
+      typedef typename DSBasis<d,dT,BIO>::Index Index;
       InfiniteVector<double,Index> gcoeffs;
       basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
       Array1D<double> help(points.size());
@@ -230,9 +230,9 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT>
-  void evaluate(const DSBasis<d,dT>& basis,
-		const typename DSBasis<d,dT>::Index& lambda,
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  void evaluate(const DSBasis<d,dT,BIO>& basis,
+		const typename DSBasis<d,dT,BIO>::Index& lambda,
 		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues)
   {
     const unsigned int npoints(points.size());
@@ -278,7 +278,7 @@ namespace WaveletTL
       }
     } else {
       // wavelet
-      typedef typename DSBasis<d,dT>::Index Index;
+      typedef typename DSBasis<d,dT,BIO>::Index Index;
       InfiniteVector<double,Index> gcoeffs;
       basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
       Array1D<double> help1, help2;

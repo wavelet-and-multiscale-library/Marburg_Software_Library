@@ -18,6 +18,7 @@
 #include <Rd/cdf_utils.h>
 #include <Rd/cdf_basis.h>
 #include <interval/i_index.h>
+#include <interval/ds_bio.h>
 
 // for convenience, include also some functionality
 #include <interval/ds_support.h>
@@ -26,24 +27,11 @@
 namespace WaveletTL
 {
   /*!
-    biorthogonalization methods for the DS basis, see, e.g., [B]
-
-    The methods 'partialSVD' and 'BernsteinSVD' enable the [DKU]/[DS] boundary treatment:
-    at the boundary, exactly one generator and one wavelet does not vanish,
-    which can then be modified to satisfy homogeneous boundary conditions.
-  */
-  enum DSBiorthogonalizationMethod
-    {
-      none,         // method #1 in IGPMlib, C_L = I
-      SVD,          // method #2 in IGPMlib, Gamma_L = U*S*V, C_L = S^{-1/2}U^T, C_L_T = S^{-1/2}V
-      Bernstein,    // method #3 in IGPMlib, transformation to Bernstein basis on [0,b]
-      partialSVD,   // method #4 in IGPMlib, partial SVD
-      BernsteinSVD  // method #5 in IGPMlib, transformation to Bernstein basis plus SVD
-    };
-
-  /*!
     Template class for the wavelet bases on the interval as introduced in [DKU] and [DS].
     All formulas refer to the preprint versions of [DS] (and [DKU], where indicated).
+
+    The biorthogonalization method is used as template parameter, to control some basis properties
+    also in those cases where an instance of DSBasis is constructed later (e.g., in LDomainBasis).
 
     References:
     [B]   Barsch:
@@ -54,7 +42,7 @@ namespace WaveletTL
     [DS]  Dahmen, Schneider:
     Wavelets with complementary boundary conditions - Function spaces on the cube
   */
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO = Bernstein>
   class DSBasis
   {
   public:
@@ -71,15 +59,13 @@ namespace WaveletTL
 
       The default basis is the original [DKU] construction without any boundary conditions.
     */
-    DSBasis(const int s0 = 0, const int s1 = 0, const int sT0 = 0, const int sT1 = 0,
-	    const DSBiorthogonalizationMethod bio = Bernstein);
+    DSBasis(const int s0 = 0, const int s1 = 0, const int sT0 = 0, const int sT1 = 0);
 
     /*!
       alternative constructor, you can specify whether first order homogeneous Dirichlet b.c.'s
       for the primal functions are set or not. The dual functions have free b.c.'s.
     */
-    DSBasis(const bool bc_left, const bool bc_right,
-	    const DSBiorthogonalizationMethod bio = Bernstein);
+    DSBasis(const bool bc_left, const bool bc_right);
 
     //! freezing parameters, (4.11)
     inline const int ellT_l() const { return ell2T<d,dT>() + s0 + sT0; }
@@ -93,7 +79,7 @@ namespace WaveletTL
     /*!
       wavelet index class
     */
-    typedef IntervalIndex<DSBasis<d,dT> > Index;
+    typedef IntervalIndex<DSBasis<d,dT,BIO> > Index;
 
     /*!
       size_type, for convenience
@@ -342,9 +328,6 @@ namespace WaveletTL
 
     //! boundary condition orders at 0 and 1
     int s0, s1, sT0, sT1;
-
-    //! the generator biorthogonalization method
-    DSBiorthogonalizationMethod bio;
 
     //! one instance of a CDF basis (for faster access to the primal and dual masks)
     CDFBasis<d,dT> cdf;

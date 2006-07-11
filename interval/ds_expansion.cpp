@@ -14,10 +14,10 @@
 
 namespace WaveletTL
 {
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   double integrate(const Function<1>* f,
-		   const DSBasis<d,dT>& basis,
-		   const typename DSBasis<d,dT>::Index& lambda)
+		   const DSBasis<d,dT,BIO>& basis,
+		   const typename DSBasis<d,dT,BIO>::Index& lambda)
   {
     double r = 0;
     
@@ -52,15 +52,15 @@ namespace WaveletTL
     return r;
   }
 
-  template <int d, int dT>
-  double integrate(const DSBasis<d,dT>& basis,
-		   const typename DSBasis<d,dT>::Index& lambda,
-		   const typename DSBasis<d,dT>::Index& mu)
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  double integrate(const DSBasis<d,dT,BIO>& basis,
+		   const typename DSBasis<d,dT,BIO>::Index& lambda,
+		   const typename DSBasis<d,dT,BIO>::Index& mu)
   {
     double r = 0;
     
     // First we compute the support intersection of \psi_\lambda and \psi_\mu:
-    typedef typename DSBasis<d,dT>::Support Support;
+    typedef typename DSBasis<d,dT,BIO>::Support Support;
     Support supp;
 
     if (intersect_supports(basis, lambda, mu, supp))
@@ -88,15 +88,15 @@ namespace WaveletTL
     return r;
   }
   
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
   expand(const Function<1>* f,
-	 const DSBasis<d,dT>& basis,
+	 const DSBasis<d,dT,BIO>& basis,
 	 const bool primal,
 	 const int jmax,
-	 InfiniteVector<double, typename DSBasis<d,dT>::Index>& coeffs)
+	 InfiniteVector<double, typename DSBasis<d,dT,BIO>::Index>& coeffs)
   {
-    typedef typename DSBasis<d,dT>::Index Index;
+    typedef typename DSBasis<d,dT,BIO>::Index Index;
     const int j0 = basis.j0();
 
     for (Index lambda = first_generator(&basis, j0);;++lambda)
@@ -108,9 +108,9 @@ namespace WaveletTL
 
     if (!primal) {
 #if 1
-      IntervalGramian<DSBasis<d,dT> > G(basis, coeffs);
-      CachedProblem<IntervalGramian<DSBasis<d,dT> > > GC(&G);
-      InfiniteVector<double, typename DSBasis<d,dT>::Index> x;
+      IntervalGramian<DSBasis<d,dT,BIO> > G(basis, coeffs);
+      CachedProblem<IntervalGramian<DSBasis<d,dT,BIO> > > GC(&G);
+      InfiniteVector<double, typename DSBasis<d,dT,BIO>::Index> x;
       CDD1_SOLVE(GC, 1e-6, x, jmax);
       coeffs.swap(x);
 #else

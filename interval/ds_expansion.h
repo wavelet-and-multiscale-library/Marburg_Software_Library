@@ -18,25 +18,25 @@ using MathTL::InfiniteVector;
 
 namespace WaveletTL
 {
-  template <int d, int dT> class DSBasis;
+  template <int d, int dT, DSBiorthogonalizationMethod BIO> class DSBasis;
 
   /*!
     helper function, integrate a smooth function f against a
     primal DS generator or wavelet
   */
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   double integrate(const Function<1>* f,
-		   const DSBasis<d,dT>& basis,
-		   const typename DSBasis<d,dT>::Index& lambda);
+		   const DSBasis<d,dT,BIO>& basis,
+		   const typename DSBasis<d,dT,BIO>::Index& lambda);
 
   /*!
     helper function, integrate two primal DS generators or wavelets
     against each other (for the Gramian)
   */
-  template <int d, int dT>
-  double integrate(const DSBasis<d,dT>& basis,
-		   const typename DSBasis<d,dT>::Index& lambda,
-		   const typename DSBasis<d,dT>::Index& mu);
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  double integrate(const DSBasis<d,dT,BIO>& basis,
+		   const typename DSBasis<d,dT,BIO>::Index& lambda,
+		   const typename DSBasis<d,dT,BIO>::Index& mu);
   
   /*!
     For a given function, compute all integrals w.r.t. the primal
@@ -50,13 +50,13 @@ namespace WaveletTL
     Maybe a thresholding of the returned coefficients is helpful (e.g. for
     expansions of spline functions).
   */
-  template <int d, int dT>
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
   expand(const Function<1>* f,
-	 const DSBasis<d,dT>& basis,
+	 const DSBasis<d,dT,BIO>& basis,
 	 const bool primal,
 	 const int jmax,
-	 InfiniteVector<double, typename DSBasis<d,dT>::Index>& coeffs);
+	 InfiniteVector<double, typename DSBasis<d,dT,BIO>::Index>& coeffs);
 }
 
 #include <interval/ds_expansion.cpp>

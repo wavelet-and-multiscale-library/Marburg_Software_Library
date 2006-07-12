@@ -1,3 +1,5 @@
+#define _WAVELETTL_CDD1_VERBOSITY 1
+
 #include <iostream>
 
 #include <utils/function.h>
@@ -59,8 +61,8 @@ int main()
   SampledMapping<1> s(Grid<1>(-1.0, 1.0, 10), p);
   s.matlab_output(cout);
 
-  const int d = 3;
-  const int dT = 3; // be sure to use a continuous dual here!
+  const int d = 2;
+  const int dT = 4; // be sure to use a continuous dual here!
 
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;

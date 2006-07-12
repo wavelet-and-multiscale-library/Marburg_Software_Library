@@ -100,7 +100,7 @@ namespace WaveletTL
 
     /*!
       (half) order t of the operator
-      (inherited from FullyDiagonalEnergyNormPreconditioner)
+      (inherited from FullyDiagonalDyadicPreconditioner)
     */
     double operator_order() const { return 1.; }
     

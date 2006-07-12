@@ -247,6 +247,10 @@ namespace WaveletTL
     NRESIDUAL(P, params, F, Lambda, u_bar, xi1, xi2, r, Lambda_c, jmax, strategy);
     const double residual_norm = l2_norm(r);
 
+#if _WAVELETTL_CDD1_VERBOSITY >= 2
+    cout << "* NGROW: current residual is " << endl << r << endl;
+#endif
+
 #if _WAVELETTL_CDD1_VERBOSITY >= 1
     cout << "* NGROW: current residual norm is " << residual_norm << endl;
 #endif

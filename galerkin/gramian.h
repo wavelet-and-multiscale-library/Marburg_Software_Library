@@ -73,20 +73,23 @@ namespace WaveletTL
     /*!
       (half) order t of the operator
     */
-    static int operator_order() { return 0; }
-    
-    /*!
-      evaluate the diagonal preconditioner D (we don't need any)
-    */
-    double D(const typename WaveletBasis::Index& lambda) const { return 1; }
+    static double operator_order() { return 0; }
 
     /*!
-      rescale a coefficient vector by an integer power of D, c |-> D^{n}c
-      (does not do anything)
+      evaluate the diagonal preconditioner D (essentially, we don't need any)
     */
-    void rescale(InfiniteVector<double,typename WaveletBasis::Index>& coeffs,
- 		 const int n) const
+    double D(const typename WaveletBasis::Index& lambda) const
     {
+      return 1;
+//       return sqrt(a(lambda,lambda)); // this does not work (why?)
+    }
+
+    /*!
+      evaluate the (unpreconditioned) bilinear form a
+    */
+    double a(const Index& lambda,
+	     const Index& nu) const {
+      return a(lambda, nu, 4);
     }
 
     /*!
@@ -99,7 +102,7 @@ namespace WaveletTL
     */
     double a(const typename WaveletBasis::Index& lambda,
  	     const typename WaveletBasis::Index& nu,
- 	     const unsigned int p = 4) const;
+ 	     const unsigned int p) const;
 
     /*!
       estimate the spectral norm ||A||

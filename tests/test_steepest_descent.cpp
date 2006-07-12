@@ -328,7 +328,7 @@ int main()
   int count = size;
   array_to_map (coeff_array, &frame, u_epsilon, count);
   
-  u_epsilon.merge(u_epsilon);
+  //  u_epsilon.merge(u_epsilon);
 
   InfiniteVector<double, Index>::const_iterator it = u_epsilon.begin();
   for (; it != u_epsilon.end(); it++) {

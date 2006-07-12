@@ -122,7 +122,7 @@ namespace FrameTL
     /*!
       access to collection of wavelet frame indices
      */
-    const Array1D<Index> indices() const { return indices_; }
+    const Array1D<Array1D<Index> >* indices() const { return &indices_levelwise; }
 
     /*!
       critical Sobolev regularity for the primal generators/wavelets
@@ -154,6 +154,10 @@ namespace FrameTL
     //! set finest possible level
     void set_jmax(const int jmax) { jmax_ = jmax; }
 
+    //all supports on cubes of frame elements
+    Array1D<typename WaveletTL::CubeBasis<IBASIS,DIM_d>::Support> all_supports;
+
+
   protected:
     //! pointer to the underlying atlas
     const Atlas<DIM_d, DIM_m>* atlas_;
@@ -167,7 +171,9 @@ namespace FrameTL
     //! coarsest possible level j0
     int j0_;
 
-    Array1D<Index> indices_;
+    //Array1D<Index> indices_;
+    Array1D<Array1D<Index> > indices_levelwise;
+
 
   private:
 

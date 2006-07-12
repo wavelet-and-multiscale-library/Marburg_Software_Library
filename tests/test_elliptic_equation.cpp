@@ -47,8 +47,8 @@ int main()
   
   const int DIM = 2;
 
-  //typedef DSBasis<3,3> Basis1D;
-  typedef PBasis<2,2> Basis1D;
+  typedef DSBasis<4,4> Basis1D;
+  //typedef PBasis<3,3> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
   typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
@@ -57,7 +57,7 @@ int main()
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 2.0;
+  A(0,0) = 2.;
   A(1,1) = 1.0;
   Point<2> b;
   b[0] = -1.;
@@ -155,8 +155,8 @@ int main()
   cout << Lshaped << endl;
 
   //finally a frame can be constructed
-  //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT);
-  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, 4);
+  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT, 5);
+  //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, 4);
 
   Vector<double> value(1);
   value[0] = 1;
@@ -174,7 +174,6 @@ int main()
 
   EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
-  
   
   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0048, 1.0/0.01);
 
@@ -245,16 +244,15 @@ int main()
 
   set<Index> Lambda;
   for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
-      lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, frame.j0()); ++lambda) {
+       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, frame.j0()); ++lambda) {
     Lambda.insert(lambda);
-    cout << lambda << endl;
+    //cout << lambda << endl;
   }
   
   cout << "setting up full right hand side..." << endl;
   Vector<double> rh;
   WaveletTL::setup_righthand_side(discrete_poisson, Lambda, rh);
-  //cout << rh << endl;
-  //abort();
+  cout << rh << endl;
   cout << "setting up full stiffness matrix..." << endl;
   SparseMatrix<double> stiff;
 
@@ -262,7 +260,8 @@ int main()
   double time;
   tstart = clock();
 
-  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
+  WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
+  //WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
 
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
@@ -282,7 +281,10 @@ int main()
   cout << "performing iterative scheme to solve projected problem..." << endl;
   Vector<double> xk(Lambda.size()), err(Lambda.size()); xk = 0;
   
-  //CG(stiff, rh, xk, 0.0001, 1000, iter);
+ 
+
+  //CG(stiff, rh, xk, 1.0e-6, 100, iter);
+  //cout << "CG iterations needed: "  << iter << endl;
   //Richardson(stiff, rh, xk, 2. / lmax - 0.01, 0.0001, 2000, iter);
   double alpha_n = 2. / lmax - 0.001;
   
@@ -298,16 +300,16 @@ int main()
     xk = xk + resid;
   }
 
-//   for (int i = 0; i < 450; i++) 
-//     for (int j = 0; j < 450; j++) {
-//       if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
-// 	cout << stiff.get_entry(i,j) << endl;
-// 	cout << stiff.get_entry(j,i) << endl;
-// 	cout << "i = " << i << " j = " << j << endl;
-// 	cout << "#######################" << endl;
-// 	abort();
-//       }
-//     }
+  for (int i = 0; i < 450; i++) 
+    for (int j = 0; j < 450; j++) {
+      if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
+	cout << stiff.get_entry(i,j) << endl;
+	cout << stiff.get_entry(j,i) << endl;
+	cout << "i = " << i << " j = " << j << endl;
+	cout << "#######################" << endl;
+	abort();
+      }
+    }
 
 
   cout << "performing output..." << endl;

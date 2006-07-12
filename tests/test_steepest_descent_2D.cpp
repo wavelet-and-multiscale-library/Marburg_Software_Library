@@ -15,6 +15,7 @@
 #include <numerics/corner_singularity.h>
 #include <frame_support.h>
 #include <frame_index.h>
+//#include <cg.h>
 #include <steepest_descent.h>
 #include <galerkin/cached_problem.h>
 //#include <richardson_CDD2.h>
@@ -51,8 +52,8 @@ int main()
 
   const int DIM = 2;
 
-  //typedef DSBasis<2,2> Basis1D;
-  typedef PBasis<3,3> Basis1D;
+  typedef DSBasis<4,6> Basis1D;
+  //typedef PBasis<3,3> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
   typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
@@ -122,15 +123,15 @@ int main()
   bound_1[0] = 1;
   bound_1[1] = 1;
   bound_1[2] = 1;
-  bound_1[3] = 2;
+  bound_1[3] = 3;
 
   bc[0] = bound_1;
 
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
   bound_2[0] = 1;
-  bound_2[1] = 1;
-  bound_2[2] = 2;
+  bound_2[1] = 3;
+  bound_2[2] = 1;
   bound_2[3] = 1;
 
   bc[1] = bound_2;
@@ -160,8 +161,8 @@ int main()
   cout << Lshaped << endl;
 
   //finally a frame can be constructed
-  //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT);
-  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, 6);
+  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT, 5);
+  //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, 4);
 
   Vector<double> value(1);
   value[0] = 1;
@@ -195,6 +196,7 @@ int main()
   tstart = clock();
 
   steepest_descent_SOLVE(problem, epsilon, u_epsilon);
+  //cg_SOLVE(problem, epsilon, u_epsilon);
   //richardson_SOLVE_CDD2(problem, epsilon, u_epsilon);
   //richardson_SOLVE(problem, epsilon, u_epsilon);
   //  steepest_descent_SOLVE(discrete_poisson, epsilon, u_epsilon);
@@ -217,7 +219,7 @@ int main()
   
   cout << "done plotting approximate solution" << endl;
 
-  //  Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(frame, u_epsilon, sing2D, 6);
+  Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(frame, u_epsilon, sing2D, 6);
 
   cout << "done plotting pointwise error" << endl;
 
@@ -225,9 +227,9 @@ int main()
   matlab_output(ofs5,U);
   ofs5.close();
 
-//   std::ofstream ofs6("error_steep_2D_out.m");
-//   matlab_output(ofs6,Error);
-//   ofs6.close();
+  std::ofstream ofs6("error_steep_2D_out.m");
+  matlab_output(ofs6,Error);
+  ofs6.close();
 
   //  problem.add_level(frame.first_generator(3),u_epsilon,3,1.);
 

@@ -101,8 +101,8 @@ int main()
   
   const int DIM = 1;
 
-  //typedef DSBasis<2,2> Basis1D;
-  typedef PBasis<3,3> Basis1D;
+  //typedef DSBasis<3,3> Basis1D;
+  typedef PBasis<4,6> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
@@ -151,15 +151,15 @@ int main()
   
   //primal boundary conditions for first patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_1;
-  bound_1[0] = 1;
-  bound_1[1] = 2;
+  bound_1[0] = 3;
+  bound_1[1] = 3;
   
   bc[0] = bound_1;
   
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
-  bound_2[0] = 2;
-  bound_2[1] = 1;
+  bound_2[0] = 3;
+  bound_2[1] = 3;
   
   bc[1] = bound_2;
 
@@ -184,8 +184,8 @@ int main()
   cout << Lshaped << endl;
 
   //finally a frame can be constructed
-  //Frame1D frame(&Lshaped, bc, bcT, 8);
-  Frame1D frame(&Lshaped, bc, 6);
+  //Frame1D frame(&Lshaped, bc, bcT, 9);
+  Frame1D frame(&Lshaped, bc, 8);
 
   Vector<double> value(1);
   value[0] = 1;

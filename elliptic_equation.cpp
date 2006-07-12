@@ -115,12 +115,14 @@ namespace FrameTL
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
     const int j0   = frame_->j0();
-    const int jmax = 4; // for a first quick hack
+    const int jmax = 8; // for a first quick hack
     for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
       {
 	const double coeff = f(lambda)/D(lambda);
-	if (fabs(coeff)>1e-15)
+	if (fabs(coeff)>1e-15) {
 	  fhelp.set_coefficient(lambda, coeff);
+	  //cout << lambda << endl;
+	}
   	if (lambda == last_wavelet<IBASIS,DIM,DIM,Frame>(frame_,jmax))
 	  break;
       }
@@ -149,7 +151,7 @@ namespace FrameTL
 
     // precompute the right-hand side on a fine level
     const int j0   = frame_->j0();
-    const int jmax = 4;  // for a first quick hack
+    const int jmax = 8;  // for a first quick hack
     for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
       {
 	stiff_diagonal.set_coefficient(lambda, sqrt(a(lambda,lambda)));
@@ -412,7 +414,7 @@ namespace FrameTL
   }
 
 
- template <class IBASIS, unsigned int DIM>
+  template <class IBASIS, unsigned int DIM>
   double
   EllipticEquation<IBASIS,DIM>::a_different_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& la,
 						    const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
@@ -428,33 +430,57 @@ namespace FrameTL
 
     typedef typename CUBEBASIS::Index CubeIndex;
  
-    typename CUBEBASIS::Support supp_lambda;
-    typename CUBEBASIS::Support supp_mu;
+    typename CUBEBASIS::Support supp_lambda_ = frame_->all_supports[lambda.number()];
+    typename CUBEBASIS::Support supp_mu_ = frame_->all_supports[mu.number()];
 
-    WaveletTL::support<IBASIS,DIM>(*frame_->bases()[lambda.p()], 
-				   CubeIndex(lambda.j(),
-					     lambda.e(),
-					     lambda.k(),
-					     frame_->bases()[lambda.p()]),
-				   supp_lambda);
-    WaveletTL::support<IBASIS,DIM>(*frame_->bases()[mu.p()],
-				   CubeIndex(mu.j(),
-					     mu.e(),
-					     mu.k(),frame_->bases()[mu.p()]),
-				   supp_mu);
+//     WaveletTL::support<IBASIS,DIM>(*frame_->bases()[lambda.p()], 
+// 				   CubeIndex(lambda.j(),
+// 					     lambda.e(),
+// 					     lambda.k(),
+// 					     frame_->bases()[lambda.p()]),
+// 				   supp_lambda);
+//     WaveletTL::support<IBASIS,DIM>(*frame_->bases()[mu.p()],
+// 				   CubeIndex(mu.j(),
+// 					     mu.e(),
+// 					     mu.k(),frame_->bases()[mu.p()]),
+// 				   supp_mu);
     typename CUBEBASIS::Support tmp_supp;
 
+
     // swap indices and supports if necessary
-    if (supp_mu.j > supp_lambda.j) {
+    if (supp_mu_.j > supp_lambda_.j) {
       tmp_ind = lambda;
       lambda = mu;
       mu = tmp_ind;
 
-      tmp_supp = supp_lambda;
-      supp_lambda = supp_mu;
-      supp_mu = tmp_supp;
+      tmp_supp = supp_lambda_;
+      supp_lambda_ = supp_mu_,
+      supp_mu_ = tmp_supp;
     }
+
+    const typename CUBEBASIS::Support* supp_lambda = &supp_lambda_;
+    const typename CUBEBASIS::Support* supp_mu = &supp_mu_;
+
+
     
+#if 0
+    cout << "##########################" << endl;
+    cout << "lambda = " << lambda << endl;
+    for (unsigned int i = 0; i < 2; i++) {
+      double dx1 = 1./(1 << supp_lambda->j);
+      cout << "j = " << supp_lambda->j << " p = " << lambda.p() << endl;
+      cout << "a = " << supp_lambda->a[i] <<  " b= " << supp_lambda->b[i] << " p = " << lambda.p() << endl;
+      //cout << "a_lambda = " << supp_lambda->a[i]*dx1 <<  " b= " << supp_lambda->b[i]*dx1 << endl;
+    }
+    cout << "mu = " << mu << endl;
+    for (unsigned int i = 0; i < 2; i++) {
+      double dx2 = 1./(1 << supp_mu->j);
+      cout << "j = " << supp_mu->j << " p = " << mu.p() << endl;
+      cout << "a = " << supp_mu->a[i] <<  " b= " << supp_mu->b[i] << " p = " << mu.p() << endl;
+      //cout << "a_mu = " << supp_mu->a[i]*dx2 <<  " b= " << supp_mu->b[i]*dx2 << endl;
+    }
+
+#endif
 
     FixedArray1D<Array1D<double>,DIM > irregular_grid;
 
@@ -483,24 +509,7 @@ namespace FrameTL
     }
     
 
-#if 0
-    cout << "##########################" << endl;
-    cout << "lambda = " << lambda << endl;
-    for (unsigned int i = 0; i < 2; i++) {
-      double dx1 = 1./(1 << supp_lambda.j);
-      cout << "j = " << supp_lambda.j << " p = " << lambda.p() << endl;
-      //      cout << "a = " << supp_lambda.a[i] <<  " b= " << supp_lambda.b[i] << " p = " << lambda.p() << endl;
-      cout << "a_lambda = " << supp_lambda.a[i]*dx1 <<  " b= " << supp_lambda.b[i]*dx1 << endl;
-    }
-    cout << "mu = " << mu << endl;
-    for (unsigned int i = 0; i < 2; i++) {
-      double dx2 = 1./(1 << supp_mu.j);
-      cout << "j = " << supp_mu.j << " p = " << mu.p() << endl;
-      //      cout << "a = " << supp_mu.a[i] <<  " b= " << supp_mu.b[i] << " p = " << mu.p() << endl;
-      cout << "a_mu = " << supp_mu.a[i]*dx2 <<  " b= " << supp_mu.b[i]*dx2 << endl;
-    }
 
-#endif
 
 #if 0
     for (unsigned int i = 0; i < DIM; i++) {
@@ -604,20 +613,20 @@ namespace FrameTL
 
     case Composite: {
       
-      //const double h = ldexp(1.0, -std::max(supp_lambda.j,supp_mu.j));// granularity for the quadrature
-      const double h = 1.0 / (1 << std::max(supp_lambda.j,supp_mu.j));// granularity for the quadrature
+      //const double h = ldexp(1.0, -std::max(supp_lambda->j,supp_mu->j));// granularity for the quadrature
+      const double h = 1.0 / (1 << std::max(supp_lambda->j,supp_mu->j));// granularity for the quadrature
       //const int N = 4;
       
       for (unsigned int i = 0; i < DIM; i++) {
-	gauss_points[i].resize(N * N_Gauss*(supp_lambda.b[i]-supp_lambda.a[i]));
-	gauss_weights[i].resize(N * N_Gauss*(supp_lambda.b[i]-supp_lambda.a[i]));
- 	for (int patch = supp_lambda.a[i]; patch < supp_lambda.b[i]; patch++)
+	gauss_points[i].resize(N * N_Gauss*(supp_lambda->b[i]-supp_lambda->a[i]));
+	gauss_weights[i].resize(N * N_Gauss*(supp_lambda->b[i]-supp_lambda->a[i]));
+ 	for (int patch = supp_lambda->a[i]; patch < supp_lambda->b[i]; patch++)
  	  for (unsigned int m = 0; m < N; m++)
 	    for (int n = 0; n < N_Gauss; n++) {
- 	      gauss_points[i][ N*(patch-supp_lambda.a[i])*N_Gauss + m*N_Gauss+n ]
+ 	      gauss_points[i][ N*(patch-supp_lambda->a[i])*N_Gauss + m*N_Gauss+n ]
 		= h*( 1.0/(2.*N)*(GaussPoints[N_Gauss-1][n]+1+2.0*m)+patch);
 	      
-	      gauss_weights[i][ N*(patch-supp_lambda.a[i])*N_Gauss + m*N_Gauss+n ]
+	      gauss_weights[i][ N*(patch-supp_lambda->a[i])*N_Gauss + m*N_Gauss+n ]
 		= (h*GaussWeights[N_Gauss-1][n])/N;
 	    }
 
@@ -705,7 +714,7 @@ namespace FrameTL
 	// "++index"
 	bool exit = false;
 	for (unsigned int i = 0; i < DIM; i++) {
-	  if (index[i] == (int) N * N_Gauss * (supp_lambda.b[i]-supp_lambda.a[i]) - 1) {
+	  if (index[i] == (int) N * N_Gauss * (supp_lambda->b[i]-supp_lambda->a[i]) - 1) {
 	    index[i] = 0;
 	    exit = (i == DIM-1);
 	  } else {
@@ -1112,103 +1121,103 @@ namespace FrameTL
   }
 
 
-  static void MultiDimIntegrand(const int *ndim, const double xx[],
-				const int *ncomp, double ff[])
-  {
+//   static void MultiDimIntegrand(const int *ndim, const double xx[],
+// 				const int *ncomp, double ff[])
+//   {
 
-#define res ff[0]
+// #define res ff[0]
 
-    const unsigned int DIM = 2;
+//     const unsigned int DIM = 2;
     
-    double a0 = (*supp_lambda_).a[0]*granularity;
-    double b0 = (*supp_lambda_).b[0]*granularity;
+//     double a0 = (*supp_lambda_).a[0]*granularity;
+//     double b0 = (*supp_lambda_).b[0]*granularity;
 
-    double a1 = (*supp_lambda_).a[1]*granularity;
-    double b1 = (*supp_lambda_).b[1]*granularity;
-
-
-    Point<DIM> x;
-    x[0] = (b0-a0)*xx[0]+a0;
-    x[1] = (b1-a1)*xx[1]+a1;
+//     double a1 = (*supp_lambda_).a[1]*granularity;
+//     double b1 = (*supp_lambda_).b[1]*granularity;
 
 
-    Point<DIM> x_patch;
-    Point<DIM> y;
+//     Point<DIM> x;
+//     x[0] = (b0-a0)*xx[0]+a0;
+//     x[1] = (b1-a1)*xx[1]+a1;
 
-    chart_la->map_point(x,x_patch);
 
-    //    cout << "x= " << x << endl;
+//     Point<DIM> x_patch;
+//     Point<DIM> y;
 
-#if 1
-    if (in_support(*frame_2,*mu_, *supp_mu_, x_patch))
-      {
+//     chart_la->map_point(x,x_patch);
 
-	chart_mu->map_point_inv(x_patch,y);
+//     //    cout << "x= " << x << endl;
+
+// #if 1
+//     if (in_support(*frame_2,*mu_, *supp_mu_, x_patch))
+//       {
+
+// 	chart_mu->map_point_inv(x_patch,y);
 
 	  
-	double sq_gram_la = chart_la->Gram_factor(x);
-	double sq_gram_mu = chart_mu->Gram_factor(y);
+// 	double sq_gram_la = chart_la->Gram_factor(x);
+// 	double sq_gram_mu = chart_mu->Gram_factor(y);
 
-	double psi_lambda=1., psi_mu=1.;
-	for (unsigned int i = 0; i < DIM; i++) {
+// 	double psi_lambda=1., psi_mu=1.;
+// 	for (unsigned int i = 0; i < DIM; i++) {
 	  
- 	  psi_lambda *=  WaveletTL::evaluate(*( (*bases1D_lambda)[i] ), 0,
-					     Index_1D(lambda_->j(), lambda_->e()[i], lambda_->k()[i], (*bases1D_lambda)[i]), x[i]);
-	  //cout << *lambda_ << endl;
- 	  psi_mu *=  WaveletTL::evaluate(*( (*bases1D_mu)[i] ), 0,
- 					 Index_1D(mu_->j(), mu_->e()[i], mu_->k()[i], (*bases1D_mu)[i]), y[i]);
+//  	  psi_lambda *=  WaveletTL::evaluate(*( (*bases1D_lambda)[i] ), 0,
+// 					     Index_1D(lambda_->j(), lambda_->e()[i], lambda_->k()[i], (*bases1D_lambda)[i]), x[i]);
+// 	  //cout << *lambda_ << endl;
+//  	  psi_mu *=  WaveletTL::evaluate(*( (*bases1D_mu)[i] ), 0,
+//  					 Index_1D(mu_->j(), mu_->e()[i], mu_->k()[i], (*bases1D_mu)[i]), y[i]);
 
- 	}
- 	if ( !(psi_lambda == 0.|| psi_mu == 0.) ) {
+//  	}
+//  	if ( !(psi_lambda == 0.|| psi_mu == 0.) ) {
 
- 	  Vector<double> values1(DIM);
- 	  Vector<double> values2(DIM);
+//  	  Vector<double> values1(DIM);
+//  	  Vector<double> values2(DIM);
 
- 	  for (unsigned int s = 0; s < DIM; s++) {
- 	    double psi_der_lambda=1., psi_der_mu=1.;
+//  	  for (unsigned int s = 0; s < DIM; s++) {
+//  	    double psi_der_lambda=1., psi_der_mu=1.;
 
- 	    psi_der_lambda = (psi_lambda / WaveletTL::evaluate(*((*bases1D_lambda)[s]), 0,
-					     Index_1D(lambda_->j(), lambda_->e()[s], lambda_->k()[s], (*bases1D_lambda)[s]), x[s])
-			      ) * WaveletTL::evaluate(*((*bases1D_lambda)[s]), 1,
-						      Index_1D(lambda_->j(), lambda_->e()[s], lambda_->k()[s], (*bases1D_lambda)[s]), x[s]);
+//  	    psi_der_lambda = (psi_lambda / WaveletTL::evaluate(*((*bases1D_lambda)[s]), 0,
+// 							       Index_1D(lambda_->j(), lambda_->e()[s], lambda_->k()[s], (*bases1D_lambda)[s]), x[s])
+// 			      ) * WaveletTL::evaluate(*((*bases1D_lambda)[s]), 1,
+// 						      Index_1D(lambda_->j(), lambda_->e()[s], lambda_->k()[s], (*bases1D_lambda)[s]), x[s]);
 	    
 
- 	    psi_der_mu = (psi_mu / WaveletTL::evaluate(*((*bases1D_mu)[s]), 0,
- 						       Index_1D(mu_->j(), mu_->e()[s], mu_->k()[s], (*bases1D_mu)[s]), y[s])
- 			  ) * WaveletTL::evaluate(*((*bases1D_mu)[s]), 1,
- 						  Index_1D(mu_->j(), mu_->e()[s], mu_->k()[s], (*bases1D_mu)[s]), y[s]);
+//  	    psi_der_mu = (psi_mu / WaveletTL::evaluate(*((*bases1D_mu)[s]), 0,
+//  						       Index_1D(mu_->j(), mu_->e()[s], mu_->k()[s], (*bases1D_mu)[s]), y[s])
+//  			  ) * WaveletTL::evaluate(*((*bases1D_mu)[s]), 1,
+//  						  Index_1D(mu_->j(), mu_->e()[s], mu_->k()[s], (*bases1D_mu)[s]), y[s]);
 	    
- 	    values1[s] = ell_bvp->a(x_patch) *
- 	      (psi_der_lambda*sq_gram_la - (psi_lambda*chart_la->Gram_D_factor(s,x)))
- 	      / (sq_gram_la*sq_gram_la);
- 	    values2[s] =
- 	      (psi_der_mu*sq_gram_mu - (psi_mu*chart_mu->Gram_D_factor(s,y)))
- 	      / (sq_gram_mu*sq_gram_mu);
+//  	    values1[s] = ell_bvp->a(x_patch) *
+//  	      (psi_der_lambda*sq_gram_la - (psi_lambda*chart_la->Gram_D_factor(s,x)))
+//  	      / (sq_gram_la*sq_gram_la);
+//  	    values2[s] =
+//  	      (psi_der_mu*sq_gram_mu - (psi_mu*chart_mu->Gram_D_factor(s,y)))
+//  	      / (sq_gram_mu*sq_gram_mu);
 	
- 	  } // end loop s
+//  	  } // end loop s
       
- 	  double tmp = 0.;
- 	  for (unsigned int i1 = 0; i1 < DIM; i1++) {
- 	    double d1 = 0.;
- 	    double d2 = 0.;
- 	    for (unsigned int i2 = 0; i2 < DIM; i2++) {
- 	      d1 += values1[i2]*chart_la->Dkappa_inv(i2, i1, x);
- 	      d2 += values2[i2]*chart_mu->Dkappa_inv(i2, i1, y);
- 	    }
- 	    tmp += d1 * d2;
-	}
+//  	  double tmp = 0.;
+//  	  for (unsigned int i1 = 0; i1 < DIM; i1++) {
+//  	    double d1 = 0.;
+//  	    double d2 = 0.;
+//  	    for (unsigned int i2 = 0; i2 < DIM; i2++) {
+//  	      d1 += values1[i2]*chart_la->Dkappa_inv(i2, i1, x);
+//  	      d2 += values2[i2]*chart_mu->Dkappa_inv(i2, i1, y);
+//  	    }
+//  	    tmp += d1 * d2;
+// 	  }
 	  
- 	  res = (tmp * (sq_gram_la*sq_gram_la) +
- 		ell_bvp->q(x_patch) * psi_lambda * (psi_mu/sq_gram_mu) * sq_gram_la) * (b0-a0)*(b1-a1);
- 	}
-      }// end if in support
-    else {
-      res = 0;
-      return;
-    }
-#endif
+//  	  res = (tmp * (sq_gram_la*sq_gram_la) +
+// 		 ell_bvp->q(x_patch) * psi_lambda * (psi_mu/sq_gram_mu) * sq_gram_la) * (b0-a0)*(b1-a1);
+//  	}
+//       }// end if in support
+//     else {
+//       res = 0;
+//       return;
+//     }
+// #endif
 
-  }
+//   }
  
   template <class IBASIS, unsigned int DIM>
   double
@@ -1501,10 +1510,10 @@ namespace FrameTL
       if (exit) break;
     }
 
-#if 1
+#if 0
     return r;
 #endif
-#if 0
+#if 1
     assert(DIM == 1);
     double tmp = 1;
     Point<DIM> p1;

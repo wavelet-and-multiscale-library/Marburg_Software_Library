@@ -66,8 +66,8 @@ public:
   void steepest_descent_SOLVE(const PROBLEM& P,  const double epsilon,
 			      InfiniteVector<double, typename PROBLEM::Index>& u_epsilon)
   {
-    //typedef DSBasis<2,2> Basis1D;
-    typedef PBasis<3,3> Basis1D;
+    typedef DSBasis<4,6> Basis1D;
+    //typedef PBasis<3,3> Basis1D;
 
     Point<2> origin;
     origin[0] = 0.0;
@@ -82,7 +82,7 @@ public:
 //    Singularity1D_2<double> exactSolution1D;
 
     unsigned int loops = 0;
-    const int jmax = 5;
+    const int jmax = 8;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
@@ -247,7 +247,7 @@ public:
 // 	  os4.close();
 // 	}
 
-	if (tmp < 1.0e-6 || loops == 3000) {
+	if (tmp < 1.0e-2 || loops == 3000) {
 	  u_epsilon = w;
 	  exit = true;
 	  break;

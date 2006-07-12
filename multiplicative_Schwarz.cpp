@@ -67,8 +67,8 @@ public:
   void  multiplicative_Schwarz_SOLVE(const PROBLEM& P,  const double epsilon,
 				     InfiniteVector<double, typename PROBLEM::Index>& u_epsilon)
   {
-    //typedef DSBasis<2,2> Basis1D;
-    typedef PBasis<3,3> Basis1D;	
+    typedef DSBasis<4,6> Basis1D;
+    //typedef PBasis<3,3> Basis1D;	
 
     Point<2> origin;
     origin[0] = 0.0;
@@ -80,7 +80,7 @@ public:
 
 
     unsigned int loops = 0;
-    const int jmax = 10;
+    const int jmax = 6;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
@@ -129,7 +129,7 @@ public:
       double tmp1 = log10(tmp);
       if (u_k.size() != 0)
 	asymptotic[log10( (double)u_k.size() )] = tmp1;
-      std::ofstream os3("steep_asymptotic_33_2D_1105.m");
+      std::ofstream os3("steep_asymptotic_46_2D_ds_0507.m");
       matlab_output(asymptotic,os3);
       os3.close();
 

@@ -41,7 +41,7 @@ namespace FrameTL
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   bool in_support(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 		  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
-		  typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda,
+		  const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda,
 		  const Point<DIM_m>& p);
 
   /*!
@@ -54,8 +54,8 @@ namespace FrameTL
   bool intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu,
-			  const typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda,
-			  const typename CubeBasis<IBASIS,DIM_d>::Support& supp_mu);
+			  const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda,
+			  const typename CubeBasis<IBASIS,DIM_d>::Support* supp_mu);
 
   /*!
     checks wether the support of the wavelet frame elements intersect,
@@ -67,7 +67,7 @@ namespace FrameTL
   bool intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu,
-			  const typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda);
+			  const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda);
 
 
   /*!
@@ -85,8 +85,8 @@ namespace FrameTL
   bool intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu,
-			  const typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda,
-			  const typename CubeBasis<IBASIS,DIM_d>::Support& supp_mu,
+			  const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda,
+			  const typename CubeBasis<IBASIS,DIM_d>::Support* supp_mu,
 			  FixedArray1D<Array1D<double>,DIM_d >& supp_intersect);
 
 

@@ -115,7 +115,7 @@ namespace FrameTL
   inline
   bool in_support(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 		  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
-		  typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda,
+		  const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda,
 		  const Point<DIM_m>& p)
   {
 
@@ -123,11 +123,11 @@ namespace FrameTL
 	  typeid(AffineLinearMapping<1>))
 	 )
       {
-	const double dx = 1.0 / (1 << supp_lambda.j);
+	const double dx = 1.0 / (1 << supp_lambda->j);
 	Point<DIM_d> a;
 	Point<DIM_d> b;
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx), a);
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx), b);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda->a[0]*dx), a);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda->b[0]*dx), b);
 
 	return (a[0] <= p[0]) && (p[0] <= b[0]);
 	
@@ -138,11 +138,11 @@ namespace FrameTL
 	  typeid(AffineLinearMapping<2>))
 	 )
       {
-	const double dx = 1.0 / (1 << supp_lambda.j);
+	const double dx = 1.0 / (1 << supp_lambda->j);
 	Point<DIM_d> a;
 	Point<DIM_d> b;
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx,supp_lambda.a[1]*dx), a);
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx,supp_lambda.b[1]*dx), b);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda->a[0]*dx,supp_lambda->a[1]*dx), a);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda->b[0]*dx,supp_lambda->b[1]*dx), b);
 
 	return (a[0] <= p[0] && p[0] <= b[0]) && (a[1] <= p[1] && p[1] <= b[1]);
 
@@ -157,7 +157,7 @@ namespace FrameTL
       {
 	assert ( DIM_d == 2 && DIM_m == 2 );
 	
-	const double dx = 1.0 / (1 << supp_lambda.j);
+	const double dx = 1.0 / (1 << supp_lambda->j);
 
 	FixedArray1D<Point<DIM_m>,4 > poly;
 
@@ -166,10 +166,10 @@ namespace FrameTL
 	// 1 -- 10
 	// 2 -- 11
 	// 3 -- 01
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx,supp_lambda.a[1]*dx), poly[0]);
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx,supp_lambda.a[1]*dx), poly[1]);
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx,supp_lambda.b[1]*dx), poly[2]);
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx,supp_lambda.b[1]*dx), poly[3]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda->a[0]*dx,supp_lambda->a[1]*dx), poly[0]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda->b[0]*dx,supp_lambda->a[1]*dx), poly[1]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda->b[0]*dx,supp_lambda->b[1]*dx), poly[2]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda->a[0]*dx,supp_lambda->b[1]*dx), poly[3]);
 
 	//make sure to walk through the vertices counter clockwise!!!
 	unsigned short int res = 
@@ -201,11 +201,11 @@ namespace FrameTL
   intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 		     const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 		     const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu,
-		     typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda,
-		     typename CubeBasis<IBASIS,DIM_d>::Support& supp_mu)
+		     const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda,
+		     const typename CubeBasis<IBASIS,DIM_d>::Support* supp_mu)
   {    
-    const double dx1 = 1.0 / (1 << supp_lambda.j);
-    const double dx2 = 1.0 / (1 << supp_mu.j);
+    const double dx1 = 1.0 / (1 << supp_lambda->j);
+    const double dx2 = 1.0 / (1 << supp_mu->j);
 
 
     if ( typeid(*frame.atlas()->charts()[lambda.p()]) ==
@@ -221,11 +221,11 @@ namespace FrameTL
 	Point<DIM_d> c;
 	Point<DIM_d> d;
 
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx1), a);
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx1), b);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda->a[0]*dx1), a);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda->b[0]*dx1), b);
 
-	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.a[0]*dx2), c);
-	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.b[0]*dx2), d);
+	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu->a[0]*dx2), c);
+	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu->b[0]*dx2), d);
 
 	return (a[0] < d[0]) && (b[0] > c[0]);
 
@@ -255,15 +255,15 @@ namespace FrameTL
 	// 1 -- 10
 	// 2 -- 11
 	// 3 -- 01
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx1,supp_lambda.a[1]*dx1), poly1[0]);
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx1,supp_lambda.a[1]*dx1), poly1[1]);
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx1,supp_lambda.b[1]*dx1), poly1[2]);
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx1,supp_lambda.b[1]*dx1), poly1[3]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda->a[0]*dx1,supp_lambda->a[1]*dx1), poly1[0]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda->b[0]*dx1,supp_lambda->a[1]*dx1), poly1[1]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda->b[0]*dx1,supp_lambda->b[1]*dx1), poly1[2]);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda->a[0]*dx1,supp_lambda->b[1]*dx1), poly1[3]);
 
-	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.a[0]*dx2,supp_mu.a[1]*dx2), poly2[0]);
-	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.b[0]*dx2,supp_mu.a[1]*dx2), poly2[1]);
-	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.b[0]*dx2,supp_mu.b[1]*dx2), poly2[2]);
-	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.a[0]*dx2,supp_mu.b[1]*dx2), poly2[3]);
+	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu->a[0]*dx2,supp_mu->a[1]*dx2), poly2[0]);
+	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu->b[0]*dx2,supp_mu->a[1]*dx2), poly2[1]);
+	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu->b[0]*dx2,supp_mu->b[1]*dx2), poly2[2]);
+	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu->a[0]*dx2,supp_mu->b[1]*dx2), poly2[3]);
 
  	bool result;
  	Point<DIM_m> p11;
@@ -385,25 +385,27 @@ namespace FrameTL
   bool intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu,
-			  const typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda)
+			  const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda)
   {
     
     typedef WaveletTL::CubeBasis<IBASIS,DIM_d> CUBEBASIS;
     typedef typename CUBEBASIS::Index CubeIndex;
-    typename CUBEBASIS::Support supp_mu;
+    const typename CUBEBASIS::Support* supp_mu = &((frame.all_supports)[mu.number()]);;
 
-    WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[mu.p()], 
-				     CubeIndex(mu.j(),
-					       mu.e(),
-					       mu.k(),
-					       frame.bases()[mu.p()]),
-				     supp_mu);
+//     WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[mu.p()], 
+// 				     CubeIndex(mu.j(),
+// 					       mu.e(),
+// 					       mu.k(),
+// 					       frame.bases()[mu.p()]),
+// 				     supp_mu);
+
+
     
-    const double dx1 = 1.0 / (1 << supp_lambda.j);
-    const double dx2 = 1.0 / (1 << supp_mu.j);
+    const double dx1 = 1.0 / (1 << supp_lambda->j);
+    const double dx2 = 1.0 / (1 << supp_mu->j);
 
 
-    //cout << supp_mu.a[0] << " " << supp_mu.b[0] << " " << supp_mu.j << endl;
+    //cout << supp_mu->a[0] << " " << supp_mu->b[0] << " " << supp_mu->j << endl;
 
     if ( (typeid(*frame.atlas()->charts()[lambda.p()]) ==
 	  typeid(AffineLinearMapping<1>) &&
@@ -422,11 +424,11 @@ namespace FrameTL
 	Point<DIM_d> c;
 	Point<DIM_d> d;
 
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx1), a);
-	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx1), b);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda->a[0]*dx1), a);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda->b[0]*dx1), b);
 
-	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.a[0]*dx2), c);
-	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu.b[0]*dx2), d);
+	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu->a[0]*dx2), c);
+	frame.atlas()->charts()[mu.p()]->map_point(Point<DIM_d>(supp_mu->b[0]*dx2), d);
 
 	return (a[0] < d[0]) && (b[0] > c[0]);
 
@@ -448,11 +450,11 @@ namespace FrameTL
 	
 	Point<DIM_m> a_la, b_la, a_mu, b_mu;
 
-	chart_la->map_point(Point<DIM_d>(supp_lambda.a[0]*dx1,supp_lambda.a[1]*dx1), a_la);
-	chart_la->map_point(Point<DIM_d>(supp_lambda.b[0]*dx1,supp_lambda.b[1]*dx1), b_la);
+	chart_la->map_point(Point<DIM_d>(supp_lambda->a[0]*dx1,supp_lambda->a[1]*dx1), a_la);
+	chart_la->map_point(Point<DIM_d>(supp_lambda->b[0]*dx1,supp_lambda->b[1]*dx1), b_la);
 	
-	chart_mu->map_point(Point<DIM_d>(supp_mu.a[0]*dx2,supp_mu.a[1]*dx2), a_mu);
-	chart_mu->map_point(Point<DIM_d>(supp_mu.b[0]*dx2,supp_mu.b[1]*dx2), b_mu);
+	chart_mu->map_point(Point<DIM_d>(supp_mu->a[0]*dx2,supp_mu->a[1]*dx2), a_mu);
+	chart_mu->map_point(Point<DIM_d>(supp_mu->b[0]*dx2,supp_mu->b[1]*dx2), b_mu);
 
 	return (a_la[0] < b_mu[0] && b_la[0] > a_mu[0]) && (a_la[1] < b_mu[1] && b_la[1] > a_mu[1]);
       }
@@ -483,15 +485,15 @@ namespace FrameTL
 	// 1 -- 10
 	// 2 -- 11
 	// 3 -- 01
-	chart_la->map_point(Point<DIM_d>(supp_lambda.a[0]*dx1,supp_lambda.a[1]*dx1), poly1[0]);
-	chart_la->map_point(Point<DIM_d>(supp_lambda.b[0]*dx1,supp_lambda.a[1]*dx1), poly1[1]);
-	chart_la->map_point(Point<DIM_d>(supp_lambda.b[0]*dx1,supp_lambda.b[1]*dx1), poly1[2]);
-	chart_la->map_point(Point<DIM_d>(supp_lambda.a[0]*dx1,supp_lambda.b[1]*dx1), poly1[3]);
+	chart_la->map_point(Point<DIM_d>(supp_lambda->a[0]*dx1,supp_lambda->a[1]*dx1), poly1[0]);
+	chart_la->map_point(Point<DIM_d>(supp_lambda->b[0]*dx1,supp_lambda->a[1]*dx1), poly1[1]);
+	chart_la->map_point(Point<DIM_d>(supp_lambda->b[0]*dx1,supp_lambda->b[1]*dx1), poly1[2]);
+	chart_la->map_point(Point<DIM_d>(supp_lambda->a[0]*dx1,supp_lambda->b[1]*dx1), poly1[3]);
 
-	chart_mu->map_point(Point<DIM_d>(supp_mu.a[0]*dx2,supp_mu.a[1]*dx2), poly2[0]);
-	chart_mu->map_point(Point<DIM_d>(supp_mu.b[0]*dx2,supp_mu.a[1]*dx2), poly2[1]);
-	chart_mu->map_point(Point<DIM_d>(supp_mu.b[0]*dx2,supp_mu.b[1]*dx2), poly2[2]);
-	chart_mu->map_point(Point<DIM_d>(supp_mu.a[0]*dx2,supp_mu.b[1]*dx2), poly2[3]);
+	chart_mu->map_point(Point<DIM_d>(supp_mu->a[0]*dx2,supp_mu->a[1]*dx2), poly2[0]);
+	chart_mu->map_point(Point<DIM_d>(supp_mu->b[0]*dx2,supp_mu->a[1]*dx2), poly2[1]);
+	chart_mu->map_point(Point<DIM_d>(supp_mu->b[0]*dx2,supp_mu->b[1]*dx2), poly2[2]);
+	chart_mu->map_point(Point<DIM_d>(supp_mu->a[0]*dx2,supp_mu->b[1]*dx2), poly2[3]);
 
  	bool result;
  	Point<DIM_m> p11;
@@ -613,8 +615,8 @@ namespace FrameTL
   bool intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu,
-			  typename CubeBasis<IBASIS,DIM_d>::Support& supp_lambda,
-			  typename CubeBasis<IBASIS,DIM_d>::Support& supp_mu,
+			  const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda,
+			  const typename CubeBasis<IBASIS,DIM_d>::Support* supp_mu,
 			  FixedArray1D<Array1D<double>,DIM_d >& supp_intersect)
   {    
 
@@ -631,12 +633,12 @@ namespace FrameTL
     // WITH POSITIVE ENTRIES ONLY
 
 //     for (unsigned int i = 0; i < DIM_d; i++) 
-//       cout << supp_lambda.a[i] << " " << supp_lambda.b[i] << " " << supp_lambda.j << endl;
+//       cout << supp_lambda->a[i] << " " << supp_lambda->b[i] << " " << supp_lambda->j << endl;
 //     for (unsigned int i = 0; i < DIM_d; i++)
-//       cout << supp_mu.a[i] << " " << supp_mu.b[i] << " " << supp_mu.j << endl;
+//       cout << supp_mu->a[i] << " " << supp_mu->b[i] << " " << supp_mu->j << endl;
 
-    const double dx1 = 1.0 / (1 << supp_lambda.j);
-    const double dx2 = 1.0 / (1 << supp_mu.j);
+    const double dx1 = 1.0 / (1 << supp_lambda->j);
+    const double dx2 = 1.0 / (1 << supp_mu->j);
 
     Point<DIM_d> x;
     Point<DIM_d> x_patch;
@@ -647,13 +649,13 @@ namespace FrameTL
     const Chart<DIM_d,DIM_m>* chart_mu = frame.atlas()->charts()[mu.p()];
     
     for (unsigned int i = 0; i < DIM_d; i++)
-      x[i] = supp_mu.a[i] * dx2;
+      x[i] = supp_mu->a[i] * dx2;
       
     chart_mu->map_point(x,x_patch);
     chart_la->map_point_inv(x_patch,y0);
   
     for (unsigned int i = 0; i < DIM_d; i++) {
-      x[i] = supp_mu.b[i] * dx2;
+      x[i] = supp_mu->b[i] * dx2;
     }
 
     
@@ -666,10 +668,10 @@ namespace FrameTL
     FixedArray1D<FixedArray1D<double,2>,DIM_d > hyperCube_intersect;
     for (unsigned int i = 0; i < DIM_d; i++) {
       assert ( y0[i] <= y1[i] );
-//       cout << supp_lambda.a[i]*dx1 << " " << y0[i] << endl;
-//       cout << supp_lambda.b[i]*dx1 << " " << y1[i] << endl;
-      hyperCube_intersect[i][0] = std::max(supp_lambda.a[i]*dx1,y0[i]);
-      hyperCube_intersect[i][1] = std::min(supp_lambda.b[i]*dx1,y1[i]);
+//       cout << supp_lambda->a[i]*dx1 << " " << y0[i] << endl;
+//       cout << supp_lambda->b[i]*dx1 << " " << y1[i] << endl;
+      hyperCube_intersect[i][0] = std::max(supp_lambda->a[i]*dx1,y0[i]);
+      hyperCube_intersect[i][1] = std::min(supp_lambda->b[i]*dx1,y1[i]);
       
 
       if ( hyperCube_intersect[i][0] >= hyperCube_intersect[i][1]  )
@@ -691,7 +693,7 @@ namespace FrameTL
     // we have to do this for both patches
     
     for (unsigned int i = 0; i < DIM_d; i++) {
-      for (int k = supp_lambda.a[i]; k <= supp_lambda.b[i]; k++) {
+      for (int k = supp_lambda->a[i]; k <= supp_lambda->b[i]; k++) {
 	double d = k*dx1;
 
 	if ( hyperCube_intersect[i][0] <= d && d <= hyperCube_intersect[i][1]) {
@@ -704,12 +706,12 @@ namespace FrameTL
     
     // lower left corner of support cube
     for (unsigned int j = 0; j < DIM_d; j++) {
-      x[j] = supp_mu.a[j]*dx2;
+      x[j] = supp_mu->a[j]*dx2;
     }
     
     // second patch
     for (unsigned int i = 0; i < DIM_d; i++) {
-      for (int k = supp_mu.a[i]; k <= supp_mu.b[i]; k++) {
+      for (int k = supp_mu->a[i]; k <= supp_mu->b[i]; k++) {
 	x[i] = k*dx2;
 	//	cout << "x[i] = " << x[i] << endl;
 	chart_mu->map_point(x,x_patch);
@@ -721,7 +723,7 @@ namespace FrameTL
 	  //cout << "inserting " << y0[i] << endl;
 	}
       }
-      x[i] = supp_mu.a[i]*dx2;
+      x[i] = supp_mu->a[i]*dx2;
       irregular_grid[i].sort();    
       
       double old = -1.;
@@ -756,10 +758,6 @@ namespace FrameTL
 			      const int j, const bool generators,
 			      std::list<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& intersecting)
   {
-//      clock_t tstart, tend;
-//      tstart = clock();
-
-//    cout << "getting level " << j << " gen = " << generators << endl;
 
     intersecting.erase(intersecting.begin(),intersecting.end());
 
@@ -768,102 +766,46 @@ namespace FrameTL
 
     typedef typename CubeBasis<IBASIS,DIM_d>::Index CubeIndex;
     
-    typename CubeBasis<IBASIS,DIM_d>::Support supp_lambda;
+    //cout << "LEVEL = " << frame.all_supports[lambda.number()].j << endl;
+
+
+    const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda = &((frame.all_supports)[lambda.number()]);
+    //cout << lambda.number() << endl;
     
-    WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[lambda.p()], 
-				     CubeIndex(lambda.j(),
-					       lambda.e(),
-					       lambda.k(),
-					       frame.bases()[lambda.p()]),
-				     supp_lambda);
+//     WaveletTL::support<IBASIS,DIM_d>(*frame.bases()[lambda.p()], 
+// 				     CubeIndex(lambda.j(),
+// 					       lambda.e(),
+// 					       lambda.k(),
+// 					       frame.bases()[lambda.p()]),
+// 				     supp_lambda);
     
-#if 0
-    // test
-    std::list<Index> intersect_du;
-    typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> Frame;
-    typedef typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index Index;
-    if ( generators ) {
-      for (Index ind = frame.first_generator(j);
-	 ind <= frame.last_generator(j); ++ind)
-	{
-	  intersecting.push_back(ind);
-	}
-      
-    }
-    else {
-      for (Index ind = frame.first_wavelet(j);
-	   ind <= frame.last_wavelet(j); ++ind)
-	{
-	  intersecting.push_back(ind);
-	}
-    }
-    //end test
-#endif
-    //cout << supp_lambda.a[0] << " " << supp_lambda.b[0] << " " << supp_lambda.j << endl;
+//    cout << supp_lambda->a[0] << " " << supp_lambda->b[0] << " " << supp_lambda->j << endl;
 #if 1
-//     std::list<CubeIndex> intersect_same_cube;
-//     WaveletTL::intersecting_wavelets<IBASIS,DIM_d>(*(frame.bases()[lambda.p()]),
-// 						   CubeIndex(lambda.j(),
-// 							     lambda.e(),
-// 							     lambda.k(),
-// 							     frame.bases()[lambda.p()]),
-// 						   j, generators,
-// 						   intersect_same_cube);
-
-//     // ################ brute force approach ##################
-//     std::list<typename Frame::Index> intersect_same;
-
-// //     // create list of FrameIndices
-//      for (typename std::list<CubeIndex>::const_iterator  it = intersect_same_cube.begin();
-//  	 it != intersect_same_cube.end(); ++it) {
-//        intersecting.push_back( FrameIndex<IBASIS,DIM_d,DIM_m>(&frame,*it,lambda.p()) );
-//        cout << *it << endl;
-//      }
 
     std::list<typename Frame::Index> intersect_diff;
 
+    const Array1D<Array1D<Index> >* indices_levelwise = frame.indices();
+
     if ( generators ) {
-      
-      for (Index ind = FrameTL::first_generator<IBASIS,DIM_d,DIM_m,Frame>(&frame, j);
-	 ind <= FrameTL::last_generator<IBASIS,DIM_d,DIM_m,Frame>(&frame, j); ++ind)
-	{
-	  if ( /*(lambda.p() != ind.p()) &&*/
-	       frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(),ind.p()) && 
-	       FrameTL::intersect_supports<IBASIS,DIM_d,DIM_m>(frame,lambda,ind,supp_lambda) ){
-	    intersect_diff.push_back(ind);
-	  }
-	  
+      for (unsigned int i = 0; i < (*indices_levelwise)[0].size(); i++) {
+	Index ind = (*indices_levelwise)[0][i];
+	if (frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(), ind.p()) && 
+	    intersect_supports(frame, lambda, ind, supp_lambda) ){
+	  intersect_diff.push_back(ind);
 	}
-      
+      }
     }
-    else {      
-      for (Index ind = FrameTL::first_wavelet<IBASIS,DIM_d,DIM_m,Frame>(&frame, j);
-	   ind <= FrameTL::last_wavelet<IBASIS,DIM_d,DIM_m,Frame>(&frame, j); ++ind)
-	{
-	  
-	  if ( /*(lambda.p() != ind.p()) &&*/
-	       frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(),ind.p()) && 
-	       FrameTL::intersect_supports<IBASIS,DIM_d,DIM_m>(frame,lambda,ind,supp_lambda) ) {
-	    intersect_diff.push_back(ind);
-	  }
+    else {
+      for (unsigned int i = 0; i < (*indices_levelwise)[j-frame.j0()+1].size(); i++) {
+	Index ind = (*indices_levelwise)[j-frame.j0()+1][i];
+	if (frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(), ind.p()) && 
+	    intersect_supports(frame,lambda, ind, supp_lambda) ){
+	  intersect_diff.push_back(ind);
 	}
+      }
     }
-    //    intersecting.unique();
     intersecting.merge(intersect_diff);
 #endif
-//     intersecting.unique();
-//     intersecting.sort();
-//     cout << "########" << endl;
-//     cout << lambda << endl;
-//     for (typename std::list<Index>::const_iterator  it = intersecting.begin();
-// 	 it != intersecting.end(); ++it) {
-//       cout << *it << endl;
-//     }
-//      cout << "###############" << endl;
-//       tend = clock();
-//       time += (double)(tend-tstart)/CLOCKS_PER_SEC;
-//      cout << "  ... done, time needed: " << time << " seconds" << endl;
-
 
   }
   

@@ -122,20 +122,20 @@ int main()
   const int DIM = 1;
 
   //typedef DSBasis<3,3> Basis1D;
-  typedef PBasis<2,2> Basis1D;
+  typedef PBasis<3,3> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 0.8;
+  A(0,0) = 0.7;
   Point<1> b;
   b[0] = 0.;
   AffineLinearMapping<1> affineP(A,b);
   
   Matrix<double> A2(DIM,DIM);
-  A2(0,0) = 0.8;
+  A2(0,0) = 0.7;
   Point<1> b2;
   b2[0] = 1.0-A2.get_entry(0,0);
   AffineLinearMapping<1> affineP2(A2,b2);
@@ -170,13 +170,13 @@ int main()
   //primal boundary conditions for first patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_1;
   bound_1[0] = 1;
-  bound_1[1] = 1;
+  bound_1[1] = 2;
 
   bc[0] = bound_1;
 
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
-  bound_2[0] = 1;
+  bound_2[0] = 2;
   bound_2[1] = 1;
 
   bc[1] = bound_2;
@@ -232,7 +232,7 @@ int main()
   int z = 0;
   set<Index> Lambda;
   for (Index lambda = FrameTL::first_generator<Basis1D,1,1,Frame1D>(&frame, frame.j0());
-       lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+2); ++lambda) {
+       lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()); ++lambda) {
     cout << lambda << endl;
     cout << z++ << endl;
     Lambda.insert(lambda);

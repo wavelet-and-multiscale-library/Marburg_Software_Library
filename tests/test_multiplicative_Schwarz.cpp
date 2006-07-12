@@ -15,8 +15,8 @@
 #include <numerics/corner_singularity.h>
 #include <frame_support.h>
 #include <frame_index.h>
-//#include <multiplicative_Schwarz.h>
-#include <additive_Schwarz.h>
+#include <multiplicative_Schwarz.h>
+//#include <additive_Schwarz.h>
 //#include <additive_Schwarz_SD.h>
 #include <galerkin/cached_problem.h>
 
@@ -51,8 +51,8 @@ int main(int argc, char* argv[])
 
   const int DIM = 2;
 
-  //typedef DSBasis<2,2> Basis1D;
-  typedef PBasis<3,3> Basis1D;
+  typedef DSBasis<4,6> Basis1D;
+  //typedef PBasis<3,3> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
   typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
@@ -61,10 +61,10 @@ int main(int argc, char* argv[])
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 2.;
+  A(0,0) = 2.0;
   A(1,1) = 1.0;
   Point<2> b;
-  b[0] = -1.0;
+  b[0] = -1.;
   b[1] = -1.;
   AffineLinearMapping<2> affineP(A,b);
 
@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
   A2(0,0) = 1.0;
   A2(1,1) = 2.0;
   Point<2> b2;
-  b2[0] = -1.;
+  b2[0] = -1.0;
   b2[1] = -1.0;
   AffineLinearMapping<2> affineP2(A2,b2);
   //##############################
@@ -122,14 +122,14 @@ int main(int argc, char* argv[])
   bound_1[0] = 1;
   bound_1[1] = 1;
   bound_1[2] = 1;
-  bound_1[3] = 2;
+  bound_1[3] = 3;
 
   bc[0] = bound_1;
 
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
   bound_2[0] = 1;
-  bound_2[1] = 2;
+  bound_2[1] = 3;
   bound_2[2] = 1;
   bound_2[3] = 1;
 
@@ -160,8 +160,8 @@ int main(int argc, char* argv[])
   cout << Lshaped << endl;
 
   //finally a frame can be constructed
-  //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT);
-  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, 6);
+  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT, 6);
+  //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, 6);
 
   Vector<double> value(1);
   value[0] = 1;
@@ -177,6 +177,32 @@ int main(int argc, char* argv[])
   PoissonBVP<DIM> poisson(&singRhs);
   //PoissonBVP<DIM> poisson(&const_fun);
 
+//   MultiIndex<int,2> e1;
+//   e1[0] = 0;
+//   e1[1] = 0;
+//   MultiIndex<int,2> k1;
+//   k1[0] = 1;
+//   k1[1] = 0;
+
+//   FrameIndex<Basis1D,2,2> ind_1(&frame, 3, e1, 0, k1);
+//   cout << ind_1 << endl;
+
+
+
+//   int count  = 0;
+//   for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
+//        lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, frame.j0()); ++lambda) {
+
+//     cout << "##############" << endl;
+//     if (lambda.number() != 7)
+//       continue;
+//     cout << lambda << endl;
+    
+//     if (lambda.number() == 7)
+//       abort();
+
+//   }
+//  abort();
   EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
 
@@ -193,8 +219,8 @@ int main(int argc, char* argv[])
   double time;
   tstart = clock();
 
-  //multiplicative_Schwarz_SOLVE(problem, epsilon, u_epsilon);
-  additive_Schwarz_SOLVE(problem, epsilon, u_epsilon);
+  multiplicative_Schwarz_SOLVE(problem, epsilon, u_epsilon);
+  //additive_Schwarz_SOLVE(problem, epsilon, u_epsilon);
   //additive_Schwarz_SD_SOLVE(problem, epsilon, u_epsilon);
 
   tend = clock();

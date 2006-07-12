@@ -23,6 +23,7 @@
 	 k_[i] = WaveletTL::first_generator<IBASIS>(frame_->bases()[0]->bases()[i], j_).k();
        
        num_ = -1;
+       //set_number();
 
      }
    }
@@ -39,6 +40,7 @@
 						const int p)
      : frame_(frame), j_(c.j()), e_(c.e()), p_(p), k_(c.k()), num_(-1)
    {
+     set_number();
    }
 
    template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
@@ -165,6 +167,8 @@
 	 tmp2 *= ((frame_->bases()[p_])->bases())[i]->Nablasize(j_);
        }
      }
+
+     //cout << "tmp2 = " << tmp2 << " " << ((frame_->bases()[p_])->bases())[1]->Deltasize(j_) << endl;
      
      act_num += 1;
      for (unsigned int i = 0; i < DIM_d; i++) {
@@ -195,10 +199,12 @@
        }
        if ((i+1) < DIM_d) {
 	 if (e_[i+1] == 0) {
-	   tmp2 /= ((frame_->bases()[p_])->bases())[i]->Deltasize(j_);
+	   //cout << tmp2 << " " << ((frame_->bases()[p_])->bases())[i]->Deltasize(j_) << endl;
+	   tmp2 /= ((frame_->bases()[p_])->bases())[i+1]->Deltasize(j_);
+	   //cout << tmp2 << " " << ((frame_->bases()[p_])->bases())[i]->Deltasize(j_) << " " << act_num << endl;
 	 }
 	 else {
-	   tmp2 /= ((frame_->bases()[p_])->bases())[i]->Nablasize(j_);
+	   tmp2 /= ((frame_->bases()[p_])->bases())[i+1]->Nablasize(j_);
 	 }
        }
      }
@@ -213,6 +219,7 @@
 
      : frame_(frame), j_(j), e_(e), p_(p), k_(k), num_(-1)
    {
+     set_number();
    }
 
    template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
@@ -299,6 +306,8 @@
        e_[DIM_d-1] = 1;
        k_[DIM_d-1] = ((frame_->bases()[p_])->bases())[DIM_d-1]->Nablamin();
      }
+
+     set_number();
      
      return *this;
    }
@@ -307,6 +316,10 @@
   void
   FrameIndex<IBASIS, DIM_d, DIM_m>::set_number()
   {
+    //cout << "setting number of " << *this << endl;
+
+
+
     type_type gen_type;
     assert( e_ != gen_type || j_ == frame_->j0() );
 
@@ -385,6 +398,8 @@
       result += tmp;
     }
 
+    //cout << "result = " << result << " " << *this << endl;
+
     // count the wavelets that belong to the same level and to the same type
     // on the same patch, whose indices are smaller than this index,
     // add the result to res
@@ -406,12 +421,14 @@
       
       for (unsigned int l = i+1; l < DIM_d; l++) {
 	if (e_[l] == 0)
-	  tmp *= ((frame_->bases()[p_])->bases())[i]->Deltasize(j_);
+	  tmp *= ((frame_->bases()[p_])->bases())[l]->Deltasize(j_);
 	else
-	  tmp *= ((frame_->bases()[p_])->bases())[i]->Nablasize(j_);
+	  tmp *= ((frame_->bases()[p_])->bases())[l]->Nablasize(j_);
       }
       result += tmp;
     }
+
+    //cout << "calculated number = " << result << endl;
 
     num_ = result;
   }
@@ -572,7 +589,33 @@
     return os;
 
    }
+   
+   template <class INDEX>
+   void to_array (const InfiniteVector<double, INDEX>& ivec,
+		  Coefficient* coeff_array) {
+    
+     typename InfiniteVector<double, INDEX>::const_iterator it = ivec.begin();
+     int i = 0;
+     for (;it != ivec.end(); ++it) {
+       Coefficient tmp;
+       tmp.num = it.index().number();
+       //it.index().set_number();
+       tmp.val = *it;
+       coeff_array[i] = tmp;
+       i++;
+     }
+   }
 
-
-
- }
+   template <class INDEX, class FRAME>
+   void array_to_map (const Coefficient* coeff_array,
+		      const FRAME* frame,
+		      InfiniteVector<double, INDEX>& ivec,
+		      const int count) {
+     ivec.clear();
+     for (int i = 0; i < count; i++) {
+       INDEX ind (coeff_array[i].num, frame);
+       ivec[ind] = coeff_array[i].val;
+     }
+   }
+ 
+}

@@ -26,6 +26,25 @@ using MathTL::MultiIndex;
 
 namespace FrameTL
 {
+  
+  /*!
+    A simple type representing pairs of a frame index, given by
+    its number, and a double valued coefficient in a frame expansion.
+    It shall be used as repacement for a pair of frame_index and
+    coeffient value.
+   */
+  typedef struct {
+    
+    // will be used to represent the number of a frame index
+    int num;
+
+    // one coefficient of a frame expansion corrwsponding to the
+    // frame index given by 'num'
+    double val;
+    
+  } Coefficient;
+  
+
   //forward declaration of class AggregatedFrame
   template<class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   class AggregatedFrame;
@@ -158,7 +177,6 @@ namespace FrameTL
 
   /*!
     index of first generator on level j >= j0
-    on patch p
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
   FrameIndex<IBASIS,DIM_d,DIM_m>
@@ -166,7 +184,6 @@ namespace FrameTL
 
   /*!
     index of last generator on level j >= j0
-    on patch p
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
   FrameIndex<IBASIS,DIM_d,DIM_m>
@@ -175,7 +192,6 @@ namespace FrameTL
     
   /*!
     index of first wavelet on level j >= j0
-    on patch p
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
   FrameIndex<IBASIS,DIM_d,DIM_m>
@@ -183,7 +199,6 @@ namespace FrameTL
     
   /*!
     index of last wavelet on level j >= j0
-    on patch p
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
   FrameIndex<IBASIS,DIM_d,DIM_m>
@@ -191,7 +206,6 @@ namespace FrameTL
 
   /*!
     number of first generator on level j0
-    on patch p
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
   int
@@ -199,15 +213,13 @@ namespace FrameTL
 
   /*!
     number of last generator on level j0
-    on patch p
-  */
+    */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
   int
   last_generator_num(const FRAME* frame);
     
   /*!
     number of first wavelet on level j >= j0
-    on patch p
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
   int
@@ -215,15 +227,22 @@ namespace FrameTL
     
   /*!
     index of last wavelet on level j >= j0
-    on patch p
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
   int
   last_wavelet_num(const FRAME* frame, const int j);
-
+  
+  template <class INDEX>
+  void to_array (const InfiniteVector<double, INDEX>& ivec,
+		 Coefficient* coeff_array);
+  
+  template <class INDEX, class FRAME>
+  void array_to_map (const Coefficient* coeff_array,
+		     const FRAME* frame,
+		     InfiniteVector<double, INDEX>& ivec,
+		     const int count);
 
 }
-
 // include implementation
 #include "frame_index.cpp"
 

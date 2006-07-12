@@ -85,8 +85,6 @@ public:
 
     InfiniteVector<double, Index> u_k, u_k_1_2, r, help, f, Av, r_exact;
     
-    
-    
     map<double,double> log_10_residual_norms;
     map<double,double> degrees_of_freedom;
     map<double,double> asymptotic;
@@ -115,7 +113,6 @@ public:
 
       cout << "reentering global loop " << endl;
 
-
       //approximate residual
       P.RHS(eta, f);
       APPLY_COARSE(P, u_k, eta, help, 0.00000001, jmax, CDD1);
@@ -123,9 +120,12 @@ public:
 
       //approximate residual
       P.RHS(0., f);
+      cout << f << endl;
+      abort();
       APPLY(P, u_k, 0., help, jmax, CDD1);
       r_exact = f - help;
-
+      
+      r_exact.COARSE(eta, r);
 
       tmp = l2_norm(r_exact);
       cout << "residual norm = " << tmp  << endl;

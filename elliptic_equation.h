@@ -17,6 +17,8 @@
 
 #include <galerkin/infinite_preconditioner.h>
 
+#include <frame_support.h>
+
 using FrameTL::AggregatedFrame;
 using MathTL::EllipticBVP;
 using WaveletTL::CompressionStrategy;
@@ -284,7 +286,6 @@ namespace FrameTL
      */
     const AggregatedFrame<IBASIS,DIM>* frame_;
 
-
     //####################
     typedef std::map<Index1D<IBASIS>,double > Column1D;
     typedef std::map<Index1D<IBASIS>,Column1D> One_D_IntegralCache;
@@ -307,7 +308,7 @@ namespace FrameTL
      */
     double a_same_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
 			  const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-			  const unsigned int q_order = 3) const;
+			  const unsigned int q_order = 4) const;
 
     /*!
      */
@@ -322,7 +323,7 @@ namespace FrameTL
      */
     double a_different_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
 			       const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-			       const unsigned int q_order = 3, const unsigned int rank = 1) const;
+			       const unsigned int q_order = 4, const unsigned int rank = 1) const;
 
 
     double a_different_patches_adaptive(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,

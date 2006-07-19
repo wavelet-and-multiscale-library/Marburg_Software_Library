@@ -160,6 +160,39 @@ namespace MathTL
     const bool constant_coefficients() const { return true; }
   };
 
+  /*!
+    The Identity equation on a d-dimensional domain
+      u(x) = f(x).
+    Actually the identity operator is noe second order operator.
+    We neglect this point for the moment.
+  */
+  template <unsigned int DIM>
+  class IdentityBVP
+    : public EllipticBVP<DIM>
+  {
+  public:
+    /*!
+      constructor with given right-hand side
+    */
+    IdentityBVP(const Function<DIM>* f);
+
+    /*!
+      diffusion coefficient a
+     */
+    const double a(const Point<DIM>& x) const { return 0.0; }
+
+    /*!
+      reaction coefficient q
+    */
+    const double q(const Point<DIM>& x) const { return 1.0; }
+
+    /*!
+      flag for constant coefficients
+    */
+    const bool constant_coefficients() const { return true; }
+  };
+
+
 }
 
 #include <numerics/bvp.cpp>

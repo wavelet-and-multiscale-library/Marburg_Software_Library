@@ -29,4 +29,11 @@ namespace MathTL
     : EllipticBVP<DIM>(f, f, f)
   {
   }
+
+  template <unsigned int DIM>
+  IdentityBVP<DIM>::IdentityBVP(const Function<DIM>* f)
+    : EllipticBVP<DIM>(f, f, f)
+  {
+  }
+
 }

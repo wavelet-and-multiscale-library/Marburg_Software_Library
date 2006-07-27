@@ -938,38 +938,34 @@ namespace WaveletTL
     SparseMatrix<double> help;
 
 //     cout << "A=" << endl << A;
-    
+
     // elimination (4.1.4)ff.:
     for (int i = 1; i <= d; i++) {
       help.diagonal(Deltasize(j0()+1), 1.0);
 
       // row index of the entry in the first column of A_j^{(i)} (w.r.t. Ahat_j^{(i)})
       const int elimrow = i%2 ? firstrow+(i-1)/2 : lastrow-(int)floor((i-1)/2.);
-//       cout << "i%2=" << i%2 << ", elimrow=" << elimrow << endl;
+//       cout << "i=" << i << ", i%2=" << i%2 << ", elimrow=" << elimrow << endl;
 
       // factorization [P, p. 112]      
-//       const int HhatLow = i%2 ? d-s0-((i+1)/2)%2 : d-s0+1-(d%2)-(i/2)%2;
-      const int HhatLow = i%2 ? d-s0-((i+1)/2)%2 : d-s0+1-(d%2)-(i/2)%2;
-      const int HhatUp  = i%2
-	? Deltasize(j0()+1)-d+s1-abs((d%2)-((i+1)/2)%2)
-	: Deltasize(j0()+1)-d+s1-abs((d%2)-(i/2)%2);
-      
+      const int HhatLow = i%2 ? (d-s0)-(((i+1)/2)%2) : d-s0+1-(d%2)-((i/2)%2);
+
       if (i%2) // i odd, elimination from above (4.1.4a)
 	{
 	  assert(fabs(A.get_entry(elimrow+1, firstcol)) >= 1e-10);
 	  const double Uentry = -A.get_entry(elimrow, firstcol) / A.get_entry(elimrow+1, firstcol);
 	  
 	  // insert Uentry in Hhat
-	  for (int k = HhatLow; k <= HhatUp; k += 2)
+ 	  for (int k = HhatLow; k+1 < Deltasize(j0()+1)-(d-1-s1); k+= 2)
 	    help.set_entry(k, k+1, Uentry);
 	}
       else // i even, elimination from below (4.1.4b)
 	{
 	  assert(fabs(A.get_entry(elimrow-1, lastcol)) >= 1e-10);
 	  const double Lentry = -A.get_entry(elimrow, lastcol) / A.get_entry(elimrow-1, lastcol);
-	  
+  
 	  // insert Lentry in Hhat
-	  for (int k = HhatLow; k <= HhatUp; k += 2)
+ 	  for (int k = HhatLow; k+1 < Deltasize(j0()+1)-(d-1-s1); k+= 2)
 	    help.set_entry(k+1, k, Lentry);
 	}
       
@@ -984,10 +980,10 @@ namespace WaveletTL
 
       // invert help
       if (i%2) {
-	for (int k = HhatLow; k <= HhatUp; k += 2)
+	for (int k = HhatLow; k+1 < Deltasize(j0()+1)-(d-1-s1); k += 2)
 	  help.set_entry(k, k+1, -help.get_entry(k, k+1));
       }	else {
-	for (int k = HhatLow; k <= HhatUp; k += 2)
+	for (int k = HhatLow; k+1 < Deltasize(j0()+1)-(d-1-s1); k += 2)
 	  help.set_entry(k+1, k, -help.get_entry(k+1, k));
       }
       

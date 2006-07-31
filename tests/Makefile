@@ -23,9 +23,9 @@ CXXFLAGS += -O3 -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -I /home/wer
 #CXXFLAGS += -L /home/werner/PROMOTION/Cuba-1.2/libcuba.a
 #CXXFLAGS += -L -lm
 
-EXEOBJF = test_compute_dual_frame_elements.o\
-test_elliptic_equation_1D.o
-#test_steepest_descent.o\
+EXEOBJF = test_elliptic_equation_1D.o\
+test_steepest_descent.o
+#test_compute_dual_frame_elements.o\
 #test_steepest_descent_2D.o\
 #test_elliptic_equation.o\
 #test_multiplicative_Schwarz.o

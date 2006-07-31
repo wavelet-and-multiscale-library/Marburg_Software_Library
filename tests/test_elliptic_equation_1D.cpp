@@ -117,19 +117,24 @@ public:
 int main()
 {
   
+
+
   cout << "Testing class EllipticEquation..." << endl;
   
   const int DIM = 1;
 
-  //typedef DSBasis<3,3> Basis1D;
-  typedef PBasis<2,4> Basis1D;
+  typedef DSBasis<2,2> Basis1D;
+  //typedef PBasis<4,4> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
+  typedef Basis1D::Index IIndex;
+
+  EvaluateFrame<Basis1D,1,1> evalObj;
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 1.;
+  A(0,0) = 0.7;
   Point<1> b;
   b[0] = 0.;
   AffineLinearMapping<1> affineP(A,b);
@@ -151,21 +156,21 @@ int main()
 
   //##############################
   
-  Array1D<Chart<DIM,DIM>* > charts(1);
+  Array1D<Chart<DIM,DIM>* > charts(2);
   charts[0] = &affineP;
-  //charts[1] = &affineP2;
+  charts[1] = &affineP2;
 
   //charts[0] = &simpleaffine1;
   //charts[1] = &simpleaffine2;
   
-  SymmetricMatrix<bool> adj(1);
+  SymmetricMatrix<bool> adj(2);
   adj(0,0) = 1;
-//   adj(1,1) = 1;
-//   adj(1,0) = 1;
-//   adj(0,1) = 1;
+  adj(1,1) = 1;
+  adj(1,0) = 1;
+  adj(0,1) = 1;
   
   //to specify primal boundary the conditions
-  Array1D<FixedArray1D<int,2*DIM> > bc(1);
+  Array1D<FixedArray1D<int,2*DIM> > bc(2);
 
   //primal boundary conditions for first patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_1;
@@ -179,7 +184,7 @@ int main()
   bound_2[0] = 1;
   bound_2[1] = 1;
 
-  //bc[1] = bound_2;
+  bc[1] = bound_2;
 
 //to specify primal boundary the conditions
   Array1D<FixedArray1D<int,2*DIM> > bcT(2);
@@ -203,7 +208,7 @@ int main()
 
   //finally a frame can be constructed
   //Frame1D frame(&Lshaped, bc, bcT);
-  Frame1D frame(&Lshaped, bc, 7);
+  Frame1D frame(&Lshaped, bc, 10);
 
   Vector<double> value(1);
   value[0] = 1;
@@ -214,8 +219,11 @@ int main()
   
   //PoissonBVP<DIM> poisson(&const_fun);
   PoissonBVP<DIM> poisson(&sing1D);
+  //IdentityBVP<DIM> trivial_bvp(&const_fun);
+  //IdentityBVP<DIM> trivial_bvp(&exactSolution);
 
   EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
+  //EllipticEquation<Basis1D,DIM> discrete_poisson(&trivial_bvp, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
   
   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 4.19, 1.0/0.146);
@@ -232,18 +240,35 @@ int main()
   int z = 0;
   set<Index> Lambda;
   for (Index lambda = FrameTL::first_generator<Basis1D,1,1,Frame1D>(&frame, frame.j0());
-       lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+3); ++lambda) {
-    cout << z++ << endl;
+       lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+7); ++lambda) {
+    //cout << lambda << endl;
+    //cout << z++ << endl;
     Lambda.insert(lambda);
   }
 
-  
   cout << "setting up full right hand side..." << endl;
   Vector<double> rh;
   WaveletTL::setup_righthand_side(discrete_poisson, Lambda, rh);
   
-  //  cout << rh << endl;
+//   cout << rh << endl;
   
+//   Basis1D basis(3,3);
+
+//   InfiniteVector<double, IIndex> coeff;
+//   IIndex index(first_generator(&basis, basis.j0()));
+//   for (int i = 0;; ++index, i++) {
+//     coeff.set_coefficient(index, rh[i]);
+//     if (index == last_generator(&basis, basis.j0())) break;
+//   }
+
+//   SampledMapping<1> res = evaluate(basis, coeff, false, 8);
+  
+//   std::ofstream ofs4("reproduced_function.m");
+//   res.matlab_output(ofs4);
+//   ofs4.close();
+
+//   abort();
+
   cout << "setting up full stiffness matrix..." << endl;
   SparseMatrix<double> stiff;
   
@@ -308,20 +333,11 @@ int main()
   
   u.scale(&discrete_poisson,-1);
 
-//   InfiniteVector<double,Index> Au;
-//   APPLY(problem, u, .0, Au, 4, CDD1);
-//   cout << "u = " << u.size() << endl;
-//   cout << "Au size = " << Au.size() << " " << Au << endl;
-
-  EvaluateFrame<Basis1D,1,1> evalObj;
-  
   Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u, true, 11);//expand in primal basis
   Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u, exactSolution, 11);
-  
-  //double L2err = evalObj.L_2_error(frame, u, exactSolution, 7, 0.0, 1.0);
-  
-  //cout << "L_2 error = " << L2err << endl;
-  
+
+
+ 
   std::ofstream ofs5("approx_solution_1D_out.m");
   matlab_output(ofs5,U);
   ofs5.close();
@@ -329,7 +345,6 @@ int main()
   std::ofstream ofs6("error_1D_out.m");
   matlab_output(ofs6,Error);
   ofs6.close();
-
 
   cout << "  ... done, time needed: " << time << " seconds" << endl;
    
@@ -387,38 +402,6 @@ int main()
 
   }
 #endif
-
-
-//    MultiIndex<unsigned int, 1> e1;
-//    e1[0] = 0;
-//    MultiIndex<int, 1> k1;
-//    k1[0] = 2;
-   
-//    MultiIndex<unsigned int, 1> e2;
-//    e2[0] = 0;
-//    MultiIndex<int, 1> k2;
-//    k2[0] = 1;
-   
-//    unsigned int p1 = 0, p2 = 1;
-//    int j2 = 3;
-
-//    FrameIndex<Basis1D,1,1> la(&frame,j2,e1,p1,k1);
-//    FrameIndex<Basis1D,1,1> mu(&frame,j2,e2,p2,k2);
-
-// //    cout << la << mu << endl;
-
-// //    cout << "val  " << discrete_poisson.a(la,mu,1) << endl;
-// //    cout << "val  " << discrete_poisson.a(mu,la,1) << endl;
-
-//    std::list<Index> intersecting;
-//    FrameTL::intersecting_wavelets<Basis1D,1,1>(frame, la, 4, false, intersecting);
-
-//    cout << intersecting.size() << endl;
-
-//    for (std::list<Index>::const_iterator  it = intersecting.begin();
-// 	it != intersecting.end(); ++it) {
-//      cout << *it << endl;
-//    }
 
 
    return 0;

@@ -143,7 +143,7 @@ namespace FrameTL
       lifted_bases[i] = new MappedCubeBasis<IBASIS,DIM_d,DIM_m>((atlas_->charts())[i],bc[i]);
     
     j0_ = lifted_bases[0]->j0();
-
+    cout << "minimal level = " << j0_ << endl;
 
     cout << "setting up collection of wavelet indices..." << endl;      
     indices_levelwise.resize(jmax - j0_ + 2);

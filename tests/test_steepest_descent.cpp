@@ -101,8 +101,8 @@ int main()
   
   const int DIM = 1;
 
-  //typedef DSBasis<3,3> Basis1D;
-  typedef PBasis<4,6> Basis1D;
+  typedef DSBasis<2,2> Basis1D;
+  //typedef PBasis<4,6> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
@@ -151,15 +151,15 @@ int main()
   
   //primal boundary conditions for first patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_1;
-  bound_1[0] = 3;
-  bound_1[1] = 3;
+  bound_1[0] = 1;
+  bound_1[1] = 1;
   
   bc[0] = bound_1;
   
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
-  bound_2[0] = 3;
-  bound_2[1] = 3;
+  bound_2[0] = 1;
+  bound_2[1] = 1;
   
   bc[1] = bound_2;
 
@@ -184,8 +184,8 @@ int main()
   cout << Lshaped << endl;
 
   //finally a frame can be constructed
-  //Frame1D frame(&Lshaped, bc, bcT, 9);
-  Frame1D frame(&Lshaped, bc, 8);
+  Frame1D frame(&Lshaped, bc, bcT, 13);
+  //Frame1D frame(&Lshaped, bc, 13);
 
   Vector<double> value(1);
   value[0] = 1;
@@ -204,25 +204,32 @@ int main()
   EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
 
+  // (0,0.7) \cup (0.3,1) DSBasis
+
+  // (d,dT) = (2,2)
+  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.3743, 1.0/0.146);
+  discrete_poisson.set_norm_A(3.3743);
+  // optimistic guess:
+  discrete_poisson.set_Ainv(1.0/0.146);
+
+
   //interval case:
-
-
   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 2.13, 1.0/0.0038);
   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 2.47, 1.0/0.0751);
   //  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.3076, 1.0/0.1);
-  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 4.19, 1.0/0.146);
+  //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 4.19, 1.0/0.146);
   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.032, 1.0/(1.0e-3*0.672));
   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.032, 1.0/0.01);
 
 
   // p basis d = 2 dt = 2
-//   discrete_poisson.set_norm_A(3.3076);
-//   discrete_poisson.set_Ainv(1.0/0.1);
-
-
+  //   discrete_poisson.set_norm_A(3.3076);
+  //   discrete_poisson.set_Ainv(1.0/0.1);
+  
+  
   // p basis d = 3 dt = 3
-  discrete_poisson.set_norm_A(4.19);
-  discrete_poisson.set_Ainv(1.0/0.146);
+//   discrete_poisson.set_norm_A(4.19);
+//   discrete_poisson.set_Ainv(1.0/0.146);
   
 
   // d = 2 dt = 2
@@ -315,25 +322,25 @@ int main()
   u_epsilon.scale(&discrete_poisson,-1);
   
   
-  const int size = u_epsilon.size();
-  Coefficient coeff_array[size];
+//   const int size = u_epsilon.size();
+//   Coefficient coeff_array[size];
 
-  // time load uncritical:
-  for (int i = 0; i< 10000; i++)
-    to_array<Index>(u_epsilon, coeff_array);
-  for (int i = 0; i < size; i++) {
-    cout << coeff_array[i].num << "  " << coeff_array[i].val << endl;
-  }
+//   // time load uncritical:
+//   for (int i = 0; i< 10000; i++)
+//     to_array<Index>(u_epsilon, coeff_array);
+//   for (int i = 0; i < size; i++) {
+//     cout << coeff_array[i].num << "  " << coeff_array[i].val << endl;
+//   }
   
-  int count = size;
-  array_to_map (coeff_array, &frame, u_epsilon, count);
+//   int count = size;
+//   array_to_map (coeff_array, &frame, u_epsilon, count);
   
-  //  u_epsilon.merge(u_epsilon);
+//   //  u_epsilon.merge(u_epsilon);
 
-  InfiniteVector<double, Index>::const_iterator it = u_epsilon.begin();
-  for (; it != u_epsilon.end(); it++) {
-    cout << it.index() << " " << *it << endl;
-  }
+//   InfiniteVector<double, Index>::const_iterator it = u_epsilon.begin();
+//   for (; it != u_epsilon.end(); it++) {
+//     cout << it.index() << " " << *it << endl;
+//   }
 
   EvaluateFrame<Basis1D,1,1> evalObj;
 

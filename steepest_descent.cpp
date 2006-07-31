@@ -66,7 +66,7 @@ public:
   void steepest_descent_SOLVE(const PROBLEM& P,  const double epsilon,
 			      InfiniteVector<double, typename PROBLEM::Index>& u_epsilon)
   {
-    typedef DSBasis<4,6> Basis1D;
+    typedef DSBasis<2,2> Basis1D;
     //typedef PBasis<3,3> Basis1D;
 
     Point<2> origin;
@@ -76,13 +76,11 @@ public:
     CornerSingularity sing2D(origin, 0.5, 1.5);
     CornerSingularityRHS singRhs(origin, 0.5, 1.5);
 
-
-
 //    Singularity1D_RHS_2<double> sing1D;
 //    Singularity1D_2<double> exactSolution1D;
 
     unsigned int loops = 0;
-    const int jmax = 8;
+    const int jmax = 13;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
@@ -152,40 +150,30 @@ public:
       while ( nu_i > omega_i/((1+3.*mu)*a_inv)) {
 
 	InfiniteVector<double, Index> z_i;
-	//APPLY(P, tilde_r, delta*l2_norm(tilde_r), z_i, jmax, CDD1);
-
 	APPLY_COARSE(P, tilde_r,delta*l2_norm(tilde_r), z_i, 0.00001, jmax, CDD1);
-	//APPLY(P, tilde_r, .0/*delta*l2_norm(tilde_r)*/, z_i, jmax, CDD1);
 
 	double d = ((tilde_r*tilde_r)/(z_i*tilde_r));
 
 	w += d*tilde_r;
 	cout << "descent param = " << d << endl;
 	++loops;
+
  	P.RHS(.0,f);
- 	//APPLY_COARSE(P, w, 0.0000000001, Av, 0.000000001, jmax, CDD1);
 	APPLY(P, w, .0, Av, jmax, CDD1);
  	help = f-Av;
-	//degrees_of_freedom[loops] = w.size();
 
 	RES(P, w, xi_i, delta, omega_i/((1+3.*mu)*a_inv), jmax,
 	    tilde_r, nu_i, CDD1);
+
 	cout << "loop: " << loops << " nu = " 
 	     << nu_i << " epsilon = " << omega_i/((1+3.*mu)*a_inv) << endl;
 	cout << "xi: " << xi_i << endl; 
 	  
-	//double tmp = l2_norm(tilde_r);
 	double tmp = l2_norm(help);
 	double tmp1 = log10(tmp);
 	cout << "residual norm = " << tmp << endl;
 	asymptotic[log10( (double)w.size() )] = tmp1;
 	log_10_residual_norms[loops] = tmp1;
-	//u_epsilon = w;
-	//P.rescale(u_epsilon,-1);
-
-	//double L2err = evalObj.L_2_error(P.basis(), u_epsilon, exactSolution1D, 7, 0.0, 1.0);
-	//log_10_L2_error[loops] = log10(L2err);
-	//cout << "L_2 error = " << L2err << endl;
 
 	tend = clock();
 	
@@ -194,60 +182,18 @@ public:
 	time_asymptotic[log10(time)] = tmp1;
 	cout << "active indices: " << w.size() << endl;
 	if (loops % 1 == 0) {
-	  std::ofstream os3("steep2D_asymptotic332305.m");
+	  std::ofstream os3("steep1D_asymptotic22_3107.m");
 	  matlab_output(asymptotic,os3);
 	  os3.close();
 	  
-	  std::ofstream os4("steep2D_time_asymptotic332305.m");
+	  std::ofstream os4("steep1D_time_asymptotic22_3107.m");
 	  matlab_output(time_asymptotic,os4);
 	  os4.close();
-
-
-// 	  std::ofstream os4("steep_1D_L2_errors.m");
-// 	  matlab_output(log_10_L2_error,os4);
-// 	  os4.close();
-     }
-
+	}
+	
 	tstart = clock();
 
-// 	if (loops == 1 || loops == 2 || loops == 3 || loops == 4 || loops == 5 || loops == 6 ||
-// 	    loops == 7 || loops == 8 || loops == 9 || loops == 10 || loops == 11 || loops == 12
-// 	    loops == 20 || loops == 25 || loops == 30 || loops == 35 || loops == 40 || loops == 60){
-// 	  u_epsilon = w;
-// 	  P.rescale(u_epsilon,-1);
-// 	  char filename1[50];
-// 	  char filename2[50];
-	  
-// 	  sprintf(filename1, "%s%d%s%d%s", "approx_sol_steep22_2D_out_", loops, "_nactive_", w.size(),".m");
-// 	  sprintf(filename2, "%s%d%s%d%s", "error_steep_2D_out_", loops, "_nactive_", w.size(),".m");
-	  
-// 	  Array1D<SampledMapping<1> > U = evalObj.evaluate(P.basis(), u_epsilon, true, 6);//expand in primal basis
-// 	  cout << "...plotting approximate solution" << endl;
-// 	  Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(P.basis(), u_epsilon, exactSolution1D, 6);
-// 	  cout << "...plotting error" << endl;
-
-// 	  double L2err = evalObj.L_2_error(P.basis(), u_epsilon, exactSolution1D, 7, 0.0, 1.0);
-// 	  cout << "L_2 error = " << L2err << endl;
-
-// 	  std::ofstream ofs5(filename1);
-// 	  matlab_output(ofs5,U);
-// 	  ofs5.close();
-	  
-// 	  std::ofstream ofs6(filename2);
-// 	  matlab_output(ofs6,Error);
-// 	  ofs6.close();
-
-// 	if (loops % 5 == 0) {
-//           std::ofstream os3("steep_asymptotic_2D_2205.m");
-//           matlab_output(asymptotic,os3);
-//           os3.close();
-
-// 	  std::ofstream os4("time_asymptotic_steep_2D_2205.m");
-// 	  matlab_output(time_asymptotic,os4);
-// 	  os4.close();
-// 	}
-
-	if (tmp < 1.0e-2 || loops == 3000) {
+	if (tmp < 1.0e-5 || loops == 3000) {
 	  u_epsilon = w;
 	  exit = true;
 	  break;
@@ -262,24 +208,8 @@ public:
 	break;
 
     }// end for 
-      //       InfiniteVector<double, Index> tmp;
-      //       w.COARSE(((3.*mu*omega_i)/(1+3.*mu)),tmp);
-      //       w = tmp;
-      
-      
-//     std::ofstream os1("residual_norms_steep.m");
-//     matlab_output(log_10_residual_norms,os1);
-//     os1.close();
-      
-    //     std::ofstream os2("degrees_of_freedom.m");
-    //     matlab_output(degrees_of_freedom,os2);
-    //     os2.close();
-      
-//     std::ofstream os3("asymptotic.m");
-//     matlab_output(asymptotic,os3);
-//     os3.close();
-      
-    
-      
+    //       InfiniteVector<double, Index> tmp;
+    //       w.COARSE(((3.*mu*omega_i)/(1+3.*mu)),tmp);
+    //       w = tmp;
   }
 }

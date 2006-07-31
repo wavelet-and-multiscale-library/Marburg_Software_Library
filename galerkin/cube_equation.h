@@ -68,11 +68,18 @@ namespace WaveletTL
     : public FullyDiagonalEnergyNormPreconditioner<typename CUBEBASIS::Index>
   {
   public:
+
     /*!
       constructor from a boundary value problem and specified b.c.'s
     */
     CubeEquation(const EllipticBVP<DIM>* bvp,
 		 const FixedArray1D<bool,2*DIM>& bc);
+
+    /*!
+      constructor from a boundary value problem and specified b.c.'s
+    */
+    CubeEquation(const EllipticBVP<DIM>* bvp,
+		 const FixedArray1D<int,2*DIM>& bc);
 
     /*!
       copy constructor

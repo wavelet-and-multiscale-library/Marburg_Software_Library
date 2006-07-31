@@ -67,6 +67,8 @@ namespace WaveletTL
   void evaluate(const PBasis<d,dT>& basis,
 		const typename PBasis<d,dT>::Index& lambda,
 		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);
+
+
 }
 
 #include <interval/p_evaluate.cpp>

@@ -33,23 +33,23 @@ namespace WaveletTL
     Matrix<double> AT(n, n), BT(MLT.row_dimension()-n, n);
     MLT.get_block(0, 0, n, n, AT);
     MLT.get_block(n, 0, MLT.row_dimension()-n, n, BT);
-//     cout << "A=" << endl << A;
-//     cout << "B=" << endl << B;
-//     cout << "AT=" << endl << AT;
-//     cout << "BT=" << endl << BT;
+    //  cout << "A=" << endl << A;
+    //  cout << "B=" << endl << B;
+    //  cout << "AT=" << endl << AT;
+    //  cout << "BT=" << endl << BT;
 
     KroneckerMatrix<double,Matrix<double>,Matrix<double> > K(transpose(AT), transpose(A));
     Matrix<double> H(K);
     H.scale(0.5);
     Matrix<double> I; I.diagonal(n*n, 1.0);
     Matrix<double> S = I - H;
-//     cout << "S=" << endl << S;
+    //cout << "S=" << endl << S;
 
     Matrix<double> R(transpose(B)*BT);
     R.scale(0.5);
     Vector<double> b;
     R.col(b);
-//     cout << "b=" << b << endl;
+    //  cout << "b=" << b << endl;
 
     Vector<double> x;
     MathTL::QUDecomposition<double>(S).solve(b, x);

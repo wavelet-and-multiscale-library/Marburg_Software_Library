@@ -1,23 +1,33 @@
 #include <iostream>
 #include <interval/p_basis.h>
+#include <interval/ds_basis.h>
+#include <numerics/bvp.h>
+#include <cube/cube_basis.h>
+#include <galerkin/cube_equation.h>
+
+using WaveletTL::CubeEquation;
+using WaveletTL::CubeBasis;
+using MathTL::IdentityBVP;
+
 
 using namespace std;
 using namespace WaveletTL;
+using namespace MathTL;
 
 int main()
 {
   cout << "Testing wavelet bases from [P] ..." << endl;
 
-  const int d = 2;
-  const int dT = 2;
+  const int d  = 3;
+  const int dT = 7;
 
   typedef PBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
-//   Basis basis(0, 0); // no b.c.'s
+   Basis basis(1,2); // no b.c.'s
 //   Basis basis(1, 0); // complementary b.c. at x=0
 //   Basis basis(0, 1); // complementary b.c. at x=1
-  Basis basis(1, 1); // complementary b.c.'s
+//   Basis basis(1, 1); // complementary b.c.'s
 
 //   Basis basis(3, 3);
 
@@ -29,7 +39,75 @@ int main()
   cout << "- leftmost wavelet on the coarsest level: " << first_wavelet(&basis, basis.j0()) << endl;
   cout << "- rightmost wavelet on the coarsest level: " << last_wavelet(&basis, basis.j0()) << endl;
 
-#if 0
+
+  //  abort();  
+
+#if 1
+  
+  typedef CubeBasis<Basis,1> CBasis;
+  typedef CBasis::Index CIndex;
+
+  FixedArray1D<int,2> bc;
+  bc[0] = 1;
+  bc[1] = 2;
+  
+  CBasis cbasis(bc);
+
+  set<CIndex> Lambda;
+  for (CIndex lambda(first_generator<Basis,1,CBasis>(&cbasis, cbasis.j0()));; ++lambda) {
+    cout << lambda << endl;
+    Lambda.insert(lambda);
+    if (lambda == last_generator<Basis,1,CBasis>(&cbasis, cbasis.j0())) break;
+  }
+
+   Vector<double> value(1);
+   value[0] = 1;
+   ConstantFunction<1> const_fun(value);
+   IdentityBVP<1> trivial_bvp(&const_fun);
+   
+
+   CubeEquation<Basis,1,CBasis> eq(&trivial_bvp, bc);
+
+
+   cout << "setting up full right hand side..." << endl;
+   Vector<double> rh;
+   WaveletTL::setup_righthand_side(eq, Lambda, rh);
+   cout << "...done setting up full right hand side" << endl;
+
+   InfiniteVector<double, Index> coeff;
+   Index index(first_generator(&basis, basis.j0()));
+   for (int i = 0;; ++index, i++) {
+     //cout << index << endl;
+     coeff.set_coefficient(index, rh[i]);
+     if (index == last_generator(&basis, basis.j0())) break;
+   }
+   
+   //coeff.scale(&eq,-1);
+
+   //cout << index << endl;
+//    ++index;
+//    ++index;
+//    ++index;
+//    ++index;
+//    ++index;
+//    coeff.set_coefficient(index, 1.);
+   
+   cout << "evaluating expansion in dual basis..." << endl;
+   SampledMapping<1> res = evaluate(basis, coeff, false, 8);
+
+   cout << "...done evaluating expansion in dual basis" << endl;
+
+   
+   std::ofstream ofs5("reproduced_function.m");
+   res.matlab_output(ofs5);
+   ofs5.close();
+
+   //   abort();
+
+#endif
+
+
+#if 1
   cout << "- checking biorthogonality of Mj0, Mj0T for different levels:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+2; level++)
     {
@@ -53,7 +131,7 @@ int main()
     }
 #endif
 
-#if 0
+#if 1
   cout << "- checking biorthogonality of Mj<->Gj and MjT<->GjT for different levels:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+1; level++)
     {
@@ -107,7 +185,7 @@ int main()
     }
 #endif
 
-#if 0
+#if 1
   cout << "- checking access to single rows of the M_{j,i} matrices:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+2; level++)
     {
@@ -238,7 +316,7 @@ int main()
   cout << "- evaluating some primal generators:" << endl;
   for (Index lambda(first_generator(&basis, basis.j0()));; ++lambda) {
     cout << lambda << endl;
-    evaluate(basis, lambda, true, 6).matlab_output(cout);
+    evaluate(basis, lambda, true, 7).matlab_output(cout);
     if (lambda == last_generator(&basis, basis.j0())) break;
   }
   

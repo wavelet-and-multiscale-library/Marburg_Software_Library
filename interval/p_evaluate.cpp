@@ -23,47 +23,75 @@ namespace WaveletTL
 	return SampledMapping<1>(grid, values);
       } else {
  	// dual
- 	const Matrix<double>& CLAT = basis.get_CLAT();
- 	if (lambda.k() < basis.DeltaLTmin()+(int)CLAT.column_dimension()) {
- 	  // left boundary generator
- 	  InfiniteVector<double, RIndex> coeffs;
- 	  for (unsigned int i(0); i < CLAT.row_dimension(); i++) {
- 	    double v(CLAT(i, lambda.k()-basis.DeltaLTmin()));
- 	    if (v != 0)
- 	      coeffs.set_coefficient(RIndex(lambda.j(), 0, 1-ell2T<d,dT>()+i), v);
- 	  }
- 	  return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
- 	} else {
- 	  const Matrix<double>& CRAT = basis.get_CRAT();
- 	  if (lambda.k() > basis.DeltaRTmax(lambda.j())-(int)CRAT.column_dimension()) {
- 	    // right boundary generator
- 	    InfiniteVector<double, RIndex> coeffs;
- 	    for (unsigned int i(0); i < CRAT.row_dimension(); i++) {
- 	      double v(CRAT(i, basis.DeltaRTmax(lambda.j())-lambda.k()));
- 	      if (v != 0)
- 		coeffs.set_coefficient(RIndex(lambda.j(), 0, (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2T<d,dT>()+i)), v);
- 	    }
- 	    return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
- 	  } else {
- 	    // inner generator
- 	    return basis.get_CDF_basis().evaluate(0, RIndex(lambda.j(), 0, lambda.k()),
- 						  primal, 0, 1, resolution);
- 	  }
- 	}
+	int s0 = basis.get_s0();
+	int s1 = basis.get_s1();
+	const Matrix<double>& CLAT = basis.get_CLAT();
+	// left boundary generator
+	if (lambda.k() < basis.DeltaLTmin()+(int)CLAT.column_dimension()) {
+	  if (s0 >= d-2) {
+	    InfiniteVector<double, RIndex> coeffs;
+	    for (unsigned int i(0); i < CLAT.row_dimension(); i++) {
+	      double v(CLAT(i, lambda.k()-basis.DeltaLTmin()));
+	      if (v != 0)
+		coeffs.set_coefficient(RIndex(lambda.j(), 0, 1-ell2T<d,dT>()+i), v);
+	    }
+	    return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
+	  }
+	  else {
+	    InfiniteVector<double, RIndex> coeffs;
+	    for (unsigned int i(0); i < CLAT.row_dimension(); i++) {
+	      double v(CLAT(i, lambda.k()-basis.DeltaLTmin()));
+	      if (v != 0)
+		coeffs.set_coefficient(RIndex(lambda.j()+1, 0, 1-ell2T<d,dT>()+i), v);
+	    }
+	    return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
+	  }
+	}
+	// no left boundary generator
+	else {
+	  const Matrix<double>& CRAT = basis.get_CRAT();
+	  if (lambda.k() > basis.DeltaRTmax(lambda.j())-(int)CRAT.column_dimension()) {
+	    if (s1 >= d-2) {
+	      // right boundary generator
+	      InfiniteVector<double, RIndex> coeffs;
+	      for (unsigned int i(0); i < CRAT.row_dimension(); i++) {
+		double v(CRAT(i, basis.DeltaRTmax(lambda.j())-lambda.k()));
+		if (v != 0)
+		  coeffs.set_coefficient(RIndex(lambda.j(), 0, (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2T<d,dT>()+i)), v);
+	      }
+	      return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
+	    }
+	    else {
+	      InfiniteVector<double, RIndex> coeffs;
+	      for (unsigned int i(0); i < CRAT.row_dimension(); i++) {
+		double v(CRAT(i, basis.DeltaRTmax(lambda.j())-lambda.k()));
+		if (v != 0)
+		  coeffs.set_coefficient(RIndex(lambda.j()+1, 0, (1<<lambda.j()+1)-ell1<d>()-ell2<d>()-(1-ell2T<d,dT>()+i)), v);
+	      }
+	      return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
+	    }
+	  }
+	   // inner generator
+	  else {
+	    return basis.get_CDF_basis().evaluate(0, RIndex(lambda.j(), 0, lambda.k()),
+						  primal, 0, 1, resolution);
+	  }
+	}
       }
-    } else { // wavelet
+    }
+    else { // wavelet
       InfiniteVector<double, typename PBasis<d,dT>::Index> gcoeffs;
       if (primal)
- 	basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
+	basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
       else
- 	basis.reconstruct_t_1(lambda, lambda.j()+1, gcoeffs);
-
+	basis.reconstruct_t_1(lambda, lambda.j()+1, gcoeffs);
+      
       return evaluate(basis, gcoeffs, primal, resolution);
     }
     
     return SampledMapping<1>(); // dummy return for the compiler
   }
-
+  
   template <int d, int dT>
   SampledMapping<1>
   evaluate(const PBasis<d,dT>& basis,
@@ -72,7 +100,6 @@ namespace WaveletTL
 	   const int resolution)
   {
     SampledMapping<1> result(Grid<1>(0, 1, 1<<resolution)); // zero
-   
     if (coeffs.size() > 0) {
       // determine maximal level
       int jmax(0);

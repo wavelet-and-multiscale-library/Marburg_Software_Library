@@ -12,7 +12,7 @@ namespace WaveletTL
   template <int d, int dT>
   PBasis<d,dT>::PBasis(const int s0, const int s1) {
     assert(std::max(s0,s1) < d);
-    assert(std::min(s0,s1) >= d-2);
+    //assert(std::min(s0,s1) >= d-2);
     
     this->s0 = s0;
     this->s1 = s1;
@@ -63,6 +63,119 @@ namespace WaveletTL
     assert(j >= j0());
     return Index(j, 1, Nablamax(j), this);
   }
+  
+  
+  template <int d, int dT>
+  void PBasis<d,dT>::setup_additional_duals_L(Matrix<double>& MLTp) {
+    // setup gramian matrix from [P], Remark 4.2 using [P], Section 2.5
+    Matrix<double> GammaL_tmp;
+    compute_biorthogonal_boundary_gramian
+      <CDFMask_primal<d>,CDFMask_dual<d,dT> >(ML_, MLTp, GammaL_tmp);
+
+//     cout << "GammaL_tmp = " << endl << GammaL_tmp << endl;
+
+    for (unsigned int k = d-2-s0; k >= 1; k--) {
+      // ##############################################
+      // [P], Prop. 4.15, Remark 4.16, Section 2.5
+      // ##############################################
+      Matrix<double> B_k(d+k-1,d+k-1); //correct
+
+      unsigned int offset = d-2-s0;
+
+      // setup B_k
+      for (unsigned int n = 1; n <= B_k.row_dimension(); n++) {
+	double B_k_ns = 0;
+	for (unsigned int s = k+1+s0; s <= d+2*k-1+s0; s++) { //correct
+	  for (unsigned int l = 1; l <= 2*(n+s0); l++) {
+	    if ((offset+1 <= s) && (s <= MLTp.column_dimension())) {
+	      if (l-1 < ML_.column_dimension()) {
+		B_k_ns += ML_.get_entry(l-1,n-1)*GammaL_tmp.get_entry(l-1,s-1);
+	      }
+	    }
+	    else if ( ((k+1 <= s) && (s <= offset)) 
+		      || (s > MLTp.column_dimension())) {
+	      if ((l-1) < ML_.row_dimension()) {
+		B_k_ns += ML_.get_entry(l-1,n-1) * (1 ? (l==s) : 0);
+	      }
+	    }
+	  }
+	  B_k.set_entry(n-1, s-(k+1+s0), 0.5*B_k_ns);
+	  B_k_ns = 0;
+	}
+      }
+
+//       cout << "B_k = " << endl << B_k << endl;
+
+      Matrix<double> inv_B_k(d+k-1,d+k-1);
+      QUDecomposition<double>(B_k).inverse(inv_B_k);
+
+//       cout << "inv_B_k = " << endl << inv_B_k << endl;
+
+
+      // [P] first equation below (4.19)
+      for (unsigned int j = 1; j <= inv_B_k.column_dimension(); j++) {
+	// extract k-th column of inv_B_k
+	MLTp.set_entry(k-1+j+s0, k-1, inv_B_k.get_entry(j-1,k-1));
+      }
+    }
+  }
+  
+  template <int d, int dT>
+  void PBasis<d,dT>::setup_additional_duals_R(Matrix<double>& MRTp) {
+    // setup gramian matrix from [P], Remark 4.2 using [P], Section 2.5
+    Matrix<double> GammaR_tmp;
+    compute_biorthogonal_boundary_gramian
+      <CDFMask_primal<d>,CDFMask_dual<d,dT> >(MR_, MRTp, GammaR_tmp);
+
+
+//     cout << "GammaR_tmp = " << endl << GammaR_tmp << endl;
+
+    for (unsigned int k = d-2-s1; k >= 1; k--) {
+      // ##############################################
+      // [P], Prop. 4.15, Remark 4.16, Section 2.5
+      // ##############################################
+      Matrix<double> B_k(d+k-1,d+k-1); //correct
+
+      unsigned int offset = d-2-s1;
+
+      // setup B_k
+      for (unsigned int n = 1; n <= B_k.row_dimension(); n++) {
+	double B_k_ns = 0;
+	for (unsigned int s = k+1+s1; s <= d+2*k-1+s1; s++) { //correct
+	  for (unsigned int l = 1; l <= 2*(n+s1); l++) {
+	    if ((offset+1 <= s) && (s <= MRTp.column_dimension())) {
+	      if (l-1 < MR_.column_dimension()) {
+		B_k_ns += MR_.get_entry(l-1,n-1)*GammaR_tmp.get_entry(l-1,s-1);
+	      }
+	    }
+	    else if ( ((k+1 <= s) && (s <= offset)) 
+		      || (s > MRTp.column_dimension())) {
+	      if ((l-1) < MR_.row_dimension()) {
+		B_k_ns += MR_.get_entry(l-1,n-1) * (1 ? (l==s) : 0);
+	      }
+	    }
+	  }
+	  B_k.set_entry(n-1, s-(k+1+s1), 0.5*B_k_ns);
+	  B_k_ns = 0;
+	}
+      }
+
+//       cout << "B_k = " << endl << B_k << endl;
+
+      Matrix<double> inv_B_k(d+k-1,d+k-1);
+      QUDecomposition<double>(B_k).inverse(inv_B_k);
+
+//       cout << "inv_B_k = " << endl << inv_B_k << endl;
+
+
+      // [P] first equation below (4.19)
+      for (unsigned int j = 1; j <= inv_B_k.column_dimension(); j++) {
+	// extract k-th column of inv_B_k
+	MRTp.set_entry(k-1+j+s1, k-1, inv_B_k.get_entry(j-1,k-1));
+      }
+    }        
+  }
+
 
   template <int d, int dT>
   void
@@ -89,71 +202,277 @@ namespace WaveletTL
     // (ignoring the current values of s0 (and s1))
     MathTL::SchoenbergKnotSequence<d> sknots;
     Matrix<double> ML_0;
-    MathTL::compute_Bspline_refinement_matrix<d>(&sknots, ML_0);
-    
+    MathTL::compute_Bspline_refinement_matrix<d>(&sknots, ML_0);  
+ 
+    const int num_dual_bound_gen_L = (s0 >= (d-2)) ? dT : (dT+d-2-s0);
+    const int num_dual_bound_gen_R = (s1 >= (d-2)) ? dT : (dT+d-2-s1);
+
+    const int num_rows_boundref_L = (s0 >= (d-2)) ? (3*dT+s0-1) : (3*dT+2*d-5-s0);
+    const int num_rows_boundref_R = (s1 >= (d-2)) ? (3*dT+s1-1) : (3*dT+2*d-5-s1);
+
     // The total number of (left) boundary generators is always exactly dT
     // (to be able reproduce all polynomials by the dual generators).
-    ML_.resize(3*dT+s0-1, dT);
+    ML_.resize(num_rows_boundref_L, num_dual_bound_gen_L);
     for (int column = s0; column < d-1; column++)
       for (int row = s0; row < 2*(d-1); row++)
 	ML_.set_entry(row-s0, column-s0, ML_0.get_entry(row,column));
-    for (int k = d; k <= dT+s0; k++)
+    for (int k = d; k <= num_dual_bound_gen_L+s0; k++)
       for (int n = 2*k-d; n <= 2*k; n++)
  	ML_.set_entry(n-1-s0,k-1-s0,cdf.a().get_coefficient(MultiIndex<int,1>(-(d/2)+n+d-2*k)));
 //     cout << "ML=" << endl << ML_;
 
-    MR_.resize(3*dT+s1-1, dT);
+    MR_.resize(num_rows_boundref_R, num_dual_bound_gen_R);
     for (int column = s1; column < d-1; column++)
       for (int row = s1; row < 2*(d-1); row++)
 	MR_.set_entry(row-s1, column-s1, ML_0.get_entry(row,column));
-    for (int k = d; k <= dT+s1; k++)
+    for (int k = d; k <= num_dual_bound_gen_R+s1; k++)
       for (int n = 2*k-d; n <= 2*k; n++)
  	MR_.set_entry(n-1-s1,k-1-s1,cdf.a().get_coefficient(MultiIndex<int,1>(-(d/2)+n+d-2*k)));
 //     cout << "MR=" << endl << MR_;
 
-    // setup the expansion coefficients of the unbiorthogonalized dual generators
-    // w.r.t. the truncated CDF generators, see [DKU, Lemma 3.1]
-    Matrix<double> MLTp(3*dT+s0-1, dT);
-    for (unsigned int r = 0; r < dT; r++) {
-      MLTp.set_entry(r, r, ldexp(1.0, -r));
-      for (int m = ellT_l(); m <= 2*ellT_l()+ell1T<d,dT>()-1; m++)
-	MLTp.set_entry(dT+m-ellT_l(), r, alpha(m, r)*ldexp(1.0, -r));
-      for (int m = 2*ellT_l()+ell1T<d,dT>(); m <= 2*ellT_l()+ell2T<d,dT>()-2; m++)
-	MLTp.set_entry(dT+m-ellT_l(), r, betaL(m, r));
+    Matrix<double> DTilde;
+    Matrix<double> inv_DTilde;
+    if (s0 < d-2 || s1 < d-2) {
+      // We setup the dual boundary generators for the
+      // polynomial reproduction the way it is done in [P], Remark 4.2.
+      // We need to do this if 'additional' dual boundary functions have
+      // to be constructed.
+       
+      // setup of matrix \tilde{D}_3
+      Matrix<double> DTilde_3(dT, dT);
+
+      // setting up devided differences [0,...,l:t^n]_t, for l = 0,...,dT-1, n fixed
+      // this computation can be done in place
+      for (int n = 0; n <= dT-1; n++) {
+	Vector<double> divided_differences(dT);
+	for (int i = 0; i <= dT; i++) {
+	  double tmp1 = 0.;
+	  double tmp2 = 0.;
+	  for (int k = i; k <= dT-1; k++) {
+	    if (i == 0) {
+	      divided_differences[k] = intpower(k,n);
+	    }
+	    else {
+	      if (k == i) {
+		if (k%2 == 0) {
+		  tmp1 = divided_differences[k-1];
+		  tmp2 = divided_differences[k];
+		}
+		else {
+		  tmp1 = divided_differences[k];
+		  tmp2 = divided_differences[k-1];
+		}
+	      }
+	      if (k%2 == 0) {		
+		tmp2 = divided_differences[k];
+		divided_differences[k] = (divided_differences[k]-tmp1)
+		  / ((double) i);
+		
+	      }
+	      else {
+		tmp1 = divided_differences[k];
+		divided_differences[k] = (divided_differences[k]-tmp2)
+		  / ((double) i);
+	      }
+	    }
+	  }
+	}
+	for (int l = 0; l <= dT-1; l++) {
+	  DTilde_3.set_entry(n,l, faculty(l)*divided_differences[l]);
+	}
+      }
+//       cout << "DTilde_3 = " << endl << DTilde_3 << endl;
+      
+      // setup of matrix \tilde{D}_2
+      Matrix<double> DTilde_2(dT, dT);
+      for (int i = 0; i <= dT-1; i++) {
+	for (int n = 0; n <= dT-1; n++) {
+	  double tmp = minus1power(n) * binomial(i,n);
+	  if (i-n >= 0)
+	    tmp *= intpower(-ell1T<d,dT>()-1,i-n);
+	  else 
+	    tmp /= intpower(-ell1T<d,dT>()-1,n-i);
+	  DTilde_2.set_entry(i,n, tmp);
+	}
+      }
+//       cout << "DTilde_2 = " << endl << DTilde_2 << endl;
+       
+      // setup of matrix \tilde{D}_1
+      Matrix<double> DTilde_1(dT, dT);
+      for (int r = 0; r <= dT-1; r++) {
+	for (int i = 0; i <= dT-1; i++) {
+	  if (r >= i)
+	    DTilde_1.set_entry(r, i, binomial(r,i)*alpha(0,r-i));
+	}
+      }
+//       cout << "DTilde_1 = " << endl << DTilde_1 << endl;
+       
+      // for readability
+      DTilde.resize(dT, dT);
+      DTilde = DTilde_1 * DTilde_2 * DTilde_3;
+
+//       cout << "DTilde = " << endl << DTilde << endl;
+
+      // now we put together the refinement matrix MLTp
+      inv_DTilde.resize(dT, dT);
+      QUDecomposition<double>(DTilde).inverse(inv_DTilde);
+       
+//       cout << "inv_DTilde" << endl << inv_DTilde << endl;
+    }
+
+    // now setting up MLTp
+    Matrix<double> MLTp(num_rows_boundref_L, num_dual_bound_gen_L);
+    if (s0 >= d-2) {
+      // setup the expansion coefficients of the unbiorthogonalized dual generators
+      // w.r.t. the truncated CDF generators, see [DKU, Lemma 3.1]
+      for (int r = 0; r < num_dual_bound_gen_L; r++) {
+	MLTp.set_entry(r, r, ldexp(1.0, -r));
+	for (int m = ellT_l(); m <= 2*ellT_l()+ell1T<d,dT>()-1; m++)
+	  MLTp.set_entry(dT+m-ellT_l(), r, alpha(m, r)*ldexp(1.0, -r));
+	for (int m = 2*ellT_l()+ell1T<d,dT>(); m <= 2*ellT_l()+ell2T<d,dT>()-2; m++)
+	  MLTp.set_entry(dT+m-ellT_l(), r, betaL(m, r));
+      }
+    }
+    else {
+      int helpDim = 3*dT+d-3;
+      
+      // for simplicity
+      Matrix<double> helpMat(helpDim, dT);
+      // compute (\tilde{mu}_{n,k}^L)n,k * DTilde^-T * J_dT
+      for (int n = 0; n <= helpDim-1; n++) {
+	for (int k = 0; k <= dT-1; k++) {
+	  double tmp = 0.;
+	  for (int i = 0; i <= dT-1; i++) {
+	    if ((0 <= n) && (n <= dT-1) && (i == n))
+	      tmp += ldexp(1.0, -i) * inv_DTilde.get_entry(dT-1-k,i);// (i,k) -- ^T --> (k,i) 
+	    // -- *J_dT from the right --> (dT-1-k,i)
+	    else if ((dT <= n) && (n <= 3*dT+d-4)) {
+	      // ATTENTION: mistake in [P], Remark 4.2, should be floor(d/2) at \beta_{...} not ceil(d/2) 
+	      tmp += betaL(n-ell1<d>()-1, i) * inv_DTilde.get_entry(dT-1-k,i);
+	    }
+	  }
+	  helpMat.set_entry(n, k, tmp);
+	}
+      }
+
+//       cout << "helpMat" << endl << helpMat << endl;
+
+      unsigned int shift = d-1-s0;
+      for (unsigned int n = shift; n <= MLTp.row_dimension(); n++) {
+	for (unsigned int k = shift; k <= MLTp.column_dimension(); k++) {
+	  if (n <= shift + dT-1) {
+	    double tmp = 0.;
+	    for (int i = 0; i <= dT-1; i++) {
+	      tmp += DTilde.get_entry(i,dT-(n-shift)-1)
+		* helpMat.get_entry(i,k-shift);
+	    }
+	    MLTp.set_entry(n-1, k-1, tmp);
+ 	  }
+	  else {
+	    MLTp.set_entry(n-1, k-1, helpMat.get_entry(n-shift,k-shift));
+	  }
+	}
+      }
+
     }
 //     cout << "MLTp=" << endl << MLTp;
-        
-    Matrix<double> MRTp(3*dT+s1-1, dT);
-    for (unsigned int r = 0; r < dT; r++) {
-      MRTp.set_entry(r, r, ldexp(1.0, -r));
-      for (int m = ellT_r(); m <= 2*ellT_r()+ell1T<d,dT>()-1; m++)
-	MRTp.set_entry(dT+m-ellT_r(), r, alpha(m, r)*ldexp(1.0, -r));
-      for (int m = 2*ellT_r()+ell1T<d,dT>(); m <= 2*ellT_r()+ell2T<d,dT>()-2; m++)
-	MRTp.set_entry(dT+m-ellT_r(), r, betaR(m, r));
+
+    // now setting up MRTp
+    Matrix<double> MRTp(num_rows_boundref_R, num_dual_bound_gen_R);     
+    if (s1 >= d-2) {
+      for (int r = 0; r < num_dual_bound_gen_R; r++) {
+	MRTp.set_entry(r, r, ldexp(1.0, -r));
+	for (int m = ellT_r(); m <= 2*ellT_r()+ell1T<d,dT>()-1; m++)
+	  MRTp.set_entry(dT+m-ellT_r(), r, alpha(m, r)*ldexp(1.0, -r));
+	for (int m = 2*ellT_r()+ell1T<d,dT>(); m <= 2*ellT_r()+ell2T<d,dT>()-2; m++)
+	  MRTp.set_entry(dT+m-ellT_r(), r, betaR(m, r));
+      }
     }
+    else {
+      int helpDim = 3*dT+d-3;
+      
+      // for simplicity
+      Matrix<double> helpMat(helpDim, dT);
+      // compute (\tilde{mu}_{n,k}^L)n,k * DTilde^-T * J_dT
+      for (int n = 0; n <= helpDim-1; n++) {
+	for (int k = 0; k <= dT-1; k++) {
+	  double tmp = 0.;
+	  for (int i = 0; i <= dT-1; i++) {
+	    if ((0 <= n) && (n <= dT-1) && (i == n))
+	      tmp += ldexp(1.0, -i) * inv_DTilde.get_entry(dT-1-k,i);// (i,k) -- ^T --> (k,i) 
+	    // -- *J_dT from the right --> (dT-1-k,i)
+	    else if ((dT <= n) && (n <= 3*dT+d-4)) {
+	      // ATTENTION: mistake in [P], Remark 4.2, should be floor(d/2) at \beta_{...} not ceil(d/2) 
+	      tmp += betaR(n-ell1<d>()-1, i) * inv_DTilde.get_entry(dT-1-k,i);
+	    }
+	  }
+	  helpMat.set_entry(n, k, tmp);
+	}
+      }
+
+//       cout << "helpMat" << endl << helpMat << endl;
+
+      unsigned int shift = d-1-s1;
+      for (unsigned int n = shift; n <= MRTp.row_dimension(); n++) {
+	for (unsigned int k = shift; k <= MRTp.column_dimension(); k++) {
+	  if (n <= shift + dT-1) {
+	    double tmp = 0.;
+	    for (int i = 0; i <= dT-1; i++) {
+	      tmp += DTilde.get_entry(i,dT-(n-shift)-1)
+		* helpMat.get_entry(i,k-shift);
+	    }
+	    MRTp.set_entry(n-1, k-1, tmp);
+	  }
+	  else {
+	    MRTp.set_entry(n-1, k-1, helpMat.get_entry(n-shift,k-shift));
+	  }
+	}
+      }     
+    }
+
 //     cout << "MRTp=" << endl << MRTp;
+    
+    // determine the two-scale relations for the additional
+    // dual boundary generators, if necessary
+    if (s0 < (d-2)) {
+      setup_additional_duals_L(MLTp);
+    }
+//     cout << "MLTp=" << endl << MLTp;
+
+    if (s1 < (d-2))
+      setup_additional_duals_R(MRTp);
+//     cout << "MRTp=" << endl << MRTp;
+
+    MLT_BB = MLTp;
+    MRT_BB = MRTp;
 
     // for the biorthogonalization of the generators,
     // compute the gramian matrix of the primal and dual boundary generators
     compute_biorthogonal_boundary_gramian
       <CDFMask_primal<d>,CDFMask_dual<d,dT> >(ML_, MLTp, GammaL);
+    //GammaL.compress(1.0e-12);
 //     cout << "GammaL=" << endl << GammaL;
-
+ 
     compute_biorthogonal_boundary_gramian
       <CDFMask_primal<d>,CDFMask_dual<d,dT> >(MR_, MRTp, GammaR);
 //     cout << "GammaR=" << endl << GammaR;
-
+ 
     setup_CXT();
     setup_CXAT();
 
     setup_Mj0(ML_, MR_, Mj0); // [DKU, (3.5.1)]
+ 
     Mj0.compress(1e-8);
     
-    SparseMatrix<double> mj0tp; setup_Mj0Tp(MLTp, MRTp, mj0tp); // [DKU, (3.5.5)]
+    SparseMatrix<double> mj0tp;
+    setup_Mj0Tp(MLTp, MRTp, mj0tp); // [DKU, (3.5.5)]
     mj0tp.compress(1e-8);
+    
+    //cout << "mj0tp = " << endl << mj0tp << endl;
     
     // biorthogonalize the generators
     setup_Cj();
+    //cout << "CjT = " << endl << CjT << endl;
     Mj0T = transpose(inv_CjpT) * mj0tp * transpose(CjT); // [DKU, (2.4.3)]
     Mj0T.compress(1e-8);
 
@@ -170,13 +489,15 @@ namespace WaveletTL
 //     cout << "Mj0=" << endl << Mj0 << endl << "Mj0T=" << endl << Mj0T << endl;
 
     SparseMatrix<double> testbio0 = transpose(Mj0) * Mj0T;
-//     cout << "Mj0^T*Mj0T=" << endl << testbio0 << endl;
+    //cout << "Mj0^T*Mj0T=" << endl << testbio0 << endl;
     for (unsigned int i = 0; i < testbio0.row_dimension(); i++)
       testbio0.set_entry(i, i, testbio0.get_entry(i, i) - 1.0);
     cout << "* ||Mj0^T*Mj0T-I||_infty: " << row_sum_norm(testbio0) << endl;
+    testbio0.compress(1.0e-8);
+    //cout << testbio0 << endl;
 
     testbio0 = transpose(Mj0T) * Mj0;
-    //     cout << "Mj0T*Mj0^T=" << endl << testbio0 << endl;
+    //cout << "Mj0T*Mj0^T=" << endl << testbio0 << endl;
     for (unsigned int i = 0; i < testbio0.row_dimension(); i++)
       testbio0.set_entry(i, i, testbio0.get_entry(i, i) - 1.0);
     cout << "* ||Mj0T^T*Mj0-I||_infty: " << row_sum_norm(testbio0) << endl;
@@ -189,11 +510,10 @@ namespace WaveletTL
 
     SparseMatrix<double> A, H, Hinv;
     GSetup(A, H, Hinv); // [DKU, (4.1.1), (4.1.13)]
-
+    
 #if 0
     SparseMatrix<double> Aold(A); // for the checks below
 #endif
-
     GElim (A, H, Hinv); // elimination [DKU, (4.1.4)ff.]
 #if 1
     // choose this branch if you don't want the interior wavelets to be the CDF ones
@@ -204,7 +524,6 @@ namespace WaveletTL
     SparseMatrix<double> BB; double binv = BT(A, BB); // [DKU, (4.1.13)]
 //     cout << "b^{-1}=" << binv << endl;
 #endif
-    
 #if 0
     cout << "PBasis(): check properties (4.1.15):" << endl;
     SparseMatrix<double> test4115 = transpose(BB)*A;
@@ -235,7 +554,6 @@ namespace WaveletTL
       testHinv.set_entry(i, i, testHinv.get_entry(i, i) - 1.0);
     cout << "* in infty-norm: " << row_sum_norm(testHinv) << endl;
 #endif
-
     SparseMatrix<double> mj1ih = PP * Hinv * FF; // [DKU, (4.1.23)]
 //     cout << "mj1ih (without SQRT1_2):" << endl << mj1ih;
     mj1ih.scale(M_SQRT1_2); // [P, Prop. 5.6]
@@ -247,7 +565,6 @@ namespace WaveletTL
     SparseMatrix<double> help = H * PPinv;
     SparseMatrix<double> gj0ih = transpose(BB) * help; gj0ih.scale(M_SQRT2); // [P, Prop. 5.6]
     SparseMatrix<double> gj1ih = transpose(FF) * help; gj1ih.scale(M_SQRT2); // [DKU, (4.1.24)], [P, Prop. 5.6]
-
 #if 0
     cout << "PBasis(): check initial stable completion:" << endl;
     SparseMatrix<double> mj_initial(Mj0.row_dimension(),
@@ -603,6 +920,7 @@ namespace WaveletTL
     Mj1T_t = transpose(Mj1T);
   }
 
+
   template <int d, int dT>
   const double
   PBasis<d,dT>::alpha(const int m, const unsigned int r) const {
@@ -712,7 +1030,7 @@ namespace WaveletTL
       for (unsigned int k = 0; k < MR.column_dimension(); k++)
 	Mj0.set_entry(njp-i-1, nj-k-1, MR.get_entry(i, k));
     
-    int startrow = d+ell_l()+ell1<d>()-2*s0;
+    int startrow = (s0 >= d-2) ? d+ell_l()+ell1<d>()-2*s0 : d+ell_l()+ell1<d>()-2*s0-(d-2-s0);
     for (int col = d-s0; col < nj-(d-s1); col++, startrow+=2) {
       int row = startrow;
       for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf.a().begin());
@@ -722,7 +1040,7 @@ namespace WaveletTL
 
     Mj0.scale(M_SQRT1_2);
     
-//     cout << "Mj0=" << endl << Mj0 << endl;
+    //cout << "Mj0=" << endl << Mj0 << endl;
   }
 
   template <int d, int dT>
@@ -741,18 +1059,24 @@ namespace WaveletTL
     for (unsigned int i = 0; i < MRTp.row_dimension(); i++)
       for (unsigned int k = 0; k < MRTp.column_dimension(); k++)
 	Mj0Tp.set_entry(njp-i-1, nj-k-1, MRTp.get_entry(i, k));
-    
-    int startrow = dT+ellT_l()+ell1T<d,dT>();
-    for (int col = dT; col < nj-dT; col++, startrow+=2) {
+
+  
+    //int startrow = (s0 >= d-2) ? dT+ellT_l()+ell1T<d,dT>() : dT+ellT_l()+ell1T<d,dT>()+2*(d-2-s0)-2;
+    int startrow = (s0 >= d-2) ? dT+ellT_l()+ell1T<d,dT>() : dT+ellT_l()+ell1T<d,dT>()+d-2-s0;
+    //int startrow = dT+ellT_l()+ell1T<d,dT>()+4;
+    //cout << "startrow = " << startrow << endl;
+    //for (int col = dT; col < nj-dT; col++, startrow+=2) {
+
+    for (unsigned int col = MLTp.column_dimension(); col < nj-MRTp.column_dimension(); col++, startrow+=2) {
       int row = startrow;
       for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf.aT().begin());
 	   it != cdf.aT().end(); ++it, row++)
 	Mj0Tp.set_entry(row, col, *it);
     }
-    
+
     Mj0Tp.scale(M_SQRT1_2);
 
-//     cout << "Mj0Tp=" << endl << Mj0Tp << endl;
+    //cout << "Mj0Tp=" << endl << Mj0Tp << endl;
   }
 
   template <int d, int dT>
@@ -763,6 +1087,7 @@ namespace WaveletTL
 
     Matrix<double> CLGammaLInv;
     QUDecomposition<double>(GammaL).inverse(CLGammaLInv);
+//     cout << "CLGammaLInv = " << endl << CLGammaLInv << endl;
     CLT = transpose(CLGammaLInv);
     
     Matrix<double> CRGammaRInv;
@@ -777,27 +1102,231 @@ namespace WaveletTL
   void PBasis<d,dT>::setup_CXAT() {
     // IGPMlib reference: I_Mask_Bspline::EvalCL(), ::EvalCR()
 
-    // setup CLAT <-> Alpha * (CLT)^T
-    CLAT.resize(ellT_l()+ell2T<d,dT>()-1, dT);
-    for (int i = 1-ell2T<d,dT>(); i <= ellT_l()-1; i++)
-      for (unsigned int r = 0; r < dT; r++)
-  	CLAT(ell2T<d,dT>()-1+i, r) = alpha(i, r);
+    if (s0 >= d-2) {
+      // setup CLAT <-> Alpha * (CLT)^T
+      CLAT.resize(ellT_l()+ell2T<d,dT>()-1, dT);
+      for (int i = 1-ell2T<d,dT>(); i <= ellT_l()-1; i++)
+	for (unsigned int r = 0; r < dT; r++)
+	  CLAT(ell2T<d,dT>()-1+i, r) = alpha(i, r);
+      
+    }
+    else {
+      // detrmine row dimension of CLAT first
+      int index_last_CDF_used = (MLT_BB.row_dimension()-1) + DeltaLTmin();
+      int index_first_CDF_used = 1-ell2T<d,dT>();
+      int row_dim_CLAT = index_last_CDF_used-index_first_CDF_used+1;
+
+      CLAT.resize(row_dim_CLAT, dT+d-2-s0);
+      Array1D<Vector<double> > CLAT_help(dT+d-2-s0);
+
+      for (unsigned int c = 0; c < CLAT_help.size(); c++) {
+	CLAT_help[c].resize(row_dim_CLAT);
+      }
+
+      // setup the columns corresponding to the polynomial reproducing
+      // dual boundary generators
+
+      // see [P], equation (4.5)
+      unsigned int i = dT-1;
+      for(unsigned int c = d-2-s0; c < CLAT_help.size(); c++, i--) {
+	int n = i;
+	int num_rows = (int)(ellT_l()-1-i)-(1-ell2T<d,dT>())+1;
+	int s = num_rows-1;
+	for (int k = (int)(ellT_l()-1-i); k >= 1-ell2T<d,dT>(); k--, n++, s--) {
+	  CLAT_help[c][s] = binomial(n,i);
+	}
+	//cout << CLAT_help[c] << endl;
+      }
+
+      // The matrix CLAT will be set up column-wise. We start with the last column
+      // belonging to the right most polynomial reproducing dual left boundary generator.
+      // We have to determine the coefficients with respect to the restricted dual CDF 
+      // functions on the real line on the level one higher than the level of the boundary
+      // functions we are currently dealing with (before biorthogonalization).
+      // This is due to the fact that the 'additional' dual boundary generators are only
+      // given by their two scale relation.
+      
+      // loop over all dual left boundary generators
+      for(int c = CLAT.column_dimension()-1; c >= 0; c--) {
+	// get two scale coefficients
+	Vector<double> mask(MLT_BB.row_dimension());
+	for (unsigned int r = 0; r < MLT_BB.row_dimension(); r++) {
+	  mask[r] = MLT_BB(r,c);
+	}
+	
+	// The following scaling has to be done because of the fact
+	// that the columns of CLAT represent the expansions
+	// of the dual boundary generators with respect to CDF generators
+	// of level j+1 no level j.
+	// In [P], eq. (4.5) on the left and on the right we then have 
+	// functions of different levels.
+	mask.scale(1./M_SQRT2);
+	//cout << "mask = " << endl << mask << endl;
+
+	// polynomial reproducing dual boundary generator
+	if (d-2-s0 <= c) {
+  
+	  Vector<double> col_of_CLAT(CLAT.row_dimension());
+	  for (unsigned int r = 0; r < mask.size(); r++) {
+	    // row corresponding to boundary generator
+ 	    if ( ((int)r) < dT+d-2-s0 ) {
+	      if (mask[r] != 0) {
+		col_of_CLAT.add(mask[r], CLAT_help[r]);
+	      }
+	    }
+	    // row corresponding to inner generator
+ 	    else {
+	      if (mask[r] != 0) {
+		int tmp = r+DeltaLTmin();
+		tmp -= index_first_CDF_used;
+		col_of_CLAT[tmp] += mask[r];
+	      }
+	    }
+	  }
+	  for (unsigned int r = 0; r < CLAT.row_dimension(); r++) {
+	    CLAT(r,c) = col_of_CLAT[r];
+	  }
+	}
+	// 'additional' dual boundary generator
+	else {
+	  for (unsigned int r = 0; r < mask.size(); r++) {
+ 	    // row corresponding to boundary generator
+ 	    if ( ((int)r) < dT+d-2-s0 ) {
+	      if (mask[r] != 0) {
+		CLAT_help[c].add(mask[r], CLAT_help[r]);
+	      }
+	    }
+ 	    // row corresponding to inner generator
+ 	    else {
+	      if (mask[r] != 0) {
+		int tmp = r+DeltaLTmin();
+		tmp -= index_first_CDF_used;
+		CLAT_help[c][tmp] += mask[r];
+	      }
+ 	    }
+ 	  } 
+	  for (unsigned int r = 0; r < CLAT.row_dimension(); r++) {
+	    CLAT(r,c) = CLAT_help[c][r];
+	  }
+	}// end 'additional' dual boundary generator
+      }
+    }
 
 //     cout << "CLAT before biorthogonalization:" << endl << CLAT << endl;
     CLAT = CLAT * transpose(CLT);
-    CLAT.compress(1e-12);
+//     CLAT.compress(1e-12);
 //     cout << "CLAT after biorthogonalization:" << endl << CLAT << endl;
+ 
 
-    // the same for CRAT:
-    CRAT.resize(ellT_r()+ell2T<d,dT>()-1, dT);
-    for (int i = 1-ell2T<d,dT>(); i <= ellT_r()-1; i++)
-      for (unsigned int r = 0; r < dT; r++)
- 	CRAT(ell2T<d,dT>()-1+i, r) = alpha(i, r);
+    // now we treat the right end of the interval
+    if (s1 >= d-2) {
+      // the same for CRAT:
+      CRAT.resize(ellT_r()+ell2T<d,dT>()-1, dT);
+      for (int i = 1-ell2T<d,dT>(); i <= ellT_r()-1; i++)
+	for (unsigned int r = 0; r < dT; r++)
+	  CRAT(ell2T<d,dT>()-1+i, r) = alpha(i, r);    
+    }
+    // see code for left end above for more comments!
+    else {
+      // determine row dimension of CRAT first
+      int offset = ellT_r()-(dT+d-2-s1);
+      int index_last_CDF_used = (MRT_BB.row_dimension()-1) + offset;
+      int index_first_CDF_used = 1-ell2T<d,dT>();
+      int row_dim_CRAT = index_last_CDF_used-index_first_CDF_used+1;
 
+      CRAT.resize(row_dim_CRAT, dT+d-2-s1);
+      Array1D<Vector<double> > CRAT_help(dT+d-2-s1);
+
+      for (unsigned int c = 0; c < CRAT_help.size(); c++) {
+	CRAT_help[c].resize(row_dim_CRAT);
+      }
+
+      // setup the columns corresponding to the polynomial reproducing
+      // dual boundary generators
+
+      // see [P], equation (4.5)
+      unsigned int i = dT-1;
+      for(unsigned int c = d-2-s1; c < CRAT_help.size(); c++, i--) {
+	int n = i;
+	int num_rows = (int)(ellT_r()-1-i)-(1-ell2T<d,dT>())+1;
+	int s = num_rows-1;
+	for (int k = (int)(ellT_r()-1-i); k >= 1-ell2T<d,dT>(); k--, n++, s--) {
+	  CRAT_help[c][s] = binomial(n,i);
+	}
+	//cout << CRAT_help[c] << endl;
+      }
+
+      // loop over all dual left boundary generators
+      for(int c = CRAT.column_dimension()-1; c >= 0; c--) {
+	// get two scale coefficients
+	Vector<double> mask(MRT_BB.row_dimension());
+	for (unsigned int r = 0; r < MRT_BB.row_dimension(); r++) {
+	  mask[r] = MRT_BB(r,c);
+	}
+	
+	// The following scaling has to be done because of the fact
+	// that the columns of CLAT represent the expansions
+	// of the dual boundary generators with respect to CDF generators
+	// of level j+1 no level j.
+	// In [P], eq. (4.5) on the left and on the right we then have 
+	// functions of different levels.
+	mask.scale(1./M_SQRT2);
+	//cout << "mask = " << endl << mask << endl;
+
+	// polynomial reproducing dual boundary generator
+	if (d-2-s1 <= c) {
+  
+	  Vector<double> col_of_CRAT(CRAT.row_dimension());
+	  for (unsigned int r = 0; r < mask.size(); r++) {
+	    // row corresponding to boundary generator
+ 	    if ( ((int)r) < dT+d-2-s1 ) {
+	      if (mask[r] != 0) {
+		col_of_CRAT.add(mask[r], CRAT_help[r]);
+	      }
+	    }
+	    // row corresponding to inner generator
+ 	    else {
+	      if (mask[r] != 0) {
+		int tmp = r+offset;
+		tmp -= index_first_CDF_used;
+		col_of_CRAT[tmp] += mask[r];
+	      }
+	    }
+	  }
+	  for (unsigned int r = 0; r < CRAT.row_dimension(); r++) {
+	    CRAT(r,c) = col_of_CRAT[r];
+	  }
+	}
+	// 'additional' dual boundary generator
+	else {
+	  for (unsigned int r = 0; r < mask.size(); r++) {
+ 	    // row corresponding to boundary generator
+ 	    if ( ((int)r) < dT+d-2-s1 ) {
+	      if (mask[r] != 0) {
+		CRAT_help[c].add(mask[r], CRAT_help[r]);
+	      }
+	    }
+ 	    // row corresponding to inner generator
+ 	    else {
+	      if (mask[r] != 0) {
+		int tmp = r+offset;
+		tmp -= index_first_CDF_used;
+		CRAT_help[c][tmp] += mask[r];
+	      }
+ 	    }
+ 	  } 
+	  for (unsigned int r = 0; r < CRAT.row_dimension(); r++) {
+	    CRAT(r,c) = CRAT_help[c][r];
+	  }
+	}// end 'additional' dual boundary generator
+      }
+    }
+  
 //     cout << "CRAT before biorthogonalization:" << endl << CRAT << endl;
     CRAT = CRAT * transpose(CRT);
-    CRAT.compress(1e-12);
+//     CRAT.compress(1e-12);
 //     cout << "CRAT after biorthogonalization:" << endl << CRAT << endl;
+
   }
 
   template <int d, int dT>
@@ -829,6 +1358,7 @@ namespace WaveletTL
     inv_CjpT.set_block(Deltasize(j0()+1)-inv_CRT.row_dimension(),
  		       Deltasize(j0()+1)-inv_CRT.column_dimension(),
  		       inv_CRT, true);
+    //cout << "inv_CjpT= " << endl << inv_CjpT << endl;
 
 #if 0
     cout << "PBasis: testing setup of Cj:" << endl;
@@ -993,6 +1523,93 @@ namespace WaveletTL
 //     cout << "finally, H=" << endl << H;
 //     cout << "finally, Hinv=" << endl << Hinv;
   }
+
+
+
+//   template <int d, int dT>
+//   void
+//   PBasis<d, dT>::GElim(SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv) {
+//     // IGPMlib reference: I_Basis_Bspline_s::gelim()
+    
+//     cout << "s0 = " << s0 << endl;
+//     cout << "s1 = " << s1 << endl;
+
+//     const int firstcol = d-1-s0; // first column of A_j^{(d)} in Ahat_j^{(d)}
+//     const int lastcol  = Deltasize(j0())-d+s1; // last column
+//     const int firstrow = d-1-s0; // first row of A_j^{(d)} in Ahat_j^{(d)}
+//     const int lastrow  = Deltasize(j0()+1)-d+s1; // last row
+    
+//     SparseMatrix<double> help;
+
+// //     cout << "A=" << endl << A;
+    
+//     // elimination (4.1.4)ff.:
+//     for (int i = 1; i <= d; i++) {
+//       help.diagonal(Deltasize(j0()+1), 1.0);
+
+//       // row index of the entry in the first column of A_j^{(i)} (w.r.t. Ahat_j^{(i)})
+//       const int elimrow = i%2 ? firstrow+(i-1)/2 : lastrow-(int)floor((i-1)/2.);
+// //       cout << "i%2=" << i%2 << ", elimrow=" << elimrow << endl;
+
+//       // factorization [P, p. 112]      
+// //       const int HhatLow = i%2 ? d-s0-((i+1)/2)%2 : d-s0+1-(d%2)-(i/2)%2;
+//       const int HhatLow = i%2 ? d-s0-((i+1)/2)%2 : d-s0+1-(d%2)-(i/2)%2;
+//       const int HhatUp  = i%2
+// 	? Deltasize(j0()+1)-d+s1-abs((d%2)-((i+1)/2)%2)
+// 	: Deltasize(j0()+1)-d+s1-abs((d%2)-(i/2)%2);
+
+//       if (i%2) // i odd, elimination from above (4.1.4a)
+// 	{
+	  
+// 	  assert(fabs(A.get_entry(elimrow+1, firstcol)) >= 1e-10);
+// 	  const double Uentry = -A.get_entry(elimrow, firstcol) / A.get_entry(elimrow+1, firstcol);
+
+// 	  // insert Uentry in Hhat
+// 	  for (int k = HhatLow; k <= HhatUp; k += 2)
+// 	    help.set_entry(k, k+1, Uentry);
+
+// 	}
+//       else // i even, elimination from below (4.1.4b)
+// 	{
+// 	  assert(fabs(A.get_entry(elimrow-1, lastcol)) >= 1e-10);
+// 	  const double Lentry = -A.get_entry(elimrow, lastcol) / A.get_entry(elimrow-1, lastcol);
+	  
+// 	  cout << "333333333333333" << endl;
+// 	  // insert Lentry in Hhat	    
+// 	  cout << " size = " << help.row_dimension()
+// 	       << " " << help.column_dimension() << endl;
+// 	  cout << "i = " << i << endl;
+// 	  cout << "up = " << HhatUp << endl;
+// 	  for (int k = HhatLow; k <= HhatUp; k += 2) {
+// 	    cout << " k = " << k << endl;
+// 	    help.set_entry(k+1, k, Lentry);
+// 	  }
+// 	  cout << "44444444444444" << endl;
+// 	}
+//       cout << "ccccccccccccccccc" << endl;
+// //       cout << "Hfactor=" << endl << help;
+
+//       A = help * A;
+//       H = help * H;
+      
+//       A.compress(1e-14);
+
+//       //      cout << "A=" << endl << A;
+
+//       // invert help
+//       if (i%2) {
+// 	for (int k = HhatLow; k <= HhatUp; k += 2)
+// 	  help.set_entry(k, k+1, -help.get_entry(k, k+1));
+//       }	else {
+// 	for (int k = HhatLow; k <= HhatUp; k += 2)
+// 	  help.set_entry(k+1, k, -help.get_entry(k+1, k));
+//       }
+//       Hinv = Hinv * help;
+//     }
+
+//     //     cout << "finally, H=" << endl << H;
+// //     cout << "finally, Hinv=" << endl << Hinv;
+//   }
 
 
   template <int d, int dT>

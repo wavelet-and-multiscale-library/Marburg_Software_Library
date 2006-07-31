@@ -88,8 +88,8 @@ namespace WaveletTL
     inline const int j0() const { return j0_; }
 
     //! freezing parameters
-    inline const int ellT_l() const { return -ell1T<d,dT>()+s0+2-d; }
-    inline const int ellT_r() const { return -ell1T<d,dT>()+s1+2-d; }
+    inline const int ellT_l() const { return (s0 >= (d-2)) ? -ell1T<d,dT>()+s0+2-d : -ell1T<d,dT>(); }
+    inline const int ellT_r() const { return (s1 >= (d-2)) ? -ell1T<d,dT>()+s1+2-d : -ell1T<d,dT>(); }
     inline const int ell_l()  const { return ellT_l() + d - dT; }
     inline const int ell_r()  const { return ellT_r() + d - dT; }
     
@@ -145,8 +145,26 @@ namespace WaveletTL
     inline const int DeltaRmin(const int j) const { return (1<<j)-(d%2)-(ell_r()-1-s1); }
     inline const int DeltaRmax(const int j) const { return (1<<j)-1-ell1<d>()-s1; }
 
-    inline const int DeltaLTmin() const { return ellT_l()-dT; } // == DeltaLmin()
-    inline const int DeltaRTmax(const int j) const { return (1<<j)-(d%2)-(ellT_r()-dT); } // == DeltaRmax()
+    inline const int DeltaLTmin() const
+    { 
+      return (s0 >= (d-2)) ? ellT_l()-dT : ellT_l()-(dT+d-2-s0);
+    } // == DeltaLmin()
+
+    inline const int DeltaLTmax() const
+    { 
+      return (s0 >= (d-2)) ? DeltaLTmin()+(dT-1) : DeltaLTmin()+(dT+d-3-s0);
+    }
+
+    inline const int DeltaRTmin(const int j) const
+    {
+      return (s1 >= (d-2)) ? DeltaRTmax(j)-(dT-1) : DeltaRTmax(j)-(dT+d-3-s1);
+    }
+
+    inline const int DeltaRTmax(const int j) const
+    {
+      return (s1 >= (d-2)) ? (1<<j)-(d%2)-(ellT_r()-dT) : (1<<j)-(d%2) - (ellT_r()-(dT+d-2-s1));
+    } // == DeltaRmax()
+
 
     //! size of Delta_j
     inline const int Deltasize(const int j) const { return DeltaRmax(j)-DeltaLmin()+1; }
@@ -261,6 +279,12 @@ namespace WaveletTL
     const Matrix<double>& get_CRAT() const { return CRAT; }
 
     //! read access to the diverse refinement matrices on level j0
+    const Matrix<double>& get_MLT_BB()  const { return MLT_BB; }
+    const Matrix<double>& get_MRT_BB()  const { return MRT_BB; }
+
+    const Matrix<double>& get_CLAT_BB()  const { return CLAT_BB; }
+    const Matrix<double>& get_CRAT_BB()  const { return CRAT_BB; }
+
     const SparseMatrix<double>& get_Mj0()  const { return Mj0; }
     const SparseMatrix<double>& get_Mj0T() const { return Mj0T; }
     const SparseMatrix<double>& get_Mj1()  const { return Mj1; }
@@ -336,6 +360,9 @@ namespace WaveletTL
     //! boundary blocks in Mj0
     Matrix<double> ML_, MR_;
 
+    //! refinement matrices for dual boundary generators BEFORE BIORTHOGONALIZATION
+    Matrix<double> MLT_BB, MRT_BB;
+
     //! boundary blocks in Mj0T
     Matrix<double> MLT_, MRT_;
 
@@ -359,9 +386,17 @@ namespace WaveletTL
     //! setup expansion coefficients w.r.t. the (restricted) dual CDF basis
     void setup_CXAT();
 
+    //! setup refinement coefficients for additional dual generators,
+    //! see [P], Section 4.2
+    void setup_additional_duals_L(Matrix<double>& MLTp);
+    void setup_additional_duals_R(Matrix<double>& MRTp);
+
     //! storage for these coefficients
     Matrix<double> CLAT, CRAT;
+    //! representation of the (polynomial reproducing) dual boundary generators BEFORE BIORTHOGONALIZATION
+    Matrix<double> CLAT_BB, CRAT_BB;
 
+    
     //! generator biorthogonalization matrices on level j0 and j0+1 CjT, CjpT (5.2.5)
     void setup_Cj();
 

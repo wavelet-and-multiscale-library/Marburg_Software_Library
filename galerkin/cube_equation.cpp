@@ -11,6 +11,14 @@ namespace WaveletTL
   }
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  CubeEquation<IBASIS,DIM,CUBEBASIS>::CubeEquation(const EllipticBVP<DIM>* bvp,
+						   const FixedArray1D<int,2*DIM>& bc)
+    : bvp_(bvp), basis_(bc), normA(0.0), normAinv(0.0)
+  {
+    compute_rhs();
+  }
+
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
   CubeEquation<IBASIS,DIM,CUBEBASIS>::CubeEquation(const CubeEquation& eq)
     : bvp_(eq.bvp_), basis_(eq.basis_),
       fcoeffs(eq.fcoeffs), fnorm_sqr(eq.fnorm_sqr),

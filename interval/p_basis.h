@@ -75,6 +75,7 @@ namespace WaveletTL
       Higher order wavelet bases will always fulfill b.c.'s of order at least d-2.
       The dual wavelet basis will have no b.c.'s in either case and can reproduce the
       full range of polynomials of order dT.
+
     */
     PBasis(const int s0 = 0, const int s1 = 0);
 

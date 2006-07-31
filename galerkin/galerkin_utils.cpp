@@ -38,8 +38,8 @@ namespace WaveletTL
 	    if (entry != 0) {
 		indices.push_back(column);
 		entries.push_back(entry / (d1 * P.D(*it2)));
-	      }
-// 	    }
+	    }
+	    // 	    }
 	  }
 	A_Lambda.set_row(row, indices, entries);
       }

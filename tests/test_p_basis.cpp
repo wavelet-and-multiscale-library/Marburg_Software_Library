@@ -21,14 +21,13 @@ int main()
   const int d  = 3;
   const int dT = 7;
 
+
   typedef PBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
    Basis basis(1,2); // no b.c.'s
 //   Basis basis(1, 0); // complementary b.c. at x=0
 //   Basis basis(0, 1); // complementary b.c. at x=1
-//   Basis basis(1, 1); // complementary b.c.'s
-
 //   Basis basis(3, 3);
 
   cout << "- d=" << d << ", dT=" << dT << endl;

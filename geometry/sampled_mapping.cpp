@@ -118,6 +118,14 @@ namespace MathTL
   }
 
   void
+  SampledMapping<1>::mult(const double alpha)
+  {
+    for (unsigned int i = 0; i < values_.size(); i++)
+      values_[i] *= alpha;
+  }
+
+
+  void
   SampledMapping<1>::matlab_output(std::ostream& os) const
   {
     Grid<1>::matlab_output(os);
@@ -273,6 +281,15 @@ namespace MathTL
       for (unsigned int n(0); n < values_.column_dimension(); n++)
 	values_(m,n) += alpha * s.values_(m,n); // Matrix does not (yet) have an add() method
   }
+
+  void
+  SampledMapping<2>::mult(const double alpha)
+  {
+    for (unsigned int m(0); m < values_.row_dimension(); m++)
+      for (unsigned int n(0); n < values_.column_dimension(); n++)
+	values_(m,n) *= alpha; // Matrix does not (yet) have an add() method    
+  }
+
 
   void
   SampledMapping<2>::matlab_output(std::ostream& os) const

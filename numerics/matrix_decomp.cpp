@@ -148,7 +148,7 @@ namespace MathTL
     getU(U);
     Matrix<double> Q;
     getQ(Q);
-    
+
     typedef typename Matrix<C>::size_type size_type;
     for (size_type i(0); i < coldim_; i++)
       {

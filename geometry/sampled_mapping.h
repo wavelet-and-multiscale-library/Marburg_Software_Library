@@ -117,6 +117,12 @@ namespace MathTL
     void add(const double alpha, const SampledMapping<DIM>& s);
 
     /*!
+      pointwise in-place multiplication *this *= alpha
+    */
+    void mult(const double alpha);
+
+
+    /*!
       Matlab output of the sampled mapping onto a stream
     */
     void matlab_output(std::ostream& os) const;
@@ -210,6 +216,11 @@ namespace MathTL
       of two sampled mappings over the same grid
     */
     void add(const double alpha, const SampledMapping<1>& s);
+
+    /*!
+      pointwise in-place multiplication *this *= alpha
+    */
+    void mult(const double alpha);
 
     /*!
       reading access to the function values
@@ -314,6 +325,11 @@ namespace MathTL
       of two sampled mappings over the same grid
     */
     void add(const double alpha, const SampledMapping<2>& s);
+
+    /*!
+      pointwise in-place multiplication *this *= alpha
+    */
+    void mult(const double alpha);
 
     /*!
       reading access to the function values

@@ -116,6 +116,27 @@ namespace MathTL
     //! the value
     Vector<VALUE> c;
   };
+
+  /*!
+    pointwise product of two (preferably scalar--valued) functions
+  */
+  template <unsigned int DIM, class VALUE = double>
+  class ProductFunction
+    : public Function<DIM, VALUE>
+  {
+  public:
+    ProductFunction(const Function<DIM,VALUE>* f1,
+		    const Function<DIM,VALUE>* f2);
+    virtual ~ProductFunction();
+    VALUE value(const Point<DIM,VALUE>& p,
+		const unsigned int component = 0) const;
+    void vector_value(const Point<DIM,VALUE> &p,
+		      Vector<VALUE>& values) const;
+    
+  protected:
+    const Function<DIM,VALUE>* f1_;
+    const Function<DIM,VALUE>* f2_;
+  };
 }
 
 // implementations of inline functions

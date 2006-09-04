@@ -85,4 +85,38 @@ namespace MathTL
     values = c;
   }
 
+  template <unsigned int DIM, class VALUE>
+  inline
+  ProductFunction<DIM, VALUE>::ProductFunction(const Function<DIM,VALUE>* f1,
+					       const Function<DIM,VALUE>* f2)
+    : Function<DIM, VALUE>(f1->n_components), f1_(f1), f2_(f2)
+  {
+  }
+  
+  template <unsigned int DIM, class VALUE>
+  inline
+  ProductFunction<DIM, VALUE>::~ProductFunction()
+  {
+  } 
+  
+  template <unsigned int DIM, class VALUE>
+  inline
+  VALUE ProductFunction<DIM, VALUE>::value(const Point<DIM,VALUE>& p,
+					   const unsigned int component) const
+  {
+    return f1_->value(p) * f2_->value(p);
+  }
+
+  template <unsigned int DIM, class VALUE>
+  inline
+  void ProductFunction<DIM, VALUE>::vector_value(const Point<DIM,VALUE> &p,
+						 Vector<VALUE>& values) const
+  {
+    Vector<VALUE> v2;
+    f1_->vector_value(p, values);
+    f2_->vector_value(p, v2);
+    for (unsigned int i = 0; i < DIM; i++)
+      values[i] *= v2[i];
+  }
+  
 }

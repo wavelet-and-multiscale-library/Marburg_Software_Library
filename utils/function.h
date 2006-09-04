@@ -61,14 +61,14 @@ namespace MathTL
     /*!
       evaluate (a component of) the function
     */
-    virtual VALUE value (const Point<DIM>& p,
+    virtual VALUE value (const Point<DIM,VALUE>& p,
 			 const unsigned int component = 0) const = 0;
 
     /*!
       evaluate the function
       (values should be of appropriate size)
     */
-    virtual void vector_value(const Point<DIM> &p,
+    virtual void vector_value(const Point<DIM,VALUE> &p,
 			      Vector<VALUE>& values) const = 0;
 
     /*!
@@ -92,9 +92,9 @@ namespace MathTL
   public:
     ZeroFunction(const unsigned int n_components = 1);
     virtual ~ZeroFunction();
-    VALUE value(const Point<DIM>& p,
+    VALUE value(const Point<DIM,VALUE>& p,
 		const unsigned int component = 0) const;
-    void vector_value(const Point<DIM> &p,
+    void vector_value(const Point<DIM,VALUE> &p,
 		      Vector<VALUE>& values) const;
   };
 
@@ -108,9 +108,9 @@ namespace MathTL
   public:
     ConstantFunction(const Vector<VALUE>& value);
     virtual ~ConstantFunction();
-    VALUE value(const Point<DIM>& p,
+    VALUE value(const Point<DIM,VALUE>& p,
 		const unsigned int component = 0) const;
-    void vector_value(const Point<DIM> &p,
+    void vector_value(const Point<DIM,VALUE> &p,
 		      Vector<VALUE>& values) const;
   protected:
     //! the value

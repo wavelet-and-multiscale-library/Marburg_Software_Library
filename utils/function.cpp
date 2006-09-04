@@ -42,7 +42,7 @@ namespace MathTL
   
   template <unsigned int DIM, class VALUE>
   inline
-  VALUE ZeroFunction<DIM, VALUE>::value(const Point<DIM>& p,
+  VALUE ZeroFunction<DIM, VALUE>::value(const Point<DIM,VALUE>& p,
 					const unsigned int component) const
   {
     return 0.0;
@@ -50,7 +50,7 @@ namespace MathTL
 
   template <unsigned int DIM, class VALUE>
   inline
-  void ZeroFunction<DIM, VALUE>::vector_value(const Point<DIM> &p,
+  void ZeroFunction<DIM, VALUE>::vector_value(const Point<DIM,VALUE> &p,
 					      Vector<VALUE>& values) const
   {
     values = 0;
@@ -71,7 +71,7 @@ namespace MathTL
   
   template <unsigned int DIM, class VALUE>
   inline
-  VALUE ConstantFunction<DIM, VALUE>::value(const Point<DIM>& p,
+  VALUE ConstantFunction<DIM, VALUE>::value(const Point<DIM,VALUE>& p,
 					    const unsigned int component) const
   {
     return c[component];
@@ -79,7 +79,7 @@ namespace MathTL
 
   template <unsigned int DIM, class VALUE>
   inline
-  void ConstantFunction<DIM, VALUE>::vector_value(const Point<DIM> &p,
+  void ConstantFunction<DIM, VALUE>::vector_value(const Point<DIM,VALUE> &p,
 						  Vector<VALUE>& values) const
   {
     values = c;

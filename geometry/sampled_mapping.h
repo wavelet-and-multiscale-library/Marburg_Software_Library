@@ -31,7 +31,7 @@ namespace MathTL
     represented by finite many samples on a rectangular grid (Matlab style).
     Meaningful values for n are n=1 and n=2 so far (see specializations).
   */
-  template <unsigned int DIM>
+  template <unsigned int DIM, class C=double>
   class SampledMapping
     : public Grid<DIM>
   {
@@ -54,7 +54,7 @@ namespace MathTL
     /*!
       constructor from a given grid and given values
     */
-    SampledMapping(const Grid<DIM>& grid, const Array1D<double>& values);
+    SampledMapping(const Grid<DIM>& grid, const Array1D<C>& values);
 
     /*!
       constructor from a fixed grid and a Function object
@@ -67,7 +67,7 @@ namespace MathTL
     */
     SampledMapping(const MultiIndex<int, DIM>& a,
 		   const MultiIndex<int, DIM>& b,
-		   const InfiniteVector<double, MultiIndex<int, DIM> >& values,
+		   const InfiniteVector<C, MultiIndex<int, DIM> >& values,
 		   const int resolution);
 
     /*!
@@ -76,9 +76,9 @@ namespace MathTL
       the number of grid points in the i-th direction is taken from the length
       of the i-th component array of 'values'
     */
-    SampledMapping(const Point<DIM>& a,
-		   const Point<DIM>& b,
-		   const FixedArray1D<Array1D<double>,DIM>& values);
+    SampledMapping(const Point<DIM,C>& a,
+		   const Point<DIM,C>& b,
+		   const FixedArray1D<Array1D<C>,DIM>& values);
 
     /*!
        a dyadic subgrid of the hypercube is mapped by 
@@ -87,7 +87,7 @@ namespace MathTL
        function values.
     */
     SampledMapping(const Chart<DIM>& ch,
-		   const FixedArray1D<Array1D<double>,DIM>& values,
+		   const FixedArray1D<Array1D<C>,DIM>& values,
 		   const unsigned int resolution);
 
     /*!
@@ -102,24 +102,24 @@ namespace MathTL
     /*!
       assignment operator
     */
-    SampledMapping<DIM>& operator = (const SampledMapping<DIM>& sm);
+    SampledMapping<DIM,C>& operator = (const SampledMapping<DIM,C>& sm);
 
     /*!
       pointwise in-place summation *this += s
       of two sampled mappings over the same grid
     */
-    void add(const SampledMapping<DIM>& s);
+    void add(const SampledMapping<DIM,C>& s);
     
     /*!
       pointwise in-place summation *this += alpha * s
       of two sampled mappings over the same grid
     */
-    void add(const double alpha, const SampledMapping<DIM>& s);
+    void add(const C alpha, const SampledMapping<DIM,C>& s);
 
     /*!
       pointwise in-place multiplication *this *= alpha
     */
-    void mult(const double alpha);
+    void mult(const C alpha);
 
 
     /*!
@@ -132,8 +132,8 @@ namespace MathTL
   //
   // template specializations to one and two space dimensions
 
-  template <>
-  class SampledMapping<1>
+  template <class C>
+  class SampledMapping<1,C>
     : public Grid<1>
   {
   public:
@@ -145,7 +145,7 @@ namespace MathTL
     /*!
       copy constructor
     */
-    SampledMapping(const SampledMapping<1>& sm);
+    SampledMapping(const SampledMapping<1,C>& sm);
 
     /*!
       constructor from a given grid, yields zero function
@@ -155,19 +155,19 @@ namespace MathTL
     /*!
       constructor from a given grid and given values
     */
-    SampledMapping(const Grid<1>& grid, const Array1D<double>& values);
+    SampledMapping(const Grid<1>& grid, const Array1D<C>& values);
 
     /*!
       constructor from a fixed grid and a Function object
     */
-    SampledMapping(const Grid<1>& grid, const Function<1>& f);
+    SampledMapping(const Grid<1>& grid, const Function<1,C>& f);
 
     /*!
       constructor from given values on 2^{-resolution}\mathbb Z, clipped to [a,b]
     */
     SampledMapping(const MultiIndex<int,1>& a,
 		   const MultiIndex<int,1>& b,
-		   const InfiniteVector<double, MultiIndex<int, 1> >& values,
+		   const InfiniteVector<C, MultiIndex<int, 1> >& values,
 		   const int resolution);
 
     /*!
@@ -177,9 +177,9 @@ namespace MathTL
       of the i-th component array of 'values'
       (this constructor does not make much sense in 1 space dimension...)
     */
-    SampledMapping(const Point<1>& a,
-		   const Point<1>& b,
-		   const FixedArray1D<Array1D<double>,1>& values);
+    SampledMapping(const Point<1,C>& a,
+		   const Point<1,C>& b,
+		   const FixedArray1D<Array1D<C>,1>& values);
 
     /*!
        a dyadic subgrid of the hypercube is mapped by 
@@ -188,7 +188,7 @@ namespace MathTL
        function values.
     */
     SampledMapping(const Chart<1>& ch,
-		   const FixedArray1D<Array1D<double>,1>& values,
+		   const FixedArray1D<Array1D<C>,1>& values,
 		   const unsigned int resolution);
 
     /*!
@@ -203,29 +203,29 @@ namespace MathTL
     /*!
       assignment operator
     */
-    SampledMapping<1>& operator = (const SampledMapping<1>& sm);
+    SampledMapping<1,C>& operator = (const SampledMapping<1,C>& sm);
 
     /*!
       pointwise in-place summation *this += s
       of two sampled mappings over the same grid
     */
-    void add(const SampledMapping<1>& s);
+    void add(const SampledMapping<1,C>& s);
     
     /*!
       pointwise in-place summation *this += alpha * s
       of two sampled mappings over the same grid
     */
-    void add(const double alpha, const SampledMapping<1>& s);
+    void add(const C alpha, const SampledMapping<1,C>& s);
 
     /*!
       pointwise in-place multiplication *this *= alpha
     */
-    void mult(const double alpha);
+    void mult(const C alpha);
 
     /*!
       reading access to the function values
     */
-    inline const Array1D<double>& values() const { return values_; }
+    inline const Array1D<C>& values() const { return values_; }
 
     /*!
       Matlab output of the sampled mapping onto a stream
@@ -236,11 +236,11 @@ namespace MathTL
     /*!
       internal storage for the function values
     */
-    Array1D<double> values_;
+    Array1D<C> values_;
   };
 
-  template <>
-  class SampledMapping<2>
+  template <class C>
+  class SampledMapping<2,C>
     : public Grid<2>
   {
   public:
@@ -252,7 +252,7 @@ namespace MathTL
     /*!
       copy constructor
     */
-    SampledMapping(const SampledMapping<2>& sm);
+    SampledMapping(const SampledMapping<2,C>& sm);
 
     /*!
       constructor from a given grid, yields zero function
@@ -262,12 +262,12 @@ namespace MathTL
     /*!
       constructor from a given grid and given values
     */
-    SampledMapping(const Grid<2>& grid, const Matrix<double>& values);
+    SampledMapping(const Grid<2>& grid, const Matrix<C>& values);
 
     /*!
       constructor from a fixed grid and a Function object
     */
-    SampledMapping(const Grid<2>& grid, const Function<2>& f);
+    SampledMapping(const Grid<2>& grid, const Function<2,C>& f);
 
     /*!
       constructor from given values on 2^{-resolution}\mathbb Z^2,
@@ -276,7 +276,7 @@ namespace MathTL
     */
     SampledMapping(const MultiIndex<int, 2>& a,
 		   const MultiIndex<int, 2>& b,
-		   const InfiniteVector<double, MultiIndex<int, 2> >& values,
+		   const InfiniteVector<C, MultiIndex<int, 2> >& values,
 		   const int resolution);
 
     /*!
@@ -285,9 +285,9 @@ namespace MathTL
       the number of grid points in the i-th direction is taken from the length
       of the i-th component array of 'values'
     */
-    SampledMapping(const Point<2>& a,
-		   const Point<2>& b,
-		   const FixedArray1D<Array1D<double>,2>& values);
+    SampledMapping(const Point<2,C>& a,
+		   const Point<2,C>& b,
+		   const FixedArray1D<Array1D<C>,2>& values);
 
     /*!
        a dyadic subgrid of the hypercube is mapped by 
@@ -296,7 +296,7 @@ namespace MathTL
        function values.
     */
     SampledMapping(const Chart<2>& ch,
-		   const FixedArray1D<Array1D<double>,2>& values,
+		   const FixedArray1D<Array1D<C>,2>& values,
 		   const unsigned int resolution);
 
     /*!
@@ -312,29 +312,29 @@ namespace MathTL
     /*!
       assignment operator
     */
-    SampledMapping<2>& operator = (const SampledMapping<2>& sm);
+    SampledMapping<2,C>& operator = (const SampledMapping<2,C>& sm);
 
     /*!
       pointwise in-place summation *this += s
       of two sampled mappings over the same grid
     */
-    void add(const SampledMapping<2>& s);
+    void add(const SampledMapping<2,C>& s);
     
     /*!
       pointwise in-place summation *this += alpha * s
       of two sampled mappings over the same grid
     */
-    void add(const double alpha, const SampledMapping<2>& s);
+    void add(const C alpha, const SampledMapping<2,C>& s);
 
     /*!
       pointwise in-place multiplication *this *= alpha
     */
-    void mult(const double alpha);
+    void mult(const C alpha);
 
     /*!
       reading access to the function values
     */
-    inline const Matrix<double>& values() const { return values_; }
+    inline const Matrix<C>& values() const { return values_; }
 
     /*!
       Matlab output of the sampled mapping onto a stream
@@ -345,15 +345,15 @@ namespace MathTL
     /*!
       internal storage for the function values
     */
-    Matrix<double> values_;
+    Matrix<C> values_;
   };
 
   /*!
     
   */
-  template <unsigned int DIM>
+  template <unsigned int DIM, class C>
   void matlab_output(std::ostream& os,
-		     const Array1D<SampledMapping<DIM> >& values);
+		     const Array1D<SampledMapping<DIM,C> >& values);
 
 
 

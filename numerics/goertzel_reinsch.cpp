@@ -31,7 +31,7 @@ namespace MathTL
   {
     assert(coeffs_.size() >= 1);
     
-    C uk(0), ukplus1(0), wk(0), wkplus1, lambda(0);
+    C uk(0), ukplus1(0), wk(0), wkplus1(0), lambda(0);
 
     if (cos(p[0])>0) {
       lambda = -4*sin(p[0]/2.)*sin(p[0]/2.);

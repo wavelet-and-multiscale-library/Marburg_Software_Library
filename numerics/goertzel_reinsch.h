@@ -64,6 +64,11 @@ namespace MathTL
       values[0] = value(p);
     }
 
+    void set_coefficients(const Vector<C>& coeffs)
+    {
+      coeffs_ = coeffs;
+    }
+
   protected:
     Vector<C> coeffs_;
     bool sine_;

@@ -126,6 +126,53 @@ namespace MathTL
     double zeta_primeprime(const double r) const;
   };
 
+  /*!
+    A time--dependent corner singularity function w.r.t. to the reentrant corner at x0 in a
+    polygonal domain in R^2. In polar coordinates w.r.t. the corner,
+    the function looks like
+
+      s(r,theta) = t^{3/4}*r^{pi/omega}*sin((pi/omega)*theta)
+
+    This function was used in [GSS+] as a test function for the heat equation
+    on the L--shaped domain in R^2.
+
+    References:
+    [D] Dahlke, Besov regularity for elliptic boundary value problems on
+        polygonal domains, Appl. Math. Lett. 12(1999), 31-36
+  */
+  class CornerTimeSingularity
+    : public Function<2>
+  {
+  public:
+    /*!
+      constructor from a corner x0,
+      a starting angle theta0 (times pi, against positive x-axis)
+      and an inner angle omega (times pi);
+    */
+    CornerTimeSingularity(const Point<2>& x0,
+			  const double theta0,
+			  const double omega);
+
+    //! destructor
+    virtual ~CornerTimeSingularity() {}
+
+    //! point value at x
+    double value(const Point<2>& x, const unsigned int component = 0) const;
+
+    //! vector-valued value at x (for compatibility with Function)
+    void vector_value(const Point<2>& p, Vector<double>& values) const;
+    
+  protected:
+    //! corner
+    Point<2> x0;
+
+    //! starting angle
+    double theta0;
+
+    //! inner angle
+    double omega;
+  };
+
 }
 
 // implementations of inline functions

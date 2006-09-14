@@ -13,6 +13,8 @@ int main()
   cout << "Testing CornerSingularity ..." << endl;
 
   Point<2> origin;
+
+#if 0
   CornerSingularity s(origin, 0.5, 1.5);
 
   cout << "- Matlab output of the corner singularity on a 2D grid..." << endl;
@@ -32,7 +34,19 @@ int main()
   fs_rhs << "surf(x,y,z)" << endl;
   fs_rhs.close();
   cout << "  ...done, see file corner_rhs.m!" << endl;
+#endif
 
+  CornerTimeSingularity st(origin, 0.5, 1.5);
+  st.set_time(1.0);
+
+  cout << "- Matlab output of the corner singularity on a 2D grid..." << endl;
+  Grid<2> gridt(Point<2>(-1.0, -1.0), Point<2>(1.0, 1.0), 1<<6, 1<<6);
+  SampledMapping<2> ht(gridt, st);
+  std::ofstream fst("corner_time.m");
+  ht.matlab_output(fst);
+  fst << "surf(x,y,z)" << endl;
+  fst.close();
+  cout << "  ...done, see file corner_time.m!" << endl;
 
   return 0;
 }

@@ -203,4 +203,38 @@ namespace MathTL
 	-exp(-1/help1_2)*(-6*exp(-1/help0_2)/help0_4+4*exp(-1/help0_2)/help0_6-6*exp(-1/help1_2)/help1_4+4*exp(-1/help1_2)/help1_6)/(denom*denom);
     }
   }
+  
+  CornerTimeSingularity::CornerTimeSingularity(const Point<2>& x,
+					       const double w0,
+					       const double w)
+    : Function<2>(), x0(x), theta0(w0), omega(w)
+  {
+  }
+  
+  double
+  CornerTimeSingularity::value(const Point<2>& p,
+			       const unsigned int component) const
+  {
+    const Point<2> x(p-x0);
+    const double r = hypot(x[0],x[1]);
+    
+    double theta = atan2(x[1],x[0]);
+
+    // shift theta to [0,2*pi]
+    if (theta < 0) theta += 2.0 * M_PI;
+    theta -= theta0 * M_PI;
+    if (theta < 0) theta += 2.0 * M_PI;
+    if (theta >= omega * M_PI) return 0.0;
+
+    return get_time() * pow(r, 1.0/omega) * sin(theta/omega) * (1-x[0]*x[0]) * (1-x[1]*x[1]);
+  }
+
+  inline
+  void
+  CornerTimeSingularity::vector_value(const Point<2> &p,
+				      Vector<double>& values) const
+  {
+    values[0] = value(p);
+  }
+
 }

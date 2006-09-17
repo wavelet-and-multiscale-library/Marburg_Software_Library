@@ -41,6 +41,8 @@ namespace WaveletTL
 
     params.c1 = 1.0/P.norm_Ainv();
     params.c2 = P.norm_A();
+//     params.c1 = 1.0;
+//     params.c2 = 1.0;
     params.kappa = params.c2/params.c1;
     params.gamma = 0.8;
     params.F = P.F_norm();

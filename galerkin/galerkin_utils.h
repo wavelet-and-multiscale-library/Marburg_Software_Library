@@ -21,13 +21,14 @@ using MathTL::Vector;
 namespace WaveletTL
 {
   /*!
-    Setup the (sparse, preconditioned) stiffness matrix for a given problem and a given active
+    Setup the (sparse, preconditioned per default) stiffness matrix for a given problem and a given active
     index set Lambda.
   */
   template <class PROBLEM>
   void setup_stiffness_matrix(const PROBLEM& P,
 			      const std::set<typename PROBLEM::Index>& Lambda,
-			      SparseMatrix<double>& A_Lambda); 
+			      SparseMatrix<double>& A_Lambda,
+			      bool preconditioned = true); 
   
   /*!
     Setup the (preconditioned) right-hand side for a given problem and a given active

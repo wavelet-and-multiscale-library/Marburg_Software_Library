@@ -508,7 +508,7 @@ namespace MathTL
   }
 
   template <class C>
-  void SparseMatrix<C>::matlab_output (char *file, char *Matrixname, int binary) const
+  void SparseMatrix<C>::matlab_output (const char *file, char *Matrixname, int binary) const
   {
     if (binary)
       {

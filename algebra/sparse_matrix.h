@@ -210,7 +210,7 @@ namespace MathTL
     /*!
       write matlab sparse matrix format.
     */
-    void matlab_output (char *file, char *Matrixname, int binary) const;
+    void matlab_output (const char *file, char *Matrixname, int binary) const;
 
   protected:
     /*!

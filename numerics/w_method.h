@@ -249,7 +249,6 @@ namespace MathTL
 				       const Vector<double>& bhat,
 				       const bool wmethod=false);
 
-  protected:
     //! A=(a_{i,j})
     LowerTriangularMatrix<double> A;
 
@@ -268,6 +267,8 @@ namespace MathTL
     //! (gamma_i)
     Vector<double> gamma_vector;
 
+
+  protected:
     //! instance of the stage equation helper
     const WMethodStageEquationHelper<VECTOR>* stage_equation_helper;
 

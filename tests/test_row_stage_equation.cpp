@@ -218,7 +218,7 @@ void solve_IVP(const ELLIPTIC* elliptic,
       // try to advance one step
       u_m.scale(elliptic, 1); // u_m <- Du_m
       increment(elliptic, row_stage_equation,
-		1e-2, t_m, tau_m, u_m, u_mplus1, error_estimate, jmax);
+		1e-3, t_m, tau_m, u_m, u_mplus1, error_estimate, jmax);
       u_m.scale(elliptic, -1); // u_m restored
       u_mplus1.scale(elliptic, -1); // u_mplus1
       
@@ -288,10 +288,10 @@ int main()
   // setup 1D wavelet basis
   const int d  = 3;
   const int dT = 3;
-//   typedef DSBasis<d,dT> Basis;
-  typedef PBasis<d,dT> Basis;
+//   typedef DSBasis<d,dT> Basis; string basis_str = "DS";
+  typedef PBasis<d,dT> Basis; string basis_str = "P";
 
-  const int jmax = 6;
+  const int jmax = 8;
 
   typedef Basis::Index Index;
   typedef InfiniteVector<double,Index> V;
@@ -345,7 +345,7 @@ int main()
   //
   //
   // select a ROW method
-  ROWMethod<Vector<double> > row_method(WMethod<Vector<double> >::ROS2);
+  ROWMethod<Vector<double> > row_method(WMethod<Vector<double> >::ROS2); string scheme_str="ROS2";
 
   //
   //
@@ -450,9 +450,13 @@ int main()
     wallclocktimes.push_back((double)(tend-tstart)/ (double)CLOCKS_PER_SEC);
 #endif
 
-    std::ofstream resultstream("work_precision.m");
+    ostringstream filename;
+    filename << basis_str << "_" << scheme_str
+	     << "_case" << _TESTCASE
+	     << "_d" << d <<  "_dt" << dT << ".m";
+    std::ofstream resultstream(filename.str().c_str());
     
-    resultstream << "errors=[";
+    resultstream << "N_errors=[";
     for (std::list<double>::const_iterator it = errors.begin();
 	 it != errors.end(); ++it) {
       resultstream << log10(*it);
@@ -469,12 +473,8 @@ int main()
 	resultstream << " ";
     }
     resultstream << "];" << endl;
-    
-    resultstream.close();
-    
-    resultstream.open("time_precision.m");
-    
-    resultstream << "errors=[";
+        
+    resultstream << "time_errors=[";
     for (std::list<double>::const_iterator it = errors.begin();
 	 it != errors.end(); ++it) {
       resultstream << log10(*it);

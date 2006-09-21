@@ -97,7 +97,8 @@ void increment(const ELLIPTIC* elliptic,
 	       const InfiniteVector<double,typename ELLIPTIC::Index>& D_un,
 	       InfiniteVector<double,typename ELLIPTIC::Index>& D_unplus1,
 	       InfiniteVector<double,typename ELLIPTIC::Index>& error_estimate,
-	       const int jmax)
+	       const int jmax,
+	       bool verbose=false)
 {
   typedef typename ELLIPTIC::Index Index;
   typedef InfiniteVector<double,Index> V; // without "typename"...
@@ -109,25 +110,25 @@ void increment(const ELLIPTIC* elliptic,
   // solve the stage equations sequentially
 
   const double alpha = 1./(h*row_stage_equation->row_method_->C(0,0)); // we assume that the gamma_{i,i} are all the same
-  cout << "increment: alpha=" << alpha << endl;
+  if (verbose) cout << "increment: alpha=" << alpha << endl;
   row_stage_equation->set_alpha(alpha);
 
   for (unsigned int i(0); i < stages; i++) {  
     // setup right-hand side of i-th stage equation
-    cout << "increment: setup rhs of stage #" << i << ":" << endl;
+    if (verbose) cout << "increment: setup rhs of stage #" << i << ":" << endl;
     row_stage_equation->setup_rhs(i, tolerance, t_n, h, D_un, Dalpha_uis, jmax);
-    cout << "  ... done" << endl;
+    if (verbose) cout << "  ... done" << endl;
 
     // solve i-th stage equation
     V result;
-    cout << "increment: call CDD1_SOLVE()..." << endl;
+    if (verbose) cout << "increment: call CDD1_SOLVE()..." << endl;
     CDD1_SOLVE(*row_stage_equation, tolerance,
 	       D_un, // guess
 	       result,
 	       1.0,
 	       1.0,
 	       jmax); // B_alpha*D_alpha x = D_alpha^{-1}y
-    cout << "increment: CDD1_SOLVE() done" << endl;
+    if (verbose) cout << "increment: CDD1_SOLVE() done" << endl;
 
     Dalpha_uis.push_back(result);
   }
@@ -145,6 +146,136 @@ void increment(const ELLIPTIC* elliptic,
   D_unplus1.add(D_un);
   error_estimate.scale(row_stage_equation, -1); // dito
   error_estimate.scale(elliptic, 1);            //
+}
+
+/*!
+  given an elliptic operator, u_0 and a stage equation object,
+  solve u'(t)=Au(t)+f(t) adaptively
+*/
+template <class ELLIPTIC>
+void solve_IVP(const ELLIPTIC* elliptic,
+	       const InfiniteVector<double,typename ELLIPTIC::Index>& u0,
+	       ROWStageEquation<ELLIPTIC>* row_stage_equation,
+ 	       const double T,
+ 	       const double atol,
+	       const double rtol,
+ 	       const double q,
+ 	       const double tau_max,
+ 	       IVPSolution<InfiniteVector<double,typename ELLIPTIC::Index> >& result,
+	       const int jmax)
+{
+  typedef typename ELLIPTIC::Index Index;
+  typedef InfiniteVector<double,Index> V; // without "typename"...
+
+  // IVP solver a la Hairer/Wanner
+  result.t.clear();
+  result.u.clear();
+  
+  double t_m = 0;
+  V u_m(u0);
+  
+  unsigned int m = 0;
+  result.t.push_back(t_m);
+  result.u.push_back(u_m);
+  
+  cout << "t_{" << m << "}=" << t_m << " accepted!" << endl;
+  
+  m++;
+    
+  const double rho = 0.8; // overall safety factor
+
+  // guess the initial time stepsize (cf. Hairer/Wanner, p. 169)
+//   double u0_norm = linfty_norm(u0);
+//   VECTOR yp0(u0);
+//     ivp->evaluate_f(0, ivp->u0, atol, yp0); // initial slope
+//     double ft0u0_norm = linfty_norm(yp0);
+//     double tau0 = (u0_norm < 1e-5 || ft0u0_norm < 1e-5)
+//       ? 1e-6 : 1e-2*u0_norm/ft0u0_norm;
+
+  double tau0 = 1e-6;
+
+//     // TODO: approximate ypp
+    
+  double tau_m = std::min(tau_max, 100*tau0);
+    
+  V u_mplus1, error_estimate;
+  bool done = false;
+
+  // parameters for step size selection;
+  const double fac1 = 5.0;
+  const double fac2 = 1./q;
+  double fac = 0, facgus = 0, hacc = 0, erracc = 0; // will be set in the loop
+
+  while (!done)
+    {
+      // jump to T if within 10% of T-t_m
+      if (1.1*tau_m >= fabs(T-t_m) || t_m+tau_m >= T)
+	{
+	  tau_m = T-t_m;
+	  done = true; // we would be "done" if the step is accepted
+	}
+
+      // try to advance one step
+      u_m.scale(elliptic, 1); // u_m <- Du_m
+      increment(elliptic, row_stage_equation,
+		1e-2, t_m, tau_m, u_m, u_mplus1, error_estimate, jmax);
+      u_m.scale(elliptic, -1); // u_m restored
+      u_mplus1.scale(elliptic, -1); // u_mplus1
+      
+      // compute an error estimator
+// 	const double u_m_norm = linfty_norm(u_m);
+// 	const double u_mplus1_norm = linfty_norm(u_mplus1);
+// 	const double maxnorm = std::max(u_m_norm, u_mplus1_norm);
+//  	double errest = 0;
+//  	for (typename VECTOR::const_iterator it(error_estimate.begin());
+// 	     it != error_estimate.end(); ++it)
+// 	  errest += ((*it * *it)/((atol+maxnorm*rtol)*(atol+maxnorm*rtol)));
+	
+// 	errest = sqrt(errest / error_estimate.size());
+//  	errest = linfty_norm(error_estimate) / (atol+maxnorm*rtol); // not good
+
+      double errest = error_estimate.wrmsqr_norm(atol, rtol, u_m, u_mplus1);
+
+      // estimate new stepsize
+      fac = std::max(fac2, std::min(fac1, pow(errest, 1./row_stage_equation->row_method_->order()) / rho));
+      double tau_new = tau_m / fac;
+	
+      if (errest <= 1)
+	{
+	  // accept the time step
+
+	  cout << "t_{" << m << "}=" << t_m+tau_m << " accepted!" << endl;
+
+	  t_m += tau_m;
+	  result.t.push_back(t_m);
+	  u_m = u_mplus1;
+	  result.u.push_back(u_m);
+
+	  // predictive controller of Gustafsson
+	  if (m >= 2) {
+	    facgus = (hacc/tau_m) * pow(errest*errest/erracc, 1./row_stage_equation->row_method_->order()) / rho;
+	    facgus = std::max(fac2, std::min(fac1, facgus));
+	    fac = std::max(fac, facgus);
+	  }
+	  hacc = tau_m;
+	  erracc = std::max(1e-2, errest);
+
+	  tau_m = tau_new;
+	    
+	  m++;
+	}
+      else
+	{
+	  // reject the time step
+
+	  cout << "t_{" << m << "}=" << t_m+tau_m << " rejected!"
+	       << " (errest=" << errest << ")" << endl;
+	    
+	  tau_m = tau_new;
+	    
+	  done = false;
+	}
+    }
 }
 
 int main()
@@ -222,8 +353,10 @@ int main()
   ROWStageEquation<CachedProblem<EllipticEquation> > row_stage_equation(&row_method, &celliptic, f, ft);
 
 
-#if 1
+#if 0
   // nonadaptive solution with constant temporal stepsize h
+
+  cout << "* testing approximation with constant stepsizes..." << endl;
 
   V temp, error_estimate, result;
   IVPSolution<V> results;
@@ -254,16 +387,15 @@ int main()
       cout << "---------------- before increment " << i << " -----------------------" << endl;
 
       increment(&celliptic, &row_stage_equation, 1e-5, (i-1)*h, h, temp, result, error_estimate, jmax);
-      results.t.push_back(i*h);
-      results.u.push_back(result);
       temp = result;
+      results.t.push_back(i*h);
+      result.scale(&celliptic, -1); // switch to L_2 coeffs
+      results.u.push_back(result);
 
       ostringstream output_filename;
       output_filename << "u" << i << ".m";
       resultstream.open(output_filename.str().c_str());
-      result.scale(&celliptic, -1);
       SampledMapping<1> ui_plot(evaluate(celliptic.basis(), result, true, resolution));
-      result.scale(&celliptic, 1);
       ui_plot.matlab_output(resultstream);
       resultstream.close();
 
@@ -272,18 +404,98 @@ int main()
       V uexact_coeffs;
       uexact.set_time(i*h);
       expand(&uexact, celliptic.basis(), false, jmax, uexact_coeffs);
-      result.scale(&celliptic, -1);
       cout << "  ell_2 error at t=" << i*h << ": " << l2_norm(result - uexact_coeffs) << endl;
-      result.scale(&celliptic, 1);
     }
   }
   
+#else
+  cout << "* adaptive solution..." << endl;
+
+  const double T = 1.0;
+  const double q = 10.0;
+  const double tau_max = 1.0;
+  
+  std::list<double> numberofsteps;
+  std::list<double> errors;
+  std::list<double> wallclocktimes;
+
+  cout << "* testing linear-implicit scheme (adaptive, several tolerances)..." << endl;
+  for (int expo = 6; expo <= 18; expo++) { // 2^{-6}=0.015625, 2^{-8}=3.9e-3, 2^{-10}=9.77e-4
+    const double TOL = ldexp(1.0, -expo);
+//     const double TOL = pow(10.0, -(double)expo);
+    
+    IVPSolution<V> result_adaptive;
+    
+    cout << "  TOL=" << TOL << endl;
+
+    clock_t tstart =  clock();
+    solve_IVP(&celliptic, u0, &row_stage_equation, T,
+	      TOL, 0, q, tau_max, result_adaptive, jmax);
+    clock_t tend = clock();
+
+#if _TESTCASE == 1
+    // compute maximal ell_2 error of the coefficients
+    double errhelp = 0;
+    std::list<double>::const_iterator ti(result_adaptive.t.begin());
+    for (std::list<V>::const_iterator ui(result_adaptive.u.begin());
+	 ui != result_adaptive.u.end(); ++ui, ++ti) {
+      V uexact_coeffs;
+      uexact.set_time(*ti);
+      expand(&uexact, celliptic.basis(), false, jmax, uexact_coeffs);
+      cout << "  ell_2 error at t=" << *ti << ": " << l2_norm(*ui - uexact_coeffs) << endl;
+      errhelp = std::max(errhelp, l2_norm(*ui - uexact_coeffs));
+    }
+    errors.push_back(errhelp);
+    numberofsteps.push_back(result_adaptive.t.size());
+    wallclocktimes.push_back((double)(tend-tstart)/ (double)CLOCKS_PER_SEC);
 #endif
 
-
-
-
-
+    std::ofstream resultstream("work_precision.m");
+    
+    resultstream << "errors=[";
+    for (std::list<double>::const_iterator it = errors.begin();
+	 it != errors.end(); ++it) {
+      resultstream << log10(*it);
+      if (it != errors.end())
+	resultstream << " ";
+    }
+    resultstream << "];" << endl;
+    
+    resultstream << "N=[";
+    for (std::list<double>::const_iterator it = numberofsteps.begin();
+	 it != numberofsteps.end(); ++it) {
+      resultstream << log10(*it);
+      if (it != numberofsteps.end())
+	resultstream << " ";
+    }
+    resultstream << "];" << endl;
+    
+    resultstream.close();
+    
+    resultstream.open("time_precision.m");
+    
+    resultstream << "errors=[";
+    for (std::list<double>::const_iterator it = errors.begin();
+	 it != errors.end(); ++it) {
+      resultstream << log10(*it);
+      if (it != errors.end())
+	resultstream << " ";
+    }
+    resultstream << "];" << endl;
+    
+    resultstream << "times=[";
+    for (std::list<double>::const_iterator it = wallclocktimes.begin();
+	 it != wallclocktimes.end(); ++it) {
+      resultstream << log10(*it);
+      if (it != wallclocktimes.end())
+	resultstream << " ";
+    }
+    resultstream << "];" << endl;
+    
+  }
+  
+#endif
+  
   // release allocated memory
   if (f) delete f;
   if (ft) delete ft;

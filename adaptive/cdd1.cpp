@@ -35,14 +35,27 @@ namespace WaveletTL
 		  const int jmax,
 		  const CompressionStrategy strategy)
   {
+    // start with pessimistic parameters c1, c2
+    CDD1_SOLVE(P, epsilon, guess, u_epsilon,
+	       1.0/P.norm_Ainv(), P.norm_A(),
+	       jmax, strategy);
+  }
+  
+  template <class PROBLEM>
+  void CDD1_SOLVE(const PROBLEM& P, const double epsilon,
+		  const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& guess,
+		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
+		  const double c1,
+		  const double c2,
+		  const int jmax,
+		  const CompressionStrategy strategy)
+  {
     // INIT, cf. [BB+] 
 
     CDD1Parameters params;
 
-    params.c1 = 1.0/P.norm_Ainv();
-    params.c2 = P.norm_A();
-//     params.c1 = 1.0;
-//     params.c2 = 1.0;
+    params.c1 = c1;
+    params.c2 = c2;
     params.kappa = params.c2/params.c1;
     params.gamma = 0.8;
     params.F = P.F_norm();

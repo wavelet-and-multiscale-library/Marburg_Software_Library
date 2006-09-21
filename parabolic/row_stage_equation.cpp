@@ -1,133 +1,103 @@
 // implementation for row_stage_equation.h
 
-// #include <adaptive/apply.h>
-// #include <adaptive/cdd1.h>
+#include <adaptive/apply.h>
 
 namespace WaveletTL
 {
+  template <class ELLIPTIC_EQ>
+  void
+  ROWStageEquation<ELLIPTIC_EQ>::setup_rhs
+  (unsigned int i,
+   const double tolerance,
+   const double t_n,
+   const double h,
+   const InfiniteVector<double,Index>& D_un,
+   const std::list<InfiniteVector<double,Index> >& Dalpha_uj,
+   const int jmax)
+  {
+    typedef InfiniteVector<double,Index> V;
+    V help, w;
 
-//   template <class ELLIPTIC_EQ>
-//   LinParEqROWStageEquationHelper<ELLIPTIC_EQ>
-//   ::LinParEqROWStageEquationHelper
-//   (const double a,
-//    const ELLIPTIC_EQ* elliptic,
-//    const CachedProblem<IntervalGramian<typename ELLIPTIC_EQ::WaveletBasis> >& GC,
-//    const InfiniteVector<double, typename ELLIPTIC_EQ::Index>& z)
-//     : alpha(a), T(elliptic), G(GC), y(z)
-//   {
-//   }
-  
-//   template <class ELLIPTIC_EQ>
-//   void
-//   LinParEqROWStageEquationHelper<ELLIPTIC_EQ>
-//   ::add_level (const Index& lambda,
-// 	       InfiniteVector<double, Index>& w, const int j,
-// 	       const double factor,
-// 	       const int J,
-// 	       const CompressionStrategy strategy) const
-//   {
-//     // Gramian part, we have to take care of the preconditioning factors
-//     InfiniteVector<double,Index> g;
-//     G.add_level(lambda, g, j, factor * alpha/T->D(lambda), J, strategy);
-//     g.scale(this, -1);
-//     w.add(g);
+    // start with zero rhs
+    y.clear();
+
+    // first summand DD^{-1}<A Psi,Psi>^T D^{-1}w, where
+    // w = Du^{(n)} + DD_alpha^{-1}sum_{j=1}^{i-1} a_{i,j}D_alpha u_j
+    if (i > 0) {
+      typename std::list<V>::const_iterator it = Dalpha_uj.begin();
+      for (unsigned int j = 0; j < i; j++, ++it) {
+	w.add(row_method_->A(i,j), *it);
+      }
+      w.scale(this, -1);    // w *= D_alpha^{-1}
+      w.scale(elliptic_, 1); // w *= D
+    }
+    w.add(D_un);
+    APPLY(*elliptic_, w, tolerance, help, jmax, St04a); // yields -D^{-1}<A Psi,Psi>D^{-1}w
+    help.scale(elliptic_, 1); // help *= D
+    help.scale(-1.0); // result = -D(-D^{-1}<A Psi,Psi>^T D^{-1}w)
+    y = help;
+//     cout << "ROWStageEquation::setup_rhs() done, y1=" << endl << y << endl;
     
-//     T->add_level(lambda, w, j, factor, J, strategy);
+    // second summand <f(t_n+alpha_i*h),Psi>^T
+    if (f_ != 0) {
+      f_->set_time(t_n+h*row_method_->alpha_vector[i]);
+      w.clear();
+      expand(f_, elliptic_->basis(), true, jmax, w); // expand in the dual (!) basis
+//       cout << "ROWStageEquation::setup_rhs() done, y2=" << endl << w << endl;
+      y.add(w);
+    }
 
-// //     G.add_level(lambda, w, j, factor * alpha/(T->D(lambda)*T->D(lambda))
-// //     if (lambda.j() == j)
-// //       w.add_coefficient(lambda, alpha*factor/(T->D(lambda)*T->D(lambda)));
-//   }
-  
-//   template <class ELLIPTIC_EQ>
-//   LinearParabolicEquation<ELLIPTIC_EQ>
-//   ::LinearParabolicEquation(const ELLIPTIC_EQ* helper,
-//  			    const InfiniteVector<double,typename ELLIPTIC_EQ::Index>& initial,
-//  			    const InfiniteVector<double,typename ELLIPTIC_EQ::Index>& f,
-//  			    const int jmax)
-//     : elliptic(helper), G(helper->basis(), InfiniteVector<double,typename ELLIPTIC_EQ::Index>()),
-//       GC(&G), constant_f_(f), f_(0), jmax_(jmax)
-//   {
-//     AbstractIVP<InfiniteVector<double,typename ELLIPTIC_EQ::Index> >::u0 = initial;
-//   }
-
-//   template <class ELLIPTIC_EQ>
-//   void
-//   LinearParabolicEquation<ELLIPTIC_EQ>
-//   ::evaluate_f(const double t,
-// 	       const InfiniteVector<double,Index>& v,
-// 	       const double tolerance,
-// 	       InfiniteVector<double,Index>& result) const
-//   {
-//     result.clear();
-//     InfiniteVector<double,Index> w(v), temp;
-//     w.scale(elliptic, 1); // w = Dv
-//     APPLY(*elliptic, w, tolerance, temp, jmax_, St04a); // yields -D^{-1}AD^{-1}w
-//     temp.scale(elliptic, 1);
-//     temp.scale(-1.0); // result = -D(-D^{-1}AD^{-1}Dv) = Av
-
-// //     // multiply with inverse primal gramian (i.e., switch from dual to primal basis)
-// //     G.set_rhs(temp);
-// //     CDD1_SOLVE(GC, tolerance, result, jmax_);
-
-//     result = temp;
+    // third summand <Psi,Psi>^T D_alpha^{-1}sum_{j=1}^{i-1}(c_{i,j}/h)D_alpha u_j
+    if (i > 0) {
+      w.clear();
+      typename std::list<V>::const_iterator it = Dalpha_uj.begin();
+      for (unsigned int j = 0; j < i; j++, ++it) {
+	w.add(row_method_->C(i,j)/h, *it);
+      }
+      w.scale(this, -1); // w *= D_alpha^{-1}
+      APPLY(GC, w, tolerance, help, jmax, St04a); // yields <Psi,Psi>^T D_alpha^{-1}sum(...)
+//       cout << "ROWStageEquation::setup_rhs() done, y3=" << endl << help << endl;
+      y.add(help);
+    }
     
-//     // add constant driving term (if present)
-//     if (!constant_f_.empty())
-//       result.add(constant_f_);
+    // fourth summand h*gamma_i*<f'(t_n),Psi>^T
+    if (ft_ != 0) {
+      ft_->set_time(t_n);
+      w.clear();
+      expand(ft_, elliptic_->basis(), true, jmax, w); // expand in the dual (!) basis
+//       cout << "ROWStageEquation::setup_rhs() done, y4=" << endl << w << endl;
+      y.add(w);
+    }
 
-//     // add time-dependent driving term (if present)
-//     if (f_ != 0) {
-//       f_->set_time(t);
-//       w.clear();
-// //       expand(f_, elliptic->basis(), false, jmax_, w); // expand in the primal basis
-//       expand(f_, elliptic->basis(), true, jmax_, w); // expand in the dual (!) basis
-//       result.add(w);
-//     }
-//   }
-  
-//   template <class ELLIPTIC_EQ>
-//   void
-//   LinearParabolicEquation<ELLIPTIC_EQ>
-//   ::evaluate_ft(const double t,
-// 		const InfiniteVector<double,Index>& v,
-// 		const double tolerance,
-// 		InfiniteVector<double,Index>& result) const
-//   {
-//     result.clear(); // from the constant driving term
+//     cout << "ROWStageEquation::setup_rhs() done, y=" << endl << y << endl;
+  }
 
-//     // approximate derivative of time-dependent driving term (if present)
-//     if (f_ != 0) {
-//       const double h = 1e-6;
-//       InfiniteVector<double,Index> fhelp;
-//       f_->set_time(t);
-// //       expand(f_, elliptic->basis(), false, jmax_, fhelp); // expand in the primal basis
-//       expand(f_, elliptic->basis(), true, jmax_, fhelp); // expand in the dual (!) basis
-//       f_->set_time(t+h);
-// //       expand(f_, elliptic->basis(), false, jmax_, result);
-//       expand(f_, elliptic->basis(), true, jmax_, result);
-//       result.add(-1., fhelp);
-//       result.scale(1./h);
-//     }
-//   }
-    
-//   template <class ELLIPTIC_EQ>
-//   void
-//   LinearParabolicEquation<ELLIPTIC_EQ>
-//   ::solve_ROW_stage_equation(const double t,
-// 			     const InfiniteVector<double,Index>& v,
-// 			     const double alpha,
-// 			     const InfiniteVector<double,Index>& y,
-// 			     const double tolerance,
-// 			     InfiniteVector<double,Index>& result) const
-//   {
-// //     // multiply everything with the Gramian
-// //     InfiniteVector<double,Index> Gy;
-// //     APPLY(GC, y, tolerance, Gy, jmax_, St04a);
-// //     LinParEqROWStageEquationHelper<ELLIPTIC_EQ> helper(alpha, elliptic, GC, Gy);
+  template <class ELLIPTIC_EQ>
+  void
+  ROWStageEquation<ELLIPTIC_EQ>
+  ::add_level (const Index& lambda,
+	       InfiniteVector<double, Index>& w, const int j,
+	       const double factor,
+	       const int J,
+	       const CompressionStrategy strategy) const
+  {
+    // We have to compute a (level-)part of the lambda-th column of 
+    //   D_alpha^{-1}<(alpha*I-A)Psi,Psi>^T D_alpha^{-1}
+    //   = alpha*D_alpha^{-1}<Psi,Psi>^T D_alpha^{-1}
+    //     - D_alpha^{-1}D ( D^{-1}<APsi,Psi>^T D^{-1} ) DD_alpha^{-1}
 
-//     LinParEqROWStageEquationHelper<ELLIPTIC_EQ> helper(alpha, elliptic, GC, y);
-//     CDD1_SOLVE(helper, tolerance, result, jmax_); // D^{-1}(alpha*I-T)D^{-1}*Dx = D^{-1}y    
-//     result.scale(elliptic, -1); // Dx -> x
-//   }
+    // Gramian part
+    InfiniteVector<double,Index> help;
+    GC.add_level(lambda, help, j, factor * alpha_/D(lambda), J, strategy);
+    help.scale(this, -1); // help *= D_alpha^{-1}
+    w.add(help);
+   
+    // elliptic part
+    help.clear();
+    elliptic_->add_level(lambda, help, j, factor*elliptic_->D(lambda)/D(lambda), J, strategy);
+    help.scale(elliptic_, 1); // help *= D
+    help.scale(this, -1);     // help *= D_alpha^{-1}
+    w.add(help);
+  }
+
 }

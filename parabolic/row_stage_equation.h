@@ -19,6 +19,7 @@
 #include <galerkin/gramian.h>
 #include <galerkin/cached_problem.h>
 #include <galerkin/infinite_preconditioner.h>
+#include <adaptive/compression.h>
 
 using MathTL::Vector;
 using MathTL::InfiniteVector;
@@ -57,18 +58,16 @@ namespace WaveletTL
       Constructor from a given ROW method (finite-vector-valued, we only need the coeffs),
       a helper object for the stiffness matrix,
       a (time-dependent) driving term f and its derivative f'.
-      If ft and/or f are ommited, we assume that f,ft=0.
+      If ft and/or f are omitted (or set to zero), we assume that f and/or ft=0.
     */
     ROWStageEquation(const ROWMethod<Vector<double> >* row_method,
 		     const ELLIPTIC_EQ* elliptic,
 		     MathTL::Function<ELLIPTIC_EQ::space_dimension,double>* f = 0,
-		     MathTL::Function<ELLIPTIC_EQ::space_dimension,double>* ft = 0,
-		     const int jmax = 10)
+		     MathTL::Function<ELLIPTIC_EQ::space_dimension,double>* ft = 0)
       : row_method_(row_method),
 	elliptic_(elliptic),
 	f_(f),
 	ft_(ft),
-	jmax_(jmax),
 	alpha_(0.0), // dummy value, alpha has to be set just before solving the stage eq.
 	G(elliptic->basis(), MathTL::InfiniteVector<double,typename ELLIPTIC_EQ::Index>()),
  	GC(&G)
@@ -165,7 +164,7 @@ namespace WaveletTL
     void RHS(const double eta,
 	     InfiniteVector<double, Index>& coeffs) const {
       coeffs = y; // dirty
-      coeffs.scale(*this, -1);
+      coeffs.scale(this, -1); // coeffs *= D_alpha^{-1}
     }
     
     /*!
@@ -173,18 +172,39 @@ namespace WaveletTL
     */
     double F_norm() const { return l2_norm(y); }
     
+    /*!
+      w += factor * (stiffness matrix entries in column lambda on level j)
+    */
+    void add_level (const Index& lambda,
+ 		    InfiniteVector<double, Index>& w, const int j,
+ 		    const double factor,
+ 		    const int J,
+ 		    const CompressionStrategy strategy = St04a) const;
     
     /*!
       set (numerical) diffusion coefficient alpha
     */
     void set_alpha(double alpha) { alpha_ = alpha; }
-    
-  protected:
+
+    /*!
+      setup (unpreconditioned) right-hand side y for the i-th stage equation,
+      this requires that the stage solutions D_alpha u_1, ..., D_alpha u_{i-1}
+      are already set up
+    */
+    void setup_rhs(unsigned int i,
+		   const double tolerance,
+		   const double t_n,
+		   const double h,
+		   const InfiniteVector<double,Index>& D_un,
+		   const std::list<InfiniteVector<double,Index> >& Dalpha_uj,
+		   const int jmax = 10);
+
     const ROWMethod<Vector<double> >* row_method_;
     const ELLIPTIC_EQ* elliptic_;
+    
+  protected:
     Function<space_dimension>* f_;
     Function<space_dimension>* ft_;
-    const int jmax_;
 
     double alpha_;
 

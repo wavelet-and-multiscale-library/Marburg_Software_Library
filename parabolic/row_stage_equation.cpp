@@ -17,6 +17,8 @@ namespace WaveletTL
   {
     typedef InfiniteVector<double,Index> V;
     V help, w;
+    
+    const unsigned int stages = row_method_->A.row_dimension(); // for readability
 
     // start with zero rhs
     y.clear();
@@ -55,7 +57,7 @@ namespace WaveletTL
 	w.add(row_method_->C(i,j)/h, *it);
       }
       w.scale(this, -1); // w *= D_alpha^{-1}
-      APPLY(GC, w, tolerance, help, jmax, St04a); // yields <Psi,Psi>^T D_alpha^{-1}sum(...)
+      APPLY(GC, w, tolerance/(4*stages), help, jmax, St04a); // yields <Psi,Psi>^T D_alpha^{-1}sum(...)
 //       cout << "ROWStageEquation::setup_rhs() done, y3=" << endl << help << endl;
       y.add(help);
     }

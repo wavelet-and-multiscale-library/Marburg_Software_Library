@@ -66,8 +66,8 @@ namespace WaveletTL
   */
   template <class WBASIS>
   class SturmEquation
-    : public FullyDiagonalDyadicPreconditioner<typename WBASIS::Index>
-//     : public FullyDiagonalEnergyNormPreconditioner<typename WBASIS::Index>
+//     : public FullyDiagonalDyadicPreconditioner<typename WBASIS::Index>
+    : public FullyDiagonalEnergyNormPreconditioner<typename WBASIS::Index>
   {
   public:
     SturmEquation(const SimpleSturmBVP& bvp,

@@ -115,7 +115,7 @@ namespace WaveletTL
     double a(const Index& lambda,
 	     const Index& nu) const
     {
-      return alpha_ * G.a(lambda, nu) + elliptic_->a(lambda, nu);
+      return alpha_ * GC.a(lambda, nu) + elliptic_->a(lambda, nu);
     }
     
     /*!

@@ -115,18 +115,18 @@ void increment(const ELLIPTIC* elliptic,
   for (unsigned int i(0); i < stages; i++) {  
     // setup right-hand side of i-th stage equation
     if (verbose) cout << "increment: setup rhs of stage #" << i << ":" << endl;
-    row_stage_equation->setup_rhs(i, tolerance, t_n, h, D_un, Dalpha_uis, jmax);
+    row_stage_equation->setup_rhs(i, tolerance/(4*stages), t_n, h, D_un, Dalpha_uis, jmax);
     if (verbose) cout << "  ... done" << endl;
 
     // solve i-th stage equation
     V result;
 #if 0
     if (verbose) cout << "increment: call CDD1_SOLVE()..." << endl;
-    CDD1_SOLVE(*row_stage_equation, tolerance,
+    CDD1_SOLVE(*row_stage_equation, tolerance/(4*stages),
 	       D_un, // guess
 	       result,
-// 	       1.0,
-// 	       1.0,
+ 	       1.0,
+ 	       1.0,
 	       jmax); // B_alpha*D_alpha x = D_alpha^{-1}y
     if (verbose) cout << "increment: CDD1_SOLVE() done" << endl;
 #else
@@ -198,7 +198,7 @@ void solve_IVP(const ELLIPTIC* elliptic,
 //     double tau0 = (u0_norm < 1e-5 || ft0u0_norm < 1e-5)
 //       ? 1e-6 : 1e-2*u0_norm/ft0u0_norm;
 
-  double tau0 = 1e-8; // pessimistic
+  double tau0 = 1e-6; // pessimistic
 
 //     // TODO: approximate ypp
     
@@ -222,11 +222,12 @@ void solve_IVP(const ELLIPTIC* elliptic,
 	}
 
       // try to advance one step
-      u_m.scale(elliptic, 1); // u_m <- Du_m
+      u_m.scale(elliptic, 1); // u_m <- Du_m, coeffs w.r.t. D^{-1}Psi
       increment(elliptic, row_stage_equation,
-		1e-3, t_m, tau_m, u_m, u_mplus1, error_estimate, jmax);
-      u_m.scale(elliptic, -1); // u_m restored
-      u_mplus1.scale(elliptic, -1); // u_mplus1
+		1e-2, t_m, tau_m, u_m, u_mplus1, error_estimate, jmax);
+      u_m.scale(elliptic, -1); // u_m restored to L_2 coeffs
+      u_mplus1.scale(elliptic, -1); // u_mplus1 now L_2 coeffs
+//       error_estimate.scale(elliptic, -1); // error_estimate in L_2
       
       // compute an error estimator
 // 	const double u_m_norm = linfty_norm(u_m);
@@ -391,6 +392,19 @@ int main()
   // select a ROW method
   ROWMethod<Vector<double> > row_method(WMethod<Vector<double> >::ROS2); string scheme_str="ROS2";
 //   ROWMethod<Vector<double> > row_method(WMethod<Vector<double> >::ROS3); string scheme_str="ROS3";
+//   ROWMethod<Vector<double> > row_method(WMethod<Vector<double> >::RODASP); string scheme_str="RODASP";
+
+
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROS3P);
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROS3Pw);
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROSI2P2);
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
+//     ROWMethod<V> row_adaptive(WMethod<V>::GRK4T);
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROWDA3);
+//     ROWMethod<V> row_adaptive(WMethod<V>::RODASP);
+
+
 
   //
   //
@@ -434,7 +448,7 @@ int main()
       increment(&celliptic, &row_stage_equation, 1e-5, (i-1)*h, h, temp, result, error_estimate, jmax);
       temp = result;
       results.t.push_back(i*h);
-      result.scale(&celliptic, -1); // switch to L_2 coeffs
+      result.scale(&celliptic, -1); // switch to the L_2 coeffs
       results.u.push_back(result);
 
       ostringstream output_filename;
@@ -497,7 +511,9 @@ int main()
     ostringstream filename;
     filename << basis_str << "_" << scheme_str
 	     << "_case" << _TESTCASE
-	     << "_d" << d <<  "_dt" << dT << ".m";
+	     << "_d" << d <<  "_dt" << dT
+	     << "_jmax" << jmax
+	     << ".m";
     std::ofstream resultstream(filename.str().c_str());
     
     resultstream << "N_errors=[";

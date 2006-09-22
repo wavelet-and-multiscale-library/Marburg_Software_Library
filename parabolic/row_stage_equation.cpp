@@ -4,9 +4,9 @@
 
 namespace WaveletTL
 {
-  template <class ELLIPTIC_EQ>
+  template <class ELLIPTIC_EQ, class GRAMIAN>
   void
-  ROWStageEquation<ELLIPTIC_EQ>::setup_rhs
+  ROWStageEquation<ELLIPTIC_EQ,GRAMIAN>::setup_rhs
   (unsigned int i,
    const double tolerance,
    const double t_n,
@@ -57,7 +57,7 @@ namespace WaveletTL
 	w.add(row_method_->C(i,j)/h, *it);
       }
       w.scale(this, -1); // w *= D_alpha^{-1}
-      APPLY(GC, w, tolerance/(4*stages), help, jmax, St04a); // yields <Psi,Psi>^T D_alpha^{-1}sum(...)
+      APPLY(*gramian_, w, tolerance/(4*stages), help, jmax, St04a); // yields <Psi,Psi>^T D_alpha^{-1}sum(...)
 //       cout << "ROWStageEquation::setup_rhs() done, y3=" << endl << help << endl;
       y.add(help);
     }
@@ -74,9 +74,9 @@ namespace WaveletTL
 //     cout << "ROWStageEquation::setup_rhs() done, y=" << endl << y << endl;
   }
 
-  template <class ELLIPTIC_EQ>
+  template <class ELLIPTIC_EQ, class GRAMIAN>
   void
-  ROWStageEquation<ELLIPTIC_EQ>
+  ROWStageEquation<ELLIPTIC_EQ,GRAMIAN>
   ::add_level (const Index& lambda,
 	       InfiniteVector<double, Index>& w, const int j,
 	       const double factor,
@@ -90,7 +90,7 @@ namespace WaveletTL
 
     // Gramian part
     InfiniteVector<double,Index> help;
-    GC.add_level(lambda, help, j, factor * alpha_/D(lambda), J, strategy);
+    gramian_->add_level(lambda, help, j, factor * alpha_/D(lambda), J, strategy);
     help.scale(this, -1); // help *= D_alpha^{-1}
     w.add(help);
    

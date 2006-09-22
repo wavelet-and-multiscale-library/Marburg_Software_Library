@@ -311,8 +311,8 @@ int main()
   
   const int d  = 3;
   const int dT = 3;
-//   typedef DSBasis<d,dT> Basis;
-  typedef PBasis<d,dT> Basis;
+  typedef DSBasis<d,dT> Basis; string basis_str = "DS";
+//   typedef PBasis<d,dT> Basis; string basis_str = "P";
   typedef Basis::Index Index;
   typedef SturmEquation<Basis> EllipticEquation;
   typedef InfiniteVector<double,Index> V;
@@ -321,11 +321,11 @@ int main()
 
 //   CachedProblem<EllipticEquation> celliptic(&elliptic);
 //   CachedProblem<EllipticEquation> celliptic(&elliptic, 12.2508, 6.41001); // d=2, dT=2
-//   CachedProblem<SturmEquation<Basis> > celliptic(&elliptic, 6.73618, 45.5762); // d=3, dT=3
+  CachedProblem<SturmEquation<Basis> > celliptic(&elliptic, 6.73618, 45.5762); // d=3, dT=3
 
-  CachedProblem<SturmEquation<Basis> > celliptic(&elliptic,  1.87567, 6.78415); // PBasis d=3,dT=3
+//   CachedProblem<SturmEquation<Basis> > celliptic(&elliptic,  1.87567, 6.78415); // PBasis d=3,dT=3
 
-  const int jmax = 9;
+  const int jmax = 8;
 
   // handle different test cases:
   // 1: u0 = hat function, f(t)=0
@@ -629,6 +629,14 @@ int main()
   std::list<double> wallclocktimes;
 
   cout << "* testing linear-implicit scheme (adaptive, several tolerances)..." << endl;
+  ROWMethod<V> row_adaptive(WMethod<V>::ROS2); string scheme_str="ROS2";
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROS3P);
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROS3Pw);
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROSI2P2);
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
+//     ROWMethod<V> row_adaptive(WMethod<V>::GRK4T);
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROWDA3);
+//   ROWMethod<V> row_adaptive(WMethod<V>::RODASP); string scheme_str="RODASP";
   for (int expo = 6; expo <= 18; expo++) { // 2^{-6}=0.015625, 2^{-8}=3.9e-3, 2^{-10}=9.77e-4
     const double TOL = ldexp(1.0, -expo);
 //     const double TOL = pow(10.0, -(double)expo);
@@ -638,14 +646,6 @@ int main()
     cout << "  TOL=" << TOL << endl;
 
     // adaptive solution of u'=Au+f
-    ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
-//     ROWMethod<V> row_adaptive(WMethod<V>::ROS3P);
-//     ROWMethod<V> row_adaptive(WMethod<V>::ROS3Pw);
-//     ROWMethod<V> row_adaptive(WMethod<V>::ROSI2P2);
-//     ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
-//     ROWMethod<V> row_adaptive(WMethod<V>::GRK4T);
-//     ROWMethod<V> row_adaptive(WMethod<V>::ROWDA3);
-//     ROWMethod<V> row_adaptive(WMethod<V>::RODASP);
     row_adaptive.set_preprocessor(&parabolic);
 
     clock_t tstart =  clock();
@@ -675,50 +675,47 @@ int main()
     errors.push_back(TOL);
     numberofsteps.push_back(result_adaptive.t.size());
 #endif
+
+    ostringstream filename;
+    filename << basis_str << "_" << scheme_str
+	     << "_case" << _TESTCASE
+	     << "_d" << d <<  "_dt" << dT
+	     << "_jmax" << jmax
+	     << "_old.m";
+    std::ofstream resultstream(filename.str().c_str());
+    
+    resultstream << "errors=[";
+    for (std::list<double>::const_iterator it = errors.begin();
+	 it != errors.end(); ++it) {
+      resultstream << log10(*it);
+      if (it != errors.end())
+	resultstream << " ";
+    }
+    resultstream << "];" << endl;
+    
+    resultstream << "N=[";
+    for (std::list<double>::const_iterator it = numberofsteps.begin();
+	 it != numberofsteps.end(); ++it) {
+      resultstream << log10(*it);
+      if (it != numberofsteps.end())
+	resultstream << " ";
+    }
+    resultstream << "];" << endl;
+    
+    resultstream << "times=[";
+    for (std::list<double>::const_iterator it = wallclocktimes.begin();
+	 it != wallclocktimes.end(); ++it) {
+      resultstream << log10(*it);
+      if (it != wallclocktimes.end())
+	resultstream << " ";
+    }
+    resultstream << "];" << endl;
+    
+    resultstream.close();
+    
   }
-
-  std::ofstream resultstream("work_precision.m");
-
-  resultstream << "errors=[";
-  for (std::list<double>::const_iterator it = errors.begin();
-       it != errors.end(); ++it) {
-    resultstream << log10(*it);
-    if (it != errors.end())
-      resultstream << " ";
-  }
-  resultstream << "];" << endl;
-
-  resultstream << "N=[";
-  for (std::list<double>::const_iterator it = numberofsteps.begin();
-       it != numberofsteps.end(); ++it) {
-    resultstream << log10(*it);
-    if (it != numberofsteps.end())
-      resultstream << " ";
-  }
-  resultstream << "];" << endl;
-
-  resultstream.close();
-
-  resultstream.open("time_precision.m");
-
-  resultstream << "errors=[";
-  for (std::list<double>::const_iterator it = errors.begin();
-       it != errors.end(); ++it) {
-    resultstream << log10(*it);
-    if (it != errors.end())
-      resultstream << " ";
-  }
-  resultstream << "];" << endl;
-
-  resultstream << "times=[";
-  for (std::list<double>::const_iterator it = wallclocktimes.begin();
-       it != wallclocktimes.end(); ++it) {
-    resultstream << log10(*it);
-    if (it != wallclocktimes.end())
-      resultstream << " ";
-  }
-  resultstream << "];" << endl;
+  
 #endif
-
+  
   return 0;
 }

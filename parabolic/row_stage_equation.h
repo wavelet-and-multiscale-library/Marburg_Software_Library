@@ -16,7 +16,6 @@
 #include <numerics/ivp.h>
 #include <numerics/row_method.h>
 #include <utils/function.h>
-#include <galerkin/gramian.h>
 #include <galerkin/cached_problem.h>
 #include <galerkin/infinite_preconditioner.h>
 #include <adaptive/compression.h>
@@ -49,28 +48,28 @@ namespace WaveletTL
     is modeled in the template parameter class ELLIPTIC_EQ.
     
   */
-  template <class ELLIPTIC_EQ>
+  template <class ELLIPTIC_EQ, class GRAMIAN>
   class ROWStageEquation
     : public FullyDiagonalEnergyNormPreconditioner<typename ELLIPTIC_EQ::Index>
   {
   public:
     /*!
       Constructor from a given ROW method (finite-vector-valued, we only need the coeffs),
-      a helper object for the stiffness matrix,
+      a helper object for the stiffness matrix and the gramian,
       a (time-dependent) driving term f and its derivative f'.
       If ft and/or f are omitted (or set to zero), we assume that f and/or ft=0.
     */
     ROWStageEquation(const ROWMethod<Vector<double> >* row_method,
 		     const ELLIPTIC_EQ* elliptic,
+		     const GRAMIAN* gramian,
 		     MathTL::Function<ELLIPTIC_EQ::space_dimension,double>* f = 0,
 		     MathTL::Function<ELLIPTIC_EQ::space_dimension,double>* ft = 0)
       : row_method_(row_method),
 	elliptic_(elliptic),
+	gramian_(gramian),
 	f_(f),
 	ft_(ft),
-	alpha_(0.0), // dummy value, alpha has to be set just before solving the stage eq.
-	G(elliptic->basis(), MathTL::InfiniteVector<double,typename ELLIPTIC_EQ::Index>()),
- 	GC(&G)
+	alpha_(0.0) // dummy value, alpha has to be set just before solving the stage eq.
     {
     }
 
@@ -115,7 +114,7 @@ namespace WaveletTL
     double a(const Index& lambda,
 	     const Index& nu) const
     {
-      return alpha_ * GC.a(lambda, nu) + elliptic_->a(lambda, nu);
+      return alpha_ * gramian_->a(lambda, nu) + elliptic_->a(lambda, nu);
     }
     
     /*!
@@ -201,6 +200,7 @@ namespace WaveletTL
 
     const ROWMethod<Vector<double> >* row_method_;
     const ELLIPTIC_EQ* elliptic_;
+    const GRAMIAN* gramian_;
     
   protected:
     Function<space_dimension>* f_;
@@ -208,12 +208,6 @@ namespace WaveletTL
 
     double alpha_;
 
-    //! Gramian
-    IntervalGramian<typename ELLIPTIC_EQ::WaveletBasis> G;
-
-    //! cached Gramian
-    CachedProblem<IntervalGramian<typename ELLIPTIC_EQ::WaveletBasis> > GC;
-    
     //! holds current (unpreconditioned) right--hand side 
     InfiniteVector<double, typename ELLIPTIC_EQ::Index> y;
   };

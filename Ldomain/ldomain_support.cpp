@@ -326,7 +326,9 @@ namespace WaveletTL
 				  const typename LDomainBasis<IBASIS>::Index& mu)
   {
     // we cheat a bit here: we return true if already the supports intersect (overestimate)
-    return intersect_support(basis, lambda, mu);
+    typedef typename LDomainBasis<IBASIS>::Support Support;
+    Support supp;
+    return intersect_supports(basis, lambda, mu, supp);
   }
 
 }

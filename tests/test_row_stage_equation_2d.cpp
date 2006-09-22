@@ -18,6 +18,7 @@
 #include <numerics/w_method.h>
 #include <numerics/row_method.h>
 #include <numerics/one_step_scheme.h>
+#include <numerics/corner_singularity.h>
 #include <geometry/grid.h>
 #include <geometry/sampled_mapping.h>
 
@@ -26,9 +27,13 @@
 #include <interval/ds_expansion.h>
 #include <interval/p_basis.h>
 #include <interval/p_expansion.h>
+#include <Ldomain/ldomain_basis.h>
+#include <galerkin/ldomain_equation.h>
+#include <galerkin/ldomain_gramian.h>
+#include <Ldomain/ldomain_expansion.h>
+
 #include <galerkin/sturm_equation.h>
 #include <galerkin/cached_problem.h>
-#include <galerkin/gramian.h>
 
 #include <parabolic/row_stage_equation.h>
 #include <adaptive/cdd1.h>
@@ -37,53 +42,8 @@ using namespace std;
 using namespace MathTL;
 using namespace WaveletTL;
 
-// 1d Poisson equation -u''=g, u(0)=u(1)=0
-class Poisson1D
-  : public SimpleSturmBVP
-{
-public:
-  double p(const double t) const {
-    return 1;
-  }
-  double p_prime(const double t) const {
-    return 0;
-  }
-  double q(const double t) const {
-    return 0;
-  }
-  double g(const double t) const {
-    return 0; // dummy rhs
-  }
-  bool bc_left() const { return true; }
-  bool bc_right() const { return true; }
-};
 
-class eigenfunction : public Function<1> {
-public:
-  inline double value(const Point<1>& p, const unsigned int component = 0) const {
-    return M_PI*M_PI*sin(M_PI*p[0]);
-  }
-  
-  void vector_value(const Point<1> &p, Vector<double>& values) const {
-    values.resize(1, false);
-    values[0] = value(p);
-  }
-};
-
-class exact_solution_1 : public Function<1> {
-public:
-  inline double value(const Point<1>& p, const unsigned int component = 0) const {
-    return (1-exp(-M_PI*M_PI*get_time()))*sin(M_PI*p[0]);
-  }
-  
-  void vector_value(const Point<1> &p, Vector<double>& values) const {
-    values.resize(1, false);
-    values[0] = value(p);
-  }
-};
-
-
-#define _CDD_SOLVE 1
+#define _CDD_SOLVE 0
 
 /*!
   given a ROW method, t_n and an approximation Du^{(n)},
@@ -328,153 +288,121 @@ void GALERKIN_SOLVE(const PROBLEM& P,
 
 int main()
 {
-  cout << "Testing ROWStageEquation..." << endl;
+  cout << "Testing ROWStageEquation for a 2D problem..." << endl;
 
-  // setup elliptic operator -Delta
-  Poisson1D poisson_bvp;
+  // setup elliptic operators -Delta and I
+  ZeroFunction<2> zero;
+  PoissonBVP<2> poisson_bvp(&zero);
+  IdentityBVP<2> identity_bvp(&zero);
 
   // setup 1D wavelet basis
-  const int d  = 3;
-  const int dT = 3;
-//   typedef DSBasis<d,dT> Basis; string basis_str = "DS";
-  typedef PBasis<d,dT> Basis; string basis_str = "P";
-
-  const int jmax = 8;
-
+  const int d  = 2;
+  const int dT = 2;
+  //   typedef DSBasis<d,dT> Basis1D; string basis_str = "DS";
+  typedef PBasis<d,dT> Basis1D; string basis_str = "P";
+  typedef LDomainBasis<Basis1D> Basis;
   typedef Basis::Index Index;
+
+  const int jmax = 4;
+
   typedef InfiniteVector<double,Index> V;
 
   // setup elliptic operator equation, reformulated in ell_2
-  typedef SturmEquation<Basis> EllipticEquation;
-  EllipticEquation poisson_equation(poisson_bvp, false); // do not compute the rhs
-//   CachedProblem<SturmEquation<Basis> > celliptic(&poisson_equation,  2.3612 , 13.3116); // PBasis d=2,dT=2
-  CachedProblem<SturmEquation<Basis> > celliptic(&poisson_equation,  1.87567, 6.78415); // PBasis d=3,dT=3
+  typedef LDomainEquation<Basis1D> EllipticEquation;
+  EllipticEquation poisson_equation(&poisson_bvp, false); // do not compute the rhs
+  CachedProblem<EllipticEquation> celliptic(&poisson_equation, 2.3612 , 13.3116); // PBasis d=2,dT=2
 
   // setup gramian matrix
-  IntervalGramian<Basis> G(celliptic.basis(),MathTL::InfiniteVector<double,Index>());
-  CachedProblem<IntervalGramian<Basis> > GC(&G);
+  LDomainGramian<Basis1D> G(&identity_bvp);
+  CachedProblem<LDomainGramian<Basis1D> > GC(&G);
 
-  //
-  //
-  // handle several test cases:
-  // 1: u0 = 0, f(t,x) = pi^2*sin(pi*x), u(t,x)=(1-exp(-pi^2*t))*sin(pi*x)
-
-#define _TESTCASE 1
-
+  
   //
   //
   // setup the initial value u0
   V u0;
 
-#if _TESTCASE == 1
-  // do nothing, u0=0
-#endif
-
   //
   //
   // setup driving term f
-
-#if _TESTCASE == 1
-  Function<1>* f = new eigenfunction();
-#endif
+  Function<2>* f = new CornerTimeSingularityRHS(Point<2>(0,0), 0.5, 1.5);
 
   //
   //
-  // setup temporal derivative of driving term f
+  // setup temporal derivative of driving term
+  Function<2>* ft = 0; // quick hack, this is a W method
 
-#if _TESTCASE == 1
-  Function<1>* ft = 0;
-#endif
-
-  //
-  //
-  // setup exact solution (if available)
-
-#if _TESTCASE == 1
-  exact_solution_1 uexact;
-#endif
+  CornerTimeSingularity uexact(Point<2>(0,0), 0.5, 1.5);
 
   //
   //
   // select a ROW method
   ROWMethod<Vector<double> > row_method(WMethod<Vector<double> >::ROS2); string scheme_str="ROS2";
-//   ROWMethod<Vector<double> > row_method(WMethod<Vector<double> >::ROS3); string scheme_str="ROS3";
-//   ROWMethod<Vector<double> > row_method(WMethod<Vector<double> >::ROWDA3); string scheme_str="ROWDA3";
-//   ROWMethod<Vector<double> > row_method(WMethod<Vector<double> >::RODASP); string scheme_str="RODASP";
-
-
-//     ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
-//     ROWMethod<V> row_adaptive(WMethod<V>::ROS3P);
-//     ROWMethod<V> row_adaptive(WMethod<V>::ROS3Pw);
-//     ROWMethod<V> row_adaptive(WMethod<V>::ROSI2P2);
-//     ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
-//     ROWMethod<V> row_adaptive(WMethod<V>::GRK4T);
-//     ROWMethod<V> row_adaptive(WMethod<V>::ROWDA3);
-//     ROWMethod<V> row_adaptive(WMethod<V>::RODASP);
-
-
+  //   ROWMethod<Vector<double> > row_method(WMethod<Vector<double> >::ROS3); string scheme_str="ROS3";
+  //   ROWMethod<Vector<double> > row_method(WMethod<Vector<double> >::ROWDA3); string scheme_str="ROWDA3";
+  //   ROWMethod<Vector<double> > row_method(WMethod<Vector<double> >::RODASP); string scheme_str="RODASP";
 
   //
   //
   // setup the ROW stage equation object
   ROWStageEquation<CachedProblem<EllipticEquation>,
-    CachedProblem<IntervalGramian<Basis> > > row_stage_equation(&row_method, &celliptic, &GC, f, ft);
+    CachedProblem<LDomainGramian<Basis1D> > > row_stage_equation(&row_method, &celliptic, &GC, f, ft);
 
 
 #if 0
-  // nonadaptive solution with constant temporal stepsize h
+//   // nonadaptive solution with constant temporal stepsize h
 
-  cout << "* testing approximation with constant stepsizes..." << endl;
+//   cout << "* testing approximation with constant stepsizes..." << endl;
 
-  V temp, error_estimate, result;
-  IVPSolution<V> results;
+//   V temp, error_estimate, result;
+//   IVPSolution<V> results;
 
-  const int expo1 = 9;
-  const int expo2 = expo1;
+//   const int expo1 = 9;
+//   const int expo2 = expo1;
 
-  for (int expo = expo1; expo <= expo2; expo++) {
-    temp = u0;
-    temp.scale(&celliptic, 1); // temp *= D
+//   for (int expo = expo1; expo <= expo2; expo++) {
+//     temp = u0;
+//     temp.scale(&celliptic, 1); // temp *= D
     
-    const int resolution = 10;
-    SampledMapping<1> u0_plot(evaluate(celliptic.basis(), u0, true, resolution));
+//     const int resolution = 10;
+//     SampledMapping<1> u0_plot(evaluate(celliptic.basis(), u0, true, resolution));
 
-    std::ofstream resultstream;
-    resultstream.open("u0.m");
-    u0_plot.matlab_output(resultstream);
-    resultstream.close();
+//     std::ofstream resultstream;
+//     resultstream.open("u0.m");
+//     u0_plot.matlab_output(resultstream);
+//     resultstream.close();
 
-    int N = 1<<expo;
-    double h = 1.0/N;
-    cout << "  h = " << h << ":" << endl;
+//     int N = 1<<expo;
+//     double h = 1.0/N;
+//     cout << "  h = " << h << ":" << endl;
 
-    results.t.push_back(0);
-    results.u.push_back(temp);
+//     results.t.push_back(0);
+//     results.u.push_back(temp);
 
-    for (int i = 1; i <= N; i++) {
-      cout << "---------------- before increment " << i << " -----------------------" << endl;
+//     for (int i = 1; i <= N; i++) {
+//       cout << "---------------- before increment " << i << " -----------------------" << endl;
 
-      increment(&celliptic, &row_stage_equation, 1e-5, (i-1)*h, h, temp, result, error_estimate, jmax);
-      temp = result;
-      results.t.push_back(i*h);
-      result.scale(&celliptic, -1); // switch to the L_2 coeffs
-      results.u.push_back(result);
+//       increment(&celliptic, &row_stage_equation, 1e-5, (i-1)*h, h, temp, result, error_estimate, jmax);
+//       temp = result;
+//       results.t.push_back(i*h);
+//       result.scale(&celliptic, -1); // switch to the L_2 coeffs
+//       results.u.push_back(result);
 
-      ostringstream output_filename;
-      output_filename << "u" << i << ".m";
-      resultstream.open(output_filename.str().c_str());
-      SampledMapping<1> ui_plot(evaluate(celliptic.basis(), result, true, resolution));
-      ui_plot.matlab_output(resultstream);
-      resultstream.close();
+//       ostringstream output_filename;
+//       output_filename << "u" << i << ".m";
+//       resultstream.open(output_filename.str().c_str());
+//       SampledMapping<1> ui_plot(evaluate(celliptic.basis(), result, true, resolution));
+//       ui_plot.matlab_output(resultstream);
+//       resultstream.close();
 
-      cout << "---------------- after increment() -----------------------" << endl;
+//       cout << "---------------- after increment() -----------------------" << endl;
 
-      V uexact_coeffs;
-      uexact.set_time(i*h);
-      expand(&uexact, celliptic.basis(), false, jmax, uexact_coeffs);
-      cout << "  ell_2 error at t=" << i*h << ": " << l2_norm(result - uexact_coeffs) << endl;
-    }
-  }
+//       V uexact_coeffs;
+//       uexact.set_time(i*h);
+//       expand(&uexact, celliptic.basis(), false, jmax, uexact_coeffs);
+//       cout << "  ell_2 error at t=" << i*h << ": " << l2_norm(result - uexact_coeffs) << endl;
+//     }
+//   }
   
 #else
 
@@ -489,7 +417,7 @@ int main()
   cout << "* testing scheme " << scheme_str << " (adaptive, several tolerances)..." << endl;
   for (int expo = 6; expo <= 18; expo++) { // 2^{-6}=0.015625, 2^{-8}=3.9e-3, 2^{-10}=9.77e-4
     const double TOL = ldexp(1.0, -expo);
-//     const double TOL = pow(10.0, -(double)expo);
+    //     const double TOL = pow(10.0, -(double)expo);
     
     IVPSolution<V> result_adaptive;
     
@@ -497,26 +425,31 @@ int main()
 
     clock_t tstart =  clock();
     solve_IVP(&celliptic, u0, &row_stage_equation, T,
-	      TOL, 0, q, tau_max, result_adaptive, jmax);
+  	      TOL, 0, q, tau_max, result_adaptive, jmax);
     clock_t tend = clock();
 
-#if _TESTCASE == 1
-    // compute maximal ell_2 error of the coefficients
-    double errhelp = 0;
-    std::list<double>::const_iterator ti(result_adaptive.t.begin());
-    for (std::list<V>::const_iterator ui(result_adaptive.u.begin());
-	 ui != result_adaptive.u.end(); ++ui, ++ti) {
-      V uexact_coeffs;
-      uexact.set_time(*ti);
-      expand(&uexact, celliptic.basis(), false, jmax, uexact_coeffs);
-      cout << "  ell_2 error at t=" << *ti << ": " << l2_norm(*ui - uexact_coeffs) << endl;
-      errhelp = std::max(errhelp, l2_norm(*ui - uexact_coeffs));
-    }
-    errors.push_back(errhelp);
+// #if _TESTCASE == 1
+//     // compute maximal ell_2 error of the coefficients
+//     double errhelp = 0;
+//     std::list<double>::const_iterator ti(result_adaptive.t.begin());
+//     for (std::list<V>::const_iterator ui(result_adaptive.u.begin());
+// 	 ui != result_adaptive.u.end(); ++ui, ++ti) {
+//       V uexact_coeffs;
+//       uexact.set_time(*ti);
+//       expand(&uexact, celliptic.basis(), false, jmax, uexact_coeffs);
+//       cout << "  ell_2 error at t=" << *ti << ": " << l2_norm(*ui - uexact_coeffs) << endl;
+//       errhelp = std::max(errhelp, l2_norm(*ui - uexact_coeffs));
+//     }
+//     errors.push_back(errhelp);
+//     numberofsteps.push_back(result_adaptive.t.size());
+//     wallclocktimes.push_back((double)(tend-tstart)/ (double)CLOCKS_PER_SEC);
+// #endif
+
+    // quick hack: use TOL
+    errors.push_back(TOL);
     numberofsteps.push_back(result_adaptive.t.size());
     wallclocktimes.push_back((double)(tend-tstart)/ (double)CLOCKS_PER_SEC);
-#endif
-
+    
     ostringstream filename;
 
 #if _CDD_SOLVE == 1
@@ -525,40 +458,39 @@ int main()
     string solver_str = "GAL";
 #endif
     filename << basis_str << "_" << scheme_str
-	     << "_case" << _TESTCASE
-	     << "_d" << d <<  "_dt" << dT
-	     << "_jmax" << jmax
-	     << "_" << solver_str
-	     << ".m";
+  	     << "_d" << d <<  "_dt" << dT
+  	     << "_jmax" << jmax
+  	     << "_" << solver_str
+  	     << ".m";
     std::ofstream resultstream(filename.str().c_str());
-    
+ 
     resultstream << "N_errors=[";
     for (std::list<double>::const_iterator it = errors.begin();
-	 it != errors.end(); ++it) {
+  	 it != errors.end(); ++it) {
       resultstream << log10(*it);
       if (it != errors.end())
-	resultstream << " ";
+  	resultstream << " ";
     }
     resultstream << "];" << endl;
-    
+ 
     resultstream << "N=[";
     for (std::list<double>::const_iterator it = numberofsteps.begin();
-	 it != numberofsteps.end(); ++it) {
+  	 it != numberofsteps.end(); ++it) {
       resultstream << log10(*it);
       if (it != numberofsteps.end())
-	resultstream << " ";
+  	resultstream << " ";
     }
     resultstream << "];" << endl;
-        
+ 
     resultstream << "times=[";
     for (std::list<double>::const_iterator it = wallclocktimes.begin();
-	 it != wallclocktimes.end(); ++it) {
+  	 it != wallclocktimes.end(); ++it) {
       resultstream << log10(*it);
       if (it != wallclocktimes.end())
-	resultstream << " ";
+  	resultstream << " ";
     }
     resultstream << "];" << endl;
-    
+ 
   }
   
 #endif

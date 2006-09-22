@@ -59,14 +59,15 @@ namespace WaveletTL
   */
   template <class IBASIS>
   class LDomainEquation
-    : public FullyDiagonalDyadicPreconditioner<typename LDomainBasis<IBASIS>::Index>
-//     : public FullyDiagonalEnergyNormPreconditioner<typename LDomainBasis<IBASIS>::Index>
+//     : public FullyDiagonalDyadicPreconditioner<typename LDomainBasis<IBASIS>::Index>
+    : public FullyDiagonalEnergyNormPreconditioner<typename LDomainBasis<IBASIS>::Index>
   {
   public:
     /*!
       constructor from a boundary value problem and specified b.c.'s
     */
-    LDomainEquation(const EllipticBVP<2>* bvp);
+    LDomainEquation(const EllipticBVP<2>* bvp,
+		    const bool precompute_rhs = true);
 
     /*!
       copy constructor

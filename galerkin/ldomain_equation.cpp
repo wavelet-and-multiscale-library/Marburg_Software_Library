@@ -8,12 +8,13 @@
 namespace WaveletTL
 {
   template <class IBASIS>
-  LDomainEquation<IBASIS>::LDomainEquation(const EllipticBVP<2>* bvp)
+  LDomainEquation<IBASIS>::LDomainEquation(const EllipticBVP<2>* bvp,
+					   const bool precompute_rhs)
     : bvp_(bvp), basis_(), normA(0.0), normAinv(0.0)
   {
-    compute_rhs();
+    if (precompute_rhs) compute_rhs();
   }
-
+  
   template <class IBASIS>
   LDomainEquation<IBASIS>::LDomainEquation(const LDomainEquation& eq)
     : bvp_(eq.bvp_), basis_(eq.basis_),
@@ -27,8 +28,8 @@ namespace WaveletTL
   double
   LDomainEquation<IBASIS>::D(const Index& lambda) const
   {
-    return ldexp(1.0, lambda.j());
-//     return sqrt(a(lambda, lambda));
+//     return ldexp(1.0, lambda.j());
+    return sqrt(a(lambda, lambda));
   }
 
   template <class IBASIS>
@@ -665,6 +666,20 @@ namespace WaveletTL
       coeffs.set_coefficient(it->first, it->second);
       ++it;
     } while (it != fcoeffs.end() && coarsenorm < bound);
+  }
+
+
+  template <class IBASIS>
+  double
+  LDomainEquation<IBASIS>::s_star() const
+  {
+    // notation from [St04a]
+    const double t = operator_order();
+    const int n = 2;
+    const int dT = WaveletBasis::primal_vanishing_moments();
+    const double gamma = WaveletBasis::primal_regularity();
+    
+    return std::min((t+dT)/(double)n, (gamma-t)/(n-1.)); // [St04a, Th. 2.3]
   }
 
 

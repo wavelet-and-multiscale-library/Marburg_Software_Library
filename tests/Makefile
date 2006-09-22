@@ -107,7 +107,7 @@ EXEOBJF5 = \
 
 # set 6 of test programs: adaptive wavelet schemes for parabolic equations
 EXEOBJF6 = \
-  test_lin_par_equation.o test_row_stage_equation.o
+  test_lin_par_equation.o test_row_stage_equation.o test_row_stage_equation_2d.o
 
 EXES1 = $(EXEOBJF1:.o=)
 EXES2 = $(EXEOBJF2:.o=)

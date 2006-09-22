@@ -66,9 +66,9 @@ namespace WaveletTL
       w.clear();
       expand(ft_, elliptic_->basis(), true, jmax, w); // expand in the dual (!) basis
 //       cout << "ROWStageEquation::setup_rhs() done, y4=" << endl << w << endl;
-      y.add(w);
+      y.add(h*row_method_->gamma_vector[i], w);
     }
-
+    
 //     cout << "ROWStageEquation::setup_rhs() done, y=" << endl << y << endl;
   }
 

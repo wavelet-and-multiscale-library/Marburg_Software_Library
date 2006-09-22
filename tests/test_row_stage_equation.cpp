@@ -82,7 +82,6 @@ public:
 };
 
 
-
 /*!
   given a ROW method, t_n and an approximation Du^{(n)},
   compute an approximation of Du^{(n+1)} for the stepwidth h;
@@ -121,15 +120,22 @@ void increment(const ELLIPTIC* elliptic,
 
     // solve i-th stage equation
     V result;
+#if 0
     if (verbose) cout << "increment: call CDD1_SOLVE()..." << endl;
     CDD1_SOLVE(*row_stage_equation, tolerance,
 	       D_un, // guess
 	       result,
-	       1.0,
-	       1.0,
+// 	       1.0,
+// 	       1.0,
 	       jmax); // B_alpha*D_alpha x = D_alpha^{-1}y
     if (verbose) cout << "increment: CDD1_SOLVE() done" << endl;
-
+#else
+    GALERKIN_SOLVE(*row_stage_equation,
+		   D_un,
+		   result,
+		   jmax);
+#endif
+    
     Dalpha_uis.push_back(result);
   }
 
@@ -192,7 +198,7 @@ void solve_IVP(const ELLIPTIC* elliptic,
 //     double tau0 = (u0_norm < 1e-5 || ft0u0_norm < 1e-5)
 //       ? 1e-6 : 1e-2*u0_norm/ft0u0_norm;
 
-  double tau0 = 1e-6;
+  double tau0 = 1e-8; // pessimistic
 
 //     // TODO: approximate ypp
     
@@ -278,6 +284,44 @@ void solve_IVP(const ELLIPTIC* elliptic,
     }
 }
 
+/*!
+  nonadaptive Galerkin solver, up to a fixed maximal level
+*/
+template <class PROBLEM>
+void GALERKIN_SOLVE(const PROBLEM& P,
+		    const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& guess,
+		    InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
+		    const int jmax)
+{
+  typedef typename PROBLEM::WaveletBasis::Index Index;
+
+  // setup index set Lambda
+  set<Index> Lambda;
+  for (Index lambda = P.basis().first_generator(P.basis().j0());; ++lambda) {
+    Lambda.insert(lambda);
+    if (lambda == P.basis().last_wavelet(P.basis().j0())) break;
+  }
+
+  // setup stiffess matrix
+  SparseMatrix<double> A_Lambda;
+  setup_stiffness_matrix(P, Lambda, A_Lambda);
+
+  // setup righthand side
+  Vector<double> F_Lambda;
+  setup_righthand_side(P, Lambda, F_Lambda);
+  
+  // solve Galerkin system with CG
+  Vector<double> xk(Lambda.size());
+  unsigned int iterations = 0;
+  const double eta = 1e-5;
+  CG(A_Lambda, F_Lambda, xk, eta, 150, iterations);
+  
+  unsigned int id = 0;
+  for (typename set<Index>::const_iterator it = Lambda.begin(), itend = Lambda.end();
+       it != itend; ++it, ++id)
+    u_epsilon.set_coefficient(*it, xk[id]);
+}
+
 int main()
 {
   cout << "Testing ROWStageEquation..." << endl;
@@ -291,7 +335,7 @@ int main()
 //   typedef DSBasis<d,dT> Basis; string basis_str = "DS";
   typedef PBasis<d,dT> Basis; string basis_str = "P";
 
-  const int jmax = 8;
+  const int jmax = 9;
 
   typedef Basis::Index Index;
   typedef InfiniteVector<double,Index> V;
@@ -346,6 +390,7 @@ int main()
   //
   // select a ROW method
   ROWMethod<Vector<double> > row_method(WMethod<Vector<double> >::ROS2); string scheme_str="ROS2";
+//   ROWMethod<Vector<double> > row_method(WMethod<Vector<double> >::ROS3); string scheme_str="ROS3";
 
   //
   //
@@ -361,7 +406,7 @@ int main()
   V temp, error_estimate, result;
   IVPSolution<V> results;
 
-  const int expo1 = 4;
+  const int expo1 = 9;
   const int expo2 = expo1;
 
   for (int expo = expo1; expo <= expo2; expo++) {
@@ -409,7 +454,6 @@ int main()
   }
   
 #else
-  cout << "* adaptive solution..." << endl;
 
   const double T = 1.0;
   const double q = 10.0;
@@ -419,7 +463,7 @@ int main()
   std::list<double> errors;
   std::list<double> wallclocktimes;
 
-  cout << "* testing linear-implicit scheme (adaptive, several tolerances)..." << endl;
+  cout << "* testing scheme " << scheme_str << " (adaptive, several tolerances)..." << endl;
   for (int expo = 6; expo <= 18; expo++) { // 2^{-6}=0.015625, 2^{-8}=3.9e-3, 2^{-10}=9.77e-4
     const double TOL = ldexp(1.0, -expo);
 //     const double TOL = pow(10.0, -(double)expo);

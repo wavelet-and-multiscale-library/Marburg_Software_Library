@@ -22,6 +22,8 @@
 #include <interval/i_index.h>
 #include <interval/ds_basis.h>
 #include <interval/ds_expansion.h>
+#include <interval/p_basis.h>
+#include <interval/p_expansion.h>
 #include <galerkin/sturm_equation.h>
 #include <galerkin/cached_problem.h>
 
@@ -308,8 +310,9 @@ int main()
   TestProblem<0> testproblem;
   
   const int d  = 3;
-  const int dT = 5;
-  typedef DSBasis<d,dT> Basis;
+  const int dT = 3;
+//   typedef DSBasis<d,dT> Basis;
+  typedef PBasis<d,dT> Basis;
   typedef Basis::Index Index;
   typedef SturmEquation<Basis> EllipticEquation;
   typedef InfiniteVector<double,Index> V;
@@ -318,7 +321,9 @@ int main()
 
 //   CachedProblem<EllipticEquation> celliptic(&elliptic);
 //   CachedProblem<EllipticEquation> celliptic(&elliptic, 12.2508, 6.41001); // d=2, dT=2
-  CachedProblem<SturmEquation<Basis> > celliptic(&elliptic, 6.73618, 45.5762); // d=3, dT=3
+//   CachedProblem<SturmEquation<Basis> > celliptic(&elliptic, 6.73618, 45.5762); // d=3, dT=3
+
+  CachedProblem<SturmEquation<Basis> > celliptic(&elliptic,  1.87567, 6.78415); // PBasis d=3,dT=3
 
   const int jmax = 9;
 
@@ -633,10 +638,10 @@ int main()
     cout << "  TOL=" << TOL << endl;
 
     // adaptive solution of u'=Au+f
-//     ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
+    ROWMethod<V> row_adaptive(WMethod<V>::ROS2);
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROS3P);
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROS3Pw);
-    ROWMethod<V> row_adaptive(WMethod<V>::ROSI2P2);
+//     ROWMethod<V> row_adaptive(WMethod<V>::ROSI2P2);
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
 //     ROWMethod<V> row_adaptive(WMethod<V>::GRK4T);
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROWDA3);

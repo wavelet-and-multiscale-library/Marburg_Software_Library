@@ -303,7 +303,7 @@ int main()
   typedef LDomainBasis<Basis1D> Basis;
   typedef Basis::Index Index;
 
-  const int jmax = 4;
+  const int jmax = 3;
 
   typedef InfiniteVector<double,Index> V;
 
@@ -461,7 +461,7 @@ int main()
   	     << "_d" << d <<  "_dt" << dT
   	     << "_jmax" << jmax
   	     << "_" << solver_str
-  	     << ".m";
+  	     << "_2d.m";
     std::ofstream resultstream(filename.str().c_str());
  
     resultstream << "N_errors=[";

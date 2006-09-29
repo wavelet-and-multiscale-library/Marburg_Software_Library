@@ -101,7 +101,7 @@ int main()
   const int DIM = 1;
 
   //typedef DSBasis<2,2> Basis1D;
-  typedef PBasis<3,3> Basis1D;
+  typedef PBasis<3,5> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
@@ -219,7 +219,7 @@ int main()
 
   //finally a frame can be constructed
   //Frame1D frame(&Lshaped, bc, bcT, 8);
-  Frame1D frame(&Lshaped, bc, 6);
+  Frame1D frame(&Lshaped, bc, 14);
 
   Vector<double> value(1);
   value[0] = 1;
@@ -237,39 +237,15 @@ int main()
 
   EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
-
-  //interval case:
-
-
-  //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 2.13, 1.0/0.0038);
-  //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 2.47, 1.0/0.0751);
-  //  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.3076, 1.0/0.1);
-  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 4.19, 1.0/0.146);
-  //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.032, 1.0/(1.0e-3*0.672));
-  //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.032, 1.0/0.01);
+  //  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 4.19, 1.0/0.146);
 
 
-  // p basis d = 2 dt = 2
-//   discrete_poisson.set_norm_A(3.3076);
-//   discrete_poisson.set_Ainv(1.0/0.1);
-
-
-  // p basis d = 3 dt = 3
-  discrete_poisson.set_norm_A(4.19);
+  // (d,dT) = (3,5)
+  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.6548, 1.0/0.146);
+  discrete_poisson.set_norm_A(3.6548);
+  // optimistic guess:
   discrete_poisson.set_Ainv(1.0/0.146);
-  
 
-  // d = 2 dt = 2
-//   discrete_poisson.set_norm_A(2.47);
-//   discrete_poisson.set_Ainv(1.0/0.0751);
-
-  // d = 3 dt = 3
-  //discrete_poisson.set_norm_A(2.13);
-  //discrete_poisson.set_Ainv(1.0/0.0038);
-  
-  // d = 4 dt = 4
-  //  discrete_pisson.set_norm_A(3.032);
-  //  discrete_poisson.set_Ainv(1.0/(1.0e-3*0.672));
 
 
   const double epsilon = 0.00005;

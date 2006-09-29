@@ -68,7 +68,7 @@ public:
 			       InfiniteVector<double, typename PROBLEM::Index>& u_epsilon)
   {
     //typedef DSBasis<2,2> Basis1D;
-    typedef PBasis<3,3> Basis1D;	
+    typedef PBasis<3,5> Basis1D;	
 
     Point<2> origin;
     origin[0] = 0.0;
@@ -77,7 +77,7 @@ public:
     CornerSingularity sing2D(origin, 0.5, 1.5);
     CornerSingularityRHS singRhs(origin, 0.5, 1.5);
 
-    const int jmax = 4;
+    const int jmax = 6;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
@@ -93,12 +93,15 @@ public:
 
     EvaluateFrame<Basis1D,2,2> evalObj;
 
-    double eta = 2;
+    double eta = 1.;
 
     const int number_patches = P.basis().n_p();
 
     //const double alpha = 0.35;//pbasis 1D 3 3, 0.7x0.7
-    const double alpha = 0.19;
+    //const double alpha = 0.7;
+    const double alpha = 0.5;
+    //const double alpha = 0.3;
+    //const double alpha = 0.2;
 
     unsigned int global_iterations = 0;
     double tmp = 5.;
@@ -109,7 +112,7 @@ public:
     clock_t tstart, tend;
     tstart = clock();
 
-    while (tmp > 0.0005) {
+    while (tmp > 0.0001) {
 
       cout << "reentering global loop " << endl;
 
@@ -120,12 +123,12 @@ public:
 
       //approximate residual
       P.RHS(0., f);
-      cout << f << endl;
-      abort();
+      //cout << f << endl;
+      //abort();
       APPLY(P, u_k, 0., help, jmax, CDD1);
       r_exact = f - help;
       
-      r_exact.COARSE(eta, r);
+      //r_exact.COARSE(eta, r);
 
       tmp = l2_norm(r_exact);
       cout << "residual norm = " << tmp  << endl;
@@ -139,13 +142,13 @@ public:
 
       if (u_k.size() != 0)
 	asymptotic[log10( (double)u_k.size() )] = tmp1;
-      //std::ofstream os3("add_schwarz_asymptotic_33_1D_1905.m");
-      std::ofstream os3("add_schwarz_asymptotic_33_2D_2605.m");
+      std::ofstream os3("add_schwarz_asymptotic_35_2D_al_02_0_9_2709.m");
+      //std::ofstream os3("add_schwarz_asymptotic_P_35_2D_1108.m");
       matlab_output(asymptotic,os3);
       os3.close();
 
-      //std::ofstream os4("add_schwarz_time_asymptotic_33_1D_1905.m");
-      std::ofstream os4("add_schwarz_time_asymptotic_33_2D_2605.m");
+      std::ofstream os4("add_schwarz_time_asymptotic_35_2D_al_02_0_9_2709.m");
+      //std::ofstream os4("add_schwarz_time_asymptotic_P_35_2D_1108.m");
       matlab_output(time_asymptotic,os4);
       os4.close();
       
@@ -213,7 +216,7 @@ public:
        
       global_iterations++;
       
-      eta *= 0.85;
+      eta *= 0.9;
       
       
       u_epsilon = u_k;

@@ -15,8 +15,8 @@
 #include <numerics/corner_singularity.h>
 #include <frame_support.h>
 #include <frame_index.h>
-#include <multiplicative_Schwarz.h>
-//#include <additive_Schwarz.h>
+//#include <multiplicative_Schwarz.h>
+#include <additive_Schwarz.h>
 //#include <additive_Schwarz_SD.h>
 #include <galerkin/cached_problem.h>
 
@@ -51,8 +51,8 @@ int main(int argc, char* argv[])
 
   const int DIM = 2;
 
-  typedef DSBasis<4,6> Basis1D;
-  //typedef PBasis<3,3> Basis1D;
+  //typedef DSBasis<4,6> Basis1D;
+  typedef PBasis<3,5> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
   typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
@@ -122,14 +122,14 @@ int main(int argc, char* argv[])
   bound_1[0] = 1;
   bound_1[1] = 1;
   bound_1[2] = 1;
-  bound_1[3] = 3;
+  bound_1[3] = 2;
 
   bc[0] = bound_1;
 
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
   bound_2[0] = 1;
-  bound_2[1] = 3;
+  bound_2[1] = 2;
   bound_2[2] = 1;
   bound_2[3] = 1;
 
@@ -160,8 +160,8 @@ int main(int argc, char* argv[])
   cout << Lshaped << endl;
 
   //finally a frame can be constructed
-  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT, 6);
-  //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, 6);
+  //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT, 6);
+  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, 6);
 
   Vector<double> value(1);
   value[0] = 1;
@@ -177,39 +177,56 @@ int main(int argc, char* argv[])
   PoissonBVP<DIM> poisson(&singRhs);
   //PoissonBVP<DIM> poisson(&const_fun);
 
-//   MultiIndex<int,2> e1;
-//   e1[0] = 0;
-//   e1[1] = 0;
-//   MultiIndex<int,2> k1;
-//   k1[0] = 1;
-//   k1[1] = 0;
-
-//   FrameIndex<Basis1D,2,2> ind_1(&frame, 3, e1, 0, k1);
-//   cout << ind_1 << endl;
-
-
-
-//   int count  = 0;
-//   for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
-//        lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, frame.j0()); ++lambda) {
-
-//     cout << "##############" << endl;
-//     if (lambda.number() != 7)
-//       continue;
-//     cout << lambda << endl;
-    
-//     if (lambda.number() == 7)
-//       abort();
-
-//   }
-//  abort();
   EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
 
-  discrete_poisson.set_norm_A(21.);
-  discrete_poisson.set_Ainv(1.0/0.096084);
+  //  L-shaped: (-1,1)x(-1,0) \cup (-1,0)x(-1,1), DSBasis
+  
+//     // (d,dT) = (2,2)
+//     CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0048, 1.0/0.146);
+//     discrete_poisson.set_norm_A(5.0048);
+//     // optimistic guess:
+//     discrete_poisson.set_Ainv(1.0/0.146);
 
-  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0048, 1.0/0.01);
+//   // (d,dT) = (3,5)
+//   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 11.7375, 1.0/0.146);
+//   discrete_poisson.set_norm_A(11.7375);
+//   // optimistic guess:
+//   discrete_poisson.set_Ainv(1.0/0.146);
+
+//   // (d,dT) = (4,6)
+//   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 19.1803, 1.0/0.146);
+//   discrete_poisson.set_norm_A(19.1803);
+//   // optimistic guess:
+//   discrete_poisson.set_Ainv(1.0/0.146);
+
+
+  //  L-shaped: (-1,1)x(-1,0) \cup (-1,0)x(-1,1), PBasis
+
+//   // (d,dT) = (2,2)
+//   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0225, 1.0/0.146);
+//   discrete_poisson.set_norm_A(5.0225);
+//   // optimistic guess:
+//   discrete_poisson.set_Ainv(1.0/0.146);
+
+  // (d,dT) = (3,5)
+  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 8.3898, 1.0/0.146);
+  discrete_poisson.set_norm_A(8.3898);
+  // optimistic guess:
+  discrete_poisson.set_Ainv(1.0/0.146);
+
+//   // (d,dT) = (4,6)
+//   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 14.6912, 1.0/0.146);
+//   discrete_poisson.set_norm_A(14.6912);
+//   // optimistic guess:
+//   discrete_poisson.set_Ainv(1.0/0.146);
+
+  //   discrete_poisson.set_norm_A(6.99614824235842);
+  //   discrete_poisson.set_Ainv(1.0/0.1);
+  // CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0048, 1.0/0.01);
+  //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 6.99614824235842, 1.0/0.1);
+
+
 
   const double epsilon = 0.01;
 
@@ -219,8 +236,10 @@ int main(int argc, char* argv[])
   double time;
   tstart = clock();
 
-  multiplicative_Schwarz_SOLVE(problem, epsilon, u_epsilon);
-  //additive_Schwarz_SOLVE(problem, epsilon, u_epsilon);
+  
+
+  //multiplicative_Schwarz_SOLVE(problem, epsilon, u_epsilon);
+  additive_Schwarz_SOLVE(problem, epsilon, u_epsilon);
   //additive_Schwarz_SD_SOLVE(problem, epsilon, u_epsilon);
 
   tend = clock();

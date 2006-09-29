@@ -52,7 +52,7 @@ int main()
 
   const int DIM = 2;
 
-  typedef DSBasis<4,6> Basis1D;
+  typedef DSBasis<3,5> Basis1D;
   //typedef PBasis<3,3> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
   typedef CubeBasis<Basis1D> Basis;
@@ -123,14 +123,14 @@ int main()
   bound_1[0] = 1;
   bound_1[1] = 1;
   bound_1[2] = 1;
-  bound_1[3] = 3;
+  bound_1[3] = 2;//2
 
   bc[0] = bound_1;
 
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
   bound_2[0] = 1;
-  bound_2[1] = 3;
+  bound_2[1] = 2;//2
   bound_2[2] = 1;
   bound_2[3] = 1;
 
@@ -161,8 +161,8 @@ int main()
   cout << Lshaped << endl;
 
   //finally a frame can be constructed
-  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT, 5);
-  //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, 4);
+  //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT, 5);
+  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, 5);
 
   Vector<double> value(1);
   value[0] = 1;
@@ -181,13 +181,74 @@ int main()
   EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
 
-  discrete_poisson.set_norm_A(6.99614824235842);
-  discrete_poisson.set_Ainv(1.0/0.1);
+  //  L-shaped: (-1,1)x(-1,0) \cup (-1,0)x(-1,1), DSBasis
+  
+//     // (d,dT) = (2,2)
+//     CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0048, 1.0/0.146);
+//     discrete_poisson.set_norm_A(5.0048);
+//     // optimistic guess:
+//     discrete_poisson.set_Ainv(1.0/0.146);
 
+//   // (d,dT) = (3,5)
+//   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 11.7375, 1.0/0.146);
+//   discrete_poisson.set_norm_A(11.7375);
+//   // optimistic guess:
+//   discrete_poisson.set_Ainv(1.0/0.146);
+
+  // (d,dT) = (3,5) all boundary conditions of order 1
+  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 8.0022, 1.0/0.146);
+  discrete_poisson.set_norm_A(8.0022);
+  // optimistic guess:
+  discrete_poisson.set_Ainv(1.0/0.146);
+
+
+//   // (d,dT) = (3,3)
+//   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 7.6336, 1.0/0.146);
+//   discrete_poisson.set_norm_A(7.6336);
+//   // optimistic guess:
+//   discrete_poisson.set_Ainv(1.0/0.146);
+
+//   // (d,dT) = (4,6)
+//   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 19.1803, 1.0/0.146);
+//   discrete_poisson.set_norm_A(19.1803);
+//   // optimistic guess:
+//   discrete_poisson.set_Ainv(1.0/0.146);
+
+
+  //  L-shaped: (-1,1)x(-1,0) \cup (-1,0)x(-1,1), PBasis
+
+//   // (d,dT) = (2,2)
+//   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0225, 1.0/0.146);
+//   discrete_poisson.set_norm_A(5.0225);
+//   // optimistic guess:
+//   discrete_poisson.set_Ainv(1.0/0.146);
+
+//   // (d,dT) = (3,5)
+//   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 8.3898, 1.0/0.146);
+//   discrete_poisson.set_norm_A(8.3898);
+//   // optimistic guess:
+//   discrete_poisson.set_Ainv(1.0/0.146);
+
+//   // (d,dT) = (3,3)
+//   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson,7.2346, 1.0/0.146);
+//   discrete_poisson.set_norm_A(7.2346);
+//   // optimistic guess:
+//   discrete_poisson.set_Ainv(1.0/0.146);
+
+
+//   // (d,dT) = (4,6)
+//   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 14.6912, 1.0/0.146);
+//   discrete_poisson.set_norm_A(14.6912);
+//   // optimistic guess:
+//   discrete_poisson.set_Ainv(1.0/0.146);
+
+  //   discrete_poisson.set_norm_A(6.99614824235842);
+  //   discrete_poisson.set_Ainv(1.0/0.1);
   // CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0048, 1.0/0.01);
-  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 6.99614824235842, 1.0/0.1);
+  //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 6.99614824235842, 1.0/0.1);
 
-  const double epsilon = 0.000001;
+
+  const double epsilon = 0.0000001;
 
   InfiniteVector<double, Index> u_epsilon;
 
@@ -215,7 +276,7 @@ int main()
   //discrete_poisson.rescale(u_epsilon,-1);
   u_epsilon.scale(&problem,-1);
 
-    Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u_epsilon, true, 6);//expand in primal basis
+  Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u_epsilon, true, 6);//expand in primal basis
   
   cout << "done plotting approximate solution" << endl;
 

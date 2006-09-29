@@ -69,6 +69,20 @@ namespace FrameTL
 	
       }
 
+    // just to get a better performance in the 
+    if ( (typeid(*frame.atlas()->charts()[lambda.p()]) ==
+	  typeid(AffineLinearMapping<2>))
+	 )
+      {
+	const double dx = 1.0 / (1 << supp_lambda.j);
+	Point<DIM_d> a;
+	Point<DIM_d> b;
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx,supp_lambda.a[1]*dx), a);
+	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx,supp_lambda.b[1]*dx), b);
+	return (a[0] <= p[0] && p[0] <= b[0]) && (a[1] <= p[1] && p[1] <= b[1]);
+
+      }
+
     if ( typeid(*frame.atlas()->charts()[lambda.p()]) ==
 	 typeid(LinearBezierMapping))
       {
@@ -143,7 +157,6 @@ namespace FrameTL
 	Point<DIM_d> b;
 	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda->a[0]*dx,supp_lambda->a[1]*dx), a);
 	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda->b[0]*dx,supp_lambda->b[1]*dx), b);
-
 	return (a[0] <= p[0] && p[0] <= b[0]) && (a[1] <= p[1] && p[1] <= b[1]);
 
       }

@@ -40,7 +40,7 @@ namespace FrameTL
       Evaluate a single primal/dual generator or wavelet \psi_\lambda
       on a dyadic subgrid of its corresponding patch.
     */
-   virtual SampledMapping<DIM_d> evaluate(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+    virtual SampledMapping<DIM_d> evaluate(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 					   const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 					   const bool primal,
 					   const int resolution) const = 0;

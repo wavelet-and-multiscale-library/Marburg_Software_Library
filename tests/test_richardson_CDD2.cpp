@@ -2,6 +2,7 @@
 #include <iostream>
 #include <time.h> 
 #include <interval/ds_basis.h>
+#include <interval/p_basis.h>
 #include "elliptic_equation.h"
 #include <algebra/sparse_matrix.h>
 #include <algebra/infinite_vector.h>
@@ -13,9 +14,11 @@
 #include <galerkin/galerkin_utils.h>
 #include <frame_support.h>
 #include <frame_index.h>
-#include <richardson_CDD2.h>
 //#include <steepest_descent.h>
+//#include <steepest_descent_basis.h>
+#include <richardson_CDD2.h>
 #include <galerkin/cached_problem.h>
+#include <utils/plot_tools.h>
 #include <interval/i_indexplot.h>
 
 using std::cout;
@@ -40,54 +43,52 @@ using namespace MathTL;
 using namespace WaveletTL;
 
 
-/*!
-  special function with steep gradients
-  near the right end of the interval
-*/
-template<class VALUE = double>
-class Singularity1D_RHS
-  : public Function<1, VALUE>
-{
-public:
-  Singularity1D_RHS() {};
-  virtual ~Singularity1D_RHS() {};
-  VALUE value(const Point<1>& p,
-	      const unsigned int component = 0) const
-  {
-    return  -100*exp(5*p[0])*(1-(exp(5*p[0])-1)/(exp(5.)-1))/(exp(5.)-1)+200*exp(10*p[0]) / 
-      ((exp(5.)-1)*(exp(5.)-1))+100*(exp(5*p[0])-1)*exp(5*p[0])/((exp(5.)-1)*(exp(5.)-1));
-  }
+// /*!
+//   special function with steep gradients
+//   near the right end of the interval
+// */
+// template<class VALUE = double>
+// class Singularity1D_RHS
+//   : public Function<1, VALUE>
+// {
+// public:
+//   Singularity1D_RHS() {};
+//   virtual ~Singularity1D_RHS() {};
+//   VALUE value(const Point<1>& p,
+// 	      const unsigned int component = 0) const
+//   {
+//     return  -100*exp(5*p[0])*(1-(exp(5*p[0])-1)/(exp(5.)-1))/(exp(5.)-1)+200*exp(10*p[0]) / 
+//       ((exp(5.)-1)*(exp(5.)-1))+100*(exp(5*p[0])-1)*exp(5*p[0])/((exp(5.)-1)*(exp(5.)-1));
+//   }
   
-  void vector_value(const Point<1> &p,
-		    Vector<VALUE>& values) const { ; }
+//   void vector_value(const Point<1> &p,
+// 		    Vector<VALUE>& values) const { ; }
   
-};
+// };
 
-/*!
-  special function with steep gradients
-  near the right end of the interval
-*/
-template<class VALUE = double>
-class Singularity1D
-  : public Function<1, VALUE>
-{
-public:
-  Singularity1D() {};
-  virtual ~Singularity1D() {};
-  VALUE value(const Point<1>& p,
-	      const unsigned int component = 0) const
-  {
-    double res = 1.0 / (exp(5.) - 1.0);
-    res = (exp(5.*p[0]) - 1.0) * res;
-    return  (4.0 * res * (1.0 - res));
-  }
+// /*!
+//   special function with steep gradients
+//   near the right end of the interval
+// */
+// template<class VALUE = double>
+// class Singularity1D
+//   : public Function<1, VALUE>
+// {
+// public:
+//   Singularity1D() {};
+//   virtual ~Singularity1D() {};
+//   VALUE value(const Point<1>& p,
+// 	      const unsigned int component = 0) const
+//   {
+//     double res = 1.0 / (exp(5.) - 1.0);
+//     res = (exp(5.*p[0]) - 1.0) * res;
+//     return  (4.0 * res * (1.0 - res));
+//   }
   
-  void vector_value(const Point<1> &p,
-		    Vector<VALUE>& values) const { ; }
+//   void vector_value(const Point<1> &p,
+// 		    Vector<VALUE>& values) const { ; }
   
-};
-
-
+// };
 
 
 int main()
@@ -97,10 +98,13 @@ int main()
   
   const int DIM = 1;
 
+
+
   typedef DSBasis<2,2> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
+
 
   //##############################  
   Matrix<double> A(DIM,DIM);
@@ -178,7 +182,7 @@ int main()
   cout << Lshaped << endl;
 
   //finally a frame can be constructed
-  Frame1D frame(&Lshaped, bc, bcT);
+  Frame1D frame(&Lshaped, bc, bcT, 14);
 
   Vector<double> value(1);
   value[0] = 1;
@@ -206,31 +210,47 @@ int main()
   EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
 
-  // d = 2 dt = 2
-  discrete_poisson.set_norm_A(2.47);
-  discrete_poisson.set_Ainv(1.0/0.0751);
-	
-  // << j preconditioner
-  //discrete_poisson.set_norm_A(14.4297);
-  //discrete_poisson.set_Ainv(1.0/0.1551);
-
-
-  // d = 3 dt = 3
-  //discrete_poisson.set_norm_A(2.13);
-  //discrete_poisson.set_Ainv(1.0/0.0038);
+  // (0,0.7) \cup (0.3,1) DSBasis
   
-  // d = 4 dt = 4
-  //  discrete_pisson.set_norm_A(3.032);
-  //  discrete_poisson.set_Ainv(1.0/(1.0e-3*0.672));
+//   // (d,dT) = (2,2)
+//   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.3743, 1.0/0.146);
+//   discrete_poisson.set_norm_A(3.3743);
+//   // optimistic guess:
+//   discrete_poisson.set_Ainv(1.0/0.146);
 
-  //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.3149, 1.0/0.0751);
-
-  //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 2.13, 1.0/0.0038);
+  // (d,dT) = (2,2)
   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 2.47, 1.0/0.0751);
-  //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.285, 1.0/0.0751);
+  discrete_poisson.set_norm_A(2.47);
+  // optimistic guess:
+  discrete_poisson.set_Ainv(1.0/0.0751);
 
-  //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.032, 1.0/1.0e-3*0.672);
-  //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 14.4297 , 1.0/0.155);
+
+
+//   // d = 2 dt = 2
+//   discrete_poisson.set_norm_A(2.47);
+//   discrete_poisson.set_Ainv(1.0/0.0751);
+	
+//   // << j preconditioner
+//   //discrete_poisson.set_norm_A(14.4297);
+//   //discrete_poisson.set_Ainv(1.0/0.1551);
+
+
+//   // d = 3 dt = 3
+//   //discrete_poisson.set_norm_A(2.13);
+//   //discrete_poisson.set_Ainv(1.0/0.0038);
+  
+//   // d = 4 dt = 4
+//   //  discrete_pisson.set_norm_A(3.032);
+//   //  discrete_poisson.set_Ainv(1.0/(1.0e-3*0.672));
+
+//   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.3149, 1.0/0.0751);
+
+//   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 2.13, 1.0/0.0038);
+//   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 2.47, 1.0/0.0751);
+//   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.285, 1.0/0.0751);
+
+//   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.032, 1.0/1.0e-3*0.672);
+//   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 14.4297 , 1.0/0.155);
 
   const double epsilon = 0.0005;
 
@@ -256,8 +276,7 @@ int main()
 
   cout << "CDD2 done" << endl;
 
-  discrete_poisson.rescale(u_epsilon,-1);
-  //problem.rescale(u_epsilon,-1);
+  u_epsilon.scale(&discrete_poisson,-1);
 
   EvaluateFrame<Basis1D,1,1> evalObj;
 
@@ -302,5 +321,4 @@ int main()
 
 
   return 0;
-
 }

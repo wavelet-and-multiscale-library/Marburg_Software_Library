@@ -83,7 +83,7 @@ public:
 };
 
 
-#define _CDD_SOLVE 1
+#define _CDD_SOLVE 0
 
 /*!
   given a ROW method, t_n and an approximation Du^{(n)},
@@ -339,7 +339,7 @@ int main()
 //   typedef DSBasis<d,dT> Basis; string basis_str = "DS";
   typedef PBasis<d,dT> Basis; string basis_str = "P";
 
-  const int jmax = 8;
+  const int jmax = 10;
 
   typedef Basis::Index Index;
   typedef InfiniteVector<double,Index> V;
@@ -532,7 +532,7 @@ int main()
 	     << ".m";
     std::ofstream resultstream(filename.str().c_str());
     
-    resultstream << "N_errors=[";
+    resultstream << "errors=[";
     for (std::list<double>::const_iterator it = errors.begin();
 	 it != errors.end(); ++it) {
       resultstream << log10(*it);

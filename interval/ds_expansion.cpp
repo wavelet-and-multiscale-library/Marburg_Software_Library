@@ -107,7 +107,7 @@ namespace WaveletTL
       }
 
     if (!primal) {
-#if 1
+#if 0
       IntervalGramian<DSBasis<d,dT,BIO> > G(basis, coeffs);
       CachedProblem<IntervalGramian<DSBasis<d,dT,BIO> > > GC(&G);
       InfiniteVector<double, typename DSBasis<d,dT,BIO>::Index> x;

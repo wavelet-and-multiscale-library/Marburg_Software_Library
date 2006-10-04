@@ -629,13 +629,13 @@ int main()
   std::list<double> wallclocktimes;
 
   cout << "* testing linear-implicit scheme (adaptive, several tolerances)..." << endl;
-  ROWMethod<V> row_adaptive(WMethod<V>::ROS2); string scheme_str="ROS2";
+//   ROWMethod<V> row_adaptive(WMethod<V>::ROS2); string scheme_str="ROS2";
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROS3P);
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROS3Pw);
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROSI2P2);
 //     ROWMethod<V> row_adaptive(WMethod<V>::ROS3);
 //     ROWMethod<V> row_adaptive(WMethod<V>::GRK4T);
-//     ROWMethod<V> row_adaptive(WMethod<V>::ROWDA3);
+  ROWMethod<V> row_adaptive(WMethod<V>::ROWDA3); string scheme_str="ROWDA3";
 //   ROWMethod<V> row_adaptive(WMethod<V>::RODASP); string scheme_str="RODASP";
   for (int expo = 6; expo <= 18; expo++) { // 2^{-6}=0.015625, 2^{-8}=3.9e-3, 2^{-10}=9.77e-4
     const double TOL = ldexp(1.0, -expo);

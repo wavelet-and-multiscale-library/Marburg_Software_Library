@@ -317,8 +317,8 @@ void GALERKIN_SOLVE(const PROBLEM& P,
   // solve Galerkin system with CG
   Vector<double> xk(Lambda.size());
   unsigned int iterations = 0;
-  const double eta = 1e-5;
-  CG(A_Lambda, F_Lambda, xk, eta, 150, iterations);
+  const double eta = 1e-12;
+  CG(A_Lambda, F_Lambda, xk, eta, 200, iterations);
   
   unsigned int id = 0;
   for (typename set<Index>::const_iterator it = Lambda.begin(), itend = Lambda.end();
@@ -335,11 +335,11 @@ int main()
 
   // setup 1D wavelet basis
   const int d  = 3;
-  const int dT = 3;
+  const int dT = 5;
 //   typedef DSBasis<d,dT> Basis; string basis_str = "DS";
   typedef PBasis<d,dT> Basis; string basis_str = "P";
 
-  const int jmax = 10;
+  const int jmax = 8;
 
   typedef Basis::Index Index;
   typedef InfiniteVector<double,Index> V;
@@ -349,6 +349,7 @@ int main()
   EllipticEquation poisson_equation(poisson_bvp, false); // do not compute the rhs
 //   CachedProblem<SturmEquation<Basis> > celliptic(&poisson_equation,  2.3612 , 13.3116); // PBasis d=2,dT=2
   CachedProblem<SturmEquation<Basis> > celliptic(&poisson_equation,  1.87567, 6.78415); // PBasis d=3,dT=3
+//   CachedProblem<SturmEquation<Basis> > celliptic(&poisson_equation,  2.12054, 209.511  ); // DSBasis d=3, dT=3
 
   // setup gramian matrix
   IntervalGramian<Basis> G(celliptic.basis(),MathTL::InfiniteVector<double,Index>());

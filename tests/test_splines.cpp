@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <algebra/matrix.h>
 #include <geometry/point.h>
 #include <geometry/grid.h>
@@ -9,8 +10,7 @@
 #include <numerics/schoenberg_splines.h>
 #include <utils/array1d.h>
 
-using std::cout;
-using std::endl;
+using namespace std;
 using namespace MathTL;
 
 int main()
@@ -66,6 +66,7 @@ int main()
 	 <<  Spline<3>().value(Point<1>(x)) << endl;
   }
 
+#if 0
   cout << "* a linear spline from a given knot sequence:" << endl;
   Array1D<double> knots(4+2);
   knots[0] =  0.0;
@@ -81,6 +82,7 @@ int main()
   coeffs[3] = 0;
   SampledMapping<1> sm1(Grid<1>(0.0, 3.0, 30), Spline<2>(knots, coeffs));
   sm1.matlab_output(cout);
+#endif
 
 #if 0
   cout << "* writing point values of a linear spline with multiple knots to a file..." << endl;
@@ -98,6 +100,34 @@ int main()
   SampledMapping<1> sm2(Grid<1>(0.0, 3.0, 60), Spline<2>(knots, coeffs));
   sm2.matlab_output(fs);
   fs.close();
+#endif
+
+#if 1
+  {
+    const unsigned int d = 3;
+    Array1D<double> knots(5+d);
+    cout << "* writing point values of various quadratic splines with multiple knots to a file..." << endl;
+    knots[0] =  0.0;
+    knots[1] =  0.0;
+    knots[2] =  1.0;
+    knots[3] =  1.0;
+    knots[4] =  2.0;
+    knots[5] =  2.0;
+    knots[6] =  3.0;
+    knots[7] =  3.0;
+    Array1D<double> coeffs(5);
+    for (unsigned int i = 0; i < coeffs.size(); i++) {
+      for (unsigned int j = 0; j < coeffs.size(); j++) {
+	coeffs[j] = (i == j ? 1.0 : 0.0);
+      }
+      ostringstream filename;
+      filename << "spline_" << i << ".m";
+      std::ofstream fs(filename.str().c_str());
+      SampledMapping<1> sm(Grid<1>(0.0, 3.0, 60), Spline<d>(knots, coeffs));
+      sm.matlab_output(fs);
+      fs.close();
+    }
+  }
 #endif
 
 #if 0

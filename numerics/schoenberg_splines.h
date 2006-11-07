@@ -110,7 +110,8 @@ namespace MathTL
   inline
   double EvaluateSchoenbergBSpline_td(const int j, const int k, const double x)
   {
-    const double factor(ldexp(1.0, j));
+    //const double factor(ldexp(1.0, j));
+    const double factor(1 << j);
     return sqrt(factor) * EvaluateSchoenbergBSpline<d>(k-(d/2), factor * x);
   }
   
@@ -154,7 +155,8 @@ namespace MathTL
   inline
   double EvaluateSchoenbergBSpline_td_x(const int j, const int k, const double x)
   {
-    const double factor(ldexp(1.0, j));
+    //const double factor(ldexp(1.0, j));
+    const double factor(1 << j);
     return factor * sqrt(factor) * EvaluateSchoenbergBSpline_x<d>(k-(d/2), factor * x);
   }
 

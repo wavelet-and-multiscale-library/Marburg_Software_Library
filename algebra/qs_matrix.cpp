@@ -72,7 +72,7 @@ namespace MathTL
   }
 
   template <class C>
-  void QuasiStationaryMatrix<C>::set_level(const int j)
+  void QuasiStationaryMatrix<C>::set_level(const int j) const
   {
     assert(j >= j0_);
     j_ = j;

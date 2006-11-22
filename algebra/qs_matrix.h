@@ -62,7 +62,7 @@ namespace MathTL
     /*!
       set level j
     */
-    void set_level(const int j);
+    void set_level(const int j) const;
 
     /*!
       read-only access to a single matrix entry
@@ -99,7 +99,8 @@ namespace MathTL
 	       const unsigned int precision = 3) const;
 
   protected:
-    int j0_, j_;
+    int j0_;
+    mutable int j_;
     unsigned int mj0_, nj0_;
     Matrix<C> ML_, MR_;
     Vector<C> bandL_,bandR_;

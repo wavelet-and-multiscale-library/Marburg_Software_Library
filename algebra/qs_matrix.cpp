@@ -171,7 +171,39 @@ namespace MathTL
     }
     
   }
+  
+  template <class C>
+  void
+  QuasiStationaryMatrix<C>::to_sparse(SparseMatrix<C>& S) const
+  {
+    // for readability:
+    const unsigned int nl = ML_.column_dimension();
+    const unsigned int mr = MR_.row_dimension();
+    const unsigned int nr = MR_.column_dimension();
+    const unsigned int m = row_dimension();
+    const unsigned int n = column_dimension();
 
+    S.resize(m, n);
+
+    // corner blocks
+    S.set_block(0, 0, ML_);
+    S.set_block(m-mr, n-nr, MR_);
+    
+    for (unsigned int i(0); i < m; i++) {
+      // left band
+      const unsigned int jbeginlefthelp = (i+2*nl+1)-bandL_.size()-offsetL_;
+      for (size_type j = std::max(nl, jbeginlefthelp-jbeginlefthelp/2);
+	   j <= std::min(n/2-1, ((i+2*nl)-offsetL_)/2); j++)
+	S.set_entry(i, j, bandL_[i-offsetL_-2*(j-nl)]);
+      
+      // right band
+      const unsigned int jbeginrighthelp = (i+offsetR_+2*(n-nr-1)+1)-m;
+      for (size_type j = std::max(n/2, jbeginrighthelp-jbeginrighthelp/2);
+	   j <= std::min(n-nr-1, ((i+offsetR_+2*(n-nr-1)+bandR_.size())-m)/2); j++)
+	S.set_entry(i, j, bandR_[i-(m-offsetR_-2*(n-nr-1-j)-bandR_.size())]);
+    }
+  }
+    
   template <class C>
   void QuasiStationaryMatrix<C>::print(std::ostream &os,
 				       const unsigned int tabwidth,

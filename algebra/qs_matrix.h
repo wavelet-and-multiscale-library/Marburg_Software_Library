@@ -11,10 +11,10 @@
 #define _WAVELETTL_QS_MATRIX_H
 
 #include <algebra/matrix.h>
+#include <algebra/sparse_matrix.h>
 
 namespace MathTL
 {
-
   /*!
     This class models quasi-stationary matrices like M_{j,0}, M_{j,1} or their dual
     counterparts. A quasi-stationary matrix is given by an upper left
@@ -65,6 +65,11 @@ namespace MathTL
       read-only access to a single matrix entry
     */
     const C get_entry(const size_type row, const size_type column) const;
+
+    /*!
+      construct a sparse matrix
+    */
+    void to_sparse(SparseMatrix<C>& S) const;
 
     /*!
       matrix-vector multiplication Mx = (*this) * x;

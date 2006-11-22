@@ -2,6 +2,7 @@
 #include <algebra/matrix.h>
 #include <algebra/vector.h>
 #include <algebra/qs_matrix.h>
+#include <algebra/sparse_matrix.h>
 
 using namespace std;
 using namespace MathTL;
@@ -20,6 +21,10 @@ int main()
 
 //   Q.set_level(4);
 //   cout << "Q on next higher level:" << endl << Q;
+
+  SparseMatrix<double> S;
+  Q.to_sparse(S);
+  cout << "Q as a sparse matrix:" << endl << S;
 
   Vector<double> x(Q.column_dimension());
   x[4] = x[5] = 1;

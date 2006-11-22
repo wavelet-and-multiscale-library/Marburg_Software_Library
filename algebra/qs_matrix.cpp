@@ -53,7 +53,7 @@ namespace MathTL
       if (column < n/2) { // left band column region
 	const unsigned int colbegin = offsetL_+2*(column-nl);
 	if (row >= colbegin && row < colbegin+bandL_.size())
-	  return bandL_[row-(offsetL_+2*(column-nl))];
+	  return bandL_[row-colbegin];
       } else {
 	if (column >= n-nr) { // right block column region
 	  if (row >= m-mr)
@@ -62,7 +62,7 @@ namespace MathTL
 	} else { // right band column region
 	  const unsigned int colendplus1 = m-offsetR_-2*(n-nr-1-column);
 	  if (row < colendplus1 && row >= colendplus1-bandR_.size())
-	    return bandR_[0];
+	    return bandR_[(row+bandR_.size())-colendplus1];
 	}
       }
     }
@@ -75,6 +75,101 @@ namespace MathTL
   {
     assert(j >= j0_);
     j_ = j;
+  }
+
+  template <class C>
+  template <class VECTOR>
+  void QuasiStationaryMatrix<C>::apply(const VECTOR& x, VECTOR& Mx) const
+  {
+    assert(Mx.size() == row_dimension());
+    
+    // for readability:
+    const unsigned int ml = ML_.row_dimension();
+    const unsigned int nl = ML_.column_dimension();
+    const unsigned int mr = MR_.row_dimension();
+    const unsigned int nr = MR_.column_dimension();
+    const unsigned int m = row_dimension();
+    const unsigned int n = column_dimension();
+
+    for (size_type i(0); i < row_dimension(); i++) {
+      C help(0);
+
+      // contribution from upper left corner block
+      if (i < ml)
+ 	for (size_type j(0); j < nl; j++)
+ 	  help += ML_.get_entry(i, j) * x[j];
+      
+      // contribution from left band
+      const unsigned int jbeginlefthelp = (i+2*nl+1)-bandL_.size()-offsetL_;
+      for (size_type j = std::max(nl, jbeginlefthelp-jbeginlefthelp/2);
+	   j <= std::min(n/2-1, ((i+2*nl)-offsetL_)/2); j++)
+	help += bandL_[i-offsetL_-2*(j-nl)] * x[j];
+      
+      // contribution from right band
+      const unsigned int jbeginrighthelp = (i+offsetR_+2*(n-nr-1)+1)-m;
+      for (size_type j = std::max(n/2, jbeginrighthelp-jbeginrighthelp/2);
+	   j <= std::min(n-nr-1, ((i+offsetR_+2*(n-nr-1)+bandR_.size())-m)/2); j++)
+	help += bandR_[i-(m-offsetR_-2*(n-nr-1-j)-bandR_.size())] * x[j];
+
+      // contribution from lower right corner block
+      if (i >= m-mr)
+	for (size_type j(0); j < nr; j++)
+	  help += MR_.get_entry(i-(m-mr), j) * x[n-nr+j];
+      
+      Mx[i] = help;
+    }
+  }
+
+  template <class C>
+  template <class VECTOR>
+  void QuasiStationaryMatrix<C>::apply_transposed(const VECTOR& x, VECTOR& Mtx) const
+  {
+    assert(Mtx.size() == column_dimension());
+    
+    // for readability:
+    const unsigned int ml = ML_.row_dimension();
+    const unsigned int nl = ML_.column_dimension();
+    const unsigned int mr = MR_.row_dimension();
+    const unsigned int nr = MR_.column_dimension();
+    const unsigned int m = row_dimension();
+    const unsigned int n = column_dimension();
+
+    // contribution from upper left corner block
+    for (size_type i(0); i < nl; i++) {
+      C help(0);
+      for (size_type j(0); j < ml; j++) {
+	help += ML_.get_entry(j, i) * x[j];
+      }
+      Mtx[i] = help;
+    }
+
+    // contribution from left band
+    for (size_type i(nl); i < n/2; i++) {
+      C help(0);
+      const unsigned int jbegin = offsetL_+2*(i-nl);
+      for (size_type j(jbegin); j < jbegin+bandL_.size(); j++)
+	help += bandL_[j-jbegin] * x[j];
+      Mtx[i] = help;
+    }
+    
+    // contribution from right band
+    for (size_type i(n/2); i < n-nr; i++) {
+      C help(0);
+      const unsigned int jendplus1 = m-offsetR_-2*(n-nr-1-i);
+      for (size_type j(jendplus1-bandR_.size()); j < jendplus1; j++)
+	help += bandR_[(j+bandR_.size())-jendplus1] * x[j];
+      Mtx[i] = help;
+    }
+
+    // contribution from lower right corner block
+    for (size_type i(n-nr); i < n; i++) {
+      C help(0);
+      for (size_type j(m-mr); j < m; j++) {
+	help += MR_.get_entry(j-(m-mr), i-(n-nr)) * x[j];
+      }
+      Mtx[i] = help;
+    }
+    
   }
 
   template <class C>

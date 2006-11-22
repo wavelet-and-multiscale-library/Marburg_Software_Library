@@ -19,9 +19,9 @@ namespace MathTL
     This class models quasi-stationary matrices like M_{j,0}, M_{j,1} or their dual
     counterparts. A quasi-stationary matrix is given by an upper left
     and a lower right corner block, and two bands for the left and right half,
-    respectively.
-    For odd number of columns, by convention,
-    the central band belongs to the _right_ half.
+    respectively. The bands are given by two stencil column vectors.
+    For an odd number of columns, by convention,
+    the central band stems from the _right_ half.
    */
   template <class C>
   class QuasiStationaryMatrix
@@ -65,6 +65,22 @@ namespace MathTL
       read-only access to a single matrix entry
     */
     const C get_entry(const size_type row, const size_type column) const;
+
+    /*!
+      matrix-vector multiplication Mx = (*this) * x;
+      we assume that the vector Mx has the correct size and
+      is not identical to x
+    */
+    template <class VECTOR>
+    void apply(const VECTOR& x, VECTOR& Mx) const;
+
+    /*!
+      transposed matrix-vector multiplication Mtx = (*this)^T * x;
+      we assume that the vector Mtx has the correct size and
+      is not identical to x
+    */
+    template <class VECTOR>
+    void apply_transposed(const VECTOR& x, VECTOR& Mtx) const;
 
     /*!
       stream output with user-defined tabwidth and precision

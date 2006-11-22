@@ -10,6 +10,7 @@
 #ifndef _WAVELETTL_QS_MATRIX_H
 #define _WAVELETTL_QS_MATRIX_H
 
+#include <cmath>
 #include <algebra/matrix.h>
 #include <algebra/sparse_matrix.h>
 
@@ -36,15 +37,17 @@ namespace MathTL
       constructor from the matrix ingredients
       j0             : coarsest level
       mj0,nj0        : number of rows and columns on coarsest level
-      ML,MR          : upper left and lower right corner block
+      ML,MR          : upper left and lower right corner block (may also be empty)
       bandL,bandR    : left and right band
       offsetL,offsetR: left and right row offset of the bands
+      factor         : constant pre-factor
      */
     QuasiStationaryMatrix(const int j0,
 			  const unsigned int mj0, const unsigned int nj0,
 			  const Matrix<C>& ML, const Matrix<C>& MR,
 			  const Vector<C>& bandL, const Vector<C>& bandR,
-			  const int offsetL, const int offsetR);
+			  const int offsetL, const int offsetR,
+			  const double factor = 1.0);
     
     /*!
       row dimension
@@ -101,6 +104,7 @@ namespace MathTL
     Matrix<C> ML_, MR_;
     Vector<C> bandL_,bandR_;
     int offsetL_, offsetR_;
+    double factor_;
   };
 
   /*!

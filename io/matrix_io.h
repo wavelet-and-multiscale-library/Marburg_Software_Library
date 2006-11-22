@@ -11,6 +11,7 @@
 #define _MATHTL_MATRIX_IO_H
 
 #include <iostream>
+#include <iomanip>
 
 namespace MathTL
 {
@@ -29,18 +30,22 @@ namespace MathTL
   void print_matrix(const MATRIX& M, std::ostream& os)
   {
     os << "[";
+    unsigned int precision=15, tabwidth=10;
+    unsigned int old_precision = os.precision(precision);
     for (unsigned int row(0); row < M.row_dimension(); row++)
       {
 	for (unsigned int column(0); column < M.column_dimension(); column++)
 	  {
-	    os << M.get_entry(row, column);
+	    os << std::setw(tabwidth) << std::setprecision(precision)
+	       << M.get_entry(row, column);
 	    if (column < M.column_dimension()-1)
 	      os << " ";
 	  }
 	if (row < M.row_dimension()-1)
 	  os << "; ";
       }
-    os << "]";
+    os << "]" << endl;
+    os.precision(old_precision);
   }
 }
 

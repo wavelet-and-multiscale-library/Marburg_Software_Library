@@ -8,11 +8,13 @@ namespace MathTL
 			  const unsigned int mj0, const unsigned int nj0,
 			  const Matrix<C>& ML, const Matrix<C>& MR,
 			  const Vector<C>& bandL, const Vector<C>& bandR,
-			  const int offsetL, const int offsetR)
+			  const int offsetL, const int offsetR,
+			  const double factor)
     : j0_(j0), mj0_(mj0), nj0_(nj0),
       ML_(ML), MR_(MR),
       bandL_(bandL), bandR_(bandR),
-      offsetL_(offsetL), offsetR_(offsetR)
+      offsetL_(offsetL), offsetR_(offsetR),
+      factor_(factor)
   {
     j_ = j0_;
   }
@@ -22,7 +24,7 @@ namespace MathTL
   const typename QuasiStationaryMatrix<C>::size_type
   QuasiStationaryMatrix<C>::row_dimension() const
   {
-    return mj0_-(1<<j0_)+(1<<j_);
+    return mj0_-(1<<(j0_+1))+(1<<(j_+1));
   }  
 
   template <class C>
@@ -48,21 +50,20 @@ namespace MathTL
 
     if (column < nl) { // left block column region
       if (row < ml)
-	return ML_.get_entry(row, column);
+	return factor_ * ML_.get_entry(row, column);
     } else {
       if (column < n/2) { // left band column region
 	const unsigned int colbegin = offsetL_+2*(column-nl);
 	if (row >= colbegin && row < colbegin+bandL_.size())
-	  return bandL_[row-colbegin];
+	  return factor_ * bandL_[row-colbegin];
       } else {
 	if (column >= n-nr) { // right block column region
 	  if (row >= m-mr)
-	    return MR_.get_entry(row-(m-mr),
-				 column-(n-nr));
+	    return factor_ * MR_.get_entry(row-(m-mr), column-(n-nr));
 	} else { // right band column region
 	  const unsigned int colendplus1 = m-offsetR_-2*(n-nr-1-column);
 	  if (row < colendplus1 && row >= colendplus1-bandR_.size())
-	    return bandR_[(row+bandR_.size())-colendplus1];
+	    return factor_ * bandR_[(row+bandR_.size())-colendplus1];
 	}
       }
     }
@@ -100,7 +101,7 @@ namespace MathTL
  	  help += ML_.get_entry(i, j) * x[j];
       
       // contribution from left band
-      const unsigned int jbeginlefthelp = (i+2*nl+1)-bandL_.size()-offsetL_;
+      const unsigned int jbeginlefthelp = (i+2*nl+1)-std::min(bandL_.size()+offsetL_,i+2*nl+1);
       for (size_type j = std::max(nl, jbeginlefthelp-jbeginlefthelp/2);
 	   j <= std::min(n/2-1, ((i+2*nl)-offsetL_)/2); j++)
 	help += bandL_[i-offsetL_-2*(j-nl)] * x[j];
@@ -116,7 +117,7 @@ namespace MathTL
 	for (size_type j(0); j < nr; j++)
 	  help += MR_.get_entry(i-(m-mr), j) * x[n-nr+j];
       
-      Mx[i] = help;
+      Mx[i] = factor_ * help;
     }
   }
 
@@ -140,7 +141,7 @@ namespace MathTL
       for (size_type j(0); j < ml; j++) {
 	help += ML_.get_entry(j, i) * x[j];
       }
-      Mtx[i] = help;
+      Mtx[i] = factor_ * help;
     }
 
     // contribution from left band
@@ -149,7 +150,7 @@ namespace MathTL
       const unsigned int jbegin = offsetL_+2*(i-nl);
       for (size_type j(jbegin); j < jbegin+bandL_.size(); j++)
 	help += bandL_[j-jbegin] * x[j];
-      Mtx[i] = help;
+      Mtx[i] = factor_ * help;
     }
     
     // contribution from right band
@@ -158,7 +159,7 @@ namespace MathTL
       const unsigned int jendplus1 = m-offsetR_-2*(n-nr-1-i);
       for (size_type j(jendplus1-bandR_.size()); j < jendplus1; j++)
 	help += bandR_[(j+bandR_.size())-jendplus1] * x[j];
-      Mtx[i] = help;
+      Mtx[i] = factor_ * help;
     }
 
     // contribution from lower right corner block
@@ -167,7 +168,7 @@ namespace MathTL
       for (size_type j(m-mr); j < m; j++) {
 	help += MR_.get_entry(j-(m-mr), i-(n-nr)) * x[j];
       }
-      Mtx[i] = help;
+      Mtx[i] = factor_ * help;
     }
     
   }
@@ -186,15 +187,16 @@ namespace MathTL
     S.resize(m, n);
 
     // corner blocks
-    S.set_block(0, 0, ML_);
-    S.set_block(m-mr, n-nr, MR_);
+    if (nl>0) S.set_block(0, 0, ML_);
+    if (nr>0) S.set_block(m-mr, n-nr, MR_);
     
     for (unsigned int i(0); i < m; i++) {
       // left band
-      const unsigned int jbeginlefthelp = (i+2*nl+1)-bandL_.size()-offsetL_;
+      const unsigned int jbeginlefthelp = (i+2*nl+1)-std::min(bandL_.size()+offsetL_,i+2*nl+1);
       for (size_type j = std::max(nl, jbeginlefthelp-jbeginlefthelp/2);
-	   j <= std::min(n/2-1, ((i+2*nl)-offsetL_)/2); j++)
+	   j <= std::min(n/2-1, ((i+2*nl)-offsetL_)/2); j++) {
 	S.set_entry(i, j, bandL_[i-offsetL_-2*(j-nl)]);
+      }
       
       // right band
       const unsigned int jbeginrighthelp = (i+offsetR_+2*(n-nr-1)+1)-m;
@@ -202,6 +204,8 @@ namespace MathTL
 	   j <= std::min(n-nr-1, ((i+offsetR_+2*(n-nr-1)+bandR_.size())-m)/2); j++)
 	S.set_entry(i, j, bandR_[i-(m-offsetR_-2*(n-nr-1-j)-bandR_.size())]);
     }
+
+    S.scale(factor_);
   }
     
   template <class C>

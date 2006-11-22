@@ -43,10 +43,10 @@ namespace MathTL
       factor         : constant pre-factor
      */
     QuasiStationaryMatrix(const int j0,
-			  const unsigned int mj0, const unsigned int nj0,
+			  const size_type mj0, const size_type nj0,
 			  const Matrix<C>& ML, const Matrix<C>& MR,
 			  const Vector<C>& bandL, const Vector<C>& bandR,
-			  const int offsetL, const int offsetR,
+			  const size_type offsetL, const size_type offsetR,
 			  const double factor = 1.0);
     
     /*!
@@ -101,10 +101,10 @@ namespace MathTL
   protected:
     int j0_;
     mutable int j_;
-    unsigned int mj0_, nj0_;
+    size_type mj0_, nj0_;
     Matrix<C> ML_, MR_;
     Vector<C> bandL_,bandR_;
-    int offsetL_, offsetR_;
+    size_type offsetL_, offsetR_;
     double factor_;
   };
 

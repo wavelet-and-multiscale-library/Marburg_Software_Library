@@ -5,10 +5,10 @@ namespace MathTL
   template <class C>
   QuasiStationaryMatrix<C>
   ::QuasiStationaryMatrix(const int j0,
-			  const unsigned int mj0, const unsigned int nj0,
+			  const size_type mj0, const size_type nj0,
 			  const Matrix<C>& ML, const Matrix<C>& MR,
 			  const Vector<C>& bandL, const Vector<C>& bandR,
-			  const int offsetL, const int offsetR,
+			  const size_type offsetL, const size_type offsetR,
 			  const double factor)
     : j0_(j0), mj0_(mj0), nj0_(nj0),
       ML_(ML), MR_(MR),
@@ -41,19 +41,19 @@ namespace MathTL
     assert(row < row_dimension() && column < column_dimension());
     
     // for readability:
-    const unsigned int ml = ML_.row_dimension();
-    const unsigned int nl = ML_.column_dimension();
-    const unsigned int mr = MR_.row_dimension();
-    const unsigned int nr = MR_.column_dimension();
-    const unsigned int m = row_dimension();
-    const unsigned int n = column_dimension();
+    const size_type ml = ML_.row_dimension();
+    const size_type nl = ML_.column_dimension();
+    const size_type mr = MR_.row_dimension();
+    const size_type nr = MR_.column_dimension();
+    const size_type m = row_dimension();
+    const size_type n = column_dimension();
 
     if (column < nl) { // left block column region
       if (row < ml)
 	return factor_ * ML_.get_entry(row, column);
     } else {
       if (column < n/2) { // left band column region
-	const unsigned int colbegin = offsetL_+2*(column-nl);
+	const size_type colbegin = offsetL_+2*(column-nl);
 	if (row >= colbegin && row < colbegin+bandL_.size())
 	  return factor_ * bandL_[row-colbegin];
       } else {
@@ -61,7 +61,7 @@ namespace MathTL
 	  if (row >= m-mr)
 	    return factor_ * MR_.get_entry(row-(m-mr), column-(n-nr));
 	} else { // right band column region
-	  const unsigned int colendplus1 = m-offsetR_-2*(n-nr-1-column);
+	  const size_type colendplus1 = m-offsetR_-2*(n-nr-1-column);
 	  if (row < colendplus1 && row >= colendplus1-bandR_.size())
 	    return factor_ * bandR_[(row+bandR_.size())-colendplus1];
 	}
@@ -85,12 +85,12 @@ namespace MathTL
     assert(Mx.size() == row_dimension());
     
     // for readability:
-    const unsigned int ml = ML_.row_dimension();
-    const unsigned int nl = ML_.column_dimension();
-    const unsigned int mr = MR_.row_dimension();
-    const unsigned int nr = MR_.column_dimension();
-    const unsigned int m = row_dimension();
-    const unsigned int n = column_dimension();
+    const size_type ml = ML_.row_dimension();
+    const size_type nl = ML_.column_dimension();
+    const size_type mr = MR_.row_dimension();
+    const size_type nr = MR_.column_dimension();
+    const size_type m = row_dimension();
+    const size_type n = column_dimension();
 
     for (size_type i(0); i < row_dimension(); i++) {
       C help(0);
@@ -101,13 +101,13 @@ namespace MathTL
  	  help += ML_.get_entry(i, j) * x[j];
       
       // contribution from left band
-      const unsigned int jbeginlefthelp = (i+2*nl+1)-std::min(bandL_.size()+offsetL_,i+2*nl+1);
+      const size_type jbeginlefthelp = (i+2*nl+1)-std::min(bandL_.size()+offsetL_,i+2*nl+1);
       for (size_type j = std::max(nl, jbeginlefthelp-jbeginlefthelp/2);
 	   j <= std::min(n/2-1, ((i+2*nl)-offsetL_)/2); j++)
 	help += bandL_[i-offsetL_-2*(j-nl)] * x[j];
       
       // contribution from right band
-      const unsigned int jbeginrighthelp = (i+offsetR_+2*(n-nr-1)+1)-m;
+      const size_type jbeginrighthelp = (i+offsetR_+2*(n-nr-1)+1)-m;
       for (size_type j = std::max(n/2, jbeginrighthelp-jbeginrighthelp/2);
 	   j <= std::min(n-nr-1, ((i+offsetR_+2*(n-nr-1)+bandR_.size())-m)/2); j++)
 	help += bandR_[i-(m-offsetR_-2*(n-nr-1-j)-bandR_.size())] * x[j];
@@ -128,12 +128,12 @@ namespace MathTL
     assert(Mtx.size() == column_dimension());
     
     // for readability:
-    const unsigned int ml = ML_.row_dimension();
-    const unsigned int nl = ML_.column_dimension();
-    const unsigned int mr = MR_.row_dimension();
-    const unsigned int nr = MR_.column_dimension();
-    const unsigned int m = row_dimension();
-    const unsigned int n = column_dimension();
+    const size_type ml = ML_.row_dimension();
+    const size_type nl = ML_.column_dimension();
+    const size_type mr = MR_.row_dimension();
+    const size_type nr = MR_.column_dimension();
+    const size_type m = row_dimension();
+    const size_type n = column_dimension();
 
     // contribution from upper left corner block
     for (size_type i(0); i < nl; i++) {
@@ -147,7 +147,7 @@ namespace MathTL
     // contribution from left band
     for (size_type i(nl); i < n/2; i++) {
       C help(0);
-      const unsigned int jbegin = offsetL_+2*(i-nl);
+      const size_type jbegin = offsetL_+2*(i-nl);
       for (size_type j(jbegin); j < jbegin+bandL_.size(); j++)
 	help += bandL_[j-jbegin] * x[j];
       Mtx[i] = factor_ * help;
@@ -156,7 +156,7 @@ namespace MathTL
     // contribution from right band
     for (size_type i(n/2); i < n-nr; i++) {
       C help(0);
-      const unsigned int jendplus1 = m-offsetR_-2*(n-nr-1-i);
+      const size_type jendplus1 = m-offsetR_-2*(n-nr-1-i);
       for (size_type j(jendplus1-bandR_.size()); j < jendplus1; j++)
 	help += bandR_[(j+bandR_.size())-jendplus1] * x[j];
       Mtx[i] = factor_ * help;
@@ -178,11 +178,11 @@ namespace MathTL
   QuasiStationaryMatrix<C>::to_sparse(SparseMatrix<C>& S) const
   {
     // for readability:
-    const unsigned int nl = ML_.column_dimension();
-    const unsigned int mr = MR_.row_dimension();
-    const unsigned int nr = MR_.column_dimension();
-    const unsigned int m = row_dimension();
-    const unsigned int n = column_dimension();
+    const size_type nl = ML_.column_dimension();
+    const size_type mr = MR_.row_dimension();
+    const size_type nr = MR_.column_dimension();
+    const size_type m = row_dimension();
+    const size_type n = column_dimension();
 
     S.resize(m, n);
 
@@ -192,14 +192,14 @@ namespace MathTL
     
     for (unsigned int i(0); i < m; i++) {
       // left band
-      const unsigned int jbeginlefthelp = (i+2*nl+1)-std::min(bandL_.size()+offsetL_,i+2*nl+1);
+      const size_type jbeginlefthelp = (i+2*nl+1)-std::min(bandL_.size()+offsetL_,i+2*nl+1);
       for (size_type j = std::max(nl, jbeginlefthelp-jbeginlefthelp/2);
 	   j <= std::min(n/2-1, ((i+2*nl)-offsetL_)/2); j++) {
 	S.set_entry(i, j, bandL_[i-offsetL_-2*(j-nl)]);
       }
       
       // right band
-      const unsigned int jbeginrighthelp = (i+offsetR_+2*(n-nr-1)+1)-m;
+      const size_type jbeginrighthelp = (i+offsetR_+2*(n-nr-1)+1)-m;
       for (size_type j = std::max(n/2, jbeginrighthelp-jbeginrighthelp/2);
 	   j <= std::min(n-nr-1, ((i+offsetR_+2*(n-nr-1)+bandR_.size())-m)/2); j++)
 	S.set_entry(i, j, bandR_[i-(m-offsetR_-2*(n-nr-1-j)-bandR_.size())]);

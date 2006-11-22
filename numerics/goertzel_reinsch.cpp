@@ -34,24 +34,26 @@ namespace MathTL
     C uk(0), ukplus1(0), wk(0), wkplus1(0), lambda(0);
 
     if (cos(p[0])>0) {
-      lambda = -4*sin(p[0]/2.)*sin(p[0]/2.);
+      const double sinp02 = sin(p[0]/2.);
+      lambda = -4*sinp02*sinp02;
       for (int k(coeffs_.size()-1); k >= 0; --k) {
 	uk = wk + ukplus1;
 	wkplus1 = wk;
 	wk = (lambda*uk + wkplus1) + coeffs_[k];
-	if (k > 0) {
+// 	if (k > 0) {
 	  ukplus1 = uk;
-	}
+// 	}
       }
     } else {
-      lambda = 4*cos(p[0]/2.)*cos(p[0]/2.);
+      const double cosp02 = cos(p[0]/2.);
+      lambda = 4*cosp02*cosp02;
       for (int k(coeffs_.size()-1); k >= 0; --k) {
 	uk = wk - ukplus1;
 	wkplus1 = wk;
 	wk = (lambda*uk - wkplus1) + coeffs_[k];
-	if (k > 0) {
+// 	if (k > 0) {
 	  ukplus1 = uk;
-	}
+// 	}
       }
     }
     

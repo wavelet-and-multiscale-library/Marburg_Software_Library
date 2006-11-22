@@ -261,6 +261,7 @@ namespace MathTL
 
     /*!
       constructor from a given grid and given values
+      (columns of the matrix correspond to the x grid)
     */
     SampledMapping(const Grid<2>& grid, const Matrix<C>& values);
 

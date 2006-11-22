@@ -131,7 +131,7 @@ namespace WaveletTL
     //! read access to the primal b.c. order at x=0
     const int get_sT0() const { return sT0; }
 
-    //! read access to the primal b.c. order at x=0
+    //! read access to the primal b.c. order at x=1
     const int get_sT1() const { return sT1; }
 
     /*!

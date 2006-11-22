@@ -18,14 +18,18 @@ using namespace MathTL;
 namespace WaveletTL
 {
   /*!
-    The following structure shall hold all the pieces of information
+    The following structure holds all the pieces of information
     needed for the construction of a spline wavelet basis on the interval.
+
    */
   template <int d, int dT>
   class SplineBasisData
   {
   public:
-    //! default constructor from the primal and dual boundary condition orders
+    /*!
+      constructor from the primal and dual boundary condition orders
+      plus additional information
+    */
     SplineBasisData(const char* flavor,
 		    const char* options,
 		    const int s0, const int s1, const int sT0, const int sT1);
@@ -33,13 +37,11 @@ namespace WaveletTL
     //! destructor
     virtual ~SplineBasisData();
 
-    /*!
-      check the integrity of the internal data
-     */
+    //! check integrity of the internal data
     void check() const;
 
   protected:
-    // flavor (e.g., "DS", "P" etc.)
+    // flavor (e.g., "DS", "P" etc.), determines also the shape of the primal generators
     std::string flavor_;
 
     // boundary condition orders

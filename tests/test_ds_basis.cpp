@@ -15,8 +15,8 @@ int main()
 {
   cout << "Testing the DS bases..." << endl;
 
-  const int d = 2;
-  const int dT = 2;
+  const int d = 3;
+  const int dT = 3;
 
 //   typedef DSBasis<d,dT> Basis;
   typedef DSBasis<d,dT,Bernstein> Basis;
@@ -283,7 +283,7 @@ int main()
   }
 #endif
 
-#if 1
+#if 0
   cout << "- create some test index set..." << endl;
   InfiniteVector<double, Index> gplotcoeffs, plotcoeffs;
   gplotcoeffs[++(++first_generator(&basis, basis.j0()+5))] = 1.0;

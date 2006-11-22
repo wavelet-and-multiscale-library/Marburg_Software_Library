@@ -44,7 +44,7 @@ namespace MathTL
 	if (row < M.row_dimension()-1)
 	  os << "; ";
       }
-    os << "]" << endl;
+    os << "]" << std::endl;
     os.precision(old_precision);
   }
 }

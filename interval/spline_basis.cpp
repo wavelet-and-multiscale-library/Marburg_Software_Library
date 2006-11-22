@@ -10,7 +10,7 @@ namespace WaveletTL
 				 const int s0, const int s1, const int sT0, const int sT1)
     : SplineBasisData<d,dT>(flavor,options,s0,s1,sT0,sT1)
   {
-    if (flavor_ == "P") {
+    if (SplineBasisData<d,dT>::flavor_ == "P") {
       // cf. PBasis<d,dT> ...
       DeltaLmin_       = 1-d-ell1<d>()+s0;
       DeltaRmax_offset = -1-ell1<d>()-s1;
@@ -21,17 +21,17 @@ namespace WaveletTL
   void
   SplineBasis<d,dT>::apply_Mj(const int j, const Vector<double>& x, Vector<double>& y) const
   {
-    Mj0_->set_level(j);
-    Mj1_->set_level(j);
+    SplineBasisData<d,dT>::Mj0_->set_level(j);
+    SplineBasisData<d,dT>::Mj1_->set_level(j);
 
     // decompose x=(x1 x2) appropriately
-    Vector<double> x1(Mj0_->column_dimension());
+    Vector<double> x1(SplineBasisData<d,dT>::Mj0_->column_dimension());
     for (unsigned int i = 0; i < x1.size(); i++) x1[i] = x[i];
-    Vector<double> x2(Mj1_->column_dimension());
+    Vector<double> x2(SplineBasisData<d,dT>::Mj1_->column_dimension());
     for (unsigned int i = 0; i < x2.size(); i++) x2[i] = x[i+x1.size()];
-    Mj0_->apply(x1, y);
+    SplineBasisData<d,dT>::Mj0_->apply(x1, y);
     Vector<double> yhelp(y.size());
-    Mj1_->apply(x2,yhelp);
+    SplineBasisData<d,dT>::Mj1_->apply(x2,yhelp);
     y.add(yhelp);
   }
 
@@ -39,14 +39,14 @@ namespace WaveletTL
   void
   SplineBasis<d,dT>::apply_Mj_transposed(const int j, const Vector<double>& x, Vector<double>& y) const
   {
-    Mj0_->set_level(j);
-    Mj1_->set_level(j);
+    SplineBasisData<d,dT>::Mj0_->set_level(j);
+    SplineBasisData<d,dT>::Mj1_->set_level(j);
 
     // y is a block vector
-    Vector<double> y1(Mj0_->column_dimension());
-    Mj0_->apply_transposed(x, y1);
-    Vector<double> y2(Mj1_->column_dimension());
-    Mj1_->apply_transposed(x, y2);
+    Vector<double> y1(SplineBasisData<d,dT>::Mj0_->column_dimension());
+    SplineBasisData<d,dT>::Mj0_->apply_transposed(x, y1);
+    Vector<double> y2(SplineBasisData<d,dT>::Mj1_->column_dimension());
+    SplineBasisData<d,dT>::Mj1_->apply_transposed(x, y2);
     for (unsigned int i = 0; i < y1.size(); i++) y[i] = y1[i];
     for (unsigned int i = 0; i < y2.size(); i++) y[i+y1.size()] = y2[i];
   }
@@ -55,14 +55,14 @@ namespace WaveletTL
   void
   SplineBasis<d,dT>::apply_Gj(const int j, const Vector<double>& x, Vector<double>& y) const
   {
-    Mj0T_->set_level(j);
-    Mj1T_->set_level(j);
+    SplineBasisData<d,dT>::Mj0T_->set_level(j);
+    SplineBasisData<d,dT>::Mj1T_->set_level(j);
 
     // y is a block vector
-    Vector<double> y1(Mj0T_->column_dimension());
-    Mj0T_->apply_transposed(x, y1);
-    Vector<double> y2(Mj1T_->column_dimension());
-    Mj1T_->apply_transposed(x, y2);
+    Vector<double> y1(SplineBasisData<d,dT>::Mj0T_->column_dimension());
+    SplineBasisData<d,dT>::Mj0T_->apply_transposed(x, y1);
+    Vector<double> y2(SplineBasisData<d,dT>::Mj1T_->column_dimension());
+    SplineBasisData<d,dT>::Mj1T_->apply_transposed(x, y2);
     for (unsigned int i = 0; i < y1.size(); i++) y[i] = y1[i];
     for (unsigned int i = 0; i < y2.size(); i++) y[i+y1.size()] = y2[i];
   }
@@ -71,17 +71,17 @@ namespace WaveletTL
   void
   SplineBasis<d,dT>::apply_Gj_transposed(const int j, const Vector<double>& x, Vector<double>& y) const
   {
-    Mj0T_->set_level(j);
-    Mj1T_->set_level(j);
+    SplineBasisData<d,dT>::Mj0T_->set_level(j);
+    SplineBasisData<d,dT>::Mj1T_->set_level(j);
 
     // decompose x=(x1 x2) appropriately
-    Vector<double> x1(Mj0T_->column_dimension());
+    Vector<double> x1(SplineBasisData<d,dT>::Mj0T_->column_dimension());
     for (unsigned int i = 0; i < x1.size(); i++) x1[i] = x[i];
-    Vector<double> x2(Mj1T_->column_dimension());
+    Vector<double> x2(SplineBasisData<d,dT>::Mj1T_->column_dimension());
     for (unsigned int i = 0; i < x2.size(); i++) x2[i] = x[i+x1.size()];
-    Mj0T_->apply(x1, y);
+    SplineBasisData<d,dT>::Mj0T_->apply(x1, y);
     Vector<double> yhelp(y.size());
-    Mj1T_->apply(x2,yhelp);
+    SplineBasisData<d,dT>::Mj1T_->apply(x2,yhelp);
     y.add(yhelp);
   }
 
@@ -90,7 +90,7 @@ namespace WaveletTL
   SplineBasis<d,dT>::apply_Tj(const int j, const Vector<double>& x, Vector<double>& y) const
   { 
     y = x;
-    for (int k = j0_; k <= j; k++) {
+    for (int k = j0(); k <= j; k++) {
       // decompose current vector appropriately
       Vector<double> y1(Deltasize(k+1));
       for (unsigned int i = 0; i < y1.size(); i++) y1[i] = y[i];
@@ -107,7 +107,7 @@ namespace WaveletTL
     y = x;
 
     // T_j^{-1}=diag(G_{j0},I)*...*diag(G_{j-1},I)*G_j
-    for (int k = j; k >= j0_; k--) {
+    for (int k = j; k >= j0(); k--) {
       // decompose current vector appropriately
       Vector<double> y1(Deltasize(k+1));
       for (unsigned int i = 0; i < y1.size(); i++) y1[i] = y[i];
@@ -123,7 +123,7 @@ namespace WaveletTL
   { 
     y = x;
 
-    for (int k = j; k >= j0_; k--) {
+    for (int k = j; k >= j0(); k--) {
       // decompose current vector appropriately
       Vector<double> y1(Deltasize(k+1));
       for (unsigned int i = 0; i < y1.size(); i++) y1[i] = y[i];

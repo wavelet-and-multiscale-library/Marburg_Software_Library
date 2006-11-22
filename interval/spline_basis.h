@@ -31,22 +31,22 @@ namespace WaveletTL
 		const int s0, const int s1, const int sT0, const int sT1);
 
     //! coarsest possible level
-    inline const int j0() const { return j0_; }
+    inline const int j0() const { return SplineBasisData<d,dT>::j0_; }
 
     //! size_type, for convenience
     typedef Vector<double>::size_type size_type;
 
     //! read access to the primal b.c. order at x=0
-    const int get_s0() const { return s0_; }
+    const int get_s0() const { return SplineBasisData<d,dT>::s0_; }
 
     //! read access to the primal b.c. order at x=1
-    const int get_s1() const { return s1_; }
+    const int get_s1() const { return SplineBasisData<d,dT>::s1_; }
 
     //! read access to the primal b.c. order at x=0
-    const int get_sT0() const { return sT0_; }
+    const int get_sT0() const { return SplineBasisData<d,dT>::sT0_; }
 
     //! read access to the primal b.c. order at x=1
-    const int get_sT1() const { return sT1_; }
+    const int get_sT1() const { return SplineBasisData<d,dT>::sT1_; }
 
     //! extremal generator indices
     inline const int DeltaLmin() const { return DeltaLmin_; }

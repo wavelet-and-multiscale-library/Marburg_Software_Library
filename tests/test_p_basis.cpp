@@ -25,8 +25,8 @@ int main()
   typedef PBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
-  Basis basis; // no b.c.'s
-//   Basis basis(1, 1); // 1st order complementary b.c.'s at x=0 and x=1
+//   Basis basis; // no b.c.'s
+  Basis basis(1, 1); // 1st order complementary b.c.'s at x=0 and x=1
 //   Basis basis(1, 0); // complementary b.c. at x=0
 //   Basis basis(0, 1); // complementary b.c. at x=1
 //   Basis basis(3, 3);
@@ -42,16 +42,48 @@ int main()
 
   //  abort();  
 
-#if 0
+#if 1
   {
-    SparseMatrix<double> mj0;
+    SparseMatrix<double> M;
     const int j = basis.j0();
-    basis.assemble_Mj0(j, mj0);
-    cout << "* Mj0 for j=j0=" << j << ":" << endl;
-    cout << mj0;
+
+    basis.assemble_Mj0(j, M);
+    M.scale(M_SQRT2);
+    cout << "* Mj0 (without factor 1/sqrt(2)) for j=j0=" << j << ":" << endl;
+    cout << M;
     std::ofstream result("Mj0.m");
     result << "M=";
-    print_matrix(mj0, result);
+    print_matrix(M, result);
+    result << endl;
+    result.close();
+
+    basis.assemble_Mj1(j, M);
+    M.scale(M_SQRT2);
+    cout << "* Mj1 (without factor 1/sqrt(2)) for j=j0=" << j << ":" << endl;
+    cout << M;
+    result.open("Mj1.m");
+    result << "M=";
+    print_matrix(M, result);
+    result << endl;
+    result.close();
+    
+    basis.assemble_Mj0T(j, M);
+    M.scale(M_SQRT2);
+    cout << "* Mj0T (without factor 1/sqrt(2)) for j=j0=" << j << ":" << endl;
+    cout << M;
+    result.open("Mj0T.m");
+    result << "M=";
+    print_matrix(M, result);
+    result << endl;
+    result.close();
+
+    basis.assemble_Mj1T(j, M);
+    M.scale(M_SQRT2);
+    cout << "* Mj1T (without factor 1/sqrt(2)) for j=j0=" << j << ":" << endl;
+    cout << M;
+    result.open("Mj1T.m");
+    result << "M=";
+    print_matrix(M, result);
     result << endl;
     result.close();
   }

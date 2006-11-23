@@ -102,7 +102,7 @@ int main()
   fs.close();
 #endif
 
-#if 1
+#if 0
   {
     const unsigned int d = 3;
     Array1D<double> knots(5+d);
@@ -162,6 +162,14 @@ int main()
     cout << "  N_{-1,2}(" << x << ")="
 	 <<  EvaluateSchoenbergBSpline<2>(-1,x) << endl;
   }
+
+  SchoenbergBSpline_td<2> sbs(0, -1);
+  cout << "* compare with the values from a function object:" << endl;
+  for (double x = -0.5; x <= 1.5; x+=0.1) {
+    cout << "  N_{-1,2}(" << x << ")="
+	 <<  sbs.value(Point<1>(x)) << endl;
+  }
+  
   cout << "* some point values of its derivative:" << endl;
   for (double x = -0.5; x <= 1.5; x+=0.1) {
     cout << "  N_{-1,2}'(" << x << ")="

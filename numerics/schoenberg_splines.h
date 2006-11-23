@@ -14,6 +14,7 @@
 #include <utils/function.h>
 #include <numerics/splines.h>
 #include <numerics/cardinal_splines.h>
+#include <utils/function.h>
 
 namespace MathTL
 {
@@ -159,6 +160,45 @@ namespace MathTL
     const double factor(1 << j);
     return factor * sqrt(factor) * EvaluateSchoenbergBSpline_x<d>(k-(d/2), factor * x);
   }
+
+  /*!
+    a translated and dilated Schoenberg B-spline as a function object
+  */
+  template <int d>
+  class SchoenbergBSpline_td : public Function<1>
+  {
+  public:
+    //! constructor from j, k
+    SchoenbergBSpline_td(const int j, const int k)
+      : j_(j), k_(k) {}
+    
+    //! virtual destructor
+    virtual ~SchoenbergBSpline_td() {}
+
+    //! point value
+    inline double value(const Point<1>& p,
+			const unsigned int component = 0) const
+    {
+      return EvaluateSchoenbergBSpline_td<d>(j_, k_, p[0]);
+    }
+  
+    //! point value
+    void vector_value(const Point<1> &p,
+		      Vector<double>& values) const
+    {
+      values.resize(1, false);
+      values[0] = value(p);
+    }
+   
+    //! set j
+    void set_j(const int j) { j_ = j; }
+    
+    //! set k
+    void set_k(const int k) { k_ = k; }
+    
+  protected:
+    int j_, k_;
+  };
 
 }
 

@@ -58,12 +58,81 @@ class RHS2_part : public Function<1> {
   }
 };
 
+// smooth part of solution 2
+class Solution3 : public Function<1> {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    return -sin(3.*M_PI*p[0]);
+  }
+  
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
+// smooth part of corresponding right-hand side
+class RHS3 : public Function<1> {
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    return -sin(3.*M_PI*p[0])*9.*M_PI*M_PI;
+  }
+  
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
+/*!
+  A translated and dilated Schoenberg B-spline as a function object,
+  depending on the current value of k, the function is mirrored
+  at x=1/2, just as in the primal generators of PBasis.
+*/
+template <int d>
+class SchoenbergIntervalBSpline_td : public Function<1>
+{
+public:
+  //! constructor from j, k
+  SchoenbergIntervalBSpline_td(const int j, const int k)
+    : j_(j), k_(k) {}
+  
+  //! virtual destructor
+  virtual ~SchoenbergIntervalBSpline_td() {}
+
+  //! point value
+  inline double value(const Point<1>& p,
+		      const unsigned int component = 0) const
+  {
+    if (k_ > (1<<j_)-ell1<d>()-d)
+      return EvaluateSchoenbergBSpline_td<d>(j_, (1<<j_)-d-k_-2*ell1<d>(), 1-p[0]);
+    else
+      return EvaluateSchoenbergBSpline_td<d>(j_, k_, p[0]);
+  }
+  
+  //! point value
+  void vector_value(const Point<1> &p,
+		    Vector<double>& values) const
+  {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+  
+  //! set j
+  void set_j(const int j) { j_ = j; }
+  
+  //! set k
+  void set_k(const int k) { k_ = k; }
+  
+protected:
+  int j_, k_;
+};
+
 int main()
 {
   cout << "Testing FullLaplacian ..." << endl;
 
-  const unsigned int d = 2;
-  const unsigned int dT = 2;
+  const unsigned int d = 3;
+  const unsigned int dT = 3;
 
   SplineBasis<d,dT> basis("P","",1,1,0,0); // PBasis, complementary b.c.'s
   FullLaplacian<d,dT> delta(basis);
@@ -75,18 +144,21 @@ int main()
   cout << "* stiffness matrix on next level j0+1=" << basis.j0()+1 << ":" << endl
        << delta;
   
-  const unsigned int solution = 1;
+  const unsigned int solution = 3;
   Function<1> *uexact = 0;
   if (solution == 1)
     uexact = new Solution1();
   else {
     if (solution == 2)
       uexact = new Solution2();
+    else
+      uexact = new Solution3();
   }
 
   cout << "* compute wavelet-Galerkin approximations for several levels..." << endl;
   const int jmin = basis.j0();
-  const int jmax = 20;
+//   const int jmax = jmin+2;
+  const int jmax = 18;
   Vector<double> js(jmax-jmin+1);
   Vector<double> Linfty_errors(jmax-jmin+1), L2_errors(jmax-jmin+1);
 
@@ -100,36 +172,53 @@ int main()
     Vector<double> rhs_phijk(delta.row_dimension());
     if (solution == 1) {
       if (d == 2) {
-	// exact right-hand side is known
-	rhs_phijk = sqrt(ldexp(1.0, -j));
+ 	// exact right-hand side is known
+ 	rhs_phijk = sqrt(ldexp(1.0, -j));
       } else {
 	// perform quadrature with a composite rule on [0,1]
+	cout << "  solution 1, quadrature for rhs..." << endl;
 	SimpsonRule simpson;
-	CompositeRule<1> composite(simpson, 2*d);
-	SchoenbergBSpline_td<d> sbs(j,0);
+	CompositeRule<1> composite(simpson, 12);
+	SchoenbergIntervalBSpline_td<d> sbs(j,0);
 	for (int k = basis.DeltaLmin(); k <= basis.DeltaRmax(j); k++) {
 	  sbs.set_k(k);
 	  rhs_phijk[k-basis.DeltaLmin()]
- 	    = composite.integrate(sbs,
- 				  Point<1>((k+ell1<d>())*ldexp(1.0, -j)),
- 				  Point<1>((k+ell2<d>())*ldexp(1.0, -j)));
-	}
+ 	    = composite.integrate(sbs, // against f=1
+ 				  Point<1>(std::max(0.0, (k+ell1<d>())*ldexp(1.0, -j))),
+ 				  Point<1>(std::min(1.0, (k+ell2<d>())*ldexp(1.0, -j))));
+ 	}
       }
     } else {
       if (solution == 2) {
 	// perform quadrature with a composite rule on [0,1]
+	cout << "  solution 2, quadrature for rhs..." << endl;
 	RHS2_part f_part;
 	SimpsonRule simpson;
-	CompositeRule<1> composite(simpson, 4);
-	SchoenbergBSpline_td<d> sbs(j,0);
+	CompositeRule<1> composite(simpson, 72);
+	SchoenbergIntervalBSpline_td<d> sbs(j,0);
 	for (int k = basis.DeltaLmin(); k <= basis.DeltaRmax(j); k++) {
 	  sbs.set_k(k);
 	  ProductFunction<1> integrand(&f_part, &sbs);
 	  rhs_phijk[k-basis.DeltaLmin()]
  	    = composite.integrate(integrand,
- 				  Point<1>((k+ell1<d>())*ldexp(1.0, -j)),
- 				  Point<1>((k+ell2<d>())*ldexp(1.0, -j)))
- 	    + 4*EvaluateSchoenbergBSpline_td<d>(j, k, 0.5);
+ 				  Point<1>(std::max(0.0, (k+ell1<d>())*ldexp(1.0, -j))),
+ 				  Point<1>(std::min(1.0, (k+ell2<d>())*ldexp(1.0, -j))))
+ 	    + 4*sbs.value(Point<1>(0.5));
+	}
+      } else {
+	// perform quadrature with a composite rule on [0,1]
+	cout << "  solution 3, quadrature for rhs..." << endl;
+	RHS3 f;
+	SimpsonRule simpson;
+	CompositeRule<1> composite(simpson, 72);
+	SchoenbergIntervalBSpline_td<d> sbs(j,0);
+	for (int k = basis.DeltaLmin(); k <= basis.DeltaRmax(j); k++) {
+	  sbs.set_k(k);
+	  ProductFunction<1> integrand(&f, &sbs);
+	  rhs_phijk[k-basis.DeltaLmin()]
+ 	    = composite.integrate(integrand,
+ 				  Point<1>(std::max(0.0, (k+ell1<d>())*ldexp(1.0, -j))),
+ 				  Point<1>(std::min(1.0, (k+ell2<d>())*ldexp(1.0, -j))));
 	}
       }
     }
@@ -152,7 +241,7 @@ int main()
     // solve Galerkin system
     Vector<double> ulambda(delta.row_dimension()), residual(delta.row_dimension()); ulambda = 0;
     unsigned int iterations;
-    CG(delta, rhs, ulambda, 1e-15, 200, iterations);
+    CG(delta, rhs, ulambda, 1e-15, 500, iterations);
 
 //     cout << "  solution coefficients: " << ulambda;
     cout << "  Galerkin system solved with residual (infinity) norm ";
@@ -175,16 +264,16 @@ int main()
 //     cout << "  solution coefficients in phi_{j,k} basis: " << ulambda_phijk << endl;
 
     // evaluate linear combination of Schoenberg B-splines on a grid
-    const unsigned int N = 1000;
+    const unsigned int N = 100;
     const double h = 1./N;
     Vector<double> ulambda_values(N+1);
     for (unsigned int i = 0; i <= N; i++) {
       const double x = i*h;
+      SchoenbergIntervalBSpline_td<d> sbs(j,0);
       for (unsigned int k = 0; k < delta.row_dimension(); k++) {
-	// here, k=0 refers to the leftmost spline generator
-	// with index 2-ceil(d/2)
+	sbs.set_k(basis.DeltaLmin()+k);
 	ulambda_values[i] +=
-	  ulambda_phijk[k] * EvaluateSchoenbergBSpline_td<d>(j,k+2-d+d/2, x);
+	  ulambda_phijk[k] * sbs.value(Point<1>(x));
       }
     }
 //     cout << "  point values of Galerkin solution: " << ulambda_values << endl;
@@ -206,14 +295,16 @@ int main()
     L2_errors[j-jmin] = L2_error;
   }
 
+#if 1
   // write Galerkin errors to a file
   ostringstream filename;
   filename << "full_galerkin_errors_" << d << "_" << solution << ".m";
   ofstream galerkin_stream(filename.str().c_str());
   galerkin_stream << "js=" << js << ";" << endl
-		  << "Linfty_errors=" << Linfty_errors << ";" << endl
-		  << "L2_errors=" << L2_errors << ";" << endl;
+ 		  << "Linfty_errors=" << Linfty_errors << ";" << endl
+ 		  << "L2_errors=" << L2_errors << ";" << endl;
   galerkin_stream.close();
+#endif
 
   delete uexact;
 

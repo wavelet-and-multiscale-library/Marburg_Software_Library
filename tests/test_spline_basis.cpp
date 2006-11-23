@@ -12,7 +12,7 @@ int main()
 {
   cout << "Testing setup of SplineBasisData objects..." << endl;
 
-#if 0
+#if 1
   SplineBasisData<2,2> sd22("P","",1,1,0,0); // PBasis, complementary b.c.'s
   sd22.check();
 

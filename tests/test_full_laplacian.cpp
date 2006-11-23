@@ -47,7 +47,7 @@ int main()
   
   const unsigned int solution = 1;
 
-  Solution uexact;
+  Solution1 uexact;
 
   cout << "* compute wavelet-Galerkin approximations for several levels..." << endl;
   const int jmin = basis.j0();

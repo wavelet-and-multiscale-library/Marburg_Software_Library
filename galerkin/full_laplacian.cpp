@@ -67,10 +67,10 @@ namespace WaveletTL
 
     // apply Laplacian w.r.t the hat functions in V_j
     // (i.e., apply 2^{2j}*tridiag(-1,2,-1)
-    y[0] = (1<<(2*j_)) * (2*Mx[0] - Mx[1]);
-    y[row_dimension()-1] = (1<<(2*j_)) * (2*Mx[row_dimension()-1]-Mx[row_dimension()-2]);
+    y[0] = ldexp(1.0, 2*j_) * (2*Mx[0] - Mx[1]);
+    y[row_dimension()-1] = ldexp(1.0, 2*j_) * (2*Mx[row_dimension()-1]-Mx[row_dimension()-2]);
     for (size_type i(1); i < row_dimension()-1; i++)
-      y[i] = (1<<(2*j_)) * (2*Mx[i] - Mx[i-1] - Mx[i+1]);
+      y[i] = ldexp(1.0, 2*j_) * (2*Mx[i] - Mx[i-1] - Mx[i+1]);
     
     // apply transposed wavelet transformation T_{j-1}^T
     // (does nothing if j==j0)

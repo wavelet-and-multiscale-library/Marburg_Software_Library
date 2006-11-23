@@ -31,9 +31,29 @@ public:
   }
 };
 
+class TestFunction_stretched : public Function<1>
+{
+public:
+  TestFunction_stretched() : Function<1>(1) {}
+  virtual ~TestFunction_stretched(){}
+  double value(const Point<1>& p,
+	       const unsigned int component = 0) const
+  {
+    return M_PI*sin(M_PI*p[0]/3.)/3.;
+  }
+  
+  void vector_value(const Point<1> &p,
+		    Vector<double>& values) const
+  {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
 int main()
 {
   TestFunction g;
+  TestFunction_stretched g_stretched;
 
   cout << "Testing QuadratureRule class ..." << endl;
 
@@ -68,7 +88,7 @@ int main()
 
   cout << "- check integration over arbitrary intervals, e.g. [0,3]: " << endl;
   cout << "* Simpson rule: "
-       << SQ.integrate(g, Point<1>(0.0), Point<1>(3.0)) << endl;
+       << SQ.integrate(g_stretched, Point<1>(0.0), Point<1>(3.0)) << endl;
 
   for (unsigned int N(1); N <= 6; N++)
     {

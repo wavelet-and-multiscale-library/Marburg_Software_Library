@@ -104,7 +104,8 @@ EXEOBJF4 = \
 EXEOBJF5 = \
   test_sturm_bvp.o test_cdd1.o test_cdd1_cube.o test_cdd2.o test_duv.o\
   test_cube_equation.o test_cdd1_ldomain.o\
-  test_cdd1_gramian.o
+  test_cdd1_gramian.o\
+  test_helmholtz_equation.o
 
 # set 6 of test programs: adaptive wavelet schemes for parabolic equations
 EXEOBJF6 = \

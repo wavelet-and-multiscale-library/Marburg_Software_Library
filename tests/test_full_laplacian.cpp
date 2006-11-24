@@ -1,10 +1,12 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 #include <algebra/vector.h>
 #include <utils/function.h>
 #include <interval/spline_basis.h>
 #include <galerkin/full_laplacian.h>
+#include <galerkin/full_gramian.h>
 #include <Rd/cdf_utils.h>
 #include <numerics/iteratsolv.h>
 #include <numerics/quadrature.h>
@@ -141,6 +143,7 @@ int main()
 
   SplineBasis<d,dT> basis("P","",1,1,0,0); // PBasis, complementary b.c.'s
   FullLaplacian<d,dT> delta(basis);
+  FullGramian<d,dT> G(basis);
 
   cout << "* stiffness matrix on coarsest level j0=" << basis.j0() << ":" << endl
        << delta;
@@ -149,7 +152,7 @@ int main()
   cout << "* stiffness matrix on next level j0+1=" << basis.j0()+1 << ":" << endl
        << delta;
   
-  const unsigned int solution = 5;
+  const unsigned int solution = 2;
   double kink = 0; // for Solution4;
 
   Function<1> *uexact = 0;
@@ -175,17 +178,42 @@ int main()
     break;
   }
 
-//   // setup (approximate) coefficients of u in the primal basis on a sufficiently high level
-//   const int jref = 15;
+  // setup (approximate) coefficients of u in the primal basis on a sufficiently high level
+  const int jref = 16;
+  G.set_level(jref);
   
-
+  // 1. compute integrals w.r.t. the primal generators on level jref
+  Vector<double> ucoeffs_phijk(G.row_dimension());
+  SimpsonRule simpson;
+  CompositeRule<1> composite(simpson, 12);
+  SchoenbergIntervalBSpline_td<d> sbs(jref,0);
+  for (int k = basis.DeltaLmin(); k <= basis.DeltaRmax(jref); k++) {
+    sbs.set_k(k);
+    ProductFunction<1> integrand(uexact, &sbs);
+    ucoeffs_phijk[k-basis.DeltaLmin()]
+      = composite.integrate(integrand,
+			    Point<1>(std::max(0.0, (k+ell1<d>())*ldexp(1.0, -jref))),
+			    Point<1>(std::min(1.0, (k+ell2<d>())*ldexp(1.0, -jref))));
+  }
+  // 2. transform rhs into that of psi_{j,k} basis: apply T_{j-1}^T
+  Vector<double> urhs(G.row_dimension());
+  if (jref == basis.j0())
+    urhs = ucoeffs_phijk;
+  else
+    basis.apply_Tj_transposed(jref-1, ucoeffs_phijk, urhs);
+  
+  // 3. solve Gramian system
+  Vector<double> uj_psijk(G.row_dimension()); uj_psijk = 0;
+  unsigned int iterations;
+  CG(G, urhs, uj_psijk, 1e-15, 250, iterations);
 
   cout << "* compute wavelet-Galerkin approximations for several levels..." << endl;
   const int jmin = basis.j0();
 //   const int jmax = jmin+2;
-  const int jmax = 18;
+  const int jmax = 16;
   Vector<double> js(jmax-jmin+1);
-  Vector<double> Linfty_errors(jmax-jmin+1), L2_errors(jmax-jmin+1);
+  Vector<double> Linfty_errors(jmax-jmin+1), L2_errors(jmax-jmin+1),
+    discr_L2_errors(jmax-jmin+1), discr_H1_errors(jmax-jmin+1);
 
   for (int j = jmin; j <= jmax; j++) {
     cout << "  j=" << j << ":" << endl;
@@ -309,6 +337,11 @@ int main()
       for (int k(basis.Deltasize(level)); k < basis.Deltasize(level+1); k++)
 	ulambda[k] /= (1<<level);
     }
+
+    // save the L_2 wavelet coefficients
+    Vector<double> ulambda_prolong(basis.Deltasize(jref));
+    std::copy(ulambda.begin(), ulambda.end(), ulambda_prolong.begin());
+
     // 2. apply T_{j-1}
     if (j == basis.j0())
       ulambda_phijk = ulambda;
@@ -347,6 +380,19 @@ int main()
     const double L2_error = sqrt(l2_norm_sqr(ulambda_values-uexact_values)*h);
     cout << "  L_2 error on a subgrid: " << L2_error << endl;
     L2_errors[j-jmin] = L2_error;
+
+    Vector<double> coeff_error = ulambda_prolong-uj_psijk;
+    const double discr_L2_error = l2_norm(coeff_error);
+    cout << "  discr. L_2 error: " << discr_L2_error << endl;
+    discr_L2_errors[j-jmin] = discr_L2_error;
+
+    for (int level = basis.j0(); level < jref; level++) {
+      for (int k(basis.Deltasize(level)); k < basis.Deltasize(level+1); k++)
+ 	coeff_error[k] *= (1<<level);
+    }
+    const double discr_H1_error = l2_norm(coeff_error);
+    cout << "  discr. H^1 error: " << discr_H1_error << endl;
+    discr_H1_errors[j-jmin] = discr_H1_error;
   }
 
 #if 1
@@ -356,7 +402,9 @@ int main()
   ofstream galerkin_stream(filename.str().c_str());
   galerkin_stream << "js=" << js << ";" << endl
  		  << "Linfty_errors=" << Linfty_errors << ";" << endl
- 		  << "L2_errors=" << L2_errors << ";" << endl;
+ 		  << "L2_errors=" << L2_errors << ";" << endl
+		  << "discr_L2_errors=" << discr_L2_errors << ";" << endl
+		  << "discr_H1_errors=" << discr_H1_errors << ";" << endl;
   galerkin_stream.close();
 #endif
 

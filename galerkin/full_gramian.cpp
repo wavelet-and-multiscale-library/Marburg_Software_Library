@@ -67,7 +67,14 @@ namespace WaveletTL
 	y[i] = (Mx[i-1] + 4*Mx[i] + Mx[i+1])/6;
     } else {
       if (d == 3) {
-	// not yet implemented
+	// cf. [P, Bsp. 3.23]
+	y[0] = Mx[0]/3 + 5*Mx[1]/24 + Mx[2]/120;
+	y[1] = 5*Mx[0]/24 + 11*Mx[1]/20 + 13*Mx[2]/60 + Mx[3]/120;
+	const size_type m = row_dimension();
+	y[m-1] = Mx[m-3]/120 + 5*Mx[m-2]/24 + Mx[m-1]/3;
+	y[m-2] = Mx[m-4]/120 + 13*Mx[m-3]/60 + 11*Mx[m-2]/20 + 5*Mx[m-1]/24;
+	for (size_type i(2); i < m-2; i++)
+	  y[i] = Mx[i-2]/120 + 13*Mx[i-1]/60 + 11*Mx[i]/20 + 13*Mx[i+1]/60 + Mx[i+2]/120;
       }
     }
     

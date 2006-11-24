@@ -65,8 +65,8 @@ int main()
 {
   cout << "Testing FullGramian ..." << endl;
 
-  const unsigned int d = 2;
-  const unsigned int dT = 2;
+  const unsigned int d = 3;
+  const unsigned int dT = 3;
 
   SplineBasis<d,dT> basis("P","",1,1,0,0); // PBasis, complementary b.c.'s
   FullGramian<d,dT> G(basis);

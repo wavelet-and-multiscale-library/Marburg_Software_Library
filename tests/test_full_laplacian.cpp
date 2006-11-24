@@ -235,7 +235,7 @@ int main()
     }
 //     cout << "  point values of Galerkin solution: " << ulambda_values << endl;
 
-    // compute L_infty error
+    // evaluate exact solution
     Vector<double> uexact_values(N+1);
     for (unsigned int i = 0; i <= N; i++) {
       const double x = i*h;
@@ -243,6 +243,7 @@ int main()
     }
 //     cout << "  point values of exact solution: " << uexact_values << endl;
 
+    // compute some errors
     const double Linfty_error = linfty_norm(ulambda_values-uexact_values);
     cout << "  L_infinity error on a subgrid: " << Linfty_error << endl;
     Linfty_errors[j-jmin] = Linfty_error;

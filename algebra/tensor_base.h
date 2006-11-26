@@ -12,7 +12,7 @@
 
 #include <iostream>
 #include "algebra/tensor.h"
-#include "utils/array1d.h"
+#include "utils/fixed_array1d.h"
 
 namespace MathTL
 {
@@ -140,7 +140,7 @@ namespace MathTL
     /*!
       internal storage for the vector entries
     */
-    Array1D<VALUE> values;
+    FixedArray1D<VALUE,DIM> values;
   };
 
   /*!

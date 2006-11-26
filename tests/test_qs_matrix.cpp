@@ -38,5 +38,19 @@ int main()
   Q.apply_transposed(y, Qty);
   cout << "Q^T applied to y=" << y << " yields Q^Ty=" << Qty << endl;
 
+  x.resize(Q.column_dimension()+2);
+  x[5] = x[6] = 1;
+  Qx.resize(Q.row_dimension()+2);
+  Q.apply(x, Qx, 1, 2);
+  cout << "Q applied to the part of x=" << x << " from index 1," << endl
+       << "written into Qx from index 2 on yields Qx=" << Qx << endl;
+
+  y.resize(Q.row_dimension()+3);
+  y[14] = y[15] = 1;
+  Qty.resize(Q.column_dimension()+1);
+  Q.apply_transposed(y, Qty, 3, 1);
+  cout << "Q^T applied to the part of y=" << y << " from index 3," << endl
+       << "written into Qty from index 1 on yields Qty=" << Qty << endl;
+
   return 0;
 }

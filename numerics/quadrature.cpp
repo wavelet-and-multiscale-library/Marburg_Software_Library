@@ -98,10 +98,10 @@ namespace MathTL
     double r(0.0);
     
     Point<DIM> helppoint;
-    double helpweight;
+//     double helpweight;
     for (unsigned int k(0); k < points_.size(); k++)
       {
-	helpweight = weights_[k];
+	double helpweight = weights_[k];
 	for (unsigned int d(0); d < DIM; d++)
 	  {
 	    helppoint(d) = a(d) + points_[k](d)*(b(d)-a(d));
@@ -185,8 +185,8 @@ namespace MathTL
 
     for (unsigned int i(0); i < Q.get_N(); i++)
       {
-	if (points[i] == Point<1>(0.0)) left = true;
-	if (points[i] == Point<1>(1.0)) right = true;
+	if (points[i][0] == 0.0) left = true;
+	if (points[i][0] == 1.0) right = true;
       }
 
     return (left && right);
@@ -213,8 +213,8 @@ namespace MathTL
 	double double_point_weight(0.0);
 	unsigned int n_end_points(0);
 	for (unsigned int i(0); i < Q.get_N(); i++)
-	  if (points[i] == Point<1>(0.0) ||
-	      points[i] == Point<1>(1.0))
+	  if (points[i][0] == 0.0 ||
+	      points[i][0] == 1.0)
 	    {
 	      double_point_weight += weights[i];
 	      n_end_points++;
@@ -229,13 +229,13 @@ namespace MathTL
 	for (unsigned int copy(0); copy < N; copy++)
 	  for (unsigned int q_point(0); q_point < Q.get_N(); q_point++)
 	    {
-	      if (copy > 0 && points[q_point] == Point<1>(0.0))
+	      if (copy > 0 && points[q_point][0] == 0.0)
 		continue;
 	      
 	      points_[next_point]
 		= Point<1>(points[q_point](0)/N + (1.0*copy)/N);
 
-	      if (copy != N-1 && points[q_point] == Point<1>(1.0))
+	      if (copy != N-1 && points[q_point][0] == 1.0)
 		weights_[next_point] = double_point_weight;
 	      else
 		weights_[next_point] = weights[q_point]/N;

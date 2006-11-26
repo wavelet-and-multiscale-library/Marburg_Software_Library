@@ -8,7 +8,7 @@ namespace MathTL
   template <unsigned int DIM, class VALUE>
   inline
   Tensor<1, DIM, VALUE>::Tensor(const bool initialize)
-    : values(DIM > 0 ? DIM : 1)
+    : values()
   {
     if (initialize)
       {

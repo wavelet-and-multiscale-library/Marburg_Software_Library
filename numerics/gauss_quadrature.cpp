@@ -21,7 +21,7 @@ namespace MathTL
     for (unsigned int n(0); n < N; n++)
       {
 	// the precomputed values live on [-1,1]
-	points_[n]  = 0.5 + GaussPoints[N-1][n]/2.0;
+	points_[n]  = 0.5 + 0.5 * GaussPoints[N-1][n];
 	weights_[n] = GaussWeights[N-1][n];
       }
   }

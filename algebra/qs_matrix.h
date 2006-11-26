@@ -76,20 +76,28 @@ namespace MathTL
 
     /*!
       matrix-vector multiplication Mx = (*this) * x;
-      we assume that the vector Mx has the correct size and
-      is not identical to x
+      it is possible to specify an offset which parts
+      of the vectors shall be used, thus enabling in-place algorithms,
+      the flag "add_to" toggles whether the result
+      is added to Mx (true) or Mx is overwritten (false)
     */
     template <class VECTOR>
-    void apply(const VECTOR& x, VECTOR& Mx) const;
+    void apply(const VECTOR& x, VECTOR& Mx,
+	       const size_type x_offset = 0,
+	       const size_type Mx_offset = 0,
+	       const bool add_to = false) const;
 
     /*!
       transposed matrix-vector multiplication Mtx = (*this)^T * x;
-      we assume that the vector Mtx has the correct size and
-      is not identical to x
+      again potentially with offsets for both input and output vector
+      and with an "add_to" flag
     */
     template <class VECTOR>
-    void apply_transposed(const VECTOR& x, VECTOR& Mtx) const;
-
+    void apply_transposed(const VECTOR& x, VECTOR& Mtx,
+			  const size_type x_offset = 0,
+			  const size_type Mtx_offset = 0,
+			  const bool add_to = false) const;
+    
     /*!
       stream output with user-defined tabwidth and precision
       (cf. deal.II)

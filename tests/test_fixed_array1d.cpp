@@ -23,9 +23,15 @@ class TestClass
 int main()
 {
   cout << "Testing MathTL::FixedArray1D ..." << endl;
+
+  FixedArray1D<int,2> a1;
+  a1[0] = -4; a1[1] = 3;
+  cout << "- a FixedArray1D<int,2>: " << a1 << endl;
+
   FixedArray1D<double,2> a;
-  a[0] = 2; a[1] = -1;
+  a[0] = 2; a[1] = -1.3;
   cout << "- a FixedArray1D<double,2>: " << a << endl;
+
   FixedArray1D<TestClass,3> b;
 
   return 0;

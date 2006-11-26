@@ -80,9 +80,13 @@ namespace MathTL
 
   template <class C>
   template <class VECTOR>
-  void QuasiStationaryMatrix<C>::apply(const VECTOR& x, VECTOR& Mx) const
+  void QuasiStationaryMatrix<C>::apply(const VECTOR& x, VECTOR& Mx,
+				       const size_type x_offset,
+				       const size_type Mx_offset,
+				       const bool add_to) const
   {
-    assert(Mx.size() == row_dimension());
+    assert(x.size() >= x_offset + column_dimension());
+    assert(Mx.size() >= Mx_offset + row_dimension());
     
     // for readability:
     const size_type ml = ML_.row_dimension();
@@ -92,40 +96,74 @@ namespace MathTL
     const size_type m = row_dimension();
     const size_type n = column_dimension();
 
-    for (size_type i(0); i < row_dimension(); i++) {
-      C help(0);
-
-      // contribution from upper left corner block
-      if (i < ml)
- 	for (size_type j(0); j < nl; j++)
- 	  help += ML_.get_entry(i, j) * x[j];
-      
-      // contribution from left band
-      const size_type jbeginlefthelp = (i+2*nl+1)-std::min(bandL_.size()+offsetL_,i+2*nl+1);
-      for (size_type j = std::max(nl, jbeginlefthelp-jbeginlefthelp/2);
-	   j <= std::min(n/2-1, ((i+2*nl)-offsetL_)/2); j++)
-	help += bandL_[i-offsetL_-2*(j-nl)] * x[j];
-      
-      // contribution from right band
-      const size_type jbeginrighthelp = (i+offsetR_+2*(n-nr-1)+1)-m;
-      for (size_type j = std::max(n/2, jbeginrighthelp-jbeginrighthelp/2);
-	   j <= std::min(n-nr-1, ((i+offsetR_+2*(n-nr-1)+bandR_.size())-m)/2); j++)
-	help += bandR_[i-(m-offsetR_-2*(n-nr-1-j)-bandR_.size())] * x[j];
-
-      // contribution from lower right corner block
-      if (i >= m-mr)
-	for (size_type j(0); j < nr; j++)
-	  help += MR_.get_entry(i-(m-mr), j) * x[n-nr+j];
-      
-      Mx[i] = factor_ * help;
+    if (add_to) {
+      for (size_type i(0); i < row_dimension(); i++) {
+	C help(0);
+	
+	// contribution from upper left corner block
+	if (i < ml)
+	  for (size_type j(0); j < nl; j++)
+	    help += ML_.get_entry(i, j) * x[x_offset + j];
+	
+	// contribution from left band
+	const size_type jbeginlefthelp = (i+2*nl+1)-std::min(bandL_.size()+offsetL_,i+2*nl+1);
+	for (size_type j = std::max(nl, jbeginlefthelp-jbeginlefthelp/2);
+	     j <= std::min(n/2-1, ((i+2*nl)-offsetL_)/2); j++)
+	  help += bandL_[i-offsetL_-2*(j-nl)] * x[x_offset + j];
+	
+	// contribution from right band
+	const size_type jbeginrighthelp = (i+offsetR_+2*(n-nr-1)+1)-m;
+	for (size_type j = std::max(n/2, jbeginrighthelp-jbeginrighthelp/2);
+	     j <= std::min(n-nr-1, ((i+offsetR_+2*(n-nr-1)+bandR_.size())-m)/2); j++)
+	  help += bandR_[i-(m-offsetR_-2*(n-nr-1-j)-bandR_.size())] * x[x_offset + j];
+	
+	// contribution from lower right corner block
+	if (i >= m-mr)
+	  for (size_type j(0); j < nr; j++)
+	    help += MR_.get_entry(i-(m-mr), j) * x[x_offset + n-nr+j];
+	
+	Mx[Mx_offset + i] += factor_ * help;
+      }
+    } else {
+      for (size_type i(0); i < row_dimension(); i++) {
+	C help(0);
+	
+	// contribution from upper left corner block
+	if (i < ml)
+	  for (size_type j(0); j < nl; j++)
+	    help += ML_.get_entry(i, j) * x[x_offset + j];
+	
+	// contribution from left band
+	const size_type jbeginlefthelp = (i+2*nl+1)-std::min(bandL_.size()+offsetL_,i+2*nl+1);
+	for (size_type j = std::max(nl, jbeginlefthelp-jbeginlefthelp/2);
+	     j <= std::min(n/2-1, ((i+2*nl)-offsetL_)/2); j++)
+	  help += bandL_[i-offsetL_-2*(j-nl)] * x[x_offset + j];
+	
+	// contribution from right band
+	const size_type jbeginrighthelp = (i+offsetR_+2*(n-nr-1)+1)-m;
+	for (size_type j = std::max(n/2, jbeginrighthelp-jbeginrighthelp/2);
+	     j <= std::min(n-nr-1, ((i+offsetR_+2*(n-nr-1)+bandR_.size())-m)/2); j++)
+	  help += bandR_[i-(m-offsetR_-2*(n-nr-1-j)-bandR_.size())] * x[x_offset + j];
+	
+	// contribution from lower right corner block
+	if (i >= m-mr)
+	  for (size_type j(0); j < nr; j++)
+	    help += MR_.get_entry(i-(m-mr), j) * x[x_offset + n-nr+j];
+	
+	Mx[Mx_offset + i] = factor_ * help;
+      }
     }
   }
 
   template <class C>
   template <class VECTOR>
-  void QuasiStationaryMatrix<C>::apply_transposed(const VECTOR& x, VECTOR& Mtx) const
+  void QuasiStationaryMatrix<C>::apply_transposed(const VECTOR& x, VECTOR& Mtx,
+						  const size_type x_offset,
+						  const size_type Mtx_offset,
+						  const bool add_to) const
   {
-    assert(Mtx.size() == column_dimension());
+    assert(x.size() >= x_offset + row_dimension());
+    assert(Mtx.size() >= Mtx_offset + column_dimension());
     
     // for readability:
     const size_type ml = ML_.row_dimension();
@@ -135,42 +173,79 @@ namespace MathTL
     const size_type m = row_dimension();
     const size_type n = column_dimension();
 
-    // contribution from upper left corner block
-    for (size_type i(0); i < nl; i++) {
-      C help(0);
-      for (size_type j(0); j < ml; j++) {
-	help += ML_.get_entry(j, i) * x[j];
+    if (add_to) {
+      // contribution from upper left corner block
+      for (size_type i(0); i < nl; i++) {
+	C help(0);
+	for (size_type j(0); j < ml; j++) {
+	  help += ML_.get_entry(j, i) * x[x_offset + j];
+	}
+	Mtx[Mtx_offset + i] += factor_ * help;
       }
-      Mtx[i] = factor_ * help;
-    }
-
-    // contribution from left band
-    for (size_type i(nl); i < n/2; i++) {
-      C help(0);
-      const size_type jbegin = offsetL_+2*(i-nl);
-      for (size_type j(jbegin); j < jbegin+bandL_.size(); j++)
-	help += bandL_[j-jbegin] * x[j];
-      Mtx[i] = factor_ * help;
-    }
-    
-    // contribution from right band
-    for (size_type i(n/2); i < n-nr; i++) {
-      C help(0);
-      const size_type jendplus1 = m-offsetR_-2*(n-nr-1-i);
-      for (size_type j(jendplus1-bandR_.size()); j < jendplus1; j++)
-	help += bandR_[(j+bandR_.size())-jendplus1] * x[j];
-      Mtx[i] = factor_ * help;
-    }
-
-    // contribution from lower right corner block
-    for (size_type i(n-nr); i < n; i++) {
-      C help(0);
-      for (size_type j(m-mr); j < m; j++) {
-	help += MR_.get_entry(j-(m-mr), i-(n-nr)) * x[j];
+      
+      // contribution from left band
+      for (size_type i(nl); i < n/2; i++) {
+	C help(0);
+	const size_type jbegin = offsetL_+2*(i-nl);
+	for (size_type j(jbegin); j < jbegin+bandL_.size(); j++)
+	  help += bandL_[j-jbegin] * x[x_offset + j];
+	Mtx[Mtx_offset + i] += factor_ * help;
       }
-      Mtx[i] = factor_ * help;
+      
+      // contribution from right band
+      for (size_type i(n/2); i < n-nr; i++) {
+	C help(0);
+	const size_type jendplus1 = m-offsetR_-2*(n-nr-1-i);
+	for (size_type j(jendplus1-bandR_.size()); j < jendplus1; j++)
+	  help += bandR_[(j+bandR_.size())-jendplus1] * x[x_offset + j];
+	Mtx[Mtx_offset + i] += factor_ * help;
+      }
+      
+      // contribution from lower right corner block
+      for (size_type i(n-nr); i < n; i++) {
+	C help(0);
+	for (size_type j(m-mr); j < m; j++) {
+	  help += MR_.get_entry(j-(m-mr), i-(n-nr)) * x[x_offset + j];
+	}
+	Mtx[Mtx_offset + i] += factor_ * help;
+      }
+    } else {
+      // contribution from upper left corner block
+      for (size_type i(0); i < nl; i++) {
+	C help(0);
+	for (size_type j(0); j < ml; j++) {
+	  help += ML_.get_entry(j, i) * x[x_offset + j];
+	}
+	Mtx[Mtx_offset + i] = factor_ * help;
+      }
+      
+      // contribution from left band
+      for (size_type i(nl); i < n/2; i++) {
+	C help(0);
+	const size_type jbegin = offsetL_+2*(i-nl);
+	for (size_type j(jbegin); j < jbegin+bandL_.size(); j++)
+	  help += bandL_[j-jbegin] * x[x_offset + j];
+	Mtx[Mtx_offset + i] = factor_ * help;
+      }
+      
+      // contribution from right band
+      for (size_type i(n/2); i < n-nr; i++) {
+	C help(0);
+	const size_type jendplus1 = m-offsetR_-2*(n-nr-1-i);
+	for (size_type j(jendplus1-bandR_.size()); j < jendplus1; j++)
+	  help += bandR_[(j+bandR_.size())-jendplus1] * x[x_offset + j];
+	Mtx[Mtx_offset + i] = factor_ * help;
+      }
+      
+      // contribution from lower right corner block
+      for (size_type i(n-nr); i < n; i++) {
+	C help(0);
+	for (size_type j(m-mr); j < m; j++) {
+	  help += MR_.get_entry(j-(m-mr), i-(n-nr)) * x[x_offset + j];
+	}
+	Mtx[Mtx_offset + i] = factor_ * help;
+      }
     }
-    
   }
   
   template <class C>

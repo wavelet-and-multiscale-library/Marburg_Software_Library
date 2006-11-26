@@ -94,7 +94,7 @@ int main()
     {
       GaussLegendreRule Gauss(N);
       cout << "* Gauss-Legendre rule (N=" << N << "): "
-	   << Gauss.integrate(g, Point<1>(0.0), Point<1>(3.0)) << endl;
+	   << Gauss.integrate(g_stretched, Point<1>(0.0), Point<1>(3.0)) << endl;
     }
   
   QuadratureRule<2> TensorQ(SQ, GaussLegendreRule(2));

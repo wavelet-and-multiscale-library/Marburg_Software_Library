@@ -36,7 +36,7 @@ namespace WaveletTL
   {
     assert(row < row_dimension() && column < column_dimension());
     
-    Vector<double> ecol(column_dimension()), col(row_dimension());
+    Vector<double> ecol(column_dimension()), col(row_dimension(), false);
     ecol[column] = 1.0;
     apply(ecol, col);
 
@@ -49,21 +49,22 @@ namespace WaveletTL
   {
     assert(Mx.size() == row_dimension());
 
-    VECTOR y(x);
-
+    VECTOR y(x.size(), false); // no initialization necessary
+    
     // apply wavelet transformation T_{j-1}
     // (does nothing if j==j0)
     if (j_ > sb_.j0())
-      sb_.apply_Tj(j_-1, y, Mx);
+      sb_.apply_Tj(j_-1, x, Mx);
     else
-      Mx.swap(y);
+      Mx = x;
 
     // apply Gramian w.r.t the B-Splines in V_j
     if (d == 2) {
       // apply tridiag(1/6,2/3,1/6)
       y[0] = (4*Mx[0] + Mx[1])/6;
-      y[row_dimension()-1] = (4*Mx[row_dimension()-1] + Mx[row_dimension()-2])/6;
-      for (size_type i(1); i < row_dimension()-1; i++)
+      const size_type m = row_dimension();
+      y[m-1] = (4*Mx[m-1] + Mx[m-2])/6;
+      for (size_type i(1); i < m-1; i++)
 	y[i] = (Mx[i-1] + 4*Mx[i] + Mx[i+1])/6;
     } else {
       if (d == 3) {

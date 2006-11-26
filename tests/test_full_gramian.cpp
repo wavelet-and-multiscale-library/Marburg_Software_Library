@@ -65,8 +65,8 @@ int main()
 {
   cout << "Testing FullGramian ..." << endl;
 
-  const unsigned int d = 3;
-  const unsigned int dT = 3;
+  const unsigned int d = 2;
+  const unsigned int dT = 2;
 
   SplineBasis<d,dT> basis("P","",1,1,0,0); // PBasis, complementary b.c.'s
   FullGramian<d,dT> G(basis);
@@ -181,7 +181,7 @@ int main()
     L2_errors[j-jmin] = L2_error;
   }
 
-#if 1
+#if 0
   // write Galerkin errors to a file
   ostringstream filename;
   filename << "full_gramian_errors_" << d << "_" << testcase << ".m";

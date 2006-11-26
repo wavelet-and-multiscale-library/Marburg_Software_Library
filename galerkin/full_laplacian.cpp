@@ -66,22 +66,24 @@ namespace WaveletTL
       Mx.swap(y);
 
     // apply Laplacian w.r.t the B-Splines in V_j
+    const double factor = ldexp(1.0, 2*j_); // not "1<<(2*j_)" !
     if (d == 2) {
       // apply 2^{2j}*tridiag(-1,2,-1)
-      y[0] = ldexp(1.0, 2*j_) * (2*Mx[0] - Mx[1]);
-      y[row_dimension()-1] = ldexp(1.0, 2*j_) * (2*Mx[row_dimension()-1]-Mx[row_dimension()-2]);
-      for (size_type i(1); i < row_dimension()-1; i++)
-	y[i] = ldexp(1.0, 2*j_) * (2*Mx[i] - Mx[i-1] - Mx[i+1]);
+      y[0] = factor * (2*Mx[0] - Mx[1]);
+      const size_type m = row_dimension();
+      y[m-1] = factor * (2*Mx[m-1]-Mx[m-2]);
+      for (size_type i(1); i < m-1; i++)
+	y[i] = factor * (2*Mx[i] - Mx[i-1] - Mx[i+1]);
     } else {
       if (d == 3) {
 	// cf. [P, Bsp. 3.26]
-	y[0] = ldexp(1.0, 2*j_) * (4*Mx[0]/3 - Mx[1]/6 - Mx[2]/6);
-	y[1] = ldexp(1.0, 2*j_) * (-Mx[0]/6 + Mx[1] - Mx[2]/3 - Mx[3]/6);
+	y[0] = factor * (4*Mx[0]/3 - Mx[1]/6 - Mx[2]/6);
+	y[1] = factor * (-Mx[0]/6 + Mx[1] - Mx[2]/3 - Mx[3]/6);
 	const size_type m = row_dimension();
-	y[m-1] = ldexp(1.0, 2*j_) * (-Mx[m-3]/6 - Mx[m-2]/6 + 4*Mx[m-1]/3);
-	y[m-2] = ldexp(1.0, 2*j_) * (-Mx[m-4]/6 - Mx[m-3]/3 + Mx[m-2] - Mx[m-1]/6);
+	y[m-1] = factor * (-Mx[m-3]/6 - Mx[m-2]/6 + 4*Mx[m-1]/3);
+	y[m-2] = factor * (-Mx[m-4]/6 - Mx[m-3]/3 + Mx[m-2] - Mx[m-1]/6);
 	for (size_type i(2); i < m-2; i++)
-	  y[i] = ldexp(1.0, 2*j_) * (-Mx[i-2]/6 - Mx[i-1]/3 + Mx[i] - Mx[i+1]/3 - Mx[i+2]/6);
+	  y[i] = factor * (-Mx[i-2]/6 - Mx[i-1]/3 + Mx[i] - Mx[i+1]/3 - Mx[i+2]/6);
       }
     }
     

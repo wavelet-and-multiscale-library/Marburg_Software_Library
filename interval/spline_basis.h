@@ -62,7 +62,11 @@ namespace WaveletTL
     //! size of Nabla_j
     inline const int Nablasize(const int j) const { return 1<<j; }
     
-    //! apply Mj=(Mj0 Mj1) to some vector x ("reconstruct")
+    /*!
+      apply Mj=(Mj0 Mj1) to some vector x ("reconstruct");
+      the routine writes only into the first part of y, i.e,
+      y might be larger than necessary, which is helpful for apply_Tj
+    */
     void apply_Mj(const int j, const Vector<double>& x, Vector<double>& y) const;
 
     //! apply Mj^T to some vector x

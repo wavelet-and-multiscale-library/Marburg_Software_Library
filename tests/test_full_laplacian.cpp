@@ -395,7 +395,7 @@ int main()
     discr_H1_errors[j-jmin] = discr_H1_error;
   }
 
-#if 1
+#if 0
   // write Galerkin errors to a file
   ostringstream filename;
   filename << "full_galerkin_errors_" << d << "_" << solution << ".m";

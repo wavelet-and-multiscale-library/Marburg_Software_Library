@@ -310,6 +310,68 @@ namespace MathTL
   
   template <class C>
   void
+  QuasiStationaryMatrix<C>::apply_transposed(const std::map<size_type, C>& x,
+					     std::map<size_type, C>& Mtx,
+					     const size_type x_offset,
+					     const size_type Mtx_offset,
+					     const bool add_to) const
+  {
+    // for readability:
+    const size_type ml = ML_.row_dimension();
+    const size_type nl = ML_.column_dimension();
+    const size_type mr = MR_.row_dimension();
+    const size_type nr = MR_.column_dimension();
+    const size_type m = row_dimension();
+    const size_type n = column_dimension();
+    
+    if (!add_to)
+      Mtx.clear(); // start with Mx=0
+
+    for (typename std::map<size_type,C>::const_iterator it(x.begin()); it != x.end(); ++it) {
+      // contribution from upper left corner block
+      if (it->first >= x_offset && it->first < x_offset+ml) {
+	for (size_type i(0); i < nl; i++) {
+	  Mtx[Mtx_offset+i] +=
+	    factor_ * ML_.get_entry(it->first-x_offset, i) * it->second;
+	}
+      }
+
+      // contribution from left band
+      const size_type ibeginlefthelp
+	= (it->first-x_offset+2*nl+1)-std::min(bandL_.size()+offsetL_,it->first-x_offset+2*nl+1);
+      for (size_type i = std::max(nl, ibeginlefthelp-ibeginlefthelp/2);
+	   i <= std::min(n/2-1, ((it->first-x_offset+2*nl)-offsetL_)/2); i++)
+	Mtx[Mtx_offset+i]
+	  += bandL_[it->first-x_offset-offsetL_-2*(i-nl)] * it->second;
+
+      // contribution from right band
+      const size_type ibeginrighthelp
+	= (it->first-x_offset+offsetR_+2*(n-nr-1)+1)-m;
+      for (size_type i = std::max(n/2, ibeginrighthelp-ibeginrighthelp/2);
+	   i <= std::min(n-nr-1, ((it->first-x_offset+offsetR_+2*(n-nr-1)+bandR_.size())-m)/2); i++)
+	Mtx[Mtx_offset+i] +=
+	  bandR_[it->first-x_offset-(m-offsetR_-2*(n-nr-1-i)-bandR_.size())] * it->second;
+
+      // contribution from lower right corner block
+      if (it->first >= x_offset+(m-mr) && it->first < x_offset+m) {
+	for (size_type i(0); i < nr; i++) {
+	  Mtx[Mtx_offset+i+(n-nr)] +=
+	    factor_ * MR_.get_entry(it->first-x_offset-(m-mr), i) * it->second;
+	}
+      }
+    }
+
+    // remove unnecessary zeros
+    for (typename std::map<size_type,C>::iterator it(Mtx.begin()); it != Mtx.end();) {
+      if (it->second == C(0))
+	Mtx.erase(it++);
+      else
+	++it;
+    }      
+  }
+
+  template <class C>
+  void
   QuasiStationaryMatrix<C>::to_sparse(SparseMatrix<C>& S) const
   {
     // for readability:

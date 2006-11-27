@@ -69,5 +69,21 @@ int main()
        it != Qxsparse.end(); ++it)
     cout << "Qx[" << it->first << "]=" << it->second << endl;
 
+  std::map<unsigned int, double> ysparse, Qtysparse;
+//   ysparse[9] = 1;
+  ysparse[Q.row_dimension()-2] = 1;
+  unsigned int yoffset = 0;
+  unsigned int Qtyoffset = 0;
+  Q.apply_transposed(ysparse, Qtysparse, yoffset, Qtyoffset);
+  cout << "entries of a sparse vector y:" << endl;
+  for (std::map<unsigned int, double>::const_iterator it(ysparse.begin());
+       it != ysparse.end(); ++it)
+    cout << "y[" << it->first << "]=" << it->second << endl;
+  cout << "Q^T applied to the part of y from index " << yoffset
+       << ", written into Qty from index " << Qtyoffset << " yields Qty=" << endl;
+  for (std::map<unsigned int, double>::const_iterator it(Qtysparse.begin());
+       it != Qtysparse.end(); ++it)
+    cout << "Qty[" << it->first << "]=" << it->second << endl;
+  
   return 0;
 }

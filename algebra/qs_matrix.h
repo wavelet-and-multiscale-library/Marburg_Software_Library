@@ -109,6 +109,15 @@ namespace MathTL
 			  const bool add_to = false) const;
     
     /*!
+      transposed matrix-vector multiplication Mtx = (*this)^T * x;
+      where the vector is modeled by std::map
+    */
+    void apply_transposed(const std::map<size_type, C>& x, std::map<size_type, C>& Mtx,
+			  const size_type x_offset = 0,
+			  const size_type Mtx_offset = 0,
+			  const bool add_to = false) const;
+    
+    /*!
       stream output with user-defined tabwidth and precision
       (cf. deal.II)
     */

@@ -18,8 +18,9 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
+  template <class V>
   void
-  SplineBasis<d,dT>::apply_Mj(const int j, const Vector<double>& x, Vector<double>& y) const
+  SplineBasis<d,dT>::apply_Mj(const int j, const V& x, V& y) const
   {
     SplineBasisData<d,dT>::Mj0_->set_level(j);
     SplineBasisData<d,dT>::Mj1_->set_level(j);
@@ -31,8 +32,9 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
+  template <class V>
   void
-  SplineBasis<d,dT>::apply_Mj_transposed(const int j, const Vector<double>& x, Vector<double>& y) const
+  SplineBasis<d,dT>::apply_Mj_transposed(const int j, const V& x, V& y) const
   {
     SplineBasisData<d,dT>::Mj0_->set_level(j);
     SplineBasisData<d,dT>::Mj1_->set_level(j);
@@ -44,8 +46,9 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
+  template <class V>
   void
-  SplineBasis<d,dT>::apply_Gj(const int j, const Vector<double>& x, Vector<double>& y) const
+  SplineBasis<d,dT>::apply_Gj(const int j, const V& x, V& y) const
   {
     SplineBasisData<d,dT>::Mj0T_->set_level(j);
     SplineBasisData<d,dT>::Mj1T_->set_level(j);
@@ -57,8 +60,9 @@ namespace WaveletTL
   }
   
   template <int d, int dT>
+  template <class V>
   void
-  SplineBasis<d,dT>::apply_Gj_transposed(const int j, const Vector<double>& x, Vector<double>& y) const
+  SplineBasis<d,dT>::apply_Gj_transposed(const int j, const V& x, V& y) const
   {
     SplineBasisData<d,dT>::Mj0T_->set_level(j);
     SplineBasisData<d,dT>::Mj1T_->set_level(j);
@@ -70,15 +74,47 @@ namespace WaveletTL
   }
   
   template <int d, int dT>
+  template <class V>
   void
-  SplineBasis<d,dT>::apply_Tj(const int j, const Vector<double>& x, Vector<double>& y) const
+  SplineBasis<d,dT>::apply_Tj(const int j, const V& x, V& y) const
   { 
     y = x;
-    Vector<double> z(x);
+    V z(x);
     apply_Mj(j0(), z, y);
     for (int k = j0()+1; k <= j; k++) {
       apply_Mj(k, y, z);
       y.swap(z);
+    }
+  }
+
+  template <int d, int dT>
+  template <class V>
+  void
+  SplineBasis<d,dT>::apply_Tj_transposed(const int j, const V& x, V& y) const
+  { 
+    V z;
+    apply_Mj_transposed(j, x, y);
+    for (int k = j-1; k >= j0(); k--) {
+      z.swap(y);
+      apply_Mj_transposed(k, z, y);
+      for (int i = Deltasize(k+1); i < Deltasize(j+1); i++)
+	y[i] = z[i];
+    }
+  }
+  
+  template <int d, int dT>
+  void
+  SplineBasis<d,dT>::apply_Tj_transposed(const int j,
+					 const Vector<double>& x,
+					 Vector<double>& y) const
+  { 
+    Vector<double> z(x.size(), false);
+    apply_Mj_transposed(j, x, y);
+    for (int k = j-1; k >= j0(); k--) {
+      z.swap(y);
+      apply_Mj_transposed(k, z, y);
+      for (int i = Deltasize(k+1); i < Deltasize(j+1); i++)
+	y[i] = z[i];
     }
   }
 
@@ -97,17 +133,4 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT>
-  void
-  SplineBasis<d,dT>::apply_Tj_transposed(const int j, const Vector<double>& x, Vector<double>& y) const
-  { 
-    Vector<double> z(x.size(), false);
-    apply_Mj_transposed(j, x, y);
-    for (int k = j-1; k >= j0(); k--) {
-      z.swap(y);
-      apply_Mj_transposed(k, z, y);
-      for (int i = Deltasize(k+1); i < Deltasize(j+1); i++)
-	y[i] = z[i];
-    }
-  }
 }

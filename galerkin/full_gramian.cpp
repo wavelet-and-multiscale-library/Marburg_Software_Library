@@ -1,5 +1,7 @@
 // implementation for full_gramian.h
 
+#include <map>
+
 namespace WaveletTL
 {
   template <int d, int dT>
@@ -36,11 +38,19 @@ namespace WaveletTL
   {
     assert(row < row_dimension() && column < column_dimension());
     
+#if 0
     Vector<double> ecol(column_dimension()), col(row_dimension(), false);
     ecol[column] = 1.0;
     apply(ecol, col);
 
     return col[row];
+#else
+    std::map<size_type,double> ecol, col;
+    ecol[column] = 1.0;
+    apply(ecol, col);
+
+    return col[row];
+#endif
   }
 
   template <int d, int dT>
@@ -87,6 +97,91 @@ namespace WaveletTL
       Mx.swap(y);
   }
 
+  template <int d, int dT>
+  void FullGramian<d,dT>::apply(const std::map<size_type,double>& x,
+				std::map<size_type,double>& Mx) const
+  {
+    std::map<size_type,double> y; // no initialization necessary
+    
+    // apply wavelet transformation T_{j-1}
+    // (does nothing if j==j0)
+    if (j_ > sb_.j0())
+      sb_.apply_Tj(j_-1, x, Mx);
+    else
+      Mx = x;
+
+    // apply Gramian w.r.t the B-Splines in V_j
+    if (d == 2) {
+      // apply tridiag(1/6,2/3,1/6)
+      for (std::map<size_type,double>::const_iterator it(Mx.begin());
+	   it != Mx.end(); ++it) {
+	y[it->first] += 2*it->second/3;
+	if (it->first > 0)
+	  y[it->first-1] += it->second/6;
+	if (it->first < column_dimension()-1)
+	  y[it->first+1] += it->second/6;
+      }
+    } else {
+      if (d == 3) {
+	// cf. [P, Bsp. 3.23]
+	for (std::map<size_type,double>::const_iterator it(Mx.begin());
+	     it != Mx.end(); ++it) {
+	  const size_type m = row_dimension();
+	  switch(it->first) {
+	  case 0:
+	    y[0] += it->second/3;
+	    y[1] += 5*it->second/24;
+	    y[2] += it->second/120;
+	    break;
+	  case 1:
+	    y[0] += 5*it->second/24;
+	    y[1] += 11*it->second/20;
+	    y[2] += 13*it->second/60;
+	    y[3] += it->second/120;
+	    break;
+	  default: // >= 2
+	    switch(m-1-it->first) {
+	    case 0: // m-1
+	      y[m-1] += it->second/3;
+	      y[m-2] += 5*it->second/24;
+	      y[m-3] += it->second/120;
+	      break;
+	    case 1: // m-2
+	      y[m-1] += 5*it->second/24;
+	      y[m-2] += 11*it->second/20;
+	      y[m-3] += 13*it->second/60;
+	      y[m-4] += it->second/120;
+	      break;
+	    default: // < m-2
+	      y[it->first-2] += it->second/120;
+	      y[it->first-1] += 13*it->second/60;
+	      y[it->first]   += 11*it->second/20;
+	      y[it->first+1] += 13*it->second/60;
+	      y[it->first+2] += it->second/120;
+	      break;
+	    }
+	    break;
+	  }
+	}
+      }
+    }
+    
+    // apply transposed wavelet transformation T_{j-1}^T
+    // (does nothing if j==j0)
+    if (j_ > sb_.j0())
+      sb_.apply_Tj_transposed(j_-1, y, Mx);
+    else
+      Mx.swap(y);
+
+    // remove unnecessary zeros
+    for (typename std::map<size_type,double>::iterator it(Mx.begin()); it != Mx.end();) {
+      if (it->second == 0)
+	Mx.erase(it++);
+      else
+	++it;
+    }  
+  }
+  
   template <int d, int dT>
   void FullGramian<d,dT>::print(std::ostream &os,
 				  const unsigned int tabwidth,

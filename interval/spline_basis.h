@@ -67,21 +67,34 @@ namespace WaveletTL
       the routine writes only into the first part of y, i.e,
       y might be larger than necessary, which is helpful for apply_Tj
     */
-    void apply_Mj(const int j, const Vector<double>& x, Vector<double>& y) const;
+    template <class V>
+    void apply_Mj(const int j, const V& x, V& y) const;
 
     //! apply Mj^T to some vector x
-    void apply_Mj_transposed(const int j, const Vector<double>& x, Vector<double>& y) const;
+    template <class V>
+    void apply_Mj_transposed(const int j, const V& x, V& y) const;
 
     //! apply Gj=(Mj0T Mj1T)^T to some vector x ("decompose")
-    void apply_Gj(const int j, const Vector<double>& x, Vector<double>& y) const;
+    template <class V>
+    void apply_Gj(const int j, const V& x, V& y) const;
 
     //! apply G_j^T to some vector x
-    void apply_Gj_transposed(const int j, const Vector<double>& x, Vector<double>& y) const;
+    template <class V>
+    void apply_Gj_transposed(const int j, const V& x, V& y) const;
 
     //! apply Tj=Mj*diag(M_{j-1},I)*...*diag(M_{j_0},I), i.e., several "reconstructions" at once
-    void apply_Tj(const int j, const Vector<double>& x, Vector<double>& y) const;
+    template <class V>
+    void apply_Tj(const int j, const V& x, V& y) const;
 
-    //! apply Tj^T
+    /*!
+      apply Tj^T,
+      this generic variant works with "infinite" vector classes like
+      std::map<size_type,double> or InfiniteVector<size_type,double>
+    */
+    template <class V>
+    void apply_Tj_transposed(const int j, const V& x, V& y) const;
+
+    //! ... dito, specialization for V=Vector<double>
     void apply_Tj_transposed(const int j, const Vector<double>& x, Vector<double>& y) const;
 
     //! apply Tj^{-1}, several "decompositions" at once

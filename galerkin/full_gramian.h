@@ -11,6 +11,7 @@
 #define _WAVELETTL_FULL_GRAMIAN_H
 
 #include <iostream>
+#include <map>
 #include <algebra/vector.h>
 #include <interval/spline_basis.h>
 
@@ -69,6 +70,10 @@ namespace WaveletTL
     template <class VECTOR>
     void apply(const VECTOR& x, VECTOR& Mx) const;
 
+    //! specialization to std::map<size_type,double>
+    void apply(const std::map<size_type,double>& x,
+	       std::map<size_type,double>& Mx) const;
+    
     /*!
       stream output with user-defined tabwidth and precision
       (cf. deal.II)

@@ -152,6 +152,7 @@ int main()
   cout << "* stiffness matrix on next level j0+1=" << basis.j0()+1 << ":" << endl
        << delta;
   
+#if 0
   const unsigned int solution = 2;
   double kink = 0; // for Solution4;
 
@@ -402,6 +403,10 @@ int main()
     discr_H1_errors[j-jmin] = discr_H1_error;
   }
 
+  delete uexact;
+
+#endif
+
 #if 0
   // write Galerkin errors to a file
   ostringstream filename;
@@ -414,8 +419,6 @@ int main()
 		  << "discr_H1_errors=" << discr_H1_errors << ";" << endl;
   galerkin_stream.close();
 #endif
-
-  delete uexact;
 
   return 0;
 }

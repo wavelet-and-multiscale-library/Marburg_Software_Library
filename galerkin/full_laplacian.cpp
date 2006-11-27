@@ -52,7 +52,8 @@ namespace WaveletTL
     VECTOR y(x);
 
     // apply diagonal preconditioner D^{-1}
-    // (does nothing if j==j0)
+    for (int k(0); k < sb_.Deltasize(sb_.j0()); k++)
+      y[k] /= (1<<sb_.j0());
     for (int j = sb_.j0(); j < j_; j++) {
       for (int k(sb_.Deltasize(j)); k < sb_.Deltasize(j+1); k++)
 	y[k] /= (1<<j);
@@ -95,7 +96,8 @@ namespace WaveletTL
       Mx.swap(y);
     
     // apply diagonal preconditioner D^{-1}
-    // (does nothing if j==j0)
+    for (int k(0); k < sb_.Deltasize(sb_.j0()); k++)
+      Mx[k] /= (1<<sb_.j0());
     for (int j = sb_.j0(); j < j_; j++) {
       for (int k(sb_.Deltasize(j)); k < sb_.Deltasize(j+1); k++)
 	Mx[k] /= (1<<j);

@@ -65,8 +65,8 @@ int main()
 {
   cout << "Testing FullGramian ..." << endl;
 
-  const unsigned int d = 2;
-  const unsigned int dT = 2;
+  const unsigned int d = 3;
+  const unsigned int dT = 3;
 
   SplineBasis<d,dT> basis("P","",1,1,0,0); // PBasis, complementary b.c.'s
   FullGramian<d,dT> G(basis);
@@ -124,7 +124,7 @@ int main()
 //     cout << "  inner products against phi_{j,k} basis: " << coeffs_phijk << endl;
 
     // transform rhs into that of psi_{j,k} basis: apply T_{j-1}^T
-    Vector<double> rhs(G.row_dimension());
+    Vector<double> rhs(G.row_dimension(), false);
     if (j == basis.j0())
       rhs = coeffs_phijk;
     else
@@ -132,7 +132,7 @@ int main()
 //     cout << "  inner products against psi_{j,k} basis: " << rhs << endl;
 
     // solve Gramian system
-    Vector<double> uj(G.row_dimension()), residual(G.row_dimension()); uj = 0;
+    Vector<double> uj(G.row_dimension()), residual(G.row_dimension(), false);
     unsigned int iterations;
     CG(G, rhs, uj, 1e-15, 250, iterations);
 //     cout << "  solution coefficients: " << uj << endl;
@@ -142,7 +142,7 @@ int main()
     cout << linfty_norm(residual) << endl;
 
     // compute coefficients of uj in the phi_{j,k} basis: apply T_{j-1}
-    Vector<double> uj_phijk(G.row_dimension());
+    Vector<double> uj_phijk(G.row_dimension(), false);
     if (j == basis.j0())
       uj_phijk = uj;
     else

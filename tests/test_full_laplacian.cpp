@@ -183,7 +183,7 @@ int main()
   G.set_level(jref);
   
   // 1. compute integrals w.r.t. the primal generators on level jref
-  Vector<double> ucoeffs_phijk(G.row_dimension());
+  Vector<double> ucoeffs_phijk(G.row_dimension(), false);
   SimpsonRule simpson;
   CompositeRule<1> composite(simpson, 12);
   SchoenbergIntervalBSpline_td<d> sbs(jref,0);
@@ -196,16 +196,17 @@ int main()
 			    Point<1>(std::min(1.0, (k+ell2<d>())*ldexp(1.0, -jref))));
   }
   // 2. transform rhs into that of psi_{j,k} basis: apply T_{j-1}^T
-  Vector<double> urhs(G.row_dimension());
+  Vector<double> urhs(G.row_dimension(), false);
   if (jref == basis.j0())
     urhs = ucoeffs_phijk;
   else
     basis.apply_Tj_transposed(jref-1, ucoeffs_phijk, urhs);
   
-  // 3. solve Gramian system
-  Vector<double> uj_psijk(G.row_dimension()); uj_psijk = 0;
+  // 3. solve Gramian system, yields approximate L_2 wavelet coefficients of u on level jref
+  Vector<double> uj_psijk(G.row_dimension());
   unsigned int iterations;
   CG(G, urhs, uj_psijk, 1e-15, 250, iterations);
+
 
   cout << "* compute wavelet-Galerkin approximations for several levels..." << endl;
   const int jmin = basis.j0();
@@ -222,7 +223,7 @@ int main()
     delta.set_level(j);
 
     // setup rhs in the phi_{j,k} basis,
-    Vector<double> rhs_phijk(delta.row_dimension());
+    Vector<double> rhs_phijk(delta.row_dimension(), false);
     if (solution == 1) {
       if (d == 2) {
  	// exact right-hand side is known
@@ -307,12 +308,14 @@ int main()
 
     // transform rhs into that of psi_{j,k} basis:
     // 1. apply T_{j-1}^T
-    Vector<double> rhs(delta.row_dimension());
+    Vector<double> rhs(delta.row_dimension(), false);
     if (j == basis.j0())
       rhs = rhs_phijk;
     else
       basis.apply_Tj_transposed(j-1, rhs_phijk, rhs);
-    // 2. apply D^{-1} (does nothing if j==j0)
+    // 2. apply D^{-1}
+    for (int k(0); k < basis.Deltasize(basis.j0()); k++)
+      rhs[k] /= (1<<basis.j0());
     for (int level = basis.j0(); level < j; level++) {
       for (int k(basis.Deltasize(level)); k < basis.Deltasize(level+1); k++)
 	rhs[k] /= (1<<level);
@@ -320,7 +323,7 @@ int main()
 //     cout << "  rhs in psi_{j,k} basis: " << rhs << endl;
 
     // solve Galerkin system
-    Vector<double> ulambda(delta.row_dimension()), residual(delta.row_dimension()); ulambda = 0;
+    Vector<double> ulambda(delta.row_dimension()), residual(delta.row_dimension(), false);
     unsigned int iterations;
     CG(delta, rhs, ulambda, 1e-15, 500, iterations);
 
@@ -332,7 +335,8 @@ int main()
 
     // compute coefficients of ulambda in the phi_{j,k} basis
     // 1. apply D^{-1}
-    Vector<double> ulambda_phijk(delta.row_dimension());
+    for (int k(0); k < basis.Deltasize(basis.j0()); k++)
+      ulambda[k] /= (1<<basis.j0());
     for (int level = basis.j0(); level < j; level++) {
       for (int k(basis.Deltasize(level)); k < basis.Deltasize(level+1); k++)
 	ulambda[k] /= (1<<level);
@@ -343,6 +347,7 @@ int main()
     std::copy(ulambda.begin(), ulambda.end(), ulambda_prolong.begin());
 
     // 2. apply T_{j-1}
+    Vector<double> ulambda_phijk(delta.row_dimension(), false);
     if (j == basis.j0())
       ulambda_phijk = ulambda;
     else
@@ -386,6 +391,8 @@ int main()
     cout << "  discr. L_2 error: " << discr_L2_error << endl;
     discr_L2_errors[j-jmin] = discr_L2_error;
 
+    for (int k(0); k < basis.Deltasize(basis.j0()); k++)
+      coeff_error[k] *= (1<<basis.j0());
     for (int level = basis.j0(); level < jref; level++) {
       for (int k(basis.Deltasize(level)); k < basis.Deltasize(level+1); k++)
  	coeff_error[k] *= (1<<level);

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <map>
 #include <algebra/matrix.h>
 #include <algebra/vector.h>
 #include <algebra/qs_matrix.h>
@@ -51,6 +52,22 @@ int main()
   Q.apply_transposed(y, Qty, 3, 1);
   cout << "Q^T applied to the part of y=" << y << " from index 3," << endl
        << "written into Qty from index 1 on yields Qty=" << Qty << endl;
+
+  std::map<unsigned int, double> xsparse, Qxsparse;
+  xsparse[6] = 1;
+//   xsparse[Q.column_dimension()-1] = 1;
+  unsigned int xoffset = 1;
+  unsigned int Qxoffset = 0;
+  Q.apply(xsparse, Qxsparse, xoffset, Qxoffset);
+  cout << "entries of a sparse vector x:" << endl;
+  for (std::map<unsigned int, double>::const_iterator it(xsparse.begin());
+       it != xsparse.end(); ++it)
+    cout << "x[" << it->first << "]=" << it->second << endl;
+  cout << "Q applied to the part of x from index " << xoffset
+       << ", written into Qx from index " << Qxoffset << " yields Qx=" << endl;
+  for (std::map<unsigned int, double>::const_iterator it(Qxsparse.begin());
+       it != Qxsparse.end(); ++it)
+    cout << "Qx[" << it->first << "]=" << it->second << endl;
 
   return 0;
 }

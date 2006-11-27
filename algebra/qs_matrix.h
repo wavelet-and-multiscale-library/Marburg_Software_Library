@@ -11,6 +11,7 @@
 #define _WAVELETTL_QS_MATRIX_H
 
 #include <cmath>
+#include <map>
 #include <algebra/matrix.h>
 #include <algebra/sparse_matrix.h>
 
@@ -87,6 +88,15 @@ namespace MathTL
 	       const size_type Mx_offset = 0,
 	       const bool add_to = false) const;
 
+    /*!
+      matrix-vector multiplication Mx = (*this) * x,
+      where the vector is modeled by std::map
+    */
+    void apply(const std::map<size_type, C>& x, std::map<size_type, C>& Mx,
+	       const size_type x_offset = 0,
+	       const size_type Mx_offset = 0,
+	       const bool add_to = false) const;
+    
     /*!
       transposed matrix-vector multiplication Mtx = (*this)^T * x;
       again potentially with offsets for both input and output vector

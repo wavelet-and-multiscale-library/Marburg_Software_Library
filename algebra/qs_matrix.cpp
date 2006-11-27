@@ -171,7 +171,7 @@ namespace MathTL
     const size_type n = column_dimension();
 
     if (!add_to)
-      Mx.clear();
+      Mx.clear(); // start with Mx=0
 
     for (typename std::map<size_type,C>::const_iterator it(x.begin()); it != x.end(); ++it) {
       // contribution from upper left corner block
@@ -208,7 +208,7 @@ namespace MathTL
 
     // remove unnecessary zeros
     for (typename std::map<size_type,C>::iterator it(Mx.begin()); it != Mx.end();) {
-      if (it->second == 0)
+      if (it->second == C(0))
 	Mx.erase(it++);
       else
 	++it;

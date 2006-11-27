@@ -170,9 +170,16 @@ namespace MathTL
     const size_type m = row_dimension();
     const size_type n = column_dimension();
 
-    if (!add_to)
-      Mx.clear(); // start with Mx=0
-
+    if (!add_to) {
+      // clear the range we want to write to
+      for (typename std::map<size_type,C>::iterator it(Mx.begin()); it != Mx.end();) {
+	if (it->first >= Mx_offset && it->first < Mx_offset+m)
+	  Mx.erase(it++);
+	else
+	  ++it;
+      }
+    }
+    
     for (typename std::map<size_type,C>::const_iterator it(x.begin()); it != x.end(); ++it) {
       // contribution from upper left corner block
       if (it->first >= x_offset && it->first < x_offset+nl) {
@@ -324,8 +331,15 @@ namespace MathTL
     const size_type m = row_dimension();
     const size_type n = column_dimension();
     
-    if (!add_to)
-      Mtx.clear(); // start with Mx=0
+    if (!add_to) {
+      // clear the range we want to write to
+      for (typename std::map<size_type,C>::iterator it(Mtx.begin()); it != Mtx.end();) {
+	if (it->first >= Mtx_offset && it->first < Mtx_offset+n)
+	  Mtx.erase(it++);
+	else
+	  ++it;
+      }
+    }
 
     for (typename std::map<size_type,C>::const_iterator it(x.begin()); it != x.end(); ++it) {
       // contribution from upper left corner block
@@ -341,17 +355,17 @@ namespace MathTL
 	= (it->first-x_offset+2*nl+1)-std::min(bandL_.size()+offsetL_,it->first-x_offset+2*nl+1);
       for (size_type i = std::max(nl, ibeginlefthelp-ibeginlefthelp/2);
 	   i <= std::min(n/2-1, ((it->first-x_offset+2*nl)-offsetL_)/2); i++)
-	Mtx[Mtx_offset+i]
-	  += bandL_[it->first-x_offset-offsetL_-2*(i-nl)] * it->second;
-
+	Mtx[Mtx_offset+i] +=
+	  factor_ * bandL_[it->first-x_offset-offsetL_-2*(i-nl)] * it->second;
+      
       // contribution from right band
       const size_type ibeginrighthelp
 	= (it->first-x_offset+offsetR_+2*(n-nr-1)+1)-m;
       for (size_type i = std::max(n/2, ibeginrighthelp-ibeginrighthelp/2);
 	   i <= std::min(n-nr-1, ((it->first-x_offset+offsetR_+2*(n-nr-1)+bandR_.size())-m)/2); i++)
 	Mtx[Mtx_offset+i] +=
-	  bandR_[it->first-x_offset-(m-offsetR_-2*(n-nr-1-i)-bandR_.size())] * it->second;
-
+	  factor_ * bandR_[it->first-x_offset-(m-offsetR_-2*(n-nr-1-i)-bandR_.size())] * it->second;
+      
       // contribution from lower right corner block
       if (it->first >= x_offset+(m-mr) && it->first < x_offset+m) {
 	for (size_type i(0); i < nr; i++) {

@@ -65,8 +65,8 @@ int main()
 {
   cout << "Testing FullGramian ..." << endl;
 
-  const unsigned int d = 3;
-  const unsigned int dT = 3;
+  const unsigned int d = 2;
+  const unsigned int dT = 2;
 
   SplineBasis<d,dT> basis("P","",1,1,0,0); // PBasis, complementary b.c.'s
   FullGramian<d,dT> G(basis);
@@ -97,8 +97,8 @@ int main()
 
   cout << "* compute approximate expansions of the test function for several levels..." << endl;
   const int jmin = basis.j0();
-  const int jmax = jmin;
-//   const int jmax = 20;
+//   const int jmax = jmin;
+  const int jmax = 20;
   Vector<double> js(jmax-jmin+1);
   Vector<double> Linfty_errors(jmax-jmin+1), L2_errors(jmax-jmin+1);
 

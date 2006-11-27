@@ -20,6 +20,15 @@ using namespace MathTL;
 namespace WaveletTL
 {
   /*!
+    three diagonal preconditioning possibilities
+   */
+  enum PreconditioningType {
+    no_precond,
+    dyadic, // 2^{-js}
+    energy  // sqrt(a(\psi_\lambda,\psi_\lambda))
+  };
+
+  /*!
     The following class models the discretization of the Laplacian operator
     in a primal spline wavelet basis on a level j.
     We use the decomposition
@@ -46,7 +55,7 @@ namespace WaveletTL
       constructor taking an information object on some spline wavelet basis
     */
     FullLaplacian(const SplineBasis<d,dT>& sb,
-		  const bool dyadic = true);
+		  const PreconditioningType precond = dyadic);
 
     /*!
       row dimension
@@ -74,6 +83,11 @@ namespace WaveletTL
     const double get_entry(const size_type row, const size_type column) const;
 
     /*!
+      read-only access to a diagonal entry of the unpreconditioned system
+    */
+    const double diagonal(const size_type row) const;
+
+    /*!
       matrix-vector multiplication Mx = (*this) * x;
       we assume that the vector Mx has the correct size and
       is not identical to x
@@ -97,8 +111,11 @@ namespace WaveletTL
 
   protected:
     const SplineBasis<d,dT>& sb_;
-    bool dyadic_;
+    PreconditioningType precond_;
     mutable int j_;
+
+    mutable Vector<double> D_;
+    void setup_D() const;
   };
 
   /*!

@@ -142,15 +142,28 @@ int main()
   const unsigned int dT = 2;
 
   SplineBasis<d,dT> basis("P","",1,1,0,0); // PBasis, complementary b.c.'s
-  FullLaplacian<d,dT> delta(basis);
+  FullLaplacian<d,dT> delta(basis, dyadic);
+//   FullLaplacian<d,dT> delta(basis, energy);
   FullGramian<d,dT> G(basis);
 
   cout << "* stiffness matrix on coarsest level j0=" << basis.j0() << ":" << endl
        << delta;
+
+  Vector<double> diagonal(delta.row_dimension());
+  for (unsigned int k = 0; k < diagonal.size(); k++)
+    diagonal[k] = delta.diagonal(k);
+  cout << "* main diagonal of unpreconditioned stiffness matrix:" << endl
+       << "  " << diagonal << endl;
   
   delta.set_level(basis.j0()+1);
   cout << "* stiffness matrix on next level j0+1=" << basis.j0()+1 << ":" << endl
        << delta;
+
+  diagonal.resize(delta.row_dimension());
+  for (unsigned int k = 0; k < diagonal.size(); k++)
+    diagonal[k] = delta.diagonal(k);
+  cout << "* main diagonal of unpreconditioned stiffness matrix:" << endl
+       << "  " << diagonal << endl;
   
 #if 1
   const unsigned int solution = 2;
@@ -211,8 +224,8 @@ int main()
 
   cout << "* compute wavelet-Galerkin approximations for several levels..." << endl;
   const int jmin = basis.j0();
-//   const int jmax = jmin+5;
-  const int jmax = 10;
+  const int jmax = jmin+5;
+//   const int jmax = 12;
   Vector<double> js(jmax-jmin+1);
   Vector<double> Linfty_errors(jmax-jmin+1), L2_errors(jmax-jmin+1),
     discr_L2_errors(jmax-jmin+1), discr_H1_errors(jmax-jmin+1);
@@ -384,6 +397,7 @@ int main()
     cout << "  discr. L_2 error: " << discr_L2_error << endl;
     discr_L2_errors[j-jmin] = discr_L2_error;
 
+    delta.set_level(jref);
     for (unsigned int k(0); k < coeff_error.size(); k++)
       coeff_error[k] *= delta.D(k);
     const double discr_H1_error = l2_norm(coeff_error);

@@ -6,9 +6,10 @@ namespace WaveletTL
 {
   template <int d, int dT>
   FullLaplacian<d,dT>::FullLaplacian(const SplineBasis<d,dT>& sb,
-				     const bool dyadic)
-    : sb_(sb), dyadic_(dyadic), j_(sb.j0())
+				     const PreconditioningType precond)
+    : sb_(sb), precond_(precond)
   {
+    set_level(sb_.j0());
   }
 
   template <int d, int dT>
@@ -33,23 +34,38 @@ namespace WaveletTL
   {
     assert(j >= sb_.j0());
     j_ = j;
+    setup_D();
   }
 
   template <int d, int dT>
+  void
+  FullLaplacian<d,dT>::setup_D() const
+  {
+    D_.resize(sb_.Deltasize(j_));
+    if (precond_ == no_precond) {
+      D_ = 1.0;
+    } else {
+      if (precond_ == dyadic) {
+	for (int k(0); k < sb_.Deltasize(sb_.j0()); k++)
+	  D_[k] = (1<<sb_.j0());
+	for (int j = sb_.j0(); j < j_; j++) {
+	  for (int k(sb_.Deltasize(j)); k < sb_.Deltasize(j+1); k++)
+	    D_[k] = (1<<j);
+	}
+      } else {
+	for (size_type k(0); k < D_.size(); k++)
+	  D_[k] = sqrt(diagonal(k));
+      }
+    }
+  }
+  
+  template <int d, int dT>
+  inline
   double
   FullLaplacian<d,dT>::D(const size_type k) const {
-    double r = 0;
-    if (dyadic_) {
-      int expo = sb_.j0();
-      const size_type Deltaj0size = sb_.Deltasize(sb_.j0());
-      if (k >= Deltaj0size)
-	expo += (int)floor(log((double)(k-Deltaj0size)/(1<<(sb_.j0()))+1.)/M_LN2);
-      r = 1<<expo;
-    } else {
-    }
-    return r;
+    return D_[k];
   }
-
+  
   template <int d, int dT>
   const double FullLaplacian<d,dT>::get_entry(const size_type row, const size_type column) const
   {
@@ -71,6 +87,101 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
+  const double
+  FullLaplacian<d,dT>::diagonal(const size_type row) const
+  {
+    std::map<size_type,double> e_k; e_k[row] = 1.0;
+    std::map<size_type,double> y;
+
+    // determine corresponding level of "row"
+    int jrow = sb_.j0();
+    if (row >= (size_type) sb_.Deltasize(sb_.j0())) {
+      jrow += 1+(int)floor(log(((double)(row-sb_.Deltasize(sb_.j0())))/(1<<sb_.j0())+1)/M_LN2);
+    }
+    
+    // apply wavelet transformation y=T_{jrow-1}e_k
+    // (does nothing if jrow==j0)
+    if (jrow > sb_.j0())
+      sb_.apply_Tj(jrow-1, e_k, y);
+    else
+      y.swap(e_k);
+    
+    // compute Ay (see "apply")
+    std::map<size_type,double> Ay;
+    const double factor = ldexp(1.0, 2*jrow); // not "1<<(2*j_)" !
+    if (d == 2) {
+      // apply 2^{2j}*tridiag(-1,2,-1)
+      for (std::map<size_type,double>::const_iterator it(y.begin());
+	   it != y.end(); ++it) {
+	Ay[it->first] += factor * 2*it->second;
+	if (it->first > 0)
+	  Ay[it->first-1] -= factor * it->second;
+	if (it->first < column_dimension()-1)
+	  Ay[it->first+1] -= factor * it->second;
+      }
+    } else {
+      if (d == 3) {
+	// cf. [P, Bsp. 3.26]
+	for (std::map<size_type,double>::const_iterator it(y.begin());
+	     it != y.end(); ++it) {
+	  const size_type m = row_dimension();
+	  switch(it->first) {
+	  case 0:
+	    Ay[0] += factor * 4*it->second/3;
+	    Ay[1] -= factor * it->second/6;
+	    Ay[2] -= factor * it->second/6;
+	    break;
+	  case 1:
+	    Ay[0] -= factor * it->second/6;
+	    Ay[1] += factor * it->second;
+	    Ay[2] -= factor * it->second/3;
+	    Ay[3] -= factor * it->second/6;
+	    break;
+	  default: // >= 2
+	    switch(m-1-it->first) {
+	    case 0: // m-1
+	      Ay[m-1] += factor * 4*it->second/3;
+	      Ay[m-2] -= factor * it->second/6;
+	      Ay[m-3] -= factor * it->second/6;
+	      break;
+	    case 1: // m-2
+	      Ay[m-1] -= factor * it->second/6;
+	      Ay[m-2] += factor * it->second;
+	      Ay[m-3] -= factor * it->second/3;
+	      Ay[m-4] -= factor * it->second/6;
+	      break;
+	    default: // < m-2
+	      Ay[it->first-2] -= factor * it->second/6;
+	      Ay[it->first-1] -= factor * it->second/3;
+	      Ay[it->first]   += factor * it->second;
+	      Ay[it->first+1] -= factor * it->second/3;
+	      Ay[it->first+2] -= factor * it->second/6;
+	      break;
+	    }
+	    break;
+	  }
+	}
+      }
+    }
+
+    // compute inner product <y,Ay>
+    double r = 0;
+    for (typename std::map<size_type,double>::const_iterator
+	   ity(y.begin()),
+	   ityend(y.end()),
+	   itAy(Ay.begin()),
+	   itAyend(Ay.end());
+	 ity != ityend && itAy != itAyend; ++itAy)
+      {
+ 	while (ity != ityend && ity->first < itAy->first) ++ity;
+	if (ity != ityend)
+	  if (itAy->first == ity->first)
+	    r += ity->second * itAy->second;
+      }
+    return r;
+  }
+
+  template <int d, int dT>
   template <class VECTOR>
   void FullLaplacian<d,dT>::apply(const VECTOR& x, VECTOR& Mx,
 				  const bool preconditioning) const
@@ -81,14 +192,8 @@ namespace WaveletTL
 
     if (preconditioning) {
       // apply diagonal preconditioner D^{-1}
-      if (dyadic_) { // faster than using the D() routine
-	for (int k(0); k < sb_.Deltasize(sb_.j0()); k++)
-	  y[k] /= (1<<sb_.j0());
-	for (int j = sb_.j0(); j < j_; j++) {
-	  for (int k(sb_.Deltasize(j)); k < sb_.Deltasize(j+1); k++)
-	    y[k] /= (1<<j);
-	}
-      }
+      for (size_type k(0); k < y.size(); k++)
+	y[k] /= D(k);
     }
 
     // apply wavelet transformation T_{j-1}
@@ -129,12 +234,8 @@ namespace WaveletTL
     
     if (preconditioning) {
       // apply diagonal preconditioner D^{-1}
-      for (int k(0); k < sb_.Deltasize(sb_.j0()); k++)
-	Mx[k] /= (1<<sb_.j0());
-      for (int j = sb_.j0(); j < j_; j++) {
-	for (int k(sb_.Deltasize(j)); k < sb_.Deltasize(j+1); k++)
-	  Mx[k] /= (1<<j);
-      }
+      for (size_type k(0); k < y.size(); k++)
+	Mx[k] /= D(k);
     }
   }
 

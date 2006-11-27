@@ -28,8 +28,10 @@ namespace WaveletTL
 
     where T_j models the multiscale transformation within V_{j+1}
     (T_j=I for j==j0-1).
-    The system is diagonally preconditioned with the inverse of
-    (D)_{\lambda,\lambda}=2^{|\lambda|}
+    The system is diagonally preconditioned with the inverse of either
+      (D)_{\lambda,\lambda}=2^{|\lambda|}
+    (in the case dyadic==true) or
+      (D)_{\lambda,\lambda}=a(\psi_\lambda,\psi_\lambda)
   */
   template <int d, int dT>
   class FullLaplacian
@@ -43,7 +45,8 @@ namespace WaveletTL
     /*!
       constructor taking an information object on some spline wavelet basis
     */
-    FullLaplacian(const SplineBasis<d,dT>& sb);
+    FullLaplacian(const SplineBasis<d,dT>& sb,
+		  const bool dyadic = true);
 
     /*!
       row dimension
@@ -61,6 +64,11 @@ namespace WaveletTL
     void set_level(const int j) const;
 
     /*!
+      evaluate the diagonal preconditioner D
+    */
+    double D(const size_type k) const;
+
+    /*!
       read-only access to a single matrix entry
     */
     const double get_entry(const size_type row, const size_type column) const;
@@ -71,11 +79,13 @@ namespace WaveletTL
       is not identical to x
     */
     template <class VECTOR>
-    void apply(const VECTOR& x, VECTOR& Mx) const;
-
+    void apply(const VECTOR& x, VECTOR& Mx,
+	       const bool preconditioning = true) const;
+    
     //! specialization to std::map<size_type,double>
     void apply(const std::map<size_type,double>& x,
-	       std::map<size_type,double>& Mx) const;
+	       std::map<size_type,double>& Mx,
+	       const bool preconditioning = true) const;
     
     /*!
       stream output with user-defined tabwidth and precision
@@ -87,6 +97,7 @@ namespace WaveletTL
 
   protected:
     const SplineBasis<d,dT>& sb_;
+    bool dyadic_;
     mutable int j_;
   };
 

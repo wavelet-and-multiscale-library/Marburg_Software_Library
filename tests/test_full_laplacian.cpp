@@ -138,8 +138,8 @@ int main()
 {
   cout << "Testing FullLaplacian ..." << endl;
 
-  const unsigned int d = 3;
-  const unsigned int dT = 3;
+  const unsigned int d = 2;
+  const unsigned int dT = 2;
 
   SplineBasis<d,dT> basis("P","",1,1,0,0); // PBasis, complementary b.c.'s
   FullLaplacian<d,dT> delta(basis);
@@ -152,7 +152,7 @@ int main()
   cout << "* stiffness matrix on next level j0+1=" << basis.j0()+1 << ":" << endl
        << delta;
   
-#if 0
+#if 1
   const unsigned int solution = 2;
   double kink = 0; // for Solution4;
 
@@ -180,7 +180,7 @@ int main()
   }
 
   // setup (approximate) coefficients of u in the primal basis on a sufficiently high level
-  const int jref = 16;
+  const int jref = 15;
   G.set_level(jref);
   
   // 1. compute integrals w.r.t. the primal generators on level jref
@@ -211,8 +211,8 @@ int main()
 
   cout << "* compute wavelet-Galerkin approximations for several levels..." << endl;
   const int jmin = basis.j0();
-//   const int jmax = jmin+2;
-  const int jmax = 16;
+//   const int jmax = jmin+5;
+  const int jmax = 10;
   Vector<double> js(jmax-jmin+1);
   Vector<double> Linfty_errors(jmax-jmin+1), L2_errors(jmax-jmin+1),
     discr_L2_errors(jmax-jmin+1), discr_H1_errors(jmax-jmin+1);
@@ -315,12 +315,8 @@ int main()
     else
       basis.apply_Tj_transposed(j-1, rhs_phijk, rhs);
     // 2. apply D^{-1}
-    for (int k(0); k < basis.Deltasize(basis.j0()); k++)
-      rhs[k] /= (1<<basis.j0());
-    for (int level = basis.j0(); level < j; level++) {
-      for (int k(basis.Deltasize(level)); k < basis.Deltasize(level+1); k++)
-	rhs[k] /= (1<<level);
-    }
+    for (unsigned int k(0); k < rhs.size(); k++)
+      rhs[k] /= delta.D(k);
 //     cout << "  rhs in psi_{j,k} basis: " << rhs << endl;
 
     // solve Galerkin system
@@ -336,12 +332,8 @@ int main()
 
     // compute coefficients of ulambda in the phi_{j,k} basis
     // 1. apply D^{-1}
-    for (int k(0); k < basis.Deltasize(basis.j0()); k++)
-      ulambda[k] /= (1<<basis.j0());
-    for (int level = basis.j0(); level < j; level++) {
-      for (int k(basis.Deltasize(level)); k < basis.Deltasize(level+1); k++)
-	ulambda[k] /= (1<<level);
-    }
+    for (unsigned int k(0); k < ulambda.size(); k++)
+      ulambda[k] /= delta.D(k);
 
     // save the L_2 wavelet coefficients
     Vector<double> ulambda_prolong(basis.Deltasize(jref));
@@ -392,12 +384,8 @@ int main()
     cout << "  discr. L_2 error: " << discr_L2_error << endl;
     discr_L2_errors[j-jmin] = discr_L2_error;
 
-    for (int k(0); k < basis.Deltasize(basis.j0()); k++)
-      coeff_error[k] *= (1<<basis.j0());
-    for (int level = basis.j0(); level < jref; level++) {
-      for (int k(basis.Deltasize(level)); k < basis.Deltasize(level+1); k++)
- 	coeff_error[k] *= (1<<level);
-    }
+    for (unsigned int k(0); k < coeff_error.size(); k++)
+      coeff_error[k] *= delta.D(k);
     const double discr_H1_error = l2_norm(coeff_error);
     cout << "  discr. H^1 error: " << discr_H1_error << endl;
     discr_H1_errors[j-jmin] = discr_H1_error;

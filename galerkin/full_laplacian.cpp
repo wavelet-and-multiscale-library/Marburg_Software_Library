@@ -5,8 +5,9 @@
 namespace WaveletTL
 {
   template <int d, int dT>
-  FullLaplacian<d,dT>::FullLaplacian(const SplineBasis<d,dT>& sb)
-    : sb_(sb), j_(sb.j0())
+  FullLaplacian<d,dT>::FullLaplacian(const SplineBasis<d,dT>& sb,
+				     const bool dyadic)
+    : sb_(sb), dyadic_(dyadic), j_(sb.j0())
   {
   }
 
@@ -27,10 +28,26 @@ namespace WaveletTL
   }  
 
   template <int d, int dT>
-  void FullLaplacian<d,dT>::set_level(const int j) const
+  void
+  FullLaplacian<d,dT>::set_level(const int j) const
   {
     assert(j >= sb_.j0());
     j_ = j;
+  }
+
+  template <int d, int dT>
+  double
+  FullLaplacian<d,dT>::D(const size_type k) const {
+    double r = 0;
+    if (dyadic_) {
+      int expo = sb_.j0();
+      const size_type Deltaj0size = sb_.Deltasize(sb_.j0());
+      if (k >= Deltaj0size)
+	expo += (int)floor(log((double)(k-Deltaj0size)/(1<<(sb_.j0()))+1.)/M_LN2);
+      r = 1<<expo;
+    } else {
+    }
+    return r;
   }
 
   template <int d, int dT>
@@ -55,18 +72,23 @@ namespace WaveletTL
 
   template <int d, int dT>
   template <class VECTOR>
-  void FullLaplacian<d,dT>::apply(const VECTOR& x, VECTOR& Mx) const
+  void FullLaplacian<d,dT>::apply(const VECTOR& x, VECTOR& Mx,
+				  const bool preconditioning) const
   {
     assert(Mx.size() == row_dimension());
 
     VECTOR y(x);
 
-    // apply diagonal preconditioner D^{-1}
-    for (int k(0); k < sb_.Deltasize(sb_.j0()); k++)
-      y[k] /= (1<<sb_.j0());
-    for (int j = sb_.j0(); j < j_; j++) {
-      for (int k(sb_.Deltasize(j)); k < sb_.Deltasize(j+1); k++)
-	y[k] /= (1<<j);
+    if (preconditioning) {
+      // apply diagonal preconditioner D^{-1}
+      if (dyadic_) { // faster than using the D() routine
+	for (int k(0); k < sb_.Deltasize(sb_.j0()); k++)
+	  y[k] /= (1<<sb_.j0());
+	for (int j = sb_.j0(); j < j_; j++) {
+	  for (int k(sb_.Deltasize(j)); k < sb_.Deltasize(j+1); k++)
+	    y[k] /= (1<<j);
+	}
+      }
     }
 
     // apply wavelet transformation T_{j-1}
@@ -105,28 +127,27 @@ namespace WaveletTL
     else
       Mx.swap(y);
     
-    // apply diagonal preconditioner D^{-1}
-    for (int k(0); k < sb_.Deltasize(sb_.j0()); k++)
-      Mx[k] /= (1<<sb_.j0());
-    for (int j = sb_.j0(); j < j_; j++) {
-      for (int k(sb_.Deltasize(j)); k < sb_.Deltasize(j+1); k++)
-	Mx[k] /= (1<<j);
+    if (preconditioning) {
+      // apply diagonal preconditioner D^{-1}
+      for (int k(0); k < sb_.Deltasize(sb_.j0()); k++)
+	Mx[k] /= (1<<sb_.j0());
+      for (int j = sb_.j0(); j < j_; j++) {
+	for (int k(sb_.Deltasize(j)); k < sb_.Deltasize(j+1); k++)
+	  Mx[k] /= (1<<j);
+      }
     }
   }
 
   template <int d, int dT>
   void FullLaplacian<d,dT>::apply(const std::map<size_type,double>& x,
-				  std::map<size_type,double>& Mx) const
+				  std::map<size_type,double>& Mx,
+				  const bool preconditioning) const
   {
     std::map<size_type,double> y(x);
 
     // apply diagonal preconditioner D^{-1}
-    for (int k(0); k < sb_.Deltasize(sb_.j0()); k++)
-      y[k] /= (1<<sb_.j0());
-    for (int j = sb_.j0(); j < j_; j++) {
-      for (int k(sb_.Deltasize(j)); k < sb_.Deltasize(j+1); k++)
-	y[k] /= (1<<j);
-    }
+    for (std::map<size_type,double>::iterator it(y.begin()); it != y.end(); ++it)
+      it->second /= D(it->first);
 
     // apply wavelet transformation T_{j-1}
     // (does nothing if j==j0)
@@ -201,12 +222,8 @@ namespace WaveletTL
       Mx.swap(y);
     
     // apply diagonal preconditioner D^{-1}
-    for (int k(0); k < sb_.Deltasize(sb_.j0()); k++)
-      Mx[k] /= (1<<sb_.j0());
-    for (int j = sb_.j0(); j < j_; j++) {
-      for (int k(sb_.Deltasize(j)); k < sb_.Deltasize(j+1); k++)
-	Mx[k] /= (1<<j);
-    }
+    for (std::map<size_type,double>::iterator it(Mx.begin()); it != Mx.end(); ++it)
+      it->second /= D(it->first);
 
     // remove unnecessary zeros
     for (typename std::map<size_type,double>::iterator it(Mx.begin()); it != Mx.end();) {

@@ -105,13 +105,13 @@ namespace WaveletTL
 	       const unsigned int tabwidth = 8,
 	       const unsigned int precision = 3) const;
 
-  protected:
-    const SplineBasis<d,dT>& sb_;
-    double alpha_;
-    PreconditioningType precond_;
-
     FullGramian<d,dT> G_;
     FullLaplacian<d,dT> A_;
+    const SplineBasis<d,dT>& sb_;
+
+  protected:
+    mutable double alpha_;
+    PreconditioningType precond_;
 
     mutable int j_;
 

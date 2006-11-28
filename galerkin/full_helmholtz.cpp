@@ -6,8 +6,7 @@ namespace WaveletTL
   FullHelmholtz<d,dT>::FullHelmholtz(const SplineBasis<d,dT>& sb,
 				     const double alpha,
 				     const PreconditioningType precond)
-    : sb_(sb), alpha_(alpha), precond_(precond),
-      G_(sb), A_(sb, no_precond)
+    : G_(sb), A_(sb, no_precond), sb_(sb), alpha_(alpha), precond_(precond)
   {
     set_level(sb_.j0());
   }

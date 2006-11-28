@@ -102,4 +102,18 @@ namespace WaveletTL
     w.add(help);
   }
 
+//   template <int d, int dT>
+//   void
+//   ROWStageEquationFull1D<d,dT>::setup_rhs(unsigned int i,
+// 					  const double tolerance,
+// 					  const double t_n,
+// 					  const double h,
+// 					  const double alpha,
+// 					  const Vector<double>& D_un,
+// 					  const std::list<Vector<double> >& Dalpha_uj,
+// 					  const int jmax)
+//   {
+//   }
+
+
 }

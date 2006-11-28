@@ -214,37 +214,60 @@ namespace WaveletTL
   };
 
 
-  /*!
-    an analogous class for approximations in full spaces V_j,
-    using spline wavelets on the interval
-  */
-  template<int d, int dT>
-  class ROWStageEquationFull1D
-  {
-  public:
-    /*!
-      Constructor from a given ROW method (finite-vector-valued, we only need the coeffs)
-      and various helper objects,
-      a (time-dependent) driving term f and its derivative f'.
-      If ft and/or f are omitted (or set to zero), we assume that f and/or ft=0.
-    */
-    ROWStageEquationFull1D(const ROWMethod<Vector<double> >* row_method,
-			   FullHelmholtz<d,dT>* A,
-			   MathTL::Function<1,double>* f = 0,
-			   MathTL::Function<1,double>* ft = 0)
-      : row_method_(row_method),
-	A_(A),
-	f_(f),
-	ft_(ft)
-    {
-    }
+//   /*!
+//     an analogous class for approximations in full spaces V_j,
+//     using spline wavelets on the interval
+//   */
+//   template<int d, int dT>
+//   class ROWStageEquationFull1D
+//   {
+//   public:
+//     /*!
+//       Constructor from a given ROW method (finite-vector-valued, we only need the coeffs)
+//       and various helper objects,
+//       a (time-dependent) driving term f and its derivative f'.
+//       If ft and/or f are omitted (or set to zero), we assume that f and/or ft=0.
+//     */
+//     ROWStageEquationFull1D(const ROWMethod<Vector<double> >* row_method,
+// 			   FullHelmholtz<d,dT>* A,
+// 			   MathTL::Function<1,double>* f = 0,
+// 			   MathTL::Function<1,double>* ft = 0)
+//       : row_method_(row_method),
+// 	A_(A),
+// 	f_(f),
+// 	ft_(ft)
+//     {
+//     }
+
+//     /*!
+//       set (numerical) diffusion coefficient alpha
+//     */
+//     void set_alpha(double alpha) { A_->set_alpha(alpha); }
     
-  protected:
-    const ROWMethod<Vector<double> >* row_method_;
-    FullHelmholtz<d,dT>* A_;
-    Function<1>* f_;
-    Function<1>* ft_;
-  };
+//     /*!
+//       setup (unpreconditioned) right-hand side y for the i-th stage equation,
+//       this requires that the stage solutions D_alpha u_1, ..., D_alpha u_{i-1}
+//       are already set up
+//     */
+//     void setup_rhs(unsigned int i,
+// 		   const double tolerance,
+// 		   const double t_n,
+// 		   const double h,
+// 		   const double alpha,
+// 		   const Vector<double>& D_un,
+// 		   const std::list<Vector<double> >& Dalpha_uj,
+// 		   const int jmax = 10);
+
+//     const ROWMethod<Vector<double> >* row_method_;
+//     FullHelmholtz<d,dT>* A_;
+    
+//   protected:
+//     Function<1>* f_;
+//     Function<1>* ft_;
+
+//     //! holds current (unpreconditioned) right--hand side 
+//     Vector<double> y;
+//   };
 
 }
 

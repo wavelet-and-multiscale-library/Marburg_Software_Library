@@ -14,6 +14,7 @@ all:: tests
 # set 4: wavelet bases on the L-domain
 # set 5: adaptive wavelet schemes for elliptic equations
 # set 6: adaptive wavelet schemes for parabolic equations
+# set 7: nonadaptive wavelet schemes for elliptic equations
 
 tests::
 	cd tests; $(MAKE)
@@ -35,6 +36,9 @@ tests5::
 
 tests6::
 	cd tests; $(MAKE) tests6
+
+tests7::
+	cd tests; $(MAKE) tests7
 
 doc::
 	cd doc; $(MAKE)

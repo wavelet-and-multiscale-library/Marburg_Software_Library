@@ -88,7 +88,7 @@ EXEOBJF2 = \
   test_p_basis.o test_p_support.o test_p_expansion.o\
   test_jl_basis.o test_jl_support.o\
   test_periodic.o\
-  test_spline_basis.o test_full_laplacian.o test_full_gramian.o
+  test_spline_basis.o
 
 # set 3 of test programs: wavelet bases on general higher-dim. domains ((mapped) cube, tensor prod.)
 EXEOBJF3 = \
@@ -111,16 +111,22 @@ EXEOBJF5 = \
 EXEOBJF6 = \
   test_lin_par_equation.o test_row_stage_equation.o test_row_stage_equation_2d.o
 
+# set 7 of test programs: nonadaptive wavelet solvers for elliptic problems	
+EXEOBJF7 = \
+  test_full_laplacian.o test_full_gramian.o test_full_helmholtz.o		
+
+
 EXES1 = $(EXEOBJF1:.o=)
 EXES2 = $(EXEOBJF2:.o=)
 EXES3 = $(EXEOBJF3:.o=)
 EXES4 = $(EXEOBJF4:.o=)
 EXES5 = $(EXEOBJF5:.o=)
 EXES6 = $(EXEOBJF6:.o=)
+EXES7 = $(EXEOBJF7:.o=)
 
 all:: tests
 
-tests:: tests1 tests2 tests3 tests4 tests5 tests6
+tests:: tests1 tests2 tests3 tests4 tests5 tests6 tests7
 
 tests1:: $(EXES1)
 tests2:: $(EXES2)
@@ -128,6 +134,7 @@ tests3:: $(EXES3)
 tests4:: $(EXES4)
 tests5:: $(EXES5)
 tests6:: $(EXES6)
+tests7:: $(EXES7)
 
 clean::
 	rm -f $(EXEOBJF1) $(EXES1)
@@ -136,6 +143,7 @@ clean::
 	rm -f $(EXEOBJF4) $(EXES4)
 	rm -f $(EXEOBJF5) $(EXES5)
 	rm -f $(EXEOBJF6) $(EXES6)
+	rm -f $(EXEOBJF7) $(EXES7)
 
 veryclean:: clean
 	rm -f *~
@@ -218,6 +226,20 @@ else
 endif
 
 $(EXES6): %: %.o
+ifeq ($(DEBUGMODE),on)
+	$(CXX) $(LDFLAGS) $< -g -o $@
+else
+	$(CXX) $(LDFLAGS) $< -o $@
+endif
+
+$(EXEOBJF7): %.o: %.cpp
+ifeq ($(DEBUGMODE),on)
+	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
+else
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+endif
+
+$(EXES7): %: %.o
 ifeq ($(DEBUGMODE),on)
 	$(CXX) $(LDFLAGS) $< -g -o $@
 else

@@ -55,6 +55,100 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
+  const double
+  FullGramian<d,dT>::diagonal(const size_type row) const
+  {
+    std::map<size_type,double> e_k; e_k[row] = 1.0;
+    std::map<size_type,double> y;
+    
+    // determine corresponding level of "row"
+    int jrow = sb_.j0();
+    if (row >= (size_type) sb_.Deltasize(sb_.j0())) {
+      jrow += 1+(int)floor(log(((double)(row-sb_.Deltasize(sb_.j0())))/(1<<sb_.j0())+1)/M_LN2);
+    }
+    
+    // apply wavelet transformation y=T_{jrow-1}e_k
+    // (does nothing if jrow==j0)
+    if (jrow > sb_.j0())
+      sb_.apply_Tj(jrow-1, e_k, y);
+    else
+      y.swap(e_k);
+    
+    // compute Ay (see "apply")
+    std::map<size_type,double> Ay;
+    if (d == 2) {
+      // apply tridiag(1/6,2/3,1/6)
+      for (std::map<size_type,double>::const_iterator it(y.begin());
+	   it != y.end(); ++it) {
+	Ay[it->first] += 2*it->second/3;
+	if (it->first > 0)
+	  Ay[it->first-1] += it->second/6;
+	if (it->first < column_dimension()-1)
+	  Ay[it->first+1] += it->second/6;
+      }
+    } else {
+      if (d == 3) {
+	// cf. [P, Bsp. 3.23]
+	for (std::map<size_type,double>::const_iterator it(y.begin());
+	     it != y.end(); ++it) {
+	  const size_type m = row_dimension();
+	  switch(it->first) {
+	  case 0:
+	    Ay[0] += it->second/3;
+	    Ay[1] += 5*it->second/24;
+	    Ay[2] += it->second/120;
+	    break;
+	  case 1:
+	    Ay[0] += 5*it->second/24;
+	    Ay[1] += 11*it->second/20;
+	    Ay[2] += 13*it->second/60;
+	    Ay[3] += it->second/120;
+	    break;
+	  default: // >= 2
+	    switch(m-1-it->first) {
+	    case 0: // m-1
+	      Ay[m-1] += it->second/3;
+	      Ay[m-2] += 5*it->second/24;
+	      Ay[m-3] += it->second/120;
+	      break;
+	    case 1: // m-2
+	      Ay[m-1] += 5*it->second/24;
+	      Ay[m-2] += 11*it->second/20;
+	      Ay[m-3] += 13*it->second/60;
+	      Ay[m-4] += it->second/120;
+	      break;
+	    default: // < m-2
+	      Ay[it->first-2] += it->second/120;
+	      Ay[it->first-1] += 13*it->second/60;
+	      Ay[it->first]   += 11*it->second/20;
+	      Ay[it->first+1] += 13*it->second/60;
+	      Ay[it->first+2] += it->second/120;
+	      break;
+	    }
+	    break;
+	  }
+	}
+      }
+    }
+    
+    // compute inner product <y,Ay>
+    double r = 0;
+    for (typename std::map<size_type,double>::const_iterator
+	   ity(y.begin()),
+	   ityend(y.end()),
+	   itAy(Ay.begin()),
+	   itAyend(Ay.end());
+	 ity != ityend && itAy != itAyend; ++itAy)
+      {
+ 	while (ity != ityend && ity->first < itAy->first) ++ity;
+	if (ity != ityend)
+	  if (itAy->first == ity->first)
+	    r += ity->second * itAy->second;
+      }
+    return r;
+  }
+  
+  template <int d, int dT>
   template <class VECTOR>
   void FullGramian<d,dT>::apply(const VECTOR& x, VECTOR& Mx) const
   {

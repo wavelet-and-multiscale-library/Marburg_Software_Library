@@ -150,7 +150,8 @@ int main()
   const unsigned int dT = 2;
 
   SplineBasis<d,dT> basis("P","",1,1,0,0); // PBasis, complementary b.c.'s
-  FullHelmholtz<d,dT> A(basis, 1.0, dyadic);
+//   FullHelmholtz<d,dT> A(basis, 1.0, dyadic);
+  FullHelmholtz<d,dT> A(basis, 1.0, energy);
   FullGramian<d,dT> G(basis);
 
   cout << "* stiffness matrix on coarsest level j0=" << basis.j0() << ":" << endl

@@ -61,6 +61,11 @@ namespace WaveletTL
     void set_level(const int j) const;
 
     /*!
+      set reaction coefficient alpha
+    */
+    void set_alpha(const double alpha) const;
+
+    /*!
       evaluate the diagonal preconditioner D
     */
     double D(const size_type k) const;

@@ -41,6 +41,15 @@ namespace WaveletTL
 
   template <int d, int dT>
   void
+  FullHelmholtz<d,dT>::set_alpha(const double alpha) const
+  {
+    assert(alpha >= 0);
+    alpha_ = alpha;
+    setup_D();
+  }
+
+  template <int d, int dT>
+  void
   FullHelmholtz<d,dT>::setup_D() const
   {
     D_.resize(sb_.Deltasize(j_));

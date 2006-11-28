@@ -31,6 +31,7 @@ public:
   }
 };
 
+// right-hand side for Solution1
 class RHS1 : public Function<1> {
 public:
   inline double value(const Point<1>& p, const unsigned int component = 0) const {
@@ -43,36 +44,30 @@ public:
   }
 };
 
-// // exact solution of -u''=f, u(0)=u(1)=0 with kink at x=0.5
-// class Solution2 : public Function<1> {
-// public:
-//   inline double value(const Point<1>& p, const unsigned int component = 0) const {
-//     if (0. <= p[0] && p[0] < 0.5)
-//       return -sin(3.*M_PI*p[0]) + 2.*p[0]*p[0];
-    
-//     if (0.5 <= p[0] && p[0] <= 1.0)
-//       return -sin(3.*M_PI*p[0]) + 2.*(1-p[0])*(1-p[0]);
-    
-//     return 0.;
-//   }
+// polynomial solution of -u''=f, u(0)=u(1)=0
+class Solution2 : public Function<1> {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    return p[0]*(1-p[0]);
+  }
   
-//   void vector_value(const Point<1> &p, Vector<double>& values) const {
-//     values.resize(1, false);
-//     values[0] = value(p);
-//   }
-// };
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
 
-// // smooth part of corresponding right-hand side
-// class RHS2_part : public Function<1> {
-//   inline double value(const Point<1>& p, const unsigned int component = 0) const {
-//     return -sin(3.*M_PI*p[0])*9.*M_PI*M_PI - 4.;
-//   }
+// right-hand side for Solution2
+class RHS2 : public Function<1> {
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    return 2+p[0]*(1-p[0]);
+  }
   
-//   void vector_value(const Point<1> &p, Vector<double>& values) const {
-//     values.resize(1, false);
-//     values[0] = value(p);
-//   }
-// };
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
 
 // // smooth part of solution 2
 // class Solution3 : public Function<1> {
@@ -178,16 +173,18 @@ int main()
        << "  " << diagonal << endl;
   
 // #if 1
-  const unsigned int solution = 1;
+  const unsigned int solution = 2;
 
-  Function<1> *uexact = 0;
+  Function<1> *uexact = 0, *f = 0;
   switch(solution) {
   case 1:
     uexact = new Solution1();
+    f = new RHS1();
     break;
-//   case 2:
-//     uexact = new Solution2();
-//     break;
+  case 2:
+    uexact = new Solution2();
+    f = new RHS2();
+    break;
 //   case 3:
 //     uexact = new Solution3();
 //     break;
@@ -249,16 +246,15 @@ int main()
 
     // setup rhs in the phi_{j,k} basis,
     Vector<double> rhs_phijk(A.row_dimension(), false);
-    if (solution == 1) {
+    if (solution == 1 || solution == 2) {
       // perform quadrature with a composite rule on [0,1]
       cout << "  solution 1, quadrature for rhs..." << endl;
-      RHS1 f;
       SimpsonRule simpson;
       CompositeRule<1> composite(simpson, 72);
       SchoenbergIntervalBSpline_td<d> sbs(j,0);
       for (int k = basis.DeltaLmin(); k <= basis.DeltaRmax(j); k++) {
 	sbs.set_k(k);
-	ProductFunction<1> integrand(&f, &sbs);
+	ProductFunction<1> integrand(f, &sbs);
 	rhs_phijk[k-basis.DeltaLmin()]
 	  = composite.integrate(integrand,
 				Point<1>(std::max(0.0, (k+ell1<d>())*ldexp(1.0, -j))),
@@ -414,6 +410,7 @@ int main()
     discr_H1_errors[j-jmin] = discr_H1_error;
   }
 
+  delete f;
   delete uexact;
 
 // #endif

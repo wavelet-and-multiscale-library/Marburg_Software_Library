@@ -1,5 +1,6 @@
 // implementation for full_gramian.h
 
+#include <list>
 #include <map>
 
 namespace WaveletTL
@@ -180,6 +181,27 @@ namespace WaveletTL
       else
 	++it;
     }  
+  }
+  
+  template <int d, int dT>
+  void
+  FullGramian<d,dT>::to_sparse(SparseMatrix<double>& S) const
+  {
+    // we utilize that the Gramian is symmetric
+    const size_type m = row_dimension();
+    S.resize(m, m);
+    for (size_type row(0); row < m; row++) {
+      std::map<size_type,double> x, Mx;
+      x[row] = 1.0;
+      apply(x, Mx);
+      typename std::list<size_type> indices;
+      std::list<double> entries;
+      for (typename std::map<size_type,double>::const_iterator it(Mx.begin()); it != Mx.end(); ++it) {
+	indices.push_back(it->first);
+	entries.push_back(it->second);
+      }
+      S.set_row(row, indices, entries);
+    }
   }
   
   template <int d, int dT>

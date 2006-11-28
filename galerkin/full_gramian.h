@@ -13,6 +13,7 @@
 #include <iostream>
 #include <map>
 #include <algebra/vector.h>
+#include <algebra/sparse_matrix.h>
 #include <interval/spline_basis.h>
 
 using namespace MathTL;
@@ -73,6 +74,9 @@ namespace WaveletTL
     //! specialization to std::map<size_type,double>
     void apply(const std::map<size_type,double>& x,
 	       std::map<size_type,double>& Mx) const;
+    
+    //! conversion to a sparse matrix
+    void to_sparse(SparseMatrix<double>& S) const;
     
     /*!
       stream output with user-defined tabwidth and precision

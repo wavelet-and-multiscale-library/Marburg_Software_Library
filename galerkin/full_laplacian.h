@@ -101,6 +101,9 @@ namespace WaveletTL
 	       std::map<size_type,double>& Mx,
 	       const bool preconditioning = true) const;
     
+    //! conversion to a sparse matrix
+    void to_sparse(SparseMatrix<double>& S) const;
+    
     /*!
       stream output with user-defined tabwidth and precision
       (cf. deal.II)

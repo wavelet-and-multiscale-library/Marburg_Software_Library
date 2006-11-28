@@ -69,85 +69,61 @@ class RHS2 : public Function<1> {
   }
 };
 
-// // smooth part of solution 2
-// class Solution3 : public Function<1> {
-// public:
-//   inline double value(const Point<1>& p, const unsigned int component = 0) const {
-//     return -sin(3.*M_PI*p[0]);
-//   }
-  
-//   void vector_value(const Point<1> &p, Vector<double>& values) const {
-//     values.resize(1, false);
-//     values[0] = value(p);
-//   }
-// };
+// kink at 0<a<1
+class Solution3 : public Function<1> {
+ public:
+  Solution3(const double a = 0.5) : a_(a) {}
 
-// // smooth part of corresponding right-hand side
-// class RHS3 : public Function<1> {
-//   inline double value(const Point<1>& p, const unsigned int component = 0) const {
-//     return -sin(3.*M_PI*p[0])*9.*M_PI*M_PI;
-//   }
-  
-//   void vector_value(const Point<1> &p, Vector<double>& values) const {
-//     values.resize(1, false);
-//     values[0] = value(p);
-//   }
-// };
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    if (0. <= p[0] && p[0] < a_)
+      return 1/(2*a_*a_)*p[0]*p[0];
+ 
+    if (a_ <= p[0] && p[0] <= 1.0)
+      return 0.5*(1-(p[0]-a_)/(1-a_))*(1-(p[0]-a_)/(1-a_));
+ 
+    return 0.;
+  }
 
-// // kink at 0<a<1
-// class Solution4 : public Function<1> {
-//  public:
-//   Solution4(const double a = 0.5) : a_(a) {}
-  
-//   inline double value(const Point<1>& p, const unsigned int component = 0) const {
-//     if (0. <= p[0] && p[0] < a_)
-//       return 1/(2*a_*a_)*p[0]*p[0];
-    
-//     if (a_ <= p[0] && p[0] <= 1.0)
-//       return 0.5*(1-(p[0]-a_)/(1-a_))*(1-(p[0]-a_)/(1-a_));
-    
-//     return 0.;
-//   }
-  
-//   void vector_value(const Point<1> &p, Vector<double>& values) const {
-//     values.resize(1, false);
-//     values[0] = value(p);
-//   }
-  
-//  protected:
-//   double a_;
-// };
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
 
-// // smooth part of corresponding right-hand side
-// class RHS4_part : public Function<1> {
-// public:
-//   RHS4_part(const double a = 0.5) : a_(a) {}
-  
-//   inline double value(const Point<1>& p, const unsigned int component = 0) const {
-//     if (0. <= p[0] && p[0] < a_)
-//       return -1/(a_*a_);
-    
-//     if (a_ <= p[0] && p[0] <= 1.0)
-//       return -1/((1-a_)*(1-a_));
-    
-//     return 0.;
-//   }
-  
-//   void vector_value(const Point<1> &p, Vector<double>& values) const {
-//     values.resize(1, false);
-//     values[0] = value(p);
-//   }
-  
-// protected:
-//   double a_;
-// };
+ protected:
+  double a_;
+};
+
+// smooth part of corresponding right-hand side
+class RHS3_part : public Function<1> {
+public:
+  RHS3_part(const double a = 0.5) : a_(a) {}
+
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    if (0. <= p[0] && p[0] < a_)
+      return -1/(a_*a_) + 1/(2*a_*a_)*p[0]*p[0];
+ 
+    if (a_ <= p[0] && p[0] <= 1.0)
+      return -1/((1-a_)*(1-a_)) + 0.5*(1-(p[0]-a_)/(1-a_))*(1-(p[0]-a_)/(1-a_));
+ 
+    return 0.;
+  }
+
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+
+protected:
+  double a_;
+};
+
 
 int main()
 {
   cout << "Testing FullHelmholtz ..." << endl;
 
-  const unsigned int d = 2;
-  const unsigned int dT = 2;
+  const unsigned int d = 3;
+  const unsigned int dT = 3;
 
   SplineBasis<d,dT> basis("P","",1,1,0,0); // PBasis, complementary b.c.'s
 //   FullHelmholtz<d,dT> A(basis, 1.0, dyadic);
@@ -174,7 +150,8 @@ int main()
        << "  " << diagonal << endl;
   
 // #if 1
-  const unsigned int solution = 2;
+  const unsigned int solution = 3;
+  double kink = 0; // for Solution3;
 
   Function<1> *uexact = 0, *f = 0;
   switch(solution) {
@@ -186,23 +163,17 @@ int main()
     uexact = new Solution2();
     f = new RHS2();
     break;
-//   case 3:
-//     uexact = new Solution3();
-//     break;
-//   case 4:
-//     kink = 0.5;
-//     uexact = new Solution4(kink);
-//     break;
-//   case 5:
-//     kink = 5./7.;
-//     uexact = new Solution4(kink);
-//     break;
+  case 3:
+    kink = 5./7.;
+    uexact = new Solution3(kink);
+    f = new RHS3_part(kink);
+    break;
   default:
     break;
   }
 
   // setup (approximate) coefficients of u in the primal basis on a sufficiently high level
-  const int jref = 15;
+  const int jref = 16;
   G.set_level(jref);
   
   // 1. compute integrals w.r.t. the primal generators on level jref
@@ -249,7 +220,7 @@ int main()
     Vector<double> rhs_phijk(A.row_dimension(), false);
     if (solution == 1 || solution == 2) {
       // perform quadrature with a composite rule on [0,1]
-      cout << "  solution 1, quadrature for rhs..." << endl;
+      cout << "  solution " << solution << ", quadrature for rhs..." << endl;
       SimpsonRule simpson;
       CompositeRule<1> composite(simpson, 72);
       SchoenbergIntervalBSpline_td<d> sbs(j,0);
@@ -261,69 +232,32 @@ int main()
 				Point<1>(std::max(0.0, (k+ell1<d>())*ldexp(1.0, -j))),
 				Point<1>(std::min(1.0, (k+ell2<d>())*ldexp(1.0, -j))));
       }
-    }
-//     } else {
-//       if (solution == 2) {
-// 	// perform quadrature with a composite rule on [0,1]
-// 	cout << "  solution 2, quadrature for rhs..." << endl;
-// 	RHS2_part f_part;
-// 	SimpsonRule simpson;
-// 	CompositeRule<1> composite(simpson, 72);
-// 	SchoenbergIntervalBSpline_td<d> sbs(j,0);
-// 	for (int k = basis.DeltaLmin(); k <= basis.DeltaRmax(j); k++) {
-// 	  sbs.set_k(k);
-// 	  ProductFunction<1> integrand(&f_part, &sbs);
-// 	  rhs_phijk[k-basis.DeltaLmin()]
-//  	    = composite.integrate(integrand,
-//  				  Point<1>(std::max(0.0, (k+ell1<d>())*ldexp(1.0, -j))),
-//  				  Point<1>(std::min(1.0, (k+ell2<d>())*ldexp(1.0, -j))))
-//  	    + 4*sbs.value(Point<1>(0.5));
-// 	}
-//       } else {
-// 	if (solution == 3) {
-// 	  // perform quadrature with a composite rule on [0,1]
-// 	  cout << "  solution 3, quadrature for rhs..." << endl;
-// 	  RHS3 f;
-// 	  SimpsonRule simpson;
-// 	  CompositeRule<1> composite(simpson, 72);
-// 	  SchoenbergIntervalBSpline_td<d> sbs(j,0);
-// 	  for (int k = basis.DeltaLmin(); k <= basis.DeltaRmax(j); k++) {
-// 	    sbs.set_k(k);
-// 	    ProductFunction<1> integrand(&f, &sbs);
-// 	    rhs_phijk[k-basis.DeltaLmin()]
-// 	      = composite.integrate(integrand,
-// 				    Point<1>(std::max(0.0, (k+ell1<d>())*ldexp(1.0, -j))),
-// 				    Point<1>(std::min(1.0, (k+ell2<d>())*ldexp(1.0, -j))));
-// 	  }
-// 	} else {
-// 	  if (solution == 4 || solution == 5) {
-// 	    // perform quadrature with a composite rule on [0,1]
-// 	    cout << "  solution " << solution << ", quadrature for rhs..." << endl;
-// 	    RHS4_part f_part(kink);
-// 	    SimpsonRule simpson;
-// 	    CompositeRule<1> composite(simpson, 72);
-// 	    SchoenbergIntervalBSpline_td<d> sbs(j,0);
-// 	    for (int k = basis.DeltaLmin(); k <= basis.DeltaRmax(j); k++) {
-// 	      sbs.set_k(k);
-// 	      ProductFunction<1> integrand(&f_part, &sbs);
-// 	      // f is piecewise smooth with (potential) jump at x=a
-// 	      rhs_phijk[k-basis.DeltaLmin()] = (1/kink + 1/(1-kink))*sbs.value(Point<1>(kink));
-// 	      if (std::max(0.0, (k+ell1<d>())*ldexp(1.0, -j)) < kink) // generator intersects left half of the interval
-// 		rhs_phijk[k-basis.DeltaLmin()]
-// 		  += composite.integrate(integrand,
-// 					 Point<1>(std::max(0.0, (k+ell1<d>())*ldexp(1.0, -j))),
-// 					 Point<1>(std::min(kink, (k+ell2<d>())*ldexp(1.0, -j))));
+    } else {
+      if (solution == 3) {
+ 	// perform quadrature with a composite rule on [0,1]
+ 	cout << "  solution 3, quadrature for rhs..." << endl;
+ 	SimpsonRule simpson;
+ 	CompositeRule<1> composite(simpson, 72);
+ 	SchoenbergIntervalBSpline_td<d> sbs(j,0);
+ 	for (int k = basis.DeltaLmin(); k <= basis.DeltaRmax(j); k++) {
+ 	  sbs.set_k(k);
+ 	  ProductFunction<1> integrand(f, &sbs);
+	  // f is piecewise smooth with (potential) jump at x=a
+	  rhs_phijk[k-basis.DeltaLmin()] = (1/kink + 1/(1-kink))*sbs.value(Point<1>(kink));
+	  if (std::max(0.0, (k+ell1<d>())*ldexp(1.0, -j)) < kink) // generator intersects left half of the interval
+	    rhs_phijk[k-basis.DeltaLmin()]
+	      += composite.integrate(integrand,
+				     Point<1>(std::max(0.0, (k+ell1<d>())*ldexp(1.0, -j))),
+				     Point<1>(std::min(kink, (k+ell2<d>())*ldexp(1.0, -j))));
 	      
-// 	      if (std::min(1.0, (k+ell2<d>())*ldexp(1.0, -j)) > kink) // generator intersects right half of the interval
-// 		rhs_phijk[k-basis.DeltaLmin()]
-// 		  += composite.integrate(integrand,
-// 					 Point<1>(std::max(kink, (k+ell1<d>())*ldexp(1.0, -j))),
-// 					 Point<1>(std::min(1.0, (k+ell2<d>())*ldexp(1.0, -j))));
-// 	    }
-// 	  }
-// 	}
-//       }
-//     }
+	  if (std::min(1.0, (k+ell2<d>())*ldexp(1.0, -j)) > kink) // generator intersects right half of the interval
+	    rhs_phijk[k-basis.DeltaLmin()]
+	      += composite.integrate(integrand,
+				     Point<1>(std::max(kink, (k+ell1<d>())*ldexp(1.0, -j))),
+				     Point<1>(std::min(1.0, (k+ell2<d>())*ldexp(1.0, -j))));
+ 	}
+      }
+    }
 //     cout << "  rhs in phi_{j,k} basis: " << rhs_phijk << endl;
 
     // transform rhs into that of psi_{j,k} basis:

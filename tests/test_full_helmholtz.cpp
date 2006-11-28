@@ -13,6 +13,7 @@
 #include <numerics/quadrature.h>
 #include <numerics/schoenberg_splines.h>
 #include <interval/interval_bspline.h>
+#include <interval/p_expansion.h>
 
 using namespace std;
 using namespace MathTL;
@@ -128,7 +129,6 @@ int main()
   SplineBasis<d,dT> basis("P","",1,1,0,0); // PBasis, complementary b.c.'s
 //   FullHelmholtz<d,dT> A(basis, 1.0, dyadic);
   FullHelmholtz<d,dT> A(basis, 1.0, energy);
-  FullGramian<d,dT> G(basis);
 
   cout << "* stiffness matrix on coarsest level j0=" << basis.j0() << ":" << endl
        << A;
@@ -174,33 +174,8 @@ int main()
 
   // setup (approximate) coefficients of u in the primal basis on a sufficiently high level
   const int jref = 16;
-  G.set_level(jref);
-  
-  // 1. compute integrals w.r.t. the primal generators on level jref
-  Vector<double> ucoeffs_phijk(G.row_dimension(), false);
-  SimpsonRule simpson;
-  CompositeRule<1> composite(simpson, 12);
-  SchoenbergIntervalBSpline_td<d> sbs(jref,0);
-  for (int k = basis.DeltaLmin(); k <= basis.DeltaRmax(jref); k++) {
-    sbs.set_k(k);
-    ProductFunction<1> integrand(uexact, &sbs);
-    ucoeffs_phijk[k-basis.DeltaLmin()]
-      = composite.integrate(integrand,
-			    Point<1>(std::max(0.0, (k+ell1<d>())*ldexp(1.0, -jref))),
-			    Point<1>(std::min(1.0, (k+ell2<d>())*ldexp(1.0, -jref))));
-  }
-  // 2. transform rhs into that of psi_{j,k} basis: apply T_{j-1}^T
-  Vector<double> urhs(G.row_dimension(), false);
-  if (jref == basis.j0())
-    urhs = ucoeffs_phijk;
-  else
-    basis.apply_Tj_transposed(jref-1, ucoeffs_phijk, urhs);
-  
-  // 3. solve Gramian system, yields approximate L_2 wavelet coefficients of u on level jref
-  Vector<double> uj_psijk(G.row_dimension());
-  unsigned int iterations;
-  CG(G, urhs, uj_psijk, 1e-15, 250, iterations);
-  
+  Vector<double> uj_psijk;
+  expand(uexact, basis, false, jref-1, uj_psijk);
   
   cout << "* compute wavelet-Galerkin approximations for several levels..." << endl;
   const int jmin = basis.j0();

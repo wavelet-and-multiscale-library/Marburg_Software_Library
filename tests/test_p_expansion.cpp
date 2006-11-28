@@ -63,10 +63,10 @@ int main()
   typedef PBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
-   Basis basis(0, 0); // no b.c.'s
+//    Basis basis(0, 0); // no b.c.'s
 //   Basis basis(1, 0); // complementary b.c. at x=0
 //   Basis basis(0, 1); // complementary b.c. at x=1
-// Basis basis(1, 1); // complementary b.c.'s
+   Basis basis(1, 1); // complementary b.c.'s
 
   InfiniteVector<double,Index> coeffs;
 
@@ -77,14 +77,20 @@ int main()
   cout << "- integrals of p against all primal generators on level j0:" << endl
        << coeffs << endl;
 
+  Vector<double> coeffs_full;
+  SplineBasis<d,dT> sb("P","",1,1,0,0);
+  expand(&p, sb, true, j0, coeffs_full);
+  cout << "- using SplineBasis<d,dT> and FullGramian:" << endl
+       << coeffs_full << endl;
+
   cout << "- evaluation of this linear combination of dual generators yields the pointwise error on [-1,1]:" << endl;
   SampledMapping<1> s2(evaluate(basis, coeffs, false, 6));
   Vector<double> error(s2.points().size());
   for (unsigned int i = 0; i < error.size(); i++)
     error[i] = fabs(s2.values()[i]-p.value(Point<1>(s2.points()[i])));
-  cout << error << endl;
+//   cout << error << endl;
   cout << "(max. error: " << linfty_norm(error) << ")" << endl;
-  
+
   cout << endl;
 
   Hat hat;
@@ -102,8 +108,22 @@ int main()
   error.resize(s3.points().size());
   for (unsigned int i = 0; i < error.size(); i++)
     error[i] = fabs(s3.values()[i]-hat.value(Point<1>(s3.points()[i])));
-  cout << error << endl;
+//   cout << error << endl;
   cout << "(max. error: " << linfty_norm(error) << ")" << endl;
-  
+
+  cout << " - now the same with SplineBasis:" << endl;
+  expand(&hat, sb, false, jmax, coeffs_full);
+  dual_coeffs.clear();
+  unsigned int i = 0;
+  for (Index lambda = basis.first_generator(j0); i < coeffs_full.size(); i++, ++lambda)
+    dual_coeffs[lambda] = coeffs_full[i];
+  SampledMapping<1> s3a(evaluate(basis, dual_coeffs, true, jmax+1));
+  error.resize(s3a.points().size());
+  for (unsigned int i = 0; i < error.size(); i++)
+    error[i] = fabs(s3a.values()[i]-hat.value(Point<1>(s3a.points()[i])));
+//   cout << error << endl;
+  cout << "(max. error: " << linfty_norm(error) << ")" << endl;
+
+
   return 0;
 }

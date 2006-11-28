@@ -19,6 +19,7 @@
 #include <galerkin/cached_problem.h>
 #include <galerkin/infinite_preconditioner.h>
 #include <adaptive/compression.h>
+#include <galerkin/full_helmholtz.h>
 
 using MathTL::Vector;
 using MathTL::InfiniteVector;
@@ -211,6 +212,40 @@ namespace WaveletTL
     //! holds current (unpreconditioned) right--hand side 
     InfiniteVector<double, typename ELLIPTIC_EQ::Index> y;
   };
+
+
+  /*!
+    an analogous class for approximations in full spaces V_j,
+    using spline wavelets on the interval
+  */
+  template<int d, int dT>
+  class ROWStageEquationFull1D
+  {
+  public:
+    /*!
+      Constructor from a given ROW method (finite-vector-valued, we only need the coeffs)
+      and various helper objects,
+      a (time-dependent) driving term f and its derivative f'.
+      If ft and/or f are omitted (or set to zero), we assume that f and/or ft=0.
+    */
+    ROWStageEquationFull1D(const ROWMethod<Vector<double> >* row_method,
+			   FullHelmholtz<d,dT>* A,
+			   MathTL::Function<1,double>* f = 0,
+			   MathTL::Function<1,double>* ft = 0)
+      : row_method_(row_method),
+	A_(A),
+	f_(f),
+	ft_(ft)
+    {
+    }
+    
+  protected:
+    const ROWMethod<Vector<double> >* row_method_;
+    FullHelmholtz<d,dT>* A_;
+    Function<1>* f_;
+    Function<1>* ft_;
+  };
+
 }
 
 #include <parabolic/row_stage_equation.cpp>

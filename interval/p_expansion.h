@@ -12,6 +12,7 @@
 
 #include <algebra/infinite_vector.h>
 #include <interval/p_basis.h>
+#include <interval/spline_basis.h>
 
 using MathTL::SampledMapping;
 using MathTL::InfiniteVector;
@@ -57,6 +58,17 @@ namespace WaveletTL
 	 const bool primal,
 	 const int jmax,
 	 InfiniteVector<double, typename PBasis<d,dT>::Index>& coeffs);
+
+  /*!
+    analogous routine for SplineBasis, returns a Vector<double>
+  */
+  template <int d, int dT>
+  void
+  expand(const Function<1>* f,
+	 const SplineBasis<d,dT>& basks,
+	 const bool primal,
+	 const int jmax,
+	 Vector<double>& coeffs);
 }
 
 #include <interval/p_expansion.cpp>

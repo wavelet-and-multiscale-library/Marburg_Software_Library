@@ -79,8 +79,7 @@ namespace MathTL
   }
 
   template <class C>
-  template <class VECTOR>
-  void QuasiStationaryMatrix<C>::apply(const VECTOR& x, VECTOR& Mx,
+  void QuasiStationaryMatrix<C>::apply(const Vector<C>& x, Vector<C>& Mx,
 				       const size_type x_offset,
 				       const size_type Mx_offset,
 				       const bool add_to) const
@@ -223,8 +222,7 @@ namespace MathTL
   } 
   
   template <class C>
-  template <class VECTOR>
-  void QuasiStationaryMatrix<C>::apply_transposed(const VECTOR& x, VECTOR& Mtx,
+  void QuasiStationaryMatrix<C>::apply_transposed(const Vector<C>& x, Vector<C>& Mtx,
 						  const size_type x_offset,
 						  const size_type Mtx_offset,
 						  const bool add_to) const

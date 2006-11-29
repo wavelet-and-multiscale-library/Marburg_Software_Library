@@ -594,7 +594,7 @@ namespace MathTL
     delete[] Filename;
 	 
     s.setf(std::ios::scientific, std::ios::fixed);
-    s.precision(12);
+    s.precision(15);
 	 
     s << Matrixname << "=sparse(" << row_dimension() << "," << column_dimension() << ");" << endl;
 	

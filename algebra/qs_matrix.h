@@ -82,8 +82,7 @@ namespace MathTL
       the flag "add_to" toggles whether the result
       is added to Mx (true) or Mx is overwritten (false)
     */
-    template <class VECTOR>
-    void apply(const VECTOR& x, VECTOR& Mx,
+    void apply(const Vector<C>& x, Vector<C>& Mx,
 	       const size_type x_offset = 0,
 	       const size_type Mx_offset = 0,
 	       const bool add_to = false) const;
@@ -102,8 +101,7 @@ namespace MathTL
       again potentially with offsets for both input and output vector
       and with an "add_to" flag
     */
-    template <class VECTOR>
-    void apply_transposed(const VECTOR& x, VECTOR& Mtx,
+    void apply_transposed(const Vector<C>& x, Vector<C>& Mtx,
 			  const size_type x_offset = 0,
 			  const size_type Mtx_offset = 0,
 			  const bool add_to = false) const;

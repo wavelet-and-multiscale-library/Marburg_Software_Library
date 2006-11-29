@@ -69,7 +69,7 @@ int main()
        it != Qxsparse.end(); ++it)
     cout << "Qx[" << it->first << "]=" << it->second << endl;
 
-  std::map<unsigned int, double> ysparse, Qtysparse;
+  std::map<size_t, double> ysparse, Qtysparse;
 //   ysparse[9] = 1;
   ysparse[Q.row_dimension()-2] = 1;
   unsigned int yoffset = 0;

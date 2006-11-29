@@ -53,19 +53,19 @@ int main()
   cout << "Q^T applied to the part of y=" << y << " from index 3," << endl
        << "written into Qty from index 1 on yields Qty=" << Qty << endl;
 
-  std::map<unsigned int, double> xsparse, Qxsparse;
+  std::map<size_t, double> xsparse, Qxsparse;
   xsparse[6] = 1;
 //   xsparse[Q.column_dimension()-1] = 1;
   unsigned int xoffset = 1;
   unsigned int Qxoffset = 0;
   Q.apply(xsparse, Qxsparse, xoffset, Qxoffset);
   cout << "entries of a sparse vector x:" << endl;
-  for (std::map<unsigned int, double>::const_iterator it(xsparse.begin());
+  for (std::map<size_t, double>::const_iterator it(xsparse.begin());
        it != xsparse.end(); ++it)
     cout << "x[" << it->first << "]=" << it->second << endl;
   cout << "Q applied to the part of x from index " << xoffset
        << ", written into Qx from index " << Qxoffset << " yields Qx=" << endl;
-  for (std::map<unsigned int, double>::const_iterator it(Qxsparse.begin());
+  for (std::map<size_t, double>::const_iterator it(Qxsparse.begin());
        it != Qxsparse.end(); ++it)
     cout << "Qx[" << it->first << "]=" << it->second << endl;
 
@@ -76,12 +76,12 @@ int main()
   unsigned int Qtyoffset = 0;
   Q.apply_transposed(ysparse, Qtysparse, yoffset, Qtyoffset);
   cout << "entries of a sparse vector y:" << endl;
-  for (std::map<unsigned int, double>::const_iterator it(ysparse.begin());
+  for (std::map<size_t, double>::const_iterator it(ysparse.begin());
        it != ysparse.end(); ++it)
     cout << "y[" << it->first << "]=" << it->second << endl;
   cout << "Q^T applied to the part of y from index " << yoffset
        << ", written into Qty from index " << Qtyoffset << " yields Qty=" << endl;
-  for (std::map<unsigned int, double>::const_iterator it(Qtysparse.begin());
+  for (std::map<size_t, double>::const_iterator it(Qtysparse.begin());
        it != Qtysparse.end(); ++it)
     cout << "Qty[" << it->first << "]=" << it->second << endl;
   

@@ -29,7 +29,7 @@ int main()
   for (int jtest = j0+4; jtest <= 10; jtest++) {
     M.set_level(jtest);
     Vector<double> x(M.column_dimension()), Mx(M.row_dimension());
-    std::map<unsigned int,double> xsparse, Mxsparse;
+    std::map<size_t,double> xsparse, Mxsparse;
     
     const unsigned int N = 2000;
     cout << "* applying M on level " << jtest << " " << N << " times to vectors of several density..." << endl;
@@ -58,7 +58,7 @@ int main()
       time2 = (double)(tend-tstart)/CLOCKS_PER_SEC;
 
       cout << "  time needed: " << time1 << "s for Vector<double>, "
-	   << time2 << "s for std::map<unsigned int,double>" << endl;
+	   << time2 << "s for std::map<size_t,double>" << endl;
     }
   }
 

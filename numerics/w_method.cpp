@@ -498,7 +498,8 @@ namespace MathTL
     gamma_vector.resize(s, true);
     for (unsigned int i = 0; i < s; i++) {
       double gammai = 0;
-      for (unsigned int j = 0; j < i; j++) gammai += Gamma.get_entry(i, j);
+      // note that here, we use "j<=i" (compare order condition check below):
+      for (unsigned int j = 0; j <= i; j++) gammai += Gamma.get_entry(i, j);
       gamma_vector[i] = gammai;
     }
 
@@ -555,6 +556,7 @@ namespace MathTL
     Vector<double> gamma_vector(s);
     for (unsigned int i = 0; i < s; i++) {
       double gammai = 0;
+      // for the order conditions, we use gamma_i=sum_{j<i}gamma_j (not "<=" as in transform_coefficients())
       for (unsigned int j = 0; j < i; j++) gammai += Gamma.get_entry(i, j);
       gamma_vector[i] = gammai;
     }

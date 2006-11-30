@@ -60,13 +60,26 @@ public:
   }
 };
 
+// Gaussian
+class Function4 : public Function<1> {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    const double x = p[0];
+    return exp(-300*(x-0.6)*(x-0.6));
+  }
+  
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
 
 int main()
 {
   cout << "Testing FullGramian ..." << endl;
 
-  const unsigned int d = 2;
-  const unsigned int dT = 2;
+  const unsigned int d = 3;
+  const unsigned int dT = 3;
 
   SplineBasis<d,dT> basis("P","",1,1,0,0); // PBasis, complementary b.c.'s
   FullGramian<d,dT> G(basis);
@@ -78,7 +91,7 @@ int main()
   cout << "* Gramian matrix on next level j0+1=" << basis.j0()+1 << ":" << endl
        << G;
 
-  const unsigned int testcase=3;
+  const unsigned int testcase=4;
   Function<1>* u = 0;
 
   switch(testcase) {
@@ -90,6 +103,9 @@ int main()
     break;
   case 3:
     u = new Function3();
+    break;
+  case 4:
+    u = new Function4();
     break;
   default:
     break;

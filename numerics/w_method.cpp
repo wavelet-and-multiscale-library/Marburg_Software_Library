@@ -355,12 +355,12 @@ namespace MathTL
 
 	// values from KARDOS:
 	gamma_vector.resize(6);
-	gamma_vector[0] =  0.2500000000000000;// - C(0,0);
-	gamma_vector[1] = -0.1043000000000000;// - C(0,0);
-	gamma_vector[2] =  0.1034999999980000;// - C(0,0);
-	gamma_vector[3] = -0.0362000000000000;// - C(0,0);
-	gamma_vector[4] =  0.0000000000000000;// - C(0,0);
-	gamma_vector[5] =  0.0000000000000000;// - C(0,0);
+	gamma_vector[0] =  0.2500000000000000;
+	gamma_vector[1] = -0.1043000000000000;
+	gamma_vector[2] =  0.1034999999980000;
+	gamma_vector[3] = -0.0362000000000000;
+	gamma_vector[4] =  0.0000000000000000;
+	gamma_vector[5] =  0.0000000000000000;
 
 	// values from KARDOS:
 	alpha_vector.resize(6);
@@ -433,12 +433,12 @@ namespace MathTL
 
 	// values from KARDOS:
 	gamma_vector.resize(6);
-	gamma_vector[0] =  0.2500000000000000;// - C(0,0);
-	gamma_vector[1] = -0.5000000000000000;// - C(0,0);
-	gamma_vector[2] = -0.0235040000000000;// - C(0,0);
-	gamma_vector[3] = -0.0362000000000000;// - C(0,0);
-	gamma_vector[4] =  0.0               ;// - C(0,0);
-	gamma_vector[5] =  0.0;              ;// - C(0,0);
+	gamma_vector[0] =  0.2500000000000000;
+	gamma_vector[1] = -0.5000000000000000;
+	gamma_vector[2] = -0.0235040000000000;
+	gamma_vector[3] = -0.0362000000000000;
+	gamma_vector[4] =  0.0               ;
+	gamma_vector[5] =  0.0               ;
 
 	// values from KARDOS:
 	alpha_vector.resize(6);

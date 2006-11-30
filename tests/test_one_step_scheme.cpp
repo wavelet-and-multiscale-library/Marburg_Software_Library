@@ -121,6 +121,106 @@ public:
 };
 
 /*
+  another IVP for u(t)=1/sqrt(t+1)
+    u'(t) = -u(t)/(2*(t+1)), u(0) = 1
+  
+  So f(t,u)=-u/(2*(t+1)), f_t(t,u)=u/(2(t+1)^2) and f_u(t,u)=-1/(2*(t+1)).
+ */
+class SquareRoot2
+  : public AbstractIVP<Vector<double> >
+{
+public:
+  SquareRoot2()
+  {
+    u0.resize(1); u0[0] = 1;
+  }
+
+  void evaluate_f(const double t,
+		  const Vector<double>& v,
+		  const double tolerance,
+		  Vector<double>& result) const
+  {
+    result[0] = -v[0]/(2*(t+1));
+  }
+
+  void evaluate_ft(const double t,
+		   const Vector<double>& v,
+		   const double tolerance,
+		   Vector<double>& result) const
+  {
+    result[0] = v[0]/(2*(t+1)*(t+1));
+  }
+  
+  void solve_ROW_stage_equation(const double t,
+				const Vector<double>& v,
+				const double alpha,
+				const Vector<double>& y,
+				const double tolerancs,
+				Vector<double>& result) const
+  {
+    // Jx=-1/(2*(t+1))*x -> (alpha*I-J)x=(alpha+1/(2*(t+1)))x
+    result[0] = y[0] / (alpha+1/(2*(t+1)));
+  }
+
+  // exact solution
+  void exact_solution(const double t, Vector<double>& y) const
+  {
+    y.resize(1);
+    y[0] = 1./sqrt(t+1.);
+  }
+};
+
+/*
+  IVP for u(t)=exp(t^2/2)
+    u'(t) = t*u(t), u(0) = 1
+  
+  So f(t,u)=tu, f_t(t,u)=u and f_u(t,u)=t.
+ */
+class Expo
+  : public AbstractIVP<Vector<double> >
+{
+public:
+  Expo()
+  {
+    u0.resize(1); u0[0] = 1;
+  }
+
+  void evaluate_f(const double t,
+		  const Vector<double>& v,
+		  const double tolerance,
+		  Vector<double>& result) const
+  {
+    result[0] = t*v[0];
+  }
+
+  void evaluate_ft(const double t,
+		   const Vector<double>& v,
+		   const double tolerance,
+		   Vector<double>& result) const
+  {
+    result[0] = v[0];
+  }
+  
+  void solve_ROW_stage_equation(const double t,
+				const Vector<double>& v,
+				const double alpha,
+				const Vector<double>& y,
+				const double tolerancs,
+				Vector<double>& result) const
+  {
+    // Jx=t*x -> (alpha*I-J)x=(alpha-t)x
+    result[0] = y[0] / (alpha-t);
+  }
+
+  // exact solution
+  void exact_solution(const double t, Vector<double>& y) const
+  {
+    y.resize(1);
+    y[0] = exp(t*t/2);
+  }
+};
+
+/*
   The circle u(t)=(cos(t),sin(t)) with
     u' = [0 -1; 1 0]*u(t), u(0) = [1 0]'
   
@@ -255,7 +355,9 @@ int main()
   typedef Vector<double> V;
 
 //   Dahlquist problem(-1.0);
-  SquareRoot problem;
+//   SquareRoot problem;
+  SquareRoot2 problem;
+//   Expo problem;
 //   Circle problem;
 
 #if 1
@@ -274,7 +376,7 @@ int main()
     int N = 1<<expo;
     double h = 1.0/N;
     double err_est = 0;
-    for (int i = 1; i <= N; i++) {
+    for (int i = 0; i < N; i++) {
       scheme->increment(&problem, i*h, temp, h, result, error_estimate);
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
@@ -334,28 +436,28 @@ int main()
 //     olderr = err;
 //   }
 
-//   cout << "* testing DoPri45:" << endl;
-//   ExplicitRungeKuttaScheme<V> dopri45(ExplicitRungeKuttaScheme<V>::DoPri45);
-//   scheme = &dopri45;
-//   olderr = 0;
-//   for (int expo = 0; expo <= 10; expo++) {
-//     temp = problem.u0;
-//     int N = 1<<expo;
-//     double h = 1.0/N;
-//     double err_est = 0;
-//     for (int i = 1; i <= N; i++) {
-//       scheme->increment(&problem, i*h, temp, h, result, error_estimate);
-//       err_est = std::max(err_est, l2_norm(error_estimate));
-//       temp = result;
-//     }
-//     problem.exact_solution(1.0, exact);
-//     err = linfty_norm(result - exact);
-//     if (expo > 0) {
-//       cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
-// 	   << ", max. of local error estimate " << err_est << endl;
-//     }
-//     olderr = err;
-//   }
+  cout << "* testing DoPri45:" << endl;
+  ExplicitRungeKuttaScheme<V> dopri45(ExplicitRungeKuttaScheme<V>::DoPri45);
+  scheme = &dopri45;
+  olderr = 0;
+  for (int expo = 0; expo <= 10; expo++) {
+    temp = problem.u0;
+    int N = 1<<expo;
+    double h = 1.0/N;
+    double err_est = 0;
+    for (int i = 0; i < N; i++) {
+      scheme->increment(&problem, i*h, temp, h, result, error_estimate);
+      err_est = std::max(err_est, l2_norm(error_estimate));
+      temp = result;
+    }
+    problem.exact_solution(1.0, exact);
+    err = linfty_norm(result - exact);
+    if (expo > 0) {
+      cout << "h=" << h << ", error " << err << ", p approx. " << log(olderr/err)/M_LN2
+	   << ", max. of local error estimate " << err_est << endl;
+    }
+    olderr = err;
+  }
 
 //   cout << "* testing DoPri78:" << endl;
 //   ExplicitRungeKuttaScheme<V> dopri78(ExplicitRungeKuttaScheme<V>::DoPri78);
@@ -389,7 +491,7 @@ int main()
     int N = 1<<expo;
     double h = 1.0/N;
     double err_est = 0;
-    for (int i = 1; i <= N; i++) {
+    for (int i = 0; i < N; i++) {
       scheme->increment(&problem, i*h, temp, h, result, error_estimate);
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
@@ -412,7 +514,7 @@ int main()
     int N = 1<<expo;
     double h = 1.0/N;
     double err_est = 0;
-    for (int i = 1; i <= N; i++) {
+    for (int i = 0; i < N; i++) {
       scheme->increment(&problem, i*h, temp, h, result, error_estimate);
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
@@ -435,7 +537,7 @@ int main()
     int N = 1<<expo;
     double h = 1.0/N;
     double err_est = 0;
-    for (int i = 1; i <= N; i++) {
+    for (int i = 0; i < N; i++) {
       scheme->increment(&problem, i*h, temp, h, result, error_estimate);
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
@@ -458,7 +560,7 @@ int main()
     int N = 1<<expo;
     double h = 1.0/N;
     double err_est = 0;
-    for (int i = 1; i <= N; i++) {
+    for (int i = 0; i < N; i++) {
       scheme->increment(&problem, i*h, temp, h, result, error_estimate);
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
@@ -481,7 +583,7 @@ int main()
     int N = 1<<expo;
     double h = 1.0/N;
     double err_est = 0;
-    for (int i = 1; i <= N; i++) {
+    for (int i = 0; i < N; i++) {
       scheme->increment(&problem, i*h, temp, h, result, error_estimate);
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
@@ -504,7 +606,7 @@ int main()
     int N = 1<<expo;
     double h = 1.0/N;
     double err_est = 0;
-    for (int i = 1; i <= N; i++) {
+    for (int i = 0; i < N; i++) {
       scheme->increment(&problem, i*h, temp, h, result, error_estimate);
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
@@ -527,7 +629,7 @@ int main()
     int N = 1<<expo;
     double h = 1.0/N;
     double err_est = 0;
-    for (int i = 1; i <= N; i++) {
+    for (int i = 0; i < N; i++) {
       scheme->increment(&problem, i*h, temp, h, result, error_estimate);
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
@@ -550,7 +652,7 @@ int main()
     int N = 1<<expo;
     double h = 1.0/N;
     double err_est = 0;
-    for (int i = 1; i <= N; i++) {
+    for (int i = 0; i < N; i++) {
       scheme->increment(&problem, i*h, temp, h, result, error_estimate);
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
@@ -573,7 +675,7 @@ int main()
     int N = 1<<expo;
     double h = 1.0/N;
     double err_est = 0;
-    for (int i = 1; i <= N; i++) {
+    for (int i = 0; i < N; i++) {
       scheme->increment(&problem, i*h, temp, h, result, error_estimate);
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
@@ -596,7 +698,7 @@ int main()
     int N = 1<<expo;
     double h = 1.0/N;
     double err_est = 0;
-    for (int i = 1; i <= N; i++) {
+    for (int i = 0; i < N; i++) {
       scheme->increment(&problem, i*h, temp, h, result, error_estimate);
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;
@@ -619,7 +721,7 @@ int main()
     int N = 1<<expo;
     double h = 1.0/N;
     double err_est = 0;
-    for (int i = 1; i <= N; i++) {
+    for (int i = 0; i < N; i++) {
       scheme->increment(&problem, i*h, temp, h, result, error_estimate);
       err_est = std::max(err_est, l2_norm(error_estimate));
       temp = result;

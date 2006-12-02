@@ -12,9 +12,11 @@
 
 #include <set>
 #include <utils/array1d.h>
-
+#include <numerics/sturm_bvp.h>
 #include <galerkin/galerkin_utils.h>
 #include <galerkin/infinite_preconditioner.h>
+
+using namespace MathTL;
 
 namespace WaveletTL
 {

@@ -525,6 +525,8 @@ namespace MathTL
 //     cout << "C=" << endl << C;
 //     cout << "m=" << m << endl;
 //     cout << "e=" << e << endl;
+
+//     check_order_conditions(Alpha, Gamma, b, bhat, false);
   }
 
   template <class VECTOR>

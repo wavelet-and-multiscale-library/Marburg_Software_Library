@@ -11,6 +11,7 @@
 #define _WAVELETTL_INTERVAL_BSPLINE_H
 
 #include <numerics/schoenberg_splines.h>
+#include <Rd/cdf_utils.h>
 
 using namespace MathTL;
 

@@ -18,6 +18,72 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
+  inline
+  typename SplineBasis<d,dT>::Index
+  SplineBasis<d,dT>::first_generator(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 0, DeltaLmin(), this);
+  }
+  
+  template <int d, int dT>
+  inline
+  typename SplineBasis<d,dT>::Index
+  SplineBasis<d,dT>::last_generator(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 0, DeltaRmax(j), this);
+  }
+
+  template <int d, int dT>
+  inline
+  typename SplineBasis<d,dT>::Index
+  SplineBasis<d,dT>::first_wavelet(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 1, Nablamin(), this);
+  }
+  
+  template <int d, int dT>
+  inline
+  typename SplineBasis<d,dT>::Index
+  SplineBasis<d,dT>::last_wavelet(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 1, Nablamax(j), this);
+  }
+
+  template <int d, int dT>
+  void
+  SplineBasis<d,dT>::support(const Index& lambda, int& k1, int& k2) const {
+    if (lambda.e() == 0) // generator
+      {
+	// phi_{j,k}(x) = 2^{j/2} B_{j,k-ell_1}
+	k1 = std::max(0, lambda.k() + ell1<d>());
+	k2 = std::min(1<<lambda.j(), lambda.k() + ell2<d>());
+      }
+    else // wavelet
+      {
+	// cf. [P, p. 125]
+	if (lambda.k() < (d+dT)/2-1) {
+	  // left boundary wavelet
+	  k1 = 0;
+	  k2 = 2*(d+dT)-2; // overestimate, TODO
+	} else {
+	  if ((1<<lambda.j())-lambda.k() <= (d+dT)/2-1) {
+	    // right boundary wavelet
+	    k1 = (1<<(lambda.j()+1))-(2*(d+dT)-2); // overestimate, TODO
+	    k2 = 1<<(lambda.j()+1);
+	  } else {
+	    // interior wavelet (CDF)
+	    k1 = 2*(lambda.k()-(d+dT)/2+1);
+	    k2 = k1+2*(d+dT)-2;
+	  }
+	}
+      }
+  }
+  
+  template <int d, int dT>
   template <class V>
   void
   SplineBasis<d,dT>::apply_Mj(const int j, const V& x, V& y) const

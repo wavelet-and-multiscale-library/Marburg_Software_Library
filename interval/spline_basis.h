@@ -11,6 +11,10 @@
 #define _WAVELETTL_SPLINE_BASIS_H
 
 #include <interval/spline_basis_data.h>
+#include <interval/i_index.h>
+
+#include <interval/spline_support.h>
+#include <interval/spline_evaluate.h>
 
 namespace WaveletTL
 {
@@ -33,8 +37,37 @@ namespace WaveletTL
     //! coarsest possible level
     inline const int j0() const { return SplineBasisData<d,dT>::j0_; }
 
+    //! wavelet index class
+    typedef IntervalIndex<SplineBasis<d,dT> > Index;
+    
     //! size_type, for convenience
     typedef Vector<double>::size_type size_type;
+
+    //! geometric type of the support sets
+    typedef struct {
+      int j;
+      int k1;
+      int k2;
+    } Support;
+
+    /*!
+      Compute an interval 2^{-j}[k1,k2] which contains the support of a
+      single primal [P] generator or wavelet \psi_\lambda.
+      (j == lambda.j()+lambda.e() is neglected for performance reasons)
+    */
+    void support(const Index& lambda, int& k1, int& k2) const;
+
+    //! space dimension of the underlying domain
+    static const int space_dimension = 1;
+
+    //! critical Sobolev regularity for the primal generators/wavelets
+    static double primal_regularity() { return d - 0.5; }
+
+    //! degree of polynomial reproduction for the primal generators/wavelets
+    static unsigned int primal_polynomial_degree() { return d; }
+
+    //! number of vanishing moments for the primal wavelets
+    static unsigned int primal_vanishing_moments() { return dT; }
 
     //! read access to the primal b.c. order at x=0
     const int get_s0() const { return SplineBasisData<d,dT>::s0_; }
@@ -62,6 +95,18 @@ namespace WaveletTL
     //! size of Nabla_j
     inline const int Nablasize(const int j) const { return 1<<j; }
     
+    //! index of first (leftmost) generator on level j >= j0
+    Index first_generator(const int j) const;
+
+    //! index of last (rightmost) generator on level j >= j0
+    Index last_generator(const int j) const;
+
+    //! index of first (leftmost) wavelet on level j >= j0
+    Index first_wavelet(const int j) const;
+
+    //! index of last (rightmost) wavelet on level j >= j0
+    Index last_wavelet(const int j) const;
+
     /*!
       apply Mj=(Mj0 Mj1) to some vector x ("reconstruct");
       the routine writes only into the first part of y, i.e,

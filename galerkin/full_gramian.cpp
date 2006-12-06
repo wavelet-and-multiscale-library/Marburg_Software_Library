@@ -40,11 +40,11 @@ namespace WaveletTL
     assert(row < row_dimension() && col < column_dimension());
     
 #if 0
-    Vector<double> ecol(column_dimension()), col(row_dimension(), false);
+    Vector<double> ecol(column_dimension()), vcol(row_dimension(), false);
     ecol[col] = 1.0;
-    apply(ecol, col);
+    apply(ecol, vcol);
 
-    return col[row];
+    return vcol[row];
 #else
     const int j0 = sb_.j0();
 
@@ -57,7 +57,7 @@ namespace WaveletTL
     if (col >= (size_type) sb_.Deltasize(j0)) {
       jcol += 1+(int)floor(log(((double)(col-sb_.Deltasize(j0)))/(1<<j0)+1)/M_LN2);
     }
-    
+
     // determine generator coeffs
     std::map<size_type,double> e_k_row; e_k_row[row] = 1.0;
     std::map<size_type,double> e_k_col; e_k_col[col] = 1.0;
@@ -89,7 +89,7 @@ namespace WaveletTL
 	// cf. [P, Bsp. 3.23]
 	for (std::map<size_type,double>::const_iterator it(y_row.begin());
 	     it != y_row.end(); ++it) {
-	  const size_type m = row_dimension();
+	  const size_type m = sb_.Deltasize(j);
 	  switch(it->first) {
 	  case 0:
 	    Ay[0] += it->second/3;
@@ -128,7 +128,7 @@ namespace WaveletTL
 	}
       }
     }
-    
+ 
     // compute inner product <y_col,Ay_row>
     double r = 0;
     for (typename std::map<size_type,double>::const_iterator
@@ -144,12 +144,12 @@ namespace WaveletTL
 	    r += ity->second * itAy->second;
       }
     return r;
-    
-//     std::map<size_type,double> ecol, col;
+ 
+//     std::map<size_type,double> ecol, vcol;
 //     ecol[col] = 1.0;
-//     apply(ecol, col);
+//     apply(ecol, vcol);
 
-//     return col[row];
+//     return vcol[row];
 #endif
   }
 
@@ -190,7 +190,7 @@ namespace WaveletTL
 	// cf. [P, Bsp. 3.23]
 	for (std::map<size_type,double>::const_iterator it(y.begin());
 	     it != y.end(); ++it) {
-	  const size_type m = row_dimension();
+	  const size_type m = sb_.Deltasize(jrow);
 	  switch(it->first) {
 	  case 0:
 	    Ay[0] += it->second/3;

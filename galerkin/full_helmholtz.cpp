@@ -126,6 +126,39 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
+  void FullHelmholtz<d,dT>::apply(const std::map<size_type,double>& x,
+				  std::map<size_type,double>& Mx,
+				  const bool preconditioning) const
+  {
+    std::map<size_type,double> y(x), yhelp;
+
+    if (preconditioning) {
+      // apply diagonal preconditioner D^{-1}
+      for (std::map<size_type,double>::iterator it(y.begin()); it != y.end(); ++it)
+	it->second /= D(it->first);
+    }
+
+    // apply Gramian
+    G_.apply(y, yhelp);
+    
+    // apply unpreconditioned Laplacian
+    A_.apply(y, Mx);
+
+    // add Gramian part, y+=alpha*yhelp
+    std::map<size_type,double>::const_iterator ithelp(yhelp.begin());
+    for (std::map<size_type,double>::iterator it(Mx.begin()); it != Mx.end(); ++it, ++ithelp) {
+      assert(it->first == ithelp->first); // we assume that A and G have the same nonzero pattern
+      it->second += alpha_ * ithelp->second; 
+    }
+
+    if (preconditioning) {
+      // apply diagonal preconditioner D^{-1}
+      for (std::map<size_type,double>::iterator it(Mx.begin()); it != Mx.end(); ++it)
+	it->second /= D(it->first);
+    }
+  }
+
+  template <int d, int dT>
   void FullHelmholtz<d,dT>::print(std::ostream &os,
 				  const unsigned int tabwidth,
 				  const unsigned int precision) const

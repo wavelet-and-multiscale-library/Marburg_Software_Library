@@ -17,6 +17,7 @@
 #include <galerkin/galerkin_utils.h>
 #include <galerkin/full_helmholtz.h>
 #include <galerkin/infinite_preconditioner.h>
+#include <adaptive/compression.h>
 
 using namespace MathTL;
 
@@ -121,6 +122,40 @@ namespace WaveletTL
     */
     double F_norm() const { return sqrt(fnorm_sqr); }
 
+    /*!
+      estimate the spectral norm ||A||
+    */
+    double norm_A() const;
+
+    /*!
+      estimate the spectral norm ||A^{-1}||
+    */
+    double norm_Ainv() const;
+
+    /*!
+      estimate compressibility exponent s^*
+    */
+    double s_star() const {
+      return 1.0 + WaveletBasis::primal_vanishing_moments(); // [St04a], Th. 2.3 for n=1
+    }
+
+    /*!
+      estimate the compression constants alpha_k in
+        ||A-A_k|| <= alpha_k * 2^{-s*k}
+    */
+    double alphak(const unsigned int k) const {
+      return 2*norm_A(); // suboptimal
+    }
+
+    /*!
+      w += factor * (stiffness matrix entries in column lambda on level j)
+    */
+    void add_level (const Index& lambda,
+		    InfiniteVector<double, Index>& w, const int j,
+		    const double factor,
+		    const int J,
+		    const CompressionStrategy strategy = St04a) const;
+
   protected:
     const Function<1>* f_;
     double alpha_;
@@ -150,31 +185,6 @@ namespace WaveletTL
   };
 
 
-
-//     /*!
-//       estimate the spectral norm ||A||
-//     */
-//     double norm_A() const;
-
-//     /*!
-//       estimate the spectral norm ||A^{-1}||
-//     */
-//     double norm_Ainv() const;
-
-//     /*!
-//       estimate compressibility exponent s^*
-//     */
-//     double s_star() const {
-//       return 1.0 + WBASIS::primal_vanishing_moments(); // [St04a], Th. 2.3 for n=1
-//     }
-
-//     /*!
-//       estimate the compression constants alpha_k in
-//         ||A-A_k|| <= alpha_k * 2^{-s*k}
-//     */
-//     double alphak(const unsigned int k) const {
-//       return 2*norm_A(); // suboptimal
-//     }
 
 }
 

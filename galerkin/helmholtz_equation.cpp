@@ -3,6 +3,7 @@
 #include <numerics/quadrature.h>
 #include <numerics/schoenberg_splines.h>
 #include <interval/interval_bspline.h>
+#include <numerics/eigenvalues.h>
 
 using namespace MathTL;
 
@@ -14,7 +15,8 @@ namespace WaveletTL
 						 const bool precompute_f)
     : f_(f), alpha_(alpha),
       basis_("P","",1,1,0,0), // PBasis, complementary b.c.'s
-      A_(basis_, alpha, no_precond)
+      A_(basis_, alpha, no_precond),
+      normA(0.0), normAinv(0.0)
   {
     if (precompute_f) precompute_rhs();
   }
@@ -78,6 +80,7 @@ namespace WaveletTL
   double
   HelmholtzEquation1D<d,dT>::D(const typename WaveletBasis::Index& lambda) const
   {
+#if 1
     // determine number of index lambda
     size_type number = 0;
     if (lambda.e() == 0) {
@@ -87,6 +90,9 @@ namespace WaveletTL
     }
     
     return sqrt(A_.diagonal(number));
+#else
+    return sqrt(a(lambda, lambda));
+#endif
   }
   
   template <int d, int dT>
@@ -185,4 +191,120 @@ namespace WaveletTL
     return fcoeffs_unsorted.get_coefficient(lambda) * D(lambda);
   }
 
+  template <int d, int dT>
+  double
+  HelmholtzEquation1D<d,dT>::norm_A() const
+  {
+    if (normA == 0.0) {
+      FullHelmholtz<d,dT> A(basis_, alpha_, energy);
+      A.set_level(basis().j0()+4);
+      double help;
+      unsigned int iterations;
+      LanczosIteration(A, 1e-6, help, normA, 200, iterations);
+      normAinv = 1./help;
+    }
+
+    return normA;
+  }
+   
+  template <int d, int dT>
+  double
+  HelmholtzEquation1D<d,dT>::norm_Ainv() const
+  {
+    if (normAinv == 0.0) {
+      FullHelmholtz<d,dT> A(basis_, alpha_, energy);
+      A.set_level(basis().j0()+4);
+      double help;
+      unsigned int iterations;
+      LanczosIteration(A, 1e-6, help, normA, 200, iterations);
+      normAinv = 1./help;
+    }
+
+    return normAinv;
+  }
+
+  template <int d, int dT>
+  void
+  HelmholtzEquation1D<d,dT>::add_level (const Index& lambda,
+					InfiniteVector<double, Index>& w, const int j,
+					const double factor,
+					const int J,
+					const CompressionStrategy strategy) const
+  {
+#if 1
+    // quick and dirty:
+    // compute a full column of the stiffness matrix
+    FullHelmholtz<d,dT> A(basis_, alpha_, energy);
+    const int jmax = std::max(j+1, lambda.j()+lambda.e());
+    A.set_level(jmax);
+    std::map<size_type,double> e_lambda, col_lambda;
+    size_type number_lambda = 0;
+    if (lambda.e() == 0) {
+      number_lambda = lambda.k()-basis_.DeltaLmin();
+    } else {
+      number_lambda = basis_.Deltasize(lambda.j())+lambda.k()-basis_.Nablamin();
+    }
+//     cout << "add_level(): lambda=" << lambda << ", nr.=" << number_lambda << endl;
+    e_lambda[number_lambda] = 1.0;
+    A.apply(e_lambda, col_lambda, true);
+    
+    // extract the entries from level j
+    if (j == basis_.j0()-1) {
+      // "generator block"
+      size_type startrow = 0;
+      size_type endrow   = basis_.Deltasize(basis_.j0())-1;
+      std::map<size_type,double>::const_iterator it(col_lambda.lower_bound(startrow));
+//       assert(startrow <= it->first);
+//       assert(it->first <= endrow);
+      for (; it != col_lambda.end() && it->first <= endrow; ++it) {
+	w.add_coefficient(Index(basis_.j0(), 0, basis_.DeltaLmin()+it->first, &basis_),
+			  it->second * factor);
+      }
+    } else {
+      // j>=j0, a "wavelet block"
+      size_type startrow = basis_.Deltasize(j);
+      size_type endrow   = basis_.Deltasize(j+1)-1;
+//       cout << "add_level(): startrow=" << startrow << ", endrow=" << endrow << endl;
+      std::map<size_type,double>::const_iterator it(col_lambda.lower_bound(startrow));
+//       cout << "add_level(): it->first=" << it->first << endl;
+//       assert(startrow <= it->first);
+//       assert(it->first <= endrow);
+      for (; it != col_lambda.end() && it->first <= endrow; ++it) {
+	w.add_coefficient(Index(j, 1, basis_.Nablamin()+it->first-startrow, &basis_),
+			  it->second * factor);
+      }
+    }
+#else
+    typedef std::list<Index> IntersectingList;
+    
+    IntersectingList nus;
+    
+    intersecting_wavelets(basis(), lambda,
+			  std::max(j, basis().j0()),
+			  j == (basis().j0()-1),
+			  nus);
+    
+    // do the rest of the job
+    const double d1 = D(lambda);
+    if (strategy == St04a) {
+      for (typename IntersectingList::iterator it(nus.begin()), itend(nus.end());
+	   it != itend; ++it) {
+	if (abs(lambda.j()-j) <= J/((double) space_dimension) ||
+	    intersect_singular_support(basis(), lambda, *it)) {
+	  const double entry = a(*it, lambda);
+	  w.add_coefficient(*it, (entry / (d1*D(*it))) * factor);
+	}
+      }
+    }
+    else if (strategy == CDD1) {
+      for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());
+	   it != itend; ++it) {
+	const double entry = a(*it, lambda);
+	w.add_coefficient(*it, (entry / (d1 * D(*it))) * factor);
+      }
+    }   
+#endif
+  }
+  
+  
 }

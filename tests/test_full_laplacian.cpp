@@ -143,8 +143,8 @@ int main()
   const unsigned int dT = 3;
 
   SplineBasis<d,dT> basis("P","",1,1,0,0); // PBasis, complementary b.c.'s
-  FullLaplacian<d,dT> delta(basis, dyadic);
-//   FullLaplacian<d,dT> delta(basis, energy);
+//   FullLaplacian<d,dT> delta(basis, dyadic);
+  FullLaplacian<d,dT> delta(basis, energy);
 
   cout << "* stiffness matrix on coarsest level j0=" << basis.j0() << ":" << endl
        << delta;
@@ -165,7 +165,7 @@ int main()
   cout << "* main diagonal of unpreconditioned stiffness matrix:" << endl
        << "  " << diagonal << endl;
   
-#if 1
+#if 0
   const unsigned int solution = 3;
   double kink = 0; // for Solution4;
 

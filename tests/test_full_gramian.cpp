@@ -91,6 +91,8 @@ int main()
   cout << "* Gramian matrix on next level j0+1=" << basis.j0()+1 << ":" << endl
        << G;
 
+#if 0
+
   const unsigned int testcase=1;
   Function<1>* u = 0;
 
@@ -197,6 +199,10 @@ int main()
     L2_errors[j-jmin] = L2_error;
   }
 
+  if (u) delete u;
+
+#endif
+
 #if 0
   // write Galerkin errors to a file
   ostringstream filename;
@@ -208,7 +214,5 @@ int main()
   galerkin_stream.close();
 #endif
   
-  if (u) delete u;
-
   return 0;
 }

@@ -75,11 +75,11 @@ namespace WaveletTL
     assert(row < row_dimension() && col < column_dimension());
 
 #if 0
-    Vector<double> ecol(column_dimension()), col(row_dimension());
+    Vector<double> ecol(column_dimension()), vcol(row_dimension());
     ecol[col] = 1.0;
-    apply(ecol, col);
+    apply(ecol, vcol);
 
-    return col[row];
+    return vcol[row];
 #else
     const int j0 = sb_.j0();
 
@@ -125,7 +125,7 @@ namespace WaveletTL
 	// cf. [P, Bsp. 3.26]
 	for (std::map<size_type,double>::const_iterator it(y_row.begin());
 	     it != y_row.end(); ++it) {
-	  const size_type m = row_dimension();
+	  const size_type m = sb_.Deltasize(j);
 	  switch(it->first) {
 	  case 0:
 	    Ay[0] += factor * 4*it->second/3;
@@ -208,7 +208,7 @@ namespace WaveletTL
       sb_.apply_Tj(jrow-1, e_k, y);
     else
       y.swap(e_k);
-    
+
     // compute Ay (see "apply")
     std::map<size_type,double> Ay;
     const double factor = ldexp(1.0, 2*jrow); // not "1<<(2*j_)" !
@@ -227,7 +227,7 @@ namespace WaveletTL
 	// cf. [P, Bsp. 3.26]
 	for (std::map<size_type,double>::const_iterator it(y.begin());
 	     it != y.end(); ++it) {
-	  const size_type m = row_dimension();
+	  const size_type m = sb_.Deltasize(jrow);
 	  switch(it->first) {
 	  case 0:
 	    Ay[0] += factor * 4*it->second/3;

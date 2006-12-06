@@ -48,7 +48,7 @@ int main()
   InfiniteVector<double, Index> coeffs;
   helmholtz.RHS(1e-8, coeffs);
 
-  const int jmax = helmholtz.basis().j0()+6;
+  const int jmax = helmholtz.basis().j0()+1;
 
   set<Index> Lambda;
   for (Index lambda = helmholtz.basis().first_generator(helmholtz.basis().j0());; ++lambda) {
@@ -67,6 +67,8 @@ int main()
   
   SparseMatrix<double> A;
   setup_stiffness_matrix(helmholtz, Lambda, A);
+
+  cout << "- stiffness matrix: " << endl << A << endl;
 #if 0
   std::ofstream ofs("stiff_out.m");
   ofs << "M=";
@@ -149,6 +151,17 @@ int main()
   
   const double Linfty_error = linfty_norm(ulambda_values-uexact_values);
   cout << "  L_infinity error on a subgrid: " << Linfty_error << endl;
+
+
+  cout << "The stiffness matrix again: A=" << endl << A << endl;
+  InfiniteVector<double,Index> w;
+  Index lambda = helmholtz.basis().first_generator(helmholtz.basis().j0());
+  lambda = helmholtz.basis().first_wavelet(helmholtz.basis().j0());
+  ++lambda;
+  cout << "lambda=" << lambda << ", call add_level():" << endl;
+  helmholtz.add_level(lambda, w, helmholtz.basis().j0(), 1.0, 1000);
+  cout << w << endl;
+  
 
   if (f) delete f;
   if (uexact) delete uexact;

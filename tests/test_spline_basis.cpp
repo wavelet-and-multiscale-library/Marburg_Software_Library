@@ -21,7 +21,7 @@ int main()
 #endif
 
   cout << "Testing SplineBasis..." << endl;
-  SplineBasis<2,2> basis("P","",1,1,0,0); // PBasis, complementary b.c.'s
+  SplineBasis<3,3> basis("P","",1,1,0,0); // PBasis, complementary b.c.'s
 
   const int j0 = basis.j0();
   Vector<double> x(basis.Deltasize(j0+1));
@@ -60,7 +60,7 @@ int main()
 
 
   cout << "* point evaluation of spline wavelets:" << endl;
-  typedef SplineBasis<2,2>::Index Index;
+  typedef SplineBasis<3,3>::Index Index;
   int N = 16;
   Array1D<double> points(N+1), values(N+1), dervalues(N+1);
   double h = 1.0/N;

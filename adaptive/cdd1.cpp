@@ -108,8 +108,8 @@ namespace WaveletTL
 	  u_epsilon.swap(v_hat);
 	  Lambda.swap(Lambda_hat);
 	}
-      delta *= 0.5; // original
-//       delta *= 0.1; // tuned
+//       delta *= 0.5; // original
+      delta *= 0.1; // tuned
     }
 
 #if _WAVELETTL_CDD1_VERBOSITY >= 1
@@ -224,7 +224,8 @@ namespace WaveletTL
 	xk[id] = v.get_coefficient(*it);
       
       unsigned int iterations = 0;
-      CG(A_Lambda, F_Lambda, xk, eta, 150, iterations);
+//       CG(A_Lambda, F_Lambda, xk, eta, 150, iterations);
+      CG(A_Lambda, F_Lambda, xk, 1e-15, 250, iterations);
 #if _WAVELETTL_CDD1_VERBOSITY >= 1
       cout << "... GALERKIN done, " << iterations << " CG iterations needed" << endl;
 #endif
@@ -288,6 +289,17 @@ namespace WaveletTL
     cout << "* NGROW: size of old index set Lambda is " << Lambdasize << ", size of increment set Lambda_c is " << Lambdacsize << endl;
 #endif
 
+#if _WAVELETTL_CDD1_VERBOSITY >= 2
+    cout << "* NGROW: old index set Lambda is..." << endl;
+    for (typename set<typename PROBLEM::WaveletBasis::Index>::const_iterator it(Lambda.begin());
+	 it != Lambda.end(); ++it)
+      cout << *it << endl;
+    cout << "* NGROW: increment set Lambda_c is..." << endl;
+    for (typename set<typename PROBLEM::WaveletBasis::Index>::const_iterator it(Lambda_c.begin());
+	 it != Lambda_c.end(); ++it)
+      cout << *it << endl;
+#endif
+
     std::set_union(Lambda.begin(), Lambda.end(),
 		   Lambda_c.begin(), Lambda_c.end(),
 		   inserter(Lambda_tilde, Lambda_tilde.end()));
@@ -335,7 +347,9 @@ namespace WaveletTL
     typedef typename PROBLEM::WaveletBasis::Index Index;
     InfiniteVector<double,Index> w;
     APPLY(P, v, eta1, w, jmax, strategy);
+//     APPLY(P, v, eta1/100, w, jmax, strategy);
     F.COARSE(eta2, r);
+//     F.COARSE(0, r);
     r -= w;
     r.support(Lambda_tilde);
   }

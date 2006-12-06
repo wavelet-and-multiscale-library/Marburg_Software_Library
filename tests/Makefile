@@ -113,7 +113,8 @@ EXEOBJF6 = \
 
 # set 7 of test programs: nonadaptive wavelet solvers for elliptic problems	
 EXEOBJF7 = \
-  test_full_laplacian.o test_full_gramian.o test_full_helmholtz.o		
+  test_full_laplacian.o test_full_laplacian_speed.o\
+  test_full_gramian.o test_full_helmholtz.o		
 
 
 EXES1 = $(EXEOBJF1:.o=)

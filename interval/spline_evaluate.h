@@ -30,6 +30,33 @@ namespace WaveletTL
 			     const InfiniteVector<double, typename SplineBasis<d,dT>::Index>& coeffs,
 			     const int resolution);
 
+  /*!
+    point evaluation of (derivatives) of a single primal [P] generator
+    or wavelet \psi_\lambda
+  */
+  template <int d, int dT>
+  double evaluate(const SplineBasis<d,dT>& basis, const unsigned int derivative,
+		  const typename SplineBasis<d,dT>::Index& lambda,
+		  const double x);
+
+  /*!
+    point evaluation of (derivatives) of a single primal [P] generator
+    or wavelet \psi_\lambda at several points simultaneously
+  */
+  template <int d, int dT>
+  void evaluate(const SplineBasis<d,dT>& basis, const unsigned int derivative,
+		const typename SplineBasis<d,dT>::Index& lambda,
+		const Array1D<double>& points, Array1D<double>& values);
+
+  /*!
+    point evaluation of 0-th and first derivative of a single primal [P] generator
+    or wavelet \psi_\lambda at several points simultaneously
+  */
+  template <int d, int dT>
+  void evaluate(const SplineBasis<d,dT>& basis,
+		const typename SplineBasis<d,dT>::Index& lambda,
+		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);
+
 }
 
 #include <interval/spline_evaluate.cpp>

@@ -58,6 +58,20 @@ int main()
   basis.apply_Tjinv(j0+2, y, x);
   cout << "* applying T_{j0+2}^{-1} to y yields x=" << x << endl;
 
+
+  cout << "* point evaluation of spline wavelets:" << endl;
+  typedef SplineBasis<2,2>::Index Index;
+  int N = 16;
+  Array1D<double> points(N+1), values(N+1), dervalues(N+1);
+  double h = 1.0/N;
+  for (int i = 0; i <= N; i++) points[i] = i*h;
+  for (Index lambda(first_generator(&basis, basis.j0()));; ++lambda) {
+    cout << lambda << endl;
+    evaluate(basis, lambda, points, values, dervalues);
+    cout << "values: " << values << endl;
+    cout << "values of first derivative: " << dervalues << endl;
+    if (lambda == last_generator(&basis, basis.j0())) break;
+  }
   
   return 0;
 }

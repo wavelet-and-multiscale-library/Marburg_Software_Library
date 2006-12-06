@@ -6,7 +6,7 @@ namespace WaveletTL
   FullHelmholtz<d,dT>::FullHelmholtz(const SplineBasis<d,dT>& sb,
 				     const double alpha,
 				     const PreconditioningType precond)
-    : G_(sb), A_(sb, no_precond), sb_(sb), alpha_(alpha), precond_(precond)
+    : G_(sb), A_(sb, no_precond), sb_(sb), alpha_(alpha), precond_(precond), j_(-1)
   {
     set_level(sb_.j0());
   }
@@ -32,10 +32,12 @@ namespace WaveletTL
   FullHelmholtz<d,dT>::set_level(const int j) const
   {
     assert(j >= sb_.j0());
-    j_ = j;
-    G_.set_level(j);
-    A_.set_level(j);
-    setup_D();
+    if (j_ != j) {
+      j_ = j;
+      G_.set_level(j);
+      A_.set_level(j);
+      setup_D();
+    }
   }
 
   template <int d, int dT>

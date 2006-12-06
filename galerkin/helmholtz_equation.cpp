@@ -111,7 +111,31 @@ namespace WaveletTL
     Support supp;
     if (intersect_supports(basis_, lambda, nu, supp))
       {
-	// determine numbers of indices
+#if 0
+	// Set up Gauss points and weights for a composite quadrature formula:
+	// (TODO: maybe use an instance of MathTL::QuadratureRule instead of computing
+	// the Gauss points and weights)
+	const unsigned int N_Gauss = (p+1)/2;
+	const double h = ldexp(1.0, -supp.j);
+	Array1D<double> gauss_points (N_Gauss*(supp.k2-supp.k1)), func1values, func2values, der1values, der2values;
+	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++) // refers to 2^{-j}[patch,patch+1]
+	  for (unsigned int n = 0; n < N_Gauss; n++, id++)
+	    gauss_points[id] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
+	
+	// - compute point values of the integrands
+	evaluate(basis_, lambda, gauss_points, func1values, der1values);
+	evaluate(basis_, nu, gauss_points, func2values, der2values);
+
+ 	// - add all integral shares
+ 	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++)
+ 	  for (unsigned int n = 0; n < N_Gauss; n++, id++) {
+//  	    const double t = gauss_points[id];
+ 	    const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
+	    r += (der1values[id] * der2values[id]
+		  + alpha_ * func1values[id] * func2values[id]) * gauss_weight;
+ 	  }
+#else
+ 	// determine numbers of indices
 	size_type number_lambda = 0, number_nu = 0;
 	if (lambda.e() == 0) {
 	  number_lambda = lambda.k()-basis_.DeltaLmin();
@@ -126,6 +150,7 @@ namespace WaveletTL
 	
 	A_.set_level(std::max(lambda.j()+lambda.e(),nu.j()+nu.e()));
 	return A_.get_entry(number_nu, number_lambda);
+#endif
       }
     
     return r;

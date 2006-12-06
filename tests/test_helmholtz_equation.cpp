@@ -48,7 +48,7 @@ int main()
   InfiniteVector<double, Index> coeffs;
   helmholtz.RHS(1e-8, coeffs);
 
-  const int jmax = helmholtz.basis().j0()+3;
+  const int jmax = helmholtz.basis().j0()+6;
 
   set<Index> Lambda;
   for (Index lambda = helmholtz.basis().first_generator(helmholtz.basis().j0());; ++lambda) {

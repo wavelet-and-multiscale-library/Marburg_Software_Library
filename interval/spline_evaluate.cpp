@@ -59,5 +59,150 @@ namespace WaveletTL
     return result;
   }
 
+  template <int d, int dT>
+  double evaluate(const SplineBasis<d,dT>& basis, const unsigned int derivative,
+		  const typename SplineBasis<d,dT>::Index& lambda,
+		  const double x)
+  {
+    assert(derivative <= 1); // we only support derivatives up to the first order
 
+    double r = 0;
+
+    if (lambda.e() == 0) {
+      // generator
+      if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) {
+	r = (derivative == 0
+	     ? MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
+							 (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
+							 1-x)
+	     : -MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
+							  (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
+							  1-x));
+      } else {
+	r = (derivative == 0
+	     ? MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), x)
+	     : MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), lambda.k(), x));
+      }
+    } else {
+      // wavelet, switch to generator representation
+      typedef typename Vector<double>::size_type size_type;
+      size_type number_lambda = basis.Deltasize(lambda.j())+lambda.k()-basis.Nablamin();
+      std::map<size_type,double> wc, gc;
+      wc[number_lambda] = 1.0;
+      basis.apply_Mj(lambda.j(), wc, gc);
+      typedef typename SplineBasis<d,dT>::Index Index;
+      for (typename std::map<size_type,double>::const_iterator it(gc.begin());
+	   it != gc.end(); ++it) {
+	r += it->second * evaluate(basis, derivative, Index(lambda.j()+1, 0, basis.DeltaLmin()+it->first, &basis), x);
+      }
+    }
+    
+    return r;
+  }
+  
+  template <int d, int dT>
+  void
+  evaluate(const SplineBasis<d,dT>& basis, const unsigned int derivative,
+	   const typename SplineBasis<d,dT>::Index& lambda,
+	   const Array1D<double>& points, Array1D<double>& values)
+  {
+    assert(derivative <= 1); // we only support derivatives up to the first order
+
+    values.resize(points.size());
+    for (unsigned int i(0); i < values.size(); i++)
+      values[i] = 0;
+
+    if (lambda.e() == 0) {
+      // generator
+      if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) {
+	for (unsigned int m(0); m < points.size(); m++)
+	  values[m] = (derivative == 0
+		       ? MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
+								   (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
+								   1-points[m])
+		       : -MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
+							    (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
+							    1-points[m]));
+      } else {
+	for (unsigned int m(0); m < points.size(); m++)
+	  values[m] = (derivative == 0
+		       ? MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
+								   lambda.k(),
+								   points[m])
+		       : MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
+								   lambda.k(),
+								   points[m]));
+      }
+    } else {
+      // wavelet, switch to generator representation
+      typedef typename Vector<double>::size_type size_type;
+      size_type number_lambda = basis.Deltasize(lambda.j())+lambda.k()-basis.Nablamin();
+      std::map<size_type,double> wc, gc;
+      wc[number_lambda] = 1.0;
+      basis.apply_Mj(lambda.j(), wc, gc);
+      typedef typename SplineBasis<d,dT>::Index Index;
+      Array1D<double> help(points.size());
+      for (typename std::map<size_type,double>::const_iterator it(gc.begin());
+	   it != gc.end(); ++it) {
+	evaluate(basis, derivative, Index(lambda.j()+1, 0, basis.DeltaLmin()+it->first, &basis), points, help);
+	for (unsigned int i = 0; i < points.size(); i++)
+	  values[i] += it->second * help[i];
+      }
+    }
+  }
+  
+  template <int d, int dT>
+  void evaluate(const SplineBasis<d,dT>& basis,
+		const typename SplineBasis<d,dT>::Index& lambda,
+		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues)
+  {
+    const unsigned int npoints(points.size());
+    funcvalues.resize(npoints);
+    dervalues.resize(npoints);
+    for (unsigned int i(0); i < npoints; i++) {
+      funcvalues[i] = 0;
+      dervalues[i] = 0;
+    }
+
+    if (lambda.e() == 0) {
+      // generator
+      if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) {
+	for (unsigned int m(0); m < npoints; m++) {
+	  funcvalues[m] = MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
+								    (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
+								    1-points[m]);
+	  dervalues[m]  = -MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
+								     (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
+								     1-points[m]);
+	}
+      } else {
+	for (unsigned int m(0); m < npoints; m++) {
+	  funcvalues[m] = MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
+								    lambda.k(),
+								    points[m]);
+	  dervalues[m]  = MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
+								    lambda.k(), 
+								    points[m]);
+	}
+      }
+    } else {
+      // wavelet, switch to generator representation
+      typedef typename Vector<double>::size_type size_type;
+      size_type number_lambda = basis.Deltasize(lambda.j())+lambda.k()-basis.Nablamin();
+      std::map<size_type,double> wc, gc;
+      wc[number_lambda] = 1.0;
+      basis.apply_Mj(lambda.j(), wc, gc);
+      typedef typename SplineBasis<d,dT>::Index Index;
+      Array1D<double> help1, help2;
+      for (typename std::map<size_type,double>::const_iterator it(gc.begin());
+	   it != gc.end(); ++it) {
+	evaluate(basis, Index(lambda.j()+1, 0, basis.DeltaLmin()+it->first, &basis), points, help1, help2);
+	for (unsigned int i = 0; i < npoints; i++) {
+	  funcvalues[i] += it->second * help1[i];
+	  dervalues[i]  += it->second * help2[i];
+	}
+      }
+    }
+  }
+  
 }

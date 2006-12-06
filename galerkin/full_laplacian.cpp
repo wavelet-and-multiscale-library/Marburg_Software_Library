@@ -8,7 +8,7 @@ namespace WaveletTL
   template <int d, int dT>
   FullLaplacian<d,dT>::FullLaplacian(const SplineBasis<d,dT>& sb,
 				     const PreconditioningType precond)
-    : sb_(sb), precond_(precond)
+    : sb_(sb), precond_(precond), j_(-1)
   {
     set_level(sb_.j0());
   }
@@ -34,8 +34,10 @@ namespace WaveletTL
   FullLaplacian<d,dT>::set_level(const int j) const
   {
     assert(j >= sb_.j0());
-    j_ = j;
-    setup_D();
+    if (j_ != j) {
+      j_ = j;
+      setup_D();
+    }
   }
 
   template <int d, int dT>
@@ -68,22 +70,122 @@ namespace WaveletTL
   }
   
   template <int d, int dT>
-  const double FullLaplacian<d,dT>::get_entry(const size_type row, const size_type column) const
+  const double FullLaplacian<d,dT>::get_entry(const size_type row, const size_type col) const
   {
-    assert(row < row_dimension() && column < column_dimension());
+    assert(row < row_dimension() && col < column_dimension());
 
 #if 0
     Vector<double> ecol(column_dimension()), col(row_dimension());
-    ecol[column] = 1.0;
+    ecol[col] = 1.0;
     apply(ecol, col);
 
     return col[row];
 #else
-    std::map<size_type,double> ecol, col;
-    ecol[column] = 1.0;
-    apply(ecol, col);
+    const int j0 = sb_.j0();
 
-    return col[row];
+    // determine level of "row" and "col"
+    int jrow = j0;
+    if (row >= (size_type) sb_.Deltasize(j0)) {
+      jrow += 1+(int)floor(log(((double)(row-sb_.Deltasize(j0)))/(1<<j0)+1)/M_LN2);
+    }
+    int jcol = j0;
+    if (col >= (size_type) sb_.Deltasize(j0)) {
+      jcol += 1+(int)floor(log(((double)(col-sb_.Deltasize(j0)))/(1<<j0)+1)/M_LN2);
+    }
+    
+    // determine generator coeffs
+    std::map<size_type,double> e_k_row; e_k_row[row] = 1.0;
+    std::map<size_type,double> e_k_col; e_k_col[col] = 1.0;
+    std::map<size_type,double> y_row, y_col;
+
+    int j = std::max(jrow,jcol);
+    if (j > j0) {
+      sb_.apply_Tj(j-1, e_k_row, y_row);
+      sb_.apply_Tj(j-1, e_k_col, y_col);
+    } else {
+      y_row.swap(e_k_row);
+      y_col.swap(e_k_col);
+    }
+
+    // compute Ay_row (see "apply")
+    std::map<size_type,double> Ay;
+    const double factor = ldexp(1.0, 2*j); // not "1<<(2*j_)" !
+    if (d == 2) {
+      // apply 2^{2j}*tridiag(-1,2,-1)
+      for (std::map<size_type,double>::const_iterator it(y_row.begin());
+	   it != y_row.end(); ++it) {
+	Ay[it->first] += factor * 2*it->second;
+	if (it->first > 0)
+	  Ay[it->first-1] -= factor * it->second;
+	if (it->first < column_dimension()-1)
+	  Ay[it->first+1] -= factor * it->second;
+      }
+    } else {
+      if (d == 3) {
+	// cf. [P, Bsp. 3.26]
+	for (std::map<size_type,double>::const_iterator it(y_row.begin());
+	     it != y_row.end(); ++it) {
+	  const size_type m = row_dimension();
+	  switch(it->first) {
+	  case 0:
+	    Ay[0] += factor * 4*it->second/3;
+	    Ay[1] -= factor * it->second/6;
+	    Ay[2] -= factor * it->second/6;
+	    break;
+	  case 1:
+	    Ay[0] -= factor * it->second/6;
+	    Ay[1] += factor * it->second;
+	    Ay[2] -= factor * it->second/3;
+	    Ay[3] -= factor * it->second/6;
+	    break;
+	  default: // >= 2
+	    switch(m-1-it->first) {
+	    case 0: // m-1
+	      Ay[m-1] += factor * 4*it->second/3;
+	      Ay[m-2] -= factor * it->second/6;
+	      Ay[m-3] -= factor * it->second/6;
+	      break;
+	    case 1: // m-2
+	      Ay[m-1] -= factor * it->second/6;
+	      Ay[m-2] += factor * it->second;
+	      Ay[m-3] -= factor * it->second/3;
+	      Ay[m-4] -= factor * it->second/6;
+	      break;
+	    default: // < m-2
+	      Ay[it->first-2] -= factor * it->second/6;
+	      Ay[it->first-1] -= factor * it->second/3;
+	      Ay[it->first]   += factor * it->second;
+	      Ay[it->first+1] -= factor * it->second/3;
+	      Ay[it->first+2] -= factor * it->second/6;
+	      break;
+	    }
+	    break;
+	  }
+	}
+      }
+    }
+    
+    // compute inner product <y_col,Ay_row>
+    double r = 0;
+    for (typename std::map<size_type,double>::const_iterator
+	   ity(y_col.begin()),
+	   ityend(y_col.end()),
+	   itAy(Ay.begin()),
+	   itAyend(Ay.end());
+	 ity != ityend && itAy != itAyend; ++itAy)
+      {
+ 	while (ity != ityend && ity->first < itAy->first) ++ity;
+	if (ity != ityend)
+	  if (itAy->first == ity->first)
+	    r += ity->second * itAy->second;
+      }
+    return r/(D(row)*D(col));
+    
+//     std::map<size_type,double> ecol, col;
+//     ecol[col] = 1.0;
+//     apply(ecol, col);
+
+//     return col[row];
 #endif
   }
 

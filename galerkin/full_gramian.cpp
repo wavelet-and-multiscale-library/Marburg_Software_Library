@@ -35,22 +35,121 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
-  const double FullGramian<d,dT>::get_entry(const size_type row, const size_type column) const
+  const double FullGramian<d,dT>::get_entry(const size_type row, const size_type col) const
   {
-    assert(row < row_dimension() && column < column_dimension());
+    assert(row < row_dimension() && col < column_dimension());
     
 #if 0
     Vector<double> ecol(column_dimension()), col(row_dimension(), false);
-    ecol[column] = 1.0;
+    ecol[col] = 1.0;
     apply(ecol, col);
 
     return col[row];
 #else
-    std::map<size_type,double> ecol, col;
-    ecol[column] = 1.0;
-    apply(ecol, col);
+    const int j0 = sb_.j0();
 
-    return col[row];
+    // determine level of "row" and "col"
+    int jrow = j0;
+    if (row >= (size_type) sb_.Deltasize(j0)) {
+      jrow += 1+(int)floor(log(((double)(row-sb_.Deltasize(j0)))/(1<<j0)+1)/M_LN2);
+    }
+    int jcol = j0;
+    if (col >= (size_type) sb_.Deltasize(j0)) {
+      jcol += 1+(int)floor(log(((double)(col-sb_.Deltasize(j0)))/(1<<j0)+1)/M_LN2);
+    }
+    
+    // determine generator coeffs
+    std::map<size_type,double> e_k_row; e_k_row[row] = 1.0;
+    std::map<size_type,double> e_k_col; e_k_col[col] = 1.0;
+    std::map<size_type,double> y_row, y_col;
+
+    int j = std::max(jrow,jcol);
+    if (j > j0) {
+      sb_.apply_Tj(j-1, e_k_row, y_row);
+      sb_.apply_Tj(j-1, e_k_col, y_col);
+    } else {
+      y_row.swap(e_k_row);
+      y_col.swap(e_k_col);
+    }
+
+    // compute Ay_row (see "apply")
+    std::map<size_type,double> Ay;
+    if (d == 2) {
+      // apply tridiag(1/6,2/3,1/6)
+      for (std::map<size_type,double>::const_iterator it(y_row.begin());
+	   it != y_row.end(); ++it) {
+	Ay[it->first] += 2*it->second/3;
+	if (it->first > 0)
+	  Ay[it->first-1] += it->second/6;
+	if (it->first < column_dimension()-1)
+	  Ay[it->first+1] += it->second/6;
+      }
+    } else {
+      if (d == 3) {
+	// cf. [P, Bsp. 3.23]
+	for (std::map<size_type,double>::const_iterator it(y_row.begin());
+	     it != y_row.end(); ++it) {
+	  const size_type m = row_dimension();
+	  switch(it->first) {
+	  case 0:
+	    Ay[0] += it->second/3;
+	    Ay[1] += 5*it->second/24;
+	    Ay[2] += it->second/120;
+	    break;
+	  case 1:
+	    Ay[0] += 5*it->second/24;
+	    Ay[1] += 11*it->second/20;
+	    Ay[2] += 13*it->second/60;
+	    Ay[3] += it->second/120;
+	    break;
+	  default: // >= 2
+	    switch(m-1-it->first) {
+	    case 0: // m-1
+	      Ay[m-1] += it->second/3;
+	      Ay[m-2] += 5*it->second/24;
+	      Ay[m-3] += it->second/120;
+	      break;
+	    case 1: // m-2
+	      Ay[m-1] += 5*it->second/24;
+	      Ay[m-2] += 11*it->second/20;
+	      Ay[m-3] += 13*it->second/60;
+	      Ay[m-4] += it->second/120;
+	      break;
+	    default: // < m-2
+	      Ay[it->first-2] += it->second/120;
+	      Ay[it->first-1] += 13*it->second/60;
+	      Ay[it->first]   += 11*it->second/20;
+	      Ay[it->first+1] += 13*it->second/60;
+	      Ay[it->first+2] += it->second/120;
+	      break;
+	    }
+	    break;
+	  }
+	}
+      }
+    }
+    
+    // compute inner product <y_col,Ay_row>
+    double r = 0;
+    for (typename std::map<size_type,double>::const_iterator
+	   ity(y_col.begin()),
+	   ityend(y_col.end()),
+	   itAy(Ay.begin()),
+	   itAyend(Ay.end());
+	 ity != ityend && itAy != itAyend; ++itAy)
+      {
+ 	while (ity != ityend && ity->first < itAy->first) ++ity;
+	if (ity != ityend)
+	  if (itAy->first == ity->first)
+	    r += ity->second * itAy->second;
+      }
+    return r;
+    
+//     std::map<size_type,double> ecol, col;
+//     ecol[col] = 1.0;
+//     apply(ecol, col);
+
+//     return col[row];
 #endif
   }
 

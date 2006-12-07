@@ -83,6 +83,16 @@ namespace WaveletTL
     double operator_order() const { return 1.; }
     
     /*!
+      set reaction coefficient alpha
+    */
+    void set_alpha(const double alpha) const;
+
+    /*!
+      set (unpreconditioned) right-hand side as a vector
+    */
+    void set_rhs(const InfiniteVector<double,Index>& rhs) const;
+
+    /*!
       evaluate the diagonal preconditioner D
     */
     double D(const Index& lambda) const;
@@ -158,9 +168,9 @@ namespace WaveletTL
 
   protected:
     const Function<1>* f_;
-    double alpha_;
+    mutable double alpha_;
     SplineBasis<d,dT> basis_;
-    FullHelmholtz<d,dT> A_;
+    mutable FullHelmholtz<d,dT> A_;
 
     // flag whether right-hand side has already been precomputed
     mutable bool rhs_precomputed;
@@ -174,7 +184,7 @@ namespace WaveletTL
     // (preconditioned) right-hand side coefficients on a fine level
     mutable InfiniteVector<double,Index> fcoeffs_unsorted;
     
-    // right-hand side coefficients on a fine level, sorted by modulus
+    // (preconditioned) right-hand side coefficients on a fine level, sorted by modulus
     mutable Array1D<std::pair<Index,double> > fcoeffs;
 
     // (squared) \ell_2 norm of the precomputed right-hand side
@@ -182,9 +192,20 @@ namespace WaveletTL
 
     // estimates for ||A|| and ||A^{-1}||
     mutable double normA, normAinv;
+
+    // type of one block in one column of the cached stiffness matrices G and A
+    typedef std::map<Index, double> Block;
+    
+    // type of one column in the entry cache of G and A
+    // the key codes the level, that data are the entries
+    typedef std::map<int, Block> Column;
+    
+    // type of the entry cache of G and A
+    typedef std::map<Index, Column> ColumnCache;
+
+    // entries cache for A (mutable to overcome the constness of add_column())
+    mutable ColumnCache G_cache, A_cache;
   };
-
-
 
 }
 

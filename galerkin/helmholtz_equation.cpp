@@ -18,7 +18,26 @@ namespace WaveletTL
       A_(basis_, alpha, no_precond),
       normA(0.0), normAinv(0.0)
   {
-    if (precompute_f) precompute_rhs();
+    if (precompute_f && f != 0) precompute_rhs();
+  }
+
+  template <int d, int dT>
+  void
+  HelmholtzEquation1D<d,dT>::set_rhs(const InfiniteVector<double,Index>& rhs) const
+  {
+    fcoeffs_unsorted = rhs;
+    fcoeffs_unsorted.scale(this, -1);
+    fnorm_sqr = l2_norm_sqr(fcoeffs_unsorted);
+    
+    // sort the coefficients into fcoeffs
+    fcoeffs.resize(fcoeffs_unsorted.size());
+    size_type i = 0;
+    for (typename InfiniteVector<double,Index>::const_iterator it(fcoeffs_unsorted.begin()),
+	   itend(fcoeffs_unsorted.end()); it != itend; ++it, ++i)
+      fcoeffs[i] = std::pair<Index,double>(it.index(), *it);
+    sort(fcoeffs.begin(), fcoeffs.end(), typename InfiniteVector<double,Index>::decreasing_order());
+    
+    rhs_precomputed = true;
   }
 
   template <int d, int dT>
@@ -51,28 +70,26 @@ namespace WaveletTL
     Vector<double> rhs(A_.row_dimension(), false);
     assert(jmax > basis_.j0());
     basis_.apply_Tj_transposed(jmax-1, rhs_phijk, rhs);
-
-    const int j0 = basis_.j0();
-    unsigned int i = 0;
-    for (Index lambda(basis_.first_generator(j0));; ++lambda, i++)
+    
+    InfiniteVector<double,Index> rhs_helper;
+    size_type i(0);
+    for (Index lambda(basis_.first_generator(basis_.j0())); i < rhs.size(); ++lambda, i++)
       {
- 	const double coeff = rhs[i]/sqrt(A_.diagonal(i));
+ 	const double coeff = rhs[i];
  	if (fabs(coeff)>1e-15)
- 	  fcoeffs_unsorted.set_coefficient(lambda, coeff);
- 	if (lambda == basis_.last_wavelet(jmax-1))
- 	  break;
+ 	  rhs_helper.set_coefficient(lambda, coeff);
       }
-    fnorm_sqr = l2_norm_sqr(fcoeffs_unsorted);
-    
-    // sort the coefficients into fcoeffs
-    fcoeffs.resize(fcoeffs_unsorted.size());
-    i = 0;
-    for (typename InfiniteVector<double,Index>::const_iterator it(fcoeffs_unsorted.begin()),
-	   itend(fcoeffs_unsorted.end()); it != itend; ++it, ++i)
-      fcoeffs[i] = std::pair<Index,double>(it.index(), *it);
-    sort(fcoeffs.begin(), fcoeffs.end(), typename InfiniteVector<double,Index>::decreasing_order());
-    
-    rhs_precomputed = true;
+
+    set_rhs(rhs_helper);
+  }
+
+  template <int d, int dT>
+  void
+  HelmholtzEquation1D<d,dT>::set_alpha(const double alpha) const
+  {
+    assert(alpha >= 0);
+    alpha_ = alpha;
+    A_.set_alpha(alpha);
   }
 
   template <int d, int dT>

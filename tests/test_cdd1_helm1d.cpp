@@ -9,6 +9,7 @@
 #include "helmholtz_1d_solutions.h"
 
 #include <galerkin/helmholtz_equation.h>
+#include <galerkin/cached_problem.h>
 #include <interval/spline_basis.h>
 #include <adaptive/cdd1.h>
 
@@ -52,11 +53,12 @@ int main()
   }
 
   const int j0   = basis.j0();
-  const int jmax = 10;
+  const int jmax = 12;
 
-  HelmholtzEquation1D<d,dT> problem(f, 1.0);
+  typedef HelmholtzEquation1D<d,dT> Problem;
+  Problem problem(f, 1.0);
 
-// //   CachedProblem<SturmEquation<Basis> > cproblem(&problem);
+  CachedProblem<Problem> cproblem(&problem);
 
 //   // initialization with some precomputed DSBasis eigenvalue bounds:
 // //   CachedProblem<IntervalGramian<Basis> > cproblem(&problem, 1.4986, 47.7824); // d=2, dT=2 (no precond.)
@@ -73,8 +75,9 @@ int main()
   cout << "* estimate for normAinv: " << normAinv << endl;
 
   InfiniteVector<double, Index> u_epsilon;
-  CDD1_SOLVE(problem, 1e-4, u_epsilon, jmax, CDD1);
-// //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 12);
+//   CDD1_SOLVE(problem, 1e-4, u_epsilon, jmax);
+  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, jmax);
+//   CDD1_SOLVE(cproblem, 1e-6, u_epsilon, jmax);
 // //   CDD1_SOLVE(cproblem, 1e-7, u_epsilon, 12);
 // //   CDD1_SOLVE(cproblem, 1e-5, u_epsilon, 20);
 // //   CDD1_SOLVE(cproblem, 1e-10, u_epsilon, 20);

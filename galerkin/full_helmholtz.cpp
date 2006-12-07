@@ -1,5 +1,9 @@
 // implementation for full_helmholtz.h
 
+#include <utils/map_tools.h>
+
+using namespace MathTL;
+
 namespace WaveletTL
 {
   template <int d, int dT>
@@ -144,12 +148,9 @@ namespace WaveletTL
     // apply unpreconditioned Laplacian
     A_.apply(y, Mx);
 
-    // add Gramian part, y+=alpha*yhelp
-    std::map<size_type,double>::const_iterator ithelp(yhelp.begin());
-    for (std::map<size_type,double>::iterator it(Mx.begin()); it != Mx.end(); ++it, ++ithelp) {
-      assert(it->first == ithelp->first); // we assume that A and G have the same nonzero pattern
-      it->second += alpha_ * ithelp->second; 
-    }
+    // add Gramian part, Mx+=alpha*yhelp
+    add_maps(yhelp, Mx, y, alpha_, 1.0);
+    Mx.swap(y);
 
     if (preconditioning) {
       // apply diagonal preconditioner D^{-1}

@@ -69,7 +69,8 @@ EXEOBJF = \
   test_multiindex.o test_multi_lp.o\
   test_sturm_bvp.o test_bvp.o\
   test_chart.o test_atlas.o\
-  test_corner_singularity.o
+  test_corner_singularity.o\
+  test_map_tools.o
 
 EXES = $(EXEOBJF:.o=)
 

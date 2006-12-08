@@ -7,15 +7,15 @@
 // | Thorsten Raasch, Manuel Werner                                     |
 // +--------------------------------------------------------------------+
 
-#ifndef _WAVELETTL_HELMHOLTZ_EQUATION_H
-#define _WAVELETTL_HELMHOLTZ_EQUATION_H
+#ifndef _WAVELETTL_POISSON_EQUATION_H
+#define _WAVELETTL_POISSON_EQUATION_H
 
 #include <utils/function.h>
 #include <utils/array1d.h>
 #include <algebra/infinite_vector.h>
 #include <interval/spline_basis.h>
 #include <galerkin/galerkin_utils.h>
-#include <galerkin/full_helmholtz.h>
+#include <galerkin/full_laplacian.h>
 #include <galerkin/infinite_preconditioner.h>
 #include <adaptive/compression.h>
 
@@ -24,35 +24,23 @@ using namespace MathTL;
 namespace WaveletTL
 {
   /*!
-    This class models the wavelet discretization of the one--dimensional
-    Helmholtz equation
-
-      -u''(t) + alpha * u(t) = f(t), 0 <= t <= 1
-
-    with Dirichlet boundary conditions u(0)=u(1)=0.
-
-    The wavelet bases useable for the discretization are those
-    modeled by SplineBasis<d,dT>.
-
-    Internally, HelmholtzEquation1D holds two distinct caches for the
-    Gramian (identity) part of the stiffness matrix and the Laplacian part.
+    The Poisson equation -u''=f, u(0)=u(1)=0 in one space dimension.
   */
   template <int d, int dT>
-  class HelmholtzEquation1D
+  class PoissonEquation1D
     :  public FullyDiagonalEnergyNormPreconditioner<typename SplineBasis<d,dT>::Index>
   {
   public:
     /*!
-      constructor from a right-hand side f
-    */
-    HelmholtzEquation1D(const Function<1>* f,
-			const double alpha = 0,
-			const bool precompute_rhs = true);
-
-    /*!
       type of the wavelet basis
     */
     typedef SplineBasis<d,dT> WaveletBasis;
+
+    /*!
+      constructor from a given wavelet basis and a right-hand side y
+    */
+    PoissonEquation1D(const SplineBasis<d,dT>& basis,
+		      const InfiniteVector<double, typename WaveletBasis::Index>& y);
 
     /*!
       read access to the basis
@@ -86,16 +74,6 @@ namespace WaveletTL
     double operator_order() const { return 1.; }
     
     /*!
-      set reaction coefficient alpha
-    */
-    void set_alpha(const double alpha) const;
-
-    /*!
-      set (unpreconditioned) right-hand side as a vector
-    */
-    void set_rhs(const InfiniteVector<double,Index>& rhs) const;
-
-    /*!
       evaluate the diagonal preconditioner D
     */
     double D(const Index& lambda) const;
@@ -120,20 +98,33 @@ namespace WaveletTL
  	     const unsigned int p) const;
 
     /*!
+      evaluate the (unpreconditioned) right-hand side f
+    */
+    double f(const typename WaveletBasis::Index& lambda) const {
+      return y_.get_coefficient(lambda);
+    }
+
+    /*!
       approximate the wavelet coefficient set of the preconditioned right-hand side F
       within a prescribed \ell_2 error tolerance
     */
-    void RHS(const double eta, InfiniteVector<double,Index>& coeffs) const;
-
-    /*!
-      evaluate the (unpreconditioned) right-hand side f
-    */
-    double f(const Index& lambda) const;
+    void RHS(const double eta,
+ 	     InfiniteVector<double,typename WaveletBasis::Index>& coeffs) const {
+      coeffs = y_; // dirty
+      coeffs.scale(this, -1); // coeffs *= D^{-1}
+    }
 
     /*!
       compute (or estimate) ||F||_2
     */
-    double F_norm() const { return sqrt(fnorm_sqr); }
+    double F_norm() const { return l2_norm(y_); }
+
+    /*!
+      set right-hand side y
+    */
+    void set_rhs(const InfiniteVector<double,Index>& y) const {
+      y_ = y;
+    }
 
     /*!
       estimate the spectral norm ||A||
@@ -170,48 +161,18 @@ namespace WaveletTL
 		    const CompressionStrategy strategy = St04a) const;
 
   protected:
-    const Function<1>* f_;
-    mutable double alpha_;
-    SplineBasis<d,dT> basis_;
-    mutable FullHelmholtz<d,dT> A_;
-
-    // flag whether right-hand side has already been precomputed
-    mutable bool rhs_precomputed;
-
-    /*!
-      precomputation of the right-hand side
-      (constness is not nice but necessary to have RHS a const function)
-    */
-    void precompute_rhs() const;
-
-    // (preconditioned) right-hand side coefficients on a fine level
-    mutable InfiniteVector<double,Index> fcoeffs_unsorted;
+    const WaveletBasis& basis_;
+    mutable FullLaplacian<d,dT> A_;
     
-    // (preconditioned) right-hand side coefficients on a fine level, sorted by modulus
-    mutable Array1D<std::pair<Index,double> > fcoeffs;
-
-    // (squared) \ell_2 norm of the precomputed right-hand side
-    mutable double fnorm_sqr;
-
+    // rhs, mutable to have 'const' method
+    mutable InfiniteVector<double, typename WaveletBasis::Index> y_;
+    
     // estimates for ||A|| and ||A^{-1}||
     mutable double normA, normAinv;
-
-    // type of one block in one column of the cached stiffness matrices G and A
-    typedef std::map<Index, double> Block;
-    
-    // type of one column in the entry cache of G and A
-    // the key codes the level, that data are the entries
-    typedef std::map<int, Block> Column;
-    
-    // type of the entry cache of G and A
-    typedef std::map<Index, Column> ColumnCache;
-
-    // entries cache for A (mutable to overcome the constness of add_column())
-    mutable ColumnCache G_cache, A_cache;
   };
 
 }
 
-#include <galerkin/helmholtz_equation.cpp>
+#include <galerkin/poisson_equation.cpp>
 
 #endif

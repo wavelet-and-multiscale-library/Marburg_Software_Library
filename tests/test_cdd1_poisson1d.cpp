@@ -8,7 +8,7 @@
 #include <algebra/infinite_vector.h>
 #include "poisson_1d_solutions.h"
 
-#include <galerkin/helmholtz_equation.h>
+#include <galerkin/poisson_equation.h>
 #include <galerkin/cached_problem.h>
 #include <interval/p_expansion.h>
 #include <interval/spline_basis.h>

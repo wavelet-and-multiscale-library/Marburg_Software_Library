@@ -12,6 +12,7 @@
 #include <interval/ds_expansion.h>
 #include <interval/p_basis.h>
 #include <interval/p_expansion.h>
+#include <interval/spline_basis.h>
 
 #include <galerkin/gramian.h>
 #include <galerkin/cached_problem.h>
@@ -28,6 +29,7 @@ using MathTL::CG;
   N=1: f(x)=1
   N=2: f(x)=exp(x)
   N=3: f(x)=chi_{[0,0.5)}(x)
+  N=4: f(x)=x*(1-x)
 */
 template <unsigned int N>
 class TestFunction
@@ -46,6 +48,12 @@ class TestFunction
       break;
     case 3:
       return (p[0] < 0.5 ? 1.0 : 0.0);
+      break;
+    case 4:
+      return p[0]*(1-p[0]);
+      break;
+    case 5:
+      return p[0]*p[0]*(1-p[0]);
       break;
     default:
       return 0.0;
@@ -66,40 +74,62 @@ int main()
   cout << "Testing adaptive wavelet-Galerkin methods for the identity operator with CDD1_SOLVE ..." << endl;
 
 #if 1
-  const int d  = 2;
-  const int dT = 2;
+  // for DSBasis+PBasis+SplineBasis
+  const int d  = 3;
+  const int dT = 3;
 //   typedef DSBasis<d,dT> Basis;
-  typedef PBasis<d,dT> Basis;
+//   typedef PBasis<d,dT> Basis;
+  typedef SplineBasis<d,dT> Basis;
 #else
   typedef JLBasis Basis;
 #endif
   typedef Basis::Index Index;
 
+#if 0
+  // for DSBasis+PBasis
   Basis basis(0, 0); // no b.c.'s
 //   Basis basis(1, 0); // complementary b.c. at x=0
 //   Basis basis(0, 1); // complementary b.c. at x=1
 //   Basis basis(1, 1); // complementary b.c.'s
+#else
+  // for SplineBasis
+  Basis basis("P","",1,1,0,0); // PBasis, complementary b.c.'s
+#endif
 
-  TestFunction<2> f;
+  TestFunction<5> f;
 
   const int j0   = basis.j0();
-  const int jmax = 8;
+  const int jmax = 10;
 
   IntervalGramian<Basis> problem(basis, InfiniteVector<double,Index>());
 
   InfiniteVector<double,Index> fcoeffs;
+#if 0
+  // for DSBasis+PBasis
   expand(&f, basis, true, jmax, fcoeffs); // expand in the dual (!) basis
 //   cout << "fcoeffs" << endl << fcoeffs;
+#else
+  Vector<double> fcoeffs_vector;
+  typedef Vector<double>::size_type size_type;
+  expand(&f, basis, true, jmax, fcoeffs_vector);
+  size_type i(0);
+  for (Index lambda(basis.first_generator(j0)); i < fcoeffs_vector.size(); ++lambda, i++)
+    {
+      const double coeff = fcoeffs_vector[i];
+      if (fabs(coeff)>1e-15)
+	fcoeffs.set_coefficient(lambda, coeff);
+    }
+#endif
 
   problem.set_rhs(fcoeffs);
-//   CachedProblem<SturmEquation<Basis> > cproblem(&problem);
+  CachedProblem<IntervalGramian<Basis> > cproblem(&problem);
 
   // initialization with some precomputed DSBasis eigenvalue bounds:
 //   CachedProblem<IntervalGramian<Basis> > cproblem(&problem, 1.4986, 47.7824); // d=2, dT=2 (no precond.)
 //   CachedProblem<IntervalGramian<Basis> > cproblem(&problem, 1.28638, 705.413); // d=3, dT=3 (no precond.)
 
   // initialization with some precomputed PBasis eigenvalue bounds:
-  CachedProblem<IntervalGramian<Basis> > cproblem(&problem, 0.928217, 24.7998); // d=2, dT=2 (no precond.)
+//   CachedProblem<IntervalGramian<Basis> > cproblem(&problem, 0.928217, 24.7998); // d=2, dT=2 (no precond.)
 //   CachedProblem<IntervalGramian<Basis> > cproblem(&problem, 0.978324, 19.8057); // d=2, dT=4 (no precond.)
 
 //   double normA = problem.norm_A();
@@ -109,15 +139,63 @@ int main()
 //   cout << "* estimate for normAinv: " << normAinv << endl;
 
   InfiniteVector<double, Index> u_epsilon;
-  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 8);
+//   CDD1_SOLVE(problem, 1e-4, u_epsilon, jmax);
+//   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, jmax);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 12);
-//   CDD1_SOLVE(cproblem, 1e-7, u_epsilon, 12);
-//   CDD1_SOLVE(cproblem, 1e-5, u_epsilon, 20);
+//   CDD1_SOLVE(problem, 1e-7, u_epsilon, jmax);
+  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, jmax);
 //   CDD1_SOLVE(cproblem, 1e-10, u_epsilon, 20);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 20);
 //   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 10);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 10);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon);
+
   
+  // insert coefficients into a dense vector
+  Vector<double> wcoeffs(problem.basis().Deltasize(jmax+1));
+  for (InfiniteVector<double,Index>::const_iterator it(u_epsilon.begin()),
+	 itend(u_epsilon.end()); it != itend; ++it) {
+    // determine number of the wavelet
+    typedef Vector<double>::size_type size_type;
+    size_type number = 0;
+    if (it.index().e() == 0) {
+      number = it.index().k()-problem.basis().DeltaLmin();
+    } else {
+      number = problem.basis().Deltasize(it.index().j())+it.index().k()-problem.basis().Nablamin();
+    }
+    wcoeffs[number] = *it;
+  }
+  
+  // switch to generator representation
+  Vector<double> gcoeffs(wcoeffs.size(), false);
+  if (jmax+1 == problem.basis().j0())
+    gcoeffs = wcoeffs;
+  else
+    problem.basis().apply_Tj(jmax, wcoeffs, gcoeffs);
+  
+  // evaluate Galerkin solution
+  const unsigned int N = 100;
+  const double h = 1./N;
+  Vector<double> ulambda_values(N+1);
+  for (unsigned int i = 0; i <= N; i++) {
+    const double x = i*h;
+    SchoenbergIntervalBSpline_td<d> sbs(jmax+1,0);
+    for (unsigned int k = 0; k < gcoeffs.size(); k++) {
+      sbs.set_k(problem.basis().DeltaLmin()+k);
+      ulambda_values[i] += gcoeffs[k] * sbs.value(Point<1>(x));
+    }
+  }
+
+  // evaluate exact solution
+  Vector<double> uexact_values(N+1);
+  for (unsigned int i = 0; i <= N; i++) {
+    const double x = i*h;
+    uexact_values[i] = f.value(Point<1>(x));
+  }
+  
+  const double Linfty_error = linfty_norm(ulambda_values-uexact_values);
+  cout << "  L_infinity error on a subgrid: " << Linfty_error << endl;
+
+
   return 0;
 }

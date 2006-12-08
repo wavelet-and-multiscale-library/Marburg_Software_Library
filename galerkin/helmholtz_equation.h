@@ -17,6 +17,9 @@
 #include <galerkin/galerkin_utils.h>
 #include <galerkin/full_helmholtz.h>
 #include <galerkin/infinite_preconditioner.h>
+#include <galerkin/gramian.h>
+#include <galerkin/poisson_equation.h>
+#include <galerkin/cached_problem.h>
 #include <adaptive/compression.h>
 
 using namespace MathTL;
@@ -43,16 +46,16 @@ namespace WaveletTL
   {
   public:
     /*!
-      constructor from a right-hand side f
-    */
-    HelmholtzEquation1D(const Function<1>* f,
-			const double alpha = 0,
-			const bool precompute_rhs = true);
-
-    /*!
       type of the wavelet basis
     */
     typedef SplineBasis<d,dT> WaveletBasis;
+
+    /*!
+      constructor from a given wavelet basis and a right-hand side y
+    */
+    HelmholtzEquation1D(const SplineBasis<d,dT>& basis,
+			const double alpha,
+			const InfiniteVector<double, typename WaveletBasis::Index>& y);
 
     /*!
       read access to the basis
@@ -86,14 +89,14 @@ namespace WaveletTL
     double operator_order() const { return 1.; }
     
     /*!
+      set (unpreconditioned) right-hand side y
+    */
+    void set_rhs(const InfiniteVector<double,Index>& y) const;
+    
+    /*!
       set reaction coefficient alpha
     */
     void set_alpha(const double alpha) const;
-
-    /*!
-      set (unpreconditioned) right-hand side as a vector
-    */
-    void set_rhs(const InfiniteVector<double,Index>& rhs) const;
 
     /*!
       evaluate the diagonal preconditioner D
@@ -108,32 +111,25 @@ namespace WaveletTL
  	     const Index& nu) const;
 
     /*!
-      evaluate the (unpreconditioned) bilinear form a;
-      you can specify the order p of the quadrature rule, i.e.,
-      (piecewise) polynomials of maximal degree p will be integrated exactly.
-      Internally, we use an m-point composite Gauss quadrature rule adapted
-      to the singular supports of the spline wavelets involved,
-      so that m = (p+1)/2;
-    */
-    double a(const Index& lambda,
- 	     const Index& nu,
- 	     const unsigned int p) const;
-
-    /*!
       approximate the wavelet coefficient set of the preconditioned right-hand side F
       within a prescribed \ell_2 error tolerance
     */
-    void RHS(const double eta, InfiniteVector<double,Index>& coeffs) const;
+    void RHS(const double eta, InfiniteVector<double,Index>& coeffs) const
+    {
+      coeffs = y_precond; // dirty
+    }
 
     /*!
       evaluate the (unpreconditioned) right-hand side f
     */
-    double f(const Index& lambda) const;
+    double f(const Index& lambda) const {
+      return y_.get_coefficient(lambda);
+    }
 
     /*!
       compute (or estimate) ||F||_2
     */
-    double F_norm() const { return sqrt(fnorm_sqr); }
+    double F_norm() const { return l2_norm(y_); }
 
     /*!
       estimate the spectral norm ||A||
@@ -170,44 +166,19 @@ namespace WaveletTL
 		    const CompressionStrategy strategy = St04a) const;
 
   protected:
-    const Function<1>* f_;
-    mutable double alpha_;
     SplineBasis<d,dT> basis_;
-    mutable FullHelmholtz<d,dT> A_;
+    mutable double alpha_;
+    mutable InfiniteVector<double, typename WaveletBasis::Index> y_;
+    mutable InfiniteVector<double, typename WaveletBasis::Index> y_precond;
 
-    // flag whether right-hand side has already been precomputed
-    mutable bool rhs_precomputed;
-
-    /*!
-      precomputation of the right-hand side
-      (constness is not nice but necessary to have RHS a const function)
-    */
-    void precompute_rhs() const;
-
-    // (preconditioned) right-hand side coefficients on a fine level
-    mutable InfiniteVector<double,Index> fcoeffs_unsorted;
+    mutable FullHelmholtz<d,dT> H_;
+    IntervalGramian<SplineBasis<d,dT> > G_;
+    CachedProblem<IntervalGramian<SplineBasis<d,dT> > > GC_;
+    PoissonEquation1D<d,dT> A_;
+    CachedProblem<PoissonEquation1D<d,dT> > AC_;
     
-    // (preconditioned) right-hand side coefficients on a fine level, sorted by modulus
-    mutable Array1D<std::pair<Index,double> > fcoeffs;
-
-    // (squared) \ell_2 norm of the precomputed right-hand side
-    mutable double fnorm_sqr;
-
     // estimates for ||A|| and ||A^{-1}||
     mutable double normA, normAinv;
-
-    // type of one block in one column of the cached stiffness matrices G and A
-    typedef std::map<Index, double> Block;
-    
-    // type of one column in the entry cache of G and A
-    // the key codes the level, that data are the entries
-    typedef std::map<int, Block> Column;
-    
-    // type of the entry cache of G and A
-    typedef std::map<Index, Column> ColumnCache;
-
-    // entries cache for A (mutable to overcome the constness of add_column())
-    mutable ColumnCache G_cache, A_cache;
   };
 
 }

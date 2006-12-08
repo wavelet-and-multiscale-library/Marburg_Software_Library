@@ -108,8 +108,8 @@ namespace WaveletTL
 	  u_epsilon.swap(v_hat);
 	  Lambda.swap(Lambda_hat);
 	}
-      delta *= 0.5; // original
-//       delta *= 0.1; // tuned
+//       delta *= 0.5; // original
+      delta *= 0.1; // tuned
     }
 
 #if _WAVELETTL_CDD1_VERBOSITY >= 1

@@ -131,6 +131,7 @@ namespace WaveletTL
       number = basis_.Deltasize(lambda.j())+lambda.k()-basis_.Nablamin();
     }
     
+    A_.set_level(lambda.j()+lambda.e());
     return sqrt(A_.diagonal(number));
 #else
     return sqrt(a(lambda, lambda));

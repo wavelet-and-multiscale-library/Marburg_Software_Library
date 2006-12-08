@@ -11,6 +11,7 @@
 #include <galerkin/helmholtz_equation.h>
 #include <galerkin/cached_problem.h>
 #include <interval/spline_basis.h>
+#include <interval/p_expansion.h>
 #include <adaptive/cdd1.h>
 
 using namespace std;
@@ -53,12 +54,25 @@ int main()
   }
 
   const int j0   = basis.j0();
-  const int jmax = 12;
+  const int jmax = 9;
 
   typedef HelmholtzEquation1D<d,dT> Problem;
-  Problem problem(f, 1.0);
+  Problem problem(basis, 1.0, InfiniteVector<double,Index>());
 
-  CachedProblem<Problem> cproblem(&problem);
+  InfiniteVector<double,Index> fcoeffs;
+  Vector<double> fcoeffs_vector;
+  typedef Vector<double>::size_type size_type;
+  expand(f, basis, true, jmax, fcoeffs_vector);
+  size_type i(0);
+  for (Index lambda(basis.first_generator(j0)); i < fcoeffs_vector.size(); ++lambda, i++)
+    {
+      const double coeff = fcoeffs_vector[i];
+      if (fabs(coeff)>1e-15)
+	fcoeffs.set_coefficient(lambda, coeff);
+    }
+  problem.set_rhs(fcoeffs);
+
+//   CachedProblem<Problem> cproblem(&problem);
 
 //   // initialization with some precomputed DSBasis eigenvalue bounds:
 // //   CachedProblem<IntervalGramian<Basis> > cproblem(&problem, 1.4986, 47.7824); // d=2, dT=2 (no precond.)
@@ -68,15 +82,15 @@ int main()
 //   CachedProblem<IntervalGramian<Basis> > cproblem(&problem, 0.928217, 24.7998); // d=2, dT=2 (no precond.)
 // //   CachedProblem<IntervalGramian<Basis> > cproblem(&problem, 0.978324, 19.8057); // d=2, dT=4 (no precond.)
 
-  double normA = problem.norm_A();
-  double normAinv = problem.norm_Ainv();
+//   double normA = problem.norm_A();
+//   double normAinv = problem.norm_Ainv();
 
-  cout << "* estimate for normA: " << normA << endl;
-  cout << "* estimate for normAinv: " << normAinv << endl;
+//   cout << "* estimate for normA: " << normA << endl;
+//   cout << "* estimate for normAinv: " << normAinv << endl;
 
   InfiniteVector<double, Index> u_epsilon;
-//   CDD1_SOLVE(problem, 1e-4, u_epsilon, jmax);
-  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, jmax);
+  CDD1_SOLVE(problem, 1e-4, u_epsilon, jmax);
+//   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, jmax);
 //   CDD1_SOLVE(cproblem, 1e-6, u_epsilon, jmax);
 // //   CDD1_SOLVE(cproblem, 1e-7, u_epsilon, 12);
 // //   CDD1_SOLVE(cproblem, 1e-5, u_epsilon, 20);

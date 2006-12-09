@@ -1,6 +1,7 @@
 #include <iostream>
 #include <set>
 #include <interval/spline_basis.h>
+#include <interval/p_expansion.h>
 #include <galerkin/helmholtz_equation.h>
 #include <utils/function.h>
 #include <numerics/iteratsolv.h>
@@ -15,11 +16,13 @@ int main()
 {
   cout << "Testing HelmholtzEquation ..." << endl;
 
-  const unsigned int d = 3;
-  const unsigned int dT = 3;
+  const int d  = 3;
+  const int dT = 3;
 
   typedef SplineBasis<d,dT> Basis;
   typedef Basis::Index Index;
+
+  Basis basis("P","",1,1,0,0); // PBasis, complementary b.c.'s
 
   const unsigned int solution = 1;
   double kink = 0; // for Solution3;
@@ -43,12 +46,30 @@ int main()
     break;
   }
 
-  HelmholtzEquation1D<d,dT> helmholtz(f, 1.0);
+  const int j0   = basis.j0();
+  int jmax = 9;
+
+  typedef HelmholtzEquation1D<d,dT> Problem;
+  Problem helmholtz(basis, 1.0, InfiniteVector<double,Index>());
+
+  InfiniteVector<double,Index> fcoeffs;
+  Vector<double> fcoeffs_vector;
+  typedef Vector<double>::size_type size_type;
+  expand(f, basis, true, jmax, fcoeffs_vector);
+  size_type i1(0);
+  for (Index lambda(basis.first_generator(j0)); i1 < fcoeffs_vector.size(); ++lambda, i1++)
+    {
+      const double coeff = fcoeffs_vector[i1];
+      if (fabs(coeff)>1e-15)
+	fcoeffs.set_coefficient(lambda, coeff);
+    }
+  helmholtz.set_rhs(fcoeffs);
+
 
   InfiniteVector<double, Index> coeffs;
   helmholtz.RHS(1e-8, coeffs);
 
-  const int jmax = helmholtz.basis().j0()+1;
+  jmax = helmholtz.basis().j0()+1;
 
   set<Index> Lambda;
   for (Index lambda = helmholtz.basis().first_generator(helmholtz.basis().j0());; ++lambda) {

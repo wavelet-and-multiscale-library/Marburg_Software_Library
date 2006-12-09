@@ -56,9 +56,9 @@ class TestFunction
       return p[0]*p[0]*(1-p[0]);
       break;
     default:
-      return 0.0;
       break;
     }
+    return 0.0;
   }
   
   void vector_value(const Point<1> &p,

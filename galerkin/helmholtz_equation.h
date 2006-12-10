@@ -172,6 +172,8 @@ namespace WaveletTL
     mutable InfiniteVector<double, typename WaveletBasis::Index> y_precond;
 
     mutable FullHelmholtz<d,dT> H_;
+
+  public:
     IntervalGramian<SplineBasis<d,dT> > G_;
     CachedProblem<IntervalGramian<SplineBasis<d,dT> > > GC_;
     PoissonEquation1D<d,dT> A_;

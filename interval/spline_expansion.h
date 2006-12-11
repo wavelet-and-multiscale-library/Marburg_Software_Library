@@ -7,11 +7,10 @@
 // | Thorsten Raasch, Manuel Werner                                     |
 // +--------------------------------------------------------------------+
 
-#ifndef _WAVELETTL_P_EXPANSION_H
-#define _WAVELETTL_P_EXPANSION_H
+#ifndef _WAVELETTL_SPLINE_EXPANSION_H
+#define _WAVELETTL_SPLINE_EXPANSION_H
 
 #include <algebra/infinite_vector.h>
-#include <interval/p_basis.h>
 #include <interval/spline_basis.h>
 
 using MathTL::SampledMapping;
@@ -19,26 +18,8 @@ using MathTL::InfiniteVector;
 
 namespace WaveletTL
 {
-  template <int d, int dT> class PBasis;
+  template <int d, int dT> class SplineBasis;
 
-  /*!
-    helper function, integrate a smooth function f against a
-    primal [P] generator or wavelet
-  */
-  template <int d, int dT>
-  double integrate(const Function<1>* f,
-		   const PBasis<d,dT>& basis,
-		   const typename PBasis<d,dT>::Index& lambda);
-
-  /*!
-    helper function, integrate two primal [P] generators or wavelets
-    against each other (for the Gramian)
-  */
-  template <int d, int dT>
-  double integrate(const PBasis<d,dT>& basis,
-		   const typename PBasis<d,dT>::Index& lambda,
-		   const typename PBasis<d,dT>::Index& mu);
-  
   /*!
     For a given function, compute all integrals w.r.t. the primal
     or dual generators/wavelets \psi_\lambda with |\lambda|\le jmax.
@@ -54,12 +35,23 @@ namespace WaveletTL
   template <int d, int dT>
   void
   expand(const Function<1>* f,
-	 const PBasis<d,dT>& basis,
+	 const SplineBasis<d,dT>& basis,
 	 const bool primal,
 	 const int jmax,
-	 InfiniteVector<double, typename PBasis<d,dT>::Index>& coeffs);
+	 InfiniteVector<double, typename SplineBasis<d,dT>::Index>& coeffs);
+
+  /*!
+    analogous routine for Vector<double> output
+  */
+  template <int d, int dT>
+  void
+  expand(const Function<1>* f,
+	 const SplineBasis<d,dT>& basks,
+	 const bool primal,
+	 const int jmax,
+	 Vector<double>& coeffs);
 }
 
-#include <interval/p_expansion.cpp>
+#include <interval/spline_expansion.cpp>
 
 #endif

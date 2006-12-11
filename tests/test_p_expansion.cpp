@@ -7,6 +7,7 @@
 
 #include <interval/p_basis.h>
 #include <interval/p_expansion.h>
+#include <interval/spline_expansion.h>
 
 using namespace std;
 using namespace WaveletTL;

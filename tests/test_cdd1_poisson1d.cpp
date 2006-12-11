@@ -12,6 +12,7 @@
 #include <galerkin/cached_problem.h>
 #include <interval/p_expansion.h>
 #include <interval/spline_basis.h>
+#include <interval/spline_expansion.h>
 #include <adaptive/cdd1.h>
 
 using namespace std;

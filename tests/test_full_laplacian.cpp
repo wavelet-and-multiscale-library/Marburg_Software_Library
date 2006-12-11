@@ -13,6 +13,7 @@
 #include <numerics/schoenberg_splines.h>
 #include <interval/interval_bspline.h>
 #include <interval/p_expansion.h>
+#include <interval/spline_expansion.h>
 
 #include "poisson_1d_solutions.h"
 

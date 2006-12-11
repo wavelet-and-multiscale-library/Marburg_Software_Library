@@ -13,6 +13,7 @@
 #include <interval/p_basis.h>
 #include <interval/p_expansion.h>
 #include <interval/spline_basis.h>
+#include <interval/spline_expansion.h>
 
 #include <galerkin/gramian.h>
 #include <galerkin/cached_problem.h>

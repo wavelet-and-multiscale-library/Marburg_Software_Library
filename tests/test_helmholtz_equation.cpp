@@ -1,7 +1,7 @@
 #include <iostream>
 #include <set>
 #include <interval/spline_basis.h>
-#include <interval/p_expansion.h>
+#include <interval/spline_expansion.h>
 #include <galerkin/helmholtz_equation.h>
 #include <utils/function.h>
 #include <numerics/iteratsolv.h>

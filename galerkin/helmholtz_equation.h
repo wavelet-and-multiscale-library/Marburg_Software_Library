@@ -89,7 +89,8 @@ namespace WaveletTL
     double operator_order() const { return 1.; }
     
     /*!
-      set (unpreconditioned) right-hand side y
+      set (unpreconditioned) right-hand side y,
+      call this _after_ the corresponding set_alpha()
     */
     void set_rhs(const InfiniteVector<double,Index>& y) const;
     

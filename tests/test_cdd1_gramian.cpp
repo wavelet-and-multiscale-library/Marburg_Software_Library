@@ -105,22 +105,8 @@ int main()
   IntervalGramian<Basis> problem(basis, InfiniteVector<double,Index>());
 
   InfiniteVector<double,Index> fcoeffs;
-#if 0
-  // for DSBasis+PBasis
   expand(&f, basis, true, jmax, fcoeffs); // expand in the dual (!) basis
 //   cout << "fcoeffs" << endl << fcoeffs;
-#else
-  Vector<double> fcoeffs_vector;
-  typedef Vector<double>::size_type size_type;
-  expand(&f, basis, true, jmax, fcoeffs_vector);
-  size_type i(0);
-  for (Index lambda(basis.first_generator(j0)); i < fcoeffs_vector.size(); ++lambda, i++)
-    {
-      const double coeff = fcoeffs_vector[i];
-      if (fabs(coeff)>1e-15)
-	fcoeffs.set_coefficient(lambda, coeff);
-    }
-#endif
 
   problem.set_rhs(fcoeffs);
   CachedProblem<IntervalGramian<Basis> > cproblem(&problem);

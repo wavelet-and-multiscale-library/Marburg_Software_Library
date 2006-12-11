@@ -54,7 +54,18 @@ namespace WaveletTL
 	 const int jmax,
 	 InfiniteVector<double, typename SplineBasis<d,dT>::Index>& coeffs)
   {
-    
+    Vector<double> coeffs_vector;
+    expand(f, basis, primal, jmax, coeffs_vector);
+    typedef typename Vector<double>::size_type size_type;
+    typedef typename SplineBasis<d,dT>::Index Index;
+    size_type i(0);
+    for (Index lambda(basis.first_generator(basis.j0()));
+	 i < coeffs_vector.size(); ++lambda, i++)
+      {
+	const double coeff = coeffs_vector[i];
+	if (fabs(coeff)>1e-15)
+	  coeffs.set_coefficient(lambda, coeff);
+      } 
   }
 
 }

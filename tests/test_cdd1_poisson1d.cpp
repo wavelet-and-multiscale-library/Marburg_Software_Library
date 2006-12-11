@@ -54,23 +54,13 @@ int main()
     break;
   }
 
-  const int j0   = basis.j0();
   const int jmax = 10;
 
   typedef PoissonEquation1D<d,dT> Problem;
   Problem problem(basis, InfiniteVector<double,Index>());
 
   InfiniteVector<double,Index> fcoeffs;
-  Vector<double> fcoeffs_vector;
-  typedef Vector<double>::size_type size_type;
-  expand(f, basis, true, jmax, fcoeffs_vector);
-  size_type i(0);
-  for (Index lambda(basis.first_generator(j0)); i < fcoeffs_vector.size(); ++lambda, i++)
-    {
-      const double coeff = fcoeffs_vector[i];
-      if (fabs(coeff)>1e-15)
-	fcoeffs.set_coefficient(lambda, coeff);
-    }
+  expand(f, basis, true, jmax, fcoeffs);
   problem.set_rhs(fcoeffs);
 
   CachedProblem<Problem> cproblem(&problem);

@@ -53,18 +53,8 @@ int main()
   Problem helmholtz(basis, 1.0, InfiniteVector<double,Index>());
 
   InfiniteVector<double,Index> fcoeffs;
-  Vector<double> fcoeffs_vector;
-  typedef Vector<double>::size_type size_type;
-  expand(f, basis, true, jmax, fcoeffs_vector);
-  size_type i1(0);
-  for (Index lambda(basis.first_generator(j0)); i1 < fcoeffs_vector.size(); ++lambda, i1++)
-    {
-      const double coeff = fcoeffs_vector[i1];
-      if (fabs(coeff)>1e-15)
-	fcoeffs.set_coefficient(lambda, coeff);
-    }
+  expand(f, basis, true, jmax, fcoeffs);
   helmholtz.set_rhs(fcoeffs);
-
 
   InfiniteVector<double, Index> coeffs;
   helmholtz.RHS(1e-8, coeffs);

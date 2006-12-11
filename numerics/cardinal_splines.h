@@ -52,6 +52,7 @@ namespace MathTL
   inline
   double EvaluateCardinalBSpline<1>(const int k, const double x)
   {
+    //cout << "evaluating first order spline for x = " << x << endl;
     if (x < k)
       return 0.;
     else
@@ -82,7 +83,17 @@ namespace MathTL
   {
     return EvaluateCardinalBSpline<d-1>(k, x) - EvaluateCardinalBSpline<d-1>(k+1, x);
   }
-  
+
+  /*!
+    evaluate the second derivative N_d''(x-k) of a shifted cardinal B-spline
+  */
+  template <int d>
+  inline
+  double EvaluateCardinalBSpline_x_sq(const int k, const double x)
+  {
+    return EvaluateCardinalBSpline_x<d-1>(k, x) - EvaluateCardinalBSpline_x<d-1>(k+1, x);
+  }
+
   /*!
     evaluate the first derivative N_1'(x-k) of a shifted cardinal B-spline
   */
@@ -105,6 +116,19 @@ namespace MathTL
     const double factor(1 << j);
     return factor * sqrt(factor) * EvaluateCardinalBSpline_x<d>(k, factor * x + d/2);
   }
+
+  /*!
+    evaluate the first derivative of a primal CDF function
+      phi_{j,k}''(x) = 2^{5*j/2}N_d''(2^jx-k+d/2)
+  */
+  template <int d>
+  inline
+  double EvaluateCardinalBSpline_td_x_sq(const int j, const int k, const double x)
+  {
+    const double factor(ldexp(1.0, j));
+    return factor * factor * sqrt(factor) * EvaluateCardinalBSpline_x_sq<d>(k, factor * x + d/2);
+  }
+
 
   /*!
     evaluate a shifted cardinal B-spline N_d(x-k) via recursion

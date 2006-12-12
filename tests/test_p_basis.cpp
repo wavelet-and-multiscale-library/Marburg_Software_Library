@@ -42,7 +42,7 @@ int main()
 
   //  abort();  
 
-#if 1
+#if 0
   {
     SparseMatrix<double> M;
     const int j = basis.j0();

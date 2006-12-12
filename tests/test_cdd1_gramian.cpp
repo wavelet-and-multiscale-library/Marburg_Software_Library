@@ -99,7 +99,6 @@ int main()
 
   TestFunction<5> f;
 
-  const int j0   = basis.j0();
   const int jmax = 10;
 
   IntervalGramian<Basis> problem(basis, InfiniteVector<double,Index>());

@@ -906,7 +906,8 @@ namespace WaveletTL
       test_reduced.set_entry(i, i, test_reduced.get_entry(i, i) - 1.0);
 //     cout << "* for the reduced system, ||Mj*Gj-I||_infty: " << row_sum_norm(test_reduced) << endl;
 
-    if (row_sum_norm(test_reduced) < 1e-10) {
+    if (row_sum_norm(test_reduced) < 1e-10
+	&& (!(d==2 && dT==2 && s0==1 && s1==0))) { // re-expand fails here since main band is missing, SplineBasis can do this
       Mj0  = Mj0_reduced;
       Mj0T = Mj0T_reduced;
       Mj1  = Mj1_reduced;

@@ -26,8 +26,8 @@ int main()
   typedef Basis::Index Index;
 
 //   Basis basis; // no b.c.'s
-  Basis basis(1, 1); // 1st order complementary b.c.'s at x=0 and x=1
-//   Basis basis(1, 0); // complementary b.c. at x=0
+//   Basis basis(1, 1); // 1st order complementary b.c.'s at x=0 and x=1
+  Basis basis(1, 0); // complementary b.c. at x=0
 //   Basis basis(0, 1); // complementary b.c. at x=1
 //   Basis basis(3, 3);
 

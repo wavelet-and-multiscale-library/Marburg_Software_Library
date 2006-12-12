@@ -13,8 +13,17 @@ int main()
   cout << "Testing setup of SplineBasisData objects..." << endl;
 
 #if 1
-  SplineBasisData<2,2> sd22("P","",1,1,0,0); // PBasis, complementary b.c.'s
-  sd22.check();
+//   SplineBasisData<2,2> sd22nobc("P","",0,0,0,0); // PBasis, no b.c.'s
+//   sd22nobc.check();
+
+//   SplineBasisData<2,2> sd22("P","",1,1,0,0); // PBasis, complementary b.c.'s
+//   sd22.check();
+
+//   SplineBasisData<2,2> sd22bcleft("P","",1,0,0,0); // PBasis, complementary b.c.'s at x=0
+//   sd22bcleft.check();
+
+  SplineBasisData<2,2> sd22bcright("P","",0,1,0,0); // PBasis, complementary b.c.'s at x=1
+  sd22bcright.check();
 
   SplineBasisData<3,3> sd33("P","",1,1,0,0); // PBasis, complementary b.c.'s
   sd33.check();

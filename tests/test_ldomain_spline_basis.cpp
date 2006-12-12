@@ -15,5 +15,11 @@ int main()
   typedef LDomainSplineBasis<d,dT> Basis;
   Basis basis;
 
+  const int j0 = basis.j0();
+  cout << "* d=" << d << ", dT=" << dT << endl;
+  cout << "* coarsest level: j0=" << j0 << endl;
+
+  
+
   return 0;
 }

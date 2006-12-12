@@ -25,9 +25,9 @@ int main()
   typedef PBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
-//   Basis basis; // no b.c.'s
+  Basis basis; // no b.c.'s
 //   Basis basis(1, 1); // 1st order complementary b.c.'s at x=0 and x=1
-  Basis basis(1, 0); // complementary b.c. at x=0
+//   Basis basis(1, 0); // complementary b.c. at x=0
 //   Basis basis(0, 1); // complementary b.c. at x=1
 //   Basis basis(3, 3);
 
@@ -373,6 +373,15 @@ int main()
     cout << lambda << endl;
     evaluate(basis, lambda, true, 6).matlab_output(cout);
     if (lambda == last_wavelet(&basis, basis.j0())) break;
+  }
+#endif
+
+#if 0
+  cout << "- evaluating some dual generators:" << endl;
+  for (Index lambda(first_generator(&basis, basis.j0()));; ++lambda) {
+    cout << lambda << endl;
+    evaluate(basis, lambda, false, 7).matlab_output(cout);
+    if (lambda == last_generator(&basis, basis.j0())) break;
   }
 #endif
 

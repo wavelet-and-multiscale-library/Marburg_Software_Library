@@ -41,17 +41,24 @@ namespace WaveletTL
     void check() const;
 
   protected:
-    // flavor (e.g., "DS", "P" etc.), determines also the shape of the primal generators
+    //! flavor (e.g., "DS", "P" etc.), determines also the shape of the primal generators
     std::string flavor_;
 
-    // boundary condition orders
+    //! boundary condition orders
     const int s0_, s1_, sT0_, sT1_;
 
-    // coarsest level
+    //! coarsest level
     int j0_;
     
-    // refinement matrices (without prefactor 1/sqrt(2)!)
+    //! refinement matrices (without prefactor 1/sqrt(2)!)
     QuasiStationaryMatrix<double> *Mj0_, *Mj1_, *Mj0T_, *Mj1T_;
+
+//     /*!
+//       for s0=0 or s1=0, prepare also the expansion coefficients
+//       of an initial stable completion with homogeneous b.c.'s
+//       (if s0=s1=1, *Mj1c_==Mj1_)
+//     */
+//     QuasiStationaryMatrix<double> *Mj1c_;
   };
 }
 

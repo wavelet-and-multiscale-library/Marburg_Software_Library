@@ -10,7 +10,8 @@ namespace MathTL
 						      const double factor)
     : A(A_), B(B_)
   {
-    A.scale(factor);
+    if (factor != 1.0)
+      A.scale(factor);
   }
 
   template <class C, class MATRIX1, class MATRIX2>

@@ -11,6 +11,8 @@
 #include <Rd/refinable.h>
 #include <Rd/r_index.h>
 
+#include <interval/ds_evaluate.h>
+
 namespace WaveletTL
 {
   template <int d, int dT, DSBiorthogonalizationMethod BIO>
@@ -417,6 +419,105 @@ namespace WaveletTL
     Mj1_t  = transpose(Mj1);
     Mj1T_t = transpose(Mj1T);
   }
+
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  void
+  DSBasis<d,dT,BIO>::dump_data(std::ostream& s) const
+  {
+    s << "Mj0 ="; print_matrix(Mj0 , s); s << ";" << endl;
+    s << "Mj0T="; print_matrix(Mj0T, s); s << ";" << endl;
+    s << "Mj1 ="; print_matrix(Mj1 , s); s << ";" << endl;
+    s << "Mj1T="; print_matrix(Mj1T, s); s << ";" << endl;
+    s << "CL  ="; print_matrix(CL  , s); s << ";" << endl;
+    s << "CR  ="; print_matrix(CR  , s); s << ";" << endl;
+    s << "CLT ="; print_matrix(CLT , s); s << ";" << endl;
+    s << "CRT ="; print_matrix(CRT , s); s << ";" << endl;
+    s << "CLA ="; print_matrix(CLA , s); s << ";" << endl;
+    s << "CRA ="; print_matrix(CRA , s); s << ";" << endl;
+    s << "CLAT="; print_matrix(CLAT, s); s << ";" << endl;
+    s << "CRAT="; print_matrix(CRAT, s); s << ";" << endl;
+  }
+
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  void
+  DSBasis<d,dT,BIO>::orthogonalize_boundary_wavelets() {
+    // orthogonalize left boundary wavelets
+    if (s0==0 && sT0==0) {
+      cout << "* orthogonalize left boundary wavelets:" << endl;
+  
+      // determine number of boundary wavelets (not automatic yet, we used dump_data and Matlab...)
+      size_type n_boundary_wavelets;
+      if (d==2 && dT==2) n_boundary_wavelets = 2;
+      if (d==3 && dT==3) n_boundary_wavelets = 3;
+      cout << "  - we have " << n_boundary_wavelets << " left boundary wavelets" << endl;
+      
+      // set up unpreconditioned stiffness matrix of the Laplacian of the boundary wavelets
+      // (all but the leftmost one)
+      Matrix<double> Ahat(n_boundary_wavelets-1, n_boundary_wavelets-1);
+      for (size_type row(0); row < n_boundary_wavelets-1; row++) {
+	Index lambda(j0(), 1, Nablamin()+1+row, this);
+	for (size_type col(0); col < n_boundary_wavelets-1; col++) {
+	  Index mu(j0(), 1, Nablamin()+1+col, this);
+
+	  double entry = 0;
+
+	  Support supp;
+	  if (intersect_supports(*this, lambda, mu, supp))
+	    {
+ 	      // Set up Gauss points and weights for a composite quadrature formula:
+ 	      const unsigned int N_Gauss = d+1;
+ 	      const double h = ldexp(1.0, -supp.j);
+ 	      Array1D<double> gauss_points (N_Gauss*(supp.k2-supp.k1)), der1values, der2values;
+	      
+ 	      for (int patch = supp.k1, id = 0; patch < supp.k2; patch++) // refers to 2^{-j}[patch,patch+1]
+ 		for (unsigned int n = 0; n < N_Gauss; n++, id++)
+ 		  gauss_points[id] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
+	      
+ 	      // - compute point values of the integrands
+ 	      evaluate(*this, 1, lambda, gauss_points, der1values);
+ 	      evaluate(*this, 1, mu, gauss_points, der2values);
+	      
+ 	      // - add all integral shares
+  	      for (int patch = supp.k1, id = 0; patch < supp.k2; patch++)
+  		for (unsigned int n = 0; n < N_Gauss; n++, id++) {
+  		  const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
+  		  entry += der1values[id] * der2values[id] * gauss_weight;
+  		}
+	    }
+	  
+	  Ahat.set_entry(row, col, entry);
+	}
+      }
+      cout << "  - stiffness matrix Ahat of the vanishing boundary wavelets:" << endl << Ahat;
+
+      // compute singular value decomposition of Ahat = U*S*V
+      Matrix<double> U, V;
+      Vector<double> S;
+      if (n_boundary_wavelets >= 3) {
+	MathTL::SVD<double> svd(Ahat);
+	svd.getU(U);
+	svd.getV(V);
+	svd.getS(S);
+      } else {
+	// trivial decomposition
+	U.resize(1, 1); U.set_entry(0, 0, 1.0);
+	V.resize(1, 1); V.set_entry(0, 0, 1.0);
+	S.resize(1); S[0] = Ahat.get_entry(0, 0);
+      }
+      cout << "  - Ahat=U*S*V, with U=" << endl << U << "    S=" << S << endl << "    V=" << endl << V;
+
+      // hier geht's weiter!!!
+      
+    }
+
+    
+    
+//     if (s1==0 && sT1==0) {
+//       cout << "* orthogonalize right boundary wavelets:" << endl;
+           
+//     }
+  }
+
   
   template <int d, int dT, DSBiorthogonalizationMethod BIO>
   const double

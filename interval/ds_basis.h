@@ -10,6 +10,8 @@
 #ifndef _WAVELETTL_DS_BASIS_H
 #define _WAVELETTL_DS_BASIS_H
 
+#include <iostream>
+
 #include <algebra/matrix.h>
 #include <algebra/sparse_matrix.h>
 #include <algebra/infinite_vector.h>
@@ -66,6 +68,18 @@ namespace WaveletTL
       for the primal functions are set or not. The dual functions have free b.c.'s.
     */
     DSBasis(const bool bc_left, const bool bc_right);
+
+    /*!
+      dump all matrices of the construction into a stream
+    */
+    void dump_data(std::ostream& s) const;
+
+    /*!
+      after the initialization, orthogonalize the boundary wavelets w.r.t.
+      the energy inner product of the Laplacian (see Section 3.2 of [B]);
+      changes Mj1 and Mj1T
+     */
+    void orthogonalize_boundary_wavelets();
 
     //! freezing parameters, (4.11)
     inline const int ellT_l() const { return ell2T<d,dT>() + s0 + sT0; }

@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
 #include <algebra/infinite_vector.h>
 #include <algebra/sparse_matrix.h>
@@ -18,15 +20,17 @@ int main()
   const int d = 3;
   const int dT = 3;
 
+  const DSBiorthogonalizationMethod bio = BernsteinSVD;
+//   const DSBiorthogonalizationMethod bio = partialSVD;
 //   typedef DSBasis<d,dT> Basis;
-  typedef DSBasis<d,dT,Bernstein> Basis;
+  typedef DSBasis<d,dT,bio> Basis;
   typedef Basis::Index Index;
 
-  Basis basis(1, 1, 0, 0); // Z={0,1}
+//   Basis basis(1, 1, 0, 0); // Z={0,1}
 //   Basis basis(1, 0, 0, 1); // Z={0}
 //   Basis basis(0, 1, 1, 0); // Z={1}
 //   Basis basis(0, 0, 1, 1); // Z={}
-//   Basis basis(0, 0, 0, 0); // should work, DKU basis without b.c.'s at all
+  Basis basis(0, 0, 0, 0); // should work, DKU basis without b.c.'s at all
 
 //   Basis basis(1, 0, 0, 1, none); // Z={0,1}
   
@@ -42,6 +46,28 @@ int main()
   cout << "- rightmost generator on the coarsest level: " << last_generator(&basis, basis.j0()) << endl;
   cout << "- leftmost wavelet on the coarsest level: " << first_wavelet(&basis, basis.j0()) << endl;
   cout << "- rightmost wavelet on the coarsest level: " << last_wavelet(&basis, basis.j0()) << endl;
+
+#if 0
+  // dump the internal data to a file for analysis with Matlab
+  std::ofstream dump;
+  ostringstream filename;
+  filename << "DSBasis" << "_"
+ 	   << "d" << d << "_"
+ 	   << "dt" << dT << "_"
+	   << "bio" << bio << "_"
+	   << "bc" << basis.get_s0() << basis.get_s1() << basis.get_sT0() << basis.get_sT1() << "_"
+ 	   << "data"
+ 	   << ".m";
+  dump.open(filename.str().c_str());
+  basis.dump_data(dump);
+  dump.close();
+#endif
+
+#if 1
+  // orthogonalize the boundary wavelets w.r.t. the energy inner product of the Laplacian
+  basis.orthogonalize_boundary_wavelets();
+
+#endif
 
 #if 1
   cout << "- checking biorthogonality of Mj0, Mj0T for different levels:" << endl;
@@ -198,7 +224,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -223,7 +249,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "

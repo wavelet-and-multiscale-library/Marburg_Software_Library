@@ -215,15 +215,13 @@ namespace MathTL
   {
     // the following code is essentially taken from the SYNAPS svd routine
 
-    assert(rowdim_>1 && coldim_>1);
-
     typedef typename Matrix<C>::size_type size_type;
 
     size_type i, j, k, EstColRank, RotCount, SweepCount, slimit;
     C eps(1e-10), e2, tol, vt, p, x0, y0, q, r, c0, s0=0, d1, d2;
     rowdim_ = A.row_dimension();
     coldim_ = A.column_dimension();
-    assert(rowdim_ >= coldim_);
+    assert(rowdim_ >= coldim_ && coldim_ > 1);
     slimit = coldim_/4;
 
     // working copy of A

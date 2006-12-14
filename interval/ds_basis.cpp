@@ -441,22 +441,26 @@ namespace WaveletTL
   template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
   DSBasis<d,dT,BIO>::orthogonalize_boundary_wavelets() {
+    SparseMatrix<double> Kj, KjinvT;
+    Kj.diagonal(Mj1.column_dimension(), 1.0);
+    KjinvT.diagonal(Mj1.column_dimension(), 1.0);
+    
     // orthogonalize left boundary wavelets
     if (s0==0 && sT0==0) {
-      cout << "* orthogonalize left boundary wavelets:" << endl;
+//       cout << "* orthogonalize left boundary wavelets:" << endl;
   
       // determine number of boundary wavelets (not automatic yet, we used dump_data and Matlab...)
-      size_type n_boundary_wavelets;
-      if (d==2 && dT==2) n_boundary_wavelets = 2;
-      if (d==3 && dT==3) n_boundary_wavelets = 3;
-      cout << "  - we have " << n_boundary_wavelets << " left boundary wavelets" << endl;
+      size_type n_left=0;
+      if (d==2 && dT==2) n_left = 2;
+      if (d==3 && dT==3) n_left = 3;
+//       cout << "  - we have " << n_left << " left boundary wavelets" << endl;
       
       // set up unpreconditioned stiffness matrix of the Laplacian of the boundary wavelets
       // (all but the leftmost one)
-      Matrix<double> Ahat(n_boundary_wavelets-1, n_boundary_wavelets-1);
-      for (size_type row(0); row < n_boundary_wavelets-1; row++) {
+      Matrix<double> Ahat(n_left-1, n_left-1);
+      for (size_type row(0); row < n_left-1; row++) {
 	Index lambda(j0(), 1, Nablamin()+1+row, this);
-	for (size_type col(0); col < n_boundary_wavelets-1; col++) {
+	for (size_type col(0); col < n_left-1; col++) {
 	  Index mu(j0(), 1, Nablamin()+1+col, this);
 
 	  double entry = 0;
@@ -488,12 +492,12 @@ namespace WaveletTL
 	  Ahat.set_entry(row, col, entry);
 	}
       }
-      cout << "  - stiffness matrix Ahat of the vanishing boundary wavelets:" << endl << Ahat;
+//       cout << "  - stiffness matrix Ahat of the vanishing left boundary wavelets:" << endl << Ahat;
 
       // compute singular value decomposition of Ahat = U*S*V
       Matrix<double> U, V;
       Vector<double> S;
-      if (n_boundary_wavelets >= 3) {
+      if (n_left >= 3) {
 	MathTL::SVD<double> svd(Ahat);
 	svd.getU(U);
 	svd.getV(V);
@@ -504,18 +508,96 @@ namespace WaveletTL
 	V.resize(1, 1); V.set_entry(0, 0, 1.0);
 	S.resize(1); S[0] = Ahat.get_entry(0, 0);
       }
-      cout << "  - Ahat=U*S*V, with U=" << endl << U << "    S=" << S << endl << "    V=" << endl << V;
+//       cout << "  - Ahat=U*S*V, with U=" << endl << U << "    S=" << S << endl << "    V=" << endl << V;
+      Matrix<double> S12(S.size(), S.size()), Sm12(S.size(), S.size());
+      for (size_type i(0); i < S.size(); i++) {
+	S12.set_entry(i, i, sqrt(S[i]));
+	Sm12.set_entry(i, i, 1./sqrt(S[i]));
+      }
 
-      // hier geht's weiter!!!
-      
+      Kj.set_block(1, 1, U*Sm12);
+      KjinvT.set_block(1, 1, U*S12);
     }
-
     
-    
-//     if (s1==0 && sT1==0) {
+    if (s1==0 && sT1==0) {
 //       cout << "* orthogonalize right boundary wavelets:" << endl;
            
-//     }
+      // determine number of boundary wavelets (not automatic yet, we used dump_data and Matlab...)
+      size_type n_right=0;
+      if (d==2 && dT==2) n_right = 2;
+      if (d==3 && dT==3) n_right = 3;
+//       cout << "  - we have " << n_right << " right boundary wavelets" << endl;
+      
+      // set up unpreconditioned stiffness matrix of the Laplacian of the boundary wavelets
+      // (all but the rightmost one)
+      Matrix<double> Ahat(n_right-1, n_right-1);
+      for (size_type row(0); row < n_right-1; row++) {
+	Index lambda(j0(), 1, Nablamax(j0())-n_right+1+row, this);
+	for (size_type col(0); col < n_right-1; col++) {
+	  Index mu(j0(), 1, Nablamax(j0())-n_right+1+col, this);
+	  
+	  double entry = 0;
+	  
+	  Support supp;
+	  if (intersect_supports(*this, lambda, mu, supp))
+	    {
+ 	      // Set up Gauss points and weights for a composite quadrature formula:
+ 	      const unsigned int N_Gauss = d+1;
+ 	      const double h = ldexp(1.0, -supp.j);
+ 	      Array1D<double> gauss_points (N_Gauss*(supp.k2-supp.k1)), der1values, der2values;
+	      
+ 	      for (int patch = supp.k1, id = 0; patch < supp.k2; patch++) // refers to 2^{-j}[patch,patch+1]
+ 		for (unsigned int n = 0; n < N_Gauss; n++, id++)
+ 		  gauss_points[id] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
+	      
+ 	      // - compute point values of the integrands
+ 	      evaluate(*this, 1, lambda, gauss_points, der1values);
+ 	      evaluate(*this, 1, mu, gauss_points, der2values);
+	      
+ 	      // - add all integral shares
+  	      for (int patch = supp.k1, id = 0; patch < supp.k2; patch++)
+  		for (unsigned int n = 0; n < N_Gauss; n++, id++) {
+  		  const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
+  		  entry += der1values[id] * der2values[id] * gauss_weight;
+  		}
+	    }
+	  
+	  Ahat.set_entry(row, col, entry);
+	}
+      }
+//       cout << "  - stiffness matrix Ahat of the vanishing right boundary wavelets:" << endl << Ahat;
+      
+      // compute singular value decomposition of Ahat = U*S*V
+      Matrix<double> U, V;
+      Vector<double> S;
+      if (n_right >= 3) {
+	MathTL::SVD<double> svd(Ahat);
+	svd.getU(U);
+	svd.getV(V);
+	svd.getS(S);
+      } else {
+	// trivial decomposition
+	U.resize(1, 1); U.set_entry(0, 0, 1.0);
+	V.resize(1, 1); V.set_entry(0, 0, 1.0);
+	S.resize(1); S[0] = Ahat.get_entry(0, 0);
+      }
+      //       cout << "  - Ahat=U*S*V, with U=" << endl << U << "    S=" << S << endl << "    V=" << endl << V;
+      Matrix<double> S12(S.size(), S.size()), Sm12(S.size(), S.size());
+      for (size_type i(0); i < S.size(); i++) {
+	S12.set_entry(i, i, sqrt(S[i]));
+	Sm12.set_entry(i, i, 1./sqrt(S[i]));
+      }
+
+      Kj.set_block(Mj1.column_dimension()-n_right,
+		   Mj1.column_dimension()-n_right, U*Sm12);
+      KjinvT.set_block(Mj1.column_dimension()-n_right,
+		       Mj1.column_dimension()-n_right, U*S12);
+    }
+
+    Mj1 = Mj1*Kj;
+    Mj1T = Mj1T*KjinvT;
+    Mj1_t  = transpose(Mj1);
+    Mj1T_t = transpose(Mj1T);
   }
 
   

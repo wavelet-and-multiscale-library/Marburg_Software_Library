@@ -17,8 +17,8 @@ int main()
 {
   cout << "Testing the DS bases..." << endl;
 
-  const int d = 2;
-  const int dT = 2;
+  const int d = 3;
+  const int dT = 3;
 
   const DSBiorthogonalizationMethod bio = BernsteinSVD;
 //   const DSBiorthogonalizationMethod bio = partialSVD;
@@ -66,7 +66,21 @@ int main()
 #if 1
   // orthogonalize the boundary wavelets w.r.t. the energy inner product of the Laplacian
   basis.orthogonalize_boundary_wavelets();
-
+  {
+    std::ofstream dump;
+    ostringstream filename;
+    filename << "DSBasis" << "_"
+	     << "d" << d << "_"
+	     << "dt" << dT << "_"
+	     << "bio" << bio << "_"
+	     << "energy_"
+	     << "bc" << basis.get_s0() << basis.get_s1() << basis.get_sT0() << basis.get_sT1() << "_"
+	     << "data"
+	     << ".m";
+    dump.open(filename.str().c_str());
+    basis.dump_data(dump);
+    dump.close();
+  }
 #endif
 
 #if 1

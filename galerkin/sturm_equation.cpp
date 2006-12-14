@@ -20,6 +20,15 @@ namespace WaveletTL
   }
 
   template <class WBASIS>
+  SturmEquation<WBASIS>::SturmEquation(const SimpleSturmBVP& bvp,
+				       const WBASIS& basis,
+				       const bool precompute_f)
+    : bvp_(bvp), basis_(basis), normA(0.0), normAinv(0.0)
+  {
+    if (precompute_f) precompute_rhs();
+  }
+
+  template <class WBASIS>
   void
   SturmEquation<WBASIS>::precompute_rhs() const
   {

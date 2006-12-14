@@ -72,13 +72,17 @@ namespace WaveletTL
     : public FullyDiagonalEnergyNormPreconditioner<typename WBASIS::Index>
   {
   public:
-    SturmEquation(const SimpleSturmBVP& bvp,
-		  const bool precompute_rhs = true);
-
     /*!
       make template argument accessible
     */
     typedef WBASIS WaveletBasis;
+
+    SturmEquation(const SimpleSturmBVP& bvp,
+		  const bool precompute_rhs = true);
+
+    SturmEquation(const SimpleSturmBVP& bvp,
+		  const WaveletBasis& basis,
+		  const bool precompute_rhs = true);
 
     /*!
       wavelet index class

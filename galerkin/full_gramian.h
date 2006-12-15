@@ -41,7 +41,7 @@ namespace WaveletTL
     /*!
       constructor taking an information object on some spline wavelet basis
     */
-    FullGramian(const SplineBasis<d,dT>& sb);
+    FullGramian(const SplineBasis<d,dT,P_construction>& sb);
 
     /*!
       row dimension
@@ -92,7 +92,7 @@ namespace WaveletTL
 	       const unsigned int precision = 3) const;
 
   protected:
-    const SplineBasis<d,dT>& sb_;
+    const SplineBasis<d,dT,P_construction>& sb_;
     mutable int j_;
   };
 

@@ -8,7 +8,7 @@ namespace WaveletTL
   template <int d, int dT>
   void
   expand(const Function<1>* f,
-	 const SplineBasis<d,dT>& basis,
+	 const SplineBasis<d,dT,P_construction>& basis,
 	 const bool primal,
 	 const int jmax,
 	 Vector<double>& coeffs)
@@ -49,15 +49,15 @@ namespace WaveletTL
   template <int d, int dT>
   void
   expand(const Function<1>* f,
-	 const SplineBasis<d,dT>& basis,
+	 const SplineBasis<d,dT,P_construction>& basis,
 	 const bool primal,
 	 const int jmax,
-	 InfiniteVector<double, typename SplineBasis<d,dT>::Index>& coeffs)
+	 InfiniteVector<double, typename SplineBasis<d,dT,P_construction>::Index>& coeffs)
   {
     Vector<double> coeffs_vector;
     expand(f, basis, primal, jmax, coeffs_vector);
     typedef typename Vector<double>::size_type size_type;
-    typedef typename SplineBasis<d,dT>::Index Index;
+    typedef typename SplineBasis<d,dT,P_construction>::Index Index;
     size_type i(0);
     for (Index lambda(basis.first_generator(basis.j0()));
 	 i < coeffs_vector.size(); ++lambda, i++)

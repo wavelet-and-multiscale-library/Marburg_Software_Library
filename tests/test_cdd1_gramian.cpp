@@ -80,7 +80,7 @@ int main()
   const int dT = 3;
 //   typedef DSBasis<d,dT> Basis;
 //   typedef PBasis<d,dT> Basis;
-  typedef SplineBasis<d,dT> Basis;
+  typedef SplineBasis<d,dT,P_construction> Basis;
 #else
   typedef JLBasis Basis;
 #endif
@@ -94,7 +94,7 @@ int main()
 //   Basis basis(1, 1); // complementary b.c.'s
 #else
   // for SplineBasis
-  Basis basis("P","",1,1,0,0); // PBasis, complementary b.c.'s
+  Basis basis("",1,1,0,0); // PBasis, complementary b.c.'s
 #endif
 
   TestFunction<5> f;

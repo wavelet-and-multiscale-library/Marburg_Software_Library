@@ -4,10 +4,10 @@
 
 namespace WaveletTL
 {
-  template <int d, int dT>
+  template <int d, int dT, SplineBasisFlavor flavor>
   SampledMapping<1>
-  evaluate(const SplineBasis<d,dT>& basis,
-	   const InfiniteVector<double, typename SplineBasis<d,dT>::Index>& coeffs,
+  evaluate(const SplineBasis<d,dT,flavor>& basis,
+	   const InfiniteVector<double, typename SplineBasis<d,dT,flavor>::Index>& coeffs,
 	   const int resolution)
   {
     Grid<1> grid(0, 1, 1<<resolution);
@@ -15,7 +15,7 @@ namespace WaveletTL
     if (coeffs.size() > 0) {
       // determine maximal level
       int jmax(0);
-      typedef typename SplineBasis<d,dT>::Index Index;
+      typedef typename SplineBasis<d,dT,flavor>::Index Index;
       for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
 	     itend(coeffs.end()); it != itend; ++it)
 	jmax = std::max(it.index().j()+it.index().e(), jmax);
@@ -59,9 +59,9 @@ namespace WaveletTL
     return result;
   }
 
-  template <int d, int dT>
-  double evaluate(const SplineBasis<d,dT>& basis, const unsigned int derivative,
-		  const typename SplineBasis<d,dT>::Index& lambda,
+  template <int d, int dT, SplineBasisFlavor flavor>
+  double evaluate(const SplineBasis<d,dT,flavor>& basis, const unsigned int derivative,
+		  const typename SplineBasis<d,dT,flavor>::Index& lambda,
 		  const double x)
   {
     assert(derivative <= 1); // we only support derivatives up to the first order
@@ -90,7 +90,7 @@ namespace WaveletTL
       std::map<size_type,double> wc, gc;
       wc[number_lambda] = 1.0;
       basis.apply_Mj(lambda.j(), wc, gc);
-      typedef typename SplineBasis<d,dT>::Index Index;
+      typedef typename SplineBasis<d,dT,flavor>::Index Index;
       for (typename std::map<size_type,double>::const_iterator it(gc.begin());
 	   it != gc.end(); ++it) {
 	r += it->second * evaluate(basis, derivative, Index(lambda.j()+1, 0, basis.DeltaLmin()+it->first, &basis), x);
@@ -100,10 +100,10 @@ namespace WaveletTL
     return r;
   }
   
-  template <int d, int dT>
+  template <int d, int dT, SplineBasisFlavor flavor>
   void
-  evaluate(const SplineBasis<d,dT>& basis, const unsigned int derivative,
-	   const typename SplineBasis<d,dT>::Index& lambda,
+  evaluate(const SplineBasis<d,dT,flavor>& basis, const unsigned int derivative,
+	   const typename SplineBasis<d,dT,flavor>::Index& lambda,
 	   const Array1D<double>& points, Array1D<double>& values)
   {
     assert(derivative <= 1); // we only support derivatives up to the first order
@@ -140,7 +140,7 @@ namespace WaveletTL
       std::map<size_type,double> wc, gc;
       wc[number_lambda] = 1.0;
       basis.apply_Mj(lambda.j(), wc, gc);
-      typedef typename SplineBasis<d,dT>::Index Index;
+      typedef typename SplineBasis<d,dT,flavor>::Index Index;
       Array1D<double> help(points.size());
       for (typename std::map<size_type,double>::const_iterator it(gc.begin());
 	   it != gc.end(); ++it) {
@@ -151,9 +151,9 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT>
-  void evaluate(const SplineBasis<d,dT>& basis,
-		const typename SplineBasis<d,dT>::Index& lambda,
+  template <int d, int dT, SplineBasisFlavor flavor>
+  void evaluate(const SplineBasis<d,dT,flavor>& basis,
+		const typename SplineBasis<d,dT,flavor>::Index& lambda,
 		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues)
   {
     const unsigned int npoints(points.size());
@@ -192,7 +192,7 @@ namespace WaveletTL
       std::map<size_type,double> wc, gc;
       wc[number_lambda] = 1.0;
       basis.apply_Mj(lambda.j(), wc, gc);
-      typedef typename SplineBasis<d,dT>::Index Index;
+      typedef typename SplineBasis<d,dT,flavor>::Index Index;
       Array1D<double> help1, help2;
       for (typename std::map<size_type,double>::const_iterator it(gc.begin());
 	   it != gc.end(); ++it) {

@@ -1,4 +1,4 @@
-// implementation for ldomain_equation.h
+// implementation for ldomain_helmholtz_equation.h
 
 #include <cmath>
 #include <time.h>
@@ -8,25 +8,20 @@
 namespace WaveletTL
 {
   template <class IBASIS>
-  LDomainEquation<IBASIS>::LDomainEquation(const EllipticBVP<2>* bvp,
-					   const bool precompute_rhs)
-    : bvp_(bvp), basis_(), normA(0.0), normAinv(0.0)
+  LDomainHelmholtzEquation<IBASIS>::LDomainHelmholtzEquation
+  (Function<2>* f,
+   const WaveletBasis& basis,
+   const double alpha,
+   const bool precompute_rhs)
+    : f_(f), basis_(basis), alpha_(alpha), normA(0.0), normAinv(0.0)
   {
     if (precompute_rhs) compute_rhs();
   }
-  
+
   template <class IBASIS>
-  LDomainEquation<IBASIS>::LDomainEquation(const EllipticBVP<2>* bvp,
-					   const WaveletBasis& basis,
-					   const bool precompute_rhs)
-    : bvp_(bvp), basis_(basis), normA(0.0), normAinv(0.0)
-  {
-    if (precompute_rhs) compute_rhs();
-  }
-  
-  template <class IBASIS>
-  LDomainEquation<IBASIS>::LDomainEquation(const LDomainEquation& eq)
-    : bvp_(eq.bvp_), basis_(eq.basis_),
+  LDomainHelmholtzEquation<IBASIS>::LDomainHelmholtzEquation
+  (const LDomainHelmholtzEquation& eq)
+    : f_(eq.f_), basis_(eq.basis_), alpha_(eq.alpha_),
       fcoeffs(eq.fcoeffs), fnorm_sqr(eq.fnorm_sqr),
       normA(eq.normA), normAinv(eq.normAinv)
   {
@@ -35,26 +30,25 @@ namespace WaveletTL
   template <class IBASIS>
   inline
   double
-  LDomainEquation<IBASIS>::D(const Index& lambda) const
+  LDomainHelmholtzEquation<IBASIS>::D(const Index& lambda) const
   {
-//     return ldexp(1.0, lambda.j());
     return sqrt(a(lambda, lambda));
   }
 
   template <class IBASIS>
   inline
   double
-  LDomainEquation<IBASIS>::a(const Index& lambda,
-			     const Index& nu) const
+  LDomainHelmholtzEquation<IBASIS>::a(const Index& lambda,
+				      const Index& nu) const
   {
     return a(lambda, nu, 4);
   }
 
   template <class IBASIS>
   double
-  LDomainEquation<IBASIS>::a(const Index& lambda1,
-			     const Index& lambda2,
-			     const unsigned int pno) const
+  LDomainHelmholtzEquation<IBASIS>::a(const Index& lambda1,
+				      const Index& lambda2,
+				      const unsigned int pno) const
   {
     // a(u,v) = \int_Omega [a(x)grad u(x)grad v(x)+q(x)u(x)v(x)] dx
 
@@ -329,26 +323,17 @@ namespace WaveletTL
 		const double psi_mu1_factor = it1.index().p() <= 2 ? 1.0 : M_SQRT1_2;
 		const double psi_mu2_factor = it2.index().p() <= 2 ? 1.0 : M_SQRT1_2;
 		
-		// determine chart action
-		const double xoffset = (p == 2 ? 0 : -1);
-		const double yoffset = (p == 0 ? 0 : -1);
-
 		// Now we know that on patch p, the generator psi_mu is nontrivial.
 		// We have to collect all the integral shares:
 		
-		Point<2> x;
 		for (unsigned int i0 = 0; i0 < gauss_points0.size(); i0++) {
-		  x[0] = gauss_points0[i0] + xoffset; // apply chart
 		  const double temp = gauss_weights0[i0] * psi_mu1_factor * psi_mu2_factor * *it1 * *it2;
 		  const double temp1   = psi_mu1_0_values[i0]   * psi_mu2_0_values[i0];
 		  const double temp1_x = psi_mu1_0_x_values[i0] * psi_mu2_0_x_values[i0];
 
 		  for (unsigned int i1 = 0; i1 < gauss_points1.size(); i1++) {
-		    x[1] = gauss_points1[i1] + yoffset; // apply chart
-    
-		    // compute the share a(x)(grad psi_mu1)(x)(grad psi_mu2)(x)
-		    r += bvp_->a(x)
-		      * gauss_weights1[i1] * temp
+		    // compute the share (grad psi_mu1)(x)(grad psi_mu2)(x)
+		    r += gauss_weights1[i1] * temp
 		      * ((temp1_x                      // d/dx1 psi_mu1 * d/dx1 psi_mu2
 			  * psi_mu1_1_values[i1]
 			  * psi_mu2_1_values[i1])             
@@ -356,8 +341,8 @@ namespace WaveletTL
 			    * psi_mu1_1_x_values[i1]
 			    * psi_mu2_1_x_values[i1]));
 		    
-		    // compute the share q(x)psi_mu1(x)psi_mu2(x)
-		    r += bvp_->q(x)
+		    // compute the share alpha*psi_mu1(x)*psi_mu2(x)
+		    r += alpha_
 		      * temp1
 		      * gauss_weights1[i1] * temp
 		      * psi_mu1_1_values[i1] * psi_mu2_1_values[i1];
@@ -375,7 +360,7 @@ namespace WaveletTL
 
   template <class IBASIS>
   double
-  LDomainEquation<IBASIS>::norm_A() const
+  LDomainHelmholtzEquation<IBASIS>::norm_A() const
   {
     if (normA == 0.0) {
       typedef typename WaveletBasis::Index Index;
@@ -407,7 +392,7 @@ namespace WaveletTL
    
   template <class IBASIS>
   double
-  LDomainEquation<IBASIS>::norm_Ainv() const
+  LDomainHelmholtzEquation<IBASIS>::norm_Ainv() const
   {
     if (normAinv == 0.0) {
       typedef typename WaveletBasis::Index Index;
@@ -439,11 +424,11 @@ namespace WaveletTL
   
   template <class IBASIS>
   double
-  LDomainEquation<IBASIS>::f(const Index& lambda) const
+  LDomainHelmholtzEquation<IBASIS>::f(const Index& lambda) const
   {
     // f(v) = \int_0^1 g(t)v(t) dt
 
-//     cout << "LDomainEquation::f() called with lambda=" << lambda << endl;
+    //     cout << "LDomainHelmholtzEquation::f() called with lambda=" << lambda << endl;
 
     double r = 0;
 
@@ -463,7 +448,7 @@ namespace WaveletTL
     for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
   	   itend(gcoeffs.end()); it != itend; ++it)
       {
-// 	cout << "LDomainEquation::f(), consider involved generator " << it.index() << endl;
+	// 	cout << "LDomainHelmholtzEquation::f(), consider involved generator " << it.index() << endl;
 
  	// compute the support of the generator corresponding to mu=it.index()
   	support(basis_, it.index(), supp);
@@ -611,7 +596,7 @@ namespace WaveletTL
 		  r += gauss_weights1[i1]
 		    * psi_mu_1_values[i1]
 		    * temp
-		    * bvp_->f(x);
+		    * f_->value(x);
 		}
 	      }
 	    }
@@ -619,28 +604,28 @@ namespace WaveletTL
  	}
       }
     
-//     cout << "LDomainEquation::f() result is r=" << r << endl;
+    //     cout << "LDomainHelmholtzEquation::f() result is r=" << r << endl;
     
     return r;
   }
 
   template <class IBASIS>
   void
-  LDomainEquation<IBASIS>::compute_rhs()
+  LDomainHelmholtzEquation<IBASIS>::compute_rhs()
   {
-    cout << "LDomainEquation(): precompute right-hand side..." << endl;
+    cout << "LDomainHelmholtzEquation(): precompute right-hand side..." << endl;
 
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
     const int j0   = basis().j0();
-//     const int jmax = 5; // for a first quick hack
-//     const int jmax = j0; // for a first quick hack
+    //     const int jmax = 5; // for a first quick hack
+    //     const int jmax = j0; // for a first quick hack
     const int jmax = j0; // for a first quick hack
     for (Index lambda(basis_.first_generator(j0));; ++lambda)
       {
 	const double coeff = f(lambda)/D(lambda);
-// 	if (fabs(coeff)>1e-15)
-	  fhelp.set_coefficient(lambda, coeff);
+	// 	if (fabs(coeff)>1e-15)
+	fhelp.set_coefficient(lambda, coeff);
   	if (lambda == basis_.last_wavelet(jmax))
 	  break;
       }
@@ -661,7 +646,7 @@ namespace WaveletTL
 
   template <class IBASIS>
   void
-  LDomainEquation<IBASIS>::RHS
+  LDomainHelmholtzEquation<IBASIS>::RHS
   (const double eta,
    InfiniteVector<double,Index>& coeffs) const
   {
@@ -680,7 +665,7 @@ namespace WaveletTL
 
   template <class IBASIS>
   double
-  LDomainEquation<IBASIS>::s_star() const
+  LDomainHelmholtzEquation<IBASIS>::s_star() const
   {
     // notation from [St04a]
     const double t = operator_order();

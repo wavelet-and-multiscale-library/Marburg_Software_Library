@@ -19,42 +19,42 @@ using MathTL::InfiniteVector;
 
 namespace WaveletTL
 {
-  template <int d, int dT> class SplineBasis;
+  template <int d, int dT, SplineBasisFlavor flavor> class SplineBasis;
 
   /*!
     Evaluate an arbitrary linear combination of primal wavelets
     on a dyadic subgrid of [0,1].
   */
-  template <int d, int dT>
-  SampledMapping<1> evaluate(const SplineBasis<d,dT>& basis,
-			     const InfiniteVector<double, typename SplineBasis<d,dT>::Index>& coeffs,
+  template <int d, int dT, SplineBasisFlavor flavor>
+  SampledMapping<1> evaluate(const SplineBasis<d,dT,flavor>& basis,
+			     const InfiniteVector<double, typename SplineBasis<d,dT,flavor>::Index>& coeffs,
 			     const int resolution);
 
   /*!
-    point evaluation of (derivatives) of a single primal [P] generator
+    point evaluation of (derivatives) of a single primal generator
     or wavelet \psi_\lambda
   */
-  template <int d, int dT>
-  double evaluate(const SplineBasis<d,dT>& basis, const unsigned int derivative,
-		  const typename SplineBasis<d,dT>::Index& lambda,
+  template <int d, int dT, SplineBasisFlavor flavor>
+  double evaluate(const SplineBasis<d,dT,flavor>& basis, const unsigned int derivative,
+		  const typename SplineBasis<d,dT,flavor>::Index& lambda,
 		  const double x);
 
   /*!
-    point evaluation of (derivatives) of a single primal [P] generator
+    point evaluation of (derivatives) of a single primal generator
     or wavelet \psi_\lambda at several points simultaneously
   */
-  template <int d, int dT>
-  void evaluate(const SplineBasis<d,dT>& basis, const unsigned int derivative,
-		const typename SplineBasis<d,dT>::Index& lambda,
+  template <int d, int dT, SplineBasisFlavor flavor>
+  void evaluate(const SplineBasis<d,dT,flavor>& basis, const unsigned int derivative,
+		const typename SplineBasis<d,dT,flavor>::Index& lambda,
 		const Array1D<double>& points, Array1D<double>& values);
 
   /*!
-    point evaluation of 0-th and first derivative of a single primal [P] generator
+    point evaluation of 0-th and first derivative of a single primal generator
     or wavelet \psi_\lambda at several points simultaneously
   */
-  template <int d, int dT>
-  void evaluate(const SplineBasis<d,dT>& basis,
-		const typename SplineBasis<d,dT>::Index& lambda,
+  template <int d, int dT, SplineBasisFlavor flavor>
+  void evaluate(const SplineBasis<d,dT,flavor>& basis,
+		const typename SplineBasis<d,dT,flavor>::Index& lambda,
 		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);
 
 }

@@ -81,7 +81,7 @@ int main()
   const unsigned int d = 3;
   const unsigned int dT = 3;
 
-  SplineBasis<d,dT> basis("P","",1,1,0,0); // PBasis, complementary b.c.'s
+  SplineBasis<d,dT,P_construction> basis("",1,1,0,0); // PBasis, complementary b.c.'s
   FullGramian<d,dT> G(basis);
 
   cout << "* Gramian matrix on coarsest level j0=" << basis.j0() << ":" << endl

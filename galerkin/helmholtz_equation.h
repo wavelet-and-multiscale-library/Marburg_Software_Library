@@ -42,18 +42,18 @@ namespace WaveletTL
   */
   template <int d, int dT>
   class HelmholtzEquation1D
-    :  public FullyDiagonalEnergyNormPreconditioner<typename SplineBasis<d,dT>::Index>
+    :  public FullyDiagonalEnergyNormPreconditioner<typename SplineBasis<d,dT,P_construction>::Index>
   {
   public:
     /*!
       type of the wavelet basis
     */
-    typedef SplineBasis<d,dT> WaveletBasis;
+    typedef SplineBasis<d,dT,P_construction> WaveletBasis;
 
     /*!
       constructor from a given wavelet basis and a right-hand side y
     */
-    HelmholtzEquation1D(const SplineBasis<d,dT>& basis,
+    HelmholtzEquation1D(const WaveletBasis& basis,
 			const double alpha,
 			const InfiniteVector<double, typename WaveletBasis::Index>& y);
 
@@ -167,7 +167,7 @@ namespace WaveletTL
 		    const CompressionStrategy strategy = St04a) const;
 
   protected:
-    SplineBasis<d,dT> basis_;
+    WaveletBasis basis_;
     mutable double alpha_;
     mutable InfiniteVector<double, typename WaveletBasis::Index> y_;
     mutable InfiniteVector<double, typename WaveletBasis::Index> y_precond;
@@ -175,8 +175,8 @@ namespace WaveletTL
     mutable FullHelmholtz<d,dT> H_;
 
   public:
-    IntervalGramian<SplineBasis<d,dT> > G_;
-    CachedProblem<IntervalGramian<SplineBasis<d,dT> > > GC_;
+    IntervalGramian<WaveletBasis> G_;
+    CachedProblem<IntervalGramian<WaveletBasis> > GC_;
     PoissonEquation1D<d,dT> A_;
     CachedProblem<PoissonEquation1D<d,dT> > AC_;
     

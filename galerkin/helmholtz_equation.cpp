@@ -11,7 +11,7 @@ namespace WaveletTL
 {
   template <int d, int dT>
   HelmholtzEquation1D<d,dT>::HelmholtzEquation1D
-  (const SplineBasis<d,dT>& basis,
+  (const WaveletBasis& basis,
    const double alpha,
    const InfiniteVector<double,Index>& y)
     : basis_(basis), alpha_(alpha), y_(y),

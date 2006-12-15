@@ -6,7 +6,7 @@
 namespace WaveletTL
 {
   template <int d, int dT>
-  FullLaplacian<d,dT>::FullLaplacian(const SplineBasis<d,dT>& sb,
+  FullLaplacian<d,dT>::FullLaplacian(const SplineBasis<d,dT,P_construction>& sb,
 				     const PreconditioningType precond)
     : sb_(sb), precond_(precond), j_(-1)
   {

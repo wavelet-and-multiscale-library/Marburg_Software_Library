@@ -21,24 +21,23 @@ namespace WaveletTL
   /*!
     Template class for spline wavelet bases on the interval.
   */
-  template <int d, int dT>
+  template <int d, int dT, SplineBasisFlavor flavor>
   class SplineBasis
-    : public SplineBasisData<d,dT>
+    : public SplineBasisData<d,dT,flavor>
   {
   public:
     /*!
       constructor from the primal and dual boundary condition orders,
       cf. SplineBasisData
     */
-    SplineBasis(const char* flavor,
-		const char* options,
+    SplineBasis(const char* options,
 		const int s0, const int s1, const int sT0, const int sT1);
 
     //! coarsest possible level
-    inline const int j0() const { return SplineBasisData<d,dT>::j0_; }
+    inline const int j0() const { return SplineBasisData<d,dT,flavor>::j0_; }
 
     //! wavelet index class
-    typedef IntervalIndex<SplineBasis<d,dT> > Index;
+    typedef IntervalIndex<SplineBasis<d,dT,flavor> > Index;
     
     //! size_type, for convenience
     typedef Vector<double>::size_type size_type;
@@ -70,16 +69,16 @@ namespace WaveletTL
     static unsigned int primal_vanishing_moments() { return dT; }
 
     //! read access to the primal b.c. order at x=0
-    const int get_s0() const { return SplineBasisData<d,dT>::s0_; }
+    const int get_s0() const { return SplineBasisData<d,dT,flavor>::s0_; }
 
     //! read access to the primal b.c. order at x=1
-    const int get_s1() const { return SplineBasisData<d,dT>::s1_; }
+    const int get_s1() const { return SplineBasisData<d,dT,flavor>::s1_; }
 
     //! read access to the primal b.c. order at x=0
-    const int get_sT0() const { return SplineBasisData<d,dT>::sT0_; }
+    const int get_sT0() const { return SplineBasisData<d,dT,flavor>::sT0_; }
 
     //! read access to the primal b.c. order at x=1
-    const int get_sT1() const { return SplineBasisData<d,dT>::sT1_; }
+    const int get_sT1() const { return SplineBasisData<d,dT,flavor>::sT1_; }
 
     //! extremal generator indices
     inline const int DeltaLmin() const { return DeltaLmin_; }

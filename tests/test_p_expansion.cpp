@@ -79,7 +79,7 @@ int main()
        << coeffs << endl;
 
   Vector<double> coeffs_full;
-  SplineBasis<d,dT> sb("P","",1,1,0,0);
+  SplineBasis<d,dT,P_construction> sb("",1,1,0,0);
   expand(&p, sb, true, j0, coeffs_full);
   cout << "- using SplineBasis<d,dT> and FullGramian:" << endl
        << coeffs_full << endl;

@@ -119,7 +119,7 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
-  IntervalGramian<SplineBasis<d,dT> >::IntervalGramian
+  IntervalGramian<SplineBasis<d,dT,P_construction> >::IntervalGramian
   (const WaveletBasis& basis,
    const InfiniteVector<double, typename WaveletBasis::Index>& y)
     : basis_(basis),
@@ -131,7 +131,7 @@ namespace WaveletTL
 
   template <int d, int dT>
   double
-  IntervalGramian<SplineBasis<d,dT> >::a
+  IntervalGramian<SplineBasis<d,dT,P_construction> >::a
   (const typename WaveletBasis::Index& lambda,
    const typename WaveletBasis::Index& nu,
    const unsigned int p) const
@@ -188,7 +188,7 @@ namespace WaveletTL
 
   template <int d, int dT>
   double
-  IntervalGramian<SplineBasis<d,dT> >::norm_A() const
+  IntervalGramian<SplineBasis<d,dT,P_construction> >::norm_A() const
   {
     if (normA == 0.0) {
       G_.set_level(basis().j0()+4);
@@ -203,7 +203,7 @@ namespace WaveletTL
   
   template <int d, int dT>
   double
-  IntervalGramian<SplineBasis<d,dT> >::norm_Ainv() const
+  IntervalGramian<SplineBasis<d,dT,P_construction> >::norm_Ainv() const
   {
     if (normAinv == 0.0) {
       G_.set_level(basis().j0()+4);
@@ -218,11 +218,12 @@ namespace WaveletTL
     
   template <int d, int dT>
   void
-  IntervalGramian<SplineBasis<d,dT> >::add_level (const Index& lambda,
-						  InfiniteVector<double, Index>& w, const int j,
-						  const double factor,
-						  const int J,
-						  const CompressionStrategy strategy) const
+  IntervalGramian<SplineBasis<d,dT,P_construction> >::add_level
+  (const Index& lambda,
+   InfiniteVector<double, Index>& w, const int j,
+   const double factor,
+   const int J,
+   const CompressionStrategy strategy) const
   {
     // quick and dirty:
     // compute a full column of the stiffness matrix

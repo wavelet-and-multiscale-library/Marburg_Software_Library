@@ -12,6 +12,7 @@
 
 #include <string.h>
 #include <algebra/qs_matrix.h>
+#include <interval/spline_basis_flavor.h>
 
 using namespace MathTL;
 
@@ -20,9 +21,9 @@ namespace WaveletTL
   /*!
     The following structure holds all the pieces of information
     needed for the construction of a spline wavelet basis on the interval.
-
+    The primal functions are either B-splines or linear combinations thereof.
    */
-  template <int d, int dT>
+  template <int d, int dT, SplineBasisFlavor flavor>
   class SplineBasisData
   {
   public:
@@ -30,8 +31,7 @@ namespace WaveletTL
       constructor from the primal and dual boundary condition orders
       plus additional information
     */
-    SplineBasisData(const char* flavor,
-		    const char* options,
+    SplineBasisData(const char* options,
 		    const int s0, const int s1, const int sT0, const int sT1);
 
     //! destructor
@@ -41,9 +41,6 @@ namespace WaveletTL
     void check() const;
 
   protected:
-    //! flavor (e.g., "DS", "P" etc.), determines also the shape of the primal generators
-    std::string flavor_;
-
     //! boundary condition orders
     const int s0_, s1_, sT0_, sT1_;
 
@@ -52,13 +49,6 @@ namespace WaveletTL
     
     //! refinement matrices (without prefactor 1/sqrt(2)!)
     QuasiStationaryMatrix<double> *Mj0_, *Mj1_, *Mj0T_, *Mj1T_;
-
-//     /*!
-//       for s0=0 or s1=0, prepare also the expansion coefficients
-//       of an initial stable completion with homogeneous b.c.'s
-//       (if s0=s1=1, *Mj1c_==Mj1_)
-//     */
-//     QuasiStationaryMatrix<double> *Mj1c_;
   };
 }
 

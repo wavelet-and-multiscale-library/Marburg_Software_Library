@@ -54,7 +54,7 @@ namespace WaveletTL
     /*!
       constructor taking an information object on some spline wavelet basis
     */
-    FullLaplacian(const SplineBasis<d,dT>& sb,
+    FullLaplacian(const SplineBasis<d,dT,P_construction>& sb,
 		  const PreconditioningType precond = dyadic);
 
     /*!
@@ -113,7 +113,7 @@ namespace WaveletTL
 	       const unsigned int precision = 3) const;
 
   protected:
-    const SplineBasis<d,dT>& sb_;
+    const SplineBasis<d,dT,P_construction>& sb_;
     PreconditioningType precond_;
     mutable int j_;
 

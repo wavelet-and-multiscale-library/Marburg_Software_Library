@@ -49,11 +49,14 @@ namespace WaveletTL
   class LDomainBasis
   {
   public:
+    //! type of the interval basis
+    typedef IBASIS IntervalBasis;
+
     //! default constructor
     LDomainBasis();
 
-    //! interval basis
-    typedef IBASIS IntervalBasis;
+    //! constructor with 1D basis
+    LDomainBasis(const IntervalBasis& basis1d);
 
     //! coarsest possible level j0
     inline const int j0() const { return basis1d_.j0(); }

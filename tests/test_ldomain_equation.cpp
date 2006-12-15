@@ -19,6 +19,7 @@
 
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
 #include <galerkin/ldomain_equation.h>
+#include <galerkin/ldomain_helmholtz_equation.h>
 
 using namespace std;
 using namespace MathTL;
@@ -61,10 +62,14 @@ int main()
 {
   cout << "Testing wavelet-Galerkin solution of an elliptic equation on the L-shaped domain ..." << endl;
 
-  const int d  = 2;
-  const int dT = 2;
-//   typedef DSBasis<d,dT,BernsteinSVD> Basis1D;
-  typedef PBasis<d,dT> Basis1D;
+  const int d  = 3;
+  const int dT = 3;
+  typedef DSBasis<d,dT,BernsteinSVD> Basis1D;
+//   typedef PBasis<d,dT> Basis1D;
+  
+  Basis1D basis1D;
+  basis1D.orthogonalize_boundary_wavelets(); // cf. [Barsch]
+
   typedef LDomainBasis<Basis1D> LBasis;
   typedef LBasis::Index Index;
 
@@ -78,8 +83,14 @@ int main()
   PoissonBVP<2> poisson(&rhs);
 #endif
 
-  LDomainEquation<Basis1D> eq(&poisson);
+  LBasis basis(basis1D);
 
+#if 0
+  LDomainEquation<Basis1D> eq(&poisson, basis);
+#else
+  LDomainHelmholtzEquation<Basis1D> eq(&rhs, basis, 0.0);
+#endif
+  
   InfiniteVector<double, Index> coeffs;
   eq.RHS(1e-8, coeffs);
 

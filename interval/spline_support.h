@@ -12,19 +12,20 @@
 
 #include <list>
 #include <set>
+#include <interval/spline_basis_flavor.h>
 
 namespace WaveletTL
 {
-  template <int d, int dT> class SplineBasis;
+  template <int d, int dT, SplineBasisFlavor flavor> class SplineBasis;
 
   /*!
     Compute an interval 2^{-j}[k1,k2] which contains the support of a
     single primal [P] generator or wavelet \psi_\lambda.
     (j == lambda.j()+lambda.e() is neglected for performance reasons)
   */
-  template <int d, int dT>
-  void support(const SplineBasis<d,dT>& basis,
-	       const typename SplineBasis<d,dT>::Index& lambda,
+  template <int d, int dT, SplineBasisFlavor flavor>
+  void support(const SplineBasis<d,dT,flavor>& basis,
+	       const typename SplineBasis<d,dT,flavor>::Index& lambda,
 	       int& k1, int& k2);
   
   /*!
@@ -33,9 +34,9 @@ namespace WaveletTL
     and compute it in the form 2^{-j}[k1,k2]. If the return value is false,
     k1 and k2 will have no meaningful value for performance reasons.
   */
-  template <int d, int dT>
-  bool intersect_supports(const SplineBasis<d,dT>& basis,
-			  const typename SplineBasis<d,dT>::Index& lambda,
+  template <int d, int dT, SplineBasisFlavor flavor>
+  bool intersect_supports(const SplineBasis<d,dT,flavor>& basis,
+			  const typename SplineBasis<d,dT,flavor>::Index& lambda,
 			  const int m, const int a, const int b,
 			  int& j, int& k1, int& k2);
   
@@ -45,22 +46,22 @@ namespace WaveletTL
     in the form 2^{-j}[k1,k2]. If the return value is false, the computed
     support intersection will have no meaningful values, for performance reasons.
   */
-  template <int d, int dT>
-  bool intersect_supports(const SplineBasis<d,dT>& basis,
-			  const typename SplineBasis<d,dT>::Index& lambda,
-			  const typename SplineBasis<d,dT>::Index& nu,
-			  typename SplineBasis<d,dT>::Support& supp);
+  template <int d, int dT, SplineBasisFlavor flavor>
+  bool intersect_supports(const SplineBasis<d,dT,flavor>& basis,
+			  const typename SplineBasis<d,dT,flavor>::Index& lambda,
+			  const typename SplineBasis<d,dT,flavor>::Index& nu,
+			  typename SplineBasis<d,dT,flavor>::Support& supp);
 
   /*!
     For a given wavelet \psi_\lambda, compute all generators/wavelets
     \psi_\nu with level |\nu|=j, such that the respective supports
     have a nontrivial intersection
   */
-  template <int d, int dT>
-  void intersecting_wavelets(const SplineBasis<d,dT>& basis,
-			     const typename SplineBasis<d,dT>::Index& lambda,
+  template <int d, int dT, SplineBasisFlavor flavor>
+  void intersecting_wavelets(const SplineBasis<d,dT,flavor>& basis,
+			     const typename SplineBasis<d,dT,flavor>::Index& lambda,
 			     const int j, const bool generators,
-			     std::list<typename SplineBasis<d,dT>::Index>& intersecting);
+			     std::list<typename SplineBasis<d,dT,flavor>::Index>& intersecting);
   
   /*!
     For a given wavelet \psi_\lambda, compute all generators/wavelets
@@ -68,12 +69,13 @@ namespace WaveletTL
     have a nontrivial intersection;
     return those intersections
   */
-  template <int d, int dT>
-  void intersecting_wavelets(const SplineBasis<d,dT>& basis,
-			     const typename SplineBasis<d,dT>::Index& lambda,
-			     const int j, const bool generators,
-			     std::list<std::pair<typename SplineBasis<d,dT>::Index, typename SplineBasis<d,dT>::Support> >& intersecting);
-
+  template <int d, int dT, SplineBasisFlavor flavor>
+  void intersecting_wavelets
+  (const SplineBasis<d,dT,flavor>& basis,
+   const typename SplineBasis<d,dT,flavor>::Index& lambda,
+   const int j, const bool generators,
+   std::list<std::pair<typename SplineBasis<d,dT,flavor>::Index, typename SplineBasis<d,dT,flavor>::Support> >& intersecting);
+  
   /*!
     Decide whether the support of a given (primal) generator/wavelet \psi_\lambda
     intersects the singular support of a union 2^{-m}[a,b] of dyadic unit intervals.
@@ -83,9 +85,9 @@ namespace WaveletTL
     no meaningful values, for performance reasons).
     The routine should only be called in the case lambda.j()+lambda.e() >= m.
   */
-  template <int d, int dT>
-  bool intersect_singular_support(const SplineBasis<d,dT>& basis,
-				  const typename SplineBasis<d,dT>::Index& lambda,
+  template <int d, int dT, SplineBasisFlavor flavor>
+  bool intersect_singular_support(const SplineBasis<d,dT,flavor>& basis,
+				  const typename SplineBasis<d,dT,flavor>::Index& lambda,
 				  const int m, const int a, const int b,
 				  int& j, int& k1, int& k2);
 
@@ -97,10 +99,10 @@ namespace WaveletTL
     Otherwise, return false (in this case, j, k1 and k2 will have
     no meaningful values, for performance reasons).
   */
-  template <int d, int dT>
-  bool intersect_singular_support(const SplineBasis<d,dT>& basis,
-				  const typename SplineBasis<d,dT>::Index& lambda,
-				  const typename SplineBasis<d,dT>::Index& nu);
+  template <int d, int dT, SplineBasisFlavor flavor>
+  bool intersect_singular_support(const SplineBasis<d,dT,flavor>& basis,
+				  const typename SplineBasis<d,dT,flavor>::Index& lambda,
+				  const typename SplineBasis<d,dT,flavor>::Index& nu);
 
   /*!
     Decide whether the support of a given (primal) generator/wavelet \psi_\lambda
@@ -110,10 +112,10 @@ namespace WaveletTL
     Otherwise, return false (in this case, j, k1 and k2 will have
     no meaningful values, for performance reasons).
   */
-  template <int d, int dT>
-  bool intersect_singular_support(const SplineBasis<d,dT>& basis,
-				  const typename SplineBasis<d,dT>::Index& lambda,
-				  const typename SplineBasis<d,dT>::Index& nu,
+  template <int d, int dT, SplineBasisFlavor flavor>
+  bool intersect_singular_support(const SplineBasis<d,dT,flavor>& basis,
+				  const typename SplineBasis<d,dT,flavor>::Index& lambda,
+				  const typename SplineBasis<d,dT,flavor>::Index& nu,
 				  int& j, int& k1, int& k2);
 
 }

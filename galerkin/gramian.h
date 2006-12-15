@@ -177,18 +177,18 @@ namespace WaveletTL
     template specialization to SplineBasis
   */
   template <int d, int dT>
-  class IntervalGramian<SplineBasis<d,dT> >
+  class IntervalGramian<SplineBasis<d,dT,P_construction> >
   {
   public:
     /*!
       make template argument accessible
     */
-    typedef SplineBasis<d,dT> WaveletBasis;
+    typedef SplineBasis<d,dT,P_construction> WaveletBasis;
 
     /*!
       constructor from a given wavelet basis and a given right-hand side y
     */
-    IntervalGramian(const SplineBasis<d,dT>& basis,
+    IntervalGramian(const SplineBasis<d,dT,P_construction>& basis,
 		    const InfiniteVector<double, typename WaveletBasis::Index>& y);
     
     /*!

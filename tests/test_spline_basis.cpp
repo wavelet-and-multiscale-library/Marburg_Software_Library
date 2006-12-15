@@ -13,25 +13,25 @@ int main()
   cout << "Testing setup of SplineBasisData objects..." << endl;
 
 #if 1
-  SplineBasisData<2,2> sd22nobc("P","",0,0,0,0); // PBasis, no b.c.'s
+  SplineBasisData<2,2,P_construction> sd22nobc("",0,0,0,0); // PBasis, no b.c.'s
   sd22nobc.check();
 
-  SplineBasisData<2,2> sd22("P","",1,1,0,0); // PBasis, complementary b.c.'s
+  SplineBasisData<2,2,P_construction> sd22("",1,1,0,0); // PBasis, complementary b.c.'s
   sd22.check();
 
-  SplineBasisData<2,2> sd22bcleft("P","",1,0,0,0); // PBasis, complementary b.c.'s at x=0
+  SplineBasisData<2,2,P_construction> sd22bcleft("",1,0,0,0); // PBasis, complementary b.c.'s at x=0
   sd22bcleft.check();
 
-  SplineBasisData<2,2> sd22bcright("P","",0,1,0,0); // PBasis, complementary b.c.'s at x=1
+  SplineBasisData<2,2,P_construction> sd22bcright("",0,1,0,0); // PBasis, complementary b.c.'s at x=1
   sd22bcright.check();
 
-  SplineBasisData<3,3> sd33("P","",1,1,0,0); // PBasis, complementary b.c.'s
+  SplineBasisData<3,3,P_construction> sd33("",1,1,0,0); // PBasis, complementary b.c.'s
   sd33.check();
 #endif
 
-#if 0
+#if 1
   cout << "Testing SplineBasis..." << endl;
-  SplineBasis<3,3> basis("P","",1,1,0,0); // PBasis, complementary b.c.'s
+  SplineBasis<3,3,P_construction> basis("",1,1,0,0); // PBasis, complementary b.c.'s
 
   const int j0 = basis.j0();
   Vector<double> x(basis.Deltasize(j0+1));
@@ -70,7 +70,7 @@ int main()
 
 
   cout << "* point evaluation of spline wavelets:" << endl;
-  typedef SplineBasis<3,3>::Index Index;
+  typedef SplineBasis<3,3,P_construction>::Index Index;
   int N = 16;
   Array1D<double> points(N+1), values(N+1), dervalues(N+1);
   double h = 1.0/N;

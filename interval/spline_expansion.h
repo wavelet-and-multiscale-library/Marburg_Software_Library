@@ -18,7 +18,7 @@ using MathTL::InfiniteVector;
 
 namespace WaveletTL
 {
-  template <int d, int dT> class SplineBasis;
+  template <int d, int dT, SplineBasisFlavor flavor> class SplineBasis;
 
   /*!
     For a given function, compute all integrals w.r.t. the primal
@@ -32,21 +32,21 @@ namespace WaveletTL
     Maybe a thresholding of the returned coefficients is helpful (e.g. for
     expansions of spline functions).
   */
-  template <int d, int dT>
+  template <int d, int dT, SplineBasisFlavor flavor>
   void
   expand(const Function<1>* f,
-	 const SplineBasis<d,dT>& basis,
+	 const SplineBasis<d,dT,flavor>& basis,
 	 const bool primal,
 	 const int jmax,
-	 InfiniteVector<double, typename SplineBasis<d,dT>::Index>& coeffs);
+	 InfiniteVector<double, typename SplineBasis<d,dT,flavor>::Index>& coeffs);
 
   /*!
     analogous routine for Vector<double> output
   */
-  template <int d, int dT>
+  template <int d, int dT, SplineBasisFlavor flavor>
   void
   expand(const Function<1>* f,
-	 const SplineBasis<d,dT>& basks,
+	 const SplineBasis<d,dT,flavor>& basis,
 	 const bool primal,
 	 const int jmax,
 	 Vector<double>& coeffs);

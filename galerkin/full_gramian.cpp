@@ -6,7 +6,7 @@
 namespace WaveletTL
 {
   template <int d, int dT>
-  FullGramian<d,dT>::FullGramian(const SplineBasis<d,dT>& sb)
+  FullGramian<d,dT>::FullGramian(const SplineBasis<d,dT,P_construction>& sb)
     : sb_(sb), j_(sb.j0())
   {
   }

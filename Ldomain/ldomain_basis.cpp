@@ -22,6 +22,18 @@ namespace WaveletTL
   }
 
   template <class IBASIS>
+  LDomainBasis<IBASIS>::LDomainBasis(const IntervalBasis& basis1d)
+    : basis1d_(basis1d)
+  {
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
+    supp_hits = 0;
+    supp_misses = 0;
+    Mj1_hits = 0;
+    Mj1_misses = 0;
+#endif
+  }
+
+  template <class IBASIS>
   const int
   LDomainBasis<IBASIS>::Deltasize(const int j) const {
     const unsigned int Deltaj = basis1d().Deltasize(j);
@@ -120,7 +132,6 @@ namespace WaveletTL
     }
     
     return Index(j, e, 0, k, this);
-
   }
 
   template <class IBASIS>

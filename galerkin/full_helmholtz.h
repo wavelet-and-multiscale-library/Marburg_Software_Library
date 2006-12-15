@@ -41,7 +41,7 @@ namespace WaveletTL
     /*!
       constructor taking an information object on some spline wavelet basis
     */
-    FullHelmholtz(const SplineBasis<d,dT>& sb,
+    FullHelmholtz(const SplineBasis<d,dT,P_construction>& sb,
 		  const double alpha,
 		  const PreconditioningType precond = dyadic);
     
@@ -107,7 +107,7 @@ namespace WaveletTL
 
     FullGramian<d,dT> G_;
     FullLaplacian<d,dT> A_;
-    const SplineBasis<d,dT>& sb_;
+    const SplineBasis<d,dT,P_construction>& sb_;
 
   protected:
     mutable double alpha_;

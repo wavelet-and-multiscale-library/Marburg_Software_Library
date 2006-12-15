@@ -7,19 +7,22 @@
 // | Thorsten Raasch, Manuel Werner                                     |
 // +--------------------------------------------------------------------+
 
-#ifndef _WAVELETTL_LDOMAIN_EQUATION_H
-#define _WAVELETTL_LDOMAIN_EQUATION_H
+#ifndef _WAVELETTL_LDOMAIN_HELMHOLTZ_EQUATION_H
+#define _WAVELETTL_LDOMAIN_HELMHOLTZ_EQUATION_H
 
-#include <set>
-#include <utils/fixed_array1d.h>
+#include <utils/function.h>
 #include <utils/array1d.h>
-#include <numerics/bvp.h>
-
+#include <algebra/infinite_vector.h>
+#include <interval/spline_basis.h>
 #include <galerkin/galerkin_utils.h>
+#include <galerkin/full_helmholtz.h>
 #include <galerkin/infinite_preconditioner.h>
+#include <galerkin/gramian.h>
+#include <galerkin/poisson_equation.h>
+#include <galerkin/cached_problem.h>
+#include <adaptive/compression.h>
 
-using MathTL::FixedArray1D;
-using MathTL::EllipticBVP;
+using namespace MathTL;
 
 namespace WaveletTL
 {
@@ -30,9 +33,9 @@ namespace WaveletTL
     
       Au = D^{-1}LD^{-1}u = D^{-1}F
 
-    when reformulating an elliptic boundary value problem on the L--shaped domain
+    when reformulating a Helmholtz equation on the L--shaped domain
     
-      -div(a(x)grad u(x)) + q(x)u(x) = f(x)
+      -Delta u(x)) + alpha*u(x) = f(x)
 
     with first order b.c.'s as an equivalent operator equation
     within \ell_2 by means of a wavelet basis.
@@ -58,8 +61,7 @@ namespace WaveletTL
     over the L--shaped domain.
   */
   template <class IBASIS>
-  class LDomainEquation
-//     : public FullyDiagonalDyadicPreconditioner<typename LDomainBasis<IBASIS>::Index>
+  class LDomainHelmholtzEquation
     : public FullyDiagonalEnergyNormPreconditioner<typename LDomainBasis<IBASIS>::Index>
   {
   public:
@@ -69,22 +71,17 @@ namespace WaveletTL
     typedef LDomainBasis<IBASIS> WaveletBasis;
 
     /*!
-      constructor from a boundary value problem and specified b.c.'s
+      constructor from a right-hand side, a basis, alpha and specified b.c.'s
     */
-    LDomainEquation(const EllipticBVP<2>* bvp,
-		    const bool precompute_rhs = true);
-
-    /*!
-      constructor from a boundary value problem, a basis and specified b.c.'s
-    */
-    LDomainEquation(const EllipticBVP<2>* bvp,
-		    const WaveletBasis& basis,
-		    const bool precompute_rhs = true);
+    LDomainHelmholtzEquation(Function<2>* f,
+			     const WaveletBasis& basis,
+			     const double alpha,
+			     const bool precompute_rhs = true);
 
     /*!
       copy constructor
     */
-    LDomainEquation(const LDomainEquation&);
+    LDomainHelmholtzEquation(const LDomainHelmholtzEquation&);
 
     /*!
       wavelet index class
@@ -180,8 +177,9 @@ namespace WaveletTL
     void set_bvp(const EllipticBVP<2>*);
 
   protected:
-    const EllipticBVP<2>* bvp_;
+    Function<2>* f_;
     WaveletBasis basis_;
+    double alpha_;
 
     // right-hand side coefficients on a fine level, sorted by modulus
     Array1D<std::pair<Index,double> > fcoeffs;
@@ -197,6 +195,6 @@ namespace WaveletTL
   };
 }
 
-#include <galerkin/ldomain_equation.cpp>
+#include <galerkin/ldomain_helmholtz_equation.cpp>
 
 #endif

@@ -142,6 +142,44 @@ namespace WaveletTL
     }
   }
 
+  template <>
+  SplineBasisData<2,2,DS_construction>::SplineBasisData
+  (const char* options,
+   const int s0, const int s1, const int sT0, const int sT1)
+    : s0_(s0), s1_(s1), sT0_(sT0), sT1_(sT1),
+      Mj0_(0), Mj1_(0), Mj0T_(0), Mj1T_(0)
+  {
+    if (s0==0 && s1==0 && sT0==0 && sT1==0) {
+      if (options == "bio5") {
+	j0_ = 3;
+	std::ostringstream entries;
+	entries << "0.35516086221747 0.06979308378346 "
+		<< "0.00810600488368 0.70549930956235 "
+		<< "0.46228453432863 -1.55311309584659 "
+		<< "0.23114226716431 -0.77655654792329";
+	Matrix<double> Mj0_l(4, 2, entries.str().c_str());
+	Matrix<double> Mj0_r; Mj0_l.mirror(Mj0_r);
+	Vector<double> Mj0_band_lr(3, "0.35355339059327 0.70710678118655 0.35355339059327");
+	Mj0_ = new QuasiStationaryMatrix<double>(j0_, 17, 9, Mj0_l, Mj0_r, Mj0_band_lr, Mj0_band_lr, 3, 3, 1.0);
+	entries.str("");
+	entries << "-0.81750665637042 -0.29785559449623 "
+		<< "5.99422645328072 1.87816682815024 "
+		<< "2.43515578856478  0.20168193840616 "
+		<< "0.50195181404901 -0.01156093489583 "
+		<< "-0.25097590702451 0.00578046744791";
+	Matrix<double> Mj0T_l(5, 2, entries.str().c_str());
+	Matrix<double> Mj0T_r; Mj0T_l.mirror(Mj0T_r);
+	Vector<double> Mj0T_band_lr(5, "-0.17677669529664 0.35355339059327 1.06066017177982 0.35355339059327 -0.17677669529664");
+	Mj0T_ = new QuasiStationaryMatrix<double>(j0_, 17, 9, Mj0T_l, Mj0T_r, Mj0T_band_lr, Mj0T_band_lr, 2, 2, 1.0);
+	entries.str("");
+// 	entries << "
+
+	Matrix<double> Mj1_l(6, 2, entries.str().c_str());
+      }
+    }
+  }
+
+
   template <int d,int dT,SplineBasisFlavor flavor>
   SplineBasisData<d,dT,flavor>::~SplineBasisData()
   {
@@ -149,7 +187,6 @@ namespace WaveletTL
     if (Mj1_) delete Mj1_;
     if (Mj0T_) delete Mj0T_;
     if (Mj1T_) delete Mj1T_;
-//     if (Mj1c_) delete Mj1c_;
   }
 
   template <int d,int dT,SplineBasisFlavor flavor>

@@ -12,7 +12,7 @@ int main()
 {
   cout << "Testing setup of SplineBasisData objects..." << endl;
 
-#if 1
+#if 0
   SplineBasisData<2,2,P_construction> sd22nobc("",0,0,0,0); // PBasis, no b.c.'s
   sd22nobc.check();
 
@@ -30,6 +30,11 @@ int main()
 #endif
 
 #if 1
+  SplineBasisData<2,2,DS_construction> sb22nobc("bio5",0,0,0,0); // DSBasis, no b.c.'s
+  sb22nobc.check();
+#endif
+
+#if 0
   cout << "Testing SplineBasis..." << endl;
   SplineBasis<3,3,P_construction> basis("",1,1,0,0); // PBasis, complementary b.c.'s
 

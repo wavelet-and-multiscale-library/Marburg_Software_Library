@@ -159,6 +159,10 @@ namespace WaveletTL
     cout << "* in infty-norm: " << row_sum_norm(testHinv) << endl;
 #endif
 
+    cout << "PP=" << endl << PP;
+    cout << "Hinv=" << endl << Hinv;
+    cout << "FF=" << endl << FF;
+
     SparseMatrix<double> mj1ih = PP * Hinv * FF; // (4.1.23)
     SparseMatrix<double> PPinv; InvertP(PP, PPinv);
 
@@ -1533,11 +1537,14 @@ namespace WaveletTL
 
     SparseMatrix<double> help;
     
+//     cout << "A=" << endl << A;
+
     // elimination (4.1.4)ff.:
     for (int i = 1; i <= d; i++) {
       help.diagonal(Deltasize(j0()+1), 1.0);
 
       const int elimrow = i%2 ? firstrow+(i-1)/2 : lastrow-(int)floor((i-1)/2.);
+//       cout << "i=" << i << ", i%2=" << i%2 << ", elimrow=" << elimrow << endl;
 
       const int HhatLow = i%2 ? elimrow : ell_l()+ell2<d>()+2-(d%2)-(i/2)-2*s0;
       const int HhatUp  = i%2 ? HhatLow + 2*p-1+(d+(d%2))/2 : elimrow;
@@ -1565,6 +1572,8 @@ namespace WaveletTL
       H = help * H;
       
       A.compress(1e-14);
+      
+//       cout << "A=" << endl << A;
 
       // invert help
       if (i%2) {

@@ -172,9 +172,26 @@ namespace WaveletTL
 	Vector<double> Mj0T_band_lr(5, "-0.17677669529664 0.35355339059327 1.06066017177982 0.35355339059327 -0.17677669529664");
 	Mj0T_ = new QuasiStationaryMatrix<double>(j0_, 17, 9, Mj0T_l, Mj0T_r, Mj0T_band_lr, Mj0T_band_lr, 2, 2, 1.0);
 	entries.str("");
-// 	entries << "
-
-	Matrix<double> Mj1_l(6, 2, entries.str().c_str());
+ 	entries << "-0.878948033925326 -0.0077232496488842 "
+		<< "-0.16202585301137 0.000177881589180352 "
+		<< "0.1875 -0.0108798534972311 "
+		<< "-0.34375 0.0326395604916934 "
+		<< "0.125 -0.0108798534972311 "
+		<< "0.0625 -0.00543992674861556";
+ 	Matrix<double> Mj1_l(6, 2, entries.str().c_str());
+	Matrix<double> Mj1_r; Mj1_l.mirror(Mj1_r);
+	Vector<double> Mj1_band_lr(5, "-0.125 -0.25 0.75 -0.25 -0.125");
+	Mj1_ = new QuasiStationaryMatrix<double>(j0_, 17, 8, Mj1_l, Mj1_r, Mj1_band_lr, Mj1_band_lr, 3, 3, 1.0);
+	entries.str("");
+	entries << "-1.35492384852016 -15.5668898582249 "
+		<< "2.33547699791327 26.8325878481227 "
+		<< "1 0 "
+		<< "0 22.9782505861521 "
+		<< "0 -11.4891252930761";
+	Matrix<double> Mj1T_l(5, 2, entries.str().c_str());
+	Matrix<double> Mj1T_r; Mj1T_l.mirror(Mj1T_r);
+	Vector<double> Mj1T_band_lr(3, "-0.5 1 -0.5");
+	Mj1T_ = new QuasiStationaryMatrix<double>(j0_, 17, 8, Mj1T_l, Mj1T_r, Mj1T_band_lr, Mj1T_band_lr, 4, 4, 1.0);
       }
     }
   }

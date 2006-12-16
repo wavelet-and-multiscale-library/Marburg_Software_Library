@@ -913,14 +913,14 @@ namespace WaveletTL
       for (unsigned int i = 0; i < R.row_dimension(); i++)
 	S[i] = sqrt(S[i]);
       for (unsigned int j = 0; j < R.row_dimension(); j++)
-	R(0, j) = a * V(0, j) / S[j];
+	R(0, j) = a * V(j, 0) / S[j];
       for (unsigned int i = 1; i < R.row_dimension(); i++)
 	for (unsigned int j = 0; j < R.row_dimension(); j++)
-	  R(i, j) = U(j, i) * S[j];
+	  R(i, j) = U(i, j) * S[j];
       for (unsigned int i = 0; i < R.row_dimension(); i++)
 	for (unsigned int j = 0; j < R.row_dimension(); j++)
-	  U(i, j) /= S[i];
-      CL = R*U;
+	  U(i, j) /= S[j];
+      CL = R*transpose(U);
       CL.compress(1e-14);
       Matrix<double> CLGammaLInv;
       QUDecomposition<double>(CL * GammaL).inverse(CLGammaLInv);
@@ -938,14 +938,14 @@ namespace WaveletTL
       for (unsigned int i = 0; i < R.row_dimension(); i++)
 	S[i] = sqrt(S[i]);
       for (unsigned int j = 0; j < R.row_dimension(); j++)
-	R(0, j) = a_r * V(0, j) / S[j];
+	R(0, j) = a_r * V(j, 0) / S[j];
       for (unsigned int i = 1; i < R.row_dimension(); i++)
 	for (unsigned int j = 0; j < R.row_dimension(); j++)
-	  R(i, j) = U(j, i) * S[j];
+	  R(i, j) = U(i, j) * S[j];
       for (unsigned int i = 0; i < R.row_dimension(); i++)
 	for (unsigned int j = 0; j < R.row_dimension(); j++)
-	  U(i, j) /= S[i];
-      CR = R*U;
+	  U(i, j) /= S[j];
+      CR = R*transpose(U);
       CR.compress(1e-14);
       Matrix<double> CRGammaRInv;
       QUDecomposition<double>(CR * GammaR).inverse(CRGammaRInv);

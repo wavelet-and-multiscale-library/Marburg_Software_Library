@@ -17,11 +17,11 @@ int main()
 {
   cout << "Testing the DS bases..." << endl;
 
-  const int d = 2;
-  const int dT = 2;
+  const int d = 3;
+  const int dT = 3;
 
-  const DSBiorthogonalizationMethod bio = BernsteinSVD;
-//   const DSBiorthogonalizationMethod bio = partialSVD;
+//   const DSBiorthogonalizationMethod bio = BernsteinSVD;
+  const DSBiorthogonalizationMethod bio = partialSVD;
 //   const DSBiorthogonalizationMethod bio = Bernstein;
 //   const DSBiorthogonalizationMethod bio = none;
 //   typedef DSBasis<d,dT> Basis;
@@ -49,7 +49,7 @@ int main()
   cout << "- leftmost wavelet on the coarsest level: " << first_wavelet(&basis, basis.j0()) << endl;
   cout << "- rightmost wavelet on the coarsest level: " << last_wavelet(&basis, basis.j0()) << endl;
 
-#if 0
+#if 1
   // dump the internal data to a file for analysis with Matlab
   std::ofstream dump;
   ostringstream filename;

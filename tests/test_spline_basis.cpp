@@ -32,6 +32,9 @@ int main()
 #if 1
   SplineBasisData<2,2,DS_construction> sb22nobc("bio5",0,0,0,0); // DSBasis, no b.c.'s
   sb22nobc.check();
+
+  SplineBasisData<2,2,DS_construction> sb22nobc_energy("bio5-energy",0,0,0,0); // DSBasis, no b.c.'s
+  sb22nobc_energy.check();
 #endif
 
 #if 0

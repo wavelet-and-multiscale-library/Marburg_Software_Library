@@ -975,12 +975,21 @@ namespace WaveletTL
       svd.getU(U);
       svd.getV(V);
       svd.getS(S);
-      
-      for (unsigned int i = 0; i < GammaL.row_dimension(); i++) {
-	S[i] = 1.0 / sqrt(S[i]);
-	for (unsigned int j = 0; j < GammaL.row_dimension(); j++)
-	  CL(i, j)  = S[i] * U(j, i);
-      }
+      Matrix<double> GammaLInv;
+      QUDecomposition<double>(GammaLNew).inverse(GammaLInv);
+      const double a = 1.0 / GammaLInv(0, 0);
+      Matrix<double> R(GammaLNew.row_dimension(), GammaLNew.column_dimension());
+      for (unsigned int i = 0; i < R.row_dimension(); i++)
+	S[i] = sqrt(S[i]);
+      for (unsigned int j = 0; j < R.row_dimension(); j++)
+	R(0, j) = a * V(j, 0) / S[j];
+      for (unsigned int i = 1; i < R.row_dimension(); i++)
+	for (unsigned int j = 0; j < R.row_dimension(); j++)
+	  R(i, j) = U(i, j) * S[j];
+      for (unsigned int i = 0; i < R.row_dimension(); i++)
+	for (unsigned int j = 0; j < R.row_dimension(); j++)
+	  U(i, j) /= S[j];
+      CL = R*transpose(U)*CL;
       CL.compress(1e-14);
       Matrix<double> CLGammaLInv;
       QUDecomposition<double>(CL * GammaL).inverse(CLGammaLInv);
@@ -997,11 +1006,21 @@ namespace WaveletTL
       svd_r.getU(U);
       svd_r.getV(V);
       svd_r.getS(S);
-      for (unsigned int i = 0; i < GammaR.row_dimension(); i++) {
-	S[i] = 1.0 / sqrt(S[i]);
-	for (unsigned int j = 0; j < GammaR.row_dimension(); j++)
-	  CR(i, j)  = S[i] * U(j, i);
-      }
+      Matrix<double> GammaRInv;
+      QUDecomposition<double>(GammaRNew).inverse(GammaRInv);
+      const double a_r = 1.0 / GammaRInv(0, 0);
+      R.resize(GammaRNew.row_dimension(), GammaRNew.column_dimension());
+      for (unsigned int i = 0; i < R.row_dimension(); i++)
+	S[i] = sqrt(S[i]);
+      for (unsigned int j = 0; j < R.row_dimension(); j++)
+	R(0, j) = a_r * V(j, 0) / S[j];
+      for (unsigned int i = 1; i < R.row_dimension(); i++)
+	for (unsigned int j = 0; j < R.row_dimension(); j++)
+	  R(i, j) = U(i, j) * S[j];
+      for (unsigned int i = 0; i < R.row_dimension(); i++)
+	for (unsigned int j = 0; j < R.row_dimension(); j++)
+	  U(i, j) /= S[j];
+      CR = R*transpose(U)*CR;
       CR.compress(1e-14);
       Matrix<double> CRGammaRInv;
       QUDecomposition<double>(CR * GammaR).inverse(CRGammaRInv);

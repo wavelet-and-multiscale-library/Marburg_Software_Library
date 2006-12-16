@@ -20,8 +20,8 @@ int main()
   const int d = 3;
   const int dT = 3;
 
-//   const DSBiorthogonalizationMethod bio = BernsteinSVD;
-  const DSBiorthogonalizationMethod bio = partialSVD;
+  const DSBiorthogonalizationMethod bio = BernsteinSVD;
+//   const DSBiorthogonalizationMethod bio = partialSVD;
 //   const DSBiorthogonalizationMethod bio = Bernstein;
 //   const DSBiorthogonalizationMethod bio = none;
 //   typedef DSBasis<d,dT> Basis;

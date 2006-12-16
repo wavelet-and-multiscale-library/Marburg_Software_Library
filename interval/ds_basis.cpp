@@ -159,9 +159,9 @@ namespace WaveletTL
     cout << "* in infty-norm: " << row_sum_norm(testHinv) << endl;
 #endif
 
-    cout << "PP=" << endl << PP;
-    cout << "Hinv=" << endl << Hinv;
-    cout << "FF=" << endl << FF;
+//     cout << "PP=" << endl << PP;
+//     cout << "Hinv=" << endl << Hinv;
+//     cout << "FF=" << endl << FF;
 
     SparseMatrix<double> mj1ih = PP * Hinv * FF; // (4.1.23)
     SparseMatrix<double> PPinv; InvertP(PP, PPinv);
@@ -422,24 +422,26 @@ namespace WaveletTL
     Mj0T_t = transpose(Mj0T);
     Mj1_t  = transpose(Mj1);
     Mj1T_t = transpose(Mj1T);
+
+//     cout << "Mj1=" << endl << Mj1;
   }
 
   template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
   DSBasis<d,dT,BIO>::dump_data(std::ostream& s) const
   {
-    s << "Mj0 ="; print_matrix(Mj0 , s); s << ";" << endl;
-    s << "Mj0T="; print_matrix(Mj0T, s); s << ";" << endl;
-    s << "Mj1 ="; print_matrix(Mj1 , s); s << ";" << endl;
-    s << "Mj1T="; print_matrix(Mj1T, s); s << ";" << endl;
-    s << "CL  ="; print_matrix(CL  , s); s << ";" << endl;
-    s << "CR  ="; print_matrix(CR  , s); s << ";" << endl;
-    s << "CLT ="; print_matrix(CLT , s); s << ";" << endl;
-    s << "CRT ="; print_matrix(CRT , s); s << ";" << endl;
-    s << "CLA ="; print_matrix(CLA , s); s << ";" << endl;
-    s << "CRA ="; print_matrix(CRA , s); s << ";" << endl;
-    s << "CLAT="; print_matrix(CLAT, s); s << ";" << endl;
-    s << "CRAT="; print_matrix(CRAT, s); s << ";" << endl;
+    s << "Mj0 ="; print_matrix(Mj0 , s);
+    s << "Mj0T="; print_matrix(Mj0T, s);
+    s << "Mj1 ="; print_matrix(Mj1 , s);
+    s << "Mj1T="; print_matrix(Mj1T, s);
+    s << "CL  ="; print_matrix(CL  , s);
+    s << "CR  ="; print_matrix(CR  , s);
+    s << "CLT ="; print_matrix(CLT , s);
+    s << "CRT ="; print_matrix(CRT , s);
+    s << "CLA ="; print_matrix(CLA , s);
+    s << "CRA ="; print_matrix(CRA , s);
+    s << "CLAT="; print_matrix(CLAT, s);
+    s << "CRAT="; print_matrix(CRAT, s);
   }
 
   template <int d, int dT, DSBiorthogonalizationMethod BIO>
@@ -1530,9 +1532,13 @@ namespace WaveletTL
     const int firstcol = d-s0; // first column of A_j^{(d)} in Ahat_j^{(d)}
     const int lastcol  = (Deltasize(j0())-1)-(d-s1); // last column
     const int firstrow = d+ell_l()+ell1<d>()-2*s0; // first row of A_j^{(d)} in Ahat_j^{(d)}
-    const int lastrow  = (Deltasize(j0()+1)-1)-(d+ell_r()-ell2<d>()+(d%2)-2*s1); // last row
+    const int lastrow  = (Deltasize(j0()+1)-1)-(d+ell_r()+ell1<d>()-2*s1); // last row
+//     cout << "firstcol=" << firstcol << endl;
+//     cout << "lastcol=" << lastcol << endl;
+//     cout << "firstrow=" << firstrow << endl;
+//     cout << "lastrow=" << lastrow << endl;    
     
-    int p = lastcol-firstcol+1;
+//     int p = lastcol-firstcol+1;
     //     int q = lastrow-firstrow+1;
 
     SparseMatrix<double> help;
@@ -1546,8 +1552,10 @@ namespace WaveletTL
       const int elimrow = i%2 ? firstrow+(i-1)/2 : lastrow-(int)floor((i-1)/2.);
 //       cout << "i=" << i << ", i%2=" << i%2 << ", elimrow=" << elimrow << endl;
 
-      const int HhatLow = i%2 ? elimrow : ell_l()+ell2<d>()+2-(d%2)-(i/2)-2*s0;
-      const int HhatUp  = i%2 ? HhatLow + 2*p-1+(d+(d%2))/2 : elimrow;
+      const int HhatLow = i%2 ? firstrow+1-(((i+1)/2)%2) : firstrow+2-(d%2)-((i/2)%2);
+      const int HhatUp  = lastrow-1;
+//       const int HhatLow = i%2 ? elimrow : ell_l()+ell2<d>()+2-(d%2)-(i/2)-2*s0;
+//       const int HhatUp  = i%2 ? HhatLow + 2*p-1+(d+(d%2))/2 : elimrow;
       
       if (i%2) // i odd, elimination from above (4.1.4a)
 	{
@@ -1568,6 +1576,8 @@ namespace WaveletTL
 	    help.set_entry(k+1, k, Lentry);
 	}
       
+//       cout << "Hfactor=" << endl << help;
+
       A = help * A;
       H = help * H;
       

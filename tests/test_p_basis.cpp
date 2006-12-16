@@ -155,7 +155,7 @@ int main()
 #endif
 
 
-#if 1
+#if 0
   cout << "- checking biorthogonality of Mj0, Mj0T for different levels:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+2; level++)
     {

@@ -24,8 +24,8 @@ namespace WaveletTL
     (j == lambda.j()+lambda.e() is neglected for performance reasons)
   */
   void support(const JLBasis& basis,
-  	       const Index& lambda,
- 	       int& k1, int& k2);
+   	       const Index& lambda,
+  	       int& k1, int& k2);
   
   /*!
     Decide whether the support of a generator/wavelet \psi_\lambda

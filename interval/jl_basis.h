@@ -14,7 +14,7 @@
 #include <algebra/matrix.h>
 #include <algebra/infinite_vector.h>
 #include <algebra/sparse_matrix.h>
-#include <interval/i_index.h>
+#include <interval/jl_index.h>
 
 using MathTL::Vector;
 using MathTL::Matrix;
@@ -26,19 +26,19 @@ namespace WaveletTL
     Template class for the (multi)wavelet bases on the interval as introduced in [JL].
     Essentially, the primal generators
 
-      phi_{j,s0},...,phi_{j,2^j-s1}             <-> 2^{j/2}phi_0(2^j*x-k), k=s0,...,s^j-s1
-      phi_{j,2^j-s1+1},...,phi_{j,2^{j+1}-s1+1} <-> 2^{j/2}phi_1(2^j*x-k), k=0,...,2^j
+      phi_{j,0,1},...,phi_{j,0,2^j-1}  <-> 2^{j/2}phi_0(2^j*x-k), k=1,...,2^j-1
+      phi_{j,1,0},...,phi_{j,0,2^j}    <-> 2^{j/2}phi_1(2^j*x-k), k=0,...,2^j
 
     are dilated and translated versions of the two cubic Hermite interpolants
     at 2^{-j}k, i.e.,
-
+    
       phi_0(k) = delta_{0,k}, (d/dx)phi_0(k) = 0
       phi_1(k) = 0          , (d/dx)phi_1(k) = delta_{0,k}
 
     The wavelets are
 
-      psi_{j,1},...,psi_{j,2^j-1}     <-> 2^{j/2}psi_0(2^j*x-k), k=1,...,2^j-1
-      psi_{j,2^j},...,psi_{j,2^{j+1}} <-> 2^{j/2}psi_1(2^j*x-k), k=0,...,2^j
+      psi_{j,0,1},...,psi_{j,0,2^j-1}  <-> 2^{j/2}psi_0(2^j*x-k), k=1,...,2^j-1
+      psi_{j,1,0},...,psi_{j,1,2^j}    <-> 2^{j/2}psi_1(2^j*x-k), k=0,...,2^j
 
     see [JL] for their definition.
 
@@ -55,23 +55,14 @@ namespace WaveletTL
   public:
     /*!
       constructor
-      
-      At the moment, you may (only) specify the order of the primal (s) boundary conditions
-      at the left and right end of the interval [0,1].
     */
-    JLBasis(const int s0 = 1, const int s1 = 1);
-
-    /*!
-      alternative constructor, you can specify whether first order homogeneous Dirichlet b.c.'s
-      for the primal functions are set or not. The dual functions have free b.c.'s
-    */
-    JLBasis(const bool bc_left, const bool bc_right);
+    JLBasis();
 
     //! coarsest possible level
     inline const int j0() const { return j0_; }
 
     //! wavelet index class
-    typedef IntervalIndex<JLBasis> Index;
+    typedef JLIndex Index;
 
     //! size_type, for convenience
     typedef Vector<double>::size_type size_type;
@@ -93,27 +84,13 @@ namespace WaveletTL
     static unsigned int primal_polynomial_degree() { return 4; }
 
     //! number of vanishing moments for the primal wavelets
-    static unsigned int primal_vanishing_moments() { return 2; }
+    unsigned int primal_vanishing_moments() { return 2; }
 
-    //! read access to the primal b.c. order at x=0
-    const int get_s0() const { return s0; }
-
-    //! read access to the primal b.c. order at x=1
-    const int get_s1() const { return s1; }
-
-    //! extremal generator indices
-    inline const int DeltaLmin() const { return s0; }
-    inline const int DeltaRmax(const int j) const { return (1<<(j+1))-s1+1; }
-    
     //! size of Delta_j
-    inline const int Deltasize(const int j) const { return DeltaRmax(j)-DeltaLmin()+1; }
-
-    //! boundary indices in \nabla_j
-    inline const int Nablamin() const { return 1; }
-    inline const int Nablamax(const int j) const { return 1<<(j+1); }
+    inline const int Deltasize(const int j) const { return 1<<(j+1); }
 
     //! size of Nabla_j
-    inline const int Nablasize(const int j) const { return Nablamax(j)-Nablamin()+1; }
+    inline const int Nablasize(const int j) const { return 1<<(j+1); }
     
     //! index of first (leftmost) generator on level j >= j0
     Index first_generator(const int j) const;
@@ -126,46 +103,6 @@ namespace WaveletTL
 
     //! index of last (rightmost) wavelet on level j >= j0
     Index last_wavelet(const int j) const;
-
-    //! DECOMPOSE routine, simple version
-    /*!
-      Constructs for a given single wavelet index lambda a coefficient set c,
-      such that
-      \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
-      where the multiscale decomposition starts with the coarsest
-      generator level jmin.
-    */
-    void decompose_1(const Index& lambda, const int jmin,
-		     InfiniteVector<double, Index>& c) const;
-
-    //! dual DECOMPOSE routine, simple version
-    /*!
-      Constructs for a given single wavelet index lambda a coefficient set c,
-      such that
-      \tilde\psi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
-      where the multiscale decomposition starts with the coarsest
-      generator level jmin.
-    */
-    void decompose_t_1(const Index& lambda, const int jmin,
-		       InfiniteVector<double, Index>& c) const;
-
-    //! DECOMPOSE routine, full version
-    /*!
-      constructs for a given coefficient set c another one v with level >= jmin,
-      such that
-      \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
-    */
-    void decompose(const InfiniteVector<double, Index>& c, const int jmin,
-		   InfiniteVector<double, Index>& v) const;
-
-    //! dual DECOMPOSE routine, full version
-    /*!
-      constructs for a given coefficient set c another one v with level >= jmin,
-      such that
-      \sum_{\lambda}c_\lambda\tilde\psi_lambda = \sum_{\lambda'}d_{\lambda'}\tilde\psi_{\lambda'}
-    */
-    void decompose_t(const InfiniteVector<double, Index>& c, const int jmin,
-		     InfiniteVector<double, Index>& v) const;
 
     //! RECONSTRUCT routine, simple version
     /*!
@@ -186,26 +123,6 @@ namespace WaveletTL
     */
     void reconstruct(const InfiniteVector<double, Index>& c, const int j,
 		     InfiniteVector<double, Index>& v) const;
-
-    //! dual RECONSTRUCT routine, simple version
-    /*!
-      Constructs for a given single wavelet index lambda a coefficient set c,
-      such that
-      \tilde\psi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
-      where always |\lambda'|>=j
-    */
-    void reconstruct_t_1(const Index& lambda, const int j,
-			 InfiniteVector<double, Index>& c) const;
-
-    //! dual RECONSTRUCT routine, full version
-    /*!
-      Constructs for a given coefficient set c another one v,
-      such that
-      \sum_{\lambda}c_\lambda\tilde\psi_\lambda = \sum_{\lambda'}v_{\lambda'}\tilde\psi_{\lambda'}
-      where always |\lambda'|>=j
-    */
-    void reconstruct_t(const InfiniteVector<double, Index>& c, const int j,
-		       InfiniteVector<double, Index>& v) const;
 
   protected:
     //! coarsest possible level

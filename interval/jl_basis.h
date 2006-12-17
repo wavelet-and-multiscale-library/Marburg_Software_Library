@@ -84,7 +84,7 @@ namespace WaveletTL
     static unsigned int primal_polynomial_degree() { return 4; }
 
     //! number of vanishing moments for the primal wavelets
-    unsigned int primal_vanishing_moments() { return 2; }
+    static unsigned int primal_vanishing_moments() { return 2; }
 
     //! size of Delta_j
     inline const int Deltasize(const int j) const { return 1<<(j+1); }

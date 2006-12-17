@@ -20,7 +20,7 @@ namespace WaveletTL
     Index class for the multiwavelet basis in [0,1] from [JL],
     modelling a multiindex of the form lambda=(j,e,c,k).
 
-    We internally assume that j0==1.
+    We implicitly assume that j0==1.
   */
   class JLIndex
   {

@@ -95,27 +95,27 @@ int main()
   InfiniteVector<double, Index> coeffs;
 
 #if 0
-  coeffs[first_generator(&eq.basis(), eq.basis().j0())] = 1.0;
-  coeffs[last_generator(&eq.basis(), eq.basis().j0())] = 2.0;
-  coeffs[first_wavelet(&eq.basis(), eq.basis().j0())] = 3.0;
-  coeffs[last_wavelet(&eq.basis(), eq.basis().j0())] = 4.0;
-  coeffs[first_wavelet(&eq.basis(), eq.basis().j0()+1)] = 5.0;
+  coeffs.set_coefficient(eq.basis().first_generator(eq.basis().j0()), 1.0);
+  coeffs.set_coefficient(eq.basis().last_generator(eq.basis().j0()), 2.0);
+  coeffs.set_coefficient(eq.basis().first_wavelet(eq.basis().j0()), 3.0);
+  coeffs.set_coefficient(eq.basis().last_wavelet(eq.basis().j0()), 4.0);
+  coeffs.set_coefficient(eq.basis().first_wavelet(eq.basis().j0()+1), 5.0);
   cout << "- a coefficient set:" << endl
        << coeffs << endl;
-  eq.rescale(coeffs, -1);
+  coeffs.scale(&eq, -1);
   cout << "- after rescaling with D^{-1}:" << endl
        << coeffs << endl;
 #endif
 
   eq.RHS(1e-2, coeffs);
 
-#if 0
+#if 1
   cout << "- approximate coefficient set of the right-hand side:" << endl
        << coeffs << endl;
-  cout << "- check expansion of the right-hand side in the dual basis:" << endl;
-  eq.rescale(coeffs, 1);
-  evaluate(eq.basis(), coeffs, false, 8).matlab_output(cout);
-  eq.rescale(coeffs, -1);
+//   cout << "- check expansion of the right-hand side in the dual basis:" << endl;
+//   eq.rescale(coeffs, 1);
+//   evaluate(eq.basis(), coeffs, false, 8).matlab_output(cout);
+//   eq.rescale(coeffs, -1);
 #endif  
 
   set<Index> Lambda;
@@ -141,12 +141,12 @@ int main()
   cout << "  ... done, time needed: " << time << " seconds" << endl;
 //   cout << "- (preconditioned) stiffness matrix A=" << endl << A << endl;
 
-  cout << "- writing A to the file stiffmat.m ..." << endl;
-  std::ofstream Astream("stiffmat.m");
-  Astream << "A=";
-  print_matrix(A, Astream);
-  Astream << ";" << endl;
-  cout << "  ... done!" << endl;
+//   cout << "- writing A to the file stiffmat.m ..." << endl;
+//   std::ofstream Astream("stiffmat.m");
+//   Astream << "A=";
+//   print_matrix(A, Astream);
+//   Astream << ";" << endl;
+//   cout << "  ... done!" << endl;
 
   cout << "- set up right-hand side..." << endl;
   tstart = clock();

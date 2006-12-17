@@ -74,16 +74,12 @@ int main()
 {
   cout << "Testing adaptive wavelet-Galerkin methods for the identity operator with CDD1_SOLVE ..." << endl;
 
-#if 1
   // for DSBasis+PBasis+SplineBasis
   const int d  = 3;
   const int dT = 3;
 //   typedef DSBasis<d,dT> Basis;
 //   typedef PBasis<d,dT> Basis;
   typedef SplineBasis<d,dT,P_construction> Basis;
-#else
-  typedef JLBasis Basis;
-#endif
   typedef Basis::Index Index;
 
 #if 0

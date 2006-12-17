@@ -348,8 +348,8 @@ namespace WaveletTL
     InfiniteVector<double,Index> w;
     APPLY(P, v, eta1, w, jmax, strategy);
 //     APPLY(P, v, eta1/100, w, jmax, strategy);
-//     F.COARSE(eta2, r);
-    F.COARSE(0, r);
+    F.COARSE(eta2, r);
+//     F.COARSE(0, r);
     r -= w;
     r.support(Lambda_tilde);
   }

@@ -37,7 +37,7 @@ namespace WaveletTL
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
     const int j0   = basis().j0();
-    const int jmax = 15;
+    const int jmax = 8;
     for (Index lambda(basis_.first_generator(j0));; ++lambda)
       {
 	const double coeff = f(lambda)/D(lambda);

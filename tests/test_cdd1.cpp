@@ -100,17 +100,17 @@ int main()
 
   TestProblem<3> T;
 
-#if 1
+#if 0
   const int d  = 3;
   const int dT = 3;
 //   typedef DSBasis<d,dT> Basis;
   typedef PBasis<d,dT> Basis;
 #else
-  typedef JLBasis Basis;
+  typedef JLBasis Basis; Basis basis;
 #endif
   typedef Basis::Index Index;
 
-  SturmEquation<Basis> problem(T);
+  SturmEquation<Basis> problem(T, basis);
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem);
 
   // initialization with some precomputed DSBasis eigenvalue bounds:
@@ -133,7 +133,7 @@ int main()
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  1.88912, 26.2107 ); // d=3, dT=3 (diag-precond.)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  1.87567, 6.78415 ); // d=3, dT=3 (diag-precond.&j0-reduction)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.37738, 26.1895 ); // d=3, dT=3 (2^j-precond.)
-  CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.36044, 6.73983 ); // d=3, dT=3 (2^j-precond.&j0-reduction)
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.36044, 6.73983 ); // d=3, dT=3 (2^j-precond.&j0-reduction)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.09306, 104.014 ); // d=3, dT=5 (diag-precond.)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.09369, 26.2107 ); // d=3, dT=5 (diag-precond.&j0-reduction)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.7267 , 104.003 ); // d=3, dT=5 (2^j-precond.)
@@ -147,7 +147,7 @@ int main()
 
   // initialization with some precomputed JLBasis eigenvalue bounds:
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 1.5753, 4.50639); // (2^j-precond.)
-//   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 1.5753, 2.3546 ); // (diag-precond.)
+  CachedProblem<SturmEquation<Basis> > cproblem(&problem, 1.5753, 2.3546 ); // (diag-precond.)
 
 //   double normA = problem.norm_A();
 //   double normAinv = problem.norm_Ainv();
@@ -156,7 +156,7 @@ int main()
 //   cout << "* estimate for normAinv: " << normAinv << endl;
 
   InfiniteVector<double, Index> u_epsilon;
-  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 12);
+  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, u_epsilon, 1.0, 1.0, 10);
 //   CDD1_SOLVE(cproblem, 1e-5, u_epsilon, 20);
 //   CDD1_SOLVE(cproblem, 1e-10, u_epsilon, 20);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 20);

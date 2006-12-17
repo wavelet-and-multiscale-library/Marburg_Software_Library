@@ -175,23 +175,32 @@ namespace WaveletTL
     if (lambda.e() == 0) {
       // generator
       if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) {
-	for (unsigned int m(0); m < points.size(); m++)
-	  values[m] = (derivative == 0
-		       ? MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
+	if (derivative == 0) {
+	  for (unsigned int m(0); m < points.size(); m++)
+	    values[m] = MathTL::EvaluateSchoenbergBSpline_td<d>(lambda.j(),
+								(1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
+								1-points[m]);
+	}
+	if (derivative == 1) {
+	  for (unsigned int m(0); m < points.size(); m++)
+	    values[m] = -MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
 								   (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
-								   1-points[m])
-		       : -MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
-							    (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
-							    1-points[m]));
+								   1-points[m]);
+	  
+	}
       } else {
-	for (unsigned int m(0); m < points.size(); m++)
-	  values[m] = (derivative == 0
-		       ? MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
-								   lambda.k(),
-								   points[m])
-		       : MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
-								   lambda.k(),
-								   points[m]));
+	if (derivative == 0) {
+	  for (unsigned int m(0); m < points.size(); m++)
+	    values[m] = MathTL::EvaluateSchoenbergBSpline_td<d>(lambda.j(),
+								lambda.k(),
+								points[m]);
+	}
+	if (derivative == 1) {
+	  for (unsigned int m(0); m < points.size(); m++)
+	    values[m] = MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
+								  lambda.k(),
+								  points[m]); 
+	}
       }
     } else {
       // wavelet

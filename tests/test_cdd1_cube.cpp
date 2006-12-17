@@ -68,13 +68,13 @@ int main()
 {
   cout << "Testing adaptive wavelet-Galerkin solution of a Poisson problem on the cube with CDD1_SOLVE ..." << endl;
 
-#if 0
+#if 1
   const int d  = 3;
   const int dT = 3;
 //   typedef DSBasis<d,dT> Basis1D;
   typedef PBasis<d,dT> Basis1D;
 #else
-  typedef JLBasis Basis1D;
+  typedef JLBasis Basis1D; // does not work at the moment
 #endif
   typedef CubeBasis<Basis1D,2> Basis;
   typedef Basis::Index Index;

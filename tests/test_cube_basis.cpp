@@ -23,10 +23,11 @@ int main()
 {
   cout << "Testing wavelet bases on the cube..." << endl;
 
-#if 0
+#if 1
   typedef DSBasis<2,2> Basis1D;
   cout << "* a 2D cube basis of DSBasis<2,2> bases:" << endl;
 #else
+  // this does not work at the moment!!!
   typedef JLBasis Basis1D;
   cout << "* a 2D cube basis of JLBasis bases:" << endl;
 #endif

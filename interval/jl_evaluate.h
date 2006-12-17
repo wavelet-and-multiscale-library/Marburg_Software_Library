@@ -29,14 +29,24 @@ namespace WaveletTL
 			     const JLBasis::Index& lambda,
 			     const int resolution);
   
-//   /*!
-//     Evaluate an arbitrary linear combination of primal or dual
-//     wavelets on a dyadic subgrid of [0,1].
-//   */
-//   SampledMapping<1> evaluate(const JLBasis& basis,
-// 			     const InfiniteVector<double, JLBasis::Index>& coeffs,
-// 			     const bool primal,
-// 			     const int resolution);
+  /*!
+    Evaluate an arbitrary linear combination of primal
+    wavelets on a dyadic subgrid of [0,1].
+  */
+  SampledMapping<1> evaluate(const JLBasis& basis,
+ 			     const InfiniteVector<double, JLBasis::Index>& coeffs,
+ 			     const int resolution);
+
+  /*!
+    dummy routine
+  */
+  SampledMapping<1> evaluate(const JLBasis& basis,
+			     const InfiniteVector<double, JLBasis::Index>& coeffs,
+			     const bool primal,
+			     const int resolution)
+  {
+    return evaluate(basis, coeffs, resolution);
+  }
 
   /*!
     point evaluation of (derivatives) of a single primal [JL] generator
@@ -46,21 +56,21 @@ namespace WaveletTL
  		  const JLBasis::Index& lambda,
  		  const double x);
 
-//   /*!
-//     point evaluation of (derivatives) of a single primal [JL] generator
-//     or wavelet \psi_\lambda at several points simultaneously
-//   */
-//   void evaluate(const JLBasis& basis, const unsigned int derivative,
-// 		const JLBasis::Index& lambda,
-// 		const Array1D<double>& points, Array1D<double>& values);
+  /*!
+    point evaluation of (derivatives) of a single primal [JL] generator
+    or wavelet \psi_\lambda at several points simultaneously
+  */
+  void evaluate(const JLBasis& basis, const unsigned int derivative,
+		const JLBasis::Index& lambda,
+		const Array1D<double>& points, Array1D<double>& values);
 
-//   /*!
-//     point evaluation of 0-th and first derivative of a single primal [JL] generator
-//     or wavelet \psi_\lambda at several points simultaneously
-//   */
-//   void evaluate(const JLBasis& basis,
-// 		const JLBasis::Index& lambda,
-// 		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);
+  /*!
+    point evaluation of 0-th and first derivative of a single primal [JL] generator
+    or wavelet \psi_\lambda at several points simultaneously
+  */
+  void evaluate(const JLBasis& basis,
+		const JLBasis::Index& lambda,
+		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);
 }
 
 #include <interval/jl_evaluate.cpp>

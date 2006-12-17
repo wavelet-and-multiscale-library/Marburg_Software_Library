@@ -85,12 +85,12 @@ int main()
 
 //   const int d  = 3;
 //   const int dT = 3; // be sure to use a continuous dual here, otherwise the RHS test will fail
-//   typedef DSBasis<d,dT> Basis;
+//   typedef DSBasis<d,dT> Basis; Basis basis(true, true);
 //   typedef PBasis<d,dT> Basis;
-  typedef JLBasis Basis;
+  typedef JLBasis Basis; Basis basis;
   typedef Basis::Index Index;
 
-  SturmEquation<Basis> eq(T);
+  SturmEquation<Basis> eq(T, basis);
 
   InfiniteVector<double, Index> coeffs;
 
@@ -120,9 +120,9 @@ int main()
 
   set<Index> Lambda;
   const int jmax = 4; // eq.basis().j0()+3;
-  for (Index lambda = first_generator(&eq.basis(), eq.basis().j0());; ++lambda) {
+  for (Index lambda = eq.basis().first_generator(eq.basis().j0());; ++lambda) {
     Lambda.insert(lambda);
-    if (lambda == last_wavelet(&eq.basis(), jmax)) break;
+    if (lambda == eq.basis().last_wavelet(jmax)) break;
   }
   
   //   cout << "- set up stiffness matrix with respect to the index set Lambda=" << endl;

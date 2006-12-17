@@ -98,13 +98,13 @@ int main()
   ConstantFunction<2> constant_rhs(Vector<double>(1, "1.0"));
   PoissonBVP<2> poisson(&constant_rhs);
 
-#if 0
+#if 1
   const int d  = 3;
   const int dT = 3; // be sure to use a continuous dual here, otherwise the RHS test will fail
 //   typedef DSBasis<d,dT> Basis1D;
   typedef PBasis<d,dT> Basis1D;
 #else
-  typedef JLBasis Basis1D;
+  typedef JLBasis Basis1D; // does not work at the moment
 #endif
   typedef CubeBasis<Basis1D,2> CBasis;
   typedef CBasis::Index Index;

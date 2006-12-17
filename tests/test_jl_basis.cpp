@@ -41,13 +41,17 @@ int main()
   }
 #endif
   
-// //   Index mu(2,1,3,&basis);
+#if 0
+//   Index mu(1,0,1,0);
+  Index mu(1,1,1,0);
 //   Index mu(first_wavelet(basis.j0()));
-//   cout << "* a wavelet coefficient mu=" << mu << endl;
-//   cout << "  - reconstruct_1() yields" << endl;
-//   InfiniteVector<double,Index> gcoeffs;
-//   basis.reconstruct_1(mu,mu.j()+1,gcoeffs);
-//   cout << gcoeffs;
+//   Index mu(first_generator(basis.j0()));
+  cout << "* a wavelet coefficient mu=" << mu << endl;
+  cout << "  - reconstruct_1() yields" << endl;
+  InfiniteVector<double,Index> gcoeffs;
+  basis.reconstruct_1(mu,mu.j()+1,gcoeffs);
+  cout << gcoeffs;
+#endif
 
 #if 1
   cout << "- evaluating some primal generators:" << endl;
@@ -57,12 +61,12 @@ int main()
     if (lambda == last_generator(basis.j0())) break;
   }
   
-//   cout << "- evaluating some primal wavelets:" << endl;
-//   for (Index lambda = first_wavelet(&basis, basis.j0());; ++lambda) {
-//     cout << lambda << endl;
-//     evaluate(basis, lambda, true, 6).matlab_output(cout);
-//     if (lambda == last_wavelet(&basis, basis.j0()+1)) break;
-//   }
+  cout << "- evaluating some primal wavelets:" << endl;
+  for (Index lambda = first_wavelet(basis.j0());; ++lambda) {
+    cout << lambda << endl;
+    evaluate(basis, lambda, 6).matlab_output(cout);
+    if (lambda == last_wavelet(basis.j0()+1)) break;
+  }
 #endif
 
   return 0;

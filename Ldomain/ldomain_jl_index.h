@@ -32,11 +32,11 @@ namespace WaveletTL
     //! type index type
     typedef MultiIndex<int,2> type_type;
     
-    //! translation index type
-    typedef MultiIndex<int,2> translation_type;
-    
     //! component index type
     typedef MultiIndex<int,2> component_type;
+    
+    //! translation index type
+    typedef MultiIndex<int,2> translation_type;
     
     //! default constructor
     LDomainJLIndex();
@@ -47,18 +47,15 @@ namespace WaveletTL
 		   const component_type& c,
 		   const translation_type& k);
     
-/*     //! copy constructor */
-/*     LDomainIndex(const LDomainIndex& lambda); */
+    //! check equality
+    bool operator == (const LDomainJLIndex& lambda) const;
 
-/*     //! check equality */
-/*     bool operator == (const LDomainIndex& lambda) const; */
+    //! check non-equality
+    inline bool operator != (const LDomainJLIndex& lambda) const
+    { return !(*this == lambda); }
 
-/*     //! check non-equality */
-/*     inline bool operator != (const LDomainIndex& lambda) const */
-/*     { return !(*this == lambda); } */
-
-/*     //! preincrement */
-/*     LDomainIndex& operator ++ (); */
+    //! preincrement
+    LDomainJLIndex& operator ++ ();
 
 /*     //! lexicographic order < */
 /*     bool operator < (const LDomainIndex& lambda) const; */
@@ -120,19 +117,13 @@ namespace WaveletTL
     return os;
   }
   
-/*   /\*! */
-/*     index of first generator on level j >= j0 */
-/*   *\/ */
-/*   template <class IBASIS> */
-/*   LDomainIndex<IBASIS> */
-/*   first_generator(const LDomainBasis<IBASIS>* basis, const int j); */
+  //! index of first generator on level j >= j0
+  LDomainJLIndex
+  first_generator(const int j);
 
-/*   /\*! */
-/*     index of last generator on level j >= j0 */
-/*   *\/ */
-/*   template <class IBASIS> */
-/*   LDomainIndex<IBASIS> */
-/*   last_generator(const LDomainBasis<IBASIS>* basis, const int j); */
+  //! index of last generator on level j >= j0
+  LDomainJLIndex
+  last_generator(const int j);
 
 /*   /\*! */
 /*     index of first wavelet on level j >= j0 */
@@ -150,12 +141,9 @@ namespace WaveletTL
 /* 		const int j, */
 /* 		const typename LDomainIndex<IBASIS>::type_type& e); */
   
-/*   /\*! */
-/*     index of last wavelet on level j >= j0 */
-/*   *\/ */
-/*   template <class IBASIS> */
-/*   LDomainIndex<IBASIS> */
-/*   last_wavelet(const LDomainBasis<IBASIS>* basis, const int j); */
+  //! index of last wavelet on level j >= j0
+  LDomainJLIndex
+  last_wavelet(const int j);
 }
 
 #include <Ldomain/ldomain_jl_index.cpp>

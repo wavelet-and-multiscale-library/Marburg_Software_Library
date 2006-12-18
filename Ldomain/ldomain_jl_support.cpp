@@ -63,4 +63,53 @@ namespace WaveletTL
     return false;
   }
 
+  inline
+  bool intersect_supports(const LDomainJLBasis& basis,
+			  const Index& lambda,
+			  const Index& mu,
+			  Support& supp)
+  {
+    Support supp_mu;
+    support(basis, mu, supp_mu);
+    return intersect_supports(basis, lambda, supp_mu, supp);
+  }
+
+  void intersecting_wavelets(const LDomainJLBasis& basis,
+			     const Index& lambda,
+			     const int j, const bool generators,
+			     std::list<Index>& intersecting) 
+  {
+    Support supp, supp_lambda;
+    support(basis, lambda, supp_lambda);
+    
+#if 1
+    // a brute force solution
+    if (generators) {
+      Index last_gen(last_generator(j));
+      for (Index mu = first_generator(j);; ++mu) {
+	if (intersect_supports(basis, mu, supp_lambda, supp))
+	  intersecting.push_back(mu);
+	if (mu == last_gen) break;
+      }
+    } else {
+      Index last_wav(last_wavelet(j));
+      for (Index mu = first_wavelet(j);; ++mu) {
+	if (intersect_supports(basis, mu, supp_lambda, supp))
+	  intersecting.push_back(mu);
+	if (mu == last_wav) break;
+      }
+    }
+#endif    
+  }
+ 
+  bool intersect_singular_support(const LDomainJLBasis& basis,
+				  const Index& lambda,
+				  const Index& mu)
+  {
+    // we cheat a bit here: we return true if already the supports intersect (overestimate)
+    Support supp;
+    return intersect_supports(basis, lambda, mu, supp);
+  }
+  
+
 }

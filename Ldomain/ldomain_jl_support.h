@@ -44,38 +44,35 @@ namespace WaveletTL
 			  const Support& supp_mu,
 			  Support& supp);
 
-//   /*!
-//     Compute the support intersection of two wavelets psi_lambda, psi_mu.
-//     Function returns true if a nontrivial intersection
-//     exists, false otherwise. In the latter case 'supp'
-//     has no meaningful value.
-//   */
-//   template <class IBASIS>
-//   bool intersect_supports(const LDomainBasis<IBASIS>& basis,
-// 			  const typename LDomainBasis<IBASIS>::Index& lambda,
-// 			  const typename LDomainBasis<IBASIS>::Index& mu,
-// 			  typename LDomainBasis<IBASIS>::Support& supp);
+  /*!
+    Compute the support intersection of two wavelets psi_lambda, psi_mu.
+    Function returns true if a nontrivial intersection
+    exists, false otherwise. In the latter case 'supp'
+    has no meaningful value.
+  */
+  bool intersect_supports(const LDomainJLBasis& basis,
+			  const Index& lambda,
+			  const Index& mu,
+			  Support& supp);
 
-//   /*!
-//     For a given wavelet \psi_\lambda, compute all generators/wavelets
-//     \psi_\nu with level |\nu|=j, such that the respective supports
-//     have a nontrivial intersection
-//   */
-//   template <class IBASIS>
-//   void intersecting_wavelets(const LDomainBasis<IBASIS>& basis,
-// 			     const typename LDomainBasis<IBASIS>::Index& lambda,
-// 			     const int j, const bool generators,
-// 			     std::list<typename LDomainBasis<IBASIS>::Index>& intersecting);
+  /*!
+    For a given wavelet \psi_\lambda, compute all generators/wavelets
+    \psi_\nu with level |\nu|=j, such that the respective supports
+    have a nontrivial intersection
+  */
+  void intersecting_wavelets(const LDomainJLBasis& basis,
+			     const Index& lambda,
+			     const int j, const bool generators,
+			     std::list<Index>& intersecting);
 
-//   /*!
-//     Decide whether the support of a given (primal) generator/wavelet \psi_\lambda
-//     intersects the singular support of another (primal) generator/wavelet \psi_\nu.
-//   */
-//   template <class IBASIS>
-//   bool intersect_singular_support(const LDomainBasis<IBASIS>& basis,
-// 				  const typename LDomainBasis<IBASIS>::Index& lambda,
-// 				  const typename LDomainBasis<IBASIS>::Index& nu);
-
+  /*!
+    Decide whether the support of a given (primal) generator/wavelet \psi_\lambda
+    intersects the singular support of another (primal) generator/wavelet \psi_\nu.
+  */
+  bool intersect_singular_support(const LDomainJLBasis& basis,
+				  const Index& lambda,
+				  const Index& nu);
+  
 }
 
 #include <Ldomain/ldomain_jl_support.cpp>

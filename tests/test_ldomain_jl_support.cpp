@@ -39,7 +39,8 @@ int main()
        << "x[" << supp_lambda.ymin << "," << supp_lambda.ymax << "]" << endl;
   for (Index mu = first_generator(basis.j0()); mu != last_wavelet(basis.j0()+1); ++mu) {
     Support supp_intersect;
-    bool inter = intersect_supports(basis, mu, supp_lambda, supp_intersect);
+//     bool inter = intersect_supports(basis, mu, supp_lambda, supp_intersect);
+    bool inter = intersect_supports(basis, lambda, mu, supp_intersect);
     cout << "- support intersection of psi_lambda and "
 	 << "psi_{" << mu << "}: ";
     if (inter) {
@@ -49,6 +50,16 @@ int main()
     } else {
       cout << "none!" << endl;
     }
+  }
+#endif
+
+#if 1
+  cout << "* for lambda=" << lambda << ", compute all intersecting generators on the coarsest level:" << endl;
+  typedef std::list<Index> SupportList;
+  SupportList nus;
+  intersecting_wavelets(basis, lambda, basis.j0(), true, nus);
+  for (SupportList::const_iterator it(nus.begin()); it != nus.end(); ++it) {
+    cout << "    nu=" << *it << endl;
   }
 #endif
 

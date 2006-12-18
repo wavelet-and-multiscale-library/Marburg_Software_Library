@@ -75,12 +75,12 @@ namespace WaveletTL
  	  // phi_0(x) = 1/2*phi_0(2*x+1)+phi_0(2*x)+1/2*phi_0(2*x-1)+3/4*phi_1(2*x+1)-3/4*phi_1(2*x-1)
 
 	  int m = 2*lambda.k()-1; // m-2k=-1
-	  if (m >= 1 && m <= (1<<(lambda.j()+1))-1) { // phi_0(2x+1)
+	  { // phi_0(2x+1)
 	    InfiniteVector<double, Index> dhelp;
 	    reconstruct_1(Index(lambda.j()+1, 0, 0, m), j, dhelp);
 	    c.add(0.5*M_SQRT1_2, dhelp);
 	  }
-	  if (m >= 0 && m <= (1<<(lambda.j()+1))) { // phi_1(2x+1)
+	  if (m >= 0) { // phi_1(2x+1)
 	    InfiniteVector<double, Index> dhelp;
 	    reconstruct_1(Index(lambda.j()+1, 0, 1, m), j, dhelp);
 	    c.add(0.75*M_SQRT1_2, dhelp);
@@ -88,7 +88,7 @@ namespace WaveletTL
 
 	  // m=2k <-> m-2k=0
 	  m++;
-	  if (m >= 1 && m <= (1<<(lambda.j()+1))-1) { // phi_0(2x)
+	  { // phi_0(2x)
 	    InfiniteVector<double, Index> dhelp;
 	    reconstruct_1(Index(lambda.j()+1, 0, 0, m), j, dhelp);
 	    c.add(M_SQRT1_2, dhelp);
@@ -96,12 +96,12 @@ namespace WaveletTL
 	  
 	  // m=2k+1 <-> m-2k=1
 	  m++;
-	  if (m >= 1 && m <= (1<<(lambda.j()+1))) { // phi_0(2x-1)
+	  { // phi_0(2x-1)
 	    InfiniteVector<double, Index> dhelp;
 	    reconstruct_1(Index(lambda.j()+1, 0, 0, m), j, dhelp);
 	    c.add(0.5*M_SQRT1_2, dhelp);
 	  }
-	  if (m >= 0 && m <= (1<<(lambda.j()+1))-1) { // phi_1(2x-1)
+	  if (m <= (1<<(lambda.j()+1))-1) { // phi_1(2x-1)
 	    InfiniteVector<double, Index> dhelp;
 	    reconstruct_1(Index(lambda.j()+1, 0, 1, m), j, dhelp);
 	    c.add(-0.75*M_SQRT1_2, dhelp);
@@ -111,12 +111,12 @@ namespace WaveletTL
  	  // phi_1(x) = -1/8*phi_0(2*x+1)+1/8*phi_0(2*x-1)-1/8*phi_1(2*x+1)+1/2*phi_1(2*x)-1/8*phi_1(2*x-1)
 	  
 	  int m = 2*lambda.k()-1; // m-2k=-1
-	  if (m >= 1 && m <= (1<<(lambda.j()+1))-1) { // phi_0(2x+1)
+	  { // phi_0(2x+1)
 	    InfiniteVector<double, Index> dhelp;
 	    reconstruct_1(Index(lambda.j()+1, 0, 0, m), j, dhelp);
 	    c.add(-0.125*M_SQRT1_2, dhelp);
 	  }
-	  if (m >= 0 && m <= (1<<(lambda.j()+1))) { // phi_1(2x+1)
+	  if (m >= 0) { // phi_1(2x+1)
 	    InfiniteVector<double, Index> dhelp;
 	    reconstruct_1(Index(lambda.j()+1, 0, 1, m), j, dhelp);
 	    c.add(-0.125*M_SQRT1_2, dhelp);
@@ -124,7 +124,7 @@ namespace WaveletTL
 
 	  // m=2k <-> m-2k=0
 	  m++;
-	  if (m >= 0 && m <= (1<<(lambda.j()+1))) { // phi_1(2x)
+	  { // phi_1(2x)
 	    InfiniteVector<double, Index> dhelp;
 	    reconstruct_1(Index(lambda.j()+1, 0, 1, m), j, dhelp);
 	    c.add(0.5*M_SQRT1_2, dhelp);
@@ -132,12 +132,12 @@ namespace WaveletTL
 
 	  // m=2k+1 <-> m-2k=1
 	  m++;
-	  if (m >= 1 && m <= (1<<(lambda.j()+1))-1) { // phi_0(2x-1)
+	  { // phi_0(2x-1)
 	    InfiniteVector<double, Index> dhelp;
 	    reconstruct_1(Index(lambda.j()+1, 0, 0, m), j, dhelp);
 	    c.add(0.125*M_SQRT1_2, dhelp);
 	  }
-	  if (m >= 0 && m <= (1<<(lambda.j()+1))) { // phi_1(2x-1)
+	  if (m <= (1<<(lambda.j()+1))) { // phi_1(2x-1)
 	    InfiniteVector<double, Index> dhelp;
 	    reconstruct_1(Index(lambda.j()+1, 0, 1, m), j, dhelp);
 	    c.add(-0.125*M_SQRT1_2, dhelp);
@@ -150,12 +150,12 @@ namespace WaveletTL
  	  // psi_0(x) = -2*phi_0(2*x+1)+4*phi_0(2*x)-2*phi_0(2*x-1)-21*phi_1(2*x+1)+21*phi_1(2*x-1)
 
 	  int m = 2*lambda.k()-1; // m-2k=-1
-	  if (m >= 1 && m <= (1<<(lambda.j()+1))-1) { // phi_0(2x+1)
+	  { // phi_0(2x+1)
 	    InfiniteVector<double, Index> dhelp;
 	    reconstruct_1(Index(lambda.j()+1, 0, 0, m), j, dhelp);
 	    c.add(-2.0*M_SQRT1_2, dhelp);
 	  }
-	  if (m >= 0 && m <= (1<<(lambda.j()+1))) { // phi_1(2x+1)
+	  if (m >= 0) { // phi_1(2x+1)
 	    InfiniteVector<double, Index> dhelp;
 	    reconstruct_1(Index(lambda.j()+1, 0, 1, m), j, dhelp);
 	    c.add(-21.0*M_SQRT1_2, dhelp);
@@ -163,7 +163,7 @@ namespace WaveletTL
 
 	  // m=2k <-> m-2k=0
 	  m++;
-	  if (m >= 1 && m <= (1<<(lambda.j()+1))-1) { // phi_0(2x)
+	  { // phi_0(2x)
 	    InfiniteVector<double, Index> dhelp;
 	    reconstruct_1(Index(lambda.j()+1, 0, 0, m), j, dhelp);
 	    c.add(4.0*M_SQRT1_2, dhelp);
@@ -171,12 +171,12 @@ namespace WaveletTL
 
 	  // m=2k+1 <-> m-2k=1
 	  m++;
-	  if (m >= 1 && m <= (1<<(lambda.j()+1))-1) { // phi_0(2x-1)
+	  { // phi_0(2x-1)
 	    InfiniteVector<double, Index> dhelp;
 	    reconstruct_1(Index(lambda.j()+1, 0, 0, m), j, dhelp);
 	    c.add(-2.0*M_SQRT1_2, dhelp);
 	  }
-	  if (m >= 0 && m <= (1<<(lambda.j()+1))) { // phi_1(2x-1)
+	  if (m <= (1<<(lambda.j()+1))) { // phi_1(2x-1)
 	    InfiniteVector<double, Index> dhelp;
 	    reconstruct_1(Index(lambda.j()+1, 0, 1, m), j, dhelp);
 	    c.add(21.0*M_SQRT1_2, dhelp);
@@ -186,12 +186,12 @@ namespace WaveletTL
  	  // psi_1(x) = phi_0(2*x+1)-phi_0(2*x-1)+ 9*phi_1(2*x+1)+12*phi_1(2*x)+ 9*phi_1(2*x-1)
 
 	  int m = 2*lambda.k()-1; // m-2k=-1
-	  if (m >= 1 && m <= (1<<(lambda.j()+1))-1) { // phi_0(2x+1)
+	  { // phi_0(2x+1)
 	    InfiniteVector<double, Index> dhelp;
 	    reconstruct_1(Index(lambda.j()+1, 0, 0, m), j, dhelp);
 	    c.add(M_SQRT1_2, dhelp);
 	  }
-	  if (m >= 0 && m <= (1<<(lambda.j()+1))) { // phi_1(2x+1)
+	  if (m >= 0) { // phi_1(2x+1)
 	    InfiniteVector<double, Index> dhelp;
 	    reconstruct_1(Index(lambda.j()+1, 0, 1, m), j, dhelp);
 	    c.add(9.0*M_SQRT1_2, dhelp);
@@ -199,7 +199,7 @@ namespace WaveletTL
 
 	  // m=2k <-> m-2k=0
 	  m++;
-	  if (m >= 0 && m <= (1<<(lambda.j()+1))) { // phi_1(2x)
+	  { // phi_1(2x)
 	    InfiniteVector<double, Index> dhelp;
 	    reconstruct_1(Index(lambda.j()+1, 0, 1, m), j, dhelp);
 	    c.add(12.0*M_SQRT1_2, dhelp);
@@ -207,12 +207,12 @@ namespace WaveletTL
 
 	  // m=2k+1 <-> m-2k=1
 	  m++;
-	  if (m >= 1 && m <= (1<<(lambda.j()+1))-1) { // phi_0(2x-1)
+	  { // phi_0(2x-1)
 	    InfiniteVector<double, Index> dhelp;
 	    reconstruct_1(Index(lambda.j()+1, 0, 0, m), j, dhelp);
 	    c.add(-M_SQRT1_2, dhelp);
 	  }
-	  if (m >= 0 && m <= (1<<(lambda.j()+1))) { // phi_1(2x-1)
+	  if (m <= (1<<(lambda.j()+1))) { // phi_1(2x-1)
 	    InfiniteVector<double, Index> dhelp;
 	    reconstruct_1(Index(lambda.j()+1, 0, 1, m), j, dhelp);
 	    c.add(9.0*M_SQRT1_2, dhelp);

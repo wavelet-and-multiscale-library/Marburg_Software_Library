@@ -90,29 +90,26 @@ namespace WaveletTL
 	// psi_0(x) = -2*phi_0(2*x+1)+4*phi_0(2*x)-2*phi_0(2*x-1)-21*phi_1(2*x+1)+21*phi_1(2*x-1)
 	
 	int m = 2*lambda.k()-1; // m-2k=-1
-	if (m >= 1 && m <= (1<<(lambda.j()+1))-1) { // phi_0(2x+1)
-	  r += (-2.0)*M_SQRT1_2
-	    * evaluate(basis, derivative, Index(lambda.j()+1, 0, 0, m), x);
-	}
-	if (m >= 0 && m <= (1<<(lambda.j()+1))) { // phi_1(2x+1)
+	// phi_0(2x+1)
+	r += (-2.0)*M_SQRT1_2
+	  * evaluate(basis, derivative, Index(lambda.j()+1, 0, 0, m), x);
+	if (m >= 0) { // phi_1(2x+1)
 	  r += (-21.0)*M_SQRT1_2
 	    * evaluate(basis, derivative, Index(lambda.j()+1, 0, 1, m), x);
 	}
 	
 	// m=2k <-> m-2k=0
 	m++;
-	if (m >= 1 && m <= (1<<(lambda.j()+1))-1) { // phi_0(2x)
+	// phi_0(2x)
 	  r += 4.0*M_SQRT1_2
 	    * evaluate(basis, derivative, Index(lambda.j()+1, 0, 0, m), x);
-	}
 	
 	// m=2k+1 <-> m-2k=1
 	m++;
-	if (m >= 1 && m <= (1<<(lambda.j()+1))-1) { // phi_0(2x-1)
-	  r += (-2.0)*M_SQRT1_2
-	    * evaluate(basis, derivative, Index(lambda.j()+1, 0, 0, m), x);
-	}
-	if (m >= 0 && m <= (1<<(lambda.j()+1))) { // phi_1(2x-1)
+	// phi_0(2x-1)
+	r += (-2.0)*M_SQRT1_2
+	  * evaluate(basis, derivative, Index(lambda.j()+1, 0, 0, m), x);
+	if (m <= (1<<(lambda.j()+1))) { // phi_1(2x-1)
 	  r += 21.0*M_SQRT1_2
 	    * evaluate(basis, derivative, Index(lambda.j()+1, 0, 1, m), x);
 	}
@@ -121,29 +118,26 @@ namespace WaveletTL
 	// psi_1(x) = phi_0(2*x+1)-phi_0(2*x-1)+ 9*phi_1(2*x+1)+12*phi_1(2*x)+ 9*phi_1(2*x-1)
 	
 	int m = 2*lambda.k()-1; // m-2k=-1
-	if (m >= 1 && m <= (1<<(lambda.j()+1))-1) { // phi_0(2x+1)
-	  r += M_SQRT1_2
-	    * evaluate(basis, derivative, Index(lambda.j()+1, 0, 0, m), x);
-	}
-	if (m >= 0 && m <= (1<<(lambda.j()+1))) { // phi_1(2x+1)
+	// phi_0(2x+1)
+	r += M_SQRT1_2
+	  * evaluate(basis, derivative, Index(lambda.j()+1, 0, 0, m), x);
+	if (m >= 0) { // phi_1(2x+1)
 	  r += 9.0*M_SQRT1_2
 	    * evaluate(basis, derivative, Index(lambda.j()+1, 0, 1, m), x);
 	}
 	
 	// m=2k <-> m-2k=0
 	m++;
-	if (m >= 0 && m <= (1<<(lambda.j()+1))) { // phi_1(2x)
-	  r += 12.0*M_SQRT1_2
-	    * evaluate(basis, derivative, Index(lambda.j()+1, 0, 1, m), x);
-	}
+	// phi_1(2x)
+	r += 12.0*M_SQRT1_2
+	  * evaluate(basis, derivative, Index(lambda.j()+1, 0, 1, m), x);
 	
 	// m=2k+1 <-> m-2k=1
 	m++;
-	if (m >= 1 && m <= (1<<(lambda.j()+1))-1) { // phi_0(2x-1)
-	  r += (-1.0)*M_SQRT1_2
-	    * evaluate(basis, derivative, Index(lambda.j()+1, 0, 0, m), x);
-	}
-	if (m >= 0 && m <= (1<<(lambda.j()+1))) { // phi_1(2x-1)
+	// phi_0(2x-1)
+	r += (-1.0)*M_SQRT1_2
+	  * evaluate(basis, derivative, Index(lambda.j()+1, 0, 0, m), x);
+	if (m <= (1<<(lambda.j()+1))) { // phi_1(2x-1)
 	  r += 9.0*M_SQRT1_2
 	    * evaluate(basis, derivative, Index(lambda.j()+1, 0, 1, m), x);
 	}
@@ -244,14 +238,13 @@ namespace WaveletTL
 	// psi_0(x) = -2*phi_0(2*x+1)+4*phi_0(2*x)-2*phi_0(2*x-1)-21*phi_1(2*x+1)+21*phi_1(2*x-1)
 	
 	int m = 2*lambda.k()-1; // m-2k=-1
-	if (m >= 1 && m <= (1<<(lambda.j()+1))-1) { // phi_0(2x+1)
-	  evaluate(lambda.j()+1, 0, m, points, help1, help2);
- 	  for (unsigned int i = 0; i < npoints; i++) {
- 	    funcvalues[i] += (-2.0)*M_SQRT1_2 * help1[i];
- 	    dervalues[i]  += (-2.0)*M_SQRT1_2 * help2[i];
- 	  }
+	// phi_0(2x+1)
+	evaluate(lambda.j()+1, 0, m, points, help1, help2);
+	for (unsigned int i = 0; i < npoints; i++) {
+	  funcvalues[i] += (-2.0)*M_SQRT1_2 * help1[i];
+	  dervalues[i]  += (-2.0)*M_SQRT1_2 * help2[i];
 	}
-	if (m >= 0 && m <= (1<<(lambda.j()+1))) { // phi_1(2x+1)
+	if (m >= 0) { // phi_1(2x+1)
 	  evaluate(lambda.j()+1, 1, m, points, help1, help2);
  	  for (unsigned int i = 0; i < npoints; i++) {
  	    funcvalues[i] += (-21.0)*M_SQRT1_2 * help1[i];
@@ -261,24 +254,22 @@ namespace WaveletTL
 	
 	// m=2k <-> m-2k=0
 	m++;
-	if (m >= 1 && m <= (1<<(lambda.j()+1))-1) { // phi_0(2x)
-	  evaluate(lambda.j()+1, 0, m, points, help1, help2);
- 	  for (unsigned int i = 0; i < npoints; i++) {
- 	    funcvalues[i] += 4.0*M_SQRT1_2 * help1[i];
- 	    dervalues[i]  += 4.0*M_SQRT1_2 * help2[i];
- 	  }
+	// phi_0(2x)
+	evaluate(lambda.j()+1, 0, m, points, help1, help2);
+	for (unsigned int i = 0; i < npoints; i++) {
+	  funcvalues[i] += 4.0*M_SQRT1_2 * help1[i];
+	  dervalues[i]  += 4.0*M_SQRT1_2 * help2[i];
 	}
 	
 	// m=2k+1 <-> m-2k=1
 	m++;
-	if (m >= 1 && m <= (1<<(lambda.j()+1))-1) { // phi_0(2x-1)
-	  evaluate(lambda.j()+1, 0, m, points, help1, help2);
- 	  for (unsigned int i = 0; i < npoints; i++) {
- 	    funcvalues[i] += (-2.0)*M_SQRT1_2 * help1[i];
- 	    dervalues[i]  += (-2.0)*M_SQRT1_2 * help2[i];
- 	  }
+	// phi_0(2x-1)
+	evaluate(lambda.j()+1, 0, m, points, help1, help2);
+	for (unsigned int i = 0; i < npoints; i++) {
+	  funcvalues[i] += (-2.0)*M_SQRT1_2 * help1[i];
+	  dervalues[i]  += (-2.0)*M_SQRT1_2 * help2[i];
 	}
-	if (m >= 0 && m <= (1<<(lambda.j()+1))) { // phi_1(2x-1)
+	if (m <= (1<<(lambda.j()+1))) { // phi_1(2x-1)
 	  evaluate(lambda.j()+1, 1, m, points, help1, help2);
  	  for (unsigned int i = 0; i < npoints; i++) {
  	    funcvalues[i] += 21.0*M_SQRT1_2 * help1[i];
@@ -290,14 +281,13 @@ namespace WaveletTL
 	// psi_1(x) = phi_0(2*x+1)-phi_0(2*x-1)+ 9*phi_1(2*x+1)+12*phi_1(2*x)+ 9*phi_1(2*x-1)
 	
 	int m = 2*lambda.k()-1; // m-2k=-1
-	if (m >= 1 && m <= (1<<(lambda.j()+1))-1) { // phi_0(2x+1)
-	  evaluate(lambda.j()+1, 0, m, points, help1, help2);
- 	  for (unsigned int i = 0; i < npoints; i++) {
- 	    funcvalues[i] += M_SQRT1_2 * help1[i];
- 	    dervalues[i]  += M_SQRT1_2 * help2[i];
- 	  }
+	// phi_0(2x+1)
+	evaluate(lambda.j()+1, 0, m, points, help1, help2);
+	for (unsigned int i = 0; i < npoints; i++) {
+	  funcvalues[i] += M_SQRT1_2 * help1[i];
+	  dervalues[i]  += M_SQRT1_2 * help2[i];
 	}
-	if (m >= 0 && m <= (1<<(lambda.j()+1))) { // phi_1(2x+1)
+	if (m >= 0) { // phi_1(2x+1)
 	  evaluate(lambda.j()+1, 1, m, points, help1, help2);
  	  for (unsigned int i = 0; i < npoints; i++) {
  	    funcvalues[i] += 9.0*M_SQRT1_2 * help1[i];
@@ -307,24 +297,22 @@ namespace WaveletTL
 	
 	// m=2k <-> m-2k=0
 	m++;
-	if (m >= 0 && m <= (1<<(lambda.j()+1))) { // phi_1(2x)
-	  evaluate(lambda.j()+1, 1, m, points, help1, help2);
- 	  for (unsigned int i = 0; i < npoints; i++) {
- 	    funcvalues[i] += 12.0*M_SQRT1_2 * help1[i];
- 	    dervalues[i]  += 12.0*M_SQRT1_2 * help2[i];
- 	  }
+	// phi_1(2x)
+	evaluate(lambda.j()+1, 1, m, points, help1, help2);
+	for (unsigned int i = 0; i < npoints; i++) {
+	  funcvalues[i] += 12.0*M_SQRT1_2 * help1[i];
+	  dervalues[i]  += 12.0*M_SQRT1_2 * help2[i];
 	}
 	
 	// m=2k+1 <-> m-2k=1
 	m++;
-	if (m >= 1 && m <= (1<<(lambda.j()+1))-1) { // phi_0(2x-1)
-	  evaluate(lambda.j()+1, 0, m, points, help1, help2);
- 	  for (unsigned int i = 0; i < npoints; i++) {
- 	    funcvalues[i] += (-1.0)*M_SQRT1_2 * help1[i];
- 	    dervalues[i]  += (-1.0)*M_SQRT1_2 * help2[i];
- 	  }
+	// phi_0(2x-1)
+	evaluate(lambda.j()+1, 0, m, points, help1, help2);
+	for (unsigned int i = 0; i < npoints; i++) {
+	  funcvalues[i] += (-1.0)*M_SQRT1_2 * help1[i];
+	  dervalues[i]  += (-1.0)*M_SQRT1_2 * help2[i];
 	}
-	if (m >= 0 && m <= (1<<(lambda.j()+1))) { // phi_1(2x-1)
+	if (m <= (1<<(lambda.j()+1))) { // phi_1(2x-1)
 	  evaluate(lambda.j()+1, 1, m, points, help1, help2);
  	  for (unsigned int i = 0; i < npoints; i++) {
  	    funcvalues[i] += 9.0*M_SQRT1_2 * help1[i];

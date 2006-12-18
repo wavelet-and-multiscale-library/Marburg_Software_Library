@@ -1,7 +1,9 @@
 #include <iostream>
+#include <fstream>
 
 #include <Ldomain/ldomain_jl_basis.h>
 #include <Ldomain/ldomain_jl_support.h>
+#include <Ldomain/ldomain_jl_evaluate.h>
 
 using namespace std;
 using namespace WaveletTL;
@@ -44,5 +46,18 @@ int main()
   }
 #endif
 
+#if 1
+//   Index lambda = first_generator(basis.j0());
+  Index lambda = first_wavelet(basis.j0());
+//   for (int i = 1; i <= 36; i++) ++lambda;
+
+  cout << "- evaluating psi_{" << lambda << "}..." << endl;
+  std::ofstream psistream("Ldomain_wavelet.m");
+  matlab_output(psistream, evaluate(basis, lambda, 6));
+  psistream.close();
+  cout << "  ...done, see file Ldomain_wavelet.m!" << endl;
+#endif
+
   return 0;
 }
+ 

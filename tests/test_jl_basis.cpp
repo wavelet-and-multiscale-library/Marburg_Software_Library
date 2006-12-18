@@ -43,9 +43,9 @@ int main()
   
 #if 0
 //   Index mu(1,0,1,0);
-  Index mu(1,1,1,0);
+//   Index mu(1,1,1,0);
 //   Index mu(first_wavelet(basis.j0()));
-//   Index mu(first_generator(basis.j0()));
+  Index mu(first_generator(basis.j0())); ++mu;
   cout << "* a wavelet coefficient mu=" << mu << endl;
   cout << "  - reconstruct_1() yields" << endl;
   InfiniteVector<double,Index> gcoeffs;

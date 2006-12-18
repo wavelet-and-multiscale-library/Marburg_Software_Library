@@ -71,6 +71,14 @@ namespace WaveletTL
   void evaluate(const JLBasis& basis,
 		const JLBasis::Index& lambda,
 		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);
+
+  /*!
+    point evaluation of 0-th and first derivative of a single primal [JL] generator
+    \psi_\lambda at several points simultaneously;
+    without a temporary JLBasis::Index object
+  */
+  void evaluate(const int j, const int c, const int k,
+		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);
 }
 
 #include <interval/jl_evaluate.cpp>

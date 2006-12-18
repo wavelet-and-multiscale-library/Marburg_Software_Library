@@ -24,14 +24,8 @@ namespace WaveletTL
   class LDomainJLBasis
   {
   public:
-/*     //! type of the interval basis */
-/*     typedef IBASIS IntervalBasis; */
-
     //! default constructor
     LDomainJLBasis();
-
-/*     //! constructor with 1D basis */
-/*     LDomainBasis(const IntervalBasis& basis1d); */
 
     //! coarsest possible level j0
     inline const int j0() const { return j0_; }
@@ -39,14 +33,18 @@ namespace WaveletTL
     //! wavelet index class
     typedef LDomainJLIndex Index;
 
-/*     //! geometric type of the support sets */
-/*     typedef struct { */
-/*       int j;       // granularity */
-/*       int xmin[3]; */
-/*       int xmax[3]; */
-/*       int ymin[3]; */
-/*       int ymax[3]; */
-/*     } Support; */
+    /*!
+      geometric type of the support sets;
+      all supports and intersections thereof can be written as the intersection
+      of a rectangle with the L-shaped domain.
+    */
+    typedef struct {
+      int j;       // granularity
+      int xmin;
+      int xmax;
+      int ymin;
+      int ymax;
+    } Support;
 
 /*     //! compute the support of psi_lambda, using the internal cache */
 /*     void support(const Index& lambda, Support& supp) const; */

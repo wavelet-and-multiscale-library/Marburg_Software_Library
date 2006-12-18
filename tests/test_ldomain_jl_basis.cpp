@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <Ldomain/ldomain_jl_basis.h>
+#include <Ldomain/ldomain_jl_support.h>
 
 using namespace std;
 using namespace WaveletTL;
@@ -43,7 +44,19 @@ int main()
   }
 #endif
 
-
+#if 1
+  typedef LDomainJLBasis::Support Support;
+  for (int level = basis.j0(); level <= basis.j0()+1; level++) {
+    for (Index lambda(first_generator(level)); lambda != last_wavelet(level); ++lambda) {
+      Support supp;
+      support(basis, lambda, supp);
+      cout << "  supp(psi_{" << lambda << "})="
+	   << "2^{-" << supp.j << "}"
+	   << "[" << supp.xmin << "," << supp.xmax << "]"
+	   << "x[" << supp.ymin << "," << supp.ymax << "]" << endl;
+    }
+  }
+#endif
 
   return 0;
 }

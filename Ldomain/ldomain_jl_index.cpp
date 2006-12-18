@@ -25,6 +25,25 @@ namespace WaveletTL
 	    k_ == lambda.k());
   }
   
+  bool
+  LDomainJLIndex::operator < (const LDomainJLIndex& lambda) const
+  {
+    // standard lexicographic order on (j,e,p,k),
+    // we assume that e and k are already lexicographically ordered (cf. MultiIndex)
+    return (j_ < lambda.j() ||
+	    (j_ == lambda.j() &&
+	     (e_ < lambda.e() ||
+	      (e_ == lambda.e() &&
+	       (c_ < lambda.c() ||
+		(c_ == lambda.c() && k_ < lambda.k()
+		 )
+		)
+	       )
+	      )
+	     )
+	    );
+  }
+
   LDomainJLIndex&
   LDomainJLIndex::operator ++ ()
   {
@@ -142,6 +161,27 @@ namespace WaveletTL
     return LDomainJLIndex(j, e, c, k);
   }
   
+  LDomainJLIndex
+  first_wavelet(const int j)
+  {
+    assert(j >= 1);
+    const LDomainJLIndex::type_type e(0,1);
+    const LDomainJLIndex::component_type c(0,0);
+    const LDomainJLIndex::translation_type k(1-(1<<j),1-(1<<j));
+    return LDomainJLIndex(j, e, c, k);
+  }
+
+  LDomainJLIndex
+  first_wavelet(const int j,
+ 		const LDomainJLIndex::type_type& e)
+  {
+    assert(j >= 1);
+    const LDomainJLIndex::component_type c(0,0);
+    const LDomainJLIndex::translation_type k(1-(1<<j),1-(1<<j));
+    return LDomainJLIndex(j, e, c, k);
+  }
+  
+
   LDomainJLIndex
   last_wavelet(const int j)
   {

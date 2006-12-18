@@ -31,7 +31,9 @@ int main()
   for (int level = basis.j0(); level <= basis.j0()+1; level++) {
     cout << "- iterate through all generators and wavelets on level j=" << level << ":" << endl;
     
-    Index lambda(first_generator(level));
+//     Index lambda(first_generator(level));
+//     Index lambda(first_wavelet(level));
+    Index lambda(first_wavelet(level,Index::type_type(1,1)));
     for (;; ++lambda) {
       cout << lambda << endl;
 

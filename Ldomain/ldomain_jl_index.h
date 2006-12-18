@@ -57,12 +57,12 @@ namespace WaveletTL
     //! preincrement
     LDomainJLIndex& operator ++ ();
 
-/*     //! lexicographic order < */
-/*     bool operator < (const LDomainIndex& lambda) const; */
-
-/*     //! lexicographic order <= */
-/*     bool operator <= (const LDomainIndex& lambda) const */
-/*     { return (*this < lambda || *this == lambda); } */
+    //! lexicographic order <
+    bool operator < (const LDomainJLIndex& lambda) const;
+    
+    //! lexicographic order <=
+    bool operator <= (const LDomainJLIndex& lambda) const
+    { return (*this < lambda || *this == lambda); }
     
     //! scale j
     const int j() const { return j_; }
@@ -75,16 +75,6 @@ namespace WaveletTL
     
     //! translation index k
     const translation_type& k() const { return k_; }
-    
-/*     /\*! */
-/*       By construction, the overall wavelet index set is ordered, so that */
-/*       there exists a bijective mapping into the positive integers. */
-/*       This routine returns the "number" of the current index, starting with 0 */
-/*       for the first generator on the coarsest level. If the current index is a */
-/*       generator on a higher level j, the number 0 corresponds to the first generator */
-/*       on the level j. */
-/*     *\/ */
-/*     const int number() const; */
     
   protected:
     //! scale
@@ -125,21 +115,14 @@ namespace WaveletTL
   LDomainJLIndex
   last_generator(const int j);
 
-/*   /\*! */
-/*     index of first wavelet on level j >= j0 */
-/*   *\/ */
-/*   template <class IBASIS> */
-/*   LDomainIndex<IBASIS> */
-/*   first_wavelet(const LDomainBasis<IBASIS>* basis, const int j); */
+  //! index of first wavelet on level j >= j0 
+  LDomainJLIndex
+  first_wavelet(const int j);
   
-/*   /\*! */
-/*     index of first wavelet with a given type on level j >= j0 */
-/*   *\/ */
-/*   template <class IBASIS> */
-/*   LDomainIndex<IBASIS> */
-/*   first_wavelet(const LDomainBasis<IBASIS>* basis, */
-/* 		const int j, */
-/* 		const typename LDomainIndex<IBASIS>::type_type& e); */
+  //! index of first wavelet with a given type on level j >= j0
+  LDomainJLIndex
+  first_wavelet(const int j,
+ 		const LDomainJLIndex::type_type& e);
   
   //! index of last wavelet on level j >= j0
   LDomainJLIndex

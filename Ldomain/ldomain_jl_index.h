@@ -41,12 +41,18 @@ namespace WaveletTL
     //! default constructor
     LDomainJLIndex();
     
+    //! copy constructor
+    LDomainJLIndex(const LDomainJLIndex& lambda);
+    
     //! constructor with given j,e,c,k
     LDomainJLIndex(const int j,
 		   const type_type& e,
 		   const component_type& c,
 		   const translation_type& k);
     
+    //! assignment
+    LDomainJLIndex& operator = (const LDomainJLIndex& lambda);
+
     //! check equality
     bool operator == (const LDomainJLIndex& lambda) const;
 
@@ -127,6 +133,11 @@ namespace WaveletTL
   //! index of last wavelet on level j >= j0
   LDomainJLIndex
   last_wavelet(const int j);
+
+  //! quickly decide whether a given index would be valid
+  bool index_is_valid(const int j, const int e0, const int e1,
+		      const int c0, const int c1, const int k0, const int k1);
+
 }
 
 #include <Ldomain/ldomain_jl_index.cpp>

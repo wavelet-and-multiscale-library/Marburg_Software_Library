@@ -1,5 +1,7 @@
 #include <iostream>
 #include <fstream>
+#include <set>
+#include <algorithm>
 
 #include <Ldomain/ldomain_jl_basis.h>
 #include <Ldomain/ldomain_jl_support.h>
@@ -31,7 +33,7 @@ int main()
 //   cout << "- rightmost wavelet on the level " << testlevel << ": " << last_wavelet(testlevel) << endl;
 
 #if 0
-  for (int level = basis.j0(); level <= basis.j0()+1; level++) {
+  for (int level = basis.j0(); level <= basis.j0(); level++) {
     cout << "- iterate through all generators and wavelets on level j=" << level << ":" << endl;
     
 //     Index lambda(first_generator(level));
@@ -47,9 +49,52 @@ int main()
 #endif
 
 #if 1
-//   Index lambda = first_generator(basis.j0());
-  Index lambda = first_wavelet(basis.j0());
+  const int j1 = basis.j0()+1;
+  // prepare set of valid wavelet indices
+  set<Index> valid;
+  for (Index lambda = first_generator(j1); lambda <= last_generator(j1); ++lambda) {
+    valid.insert(lambda);
+  }
+  cout << "- a set of 'valid' wavelet indices:" << endl;
+  for (set<Index>::const_iterator it = valid.begin(); it != valid.end(); ++it)
+    cout << *it << endl;
+
+  set<Index> tested;
+
+  for (int c0 = 0; c0 <= 1; c0++)
+    for (int c1 = 0; c1 <= 1; c1++)
+      for (int k0 = -(1<<j1); k0 <= (1<<j1); k0++)
+	for (int k1 = -(1<<j1); k1 <= (1<<j1); k1++) {
+	  if (index_is_valid(j1,0,0,c0,c1,k0,k1))
+	    tested.insert(Index(j1,Index::type_type(0,0),Index::component_type(c0,c1),Index::translation_type(k0,k1)));
+	}
+  cout << "- a set of 'tested' wavelet indices:" << endl;
+  for (set<Index>::const_iterator it = tested.begin(); it != tested.end(); ++it)
+    cout << *it << endl;
+
+  set<Index> tested_but_invalid;
+  set_difference(tested.begin(), tested.end(),
+		 valid.begin(), valid.end(),
+		 inserter(tested_but_invalid, tested_but_invalid.begin()));
+  cout << "- 'tested' but really invalid wavelet indices:" << endl;
+  for (set<Index>::const_iterator it = tested_but_invalid.begin(); it != tested_but_invalid.end(); ++it)
+    cout << *it << endl;
+
+  set<Index> valid_but_not_tested;
+  set_difference(valid.begin(), valid.end(),
+		 tested.begin(), tested.end(),
+		 inserter(valid_but_not_tested, valid_but_not_tested.begin()));
+  cout << "- valid but wrongly tested wavelet indices:" << endl;
+  for (set<Index>::const_iterator it = valid_but_not_tested.begin(); it != valid_but_not_tested.end(); ++it)
+    cout << *it << endl;
+
+#endif  
+
+#if 0
+  Index lambda = first_generator(basis.j0());
+//   Index lambda = first_wavelet(basis.j0());
 //   for (int i = 1; i <= 36; i++) ++lambda;
+  for (int i = 1; i <= 24; i++) ++lambda;
 
   cout << "- evaluating psi_{" << lambda << "}..." << endl;
   std::ofstream psistream("Ldomain_wavelet.m");

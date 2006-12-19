@@ -11,16 +11,16 @@ namespace WaveletTL
       // generator
       supp.j = lambda.j();
       supp.xmin = lambda.k()[0]-1;
-      supp.xmax = lambda.k()[0]+1;
+      supp.xmax = supp.xmin+2;
       supp.ymin = lambda.k()[1]-1;
-      supp.ymax = lambda.k()[1]+1;
+      supp.ymax = supp.ymin+2;
     } else {
       // wavelet
       supp.j = lambda.j()+1;
       supp.xmin = 2*(lambda.k()[0]-1);
-      supp.xmax = 2*(lambda.k()[0]+1);
+      supp.xmax = supp.xmin+4;
       supp.ymin = 2*(lambda.k()[1]-1);
-      supp.ymax = 2*(lambda.k()[1]+1);
+      supp.ymax = supp.ymin+4;
     }
   }
  

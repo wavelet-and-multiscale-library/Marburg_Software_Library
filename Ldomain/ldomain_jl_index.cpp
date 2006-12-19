@@ -16,6 +16,21 @@ namespace WaveletTL
   {
   }
 
+  LDomainJLIndex::LDomainJLIndex(const LDomainJLIndex& lambda)
+    : j_(lambda.j_), e_(lambda.e_), c_(lambda.c_), k_(lambda.k_)
+  {
+  }
+
+  LDomainJLIndex&
+  LDomainJLIndex::operator = (const LDomainJLIndex& lambda)
+  {
+    j_ = lambda.j();
+    e_ = lambda.e();
+    c_ = lambda.c();
+    k_ = lambda.k();
+    return *this;
+  }
+
   bool
   LDomainJLIndex::operator == (const LDomainJLIndex& lambda) const
   {
@@ -87,7 +102,7 @@ namespace WaveletTL
     }
 
     // try to advance k[0]
-    if (k_[0] < (c_[0] == 1 && c_[1] == 1 ? (1<<j_) : (1<<j_)-1)) {
+    if (k_[0] < (c_[0] == 1 ? (1<<j_) : (1<<j_)-1)) {
       k_[0]++; // i.e., we are no longer at the left boundary
       k_[1] = (c_[1] == 0 ? 1-(1<<j_) : -(1<<j_));
       return *this;
@@ -191,4 +206,37 @@ namespace WaveletTL
     const LDomainJLIndex::translation_type k(1<<j,0); // wavelet sits at upper right corner of the "forefoot"
     return LDomainJLIndex(j, e, c, k);
   }
+
+  bool index_is_valid(const int j, const int e0, const int e1,
+		      const int c0, const int c1, const int k0, const int k1)
+  {
+    // return a result as fast as possible
+    if (k0 >= 1-(1<<j) && k0 <= -1 && k1 >= 1-(1<<j) && k1 <= (1<<j)-1) return true; // in "shaft"
+    if (k0 >= 0 && k0 <= (1<<j)-1 && k1 >= 1-(1<<j) && k1 <= -1) return true;        // in "forefoot"
+    if (k0 == -(1<<j)) {
+      if (k1 >= 1-(1<<j) && k1 <= (1<<j)-1 && c0 == 1) return true; // left edge of "shaft"
+      if (k1 == -(1<<j) && c0 == 1 && c1 == 1) return true;         // lower left corner
+      if (k1 == (1<<j) && c0 == 1 && c1 == 1) return true;          // upper left corner
+    }
+    if (k1 == -(1<<j)) {
+      if (k0 >= 1-(1<<j) && k0 <= (1<<j)-1 && c1 == 1) return true; // bottom
+      if (k0 == (1<<j) && c0 == 1 && c1 == 1) return true;          // lower right corner
+    }
+    if (k0 == (1<<j)) {
+      if (k1 >= 1-(1<<j) && k1 <= -1 && c0 == 1) return true;       // right edge of "forefoot"
+      if (k1 == 0 && c0 == 1 && c1 == 1) return true;               // upper right corner of "forefoot"
+    }
+    if (k1 == 0) {
+      if (k0 >= 1 && k0 <= (1<<j)-1 && c1 == 1) return true;        // upper edge of "forefoot"
+      if (k0 == 0 && c0 == 1 && c1 == 1) return true;               // origin
+    }
+    if (k0 == 0) {
+      if (k1 >= 1 && k1 <= (1<<j)-1 && c0 == 1) return true;        // right edge of "shaft"
+      if (k1 == (1<<j) && c0 == 1 && c1 == 1) return true;          // upper right corner of "shaft"
+    }
+    if (k1 == (1<<j) && k0 >= 1-(1<<j) && k0 <= -1 && c1 == 1) return true; // top
+
+    return false;
+  }
+
 }

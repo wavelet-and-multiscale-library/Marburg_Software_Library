@@ -60,13 +60,25 @@ int main()
     evaluate(basis, lambda, 6).matlab_output(cout);
     if (lambda == last_generator(basis.j0())) break;
   }
+#endif
   
+#if 0
   cout << "- evaluating some primal wavelets:" << endl;
   for (Index lambda = first_wavelet(basis.j0());; ++lambda) {
     cout << lambda << endl;
     evaluate(basis, lambda, 6).matlab_output(cout);
     if (lambda == last_wavelet(basis.j0()+1)) break;
   }
+#endif
+
+#if 1
+  cout << "- evaluate refined primal generators:" << endl;
+  Index nu(first_generator(basis.j0()));
+  ++nu;
+  InfiniteVector<double,Index> nucoeffs;
+  basis.reconstruct_1(nu,nu.j()+1,nucoeffs);
+  cout << nu << endl;
+  evaluate(basis, nucoeffs, 6).matlab_output(cout);
 #endif
 
   return 0;

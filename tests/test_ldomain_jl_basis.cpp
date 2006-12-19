@@ -91,7 +91,7 @@ int main()
     cout << *it << endl;
 #endif  
   
-#if 1
+#if 0
   clock_t tstart, tend;
   Index mu = first_generator(basis.j0());
   const int j2 = basis.j0()+8;
@@ -176,6 +176,15 @@ int main()
   for (set<Index>::const_iterator it = valid_but_not_guessed.begin(); it != valid_but_not_guessed.end(); ++it)
     cout << *it << endl;
 
+#endif
+
+#if 1
+//   Index lambda1 = first_wavelet(basis.j0());
+  Index lambda1 = first_generator(basis.j0());
+  InfiniteVector<double,Index> lambda1coeffs;
+  basis.reconstruct_1(lambda1, lambda1.j()+1, lambda1coeffs);
+  cout << "- generator coefficients of psi_{" << lambda1 << "}:" << endl
+       << lambda1coeffs << endl;
 #endif
   
 #if 0

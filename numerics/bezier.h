@@ -209,6 +209,54 @@ namespace MathTL
     int j_, c_, k_;
   };
   
+  /*!
+    tensor product of translated and dilated Hermite interpolants as a function object
+   */
+  class CubicHermiteInterpolant2D_td : public Function<2>
+  {
+  public:
+    //! constructor from j, c, k
+    CubicHermiteInterpolant2D_td(const int j, const int c0, const int c1, const int k0, const int k1)
+      : j_(j), c0_(c0), c1_(c1), k0_(k0), k1_(k1) {}
+    
+    //! virtual destructor
+    virtual ~CubicHermiteInterpolant2D_td() {}
+    
+    //! point value
+    inline double value(const Point<2>& p,
+			const unsigned int component = 0) const
+    {
+      return EvaluateHermiteSpline_td(c0_, j_, k0_, p[0])
+	* EvaluateHermiteSpline_td(c1_, j_, k1_, p[1]);
+    }
+    
+    //! point value
+    void vector_value(const Point<2> &p,
+		      Vector<double>& values) const
+    {
+      values.resize(1, false);
+      values[0] = value(p);
+    }
+    
+    //! set j
+    void set_j(const int j) { j_ = j; }
+    
+    //! set c0
+    void set_c0(const int c0) { c0_ = c0; }
+
+    //! set c1
+    void set_c1(const int c1) { c1_ = c1; }
+
+    //! set k0
+    void set_k0(const int k0) { k0_ = k0; }
+    
+    //! set k1
+    void set_k1(const int k1) { k1_ = k1; }
+    
+  protected:
+    int j_, c0_, c1_, k0_, k1_;
+  };
+  
 }
 
 #include <numerics/bezier.cpp>

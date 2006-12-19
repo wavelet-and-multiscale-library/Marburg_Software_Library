@@ -79,10 +79,51 @@ namespace WaveletTL
 			     const int j, const bool generators,
 			     std::list<Index>& intersecting) 
   {
+    intersecting.clear();
+
+#if 1
+    // fast solution, use that supp(psi_lambda) is contained in 
+    // 2^{-lambda.j}[k0-1,k0+1]x[k1-1,k1+1]
+    if (generators) {
+      for (int k0 = std::max(-(1<<j),(int) floor(ldexp(1.0,j-lambda.j())*(lambda.k()[0]-1)));
+	   k0 <= std::min((1<<j), (int) ceil(ldexp(1.0,j-lambda.j())*(lambda.k()[0]+1))); k0++)
+	for (int k1 = std::max(-(1<<j), (int) floor(ldexp(1.0,j-lambda.j())*(lambda.k()[1]-1)));
+	     k1 <= std::min((1<<j), (int) ceil(ldexp(1.0,j-lambda.j())*(lambda.k()[1]+1))); k1++)
+	  for (int c0 = 0; c0 <= 1; c0++)
+	    for (int c1 = 0; c1 <= 1; c1++) {
+	      if (index_is_valid(j,0,0,c0,c1,k0,k1))
+		intersecting.push_back
+		  (Index(j, Index::type_type(0,0),
+			 Index::component_type(c0,c1),
+			 Index::translation_type(k0,k1)));
+	    }
+    } else {
+      for (int k0 = std::max(-(1<<j),(int) floor(ldexp(1.0,j-lambda.j())*(lambda.k()[0]-1)));
+	   k0 <= std::min((1<<j), (int) ceil(ldexp(1.0,j-lambda.j())*(lambda.k()[0]+1))); k0++)
+	for (int k1 = std::max(-(1<<j), (int) floor(ldexp(1.0,j-lambda.j())*(lambda.k()[1]-1)));
+	     k1 <= std::min((1<<j), (int) ceil(ldexp(1.0,j-lambda.j())*(lambda.k()[1]+1))); k1++)
+	  for (int c0 = 0; c0 <= 1; c0++)
+	    for (int c1 = 0; c1 <= 1; c1++) {
+	      if (index_is_valid(j,0,0,c0,c1,k0,k1)) {
+		intersecting.push_back
+		  (Index(j, Index::type_type(0,1),
+			 Index::component_type(c0,c1),
+			 Index::translation_type(k0,k1)));
+		intersecting.push_back
+		  (Index(j, Index::type_type(1,0),
+			 Index::component_type(c0,c1),
+			 Index::translation_type(k0,k1)));
+		intersecting.push_back
+		  (Index(j, Index::type_type(1,1),
+			 Index::component_type(c0,c1),
+			 Index::translation_type(k0,k1)));
+	      }
+	    }
+    }
+#else
     Support supp, supp_lambda;
     support(basis, lambda, supp_lambda);
     
-#if 1
     // a brute force solution
     if (generators) {
       Index last_gen(last_generator(j));

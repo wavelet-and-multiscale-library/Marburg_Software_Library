@@ -299,6 +299,8 @@ namespace WaveletTL
     typedef typename LDomainBasis<IBASIS>::Index Index;
     typedef typename LDomainBasis<IBASIS>::Support Support;
 
+    intersecting.clear();
+
     Support supp, supp_lambda;
     support(basis, lambda, supp_lambda);
     

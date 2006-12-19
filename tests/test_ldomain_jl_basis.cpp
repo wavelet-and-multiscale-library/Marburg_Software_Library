@@ -1,7 +1,9 @@
 #include <iostream>
 #include <fstream>
 #include <set>
+#include <list>
 #include <algorithm>
+#include <time.h>
 
 #include <Ldomain/ldomain_jl_basis.h>
 #include <Ldomain/ldomain_jl_support.h>
@@ -48,7 +50,7 @@ int main()
   }
 #endif
 
-#if 1
+#if 0
   const int j1 = basis.j0()+1;
   // prepare set of valid wavelet indices
   set<Index> valid;
@@ -71,7 +73,7 @@ int main()
   cout << "- a set of 'tested' wavelet indices:" << endl;
   for (set<Index>::const_iterator it = tested.begin(); it != tested.end(); ++it)
     cout << *it << endl;
-
+  
   set<Index> tested_but_invalid;
   set_difference(tested.begin(), tested.end(),
 		 valid.begin(), valid.end(),
@@ -79,7 +81,7 @@ int main()
   cout << "- 'tested' but really invalid wavelet indices:" << endl;
   for (set<Index>::const_iterator it = tested_but_invalid.begin(); it != tested_but_invalid.end(); ++it)
     cout << *it << endl;
-
+  
   set<Index> valid_but_not_tested;
   set_difference(valid.begin(), valid.end(),
 		 tested.begin(), tested.end(),
@@ -87,9 +89,95 @@ int main()
   cout << "- valid but wrongly tested wavelet indices:" << endl;
   for (set<Index>::const_iterator it = valid_but_not_tested.begin(); it != valid_but_not_tested.end(); ++it)
     cout << *it << endl;
-
 #endif  
+  
+#if 1
+  clock_t tstart, tend;
+  Index mu = first_generator(basis.j0());
+  const int j2 = basis.j0()+8;
+  cout << "* compute all generators on the level " << j2 << " with support intersection to mu=" << mu << ":" << endl;
+  set<Index> bruteforce;
+  Support supp2;
+  tstart = clock();
+  for (Index nu = first_generator(j2); nu <= last_generator(j2); ++nu) {
+    if (intersect_supports(basis, mu, nu, supp2))
+      bruteforce.insert(nu);
+  }
+  tend = clock();
+  cout << "- brute force solution needed " << (double)(tend-tstart)/CLOCKS_PER_SEC << "s" << endl;
+//   cout << "- brute force solution yielded the generators" << endl;
+//   for (set<Index>::const_iterator it = bruteforce.begin(); it != bruteforce.end(); ++it)
+//     cout << *it << endl;
+  
+  list<Index> guessed;
+  tstart = clock();
+  intersecting_wavelets(basis, mu, j2, true, guessed);
+  tend = clock();
+  cout << "- new variant needed " << (double)(tend-tstart)/CLOCKS_PER_SEC << "s" << endl;
+  set<Index> guessed_set;
+  copy(guessed.begin(), guessed.end(), inserter(guessed_set, guessed_set.begin()));
+//   cout << "- new variant of intersecting_wavelets() yielded the generators" << endl;
+//   for (set<Index>::const_iterator it = guessed_set.begin(); it != guessed_set.end(); ++it)
+//     cout << *it << endl;
+  
+  set<Index> guessed_but_invalid;
+  set_difference(guessed_set.begin(), guessed_set.end(),
+		 bruteforce.begin(), bruteforce.end(),
+		 inserter(guessed_but_invalid, guessed_but_invalid.begin()));
+  cout << "- guessed but really invalid wavelet indices:" << endl;
+  for (set<Index>::const_iterator it = guessed_but_invalid.begin(); it != guessed_but_invalid.end(); ++it)
+    cout << *it << endl;
 
+  set<Index> valid_but_not_guessed;
+  set_difference(bruteforce.begin(), bruteforce.end(),
+		 guessed_set.begin(), guessed_set.end(),
+		 inserter(valid_but_not_guessed, valid_but_not_guessed.begin()));
+  cout << "- valid but not guessed wavelet indices:" << endl;
+  for (set<Index>::const_iterator it = valid_but_not_guessed.begin(); it != valid_but_not_guessed.end(); ++it)
+    cout << *it << endl;
+
+  cout << "* compute all wavelets on the level " << j2 << " with support intersection to mu=" << mu << ":" << endl;
+  bruteforce.clear();
+  tstart = clock();
+  for (Index nu = first_wavelet(j2); nu <= last_wavelet(j2); ++nu) {
+    if (intersect_supports(basis, mu, nu, supp2))
+      bruteforce.insert(nu);
+  }
+  tend = clock();
+  cout << "- brute force solution needed " << (double)(tend-tstart)/CLOCKS_PER_SEC << "s" << endl;
+//   cout << "- brute force solution yielded the wavelets" << endl;
+//   for (set<Index>::const_iterator it = bruteforce.begin(); it != bruteforce.end(); ++it)
+//     cout << *it << endl;
+  
+  guessed.clear();
+  tstart = clock();
+  intersecting_wavelets(basis, mu, j2, false, guessed);
+  tend = clock();
+  cout << "- new variant needed " << (double)(tend-tstart)/CLOCKS_PER_SEC << "s" << endl;
+  guessed_set.clear();
+  copy(guessed.begin(), guessed.end(), inserter(guessed_set, guessed_set.begin()));
+//   cout << "- new variant of intersecting_wavelets() yielded the wavelets" << endl;
+//   for (set<Index>::const_iterator it = guessed_set.begin(); it != guessed_set.end(); ++it)
+//     cout << *it << endl;
+  
+  guessed_but_invalid.clear();
+  set_difference(guessed_set.begin(), guessed_set.end(),
+		 bruteforce.begin(), bruteforce.end(),
+		 inserter(guessed_but_invalid, guessed_but_invalid.begin()));
+  cout << "- guessed but really invalid wavelet indices:" << endl;
+  for (set<Index>::const_iterator it = guessed_but_invalid.begin(); it != guessed_but_invalid.end(); ++it)
+    cout << *it << endl;
+
+  valid_but_not_guessed.clear();
+  set_difference(bruteforce.begin(), bruteforce.end(),
+		 guessed_set.begin(), guessed_set.end(),
+		 inserter(valid_but_not_guessed, valid_but_not_guessed.begin()));
+  cout << "- valid but not guessed wavelet indices:" << endl;
+  for (set<Index>::const_iterator it = valid_but_not_guessed.begin(); it != valid_but_not_guessed.end(); ++it)
+    cout << *it << endl;
+
+#endif
+  
 #if 0
   Index lambda = first_generator(basis.j0());
 //   Index lambda = first_wavelet(basis.j0());

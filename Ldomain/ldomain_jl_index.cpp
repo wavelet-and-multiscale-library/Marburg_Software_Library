@@ -213,26 +213,28 @@ namespace WaveletTL
     // return a result as fast as possible
     if (k0 >= 1-(1<<j) && k0 <= -1 && k1 >= 1-(1<<j) && k1 <= (1<<j)-1) return true; // in "shaft"
     if (k0 >= 0 && k0 <= (1<<j)-1 && k1 >= 1-(1<<j) && k1 <= -1) return true;        // in "forefoot"
-    if (k0 == -(1<<j)) {
-      if (k1 >= 1-(1<<j) && k1 <= (1<<j)-1 && c0 == 1) return true; // left edge of "shaft"
-      if (k1 == -(1<<j) && c0 == 1 && c1 == 1) return true;         // lower left corner
-      if (k1 == (1<<j) && c0 == 1 && c1 == 1) return true;          // upper left corner
+    if (k0 == -(1<<j) && c0 == 1) {
+      if (k1 >= 1-(1<<j) && k1 <= (1<<j)-1) return true; // left edge of "shaft"
+      if (c1 == 1) {
+	if (k1 == -(1<<j)) return true;         // lower left corner
+	if (k1 == (1<<j)) return true;          // upper left corner
+      }
     }
-    if (k1 == -(1<<j)) {
-      if (k0 >= 1-(1<<j) && k0 <= (1<<j)-1 && c1 == 1) return true; // bottom
-      if (k0 == (1<<j) && c0 == 1 && c1 == 1) return true;          // lower right corner
+    if (k1 == -(1<<j) && c1 == 1) {
+      if (k0 >= 1-(1<<j) && k0 <= (1<<j)-1) return true; // bottom
+      if (k0 == (1<<j) && c0 == 1) return true;          // lower right corner
     }
-    if (k0 == (1<<j)) {
-      if (k1 >= 1-(1<<j) && k1 <= -1 && c0 == 1) return true;       // right edge of "forefoot"
-      if (k1 == 0 && c0 == 1 && c1 == 1) return true;               // upper right corner of "forefoot"
+    if (k0 == (1<<j) && c0 == 1) {
+      if (k1 >= 1-(1<<j) && k1 <= -1) return true;       // right edge of "forefoot"
+      if (k1 == 0 && c1 == 1) return true;               // upper right corner of "forefoot"
     }
-    if (k1 == 0) {
-      if (k0 >= 1 && k0 <= (1<<j)-1 && c1 == 1) return true;        // upper edge of "forefoot"
-      if (k0 == 0 && c0 == 1 && c1 == 1) return true;               // origin
+    if (k1 == 0 && c1 == 1) {
+      if (k0 >= 1 && k0 <= (1<<j)-1) return true;        // upper edge of "forefoot"
+      if (k0 == 0 && c0 == 1) return true;               // origin
     }
-    if (k0 == 0) {
-      if (k1 >= 1 && k1 <= (1<<j)-1 && c0 == 1) return true;        // right edge of "shaft"
-      if (k1 == (1<<j) && c0 == 1 && c1 == 1) return true;          // upper right corner of "shaft"
+    if (k0 == 0 && c0 == 1) {
+      if (k1 >= 1 && k1 <= (1<<j)-1) return true;        // right edge of "shaft"
+      if (k1 == (1<<j) && c1 == 1) return true;          // upper right corner of "shaft"
     }
     if (k1 == (1<<j) && k0 >= 1-(1<<j) && k0 <= -1 && c1 == 1) return true; // top
 

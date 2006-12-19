@@ -206,8 +206,8 @@ namespace WaveletTL
 
 
       
-      cout << "In reconstruct_1(), coeffs[0]=" << endl << coeffs[0] << endl
-	   << "coeffs[1]=" << endl << coeffs[1] << endl;
+//       cout << "In reconstruct_1(), coeffs[0]=" << endl << coeffs[0] << endl
+// 	   << "coeffs[1]=" << endl << coeffs[1] << endl;
     }
   }
 

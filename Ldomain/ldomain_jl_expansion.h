@@ -7,45 +7,44 @@
 // | Thorsten Raasch, Manuel Werner                                     |
 // +--------------------------------------------------------------------+
 
-#ifndef _WAVELETTL_LDOMAIN_EXPANSION_H
-#define _WAVELETTL_LDOMAIN_EXPANSION_H
+#ifndef _WAVELETTL_LDOMAIN_JL_EXPANSION_H
+#define _WAVELETTL_LDOMAIN_JL_EXPANSION_H
 
 #include <utils/function.h>
+#include <geometry/sampled_mapping.h>
 #include <algebra/infinite_vector.h>
+#include <Ldomain/ldomain_jl_basis.h>
 
 using MathTL::SampledMapping;
 using MathTL::InfiniteVector;
+using MathTL::Function;
 
 namespace WaveletTL
 {
-  template <class IBASIS> class LDomainBasis;
+  typedef LDomainJLBasis::Index Index;
 
   /*!
     helper function, integrate a smooth function f against a
     primal Ldomain generator or wavelet
   */
-  template <class IBASIS>
   double integrate(const Function<2>* f,
-		   const LDomainBasis<IBASIS>& basis,
-		   const typename LDomainBasis<IBASIS>::Index& lambda);
+		   const LDomainJLBasis& basis,
+		   const Index& lambda);
 
   /*!
     For a given function, compute all integrals w.r.t. the primal
     generators/wavelets (primal=true)
     or approximate the expansion coefficients w.r.t. the primal basis
     (primal=false)
-
-    remark: at the moment, "primal" is a dummy variable yet.
   */
-  template <class IBASIS>
   void
   expand(const Function<2>* f,
-	 const LDomainBasis<IBASIS>& basis,
+	 const LDomainJLBasis& basis,
 	 const bool primal,
 	 const int jmax,
-	 InfiniteVector<double, typename LDomainBasis<IBASIS>::Index>& coeffs);
+	 InfiniteVector<double,Index>& coeffs);
 }
 
-#include <Ldomain/ldomain_expansion.cpp>
+#include <Ldomain/ldomain_jl_expansion.cpp>
 
 #endif

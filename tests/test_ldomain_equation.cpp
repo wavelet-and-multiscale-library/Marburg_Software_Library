@@ -21,49 +21,19 @@
 #include <galerkin/ldomain_equation.h>
 #include <galerkin/ldomain_helmholtz_equation.h>
 
+#include "ldomain_solutions.h"
+
 using namespace std;
 using namespace MathTL;
 using namespace WaveletTL;
-
-/*
-  A test problem for the Poisson equation on the L--shaped domain with homogeneous Dirichlet b.c.'s:
-    -Delta u(x,y) = 2*pi^2*sin(pi*x)*sin(pi*y)
-  with exact solution
-    u(x,y) = sin(pi*x)*sin(pi*y)
-*/
-class myRHS
-  : public Function<2,double>
-{
-public:
-  virtual ~myRHS() {};
-  double value(const Point<2>& p, const unsigned int component = 0) const {
-    return 2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1]);
-  }
-  void vector_value(const Point<2>& p, Vector<double>& values) const {
-    values[0] = value(p);
-  }
-};
-
-class mySolution
-  : public Function<2,double>
-{
-public:
-  virtual ~mySolution() {};
-  double value(const Point<2>& p, const unsigned int component = 0) const {
-    return sin(M_PI*p[0])*sin(M_PI*p[1]);
-  }
-  void vector_value(const Point<2>& p, Vector<double>& values) const {
-    values[0] = value(p);
-  }
-};
 
 
 int main()
 {
   cout << "Testing wavelet-Galerkin solution of an elliptic equation on the L-shaped domain ..." << endl;
 
-  const int d  = 3;
-  const int dT = 3;
+  const int d  = 2;
+  const int dT = 2;
   typedef DSBasis<d,dT,BernsteinSVD> Basis1D;
 //   typedef PBasis<d,dT> Basis1D;
   
@@ -79,7 +49,7 @@ int main()
 #if 0
   PoissonBVP<2> poisson(&f_sing);
 #else
-  myRHS rhs;
+  EigenRHS rhs;
   PoissonBVP<2> poisson(&rhs);
 #endif
 
@@ -155,7 +125,7 @@ int main()
   matlab_output(u_Lambda_stream, s);
   u_Lambda_stream.close();
   cout << "  ... done, see file 'u_lambda.m'" << endl;
-//   mySolution u_Lambda;
+//   EigenSolution u_Lambda;
 //   s.add(-1.0, SampledMapping<2>(s, u_Lambda));
 //   cout << "  ... done, pointwise error: " << row_sum_norm(s.values()) << endl;
 #endif

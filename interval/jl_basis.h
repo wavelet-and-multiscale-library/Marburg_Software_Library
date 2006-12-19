@@ -78,7 +78,7 @@ namespace WaveletTL
     static const int space_dimension = 1;
 
     //! critical Sobolev regularity for the primal generators/wavelets
-    static double primal_regularity() { return 3.5; }
+    static double primal_regularity() { return 2.5; }
 
     //! degree of polynomial reproduction for the primal generators/wavelets
     static unsigned int primal_polynomial_degree() { return 4; }

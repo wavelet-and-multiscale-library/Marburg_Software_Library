@@ -40,8 +40,8 @@ endif
 endif
 endif
 
-#CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
-CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+#CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -ffast-math -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -funroll-loops -fomit-frame-pointer -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
@@ -99,7 +99,9 @@ EXEOBJF3 = \
 EXEOBJF4 = \
   test_ldomain_index.o test_ldomain_support.o test_ldomain_basis.o\
   test_ldomain_equation.o\
-  test_ldomain_jl_basis.o test_ldomain_jl_support.o
+  test_ldomain_jl_basis.o test_ldomain_jl_support.o\
+  test_ldomain_jl_gramian.o\
+  test_ldomain_helmholtz_equation.o
 
 # set 5 of test programs: adaptive wavelet schemes for elliptic equations
 EXEOBJF5 = \

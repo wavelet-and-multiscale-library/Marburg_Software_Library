@@ -16,7 +16,7 @@ namespace WaveletTL
 
     double r = 0;
 
-    // compute the generator expansion of lambda
+    // compute the generator expansion of psi_lambda
     InfiniteVector<double, Index> gcoeffs;
     const int level = lambda.j()+ (lambda.e()[0]==1 || lambda.e()[1]==1 ? 1 : 0);
     basis.reconstruct_1(lambda, level, gcoeffs);

@@ -11,6 +11,7 @@
 #define _MATHTL_BEZIER_H
 
 #include <cmath>
+#include <utils/function.h>
 
 namespace MathTL
 {
@@ -166,6 +167,47 @@ namespace MathTL
     const double factor(ldexp(1.0, j));
     return factor * sqrt(factor) * EvaluateHermiteSpline_x(i, factor * x - k);
   }
+
+  /*!
+    translated and dilated Hermite interpolant as a function object
+   */
+  class CubicHermiteInterpolant_td : public Function<1>
+  {
+  public:
+    //! constructor from j, c, k
+    CubicHermiteInterpolant_td(const int j, const int c, const int k)
+      : j_(j), c_(c), k_(k) {}
+    
+    //! virtual destructor
+    virtual ~CubicHermiteInterpolant_td() {}
+    
+    //! point value
+    inline double value(const Point<1>& p,
+			const unsigned int component = 0) const
+    {
+      return EvaluateHermiteSpline_td(c_, j_, k_, p[0]);
+    }
+    
+    //! point value
+    void vector_value(const Point<1> &p,
+		      Vector<double>& values) const
+    {
+      values.resize(1, false);
+      values[0] = value(p);
+    }
+    
+    //! set j
+    void set_j(const int j) { j_ = j; }
+    
+    //! set c
+    void set_c(const int c) { c_ = c; }
+
+    //! set k
+    void set_k(const int k) { k_ = k; }
+    
+  protected:
+    int j_, c_, k_;
+  };
   
 }
 

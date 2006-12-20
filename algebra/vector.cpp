@@ -364,7 +364,7 @@ namespace MathTL
 
   template <class C>
   template <class C2>
-  const C Vector<C>::operator * (const Vector<C2>& v) const
+  const C Vector<C>::inner_product (const Vector<C2>& v) const
   {
     assert(size_ == v.size());
 
@@ -379,6 +379,13 @@ namespace MathTL
       r += *it++ * *itv++;
 
     return r;
+  }
+
+  template <class C>
+  template <class C2>
+  const C Vector<C>::operator * (const Vector<C2>& v) const
+  {
+    return inner_product(v); // handles the assertions
   }
 
   template <class C>

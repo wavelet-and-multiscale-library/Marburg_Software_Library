@@ -243,6 +243,12 @@ namespace MathTL
     Vector<C>& operator -= (const Vector<C2>& v);
 
     /*!
+      inner product
+    */
+    template <class C2>
+    const C inner_product (const Vector<C2>& v) const;
+
+    /*!
       in place multiplication with a scalar
     */
     Vector<C>& operator *= (const C c);

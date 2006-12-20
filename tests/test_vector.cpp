@@ -49,6 +49,9 @@ int main()
   v /= 3;
   cout << v << endl;
 
+  cout << "- inner product v.w:" << endl;
+  cout << v.inner_product(w) << endl;
+
   cout << "- ell_p norms of v:" << endl;
   cout << "  ||x||_2 = " << l2_norm(v)
        << ", ||x||_1 = " << l1_norm(v)

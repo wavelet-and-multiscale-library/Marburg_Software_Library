@@ -40,27 +40,27 @@ namespace WaveletTL
 	MathTL::ProductFunction<2> integrand(f, &generator);
 	
  	if (k0 >= 1-(1<<level) && k1 >= 1-(1<<level)) { // lower left subsquare
- 	  r += gauss2d.integrate(integrand,
-				 MathTL::Point<2>((k0-1)*h,(k1-1)*h),
-				 MathTL::Point<2>(    k0*h,    k1*h));
+ 	  r += *it * gauss2d.integrate(integrand,
+				       MathTL::Point<2>((k0-1)*h,(k1-1)*h),
+				       MathTL::Point<2>(    k0*h,    k1*h));
 	}
 
 	if (!(k1 == -(1<<level) || k0 == (1<<level) || (k0 == 0 && k1 >= 1))) { // lower right subsquare
- 	  r += gauss2d.integrate(integrand,
-				 MathTL::Point<2>(    k0*h,(k1-1)*h),
-				 MathTL::Point<2>((k0+1)*h,    k1*h));
+ 	  r += *it * gauss2d.integrate(integrand,
+				       MathTL::Point<2>(    k0*h,(k1-1)*h),
+				       MathTL::Point<2>((k0+1)*h,    k1*h));
 	}
 
 	if (!(k0 == -(1<<level) || k1 == (1<<level) || (k1 == 0 && k0 >= 1))) { // upper left subsquare
- 	  r += gauss2d.integrate(integrand,
-				 MathTL::Point<2>((k0-1)*h,    k1*h),
-				 MathTL::Point<2>(    k0*h,(k1+1)*h));
+ 	  r += *it * gauss2d.integrate(integrand,
+				       MathTL::Point<2>((k0-1)*h,    k1*h),
+				       MathTL::Point<2>(    k0*h,(k1+1)*h));
 	}
 
 	if (!(k1 == (1<<level) || (k0 == 0 && k1 >= 0) || (k1 == 0 && k0 >= 0) || k0 == (1<<level))) { // upper right subsquare
- 	  r += gauss2d.integrate(integrand,
-				 MathTL::Point<2>(    k0*h,    k1*h),
-				 MathTL::Point<2>((k0+1)*h,(k1+1)*h));
+ 	  r += *it * gauss2d.integrate(integrand,
+				       MathTL::Point<2>(    k0*h,    k1*h),
+				       MathTL::Point<2>((k0+1)*h,(k1+1)*h));
 	}
       }
     
@@ -78,7 +78,7 @@ namespace WaveletTL
     for (Index lambda = first_generator(j0);;++lambda)
       {
 	const double coeff = integrate(f, basis, lambda);
-	if (fabs(coeff) > 1e-15)
+	if (fabs(coeff) > 1e-14)
 	  coeffs.set_coefficient(lambda, coeff);
  	if (lambda == last_wavelet(jmax))
  	  break;

@@ -16,17 +16,20 @@ namespace WaveletTL
   LDomainJLBasis::reconstruct_1(const Index& lambda,
 				const int j,
 				InfiniteVector<double, Index>& c) const {
-    assert(lambda.j()+1 == j); // we assume that we only have to perform one step
-    
-    // perform 2 1D reconstruct_1() calls, we only store the k parameters
-    FixedArray1D<InfiniteVector<double,int>,2> coeffs0, coeffs1; // for c=0,1 resp.
-    for (int n = 0; n <= 1; n++) {
+    if (lambda.j() >= j) {
+      c.add_coefficient(lambda, 1.0);
+    } else {
+      assert(lambda.j()+1 == j); // we assume that we only have to perform one step
+      
+      // perform 2 1D reconstruct_1() calls, we only store the k parameters
+      FixedArray1D<InfiniteVector<double,int>,2> coeffs0, coeffs1; // for c=0,1 resp.
+      for (int n = 0; n <= 1; n++) {
 	if (lambda.e()[n] == 0) {
 	  // generator
 	  if (lambda.c()[n] == 0) {
 	    // type phi_0
 	    // phi_0(x) = 1/2*phi_0(2*x+1)+phi_0(2*x)+1/2*phi_0(2*x-1)+3/4*phi_1(2*x+1)-3/4*phi_1(2*x-1)
-	  
+	    
 	    int m = 2*lambda.k()[n]-1; // m-2k=-1
 	    coeffs0[n].add_coefficient(m, 0.5*M_SQRT1_2);  // phi_0(2x+1)
 	    coeffs1[n].add_coefficient(m, 0.75*M_SQRT1_2); // phi_1(2x+1)
@@ -93,7 +96,7 @@ namespace WaveletTL
 	  }
 	}
       } // end for (int n = 0; n <= 1; n++)
-
+      
 //       cout << "In reconstruct_1() for lambda=" << lambda << "," << endl
 // 	   << "coeffs0[0]=" << endl << coeffs0[0] << endl
 // 	   << "coeffs1[0]=" << endl << coeffs1[0] << endl
@@ -147,6 +150,7 @@ namespace WaveletTL
 			      *it10 * *it11);  
 	}
       }
+    }
   }
   
 }

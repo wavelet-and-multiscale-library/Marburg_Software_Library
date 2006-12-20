@@ -178,7 +178,7 @@ int main()
 
 #endif
 
-#if 1
+#if 0
 //   Index lambda1 = first_wavelet(basis.j0());
   Index lambda1 = first_generator(basis.j0());
   InfiniteVector<double,Index> lambda1coeffs;
@@ -187,17 +187,26 @@ int main()
        << lambda1coeffs << endl;
 #endif
   
-#if 0
-  Index lambda = first_generator(basis.j0());
-//   Index lambda = first_wavelet(basis.j0());
-//   for (int i = 1; i <= 36; i++) ++lambda;
-  for (int i = 1; i <= 24; i++) ++lambda;
+#if 1
+//   Index lambda = first_generator(basis.j0());
+  Index lambda = first_wavelet(basis.j0());
+//   for (int i = 1; i <= 5; i++) ++lambda;
+  for (int i = 1; i <= 37; i++) ++lambda;
+//   for (int i = 1; i <= 24; i++) ++lambda;
 
   cout << "- evaluating psi_{" << lambda << "}..." << endl;
   std::ofstream psistream("Ldomain_wavelet.m");
   matlab_output(psistream, evaluate(basis, lambda, 6));
   psistream.close();
   cout << "  ...done, see file Ldomain_wavelet.m!" << endl;
+
+
+  InfiniteVector<double,Index> lambdacoeffs;
+  basis.reconstruct_1(lambda, lambda.j()+1, lambdacoeffs);
+  cout << "- evaluate psi_lambda again, on a higher level..." << endl;
+  psistream.open("Ldomain_wavelet2.m");
+  matlab_output(psistream, evaluate(basis, lambdacoeffs, 6));
+  psistream.close();
 #endif
 
   return 0;

@@ -71,15 +71,15 @@ namespace WaveletTL
     void reconstruct_1(const Index& lambda, const int j,
 		       InfiniteVector<double,Index>& c) const;
 
-    //! RECONSTRUCT routine, full version
-    /*!
-      Constructs for a given coefficient set c another one v,
-      such that
-      \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
-      where always |\lambda'|>=j
-    */
-    void reconstruct(const InfiniteVector<double, Index>& c, const int j,
-		     InfiniteVector<double, Index>& v) const;
+//     //! RECONSTRUCT routine, full version
+//     /*!
+//       Constructs for a given coefficient set c another one v,
+//       such that
+//       \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
+//       where always |\lambda'|>=j
+//     */
+//     void reconstruct(const InfiniteVector<double, Index>& c, const int j,
+// 		     InfiniteVector<double, Index>& v) const;
 
   protected:
     //! coarsest level

@@ -1,6 +1,7 @@
 // implementation for spline_basis_data.h
 
 #include <sstream>
+#include <cstring>
 
 namespace WaveletTL
 {
@@ -150,7 +151,7 @@ namespace WaveletTL
       Mj0_(0), Mj1_(0), Mj0T_(0), Mj1T_(0)
   {
     if (s0==0 && s1==0 && sT0==0 && sT1==0) {
-      if (options == "bio5") {
+      if (strcmp(options,"bio5") == 0) {
 // 	j0_ = 3;
 	j0_ = 2;
 	std::ostringstream entries;
@@ -199,7 +200,7 @@ namespace WaveletTL
 	Mj1T_ = new QuasiStationaryMatrix<double>(j0_, 9, 4, Mj1T_l, Mj1T_r, Mj1T_band_lr, Mj1T_band_lr, 4, 4, 1.0);
       }
 
-      if (options == "bio5-energy") {
+      if (strcmp(options,"bio5-energy") == 0) {
 // 	j0_ = 3;
 	j0_ = 2;
 	std::ostringstream entries;

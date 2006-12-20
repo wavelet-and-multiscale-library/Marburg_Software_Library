@@ -11,6 +11,7 @@
 #define _WAVELETTL_LDOMAIN_JL_BASIS_H
 
 #include <Ldomain/ldomain_jl_index.h>
+#include <Rd/r_mw_index.h>
 #include <algebra/infinite_vector.h>
 
 using MathTL::InfiniteVector;
@@ -71,6 +72,12 @@ namespace WaveletTL
     void reconstruct_1(const Index& lambda, const int j,
 		       InfiniteVector<double,Index>& c) const;
 
+    /*!
+      helper function for 1D reconstruct_1() calls
+    */
+    void reconstruct_1_1d(const RMWIndex& lambda, const int j,
+			  InfiniteVector<double,RMWIndex>& c) const;
+
 //     //! RECONSTRUCT routine, full version
 //     /*!
 //       Constructs for a given coefficient set c another one v,
@@ -80,6 +87,21 @@ namespace WaveletTL
 //     */
 //     void reconstruct(const InfiniteVector<double, Index>& c, const int j,
 // 		     InfiniteVector<double, Index>& v) const;
+
+    //! index of first generator on level j >= j0
+    Index first_generator(const int j) const;
+      
+    //! index of last generator on level j >= j0
+    Index last_generator(const int j) const;
+      
+    //! index of first wavelet on level j >= j0
+    Index first_wavelet(const int j) const;
+      
+    //! index of first wavelet on level j >= j0 with type e
+    Index first_wavelet(const int j, const Index::type_type& e) const;
+
+    //! index of last wavelet on level j >= j0
+    Index last_wavelet(const int j) const;
 
   protected:
     //! coarsest level

@@ -6,6 +6,7 @@
 #include <Rd/cdf_mask.h>
 #include <Rd/r_basis.h>
 #include <Rd/r_index.h>
+#include <Rd/r_mw_index.h>
 #include <Rd/cdf_basis.h>
 #include <Rd/cdf_utils.h>
 
@@ -118,6 +119,12 @@ int main()
 		  (int)floor(ldexp(1.0, -lambda.j())*k1), (int)ceil(ldexp(1.0, -lambda.j())*k2),
 		  10).matlab_output(fs);
 #endif
+
+  cout << "- testing multiwavelet index class RMWIndex:" << endl;
+  RMWIndex rmwindex;
+  cout << "  * default index: " << rmwindex << endl;
+  rmwindex = RMWIndex(42, 1, 1, -23);
+  cout << "  * a crude index: " << rmwindex << endl;
 
   return 0;
 }

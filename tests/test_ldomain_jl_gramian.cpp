@@ -61,7 +61,8 @@ int main()
   set<Index> Lambda;
   for (Index lambda = basis.first_generator(basis.j0());; ++lambda) {
     Lambda.insert(lambda);
-    if (lambda == basis.last_wavelet(basis.j0())) break;
+//     if (lambda == basis.last_generator(basis.j0())) break;
+    if (lambda == basis.last_wavelet(jmax)) break;
   }
   
   cout << "- set up Gramian matrix..." << endl;

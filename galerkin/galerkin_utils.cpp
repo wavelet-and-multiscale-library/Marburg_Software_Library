@@ -32,11 +32,11 @@ namespace WaveletTL
 // 	    if (intersect_singular_support(P.basis(), *it1, *it2)) {
 	    const double entry = P.a(*it2, *it1);
 #if _WAVELETTL_GALERKINUTILS_VERBOSITY >= 2
- 	    if (entry != 0) {
+ 	    if (fabs(entry) > 1e-15) {
  	      cout << " column: " << *it2 <<  ", value " << entry << endl;
  	    }
 #endif
-	    if (entry != 0) {
+	    if (fabs(entry) > 1e-15) {
 		indices.push_back(column);
 		entries.push_back(entry / (d1 * (preconditioned ? P.D(*it2) : 1.0)));
 	    }

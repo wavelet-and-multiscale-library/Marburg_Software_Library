@@ -1,10 +1,7 @@
 // implementation for ldomain_jl_gramian.h
 
 #include <Ldomain/ldomain_jl_support.h>
-#include <numerics/quadrature.h>
-#include <numerics/gauss_quadrature.h>
 #include <numerics/gauss_data.h>
-#include <numerics/bezier.h>
 #include <interval/jl_utils.h>
 
 namespace WaveletTL

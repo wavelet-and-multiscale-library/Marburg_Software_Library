@@ -1,6 +1,7 @@
 // implementation for jl_basis.h
 
 #include <cmath>
+#include <interval/jl_utils.h>
 
 namespace WaveletTL
 {
@@ -68,8 +69,13 @@ namespace WaveletTL
     if (lambda.j() >= j)
       c.set_coefficient(lambda, 1.0); 
     else {
+#if _JL_PRECOND==0
       const double phi0factor = sqrt(35./26.);
       const double phi1factor = sqrt(105./2.);
+#else
+      const double phi0factor = sqrt(5./12.);
+      const double phi1factor = sqrt(15./4.);
+#endif
       if (lambda.e() == 0) {
  	// generator
 	if (lambda.c() == 0) {
@@ -150,7 +156,11 @@ namespace WaveletTL
 	if (lambda.c() == 0) {
  	  // type psi_0
  	  // psi_0(x) = -2*phi_0(2*x+1)+4*phi_0(2*x)-2*phi_0(2*x-1)-21*phi_1(2*x+1)+21*phi_1(2*x-1)
+#if _JL_PRECOND==0
 	  const double factor = sqrt(35./352.);
+#else
+	  const double factor = sqrt(5./3648.);
+#endif
 
 	  int m = 2*lambda.k()-1; // m-2k=-1
 	  { // phi_0(2x+1)
@@ -187,7 +197,11 @@ namespace WaveletTL
 	} else { // lambda.c() == 1
  	  // type psi_1
  	  // psi_1(x) = phi_0(2*x+1)-phi_0(2*x-1)+ 9*phi_1(2*x+1)+12*phi_1(2*x)+ 9*phi_1(2*x-1)
+#if _JL_PRECOND==0
 	  const double factor = sqrt(35./48.);
+#else
+	  const double factor = sqrt(5./768.);
+#endif
 	  
 	  int m = 2*lambda.k()-1; // m-2k=-1
 	  { // phi_0(2x+1)

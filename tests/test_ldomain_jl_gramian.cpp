@@ -3,10 +3,12 @@
 
 #include <utils/function.h>
 #include <algebra/sparse_matrix.h>
+#include <numerics/iteratsolv.h>
 #include <Ldomain/ldomain_jl_basis.h>
+#include <Ldomain/ldomain_jl_evaluate.h>
 #include <Ldomain/ldomain_jl_expansion.h>
 
-#define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
 #include <galerkin/ldomain_jl_gramian.h>
 #include <galerkin/galerkin_utils.h>
 
@@ -55,8 +57,8 @@ int main()
   expand(f, basis, true, jmax, fcoeffs);
   problem.set_rhs(fcoeffs);
 
-//   cout << "- integrals of f against the primal wavelets:" << endl
-//        << fcoeffs << endl;
+  cout << "- integrals of f against the primal wavelets:" << endl
+       << fcoeffs << endl;
 
   set<Index> Lambda;
   for (Index lambda = basis.first_generator(basis.j0());; ++lambda) {
@@ -80,7 +82,38 @@ int main()
   A.matlab_output("LdomainJL_gramian", "G", 1);
 #endif
 
+  cout << "- set up right-hand side..." << endl;
+  tstart = clock();
+  Vector<double> b;
+  setup_righthand_side(problem, Lambda, b);
+  tend = clock();
+  time = (double)(tend-tstart)/CLOCKS_PER_SEC;
+  cout << "  ... done, time needed: " << time << " seconds" << endl;
+//   cout << "- right hand side: " << b << endl;
 
+  Vector<double> x(Lambda.size()), err(Lambda.size()); x = 0;
+  unsigned int iterations;
+  CG(A, b, x, 1e-15, 200, iterations);
+  
+//   cout << "- solution coefficients: " << x;
+  cout << "- residual (infinity) norm: ";
+  A.apply(x, err);
+  err -= b;
+  cout << linfty_norm(err) << endl;
+  
+#if 1
+  cout << "- point values of the solution:" << endl;
+  InfiniteVector<double,Index> u;
+  unsigned int i = 0;
+  for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
+    u.set_coefficient(*it, x[i]);
+  u.scale(&problem, -1);
+  Array1D<SampledMapping<2> > s(evaluate(problem.basis(), u, 5));
+  std::ofstream u_Lambda_stream("u_lambda.m");
+  matlab_output(u_Lambda_stream, s);
+  u_Lambda_stream.close();
+  cout << "  ... done, see file 'u_lambda.m'" << endl;
+#endif
 
   if (uexact) delete uexact;
   if (f) delete f;

@@ -47,20 +47,15 @@ namespace WaveletTL
     LDomainJLGramian(const WaveletBasis& basis,
 		     const InfiniteVector<double,Index>& y);
     
-//     /*!
-//       copy constructor
-//     */
-//     IntervalGramian(const IntervalGramian&);
-
-//     /*!
-//       read access to the basis
-//     */
-//     const WaveletBasis& basis() const { return basis_; }
+    /*!
+      read access to the basis
+    */
+    const WaveletBasis& basis() const { return basis_; }
     
-//     /*!
-//       index type of vectors and matrices
-//     */
-//     typedef typename Vector<double>::size_type size_type;
+    /*!
+      index type of vectors and matrices
+    */
+    typedef Vector<double>::size_type size_type;
 
     /*!
       space dimension of the problem
@@ -80,7 +75,8 @@ namespace WaveletTL
     /*!
       evaluate the diagonal preconditioner D
     */
-    double D(const WaveletBasis::Index& lambda) const { return sqrt(a(lambda,lambda)); }
+//     double D(const WaveletBasis::Index& lambda) const { return sqrt(a(lambda,lambda)); }
+    double D(const WaveletBasis::Index& lambda) const { return 1; }
 
     /*!
       evaluate the (unpreconditioned) bilinear form a
@@ -113,12 +109,12 @@ namespace WaveletTL
 //       return 2*norm_A(); // suboptimal
 //     }
 
-//     /*!
-//       evaluate the (unpreconditioned) right-hand side f
-//     */
-//     double f(const typename WaveletBasis::Index& lambda) const {
-//       return y_.get_coefficient(lambda);
-//     }
+    /*!
+      evaluate the (unpreconditioned) right-hand side f
+    */
+    double f(const Index& lambda) const {
+      return y_.get_coefficient(lambda);
+    }
 
 //     /*!
 //       approximate the wavelet coefficient set of the preconditioned right-hand side F

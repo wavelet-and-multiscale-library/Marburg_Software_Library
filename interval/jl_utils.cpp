@@ -2,8 +2,8 @@
 
 #include <numerics/bezier.h>
 
-#define _JL_PRECOND 0 // ||phi_i||_2=1
-// #define _JL_PRECOND 1 // ||phi'_i||_2=1
+// #define _JL_PRECOND 0 // ||phi_i||_2=1
+#define _JL_PRECOND 1 // ||phi'_i||_2=1
 
 namespace WaveletTL
 {

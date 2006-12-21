@@ -32,7 +32,7 @@ namespace WaveletTL
 	
 	// iterate through the subsquares of supp and compute the integral shares
  	const double h = ldexp(1.0, -supp.j); // sidelength of the subsquare
-	const int N_Gauss = 6;
+	const int N_Gauss = 4;
 	FixedArray1D<Array1D<double>,2> gauss_points, gauss_weights;
 	for (int i = 0; i <= 1; i++) {
 	  gauss_points[i].resize(N_Gauss);
@@ -46,20 +46,19 @@ namespace WaveletTL
  	  psi_mu_values;         // -"-, for psi_mu
 	Array1D<double> dummy;
  	for (k[0] = supp.xmin; k[0] < supp.xmax; k[0]++) {
+	  for (int ii = 0; ii < N_Gauss; ii++)
+	    gauss_points[0][ii] = h*(2*k[0]+1+GaussPoints[N_Gauss-1][ii])/2.;
+	  evaluate(lambda.j(), lambda.e()[0], lambda.c()[0], lambda.k()[0],
+		   gauss_points[0], psi_lambda_values[0], dummy);
+	  evaluate(mu.j(), mu.e()[0], mu.c()[0], mu.k()[0],
+		   gauss_points[0], psi_mu_values[0], dummy);
+	  double factor0 = 0;
+	  for (int i0 = 0; i0 < N_Gauss; i0++)
+	    factor0 += gauss_weights[0][i0] * psi_lambda_values[0][i0] * psi_mu_values[0][i0];
  	  for (k[1] = supp.ymin; k[1] < supp.ymax; k[1]++) {
  	    // check whether 2^{-supp.j}[k0,k0+1]x[k1,k1+1] is contained in Omega
  	    if ((k[0] >= -(1<<supp.j) && k[0] < (1<<supp.j) && k[1] >= -(1<<supp.j) && k[1] < 0)
  		|| (k[0] >= -(1<<supp.j) && k[0] < 0 && k[1] >= 0 && k[1] < (1<<supp.j))) {
- 	      for (int ii = 0; ii < N_Gauss; ii++)
- 		gauss_points[0][ii] = h*(2*k[0]+1+GaussPoints[N_Gauss-1][ii])/2.;
- 	      evaluate(lambda.j(), lambda.e()[0], lambda.c()[0], lambda.k()[0],
- 		       gauss_points[0], psi_lambda_values[0], dummy);
-  	      evaluate(mu.j(), mu.e()[0], mu.c()[0], mu.k()[0],
-  		       gauss_points[0], psi_mu_values[0], dummy);
- 	      double factor0 = 0;
-	      for (int i0 = 0; i0 < N_Gauss; i0++)
-		factor0 += gauss_weights[0][i0] * psi_lambda_values[0][i0] * psi_mu_values[0][i0];
-	      
 	      for (int ii = 0; ii < N_Gauss; ii++)
 		gauss_points[1][ii] = h*(2*k[1]+1+GaussPoints[N_Gauss-1][ii])/2.;
 	      evaluate(lambda.j(), lambda.e()[1], lambda.c()[1], lambda.k()[1],

@@ -1,7 +1,7 @@
 // implementation for ldomain_jl_evaluate.h
 
 #include <utils/fixed_array1d.h>
-#include <numerics/bezier.h>
+#include <interval/jl_utils.h>
 
 using MathTL::FixedArray1D;
 using MathTL::Point;
@@ -28,13 +28,11 @@ namespace WaveletTL
 	values[0][i] = values[1][i] = 0;
       if (lambda.k()[0] <= 0 && lambda.k()[1] >= 0) {
 	for (int i = 0; i <= 1<<resolution; i++)
-	  values[0][i] =    
-	    MathTL::EvaluateHermiteSpline_td(lambda.c()[0], lambda.j(), lambda.k()[0],
-					     -1.0+i*ldexp(1.0,-resolution));
+	  values[0][i] = evaluate(0, lambda.j(), 0, lambda.c()[0], lambda.k()[0],
+				  -1.0+i*ldexp(1.0,-resolution));
 	for (int i = 0; i <= 1<<resolution; i++)
-	  values[1][i] =    
-	    MathTL::EvaluateHermiteSpline_td(lambda.c()[1], lambda.j(), lambda.k()[1],
-					     i*ldexp(1.0,-resolution));
+	  values[1][i] = evaluate(0, lambda.j(), 0, lambda.c()[1], lambda.k()[1],
+				  i*ldexp(1.0,-resolution));
       }
       r[0] = SampledMapping<2>(Point<2>(-1, 0), Point<2>(0,1), values);
       
@@ -43,13 +41,11 @@ namespace WaveletTL
 	values[0][i] = values[1][i] = 0;
       if (lambda.k()[0] <= 0 && lambda.k()[1] <= 0) {
 	for (int i = 0; i <= 1<<resolution; i++)
-	  values[0][i] =    
-	    MathTL::EvaluateHermiteSpline_td(lambda.c()[0], lambda.j(), lambda.k()[0],
-					     -1.0+i*ldexp(1.0,-resolution));
+	  values[0][i] = evaluate(0, lambda.j(), 0, lambda.c()[0], lambda.k()[0],
+				  -1.0+i*ldexp(1.0,-resolution));
 	for (int i = 0; i <= 1<<resolution; i++)
-	  values[1][i] =    
-	    MathTL::EvaluateHermiteSpline_td(lambda.c()[1], lambda.j(), lambda.k()[1],
-					     -1.0+i*ldexp(1.0,-resolution));
+	  values[1][i] = evaluate(0, lambda.j(), 0, lambda.c()[1], lambda.k()[1],
+				  -1.0+i*ldexp(1.0,-resolution));
       }
       r[1] = SampledMapping<2>(Point<2>(-1,-1), Point<2>(0,0), values);
       
@@ -58,13 +54,11 @@ namespace WaveletTL
 	values[0][i] = values[1][i] = 0;
       if (lambda.k()[0] >= 0 && lambda.k()[1] <= 0) {
 	for (int i = 0; i <= 1<<resolution; i++)
-	  values[0][i] =    
-	    MathTL::EvaluateHermiteSpline_td(lambda.c()[0], lambda.j(), lambda.k()[0],
-					     i*ldexp(1.0,-resolution));
+	  values[0][i] = evaluate(0, lambda.j(), 0, lambda.c()[0], lambda.k()[0],
+				  i*ldexp(1.0,-resolution));
 	for (int i = 0; i <= 1<<resolution; i++)
-	  values[1][i] =    
-	    MathTL::EvaluateHermiteSpline_td(lambda.c()[1], lambda.j(), lambda.k()[1],
-					     -1.0+i*ldexp(1.0,-resolution));
+	  values[1][i] = evaluate(0, lambda.j(), 0, lambda.c()[1], lambda.k()[1],
+				  -1.0+i*ldexp(1.0,-resolution));
       }
       r[2] = SampledMapping<2>(Point<2>( 0,-1), Point<2>(1,0), values);
     } else {

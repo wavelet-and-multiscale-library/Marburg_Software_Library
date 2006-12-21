@@ -42,9 +42,8 @@ namespace WaveletTL
 
     see [JL] for their definition.
 
-    Note that in [JL], both the generators and wavelets are scaled,
-    so that ||psi_lambda'||_{L_2(0,1)}=1 holds for all indices lambda.
-    Here (for the moment) we do not scale them.
+    Note that here, in contrast to [JL], both components of the generators and
+    the wavelets are normalized in the L_2 norm.
 
     References:
     [JL] Jia/Liu:

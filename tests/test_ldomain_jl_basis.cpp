@@ -200,12 +200,12 @@ int main()
   psistream.close();
   cout << "  ...done, see file Ldomain_wavelet.m!" << endl;
 
-//   InfiniteVector<double,Index> lambdacoeffs;
-//   basis.reconstruct_1(lambda, lambda.j()+1, lambdacoeffs);
-//   cout << "- evaluate psi_lambda again, on a higher level..." << endl;
-//   psistream.open("Ldomain_wavelet2.m");
-//   matlab_output(psistream, evaluate(basis, lambdacoeffs, 6));
-//   psistream.close();
+  InfiniteVector<double,Index> lambdacoeffs;
+  basis.reconstruct_1(lambda, lambda.j()+1, lambdacoeffs);
+  cout << "- evaluate psi_lambda again, on a higher level..." << endl;
+  psistream.open("Ldomain_wavelet2.m");
+  matlab_output(psistream, evaluate(basis, lambdacoeffs, 6));
+  psistream.close();
 #endif
 
   return 0;

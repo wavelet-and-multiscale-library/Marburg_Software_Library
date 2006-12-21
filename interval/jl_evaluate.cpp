@@ -200,32 +200,18 @@ namespace WaveletTL
   }
   
   inline
-  void evaluate(const int j, const int c, const int k,
+  void evaluate(const int j, const int e, const int c, const int k,
 		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues)
   {
     const unsigned int npoints(points.size());
     funcvalues.resize(npoints);
     dervalues.resize(npoints);
-    const double factor = (c==0 ? sqrt(35./26.) : sqrt(105./2.)); // 1/||phi_c||_2
-    for (unsigned int m(0); m < npoints; m++) {
-      funcvalues[m] = factor * MathTL::EvaluateHermiteSpline_td  (c, j, k, points[m]);
-      dervalues[m]  = factor * MathTL::EvaluateHermiteSpline_td_x(c, j, k, points[m]);
-    }
-  }
-  
-  void evaluate(const JLBasis& basis,
-  		const JLBasis::Index& lambda,
-  		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues)
-  {
-    const unsigned int npoints(points.size());
-    funcvalues.resize(npoints);
-    dervalues.resize(npoints);
-    if (lambda.e() == 0) {
+    if (e == 0) {
       // generator
-      const double factor = (lambda.c()==0 ? sqrt(35./26.) : sqrt(105./2.)); // 1/||phi_c||_2
+      const double factor = (c==0 ? sqrt(35./26.) : sqrt(105./2.)); // 1/||phi_c||_2
       for (unsigned int m(0); m < npoints; m++) {
-	funcvalues[m] = factor * MathTL::EvaluateHermiteSpline_td  (lambda.c(), lambda.j(), lambda.k(), points[m]);
-	dervalues[m]  = factor * MathTL::EvaluateHermiteSpline_td_x(lambda.c(), lambda.j(), lambda.k(), points[m]);
+	funcvalues[m] = factor * MathTL::EvaluateHermiteSpline_td  (c, j, k, points[m]);
+	dervalues[m]  = factor * MathTL::EvaluateHermiteSpline_td_x(c, j, k, points[m]);
       }
     } else {
       // wavelet
@@ -233,25 +219,25 @@ namespace WaveletTL
 	funcvalues[i] = 0;
 	dervalues[i] = 0;
       }
-
+      
       const double phi0factor = sqrt(35./26.);
       const double phi1factor = sqrt(105./2.);
       
       Array1D<double> help1, help2;
-      if (lambda.c() == 0) {
+      if (c == 0) {
 	// type psi_0
 	// psi_0(x) = -2*phi_0(2*x+1)+4*phi_0(2*x)-2*phi_0(2*x-1)-21*phi_1(2*x+1)+21*phi_1(2*x-1)
 	const double factor = sqrt(35./352.);
 	
-	int m = 2*lambda.k()-1; // m-2k=-1
+	int m = 2*k-1; // m-2k=-1
 	// phi_0(2x+1)
-	evaluate(lambda.j()+1, 0, m, points, help1, help2);
+	evaluate(j+1, 0, 0, m, points, help1, help2);
 	for (unsigned int i = 0; i < npoints; i++) {
 	  funcvalues[i] += (-2.0)*M_SQRT1_2 * factor/phi0factor * help1[i];
 	  dervalues[i]  += (-2.0)*M_SQRT1_2 * factor/phi0factor * help2[i];
 	}
 	// phi_1(2x+1)
-	evaluate(lambda.j()+1, 1, m, points, help1, help2);
+	evaluate(j+1, 0, 1, m, points, help1, help2);
 	for (unsigned int i = 0; i < npoints; i++) {
 	  funcvalues[i] += (-21.0)*M_SQRT1_2 * factor/phi1factor * help1[i];
 	  dervalues[i]  += (-21.0)*M_SQRT1_2 * factor/phi1factor * help2[i];
@@ -260,7 +246,7 @@ namespace WaveletTL
 	// m=2k <-> m-2k=0
 	m++;
 	// phi_0(2x)
-	evaluate(lambda.j()+1, 0, m, points, help1, help2);
+	evaluate(j+1, 0, 0, m, points, help1, help2);
 	for (unsigned int i = 0; i < npoints; i++) {
 	  funcvalues[i] += 4.0*M_SQRT1_2 * factor/phi0factor * help1[i];
 	  dervalues[i]  += 4.0*M_SQRT1_2 * factor/phi0factor * help2[i];
@@ -269,31 +255,31 @@ namespace WaveletTL
 	// m=2k+1 <-> m-2k=1
 	m++;
 	// phi_0(2x-1)
-	evaluate(lambda.j()+1, 0, m, points, help1, help2);
+	evaluate(j+1, 0, 0, m, points, help1, help2);
 	for (unsigned int i = 0; i < npoints; i++) {
 	  funcvalues[i] += (-2.0)*M_SQRT1_2 * factor/phi0factor * help1[i];
 	  dervalues[i]  += (-2.0)*M_SQRT1_2 * factor/phi0factor * help2[i];
 	}
 	// phi_1(2x-1)
-	evaluate(lambda.j()+1, 1, m, points, help1, help2);
+	evaluate(j+1, 0, 1, m, points, help1, help2);
 	for (unsigned int i = 0; i < npoints; i++) {
 	  funcvalues[i] += 21.0*M_SQRT1_2 * factor/phi1factor * help1[i];
 	  dervalues[i]  += 21.0*M_SQRT1_2 * factor/phi1factor * help2[i];
 	}
-      } else { // lambda.c() == 1
+      } else { // c == 1
 	// type psi_1
 	// psi_1(x) = phi_0(2*x+1)-phi_0(2*x-1)+ 9*phi_1(2*x+1)+12*phi_1(2*x)+ 9*phi_1(2*x-1)
 	const double factor = sqrt(35./48.);
 	
-	int m = 2*lambda.k()-1; // m-2k=-1
+	int m = 2*k-1; // m-2k=-1
 	// phi_0(2x+1)
-	evaluate(lambda.j()+1, 0, m, points, help1, help2);
+	evaluate(j+1, 0, 0, m, points, help1, help2);
 	for (unsigned int i = 0; i < npoints; i++) {
 	  funcvalues[i] += M_SQRT1_2 * factor/phi0factor * help1[i];
 	  dervalues[i]  += M_SQRT1_2 * factor/phi0factor * help2[i];
 	}
 	// phi_1(2x+1)
-	evaluate(lambda.j()+1, 1, m, points, help1, help2);
+	evaluate(j+1, 0, 1, m, points, help1, help2);
 	for (unsigned int i = 0; i < npoints; i++) {
 	  funcvalues[i] += 9.0*M_SQRT1_2 * factor/phi1factor * help1[i];
 	  dervalues[i]  += 9.0*M_SQRT1_2 * factor/phi1factor * help2[i];
@@ -302,7 +288,7 @@ namespace WaveletTL
 	// m=2k <-> m-2k=0
 	m++;
 	// phi_1(2x)
-	evaluate(lambda.j()+1, 1, m, points, help1, help2);
+	evaluate(j+1, 0, 1, m, points, help1, help2);
 	for (unsigned int i = 0; i < npoints; i++) {
 	  funcvalues[i] += 12.0*M_SQRT1_2 * factor/phi1factor * help1[i];
 	  dervalues[i]  += 12.0*M_SQRT1_2 * factor/phi1factor * help2[i];
@@ -311,19 +297,28 @@ namespace WaveletTL
 	// m=2k+1 <-> m-2k=1
 	m++;
 	// phi_0(2x-1)
-	evaluate(lambda.j()+1, 0, m, points, help1, help2);
+	evaluate(j+1, 0, 0, m, points, help1, help2);
 	for (unsigned int i = 0; i < npoints; i++) {
 	  funcvalues[i] += (-1.0)*M_SQRT1_2 * factor/phi0factor * help1[i];
 	  dervalues[i]  += (-1.0)*M_SQRT1_2 * factor/phi0factor * help2[i];
 	}
 	// phi_1(2x-1)
-	evaluate(lambda.j()+1, 1, m, points, help1, help2);
+	evaluate(j+1, 0, 1, m, points, help1, help2);
 	for (unsigned int i = 0; i < npoints; i++) {
 	  funcvalues[i] += 9.0*M_SQRT1_2 * factor/phi1factor * help1[i];
 	  dervalues[i]  += 9.0*M_SQRT1_2 * factor/phi1factor * help2[i];
 	}
       }
     }
+  }
+  
+  inline
+  void evaluate(const JLBasis& basis,
+  		const JLBasis::Index& lambda,
+  		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues)
+  {
+    evaluate(lambda.j(), lambda.e(), lambda.c(), lambda.k(),
+	     points, funcvalues, dervalues);
   }
 
 }

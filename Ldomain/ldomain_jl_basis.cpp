@@ -5,6 +5,9 @@
 
 using MathTL::FixedArray1D;
 
+// #define _LDOMAIN_JL_PRECOND 0 // ||phi_i||_2=1
+#define _LDOMAIN_JL_PRECOND 1 // ||phi'_i||_2=1
+
 namespace WaveletTL
 {
   LDomainJLBasis::LDomainJLBasis()
@@ -19,8 +22,13 @@ namespace WaveletTL
       c.add_coefficient(lambda, 1.0);
     } else {
       assert(lambda.j()+1 == j); // for the moment we only allow one step at a time
+#if _LDOMAIN_JL_PRECOND==0
       const double phi0factor = sqrt(35./26.);
       const double phi1factor = sqrt(105./2.);
+#else
+      const double phi0factor = sqrt(5./12.);
+      const double phi1factor = sqrt(15./4.);
+#endif
      
       if (lambda.e() == 0) {
 	// generator
@@ -62,7 +70,11 @@ namespace WaveletTL
 	if (lambda.c() == 0) {
 	  // type psi_0
 	  // psi_0(x) = -2*phi_0(2*x+1)+4*phi_0(2*x)-2*phi_0(2*x-1)-21*phi_1(2*x+1)+21*phi_1(2*x-1)
+#if _LDOMAIN_JL_PRECOND==0
 	  const double factor = sqrt(35./352.);
+#else
+	  const double factor = sqrt(5./3648.);
+#endif
 
 	  int m = 2*lambda.k()-1; // m-2k=-1
 	  c.add_coefficient(RMWIndex(j, 0, 0, m), -2.0*M_SQRT1_2 * factor/phi0factor);  // phi_0(2x+1)
@@ -79,7 +91,11 @@ namespace WaveletTL
 	} else {
 	  // type psi_1
 	  // psi_1(x) = phi_0(2*x+1)-phi_0(2*x-1)+ 9*phi_1(2*x+1)+12*phi_1(2*x)+ 9*phi_1(2*x-1)
-  	  const double factor = sqrt(35./48.);
+#if _LDOMAIN_JL_PRECOND==0
+	  const double factor = sqrt(35./48.);
+#else
+	  const double factor = sqrt(5./768.);
+#endif
 
 	  int m = 2*lambda.k()-1; // m-2k=-1
 	  c.add_coefficient(RMWIndex(j, 0, 0, m), M_SQRT1_2 * factor/phi0factor);     // phi_0(2x+1)

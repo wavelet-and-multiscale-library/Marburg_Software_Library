@@ -18,6 +18,7 @@
 #include <interval/spline_basis.h>
 #include <galerkin/full_gramian.h>
 #include <adaptive/compression.h>
+#include <galerkin/infinite_preconditioner.h>
 
 using MathTL::InfiniteVector;
 
@@ -27,6 +28,7 @@ namespace WaveletTL
     Gramian matrix for an LDomainJLBasis.
   */
   class LDomainJLGramian
+    : public FullyDiagonalEnergyNormPreconditioner<LDomainJLBasis::Index>
   {
   public:
     /*!
@@ -76,9 +78,9 @@ namespace WaveletTL
     static double operator_order() { return 0; }
 
     /*!
-      evaluate the diagonal preconditioner D (essentially, we don't need any)
+      evaluate the diagonal preconditioner D
     */
-    double D(const WaveletBasis::Index& lambda) const { return 1; }
+    double D(const WaveletBasis::Index& lambda) const { return sqrt(a(lambda,lambda)); }
 
     /*!
       evaluate the (unpreconditioned) bilinear form a

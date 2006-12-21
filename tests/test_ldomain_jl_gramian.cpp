@@ -77,7 +77,7 @@ int main()
   cout << "  ... done, time needed: " << time << " seconds" << endl;
 //   cout << "- Gramian matrix A=" << endl << A << endl;
 #if 1
-  A.matlab_output("LDomainJL_gramian", "G", 1);
+  A.matlab_output("LdomainJL_gramian", "G", 1);
 #endif
 
 

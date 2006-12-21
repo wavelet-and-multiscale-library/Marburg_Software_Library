@@ -2,6 +2,9 @@
 
 #include <numerics/bezier.h>
 
+#define _JL_PRECOND 0 // ||phi_i||_2=1
+// #define _JL_PRECOND 1 // ||phi'_i||_2=1
+
 namespace WaveletTL
 {
   double evaluate(const unsigned int derivative,
@@ -14,18 +17,31 @@ namespace WaveletTL
 
     if (e == 0) {
       // generator
+#if _JL_PRECOND==0
       const double factor = (c==0 ? sqrt(35./26.) : sqrt(105./2.)); // 1/||phi_c||_2
+#else
+      const double factor = (c==0 ? sqrt(5./12.) : sqrt(15./4.)); // 1/||phi'_c||_2
+#endif
       r = factor * (derivative == 0
 		    ? MathTL::EvaluateHermiteSpline_td  (c, j, k, x)
 		    : MathTL::EvaluateHermiteSpline_td_x(c, j, k, x));
     } else {
       // wavelet
+#if _JL_PRECOND==0
       const double phi0factor = sqrt(35./26.);
       const double phi1factor = sqrt(105./2.);
+#else
+      const double phi0factor = sqrt(5./12.);
+      const double phi1factor = sqrt(15./4.);
+#endif
       if (c == 0) {
  	// type psi_0
  	// psi_0(x) = -2*phi_0(2*x+1)+4*phi_0(2*x)-2*phi_0(2*x-1)-21*phi_1(2*x+1)+21*phi_1(2*x-1)
+#if _JL_PRECOND==0
 	const double factor = sqrt(35./352.);
+#else
+	const double factor = sqrt(5./3648.);
+#endif
 	
  	int m = 2*k-1; // m-2k=-1
  	// phi_0(2x+1)
@@ -52,7 +68,11 @@ namespace WaveletTL
       } else { // c == 1
  	// type psi_1
  	// psi_1(x) = phi_0(2*x+1)-phi_0(2*x-1)+ 9*phi_1(2*x+1)+12*phi_1(2*x)+ 9*phi_1(2*x-1)
+#if _JL_PRECOND==0
 	const double factor = sqrt(35./48.);
+#else
+	const double factor = sqrt(5./768.);
+#endif
 	
  	int m = 2*k-1; // m-2k=-1
  	// phi_0(2x+1)
@@ -91,7 +111,11 @@ namespace WaveletTL
     dervalues.resize(npoints);
     if (e == 0) {
       // generator
+#if _JL_PRECOND==0
       const double factor = (c==0 ? sqrt(35./26.) : sqrt(105./2.)); // 1/||phi_c||_2
+#else
+      const double factor = (c==0 ? sqrt(5./12.) : sqrt(15./4.)); // 1/||phi'_c||_2
+#endif
       for (unsigned int m(0); m < npoints; m++) {
 	funcvalues[m] = factor * MathTL::EvaluateHermiteSpline_td  (c, j, k, points[m]);
 	dervalues[m]  = factor * MathTL::EvaluateHermiteSpline_td_x(c, j, k, points[m]);
@@ -103,14 +127,23 @@ namespace WaveletTL
 	dervalues[i] = 0;
       }
       
+#if _JL_PRECOND==0
       const double phi0factor = sqrt(35./26.);
       const double phi1factor = sqrt(105./2.);
+#else
+      const double phi0factor = sqrt(5./12.);
+      const double phi1factor = sqrt(15./4.);
+#endif
       
       Array1D<double> help1, help2;
       if (c == 0) {
 	// type psi_0
 	// psi_0(x) = -2*phi_0(2*x+1)+4*phi_0(2*x)-2*phi_0(2*x-1)-21*phi_1(2*x+1)+21*phi_1(2*x-1)
+#if _JL_PRECOND==0
 	const double factor = sqrt(35./352.);
+#else
+	const double factor = sqrt(5./3648.);
+#endif
 	
 	int m = 2*k-1; // m-2k=-1
 	// phi_0(2x+1)
@@ -152,7 +185,11 @@ namespace WaveletTL
       } else { // c == 1
 	// type psi_1
 	// psi_1(x) = phi_0(2*x+1)-phi_0(2*x-1)+ 9*phi_1(2*x+1)+12*phi_1(2*x)+ 9*phi_1(2*x-1)
+#if _JL_PRECOND==0
 	const double factor = sqrt(35./48.);
+#else
+	const double factor = sqrt(5./768.);
+#endif
 	
 	int m = 2*k-1; // m-2k=-1
 	// phi_0(2x+1)

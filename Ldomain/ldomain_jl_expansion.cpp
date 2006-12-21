@@ -20,8 +20,8 @@ namespace WaveletTL
     
     // iterate through the involved generators and add the shares
     const double h = ldexp(1.0, -level); // granularity for the quadrature
-    MathTL::GaussLegendreRule gauss1d(5);
-    MathTL::QuadratureRule<2> gauss2d(gauss1d, gauss1d); // tensor product quadrature rule
+    MathTL::CompositeRule<1> qrule1d(MathTL::GaussLegendreRule(5),2); // the 1d functions are piecewise smooth
+    MathTL::QuadratureRule<2> qrule2d(qrule1d, qrule1d); // tensor product quadrature rule
     MathTL::CubicHermiteInterpolant2D_td generator(level, 0, 0, 0, 0);
 
     for (InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
@@ -40,25 +40,25 @@ namespace WaveletTL
 	MathTL::ProductFunction<2> integrand(f, &generator);
 	
  	if (k0 >= 1-(1<<level) && k1 >= 1-(1<<level)) { // lower left subsquare
- 	  r += *it * gauss2d.integrate(integrand,
+ 	  r += *it * qrule2d.integrate(integrand,
 				       MathTL::Point<2>((k0-1)*h,(k1-1)*h),
 				       MathTL::Point<2>(    k0*h,    k1*h));
 	}
 
 	if (!(k1 == -(1<<level) || k0 == (1<<level) || (k0 == 0 && k1 >= 1))) { // lower right subsquare
- 	  r += *it * gauss2d.integrate(integrand,
+ 	  r += *it * qrule2d.integrate(integrand,
 				       MathTL::Point<2>(    k0*h,(k1-1)*h),
 				       MathTL::Point<2>((k0+1)*h,    k1*h));
 	}
 
 	if (!(k0 == -(1<<level) || k1 == (1<<level) || (k1 == 0 && k0 >= 1))) { // upper left subsquare
- 	  r += *it * gauss2d.integrate(integrand,
+ 	  r += *it * qrule2d.integrate(integrand,
 				       MathTL::Point<2>((k0-1)*h,    k1*h),
 				       MathTL::Point<2>(    k0*h,(k1+1)*h));
 	}
 
 	if (!(k1 == (1<<level) || (k0 == 0 && k1 >= 0) || (k1 == 0 && k0 >= 0) || k0 == (1<<level))) { // upper right subsquare
- 	  r += *it * gauss2d.integrate(integrand,
+ 	  r += *it * qrule2d.integrate(integrand,
 				       MathTL::Point<2>(    k0*h,    k1*h),
 				       MathTL::Point<2>((k0+1)*h,(k1+1)*h));
 	}

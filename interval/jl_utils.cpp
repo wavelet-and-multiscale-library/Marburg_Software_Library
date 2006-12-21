@@ -101,7 +101,6 @@ namespace WaveletTL
 
     return r;
   }
-  
 
   void evaluate(const int j, const int e, const int c, const int k,
 		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues)

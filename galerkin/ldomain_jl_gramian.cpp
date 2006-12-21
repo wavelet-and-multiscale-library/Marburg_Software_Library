@@ -3,6 +3,7 @@
 #include <Ldomain/ldomain_jl_support.h>
 #include <numerics/quadrature.h>
 #include <numerics/gauss_quadrature.h>
+#include <numerics/gauss_data.h>
 #include <numerics/bezier.h>
 #include <interval/jl_utils.h>
 
@@ -29,55 +30,53 @@ namespace WaveletTL
 	// use that both \psi_\lambda and \psi_\mu are a tensor product of 1D bases;
 	// the entry of the Gramian on each square subpatch is a product of 2 1D integrals
 	
-	// first compute the 1D generator coefficients;
-	FixedArray1D<int,2> psilambdalevel, psimulevel;
-	FixedArray1D<InfiniteVector<double,RMWIndex>,2> coeffs_lambda, coeffs_mu;
-	for (int n = 0; n <= 1; n++) {
-	  psilambdalevel[n] = lambda.j()+(lambda.e()[n]==1 ? 1 : 0);
-	  basis_.reconstruct_1_1d(RMWIndex(lambda.j(),lambda.e()[n],lambda.c()[n],lambda.k()[n]),
-				  psilambdalevel[n], coeffs_lambda[n]);
-	  psimulevel[n] = mu.j()+(mu.e()[n]==1 ? 1 : 0);
-	  basis_.reconstruct_1_1d(RMWIndex(mu.j(),mu.e()[n],mu.c()[n],mu.k()[n]),
-				  psimulevel[n], coeffs_mu[n]);
+	// iterate through the subsquares of supp and compute the integral shares
+ 	const double h = ldexp(1.0, -supp.j); // sidelength of the subsquare
+	const int N_Gauss = 6;
+	FixedArray1D<Array1D<double>,2> gauss_points, gauss_weights;
+	for (int i = 0; i <= 1; i++) {
+	  gauss_points[i].resize(N_Gauss);
+	  gauss_weights[i].resize(N_Gauss);
+	  for (int ii = 0; ii < N_Gauss; ii++)
+	    gauss_weights[i][ii] = h*GaussWeights[N_Gauss-1][ii];
 	}
-
-	// then iterate through the subsquares of supp and compute the integral shares
-	const double h = ldexp(1.0, -supp.j); // granularity for the quadrature
-	MathTL::GaussLegendreRule gauss1d(6);
-	FixedArray1D<int,2> k;
-	for (k[0] = supp.xmin; k[0] < supp.xmax; k[0]++)
-	  for (k[1] = supp.ymin; k[1] < supp.ymax; k[1]++) {
-	    // check whether 2^{-supp.j}[k0,k0+1]x[k1,k1+1] is contained in Omega
-	    if ((k[0] >= -(1<<supp.j) && k[0] < (1<<supp.j) && k[1] >= -(1<<supp.j) && k[1] < 0)
-		|| (k[0] >= -(1<<supp.j) && k[0] < 0 && k[1] >= 0 && k[1] < (1<<supp.j))) {
-	      // perform the integration
-	      FixedArray1D<double,2> factor;
-	      for (int n=0; n <= 1; n++) {
-		factor[n] = 0;
-		for (InfiniteVector<double,RMWIndex>::const_iterator itlambda(coeffs_lambda[n].begin());
-		     itlambda != coeffs_lambda[n].end(); ++itlambda) {
-		  MathTL::CubicHermiteInterpolant_td glambda(psilambdalevel[n],
-							     itlambda.index().c(),
-							     itlambda.index().k());
-		  for (InfiniteVector<double,RMWIndex>::const_iterator itmu(coeffs_mu[n].begin());
-		       itmu != coeffs_mu[n].end(); ++itmu) {
-		    MathTL::CubicHermiteInterpolant_td gmu(psimulevel[n],
-							   itmu.index().c(),
-							   itmu.index().k());
-		    ProductFunction<1> integrand(&glambda, &gmu);
-		    factor[n] += *itlambda * *itmu
-		      * gauss1d.integrate(integrand,
-					  MathTL::Point<1>(    k[n]*h),
-					  MathTL::Point<1>((k[n]+1)*h));
-		  }
-		}
-	      }
-	      r += factor[0] * factor[1];
-	    }
+ 	FixedArray1D<int,2> k;
+ 	FixedArray1D<Array1D<double>,2>
+ 	  psi_lambda_values,     // values of the components of psi_lambda at gauss_points[i]
+ 	  psi_mu_values;         // -"-, for psi_mu
+	Array1D<double> dummy;
+ 	for (k[0] = supp.xmin; k[0] < supp.xmax; k[0]++) {
+ 	  for (k[1] = supp.ymin; k[1] < supp.ymax; k[1]++) {
+ 	    // check whether 2^{-supp.j}[k0,k0+1]x[k1,k1+1] is contained in Omega
+ 	    if ((k[0] >= -(1<<supp.j) && k[0] < (1<<supp.j) && k[1] >= -(1<<supp.j) && k[1] < 0)
+ 		|| (k[0] >= -(1<<supp.j) && k[0] < 0 && k[1] >= 0 && k[1] < (1<<supp.j))) {
+ 	      for (int ii = 0; ii < N_Gauss; ii++)
+ 		gauss_points[0][ii] = h*(2*k[0]+1+GaussPoints[N_Gauss-1][ii])/2.;
+ 	      evaluate(lambda.j(), lambda.e()[0], lambda.c()[0], lambda.k()[0],
+ 		       gauss_points[0], psi_lambda_values[0], dummy);
+  	      evaluate(mu.j(), mu.e()[0], mu.c()[0], mu.k()[0],
+  		       gauss_points[0], psi_mu_values[0], dummy);
+ 	      double factor0 = 0;
+	      for (int i0 = 0; i0 < N_Gauss; i0++)
+		factor0 += gauss_weights[0][i0] * psi_lambda_values[0][i0] * psi_mu_values[0][i0];
+	      
+	      for (int ii = 0; ii < N_Gauss; ii++)
+		gauss_points[1][ii] = h*(2*k[1]+1+GaussPoints[N_Gauss-1][ii])/2.;
+	      evaluate(lambda.j(), lambda.e()[1], lambda.c()[1], lambda.k()[1],
+		       gauss_points[1], psi_lambda_values[1], dummy);
+	      evaluate(mu.j(), mu.e()[1], mu.c()[1], mu.k()[1],
+		       gauss_points[1], psi_mu_values[1], dummy);
+	      double factor1 = 0;
+	      for (int i1 = 0; i1 < N_Gauss; i1++)
+		factor1 += gauss_weights[1][i1] * psi_lambda_values[1][i1] * psi_mu_values[1][i1];
+	      
+	      r += factor0 * factor1;
+ 	    }
 	  }
+	}
       }
-
+    
     return r;
   }
-
+  
 }

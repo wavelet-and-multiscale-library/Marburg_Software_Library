@@ -19,7 +19,7 @@ namespace WaveletTL
   // some standalone utility functions for JLBasis and variants thereof
 
   /*!
-    point evaluation of (derivatives) of a single primal [JL] generator
+    point evaluation of (derivatives of) a single primal [JL] generator
     or wavelet \psi_\lambda;
     this routine works for _all_ Hermite spline wavelets on R
   */

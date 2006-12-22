@@ -25,21 +25,21 @@ namespace WaveletTL
     
   /*!
     Evaluate a single primal generator or wavelet \psi_\lambda
-    on a dyadic subgrid of the L-shaped domain
+    on a subgrid of the L-shaped domain with N segments each.
   */
   Array1D<SampledMapping<2> >
   evaluate(const LDomainJLBasis& basis,
 	   const Index& lambda,
-	   const int resolution);
+	   const int N);
     
   /*!
     Evaluate an arbitrary linear combination of primal wavelets
-    on a dyadic subgrid of the L-shaped domain
+    on a subgrid of the L-shaped domain with N segments each.
   */
   Array1D<SampledMapping<2> >
   evaluate(const LDomainJLBasis& basis,
 	   const InfiniteVector<double, Index>& coeffs,
-	   const int resolution);
+	   const int N);
 }
 
 #include <Ldomain/ldomain_jl_evaluate.cpp>

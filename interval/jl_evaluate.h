@@ -58,15 +58,6 @@ namespace WaveletTL
 
   /*!
     point evaluation of (derivatives) of a single primal [JL] generator
-    or wavelet \psi_\lambda;
-    this routine works for _all_ Hermite spline wavelets on R
-  */
-  double evaluate(const unsigned int derivative,
-		  const int j, const int e, const int c, const int k,
- 		  const double x);
-  
-  /*!
-    point evaluation of (derivatives) of a single primal [JL] generator
     or wavelet \psi_\lambda at several points simultaneously
   */
   void evaluate(const JLBasis& basis, const unsigned int derivative,
@@ -79,15 +70,6 @@ namespace WaveletTL
   */
   void evaluate(const JLBasis& basis,
 		const JLBasis::Index& lambda,
-		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);
-
-  /*!
-    point evaluation of 0-th and first derivative of a single primal [JL] generator
-    or wavelet \psi_\lambda at several points simultaneously;
-    without a temporary JLBasis::Index object, the routine works for _all_ Hermite spline
-    wavelets on R
-  */
-  void evaluate(const int j, const int e, const int c, const int k,
 		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);
 }
 

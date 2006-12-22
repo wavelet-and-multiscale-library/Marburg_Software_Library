@@ -62,7 +62,7 @@ int main()
   }
 #endif
   
-#if 0
+#if 1
   cout << "- evaluating some primal wavelets:" << endl;
   for (Index lambda = first_wavelet(basis.j0());; ++lambda) {
     cout << lambda << endl;
@@ -71,7 +71,7 @@ int main()
   }
 #endif
 
-#if 1
+#if 0
   cout << "- evaluate refined primal generators:" << endl;
   Index nu(first_generator(basis.j0()));
   ++nu;

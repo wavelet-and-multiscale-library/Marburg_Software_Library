@@ -100,7 +100,7 @@ EXEOBJF4 = \
   test_ldomain_index.o test_ldomain_support.o test_ldomain_basis.o\
   test_ldomain_equation.o\
   test_ldomain_jl_basis.o test_ldomain_jl_support.o\
-  test_ldomain_jl_gramian.o\
+  test_ldomain_jl_expansion.o test_ldomain_jl_gramian.o\
   test_ldomain_helmholtz_equation.o
 
 # set 5 of test programs: adaptive wavelet schemes for elliptic equations

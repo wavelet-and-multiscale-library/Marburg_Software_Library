@@ -2,9 +2,6 @@
 
 #include <numerics/bezier.h>
 
-// #define _JL_PRECOND 0 // ||phi_i||_2=1
-#define _JL_PRECOND 1 // ||phi'_i||_2=1
-
 namespace WaveletTL
 {
   double evaluate(const unsigned int derivative,
@@ -100,6 +97,117 @@ namespace WaveletTL
     }
 
     return r;
+  }
+
+  void evaluate(const unsigned int derivative,
+		const int j, const int e, const int c, const int k,
+		const Array1D<double>& points, Array1D<double>& values)
+  {
+    const unsigned int npoints(points.size());
+    values.resize(npoints);
+    
+    if (e == 0) {
+      // generator
+#if _JL_PRECOND==0
+      const double factor = (c==0 ? sqrt(35./26.) : sqrt(105./2.)); // 1/||phi_c||_2
+#else
+      const double factor = (c==0 ? sqrt(5./12.) : sqrt(15./4.)); // 1/||phi'_c||_2
+#endif
+      if (derivative == 0) {
+	for (unsigned int m(0); m < npoints; m++)
+	  values[m] = factor * MathTL::EvaluateHermiteSpline_td  (c, j, k, points[m]);
+      } else {
+	for (unsigned int m(0); m < npoints; m++)
+	  values[m] = factor * MathTL::EvaluateHermiteSpline_td_x(c, j, k, points[m]);
+      }
+    } else {
+      // wavelet
+      for (unsigned int i(0); i < npoints; i++)
+	values[i] = 0;
+      
+#if _JL_PRECOND==0
+      const double phi0factor = sqrt(35./26.);
+      const double phi1factor = sqrt(105./2.);
+#else
+      const double phi0factor = sqrt(5./12.);
+      const double phi1factor = sqrt(15./4.);
+#endif
+      
+      Array1D<double> help;
+      if (c == 0) {
+	// type psi_0
+	// psi_0(x) = -2*phi_0(2*x+1)+4*phi_0(2*x)-2*phi_0(2*x-1)-21*phi_1(2*x+1)+21*phi_1(2*x-1)
+#if _JL_PRECOND==0
+	const double factor = sqrt(35./352.);
+#else
+	const double factor = sqrt(5./3648.);
+#endif
+	
+	int m = 2*k-1; // m-2k=-1
+	// phi_0(2x+1)
+	evaluate(derivative, j+1, 0, 0, m, points, help);
+	for (unsigned int i = 0; i < npoints; i++)
+	  values[i] += (-2.0)*M_SQRT1_2 * factor/phi0factor * help[i];
+	// phi_1(2x+1)
+	evaluate(derivative, j+1, 0, 1, m, points, help);
+	for (unsigned int i = 0; i < npoints; i++)
+	  values[i] += (-21.0)*M_SQRT1_2 * factor/phi1factor * help[i];
+	
+	// m=2k <-> m-2k=0
+	m++;
+	// phi_0(2x)
+	evaluate(derivative, j+1, 0, 0, m, points, help);
+	for (unsigned int i = 0; i < npoints; i++)
+	  values[i] += 4.0*M_SQRT1_2 * factor/phi0factor * help[i];
+	
+	// m=2k+1 <-> m-2k=1
+	m++;
+	// phi_0(2x-1)
+	evaluate(derivative, j+1, 0, 0, m, points, help);
+	for (unsigned int i = 0; i < npoints; i++)
+	  values[i] += (-2.0)*M_SQRT1_2 * factor/phi0factor * help[i];
+	// phi_1(2x-1)
+	evaluate(derivative, j+1, 0, 1, m, points, help);
+	for (unsigned int i = 0; i < npoints; i++)
+	  values[i] += 21.0*M_SQRT1_2 * factor/phi1factor * help[i];
+      } else { // c == 1
+	// type psi_1
+	// psi_1(x) = phi_0(2*x+1)-phi_0(2*x-1)+ 9*phi_1(2*x+1)+12*phi_1(2*x)+ 9*phi_1(2*x-1)
+#if _JL_PRECOND==0
+	const double factor = sqrt(35./48.);
+#else
+	const double factor = sqrt(5./768.);
+#endif
+	
+	int m = 2*k-1; // m-2k=-1
+	// phi_0(2x+1)
+	evaluate(derivative, j+1, 0, 0, m, points, help);
+	for (unsigned int i = 0; i < npoints; i++)
+	  values[i] += M_SQRT1_2 * factor/phi0factor * help[i];
+	// phi_1(2x+1)
+	evaluate(derivative, j+1, 0, 1, m, points, help);
+	for (unsigned int i = 0; i < npoints; i++)
+	  values[i] += 9.0*M_SQRT1_2 * factor/phi1factor * help[i];
+	
+	// m=2k <-> m-2k=0
+	m++;
+	// phi_1(2x)
+	evaluate(derivative, j+1, 0, 1, m, points, help);
+	for (unsigned int i = 0; i < npoints; i++)
+	  values[i] += 12.0*M_SQRT1_2 * factor/phi1factor * help[i];
+	
+	// m=2k+1 <-> m-2k=1
+	m++;
+	// phi_0(2x-1)
+	evaluate(derivative, j+1, 0, 0, m, points, help);
+	for (unsigned int i = 0; i < npoints; i++)
+	  values[i] += (-1.0)*M_SQRT1_2 * factor/phi0factor * help[i];
+	// phi_1(2x-1)
+	evaluate(derivative, j+1, 0, 1, m, points, help);
+	for (unsigned int i = 0; i < npoints; i++)
+	  values[i] += 9.0*M_SQRT1_2 * factor/phi1factor * help[i];
+      }
+    }
   }
 
   void evaluate(const int j, const int e, const int c, const int k,

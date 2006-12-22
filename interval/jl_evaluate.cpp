@@ -83,42 +83,11 @@ namespace WaveletTL
   {
     assert(derivative <= 1); // we only support derivatives up to the first order
 
-    values.resize(points.size());
-
-    if (lambda.e() == 0) {
-      // generator
-      const double factor = (lambda.c()==0 ? sqrt(35./26.) : sqrt(105./2.)); // 1/||phi_c||_2
-      switch(derivative) {
-      case 0:
-	for (unsigned int m(0); m < points.size(); m++)
-	  values[m] = factor
-	    * MathTL::EvaluateHermiteSpline_td  (lambda.c(), lambda.j(), lambda.k(), points[m]);
-	break;
-      case 1:
-	for (unsigned int m(0); m < points.size(); m++)
-	  values[m] = factor
-	    * MathTL::EvaluateHermiteSpline_td_x(lambda.c(), lambda.j(), lambda.k(), points[m]);
-	break;
-      default:
-	break;
-      }
-    } else {
-      // wavelet
-      for (unsigned int i(0); i < values.size(); i++)
-	values[i] = 0;
-      
-      typedef JLBasis::Index Index;
-      InfiniteVector<double,Index> gcoeffs;
-      basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
-      Array1D<double> help(points.size());
-      for (InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin());
-  	   it != gcoeffs.end(); ++it)
-  	{
-  	  evaluate(basis, derivative, it.index(), points, help);
-  	  for (unsigned int i = 0; i < points.size(); i++)
-  	    values[i] += *it * help[i];
-  	}
-    }
+    Array1D<double> dummy;
+    if (derivative == 0)
+      evaluate(lambda.j(), lambda.e(), lambda.c(), lambda.k(), points, values, dummy);
+    else
+      evaluate(lambda.j(), lambda.e(), lambda.c(), lambda.k(), points, dummy, values);
   }
   
   inline

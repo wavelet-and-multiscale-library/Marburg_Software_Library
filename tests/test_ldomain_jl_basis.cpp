@@ -188,15 +188,15 @@ int main()
 #endif
   
 #if 1
-  Index lambda = first_generator(basis.j0());
-//   Index lambda = first_wavelet(basis.j0());
-  for (int i = 1; i <= 1; i++) ++lambda;
+//   Index lambda = first_generator(basis.j0());
+  Index lambda = first_wavelet(basis.j0());
+//   for (int i = 1; i <= 1; i++) ++lambda;
 //   for (int i = 1; i <= 37; i++) ++lambda;
 //   for (int i = 1; i <= 583; i++) ++lambda;
   
   cout << "- evaluating psi_{" << lambda << "}..." << endl;
   std::ofstream psistream("Ldomain_wavelet.m");
-  matlab_output(psistream, evaluate(basis, lambda, 6));
+  matlab_output(psistream, evaluate(basis, lambda, 1<<6));
   psistream.close();
   cout << "  ...done, see file Ldomain_wavelet.m!" << endl;
 

@@ -103,8 +103,9 @@ int main()
 #if 0
   const int d  = 3;
   const int dT = 3;
-//   typedef DSBasis<d,dT> Basis;
-  typedef PBasis<d,dT> Basis;
+  typedef DSBasis<d,dT> Basis;
+//   typedef PBasis<d,dT> Basis;
+  Basis basis(true, true);
 #else
   typedef JLBasis Basis; Basis basis;
 #endif
@@ -156,6 +157,7 @@ int main()
 //   cout << "* estimate for normAinv: " << normAinv << endl;
 
   InfiniteVector<double, Index> u_epsilon;
+//   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, u_epsilon, 10);
   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, u_epsilon, 1.0, 1.0, 10);
 //   CDD1_SOLVE(cproblem, 1e-5, u_epsilon, 20);
 //   CDD1_SOLVE(cproblem, 1e-10, u_epsilon, 20);

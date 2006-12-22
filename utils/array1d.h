@@ -80,7 +80,7 @@ namespace MathTL
       please note that the builtin types (int, double, ...) may _not_
       automatically be set to _zero_, this depends on the compiler!
     */
-    Array1D(const size_type s);
+    explicit Array1D(const size_type s);
 
     /*!
       release allocated memory

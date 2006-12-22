@@ -49,7 +49,7 @@ int main()
   cout << "* some point values from a cubic Bernstein polynomial with Bezier coefficients "
        << "b0=" << b0 << ", b1=" << b1 << ", b2=" << b2 << ", b3=" << b3 << ":" << endl;
 
-  Array1D<double> xi(n+1), yi(n+1);
+  Array1D<double> xi(n+1), yi(n+1), zi(n+1), err(n+1);
   for (unsigned int i = 0; i <= n; i++) {
     xi[i] = i/(double)n;
     yi[i] = EvaluateBernsteinPolynomial(b0, b1, b2, b3, xi[i]);
@@ -64,10 +64,31 @@ int main()
     for (unsigned int i = 0; i <= n; i++) {
       xi[i] = -1.5 + i*(1.5-(-1.5))/(double)n;
       yi[i] = EvaluateHermiteSpline(m, xi[i]);
+      
+      if (xi[i] <= -1 || xi[i] >= 1)
+	zi[i] = 0;
+      else {
+	if (xi[i] <= 0) {
+	  if (m == 0)
+	    zi[i] = (xi[i]+1)*(xi[i]+1)*(1-2*xi[i]);
+	  else
+ 	    zi[i] = xi[i]*(xi[i]+1)*(xi[i]+1);
+	} else {
+	  zi[i] = 0;
+ 	  if (m == 0)
+	    zi[i] = (1-xi[i])*(1-xi[i])*(2*xi[i]+1);
+ 	  else
+ 	    zi[i] = xi[i]*(xi[i]-1)*(xi[i]-1);
+	}
+      }
+
+      err[i] = fabs(yi[i]-zi[i]);
     }
     
     cout << "  xi=" << xi << endl;
     cout << "  yi=" << yi << endl;
+    cout << "  zi=" << zi << endl;
+    cout << "  error=" << err << endl;
   }
   
   for (unsigned int m = 0; m <= 1; m++) {

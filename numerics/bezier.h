@@ -128,8 +128,9 @@ namespace MathTL
   /*!
     evaluate a translated and dilated version of the i-th cubic Hermite interpolant
   */
+  inline
   double EvaluateHermiteSpline_td(const int i, const int j, const int k, const double x) {
-    const double factor(ldexp(1.0, j));
+    const double factor(1<<j);
     return sqrt(factor) * EvaluateHermiteSpline(i, factor * x - k);
   }
   
@@ -164,7 +165,7 @@ namespace MathTL
     evaluate the first derivative of a translated and dilated version of the i-th cubic Hermite interpolant
   */
   double EvaluateHermiteSpline_td_x(const int i, const int j, const int k, const double x) {
-    const double factor(ldexp(1.0, j));
+    const double factor(1<<j);
     return factor * sqrt(factor) * EvaluateHermiteSpline_x(i, factor * x - k);
   }
 

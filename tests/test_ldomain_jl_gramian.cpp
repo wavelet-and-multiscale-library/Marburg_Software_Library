@@ -32,11 +32,11 @@ int main()
   switch(solution) {
   case 1:
     uexact = new PolySolution();
-    f = new PolyRHS();
+    f = new PolySolution();
     break;
   case 2:
     uexact = new EigenSolution();
-    f = new EigenRHS();
+    f = new EigenSolution();
     break;
   default:
     break;
@@ -48,7 +48,7 @@ int main()
   f = new ConstantFunction<2>(Vector<double>(1, "1"));
 #endif
 
-  const int jmax = 1;
+  const int jmax = 3;
   
   typedef LDomainJLGramian Problem;
   Problem problem(basis, InfiniteVector<double,Index>());
@@ -82,7 +82,7 @@ int main()
   A.matlab_output("LdomainJL_gramian", "G", 1);
 #endif
 
-#if 1
+#if 0
   cout << "- validate entries of the (unpreconditioned) Gramian matrix:" << endl;
 
   for (set<Index>::const_iterator itlambda = Lambda.begin(); itlambda != Lambda.end(); ++itlambda) {
@@ -185,7 +185,7 @@ int main()
   err -= b;
   cout << linfty_norm(err) << endl;
   
-#if 0
+#if 1
   cout << "- point values of the solution:" << endl;
   InfiniteVector<double,Index> u;
   unsigned int i = 0;

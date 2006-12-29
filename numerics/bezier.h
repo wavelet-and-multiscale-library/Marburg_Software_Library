@@ -12,6 +12,7 @@
 
 #include <cmath>
 #include <utils/function.h>
+#include <utils/tiny_tools.h>
 
 namespace MathTL
 {
@@ -58,10 +59,10 @@ namespace MathTL
   double EvaluateBernsteinPolynomial(const double b0, const double b1, const double b2,
 				     const double x)
   {
-    const double b10 = (1-x)*b0+x*b1;
-    const double b11 = (1-x)*b1+x*b2;
+    const double b10 = (1.-x)*b0+x*b1;
+    const double b11 = (1.-x)*b1+x*b2;
     
-    return (1-x)*b10+x*b11;
+    return (1.-x)*b10+x*b11;
   }
   
   /*!
@@ -69,18 +70,19 @@ namespace MathTL
      
       p(x) = sum_{k=0}^3 B_{k,3}(x) * b_k
   */
+  inline
   double EvaluateBernsteinPolynomial(const double b0, const double b1,
 				     const double b2, const double b3,
 				     const double x)
   {
-    const double b10 = (1-x)*b0+x*b1;
-    const double b11 = (1-x)*b1+x*b2;
-    const double b12 = (1-x)*b2+x*b3;
+    const double b10 (b0+x*(b1-b0)); // = (1.-x)*b0+x*b1;
+    const double b11 (b1+x*(b2-b1)); // = (1.-x)*b1+x*b2;
+    const double b12 (b2+x*(b3-b2)); // = (1.-x)*b2+x*b3;
     
-    const double b20 = (1-x)*b10+x*b11;
-    const double b21 = (1-x)*b11+x*b12;
+    const double b20 (b10+x*(b11-b10)); // = (1.-x)*b10+x*b11;
+    const double b21 (b11+x*(b12-b11)); // = (1.-x)*b11+x*b12;
 
-    return (1-x)*b20+x*b21;
+    return b20+x*(b21-b20); // = (1.-x)*b20+x*b21;
   }
 
   /*!
@@ -106,21 +108,24 @@ namespace MathTL
   double EvaluateHermiteSpline(const int i, const double x) {
     if (i == 0) {
       // phi_0, Bezier coefficients are {0,0,1,1,1,0,0}
-      if (x <= -1 || x >= 1) {
-	return 0;
+      if (x <= -1. || x >= 1.) {
+	return 0.;
       } else {
-	return (x <= 0
-		? EvaluateBernsteinPolynomial(0, 0, 1, 1, x+1.0)
-		: EvaluateBernsteinPolynomial(1, 1, 0, 0, x));
+	return (x <= 0.
+		? EvaluateBernsteinPolynomial(0., 0., 1., 1., x+1.)
+// 		(x+1)*(x+1)*(1-2*x)
+		: EvaluateBernsteinPolynomial(1., 1., 0., 0., x)
+// 		(1-x)*(1-x)*(2*x+1)
+		);
       }
     } else {
       // phi_1, Bezier coefficients are {0,0,-1/3,0,1/3,0,0}
-      if (x <= -1 || x >= 1) {
-	return 0;
+      if (x <= -1. || x >= 1.) {
+	return 0.;
       } else {
-	return (x <= 0
-		? EvaluateBernsteinPolynomial(0, 0, -1./3., 0, x+1.0)
-		: EvaluateBernsteinPolynomial(0, 1./3., 0, 0, x));
+	return (x <= 0.
+		? EvaluateBernsteinPolynomial(0., 0., -1./3., 0., x+1.)
+		: EvaluateBernsteinPolynomial(0., 1./3., 0., 0., x));
       }
     }
   }
@@ -130,8 +135,12 @@ namespace MathTL
   */
   inline
   double EvaluateHermiteSpline_td(const int i, const int j, const int k, const double x) {
+#if 0
     const double factor(1<<j);
     return sqrt(factor) * EvaluateHermiteSpline(i, factor * x - k);
+#else
+    return twotothejhalf(j) * EvaluateHermiteSpline(i, (1<<j) * x - k);
+#endif
   }
   
   /*!
@@ -139,6 +148,7 @@ namespace MathTL
       i=0 : s(0)=1, s'(0)=0
       i!=0: s(0)=0, s'(0)=1
   */
+  inline
   double EvaluateHermiteSpline_x(const int i, const double x) {
     if (i == 0) {
       // phi_0, Bezier coefficients are {0,0,1,1,1,0,0}
@@ -164,9 +174,14 @@ namespace MathTL
   /*!
     evaluate the first derivative of a translated and dilated version of the i-th cubic Hermite interpolant
   */
+  inline
   double EvaluateHermiteSpline_td_x(const int i, const int j, const int k, const double x) {
+#if 0
     const double factor(1<<j);
     return factor * sqrt(factor) * EvaluateHermiteSpline_x(i, factor * x - k);
+#else
+    return twotothejhalf(3*j) * EvaluateHermiteSpline_x(i, (1<<j) * x - k);
+#endif
   }
 
   /*!

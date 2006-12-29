@@ -52,7 +52,7 @@ CXXFLAGS += -I$(MATHTL_DIR)
 endif
 
 EXEOBJF = \
-  test_random.o\
+  test_random.o test_tools.o\
   test_tensor.o test_point.o test_array1d.o test_fixed_array1d.o\
   test_vector.o test_infinite_vector.o test_vectorspeed.o test_matrix.o\
   test_block_matrix.o test_qs_matrix.o test_qs_matrixspeed.o\

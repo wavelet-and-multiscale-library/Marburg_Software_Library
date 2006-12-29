@@ -11,6 +11,7 @@
 #define _MATHTL_TINY_TOOLS_H
 
 #include <cassert>
+#include <cmath>
 #include <functional>
 #include <map>
 
@@ -115,5 +116,14 @@ public:
 private:
   const double eta_;
 };
+
+/*!
+  fast routine to compute 2^(j/2) without a sqrt() call
+*/
+inline
+double twotothejhalf(const int j)
+{
+  return j%2 ? M_SQRT2 * (1<<(j>>1)) : 1<<(j>>1);
+}
 
 #endif

@@ -21,7 +21,7 @@ namespace WaveletTL
 
     // iterate through the subsquares of supp and compute the integral shares
     const double h = ldexp(1.0, -supp.j); // sidelength of the subsquares
-    const int N_Gauss = 6;
+    const int N_Gauss = 8;
     FixedArray1D<Array1D<double>,2> gauss_points, gauss_weights;
     for (int i = 0; i <= 1; i++) {
       gauss_points[i].resize(N_Gauss);

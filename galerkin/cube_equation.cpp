@@ -115,7 +115,7 @@ namespace WaveletTL
 	FixedArray1D<Array1D<double>,DIM>
 	  psi_lambda_values,     // values of the components of psi_lambda at gauss_points[i]
 	  psi_mu_values,         // -"-, for psi_mu
-	  psi_lambda_der_values, // values of the 1st deriv. of the components of psi_lambda gauss_points[i]
+	  psi_lambda_der_values, // values of the 1st deriv. of the components of psi_lambda at gauss_points[i]
 	  psi_mu_der_values;     // -"-, for psi_mu
 	for (unsigned int i = 0; i < DIM; i++) {
 	  evaluate(*basis_.bases()[i], 0,

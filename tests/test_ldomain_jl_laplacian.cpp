@@ -5,11 +5,12 @@
 #include <algebra/sparse_matrix.h>
 #include <numerics/iteratsolv.h>
 #include <numerics/bezier.h>
+#include <numerics/corner_singularity.h>
 #include <Ldomain/ldomain_jl_basis.h>
 #include <Ldomain/ldomain_jl_evaluate.h>
 #include <Ldomain/ldomain_jl_expansion.h>
 
-#define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
 #include <galerkin/ldomain_jl_laplacian.h>
 #include <galerkin/galerkin_utils.h>
 
@@ -28,7 +29,7 @@ int main()
 
   Basis basis;
   
-  const int solution = 1;
+  const int solution = 3;
   Function<2> *uexact = 0, *f = 0;
   switch(solution) {
   case 1:
@@ -39,6 +40,9 @@ int main()
     uexact = new EigenSolution();
     f      = new EigenRHS();
     break;
+  case 3:
+    uexact = new CornerSingularity   (Point<2>(0,0), 0.5, 1.5);
+    f      = new CornerSingularityRHS(Point<2>(0,0), 0.5, 1.5);
   default:
     break;
   }
@@ -49,7 +53,7 @@ int main()
   f = new ConstantFunction<2>(Vector<double>(1, "1"));
 #endif
 
-  const int jmax = 1;
+  const int jmax = 4;
   
   typedef LDomainJLLaplacian Problem;
   Problem problem(basis, InfiniteVector<double,Index>());
@@ -64,7 +68,6 @@ int main()
   set<Index> Lambda;
   for (Index lambda = basis.first_generator(basis.j0());; ++lambda) {
     Lambda.insert(lambda);
-//     if (lambda == basis.last_generator(basis.j0())) break;
     if (lambda == basis.last_wavelet(jmax)) break;
   }
   
@@ -79,7 +82,7 @@ int main()
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
 //   cout << "- stiffness matrix A=" << endl << A << endl;
-#if 1
+#if 0
   A.matlab_output("LdomainJL_laplacian", "A", 1);
 #endif
 

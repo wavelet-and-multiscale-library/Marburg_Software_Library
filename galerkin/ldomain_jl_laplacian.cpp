@@ -24,8 +24,14 @@ namespace WaveletTL
     
     if (intersect_supports(basis_, lambda, mu, supp))
       {
-	// use that both \psi_\lambda and \psi_\mu are a tensor product of 1D bases;
-	// the entry of the Gramian on each square subpatch is a product of 2 1D integrals
+	// use that both psi_lambda and psi_mu are a tensor product of 1D bases;
+	// the entry of the stiffness matrix is an integral over
+	//   (grad psi_lambda)(x,y)(grad psi_mu)(x,y)
+	//   = [(psi_lambda)_1'(x)(psi_lambda)_2(y),(psi_lambda)_1(x)(psi_lambda)_2'(y)]
+	//     * [(psi_mu)_1'(x)(psi_mu)_2(y),(psi_mu)_1(x)(psi_mu)_2'(y)]
+	//   = (psi_lambda)_1'(x)(psi_mu)_1'(x)(psi_lambda)_2(y)(psi_mu)_2(y)
+	//     + (psi_lambda)_1(x)(psi_mu)_1(x)(psi_lambda)_2'(y)(psi_mu)_2'(y)
+	// hence a sum of two products of 1D integrals
 	
 	// iterate through the subsquares of supp and compute the integral shares
  	const double h = ldexp(1.0, -supp.j); // sidelength of the subsquare
@@ -37,39 +43,49 @@ namespace WaveletTL
 	  for (int ii = 0; ii < N_Gauss; ii++)
 	    gauss_weights[i][ii] = h*GaussWeights[N_Gauss-1][ii];
 	}
-//  	FixedArray1D<int,2> k;
-//  	FixedArray1D<Array1D<double>,2>
-//  	  psi_lambda_values,     // values of the components of psi_lambda at gauss_points[i]
-//  	  psi_mu_values;         // -"-, for psi_mu
-// 	Array1D<double> dummy;
-//  	for (k[0] = supp.xmin; k[0] < supp.xmax; k[0]++) {
-// 	  for (int ii = 0; ii < N_Gauss; ii++)
-// 	    gauss_points[0][ii] = h*(2*k[0]+1+GaussPoints[N_Gauss-1][ii])/2.;
-// 	  evaluate(lambda.j(), lambda.e()[0], lambda.c()[0], lambda.k()[0],
-// 		   gauss_points[0], psi_lambda_values[0], dummy);
-// 	  evaluate(mu.j(), mu.e()[0], mu.c()[0], mu.k()[0],
-// 		   gauss_points[0], psi_mu_values[0], dummy);
-// 	  double factor0 = 0;
-// 	  for (int i0 = 0; i0 < N_Gauss; i0++)
-// 	    factor0 += gauss_weights[0][i0] * psi_lambda_values[0][i0] * psi_mu_values[0][i0];
-//  	  for (k[1] = supp.ymin; k[1] < supp.ymax; k[1]++) {
-//  	    // check whether 2^{-supp.j}[k0,k0+1]x[k1,k1+1] is contained in Omega
-//  	    if ((k[0] >= -(1<<supp.j) && k[0] < (1<<supp.j) && k[1] >= -(1<<supp.j) && k[1] < 0)
-//  		|| (k[0] >= -(1<<supp.j) && k[0] < 0 && k[1] >= 0 && k[1] < (1<<supp.j))) {
-// 	      for (int ii = 0; ii < N_Gauss; ii++)
-// 		gauss_points[1][ii] = h*(2*k[1]+1+GaussPoints[N_Gauss-1][ii])/2.;
-// 	      evaluate(lambda.j(), lambda.e()[1], lambda.c()[1], lambda.k()[1],
-// 		       gauss_points[1], psi_lambda_values[1], dummy);
-// 	      evaluate(mu.j(), mu.e()[1], mu.c()[1], mu.k()[1],
-// 		       gauss_points[1], psi_mu_values[1], dummy);
-// 	      double factor1 = 0;
-// 	      for (int i1 = 0; i1 < N_Gauss; i1++)
-// 		factor1 += gauss_weights[1][i1] * psi_lambda_values[1][i1] * psi_mu_values[1][i1];
-	      
-// 	      r += factor0 * factor1;
-//  	    }
-// 	  }
-// 	}
+  	FixedArray1D<int,2> k;
+  	FixedArray1D<Array1D<double>,2>
+  	  psi_lambda_values,     // values of the components of psi_lambda at gauss_points[i]
+  	  psi_mu_values,         // -"-, for psi_mu
+	  psi_lambda_der_values, // values of the 1st deriv. of the components of psi_lambda at gauss_points[i]
+	  psi_mu_der_values;     // -"-, for psi_mu
+
+  	for (k[0] = supp.xmin; k[0] < supp.xmax; k[0]++) {
+	  if (k[0] >= -(1<<supp.j) && k[0] < (1<<supp.j)) {
+	    for (int ii = 0; ii < N_Gauss; ii++)
+	      gauss_points[0][ii] = h*(2*k[0]+1+GaussPoints[N_Gauss-1][ii])/2.;
+	    evaluate(lambda.j(), lambda.e()[0], lambda.c()[0], lambda.k()[0],
+		     gauss_points[0], psi_lambda_values[0], psi_lambda_der_values[0]);
+	    evaluate(mu.j(), mu.e()[0], mu.c()[0], mu.k()[0],
+		     gauss_points[0], psi_mu_values[0], psi_mu_der_values[0]);
+	    double factor0 = 0;
+	    for (int i0 = 0; i0 < N_Gauss; i0++)
+	      factor0 += gauss_weights[0][i0] * psi_lambda_values[0][i0] * psi_mu_values[0][i0];
+	    double factor0der = 0;
+	    for (int i0 = 0; i0 < N_Gauss; i0++)
+	      factor0der += gauss_weights[0][i0] * psi_lambda_der_values[0][i0] * psi_mu_der_values[0][i0];
+	    for (k[1] = supp.ymin; k[1] < supp.ymax; k[1]++) {
+	      // check whether 2^{-supp.j}[k0,k0+1]x[k1,k1+1] is contained in Omega
+	      if ((k[1] >= -(1<<supp.j) && k[1] < 0)
+		  || (k[0] < 0 && k[1] >= 0 && k[1] < (1<<supp.j))) {
+		for (int ii = 0; ii < N_Gauss; ii++)
+		  gauss_points[1][ii] = h*(2*k[1]+1+GaussPoints[N_Gauss-1][ii])/2.;
+		evaluate(lambda.j(), lambda.e()[1], lambda.c()[1], lambda.k()[1],
+			 gauss_points[1], psi_lambda_values[1], psi_lambda_der_values[1]);
+		evaluate(mu.j(), mu.e()[1], mu.c()[1], mu.k()[1],
+			 gauss_points[1], psi_mu_values[1], psi_mu_der_values[1]);
+		double factor1 = 0;
+		for (int i1 = 0; i1 < N_Gauss; i1++)
+		  factor1 += gauss_weights[1][i1] * psi_lambda_values[1][i1] * psi_mu_values[1][i1];
+		double factor1der = 0;
+		for (int i1 = 0; i1 < N_Gauss; i1++)
+		  factor1der += gauss_weights[1][i1] * psi_lambda_der_values[1][i1] * psi_mu_der_values[1][i1];
+		
+		r += factor0 * factor1der + factor0der * factor1;
+	      }
+  	    }
+ 	  }
+ 	}
       }
     
     return r;

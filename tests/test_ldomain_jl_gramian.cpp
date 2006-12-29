@@ -4,6 +4,7 @@
 #include <utils/function.h>
 #include <algebra/sparse_matrix.h>
 #include <numerics/iteratsolv.h>
+#include <numerics/bezier.h>
 #include <Ldomain/ldomain_jl_basis.h>
 #include <Ldomain/ldomain_jl_evaluate.h>
 #include <Ldomain/ldomain_jl_expansion.h>
@@ -27,16 +28,22 @@ int main()
 
   Basis basis;
   
-  const int solution = 1;
+  const int solution = 2;
   Function<2> *uexact = 0, *f = 0;
   switch(solution) {
   case 1:
     uexact = new PolySolution();
-    f = new PolySolution();
+    f      = new PolySolution();
     break;
   case 2:
     uexact = new EigenSolution();
-    f = new EigenSolution();
+    f      = new EigenSolution();
+    break;
+  case 3:
+    uexact = new CubicHermiteInterpolant2D_td(1, 0, 0, -1, -1);
+    f      = new CubicHermiteInterpolant2D_td(1, 0, 0, -1, -1);
+//     uexact = new CubicHermiteInterpolant2D_td(1, 1, 1, -1, -2);
+//     f      = new CubicHermiteInterpolant2D_td(1, 1, 1, -1, -2);
     break;
   default:
     break;
@@ -48,7 +55,7 @@ int main()
   f = new ConstantFunction<2>(Vector<double>(1, "1"));
 #endif
 
-  const int jmax = 3;
+  const int jmax = 4;
   
   typedef LDomainJLGramian Problem;
   Problem problem(basis, InfiniteVector<double,Index>());
@@ -197,6 +204,10 @@ int main()
   matlab_output(u_Lambda_stream, s);
   u_Lambda_stream.close();
   cout << "  ... done, see file 'u_lambda.m'" << endl;
+  for (int i = 0; i <= 2; i++) {
+    s[i].add(-1.0, SampledMapping<2>(s[i], *uexact));
+    cout << "  pointwise error on patch " << i << ": " << row_sum_norm(s[i].values()) << endl;
+  }
 #endif
 
   if (uexact) delete uexact;

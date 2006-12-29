@@ -34,15 +34,15 @@ int main()
 //   cout << "- leftmost wavelet on the level " << testlevel << ": " << first_wavelet(testlevel) << endl;
 //   cout << "- rightmost wavelet on the level " << testlevel << ": " << last_wavelet(testlevel) << endl;
 
-#if 0
+#if 1
   for (int level = basis.j0(); level <= basis.j0(); level++) {
     cout << "- iterate through all generators and wavelets on level j=" << level << ":" << endl;
-    
-//     Index lambda(first_generator(level));
+    int nr = 0;
+    Index lambda(first_generator(level));
 //     Index lambda(first_wavelet(level));
-    Index lambda(first_wavelet(level,Index::type_type(1,1)));
-    for (;; ++lambda) {
-      cout << lambda << endl;
+//     Index lambda(first_wavelet(level,Index::type_type(1,1)));
+    for (;; ++lambda, nr++) {
+      cout << nr << ": " << lambda << endl;
 
       if (lambda == last_wavelet(level)) break;
 //       if (lambda == last_generator(level)) break;

@@ -5,8 +5,8 @@
 # | Thorsten Raasch, Manuel Werner                                 |
 # +----------------------------------------------------------------+
 
-DEBUGMODE = on
-#DEBUGMODE = off
+#DEBUGMODE = on
+DEBUGMODE = off
 
 # choose between GNU/Intel/Portland Group compiler
 COMPILER = gnu

@@ -10,8 +10,8 @@
 #ifndef _WAVELETTL_JL_UTILS_H
 #define _WAVELETTL_JL_UTILS_H
 
-#define _JL_PRECOND 0 // ||phi_i||_2=1
-// #define _JL_PRECOND 1 // ||phi'_i||_2=1
+// #define _JL_PRECOND 0 // ||phi_i||_2=1
+#define _JL_PRECOND 1 // ||phi'_i||_2=1
 
 #include <utils/array1d.h>
 

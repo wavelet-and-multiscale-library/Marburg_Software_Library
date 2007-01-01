@@ -43,6 +43,7 @@ int main()
   case 3:
     uexact = new CornerSingularity   (Point<2>(0,0), 0.5, 1.5);
     f      = new CornerSingularityRHS(Point<2>(0,0), 0.5, 1.5);
+    break;
   default:
     break;
   }
@@ -53,7 +54,7 @@ int main()
   f = new ConstantFunction<2>(Vector<double>(1, "1"));
 #endif
 
-  const int jmax = 4;
+  const int jmax = 2;
   
   typedef LDomainJLLaplacian Problem;
   Problem problem(basis, InfiniteVector<double,Index>());
@@ -107,21 +108,33 @@ int main()
   cout << linfty_norm(err) << endl;
   
 #if 1
-  cout << "- point values of the solution:" << endl;
+  cout << "- extract point values of the solution:" << endl;
   InfiniteVector<double,Index> u;
   unsigned int i = 0;
   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
     u.set_coefficient(*it, x[i]);
   u.scale(&problem, -1);
-  Array1D<SampledMapping<2> > s(evaluate(problem.basis(), u, 1<<5));
-  std::ofstream u_Lambda_stream("u_lambda.m");
-  matlab_output(u_Lambda_stream, s);
-  u_Lambda_stream.close();
-  cout << "  ... done, see file 'u_lambda.m'" << endl;
+//   Array1D<SampledMapping<2> > s(evaluate(problem.basis(), u, 1<<5));
+  const int N = 200;
+  Array1D<SampledMapping<2> > s(evaluate(problem.basis(), u, N));
+//   std::ofstream u_Lambda_stream("u_lambda.m");
+//   matlab_output(u_Lambda_stream, s);
+//   u_Lambda_stream.close();
+//   cout << "  ... done, see file 'u_lambda.m'" << endl;
+
+//   for (int i = 0; i <= 2; i++) {
+//     s[i].add(-1.0, SampledMapping<2>(s[i], *uexact));
+//     cout << "  ... pointwise error on patch " << i << ": " << row_sum_norm(s[i].values()) << endl;
+//   }
+
+  double L2error = 0;
   for (int i = 0; i <= 2; i++) {
     s[i].add(-1.0, SampledMapping<2>(s[i], *uexact));
-    cout << "  pointwise error on patch " << i << ": " << row_sum_norm(s[i].values()) << endl;
+    const double frob = frobenius_norm(s[i].values());
+    L2error += frob*frob;
   }
+  L2error = sqrt(L2error/(N*N));
+  cout << "  ... L_2 error " << L2error << endl;
 #endif
 
   if (uexact) delete uexact;

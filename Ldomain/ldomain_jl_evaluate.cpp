@@ -25,8 +25,10 @@ namespace WaveletTL
     const double h = 1./N;
     
     // patch Omega_0 = [-1,0]x[0,1]
-    for (int i = 0; i <= N; i++)
-      values[0][i] = values[1][i] = 0;
+    for (int i = 0; i <= N; i++) {
+      values[0][i] = 0.;
+      values[1][i] = 0.;
+    }
     if (lambda.k()[0] <= 0 && lambda.k()[1] >= 0) {
       for (int i = 0; i <= N; i++)
 	knots[i] = -1.0+i*h;
@@ -38,8 +40,10 @@ namespace WaveletTL
     r[0] = SampledMapping<2>(Point<2>(-1, 0), Point<2>(0,1), values);
     
     // patch Omega_1 = [-1,0]x[-1,0]
-    for (int i = 0; i <= N; i++)
-      values[0][i] = values[1][i] = 0;
+    for (int i = 0; i <= N; i++) {
+      values[0][i] = 0.;
+      values[1][i] = 0.;
+    }
     if (lambda.k()[0] <= 0 && lambda.k()[1] <= 0) {
       for (int i = 0; i <= N; i++)
 	knots[i] = -1.0+i*h;
@@ -49,8 +53,10 @@ namespace WaveletTL
     r[1] = SampledMapping<2>(Point<2>(-1,-1), Point<2>(0,0), values);
     
     // patch Omega_2 = [0,1]x[-1,0]
-    for (int i = 0; i <= N; i++)
-      values[0][i] = values[1][i] = 0;
+    for (int i = 0; i <= N; i++) {
+      values[0][i] = 0.;
+      values[1][i] = 0.;
+    }
     if (lambda.k()[0] >= 0 && lambda.k()[1] <= 0) {
       for (int i = 0; i <= N; i++)
 	knots[i] = i*h;
@@ -74,7 +80,8 @@ namespace WaveletTL
     values[0].resize(N+1);
     values[1].resize(N+1);
     for (int i = 0; i <= N; i++) {
-      values[0][i] = values[1][i] = 0;
+      values[0][i] = 0.;
+      values[1][i] = 0.;
     }
     Array1D<SampledMapping<2> > result(3);
     result[0] = SampledMapping<2>(Point<2>(-1, 0), Point<2>(0,1), values);

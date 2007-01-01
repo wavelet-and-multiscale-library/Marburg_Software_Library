@@ -5,6 +5,7 @@
 #include <utils/fixed_array1d.h>
 #include <algebra/sparse_matrix.h>
 #include <numerics/iteratsolv.h>
+#include <numerics/corner_singularity.h>
 #include <Ldomain/ldomain_jl_basis.h>
 #include <Ldomain/ldomain_jl_evaluate.h>
 #include <Ldomain/ldomain_jl_expansion.h>
@@ -61,9 +62,12 @@ int main()
 //   Polyx f;
 //   Polyy f;
 //   Polyxy f;
-  PolyRHS f;
+//   PolyRHS f;
+//   CubicHermiteInterpolant2D_td f(1, 0, 0, -1, 1);
+  CubicHermiteInterpolant2D_td f(2, 0, 0, -1, 1);
+//   CornerSingularity f(Point<2>(0.,0.), 0.5, 1.5);
 
-  const int jmax = 1;
+  const int jmax = 2;
   
   InfiniteVector<double,Index> fcoeffs;
   expand(&f, basis, true, jmax, fcoeffs);
@@ -73,7 +77,7 @@ int main()
 
   cout << "- checking the integrals:" << endl;
   for (Index lambda = basis.first_generator(basis.j0());; ++lambda) {
-    const int N = 10000;
+    const int N = 5000;
     const double h = 1./N;
 
     // sum up all the point values:

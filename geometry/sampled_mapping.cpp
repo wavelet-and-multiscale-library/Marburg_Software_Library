@@ -327,6 +327,17 @@ namespace MathTL
        << std::endl;
   }
 
+  template <class C>
+  void
+  SampledMapping<2,C>::octave_output(std::ostream& os) const
+  {
+    Grid<2>::octave_output(os);
+    os << "z = ";
+    print_matrix(values_, os);
+//     os << ";"
+//        << std::endl;
+  }
+  
   template <unsigned int DIM, class C>
   void matlab_output(std::ostream& os,
 		     const Array1D<SampledMapping<DIM,C> >& values)
@@ -356,5 +367,20 @@ namespace MathTL
 
   }
 
+  template <unsigned int DIM, class C>
+  void octave_output(std::ostream& os,
+		     const Array1D<SampledMapping<DIM,C> >& values)
+  {
+    assert(DIM==2);
+
+//     for (unsigned int i = 0; i < values.size(); i++) {
+    for (unsigned int i = 0; i < 1; i++) { // temporary hack!!!
+      values[i].octave_output(os);
+      os << "hold on" << std::endl
+	 << "mesh(x,y,z)" << std::endl;
+      if (i == (values.size()-1))
+	os << "hold off" << std::endl;
+    }
+  }
   
 }

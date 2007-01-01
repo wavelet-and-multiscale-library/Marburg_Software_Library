@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <geometry/sampled_mapping.h>
 #include <numerics/bezier.h>
 #include <numerics/quadrature.h>
 #include <numerics/gauss_quadrature.h>
@@ -128,6 +129,15 @@ int main()
   cout << "<phi_1,phi_1(.-1)>=" << qrule.integrate(integrand6, Point<1>(-1), Point<1>(1))
        << " (expected " << -1./140. << ")" << endl;
   
+#if 1
+  cout << "* plot a cubic Hermite interpolant into a file..." << endl;
+  CubicHermiteInterpolant2D_td fh(3, 1, 1, 0, 0);
+  Grid<2> fh_grid(Point<2>(-1,0), Point<2>(0,1), 1<<5);
+  SampledMapping<2> fh_sm(fh_grid, fh);
+  std::ofstream fh_stream("hermite_spline.m");
+  fh_sm.octave_output(fh_stream);
+  fh_stream.close();
+#endif
 
   return 0;
 }

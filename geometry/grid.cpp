@@ -86,4 +86,16 @@ namespace MathTL
     os << ";" << std::endl;
   }
   
+  void
+  Grid<2>::octave_output(std::ostream& os) const
+  {
+    os << "x = ";
+    print_matrix(gridx_, os);
+//     os << ";" << std::endl;
+    
+    os << "y = ";
+    print_matrix(gridy_, os);
+//     os << ";" << std::endl;
+  }
+  
 }

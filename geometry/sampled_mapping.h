@@ -342,6 +342,11 @@ namespace MathTL
     */
     void matlab_output(std::ostream& os) const;
 
+    /*!
+      Octave-compatible output of the sampled mapping onto a stream
+    */
+    void octave_output(std::ostream& os) const;
+
   protected:
     /*!
       internal storage for the function values
@@ -350,14 +355,18 @@ namespace MathTL
   };
 
   /*!
-    
+    Matlab output for an Array1D of SampledMapping's
   */
   template <unsigned int DIM, class C>
   void matlab_output(std::ostream& os,
 		     const Array1D<SampledMapping<DIM,C> >& values);
 
-
-
+  /*!
+    Octave-compatible output for an Array1D of SampledMapping's
+  */
+  template <unsigned int DIM, class C>
+  void octave_output(std::ostream& os,
+		     const Array1D<SampledMapping<DIM,C> >& values);
 
 }
 

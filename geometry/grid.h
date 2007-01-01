@@ -138,6 +138,11 @@ namespace MathTL
     */
     void matlab_output(std::ostream& os) const;
     
+    /*!
+      Octave-compatible output of the grid onto a stream
+    */
+    void octave_output(std::ostream& os) const;
+    
   protected:
     /*!
       internal storage for the grid points

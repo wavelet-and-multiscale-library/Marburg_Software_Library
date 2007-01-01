@@ -14,28 +14,58 @@ int main()
 
   Point<2> origin;
 
-#if 0
+#if 1
   CornerSingularity s(origin, 0.5, 1.5);
 
-  cout << "- Matlab output of the corner singularity on a 2D grid..." << endl;
-  Grid<2> grid(Point<2>(-1.0, -1.0), Point<2>(1.0, 1.0), 1<<6, 1<<6);
+  const bool matlab = false; // false -> Octave output
+
+  if (matlab)
+    cout << "- Matlab output of the corner singularity on a 2D grid..." << endl;
+  else
+    cout << "- Octave output of the corner singularity on a 2D grid..." << endl;
+  
+//   Grid<2> grid(Point<2>(-1.0, -1.0), Point<2>(1.0, 1.0), 1<<6, 1<<6);
+  Grid<2> grid(Point<2>(-1.0, 0.0), Point<2>(0.0, 1.0), 1<<6, 1<<6); // only patch 0
+//   Grid<2> grid(Point<2>(-1.0, -1.0), Point<2>(0.0, 1.0), 1<<6, 1<<6); // only patches 0+1
   SampledMapping<2> h(grid, s);
   std::ofstream fs("corner.m");
-  h.matlab_output(fs);
-  fs << "surf(x,y,z)" << endl;
+
+  if (matlab)
+    h.matlab_output(fs);
+  else
+    h.octave_output(fs);
+
+  if (matlab)
+    fs << "surf(x,y,z)" << endl;
+  else
+    fs << "mesh(x,y,z)" << endl;
+
   fs.close();
   cout << "  ...done, see file corner.m!" << endl;
 
   CornerSingularityRHS rhs(origin, 0.5, 1.5);
-  cout << "- Matlab output of the corner singularity rhs on a 2D grid..." << endl;
+  if (matlab)
+    cout << "- Matlab output of the corner singularity rhs on a 2D grid..." << endl;
+  else
+    cout << "- Octave output of the corner singularity rhs on a 2D grid..." << endl;
+
   SampledMapping<2> h_rhs(grid, rhs);
   std::ofstream fs_rhs("corner_rhs.m");
-  h_rhs.matlab_output(fs_rhs);
-  fs_rhs << "surf(x,y,z)" << endl;
+  if (matlab)
+    h_rhs.matlab_output(fs_rhs);
+  else
+    h_rhs.octave_output(fs_rhs);
+
+  if (matlab)
+    fs_rhs << "surf(x,y,z)" << endl;
+  else
+    fs_rhs << "mesh(x,y,z)" << endl;
+
   fs_rhs.close();
   cout << "  ...done, see file corner_rhs.m!" << endl;
 #endif
 
+#if 0
   CornerTimeSingularity st(origin, 0.5, 1.5);
   st.set_time(1.0);
 
@@ -59,6 +89,7 @@ int main()
   fst_rhs << "surf(x,y,z)" << endl;
   fst_rhs.close();
   cout << "  ...done, see file corner_time_rhs.m!" << endl;
+#endif
 
   return 0;
 }

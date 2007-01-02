@@ -22,6 +22,10 @@ namespace WaveletTL
     The following structure holds all the pieces of information
     needed for the construction of a spline wavelet basis on the interval.
     The primal functions are either B-splines or linear combinations thereof.
+
+    For flavor==DS_construction, you should set options to the appropriate biorthogonalization method:
+      "bio5"        <-> BernsteinSVD
+      "bio5-energy" <-> BernsteinSVD + energy inner product orthogonalization from [Ba01]
    */
   template <int d, int dT, SplineBasisFlavor flavor>
   class SplineBasisData

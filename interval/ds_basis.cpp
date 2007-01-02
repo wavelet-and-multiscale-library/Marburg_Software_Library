@@ -458,7 +458,7 @@ namespace WaveletTL
       // determine number of boundary wavelets (not automatic yet, we used dump_data and Matlab...)
       size_type n_left=0;
       if (d==2 && dT==2) n_left = 2;
-      if (d==3 && dT==3) n_left = 3;
+      if (d==3 && dT==3) n_left = 5;
 //       cout << "  - we have " << n_left << " left boundary wavelets" << endl;
       
       // set up unpreconditioned stiffness matrix of the Laplacian of the boundary wavelets
@@ -531,7 +531,7 @@ namespace WaveletTL
       // determine number of boundary wavelets (not automatic yet, we used dump_data and Matlab...)
       size_type n_right=0;
       if (d==2 && dT==2) n_right = 2;
-      if (d==3 && dT==3) n_right = 3;
+      if (d==3 && dT==3) n_right = 5;
 //       cout << "  - we have " << n_right << " right boundary wavelets" << endl;
       
       // set up unpreconditioned stiffness matrix of the Laplacian of the boundary wavelets

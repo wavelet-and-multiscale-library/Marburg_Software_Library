@@ -3,6 +3,7 @@
 #include <algebra/infinite_vector.h>
 
 #include <interval/ds_basis.h>
+#include <interval/spline_basis.h>
 #include <Ldomain/ldomain_basis.h>
 
 using namespace std;
@@ -15,9 +16,15 @@ int main()
   const int d  = 2;
   const int dT = 2;
 
+#if 0
   typedef DSBasis<d,dT,BernsteinSVD> Basis1D;
+  Basis1D basis1d;
+#else
+  typedef SplineBasis<d,dT,DS_construction> Basis1D;
+  Basis1D basis1d("bio5-energy",0,0,0,0);
+#endif
   typedef LDomainBasis<Basis1D> Basis;
-  Basis basis;
+  Basis basis(basis1d);
 
   typedef Basis::Index Index;
 

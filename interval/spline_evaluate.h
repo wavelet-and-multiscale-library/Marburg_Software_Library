@@ -21,6 +21,8 @@ namespace WaveletTL
 {
   template <int d, int dT, SplineBasisFlavor flavor> class SplineBasis;
 
+  // remark: the following routines only work with flavor==P_construction yet!!!
+
   /*!
     Evaluate an arbitrary linear combination of primal wavelets
     on a dyadic subgrid of [0,1].

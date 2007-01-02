@@ -51,7 +51,7 @@ namespace WaveletTL
 
     /*!
       Compute an interval 2^{-j}[k1,k2] which contains the support of a
-      single primal [P] generator or wavelet \psi_\lambda.
+      single primal spline generator or wavelet \psi_\lambda.
       (j == lambda.j()+lambda.e() is neglected for performance reasons)
     */
     void support(const Index& lambda, int& k1, int& k2) const;

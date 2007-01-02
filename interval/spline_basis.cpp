@@ -8,11 +8,22 @@ namespace WaveletTL
   SplineBasis<d,dT,flavor>::SplineBasis
   (const char* options,
    const int s0, const int s1, const int sT0, const int sT1)
-    : SplineBasisData<d,dT,P_construction>(options,s0,s1,sT0,sT1)
+    : SplineBasisData<d,dT,flavor>(options,s0,s1,sT0,sT1)
   {
-    // cf. PBasis<d,dT> ...
-    DeltaLmin_       = 1-d-ell1<d>()+s0;
-    DeltaRmax_offset = -1-ell1<d>()-s1;
+    switch (flavor) {
+    case DS_construction:
+      // cf. DSBasis<d,dT> ...
+      DeltaLmin_       = ell2T<d,dT>()+s0+sT0-dT;
+      DeltaRmax_offset = -(d%2)-(ell2T<d,dT>()+s1+sT1-dT);
+      break;
+    case P_construction:
+      // cf. PBasis<d,dT> ...
+      DeltaLmin_       = 1-d-ell1<d>()+s0;
+      DeltaRmax_offset = -1-ell1<d>()-s1;
+      break;
+    default:
+      break;
+    }
   }
 
   template <int d, int dT, SplineBasisFlavor flavor>

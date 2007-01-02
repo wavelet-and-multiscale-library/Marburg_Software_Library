@@ -55,14 +55,14 @@ namespace WaveletTL
     //! default constructor
     LDomainBasis();
 
-    //! constructor with 1D basis
+    //! constructor with a precomputed 1D basis
     LDomainBasis(const IntervalBasis& basis1d);
 
     //! coarsest possible level j0
     inline const int j0() const { return basis1d_.j0(); }
     
     //! wavelet index class
-    typedef LDomainIndex<IBASIS> Index;
+    typedef LDomainIndex<IntervalBasis> Index;
 
     //! geometric type of the support sets
     typedef struct {
@@ -77,13 +77,13 @@ namespace WaveletTL
     void support(const Index& lambda, Support& supp) const;
     
     //! critical Sobolev regularity for the primal generators/wavelets
-    static double primal_regularity() { return IBASIS::primal_regularity(); } // dirty, we should use max(1.5,~) instead
+    static double primal_regularity() { return IntervalBasis::primal_regularity(); } // dirty, we should use max(1.5,~) instead
     
     //! degree of polynomial reproduction for the primal generators/wavelets
-    static unsigned int primal_polynomial_degree() { return IBASIS::primal_polynomial_degree(); }
+    static unsigned int primal_polynomial_degree() { return IntervalBasis::primal_polynomial_degree(); }
 
     //! number of vanishing moments for the primal wavelets
-    static unsigned int primal_vanishing_moments() { return IBASIS::primal_vanishing_moments(); }
+    static unsigned int primal_vanishing_moments() { return IntervalBasis::primal_vanishing_moments(); }
 
     //! read access to the underlying 1D basis
     const IntervalBasis& basis1d() const { return basis1d_; }

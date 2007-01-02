@@ -5,8 +5,8 @@
 # | Thorsten Raasch, Manuel Werner                                 |
 # +----------------------------------------------------------------+
 
-#DEBUGMODE = on
-DEBUGMODE = off
+DEBUGMODE = on
+#DEBUGMODE = off
 
 # choose between GNU/Intel/Portland Group compiler
 COMPILER = gnu
@@ -100,10 +100,10 @@ EXEOBJF3 = \
 EXEOBJF4 = \
   test_ldomain_index.o test_ldomain_support.o test_ldomain_basis.o\
   test_ldomain_equation.o\
-  test_ldomain_jl_basis.o test_ldomain_jl_support.o\
-  test_ldomain_jl_expansion.o test_ldomain_jl_gramian.o\
-  test_ldomain_jl_laplacian.o\
   test_ldomain_helmholtz_equation.o
+#  test_ldomain_jl_basis.o test_ldomain_jl_support.o\
+#  test_ldomain_jl_expansion.o test_ldomain_jl_gramian.o\
+#  test_ldomain_jl_laplacian.o\
 
 # set 5 of test programs: adaptive wavelet schemes for elliptic equations
 EXEOBJF5 = \

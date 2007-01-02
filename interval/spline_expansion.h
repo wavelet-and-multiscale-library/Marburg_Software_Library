@@ -20,6 +20,8 @@ namespace WaveletTL
 {
   template <int d, int dT, SplineBasisFlavor flavor> class SplineBasis;
 
+  // remark: the following routines only work with flavor==P_construction yet!!!
+
   /*!
     For a given function, compute all integrals w.r.t. the primal
     or dual generators/wavelets \psi_\lambda with |\lambda|\le jmax.

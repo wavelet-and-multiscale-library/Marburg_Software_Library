@@ -10,6 +10,8 @@ namespace WaveletTL
 	   const InfiniteVector<double, typename SplineBasis<d,dT,flavor>::Index>& coeffs,
 	   const int resolution)
   {
+    assert(flavor == P_construction); // the other cases are done in a template specialization
+
     Grid<1> grid(0, 1, 1<<resolution);
     SampledMapping<1> result(grid); // zero
     if (coeffs.size() > 0) {
@@ -59,11 +61,14 @@ namespace WaveletTL
     return result;
   }
 
+
+
   template <int d, int dT, SplineBasisFlavor flavor>
   double evaluate(const SplineBasis<d,dT,flavor>& basis, const unsigned int derivative,
 		  const typename SplineBasis<d,dT,flavor>::Index& lambda,
 		  const double x)
   {
+    assert(flavor == P_construction); // the other cases are done in a template specialization
     assert(derivative <= 1); // we only support derivatives up to the first order
 
     double r = 0;
@@ -106,6 +111,7 @@ namespace WaveletTL
 	   const typename SplineBasis<d,dT,flavor>::Index& lambda,
 	   const Array1D<double>& points, Array1D<double>& values)
   {
+    assert(flavor == P_construction); // the other cases are done in a template specialization
     assert(derivative <= 1); // we only support derivatives up to the first order
 
     values.resize(points.size());
@@ -156,6 +162,8 @@ namespace WaveletTL
 		const typename SplineBasis<d,dT,flavor>::Index& lambda,
 		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues)
   {
+    assert(flavor == P_construction); // the other cases are done in a template specialization
+
     const unsigned int npoints(points.size());
     funcvalues.resize(npoints);
     dervalues.resize(npoints);

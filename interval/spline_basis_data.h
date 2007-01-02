@@ -45,6 +45,9 @@ namespace WaveletTL
     void check() const;
 
   protected:
+    //! options
+    std::string options_;
+
     //! boundary condition orders
     const int s0_, s1_, sT0_, sT1_;
 

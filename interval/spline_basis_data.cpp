@@ -9,7 +9,8 @@ namespace WaveletTL
   SplineBasisData<2,2,P_construction>::SplineBasisData
   (const char* options,
    const int s0, const int s1, const int sT0, const int sT1)
-    : s0_(s0), s1_(s1), sT0_(sT0), sT1_(sT1),
+    : options_(options),
+      s0_(s0), s1_(s1), sT0_(sT0), sT1_(sT1),
       Mj0_(0), Mj1_(0), Mj0T_(0), Mj1T_(0)
   {
     assert(sT0==0 && sT1==0);
@@ -97,7 +98,8 @@ namespace WaveletTL
   SplineBasisData<3,3,P_construction>::SplineBasisData
   (const char* options,
    const int s0, const int s1, const int sT0, const int sT1)
-    : s0_(s0), s1_(s1), sT0_(sT0), sT1_(sT1),
+    : options_(options),
+      s0_(s0), s1_(s1), sT0_(sT0), sT1_(sT1),
       Mj0_(0), Mj1_(0), Mj0T_(0), Mj1T_(0)
   {
     assert(sT0 == 0 && sT1 == 0);
@@ -147,7 +149,8 @@ namespace WaveletTL
   SplineBasisData<2,2,DS_construction>::SplineBasisData
   (const char* options,
    const int s0, const int s1, const int sT0, const int sT1)
-    : s0_(s0), s1_(s1), sT0_(sT0), sT1_(sT1),
+    : options_(options),
+      s0_(s0), s1_(s1), sT0_(sT0), sT1_(sT1),
       Mj0_(0), Mj1_(0), Mj0T_(0), Mj1T_(0)
   {
     if (s0==0 && s1==0 && sT0==0 && sT1==0) {
@@ -255,7 +258,8 @@ namespace WaveletTL
   SplineBasisData<3,3,DS_construction>::SplineBasisData
   (const char* options,
    const int s0, const int s1, const int sT0, const int sT1)
-    : s0_(s0), s1_(s1), sT0_(sT0), sT1_(sT1),
+    : options_(options),
+      s0_(s0), s1_(s1), sT0_(sT0), sT1_(sT1),
       Mj0_(0), Mj1_(0), Mj0T_(0), Mj1T_(0)
   {
     if (s0==0 && s1==0 && sT0==0 && sT1==0) {
@@ -442,6 +446,7 @@ namespace WaveletTL
 
     cout << "* some basic data:" << endl;
     cout << "  flavor: " << flavor << endl;
+    cout << "  options: " << options_ << endl;
     cout << "  d=" << d << endl;
     cout << "  dT=" << dT << endl;
     cout << "  s0=" << s0_ << endl;

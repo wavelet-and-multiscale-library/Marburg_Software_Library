@@ -10,8 +10,12 @@ using namespace MathTL;
 
 int main()
 {
-  cout << "Constructing a quasi-stationary matrix..." << endl;
+  cout << "Constructing quasi-stationary matrices..." << endl;
   
+  cout << "- the default QuasiStationaryMatrix:" << endl;
+  QuasiStationaryMatrix<double> Qdefault;
+  cout << "Qdefault=" << endl << Qdefault;
+
   Matrix<double> one(3, 2, "1 2 3 4 5 6");
   Matrix<double> two(4, 1, "-4 -3 -2 -1");
   Vector<double> b1(3, "3 4 5");
@@ -19,6 +23,9 @@ int main()
 
   QuasiStationaryMatrix<double> Q(3, 17, 9, one, two, b1, b2, 2, 1);
   cout << "Q=" << endl << Q;
+
+  Qdefault = Q;
+  cout << "after assignment, Qdefault=" << endl << Qdefault;
 
 //   Q.set_level(4);
 //   cout << "Q on next higher level:" << endl << Q;

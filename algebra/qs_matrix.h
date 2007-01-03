@@ -34,6 +34,9 @@ namespace MathTL
      */
     typedef typename Vector<C>::size_type size_type;
 
+    //! default constructor, yields (2^j)x(2^j) zero matrix
+    QuasiStationaryMatrix();
+
     /*!
       constructor from the matrix ingredients
       j0             : coarsest level
@@ -49,6 +52,9 @@ namespace MathTL
 			  const Vector<C>& bandL, const Vector<C>& bandR,
 			  const size_type offsetL, const size_type offsetR,
 			  const double factor = 1.0);
+
+    //! assignment
+    QuasiStationaryMatrix<C>& operator = (const QuasiStationaryMatrix<C>& M);
     
     /*!
       row dimension

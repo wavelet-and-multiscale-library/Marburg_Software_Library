@@ -3,6 +3,17 @@
 namespace MathTL
 {
   template <class C>
+  QuasiStationaryMatrix<C>::QuasiStationaryMatrix()
+    : j0_(0), mj0_(2), nj0_(1),
+      ML_(), MR_(),
+      bandL_(), bandR_(),
+      offsetL_(0), offsetR_(0),
+      factor_(0.0)
+  {
+    j_ = j0_;
+  };
+
+  template <class C>
   QuasiStationaryMatrix<C>
   ::QuasiStationaryMatrix(const int j0,
 			  const size_type mj0, const size_type nj0,
@@ -17,6 +28,24 @@ namespace MathTL
       factor_(factor)
   {
     j_ = j0_;
+  }
+
+  template <class C>
+  QuasiStationaryMatrix<C>&
+  QuasiStationaryMatrix<C>::operator = (const QuasiStationaryMatrix<C>& M)
+  {
+    j0_ = M.j0_;
+    mj0_ = M.mj0_;
+    nj0_ = M.nj0_;
+    ML_ = M.ML_;
+    MR_ = M.MR_;
+    bandL_ = M.bandL_;
+    bandR_ = M.bandR_;
+    offsetL_ = M.offsetL_;
+    offsetR_ = M.offsetR_;
+    factor_ = M.factor_;
+    j_ = j0_;
+    return *this;
   }
 
   template <class C>

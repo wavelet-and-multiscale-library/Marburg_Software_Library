@@ -20,8 +20,7 @@ using MathTL::InfiniteVector;
 namespace WaveletTL
 {
   template <int d, int dT, SplineBasisFlavor flavor> class SplineBasis;
-
-  // remark: the following routines only work with flavor==P_construction yet!!!
+  template <int d, int dT> class SplineBasis<d,dT,DS_construction>;
 
   /*!
     Evaluate an arbitrary linear combination of primal wavelets

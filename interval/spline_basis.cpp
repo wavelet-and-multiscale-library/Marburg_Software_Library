@@ -1,11 +1,17 @@
 // implementation for spline_basis.h
 
+#include <algebra/sparse_matrix.h>
+#include <algebra/vector.h>
 #include <numerics/cardinal_splines.h>
 #include <numerics/schoenberg_splines.h>
+#include <numerics/gauss_data.h>
+#include <numerics/quadrature.h>
+#include <numerics/iteratsolv.h>
 
 #include <Rd/r_index.h>
 #include <Rd/cdf_utils.h>
 #include <interval/interval_bspline.h>
+#include <galerkin/full_gramian.h>
 
 namespace WaveletTL
 {
@@ -42,10 +48,28 @@ namespace WaveletTL
     return Index(j, 0, DeltaLmin(), this);
   }
   
+  template <int d, int dT>
+  inline
+  typename SplineBasis<d,dT,DS_construction>::Index
+  SplineBasis<d,dT,DS_construction>::first_generator(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 0, DeltaLmin(), this);
+  }
+  
   template <int d, int dT, SplineBasisFlavor flavor>
   inline
   typename SplineBasis<d,dT,flavor>::Index
   SplineBasis<d,dT,flavor>::last_generator(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 0, DeltaRmax(j), this);
+  }
+
+  template <int d, int dT>
+  inline
+  typename SplineBasis<d,dT,DS_construction>::Index
+  SplineBasis<d,dT,DS_construction>::last_generator(const int j) const
   {
     assert(j >= j0());
     return Index(j, 0, DeltaRmax(j), this);
@@ -60,10 +84,28 @@ namespace WaveletTL
     return Index(j, 1, Nablamin(), this);
   }
   
+  template <int d, int dT>
+  inline
+  typename SplineBasis<d,dT,DS_construction>::Index
+  SplineBasis<d,dT,DS_construction>::first_wavelet(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 1, Nablamin(), this);
+  }
+  
   template <int d, int dT, SplineBasisFlavor flavor>
   inline
   typename SplineBasis<d,dT,flavor>::Index
   SplineBasis<d,dT,flavor>::last_wavelet(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 1, Nablamax(j), this);
+  }
+
+  template <int d, int dT>
+  inline
+  typename SplineBasis<d,dT,DS_construction>::Index
+  SplineBasis<d,dT,DS_construction>::last_wavelet(const int j) const
   {
     assert(j >= j0());
     return Index(j, 1, Nablamax(j), this);
@@ -96,6 +138,51 @@ namespace WaveletTL
 	    k2 = k1+2*(d+dT)-2;
 	  }
 	}
+      }
+  }
+  
+  template <int d, int dT>
+  void
+  SplineBasis<d,dT,DS_construction>::support(const Index& lambda, int& k1, int& k2) const {
+    if (lambda.e() == 0) // generator
+      {
+	if (lambda.k() < DeltaLmin()+(int)CLA_.column_dimension())
+	  {
+	    // left boundary generator
+	    k1 = 0;
+	    k2 = CLA_.row_dimension();
+	  }
+	else
+	  {
+	    if (lambda.k() > DeltaRmax(lambda.j())-(int)CRA_.column_dimension())
+	      {
+		// right boundary generator
+		k1 = (1<<lambda.j()) - CRA_.row_dimension();
+		k2 = 1<<lambda.j();
+	      }
+	    else
+	      {
+		k1 = lambda.k() + ell1<d>();
+		k2 = lambda.k() + ell2<d>();
+	      }
+	  }
+      }
+    else // wavelet
+      {
+ 	// To determine which generators would be necessary to create the
+ 	// wavelet in question, we mimic a reconstruct_1() call:
+	
+	typedef typename Vector<double>::size_type size_type;
+	size_type number_lambda = Deltasize(lambda.j())+lambda.k()-Nablamin();
+	std::map<size_type,double> wc, gc;
+	wc[number_lambda] = 1.0;
+	apply_Mj(lambda.j(), wc, gc);
+	typedef typename SplineBasis<d,dT,DS_construction>::Index Index;
+	const size_type kleft = DeltaLmin()+gc.begin()->first;
+	const size_type kright = DeltaLmin()+gc.rbegin()->first;
+	int dummy;
+ 	support(Index(lambda.j()+1, 0, kleft, this), k1, dummy);
+ 	support(Index(lambda.j()+1, 0, kright, this), dummy, k2);
       }
   }
   
@@ -782,5 +869,219 @@ namespace WaveletTL
     }
   }
   
+  //
+  //
+  // expansion subroutines
+
+  template <int d, int dT, SplineBasisFlavor flavor>
+  void
+  SplineBasis<d,dT,flavor>::expand
+  (const Function<1>* f,
+   const bool primal,
+   const int jmax,
+   InfiniteVector<double, typename SplineBasis<d,dT,flavor>::Index>& coeffs) const
+  {
+    assert(flavor == P_construction);
+    
+    Vector<double> coeffs_vector;
+    expand(f, primal, jmax, coeffs_vector);
+    typedef typename Vector<double>::size_type size_type;
+    typedef typename SplineBasis<d,dT,flavor>::Index Index;
+    size_type i(0);
+    for (Index lambda(first_generator(j0()));
+	 i < coeffs_vector.size(); ++lambda, i++)
+      {
+	const double coeff = coeffs_vector[i];
+	if (fabs(coeff)>1e-15)
+	  coeffs.set_coefficient(lambda, coeff);
+      } 
+  }
+  
+  template <int d, int dT>
+  double
+  SplineBasis<d,dT,DS_construction>::integrate
+  (const Function<1>* f,
+   const typename SplineBasis<d,dT,DS_construction>::Index& lambda) const
+  {
+    double r = 0;
+    
+    const int j = lambda.j()+lambda.e();
+    int k1, k2;
+    support(lambda, k1, k2);
+    
+    // setup Gauss points and weights for a composite quadrature formula:
+    const unsigned int N_Gauss = 5;
+    const double h = ldexp(1.0, -j);
+    Array1D<double> gauss_points (N_Gauss*(k2-k1));
+    for (int patch = k1; patch < k2; patch++) // refers to 2^{-j}[patch,patch+1]
+      for (unsigned int n = 0; n < N_Gauss; n++)
+	gauss_points[(patch-k1)*N_Gauss+n] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2;
+    
+    // add all integral shares
+    for (unsigned int n = 0; n < N_Gauss; n++)
+      {
+	const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
+	for (int patch = k1; patch < k2; patch++)
+	  {
+	    const double t = gauss_points[(patch-k1)*N_Gauss+n];
+	    
+	    const double ft = f->value(Point<1>(t));
+	    if (ft != 0)
+	      r += ft
+		* evaluate(0, lambda, t)
+		* gauss_weight;
+	  }
+      }
+    
+    return r;
+  }
+  
+  template <int d, int dT>
+  double
+  SplineBasis<d,dT,DS_construction>::integrate
+  (const typename SplineBasis<d,dT,DS_construction>::Index& lambda,
+   const typename SplineBasis<d,dT,DS_construction>::Index& mu) const
+  {
+    double r = 0;
+    
+    // First we compute the support intersection of \psi_\lambda and \psi_\mu:
+    typedef typename SplineBasis<d,dT,DS_construction>::Support Support;
+    Support supp;
+    
+    if (intersect_supports(*this, lambda, mu, supp))
+      {
+ 	// Set up Gauss points and weights for a composite quadrature formula:
+ 	const unsigned int N_Gauss = d;
+ 	const double h = ldexp(1.0, -supp.j);
+ 	Array1D<double> gauss_points (N_Gauss*(supp.k2-supp.k1)), func1values, func2values;
+ 	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++) // refers to 2^{-j}[patch,patch+1]
+ 	  for (unsigned int n = 0; n < N_Gauss; n++, id++)
+ 	    gauss_points[id] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
+	
+ 	// - compute point values of the integrands
+  	evaluate(0, lambda, gauss_points, func1values);
+ 	evaluate(0, mu, gauss_points, func2values);
+	
+ 	// - add all integral shares
+ 	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++)
+ 	  for (unsigned int n = 0; n < N_Gauss; n++, id++) {
+ 	    const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
+	    r += func1values[id] * func2values[id] * gauss_weight;
+ 	  }
+      }
+    
+    return r;
+  }
+  
+  template <int d, int dT>
+  void
+  SplineBasis<d,dT,DS_construction>::expand
+  (const Function<1>* f,
+   const bool primal,
+   const int jmax,
+   InfiniteVector<double, typename SplineBasis<d,dT,DS_construction>::Index>& coeffs) const
+  {
+    typedef typename SplineBasis<d,dT,DS_construction>::Index Index;
+
+    for (Index lambda = first_generator(j0());;++lambda)
+      {
+	coeffs.set_coefficient(lambda, integrate(f, lambda));
+	if (lambda == last_wavelet(jmax))
+	  break;
+      }
+    
+    if (!primal) {
+      // setup active index set
+      std::set<Index> Lambda;
+      for (Index lambda = first_generator(j0());; ++lambda) {
+	Lambda.insert(lambda);
+	if (lambda == last_wavelet(jmax)) break;
+      }
+      
+      // setup Gramian A_Lambda
+      SparseMatrix<double> A_Lambda(Lambda.size());
+      typedef typename SparseMatrix<double>::size_type size_type;     
+      size_type row = 0;
+      for (typename std::set<Index>::const_iterator it1(Lambda.begin()), itend(Lambda.end());
+	   it1 != itend; ++it1, ++row)
+	{
+	  std::list<size_type> indices;
+	  std::list<double> entries;
+	  
+	  size_type column = 0;
+	  for (typename std::set<Index>::const_iterator it2(Lambda.begin());
+	     it2 != itend; ++it2, ++column)
+	    {
+	      double entry = integrate(*it2, *it1);
+	      
+	      if (entry != 0) {
+		indices.push_back(column);
+		entries.push_back(entry);
+	      }
+	    }
+	  A_Lambda.set_row(row, indices, entries);
+	} 
+
+      // solve A_Lambda*x = b
+      Vector<double> b(Lambda.size());
+      row = 0;
+      for (typename std::set<Index>::const_iterator it(Lambda.begin()), itend(Lambda.end());
+	   it != itend; ++it, ++row)
+	b[row] = coeffs.get_coefficient(*it);
+
+      Vector<double> x(b);
+      unsigned int iterations;
+      CG(A_Lambda, b, x, 1e-12, 200, iterations);
+  
+      coeffs.clear();
+      row = 0;
+      for (typename std::set<Index>::const_iterator it(Lambda.begin()), itend(Lambda.end());
+	   it != itend; ++it, ++row)
+	coeffs.set_coefficient(*it, x[row]);
+    }
+  }
+  
+
+  template <int d, int dT, SplineBasisFlavor flavor>
+  void
+  SplineBasis<d,dT,flavor>::expand
+  (const Function<1>* f,
+   const bool primal,
+   const int jmax,
+   Vector<double>& coeffs) const
+  {
+    assert(flavor == P_construction);
+    assert(jmax >= j0());
+	   
+    coeffs.resize(Deltasize(jmax+1));
+
+    // 1. compute integrals w.r.t. the primal generators on level jmax
+    Vector<double> coeffs_phijk(coeffs.size(), false);
+    SimpsonRule simpson;
+    CompositeRule<1> composite(simpson, 12); // should be sufficient for many cases
+    SchoenbergIntervalBSpline_td<d> sbs(jmax+1,0);
+    for (int k = DeltaLmin(); k <= DeltaRmax(jmax+1); k++) {
+      sbs.set_k(k);
+      ProductFunction<1> integrand(f, &sbs);
+      coeffs_phijk[k-DeltaLmin()]
+	= composite.integrate(integrand,
+			      Point<1>(std::max(0.0, (k+ell1<d>())*ldexp(1.0, -jmax-1))),
+			      Point<1>(std::min(1.0, (k+ell2<d>())*ldexp(1.0, -jmax-1))));
+    }
+    // 2. transform rhs into that of psi_{j,k} basis: apply T_{j-1}^T
+    Vector<double> rhs(coeffs.size(), false);
+    apply_Tj_transposed(jmax, coeffs_phijk, rhs);
+    
+    if (!primal) {
+      FullGramian<d,dT> G(*this);
+      G.set_level(jmax+1);
+      unsigned int iterations;
+      CG(G, rhs, coeffs, 1e-15, 250, iterations);
+    } else {
+      coeffs.swap(rhs);
+    }
+  }
+
+
 
 }

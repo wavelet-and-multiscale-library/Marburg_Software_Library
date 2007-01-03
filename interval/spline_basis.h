@@ -185,7 +185,38 @@ namespace WaveletTL
     evaluate
     (const typename SplineBasis<d,dT,flavor>::Index& lambda,
      const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues) const;
+
+
+    /*!
+      For a given function, compute all integrals w.r.t. the primal
+      or dual generators/wavelets \psi_\lambda with |\lambda|\le jmax.
+      - When integrating against the primal functions, the integrand has to be smooth
+        to be accurately reproduced by the dual basis.
+      - When integration against dual functions is specified,
+        we integrate against the primal ones instead and multiply the resulting
+        coefficients with the inverse of the primal gramian.
+
+      Maybe a thresholding of the returned coefficients is helpful (e.g. for
+      expansions of spline functions).
+    */
+    void
+    expand
+    (const Function<1>* f,
+     const bool primal,
+     const int jmax,
+     InfiniteVector<double, typename SplineBasis<d,dT,flavor>::Index>& coeffs) const;
     
+    /*!
+      analogous routine for Vector<double> output
+    */
+    void
+    expand
+    (const Function<1>* f,
+     const bool primal,
+     const int jmax,
+     Vector<double>& coeffs) const;
+    
+
   protected:
     int DeltaLmin_, DeltaRmax_offset;
   };
@@ -207,7 +238,7 @@ namespace WaveletTL
 
     //! coarsest possible level
     inline const int j0() const { return SplineBasisData<d,dT,DS_construction>::j0_; }
-
+    
     //! wavelet index class
     typedef IntervalIndex<SplineBasis<d,dT,DS_construction> > Index;
     
@@ -348,6 +379,54 @@ namespace WaveletTL
     */
     void evaluate(const typename SplineBasis<d,dT,DS_construction>::Index& lambda,
 		  const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues) const;
+
+
+    /*!
+      For a given function, compute all integrals w.r.t. the primal
+      or dual generators/wavelets \psi_\lambda with |\lambda|\le jmax.
+      - When integrating against the primal functions, the integrand has to be smooth
+        to be accurately reproduced by the dual basis.
+      - When integration against dual functions is specified,
+        we integrate against the primal ones instead and multiply the resulting
+        coefficients with the inverse of the primal gramian.
+
+      Maybe a thresholding of the returned coefficients is helpful (e.g. for
+      expansions of spline functions).
+    */
+    void
+    expand
+    (const Function<1>* f,
+     const bool primal,
+     const int jmax,
+     InfiniteVector<double, typename SplineBasis<d,dT,DS_construction>::Index>& coeffs) const;
+    
+    /*!
+      analogous routine for Vector<double> output
+    */
+    void
+    expand
+    (const Function<1>* f,
+     const bool primal,
+     const int jmax,
+     Vector<double>& coeffs) const;
+    
+    /*!
+      helper function, integrate a smooth function f against a
+      primal DS generator or wavelet
+    */
+    double
+    integrate
+    (const Function<1>* f,
+     const typename SplineBasis<d,dT,DS_construction>::Index& lambda) const;
+
+    /*!
+      helper function, integrate two primal DS generators or wavelets
+      against each other (for the Gramian)
+    */
+    double
+    integrate
+    (const typename SplineBasis<d,dT,DS_construction>::Index& lambda,
+     const typename SplineBasis<d,dT,DS_construction>::Index& mu) const;
     
   protected:
     int DeltaLmin_, DeltaRmax_offset;

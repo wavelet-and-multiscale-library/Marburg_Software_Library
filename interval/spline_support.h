@@ -17,8 +17,7 @@
 namespace WaveletTL
 {
   template <int d, int dT, SplineBasisFlavor flavor> class SplineBasis;
-
-  // remark: the following routines only work with flavor==P_construction yet!!!
+  template <int d, int dT> class SplineBasis<d,dT,DS_construction>;
 
   /*!
     Compute an interval 2^{-j}[k1,k2] which contains the support of a

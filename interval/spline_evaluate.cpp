@@ -9,6 +9,7 @@ namespace WaveletTL
 	   const InfiniteVector<double, typename SplineBasis<d,dT,flavor>::Index>& coeffs,
 	   const int resolution)
   {
+    // universal routine for all values of "flavor"
     return basis.evaluate(coeffs, resolution);
   }
 
@@ -20,6 +21,7 @@ namespace WaveletTL
 	   const typename SplineBasis<d,dT,flavor>::Index& lambda,
 	   const double x)
   {
+    // universal routine for all values of "flavor"
     return basis.evaluate(derivative, lambda, x);
   }
   
@@ -30,6 +32,7 @@ namespace WaveletTL
 	   const typename SplineBasis<d,dT,flavor>::Index& lambda,
 	   const Array1D<double>& points, Array1D<double>& values)
   {
+    // universal routine for all values of "flavor"
     basis.evaluate(derivative, lambda, points, values);
   }
   
@@ -40,6 +43,7 @@ namespace WaveletTL
 	   const typename SplineBasis<d,dT,flavor>::Index& lambda,
 	   const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues)
   {
+    // universal routine for all values of "flavor"
     basis.evaluate(lambda, points, funcvalues, dervalues);
   }
   

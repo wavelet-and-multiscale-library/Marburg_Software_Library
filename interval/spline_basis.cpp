@@ -502,20 +502,20 @@ namespace WaveletTL
     
     if (lambda.e() == 0) {
       // generator
-      if (lambda.k() < DeltaLmin()+(int)CLA_.column_dimension()) {
+      if (lambda.k() < DeltaLmin()+(int)SplineBasisData<d,dT,DS_construction>::CLA_.column_dimension()) {
 	// left boundary generator
-	for (unsigned int i(0); i < CLA_.row_dimension(); i++) {
-	  double help(CLA_(i, lambda.k()-DeltaLmin()));
+	for (unsigned int i(0); i < SplineBasisData<d,dT,DS_construction>::CLA_.row_dimension(); i++) {
+	  double help(SplineBasisData<d,dT,DS_construction>::CLA_.get_entry(i, lambda.k()-DeltaLmin()));
 	  if (help != 0)
 	    r += help * (derivative == 0
 			 ? EvaluateCardinalBSpline_td<d>  (lambda.j(), 1-ell2<d>()+i, x)
 			 : EvaluateCardinalBSpline_td_x<d>(lambda.j(), 1-ell2<d>()+i, x));
 	}
       }	else {
-	if (lambda.k() > DeltaRmax(lambda.j())-(int)CRA_.column_dimension()) {
+	if (lambda.k() > DeltaRmax(lambda.j())-(int)SplineBasisData<d,dT,DS_construction>::CRA_.column_dimension()) {
 	  // right boundary generator
-	  for (unsigned int i(0); i < CRA_.row_dimension(); i++) {
-	    double help(CRA_(i, DeltaRmax(lambda.j())-lambda.k()));
+	  for (unsigned int i(0); i < SplineBasisData<d,dT,DS_construction>::CRA_.row_dimension(); i++) {
+	    double help(SplineBasisData<d,dT,DS_construction>::CRA_.get_entry(i, DeltaRmax(lambda.j())-lambda.k()));
 	    if (help != 0)
 	      r += help * (derivative == 0
 			   ? EvaluateCardinalBSpline_td<d>  (lambda.j(), (1<<lambda.j())-(d%2)-(1-ell2<d>()+i), x)
@@ -613,10 +613,10 @@ namespace WaveletTL
     
     if (lambda.e() == 0) {
       // generator
-      if (lambda.k() < DeltaLmin()+(int)CLA_.column_dimension()) {
+      if (lambda.k() < DeltaLmin()+(int)SplineBasisData<d,dT,DS_construction>::CLA_.column_dimension()) {
 	// left boundary generator
-	for (unsigned int i(0); i < CLA_.row_dimension(); i++) {
-	  const double help(CLA_(i, lambda.k()-DeltaLmin()));
+	for (unsigned int i(0); i < SplineBasisData<d,dT,DS_construction>::CLA_.row_dimension(); i++) {
+	  const double help(SplineBasisData<d,dT,DS_construction>::CLA_.get_entry(i, lambda.k()-DeltaLmin()));
 	  // 	  if (help != 0)
 	  for (unsigned int m(0); m < points.size(); m++)
 	    values[m] += help * (derivative == 0
@@ -624,10 +624,10 @@ namespace WaveletTL
 				 : EvaluateCardinalBSpline_td_x<d>(lambda.j(), 1-ell2<d>()+i, points[m]));
 	}
       }	else {
-	if (lambda.k() > DeltaRmax(lambda.j())-(int)CRA_.column_dimension()) {
+	if (lambda.k() > DeltaRmax(lambda.j())-(int)SplineBasisData<d,dT,DS_construction>::CRA_.column_dimension()) {
 	  // right boundary generator
-	  for (unsigned int i(0); i < CRA_.row_dimension(); i++) {
-	    const double help(CRA_(i, DeltaRmax(lambda.j())-lambda.k()));
+	  for (unsigned int i(0); i < SplineBasisData<d,dT,DS_construction>::CRA_.row_dimension(); i++) {
+	    const double help(SplineBasisData<d,dT,DS_construction>::CRA_.get_entry(i, DeltaRmax(lambda.j())-lambda.k()));
 	    // 	    if (help != 0)
 	    for (unsigned int m(0); m < points.size(); m++)
 	      values[m] += help * (derivative == 0
@@ -733,10 +733,10 @@ namespace WaveletTL
 
     if (lambda.e() == 0) {
       // generator
-      if (lambda.k() < DeltaLmin()+(int)CLA_.column_dimension()) {
+      if (lambda.k() < DeltaLmin()+(int)SplineBasisData<d,dT,DS_construction>::CLA_.column_dimension()) {
 	// left boundary generator
-	for (unsigned int i(0); i < CLA_.row_dimension(); i++) {
-	  const double help(CLA_(i, lambda.k()-DeltaLmin()));
+	for (unsigned int i(0); i < SplineBasisData<d,dT,DS_construction>::CLA_.row_dimension(); i++) {
+	  const double help(SplineBasisData<d,dT,DS_construction>::CLA_.get_entry(i, lambda.k()-DeltaLmin()));
 	  // 	  if (help != 0)
 	  for (unsigned int m(0); m < npoints; m++) {
 	    funcvalues[m] += help * EvaluateCardinalBSpline_td<d>  (lambda.j(), 1-ell2<d>()+i, points[m]);
@@ -744,10 +744,10 @@ namespace WaveletTL
 	  }
 	}
       }	else {
-	if (lambda.k() > DeltaRmax(lambda.j())-(int)CRA_.column_dimension()) {
+	if (lambda.k() > DeltaRmax(lambda.j())-(int)SplineBasisData<d,dT,DS_construction>::CRA_.column_dimension()) {
 	  // right boundary generator
-	  for (unsigned int i(0); i < CRA_.row_dimension(); i++) {
-	    const double help(CRA_(i, DeltaRmax(lambda.j())-lambda.k()));
+	  for (unsigned int i(0); i < SplineBasisData<d,dT,DS_construction>::CRA_.row_dimension(); i++) {
+	    const double help(SplineBasisData<d,dT,DS_construction>::CRA_.get_entry(i, DeltaRmax(lambda.j())-lambda.k()));
 	    // 	    if (help != 0)
 	    for (unsigned int m(0); m < npoints; m++) {
 	      funcvalues[m] += help * EvaluateCardinalBSpline_td<d>  (lambda.j(), (1<<lambda.j())-(d%2)-(1-ell2<d>()+i), points[m]);

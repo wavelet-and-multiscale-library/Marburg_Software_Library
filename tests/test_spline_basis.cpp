@@ -87,7 +87,7 @@ int main()
   cout << "* point evaluation of spline wavelets:" << endl;
 //   typedef SplineBasis<3,3,P_construction>::Index Index;
   typedef SplineBasis<3,3,DS_construction>::Index Index;
-  int N = 16;
+  int N = 32;
   Array1D<double> points(N+1), values(N+1), dervalues(N+1);
   double h = 1.0/N;
   for (int i = 0; i <= N; i++) points[i] = i*h;
@@ -96,7 +96,8 @@ int main()
     evaluate(basis, lambda, points, values, dervalues);
     cout << "values: " << values << endl;
     cout << "values of first derivative: " << dervalues << endl;
-    if (lambda == last_generator(&basis, basis.j0())) break;
+//     if (lambda == last_generator(&basis, basis.j0())) break;
+    if (lambda == last_wavelet(&basis, basis.j0())) break;
   }
 #endif
   

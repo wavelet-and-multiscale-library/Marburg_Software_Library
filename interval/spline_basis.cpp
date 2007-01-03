@@ -146,18 +146,18 @@ namespace WaveletTL
   SplineBasis<d,dT,DS_construction>::support(const Index& lambda, int& k1, int& k2) const {
     if (lambda.e() == 0) // generator
       {
-	if (lambda.k() < DeltaLmin()+(int)CLA_.column_dimension())
+	if (lambda.k() < DeltaLmin()+(int)SplineBasis<d,dT,DS_construction>::CLA_.column_dimension())
 	  {
 	    // left boundary generator
 	    k1 = 0;
-	    k2 = CLA_.row_dimension();
+	    k2 = SplineBasis<d,dT,DS_construction>::CLA_.row_dimension();
 	  }
 	else
 	  {
-	    if (lambda.k() > DeltaRmax(lambda.j())-(int)CRA_.column_dimension())
+	    if (lambda.k() > DeltaRmax(lambda.j())-(int)SplineBasis<d,dT,DS_construction>::CRA_.column_dimension())
 	      {
 		// right boundary generator
-		k1 = (1<<lambda.j()) - CRA_.row_dimension();
+		k1 = (1<<lambda.j()) - SplineBasis<d,dT,DS_construction>::CRA_.row_dimension();
 		k2 = 1<<lambda.j();
 	      }
 	    else

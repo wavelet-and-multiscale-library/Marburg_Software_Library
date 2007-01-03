@@ -97,13 +97,13 @@ namespace WaveletTL
   void
   SplineBasis<d,dT,flavor>::apply_Mj(const int j, const V& x, V& y) const
   {
-    SplineBasisData<d,dT,flavor>::Mj0_->set_level(j);
-    SplineBasisData<d,dT,flavor>::Mj1_->set_level(j);
+    SplineBasisData<d,dT,flavor>::Mj0_.set_level(j);
+    SplineBasisData<d,dT,flavor>::Mj1_.set_level(j);
 
     // decompose x=(x1 x2) appropriately
-    SplineBasisData<d,dT,flavor>::Mj0_->apply(x, y, 0, 0); // apply Mj0 to first block x1
-    SplineBasisData<d,dT,flavor>::Mj1_->apply(x, y,        // apply Mj1 to second block x2 and add result
-					      SplineBasisData<d,dT,flavor>::Mj0_->column_dimension(), 0, true);
+    SplineBasisData<d,dT,flavor>::Mj0_.apply(x, y, 0, 0); // apply Mj0 to first block x1
+    SplineBasisData<d,dT,flavor>::Mj1_.apply(x, y,        // apply Mj1 to second block x2 and add result
+					     SplineBasisData<d,dT,flavor>::Mj0_.column_dimension(), 0, true);
   }
 
   template <int d, int dT, SplineBasisFlavor flavor>
@@ -111,13 +111,13 @@ namespace WaveletTL
   void
   SplineBasis<d,dT,flavor>::apply_Mj_transposed(const int j, const V& x, V& y) const
   {
-    SplineBasisData<d,dT,flavor>::Mj0_->set_level(j);
-    SplineBasisData<d,dT,flavor>::Mj1_->set_level(j);
+    SplineBasisData<d,dT,flavor>::Mj0_.set_level(j);
+    SplineBasisData<d,dT,flavor>::Mj1_.set_level(j);
 
     // y=(y1 y2) is a block vector
-    SplineBasisData<d,dT,flavor>::Mj0_->apply_transposed(x, y, 0, 0); // write into first block y1
-    SplineBasisData<d,dT,flavor>::Mj1_->apply_transposed(x, y, 0,     // write into second block y2
-							 SplineBasisData<d,dT,flavor>::Mj0_->column_dimension());
+    SplineBasisData<d,dT,flavor>::Mj0_.apply_transposed(x, y, 0, 0); // write into first block y1
+    SplineBasisData<d,dT,flavor>::Mj1_.apply_transposed(x, y, 0,     // write into second block y2
+							SplineBasisData<d,dT,flavor>::Mj0_.column_dimension());
   }
 
   template <int d, int dT, SplineBasisFlavor flavor>
@@ -125,13 +125,13 @@ namespace WaveletTL
   void
   SplineBasis<d,dT,flavor>::apply_Gj(const int j, const V& x, V& y) const
   {
-    SplineBasisData<d,dT,flavor>::Mj0T_->set_level(j);
-    SplineBasisData<d,dT,flavor>::Mj1T_->set_level(j);
+    SplineBasisData<d,dT,flavor>::Mj0T_.set_level(j);
+    SplineBasisData<d,dT,flavor>::Mj1T_.set_level(j);
 
     // y=(y1 y2) is a block vector
-    SplineBasisData<d,dT,flavor>::Mj0T_->apply_transposed(x, y, 0, 0); // write into first block y1
-    SplineBasisData<d,dT,flavor>::Mj1T_->apply_transposed(x, y, 0,     // write into second block y2
-							  SplineBasisData<d,dT,flavor>::Mj0T_->column_dimension());
+    SplineBasisData<d,dT,flavor>::Mj0T_.apply_transposed(x, y, 0, 0); // write into first block y1
+    SplineBasisData<d,dT,flavor>::Mj1T_.apply_transposed(x, y, 0,     // write into second block y2
+							 SplineBasisData<d,dT,flavor>::Mj0T_.column_dimension());
   }
   
   template <int d, int dT, SplineBasisFlavor flavor>
@@ -139,13 +139,13 @@ namespace WaveletTL
   void
   SplineBasis<d,dT,flavor>::apply_Gj_transposed(const int j, const V& x, V& y) const
   {
-    SplineBasisData<d,dT,flavor>::Mj0T_->set_level(j);
-    SplineBasisData<d,dT,flavor>::Mj1T_->set_level(j);
+    SplineBasisData<d,dT,flavor>::Mj0T_.set_level(j);
+    SplineBasisData<d,dT,flavor>::Mj1T_.set_level(j);
     
     // decompose x=(x1 x2) appropriately
-    SplineBasisData<d,dT,flavor>::Mj0T_->apply(x, y, 0); // apply Mj0T to first block x1
-    SplineBasisData<d,dT,flavor>::Mj1T_->apply(x, y,     // apply Mj1T to second block x2 and add result
-					       SplineBasisData<d,dT,flavor>::Mj0T_->column_dimension(), 0, true);
+    SplineBasisData<d,dT,flavor>::Mj0T_.apply(x, y, 0); // apply Mj0T to first block x1
+    SplineBasisData<d,dT,flavor>::Mj1T_.apply(x, y,     // apply Mj1T to second block x2 and add result
+					      SplineBasisData<d,dT,flavor>::Mj0T_.column_dimension(), 0, true);
   }
   
   template <int d, int dT, SplineBasisFlavor flavor>

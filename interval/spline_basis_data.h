@@ -11,6 +11,7 @@
 #define _WAVELETTL_SPLINE_BASIS_DATA_H
 
 #include <string.h>
+#include <algebra/matrix.h>
 #include <algebra/qs_matrix.h>
 #include <interval/spline_basis_flavor.h>
 
@@ -22,19 +23,12 @@ namespace WaveletTL
     The following structure holds all the pieces of information
     needed for the construction of a spline wavelet basis on the interval.
     The primal functions are either B-splines or linear combinations thereof.
-
-    For flavor==DS_construction, you should set options to the appropriate biorthogonalization method:
-      "bio5"        <-> BernsteinSVD
-      "bio5-energy" <-> BernsteinSVD + energy inner product orthogonalization from [Ba01]
    */
   template <int d, int dT, SplineBasisFlavor flavor>
   class SplineBasisData
   {
   public:
-    /*!
-      constructor from the primal and dual boundary condition orders
-      plus additional information
-    */
+    //! constructor from the primal and dual boundary condition orders
     SplineBasisData(const char* options,
 		    const int s0, const int s1, const int sT0, const int sT1);
 
@@ -55,8 +49,50 @@ namespace WaveletTL
     int j0_;
     
     //! refinement matrices (without prefactor 1/sqrt(2)!)
-    QuasiStationaryMatrix<double> *Mj0_, *Mj1_, *Mj0T_, *Mj1T_;
+    QuasiStationaryMatrix<double> Mj0_, Mj1_, Mj0T_, Mj1T_;
   };
+
+  /*!
+    template specialization to SplineBasisFlavor==DS_construction,
+    here we have to store further matrices for the spline expansion of the generators
+  */
+  template <int d, int dT>
+  class SplineBasisData<d,dT,DS_construction>
+  {
+  public:
+    /*!
+      constructor from the primal and dual boundary condition orders;
+      the variable "options" should be set to the appropriate
+      biorthogonalization method:
+        "bio5"        <-> BernsteinSVD
+        "bio5-energy" <-> BernsteinSVD + energy inner product orthogonalization from [Ba01]
+    */
+    SplineBasisData(const char* options,
+		    const int s0, const int s1, const int sT0, const int sT1);
+ 
+    //! destructor
+    virtual ~SplineBasisData();
+ 
+    //! check integrity of the internal data
+    void check() const;
+
+  protected:
+    //! options
+    std::string options_;
+
+    //! boundary condition orders
+    const int s0_, s1_, sT0_, sT1_;
+
+    //! coarsest level
+    int j0_;
+ 
+    //! refinement matrices (without prefactor 1/sqrt(2)!)
+    QuasiStationaryMatrix<double> Mj0_, Mj1_, Mj0T_, Mj1T_;
+
+    //! expansion coefficients of the primal generators w.r.t. restricted cardinal B-splines
+    Matrix<double> CLA_, CRA_, CLAT_, CRAT_;
+  };
+
 }
 
 #include <interval/spline_basis_data.cpp>

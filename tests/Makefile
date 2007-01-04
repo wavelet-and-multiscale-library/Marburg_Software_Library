@@ -40,8 +40,8 @@ endif
 endif
 endif
 
-#CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
-CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+#CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O2 -msse2 -ffast-math -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -ffast-math -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
@@ -99,8 +99,9 @@ EXEOBJF3 = \
 # set 4 of test programs: wavelet bases on the L-domain
 EXEOBJF4 = \
   test_ldomain_index.o test_ldomain_support.o test_ldomain_basis.o\
-  test_ldomain_equation.o\
-  test_ldomain_helmholtz_equation.o
+#  test_ldomain_equation.o\
+#  test_ldomain_helmholtz_equation.o
+#
 #  test_ldomain_jl_basis.o test_ldomain_jl_support.o\
 #  test_ldomain_jl_expansion.o test_ldomain_jl_gramian.o\
 #  test_ldomain_jl_laplacian.o\

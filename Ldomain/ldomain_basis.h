@@ -20,6 +20,7 @@
 #include <utils/fixed_array1d.h>
 #include <utils/multiindex.h>
 
+#include <interval/spline_basis.h>
 #include <Ldomain/ldomain_index.h>
 
 // for convenience, include also some functionality
@@ -185,6 +186,72 @@ namespace WaveletTL
 #if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
     mutable unsigned long supp_hits, supp_misses;
 #endif
+  };
+
+  //! template specialization for the cass IBASIS==SplineBasis<d,dT,DS_construction>
+  template <int d, int dT>
+  class LDomainBasis<SplineBasis<d,dT,DS_construction> >
+  {
+  public:
+    //! type of the interval basis
+    typedef SplineBasis<d,dT,DS_construction> IntervalBasis;
+    
+    //! constructor with a precomputed 1D basis
+    LDomainBasis(const IntervalBasis& basis1d);
+
+    //! coarsest possible level j0
+    inline const int j0() const { return basis1d_.j0(); }
+    
+    //! wavelet index class
+    typedef LDomainIndex<IntervalBasis> Index;
+
+    //! geometric type of the support sets
+    typedef struct {
+      int j;       // granularity
+      int xmin[3];
+      int xmax[3];
+      int ymin[3];
+      int ymax[3];
+    } Support;
+
+    //! critical Sobolev regularity for the primal generators/wavelets
+    static double primal_regularity() { return IntervalBasis::primal_regularity(); } // dirty, we should use max(1.5,~) instead
+    
+    //! degree of polynomial reproduction for the primal generators/wavelets
+    static unsigned int primal_polynomial_degree() { return IntervalBasis::primal_polynomial_degree(); }
+
+    //! number of vanishing moments for the primal wavelets
+    static unsigned int primal_vanishing_moments() { return IntervalBasis::primal_vanishing_moments(); }
+
+    //! read access to the underlying 1D basis
+    const IntervalBasis& basis1d() const { return basis1d_; }
+
+    //! index of first generator on level j >= j0
+    Index first_generator(const int j) const;
+      
+    //! index of last generator on level j >= j0
+    Index last_generator(const int j) const;
+      
+    //! index of first wavelet on level j >= j0
+    Index first_wavelet(const int j) const;
+      
+    //! index of first wavelet on level j >= j0 with type e
+    Index first_wavelet(const int j, const typename Index::type_type& e) const;
+
+    //! index of last wavelet on level j >= j0
+    Index last_wavelet(const int j) const;
+
+    //! size of Delta_j
+    const int Deltasize(const int j) const;
+
+    //! sizes of the different wavelet index sets
+    const int Nabla01size(const int j) const;
+    const int Nabla10size(const int j) const;
+    const int Nabla11size(const int j) const;
+
+  protected:
+    //! the interval 1d wavelet basis
+    IntervalBasis basis1d_;
   };
 }
 

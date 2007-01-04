@@ -357,7 +357,7 @@ namespace MathTL
       for (unsigned int i = 0; i < values.size(); i++) {
 	values[i].matlab_output(os);
 	os << "hold on" << std::endl
-	   << "surf(x,y,z)" << std::endl;
+ 	   << "surf(x,y,z)" << std::endl;
 	if (i == (values.size()-1))
 	  os << "hold off" << std::endl;
       }
@@ -373,8 +373,7 @@ namespace MathTL
   {
     assert(DIM==2);
 
-//     for (unsigned int i = 0; i < values.size(); i++) {
-    for (unsigned int i = 0; i < 1; i++) { // temporary hack!!!
+    for (unsigned int i = 0; i < values.size(); i++) {
       values[i].octave_output(os);
       os << "hold on" << std::endl
 	 << "mesh(x,y,z)" << std::endl;

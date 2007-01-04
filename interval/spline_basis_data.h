@@ -48,7 +48,7 @@ namespace WaveletTL
     //! coarsest level
     int j0_;
     
-    //! refinement matrices (without prefactor 1/sqrt(2)!)
+    //! refinement matrices
     QuasiStationaryMatrix<double> Mj0_, Mj1_, Mj0T_, Mj1T_;
   };
 
@@ -86,11 +86,14 @@ namespace WaveletTL
     //! coarsest level
     int j0_;
  
-    //! refinement matrices (without prefactor 1/sqrt(2)!)
+    //! refinement matrices
     QuasiStationaryMatrix<double> Mj0_, Mj1_, Mj0T_, Mj1T_;
 
     //! expansion coefficients of the primal generators w.r.t. restricted cardinal B-splines
     Matrix<double> CLA_, CRA_, CLAT_, CRAT_;
+
+    //! initial stable completion with homogeneous b.c.'s (for composite basis), available for bio5(-energy)
+    QuasiStationaryMatrix<double> Mj1c_;
   };
 
 }

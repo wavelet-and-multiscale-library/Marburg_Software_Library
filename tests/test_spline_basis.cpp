@@ -43,7 +43,7 @@ int main()
   sb33nobc_energy.check();
 #endif
 
-#if 1
+#if 0
   cout << "Testing SplineBasis..." << endl;
 //   SplineBasis<3,3,P_construction> basis("",1,1,0,0); // PBasis, complementary b.c.'s
   SplineBasis<3,3,DS_construction> basis("bio5",0,0,0,0); // DSBasis, no b.c.'s

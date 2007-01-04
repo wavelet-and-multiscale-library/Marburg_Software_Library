@@ -434,6 +434,18 @@ namespace WaveletTL
     s << "Mj0T="; print_matrix(Mj0T, s);
     s << "Mj1 ="; print_matrix(Mj1 , s);
     s << "Mj1T="; print_matrix(Mj1T, s);
+    if (BIO == BernsteinSVD) {
+      // compute and export initial stable completion with homogeneous b.c.'s Mj1c
+      SparseMatrix<double> Mj0T_modified(Deltasize(j0()+1),Deltasize(j0()));
+      Mj0T_modified.set_entry(0, 0, M_SQRT2);
+      Mj0T_modified.set_entry(Deltasize(j0()+1)-1, Deltasize(j0())-1, M_SQRT2);
+      for (int row = 1; row < Deltasize(j0()+1)-1; row++)
+	for (int column = 1; column < Deltasize(j0())-1; column++)
+	  Mj0T_modified.set_entry(row, column, Mj0T.get_entry(row, column));
+      SparseMatrix<double> Mj1c = Mj1 - (Mj0*transpose(Mj0T_modified)*Mj1);
+      Mj1c.compress(1e-12);
+      s << "Mj1c="; print_matrix(Mj1c, s);
+    }
     s << "CL  ="; print_matrix(CL  , s);
     s << "CR  ="; print_matrix(CR  , s);
     s << "CLT ="; print_matrix(CLT , s);

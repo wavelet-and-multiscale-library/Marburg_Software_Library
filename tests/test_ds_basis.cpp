@@ -17,8 +17,8 @@ int main()
 {
   cout << "Testing the DS bases..." << endl;
 
-  const int d = 3;
-  const int dT = 3;
+  const int d = 2;
+  const int dT = 2;
 
   const DSBiorthogonalizationMethod bio = BernsteinSVD;
 //   const DSBiorthogonalizationMethod bio = partialSVD;

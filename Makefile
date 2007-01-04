@@ -1,7 +1,7 @@
 # +----------------------------------------------------------------+
 # | Makefile for WaveletTL - Wavelet Template Library for C++      |
 # |                                                                |
-# | Copyright (c) 2002-2006                                        |
+# | Copyright (c) 2002-2007                                        |
 # | Thorsten Raasch, Manuel Werner                                 |
 # +----------------------------------------------------------------+
 

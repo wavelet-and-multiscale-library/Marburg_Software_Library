@@ -861,10 +861,10 @@ namespace WaveletTL
   	// interface generators decompose into themselves and patch generators from the neighboring patches
    	matrix_it->second.set_block(0, 3,
    				    new KroneckerMatrix<double,SparseMatrix<double>,SparseMatrix<double> >
-   				    (Mj1c_1d_interior, Mj0_1d_right, M_SQRT1_2));
+   				    (Mj1c_1d_interior, Mj0_1d_left, M_SQRT1_2));
    	matrix_it->second.set_block(1, 3,
    				    new KroneckerMatrix<double,SparseMatrix<double>,SparseMatrix<double> >
-   				    (Mj1c_1d_interior, Mj0_1d_left, M_SQRT1_2));
+   				    (Mj1c_1d_interior, Mj0_1d_right, M_SQRT1_2));
    	matrix_it->second.set_block(3, 3,
    				    new KroneckerMatrix<double,SparseMatrix<double>,SparseMatrix<double> >
    				    (Mj0_1d_left_top, Mj1c_1d_interior));
@@ -940,19 +940,6 @@ namespace WaveletTL
     }
   }
   
-  template <class IBASIS>
-  void
-  LDomainBasis<IBASIS>::reconstruct_t(const InfiniteVector<double, Index>& c,
-				      const int j,
-				      InfiniteVector<double, Index>& d) const {
-    for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
-	 it != itend; ++it) {
-      InfiniteVector<double, Index> help;
-      reconstruct_t_1(it.index(), j, help);
-      d.add(*it, help);
-    }
-  }
-
   template <class IBASIS>
   void
   LDomainBasis<IBASIS>::reconstruct_1(const Index& lambda,
@@ -1199,12 +1186,4 @@ namespace WaveletTL
     }
   }
   
-  template <class IBASIS>
-  void
-  LDomainBasis<IBASIS>::reconstruct_t_1(const Index& lambda,
-					const int j,
-					InfiniteVector<double, Index>& c) const {
-    // not implemented (yet)
-  }
-
 }

@@ -3,7 +3,7 @@
 // +--------------------------------------------------------------------+
 // | This file is part of WaveletTL - the Wavelet Template Library      |
 // |                                                                    |
-// | Copyright (c) 2002-2006                                            |
+// | Copyright (c) 2002-2007                                            |
 // | Thorsten Raasch, Manuel Werner                                     |
 // +--------------------------------------------------------------------+
 
@@ -143,26 +143,6 @@ namespace WaveletTL
     */
     void reconstruct(const InfiniteVector<double, Index>& c, const int j,
 		     InfiniteVector<double, Index>& v) const;
-
-    //! dual RECONSTRUCT routine, simple version
-    /*!
-      Constructs for a given single wavelet index lambda a coefficient set c,
-      such that
-      \tilde\psi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
-      where always |\lambda'|>=j
-    */
-    void reconstruct_t_1(const Index& lambda, const int j,
-			 InfiniteVector<double, Index>& c) const;
-
-    //! dual RECONSTRUCT routine, full version
-    /*!
-      Constructs for a given coefficient set c another one v,
-      such that
-      \sum_{\lambda}c_\lambda\tilde\psi_\lambda = \sum_{\lambda'}v_{\lambda'}\tilde\psi_{\lambda'}
-      where always |\lambda'|>=j
-    */
-    void reconstruct_t(const InfiniteVector<double, Index>& c, const int j,
-		       InfiniteVector<double, Index>& v) const;
 
   protected:
     //! the interval 1d wavelet basis

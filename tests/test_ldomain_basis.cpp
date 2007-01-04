@@ -3,7 +3,7 @@
 #include <algebra/infinite_vector.h>
 
 #include <interval/ds_basis.h>
-#include <interval/p_basis.h>
+#include <interval/spline_basis.h>
 
 #define _WAVELETTL_LDOMAINBASIS_VERBOSITY 2
 #include <Ldomain/ldomain_basis.h>
@@ -18,10 +18,16 @@ int main()
   const int d  = 2;
   const int dT = 2;
 
-//   typedef DSBasis<d,dT,BernsteinSVD> Basis1D;
-  typedef PBasis<d,dT> Basis1D;
+#if 0
+  typedef DSBasis<d,dT,BernsteinSVD> Basis1D;
+  Basis1D basis1d;
+#else
+  typedef SplineBasis<d,dT,DS_construction> Basis1D;
+  Basis1D basis1d("bio5-energy",0,0,0,0);
+#endif
+  
   typedef LDomainBasis<Basis1D> Basis;
-  Basis basis;
+  Basis basis(basis1d);
 
   typedef Basis::Index Index;
 
@@ -105,7 +111,7 @@ int main()
   }
 #endif
 
-#if 1
+#if 0
 //   Index lambda(first_generator<Basis1D>(&basis, basis.j0()));
 //   Index lambda(first_wavelet<Basis1D>(&basis, basis.j0()));
   Index lambda(2, MultiIndex<int,2>(0,1), 0, MultiIndex<int,2>(3,0), &basis);

@@ -31,6 +31,16 @@ namespace WaveletTL
 			     const InfiniteVector<double, typename SplineBasis<d,dT,flavor>::Index>& coeffs,
 			     const int resolution);
 
+  //! for compatibility also with useless "primal" parameter
+  template <int d, int dT, SplineBasisFlavor flavor>
+  SampledMapping<1> evaluate(const SplineBasis<d,dT,flavor>& basis,
+			     const InfiniteVector<double, typename SplineBasis<d,dT,flavor>::Index>& coeffs,
+			     const bool primal,
+			     const int resolution)
+  {
+    return evaluate(basis, coeffs, resolution);
+  }
+
   /*!
     point evaluation of (derivatives) of a single primal generator
     or wavelet \psi_\lambda

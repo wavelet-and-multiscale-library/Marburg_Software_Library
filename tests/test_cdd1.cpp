@@ -13,6 +13,7 @@
 #include <interval/jl_basis.h>
 #include <interval/jl_support.h>
 #include <interval/jl_evaluate.h>
+#include <interval/spline_basis.h>
 
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
 
@@ -100,19 +101,20 @@ int main()
 
   TestProblem<3> T;
 
-#if 0
+#if 1
   const int d  = 3;
   const int dT = 3;
-  typedef DSBasis<d,dT> Basis;
+//   typedef DSBasis<d,dT> Basis;
 //   typedef PBasis<d,dT> Basis;
-  Basis basis(true, true);
+//   Basis basis(true, true);
+  typedef SplineBasis<d,dT,P_construction> Basis; Basis basis("",1,1,0,0);
 #else
   typedef JLBasis Basis; Basis basis;
 #endif
   typedef Basis::Index Index;
 
   SturmEquation<Basis> problem(T, basis);
-//   CachedProblem<SturmEquation<Basis> > cproblem(&problem);
+  CachedProblem<SturmEquation<Basis> > cproblem(&problem);
 
   // initialization with some precomputed DSBasis eigenvalue bounds:
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.34801,  13.3113 ); // d=2, dT=2 (diag-precond.)
@@ -148,7 +150,7 @@ int main()
 
   // initialization with some precomputed JLBasis eigenvalue bounds:
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 1.5753, 4.50639); // (2^j-precond.)
-  CachedProblem<SturmEquation<Basis> > cproblem(&problem, 1.5753, 2.3546 ); // (diag-precond.)
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 1.5753, 2.3546 ); // (diag-precond.)
 
 //   double normA = problem.norm_A();
 //   double normAinv = problem.norm_Ainv();

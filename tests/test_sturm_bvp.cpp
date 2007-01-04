@@ -14,6 +14,7 @@
 #include <interval/jl_basis.h>
 #include <interval/jl_support.h>
 #include <interval/jl_evaluate.h>
+#include <interval/spline_basis.h>
 
 #include <galerkin/sturm_equation.h>
 
@@ -83,11 +84,12 @@ int main()
 
   TestProblem<1> T;
 
-//   const int d  = 3;
-//   const int dT = 3; // be sure to use a continuous dual here, otherwise the RHS test will fail
+  const int d  = 3;
+  const int dT = 3; // be sure to use a continuous dual here, otherwise the RHS test will fail
 //   typedef DSBasis<d,dT> Basis; Basis basis(true, true);
 //   typedef PBasis<d,dT> Basis;
-  typedef JLBasis Basis; Basis basis;
+//   typedef JLBasis Basis; Basis basis;
+  typedef SplineBasis<d,dT,P_construction> Basis; Basis basis("",1,1,0,0);
   typedef Basis::Index Index;
 
   SturmEquation<Basis> eq(T, basis);

@@ -17,6 +17,7 @@
 #include <algebra/infinite_vector.h>
 #include <algebra/sparse_matrix.h>
 #include <algebra/block_matrix.h>
+#include <geometry/sampled_mapping.h>
 #include <utils/fixed_array1d.h>
 #include <utils/multiindex.h>
 
@@ -25,7 +26,6 @@
 
 // for convenience, include also some functionality
 #include <Ldomain/ldomain_support.h>
-#include <Ldomain/ldomain_evaluate.h>
 
 using std::list;
 using MathTL::FixedArray1D;
@@ -144,6 +144,26 @@ namespace WaveletTL
     void reconstruct(const InfiniteVector<double, Index>& c, const int j,
 		     InfiniteVector<double, Index>& v) const;
 
+    /*!
+      Evaluate a single primal/dual generator or wavelet \psi_\lambda
+      on a dyadic subgrid of the L-shaped domain
+    */
+    Array1D<SampledMapping<2> >
+    evaluate
+    (const typename LDomainBasis<IBASIS>::Index& lambda,
+     const bool primal,
+     const int resolution) const;
+    
+    /*!
+      Evaluate an arbitrary linear combination of primal/dual wavelets
+      on a dyadic subgrid of the L-shaped domain
+    */
+    Array1D<SampledMapping<2> >
+    evaluate
+    (const InfiniteVector<double, typename LDomainBasis<IBASIS>::Index>& coeffs,
+     const bool primal,
+     const int resolution) const;
+
   protected:
     //! the interval 1d wavelet basis
     IntervalBasis basis1d_;
@@ -236,5 +256,6 @@ namespace WaveletTL
 }
 
 #include <Ldomain/ldomain_basis.cpp>
+#include <Ldomain/ldomain_evaluate.cpp>
 
 #endif

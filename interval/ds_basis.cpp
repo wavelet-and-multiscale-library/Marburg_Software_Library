@@ -496,8 +496,8 @@ namespace WaveletTL
  		  gauss_points[id] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
 	      
  	      // - compute point values of the integrands
- 	      evaluate(*this, 1, lambda, gauss_points, der1values);
- 	      evaluate(*this, 1, mu, gauss_points, der2values);
+ 	      WaveletTL::evaluate(*this, 1, lambda, gauss_points, der1values);
+ 	      WaveletTL::evaluate(*this, 1, mu, gauss_points, der2values);
 	      
  	      // - add all integral shares
   	      for (int patch = supp.k1, id = 0; patch < supp.k2; patch++)
@@ -569,8 +569,8 @@ namespace WaveletTL
  		  gauss_points[id] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
 	      
  	      // - compute point values of the integrands
- 	      evaluate(*this, 1, lambda, gauss_points, der1values);
- 	      evaluate(*this, 1, mu, gauss_points, der2values);
+ 	      WaveletTL::evaluate(*this, 1, lambda, gauss_points, der1values);
+ 	      WaveletTL::evaluate(*this, 1, mu, gauss_points, der2values);
 	      
  	      // - add all integral shares
   	      for (int patch = supp.k1, id = 0; patch < supp.k2; patch++)

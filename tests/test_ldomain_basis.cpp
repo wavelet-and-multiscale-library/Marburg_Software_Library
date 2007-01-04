@@ -3,6 +3,7 @@
 #include <algebra/infinite_vector.h>
 
 #include <interval/ds_basis.h>
+#include <interval/ds_evaluate.h>
 #include <interval/spline_basis.h>
 
 #define _WAVELETTL_LDOMAINBASIS_VERBOSITY 2
@@ -18,7 +19,7 @@ int main()
   const int d  = 2;
   const int dT = 2;
 
-#if 0
+#if 1
   typedef DSBasis<d,dT,BernsteinSVD> Basis1D;
   Basis1D basis1d;
 #else
@@ -40,6 +41,7 @@ int main()
   cout << "- last wavelet on the coarsest level: " << last_wavelet<Basis1D>(&basis, basis.j0()) << endl;
 
 #if 0
+  // only for IBASIS != SplineBasis
   cout << "- checking setup of Mj0 for different levels:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+2; level++) {
     cout << "* j=" << level << endl;
@@ -58,6 +60,7 @@ int main()
 #endif
 
 #if 0
+  // only for IBASIS != SplineBasis
   cout << "- checking setup of Mj1c_1d for different levels:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+2; level++) {
     cout << "* j=" << level << endl;
@@ -68,6 +71,7 @@ int main()
 #endif
 
 #if 0
+  // only for IBASIS != SplineBasis
   cout << "- checking setup of Mj1c_01 for different levels:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+2; level++) {
     cout << "* j=" << level << endl;
@@ -78,6 +82,7 @@ int main()
 #endif
 
 #if 0
+  // only for IBASIS != SplineBasis
   cout << "- checking setup of Mj1c_10 for different levels:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+2; level++) {
     cout << "* j=" << level << endl;
@@ -88,6 +93,7 @@ int main()
 #endif
 
 #if 0
+  // only for IBASIS != SplineBasis
   cout << "- checking setup of Mj1c_11 for different levels:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+2; level++) {
     cout << "* j=" << level << endl;
@@ -111,10 +117,10 @@ int main()
   }
 #endif
 
-#if 0
-//   Index lambda(first_generator<Basis1D>(&basis, basis.j0()));
+#if 1
+  Index lambda(basis.first_generator(basis.j0()));
 //   Index lambda(first_wavelet<Basis1D>(&basis, basis.j0()));
-  Index lambda(2, MultiIndex<int,2>(0,1), 0, MultiIndex<int,2>(3,0), &basis);
+//   Index lambda(2, MultiIndex<int,2>(0,1), 0, MultiIndex<int,2>(3,0), &basis);
 
 //   for (; !(lambda.p() == 1); ++lambda);
 //   for (; !(lambda.p() == 2); ++lambda);
@@ -137,17 +143,17 @@ int main()
 //   for (int i = 0; i < 334; i++, ++lambda);
 //   for (int i = 0; i < 6; i++, ++lambda);
 
-//   cout << "- evaluating a primal wavelet lambda=" << lambda << " ..." << endl;
-//   std::ofstream psistream("Ldomain_wavelet.m");
-//   matlab_output(psistream, evaluate<Basis1D>(basis, lambda, true, 6));
-//   psistream.close();
-//   cout << "  ...done, see file Ldomain_wavelet.m!" << endl;
+  cout << "- evaluating a primal wavelet lambda=" << lambda << " ..." << endl;
+  std::ofstream psistream("Ldomain_wavelet.m");
+  matlab_output(psistream, basis.evaluate(lambda, true, 6));
+  psistream.close();
+  cout << "  ...done, see file Ldomain_wavelet.m!" << endl;
 
 
-  InfiniteVector<double, Index> gcoeffs;
-  basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
-  cout << "- generator coefficients of lambda=" << lambda << " on a higher scale " << lambda.j()+1 << ":"
-       << endl << gcoeffs;
+//   InfiniteVector<double, Index> gcoeffs;
+//   basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
+//   cout << "- generator coefficients of lambda=" << lambda << " on a higher scale " << lambda.j()+1 << ":"
+//        << endl << gcoeffs;
 
 
 //   cout << "- evaluating this linear combination..." << endl;

@@ -15,6 +15,7 @@
 #include <algebra/matrix.h>
 #include <algebra/sparse_matrix.h>
 #include <algebra/infinite_vector.h>
+#include <geometry/sampled_mapping.h>
 #include <utils/array1d.h>
 
 #include <Rd/cdf_utils.h>
@@ -336,6 +337,22 @@ namespace WaveletTL
     void Mj1T_t_get_row(const int j, const Vector<double>::size_type row,
 			InfiniteVector<double, Vector<double>::size_type>& v) const;
 
+    /*!
+      Evaluate a single primal/dual generator or wavelet \psi_\lambda
+      on a dyadic subgrid of [0,1].
+    */
+    SampledMapping<1> evaluate(const typename DSBasis<d,dT,BIO>::Index& lambda,
+			       const bool primal,
+			       const int resolution) const;
+    
+    /*!
+      Evaluate an arbitrary linear combination of primal or dual
+      wavelets on a dyadic subgrid of [0,1].
+    */
+    SampledMapping<1> evaluate(const InfiniteVector<double, typename DSBasis<d,dT,BIO>::Index>& coeffs,
+			       const bool primal,
+			       const int resolution) const;
+
   protected:
     //! coarsest possible level
     int j0_;
@@ -423,5 +440,6 @@ namespace WaveletTL
 }
 
 #include <interval/ds_basis.cpp>
+#include <interval/ds_basis_eval.cpp>
 
 #endif

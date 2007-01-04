@@ -482,6 +482,17 @@ namespace WaveletTL
   template <int d, int dT>
   SampledMapping<1>
   SplineBasis<d,dT,DS_construction>::evaluate
+  (const typename SplineBasis<d,dT,DS_construction>::Index& lambda,
+   const int resolution) const
+  {
+    InfiniteVector<double, typename SplineBasis<d,dT,DS_construction>::Index> coeffs;
+    coeffs.set_coefficient(lambda, 1.0);
+    return evaluate(coeffs, resolution);
+  }
+
+  template <int d, int dT>
+  SampledMapping<1>
+  SplineBasis<d,dT,DS_construction>::evaluate
   (const InfiniteVector<double, typename SplineBasis<d,dT,DS_construction>::Index>& coeffs,
    const int resolution) const
   {

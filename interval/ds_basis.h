@@ -344,6 +344,13 @@ namespace WaveletTL
     SampledMapping<1> evaluate(const typename DSBasis<d,dT,BIO>::Index& lambda,
 			       const bool primal,
 			       const int resolution) const;
+
+    //! for compatibility, a version without the "primal" parameter
+    SampledMapping<1> evaluate(const typename DSBasis<d,dT,BIO>::Index& lambda,
+			       const int resolution) const
+    {
+      return evaluate(lambda, true, resolution);
+    }
     
     /*!
       Evaluate an arbitrary linear combination of primal or dual
@@ -352,6 +359,13 @@ namespace WaveletTL
     SampledMapping<1> evaluate(const InfiniteVector<double, typename DSBasis<d,dT,BIO>::Index>& coeffs,
 			       const bool primal,
 			       const int resolution) const;
+
+    //! for compatibility, a version without the "primal" parameter
+    SampledMapping<1> evaluate(const InfiniteVector<double, typename DSBasis<d,dT,BIO>::Index>& coeffs,
+			       const int resolution) const
+    {
+      return evaluate(coeffs, true, resolution);
+    }
 
   protected:
     //! coarsest possible level

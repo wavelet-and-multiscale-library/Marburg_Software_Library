@@ -145,13 +145,12 @@ namespace WaveletTL
 		     InfiniteVector<double, Index>& v) const;
 
     /*!
-      Evaluate a single primal/dual generator or wavelet \psi_\lambda
+      Evaluate a single primal generator or wavelet \psi_\lambda
       on a dyadic subgrid of the L-shaped domain
     */
     Array1D<SampledMapping<2> >
     evaluate
-    (const typename LDomainBasis<IBASIS>::Index& lambda,
-     const bool primal,
+    (const typename LDomainBasis<IntervalBasis>::Index& lambda,
      const int resolution) const;
     
     /*!
@@ -160,8 +159,7 @@ namespace WaveletTL
     */
     Array1D<SampledMapping<2> >
     evaluate
-    (const InfiniteVector<double, typename LDomainBasis<IBASIS>::Index>& coeffs,
-     const bool primal,
+    (const InfiniteVector<double, typename LDomainBasis<IntervalBasis>::Index>& coeffs,
      const int resolution) const;
 
   protected:
@@ -248,6 +246,24 @@ namespace WaveletTL
     const int Nabla01size(const int j) const;
     const int Nabla10size(const int j) const;
     const int Nabla11size(const int j) const;
+
+    /*!
+      Evaluate a single primal generator or wavelet \psi_\lambda
+      on a dyadic subgrid of the L-shaped domain
+    */
+    Array1D<SampledMapping<2> >
+    evaluate
+    (const typename LDomainBasis<IntervalBasis>::Index& lambda,
+     const int resolution) const;
+    
+    /*!
+      Evaluate an arbitrary linear combination of primal/dual wavelets
+      on a dyadic subgrid of the L-shaped domain
+    */
+    Array1D<SampledMapping<2> >
+    evaluate
+    (const InfiniteVector<double, typename LDomainBasis<IntervalBasis>::Index>& coeffs,
+     const int resolution) const;
 
   protected:
     //! the interval 1d wavelet basis

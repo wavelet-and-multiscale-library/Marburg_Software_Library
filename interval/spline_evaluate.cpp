@@ -13,6 +13,16 @@ namespace WaveletTL
     return basis.evaluate(coeffs, resolution);
   }
 
+  template <int d, int dT, SplineBasisFlavor flavor>
+  inline
+  SampledMapping<1>
+  evaluate(const SplineBasis<d,dT,flavor>& basis,
+	   const typename SplineBasis<d,dT,flavor>::Index& lambda,
+	   const int resolution)
+  {
+    // universal routine for all values of "flavor"
+    return basis.evaluate(lambda, resolution);
+  }
 
   template <int d, int dT, SplineBasisFlavor flavor>
   inline

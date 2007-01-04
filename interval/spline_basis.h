@@ -349,6 +349,15 @@ namespace WaveletTL
 
     
     /*!
+      Evaluate a single primal/dual generator or wavelet \psi_\lambda
+      on a dyadic subgrid of [0,1].
+    */
+    SampledMapping<1>
+    evaluate
+    (const typename SplineBasis<d,dT,DS_construction>::Index& lambda,
+     const int resolution) const;
+
+    /*!
       Evaluate an arbitrary linear combination of primal wavelets
       on a dyadic subgrid of [0,1].
     */

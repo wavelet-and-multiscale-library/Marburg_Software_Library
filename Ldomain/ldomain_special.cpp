@@ -394,5 +394,266 @@ namespace WaveletTL
     }
   }
 
+  template <int d, int dT>
+  void
+  LDomainBasis<SplineBasis<d,dT,DS_construction> >::map_to_vector
+  (const int j,
+   const std::map<size_type,double>& x,
+   InfiniteVector<double, Index>& c) const
+  {
+    typedef std::map<size_type,double> V;
+
+    const unsigned int Deltaj   = basis1d().Deltasize(j);
+    
+    c.clear();
+    for (V::const_iterator it(x.begin()); it != x.end(); ++it) {
+      size_type help(it->first);
+      unsigned int patch = 0;
+      if (help < 3*(Deltaj-2)*(Deltaj-2)) {
+	patch = help / ((Deltaj-2)*(Deltaj-2));
+	help -= patch * (Deltaj-2)*(Deltaj-2);
+      } else {
+	patch = 3+(help-3*(Deltaj-2)*(Deltaj-2))/(Deltaj-2);
+	help -= 3*(Deltaj-2)*(Deltaj-2)+(patch-3)*(Deltaj-2);
+      }
+      
+      switch(patch) {
+      case 0:
+      case 1:
+      case 2:
+	c.add_coefficient(Index(j,
+				MultiIndex<int,2>(0,0),
+				patch,
+				MultiIndex<int,2>(basis1d().DeltaLmin()+1+(help/(Deltaj-2)),
+						  basis1d().DeltaLmin()+1+(help%(Deltaj-2))),
+				this),
+			  it->second);
+	break;
+      case 3:
+	c.add_coefficient(Index(j,
+				MultiIndex<int,2>(0,0),
+				patch,
+				MultiIndex<int,2>(basis1d().DeltaLmin()+1+help,
+						  0),
+				this),
+			  it->second);
+	break;
+      case 4:
+	c.add_coefficient(Index(j,
+				MultiIndex<int,2>(0,0),
+				patch,
+				MultiIndex<int,2>(0,
+						  basis1d().DeltaLmin()+1+help),
+				this),
+			  it->second);
+	break;
+      default:
+	break;
+      }
+    }
+  }
+
+  template <int d, int dT>
+  void
+  LDomainBasis<SplineBasis<d,dT,DS_construction> >::apply_Mj0
+  (const int j,
+   const std::map<size_type,double>& x, 
+   std::map<size_type,double>& y) const
+  {
+    typedef std::map<size_type,double> V;
+    
+    const unsigned int Deltaj   = basis1d().Deltasize(j);
+    const unsigned int Deltajp1 = basis1d().Deltasize(j+1);
+    
+    for (V::const_iterator itx(x.begin()); itx != x.end(); ++itx) {
+      // determine patch number
+      const unsigned int patch =
+	itx->first < 3*(Deltaj-2)*(Deltaj-2)
+	? itx->first / ((Deltaj-2)*(Deltaj-2))
+	: 3+(itx->first-3*(Deltaj-2)*(Deltaj-2))/(Deltaj-2);
+      
+      switch(patch) {
+      case 0: {
+	// psi_lambda decomposes into generators on patch 0 alone
+	// apply kron(M#,M#), cf. KroneckerMatrix::apply()
+	// 1. first decide which block number and subindex corresponds to the given generator
+	const size_type block_nr    = itx->first / (Deltaj-2);
+	const size_type block_index = itx->first % (Deltaj-2);
+	
+ 	// 2. get column of second factor M#
+ 	V z1, z2, z3;
+ 	z1[block_index] = 1.0;
+	basis1d().Mj0_.set_level(j);
+ 	basis1d().Mj0_.apply_central_block(z1, z2);
+	
+ 	// 3. get column of first factor M#
+ 	z1.clear();
+ 	z1[block_nr] = 1.0;
+ 	basis1d().Mj0_.apply_central_block(z1, z3);
+	
+ 	// 4. combine results
+ 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+ 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	    y[it3->first*(Deltajp1-2)+it2->first]
+	      += it2->second * it3->second;
+      }
+	break;
+      case 1: {
+	// psi_lambda decomposes into generators on patch 1 alone
+	// apply kron(M#,M#)
+	const size_type block_nr    = (itx->first-(Deltaj-2)*(Deltaj-2)) / (Deltaj-2);
+	const size_type block_index = (itx->first-(Deltaj-2)*(Deltaj-2)) % (Deltaj-2);
+	
+ 	V z1, z2, z3;
+ 	z1[block_index] = 1.0;
+	basis1d().Mj0_.set_level(j);
+ 	basis1d().Mj0_.apply_central_block(z1, z2);
+
+ 	z1.clear();
+ 	z1[block_nr] = 1.0;
+ 	basis1d().Mj0_.apply_central_block(z1, z3);
+
+ 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+ 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	    y[(Deltajp1-2)*(Deltajp1-2)+it3->first*(Deltajp1-2)+it2->first]
+	      += it2->second * it3->second;
+      }
+      case 2: {
+	// psi_lambda decomposes into generators on patch 2 alone
+	// apply kron(M#,M#)
+	const size_type block_nr    = (itx->first-2*(Deltaj-2)*(Deltaj-2)) / (Deltaj-2);
+	const size_type block_index = (itx->first-2*(Deltaj-2)*(Deltaj-2)) % (Deltaj-2);
+
+ 	V z1, z2, z3;
+ 	z1[block_index] = 1.0;
+	basis1d().Mj0_.set_level(j);
+ 	basis1d().Mj0_.apply_central_block(z1, z2);
+
+ 	z1.clear();
+ 	z1[block_nr] = 1.0;
+ 	basis1d().Mj0_.apply_central_block(z1, z3);
+
+ 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+ 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	    y[2*(Deltajp1-2)*(Deltajp1-2)+it3->first*(Deltajp1-2)+it2->first]
+	      += it2->second * it3->second;
+      }
+	break;
+      case 3: {
+	// psi_lambda decomposes into generators on patches 0,1 and 3
+
+	// contribution from patch 0
+	//
+	// apply kron(M#,ML):
+ 	// 1. get column of second factor ML
+	V z1, z2, z3;
+	z1[0] = 1.0;
+	basis1d().Mj0_.set_level(j);
+	basis1d().Mj0_.apply(z1, z2); // we have to neglect the first entry of z2 later
+
+ 	// 2. get column of first factor M#
+ 	z1.clear();
+ 	const size_type block_nr = itx->first-3*(Deltaj-2)*(Deltaj-2);
+ 	z1[block_nr] = 1.0;
+ 	basis1d().Mj0_.apply_central_block(z1, z3);
+
+ 	// 3. combine results
+ 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+ 	  for (V::const_iterator it2(++(z2.begin())); it2 != z2.end(); ++it2)
+	    y[it3->first*(Deltajp1-2)+it2->first-1] // note the "-1"
+	      += it2->second * it3->second * M_SQRT1_2;
+
+	// contribution from patch 1
+	//
+	// apply kron(M#,MR):
+ 	// 1. get column of second factor MR
+	z1.clear();
+	z1[basis1d().Deltasize(j)-1] = 1.0;
+	z2.clear();
+	basis1d().Mj0_.apply(z1, z2); // we have to neglect the last entry of z2 later
+
+	// 2. get column of first factor M#: this has already been done above
+	
+	// 3. combine results
+ 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+ 	  for (V::reverse_iterator it2(++(z2.rbegin())); it2 != z2.rend(); ++it2)
+	    y[(Deltajp1-2)*(Deltajp1-2)+it3->first*(Deltajp1-2)+it2->first-1] // note the "-1"
+	      += it2->second * it3->second * M_SQRT1_2;
+
+	// contribution from patch 3
+	//
+	// apply kron(M#,Mtopleft):
+	// 1. get column of first factor M#: this has already been done above
+
+	// 2. get top left entry of Mj0
+	const double Mtopleft = basis1d().Mj0_.get_entry(0,0);
+	
+	// 3. combine results
+	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+	  y[3*(Deltajp1-2)*(Deltajp1-2)+it3->first]
+	    += it3->second * Mtopleft;
+      }
+	break;
+      case 4: {
+	// psi_lambda decomposes into generators on patches 1,2 and 4
+
+	// contribution from patch 1
+	//
+	// apply kron(MR,M#):
+ 	// 1. get column of second factor M#
+	V z1, z2, z3;
+	const size_type block_index = itx->first-(3*(Deltaj-2)+1)*(Deltaj-2);
+	z1[block_index] = 1.0;
+	basis1d().Mj0_.set_level(j);
+	basis1d().Mj0_.apply_central_block(z1, z2);
+
+ 	// 2. get column of first factor MR
+	z1.clear();
+	z1[basis1d().Deltasize(j)-1] = 1.0;
+	basis1d().Mj0_.apply(z1, z3); // we have to neglect the last entry of z3 later
+	
+	// 3. combine results
+ 	for (V::reverse_iterator it3(++(z3.rbegin())); it3 != z3.rend(); ++it3)
+ 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	    y[(Deltajp1-2)*(Deltajp1-2)+(it3->first-1)*(Deltajp1-2)+it2->first] // note the "-1"
+	      += it2->second * it3->second * M_SQRT1_2;
+
+	// contribution from patch 2
+	//
+	// apply kron(ML,M#):
+	// 1. get column of second factor M#: this has already been done above
+
+	// 2. get column of first factor ML
+	z1.clear();
+	z1[0] = 1.0;
+	z3.clear();
+	basis1d().Mj0_.apply(z1, z3); // we have to neglect the first entry of z3 later
+
+	// 3. combine results
+ 	for (V::const_iterator it3(++(z3.begin())); it3 != z3.end(); ++it3)
+ 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	    y[2*(Deltajp1-2)*(Deltajp1-2)+(it3->first-1)*(Deltajp1-2)+it2->first] // note the "-1"
+	      += it2->second * it3->second * M_SQRT1_2;
+
+	// contribution from patch 4
+	//
+	// apply kron(Mtopleft,M#):
+	// 1. get column of second factor M#: this has already been done above
+
+	// 2. get top left entry of Mj0
+	const double Mtopleft = basis1d().Mj0_.get_entry(0,0);
+	
+	// 3. combine results
+	for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	  y[(3*(Deltajp1-2)+1)*(Deltajp1-2)+it2->first]
+	    += it2->second * Mtopleft;
+      }
+	break;
+      default:
+	break;
+      }
+    }
+  }
+  
 
 }

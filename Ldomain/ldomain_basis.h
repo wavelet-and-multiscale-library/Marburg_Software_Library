@@ -249,6 +249,11 @@ namespace WaveletTL
     const int Nabla10size(const int j) const;
     const int Nabla11size(const int j) const;
 
+    //! helper routine: convert a map (of generators on the level j) to an InfiniteVector
+    void map_to_vector(const int j,
+		       const std::map<size_type,double>& x,
+		       InfiniteVector<double, Index>& c) const;
+
     /*!
       apply Mj0 to some vector x (i.e. "reconstruct" a generator),
       the ordering is chosen compatible to Index::number()

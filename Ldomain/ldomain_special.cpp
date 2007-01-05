@@ -160,25 +160,17 @@ namespace WaveletTL
 	// 1. first decide which block number and subindex corresponds to the given generator
 	const size_type block_nr    = lambda.k()[0]-(basis1d().DeltaLmin()+1);
 	const size_type block_index = lambda.k()[1]-(basis1d().DeltaLmin()+1);
-// 	cout << "block_nr=" << block_nr << endl;
-// 	cout << "block_index=" << block_index << endl;
 
  	// 2. get column of second factor M#
  	V z1, z2, z3;
  	z1[block_index] = 1.0;
 	basis1d().Mj0_.set_level(lambda.j());
  	basis1d().Mj0_.apply_central_block(z1, z2);
-//  	cout << "- column " << block_index << " of second factor M#:" << endl;
-//  	for (V::const_iterator it(z2.begin()); it != z2.end(); ++it)
-//  	  cout << "c[" << it->first << "]=" << it->second << endl;
 
  	// 3. get column of first factor M#
  	z1.clear();
  	z1[block_nr] = 1.0;
  	basis1d().Mj0_.apply_central_block(z1, z3);
-//  	cout << "- column " << block_nr << " of first factor M#:" << endl;
-//  	for (V::const_iterator it(z3.begin()); it != z3.end(); ++it)
-//  	  cout << "c[" << it->first << "]=" << it->second << endl;
 	
  	// 4. combine results
  	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
@@ -255,18 +247,12 @@ namespace WaveletTL
 	z1[0] = 1.0;
 	basis1d().Mj0_.set_level(lambda.j());
 	basis1d().Mj0_.apply(z1, z2); // we have to neglect the first entry of z2 later
-//   	cout << "- second factor ML:" << endl;
-//   	for (V::const_iterator it(z2.begin()); it != z2.end(); ++it)
-//   	  cout << "c[" << it->first << "]=" << it->second << endl;
 
  	// 2. get column of first factor M#
  	z1.clear();
  	const size_type block_nr = lambda.k()[0]-(basis1d().DeltaLmin()+1);
  	z1[block_nr] = 1.0;
  	basis1d().Mj0_.apply_central_block(z1, z3);
-//   	cout << "- column " << block_nr << " of first factor M#:" << endl;
-//   	for (V::const_iterator it(z3.begin()); it != z3.end(); ++it)
-//   	  cout << "c[" << it->first << "]=" << it->second << endl;
 
  	// 3. combine results
  	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
@@ -287,9 +273,6 @@ namespace WaveletTL
 	z1[basis1d().Deltasize(lambda.j())-1] = 1.0;
 	z2.clear();
 	basis1d().Mj0_.apply(z1, z2); // we have to neglect the last entry of z2 later
-//    	cout << "- second factor MR:" << endl;
-//    	for (V::const_iterator it(z2.begin()); it != z2.end(); ++it)
-//    	  cout << "c[" << it->first << "]=" << it->second << endl;
 
 	// 2. get column of first factor M#: this has already been done above
 	
@@ -335,9 +318,6 @@ namespace WaveletTL
 	z1[block_index] = 1.0;
 	basis1d().Mj0_.set_level(lambda.j());
 	basis1d().Mj0_.apply_central_block(z1, z2);
-//   	cout << "- column " << block_index << " of second factor M#:" << endl;
-//   	for (V::const_iterator it(z2.begin()); it != z2.end(); ++it)
-//   	  cout << "c[" << it->first << "]=" << it->second << endl;
 
  	// 2. get column of first factor MR
 	z1.clear();

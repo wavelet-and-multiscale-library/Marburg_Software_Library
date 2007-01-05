@@ -261,6 +261,14 @@ namespace WaveletTL
     void apply_Mj0(const int j,
 		   const std::map<size_type,double>& x, 
 		   std::map<size_type,double>& y) const;
+
+    /*!
+      apply Mj0T^T to some vector x
+    */
+    void apply_Mj0T_transposed(const int j,
+			       const std::map<size_type,double>& x, 
+			       std::map<size_type,double>& y) const;
+    
     
     //! RECONSTRUCT routine, simple version
     /*!

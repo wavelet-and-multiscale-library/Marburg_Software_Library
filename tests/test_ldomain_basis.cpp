@@ -2,6 +2,7 @@
 #include <map>
 
 #include <algebra/infinite_vector.h>
+#include <utils/map_tools.h>
 
 #include <interval/ds_basis.h>
 #include <interval/ds_evaluate.h>
@@ -118,6 +119,31 @@ int main()
 #endif
 
 #if 1
+ {
+   cout << "- check apply_Mj0() and apply_Mj0T_transposed:" << endl;
+   const int level = basis.j0();
+   for (int i = 0; i < basis.Deltasize(level); i++) {
+     std::map<size_t,double> x,y,z;
+     x[i] = 1.0;
+     basis.apply_Mj0(level,x,y);
+     cout << "i=" << i << ": ";
+//      cout << "Mj0*e_i=" << endl;
+//      for (std::map<size_t,double>::const_iterator it(y.begin()); it != y.end(); ++it)
+//        cout << it->first << ": " << it->second << endl;
+
+     basis.apply_Mj0T_transposed(level,y,z);
+     y.clear();
+     add_maps(x,z,y,1.0,-1.0);
+     cout << "||(I-Mj0T^T*Mj0)*e_i||_infty=";
+     double error = 0;
+     for (std::map<size_t,double>::const_iterator it(y.begin()); it != y.end(); ++it)
+       error = max(error, fabs(it->second));
+     cout << error << endl;
+   }
+ }
+#endif
+
+#if 0
   Index lambda(basis.first_generator(basis.j0()));
 //   Index lambda(first_wavelet<Basis1D>(&basis, basis.j0()));
 //   Index lambda(2, MultiIndex<int,2>(0,1), 0, MultiIndex<int,2>(3,0), &basis);

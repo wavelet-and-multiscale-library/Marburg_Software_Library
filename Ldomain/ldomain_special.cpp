@@ -655,5 +655,15 @@ namespace WaveletTL
     }
   }
   
+  template <int d, int dT>
+  void
+  LDomainBasis<SplineBasis<d,dT,DS_construction> >::apply_Mj0T_transposed
+  (const int j,
+   const std::map<size_type,double>& x, 
+   std::map<size_type,double>& y) const
+  {
 
+    // hier geht es weiter!!!
+    
+  }
 }

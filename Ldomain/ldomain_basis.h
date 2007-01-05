@@ -273,5 +273,6 @@ namespace WaveletTL
 
 #include <Ldomain/ldomain_basis.cpp>
 #include <Ldomain/ldomain_evaluate.cpp>
+#include <Ldomain/ldomain_special.cpp>
 
 #endif

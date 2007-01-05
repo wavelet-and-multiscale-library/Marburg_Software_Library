@@ -138,5 +138,281 @@ namespace WaveletTL
     return Index(j, e, 2, k, this);
   }
 
+  template <int d, int dT>
+  void
+  LDomainBasis<SplineBasis<d,dT,DS_construction> >::reconstruct_1
+  (const Index& lambda,
+   const int j,
+   InfiniteVector<double, Index>& c) const
+  {
+    assert(j == lambda.j()+1); // we only support a level difference of one
+    
+    typedef std::map<size_type,double> V;
+
+    const int ecode(lambda.e()[0]+2*lambda.e()[1]);
+    switch(ecode) {
+    case 0:
+      // generator
+      switch(lambda.p()) {
+      case 0: {
+	// psi_lambda decomposes into generators on patch 0 alone
+	// apply kron(M#,M#), cf. KroneckerMatrix::apply()
+	// 1. first decide which block number and subindex corresponds to the given generator
+	const size_type block_nr    = lambda.k()[0]-(basis1d().DeltaLmin()+1);
+	const size_type block_index = lambda.k()[1]-(basis1d().DeltaLmin()+1);
+// 	cout << "block_nr=" << block_nr << endl;
+// 	cout << "block_index=" << block_index << endl;
+
+ 	// 2. get column of second factor M#
+ 	V z1, z2, z3;
+ 	z1[block_index] = 1.0;
+	basis1d().Mj0_.set_level(lambda.j());
+ 	basis1d().Mj0_.apply_central_block(z1, z2);
+//  	cout << "- column " << block_index << " of second factor M#:" << endl;
+//  	for (V::const_iterator it(z2.begin()); it != z2.end(); ++it)
+//  	  cout << "c[" << it->first << "]=" << it->second << endl;
+
+ 	// 3. get column of first factor M#
+ 	z1.clear();
+ 	z1[block_nr] = 1.0;
+ 	basis1d().Mj0_.apply_central_block(z1, z3);
+//  	cout << "- column " << block_nr << " of first factor M#:" << endl;
+//  	for (V::const_iterator it(z3.begin()); it != z3.end(); ++it)
+//  	  cout << "c[" << it->first << "]=" << it->second << endl;
+	
+ 	// 4. combine results
+ 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+ 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	    c.add_coefficient(Index(lambda.j()+1,
+				    MultiIndex<int,2>(0,0),
+				    0,
+				    MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
+						      basis1d().DeltaLmin()+1+it2->first),
+				    this),
+			      it2->second * it3->second);	
+      }
+	break;
+      case 1: {
+	// psi_lambda decomposes into generators on patch 1 alone
+	// apply kron(M#,M#)
+	const size_type block_nr    = lambda.k()[0]-(basis1d().DeltaLmin()+1);
+	const size_type block_index = lambda.k()[1]-(basis1d().DeltaLmin()+1);
+
+ 	V z1, z2, z3;
+ 	z1[block_index] = 1.0;
+	basis1d().Mj0_.set_level(lambda.j());
+ 	basis1d().Mj0_.apply_central_block(z1, z2);
+
+ 	z1.clear();
+ 	z1[block_nr] = 1.0;
+ 	basis1d().Mj0_.apply_central_block(z1, z3);
+
+ 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+ 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	    c.add_coefficient(Index(lambda.j()+1,
+				    MultiIndex<int,2>(0,0),
+				    1,
+				    MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
+						      basis1d().DeltaLmin()+1+it2->first),
+				    this),
+			      it2->second * it3->second);	
+      }
+	break;
+      case 2: {
+	// psi_lambda decomposes into generators on patch 2 alone
+	// apply kron(M#,M#)
+	const size_type block_nr    = lambda.k()[0]-(basis1d().DeltaLmin()+1);
+	const size_type block_index = lambda.k()[1]-(basis1d().DeltaLmin()+1);
+
+ 	V z1, z2, z3;
+ 	z1[block_index] = 1.0;
+	basis1d().Mj0_.set_level(lambda.j());
+ 	basis1d().Mj0_.apply_central_block(z1, z2);
+
+ 	z1.clear();
+ 	z1[block_nr] = 1.0;
+ 	basis1d().Mj0_.apply_central_block(z1, z3);
+
+ 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+ 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	    c.add_coefficient(Index(lambda.j()+1,
+				    MultiIndex<int,2>(0,0),
+				    2,
+				    MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
+						      basis1d().DeltaLmin()+1+it2->first),
+				    this),
+			      it2->second * it3->second);	
+      }
+	break;
+      case 3: {
+	// psi_lambda decomposes into generators on patches 0,1 and 3
+
+	// contribution from patch 0
+	//
+	// apply kron(M#,ML):
+ 	// 1. get column of second factor ML
+	V z1, z2, z3;
+	z1[0] = 1.0;
+	basis1d().Mj0_.set_level(lambda.j());
+	basis1d().Mj0_.apply(z1, z2); // we have to neglect the first entry of z2 later
+//   	cout << "- second factor ML:" << endl;
+//   	for (V::const_iterator it(z2.begin()); it != z2.end(); ++it)
+//   	  cout << "c[" << it->first << "]=" << it->second << endl;
+
+ 	// 2. get column of first factor M#
+ 	z1.clear();
+ 	const size_type block_nr = lambda.k()[0]-(basis1d().DeltaLmin()+1);
+ 	z1[block_nr] = 1.0;
+ 	basis1d().Mj0_.apply_central_block(z1, z3);
+//   	cout << "- column " << block_nr << " of first factor M#:" << endl;
+//   	for (V::const_iterator it(z3.begin()); it != z3.end(); ++it)
+//   	  cout << "c[" << it->first << "]=" << it->second << endl;
+
+ 	// 3. combine results
+ 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+ 	  for (V::const_iterator it2(++(z2.begin())); it2 != z2.end(); ++it2)
+	    c.add_coefficient(Index(lambda.j()+1,
+				    MultiIndex<int,2>(0,0),
+				    0,
+				    MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
+						      basis1d().DeltaLmin()+it2->first), // note the "-1"
+				    this),
+			      it2->second * it3->second * M_SQRT1_2);	
+
+	// contribution from patch 1
+	//
+	// apply kron(M#,MR):
+ 	// 1. get column of second factor MR
+	z1.clear();
+	z1[basis1d().Deltasize(lambda.j())-1] = 1.0;
+	z2.clear();
+	basis1d().Mj0_.apply(z1, z2); // we have to neglect the last entry of z2 later
+//    	cout << "- second factor MR:" << endl;
+//    	for (V::const_iterator it(z2.begin()); it != z2.end(); ++it)
+//    	  cout << "c[" << it->first << "]=" << it->second << endl;
+
+	// 2. get column of first factor M#: this has already been done above
+	
+	// 3. combine results
+ 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+ 	  for (V::reverse_iterator it2(++(z2.rbegin())); it2 != z2.rend(); ++it2)
+	    c.add_coefficient(Index(lambda.j()+1,
+				    MultiIndex<int,2>(0,0),
+				    1,
+				    MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
+						      basis1d().DeltaLmin()+it2->first), // note the "-1"
+				    this),
+			      it2->second * it3->second * M_SQRT1_2);	
+
+	// contribution from patch 3
+	//
+	// apply kron(M#,Mtopleft):
+	// 1. get column of first factor M#: this has already been done above
+
+	// 2. get top left entry of Mj0
+	const double Mtopleft = basis1d().Mj0_.get_entry(0,0);
+	
+	// 3. combine results
+	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+	  c.add_coefficient(Index(lambda.j()+1,
+				  MultiIndex<int,2>(0,0),
+				  3,
+				  MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
+						    0),
+				  this),
+			    it3->second * Mtopleft);
+      }
+	break;
+      case 4: {
+	// psi_lambda decomposes into generators on patches 1,2 and 4
+
+	// contribution from patch 1
+	//
+	// apply kron(MR,M#):
+ 	// 1. get column of second factor M#
+	V z1, z2, z3;
+	const size_type block_index = lambda.k()[1]-(basis1d().DeltaLmin()+1);
+	z1[block_index] = 1.0;
+	basis1d().Mj0_.set_level(lambda.j());
+	basis1d().Mj0_.apply_central_block(z1, z2);
+//   	cout << "- column " << block_index << " of second factor M#:" << endl;
+//   	for (V::const_iterator it(z2.begin()); it != z2.end(); ++it)
+//   	  cout << "c[" << it->first << "]=" << it->second << endl;
+
+ 	// 2. get column of first factor MR
+	z1.clear();
+	z1[basis1d().Deltasize(lambda.j())-1] = 1.0;
+	basis1d().Mj0_.apply(z1, z3); // we have to neglect the last entry of z3 later
+	
+	// 3. combine results
+ 	for (V::reverse_iterator it3(++(z3.rbegin())); it3 != z3.rend(); ++it3)
+ 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	    c.add_coefficient(Index(lambda.j()+1,
+				    MultiIndex<int,2>(0,0),
+				    1,
+				    MultiIndex<int,2>(basis1d().DeltaLmin()+it3->first, // note the "-1"
+						      basis1d().DeltaLmin()+1+it2->first), 
+				    this),
+			      it2->second * it3->second * M_SQRT1_2);	
+
+	// contribution from patch 2
+	//
+	// apply kron(ML,M#):
+	// 1. get column of second factor M#: this has already been done above
+
+	// 2. get column of first factor ML
+	z1.clear();
+	z1[0] = 1.0;
+	z3.clear();
+	basis1d().Mj0_.apply(z1, z3); // we have to neglect the first entry of z3 later
+
+	// 3. combine results
+ 	for (V::const_iterator it3(++(z3.begin())); it3 != z3.end(); ++it3)
+ 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	    c.add_coefficient(Index(lambda.j()+1,
+				    MultiIndex<int,2>(0,0),
+				    2,
+				    MultiIndex<int,2>(basis1d().DeltaLmin()+it3->first, // note the "-1"
+						      basis1d().DeltaLmin()+1+it2->first), 
+				    this),
+			      it2->second * it3->second * M_SQRT1_2);	
+
+	// contribution from patch 4
+	//
+	// apply kron(Mtopleft,M#):
+	// 1. get column of second factor M#: this has already been done above
+
+	// 2. get top left entry of Mj0
+	const double Mtopleft = basis1d().Mj0_.get_entry(0,0);
+	
+	// 3. combine results
+	for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	  c.add_coefficient(Index(lambda.j()+1,
+				  MultiIndex<int,2>(0,0),
+				  4,
+				  MultiIndex<int,2>(0,
+						    basis1d().DeltaLmin()+1+it2->first),
+				  this),
+			    it2->second * Mtopleft);
+      }
+	break;
+      default:
+	break;
+      }
+      break;
+    case 1:
+      // (1,0)-wavelet
+      break;
+    case 2:
+      // (0,1)-wavelet
+      break;
+    case 3:
+      // (1,1)-wavelet
+      break;
+    default:
+      break;
+    }
+  }
+
 
 }

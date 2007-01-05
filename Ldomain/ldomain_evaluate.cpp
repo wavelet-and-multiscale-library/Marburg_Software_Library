@@ -353,4 +353,36 @@ namespace WaveletTL
     return result;
   }
 
+  // template specialization to IBASIS=SplineBasis<d,dT,DS_construction>
+  template <int d, int dT>
+  Array1D<SampledMapping<2> >
+  LDomainBasis<SplineBasis<d,dT,DS_construction> >::evaluate
+  (const InfiniteVector<double, typename LDomainBasis<SplineBasis<d,dT,DS_construction> >::Index>& coeffs,
+   const int resolution) const
+  {
+    // first prepare a plot of the zero function
+    FixedArray1D<Array1D<double>,2> values;
+    values[0].resize((1<<resolution)+1);
+    values[1].resize((1<<resolution)+1);
+    for (int i = 0; i <= 1<<resolution; i++) {
+      values[0][i] = values[1][i] = 0;
+    }
+    Array1D<SampledMapping<2> > result(3);
+    result[0] = SampledMapping<2>(Point<2>(-1, 0), Point<2>(0,1), values);
+    result[1] = SampledMapping<2>(Point<2>(-1,-1), Point<2>(0,0), values);
+    result[2] = SampledMapping<2>(Point<2>( 0,-1), Point<2>(1,0), values);
+          
+    // add all plots of the single functions
+    typedef typename LDomainBasis<SplineBasis<d,dT,DS_construction> >::Index Index;
+    for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
+ 	   itend(coeffs.end()); it != itend; ++it) {
+      Array1D<SampledMapping<2> > temp(evaluate(it.index(), resolution));
+      result[0].add(*it, temp[0]);
+      result[1].add(*it, temp[1]);
+      result[2].add(*it, temp[2]);
+    }
+    
+    return result;
+  }
+
 }

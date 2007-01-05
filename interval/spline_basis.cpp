@@ -485,6 +485,18 @@ namespace WaveletTL
   (const typename SplineBasis<d,dT,DS_construction>::Index& lambda,
    const int resolution) const
   {
+    // treat generator case separately
+    if (lambda.e() == 0) {
+      Grid<1> grid(0, 1, 1<<resolution);
+      SampledMapping<1> result(grid); // zero
+      Array1D<double> values((1<<resolution)+1);
+      for (unsigned int i(0); i < values.size(); i++) {
+ 	const double x = i*ldexp(1.0, -resolution);
+	values[i] = evaluate(0, lambda, x);
+      }     
+      return SampledMapping<1>(grid, values);
+    }
+
     InfiniteVector<double, typename SplineBasis<d,dT,DS_construction>::Index> coeffs;
     coeffs.set_coefficient(lambda, 1.0);
     return evaluate(coeffs, resolution);
@@ -520,7 +532,7 @@ namespace WaveletTL
  	}
  	wcoeffs[number] = *it;
       }
-      
+
       // switch to generator representation
       Vector<double> gcoeffs(wcoeffs.size(), false);
       if (jmax == j0())

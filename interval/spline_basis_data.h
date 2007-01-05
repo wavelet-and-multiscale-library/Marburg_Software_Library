@@ -38,7 +38,6 @@ namespace WaveletTL
     //! check integrity of the internal data
     void check() const;
 
-  protected:
     //! options
     std::string options_;
 
@@ -76,7 +75,6 @@ namespace WaveletTL
     //! check integrity of the internal data
     void check() const;
 
-  protected:
     //! options
     std::string options_;
 

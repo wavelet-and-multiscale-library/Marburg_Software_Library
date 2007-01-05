@@ -10,7 +10,6 @@
 #ifndef _WAVELETTL_LDOMAIN_BASIS_H
 #define _WAVELETTL_LDOMAIN_BASIS_H
 
-#include <list>
 #include <map>
 
 #include <algebra/vector.h>
@@ -27,7 +26,7 @@
 // for convenience, include also some functionality
 #include <Ldomain/ldomain_support.h>
 
-using std::list;
+using std::map;
 using MathTL::FixedArray1D;
 using MathTL::InfiniteVector;
 using MathTL::SparseMatrix;
@@ -193,6 +192,9 @@ namespace WaveletTL
   public:
     //! type of the interval basis
     typedef SplineBasis<d,dT,DS_construction> IntervalBasis;
+
+    //! size_type, for convenience
+    typedef Vector<double>::size_type size_type;
     
     //! constructor with a precomputed 1D basis
     LDomainBasis(const IntervalBasis& basis1d);
@@ -246,6 +248,24 @@ namespace WaveletTL
     const int Nabla01size(const int j) const;
     const int Nabla10size(const int j) const;
     const int Nabla11size(const int j) const;
+
+    /*!
+      apply Mj0 to some vector x (i.e. "reconstruct" a generator),
+      the ordering is chosen compatible to Index::number()
+    */
+    void apply_Mj0(const int j,
+		   const std::map<size_type,double>& x, 
+		   std::map<size_type,double>& y) const;
+    
+    //! RECONSTRUCT routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+      \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
+      where always |\lambda'|>=j
+    */
+    void reconstruct_1(const Index& lambda, const int j,
+		       InfiniteVector<double, Index>& c) const;
 
     /*!
       Evaluate a single primal generator or wavelet \psi_\lambda

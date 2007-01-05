@@ -1,4 +1,5 @@
 #include <iostream>
+#include <map>
 
 #include <algebra/infinite_vector.h>
 
@@ -16,8 +17,8 @@ int main()
 {
   cout << "Testing wavelet bases on the L-shaped domain..." << endl;
 
-  const int d  = 3;
-  const int dT = 3;
+  const int d  = 2;
+  const int dT = 2;
 
 #if 0
   typedef DSBasis<d,dT,BernsteinSVD> Basis1D;
@@ -140,7 +141,7 @@ int main()
 //   for (int i = 0; i < 155; i++, ++lambda); // one of the generators on patch 4
 //   for (int i = 0; i < 330; i++, ++lambda); // one of the (0,1)-wavelets on patch 4
 //   for (int i = 0; i < 334; i++, ++lambda);
-  for (int i = 0; i < 2; i++, ++lambda);
+//   for (int i = 0; i < 2; i++, ++lambda);
 
   cout << "- evaluating a primal wavelet lambda=" << lambda << " ..." << endl;
   std::ofstream psistream("Ldomain_wavelet.m");
@@ -149,18 +150,33 @@ int main()
   psistream.close();
   cout << "  ...done, see file Ldomain_wavelet.m!" << endl;
 
+// //   const int ecode = lambda.e()[0]+lambda.e()[1];
+// //   if (ecode == 0) {
+// //     std::map<size_t,double> gmap;
+// //     gmap[lambda.number()] = 1.0;
+// //     for (std::map<size_t,double>::const_iterator it(gmap.begin()); it != gmap.end(); ++it)
+// //       cout << "gmap[" << it->first << "]=" << it->second << endl;
 
-//   InfiniteVector<double, Index> gcoeffs;
-//   basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
-//   cout << "- generator coefficients of lambda=" << lambda << " on a higher scale " << lambda.j()+1 << ":"
-//        << endl << gcoeffs;
+// //     std::map<size_t,double> gmap2;
+// //     basis.apply_Mj0(basis.j0(), gmap, gmap2);
+// //     for (std::map<size_t,double>::const_iterator it(gmap2.begin()); it != gmap2.end(); ++it)
+// //       cout << "gmap2[" << it->first << "]=" << it->second << endl;
+// //   }
+  
 
+  InfiniteVector<double, Index> gcoeffs;
+  basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
+  cout << "- generator coefficients of lambda=" << lambda << " on a higher scale " << lambda.j()+1 << ":"
+       << endl << gcoeffs;
 
-//   cout << "- evaluating this linear combination..." << endl;
-//   std::ofstream psi2stream("Ldomain_wavelet2.m");
-//   matlab_output(psi2stream, evaluate<Basis1D>(basis, gcoeffs, true, 6));
-//   psi2stream.close();
-//   cout << "  ...done, see file Ldomain_wavelet2.m!" << endl;
+  cout << "- evaluating this linear combination..." << endl;
+  std::ofstream psi2stream("Ldomain_wavelet2.m");
+  matlab_output(psi2stream, basis.evaluate(gcoeffs, 6));
+  psi2stream.close();
+  cout << "  ...done, see file Ldomain_wavelet2.m!" << endl;
+
 #endif
 
+
+  return 0;
 }

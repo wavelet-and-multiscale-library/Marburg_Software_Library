@@ -12,7 +12,7 @@ int main()
 {
   cout << "Testing setup of SplineBasisData objects..." << endl;
 
-#if 1
+#if 0
   SplineBasisData<2,2,P_construction> sd22nobc("",0,0,0,0); // PBasis, no b.c.'s
   sd22nobc.check();
 
@@ -29,7 +29,7 @@ int main()
   sd33.check();
 #endif
 
-#if 1
+#if 0
   SplineBasisData<2,2,DS_construction> sb22nobc("bio5",0,0,0,0); // DSBasis, no b.c.'s
   sb22nobc.check();
 
@@ -43,10 +43,10 @@ int main()
   sb33nobc_energy.check();
 #endif
 
-#if 0
+#if 1
   cout << "Testing SplineBasis..." << endl;
-//   SplineBasis<3,3,P_construction> basis("",1,1,0,0); // PBasis, complementary b.c.'s
-  SplineBasis<3,3,DS_construction> basis("bio5",0,0,0,0); // DSBasis, no b.c.'s
+  SplineBasis<3,3,P_construction> basis("",1,1,0,0); // PBasis, complementary b.c.'s
+//   SplineBasis<3,3,DS_construction> basis("bio5",0,0,0,0); // DSBasis, no b.c.'s
 
   const int j0 = basis.j0();
   Vector<double> x(basis.Deltasize(j0+1));
@@ -85,20 +85,22 @@ int main()
 
 
   cout << "* point evaluation of spline wavelets:" << endl;
-//   typedef SplineBasis<3,3,P_construction>::Index Index;
-  typedef SplineBasis<3,3,DS_construction>::Index Index;
+  typedef SplineBasis<3,3,P_construction>::Index Index;
+//   typedef SplineBasis<3,3,DS_construction>::Index Index;
   int N = 32;
   Array1D<double> points(N+1), values(N+1), dervalues(N+1);
   double h = 1.0/N;
   for (int i = 0; i <= N; i++) points[i] = i*h;
-  for (Index lambda(first_generator(&basis, basis.j0()));; ++lambda) {
+  const int level = basis.j0();
+  for (Index lambda(first_generator(&basis, level));; ++lambda) {
     cout << lambda << endl;
     evaluate(basis, lambda, points, values, dervalues);
     cout << "values: " << values << endl;
     cout << "values of first derivative: " << dervalues << endl;
-//     if (lambda == last_generator(&basis, basis.j0())) break;
-    if (lambda == last_wavelet(&basis, basis.j0())) break;
+//     if (lambda == last_generator(&basis, level)) break;
+    if (lambda == last_wavelet(&basis, level)) break;
   }
+
 #endif
   
   return 0;

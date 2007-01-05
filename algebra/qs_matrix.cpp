@@ -252,6 +252,142 @@ namespace MathTL
   } 
   
   template <class C>
+  void
+  QuasiStationaryMatrix<C>::apply_central_block
+  (const std::map<size_type, C>& x, std::map<size_type, C>& Mx,
+   const size_type x_offset,
+   const size_type Mx_offset,
+   const bool add_to) const
+  {
+    // for readability:
+    const size_type ml = ML_.row_dimension();
+    const size_type nl = ML_.column_dimension();
+    const size_type mr = MR_.row_dimension();
+    const size_type nr = MR_.column_dimension();
+    const size_type m = row_dimension();
+    const size_type n = column_dimension();
+
+    if (!add_to) {
+      // clear the range we want to write to
+      for (typename std::map<size_type,C>::iterator it(Mx.begin()); it != Mx.end();) {
+	if (it->first >= Mx_offset && it->first < Mx_offset+(m-2))
+	  Mx.erase(it++);
+	else
+	  ++it;
+      }
+    }
+    
+    for (typename std::map<size_type,C>::const_iterator it(x.begin()); it != x.end(); ++it) {
+      // contribution from upper left corner block
+      if (it->first >= x_offset && it->first < x_offset+(nl-1)) {
+	for (size_type i(0); i < ml-1; i++)
+	  Mx[Mx_offset + i] +=
+	    factor_ * ML_.get_entry(i+1, it->first-x_offset+1) * it->second;
+      }
+      
+      // contribution from left band
+      if (it->first >= x_offset+(nl-1) && it->first < x_offset+(n-2)/2) {
+	const size_type ibegin = offsetL_-1+2*(it->first-x_offset-(nl-1));
+	for (size_type i(ibegin); i < ibegin+bandL_.size(); i++) {
+	  Mx[Mx_offset + i] +=
+	    factor_ * bandL_[i-ibegin] * it->second;
+	}
+      }
+      
+      // contribution from right band
+      if (it->first >= x_offset+(n-2)/2 && it->first < x_offset+(n-2)-(nr-1)) {
+	const size_type iendplus1 = (m-2)-(offsetR_-1)-2*((n-2)+x_offset-(nr-1)-1-it->first);
+	for (size_type i(iendplus1-bandR_.size()); i < iendplus1; i++)
+	  Mx[Mx_offset + i] +=
+	    factor_ * bandR_[(i+bandR_.size())-iendplus1] * it->second;
+      }
+      
+      // contribution from lower right corner block
+      if (it->first >= x_offset+(n-2)-(nr-1) && it->first < x_offset+(n-2)) {
+	for (size_type i((m-2)-(mr-1)); i < m-2; i++)
+	  Mx[Mx_offset + i] +=
+	    factor_ * MR_.get_entry(i-((m-2)-(mr-1)), it->first-x_offset-((n-2)-(nr-1))) * it->second;
+      }
+    } 
+    
+    // remove unnecessary zeros
+    for (typename std::map<size_type,C>::iterator it(Mx.begin()); it != Mx.end();) {
+      if (it->second == C(0))
+	Mx.erase(it++);
+      else
+	++it;
+    }    
+  }
+
+  template <class C>
+  void
+  QuasiStationaryMatrix<C>::apply_central_columns
+  (const std::map<size_type, C>& x, std::map<size_type, C>& Mx,
+   const size_type x_offset,
+   const size_type Mx_offset,
+   const bool add_to) const
+  {
+    // for readability:
+    const size_type ml = ML_.row_dimension();
+    const size_type nl = ML_.column_dimension();
+    const size_type mr = MR_.row_dimension();
+    const size_type nr = MR_.column_dimension();
+    const size_type m = row_dimension();
+    const size_type n = column_dimension();
+
+    if (!add_to) {
+      // clear the range we want to write to
+      for (typename std::map<size_type,C>::iterator it(Mx.begin()); it != Mx.end();) {
+	if (it->first >= Mx_offset && it->first < Mx_offset+m)
+	  Mx.erase(it++);
+	else
+	  ++it;
+      }
+    }
+    
+    for (typename std::map<size_type,C>::const_iterator it(x.begin()); it != x.end(); ++it) {
+      // contribution from upper left corner block
+      if (it->first >= x_offset && it->first < x_offset+(nl-1)) {
+	for (size_type i(0); i < ml; i++)
+	  Mx[Mx_offset + i] +=
+	    factor_ * ML_.get_entry(i, it->first-x_offset+1) * it->second;
+      }
+      
+      // contribution from left band
+      if (it->first >= x_offset+(nl-1) && it->first < x_offset+(n-2)/2) {
+	const size_type ibegin = offsetL_+2*(it->first-x_offset-(nl-1));
+	for (size_type i(ibegin); i < ibegin+bandL_.size(); i++) {
+	  Mx[Mx_offset + i] +=
+	    factor_ * bandL_[i-ibegin] * it->second;
+	}
+      }
+      
+      // contribution from right band
+      if (it->first >= x_offset+(n-2)/2 && it->first < x_offset+(n-2)-(nr-1)) {
+	const size_type iendplus1 = m-offsetR_-2*((n-2)+x_offset-(nr-1)-1-it->first);
+	for (size_type i(iendplus1-bandR_.size()); i < iendplus1; i++)
+	  Mx[Mx_offset + i] +=
+	    factor_ * bandR_[(i+bandR_.size())-iendplus1] * it->second;
+      }
+      
+      // contribution from lower right corner block
+      if (it->first >= x_offset+(n-2)-(nr-1) && it->first < x_offset+(n-2)) {
+	for (size_type i(m-mr); i < m; i++)
+	  Mx[Mx_offset + i] +=
+	    factor_ * MR_.get_entry(i-(m-mr), it->first-x_offset-((n-2)-(nr-1))) * it->second;
+      }
+    } 
+    
+    // remove unnecessary zeros
+    for (typename std::map<size_type,C>::iterator it(Mx.begin()); it != Mx.end();) {
+      if (it->second == C(0))
+	Mx.erase(it++);
+      else
+	++it;
+    }    
+  }
+
+  template <class C>
   template <class VECTOR>
   void QuasiStationaryMatrix<C>::apply_transposed(const VECTOR& x, VECTOR& Mtx,
 						  const size_type x_offset,

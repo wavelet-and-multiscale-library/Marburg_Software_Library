@@ -91,6 +91,26 @@ int main()
   for (std::map<size_t, double>::const_iterator it(Qtysparse.begin());
        it != Qtysparse.end(); ++it)
     cout << "Qty[" << it->first << "]=" << it->second << endl;
+
+  xsparse.clear();
+  xsparse[6] = 1.0;
+  cout << "x again:" << endl;
+  for (std::map<size_t, double>::const_iterator it(xsparse.begin());
+       it != xsparse.end(); ++it)
+    cout << "x[" << it->first << "]=" << it->second << endl;
+  Qxsparse.clear();
+  Q.apply_central_block(xsparse, Qxsparse);
+  cout << "central block of Q applied to x yields Qx=" << endl;
+  for (std::map<size_t, double>::const_iterator it(Qxsparse.begin());
+       it != Qxsparse.end(); ++it)
+    cout << "Qx[" << it->first << "]=" << it->second << endl;
+    
+  Qxsparse.clear();
+  Q.apply_central_columns(xsparse, Qxsparse);
+  cout << "central columns of Q applied to x yields Qx=" << endl;
+  for (std::map<size_t, double>::const_iterator it(Qxsparse.begin());
+       it != Qxsparse.end(); ++it)
+    cout << "Qx[" << it->first << "]=" << it->second << endl;
   
   return 0;
 }

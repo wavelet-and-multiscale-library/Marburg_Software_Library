@@ -124,6 +124,24 @@ namespace MathTL
 			  const bool add_to = false) const;
     
     /*!
+      apply the central block of the matrix (i.e. without first/last row/column) to a vector
+    */
+    void apply_central_block
+    (const std::map<size_type, C>& x, std::map<size_type, C>& Mx,
+     const size_type x_offset = 0,
+     const size_type Mx_offset = 0,
+     const bool add_to = false) const;
+
+    /*!
+      apply the central columns of the matrix (i.e. without first/last column) to a vector
+    */
+    void apply_central_columns
+    (const std::map<size_type, C>& x, std::map<size_type, C>& Mx,
+     const size_type x_offset = 0,
+     const size_type Mx_offset = 0,
+     const bool add_to = false) const;
+    
+    /*!
       stream output with user-defined tabwidth and precision
       (cf. deal.II)
     */

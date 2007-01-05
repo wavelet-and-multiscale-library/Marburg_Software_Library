@@ -111,6 +111,32 @@ int main()
   for (std::map<size_t, double>::const_iterator it(Qxsparse.begin());
        it != Qxsparse.end(); ++it)
     cout << "Qx[" << it->first << "]=" << it->second << endl;
+
+  ysparse.clear();
+  ysparse[12] = 1.0;
+  cout << "y again:" << endl;
+  for (std::map<size_t, double>::const_iterator it(ysparse.begin());
+       it != ysparse.end(); ++it)
+    cout << "y[" << it->first << "]=" << it->second << endl;
+  Qtysparse.clear();
+  Q.apply_central_block_transposed(ysparse, Qtysparse);
+  cout << "transpose of central block of Q applied to y yields Qty=" << endl;
+  for (std::map<size_t, double>::const_iterator it(Qtysparse.begin());
+       it != Qtysparse.end(); ++it)
+    cout << "Qty[" << it->first << "]=" << it->second << endl;
   
+  ysparse.clear();
+  ysparse[2] = 1.0;
+  cout << "y again:" << endl;
+  for (std::map<size_t, double>::const_iterator it(ysparse.begin());
+       it != ysparse.end(); ++it)
+    cout << "y[" << it->first << "]=" << it->second << endl;
+  Qtysparse.clear();
+  Q.apply_central_columns_transposed(ysparse, Qtysparse);
+  cout << "transpose of central columns of Q applied to y yields Qty=" << endl;
+  for (std::map<size_t, double>::const_iterator it(Qtysparse.begin());
+       it != Qtysparse.end(); ++it)
+    cout << "Qty[" << it->first << "]=" << it->second << endl;
+
   return 0;
 }

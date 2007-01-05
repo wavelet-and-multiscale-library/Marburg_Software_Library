@@ -551,6 +551,144 @@ namespace MathTL
 
   template <class C>
   void
+  QuasiStationaryMatrix<C>::apply_central_block_transposed
+  (const std::map<size_type, C>& x, std::map<size_type, C>& Mtx,
+   const size_type x_offset,
+   const size_type Mtx_offset,
+   const bool add_to) const
+  {
+    // for readability:
+    const size_type ml = ML_.row_dimension();
+    const size_type nl = ML_.column_dimension();
+    const size_type mr = MR_.row_dimension();
+    const size_type nr = MR_.column_dimension();
+    const size_type m = row_dimension();
+    const size_type n = column_dimension();
+    
+    if (!add_to) {
+      // clear the range we want to write to
+      for (typename std::map<size_type,C>::iterator it(Mtx.begin()); it != Mtx.end();) {
+	if (it->first >= Mtx_offset && it->first < Mtx_offset+(n-2))
+	  Mtx.erase(it++);
+	else
+	  ++it;
+      }
+    }
+
+    for (typename std::map<size_type,C>::const_iterator it(x.begin()); it != x.end(); ++it) {
+      // contribution from upper left corner block
+      if (it->first >= x_offset && it->first < x_offset+(ml-1)) {
+	for (size_type i(0); i < nl-1; i++) {
+	  Mtx[Mtx_offset+i] +=
+	    factor_ * ML_.get_entry(it->first-x_offset+1, i+1) * it->second;
+	}
+      }
+
+      // contribution from left band
+      const size_type ibeginlefthelp
+ 	= (it->first-x_offset+2*(nl-1)+1)-std::min(bandL_.size()+(offsetL_-1),it->first-x_offset+2*(nl-1)+1);
+      for (size_type i = std::max(nl-1, ibeginlefthelp-ibeginlefthelp/2);
+ 	   i <= std::min((n-2)/2-1, ((it->first-x_offset+2*(nl-1))-(offsetL_-1))/2); i++)
+ 	Mtx[Mtx_offset+i] +=
+ 	  factor_ * bandL_[it->first-x_offset-(offsetL_-1)-2*(i-(nl-1))] * it->second;
+      
+      // contribution from right band
+      const size_type ibeginrighthelp
+ 	= (it->first-x_offset+(offsetR_-1)+2*((n-2)-(nr-1)-1)+1)-(m-2);
+      for (size_type i = std::max((n-2)/2, ibeginrighthelp-ibeginrighthelp/2);
+ 	   i <= std::min((n-2)-(nr-1)-1, ((it->first-x_offset+(offsetR_-1)+2*((n-2)-(nr-1)-1)+bandR_.size())-(m-2))/2); i++)
+ 	Mtx[Mtx_offset+i] +=
+ 	  factor_ * bandR_[it->first-x_offset-((m-2)-(offsetR_-1)-2*((n-2)-(nr-1)-1-i)-bandR_.size())] * it->second;
+      
+      // contribution from lower right corner block
+      if (it->first >= x_offset+((m-2)-(mr-1)) && it->first < x_offset+(m-2)) {
+ 	for (size_type i(0); i < nr-1; i++) {
+ 	  Mtx[Mtx_offset+i+((n-2)-(nr-1))] +=
+ 	    factor_ * MR_.get_entry(it->first-x_offset-((m-2)-(mr-1)), i) * it->second;
+ 	}
+      }
+    }
+    
+    // remove unnecessary zeros
+    for (typename std::map<size_type,C>::iterator it(Mtx.begin()); it != Mtx.end();) {
+      if (it->second == C(0))
+	Mtx.erase(it++);
+      else
+	++it;
+    }      
+  }
+  
+  template <class C>
+  void
+  QuasiStationaryMatrix<C>::apply_central_columns_transposed
+  (const std::map<size_type, C>& x, std::map<size_type, C>& Mtx,
+   const size_type x_offset,
+   const size_type Mtx_offset,
+   const bool add_to) const
+  {
+    // for readability:
+    const size_type ml = ML_.row_dimension();
+    const size_type nl = ML_.column_dimension();
+    const size_type mr = MR_.row_dimension();
+    const size_type nr = MR_.column_dimension();
+    const size_type m = row_dimension();
+    const size_type n = column_dimension();
+    
+    if (!add_to) {
+      // clear the range we want to write to
+      for (typename std::map<size_type,C>::iterator it(Mtx.begin()); it != Mtx.end();) {
+	if (it->first >= Mtx_offset && it->first < Mtx_offset+(n-2))
+	  Mtx.erase(it++);
+	else
+	  ++it;
+      }
+    }
+
+    for (typename std::map<size_type,C>::const_iterator it(x.begin()); it != x.end(); ++it) {
+      // contribution from upper left corner block
+      if (it->first >= x_offset && it->first < x_offset+ml) {
+	for (size_type i(0); i < nl-1; i++) {
+	  Mtx[Mtx_offset+i] +=
+	    factor_ * ML_.get_entry(it->first-x_offset, i+1) * it->second;
+	}
+      }
+
+      // contribution from left band
+      const size_type ibeginlefthelp
+ 	= (it->first-x_offset+2*(nl-1)+1)-std::min(bandL_.size()+offsetL_,it->first-x_offset+2*(nl-1)+1);
+      for (size_type i = std::max(nl-1, ibeginlefthelp-ibeginlefthelp/2);
+ 	   i <= std::min((n-2)/2-1, ((it->first-x_offset+2*(nl-1))-offsetL_)/2); i++)
+ 	Mtx[Mtx_offset+i] +=
+ 	  factor_ * bandL_[it->first-x_offset-offsetL_-2*(i-(nl-1))] * it->second;
+      
+      // contribution from right band
+      const size_type ibeginrighthelp
+ 	= (it->first-x_offset+offsetR_+2*((n-2)-(nr-1)-1)+1)-m;
+      for (size_type i = std::max((n-2)/2, ibeginrighthelp-ibeginrighthelp/2);
+ 	   i <= std::min((n-2)-(nr-1)-1, ((it->first-x_offset+offsetR_+2*((n-2)-(nr-1)-1)+bandR_.size())-m)/2); i++)
+ 	Mtx[Mtx_offset+i] +=
+ 	  factor_ * bandR_[it->first-x_offset-(m-offsetR_-2*((n-2)-(nr-1)-1-i)-bandR_.size())] * it->second;
+      
+      // contribution from lower right corner block
+      if (it->first >= x_offset+(m-mr) && it->first < x_offset+m) {
+ 	for (size_type i(0); i < nr-1; i++) {
+ 	  Mtx[Mtx_offset+i+((n-2)-(nr-1))] +=
+ 	    factor_ * MR_.get_entry(it->first-x_offset-(m-mr), i) * it->second;
+ 	}
+      }
+    }
+    
+    // remove unnecessary zeros
+    for (typename std::map<size_type,C>::iterator it(Mtx.begin()); it != Mtx.end();) {
+      if (it->second == C(0))
+	Mtx.erase(it++);
+      else
+	++it;
+    }      
+  }
+  
+  template <class C>
+  void
   QuasiStationaryMatrix<C>::to_sparse(SparseMatrix<C>& S) const
   {
     // for readability:

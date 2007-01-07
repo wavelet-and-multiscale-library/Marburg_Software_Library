@@ -56,6 +56,7 @@ namespace MathTL
      
       p(x) = sum_{k=0}^2 B_{k,2}(x) * b_k
   */
+  inline
   double EvaluateBernsteinPolynomial(const double b0, const double b1, const double b2,
 				     const double x)
   {

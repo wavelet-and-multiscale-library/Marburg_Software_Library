@@ -16,9 +16,10 @@ int main()
   QuasiStationaryMatrix<double> Qdefault;
   cout << "Qdefault=" << endl << Qdefault;
 
-  Matrix<double> one(3, 2, "1 2 3 4 5 6");
-  Matrix<double> two(4, 1, "-4 -3 -2 -1");
-  Vector<double> b1(3, "3 4 5");
+//   Matrix<double> one(3, 3, "1 2 3 4 5 6 7 8 9");
+  Matrix<double> one(4, 2, "1 2 3 4 5 6 7 8");
+  Matrix<double> two(4, 2, "-4 -3 -2 -1 0 1 2 3");
+  Vector<double> b1(4, "3 4 5 6");
   Vector<double> b2(3, "5 6 -7");
 
   QuasiStationaryMatrix<double> Q(3, 17, 9, one, two, b1, b2, 2, 1);
@@ -113,7 +114,7 @@ int main()
     cout << "Qx[" << it->first << "]=" << it->second << endl;
 
   ysparse.clear();
-  ysparse[12] = 1.0;
+  ysparse[2] = 1.0;
   cout << "y again:" << endl;
   for (std::map<size_t, double>::const_iterator it(ysparse.begin());
        it != ysparse.end(); ++it)

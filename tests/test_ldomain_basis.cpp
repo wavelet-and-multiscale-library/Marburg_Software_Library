@@ -122,6 +122,24 @@ int main()
  {
    cout << "- check apply_Mj0() and apply_Mj0T_transposed:" << endl;
    const int level = basis.j0();
+
+//    for (int i = 0; i < basis.Deltasize(level+1); i++) {
+//      cout << "i=" << i << endl;
+     
+//      std::map<size_t,double> x,y;
+//      x[i] = 1.0;
+// //      basis.apply_Mj0(level,x,y);
+// //      cout << "Mj0*e_i=" << endl;
+// //      for (std::map<size_t,double>::const_iterator it(y.begin()); it != y.end(); ++it)
+// //        cout << it->first << ": " << it->second << endl;
+
+//      y.clear();
+//      basis.apply_Mj0T_transposed(level,x,y);
+//      cout << "Mj0T^T*e_i=" << endl;
+//      for (std::map<size_t,double>::const_iterator it(y.begin()); it != y.end(); ++it)
+//        cout << it->first << ": " << it->second << endl;
+//    }
+
    for (int i = 0; i < basis.Deltasize(level); i++) {
      std::map<size_t,double> x,y,z;
      x[i] = 1.0;
@@ -132,12 +150,22 @@ int main()
 //        cout << it->first << ": " << it->second << endl;
 
      basis.apply_Mj0T_transposed(level,y,z);
+//      cout << "Mj0T^T*Mj0*e_i=" << endl;
+//      for (std::map<size_t,double>::const_iterator it(z.begin()); it != z.end(); ++it)
+//        cout << it->first << ": " << it->second << endl;
+
      y.clear();
      add_maps(x,z,y,1.0,-1.0);
+
      cout << "||(I-Mj0T^T*Mj0)*e_i||_infty=";
      double error = 0;
-     for (std::map<size_t,double>::const_iterator it(y.begin()); it != y.end(); ++it)
-       error = max(error, fabs(it->second));
+     for (std::map<size_t,double>::const_iterator it(y.begin()); it != y.end(); ++it) {
+//        if ((int)it->first < 3*(basis1d.Deltasize(basis.j0())-2)*(basis1d.Deltasize(basis.j0())-2))
+//        if ((int)it->first >= 3*(basis1d.Deltasize(basis.j0())-2)*(basis1d.Deltasize(basis.j0())-2)
+// 	   && (int)it->first < (3*(basis1d.Deltasize(basis.j0())-2)+1)*(basis1d.Deltasize(basis.j0())-2))
+//        if ((int)it->first >= (3*(basis1d.Deltasize(basis.j0())-2)+1)*(basis1d.Deltasize(basis.j0())-2))
+	 error = max(error, fabs(it->second));
+     }
      cout << error << endl;
    }
  }

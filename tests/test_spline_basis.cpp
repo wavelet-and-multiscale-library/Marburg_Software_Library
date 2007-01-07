@@ -29,7 +29,7 @@ int main()
   sd33.check();
 #endif
 
-#if 0
+#if 1
   SplineBasisData<2,2,DS_construction> sb22nobc("bio5",0,0,0,0); // DSBasis, no b.c.'s
   sb22nobc.check();
 

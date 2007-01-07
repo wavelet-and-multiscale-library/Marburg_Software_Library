@@ -268,7 +268,21 @@ namespace WaveletTL
     void apply_Mj0T_transposed(const int j,
 			       const std::map<size_type,double>& x, 
 			       std::map<size_type,double>& y) const;
-    
+
+    /*!
+      apply Mj1c to some vector x (i.e. "reconstruct" a wavelet of the initial completion)
+    */
+    void apply_Mj1c(const int j,
+		    const std::map<size_type,double>& x, 
+		    std::map<size_type,double>& y) const;
+
+    /*!
+      apply Mj1 to some vector x (i.e. "reconstruct" a wavelet)
+    */
+    void apply_Mj1(const int j,
+		   const std::map<size_type,double>& x, 
+		   std::map<size_type,double>& y) const;
+
     
     //! RECONSTRUCT routine, simple version
     /*!

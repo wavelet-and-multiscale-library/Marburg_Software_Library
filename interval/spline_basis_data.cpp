@@ -152,8 +152,8 @@ namespace WaveletTL
   {
     if (s0==0 && s1==0 && sT0==0 && sT1==0) {
       if (strcmp(options,"bio5") == 0) {
-// 	j0_ = 3;
-	j0_ = 2;
+ 	j0_ = 3;
+// 	j0_ = 2; // does not work with composite bases...
 	std::ostringstream entries;
 	entries << "0.707106781186547 0 "
 		<< "0.288735268984507 0.353553390593274 "
@@ -162,8 +162,8 @@ namespace WaveletTL
 	Matrix<double> Mj0_l(4, 2, entries.str().c_str());
 	Matrix<double> Mj0_r; Mj0_l.mirror(Mj0_r);
 	Vector<double> Mj0_band_lr(3, "0.35355339059327 0.70710678118655 0.35355339059327");
-// 	Mj0_ = QuasiStationaryMatrix<double>(j0_, 17, 9, Mj0_l, Mj0_r, Mj0_band_lr, Mj0_band_lr, 3, 3, 1.0);
-	Mj0_ = QuasiStationaryMatrix<double>(j0_, 9, 5, Mj0_l, Mj0_r, Mj0_band_lr, Mj0_band_lr, 3, 3, 1.0);
+ 	Mj0_ = QuasiStationaryMatrix<double>(j0_, 17, 9, Mj0_l, Mj0_r, Mj0_band_lr, Mj0_band_lr, 3, 3, 1.0);
+// 	Mj0_ = QuasiStationaryMatrix<double>(j0_, 9, 5, Mj0_l, Mj0_r, Mj0_band_lr, Mj0_band_lr, 3, 3, 1.0);
 	entries.str("");
 	entries << "0.707106781186547 0 "
 		<< "1.51522881682832 0.353553390593274 "
@@ -173,8 +173,8 @@ namespace WaveletTL
 	Matrix<double> Mj0T_l(5, 2, entries.str().c_str());
 	Matrix<double> Mj0T_r; Mj0T_l.mirror(Mj0T_r);
 	Vector<double> Mj0T_band_lr(5, "-0.17677669529664 0.35355339059327 1.06066017177982 0.35355339059327 -0.17677669529664");
-// 	Mj0T_ = QuasiStationaryMatrix<double>(j0_, 17, 9, Mj0T_l, Mj0T_r, Mj0T_band_lr, Mj0T_band_lr, 2, 2, 1.0);
-	Mj0T_ = QuasiStationaryMatrix<double>(j0_, 9, 5, Mj0T_l, Mj0T_r, Mj0T_band_lr, Mj0T_band_lr, 2, 2, 1.0);
+ 	Mj0T_ = QuasiStationaryMatrix<double>(j0_, 17, 9, Mj0T_l, Mj0T_r, Mj0T_band_lr, Mj0T_band_lr, 2, 2, 1.0);
+// 	Mj0T_ = QuasiStationaryMatrix<double>(j0_, 9, 5, Mj0T_l, Mj0T_r, Mj0T_band_lr, Mj0T_band_lr, 2, 2, 1.0);
 	entries.str("");
 	entries << "0.375 0 "
 		<< "-0.109375 -0.0875 "
@@ -185,8 +185,8 @@ namespace WaveletTL
  	Matrix<double> Mj1_l(6, 2, entries.str().c_str());
 	Matrix<double> Mj1_r; Mj1_l.mirror(Mj1_r);
 	Vector<double> Mj1_band_lr(5, "-0.125 -0.25 0.75 -0.25 -0.125");
-// 	Mj1_ = QuasiStationaryMatrix<double>(j0_, 17, 8, Mj1_l, Mj1_r, Mj1_band_lr, Mj1_band_lr, 3, 3, 1.0);
-	Mj1_ = QuasiStationaryMatrix<double>(j0_, 9, 4, Mj1_l, Mj1_r, Mj1_band_lr, Mj1_band_lr, 3, 3, 1.0);
+ 	Mj1_ = QuasiStationaryMatrix<double>(j0_, 17, 8, Mj1_l, Mj1_r, Mj1_band_lr, Mj1_band_lr, 3, 3, 1.0);
+// 	Mj1_ = QuasiStationaryMatrix<double>(j0_, 9, 4, Mj1_l, Mj1_r, Mj1_band_lr, Mj1_band_lr, 3, 3, 1.0);
 	entries.str("");
 	entries << "1.33333333333333 0.666666666666667 "
 		<< "-2.85714285714286 -1.42857142857143 "
@@ -196,8 +196,8 @@ namespace WaveletTL
 	Matrix<double> Mj1T_l(5, 2, entries.str().c_str());
 	Matrix<double> Mj1T_r; Mj1T_l.mirror(Mj1T_r);
 	Vector<double> Mj1T_band_lr(3, "-0.5 1 -0.5");
-// 	Mj1T_ = QuasiStationaryMatrix<double>(j0_, 17, 8, Mj1T_l, Mj1T_r, Mj1T_band_lr, Mj1T_band_lr, 4, 4, 1.0);
-	Mj1T_ = QuasiStationaryMatrix<double>(j0_, 9, 4, Mj1T_l, Mj1T_r, Mj1T_band_lr, Mj1T_band_lr, 4, 4, 1.0);
+ 	Mj1T_ = QuasiStationaryMatrix<double>(j0_, 17, 8, Mj1T_l, Mj1T_r, Mj1T_band_lr, Mj1T_band_lr, 4, 4, 1.0);
+// 	Mj1T_ = QuasiStationaryMatrix<double>(j0_, 9, 4, Mj1T_l, Mj1T_r, Mj1T_band_lr, Mj1T_band_lr, 4, 4, 1.0);
 	entries.str("");
 	entries << "0 0 "
 		<< "-0.2625 -0.0875 "
@@ -207,8 +207,8 @@ namespace WaveletTL
 		<< "0.0625 -0.125";
  	Matrix<double> Mj1c_l(6, 2, entries.str().c_str());
 	Matrix<double> Mj1c_r; Mj1c_l.mirror(Mj1c_r);
-// 	Mj1c_ = QuasiStationaryMatrix<double>(j0_, 17, 8, Mj1c_l, Mj1c_r, Mj1_band_lr, Mj1_band_lr, 3, 3, 1.0);
-	Mj1c_ = QuasiStationaryMatrix<double>(j0_, 9, 4, Mj1c_l, Mj1c_r, Mj1_band_lr, Mj1_band_lr, 3, 3, 1.0);
+ 	Mj1c_ = QuasiStationaryMatrix<double>(j0_, 17, 8, Mj1c_l, Mj1c_r, Mj1_band_lr, Mj1_band_lr, 3, 3, 1.0);
+// 	Mj1c_ = QuasiStationaryMatrix<double>(j0_, 9, 4, Mj1c_l, Mj1c_r, Mj1_band_lr, Mj1_band_lr, 3, 3, 1.0);
 	CLA_ = Matrix<double>(2, 2, "1 0 -0.166666666666667 1.42857142857143");
 	CRA_ = CLA_;
 	CLAT_ = Matrix<double>(3, 2, "6 -0.7 3 0 0 0.7");
@@ -217,7 +217,7 @@ namespace WaveletTL
 
       if (strcmp(options,"bio5-energy") == 0) {
  	j0_ = 3;
-// 	j0_ = 2;
+// 	j0_ = 2; // does not work with composite bases...
 	std::ostringstream entries;
 	entries << "0.707106781186547 0 "
 		<< "0.288735268984507 0.353553390593274 "

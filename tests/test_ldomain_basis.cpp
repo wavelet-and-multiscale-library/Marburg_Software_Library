@@ -123,23 +123,6 @@ int main()
    cout << "- check apply_Mj0() and apply_Mj0T_transposed:" << endl;
    const int level = basis.j0();
 
-//    for (int i = 0; i < basis.Deltasize(level+1); i++) {
-//      cout << "i=" << i << endl;
-     
-//      std::map<size_t,double> x,y;
-//      x[i] = 1.0;
-// //      basis.apply_Mj0(level,x,y);
-// //      cout << "Mj0*e_i=" << endl;
-// //      for (std::map<size_t,double>::const_iterator it(y.begin()); it != y.end(); ++it)
-// //        cout << it->first << ": " << it->second << endl;
-
-//      y.clear();
-//      basis.apply_Mj0T_transposed(level,x,y);
-//      cout << "Mj0T^T*e_i=" << endl;
-//      for (std::map<size_t,double>::const_iterator it(y.begin()); it != y.end(); ++it)
-//        cout << it->first << ": " << it->second << endl;
-//    }
-
    for (int i = 0; i < basis.Deltasize(level); i++) {
      std::map<size_t,double> x,y,z;
      x[i] = 1.0;

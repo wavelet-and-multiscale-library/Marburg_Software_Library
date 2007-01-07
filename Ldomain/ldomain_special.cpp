@@ -666,14 +666,11 @@ namespace WaveletTL
     const unsigned int Deltajp1 = basis1d().Deltasize(j+1);
     
     for (V::const_iterator itx(x.begin()); itx != x.end(); ++itx) {
-//       cout << "apply_Mj0T_t(): number " << itx->first << ",  value " << itx->second << endl;
-
       // determine patch number
       const unsigned int patch =
 	itx->first < 3*(Deltajp1-2)*(Deltajp1-2)
 	? itx->first / ((Deltajp1-2)*(Deltajp1-2))
 	: 3+(itx->first-3*(Deltajp1-2)*(Deltajp1-2))/(Deltajp1-2);
-//       cout << "apply_Mj0T_t(): patch number " << patch << endl;
       
       switch(patch) {
       case 0: {
@@ -684,18 +681,12 @@ namespace WaveletTL
  	z1[block_index] = 1.0;
 	basis1d().Mj0T_.set_level(j);
  	basis1d().Mj0T_.apply_central_block_transposed(z1, z2);
-// 	cout << "row " << block_index << " of Mj0T is" << endl;
-//  	for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
-//  	  cout << it2->first << ": " << it2->second << endl;
 
  	// 2. get column of first factor (M#)^T
  	z1.clear();
 	const size_type block_nr    = itx->first / (Deltajp1-2);
  	z1[block_nr] = 1.0;
  	basis1d().Mj0T_.apply_central_block_transposed(z1, z3);
-// 	cout << "row " << block_nr << " of Mj0T is" << endl;
-//  	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
-//  	  cout << it3->first << ": " << it3->second << endl;
 	
 	// 3. combine results
  	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)

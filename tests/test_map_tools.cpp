@@ -29,9 +29,7 @@ int main()
   add_maps(m1, m2, m3, 2.0, 3.0);
 
   cout << "  m3=2*m1+3*m2=" << endl;
-  for (map<int,double>::const_iterator it(m3.begin()); it != m3.end(); ++it) {
-    cout << it->first << ": " << it->second << endl;
-  }
+  cout << m3 << endl;
   
   return 0;
 }

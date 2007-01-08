@@ -63,4 +63,12 @@ namespace MathTL
  	++it2;
       }
   }
+
+  template <class K, class C>
+  std::ostream& operator << (std::ostream& os, const std::map<K,C>& m)
+  {
+    for (typename std::map<K,C>::const_iterator it(m.begin()); it != m.end(); ++it)
+      os << it->first << ": " << it->second << std::endl;
+    return os;
+  }
 }

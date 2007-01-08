@@ -166,17 +166,17 @@ namespace WaveletTL
 	  case 0:
 	    // psi_lambda completely lives on patch 0
 	    
-	    basis1d().support(IntervalBasis::Index(lambdaj,
-						   0,
-						   lambda.k()[0],
-						   &basis1d()),
+	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+							    0,
+							    lambda.k()[0],
+							    &basis1d()),
 			      supp.xmin[0],
 			      supp.xmax[0]);
 	    
-	    basis1d().support(IntervalBasis::Index(lambdaj,
-						   0,
-						   lambda.k()[1],
-						   &basis1d()),
+	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+							    0,
+							    lambda.k()[1],
+							    &basis1d()),
 			      supp.ymin[0],
 			      supp.ymax[0]);
 	    
@@ -187,17 +187,17 @@ namespace WaveletTL
 	  case 1:
 	    // psi_lambda completely lives on patch 1
 	    
-	    basis1d().support(IntervalBasis::Index(lambdaj,
-						   0,
-						   lambda.k()[0],
-						   &basis1d()),
+	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+							    0,
+							    lambda.k()[0],
+							    &basis1d()),
 			      supp.xmin[1],
 			      supp.xmax[1]);
 	    
-	    basis1d().support(IntervalBasis::Index(lambdaj,
-						   0,
-						   lambda.k()[1],
-						   &basis1d()),
+	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+							    0,
+							    lambda.k()[1],
+							    &basis1d()),
 			      supp.ymin[1],
 			      supp.ymax[1]);
 	    
@@ -208,17 +208,17 @@ namespace WaveletTL
 	  case 2:
 	    // psi_lambda completely lives on patch 2
 	    
-	    basis1d().support(IntervalBasis::Index(lambdaj,
-						   0,
-						   lambda.k()[0],
-						   &basis1d()),
+	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+							    0,
+							    lambda.k()[0],
+							    &basis1d()),
 			      supp.xmin[2],
 			      supp.xmax[2]);
 	    
-	    basis1d().support(IntervalBasis::Index(lambdaj,
-						   0,
-						   lambda.k()[1],
-						   &basis1d()),
+	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+							    0,
+							    lambda.k()[1],
+							    &basis1d()),
 			      supp.ymin[2],
 			      supp.ymax[2]);
 	    
@@ -229,31 +229,31 @@ namespace WaveletTL
 	  case 3:
 	    // psi_lambda lives on patches 0 and 1
 	    
-	    basis1d().support(IntervalBasis::Index(lambdaj,
-						   0,
-						   lambda.k()[0],
-						   &basis1d()),
+	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+							    0,
+							    lambda.k()[0],
+							    &basis1d()),
 			      supp.xmin[0],
 			      supp.xmax[0]);
 	    
-	    basis1d().support(IntervalBasis::Index(lambdaj,
-						   0,
-						   basis1d().DeltaLmin(),
-						   &basis1d()),
+	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+							    0,
+							    basis1d().DeltaLmin(),
+							    &basis1d()),
 			      supp.ymin[0],
 			      supp.ymax[0]);
 	    
-	    basis1d().support(IntervalBasis::Index(lambdaj,
-						   0,
-						   lambda.k()[0],
-						   &basis1d()),
+	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+							    0,
+							    lambda.k()[0],
+							    &basis1d()),
 			      supp.xmin[1],
 			      supp.xmax[1]);
 	    
-	    basis1d().support(IntervalBasis::Index(lambdaj,
-						   0,
-						   basis1d().DeltaRmax(lambdaj),
-						   &basis1d()),
+	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+							    0,
+							    basis1d().DeltaRmax(lambdaj),
+							    &basis1d()),
 			      supp.ymin[1],
 			      supp.ymax[1]);
 	    
@@ -263,31 +263,31 @@ namespace WaveletTL
 	  case 4:
 	    // psi_lambda lives on patches 1 and 2
 	    
-	    basis1d().support(IntervalBasis::Index(lambdaj,
-						   0,
-						   basis1d().DeltaRmax(lambdaj),
-						   &basis1d()),
+	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+							    0,
+							    basis1d().DeltaRmax(lambdaj),
+							    &basis1d()),
 			      supp.xmin[1],
 			      supp.xmax[1]);
 	    
-	    basis1d().support(IntervalBasis::Index(lambdaj,
-						   0,
-						   lambda.k()[1],
-						   &basis1d()),
+	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+							    0,
+							    lambda.k()[1],
+							    &basis1d()),
 			      supp.ymin[1],
 			      supp.ymax[1]);
 	    
-	    basis1d().support(IntervalBasis::Index(lambdaj,
-						   0,
-						   basis1d().DeltaLmin(),
-						   &basis1d()),
+	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+							    0,
+							    basis1d().DeltaLmin(),
+							    &basis1d()),
 			      supp.xmin[2],
 			      supp.xmax[2]);
 	    
-	    basis1d().support(IntervalBasis::Index(lambdaj,
-						   0,
-						   lambda.k()[1],
-						   &basis1d()),
+	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+							    0,
+							    lambda.k()[1],
+							    &basis1d()),
 			      supp.ymin[2],
 			      supp.ymax[2]);
 	    

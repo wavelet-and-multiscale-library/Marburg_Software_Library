@@ -90,7 +90,12 @@ namespace WaveletTL
     //! expansion coefficients of the primal generators w.r.t. restricted cardinal B-splines
     Matrix<double> CLA_, CRA_, CLAT_, CRAT_;
 
-    //! initial stable completion with homogeneous b.c.'s (for composite basis), available for bio5(-energy)
+    /*!
+      initial stable completion with homogeneous b.c.'s (for composite basis),
+      available for bio5(-energy)
+
+      the first and last row is zero, we don't store it
+    */
     QuasiStationaryMatrix<double> Mj1c_;
   };
 

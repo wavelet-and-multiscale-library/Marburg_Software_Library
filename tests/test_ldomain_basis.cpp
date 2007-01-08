@@ -118,7 +118,7 @@ int main()
   }
 #endif
 
-#if 1
+#if 0
  {
    cout << "- check apply_Mj0() and apply_Mj0T_transposed:" << endl;
    const int level = basis.j0();
@@ -154,14 +154,14 @@ int main()
  }
 #endif
 
-#if 0
+#if 1
   Index lambda(basis.first_generator(basis.j0()));
 //   Index lambda(first_wavelet<Basis1D>(&basis, basis.j0()));
 //   Index lambda(2, MultiIndex<int,2>(0,1), 0, MultiIndex<int,2>(3,0), &basis);
 
 //   for (; !(lambda.p() == 1); ++lambda);
 //   for (; !(lambda.p() == 2); ++lambda);
-  for (; !(lambda.p() == 3); ++lambda);
+//   for (; !(lambda.p() == 3); ++lambda);
 //   for (; !(lambda.p() == 4); ++lambda);
 
 //   for (; lambda.e()[0] != 0 || lambda.e()[1] != 1; ++lambda);
@@ -169,7 +169,7 @@ int main()
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 1 && lambda.k()[1] == 7); ++lambda);
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 2); ++lambda);
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 2 && lambda.k()[1] == 7); ++lambda);
-//   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 4); ++lambda);
+  for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 4); ++lambda);
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 4 && lambda.k()[1] == 6); ++lambda);
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 4 && lambda.k()[1] == 7); ++lambda);
 
@@ -178,15 +178,17 @@ int main()
 //   for (int i = 0; i < 155; i++, ++lambda); // one of the generators on patch 4
 //   for (int i = 0; i < 330; i++, ++lambda); // one of the (0,1)-wavelets on patch 4
 //   for (int i = 0; i < 334; i++, ++lambda);
-  for (int i = 0; i < 2; i++, ++lambda);
+//   for (int i = 0; i < 2; i++, ++lambda);
 
   cout << "- evaluating a primal wavelet lambda=" << lambda << " ..." << endl;
   std::ofstream psistream("Ldomain_wavelet.m");
   matlab_output(psistream, basis.evaluate(lambda, 6));
-//   octave_output(psistream, basis.evaluate(lambda, 6));
+  //   octave_output(psistream, basis.evaluate(lambda, 6));
   psistream.close();
   cout << "  ...done, see file Ldomain_wavelet.m!" << endl;
+#endif
 
+#if 0
   InfiniteVector<double, Index> gcoeffs;
   basis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
   cout << "- generator coefficients of lambda=" << lambda << " on a higher scale " << lambda.j()+1 << ":"
@@ -210,8 +212,6 @@ int main()
     cout << "- alternative computation of the generator coeffs yielded abs. error "
 	 << linfty_norm(gcoeffs-gcoeffs2) << endl;
   }
-
-
 
   cout << "- evaluating this linear combination..." << endl;
   std::ofstream psi2stream("Ldomain_wavelet2.m");

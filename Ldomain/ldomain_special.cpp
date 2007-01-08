@@ -3,6 +3,8 @@
 #include <cmath>
 #include <time.h>
 #include <iostream>
+#include <algorithm>
+#include <utils/map_tools.h>
 
 using std::cout;
 using std::endl;
@@ -149,6 +151,8 @@ namespace WaveletTL
     
     typedef std::map<size_type,double> V;
 
+    const unsigned int Deltaj   = basis1d().Deltasize(j);
+
     const int ecode(lambda.e()[0]+2*lambda.e()[1]);
     switch(ecode) {
     case 0:
@@ -270,7 +274,7 @@ namespace WaveletTL
 	// apply kron(M#,MR):
  	// 1. get column of second factor MR
 	z1.clear();
-	z1[basis1d().Deltasize(lambda.j())-1] = 1.0;
+	z1[Deltaj-1] = 1.0;
 	z2.clear();
 	basis1d().Mj0_.apply(z1, z2); // we have to neglect the last entry of z2 later
 
@@ -321,7 +325,7 @@ namespace WaveletTL
 
  	// 2. get column of first factor MR
 	z1.clear();
-	z1[basis1d().Deltasize(lambda.j())-1] = 1.0;
+	z1[Deltaj-1] = 1.0;
 	basis1d().Mj0_.apply(z1, z3); // we have to neglect the last entry of z3 later
 	
 	// 3. combine results
@@ -385,6 +389,17 @@ namespace WaveletTL
       break;
     case 2:
       // (0,1)-wavelet
+      {
+	std::map<size_type,double> x,y,z,z1,z2;
+	x[lambda.number()-Deltasize(lambda.j())] = 1.0;
+	apply_Mj1c_01(lambda.j(), x, y); // generator coeffs of initial stable completion
+	apply_Mj0T_transposed(lambda.j(),  y, z1);
+	apply_Mj0            (lambda.j(), z1, z2);
+// 	add_maps(y, z2, z, 1.0, -1.0);
+	add_maps(y, z2, z, 1.0, 0.0);
+	map_to_vector(lambda.j()+1, z, c);
+      }
+
       break;
     case 3:
       // (1,1)-wavelet
@@ -823,4 +838,179 @@ namespace WaveletTL
       }
     }
   }
+
+  template <int d, int dT>
+  void
+  LDomainBasis<SplineBasis<d,dT,DS_construction> >::apply_Mj1c_01
+  (const int j,
+   const std::map<size_type,double>& x, 
+   std::map<size_type,double>& y) const
+  {
+    typedef std::map<size_type,double> V;
+    
+    const unsigned int Deltaj   = basis1d().Deltasize(j);
+    const unsigned int Nablaj   = basis1d().Nablasize(j);
+    const unsigned int Deltajp1 = basis1d().Deltasize(j+1);
+    
+//     cout << "apply_Mj1c_01() called with coeffs" << endl;
+//     MathTL::operator << (cout, x);
+
+    for (V::const_iterator itx(x.begin()); itx != x.end(); ++itx) {
+      // determine patch number
+      const unsigned int patch =
+ 	itx->first < 3*(Deltaj-2)*Nablaj
+ 	? itx->first / ((Deltaj-2)*Nablaj)
+ 	: 4;
+      
+      switch(patch) {
+      case 0: {
+	// apply kron(M#,N#)
+ 	// 1. get column of second factor N#
+ 	V z1, z2, z3;
+	const size_type block_index = itx->first % Nablaj;
+ 	z1[block_index] = 1.0;
+	basis1d().Mj1c_.set_level(j);
+ 	basis1d().Mj1c_.apply(z1, z2);
+	
+ 	// 2. get column of first factor M#
+ 	z1.clear();
+	const size_type block_nr    = itx->first / Nablaj;
+ 	z1[block_nr] = 1.0;
+	basis1d().Mj0_.set_level(j);
+ 	basis1d().Mj0_.apply_central_block(z1, z3);
+	
+ 	// 3. combine results
+ 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+ 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	    y[it3->first*(Deltajp1-2)+it2->first]
+	      += itx->second * it2->second * it3->second;
+      }
+	break;
+      case 1: {
+	// apply kron(M#,N#)
+ 	// 1. get column of second factor N#
+ 	V z1, z2, z3;
+	const size_type block_index = (itx->first-(Deltaj-2)*Nablaj) % Nablaj;
+ 	z1[block_index] = 1.0;
+	basis1d().Mj1c_.set_level(j);
+ 	basis1d().Mj1c_.apply(z1, z2);
+	
+ 	// 2. get column of first factor M#
+ 	z1.clear();
+	const size_type block_nr    = (itx->first-(Deltaj-2)*Nablaj) / Nablaj;
+ 	z1[block_nr] = 1.0;
+	basis1d().Mj0_.set_level(j);
+ 	basis1d().Mj0_.apply_central_block(z1, z3);
+	
+ 	// 3. combine results
+ 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+ 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	    y[(Deltajp1-2)*(Deltajp1-2)+it3->first*(Deltajp1-2)+it2->first]
+	      += itx->second * it2->second * it3->second;
+      }
+	break;
+      case 2: {
+	// apply kron(M#,N#)
+ 	// 1. get column of second factor N#
+ 	V z1, z2, z3;
+	const size_type block_index = (itx->first-2*(Deltaj-2)*Nablaj) % Nablaj;
+ 	z1[block_index] = 1.0;
+	basis1d().Mj1c_.set_level(j);
+ 	basis1d().Mj1c_.apply(z1, z2);
+	
+ 	// 2. get column of first factor M#
+ 	z1.clear();
+	const size_type block_nr    = (itx->first-2*(Deltaj-2)*Nablaj) / Nablaj;
+ 	z1[block_nr] = 1.0;
+	basis1d().Mj0_.set_level(j);
+ 	basis1d().Mj0_.apply_central_block(z1, z3);
+	
+ 	// 3. combine results
+ 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+ 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	    y[2*(Deltajp1-2)*(Deltajp1-2)+it3->first*(Deltajp1-2)+it2->first]
+	      += itx->second * it2->second * it3->second;
+      }
+	break;
+      case 4: {
+	// contribution from patch 1
+	//
+	// apply kron(MR,N#):
+ 	// 1. get column of second factor N#
+	V z1, z2, z3;
+	const size_type block_index = itx->first-3*(Deltaj-2)*Nablaj;
+	z1[block_index] = 1.0;
+	basis1d().Mj1c_.set_level(j);
+	basis1d().Mj1c_.apply(z1, z2);
+//  	cout << "column " << block_index << " of Mj1c is" << endl;
+// 	MathTL::operator << (cout, z2);
+
+ 	// 2. get column of first factor MR
+	z1.clear();
+	z1[basis1d().Deltasize(j)-1] = 1.0;
+	basis1d().Mj0_.set_level(j);
+	basis1d().Mj0_.apply(z1, z3); // we have to neglect the last entry of z3 later
+	
+	// 3. combine results
+ 	for (V::reverse_iterator it3(++(z3.rbegin())); it3 != z3.rend(); ++it3)
+ 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	    y[(Deltajp1-2)*(Deltajp1-2)+(it3->first-1)*(Deltajp1-2)+it2->first] // note the "-1"
+	      += itx->second * it2->second * it3->second * M_SQRT1_2;
+
+ 	// contribution from patch 2
+ 	//
+ 	// apply kron(ML,N#):
+ 	// 1. get column of second factor N#: this has already been done above
+
+ 	// 2. get column of first factor ML
+ 	z1.clear();
+ 	z1[0] = 1.0;
+ 	z3.clear();
+ 	basis1d().Mj0_.apply(z1, z3); // we have to neglect the first entry of z3 later
+
+ 	// 3. combine results
+  	for (V::const_iterator it3(++(z3.begin())); it3 != z3.end(); ++it3)
+  	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+ 	    y[2*(Deltajp1-2)*(Deltajp1-2)+(it3->first-1)*(Deltajp1-2)+it2->first] // note the "-1"
+ 	      += itx->second * it2->second * it3->second * M_SQRT1_2;
+
+ 	// contribution from patch 4
+ 	//
+ 	// apply kron(Mtopleft,N#):
+ 	// 1. get column of second factor M#: this has already been done above
+
+ 	// 2. get top left entry of Mj0
+ 	const double Mtopleft = basis1d().Mj0_.get_entry(0,0);
+	
+ 	// 3. combine results
+ 	for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+ 	  y[(3*(Deltajp1-2)+1)*(Deltajp1-2)+it2->first]
+ 	    += itx->second * it2->second * Mtopleft;
+      }
+	break;
+      default:
+	break;
+      }
+    }
+  }
+  
+  template <int d, int dT>
+  void
+  LDomainBasis<SplineBasis<d,dT,DS_construction> >::apply_Mj1c_10
+  (const int j,
+   const std::map<size_type,double>& x, 
+   std::map<size_type,double>& y) const
+  {
+  }
+  
+  template <int d, int dT>
+  void
+  LDomainBasis<SplineBasis<d,dT,DS_construction> >::apply_Mj1c_11
+  (const int j,
+   const std::map<size_type,double>& x, 
+   std::map<size_type,double>& y) const
+  {
+  }
+  
+
 }

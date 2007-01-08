@@ -270,18 +270,25 @@ namespace WaveletTL
 			       std::map<size_type,double>& y) const;
 
     /*!
-      apply Mj1c to some vector x (i.e. "reconstruct" a wavelet of the initial completion)
+      apply Mj1c_01 to some vector x (i.e. "reconstruct" a (0,1)-wavelet of the initial completion)
     */
-    void apply_Mj1c(const int j,
-		    const std::map<size_type,double>& x, 
-		    std::map<size_type,double>& y) const;
+    void apply_Mj1c_01(const int j,
+		       const std::map<size_type,double>& x, 
+		       std::map<size_type,double>& y) const;
 
     /*!
-      apply Mj1 to some vector x (i.e. "reconstruct" a wavelet)
+      apply Mj1c_10 to some vector x (i.e. "reconstruct" a (1,0)-wavelet of the initial completion)
     */
-    void apply_Mj1(const int j,
-		   const std::map<size_type,double>& x, 
-		   std::map<size_type,double>& y) const;
+    void apply_Mj1c_10(const int j,
+		       const std::map<size_type,double>& x, 
+		       std::map<size_type,double>& y) const;
+    
+    /*!
+      apply Mj1c_11 to some vector x (i.e. "reconstruct" a (1,1)-wavelet of the initial completion)
+    */
+    void apply_Mj1c_11(const int j,
+		       const std::map<size_type,double>& x, 
+		       std::map<size_type,double>& y) const;
 
     
     //! RECONSTRUCT routine, simple version

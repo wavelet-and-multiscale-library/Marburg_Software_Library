@@ -312,11 +312,9 @@ namespace WaveletTL
     } else {
       // psi_lambda is a true wavelet. We leave this delicate case to the wavelet transform routines...
 
-      // TODO!!!
-
-//       InfiniteVector<double, Index> gcoeffs;
-//       reconstruct_1(lambda, lambda.j()+1, gcoeffs);    
-//       return evaluate(gcoeffs, resolution);
+      InfiniteVector<double, Index> gcoeffs;
+      reconstruct_1(lambda, lambda.j()+1, gcoeffs);    
+      return evaluate(gcoeffs, resolution);
     }
     
     return r;

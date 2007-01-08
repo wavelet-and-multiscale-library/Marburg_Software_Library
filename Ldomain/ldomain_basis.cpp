@@ -1056,5 +1056,4 @@ namespace WaveletTL
 	}
     }
   }
-  
 }

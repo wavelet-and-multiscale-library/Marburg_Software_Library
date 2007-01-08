@@ -199,16 +199,15 @@ namespace WaveletTL
  	Mj1T_ = QuasiStationaryMatrix<double>(j0_, 17, 8, Mj1T_l, Mj1T_r, Mj1T_band_lr, Mj1T_band_lr, 4, 4, 1.0);
 // 	Mj1T_ = QuasiStationaryMatrix<double>(j0_, 9, 4, Mj1T_l, Mj1T_r, Mj1T_band_lr, Mj1T_band_lr, 4, 4, 1.0);
 	entries.str("");
-	entries << "0 0 "
-		<< "-0.2625 -0.0875 "
+	entries << "-0.2625 -0.0875 "
 		<< "0.25 -0.25 "
 		<< "-0.3125 0.75 "
 		<< "0.125 -0.25 "
 		<< "0.0625 -0.125";
- 	Matrix<double> Mj1c_l(6, 2, entries.str().c_str());
+ 	Matrix<double> Mj1c_l(5, 2, entries.str().c_str());
 	Matrix<double> Mj1c_r; Mj1c_l.mirror(Mj1c_r);
- 	Mj1c_ = QuasiStationaryMatrix<double>(j0_, 17, 8, Mj1c_l, Mj1c_r, Mj1_band_lr, Mj1_band_lr, 3, 3, 1.0);
-// 	Mj1c_ = QuasiStationaryMatrix<double>(j0_, 9, 4, Mj1c_l, Mj1c_r, Mj1_band_lr, Mj1_band_lr, 3, 3, 1.0);
+ 	Mj1c_ = QuasiStationaryMatrix<double>(j0_, 15, 8, Mj1c_l, Mj1c_r, Mj1_band_lr, Mj1_band_lr, 2, 2, 1.0);
+// 	Mj1c_ = QuasiStationaryMatrix<double>(j0_, 7, 4, Mj1c_l, Mj1c_r, Mj1_band_lr, Mj1_band_lr, 2, 2, 1.0);
 	CLA_ = Matrix<double>(2, 2, "1 0 -0.166666666666667 1.42857142857143");
 	CRA_ = CLA_;
 	CLAT_ = Matrix<double>(3, 2, "6 -0.7 3 0 0 0.7");
@@ -263,16 +262,15 @@ namespace WaveletTL
  	Mj1T_ = QuasiStationaryMatrix<double>(j0_, 17, 8, Mj1T_l, Mj1T_r, Mj1T_band_lr, Mj1T_band_lr, 4, 4, 1.0);
 // 	Mj1T_ = QuasiStationaryMatrix<double>(j0_, 9, 4, Mj1T_l, Mj1T_r, Mj1T_band_lr, Mj1T_band_lr, 4, 4, 1.0);
 	entries.str("");
-	entries << "0 0 "
-		<< "-0.2625 -0.00380794872403089 "
+	entries << "-0.2625 -0.00380794872403089 "
 		<< "0.25 -0.0108798534972311 "
 		<< "-0.3125 0.0326395604916934 "
 		<< "0.125 -0.0108798534972311 "
 		<< "0.0625 -0.00543992674861556 ";
- 	Matrix<double> Mj1c_l(6, 2, entries.str().c_str());
+ 	Matrix<double> Mj1c_l(5, 2, entries.str().c_str());
 	Matrix<double> Mj1c_r; Mj1c_l.mirror(Mj1c_r);
- 	Mj1c_ = QuasiStationaryMatrix<double>(j0_, 17, 8, Mj1c_l, Mj1c_r, Mj1_band_lr, Mj1_band_lr, 3, 3, 1.0);
-// 	Mj1c_ = QuasiStationaryMatrix<double>(j0_, 9, 4, Mj1c_l, Mj1c_r, Mj1_band_lr, Mj1_band_lr, 3, 3, 1.0);
+ 	Mj1c_ = QuasiStationaryMatrix<double>(j0_, 15, 8, Mj1c_l, Mj1c_r, Mj1_band_lr, Mj1_band_lr, 2, 2, 1.0);
+// 	Mj1c_ = QuasiStationaryMatrix<double>(j0_, 7, 4, Mj1c_l, Mj1c_r, Mj1_band_lr, Mj1_band_lr, 2, 2, 1.0);
 	CLA_ = Matrix<double>(2, 2, "1 0 -0.166666666666667 1.42857142857143");
 	CRA_ = CLA_;
 	CLAT_ = Matrix<double>(3, 2, "6 -0.7 3 0 0 0.7");

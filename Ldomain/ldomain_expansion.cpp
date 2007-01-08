@@ -18,8 +18,12 @@ namespace WaveletTL
 
     // compute the generator expansion of psi_lambda
     InfiniteVector<double, Index> gcoeffs;
-    const int level = lambda.j()+ (lambda.e()[0]==1 || lambda.e()[1]==1 ? 1 : 0);
-    basis.reconstruct_1(lambda, level, gcoeffs);
+    const int ecode(lambda.e()[0]+2*lambda.e()[1]);
+    const int level = lambda.j() + (ecode == 0 ? 0 : 1);
+    if (ecode == 0)
+      gcoeffs.set_coefficient(lambda, 1.0);
+    else
+      basis.reconstruct_1(lambda, level, gcoeffs);
 
     // iterate through the involved generators and collect the point evaluations
     const int N_Gauss = 5; // number of Gauss points in x- and y-direction (per sing. supp. subpatch)

@@ -19,8 +19,8 @@ using MathTL::InfiniteVector;
 
 namespace WaveletTL
 {
-  template <int d, int dT, SplineBasisFlavor flavor> class SplineBasis;
-  template <int d, int dT> class SplineBasis<d,dT,DS_construction>;
+//   template <int d, int dT, SplineBasisFlavor flavor> class SplineBasis;
+//   template <int d, int dT> class SplineBasis<d,dT,DS_construction>;
 
   /*!
     Evaluate a single primal/dual generator or wavelet \psi_\lambda

@@ -322,6 +322,20 @@ namespace WaveletTL
     (const InfiniteVector<double, typename LDomainBasis<IntervalBasis>::Index>& coeffs,
      const int resolution) const;
 
+    /*!
+      Evaluate a single primal generator or wavelet \psi_\lambda
+      and its derivatives on a tensor product subgrid of a given patch
+    */
+    void
+    evaluate
+    (const typename LDomainBasis<IntervalBasis>::Index& lambda,
+     const int patch,
+     const Array1D<double>& xlist,
+     const Array1D<double>& ylist,
+     Array1D<double>& funcvalues,
+     Array1D<double>& derxvalues,
+     Array1D<double>& deryvalues) const;
+
   protected:
     //! the interval 1d wavelet basis
     IntervalBasis basis1d_;

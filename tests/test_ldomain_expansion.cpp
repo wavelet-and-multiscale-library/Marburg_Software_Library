@@ -78,88 +78,14 @@ int main()
 //   CubicHermiteInterpolant2D_td f(2, 0, 0, -1, 1);
 //   CornerSingularity f(Point<2>(0.,0.), 0.5, 1.5);
 
-  const int jmax = 2;
+  const int jmax = basis.j0();
   
   InfiniteVector<double,Index> fcoeffs;
   expand(&f, basis, true, jmax, fcoeffs);
+  fcoeffs.compress(1e-12);
 
   cout << "- integrals of f against the primal wavelets:" << endl
        << fcoeffs << endl;
-
-//   cout << "- checking the integrals:" << endl;
-//   for (Index lambda = basis.first_generator(basis.j0());; ++lambda) {
-//     const int N = 5000;
-//     const double h = 1./N;
-
-//     // sum up all the point values:
-//     double s = 0;
-
-//     FixedArray1D<Array1D<double>,2> values;
-//     FixedArray1D<Array1D<double>,2> knots;
-//     knots[0].resize(N+1);
-//     knots[1].resize(N+1);
-//     Point<2> x;
-
-//     // patch Omega_0 = [-1,0]x[0,1]
-//     if (lambda.k()[0] <= 0 && lambda.k()[1] >= 0) {
-//       for (int k0 = 0; k0 < N; k0++)
-// 	knots[0][k0] = -1.0+k0*h;
-//       evaluate(0, lambda.j(), lambda.e()[0], lambda.c()[0], lambda.k()[0], knots[0], values[0]);
-//       for (int k1 = 0; k1 < N; k1++)
-// 	knots[1][k1] = k1*h;
-//       evaluate(0, lambda.j(), lambda.e()[1], lambda.c()[1], lambda.k()[1], knots[1], values[1]);
-//       for (int k0 = 0; k0 < N; k0++) {
-//  	x[0] = knots[0][k0];
-//  	for (int k1 = 1; k1 < N; k1++) {
-//  	  x[1] = knots[1][k1];
-//  	  s += values[0][k0] * values[1][k1] * f.value(x);
-//  	}
-//       }
-//     }
-//     // patch Omega_1 = [-1,0]x[-1,0]
-//     if (lambda.k()[0] <= 0 && lambda.k()[1] <= 0) {
-//       for (int k0 = 0; k0 < N; k0++)
-// 	knots[0][k0] = -1.0+k0*h;
-//       evaluate(0, lambda.j(), lambda.e()[0], lambda.c()[0], lambda.k()[0], knots[0], values[0]);
-//       for (int k1 = 0; k1 < N; k1++)
-// 	knots[1][k1] = -1.0+k1*h;
-//       evaluate(0, lambda.j(), lambda.e()[1], lambda.c()[1], lambda.k()[1], knots[1], values[1]);
-//       for (int k0 = 0; k0 < N; k0++) {
-//  	x[0] = knots[0][k0];
-//  	for (int k1 = 1; k1 < N; k1++) {
-//  	  x[1] = knots[1][k1];
-//  	  s += values[0][k0] * values[1][k1] * f.value(x);
-//  	}
-//       }
-//     }
-//     // patch Omega_2 = [0,1]x[-1,0]
-//     if (lambda.k()[0] >= 0 && lambda.k()[1] <= 0) {
-//       for (int k0 = 0; k0 < N; k0++)
-// 	knots[0][k0] = k0*h;
-//       evaluate(0, lambda.j(), lambda.e()[0], lambda.c()[0], lambda.k()[0], knots[0], values[0]);
-//       for (int k1 = 0; k1 < N; k1++)
-// 	knots[1][k1] = -1.0+k1*h;
-//       evaluate(0, lambda.j(), lambda.e()[1], lambda.c()[1], lambda.k()[1], knots[1], values[1]);
-//       for (int k0 = 0; k0 < N; k0++) {
-//  	x[0] = knots[0][k0];
-//  	for (int k1 = 1; k1 < N; k1++) {
-//  	  x[1] = knots[1][k1];
-//  	  s += values[0][k0] * values[1][k1] * f.value(x);
-//  	}
-//       }
-//     }
-
-//     const double flambda = fcoeffs.get_coefficient(lambda);
-//     const double flambdaapprox = s*h*h;
-
-//     cout << "lambda=" << lambda << ": "
-// 	 << "f(lambda): " << flambda
-// 	 << ", approx.: " << flambdaapprox
-// 	 << ", deviation: " << fabs(flambda-flambdaapprox) << endl;
-
-//     if (lambda == basis.last_wavelet(jmax)) break;
-//   }
-  
 
 
   return 0;

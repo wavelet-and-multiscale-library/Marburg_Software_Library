@@ -70,8 +70,11 @@ namespace WaveletTL
   };
   
   // template specialization for the case IBASIS==SplineBasis<d,dT,DS_construction>
+  template <int d, int dT> class LDomainGramian<SplineBasis<d,dT,DS_construction> >;
+
   template <int d, int dT>
   class LDomainGramian<SplineBasis<d,dT,DS_construction> >
+    : public FullyDiagonalEnergyNormPreconditioner<typename LDomainBasis<SplineBasis<d,dT,DS_construction> >::Index>
   {
   public:
     /*!
@@ -95,6 +98,32 @@ namespace WaveletTL
     LDomainGramian(const WaveletBasis& basis,
  		   const InfiniteVector<double,Index>& y);
     
+    /*!
+      set right-hand side y
+    */
+    void set_rhs(const InfiniteVector<double,Index>& y) const {
+      y_ = y;
+    }
+
+    /*!
+      evaluate the diagonal preconditioner D
+    */
+    double D(const Index& lambda) const { return sqrt(a(lambda,lambda)); }
+//     double D(const Index& lambda) const { return 1; }
+
+    /*!
+      evaluate the (unpreconditioned) bilinear form a
+    */
+    double a(const Index& lambda,
+ 	     const Index& nu) const;
+
+    /*!
+      evaluate the (unpreconditioned) right-hand side f
+    */
+    double f(const Index& lambda) const {
+      return y_.get_coefficient(lambda);
+    }
+
   protected:
     const WaveletBasis& basis_;
     

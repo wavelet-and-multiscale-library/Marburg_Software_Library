@@ -8,6 +8,7 @@
 #include <numerics/iteratsolv.h>
 #include <numerics/bezier.h>
 #include <numerics/corner_singularity.h>
+#define _WAVELETTL_LDOMAINBASIS_VERBOSITY 1
 #include <Ldomain/ldomain_basis.h>
 #include <Ldomain/ldomain_evaluate.h>
 #include <Ldomain/ldomain_expansion.h>
@@ -106,44 +107,44 @@ int main()
   f = new ConstantFunction<2>(Vector<double>(1, "1"));
 #endif
 
-  const int jmax = 4;
+  const int jmax = basis.j0()+1;
   
   typedef LDomainGramian<Basis1D> Problem;
-  Problem problem(basis, InfiniteVector<double,Index>());
+  Problem problem(basis, InfiniteVector<double, Index>());
 
   cout << "- expand right-hand side..." << endl;
   InfiniteVector<double,Index> fcoeffs;
-//   expand(f, basis, true, jmax, fcoeffs);
-//   problem.set_rhs(fcoeffs);
-//   cout << "  ... done!" << endl;
+  expand(f, basis, true, jmax, fcoeffs);
+  problem.set_rhs(fcoeffs);
+  cout << "  ... done!" << endl;
 
-// //   cout << "- integrals of f against the primal wavelets:" << endl
-// //        << fcoeffs << endl;
+  //   cout << "- integrals of f against the primal wavelets:" << endl
+  //        << fcoeffs << endl;
 
-//   cout << "- set up index set of active wavelets..." << endl;
-//   set<Index> Lambda;
-//   for (Index lambda = basis.first_generator(basis.j0());; ++lambda) {
-//     Lambda.insert(lambda);
-//     if (lambda == basis.last_wavelet(jmax)) break;
-//   }
-//   cout << "  ... done!" << endl;
-  
-//   cout << "- set up Gramian matrix..." << endl;
-//   clock_t tstart, tend;
-//   double time;
-//   tstart = clock();
+  cout << "- set up index set of active wavelets..." << endl;
+  set<Index> Lambda;
+  for (Index lambda = basis.first_generator(basis.j0());; ++lambda) {
+    Lambda.insert(lambda);
+    if (lambda == basis.last_wavelet(jmax)) break;
+  }
+  cout << "  ... done!" << endl;
 
-//   SparseMatrix<double> A;
-//   setup_stiffness_matrix(problem, Lambda, A);
-//   tend = clock();
-//   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
-//   cout << "  ... done, time needed: " << time << " seconds" << endl;
-// //   cout << "- Gramian matrix A=" << endl << A << endl;
-// #if 0
-//   A.matlab_output("LdomainJL_gramian", "G", 1);
-// #endif
+  cout << "- set up Gramian matrix..." << endl;
+  clock_t tstart, tend;
+  double time;
+  tstart = clock();
 
-// #if 0
+  SparseMatrix<double> A;
+  setup_stiffness_matrix(problem, Lambda, A);
+  tend = clock();
+  time = (double)(tend-tstart)/CLOCKS_PER_SEC;
+  cout << "  ... done, time needed: " << time << " seconds" << endl;
+  //   cout << "- Gramian matrix A=" << endl << A << endl;
+#if 1
+  A.matlab_output("Ldomain_gramian", "G", 1);
+#endif
+
+#if 0
 //   cout << "- validate entries of the (unpreconditioned) Gramian matrix:" << endl;
 
 //   for (set<Index>::const_iterator itlambda = Lambda.begin(); itlambda != Lambda.end(); ++itlambda) {
@@ -225,47 +226,48 @@ int main()
 // 	     << ", dev.=" << dev << endl;
 //     }
 //   }
-// #endif
+#endif
 
-//   cout << "- set up right-hand side..." << endl;
-//   tstart = clock();
-//   Vector<double> b;
-//   setup_righthand_side(problem, Lambda, b);
-//   tend = clock();
-//   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
-//   cout << "  ... done, time needed: " << time << " seconds" << endl;
-// //   cout << "- right hand side: " << b << endl;
+  cout << "- set up right-hand side..." << endl;
+  tstart = clock();
+  Vector<double> b;
+  setup_righthand_side(problem, Lambda, b);
+  tend = clock();
+  time = (double)(tend-tstart)/CLOCKS_PER_SEC;
+  cout << "  ... done, time needed: " << time << " seconds" << endl;
+//   cout << "- right hand side: " << b << endl;
 
-//   Vector<double> x(Lambda.size()), err(Lambda.size()); x = 0;
-//   unsigned int iterations;
-//   CG(A, b, x, 1e-15, 200, iterations);
+  Vector<double> x(Lambda.size()), err(Lambda.size()); x = 0;
+  unsigned int iterations;
+  CG(A, b, x, 1e-15, 200, iterations);
   
-// //   cout << "- solution coefficients: " << x;
-//   cout << "- residual (infinity) norm: ";
-//   A.apply(x, err);
-//   err -= b;
-//   cout << linfty_norm(err) << endl;
+  //   cout << "- solution coefficients: " << x;
+  cout << "- residual (infinity) norm: ";
+  A.apply(x, err);
+  err -= b;
+  cout << linfty_norm(err) << endl;
   
-// #if 0
-//   {
-//     cout << "- plot point values of the solution:" << endl;
-//     InfiniteVector<double,Index> u;
-//     unsigned int i = 0;
-//     for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
-//       u.set_coefficient(*it, x[i]);
-//     u.scale(&problem, -1);
-//     Array1D<SampledMapping<2> > s(evaluate(problem.basis(), u, 1<<5));
-//     std::ofstream u_Lambda_stream("u_lambda.m");
+#if 1
+  {
+    cout << "- plot point values of the solution:" << endl;
+    InfiniteVector<double,Index> u;
+    unsigned int i = 0;
+    for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
+      u.set_coefficient(*it, x[i]);
+    u.scale(&problem, -1);
+    Array1D<SampledMapping<2> > s(basis.evaluate(u, 5));
+    std::ofstream u_Lambda_stream("u_lambda.m");
 //     octave_output(u_Lambda_stream, s);
-//     u_Lambda_stream.close();
-//     cout << "  ... done, see file 'u_lambda.m'" << endl;
+    matlab_output(u_Lambda_stream, s);
+    u_Lambda_stream.close();
+    cout << "  ... done, see file 'u_lambda.m'" << endl;
     
-//     for (int i = 0; i <= 2; i++) {
-//       s[i].add(-1.0, SampledMapping<2>(s[i], *uexact));
-//       cout << "  pointwise error on patch " << i << ": " << row_sum_norm(s[i].values()) << endl;
-//     }
-//   }
-// #endif
+    for (int i = 0; i <= 2; i++) {
+      s[i].add(-1.0, SampledMapping<2>(s[i], *uexact));
+      cout << "  pointwise error on patch " << i << ": " << row_sum_norm(s[i].values()) << endl;
+    }
+  }
+#endif
 
 // #if 0
 //   {

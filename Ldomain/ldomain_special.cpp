@@ -16,12 +16,10 @@ namespace WaveletTL
   ::LDomainBasis(const IntervalBasis& basis1d)
     : basis1d_(basis1d)
   {
-// #if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
-//     supp_hits = 0;
-//     supp_misses = 0;
-//     Mj1_hits = 0;
-//     Mj1_misses = 0;
-// #endif
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
+    supp_hits = 0;
+    supp_misses = 0;
+#endif
   }
 
   template <int d, int dT>
@@ -140,6 +138,254 @@ namespace WaveletTL
     return Index(j, e, 2, k, this);
   }
 
+  template <int d, int dT>
+  void
+  LDomainBasis<SplineBasis<d,dT,DS_construction> >::support
+  (const Index& lambda, Support& supp) const
+  {
+    // check whether the supp(psi_lambda) already exists in the cache
+    typename SupportCache::iterator supp_lb(supp_cache.lower_bound(lambda));
+    typename SupportCache::iterator supp_it(supp_lb);
+    if (supp_lb == supp_cache.end() ||
+	supp_cache.key_comp()(lambda, supp_lb->first))
+      {
+	// compute supp(psi_lambda) and insert it into the cache
+	typedef typename SupportCache::value_type value_type;
+
+	const int ecode = lambda.e()[0]+2*lambda.e()[1];
+	const int lambdaj = lambda.j();
+	
+	if (ecode == 0) {
+	  // psi_lambda is a generator. Here we know by construction of the
+	  // composite basis that per patch, psi_lambda looks like a single
+	  // tensor product of 1D generators (possibly weighted by a factor).
+	  
+	  supp.j = lambdaj;
+	  
+	  switch (lambda.p()) {
+	  case 0:
+	    // psi_lambda completely lives on patch 0
+	    
+	    basis1d().support(IntervalBasis::Index(lambdaj,
+						   0,
+						   lambda.k()[0],
+						   &basis1d()),
+			      supp.xmin[0],
+			      supp.xmax[0]);
+	    
+	    basis1d().support(IntervalBasis::Index(lambdaj,
+						   0,
+						   lambda.k()[1],
+						   &basis1d()),
+			      supp.ymin[0],
+			      supp.ymax[0]);
+	    
+	    supp.xmin[1] = -1;
+	    supp.xmin[2] = -1;
+	    
+	    break;
+	  case 1:
+	    // psi_lambda completely lives on patch 1
+	    
+	    basis1d().support(IntervalBasis::Index(lambdaj,
+						   0,
+						   lambda.k()[0],
+						   &basis1d()),
+			      supp.xmin[1],
+			      supp.xmax[1]);
+	    
+	    basis1d().support(IntervalBasis::Index(lambdaj,
+						   0,
+						   lambda.k()[1],
+						   &basis1d()),
+			      supp.ymin[1],
+			      supp.ymax[1]);
+	    
+	    supp.xmin[0] = -1;
+	    supp.xmin[2] = -1;
+	    
+	    break;
+	  case 2:
+	    // psi_lambda completely lives on patch 2
+	    
+	    basis1d().support(IntervalBasis::Index(lambdaj,
+						   0,
+						   lambda.k()[0],
+						   &basis1d()),
+			      supp.xmin[2],
+			      supp.xmax[2]);
+	    
+	    basis1d().support(IntervalBasis::Index(lambdaj,
+						   0,
+						   lambda.k()[1],
+						   &basis1d()),
+			      supp.ymin[2],
+			      supp.ymax[2]);
+	    
+	    supp.xmin[0] = -1;
+	    supp.xmin[1] = -1;
+	    
+	    break;
+	  case 3:
+	    // psi_lambda lives on patches 0 and 1
+	    
+	    basis1d().support(IntervalBasis::Index(lambdaj,
+						   0,
+						   lambda.k()[0],
+						   &basis1d()),
+			      supp.xmin[0],
+			      supp.xmax[0]);
+	    
+	    basis1d().support(IntervalBasis::Index(lambdaj,
+						   0,
+						   basis1d().DeltaLmin(),
+						   &basis1d()),
+			      supp.ymin[0],
+			      supp.ymax[0]);
+	    
+	    basis1d().support(IntervalBasis::Index(lambdaj,
+						   0,
+						   lambda.k()[0],
+						   &basis1d()),
+			      supp.xmin[1],
+			      supp.xmax[1]);
+	    
+	    basis1d().support(IntervalBasis::Index(lambdaj,
+						   0,
+						   basis1d().DeltaRmax(lambdaj),
+						   &basis1d()),
+			      supp.ymin[1],
+			      supp.ymax[1]);
+	    
+	    supp.xmin[2] = -1;
+	    
+	    break;
+	  case 4:
+	    // psi_lambda lives on patches 1 and 2
+	    
+	    basis1d().support(IntervalBasis::Index(lambdaj,
+						   0,
+						   basis1d().DeltaRmax(lambdaj),
+						   &basis1d()),
+			      supp.xmin[1],
+			      supp.xmax[1]);
+	    
+	    basis1d().support(IntervalBasis::Index(lambdaj,
+						   0,
+						   lambda.k()[1],
+						   &basis1d()),
+			      supp.ymin[1],
+			      supp.ymax[1]);
+	    
+	    basis1d().support(IntervalBasis::Index(lambdaj,
+						   0,
+						   basis1d().DeltaLmin(),
+						   &basis1d()),
+			      supp.xmin[2],
+			      supp.xmax[2]);
+	    
+	    basis1d().support(IntervalBasis::Index(lambdaj,
+						   0,
+						   lambda.k()[1],
+						   &basis1d()),
+			      supp.ymin[2],
+			      supp.ymax[2]);
+	    
+	    supp.xmin[0] = -1;
+	    
+	    break;
+	  }
+	} else {
+	  // wavelet
+	  
+	  supp.j = lambdaj+1;
+	  
+	  // compute the expansion coefficients of psi_lambda w.r.t. the
+	  // generators of the next higher scale, then aggregating all the supports
+	  // (of course, this is a brute force solution...)
+	  InfiniteVector<double, Index> gcoeffs;
+	  reconstruct_1(lambda, lambdaj+1, gcoeffs);
+	  
+	  Support tempsupp;
+	  
+	  // initialize the support with an "empty" set
+	  for (int p = 0; p <= 2; p++) {
+	    supp.xmin[p] = -1;
+	  }
+	  
+	  for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
+		 itend(gcoeffs.end()); it != itend; ++it)
+	    {
+	      // compute supp(psi_mu)
+	      support(it.index(), tempsupp);
+	      
+	      // for each patch p, update the corresponding support estimate
+	      for (int p = 0; p <= 2; p++) {
+		if (tempsupp.xmin[p] != -1) {
+		  // a nontrivial new support share, we have to do something
+		  if (supp.xmin[p] == -1) {
+		    // previous support estimate was "empty", we have to insert a nontrivial new one
+		    supp.xmin[p] = tempsupp.xmin[p];
+		    supp.xmax[p] = tempsupp.xmax[p];
+		    supp.ymin[p] = tempsupp.ymin[p];
+		    supp.ymax[p] = tempsupp.ymax[p];
+		  } else {
+		    // previous support estimate was nontrivial, we have to compute a new one
+		    supp.xmin[p] = std::min(supp.xmin[p], tempsupp.xmin[p]);
+		    supp.xmax[p] = std::max(supp.xmax[p], tempsupp.xmax[p]);
+		    supp.ymin[p] = std::min(supp.ymin[p], tempsupp.ymin[p]);
+		    supp.ymax[p] = std::max(supp.ymax[p], tempsupp.ymax[p]);
+		  }
+		}
+	      }
+	    }
+	}
+	
+	supp_it = supp_cache.insert(supp_lb, value_type(lambda, supp));
+
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
+	supp_misses++;
+	if ((supp_hits+supp_misses)%1000000 == 0)
+	  {
+	    cout << "[LdomainBasis support cache (hits/misses/total/hit ratio): ("
+		 << supp_hits << "/"
+		 << supp_misses << "/"
+		 << supp_hits+supp_misses << "/"
+		 << (double) supp_hits/(supp_hits+supp_misses)
+		 << ")"
+		 << "]"
+		 << endl;
+	  }
+#endif
+      }
+    else
+      {
+	// cache hit, copy the precomputed support
+  	supp.j = supp_it->second.j;
+  	for (unsigned int i = 0; i < 3; i++) {
+  	  supp.xmin[i] = supp_it->second.xmin[i];
+  	  supp.xmax[i] = supp_it->second.xmax[i];
+  	  supp.ymin[i] = supp_it->second.ymin[i];
+  	  supp.ymax[i] = supp_it->second.ymax[i];
+  	}
+	
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
+	supp_hits++;
+	if ((supp_hits+supp_misses)%1000000 == 0)
+	  {
+	    cout << "[LdomainBasis support cache (hits/misses/total/hit ratio): ("
+		 << supp_hits << "/"
+		 << supp_misses << "/"
+		 << supp_hits+supp_misses << "/"
+		 << (double) supp_hits/(supp_hits+supp_misses)
+		 << ")"
+		 << "]"
+		 << endl;
+	  }
+#endif
+      }  
+  }
+  
   template <int d, int dT>
   void
   LDomainBasis<SplineBasis<d,dT,DS_construction> >::reconstruct_1
@@ -438,48 +684,50 @@ namespace WaveletTL
     
     c.clear();
     for (V::const_iterator it(x.begin()); it != x.end(); ++it) {
-      size_type help(it->first);
-      unsigned int patch = 0;
-      if (help < 3*(Deltaj-2)*(Deltaj-2)) {
-	patch = help / ((Deltaj-2)*(Deltaj-2));
-	help -= patch * (Deltaj-2)*(Deltaj-2);
-      } else {
-	patch = 3+(help-3*(Deltaj-2)*(Deltaj-2))/(Deltaj-2);
-	help -= 3*(Deltaj-2)*(Deltaj-2)+(patch-3)*(Deltaj-2);
-      }
-      
-      switch(patch) {
-      case 0:
-      case 1:
-      case 2:
-	c.add_coefficient(Index(j,
-				MultiIndex<int,2>(0,0),
-				patch,
-				MultiIndex<int,2>(basis1d().DeltaLmin()+1+(help/(Deltaj-2)),
-						  basis1d().DeltaLmin()+1+(help%(Deltaj-2))),
-				this),
-			  it->second);
-	break;
-      case 3:
-	c.add_coefficient(Index(j,
-				MultiIndex<int,2>(0,0),
-				patch,
-				MultiIndex<int,2>(basis1d().DeltaLmin()+1+help,
-						  0),
-				this),
-			  it->second);
-	break;
-      case 4:
-	c.add_coefficient(Index(j,
-				MultiIndex<int,2>(0,0),
-				patch,
-				MultiIndex<int,2>(0,
-						  basis1d().DeltaLmin()+1+help),
-				this),
-			  it->second);
-	break;
-      default:
-	break;
+      if (fabs(it->second) > 1e-12) {
+	size_type help(it->first);
+	unsigned int patch = 0;
+	if (help < 3*(Deltaj-2)*(Deltaj-2)) {
+	  patch = help / ((Deltaj-2)*(Deltaj-2));
+	  help -= patch * (Deltaj-2)*(Deltaj-2);
+	} else {
+	  patch = 3+(help-3*(Deltaj-2)*(Deltaj-2))/(Deltaj-2);
+	  help -= 3*(Deltaj-2)*(Deltaj-2)+(patch-3)*(Deltaj-2);
+	}
+	
+	switch(patch) {
+	case 0:
+	case 1:
+	case 2:
+	  c.add_coefficient(Index(j,
+				  MultiIndex<int,2>(0,0),
+				  patch,
+				  MultiIndex<int,2>(basis1d().DeltaLmin()+1+(help/(Deltaj-2)),
+						    basis1d().DeltaLmin()+1+(help%(Deltaj-2))),
+				  this),
+			    it->second);
+	  break;
+	case 3:
+	  c.add_coefficient(Index(j,
+				  MultiIndex<int,2>(0,0),
+				  patch,
+				  MultiIndex<int,2>(basis1d().DeltaLmin()+1+help,
+						    0),
+				  this),
+			    it->second);
+	  break;
+	case 4:
+	  c.add_coefficient(Index(j,
+				  MultiIndex<int,2>(0,0),
+				  patch,
+				  MultiIndex<int,2>(0,
+						    basis1d().DeltaLmin()+1+help),
+				  this),
+			    it->second);
+	  break;
+	default:
+	  break;
+	}
       }
     }
   }

@@ -15,6 +15,7 @@
 #include <utils/array1d.h>
 #include <numerics/bvp.h>
 
+#include <interval/spline_basis.h>
 #include <galerkin/galerkin_utils.h>
 #include <galerkin/infinite_preconditioner.h>
 #include <galerkin/ldomain_equation.h>
@@ -24,7 +25,11 @@ using MathTL::EllipticBVP;
 
 namespace WaveletTL
 {
+  template <int d, int dT, SplineBasisFlavor flavor> class SplineBasis;
+  template <int d, int dT> class SplineBasis<d,dT,DS_construction>;
+ 
   template <class IBASIS> class LDomainBasis;
+  template <int d, int dT> class LDomainBasis<SplineBasis<d,dT,DS_construction> >;
 
   /*!
     This class models the Gramian matrix of a composite wavelet basis
@@ -62,6 +67,42 @@ namespace WaveletTL
       evaluate the diagonal preconditioner D (we don't have any)
     */
     double D(const Index& lambda) const { return 1; }
+  };
+  
+  // template specialization for the case IBASIS==SplineBasis<d,dT,DS_construction>
+  template <int d, int dT>
+  class LDomainGramian<SplineBasis<d,dT,DS_construction> >
+  {
+  public:
+    /*!
+      the 1D wavelet basis class
+    */
+    typedef SplineBasis<d,dT,DS_construction> IntervalBasis;
+    
+    /*!
+      the wavelet basis class
+    */
+    typedef LDomainBasis<IntervalBasis> WaveletBasis;
+    
+    /*!
+      wavelet index class
+    */
+    typedef typename WaveletBasis::Index Index;
+
+    /*!
+      constructor from a given wavelet basis and a given right-hand side y
+    */
+    LDomainGramian(const WaveletBasis& basis,
+ 		   const InfiniteVector<double,Index>& y);
+    
+  protected:
+    const WaveletBasis& basis_;
+    
+    // rhs, mutable to have 'const' method
+    mutable InfiniteVector<double,Index> y_;
+    
+    // estimates for ||A|| and ||A^{-1}||
+    mutable double normA, normAinv;
   };
 }
 

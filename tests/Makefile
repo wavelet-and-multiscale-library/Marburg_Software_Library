@@ -99,6 +99,7 @@ EXEOBJF3 = \
 # set 4 of test programs: wavelet bases on the L-domain
 EXEOBJF4 = \
   test_ldomain_index.o test_ldomain_support.o test_ldomain_basis.o\
+  test_ldomain_expansion.o test_ldomain_gramian.o
 #  test_ldomain_equation.o\
 #  test_ldomain_helmholtz_equation.o
 #

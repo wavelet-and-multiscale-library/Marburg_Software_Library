@@ -185,7 +185,7 @@ namespace WaveletTL
 #endif
   };
 
-  //! template specialization for the cass IBASIS==SplineBasis<d,dT,DS_construction>
+  //! template specialization for the case IBASIS==SplineBasis<d,dT,DS_construction>
   template <int d, int dT>
   class LDomainBasis<SplineBasis<d,dT,DS_construction> >
   {
@@ -214,6 +214,9 @@ namespace WaveletTL
       int ymax[3];
     } Support;
 
+    //! compute the support of psi_lambda, using the internal cache
+    void support(const Index& lambda, Support& supp) const;
+    
     //! critical Sobolev regularity for the primal generators/wavelets
     static double primal_regularity() { return IntervalBasis::primal_regularity(); } // dirty, we should use max(1.5,~) instead
     
@@ -322,6 +325,13 @@ namespace WaveletTL
   protected:
     //! the interval 1d wavelet basis
     IntervalBasis basis1d_;
+
+    //! support cache
+    typedef std::map<Index,Support> SupportCache;
+    mutable SupportCache supp_cache;
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
+    mutable unsigned long supp_hits, supp_misses;
+#endif
   };
 }
 

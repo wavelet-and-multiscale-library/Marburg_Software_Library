@@ -386,6 +386,16 @@ namespace WaveletTL
       break;
     case 1:
       // (1,0)-wavelet
+      {
+	std::map<size_type,double> x,y,z,z1,z2;
+	x[lambda.number()-Deltasize(lambda.j())-Nabla01size(lambda.j())] = 1.0;
+	apply_Mj1c_10(lambda.j(), x, y); // generator coeffs of initial stable completion
+	apply_Mj0T_transposed(lambda.j(),  y, z1);
+	apply_Mj0            (lambda.j(), z1, z2);
+// 	add_maps(y, z2, z, 1.0, -1.0);
+	add_maps(y, z2, z, 1.0, 0.0);
+	map_to_vector(lambda.j()+1, z, c);
+      }
       break;
     case 2:
       // (0,1)-wavelet
@@ -399,10 +409,19 @@ namespace WaveletTL
 	add_maps(y, z2, z, 1.0, 0.0);
 	map_to_vector(lambda.j()+1, z, c);
       }
-
       break;
     case 3:
       // (1,1)-wavelet
+      {
+	std::map<size_type,double> x,y,z,z1,z2;
+	x[lambda.number()-Deltasize(lambda.j())-Nabla01size(lambda.j())-Nabla10size(lambda.j())] = 1.0;
+	apply_Mj1c_11(lambda.j(), x, y); // generator coeffs of initial stable completion
+	apply_Mj0T_transposed(lambda.j(),  y, z1);
+	apply_Mj0            (lambda.j(), z1, z2);
+// 	add_maps(y, z2, z, 1.0, -1.0);
+	add_maps(y, z2, z, 1.0, 0.0);
+	map_to_vector(lambda.j()+1, z, c);
+      }
       break;
     default:
       break;
@@ -581,7 +600,7 @@ namespace WaveletTL
 	// apply kron(M#,MR):
  	// 1. get column of second factor MR
 	z1.clear();
-	z1[basis1d().Deltasize(j)-1] = 1.0;
+	z1[Deltaj-1] = 1.0;
 	z2.clear();
 	basis1d().Mj0_.apply(z1, z2); // we have to neglect the last entry of z2 later
 
@@ -622,7 +641,7 @@ namespace WaveletTL
 
  	// 2. get column of first factor MR
 	z1.clear();
-	z1[basis1d().Deltasize(j)-1] = 1.0;
+	z1[Deltaj-1] = 1.0;
 	basis1d().Mj0_.apply(z1, z3); // we have to neglect the last entry of z3 later
 	
 	// 3. combine results
@@ -852,9 +871,6 @@ namespace WaveletTL
     const unsigned int Nablaj   = basis1d().Nablasize(j);
     const unsigned int Deltajp1 = basis1d().Deltasize(j+1);
     
-//     cout << "apply_Mj1c_01() called with coeffs" << endl;
-//     MathTL::operator << (cout, x);
-
     for (V::const_iterator itx(x.begin()); itx != x.end(); ++itx) {
       // determine patch number
       const unsigned int patch =
@@ -942,12 +958,10 @@ namespace WaveletTL
 	z1[block_index] = 1.0;
 	basis1d().Mj1c_.set_level(j);
 	basis1d().Mj1c_.apply(z1, z2);
-//  	cout << "column " << block_index << " of Mj1c is" << endl;
-// 	MathTL::operator << (cout, z2);
 
  	// 2. get column of first factor MR
 	z1.clear();
-	z1[basis1d().Deltasize(j)-1] = 1.0;
+	z1[Deltaj-1] = 1.0;
 	basis1d().Mj0_.set_level(j);
 	basis1d().Mj0_.apply(z1, z3); // we have to neglect the last entry of z3 later
 	
@@ -1001,6 +1015,150 @@ namespace WaveletTL
    const std::map<size_type,double>& x, 
    std::map<size_type,double>& y) const
   {
+    typedef std::map<size_type,double> V;
+    
+    const unsigned int Deltaj   = basis1d().Deltasize(j);
+    const unsigned int Nablaj   = basis1d().Nablasize(j);
+    const unsigned int Deltajp1 = basis1d().Deltasize(j+1);
+    
+//     cout << "apply_Mj1c_10() called with coeffs" << endl;
+//     MathTL::operator << (cout, x);
+
+    for (V::const_iterator itx(x.begin()); itx != x.end(); ++itx) {
+      // determine patch number
+      const unsigned int patch =
+ 	itx->first < 3*(Deltaj-2)*Nablaj
+ 	? itx->first / ((Deltaj-2)*Nablaj)
+ 	: 3;
+
+      switch(patch) {
+      case 0: {
+	// apply kron(N#,M#)
+ 	// 1. get column of second factor M#
+ 	V z1, z2, z3;
+	const size_type block_index = itx->first % (Deltaj-2);
+ 	z1[block_index] = 1.0;
+	basis1d().Mj0_.set_level(j);
+	basis1d().Mj0_.apply_central_block(z1, z2);
+	
+ 	// 2. get column of first factor N#
+ 	z1.clear();
+	const size_type block_nr    = itx->first / (Deltaj-2);
+ 	z1[block_nr] = 1.0;
+	basis1d().Mj1c_.set_level(j);
+ 	basis1d().Mj1c_.apply(z1, z3);
+	
+ 	// 3. combine results
+ 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+ 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	    y[it3->first*(Deltajp1-2)+it2->first]
+	      += itx->second * it2->second * it3->second;
+      }
+	break;
+      case 1: {
+	// apply kron(N#,M#)
+ 	// 1. get column of second factor M#
+ 	V z1, z2, z3;
+	const size_type block_index = (itx->first-(Deltaj-2)*Nablaj) % (Deltaj-2);
+ 	z1[block_index] = 1.0;
+	basis1d().Mj0_.set_level(j);
+ 	basis1d().Mj0_.apply_central_block(z1, z2);
+	
+ 	// 2. get column of first factor N#
+ 	z1.clear();
+	const size_type block_nr    = (itx->first-(Deltaj-2)*Nablaj) / (Deltaj-2);
+ 	z1[block_nr] = 1.0;
+	basis1d().Mj1c_.set_level(j);
+ 	basis1d().Mj1c_.apply(z1, z3);
+	
+ 	// 3. combine results
+ 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+ 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	    y[(Deltajp1-2)*(Deltajp1-2)+it3->first*(Deltajp1-2)+it2->first]
+	      += itx->second * it2->second * it3->second;
+      }
+	break;
+      case 2: {
+	// apply kron(N#,M#)
+ 	// 1. get column of second factor M#
+ 	V z1, z2, z3;
+	const size_type block_index = (itx->first-2*(Deltaj-2)*Nablaj) % (Deltaj-2);
+ 	z1[block_index] = 1.0;
+	basis1d().Mj0_.set_level(j);
+ 	basis1d().Mj0_.apply_central_block(z1, z2);
+	
+ 	// 2. get column of first factor N#
+ 	z1.clear();
+	const size_type block_nr    = (itx->first-2*(Deltaj-2)*Nablaj) / (Deltaj-2);
+ 	z1[block_nr] = 1.0;
+	basis1d().Mj1c_.set_level(j);
+ 	basis1d().Mj1c_.apply(z1, z3);
+	
+ 	// 3. combine results
+ 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+ 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	    y[2*(Deltajp1-2)*(Deltajp1-2)+it3->first*(Deltajp1-2)+it2->first]
+	      += itx->second * it2->second * it3->second;
+      }
+	break;
+      case 3: {
+	// contribution from patch 0
+	//
+	// apply kron(N#,ML):
+ 	// 1. get column of second factor ML
+	V z1, z2, z3;
+	z1[0] = 1.0;
+	basis1d().Mj0_.set_level(j);
+	basis1d().Mj0_.apply(z1, z2); // we have to neglect the first entry of z2 later
+
+ 	// 2. get column of first factor N#
+ 	z1.clear();
+ 	const size_type block_nr = itx->first-3*(Deltaj-2)*Nablaj;
+ 	z1[block_nr] = 1.0;
+	basis1d().Mj1c_.set_level(j);
+ 	basis1d().Mj1c_.apply(z1, z3);
+	
+ 	// 3. combine results
+ 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+ 	  for (V::const_iterator it2(++(z2.begin())); it2 != z2.end(); ++it2)
+	    y[it3->first*(Deltajp1-2)+it2->first-1] // note the "-1"
+	      += itx->second * it2->second * it3->second * M_SQRT1_2;
+
+ 	// contribution from patch 1
+ 	//
+ 	// apply kron(N#,MR):
+  	// 1. get column of second factor MR
+ 	z1.clear();
+ 	z1[Deltaj-1] = 1.0;
+ 	z2.clear();
+ 	basis1d().Mj0_.apply(z1, z2); // we have to neglect the last entry of z2 later
+
+ 	// 2. get column of first factor N#: this has already been done above
+	
+ 	// 3. combine results
+  	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+  	  for (V::reverse_iterator it2(++(z2.rbegin())); it2 != z2.rend(); ++it2)
+ 	    y[(Deltajp1-2)*(Deltajp1-2)+it3->first*(Deltajp1-2)+it2->first-1] // note the "-1"
+ 	      += itx->second * it2->second * it3->second * M_SQRT1_2;
+
+ 	// contribution from patch 3
+ 	//
+ 	// apply kron(N#,Mtopleft):
+ 	// 1. get column of first factor N#: this has already been done above
+
+ 	// 2. get top left entry of Mj0
+ 	const double Mtopleft = basis1d().Mj0_.get_entry(0,0);
+	
+ 	// 3. combine results
+ 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+ 	  y[3*(Deltajp1-2)*(Deltajp1-2)+it3->first]
+ 	    += itx->second * it3->second * Mtopleft;
+      }
+	break;
+      default:
+	break;
+      }
+    }      
   }
   
   template <int d, int dT>
@@ -1010,6 +1168,85 @@ namespace WaveletTL
    const std::map<size_type,double>& x, 
    std::map<size_type,double>& y) const
   {
+    typedef std::map<size_type,double> V;
+    
+    const unsigned int Nablaj   = basis1d().Nablasize(j);
+    const unsigned int Deltajp1 = basis1d().Deltasize(j+1);
+    
+//     cout << "apply_Mj1c_11() called with coeffs" << endl;
+//     MathTL::operator << (cout, x);
+
+    for (V::const_iterator itx(x.begin()); itx != x.end(); ++itx) {
+      // determine patch number
+      const unsigned int patch = itx->first / (Nablaj*Nablaj);
+
+      switch(patch) {
+      case 0: {
+	// apply kron(N#,N#)
+ 	// 1. get column of second factor N#
+ 	V z1, z2, z3;
+	const size_type block_index = itx->first % Nablaj;
+ 	z1[block_index] = 1.0;
+	basis1d().Mj1c_.set_level(j);
+ 	basis1d().Mj1c_.apply(z1, z2);
+	
+ 	// 2. get column of first factor N#
+ 	z1.clear();
+	const size_type block_nr    = itx->first / Nablaj;
+ 	z1[block_nr] = 1.0;
+ 	basis1d().Mj1c_.apply(z1, z3);
+	
+ 	// 3. combine results
+ 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+ 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	    y[it3->first*(Deltajp1-2)+it2->first]
+	      += itx->second * it2->second * it3->second;
+      }
+	break;
+      case 1: {
+	// apply kron(N#,N#)
+	const size_type block_nr    = (itx->first-Nablaj*Nablaj) / Nablaj;
+	const size_type block_index = (itx->first-Nablaj*Nablaj) % Nablaj;
+	
+ 	V z1, z2, z3;
+ 	z1[block_index] = 1.0;
+	basis1d().Mj1c_.set_level(j);
+ 	basis1d().Mj1c_.apply(z1, z2);
+
+ 	z1.clear();
+ 	z1[block_nr] = 1.0;
+ 	basis1d().Mj1c_.apply(z1, z3);
+
+ 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+ 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	    y[(Deltajp1-2)*(Deltajp1-2)+it3->first*(Deltajp1-2)+it2->first]
+	      += itx->second * it2->second * it3->second;
+      }
+	break;
+      case 2: {
+	// apply kron(N#,N#)
+	const size_type block_nr    = (itx->first-2*Nablaj*Nablaj) / Nablaj;
+	const size_type block_index = (itx->first-2*Nablaj*Nablaj) % Nablaj;
+	
+ 	V z1, z2, z3;
+ 	z1[block_index] = 1.0;
+	basis1d().Mj1c_.set_level(j);
+ 	basis1d().Mj1c_.apply(z1, z2);
+
+ 	z1.clear();
+ 	z1[block_nr] = 1.0;
+ 	basis1d().Mj1c_.apply(z1, z3);
+
+ 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+ 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	    y[2*(Deltajp1-2)*(Deltajp1-2)+it3->first*(Deltajp1-2)+it2->first]
+	      += itx->second * it2->second * it3->second;
+      }
+	break;
+      default:
+	break;
+      }
+    }
   }
   
 

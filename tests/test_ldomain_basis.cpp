@@ -169,16 +169,23 @@ int main()
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 1 && lambda.k()[1] == 7); ++lambda);
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 2); ++lambda);
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 2 && lambda.k()[1] == 7); ++lambda);
-  for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 4); ++lambda);
+//   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 4); ++lambda);
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 4 && lambda.k()[1] == 6); ++lambda);
 //   for (; !(lambda.e()[0] == 0 && lambda.e()[1] == 1 && lambda.p() == 4 && lambda.k()[1] == 7); ++lambda);
 
 //   for (; lambda.e()[0] != 1 || lambda.e()[1] != 0; ++lambda);
+//   for (; !(lambda.e()[0] == 1 && lambda.e()[1] == 0 && lambda.p() == 1); ++lambda);
+//   for (; !(lambda.e()[0] == 1 && lambda.e()[1] == 0 && lambda.p() == 2); ++lambda);
+//   for (; !(lambda.e()[0] == 1 && lambda.e()[1] == 0 && lambda.p() == 3); ++lambda);
+
+//   for (; lambda.e()[0] != 1 || lambda.e()[1] != 1; ++lambda);
+//   for (; !(lambda.e()[0] == 1 && lambda.e()[1] == 1 && lambda.p() == 1); ++lambda);
+  for (; !(lambda.e()[0] == 1 && lambda.e()[1] == 1 && lambda.p() == 2); ++lambda);
 
 //   for (int i = 0; i < 155; i++, ++lambda); // one of the generators on patch 4
 //   for (int i = 0; i < 330; i++, ++lambda); // one of the (0,1)-wavelets on patch 4
 //   for (int i = 0; i < 334; i++, ++lambda);
-//   for (int i = 0; i < 2; i++, ++lambda);
+  for (int i = 0; i < 2; i++, ++lambda);
 
   cout << "- evaluating a primal wavelet lambda=" << lambda << " ..." << endl;
   std::ofstream psistream("Ldomain_wavelet.m");

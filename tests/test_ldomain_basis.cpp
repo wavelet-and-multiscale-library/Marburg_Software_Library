@@ -185,7 +185,7 @@ int main()
 //   for (int i = 0; i < 155; i++, ++lambda); // one of the generators on patch 4
 //   for (int i = 0; i < 330; i++, ++lambda); // one of the (0,1)-wavelets on patch 4
 //   for (int i = 0; i < 334; i++, ++lambda);
-  for (int i = 0; i < 2; i++, ++lambda);
+//   for (int i = 0; i < 7; i++, ++lambda);
 
   cout << "- evaluating a primal wavelet lambda=" << lambda << " ..." << endl;
   std::ofstream psistream("Ldomain_wavelet.m");

@@ -392,8 +392,7 @@ namespace WaveletTL
 	apply_Mj1c_10(lambda.j(), x, y); // generator coeffs of initial stable completion
 	apply_Mj0T_transposed(lambda.j(),  y, z1);
 	apply_Mj0            (lambda.j(), z1, z2);
-// 	add_maps(y, z2, z, 1.0, -1.0);
-	add_maps(y, z2, z, 1.0, 0.0);
+ 	add_maps(y, z2, z, 1.0, -1.0);
 	map_to_vector(lambda.j()+1, z, c);
       }
       break;
@@ -405,8 +404,7 @@ namespace WaveletTL
 	apply_Mj1c_01(lambda.j(), x, y); // generator coeffs of initial stable completion
 	apply_Mj0T_transposed(lambda.j(),  y, z1);
 	apply_Mj0            (lambda.j(), z1, z2);
-// 	add_maps(y, z2, z, 1.0, -1.0);
-	add_maps(y, z2, z, 1.0, 0.0);
+ 	add_maps(y, z2, z, 1.0, -1.0);
 	map_to_vector(lambda.j()+1, z, c);
       }
       break;
@@ -418,8 +416,7 @@ namespace WaveletTL
 	apply_Mj1c_11(lambda.j(), x, y); // generator coeffs of initial stable completion
 	apply_Mj0T_transposed(lambda.j(),  y, z1);
 	apply_Mj0            (lambda.j(), z1, z2);
-// 	add_maps(y, z2, z, 1.0, -1.0);
-	add_maps(y, z2, z, 1.0, 0.0);
+ 	add_maps(y, z2, z, 1.0, -1.0);
 	map_to_vector(lambda.j()+1, z, c);
       }
       break;
@@ -1021,9 +1018,6 @@ namespace WaveletTL
     const unsigned int Nablaj   = basis1d().Nablasize(j);
     const unsigned int Deltajp1 = basis1d().Deltasize(j+1);
     
-//     cout << "apply_Mj1c_10() called with coeffs" << endl;
-//     MathTL::operator << (cout, x);
-
     for (V::const_iterator itx(x.begin()); itx != x.end(); ++itx) {
       // determine patch number
       const unsigned int patch =
@@ -1173,9 +1167,6 @@ namespace WaveletTL
     const unsigned int Nablaj   = basis1d().Nablasize(j);
     const unsigned int Deltajp1 = basis1d().Deltasize(j+1);
     
-//     cout << "apply_Mj1c_11() called with coeffs" << endl;
-//     MathTL::operator << (cout, x);
-
     for (V::const_iterator itx(x.begin()); itx != x.end(); ++itx) {
       // determine patch number
       const unsigned int patch = itx->first / (Nablaj*Nablaj);

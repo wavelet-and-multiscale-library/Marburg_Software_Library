@@ -24,7 +24,7 @@ namespace MathTL
   
   /*!
     generic Matlab-style matrix stream output of the form
-    [x_{1,1} x_{1,2} ... x_{1,n}; x_{2,1} ... x_{m,n}]
+      [x_{1,1} x_{1,2} ... x_{1,n}; x_{2,1} ... x_{m,n}];
   */
   template <class MATRIX>
   void print_matrix(const MATRIX& M, std::ostream& os)
@@ -44,7 +44,7 @@ namespace MathTL
 	if (row < M.row_dimension()-1)
 	  os << "; ";
       }
-    os << "]" << std::endl;
+    os << "];" << std::endl;
     os.precision(old_precision);
   }
 }

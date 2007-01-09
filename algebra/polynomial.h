@@ -114,7 +114,7 @@ namespace MathTL
       (calls the above value(const C))
     */
     void vector_value(const Point<1> &p,
-		      Vector<C>& values) const;
+                      Vector<C>& values) const;
 
     /*!
       in place scaling p(x) -> p(s*x)
@@ -130,6 +130,12 @@ namespace MathTL
       substitute another polynomial into this one *this <- *this\circ p
     */
     void chain(const Polynomial<C>& p);
+
+    /*!
+      substitute another polynomial into this one without changing this object
+      ( return *this\circ p )
+    */
+    Polynomial<C> substitute_into(const Polynomial<C>& p) const;
 
     /*!
       assignment of another polynomial
@@ -245,8 +251,13 @@ namespace MathTL
       integration over [a,b], optional use of (Gauss) quadrature formulae
     */
     double integrate(const double a,
-		     const double b,
-		     const bool quadrature = false) const;
+                     const double b,
+                     const bool quadrature = false) const;
+
+    /*!
+      inner product
+    */
+    double inner_product(Polynomial<C> p2, double a, double b);
 
   protected:
     /*!

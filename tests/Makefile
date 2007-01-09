@@ -70,7 +70,8 @@ EXEOBJF = \
   test_sturm_bvp.o test_bvp.o\
   test_chart.o test_atlas.o\
   test_corner_singularity.o\
-  test_map_tools.o
+  test_map_tools.o\
+  test_gram_schmidt.o test_piecewise.o
 
 EXES = $(EXEOBJF:.o=)
 

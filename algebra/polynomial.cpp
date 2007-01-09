@@ -197,6 +197,15 @@ namespace MathTL
   }
 
   template <class C>
+  Polynomial<C> Polynomial<C>::substitute_into(const Polynomial<C>& p) const
+  {
+    Polynomial r(*this);
+    r.chain(p);
+
+    return r;
+  }
+
+  template <class C>
   Polynomial<C>& Polynomial<C>::operator = (const Polynomial<C>& p)
   {
     Vector<C>::operator = (p);
@@ -433,8 +442,8 @@ namespace MathTL
 
   template <class C>
   double Polynomial<C>::integrate(const double a,
-				  const double b,
-				  const bool quadrature) const
+                                  const double b,
+                                  const bool quadrature) const
   {
     assert(a <= b);
 
@@ -456,6 +465,14 @@ namespace MathTL
       }
 
     return r;
+  }
+
+  template <class C>
+  double Polynomial<C>::inner_product(Polynomial<C> p2, double a, double b)
+  {
+    Polynomial<C> t(this);
+    t *= p2;
+    return t.integrate(t, a, b);
   }
 
   template <class C>

@@ -13,6 +13,7 @@
 #include <cmath>
 #include <utils/function.h>
 #include <numerics/splines.h>
+#include <utils/tiny_tools.h>
 
 namespace MathTL
 {
@@ -69,8 +70,12 @@ namespace MathTL
   inline
   double EvaluateCardinalBSpline_td(const int j, const int k, const double x)
   {
+#if 0
     const double factor(1<<j);
     return sqrt(factor) * EvaluateCardinalBSpline<d>(k, factor * x + d/2);
+#else
+    return twotothejhalf(j) * EvaluateCardinalBSpline<d>(k, (1<<j) * x + d/2);
+#endif
   }
   
   /*!
@@ -111,8 +116,12 @@ namespace MathTL
   inline
   double EvaluateCardinalBSpline_td_x(const int j, const int k, const double x)
   {
+#if 0
     const double factor(1<<j);
     return factor * sqrt(factor) * EvaluateCardinalBSpline_x<d>(k, factor * x + d/2);
+#else
+    return twotothejhalf(3*j) * EvaluateCardinalBSpline_x<d>(k, (1<<j) * x + d/2);
+#endif
   }
 
   /*!
@@ -123,8 +132,12 @@ namespace MathTL
   inline
   double EvaluateCardinalBSpline_td_x_sq(const int j, const int k, const double x)
   {
+#if 0
     const double factor(1<<j);
     return factor * factor * sqrt(factor) * EvaluateCardinalBSpline_x_sq<d>(k, factor * x + d/2);
+#else
+    return twotothejhalf(5*j) * EvaluateCardinalBSpline_x_sq<d>(k, (1<<j) * x + d/2);
+#endif
   }
 
 

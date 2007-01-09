@@ -312,52 +312,6 @@ namespace MathTL
       }
 #endif
   }
-  
-//   template <class C, class I>
-//   void
-//   InfiniteVector<C,I>::sadd(const C s, const std::list<I>& v, const Array1D<double>& values)
-//   {
-    // std::map<I,C> help;
-
-//     // The following O(N) algorithm is adapted from the STL algorithm set_union(),
-//     // cf. stl_algo.h ...
-
-//     typename InfiniteVector<C,I>::const_iterator it(begin()), itend(end());
-//     typename std::list<I>::const_iterator itv(v.begin()), itvend(v.end());
-//     typename std::map<I,C>::iterator hint(help.begin()), hint2(help.begin());
-    
-//     while (it != itend && itv != itvend)
-//       {
-// 	if (it.index() < itv.index())
-// 	  {
-// 	    hint2 = help.insert(hint, std::pair<I,C>(it.index(), s * *it));
-// 	    hint = hint2;
-// 	    ++it;
-// 	  }
-// 	else
-// 	  {
-// 	    if (itv.index() < it.index())
-// 	      {
-// 		hint2 = help.insert(hint, std::pair<I,C>(itv.index(), ));
-// 		hint = hint2;
-// 		++itv;
-// 	      }
-// 	    else
-// 	      {
-// 		const C value(s * *it + *itv);
-// 		if (value != C(0)) {
-// 		  hint2 = help.insert(hint, std::pair<I,C>(itv.index(), value));
-// 		  hint = hint2;
-// 		}
-// 		++it;
-// 		++itv;
-// 	      }
-// 	  }
-//       }
-
-
-//   }
-
 
   template <class C, class I>
   void InfiniteVector<C,I>::sadd(const C s, const InfiniteVector<C,I>& v)

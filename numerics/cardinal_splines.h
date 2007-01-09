@@ -40,6 +40,7 @@ namespace MathTL
     evaluate a shifted cardinal B-spline N_d(x-k) via recursion
   */
   template <int d>
+  inline
   double EvaluateCardinalBSpline(const int k, const double x)
   {
     return ((x-k) * EvaluateCardinalBSpline<d-1>(k, x)

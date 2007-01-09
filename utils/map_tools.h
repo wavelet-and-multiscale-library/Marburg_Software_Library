@@ -23,7 +23,7 @@ namespace MathTL
   add_maps(const std::map<K,C>& m1, const std::map<K,C>& m2,
 	   std::map<K,C>& result,
 	   const double factor1 = 1.0, const double factor2 = 1.0);
-
+  
   /*!
     stream output for an arbitrary map
   */

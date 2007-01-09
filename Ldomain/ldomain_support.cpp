@@ -31,7 +31,7 @@ namespace WaveletTL
     for (int p = 0; p <= 2; p++) {
       if (supp1.xmin[p] != -1 && supp2.xmin[p] != -1) {
 	// intersection of two nontrivial sets on patch p
-
+	
 	const int xmin1 = supp1.xmin[p] << diff1;
 	const int xmax1 = supp1.xmax[p] << diff1;
 	const int xmin2 = supp2.xmin[p] << diff2;

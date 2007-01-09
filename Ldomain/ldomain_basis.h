@@ -302,7 +302,11 @@ namespace WaveletTL
       where always |\lambda'|>=j
     */
     void reconstruct_1(const Index& lambda, const int j,
-		       InfiniteVector<double, Index>& c) const;
+		       InfiniteVector<double,Index>& c) const;
+
+    //! reconstruct_1() version with maps
+    void reconstruct_1(const Index& lambda, const int j,
+		       std::map<size_type,double>& c) const;
 
     /*!
       Evaluate a single primal generator or wavelet \psi_\lambda
@@ -324,7 +328,8 @@ namespace WaveletTL
 
     /*!
       Evaluate a single primal generator or wavelet \psi_\lambda
-      and its derivatives on a tensor product subgrid of a given patch
+      on a tensor product subgrid of a given patch
+      (points are expected to be contained in [0,1])
     */
     void
     evaluate
@@ -332,9 +337,7 @@ namespace WaveletTL
      const int patch,
      const Array1D<double>& xlist,
      const Array1D<double>& ylist,
-     Array1D<double>& funcvalues,
-     Array1D<double>& derxvalues,
-     Array1D<double>& deryvalues) const;
+     Array1D<double>& funcvalues) const;
 
   protected:
     //! the interval 1d wavelet basis
@@ -352,5 +355,6 @@ namespace WaveletTL
 #include <Ldomain/ldomain_basis.cpp>
 #include <Ldomain/ldomain_evaluate.cpp>
 #include <Ldomain/ldomain_special.cpp>
+#include <Ldomain/ldomain_special_matrices.cpp>
 
 #endif

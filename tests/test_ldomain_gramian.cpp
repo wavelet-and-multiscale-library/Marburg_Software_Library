@@ -107,7 +107,7 @@ int main()
   f = new ConstantFunction<2>(Vector<double>(1, "1"));
 #endif
 
-  const int jmax = basis.j0()+1;
+  const int jmax = basis.j0();
   
   typedef LDomainGramian<Basis1D> Problem;
   Problem problem(basis, InfiniteVector<double, Index>());
@@ -140,7 +140,7 @@ int main()
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
   //   cout << "- Gramian matrix A=" << endl << A << endl;
-#if 1
+#if 0
   A.matlab_output("Ldomain_gramian", "G", 1);
 #endif
 

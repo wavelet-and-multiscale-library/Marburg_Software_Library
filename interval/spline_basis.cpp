@@ -184,8 +184,8 @@ namespace WaveletTL
  	support(Index(lambda.j()+1, 0, kleft, this), k1, dummy);
  	support(Index(lambda.j()+1, 0, kright, this), dummy, k2);
       }
-  }
-  
+  }  
+
   template <int d, int dT, SplineBasisFlavor flavor>
   template <class V>
   void
@@ -764,6 +764,68 @@ namespace WaveletTL
       for (typename std::map<size_type,double>::const_iterator it(gc.begin());
 	   it != gc.end(); ++it) {
 	evaluate(derivative, Index(lambda.j()+1, 0, DeltaLmin()+it->first, this), points, help);
+	for (unsigned int i = 0; i < points.size(); i++)
+	  values[i] += it->second * help[i];
+      }
+    }
+  }
+  
+  template <int d, int dT>
+  void
+  SplineBasis<d,dT,DS_construction>::evaluate
+  (const unsigned int derivative,
+   const int j, const int e, const int k,
+   const Array1D<double>& points, Array1D<double>& values) const
+  {
+    assert(derivative <= 1); // we only support derivatives up to the first order
+
+    values.resize(points.size());
+    for (unsigned int i(0); i < values.size(); i++)
+      values[i] = 0;
+    
+    if (e == 0) {
+      // generator
+      if (k < DeltaLmin()+(int)SplineBasisData<d,dT,DS_construction>::CLA_.column_dimension()) {
+	// left boundary generator
+	for (unsigned int i(0); i < SplineBasisData<d,dT,DS_construction>::CLA_.row_dimension(); i++) {
+	  const double help(SplineBasisData<d,dT,DS_construction>::CLA_.get_entry(i, k-DeltaLmin()));
+	  // 	  if (help != 0)
+	  for (unsigned int m(0); m < points.size(); m++)
+	    values[m] += help * (derivative == 0
+				 ? EvaluateCardinalBSpline_td<d>  (j, 1-ell2<d>()+i, points[m])
+				 : EvaluateCardinalBSpline_td_x<d>(j, 1-ell2<d>()+i, points[m]));
+	}
+      }	else {
+	if (k > DeltaRmax(j)-(int)SplineBasisData<d,dT,DS_construction>::CRA_.column_dimension()) {
+	  // right boundary generator
+	  for (unsigned int i(0); i < SplineBasisData<d,dT,DS_construction>::CRA_.row_dimension(); i++) {
+	    const double help(SplineBasisData<d,dT,DS_construction>::CRA_.get_entry(i, DeltaRmax(j)-k));
+	    // 	    if (help != 0)
+	    for (unsigned int m(0); m < points.size(); m++)
+	      values[m] += help * (derivative == 0
+				   ? EvaluateCardinalBSpline_td<d>  (j, (1<<j)-ell1<d>()-ell2<d>()-(1-ell2<d>()+i), points[m])
+				   : EvaluateCardinalBSpline_td_x<d>(j, (1<<j)-ell1<d>()-ell2<d>()-(1-ell2<d>()+i), points[m]));
+	  }
+	} else {
+	  // inner generator
+	  for (unsigned int m(0); m < points.size(); m++)
+	    values[m] = (derivative == 0
+			 ? EvaluateCardinalBSpline_td<d>  (j, k, points[m])
+			 : EvaluateCardinalBSpline_td_x<d>(j, k, points[m]));
+	}
+      }
+    } else {
+      // wavelet, switch to generator representation
+      typedef typename Vector<double>::size_type size_type;
+      size_type number_lambda = Deltasize(j)+k-Nablamin();
+      std::map<size_type,double> wc, gc;
+      wc[number_lambda] = 1.0;
+      apply_Mj(j, wc, gc);
+      typedef typename SplineBasis<d,dT,DS_construction>::Index Index;
+      Array1D<double> help(points.size());
+      for (typename std::map<size_type,double>::const_iterator it(gc.begin());
+	   it != gc.end(); ++it) {
+	evaluate(derivative, j+1, 0, DeltaLmin()+it->first, points, help);
 	for (unsigned int i = 0; i < points.size(); i++)
 	  values[i] += it->second * help[i];
       }

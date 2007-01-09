@@ -21,6 +21,24 @@ namespace WaveletTL
     // first compute the support intersection of psi_lambda1 and psi_lambda2
     typename LDomainBasis<IntervalBasis>::Support supp;
     if (intersect_supports(basis_, lambda1, lambda2, supp)) {
+
+#if 0
+      // new variant, integrate over supp
+      const int N_Gauss = d+1; // number of Gauss points in x- and y-direction (per sing. supp. subpatch)
+      const double h = ldexp(1.0, -supp.j); // granularity for the quadrature
+      
+      Array1D<double> gauss_points0, gauss_points1, gauss_weights0, gauss_weights1,
+	psi_lambda1_values, psi_lambda2_values; // point values of the integrands
+
+      // per patch, collect all point values
+      for (int p = 0; p <= 2; p++) {
+	if (supp.xmin[p] != -1) { // psi_lambda1 and psi_lambda2 are nontrivial on patch p
+
+	  // TODO!!!
+
+	}
+      }
+#else
       // compute the generator expansions of psi_lambda1 and psi_lambda2
       InfiniteVector<double, Index> gcoeffs1, gcoeffs2;
       const int ecode1 = lambda1.e()[0]+2*lambda1.e()[1];
@@ -37,7 +55,7 @@ namespace WaveletTL
       else
 	basis_.reconstruct_1(lambda2, level2, gcoeffs2);
 
-            // iterate through the involved generators and collect the point evaluations
+      // iterate through the involved generators and collect the point evaluations
       const int N_Gauss = d+1; // number of Gauss points in x- and y-direction (per sing. supp. subpatch)
       const double h = ldexp(1.0, -supp.j); // granularity for the quadrature
       
@@ -89,106 +107,66 @@ namespace WaveletTL
 		  // this can only happen if p == it.index().p()
 		  assert(p == it1.index().p());
 		  
-		  evaluate(basis_.basis1d(),
-			   0,
-			   typename IntervalBasis::Index(level1,
-							 0,
-							 it1.index().k()[0],
-							 &basis_.basis1d()),
-			   gauss_points0,
-			   psi_mu1_0_values);
+		  basis_.basis1d().evaluate(0,
+					    level1, 0, it1.index().k()[0],
+					    gauss_points0,
+					    psi_mu1_0_values);
 		  
-		  evaluate(basis_.basis1d(),
-			   0,
-			   typename IntervalBasis::Index(level1,
-							 0,
-							 it1.index().k()[1],
-							 &basis_.basis1d()),
-			   gauss_points1,
-			   psi_mu1_1_values);
+		  basis_.basis1d().evaluate(0,
+					    level1, 0, it1.index().k()[1],
+					    gauss_points1,
+					    psi_mu1_1_values);
 		  break;
 		case 3:
 		  // psi_mu1 lives on patches 0 and 1
 		  if (p == 0) {
-		    evaluate(basis_.basis1d(),
-			     0,
-			     typename IntervalBasis::Index(level1,
-							   0,
-							   it1.index().k()[0],
-							   &basis_.basis1d()),
-			     gauss_points0,
-			     psi_mu1_0_values);
+		    basis_.basis1d().evaluate(0,
+					      level1, 0, it1.index().k()[0],
+					      gauss_points0,
+					      psi_mu1_0_values);
 		    
-		    evaluate(basis_.basis1d(),
-			     0,
-			     typename IntervalBasis::Index(level1,
-							   0,
-							   basis_.basis1d().DeltaLmin(),
-							   &basis_.basis1d()),
-			     gauss_points1,
-			     psi_mu1_1_values);
+		    basis_.basis1d().evaluate(0,
+					      level1, 0, basis_.basis1d().DeltaLmin(),
+					      gauss_points1,
+					      psi_mu1_1_values);
 		  } else {
 		    assert(p == 1);
 		    
-		    evaluate(basis_.basis1d(),
-			     0,
-			     typename IntervalBasis::Index(level1,
-							   0,
-							   it1.index().k()[0],
-							   &basis_.basis1d()),
-			     gauss_points0,
-			     psi_mu1_0_values);
+		    basis_.basis1d().evaluate(0,
+					      level1, 0, it1.index().k()[0],
+					      gauss_points0,
+					      psi_mu1_0_values);
 		    
-		    evaluate(basis_.basis1d(),
-			     0,
-			     typename IntervalBasis::Index(level1,
-							   0,
-							   basis_.basis1d().DeltaRmax(level1),
-							   &basis_.basis1d()),
-			     gauss_points1,
-			     psi_mu1_1_values);
+		    basis_.basis1d().evaluate(0,
+					      level1, 0, basis_.basis1d().DeltaRmax(level1),
+					      gauss_points1,
+					      psi_mu1_1_values);
 		  }
 		  break;
 		case 4:
 		  // psi_mu1 lives on patches 1 and 2
 		  if (p == 1) {
-		    evaluate(basis_.basis1d(),
-			     0,
-			     typename IntervalBasis::Index(level1,
-							   0,
-							   basis_.basis1d().DeltaRmax(level1),
-							   &basis_.basis1d()),
-			     gauss_points0,
-			     psi_mu1_0_values);
+		    basis_.basis1d().evaluate(0,
+					      level1, 0, basis_.basis1d().DeltaRmax(level1),
+					      gauss_points0,
+					      psi_mu1_0_values);
 		    
-		    evaluate(basis_.basis1d(),
-			     0,
-			     typename IntervalBasis::Index(level1,
-							   0,
-							   it1.index().k()[1],
-							   &basis_.basis1d()),
-			     gauss_points1,
-			     psi_mu1_1_values);
+		    basis_.basis1d().evaluate(0,
+					      level1, 0, it1.index().k()[1],
+					      gauss_points1,
+					      psi_mu1_1_values);
 		  } else {
 		    assert(p == 2);
 		    
-		    evaluate(basis_.basis1d(),
-			     0,
-			     typename IntervalBasis::Index(level1,
-							   0,
-							   basis_.basis1d().DeltaLmin(),
-							   &basis_.basis1d()),
-			     gauss_points0,
-			     psi_mu1_0_values);
+		    basis_.basis1d().evaluate(0,
+					      level1, 0, basis_.basis1d().DeltaLmin(),
+					      gauss_points0,
+					      psi_mu1_0_values);
 		    
-		    evaluate(basis_.basis1d(),
-			     0,
-			     typename IntervalBasis::Index(level1,
-							   0,
-							   it1.index().k()[1],
-							   &basis_.basis1d()),
-			     gauss_points1,
-			     psi_mu1_1_values);
+		    basis_.basis1d().evaluate(0,
+					      level1, 0, it1.index().k()[1],
+					      gauss_points1,
+					      psi_mu1_1_values);
 		  }
 		  break;
 		default:
@@ -204,106 +182,66 @@ namespace WaveletTL
 		  // this can only happen if p == it.index().p()
 		  assert(p == it2.index().p());
 		  
-		  evaluate(basis_.basis1d(),
-			   0,
-			   typename IntervalBasis::Index(level2,
-							 0,
-							 it2.index().k()[0],
-							 &basis_.basis1d()),
-			   gauss_points0,
-			   psi_mu2_0_values);
+		  basis_.basis1d().evaluate(0,
+					    level2, 0, it2.index().k()[0],
+					    gauss_points0,
+					    psi_mu2_0_values);
 		  
-		  evaluate(basis_.basis1d(),
-			   0,
-			   typename IntervalBasis::Index(level2,
-							 0,
-							 it2.index().k()[1],
-							 &basis_.basis1d()),
-			   gauss_points1,
-			   psi_mu2_1_values);
+		  basis_.basis1d().evaluate(0,
+					    level2, 0, it2.index().k()[1],
+					    gauss_points1,
+					    psi_mu2_1_values);
 		  break;
 		case 3:
 		  // psi_mu1 lives on patches 0 and 1
 		  if (p == 0) {
-		    evaluate(basis_.basis1d(),
-			     0,
-			     typename IntervalBasis::Index(level2,
-							   0,
-							   it2.index().k()[0],
-							   &basis_.basis1d()),
-			     gauss_points0,
-			     psi_mu2_0_values);
+		    basis_.basis1d().evaluate(0,
+					      level2, 0,it2.index().k()[0],
+					      gauss_points0,
+					      psi_mu2_0_values);
 		    
-		    evaluate(basis_.basis1d(),
-			     0,
-			     typename IntervalBasis::Index(level2,
-							   0,
-							   basis_.basis1d().DeltaLmin(),
-							   &basis_.basis1d()),
-			     gauss_points1,
-			     psi_mu2_1_values);
+		    basis_.basis1d().evaluate(0,
+					      level2, 0, basis_.basis1d().DeltaLmin(),
+					      gauss_points1,
+					      psi_mu2_1_values);
 		  } else {
 		    assert(p == 1);
 		    
-		    evaluate(basis_.basis1d(),
-			     0,
-			     typename IntervalBasis::Index(level2,
-							   0,
-							   it2.index().k()[0],
-							   &basis_.basis1d()),
-			     gauss_points0,
-			     psi_mu2_0_values);
+		    basis_.basis1d().evaluate(0,
+					      level2, 0, it2.index().k()[0],
+					      gauss_points0,
+					      psi_mu2_0_values);
 		    
-		    evaluate(basis_.basis1d(),
-			     0,
-			     typename IntervalBasis::Index(level2,
-							   0,
-							   basis_.basis1d().DeltaRmax(level2),
-							   &basis_.basis1d()),
-			     gauss_points1,
-			     psi_mu2_1_values);
+		    basis_.basis1d().evaluate(0,
+					      level2, 0, basis_.basis1d().DeltaRmax(level2),
+					      gauss_points1,
+					      psi_mu2_1_values);
 		  }
 		  break;
 		case 4:
 		  // psi_mu2 lives on patches 1 and 2
 		  if (p == 1) {
-		    evaluate(basis_.basis1d(),
-			     0,
-			     typename IntervalBasis::Index(level2,
-							   0,
-							   basis_.basis1d().DeltaRmax(level2),
-							   &basis_.basis1d()),
-			     gauss_points0,
-			     psi_mu2_0_values);
+		    basis_.basis1d().evaluate(0,
+					      level2, 0, basis_.basis1d().DeltaRmax(level2),
+					      gauss_points0,
+					      psi_mu2_0_values);
 		    
-		    evaluate(basis_.basis1d(),
-			     0,
-			     typename IntervalBasis::Index(level2,
-							   0,
-							   it2.index().k()[1],
-							   &basis_.basis1d()),
-			     gauss_points1,
-			     psi_mu2_1_values);
+		    basis_.basis1d().evaluate(0,
+					      level2, 0, it2.index().k()[1],
+					      gauss_points1,
+					      psi_mu2_1_values);
 		  } else {
 		    assert(p == 2);
 		    
-		    evaluate(basis_.basis1d(),
-			     0,
-			     typename IntervalBasis::Index(level2,
-							   0,
-							   basis_.basis1d().DeltaLmin(),
-							   &basis_.basis1d()),
-			     gauss_points0,
-			     psi_mu2_0_values);
+		    basis_.basis1d().evaluate(0,
+					      level2, 0, basis_.basis1d().DeltaLmin(),
+					      gauss_points0,
+					      psi_mu2_0_values);
 		    
-		    evaluate(basis_.basis1d(),
-			     0,
-			     typename IntervalBasis::Index(level2,
-							   0,
-							   it2.index().k()[1],
-							   &basis_.basis1d()),
-			     gauss_points1,
-			     psi_mu2_1_values);
+		    basis_.basis1d().evaluate(0,
+					      level2, 0, it2.index().k()[1],
+					      gauss_points1,
+					      psi_mu2_1_values);
 		  }
 		  break;
 		default:
@@ -332,7 +270,8 @@ namespace WaveletTL
 	  }
 	}
       }
-    }
+#endif
+    } // if intersect_supports(...
 
     return r;
   }

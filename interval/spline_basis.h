@@ -176,7 +176,7 @@ namespace WaveletTL
     (const unsigned int derivative,
      const typename SplineBasis<d,dT,flavor>::Index& lambda,
      const Array1D<double>& points, Array1D<double>& values) const;
-    
+
     /*!
       point evaluation of 0-th and first derivative of a single primal generator
       or wavelet \psi_\lambda at several points simultaneously
@@ -380,6 +380,11 @@ namespace WaveletTL
     */
     void evaluate(const unsigned int derivative,
 		  const typename SplineBasis<d,dT,DS_construction>::Index& lambda,
+		  const Array1D<double>& points, Array1D<double>& values) const;
+
+    //! a version without an Index object
+    void evaluate(const unsigned int derivative,
+		  const int j, const int e, const int k,
 		  const Array1D<double>& points, Array1D<double>& values) const;
     
     /*!

@@ -37,16 +37,53 @@ namespace MathTL
   };
 
   /*!
+    evaluate a cardinal B-spline N_d(x) via recursion
+    (fastest possible variant)
+  */
+  template <int d>
+  inline
+  double EvaluateCardinalBSpline(const double x)
+  {
+    return (x < 0 || x >= d ? 0
+	    : (x * EvaluateCardinalBSpline<d-1>(x)
+	       + (d-x) * EvaluateCardinalBSpline<d-1>(x-1)) / (d-1));
+  }
+
+  /*!
+    evaluate a cardinal B-spline N_2(x)
+    (fastest possible variant)
+  */
+  template <>
+  inline
+  double EvaluateCardinalBSpline<2>(const double x)
+  {
+    return (x < 0 || x >= 2 ? 0 : 1-abs(x-1));
+  }
+  
+  /*!
+    evaluate a cardinal B-spline N_1(x)
+    (fastest possible variant)
+  */
+  template <>
+  inline
+  double EvaluateCardinalBSpline<1>(const double x)
+  {
+    return (x < 0 || x >= 1 ? 0 : 1);
+  }
+
+  /*!
     evaluate a shifted cardinal B-spline N_d(x-k) via recursion
   */
   template <int d>
   inline
   double EvaluateCardinalBSpline(const int k, const double x)
   {
+    if (x < k || x >= k+d)
+      return 0.;
     return ((x-k) * EvaluateCardinalBSpline<d-1>(k, x)
-	    + (k+d-x) * EvaluateCardinalBSpline<d-1>(k+1, x)) / (d-1);
+ 	    + (k+d-x) * EvaluateCardinalBSpline<d-1>(k+1, x)) / (d-1);
   }
-
+  
   /*!
     evaluate a shifted cardinal B-spline N_1(x-k)
   */
@@ -54,12 +91,8 @@ namespace MathTL
   inline
   double EvaluateCardinalBSpline<1>(const int k, const double x)
   {
-    //cout << "evaluating first order spline for x = " << x << endl;
-    if (x < k)
+    if (x < k || x >= k+1)
       return 0.;
-    else
-      if (x >= k+1)
-	return 0.;
     return 1.;
   }
 
@@ -75,7 +108,7 @@ namespace MathTL
     const double factor(1<<j);
     return sqrt(factor) * EvaluateCardinalBSpline<d>(k, factor * x + d/2);
 #else
-    return twotothejhalf(j) * EvaluateCardinalBSpline<d>(k, (1<<j) * x + d/2);
+    return twotothejhalf(j) * EvaluateCardinalBSpline<d>((1<<j) * x - k + d/2);
 #endif
   }
   
@@ -86,6 +119,8 @@ namespace MathTL
   inline
   double EvaluateCardinalBSpline_x(const int k, const double x)
   {
+    if (x < k || x >= k+d)
+      return 0.;
     return EvaluateCardinalBSpline<d-1>(k, x) - EvaluateCardinalBSpline<d-1>(k+1, x);
   }
 

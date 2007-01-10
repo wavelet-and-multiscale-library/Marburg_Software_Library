@@ -304,9 +304,15 @@ namespace WaveletTL
     void reconstruct_1(const Index& lambda, const int j,
 		       InfiniteVector<double,Index>& c) const;
 
+    //! reconstruct_1() version which returns two const_iterators (to avoid object copies)
+    void reconstruct_1(const Index& lambda, const int j,
+		       typename InfiniteVector<double,Index>::const_iterator& it_begin,
+		       typename InfiniteVector<double,Index>::const_iterator& it_end) const;
+
     //! reconstruct_1() version with maps
     void reconstruct_1(const Index& lambda, const int j,
 		       std::map<size_type,double>& c) const;
+
 
     /*!
       Evaluate a single primal generator or wavelet \psi_\lambda
@@ -348,6 +354,13 @@ namespace WaveletTL
     mutable SupportCache supp_cache;
 #if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
     mutable unsigned long supp_hits, supp_misses;
+#endif
+
+    //! reconstruct_1 cache
+    typedef std::map<Index,InfiniteVector<double,Index> > Reconstruct1Cache;
+    mutable Reconstruct1Cache rec1_cache;
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
+    mutable unsigned long rec1_hits, rec1_misses;
 #endif
   };
 }

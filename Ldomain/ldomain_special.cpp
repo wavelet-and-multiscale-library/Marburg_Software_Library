@@ -19,6 +19,8 @@ namespace WaveletTL
 #if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
     supp_hits = 0;
     supp_misses = 0;
+    rec1_hits = 0;
+    rec1_misses = 0;
 #endif
   }
 
@@ -395,277 +397,659 @@ namespace WaveletTL
     
     typedef std::map<size_type,double> V;
 
-    const unsigned int Deltaj   = basis1d().Deltasize(j);
-    const MultiIndex<int,2> zero(0,0); // e=(0,0)
-
-    const int ecode(lambda.e()[0]+2*lambda.e()[1]);
-    switch(ecode) {
-    case 0:
-      // generator
-      basis1d().Mj0_.set_level(lambda.j());
-      switch(lambda.p()) {
-      case 0: {
-	// psi_lambda decomposes into generators on patch 0 alone
-	// apply kron(M#,M#), cf. KroneckerMatrix::apply()
-	// 1. first decide which block number and subindex corresponds to the given generator
-	const size_type block_nr    = lambda.k()[0]-(basis1d().DeltaLmin()+1);
-	const size_type block_index = lambda.k()[1]-(basis1d().DeltaLmin()+1);
-
- 	// 2. get column of second factor M#
- 	V z1, z2, z3;
- 	z1.insert(std::pair<size_type,double>(block_index, 1.0));
- 	basis1d().Mj0_.apply_central_block(z1, z2);
-
- 	// 3. get column of first factor M#
- 	z1.clear();
- 	z1.insert(std::pair<size_type,double>(block_nr, 1.0));
- 	basis1d().Mj0_.apply_central_block(z1, z3);
-	
- 	// 4. combine results
- 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
- 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
-	    c.add_coefficient(Index(lambda.j()+1,
-				    zero,
-				    0,
-				    MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
-						      basis1d().DeltaLmin()+1+it2->first),
-				    this),
-			      it2->second * it3->second);	
-      }
-	break;
-      case 1: {
-	// psi_lambda decomposes into generators on patch 1 alone
-	// apply kron(M#,M#)
-	const size_type block_nr    = lambda.k()[0]-(basis1d().DeltaLmin()+1);
-	const size_type block_index = lambda.k()[1]-(basis1d().DeltaLmin()+1);
-
- 	V z1, z2, z3;
- 	z1.insert(std::pair<size_type,double>(block_index, 1.0));
- 	basis1d().Mj0_.apply_central_block(z1, z2);
-
- 	z1.clear();
- 	z1.insert(std::pair<size_type,double>(block_nr, 1.0));
- 	basis1d().Mj0_.apply_central_block(z1, z3);
-
- 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
- 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
-	    c.add_coefficient(Index(lambda.j()+1,
-				    zero,
-				    1,
-				    MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
-						      basis1d().DeltaLmin()+1+it2->first),
-				    this),
-			      it2->second * it3->second);	
-      }
-	break;
-      case 2: {
-	// psi_lambda decomposes into generators on patch 2 alone
-	// apply kron(M#,M#)
-	const size_type block_nr    = lambda.k()[0]-(basis1d().DeltaLmin()+1);
-	const size_type block_index = lambda.k()[1]-(basis1d().DeltaLmin()+1);
-
- 	V z1, z2, z3;
-	z1.insert(std::pair<size_type,double>(block_index, 1.0));
- 	basis1d().Mj0_.apply_central_block(z1, z2);
-
- 	z1.clear();
- 	z1.insert(std::pair<size_type,double>(block_nr, 1.0));
- 	basis1d().Mj0_.apply_central_block(z1, z3);
-
- 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
- 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
-	    c.add_coefficient(Index(lambda.j()+1,
-				    zero,
-				    2,
-				    MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
-						      basis1d().DeltaLmin()+1+it2->first),
-				    this),
-			      it2->second * it3->second);	
-      }
-	break;
-      case 3: {
-	// psi_lambda decomposes into generators on patches 0,1 and 3
-
-	// contribution from patch 0
-	//
-	// apply kron(M#,ML):
- 	// 1. get column of second factor ML
-	V z1, z2, z3;
-	z1.insert(std::pair<size_type,double>(0, 1.0));
-	basis1d().Mj0_.apply(z1, z2); // we have to neglect the first entry of z2 later
-
- 	// 2. get column of first factor M#
- 	z1.clear();
- 	const size_type block_nr = lambda.k()[0]-(basis1d().DeltaLmin()+1);
- 	z1.insert(std::pair<size_type,double>(block_nr, 1.0));
- 	basis1d().Mj0_.apply_central_block(z1, z3);
-
- 	// 3. combine results
- 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
- 	  for (V::const_iterator it2(++(z2.begin())); it2 != z2.end(); ++it2)
-	    c.add_coefficient(Index(lambda.j()+1,
-				    zero,
-				    0,
-				    MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
-						      basis1d().DeltaLmin()+it2->first), // note the "-1"
-				    this),
-			      it2->second * it3->second * M_SQRT1_2);	
-
-	// contribution from patch 1
-	//
-	// apply kron(M#,MR):
- 	// 1. get column of second factor MR
-	z1.clear();
-	z1.insert(std::pair<size_type,double>(Deltaj-1, 1.0));
-	z2.clear();
-	basis1d().Mj0_.apply(z1, z2); // we have to neglect the last entry of z2 later
-
-	// 2. get column of first factor M#: this has already been done above
-	
-	// 3. combine results
- 	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
- 	  for (V::reverse_iterator it2(++(z2.rbegin())); it2 != z2.rend(); ++it2)
-	    c.add_coefficient(Index(lambda.j()+1,
-				    zero,
-				    1,
-				    MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
-						      basis1d().DeltaLmin()+it2->first), // note the "-1"
-				    this),
-			      it2->second * it3->second * M_SQRT1_2);	
-
-	// contribution from patch 3
-	//
-	// apply kron(M#,Mtopleft):
-	// 1. get column of first factor M#: this has already been done above
-
-	// 2. get top left entry of Mj0
-	const double Mtopleft = basis1d().Mj0_.get_entry(0,0);
-	
-	// 3. combine results
-	for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
-	  c.add_coefficient(Index(lambda.j()+1,
-				  zero,
-				  3,
-				  MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
-						    0),
-				  this),
-			    it3->second * Mtopleft);
-      }
-	break;
-      case 4: {
-	// psi_lambda decomposes into generators on patches 1,2 and 4
-
-	// contribution from patch 1
-	//
-	// apply kron(MR,M#):
- 	// 1. get column of second factor M#
-	V z1, z2, z3;
-	const size_type block_index = lambda.k()[1]-(basis1d().DeltaLmin()+1);
-	z1.insert(std::pair<size_type,double>(block_index, 1.0));
-	basis1d().Mj0_.apply_central_block(z1, z2);
-
- 	// 2. get column of first factor MR
-	z1.clear();
-	z1.insert(std::pair<size_type,double>(Deltaj-1, 1.0));
-	basis1d().Mj0_.apply(z1, z3); // we have to neglect the last entry of z3 later
-	
-	// 3. combine results
- 	for (V::reverse_iterator it3(++(z3.rbegin())); it3 != z3.rend(); ++it3)
- 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
-	    c.add_coefficient(Index(lambda.j()+1,
-				    zero,
-				    1,
-				    MultiIndex<int,2>(basis1d().DeltaLmin()+it3->first, // note the "-1"
-						      basis1d().DeltaLmin()+1+it2->first), 
-				    this),
-			      it2->second * it3->second * M_SQRT1_2);	
-
-	// contribution from patch 2
-	//
-	// apply kron(ML,M#):
-	// 1. get column of second factor M#: this has already been done above
-
-	// 2. get column of first factor ML
-	z1.clear();
-	z1.insert(std::pair<size_type,double>(0, 1.0));
-	z3.clear();
-	basis1d().Mj0_.apply(z1, z3); // we have to neglect the first entry of z3 later
-
-	// 3. combine results
- 	for (V::const_iterator it3(++(z3.begin())); it3 != z3.end(); ++it3)
- 	  for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
-	    c.add_coefficient(Index(lambda.j()+1,
-				    zero,
-				    2,
-				    MultiIndex<int,2>(basis1d().DeltaLmin()+it3->first, // note the "-1"
-						      basis1d().DeltaLmin()+1+it2->first), 
-				    this),
-			      it2->second * it3->second * M_SQRT1_2);	
-
-	// contribution from patch 4
-	//
-	// apply kron(Mtopleft,M#):
-	// 1. get column of second factor M#: this has already been done above
-
-	// 2. get top left entry of Mj0
-	const double Mtopleft = basis1d().Mj0_.get_entry(0,0);
-	
-	// 3. combine results
-	for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
-	  c.add_coefficient(Index(lambda.j()+1,
-				  zero,
-				  4,
-				  MultiIndex<int,2>(0,
-						    basis1d().DeltaLmin()+1+it2->first),
-				  this),
-			    it2->second * Mtopleft);
-      }
-	break;
-      default:
-	break;
-      }
-      break;
-    case 1:
-      // (1,0)-wavelet
+    // check whether the result already exists in the cache
+    typename Reconstruct1Cache::iterator rec1_lb(rec1_cache.lower_bound(lambda));
+    typename Reconstruct1Cache::iterator rec1_it(rec1_lb);
+    if (rec1_lb == rec1_cache.end() ||
+	rec1_cache.key_comp()(lambda, rec1_lb->first))
       {
-	std::map<size_type,double> x,y,z,z1,z2;
-	x.insert(std::pair<size_type,double>(lambda.number()-Deltasize(lambda.j())-Nabla01size(lambda.j()), 1.0));
-	apply_Mj1c_10(lambda.j(), x, y); // generator coeffs of initial stable completion
-	apply_Mj0T_transposed(lambda.j(),  y, z1);
-	apply_Mj0            (lambda.j(), z1, z2);
- 	add_maps(y, z2, z, 1.0, -1.0);
-	map_to_vector(lambda.j()+1, z, c);
+     	// compute supp(psi_lambda) and insert it into the cache
+	typedef typename Reconstruct1Cache::value_type value_type;
+
+	const unsigned int Deltaj   = basis1d().Deltasize(j);
+	const MultiIndex<int,2> zero(0,0); // e=(0,0)
+	
+	const int ecode(lambda.e()[0]+2*lambda.e()[1]);
+	switch(ecode) {
+	case 0:
+	  // generator
+	  basis1d().Mj0_.set_level(lambda.j());
+	  switch(lambda.p()) {
+	  case 0: {
+	    // psi_lambda decomposes into generators on patch 0 alone
+	    // apply kron(M#,M#), cf. KroneckerMatrix::apply()
+	    // 1. first decide which block number and subindex corresponds to the given generator
+	    const size_type block_nr    = lambda.k()[0]-(basis1d().DeltaLmin()+1);
+	    const size_type block_index = lambda.k()[1]-(basis1d().DeltaLmin()+1);
+	    
+	    // 2. get column of second factor M#
+	    V z1, z2, z3;
+	    z1.insert(std::pair<size_type,double>(block_index, 1.0));
+	    basis1d().Mj0_.apply_central_block(z1, z2);
+	    
+	    // 3. get column of first factor M#
+	    z1.clear();
+	    z1.insert(std::pair<size_type,double>(block_nr, 1.0));
+	    basis1d().Mj0_.apply_central_block(z1, z3);
+	    
+	    // 4. combine results
+	    for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+	      for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+		c.add_coefficient(Index(lambda.j()+1,
+					zero,
+					0,
+					MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
+							  basis1d().DeltaLmin()+1+it2->first),
+					this),
+				  it2->second * it3->second);	
+	  }
+	    break;
+	  case 1: {
+	    // psi_lambda decomposes into generators on patch 1 alone
+	    // apply kron(M#,M#)
+	    const size_type block_nr    = lambda.k()[0]-(basis1d().DeltaLmin()+1);
+	    const size_type block_index = lambda.k()[1]-(basis1d().DeltaLmin()+1);
+	    
+	    V z1, z2, z3;
+	    z1.insert(std::pair<size_type,double>(block_index, 1.0));
+	    basis1d().Mj0_.apply_central_block(z1, z2);
+	    
+	    z1.clear();
+	    z1.insert(std::pair<size_type,double>(block_nr, 1.0));
+	    basis1d().Mj0_.apply_central_block(z1, z3);
+	    
+	    for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+	      for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+		c.add_coefficient(Index(lambda.j()+1,
+					zero,
+					1,
+					MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
+							  basis1d().DeltaLmin()+1+it2->first),
+					this),
+				  it2->second * it3->second);	
+	  }
+	    break;
+	  case 2: {
+	    // psi_lambda decomposes into generators on patch 2 alone
+	    // apply kron(M#,M#)
+	    const size_type block_nr    = lambda.k()[0]-(basis1d().DeltaLmin()+1);
+	    const size_type block_index = lambda.k()[1]-(basis1d().DeltaLmin()+1);
+	    
+	    V z1, z2, z3;
+	    z1.insert(std::pair<size_type,double>(block_index, 1.0));
+	    basis1d().Mj0_.apply_central_block(z1, z2);
+	    
+	    z1.clear();
+	    z1.insert(std::pair<size_type,double>(block_nr, 1.0));
+	    basis1d().Mj0_.apply_central_block(z1, z3);
+	    
+	    for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+	      for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+		c.add_coefficient(Index(lambda.j()+1,
+					zero,
+					2,
+					MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
+							  basis1d().DeltaLmin()+1+it2->first),
+					this),
+				  it2->second * it3->second);	
+	  }
+	    break;
+	  case 3: {
+	    // psi_lambda decomposes into generators on patches 0,1 and 3
+	    
+	    // contribution from patch 0
+	    //
+	    // apply kron(M#,ML):
+	    // 1. get column of second factor ML
+	    V z1, z2, z3;
+	    z1.insert(std::pair<size_type,double>(0, 1.0));
+	    basis1d().Mj0_.apply(z1, z2); // we have to neglect the first entry of z2 later
+	    
+	    // 2. get column of first factor M#
+	    z1.clear();
+	    const size_type block_nr = lambda.k()[0]-(basis1d().DeltaLmin()+1);
+	    z1.insert(std::pair<size_type,double>(block_nr, 1.0));
+	    basis1d().Mj0_.apply_central_block(z1, z3);
+	    
+	    // 3. combine results
+	    for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+	      for (V::const_iterator it2(++(z2.begin())); it2 != z2.end(); ++it2)
+		c.add_coefficient(Index(lambda.j()+1,
+					zero,
+					0,
+					MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
+							  basis1d().DeltaLmin()+it2->first), // note the "-1"
+					this),
+				  it2->second * it3->second * M_SQRT1_2);	
+	    
+	    // contribution from patch 1
+	    //
+	    // apply kron(M#,MR):
+	    // 1. get column of second factor MR
+	    z1.clear();
+	    z1.insert(std::pair<size_type,double>(Deltaj-1, 1.0));
+	    z2.clear();
+	    basis1d().Mj0_.apply(z1, z2); // we have to neglect the last entry of z2 later
+	    
+	    // 2. get column of first factor M#: this has already been done above
+	    
+	    // 3. combine results
+	    for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+	      for (V::reverse_iterator it2(++(z2.rbegin())); it2 != z2.rend(); ++it2)
+		c.add_coefficient(Index(lambda.j()+1,
+					zero,
+					1,
+					MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
+							  basis1d().DeltaLmin()+it2->first), // note the "-1"
+					this),
+				  it2->second * it3->second * M_SQRT1_2);	
+	    
+	    // contribution from patch 3
+	    //
+	    // apply kron(M#,Mtopleft):
+	    // 1. get column of first factor M#: this has already been done above
+	    
+	    // 2. get top left entry of Mj0
+	    const double Mtopleft = basis1d().Mj0_.get_entry(0,0);
+	    
+	    // 3. combine results
+	    for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+	      c.add_coefficient(Index(lambda.j()+1,
+				      zero,
+				      3,
+				      MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
+							0),
+				      this),
+				it3->second * Mtopleft);
+	  }
+	    break;
+	  case 4: {
+	    // psi_lambda decomposes into generators on patches 1,2 and 4
+	    
+	    // contribution from patch 1
+	    //
+	    // apply kron(MR,M#):
+	    // 1. get column of second factor M#
+	    V z1, z2, z3;
+	    const size_type block_index = lambda.k()[1]-(basis1d().DeltaLmin()+1);
+	    z1.insert(std::pair<size_type,double>(block_index, 1.0));
+	    basis1d().Mj0_.apply_central_block(z1, z2);
+	    
+	    // 2. get column of first factor MR
+	    z1.clear();
+	    z1.insert(std::pair<size_type,double>(Deltaj-1, 1.0));
+	    basis1d().Mj0_.apply(z1, z3); // we have to neglect the last entry of z3 later
+	    
+	    // 3. combine results
+	    for (V::reverse_iterator it3(++(z3.rbegin())); it3 != z3.rend(); ++it3)
+	      for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+		c.add_coefficient(Index(lambda.j()+1,
+					zero,
+					1,
+					MultiIndex<int,2>(basis1d().DeltaLmin()+it3->first, // note the "-1"
+							  basis1d().DeltaLmin()+1+it2->first), 
+					this),
+				  it2->second * it3->second * M_SQRT1_2);	
+	    
+	    // contribution from patch 2
+	    //
+	    // apply kron(ML,M#):
+	    // 1. get column of second factor M#: this has already been done above
+	    
+	    // 2. get column of first factor ML
+	    z1.clear();
+	    z1.insert(std::pair<size_type,double>(0, 1.0));
+	    z3.clear();
+	    basis1d().Mj0_.apply(z1, z3); // we have to neglect the first entry of z3 later
+	    
+	    // 3. combine results
+	    for (V::const_iterator it3(++(z3.begin())); it3 != z3.end(); ++it3)
+	      for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+		c.add_coefficient(Index(lambda.j()+1,
+					zero,
+					2,
+					MultiIndex<int,2>(basis1d().DeltaLmin()+it3->first, // note the "-1"
+							  basis1d().DeltaLmin()+1+it2->first), 
+					this),
+				  it2->second * it3->second * M_SQRT1_2);	
+	    
+	    // contribution from patch 4
+	    //
+	    // apply kron(Mtopleft,M#):
+	    // 1. get column of second factor M#: this has already been done above
+	    
+	    // 2. get top left entry of Mj0
+	    const double Mtopleft = basis1d().Mj0_.get_entry(0,0);
+	    
+	    // 3. combine results
+	    for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	      c.add_coefficient(Index(lambda.j()+1,
+				      zero,
+				      4,
+				      MultiIndex<int,2>(0,
+							basis1d().DeltaLmin()+1+it2->first),
+				      this),
+				it2->second * Mtopleft);
+	  }
+	    break;
+	  default:
+	    break;
+	  }
+	  break;
+	case 1:
+	  // (1,0)-wavelet
+	  {
+	    std::map<size_type,double> x,y,z,z1,z2;
+	    x.insert(std::pair<size_type,double>(lambda.number()-Deltasize(lambda.j())-Nabla01size(lambda.j()), 1.0));
+	    apply_Mj1c_10(lambda.j(), x, y); // generator coeffs of initial stable completion
+	    apply_Mj0T_transposed(lambda.j(),  y, z1);
+	    apply_Mj0            (lambda.j(), z1, z2);
+	    add_maps(y, z2, z, 1.0, -1.0);
+	    map_to_vector(lambda.j()+1, z, c);
+	  }
+	  break;
+	case 2:
+	  // (0,1)-wavelet
+	  {
+	    std::map<size_type,double> x,y,z,z1,z2;
+	    x.insert(std::pair<size_type,double>(lambda.number()-Deltasize(lambda.j()), 1.0));
+	    apply_Mj1c_01(lambda.j(), x, y); // generator coeffs of initial stable completion
+	    apply_Mj0T_transposed(lambda.j(),  y, z1);
+	    apply_Mj0            (lambda.j(), z1, z2);
+	    add_maps(y, z2, z, 1.0, -1.0);
+	    map_to_vector(lambda.j()+1, z, c);
+	  }
+	  break;
+	case 3:
+	  // (1,1)-wavelet
+	  {
+	    std::map<size_type,double> x,y,z,z1,z2;
+	    x.insert(std::pair<size_type,double>(lambda.number()-Deltasize(lambda.j())-Nabla01size(lambda.j())-Nabla10size(lambda.j()), 1.0));
+	    apply_Mj1c_11(lambda.j(), x, y); // generator coeffs of initial stable completion
+	    apply_Mj0T_transposed(lambda.j(),  y, z1);
+	    apply_Mj0            (lambda.j(), z1, z2);
+	    add_maps(y, z2, z, 1.0, -1.0);
+	    map_to_vector(lambda.j()+1, z, c);
+	  }
+	  break;
+	default:
+	  break;
+	}
+
+	rec1_it = rec1_cache.insert(rec1_lb, value_type(lambda, c));
+	
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
+	rec1_misses++;
+	if ((rec1_hits+rec1_misses)%1000000 == 0)
+	  {
+	    cout << "[LdomainBasis reconstruct_1 cache (hits/misses/total/hit ratio): ("
+		 << rec1_hits << "/"
+		 << rec1_misses << "/"
+		 << rec1_hits+rec1_misses << "/"
+		 << (double) rec1_hits/(rec1_hits+rec1_misses)
+		 << ")"
+		 << "]"
+		 << endl;
+	  }
+#endif
+
       }
-      break;
-    case 2:
-      // (0,1)-wavelet
+    else
       {
-	std::map<size_type,double> x,y,z,z1,z2;
-	x.insert(std::pair<size_type,double>(lambda.number()-Deltasize(lambda.j()), 1.0));
-	apply_Mj1c_01(lambda.j(), x, y); // generator coeffs of initial stable completion
-	apply_Mj0T_transposed(lambda.j(),  y, z1);
-	apply_Mj0            (lambda.j(), z1, z2);
- 	add_maps(y, z2, z, 1.0, -1.0);
-	map_to_vector(lambda.j()+1, z, c);
+	// cache hit, copy the precomputed coefficients
+	c = rec1_it->second;
+
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
+	rec1_hits++;
+	if ((rec1_hits+rec1_misses)%1000000 == 0)
+	  {
+	    cout << "[LdomainBasis reconstruct_1 cache (hits/misses/total/hit ratio): ("
+		 << rec1_hits << "/"
+		 << rec1_misses << "/"
+		 << rec1_hits+rec1_misses << "/"
+		 << (double) rec1_hits/(rec1_hits+rec1_misses)
+		 << ")"
+		 << "]"
+		 << endl;
+	  }
+#endif
       }
-      break;
-    case 3:
-      // (1,1)-wavelet
-      {
-	std::map<size_type,double> x,y,z,z1,z2;
-	x.insert(std::pair<size_type,double>(lambda.number()-Deltasize(lambda.j())-Nabla01size(lambda.j())-Nabla10size(lambda.j()), 1.0));
-	apply_Mj1c_11(lambda.j(), x, y); // generator coeffs of initial stable completion
-	apply_Mj0T_transposed(lambda.j(),  y, z1);
-	apply_Mj0            (lambda.j(), z1, z2);
- 	add_maps(y, z2, z, 1.0, -1.0);
-	map_to_vector(lambda.j()+1, z, c);
-      }
-      break;
-    default:
-      break;
-    }
   }
 
+  template <int d, int dT>
+  void
+  LDomainBasis<SplineBasis<d,dT,DS_construction> >::reconstruct_1
+  (const Index& lambda, const int j,
+   typename InfiniteVector<double,Index>::const_iterator& it_begin,
+   typename InfiniteVector<double,Index>::const_iterator& it_end) const
+  {
+    assert(j == lambda.j()+1); // we only support a level difference of one
+    
+    typedef std::map<size_type,double> V;
+    
+    // check whether the result already exists in the cache
+    typename Reconstruct1Cache::iterator rec1_lb(rec1_cache.lower_bound(lambda));
+    typename Reconstruct1Cache::iterator rec1_it(rec1_lb);
+    if (rec1_lb == rec1_cache.end() ||
+	rec1_cache.key_comp()(lambda, rec1_lb->first))
+      {
+     	// compute supp(psi_lambda) and insert it into the cache
+	typedef typename Reconstruct1Cache::value_type value_type;
+
+	InfiniteVector<double,Index> c;
+
+	const unsigned int Deltaj   = basis1d().Deltasize(j);
+	const MultiIndex<int,2> zero(0,0); // e=(0,0)
+	
+	const int ecode(lambda.e()[0]+2*lambda.e()[1]);
+	switch(ecode) {
+	case 0:
+	  // generator
+	  basis1d().Mj0_.set_level(lambda.j());
+	  switch(lambda.p()) {
+	  case 0: {
+	    // psi_lambda decomposes into generators on patch 0 alone
+	    // apply kron(M#,M#), cf. KroneckerMatrix::apply()
+	    // 1. first decide which block number and subindex corresponds to the given generator
+	    const size_type block_nr    = lambda.k()[0]-(basis1d().DeltaLmin()+1);
+	    const size_type block_index = lambda.k()[1]-(basis1d().DeltaLmin()+1);
+	    
+	    // 2. get column of second factor M#
+	    V z1, z2, z3;
+	    z1.insert(std::pair<size_type,double>(block_index, 1.0));
+	    basis1d().Mj0_.apply_central_block(z1, z2);
+	    
+	    // 3. get column of first factor M#
+	    z1.clear();
+	    z1.insert(std::pair<size_type,double>(block_nr, 1.0));
+	    basis1d().Mj0_.apply_central_block(z1, z3);
+	    
+	    // 4. combine results
+	    for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+	      for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+		c.add_coefficient(Index(lambda.j()+1,
+					zero,
+					0,
+					MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
+							  basis1d().DeltaLmin()+1+it2->first),
+					this),
+				  it2->second * it3->second);	
+	  }
+	    break;
+	  case 1: {
+	    // psi_lambda decomposes into generators on patch 1 alone
+	    // apply kron(M#,M#)
+	    const size_type block_nr    = lambda.k()[0]-(basis1d().DeltaLmin()+1);
+	    const size_type block_index = lambda.k()[1]-(basis1d().DeltaLmin()+1);
+	    
+	    V z1, z2, z3;
+	    z1.insert(std::pair<size_type,double>(block_index, 1.0));
+	    basis1d().Mj0_.apply_central_block(z1, z2);
+	    
+	    z1.clear();
+	    z1.insert(std::pair<size_type,double>(block_nr, 1.0));
+	    basis1d().Mj0_.apply_central_block(z1, z3);
+	    
+	    for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+	      for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+		c.add_coefficient(Index(lambda.j()+1,
+					zero,
+					1,
+					MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
+							  basis1d().DeltaLmin()+1+it2->first),
+					this),
+				  it2->second * it3->second);	
+	  }
+	    break;
+	  case 2: {
+	    // psi_lambda decomposes into generators on patch 2 alone
+	    // apply kron(M#,M#)
+	    const size_type block_nr    = lambda.k()[0]-(basis1d().DeltaLmin()+1);
+	    const size_type block_index = lambda.k()[1]-(basis1d().DeltaLmin()+1);
+	    
+	    V z1, z2, z3;
+	    z1.insert(std::pair<size_type,double>(block_index, 1.0));
+	    basis1d().Mj0_.apply_central_block(z1, z2);
+	    
+	    z1.clear();
+	    z1.insert(std::pair<size_type,double>(block_nr, 1.0));
+	    basis1d().Mj0_.apply_central_block(z1, z3);
+	    
+	    for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+	      for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+		c.add_coefficient(Index(lambda.j()+1,
+					zero,
+					2,
+					MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
+							  basis1d().DeltaLmin()+1+it2->first),
+					this),
+				  it2->second * it3->second);	
+	  }
+	    break;
+	  case 3: {
+	    // psi_lambda decomposes into generators on patches 0,1 and 3
+	    
+	    // contribution from patch 0
+	    //
+	    // apply kron(M#,ML):
+	    // 1. get column of second factor ML
+	    V z1, z2, z3;
+	    z1.insert(std::pair<size_type,double>(0, 1.0));
+	    basis1d().Mj0_.apply(z1, z2); // we have to neglect the first entry of z2 later
+	    
+	    // 2. get column of first factor M#
+	    z1.clear();
+	    const size_type block_nr = lambda.k()[0]-(basis1d().DeltaLmin()+1);
+	    z1.insert(std::pair<size_type,double>(block_nr, 1.0));
+	    basis1d().Mj0_.apply_central_block(z1, z3);
+	    
+	    // 3. combine results
+	    for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+	      for (V::const_iterator it2(++(z2.begin())); it2 != z2.end(); ++it2)
+		c.add_coefficient(Index(lambda.j()+1,
+					zero,
+					0,
+					MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
+							  basis1d().DeltaLmin()+it2->first), // note the "-1"
+					this),
+				  it2->second * it3->second * M_SQRT1_2);	
+	    
+	    // contribution from patch 1
+	    //
+	    // apply kron(M#,MR):
+	    // 1. get column of second factor MR
+	    z1.clear();
+	    z1.insert(std::pair<size_type,double>(Deltaj-1, 1.0));
+	    z2.clear();
+	    basis1d().Mj0_.apply(z1, z2); // we have to neglect the last entry of z2 later
+	    
+	    // 2. get column of first factor M#: this has already been done above
+	    
+	    // 3. combine results
+	    for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+	      for (V::reverse_iterator it2(++(z2.rbegin())); it2 != z2.rend(); ++it2)
+		c.add_coefficient(Index(lambda.j()+1,
+					zero,
+					1,
+					MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
+							  basis1d().DeltaLmin()+it2->first), // note the "-1"
+					this),
+				  it2->second * it3->second * M_SQRT1_2);	
+	    
+	    // contribution from patch 3
+	    //
+	    // apply kron(M#,Mtopleft):
+	    // 1. get column of first factor M#: this has already been done above
+	    
+	    // 2. get top left entry of Mj0
+	    const double Mtopleft = basis1d().Mj0_.get_entry(0,0);
+	    
+	    // 3. combine results
+	    for (V::const_iterator it3(z3.begin()); it3 != z3.end(); ++it3)
+	      c.add_coefficient(Index(lambda.j()+1,
+				      zero,
+				      3,
+				      MultiIndex<int,2>(basis1d().DeltaLmin()+1+it3->first,
+							0),
+				      this),
+				it3->second * Mtopleft);
+	  }
+	    break;
+	  case 4: {
+	    // psi_lambda decomposes into generators on patches 1,2 and 4
+	    
+	    // contribution from patch 1
+	    //
+	    // apply kron(MR,M#):
+	    // 1. get column of second factor M#
+	    V z1, z2, z3;
+	    const size_type block_index = lambda.k()[1]-(basis1d().DeltaLmin()+1);
+	    z1.insert(std::pair<size_type,double>(block_index, 1.0));
+	    basis1d().Mj0_.apply_central_block(z1, z2);
+	    
+	    // 2. get column of first factor MR
+	    z1.clear();
+	    z1.insert(std::pair<size_type,double>(Deltaj-1, 1.0));
+	    basis1d().Mj0_.apply(z1, z3); // we have to neglect the last entry of z3 later
+	    
+	    // 3. combine results
+	    for (V::reverse_iterator it3(++(z3.rbegin())); it3 != z3.rend(); ++it3)
+	      for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+		c.add_coefficient(Index(lambda.j()+1,
+					zero,
+					1,
+					MultiIndex<int,2>(basis1d().DeltaLmin()+it3->first, // note the "-1"
+							  basis1d().DeltaLmin()+1+it2->first), 
+					this),
+				  it2->second * it3->second * M_SQRT1_2);	
+	    
+	    // contribution from patch 2
+	    //
+	    // apply kron(ML,M#):
+	    // 1. get column of second factor M#: this has already been done above
+	    
+	    // 2. get column of first factor ML
+	    z1.clear();
+	    z1.insert(std::pair<size_type,double>(0, 1.0));
+	    z3.clear();
+	    basis1d().Mj0_.apply(z1, z3); // we have to neglect the first entry of z3 later
+	    
+	    // 3. combine results
+	    for (V::const_iterator it3(++(z3.begin())); it3 != z3.end(); ++it3)
+	      for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+		c.add_coefficient(Index(lambda.j()+1,
+					zero,
+					2,
+					MultiIndex<int,2>(basis1d().DeltaLmin()+it3->first, // note the "-1"
+							  basis1d().DeltaLmin()+1+it2->first), 
+					this),
+				  it2->second * it3->second * M_SQRT1_2);	
+	    
+	    // contribution from patch 4
+	    //
+	    // apply kron(Mtopleft,M#):
+	    // 1. get column of second factor M#: this has already been done above
+	    
+	    // 2. get top left entry of Mj0
+	    const double Mtopleft = basis1d().Mj0_.get_entry(0,0);
+	    
+	    // 3. combine results
+	    for (V::const_iterator it2(z2.begin()); it2 != z2.end(); ++it2)
+	      c.add_coefficient(Index(lambda.j()+1,
+				      zero,
+				      4,
+				      MultiIndex<int,2>(0,
+							basis1d().DeltaLmin()+1+it2->first),
+				      this),
+				it2->second * Mtopleft);
+	  }
+	    break;
+	  default:
+	    break;
+	  }
+	  break;
+	case 1:
+	  // (1,0)-wavelet
+	  {
+	    std::map<size_type,double> x,y,z,z1,z2;
+	    x.insert(std::pair<size_type,double>(lambda.number()-Deltasize(lambda.j())-Nabla01size(lambda.j()), 1.0));
+	    apply_Mj1c_10(lambda.j(), x, y); // generator coeffs of initial stable completion
+	    apply_Mj0T_transposed(lambda.j(),  y, z1);
+	    apply_Mj0            (lambda.j(), z1, z2);
+	    add_maps(y, z2, z, 1.0, -1.0);
+	    map_to_vector(lambda.j()+1, z, c);
+	  }
+	  break;
+	case 2:
+	  // (0,1)-wavelet
+	  {
+	    std::map<size_type,double> x,y,z,z1,z2;
+	    x.insert(std::pair<size_type,double>(lambda.number()-Deltasize(lambda.j()), 1.0));
+	    apply_Mj1c_01(lambda.j(), x, y); // generator coeffs of initial stable completion
+	    apply_Mj0T_transposed(lambda.j(),  y, z1);
+	    apply_Mj0            (lambda.j(), z1, z2);
+	    add_maps(y, z2, z, 1.0, -1.0);
+	    map_to_vector(lambda.j()+1, z, c);
+	  }
+	  break;
+	case 3:
+	  // (1,1)-wavelet
+	  {
+	    std::map<size_type,double> x,y,z,z1,z2;
+	    x.insert(std::pair<size_type,double>(lambda.number()-Deltasize(lambda.j())-Nabla01size(lambda.j())-Nabla10size(lambda.j()), 1.0));
+	    apply_Mj1c_11(lambda.j(), x, y); // generator coeffs of initial stable completion
+	    apply_Mj0T_transposed(lambda.j(),  y, z1);
+	    apply_Mj0            (lambda.j(), z1, z2);
+	    add_maps(y, z2, z, 1.0, -1.0);
+	    map_to_vector(lambda.j()+1, z, c);
+	  }
+	  break;
+	default:
+	  break;
+	}
+
+	rec1_it = rec1_cache.insert(rec1_lb, value_type(lambda, c));
+	
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
+	rec1_misses++;
+	if ((rec1_hits+rec1_misses)%1000000 == 0)
+	  {
+	    cout << "[LdomainBasis reconstruct_1 cache (hits/misses/total/hit ratio): ("
+		 << rec1_hits << "/"
+		 << rec1_misses << "/"
+		 << rec1_hits+rec1_misses << "/"
+		 << (double) rec1_hits/(rec1_hits+rec1_misses)
+		 << ")"
+		 << "]"
+		 << endl;
+	  }
+#endif
+
+      }
+    else
+      {
+	// cache hit
+
+#if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
+	rec1_hits++;
+	if ((rec1_hits+rec1_misses)%1000000 == 0)
+	  {
+	    cout << "[LdomainBasis reconstruct_1 cache (hits/misses/total/hit ratio): ("
+		 << rec1_hits << "/"
+		 << rec1_misses << "/"
+		 << rec1_hits+rec1_misses << "/"
+		 << (double) rec1_hits/(rec1_hits+rec1_misses)
+		 << ")"
+		 << "]"
+		 << endl;
+	  }
+#endif
+      }
+
+    it_begin = rec1_it->second.begin();
+    it_end = rec1_it->second.end();
+  }
+  
   template <int d, int dT>
   void
   LDomainBasis<SplineBasis<d,dT,DS_construction> >::reconstruct_1
@@ -784,47 +1168,50 @@ namespace WaveletTL
   {
     // compute the generator expansion of psi_lambda
     InfiniteVector<double,Index> gcoeffs;
+    typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()), gcoeffs_end(gcoeffs.begin());
     const int ecode = lambda.e()[0]+2*lambda.e()[1];
     const int level = lambda.j() + (ecode == 0 ? 0 : 1);
-    if (ecode == 0)
+    if (ecode == 0) {
       gcoeffs.set_coefficient(lambda, 1.0);
-    else
-      reconstruct_1(lambda, level, gcoeffs);
+      it = gcoeffs.begin();
+      gcoeffs_end = gcoeffs.end();
+    } else {
+      reconstruct_1(lambda, level, it, gcoeffs_end);
+    }
     
     const int nx(xlist.size());
     const int ny(ylist.size());
-    Array1D<double> fx(nx, false);
-    Array1D<double> fy(ny, false);
+    Array1D<double> fx(nx);
+    Array1D<double> fy(ny);
 
     funcvalues.resize(nx*ny);
     for (int i = 0; i < nx*ny; i++)
       funcvalues[i] = 0;
 
     // iterate through the generators and collect the point values on patch <patch>
-    for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin());
-	 it != gcoeffs.end(); ++it) {
+    for (; it != gcoeffs_end; ++it) {
       if (it.index().p() == patch) { // i.e. lambda.p <= 2 and lambda.p == p
-	// "patch generator"
-	basis1d().evaluate(0,
-			   level, 0, it.index().k()[0],
-			   xlist,
-			   fx);
+ 	// "patch generator"
+ 	basis1d().evaluate(0,
+ 			   level, 0, it.index().k()[0],
+ 			   xlist,
+ 			   fx);
 	
-	basis1d().evaluate(0,
-			   level, 0, it.index().k()[1],
-			   ylist,
-			   fy);
+ 	basis1d().evaluate(0,
+ 			   level, 0, it.index().k()[1],
+ 			   ylist,
+ 			   fy);
 
-	for (int n = 0, id = 0; n < nx; n++) {
-	  if (fx[n] != 0) {
-	    const double help(it->second * fx[n]);
-	    for (int m = 0; m < ny; m++, id++) {
-	      funcvalues[id] += help * fx[m];
-	    }
-	  } else {
-	    id += ny;
+ 	for (int n = 0, id = 0; n < nx; n++) {
+  	  if (fx[n] != 0) {
+  	    const double help(*it * fx[n]);
+  	    for (int m = 0; m < ny; m++, id++) {
+ 	      funcvalues[id] += help * fy[m];
+  	    }
+  	  } else {
+  	    id += ny;
 	  }
-	}	  
+ 	}	  
       } else {
 	switch(it.index().p()) {
 	case 3:
@@ -840,12 +1227,12 @@ namespace WaveletTL
 				 level, 0, basis1d().DeltaLmin(),
 				 ylist,
 				 fy);
-	      
+	    
 	      for (int n = 0, id = 0; n < nx; n++) {
-		if (fx[n] != 0) {
-		  const double help(M_SQRT1_2 * it->second * fx[n]);
+ 		if (fx[n] != 0) {
+		  const double help(M_SQRT1_2 * *it * fx[n]);
 		  for (int m = 0; m < ny; m++, id++) {
-		    funcvalues[id] += help * fx[m];
+		    funcvalues[id] += help * fy[m];
 		  }
 		} else {
 		  id += ny;
@@ -860,14 +1247,14 @@ namespace WaveletTL
 	      
 	      basis1d().evaluate(0,
 				 level, 0, basis1d().DeltaRmax(level),
-				 ylist,
+ 				 ylist,
 				 fy);
 
 	      for (int n = 0, id = 0; n < nx; n++) {
 		if (fx[n] != 0) {
-		  const double help(M_SQRT1_2 * it->second * fx[n]);
+		  const double help(M_SQRT1_2 * *it * fx[n]);
 		  for (int m = 0; m < ny; m++, id++) {
-		    funcvalues[id] += help * fx[m];
+		    funcvalues[id] += help * fy[m];
 		  }
 		} else {
 		  id += ny;
@@ -895,9 +1282,9 @@ namespace WaveletTL
 
 	      for (int n = 0, id = 0; n < nx; n++) {
 		if (fx[n] != 0) {
-		  const double help(M_SQRT1_2 * it->second * fx[n]);
+		  const double help(M_SQRT1_2 * *it * fx[n]);
 		  for (int m = 0; m < ny; m++, id++) {
-		    funcvalues[id] += help * fx[m];
+		    funcvalues[id] += help * fy[m];
 		  }
 		} else {
 		  id += ny;
@@ -914,12 +1301,12 @@ namespace WaveletTL
 				 level, 0, it.index().k()[1],
 				 ylist,
 				 fy);
-
+	      
 	      for (int n = 0, id = 0; n < nx; n++) {
 		if (fx[n] != 0) {
-		  const double help(M_SQRT1_2 * it->second * fx[n]);
+		  const double help(M_SQRT1_2 * *it * fx[n]);
 		  for (int m = 0; m < ny; m++, id++) {
-		    funcvalues[id] += help * fx[m];
+		    funcvalues[id] += help * fy[m];
 		  }
 		} else {
 		  id += ny;

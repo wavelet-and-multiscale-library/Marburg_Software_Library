@@ -107,7 +107,7 @@ int main()
   f = new ConstantFunction<2>(Vector<double>(1, "1"));
 #endif
 
-  const int jmax = basis.j0();
+  const int jmax = basis.j0()+1;
   
   typedef LDomainGramian<Basis1D> Problem;
   Problem problem(basis, InfiniteVector<double, Index>());

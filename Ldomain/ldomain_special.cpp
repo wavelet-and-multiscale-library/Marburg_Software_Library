@@ -302,8 +302,10 @@ namespace WaveletTL
 	  // compute the expansion coefficients of psi_lambda w.r.t. the
 	  // generators of the next higher scale, then aggregating all the supports
 	  // (of course, this is a brute force solution...)
- 	  InfiniteVector<double, Index> gcoeffs;
-	  reconstruct_1(lambda, lambdaj+1, gcoeffs);
+	  
+ 	  InfiniteVector<double, Index> gcoeffs; // dummy object to let the following line compile
+	  typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()), gcoeffs_end(gcoeffs.begin());
+	  reconstruct_1(lambda, lambdaj+1, it, gcoeffs_end);
 	  
 	  Support tempsupp;
 	  
@@ -312,8 +314,7 @@ namespace WaveletTL
 	    supp.xmin[p] = -1;
 	  }
 	  
-	  for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
-		 itend(gcoeffs.end()); it != itend; ++it)
+	  for (; it != gcoeffs_end; ++it)
 	    {
 	      // compute supp(psi_mu)
 	      support(it.index(), tempsupp);

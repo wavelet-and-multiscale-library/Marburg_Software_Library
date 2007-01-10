@@ -24,9 +24,21 @@ namespace WaveletTL
     
     bool r = false;
     
+#if 1
+    supp.j = supp1.j;
+    int diff1 = 0;
+    int diff2 = supp.j-supp2.j;
+    if (supp2.j>supp1.j) {
+      supp.j = supp2.j;
+      diff1 = supp.j-supp1.j;
+      diff2 = 0;
+    }
+#else
+    // old version, slightly slower
     supp.j = std::max(supp1.j, supp2.j);
     const int diff1 = supp.j-supp1.j;
     const int diff2 = supp.j-supp2.j;
+#endif
     
     for (int p = 0; p <= 2; p++) {
       if (supp1.xmin[p] != -1 && supp2.xmin[p] != -1) {

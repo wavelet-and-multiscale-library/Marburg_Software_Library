@@ -160,7 +160,7 @@ $(EXEOBJF1): %.o: %.cpp
 ifeq ($(DEBUGMODE),on)
 	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
 else
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -DNDEBUG -o $@ $<
 endif
 
 $(EXES1): %: %.o
@@ -174,7 +174,7 @@ $(EXEOBJF2): %.o: %.cpp
 ifeq ($(DEBUGMODE),on)
 	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
 else
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -DNDEBUG -o $@ $<
 endif
 
 $(EXES2): %: %.o
@@ -188,7 +188,7 @@ $(EXEOBJF3): %.o: %.cpp
 ifeq ($(DEBUGMODE),on)
 	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
 else
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -DNDEBUG -o $@ $<
 endif
 
 $(EXES3): %: %.o
@@ -202,7 +202,7 @@ $(EXEOBJF4): %.o: %.cpp
 ifeq ($(DEBUGMODE),on)
 	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
 else
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -DNDEBUG -o $@ $<
 endif
 
 $(EXES4): %: %.o
@@ -216,7 +216,7 @@ $(EXEOBJF5): %.o: %.cpp
 ifeq ($(DEBUGMODE),on)
 	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
 else
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -DNDEBUG -o $@ $<
 endif
 
 $(EXES5): %: %.o
@@ -230,7 +230,7 @@ $(EXEOBJF6): %.o: %.cpp
 ifeq ($(DEBUGMODE),on)
 	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
 else
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -DNDEBUG -o $@ $<
 endif
 
 $(EXES6): %: %.o
@@ -244,7 +244,7 @@ $(EXEOBJF7): %.o: %.cpp
 ifeq ($(DEBUGMODE),on)
 	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
 else
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -DNDEBUG -o $@ $<
 endif
 
 $(EXES7): %: %.o

@@ -173,16 +173,12 @@ namespace WaveletTL
  	// wavelet in question, we mimic a reconstruct_1() call:
 	
 	typedef typename Vector<double>::size_type size_type;
-	size_type number_lambda = Deltasize(lambda.j())+lambda.k()-Nablamin();
 	std::map<size_type,double> wc, gc;
-	wc[number_lambda] = 1.0;
+	wc.insert(std::pair<size_type,double>(Deltasize(lambda.j())+lambda.k()-Nablamin(), 1.0));
 	apply_Mj(lambda.j(), wc, gc);
-	typedef typename SplineBasis<d,dT,DS_construction>::Index Index;
-	const size_type kleft = DeltaLmin()+gc.begin()->first;
-	const size_type kright = DeltaLmin()+gc.rbegin()->first;
 	int dummy;
- 	support(Index(lambda.j()+1, 0, kleft, this), k1, dummy);
- 	support(Index(lambda.j()+1, 0, kright, this), dummy, k2);
+ 	support(Index(lambda.j()+1, 0, DeltaLmin()+gc.begin()->first, this), k1, dummy);
+ 	support(Index(lambda.j()+1, 0, DeltaLmin()+gc.rbegin()->first, this), dummy, k2);
       }
   }  
 
@@ -725,39 +721,74 @@ namespace WaveletTL
       // generator
       if (lambda.k() < DeltaLmin()+(int)SplineBasisData<d,dT,DS_construction>::CLA_.column_dimension()) {
 	// left boundary generator
-	for (unsigned int i(0); i < SplineBasisData<d,dT,DS_construction>::CLA_.row_dimension(); i++) {
-	  const double help(SplineBasisData<d,dT,DS_construction>::CLA_.get_entry(i, lambda.k()-DeltaLmin()));
-	  // 	  if (help != 0)
-	  for (unsigned int m(0); m < points.size(); m++)
-	    values[m] += help * (derivative == 0
-				 ? EvaluateCardinalBSpline_td<d>  (lambda.j(), 1-ell2<d>()+i, points[m])
-				 : EvaluateCardinalBSpline_td_x<d>(lambda.j(), 1-ell2<d>()+i, points[m]));
+	switch(derivative) {
+	case 0:
+	  for (unsigned int i(0); i < SplineBasisData<d,dT,DS_construction>::CLA_.row_dimension(); i++) {
+	    const double help(SplineBasisData<d,dT,DS_construction>::CLA_.get_entry(i, lambda.k()-DeltaLmin()));
+	    if (help != 0)
+	      for (unsigned int m(0); m < points.size(); m++)
+		values[m] += help * EvaluateCardinalBSpline_td<d>  (lambda.j(), 1-ell2<d>()+i, points[m]);
+	  }
+	  break;
+	case 1:
+	  for (unsigned int i(0); i < SplineBasisData<d,dT,DS_construction>::CLA_.row_dimension(); i++) {
+	    const double help(SplineBasisData<d,dT,DS_construction>::CLA_.get_entry(i, lambda.k()-DeltaLmin()));
+	    if (help != 0)
+	      for (unsigned int m(0); m < points.size(); m++)
+		values[m] += help * EvaluateCardinalBSpline_td_x<d>(lambda.j(), 1-ell2<d>()+i, points[m]);
+	  }
+	  break;
+	default:
+	  break;
 	}
       }	else {
 	if (lambda.k() > DeltaRmax(lambda.j())-(int)SplineBasisData<d,dT,DS_construction>::CRA_.column_dimension()) {
 	  // right boundary generator
-	  for (unsigned int i(0); i < SplineBasisData<d,dT,DS_construction>::CRA_.row_dimension(); i++) {
-	    const double help(SplineBasisData<d,dT,DS_construction>::CRA_.get_entry(i, DeltaRmax(lambda.j())-lambda.k()));
-	    // 	    if (help != 0)
-	    for (unsigned int m(0); m < points.size(); m++)
-	      values[m] += help * (derivative == 0
-				   ? EvaluateCardinalBSpline_td<d>  (lambda.j(), (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2<d>()+i), points[m])
-				   : EvaluateCardinalBSpline_td_x<d>(lambda.j(), (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2<d>()+i), points[m]));
+	  switch(derivative) {
+	  case 0:
+	    for (unsigned int i(0); i < SplineBasisData<d,dT,DS_construction>::CRA_.row_dimension(); i++) {
+	      const double help(SplineBasisData<d,dT,DS_construction>::CRA_.get_entry(i, DeltaRmax(lambda.j())-lambda.k()));
+	      if (help != 0) {
+		const int k = (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2<d>()+i);
+		for (unsigned int m(0); m < points.size(); m++)
+		  values[m] += help * EvaluateCardinalBSpline_td<d>  (lambda.j(), k, points[m]);
+	      }
+	    }
+	    break;
+	  case 1:
+	    for (unsigned int i(0); i < SplineBasisData<d,dT,DS_construction>::CRA_.row_dimension(); i++) {
+	      const double help(SplineBasisData<d,dT,DS_construction>::CRA_.get_entry(i, DeltaRmax(lambda.j())-lambda.k()));
+	      if (help != 0) {
+		const int k = (1<<lambda.j())-ell1<d>()-ell2<d>()-(1-ell2<d>()+i);
+		for (unsigned int m(0); m < points.size(); m++)
+		  values[m] += help * EvaluateCardinalBSpline_td_x<d>(lambda.j(), k, points[m]);
+	      }
+	    }
+	    break;
+	  default:
+	    break;
 	  }
 	} else {
 	  // inner generator
-	  for (unsigned int m(0); m < points.size(); m++)
-	    values[m] = (derivative == 0
-			 ? EvaluateCardinalBSpline_td<d>  (lambda.j(), lambda.k(), points[m])
-			 : EvaluateCardinalBSpline_td_x<d>(lambda.j(), lambda.k(), points[m]));
+	  switch(derivative) {
+	  case 0:
+	    for (unsigned int m(0); m < points.size(); m++)
+	      values[m] = EvaluateCardinalBSpline_td<d>  (lambda.j(), lambda.k(), points[m]);
+	    break;
+	  case 1:
+	    for (unsigned int m(0); m < points.size(); m++)
+	      values[m] = EvaluateCardinalBSpline_td_x<d>(lambda.j(), lambda.k(), points[m]);
+	    break;
+	  default:
+	    break;
+	  }
 	}
       }
     } else {
       // wavelet, switch to generator representation
       typedef typename Vector<double>::size_type size_type;
-      size_type number_lambda = Deltasize(lambda.j())+lambda.k()-Nablamin();
       std::map<size_type,double> wc, gc;
-      wc[number_lambda] = 1.0;
+      wc.insert(std::pair<size_type,double>(Deltasize(lambda.j())+lambda.k()-Nablamin(), 1.0));
       apply_Mj(lambda.j(), wc, gc);
       typedef typename SplineBasis<d,dT,DS_construction>::Index Index;
       Array1D<double> help(points.size());
@@ -789,22 +820,22 @@ namespace WaveletTL
 	// left boundary generator
 	for (unsigned int i(0); i < SplineBasisData<d,dT,DS_construction>::CLA_.row_dimension(); i++) {
 	  const double help(SplineBasisData<d,dT,DS_construction>::CLA_.get_entry(i, k-DeltaLmin()));
-	  // 	  if (help != 0)
-	  for (unsigned int m(0); m < points.size(); m++)
-	    values[m] += help * (derivative == 0
-				 ? EvaluateCardinalBSpline_td<d>  (j, 1-ell2<d>()+i, points[m])
-				 : EvaluateCardinalBSpline_td_x<d>(j, 1-ell2<d>()+i, points[m]));
+	  if (help != 0)
+	    for (unsigned int m(0); m < points.size(); m++)
+	      values[m] += help * (derivative == 0
+				   ? EvaluateCardinalBSpline_td<d>  (j, 1-ell2<d>()+i, points[m])
+				   : EvaluateCardinalBSpline_td_x<d>(j, 1-ell2<d>()+i, points[m]));
 	}
       }	else {
 	if (k > DeltaRmax(j)-(int)SplineBasisData<d,dT,DS_construction>::CRA_.column_dimension()) {
 	  // right boundary generator
 	  for (unsigned int i(0); i < SplineBasisData<d,dT,DS_construction>::CRA_.row_dimension(); i++) {
 	    const double help(SplineBasisData<d,dT,DS_construction>::CRA_.get_entry(i, DeltaRmax(j)-k));
-	    // 	    if (help != 0)
-	    for (unsigned int m(0); m < points.size(); m++)
-	      values[m] += help * (derivative == 0
-				   ? EvaluateCardinalBSpline_td<d>  (j, (1<<j)-ell1<d>()-ell2<d>()-(1-ell2<d>()+i), points[m])
-				   : EvaluateCardinalBSpline_td_x<d>(j, (1<<j)-ell1<d>()-ell2<d>()-(1-ell2<d>()+i), points[m]));
+ 	    if (help != 0)
+	      for (unsigned int m(0); m < points.size(); m++)
+		values[m] += help * (derivative == 0
+				     ? EvaluateCardinalBSpline_td<d>  (j, (1<<j)-ell1<d>()-ell2<d>()-(1-ell2<d>()+i), points[m])
+				     : EvaluateCardinalBSpline_td_x<d>(j, (1<<j)-ell1<d>()-ell2<d>()-(1-ell2<d>()+i), points[m]));
 	  }
 	} else {
 	  // inner generator

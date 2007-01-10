@@ -18,12 +18,17 @@ namespace WaveletTL
 
     // compute the generator expansion of psi_lambda
     InfiniteVector<double, Index> gcoeffs;
+    typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()), gcoeffs_end(gcoeffs.begin());
+
     const int ecode(lambda.e()[0]+2*lambda.e()[1]);
     const int level = lambda.j() + (ecode == 0 ? 0 : 1);
-    if (ecode == 0)
+    if (ecode == 0) {
       gcoeffs.set_coefficient(lambda, 1.0);
+      it = gcoeffs.begin();
+      gcoeffs_end = gcoeffs.end();
+    }
     else
-      basis.reconstruct_1(lambda, level, gcoeffs);
+      basis.reconstruct_1(lambda, level, it, gcoeffs_end);
 
     // iterate through the involved generators and collect the point evaluations
     const int N_Gauss = 5; // number of Gauss points in x- and y-direction (per sing. supp. subpatch)
@@ -33,8 +38,7 @@ namespace WaveletTL
     Array1D<double> gauss_points0, gauss_points1, gauss_weights0, gauss_weights1,
       psi_mu_0_values, psi_mu_1_values;
     
-    for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
-  	   itend(gcoeffs.end()); it != itend; ++it)
+    for (; it != gcoeffs_end; ++it)
       {
  	// compute the support of the generator corresponding to mu=it.index()
   	support(basis, it.index(), supp);

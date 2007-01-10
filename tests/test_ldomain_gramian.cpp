@@ -8,7 +8,7 @@
 #include <numerics/iteratsolv.h>
 #include <numerics/bezier.h>
 #include <numerics/corner_singularity.h>
-#define _WAVELETTL_LDOMAINBASIS_VERBOSITY 1
+#define _WAVELETTL_LDOMAINBASIS_VERBOSITY 0
 #include <Ldomain/ldomain_basis.h>
 #include <Ldomain/ldomain_evaluate.h>
 #include <Ldomain/ldomain_expansion.h>
@@ -43,7 +43,7 @@ int main()
 
   typedef Basis::Index Index;
 
-  const int solution = 1;
+  const int solution = 4;
   Function<2> *uexact = 0, *f = 0;
   switch(solution) {
   case 1:
@@ -107,7 +107,7 @@ int main()
   f = new ConstantFunction<2>(Vector<double>(1, "1"));
 #endif
 
-  const int jmax = basis.j0()+1;
+  const int jmax = basis.j0()+4;
   
   typedef LDomainGramian<Basis1D> Problem;
   Problem problem(basis, InfiniteVector<double, Index>());

@@ -113,6 +113,41 @@ namespace MathTL
   }
   
   /*!
+    evaluate the first derivative N_d'(x) of a cardinal B-spline
+    (fastest possible variant)
+  */
+  template <int d>
+  inline
+  double EvaluateCardinalBSpline_x(const double x)
+  {
+    return (x < 0 || x >= d ? 0
+	    : EvaluateCardinalBSpline<d-1>(x) - EvaluateCardinalBSpline<d-1>(x-1));
+  }
+  
+  /*!
+    evaluate the first derivative N_2'(x) of a cardinal B-spline
+    (fastest possible variant)
+  */
+  template <>
+  inline
+  double EvaluateCardinalBSpline_x<2>(const double x)
+  {
+    if (x < 0 || x >= 2)
+      return 0;
+    return (x < 1 ? 1: -1);
+  }
+
+  /*!
+    evaluate the first derivative N_1'(x) of a cardinal B-spline
+  */
+  template <>
+  inline
+  double EvaluateCardinalBSpline_x<1>(const double x)
+  {
+    return 0;
+  }
+
+  /*!
     evaluate the first derivative N_d'(x-k) of a shifted cardinal B-spline
   */
   template <int d>
@@ -120,7 +155,7 @@ namespace MathTL
   double EvaluateCardinalBSpline_x(const int k, const double x)
   {
     if (x < k || x >= k+d)
-      return 0.;
+      return 0;
     return EvaluateCardinalBSpline<d-1>(k, x) - EvaluateCardinalBSpline<d-1>(k+1, x);
   }
 
@@ -141,7 +176,7 @@ namespace MathTL
   inline
   double EvaluateCardinalBSpline_x<1>(const int k, const double x)
   {
-    return 0.;
+    return 0;
   }
   
   /*!
@@ -156,7 +191,7 @@ namespace MathTL
     const double factor(1<<j);
     return factor * sqrt(factor) * EvaluateCardinalBSpline_x<d>(k, factor * x + d/2);
 #else
-    return twotothejhalf(3*j) * EvaluateCardinalBSpline_x<d>(k, (1<<j) * x + d/2);
+    return twotothejhalf(3*j) * EvaluateCardinalBSpline_x<d>((1<<j) * x - k + d/2);
 #endif
   }
 

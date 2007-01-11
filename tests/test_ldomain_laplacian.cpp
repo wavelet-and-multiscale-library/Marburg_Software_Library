@@ -43,7 +43,7 @@ int main()
 
   typedef Basis::Index Index;
 
-  const int solution = 2;
+  const int solution = 1;
   Function<2> *uexact = 0, *f = 0;
   switch(solution) {
   case 1:
@@ -119,7 +119,7 @@ int main()
   cout << "  ... done, time needed: " << time << " seconds" << endl;
   //   cout << "- Gramian matrix A=" << endl << A << endl;
 #if 0
-  A.matlab_output("Ldomain_gramian", "G", 1);
+  A.matlab_output("Ldomain_laplacian", "A", 1);
 #endif
 
   cout << "- set up right-hand side..." << endl;

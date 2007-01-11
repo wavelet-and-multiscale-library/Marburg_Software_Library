@@ -25,6 +25,7 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
+  inline
   const int
   LDomainBasis<SplineBasis<d,dT,DS_construction> >::Deltasize(const int j) const {
     const unsigned int Deltaj = basis1d().Deltasize(j);
@@ -32,18 +33,21 @@ namespace WaveletTL
   }
   
   template <int d, int dT>
+  inline
   const int
   LDomainBasis<SplineBasis<d,dT,DS_construction> >::Nabla01size(const int j) const {
     return (3*basis1d().Deltasize(j)-5)*(1<<j);
   }
   
   template <int d, int dT>
+  inline
   const int
   LDomainBasis<SplineBasis<d,dT,DS_construction> >::Nabla10size(const int j) const {
     return (3*basis1d().Deltasize(j)-5)*(1<<j);
   }
   
   template <int d, int dT>
+  inline
   const int
   LDomainBasis<SplineBasis<d,dT,DS_construction> >::Nabla11size(const int j) const {
     return 3*(1<<(2*j));
@@ -147,35 +151,33 @@ namespace WaveletTL
   {
     // check whether the supp(psi_lambda) already exists in the cache
     typename SupportCache::iterator supp_lb(supp_cache.lower_bound(lambda));
-    typename SupportCache::iterator supp_it(supp_lb);
     if (supp_lb == supp_cache.end() ||
 	supp_cache.key_comp()(lambda, supp_lb->first))
       {
 	// compute supp(psi_lambda) and insert it into the cache
 	typedef typename SupportCache::value_type value_type;
 
-	const int ecode = lambda.e()[0]+2*lambda.e()[1];
-	const int lambdaj = lambda.j();
+	int ecode = lambda.e()[0]+2*lambda.e()[1];
 	
 	if (ecode == 0) {
 	  // psi_lambda is a generator. Here we know by construction of the
 	  // composite basis that per patch, psi_lambda looks like a single
 	  // tensor product of 1D generators (possibly weighted by a factor).
 	  
-	  supp.j = lambdaj;
+	  supp.j = lambda.j();
 	  
 	  switch (lambda.p()) {
 	  case 0:
 	    // psi_lambda completely lives on patch 0
 	    
-	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+	    basis1d().support(typename IntervalBasis::Index(lambda.j(),
 							    0,
 							    lambda.k()[0],
 							    &basis1d()),
 			      supp.xmin[0],
 			      supp.xmax[0]);
 	    
-	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+	    basis1d().support(typename IntervalBasis::Index(lambda.j(),
 							    0,
 							    lambda.k()[1],
 							    &basis1d()),
@@ -188,14 +190,14 @@ namespace WaveletTL
 	  case 1:
 	    // psi_lambda completely lives on patch 1
 	    
-	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+	    basis1d().support(typename IntervalBasis::Index(lambda.j(),
 							    0,
 							    lambda.k()[0],
 							    &basis1d()),
 			      supp.xmin[1],
 			      supp.xmax[1]);
 	    
-	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+	    basis1d().support(typename IntervalBasis::Index(lambda.j(),
 							    0,
 							    lambda.k()[1],
 							    &basis1d()),
@@ -208,14 +210,14 @@ namespace WaveletTL
 	  case 2:
 	    // psi_lambda completely lives on patch 2
 	    
-	    basis1d().support(typename IntervalBasis::Index(lambdaj, 
+	    basis1d().support(typename IntervalBasis::Index(lambda.j(), 
 							    0,
 							    lambda.k()[0],
 							    &basis1d()),
 			      supp.xmin[2],
 			      supp.xmax[2]);
 	    
-	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+	    basis1d().support(typename IntervalBasis::Index(lambda.j(),
 							    0, 
 							    lambda.k()[1],
 							    &basis1d()),
@@ -228,30 +230,30 @@ namespace WaveletTL
 	  case 3:
 	    // psi_lambda lives on patches 0 and 1
 	    
-	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+	    basis1d().support(typename IntervalBasis::Index(lambda.j(),
 							    0,
 							    lambda.k()[0],
 							    &basis1d()),
 			      supp.xmin[0],
 			      supp.xmax[0]);
 	    
-	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+	    basis1d().support(typename IntervalBasis::Index(lambda.j(),
 							    0,
 							    basis1d().DeltaLmin(),
 							    &basis1d()),
 			      supp.ymin[0],
 			      supp.ymax[0]);
 	    
-	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+	    basis1d().support(typename IntervalBasis::Index(lambda.j(),
 							    0,
 							    lambda.k()[0],
 							    &basis1d()),
 			      supp.xmin[1],
 			      supp.xmax[1]);
 	    
-	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+	    basis1d().support(typename IntervalBasis::Index(lambda.j(),
 							    0,
-							    basis1d().DeltaRmax(lambdaj),
+							    basis1d().DeltaRmax(lambda.j()),
 							    &basis1d()),
 			      supp.ymin[1],
 			      supp.ymax[1]);
@@ -262,28 +264,28 @@ namespace WaveletTL
 	  case 4:
 	    // psi_lambda lives on patches 1 and 2
 	    
-	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+	    basis1d().support(typename IntervalBasis::Index(lambda.j(),
 							    0,
-							    basis1d().DeltaRmax(lambdaj),
+							    basis1d().DeltaRmax(lambda.j()),
 							    &basis1d()),
 			      supp.xmin[1],
 			      supp.xmax[1]);
 	    
-	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+	    basis1d().support(typename IntervalBasis::Index(lambda.j(),
 							    0,
 							    lambda.k()[1],
 							    &basis1d()),
 			      supp.ymin[1],
 			      supp.ymax[1]);
 	    
-	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+	    basis1d().support(typename IntervalBasis::Index(lambda.j(),
 							    0,
 							    basis1d().DeltaLmin(),
 							    &basis1d()),
 			      supp.xmin[2],
 			      supp.xmax[2]);
 	    
-	    basis1d().support(typename IntervalBasis::Index(lambdaj,
+	    basis1d().support(typename IntervalBasis::Index(lambda.j(),
 							    0,
 							    lambda.k()[1],
 							    &basis1d()),
@@ -297,7 +299,7 @@ namespace WaveletTL
 	} else {
 	  // wavelet
 	  
-	  supp.j = lambdaj+1;
+	  supp.j = lambda.j()+1;
 	  
 	  // compute the expansion coefficients of psi_lambda w.r.t. the
 	  // generators of the next higher scale, then aggregating all the supports
@@ -305,7 +307,7 @@ namespace WaveletTL
 	  
  	  InfiniteVector<double, Index> gcoeffs; // dummy object to let the following line compile
 	  typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()), gcoeffs_end(gcoeffs.begin());
-	  reconstruct_1(lambda, lambdaj+1, it, gcoeffs_end);
+	  reconstruct_1(lambda, lambda.j()+1, it, gcoeffs_end);
 	  
 	  Support tempsupp;
 	  
@@ -341,7 +343,7 @@ namespace WaveletTL
 	    }
 	}
 	
-	supp_it = supp_cache.insert(supp_lb, value_type(lambda, supp));
+	supp_cache.insert(supp_lb, value_type(lambda, supp));
 
 #if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
 	supp_misses++;
@@ -361,7 +363,7 @@ namespace WaveletTL
     else
       {
 	// cache hit, copy the precomputed support
-	const Support& suppcache = supp_it->second;
+	const Support& suppcache = supp_lb->second;
   	supp.j = suppcache.j;
   	for (unsigned int i = 0; i < 3; i++) {
   	  supp.xmin[i] = suppcache.xmin[i];
@@ -400,7 +402,6 @@ namespace WaveletTL
 
     // check whether the result already exists in the cache
     typename Reconstruct1Cache::iterator rec1_lb(rec1_cache.lower_bound(lambda));
-    typename Reconstruct1Cache::iterator rec1_it(rec1_lb);
     if (rec1_lb == rec1_cache.end() ||
 	rec1_cache.key_comp()(lambda, rec1_lb->first))
       {
@@ -677,7 +678,7 @@ namespace WaveletTL
 	  break;
 	}
 
-	rec1_it = rec1_cache.insert(rec1_lb, value_type(lambda, c));
+	rec1_cache.insert(rec1_lb, value_type(lambda, c));
 	
 #if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
 	rec1_misses++;
@@ -698,7 +699,7 @@ namespace WaveletTL
     else
       {
 	// cache hit, copy the precomputed coefficients
-	c = rec1_it->second;
+	c = rec1_lb->second;
 
 #if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
 	rec1_hits++;
@@ -730,7 +731,6 @@ namespace WaveletTL
     
     // check whether the result already exists in the cache
     typename Reconstruct1Cache::iterator rec1_lb(rec1_cache.lower_bound(lambda));
-    typename Reconstruct1Cache::iterator rec1_it(rec1_lb);
     if (rec1_lb == rec1_cache.end() ||
 	rec1_cache.key_comp()(lambda, rec1_lb->first))
       {
@@ -1009,7 +1009,10 @@ namespace WaveletTL
 	  break;
 	}
 
-	rec1_it = rec1_cache.insert(rec1_lb, value_type(lambda, c));
+	typename Reconstruct1Cache::iterator rec1_it
+	  = rec1_cache.insert(rec1_lb, value_type(lambda, c));
+	it_begin = rec1_it->second.begin();
+	it_end   = rec1_it->second.end();
 	
 #if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
 	rec1_misses++;
@@ -1030,6 +1033,8 @@ namespace WaveletTL
     else
       {
 	// cache hit
+	it_begin = rec1_lb->second.begin();
+	it_end   = rec1_lb->second.end();
 
 #if _WAVELETTL_LDOMAINBASIS_VERBOSITY >= 1
 	rec1_hits++;
@@ -1047,8 +1052,6 @@ namespace WaveletTL
 #endif
       }
 
-    it_begin = rec1_it->second.begin();
-    it_end = rec1_it->second.end();
   }
   
   template <int d, int dT>
@@ -1194,20 +1197,20 @@ namespace WaveletTL
       if (it.index().p() == patch) { // i.e. lambda.p <= 2 and lambda.p == p
  	// "patch generator"
  	basis1d().evaluate(0,
- 			   level, 0, it.index().k()[0],
+ 			   typename IntervalBasis::Index(level, 0, it.index().k()[0], &basis1d()),
  			   xlist,
  			   fx);
 	
  	basis1d().evaluate(0,
- 			   level, 0, it.index().k()[1],
+ 			   typename IntervalBasis::Index(level, 0, it.index().k()[1], &basis1d()),
  			   ylist,
  			   fy);
 
  	for (int n = 0, id = 0; n < nx; n++) {
   	  if (fx[n] != 0) {
-  	    const double help(*it * fx[n]);
-  	    for (int m = 0; m < ny; m++, id++) {
- 	      funcvalues[id] += help * fy[m];
+    	    double help(*it * fx[n]);
+  	    for (int m = 0; m < ny; m++) {
+   	      funcvalues[id++] += help * fy[m];
   	    }
   	  } else {
   	    id += ny;
@@ -1220,18 +1223,18 @@ namespace WaveletTL
 	    switch(patch) {
 	    case 0:
 	      basis1d().evaluate(0,
-				 level, 0, it.index().k()[0],
+				 typename IntervalBasis::Index(level, 0, it.index().k()[0], &basis1d()),
 				 xlist, fx);
 	      
 	      basis1d().evaluate(0,
-				 level, 0, basis1d().DeltaLmin(),
+				 typename IntervalBasis::Index(level, 0, basis1d().DeltaLmin(), &basis1d()),
 				 ylist, fy);
 	    
 	      for (int n = 0, id = 0; n < nx; n++) {
  		if (fx[n] != 0) {
-		  const double help(M_SQRT1_2 * *it * fx[n]);
-		  for (int m = 0; m < ny; m++, id++) {
-		    funcvalues[id] += help * fy[m];
+ 		  double help(M_SQRT1_2 * *it * fx[n]);
+		  for (int m = 0; m < ny; m++) {
+ 		    funcvalues[id++] += help * fy[m];
 		  }
 		} else {
 		  id += ny;
@@ -1240,18 +1243,18 @@ namespace WaveletTL
 	      break;
 	    case 1:
 	      basis1d().evaluate(0,
-				 level, 0, it.index().k()[0],
+				 typename IntervalBasis::Index(level, 0, it.index().k()[0], &basis1d()),
 				 xlist, fx);
 	      
 	      basis1d().evaluate(0,
-				 level, 0, basis1d().DeltaRmax(level),
+				 typename IntervalBasis::Index(level, 0, basis1d().DeltaRmax(level), &basis1d()),
  				 ylist, fy);
 
 	      for (int n = 0, id = 0; n < nx; n++) {
 		if (fx[n] != 0) {
-		  const double help(M_SQRT1_2 * *it * fx[n]);
-		  for (int m = 0; m < ny; m++, id++) {
-		    funcvalues[id] += help * fy[m];
+ 		  double help(M_SQRT1_2 * *it * fx[n]);
+		  for (int m = 0; m < ny; m++) {
+ 		    funcvalues[id++] += help * fy[m];
 		  }
 		} else {
 		  id += ny;
@@ -1268,18 +1271,18 @@ namespace WaveletTL
 	    switch(patch) {
 	    case 1:
 	      basis1d().evaluate(0,
-				 level, 0, basis1d().DeltaRmax(level),
+				 typename IntervalBasis::Index(level, 0, basis1d().DeltaRmax(level), &basis1d()),
 				 xlist, fx);
 	      
 	      basis1d().evaluate(0,
-				 level, 0, it.index().k()[1],
+				 typename IntervalBasis::Index(level, 0, it.index().k()[1], &basis1d()),
 				 ylist, fy);
 
 	      for (int n = 0, id = 0; n < nx; n++) {
 		if (fx[n] != 0) {
-		  const double help(M_SQRT1_2 * *it * fx[n]);
-		  for (int m = 0; m < ny; m++, id++) {
-		    funcvalues[id] += help * fy[m];
+ 		  double help(M_SQRT1_2 * *it * fx[n]);
+		  for (int m = 0; m < ny; m++) {
+ 		    funcvalues[id++] += help * fy[m];
 		  }
 		} else {
 		  id += ny;
@@ -1288,18 +1291,18 @@ namespace WaveletTL
 	      break;
 	    case 2:
 	      basis1d().evaluate(0,
-				 level, 0, basis1d().DeltaLmin(),
+				 typename IntervalBasis::Index(level, 0, basis1d().DeltaLmin(), &basis1d()),
 				 xlist, fx);
 	      
 	      basis1d().evaluate(0,
-				 level, 0, it.index().k()[1],
+				 typename IntervalBasis::Index(level, 0, it.index().k()[1], &basis1d()),
 				 ylist, fy);
 	      
 	      for (int n = 0, id = 0; n < nx; n++) {
 		if (fx[n] != 0) {
-		  const double help(M_SQRT1_2 * *it * fx[n]);
-		  for (int m = 0; m < ny; m++, id++) {
-		    funcvalues[id] += help * fy[m];
+ 		  double help(M_SQRT1_2 * *it * fx[n]);
+		  for (int m = 0; m < ny; m++) {
+		    funcvalues[id++] += help * fy[m];
 		  }
 		} else {
 		  id += ny;
@@ -1366,8 +1369,8 @@ namespace WaveletTL
  	for (int n = 0, id = 0; n < nx; n++) {
   	  if (fx[n] != 0) {
   	    const double help(*it * fx[n]);
-  	    for (int m = 0; m < ny; m++, id++) {
-	      deryvalues[id] += help * fpy[m];
+  	    for (int m = 0; m < ny; m++) {
+	      deryvalues[id++] += help * fpy[m];
   	    }
   	  } else {
   	    id += ny;
@@ -1376,8 +1379,8 @@ namespace WaveletTL
 	for (int n = 0, id = 0; n < nx; n++) {
 	  if (fpx[n] != 0) {
 	    const double help(*it * fpx[n]);
-	    for (int m = 0; m < ny; m++, id++) {
-	      derxvalues[id] += help * fy[m];
+	    for (int m = 0; m < ny; m++) {
+	      derxvalues[id++] += help * fy[m];
 	    }
 	  } else {
   	    id += ny;
@@ -1398,8 +1401,8 @@ namespace WaveletTL
 	      for (int n = 0, id = 0; n < nx; n++) {
 		if (fx[n] != 0) {
 		  const double help(M_SQRT1_2 * *it * fx[n]);
-		  for (int m = 0; m < ny; m++, id++) {
-		    deryvalues[id] += help * fpy[m];
+		  for (int m = 0; m < ny; m++) {
+		    deryvalues[id++] += help * fpy[m];
 		  }
 		} else {
 		  id += ny;
@@ -1408,8 +1411,8 @@ namespace WaveletTL
 	      for (int n = 0, id = 0; n < nx; n++) {
 		if (fpx[n] != 0) {
 		  const double help(M_SQRT1_2 * *it * fpx[n]);
-		  for (int m = 0; m < ny; m++, id++) {
-		    derxvalues[id] += help * fy[m];
+		  for (int m = 0; m < ny; m++) {
+		    derxvalues[id++] += help * fy[m];
 		  }
 		} else {
 		  id += ny;
@@ -1426,8 +1429,8 @@ namespace WaveletTL
 	      for (int n = 0, id = 0; n < nx; n++) {
 		if (fx[n] != 0) {
 		  const double help(M_SQRT1_2 * *it * fx[n]);
-		  for (int m = 0; m < ny; m++, id++) {
-		    deryvalues[id] += help * fpy[m];
+		  for (int m = 0; m < ny; m++) {
+		    deryvalues[id++] += help * fpy[m];
 		  }
 		} else {
 		  id += ny;
@@ -1436,8 +1439,8 @@ namespace WaveletTL
 	      for (int n = 0, id = 0; n < nx; n++) {
 		if (fpx[n] != 0) {
 		  const double help(M_SQRT1_2 * *it * fpx[n]);
-		  for (int m = 0; m < ny; m++, id++) {
-		    derxvalues[id] += help * fy[m];
+		  for (int m = 0; m < ny; m++) {
+		    derxvalues[id++] += help * fy[m];
 		  }
 		} else {
 		  id += ny;
@@ -1462,8 +1465,8 @@ namespace WaveletTL
 	      for (int n = 0, id = 0; n < nx; n++) {
 		if (fx[n] != 0) {
 		  const double help(M_SQRT1_2 * *it * fx[n]);
-		  for (int m = 0; m < ny; m++, id++) {
-		    deryvalues[id] += help * fpy[m];
+		  for (int m = 0; m < ny; m++) {
+		    deryvalues[id++] += help * fpy[m];
 		  }
 		} else {
 		  id += ny;
@@ -1472,8 +1475,8 @@ namespace WaveletTL
 	      for (int n = 0, id = 0; n < nx; n++) {
 		if (fpx[n] != 0) {
 		  const double help(M_SQRT1_2 * *it * fpx[n]);
-		  for (int m = 0; m < ny; m++, id++) {
-		    derxvalues[id] += help * fy[m];
+		  for (int m = 0; m < ny; m++) {
+		    derxvalues[id++] += help * fy[m];
 		  }
 		} else {
 		  id += ny;
@@ -1490,8 +1493,8 @@ namespace WaveletTL
 	      for (int n = 0, id = 0; n < nx; n++) {
 		if (fx[n] != 0) {
 		  const double help(M_SQRT1_2 * *it * fx[n]);
-		  for (int m = 0; m < ny; m++, id++) {
-		    deryvalues[id] += help * fpy[m];
+		  for (int m = 0; m < ny; m++) {
+		    deryvalues[id++] += help * fpy[m];
 		  }
 		} else {
 		  id += ny;
@@ -1500,8 +1503,8 @@ namespace WaveletTL
 	      for (int n = 0, id = 0; n < nx; n++) {
 		if (fpx[n] != 0) {
 		  const double help(M_SQRT1_2 * *it * fpx[n]);
-		  for (int m = 0; m < ny; m++, id++) {
-		    derxvalues[id] += help * fy[m];
+		  for (int m = 0; m < ny; m++) {
+		    derxvalues[id++] += help * fy[m];
 		  }
 		} else {
 		  id += ny;

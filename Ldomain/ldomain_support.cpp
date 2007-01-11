@@ -20,15 +20,20 @@ namespace WaveletTL
     typedef typename LDomainBasis<IBASIS>::Support Support;
 
     Support supp1;
-    support(basis, lambda, supp1);
+    basis.support(lambda, supp1);
+    
+    // quickly return false if the supports do not intersect at all
+    if (supp1.xmin[0] == -1 && supp2.xmin[1] == -1 && supp2.xmin[2] == -1) return false;
+    if (supp2.xmin[0] == -1 && supp1.xmin[1] == -1 && supp2.xmin[2] == -1) return false;
+    if (supp2.xmin[0] == -1 && supp2.xmin[1] == -1 && supp1.xmin[2] == -1) return false;
     
     bool r = false;
-    
+
 #if 1
     supp.j = supp1.j;
     int diff1 = 0;
     int diff2 = supp.j-supp2.j;
-    if (supp2.j>supp1.j) {
+    if (supp2.j > supp1.j) {
       supp.j = supp2.j;
       diff1 = supp.j-supp1.j;
       diff2 = 0;
@@ -81,6 +86,7 @@ namespace WaveletTL
   }
 
   template <class IBASIS>
+  inline
   bool intersect_supports(const LDomainBasis<IBASIS>& basis,
 			  const typename LDomainBasis<IBASIS>::Index& lambda1,
 			  const typename LDomainBasis<IBASIS>::Index& lambda2,

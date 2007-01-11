@@ -43,7 +43,7 @@ int main()
 
   typedef Basis::Index Index;
 
-  const int solution = 4;
+  const int solution = 1;
   Function<2> *uexact = 0, *f = 0;
   switch(solution) {
   case 1:

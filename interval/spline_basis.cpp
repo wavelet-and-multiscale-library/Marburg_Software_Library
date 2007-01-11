@@ -940,21 +940,23 @@ namespace WaveletTL
 	// left boundary generator
 	for (unsigned int i(0); i < SplineBasisData<d,dT,DS_construction>::CLA_.row_dimension(); i++) {
 	  const double help(SplineBasisData<d,dT,DS_construction>::CLA_.get_entry(i, lambda.k()-DeltaLmin()));
-	  // 	  if (help != 0)
-	  for (unsigned int m(0); m < npoints; m++) {
-	    funcvalues[m] += help * EvaluateCardinalBSpline_td<d>  (lambda.j(), 1-ell2<d>()+i, points[m]);
-	    dervalues[m]  += help * EvaluateCardinalBSpline_td_x<d>(lambda.j(), 1-ell2<d>()+i, points[m]);
-	  }
+	  if (help != 0)
+	    for (unsigned int m(0); m < npoints; m++) {
+	      funcvalues[m] += help * EvaluateCardinalBSpline_td<d>  (lambda.j(), 1-ell2<d>()+i, points[m]);
+	      dervalues[m]  += help * EvaluateCardinalBSpline_td_x<d>(lambda.j(), 1-ell2<d>()+i, points[m]);
+	    }
 	}
       }	else {
 	if (lambda.k() > DeltaRmax(lambda.j())-(int)SplineBasisData<d,dT,DS_construction>::CRA_.column_dimension()) {
 	  // right boundary generator
 	  for (unsigned int i(0); i < SplineBasisData<d,dT,DS_construction>::CRA_.row_dimension(); i++) {
 	    const double help(SplineBasisData<d,dT,DS_construction>::CRA_.get_entry(i, DeltaRmax(lambda.j())-lambda.k()));
-	    // 	    if (help != 0)
-	    for (unsigned int m(0); m < npoints; m++) {
-	      funcvalues[m] += help * EvaluateCardinalBSpline_td<d>  (lambda.j(), (1<<lambda.j())-(d%2)-(1-ell2<d>()+i), points[m]);
-	      dervalues[m]  += help * EvaluateCardinalBSpline_td_x<d>(lambda.j(), (1<<lambda.j())-(d%2)-(1-ell2<d>()+i), points[m]);
+	    if (help != 0) {
+	      const int k = (1<<lambda.j())-(d%2)-(1-ell2<d>()+i);
+	      for (unsigned int m(0); m < npoints; m++) {
+		funcvalues[m] += help * EvaluateCardinalBSpline_td<d>  (lambda.j(), k, points[m]);
+		dervalues[m]  += help * EvaluateCardinalBSpline_td_x<d>(lambda.j(), k, points[m]);
+	      }
 	    }
 	  }
 	} else {
@@ -968,9 +970,8 @@ namespace WaveletTL
     } else {
       // wavelet, switch to generator representation
       typedef typename Vector<double>::size_type size_type;
-      size_type number_lambda = Deltasize(lambda.j())+lambda.k()-Nablamin();
       std::map<size_type,double> wc, gc;
-      wc[number_lambda] = 1.0;
+      wc.insert(std::pair<size_type,double>(Deltasize(lambda.j())+lambda.k()-Nablamin(), 1.0));
       apply_Mj(lambda.j(), wc, gc);
       typedef typename SplineBasis<d,dT,DS_construction>::Index Index;
       Array1D<double> help1, help2;

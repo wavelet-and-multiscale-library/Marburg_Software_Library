@@ -7,8 +7,8 @@
 // | Thorsten Raasch, Manuel Werner                                     |
 // +--------------------------------------------------------------------+
 
-#ifndef _WAVELETTL_LDOMAIN_GRAMIAN_H
-#define _WAVELETTL_LDOMAIN_GRAMIAN_H
+#ifndef _WAVELETTL_LDOMAIN_LAPLACIAN_H
+#define _WAVELETTL_LDOMAIN_LAPLACIAN_H
 
 #include <set>
 #include <utils/fixed_array1d.h>
@@ -18,7 +18,6 @@
 #include <interval/spline_basis.h>
 #include <galerkin/galerkin_utils.h>
 #include <galerkin/infinite_preconditioner.h>
-#include <galerkin/ldomain_equation.h>
 
 using MathTL::FixedArray1D;
 using MathTL::EllipticBVP;
@@ -32,12 +31,15 @@ namespace WaveletTL
   template <int d, int dT> class LDomainBasis<SplineBasis<d,dT,DS_construction> >;
 
   /*!
-    This class models the Gramian matrix of a composite wavelet basis
+    This class models the stiffness matrix of the Laplacian
+    with respect to a composite wavelet basis
     on the L--shaped domain in R^2.
+
+    The general template class is incomplete!
   */
   template <class IBASIS>
-  class LDomainGramian
-    : public LDomainEquation<IBASIS>
+  class LDomainLaplacian
+    : public FullyDiagonalEnergyNormPreconditioner<typename LDomainBasis<IBASIS>::Index>
   {
   public:
     /*!
@@ -50,30 +52,13 @@ namespace WaveletTL
     */
     typedef typename WaveletBasis::Index Index;
 
-    /*!
-      constructor from an identity bvp
-    */
-    LDomainGramian(IdentityBVP<2>* bvp)
-      : LDomainEquation<IBASIS>(bvp, false)
-    {
-    }
-
-    /*!
-      (half) order t of the operator
-    */
-    double operator_order() const { return 0.; }
-    
-    /*!
-      evaluate the diagonal preconditioner D (we don't have any)
-    */
-    double D(const Index& lambda) const { return 1; }
   };
   
   // template specialization for the case IBASIS==SplineBasis<d,dT,DS_construction>
-  template <int d, int dT> class LDomainGramian<SplineBasis<d,dT,DS_construction> >;
+  template <int d, int dT> class LDomainLaplacian<SplineBasis<d,dT,DS_construction> >;
 
   template <int d, int dT>
-  class LDomainGramian<SplineBasis<d,dT,DS_construction> >
+  class LDomainLaplacian<SplineBasis<d,dT,DS_construction> >
     : public FullyDiagonalEnergyNormPreconditioner<typename LDomainBasis<SplineBasis<d,dT,DS_construction> >::Index>
   {
   public:
@@ -95,8 +80,8 @@ namespace WaveletTL
     /*!
       constructor from a given wavelet basis and a given right-hand side y
     */
-    LDomainGramian(const WaveletBasis& basis,
- 		   const InfiniteVector<double,Index>& y);
+    LDomainLaplacian(const WaveletBasis& basis,
+		     const InfiniteVector<double,Index>& y);
     
     /*!
       set right-hand side y
@@ -109,7 +94,7 @@ namespace WaveletTL
       evaluate the diagonal preconditioner D
     */
     double D(const Index& lambda) const { return sqrt(a(lambda,lambda)); }
-
+    
     /*!
       evaluate the (unpreconditioned) bilinear form a
     */
@@ -134,6 +119,6 @@ namespace WaveletTL
   };
 }
 
-#include <galerkin/ldomain_gramian.cpp>
+#include <galerkin/ldomain_laplacian.cpp>
 
 #endif

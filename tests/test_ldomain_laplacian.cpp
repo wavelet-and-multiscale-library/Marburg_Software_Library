@@ -14,7 +14,7 @@
 #include <Ldomain/ldomain_expansion.h>
 
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
-#include <galerkin/ldomain_gramian.h>
+#include <galerkin/ldomain_laplacian.h>
 #include <galerkin/galerkin_utils.h>
 
 #include "ldomain_solutions.h"
@@ -25,7 +25,7 @@ using namespace WaveletTL;
 
 int main()
 {
-  cout << "Testing LDomainGramian ..." << endl;
+  cout << "Testing LDomainLaplacian ..." << endl;
 
   const int d  = 2;
   const int dT = 2;
@@ -43,36 +43,20 @@ int main()
 
   typedef Basis::Index Index;
 
-  const int solution = 4;
+  const int solution = 2;
   Function<2> *uexact = 0, *f = 0;
   switch(solution) {
   case 1:
     uexact = new PolySolution();
-    f      = new PolySolution();
+    f      = new PolyRHS();
     break;
   case 2:
     uexact = new EigenSolution();
-    f      = new EigenSolution();
+    f      = new EigenRHS();
     break;
   case 3:
-    uexact = new CubicHermiteInterpolant2D_td(2, 0, 0, -2, 1);
-    f      = new CubicHermiteInterpolant2D_td(2, 0, 0, -2, 1);
-//     uexact = new CubicHermiteInterpolant2D_td(1, 0, 0, -1, 1);
-//     f      = new CubicHermiteInterpolant2D_td(1, 0, 0, -1, 1);
-//     uexact = new CubicHermiteInterpolant2D_td(1, 0, 0, -1, -1);
-//     f      = new CubicHermiteInterpolant2D_td(1, 0, 0, -1, -1);
-//     uexact = new CubicHermiteInterpolant2D_td(1, 1, 1, -1, -2);
-//     f      = new CubicHermiteInterpolant2D_td(1, 1, 1, -1, -2);
-//     uexact = new CubicHermiteInterpolant2D_td(1, 1, 1, 2, 0);
-//     f      = new CubicHermiteInterpolant2D_td(1, 1, 1, 2, 0);
-    break;
-  case 4:
-    {
-      Point<2> origin(0., 0.);
-      uexact = new CornerSingularity   (origin, 0.5, 1.5);
-      f      = new CornerSingularity   (origin, 0.5, 1.5);
-      break;
-    }
+    uexact = new CornerSingularity   (Point<2>(0,0), 0.5, 1.5);
+    f      = new CornerSingularityRHS(Point<2>(0,0), 0.5, 1.5);
     break;
   default:
     break;
@@ -101,15 +85,9 @@ int main()
   }
 #endif
 
-#if 0
-  // temporary hack, choose f=1 just to see the inner products
-  delete f;
-  f = new ConstantFunction<2>(Vector<double>(1, "1"));
-#endif
-
   const int jmax = basis.j0();
   
-  typedef LDomainGramian<Basis1D> Problem;
+  typedef LDomainLaplacian<Basis1D> Problem;
   Problem problem(basis, InfiniteVector<double, Index>());
 
   cout << "- expand right-hand side..." << endl;
@@ -142,90 +120,6 @@ int main()
   //   cout << "- Gramian matrix A=" << endl << A << endl;
 #if 0
   A.matlab_output("Ldomain_gramian", "G", 1);
-#endif
-
-#if 0
-//   cout << "- validate entries of the (unpreconditioned) Gramian matrix:" << endl;
-
-//   for (set<Index>::const_iterator itlambda = Lambda.begin(); itlambda != Lambda.end(); ++itlambda) {
-//     cout << "* checking row " << *itlambda << "..." << endl;
-//     for (set<Index>::const_iterator itmu = Lambda.begin(); itmu != Lambda.end(); ++itmu) {
-//       const int N = 2000;
-//       const double h = 1./N;
-
-//       double s = 0;
-
-//       FixedArray1D<Array1D<double>,2> lambdavalues, muvalues;
-//       FixedArray1D<Array1D<double>,2> knots;
-//       knots[0].resize(N+1);
-//       knots[1].resize(N+1);
-
-//       const Index& lambda = *itlambda;
-//       const Index& mu = *itmu;
-      
-//       // patch Omega_0 = [-1,0]x[0,1]
-//       if (lambda.k()[0] <= 0 && lambda.k()[1] >= 0 && mu.k()[0] <= 0 && mu.k()[1] >= 0) {
-// 	for (int k0 = 0; k0 < N; k0++)
-// 	  knots[0][k0] = -1.0+k0*h;
-// 	evaluate(0, lambda.j(), lambda.e()[0], lambda.c()[0], lambda.k()[0], knots[0], lambdavalues[0]);
-// 	evaluate(0, mu.j(), mu.e()[0], mu.c()[0], mu.k()[0], knots[0], muvalues[0]);
-// 	for (int k1 = 0; k1 < N; k1++)
-// 	  knots[1][k1] = k1*h;
-// 	evaluate(0, lambda.j(), lambda.e()[1], lambda.c()[1], lambda.k()[1], knots[1], lambdavalues[1]);
-// 	evaluate(0, mu.j(), mu.e()[1], mu.c()[1], mu.k()[1], knots[1], muvalues[1]);
-// 	for (int k0 = 0; k0 < N; k0++) {
-// 	  for (int k1 = 1; k1 < N; k1++) {
-// 	    s += lambdavalues[0][k0] * lambdavalues[1][k1]
-// 	      * muvalues[0][k0] * muvalues[1][k1];
-// 	  }
-// 	}
-//       }
-//       // patch Omega_1 = [-1,0]x[-1,0]
-//       if (lambda.k()[0] <= 0 && lambda.k()[1] <= 0 && mu.k()[0] <= 0 && mu.k()[1] <= 0) {
-// 	for (int k0 = 0; k0 < N; k0++)
-// 	  knots[0][k0] = -1.0+k0*h;
-// 	evaluate(0, lambda.j(), lambda.e()[0], lambda.c()[0], lambda.k()[0], knots[0], lambdavalues[0]);
-// 	evaluate(0, mu.j(), mu.e()[0], mu.c()[0], mu.k()[0], knots[0], muvalues[0]);
-// 	for (int k1 = 0; k1 < N; k1++)
-// 	  knots[1][k1] = -1.0+k1*h;
-// 	evaluate(0, lambda.j(), lambda.e()[1], lambda.c()[1], lambda.k()[1], knots[1], lambdavalues[1]);
-// 	evaluate(0, mu.j(), mu.e()[1], mu.c()[1], mu.k()[1], knots[1], muvalues[1]);
-// 	for (int k0 = 0; k0 < N; k0++) {
-// 	  for (int k1 = 1; k1 < N; k1++) {
-// 	    s += lambdavalues[0][k0] * lambdavalues[1][k1]
-// 	      * muvalues[0][k0] * muvalues[1][k1];
-// 	  }
-// 	}
-//       }
-//       // patch Omega_2 = [0,1]x[-1,0]
-//       if (lambda.k()[0] >= 0 && lambda.k()[1] <= 0 && mu.k()[0] >= 0 && mu.k()[1] <= 0) {
-// 	for (int k0 = 0; k0 < N; k0++)
-// 	  knots[0][k0] = k0*h;
-// 	evaluate(0, lambda.j(), lambda.e()[0], lambda.c()[0], lambda.k()[0], knots[0], lambdavalues[0]);
-// 	evaluate(0, mu.j(), mu.e()[0], mu.c()[0], mu.k()[0], knots[0], muvalues[0]);
-// 	for (int k1 = 0; k1 < N; k1++)
-// 	  knots[1][k1] = -1.0+k1*h;
-// 	evaluate(0, lambda.j(), lambda.e()[1], lambda.c()[1], lambda.k()[1], knots[1], lambdavalues[1]);
-// 	evaluate(0, mu.j(), mu.e()[1], mu.c()[1], mu.k()[1], knots[1], muvalues[1]);
-// 	for (int k0 = 0; k0 < N; k0++) {
-// 	  for (int k1 = 1; k1 < N; k1++) {
-// 	    s += lambdavalues[0][k0] * lambdavalues[1][k1]
-// 	      * muvalues[0][k0] * muvalues[1][k1];
-// 	  }
-// 	}
-//       }
-      
-//       const double alambdamu = problem.a(*itlambda,*itmu);
-//       const double alambdamuapprox = s*h*h;
-//       const double dev = fabs(alambdamu-alambdamuapprox);
-//       if (dev > 1e-6)
-// 	cout << "lambda=" << *itlambda
-// 	     << ", mu=" << *itmu << ": "
-// 	     << "a(.,.)=" << alambdamu
-// 	     << ", approx.=" << alambdamuapprox
-// 	     << ", dev.=" << dev << endl;
-//     }
-//   }
 #endif
 
   cout << "- set up right-hand side..." << endl;
@@ -261,7 +155,7 @@ int main()
     matlab_output(u_Lambda_stream, s);
     u_Lambda_stream.close();
     cout << "  ... done, see file 'u_lambda.m'" << endl;
-    
+ 
     for (int i = 0; i <= 2; i++) {
       s[i].add(-1.0, SampledMapping<2>(s[i], *uexact));
       cout << "  pointwise error on patch " << i << ": " << row_sum_norm(s[i].values()) << endl;

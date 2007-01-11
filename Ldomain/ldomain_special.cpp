@@ -1221,13 +1221,11 @@ namespace WaveletTL
 	    case 0:
 	      basis1d().evaluate(0,
 				 level, 0, it.index().k()[0],
-				 xlist,
-				 fx);
+				 xlist, fx);
 	      
 	      basis1d().evaluate(0,
 				 level, 0, basis1d().DeltaLmin(),
-				 ylist,
-				 fy);
+				 ylist, fy);
 	    
 	      for (int n = 0, id = 0; n < nx; n++) {
  		if (fx[n] != 0) {
@@ -1243,13 +1241,11 @@ namespace WaveletTL
 	    case 1:
 	      basis1d().evaluate(0,
 				 level, 0, it.index().k()[0],
-				 xlist,
-				 fx);
+				 xlist, fx);
 	      
 	      basis1d().evaluate(0,
 				 level, 0, basis1d().DeltaRmax(level),
- 				 ylist,
-				 fy);
+ 				 ylist, fy);
 
 	      for (int n = 0, id = 0; n < nx; n++) {
 		if (fx[n] != 0) {
@@ -1273,13 +1269,11 @@ namespace WaveletTL
 	    case 1:
 	      basis1d().evaluate(0,
 				 level, 0, basis1d().DeltaRmax(level),
-				 xlist,
-				 fx);
+				 xlist, fx);
 	      
 	      basis1d().evaluate(0,
 				 level, 0, it.index().k()[1],
-				 ylist,
-				 fy);
+				 ylist, fy);
 
 	      for (int n = 0, id = 0; n < nx; n++) {
 		if (fx[n] != 0) {
@@ -1295,19 +1289,219 @@ namespace WaveletTL
 	    case 2:
 	      basis1d().evaluate(0,
 				 level, 0, basis1d().DeltaLmin(),
-				 xlist,
-				 fx);
+				 xlist, fx);
 	      
 	      basis1d().evaluate(0,
 				 level, 0, it.index().k()[1],
-				 ylist,
-				 fy);
+				 ylist, fy);
 	      
 	      for (int n = 0, id = 0; n < nx; n++) {
 		if (fx[n] != 0) {
 		  const double help(M_SQRT1_2 * *it * fx[n]);
 		  for (int m = 0; m < ny; m++, id++) {
 		    funcvalues[id] += help * fy[m];
+		  }
+		} else {
+		  id += ny;
+		}
+	      }
+	      break;
+	    default:
+	      break;
+	    }
+	  }
+	  break;
+	default:
+	  break;
+	}
+      }
+    }
+  }
+
+  template <int d, int dT>
+  void
+  LDomainBasis<SplineBasis<d,dT,DS_construction> >::evaluate
+  (const typename LDomainBasis<IntervalBasis>::Index& lambda,
+   const int patch,
+   const Array1D<double>& xlist,
+   const Array1D<double>& ylist,
+   Array1D<double>& derxvalues,
+   Array1D<double>& deryvalues) const
+  {
+    // compute the generator expansion of psi_lambda
+    InfiniteVector<double,Index> gcoeffs;
+    typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()), gcoeffs_end(gcoeffs.begin());
+    const int ecode = lambda.e()[0]+2*lambda.e()[1];
+    const int level = lambda.j() + (ecode == 0 ? 0 : 1);
+    if (ecode == 0) {
+      gcoeffs.set_coefficient(lambda, 1.0);
+      it = gcoeffs.begin();
+      gcoeffs_end = gcoeffs.end();
+    } else {
+      reconstruct_1(lambda, level, it, gcoeffs_end);
+    }
+    
+    const int nx(xlist.size());
+    const int ny(ylist.size());
+    Array1D<double> fx(nx), fpx(nx);
+    Array1D<double> fy(ny), fpy(ny);
+    
+    derxvalues.resize(nx*ny);
+    deryvalues.resize(nx*ny);
+    for (int i = 0; i < nx*ny; i++) {
+      derxvalues[i] = 0;
+      deryvalues[i] = 0;
+    }
+
+    // iterate through the generators and collect the point values on patch <patch>
+    for (; it != gcoeffs_end; ++it) {
+      if (it.index().p() == patch) { // i.e. lambda.p <= 2 and lambda.p == p
+ 	// "patch generator"
+ 	basis1d().evaluate(typename IntervalBasis::Index(level, 0, it.index().k()[0], &basis1d()),
+ 			   xlist, fx, fpx);
+	
+ 	basis1d().evaluate(typename IntervalBasis::Index(level, 0, it.index().k()[1], &basis1d()),
+ 			   ylist, fy, fpy);
+	
+ 	for (int n = 0, id = 0; n < nx; n++) {
+  	  if (fx[n] != 0) {
+  	    const double help(*it * fx[n]);
+  	    for (int m = 0; m < ny; m++, id++) {
+	      deryvalues[id] += help * fpy[m];
+  	    }
+  	  } else {
+  	    id += ny;
+	  }
+ 	}
+	for (int n = 0, id = 0; n < nx; n++) {
+	  if (fpx[n] != 0) {
+	    const double help(*it * fpx[n]);
+	    for (int m = 0; m < ny; m++, id++) {
+	      derxvalues[id] += help * fy[m];
+	    }
+	  } else {
+  	    id += ny;
+	  }
+	}
+      } else {
+	switch(it.index().p()) {
+	case 3:
+	  {
+	    switch(patch) {
+	    case 0:
+	      basis1d().evaluate(typename IntervalBasis::Index(level, 0, it.index().k()[0], &basis1d()),
+				 xlist, fx, fpx);
+	      
+	      basis1d().evaluate(typename IntervalBasis::Index(level, 0, basis1d().DeltaLmin(), &basis1d()),
+				 ylist, fy, fpy);
+	      
+	      for (int n = 0, id = 0; n < nx; n++) {
+		if (fx[n] != 0) {
+		  const double help(M_SQRT1_2 * *it * fx[n]);
+		  for (int m = 0; m < ny; m++, id++) {
+		    deryvalues[id] += help * fpy[m];
+		  }
+		} else {
+		  id += ny;
+		}
+	      }
+	      for (int n = 0, id = 0; n < nx; n++) {
+		if (fpx[n] != 0) {
+		  const double help(M_SQRT1_2 * *it * fpx[n]);
+		  for (int m = 0; m < ny; m++, id++) {
+		    derxvalues[id] += help * fy[m];
+		  }
+		} else {
+		  id += ny;
+		}
+	      }
+	      break;
+	    case 1:
+	      basis1d().evaluate(typename IntervalBasis::Index(level, 0, it.index().k()[0], &basis1d()),
+				 xlist, fx, fpx);
+	      
+	      basis1d().evaluate(typename IntervalBasis::Index(level, 0, basis1d().DeltaRmax(level), &basis1d()),
+ 				 ylist, fy, fpy);
+	      
+	      for (int n = 0, id = 0; n < nx; n++) {
+		if (fx[n] != 0) {
+		  const double help(M_SQRT1_2 * *it * fx[n]);
+		  for (int m = 0; m < ny; m++, id++) {
+		    deryvalues[id] += help * fpy[m];
+		  }
+		} else {
+		  id += ny;
+		}
+	      }
+	      for (int n = 0, id = 0; n < nx; n++) {
+		if (fpx[n] != 0) {
+		  const double help(M_SQRT1_2 * *it * fpx[n]);
+		  for (int m = 0; m < ny; m++, id++) {
+		    derxvalues[id] += help * fy[m];
+		  }
+		} else {
+		  id += ny;
+		}
+	      }
+	      break;
+	    default:
+	      break;
+	    }
+    	  }
+	  break;
+	case 4:
+	  {
+	    switch(patch) {
+	    case 1:
+	      basis1d().evaluate(typename IntervalBasis::Index(level, 0, basis1d().DeltaRmax(level), &basis1d()),
+				 xlist, fx, fpx);
+	      
+	      basis1d().evaluate(typename IntervalBasis::Index(level, 0, it.index().k()[1], &basis1d()),
+				 ylist, fy, fpy);
+	      
+	      for (int n = 0, id = 0; n < nx; n++) {
+		if (fx[n] != 0) {
+		  const double help(M_SQRT1_2 * *it * fx[n]);
+		  for (int m = 0; m < ny; m++, id++) {
+		    deryvalues[id] += help * fpy[m];
+		  }
+		} else {
+		  id += ny;
+		}
+	      }
+	      for (int n = 0, id = 0; n < nx; n++) {
+		if (fpx[n] != 0) {
+		  const double help(M_SQRT1_2 * *it * fpx[n]);
+		  for (int m = 0; m < ny; m++, id++) {
+		    derxvalues[id] += help * fy[m];
+		  }
+		} else {
+		  id += ny;
+		}
+	      }
+	      break;
+	    case 2:
+	      basis1d().evaluate(typename IntervalBasis::Index(level, 0, basis1d().DeltaLmin(), &basis1d()),
+				 xlist, fx, fpx);
+	      
+	      basis1d().evaluate(typename IntervalBasis::Index(level, 0, it.index().k()[1], &basis1d()),
+				 ylist, fy, fpy);
+	      
+	      for (int n = 0, id = 0; n < nx; n++) {
+		if (fx[n] != 0) {
+		  const double help(M_SQRT1_2 * *it * fx[n]);
+		  for (int m = 0; m < ny; m++, id++) {
+		    deryvalues[id] += help * fpy[m];
+		  }
+		} else {
+		  id += ny;
+		}
+	      }
+	      for (int n = 0, id = 0; n < nx; n++) {
+		if (fpx[n] != 0) {
+		  const double help(M_SQRT1_2 * *it * fpx[n]);
+		  for (int m = 0; m < ny; m++, id++) {
+		    derxvalues[id] += help * fy[m];
 		  }
 		} else {
 		  id += ny;

@@ -113,8 +113,8 @@ int main()
   typedef Basis::Index Index;
 
   SturmEquation<Basis> problem(T, basis);
-  CachedProblem<SturmEquation<Basis> > cproblem(&problem);
-//   CachedProblemFromFile<SturmEquation<Basis> > cproblem(&problem, "P_3_3_10_A", 10);
+//   CachedProblem<SturmEquation<Basis> > cproblem(&problem);
+  CachedProblemFromFile<SturmEquation<Basis> > cproblem(&problem, "P_3_3_10_A", 10);
   
   // initialization with some precomputed DSBasis eigenvalue bounds:
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.34801,  13.3113 ); // d=2, dT=2 (diag-precond.)

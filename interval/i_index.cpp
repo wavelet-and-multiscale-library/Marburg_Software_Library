@@ -14,7 +14,8 @@ namespace WaveletTL
       k_ = basis_->DeltaLmin(); // leftmost
       e_ = 0;                   // generator
       j_ = basis_->j0();        // on the coarsest level
-      num_ = -1;
+
+//       num_ = -1;
     }
   }
   
@@ -25,7 +26,7 @@ namespace WaveletTL
     e_ = lambda.e();
     k_ = lambda.k();
     basis_ = lambda.basis();
-    num_ = lambda.number();
+//     num_ = lambda.number();
   }
 
   template <class IBASIS>
@@ -36,7 +37,7 @@ namespace WaveletTL
     e_ = e;
     k_ = k;
     basis_ = basis;
-    num_ = -1;
+//     num_ = -1;
   }
 
 
@@ -45,7 +46,8 @@ namespace WaveletTL
 				       const IBASIS* basis)
   :  basis_(basis)
   {
-    num_ = num; 
+    // num_ = num; 
+    int num_ = num; 
     
     // to be decreased successively
     int act_num = num_;
@@ -86,7 +88,7 @@ namespace WaveletTL
     e_ = lambda.e();
     k_ = lambda.k();
     basis_ = lambda.basis();
-    num_ = lambda.number();
+//     num_ = lambda.number();
 
     return *this;
   }
@@ -113,8 +115,8 @@ namespace WaveletTL
   IntervalIndex<IBASIS>&
   IntervalIndex<IBASIS>::operator ++ ()
   {
-    if (num_ > -1)
-      num_++;
+//     if (num_ > -1)
+//       num_++;
 
     switch (e_) {
     case 0:
@@ -159,7 +161,7 @@ namespace WaveletTL
       result += k_ - basis_->DeltaLmin();
     else
       result += k_ - basis_->Nablamin();
-    num_ = result;
+//     num_ = result;
   }
 
 

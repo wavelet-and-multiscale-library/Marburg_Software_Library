@@ -79,9 +79,10 @@ namespace WaveletTL
 
     //! number
     const int number() const {
+//       return num_;
       return (e() == 0
- 	      ? k() - basis_->DeltaLmin()
- 	      : basis_->Deltasize(j()) + k() - basis_->Nablamin());
+  	      ? k() - basis_->DeltaLmin()
+  	      : basis_->Deltasize(j()) + k() - basis_->Nablamin());
     }
 
     /*!
@@ -100,8 +101,8 @@ namespace WaveletTL
     //! scale, type, translation
     int j_, e_, k_;
     
-    //! number of the index (not for generators on level j > j0)
-    int num_;
+//     //! number of the index (not for generators on level j > j0)
+//     int num_;
     
 
     //! pointer to the underlying interval basis

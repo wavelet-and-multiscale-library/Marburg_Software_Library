@@ -508,7 +508,7 @@ namespace MathTL
   }
 
   template <class C>
-  void SparseMatrix<C>::matlab_output (const char *file, char *Matrixname, int binary) const
+  void SparseMatrix<C>::matlab_output (const char *file, const char *Matrixname, const int binary) const
   {
     if (binary)
       {
@@ -578,38 +578,123 @@ namespace MathTL
 	      bin_file.write((char*)(entries_[i]), indices_[i][0]*sizeof(C));
 	  }   
       }
-  else
-  {
-    unsigned int i;
+    else
+      {
+	unsigned int i;
 	 
-    char *Filename = new char[200];
-    Filename[0] = '\x0';
+	char *Filename = new char[200];
+	Filename[0] = '\x0';
 	 
-    strcat(Filename, file);
-    strcat(Filename, ".m");
+	strcat(Filename, file);
+	strcat(Filename, ".m");
 	 
-    std::ofstream s;
-    s.open(Filename);
+	std::ofstream s;
+	s.open(Filename);
 	 
-    delete[] Filename;
+	delete[] Filename;
 	 
-    s.setf(std::ios::scientific, std::ios::fixed);
-    s.precision(15);
+	s.setf(std::ios::scientific, std::ios::fixed);
+	s.precision(15);
 	 
-    s << Matrixname << "=sparse(" << row_dimension() << "," << column_dimension() << ");" << endl;
+	s << Matrixname << "=sparse(" << row_dimension() << "," << column_dimension() << ");" << endl;
 	
-    for (i=0; i<row_dimension(); i++) {
-      if (indices_[i]) {
-	for (size_type k(1); k <= indices_[i][0]; k++) {
-	  s << Matrixname << "(" << i+1 << "," << indices_[i][k]+1 << ")="
-	    << entries_[i][k-1] << ";" << endl;
+	for (i=0; i<row_dimension(); i++) {
+	  if (indices_[i]) {
+	    for (size_type k(1); k <= indices_[i][0]; k++) {
+	      s << Matrixname << "(" << i+1 << "," << indices_[i][k]+1 << ")="
+		<< entries_[i][k-1] << ";" << endl;
+	    }
+	  }
+	}   
+      }
+  }
+  
+  template <class C>
+  void SparseMatrix<C>::matlab_input(const char *file)
+  {
+    char Filename[200];
+    
+    Filename[0] = '\x0';
+    
+    strcat(Filename, file);
+    strcat(Filename, ".bin");
+    
+    std::ifstream bin_file(Filename);
+    
+    int r, c, l;
+    bin_file.read((char*)(&r), sizeof(int));
+    bin_file.read((char*)(&c), sizeof(int));
+    bin_file.read((char*)(&l), sizeof(int));
+
+    resize(r, c);
+
+    // read row indices
+    int* i = new int[l];
+    bin_file.read((char*)(i), l*sizeof(int));
+//     cout << "i=" << "[";
+//     for (int k = 0; k < l; k++) {
+//       cout << i[k];
+//       if (k < l-1) cout << ",";
+//     }
+//     cout << "]" << endl;
+
+    // read column indices
+    int* j = new int[l];
+    bin_file.read((char*)(j), l*sizeof(int));
+//     cout << "j=" << "[";
+//     for (int k = 0; k < l; k++) {
+//       cout << j[k];
+//       if (k < l-1) cout << ",";
+//     }
+//     cout << "]" << endl;
+
+    // read entries
+    double* e = new double[l];
+    bin_file.read((char*)(e), l*sizeof(double));
+//     cout << "e=" << "[";
+//     for (int k = 0; k < l; k++) {
+//       cout << e[k];
+//       if (k < l-1) cout << ",";
+//     }
+//     cout << "]" << endl;
+
+    // reinterpret data as compressed row storage format
+    int counter = 1;
+    for (int k = 0; k < l; k++) {
+      // search for a row skip
+      if (k < l-1 && i[k] < i[k+1]) {
+	indices_[i[k]-1] = new size_type[counter+1];
+	indices_[i[k]-1][0] = counter;
+	entries_[i[k]-1] = new C[counter];
+	
+	counter = 1;
+      } else {
+	counter++;
+      }
+    }
+    if (counter > 1) { // treat last row separately
+      indices_[i[l-1]-1] = new size_type[counter];
+      indices_[i[l-1]-1][0] = counter-1;
+      entries_[i[l-1]-1] = new C[counter-1];
+    }
+
+    for (counter = 0; counter < l; ) {
+      for (int k = 0; k < (int) row_dimension(); k++) {
+	if (indices_[k]) {
+	  for (unsigned int m = 1; m <= indices_[k][0]; m++) {
+	    indices_[k][m]   = j[counter]-1;
+	    entries_[k][m-1] = e[counter];
+	    counter++;
+	  }
 	}
       }
-    }   
-  }
-}
-  
+    }
 
+    delete i;
+    delete j;
+    delete e;
+  }
+  
   template <class C>
   SparseMatrix<C> operator - (const SparseMatrix<C>& M, const SparseMatrix<C>& N)
   {

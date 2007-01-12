@@ -50,6 +50,22 @@ namespace MathTL
   }
 
   /*!
+    evaluate a cardinal B-spline N_3(x)
+    (fastest possible variant)
+  */
+  template <>
+  inline
+  double EvaluateCardinalBSpline<3>(const double x)
+  {
+    if (x < 0 || x >= 3)
+      return 0;
+    if (x < 1)
+      return x*x/2;
+    else
+      return (x < 2 ? x*(3-x)-1.5 : (x*(x-6)+9)/2);
+  }
+  
+  /*!
     evaluate a cardinal B-spline N_2(x)
     (fastest possible variant)
   */

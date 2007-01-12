@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <list>
 #include <string>
 #include <algebra/matrix.h>
@@ -474,6 +475,25 @@ int main()
   M.resize(45,67);
   M.decol(colM, 2);
   cout << "- decol(col(M))=" << endl << M;
+
+#if 1
+  F1.resize(5,2);
+  F1.set_entry(0,0,1);
+  F1.set_entry(0,1,2);
+  F1.set_entry(1,1,3);
+  F1.set_entry(2,0,4);
+  F1.set_entry(4,1,5);
+
+  cout << "- a sparse matrix F1 again:" << endl << F1;
+  cout << "- write F1 to a file..." << endl;
+  F1.matlab_output("F1", "F1", 1);
+  cout << "  ... done" << endl;
+  F1.resize(1,1);
+  cout << "- resized F1:" << endl << F1;
+  cout << "- read F1 from the file again..." << endl;
+  F1.matlab_input("F1");
+  cout << "  ...done, F1=" << endl << F1;
+#endif
 
   return 0;
 }

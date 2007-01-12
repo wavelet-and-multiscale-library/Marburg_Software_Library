@@ -208,9 +208,14 @@ namespace MathTL
 	       const unsigned int precision = 3) const;
 
     /*!
-      write matlab sparse matrix format.
+      write matlab sparse matrix format
     */
-    void matlab_output (const char *file, char *Matrixname, int binary) const;
+    void matlab_output(const char *file, const char *Matrixname, const int binary) const;
+
+    /*!
+      read from matlab sparse matrix format (in binary==1 format)
+    */
+    void matlab_input(const char *file);
 
   protected:
     /*!

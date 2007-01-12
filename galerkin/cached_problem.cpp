@@ -321,20 +321,24 @@ namespace WaveletTL
 					     const int J,
 					     const CompressionStrategy strategy) const
   {
-    if (problem->local_operator()) {
-      typedef std::list<Index> IntersectingList;
-      IntersectingList nus;
-      intersecting_wavelets(basis(), lambda,
-			    std::max(j, basis().j0()),
-			    j == (basis().j0()-1),
-			    nus);
+    typedef typename Vector<double>::size_type size_type;
 
-      // do the rest of the job, we only implement the CDD1 compression strategy here!!!
-      const double d1 = problem->D(lambda);
-      for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());
-	   it != itend; ++it) {
-	const double entry = problem->a(*it, lambda);
-	w.add_coefficient(*it, (entry / (d1 * problem->D(*it))) * factor);
+    if (problem->local_operator()) {
+      // remark: the following loop can still be optimized
+      Index mu = (j == (basis().j0()-1)
+ 		  ? basis().first_generator(basis().j0())
+ 		  : basis().first_wavelet(j));
+      size_type start_index = (j == (basis().j0()-1)
+ 			       ? 0
+ 			       : basis().Deltasize(j));
+      size_type end_index = basis().Deltasize(j+1);
+      size_type lambda_number = lambda.number();
+      const double d1 = sqrt(entries_cache.get_entry(lambda_number, lambda_number));
+      for (size_type i = start_index; i < end_index; i++, ++mu) {
+	const double entry = entries_cache.get_entry(i,lambda_number);
+	if (entry != 0)
+	  w.add_coefficient(mu, entry * factor /
+			    (d1 * sqrt(entries_cache.get_entry(i, i))));
       }
     } else {
       // integral operator case, TODO

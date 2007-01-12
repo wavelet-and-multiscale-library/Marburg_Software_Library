@@ -12,7 +12,7 @@ int main()
 {
   cout << "Testing setup of SplineBasisData objects..." << endl;
 
-#if 0
+#if 1
   SplineBasisData<2,2,P_construction> sd22nobc("",0,0,0,0); // PBasis, no b.c.'s
   sd22nobc.check();
 
@@ -45,8 +45,8 @@ int main()
 
 #if 1
   cout << "Testing SplineBasis..." << endl;
-  SplineBasis<3,3,P_construction> basis("",1,1,0,0); // PBasis, complementary b.c.'s
-//   SplineBasis<3,3,DS_construction> basis("bio5",0,0,0,0); // DSBasis, no b.c.'s
+//   SplineBasis<3,3,P_construction> basis("",1,1,0,0); // PBasis, complementary b.c.'s
+  SplineBasis<3,3,DS_construction> basis("bio5-energy",0,0,0,0); // DSBasis, no b.c.'s
 
   const int j0 = basis.j0();
   Vector<double> x(basis.Deltasize(j0+1));
@@ -85,8 +85,8 @@ int main()
 
 
   cout << "* point evaluation of spline wavelets:" << endl;
-  typedef SplineBasis<3,3,P_construction>::Index Index;
-//   typedef SplineBasis<3,3,DS_construction>::Index Index;
+//   typedef SplineBasis<3,3,P_construction>::Index Index;
+  typedef SplineBasis<3,3,DS_construction>::Index Index;
   int N = 32;
   Array1D<double> points(N+1), values(N+1), dervalues(N+1);
   double h = 1.0/N;

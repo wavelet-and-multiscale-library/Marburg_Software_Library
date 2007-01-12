@@ -121,7 +121,7 @@ int main()
 #endif  
 
   set<Index> Lambda;
-  const int jmax = 4; // eq.basis().j0()+3;
+  const int jmax = 6; // eq.basis().j0()+3;
   for (Index lambda = eq.basis().first_generator(eq.basis().j0());; ++lambda) {
     Lambda.insert(lambda);
     if (lambda == eq.basis().last_wavelet(jmax)) break;

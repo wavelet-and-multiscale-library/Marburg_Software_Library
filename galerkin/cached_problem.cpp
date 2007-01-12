@@ -20,7 +20,7 @@ namespace WaveletTL
   CachedProblem<PROBLEM>::a(const Index& lambda,
 			    const Index& nu) const
   {
-      double r = 0;
+    double r = 0;
     
     if (problem->local_operator()) {
 
@@ -290,4 +290,133 @@ namespace WaveletTL
 
     return normAinv;
   }
+
+
+  template <class PROBLEM>
+  CachedProblemFromFile<PROBLEM>::CachedProblemFromFile
+  (const PROBLEM* P,
+   const char* filename,
+   const int jmax,
+   const double estnormA,
+   const double estnormAinv)
+    : problem(P), jmax_(jmax), normA(estnormA), normAinv(estnormAinv)
+  {
+    entries_cache.matlab_input(filename);
+  }
+
+  template <class PROBLEM>
+  inline
+  double
+  CachedProblemFromFile<PROBLEM>::a(const Index& lambda,
+				    const Index& nu) const
+  {
+    return entries_cache.get_entry(lambda.number(), nu.number());
+  }
+
+  template <class PROBLEM>
+  void
+  CachedProblemFromFile<PROBLEM>::add_level (const Index& lambda,
+					     InfiniteVector<double, Index>& w, const int j,
+					     const double factor,
+					     const int J,
+					     const CompressionStrategy strategy) const
+  {
+    if (problem->local_operator()) {
+      typedef std::list<Index> IntersectingList;
+      IntersectingList nus;
+      intersecting_wavelets(basis(), lambda,
+			    std::max(j, basis().j0()),
+			    j == (basis().j0()-1),
+			    nus);
+
+      // do the rest of the job, we only implement the CDD1 compression strategy here!!!
+      const double d1 = problem->D(lambda);
+      for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());
+	   it != itend; ++it) {
+	const double entry = problem->a(*it, lambda);
+	w.add_coefficient(*it, (entry / (d1 * problem->D(*it))) * factor);
+      }
+    } else {
+      // integral operator case, TODO
+    }
+  }
+
+  template <class PROBLEM>
+  double
+  CachedProblemFromFile<PROBLEM>::norm_A() const
+  {
+    if (normA == 0.0) {
+#if _WAVELETTL_CACHEDPROBLEM_VERBOSITY >= 1
+      cout << "CachedProblemFromFile()::norm_A() called..." << endl;
+#endif
+
+      std::set<Index> Lambda;
+      const int j0 = problem->basis().j0();
+      const int jmax = j0+2;
+      for (Index lambda = problem->basis().first_generator(j0);; ++lambda) {
+	Lambda.insert(lambda);
+	if (lambda == problem->basis().last_wavelet(jmax)) break;
+      }
+      SparseMatrix<double> A_Lambda;
+      setup_stiffness_matrix(*this, Lambda, A_Lambda);
+      
+#if 1
+      double help;
+      unsigned int iterations;
+      LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
+      normAinv = 1./help;
+#else
+      Vector<double> xk(Lambda.size(), false);
+      xk = 1;
+      unsigned int iterations;
+      normA = PowerIteration(A_Lambda, xk, 1e-6, 100, iterations);
+#endif
+
+#if _WAVELETTL_CACHEDPROBLEM_VERBOSITY >= 1
+      cout << "... done!" << endl;
+#endif
+    }
+
+    return normA;
+  }
+   
+  template <class PROBLEM>
+  double
+  CachedProblemFromFile<PROBLEM>::norm_Ainv() const
+  {
+    if (normAinv == 0.0) {
+#if _WAVELETTL_CACHEDPROBLEM_VERBOSITY >= 1
+      cout << "CachedProblemFromFile()::norm_Ainv() called..." << endl;
+#endif
+
+      std::set<Index> Lambda;
+      const int j0 = problem->basis().j0();
+      const int jmax = j0+2;
+      for (Index lambda = problem->basis().first_generator(j0);; ++lambda) {
+	Lambda.insert(lambda);
+	if (lambda == problem->basis().last_wavelet(jmax)) break;
+      }
+      SparseMatrix<double> A_Lambda;
+      setup_stiffness_matrix(*this, Lambda, A_Lambda);
+      
+#if 1
+      double help;
+      unsigned int iterations;
+      LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
+      normAinv = 1./help;
+#else
+      Vector<double> xk(Lambda.size(), false);
+      xk = 1;
+      unsigned int iterations;
+      normAinv = InversePowerIteration(A_Lambda, xk, 1e-6, 200, iterations);
+#endif
+
+#if _WAVELETTL_CACHEDPROBLEM_VERBOSITY >= 1
+      cout << "... done!" << endl;
+#endif
+    }
+
+    return normAinv;
+  }
+
 }

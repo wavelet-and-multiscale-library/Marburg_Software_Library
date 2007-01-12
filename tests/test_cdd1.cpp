@@ -104,9 +104,8 @@ int main()
 #if 1
   const int d  = 3;
   const int dT = 3;
-//   typedef DSBasis<d,dT> Basis;
+//   typedef DSBasis<d,dT> Basis; Basis basis(true, true);
 //   typedef PBasis<d,dT> Basis;
-//   Basis basis(true, true);
   typedef SplineBasis<d,dT,P_construction> Basis; Basis basis("",1,1,0,0);
 #else
   typedef JLBasis Basis; Basis basis;
@@ -115,7 +114,8 @@ int main()
 
   SturmEquation<Basis> problem(T, basis);
   CachedProblem<SturmEquation<Basis> > cproblem(&problem);
-
+//   CachedProblemFromFile<SturmEquation<Basis> > cproblem(&problem, "P_3_3_10_A", 10);
+  
   // initialization with some precomputed DSBasis eigenvalue bounds:
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.34801,  13.3113 ); // d=2, dT=2 (diag-precond.)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem, 12.2509 ,   6.41001); // d=2, dT=2 (2^j-precond.)
@@ -159,8 +159,8 @@ int main()
 //   cout << "* estimate for normAinv: " << normAinv << endl;
 
   InfiniteVector<double, Index> u_epsilon;
-//   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, u_epsilon, 10);
-  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, u_epsilon, 1.0, 1.0, 10);
+  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, u_epsilon, 10);
+//    CDD1_SOLVE(cproblem, 1e-4, u_epsilon, u_epsilon, 1.0, 1.0, 10);
 //   CDD1_SOLVE(cproblem, 1e-5, u_epsilon, 20);
 //   CDD1_SOLVE(cproblem, 1e-10, u_epsilon, 20);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 20);

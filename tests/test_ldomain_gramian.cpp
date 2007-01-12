@@ -27,8 +27,8 @@ int main()
 {
   cout << "Testing LDomainGramian ..." << endl;
 
-  const int d  = 2;
-  const int dT = 2;
+  const int d  = 3;
+  const int dT = 3;
 
 #if 0
   typedef DSBasis<d,dT,BernsteinSVD> Basis1D;
@@ -123,9 +123,13 @@ int main()
 
   cout << "- set up index set of active wavelets..." << endl;
   set<Index> Lambda;
+//   Index lastlambda = basis.last_generator(basis.j0());
+//   for (int i = 0; i < 100; i++, ++lastlambda);
   for (Index lambda = basis.first_generator(basis.j0());; ++lambda) {
+//   for (Index lambda = basis.first_wavelet(basis.j0());; ++lambda) {
     Lambda.insert(lambda);
     if (lambda == basis.last_wavelet(jmax)) break;
+//     if (lambda == lastlambda) break;
   }
   cout << "  ... done!" << endl;
 

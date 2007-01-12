@@ -77,8 +77,12 @@ namespace WaveletTL
     //! translation index k
     const translation_type& k() const { return k_; }
 
-    //! number num_
-    const int number() const { return num_; }
+    //! number
+    const int number() const {
+      return (e() == 0
+ 	      ? k() - basis_->DeltaLmin()
+ 	      : basis_->Deltasize(j()) + k() - basis_->Nablamin());
+    }
 
     /*!
       inverse of constructor

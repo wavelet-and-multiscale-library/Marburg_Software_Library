@@ -631,32 +631,14 @@ namespace MathTL
     // read row indices
     int* i = new int[l];
     bin_file.read((char*)(i), l*sizeof(int));
-//     cout << "i=" << "[";
-//     for (int k = 0; k < l; k++) {
-//       cout << i[k];
-//       if (k < l-1) cout << ",";
-//     }
-//     cout << "]" << endl;
 
     // read column indices
     int* j = new int[l];
     bin_file.read((char*)(j), l*sizeof(int));
-//     cout << "j=" << "[";
-//     for (int k = 0; k < l; k++) {
-//       cout << j[k];
-//       if (k < l-1) cout << ",";
-//     }
-//     cout << "]" << endl;
 
     // read entries
     double* e = new double[l];
     bin_file.read((char*)(e), l*sizeof(double));
-//     cout << "e=" << "[";
-//     for (int k = 0; k < l; k++) {
-//       cout << e[k];
-//       if (k < l-1) cout << ",";
-//     }
-//     cout << "]" << endl;
 
     // reinterpret data as compressed row storage format
     int counter = 1;

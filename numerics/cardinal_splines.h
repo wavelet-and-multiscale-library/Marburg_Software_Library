@@ -54,7 +54,6 @@ namespace MathTL
     (fastest possible variant)
   */
   template <>
-  inline
   double EvaluateCardinalBSpline<3>(const double x)
   {
     if (x < 0 || x >= 3)

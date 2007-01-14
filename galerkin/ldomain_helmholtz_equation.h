@@ -15,19 +15,17 @@
 #include <algebra/infinite_vector.h>
 #include <interval/spline_basis.h>
 #include <galerkin/galerkin_utils.h>
-#include <galerkin/full_helmholtz.h>
 #include <galerkin/infinite_preconditioner.h>
-#include <galerkin/gramian.h>
-#include <galerkin/poisson_equation.h>
+#include <galerkin/ldomain_gramian.h>
+#include <galerkin/ldomain_laplacian.h>
 #include <galerkin/cached_problem.h>
 #include <adaptive/compression.h>
+#include <Ldomain/ldomain_basis.h>
 
 using namespace MathTL;
 
 namespace WaveletTL
 {
-  template <class IBASIS> class LDomainBasis;
-
   /*!
     This class models the (preconditioned) infinite-dimensional matrix problem
     
@@ -56,37 +54,50 @@ namespace WaveletTL
     which stem from a wavelet basis \Psi=\{\psi_\lambda\} of the corresponding
     function space over Omega.
 
-    (Currently, ) this class is designed to work with the LDomainBasis Riesz basis.
-    However, in the future, this may be changed to allow also other wavelet bases
-    over the L--shaped domain.
+    The wavelet bases useable for the discretization are those
+    modeled by SplineBasis<d,dT,DS_construction>.
+
+    Internally, HelmholtzEquation1D holds two distinct caches for the
+    Gramian (identity) part of the stiffness matrix and the Laplacian part.
   */
-  template <class IBASIS>
+  template <int d, int dT>
   class LDomainHelmholtzEquation
-    : public FullyDiagonalEnergyNormPreconditioner<typename LDomainBasis<IBASIS>::Index>
+    : public FullyDiagonalEnergyNormPreconditioner<typename LDomainBasis<SplineBasis<d,dT,DS_construction> >::Index>
   {
   public:
     /*!
       make template argument accessible
     */
-    typedef LDomainBasis<IBASIS> WaveletBasis;
-
-    /*!
-      constructor from a right-hand side, a basis, alpha and specified b.c.'s
-    */
-    LDomainHelmholtzEquation(Function<2>* f,
-			     const WaveletBasis& basis,
-			     const double alpha,
-			     const bool precompute_rhs = true);
-
-    /*!
-      copy constructor
-    */
-    LDomainHelmholtzEquation(const LDomainHelmholtzEquation&);
+    typedef LDomainBasis<SplineBasis<d,dT,DS_construction> > WaveletBasis;
 
     /*!
       wavelet index class
     */
     typedef typename WaveletBasis::Index Index;
+
+    /*!
+      index type of vectors and matrices
+    */
+    typedef typename Vector<double>::size_type size_type;
+
+    /*!
+      constructor from a given wavelet basis,
+      two filenames for the precomputed Gramian and Laplacian (plus corresponding jmax)
+      and a right-hand side y
+    */
+    LDomainHelmholtzEquation(const WaveletBasis& basis,
+			     const char* G_file,
+			     const char* A_file,
+			     const int jmax,
+			     const double alpha,
+			     const InfiniteVector<double, typename WaveletBasis::Index>& y);
+
+    /*!
+      set right-hand side y
+    */
+    void set_rhs(const InfiniteVector<double,Index>& y) const {
+      y_ = y;
+    }
 
     /*!
       read access to the basis
@@ -120,17 +131,6 @@ namespace WaveletTL
     double a(const Index& lambda, const Index& nu) const;
 
     /*!
-      evaluate the (unpreconditioned) bilinear form a;
-      you can specify the order p of the quadrature rule, i.e.,
-      (piecewise) polynomials of maximal degree p will be integrated exactly.
-      Internally, we use an m-point composite tensor product Gauss rule adapted
-      to the singular supports of the spline wavelets involved,
-      so that m = (p+1)/2;
-    */
-    double a(const Index& lambda, const Index& nu,
-	     const unsigned int p) const; // p=4
-
-    /*!
       estimate the spectral norm ||A||
     */
     double norm_A() const;
@@ -142,7 +142,6 @@ namespace WaveletTL
 
     /*!
       estimate compressibility exponent s^*
-      (we assume that the coefficients a(x),q(x) are smooth)
     */
     double s_star() const;
     
@@ -157,7 +156,9 @@ namespace WaveletTL
     /*!
       evaluate the (unpreconditioned) right-hand side f
     */
-    double f(const Index& lambda) const;
+    double f(const Index& lambda) const {
+      return y_.get_coefficient(lambda);
+    }
 
     /*!
       approximate the wavelet coefficient set of the preconditioned right-hand side F
@@ -172,23 +173,25 @@ namespace WaveletTL
     double F_norm() const { return sqrt(fnorm_sqr); }
 
     /*!
-      set the boundary value problem
+      w += factor * (stiffness matrix entries in column lambda on level j)
     */
-    void set_bvp(const EllipticBVP<2>*);
+    void add_level (const Index& lambda,
+		    InfiniteVector<double, Index>& w, const int j,
+		    const double factor,
+		    const int J,
+		    const CompressionStrategy strategy = St04a) const;
 
   protected:
-    Function<2>* f_;
     WaveletBasis basis_;
-    double alpha_;
+    mutable double alpha_;
+    mutable InfiniteVector<double, typename WaveletBasis::Index> y_;
+    mutable InfiniteVector<double, typename WaveletBasis::Index> y_precond;
 
-    // right-hand side coefficients on a fine level, sorted by modulus
-    Array1D<std::pair<Index,double> > fcoeffs;
-
-    // precompute the right-hand side
-    void compute_rhs();
-
-    // (squared) \ell_2 norm of the precomputed right-hand side
-    double fnorm_sqr;
+  public:
+    LDomainGramian<SplineBasis<d,dT,DS_construction> > G_;
+    CachedProblemFromFile<LDomainGramian<SplineBasis<d,dT,DS_construction> > > GC_;
+    LDomainLaplacian<SplineBasis<d,dT,DS_construction> > A_;
+    CachedProblemFromFile<LDomainLaplacian<SplineBasis<d,dT,DS_construction> > > AC_;
 
     // estimates for ||A|| and ||A^{-1}||
     mutable double normA, normAinv;

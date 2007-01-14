@@ -107,7 +107,7 @@ int main()
   }
   cout << "  ... done!" << endl;
 
-  cout << "- set up Gramian matrix..." << endl;
+  cout << "- set up stiffness matrix..." << endl;
   clock_t tstart, tend;
   double time;
   tstart = clock();
@@ -117,7 +117,7 @@ int main()
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
-  //   cout << "- Gramian matrix A=" << endl << A << endl;
+  //   cout << "- stiffness matrix A=" << endl << A << endl;
 #if 0
   A.matlab_output("Ldomain_laplacian", "A", 1);
 #endif

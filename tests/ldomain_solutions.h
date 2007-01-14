@@ -68,6 +68,20 @@ namespace WaveletTL
       values[0] = value(p);
     }
   };
+
+  class PolySum
+    : public Function<2,double>
+  {
+  public:
+    virtual ~PolySum() {};
+    double value(const Point<2>& p, const unsigned int component = 0) const {
+      return p[0]*(1-p[0])*(1+p[0])*p[1]*(1-p[1])*(1+p[1])
+	+12*p[0]*p[1]-6*p[0]*p[1]*p[1]*p[1]-6*p[0]*p[0]*p[0]*p[1];
+    }
+    void vector_value(const Point<2>& p, Vector<double>& values) const {
+      values[0] = value(p);
+    }
+  };
 }
 
 #endif

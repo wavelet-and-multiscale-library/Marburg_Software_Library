@@ -73,6 +73,11 @@ namespace WaveletTL
     typedef LDomainBasis<IntervalBasis> WaveletBasis;
     
     /*!
+      read access to the basis
+    */
+    const WaveletBasis& basis() const { return basis_; }
+
+    /*!
       wavelet index class
     */
     typedef typename WaveletBasis::Index Index;
@@ -90,6 +95,21 @@ namespace WaveletTL
       y_ = y;
     }
 
+    /*!
+      space dimension of the problem
+    */
+    static const int space_dimension = 2;
+
+    /*!
+      differential operators are local
+    */
+    static bool local_operator() { return true; }
+
+    /*!
+      (half) order t of the operator
+    */
+    double operator_order() const { return 1.; }
+    
     /*!
       evaluate the diagonal preconditioner D
     */

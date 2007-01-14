@@ -46,8 +46,8 @@ int main()
     break;
   }
 
-  const int jmax = basis.j0()+1;
-//   const int jmax = 5;
+//   const int jmax = basis.j0()+1;
+  const int jmax = 5;
   
   typedef LDomainHelmholtzEquation<d,dT> Problem;
   Problem problem(basis,
@@ -116,17 +116,24 @@ int main()
     for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
       u.set_coefficient(*it, x[i]);
     u.scale(&problem, -1);
-    Array1D<SampledMapping<2> > s(basis.evaluate(u, 5));
+    const int resi = 5;
+    const int N = 1<<resi;
+    Array1D<SampledMapping<2> > s(basis.evaluate(u, resi));
     std::ofstream u_Lambda_stream("u_lambda.m");
 //     octave_output(u_Lambda_stream, s);
     matlab_output(u_Lambda_stream, s);
     u_Lambda_stream.close();
     cout << "  ... done, see file 'u_lambda.m'" << endl;
  
+    double L2error = 0;
     for (int i = 0; i <= 2; i++) {
       s[i].add(-1.0, SampledMapping<2>(s[i], *uexact));
       cout << "  pointwise error on patch " << i << ": " << row_sum_norm(s[i].values()) << endl;
+      const double frob = frobenius_norm(s[i].values());
+      L2error += frob*frob;
     }
+    L2error = sqrt(L2error/(N*N));
+    cout << "  ... L_2 error " << L2error << endl;
   }
 #endif
 

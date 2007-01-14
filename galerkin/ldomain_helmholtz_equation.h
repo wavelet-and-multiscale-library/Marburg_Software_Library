@@ -170,7 +170,7 @@ namespace WaveletTL
     /*!
       compute (or estimate) ||F||_2
     */
-    double F_norm() const { return sqrt(fnorm_sqr); }
+    double F_norm() const { return l2_norm(y_); }
 
     /*!
       w += factor * (stiffness matrix entries in column lambda on level j)

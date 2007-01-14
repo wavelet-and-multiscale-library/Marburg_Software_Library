@@ -4,6 +4,7 @@
 #include <time.h>
 #include <utils/fixed_array1d.h>
 #include <numerics/gauss_data.h>
+#include <numerics/eigenvalues.h>
 
 namespace WaveletTL
 {

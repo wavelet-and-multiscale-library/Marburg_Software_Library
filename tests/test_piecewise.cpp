@@ -79,6 +79,9 @@ int main()
 //   int k=2;
 //   cout << "p shifted by k=" << k << ":" << endl << p.shift(k) << endl << p << endl;
 
+  s.dilate_me(1);
+  cout << "s dilated by 2: " << s << endl;
+
   // monomial basis
   Polynomial<double> x0;
   x0.set_coefficient(0,1);

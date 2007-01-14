@@ -120,12 +120,24 @@ namespace MathTL
     Piecewise split(const int jnew) const;
 
     /*!
+      dilate by 2^{-j}
+    */
+    void dilate_me(const int j);
+
+    /*!
+      dilate by 2^{-j}
+      (makes a copy)
+    */
+    Piecewise<C> dilate(const int j) const;
+
+    /*!
       shift by 2^{-j}k
     */
     void shift_me(const int k);
 
     /*!
       shift by 2^{-j}k
+      (makes a copy)
     */
     Piecewise<C> shift(const int k) const;
 

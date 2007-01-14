@@ -148,6 +148,24 @@ namespace MathTL
   }
 
 
+  /*! dilate */
+  template <class C>
+  void Piecewise<C>::dilate_me(const int j)
+  {
+    granularity += j;
+    scale( sqrt(1<<j) ); // scale by 2^{j/2}
+  }
+
+  template <class C>
+  Piecewise<C> Piecewise<C>::dilate(const int j) const
+  {
+    Piecewise r(*this);
+    r.dilate_me(j);
+
+    return r;
+  }
+
+
   /*! increase granularity */
   template <class C>
   void Piecewise<C>::split_me(const int jnew)

@@ -10,14 +10,19 @@
 
 #include <interval/i_index.h>
 #include <interval/ds_basis.h>
-#include <interval/p_basis.h>
+#include <interval/spline_basis.h>
 
-#define _WAVELETTL_LDOMAINBASIS_VERBOSITY 1
-#define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
+#define _WAVELETTL_LDOMAINBASIS_VERBOSITY 0
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
 
 #include <Ldomain/ldomain_basis.h>
+#include <Ldomain/ldomain_expansion.h>
 #include <galerkin/cached_problem.h>
 #include <galerkin/ldomain_equation.h>
+#include <galerkin/ldomain_helmholtz_equation.h>
+
+#define _WAVELETTL_CDD1_VERBOSITY 1
+#include <adaptive/cdd1.h>
 
 using namespace std;
 using namespace MathTL;
@@ -61,45 +66,40 @@ int main()
 
   const int d  = 2;
   const int dT = 2;
-//   typedef DSBasis<d,dT> Basis1D;
-  typedef PBasis<d,dT> Basis1D;
-
-  typedef LDomainBasis<Basis1D> LBasis;
-  typedef LBasis::Index Index;
-
+  
+  typedef SplineBasis<d,dT,DS_construction> Basis1D;
+  Basis1D basis1d("bio5-energy",0,0,0,0);
+  
+  typedef LDomainBasis<Basis1D> Basis;
+  typedef Basis::Index Index;
+  Basis basis(basis1d);
+  
 //   CornerSingularity    u_sing(Point<2>(0,0), 0.5, 1.5);
 //   CornerSingularityRHS f_sing(Point<2>(0,0), 0.5, 1.5);
 
   myRHS rhs;
-  PoissonBVP<2> poisson(&rhs);
 
-  typedef LDomainEquation<Basis1D> Problem;
-  Problem problem(&poisson);
-  //   CachedProblem<Problem> cproblem(&problem);
+  InfiniteVector<double,Index> rhs_coeffs;
+  expand(&rhs, basis, true, 5, rhs_coeffs);
 
-  // initialization with some precomputed DSBasis eigenvalue bounds: ### update the values!!!
-  //   CachedProblem<Problem> cproblem(&problem, 19.97  ,    6.86044); // d=2, dT=2
-  //   CachedProblem<Problem> cproblem(&problem, 29.8173,   25.6677 ); // d=2, dT=4
-  //   CachedProblem<Problem> cproblem(&problem, 8.51622, 10000); //6311.51   ); // d=3, dT=3 
+  typedef LDomainHelmholtzEquation<d,dT> Problem;
+  Problem problem(basis,
+		  "DS_B_2_2_5_G",
+		  "DS_B_2_2_5_A",
+		  5,
+		  0.0,
+		  rhs_coeffs);
 
-  // initialization with some precomputed PBasis eigenvalue bounds: ### update the values!!!
-  //   CachedProblem<Problem> cproblem(&problem, 10.6941 ,   3.4127); // d=2, dT=2 (2^j-precond.)
-  //   CachedProblem<Problem> cproblem(&problem,  2.77329,  11.1314); // d=2, dT=2 (diag. precond.)
-  //   CachedProblem<Problem> cproblem(&problem, 37.9188 ,  14.6577); // d=2, dT=4 (2^j-precond.)
-  //   CachedProblem<Problem> cproblem(&problem,  4.45301,  213.333); // d=2, dT=4 (diag. precond.)
-  //   CachedProblem<Problem> cproblem(&problem,  7.15276, 9044.08 ); // d=2, dT=6 (diag. precond.)
-  //   CachedProblem<Problem> cproblem(&problem,  2.35701,  80.8879); // d=3, dT=3 (2^j-precond.)
-//   CachedProblem<Problem> cproblem(&problem,  4.91237,  23.5086); // d=3, dT=3 (diag. precond.)
-  //   CachedProblem<Problem> cproblem(&problem,  2.4999 ,  67.5863); // d=3, dT=5 (2^j-precond., not exact)
-  //   CachedProblem<Problem> cproblem(&problem,  5.49044, 124.85  ); // d=3, dT=5 (diag. precond.)
+//   double normA = problem.norm_A();
+//   double normAinv = problem.norm_Ainv();
 
-  double normA = problem.norm_A();
-  double normAinv = problem.norm_Ainv();
+//   cout << "* estimate for normA: " << normA << endl;
+//   cout << "* estimate for normAinv: " << normAinv << endl;
 
-  cout << "* estimate for normA: " << normA << endl;
-  cout << "* estimate for normAinv: " << normAinv << endl;
+  InfiniteVector<double, Index> u_epsilon;
 
-//   InfiniteVector<double, Index> u_epsilon;
+  CDD1_SOLVE(problem, 1e-2, u_epsilon, u_epsilon, 1.0, 1.0, 4);
+//   CDD1_SOLVE(problem, 1e-4, u_epsilon, u_epsilon, 5);
 
 //   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 5);
 // //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 7);

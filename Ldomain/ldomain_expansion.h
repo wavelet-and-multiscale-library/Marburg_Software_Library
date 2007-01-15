@@ -12,6 +12,7 @@
 
 #include <utils/function.h>
 #include <algebra/infinite_vector.h>
+#include <geometry/sampled_mapping.h>
 
 using MathTL::SampledMapping;
 using MathTL::InfiniteVector;

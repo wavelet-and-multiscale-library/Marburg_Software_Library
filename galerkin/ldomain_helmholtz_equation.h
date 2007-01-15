@@ -95,9 +95,12 @@ namespace WaveletTL
     /*!
       set right-hand side y
     */
-    void set_rhs(const InfiniteVector<double,Index>& y) const {
-      y_ = y;
-    }
+    void set_rhs(const InfiniteVector<double,Index>& y) const;
+
+    /*!
+      set reaction coefficient alpha
+    */
+    void set_alpha(const double alpha) const;
 
     /*!
       read access to the basis
@@ -164,8 +167,10 @@ namespace WaveletTL
       approximate the wavelet coefficient set of the preconditioned right-hand side F
       within a prescribed \ell_2 error tolerance
     */
-    void RHS(const double eta,
-	     InfiniteVector<double,Index>& coeffs) const;
+    void RHS(const double eta, InfiniteVector<double,Index>& coeffs) const
+    {
+      coeffs = y_precond; // dirty
+    }
 
     /*!
       compute (or estimate) ||F||_2

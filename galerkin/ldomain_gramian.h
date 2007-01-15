@@ -126,6 +126,14 @@ namespace WaveletTL
     double operator_order() const { return 0.; }
     
     /*!
+      estimate compressibility exponent s^*
+    */
+    double s_star() const {
+      return std::min(WaveletBasis::primal_regularity(),
+		      WaveletBasis::primal_vanishing_moments()/2.); // [St04a], Th. 2.3 for n=2,t=0,gamma
+    }
+    
+    /*!
       evaluate the diagonal preconditioner D
     */
     double D(const Index& lambda) const { return sqrt(a(lambda,lambda)); }

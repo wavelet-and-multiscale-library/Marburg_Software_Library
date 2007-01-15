@@ -140,7 +140,8 @@ namespace WaveletTL
 #endif
       NGROW(P, params, F, Lambda_k, u_Lambda_k, params.q1*delta, params.q2*delta, Lambda_kplus1, r_hat, jmax, strategy);
       if (l2_norm(r_hat) <= params.c1*delta/20. || k == params.K || Lambda_k.size() == Lambda_kplus1.size()) {
-	u_Lambda_k.COARSE(2.*delta/5., v_hat);
+//  	u_Lambda_k.COARSE(2.*delta/5., v_hat);
+ 	v_hat = u_Lambda_k;
 	v_hat.support(Lambda_hat);
 	break;
       }

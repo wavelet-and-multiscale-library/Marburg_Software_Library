@@ -131,7 +131,7 @@ namespace MathTL
     polygonal domain in R^2. In polar coordinates w.r.t. the corner,
     the function looks like
 
-      s(r,theta) = t^{3/4}*r^{pi/omega}*sin((pi/omega)*theta)*(1-r^2x^2)*(1-y^2)
+      s(r,theta) = t^{3/4}*r^{pi/omega}*sin((pi/omega)*theta)*(1-x^2)*(1-y^2)
 
     with x=r*cos(theta0+theta), y=r*sin(theta0+theta).
 

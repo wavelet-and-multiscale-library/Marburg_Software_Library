@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <utils/array1d.h>
 
 using std::cout;
 using std::endl;

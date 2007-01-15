@@ -60,6 +60,19 @@ public:
   }
 };
 
+class mySum
+  : public Function<2,double>
+{
+public:
+  virtual ~mySum() {};
+  double value(const Point<2>& p, const unsigned int component = 0) const {
+    return (1+2*M_PI*M_PI)*sin(M_PI*p[0])*sin(M_PI*p[1]);
+  }
+  void vector_value(const Point<2>& p, Vector<double>& values) const {
+    values[0] = value(p);
+  }
+};
+
 int main()
 {
   cout << "Testing adaptive wavelet-Galerkin solution of a Poisson problem on the L-shaped domain with CDD1_SOLVE ..." << endl;
@@ -77,7 +90,8 @@ int main()
 //   CornerSingularity    u_sing(Point<2>(0,0), 0.5, 1.5);
 //   CornerSingularityRHS f_sing(Point<2>(0,0), 0.5, 1.5);
 
-  myRHS rhs;
+//   myRHS rhs; // alpha=0
+  mySum rhs; // alpha=1
 
   InfiniteVector<double,Index> rhs_coeffs;
   expand(&rhs, basis, true, 5, rhs_coeffs);
@@ -87,7 +101,7 @@ int main()
 		  "DS_B_2_2_5_G",
 		  "DS_B_2_2_5_A",
 		  5,
-		  0.0,
+		  1.0,
 		  rhs_coeffs);
 
 //   double normA = problem.norm_A();

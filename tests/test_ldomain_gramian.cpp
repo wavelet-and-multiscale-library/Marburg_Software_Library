@@ -27,8 +27,8 @@ int main()
 {
   cout << "Testing LDomainGramian ..." << endl;
 
-  const int d  = 3;
-  const int dT = 3;
+  const int d  = 2;
+  const int dT = 2;
 
 #if 0
   typedef DSBasis<d,dT,BernsteinSVD> Basis1D;
@@ -258,7 +258,7 @@ int main()
     unsigned int i = 0;
     for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
       u.set_coefficient(*it, x[i]);
-    u.scale(&problem, -1);
+//     u.scale(&problem, -1);
     Array1D<SampledMapping<2> > s(basis.evaluate(u, 5));
     std::ofstream u_Lambda_stream("u_lambda.m");
 //     octave_output(u_Lambda_stream, s);

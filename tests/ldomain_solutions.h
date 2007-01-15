@@ -39,6 +39,19 @@ namespace WaveletTL
     }
   };
 
+  class EigenSum
+    : public Function<2,double>
+  {
+  public:
+    virtual ~EigenSum() {};
+    double value(const Point<2>& p, const unsigned int component = 0) const {
+      return (1.0+2*M_PI*M_PI)*sin(M_PI*p[0])*sin(M_PI*p[1]);
+    }
+    void vector_value(const Point<2>& p, Vector<double>& values) const {
+      values[0] = value(p);
+    }
+  };
+
   /*!
     u(x,y) = x*(1-x)*(1+x)*y*(1-y)*(1+y)
     f(x,y) = -Delta u(x,y) = 12*x*y-6*x*y^3-6*x^3*y

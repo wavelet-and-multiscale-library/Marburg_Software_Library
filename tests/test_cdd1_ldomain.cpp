@@ -112,8 +112,8 @@ int main()
 
   InfiniteVector<double, Index> u_epsilon;
 
-  CDD1_SOLVE(problem, 1e-2, u_epsilon, u_epsilon, 1.0, 1.0, 4);
-//   CDD1_SOLVE(problem, 1e-4, u_epsilon, u_epsilon, 5);
+  CDD1_SOLVE(problem, 1e-2, u_epsilon, u_epsilon, 1.0, 1.0, 5);
+//   CDD1_SOLVE(problem, 1e-2, u_epsilon, u_epsilon, 4);
 
 //   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 5);
 // //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 7);

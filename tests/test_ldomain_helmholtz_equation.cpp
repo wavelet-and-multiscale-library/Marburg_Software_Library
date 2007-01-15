@@ -42,12 +42,17 @@ int main()
     f = new PolySum(); // alpha=1
 //     f = new PolyRHS(); // alpha=0
     break;
+  case 2:
+    uexact = new EigenSolution();
+    f = new EigenSum(); // alpha=1
+//     f = new EigenRHS(); // alpha=0
+    break;
   default:
     break;
   }
 
-//   const int jmax = basis.j0()+1;
-  const int jmax = 5;
+  const int jmax = basis.j0()+1;
+//   const int jmax = 5;
   
   typedef LDomainHelmholtzEquation<d,dT> Problem;
   Problem problem(basis,

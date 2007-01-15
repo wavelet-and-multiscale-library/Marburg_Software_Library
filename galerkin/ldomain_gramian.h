@@ -74,7 +74,9 @@ namespace WaveletTL
 
   template <int d, int dT>
   class LDomainGramian<SplineBasis<d,dT,DS_construction> >
-    : public FullyDiagonalEnergyNormPreconditioner<typename LDomainBasis<SplineBasis<d,dT,DS_construction> >::Index>
+//     : public FullyDiagonalEnergyNormPreconditioner<typename LDomainBasis<SplineBasis<d,dT,DS_construction> >::Index>
+// note: energy norm preconditioning (and the corresponding branch in D()) is commented out
+//       since this is incompatible with the current implementation of LDomainHelmholtzEquation!!!
   {
   public:
     /*!
@@ -136,7 +138,10 @@ namespace WaveletTL
     /*!
       evaluate the diagonal preconditioner D
     */
-    double D(const Index& lambda) const { return sqrt(a(lambda,lambda)); }
+    double D(const Index& lambda) const {
+//       return sqrt(a(lambda,lambda));
+      return 1.0;
+    }
 
     /*!
       evaluate the (unpreconditioned) bilinear form a

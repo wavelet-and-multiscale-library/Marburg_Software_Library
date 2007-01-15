@@ -333,12 +333,14 @@ namespace WaveletTL
  			       : basis().Deltasize(j));
       size_type end_index = basis().Deltasize(j+1);
       size_type lambda_number = lambda.number();
-      const double d1 = sqrt(entries_cache.get_entry(lambda_number, lambda_number));
+//       const double d1 = sqrt(entries_cache.get_entry(lambda_number, lambda_number)); // fails for D==1
+      const double d1 = problem->D(lambda);
       for (size_type i = start_index; i < end_index; i++, ++mu) {
 	const double entry = entries_cache.get_entry(i,lambda_number);
 	if (entry != 0)
 	  w.add_coefficient(mu, entry * factor /
-			    (d1 * sqrt(entries_cache.get_entry(i, i))));
+// 			    (d1 * sqrt(entries_cache.get_entry(i, i)))); // fails for D==1
+			    (d1 * problem->D(mu)));
       }
     } else {
       // integral operator case, TODO

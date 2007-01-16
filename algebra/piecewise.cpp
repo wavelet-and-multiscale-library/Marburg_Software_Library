@@ -153,7 +153,7 @@ namespace MathTL
   void Piecewise<C>::dilate_me(const int j)
   {
     granularity += j;
-    scale( sqrt(1<<j) ); // scale by 2^{j/2}
+    scale( sqrt((double)(1<<j))); // scale by 2^{j/2}
   }
 
   template <class C>

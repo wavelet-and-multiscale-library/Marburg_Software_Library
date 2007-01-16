@@ -210,6 +210,42 @@ namespace MathTL
     double omega;
   };
 
+  /*!
+    temporal derivative of CornerTimeSingularityRHS
+  */
+  class CornerTimeSingularityRHSt
+    : public Function<2>
+  {
+  public:
+    /*!
+      constructor from a corner x0,
+      a starting angle theta0 (times pi, against positive x-axis)
+      and an inner angle omega (times pi);
+    */
+    CornerTimeSingularityRHSt(const Point<2>& x0,
+			      const double theta0,
+			      const double omega);
+
+    //! destructor
+    virtual ~CornerTimeSingularityRHSt() {}
+    
+    //! point value at x
+    double value(const Point<2>& x, const unsigned int component = 0) const;
+    
+    //! vector-valued value at x (for compatibility with Function)
+    void vector_value(const Point<2>& p, Vector<double>& values) const;
+    
+  protected:
+    //! corner
+    Point<2> x0;
+
+    //! starting angle
+    double theta0;
+
+    //! inner angle
+    double omega;
+  };
+
 }
 
 // implementations of inline functions

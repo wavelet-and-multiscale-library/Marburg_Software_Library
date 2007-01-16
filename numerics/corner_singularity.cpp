@@ -265,11 +265,11 @@ namespace MathTL
     return
       0.75*pow(get_time(),-0.25)*pow(r,1/omega)*sin(theta/omega)*(1-x[0]*x[0])*(1-x[1]*x[1]) // temporal derivative
       - pow(get_time(),0.75) * // spatial derivative:
-      (2*1/omega*pow(r,1/omega-1)*sin(theta/omega)*(-2*r+4*r*r*r*ct*ct*st*st)                   // 2*u_r*f_r(r,theta)
-       + pow(r,1/omega)*sin(theta/omega)*(-2+12*r*r*ct*ct*st*st)                                // u*f_{rr}
-       + 1/r*pow(r,1/omega)*sin(theta/omega)*(-2*r+4*r*r*r*ct*ct*st*st)                         // 1/r*u*f_r
-       + 2/(omega)*pow(r,1/omega-2)*cos(theta/omega)*r*r*r*r*(2*st*ct*ct*ct-2*st*st*st*ct)      // 2/r^2*u_theta*f_theta
-       + pow(r,1/omega-2)*sin(theta/omega)*r*r*r*r*(2*ct*ct*ct*ct-12*ct*ct*st*st+2*st*st*st*st) // 1/r^2*u*f_{thetatheta}
+      (2*1/omega*pow(r,1/omega-1)*sin(theta/omega)*(-2*r+4*r*r*r*ct*ct*st*st)           // 2*u_r*f_r(r,theta)
+       + pow(r,1/omega)*sin(theta/omega)*(-2+12*r*r*ct*ct*st*st)                        // u*f_{rr}
+       + pow(r,1/omega-1)*sin(theta/omega)*(-2*r+4*r*r*r*ct*ct*st*st)                   // 1/r*u*f_r
+       + 2/(omega)*pow(r,1/omega+2)*cos(theta/omega)*(2*st*ct*ct*ct-2*st*st*st*ct)      // 2/r^2*u_theta*f_theta
+       + pow(r,1/omega+2)*sin(theta/omega)*(2*ct*ct*ct*ct-12*ct*ct*st*st+2*st*st*st*st) // 1/r^2*u*f_{thetatheta}
        );
   }
   
@@ -277,6 +277,50 @@ namespace MathTL
   void
   CornerTimeSingularityRHS::vector_value(const Point<2> &p,
 					 Vector<double>& values) const
+  {
+    values[0] = value(p);
+  }
+
+  CornerTimeSingularityRHSt::CornerTimeSingularityRHSt(const Point<2>& x,
+						       const double w0,
+						       const double w)
+    : Function<2>(), x0(x), theta0(w0), omega(w)
+  {
+  }
+  
+  double
+  CornerTimeSingularityRHSt::value(const Point<2>& p,
+				   const unsigned int component) const
+  {
+    const Point<2> x(p-x0);
+    const double r = hypot(x[0],x[1]);
+    
+    double theta = atan2(x[1],x[0]);
+    
+    // shift theta to [0,2*pi]
+    if (theta < 0) theta += 2.0 * M_PI;
+    theta -= theta0 * M_PI;
+    if (theta < 0) theta += 2.0 * M_PI;
+    if (theta >= omega * M_PI) return 0.0;
+    
+    const double ct = cos(theta+theta0*M_PI);
+    const double st = sin(theta+theta0*M_PI);
+    
+    return
+      -0.1875*pow(get_time(),-1.25)*pow(r,1/omega)*sin(theta/omega)*(1-x[0]*x[0])*(1-x[1]*x[1]) // temporal derivative
+      -0.75*pow(get_time(),-0.25) * // spatial derivative:
+      (2*1/omega*pow(r,1/omega-1)*sin(theta/omega)*(-2*r+4*r*r*r*ct*ct*st*st)           // 2*u_r*f_r(r,theta)
+       + pow(r,1/omega)*sin(theta/omega)*(-2+12*r*r*ct*ct*st*st)                        // u*f_{rr}
+       + pow(r,1/omega-1)*sin(theta/omega)*(-2*r+4*r*r*r*ct*ct*st*st)                   // 1/r*u*f_r
+       + 2/(omega)*pow(r,1/omega+2)*cos(theta/omega)*(2*st*ct*ct*ct-2*st*st*st*ct)      // 2/r^2*u_theta*f_theta
+       + pow(r,1/omega+2)*sin(theta/omega)*(2*ct*ct*ct*ct-12*ct*ct*st*st+2*st*st*st*st) // 1/r^2*u*f_{thetatheta}
+       );
+  }
+  
+  inline
+  void
+  CornerTimeSingularityRHSt::vector_value(const Point<2> &p,
+					  Vector<double>& values) const
   {
     values[0] = value(p);
   }

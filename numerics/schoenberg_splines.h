@@ -146,6 +146,35 @@ namespace MathTL
     return 0.;
   }
 
+template <int d>
+  inline
+  double EvaluateSchoenbergBSpline_xx(const int k, const double x)
+  {
+    double r(0);
+
+    if (k == 1-d) {
+      r = (1-d) * EvaluateSchoenbergBSpline_x<d-1>(2-d, x);
+    } else {
+      if (k >= 0)
+	r = EvaluateSchoenbergBSpline_x<d-1>(k, x) - EvaluateSchoenbergBSpline_x<d-1>(k+1, x);
+      else
+	r = (d-1) * (EvaluateSchoenbergBSpline_x<d-1>(k, x) / (k+d-1)
+		     - EvaluateSchoenbergBSpline_x<d-1>(k+1, x) / (k+d));
+    }
+
+    return r;
+  }
+  
+  /*!
+    evaluate the first derivative N_{k,1}'(x) of an arbitrary Schoenberg B-spline
+  */
+  template <>
+  inline
+  double EvaluateSchoenbergBSpline_xx<1>(const int k, const double x)
+  {
+    return 0.;
+  }
+
   /*!
     evaluate the first derivative of a primal [P] function
       phi_{j,k}'(x) = 2^{3*j/2}N_{k-d/2,d}'(2^jx)
@@ -157,6 +186,15 @@ namespace MathTL
     const double factor(1 << j);
     return factor * sqrt(factor) * EvaluateSchoenbergBSpline_x<d>(k-(d/2), factor * x);
   }
+
+template <int d>
+  inline
+  double EvaluateSchoenbergBSpline_td_xx(const int j, const int k, const double x)
+  {
+    const double factor(1 << j);
+    return factor * sqrt(factor) * EvaluateSchoenbergBSpline_xx<d>(k-(d/2), factor * x);
+  }
+
 
   /*!
     a translated and dilated Schoenberg B-spline as a function object

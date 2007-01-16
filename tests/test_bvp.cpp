@@ -43,5 +43,11 @@ int main()
 //   cout << poisson.q(Point<2>(1.0, 2.9)) << endl;
 //   cout << poisson.f(Point<2>(1.0, 2.9)) << endl;
 
+   ConstantFunction<2> one(Vector<double>(1, "1.0"));
+//s   ZeroFunction<2> zero;
+   
+   BiharmonicBVP<2> bvp(&one);
+
+
   return 0;
 }

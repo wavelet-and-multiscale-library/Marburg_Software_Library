@@ -36,4 +36,17 @@ namespace MathTL
   {
   }
 
+  template <unsigned int DIM>
+  BiharmonicBVP<DIM>::BiharmonicBVP(const Function<DIM>* f)
+    :f_(f)
+  {
+  }
+  
+  template <unsigned int DIM>
+  void
+  BiharmonicBVP<DIM>::set_f(const Function<DIM>* f)
+  {
+    f_ = f;
+  }
+
 }

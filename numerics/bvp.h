@@ -193,6 +193,66 @@ namespace MathTL
   };
 
 
+
+  /*!
+    Base class for a symmetric, second-order elliptic
+    boundary value problem in divergence form over some domain
+    Omega in R^d with boundary Gamma=dOmega
+
+      -delta u(x)= f(x) in Omega
+
+    with some boundary conditions (Dirichlet, Neumann, Robin).
+    However, we only specify the parameter f in this class
+    and postpone the boundary condition treatment to the
+    discretization process. It will be implicitly assumed that
+    the wavelet bases or frames used in a wavelet-Galerkin scheme
+    fulfill the appropriate boundary conditions.
+  */
+   template <unsigned int DIM>
+   class BiharmonicBVP
+   {
+  public:
+    /*!
+      constructor with given (scalar) coefficients
+    */
+    BiharmonicBVP(const Function<DIM>* f);
+
+    /*!
+      virtual destructor
+    */
+    virtual ~BiharmonicBVP() {}
+
+    /*!
+      diffusion coefficient a
+     */
+    
+
+    /*!
+      flag to indicate whether all coefficients are constants
+      (speeds up quadrature a bit)
+    */
+    const bool constant_coefficients() const;
+    
+    /*!
+      right-hand side f
+    */
+    const double f(const Point<DIM>& x) const
+    {
+      return f_->value(x);
+    }
+
+    /*!
+      set the right-hand side to another function
+    */
+    void set_f(const Function<DIM>* f);
+    
+  protected:
+    
+    //! right-hand side
+    const Function<DIM>* f_;
+  };
+
+
 }
 
 #include <numerics/bvp.cpp>

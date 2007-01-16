@@ -2,6 +2,7 @@
 
 #include <algebra/piecewise.h>
 #include <algebra/polynomial.h>
+#include <utils/tiny_tools.h>
 #include <cmath>
 #include <iostream>
 //#include <iomanip>
@@ -153,7 +154,7 @@ namespace MathTL
   void Piecewise<C>::dilate_me(const int j)
   {
     granularity += j;
-    scale( sqrt((double)(1<<j))); // scale by 2^{j/2}
+    scale( twotothejhalf(j) ); // scale by 2^{j/2}
   }
 
   template <class C>

@@ -226,7 +226,7 @@ namespace MathTL
     if (theta < 0) theta += 2.0 * M_PI;
     if (theta >= omega * M_PI) return 0.0;
 
-    return get_time() * pow(r, 1.0/omega) * sin(theta/omega) * (1-x[0]*x[0]) * (1-x[1]*x[1]);
+    return pow(get_time(),0.75) * pow(r, 1.0/omega) * sin(theta/omega) * (1-x[0]*x[0]) * (1-x[1]*x[1]);
   }
 
   inline

@@ -140,7 +140,7 @@ namespace WaveletTL
 							 (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
 								1-x);
 	  break;
-	case 1: r=MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
+	case 1: r=-MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
 							  (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
 								1-x); 
 	  break;
@@ -204,7 +204,7 @@ namespace WaveletTL
 
 	case 2:
 	  for (unsigned int m(0); m < points.size(); m++)
-	    values[m] = -MathTL::EvaluateSchoenbergBSpline_td_xx<d>(lambda.j(),
+	    values[m] = MathTL::EvaluateSchoenbergBSpline_td_xx<d>(lambda.j(),
 								   (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
 								   1-points[m]);
 	  break;

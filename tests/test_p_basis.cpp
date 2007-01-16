@@ -1,9 +1,11 @@
 #include <iostream>
 #include <interval/p_basis.h>
+#include <interval/p_evaluate.h>
 #include <interval/ds_basis.h>
 #include <numerics/bvp.h>
 #include <cube/cube_basis.h>
 #include <galerkin/cube_equation.h>
+#include <geometry/grid.h>
 
 using WaveletTL::CubeEquation;
 using WaveletTL::CubeBasis;
@@ -18,8 +20,8 @@ int main()
 {
   cout << "Testing wavelet bases from [P] ..." << endl;
 
-  const int d  = 2;
-  const int dT = 2;
+  const int d  = 3;
+  const int dT = 3;
 
 
   typedef PBasis<d,dT> Basis;
@@ -30,7 +32,8 @@ int main()
 //   Basis basis(1, 0); // complementary b.c. at x=0
 //   Basis basis(0, 1); // complementary b.c. at x=1
 //   Basis basis(3, 3);
-
+//Array1D<int>() Ar;
+//evaluate(Basis,2,Index,Ar,Ar);
   cout << "- d=" << d << ", dT=" << dT << endl;
   cout << "- the (" << d << "," << dT << ") basis has j0=" << basis.j0() << endl;
   cout << "- the default wavelet index: " << Index() << endl;
@@ -383,6 +386,31 @@ int main()
     evaluate(basis, lambda, false, 7).matlab_output(cout);
     if (lambda == last_generator(&basis, basis.j0())) break;
   }
+#endif
+
+#if 1
+  InfiniteVector<double, Index> coeff;
+  Index index(first_generator(&basis, basis.j0()));
+  coeff.set_coefficient(index,1.0);
+ //  for (int i = 0;; ++index, i++) {
+//     //cout << index << endl;
+//     coeff.set_coefficient(index, rh[i]);
+//     if (index == last_generator(&basis, basis.j0())) break;
+  //}
+  int dil=8;
+  Array1D<double> grid;
+  Array1D<double> funval;
+  grid.resize((1<<dil)+1);
+  for(int k=0;k<grid.size();k++)
+  	grid[k]=k*(1.0/(1<<dil));
+  Grid<1>gitter(grid);
+  evaluate(basis,0,index,grid,funval);  
+  SampledMapping<1> res (gitter, funval);
+  std::ofstream ofs5("reproduced_function.m");
+  res.matlab_output(ofs5);
+  ofs5.close();
+   
+
 #endif
 
   return 0;

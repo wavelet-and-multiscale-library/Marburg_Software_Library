@@ -9,8 +9,8 @@ CXX = g++
 #CXX = mpiCC
 
 #CXX = icpc
-#CXXFLAGS += -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
-CXXFLAGS += -O3 -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -I /home/werner/PROMOTION/Cuba-1.2 -Wall -pipe
+CXXFLAGS += -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+#CXXFLAGS += -O3 -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -I /home/werner/PROMOTION/Cuba-1.2 -Wall -pipe
 #CXXFLAGS += -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -I /home/werner/PROMOTION/Cuba-1.2 -Wall -pipe
 #CXXFLAGS += -O3 -mcpu=pentium4 -msse3 -funroll-loops -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O4 -mcpu=pentium4 -msse3 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
@@ -23,14 +23,15 @@ CXXFLAGS += -O3 -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -I /home/wer
 #CXXFLAGS += -L /home/werner/PROMOTION/Cuba-1.2/libcuba.a
 #CXXFLAGS += -L -lm
 
-EXEOBJF = test_multiplicative_Schwarz_1D.o\
-test_multiplicative_Schwarz.o\
-test_steepest_descent_2D.o\
-test_elliptic_equation.o\
-test_elliptic_equation_1D.o\
-test_steepest_descent.o\
-test_richardson_CDD2.o\
-test_richardson_CDD2_2D.o
+EXEOBJF = test_biharmonic_equation.o
+#test_multiplicative_Schwarz_1D.o\
+#test_multiplicative_Schwarz.o\
+#test_steepest_descent_2D.o\
+#test_elliptic_equation.o\
+#test_elliptic_equation_1D.o\
+#test_steepest_descent.o\
+#test_richardson_CDD2.o\
+#test_richardson_CDD2_2D.o
 #test_compute_dual_frame_elements.o\
 #test_steepest_descent_2D.o\
 #test_elliptic_equation_1D.o\

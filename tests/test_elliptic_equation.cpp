@@ -172,9 +172,13 @@ int main()
   PoissonBVP<DIM> poisson(&singRhs);
   //PoissonBVP<DIM> poisson(&const_fun);
 
+  BiharmonicBVP<DIM> biahrmonic(&singRhs);
+
   EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
   
+  BiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharmonic, &frame, TrivialAffine);  
+
   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0048, 1.0/0.01);
 
   double tmp = 0.0;

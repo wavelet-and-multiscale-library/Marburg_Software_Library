@@ -60,11 +60,11 @@ endif
 
 ifeq ($(COMPILER),intel)
 CXX = icpc
-CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+#CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -funroll-loops -fomit-frame-pointer -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
-#CXXFLAGS += -O3 -funroll-loops -fomit-frame-pointer -mp1 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+CXXFLAGS += -O3 -funroll-loops -fomit-frame-pointer -mp1 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 
 # disable some annoying warnings of icpc
 CXXFLAGS += -wd383 -wd981
@@ -79,29 +79,28 @@ CXXFLAGS += -O3 -Mvect=assoc,cachesize:1048576 -Mcache_align -fast -I$(WAVELETTL
 endif
 
 # set 1 of test programs: stuff on R and R^d
-EXEOBJF1 = 
-#  test_refinable.o test_regularity.o test_dm.o\
-#  test_r_basis.o test_cdf_expansion.o
+EXEOBJF1 = \
+  test_refinable.o test_regularity.o test_dm.o\
+  test_r_basis.o test_cdf_expansion.o
 
 # set 2 of test programs: wavelet bases on the interval ([DS],[P],[JL],periodic)
 EXEOBJF2 = \
-  test_p_basis.o
-#  test_ds_basis.o test_ds_support.o test_ds_expansion.o\
-#   test_p_support.o test_p_expansion.o\
-#  test_jl_basis.o test_jl_support.o\
-#  test_periodic.o\
-#  test_spline_basis.o test_spline_support.o test_spline_expansion.o
+  test_ds_basis.o test_ds_support.o test_ds_expansion.o\
+  test_p_basis.o test_p_support.o test_p_expansion.o\
+  test_jl_basis.o test_jl_support.o\
+  test_periodic.o\
+  test_spline_basis.o test_spline_support.o test_spline_expansion.o
 
 # set 3 of test programs: wavelet bases on general higher-dim. domains ((mapped) cube, tensor prod.)
-EXEOBJF3 = 
-#  test_cube_index.o test_cube_support.o test_cube_basis.o test_mapped_cube_basis.o\
-#  test_tp_basis.o
+EXEOBJF3 = \
+  test_cube_index.o test_cube_support.o test_cube_basis.o test_mapped_cube_basis.o\
+  test_tp_basis.o
 
 # set 4 of test programs: wavelet bases on the L-domain
-EXEOBJF4 = 
-#  test_ldomain_index.o test_ldomain_support.o test_ldomain_basis.o\
-#  test_ldomain_expansion.o test_ldomain_gramian.o test_ldomain_laplacian.o\
-#  test_ldomain_helmholtz_equation.o
+EXEOBJF4 = \
+  test_ldomain_index.o test_ldomain_support.o test_ldomain_basis.o\
+  test_ldomain_expansion.o test_ldomain_gramian.o test_ldomain_laplacian.o\
+  test_ldomain_helmholtz_equation.o
 #  test_ldomain_equation.o\
 #
 #  test_ldomain_jl_basis.o test_ldomain_jl_support.o\
@@ -109,20 +108,20 @@ EXEOBJF4 =
 #  test_ldomain_jl_laplacian.o\
 
 # set 5 of test programs: adaptive wavelet schemes for elliptic equations
-EXEOBJF5 = 
-#  test_sturm_bvp.o test_cdd1.o test_cdd1_cube.o test_cdd2.o test_duv.o\
-#  test_cube_equation.o test_cdd1_ldomain.o\
-#  test_cdd1_gramian.o test_cdd1_poisson1d.o test_cdd1_helm1d.o\
-#  test_helmholtz_equation.o
+EXEOBJF5 = \
+  test_sturm_bvp.o test_cdd1.o test_cdd1_cube.o test_cdd2.o test_duv.o\
+  test_cube_equation.o test_cdd1_ldomain.o\
+  test_cdd1_gramian.o test_cdd1_poisson1d.o test_cdd1_helm1d.o\
+  test_helmholtz_equation.o
 
 # set 6 of test programs: adaptive wavelet schemes for parabolic equations
-EXEOBJF6 = 
-#  test_lin_par_equation.o test_row_stage_equation.o test_row_stage_equation_2d.o
+EXEOBJF6 = \
+  test_lin_par_equation.o test_row_stage_equation.o test_row_stage_equation_2d.o
 
 # set 7 of test programs: nonadaptive wavelet solvers for elliptic problems	
-EXEOBJF7 = 
-#  test_full_laplacian.o test_full_laplacian_speed.o\
-#  test_full_gramian.o test_full_helmholtz.o		
+EXEOBJF7 = \
+  test_full_laplacian.o test_full_laplacian_speed.o\
+  test_full_gramian.o test_full_helmholtz.o		
 
 
 EXES1 = $(EXEOBJF1:.o=)
@@ -254,3 +253,5 @@ ifeq ($(DEBUGMODE),on)
 else
 	$(CXX) $(LDFLAGS) $< -o $@
 endif
+
+

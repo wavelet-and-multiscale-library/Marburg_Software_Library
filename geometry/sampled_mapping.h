@@ -232,6 +232,11 @@ namespace MathTL
     */
     void matlab_output(std::ostream& os) const;
 
+    /*!
+      Gnuplot output of the sampled mapping onto a stream
+    */
+    void gnuplot_output(std::ostream& os) const;
+
   protected:
     /*!
       internal storage for the function values

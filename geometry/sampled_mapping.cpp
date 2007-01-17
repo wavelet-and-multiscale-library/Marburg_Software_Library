@@ -149,6 +149,18 @@ namespace MathTL
   }
 
   template <class C>
+  void
+  SampledMapping<1,C>::gnuplot_output(std::ostream& os) const
+  {
+    unsigned int i;
+    const unsigned int size = grid_.size();
+    assert(values_.size() == size); // sizes of arrays must match
+
+    for (i = 0; i < size; i++) // loop through entries
+      os << grid_[i] << "\t" << values_[i] << std::endl; // format: one value pair per row, in each row x y
+  }
+
+  template <class C>
   SampledMapping<2,C>::SampledMapping()
     : Grid<2>(), values_()
   {

@@ -470,9 +470,9 @@ namespace MathTL
   template <class C>
   double Polynomial<C>::inner_product(Polynomial<C> p2, double a, double b)
   {
-    Polynomial<C> t(this);
+    Polynomial<C> t(*this);
     t *= p2;
-    return t.integrate(t, a, b);
+    return t.integrate(a, b, true);
   }
 
   template <class C>

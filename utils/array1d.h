@@ -139,6 +139,11 @@ namespace MathTL
     */
     void swap (Array1D<C>& a);
 
+    /*!
+      swap two entries of an array
+    */
+    void swap (const size_type i, const size_type j);
+
   protected:
     /*!
       internal storage is just a pointer to a C array

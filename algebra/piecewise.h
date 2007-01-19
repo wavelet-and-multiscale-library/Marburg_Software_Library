@@ -121,6 +121,7 @@ namespace MathTL
 
     /*!
       dilate by 2^{-j}
+      f(x) -> 2^{j/2} f(2^j x)
     */
     void dilate_me(const int j);
 

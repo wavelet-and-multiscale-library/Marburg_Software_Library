@@ -142,6 +142,18 @@ namespace MathTL
   }
 
   template <class C>
+  void Array1D<C>::swap (const size_type i, const size_type j)
+  {
+    assert(i < size_);
+    assert(j < size_);
+
+    C tmp;
+    tmp = data_[i];
+    data_[i] = data_[j];
+    data_[j] = tmp;
+  }
+
+  template <class C>
   inline
   std::ostream& operator << (std::ostream& os, const Array1D<C>& A)
   {

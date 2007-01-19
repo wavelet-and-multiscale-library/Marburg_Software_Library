@@ -154,6 +154,11 @@ namespace MathTL
   void Piecewise<C>::dilate_me(const int j)
   {
     granularity += j;
+    // f(x) -> f(2^j x)
+    typename Piecewise<C>::PiecesType::iterator iter;
+    for (iter=expansion.begin(); iter!=expansion.end(); ++iter)
+      iter->second.scale((double)(1<<j));
+
     scale( twotothejhalf(j) ); // scale by 2^{j/2}
   }
 

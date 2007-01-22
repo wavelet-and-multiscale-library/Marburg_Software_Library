@@ -134,6 +134,11 @@ namespace MathTL
     inline unsigned int size() const { return gridx_.size() * gridy_.size(); }
 
     /*!
+      assignment operator
+    */
+    Grid<2>& operator = (const Grid<2>& grid);
+
+    /*!
       Matlab output of the grid onto a stream
     */
     void matlab_output(std::ostream& os) const;

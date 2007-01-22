@@ -74,6 +74,14 @@ namespace MathTL
 	}
   }
   
+  Grid<2>&
+  Grid<2>::operator = (const Grid<2>& grid)
+  {
+    gridx_ = grid.gridx_;
+    gridy_ = grid.gridy_;
+    return *this;
+  }
+
   void
   Grid<2>::matlab_output(std::ostream& os) const
   {

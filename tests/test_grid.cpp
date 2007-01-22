@@ -45,5 +45,9 @@ int main()
   Grid<2> tensor(gx, gy);
   tensor.matlab_output(cout);
 
+  cout << "- test assignment operator:" << endl;
+  equi = tensor;
+  equi.matlab_output(cout);
+  
   return 0;
 }

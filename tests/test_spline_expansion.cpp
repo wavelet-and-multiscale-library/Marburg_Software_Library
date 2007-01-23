@@ -48,6 +48,21 @@ class Hat
   }
 };
 
+class Gaussian
+  : public Function<1> {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    const double x = p[0];
+    const double t = get_time();
+    return exp(-300*(x-0.6+0.2*t)*(x-0.6+0.2*t));
+  }
+  
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
 int main()
 {
   cout << "Test expansion of a polynomial in a SplineBasis..." << endl;
@@ -57,10 +72,12 @@ int main()
   SampledMapping<1> s(Grid<1>(-1.0, 1.0, 10), p);
   s.matlab_output(cout);
 
-#if 0
-  typedef SplineBasis<2,2,P_construction> Basis;
+#if 1
+//   typedef SplineBasis<2,2,P_construction> Basis;
+  typedef SplineBasis<3,3,P_construction> Basis;
   typedef Basis::Index Index;
-  Basis basis("",0,0,0,0); // PBasis, no b.c.'s
+//   Basis basis("",0,0,0,0); // PBasis, no b.c.'s
+  Basis basis("",1,1,0,0); // PBasis, homogeneous b.c.'s
 #else
   typedef SplineBasis<3,3,DS_construction> Basis;
   typedef Basis::Index Index;
@@ -95,7 +112,19 @@ int main()
 //   cout << error << endl;
   cout << "(max. error: " << linfty_norm(error) << ")" << endl;
 
-
+  cout << "- expand a Gaussian..." << endl;
+  Gaussian g;
+  g.set_time(0);
+  InfiniteVector<double,Index> g_coeffs;
+  expand(&g, basis, false, jmax, g_coeffs);
+  cout << "- pointwise error:" << endl;
+  SampledMapping<1> gs(basis.evaluate(g_coeffs, jmax+1));
+  error.resize(gs.points().size());
+  for (unsigned int i = 0; i < error.size(); i++)
+    error[i] = fabs(gs.values()[i]-g.value(Point<1>(gs.points()[i])));
+//   cout << error << endl;
+  cout << "(max. error: " << linfty_norm(error) << ")" << endl;
+  
 
   return 0;
 }

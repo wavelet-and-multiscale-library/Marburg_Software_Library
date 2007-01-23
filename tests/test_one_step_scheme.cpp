@@ -356,8 +356,8 @@ int main()
 
 //   Dahlquist problem(-1.0);
 //   SquareRoot problem;
-  SquareRoot2 problem;
-//   Expo problem;
+//   SquareRoot2 problem;
+  Expo problem;
 //   Circle problem;
 
 #if 1

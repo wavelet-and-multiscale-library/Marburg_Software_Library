@@ -248,6 +248,8 @@ namespace MathTL
   CornerTimeSingularityRHS::value(const Point<2>& p,
 				  const unsigned int component) const
   {
+    if (get_time() == 0) return 0;
+
     const Point<2> x(p-x0);
     const double r = hypot(x[0],x[1]);
     
@@ -292,6 +294,8 @@ namespace MathTL
   CornerTimeSingularityRHSt::value(const Point<2>& p,
 				   const unsigned int component) const
   {
+    if (get_time() == 0) return 0;
+
     const Point<2> x(p-x0);
     const double r = hypot(x[0],x[1]);
     

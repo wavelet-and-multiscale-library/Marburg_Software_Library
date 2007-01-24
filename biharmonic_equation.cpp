@@ -70,7 +70,7 @@ namespace FrameTL
     : bih_bvp_(bih_bvp), frame_(frame), qstrat_(qstrat)
   {
     
-    //compute_diagonal();
+    compute_diagonal();
     compute_rhs();
   }
 
@@ -78,11 +78,14 @@ namespace FrameTL
   double 
   BiharmonicEquation<IBASIS,DIM>::D(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda) const
   {
-    return ldexp(1.0,lambda.j() * operator_order());
+    //cout << lambda.j() << endl;
+    //cout << (1 << (lambda.j())) << endl;
+    
+    //return ldexp(1.0,lambda.j() * ((int)operator_order()));
     //    return sqrt(a(lambda,lambda));
     //cout << stiff_diagonal.find(lambda).second << endl;
     //    cout << "1111111111" << endl;
-    //return stiff_diagonal.get_coefficient(lambda);
+    return stiff_diagonal.get_coefficient(lambda);
   }
 
   template <class IBASIS, unsigned int DIM>
@@ -113,7 +116,7 @@ namespace FrameTL
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
     const int j0   = frame_->j0();
-    const int jmax = 7; // for a first quick hack
+    const int jmax = 10; // for a first quick hack
     for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
       {
 	const double coeff = f(lambda)/D(lambda);
@@ -149,7 +152,7 @@ namespace FrameTL
 
     // precompute the right-hand side on a fine level
     const int j0   = frame_->j0();
-    const int jmax = 7;  // for a first quick hack
+    const int jmax = 10;  // for a first quick hack
     for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
       {
 	stiff_diagonal.set_coefficient(lambda, sqrt(a(lambda,lambda)));
@@ -176,24 +179,24 @@ namespace FrameTL
     
     double res = 0;
     
-//     typename One_D_IntegralCache::iterator col_lb(one_d_integrals.lower_bound(lambda));
-//     typename One_D_IntegralCache::iterator col_it(col_lb);
-//     if (col_lb == one_d_integrals.end() ||
-// 	one_d_integrals.key_comp()(lambda,col_lb->first))
-//       {
-// 	// insert a new column
-// 	typedef typename One_D_IntegralCache::value_type value_type;
-// 	col_it = one_d_integrals.insert(col_lb, value_type(lambda, Column1D()));
-//       }
+    typename One_D_IntegralCache::iterator col_lb(one_d_integrals.lower_bound(lambda));
+    typename One_D_IntegralCache::iterator col_it(col_lb);
+    if (col_lb == one_d_integrals.end() ||
+	one_d_integrals.key_comp()(lambda,col_lb->first))
+      {
+	// insert a new column
+	typedef typename One_D_IntegralCache::value_type value_type;
+	col_it = one_d_integrals.insert(col_lb, value_type(lambda, Column1D()));
+      }
     
-//     Column1D& col(col_it->second);
+    Column1D& col(col_it->second);
     
-//     typename Column1D::iterator lb(col.lower_bound(mu));
-//     typename Column1D::iterator it(lb);
-//     if (lb == col.end() ||
-// 	col.key_comp()(mu, lb->first))
-//       {
-//	const unsigned int dir = lambda.direction();
+    typename Column1D::iterator lb(col.lower_bound(mu));
+    typename Column1D::iterator it(lb);
+    if (lb == col.end() ||
+	col.key_comp()(mu, lb->first))
+      {
+	const unsigned int dir = lambda.direction();
 	Array1D<double> gauss_points_la, gauss_points_mu, gauss_weights,
 	  values_lambda, values_mu;
 	
@@ -247,12 +250,12 @@ namespace FrameTL
 	for (unsigned int i = 0; i < values_lambda.size(); i++)
 	  res += gauss_weights[i] * values_lambda[i] * values_mu[i];
 
-// 	typedef typename Column1D::value_type value_type;
-// 	it = col.insert(lb, value_type(mu, res));
-//       }
-//     else {
-//       res = it->second;
-//     }
+	typedef typename Column1D::value_type value_type;
+	it = col.insert(lb, value_type(mu, res));
+      }
+    else {
+      res = it->second;
+    }
 	
     return res;
   }
@@ -285,10 +288,10 @@ namespace FrameTL
       tmp_ind = lambda;
       lambda = mu;
       mu = tmp_ind;
-
+      
       tmp_supp = supp_lambda_;
-      supp_lambda_ = supp_mu_,
-	supp_mu_ = tmp_supp;
+      supp_lambda_ = supp_mu_;
+      supp_mu_ = tmp_supp;
     }
 
     const typename CUBEBASIS::Support* supp_lambda = &supp_lambda_;
@@ -321,45 +324,66 @@ namespace FrameTL
     FixedArray1D<IBASIS*,DIM> bases1D_lambda = frame_->bases()[lambda.p()]->bases();
     FixedArray1D<IBASIS*,DIM> bases1D_mu     = frame_->bases()[mu.p()]->bases();
     
-    FixedArray1D<Array1D<double>,DIM> gauss_points, gauss_points_mu, gauss_weights,
-      wav_values_lambda, wav_der_values_lambda, wav_values_mu, wav_der_values_mu;
+//     FixedArray1D<Array1D<double>,DIM> gauss_points, gauss_points_mu, gauss_weights,
+//       wav_values_lambda, wav_der_values_lambda, wav_values_mu, wav_der_values_mu;
 
-
-#if 1
-    int dim=(int)DIM;
-    int terms=dim*dim;
-    int d[2][dim]; 
-    //loop over all terms
-    for (int i = 0; i <terms; i++) {
+#if 0
+      // loop over spatial direction
+      for (int i = 0; i < (int) DIM; i++) {
 	double t = 1.;
-	// loop over spatial direction
-	for(int l=0;l<dim;l++) {d[0][l]=0;d[1][l]=0;}
-	d[0][i/dim]=2;
-	d[1][i%dim]=2;
-	for (int j = 0; j < (int)DIM; j++) {  
+
+	for (int j = 0; j <= i-1; j++) {  
 	  Index1D<IBASIS> i1(IntervalIndex<IBASIS> (
 						    lambda.j(),lambda.e()[j],lambda.k()[j],
 						    bases1D_lambda[j]
 						    ),
-			     lambda.p(),j,d[0][j]    
+			     lambda.p(),j,0
 			     );
-	  
 	  Index1D<IBASIS> i2(IntervalIndex<IBASIS> (mu.j(),mu.e()[j],mu.k()[j],
 						    bases1D_mu[j]
 						    ),
-			     mu.p(),j,d[1][j]
+			     mu.p(),j,0
 			     );
+
 
 	  t *= integrate(i1, i2, irregular_grid, N_Gauss, j);
 	  
  	}
 
+	for (unsigned int j = i+1; j < DIM; j++) {
+	  Index1D<IBASIS> i1(IntervalIndex<IBASIS> (
+						    lambda.j(),lambda.e()[j],lambda.k()[j],
+						    bases1D_lambda[j]
+						    ),
+			     lambda.p(),j,0
+			     );
+	  Index1D<IBASIS> i2(IntervalIndex<IBASIS> (mu.j(),mu.e()[j],mu.k()[j],
+						    bases1D_mu[j]
+						    ),
+			     mu.p(),j,0
+			     );
 
+ 	  t *= integrate(i1, i2, irregular_grid, N_Gauss, j);
 
-	t *=(1./(chart_la->a_i(i/dim) * chart_mu->a_i(i%dim)))*(1./(chart_la->a_i(i/dim) * chart_mu->a_i(i%dim)));
+	}
+	Index1D<IBASIS> i1(IntervalIndex<IBASIS> (
+						  lambda.j(),lambda.e()[i],lambda.k()[i],
+						  bases1D_lambda[i]
+						  ),
+			   lambda.p(),i,1
+			   );
+	Index1D<IBASIS> i2(IntervalIndex<IBASIS> (mu.j(),mu.e()[i],mu.k()[i],
+						  bases1D_mu[i]
+						  ),
+			   mu.p(),i,1
+			   );
+
+	t *= integrate(i1, i2, irregular_grid, N_Gauss, i);
+
+	t *= 1./(chart_la->a_i(i) * chart_mu->a_i(i));
 	
 	r += t;
-  }
+      }
 
       double tmp1 = 1., tmp2 = 1.;
 
@@ -369,26 +393,60 @@ namespace FrameTL
       }
       tmp1 = sqrt(fabs(tmp1)) / sqrt(fabs(tmp2));
       r *= tmp1;
-      //cout<<"a end";
+#else
+    int dim=(int)DIM;
+    int terms=dim*dim;
+    int d[2][dim]; 
+    //loop over all terms
+    for (int i = 0; i <terms; i++) {
+	double t = 1.;
+	// loop over spatial direction
+	for(int l=0; l < dim; l++) {
+	  d[0][l]=0;d[1][l]=0;
+	}
+ 	d[0][i/dim]=2;
+ 	d[1][i%dim]=2;
+
+	for (int j = 0; j < (int)DIM; j++) {
+	  Index1D<IBASIS> i1(IntervalIndex<IBASIS> (
+						    lambda.j(),lambda.e()[j],lambda.k()[j],
+						    bases1D_lambda[j]
+						    ),
+			     lambda.p(),j,d[0][j]    
+			     );
+	  Index1D<IBASIS> i2(IntervalIndex<IBASIS> (mu.j(),mu.e()[j],mu.k()[j],
+						    bases1D_mu[j]
+						    ),
+			     mu.p(),j,d[1][j]
+			     );
+
+	  t *= integrate(i1, i2, irregular_grid, N_Gauss, j);//cout << integrate(i1, i2, irregular_grid, N_Gauss, j) << endl;
+ 	}
+
+
+
+	t *=(1./(chart_la->a_i(i/dim) * chart_mu->a_i(i%dim)))*(1./(chart_la->a_i(i/dim) * chart_mu->a_i(i%dim)));
+	
+	r += t;
+    }
+
+    double tmp1 = 1., tmp2 = 1.;
+    
+    for (unsigned int i = 0; i < DIM; i++) {
+      tmp1 *= chart_la->a_i(i);
+      tmp2 *= chart_mu->a_i(i);
+    }
+    tmp1 = sqrt(fabs(tmp1)) / sqrt(fabs(tmp2));
+    r *= tmp1;
+    //cout<<"a end";
 #endif      
-      return r;
-
-
-
-    // dummy return
-    return 0.0;
+    return r;
   }
-
-
-
-
-
-
 
   template <class IBASIS, unsigned int DIM>
   double
   BiharmonicEquation<IBASIS,DIM>::a(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
-				  const typename AggregatedFrame<IBASIS,DIM>::Index& nu) const
+				    const typename AggregatedFrame<IBASIS,DIM>::Index& nu) const
   {
     /* //the cases lambda.p() == nu.p() and lambda.p() != nu.p() have
     //to be treated seperately

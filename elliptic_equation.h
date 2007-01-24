@@ -99,8 +99,8 @@ namespace FrameTL
   */
   template <class IBASIS, unsigned int DIM>
   class EllipticEquation
-  //  : public FullyDiagonalDyadicPreconditioner<typename AggregatedFrame<IBASIS,DIM>::Index>
-    : public FullyDiagonalEnergyNormPreconditioner<typename AggregatedFrame<IBASIS,DIM>::Index>
+  //: public FullyDiagonalDyadicPreconditioner<typename AggregatedFrame<IBASIS,DIM>::Index>
+      : public FullyDiagonalEnergyNormPreconditioner<typename AggregatedFrame<IBASIS,DIM>::Index>
   {
   public:
 
@@ -308,7 +308,7 @@ namespace FrameTL
      */
     double a_same_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
 			  const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-			  const unsigned int q_order = 3) const;
+			  const unsigned int q_order = 2) const;
 
     /*!
      */
@@ -323,7 +323,7 @@ namespace FrameTL
      */
     double a_different_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
 			       const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-			       const unsigned int q_order = 3, const unsigned int rank = 1) const;
+			       const unsigned int q_order = 2, const unsigned int rank = 1) const;
 
 
     double a_different_patches_adaptive(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,

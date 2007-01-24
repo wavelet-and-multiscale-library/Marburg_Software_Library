@@ -52,8 +52,8 @@ int main()
 
   const int DIM = 2;
 
-  typedef DSBasis<3,5> Basis1D;
-  //typedef PBasis<3,3> Basis1D;
+  //typedef DSBasis<3,5> Basis1D;
+  typedef PBasis<3,3> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
   typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
@@ -79,26 +79,6 @@ int main()
   //##############################
 
 
-
-
-  //##############################
-  LinearBezierMapping bezierP(Point<2>(-1.,-1.),Point<2>(-1.,1.),
- 			      Point<2>(0.,-1.), Point<2>(0.,1.));
-  
-  LinearBezierMapping bezierP2(Point<2>(-1.,-1.),Point<2>(-1.,0.),
-			       Point<2>(1.,-1.), Point<2>(1.,0.));
- 
-
-  FixedArray1D<double,2> A3;
-  A3[0] = 1.;
-  A3[1] = 2.;
-  SimpleAffineLinearMapping<2> simpleaffine1(A3,b);
-  
-  FixedArray1D<double,2> A4;
-  A4[0] = 2.;
-  A4[1] = 1.;
-  SimpleAffineLinearMapping<2> simpleaffine2(A4,b2);
-
   //##############################
   Array1D<Chart<DIM,DIM>* > charts(2);
   //charts[0] = &bezierP;
@@ -123,14 +103,14 @@ int main()
   bound_1[0] = 1;
   bound_1[1] = 1;
   bound_1[2] = 1;
-  bound_1[3] = 2;//2
+  bound_1[3] = 1;//2
 
   bc[0] = bound_1;
 
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
   bound_2[0] = 1;
-  bound_2[1] = 2;//2
+  bound_2[1] = 1;//2
   bound_2[2] = 1;
   bound_2[3] = 1;
 
@@ -168,10 +148,10 @@ int main()
   value[0] = 1;
   
   ConstantFunction<DIM> const_fun(value);
+
   Point<2> origin;
   origin[0] = 0.0;
   origin[1] = 0.0;
-
   CornerSingularity sing2D(origin, 0.5, 1.5);
   CornerSingularityRHS singRhs(origin, 0.5, 1.5);
   
@@ -248,7 +228,7 @@ int main()
   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 6.99614824235842, 1.0/0.1);
 
 
-  const double epsilon = 0.0000001;
+  const double epsilon = 1.0e-6;
 
   InfiniteVector<double, Index> u_epsilon;
 

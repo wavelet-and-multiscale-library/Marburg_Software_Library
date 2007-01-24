@@ -45,10 +45,7 @@ namespace FrameTL
 		  const Point<DIM_m>& p);
 
   /*!
-    checks wether the support of the wavelet frame elements intersect,
-    also the supports of the corresponding cube wavelets are returned
-    in 'supp_lambda' and 'supp_mu'.
-    
+    checks wether the support of the wavelet frame elements intersect
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   bool intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
@@ -58,10 +55,7 @@ namespace FrameTL
 			  const typename CubeBasis<IBASIS,DIM_d>::Support* supp_mu);
 
   /*!
-    checks wether the support of the wavelet frame elements intersect,
-    also the supports of the corresponding cube wavelets are returned
-    in 'supp_lambda' and 'supp_mu'.
-    
+    checks wether the support of the wavelet frame elements intersect   
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   bool intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
@@ -72,12 +66,12 @@ namespace FrameTL
 
   /*!
     THIS ROUTINE IS INTENDED FOR THE SPECIAL CASE OF TRIVIAL
-    PARAMETRIZATIONS NAMELY AFFINE LINEAR MAPPINGS 'A x + B' WITH 'A' BEEING
+    PARAMETRIZATIONS, NAMELY AFFINE LINEAR MAPPINGS 'A x + B' WITH 'A' BEEING
     A DIAGONAL MATRIX.
     The function checks wether two wavelets intersect and returns
     an irregualar partition of the support intersection pulled back
     to the unit cube by the chart corresponding to \psi_\lambda.
-    This is at all needed to be able to exactly compute the entries
+    This is needed to be able to exactly compute the entries
     of the stiffness matrix for the above case of very simple patch
     parametrizations.
   */
@@ -104,16 +98,20 @@ namespace FrameTL
   /*!
     Decide whether the support of a given (primal) generator/wavelet \psi_\lambda
     intersects the singular support of another (primal) generator/wavelet \psi_\nu.
-    If this is the case, return true and the intersection of \supp\psi_\lambda
-    and \supp\psi_\nu in the form 2^{-j}[k1,k2].
-    Otherwise, return false (in this case, j, k1 and k2 will have
-    no meaningful values, for performance reasons).
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   bool intersect_singular_support(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 				  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
-				  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& nu
-				  /*,const FixedArray1D<double,DIM_m>& irregular_grid*/);
+				  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& nu);
+
+
+
+  template <unsigned int DIM>
+  bool qudarangles_intersect (FixedArray1D<Point<DIM>, 4> poly1, FixedArray1D<Point<DIM>, 4> poly2);
+
+  template <unsigned int DIM>
+  bool qudarangles_intersect2 (FixedArray1D<Point<DIM>, 4> poly1, FixedArray1D<Point<DIM>, 4> poly2);
+
 
   /*!
     tests wether the line segments defined by the points
@@ -129,6 +127,10 @@ namespace FrameTL
 		      const Point<DIM>& C, const Point<DIM>& D);
 
 
+  template <unsigned int DIM>
+  int edgesIntersect2 (const Point<DIM>& A, const Point<DIM>& B,
+		      const Point<DIM>& C, const Point<DIM>& D);
+
   /*!
     Checks whether p lies left of right of or on the line specified by the
     Points p1 and p2. This line's orientation is given by the vector starting in p1 and
@@ -138,8 +140,7 @@ namespace FrameTL
     returning 2 means ON LINE
    */
   template <unsigned int DIM>
-  unsigned short int pos_wrt_line (const Point<DIM>& p,
-				   const Point<DIM>& p1, const Point<DIM>&  p2);
+  unsigned short int pos_wrt_line (const Point<DIM>& p, const Point<DIM>& p1, const Point<DIM>&  p2);
   
  
 }

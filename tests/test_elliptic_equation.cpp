@@ -48,7 +48,7 @@ int main()
   const int DIM = 2;
 
   //typedef DSBasis<4,6> Basis1D;
-  typedef PBasis<4,6> Basis1D;
+  typedef PBasis<2,2> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
   typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
@@ -117,14 +117,14 @@ int main()
   bound_1[0] = 1;
   bound_1[1] = 1;
   bound_1[2] = 1;
-  bound_1[3] = 3;
+  bound_1[3] = 1;//2
 
   bc[0] = bound_1;
 
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
   bound_2[0] = 1;
-  bound_2[1] = 3;
+  bound_2[1] = 1;//2
   bound_2[2] = 1;
   bound_2[3] = 1;
 
@@ -156,7 +156,7 @@ int main()
 
   //finally a frame can be constructed
   //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT, 5);
-  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, 5);
+  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, 4);
 
   Vector<double> value(1);
   value[0] = 1;
@@ -248,7 +248,7 @@ int main()
 
   set<Index> Lambda;
   for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
-       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, frame.j0()); ++lambda) {
+       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, frame.j0()+1); ++lambda) {
     Lambda.insert(lambda);
     //cout << lambda << endl;
   }

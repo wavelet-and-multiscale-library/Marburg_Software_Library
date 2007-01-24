@@ -84,6 +84,7 @@ public:
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
+
     double kappa     = P.norm_A()*a_inv;
     //double kappa     = 1.;
     double omega_i   = a_inv*P.F_norm();
@@ -135,7 +136,7 @@ public:
     clock_t tstart, tend;
     tstart = clock();
 
-    EvaluateFrame<Basis1D,2,2> evalObj;
+    //EvaluateFrame<Basis1D,2,2> evalObj;
 
     //double acctime = 0;
 
@@ -182,35 +183,35 @@ public:
 	time_asymptotic[log10(time)] = tmp1;
 	cout << "active indices: " << w.size() << endl;
 
-	if ((loops <= 10) || ((loops % 10 == 0) && (loops <= 100))
-	    || ((loops % 50 == 0) && (loops <= 600))
-	    || ((loops % 200 == 0) && (loops <= 1000))
-	    || (loops % 500 == 0)
-	    ) {
-	  u_epsilon = w;
-	  u_epsilon.scale(&P,-1);
+// 	if ((loops <= 10) || ((loops % 10 == 0) && (loops <= 100))
+// 	    || ((loops % 50 == 0) && (loops <= 600))
+// 	    || ((loops % 200 == 0) && (loops <= 1000))
+// 	    || (loops % 500 == 0)
+// 	    ) {
+// 	  u_epsilon = w;
+// 	  u_epsilon.scale(&P,-1);
 	  
- 	  char filename1[50];
- 	  char filename2[50];
+//  	  char filename1[50];
+//  	  char filename2[50];
 	  
- 	  sprintf(filename1, "%s%d%s%d%s", "approx_sol_steep35_2D_2509out_", loops, "_nactive_", w.size(),".m");
- 	  sprintf(filename2, "%s%d%s%d%s", "error_steep35_2D_2509out_", loops, "_nactive_", w.size(),".m");
+//  	  sprintf(filename1, "%s%d%s%d%s", "approx_sol_steep35_2D_2509out_", loops, "_nactive_", w.size(),".m");
+//  	  sprintf(filename2, "%s%d%s%d%s", "error_steep35_2D_2509out_", loops, "_nactive_", w.size(),".m");
 
 
-	  Array1D<SampledMapping<2> > U = evalObj.evaluate(P.basis(), u_epsilon, true, 6);
-	  cout << "done plotting approximate solution" << endl;
+// 	  Array1D<SampledMapping<2> > U = evalObj.evaluate(P.basis(), u_epsilon, true, 6);
+// 	  cout << "done plotting approximate solution" << endl;
 	  
-	  Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(P.basis(), u_epsilon, sing2D, 6);
-	  cout << "done plotting pointwise error" << endl;
+// 	  Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(P.basis(), u_epsilon, sing2D, 6);
+// 	  cout << "done plotting pointwise error" << endl;
 	  
-	  std::ofstream ofs5(filename1);
-	  matlab_output(ofs5,U);
-	  ofs5.close();
+// 	  std::ofstream ofs5(filename1);
+// 	  matlab_output(ofs5,U);
+// 	  ofs5.close();
 	  
-	  std::ofstream ofs6(filename2);
-	  matlab_output(ofs6,Error);
-	  ofs6.close();
-	}
+// 	  std::ofstream ofs6(filename2);
+// 	  matlab_output(ofs6,Error);
+// 	  ofs6.close();
+// 	}
 
 // 	if (loops % 1 == 0) {
 // 	  std::ofstream os3("steep2D_asymptotic_DS_homb1_35_2209.m");

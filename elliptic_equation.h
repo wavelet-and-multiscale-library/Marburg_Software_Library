@@ -115,6 +115,7 @@ namespace FrameTL
      */
     EllipticEquation(const EllipticBVP<DIM>* ell_bvp,
 		     const AggregatedFrame<IBASIS,DIM>* frame,
+		     const int jmax,
 		     const QuadratureStrategy qsrtat = Composite);
 
     /*!
@@ -165,7 +166,7 @@ namespace FrameTL
     /*!
       order of the operator
     */
-    static int operator_order() { return 1; }
+    double operator_order() const { return 1; }
     
     /*!
       evaluate the diagonal preconditioner D
@@ -183,24 +184,6 @@ namespace FrameTL
     */
     double a(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
 	     const typename AggregatedFrame<IBASIS,DIM>::Index& nu) const;
-
-    /*!
-    */
-    double a_quad(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
-		  const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-		  const unsigned int p, const unsigned int N) const;
-
-    /*!
-      evaluate the (unpreconditioned) bilinear form a;
-      you can specify the order p of the quadrature rule, i.e.,
-      (piecewise) polynomials of maximal degree p will be integrated exactly.
-      Internally, we use an m-point composite Gauss quadrature rule adapted
-      to the singular supports of the spline wavelets involved,
-      so that m = (p+1)/2;
-    */
-//     double a(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
-// 	     const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-// 	     const unsigned int p = 2) const;
 
     /*!
       estimate the spectral norm ||A||
@@ -286,7 +269,7 @@ namespace FrameTL
      */
     const AggregatedFrame<IBASIS,DIM>* frame_;
 
-    //####################
+    //#################### Caching ##################
     typedef std::map<Index1D<IBASIS>,double > Column1D;
     typedef std::map<Index1D<IBASIS>,Column1D> One_D_IntegralCache;
     
@@ -295,10 +278,7 @@ namespace FrameTL
       ONLY USED TOGETHER WITH TrivialAffine QUADRATURE RULE OPTION
      */
     mutable One_D_IntegralCache one_d_integrals;
-    
-    
-
-    //####################
+    //###############################################
 
   private:
 
@@ -326,16 +306,14 @@ namespace FrameTL
 			       const unsigned int q_order = 2, const unsigned int rank = 1) const;
 
 
-    double a_different_patches_adaptive(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
-					const typename AggregatedFrame<IBASIS,DIM>::Index& nu) const;
-
-
     // precompute the right-hand side
     void compute_rhs();
 
     // precompute diagonal of stiffness matrix
     void compute_diagonal();
 
+
+    const int jmax_;
 
     // right-hand side coefficients on a fine level, sorted by modulus
     Array1D<std::pair<typename AggregatedFrame<IBASIS,DIM>::Index,double> > fcoeffs;
@@ -347,6 +325,7 @@ namespace FrameTL
     // (squared) \ell_2 norm of the precomputed right-hand side
     double fnorm_sqr;
 
+
     // reminder: This keyword can only be applied to non-static
     // and non-const data members of a class. If a data member is declared mutable,
     // then it is legal to assign a value to this data member from
@@ -355,6 +334,7 @@ namespace FrameTL
     mutable double normA, normAinv;
 
     QuadratureStrategy qstrat_; 
+
 
   };
 }

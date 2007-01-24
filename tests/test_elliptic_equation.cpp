@@ -46,6 +46,7 @@ int main()
   cout << "Testing class EllipticEquation..." << endl;
   
   const int DIM = 2;
+  const int jmax = 3;
 
   //typedef DSBasis<4,6> Basis1D;
   typedef PBasis<2,2> Basis1D;
@@ -155,8 +156,8 @@ int main()
   cout << Lshaped << endl;
 
   //finally a frame can be constructed
-  //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT, 5);
-  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, 4);
+  //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT, jmax);
+  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, jmax);
 
   Vector<double> value(1);
   value[0] = 1;
@@ -174,7 +175,7 @@ int main()
 
   // BiharmonicBVP<DIM> biahrmonic(&singRhs);
 
-  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
+  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
   
   //BiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharmonic, &frame, TrivialAffine);  
@@ -248,7 +249,7 @@ int main()
 
   set<Index> Lambda;
   for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
-       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, frame.j0()+1); ++lambda) {
+       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, jmax); ++lambda) {
     Lambda.insert(lambda);
     //cout << lambda << endl;
   }

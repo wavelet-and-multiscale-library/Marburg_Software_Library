@@ -6,25 +6,17 @@
 namespace MathTL
 {
   CornerSingularityBiharmonic::CornerSingularityBiharmonic(const Point<2>& x,
-<<<<<<< corner_singularity_biharmonic.cpp
 				       const double w0,
 				       const double w,
 				       const double t0,
 				       const double t1)
     : Function<2>(), x0(x), theta0(w0), omega(w*M_PI), r0(t0), r1(t1)
-=======
-							   const double w0,
-							   const double w,
-							   const double t0,
-							   const double t1)
-    : Function<2>(), x0(x), theta0(w0), omega(M_PI*w), r0(t0), r1(t1)
->>>>>>> 1.2
   {
   }
   
   double
   CornerSingularityBiharmonic::value(const Point<2>& p,
-				     const unsigned int component) const
+			   const unsigned int component) const
   {
     double res=0.0;
     const Point<2> x(p-x0);
@@ -40,32 +32,16 @@ namespace MathTL
     if (theta < 0) theta += 2.0 * M_PI;
     theta -= theta0 * M_PI;
     if (theta < 0) theta += 2.0 * M_PI;
-<<<<<<< corner_singularity_biharmonic.cpp
    if (theta >= omega) return 0.0;
  
     //   omega*=M_PI;
-=======
-    if (theta >= omega /** M_PI*/) return 0.0;
-
-    
-
->>>>>>> 1.2
     for(int m=0;m<2;m++)    
-<<<<<<< corner_singularity_biharmonic.cpp
 	  res+= zeta(r) * pow(r, 1.0+rootz[m]) * ((1/(rootz[m]-1)*sin((rootz[m]-1)*omega)
 					     -1/(rootz[m]+1)*sin((rootz[m]+1)*omega))
 					    *(cos((rootz[m]-1)*theta)-cos((rootz[m]+1)*theta))
 						  -(1/(rootz[m]-1)*sin((rootz[m]-1)*theta)
 					      -1/(rootz[m]+1)*sin((rootz[m]+1)*theta))
 					    *(cos((rootz[m]-1)*omega)-cos((rootz[m]+1)*omega)));
-=======
-	  res += zeta(r) * pow(r, 1.0+rootz[m]) * ((1./(rootz[m]-1)*sin((rootz[m]-1.)*omega)
-					     -1./(rootz[m]+1)*sin((rootz[m]+1.)*omega))
-					    *(cos((rootz[m]-1.)*theta)-cos((rootz[m]+1.)*theta))
-						  -(1./(rootz[m]-1.)*sin((rootz[m]-1.)*theta)
-					      -1./(rootz[m]+1.)*sin((rootz[m]+1.)*theta))
-					    *(cos((rootz[m]-1.)*omega)-cos((rootz[m]+1.)*omega)));
->>>>>>> 1.2
     return res;
   }
 

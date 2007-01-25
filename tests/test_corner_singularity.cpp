@@ -17,15 +17,15 @@ int main()
 #if 1
   CornerSingularity s(origin, 0.5, 1.5);
 
-  const bool matlab = false; // false -> Octave output
+  const bool matlab = true; // false -> Octave output
 
   if (matlab)
     cout << "- Matlab output of the corner singularity on a 2D grid..." << endl;
   else
     cout << "- Octave output of the corner singularity on a 2D grid..." << endl;
   
-//   Grid<2> grid(Point<2>(-1.0, -1.0), Point<2>(1.0, 1.0), 1<<6, 1<<6);
-  Grid<2> grid(Point<2>(-1.0, 0.0), Point<2>(0.0, 1.0), 1<<6, 1<<6); // only patch 0
+   Grid<2> grid(Point<2>(-1.0, -1.0), Point<2>(1.0, 1.0), 1<<6, 1<<6);
+//  Grid<2> grid(Point<2>(-1.0, 0.0), Point<2>(0.0, 1.0), 1<<6, 1<<6); // only patch 0
 //   Grid<2> grid(Point<2>(-1.0, -1.0), Point<2>(0.0, 1.0), 1<<6, 1<<6); // only patches 0+1
   SampledMapping<2> h(grid, s);
   std::ofstream fs("corner.m");

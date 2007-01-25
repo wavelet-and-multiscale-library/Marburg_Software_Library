@@ -124,7 +124,13 @@ namespace MathTL
 
     //! second derivative of the cutoff function
     double zeta_primeprime(const double r) const;
-  };
+ 
+    //! third derivative of the cutoff function
+    double zeta_third_der(const double r) const;
+
+    //! fourth derivative of the cutoff function
+    double zeta_fourth_der(const double r) const;
+ };
 
 }
 

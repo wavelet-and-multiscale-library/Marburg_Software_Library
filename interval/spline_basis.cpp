@@ -1148,7 +1148,7 @@ namespace WaveletTL
 
       Vector<double> x(b);
       unsigned int iterations;
-      CG(A_Lambda, b, x, 1e-12, 200, iterations);
+      CG(A_Lambda, b, x, 1e-15, 500, iterations);
   
       coeffs.clear();
       row = 0;
@@ -1175,7 +1175,7 @@ namespace WaveletTL
     // 1. compute integrals w.r.t. the primal generators on level jmax
     Vector<double> coeffs_phijk(coeffs.size(), false);
     SimpsonRule simpson;
-    CompositeRule<1> composite(simpson, 12); // should be sufficient for many cases
+    CompositeRule<1> composite(simpson, 24); // should be sufficient for many cases
     SchoenbergIntervalBSpline_td<d> sbs(jmax+1,0);
     for (int k = DeltaLmin(); k <= DeltaRmax(jmax+1); k++) {
       sbs.set_k(k);
@@ -1193,12 +1193,10 @@ namespace WaveletTL
       FullGramian<d,dT> G(*this);
       G.set_level(jmax+1);
       unsigned int iterations;
-      CG(G, rhs, coeffs, 1e-15, 250, iterations);
+      CG(G, rhs, coeffs, 1e-15, 500, iterations);
     } else {
       coeffs.swap(rhs);
     }
   }
-
-
 
 }

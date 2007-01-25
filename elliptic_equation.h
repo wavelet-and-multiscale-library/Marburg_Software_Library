@@ -104,12 +104,6 @@ namespace FrameTL
   {
   public:
 
-//     /*!
-//       constructor from a boundary value problem and specified b.c.'s
-//     */
-//     EllipticEquation(const EllipticBVP<DIM>* bvp,
-// 		     const FixedArray1D<bool,2*DIM>& bc);
-
     /*!
       constructor
      */
@@ -326,11 +320,10 @@ namespace FrameTL
     double fnorm_sqr;
 
 
-    // reminder: This keyword can only be applied to non-static
+    // reminder: The keyword mutable can only be applied to non-static
     // and non-const data members of a class. If a data member is declared mutable,
     // then it is legal to assign a value to this data member from
     // a const member function.
-    // estimates for ||A|| and ||A^{-1}||
     mutable double normA, normAinv;
 
     QuadratureStrategy qstrat_; 

@@ -48,6 +48,5 @@ int main()
    
    BiharmonicBVP<2> bvp(&one);
 
-
   return 0;
 }

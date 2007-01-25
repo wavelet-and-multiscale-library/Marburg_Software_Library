@@ -110,10 +110,13 @@ namespace MathTL
   inline
   double EvaluateSchoenbergBSpline_td(const int j, const int k, const double x)
   {
+#if 0
     const double factor(1 << j);
     return sqrt(factor) * EvaluateSchoenbergBSpline<d>(k-(d/2), factor * x);
+#else
+    return twotothejhalf(j) * EvaluateSchoenbergBSpline<d>(k-(d/2), (1<<j) * x);
+#endif
   }
-  
   /*!
     evaluate the first derivative N_{k,d}'(x) of an arbitrary Schoenberg B-spline
   */
@@ -183,16 +186,24 @@ template <int d>
   inline
   double EvaluateSchoenbergBSpline_td_x(const int j, const int k, const double x)
   {
+#if 0
     const double factor(1 << j);
     return factor * sqrt(factor) * EvaluateSchoenbergBSpline_x<d>(k-(d/2), factor * x);
+#else
+    return twotothejhalf(3*j) * EvaluateSchoenbergBSpline_x<d>(k-(d/2), (1<<j) * x);
+#endif
   }
 
 template <int d>
   inline
   double EvaluateSchoenbergBSpline_td_xx(const int j, const int k, const double x)
   {
+#if 0
     const double factor(1 << j);
-    return factor * sqrt(factor) * EvaluateSchoenbergBSpline_xx<d>(k-(d/2), factor * x);
+    return  factor * factor * sqrt(factor) * EvaluateSchoenbergBSpline_xx<d>(k-(d/2), factor * x);
+#else
+    return twotothejhalf(5*j) * EvaluateSchoenbergBSpline_xx<d>(k-(d/2), (1<<j) * x);
+#endif
   }
 
 

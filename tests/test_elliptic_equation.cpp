@@ -46,10 +46,10 @@ int main()
   cout << "Testing class EllipticEquation..." << endl;
   
   const int DIM = 2;
-  const int jmax = 3;
+  const int jmax = 4;
 
-  //typedef DSBasis<4,6> Basis1D;
-  typedef PBasis<2,2> Basis1D;
+  //typedef DSBasis<2,2> Basis1D;
+  typedef PBasis<3,3> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
   typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
@@ -118,14 +118,14 @@ int main()
   bound_1[0] = 1;
   bound_1[1] = 1;
   bound_1[2] = 1;
-  bound_1[3] = 1;//2
+  bound_1[3] = 2;//2
 
   bc[0] = bound_1;
 
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
   bound_2[0] = 1;
-  bound_2[1] = 1;//2
+  bound_2[1] = 2;//2
   bound_2[2] = 1;
   bound_2[3] = 1;
 

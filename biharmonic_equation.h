@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 // +--------------------------------------------------------------------+
-// | This file is part of WaveletTL - the Wavelet Template Library      |
+// | This file is part of FrameTL - the Frame Template Library      |
 // |                                                                    |
 // | Copyright (c) 2002-2005                                            |
 // | Manuel Werner                                                      |
@@ -57,7 +57,7 @@ namespace FrameTL
 
   /*!
     quadrature strategies for computation of
-    stiffness matrix entries
+    stiffness matrix entries, use only TrivialAffine!
   */
   enum QuadratureStrategy
     {
@@ -71,12 +71,12 @@ namespace FrameTL
     
     Au = D^{-1}LD^{-1}u = D^{-1}F
 
-    when reformulating a symmetric, second-order elliptic
+    when reformulating a symmetric, forth-order elliptic
     boundary value problem in divergence form over some domain
     Omega in R^d with boundary Gamma=dOmega,
     with homogeneous Dirichlet/Neumann/Robin boundary conditions
 
-    -div(a(x)grad u(x)) + q(x)u(x) = f(x) in Omega
+    -Delta^2 u(x) = f(x) in Omega
                              u(x) = 0 on Gamma_D
                          du/dn(x) = 0 on Gamma\Gamma_D.
     
@@ -101,19 +101,14 @@ namespace FrameTL
   //  : public FullyDiagonalDyadicPreconditioner<typename AggregatedFrame<IBASIS,DIM>::Index>
     : public FullyDiagonalEnergyNormPreconditioner<typename AggregatedFrame<IBASIS,DIM>::Index>
   {
-  public:
-
-//     /*!
-//       constructor from a boundary value problem and specified b.c.'s
-//     */
-//     EllipticEquation(const EllipticBVP<DIM>* bvp,
-// 		     const FixedArray1D<bool,2*DIM>& bc);
+  public:	
 
     /*!
       constructor
      */
     BiharmonicEquation(const BiharmonicBVP<DIM>* bih_bvp,
 		       const AggregatedFrame<IBASIS,DIM>* frame,
+		       const int jmax,
 		       const QuadratureStrategy qsrtat = TrivialAffine);
 
     /*!
@@ -164,7 +159,7 @@ namespace FrameTL
     /*!
       order of the operator
     */
-    double operator_order() const { return 2.; }
+    static double operator_order() { return 2; }
     
     /*!
       evaluate the diagonal preconditioner D
@@ -172,75 +167,13 @@ namespace FrameTL
     double D(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda) const;
 
     /*!
-      rescale a coefficient vector by an integer power of D, c |-> D^{n}c
-    */
-    void rescale(InfiniteVector<double, typename AggregatedFrame<IBASIS,DIM>::Index>& coeffs,
-		 const int n) const;
-
-    /*!
       evaluate the (unpreconditioned) bilinear form a;
     */
     double a(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
 	     const typename AggregatedFrame<IBASIS,DIM>::Index& nu) const;
 
-    /*!
-    */
-    double a_quad(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
-		  const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-		  const unsigned int p, const unsigned int N) const;
-
-    /*!
-      evaluate the (unpreconditioned) bilinear form a;
-      you can specify the order p of the quadrature rule, i.e.,
-      (piecewise) polynomials of maximal degree p will be integrated exactly.
-      Internally, we use an m-point composite Gauss quadrature rule adapted
-      to the singular supports of the spline wavelets involved,
-      so that m = (p+1)/2;
-    */
-//     double a(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
-// 	     const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-// 	     const unsigned int p = 2) const;
-
-    /*!
-      estimate the spectral norm ||A||
-    */
-    double norm_A() const;
-    
-    /*!
-      returns spectral norm ||A^{-1}||
-      estimate for ||A^{-1}|| has to be
-      externally computed and to be set
-      during initialization of the program.
-      We assume this because ||A^{-1}|| quantity is hardly
-      available in the frame case and
-      quite complicated eigenvalue/eigenvector
-      methods have to applied that are not implemented so
-      far.
-    */
-    double norm_Ainv() const { return normAinv; };
-
-    /*!
-      sets estimate for ||A||
-    */
-    void set_norm_A(const double _normA) { normA = _normA; }
-    /*!
-      sets estimate for ||A^{-1}||
-    */
-    void set_Ainv(const double nAinv) { normAinv = nAinv; };
-
-    /*!
-      estimate compressibility exponent s^*
-    */
-    double s_star() const;
-
-    /*!
-      estimate the compression constants alpha_k in
-        ||A-A_k|| <= alpha_k * 2^{-s*k}
-    */
-    double alphak(const unsigned int k) const {
-      return pow(2,(-k))*norm_A(); // suboptimal
-    }
-
+   
+   
     /*!
       evaluate the (unpreconditioned) right-hand side f
     */
@@ -253,25 +186,12 @@ namespace FrameTL
     void RHS(const double eta, InfiniteVector<double, 
 	     typename AggregatedFrame<IBASIS,DIM>::Index>& coeffs) const;
 
-    /*!
-      compute (or estimate) ||F||_2
-    */
-    double F_norm() const { return sqrt(fnorm_sqr); }
-
+   
     /*!
       set the boundary value problem
     */
     void set_bvp(const BiharmonicBVP<DIM>*);
 
-
-    /*!
-      w += factor * (stiffness matrix entries of in column lambda on level j)
-    */
-    void add_level (const Index& lambda,
-		    InfiniteVector<double, Index>& w, const int j,
-		    const double factor,
-		    const int J,
-		    const CompressionStrategy strategy) const;
 
    protected:
     
@@ -279,11 +199,10 @@ namespace FrameTL
       corresponding elliptic boundary value problem
      */
     const BiharmonicBVP<DIM>* bih_bvp_;
+    const AggregatedFrame<IBASIS,DIM>* frame_; 
+    const int jmax_;
 
-    /*!
-      underlying frame
-     */
-    const AggregatedFrame<IBASIS,DIM>* frame_;
+
 
     //####################
     typedef std::map<Index1D<IBASIS>,double > Column1D;
@@ -301,34 +220,14 @@ namespace FrameTL
 
   private:
 
-    /*!
-      helper routines for a (.. , ..). Entries in diagonal and non-diagonal
-      blocks of the stiffness matrix have to be treated differently.
-     */
-    double a_same_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
-			  const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-			  const unsigned int q_order = 3) const;
-
-    /*!
+     /*!
      */
     double integrate(const Index1D<IBASIS>& lambda,
 		     const Index1D<IBASIS>& mu,
 		     const FixedArray1D<Array1D<double>,DIM >& irregular_grid,
 		     const int N_Gauss, const int dir) const;
 
-    /*!
-      helper routines for a (.. , ..). Entries in diagonal and non-diagonal
-      blocks of the stiffness matrix have to be treated differently.
-     */
-    double a_different_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
-			       const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-			       const unsigned int q_order = 3, const unsigned int rank = 1) const;
-
-
-    double a_different_patches_adaptive(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
-					const typename AggregatedFrame<IBASIS,DIM>::Index& nu) const;
-
-
+   
     // precompute the right-hand side
     void compute_rhs();
 
@@ -346,12 +245,6 @@ namespace FrameTL
     // (squared) \ell_2 norm of the precomputed right-hand side
     double fnorm_sqr;
 
-    // reminder: This keyword can only be applied to non-static
-    // and non-const data members of a class. If a data member is declared mutable,
-    // then it is legal to assign a value to this data member from
-    // a const member function.
-    // estimates for ||A|| and ||A^{-1}||
-    mutable double normA, normAinv;
 
     QuadratureStrategy qstrat_; 
 

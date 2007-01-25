@@ -1,11 +1,12 @@
+
 #include <map>
 #include <fstream>
 #include <iostream>
 #include <time.h> 
 #include <interval/ds_basis.h>
 #include <interval/p_basis.h>
-#include <numerics/corner_singularity.h>
-#include <elliptic_equation.h>
+#include <numerics/corner_singularity_biharmonic.h>
+//#include <elliptic_equation.h>
 #include <biharmonic_equation.h>
 #include <algebra/sparse_matrix.h>
 #include <algebra/infinite_vector.h>
@@ -23,13 +24,13 @@ using std::cout;
 using std::endl;
 
 using FrameTL::EvaluateFrame;
-using FrameTL::EllipticEquation;
+//using FrameTL::EllipticEquation;
 using FrameTL::BiharmonicEquation;
 using FrameTL::AggregatedFrame;
 using MathTL::EllipticBVP;
 using MathTL::PoissonBVP;
 using MathTL::ConstantFunction;
-using MathTL::CornerSingularityRHS;
+using MathTL::CornerSingularityBiharmonicRHS;
 using MathTL::SparseMatrix;
 using MathTL::InfiniteVector;
 using WaveletTL::CubeBasis;
@@ -48,7 +49,7 @@ int main()
   cout << "Testing class BiharmonicEquation..." << endl;
   
   const int DIM = 2;
-  const int jmax = 4;
+  const int jmax = 3;
 
   //typedef DSBasis<4,6> Basis1D;
   typedef PBasis<3,3> Basis1D;
@@ -169,15 +170,17 @@ int main()
   origin[0] = 0.0;
   origin[1] = 0.0;
 
-  CornerSingularityRHS singRhs(origin, 0.5, 1.5);
-  CornerSingularity sing2D(origin, 0.5, 1.5);
+//   CornerSingularityRHS singRhs(origin, 0.5, 1.5);
+//   CornerSingularity sing2D(origin, 0.5, 1.5);
   
   //PoissonBVP<DIM> poisson(&singRhs);
   //PoissonBVP<DIM> poisson(&const_fun);
 
-  BiharmonicBVP<DIM> biharmonic(&const_fun);
+  CornerSingularityBiharmonicRHS singRhs(origin, 0.5, 1.5);
+
+  BiharmonicBVP<DIM> biharmonic(&singRhs);
   
-  BiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharmonic, &frame, TrivialAffine);  
+  BiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharmonic, &frame,jmax, TrivialAffine);  
 
   CachedProblem<BiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 5.0048, 1.0/0.01);
 
@@ -240,7 +243,7 @@ int main()
   Vector<double> resid(xk.size());
   Vector<double> help(xk.size());
 
-  for (int i = 0; i < 500;i++) {
+  for (int i = 0; i < 1500;i++) {
     stiff.apply(xk,help);
     resid = rh - help;
     cout << "i = " << i << " " << sqrt(resid*resid) << endl;

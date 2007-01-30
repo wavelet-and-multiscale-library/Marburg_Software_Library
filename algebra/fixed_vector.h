@@ -74,9 +74,10 @@ namespace MathTL
     typedef unsigned int size_type;
 
     /*!
-      default constructor: yields a zero vector
+      construct a vector with all entries of the given number
+      also serves as default constructor: yields a zero vector
      */
-    FixedVector();
+    FixedVector(const C c = 0);
 
     /*!
       copy constructor

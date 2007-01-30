@@ -7,8 +7,8 @@ namespace MathTL
 {
   template <class C, unsigned int ROW_DIM, unsigned int COL_DIM>
   inline
-  FixedMatrix<C, ROW_DIM, COL_DIM>::FixedMatrix()
-    : entries_()
+  FixedMatrix<C, ROW_DIM, COL_DIM>::FixedMatrix(const C value)
+    : entries_(value)
   {
   }
 
@@ -20,9 +20,22 @@ namespace MathTL
   }
 
   template <class C, unsigned int ROW_DIM, unsigned int COL_DIM>
-  FixedMatrix<C, ROW_DIM, COL_DIM>::FixedMatrix(const char* str,
-                    const bool byrow)
+  FixedMatrix<C, ROW_DIM, COL_DIM>::FixedMatrix(const char* str, const bool byrow)
     : entries_()
+  {
+    setup_matrix(str, byrow);
+  }
+
+  template <class C, unsigned int ROW_DIM, unsigned int COL_DIM>
+  FixedMatrix<C, ROW_DIM, COL_DIM>::FixedMatrix(const char* str, const C denominator, const bool byrow)
+    : entries_()
+  {
+    setup_matrix(str, byrow);
+    scale(C(1)/denominator);
+  }
+
+  template <class C, unsigned int ROW_DIM, unsigned int COL_DIM>
+  void FixedMatrix<C, ROW_DIM, COL_DIM>::setup_matrix(const char* str, const bool byrow)
   {
     std::istringstream ins(str);
     if (byrow)

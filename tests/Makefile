@@ -71,7 +71,8 @@ EXEOBJF =  test_corner_singularity_biharmonic.o\
  test_chart.o test_atlas.o\
  test_corner_singularity.o\
  test_map_tools.o\
- test_gram_schmidt.o test_piecewise.o
+ test_gram_schmidt.o test_piecewise.o\
+ test_fixed_vector.o test_fixed_matrix.o
 
 
 EXES = $(EXEOBJF:.o=)

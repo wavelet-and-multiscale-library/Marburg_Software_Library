@@ -35,9 +35,10 @@ namespace MathTL
     
     /* constructors and destructors ****************************************/
     /*!
-      default constructor, yields zero square matrix which is empty per default
+      construct a fixed matrix with all entries equal to the given number
+      also used as default constructor, yields zero matrix
     */
-    explicit FixedMatrix();
+    FixedMatrix(const C value = 0);
 
     /*!
       copy constructor
@@ -49,8 +50,16 @@ namespace MathTL
       \param str input string
       \param byrow indicates whether coefficients are stored row by row in the stream
      */
-    FixedMatrix(const char* str,
-                const bool byrow = true);
+    explicit FixedMatrix(const char* str, const bool byrow = true);
+
+    /*!
+      Construct matrix of fractions from a string holding its numerators
+      (separated by a blank), with a common denominator.
+      \param str input string of nominators
+      \param denominator The common denominator
+      \param byrow indicates whether coefficients are stored row by row in the stream
+     */
+    explicit FixedMatrix(const char* str, const C denominator, const bool byrow);
 
     /*!
       release allocated memory
@@ -174,6 +183,14 @@ namespace MathTL
     void print(std::ostream& os,
                const unsigned int tabwidth = 10,
                const unsigned int precision = 3) const;
+
+
+    /* private member functions ********************************************/
+    private:
+    /*!
+      setup routine shared by several constructors
+    */
+    void setup_matrix(const char* str, const bool byrow = true);
 
 
     /* private data fields *************************************************/

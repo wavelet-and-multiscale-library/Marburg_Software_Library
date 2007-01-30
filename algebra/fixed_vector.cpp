@@ -8,10 +8,11 @@ namespace MathTL
 {
   template <class C, unsigned int SIZE>
   inline
-  FixedVector<C, SIZE>::FixedVector()
+  FixedVector<C, SIZE>::FixedVector(const C c)
   {
     values_ = new C[SIZE];
-  }
+    (*this).operator = (c);
+   }
   
   template <class C, unsigned int SIZE>
   inline

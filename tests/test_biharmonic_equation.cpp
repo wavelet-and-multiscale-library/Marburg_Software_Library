@@ -49,7 +49,7 @@ int main()
   cout << "Testing class BiharmonicEquation..." << endl;
   
   const int DIM = 2;
-  const int jmax = 3;
+  const int jmax = 4;
 
   //typedef DSBasis<4,6> Basis1D;
   typedef PBasis<3,3> Basis1D;
@@ -170,12 +170,7 @@ int main()
   origin[0] = 0.0;
   origin[1] = 0.0;
 
-//   CornerSingularityRHS singRhs(origin, 0.5, 1.5);
-//   CornerSingularity sing2D(origin, 0.5, 1.5);
-  
-  //PoissonBVP<DIM> poisson(&singRhs);
-  //PoissonBVP<DIM> poisson(&const_fun);
-
+  CornerSingularityBiharmonic sing2D(origin, 0.5, 1.5);
   CornerSingularityBiharmonicRHS singRhs(origin, 0.5, 1.5);
 
   BiharmonicBVP<DIM> biharmonic(&singRhs);
@@ -184,9 +179,9 @@ int main()
 
   CachedProblem<BiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 5.0048, 1.0/0.01);
 
-  double tmp = 0.0;
-  int c = 0;
-  int d = 0;
+//   double tmp = 0.0;
+//   int c = 0;
+//   int d = 0;
   
   cout.precision(12);
 
@@ -221,7 +216,7 @@ int main()
 
   stiff.matlab_output("stiff_2D_out", "stiff",1);
   
-  unsigned int iter= 0;
+  //unsigned int iter= 0;
   //ctor<double> x(Lambda.size()); x = 1;
   //double lmax = PowerIteration(stiff, x, 0.01, 1000, iter);
   double lmax = 1;
@@ -276,6 +271,12 @@ int main()
  
   Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u, true, 5);//expand in primal basis
   
+  Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(frame, u, sing2D, 6);
+
+  std::ofstream ofs6("error_2D_out.m");
+  matlab_output(ofs6,Error);
+  ofs6.close();
+
   std::ofstream ofs5("approx_solution_out.m");
   matlab_output(ofs5,U);
   ofs5.close();

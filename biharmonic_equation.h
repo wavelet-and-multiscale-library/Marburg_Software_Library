@@ -172,7 +172,15 @@ namespace FrameTL
     double a(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
 	     const typename AggregatedFrame<IBASIS,DIM>::Index& nu) const;
 
-   
+    /*!
+      estimate the spectral norm ||A||
+    */
+    double norm_A() const;
+
+    /*!
+      estimate compressibility exponent s^*
+    */   
+     double s_star() const;
    
     /*!
       evaluate the (unpreconditioned) right-hand side f
@@ -186,7 +194,11 @@ namespace FrameTL
     void RHS(const double eta, InfiniteVector<double, 
 	     typename AggregatedFrame<IBASIS,DIM>::Index>& coeffs) const;
 
-   
+   /*!
+      compute (or estimate) ||F||_2
+    */
+    double F_norm() const { return sqrt(fnorm_sqr); }
+
     /*!
       set the boundary value problem
     */
@@ -245,6 +257,7 @@ namespace FrameTL
     // (squared) \ell_2 norm of the precomputed right-hand side
     double fnorm_sqr;
 
+    mutable double normA;
 
     QuadratureStrategy qstrat_; 
 

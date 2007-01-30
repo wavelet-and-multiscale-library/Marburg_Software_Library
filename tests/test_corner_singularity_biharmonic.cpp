@@ -4,7 +4,7 @@
 #include <geometry/grid.h>
 #include <geometry/sampled_mapping.h>
 #include <numerics/corner_singularity_biharmonic.h>
-#include <numerics/atez.h>
+//#include <numerics/atez.h>
 
 using namespace MathTL;
 using namespace std;
@@ -16,7 +16,7 @@ int main()
   Point<2> origin;
 
 #if 1
-  //  CornerSingularityBiharmonic s(origin, 0.5, 1.5);
+   CornerSingularityBiharmonic s(origin, 0.5, 1.5);
 
   const bool matlab = true; // false -> Octave output
 
@@ -29,20 +29,20 @@ int main()
   //   Grid<2> grid(Point<2>(-1.0, 0.0), Point<2>(0.0, 1.0), 1<<6, 1<<6); // only patch 0
   // Grid<2> grid(Point<2>(-1.0, -1.0), Point<2>(0.0, 1.0), 1<<6, 1<<6); // only patches 0+1
   //   Grid<1> grid(0.0,1.0,1<<10);
- //  SampledMapping<2> h(grid, s);
-//   std::ofstream fs("corner.m");
+  SampledMapping<2> h(grid, s);
+  std::ofstream fs("corner_maple.m");
 
-//   if (matlab)
-//     h.matlab_output(fs);
-//   else
-//     h.octave_output(fs);
+  if (matlab)
+    h.matlab_output(fs);
+  else
+    h.octave_output(fs);
 
-//   if (matlab)
-//     fs << "surf(x,y,z)" << endl;
-//   else
-//     fs << "mesh(x,y,z)" << endl;
+  if (matlab)
+    fs << "surf(x,y,z)" << endl;
+  else
+    fs << "mesh(x,y,z)" << endl;
 
-//   fs.close();
+  fs.close();
 //   cout << "  ...done, see file corner.m!" << endl;
 
   CornerSingularityBiharmonicRHS rhs(origin, 0.5, 1.5);
@@ -52,7 +52,7 @@ int main()
     cout << "- Octave output of the corner singularity rhs on a 2D grid..." << endl;
 
   SampledMapping<2> h_rhs(grid, rhs);
-  std::ofstream fs_rhs("corner_rhs.m");
+  std::ofstream fs_rhs("corner_rhs_maple.m");
   if (matlab)
     h_rhs.matlab_output(fs_rhs);
    else

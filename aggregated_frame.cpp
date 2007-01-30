@@ -11,23 +11,6 @@ namespace FrameTL
   {
     lifted_bases.resize((atlas_->charts()).size());
 
-#if 0 //FORGET ABOUT IT
-   
-    //we want to make sure that in case some mapped cube bases
-    //fulfill exactly the same boundary conditions, only one instance
-    //of such a basis is created
-    for (unsigned int  i = 0; i < (atlas_->charts()).size(); ++i)
-      {
-	MappedCubeBasis<IBASIS,DIM_d,DIM_m>* b = 0;
-	for (typename list<IBASIS*>::const_iterator it(bases_infact.begin());
-	     it != bases_infact.end(); ++it)
-	  {
-	    //compare boundary conditions
-	    
-	  }
-      }
-#endif
-
     for (unsigned int  i = 0; i < (atlas_->charts()).size(); ++i)
       lifted_bases[i] = new MappedCubeBasis<IBASIS,DIM_d,DIM_m>((atlas_->charts())[i],bc[i],bcT[i]);
     
@@ -120,7 +103,7 @@ namespace FrameTL
 	  all_supports[count].a[i] = supp_of_ind.a[i];
 	  all_supports[count].b[i] = supp_of_ind.b[i];
 	}
-	//cout << supp_of_ind.a[0] << " " << supp_of_ind.b[0] << " " << supp_of_ind.j << endl;
+		
 	count++;
       }
     }

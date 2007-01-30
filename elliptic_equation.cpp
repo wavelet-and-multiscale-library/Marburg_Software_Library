@@ -428,17 +428,6 @@ namespace FrameTL
     typename CUBEBASIS::Support supp_lambda_ = frame_->all_supports[lambda.number()];
     typename CUBEBASIS::Support supp_mu_ = frame_->all_supports[mu.number()];
 
-    //     WaveletTL::support<IBASIS,DIM>(*frame_->bases()[lambda.p()], 
-    // 				   CubeIndex(lambda.j(),
-    // 					     lambda.e(),
-    // 					     lambda.k(),
-    // 					     frame_->bases()[lambda.p()]),
-    // 				   supp_lambda);
-    //     WaveletTL::support<IBASIS,DIM>(*frame_->bases()[mu.p()],
-    // 				   CubeIndex(mu.j(),
-    // 					     mu.e(),
-    // 					     mu.k(),frame_->bases()[mu.p()]),
-    // 				   supp_mu);
     typename CUBEBASIS::Support tmp_supp;
 
 
@@ -536,8 +525,10 @@ namespace FrameTL
       // loop over spatial direction
       for (int i = 0; i < (int) DIM; i++) {
 	double t = 1.;
-
-	for (int j = 0; j <= i-1; j++) {  
+	
+	for (int j = 0; j < (int) DIM; j++) {
+	  if (j == i)
+	    continue;
 	  Index1D<IBASIS> i1(IntervalIndex<IBASIS> (
 						    lambda.j(),lambda.e()[j],lambda.k()[j],
 						    bases1D_lambda[j]
@@ -552,25 +543,9 @@ namespace FrameTL
 
 
 	  t *= integrate(i1, i2, irregular_grid, N_Gauss, j);
-	  
- 	}
-
-	for (unsigned int j = i+1; j < DIM; j++) {
-	  Index1D<IBASIS> i1(IntervalIndex<IBASIS> (
-						    lambda.j(),lambda.e()[j],lambda.k()[j],
-						    bases1D_lambda[j]
-						    ),
-			     lambda.p(),j,0
-			     );
-	  Index1D<IBASIS> i2(IntervalIndex<IBASIS> (mu.j(),mu.e()[j],mu.k()[j],
-						    bases1D_mu[j]
-						    ),
-			     mu.p(),j,0
-			     );
-
- 	  t *= integrate(i1, i2, irregular_grid, N_Gauss, j);
-
 	}
+
+
 	Index1D<IBASIS> i1(IntervalIndex<IBASIS> (
 						  lambda.j(),lambda.e()[i],lambda.k()[i],
 						  bases1D_lambda[i]

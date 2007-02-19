@@ -4,7 +4,7 @@
 #include <numerics/gauss_data.h>
 #include <frame_index.h>
 #include <frame_support.h>
-//#include <cuba.h>
+#include <index1D.h>
 
 //#include <cube/cube_support.h>
 
@@ -13,62 +13,11 @@ using WaveletTL::CubeBasis;
 namespace FrameTL
 {
 
-  template <class IBASIS>
-  Index1D<IBASIS>::Index1D(const IntervalIndex<IBASIS>& ind,
-			   const unsigned int p, const unsigned int dir,
-			   const unsigned int der)
-    : ind_(ind), p_(p), dir_(dir), der_(der)
-  {
-  }
-
-  template <class IBASIS>
-  bool
-  Index1D<IBASIS>::operator < (const Index1D<IBASIS>& lambda) const
-  {
-    return ind_ < lambda.index() ||
-      (
-       ind_ == lambda.index() &&
-       (
-	p_ < lambda.p() ||
-	(
-	 p_ == lambda.p() &&
-	 (
-	  dir_ < lambda.direction() ||
-	  (
-	   dir_ == lambda.direction() && der_ < lambda.derivative()   
-	   )
-	  )
-	 )
-	)
-       );
-  };
-  
-  template <class IBASIS>
-  bool Index1D<IBASIS>::operator == (const Index1D<IBASIS>& lambda) const
-  {
-    return (ind_ == lambda.index()) && (p_ == lambda.p()) && (der_ == lambda.derivative());
-  };
-
-  template <class IBASIS>
-  bool Index1D<IBASIS>::operator != (const Index1D<IBASIS>& lambda) const
-  {
-    return !(*this == lambda);
-  };
-  
-  template <class IBASIS>
-  bool Index1D<IBASIS>::operator <= (const Index1D<IBASIS>& lambda) const
-  {
-    return (*this < lambda) || (*this == lambda);
-  };
-  
-
-
   template <class IBASIS, unsigned int DIM>
   EllipticEquation<IBASIS,DIM>::EllipticEquation(const EllipticBVP<DIM>* ell_bvp,
 						 const AggregatedFrame<IBASIS,DIM>* frame,
-						 const int jmax,
-						 QuadratureStrategy qstrat)
-    : ell_bvp_(ell_bvp), frame_(frame), jmax_(jmax), qstrat_(qstrat) 
+						 const int jmax)
+    : ell_bvp_(ell_bvp), frame_(frame), jmax_(jmax)
   {
     
     compute_diagonal();
@@ -315,101 +264,6 @@ namespace FrameTL
   }
 
   template <class IBASIS, unsigned int DIM>
-  inline
-  double
-  EllipticEquation<IBASIS,DIM>:: integrate(const Index1D<IBASIS>& lambda,
-					   const Index1D<IBASIS>& mu,
-					   const FixedArray1D<Array1D<double>,DIM >& irregular_grid,
-					   const int N_Gauss,
-					   const int dir) const
-  {
-    
-    double res = 0;
-    
-    typename One_D_IntegralCache::iterator col_lb(one_d_integrals.lower_bound(lambda));
-    typename One_D_IntegralCache::iterator col_it(col_lb);
-    if (col_lb == one_d_integrals.end() ||
-	one_d_integrals.key_comp()(lambda,col_lb->first))
-      {
-	// insert a new column
-	typedef typename One_D_IntegralCache::value_type value_type;
-	col_it = one_d_integrals.insert(col_lb, value_type(lambda, Column1D()));
-      }
-    
-    Column1D& col(col_it->second);
-    
-    typename Column1D::iterator lb(col.lower_bound(mu));
-    typename Column1D::iterator it(lb);
-    if (lb == col.end() ||
-	col.key_comp()(mu, lb->first))
-      {
-	const unsigned int dir = lambda.direction();
-	Array1D<double> gauss_points_la, gauss_points_mu, gauss_weights,
-	  values_lambda, values_mu;
-	
-	//	cout << "N Gauss " << N_Gauss << endl;
- 	gauss_points_la.resize(N_Gauss*(irregular_grid[dir].size()-1));
- 	gauss_points_mu.resize(N_Gauss*(irregular_grid[dir].size()-1));
- 	gauss_weights.resize(N_Gauss*(irregular_grid[dir].size()-1));
-  	for (unsigned int k = 0; k < irregular_grid[dir].size()-1; k++)
- 	  for (int n = 0; n < N_Gauss; n++) {
- 	    gauss_points_la[ k*N_Gauss+n  ]
- 	      = 0.5 * (irregular_grid[dir][k+1]-irregular_grid[dir][k]) * (GaussPoints[N_Gauss-1][n]+1)
- 	      + irregular_grid[dir][k];
-	    
-	    //	    	    cout << "gp = " << gauss_points_la[ k*N_Gauss+n  ] << endl;
-
- 	    gauss_weights[ k*N_Gauss+n ]
- 	      = (irregular_grid[dir][k+1]-irregular_grid[dir][k])*GaussWeights[N_Gauss-1][n];
-
-	    //	    	    cout << "gw = " << gauss_weights[ k*N_Gauss+n  ] << endl;
- 	  }
-	
-	IBASIS* basis1D_lambda = frame_->bases()[lambda.p()]->bases()[dir];// IMPORTANT: choose 1D basis of right direction !!!!!
-	IBASIS* basis1D_mu     = frame_->bases()[mu.p()]->bases()[dir];
-	
-	const Chart<DIM>* chart_la = frame_->atlas()->charts()[lambda.p()];
-	const Chart<DIM>* chart_mu = frame_->atlas()->charts()[mu.p()];
-	
-
-	//	cout << "deriv_lambda = " << lambda.derivative() << endl;
-	WaveletTL::evaluate(*(basis1D_lambda), lambda.derivative(),
-			    lambda.index(),
-			    gauss_points_la, values_lambda);
-	
-	const Array1D<double> gouss_points_mu;
-	Point<DIM> x; // = 0;
-	Point<DIM> x_patch;
-	Point<DIM> y;
-	// setup mapped gauss points
-	for (unsigned int i = 0; i < gauss_points_la.size(); i++) {
-	  x[dir] = gauss_points_la[i];
-	  chart_la->map_point(x,x_patch);
-	  chart_mu->map_point_inv(x_patch,y);
-	  gauss_points_mu[i] = y[dir];
-	}
-
-	//	cout << "deriv_mu = " << mu.derivative() << endl;
-	WaveletTL::evaluate(*(basis1D_mu), mu.derivative(),
-			    mu.index(),
-			    gauss_points_mu, values_mu);
-		
-	//cout << "doing the job.." << endl;
-	for (unsigned int i = 0; i < values_lambda.size(); i++)
-	  res += gauss_weights[i] * values_lambda[i] * values_mu[i];
-
-	typedef typename Column1D::value_type value_type;
-	it = col.insert(lb, value_type(mu, res));
-      }
-    else {
-      res = it->second;
-    }
-	
-    return res;
-  }
-
-
-  template <class IBASIS, unsigned int DIM>
   double
   EllipticEquation<IBASIS,DIM>::a_different_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& la,
 						    const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
@@ -446,59 +300,15 @@ namespace FrameTL
     const typename CUBEBASIS::Support* supp_mu = &supp_mu_;
 
 
-    
-#if 0
-    cout << "##########################" << endl;
-    cout << "lambda = " << lambda << endl;
-    for (unsigned int i = 0; i < 2; i++) {
-      double dx1 = 1./(1 << supp_lambda->j);
-      cout << "j = " << supp_lambda->j << " p = " << lambda.p() << endl;
-      cout << "a = " << supp_lambda->a[i] <<  " b= " << supp_lambda->b[i] << " p = " << lambda.p() << endl;
-      //cout << "a_lambda = " << supp_lambda->a[i]*dx1 <<  " b= " << supp_lambda->b[i]*dx1 << endl;
-    }
-    cout << "mu = " << mu << endl;
-    for (unsigned int i = 0; i < 2; i++) {
-      double dx2 = 1./(1 << supp_mu->j);
-      cout << "j = " << supp_mu->j << " p = " << mu.p() << endl;
-      cout << "a = " << supp_mu->a[i] <<  " b= " << supp_mu->b[i] << " p = " << mu.p() << endl;
-      //cout << "a_mu = " << supp_mu->a[i]*dx2 <<  " b= " << supp_mu->b[i]*dx2 << endl;
-    }
-
-#endif
-
     FixedArray1D<Array1D<double>,DIM > irregular_grid;
 
     const int N_Gauss = q;
 
     bool b = 0;
-    switch ( qstrat_ ) {
-    case SplineInterpolation: {
-      
-      //TODO
-      break;
-    }
-    case TrivialAffine: {
-      b = intersect_supports<IBASIS,DIM,DIM>(*frame_, lambda, mu,
-					     supp_lambda, supp_mu, irregular_grid);
-      if ( !b )
-	return 0.0;
-      break;
-    }
-    case Composite: {
-      b = intersect_supports<IBASIS,DIM,DIM>(*frame_, lambda, mu, supp_lambda, supp_mu);
-      if ( !b )
-        return 0.0;
-      break;
-    }
-    }
+    b = intersect_supports<IBASIS,DIM,DIM>(*frame_, lambda, mu, supp_lambda, supp_mu);
+    if ( !b )
+      return 0.0;
     
-#if 0
-    for (unsigned int i = 0; i < DIM; i++) {
-      cout << "intersect = " << b << endl;
-      cout << "dim = " << i << " " << irregular_grid[i] << endl;
-    }
-#endif
-
     typedef typename IBASIS::Index Index_1D;
     
     const Chart<DIM>* chart_la = frame_->atlas()->charts()[lambda.p()];
@@ -510,228 +320,118 @@ namespace FrameTL
     FixedArray1D<Array1D<double>,DIM> gauss_points, gauss_points_mu, gauss_weights,
       wav_values_lambda, wav_der_values_lambda, wav_values_mu, wav_der_values_mu;
 
-    switch ( qstrat_ ) {
-
-    case SplineInterpolation: {
-      // TODO
-      return 0.;
-    }
-      // ATTENTION: for this particular integration strategy, the coefficients q(x) and a(x)
-      // also have to be separable!!!
-      // For the moment, we assume a = 1, q = 0, or a = 0, q = 1.
-      // No other cases are implememnted so far!!!
-    case TrivialAffine: {
-#if 1
-      // loop over spatial direction
-      for (int i = 0; i < (int) DIM; i++) {
-	double t = 1.;
-	
-	for (int j = 0; j < (int) DIM; j++) {
-	  if (j == i)
-	    continue;
-	  Index1D<IBASIS> i1(IntervalIndex<IBASIS> (
-						    lambda.j(),lambda.e()[j],lambda.k()[j],
-						    bases1D_lambda[j]
-						    ),
-			     lambda.p(),j,0
-			     );
-	  Index1D<IBASIS> i2(IntervalIndex<IBASIS> (mu.j(),mu.e()[j],mu.k()[j],
-						    bases1D_mu[j]
-						    ),
-			     mu.p(),j,0
-			     );
-
-
-	  t *= integrate(i1, i2, irregular_grid, N_Gauss, j);
-	}
-
-
-	Index1D<IBASIS> i1(IntervalIndex<IBASIS> (
-						  lambda.j(),lambda.e()[i],lambda.k()[i],
-						  bases1D_lambda[i]
-						  ),
-			   lambda.p(),i,1
-			   );
-	Index1D<IBASIS> i2(IntervalIndex<IBASIS> (mu.j(),mu.e()[i],mu.k()[i],
-						  bases1D_mu[i]
-						  ),
-			   mu.p(),i,1
-			   );
-
-	t *= integrate(i1, i2, irregular_grid, N_Gauss, i);
-
-	t *= 1./(chart_la->a_i(i) * chart_mu->a_i(i));
-	
-	r += t;
-      }
-
-      double tmp1 = 1., tmp2 = 1.;
-
-      for (unsigned int i = 0; i < DIM; i++) {
-	tmp1 *= chart_la->a_i(i);
-	tmp2 *= chart_mu->a_i(i);
-      }
-      tmp1 = sqrt(fabs(tmp1)) / sqrt(fabs(tmp2));
-      r *= tmp1;
-
-#else
-      // at this point the integration of the principal part of the operator has been
-      // finished
-      // now follows integration of q(x)*psi_lambda(x)*psi_mu(x)
-
-      double s = 1.;
-
-      // loop over spatial direction     
-      for (int i = 0; i < (int) DIM; i++) {
-	Index1D<IBASIS> i1(IntervalIndex<IBASIS> (
-						  lambda.j(),lambda.e()[i],lambda.k()[i],
-						  bases1D_lambda[i]
-						  ),
-			   lambda.p(),i,0
-			   );
-	Index1D<IBASIS> i2(IntervalIndex<IBASIS> (mu.j(),mu.e()[i],mu.k()[i],
-						  bases1D_mu[i]
-						  ),
-			   mu.p(),i,0
-			     );
-	s *= integrate(i1, i2, irregular_grid, N_Gauss, i);
-      }
-
-      double tmp1 = 1., tmp2 = 1.;
-
-      for (unsigned int i = 0; i < DIM; i++) {
-	tmp1 *= chart_la->a_i(i);
-	tmp2 *= chart_mu->a_i(i);
-      }
-      tmp1 = sqrt(fabs(tmp1)) / sqrt(fabs(tmp2));
-
-      s *= tmp1;
-
-      r += s;
-#endif      
-      return r;
-
-    }// end case TrivialAffine
-
-    case Composite: {
+    //const double h = ldexp(1.0, -std::max(supp_lambda->j,supp_mu->j));// granularity for the quadrature
+    const double h = 1.0 / (1 << std::max(supp_lambda->j,supp_mu->j));// granularity for the quadrature
+    //const int N = 4;
       
-      //const double h = ldexp(1.0, -std::max(supp_lambda->j,supp_mu->j));// granularity for the quadrature
-      const double h = 1.0 / (1 << std::max(supp_lambda->j,supp_mu->j));// granularity for the quadrature
-      //const int N = 4;
-      
-      for (unsigned int i = 0; i < DIM; i++) {
-	gauss_points[i].resize(N * N_Gauss*(supp_lambda->b[i]-supp_lambda->a[i]));
-	gauss_weights[i].resize(N * N_Gauss*(supp_lambda->b[i]-supp_lambda->a[i]));
- 	for (int patch = supp_lambda->a[i]; patch < supp_lambda->b[i]; patch++)
- 	  for (unsigned int m = 0; m < N; m++)
-	    for (int n = 0; n < N_Gauss; n++) {
- 	      gauss_points[i][ N*(patch-supp_lambda->a[i])*N_Gauss + m*N_Gauss+n ]
-		= h*( 1.0/(2.*N)*(GaussPoints[N_Gauss-1][n]+1+2.0*m)+patch);
+    for (unsigned int i = 0; i < DIM; i++) {
+      gauss_points[i].resize(N * N_Gauss*(supp_lambda->b[i]-supp_lambda->a[i]));
+      gauss_weights[i].resize(N * N_Gauss*(supp_lambda->b[i]-supp_lambda->a[i]));
+      for (int patch = supp_lambda->a[i]; patch < supp_lambda->b[i]; patch++)
+	for (unsigned int m = 0; m < N; m++)
+	  for (int n = 0; n < N_Gauss; n++) {
+	    gauss_points[i][ N*(patch-supp_lambda->a[i])*N_Gauss + m*N_Gauss+n ]
+	      = h*( 1.0/(2.*N)*(GaussPoints[N_Gauss-1][n]+1+2.0*m)+patch);
 	      
-	      gauss_weights[i][ N*(patch-supp_lambda->a[i])*N_Gauss + m*N_Gauss+n ]
-		= (h*GaussWeights[N_Gauss-1][n])/N;
-	    }
+	    gauss_weights[i][ N*(patch-supp_lambda->a[i])*N_Gauss + m*N_Gauss+n ]
+	      = (h*GaussWeights[N_Gauss-1][n])/N;
+	  }
 
-      }
+    }
 
-      for (unsigned int i = 0; i < DIM; i++) {
-	WaveletTL::evaluate(*(bases1D_lambda[i]), 0,
-			    Index_1D(lambda.j(), lambda.e()[i], lambda.k()[i], bases1D_lambda[i]),
-			    gauss_points[i], wav_values_lambda[i]);
+    for (unsigned int i = 0; i < DIM; i++) {
+      WaveletTL::evaluate(*(bases1D_lambda[i]), 0,
+			  Index_1D(lambda.j(), lambda.e()[i], lambda.k()[i], bases1D_lambda[i]),
+			  gauss_points[i], wav_values_lambda[i]);
       
-	WaveletTL::evaluate(*(bases1D_lambda[i]), 1,
-			    Index_1D(lambda.j(), lambda.e()[i], lambda.k()[i], bases1D_lambda[i]),
-			    gauss_points[i], wav_der_values_lambda[i]);
-      }
+      WaveletTL::evaluate(*(bases1D_lambda[i]), 1,
+			  Index_1D(lambda.j(), lambda.e()[i], lambda.k()[i], bases1D_lambda[i]),
+			  gauss_points[i], wav_der_values_lambda[i]);
+    }
     
-      int index[DIM]; // current multiindex for the point values
-      for (unsigned int i = 0; i < DIM; i++)
-	index[i] = 0;
+    int index[DIM]; // current multiindex for the point values
+    for (unsigned int i = 0; i < DIM; i++)
+      index[i] = 0;
 
-      Point<DIM> x;
-      Point<DIM> x_patch;
-      Point<DIM> y;
+    Point<DIM> x;
+    Point<DIM> x_patch;
+    Point<DIM> y;
 
-      // loop over all quadrature knots
-      while (true) {      
-	for (unsigned int i = 0; i < DIM; i++) {
-	  x[i] = gauss_points[i][index[i]];
-	}
-	//cout << x << endl;
-	chart_la->map_point(x,x_patch);
-	if ( in_support(*frame_,mu, supp_mu, x_patch) )
-	  {
-	    chart_mu->map_point_inv(x_patch,y);
+    // loop over all quadrature knots
+    while (true) {      
+      for (unsigned int i = 0; i < DIM; i++) {
+	x[i] = gauss_points[i][index[i]];
+      }
+      //cout << x << endl;
+      chart_la->map_point(x,x_patch);
+      if ( in_support(*frame_,mu, supp_mu, x_patch) )
+	{
+	  chart_mu->map_point_inv(x_patch,y);
 
 	  
-	    double sq_gram_la = chart_la->Gram_factor(x);
-	    double sq_gram_mu = chart_mu->Gram_factor(y);
+	  double sq_gram_la = chart_la->Gram_factor(x);
+	  double sq_gram_mu = chart_mu->Gram_factor(y);
 
-	    double weight=1., psi_lambda=1., psi_mu=1.;
-	    for (unsigned int i = 0; i < DIM; i++) {
-	      weight *= gauss_weights[i][index[i]];
-	      psi_lambda *= wav_values_lambda[i][index[i]];
-	      psi_mu *=  WaveletTL::evaluate(*(bases1D_mu[i]), 0,
-					     Index_1D(mu.j(), mu.e()[i], mu.k()[i], bases1D_mu[i]), y[i]);
+	  double weight=1., psi_lambda=1., psi_mu=1.;
+	  for (unsigned int i = 0; i < DIM; i++) {
+	    weight *= gauss_weights[i][index[i]];
+	    psi_lambda *= wav_values_lambda[i][index[i]];
+	    psi_mu *=  WaveletTL::evaluate(*(bases1D_mu[i]), 0,
+					   Index_1D(mu.j(), mu.e()[i], mu.k()[i], bases1D_mu[i]), y[i]);
 
-	    }
-      	    if ( !(psi_lambda == 0.|| psi_mu == 0.) ) {
-	            
-	      Vector<double> values1(DIM);
-	      Vector<double> values2(DIM);
-
-	      for (unsigned int s = 0; s < DIM; s++) {
-		double psi_der_lambda=1., psi_der_mu=1.;
-		psi_der_lambda = (psi_lambda / wav_values_lambda[s][index[s]]) * wav_der_values_lambda[s][index[s]];
-
-		psi_der_mu = (psi_mu / WaveletTL::evaluate(*(bases1D_mu[s]), 0,
-							   Index_1D(mu.j(), mu.e()[s], mu.k()[s], bases1D_mu[s]), y[s])
-			      ) * WaveletTL::evaluate(*(bases1D_mu[s]), 1,
-						      Index_1D(mu.j(), mu.e()[s], mu.k()[s], bases1D_mu[s]), y[s]);
-	    
-		values1[s] = ell_bvp_->a(x_patch) *
-		  (psi_der_lambda*sq_gram_la - (psi_lambda*chart_la->Gram_D_factor(s,x)))
-		  / (sq_gram_la*sq_gram_la);
-		values2[s] =
-		  (psi_der_mu*sq_gram_mu - (psi_mu*chart_mu->Gram_D_factor(s,y)))
-		  / (sq_gram_mu*sq_gram_mu);
-	
-	      } // end loop s
-      
-	      double tmp = 0.;
-	      for (unsigned int i1 = 0; i1 < DIM; i1++) {
-		double d1 = 0.;
-		double d2 = 0.;
-		for (unsigned int i2 = 0; i2 < DIM; i2++) {
-		  d1 += values1[i2]*chart_la->Dkappa_inv(i2, i1, x);
-		  d2 += values2[i2]*chart_mu->Dkappa_inv(i2, i1, y);
-		}
-		tmp += d1 * d2;
-	      }
-	      
-	      r += (tmp * (sq_gram_la*sq_gram_la) +
-		    ell_bvp_->q(x_patch) * psi_lambda * (psi_mu/sq_gram_mu) * sq_gram_la) * weight;
-	    }
 	  }
-	// "++index"
-	bool exit = false;
-	for (unsigned int i = 0; i < DIM; i++) {
-	  if (index[i] == (int) N * N_Gauss * (supp_lambda->b[i]-supp_lambda->a[i]) - 1) {
-	    index[i] = 0;
-	    exit = (i == DIM-1);
-	  } else {
-	    index[i]++;
-	    break;
+	  if ( !(psi_lambda == 0.|| psi_mu == 0.) ) {
+	            
+	    Vector<double> values1(DIM);
+	    Vector<double> values2(DIM);
+
+	    for (unsigned int s = 0; s < DIM; s++) {
+	      double psi_der_lambda=1., psi_der_mu=1.;
+	      psi_der_lambda = (psi_lambda / wav_values_lambda[s][index[s]]) * wav_der_values_lambda[s][index[s]];
+
+	      psi_der_mu = (psi_mu / WaveletTL::evaluate(*(bases1D_mu[s]), 0,
+							 Index_1D(mu.j(), mu.e()[s], mu.k()[s], bases1D_mu[s]), y[s])
+			    ) * WaveletTL::evaluate(*(bases1D_mu[s]), 1,
+						    Index_1D(mu.j(), mu.e()[s], mu.k()[s], bases1D_mu[s]), y[s]);
+	    
+	      values1[s] = ell_bvp_->a(x_patch) *
+		(psi_der_lambda*sq_gram_la - (psi_lambda*chart_la->Gram_D_factor(s,x)))
+		/ (sq_gram_la*sq_gram_la);
+	      values2[s] =
+		(psi_der_mu*sq_gram_mu - (psi_mu*chart_mu->Gram_D_factor(s,y)))
+		/ (sq_gram_mu*sq_gram_mu);
+	
+	    } // end loop s
+      
+	    double tmp = 0.;
+	    for (unsigned int i1 = 0; i1 < DIM; i1++) {
+	      double d1 = 0.;
+	      double d2 = 0.;
+	      for (unsigned int i2 = 0; i2 < DIM; i2++) {
+		d1 += values1[i2]*chart_la->Dkappa_inv(i2, i1, x);
+		d2 += values2[i2]*chart_mu->Dkappa_inv(i2, i1, y);
+	      }
+	      tmp += d1 * d2;
+	    }
+	      
+	    r += (tmp * (sq_gram_la*sq_gram_la) +
+		  ell_bvp_->q(x_patch) * psi_lambda * (psi_mu/sq_gram_mu) * sq_gram_la) * weight;
 	  }
 	}
-	if (exit) break;
+      // "++index"
+      bool exit = false;
+      for (unsigned int i = 0; i < DIM; i++) {
+	if (index[i] == (int) N * N_Gauss * (supp_lambda->b[i]-supp_lambda->a[i]) - 1) {
+	  index[i] = 0;
+	  exit = (i == DIM-1);
+	} else {
+	  index[i]++;
+	  break;
+	}
       }
-      return r;
-    }// end case Composite
-    }// end switch integration strategy
-
-    // dummy return
-    return 0.;
+      if (exit) break;
+    }
+    return r;
   }
 
   template <class IBASIS, unsigned int DIM>

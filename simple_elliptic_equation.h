@@ -1,24 +1,22 @@
 // -*- c++ -*-
 
 // +--------------------------------------------------------------------+
-// | This file is part of WaveletTL - the Wavelet Template Library      |
+// | This file is part of FrameTL - the Frame Template Library      |
 // |                                                                    |
 // | Copyright (c) 2002-2005                                            |
 // | Manuel Werner                                                      |
 // +--------------------------------------------------------------------+
 
-#ifndef _FRAMETL_ELLIPTIC_EQUATION_H
-#define _FRAMETL_ELLIPTIC_EQUATION_H
+#ifndef _FRAMETL_SIMPLE_ELLIPTIC_EQUATION_H
+#define _FRAMETL_SIMPLE_ELLIPTIC_EQUATION_H
 
 #include <aggregated_frame.h>
 #include <numerics/bvp.h>
 #include <adaptive/compression.h>
 #include <interval/i_index.h>
-#include <index1D.h>
-
 #include <galerkin/infinite_preconditioner.h>
-
 #include <frame_support.h>
+#include <index1D.h>
 
 using FrameTL::AggregatedFrame;
 using MathTL::EllipticBVP;
@@ -58,10 +56,16 @@ namespace FrameTL
 
     The evaluation of a(.,.) and f is possible for arguments \psi_\lambda
     which stem from an aggregated wavelet frame \Psi=\{\psi_\lambda\} of the corresponding
-    function space over Omega.     
+    function space over Omega.
+
+    WE ASSUME THAT THE COEFFICIENTS OF THE ELLIPTIC PDE ARE SEPERABLE AND SMOOTH AND THAT THE PATCHES
+    OF THE UNDERLYING DOMAIN DECOMPOSITION ARE RECATANGULAR AND ALIGNED WITH THE CARTESIAN
+    COORDINATES.
+    FOR THIS SPECIAL CASE, a(.,.) CAN BE EXACTLY COMPUTED AT UNIT COST AND TENSOR PRODUCT
+    STRUCTURE CAN BE EXPLOITED.
   */
   template <class IBASIS, unsigned int DIM>
-  class EllipticEquation
+  class SimpleEllipticEquation
   //: public FullyDiagonalDyadicPreconditioner<typename AggregatedFrame<IBASIS,DIM>::Index>
       : public FullyDiagonalEnergyNormPreconditioner<typename AggregatedFrame<IBASIS,DIM>::Index>
   {
@@ -70,13 +74,11 @@ namespace FrameTL
     /*!
       constructor
      */
-    EllipticEquation(const EllipticBVP<DIM>* ell_bvp,
-		     const AggregatedFrame<IBASIS,DIM>* frame,
-		     const int jmax);
+    SimpleEllipticEquation(const EllipticBVP<DIM>* ell_bvp,
+			   const AggregatedFrame<IBASIS,DIM>* frame,
+			   const int jmax);
 
-    /*!
-      make template argument accessible
-    */
+    
     typedef AggregatedFrame<IBASIS,DIM> Frame;
 
     /*!
@@ -225,24 +227,27 @@ namespace FrameTL
      */
     const AggregatedFrame<IBASIS,DIM>* frame_;
 
+    //#################### Caching ##################
+    typedef std::map<Index1D<IBASIS>,double > Column1D;
+    typedef std::map<Index1D<IBASIS>,Column1D> One_D_IntegralCache;
+    
+    /*!
+      cache for one dimensional integrals
+      ONLY USED TOGETHER WITH TrivialAffine QUADRATURE RULE OPTION
+     */
+    mutable One_D_IntegralCache one_d_integrals;
+    //###############################################
+
   private:
 
     /*!
-      helper routines for a (.. , ..). Entries in diagonal and non-diagonal
-      blocks of the stiffness matrix have to be treated differently.
      */
-    double a_same_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
-			  const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-			  const unsigned int q_order = 3) const;
-
-    /*!
-      helper routines for a (.. , ..). Entries in diagonal and non-diagonal
-      blocks of the stiffness matrix have to be treated differently.
-     */
-    double a_different_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
-			       const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-			       const unsigned int q_order = 3, const unsigned int rank = 1) const;
-
+    double integrate(const Index1D<IBASIS>& lambda,
+		     const Index1D<IBASIS>& mu,
+		     const int N_Gauss,
+		     const int dir,
+		     const typename CubeBasis<IBASIS,DIM>::Support* supp_lambda,
+		     const typename CubeBasis<IBASIS,DIM>::Support* supp_mu) const;
 
     // precompute the right-hand side
     void compute_rhs();
@@ -272,6 +277,6 @@ namespace FrameTL
   };
 }
 
-#include <elliptic_equation.cpp>
+#include <simple_elliptic_equation.cpp>
 
 #endif

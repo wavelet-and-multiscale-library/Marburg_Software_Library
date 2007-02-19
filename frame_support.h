@@ -16,13 +16,16 @@
 #include <geometry/chart.h>
 #include <geometry/point.h>
 #include <cube/cube_basis.h>
+#include <galerkin/infinite_preconditioner.h>
+#include <index1D.h>
+
+
 
 using WaveletTL::CubeBasis;
+using FrameTL::Index1D;
 
 namespace FrameTL
 {
-
-
   /*!
     checks wether Point 'p' lies in the support of
     the wavelet \psi_\lambda
@@ -83,6 +86,15 @@ namespace FrameTL
 			  const typename CubeBasis<IBASIS,DIM_d>::Support* supp_mu,
 			  FixedArray1D<Array1D<double>,DIM_d >& supp_intersect);
 
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  bool intersect_supports_1D(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+ 			     const Index1D<IBASIS>& lambda,
+ 			     const Index1D<IBASIS>& mu,
+ 			     const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda,
+ 			     const typename CubeBasis<IBASIS,DIM_d>::Support* supp_mu,
+			     const int dir,
+			     Array1D<double>& supp_intersect);
+  
 
   /*!
     For a given wavelet frame element \psi_\lambda, compute all generators/wavelets
@@ -109,10 +121,6 @@ namespace FrameTL
   template <unsigned int DIM>
   bool qudarangles_intersect (FixedArray1D<Point<DIM>, 4> poly1, FixedArray1D<Point<DIM>, 4> poly2);
 
-  template <unsigned int DIM>
-  bool qudarangles_intersect2 (FixedArray1D<Point<DIM>, 4> poly1, FixedArray1D<Point<DIM>, 4> poly2);
-
-
   /*!
     tests wether the line segments defined by the points
     A and B as well as C and D intersect.
@@ -124,11 +132,6 @@ namespace FrameTL
    */
   template <unsigned int DIM>
   int edgesIntersect (const Point<DIM>& A, const Point<DIM>& B,
-		      const Point<DIM>& C, const Point<DIM>& D);
-
-
-  template <unsigned int DIM>
-  int edgesIntersect2 (const Point<DIM>& A, const Point<DIM>& B,
 		      const Point<DIM>& C, const Point<DIM>& D);
 
   /*!

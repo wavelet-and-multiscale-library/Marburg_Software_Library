@@ -592,13 +592,102 @@ namespace FrameTL
 		
       if (result)
 	return result;
-      //cout << "7777777777777" << endl;
+
     }//end outer for
 
     return false;
 
   }
   
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  bool intersect_supports_1D(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+			     const Index1D<IBASIS>& lambda,
+ 			     const Index1D<IBASIS>& mu,
+ 			     const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda,
+ 			     const typename CubeBasis<IBASIS,DIM_d>::Support* supp_mu,
+			     const int dir,
+			     Array1D<double>& supp_intersect)
+  {
+    const double dx1 = 1.0 / (1 << supp_lambda->j);
+    const double dx2 = 1.0 / (1 << supp_mu->j);
+
+    double x;
+    double x_patch;
+    double y0;
+    double y1;
+
+    const Chart<DIM_d,DIM_m>* chart_la = frame.atlas()->charts()[lambda.p()];
+    const Chart<DIM_d,DIM_m>* chart_mu = frame.atlas()->charts()[mu.p()];
+    
+    x = supp_mu->a[dir] * dx2;
+      
+    x_patch = chart_mu->map_point(x, dir);
+    y0 = chart_la->map_point_inv(x_patch, dir); 
+
+    x = supp_mu->b[dir] * dx2;
+
+    x_patch = chart_mu->map_point(x, dir);
+    y1 = chart_la->map_point_inv(x_patch, dir);
+    
+    // compute lower left and right end of  intersection interval
+    FixedArray1D<double,2> hyperCube_intersect;
+
+    hyperCube_intersect[0] = std::max(supp_lambda->a[dir]*dx1,y0);
+    hyperCube_intersect[1] = std::min(supp_lambda->b[dir]*dx1,y1);
+    
+    if ( hyperCube_intersect[0] >= hyperCube_intersect[1]  )
+      return false;
+    
+    // we just need some kind of a sorted list
+    list<double> irregular_grid;
+    list<double> irregular_grid_tmp;
+
+    // collect gridpoints for all directions,
+    // we have to do this for both patches  
+    for (int k = supp_lambda->a[dir]; k <= supp_lambda->b[dir]; k++) {
+      double d = k*dx1;
+      if ( hyperCube_intersect[0] <= d && d <= hyperCube_intersect[1]) {
+	irregular_grid.push_back(d);
+      }
+    }
+    
+    // left end of support interval
+    x = supp_mu->a[dir]*dx2;  
+    
+    // second patch
+    //for (unsigned int i = 0; i < DIM_d; i++) {
+    for (int k = supp_mu->a[dir]; k <= supp_mu->b[dir]; k++) {
+      x = k*dx2;
+      
+      x_patch = chart_mu->map_point(x, dir);
+      y0 = chart_la->map_point_inv(x_patch, dir);
+
+      if ( hyperCube_intersect[0] <= y0 &&  y0 <= hyperCube_intersect[1]){
+	irregular_grid.push_back(y0);
+      }
+    }
+    x = supp_mu->a[dir]*dx2;
+    irregular_grid.sort();    
+    
+    double old = -1.;
+    for (list<double>::const_iterator it = irregular_grid.begin();
+	 it != irregular_grid.end(); ++it) {
+      if (! (fabs(old-*it) < 1.0e-13))
+	irregular_grid_tmp.push_back(*it);
+      old = *it;
+    }
+    
+    supp_intersect.resize(irregular_grid_tmp.size());
+    unsigned int j = 0;
+    for (list<double>::const_iterator it = irregular_grid_tmp.begin();
+	 it != irregular_grid_tmp.end(); ++it) {
+      supp_intersect[j] = *it;
+      j++;
+    }
+    return true;
+
+  }
+
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   inline
   bool intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
@@ -647,7 +736,6 @@ namespace FrameTL
       x[i] = supp_mu->b[i] * dx2;
     }
 
-    
     chart_mu->map_point(x,x_patch);
     chart_la->map_point_inv(x_patch,y1);
     
@@ -722,9 +810,7 @@ namespace FrameTL
 	  irregular_grid_tmp[i].push_back(*it);
 	old = *it;
       }
-
     }
-
 
     for (unsigned int i = 0; i < DIM_d; i++) {
       supp_intersect[i].resize(irregular_grid_tmp[i].size());

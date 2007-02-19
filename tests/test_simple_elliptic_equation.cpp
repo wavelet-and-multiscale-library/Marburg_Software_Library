@@ -5,7 +5,7 @@
 #include <interval/ds_basis.h>
 #include <interval/p_basis.h>
 #include <numerics/corner_singularity.h>
-#include <elliptic_equation.h>
+#include <simple_elliptic_equation.h>
 #include <algebra/sparse_matrix.h>
 #include <algebra/infinite_vector.h>
 #include <numerics/iteratsolv.h>
@@ -22,7 +22,7 @@ using std::cout;
 using std::endl;
 
 using FrameTL::EvaluateFrame;
-using FrameTL::EllipticEquation;
+using FrameTL::SimpleEllipticEquation;
 using FrameTL::AggregatedFrame;
 using MathTL::EllipticBVP;
 using MathTL::PoissonBVP;
@@ -74,34 +74,9 @@ int main()
   AffineLinearMapping<2> affineP2(A2,b2);
   //##############################
 
-  //##############################
-  const double t = 2./3.;
-  const double theta0 = 0.5-t*0.25;
-  const double omega = 1.5+2*t*0.25;
-  
-  const double alpha = tan(t*M_PI*0.25);
-  cout << "alpha = " << alpha << endl;
-
-  LinearBezierMapping bezierP(Point<2>(-1.,-1.), Point<2>(-1.,-alpha),
-			      Point<2>(1.,-1.), Point<2>(1.,alpha));
-
-  
-  LinearBezierMapping bezierP2(Point<2>(-1.,-1.), Point<2>(-1.,1.),
-			       Point<2>(-alpha,-1.), Point<2>(alpha,1.));
-
-  // L- shaped:
-//   LinearBezierMapping bezierP(Point<2>(-1.,-1.),Point<2>(-1.,1.),
-//  			      Point<2>(0.,-1.), Point<2>(0.,1.));
-  
-//   LinearBezierMapping bezierP2(Point<2>(-1.,-1.),Point<2>(-1.,0.),
-// 			       Point<2>(1.,-1.), Point<2>(1.,0.));
- 
-
-
-  //##############################
   Array1D<Chart<DIM,DIM>* > charts(2);
-  charts[0] = &bezierP;
-  charts[1] = &bezierP2;
+  charts[0] = &affineP;
+  charts[1] = &affineP2;
  
   SymmetricMatrix<bool> adj(2);
   adj(0,0) = 1;
@@ -172,8 +147,10 @@ int main()
   PoissonBVP<DIM> poisson(&singRhs);
   //PoissonBVP<DIM> poisson(&const_fun);
 
-  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax);
-  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0048, 1.0/0.01);
+  // BiharmonicBVP<DIM> biahrmonic(&singRhs);
+
+  SimpleEllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax);
+  CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0048, 1.0/0.01);
 
   double tmp = 0.0;
   int c = 0;
@@ -298,16 +275,16 @@ int main()
     xk = xk + resid;
   }
 
-//   for (int i = 0; i < 450; i++) 
-//     for (int j = 0; j < 450; j++) {
-//       if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
-// 	cout << stiff.get_entry(i,j) << endl;
-// 	cout << stiff.get_entry(j,i) << endl;
-// 	cout << "i = " << i << " j = " << j << endl;
-// 	cout << "#######################" << endl;
-// 	abort();
-//       }
-//     }
+  for (int i = 0; i < 450; i++) 
+    for (int j = 0; j < 450; j++) {
+      if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
+	cout << stiff.get_entry(i,j) << endl;
+	cout << stiff.get_entry(j,i) << endl;
+	cout << "i = " << i << " j = " << j << endl;
+	cout << "#######################" << endl;
+	abort();
+      }
+    }
 
 
   cout << "performing output..." << endl;

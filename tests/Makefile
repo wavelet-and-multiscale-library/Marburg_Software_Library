@@ -52,8 +52,9 @@ CXXFLAGS += -O3 -funroll-loops -fomit-frame-pointer -I$(FRAMETL_DIR) -I$(WAVELET
 endif
 
 
-EXEOBJF = test_elliptic_equation.o
-#test_biharmonic_equation_1D.o\
+EXEOBJF = test_simple_elliptic_equation.o\
+test_elliptic_equation.o
+#test_biharmonic_equation_1D.o
 #test_elliptic_equation_1D.o\
 
 

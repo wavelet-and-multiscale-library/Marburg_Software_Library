@@ -55,13 +55,31 @@ namespace MathTL
     A_.apply(x, y);
     y += b_;
   }
-    
+
+  // works only for the case of a DIAGONAL matrix A_
+  template <unsigned int DIM>
+  inline
+  double
+  AffineLinearMapping<DIM>::map_point(const double x, const int component) const {
+    return A_(component, component) * x + b_[component];
+  }
+  
+  
   template <unsigned int DIM>
   inline
   void
   AffineLinearMapping<DIM>::map_point_inv(const Point<DIM>& x, Point<DIM>& y) const {
     A_inv.apply(Point<DIM>(x-b_), y);
   }
+
+  // works only for the case of a DIAGONAL matrix A_
+  template <unsigned int DIM>
+  inline
+  double
+  AffineLinearMapping<DIM>::map_point_inv(const double x, const int component) const {
+    return A_inv(component, component)*(x - b_[component]);
+  }
+
 
   template <unsigned int DIM>
   inline

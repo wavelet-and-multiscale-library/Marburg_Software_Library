@@ -38,10 +38,19 @@ namespace MathTL
      */
     virtual void map_point(const Point<DIM_d>& x, Point<DIM_m>& y) const = 0;
 
+
+    /*!
+     */
+    virtual double map_point(const double, const int) const = 0;
+
     /*!
       inverse mapping y = kappa^{-1}(x)
      */
     virtual void map_point_inv(const Point<DIM_d>& x, Point<DIM_m>& y) const = 0;
+
+    /*!
+     */
+    virtual double map_point_inv(const double, const int) const = 0;
 
     /*!
       square root of the Gram determinant sqrt(det(Dkappa(x)^T * Dkappa(x)))
@@ -105,7 +114,11 @@ namespace MathTL
     virtual ~AffineLinearMapping() {}
 
     void map_point(const Point<DIM>&, Point<DIM>&) const;
+    double map_point(const double, const int) const;
+
     void map_point_inv(const Point<DIM>&, Point<DIM>&) const;
+    double map_point_inv(const double, const int) const;
+
     const double Gram_factor(const Point<DIM>&) const;
     const double Gram_D_factor(const unsigned int i, const Point<DIM>& x) const;
     const double Dkappa_inv(const unsigned int i, const unsigned int j,
@@ -151,7 +164,11 @@ namespace MathTL
     SimpleAffineLinearMapping(const FixedArray1D<double,DIM>& A, const Point<DIM>& b);
 
     void map_point(const Point<DIM>&, Point<DIM>&) const;
+    double map_point(const double, const int) const {return 0.;};// dummy;
+
     void map_point_inv(const Point<DIM>&, Point<DIM>&) const;
+    double map_point_inv(const double, const int) const {return 0.;};// dummy
+
     const double Gram_factor(const Point<DIM>&) const;
     const double Gram_D_factor(const unsigned int i, const Point<DIM>& x) const;
     const double Dkappa_inv(const unsigned int i, const unsigned int j,
@@ -239,8 +256,10 @@ namespace MathTL
     const Point<2>& get_b_11() const;
  
     void map_point(const Point<2>&, Point<2>&) const;
+    double map_point(const double, const int) const {return 0.;};// dummy;
 
     void map_point_inv(const Point<2>&, Point<2>&) const;
+    double map_point_inv(const double, const int) const {return 0.;};// dummy;
 
     const double Gram_factor(const Point<2>& x) const;
     const double Gram_D_factor(const unsigned int i, const Point<2>& x) const;

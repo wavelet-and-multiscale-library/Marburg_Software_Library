@@ -23,6 +23,9 @@ namespace WaveletTL
     double r = 0;
     
     if (problem->local_operator()) {
+      const int lambda_num = lambda.number();
+      const int nu_num = nu.number();
+
 
       // BE CAREFUL: KEY OF GENERATOR LEVEL IS j0-1 NOT j0 !!!!
       typedef typename Index::type_type generator_type;
@@ -32,16 +35,16 @@ namespace WaveletTL
       typedef std::list<Index> IntersectingList;
 
       // search for column 'mu'
-      typename ColumnCache::iterator col_lb(entries_cache.lower_bound(nu));
+      typename ColumnCache::iterator col_lb(entries_cache.lower_bound(nu_num));
       typename ColumnCache::iterator col_it(col_lb);
       
       if (col_lb == entries_cache.end() ||
-	  entries_cache.key_comp()(nu, col_lb->first))
+	  entries_cache.key_comp()(nu_num, col_lb->first))
 	
 	{
 	  // insert a new column
 	  typedef typename ColumnCache::value_type value_type;
-	  col_it = entries_cache.insert(col_lb, value_type(nu, Column()));
+	  col_it = entries_cache.insert(col_lb, value_type(nu_num, Column()));
 	}
 	  
       Column& col(col_it->second);
@@ -80,8 +83,8 @@ namespace WaveletTL
 	    const double entry = problem->a(*it, nu);
 	    typedef typename Block::value_type value_type_block;
 	    if (entry != 0.) {
-	      block.insert(block.end(), value_type_block(*it, entry));
-	      if (Index(*it) == lambda) {
+	      block.insert(block.end(), value_type_block((*it).number(), entry));
+	      if ((*it).number() == lambda_num) {
 		r = entry;
 	      }
 	    }
@@ -91,11 +94,13 @@ namespace WaveletTL
       else {
 	Block& block(it->second);
 
- 	typename Block::iterator block_lb(block.lower_bound(lambda));
+ 	//typename Block::iterator block_lb(block.lower_bound(lambda));
+	typename Block::iterator block_lb(block.lower_bound(lambda_num));
  	typename Block::iterator block_it(block_lb);
 	// level exists, but in row 'lambda' no entry is available ==> entry must be zero
 	if (block_lb == block.end() ||
-	    block.key_comp()(lambda, block_lb->first))
+	    block.key_comp()(lambda_num, block_lb->first))
+
 	  {
 	    r = 0;
 	  }
@@ -121,17 +126,21 @@ namespace WaveletTL
 				     const CompressionStrategy strategy) const
   {
     if (problem->local_operator()) {
+      int lambda_num = lambda.number();
+      //cout << "lambda_num= " << lambda_num << endl;
+
+
       typedef std::list<Index> IntersectingList;
-      typename ColumnCache::iterator col_lb(entries_cache.lower_bound(lambda));
+      typename ColumnCache::iterator col_lb(entries_cache.lower_bound(lambda_num));
       typename ColumnCache::iterator col_it(col_lb);
 	 
       if (col_lb == entries_cache.end() ||
-	  entries_cache.key_comp()(lambda,col_lb->first))
+	  entries_cache.key_comp()(lambda_num,col_lb->first))
 
 	{
 	  // insert a new column
 	  typedef typename ColumnCache::value_type value_type;
-	  col_it = entries_cache.insert(col_lb, value_type(lambda, Column()));
+	  col_it = entries_cache.insert(col_lb, value_type(lambda_num, Column()));
 	}
 	  
       Column& col(col_it->second);
@@ -167,8 +176,7 @@ namespace WaveletTL
 		  intersect_singular_support(problem->basis(), lambda, *it)) {
 		const double entry = problem->a(*it, lambda);
 		typedef typename Block::value_type value_type_block;
-
-		block.insert(block.end(), value_type_block(*it, entry));
+		block.insert(block.end(), value_type_block((*it).number(), entry));
 		w.add_coefficient(*it, (entry / (d1*problem->D(*it))) * factor);
 	      }
 	    }
@@ -179,7 +187,7 @@ namespace WaveletTL
 	      const double entry = problem->a(*it, lambda);
 	      typedef typename Block::value_type value_type_block;
 	      if (entry != 0.)
-		block.insert(block.end(), value_type_block(*it, entry));
+		block.insert(block.end(), value_type_block((*it).number(), entry));
 	      w.add_coefficient(*it, (entry / (d1 * problem->D(*it))) * factor);
 	    }
 	  }
@@ -193,16 +201,18 @@ namespace WaveletTL
 	if (strategy == St04a) {
 	  for (typename Block::const_iterator it(block.begin()), itend(block.end());
 	       it != itend; ++it) {
-	    if (abs(lambda.j()-j) <= J/((double) problem->space_dimension) ||
-		intersect_singular_support(problem->basis(), lambda, it->first)) {
-	      w.add_coefficient(it->first, (it->second / (d1*problem->D(it->first))) * factor);
+ 	    if (abs(lambda.j()-j) <= J/((double) problem->space_dimension) ||
+ 		intersect_singular_support(problem->basis(), lambda, *(problem->basis().get_wavelet(it->first)))) {
+	      w.add_coefficient(*(problem->basis().get_wavelet(it->first)),
+				(it->second / (d1*problem->D(*(problem->basis().get_wavelet(it->first))))) * factor);
 	    }
 	  }
 	}
 	else if (strategy == CDD1) {
 	  for (typename Block::const_iterator it(block.begin()), itend(block.end());
 	       it != itend; ++it) {
-	    w.add_coefficient(it->first, (it->second / (d1 * problem->D(it->first)))  * factor);
+	    w.add_coefficient(*(problem->basis().get_wavelet(it->first)),
+			      (it->second / (d1 * problem->D( *(problem->basis().get_wavelet(it->first)) )))  * factor);
 	  }
 	}
       }// end else

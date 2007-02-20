@@ -154,14 +154,16 @@ namespace WaveletTL
     const PROBLEM* problem;
    
     // type of one block in one column of stiffness matrix  A
-    typedef std::map<Index, double> Block;
+    //typedef std::map<Index, double> Block;
+    typedef std::map<int, double> Block;
     
     // type of one column in the entry cache of A
     // the key codes the level, that data are the entries
     typedef std::map<int, Block> Column;
     
     // type of the entry cache of A
-    typedef std::map<Index, Column> ColumnCache;
+    //typedef std::map<Index, Column> ColumnCache;
+    typedef std::map<int, Column> ColumnCache;
 
     // entries cache for A (mutable to overcome the constness of add_column())
     mutable ColumnCache entries_cache;

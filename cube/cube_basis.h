@@ -74,6 +74,11 @@ namespace WaveletTL
     //! coarsest possible level j0
     inline const int j0() const { return j0_; }
 
+    void set_jmax(const int jmax) {
+      jmax_ = jmax;
+      setup_full_collection();
+    }
+
     //! wavelet index class
     typedef CubeIndex<IBASIS,DIM,CubeBasis<IBASIS,DIM> > Index;
 
@@ -190,9 +195,26 @@ namespace WaveletTL
     void reconstruct_t(const InfiniteVector<double, Index>& c, const int j,
 		       InfiniteVector<double, Index>& v) const;
 
+    //! setup full collectin of wavelets between j0_ and jmax_ as long as a jmax_ has been specified
+    void setup_full_collection();
+
+    //! collection of all wavelets between coarsest and finest level
+    Array1D<Index> full_collection;
+
+    //! number of wavelets between coarsest and finest level
+    const int degrees_of_freedom() { return full_collection.size(); };
+
+    //! get the wavelet index corresponding to a specified number
+    const inline Index* get_wavelet (const int number) const {
+      return &full_collection[number];
+    }
+
   protected:
     //! coarsest possible level j0
     int j0_;
+
+    //! finest possible level j0
+    int jmax_;
 
     /*!
       the instances of the 1D bases (in general, we will of course

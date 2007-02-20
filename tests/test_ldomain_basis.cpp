@@ -41,6 +41,13 @@ int main()
   cout << "- first wavelet on the coarsest level: " << first_wavelet<Basis1D>(&basis, basis.j0()) << endl;
   cout << "- last wavelet on the coarsest level: " << last_wavelet<Basis1D>(&basis, basis.j0()) << endl;
 
+  basis.set_jmax(basis.j0()+1);
+  for (int i = 0; i < basis.degrees_of_freedom(); i++) {
+    const Index* ind = basis.get_wavelet(i);
+    cout << (*ind) << endl;
+  }
+
+
 #if 0
   // only for IBASIS != SplineBasis
   cout << "- checking setup of Mj0 for different levels:" << endl;

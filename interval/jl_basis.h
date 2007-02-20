@@ -15,10 +15,12 @@
 #include <algebra/infinite_vector.h>
 #include <algebra/sparse_matrix.h>
 #include <interval/jl_index.h>
+#include <utils/array1d.h>
 
 using MathTL::Vector;
 using MathTL::Matrix;
 using MathTL::InfiniteVector;
+using MathTL::Array1D;
 
 namespace WaveletTL
 {
@@ -76,6 +78,11 @@ namespace WaveletTL
     //! space dimension of the underlying domain
     static const int space_dimension = 1;
 
+    void set_jmax(const int jmax) {
+      jmax_ = jmax;
+      setup_full_collection();
+    }
+
     //! critical Sobolev regularity for the primal generators/wavelets
     static double primal_regularity() { return 2.5; }
 
@@ -123,15 +130,35 @@ namespace WaveletTL
     void reconstruct(const InfiniteVector<double, Index>& c, const int j,
 		     InfiniteVector<double, Index>& v) const;
 
+    //! get the wavelet index corresponding to a specified number
+    const inline Index* get_wavelet (const int number) const {
+      return &full_collection[number];
+    }
+
+    //! number of wavelets between coarsest and finest level
+    const int degrees_of_freedom() { return full_collection.size(); };
+
+
   protected:
     //! coarsest possible level
     int j0_;
+
+    //! finest possible level
+    int jmax_;
 
     //! boundary condition orders at 0 and 1
     int s0, s1;
 
     //! general setup routine which is shared by the different constructors
     void setup();
+
+    //! setup full collectin of wavelets between j0_ and jmax_ as long as a jmax_ has been specified
+    void setup_full_collection();
+
+    //! collection of all wavelets between coarsest and finest level
+    Array1D<Index> full_collection;
+
+
   };
 }
 

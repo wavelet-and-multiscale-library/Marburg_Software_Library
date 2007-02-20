@@ -42,6 +42,12 @@ int main()
   cout << "- leftmost wavelet on the coarsest level: " << first_wavelet(&basis, basis.j0()) << endl;
   cout << "- rightmost wavelet on the coarsest level: " << last_wavelet(&basis, basis.j0()) << endl;
 
+//   basis.set_jmax(basis.j0()+4);
+//   for (int i = 0; i < basis.Deltasize(basis.j0()+5); i++) {
+//     const Index* ind = basis.get_wavelet(i);
+//     cout << (*ind) << endl;
+//   }
+
 
   //  abort();  
 

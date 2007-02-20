@@ -138,6 +138,12 @@ namespace WaveletTL
     //! read access to the primal b.c. order at x=1
     const int get_sT1() const { return 0; }
 
+    void set_jmax(const int jmax) {
+      jmax_ = jmax;
+      setup_full_collection();
+    }
+
+
     //! extremal generator indices
     inline const int DeltaLmin() const { return 1-d-ell1<d>()+s0; }
     inline const int DeltaLmax() const { return -ell1<d>(); }
@@ -336,15 +342,33 @@ namespace WaveletTL
 			InfiniteVector<double, Vector<double>::size_type>& v) const;
     void Mj1T_t_get_row(const int j, const Vector<double>::size_type row,
 			InfiniteVector<double, Vector<double>::size_type>& v) const;
+
+    //! get the wavelet index corresponding to a specified number
+    const inline Index* get_wavelet (const int number) const {
+      return &full_collection[number];
+    }
+
   protected:
     //! coarsest possible level
     int j0_;
+
+    //! finest possible level
+    int jmax_;
 
     //! boundary condition orders at 0 and 1
     int s0, s1;
 
     //! general setup routine which is shared by the different constructors
     void setup();
+
+    //! setup full collectin of wavelets between j0_ and jmax_ as long as a jmax_ has been specified
+    void setup_full_collection();
+
+    //! collection of all wavelets between coarsest and finest level
+    Array1D<Index> full_collection;
+
+    //! number of wavelets between coarsest and finest level
+    const int degrees_of_freedom() { return full_collection.size(); };
 
     //! one instance of a CDF basis (for faster access to the primal and dual masks)
     CDFBasis<d,dT> cdf;

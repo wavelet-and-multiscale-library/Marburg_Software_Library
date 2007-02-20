@@ -54,6 +54,14 @@ int main()
   Basis basis(bc);
 #endif
 
+//   basis.set_jmax(basis.j0()+5);
+//   for (int i = 0; i < basis.degrees_of_freedom(); i++) {
+//     const Index* ind = basis.get_wavelet(i);
+//     cout << (*ind) << endl;
+//   }
+
+
+
   cout << "- j0=" << basis.j0() << endl;
   cout << "- the default wavelet index: " << Index() << endl;
   cout << "- the default wavelet index w.r.t. the cube basis: " << Index(&basis) << endl;

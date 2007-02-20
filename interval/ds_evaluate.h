@@ -3,7 +3,7 @@
 // +--------------------------------------------------------------------+
 // | This file is part of WaveletTL - the Wavelet Template Library      |
 // |                                                                    |
-// | Copyright (c) 2002-2007                                            |
+// | Copyright (c) 2002-2006                                            |
 // | Thorsten Raasch, Manuel Werner                                     |
 // +--------------------------------------------------------------------+
 
@@ -24,32 +24,22 @@ namespace WaveletTL
   /*!
     Evaluate a single primal/dual generator or wavelet \psi_\lambda
     on a dyadic subgrid of [0,1].
-
-    We redirect this to a member function of basis.
   */
   template <int d, int dT, DSBiorthogonalizationMethod BIO>
   SampledMapping<1> evaluate(const DSBasis<d,dT,BIO>& basis,
 			     const typename DSBasis<d,dT,BIO>::Index& lambda,
 			     const bool primal,
-			     const int resolution)
-  {
-    return basis.evaluate(lambda, primal, resolution);
-  }
+			     const int resolution);
   
   /*!
     Evaluate an arbitrary linear combination of primal or dual
     wavelets on a dyadic subgrid of [0,1].
-
-    We redirect this to a member function of basis.
   */
   template <int d, int dT, DSBiorthogonalizationMethod BIO>
   SampledMapping<1> evaluate(const DSBasis<d,dT,BIO>& basis,
 			     const InfiniteVector<double, typename DSBasis<d,dT,BIO>::Index>& coeffs,
 			     const bool primal,
-			     const int resolution)
-  {
-    return basis.evaluate(coeffs, primal, resolution);
-  }
+			     const int resolution);
 
   /*!
     point evaluation of (derivatives) of a single primal DKU generator

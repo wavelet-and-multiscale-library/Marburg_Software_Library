@@ -117,7 +117,7 @@ namespace WaveletTL
   {
 //     if (num_ > -1)
 //       num_++;
-
+    
     switch (e_) {
     case 0:
       if (k_ == basis_->DeltaRmax(j_)) {

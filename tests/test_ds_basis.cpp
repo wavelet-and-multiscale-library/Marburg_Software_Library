@@ -34,6 +34,12 @@ int main()
 //   Basis basis(0, 0, 1, 1); // Z={}
   Basis basis(0, 0, 0, 0); // should work, DKU basis without b.c.'s at all
 
+//   basis.set_jmax(5);
+//   for (int i = 0; i < basis.Deltasize(6); i++) {
+//     const Index* ind = basis.get_wavelet(i);
+//     cout << (*ind) << endl;
+//   }
+
 //   Basis basis(1, 0, 0, 1, none); // Z={0,1}
   
   cout << "- d=" << d << ", dT=" << dT << endl;

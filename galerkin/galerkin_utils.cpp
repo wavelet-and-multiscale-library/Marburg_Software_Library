@@ -1,6 +1,7 @@
 // implementation for galerkin_utils.h
 
 namespace WaveletTL
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
 {
   template <class PROBLEM>
   void setup_stiffness_matrix(const PROBLEM& P,

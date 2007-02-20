@@ -161,7 +161,31 @@ namespace WaveletTL
     (const InfiniteVector<double, typename LDomainBasis<IntervalBasis>::Index>& coeffs,
      const int resolution) const;
 
+    void set_jmax(const int jmax) {
+      jmax_ = jmax;
+      setup_full_collection();
+    }
+
+    //! get the wavelet index corresponding to a specified number
+    const inline Index* get_wavelet (const int number) const {
+      return &full_collection[number];
+    }
+
+    //! number of wavelets between coarsest and finest level
+    const int degrees_of_freedom() { return full_collection.size(); };
+
+
   protected:
+
+    //! finest possible level
+    int jmax_;
+
+    //! setup full collectin of wavelets between j0_ and jmax_ as long as a jmax_ has been specified
+    void setup_full_collection();
+
+    //! collection of all wavelets between coarsest and finest level
+    Array1D<Index> full_collection;
+
     //! the interval 1d wavelet basis
     IntervalBasis basis1d_;
 
@@ -359,7 +383,32 @@ namespace WaveletTL
      Array1D<double>& derxvalues,
      Array1D<double>& deryvalues) const;
 
+
+    void set_jmax(const int jmax) {
+      jmax_ = jmax;
+      setup_full_collection();
+    }
+
+    //! get the wavelet index corresponding to a specified number
+    const inline Index* get_wavelet (const int number) const {
+      return &full_collection[number];
+    }
+
+    //! number of wavelets between coarsest and finest level
+    const int degrees_of_freedom() { return full_collection.size(); };
+
+
   protected:
+    //! finest possible level
+    int jmax_;
+
+    //! setup full collectin of wavelets between j0_ and jmax_ as long as a jmax_ has been specified
+    void setup_full_collection();
+
+    //! collection of all wavelets between coarsest and finest level
+    Array1D<Index> full_collection;
+
+
     //! the interval 1d wavelet basis
     IntervalBasis basis1d_;
 

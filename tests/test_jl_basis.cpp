@@ -26,6 +26,13 @@ int main()
   cout << "- leftmost wavelet on the level " << testlevel << ": " << first_wavelet(testlevel) << endl;
   cout << "- rightmost wavelet on the level " << testlevel << ": " << last_wavelet(testlevel) << endl;
 
+  basis.set_jmax(basis.j0()+5);
+  for (int i = 0; i < basis.degrees_of_freedom(); i++) {
+    const Index* ind = basis.get_wavelet(i);
+    cout << (*ind) << endl;
+  }
+
+
 
 #if 0
   for (int level = basis.j0(); level <= basis.j0()+1; level++) {

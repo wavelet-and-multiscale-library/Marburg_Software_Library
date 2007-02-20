@@ -149,6 +149,11 @@ namespace WaveletTL
     //! read access to the primal b.c. order at x=1
     const int get_sT1() const { return sT1; }
 
+    void set_jmax(const int jmax) {
+      jmax_ = jmax;
+      setup_full_collection();
+    }
+
     /*!
       boundary indices in \Delta_j^X and \tilde\Delta_j^X (4.10),(4.14),(4.26)
     */
@@ -367,9 +372,18 @@ namespace WaveletTL
       return evaluate(coeffs, true, resolution);
     }
 
+    //! get the wavelet index corresponding to a specified number
+    const inline Index* get_wavelet (const int number) const {
+      return &full_collection[number];
+    }
+
+
   protected:
     //! coarsest possible level
     int j0_;
+
+    //! finest possible level
+    int jmax_;
 
     //! boundary condition orders at 0 and 1
     int s0, s1, sT0, sT1;
@@ -397,6 +411,14 @@ namespace WaveletTL
 
     //! general setup routine which is shared by the different constructors
     void setup();
+
+    //! setup full collectin of wavelets between j0_ and jmax_ as long as a jmax_ has been specified
+    void setup_full_collection();
+
+    //! collection of all wavelets between coarsest and finest level
+    Array1D<Index> full_collection;
+
+    const int degrees_of_freedom() { return full_collection.size(); };
 
     //! compute Gramian of left and right unbiorthogonalized primal boundary functions
     void setup_GammaLR();

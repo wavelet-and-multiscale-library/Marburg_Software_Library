@@ -922,6 +922,30 @@ namespace WaveletTL
     Mj1T_t = transpose(Mj1T);
   }
 
+  template <int d, int dT>
+  void
+  PBasis<d,dT>::setup_full_collection()
+  {
+    if (jmax_ == -1 || jmax_ < j0_) {
+      cout << "PBasis<d,dT>::setup_full_collection(): specify a mximal level of resolution first!" << endl;
+      abort();
+    }   
+
+    int degrees_of_freedom = Deltasize(jmax_+1);
+    cout << "total degrees of freedom between j0_ and jmax_ is " << degrees_of_freedom << endl;
+
+    cout << "setting up collection of wavelet indices..." << endl;
+    full_collection.resize(degrees_of_freedom);
+    int k = 0;
+    for (Index ind = first_generator(j0_); ind <= last_wavelet(jmax_); ++ind) {
+      full_collection[k] = ind;
+      k++;
+    }
+    cout << "done setting up collection of wavelet indices..." << endl;
+
+  }
+
+
 
   template <int d, int dT>
   const double

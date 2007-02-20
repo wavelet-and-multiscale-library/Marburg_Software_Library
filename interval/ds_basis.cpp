@@ -424,7 +424,32 @@ namespace WaveletTL
     Mj1T_t = transpose(Mj1T);
 
 //     cout << "Mj1=" << endl << Mj1;
+
   }
+
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  void
+  DSBasis<d,dT,BIO>::setup_full_collection()
+  {
+    if (jmax_ == -1 || jmax_ < j0_) {
+      cout << "DSBasis<d,dT,BIO>::setup_full_collection(): specify a mximal level of resolution first!" << endl;
+      abort();
+    }   
+
+    int degrees_of_freedom = Deltasize(jmax_+1);
+    cout << "total degrees of freedom between j0_ and jmax_ is " << degrees_of_freedom << endl;
+
+    cout << "setting up collection of wavelet indices..." << endl;
+    full_collection.resize(degrees_of_freedom);
+    int k = 0;
+    for (Index ind = first_generator(j0_); ind <= last_wavelet(jmax_); ++ind) {
+      full_collection[k] = ind;
+      k++;
+    }
+    cout << "done setting up collection of wavelet indices..." << endl;
+
+  }
+
 
   template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
@@ -1727,8 +1752,8 @@ namespace WaveletTL
   template <int d, int dT, DSBiorthogonalizationMethod BIO>
   void
   DSBasis<d,dT,BIO>::decompose(const InfiniteVector<double, Index>& c,
-			    const int jmin,
-			    InfiniteVector<double, Index>& v) const {
+			       const int jmin,
+			       InfiniteVector<double, Index>& v) const {
     v.clear();
     InfiniteVector<double, Index> help;
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());

@@ -122,7 +122,7 @@ namespace FrameTL
     /*!
       access to collection of wavelet frame indices
      */
-    const Array1D<Array1D<Index> >* indices() const { return &indices_levelwise; }
+    const Array1D<Array1D<Index> >* get_full_collection_levelwise() const { return &full_collection_levelwise; }
 
     /*!
       critical Sobolev regularity for the primal generators/wavelets
@@ -150,12 +150,20 @@ namespace FrameTL
       
     //! index of last wavelet on level j >= j0
     Index last_wavelet(const int j) const;
+    
+    const inline Index* get_wavelet (const int number) const {
+      return &full_collection[number];
+    }
 
     //! set finest possible level
     void set_jmax(const int jmax) { jmax_ = jmax; }
 
     //all supports on cubes of frame elements
     Array1D<typename WaveletTL::CubeBasis<IBASIS,DIM_d>::Support> all_supports;
+
+
+    //! number of wavelets between coarsest and finest level
+    const int degrees_of_freedom() { return full_collection.size(); };
 
 
   protected:
@@ -171,22 +179,18 @@ namespace FrameTL
     //! coarsest possible level j0
     int j0_;
 
-    //Array1D<Index> indices_;
-    Array1D<Array1D<Index> > indices_levelwise;
+    //! Array1D<Index> indices_;
+    Array1D<Array1D<Index> > full_collection_levelwise;
 
+    //! collection of all wavelets between coarsest and finest level
+    Array1D<Index> full_collection;
 
   private:
-
     /*!
       collection of mapped cube bases together forming
       the aggregated frame
      */
     Array1D<MappedCubeBasis<IBASIS, DIM_d, DIM_m>* > lifted_bases;
-
-    /*!
-      the instances of the mapped cube bases 
-    */
-    list<MappedCubeBasis<IBASIS, DIM_d, DIM_m>*> bases_infact;
 
     //! finest possible level
     int jmax_;

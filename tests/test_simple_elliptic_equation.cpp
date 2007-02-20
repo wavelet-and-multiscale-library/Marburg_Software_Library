@@ -133,6 +133,11 @@ int main()
   //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT, jmax);
   AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, jmax);
 
+//   for (int i = 0; i < 480; i++) {
+//     const Index* ind = frame.get_wavelet(i);
+//     cout << (*ind) << endl;
+//   }
+
   Vector<double> value(1);
   value[0] = 1;
   

@@ -852,11 +852,11 @@ namespace FrameTL
 
     std::list<typename Frame::Index> intersect_diff;
 
-    const Array1D<Array1D<Index> >* indices_levelwise = frame.indices();
+    const Array1D<Array1D<Index> >* full_collection_levelwise = frame.get_full_collection_levelwise();
 
     if ( generators ) {
-      for (unsigned int i = 0; i < (*indices_levelwise)[0].size(); i++) {
-	Index ind = (*indices_levelwise)[0][i];
+      for (unsigned int i = 0; i < (*full_collection_levelwise)[0].size(); i++) {
+	Index ind = (*full_collection_levelwise)[0][i];
 	if (frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(), ind.p()) && 
 	    intersect_supports(frame, lambda, ind, supp_lambda) ){
 	  intersect_diff.push_back(ind);
@@ -864,8 +864,8 @@ namespace FrameTL
       }
     }
     else {
-      for (unsigned int i = 0; i < (*indices_levelwise)[j-frame.j0()+1].size(); i++) {
-	Index ind = (*indices_levelwise)[j-frame.j0()+1][i];
+      for (unsigned int i = 0; i < (*full_collection_levelwise)[j-frame.j0()+1].size(); i++) {
+	Index ind = (*full_collection_levelwise)[j-frame.j0()+1][i];
 	if (frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(), ind.p()) && 
 	    intersect_supports(frame,lambda, ind, supp_lambda) ){
 	  intersect_diff.push_back(ind);

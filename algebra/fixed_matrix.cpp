@@ -14,6 +14,13 @@ namespace MathTL
 
   template <class C, unsigned int ROW_DIM, unsigned int COL_DIM>
   inline
+  FixedMatrix<C, ROW_DIM, COL_DIM>::FixedMatrix(const int value)
+    : entries_(value)
+  {
+  }
+
+  template <class C, unsigned int ROW_DIM, unsigned int COL_DIM>
+  inline
   FixedMatrix<C, ROW_DIM, COL_DIM>::FixedMatrix(const FixedMatrix<C, ROW_DIM, COL_DIM>& M)
     : entries_(M.entries_)
   {
@@ -101,6 +108,8 @@ namespace MathTL
   inline
   const C FixedMatrix<C, ROW_DIM, COL_DIM>::operator () (const size_type row, const size_type column) const
   {
+    assert(row < ROW_DIM);
+    assert(column < COL_DIM);
     return entries_[row+column*ROW_DIM];
   }
 
@@ -115,6 +124,8 @@ namespace MathTL
   inline
   C& FixedMatrix<C, ROW_DIM, COL_DIM>::operator () (const size_type row, const size_type column)
   {
+    assert(row < ROW_DIM);
+    assert(column < COL_DIM);
     return entries_[row+column*ROW_DIM];
   }
 

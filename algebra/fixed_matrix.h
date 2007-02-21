@@ -41,6 +41,11 @@ namespace MathTL
     FixedMatrix(const C value = 0);
 
     /*!
+      just to satisfy the compiler at constructs like FixedMatrix(0)
+     */
+    FixedMatrix(const int value);
+
+    /*!
       copy constructor
     */
     FixedMatrix(const FixedMatrix<C, ROW_DIM, COL_DIM>& M);

@@ -219,6 +219,8 @@ namespace MathTL
   inline
   const C Matrix<C>::operator () (const size_type row, const size_type column) const
   {
+    assert(row < rowdim_);
+    assert(column < coldim_);
     return entries_[row+column*rowdim_];
   }
 
@@ -249,6 +251,8 @@ namespace MathTL
   inline
   C& Matrix<C>::operator () (const size_type row, const size_type column)
   {
+    assert(row < rowdim_);
+    assert(column < coldim_);
     return entries_[row+column*rowdim_];
   }
 

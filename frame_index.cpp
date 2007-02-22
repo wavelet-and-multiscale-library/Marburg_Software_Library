@@ -35,6 +35,13 @@
    }
 
    template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+   FrameIndex<IBASIS, DIM_d, DIM_m>::FrameIndex(const FrameIndex* ind)
+     : frame_(ind->frame()), j_(ind->j()), e_(ind->e()), p_(ind->p()), k_(ind->k()), num_(ind->number())
+   {
+   }
+
+
+   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
    FrameIndex<IBASIS, DIM_d, DIM_m>::FrameIndex(const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame,
 						const CubeIndex<IBASIS,DIM_d>& c,
 						const int p)

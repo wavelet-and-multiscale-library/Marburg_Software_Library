@@ -76,6 +76,12 @@ namespace FrameTL
     FrameIndex(const FrameIndex&);
 
     /*!
+      clone index from a given const pointer to another FrameIndex
+     */
+    FrameIndex(const FrameIndex*);
+
+
+    /*!
       constructor
     */
     FrameIndex(const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame,

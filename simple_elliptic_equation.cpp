@@ -7,6 +7,8 @@
 
 using WaveletTL::CubeBasis;
 
+#define _FRAMETL_ADAPTIVE_COMPUTATION 0
+
 namespace FrameTL
 {
 
@@ -61,7 +63,7 @@ namespace FrameTL
   {
     
     compute_diagonal();
-    compute_rhs();
+    //compute_rhs();
   }
 
   template <class IBASIS, unsigned int DIM>
@@ -69,6 +71,7 @@ namespace FrameTL
   SimpleEllipticEquation<IBASIS,DIM>::D(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda) const
   {
     //return 1 << lambda.j();
+    
     return stiff_diagonal.get_coefficient(lambda);
   }
 
@@ -217,15 +220,10 @@ namespace FrameTL
 			    gauss_points_la, values_lambda);
 	
 	const Array1D<double> gouss_points_mu;
-	Point<DIM> x; // = 0;
-	Point<DIM> x_patch;
-	Point<DIM> y;
+
 	// setup mapped gauss points
 	for (unsigned int i = 0; i < gauss_points_la.size(); i++) {
-	  x[dir] = gauss_points_la[i];
-	  chart_la->map_point(x,x_patch);
-	  chart_mu->map_point_inv(x_patch,y);
-	  gauss_points_mu[i] = y[dir];
+	  gauss_points_mu[i] = chart_mu->map_point_inv(chart_la->map_point(gauss_points_la[i], dir), dir);
 	}
 
 	//	cout << "deriv_mu = " << mu.derivative() << endl;
@@ -254,7 +252,8 @@ namespace FrameTL
 					const typename AggregatedFrame<IBASIS,DIM>::Index& nu) const
   {
     double r = 0.0;
-    
+
+
     Index lambda = la;
     Index mu = nu;
     Index tmp_ind;
@@ -284,11 +283,13 @@ namespace FrameTL
     const typename CUBEBASIS::Support* supp_mu = &supp_mu_;
 
     const int N_Gauss = 3;
-
-    bool b = intersect_supports<IBASIS,DIM,DIM>(*frame_, lambda, mu, supp_lambda, supp_mu);
-    if ( !b )
-      return 0.0;
-              
+    
+    //#if _FRAMETL_ADAPTIVE_COMPUTATION == 1
+//     bool b = intersect_supports_simple<IBASIS,DIM,DIM>(*frame_, lambda, mu, supp_lambda, supp_mu);
+//     return 0.;
+//     if ( !b )
+//       return 0.0;
+    //#endif
     typedef typename IBASIS::Index Index_1D;
     
     const Chart<DIM>* chart_la = frame_->atlas()->charts()[lambda.p()];
@@ -416,7 +417,7 @@ namespace FrameTL
   SimpleEllipticEquation<IBASIS,DIM>::s_star() const
   {
     // notation from [St04a]
-    const int t = operator_order();
+    const double t = operator_order();
     const int n = DIM;
     const int dT = frame_->bases()[0]->primal_vanishing_moments(); // we assume to have the same 'kind'
                                                                    // of wavelets on each patch, so use

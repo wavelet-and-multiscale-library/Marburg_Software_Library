@@ -3,7 +3,9 @@
 #include <time.h> 
 #include <interval/ds_basis.h>
 #include <interval/p_basis.h>
-#include <elliptic_equation.h>
+#include <interval/spline_basis.h>
+//#include <elliptic_equation.h>
+#include <simple_elliptic_equation.h>
 #include <algebra/sparse_matrix.h>
 #include <algebra/infinite_vector.h>
 #include <numerics/iteratsolv.h>
@@ -25,7 +27,8 @@ using std::cout;
 using std::endl;
 
 using FrameTL::FrameIndex;
-using FrameTL::EllipticEquation;
+//using FrameTL::EllipticEquation;
+using FrameTL::SimpleEllipticEquation;
 using FrameTL::EvaluateFrame;
 using FrameTL::AggregatedFrame;
 using MathTL::EllipticBVP;
@@ -45,17 +48,27 @@ using namespace MathTL;
 using namespace WaveletTL;
 
 
+#define _FRAMETL_ADAPTIVE_COMPUTATION  1
+
 int main()
 {
   
   cout << "testing steepest descent algorithm in 2D..." << endl;
 
   const int DIM = 2;
+  const int jmax = 4;
+
+  const int d  = 3;
+  const int dT = 3;
 
   //typedef DSBasis<3,5> Basis1D;
-  typedef PBasis<3,3> Basis1D;
+  typedef PBasis<d,dT> Basis1D;
+  
+ 
+  //typedef SplineBasis<d,dT,P_construction> Basis1D;
+
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
-  typedef CubeBasis<Basis1D> Basis;
+  //typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
 
   EvaluateFrame<Basis1D,2,2> evalObj;
@@ -141,8 +154,8 @@ int main()
   cout << Lshaped << endl;
 
   //finally a frame can be constructed
-  //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT, 5);
-  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, 5);
+  //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT, jmax);
+  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, jmax);
 
   Vector<double> value(1);
   value[0] = 1;
@@ -158,7 +171,7 @@ int main()
   PoissonBVP<DIM> poisson(&singRhs);
   //PoissonBVP<DIM> poisson(&const_fun);
 
-  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
+  SimpleEllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
 
   //  L-shaped: (-1,1)x(-1,0) \cup (-1,0)x(-1,1), DSBasis
@@ -176,7 +189,7 @@ int main()
 //   discrete_poisson.set_Ainv(1.0/0.146);
 
   // (d,dT) = (3,5) all boundary conditions of order 1
-  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 8.0022, 1.0/0.146);
+  CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 8.0022, 1.0/0.146);
   discrete_poisson.set_norm_A(8.0022);
   // optimistic guess:
   discrete_poisson.set_Ainv(1.0/0.146);
@@ -255,7 +268,7 @@ int main()
 
   //discrete_poisson.rescale(u_epsilon,-1);
   u_epsilon.scale(&problem,-1);
-
+#if 1
   Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u_epsilon, true, 6);//expand in primal basis
   
   cout << "done plotting approximate solution" << endl;
@@ -271,7 +284,7 @@ int main()
   std::ofstream ofs6("error_steep_2D_out.m");
   matlab_output(ofs6,Error);
   ofs6.close();
-
+#endif
   //  problem.add_level(frame.first_generator(3),u_epsilon,3,1.);
 
   return 0;

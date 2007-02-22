@@ -1,5 +1,7 @@
 // implementation for aggregated_frame.h
 
+#include <frame_support.h>
+
 namespace FrameTL
 {
   template<class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
@@ -117,6 +119,13 @@ namespace FrameTL
       k++;
     }
     cout << "done setting up full collection of wavelet indices..." << endl;
+
+    cout << "precomputing all support cubes on patches..." << endl;
+    all_patch_supports.resize(degrees_of_freedom);
+    precompute_supports_simple<IBASIS,DIM_d,DIM_m>(this, all_patch_supports);
+    cout << "done precomputing all support cubes on patches..." << endl;
+
+
   }
 
   template<class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
@@ -234,6 +243,11 @@ namespace FrameTL
       k++;
     }
     cout << "done setting up collection of wavelet indices..." << endl;
+
+    cout << "precomputing all support cubes on patches..." << endl;
+    all_patch_supports.resize(degrees_of_freedom);
+    precompute_supports_simple<IBASIS,DIM_d,DIM_m>(this, all_patch_supports);
+    cout << "done precomputing all support cubes on patches..." << endl;
   }
 
 

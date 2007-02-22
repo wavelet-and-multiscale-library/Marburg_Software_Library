@@ -91,6 +91,19 @@ namespace FrameTL
       return lifted_bases;
     }
 
+//     /*!
+//       geometric type of the support sets.
+//       support is only implicitly given by the
+//       support of the corresponding wavelet on the
+//       hypercube and the respective patch chart.
+//     */
+//     typedef struct {
+//       int j;
+//       int a[DIM_d];
+//       int b[DIM_d];
+//       const Chart<DIM_d,DIM_m>* ch;
+//     } Support;
+
     /*!
       geometric type of the support sets.
       support is only implicitly given by the
@@ -98,11 +111,10 @@ namespace FrameTL
       hypercube and the respective patch chart.
     */
     typedef struct {
-      int j;
-      int a[DIM_d];
-      int b[DIM_d];
-      const Chart<DIM_d,DIM_m>* ch;
+      Point<DIM_d> a;
+      Point<DIM_d> b;
     } Support;
+
 
     /*!
       coarsest level
@@ -161,9 +173,12 @@ namespace FrameTL
     //all supports on cubes of frame elements
     Array1D<typename WaveletTL::CubeBasis<IBASIS,DIM_d>::Support> all_supports;
 
+    //all supports on cubes of frame elements
+    Array1D<Support> all_patch_supports;
+
 
     //! number of wavelets between coarsest and finest level
-    const int degrees_of_freedom() { return full_collection.size(); };
+    const int degrees_of_freedom() const { return full_collection.size(); };
 
 
   protected:

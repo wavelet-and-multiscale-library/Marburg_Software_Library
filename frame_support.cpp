@@ -336,6 +336,67 @@ namespace FrameTL
       }
     else return false;
   }
+
+
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  void
+  precompute_supports_simple(const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame,
+			     Array1D<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Support>& all_patch_supports)
+  {
+    typedef typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index Index;
+    for (int i = 0; i < frame->degrees_of_freedom(); i++) {
+      const Index* ind = frame->get_wavelet(i);
+      const typename CubeBasis<IBASIS,DIM_d>::Support* supp_ind = &((frame->all_supports)[ind->number()]);
+      const double dx1 = 1.0 / (1 << supp_ind->j);
+      const Chart<DIM_d,DIM_m>* chart_la = frame->atlas()->charts()[ind->p()];
+
+      Point<DIM_m> a, b;
+      if (DIM_m == 2) {
+	chart_la->map_point(Point<DIM_d>(supp_ind->a[0]*dx1,supp_ind->a[1]*dx1), a);
+	chart_la->map_point(Point<DIM_d>(supp_ind->b[0]*dx1,supp_ind->b[1]*dx1), b);
+      }
+      else if (DIM_m == 1) {
+	chart_la->map_point(Point<DIM_d>(supp_ind->a[0]*dx1), a);
+	chart_la->map_point(Point<DIM_d>(supp_ind->b[0]*dx1), b);
+      }
+      all_patch_supports[i].a = a;
+      all_patch_supports[i].b = b;
+    }
+  }
+
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  bool
+  intersect_supports_simple(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+			    const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+			    const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu,
+			    const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda,
+			    const typename CubeBasis<IBASIS,DIM_d>::Support* supp_mu2)
+  {
+    typedef typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Support SuppType;
+    const SuppType* supp_la = &(frame.all_patch_supports[lambda.number()]);
+    const SuppType* supp_mu = &(frame.all_patch_supports[mu.number()]);
+
+    if (DIM_m == 2)
+      return (supp_la->a[0] < supp_mu->b[0] && supp_la->b[0] > supp_mu->a[0]) && 
+      (supp_la->a[1] < supp_mu->b[1] && supp_la->b[1] > supp_mu->a[1]);
+    else if (DIM_m == 1)
+      return (supp_la->a[0] < supp_mu->b[0] && supp_la->b[0] > supp_mu->a[0]);
+
+//       const double dx1 = 1.0 / (1 << supp_lambda->j);
+//       const double dx2 = 1.0 / (1 << supp_mu->j);
+//       const Chart<DIM_d,DIM_m>* chart_la = frame.atlas()->charts()[lambda.p()];
+//       const Chart<DIM_d,DIM_m>* chart_mu = frame.atlas()->charts()[mu.p()];
+      
+//       Point<DIM_m> a_la, b_la, a_mu, b_mu;
+      
+//       chart_la->map_point(Point<DIM_d>(supp_lambda->a[0]*dx1,supp_lambda->a[1]*dx1), a_la);
+//       chart_la->map_point(Point<DIM_d>(supp_lambda->b[0]*dx1,supp_lambda->b[1]*dx1), b_la);
+      
+//       chart_mu->map_point(Point<DIM_d>(supp_mu->a[0]*dx2,supp_mu->a[1]*dx2), a_mu);
+//       chart_mu->map_point(Point<DIM_d>(supp_mu->b[0]*dx2,supp_mu->b[1]*dx2), b_mu);
+      
+//       return (a_la[0] < b_mu[0] && b_la[0] > a_mu[0]) && (a_la[1] < b_mu[1] && b_la[1] > a_mu[1]);
+  }
  
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   inline
@@ -833,46 +894,43 @@ namespace FrameTL
 			      const int j, const bool generators,
 			      std::list<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& intersecting)
   {
-
-    intersecting.erase(intersecting.begin(),intersecting.end());
+    //intersecting.erase(intersecting.begin(),intersecting.end());
 
     typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> Frame;
     typedef typename Frame::Index Index;
 
     typedef typename CubeBasis<IBASIS,DIM_d>::Index CubeIndex;
-    
-    //cout << "LEVEL = " << frame.all_supports[lambda.number()].j << endl;
-
 
     const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda = &((frame.all_supports)[lambda.number()]);
-    //cout << lambda.number() << endl;
-        
-    //    cout << supp_lambda->a[0] << " " << supp_lambda->b[0] << " " << supp_lambda->j << endl;
-#if 1
 
+#if 1
     std::list<typename Frame::Index> intersect_diff;
 
     const Array1D<Array1D<Index> >* full_collection_levelwise = frame.get_full_collection_levelwise();
 
     if ( generators ) {
       for (unsigned int i = 0; i < (*full_collection_levelwise)[0].size(); i++) {
-	Index ind = (*full_collection_levelwise)[0][i];
-	if (frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(), ind.p()) && 
-	    intersect_supports(frame, lambda, ind, supp_lambda) ){
-	  intersect_diff.push_back(ind);
+	const Index* ind = &((*full_collection_levelwise)[0][i]);
+	const typename CubeBasis<IBASIS,DIM_d>::Support* supp_ind = &((frame.all_supports)[ind->number()]);
+	if (frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(), ind->p()) && 
+	    intersect_supports_simple(frame, lambda, *ind, supp_lambda, supp_ind) ){
+	  //intersect_diff.push_back(*ind);
+	  intersecting.push_back(*ind);
 	}
       }
     }
     else {
       for (unsigned int i = 0; i < (*full_collection_levelwise)[j-frame.j0()+1].size(); i++) {
-	Index ind = (*full_collection_levelwise)[j-frame.j0()+1][i];
-	if (frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(), ind.p()) && 
-	    intersect_supports(frame,lambda, ind, supp_lambda) ){
-	  intersect_diff.push_back(ind);
+	const Index* ind = &((*full_collection_levelwise)[j-frame.j0()+1][i]);
+	const typename CubeBasis<IBASIS,DIM_d>::Support* supp_ind = &((frame.all_supports)[ind->number()]);
+	if (frame.atlas()->get_adjacency_matrix().get_entry(lambda.p(), ind->p()) && 
+	    intersect_supports_simple(frame, lambda, *ind, supp_lambda, supp_ind) ){
+	  //intersect_diff.push_back(*ind);
+	  intersecting.push_back(*ind);
 	}
       }
     }
-    intersecting.merge(intersect_diff);
+    //intersecting.merge(intersect_diff);
 #endif
 
   }

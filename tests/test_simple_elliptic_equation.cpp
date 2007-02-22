@@ -4,6 +4,7 @@
 #include <time.h> 
 #include <interval/ds_basis.h>
 #include <interval/p_basis.h>
+#include <interval/spline_basis.h>
 #include <numerics/corner_singularity.h>
 #include <simple_elliptic_equation.h>
 #include <algebra/sparse_matrix.h>
@@ -38,7 +39,7 @@ using namespace FrameTL;
 using namespace MathTL;
 using namespace WaveletTL;
 
-//#define TWO_DIMENSIONS
+#define _FRAMETL_ADAPTIVE_COMPUTATION  0
 
 int main()
 {
@@ -46,10 +47,16 @@ int main()
   cout << "Testing class EllipticEquation..." << endl;
   
   const int DIM = 2;
-  const int jmax = 3;
+  const int jmax = 4;
+
+  const int d  = 3;
+  const int dT = 3;
 
   //typedef DSBasis<2,2> Basis1D;
-  typedef PBasis<3,3> Basis1D;
+
+  typedef PBasis<d,dT> Basis1D;
+  //typedef SplineBasis<d,dT,P_construction> Basis1D;
+
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
   typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
@@ -159,7 +166,7 @@ int main()
 
   double tmp = 0.0;
   int c = 0;
-  int d = 0;
+  //int d = 0;
   
   cout.precision(12);
   
@@ -235,12 +242,13 @@ int main()
   cout << rh << endl;
   cout << "setting up full stiffness matrix..." << endl;
   SparseMatrix<double> stiff;
-
+  
   clock_t tstart, tend;
   double time;
   tstart = clock();
 
   WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
+  //WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
   //WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
 
   tend = clock();
@@ -302,11 +310,11 @@ int main()
   u.scale(&discrete_poisson,-1);
   
   
-  Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u, true, 6);//expand in primal basis
+//   Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u, true, 6);//expand in primal basis
   
-  std::ofstream ofs5("approx_solution_out.m");
-  matlab_output(ofs5,U);
-  ofs5.close();
+//   std::ofstream ofs5("approx_solution_out.m");
+//   matlab_output(ofs5,U);
+//   ofs5.close();
   
 //   cout << "computing L_2 error..." << endl;
 //   double L2err = evalObj.L_2_error(frame, u, sing2D, 5, 0.0, 1.0);

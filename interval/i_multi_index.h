@@ -16,6 +16,10 @@ using std::endl;
 
 namespace WaveletTL
 {
+  // provide some constants for better readability
+  #define E_GENERATOR 0  // index type generator
+  #define E_WAVELET 1  // index type wavelet
+
   /*!
     A (template) multi-wavelet index class for multiwavelet basis on [0,1]
     modelling a multiindex of the form lambda=(j,e,c,k).
@@ -33,11 +37,11 @@ namespace WaveletTL
     //! type index type
     typedef int type_type;
 
-    //! component type
-    typedef int component_type;
-
     //! translation index type
     typedef int translation_type;
+
+    //! component type
+    typedef unsigned int component_type;
 
 
     /* constructors ********************************************************/
@@ -52,7 +56,7 @@ namespace WaveletTL
     IntervalMultiIndex(const IntervalMultiIndex<IBASIS>& lambda);
 
     //! constructor with specified parameters
-    IntervalMultiIndex(const int j, const type_type e, const component_type c, const translation_type k, const IBASIS* basis);
+    IntervalMultiIndex(const int j, const type_type e, const translation_type k, const component_type c, const IBASIS* basis);
 
 
     /* member functions ****************************************************/
@@ -69,6 +73,9 @@ namespace WaveletTL
     //! preincrement
     IntervalMultiIndex<IBASIS>& operator ++ ();
     
+    //! predecrement
+    IntervalMultiIndex<IBASIS>& operator -- ();
+    
     //! lexicographic order <
     bool operator < (const IntervalMultiIndex<IBASIS>& lambda) const;
 
@@ -82,11 +89,11 @@ namespace WaveletTL
     //! type e
     inline const type_type& e() const { return e_; }
     
-    //! component type c
-    inline const component_type& c() const { return c_; }
-
     //! translation index k
     inline const translation_type& k() const { return k_; }
+
+    //! component index c
+    inline const component_type& c() const { return c_; }
 
     //! underlying basis
     inline const IBASIS* basis() const { return basis_; }
@@ -96,8 +103,8 @@ namespace WaveletTL
     //! scale, type, component, translation
     int j_;
     type_type e_;
-    component_type c_;
     translation_type k_;
+    component_type c_;
     
     //! pointer to the underlying interval basis
     const IBASIS* basis_;
@@ -113,9 +120,9 @@ namespace WaveletTL
        << ","
        << lambda.e()
        << ","
-       << lambda.c()
-       << ","
        << lambda.k()
+       << ","
+       << lambda.c()
        << ")";
     return os;
   }

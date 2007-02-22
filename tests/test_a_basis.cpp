@@ -34,18 +34,18 @@ int main()
 
   cout << "Generators:" << endl;
   for (i = 0; i < n; i++)
-    cout << basis.get_function(Basis::Index(0, 0, i, 0, &basis)) << endl;
+    cout << basis.get_function(Basis::Index(0, E_GENERATOR, 0, i, &basis)) << endl;
 
   cout << "Wavelets:" << endl;
   for (i = 0; i < n; i++)
-    cout << basis.get_function(Basis::Index(0, 1, i, 0, &basis)) << endl;
+    cout << basis.get_function(Basis::Index(0, E_WAVELET, 0, i, &basis)) << endl;
 
   cout << "- evaluating primal A functions: writing file 'agenerator-i.dat'" << endl;
   for (i = 0; i < n; i++) {
     ostringstream filename;
     filename << "agenerator-" << i << ".dat";
     fs.open(filename.str().c_str());
-    lambda = Basis::Index(0, 0, i, 0, &basis);
+    lambda = Basis::Index(0, E_GENERATOR, 0, i, &basis);
     map = WaveletTL::evaluate(basis, lambda, plot_resolution);
     map.gnuplot_output(fs);
     fs.close();
@@ -56,8 +56,7 @@ int main()
     ostringstream filename;
     filename << "awavelet-" << i << ".dat";
     fs.open(filename.str().c_str());
-    lambda = Basis::Index(0, 1, i, 0, &basis);
-//    cout << basis.get_function(Basis::Index(0, 1, i, 0, &basis)) << endl;
+    lambda = Basis::Index(0, E_WAVELET, 0, i, &basis);
     map = evaluate(basis, lambda, plot_resolution);
     map.gnuplot_output(fs);
     fs.close();
@@ -65,18 +64,18 @@ int main()
 
   cout << endl << "Testing the A basis for n = 1 (should be the Haar basis)" << endl;
   ABasis<1> haar;
-  cout << haar.get_function(ABasis<1>::Index(0, 0, 0, 0, &haar)) << endl; // Haar generator
-  cout << haar.get_function(ABasis<1>::Index(0, 1, 0, 0, &haar)) << endl; // Haar wavelet
+  cout << haar.get_function(ABasis<1>::Index(0, E_GENERATOR, 0, 0, &haar)) << endl; // Haar generator
+  cout << haar.get_function(ABasis<1>::Index(0, E_WAVELET, 0, 0, &haar)) << endl; // Haar wavelet
   // plot Haar generator
   cout << "Writing file 'haar-generator.dat'" << endl;
   fs.open("haar-generator.dat");
-  map = WaveletTL::evaluate(haar, ABasis<1>::Index(0, 0, 0, 0, &haar), plot_resolution);
+  map = WaveletTL::evaluate(haar, ABasis<1>::Index(0, E_GENERATOR, 0, 0, &haar), plot_resolution);
   map.gnuplot_output(fs);
   fs.close();
   // plot Haar wavelet
   cout << "Writing file 'haar-wavelet.dat'" << endl;
   fs.open("haar-wavelet.dat");
-  map = WaveletTL::evaluate(haar, ABasis<1>::Index(0, 1, 0, 0, &haar), plot_resolution);
+  map = WaveletTL::evaluate(haar, ABasis<1>::Index(0, E_WAVELET, 0, 0, &haar), plot_resolution);
   map.gnuplot_output(fs);
   fs.close();
 

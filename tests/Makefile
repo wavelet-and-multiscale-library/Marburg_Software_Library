@@ -83,13 +83,15 @@ EXEOBJF1 = \
   test_refinable.o test_regularity.o test_dm.o\
   test_r_basis.o test_cdf_expansion.o
 
-# set 2 of test programs: wavelet bases on the interval ([DS],[P],[JL],periodic)
+# set 2 of test programs: wavelet bases on the interval ([DS],[P],[JL],periodic,[A],[S])
 EXEOBJF2 = \
   test_ds_basis.o test_ds_support.o test_ds_expansion.o\
   test_p_basis.o test_p_support.o test_p_expansion.o\
   test_jl_basis.o test_jl_support.o\
   test_periodic.o\
-  test_spline_basis.o test_spline_support.o test_spline_expansion.o
+  test_spline_basis.o test_spline_support.o test_spline_expansion.o\
+  test_a_basis.o\
+  test_s_basis.o
 
 # set 3 of test programs: wavelet bases on general higher-dim. domains ((mapped) cube, tensor prod.)
 EXEOBJF3 = \

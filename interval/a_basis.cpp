@@ -206,7 +206,7 @@ namespace WaveletTL
   ABasis<n>::first_generator(const int j) const
   {
     assert(j >= j0());
-    return IntervalMultiIndex<ABasis<n> >(j, 0, 0, 0, this);
+    return IntervalMultiIndex<ABasis<n> >(j, E_GENERATOR, 0, 0, this);
   }
   
   template <int n>
@@ -215,7 +215,7 @@ namespace WaveletTL
   ABasis<n>::last_generator(const int j) const
   {
     assert(j >= j0());
-    return IntervalMultiIndex<ABasis<n> >(j, 0, n-1, (1<<j)-1, this);
+    return IntervalMultiIndex<ABasis<n> >(j, E_GENERATOR, (1<<j)-1, n-1, this);
   }
   
   template <int n>
@@ -224,7 +224,7 @@ namespace WaveletTL
   ABasis<n>::first_wavelet(const int j) const
   {
     assert(j >= j0());
-    return IntervalMultiIndex<ABasis<n> >(j, 1, 0, 0, this);
+    return IntervalMultiIndex<ABasis<n> >(j, E_WAVELET, 0, 0, this);
   }
   
   template <int n>
@@ -233,7 +233,7 @@ namespace WaveletTL
   ABasis<n>::last_wavelet(const int j) const
   {
     assert(j >= j0());
-    return IntervalMultiIndex<ABasis<n> >(j, 1, n-1, (1<<j)-1, this);
+    return IntervalMultiIndex<ABasis<n> >(j, E_WAVELET, (1<<j)-1, n-1, this);
   }
 
   template <int n>

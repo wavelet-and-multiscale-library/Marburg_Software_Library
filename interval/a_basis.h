@@ -65,7 +65,7 @@ namespace WaveletTL
     static const int space_dimension = 1;
 
     //! number of compononents of the multi-wavelet basis
-    static const int number_of_components = n;
+    static const unsigned int number_of_components = n;
 
     //! critical Sobolev regularity for the (primal) generators/wavelets
     static double primal_regularity() { return 0.5; }

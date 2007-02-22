@@ -594,15 +594,21 @@ namespace MathTL
       if (eps == 0)
 	v = *this;
       else {
+	
+	//cout << size() << endl;
+	
 	// prepare vector to be sorted
 	std::vector<std::pair<I,C> > sv(size());
+	
 	unsigned int id(0);
-	for (const_iterator it(begin()), itend(end()); it != itend; ++it, ++id)
+	for (const_iterator it(begin()), itend(end()); it != itend; ++it, ++id) {
+	  //cout << it.index() << endl;
 	  sv[id] = std::pair<I,C>(it.index(), *it); // can't use make_pair for gcc 2.95
+	}
 	
 	// sort vector (Introsort, O(N*log N))
 	sort(sv.begin(), sv.end(), decreasing_order());
-	
+
 	// insert largest in modulus entries until tolerance is reached
 	double coarsenorm(0);
 	double nrm(l2_norm(*this));
@@ -614,6 +620,7 @@ namespace MathTL
 	    ++it;
 	  }
 	while ((it != sv.end()) && (coarsenorm < bound));
+
 	sv.erase(it, sv.end());
 
 	// insert relevant entries in v (-> insertion sort, we hope that

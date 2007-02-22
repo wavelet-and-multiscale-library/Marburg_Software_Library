@@ -35,6 +35,9 @@ namespace WaveletTL
 
     //! copy constructor
     IntervalIndex(const IntervalIndex& lambda);
+
+    //! copy index from const pointer
+    IntervalIndex(const IntervalIndex* lambda);
   
     //! constructor with specified parameters
     IntervalIndex(const int j, const int e, const int k, const IBASIS* basis);

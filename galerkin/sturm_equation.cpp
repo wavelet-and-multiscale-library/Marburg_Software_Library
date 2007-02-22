@@ -17,6 +17,8 @@ namespace WaveletTL
     : bvp_(bvp), basis_(bvp.bc_left(), bvp.bc_right()), normA(0.0), normAinv(0.0)
   {
     if (precompute_f) precompute_rhs();
+    const int jmax = 8;
+    basis_.set_jmax(jmax);
   }
 
   template <class WBASIS>
@@ -26,6 +28,8 @@ namespace WaveletTL
     : bvp_(bvp), basis_(basis), normA(0.0), normAinv(0.0)
   {
     if (precompute_f) precompute_rhs();
+    const int jmax = 8;
+    basis_.set_jmax(jmax);
   }
 
   template <class WBASIS>

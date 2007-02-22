@@ -86,7 +86,11 @@ int main()
   typedef LDomainBasis<Basis1D> Basis;
   typedef Basis::Index Index;
   Basis basis(basis1d);
-  
+
+
+  const int jmax = 5;
+  basis.set_jmax(jmax);
+
 //   CornerSingularity    u_sing(Point<2>(0,0), 0.5, 1.5);
 //   CornerSingularityRHS f_sing(Point<2>(0,0), 0.5, 1.5);
 
@@ -94,13 +98,15 @@ int main()
   mySum rhs; // alpha=1
 
   InfiniteVector<double,Index> rhs_coeffs;
-  expand(&rhs, basis, true, 5, rhs_coeffs);
+  cout << "expanding right-hand side" << endl;
+  expand(&rhs, basis, true, jmax, rhs_coeffs);
+  cout << "done expanding right-hand side" << endl;
 
   typedef LDomainHelmholtzEquation<d,dT> Problem;
   Problem problem(basis,
 		  "DS_B_2_2_5_G",
 		  "DS_B_2_2_5_A",
-		  5,
+		  jmax,
 		  1.0,
 		  rhs_coeffs);
 
@@ -112,7 +118,7 @@ int main()
 
   InfiniteVector<double, Index> u_epsilon;
 
-  CDD1_SOLVE(problem, 1e-2, u_epsilon, u_epsilon, 1.0, 1.0, 5);
+  CDD1_SOLVE(problem, 1e-2, u_epsilon, u_epsilon, 1.0, 1.0, jmax);
 //   CDD1_SOLVE(problem, 1e-2, u_epsilon, u_epsilon, 4);
 
 //   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 5);

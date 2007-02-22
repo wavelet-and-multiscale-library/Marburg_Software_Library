@@ -216,9 +216,31 @@ namespace WaveletTL
      const int jmax,
      Vector<double>& coeffs) const;
     
+    void set_jmax(const int jmax) {
+      jmax_ = jmax;
+      setup_full_collection();
+    }
+
+    //! get the wavelet index corresponding to a specified number
+    const inline Index* get_wavelet (const int number) const {
+      return &full_collection[number];
+    }
+
+    //! number of wavelets between coarsest and finest level
+    const int degrees_of_freedom() const { return full_collection.size(); };
 
   protected:
+    //! finest possible level
+    int jmax_;
+
     int DeltaLmin_, DeltaRmax_offset;
+
+    //! setup full collectin of wavelets between j0_ and jmax_ as long as a jmax_ has been specified
+    void setup_full_collection();
+
+    //! collection of all wavelets between coarsest and finest level
+    Array1D<Index> full_collection;
+
   };
 
   /*!
@@ -441,9 +463,34 @@ namespace WaveletTL
     integrate
     (const typename SplineBasis<d,dT,DS_construction>::Index& lambda,
      const typename SplineBasis<d,dT,DS_construction>::Index& mu) const;
+
+    void set_jmax(const int jmax) {
+      jmax_ = jmax;
+      setup_full_collection();
+    }
+
+    //! get the wavelet index corresponding to a specified number
+    const inline Index* get_wavelet (const int number) const {
+      return &full_collection[number];
+    }
+
+    //! number of wavelets between coarsest and finest level
+    const int degrees_of_freedom() const { return full_collection.size(); };
     
+
   protected:
+    //! finest possible level
+    int jmax_;
+
     int DeltaLmin_, DeltaRmax_offset;
+
+    //! setup full collectin of wavelets between j0_ and jmax_ as long as a jmax_ has been specified
+    void setup_full_collection();
+
+    //! collection of all wavelets between coarsest and finest level
+    Array1D<Index> full_collection;
+
+
   };
 
 }

@@ -112,6 +112,8 @@ int main()
 #endif
   typedef Basis::Index Index;
 
+  basis.set_jmax(10);
+
   SturmEquation<Basis> problem(T, basis);
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem);
   CachedProblemFromFile<SturmEquation<Basis> > cproblem(&problem, "P_3_3_10_A", 10);

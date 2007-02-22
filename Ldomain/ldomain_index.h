@@ -63,6 +63,10 @@ namespace WaveletTL
 
     //! copy constructor
     LDomainIndex(const LDomainIndex& lambda);
+
+    //! copy index from const pointer
+    LDomainIndex(const LDomainIndex* lambda);
+
   
     //! check equality
     bool operator == (const LDomainIndex& lambda) const;

@@ -28,6 +28,12 @@ namespace WaveletTL
     //! default constructor
     JLIndex();
 
+    //! copy constructor
+    JLIndex(const JLIndex& lambda);
+
+    //! copy index from const pointer
+    JLIndex(const JLIndex* lambda);
+
     //! type index type
     typedef int type_type;
 

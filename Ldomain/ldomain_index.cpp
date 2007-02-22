@@ -33,6 +33,13 @@ namespace WaveletTL
   }
 
   template <class IBASIS>
+  LDomainIndex<IBASIS>::LDomainIndex(const LDomainIndex* lambda)
+    : basis_(lambda->basis_), j_(lambda->j_), e_(lambda->e_), p_(lambda->p_), k_(lambda->k_)
+  {
+  }
+
+
+  template <class IBASIS>
   bool
   LDomainIndex<IBASIS>::operator == (const LDomainIndex& lambda) const
   {

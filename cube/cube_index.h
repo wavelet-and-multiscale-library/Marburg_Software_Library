@@ -54,6 +54,9 @@ namespace WaveletTL
     //! copy constructor
     CubeIndex(const CubeIndex& lambda);
 
+    //! copy index from const pointer
+    CubeIndex(const CubeIndex* lambda);
+
 
     /*!
       constructor.

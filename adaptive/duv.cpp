@@ -35,7 +35,7 @@ namespace WaveletTL
 	const double eta = pow(rho, (double)j) * epsilon_k;
 	P.RHS(eta, f);
 // 	cout << "DUV_SOLVE_SD: f=" << endl << f << endl;
-	APPLY_COARSE(P, v, eta, Av, 1.0, 12);
+	APPLY_COARSE(P, v, eta, Av, 1.0, 8);
 // 	cout << "DUV_SOLVE_SD: Av=" << endl << Av << endl;
 	rj = f - Av;
 // 	cout << "DUV_SOLVE_SD: rj=" << endl << rj << endl;
@@ -45,7 +45,7 @@ namespace WaveletTL
 	     << "), current residual error: " << residual_error << endl;
 	if (residual_error < epsilon) break;
 
-	APPLY_COARSE(P, rj, eta/5.0, Arj, 1.0, 12);
+	APPLY_COARSE(P, rj, eta/5.0, Arj, 1.0, 8);
 // 	cout << "rj * rj = " << rj * rj << endl;
 //  	cout << "DUV_SOLVE: rj * Arj = " << rj * Arj << endl;
 	

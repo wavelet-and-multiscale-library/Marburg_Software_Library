@@ -25,6 +25,8 @@ namespace WaveletTL
     // Remark: it is possible to perform binary binning without actually assembling
     // the bins, however, in this first version we do setup the bins to avoid
     // unnecessary difficulties
+
+    //cout << "size = " << v.size() << endl;
     if (v.size() > 0) {
       // compute the number of bins V_0,...,V_q
       const double norm_v_sqr = l2_norm_sqr(v);
@@ -90,6 +92,15 @@ namespace WaveletTL
 	J++;
       }
 
+      // hack: We let 'add_compressed_column' and 'add_level'
+      // in cached_problem.cpp/.h work on full vectors. We do this because the call of 
+      // 'w.add_coefficient();' in 'add_level' is inefficient. 
+      // Below we will then copy ww into the sparse vector w.
+      // Probably this will be handled in a more elegant way in the near future.
+
+      Vector<double> ww(P.basis().degrees_of_freedom());
+
+      //cout << *(P.basis().get_wavelet(4000)) << endl;
       // compute w = \sum_{k=0}^\ell A_{J-k}v_{[k]}
       k = 0;
       unsigned int z = 0;
@@ -97,8 +108,17 @@ namespace WaveletTL
 	   k <= ell; ++it, ++k) {
 	for (typename std::list<std::pair<Index, double> >::const_iterator itk(it->begin());
 	     itk != it->end(); ++itk) {
-	  add_compressed_column(P, itk->second, itk->first, J-k, w, jmax, strategy);
+	  //add_compressed_column(P, itk->second, itk->first, J-k, w, jmax, strategy);
+	  add_compressed_column(P, itk->second, itk->first, J-k, ww, jmax, strategy);
 	  z++;
+	}
+      }
+      //cout << "copying vector" << endl;
+      // copy ww into w
+      for (unsigned int i = 0; i < ww.size(); i++) {
+	if (ww[i] != 0.) {
+	  Index ind(P.basis().get_wavelet(i));
+	  w.set_coefficient(ind, ww[i]);
 	}
       }
     }
@@ -138,28 +158,26 @@ namespace WaveletTL
 //      {
 	do {
 	  zeta /= 2.;
+	  //cout << "in RES -1" << endl;
 	  P.RHS (zeta/2., tilde_r);
-	  //cout << tilde_r << endl;
 	  InfiniteVector<double, typename PROBLEM::Index> help;
-	  //cout << w << endl;
 	  cout << "zeta halbe = " << zeta/2. << endl;
 	  //cout << "before aply in RES " << endl;
 	  //APPLY(P, w, .0/*zeta/2.*/, help, jmax, strategy);
 	  cout << ++k << "calls of APPlY in RES" << endl;
 	  APPLY_COARSE(P, w, zeta/2., help, 0.000001, jmax, strategy);
-	  //cout << "after apply in RES " << endl;
 	  tilde_r -= help;
+
 	  l2n = l2_norm(tilde_r);
+
 	  nu = l2n + zeta;
-	  //cout << "zeta = " << zeta << endl;
-	  //cout << delta*l2n << endl;
-	  //cout << "delta = " << delta << endl;
 	  //if(k == 10)
 	  //	break;
 	  //cout << "NU = " << nu << "  EPS = " << epsilon << " ZETA = " << zeta << " " << "  DELTA*L2N = " << delta*l2n << endl;
 	}
   	while ( (nu > epsilon) && (zeta > delta*l2n) );
 	//}
+
   }
 
 }

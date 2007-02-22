@@ -54,7 +54,9 @@ int main()
     break;
   }
 
-  const int jmax = 10;
+  const int jmax = 14;
+
+  basis.set_jmax(jmax);
 
   typedef PoissonEquation1D<d,dT> Problem;
   Problem problem(basis, InfiniteVector<double,Index>());

@@ -7,6 +7,18 @@ namespace WaveletTL
   {
   }
 
+  JLIndex::JLIndex(const JLIndex& index)
+    : j_(index.j_), e_(index.e_), c_(index.c_), k_(index.k_)
+  {
+  }
+
+  JLIndex::JLIndex(const JLIndex* index)
+    : j_(index->j_), e_(index->e_), c_(index->c_), k_(index->k_)
+  {
+  }
+
+
+
   JLIndex::JLIndex(const int j, const type_type e, const component_type c, const translation_type k)
     : j_(j), e_(e), c_(c), k_(k)
   {

@@ -25,12 +25,21 @@ namespace WaveletTL
 					     const CUBEBASIS* basis)
     : basis_(basis), j_(j), e_(e), k_(k), num_(-1)
   {
+    set_number();
   }
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
   CubeIndex<IBASIS,DIM,CUBEBASIS>::CubeIndex(const CubeIndex& lambda)
     : basis_(lambda.basis_), j_(lambda.j_), e_(lambda.e_), k_(lambda.k_), num_(lambda.num_)
+  {
+    set_number();
+  }
+
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  CubeIndex<IBASIS,DIM,CUBEBASIS>::CubeIndex(const CubeIndex* lambda)
+    : basis_(lambda->basis_), j_(lambda->j_), e_(lambda->e_), k_(lambda->k_), num_(lambda->num_)
   { 
+    set_number();
   }
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>

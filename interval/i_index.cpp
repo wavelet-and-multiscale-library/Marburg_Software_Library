@@ -26,8 +26,20 @@ namespace WaveletTL
     e_ = lambda.e();
     k_ = lambda.k();
     basis_ = lambda.basis();
-//     num_ = lambda.number();
+    //num_ = lambda.number();
   }
+
+  template <class IBASIS>
+  IntervalIndex<IBASIS>::IntervalIndex(const IntervalIndex<IBASIS>* lambda)
+  {
+    j_ = lambda->j();
+    e_ = lambda->e();
+    k_ = lambda->k();
+    basis_ = lambda->basis();
+    //num_ = lambda->number();
+  }
+
+
 
   template <class IBASIS>
   IntervalIndex<IBASIS>::IntervalIndex(const int j, const int e, const int k,

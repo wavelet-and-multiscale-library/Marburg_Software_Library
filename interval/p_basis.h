@@ -348,6 +348,10 @@ namespace WaveletTL
       return &full_collection[number];
     }
 
+    //! number of wavelets between coarsest and finest level
+    const int degrees_of_freedom() const { return full_collection.size(); };
+
+
   protected:
     //! coarsest possible level
     int j0_;
@@ -366,9 +370,6 @@ namespace WaveletTL
 
     //! collection of all wavelets between coarsest and finest level
     Array1D<Index> full_collection;
-
-    //! number of wavelets between coarsest and finest level
-    const int degrees_of_freedom() { return full_collection.size(); };
 
     //! one instance of a CDF basis (for faster access to the primal and dual masks)
     CDFBasis<d,dT> cdf;

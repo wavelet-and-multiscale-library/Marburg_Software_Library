@@ -20,16 +20,38 @@ namespace WaveletTL
   void
   LinParEqROWStageEquationHelper<ELLIPTIC_EQ>
   ::add_level (const Index& lambda,
-	       InfiniteVector<double, Index>& w, const int j,
+	       //InfiniteVector<double, Index>& w,
+	       Vector<double>& w,
+	       const int j,
 	       const double factor,
 	       const int J,
 	       const CompressionStrategy strategy) const
   {
     // Gramian part, we have to take care of the preconditioning factors
     InfiniteVector<double,Index> g;
-    G.add_level(lambda, g, j, factor * alpha/T->D(lambda), J, strategy);
+    Vector<double> g_full(w.size());
+
+    //G.add_level(lambda, g, j, factor * alpha/T->D(lambda), J, strategy);
+    G.add_level(lambda, g_full, j, factor * alpha/T->D(lambda), J, strategy);
+    
+    // hack: copy full vector g into sparse representation
+    for (unsigned int i = 0; i < g_full.size(); i++) {
+      if (g_full[i] != 0.) {
+	Index ind(basis().get_wavelet(i));
+	g.set_coefficient(ind, g_full[i]);
+      }
+    }
+    
     g.scale(this, -1);
-    w.add(g);
+
+    Vector<double> g_full_new(w.size());
+    for (typename InfiniteVector<double,Index>::const_iterator it(g.begin());
+ 	   it != g.end(); ++it) {
+      g_full_new[it.index().number()] = *it;
+    }
+
+    //w.add(g);
+    w += g_full_new;
     
     T->add_level(lambda, w, j, factor, J, strategy);
 

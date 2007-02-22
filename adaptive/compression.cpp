@@ -11,7 +11,8 @@ namespace WaveletTL
 			const double factor,
 			const typename PROBLEM::Index& lambda,
 			const int J,
-			InfiniteVector<double, typename PROBLEM::Index>& w,
+			//InfiniteVector<double, typename PROBLEM::Index>& w,
+			Vector<double>& w,
 			const int jmax,
 			const CompressionStrategy strategy)
   {

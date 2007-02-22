@@ -150,7 +150,9 @@ namespace WaveletTL
   void
   LDomainHelmholtzEquation<d,dT>::add_level
   (const Index& lambda,
-   InfiniteVector<double, Index>& w, const int j,
+   //InfiniteVector<double, Index>& w,
+   Vector<double>& w,
+   const int j,
    const double factor,
    const int J,
    const CompressionStrategy strategy) const
@@ -161,17 +163,42 @@ namespace WaveletTL
     //     - D_alpha^{-1}D ( D^{-1}<APsi,Psi>^T D^{-1} ) DD_alpha^{-1}
 
     // Gramian part, help1 = column block of alpha*<Psi,Psi>^T D_alpha^{-1}
+    
     InfiniteVector<double,Index> help1, help2;
-    GC_.add_level(lambda, help1, j, factor * alpha_/D(lambda), J, strategy);
+    Vector<double> help1_full(w.size()), help2_full(w.size());
+
+    GC_.add_level(lambda, help1_full, j, factor * alpha_/D(lambda), J, strategy);
     
     // elliptic part, help2 = column block of D(D^{-1}<-APsi,Psi>^T D^{-1})DD_alpha^{-1}
-    AC_.add_level(lambda, help2, j, factor*AC_.D(lambda)/D(lambda), J, strategy);
-    help2.scale(&AC_, 1); // help2 *= D
+    AC_.add_level(lambda, help2_full, j, factor*AC_.D(lambda)/D(lambda), J, strategy);
     
+    // hack: copy full vectors to sparse ones
+    for (unsigned int i = 0; i < help1_full.size(); i++) {
+      if (help1_full[i] != 0.) {
+	Index ind(basis_.get_wavelet(i));
+	help1.set_coefficient(ind, help1_full[i]);
+      }
+      if (help2_full[i] != 0.) {
+	Index ind(basis_.get_wavelet(i));
+	help2.set_coefficient(ind, help2_full[i]);
+      }
+    }
+
+    help2.scale(&AC_, 1); // help2 *= D
     help1.add(help2);
     help1.scale(this, -1); // help1 *= D_alpha^{-1}
 
-    w.add(help1);
+    // hack: copy help1 to full vector
+    
+    Vector<double> help1_full_new(w.size());
+    for (typename InfiniteVector<double,Index>::const_iterator it(help1.begin());
+ 	   it != help1.end(); ++it) {
+      help1_full_new[it.index().number()] = *it;
+    }
+    
+    //w.add(help1);
+    
+    w += help1_full_new;
   }
   
   

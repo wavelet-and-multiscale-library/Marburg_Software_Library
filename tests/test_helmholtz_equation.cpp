@@ -22,7 +22,7 @@ int main()
   typedef SplineBasis<d,dT,P_construction> Basis;
   typedef Basis::Index Index;
 
-  Basis basis("",1,1,0,0); // PBasis, complementary b.c.'s
+  Basis basis("",1,1,0,0); // PBasis, complementary b.c.'s  
 
   const unsigned int solution = 1;
   double kink = 0; // for Solution3;
@@ -47,6 +47,8 @@ int main()
   }
 
   int jmax = 9;
+  basis.set_jmax(jmax);
+
 
   typedef HelmholtzEquation1D<d,dT> Problem;
   Problem helmholtz(basis, 1.0, InfiniteVector<double,Index>());
@@ -164,7 +166,8 @@ int main()
 
 
   cout << "The stiffness matrix again: A=" << endl << A << endl;
-  InfiniteVector<double,Index> w;
+  //InfiniteVector<double,Index> w;
+  Vector<double> w(basis.degrees_of_freedom());
   Index lambda = helmholtz.basis().first_generator(helmholtz.basis().j0());
   lambda = helmholtz.basis().first_wavelet(helmholtz.basis().j0());
   ++lambda;

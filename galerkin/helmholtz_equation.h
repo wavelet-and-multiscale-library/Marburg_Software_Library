@@ -161,7 +161,9 @@ namespace WaveletTL
       w += factor * (stiffness matrix entries in column lambda on level j)
     */
     void add_level (const Index& lambda,
-		    InfiniteVector<double, Index>& w, const int j,
+		    //InfiniteVector<double, Index>& w,
+		    Vector<double>& w,
+		    const int j,
 		    const double factor,
 		    const int J,
 		    const CompressionStrategy strategy = St04a) const;

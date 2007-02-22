@@ -95,7 +95,8 @@ int main()
 
   TestFunction<5> f;
 
-  const int jmax = 10;
+  const int jmax = 12;
+  basis.set_jmax(12);
 
   IntervalGramian<Basis> problem(basis, InfiniteVector<double,Index>());
 

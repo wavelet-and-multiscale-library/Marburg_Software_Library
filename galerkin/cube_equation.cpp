@@ -8,6 +8,8 @@ namespace WaveletTL
     : bvp_(bvp), basis_(bc), normA(0.0), normAinv(0.0)
   {
     compute_rhs();
+    const int jmax = 5; // for a first quick hack
+    basis_.set_jmax(jmax);
   }
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
@@ -16,6 +18,9 @@ namespace WaveletTL
     : bvp_(bvp), basis_(bc), normA(0.0), normAinv(0.0)
   {
     compute_rhs();
+    const int jmax = 5; // for a first quick hack
+    basis_.set_jmax(jmax);
+ 
   }
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
@@ -24,6 +29,8 @@ namespace WaveletTL
       fcoeffs(eq.fcoeffs), fnorm_sqr(eq.fnorm_sqr),
       normA(eq.normA), normAinv(eq.normAinv)
   {
+    const int jmax = 5; // for a first quick hack
+    basis_.set_jmax(jmax);
   }
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>

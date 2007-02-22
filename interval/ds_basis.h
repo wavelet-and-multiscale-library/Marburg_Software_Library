@@ -377,6 +377,7 @@ namespace WaveletTL
       return &full_collection[number];
     }
 
+    const int degrees_of_freedom() const { return full_collection.size(); };
 
   protected:
     //! coarsest possible level
@@ -417,8 +418,6 @@ namespace WaveletTL
 
     //! collection of all wavelets between coarsest and finest level
     Array1D<Index> full_collection;
-
-    const int degrees_of_freedom() { return full_collection.size(); };
 
     //! compute Gramian of left and right unbiorthogonalized primal boundary functions
     void setup_GammaLR();

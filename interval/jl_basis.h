@@ -136,7 +136,7 @@ namespace WaveletTL
     }
 
     //! number of wavelets between coarsest and finest level
-    const int degrees_of_freedom() { return full_collection.size(); };
+    const int degrees_of_freedom() const { return full_collection.size(); };
 
 
   protected:

@@ -202,7 +202,7 @@ namespace WaveletTL
     Array1D<Index> full_collection;
 
     //! number of wavelets between coarsest and finest level
-    const int degrees_of_freedom() { return full_collection.size(); };
+    const int degrees_of_freedom() const { return full_collection.size(); };
 
     //! get the wavelet index corresponding to a specified number
     const inline Index* get_wavelet (const int number) const {

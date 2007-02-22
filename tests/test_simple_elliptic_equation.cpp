@@ -47,10 +47,10 @@ int main()
   cout << "Testing class EllipticEquation..." << endl;
   
   const int DIM = 2;
-  const int jmax = 4;
+  const int jmax = 6;
 
-  const int d  = 3;
-  const int dT = 3;
+  const int d  = 2;
+  const int dT = 2;
 
   //typedef DSBasis<2,2> Basis1D;
 
@@ -99,14 +99,14 @@ int main()
   bound_1[0] = 1;
   bound_1[1] = 1;
   bound_1[2] = 1;
-  bound_1[3] = 2;//2
+  bound_1[3] = 1;//2
 
   bc[0] = bound_1;
 
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
   bound_2[0] = 1;
-  bound_2[1] = 2;//2
+  bound_2[1] = 1;//2
   bound_2[2] = 1;
   bound_2[3] = 1;
 
@@ -310,11 +310,11 @@ int main()
   u.scale(&discrete_poisson,-1);
   
   
-//   Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u, true, 6);//expand in primal basis
+  Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u, true, 6);//expand in primal basis
   
-//   std::ofstream ofs5("approx_solution_out.m");
-//   matlab_output(ofs5,U);
-//   ofs5.close();
+  std::ofstream ofs5("approx_solution_out.m");
+  matlab_output(ofs5,U);
+  ofs5.close();
   
 //   cout << "computing L_2 error..." << endl;
 //   double L2err = evalObj.L_2_error(frame, u, sing2D, 5, 0.0, 1.0);

@@ -68,7 +68,7 @@ public:
 			       InfiniteVector<double, typename PROBLEM::Index>& u_epsilon)
   {
     //typedef DSBasis<2,2> Basis1D;
-    typedef PBasis<3,5> Basis1D;	
+    typedef PBasis<3,3> Basis1D;	
 
     Point<2> origin;
     origin[0] = 0.0;
@@ -111,6 +111,8 @@ public:
 
     clock_t tstart, tend;
     tstart = clock();
+
+    //FixedArray1D<Vector<double>, 2> old_xk;
 
     while (tmp > 0.0001) {
 
@@ -198,10 +200,17 @@ public:
 	
 	// compute approximation to local problem
 	Vector<double> xk(local_index_set.size());
+	
+	int j = 0;
+	for (typename set<Index>::const_iterator it = local_index_set.begin(), itend = local_index_set.end();
+	     it != itend; ++it, ++j)
+	  xk[j] = u_k.get_coefficient(*it);
+      
 	cout << "r_1 size = " << r_i.size() << endl;
 	unsigned int iterations = 0;
-	CG(A_Lambda_i, F_Lambda_i, xk, 0.0001, 300, iterations);
-	cout << "CG done!!!!" << endl;           
+	CG(A_Lambda_i, F_Lambda_i, xk, 1.0e-15, 300, iterations);
+	cout << "CG done!!!!" << " Needed " << iterations << " iterations" << endl;
+
 	
 	help.clear();
 	

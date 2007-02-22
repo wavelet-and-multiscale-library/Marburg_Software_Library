@@ -63,7 +63,7 @@ namespace FrameTL
   {
     
     compute_diagonal();
-    //compute_rhs();
+    compute_rhs();
   }
 
   template <class IBASIS, unsigned int DIM>

@@ -3,7 +3,8 @@
 #include <time.h> 
 #include <interval/ds_basis.h>
 #include <interval/p_basis.h>
-#include "elliptic_equation.h"
+#include <elliptic_equation.h>
+#include <simple_elliptic_equation.h>
 #include <algebra/sparse_matrix.h>
 #include <algebra/infinite_vector.h>
 #include <numerics/iteratsolv.h>
@@ -51,8 +52,10 @@ int main(int argc, char* argv[])
 
   const int DIM = 2;
 
+  const int jmax = 6;
+
   //typedef DSBasis<4,6> Basis1D;
-  typedef PBasis<3,5> Basis1D;
+  typedef PBasis<3,3> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
   typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
@@ -75,10 +78,6 @@ int main(int argc, char* argv[])
   b2[0] = -1.0;
   b2[1] = -1.0;
   AffineLinearMapping<2> affineP2(A2,b2);
-  //##############################
-
-
-
 
   //##############################
   LinearBezierMapping bezierP(Point<2>(-1.,-1.),Point<2>(-1.,1.),
@@ -122,14 +121,14 @@ int main(int argc, char* argv[])
   bound_1[0] = 1;
   bound_1[1] = 1;
   bound_1[2] = 1;
-  bound_1[3] = 2;
+  bound_1[3] = 1;
 
   bc[0] = bound_1;
 
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
   bound_2[0] = 1;
-  bound_2[1] = 2;
+  bound_2[1] = 1;
   bound_2[2] = 1;
   bound_2[3] = 1;
 
@@ -161,7 +160,7 @@ int main(int argc, char* argv[])
 
   //finally a frame can be constructed
   //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT, 6);
-  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, 6);
+  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, jmax);
 
   Vector<double> value(1);
   value[0] = 1;
@@ -177,8 +176,9 @@ int main(int argc, char* argv[])
   PoissonBVP<DIM> poisson(&singRhs);
   //PoissonBVP<DIM> poisson(&const_fun);
 
-  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
+  //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
+  SimpleEllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax);
 
   //  L-shaped: (-1,1)x(-1,0) \cup (-1,0)x(-1,1), DSBasis
   
@@ -210,7 +210,8 @@ int main(int argc, char* argv[])
 //   discrete_poisson.set_Ainv(1.0/0.146);
 
   // (d,dT) = (3,5)
-  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 8.3898, 1.0/0.146);
+  //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 8.3898, 1.0/0.146);
+  CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 8.3898, 1.0/0.146);
   discrete_poisson.set_norm_A(8.3898);
   // optimistic guess:
   discrete_poisson.set_Ainv(1.0/0.146);

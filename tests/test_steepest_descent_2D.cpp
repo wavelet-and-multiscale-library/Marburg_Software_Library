@@ -56,7 +56,7 @@ int main()
   cout << "testing steepest descent algorithm in 2D..." << endl;
 
   const int DIM = 2;
-  const int jmax = 4;
+  const int jmax = 6;
 
   const int d  = 3;
   const int dT = 3;

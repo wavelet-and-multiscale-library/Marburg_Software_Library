@@ -80,7 +80,7 @@ public:
 //    Singularity1D_2<double> exactSolution1D;
 
     unsigned int loops = 0;
-    const int jmax = 4;
+    const int jmax = 6;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();

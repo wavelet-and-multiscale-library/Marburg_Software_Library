@@ -47,10 +47,10 @@ int main()
   cout << "Testing class EllipticEquation..." << endl;
   
   const int DIM = 2;
-  const int jmax = 6;
+  const int jmax = 4;
 
-  const int d  = 2;
-  const int dT = 2;
+  const int d  = 3;
+  const int dT = 3;
 
   //typedef DSBasis<2,2> Basis1D;
 

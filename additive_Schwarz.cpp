@@ -77,7 +77,7 @@ public:
     CornerSingularity sing2D(origin, 0.5, 1.5);
     CornerSingularityRHS singRhs(origin, 0.5, 1.5);
 
-    const int jmax = 6;
+    const int jmax = 4;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
@@ -93,7 +93,8 @@ public:
 
     EvaluateFrame<Basis1D,2,2> evalObj;
 
-    double eta = 1.;
+    //double eta = 1.;
+    double eta = 0.00001;
 
     const int number_patches = P.basis().n_p();
 
@@ -225,7 +226,7 @@ public:
        
       global_iterations++;
       
-      eta *= 0.9;
+      eta *= 1;//0.8;
       
       
       u_epsilon = u_k;

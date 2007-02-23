@@ -18,7 +18,6 @@ namespace MathTL
   CornerSingularityBiharmonic::value(const Point<2>& p,
 			   const unsigned int component) const
   {
-    double res=0.0;
     const Point<2> x(p-x0);
     const double r = hypot(x[0],x[1]);
     double rootz[2];
@@ -36,6 +35,7 @@ namespace MathTL
  
 #if 0
    //seems to work
+    double res=0.0;
     for(int m=0;m<2;m++)    
 	  res+= zeta(r) * pow(r, 1.0+rootz[m]) * ((1/(rootz[m]-1)*sin((rootz[m]-1)*omega)
 					     -1/(rootz[m]+1)*sin((rootz[m]+1)*omega))
@@ -131,7 +131,6 @@ t33+0.9520726166*t35));
   CornerSingularityBiharmonicRHS::value(const Point<2>& p,
 			      const unsigned int component) const
   {
-    double res=0.0;
     const Point<2> x(p-x0);
     const double r = hypot(x[0],x[1]);
     
@@ -153,6 +152,8 @@ t33+0.9520726166*t35));
     //   -zeta''(r)*u(r,phi)+2*zeta'(r)u_r(r,phi)+1/r*zeta'(r)u(r,phi)
 
     //error inside
+
+    double res=0.0;
 
     const double zeta_r=zeta(r);
     const double zeta_prime_r = zeta_prime(r);

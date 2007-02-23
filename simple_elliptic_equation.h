@@ -261,8 +261,12 @@ namespace FrameTL
     // right-hand side coefficients on a fine level, sorted by modulus
     Array1D<std::pair<typename AggregatedFrame<IBASIS,DIM>::Index,double> > fcoeffs;
 
-    // right-hand side coefficients on a fine level, sorted by modulus
-    InfiniteVector<double,typename AggregatedFrame<IBASIS,DIM>::Index> stiff_diagonal;
+    //     // right-hand side coefficients on a fine level, sorted by modulus
+    //     InfiniteVector<double,typename AggregatedFrame<IBASIS,DIM>::Index> stiff_diagonal;
+    
+    
+    // square root of coefficients on diagonal of stiffness matrix
+    Array1D<double> stiff_diagonal;
 
 
     // (squared) \ell_2 norm of the precomputed right-hand side

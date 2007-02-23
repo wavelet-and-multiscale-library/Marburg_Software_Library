@@ -18,9 +18,9 @@
 #include <frame_support.h>
 #include <frame_index.h>
 //#include <cg.h>
-#include <steepest_descent.h>
+//#include <steepest_descent.h>
 #include <galerkin/cached_problem.h>
-//#include <richardson_CDD2.h>
+#include <richardson_CDD2.h>
 //#include <richardson.h>
 
 using std::cout;
@@ -249,9 +249,9 @@ int main()
   double time;
   tstart = clock();
 
-  steepest_descent_SOLVE(problem, epsilon, u_epsilon);
+  //steepest_descent_SOLVE(problem, epsilon, u_epsilon);
   //cg_SOLVE(problem, epsilon, u_epsilon);
-  //richardson_SOLVE_CDD2(problem, epsilon, u_epsilon);
+  richardson_SOLVE_CDD2(problem, epsilon, u_epsilon);
   //richardson_SOLVE(problem, epsilon, u_epsilon);
   //  steepest_descent_SOLVE(discrete_poisson, epsilon, u_epsilon);
  //  for (unsigned int i = 0; i < 50*20;i++)

@@ -11,50 +11,6 @@ using WaveletTL::CubeBasis;
 
 namespace FrameTL
 {
-
-//   template <class IBASIS>
-//   Index1D<IBASIS>::Index1D(const IntervalIndex<IBASIS>& ind,
-// 			   const unsigned int p, const unsigned int der)
-//     : ind_(ind), p_(p), der_(der)
-//   {
-//   }
-
-//   template <class IBASIS>
-//   bool
-//   Index1D<IBASIS>::operator < (const Index1D<IBASIS>& lambda) const
-//   {
-//     return ind_ < lambda.index() ||
-//       (
-//        ind_ == lambda.index() &&
-//        (
-// 	p_ < lambda.p() ||
-// 	(
-// 	 p_ == lambda.p() && der_ < lambda.derivative()   
-// 	 )
-// 	)
-//        );
-//   };
-  
-//   template <class IBASIS>
-//   bool Index1D<IBASIS>::operator == (const Index1D<IBASIS>& lambda) const
-//   {
-//     return (ind_ == lambda.index()) && (p_ == lambda.p()) && (der_ == lambda.derivative());
-//   };
-
-//   template <class IBASIS>
-//   bool Index1D<IBASIS>::operator != (const Index1D<IBASIS>& lambda) const
-//   {
-//     return !(*this == lambda);
-//   };
-  
-//   template <class IBASIS>
-//   bool Index1D<IBASIS>::operator <= (const Index1D<IBASIS>& lambda) const
-//   {
-//     return (*this < lambda) || (*this == lambda);
-//   };
-  
-
-
   template <class IBASIS, unsigned int DIM>
   SimpleEllipticEquation<IBASIS,DIM>::SimpleEllipticEquation(const EllipticBVP<DIM>* ell_bvp,
 							     const AggregatedFrame<IBASIS,DIM>* frame,
@@ -70,9 +26,9 @@ namespace FrameTL
   double 
   SimpleEllipticEquation<IBASIS,DIM>::D(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda) const
   {
-    //return 1 << lambda.j();
-    
-    return stiff_diagonal.get_coefficient(lambda);
+    // return 1 << lambda.j();
+    // return stiff_diagonal.get_coefficient(lambda);
+    return stiff_diagonal[lambda.number()];
   }
 
   template <class IBASIS, unsigned int DIM>
@@ -102,16 +58,21 @@ namespace FrameTL
 
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
-    const int j0   = frame_->j0();
-    for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
+    //const int j0   = frame_->j0();
+    //for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
+    for (int i = 0; i < frame_->degrees_of_freedom(); i++)
       {
-	const double coeff = f(lambda)/D(lambda);
+	//const double coeff = f(lambda)/D(lambda);
+	const double coeff = f(*(frame_->get_wavelet(i)))/D(*(frame_->get_wavelet(i)));
 	if (fabs(coeff)>1e-15) {
-	  fhelp.set_coefficient(lambda, coeff);
+	  //fhelp.set_coefficient(lambda, coeff);
+	  fhelp.set_coefficient(*(frame_->get_wavelet(i)), coeff);
 	  //cout << lambda << endl;
+	  if (i % 100 == 0)
+	    cout << *(frame_->get_wavelet(i)) << endl;
 	}
-  	if (lambda == last_wavelet<IBASIS,DIM,DIM,Frame>(frame_,jmax_))
-	  break;
+//    	if (lambda == last_wavelet<IBASIS,DIM,DIM,Frame>(frame_,jmax_))
+// 	  break;
       }
     fnorm_sqr = l2_norm_sqr(fhelp);
 
@@ -133,17 +94,21 @@ namespace FrameTL
   {
     cout << "SimpleEllipticEquation(): precompute diagonal of stiffness matrix..." << endl;
 
-    typedef AggregatedFrame<IBASIS,DIM> Frame;
-    typedef typename Frame::Index Index;
+//     typedef AggregatedFrame<IBASIS,DIM> Frame;
+//     typedef typename Frame::Index Index;
 
     // precompute the right-hand side on a fine level
-    const int j0   = frame_->j0();
-    for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
-      {
-	stiff_diagonal.set_coefficient(lambda, sqrt(a(lambda,lambda)));
-	if (lambda == last_wavelet<IBASIS,DIM,DIM,Frame>(frame_,jmax_))
-	  break;
-      }
+    //const int j0   = frame_->j0();
+    stiff_diagonal.resize(frame_->degrees_of_freedom());
+    for (int i = 0; i < frame_->degrees_of_freedom(); i++) {
+      stiff_diagonal[i] = sqrt(a(*(frame_->get_wavelet(i)),*(frame_->get_wavelet(i))));
+    }
+//     for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
+//       {
+// 	stiff_diagonal.set_coefficient(lambda, sqrt(a(lambda,lambda)));
+// 	if (lambda == last_wavelet<IBASIS,DIM,DIM,Frame>(frame_,jmax_))
+// 	  break;
+//       }
 
     cout << "... done, digonal of stiffness matrix computed" << endl;
   }
@@ -253,34 +218,20 @@ namespace FrameTL
   {
     double r = 0.0;
 
-
-    Index lambda = la;
-    Index mu = nu;
-    Index tmp_ind;
-
     typedef WaveletTL::CubeBasis<IBASIS,DIM> CUBEBASIS;
 
-    typedef typename CUBEBASIS::Index CubeIndex;
- 
-    typename CUBEBASIS::Support supp_lambda_ = frame_->all_supports[lambda.number()];
-    typename CUBEBASIS::Support supp_mu_ = frame_->all_supports[mu.number()];
+    const int jla = (frame_->all_supports[la.number()]).j;
+    const int jnu = (frame_->all_supports[nu.number()]).j;
 
-    typename CUBEBASIS::Support tmp_supp;
+    const Index* lambda = (jnu > jla) ? &nu : &la;
+    const Index* mu     = (jnu > jla) ? &la : &nu;
 
+    const typename CUBEBASIS::Support* supp_lambda =
+      (jnu > jla) ? &(frame_->all_supports[nu.number()]) : &(frame_->all_supports[la.number()]);
 
-    // swap indices and supports if necessary
-    if (supp_mu_.j > supp_lambda_.j) {
-      tmp_ind = lambda;
-      lambda = mu;
-      mu = tmp_ind;
+    const typename CUBEBASIS::Support* supp_mu =
+      (jnu > jla) ? &(frame_->all_supports[la.number()]) : &(frame_->all_supports[nu.number()]);
 
-      tmp_supp = supp_lambda_;
-      supp_lambda_ = supp_mu_,
-	supp_mu_ = tmp_supp;
-    }
-
-    const typename CUBEBASIS::Support* supp_lambda = &supp_lambda_;
-    const typename CUBEBASIS::Support* supp_mu = &supp_mu_;
 
     const int N_Gauss = 3;
     
@@ -292,8 +243,8 @@ namespace FrameTL
     //#endif
     typedef typename IBASIS::Index Index_1D;
     
-    const Chart<DIM>* chart_la = frame_->atlas()->charts()[lambda.p()];
-    const Chart<DIM>* chart_mu = frame_->atlas()->charts()[mu.p()];
+    const Chart<DIM>* chart_la = frame_->atlas()->charts()[lambda->p()];
+    const Chart<DIM>* chart_mu = frame_->atlas()->charts()[mu->p()];
 
 #if 1
     // loop over spatial direction
@@ -304,15 +255,15 @@ namespace FrameTL
 	if (j == i)
 	  continue;
 	Index1D<IBASIS> i1(IntervalIndex<IBASIS> (
-						  lambda.j(),lambda.e()[j],lambda.k()[j],
-						  frame_->bases()[lambda.p()]->bases()[j]
+						  lambda->j(),lambda->e()[j],lambda->k()[j],
+						  frame_->bases()[lambda->p()]->bases()[j]
 						  ),
-			   lambda.p(),j,0
+			   lambda->p(),j,0
 			   );
-	Index1D<IBASIS> i2(IntervalIndex<IBASIS> (mu.j(),mu.e()[j],mu.k()[j],
-						  frame_->bases()[mu.p()]->bases()[j]
+	Index1D<IBASIS> i2(IntervalIndex<IBASIS> (mu->j(),mu->e()[j],mu->k()[j],
+						  frame_->bases()[mu->p()]->bases()[j]
 						  ),
-			   mu.p(),j,0
+			   mu->p(),j,0
 			   );
 	
 	
@@ -321,15 +272,15 @@ namespace FrameTL
       
       
       Index1D<IBASIS> i1(IntervalIndex<IBASIS> (
-						lambda.j(),lambda.e()[i],lambda.k()[i],
-						frame_->bases()[lambda.p()]->bases()[i]
+						lambda->j(),lambda->e()[i],lambda->k()[i],
+						frame_->bases()[lambda->p()]->bases()[i]
 						),
-			 lambda.p(),i,1
+			 lambda->p(),i,1
 			 );
-      Index1D<IBASIS> i2(IntervalIndex<IBASIS> (mu.j(),mu.e()[i],mu.k()[i],
-						frame_->bases()[mu.p()]->bases()[i]
+      Index1D<IBASIS> i2(IntervalIndex<IBASIS> (mu->j(),mu->e()[i],mu->k()[i],
+						frame_->bases()[mu->p()]->bases()[i]
 						),
-			 mu.p(),i,1
+			 mu->p(),i,1
 			 );
       
       t *= integrate(i1, i2, N_Gauss, i, supp_lambda, supp_mu);
@@ -358,15 +309,15 @@ namespace FrameTL
     // loop over spatial direction     
     for (int i = 0; i < (int) DIM; i++) {
       Index1D<IBASIS> i1(IntervalIndex<IBASIS> (
-						lambda.j(),lambda.e()[i],lambda.k()[i],
-						frame_->bases()[lambda.p()]->bases()[i]
+						lambda->j(),lambda->e()[i],lambda->k()[i],
+						frame_->bases()[lambda->p()]->bases()[i]
 						),
-			 lambda.p(),i,0
+			 lambda->p(),i,0
 			 );
-      Index1D<IBASIS> i2(IntervalIndex<IBASIS> (mu.j(),mu.e()[i],mu.k()[i],
-						frame_->bases()[mu.p()]->bases()[i]
+      Index1D<IBASIS> i2(IntervalIndex<IBASIS> (mu->j(),mu->e()[i],mu->k()[i],
+						frame_->bases()[mu->p()]->bases()[i]
 						),
-			 mu.p(),i,0
+			 mu->p(),i,0
 			 );
       s *= integrate(i1, i2, N_Gauss, i, supp_lambda, supp_mu);
     }

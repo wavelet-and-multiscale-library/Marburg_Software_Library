@@ -52,10 +52,10 @@ int main(int argc, char* argv[])
 
   const int DIM = 2;
 
-  const int jmax = 4;
+  const int jmax = 7;
 
   //typedef DSBasis<4,6> Basis1D;
-  typedef PBasis<3,3> Basis1D;
+  typedef PBasis<2,2> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
   typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
@@ -176,6 +176,12 @@ int main(int argc, char* argv[])
   PoissonBVP<DIM> poisson(&singRhs);
   //PoissonBVP<DIM> poisson(&const_fun);
 
+
+  clock_t tstart, tend;
+  double time;
+  tstart = clock();
+
+
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
   SimpleEllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax);
@@ -233,9 +239,7 @@ int main(int argc, char* argv[])
 
   InfiniteVector<double, Index> u_epsilon;
 
-  clock_t tstart, tend;
-  double time;
-  tstart = clock();
+
 
   
 

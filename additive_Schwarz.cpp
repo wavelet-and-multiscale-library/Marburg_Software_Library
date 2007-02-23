@@ -77,7 +77,7 @@ public:
     CornerSingularity sing2D(origin, 0.5, 1.5);
     CornerSingularityRHS singRhs(origin, 0.5, 1.5);
 
-    const int jmax = 4;
+    const int jmax = 7;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
@@ -93,8 +93,8 @@ public:
 
     EvaluateFrame<Basis1D,2,2> evalObj;
 
-    //double eta = 1.;
-    double eta = 0.00001;
+    double eta = 1.5;
+    //double eta = 0.00001;
 
     const int number_patches = P.basis().n_p();
 
@@ -115,7 +115,7 @@ public:
 
     //FixedArray1D<Vector<double>, 2> old_xk;
 
-    while (tmp > 0.0001) {
+    while (tmp > 0.0009) {
 
       cout << "reentering global loop " << endl;
 
@@ -125,10 +125,10 @@ public:
       r = f - help;
 
       //approximate residual
-      P.RHS(0., f);
+      P.RHS(1.0e-8, f);
       //cout << f << endl;
       //abort();
-      APPLY(P, u_k, 0., help, jmax, CDD1);
+      APPLY(P, u_k, 1.0e-8, help, jmax, CDD1);
       r_exact = f - help;
       
       //r_exact.COARSE(eta, r);
@@ -209,7 +209,7 @@ public:
       
 	cout << "r_1 size = " << r_i.size() << endl;
 	unsigned int iterations = 0;
-	CG(A_Lambda_i, F_Lambda_i, xk, 1.0e-15, 300, iterations);
+	CG(A_Lambda_i, F_Lambda_i, xk, 1.0e-15, 500, iterations);
 	cout << "CG done!!!!" << " Needed " << iterations << " iterations" << endl;
 
 	
@@ -226,7 +226,7 @@ public:
        
       global_iterations++;
       
-      eta *= 1;//0.8;
+      eta *= 0.5;
       
       
       u_epsilon = u_k;

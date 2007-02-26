@@ -144,6 +144,7 @@ namespace MathTL
   protected:
     Matrix<double> A_, A_inv;
     double det_A;
+    double square_root_of_abs_det_A;
     Point<DIM> b_;
   };
 
@@ -193,6 +194,7 @@ namespace MathTL
   protected:
     FixedArray1D<double,DIM> A_, A_inv;
     double det_A;
+    double square_root_of_abs_det_A;
     Point<DIM> b_;
     
     

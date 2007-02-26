@@ -46,6 +46,9 @@ namespace MathTL
       A_inv(1,1) = A_(0,0)/det_A;
       break;
     }
+    
+    square_root_of_abs_det_A = sqrt(fabs(det_A));
+
   }
 
   template <unsigned int DIM>
@@ -85,7 +88,8 @@ namespace MathTL
   inline
   const double
   AffineLinearMapping<DIM>::Gram_factor(const Point<DIM>& x) const {
-    return sqrt(fabs(det_A));
+    return square_root_of_abs_det_A;
+    //return sqrt(fabs(det_A));
   }
 
   template <unsigned int DIM>
@@ -149,6 +153,7 @@ namespace MathTL
       det_A *= A_[i];
       A_inv[i] = 1./A_[i];
     }
+    square_root_of_abs_det_A = sqrt(fabs(det_A));
   }
 
   template <unsigned int DIM>
@@ -171,7 +176,8 @@ namespace MathTL
   inline
   const double
   SimpleAffineLinearMapping<DIM>::Gram_factor(const Point<DIM>& x) const {
-    return sqrt(fabs(det_A));
+    return square_root_of_abs_det_A;
+    //return sqrt(fabs(det_A));
   }
 
   template <unsigned int DIM>

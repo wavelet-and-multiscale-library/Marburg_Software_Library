@@ -52,10 +52,10 @@ int main(int argc, char* argv[])
 
   const int DIM = 2;
 
-  const int jmax = 7;
+  const int jmax = 6;
 
   //typedef DSBasis<4,6> Basis1D;
-  typedef PBasis<2,2> Basis1D;
+  typedef PBasis<3,3> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
   typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;

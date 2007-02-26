@@ -1,9 +1,9 @@
-
 #include <iostream>
 #include <time.h> 
 #include <interval/ds_basis.h>
 #include <interval/p_basis.h>
-#include "elliptic_equation.h"
+//#include <elliptic_equation.h>
+#include <simple_elliptic_equation.h>
 #include <algebra/sparse_matrix.h>
 #include <algebra/infinite_vector.h>
 #include <numerics/iteratsolv.h>
@@ -27,7 +27,8 @@ using std::cout;
 using std::endl;
 
 using FrameTL::FrameIndex;
-using FrameTL::EllipticEquation;
+//using FrameTL::EllipticEquation;
+using FrameTL::SimpleEllipticEquation;
 using FrameTL::EvaluateFrame;
 using FrameTL::AggregatedFrame;
 using MathTL::EllipticBVP;
@@ -100,8 +101,10 @@ int main()
   
   const int DIM = 1;
 
+  const int jmax = 16;
+
   //typedef DSBasis<2,2> Basis1D;
-  typedef PBasis<3,5> Basis1D;
+  typedef PBasis<3,3> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
@@ -219,7 +222,7 @@ int main()
 
   //finally a frame can be constructed
   //Frame1D frame(&Lshaped, bc, bcT, 8);
-  Frame1D frame(&Lshaped, bc, 14);
+  Frame1D frame(&Lshaped, bc, jmax);
 
   Vector<double> value(1);
   value[0] = 1;
@@ -235,13 +238,21 @@ int main()
   //PoissonBVP<DIM> poisson(&const_fun);
   PoissonBVP<DIM> poisson(&sing1D);
 
-  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
+
+  SimpleEllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax);
+  //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
   //  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 4.19, 1.0/0.146);
 
 
+//   // (d,dT) = (3,5)
+//   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.6548, 1.0/0.146);
+//   discrete_poisson.set_norm_A(3.6548);
+//   // optimistic guess:
+//   discrete_poisson.set_Ainv(1.0/0.146);
+
   // (d,dT) = (3,5)
-  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.6548, 1.0/0.146);
+  CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.6548, 1.0/0.146);
   discrete_poisson.set_norm_A(3.6548);
   // optimistic guess:
   discrete_poisson.set_Ainv(1.0/0.146);

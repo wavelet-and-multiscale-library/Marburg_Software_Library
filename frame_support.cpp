@@ -33,6 +33,10 @@ namespace FrameTL
     return ! (lt(x,y) || eq(x,y));
   }
 
+  inline bool leq (const double x, const double y)
+  {
+    return lt(x,y) || eq(x,y);
+  }
 
 
   template <unsigned int DIM>
@@ -359,6 +363,7 @@ namespace FrameTL
 	chart_la->map_point(Point<DIM_d>(supp_ind->a[0]*dx1), a);
 	chart_la->map_point(Point<DIM_d>(supp_ind->b[0]*dx1), b);
       }
+      all_patch_supports[i].j = supp_ind->j;
       all_patch_supports[i].a = a;
       all_patch_supports[i].b = b;
     }
@@ -695,19 +700,24 @@ namespace FrameTL
 
     hyperCube_intersect[0] = std::max(supp_lambda->a[dir]*dx1,y0);
     hyperCube_intersect[1] = std::min(supp_lambda->b[dir]*dx1,y1);
+
+    //cout << "left end = " << hyperCube_intersect[0] << " right end = " << hyperCube_intersect[1] << endl;
+
     
     if ( hyperCube_intersect[0] >= hyperCube_intersect[1]  )
       return false;
     
     // we just need some kind of a sorted list
-    list<double> irregular_grid;
-    list<double> irregular_grid_tmp;
+    std::list<double> irregular_grid;
+    std::list<double> irregular_grid_tmp;
 
     // collect gridpoints for all directions,
     // we have to do this for both patches  
     for (int k = supp_lambda->a[dir]; k <= supp_lambda->b[dir]; k++) {
       double d = k*dx1;
-      if ( hyperCube_intersect[0] <= d && d <= hyperCube_intersect[1]) {
+      //cout << "d = " << d << endl;
+      //if ( hyperCube_intersect[0] <= d && d <= hyperCube_intersect[1]) {
+      if ( leq(hyperCube_intersect[0],d) && leq(d,hyperCube_intersect[1])) {
 	irregular_grid.push_back(d);
       }
     }
@@ -719,32 +729,41 @@ namespace FrameTL
     //for (unsigned int i = 0; i < DIM_d; i++) {
     for (int k = supp_mu->a[dir]; k <= supp_mu->b[dir]; k++) {
       x = k*dx2;
-      
+      //cout << "x = " << x << endl;
       x_patch = chart_mu->map_point(x, dir);
       y0 = chart_la->map_point_inv(x_patch, dir);
 
-      if ( hyperCube_intersect[0] <= y0 &&  y0 <= hyperCube_intersect[1]){
+      //if ( hyperCube_intersect[0] <= y0 &&  y0 <= hyperCube_intersect[1]){
+      if ( leq(hyperCube_intersect[0],y0) &&  leq(y0,hyperCube_intersect[1])){
 	irregular_grid.push_back(y0);
       }
     }
     x = supp_mu->a[dir]*dx2;
     irregular_grid.sort();    
     
-    double old = -1.;
+    supp_intersect.resize(irregular_grid.size());
+    unsigned int j = 0;
     for (list<double>::const_iterator it = irregular_grid.begin();
 	 it != irregular_grid.end(); ++it) {
-      if (! (fabs(old-*it) < 1.0e-13))
-	irregular_grid_tmp.push_back(*it);
-      old = *it;
-    }
-    
-    supp_intersect.resize(irregular_grid_tmp.size());
-    unsigned int j = 0;
-    for (list<double>::const_iterator it = irregular_grid_tmp.begin();
-	 it != irregular_grid_tmp.end(); ++it) {
       supp_intersect[j] = *it;
       j++;
     }
+
+//     double old = -1.;
+//     for (list<double>::const_iterator it = irregular_grid.begin();
+// 	 it != irregular_grid.end(); ++it) {
+//       if (! (fabs(old-*it) < 1.0e-13))
+// 	irregular_grid_tmp.push_back(*it);
+//       old = *it;
+//     }
+    
+//     supp_intersect.resize(irregular_grid_tmp.size());
+//     unsigned int j = 0;
+//     for (list<double>::const_iterator it = irregular_grid_tmp.begin();
+// 	 it != irregular_grid_tmp.end(); ++it) {
+//       supp_intersect[j] = *it;
+//       j++;
+//     }
     return true;
 
   }

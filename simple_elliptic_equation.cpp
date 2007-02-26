@@ -147,7 +147,16 @@ namespace FrameTL
 	// compute 1D irregular grid
 	Array1D<double> irregular_grid;
 
+	
+
 	bool b = intersect_supports_1D<IBASIS,DIM>(*frame_, lambda, mu, supp_lambda, supp_mu, dir, irregular_grid);
+
+// 	for (int i = 0; i < irregular_grid.size(); i++) {
+// 	  cout << "tick at: " << irregular_grid[i] << endl;
+// 	}
+
+// 	cout << "intersect 1D = " << b << endl;
+
 	if (!b)
 	  return 0.0;
 
@@ -232,7 +241,10 @@ namespace FrameTL
     const typename CUBEBASIS::Support* supp_mu =
       (jnu > jla) ? &(frame_->all_supports[la.number()]) : &(frame_->all_supports[nu.number()]);
 
-
+//     cout << "jla = " << jla << " jnu = " << jnu << endl;
+//     cout << "a_la = " << supp_lambda->a[0] << " b_la  = " << supp_lambda->b[0] << endl;
+//     cout << "a_mu = " << supp_mu->a[0] << " b_mu  = " << supp_mu->b[0] << endl;
+    
     const int N_Gauss = 3;
     
     //#if _FRAMETL_ADAPTIVE_COMPUTATION == 1
@@ -282,6 +294,8 @@ namespace FrameTL
 						),
 			 mu->p(),i,1
 			 );
+
+      
       
       t *= integrate(i1, i2, N_Gauss, i, supp_lambda, supp_mu);
       

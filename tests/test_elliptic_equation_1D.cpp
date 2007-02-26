@@ -3,7 +3,8 @@
 #include <time.h> 
 #include <interval/ds_basis.h>
 #include <interval/p_basis.h>
-#include "elliptic_equation.h"
+//#include "elliptic_equation.h"
+#include <simple_elliptic_equation.h>
 #include <algebra/sparse_matrix.h>
 #include <algebra/infinite_vector.h>
 #include <numerics/iteratsolv.h>
@@ -23,7 +24,8 @@ using std::endl;
 
 
 using FrameTL::FrameIndex;
-using FrameTL::EllipticEquation;
+//using FrameTL::EllipticEquation;
+using FrameTL::SimpleEllipticEquation;
 using FrameTL::EvaluateFrame;
 using FrameTL::AggregatedFrame;
 using MathTL::EllipticBVP;
@@ -119,10 +121,10 @@ int main()
   cout << "Testing class EllipticEquation..." << endl;
   
   const int DIM   = 1;
-  const int jmax = 7;
+  const int jmax = 10;
 
-  typedef DSBasis<3,3> Basis1D;
-  //typedef PBasis<2,2> Basis1D;
+  //typedef DSBasis<2,2> Basis1D;
+  typedef PBasis<2,2> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
@@ -132,7 +134,7 @@ int main()
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 1.;
+  A(0,0) = 0.7;
   Point<1> b;
   b[0] = 0.;
   AffineLinearMapping<1> affineP(A,b);
@@ -154,21 +156,21 @@ int main()
 
   //##############################
   
-  Array1D<Chart<DIM,DIM>* > charts(1);
+  Array1D<Chart<DIM,DIM>* > charts(2);
   charts[0] = &affineP;
-  //charts[1] = &affineP2;
+  charts[1] = &affineP2;
 
   //charts[0] = &simpleaffine1;
   //charts[1] = &simpleaffine2;
   
-  SymmetricMatrix<bool> adj(1);
+  SymmetricMatrix<bool> adj(2);
   adj(0,0) = 1;
-//   adj(1,1) = 1;
-//   adj(1,0) = 1;
-//   adj(0,1) = 1;
+  adj(1,1) = 1;
+  adj(1,0) = 1;
+  adj(0,1) = 1;
   
   //to specify primal boundary the conditions
-  Array1D<FixedArray1D<int,2*DIM> > bc(1);
+  Array1D<FixedArray1D<int,2*DIM> > bc(2);
 
   //primal boundary conditions for first patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_1;
@@ -179,13 +181,13 @@ int main()
 
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
-  bound_2[0] = 2;
+  bound_2[0] = 1;
   bound_2[1] = 1;
 
-  //bc[1] = bound_2;
+  bc[1] = bound_2;
 
 //to specify primal boundary the conditions
-  Array1D<FixedArray1D<int,2*DIM> > bcT(1);
+  Array1D<FixedArray1D<int,2*DIM> > bcT(2);
 
   //dual boundary conditions for first patch
   FixedArray1D<int,2*DIM> bound_3;
@@ -199,14 +201,14 @@ int main()
   bound_4[0] = 0;
   bound_4[1] = 0;
  
-  //bcT[1] = bound_4;
+  bcT[1] = bound_4;
 
   Atlas<DIM,DIM> Lshaped(charts,adj);  
   cout << Lshaped << endl;
 
   //finally a frame can be constructed
-  Frame1D frame(&Lshaped, bc, bcT, jmax);
-  //Frame1D frame(&Lshaped, bc, jmax);
+  //Frame1D frame(&Lshaped, bc, bcT, jmax);
+  Frame1D frame(&Lshaped, bc, jmax);
 
   Vector<double> value(1);
   value[0] = 1;
@@ -215,16 +217,18 @@ int main()
   Singularity1D_2<double> exactSolution;
   Singularity1D_RHS_2<double> sing1D;
   
-  PoissonBVP<DIM> poisson(&const_fun);
-  //PoissonBVP<DIM> poisson(&sing1D);
+  //PoissonBVP<DIM> poisson(&const_fun);
+  PoissonBVP<DIM> poisson(&sing1D);
   //IdentityBVP<DIM> trivial_bvp(&const_fun);
   //IdentityBVP<DIM> trivial_bvp(&exactSolution);
 
-  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
+  SimpleEllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax);
+  //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&trivial_bvp, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
   
-  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 4.19, 1.0/0.146);
+  //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 4.19, 1.0/0.146);
+  CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 4.19, 1.0/0.146);
 
   double tmp = 0.0;
   int c = 0;
@@ -234,6 +238,13 @@ int main()
   
   //############### 1D galerkin scheme test ##################
 #if 1
+
+
+//   double val1 = discrete_poisson.a(*(frame.get_wavelet(1)), *(frame.get_wavelet(2)));
+//   cout << "value = " << val1 << endl;
+//   val1 = discrete_poisson.a(*(frame.get_wavelet(2)), *(frame.get_wavelet(1)));
+//   cout << "value = " << val1 << endl;
+//   abort();
 
   int z = 0;
   set<Index> Lambda;
@@ -291,21 +302,21 @@ int main()
   Vector<double> xk(Lambda.size()); xk = 0;
 
 
-//   for (int i = 0; i < 30 ; i++) 
-//     for (int j = 0; j < 30 ; j++) {
-//       if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
-// 	cout << stiff.get_entry(i,j) << endl;
-// 	cout << stiff.get_entry(j,i) << endl;
-// 	cout << "i = " << i << " j = " << j << endl;
-// 	//abort();
-// 	cout << "#######################" << endl;
-//       }
-//     } 
+  for (int i = 0; i < 200 ; i++) 
+    for (int j = 0; j < 200 ; j++) {
+      if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
+	cout << stiff.get_entry(i,j) << endl;
+	cout << stiff.get_entry(j,i) << endl;
+	cout << "i = " << i << " j = " << j << endl;
+	//abort();
+	cout << "#######################" << endl;
+      }
+    } 
 
   double alpha_n = 0.07;
   Vector<double> resid(xk.size());
   Vector<double> help(xk.size());
-  for (int i = 0; i < 10000; i++) {
+  for (int i = 0; i < 3000; i++) {
     stiff.apply(xk,help);
     resid = rh - help;
     cout << ".loop = " << i << " " << " res = " << sqrt((resid*resid)) << endl;

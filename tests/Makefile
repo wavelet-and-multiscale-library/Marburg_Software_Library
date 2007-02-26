@@ -55,9 +55,11 @@ endif
 EXEOBJF = test_steepest_descent_2D.o\
 test_simple_elliptic_equation.o\
 test_multiplicative_Schwarz.o\
-#test_elliptic_equation.o
+test_multiplicative_Schwarz_1D.o\
+test_elliptic_equation_1D.o\
+test_elliptic_equation.o
 #test_biharmonic_equation_1D.o
-#test_elliptic_equation_1D.o\
+
 
 
 EXES = $(EXEOBJF:.o=)

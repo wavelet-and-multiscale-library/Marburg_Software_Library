@@ -111,6 +111,7 @@ namespace FrameTL
       hypercube and the respective patch chart.
     */
     typedef struct {
+      int j;
       Point<DIM_d> a;
       Point<DIM_d> b;
     } Support;

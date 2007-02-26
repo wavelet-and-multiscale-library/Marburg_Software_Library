@@ -77,7 +77,7 @@ public:
     CornerSingularity sing2D(origin, 0.5, 1.5);
     CornerSingularityRHS singRhs(origin, 0.5, 1.5);
 
-    const int jmax = 7;
+    const int jmax = 6;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();

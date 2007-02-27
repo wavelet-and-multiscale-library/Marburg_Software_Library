@@ -311,20 +311,7 @@ namespace WaveletTL
     return normAinv;
   }
 
-  template <class PROBLEM>
-  void
-  CachedProblem<PROBLEM>::apply(const std::set<int>& window, const Vector<double>& x,
-				Vector<double>& res) const
-  {
-    //     for (typename std::set<Index>::const_iterator iter = window.begin(); iter != window.end(); iter++) {
-    //       cout << *iter << endl;
-    //     }
-    //cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-    res.resize(x.size());
-    typedef typename Index::type_type generator_type;
-
-    typename std::set<int>::const_iterator win_it_col = window.begin();
-    unsigned int l = 0;
+  // ############## THE FOLLOWING TWO ROUTINES ARE PURELY EXPERIMENTAL AT THE MOMENT! ###########
 
 //     // determining the first index of a new level in the index set
 //     list<int> level_pos;
@@ -343,47 +330,76 @@ namespace WaveletTL
 // 	level_pos.push_back(*win_it);
 //     }
     
+// 	typename list<int>::const_iterator level_pos_it = level_pos.begin();
+// 	level_pos_it++; // starting position of second level occuring
+
+  template <class PROBLEM>
+  void
+  CachedProblem<PROBLEM>::apply(const std::set<int>& window, const Vector<double>& x,
+				Vector<double>& res) const
+  {
+//     for (typename std::set<int>::const_iterator iter = window.begin(); iter != window.end(); iter++) {
+//       cout << *(problem->basis().get_wavelet(*iter)) << endl;
+//     }
+//     cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+    res.resize(x.size());
+    typedef typename Index::type_type generator_type;
+    // cout << " size = " << entries_cache.size() << endl;  
+    if (entries_cache.size() == 0) {
+      unsigned int l = 0;
+      for (typename std::set<int>::const_iterator win_it_col = window.begin(); win_it_col != window.end(); win_it_col++, l++) {
+	const double d1 = problem->D(*(problem->basis().get_wavelet(*win_it_col)));
+	unsigned int k = 0;
+	for (typename std::set<int>::const_iterator win_it_row = window.begin(); win_it_row != window.end(); win_it_row++, k++) {
+	  res[k] += x[l] * this->a(*(problem->basis().get_wavelet(*win_it_row)),*(problem->basis().get_wavelet(*win_it_col)))
+	    / (d1*problem->D(*(problem->basis().get_wavelet(*win_it_row))));
+	}
+      }
+      return;
+    }
+
+    typename std::set<int>::const_iterator win_it_col = window.begin();
+    unsigned int l = 0;
+
     for (typename ColumnCache::iterator col_it = entries_cache.begin();
 	 col_it != entries_cache.end(); col_it++) {
-      //        cout << "doing column " << col_it->first << endl;
       if (col_it->first < *win_it_col) {
 	continue;
       }
-      // this case is fine
       else if (col_it->first > *win_it_col){
-	cout << "inserting column " << *win_it_col << endl;
-	const double d1 = problem->D(*(problem->basis().get_wavelet(col_it->first)));
+	//	cout << "inserting column " << *win_it_col << endl;
+	const double d1 = problem->D(*(problem->basis().get_wavelet(*win_it_col)));
 	unsigned int k = 0;
 	for (typename std::set<int>::const_iterator win_it_row = window.begin();
 	     win_it_row != window.end(); win_it_row++, k++) {
-	  res[k] += x[l] * problem->a(*(problem->basis().get_wavelet(*win_it_row)),
-				      *(problem->basis().get_wavelet(*win_it_col)))
-	    / (d1*problem->D(*(problem->basis().get_wavelet(*win_it_col))));
+	  res[k] += x[l] * this->a(*(problem->basis().get_wavelet(*win_it_row)),
+			     *(problem->basis().get_wavelet(*win_it_col)))
+	    / (d1*problem->D(*(problem->basis().get_wavelet(*win_it_row))));
 	}
+	col_it--;
+// 	cout << "column should be " << (*win_it_col) << " and it is " << col_it->first << endl;
+// 	cout << "done inserting column " << (*win_it_col) << endl;
 	win_it_col++;
 	l++;
-	col_it--;
-	cout << "done inserting column " << (*win_it_col) << endl;
-	if(win_it_col == window.end())
+	if(l == res.size())
 	  return;
       }
       else if (col_it->first == *win_it_col) {
 	typename std::set<int>::const_iterator win_it_row = window.begin();
 	unsigned int k = 0;
 	
-// 	typename list<int>::const_iterator level_pos_it = level_pos.begin();
-// 	level_pos_it++; // starting position of second level occuring
 	for (typename Column::const_iterator block_it = (col_it->second).begin();
 	     block_it != (col_it->second).end(); block_it++) {
 
-
 	  const Index* rowind = problem->basis().get_wavelet(*win_it_row);
+
 	  int j = (rowind->e() == generator_type()) ? (rowind->j()-1) : rowind->j();
+
 	  if (block_it->first < j) {
 	    continue;
 	  }
 	  else if (block_it->first > j) { // insert this block!
-	    cout << "inserting level " << j << endl;
+	    //	    cout << "inserting level " << j << endl;
 	    Column& col(col_it->second);
 	    typename Column::iterator lb(col.lower_bound(j));
 	    typename Column::iterator it(lb);
@@ -400,11 +416,12 @@ namespace WaveletTL
 	     
 	    for (typename std::list<Index>::const_iterator it(nus.begin()), itend(nus.end());
 		 it != itend; ++it) {
-
+	      //	      cout << "nonzero entry at " << (*it).number() << endl;
 	      while (*win_it_row < (*it).number() && win_it_row != window.end()) {
 		win_it_row++;
 		k++;
 	      }
+	      //	      cout << "k=" << k << endl;
 	      const double entry = problem->a(*it, problem->basis().get_wavelet(col_it->first));
 	      typedef typename Block::value_type value_type_block;
 	      if (entry != 0.)
@@ -431,41 +448,37 @@ namespace WaveletTL
 	      break;
 	  }
 	  else if (block_it->first == j) { // extract existing block!
-	    //cout << "extracting level " << j << endl;
+	    //	    cout << "extracting level " << j << " in column " << col_it->first << endl;
 	    const double d1 = problem->D(*(problem->basis().get_wavelet(col_it->first)));
 	    for (typename Block::const_iterator it = block_it->second.begin(); it != block_it->second.end(); ++it) {
-	      // 	       cout << "nonzero entry in row " << it->first << endl;
+	      //	      cout << "nonzero entry in row " << it->first << endl;
 	      const Index* ind = problem->basis().get_wavelet(it->first);
 	      while (*win_it_row < ind->number() && k < res.size()) {
 		win_it_row++;
 		k++;
 	      }
-	      // 	       cout << "k = " << k << endl;
+	      //	      cout << "k = " << k << endl;
 	      if (k == res.size())
 		break;
 	      // at this point holds either (*win_it_row).number() < (*it).number() or (*win_it_row).number() == (*it).number()
 	      if ( *win_it_row == ind->number() ) {
-		const double entry = it->second;
-		if (entry != 0.)
-		  res[k] += x[l] * (entry / (d1*problem->D(*ind)));
+		//		cout << "putting row " << *win_it_row << endl;
+		res[k] += x[l] * (it->second / (d1*problem->D(*ind)));
 	      }
-	      if (k == res.size())
-		break;
+	    
 	    }// end loop over level block
 	    if (k == res.size())
 	      break;
-	    // 	     cout << "leaving the level " << endl;
+	    //cout << "leaving the level " << endl;
 	    // leaving this level
-	    //	    while ( k < *level_pos_it && k < res.size()) {
 	    while ( (( problem->basis().get_wavelet(*win_it_row)->e() == generator_type()) ?
 		     ( problem->basis().get_wavelet(*win_it_row)->j()-1) :
 		     problem->basis().get_wavelet(*win_it_row)->j()) == j
 		    && k < res.size()) {
-	      //cout << "kk = " << k << endl;
+	      //	      cout << "kk = " << k << endl;
 	      win_it_row++;
 	      k++;
 	    }
-	    //level_pos_it++;
 	    if (k == res.size())
 	      break;
 	  }// end else if (block_it->first == j)
@@ -476,7 +489,21 @@ namespace WaveletTL
 	  return;
       }// end if existing column found
     }// end loop over all columns in cache
-    //cout << "#####################################################################################" << endl;
+
+    // insert the remaining columns
+    while (l < res.size()) {
+      //      cout << "inserting column " << *win_it_col << endl;
+      const double d1 = problem->D(*(problem->basis().get_wavelet(*win_it_col)));
+      unsigned int k = 0;
+      for (typename std::set<int>::const_iterator win_it_row = window.begin();
+	   win_it_row != window.end(); win_it_row++, k++) {
+	res[k] += x[l] * this->a(*(problem->basis().get_wavelet(*win_it_row)),
+				 *(problem->basis().get_wavelet(*win_it_col)))
+	  / (d1*problem->D(*(problem->basis().get_wavelet(*win_it_row))));
+      }
+      win_it_col++;
+      l++;
+    }
   }
   
   template <class PROBLEM>
@@ -511,6 +538,7 @@ namespace WaveletTL
 	  pk.sadd(rhok/oldrhok, zk);
 	//cout << "entering windowed matrix vector product..." << endl;
 	apply(window, pk, Apk);
+	
 	//cout << "done windowed matrix vector product..." << endl;
 	//cout << Apk << endl;
 	const double alpha = rhok/(pk*Apk);

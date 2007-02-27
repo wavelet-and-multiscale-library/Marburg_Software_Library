@@ -124,7 +124,7 @@ int main()
   const int jmax = 10;
 
   //typedef DSBasis<2,2> Basis1D;
-  typedef PBasis<2,2> Basis1D;
+  typedef PBasis<3,3> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;

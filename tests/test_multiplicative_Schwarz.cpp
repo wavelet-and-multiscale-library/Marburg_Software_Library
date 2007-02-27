@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
 
   const int DIM = 2;
 
-  const int jmax = 6;
+  const int jmax = 4;
 
   //typedef DSBasis<4,6> Basis1D;
   typedef PBasis<3,3> Basis1D;
@@ -240,8 +240,17 @@ int main(int argc, char* argv[])
   InfiniteVector<double, Index> u_epsilon;
 
 
-
+//   set<Index> Lambda;
+//   for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
+//        lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, jmax); ++lambda) {
+//     Lambda.insert(lambda);
+//     //cout << lambda << endl;
+//   }
   
+//   SparseMatrix<double> stiff;
+  
+//   WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
+
 
   //multiplicative_Schwarz_SOLVE(problem, epsilon, u_epsilon);
   additive_Schwarz_SOLVE(problem, epsilon, u_epsilon);

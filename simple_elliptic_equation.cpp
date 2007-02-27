@@ -304,15 +304,8 @@ namespace FrameTL
       r += t;
     }
     
-    double tmp1 = 1., tmp2 = 1.;
-    
-    for (unsigned int i = 0; i < DIM; i++) {
-      tmp1 *= chart_la->a_i(i);
-      tmp2 *= chart_mu->a_i(i);
-    }
-    tmp1 = sqrt(fabs(tmp1)) / sqrt(fabs(tmp2));
-    r *= tmp1;
-    
+    r *= chart_la->Gram_factor(Point<DIM>()) / chart_mu->Gram_factor(Point<DIM>());
+
 #else
     // at this point the integration of the principal part of the operator has been
     // finished

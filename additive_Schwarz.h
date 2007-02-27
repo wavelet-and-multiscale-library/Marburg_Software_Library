@@ -17,8 +17,8 @@ namespace FrameTL
   /*!
   */
   template <class PROBLEM>
-  void addtive_Schwarz_SOLVE(const PROBLEM& P, const double epsilon,
-				    InfiniteVector<double, typename PROBLEM::Index>& u_epsilon);
+  void addtive_Schwarz_SOLVE(PROBLEM& P, const double epsilon,
+			     InfiniteVector<double, typename PROBLEM::Index>& u_epsilon);
 }
 
 #include <additive_Schwarz.cpp>

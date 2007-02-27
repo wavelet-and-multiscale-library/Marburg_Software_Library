@@ -64,7 +64,7 @@ public:
 
 
   template <class PROBLEM>
-  void  additive_Schwarz_SOLVE(const PROBLEM& P,  const double epsilon,
+  void  additive_Schwarz_SOLVE(PROBLEM& P,  const double epsilon,
 			       InfiniteVector<double, typename PROBLEM::Index>& u_epsilon)
   {
     //typedef DSBasis<2,2> Basis1D;
@@ -77,7 +77,7 @@ public:
     CornerSingularity sing2D(origin, 0.5, 1.5);
     CornerSingularityRHS singRhs(origin, 0.5, 1.5);
 
-    const int jmax = 6;
+    const int jmax = 4;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
@@ -164,22 +164,23 @@ public:
       for (int i = 0; i < number_patches; i++) {
 	cout << "doing patch " << i << endl;
 	set<Index> local_index_set;
-
+	set<int> local_index_set2;
 	typename set<Index>::const_iterator it = Lambda.begin();
 
 	for (; it != Lambda.end(); ++it) {
 	  if ((*it).p() == i) {
 	    local_index_set.insert(*it);
+	    local_index_set2.insert((*it).number());
 	  }
 	}
 	
 	if (local_index_set.size() == 0)
 	  continue;
 
-	// setup local stiffness matrix
-	cout << "setting up full stiffness matrix..." << endl;
-	SparseMatrix<double> A_Lambda_i;
-	WaveletTL::setup_stiffness_matrix(P, local_index_set, A_Lambda_i);
+// 	// setup local stiffness matrix
+// 	cout << "setting up full stiffness matrix..." << endl;
+// 	SparseMatrix<double> A_Lambda_i;
+// 	WaveletTL::setup_stiffness_matrix(P, local_index_set, A_Lambda_i);
 	
 	
 	// setup local right hand side
@@ -209,7 +210,9 @@ public:
       
 	cout << "r_1 size = " << r_i.size() << endl;
 	unsigned int iterations = 0;
-	CG(A_Lambda_i, F_Lambda_i, xk, 1.0e-15, 500, iterations);
+	//CG(A_Lambda_i, F_Lambda_i, xk, 1.0e-15, 500, iterations);
+	//P.CG(local_index_set, F_Lambda_i, xk, 1.0e-15, 500, iterations);
+	P.CG(local_index_set2, F_Lambda_i, xk, 1.0e-15, 500, iterations);
 	cout << "CG done!!!!" << " Needed " << iterations << " iterations" << endl;
 
 	

@@ -25,6 +25,7 @@ namespace WaveletTL
     // Remark: it is possible to perform binary binning without actually assembling
     // the bins, however, in this first version we do setup the bins to avoid
     // unnecessary difficulties
+    cout << "entering apply..." << endl;
 
     //cout << "size = " << v.size() << endl;
     if (v.size() > 0) {
@@ -98,6 +99,8 @@ namespace WaveletTL
       // Below we will then copy ww into the sparse vector w.
       // Probably this will be handled in a more elegant way in the near future.
 
+      cout << "done binning in apply..." << endl;
+
       Vector<double> ww(P.basis().degrees_of_freedom());
 
       //cout << *(P.basis().get_wavelet(4000)) << endl;
@@ -117,8 +120,7 @@ namespace WaveletTL
       // copy ww into w
       for (unsigned int i = 0; i < ww.size(); i++) {
 	if (ww[i] != 0.) {
-	  Index ind(P.basis().get_wavelet(i));
-	  w.set_coefficient(ind, ww[i]);
+	  w.set_coefficient(*(P.basis().get_wavelet(i)), ww[i]);
 	}
       }
     }

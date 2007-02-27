@@ -134,6 +134,22 @@ namespace WaveletTL
 	     InfiniteVector<double, Index>& coeffs) const {
       problem->RHS(eta, coeffs);
     }
+
+
+    /*!
+      applys the galerkin system matrix corresponding to the given index set
+      'window' to vector x. Missing entries will be computed
+    */
+    void apply(const std::set<int>& window, const Vector<double>& x,
+	       Vector<double>& res) const;
+
+    /*!
+      applys the galerkin system matrix corresponding to the given index set
+      'window' to vector x. Missing entries will be computed
+    */
+    bool CG(const std::set<int>& window, const Vector<double> &b, Vector<double> &xk,
+	    const double tol, const unsigned int maxiter, unsigned int& iterations);
+
     
     /*!
       compute (or estimate) ||F||_2
@@ -156,7 +172,6 @@ namespace WaveletTL
     const PROBLEM* problem;
    
     // type of one block in one column of stiffness matrix  A
-    //typedef std::map<Index, double> Block;
     typedef std::map<int, double> Block;
     
     // type of one column in the entry cache of A

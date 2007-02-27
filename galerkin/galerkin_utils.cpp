@@ -1,6 +1,6 @@
 // implementation for galerkin_utils.h
 
-#define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
 
 namespace WaveletTL
 {
@@ -32,7 +32,7 @@ namespace WaveletTL
 	     it2 != itend; ++it2, ++column)
 	  {
 	    // 	    if (intersect_singular_support(P.basis(), *it1, *it2)) {
-	    const double entry = P.a(*it2, *it1);
+	    double entry = P.a(*it2, *it1);
 	    
 	    //const double entry = 0;
 #if _WAVELETTL_GALERKINUTILS_VERBOSITY >= 2

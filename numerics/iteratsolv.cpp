@@ -199,6 +199,7 @@ namespace MathTL
     const double normr0 = l2_norm_sqr(rk);
     double normrk = normr0, rhok = 0, oldrhok = 0;
     for (iterations = 1; normrk/normr0 > tol*tol && iterations <= maxiter; iterations++)
+    //for (iterations = 1; normrk > tol*tol && iterations <= maxiter; iterations++)
       {
 	P.apply_preconditioner(rk, zk);
 	rhok = rk * zk;
@@ -213,6 +214,8 @@ namespace MathTL
 	xk.add(-alpha,  pk);
 	rk.add(-alpha, Apk);
 	normrk = l2_norm_sqr(rk);
+
+	//cout << "normrk = " << sqrt(normrk) << endl;
 
 	oldrhok = rhok;
       }

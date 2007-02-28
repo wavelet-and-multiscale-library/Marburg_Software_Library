@@ -1,5 +1,3 @@
-
-#include <map>
 #include <fstream>
 #include <iostream>
 #include <time.h> 
@@ -7,7 +5,7 @@
 #include <interval/p_basis.h>
 #include <numerics/corner_singularity_biharmonic.h>
 //#include <elliptic_equation.h>
-#include <biharmonic_equation.h>
+#include <simple_biharmonic_equation.h>
 #include <algebra/sparse_matrix.h>
 #include <algebra/infinite_vector.h>
 #include <numerics/iteratsolv.h>
@@ -20,14 +18,14 @@
 #include <frame_support.h>
 #include <numerics/eigenvalues.h>
 //#include <biharmonic_rhs.h>
-#include <numerics/bvp.h>
+//#include <numerics/bvp.h>
 
 using std::cout;
 using std::endl;
 
 using FrameTL::EvaluateFrame;
 //using FrameTL::EllipticEquation;
-using FrameTL::BiharmonicEquation;
+using FrameTL::SimpleBiharmonicEquation;
 using FrameTL::AggregatedFrame;
 using MathTL::EllipticBVP;
 using MathTL::PoissonBVP;
@@ -54,7 +52,7 @@ template <class C>
     for(int i=0; i< v.size(); i++)
       S.set_entry( 0, i, v[i]);
 
-    S.matlab_output("Rhs_2D_jmax5_b3_mod", "Matrix", 1);
+    S.matlab_output("Rhs_2D_jmax6_b3_mod", "Matrix", 1);
  
   }
   
@@ -62,7 +60,7 @@ template <class C>
   void Rhs_input(Vector<C> &v)
   {
     SparseMatrix<C> S;
-    S.matlab_input("Rhs_2D_jmax6_b4");
+    S.matlab_input("Rhs_2D_jmax6_b3_mod");
     v.resize(S.row_dimension());
     for(int i=0; i< S.row_dimension(); i++)
      v[i] =S.get_entry( 0, i);
@@ -75,7 +73,7 @@ int main()
   cout << "Testing class BiharmonicEquation..." << endl;
   
   const int DIM = 2;
-  const int jmax = 5; 
+  const int jmax = 6; 
   //typedef DSBasis<4,6> Basis1D;
   typedef PBasis<3,3> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
@@ -200,9 +198,9 @@ int main()
 
   BiharmonicBVP<DIM> biharmonic(&singRhs);
   
-  BiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharmonic, &frame,jmax, TrivialAffine);  
+  SimpleBiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharmonic, &frame,jmax, TrivialAffine);  
 
-  CachedProblem<BiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 5.0048, 1.0/0.01);
+  CachedProblem<SimpleBiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 7, 1.0/0.01);
 
 //   double tmp = 0.0;
 //   int c = 0;
@@ -222,10 +220,10 @@ int main()
   
   cout << "setting up full right hand side..." << endl;
   Vector<double> rh;
-  //Rhs_input(rh);
-  WaveletTL::setup_righthand_side(discrete_biharmonic, Lambda, rh);
+  Rhs_input(rh);
+  //WaveletTL::setup_righthand_side(discrete_biharmonic, Lambda, rh);
   cout << rh << endl;
-#if 0
+#if 1
   cout << "setting up full stiffness matrix..." << endl;
   SparseMatrix<double> stiff;
 
@@ -273,48 +271,39 @@ int main()
   Vector<double> resid(xk.size());
   Vector<double> help(xk.size());
 
-  for (int i = 0; i < 1500;i++) {
-    stiff.apply(xk,help);
-    resid = rh - help;
-    cout << "i = " << i << " " << sqrt(resid*resid) << endl;
-    stiff.apply(resid,help);
-    alpha_n = (resid * resid) * (1.0 / (resid * help));
-    resid *= alpha_n;
-    xk = xk + resid;
-  }
-
-//   for (int i = 0; i < 450; i++) 
-//     for (int j = 0; j < 450; j++) {
-//       if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
-// 	cout << stiff.get_entry(i,j) << endl;
-// 	cout << stiff.get_entry(j,i) << endl;
-// 	cout << "i = " << i << " j = " << j << endl;
-// 	cout << "#######################" << endl;
-// 	abort();
-//       }
-//     }
+//   for (int i = 0; i < 1500;i++) {
+//     stiff.apply(xk,help);
+//     resid = rh - help;
+//     cout << "i = " << i << " " << sqrt(resid*resid) << endl;
+//     stiff.apply(resid,help);
+//     alpha_n = (resid * resid) * (1.0 / (resid * help));
+//     resid *= alpha_n;
+//     xk = xk + resid;
+//   }
 
 
- cout << "performing output..." << endl;
+
+
+//  cout << "performing output..." << endl;
   
-  InfiniteVector<double,Frame2D::Index> u;
-  unsigned int i = 0;
-  for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
-    u.set_coefficient(*it, xk[i]);
+   InfiniteVector<double,Frame2D::Index> u;
+   unsigned int i = 0;
+//   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
+//     u.set_coefficient(*it, xk[i]);
   
-  u.scale(&discrete_biharmonic,-1);
+//   u.scale(&discrete_biharmonic,-1);
  
-  Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u, true, jmax);//expand in primal basis
+//   Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u, true, jmax);//expand in primal basis
   
-  Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(frame, u, sing2D, 6);
+//   Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(frame, u, sing2D, 6);
 
-  std::ofstream ofs6("error_2D_out_jmax6_steps1500_b4.m");
-  matlab_output(ofs6,Error);
-  ofs6.close();
+//   std::ofstream ofs6("error_2D_out_jmax6_steps1500_b4.m");
+//   matlab_output(ofs6,Error);
+//   ofs6.close();
 
-  std::ofstream ofs5("approx_solution_out_6_1500_b4.m");
-  matlab_output(ofs5,U);
-  ofs5.close();
+//   std::ofstream ofs5("approx_solution_out_6_1500_b4.m");
+//   matlab_output(ofs5,U);
+//   ofs5.close();
 
   xk=0;
   alpha_n = 2. / lmax - 0.001;
@@ -356,7 +345,7 @@ int main()
 #endif
   
 
-#if 1
+#if 0
 
   Rhs_output( rh); 
 

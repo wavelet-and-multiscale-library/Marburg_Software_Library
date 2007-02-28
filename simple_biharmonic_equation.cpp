@@ -13,58 +13,8 @@ using WaveletTL::CubeBasis;
 namespace FrameTL
 {
 
-//   template <class IBASIS>
-//   Index1D<IBASIS>::Index1D(const IntervalIndex<IBASIS>& ind,
-// 			   const unsigned int p, const unsigned int dir,
-// 			   const unsigned int der)
-//     : ind_(ind), p_(p), dir_(dir), der_(der)
-//   {
-//   }
-
-//   template <class IBASIS>
-//   bool
-//   Index1D<IBASIS>::operator < (const Index1D<IBASIS>& lambda) const
-//   {
-//     return ind_ < lambda.index() ||
-//       (
-//        ind_ == lambda.index() &&
-//        (
-// 	p_ < lambda.p() ||
-// 	(
-// 	 p_ == lambda.p() &&
-// 	 (
-// 	  dir_ < lambda.direction() ||
-// 	  (
-// 	   dir_ == lambda.direction() && der_ < lambda.derivative()   
-// 	   )
-// 	  )
-// 	 )
-// 	)
-//        );
-//   };
-  
-//   template <class IBASIS>
-//   bool Index1D<IBASIS>::operator == (const Index1D<IBASIS>& lambda) const
-//   {
-//     return (ind_ == lambda.index()) && (p_ == lambda.p()) && (der_ == lambda.derivative());
-//   };
-
-//   template <class IBASIS>
-//   bool Index1D<IBASIS>::operator != (const Index1D<IBASIS>& lambda) const
-//   {
-//     return !(*this == lambda);
-//   };
-  
-//   template <class IBASIS>
-//   bool Index1D<IBASIS>::operator <= (const Index1D<IBASIS>& lambda) const
-//   {
-//     return (*this < lambda) || (*this == lambda);
-//   };
-  
-
-
   template <class IBASIS, unsigned int DIM>
-  BiharmonicEquation<IBASIS,DIM>::BiharmonicEquation(const BiharmonicBVP<DIM>* bih_bvp,
+  SimpleBiharmonicEquation<IBASIS,DIM>::SimpleBiharmonicEquation(const BiharmonicBVP<DIM>* bih_bvp,
 						     const AggregatedFrame<IBASIS,DIM>* frame,
 						     const int jmax,
 						     QuadratureStrategy qstrat)
@@ -72,23 +22,21 @@ namespace FrameTL
   {
     compute_diagonal();
     // compute_rhs(false);
+    compute_rhs(true);
   }
 
   template <class IBASIS, unsigned int DIM>
   double 
-  BiharmonicEquation<IBASIS,DIM>::D(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda) const
+  SimpleBiharmonicEquation<IBASIS,DIM>::D(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda) const
   {
-
-    //return ldexp(1.0,lambda.j() * operator_order());
-
-    return stiff_diagonal.get_coefficient(lambda);
+    return stiff_diagonal[lambda.number()];
   }
 
 
 
   template <class IBASIS, unsigned int DIM>
   void
-  BiharmonicEquation<IBASIS,DIM>::compute_rhs(bool compute)
+  SimpleBiharmonicEquation<IBASIS,DIM>::compute_rhs(bool compute)
   {
     cout << "BiharmonicEquation(): precompute right-hand side..." << endl;
     
@@ -103,7 +51,8 @@ namespace FrameTL
 	for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
 	  {
 	    const double coeff = f(lambda)/D(lambda);
-	    cout << lambda << " " << coeff << endl; 
+	    //cout << "f(lambda):" << f(lambda) << endl;
+	    //cout << lambda << " " << coeff << endl; 
 	    if (fabs(coeff)>1e-15) {
 	      fhelp.set_coefficient(lambda, coeff);
 	    }
@@ -141,24 +90,30 @@ namespace FrameTL
 
   template <class IBASIS, unsigned int DIM>
   void
-  BiharmonicEquation<IBASIS,DIM>::compute_diagonal()
+  SimpleBiharmonicEquation<IBASIS,DIM>::compute_diagonal()
   {
-    cout << "BiharmonicEquation(): precompute diagonal of stiffness matrix..." << endl;
+    cout << "SimpleBiharmonicEquation(): precompute diagonal of stiffness matrix..." << endl;
 
-    typedef AggregatedFrame<IBASIS,DIM> Frame;
-    typedef typename Frame::Index Index;
+    stiff_diagonal.resize(frame_->degrees_of_freedom());
+    for (int i = 0; i < frame_->degrees_of_freedom(); i++) {
+      stiff_diagonal[i] = sqrt(a(*(frame_->get_wavelet(i)),*(frame_->get_wavelet(i))));
+      cout << "stiff_diag["<< i << "]:" << stiff_diagonal[i] << endl;
+    }
 
-    // precompute the right-hand side on a fine level
-    const int j0   = frame_->j0();
+   //  typedef AggregatedFrame<IBASIS,DIM> Frame;
+//     typedef typename Frame::Index Index;
 
-    for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
-      {
-	stiff_diagonal.set_coefficient(lambda, sqrt(a(lambda,lambda)));
-	//	cout << "lambda: " <<lambda<< endl;
-	if (lambda == last_wavelet<IBASIS,DIM,DIM,Frame>(frame_,jmax_))
-	  break;
+//     // precompute the right-hand side on a fine level
+//     const int j0   = frame_->j0();
+
+//     for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
+//       {
+// 	stiff_diagonal.set_coefficient(lambda, sqrt(a(lambda,lambda)));
+// 	//	cout << "lambda: " <<lambda<< endl;
+// 	if (lambda == last_wavelet<IBASIS,DIM,DIM,Frame>(frame_,jmax_))
+// 	  break;
 	//cout << " ok ";
-      }
+    //}
 
     cout << "... done, diagonal of stiffness matrix computed" << endl;
   }
@@ -168,7 +123,7 @@ namespace FrameTL
   template <class IBASIS, unsigned int DIM>
   inline
   double
-  BiharmonicEquation<IBASIS,DIM>:: integrate(const Index1D<IBASIS>& lambda,
+  SimpleBiharmonicEquation<IBASIS,DIM>:: integrate(const Index1D<IBASIS>& lambda,
 					   const Index1D<IBASIS>& mu,
 					   const FixedArray1D<Array1D<double>,DIM >& irregular_grid,
 					   const int N_Gauss,
@@ -222,7 +177,7 @@ namespace FrameTL
 
   template <class IBASIS, unsigned int DIM>
   double
-  BiharmonicEquation<IBASIS,DIM>::a(const typename AggregatedFrame<IBASIS,DIM>::Index& la,
+  SimpleBiharmonicEquation<IBASIS,DIM>::a(const typename AggregatedFrame<IBASIS,DIM>::Index& la,
 				    const typename AggregatedFrame<IBASIS,DIM>::Index& nu) const
   {
     double r = 0.0;
@@ -330,7 +285,7 @@ namespace FrameTL
 
   template <class IBASIS, unsigned int DIM>
   void
-  BiharmonicEquation<IBASIS,DIM>::RHS
+  SimpleBiharmonicEquation<IBASIS,DIM>::RHS
   (const double eta,
    InfiniteVector<double, typename AggregatedFrame<IBASIS,DIM>::Index>& coeffs) const
   {
@@ -348,7 +303,7 @@ namespace FrameTL
 
   template <class IBASIS, unsigned int DIM>
   double
-  BiharmonicEquation<IBASIS,DIM>::norm_A() const
+  SimpleBiharmonicEquation<IBASIS,DIM>::norm_A() const
   {
     if (normA == 0.0) {
       typedef typename AggregatedFrame<IBASIS,DIM>::Index Index;
@@ -373,7 +328,7 @@ namespace FrameTL
 
 template <class IBASIS, unsigned int DIM>
   double
-  BiharmonicEquation<IBASIS,DIM>::s_star() const
+  SimpleBiharmonicEquation<IBASIS,DIM>::s_star() const
   {
     // cout << "Stern" << endl;
     // notation from [St04a]
@@ -391,13 +346,13 @@ template <class IBASIS, unsigned int DIM>
 
   template <class IBASIS, unsigned int DIM>
   double
-  BiharmonicEquation<IBASIS,DIM>::f(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda) const
+  SimpleBiharmonicEquation<IBASIS,DIM>::f(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda) const
   {
 
     //\int_\Omega f(Kappa(x)) \psi^\Box (x) \sqrt(\sqrt(det ((D Kappa)^T(x) (D Kappa)(x)) ))
     //recall: \sqrt(\sqrt(...)) = Gram_factor
 
-    int N=10;
+    int N=50;
 
 
     double r = 0;
@@ -478,7 +433,41 @@ template <class IBASIS, unsigned int DIM>
       }
       if (exit) break;
     }
+#if 0
     return r;
+#endif
+#if 1
+    assert(DIM == 1);
+    double tmp = 1;
+    //double tmp2 = 1;
+    Point<DIM> p1;
+    p1[0] = 0.5;
+    Point<DIM> p2;
+    chart->map_point_inv(p1,p2);
+    tmp =  WaveletTL::evaluate(*(frame_->bases()[p]->bases()[0]), 0,
+			       typename IBASIS::Index(lambda.j(),
+						      lambda.e()[0],
+						      lambda.k()[0],
+						      frame_->bases()[p]->bases()[0]),
+			       p2[0]);
+    /*tmp2 =  WaveletTL::evaluate(*(frame_->bases()[p]->bases()[0]), 2,
+			       typename IBASIS::Index(lambda.j(),
+						      lambda.e()[0],
+						      lambda.k()[0],
+						      frame_->bases()[p]->bases()[0]),p2[0]);
+    */
+    //cout << "r:"<< r<<endl;
+    if(tmp !=0.0){
+      cout << "tmp:" << tmp << "lambda:" << lambda << endl;
+      cout << "r:" << r << endl;
+      cout << "D(lambda):" << D(lambda) << endl; 
+    }
+    tmp /= chart->Gram_factor(p2);
+    
+    
+  
+    return  48*tmp + r;
+#endif
   }
 
 }

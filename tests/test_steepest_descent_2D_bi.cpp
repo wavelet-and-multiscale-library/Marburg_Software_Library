@@ -18,7 +18,7 @@
 #include <map>
 #include <numerics/corner_singularity_biharmonic.h>
 #include <biharmonic_equation.h>
-
+#include <steepest_descent1.h>
 
 
 using std::cout;
@@ -43,6 +43,30 @@ using namespace FrameTL;
 using namespace MathTL;
 using namespace WaveletTL;
 
+/*
+template <class C>
+  void Rhs_output (const Vector<C> v) 
+  {
+
+    SparseMatrix<C> S = SparseMatrix<C>(v.size());
+
+    for(int i=0; i< v.size(); i++)
+      S.set_entry( 0, i, v[i]);
+
+    S.matlab_output("Rhs_2D_jmax6", "Matrix", 1);
+ 
+  }
+  
+  template <class C>
+  void Rhs_input(Vector<C> &v)
+  {
+    SparseMatrix<C> S;
+    S.matlab_input("Rhs_2D_jmax6");
+    v.resize(S.row_dimension());
+    for(int i=0; i< S.row_dimension(); i++)
+      v[i] =S.get_entry( 0, i);
+    
+      }*/
 
 int main()
 {
@@ -156,8 +180,15 @@ int main()
   BiharmonicBVP<DIM> biharmonic(&singRhs);
   
   BiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharmonic, &frame,jmax, TrivialAffine);  
+  //discrete_biharmonic.norm_A();
+  
+  //precalculated lambda_max
+  // double normA = 6.53997; // m=3, jmax=3
+  // double normA = 7.18148; // m=3, jmax=4
+  double normA = 7.45729; // m=3, jmax=5
 
-  CachedProblem<BiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 5.0048, 1.0/0.01);
+  CachedProblem<BiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, normA, 1);
+  problem.norm_A();
 
   const double epsilon = 1.0e-6;
 
@@ -166,8 +197,14 @@ int main()
   clock_t tstart, tend;
   double time;
   tstart = clock();
+  cout << "here" <<endl;
 
-  steepest_descent1_SOLVE(problem, epsilon, u_epsilon, jmax);
+  
+
+#if 1
+    steepest_descent1_SOLVE(problem, epsilon, u_epsilon, jmax);
+
+  //steepest_descent_SOLVE(problem, epsilon, u_epsilon);
 
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
@@ -185,16 +222,16 @@ int main()
 
   cout << "done plotting pointwise error" << endl;
 
-  std::ofstream ofs5("approx_sol_steep_2D_out.m");
+  std::ofstream ofs5("approx_sol_steep_2D_out_5_b3_mod.m");
   matlab_output(ofs5,U);
   ofs5.close();
 
-  std::ofstream ofs6("error_steep_2D_out.m");
+  std::ofstream ofs6("error_steep_2D_out_5_b3_mod.m");
   matlab_output(ofs6,Error);
   ofs6.close();
 
   //  problem.add_level(frame.first_generator(3),u_epsilon,3,1.);
-
+#endif
   return 0;
 
 }

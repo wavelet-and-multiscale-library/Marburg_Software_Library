@@ -28,33 +28,7 @@ using WaveletTL::FullyDiagonalEnergyNormPreconditioner;
 namespace FrameTL
 {
 
- //  template <class IBASIS>
-//   class Index1D
-//   {
-
-//   public:
-//     Index1D (const IntervalIndex<IBASIS>& ind,
-// 	     const unsigned int p, const unsigned int dir,
-// 	     const unsigned int der);
-
-//     bool operator < (const Index1D<IBASIS>& lambda) const;
-//     bool operator == (const Index1D<IBASIS>& lambda) const;
-//     bool operator != (const Index1D<IBASIS>& lambda) const;
-//     bool operator <= (const Index1D<IBASIS>& lambda) const;
-
-//     IntervalIndex<IBASIS> index() const { return ind_; };
-//     unsigned int derivative() const { return der_; };
-//     unsigned int p() const { return p_; };
-//     unsigned int direction() const { return dir_; };
-
-//   protected:
-//     IntervalIndex<IBASIS> ind_;
-//     unsigned int p_;
-//     unsigned int dir_;
-//     unsigned int der_;
-
-//   };
-
+ 
   /*!
     quadrature strategies for computation of
     stiffness matrix entries, use only TrivialAffine!
@@ -97,7 +71,7 @@ namespace FrameTL
     function space over Omega.     
   */
   template <class IBASIS, unsigned int DIM>
-  class BiharmonicEquation
+  class SimpleBiharmonicEquation
   //  : public FullyDiagonalDyadicPreconditioner<typename AggregatedFrame<IBASIS,DIM>::Index>
     : public FullyDiagonalEnergyNormPreconditioner<typename AggregatedFrame<IBASIS,DIM>::Index>
   {
@@ -106,7 +80,7 @@ namespace FrameTL
     /*!
       constructor
      */
-    BiharmonicEquation(const BiharmonicBVP<DIM>* bih_bvp,
+    SimpleBiharmonicEquation(const BiharmonicBVP<DIM>* bih_bvp,
 		       const AggregatedFrame<IBASIS,DIM>* frame,
 		       const int jmax,
 		       const QuadratureStrategy qsrtat = TrivialAffine);
@@ -270,8 +244,8 @@ namespace FrameTL
     Array1D<std::pair<typename AggregatedFrame<IBASIS,DIM>::Index,double> > fcoeffs;
 
     // right-hand side coefficients on a fine level, sorted by modulus
-    InfiniteVector<double,typename AggregatedFrame<IBASIS,DIM>::Index> stiff_diagonal;
-
+    // square root of coefficients on diagonal of stiffness matrix
+    Array1D<double> stiff_diagonal;
 
     // (squared) \ell_2 norm of the precomputed right-hand side
     double fnorm_sqr;
@@ -283,6 +257,6 @@ namespace FrameTL
   };
 }
 
-#include <biharmonic_equation.cpp>
+#include <simple_biharmonic_equation.cpp>
 
 #endif

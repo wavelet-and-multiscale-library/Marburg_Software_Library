@@ -128,8 +128,7 @@ namespace WaveletTL
 		  const typename PBasis<d,dT>::Index& lambda,
 		  const double x)
   {
-    assert(derivative <= 1); // we only support derivatives up to the first order
-
+    assert(derivative <= 2); // we only support derivatives up to the second order
     double r = 0;
 
     if (lambda.e() == 0) {
@@ -137,16 +136,16 @@ namespace WaveletTL
       if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) {
 	switch (derivative){
 	case 0: r= MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
-							 (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
-								1-x);
+							     (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
+							     1-x);
 	  break;
 	case 1: r=-MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
-							  (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
-								1-x); 
+							     (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
+							     1-x); 
 	  break;
 	case 2: r=MathTL::EvaluateSchoenbergBSpline_td_xx<d>(lambda.j(),
-							  (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
-								1-x); 
+							     (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
+							     1-x); 
 	  break;
 	}
       } else {

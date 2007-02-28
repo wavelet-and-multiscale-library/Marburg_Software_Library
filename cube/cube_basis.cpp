@@ -33,8 +33,8 @@ namespace WaveletTL
 	}
       }
       if (b == 0) {
-	b = new IBASIS("",s[2*i], s[2*i+1], sT[2*i], sT[2*i+1]);
-	//b = new IBASIS(s[2*i], s[2*i+1], sT[2*i], sT[2*i+1]);
+	//b = new IBASIS("",s[2*i], s[2*i+1], sT[2*i], sT[2*i+1]);
+	b = new IBASIS(s[2*i], s[2*i+1], sT[2*i], sT[2*i+1]);
 	bases_infact.push_back(b);
       }
       bases_[i] = b;

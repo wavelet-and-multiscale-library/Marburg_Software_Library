@@ -88,7 +88,7 @@ int main()
 
   cout << "Constructing \\tilde G_j ( = (M_{j,0}, M_{j,1})^T ) via decompose_t_1" << endl;
   for (lambda = basis.first_generator(basis.j0()+1); lambda <= basis.last_generator(basis.j0()+1); ++lambda) {
-    cout << "lambda = " << lambda << endl;
+//    cout << "lambda = " << lambda << endl;
     basis.decompose_t_1(lambda, coeff);
     col = (lambda.k()-basis.DeltaLTmin())*2+lambda.c();
     for (InfiniteVector<double, SBasis::Index>::const_iterator it(coeff.begin()), itend(coeff.end()); it != itend; ++it) {

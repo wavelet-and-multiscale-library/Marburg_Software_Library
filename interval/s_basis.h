@@ -115,8 +115,8 @@ namespace WaveletTL
     */
     inline const int Nablamin() const { return 0; }
     inline const int Nablamax(const int j) const { return (1<<j)-1; }
-    inline const int NablaLmax() const { return Nablamin()+1; }
-    inline const int NablaRmin(const int j) const { return Nablamax(j)-1; }
+    inline const int NablaLmax() const { return Nablamin(); }
+    inline const int NablaRmin(const int j) const { return Nablamax(j); }
 
     //! size of Nabla_j
     inline const int Nablasize(const int j) const { return 1<<j; }
@@ -322,8 +322,8 @@ namespace WaveletTL
     FixedMatrix<double, 8, 2> MRT; // right boundary
 
     //! stable completion matrix blocks
-    FixedMatrix<double, 10, 4> Mj1L; // left boundary
-    FixedMatrix<double, 10, 4> Mj1R; // right boundary
+    FixedMatrix<double, 6, 2> Mj1L; // left boundary
+    FixedMatrix<double, 6, 2> Mj1R; // right boundary
     FixedMatrix<double, 10, 2> Mj1I; // inner block
     FixedMatrix<double, 6, 2> MTj1I; // has only inner blocks
 

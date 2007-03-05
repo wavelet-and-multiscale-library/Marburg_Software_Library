@@ -241,9 +241,7 @@ namespace WaveletTL
       dk = ((lambda.k()-DeltaLTmin())%2 == 0) ? 1 : 0;
       k_start = Nablamin() + (lambda.k()-DeltaLTmin()-1)/2;
       mu_end = SBasis::Index(lambda.j()-1,E_WAVELET,k_start+1+dk,number_of_components-1,this);
-//      cout << k_start << mu_end << endl;
       for (mu = SBasis::Index(lambda.j()-1,E_WAVELET,k_start,0,this); mu <= mu_end; ++mu) {
-//        cout << mu << (k_start-mu.k())*4+6+2*dk+lambda.c() << "  ";
         c.set_coefficient(mu, Mj1I.get_entry((k_start-mu.k())*4+6+2*dk+lambda.c(),mu.c()));
       }
     }

@@ -18,31 +18,11 @@ namespace WaveletTL
   SBasis::setup()
   {
     // setup dual generator refinement matrix boundary blocks
-    MLT = FixedMatrix<double,8,2>("1.0 -4.821134727 0.0 0.5 1.109375 0.5265924966 0.078125 2.255568114 0.5 1.933878985 -0.1875 -0.7227138327 -0.109375 -0.4249041181 0.078125 0.3027912881");
-    //("0.707106781 -3.409057058 0. 0.3535533905 0.7844465852 0.3723571252 0.05524271727 1.594927508 0.3535533905 1.367458944 -0.1325825214 -0.5110358519 -0.07733980417 -0.3004525831 0.05524271727 0.2141057731");
+    MLT = FixedMatrix<double,8,2>("1.0 -7.5 0.0 0.5 1.109375 0.9609375 0.078125 1.1875 0.5 3.09375 -0.1875 -1.15625 -0.109375 -0.6796875 0.078125 0.484375");
     MRT = FixedMatrix<double,8,2>("-0.109375 0.6796875 -0.078125 0.484375 0.5 -3.09375 0.1875 -1.15625 1.109375 -0.9609375 -0.078125 1.1875 1.0 7.5 0.0 0.5");
-    //("-0.07733980417 0.4806116402 -0.05524271727 0.342504847 0.3535533905 -2.187611604 0.1325825214 -0.8175922155 0.7844465852 -0.6794854224 -0.05524271727 0.8396893024 0.707106781 5.303300858 0. 0.3535533905");
 
-    Mj1L = FixedMatrix<double,10,4>("0.4486790795 0.03125 -0.004132563421 0.001705385456" \
-                                    "-0.6763209205 1.03125 -0.06663256342 0.02514288546" \
-                                    "-0.5 0.0 -0.25 0.09375" \
-                                    "1.205283682 -0.125 -0.4834697463 0.1806784582" \
-                                    "0.05132092047 -0.03125 0.4357731884 -0.02709601046" \
-                                    "0.07367907953 0.03125 -0.07249193842 0.7419397605" \
-                                    "0.0 0.0 -0.25 -0.09375" \
-                                    "0.0 0.0 0.7734375 0.2890625" \
-                                    "0.0 0.0 0.068359375 0.025390625" \
-                                    "0.0 0.0 -0.005859375 -0.001953125");
-    Mj1R = FixedMatrix<double,10,4>("0.068359375 -0.025390625 0.0 0.0" \
-                                    "0.005859375 -0.001953125 0.0 0.0" \
-                                    "-0.25 0.09375 0.0 0.0" \
-                                    "-0.7734375 0.2890625 0.0 0.0" \
-                                    "0.36328125 0.0 0.21875 0.03125" \
-                                    "0.0 0.71484375 0.09375 0.03125" \
-                                    "-0.25 -0.09375 -0.5 0.0" \
-                                    "0.7734375 0.2890625 -1.875 -0.125" \
-                                    "0.068359375 0.025390625 0.28125 -0.03125" \
-                                    "-0.005859375 -0.001953125 0.84375 1.03125");
+    Mj1L = FixedMatrix<double,6,2>("0.28125 0.03125 -0.84375 1.03125 -0.5 0.0 1.875 -0.125 0.21875 -0.03125 -0.09375 0.03125");
+    Mj1R = FixedMatrix<double,6,2>("0.21875 0.03125 0.09375 0.03125 -0.5 0.0 -1.875 -0.125 0.28125 -0.03125 0.84375 1.03125");
     Mj1I = FixedMatrix<double,10,2>("0.068359375 -0.025390625" \
                                     "0.005859375 -0.001953125" \
                                     "-0.25 0.09375" \
@@ -237,17 +217,21 @@ namespace WaveletTL
     // now build the corresponding row of M{j-1,1} for the wavelets
     if ((lambda.k() >= DeltaLTmin()) && (lambda.k() <= DeltaLTmin()+2)) { // left boundary block involved
       int row = 2*(lambda.k()-DeltaLTmin())+lambda.c();
-      for (mu = SBasis::Index(lambda.j()-1,E_WAVELET,Nablamin(),0,this), i = 0; mu.k() <= Nablamin()+1; ++mu, i++) {
+      for (mu = SBasis::Index(lambda.j()-1,E_WAVELET,Nablamin(),0,this), i = 0; mu.k() == Nablamin(); ++mu, i++) {
         c.set_coefficient(mu, Mj1L.get_entry(row, i));
       }
+      for(; mu.k() == Nablamin()+1; ++mu)
+        c.set_coefficient(mu, Mj1I.get_entry(row,mu.c()));
       if (lambda.k() == DeltaLTmin()+2)
         for(; mu.k() == Nablamin()+2; ++mu)
           c.set_coefficient(mu, Mj1I.get_entry(lambda.c(),mu.c()));
     }
     else if ((lambda.k() >= DeltaRTmax(lambda.j())-2) && (lambda.k() <= DeltaRTmax(lambda.j()))) { // right boundary block involved
-      int row = Mj1R.row_dimension()-2-2*(DeltaRTmax(lambda.j())-lambda.k())+lambda.c();
-      for (mu = SBasis::Index(lambda.j()-1,E_WAVELET,Nablamax(lambda.j()-1),number_of_components-1,this), i = Mj1R.column_dimension()-1; mu.k() >= DeltaRTmax(lambda.j()-1)-1; --mu, i--)
+      int row = Mj1R.row_dimension()-number_of_components*(DeltaRTmax(lambda.j())-lambda.k()+1)+lambda.c();
+      for (mu = SBasis::Index(lambda.j()-1,E_WAVELET,Nablamax(lambda.j()-1),number_of_components-1,this), i = Mj1R.column_dimension()-1; mu.k() == DeltaRTmax(lambda.j()-1); --mu, i--)
         c.set_coefficient(mu, Mj1R.get_entry(row, i));
+      for(row = Mj1I.row_dimension()-number_of_components*(DeltaRTmax(lambda.j())-lambda.k()+1)+lambda.c(); mu.k() == Nablamax(lambda.j()-1)-1; --mu)
+        c.set_coefficient(mu, Mj1I.get_entry(row,mu.c()));
       if (lambda.k() == DeltaRTmax(lambda.j())-2) {
         for(; mu.k() == Nablamax(lambda.j()-1)-2; --mu)
           c.set_coefficient(mu, Mj1I.get_entry(Mj1I.row_dimension()-2+lambda.c(),mu.c()));
@@ -257,8 +241,11 @@ namespace WaveletTL
       dk = ((lambda.k()-DeltaLTmin())%2 == 0) ? 1 : 0;
       k_start = Nablamin() + (lambda.k()-DeltaLTmin()-1)/2;
       mu_end = SBasis::Index(lambda.j()-1,E_WAVELET,k_start+1+dk,number_of_components-1,this);
-      for (mu = SBasis::Index(lambda.j()-1,E_WAVELET,k_start,0,this); mu <= mu_end; ++mu)
+//      cout << k_start << mu_end << endl;
+      for (mu = SBasis::Index(lambda.j()-1,E_WAVELET,k_start,0,this); mu <= mu_end; ++mu) {
+//        cout << mu << (k_start-mu.k())*4+6+2*dk+lambda.c() << "  ";
         c.set_coefficient(mu, Mj1I.get_entry((k_start-mu.k())*4+6+2*dk+lambda.c(),mu.c()));
+      }
     }
   }
   
@@ -342,8 +329,8 @@ namespace WaveletTL
     }
     else { // inner block
       const SBasis::Index::translation_type k_start = DeltaLmin()+(lambda.k()-1)*2;
-      const SBasis::Index::translation_type k_end = k_start+Mj1I.row_dimension()/number_of_components-1; // alltogether 5 non-zero k-indices
-      for (mu = SBasis::Index(lambda.j()+1,E_GENERATOR,k_start,0,this); mu.k() <= k_end; ++mu)
+      const SBasis::Index mu_end(lambda.j()+1, E_GENERATOR, k_start+Mj1I.row_dimension()/number_of_components-1, number_of_components-1, this); // alltogether 5 non-zero k-indices
+      for (mu = SBasis::Index(lambda.j()+1,E_GENERATOR,k_start,0,this); mu <= mu_end; ++mu)
         c.set_coefficient(mu, Mj1I.get_entry(number_of_components*(mu.k()-k_start) + mu.c(), lambda.c()));
     }
   }

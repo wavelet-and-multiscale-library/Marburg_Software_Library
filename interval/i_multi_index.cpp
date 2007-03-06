@@ -33,6 +33,15 @@ namespace WaveletTL
   
   /* member functions ******************************************************/
   template <class IBASIS>
+  bool
+  IntervalMultiIndex<IBASIS>::is_valid()
+  {
+    return ( (j_ >= basis_->j0()) && ((e_ == E_GENERATOR) || (e_ == E_WAVELET))
+             && (k_ >= basis_->DeltaLmin()) && (k_ <= basis_->DeltaRmax(j_))
+             && (c_ >= 0) && (c_ < basis_->number_of_components) );
+  }
+
+  template <class IBASIS>
   IntervalMultiIndex<IBASIS>&
   IntervalMultiIndex<IBASIS>::operator = (const IntervalMultiIndex<IBASIS>& lambda)
   {

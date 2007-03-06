@@ -88,7 +88,7 @@ namespace WaveletTL
     // \Phi_j = \tilde M_{j-1, 0} \Phi_{j-1} + G_{j-1, 1}  \psi_{j-1}
 
     // first calculate corresponding row of \tilde M_{j,0}
-    if ((lambda.k() >= DeltaLmin()) && (lambda.k() <= DeltaLmin()+MLT.row_dimension()/number_of_components-1)) { // left boundary block involved
+    if ((lambda.k() >= DeltaLmin()) && (lambda.k() <= DeltaLmin()+(int)(MLT.row_dimension()/number_of_components)-1)) { // left boundary block involved
       const int row = (lambda.k()-DeltaLmin())*number_of_components+lambda.c();
       k_now = DeltaLmin();
       for (mu = SBasis::Index(lambda.j()-1,E_GENERATOR,k_now,0,this); mu.k() == DeltaLmin(); ++mu)
@@ -104,7 +104,7 @@ namespace WaveletTL
         }
       }
     }
-    else if ((lambda.k() >= DeltaRmax(lambda.j())-MRT.row_dimension()/number_of_components+1) && (lambda.k() <= DeltaRmax(lambda.j()))) { // right boundary block involved
+    else if ((lambda.k() >= DeltaRmax(lambda.j())-(int)(MRT.row_dimension()/number_of_components)+1) && (lambda.k() <= DeltaRmax(lambda.j()))) { // right boundary block involved
       const int row = (lambda.k()-DeltaRmax(lambda.j())+MRT.row_dimension()/number_of_components-1)*number_of_components+lambda.c();
       k_now = DeltaRmax(lambda.j()-1);
       for (mu = SBasis::Index(lambda.j()-1,E_GENERATOR,k_now,number_of_components-1,this); mu.k() == k_now; --mu)
@@ -170,9 +170,9 @@ namespace WaveletTL
         for (InfiniteVector<double, SBasis::Index>::const_iterator it(ctmp.begin()), itend(ctmp.end());
              it != itend; ++it) {
           if (it.index().e() == E_WAVELET)
-            c.add(*it, ctmp);
+            c.add_coefficient(it.index(), *it);
           else
-            cphi.add(*it, ctmp);
+            cphi.add_coefficient(it.index(), *it);
         }
       }
       // copy contents of cphi to c
@@ -276,9 +276,9 @@ namespace WaveletTL
         for (InfiniteVector<double, SBasis::Index>::const_iterator it(ctmp.begin()), itend(ctmp.end());
              it != itend; ++it) {
           if (it.index().e() == E_WAVELET)
-            c.add(*it, ctmp);
+            c.add_coefficient(it.index(), *it);
           else
-            cphi.add(*it, ctmp);
+            cphi.add_coefficient(it.index(), *it);
         }
       }
       // copy contents of cphi to c
@@ -316,7 +316,7 @@ namespace WaveletTL
     // build corresponding row of M_{j,1}
     if ( (lambda.k() >= Nablamin()) && (lambda.k() <= NablaLmax()) ) { // left boundary block of M_{j,1}
       column = number_of_components*(lambda.k()-Nablamin()) + lambda.c();
-      for (mu = SBasis::Index(lambda.j()+1,E_GENERATOR,DeltaLmin(),0,this); mu.k() <= DeltaLmin()+Mj1L.row_dimension()/number_of_components-1; ++mu)
+      for (mu = SBasis::Index(lambda.j()+1,E_GENERATOR,DeltaLmin(),0,this); mu.k() <= DeltaLmin()+(int)(Mj1L.row_dimension()/number_of_components)-1; ++mu)
         c.set_coefficient(mu, Mj1L.get_entry(number_of_components*(mu.k()-DeltaLmin()) + mu.c(), column));
     }
     else if ( (lambda.k() >= NablaRmin(lambda.j())) && (lambda.k() <= Nablamax(lambda.j())) ) { // right boundary block of M_{j,1}
@@ -476,7 +476,7 @@ namespace WaveletTL
 
     // is it a boundary function?
     if ((lambda.k() >= DeltaLTmin()) && (lambda.k() <= DeltaLTmax())) { // yes, left boundary
-      for (mu = SBasis::Index(lambda.j()+1,E_GENERATOR,DeltaLTmin(),0,this); mu.k() < DeltaLTmin()+MLT.row_dimension()/number_of_components; ++mu) {
+      for (mu = SBasis::Index(lambda.j()+1,E_GENERATOR,DeltaLTmin(),0,this); mu.k() < DeltaLTmin()+(int)(MLT.row_dimension()/number_of_components); ++mu) {
         c.set_coefficient(mu, MLT.get_entry((mu.k()-DeltaLmin())*number_of_components+mu.c(),lambda.c()));
       }
     }

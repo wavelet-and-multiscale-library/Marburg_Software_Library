@@ -1,7 +1,5 @@
 // implementation for galerkin_utils.h
 
-#define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
-
 namespace WaveletTL
 {
   template <class PROBLEM>

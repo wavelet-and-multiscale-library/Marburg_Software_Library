@@ -12,7 +12,7 @@
 namespace WaveletTL
 {
   /* constructors **********************************************************/
-  template <int n>
+  template <unsigned int n>
   ABasis<n>::ABasis()
   {
     setup();
@@ -21,7 +21,7 @@ namespace WaveletTL
   /* setup routine shared by different constructors */
   #ifndef ALPERT_CODE
   /* construction as described in [A] */
-  template <int n>
+  template <unsigned int n>
   void
   ABasis<n>::setup()
   {
@@ -34,11 +34,11 @@ namespace WaveletTL
     generators = Array1D<Piecewise<double> >(n);
     // start with monomial basis
     // create monomial basis on [-1,1] in monom, create generators on the fly
-    for (i = 0; i < 2*n-1; i++) {
+    for (i = 0; i < 2*(int)n-1; i++) {
       p.set_coefficient(i,1);
       monom[i].set_local_expansion(-1,p);
       monom[i].set_local_expansion(0,p);
-      if (i < n)
+      if (i < (int)n)
         generators[i].set_local_expansion(0,p);
       p.set_coefficient(i,0);
     }
@@ -49,21 +49,21 @@ namespace WaveletTL
     // we first construct them on [-1,1] and then scale it to [0,1]
     // initialize wavelets
     wavelets = Array1D<Piecewise<double> >(n);
-    for (i = 0; i < n; i++) {
+    for (i = 0; i < (int)n; i++) {
       wavelets[i].set_local_expansion(-1,monom[i].get_local_expansion(0));
       wavelets[i].set_local_expansion(0,(-1.0)*monom[i].get_local_expansion(0));
     }
 
     // step 1: Orthogonalize wavelets to the generators via Gram-Schmidt
-    for (i = 0; i < n; i++) // loop through all wavelets
-      for (j = 0; j < n; j++) // loop through the monoms
+    for (i = 0; i < (int)n; i++) // loop through all wavelets
+      for (j = 0; j < (int)n; j++) // loop through the monoms
         wavelets[i] -= monom[j].inner_product(wavelets[i]) * monom[j];
     cout << "Step 1 finished." << endl;
     cout << wavelets << endl;
 
     // step 2: Orthogonalize them to x^n,..., x^(2n-2)
-    for (i = 0; i < n-1; i++) {
-      for (j = i, k = -1; j < n; j++) {
+    for (i = 0; i < (int)n-1; i++) {
+      for (j = i, k = -1; j < (int)n; j++) {
         if ( (a[j] = wavelets[j].inner_product(monom[n+i])) != 0 )
           k = j; // memorise which inner product is != 0
       }
@@ -72,7 +72,7 @@ namespace WaveletTL
         wavelets.swap(i,k);
         a.swap(i,k);
         // orthogonalize
-        for (j = i+1; j < n; j++)
+        for (j = i+1; j < (int)n; j++)
           wavelets[j] -= a[j]/a[i] * wavelets[i];
       }
     }
@@ -82,7 +82,7 @@ namespace WaveletTL
     /* step 3: Orthogonalize wavelets among themselves, preserving proper
        orthogonality to x^n,...,x^(2n-2), and norm them */
     for (i = n-1; i >= 0; i--) {
-      for (j = i; j < n; j++)
+      for (j = i; j < (int)n; j++)
         wavelets[i] -= wavelets[i].inner_product(wavelets[j]) * wavelets[j];
       wavelets[i] *= 1.0/sqrt(wavelets[i].inner_product(wavelets[i]));
     }
@@ -101,7 +101,7 @@ namespace WaveletTL
   #else // ALPERT_CODE
   /* port of the Maple code I got from Bradley Alpert */
   #define ip(g, k) (g.inner_product(legendre[k],0.0,1.0)*(double)(2*(k)+1))
-  template <int n>
+  template <unsigned int n>
   void
   ABasis<n>::setup()
   {
@@ -114,7 +114,7 @@ namespace WaveletTL
     // we first construct them on [-1,1] and then scale them to [0,1]
 
     /* construct Legendre polynomials (needed later) */
-    for (i = 0, a = 1.0; i < 2*n-1; i++) {
+    for (i = 0, a = 1.0; i < 2*(int)n-1; i++) {
       legendre[i] = legendre_pol.assemble(i);
       // renorm with (2i)!/(2^i (i!)^2)
       if (i > 1) {
@@ -141,7 +141,7 @@ namespace WaveletTL
     /* construct generators: normed Legendre polynomials */
     generators = Array1D<Piecewise<double> >(n);
     // copy first n Legendre Polynomials into enerators
-    for (i = 0; i < n; i++) {
+    for (i = 0; i < (int)n; i++) {
       Polynomial<double> p;
       p.set_coefficient(1,2);
       p.set_coefficient(0,-1);
@@ -152,9 +152,9 @@ namespace WaveletTL
 //    cout << "Constructing functions f ..." << endl;
     /* construct wavelets */
     // step 1: create wavelets and orthogonalize then to the generators via Gram-Schmidt
-    for (i = 0; i < n; i++) {
+    for (i = 0; i < (int)n; i++) {
       f[i].set_coefficient(n-i-1,1);
-      for (j = (n-i)%2; j <= n-1; j+=2) {
+      for (j = (n-i)%2; j <= (int)n-1; j+=2) {
         f[i] -= ip(f[i],j) * legendre[j];
       }
     }
@@ -162,9 +162,9 @@ namespace WaveletTL
 //    cout << f << endl;
 
     // step 2: Orthogonalize them to x^n,..., x^(2n-2)
-    for (i = 0; i < n-1; i++) {
+    for (i = 0; i < (int)n-1; i++) {
       a = ip(f[i],i+n);
-      for (j = i+2; j < n; j+=2)
+      for (j = i+2; j < (int)n; j+=2)
         f[j] -= (ip(f[j],i+n) / a) * f[i];
     }
 //    cout << "Step 2 finished." << endl;
@@ -173,7 +173,7 @@ namespace WaveletTL
     /* step 3: Orthogonalize wavelets among themselves, preserving proper
        orthogonality to x^n,...,x^(2n-2), and norm them */
     for (i = n-1; i >= 0; i--) {
-      for (j = i+2; j < n; j+=2)
+      for (j = i+2; j < (int)n; j+=2)
         f[i] -= f[i].inner_product(f[j],0.0,1.0)*2 * f[j];
       f[i] *= 1.0/sqrt(f[i].inner_product(f[i],0.0,1.0)*2);
     }
@@ -186,7 +186,7 @@ namespace WaveletTL
       wavelets[i].set_local_expansion(0, ((i+n)%2 ? (-1.0) : 1.0) * f[i] );
     #else
     /* set local expansions and continue wavelets to [-1,0] */
-    for (i = 0; i < n; i++) {
+    for (i = 0; i < (int)n; i++) {
       wavelets[i].set_local_expansion(0, ((i+n)%2 ? (-1.0) : 1.0) * f[i] );
       f[i].scale(-1.0); // f -> f(-x)
       wavelets[i].set_local_expansion(-1, f[i]);
@@ -200,7 +200,7 @@ namespace WaveletTL
   #endif // ALPERT_CODE
 
   /* member functions ******************************************************/
-  template <int n>
+  template <unsigned int n>
   inline
   typename ABasis<n>::Index
   ABasis<n>::first_generator(const int j) const
@@ -209,7 +209,7 @@ namespace WaveletTL
     return IntervalMultiIndex<ABasis<n> >(j, E_GENERATOR, 0, 0, this);
   }
   
-  template <int n>
+  template <unsigned int n>
   inline
   typename ABasis<n>::Index
   ABasis<n>::last_generator(const int j) const
@@ -218,7 +218,7 @@ namespace WaveletTL
     return IntervalMultiIndex<ABasis<n> >(j, E_GENERATOR, (1<<j)-1, n-1, this);
   }
   
-  template <int n>
+  template <unsigned int n>
   inline
   typename ABasis<n>::Index
   ABasis<n>::first_wavelet(const int j) const
@@ -227,7 +227,7 @@ namespace WaveletTL
     return IntervalMultiIndex<ABasis<n> >(j, E_WAVELET, 0, 0, this);
   }
   
-  template <int n>
+  template <unsigned int n>
   inline
   typename ABasis<n>::Index
   ABasis<n>::last_wavelet(const int j) const
@@ -236,7 +236,7 @@ namespace WaveletTL
     return IntervalMultiIndex<ABasis<n> >(j, E_WAVELET, (1<<j)-1, n-1, this);
   }
 
-  template <int n>
+  template <unsigned int n>
   Piecewise<double>
   ABasis<n>::get_function(const ABasis<n>::Index index) const
   {
@@ -256,7 +256,7 @@ namespace WaveletTL
   }
   
   #if 0
-  template <int n>
+  template <unsigned int n>
   void
   ABasis<n>::reconstruct(const InfiniteVector<double, Index>& c,
                        const int j,
@@ -265,7 +265,7 @@ namespace WaveletTL
     ;
   }
   
-  template <int n>
+  template <unsigned int n>
   void
   ABasis<n>::reconstruct_1(const Index& lambda,
                          const int j,

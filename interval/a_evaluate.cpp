@@ -7,7 +7,7 @@ using MathTL::Grid;
 
 namespace WaveletTL
 {
-  template <int n>
+  template <unsigned int n>
   SampledMapping<1>
   evaluate(const ABasis<n>& basis,
            const typename ABasis<n>::Index& lambda,
@@ -33,7 +33,7 @@ namespace WaveletTL
     return SampledMapping<1>(); // dummy return for the compiler
   }
   
-  template <int n>
+  template <unsigned int n>
   SampledMapping<1>
   evaluate(const ABasis<n>& basis,
            const InfiniteVector<double, typename ABasis<n>::Index>& coeffs,
@@ -60,7 +60,7 @@ namespace WaveletTL
     return result;
   }
 
-  template <int n>
+  template <unsigned int n>
   inline
   double evaluate(const ABasis<n>& basis, const unsigned int derivative,
                   const typename ABasis<n>::Index& lambda,
@@ -78,7 +78,7 @@ namespace WaveletTL
     return fkt.value(x);
   }
  
-  template <int n>
+  template <unsigned int n>
   void
   evaluate(const ABasis<n>& basis, const unsigned int derivative,
            const typename ABasis<n>::Index& lambda,
@@ -98,7 +98,7 @@ namespace WaveletTL
       values[i] = fkt.value(points[i]);
   }
   
-  template <int n>
+  template <unsigned int n>
   inline
   void evaluate(const ABasis<n>& basis,
                 const typename ABasis<n>::Index& lambda,

@@ -36,7 +36,7 @@ namespace WaveletTL
     [A] Alpert:
         A Class of Bases in $L^2$ for the Sparse Representation of Integral Operators
   */
-  template <int n>
+  template <unsigned int n>
   class ABasis
   {
   public:

@@ -25,7 +25,7 @@ namespace WaveletTL
     Evaluate a single primal generator or wavelet \psi_\lambda
     on a dyadic subgrid of [0,1].
   */
-  template <int n>
+  template <unsigned int n>
   SampledMapping<1> evaluate(const ABasis<n>& basis,
                              const typename ABasis<n>::Index& lambda,
                              const int resolution);
@@ -34,7 +34,7 @@ namespace WaveletTL
     Evaluate an arbitrary linear combination of primal
     wavelets on a dyadic subgrid of [0,1].
   */
-  template <int n>
+  template <unsigned int n>
   SampledMapping<1> evaluate(const ABasis<n>& basis,
                              const InfiniteVector<double, typename ABasis<n>::Index>& coeffs,
                              const int resolution);
@@ -42,7 +42,7 @@ namespace WaveletTL
   /*!
     dummy routine
   */
-  template <int n>
+  template <unsigned int n>
   SampledMapping<1> evaluate(const ABasis<n>& basis,
                              const InfiniteVector<double, typename ABasis<n>::Index>& coeffs,
                              const bool primal,
@@ -55,7 +55,7 @@ namespace WaveletTL
     point evaluation of (derivatives) of a single primal [A] generator
     or wavelet \psi_\lambda
   */
-  template <int n>
+  template <unsigned int n>
   double evaluate(const ABasis<n>& basis, const unsigned int derivative,
                   const typename ABasis<n>::Index& lambda,
                   const double x);
@@ -64,7 +64,7 @@ namespace WaveletTL
     point evaluation of (derivatives) of a single primal [A] generator
     or wavelet \psi_\lambda at several points simultaneously
   */
-  template <int n>
+  template <unsigned int n>
   void evaluate(const ABasis<n>& basis, const unsigned int derivative,
                 const typename ABasis<n>::Index& lambda,
                 const Array1D<double>& points, Array1D<double>& values);
@@ -73,7 +73,7 @@ namespace WaveletTL
     point evaluation of 0-th and first derivative of a single primal [A] generator
     or wavelet \psi_\lambda at several points simultaneously
   */
-  template <int n>
+  template <unsigned int n>
   void evaluate(const ABasis<n>& basis,
                 const typename ABasis<n>::Index& lambda,
                 const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);

@@ -77,7 +77,7 @@ namespace WaveletTL
     static unsigned int primal_polynomial_degree() { return 4; }
 
     //! number of vanishing moments for the primal wavelets
-//    static unsigned int primal_vanishing_moments() { return 4; }
+    static unsigned int primal_vanishing_moments() { return 2; }
 
     //! critical Sobolev regularity for the dual generators/wavelets
     static double dual_regularity() { return 0.824929; }
@@ -86,7 +86,7 @@ namespace WaveletTL
     static unsigned int dual_polynomial_degree() { return 2; }
 
     //! number of vanishing moments for the dual wavelets
-//    static unsigned int dual_vanishing_moments() { return 4; }
+    static unsigned int dual_vanishing_moments() { return 4; }
 
 
     /*!
@@ -139,7 +139,7 @@ namespace WaveletTL
     /*!
       Constructs for a given single generator index lambda a coefficient set c,
       such that
-      \phi_lambda = \sum_{\lambda'}c_{\lambda'}\phi_{\lambda'} + \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
+      \phi_\lambda = \sum_{\lambda'}c_{\lambda'}\phi_{\lambda'} + \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
       where |\lambda'| = |\lambda|-1
     */
     void decompose_1(const Index& lambda, InfiniteVector<double, Index>& c) const;
@@ -148,7 +148,7 @@ namespace WaveletTL
     /*!
       Constructs for a given single wavelet index lambda a coefficient set c,
       such that
-      \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
+      \psi_\lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
       where the multiscale decomposition starts with the coarsest
       generator level jmin, i.e. all generators have level jmin,
       wavelets may have higher levels.
@@ -160,7 +160,7 @@ namespace WaveletTL
     /*!
       constructs for a given coefficient set c another one v
       such that
-      \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
+      \sum_{\lambda}c_\lambda\psi_\lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
       where generator level == jmin and wavelet level >= jmin
     */
     void decompose(const InfiniteVector<double, Index>& c, const int jmin,
@@ -170,7 +170,7 @@ namespace WaveletTL
     /*!
       Constructs for a given single generator index lambda a coefficient set c,
       such that
-      \tilde\phi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\phi_{\lambda'} + \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
+      \tilde\phi_\lambda = \sum_{\lambda'}c_{\lambda'}\tilde\phi_{\lambda'} + \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
       where |\lambda'| = |\lambda|-1
     */
     void decompose_t_1(const Index& lambda, InfiniteVector<double, Index>& c) const;
@@ -179,7 +179,7 @@ namespace WaveletTL
     /*!
       Constructs for a given single wavelet index lambda a coefficient set c,
       such that
-      \tilde\psi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
+      \tilde\psi_\lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
       where the multiscale decomposition starts with the coarsest
       generator level jmin, i.e. all generators have level jmin,
       wavelets may have higher levels.
@@ -191,7 +191,7 @@ namespace WaveletTL
     /*!
       constructs for a given coefficient set c another one v with wavelet level >= jmin,
       generator level == jmin, such that
-      \sum_{\lambda}c_\lambda\tilde\psi_lambda = \sum_{\lambda'}d_{\lambda'}\tilde\psi_{\lambda'}
+      \sum_{\lambda}c_\lambda\tilde\psi_\lambda = \sum_{\lambda'}d_{\lambda'}\tilde\psi_{\lambda'}
     */
     void decompose_t(const InfiniteVector<double, Index>& c, const int jmin,
                      InfiniteVector<double, Index>& v) const;
@@ -199,8 +199,8 @@ namespace WaveletTL
     //! primal RECONSTRUCT routine, simple version, one step
     /*!
        for a given single wavelet index, write it as a sum of generators
-        \psi_lambda = \sum_{\lambda'} c_{\lambda'} \phi_{\lambda'}
-       with |lambda'| = |lambda|+1
+        \psi_\lambda = \sum_{\lambda'} c_{\lambda'} \phi_{\lambda'}
+       with |\lambda'| = |\lambda|+1
      */
     void reconstruct_1(const Index& lambda, InfiniteVector<double, Index>& c) const;
 
@@ -208,7 +208,7 @@ namespace WaveletTL
     /*!
       Constructs for a given single wavelet index lambda a coefficient set c,
       such that
-      \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
+      \psi_\lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
       where always |\lambda'|>=j
     */
     void reconstruct_1(const Index& lambda, const int j,
@@ -218,7 +218,7 @@ namespace WaveletTL
     /*!
       Constructs for a given coefficient set c another one v,
       such that
-      \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
+      \sum_{\lambda}c_\lambda\psi_\lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
       where always |\lambda'|>=j
     */
     void reconstruct(const InfiniteVector<double, Index>& c, const int j,
@@ -228,7 +228,7 @@ namespace WaveletTL
     /*!
        for a given single wavelet index, write it as a sum of generators
         \tilde\psi_lambda = \sum_{\lambda'} c_{\lambda'} \tilde\phi_{\lambda'}
-       with |lambda'| = |lambda|+1
+       with |\lambda'| = |\lambda|+1
      */
     void reconstruct_t_1(const Index& lambda, InfiniteVector<double, Index>& c) const;
 

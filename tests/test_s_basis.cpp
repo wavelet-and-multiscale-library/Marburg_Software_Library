@@ -1,5 +1,4 @@
 #include <iostream>
-#include <fstream>
 
 #include <algebra/infinite_vector.h>
 #include <algebra/vector_norms.h>
@@ -7,12 +6,15 @@
 #include <algebra/sparse_matrix.h>
 #include <algebra/matrix_norms.h>
 #include <utils/random.h>
+#include <ctime>
 
 #include <interval/s_basis.h>
+#include <interval/s_support.h>
 
 using namespace std;
 using namespace WaveletTL;
 using namespace MathTL;
+
 
 int main()
 {
@@ -34,7 +36,7 @@ int main()
   Matrix<double> GTj = Matrix<double>(30,30);
   InfiniteVector<double, SBasis::Index> coeff;
   SBasis::Index lambda;
-  int row, col;
+  unsigned int row, col;
 
   cout << endl << "Constructing M_{j,0} via refine_1" << endl;
   for (lambda = basis.first_generator(basis.j0()); lambda <= basis.last_generator(basis.j0()); ++lambda) {
@@ -151,6 +153,19 @@ int main()
 
   InfiniteVector<double, SBasis::Index> coeff_orig, coeff_decompose, coeff_reconstruct, coeff_diff;
   cout << "decomposing a random coefficient ..." << endl;
+  // initialize random generator
+  #ifdef HAVE_CLOCK_GETTIME
+  struct timespec d;
+  clock_gettime(CLOCK_REALTIME, &d);
+  srand(d.tv_nsec);
+  #else // !HAVE_CLOCK_GETTIME
+  time_t rawtime;
+  tm* gt;
+  rawtime = time(NULL);
+  gt = gmtime(&rawtime);
+  srand(gt->tm_sec);
+  #endif // !HAVE_CLOCK_GETTIME
+  // decompose and reconstruct a random coefficient on several levels
   for (j = basis.j0() + 1; j < basis.j0() + 4; j++) {
     lambda = SBasis::Index(j, E_GENERATOR, random_integer(basis.DeltaLmin(),basis.DeltaRmax(j)), random_integer(0, basis.number_of_components-1), &basis);
     cout << "lambda = " << lambda << endl;
@@ -183,6 +198,36 @@ int main()
     coeff_diff = coeff_orig - coeff_reconstruct;
     cout << linfty_norm(coeff_diff) << endl;
   }
+
+  cout << endl << "Testing the (class-member) support routines ..." << endl;
+  int k1, k2;
+  j = basis.j0()+1;
+  lambda = SBasis::Index(j, E_GENERATOR, random_integer(basis.DeltaLmin(),basis.DeltaRmax(j)), random_integer(0, basis.number_of_components-1), &basis); // a random generator index at level j
+  basis.primal_support(lambda, k1, k2);
+  cout << "support of \\Phi_" << lambda << ": 2^{-" << lambda.j() << "} [" << k1 << ", " << k2 << "]" << endl;
+  basis.dual_support(lambda, k1, k2);
+  cout << "support of \\tilde\\Phi_" << lambda << ": 2^{-" << lambda.j() << "} [" << k1 << ", " << k2 << "]" << endl;
+  lambda = SBasis::Index(j, E_WAVELET, random_integer(basis.Nablamin(),basis.Nablamax(j)), random_integer(0, basis.number_of_components-1), &basis); // a random wavelet index at level j
+  basis.primal_support(lambda, k1, k2);
+  cout << "support of \\Psi_" << lambda << ": 2^{-" << lambda.j()+lambda.e() << "} [" << k1 << ", " << k2 << "]" << endl;
+  basis.dual_support(lambda, k1, k2);
+  cout << "support of \\tilde\\Psi_" << lambda << ": 2^{-" << lambda.j()+lambda.e() << "} [" << k1 << ", " << k2 << "]" << endl;
+
+  cout << "support of primal boundary wavelets: ";
+  j = basis.j0();
+  lambda = SBasis::Index(j, E_WAVELET, basis.Nablamin(), 0, &basis);
+  basis.primal_support(lambda, k1, k2);
+  cout << lambda << ": 2^{-" << lambda.j()+lambda.e() << "} [" << k1 << ", " << k2 << "]; ";
+  lambda = SBasis::Index(j, E_WAVELET, basis.Nablamax(j), 0, &basis);
+  basis.primal_support(lambda, k1, k2);
+  cout << lambda << ": 2^{-" << lambda.j()+lambda.e() << "} [" << k1 << ", " << k2 << "]" << endl;
+  cout << "support of dual boundary generators: ";
+  lambda = SBasis::Index(j, E_GENERATOR, basis.DeltaLTmin(), 0, &basis);
+  basis.dual_support(lambda, k1, k2);
+  cout << lambda << ": 2^{-" << lambda.j() << "} [" << k1 << ", " << k2 << "]; ";
+  lambda = SBasis::Index(j, E_GENERATOR, basis.DeltaRTmax(j), 0, &basis);
+  basis.dual_support(lambda, k1, k2);
+  cout << lambda << ": 2^{-" << lambda.j() << "} [" << k1 << ", " << k2 << "]" << endl;
 
   return 0;
 }

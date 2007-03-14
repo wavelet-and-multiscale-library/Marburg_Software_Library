@@ -73,6 +73,45 @@ namespace WaveletTL
   }
 
 
+  void
+  SBasis::primal_support(const SBasis::Index& lambda, int& k1, int& k2) const
+  {
+    assert(lambda.is_valid());
+
+    if (lambda.e() == E_GENERATOR) {
+      // support is 1 unit to the left and to the right of the k index; no boundary adaption
+      k1 = lambda.k() - 1;
+      k2 = lambda.k() + 1;
+    }
+    else { // lambda.e() == E_WAVELET
+      // support is 1 unit to the left and one unit to the right of the k index;
+      // boundary wavelets have "cut off" support
+      // wavelets have an effective granularity lambda.j()+1, so multiply resulting k values with 2
+      k1 = max(lambda.k() - Nablamin() - 1, 0) * 2;
+      k2 = min(lambda.k() - Nablamin() + 2, 1<<lambda.j()) * 2;
+    }
+  }
+
+  void
+  SBasis::dual_support(const SBasis::Index& lambda, int& k1, int& k2) const
+  {
+    assert(lambda.is_valid());
+
+    if (lambda.e() == E_GENERATOR) {
+      // support is 2 units to the left and to the right of the k index;
+      // boundary wavelets have "cut off" support
+      k1 = max(lambda.k() - 2, 0);
+      k2 = min(lambda.k() + 2, 1<<lambda.j());
+    }
+    else { // lambda.e() == E_WAVELET
+      // same support as primal wavelets
+      // wavelets have an effective granularity lambda.j()+1, so multiply resulting k values with 2
+      k1 = max(lambda.k() - Nablamin() - 1, 0) * 2;
+      k2 = min(lambda.k() - Nablamin() + 2, 1<<lambda.j()) * 2;
+    }
+  }
+
+
   /* DECOMPOSE methods */
   void
   SBasis::decompose_1(const SBasis::Index& lambda, InfiniteVector<double, SBasis::Index>& c) const

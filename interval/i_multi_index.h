@@ -61,7 +61,7 @@ namespace WaveletTL
 
     /* member functions ****************************************************/
     //! check if it is a valid index
-    bool is_valid();
+    bool is_valid() const;
 
     //! assignment
     IntervalMultiIndex<IBASIS>& operator = (const IntervalMultiIndex<IBASIS>& lambda);

@@ -91,7 +91,7 @@ EXEOBJF2 = \
   test_periodic.o\
   test_spline_basis.o test_spline_support.o test_spline_expansion.o\
   test_a_basis.o\
-  test_s_basis.o
+  test_s_basis.o test_s_support.o
 
 # set 3 of test programs: wavelet bases on general higher-dim. domains ((mapped) cube, tensor prod.)
 EXEOBJF3 = \

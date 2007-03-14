@@ -57,12 +57,28 @@ namespace WaveletTL
     //! size_type, for convenience
     typedef Vector<double>::size_type size_type;
 
-    //! geometric type of the support sets
+    //! geometric type of the support sets (2^{-j}[k1,k2])
     typedef struct {
       int j;
       int k1;
       int k2;
     } Support;
+
+    /*!
+      Compute an interval 2^{-j}[k1,k2] which contains the support of a
+      single primal generator or wavelet with index lambda.
+      Note that wavelets have granularity j = lambda.j()+1, so the
+      returned k values are respective to lambda.j()+lambda.e().
+    */
+    void primal_support(const Index& lambda, int& k1, int& k2) const;
+
+    /*!
+      Compute an interval 2^{-j}[k1,k2] which contains the support of a
+      single dual generator or wavelet with index lambda.
+      Note that wavelets have granularity j = lambda.j()+1, so the
+      returned k values are respective to lambda.j()+lambda.e().
+    */
+    void dual_support(const Index& lambda, int& k1, int& k2) const;
 
     //! space dimension of the underlying domain
     static const int space_dimension = 1;

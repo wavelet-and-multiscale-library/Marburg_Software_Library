@@ -37,19 +37,6 @@ namespace WaveletTL
     return true;
   }
 
-  bool intersect_supports(const SBasis& basis,
-                          const SBasis::Index& lambda,
-                          const SBasis::Index& nu,
-                          int& j, int& k1, int& k2)
-  {
-    // compute support of \psi_\lambda
-    int k1_lambda, k2_lambda;
-    support(basis, lambda, k1_lambda, k2_lambda);
-
-    // call intersect_supports routine for the interval 2^{-j} [k1_lambda, k2_lambda]
-    return intersect_supports(basis, nu, lambda.j()+lambda.e(), k1_lambda, k2_lambda, j, k1, k2);
-  }
-
   inline
   bool intersect_supports(const SBasis& basis,
                           const SBasis::Index& lambda,
@@ -142,6 +129,11 @@ namespace WaveletTL
     int k1, k2;
     intersecting_wavelets(basis, lambda, j, generators, k1, k2);
 
+    // compute support of \psi_\lambda
+    int k1_lambda, k2_lambda;
+    support(basis, lambda, k1_lambda, k2_lambda);
+    const int j_lambda = lambda.j()+lambda.e();
+
     // create list (all indices between k1 and k2)
     Support supp;
     Index nu;
@@ -149,9 +141,9 @@ namespace WaveletTL
       for (int c = 0; c < (int)basis.number_of_components; c++) {
         nu = Index(j, !generators, k, c, &basis);
         #ifdef NDEBUG // no debuging, final version
-        intersect_supports(basis, nu, lambda, supp.j, supp.k1, supp.k2);
+        intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2);
         #else // !NDEBUG (debuging)
-        if (!intersect_supports(basis, nu, lambda, supp.j, supp.k1, supp.k2))
+        if (!intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
           cerr << "intersecting_wavelets: Error: intersect_supports returned false. lambda = "<<lambda<<", nu = "<<nu << endl;
         #endif // !NDEBUG
         intersecting.push_back(std::make_pair(nu, supp));

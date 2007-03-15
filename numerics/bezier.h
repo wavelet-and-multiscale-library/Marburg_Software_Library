@@ -52,13 +52,24 @@ namespace MathTL
   }
 
   /*!
+    point evaluation of the second derivative of B_{k,d}(x)
+  */
+  template <int d>
+  double EvaluateBernsteinPolynomial_xx(const int k, const double x)
+  {
+    return d*(d-1) * (EvaluateBernsteinPolynomial<d-2>(k-2, x)
+		      - 2*EvaluateBernsteinPolynomial<d-2>(k-1, x)
+		      + EvaluateBernsteinPolynomial<d-2>(k, x));
+  }
+
+  /*!
     point evaluation of a quadratic polynomial p(x) in Bernstein representation
      
       p(x) = sum_{k=0}^2 B_{k,2}(x) * b_k
   */
   inline
-  double EvaluateBernsteinPolynomial(const double b0, const double b1, const double b2,
-				     const double x)
+  double EvaluateBernsteinRepresentation(const double b0, const double b1, const double b2,
+					 const double x)
   {
     const double b10 = (1.-x)*b0+x*b1;
     const double b11 = (1.-x)*b1+x*b2;
@@ -72,9 +83,9 @@ namespace MathTL
       p(x) = sum_{k=0}^3 B_{k,3}(x) * b_k
   */
   inline
-  double EvaluateBernsteinPolynomial(const double b0, const double b1,
-				     const double b2, const double b3,
-				     const double x)
+  double EvaluateBernsteinRepresentation(const double b0, const double b1,
+					 const double b2, const double b3,
+					 const double x)
   {
     const double b10 (b0+x*(b1-b0)); // = (1.-x)*b0+x*b1;
     const double b11 (b1+x*(b2-b1)); // = (1.-x)*b1+x*b2;
@@ -90,17 +101,32 @@ namespace MathTL
     point evaluation of the first derivative of a cubic polynomial p(x) in Bernstein representation
      
       p'(x) = sum_{k=0}^3 B'_{k,3}(x) * b_k
-            = 3 * sum_{k=0}^3 (B_{k-1,2}(x)-B_{k,2}) * b_k
+            = 3 * sum_{k=0}^3 (B_{k-1,2}(x)-B_{k,2}(x)) * b_k
             = 3 * sum_{k=0}^2 B_{k,2}(x) * (b_{k+1}-b_k)
   */
   inline
-  double EvaluateBernsteinPolynomial_x(const double b0, const double b1,
-				       const double b2, const double b3,
-				       const double x)
+  double EvaluateBernsteinRepresentation_x(const double b0, const double b1,
+					   const double b2, const double b3,
+					   const double x)
   {
-    return 3*EvaluateBernsteinPolynomial(b1-b0, b2-b1, b3-b2, x);
+    return 3*EvaluateBernsteinRepresentation(b1-b0, b2-b1, b3-b2, x);
   }
 
+  /*!
+    point evaluation of the second derivative of a cubic polynomial p(x) in Bernstein representation
+     
+      p''(x) = sum_{k=0}^3 B''_{k,3}(x) * b_k
+             = 6 * sum_{k=0}^3 (B_{k-2,1}(x)-2*B_{k_1,1}(x)+B_{k,1}(x)) * b_k
+             = 6 * sum_{k=0}^1 B_{k,1}(x) * (b_{k+2}-2*b_{k+1}-b_k)
+  */
+  inline
+  double EvaluateBernsteinRepresentation_xx(const double b0, const double b1,
+					    const double b2, const double b3,
+					    const double x)
+  {
+    return 6*((1-x)*(b2-2*b1+b0) + x*(b3-2*b2+b1));
+  }
+  
   /*!
     point evaluation of the i-th cubic Hermite basic interpolatory spline
       i=0 : s(0)=1, s'(0)=0
@@ -113,9 +139,9 @@ namespace MathTL
 	return 0.;
       } else {
 	return (x <= 0.
-		? EvaluateBernsteinPolynomial(0., 0., 1., 1., x+1.)
+		? EvaluateBernsteinRepresentation(0., 0., 1., 1., x+1.)
 // 		(x+1)*(x+1)*(1-2*x)
-		: EvaluateBernsteinPolynomial(1., 1., 0., 0., x)
+		: EvaluateBernsteinRepresentation(1., 1., 0., 0., x)
 // 		(1-x)*(1-x)*(2*x+1)
 		);
       }
@@ -125,8 +151,8 @@ namespace MathTL
 	return 0.;
       } else {
 	return (x <= 0.
-		? EvaluateBernsteinPolynomial(0., 0., -1./3., 0., x+1.)
-		: EvaluateBernsteinPolynomial(0., 1./3., 0., 0., x));
+		? EvaluateBernsteinRepresentation(0., 0., -1./3., 0., x+1.)
+		: EvaluateBernsteinRepresentation(0., 1./3., 0., 0., x));
       }
     }
   }
@@ -157,8 +183,8 @@ namespace MathTL
 	return 0;
       } else {
 	return (x <= 0
-		? EvaluateBernsteinPolynomial_x(0, 0, 1, 1, x+1.0)
-		: EvaluateBernsteinPolynomial_x(1, 1, 0, 0, x));
+		? EvaluateBernsteinRepresentation_x(0, 0, 1, 1, x+1.0)
+		: EvaluateBernsteinRepresentation_x(1, 1, 0, 0, x));
       }
     } else {
       // phi_1, Bezier coefficients are {0,0,-1/3,0,1/3,0,0}
@@ -166,8 +192,36 @@ namespace MathTL
 	return 0;
       } else {
 	return (x <= 0
-		? EvaluateBernsteinPolynomial_x(0, 0, -1./3., 0, x+1.0)
-		: EvaluateBernsteinPolynomial_x(0, 1./3., 0, 0, x));
+		? EvaluateBernsteinRepresentation_x(0, 0, -1./3., 0, x+1.0)
+		: EvaluateBernsteinRepresentation_x(0, 1./3., 0, 0, x));
+      }
+    }
+  }
+
+  /*!
+    point evaluation of the second derivative of the i-th cubic Hermite basic interpolatory spline
+      i=0 : s(0)=1, s'(0)=0
+      i!=0: s(0)=0, s'(0)=1
+  */
+  inline
+  double EvaluateHermiteSpline_xx(const int i, const double x) {
+    if (i == 0) {
+      // phi_0, Bezier coefficients are {0,0,1,1,1,0,0}
+      if (x <= -1 || x >= 1) {
+	return 0;
+      } else {
+	return (x <= 0
+		? EvaluateBernsteinRepresentation_xx(0, 0, 1, 1, x+1.0)
+		: EvaluateBernsteinRepresentation_xx(1, 1, 0, 0, x));
+      }
+    } else {
+      // phi_1, Bezier coefficients are {0,0,-1/3,0,1/3,0,0}
+      if (x <= -1 || x >= 1) {
+	return 0;
+      } else {
+	return (x <= 0
+		? EvaluateBernsteinRepresentation_xx(0, 0, -1./3., 0, x+1.0)
+		: EvaluateBernsteinRepresentation_xx(0, 1./3., 0, 0, x));
       }
     }
   }
@@ -177,12 +231,15 @@ namespace MathTL
   */
   inline
   double EvaluateHermiteSpline_td_x(const int i, const int j, const int k, const double x) {
-#if 0
-    const double factor(1<<j);
-    return factor * sqrt(factor) * EvaluateHermiteSpline_x(i, factor * x - k);
-#else
     return twotothejhalf(3*j) * EvaluateHermiteSpline_x(i, (1<<j) * x - k);
-#endif
+  }
+  
+  /*!
+    evaluate the second derivative of a translated and dilated version of the i-th cubic Hermite interpolant
+  */
+  inline
+  double EvaluateHermiteSpline_td_xx(const int i, const int j, const int k, const double x) {
+    return twotothejhalf(5*j) * EvaluateHermiteSpline_xx(i, (1<<j) * x - k);
   }
 
   /*!

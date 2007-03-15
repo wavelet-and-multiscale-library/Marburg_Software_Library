@@ -17,7 +17,7 @@ int main()
 
   const unsigned int n = 50;
 
-#if 0
+#if 1
   const int d = 3;
   for (int k = -1; k <= d+1; k++) {
     cout << "* some point values of the " << k << "-th Bernstein polynomial of degree " << d << ":" << endl;
@@ -41,8 +41,20 @@ int main()
     cout << "  xi=" << xi << endl;
     cout << "  yi=" << yi << endl;
   }
+  for (int k = -1; k <= d+1; k++) {
+    cout << "* some point values of the 2nd derivative of the " << k << "-th Bernstein polynomial of degree " << d << ":" << endl;
+    Array1D<double> xi(n+1), yi(n+1);
+    for (unsigned int i = 0; i <= n; i++) {
+      xi[i] = i/(double)n;
+      yi[i] = EvaluateBernsteinPolynomial_xx<d>(k, xi[i]);
+    }
+    
+    cout << "  xi=" << xi << endl;
+    cout << "  yi=" << yi << endl;
+  }
 #endif
   
+#if 1
   double b0 = 0;
   double b1 = 1;
   double b2 = 0;
@@ -53,7 +65,7 @@ int main()
   Array1D<double> xi(n+1), yi(n+1), zi(n+1), err(n+1);
   for (unsigned int i = 0; i <= n; i++) {
     xi[i] = i/(double)n;
-    yi[i] = EvaluateBernsteinPolynomial(b0, b1, b2, b3, xi[i]);
+    yi[i] = EvaluateBernsteinRepresentation(b0, b1, b2, b3, xi[i]);
   }
 
   cout << "  xi=" << xi << endl;
@@ -103,7 +115,21 @@ int main()
     cout << "  xi=" << xi << endl;
     cout << "  yi=" << yi << endl;
   }
+  
+  for (unsigned int m = 0; m <= 1; m++) {
+    cout << "* some point values from the second derivative of the " << m << "-th cubic Hermite interpolant:" << endl;
+    
+    for (unsigned int i = 0; i <= n; i++) {
+      xi[i] = -1.5 + i*(1.5-(-1.5))/(double)n;
+      yi[i] = EvaluateHermiteSpline_xx(m, xi[i]);
+    }
+    
+    cout << "  xi=" << xi << endl;
+    cout << "  yi=" << yi << endl;
+  }
+#endif
 
+#if 0
   cout << "- examine the two components of a Hermite interpolatory spline:" << endl;
   CubicHermiteInterpolant_td phi1(0, 0, 0), phi2(0, 0, 1);
   CompositeRule<1> qrule(GaussLegendreRule(4), 4);
@@ -128,8 +154,9 @@ int main()
   ProductFunction<1> integrand6(&phi1, &phi2);
   cout << "<phi_1,phi_1(.-1)>=" << qrule.integrate(integrand6, Point<1>(-1), Point<1>(1))
        << " (expected " << -1./140. << ")" << endl;
+#endif
   
-#if 1
+#if 0
   cout << "* plot a cubic Hermite interpolant into a file..." << endl;
   CubicHermiteInterpolant2D_td fh(3, 1, 1, 0, 0);
   Grid<2> fh_grid(Point<2>(-1,0), Point<2>(0,1), 1<<5);

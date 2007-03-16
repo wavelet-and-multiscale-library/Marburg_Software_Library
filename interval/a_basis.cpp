@@ -237,8 +237,23 @@ namespace WaveletTL
   }
 
   template <unsigned int n>
+  void
+  ABasis<n>::primal_support(const ABasis<n>::Index& lambda, int& k1, int& k2) const
+  {
+    k1 = lambda.k();
+    k2 = k1 + 1;
+
+    // wavelets have a finer granularity
+    // (though, at this construction, you can't see this at the support)
+    if (lambda.e() == E_WAVELET) {
+      k1 *= 2;
+      k2 *= 2;
+    }
+  }
+
+  template <unsigned int n>
   Piecewise<double>
-  ABasis<n>::get_function(const ABasis<n>::Index index) const
+  ABasis<n>::get_function(const ABasis<n>::Index index, const unsigned int derivative) const
   {
     assert(index.c() < n); // component is within range
 
@@ -246,15 +261,39 @@ namespace WaveletTL
 
     if (index.e() == 0) // generator
       fkt = generators[index.c()];
-    else { // wavelet
+    else // wavelet
       fkt = wavelets[index.c()];
-      fkt.dilate_me(index.j());
-    }
     fkt.shift_me(index.k());
+    fkt.dilate_me(index.j());
+
+    for (unsigned int i = 0; i < derivative; i++)
+      fkt.differentiate();
 
     return fkt;
   }
   
+  template <unsigned int n>
+  double
+  ABasis<n>::primal_evaluate(const unsigned int derivative, const ABasis<n>::Index& lambda, const double x) const
+  {
+    return get_function(lambda, derivative).value(x);
+  }
+
+  template <unsigned int n>
+  void
+  ABasis<n>::primal_evaluate(const unsigned int derivative, const ABasis<n>::Index& lambda,
+                             const Array1D<double>& points, Array1D<double>& values) const
+  {
+    Piecewise<double> fkt;
+    const unsigned int npoints(points.size()); // number of points
+    unsigned int i;
+
+    fkt = get_function(lambda, derivative);
+
+    for (i = 0; i < npoints; i++)
+      values[i] = fkt.value(points[i]);
+  }
+
   #if 0
   template <unsigned int n>
   void

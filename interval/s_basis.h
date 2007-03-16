@@ -10,6 +10,7 @@
 #ifndef _WAVELETTL_S_BASIS_H
 #define _WAVELETTL_S_BASIS_H
 
+#include <utils/array1d.h>
 #include <algebra/vector.h>
 #include <algebra/matrix.h>
 #include <algebra/infinite_vector.h>
@@ -17,6 +18,7 @@
 #include <interval/i_multi_index.h>
 #include <Rd/dhjk_mask.h>
 
+using MathTL::Array1D;
 using MathTL::Vector;
 using MathTL::Matrix;
 using MathTL::InfiniteVector;
@@ -323,6 +325,20 @@ namespace WaveletTL
     */
     void refine_t(const InfiniteVector<double, Index>& c, const int j,
                   InfiniteVector<double, Index>& v) const;
+
+
+    /*!
+      point evaluation of (derivatives) of a single primal generator
+      or wavelet \psi_\lambda
+     */
+    double primal_evaluate(const unsigned int derivative, const Index& lambda, const double x) const;
+
+    /*!
+      point evaluation of (derivatives) of a single primal generator
+      or wavelet \psi_\lambda at several points simultaneously
+    */
+    void primal_evaluate(const unsigned int derivative, const Index& lambda,
+                         const Array1D<double>& points, Array1D<double>& values) const;
 
 
   protected:

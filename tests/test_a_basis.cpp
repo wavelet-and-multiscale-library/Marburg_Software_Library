@@ -1,14 +1,12 @@
 #include <iostream>
 #include <fstream>
-#include <sstream>
 
 #include <algebra/infinite_vector.h>
 #include <utils/array1d.h>
 #include <geometry/sampled_mapping.h>
 
 #include <interval/a_basis.h>
-#include <interval/a_evaluate.h>
-#include <interval/i_indexplot.h>
+#include <interval/interval_evaluate.h>
 
 using namespace std;
 using namespace WaveletTL;

@@ -61,6 +61,14 @@ namespace WaveletTL
       int k2;
     } Support;
 
+    /*!
+      Compute an interval 2^{-j}[k1,k2] which contains the support of a
+      single (primal) generator or wavelet with index lambda.
+      Note that wavelets have granularity j = lambda.j()+1, so the
+      returned k values are respective to lambda.j()+lambda.e().
+    */
+    void primal_support(const Index& lambda, int& k1, int& k2) const;
+
     //! space dimension of the underlying domain
     static const int space_dimension = 1;
 
@@ -102,8 +110,21 @@ namespace WaveletTL
     //! index of last (rightmost) wavelet on level j >= j0
     Index last_wavelet(const int j) const;
 
-    //! return wavelet or generator function with given index
-    Piecewise<double> get_function(const Index index) const;
+    //! return (derivatives of) a wavelet or generator function with given index
+    Piecewise<double> get_function(const Index index, const unsigned int derivative = 0) const;
+
+    /*!
+      point evaluation of (derivatives) of a single generator or wavelet
+      \psi_\lambda
+     */
+    double primal_evaluate(const unsigned int derivative, const Index& lambda, const double x) const;
+
+    /*!
+      point evaluation of (derivatives) of a single generator or wavelet
+      \psi_\lambda at several points simultaneously
+    */
+    void primal_evaluate(const unsigned int derivative, const Index& lambda,
+                         const Array1D<double>& points, Array1D<double>& values) const;
 
     //! RECONSTRUCT routine, simple version
     /*!

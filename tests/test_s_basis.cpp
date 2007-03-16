@@ -10,6 +10,7 @@
 
 #include <interval/s_basis.h>
 #include <interval/s_support.h>
+#include <interval/interval_evaluate.h>
 
 using namespace std;
 using namespace WaveletTL;
@@ -228,6 +229,29 @@ int main()
   lambda = SBasis::Index(j, E_GENERATOR, basis.DeltaRTmax(j), 0, &basis);
   basis.dual_support(lambda, k1, k2);
   cout << lambda << ": 2^{-" << lambda.j() << "} [" << k1 << ", " << k2 << "]" << endl;
+
+  cout << endl << "Testing the evaluate routines ..." << endl;
+  const unsigned int plot_resolution = 10;
+  SampledMapping<1> map;
+  std::ofstream fs;
+  cout << "- evaluating primal S generators: writing files 'sgenerator-k_i.dat'" << endl;
+  for (lambda = basis.first_generator(j); lambda <= basis.last_generator(j); ++lambda) {
+    ostringstream filename;
+    filename << "sgenerator-" << lambda.k() << "_" << lambda.c() << ".dat";
+    fs.open(filename.str().c_str());
+    map = WaveletTL::evaluate(basis, lambda, plot_resolution);
+    map.gnuplot_output(fs);
+    fs.close();
+  }
+  cout << "- evaluating primal S wavelets: writing files 'swavelet-k_i.dat'" << endl;
+  for (lambda = basis.first_wavelet(j); lambda <= basis.last_wavelet(j); ++lambda) {
+    ostringstream filename;
+    filename << "swavelet-" << lambda.k() << "_" << lambda.c() << ".dat";
+    fs.open(filename.str().c_str());
+    map = WaveletTL::evaluate(basis, lambda, plot_resolution);
+    map.gnuplot_output(fs);
+    fs.close();
+  }
 
   return 0;
 }

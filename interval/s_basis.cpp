@@ -5,6 +5,8 @@
 
 #include <Rd/dhjk_mask.h>
 
+#include <numerics/bezier.h>
+
 using namespace std;
 
 namespace WaveletTL
@@ -568,4 +570,64 @@ namespace WaveletTL
     }
   }
 
+  double
+  SBasis::primal_evaluate(const unsigned int derivative, const SBasis::Index& lambda, const double x) const
+  {
+    assert(lambda.is_valid());
+    assert(derivative <= 2); // only function values, 1st and 2nd derivatives implemented at the moment
+
+    double fx = 0;
+
+    if (lambda.e() == E_GENERATOR) { // it's a generator
+      switch(derivative) {
+        case 0:
+          fx = MathTL::EvaluateHermiteSpline_td   (lambda.c(), lambda.j(), lambda.k(), x);
+          break;
+        case 1:
+          fx = MathTL::EvaluateHermiteSpline_td_x (lambda.c(), lambda.j(), lambda.k(), x);
+          break;
+        case 2:
+          fx = MathTL::EvaluateHermiteSpline_td_xx(lambda.c(), lambda.j(), lambda.k(), x);
+          break;
+      }
+    }
+    else { // lambda.e() == E_WAVELET
+      InfiniteVector<double, SBasis::Index> coeff;
+      reconstruct_1(lambda, coeff); // get notation of wavelet as a linear combination of generators
+      for (InfiniteVector<double, SBasis::Index>::const_iterator it(coeff.begin()), itend(coeff.end()); it != itend; ++it)
+        fx += *it * primal_evaluate(derivative, it.index(), x);
+    }
+
+    return fx;
+  }
+
+  void
+  SBasis::primal_evaluate(const unsigned int derivative, const SBasis::Index& lambda,
+           const Array1D<double>& points, Array1D<double>& values) const
+  {
+    assert(lambda.is_valid());
+    assert(derivative <= 2); // only function values, 1st and 2nd derivatives implemented at the moment
+
+    const unsigned int npoints(points.size()); // number of points
+    unsigned int i;
+
+    if (lambda.e() == E_GENERATOR) { // it's a generator
+      if (derivative == 0)
+        for (i = 0; i < npoints; i++)
+          values[i] = MathTL::EvaluateHermiteSpline_td(lambda.c(), lambda.j(), lambda.k(), points[i]);
+      else if (derivative == 1)
+        for (i = 0; i < npoints; i++)
+          values[i] = MathTL::EvaluateHermiteSpline_td_x(lambda.c(), lambda.j(), lambda.k(), points[i]);
+      else if (derivative == 2)
+        for (i = 0; i < npoints; i++)
+          values[i] = MathTL::EvaluateHermiteSpline_td_xx(lambda.c(), lambda.j(), lambda.k(), points[i]);
+    }
+    else { // lambda.e() == E_WAVELET
+      InfiniteVector<double, SBasis::Index> coeff;
+      reconstruct_1(lambda, coeff); // get notation of wavelet as a linear combination of generators
+      for (InfiniteVector<double, SBasis::Index>::const_iterator it(coeff.begin()), itend(coeff.end()); it != itend; ++it)
+        for (i = 0; i < npoints; i++)
+          values[i] += *it * primal_evaluate(derivative, it.index(), points[i]);
+    }
+  }
 }

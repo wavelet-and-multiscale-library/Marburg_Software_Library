@@ -2,6 +2,7 @@
 
 #include <list>
 #include <numerics/gauss_data.h>
+#include <numerics/eigenvalues.h>
 #include <frame_index.h>
 #include <frame_support.h>
 //#include <cuba.h>

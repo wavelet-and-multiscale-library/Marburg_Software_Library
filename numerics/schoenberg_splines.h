@@ -186,7 +186,7 @@ template <int d>
   inline
   double EvaluateSchoenbergBSpline_td_x(const int j, const int k, const double x)
   {
-#if 0
+#if 1
     const double factor(1 << j);
     return factor * sqrt(factor) * EvaluateSchoenbergBSpline_x<d>(k-(d/2), factor * x);
 #else
@@ -198,7 +198,7 @@ template <int d>
   inline
   double EvaluateSchoenbergBSpline_td_xx(const int j, const int k, const double x)
   {
-#if 0
+#if 1
     const double factor(1 << j);
     return  factor * factor * sqrt(factor) * EvaluateSchoenbergBSpline_xx<d>(k-(d/2), factor * x);
 #else

@@ -186,6 +186,7 @@ namespace MathTL
   bool PCG(const MATRIX &A, const VECTOR &b, const PREC& P, VECTOR &xk,
 	   const double tol, const unsigned int maxiter, unsigned int& iterations)
   {
+    //cout << b << endl;
     // see: "Templates for the Solution of Linear Systems: Building Blocks for Iterative Methods"
 
     VECTOR rk(A.row_dimension(), false),
@@ -193,6 +194,8 @@ namespace MathTL
       pk(A.row_dimension(), false),
       Apk(A.row_dimension(), false);
 
+    //cout << A << endl;
+    //A.matlab_output("AMAT", "A", 1);
     // first (negative) residual
     A.apply(xk, rk);
     rk.subtract(b);
@@ -216,7 +219,6 @@ namespace MathTL
 	normrk = l2_norm_sqr(rk);
 
 	//cout << "normrk = " << sqrt(normrk) << endl;
-
 	oldrhok = rhok;
       }
 

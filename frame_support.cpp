@@ -17,7 +17,7 @@ namespace FrameTL
 
   inline bool eq (const double x, const double y)
   {
-    const double eps = 1.0e-10;
+    const double eps = 1.0e-12;
     return fabs(x-y) < eps;
   }
 
@@ -94,7 +94,9 @@ namespace FrameTL
 	Point<DIM_d> b;
 	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx), a);
 	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx), b);
-	return (a[0] <= p[0]) && (p[0] <= b[0]);
+	//cout << a[0] << " " << p[0] << " " <<  b[0] << " " << ((a[0] <= p[0]) && (p[0] <= b[0])) << endl;
+	//return (a[0] <= p[0]) && (p[0] <= b[0]);
+	return leq(a[0],p[0]) && leq(p[0],b[0]);
 	
       }
 
@@ -172,7 +174,7 @@ namespace FrameTL
 	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda->a[0]*dx), a);
 	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda->b[0]*dx), b);
 
-	return (a[0] <= p[0]) && (p[0] <= b[0]);
+	return (leq(a[0],p[0]) && leq(p[0],b[0]));
 	
       }
 
@@ -739,7 +741,8 @@ namespace FrameTL
       }
     }
     x = supp_mu->a[dir]*dx2;
-    irregular_grid.sort();    
+    irregular_grid.sort();
+    irregular_grid.unique();    
     
     supp_intersect.resize(irregular_grid.size());
     unsigned int j = 0;

@@ -16,6 +16,7 @@
 #include <galerkin/cached_problem.h>
 #include <frame_support.h>
 #include <frame_index.h>
+#include <utils/tiny_tools.h>
 
 
 using std::cout;
@@ -91,7 +92,7 @@ int main()
   cout << "Testing class BiharmonicEquation..." << endl;
   
   const int DIM = 1;
-  int jmax=7;
+  int jmax = 8;
 
   //typedef DSBasis<2,2> Basis1D;
   typedef PBasis<3,3> Basis1D;
@@ -174,17 +175,12 @@ int main()
   //PoissonBVP<DIM> poisson(&sing1D);
   //IdentityBVP<DIM> trivial_bvp(&const_fun);
   //IdentityBVP<DIM> trivial_bvp(&exactSolution);
-
-    BiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharmonic, &frame, jmax, TrivialAffine);
+  
+  BiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharmonic, &frame, jmax, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&trivial_bvp, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
   
   CachedProblem<BiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 4.19, 1.0/0.146);
-
-  // double tmp = 0.0;
-//   int c = 0;
-//   int d = 0
-    ;
   
   cout.precision(12);
   
@@ -247,21 +243,21 @@ int main()
   Vector<double> xk(Lambda.size()); xk = 0;
 
 
-//   for (int i = 0; i < 30 ; i++) 
-//     for (int j = 0; j < 30 ; j++) {
-//       if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
-// 	cout << stiff.get_entry(i,j) << endl;
-// 	cout << stiff.get_entry(j,i) << endl;
-// 	cout << "i = " << i << " j = " << j << endl;
-// 	//abort();
-// 	cout << "#######################" << endl;
-//       }
-//     } 
+  for (int i = 0; i < 1020 ; i++) 
+    for (int j = 0; j < 1020 ; j++) {
+      if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
+	cout << stiff.get_entry(i,j) << endl;
+	cout << stiff.get_entry(j,i) << endl;
+	cout << "i = " << i << " j = " << j << endl;
+	//abort();
+	cout << "#######################" << endl;
+      }
+    } 
 
   double alpha_n = 0.07;
   Vector<double> resid(xk.size());
   Vector<double> help(xk.size());
-  for (int i = 0; i <3000; i++) {
+  for (int i = 0; i <10000; i++) {
     stiff.apply(xk,help);
     resid = rh - help;
     cout << ".loop = " << i << " " << " res = " << sqrt((resid*resid)) << endl;

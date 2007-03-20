@@ -80,14 +80,14 @@ public:
 //    Singularity1D_2<double> exactSolution1D;
 
     unsigned int loops = 0;
-    const int jmax = 6;
+    const int jmax = 7;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
 
     double kappa     = P.norm_A()*a_inv;
     //double kappa     = 1.;
-    double omega_i   = a_inv*P.F_norm();
+    double omega_i   = 1.0e-15;//a_inv*P.F_norm();
     //double omega_i   = 1;
     cout << "a_inv = " << a_inv << endl;
     cout << "omega_i = " << omega_i << endl;
@@ -113,6 +113,7 @@ public:
     //double mu        = 1./3.; //shall be > 1
     //beta in (0,1)
     double beta      = 0.9;
+    //double beta      = 0.5;
     //let K be such that beta^K * omega <= epsilon
     unsigned int K   = (int) (log(epsilon/omega_i) / log(beta) + 1);
     //let M be such that lambda^M <= ((1-delta) / (1+delta)) * (beta / ((1+3*mu)*kappa))
@@ -140,6 +141,8 @@ public:
 
     //double acctime = 0;
 
+    double d = 0.5;
+
     for (unsigned int i = 1; i < K; i++) {
       omega_i *= beta;
       double xi_i = omega_i / ((1+3.0*mu)*C3*M);
@@ -155,8 +158,11 @@ public:
 	
 	//cout << z_i << endl << endl << tilde_r << endl;
 	
-	
-	double d = ((tilde_r*tilde_r)/(z_i*tilde_r));
+// 	cout << tilde_r.size() << " " << z_i.size() << endl;
+// 	cout << tilde_r << " " << z_i << endl;
+ 	double g = z_i*tilde_r;
+	if  (g != 0.)
+	  d = ((tilde_r*tilde_r)/(z_i*tilde_r));
 	
 	w += d*tilde_r;
 	cout << "descent param = " << d << endl;
@@ -216,19 +222,19 @@ public:
 // 	  ofs6.close();
 // 	}
 
-// 	if (loops % 1 == 0) {
-// 	  std::ofstream os3("steep2D_asymptotic_DS_homb1_35_2209.m");
-// 	  matlab_output(asymptotic,os3);
-// 	  os3.close();
+	if (loops % 1 == 0) {
+	  std::ofstream os3("steep2D_asymptotic_DS_33.m");
+	  matlab_output(asymptotic,os3);
+	  os3.close();
 	  
-// 	  std::ofstream os4("steep2D_time_asymptotic_DS_homb1_35_2209.m");
-// 	  matlab_output(time_asymptotic,os4);
-// 	  os4.close();
-// 	}
+	  std::ofstream os4("steep2D_time_asymptotic_DS_33.m");
+	  matlab_output(time_asymptotic,os4);
+	  os4.close();
+	}
 	
 	tstart = clock();
 
-	if (tmp < 1.0e-5 || loops == 20000) {
+	if (tmp < 1.0e-3 || loops == 20000) {
 	  u_epsilon = w;
 	  exit = true;
 	  break;

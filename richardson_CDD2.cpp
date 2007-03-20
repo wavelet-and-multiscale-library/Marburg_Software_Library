@@ -79,10 +79,10 @@ public:
 //     CornerSingularity sing2D(origin, 0.5, 1.5);
 //     CornerSingularityRHS singRhs(origin, 0.5, 1.5);
      
-    const int jmax = 6;
+    const int jmax = 13;
 
     double nu = P.norm_Ainv()*P.F_norm();
-    nu *= 10;
+    //nu *= 10;
     //double nu = 50;
     cout << "nu = " << nu << endl;
     typedef typename PROBLEM::Index Index;
@@ -101,6 +101,12 @@ public:
     //const double omega = 2.0/10;
     //const double omega = 2.0/100;
     cout << "CDD2_SOLVE: omega=" << omega << endl;
+
+
+
+    //const double omega = 0.2;
+
+
 
     // compute spectral norm rho
     double cond_A = P.norm_A() * P.norm_Ainv();

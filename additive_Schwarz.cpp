@@ -13,59 +13,87 @@ namespace FrameTL
 {
 
 
-/*!
-*/
-template<class VALUE = double>
-class Singularity1D_RHS_2
-  : public Function<1, VALUE>
-{
-public:
-  Singularity1D_RHS_2() {};
-  virtual ~Singularity1D_RHS_2() {};
-  VALUE value(const Point<1>& p,
-	      const unsigned int component = 0) const
+  /*!
+   */
+  template<class VALUE = double>
+  class Singularity1D_RHS_2
+    : public Function<1, VALUE>
   {
-    return -sin(3.*M_PI*p[0])*9.*M_PI*M_PI - 4.;
-  }
+  public:
+    Singularity1D_RHS_2() {};
+    virtual ~Singularity1D_RHS_2() {};
+    VALUE value(const Point<1>& p,
+		const unsigned int component = 0) const
+    {
+      return -sin(3.*M_PI*p[0])*9.*M_PI*M_PI - 4.;
+    }
   
-  void vector_value(const Point<1> &p,
-		    Vector<VALUE>& values) const { ; }
+    void vector_value(const Point<1> &p,
+		      Vector<VALUE>& values) const { ; }
   
-};
+  };
 
-/*!
-  special function with steep gradients
-  near the right end of the interval
-*/
-template<class VALUE = double>
-class Singularity1D_2
-  : public Function<1, VALUE>
-{
-public:
-  Singularity1D_2() {};
-  virtual ~Singularity1D_2() {};
-  VALUE value(const Point<1>& p,
-	      const unsigned int component = 0) const
+  /*!
+    special function with steep gradients
+    near the right end of the interval
+  */
+  template<class VALUE = double>
+  class Singularity1D_2
+    : public Function<1, VALUE>
   {
-    if (0. <= p[0] && p[0] < 0.5)
-      return -sin(3.*M_PI*p[0]) + 2.*p[0]*p[0];
+  public:
+    Singularity1D_2() {};
+    virtual ~Singularity1D_2() {};
+    VALUE value(const Point<1>& p,
+		const unsigned int component = 0) const
+    {
+      if (0. <= p[0] && p[0] < 0.5)
+	return -sin(3.*M_PI*p[0]) + 2.*p[0]*p[0];
 
-    if (0.5 <= p[0] && p[0] <= 1.0)
-      return -sin(3.*M_PI*p[0]) + 2.*(1-p[0])*(1-p[0]);
+      if (0.5 <= p[0] && p[0] <= 1.0)
+	return -sin(3.*M_PI*p[0]) + 2.*(1-p[0])*(1-p[0]);
 
-    return 0.;
+      return 0.;
 
-  }
+    }
   
-  void vector_value(const Point<1> &p,
-		    Vector<VALUE>& values) const { ; }
+    void vector_value(const Point<1> &p,
+		      Vector<VALUE>& values) const { ; }
   
-};
+  };
 
 
   template <class PROBLEM>
-  void  additive_Schwarz_SOLVE(PROBLEM& P,  const double epsilon,
-			       InfiniteVector<double, typename PROBLEM::Index>& u_epsilon)
+  void GALERKIN (PROBLEM& P,
+		 const set<typename PROBLEM::Index>& Lambda,
+		 const InfiniteVector<double, typename PROBLEM::Index>& rhs,
+		 Vector<double>& u)
+  {
+    typedef typename PROBLEM::Index Index;
+    // setup stiffness matrix
+    cout << "setting up full stiffness matrix..." << endl;
+    SparseMatrix<double> A_Lambda;
+    WaveletTL::setup_stiffness_matrix(P, Lambda, A_Lambda);
+
+    cout << "setting up full right hand side..." << endl;
+    Vector<double> F(Lambda.size());
+    unsigned int id = 0;
+    typename set<Index>::const_iterator it = Lambda.begin();
+    for (; it != Lambda.end(); ++it, ++id) {
+      F[id] = rhs.get_coefficient(*it);
+    }
+
+    cout << "size = " << F.size() << endl;
+    unsigned int iterations = 0;
+    CG(A_Lambda, F, u, 1.0e-15, 500, iterations);
+    cout << "CG done!!!!" << " Needed " << iterations << " iterations" << endl;
+  }
+
+
+
+  template <class PROBLEM>
+  void additive_Schwarz_SOLVE(PROBLEM& P,  const double epsilon,
+			      InfiniteVector<double, typename PROBLEM::Index>& u_epsilon)
   {
     //typedef DSBasis<2,2> Basis1D;
     typedef PBasis<3,3> Basis1D;	
@@ -77,7 +105,7 @@ public:
     CornerSingularity sing2D(origin, 0.5, 1.5);
     CornerSingularityRHS singRhs(origin, 0.5, 1.5);
 
-    const int jmax = 4;
+    const int jmax = 7;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
@@ -93,14 +121,14 @@ public:
 
     EvaluateFrame<Basis1D,2,2> evalObj;
 
-    double eta = 1.5;
+    double eta = 0.5;
     //double eta = 0.00001;
 
     const int number_patches = P.basis().n_p();
 
     //const double alpha = 0.35;//pbasis 1D 3 3, 0.7x0.7
-    //const double alpha = 0.7;
-    const double alpha = 0.5;
+    const double alpha = 0.7;
+    //double alpha = 0.5;
     //const double alpha = 0.3;
     //const double alpha = 0.2;
 
@@ -113,9 +141,11 @@ public:
     clock_t tstart, tend;
     tstart = clock();
 
-    //FixedArray1D<Vector<double>, 2> old_xk;
+    Array1D<InfiniteVector<double, Index> > old_xk(2);
 
-    while (tmp > 0.0009) {
+    
+
+    while (tmp > 1.0e-3) {
 
       cout << "reentering global loop " << endl;
 
@@ -124,6 +154,8 @@ public:
       APPLY_COARSE(P, u_k, eta, help, 0.00000001, jmax, CDD1);
       r = f - help;
 
+      //################# OUTPUT ####################
+      tend = clock();
       //approximate residual
       P.RHS(1.0e-8, f);
       //cout << f << endl;
@@ -137,7 +169,6 @@ public:
       cout << "residual norm = " << tmp  << endl;
       double tmp1 = log10(tmp);
 
-      tend = clock();
       //time = (double)((tend-tstart)/CLOCKS_PER_SEC);
       time += ((double) (tend-tstart))/((double) CLOCKS_PER_SEC);
       time_asymptotic[log10(time)] = tmp1;
@@ -156,11 +187,53 @@ public:
       os4.close();
       
       tstart = clock();
+      //################# END OUTPUT #################
+
 
       // setup local index set
       set<Index> Lambda;
       r.support(Lambda);
+
+#if 0
+      //#### computing descent parameter ####
+      help.clear();
+      InfiniteVector<double, Index> Ahelp;
+
+      APPLY_COARSE(P, r, eta/2., help, 0.00000001, jmax, CDD1);
+
+      set<Index> Lambda2;
+      help.support(Lambda2);
       
+      // compute relaxation parameter
+      for (int i = 0; i < number_patches; i++) {
+	cout << "doing patch for relaxation parameter computation " << i << endl;
+	set<Index> local_index_set;
+	typename set<Index>::const_iterator it = Lambda2.begin();
+
+	for (; it != Lambda2.end(); ++it) {
+	  if ((*it).p() == i) {
+	    local_index_set.insert(*it);
+	  }
+	}
+
+	if (local_index_set.size() == 0)
+	  continue;
+	
+	Vector<double> xk(local_index_set.size());
+	GALERKIN(P, local_index_set, help, xk);
+
+	int id = 0;
+	for (typename set<Index>::const_iterator it = local_index_set.begin(), itend = local_index_set.end();
+	     it != itend; ++it, ++id)
+	  Ahelp.set_coefficient(*it, xk[id]);		
+      }
+      
+      if (Ahelp.size() != 0 && r.size() != 0)
+	alpha = ((r*r)/(r*Ahelp));
+      cout << "descent parameter = " << alpha << endl;
+      //#### end computing descent parameter ####
+#endif
+
       for (int i = 0; i < number_patches; i++) {
 	cout << "doing patch " << i << endl;
 	set<Index> local_index_set;
@@ -170,55 +243,17 @@ public:
 	for (; it != Lambda.end(); ++it) {
 	  if ((*it).p() == i) {
 	    local_index_set.insert(*it);
-	    local_index_set2.insert((*it).number());
 	  }
 	}
-	
+
 	if (local_index_set.size() == 0)
 	  continue;
-
-// 	// setup local stiffness matrix
-// 	cout << "setting up full stiffness matrix..." << endl;
-// 	SparseMatrix<double> A_Lambda_i;
-// 	WaveletTL::setup_stiffness_matrix(P, local_index_set, A_Lambda_i);
 	
-	
-	// setup local right hand side
-	InfiniteVector<double, Index> r_i;
-	typename InfiniteVector<double, Index>::const_iterator it2 = r.begin();
-	for (; it2 != r.end(); ++it2) {
-	  if ((it2.index()).p() == i) {
-	    r_i.set_coefficient(it2.index(), *it2);
-	  }
-	}
-	
-	cout << "setting up full right hand side..." << endl;
-	Vector<double> F_Lambda_i(r_i.size());
-	unsigned int id = 0;
-	typename InfiniteVector<double, Index>::const_iterator it3 = r_i.begin();
-	for (; it3 != r_i.end(); ++it3, ++id) {
-	  F_Lambda_i[id] = *it3;
-	}
-	
-	// compute approximation to local problem
 	Vector<double> xk(local_index_set.size());
-	
-	int j = 0;
-	for (typename set<Index>::const_iterator it = local_index_set.begin(), itend = local_index_set.end();
-	     it != itend; ++it, ++j)
-	  xk[j] = u_k.get_coefficient(*it);
-      
-	cout << "r_1 size = " << r_i.size() << endl;
-	unsigned int iterations = 0;
-	//CG(A_Lambda_i, F_Lambda_i, xk, 1.0e-15, 500, iterations);
-	//P.CG(local_index_set, F_Lambda_i, xk, 1.0e-15, 500, iterations);
-	P.CG(local_index_set2, F_Lambda_i, xk, 1.0e-15, 500, iterations);
-	cout << "CG done!!!!" << " Needed " << iterations << " iterations" << endl;
+	GALERKIN(P, local_index_set, r, xk);
 
-	
 	help.clear();
-	
-	id = 0;
+	int id = 0;
 	for (typename set<Index>::const_iterator it = local_index_set.begin(), itend = local_index_set.end();
 	     it != itend; ++it, ++id)
 	  help.set_coefficient(*it, xk[id]);
@@ -229,44 +264,38 @@ public:
        
       global_iterations++;
       
-      eta *= 0.5;
-      
+      eta *= 0.8;
       
       u_epsilon = u_k;
       
       cout << global_iterations <<" loops completed" << endl;
       
-//       if (tmp < 0.0009) {
-// 	u_epsilon = u_k;
-// 	u_epsilon.scale(&P,-1);
-// 	char filename1[50];
-// 	char filename2[50];
+      //       if (tmp < 0.0009) {
+      // 	u_epsilon = u_k;
+      // 	u_epsilon.scale(&P,-1);
+      // 	char filename1[50];
+      // 	char filename2[50];
 	
-// 	sprintf(filename1, "%s%d%s%d%s", "approx_sol_add_schwarz33_2D_out_", global_iterations, "_nactive_", u_k.size(),".m");
-// 	sprintf(filename2, "%s%d%s%d%s", "error_add_schwarz_2D_out_", global_iterations, "_nactive_", u_k.size(),".m");
-// 	cout << "...plotting approximate solution" << endl;
-// 	Array1D<SampledMapping<2> > U = evalObj.evaluate(P.basis(), u_epsilon, true, 6);//expand in primal basis
+      // 	sprintf(filename1, "%s%d%s%d%s", "approx_sol_add_schwarz33_2D_out_", global_iterations, "_nactive_", u_k.size(),".m");
+      // 	sprintf(filename2, "%s%d%s%d%s", "error_add_schwarz_2D_out_", global_iterations, "_nactive_", u_k.size(),".m");
+      // 	cout << "...plotting approximate solution" << endl;
+      // 	Array1D<SampledMapping<2> > U = evalObj.evaluate(P.basis(), u_epsilon, true, 6);//expand in primal basis
 	
-// 	std::ofstream ofs5(filename1);
-// 	matlab_output(ofs5,U);
-// 	ofs5.close();
+      // 	std::ofstream ofs5(filename1);
+      // 	matlab_output(ofs5,U);
+      // 	ofs5.close();
 
 
 
-// 	Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(P.basis(), u_epsilon, sing2D, 6);
-//  	cout << "...plotting error" << endl;
-// 	std::ofstream ofs6(filename2);
-// 	matlab_output(ofs6, Error);
-// 	ofs6.close();
+      // 	Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(P.basis(), u_epsilon, sing2D, 6);
+      //  	cout << "...plotting error" << endl;
+      // 	std::ofstream ofs6(filename2);
+      // 	matlab_output(ofs6, Error);
+      // 	ofs6.close();
 	
 	
-//       }
+      //       }
     }
-
- 
-
-
-
 
   }
 }

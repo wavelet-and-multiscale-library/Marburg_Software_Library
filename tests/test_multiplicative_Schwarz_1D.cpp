@@ -2,6 +2,7 @@
 #include <time.h> 
 #include <interval/ds_basis.h>
 #include <interval/p_basis.h>
+#include <interval/spline_basis.h>
 //#include <elliptic_equation.h>
 #include <simple_elliptic_equation.h>
 #include <algebra/sparse_matrix.h>
@@ -15,8 +16,8 @@
 #include <frame_support.h>
 #include <frame_index.h>
 //#include <steepest_descent.h>
-//#include <multiplicative_Schwarz.h>
-#include <additive_Schwarz.h>
+#include <multiplicative_Schwarz.h>
+//#include <additive_Schwarz.h>
 //#include <steepest_descent_basis.h>
 //#include <richardson_CDD2.h>
 #include <galerkin/cached_problem.h>
@@ -101,10 +102,14 @@ int main()
   
   const int DIM = 1;
 
-  const int jmax = 16;
+  const int jmax = 9;
+  
+  const int d = 3, dT = 3;
+
+  //typedef SplineBasis<d,dT,P_construction> Basis1D;
 
   //typedef DSBasis<2,2> Basis1D;
-  typedef PBasis<3,3> Basis1D;
+  typedef PBasis<d,dT> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
@@ -112,13 +117,13 @@ int main()
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 0.7;
+  A(0,0) = 0.9;
   Point<1> b;
   b[0] = 0.;
   AffineLinearMapping<1> affineP(A,b);
   
   Matrix<double> A2(DIM,DIM);
-  A2(0,0) = 0.7;
+  A2(0,0) = 0.9;
   Point<1> b2;
   b2[0] = 1-A2.get_entry(0,0);
   AffineLinearMapping<1> affineP2(A2,b2);
@@ -193,37 +198,30 @@ int main()
   
   bc[1] = bound_2;
 
-  FixedArray1D<int,2*DIM> bound_3;
-  bound_3[0] = 2;
-  bound_3[1] = 1;
-  
-  //bc[2] = bound_3;
-
-
 // //to specify primal boundary the conditions
-//   Array1D<FixedArray1D<int,2*DIM> > bcT(2);
+   Array1D<FixedArray1D<int,2*DIM> > bcT(2);
+   
+   //   //dual boundary conditions for first patch
+   FixedArray1D<int,2*DIM> bound_3;
+   bound_3[0] = 0;
+   bound_3[1] = 0;
+   
+   bcT[0] = bound_3;
 
-//   //dual boundary conditions for first patch
-//   FixedArray1D<int,2*DIM> bound_3;
-//   bound_3[0] = 0;
-//   bound_3[1] = 0;
-
-//   bcT[0] = bound_3;
-
-//   //dual boundary conditions for second patch
-//   FixedArray1D<int,2*DIM> bound_4;
-//   bound_4[0] = 0;
-//   bound_4[1] = 0;
+   //dual boundary conditions for second patch
+   FixedArray1D<int,2*DIM> bound_4;
+   bound_4[0] = 0;
+   bound_4[1] = 0;
  
-//   bcT[1] = bound_4;
+   bcT[1] = bound_4;
 
-  Atlas<DIM,DIM> Lshaped(charts,adj);  
-  cout << Lshaped << endl;
-
-  //finally a frame can be constructed
-  //Frame1D frame(&Lshaped, bc, bcT, 8);
-  Frame1D frame(&Lshaped, bc, jmax);
-
+   Atlas<DIM,DIM> Lshaped(charts,adj);  
+   cout << Lshaped << endl;
+   
+   //finally a frame can be constructed
+   //Frame1D frame(&Lshaped, bc, bcT, jmax);
+   Frame1D frame(&Lshaped, bc, jmax);
+   
   Vector<double> value(1);
   value[0] = 1;
   ConstantFunction<DIM> const_fun(value);
@@ -320,8 +318,8 @@ int main()
 //       cout << ind << endl;
 //     }
 
-  //multiplicative_Schwarz_SOLVE(problem, epsilon, u_epsilon);
-  additive_Schwarz_SOLVE(problem, epsilon, u_epsilon);
+  multiplicative_Schwarz_SOLVE(problem, epsilon, u_epsilon);
+  //additive_Schwarz_SOLVE(problem, epsilon, u_epsilon);
   //steepest_descent_SOLVE(problem, epsilon, u_epsilon);
   //  steepest_descent_SOLVE_basis(problem, epsilon, u_epsilon);
   //richardson_SOLVE_CDD2(problem, epsilon, u_epsilon);
@@ -343,7 +341,7 @@ int main()
   cout << "...finished plotting approximate solution" << endl;
   Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u_epsilon, exactSolution1D, 11);
   cout << "...finished plotting error" << endl;
-
+  
   std::ofstream ofs5("approx_sol_mult_schw_1D_out.m");
   matlab_output(ofs5,U);
   ofs5.close();

@@ -59,7 +59,6 @@ namespace FrameTL
 				       const bool primal,
 				       const int resolution) const
   {
-    
     Point<1> x;
     Point<1> x_patch;
     Point<1> y;
@@ -99,7 +98,7 @@ namespace FrameTL
  {
  
    FixedArray1D<Array1D<double>,1> values; // point values of the factors within psi_lambda
-   for (unsigned int i = 0; i < 1; i++)
+   for (unsigned int i = 0; i < 1; i++) {
      values[i] = WaveletTL::evaluate(*(frame.bases()[lambda.p()]->bases()[i]),
 			  typename IBASIS::Index(lambda.j(),
 						 lambda.e()[i],
@@ -107,6 +106,10 @@ namespace FrameTL
 						 frame.bases()[lambda.p()]->bases()[i]),
 			  primal,
 			  resolution).values();
+     
+//      typename IBASIS::Index ind (lambda.j(), lambda.e()[i], lambda.k()[i], frame.bases()[lambda.p()]->bases()[i]);
+//      values[i] = ((frame.bases()[lambda.p()]->bases()[i])->evaluate(ind, resolution)).values();
+   }
 
    SampledMapping<1> result(*(frame.atlas()->charts()[lambda.p()]),
 				values,
@@ -139,17 +142,13 @@ namespace FrameTL
       for (unsigned int i = 0; i < frame.n_p(); i++) {
 	if ( i == it.index().p()) {
 	  result[i].add(*it, evaluate(frame, it.index(), primal, resolution));
-	  //	  cout << "1111111" << endl;
 	}
 	else
 	  if ( frame.atlas()->get_adjacency_matrix().get_entry(i,it.index().p()) ) {
 	    result[i].add(*it, evaluate(frame, it.index(), i, primal, resolution));
-	    //	    cout << "22222" << endl;
-	  }  
-      }
-      
+	  } 
+      } 
     }
-
     return result;
   }
 

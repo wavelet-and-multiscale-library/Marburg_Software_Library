@@ -58,21 +58,14 @@ namespace FrameTL
 
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
-    //const int j0   = frame_->j0();
-    //for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
     for (int i = 0; i < frame_->degrees_of_freedom(); i++)
       {
-	//const double coeff = f(lambda)/D(lambda);
 	const double coeff = f(*(frame_->get_wavelet(i)))/D(*(frame_->get_wavelet(i)));
 	if (fabs(coeff)>1e-15) {
-	  //fhelp.set_coefficient(lambda, coeff);
 	  fhelp.set_coefficient(*(frame_->get_wavelet(i)), coeff);
-	  //cout << lambda << endl;
-	  if (i % 100 == 0)
-	    cout << *(frame_->get_wavelet(i)) << endl;
+	  //if (i % 100 == 0)
+	  //cout << *(frame_->get_wavelet(i)) << " " << coeff << endl;
 	}
-//    	if (lambda == last_wavelet<IBASIS,DIM,DIM,Frame>(frame_,jmax_))
-// 	  break;
       }
     fnorm_sqr = l2_norm_sqr(fhelp);
 
@@ -94,23 +87,14 @@ namespace FrameTL
   {
     cout << "SimpleEllipticEquation(): precompute diagonal of stiffness matrix..." << endl;
 
-//     typedef AggregatedFrame<IBASIS,DIM> Frame;
-//     typedef typename Frame::Index Index;
-
     // precompute the right-hand side on a fine level
-    //const int j0   = frame_->j0();
     stiff_diagonal.resize(frame_->degrees_of_freedom());
     for (int i = 0; i < frame_->degrees_of_freedom(); i++) {
       stiff_diagonal[i] = sqrt(a(*(frame_->get_wavelet(i)),*(frame_->get_wavelet(i))));
+      //cout << stiff_diagonal[i] << " " << *(frame_->get_wavelet(i)) << endl;
     }
-//     for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
-//       {
-// 	stiff_diagonal.set_coefficient(lambda, sqrt(a(lambda,lambda)));
-// 	if (lambda == last_wavelet<IBASIS,DIM,DIM,Frame>(frame_,jmax_))
-// 	  break;
-//       }
 
-    cout << "... done, digonal of stiffness matrix computed" << endl;
+    cout << "... done, diagonal of stiffness matrix computed" << endl;
   }
 
   template <class IBASIS, unsigned int DIM>
@@ -126,37 +110,28 @@ namespace FrameTL
     
     double res = 0;
     
-    typename One_D_IntegralCache::iterator col_lb(one_d_integrals.lower_bound(lambda));
-    typename One_D_IntegralCache::iterator col_it(col_lb);
-    if (col_lb == one_d_integrals.end() ||
-	one_d_integrals.key_comp()(lambda,col_lb->first))
-      {
-	// insert a new column
-	typedef typename One_D_IntegralCache::value_type value_type;
-	col_it = one_d_integrals.insert(col_lb, value_type(lambda, Column1D()));
-      }
+//     typename One_D_IntegralCache::iterator col_lb(one_d_integrals.lower_bound(lambda));
+//     typename One_D_IntegralCache::iterator col_it(col_lb);
+//     if (col_lb == one_d_integrals.end() ||
+// 	one_d_integrals.key_comp()(lambda,col_lb->first))
+//       {
+// 	// insert a new column
+// 	typedef typename One_D_IntegralCache::value_type value_type;
+// 	col_it = one_d_integrals.insert(col_lb, value_type(lambda, Column1D()));
+//       }
     
-    Column1D& col(col_it->second);
+//     Column1D& col(col_it->second);
     
-    typename Column1D::iterator lb(col.lower_bound(mu));
-    typename Column1D::iterator it(lb);
-    if (lb == col.end() ||
-	col.key_comp()(mu, lb->first))
-      {
+//     typename Column1D::iterator lb(col.lower_bound(mu));
+//     typename Column1D::iterator it(lb);
+//     if (lb == col.end() ||
+// 	col.key_comp()(mu, lb->first))
+//       {
 
 	// compute 1D irregular grid
 	Array1D<double> irregular_grid;
 
-	
-
 	bool b = intersect_supports_1D<IBASIS,DIM>(*frame_, lambda, mu, supp_lambda, supp_mu, dir, irregular_grid);
-
-// 	for (int i = 0; i < irregular_grid.size(); i++) {
-// 	  cout << "tick at: " << irregular_grid[i] << endl;
-// 	}
-
-// 	cout << "intersect 1D = " << b << endl;
-
 	if (!b)
 	  return 0.0;
 
@@ -209,12 +184,12 @@ namespace FrameTL
 	for (unsigned int i = 0; i < values_lambda.size(); i++)
 	  res += gauss_weights[i] * values_lambda[i] * values_mu[i];
 
-	typedef typename Column1D::value_type value_type;
-	it = col.insert(lb, value_type(mu, res));
-      }
-    else {
-      res = it->second;
-    }
+// 	typedef typename Column1D::value_type value_type;
+// 	it = col.insert(lb, value_type(mu, res));
+//       }
+//     else {
+//       res = it->second;
+//     }
 	
     return res;
   }
@@ -241,11 +216,7 @@ namespace FrameTL
     const typename CUBEBASIS::Support* supp_mu =
       (jnu > jla) ? &(frame_->all_supports[la.number()]) : &(frame_->all_supports[nu.number()]);
 
-//     cout << "jla = " << jla << " jnu = " << jnu << endl;
-//     cout << "a_la = " << supp_lambda->a[0] << " b_la  = " << supp_lambda->b[0] << endl;
-//     cout << "a_mu = " << supp_mu->a[0] << " b_mu  = " << supp_mu->b[0] << endl;
-    
-    const int N_Gauss = 3;
+    const int N_Gauss = 2;
     
     //#if _FRAMETL_ADAPTIVE_COMPUTATION == 1
 //     bool b = intersect_supports_simple<IBASIS,DIM,DIM>(*frame_, lambda, mu, supp_lambda, supp_mu);
@@ -294,13 +265,11 @@ namespace FrameTL
 						),
 			 mu->p(),i,1
 			 );
+//       t *= integrate(i1, i2, N_Gauss, i, supp_lambda, supp_mu);
+//       t *= 1./(chart_la->a_i(i) * chart_mu->a_i(i));
 
-      
-      
-      t *= integrate(i1, i2, N_Gauss, i, supp_lambda, supp_mu);
-      
-      t *= 1./(chart_la->a_i(i) * chart_mu->a_i(i));
-      
+      t *= integrate(i1, i2, N_Gauss, i, supp_lambda, supp_mu) / (chart_la->a_i(i) * chart_mu->a_i(i));
+     
       r += t;
     }
     
@@ -473,10 +442,10 @@ namespace FrameTL
       if (exit) break;
     }
 
-#if 1
+#if 0
     return r;
 #endif
-#if 0
+#if 1
     assert(DIM == 1);
     double tmp = 1;
     Point<DIM> p1;

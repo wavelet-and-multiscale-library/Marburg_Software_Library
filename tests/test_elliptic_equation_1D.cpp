@@ -5,6 +5,7 @@
 #include <interval/p_basis.h>
 //#include "elliptic_equation.h"
 #include <simple_elliptic_equation.h>
+//#include <biharmonic_equation.h>
 #include <algebra/sparse_matrix.h>
 #include <algebra/infinite_vector.h>
 #include <numerics/iteratsolv.h>
@@ -26,6 +27,7 @@ using std::endl;
 using FrameTL::FrameIndex;
 //using FrameTL::EllipticEquation;
 using FrameTL::SimpleEllipticEquation;
+//using FrameTL::BiharmonicEquation;
 using FrameTL::EvaluateFrame;
 using FrameTL::AggregatedFrame;
 using MathTL::EllipticBVP;
@@ -121,10 +123,10 @@ int main()
   cout << "Testing class EllipticEquation..." << endl;
   
   const int DIM   = 1;
-  const int jmax = 10;
+  const int jmax = 9;
 
   //typedef DSBasis<2,2> Basis1D;
-  typedef PBasis<3,3> Basis1D;
+  typedef PBasis<2,2> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
@@ -210,7 +212,7 @@ int main()
   //Frame1D frame(&Lshaped, bc, bcT, jmax);
   Frame1D frame(&Lshaped, bc, jmax);
 
-  Vector<double> value(1);
+  Vector<double> value(384);
   value[0] = 1;
   ConstantFunction<DIM> const_fun(value);
 
@@ -219,16 +221,26 @@ int main()
   
   //PoissonBVP<DIM> poisson(&const_fun);
   PoissonBVP<DIM> poisson(&sing1D);
+  //BiharmonicBVP<DIM> biharm(&const_fun);
   //IdentityBVP<DIM> trivial_bvp(&const_fun);
   //IdentityBVP<DIM> trivial_bvp(&exactSolution);
 
   SimpleEllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax);
+  //BiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharm, &frame, jmax);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&trivial_bvp, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
   
   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 4.19, 1.0/0.146);
   CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 4.19, 1.0/0.146);
+
+
+//   cout << "val = " << sqrt(discrete_poisson.a(*(frame.get_wavelet(10279)),*(frame.get_wavelet(10279)) )) << endl;
+  
+
+//  return 0.;
+
+
 
   double tmp = 0.0;
   int c = 0;

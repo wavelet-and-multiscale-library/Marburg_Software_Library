@@ -49,6 +49,55 @@ namespace WaveletTL
   }
 
   template <class PROBLEM>
+  void setup_stiffness_matrix(const PROBLEM& P,
+			      const std::set<typename PROBLEM::Index>& Lambda1,
+			      const std::set<typename PROBLEM::Index>& Lambda2,
+			      SparseMatrix<double>& A_Lambda,
+			      bool preconditioned)
+  {
+    A_Lambda.resize(Lambda1.size(), Lambda2.size());
+    
+    typedef typename SparseMatrix<double>::size_type size_type;
+
+    size_type row = 0;
+    typedef typename PROBLEM::Index Index;
+    for (typename std::set<Index>::const_iterator it1(Lambda1.begin()), itend(Lambda1.end());
+	 it1 != itend; ++it1, ++row)
+      {
+	const double d1 = preconditioned ? P.D(*it1) : 1.0;
+	std::list<size_type> indices;
+	std::list<double> entries;
+
+	size_type column = 0;
+#if _WAVELETTL_GALERKINUTILS_VERBOSITY >= 1
+	cout << "setup_stiffness_matrix(): doing row " << row << " of " << Lambda1.size()
+	     << " (wavelet index " << *it1 << ")" << endl;
+#endif
+	for (typename std::set<Index>::const_iterator it2(Lambda2.begin()), itend2(Lambda2.end());
+	     it2 != itend2; ++it2, ++column)
+	  {
+	    // 	    if (intersect_singular_support(P.basis(), *it1, *it2)) {
+	    //double entry = P.a(*it2, *it1);
+	    double entry = P.a(*it1, *it2);
+	    
+	    //const double entry = 0;
+#if _WAVELETTL_GALERKINUTILS_VERBOSITY >= 2
+ 	    if (fabs(entry) > 1e-15) {
+ 	      cout << " column: " << *it2 <<  ", value " << entry << endl;
+ 	    }
+#endif
+	    if (fabs(entry) > 1e-15) {
+		indices.push_back(column);
+		entries.push_back(entry / (d1 * (preconditioned ? P.D(*it2) : 1.0)));
+	    }
+	    // 	    }
+	  }
+	A_Lambda.set_row(row, indices, entries);
+      }
+  }
+
+
+  template <class PROBLEM>
   void setup_righthand_side(const PROBLEM& P,
 			    const std::set<typename PROBLEM::Index>& Lambda,
 			    Vector<double>& F_Lambda)

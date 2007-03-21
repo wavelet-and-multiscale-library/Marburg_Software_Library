@@ -136,7 +136,7 @@ namespace FrameTL
 
     typedef typename PROBLEM::WaveletBasis Frame;
 
-    const int jmax = 9;
+    const int jmax = 7;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
@@ -206,7 +206,7 @@ namespace FrameTL
 
     
     double res_norm = 25;
-    while ( sqrt(res_norm) > 1.0e-10 && global_iterations < 30) {
+    while ( sqrt(res_norm) > 1.0e-10 && global_iterations < 3) {
       help_1 = 0;
       help_2 = 0;
       // perform the two half steps explicitely
@@ -215,7 +215,7 @@ namespace FrameTL
 #if 1
       // sparsen u_2
       int k = 0;
-      Point<1> x(0.9);
+      Point<1> x(0.7);
       for (typename set<Index>::const_iterator it = I2.begin(); it != I2.end(); it++, k++) {
 	if (! in_support(P.basis(), *it, x)) {
 	  u_2[k] = 0;
@@ -232,7 +232,7 @@ namespace FrameTL
       
       // sparsen u_1
       k = 0;
-      Point<1> y(0.1);
+      Point<1> y(0.3);
       for (typename set<Index>::const_iterator it = I1.begin(); it != I1.end(); it++, k++) {
 	if (! in_support(P.basis(), *it, y)) {
 	  u_1[k] = 0;
@@ -244,6 +244,7 @@ namespace FrameTL
       CG(A22, (f_2 - help_2), u_2, 1.0e-15, 500, iterations); // u_2 = A22^-1 * (f_2 - A21*u_1);
       cout << "needed " << iterations << " in CG" << endl;
  
+#if 1
       // setup the current global approximation
       // we have to remove those coefficients of u_1_bak that are contained in the closure of the second patch
       typedef typename PROBLEM::WaveletBasis::Support SuppType;
@@ -251,7 +252,8 @@ namespace FrameTL
       for (typename set<Index>::const_iterator it = I1.begin(); it != I1.end(); it++, k++) {
 	const SuppType* supp = &(P.basis().all_patch_supports[(*it).number()]);
 	
-	if ( leq(0.1, supp->a[0]) ) {
+	//cout << "#### " << supp->a[0] << " " << leq(0.3, supp->a[0]) << endl;
+	if ( leq(0.3, supp->a[0]) ) {
 	//if (! leq(supp->b[0], 0.2) ) {
 	  u_1_bak[k] = 0;
 	}
@@ -259,6 +261,7 @@ namespace FrameTL
       //cout << u_1_bak << endl;
 
       u_1 = u_1_bak;
+#endif
 
       // compute residual norm:
       A11.apply(u_1, help_1);
@@ -277,15 +280,19 @@ namespace FrameTL
 
     int id = 0;
     for (typename set<Index>::const_iterator it = I1.begin(); it != I1.end(); it++, id++) {
-      if (u_1[id] != 0)
+      if (u_1[id] != 0) {
+	//cout << "index1 = " << (*it).number() << " " << u_1[id] << endl;
 	u_epsilon.set_coefficient(*it, u_1[id]);
+      }
     }
 
     id = 0;
     for (typename set<Index>::const_iterator it = I2.begin(); it != I2.end(); it++, id++) {
       //cout << *it << endl;
-      if (u_2[id] != 0)
+      if (u_2[id] != 0) {
+	//cout << "index2 = " << (*it).number() << " " << u_2[id] << endl;
 	u_epsilon.set_coefficient(*it, u_2[id]);
+      }
     }
 
     cout << "degrees_of_freedom = " << u_epsilon.size() << endl;

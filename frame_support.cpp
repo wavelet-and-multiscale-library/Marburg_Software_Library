@@ -24,7 +24,7 @@ namespace FrameTL
   inline bool lt (const double x, const double y)
   {
     return x < y;
-//     const double eps = 1.0e-15;
+//     const double eps = 1.0e-12;
 //     return x-y < eps;
   }
 
@@ -94,7 +94,7 @@ namespace FrameTL
 	Point<DIM_d> b;
 	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.a[0]*dx), a);
 	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda.b[0]*dx), b);
-	//cout << a[0] << " " << p[0] << " " <<  b[0] << " " << ((a[0] <= p[0]) && (p[0] <= b[0])) << endl;
+	//cout << a[0] << " " << p[0] << " " <<  b[0] << " " << (leq(a[0],p[0]) && leq(p[0],b[0])) << endl;
 	//return (a[0] <= p[0]) && (p[0] <= b[0]);
 	return leq(a[0],p[0]) && leq(p[0],b[0]);
 	

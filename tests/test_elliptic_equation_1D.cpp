@@ -126,7 +126,7 @@ int main()
   const int jmax = 9;
 
   //typedef DSBasis<2,2> Basis1D;
-  typedef PBasis<2,2> Basis1D;
+  typedef PBasis<3,3> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
@@ -177,13 +177,13 @@ int main()
   //primal boundary conditions for first patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_1;
   bound_1[0] = 1;
-  bound_1[1] = 1;
+  bound_1[1] = 2;
 
   bc[0] = bound_1;
 
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
-  bound_2[0] = 1;
+  bound_2[0] = 2;
   bound_2[1] = 1;
 
   bc[1] = bound_2;
@@ -314,16 +314,16 @@ int main()
   Vector<double> xk(Lambda.size()); xk = 0;
 
 
-  for (int i = 0; i < 200 ; i++) 
-    for (int j = 0; j < 200 ; j++) {
-      if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
-	cout << stiff.get_entry(i,j) << endl;
-	cout << stiff.get_entry(j,i) << endl;
-	cout << "i = " << i << " j = " << j << endl;
-	//abort();
-	cout << "#######################" << endl;
-      }
-    } 
+//   for (int i = 0; i < 200 ; i++) 
+//     for (int j = 0; j < 200 ; j++) {
+//       if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
+// 	cout << stiff.get_entry(i,j) << endl;
+// 	cout << stiff.get_entry(j,i) << endl;
+// 	cout << "i = " << i << " j = " << j << endl;
+// 	//abort();
+// 	cout << "#######################" << endl;
+//       }
+//     } 
 
   double alpha_n = 0.07;
   Vector<double> resid(xk.size());
@@ -378,7 +378,7 @@ int main()
   Lambda.clear();
   int l = 0;
   for (Index lambda = FrameTL::first_generator<Basis1D,1,1,Frame1D>(&frame, frame.j0());
-       lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+1); ++lambda) {
+       lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, jmax); ++lambda) {
 
 
     typedef WaveletTL::CubeBasis<Basis1D,DIM> CUBEBASIS;
@@ -410,7 +410,7 @@ int main()
     cout << "##################" << endl;
     u.set_coefficient(lambda, 1);
     
-    Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u, true, 11);//expand in primal basis
+    Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u, true, 9);//expand in primal basis
     sprintf(filename1, "%s%d%s", "wav_1D_", l, ".m");
     
     

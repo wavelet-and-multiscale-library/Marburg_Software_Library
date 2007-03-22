@@ -123,7 +123,7 @@ int main()
   cout << "Testing class EllipticEquation..." << endl;
   
   const int DIM   = 1;
-  const int jmax = 9;
+  const int jmax = 3;
 
   //typedef DSBasis<2,2> Basis1D;
   typedef PBasis<3,3> Basis1D;
@@ -136,13 +136,13 @@ int main()
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 0.7;
+  A(0,0) = 0.8;
   Point<1> b;
   b[0] = 0.;
   AffineLinearMapping<1> affineP(A,b);
   
   Matrix<double> A2(DIM,DIM);
-  A2(0,0) = 0.7;
+  A2(0,0) = 0.8;
   Point<1> b2;
   b2[0] = 1.0-A2.get_entry(0,0);
   AffineLinearMapping<1> affineP2(A2,b2);
@@ -372,7 +372,7 @@ int main()
 #endif
 	  
   
-#if 0
+#if 1
   char filename1[50];
   u.clear();
   Lambda.clear();

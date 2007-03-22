@@ -1,3 +1,5 @@
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
+
 #include <fstream>
 #include <iostream>
 #include <time.h> 
@@ -16,8 +18,8 @@
 #include <numerics/corner_singularity.h>
 #include <frame_support.h>
 #include <frame_index.h>
-//#include <multiplicative_Schwarz.h>
-#include <additive_Schwarz.h>
+#include <multiplicative_Schwarz.h>
+//#include <additive_Schwarz.h>
 //#include <additive_Schwarz_SD.h>
 #include <galerkin/cached_problem.h>
 
@@ -52,10 +54,10 @@ int main(int argc, char* argv[])
 
   const int DIM = 2;
 
-  const int jmax = 4;
+  const int jmax = 5;
 
   //typedef DSBasis<4,6> Basis1D;
-  typedef PBasis<3,3> Basis1D;
+  typedef PBasis<2,2> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
   typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
@@ -121,14 +123,14 @@ int main(int argc, char* argv[])
   bound_1[0] = 1;
   bound_1[1] = 1;
   bound_1[2] = 1;
-  bound_1[3] = 1;
+  bound_1[3] = 1;//2;
 
   bc[0] = bound_1;
 
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
   bound_2[0] = 1;
-  bound_2[1] = 1;
+  bound_2[1] = 1;//2;
   bound_2[2] = 1;
   bound_2[3] = 1;
 
@@ -252,8 +254,8 @@ int main(int argc, char* argv[])
 //   WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
 
 
-  //multiplicative_Schwarz_SOLVE(problem, epsilon, u_epsilon);
-  additive_Schwarz_SOLVE(problem, epsilon, u_epsilon);
+  multiplicative_Schwarz_SOLVE(problem, epsilon, u_epsilon);
+  //additive_Schwarz_SOLVE(problem, epsilon, u_epsilon);
   //additive_Schwarz_SD_SOLVE(problem, epsilon, u_epsilon);
 
   tend = clock();

@@ -62,6 +62,26 @@ namespace FrameTL
   
   };
 
+  /*!
+  */
+  template<class VALUE = double>
+  class PolySolBiharmonic
+    : public Function<1, VALUE>
+  {
+  public:
+    PolySolBiharmonic() {};
+    virtual ~PolySolBiharmonic() {};
+    VALUE value(const Point<1>& p,
+		const unsigned int component = 0) const
+    {
+      return 16*(p[0]*p[0])*(1-p[0])*(1-p[0]);
+    }
+  
+    void vector_value(const Point<1> &p,
+		      Vector<VALUE>& values) const { ; }
+  
+  };
+
 
   template <class PROBLEM>
   void GALERKIN (PROBLEM& P,
@@ -125,18 +145,53 @@ namespace FrameTL
     //u.compress();
 #endif
   }
+
+  template <class PROBLEM>
+  bool intersect_line1 (PROBLEM& P,
+			const typename PROBLEM::Index& lambda)
+  {
+    typedef typename PROBLEM::WaveletBasis::Support SuppType;
+    const SuppType* supp = &(P.basis().all_patch_supports[lambda.number()]);
+    if ((supp->a[1] < 0.0) && (0.0 < supp->b[1]))
+      return true;
+    return false;
+  }
   
+  template <class PROBLEM>
+  bool intersect_line2 (PROBLEM& P,
+			const typename PROBLEM::Index& lambda)
+  {
+    typedef typename PROBLEM::WaveletBasis::Support SuppType;
+    const SuppType* supp = &(P.basis().all_patch_supports[lambda.number()]);
+    if ((supp->a[0] < 0.0) && (0.0 < supp->b[0]))
+      return true;
+    return false;
+
+  }
+
+  template <class PROBLEM>
+  bool no_contact_with_patch2 (PROBLEM& P,
+			const typename PROBLEM::Index& lambda)
+  {
+    typedef typename PROBLEM::WaveletBasis::Support SuppType;
+    const SuppType* supp = &(P.basis().all_patch_supports[lambda.number()]);
+    if ( leq(0.0, supp->a[0]) )
+      return true;
+    return false;
+
+  }
+
 
   template <class PROBLEM>
   void  multiplicative_Schwarz_SOLVE(const PROBLEM& P,  const double epsilon,
 				     InfiniteVector<double, typename PROBLEM::Index>& u_epsilon)
   {
-    typedef PBasis<3,3> Basis1D;
+    typedef PBasis<2,2> Basis1D;
     //typedef SplineBasis<2,2,P_construction> Basis1D;
 
     typedef typename PROBLEM::WaveletBasis Frame;
 
-    const int jmax = 7;
+    const int jmax = 5;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
@@ -164,9 +219,11 @@ namespace FrameTL
     set<Index> I1;
     set<Index> I2;
     
+    const int DIM = 2;
+
     // setup index sets for blocks of stiffness matrix
-    for (Index lambda = FrameTL::first_generator<Basis1D,1,1,Frame>(&P.basis(), P.basis().j0());
-	 lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame>(&P.basis(), jmax); ++lambda) {
+    for (Index lambda = FrameTL::first_generator<Basis1D,DIM,DIM,Frame>(&P.basis(), P.basis().j0());
+	 lambda <= FrameTL::last_wavelet<Basis1D,DIM,DIM,Frame>(&P.basis(), jmax); ++lambda) {
       if (lambda.p() == 0)
 	I1.insert(lambda);
       else if (lambda.p() == 1)
@@ -206,13 +263,14 @@ namespace FrameTL
 
     
     double res_norm = 25;
-    while ( sqrt(res_norm) > 1.0e-10 && global_iterations < 3) {
+    while ( sqrt(res_norm) > 1.0e-10 && global_iterations < 20) {
+      cout << "##### global iteration = " << global_iterations << endl;
       help_1 = 0;
       help_2 = 0;
       // perform the two half steps explicitely
       unsigned int iterations = 0;
       
-#if 1
+#if 0 // 1D
       // sparsen u_2
       int k = 0;
       Point<1> x(0.7);
@@ -221,12 +279,24 @@ namespace FrameTL
 	  u_2[k] = 0;
 	}
       }
-#endif      
+#endif
+#if 0 // 2D
+      // sparsen u_2
+      int k = 0;
+      for (typename set<Index>::const_iterator it = I2.begin(); it != I2.end(); it++, k++) {
+	if (! intersect_line1 (P,*it) ) {
+	  u_2[k] = 0;
+	}
+      }
+#endif
+
+      //cout << "sparse u2 " << u_2 << endl;
       A12.apply(u_2,help_1);
       CG(A11, (f_1 - help_1), u_1, 1.0e-15, 500, iterations); // u_1 = A11^-1 * (f_1 - A12*u_2);
       cout << "needed " << iterations << " in CG" << endl;
+      //cout << "u1 after first partial step" << u_1 << endl;
 
-#if 1
+#if 0 // 1D
       // backup u_1 now
       u_1_bak = u_1;
       
@@ -238,13 +308,29 @@ namespace FrameTL
 	  u_1[k] = 0;
 	}
       }
+      //cout << "sparse u1 " << u_1 << endl;
 #endif      
+#if 0 // 2D
+      // backup u_1 now
+      u_1_bak = u_1;
+      
+      // sparsen u_1
+      k = 0;
+      for (typename set<Index>::const_iterator it = I1.begin(); it != I1.end(); it++, k++) {
+	if (! intersect_line2(P,*it) ) {
+	  u_1[k] = 0;
+	}
+      }
+      //cout << "sparse u1 " << u_1 << endl;
+#endif      
+
 
       A21.apply(u_1,help_2);
       CG(A22, (f_2 - help_2), u_2, 1.0e-15, 500, iterations); // u_2 = A22^-1 * (f_2 - A21*u_1);
       cout << "needed " << iterations << " in CG" << endl;
- 
-#if 1
+      //cout << "u2 after first partial step" << u_2 << endl;
+
+#if 0 //1D
       // setup the current global approximation
       // we have to remove those coefficients of u_1_bak that are contained in the closure of the second patch
       typedef typename PROBLEM::WaveletBasis::Support SuppType;
@@ -262,6 +348,23 @@ namespace FrameTL
 
       u_1 = u_1_bak;
 #endif
+#if 0 //2D
+      // setup the current global approximation
+      // we have to remove those coefficients of u_1_bak that are contained in the closure of the second patch
+      typedef typename PROBLEM::WaveletBasis::Support SuppType;
+      k = 0;
+      for (typename set<Index>::const_iterator it = I1.begin(); it != I1.end(); it++, k++) {
+	const SuppType* supp = &(P.basis().all_patch_supports[(*it).number()]);
+	if ( no_contact_with_patch2(P,*it) ) {
+	  u_1_bak[k] = 0;
+	}
+      }
+      //cout << u_1_bak << endl;
+
+      u_1 = u_1_bak;
+#endif
+
+
 
       // compute residual norm:
       A11.apply(u_1, help_1);

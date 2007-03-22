@@ -110,23 +110,23 @@ namespace FrameTL
     
     double res = 0;
     
-//     typename One_D_IntegralCache::iterator col_lb(one_d_integrals.lower_bound(lambda));
-//     typename One_D_IntegralCache::iterator col_it(col_lb);
-//     if (col_lb == one_d_integrals.end() ||
-// 	one_d_integrals.key_comp()(lambda,col_lb->first))
-//       {
-// 	// insert a new column
-// 	typedef typename One_D_IntegralCache::value_type value_type;
-// 	col_it = one_d_integrals.insert(col_lb, value_type(lambda, Column1D()));
-//       }
+    typename One_D_IntegralCache::iterator col_lb(one_d_integrals.lower_bound(lambda));
+    typename One_D_IntegralCache::iterator col_it(col_lb);
+    if (col_lb == one_d_integrals.end() ||
+	one_d_integrals.key_comp()(lambda,col_lb->first))
+      {
+	// insert a new column
+	typedef typename One_D_IntegralCache::value_type value_type;
+	col_it = one_d_integrals.insert(col_lb, value_type(lambda, Column1D()));
+      }
     
-//     Column1D& col(col_it->second);
+    Column1D& col(col_it->second);
     
-//     typename Column1D::iterator lb(col.lower_bound(mu));
-//     typename Column1D::iterator it(lb);
-//     if (lb == col.end() ||
-// 	col.key_comp()(mu, lb->first))
-//       {
+    typename Column1D::iterator lb(col.lower_bound(mu));
+    typename Column1D::iterator it(lb);
+    if (lb == col.end() ||
+	col.key_comp()(mu, lb->first))
+      {
 
 	// compute 1D irregular grid
 	Array1D<double> irregular_grid;
@@ -184,12 +184,12 @@ namespace FrameTL
 	for (unsigned int i = 0; i < values_lambda.size(); i++)
 	  res += gauss_weights[i] * values_lambda[i] * values_mu[i];
 
-// 	typedef typename Column1D::value_type value_type;
-// 	it = col.insert(lb, value_type(mu, res));
-//       }
-//     else {
-//       res = it->second;
-//     }
+	typedef typename Column1D::value_type value_type;
+	it = col.insert(lb, value_type(mu, res));
+      }
+    else {
+      res = it->second;
+    }
 	
     return res;
   }
@@ -442,10 +442,10 @@ namespace FrameTL
       if (exit) break;
     }
 
-#if 0
+#if 1
     return r;
 #endif
-#if 1
+#if 0
     assert(DIM == 1);
     double tmp = 1;
     Point<DIM> p1;

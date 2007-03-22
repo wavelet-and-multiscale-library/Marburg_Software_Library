@@ -1,3 +1,5 @@
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
+
 #include <iostream>
 #include <time.h> 
 #include <interval/ds_basis.h>
@@ -5,6 +7,7 @@
 #include <interval/spline_basis.h>
 //#include <elliptic_equation.h>
 #include <simple_elliptic_equation.h>
+#include <biharmonic_equation.h>
 #include <algebra/sparse_matrix.h>
 #include <algebra/infinite_vector.h>
 #include <numerics/iteratsolv.h>
@@ -30,6 +33,7 @@ using std::endl;
 using FrameTL::FrameIndex;
 //using FrameTL::EllipticEquation;
 using FrameTL::SimpleEllipticEquation;
+using FrameTL::BiharmonicEquation;
 using FrameTL::EvaluateFrame;
 using FrameTL::AggregatedFrame;
 using MathTL::EllipticBVP;
@@ -102,7 +106,7 @@ int main()
   
   const int DIM = 1;
 
-  const int jmax = 7;
+  const int jmax = 10;
   
   const int d = 3, dT = 3;
 
@@ -223,7 +227,7 @@ int main()
    Frame1D frame(&Lshaped, bc, jmax);
    
   Vector<double> value(1);
-  value[0] = 1;
+  value[0] = 384;
   ConstantFunction<DIM> const_fun(value);
 
   //  Singularity1D_RHS<double> sing1D;
@@ -231,13 +235,14 @@ int main()
 
   Singularity1D_RHS_2<double> sing1D;
   Singularity1D_2<double> exactSolution1D;
-
+  //PolySolBiharmonic<double> exactSolution1D;
   
   //PoissonBVP<DIM> poisson(&const_fun);
   PoissonBVP<DIM> poisson(&sing1D);
-
+  //BiharmonicBVP<DIM> biharmonic(&const_fun);
 
   SimpleEllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax);
+  //BiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharmonic, &frame, jmax, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
   //  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 4.19, 1.0/0.146);
@@ -246,16 +251,16 @@ int main()
 //   // (d,dT) = (3,5)
 //   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.6548, 1.0/0.146);
 //   discrete_poisson.set_norm_A(3.6548);
-//   // optimistic guess:
+//   optimistic guess:
 //   discrete_poisson.set_Ainv(1.0/0.146);
 
   // (d,dT) = (3,5)
   CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.6548, 1.0/0.146);
   discrete_poisson.set_norm_A(3.6548);
-  // optimistic guess:
+  //optimistic guess:
   discrete_poisson.set_Ainv(1.0/0.146);
 
-
+  //CachedProblem<BiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 4.19, 1.0/0.146);
 
   const double epsilon = 0.00005;
 
@@ -334,6 +339,7 @@ int main()
   cout << "steepest descent done" << endl;
 
   u_epsilon.scale(&discrete_poisson,-1);
+  //u_epsilon.scale(&discrete_biharmonic,-1);
 
   EvaluateFrame<Basis1D,1,1> evalObj;
 

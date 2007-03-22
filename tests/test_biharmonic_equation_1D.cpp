@@ -1,3 +1,5 @@
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
+
 #include <fstream>
 #include <iostream>
 #include <time.h> 
@@ -92,10 +94,10 @@ int main()
   cout << "Testing class BiharmonicEquation..." << endl;
   
   const int DIM = 1;
-  int jmax = 8;
+  int jmax = 5;
 
   //typedef DSBasis<2,2> Basis1D;
-  typedef PBasis<3,3> Basis1D;
+  typedef PBasis<4,4> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
@@ -105,7 +107,7 @@ int main()
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 0.7;
+  A(0,0) = 1;//0.7;
   Point<1> b;
   b[0] = 0.;
   AffineLinearMapping<1> affineP(A,b);
@@ -127,9 +129,9 @@ int main()
 
   //##############################
   
-  Array1D<Chart<DIM,DIM>* > charts(2);
+  Array1D<Chart<DIM,DIM>* > charts(1);
   charts[0] = &affineP;
-  charts[1] = &affineP2;
+  //charts[1] = &affineP2;
 
   //charts[0] = &simpleaffine1;
   //charts[1] = &simpleaffine2;
@@ -243,16 +245,16 @@ int main()
   Vector<double> xk(Lambda.size()); xk = 0;
 
 
-  for (int i = 0; i < 1020 ; i++) 
-    for (int j = 0; j < 1020 ; j++) {
-      if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
-	cout << stiff.get_entry(i,j) << endl;
-	cout << stiff.get_entry(j,i) << endl;
-	cout << "i = " << i << " j = " << j << endl;
-	//abort();
-	cout << "#######################" << endl;
-      }
-    } 
+//   for (int i = 0; i < 1020 ; i++) 
+//     for (int j = 0; j < 1020 ; j++) {
+//       if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
+// 	cout << stiff.get_entry(i,j) << endl;
+// 	cout << stiff.get_entry(j,i) << endl;
+// 	cout << "i = " << i << " j = " << j << endl;
+// 	//abort();
+// 	cout << "#######################" << endl;
+//       }
+//     } 
 
   double alpha_n = 0.07;
   Vector<double> resid(xk.size());

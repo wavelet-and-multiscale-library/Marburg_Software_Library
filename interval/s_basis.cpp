@@ -576,7 +576,7 @@ namespace WaveletTL
     assert(lambda.is_valid());
     assert(derivative <= 2); // only function values, 1st and 2nd derivatives implemented at the moment
 
-    double fx = 0;
+    double fx = 0.;
 
     if (lambda.e() == E_GENERATOR) { // it's a generator
       switch(derivative) {
@@ -608,6 +608,8 @@ namespace WaveletTL
     assert(lambda.is_valid());
     assert(derivative <= 2); // only function values, 1st and 2nd derivatives implemented at the moment
 
+    values.resize(points.size());
+
     const unsigned int npoints(points.size()); // number of points
     unsigned int i;
 
@@ -625,6 +627,8 @@ namespace WaveletTL
     else { // lambda.e() == E_WAVELET
       InfiniteVector<double, SBasis::Index> coeff;
       reconstruct_1(lambda, coeff); // get notation of wavelet as a linear combination of generators
+      for (i = 0; i < npoints; i++) // initialize array
+        values[i] = 0;
       for (InfiniteVector<double, SBasis::Index>::const_iterator it(coeff.begin()), itend(coeff.end()); it != itend; ++it)
         for (i = 0; i < npoints; i++)
           values[i] += *it * primal_evaluate(derivative, it.index(), points[i]);

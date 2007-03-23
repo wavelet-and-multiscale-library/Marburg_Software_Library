@@ -29,6 +29,7 @@ typedef SBasis Basis;
 
 int main()
 {
+  cout << "Testing biharmonic equation ..." << endl;
   Basis basis;
   Basis::Index lambda;
   set<Basis::Index> Lambda;
@@ -43,7 +44,7 @@ int main()
 //  BiharmonicBVP<1> biharmonic(&const_fkt);
   BiharmonicEquation1D<Basis> discrete_biharmonic(basis, &const_fkt);
 
-  cout << endl << "Setting up full stiffness matrix ..." << endl;
+  cout << "Setting up full stiffness matrix ..." << endl;
   SparseMatrix<double> stiff(Lambda.size());
 
   setup_stiffness_matrix(discrete_biharmonic, Lambda, stiff, true);
@@ -73,11 +74,18 @@ int main()
     u.set_coefficient(*it, x[i]);
   u.scale(&discrete_biharmonic, -1); // undo preconditioning
 
-  cout << "Writing solution to biharmonic-solution.dat ..." << endl;
+  cout << "Writing solution to file biharmonic-solution.dat ..." << endl;
   SampledMapping<1> s(evaluate(basis, u, true, 7));
   std::ofstream fs("biharmonic-solution.dat");
   s.gnuplot_output(fs);
   fs.close();
+
+  cout << "Maximal difference to exact solution: ";
+  Polynomial<double> solution(Vector<double>(5, "0 0 16 -32 16")); // 16 x^2 (1-x)^2 = 16 (x^2 - 2 x^3 + x^4)
+  SampledMapping<1> difference(Grid<1>(s.points()), solution);
+  difference.add(-1.0,s);
+  Array1D<double> err(difference.values());
+  cout << linfty_norm(err) << endl;
 
   return 0;
 }

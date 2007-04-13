@@ -29,7 +29,7 @@ namespace WaveletTL
     Since the color value of the rectangles will actually be
     log10(|c_lambda|/||c||_infty), you have to specify a range 10^a...10^0
     to which these values shall be clipped.
-    You can choose a Matlab colormap and toggle the colorbar on or off.
+    You can choose a Matlab colormap and toggle the boxes and a colorbar on or off.
   */
   template <class IBASIS>
   void plot_indices(const IBASIS* basis,
@@ -37,6 +37,7 @@ namespace WaveletTL
 		    const int jmax,
 		    std::ostream& os,
 		    const char* colormap = "cool",
+		    bool boxed = false,
 		    bool colorbar = true,
 		    const double a = -6);
 }

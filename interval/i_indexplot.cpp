@@ -8,6 +8,7 @@ namespace WaveletTL
 		    const int jmax,
 		    std::ostream& os,
 		    const char* colormap,
+		    bool boxed,
 		    bool colorbar,
 		    const double a)
   {
@@ -15,7 +16,7 @@ namespace WaveletTL
     
     const int j0 = basis->j0();
     const double maxnorm = linfty_norm(coeffs);
-    
+
     // first plot all generator coefficients on the coarsest level
     const int n_generators = basis->Deltasize(j0);
     const double h0 = 1./n_generators;
@@ -31,12 +32,17 @@ namespace WaveletTL
 // 	   << "'FaceColor',[1.0,1.0,1.0])" << endl;
       } else {
 	// draw a patch (to have Matlab manage the colormap)
- 	os << "patch("
+	os << "patch("
 	   << "[" << x << ";" << x+h0 << ";" << x+h0 << ";" << x << "],"
 	   << "[" << y << ";" << y << ";" << y+1 << ";" << y+1 << "],"
-	   << std::max(log10(fabs(c)/maxnorm),a)
-	   << ",'EdgeColor','none'"
-	   << ")" << endl;
+	   << std::max(log10(fabs(c)/maxnorm),a);
+	if (!boxed)
+	  os << ",'EdgeColor','none'";
+	os 
+// 	   << ",'LineWidth',0.125"
+// 	   << ",'LineStyle','none'"
+// 	   << ",'EraseMode','background'"
+	  << ")" << endl;
       }
     }
 
@@ -69,13 +75,24 @@ namespace WaveletTL
 	  os << "patch("
 	     << "[" << x << ";" << x+hj << ";" << x+hj << ";" << x << "],"
 	     << "[" << y << ";" << y << ";" << y+1 << ";" << y+1 << "],"
-	     << std::max(log10(fabs(c)/maxnorm),a)
- 	     << ",'EdgeColor','none'"
-	     << ")" << endl;
+	     << std::max(log10(fabs(c)/maxnorm),a);
+	  if (!boxed)
+	    os << ",'EdgeColor','none'";
+	  os
+//   	     << ",'LineStyle','none'"
+//   	     << ",'LineWidth',0.125"
+	    << ")" << endl;
 	}
       }
     }
+
+    // draw boxes and axes on top of figure
+    os << "box on" << endl;
+    os << "set(gca,'Layer','top')" << endl;
     
+//     // set x axis limits
+//     os << "set(gca,'XLim',[" << -0.01 << " " << 1.01 << "])" << endl;
+
     // set y axis limits
     os << "set(gca,'YLim',[" << j0-0.5 << " " << jmax+1.5 << "])" << endl;
 

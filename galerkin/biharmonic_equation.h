@@ -36,7 +36,7 @@ namespace WaveletTL
     typedef IBasis WaveletBasis;
 
     /*!
-      constructor from a given wavelet basis and a right-hand side f
+      constructor from a given wavelet basis and a right-hand side g
     */
     BiharmonicEquation1D(const WaveletBasis& basis, const Function<1>* g);
 

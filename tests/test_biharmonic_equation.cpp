@@ -1,5 +1,13 @@
 //#define _WAVELETTL_GALERKINUTILS_VERBOSITY 2
 
+// choose which basis to use
+#define BASIS_S 0
+#define BASIS_P 1
+#define BASIS_DS 2
+
+#define BASIS BASIS_DS
+
+
 #include <iostream>
 
 #include <algebra/infinite_vector.h>
@@ -10,9 +18,25 @@
 #include <utils/random.h>
 #include <ctime>
 
-#include <interval/s_basis.h>
-#include <interval/s_support.h>
-#include <interval/interval_evaluate.h>
+#if (BASIS == BASIS_S)
+ #include <interval/s_basis.h>
+ #include <interval/s_support.h>
+ #include <interval/interval_evaluate.h>
+ typedef WaveletTL::SBasis Basis;
+ #define BASIS_NAME "s"
+#elif (BASIS == BASIS_P)
+ #include <interval/p_basis.h>
+ #include <interval/p_support.h>
+ #include <interval/p_evaluate.h>
+ typedef WaveletTL::PBasis<4, 4> Basis;
+ #define BASIS_NAME "p"
+#elif (BASIS == BASIS_DS)
+ #include <interval/ds_basis.h>
+ #include <interval/ds_support.h>
+ #include <interval/ds_evaluate.h>
+ typedef WaveletTL::DSBasis<4, 4> Basis;
+ #define BASIS_NAME "ds"
+#endif
 
 #include <numerics/bvp.h>
 #include <galerkin/galerkin_utils.h>
@@ -24,17 +48,19 @@ using namespace std;
 using namespace WaveletTL;
 using namespace MathTL;
 
-typedef SBasis Basis;
-
 
 int main()
 {
   cout << "Testing biharmonic equation ..." << endl;
+  #if (BASIS == BASIS_S)
   Basis basis;
+  #else
+  Basis basis(2, 2);
+  #endif
   Basis::Index lambda;
   set<Basis::Index> Lambda;
   
-  int jmax = basis.j0()+3;
+  int jmax = 12; //basis.j0()+3;
   for (lambda = basis.first_generator(basis.j0()); lambda <= basis.last_wavelet(jmax); ++lambda)
     Lambda.insert(lambda);
 
@@ -49,8 +75,10 @@ int main()
 
   setup_stiffness_matrix(discrete_biharmonic, Lambda, stiff, true);
 //  cout << stiff << endl;
-  cout << "Saving stiffness matrix to s_stiff.m" << endl;
-  stiff.matlab_output("s_stiff", "A", 1);
+  cout << "Saving stiffness matrix to " << BASIS_NAME << "_stiff.m" << endl;
+  ostringstream filename;
+  filename << BASIS_NAME << "_stiff";
+  stiff.matlab_output(filename.str().c_str(), "A", 1);
 //  cout << "kappa = " << MathTL::CondSymm(stiff) << endl;
   double lambdamin, lambdamax;
   unsigned int iterations;

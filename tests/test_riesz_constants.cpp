@@ -7,6 +7,9 @@
 #define BASIS BASIS_S
 
 
+#define JMAX_END 15
+
+
 #include <iostream>
 
 #include <algebra/infinite_vector.h>
@@ -61,24 +64,27 @@ int main()
   Basis::Index lambda;
   set<Basis::Index> Lambda;
 
-  int jmax = 12; //basis.j0()+3;
-  for (lambda = basis.first_generator(basis.j0()); lambda <= basis.last_wavelet(jmax); ++lambda)
-    Lambda.insert(lambda);
-  SparseMatrix<double> G(Lambda.size());
-
   cout << "Estimating the Riesz constants via Eigenvalues of the Gram Matrix" << endl;
   // cf. [P], Kap. 6
-  cout << "- setting up Gramian matrix ..." << endl;
-  IntervalGramian<Basis> problem(basis, InfiniteVector<double,Basis::Index>());
-  cout << "- solving Eigenvalue problem ..." << endl;
-  setup_stiffness_matrix(problem, Lambda, G, true);
-  double lambdamin, lambdamax;
-  unsigned int iterations;
-  LanczosIteration(G, 1e-6, lambdamin, lambdamax, 200, iterations);
-  cout << "Needed " << iterations << " iterations for the Eigenvalue problem" << endl;
-  cout << "C_1 = " << sqrt(lambdamin) << endl;
-  cout << "C_2 = " << sqrt(lambdamax) << endl;
-  cout << "kappa = C_2^2/C_1^2 = " << lambdamax/lambdamin << endl;
+  for (int jmax = basis.j0(); jmax <= JMAX_END; jmax += 3) {
+    cout << "jmax = " << jmax << endl;
+    Lambda.clear();
+    for (lambda = basis.first_generator(basis.j0()); lambda <= basis.last_wavelet(jmax); ++lambda)
+      Lambda.insert(lambda);
+    SparseMatrix<double> G(Lambda.size());
+
+    cout << "- setting up Gramian matrix ..." << endl;
+    IntervalGramian<Basis> problem(basis, InfiniteVector<double,Basis::Index>());
+    cout << "- solving Eigenvalue problem ..." << endl;
+    setup_stiffness_matrix(problem, Lambda, G, true);
+    double lambdamin, lambdamax;
+    unsigned int iterations;
+    LanczosIteration(G, 1e-10, lambdamin, lambdamax, 200, iterations);
+    cout << "Needed " << iterations << " iterations for the Eigenvalue problem" << endl;
+    cout << "C_1 = " << sqrt(lambdamin) << endl;
+    cout << "C_2 = " << sqrt(lambdamax) << endl;
+    cout << "kappa = C_2^2/C_1^2 = " << lambdamax/lambdamin << endl;
+  }
 
   return 0;
 }

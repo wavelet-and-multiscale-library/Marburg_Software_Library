@@ -1,19 +1,21 @@
 //#define _WAVELETTL_GALERKINUTILS_VERBOSITY 2
 
 // resolution of the grid
-#define RESOLUTION 7
+#define RESOLUTION 15
 // should the data be saved to files?
 //#define SAVE_DATA
+#define SAVE_RESULTS
 
 // choose which basis to use
 #define BASIS_S 0
 #define BASIS_P 1
 #define BASIS_DS 2
 
-#define BASIS BASIS_S
+#define BASIS BASIS_P
 
 
 #define JMAX_END 15
+#define JMAX_STEP 1
 
 
 #include <iostream>
@@ -64,6 +66,44 @@ double quad(double x)
 }
 
 
+//! computes the L_2 norm of a function given on a grid as an Array1D
+double L2norm(const Array1D<double>& f)
+{
+  Array1D<double>::size_type i;
+  double norm;
+
+  // use added trapezuidal rule
+  const double h = 1.0/(double)f.size();
+  norm = quad(f[0])/2.0;
+  for (i = 1; i < f.size()-1; i++) {
+    norm += quad(f[i]);
+  }
+  norm += quad(f[f.size()-1])/2.0;
+  norm *= h;
+
+  return sqrt(norm);
+}
+
+
+//! differentiates a function known only on a grid, given as a vector
+void differentiate(const Array1D<double>& f, Array1D<double>& derivative)
+{
+  assert(derivative.size() == f.size());
+  const double h = 1.0/(double)f.size();
+  Array1D<double>::size_type i;
+  const Array1D<double>::size_type imax = f.size()-1;
+
+  derivative[0] = (f[1]-f[0])/h;
+  for (i = 1; i < imax; i++)
+    derivative[i] = (f[i+1]-f[i-1])/(2*h);
+  derivative[imax] = (f[imax]-f[imax-1])/h;
+
+  return;
+}
+
+
+
+//! main routine
 int main()
 {
   cout << "Testing biharmonic equation ..." << endl;
@@ -75,7 +115,11 @@ int main()
   Basis::Index lambda;
   set<Basis::Index> Lambda;
   
-  for (int jmax = basis.j0(); jmax <= JMAX_END; jmax+=3) {
+  #ifdef SAVE_RESULTS
+  std::ofstream fs;
+  fs.open("biharmonic-results.dat");
+  #endif // SAVE_RESULTS
+  for (int jmax = basis.j0(); jmax <= JMAX_END; jmax+=JMAX_STEP) {
     cout << "jmax = " << jmax << endl;
     Lambda.clear();
     for (lambda = basis.first_generator(basis.j0()); lambda <= basis.last_wavelet(jmax); ++lambda)
@@ -132,16 +176,22 @@ int main()
     Array1D<double> err(difference.values());
     cout << linfty_norm(err) << endl;
     cout << "L_2 error approximation: ";
-    // use added trapezuidal rule
-    double h = 1.0/(double)err.size();
-    double err_L2 = quad(err[0])/2.0;
-    for (i = 1; i < err.size()-1; i++) {
-      err_L2 += quad(err[i]);
-    }
-    err_L2 += quad(err[err.size()-1])/2.0;
-    err_L2 *= h;
+    double err_L2 = L2norm(err);
     cout << err_L2 << endl;
+    cout << "H^2 error approximation: ";
+    Array1D<double> d1(err.size());
+    differentiate(err, d1);
+    Array1D<double> d2(err.size());
+    differentiate(d1,d2);
+    double err_H2 = err_L2 + L2norm(d1) + L2norm(d2);
+    cout << err_H2 << endl;
+    #ifdef SAVE_RESULTS
+    fs << jmax << "\t" << lambdamax/lambdamin << "\t" << linfty_norm(err) << "\t" << err_L2 << "\t" << err_H2 << endl;
+    #endif // SAVE_RESULTS
   }
+  #ifdef SAVE_RESULTS
+  fs.close();
+  #endif // SAVE_RESULTS
 
   return 0;
 }

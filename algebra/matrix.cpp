@@ -428,6 +428,23 @@ namespace MathTL
   }
   
   template <class C>
+  Matrix<C> operator + (const Matrix<C>& M, const Matrix<C>& N)
+  {
+    assert(M.column_dimension() == N.column_dimension());
+    assert(M.row_dimension() == N.row_dimension());
+    typedef typename Matrix<C>::size_type size_type;
+
+    Matrix<C> R(M.row_dimension(), M.column_dimension());
+    for (size_type i(0); i < M.row_dimension(); i++)
+      for (size_type j(0); j < M.column_dimension(); j++)
+	{
+	  R(i, j) = M(i, j) + N(i, j);
+	}
+
+    return R;
+  }
+  
+  template <class C>
   Matrix<C> operator - (const Matrix<C>& M, const Matrix<C>& N)
   {
     assert(M.column_dimension() == N.column_dimension());

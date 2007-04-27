@@ -1,7 +1,7 @@
 //#define _WAVELETTL_GALERKINUTILS_VERBOSITY 2
 
 // resolution of the grid
-#define RESOLUTION 15
+#define RESOLUTION 20
 // should the data be saved to files?
 //#define SAVE_DATA
 #define SAVE_RESULTS
@@ -11,7 +11,7 @@
 #define BASIS_P 1
 #define BASIS_DS 2
 
-#define BASIS BASIS_P
+#define BASIS BASIS_S
 
 
 #define JMAX_END 15
@@ -117,7 +117,9 @@ int main()
   
   #ifdef SAVE_RESULTS
   std::ofstream fs;
-  fs.open("biharmonic-results.dat");
+  ostringstream filename;
+  filename << "biharmonic_results_" << BASIS_NAME << ".dat";
+  fs.open(filename.str().c_str()); // ("biharmonic-results.dat");
   #endif // SAVE_RESULTS
   for (int jmax = basis.j0(); jmax <= JMAX_END; jmax+=JMAX_STEP) {
     cout << "jmax = " << jmax << endl;
@@ -136,10 +138,10 @@ int main()
 
     setup_stiffness_matrix(discrete_biharmonic, Lambda, stiff, true);
     #ifdef SAVE_DATA
-    ostringstream filename;
-    filename << BASIS_NAME << "_stiff_" << jmax;
-    cout << "Saving stiffness matrix to " << filename << ".m" << endl;
-    stiff.matlab_output(filename.str().c_str(), "A", 1);
+    ostringstream matrix_filename;
+    matrix_filename << BASIS_NAME << "_stiff_" << jmax;
+    cout << "Saving stiffness matrix to " << matrix_filename << ".m" << endl;
+    stiff.matlab_output(matrix_filename.str().c_str(), "A", 1);
     #endif
     double lambdamin, lambdamax;
     unsigned int iterations;
@@ -160,6 +162,7 @@ int main()
     for (set<Basis::Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
       u.set_coefficient(*it, x[i]);
     u.scale(&discrete_biharmonic, -1); // undo preconditioning
+    cout << "Evaluating solution on grid with resolution 2^{" << RESOLUTION << "} ... " << endl;
     SampledMapping<1> s(evaluate(basis, u, true, RESOLUTION));
 
     #ifdef SAVE_DATA

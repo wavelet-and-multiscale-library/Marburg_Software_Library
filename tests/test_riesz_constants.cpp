@@ -6,8 +6,10 @@
 
 #define BASIS BASIS_S
 
+#define JMAX_END 16
+#define JMAX_STEP 1
 
-#define JMAX_END 15
+#define SAVE_RESULTS
 
 
 #include <iostream>
@@ -20,21 +22,25 @@
  #include <interval/s_support.h>
  #include <interval/interval_evaluate.h>
  typedef WaveletTL::SBasis Basis;
+ #define BASIS_NAME "s"
 #elif (BASIS == BASIS_P)
  #include <interval/p_basis.h>
  #include <interval/p_support.h>
  #include <interval/p_evaluate.h>
  typedef WaveletTL::PBasis<4, 4> Basis;
+ #define BASIS_NAME "p"
 #elif (BASIS == BASIS_DS)
  #include <interval/ds_basis.h>
  #include <interval/ds_support.h>
  #include <interval/ds_evaluate.h>
  typedef WaveletTL::DSBasis<4, 4> Basis;
+ #define BASIS_NAME "ds"
 #elif (BASIS == BASIS_JL)
  #include <interval/jl_basis.h>
  #include <interval/jl_support.h>
  #include <interval/jl_evaluate.h>
  typedef WaveletTL::JLBasis Basis;
+ #define BASIS_NAME "jl"
 #endif
 
 #include <galerkin/gramian.h>
@@ -64,9 +70,15 @@ int main()
   Basis::Index lambda;
   set<Basis::Index> Lambda;
 
-  cout << "Estimating the Riesz constants via Eigenvalues of the Gram Matrix" << endl;
+  cout << "Estimating the Riesz constants via Eigenvalues of the Gramian matrix" << endl;
   // cf. [P], Kap. 6
-  for (int jmax = basis.j0(); jmax <= JMAX_END; jmax += 3) {
+  #ifdef SAVE_RESULTS
+  std::ofstream fs;
+  ostringstream filename;
+  filename << "riesz_constants_" << BASIS_NAME << ".dat";
+  fs.open(filename.str().c_str());
+  #endif // SAVE_RESULTS
+  for (int jmax = basis.j0(); jmax <= JMAX_END; jmax += JMAX_STEP) {
     cout << "jmax = " << jmax << endl;
     Lambda.clear();
     for (lambda = basis.first_generator(basis.j0()); lambda <= basis.last_wavelet(jmax); ++lambda)
@@ -75,16 +87,35 @@ int main()
 
     cout << "- setting up Gramian matrix ..." << endl;
     IntervalGramian<Basis> problem(basis, InfiniteVector<double,Basis::Index>());
-    cout << "- solving Eigenvalue problem ..." << endl;
     setup_stiffness_matrix(problem, Lambda, G, true);
+    cout << "- preconditioning Gramian matrix ..." << endl;
+    Vector<double> diag(G.row_dimension());
+    for (unsigned int i = 0; i < G.row_dimension(); i++)
+      diag[i] = G.get_entry(i, i);
+    SparseMatrix<double> H(G.row_dimension(), G.column_dimension());
+    for (unsigned int row = 0; row < G.row_dimension(); row++) {
+      for (unsigned int col = 0; col < G.column_dimension(); col++) {
+        double entry = G.get_entry(row, col);
+        if (entry != 0) {
+          H.set_entry(row, col, entry/(sqrt(diag[row])*sqrt(diag[col])));
+        }
+      }
+    }
+    cout << "- solving Eigenvalue problem ..." << endl;
     double lambdamin, lambdamax;
     unsigned int iterations;
-    LanczosIteration(G, 1e-10, lambdamin, lambdamax, 200, iterations);
+    LanczosIteration(H, 1e-10, lambdamin, lambdamax, 200, iterations);
     cout << "Needed " << iterations << " iterations for the Eigenvalue problem" << endl;
     cout << "C_1 = " << sqrt(lambdamin) << endl;
     cout << "C_2 = " << sqrt(lambdamax) << endl;
     cout << "kappa = C_2^2/C_1^2 = " << lambdamax/lambdamin << endl;
+    #ifdef SAVE_RESULTS
+    fs << jmax << "\t" << sqrt(lambdamin) << "\t" << sqrt(lambdamax) << "\t" << lambdamax/lambdamin << endl;
+    #endif // SAVE_RESULTS
   }
+  #ifdef SAVE_RESULTS
+  fs.close();
+  #endif // SAVE_RESULTS
 
   return 0;
 }

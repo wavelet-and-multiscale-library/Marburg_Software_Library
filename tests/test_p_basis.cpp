@@ -407,7 +407,7 @@ int main()
   Array1D<double> grid;
   Array1D<double> funval;
   grid.resize((1<<dil)+1);
-  for(int k=0;k<grid.size();k++)
+  for(unsigned int k=0;k<grid.size();k++)
   	grid[k]=k*(1.0/(1<<dil));
   Grid<1>gitter(grid);
   evaluate(basis,0,index,grid,funval);  

@@ -90,6 +90,7 @@ EXEOBJF2 = \
   test_jl_basis.o test_jl_support.o\
   test_periodic.o\
   test_spline_basis.o test_spline_support.o test_spline_expansion.o\
+  test_i_indexplot.o\
   test_a_basis.o\
   test_s_basis.o test_s_support.o
 

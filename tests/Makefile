@@ -96,7 +96,9 @@ EXEOBJF2 = \
 
 # set 3 of test programs: wavelet bases on general higher-dim. domains ((mapped) cube, tensor prod.)
 EXEOBJF3 = \
-  test_cube_index.o test_cube_support.o test_cube_basis.o test_mapped_cube_basis.o\
+  test_cube_index.o test_cube_support.o test_cube_basis.o\
+  test_cube_indexplot.o\
+  test_mapped_cube_basis.o\
   test_tp_basis.o
 
 # set 4 of test programs: wavelet bases on the L-domain

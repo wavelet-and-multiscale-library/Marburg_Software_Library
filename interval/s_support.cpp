@@ -136,6 +136,7 @@ namespace WaveletTL
 
     // create list (all indices between k1 and k2)
     Support supp;
+    supp.k1 = supp.k2 = 0;
     Index nu;
     for (int k = k1; k <= k2; k++) {
       for (int c = 0; c < (int)basis.number_of_components; c++) {

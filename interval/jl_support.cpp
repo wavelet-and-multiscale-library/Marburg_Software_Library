@@ -74,6 +74,7 @@ namespace WaveletTL
 #if 1
     // new code
     Support supp;
+    supp.k1 = supp.k2 = 0;
     if (generators) {
       // the leftmost generator (of type phi_0) on the level j, s.th. its support intersects [a,b], fulfills
       //   2^{-j}(k+1) > a  but  2^{-j}k <= a,

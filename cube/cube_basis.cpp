@@ -14,6 +14,7 @@ namespace WaveletTL
     for (unsigned int i = 0; i < DIM; i++)
       bases_[i] = b;
     j0_ = bases_[0]->j0();
+    delete_pointers = true;
   }
 
   template <class IBASIS, unsigned int DIM>
@@ -41,6 +42,7 @@ namespace WaveletTL
     }
     
     j0_ = bases_[0]->j0();
+    delete_pointers = true;
   }
 
   template <class IBASIS, unsigned int DIM>
@@ -64,9 +66,9 @@ namespace WaveletTL
     }
     
     j0_ = bases_[0]->j0();
+    delete_pointers = true;
   }
 
-  
   template <class IBASIS, unsigned int DIM>
   CubeBasis<IBASIS,DIM>::CubeBasis(const FixedArray1D<bool,2*DIM>& bc) {
     for (unsigned int i = 0; i < DIM; i++) {
@@ -88,14 +90,26 @@ namespace WaveletTL
     }
     
     j0_ = bases_[0]->j0();
+    delete_pointers = true;
   }
   
   template <class IBASIS, unsigned int DIM>
+  CubeBasis<IBASIS,DIM>::CubeBasis(const FixedArray1D<IBASIS*,DIM> bases) {
+    for (unsigned int i = 0; i < DIM; i++)
+      bases_[i] = bases[i];
+    
+    j0_ = bases_[0]->j0();
+    delete_pointers = false;
+  }
+
+  template <class IBASIS, unsigned int DIM>
   CubeBasis<IBASIS,DIM>::~CubeBasis()
   {
-    for (typename list<IBASIS*>::const_iterator it(bases_infact.begin());
-	 it != bases_infact.end(); ++it)
-      delete *it;
+    if (delete_pointers) {
+      for (typename list<IBASIS*>::const_iterator it(bases_infact.begin());
+	   it != bases_infact.end(); ++it)
+	delete *it;
+    }
   }
 
   template <class IBASIS, unsigned int DIM>
@@ -572,6 +586,87 @@ namespace WaveletTL
     }
   }
 
+  template <class IBASIS, unsigned int DIM>
+  void
+  CubeBasis<IBASIS,DIM>::expand
+  (const Function<DIM>* f,
+   const bool primal,
+   const int jmax,
+   InfiniteVector<double,Index>& coeffs) const
+  {
+    
+  }
+
+  template <class IBASIS, unsigned int DIM>
+  double
+  CubeBasis<IBASIS,DIM>::integrate
+  (const Function<DIM>* f,
+   const Index& lambda) const
+  {
+    // f(v) = \int_0^1 g(t)v(t) dt
+    
+    double r = 0;
+    
+    // first compute supp(psi_lambda)
+    Support supp;
+    support(*this, lambda, supp);
+    
+    // setup Gauss points and weights for a composite quadrature formula:
+    const int N_Gauss = 5;
+    const double h = ldexp(1.0, -supp.j); // granularity for the quadrature
+    FixedArray1D<Array1D<double>,DIM> gauss_points, gauss_weights, v_values;
+    for (unsigned int i = 0; i < DIM; i++) {
+      gauss_points[i].resize(N_Gauss*(supp.b[i]-supp.a[i]));
+      gauss_weights[i].resize(N_Gauss*(supp.b[i]-supp.a[i]));
+      for (int patch = supp.a[i]; patch < supp.b[i]; patch++)
+	for (int n = 0; n < N_Gauss; n++) {
+	  gauss_points[i][(patch-supp.a[i])*N_Gauss+n]
+	    = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
+	  gauss_weights[i][(patch-supp.a[i])*N_Gauss+n]
+	    = h*GaussWeights[N_Gauss-1][n];
+	}
+    }
+
+    // compute the point values of the integrand (where we use that it is a tensor product)
+    for (unsigned int i = 0; i < DIM; i++)
+      evaluate(bases()[i], 0,
+	       typename IBASIS::Index(lambda.j(),
+				      lambda.e()[i],
+				      lambda.k()[i],
+				      bases()[i]),
+	       gauss_points[i], v_values[i]);
+    
+    // iterate over all points and sum up the integral shares
+    int index[DIM]; // current multiindex for the point values
+    for (unsigned int i = 0; i < DIM; i++)
+      index[i] = 0;
+    
+    Point<DIM> x;
+    while (true) {
+      for (unsigned int i = 0; i < DIM; i++)
+	x[i] = gauss_points[i][index[i]];
+      double share = f->value(x);
+      for (unsigned int i = 0; i < DIM; i++)
+	share *= gauss_weights[i][index[i]] * v_values[i][index[i]];
+      r += share;
+
+      // "++index"
+      bool exit = false;
+      for (unsigned int i = 0; i < DIM; i++) {
+	if (index[i] == N_Gauss*(supp.b[i]-supp.a[i])-1) {
+	  index[i] = 0;
+	  exit = (i == DIM-1);
+	} else {
+	  index[i]++;
+	  break;
+	}
+      }
+      if (exit) break;
+    }
+    
+    return r;
+  }
+  
   template <class IBASIS, unsigned int DIM>
   void
   CubeBasis<IBASIS,DIM>::setup_full_collection()

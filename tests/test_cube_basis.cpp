@@ -9,6 +9,7 @@
 #include <utils/fixed_array1d.h>
 
 #include <interval/ds_basis.h>
+#include <interval/spline_basis.h>
 #include <interval/jl_basis.h>
 #include <interval/jl_support.h>
 #include <interval/jl_evaluate.h>

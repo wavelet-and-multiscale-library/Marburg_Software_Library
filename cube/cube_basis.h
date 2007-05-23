@@ -57,7 +57,6 @@ namespace WaveletTL
     */
     CubeBasis(const FixedArray1D<int,2*DIM>& s);
 
-
     /*!
       constructor with specified Dirichlet boundary conditions for
       the primal functions, the dual functions will be constructed to
@@ -65,9 +64,16 @@ namespace WaveletTL
     */
     CubeBasis(const FixedArray1D<bool,2*DIM>& bc);
 
+    /*!
+      constructor with precomputed instances of the 1D bases;
+      in this case, the pointers are reused and
+      not deleted at destruction time.
+    */
+    CubeBasis(const FixedArray1D<IBASIS*,DIM> bases);
+    
     //! destructor
     ~CubeBasis();
-
+    
     //! interval basis
     typedef IBASIS IntervalBasis;
 
@@ -195,7 +201,35 @@ namespace WaveletTL
     void reconstruct_t(const InfiniteVector<double, Index>& c, const int j,
 		       InfiniteVector<double, Index>& v) const;
 
-    //! setup full collectin of wavelets between j0_ and jmax_ as long as a jmax_ has been specified
+    /*!
+      For a given function, compute all integrals w.r.t. the primal
+      or dual generators/wavelets \psi_\lambda with |\lambda|\le jmax.
+      - When integrating against the primal functions, the integrand has to be smooth
+        to be accurately reproduced by the dual basis.
+      - When integration against dual functions is specified,
+        we integrate against the primal ones instead and multiply the resulting
+        coefficients with the inverse of the primal gramian.
+
+      Maybe a thresholding of the returned coefficients is helpful (e.g. for
+      expansions of spline functions).
+    */
+    void
+    expand
+    (const Function<DIM>* f,
+     const bool primal,
+     const int jmax,
+     InfiniteVector<double,Index>& coeffs) const;
+
+    /*!
+      helper function, integrate a smooth function f against a
+      primal generator or wavelet
+    */
+    double
+    integrate
+    (const Function<DIM>* f,
+     const Index& lambda) const;
+
+    //! setup full collection of wavelets between j0_ and jmax_ as long as a jmax_ has been specified
     void setup_full_collection();
 
     //! collection of all wavelets between coarsest and finest level
@@ -224,6 +258,9 @@ namespace WaveletTL
 
     //! for faster access, all relevant pointers to the 1D bases
     FixedArray1D<IBASIS*,DIM> bases_;
+
+    //! flag for deletion of the pointers
+    bool delete_pointers;
   };
 }
 

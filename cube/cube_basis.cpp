@@ -588,13 +588,39 @@ namespace WaveletTL
 
   template <class IBASIS, unsigned int DIM>
   void
+  CubeBasis<IBASIS,DIM>::support(const Index& lambda, Support& supp) const
+  {
+    const unsigned int jplus = multi_degree(lambda.e()) > 0 ? 1 : 0;
+    supp.j = lambda.j() + jplus;
+    for (unsigned int i(0); i < DIM; i++) {
+      bases()[i]->support(typename IBASIS::Index(lambda.j(),
+						 lambda.e()[i],
+						 lambda.k()[i],
+						 bases()[i]),
+			  supp.a[i], supp.b[i]);
+      if (lambda.e()[i] == 0 && jplus > 0) {
+	supp.a[i] *= 2;
+	supp.b[i] *= 2;
+      }
+    }
+  }
+  
+  template <class IBASIS, unsigned int DIM>
+  void
   CubeBasis<IBASIS,DIM>::expand
   (const Function<DIM>* f,
    const bool primal,
    const int jmax,
    InfiniteVector<double,Index>& coeffs) const
   {
-    
+    assert(primal == false); // only integrate against primal wavelets and generators
+
+    for (Index lambda = first_generator(j0());;++lambda)
+      {
+ 	coeffs.set_coefficient(lambda, integrate(f, lambda));
+ 	if (lambda == last_wavelet(jmax))
+ 	  break;
+      }
   }
 
   template <class IBASIS, unsigned int DIM>
@@ -609,7 +635,7 @@ namespace WaveletTL
     
     // first compute supp(psi_lambda)
     Support supp;
-    support(*this, lambda, supp);
+    support(lambda, supp);
     
     // setup Gauss points and weights for a composite quadrature formula:
     const int N_Gauss = 5;
@@ -629,12 +655,12 @@ namespace WaveletTL
 
     // compute the point values of the integrand (where we use that it is a tensor product)
     for (unsigned int i = 0; i < DIM; i++)
-      evaluate(bases()[i], 0,
-	       typename IBASIS::Index(lambda.j(),
-				      lambda.e()[i],
-				      lambda.k()[i],
-				      bases()[i]),
-	       gauss_points[i], v_values[i]);
+      bases()[i]->evaluate(0,
+			   typename IBASIS::Index(lambda.j(),
+						  lambda.e()[i],
+						  lambda.k()[i],
+						  bases()[i]),
+			   gauss_points[i], v_values[i]);
     
     // iterate over all points and sum up the integral shares
     int index[DIM]; // current multiindex for the point values

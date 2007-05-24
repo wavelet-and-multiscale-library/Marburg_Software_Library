@@ -9,25 +9,13 @@ using MathTL::FixedArray1D;
 namespace WaveletTL
 {
   template <class IBASIS, unsigned int DIM>
+  inline
   void
   support(const CubeBasis<IBASIS,DIM>& basis,
 	  const typename CubeBasis<IBASIS,DIM>::Index& lambda,
 	  typename CubeBasis<IBASIS,DIM>::Support& supp)
   {
-    const unsigned int jplus = multi_degree(lambda.e()) > 0 ? 1 : 0;
-    supp.j = lambda.j() + jplus;
-    for (unsigned int i(0); i < DIM; i++) {
-      support(*basis.bases()[i],
-	      typename IBASIS::Index(lambda.j(),
-				     lambda.e()[i],
-				     lambda.k()[i],
-				     basis.bases()[i]),
-	      supp.a[i], supp.b[i]);
-      if (lambda.e()[i] == 0 && jplus > 0) {
-	supp.a[i] *= 2;
-	supp.b[i] *= 2;
-      }
-    }
+    basis.support(lambda, supp);
   }
 
   template <class IBASIS, unsigned int DIM>

@@ -100,6 +100,14 @@ namespace WaveletTL
       int b[DIM];
     } Support;
 
+    /*!
+      For a given interval basis IBASIS, compute a cube
+      2^{-j}<a,b> = 2^{-j}[a_1,b_1]x...x[a_n,b_n]
+      which contains the support of a single primal cube generator
+      or wavelet psi_lambda.
+    */
+    void support(const Index& lambda, Support& supp) const;
+
     //! critical Sobolev regularity for the primal generators/wavelets
     static double primal_regularity() { return IBASIS::primal_regularity(); }
     

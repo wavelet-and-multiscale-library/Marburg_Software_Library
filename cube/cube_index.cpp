@@ -283,33 +283,26 @@ namespace WaveletTL
     // determine how many wavelets there are on all the levels
     // below the level of this index
     if (! gen) {
-//       Funktioniert nur für homogene RB :
-      /*
-      result = 1;
-      for (unsigned int i = 0; i < DIM; i++)
-	result *= (basis_->bases()[i])->Deltasize(j_);
-      */
-// Algemein:
       result = 0;
       genfstlvl =1;
-      //Generatoren auf Level j0
+      //generators on level j0
       for (unsigned int i = 0; i< DIM; i++)                     
 	genfstlvl *= (basis_->bases()[i])->Deltasize((basis_->bases()[i])->j0());
-      //Zuwachs auf Level j
+      //additional wavelets on level j
       //            =(#Gen[1]+#Wav[1])*...*(#Gen[Dim-1]+#Wav[Dim-1])
       //             -#Gen[1]*...*#Gen[Dim-1]
       for (int lvl= 0 ; 
 	   lvl < (j_-basis_->j0());
 	   lvl++){
-	int genAktLvl = 1;
-	int zuwachs = 1;
+	int genCurLvl = 1;
+	int addWav = 1;
 	for (unsigned int i = 0; i< DIM; i++) {
-	  unsigned int aktJ = basis_->bases()[i]->j0()+lvl;
-	  int genAktDim = (basis_->bases()[i])->Deltasize(aktJ);
-	  genAktLvl *= genAktDim;
-	  zuwachs *= genAktDim+ (basis_->bases()[i])->Nablasize(aktJ);
+	  unsigned int curJ = basis_->bases()[i]->j0()+lvl;
+	  int genCurDim = (basis_->bases()[i])->Deltasize(curJ);
+	  genCurLvl *= genCurDim;
+	  addWav *= genCurDim+ (basis_->bases()[i])->Nablasize(curJ);
 	}
-	result += zuwachs-genAktLvl;
+	result += addWav-genCurLvl;
       }
       result += genfstlvl;
     }

@@ -123,7 +123,7 @@ EXEOBJF5 = \
 
 # set 6 of test programs: adaptive wavelet schemes for parabolic equations
 EXEOBJF6 = \
-  test_lin_par_equation.o test_row_stage_equation.o test_row_stage_equation_2d.o
+  test_lin_par_equation.o test_row_stage_equation.o 
 
 # set 7 of test programs: nonadaptive wavelet solvers for elliptic problems	
 EXEOBJF7 = \

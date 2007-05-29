@@ -94,10 +94,10 @@ int main()
   //primal boundary conditions
   FixedArray1D<int,2*2> bound_1_2D;
   bound_1_2D[0] = 1;
-  bound_1_2D[1] = 1;
-  bound_1_2D[2] = 1;
+  bound_1_2D[1] = 0;
+  bound_1_2D[2] = 0;
   bound_1_2D[3] = 1;
-
+  cout << "testing inhomogeneous boundary conditions bc = " << bound_1_2D << endl;
 
   //dual boundary conditions
   FixedArray1D<int,2*2> bound_1T_2D;
@@ -119,14 +119,16 @@ int main()
 
   unsigned int i = 0;
   for (CubeIndex<Basis1D,2> lambda(first_generator<Basis1D,2,Basis2>(&basis2, basis2.j0()));; ++lambda) {
-    cout << "-----------------------------------------" << endl;
     lambda.set_number();
-    cout << lambda << " number  = " << lambda.number() << endl;
-    cout << " index  = " << CubeIndex<Basis1D,2>(i, &basis2) << endl;
+    cout << " index  = " << CubeIndex<Basis1D,2>(i, &basis2);
+    cout << " lambda = " << lambda << " number  = " << lambda.number();
+    if ((CubeIndex<Basis1D,2>(i, &basis2) != lambda) || (lambda.number()!=i)) cout << " !!! Error !!! ";
+    cout << endl;
     if (! (CubeIndex<Basis1D,2>(i, &basis2) == lambda))
       abort();
     i++;
     if (lambda == last_wavelet<Basis1D,2,Basis2>(&basis2, basis2.j0()+1)) break;
+    if (i>200) break; 
   }
   
   for (int j = basis2.j0(); j < basis2.j0()+5; j++ ) {

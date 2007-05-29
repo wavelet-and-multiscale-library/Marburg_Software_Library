@@ -268,8 +268,8 @@ namespace WaveletTL
   {
     type_type gen_type;
     assert( e_ != gen_type || j_ == basis_->j0() );
-
     int result = 0;
+    int genfstlvl = 0;
     bool gen = 1;
 
     // check if wavelet is a generator
@@ -283,11 +283,37 @@ namespace WaveletTL
     // determine how many wavelets there are on all the levels
     // below the level of this index
     if (! gen) {
+//       Funktioniert nur für homogene RB :
+      /*
       result = 1;
       for (unsigned int i = 0; i < DIM; i++)
 	result *= (basis_->bases()[i])->Deltasize(j_);
+      */
+// Algemein:
+      result = 0;
+      genfstlvl =1;
+      //Generatoren auf Level j0
+      for (unsigned int i = 0; i< DIM; i++)                     
+	genfstlvl *= (basis_->bases()[i])->Deltasize((basis_->bases()[i])->j0());
+      //Zuwachs auf Level j
+      //            =(#Gen[1]+#Wav[1])*...*(#Gen[Dim-1]+#Wav[Dim-1])
+      //             -#Gen[1]*...*#Gen[Dim-1]
+      for (int lvl= 0 ; 
+	   lvl < (j_-basis_->j0());
+	   lvl++){
+	int genAktLvl = 1;
+	int zuwachs = 1;
+	for (unsigned int i = 0; i< DIM; i++) {
+	  unsigned int aktJ = basis_->bases()[i]->j0()+lvl;
+	  int genAktDim = (basis_->bases()[i])->Deltasize(aktJ);
+	  genAktLvl *= genAktDim;
+	  zuwachs *= genAktDim+ (basis_->bases()[i])->Nablasize(aktJ);
+	}
+	result += zuwachs-genAktLvl;
+      }
+      result += genfstlvl;
     }
-    
+
     // now determine how many wavelets there are on the same level
     // that belong to another type less than the type of this wavelet,
     // add the result to res afterwards
@@ -320,7 +346,6 @@ namespace WaveletTL
 	  break;
       }//end while
     }// end if
-
     // count the wavelets that belong to the same level and to the same type
     // whose indices are smaller than this index,
     // add the result to res
@@ -340,10 +365,12 @@ namespace WaveletTL
 	tmp *= k_[i]-(basis_->bases()[i])->Nablamin();
       
       for (unsigned int l = i+1; l < DIM; l++) {
-	if (e_[l] == 0)
-	  tmp *= (basis_->bases()[i])->Deltasize(j_);
-	else
-	  tmp *= (basis_->bases()[i])->Nablasize(j_);
+	if (e_[l] == 0) {
+	  tmp *= (basis_->bases()[l])->Deltasize(j_);
+	}
+	else {
+	  tmp *= (basis_->bases()[l])->Nablasize(j_);
+	}
       }
       result += tmp;
     }

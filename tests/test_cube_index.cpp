@@ -117,7 +117,7 @@ int main()
 //       ++index2;
 //   }
 
-  unsigned int i = 0;
+  int i = 0;
   for (CubeIndex<Basis1D,2> lambda(first_generator<Basis1D,2,Basis2>(&basis2, basis2.j0()));; ++lambda) {
     lambda.set_number();
     cout << " index  = " << CubeIndex<Basis1D,2>(i, &basis2);

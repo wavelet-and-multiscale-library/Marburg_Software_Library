@@ -38,10 +38,10 @@ int main()
 
   Function<2>* f = new Plateau();
 
-#if 0
+#if 1
   Grid<2> grid(Point<2>(0.0, 0.0), Point<2>(1.0, 1.0), 1<<5, 1<<5);
   SampledMapping<2> mapping(grid, *f);
-  ofstream file("zweidfunction.m");
+  ofstream file("plateau_function.m");
   mapping.matlab_output(file);
   file.close();
 #endif

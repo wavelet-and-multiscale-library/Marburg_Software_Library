@@ -95,8 +95,10 @@ namespace WaveletTL
   
   template <class IBASIS, unsigned int DIM>
   CubeBasis<IBASIS,DIM>::CubeBasis(const FixedArray1D<IBASIS*,DIM> bases) {
-    for (unsigned int i = 0; i < DIM; i++)
+    for (unsigned int i = 0; i < DIM; i++) {
+      bases_infact.push_back(bases[i]);
       bases_[i] = bases[i];
+    }
     
     j0_ = bases_[0]->j0();
     delete_pointers = false;

@@ -180,7 +180,7 @@ namespace WaveletTL
 		  grad_psi_mu[i]     *= psi_mu_der_values[i][index[i]];
 		} else {
 		  grad_psi_lambda[i] *= psi_lambda_values[s][index[s]];
-		  grad_psi_lambda[i] *= psi_mu_values[s][index[s]];
+		  grad_psi_mu[i] *= psi_mu_values[s][index[s]];
 		}
 	      }
 	    }
@@ -228,7 +228,7 @@ namespace WaveletTL
 		  grad_psi_mu[i]     *= psi_mu_der_values[i][index[i]];
 		} else {
 		  grad_psi_lambda[i] *= psi_lambda_values[s][index[s]];
-		  grad_psi_lambda[i] *= psi_mu_values[s][index[s]];
+		  grad_psi_mu[i] *= psi_mu_values[s][index[s]];
 		}
 	      }
 	    }

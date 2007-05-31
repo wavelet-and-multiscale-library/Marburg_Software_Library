@@ -617,12 +617,14 @@ namespace WaveletTL
 
     for (Index lambda = first_generator(j0());;++lambda)
       {
- 	coeffs.set_coefficient(lambda, integrate(f, lambda));
+	const double coeff = integrate(f, lambda);
+	if (fabs(coeff)>1e-15)
+	  coeffs.set_coefficient(lambda, coeff);
  	if (lambda == last_wavelet(jmax))
  	  break;
-      }
+      } 
   }
-
+  
   template <class IBASIS, unsigned int DIM>
   double
   CubeBasis<IBASIS,DIM>::integrate

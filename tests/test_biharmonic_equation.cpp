@@ -1,7 +1,7 @@
 //#define _WAVELETTL_GALERKINUTILS_VERBOSITY 2
 
 // resolution of the grid
-#define RESOLUTION 20
+#define RESOLUTION 15
 // should the data be saved to files?
 //#define SAVE_DATA
 #define SAVE_RESULTS
@@ -10,8 +10,9 @@
 #define BASIS_S 0
 #define BASIS_P 1
 #define BASIS_DS 2
+#define BASIS_ADAPTED_S 3
 
-#define BASIS BASIS_S
+#define BASIS BASIS_ADAPTED_S
 
 
 #define JMAX_END 15
@@ -46,6 +47,18 @@
  #include <interval/ds_evaluate.h>
  typedef WaveletTL::DSBasis<4, 4> Basis;
  #define BASIS_NAME "ds"
+#elif (BASIS == BASIS_ADAPTED_S)
+ #define ADAPTED_BASIS
+ #include <interval/s_basis.h>
+ #include <interval/s_support.h>
+ #include <interval/interval_evaluate.h>
+ typedef WaveletTL::SBasis MultiBasis;
+ #define BASIS_NAME "adapted_s"
+#endif
+#ifdef ADAPTED_BASIS
+ #include <interval/adapted_basis.h>
+ #include <interval/adapted_support.h>
+ typedef WaveletTL::AdaptedBasis<MultiBasis> Basis;
 #endif
 
 #include <numerics/bvp.h>
@@ -109,8 +122,11 @@ int main()
   cout << "Testing biharmonic equation ..." << endl;
   #if (BASIS == BASIS_S)
   Basis basis;
-  #else
+  #elif ((BASIS == BASIS_P) || (BASIS == BASIS_DS))
   Basis basis(2, 2);
+  #elif defined(ADAPTED_BASIS)
+  MultiBasis multi_basis;
+  Basis basis(&multi_basis);
   #endif
   Basis::Index lambda;
   set<Basis::Index> Lambda;

@@ -98,7 +98,7 @@ namespace WaveletTL
     static unsigned int primal_vanishing_moments() { return 2; }
 
     //! critical Sobolev regularity for the dual generators/wavelets
-    static double dual_regularity() { return 0.824929; }
+    static double dual_regularity() { return 0.824926; }
 
     //! degree of polynomial reproduction for the dual generators/wavelets
     static unsigned int dual_polynomial_degree() { return 2; }

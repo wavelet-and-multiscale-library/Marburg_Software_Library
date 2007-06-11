@@ -27,7 +27,8 @@ namespace WaveletTL
     r is the number of multi-wavelets in the basis.
 
     We require the template parameter class IBASIS to provide the routines
-    j0(), DeltaLmin(), DeltaRmax(j), Nablamin() and Nablamax(j).
+    j0(), DeltaLmin(), DeltaRmax(j), Nablamin(), Nablamax(j) and the data
+    field number_of_components.
   */
   template <class IBASIS>
   class IntervalMultiIndex
@@ -100,6 +101,24 @@ namespace WaveletTL
 
     //! underlying basis
     inline const IBASIS* basis() const { return basis_; }
+
+    //! set the values of j, e, k, c directly
+    inline void set(int j, type_type e, translation_type k, component_type c);
+
+    /*! encode c and k index of this object into a single integer
+        (for usage with an adaptor class which wraps a multiwavelet basis in a classical wavelet basis)
+    */
+    inline translation_type ck_encode() const { return ck_encode(k_, c_); }
+
+    /*! encode given c and k index into a single integer
+        (for usage with an adaptor class which wraps a multiwavelet basis in a classical wavelet basis)
+    */
+    static translation_type ck_encode(const translation_type& k, const component_type& c);
+
+    /*! decode a single (encoded) integer k into translation index k and component index c
+        (for usage with an adaptor class which wraps a multiwavelet basis in a classical wavelet basis)
+    */
+    static void ck_decode(const translation_type& k_enc, translation_type& k, component_type& c);
 
   protected:  
     

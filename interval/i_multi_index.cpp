@@ -1,6 +1,7 @@
 // implementation for i_multi_index.h
 
 #include <interval/i_multi_index.h>
+typedef int translation_type; // forward declaration for the compiler
 
 namespace WaveletTL
 {
@@ -130,7 +131,32 @@ namespace WaveletTL
     
     return *this;
   }
-  
+
+  template <class IBASIS>
+  inline void
+  IntervalMultiIndex<IBASIS>::set(int j, type_type e, translation_type k, component_type c)
+  {
+    j_ = j;
+    e_ = e;
+    k_ = k;
+    c_ = c;
+  }
+
+  template <class IBASIS>
+  translation_type
+  IntervalMultiIndex<IBASIS>::ck_encode(const translation_type& k, const component_type& c)
+  {
+    return IBASIS::number_of_components*k + c;
+  }
+
+  template <class IBASIS>
+  void
+  IntervalMultiIndex<IBASIS>::ck_decode(const translation_type& k_enc, translation_type& k, component_type& c)
+  {
+    c = k_enc % IBASIS::number_of_components;
+    k = (k_enc-c) / IBASIS::number_of_components;
+  }
+
 
   /* non member functions **************************************************/
   template <class IBASIS>

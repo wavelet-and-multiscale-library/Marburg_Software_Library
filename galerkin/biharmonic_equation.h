@@ -13,7 +13,6 @@
 #include <utils/function.h>
 #include <utils/array1d.h>
 #include <algebra/infinite_vector.h>
-#include <interval/spline_basis.h>
 #include <galerkin/galerkin_utils.h>
 #include <galerkin/infinite_preconditioner.h>
 #include <adaptive/compression.h>

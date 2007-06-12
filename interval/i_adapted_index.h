@@ -91,12 +91,6 @@ namespace WaveletTL
       return index_->number();
     }
 
-    /*!
-      inverse of constructor
-      'IntervalAdaptedIndex(const unsigned int number, const IAdaptedBasis* basis)'
-    */
-    void set_number();
-
 
     //! get multi index
     const IMultiIndex* multi_index() const { return index_; }

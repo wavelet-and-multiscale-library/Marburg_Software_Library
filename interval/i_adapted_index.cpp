@@ -99,13 +99,6 @@ namespace WaveletTL
     
     return *this;
   }
-  
-  template <class IAdaptedBasis>
-  void
-  IntervalAdaptedIndex<IAdaptedBasis>::set_number()
-  {
-    index_->set_number();
-  }
 
 
   template <class IAdaptedBasis>

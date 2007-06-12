@@ -130,15 +130,21 @@ int main()
   #endif
   Basis::Index lambda;
   set<Basis::Index> Lambda;
+
+  clock_t t_start, t_end;
+  double time;
   
   #ifdef SAVE_RESULTS
   std::ofstream fs;
   ostringstream filename;
   filename << "biharmonic_results_" << BASIS_NAME << ".dat";
   fs.open(filename.str().c_str()); // ("biharmonic-results.dat");
+  fs << "BASIS = " << BASIS_NAME << endl;
+  fs << "RESOLUTION = " << RESOLUTION << endl;
   #endif // SAVE_RESULTS
   for (int jmax = basis.j0(); jmax <= JMAX_END; jmax+=JMAX_STEP) {
     cout << "jmax = " << jmax << endl;
+    t_start = clock(); // start counting time
     Lambda.clear();
     for (lambda = basis.first_generator(basis.j0()); lambda <= basis.last_wavelet(jmax); ++lambda)
       Lambda.insert(lambda);
@@ -204,8 +210,12 @@ int main()
     differentiate(d1,d2);
     double err_H2 = err_L2 + L2norm(d1) + L2norm(d2);
     cout << err_H2 << endl;
+    t_end = clock(); // stop counting time
+    time = (double)(t_end - t_start)/CLOCKS_PER_SEC;
+    cout << "Calculations on level " << jmax << " needed " << time << "s." << endl;
+
     #ifdef SAVE_RESULTS
-    fs << jmax << "\t" << lambdamax/lambdamin << "\t" << linfty_norm(err) << "\t" << err_L2 << "\t" << err_H2 << endl;
+    fs << jmax << "\t" << lambdamax/lambdamin << "\t" << linfty_norm(err) << "\t" << err_L2 << "\t" << err_H2 << "\t" << time << "s" << endl;
     #endif // SAVE_RESULTS
   }
   #ifdef SAVE_RESULTS

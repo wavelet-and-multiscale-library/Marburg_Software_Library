@@ -20,6 +20,13 @@ namespace WaveletTL
   #define E_GENERATOR 0  // index type generator
   #define E_WAVELET 1  // index type wavelet
 
+  //#ifndef N_UNDEFINED
+   #define N_UNDEFINED -1
+  //#endif
+  //#ifndef N_UNKNOWN
+   #define N_UNKNOWN -2
+  //#endif
+
   /*!
     A (template) multi-wavelet index class for multiwavelet basis on [0,1]
     modelling a multiindex of the form lambda=(j,e,c,k).
@@ -44,6 +51,9 @@ namespace WaveletTL
     //! component type
     typedef unsigned int component_type;
 
+    //! number type
+    typedef int number_type;
+
 
     /* constructors ********************************************************/
     /*!
@@ -58,6 +68,9 @@ namespace WaveletTL
 
     //! constructor with specified parameters
     IntervalMultiIndex(const int j, const type_type e, const translation_type k, const component_type c, const IBASIS* basis);
+
+    //! constructor with specified number
+    IntervalMultiIndex(const number_type n, const IBASIS* basis);
 
 
     /* member functions ****************************************************/
@@ -99,6 +112,12 @@ namespace WaveletTL
     //! component index c
     inline const component_type& c() const { return c_; }
 
+    //! number of the multi-index
+    number_type number();
+
+    //! number of the multi-index, if already computed
+    const number_type& number_if_computed() const { return num_; }
+
     //! underlying basis
     inline const IBASIS* basis() const { return basis_; }
 
@@ -127,6 +146,9 @@ namespace WaveletTL
     type_type e_;
     translation_type k_;
     component_type c_;
+
+    //! number of the multi-index
+    number_type num_;
     
     //! pointer to the underlying interval basis
     const IBASIS* basis_;

@@ -32,6 +32,17 @@ namespace WaveletTL
     
     return SampledMapping<1>(); // dummy return for the compiler
   }
+
+  template <class IBasis>
+  SampledMapping<1>
+  evaluate(const IBasis& basis,
+           const typename IBasis::Index& lambda,
+           const bool primal,
+           const int resolution)
+  {
+    assert(primal);
+    return evaluate(basis, lambda, resolution);
+  }
   
   template <class IBasis>
   SampledMapping<1>

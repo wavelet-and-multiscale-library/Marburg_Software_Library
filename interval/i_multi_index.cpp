@@ -216,6 +216,7 @@ namespace WaveletTL
 
 
   /* non member functions **************************************************/
+#if 0
   template <class IBASIS>
   inline
   IntervalMultiIndex<IBASIS>
@@ -267,5 +268,6 @@ namespace WaveletTL
   {
     return (e == E_GENERATOR ? last_generator(basis, j) : last_wavelet(basis, j));
   }
+#endif
 
 }

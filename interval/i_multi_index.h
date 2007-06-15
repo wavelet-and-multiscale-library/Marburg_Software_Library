@@ -171,6 +171,7 @@ namespace WaveletTL
     return os;
   }
 
+#if 0
   /*!
     index of first (leftmost) generator on level j >= j0
   */
@@ -214,6 +215,7 @@ namespace WaveletTL
   template <class IBASIS>
   inline
   IntervalMultiIndex<IBASIS> last_index(const IBASIS* basis, const int j, const typename IntervalMultiIndex<IBASIS>::type_type e);
+#endif
 }
 
 // include implementation

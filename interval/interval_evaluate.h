@@ -30,6 +30,16 @@ namespace WaveletTL
                              const int resolution);
   
   /*!
+    Evaluate a single primal or dual generator or wavelet \psi_\lambda
+    on a dyadic subgrid of [0,1].
+  */
+  template <class IBasis>
+  SampledMapping<1> evaluate(const IBasis& basis,
+                             const typename IBasis::Index& lambda,
+                             const bool primal,
+                             const int resolution);
+
+  /*!
     Evaluate an arbitrary linear combination of primal
     wavelets on a dyadic subgrid of [0,1].
   */

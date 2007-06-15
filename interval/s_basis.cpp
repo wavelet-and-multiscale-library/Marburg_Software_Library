@@ -16,6 +16,13 @@ namespace WaveletTL
     setup();
   }
 
+  SBasis::SBasis(const int s0, const int s1)
+  {
+    assert(s0 == 2);
+    assert(s1 == 2);
+    setup();
+  }
+
   void
   SBasis::setup()
   {

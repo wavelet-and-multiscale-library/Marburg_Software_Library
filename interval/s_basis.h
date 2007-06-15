@@ -50,6 +50,13 @@ namespace WaveletTL
     */
     SBasis();
 
+    /*!
+      constructor with boundary (primal) condition order as parameter
+      present just for the signature, needed by CubeBasis
+      Requires s0 and s1 to be 2 as this basis has fixed boundary conditions.
+    */
+    SBasis(const int s0, const int s1);
+
     //! coarsest possible level
     inline const int j0() const { return j0_; }
 
@@ -105,6 +112,18 @@ namespace WaveletTL
 
     //! number of vanishing moments for the dual wavelets
     static unsigned int dual_vanishing_moments() { return 4; }
+
+    //! read access to the primal b.c. order at x=0
+    const int get_s0() const { return 2; }
+
+    //! read access to the primal b.c. order at x=1
+    const int get_s1() const { return 2; }
+
+    //! read access to the dual b.c. order at x=0
+    const int get_sT0() const { return 0; }
+
+    //! read access to the dual b.c. order at x=1
+    const int get_sT1() const { return 0; }
 
 
     /*!

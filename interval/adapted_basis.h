@@ -24,12 +24,27 @@ namespace WaveletTL
   class AdaptedBasis
   {
     public:
+    //! default constructor: creates a new IBASIS object
+    AdaptedBasis()
+    {
+      basis_ = new IBASIS();
+    }
+
     /*!
-      constructor with instance of basis to wrap (also serves as default constructor)
+      constructor with instance of basis to wrap
     */
-    AdaptedBasis(IBASIS* basis = NULL)
+    AdaptedBasis(IBASIS* basis)
       : basis_(basis)
     {
+    }
+
+    /*!
+      constructor with given (primal) boundary condition order
+      creates a new IBASIS object with given parameters
+    */
+    AdaptedBasis(const int s0, const int s1)
+    {
+      basis_ = new IBASIS(s0, s1);
     }
 
     //! coarsest possible level
@@ -69,6 +84,13 @@ namespace WaveletTL
     void dual_support(const Index& lambda, int& k1, int& k2) const
     { basis_->dual_support(*lambda.multi_index(), k1, k2); }
 
+    /*!
+      present just for compatibility reasons with CubeBasis etc.
+      Computes the support of the given primal generator or wavelet.
+    */
+    void support(const Index& lambda, int& k1, int& k2) const
+    { primal_support(lambda, k1, k2); }
+
     //! space dimension of the underlying domain
     static const int space_dimension = IBASIS::space_dimension;
 
@@ -89,6 +111,18 @@ namespace WaveletTL
 
     //! number of vanishing moments for the dual wavelets
     static unsigned int dual_vanishing_moments() { return IBASIS::dual_vanishing_moments(); }
+
+    //! read access to the primal b.c. order at x=0
+    const int get_s0() const { return basis_->get_s0(); }
+
+    //! read access to the primal b.c. order at x=1
+    const int get_s1() const { return basis_->get_s1(); }
+
+    //! read access to the dual b.c. order at x=0
+    const int get_sT0() const { return basis_->get_sT0(); }
+
+    //! read access to the dual b.c. order at x=1
+    const int get_sT1() const { return basis_->get_sT1(); }
 
 
     /*!
@@ -121,7 +155,7 @@ namespace WaveletTL
     inline const int NablaRmin(const int j) const { return IBASIS::Index::ck_encode(basis_->NablaRmin(j),0); }
 
     //! size of Nabla_j
-    inline const int Nablasize(const int j) const { return Nablamax()-Nablamin()+1; }
+    inline const int Nablasize(const int j) const { return Nablamax(j)-Nablamin()+1; }
 
 
     //! index of first (leftmost) generator on level j >= j0

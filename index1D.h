@@ -10,10 +10,6 @@
 #ifndef _FRAMETL_INDEX1D_H
 #define _FRAMETL_INDEX1D_H
 
-#include<interval/i_index.h>
-
-using WaveletTL::IntervalIndex;
-
 namespace FrameTL
 {
   template <class IBASIS>
@@ -21,7 +17,7 @@ namespace FrameTL
   {
 
   public:
-    Index1D (const IntervalIndex<IBASIS>& ind,
+    Index1D (const typename IBASIS::Index& ind,
 	     const unsigned int p, const unsigned int dir,
 	     const unsigned int der);
 
@@ -30,13 +26,13 @@ namespace FrameTL
     bool operator != (const Index1D<IBASIS>& lambda) const;
     bool operator <= (const Index1D<IBASIS>& lambda) const;
 
-    IntervalIndex<IBASIS> index() const { return ind_; };
+    typename IBASIS::Index index() const { return ind_; };
     unsigned int derivative() const { return der_; };
     unsigned int p() const { return p_; };
     unsigned int direction() const { return dir_; };
 
   protected:
-    IntervalIndex<IBASIS> ind_;
+    typename IBASIS::Index ind_;
     unsigned int p_;
     unsigned int dir_;
     unsigned int der_;

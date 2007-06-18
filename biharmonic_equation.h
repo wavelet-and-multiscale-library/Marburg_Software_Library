@@ -13,7 +13,6 @@
 #include <aggregated_frame.h>
 #include <numerics/bvp.h>
 #include <adaptive/compression.h>
-#include <interval/i_index.h>
 //#include <biharmonic_rhs.h>
 #include <galerkin/infinite_preconditioner.h>
 #include<index1D.h>
@@ -22,7 +21,6 @@
 using FrameTL::AggregatedFrame;
 using MathTL::EllipticBVP;
 using WaveletTL::CompressionStrategy;
-using WaveletTL::IntervalIndex;
 using WaveletTL::FullyDiagonalEnergyNormPreconditioner;
 
 namespace FrameTL

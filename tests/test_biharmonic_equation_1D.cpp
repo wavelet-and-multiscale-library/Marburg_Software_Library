@@ -1,10 +1,22 @@
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
 
+#define ADAPTED_BASIS
+
 #include <fstream>
 #include <iostream>
 #include <time.h> 
-#include <interval/ds_basis.h>
+
+#ifdef ADAPTED_BASIS
+#include <interval/s_basis.h>
+#include <interval/s_support.h>
+#include <interval/interval_evaluate.h>
+#include <interval/adapted_basis.h>
+#include <interval/adapted_support.h>
+#else
+//#include <interval/ds_basis.h>
 #include <interval/p_basis.h>
+#endif
+
 #include <biharmonic_equation.h>
 #include <algebra/sparse_matrix.h>
 #include <algebra/infinite_vector.h>
@@ -91,13 +103,17 @@ public:
 
 int main()
 {
-  cout << "Testing class BiharmonicEquation..." << endl;
+  cout << "Testing class BiharmonicEquation ..." << endl;
   
   const int DIM = 1;
-  int jmax = 5;
+  int jmax = 10;
 
+  #ifdef ADAPTED_BASIS
+  typedef AdaptedBasis<SBasis> Basis1D;
+  #else
   //typedef DSBasis<2,2> Basis1D;
   typedef PBasis<4,4> Basis1D;
+  #endif
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
@@ -107,7 +123,7 @@ int main()
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 1;//0.7;
+  A(0,0) = 0.7;
   Point<1> b;
   b[0] = 0.;
   AffineLinearMapping<1> affineP(A,b);
@@ -118,20 +134,20 @@ int main()
   b2[0] = 1.0-A2.get_entry(0,0);
   AffineLinearMapping<1> affineP2(A2,b2);
 
-  FixedArray1D<double,1> A3;
-  A3[0] = 0.75;
-  SimpleAffineLinearMapping<1> simpleaffine1(A3,b);
+  //FixedArray1D<double,1> A3;
+  //A3[0] = 0.75;
+  //SimpleAffineLinearMapping<1> simpleaffine1(A3,b);
   
-  FixedArray1D<double,1> A4;
-  A4[0] = 0.75;
-  SimpleAffineLinearMapping<1> simpleaffine2(A4,b2);
+  //FixedArray1D<double,1> A4;
+  //A4[0] = 0.75;
+  //SimpleAffineLinearMapping<1> simpleaffine2(A4,b2);
 
 
   //##############################
   
-  Array1D<Chart<DIM,DIM>* > charts(1);
+  Array1D<Chart<DIM,DIM>* > charts(2);
   charts[0] = &affineP;
-  //charts[1] = &affineP2;
+  charts[1] = &affineP2;
 
   //charts[0] = &simpleaffine1;
   //charts[1] = &simpleaffine2;
@@ -159,12 +175,12 @@ int main()
 
   bc[1] = bound_2;
 
-  Atlas<DIM,DIM> Lshaped(charts,adj);  
-  cout << Lshaped << endl;
+  Atlas<DIM,DIM> interval(charts,adj);
+  cout << interval << endl;
 
   //finally a frame can be constructed
-  //Frame1D frame(&Lshaped, bc, bcT);
-  Frame1D frame(&Lshaped, bc, jmax);
+  //Frame1D frame(&interval, bc, bcT);
+  Frame1D frame(&interval, bc, jmax);
 
   Vector<double> value(1);
   value[0] = 384;
@@ -198,7 +214,7 @@ int main()
     Lambda.insert(lambda);
   }
 
-  cout << "setting up full right hand side..." << endl;
+  cout << "setting up full right hand side ..." << endl;
   Vector<double> rh;
   WaveletTL::setup_righthand_side(discrete_biharmonic, Lambda, rh);
   
@@ -221,7 +237,7 @@ int main()
 
 //   abort();
 
-  cout << "setting up full stiffness matrix..." << endl;
+  cout << "setting up full stiffness matrix ..." << endl;
   SparseMatrix<double> stiff;
   
   clock_t tstart, tend;
@@ -241,7 +257,7 @@ int main()
 //   double lmax = PowerIteration(stiff, x, 0.01, 1000, iter);
 //   cout << "lmax = " << lmax << endl;
 
-  cout << "performing iterative scheme to solve projected problem..." << endl;
+  cout << "performing iterative scheme to solve projected problem ..." << endl;
   Vector<double> xk(Lambda.size()); xk = 0;
 
 
@@ -272,11 +288,10 @@ int main()
   }
 
 
-
   //CG(stiff, rh, xk, 0.0001, 1000, iter);
   //Richardson(stiff, rh, xk, 2. / lmax, 0.0001, 1000, iter);
   //Richardson(stiff, rh, xk, 0.07, 0.0001, 2000, iter);  
-  cout << "performing output..." << endl;
+  cout << "performing output ..." << endl;
   
   InfiniteVector<double,Index> u;
   unsigned int i = 0;
@@ -301,62 +316,7 @@ int main()
   // cout << "  ... done, time needed: " << time << " seconds" << endl;
    
 #endif
-	  
-  
-#if 0
-  char filename1[50];
-  u.clear();
-  Lambda.clear();
-  int l = 0;
-  for (Index lambda = FrameTL::first_generator<Basis1D,1,1,Frame1D>(&frame, frame.j0());
-       lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+7); ++lambda) {
-
-
-    typedef WaveletTL::CubeBasis<Basis1D,DIM> CUBEBASIS;
-    
-    typedef CUBEBASIS::Index CubeIndex;
-    
-    CUBEBASIS::Support supp_lambda;
-    
-    WaveletTL::support<Basis1D,DIM>(*frame.bases()[lambda.p()], 
-				    CubeIndex(lambda.j(),
-					      lambda.e(),
-					      lambda.k(),
-					      frame.bases()[lambda.p()]),
-				    supp_lambda);
-    
-    double dx = 1./(1 << supp_lambda.j);
-    cout << "l= " << l << " lambda:" << endl;
-    for (unsigned int i = 0; i < 1; i++) {
-      cout << "j = " << supp_lambda.j << endl;
-      cout << "a = " << supp_lambda.a[i]*dx <<  " b= " << supp_lambda.b[i]*dx << " p = " << lambda.p() << endl;
-    }    
-    
-//     if (l != 14) {
-//       l++;
-//       continue;
- //     }
-
-    cout << lambda << endl;
-    cout << "##################" << endl;
-    u.set_coefficient(lambda, 1);
-    
-    Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u, true, 11);//expand in primal basis
-    sprintf(filename1, "%s%d%s", "wav_1D_", l, ".m");
-    
-    
-    std::ofstream ofs5(filename1);
-    matlab_output(ofs5,U);
-    ofs5.close();
-
-    u.clear();
-    ++l;
-
-  }
-#endif
-
 
    return 0;
 
 }
-

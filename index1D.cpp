@@ -3,7 +3,7 @@
 namespace FrameTL
 {
   template <class IBASIS>
-  Index1D<IBASIS>::Index1D(const IntervalIndex<IBASIS>& ind,
+  Index1D<IBASIS>::Index1D(const typename IBASIS::Index& ind,
 			   const unsigned int p, const unsigned int dir,
 			   const unsigned int der)
     : ind_(ind), p_(p), dir_(dir), der_(der)

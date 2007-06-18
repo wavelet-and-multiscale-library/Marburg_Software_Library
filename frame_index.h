@@ -38,7 +38,7 @@ namespace FrameTL
     // will be used to represent the number of a frame index
     int num;
 
-    // one coefficient of a frame expansion corrwsponding to the
+    // one coefficient of a frame expansion corresponding to the
     // frame index given by 'num'
     double val;
     

@@ -3,6 +3,7 @@
 #include <list>
 #include <numerics/gauss_data.h>
 #include <numerics/eigenvalues.h>
+#include <algebra/sparse_matrix.h>
 #include <frame_index.h>
 #include <frame_support.h>
 //#include <cuba.h>
@@ -15,7 +16,7 @@ namespace FrameTL
 {
 
 //   template <class IBASIS>
-//   Index1D<IBASIS>::Index1D(const IntervalIndex<IBASIS>& ind,
+//   Index1D<IBASIS>::Index1D(const typename IBASIS::Index& ind,
 // 			   const unsigned int p, const unsigned int dir,
 // 			   const unsigned int der)
 //     : ind_(ind), p_(p), dir_(dir), der_(der)
@@ -298,13 +299,13 @@ namespace FrameTL
  	d[1][i%dim]=2;
 
 	for (int j = 0; j < (int)DIM; j++) {
-	  Index1D<IBASIS> i1(IntervalIndex<IBASIS> (
+	  Index1D<IBASIS> i1(typename IBASIS::Index (
 						    lambda.j(),lambda.e()[j],lambda.k()[j],
 						    bases1D_lambda[j]
 						    ),
 			     lambda.p(),j,d[0][j]    
 			     );
-	  Index1D<IBASIS> i2(IntervalIndex<IBASIS> (mu.j(),mu.e()[j],mu.k()[j],
+	  Index1D<IBASIS> i2(typename IBASIS::Index (mu.j(),mu.e()[j],mu.k()[j],
 						    bases1D_mu[j]
 						    ),
 			     mu.p(),j,d[1][j]

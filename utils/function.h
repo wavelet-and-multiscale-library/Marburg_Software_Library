@@ -118,7 +118,7 @@ namespace MathTL
   };
 
   /*!
-    pointwise product of two (preferably scalar--valued) functions
+    pointwise product of two (preferably scalar-valued) functions
   */
   template <unsigned int DIM, class VALUE = double>
   class ProductFunction

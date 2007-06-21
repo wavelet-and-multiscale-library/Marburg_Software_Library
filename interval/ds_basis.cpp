@@ -77,6 +77,9 @@ namespace WaveletTL
   void
   DSBasis<d,dT,BIO>::setup() {
     j0_ = (int) ceil(log(std::max(ellT_l(),ellT_r())+ell2T<d,dT>()-1.)/M_LN2+1);
+    //j0_ = 5;
+
+    cout << "MINIMAL LEVEL = " << j0_ << endl;
 
     setup_GammaLR();
     setup_CX_CXT();

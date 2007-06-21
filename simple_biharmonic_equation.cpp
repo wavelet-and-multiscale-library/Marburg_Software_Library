@@ -2,6 +2,8 @@
 
 #include <list>
 #include <numerics/gauss_data.h>
+#include <algebra/sparse_matrix.h>
+#include <numerics/eigenvalues.h>
 #include <frame_index.h>
 #include <frame_support.h>
 //#include <cuba.h>
@@ -38,7 +40,7 @@ namespace FrameTL
   void
   SimpleBiharmonicEquation<IBASIS,DIM>::compute_rhs(bool compute)
   {
-    cout << "BiharmonicEquation(): precompute right-hand side..." << endl;
+    cout << "BiharmonicEquation(): precompute right-hand side ..." << endl;
     
     typedef AggregatedFrame<IBASIS,DIM> Frame;
     typedef typename Frame::Index Index;
@@ -92,7 +94,7 @@ namespace FrameTL
   void
   SimpleBiharmonicEquation<IBASIS,DIM>::compute_diagonal()
   {
-    cout << "SimpleBiharmonicEquation(): precompute diagonal of stiffness matrix..." << endl;
+    cout << "SimpleBiharmonicEquation(): precompute diagonal of stiffness matrix ..." << endl;
 
     stiff_diagonal.resize(frame_->degrees_of_freedom());
     for (int i = 0; i < frame_->degrees_of_freedom(); i++) {
@@ -252,13 +254,13 @@ namespace FrameTL
  	d[1][i%dim]=2;
 
 	for (int j = 0; j < (int)DIM; j++) {
-	  Index1D<IBASIS> i1(IntervalIndex<IBASIS> (
+	  Index1D<IBASIS> i1(typename IBASIS::Index (
 						    lambda.j(),lambda.e()[j],lambda.k()[j],
 						    bases1D_lambda[j]
 						    ),
 			     lambda.p(),j,d[0][j]    
 			     );
-	  Index1D<IBASIS> i2(IntervalIndex<IBASIS> (mu.j(),mu.e()[j],mu.k()[j],
+	  Index1D<IBASIS> i2(typename IBASIS::Index (mu.j(),mu.e()[j],mu.k()[j],
 						    bases1D_mu[j]
 						    ),
 			     mu.p(),j,d[1][j]

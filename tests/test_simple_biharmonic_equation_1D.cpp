@@ -1,8 +1,20 @@
 #include <fstream>
 #include <iostream>
 #include <time.h> 
-#include <interval/ds_basis.h>
+
+#define ADAPTED_BASIS
+
+#ifdef ADAPTED_BASIS
+#include <interval/s_basis.h>
+#include <interval/s_support.h>
+#include <interval/interval_evaluate.h>
+#include <interval/adapted_basis.h>
+#include <interval/adapted_support.h>
+#else
+//#include <interval/ds_basis.h>
 #include <interval/p_basis.h>
+#endif
+
 #include <simple_biharmonic_equation.h>
 #include <algebra/sparse_matrix.h>
 #include <algebra/infinite_vector.h>
@@ -82,8 +94,8 @@ public:
     //Non-constant function with singularity in their first order
     double x=p[0];
     if(x<0.5)
-      return cos(2*M_PI*x)+2*x*x*x-3*x*x*x*x-1;
-    else return (cos(2*M_PI*x)-3*(1-x)*(1-x)*(1-x)*(1-x)+2*(1-x)*(1-x)*(1-x)-1);
+      return cos(2*M_PI*x)+10*x*x*x-15*x*x*x*x-1;
+    else return (cos(2*M_PI*x)-15*(1-x)*(1-x)*(1-x)*(1-x)+10*(1-x)*(1-x)*(1-x)-1);
 
   }
   
@@ -95,13 +107,17 @@ public:
 
 int main()
 {
-  cout << "Testing class BiharmonicEquation..." << endl;
+  cout << "Testing class SimpleBiharmonicEquation ..." << endl;
   
   const int DIM = 1;
   int jmax=9;
 
+  #ifdef ADAPTED_BASIS
+  typedef AdaptedBasis<SBasis> Basis1D;
+  #else
   //typedef DSBasis<2,2> Basis1D;
   typedef PBasis<3,3> Basis1D;
+  #endif
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
@@ -183,7 +199,7 @@ int main()
     Lambda.insert(lambda);
   }
 
-  cout << "setting up full right hand side..." << endl;
+  cout << "setting up full right hand side ..." << endl;
   Vector<double> rh;
   WaveletTL::setup_righthand_side(discrete_biharmonic, Lambda, rh);
   
@@ -226,7 +242,7 @@ int main()
 //   double lmax = PowerIteration(stiff, x, 0.01, 1000, iter);
 //   cout << "lmax = " << lmax << endl;
 
-  cout << "performing iterative scheme to solve projected problem..." << endl;
+  cout << "performing iterative scheme to solve projected problem ..." << endl;
   Vector<double> xk(Lambda.size()); xk = 0;
 
 
@@ -281,4 +297,3 @@ int main()
    return 0;
 
 }
-

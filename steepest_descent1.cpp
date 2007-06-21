@@ -69,7 +69,7 @@ namespace FrameTL{
     APPLY_COARSE(P, w,omega_i, r, 0.00001, jmax, CDD1);
     r*=-1;
     cout << "r:" << r << endl;
-     P.RHS(omega_i,b);
+    P.RHS(omega_i,b);
     r+=b;
     cout << "b:" << b << endl;
     //if(f.size()==0) 

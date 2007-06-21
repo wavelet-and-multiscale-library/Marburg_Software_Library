@@ -18,9 +18,9 @@
 #include <frame_support.h>
 #include <frame_index.h>
 //#include <cg.h>
-//#include <steepest_descent.h>
+#include <steepest_descent.h>
 #include <galerkin/cached_problem.h>
-#include <richardson_CDD2.h>
+//#include <richardson_CDD2.h>
 //#include <richardson.h>
 
 using std::cout;
@@ -48,20 +48,18 @@ using namespace MathTL;
 using namespace WaveletTL;
 
 
-#define _FRAMETL_ADAPTIVE_COMPUTATION  1
-
 int main()
 {
   
   cout << "testing steepest descent algorithm in 2D..." << endl;
 
   const int DIM = 2;
-  const int jmax = 6;
+  const int jmax = 7;
 
   const int d  = 3;
   const int dT = 3;
 
-  //typedef DSBasis<3,5> Basis1D;
+  //typedef DSBasis<d,dT> Basis1D;
   typedef PBasis<d,dT> Basis1D;
   
  
@@ -188,18 +186,21 @@ int main()
 //   // optimistic guess:
 //   discrete_poisson.set_Ainv(1.0/0.146);
 
-  // (d,dT) = (3,5) all boundary conditions of order 1
-  CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 8.0022, 1.0/0.146);
-  discrete_poisson.set_norm_A(8.0022);
-  // optimistic guess:
-  discrete_poisson.set_Ainv(1.0/0.146);
+//   // (d,dT) = (3,5) all boundary conditions of order 1
+//   CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 8.0022, 1.0/0.146);
+//   discrete_poisson.set_norm_A(8.0022);
+//   // optimistic guess:
+//   discrete_poisson.set_Ainv(1.0/0.146);
 
 
 //   // (d,dT) = (3,3)
-//   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 7.6336, 1.0/0.146);
+//   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 7.6336, 1.0/0.146);
+//   CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 7.6336, 1.0/0.146);
 //   discrete_poisson.set_norm_A(7.6336);
 //   // optimistic guess:
 //   discrete_poisson.set_Ainv(1.0/0.146);
+
+
 
 //   // (d,dT) = (4,6)
 //   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 19.1803, 1.0/0.146);
@@ -222,11 +223,12 @@ int main()
 //   // optimistic guess:
 //   discrete_poisson.set_Ainv(1.0/0.146);
 
-//   // (d,dT) = (3,3)
-//   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson,7.2346, 1.0/0.146);
-//   discrete_poisson.set_norm_A(7.2346);
-//   // optimistic guess:
-//   discrete_poisson.set_Ainv(1.0/0.146);
+  // (d,dT) = (3,3)
+  //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson,7.2346, 1.0/0.146);
+  CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson,7.2346, 1.0/0.146);
+  discrete_poisson.set_norm_A(7.2346);
+  // optimistic guess:
+  discrete_poisson.set_Ainv(1.0/0.146);
 
 
 //   // (d,dT) = (4,6)
@@ -249,9 +251,9 @@ int main()
   double time;
   tstart = clock();
 
-  //steepest_descent_SOLVE(problem, epsilon, u_epsilon);
+  steepest_descent_SOLVE(problem, epsilon, u_epsilon);
   //cg_SOLVE(problem, epsilon, u_epsilon);
-  richardson_SOLVE_CDD2(problem, epsilon, u_epsilon);
+  //richardson_SOLVE_CDD2(problem, epsilon, u_epsilon);
   //richardson_SOLVE(problem, epsilon, u_epsilon);
   //  steepest_descent_SOLVE(discrete_poisson, epsilon, u_epsilon);
  //  for (unsigned int i = 0; i < 50*20;i++)

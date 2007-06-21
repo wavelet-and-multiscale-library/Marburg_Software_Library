@@ -106,7 +106,7 @@ int main()
   
   const int DIM = 1;
 
-  const int jmax = 10;
+  const int jmax = 9;
   
   const int d = 3, dT = 3;
 
@@ -121,13 +121,13 @@ int main()
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 0.7;
+  A(0,0) = 0.9;
   Point<1> b;
   b[0] = 0.;
   AffineLinearMapping<1> affineP(A,b);
   
   Matrix<double> A2(DIM,DIM);
-  A2(0,0) = 0.7;
+  A2(0,0) = 0.9;
   Point<1> b2;
   b2[0] = 1-A2.get_entry(0,0);
   AffineLinearMapping<1> affineP2(A2,b2);
@@ -264,7 +264,10 @@ int main()
 
   const double epsilon = 0.00005;
 
+  InfiniteVector<double, Index> u_epsilon0;
+  InfiniteVector<double, Index> u_epsilon1;
   InfiniteVector<double, Index> u_epsilon;
+  
 
 #if 0
   
@@ -323,7 +326,7 @@ int main()
 //       cout << ind << endl;
 //     }
 
-  multiplicative_Schwarz_SOLVE(problem, epsilon, u_epsilon);
+  multiplicative_Schwarz_SOLVE(problem, epsilon, u_epsilon0, u_epsilon1, u_epsilon);
   //additive_Schwarz_SOLVE(problem, epsilon, u_epsilon);
   //steepest_descent_SOLVE(problem, epsilon, u_epsilon);
   //  steepest_descent_SOLVE_basis(problem, epsilon, u_epsilon);
@@ -338,23 +341,35 @@ int main()
 
   cout << "steepest descent done" << endl;
 
+  u_epsilon0.scale(&discrete_poisson,-1);
+  u_epsilon1.scale(&discrete_poisson,-1);
   u_epsilon.scale(&discrete_poisson,-1);
-  //u_epsilon.scale(&discrete_biharmonic,-1);
 
   EvaluateFrame<Basis1D,1,1> evalObj;
 
-  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u_epsilon, true, 11);//expand in primal basis
+  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u_epsilon0, true, 10);//expand in primal basis
+  Array1D<SampledMapping<1> > U1 = evalObj.evaluate(frame, u_epsilon1, true, 10);//expand in primal basis
+  Array1D<SampledMapping<1> > U2 = evalObj.evaluate(frame, u_epsilon, true, 10);//expand in primal basis
   cout << "...finished plotting approximate solution" << endl;
-  Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u_epsilon, exactSolution1D, 11);
+  Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u_epsilon, exactSolution1D, 10);
   cout << "...finished plotting error" << endl;
   
-  std::ofstream ofs5("approx_sol_mult_schw_1D_out.m");
+  std::ofstream ofs5("approx_sol_mult_schw_1D_out0.m");
   matlab_output(ofs5,U);
   ofs5.close();
 
-  std::ofstream ofs6("error_mult_schw_1D_out.m");
-  matlab_output(ofs6,Error);
+  std::ofstream ofs6("approx_sol_mult_schw_1D_out1.m");
+  matlab_output(ofs6,U1);
   ofs6.close();
+
+  std::ofstream ofs7("approx_sol_mult_schw_1D_out_global.m");
+  matlab_output(ofs7,U2);
+  ofs6.close();
+
+
+  std::ofstream ofs8("error_mult_schw_1D_out.m");
+  matlab_output(ofs8,Error);
+  ofs8.close();
   return 0;
 
 

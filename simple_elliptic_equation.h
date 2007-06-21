@@ -180,7 +180,8 @@ namespace FrameTL
         ||A-A_k|| <= alpha_k * 2^{-s*k}
     */
     double alphak(const unsigned int k) const {
-      return pow(2,(-k))*norm_A(); // suboptimal
+      //return pow(2,(-k))*norm_A(); // suboptimal
+      return 2.*norm_A(); // suboptimal
     }
 
     /*!

@@ -66,8 +66,8 @@ public:
   void steepest_descent_SOLVE(const PROBLEM& P,  const double epsilon,
 			      InfiniteVector<double, typename PROBLEM::Index>& u_epsilon)
   {
-    //typedef DSBasis<3,5> Basis1D;
-    //typedef PBasis<3,3> Basis1D;
+    //typedef DSBasis<3,3> Basis1D;
+    typedef PBasis<3,3> Basis1D;
 
     Point<2> origin;
     origin[0] = 0.0;
@@ -87,7 +87,7 @@ public:
 
     double kappa     = P.norm_A()*a_inv;
     //double kappa     = 1.;
-    double omega_i   = 1.0e-15;//a_inv*P.F_norm();
+    double omega_i   = a_inv*P.F_norm();
     //double omega_i   = 1;
     cout << "a_inv = " << a_inv << endl;
     cout << "omega_i = " << omega_i << endl;
@@ -156,10 +156,6 @@ public:
 	InfiniteVector<double, Index> z_i;
 	APPLY_COARSE(P, tilde_r,delta*l2_norm(tilde_r), z_i, 0.00001, jmax, CDD1);
 	
-	//cout << z_i << endl << endl << tilde_r << endl;
-	
-// 	cout << tilde_r.size() << " " << z_i.size() << endl;
-// 	cout << tilde_r << " " << z_i << endl;
  	double g = z_i*tilde_r;
 	if  (g != 0.)
 	  d = ((tilde_r*tilde_r)/(z_i*tilde_r));
@@ -168,25 +164,25 @@ public:
 	cout << "descent param = " << d << endl;
 	++loops;
 
- 	P.RHS(1.0e-6,f);
-	APPLY(P, w, 1.0e-6, Av, jmax, CDD1);
- 	help = f-Av;
-
 	RES(P, w, xi_i, delta, omega_i/((1+3.*mu)*a_inv), jmax,
 	    tilde_r, nu_i, CDD1);
 
 	cout << "loop: " << loops << " nu = " 
 	     << nu_i << " epsilon = " << omega_i/((1+3.*mu)*a_inv) << endl;
 	cout << "xi: " << xi_i << endl; 
+
+	// ######### output #########
+	tend = clock();
+
+ 	P.RHS(1.0e-6,f);
+	APPLY(P, w, 1.0e-6, Av, jmax, CDD1);
+ 	help = f-Av;
 	  
 	double tmp = l2_norm(help);
 	double tmp1 = log10(tmp);
 	cout << "residual norm = " << tmp << endl;
 	asymptotic[log10( (double)w.size() )] = tmp1;
-	log_10_residual_norms[loops] = tmp1;
 
-	tend = clock();
-	
 	time += ((double) (tend-tstart))/((double) CLOCKS_PER_SEC);
 	
 	time_asymptotic[log10(time)] = tmp1;
@@ -198,43 +194,38 @@ public:
 // 	    || (loops % 500 == 0)
 // 	    ) {
 // 	  u_epsilon = w;
-// 	  u_epsilon.scale(&P,-1);
-	  
+// 	  u_epsilon.scale(&P,-1);  
 //  	  char filename1[50];
 //  	  char filename2[50];
-	  
 //  	  sprintf(filename1, "%s%d%s%d%s", "approx_sol_steep35_2D_2509out_", loops, "_nactive_", w.size(),".m");
 //  	  sprintf(filename2, "%s%d%s%d%s", "error_steep35_2D_2509out_", loops, "_nactive_", w.size(),".m");
-
-
 // 	  Array1D<SampledMapping<2> > U = evalObj.evaluate(P.basis(), u_epsilon, true, 6);
 // 	  cout << "done plotting approximate solution" << endl;
-	  
 // 	  Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(P.basis(), u_epsilon, sing2D, 6);
 // 	  cout << "done plotting pointwise error" << endl;
-	  
 // 	  std::ofstream ofs5(filename1);
 // 	  matlab_output(ofs5,U);
 // 	  ofs5.close();
-	  
 // 	  std::ofstream ofs6(filename2);
 // 	  matlab_output(ofs6,Error);
 // 	  ofs6.close();
 // 	}
 
 	if (loops % 1 == 0) {
-	  std::ofstream os3("steep2D_asymptotic_DS_33.m");
+	  std::ofstream os3("steep2D_asymptotic_P_33.m");
 	  matlab_output(asymptotic,os3);
 	  os3.close();
 	  
-	  std::ofstream os4("steep2D_time_asymptotic_DS_33.m");
+	  std::ofstream os4("steep2D_time_asymptotic_P_33.m");
 	  matlab_output(time_asymptotic,os4);
 	  os4.close();
 	}
 	
 	tstart = clock();
+	// ######### end output #########
 
-	if (tmp < 1.0e-3 || loops == 20000) {
+
+	if (tmp < 1.0e-4 || loops == 40000) {
 	  u_epsilon = w;
 	  exit = true;
 	  break;

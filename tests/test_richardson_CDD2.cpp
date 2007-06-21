@@ -98,8 +98,6 @@ int main()
   
   const int DIM = 1;
 
-
-
   typedef DSBasis<2,2> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
@@ -178,11 +176,11 @@ int main()
  
   bcT[1] = bound_4;
 
-  Atlas<DIM,DIM> Lshaped(charts,adj);  
-  cout << Lshaped << endl;
+  Atlas<DIM,DIM> interval(charts,adj);  
+  cout << interval << endl;
 
   //finally a frame can be constructed
-  Frame1D frame(&Lshaped, bc, bcT, 14);
+  Frame1D frame(&interval, bc, bcT, 14);
 
   Vector<double> value(1);
   value[0] = 1;

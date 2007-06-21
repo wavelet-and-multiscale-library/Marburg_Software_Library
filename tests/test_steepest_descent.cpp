@@ -16,8 +16,8 @@
 #include <galerkin/galerkin_utils.h>
 #include <frame_support.h>
 #include <frame_index.h>
-//#include <steepest_descent.h>
-#include <additive_Schwarz.h>
+#include <steepest_descent.h>
+//#include <additive_Schwarz.h>
 //#include <steepest_descent_basis.h>
 //#include <richardson_CDD2.h>
 #include <galerkin/cached_problem.h>
@@ -101,9 +101,9 @@ int main()
   cout << "testing steepest descent in 1D..." << endl;
   
   const int DIM = 1;
-  const int jmax = 13;
+  const int jmax = 14;
 
-  //typedef DSBasis<4,4> Basis1D;
+  //typedef DSBasis<3,3> Basis1D;
   typedef PBasis<3,3> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
@@ -112,13 +112,13 @@ int main()
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 0.8;
+  A(0,0) = 0.7;
   Point<1> b;
   b[0] = 0.;
   AffineLinearMapping<1> affineP(A,b);
   
   Matrix<double> A2(DIM,DIM);
-  A2(0,0) = 0.8;
+  A2(0,0) = 0.7;
   Point<1> b2;
   b2[0] = 1-A2.get_entry(0,0);
   AffineLinearMapping<1> affineP2(A2,b2);
@@ -153,7 +153,7 @@ int main()
   
   //primal boundary conditions for first patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_1;
-  bound_1[0] = 2;
+  bound_1[0] = 1;
   bound_1[1] = 2;
   
   bc[0] = bound_1;
@@ -161,7 +161,7 @@ int main()
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
   bound_2[0] = 2;
-  bound_2[1] = 2;
+  bound_2[1] = 1;
   
   bc[1] = bound_2;
   
@@ -189,24 +189,24 @@ int main()
   //Frame1D frame(&Lshaped, bc, bcT, jmax);
   Frame1D frame(&Lshaped, bc, jmax);
 
-  Vector<double> value(1);
-  value[0] = 384;
-  ConstantFunction<DIM> const_fun(value);
+//   Vector<double> value(1);
+//   value[0] = 384;
+//   ConstantFunction<DIM> const_fun(value);
 
   //  Singularity1D_RHS<double> sing1D;
   //  Singularity1D<double> exactSolution1D;
 
-//   Singularity1D_RHS_2<double> sing1D;
-//   Singularity1D_2<double> exactSolution1D;
+  Singularity1D_RHS_2<double> sing1D;
+  Singularity1D_2<double> exactSolution1D;
 
   
   //PoissonBVP<DIM> poisson(&const_fun);
-  //PoissonBVP<DIM> poisson(&sing1D);
-  BiharmonicBVP<DIM> biharm(&const_fun);  
-  //SimpleEllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax);
+  PoissonBVP<DIM> poisson(&sing1D);
+  //BiharmonicBVP<DIM> biharm(&const_fun);  
+  SimpleEllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax);
   // EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
-  BiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharm, &frame, jmax);
+  //BiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharm, &frame, jmax);
 
   // (0,0.7) \cup (0.3,1) DSBasis
   
@@ -224,12 +224,12 @@ int main()
 
   // (d,dT) = (3,3)
   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0581, 1.0/0.146);
-  //CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0581, 1.0/0.146);
-//   discrete_poisson.set_norm_A(5.0581);
-//   // optimistic guess:
-//   discrete_poisson.set_Ainv(1.0/0.146);
+  CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0581, 1.0/0.146);
+  discrete_poisson.set_norm_A(5.0581);
+  //   // optimistic guess:
+  discrete_poisson.set_Ainv(1.0/0.146);
 
-  CachedProblem<BiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 4.19, 1.0/0.146);
+  //CachedProblem<BiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 4.19, 1.0/0.146);
 //   discrete_biharmonic.set_norm_A(5.0581);
 //   // optimistic guess:
 //   discrete_biharmonic.set_Ainv(1.0/0.146);
@@ -303,7 +303,7 @@ int main()
   //  discrete_poisson.set_Ainv(1.0/(1.0e-3*0.672));
   
   
-  const double epsilon = 0.00005;
+  const double epsilon = 0.000001;
 
   InfiniteVector<double, Index> u_epsilon;
 
@@ -364,8 +364,8 @@ int main()
 //       cout << ind << endl;
 //     }
 
-  //steepest_descent_SOLVE(problem, epsilon, u_epsilon);
-  additive_Schwarz_SOLVE(problem, epsilon, u_epsilon);
+  steepest_descent_SOLVE(problem, epsilon, u_epsilon);
+  //additive_Schwarz_SOLVE(problem, epsilon, u_epsilon);
 
   //  steepest_descent_SOLVE_basis(problem, epsilon, u_epsilon);
   //richardson_SOLVE_CDD2(problem, epsilon, u_epsilon);
@@ -379,8 +379,8 @@ int main()
 
   cout << "steepest descent done" << endl;
 
-  //u_epsilon.scale(&discrete_poisson,-1);
-  u_epsilon.scale(&discrete_biharmonic,-1);
+  u_epsilon.scale(&discrete_poisson,-1);
+  //u_epsilon.scale(&discrete_biharmonic,-1);
   
   
 //   const int size = u_epsilon.size();
@@ -407,16 +407,16 @@ int main()
 
   Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u_epsilon, true, 11);//expand in primal basis
   cout << "...finished plotting approximate solution" << endl;
-//   Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u_epsilon, exactSolution1D, 11);
-//   cout << "...finished plotting error" << endl;
-
+  Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u_epsilon, exactSolution1D, 11);
+  cout << "...finished plotting error" << endl;
+  
   std::ofstream ofs5("approx_sol_steep_1D_out.m");
   matlab_output(ofs5,U);
   ofs5.close();
 
-//   std::ofstream ofs6("error_steep_1D_out.m");
-//   matlab_output(ofs6,Error);
-//   ofs6.close();
+  std::ofstream ofs6("error_steep_1D_out.m");
+  matlab_output(ofs6,Error);
+  ofs6.close();
 
 
   // compute infinite vectors of 1D indices, one for each patch

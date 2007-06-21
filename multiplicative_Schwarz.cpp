@@ -152,7 +152,12 @@ namespace FrameTL
   {
     typedef typename PROBLEM::WaveletBasis::Support SuppType;
     const SuppType* supp = &(P.basis().all_patch_supports[lambda.number()]);
-    if ((supp->a[1] < 0.0) && (0.0 < supp->b[1]))
+    if ( (supp->a[0] < -0.7) && (-0.7 < supp->b[0]) && (supp->a[1] < 0.0) 
+	 || 
+	 (supp->a[1] < 0.0) && (0.0 < supp->b[1]) && (supp->b[0] > -0.7)
+	 ) // L-shaped with smaller overlap
+      //if ((supp->a[1] < 0.0) && (0.0 < supp->b[1]))  // usual L-shaped
+      //if ((supp->a[0] < -0.3) && (-0.3 < supp->b[0]))
       return true;
     return false;
   }
@@ -164,18 +169,20 @@ namespace FrameTL
     typedef typename PROBLEM::WaveletBasis::Support SuppType;
     const SuppType* supp = &(P.basis().all_patch_supports[lambda.number()]);
     if ((supp->a[0] < 0.0) && (0.0 < supp->b[0]))
+    //if ((supp->a[0] < 0.3) && (0.3 < supp->b[0]))
       return true;
     return false;
 
   }
 
   template <class PROBLEM>
-  bool no_contact_with_patch2 (PROBLEM& P,
-			const typename PROBLEM::Index& lambda)
+  bool contact_with_patch2 (PROBLEM& P,
+			    const typename PROBLEM::Index& lambda)
   {
     typedef typename PROBLEM::WaveletBasis::Support SuppType;
     const SuppType* supp = &(P.basis().all_patch_supports[lambda.number()]);
-    if ( leq(0.0, supp->a[0]) )
+    //if ( leq(supp->b[0],0.3) )
+    if ( leq(supp->b[0],0.0) )
       return true;
     return false;
 
@@ -184,14 +191,19 @@ namespace FrameTL
 
   template <class PROBLEM>
   void  multiplicative_Schwarz_SOLVE(const PROBLEM& P,  const double epsilon,
+				     InfiniteVector<double, typename PROBLEM::Index>& u_epsilon_0,
+				     InfiniteVector<double, typename PROBLEM::Index>& u_epsilon_1,
 				     InfiniteVector<double, typename PROBLEM::Index>& u_epsilon)
   {
-    typedef PBasis<2,2> Basis1D;
+    double o_lap = 0.7;
+
+
+    typedef PBasis<3,3> Basis1D;
     //typedef SplineBasis<2,2,P_construction> Basis1D;
 
     typedef typename PROBLEM::WaveletBasis Frame;
 
-    const int jmax = 5;
+    const int jmax = 9;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
@@ -219,7 +231,7 @@ namespace FrameTL
     set<Index> I1;
     set<Index> I2;
     
-    const int DIM = 2;
+    const int DIM = 1;
 
     // setup index sets for blocks of stiffness matrix
     for (Index lambda = FrameTL::first_generator<Basis1D,DIM,DIM,Frame>(&P.basis(), P.basis().j0());
@@ -258,22 +270,24 @@ namespace FrameTL
     // setup full local right hand sides
     Vector<double> f_1(I1.size());
     Vector<double> f_2(I2.size());
+    cout << "setting up f1... " << endl;
     WaveletTL::setup_righthand_side(P, I1, f_1);
+    cout << "setting up f2... " << endl;
     WaveletTL::setup_righthand_side(P, I2, f_2);
 
     
     double res_norm = 25;
-    while ( sqrt(res_norm) > 1.0e-10 && global_iterations < 20) {
+    while ( sqrt(res_norm) > 1.0e-10 && global_iterations < 100) {
       cout << "##### global iteration = " << global_iterations << endl;
       help_1 = 0;
       help_2 = 0;
       // perform the two half steps explicitely
       unsigned int iterations = 0;
       
-#if 0 // 1D
+#if 1 // 1D
       // sparsen u_2
       int k = 0;
-      Point<1> x(0.7);
+      Point<1> x(o_lap);
       for (typename set<Index>::const_iterator it = I2.begin(); it != I2.end(); it++, k++) {
 	if (! in_support(P.basis(), *it, x)) {
 	  u_2[k] = 0;
@@ -296,13 +310,13 @@ namespace FrameTL
       cout << "needed " << iterations << " in CG" << endl;
       //cout << "u1 after first partial step" << u_1 << endl;
 
-#if 0 // 1D
+#if 1 // 1D
       // backup u_1 now
       u_1_bak = u_1;
       
       // sparsen u_1
       k = 0;
-      Point<1> y(0.3);
+      Point<1> y(1-o_lap);
       for (typename set<Index>::const_iterator it = I1.begin(); it != I1.end(); it++, k++) {
 	if (! in_support(P.basis(), *it, y)) {
 	  u_1[k] = 0;
@@ -330,7 +344,7 @@ namespace FrameTL
       cout << "needed " << iterations << " in CG" << endl;
       //cout << "u2 after first partial step" << u_2 << endl;
 
-#if 0 //1D
+#if 1 //1D
       // setup the current global approximation
       // we have to remove those coefficients of u_1_bak that are contained in the closure of the second patch
       typedef typename PROBLEM::WaveletBasis::Support SuppType;
@@ -339,7 +353,7 @@ namespace FrameTL
 	const SuppType* supp = &(P.basis().all_patch_supports[(*it).number()]);
 	
 	//cout << "#### " << supp->a[0] << " " << leq(0.3, supp->a[0]) << endl;
-	if ( leq(0.3, supp->a[0]) ) {
+	if (leq(1-o_lap, supp->a[0]) ) {
 	//if (! leq(supp->b[0], 0.2) ) {
 	  u_1_bak[k] = 0;
 	}
@@ -355,7 +369,7 @@ namespace FrameTL
       k = 0;
       for (typename set<Index>::const_iterator it = I1.begin(); it != I1.end(); it++, k++) {
 	const SuppType* supp = &(P.basis().all_patch_supports[(*it).number()]);
-	if ( no_contact_with_patch2(P,*it) ) {
+	if (contact_with_patch2(P,*it) ) {
 	  u_1_bak[k] = 0;
 	}
       }
@@ -385,7 +399,7 @@ namespace FrameTL
     for (typename set<Index>::const_iterator it = I1.begin(); it != I1.end(); it++, id++) {
       if (u_1[id] != 0) {
 	//cout << "index1 = " << (*it).number() << " " << u_1[id] << endl;
-	u_epsilon.set_coefficient(*it, u_1[id]);
+	u_epsilon_0.set_coefficient(*it, u_1[id]);
       }
     }
 
@@ -394,11 +408,21 @@ namespace FrameTL
       //cout << *it << endl;
       if (u_2[id] != 0) {
 	//cout << "index2 = " << (*it).number() << " " << u_2[id] << endl;
-	u_epsilon.set_coefficient(*it, u_2[id]);
+	u_epsilon_1.set_coefficient(*it, u_2[id]);
       }
     }
 
-    cout << "degrees_of_freedom = " << u_epsilon.size() << endl;
+    u_epsilon = u_epsilon_0 + u_epsilon_1;
+
+
+    //cout << "degrees_of_freedom = " << u_epsilon.size() << endl;
+
+//     SparseMatrix<double> A;
+//     set<Index> Lambda_sparse;
+//     u_epsilon.support(Lambda_sparse);
+//     WaveletTL::setup_stiffness_matrix(P, Lambda_sparse, A);
+//     A.matlab_output("stiff_sparse_1D_out", "stiff_sparse",1);
+
   }
 
 

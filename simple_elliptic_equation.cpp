@@ -26,6 +26,7 @@ namespace FrameTL
   double 
   SimpleEllipticEquation<IBASIS,DIM>::D(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda) const
   {
+    //return 1;
     // return 1 << lambda.j();
     // return stiff_diagonal.get_coefficient(lambda);
     return stiff_diagonal[lambda.number()];
@@ -63,8 +64,8 @@ namespace FrameTL
 	const double coeff = f(*(frame_->get_wavelet(i)))/D(*(frame_->get_wavelet(i)));
 	if (fabs(coeff)>1e-15) {
 	  fhelp.set_coefficient(*(frame_->get_wavelet(i)), coeff);
-	  //if (i % 100 == 0)
-	  //cout << *(frame_->get_wavelet(i)) << " " << coeff << endl;
+	  if (i % 100 == 0)
+	    cout << *(frame_->get_wavelet(i)) << " " << coeff << endl;
 	}
       }
     fnorm_sqr = l2_norm_sqr(fhelp);
@@ -108,7 +109,7 @@ namespace FrameTL
 						 const typename CubeBasis<IBASIS,DIM>::Support* supp_mu) const
   {
     
-    double res = 0;
+     double res = 0;
     
     typename One_D_IntegralCache::iterator col_lb(one_d_integrals.lower_bound(lambda));
     typename One_D_IntegralCache::iterator col_it(col_lb);
@@ -216,7 +217,7 @@ namespace FrameTL
     const typename CUBEBASIS::Support* supp_mu =
       (jnu > jla) ? &(frame_->all_supports[la.number()]) : &(frame_->all_supports[nu.number()]);
 
-    const int N_Gauss = 2;
+    const int N_Gauss = 3;
     
     //#if _FRAMETL_ADAPTIVE_COMPUTATION == 1
 //     bool b = intersect_supports_simple<IBASIS,DIM,DIM>(*frame_, lambda, mu, supp_lambda, supp_mu);
@@ -442,10 +443,10 @@ namespace FrameTL
       if (exit) break;
     }
 
-#if 1
+#if 0
     return r;
 #endif
-#if 0
+#if 1
     assert(DIM == 1);
     double tmp = 1;
     Point<DIM> p1;

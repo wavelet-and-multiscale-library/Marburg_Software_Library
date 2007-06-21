@@ -53,8 +53,6 @@ using namespace FrameTL;
 using namespace MathTL;
 using namespace WaveletTL;
 
-
-
 /*!
 */
 template<class VALUE = double>
@@ -100,13 +98,16 @@ public:
   
 };
 
-
 int main()
 {
   cout << "Testing class BiharmonicEquation ..." << endl;
   
   const int DIM = 1;
+<<<<<<< test_biharmonic_equation_1D.cpp
+  int jmax = 12;
+=======
   int jmax = 10;
+>>>>>>> 1.6
 
   #ifdef ADAPTED_BASIS
   typedef AdaptedBasis<SBasis> Basis1D;
@@ -177,6 +178,7 @@ int main()
 
   Atlas<DIM,DIM> interval(charts,adj);
   cout << interval << endl;
+
 
   //finally a frame can be constructed
   //Frame1D frame(&interval, bc, bcT);

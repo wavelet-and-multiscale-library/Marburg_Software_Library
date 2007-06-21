@@ -1,3 +1,4 @@
+# define _WAVELETTL_GALERKINUTILS_VERBOSITY  1
 #include <fstream>
 #include <iostream>
 #include <time.h> 
@@ -123,7 +124,7 @@ int main()
   cout << "Testing class EllipticEquation..." << endl;
   
   const int DIM   = 1;
-  const int jmax = 3;
+  const int jmax  = 8;
 
   //typedef DSBasis<2,2> Basis1D;
   typedef PBasis<3,3> Basis1D;
@@ -136,13 +137,13 @@ int main()
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 0.8;
+  A(0,0) = 0.7;
   Point<1> b;
   b[0] = 0.;
   AffineLinearMapping<1> affineP(A,b);
   
   Matrix<double> A2(DIM,DIM);
-  A2(0,0) = 0.8;
+  A2(0,0) = 0.7;
   Point<1> b2;
   b2[0] = 1.0-A2.get_entry(0,0);
   AffineLinearMapping<1> affineP2(A2,b2);
@@ -220,7 +221,8 @@ int main()
   Singularity1D_RHS_2<double> sing1D;
   
   //PoissonBVP<DIM> poisson(&const_fun);
-  PoissonBVP<DIM> poisson(&sing1D);
+  //PoissonBVP<DIM> poisson(&sing1D);
+  PoissonBVP<DIM> poisson(&exactSolution);
   //BiharmonicBVP<DIM> biharm(&const_fun);
   //IdentityBVP<DIM> trivial_bvp(&const_fun);
   //IdentityBVP<DIM> trivial_bvp(&exactSolution);
@@ -372,7 +374,7 @@ int main()
 #endif
 	  
   
-#if 1
+#if 0
   char filename1[50];
   u.clear();
   Lambda.clear();

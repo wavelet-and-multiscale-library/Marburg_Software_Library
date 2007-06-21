@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
 
   const int DIM = 2;
 
-  const int jmax = 5;
+  const int jmax = 6;
 
   //typedef DSBasis<4,6> Basis1D;
   typedef PBasis<2,2> Basis1D;
@@ -64,12 +64,12 @@ int main(int argc, char* argv[])
 
   EvaluateFrame<Basis1D,2,2> evalObj;
 
-  //##############################  
+//   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 2.0;
+  A(0,0) = 1.7;
   A(1,1) = 1.0;
   Point<2> b;
-  b[0] = -1.;
+  b[0] = -0.7;
   b[1] = -1.;
   AffineLinearMapping<2> affineP(A,b);
 
@@ -81,7 +81,27 @@ int main(int argc, char* argv[])
   b2[1] = -1.0;
   AffineLinearMapping<2> affineP2(A2,b2);
 
-  //##############################
+//   //##############################
+//   //##############################  
+//   Matrix<double> A(DIM,DIM);
+//   A(0,0) = 1.3;
+//   A(1,1) = 1.0;
+//   Point<2> b;
+//   b[0] = -0.3;
+//   b[1] = 0.;
+//   AffineLinearMapping<2> affineP(A,b);
+
+//   Matrix<double> A2(DIM,DIM);
+//   A2(0,0) = 1.3;
+//   A2(1,1) = 1.0;
+//   Point<2> b2;
+//   b2[0] = -1.;
+//   b2[1] = 0.;
+//   AffineLinearMapping<2> affineP2(A2,b2);
+
+//   //##############################
+
+
   LinearBezierMapping bezierP(Point<2>(-1.,-1.),Point<2>(-1.,1.),
  			      Point<2>(0.,-1.), Point<2>(0.,1.));
   

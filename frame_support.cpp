@@ -174,8 +174,8 @@ namespace FrameTL
 	Point<DIM_d> b;
 	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda->a[0]*dx), a);
 	frame.atlas()->charts()[lambda.p()]->map_point(Point<DIM_d>(supp_lambda->b[0]*dx), b);
-	return (a[0] < p[0]) && (p[0] < b[0]);
-	//return (leq(a[0],p[0]) && leq(p[0],b[0]));
+	//return (a[0] < p[0]) && (p[0] < b[0]);
+	return (leq(a[0],p[0]) && leq(p[0],b[0]));
 	
       }
 

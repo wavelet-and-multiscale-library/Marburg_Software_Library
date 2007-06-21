@@ -14,11 +14,16 @@
 
 namespace FrameTL
 {
-  /*!
-  */
   template <class PROBLEM>
-  void multiplicative_Schwarz_SOLVE(const PROBLEM& P, const double epsilon,
-				    InfiniteVector<double, typename PROBLEM::Index>& u_epsilon);
+  void  multiplicative_Schwarz_SOLVE(const PROBLEM& P,  const double epsilon,
+				     InfiniteVector<double, typename PROBLEM::Index>& u_epsilon_0,
+				     InfiniteVector<double, typename PROBLEM::Index>& u_epsilon_1,
+				     InfiniteVector<double, typename PROBLEM::Index>& u_epsilon);
+//   /*!
+//   */
+//   template <class PROBLEM>
+//   void multiplicative_Schwarz_SOLVE(const PROBLEM& P, const double epsilon,
+// 				    InfiniteVector<double, typename PROBLEM::Index>& u_epsilon);
 }
 
 #include <multiplicative_Schwarz.cpp>

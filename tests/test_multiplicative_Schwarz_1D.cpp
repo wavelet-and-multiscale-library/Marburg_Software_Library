@@ -219,12 +219,12 @@ int main()
  
    bcT[1] = bound_4;
 
-   Atlas<DIM,DIM> Lshaped(charts,adj);  
-   cout << Lshaped << endl;
+   Atlas<DIM,DIM> interval(charts,adj);  
+   cout << interval << endl;
    
    //finally a frame can be constructed
    //Frame1D frame(&Lshaped, bc, bcT, jmax);
-   Frame1D frame(&Lshaped, bc, jmax);
+   Frame1D frame(&interval, bc, jmax);
    
   Vector<double> value(1);
   value[0] = 384;

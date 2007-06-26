@@ -641,4 +641,15 @@ namespace WaveletTL
           values[i] += *it * primal_evaluate(derivative, it.index(), points[i]);
     }
   }
+
+  inline
+  double
+  SBasis::evaluate(const bool primal, const unsigned int derivative, const Index& lambda, const double x) const
+  {
+    assert(primal); // only primal point evaluation is implemented
+    if (primal)
+      return primal_evaluate(derivative, lambda, x);
+    else
+      return 0.0; // not implemented
+  }
 }

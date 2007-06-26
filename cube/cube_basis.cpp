@@ -1,6 +1,7 @@
 // implementation for cube_basis.h
 
 #include <map>
+#include <numerics/gauss_data.h>
 
 namespace WaveletTL
 {
@@ -696,6 +697,18 @@ namespace WaveletTL
     
     return r;
   }
+
+  template <class IBASIS, unsigned int DIM>
+  double
+  CubeBasis<IBASIS,DIM>::evaluate(const bool primal, const unsigned int derivative, const Index& lambda, const Point<DIM> x) const
+  {
+    double value = 0.0;
+
+    for (int i = 0; i < DIM; i++) // loop through components of the tensor product
+      value *= bases_[i]->evaluate(primal, derivative, lambda, x(i));
+
+    return value;
+  }
   
   template <class IBASIS, unsigned int DIM>
   void
@@ -723,7 +736,5 @@ namespace WaveletTL
     cout << "done setting up collection of wavelet indices..." << endl;
 
   }
-
-
 
 }

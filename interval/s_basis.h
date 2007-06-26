@@ -359,6 +359,12 @@ namespace WaveletTL
     void primal_evaluate(const unsigned int derivative, const Index& lambda,
                          const Array1D<double>& points, Array1D<double>& values) const;
 
+    /*!
+      point evaluation of (derivatives) of a single primal or dual
+      generator or wavelet \psi_\lambda or \tilde\psi_\lambda
+    */
+    inline double evaluate(const bool primal, const unsigned int derivative, const Index& lambda, const double x) const;
+
 
   protected:
     //! coarsest possible level

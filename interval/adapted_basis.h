@@ -274,6 +274,13 @@ namespace WaveletTL
                          const Array1D<double>& points, Array1D<double>& values) const
     { basis_->primal_evaluate(derivative, *lambda.multi_index(), points, values); }
 
+    /*!
+      point evaluation of (derivatives) of a single primal or dual
+      generator or wavelet \psi_\lambda or \tilde\psi_\lambda
+    */
+    double evaluate(const bool primal, const unsigned int derivative, const Index& lambda, const double x) const
+    { return basis_->evaluate(primal, derivative, lambda, x); }
+
 
     /*!
       reading access to underlying multiwavelet basis

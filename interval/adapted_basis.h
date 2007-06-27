@@ -279,7 +279,7 @@ namespace WaveletTL
       generator or wavelet \psi_\lambda or \tilde\psi_\lambda
     */
     double evaluate(const bool primal, const unsigned int derivative, const Index& lambda, const double x) const
-    { return basis_->evaluate(primal, derivative, lambda, x); }
+    { return basis_->evaluate(primal, derivative, *lambda.multi_index(), x); }
 
 
     /*!

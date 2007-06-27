@@ -704,8 +704,10 @@ namespace WaveletTL
   {
     double value = 1.0;
 
-    for (int i = 0; i < DIM; i++) // loop through components of the tensor product
-      value *= bases_[i]->evaluate(primal, derivative, lambda, x(i));
+    for (unsigned int i = 0; i < DIM; i++) // loop through components of the tensor product
+      value *= bases_[i]->evaluate(primal, derivative,
+                                   typename IBASIS::Index(lambda.j(), lambda.e()[i], lambda.k()[i], bases_[i]),
+                                   x[i]);
 
     return value;
   }

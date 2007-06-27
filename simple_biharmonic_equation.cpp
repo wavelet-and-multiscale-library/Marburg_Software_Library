@@ -1,6 +1,7 @@
 // implementation for biharmonic_equation.h
 
 #include <list>
+#include <utils/array1d.h>
 #include <numerics/gauss_data.h>
 #include <algebra/sparse_matrix.h>
 #include <numerics/eigenvalues.h>
@@ -11,16 +12,16 @@
 //#include <cube/cube_support.h>
 
 using WaveletTL::CubeBasis;
+using MathTL::Array1D;
 
 namespace FrameTL
 {
-
   template <class IBASIS, unsigned int DIM>
-  SimpleBiharmonicEquation<IBASIS,DIM>::SimpleBiharmonicEquation(const BiharmonicBVP<DIM>* bih_bvp,
+  SimpleBiharmonicEquation<IBASIS,DIM>::SimpleBiharmonicEquation(const Functional<IBASIS,DIM>* rhs,
 						     const AggregatedFrame<IBASIS,DIM>* frame,
 						     const int jmax,
 						     QuadratureStrategy qstrat)
-    : bih_bvp_(bih_bvp), frame_(frame),jmax_(jmax), qstrat_(qstrat)
+    : rhs_(rhs), frame_(frame),jmax_(jmax), qstrat_(qstrat)
   {
     compute_diagonal();
     // compute_rhs(false);
@@ -350,126 +351,8 @@ template <class IBASIS, unsigned int DIM>
   double
   SimpleBiharmonicEquation<IBASIS,DIM>::f(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda) const
   {
-
-    //\int_\Omega f(Kappa(x)) \psi^\Box (x) \sqrt(\sqrt(det ((D Kappa)^T(x) (D Kappa)(x)) ))
-    //recall: \sqrt(\sqrt(...)) = Gram_factor
-
-    int N=50;
-
-
-    double r = 0;
-
-    const unsigned int p = lambda.p();
- 
-    typedef WaveletTL::CubeBasis<IBASIS,DIM> CUBEBASIS;
- 
-    // first compute supp(psi_lambda)
- 
-    typename CUBEBASIS::Support supp;
-    
-    typename CubeBasis<IBASIS,DIM>::Index lambda_c(lambda.j(),
-						   lambda.e(),
-						   lambda.k(),frame_->bases()[p]);
-
-    
-    WaveletTL::support<IBASIS,DIM>(*(frame_->bases()[p]), lambda_c, supp); 
-    const Chart<DIM>* chart = frame_->atlas()->charts()[p];
-    // setup Gauss points and weights for a composite quadrature formula:
-    const int N_Gauss = 8;
-    //const double h = ldexp(1.0, -supp.j); // granularity for the quadrature
-    const double h = 1.0 / (1 << supp.j); // granularity for the quadrature
-    FixedArray1D<Array1D<double>,DIM> gauss_points, gauss_weights, v_values;
-    for (unsigned int i = 0; i < DIM; i++) {
-      gauss_points[i].resize(N*N_Gauss*(supp.b[i]-supp.a[i]));
-      gauss_weights[i].resize(N*N_Gauss*(supp.b[i]-supp.a[i]));
-      for (int patch = supp.a[i]; patch < supp.b[i]; patch++)
-	for(int m=0;m<N;m++)
-	  for (int n = 0; n < N_Gauss; n++) {
-	    gauss_points[i][N*(patch-supp.a[i])*N_Gauss+m*N_Gauss+n]
-	      = h*(N*2*patch+1+GaussPoints[N_Gauss-1][n]+2.0*m)/(2.*N);
-	    gauss_weights[i][N*(patch-supp.a[i])*N_Gauss+m*N_Gauss+n]
-	      = h*GaussWeights[N_Gauss-1][n]/N;
-	  }
-    }
-
-    // compute the point values of the integrand (where we use that it is a tensor product)
-    for (unsigned int i = 0; i < DIM; i++) {
-       
-      WaveletTL::evaluate(*(frame_->bases()[p]->bases()[i]), 0,
-			  typename IBASIS::Index(lambda.j(),
-						 lambda.e()[i],
-						 lambda.k()[i],
-						 frame_->bases()[p]->bases()[i]),
-			  gauss_points[i], v_values[i]);
-      
-    }
-    // iterate over all points and sum up the integral shares
-    int index[DIM]; // current multiindex for the point values
-    for (unsigned int i = 0; i < DIM; i++)
-      index[i] = 0;
-    
-    Point<DIM> x;
-    Point<DIM> x_patch;
-    
-    while (true) {
-      for (unsigned int i = 0; i < DIM; i++)
-	x[i] = gauss_points[i][index[i]];
-
-      chart->map_point(x,x_patch);
-
-      double share = bih_bvp_->f(x_patch) * chart->Gram_factor(x);
-      for (unsigned int i = 0; i < DIM; i++)
-	share *= gauss_weights[i][index[i]] * v_values[i][index[i]];
-      r += share;
-
-      // "++index"
-      bool exit = false;
-      for (unsigned int i = 0; i < DIM; i++) {
-	if (index[i] ==N* N_Gauss*(supp.b[i]-supp.a[i])-1) {
-	  index[i] = 0;
-	  exit = (i == DIM-1);
-	} else {
-	  index[i]++;
-	  break;
-	}
-      }
-      if (exit) break;
-    }
-#if 0
-    return r;
-#endif
-#if 1
-    assert(DIM == 1);
-    double tmp = 1;
-    //double tmp2 = 1;
-    Point<DIM> p1;
-    p1[0] = 0.5;
-    Point<DIM> p2;
-    chart->map_point_inv(p1,p2);
-    tmp =  WaveletTL::evaluate(*(frame_->bases()[p]->bases()[0]), 0,
-			       typename IBASIS::Index(lambda.j(),
-						      lambda.e()[0],
-						      lambda.k()[0],
-						      frame_->bases()[p]->bases()[0]),
-			       p2[0]);
-    /*tmp2 =  WaveletTL::evaluate(*(frame_->bases()[p]->bases()[0]), 2,
-			       typename IBASIS::Index(lambda.j(),
-						      lambda.e()[0],
-						      lambda.k()[0],
-						      frame_->bases()[p]->bases()[0]),p2[0]);
-    */
-    //cout << "r:"<< r<<endl;
-    if(tmp !=0.0){
-      cout << "tmp:" << tmp << "lambda:" << lambda << endl;
-      cout << "r:" << r << endl;
-      cout << "D(lambda):" << D(lambda) << endl; 
-    }
-    tmp /= chart->Gram_factor(p2);
-    
-    
-  
-    return  48*tmp + r;
-#endif
+    // evaluate righthand side functional
+    return rhs_->evaluate(lambda);
   }
 
 }

@@ -182,6 +182,13 @@ namespace FrameTL
     const int degrees_of_freedom() const { return full_collection.size(); };
 
 
+    /*!
+      point evaluation of (derivatives) of a single frame generator or wavelet
+    */
+    double evaluate(const bool primal, const unsigned int derivative,
+                    const Index& lambda, const Point<DIM_m> x) const;
+
+
   protected:
     //! pointer to the underlying atlas
     const Atlas<DIM_d, DIM_m>* atlas_;

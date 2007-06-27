@@ -1,25 +1,23 @@
 // -*- c++ -*-
 
 // +--------------------------------------------------------------------+
-// | This file is part of FrameTL - the Frame Template Library      |
+// | This file is part of FrameTL - the Frame Template Library          |
 // |                                                                    |
-// | Copyright (c) 2002-2005                                            |
-// | Manuel Werner                                                      |
+// | Copyright (c) 2002-2007                                            |
+// | Manuel Werner, Andreas Schneider                                   |
 // +--------------------------------------------------------------------+
 
-#ifndef _FRAMETL_BIHARMONIC_EQUATION_H
-#define _FRAMETL_BIHARMONIC_EQUATION_H
+#ifndef _FRAMETL_SIMPLE_BIHARMONIC_EQUATION_H
+#define _FRAMETL_SIMPLE_BIHARMONIC_EQUATION_H
 
 #include <aggregated_frame.h>
-#include <numerics/bvp.h>
+#include <functional.h>
 #include <adaptive/compression.h>
-//#include <biharmonic_rhs.h>
 #include <galerkin/infinite_preconditioner.h>
-#include<index1D.h>
+#include <index1D.h>
 #include <frame_support.h>
 
 using FrameTL::AggregatedFrame;
-using MathTL::EllipticBVP;
 using WaveletTL::CompressionStrategy;
 using WaveletTL::FullyDiagonalEnergyNormPreconditioner;
 
@@ -60,9 +58,9 @@ namespace FrameTL
 
     a(u,v) = \int_Omega <Delta u(x), Delta v(x)>  dx 
      
-    and the right-hand side is
+    and the right-hand side is a functional
      
-    f(v) = \int_Omega f(x)*v(x)  dx.
+    v -> f(v).
 
     The evaluation of a(.,.) and f is possible for arguments \psi_\lambda
     which stem from an aggregated wavelet frame \Psi=\{\psi_\lambda\} of the corresponding
@@ -78,7 +76,7 @@ namespace FrameTL
     /*!
       constructor
      */
-    SimpleBiharmonicEquation(const BiharmonicBVP<DIM>* bih_bvp,
+    SimpleBiharmonicEquation(const Functional<IBASIS,DIM>* rhs,
 		       const AggregatedFrame<IBASIS,DIM>* frame,
 		       const int jmax,
 		       const QuadratureStrategy qsrtat = TrivialAffine);
@@ -105,9 +103,9 @@ namespace FrameTL
     const AggregatedFrame<IBASIS,DIM>& frame() const { return *frame_; }
 
     /*!
-      get the boundary value problem
+      get the righthand side
     */
-    const BiharmonicBVP<DIM>&  get_bvp() const { return *bih_bvp_; }
+    const Functional<IBASIS,DIM>&  get_rhs() const { return *rhs_; }
 
 
     /*!
@@ -190,19 +188,14 @@ namespace FrameTL
     */
     double F_norm() const { return sqrt(fnorm_sqr); }
 
-    /*!
-      set the boundary value problem
-    */
-    void set_bvp(const BiharmonicBVP<DIM>*);
-
 
    protected:
     
-    /*!
-      corresponding elliptic boundary value problem
-     */
-    const BiharmonicBVP<DIM>* bih_bvp_;
-    const AggregatedFrame<IBASIS,DIM>* frame_; 
+    //! corresponding righthand side
+    const Functional<IBASIS,DIM>* rhs_;
+    //! corresponding frame
+    const AggregatedFrame<IBASIS,DIM>* frame_;
+    //! maximal level to be used
     const int jmax_;
 
 
@@ -257,4 +250,4 @@ namespace FrameTL
 
 #include <simple_biharmonic_equation.cpp>
 
-#endif
+#endif // _FRAMETL_SIMPLE_BIHARMONIC_EQUATION_H

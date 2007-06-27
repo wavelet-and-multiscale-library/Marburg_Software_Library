@@ -319,4 +319,25 @@ namespace FrameTL
     return FrameIndex<IBASIS,DIM_d,DIM_m>(this, j, e, bases().size()-1, k); 
   }
 
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  double
+  AggregatedFrame<IBASIS,DIM_d,DIM_m>::evaluate(const bool primal, const unsigned int derivative,
+                                                const Index& lambda, Point<DIM_m> x) const
+  {
+    double value;
+    Point<DIM_d> p_d;
+    const Chart<DIM_d,DIM_m>* chart(atlas_->charts()[lambda.p()]);
+
+    chart->map_point_inv(x, p_d);
+    value = lifted_bases[lambda.p()]->evaluate(primal, derivative,
+                              typename CubeBasis<IBASIS,DIM_d>::Index(lambda.j(),
+                                                        lambda.e(),
+                                                        lambda.k(),
+                                                        lifted_bases[lambda.p()]),
+                              p_d);
+    value /= chart->Gram_factor(p_d);
+
+    return value;
+  }
+
 }

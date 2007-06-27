@@ -16,6 +16,7 @@
 #endif
 
 #include <simple_biharmonic_equation.h>
+#include <biharmonic_1d_testcase.h>
 #include <algebra/sparse_matrix.h>
 #include <algebra/infinite_vector.h>
 #include <numerics/iteratsolv.h>
@@ -38,7 +39,6 @@ using FrameTL::FrameIndex;
 using FrameTL::SimpleBiharmonicEquation;
 using FrameTL::EvaluateFrame;
 using FrameTL::AggregatedFrame;
-using MathTL::BiharmonicBVP;
 using MathTL::ConstantFunction;
 using MathTL::SparseMatrix;
 using MathTL::InfiniteVector;
@@ -52,65 +52,12 @@ using namespace WaveletTL;
 
 
 
-/*!
-*/
-template<class VALUE = double>
-class Singularity1D_RHS_2
-  : public Function<1, VALUE>
-{
-public:
-  Singularity1D_RHS_2() {};
-  virtual ~Singularity1D_RHS_2() {};
-  VALUE value(const Point<1>& p,
-	      const unsigned int component = 0) const
-  {
-    double x=p[0];
-    return 16*M_PI*M_PI*M_PI*M_PI*cos(2*M_PI*x)-72;
-    //return 0;
-  }
-  
-  void vector_value(const Point<1> &p,
-		    Vector<VALUE>& values) const { ; }
-  
-};
-
-/*!
-  special function with steep gradients
-  near the right end of the interval
-*/
-template<class VALUE = double>
-class Singularity1D_2
-  : public Function<1, VALUE>
-{
-public:
-  Singularity1D_2() {};
-  virtual ~Singularity1D_2() {};
-  VALUE value(const Point<1>& p,
-	      const unsigned int component = 0) const
-  {
-    //function for constant rhs
-    //return 16*(p[0]*p[0]*p[0]*p[0]-2*p[0]*p[0]*p[0]+p[0]*p[0]);
-    
-    //Non-constant function with singularity in their first order
-    double x=p[0];
-    if(x<0.5)
-      return cos(2*M_PI*x)+10*x*x*x-15*x*x*x*x-1;
-    else return (cos(2*M_PI*x)-15*(1-x)*(1-x)*(1-x)*(1-x)+10*(1-x)*(1-x)*(1-x)-1);
-
-  }
-  
-  void vector_value(const Point<1> &p,
-		    Vector<VALUE>& values) const { ; }
-  
-};
-
-
 int main()
 {
   cout << "Testing class SimpleBiharmonicEquation ..." << endl;
   
   const int DIM = 1;
-  int jmax=9;
+  int jmax=7;
 
   #ifdef ADAPTED_BASIS
   typedef AdaptedBasis<SBasis> Basis1D;
@@ -168,23 +115,27 @@ int main()
 
   bc[1] = bound_2;
 
-  Atlas<DIM,DIM> Lshaped(charts,adj);  
-  cout << Lshaped << endl;
+  Atlas<DIM,DIM> interval(charts,adj);
+  cout << interval << endl;
 
   //finally a frame can be constructed
-  //Frame1D frame(&Lshaped, bc, bcT);
-  Frame1D frame(&Lshaped, bc, jmax);
+  //Frame1D frame(&interval, bc, bcT);
+  Frame1D frame(&interval, bc, jmax);
 
+  /*
+  // constant right-hand sinde, exact solution is x^2 (1-x)^2
   Vector<double> value(1);
   value[0] = 384;
   ConstantFunction<DIM> const_fun(value);
+  Functional<Basis1D,1,1> rhs(&const_fun, &frame);
+  Polynomial<double> exactSolution(Vector<double>(5, "0 0 16 -32 16"));
+  cout << exactSolution << endl;
+  */
 
-  Singularity1D_2<double> exactSolution;
-  Singularity1D_RHS_2<double> sing1D;
-  
-  BiharmonicBVP<DIM> biharmonic(&sing1D);
+  Biharmonic1D_Solution exactSolution;
+  Biharmonic1D_RHS<Basis1D> rhs(&frame);
 
-  SimpleBiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharmonic, &frame, jmax, TrivialAffine);
+  SimpleBiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&rhs, &frame, jmax, TrivialAffine);
  
   CachedProblem<SimpleBiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 5, 1.0/0.146);
 
@@ -249,10 +200,12 @@ int main()
   double alpha_n = 0.07;
   Vector<double> resid(xk.size());
   Vector<double> help(xk.size());
-  for (int i = 0; i <30000; i++) {
+  double res = 1;
+  for (int i = 0; i < 30000 && res > 1.0e-3; i++) {
     stiff.apply(xk,help);
     resid = rh - help;
-    cout << ".loop = " << i << " " << " res = " << sqrt((resid*resid)) << endl;
+    res = sqrt((resid*resid));
+    cout << ".loop = " << i << " " << " res = " << res << endl;
     stiff.apply(resid,help);
     alpha_n = (resid * resid) * (1.0 / (resid * help));
     //cout  << alpha_n << endl;
@@ -266,7 +219,9 @@ int main()
   //CG(stiff, rh, xk, 0.0001, 1000, iter);
   //Richardson(stiff, rh, xk, 2. / lmax, 0.0001, 1000, iter);
   //Richardson(stiff, rh, xk, 0.07, 0.0001, 2000, iter);  
-  cout << "performing output..." << endl;
+  cout << "performing output ..." << endl;
+
+#endif
   
   InfiniteVector<double,Index> u;
   unsigned int i = 0;
@@ -277,8 +232,6 @@ int main()
 
   Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u, true, 11);//expand in primal basis
   Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u, exactSolution, 11);
-
-
  
   std::ofstream ofs5("approx_solution_1D_out.m");
   matlab_output(ofs5,U);
@@ -289,9 +242,6 @@ int main()
   ofs6.close();
 
   // cout << "  ... done, time needed: " << time << " seconds" << endl;
-   
-#endif
-
 
 
    return 0;

@@ -151,4 +151,69 @@ namespace WaveletTL
       }
     }
   }
+
+  bool intersect_singular_support(const SBasis& basis,
+                                  const SBasis::Index& lambda,
+                                  const int m, const int a, const int b,
+                                  int& j, int& k1, int& k2)
+  {
+    // check if there is a non-trivial intersection and compute it
+    bool flag;
+    if (!(flag = intersect_supports(basis, lambda, m, a, b, j, k1, k2)))
+      return false;
+
+    // now we know \psi_\lambda and 2^{-m}[a, b] have non-trivial intersection
+
+    const int j_lambda = lambda.j() + lambda.e();
+    if (j_lambda < m) {
+      // granularity of support intersection is m
+      return flag;
+    }
+    else {
+      // Here j_lambda >= m, i.e., the support of psi_lambda determines the
+      // granularity of the support intersection
+
+      // compute support of \psi\lambda
+      int k1_lambda, k2_lambda;
+      support(basis, lambda, k1_lambda, k2_lambda);
+
+      //
+      const int delta_j = (1<<(j_lambda - m));
+      const int a_help = delta_j * a;
+      const int b_help = delta_j * b;
+      if ( ( k1_lambda >= a_help && k2_lambda <= b_help ) && k1_lambda+delta_j > k2_lambda)
+        return false;
+      else {
+        j = j_lambda;
+        k1 = std::max(k1_lambda, a_help);
+        k2 = std::min(k2_lambda, b_help);
+        return true;
+      }
+    }
+    
+  }
+
+  bool intersect_singular_support(const SBasis& basis,
+                                  const SBasis::Index& lambda,
+                                  const SBasis::Index& nu,
+                                  int& j, int& k1, int& k2)
+  {
+    const int j_lambda = lambda.j() + lambda.e();
+    const int j_nu = nu.j() + nu.e();
+
+    if (j_lambda < j_nu)
+      return intersect_singular_support(basis, nu, lambda, j, k1, k2);
+    
+    int k1_nu, k2_nu;
+    support(basis, nu, k1_nu, k2_nu);
+    return intersect_singular_support(basis, lambda, j_nu, k1_nu, k2_nu, j, k1, k2);
+  }
+
+  bool intersect_singular_support(const SBasis& basis,
+                                  const SBasis::Index& lambda,
+                                  const SBasis::Index& nu)
+  {
+    int j, k1, k2;
+    return intersect_singular_support(basis, lambda, nu, j, k1, k2);
+  }
 }

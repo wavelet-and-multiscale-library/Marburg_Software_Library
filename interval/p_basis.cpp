@@ -2675,4 +2675,12 @@ namespace WaveletTL
     }
   }
 
+  template <int d, int dT>
+  inline
+  double
+  PBasis<d, dT>::evaluate(const bool primal, const unsigned int derivative, const Index& lambda, const double x) const
+  {
+    return WaveletTL::evaluate(*this, derivative, lambda, x);
+  }
+
 }

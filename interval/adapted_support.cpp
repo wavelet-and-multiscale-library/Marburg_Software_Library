@@ -85,4 +85,20 @@ namespace WaveletTL
     }
   }
 
+  template <class IBASIS>
+  bool intersect_singular_support(const AdaptedBasis<IBASIS>& basis,
+                                  const typename AdaptedBasis<IBASIS>::Index& lambda,
+                                  const typename AdaptedBasis<IBASIS>::Index& nu)
+  {
+    return intersect_singular_support(*basis.multi_basis(), *lambda.multi_index(), *nu.multi_index());
+  }
+
+  template <class IBASIS>
+  bool intersect_singular_support(const AdaptedBasis<IBASIS>& basis,
+                                  const typename AdaptedBasis<IBASIS>::Index& lambda,
+                                  const typename AdaptedBasis<IBASIS>::Index& nu,
+                                  int& j, int& k1, int& k2)
+  {
+    return intersect_singular_support(*basis.multi_basis(), *lambda.multi_index(), *nu.multi_index(), j, k1, k2);
+  }
 }

@@ -57,6 +57,19 @@ namespace WaveletTL
 			     Vector<double>& w,
 			     const int jmax = 999,
 			     const CompressionStrategy strategy = St04a);
+  /*
+   */
+  template <class PROBLEM>
+  void add_compressed_column(const PROBLEM& P,
+			     const int p,
+			     const double factor,
+			     const typename PROBLEM::Index& lambda,
+			     const int J,
+			     //InfiniteVector<double, typename PROBLEM::Index>& w,
+			     Vector<double>& w,
+			     const int jmax = 999,
+			     const CompressionStrategy strategy = St04a);
+
 }
 
 #include <adaptive/compression.cpp>

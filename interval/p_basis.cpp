@@ -190,7 +190,8 @@ namespace WaveletTL
     // choose j0 s.th. the supports of the dual boundary generators do not overlap
     // (at the end of the setup, j0 may be reduced by one, see below)
     j0_ = (int) ceil(log(ell2T<d,dT>()-ell1T<d,dT>()+std::max(s0,s1)+1.-d)/M_LN2+1);
-    //j0_ = 5;
+    //cout << "minLev = " << j0_ << endl;
+    //j0_ = 6;
 #else
     // choose j0 s.th. the supports of the primal boundary generators do not overlap
     // the supports of the dual boundary generators from the other endpoint
@@ -921,6 +922,7 @@ namespace WaveletTL
     Mj0T_t = transpose(Mj0T);
     Mj1_t  = transpose(Mj1);
     Mj1T_t = transpose(Mj1T);
+    cout << "minLev = " << j0_ << endl;
   }
 
   template <int d, int dT>

@@ -57,6 +57,17 @@ namespace WaveletTL
 	     InfiniteVector<double, typename PROBLEM::Index>& w,
 	     const int jmax = 99,
 	     const CompressionStrategy strategy = St04a);
+  /*
+   */
+  template <class PROBLEM>
+  void APPLY(const PROBLEM& P,
+	     const int p,
+	     const InfiniteVector<double, typename PROBLEM::Index>& v,
+	     const double eta,
+	     InfiniteVector<double, typename PROBLEM::Index>& w,
+	     const int jmax = 99,
+	     const CompressionStrategy strategy = St04a);
+
 
   template <class PROBLEM>
   void APPLY_TEST(const PROBLEM& P,

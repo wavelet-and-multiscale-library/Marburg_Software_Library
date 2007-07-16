@@ -1,4 +1,9 @@
-#define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
+#define OVERLAP 0.7
+
+#define SPARSE
+//#define FULL
+#define ONE_D
 
 #include <iostream>
 #include <time.h> 
@@ -19,7 +24,8 @@
 #include <frame_support.h>
 #include <frame_index.h>
 //#include <steepest_descent.h>
-#include <multiplicative_Schwarz.h>
+#include <adaptive_multiplicative_Schwarz.h>
+//#include <multiplicative_Schwarz.h>
 //#include <additive_Schwarz.h>
 //#include <steepest_descent_basis.h>
 //#include <richardson_CDD2.h>
@@ -98,6 +104,9 @@ public:
   
 };
 
+
+
+
 int main()
 {
 
@@ -106,7 +115,7 @@ int main()
   
   const int DIM = 1;
 
-  const int jmax = 9;
+  const int jmax = 12;
   
   const int d = 3, dT = 3;
 
@@ -121,13 +130,13 @@ int main()
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 0.9;
+  A(0,0) = OVERLAP;
   Point<1> b;
   b[0] = 0.;
   AffineLinearMapping<1> affineP(A,b);
   
   Matrix<double> A2(DIM,DIM);
-  A2(0,0) = 0.9;
+  A2(0,0) = OVERLAP;
   Point<1> b2;
   b2[0] = 1-A2.get_entry(0,0);
   AffineLinearMapping<1> affineP2(A2,b2);
@@ -191,13 +200,13 @@ int main()
   //primal boundary conditions for first patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_1;
   bound_1[0] = 1;
-  bound_1[1] = 2;
+  bound_1[1] = d-1;
   
   bc[0] = bound_1;
   
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
-  bound_2[0] = 2;
+  bound_2[0] = d-1;
   bound_2[1] = 1;
   
   bc[1] = bound_2;
@@ -245,7 +254,7 @@ int main()
   //BiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharmonic, &frame, jmax, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
-  //  CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 4.19, 1.0/0.146);
+  //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 4.19, 1.0/0.146);
 
 
 //   // (d,dT) = (3,5)
@@ -255,7 +264,8 @@ int main()
 //   discrete_poisson.set_Ainv(1.0/0.146);
 
   // (d,dT) = (3,5)
-  CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.6548, 1.0/0.146);
+  CachedProblemLocal<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.6548, 1.0/0.146);
+  //CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.6548, 1.0/0.146);
   discrete_poisson.set_norm_A(3.6548);
   //optimistic guess:
   discrete_poisson.set_Ainv(1.0/0.146);
@@ -264,113 +274,78 @@ int main()
 
   const double epsilon = 0.00005;
 
-  InfiniteVector<double, Index> u_epsilon0;
-  InfiniteVector<double, Index> u_epsilon1;
-  InfiniteVector<double, Index> u_epsilon;
+  Array1D<InfiniteVector<double, Index> > approximations(frame.n_p()+1);
   
-
-#if 0
-  
-  //la = (5,(1),0,(23))
-  //nu = (4,(0),1,(4))
-
-  //d=dt=3
-  MultiIndex<unsigned int,1> e1;
-  e1[0] = 1;
-  MultiIndex<int,1> k1;
-  k1[0] = 23;
-
-  MultiIndex<unsigned int,1> e2;
-  e2[0] = 0;
-  MultiIndex<int,1> k2;
-  k2[0] = 4;
-
-  Index ind_1(&frame, 5, e1, 0, k1);
-  Index ind_2(&frame, 4, e2, 1, k2);
- 
-  //d=dt=2
-//   MultiIndex<unsigned int,1> e1;
-//   e1[0] = 1;
-//   MultiIndex<int,1> k1;
-//   k1[0] = 11;
-
-//   MultiIndex<unsigned int,1> e2;
-//   e2[0] = 0;
-//   MultiIndex<int,1> k2;
-//   k2[0] = 4;
-
-//   Index ind_1(&frame, 6, e1, 1, k1);
-//   Index ind_2(&frame, 3, e2, 0, k2);
-
-  map<double,double> integral_values;
-
-  cout.precision(12);
-
-  for (unsigned int i = 0; i < 300; i++) {
-    double d = discrete_poisson.a_quad(ind_1, ind_2, 2, i+1);
-    cout << "Result = " << d << endl;
-    integral_values[i+1] = fabs(d);
-  }
-
-  std::ofstream os3("integral_values.m");
-  matlab_output(integral_values,os3);
-  os3.close();
-#endif
-
   clock_t tstart, tend;
   double time;
   tstart = clock();
-//   for (Index ind = FrameTL::first_generator<Basis1D,1,1,Frame1D>(&frame, frame.j0());
-//        ind <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+2); ++ind)
-//     {
-//       cout << ind << endl;
-//     }
 
-  multiplicative_Schwarz_SOLVE(problem, epsilon, u_epsilon0, u_epsilon1, u_epsilon);
-  //additive_Schwarz_SOLVE(problem, epsilon, u_epsilon);
-  //steepest_descent_SOLVE(problem, epsilon, u_epsilon);
-  //  steepest_descent_SOLVE_basis(problem, epsilon, u_epsilon);
-  //richardson_SOLVE_CDD2(problem, epsilon, u_epsilon);
-  //CDD1_SOLVE(problem, epsilon, u_epsilon, 7, CDD1);
+  //multiplicative_Schwarz_SOLVE(problem, epsilon, u_epsilon0, u_epsilon1, u_epsilon);
+  adaptive_multiplicative_Schwarz_SOLVE(problem, epsilon, approximations);
 
-  //steepest_descent_SOLVE(discrete_poisson, epsilon, u_epsilon);
 
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
 
-  cout << "steepest descent done" << endl;
+  cout << "adaptive multiplicative Schwarz done, generating output..." << endl;
 
-  u_epsilon0.scale(&discrete_poisson,-1);
-  u_epsilon1.scale(&discrete_poisson,-1);
-  u_epsilon.scale(&discrete_poisson,-1);
-
+ 
+  for (int i = 0; i <= frame.n_p(); i++)
+    approximations[i].scale(&discrete_poisson,-1);
+  
   EvaluateFrame<Basis1D,1,1> evalObj;
 
-  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u_epsilon0, true, 10);//expand in primal basis
-  Array1D<SampledMapping<1> > U1 = evalObj.evaluate(frame, u_epsilon1, true, 10);//expand in primal basis
-  Array1D<SampledMapping<1> > U2 = evalObj.evaluate(frame, u_epsilon, true, 10);//expand in primal basis
-  cout << "...finished plotting approximate solution" << endl;
-  Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u_epsilon, exactSolution1D, 10);
-  cout << "...finished plotting error" << endl;
+  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, approximations[frame.n_p()], true, 10);//expand in primal basis
+  cout << "...finished plotting global approximate solution" << endl;
+  Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, approximations[frame.n_p()], exactSolution1D, 12);
+  cout << "...finished plotting global error" << endl;
+
+  char filename1[50];
+  sprintf(filename1, "%s%d%s%d%s", "approx1D_global_d", d, "_dT", dT, ".m");
+  std::ofstream ofs(filename1);
+  matlab_output(ofs,U);
+  ofs.close();
+
+  char filename2[50];
+  sprintf(filename2, "%s%d%s%d%s", "error1D_global_d", d, "_dT", dT, ".m");
+  std::ofstream ofs1(filename2);
+  matlab_output(ofs1,Error);
+  ofs1.close();
+
+
+  for (int i = 0; i < frame.n_p(); i++) {
+    cout << "plotting local approximation on patch " << i << endl;
+
+    char filename3[50];
+    sprintf(filename3, "%s%d%s%d%s%d%s", "approx1D_local_on_patch_" , i , "_d" , d ,  "_dT", dT, ".m");
+
+    U = evalObj.evaluate(frame, approximations[i], true, 10);//expand in primal basis
+    std::ofstream ofsloc(filename3);
+    matlab_output(ofsloc,U);
+    ofsloc.close();
+  }
+
+  typedef Basis1D::Index Index1D;
+
+  FixedArray1D<InfiniteVector<double, Index1D>, 2> indices;
+ 
+  InfiniteVector<double, Index>::const_iterator it = approximations[frame.n_p()].begin();
+  for (; it!= approximations[frame.n_p()].end(); ++it) {
+    //cout << *it << endl;
+    Index ind(it.index());
+    //cout << "level = " << ind.j() << endl;
+    indices[ind.p()].set_coefficient(Index1D(ind.j(),ind.e()[0],ind.k()[0],
+					     frame.bases()[0]->bases()[0]), *it);
   
-  std::ofstream ofs5("approx_sol_mult_schw_1D_out0.m");
-  matlab_output(ofs5,U);
-  ofs5.close();
+    //cout << log10(fabs(*it)) << endl;
+  }
 
-  std::ofstream ofs6("approx_sol_mult_schw_1D_out1.m");
-  matlab_output(ofs6,U1);
-  ofs6.close();
+  std::ofstream ofs7("indices_patch_0.m");
+  WaveletTL::plot_indices<Basis1D>(frame.bases()[0]->bases()[0], indices[0], 13, ofs7, "jet", true, -16);
 
-  std::ofstream ofs7("approx_sol_mult_schw_1D_out_global.m");
-  matlab_output(ofs7,U2);
-  ofs6.close();
+  std::ofstream ofs8("indices_patch_1.m");
+  WaveletTL::plot_indices<Basis1D>(frame.bases()[1]->bases()[0], indices[1], 13, ofs8, "jet", true, -16);
 
-
-  std::ofstream ofs8("error_mult_schw_1D_out.m");
-  matlab_output(ofs8,Error);
-  ofs8.close();
   return 0;
-
-
 }

@@ -123,6 +123,20 @@ namespace FrameTL
 			     std::list<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& intersecting);
 
   /*!
+    For a given wavelet frame element \psi_\lambda, compute all generators/wavelets
+    \psi_\nu with level |\nu|=j, such that the respective supports
+    have a nontrivial intersection
+  */
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  void intersecting_wavelets(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+			     const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+			     const int p,
+			     const int j, const bool generators,
+			     std::list<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& intersecting);
+
+
+
+  /*!
     Decide whether the support of a given (primal) generator/wavelet \psi_\lambda
     intersects the singular support of another (primal) generator/wavelet \psi_\nu.
   */

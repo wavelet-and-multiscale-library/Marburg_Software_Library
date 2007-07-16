@@ -248,7 +248,7 @@
      if (num_ > -1)
        ++num_;
      
-     const unsigned int num_patches = (frame_->bases()).size();
+     const int num_patches = (frame_->bases()).size();
      assert(0 <= p_ && p_ < num_patches);
 
      //bool eplusplus = false;
@@ -393,7 +393,7 @@
 
     // now we are on the right level and on the right type.
     // next we have to go to right patch
-    for (unsigned int p = 0; p < p_ ; p++) {
+    for (int p = 0; p < p_ ; p++) {
       int tmp = 1;
       for (unsigned int i = 0; i < DIM_d; i++) {
 	if (e_[i] == 0)

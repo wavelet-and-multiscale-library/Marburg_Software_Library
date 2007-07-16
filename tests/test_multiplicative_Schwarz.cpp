@@ -1,4 +1,10 @@
-#define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
+
+#define OVERLAP 1.
+
+//#define SPARSE
+#define FULL
+#define TWO_D
 
 #include <fstream>
 #include <iostream>
@@ -18,7 +24,8 @@
 #include <numerics/corner_singularity.h>
 #include <frame_support.h>
 #include <frame_index.h>
-#include <multiplicative_Schwarz.h>
+#include <adaptive_multiplicative_Schwarz.h>
+//#include <multiplicative_Schwarz.h>
 //#include <additive_Schwarz.h>
 //#include <additive_Schwarz_SD.h>
 #include <galerkin/cached_problem.h>
@@ -54,22 +61,22 @@ int main(int argc, char* argv[])
 
   const int DIM = 2;
 
-  const int jmax = 6;
+  const int jmax = 5;
+  
+  const int d = 3, dT = 3;
 
-  //typedef DSBasis<4,6> Basis1D;
-  typedef PBasis<2,2> Basis1D;
+  //typedef DSBasis<d,dT> Basis1D;
+  typedef PBasis<d,dT> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
   typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
 
-  EvaluateFrame<Basis1D,2,2> evalObj;
-
 //   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 1.7;
+  A(0,0) = 1. + OVERLAP;
   A(1,1) = 1.0;
   Point<2> b;
-  b[0] = -0.7;
+  b[0] = -OVERLAP;
   b[1] = -1.;
   AffineLinearMapping<2> affineP(A,b);
 
@@ -81,43 +88,13 @@ int main(int argc, char* argv[])
   b2[1] = -1.0;
   AffineLinearMapping<2> affineP2(A2,b2);
 
-//   //##############################
-//   //##############################  
-//   Matrix<double> A(DIM,DIM);
-//   A(0,0) = 1.3;
-//   A(1,1) = 1.0;
-//   Point<2> b;
-//   b[0] = -0.3;
-//   b[1] = 0.;
-//   AffineLinearMapping<2> affineP(A,b);
 
-//   Matrix<double> A2(DIM,DIM);
-//   A2(0,0) = 1.3;
-//   A2(1,1) = 1.0;
-//   Point<2> b2;
-//   b2[0] = -1.;
-//   b2[1] = 0.;
-//   AffineLinearMapping<2> affineP2(A2,b2);
-
-//   //##############################
-
-
-  LinearBezierMapping bezierP(Point<2>(-1.,-1.),Point<2>(-1.,1.),
- 			      Point<2>(0.,-1.), Point<2>(0.,1.));
+//   LinearBezierMapping bezierP(Point<2>(-1.,-1.),Point<2>(-1.,1.),
+//  			      Point<2>(0.,-1.), Point<2>(0.,1.));
   
-  LinearBezierMapping bezierP2(Point<2>(-1.,-1.),Point<2>(-1.,0.),
-			       Point<2>(1.,-1.), Point<2>(1.,0.));
+//   LinearBezierMapping bezierP2(Point<2>(-1.,-1.),Point<2>(-1.,0.),
+// 			       Point<2>(1.,-1.), Point<2>(1.,0.));
  
-
-  FixedArray1D<double,2> A3;
-  A3[0] = 1.;
-  A3[1] = 2.;
-  SimpleAffineLinearMapping<2> simpleaffine1(A3,b);
-  
-  FixedArray1D<double,2> A4;
-  A4[0] = 2.;
-  A4[1] = 1.;
-  SimpleAffineLinearMapping<2> simpleaffine2(A4,b2);
 
   //##############################
   Array1D<Chart<DIM,DIM>* > charts(2);
@@ -140,17 +117,17 @@ int main(int argc, char* argv[])
 
   //primal boundary conditions for first patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_1;
-  bound_1[0] = 1;
+  bound_1[0] = 1;//2
   bound_1[1] = 1;
   bound_1[2] = 1;
-  bound_1[3] = 1;//2;
+  bound_1[3] = 2;//2;
 
   bc[0] = bound_1;
 
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
   bound_2[0] = 1;
-  bound_2[1] = 1;//2;
+  bound_2[1] = 2;//2;
   bound_2[2] = 1;
   bound_2[3] = 1;
 
@@ -239,7 +216,8 @@ int main(int argc, char* argv[])
 
   // (d,dT) = (3,5)
   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 8.3898, 1.0/0.146);
-  CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 8.3898, 1.0/0.146);
+  //CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 8.3898, 1.0/0.146);
+  CachedProblemLocal<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 8.3898, 1.0/0.146);
   discrete_poisson.set_norm_A(8.3898);
   // optimistic guess:
   discrete_poisson.set_Ainv(1.0/0.146);
@@ -259,8 +237,7 @@ int main(int argc, char* argv[])
 
   const double epsilon = 0.01;
 
-  InfiniteVector<double, Index> u_epsilon;
-
+  Array1D<InfiniteVector<double, Index> > approximations(frame.n_p()+1);
 
 //   set<Index> Lambda;
 //   for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
@@ -274,9 +251,7 @@ int main(int argc, char* argv[])
 //   WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
 
 
-  multiplicative_Schwarz_SOLVE(problem, epsilon, u_epsilon);
-  //additive_Schwarz_SOLVE(problem, epsilon, u_epsilon);
-  //additive_Schwarz_SD_SOLVE(problem, epsilon, u_epsilon);
+  adaptive_multiplicative_Schwarz_SOLVE(problem, epsilon, approximations);
 
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
@@ -284,27 +259,44 @@ int main(int argc, char* argv[])
 
   cout << "algorithm done" << endl;
 
-  
-  u_epsilon.scale(&discrete_poisson,-1);
-  cout << "plotting approximate solution" << endl;
-  Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u_epsilon, true, 6);//expand in primal basis
-  
+  cout << "adaptive multiplicative Schwarz done, generating output..." << endl;
  
-  cout << "plotting pointwise error" << endl;
-  Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(frame, u_epsilon, sing2D, 6);
+  for (int i = 0; i <= frame.n_p(); i++)
+    approximations[i].scale(&discrete_poisson,-1);
+  
+  EvaluateFrame<Basis1D,2,2> evalObj;
+
+  Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, approximations[frame.n_p()], true, 5);//expand in primal basis
+  cout << "...finished plotting global approximate solution" << endl;
+  Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(frame, approximations[frame.n_p()], sing2D, 5);
+  cout << "...finished plotting global error" << endl;
+
+  char filename1[50];
+  sprintf(filename1, "%s%d%s%d%s", "approx2D_global_d", d, "_dT", dT, ".m");
+  std::ofstream ofs(filename1);
+  matlab_output(ofs,U);
+  ofs.close();
+
+  char filename2[50];
+  sprintf(filename2, "%s%d%s%d%s", "error2D_global_d", d, "_dT", dT, ".m");
+  std::ofstream ofs1(filename2);
+  matlab_output(ofs1,Error);
+  ofs1.close();
 
 
+  for (int i = 0; i < frame.n_p(); i++) {
+    cout << "plotting local approximation on patch " << i << endl;
 
-  std::ofstream ofs5("approx_sol_add_schwarz_2D_out.m");
-  matlab_output(ofs5,U);
-  ofs5.close();
+    char filename3[50];
+    sprintf(filename3, "%s%d%s%d%s%d%s", "approx2D_local_on_patch_" , i , "_d" , d ,  "_dT", dT, ".m");
 
-  std::ofstream ofs6("error_add_schwarz_2D_out.m");
-  matlab_output(ofs6,Error);
-  ofs6.close();
-
-  //  problem.add_level(frame.first_generator(3),u_epsilon,3,1.);
-
+    U = evalObj.evaluate(frame, approximations[i], true, 5);//expand in primal basis
+    std::ofstream ofsloc(filename3);
+    matlab_output(ofsloc,U);
+    ofsloc.close();
+  
+  }
   return 0;
 
 }
+

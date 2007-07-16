@@ -133,7 +133,7 @@ namespace FrameTL
     const translation_type& k() const { return k_; }
 
     //! access to patchnumber
-    const unsigned int p() const { return p_; }
+    const int p() const { return p_; }
 
     const int number() const { return num_; }
 
@@ -165,7 +165,7 @@ namespace FrameTL
     /*!
       patchnumber
      */
-    unsigned int p_;
+    int p_;
 
     //! translation
     //MultiIndex<int,DIM_d> k_;

@@ -957,6 +957,54 @@ namespace FrameTL
 #endif
 
   }
+
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  inline
+  void intersecting_wavelets_on_patch (const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+				       const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+				       const int p,
+				       const int j, const bool generators,
+				       std::list<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& intersecting)
+  {
+    //intersecting.erase(intersecting.begin(),intersecting.end());
+
+    typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> Frame;
+    typedef typename Frame::Index Index;
+
+    typedef typename CubeBasis<IBASIS,DIM_d>::Index CubeIndex;
+
+    const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda = &((frame.all_supports)[lambda.number()]);
+
+#if 1
+    std::list<typename Frame::Index> intersect_diff;
+
+    const Array1D<Array1D<Index> >* full_collection_levelwise = frame.get_full_collection_levelwise();
+
+    if ( generators ) {
+      for (unsigned int i = 0; i < (*full_collection_levelwise)[0].size(); i++) {
+	const Index* ind = &((*full_collection_levelwise)[0][i]);
+	const typename CubeBasis<IBASIS,DIM_d>::Support* supp_ind = &((frame.all_supports)[ind->number()]);
+	if ( (ind->p() == p) && 
+	    intersect_supports_simple(frame, lambda, *ind, supp_lambda, supp_ind) ){
+	  intersecting.push_back(*ind);
+	}
+      }
+    }
+    else {
+      for (unsigned int i = 0; i < (*full_collection_levelwise)[j-frame.j0()+1].size(); i++) {
+	const Index* ind = &((*full_collection_levelwise)[j-frame.j0()+1][i]);
+	const typename CubeBasis<IBASIS,DIM_d>::Support* supp_ind = &((frame.all_supports)[ind->number()]);
+	if ( (ind->p() == p)  && 
+	    intersect_supports_simple(frame, lambda, *ind, supp_lambda, supp_ind) ){
+	  intersecting.push_back(*ind);
+	}
+      }
+    }
+#endif
+
+  }
+
+
   
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   inline

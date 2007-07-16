@@ -160,7 +160,7 @@ namespace FrameTL
       Index last;
       if (j == j0_-1) {
 	// determine how many functions there are
-	for (unsigned int p = 0; p < n_p(); p++) {
+	for (int p = 0; p < n_p(); p++) {
 	  int tmp = 1;
 	  for (unsigned int i = 0; i < DIM_d; i++) {
 	    tmp *= bases()[p]->bases()[i]->Deltasize(j0_);
@@ -175,7 +175,7 @@ namespace FrameTL
       else {
 	int degrees_of_freedom_on_lev_min_1 = 0;
 	// determine how many functions there are
-	for (unsigned int p = 0; p < n_p(); p++) {
+	for (int p = 0; p < n_p(); p++) {
 	  int tmp = 1;
 	  int tmp2 = 1;
 	  for (unsigned int i = 0; i < DIM_d; i++) {

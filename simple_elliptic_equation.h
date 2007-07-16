@@ -197,6 +197,15 @@ namespace FrameTL
 	     typename AggregatedFrame<IBASIS,DIM>::Index>& coeffs) const;
 
     /*!
+      approximate the wavelet coefficient set of the preconditioned right-hand side F restricted
+      to patch p within a prescribed \ell_2 error tolerance
+    */
+    void RHS(const double eta, const int p,
+	     InfiniteVector<double, 
+	     typename AggregatedFrame<IBASIS,DIM>::Index>& coeffs) const;
+
+
+    /*!
       compute (or estimate) ||F||_2
     */
     double F_norm() const { return sqrt(fnorm_sqr); }
@@ -262,6 +271,10 @@ namespace FrameTL
     // right-hand side coefficients on a fine level, sorted by modulus
     Array1D<std::pair<typename AggregatedFrame<IBASIS,DIM>::Index,double> > fcoeffs;
 
+    // patchwise right-hand side coefficients on a fine level, sorted by modulus
+    Array1D<Array1D<std::pair<typename AggregatedFrame<IBASIS,DIM>::Index,double> > > fcoeffs_patch;
+
+
     //     // right-hand side coefficients on a fine level, sorted by modulus
     //     InfiniteVector<double,typename AggregatedFrame<IBASIS,DIM>::Index> stiff_diagonal;
     
@@ -272,7 +285,7 @@ namespace FrameTL
 
     // (squared) \ell_2 norm of the precomputed right-hand side
     double fnorm_sqr;
-
+    Array1D<double> fnorms_sqr_patch;
 
     // reminder: The keyword mutable can only be applied to non-static
     // and non-const data members of a class. If a data member is declared mutable,

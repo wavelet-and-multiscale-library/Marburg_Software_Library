@@ -125,7 +125,7 @@ namespace FrameTL
     /*!
       number of patches
      */
-    const unsigned int n_p() const { return lifted_bases.size(); }
+    const int n_p() const { return lifted_bases.size(); }
 
     /*!
       access to underlying atlas

@@ -131,7 +131,7 @@ namespace FrameTL
 
     Array1D<SampledMapping<1> > result(frame.n_p());
 
-    for (unsigned int i = 0; i < frame.n_p(); i++) {      
+    for (int i = 0; i < frame.n_p(); i++) {      
       result[i] = SampledMapping<1>(*(frame.atlas()->charts()[i]),resolution);// all zero
     }
 
@@ -139,7 +139,7 @@ namespace FrameTL
     for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
  	  itend(coeffs.end()); it != itend; ++it) {
      
-      for (unsigned int i = 0; i < frame.n_p(); i++) {
+      for (int i = 0; i < frame.n_p(); i++) {
 	if ( i == it.index().p()) {
 	  result[i].add(*it, evaluate(frame, it.index(), primal, resolution));
 	}
@@ -164,7 +164,7 @@ namespace FrameTL
 
     result = evaluate(frame, coeffs, true, resolution);
 
-    for (unsigned int i = 0; i < frame.n_p(); i++) {
+    for (int i = 0; i < frame.n_p(); i++) {
       result[i].add(-1.,SampledMapping<1>(result[i],f)); // SampledMapping<1> extends Grid<1> --> all fine
     }
     return result;
@@ -339,7 +339,7 @@ namespace FrameTL
 
     Array1D<SampledMapping<2> > result(frame.n_p());
 
-    for (unsigned int i = 0; i < frame.n_p(); i++) {      
+    for (int i = 0; i < frame.n_p(); i++) {      
       result[i] = SampledMapping<2>(*(frame.atlas()->charts()[i]),resolution);// all zero
     }
 
@@ -347,7 +347,7 @@ namespace FrameTL
     for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
  	  itend(coeffs.end()); it != itend; ++it) {
 
-      for (unsigned int i = 0; i < frame.n_p(); i++) {
+      for (int i = 0; i < frame.n_p(); i++) {
 	if ( i == it.index().p()) {
 	  result[i].add(*it, evaluate(frame, it.index(), primal, resolution));
 	}
@@ -372,7 +372,7 @@ namespace FrameTL
 
     result = evaluate(frame, coeffs, true, resolution);
 
-    for (unsigned int i = 0; i < frame.n_p(); i++) {
+    for (int i = 0; i < frame.n_p(); i++) {
       result[i].add(-1.,SampledMapping<2>(result[i],f)); // SampledMapping<2> extends Grid<2> --> all fine
     }
     return result;

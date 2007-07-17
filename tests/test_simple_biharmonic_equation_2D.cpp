@@ -1,11 +1,38 @@
+#define MAX_LOOPS 10000
+
+#define BASIS_S
+
+//#define USED_SAVED_RHS
+#define SAVE_RHS
+
+#define RHS_QUADRATURE_GRANULARITY 10
+
 #include <fstream>
 #include <iostream>
 #include <time.h> 
+
+#ifdef BASIS_DS
 #include <interval/ds_basis.h>
+#define BASIS_NAME "ds"
+#endif
+#ifdef BASIS_P
 #include <interval/p_basis.h>
+#include <interval/p_support.h>
+#include <interval/p_evaluate.h>
+#define BASIS_NAME "p"
+#endif
+#ifdef BASIS_S
+#include <interval/s_basis.h>
+#include <interval/s_support.h>
+#include <interval/interval_evaluate.h>
+#include <interval/adapted_basis.h>
+#include <interval/adapted_support.h>
+#define BASIS_NAME "s"
+#endif
+
 #include <numerics/corner_singularity_biharmonic.h>
-//#include <elliptic_equation.h>
 #include <simple_biharmonic_equation.h>
+
 #include <algebra/sparse_matrix.h>
 #include <algebra/infinite_vector.h>
 #include <numerics/iteratsolv.h>
@@ -27,8 +54,6 @@ using FrameTL::EvaluateFrame;
 //using FrameTL::EllipticEquation;
 using FrameTL::SimpleBiharmonicEquation;
 using FrameTL::AggregatedFrame;
-using MathTL::EllipticBVP;
-using MathTL::PoissonBVP;
 using MathTL::ConstantFunction;
 using MathTL::CornerSingularityBiharmonicRHS;
 using MathTL::SparseMatrix;
@@ -44,43 +69,56 @@ using namespace WaveletTL;
 //#define TWO_DIMENSIONS
 
 template <class C>
-  void Rhs_output (const Vector<C> v) 
+  void Rhs_output (const Vector<C> v, const int jmax) 
   {
 
     SparseMatrix<C> S = SparseMatrix<C>(v.size());
 
-    for(int i=0; i< v.size(); i++)
+    for(unsigned int i=0; i< v.size(); i++)
       S.set_entry( 0, i, v[i]);
 
-    S.matlab_output("Rhs_2D_jmax6_b3_mod", "Matrix", 1);
+    ostringstream filename;
+    filename << "Rhs_2D_" << BASIS_NAME << "_jmax" << jmax << "_N" << RHS_QUADRATURE_GRANULARITY << "_out";
+    S.matlab_output(filename.str().c_str(), "Matrix", 1);
  
   }
   
   template <class C>
-  void Rhs_input(Vector<C> &v)
+  void Rhs_input(Vector<C> &v, const int jmax)
   {
     SparseMatrix<C> S;
-    S.matlab_input("Rhs_2D_jmax6_b3_mod");
+    ostringstream filename;
+    filename << "Rhs_2D_" << BASIS_NAME << "_jmax" << jmax << "_N" << RHS_QUADRATURE_GRANULARITY << "_out";
+    S.matlab_input(filename.str().c_str());
     v.resize(S.row_dimension());
-    for(int i=0; i< S.row_dimension(); i++)
-     v[i] =S.get_entry( 0, i);
+    for(unsigned int i=0; i< S.row_dimension(); i++)
+     v[i] = S.get_entry( 0, i);
     
   }
 
 int main()
 {
   
-  cout << "Testing class BiharmonicEquation..." << endl;
+  cout << "Testing class SimpleBiharmonicEquation in 2D ..." << endl;
   
   const int DIM = 2;
-  const int jmax = 6; 
-  //typedef DSBasis<4,6> Basis1D;
-  typedef PBasis<3,3> Basis1D;
+  const int jmax = 5;
+  #ifdef BASIS_DS
+  typedef DSBasis<4,6> Basis1D;
+  #endif
+  #ifdef BASIS_P
+  #define D_PRIMAL 4
+  #define D_DUAL 4
+  typedef PBasis<D_PRIMAL,D_DUAL> Basis1D;
+  #endif
+  #ifdef BASIS_S
+  #define D_PRIMAL 4
+  #define D_DUAL 2
+  typedef AdaptedBasis<SBasis> Basis1D;
+  #endif
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
   typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
-
-  EvaluateFrame<Basis1D,2,2> evalObj;
 
   //##############################  
   Matrix<double> A(DIM,DIM);
@@ -185,20 +223,20 @@ int main()
   //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT, 5);
   AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, jmax);
 
+  // setup biharmonic equation
   Vector<double> value(1);
   value[0] = 384;
-  
   ConstantFunction<DIM> const_fun(value);
+
   Point<2> origin;
   origin[0] = 0.0;
   origin[1] = 0.0;
 
   CornerSingularityBiharmonic sing2D(origin, 0.5, 1.5);
   CornerSingularityBiharmonicRHS singRhs(origin, 0.5, 1.5);
-
-  BiharmonicBVP<DIM> biharmonic(&singRhs);
+  Functional<Basis1D, DIM> rhs(&singRhs, &frame);
   
-  SimpleBiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharmonic, &frame,jmax, TrivialAffine);  
+  SimpleBiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&rhs, &frame,jmax, TrivialAffine);
 
   CachedProblem<SimpleBiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 7, 1.0/0.01);
 
@@ -218,13 +256,20 @@ int main()
     //cout << lambda << endl;
   }
   
-  cout << "setting up full right hand side..." << endl;
+  cout << "Setting up full right hand side ..." << endl;
   Vector<double> rh;
-  Rhs_input(rh);
-  //WaveletTL::setup_righthand_side(discrete_biharmonic, Lambda, rh);
-  cout << rh << endl;
+  #ifdef USE_SAVED_RHS
+  Rhs_input(rh, jmax);
+  #else
+  WaveletTL::setup_righthand_side(discrete_biharmonic, Lambda, rh);
+   #ifdef SAVE_RHS
+   Rhs_output(rh, jmax); 
+   #endif
+  #endif
+  //cout << rh << endl;
+  cout << "l_2-norm of RHS (with quadrature granularity " << RHS_QUADRATURE_GRANULARITY << "): " << sqrt(rh*rh) << endl;
 #if 1
-  cout << "setting up full stiffness matrix..." << endl;
+  cout << "Setting up full stiffness matrix ..." << endl;
   SparseMatrix<double> stiff;
 
   clock_t tstart, tend;
@@ -238,7 +283,12 @@ int main()
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
 
-  stiff.matlab_output("stiff_2D_out", "stiff",1);
+#ifdef SAVE_STIFFNESS_MATRIX
+  cout << "Saving stiffness matrix to file ..." << endl;
+  ostringstream filename_stiff;
+  filename_stiff << "biharmonic_stiff_2D_" << BASIS_NAME << "_out";
+  stiff.matlab_output(filename_stiff.str().c_str(), "stiff",1);
+#endif
   
 //   unsigned int k;
 //   double lambdamin, lambdamax;
@@ -258,7 +308,7 @@ int main()
   //x = 1;
   //double lmin = InversePowerIteration(stiff, x, 0.01, 1000, iter);
   
-  cout << "performing iterative scheme to solve projected problem..." << endl;
+  cout << "Performing iterative scheme to solve projected problem ..." << endl;
   
   Vector<double> xk(Lambda.size()), err(Lambda.size()); xk = 0;
   
@@ -284,7 +334,7 @@ int main()
 
 
 
-//  cout << "performing output..." << endl;
+//  cout << "performing output ..." << endl;
   
    InfiniteVector<double,Frame2D::Index> u;
    unsigned int i = 0;
@@ -293,6 +343,7 @@ int main()
   
 //   u.scale(&discrete_biharmonic,-1);
  
+//   EvaluateFrame<Basis1D,2,2> evalObj;
 //   Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u, true, jmax);//expand in primal basis
   
 //   Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(frame, u, sing2D, 6);
@@ -308,12 +359,14 @@ int main()
   xk=0;
   alpha_n = 2. / lmax - 0.001;
   double min=1;
-  int z;
-  for (int i = 0; i < 5000;i++) {
+  unsigned int z = 0;
+  double res_norm;
+  for (unsigned int i = 0; i < MAX_LOOPS;i++) {
     stiff.apply(xk,help);
     resid = rh - help;
-    cout << "i = " << i << " " << sqrt(resid*resid) << endl;
-    if(sqrt(resid*resid)<min){min=sqrt(resid*resid);z=i;}
+    res_norm = sqrt(resid*resid);
+    cout << "loop " << i << ": res_norm = " << res_norm << endl;
+    if (res_norm < min) { min=res_norm; z=i; }
     stiff.apply(resid,help);
     alpha_n = (resid * resid) * (1.0 / (resid * help));
     resid *= alpha_n;
@@ -322,7 +375,7 @@ int main()
 
 
 
- cout << "performing output..." << endl;
+ cout << "Performing output ..." << endl;
   
   i = 0;
   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
@@ -330,25 +383,25 @@ int main()
   
   u.scale(&discrete_biharmonic,-1);
  
+  EvaluateFrame<Basis1D,2,2> evalObj;
   Array1D<SampledMapping<2> > U1 = evalObj.evaluate(frame, u, true, jmax);//expand in primal basis
   
   Array1D<SampledMapping<2> > Error1 = evalObj.evaluate_difference(frame, u, sing2D, 6);
 
-  std::ofstream ofs61("error_2D_out_jmax6_loops5000_b4.m");
+  ostringstream filename_error;
+  filename_error << "biharmonic_2D_" << BASIS_NAME << "_jmax" << jmax << "_error.m";
+  std::ofstream ofs61(filename_error.str().c_str());
   matlab_output(ofs61,Error1);
   ofs61.close();
 
-  std::ofstream ofs51("approx_solution_out_6_5000_b4.m");
+  ostringstream filename_apprsol;
+  filename_apprsol << "biharmonic_2D_" << BASIS_NAME << "_jmax" << jmax << "_approx_solution_out.m";
+  std::ofstream ofs51(filename_apprsol.str().c_str());
   matlab_output(ofs51,U1);
   ofs51.close();
   cout<< "Minimum:" << min << " im Schritt " << z <<endl; 
 #endif
   
 
-#if 0
-
-  Rhs_output( rh); 
-
-#endif
   return 0;
 }

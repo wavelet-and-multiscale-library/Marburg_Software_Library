@@ -215,7 +215,7 @@ namespace FrameTL
     FixedArray1D<Array1D<double>,DIM > irregular_grid;
 
     //int q_order;    
-    const int N_Gauss = 3;
+    const int N_Gauss = IBASIS::primal_polynomial_degree();
 
     bool b = 0;
 

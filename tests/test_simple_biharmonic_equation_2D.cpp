@@ -3,13 +3,13 @@
 #define BASIS_S
 
 //#define USED_SAVED_RHS
-#define SAVE_RHS
+//#define SAVE_RHS
 
-#define RHS_QUADRATURE_GRANULARITY 10
+#define RHS_QUADRATURE_GRANULARITY 4
 
 #include <fstream>
 #include <iostream>
-#include <time.h> 
+#include <time.h>
 
 #ifdef BASIS_DS
 #include <interval/ds_basis.h>
@@ -96,13 +96,25 @@ template <class C>
     
   }
 
+
+std::ostream& current_time(std::ostream& s)
+{
+  time_t rawtime = time(NULL);
+  struct tm* timeinfo = localtime(&rawtime);
+  char time_string[10];
+  sprintf(time_string, "%02d:%02d:%02d", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+  s << time_string << "  ";
+  return s;
+}
+
+
 int main()
 {
   
   cout << "Testing class SimpleBiharmonicEquation in 2D ..." << endl;
   
   const int DIM = 2;
-  const int jmax = 5;
+  const int jmax = 3;
   #ifdef BASIS_DS
   typedef DSBasis<4,6> Basis1D;
   #endif
@@ -255,7 +267,8 @@ int main()
     Lambda.insert(lambda);
     //cout << lambda << endl;
   }
-  
+
+  current_time(cout);
   cout << "Setting up full right hand side ..." << endl;
   Vector<double> rh;
   #ifdef USE_SAVED_RHS
@@ -263,12 +276,14 @@ int main()
   #else
   WaveletTL::setup_righthand_side(discrete_biharmonic, Lambda, rh);
    #ifdef SAVE_RHS
+   cout << "Saving right hand side to file ..." << endl;
    Rhs_output(rh, jmax); 
    #endif
   #endif
   //cout << rh << endl;
   cout << "l_2-norm of RHS (with quadrature granularity " << RHS_QUADRATURE_GRANULARITY << "): " << sqrt(rh*rh) << endl;
 #if 1
+  current_time(cout);
   cout << "Setting up full stiffness matrix ..." << endl;
   SparseMatrix<double> stiff;
 
@@ -307,10 +322,12 @@ int main()
 
   //x = 1;
   //double lmin = InversePowerIteration(stiff, x, 0.01, 1000, iter);
-  
+
+  current_time(cout);
   cout << "Performing iterative scheme to solve projected problem ..." << endl;
   
-  Vector<double> xk(Lambda.size()), err(Lambda.size()); xk = 0;
+  Vector<double> xk(Lambda.size()), err(Lambda.size());
+  xk = 0;
   
   //CG(stiff, rh, xk, 1.0e-6, 100, iter);
   //cout << "CG iterations needed: "  << iter << endl;
@@ -361,12 +378,16 @@ int main()
   double min=1;
   unsigned int z = 0;
   double res_norm;
-  for (unsigned int i = 0; i < MAX_LOOPS;i++) {
+  for (unsigned int i = 0; i < MAX_LOOPS; i++) {
     stiff.apply(xk,help);
     resid = rh - help;
     res_norm = sqrt(resid*resid);
+    current_time(cout);
     cout << "loop " << i << ": res_norm = " << res_norm << endl;
-    if (res_norm < min) { min=res_norm; z=i; }
+    if (res_norm < min) {
+      min = res_norm;
+      z = i;
+    }
     stiff.apply(resid,help);
     alpha_n = (resid * resid) * (1.0 / (resid * help));
     resid *= alpha_n;
@@ -374,9 +395,9 @@ int main()
   }
 
 
+  current_time(cout);
+  cout << "Performing output ..." << endl;
 
- cout << "Performing output ..." << endl;
-  
   i = 0;
   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
     u.set_coefficient(*it, xk[i]);
@@ -399,7 +420,7 @@ int main()
   std::ofstream ofs51(filename_apprsol.str().c_str());
   matlab_output(ofs51,U1);
   ofs51.close();
-  cout<< "Minimum:" << min << " im Schritt " << z <<endl; 
+  cout << "Minimum:" << min << " im Schritt " << z << endl;
 #endif
   
 

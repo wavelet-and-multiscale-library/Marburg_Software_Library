@@ -231,7 +231,11 @@ namespace MathTL
   */
   inline
   double EvaluateHermiteSpline_td_x(const int i, const int j, const int k, const double x) {
+#if 0
     return twotothejhalf(3*j) * EvaluateHermiteSpline_x(i, (1<<j) * x - k);
+#else
+    return (double)(1<<j) * (double)twotothejhalf(j) * EvaluateHermiteSpline_x(i, (1<<j) * x - k);
+#endif
   }
   
   /*!
@@ -239,7 +243,12 @@ namespace MathTL
   */
   inline
   double EvaluateHermiteSpline_td_xx(const int i, const int j, const int k, const double x) {
+#if 0
     return twotothejhalf(5*j) * EvaluateHermiteSpline_xx(i, (1<<j) * x - k);
+#else
+    const double factor = (double)(1<<j);
+    return factor * factor * twotothejhalf(j) * EvaluateHermiteSpline_xx(i, (1<<j) * x - k);
+#endif
   }
 
   /*!

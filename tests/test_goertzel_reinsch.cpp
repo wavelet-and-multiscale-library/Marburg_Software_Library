@@ -46,7 +46,8 @@ int main()
   }
 #endif
 
-  typedef float C;
+//   typedef float C; // leads to pointwise difference of approx. 1e-4
+  typedef double C; // no pointwise difference visible
 
   const unsigned int N = 100;
   Vector<C> fewcoeffs(N);

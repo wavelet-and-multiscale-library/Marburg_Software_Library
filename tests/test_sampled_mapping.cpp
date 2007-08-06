@@ -58,6 +58,9 @@ int main()
   SampledMapping<1> g(Grid<1>(0.0, 1.0, 5), TestFunction());
   g.matlab_output(cout);
 
+  cout << "- Gnuplot output for the same parameters:" << endl;
+  g.gnuplot_output(cout);
+
   cout << "- testing SampledMapping<1>::add():" << endl;
   g.add(SampledMapping<1>(Grid<1>(0.0, 1.0, 5), TestFunction()));
   g.matlab_output(cout);

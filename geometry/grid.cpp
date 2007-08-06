@@ -16,7 +16,7 @@ namespace MathTL
     : grid_(N+1)
   {
     for (unsigned int n(0); n <= N; n++)
-      grid_[n] = a+(b-a)*n/N;
+      grid_[n] = a+((b-a)*n)/N;
   }
 
   void

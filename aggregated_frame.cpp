@@ -1,6 +1,7 @@
 // implementation for aggregated_frame.h
 
 #include <frame_support.h>
+#include <cube/cube_basis.h>
 
 namespace FrameTL
 {

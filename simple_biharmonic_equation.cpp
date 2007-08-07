@@ -20,12 +20,12 @@ namespace FrameTL
   SimpleBiharmonicEquation<IBASIS,DIM>::SimpleBiharmonicEquation(const Functional<IBASIS,DIM>* rhs,
 						     const AggregatedFrame<IBASIS,DIM>* frame,
 						     const int jmax,
-						     QuadratureStrategy qstrat)
+						     QuadratureStrategy qstrat,
+						     const bool precompute_rhs)
     : rhs_(rhs), frame_(frame),jmax_(jmax), qstrat_(qstrat)
   {
     compute_diagonal();
-    // compute_rhs(false);
-    compute_rhs(true);
+    compute_rhs(precompute_rhs);
   }
 
   template <class IBASIS, unsigned int DIM>

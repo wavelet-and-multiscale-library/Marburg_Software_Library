@@ -18,6 +18,7 @@
 #include <utils/fixed_array1d.h>
 #include <utils/array1d.h>
 #include <frame_index.h>
+#include <frame_support.h>
 
 using std::list;
 

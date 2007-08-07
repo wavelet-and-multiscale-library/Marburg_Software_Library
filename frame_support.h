@@ -18,6 +18,7 @@
 #include <cube/cube_basis.h>
 #include <galerkin/infinite_preconditioner.h>
 #include <index1D.h>
+#include <aggregated_frame.h>
 
 
 

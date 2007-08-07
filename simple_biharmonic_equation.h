@@ -79,7 +79,8 @@ namespace FrameTL
     SimpleBiharmonicEquation(const Functional<IBASIS,DIM>* rhs,
 		       const AggregatedFrame<IBASIS,DIM>* frame,
 		       const int jmax,
-		       const QuadratureStrategy qsrtat = TrivialAffine);
+		       const QuadratureStrategy qsrtat = TrivialAffine,
+		       const bool precompute_rhs = true);
 
     /*!
       make template argument accessible

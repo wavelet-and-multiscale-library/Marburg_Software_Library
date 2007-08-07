@@ -135,7 +135,7 @@ int main()
   Biharmonic1D_Solution exactSolution;
   Biharmonic1D_RHS<Basis1D> rhs(&frame);
 
-  SimpleBiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&rhs, &frame, jmax, TrivialAffine);
+  SimpleBiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&rhs, &frame, jmax, TrivialAffine, false);
  
   CachedProblem<SimpleBiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 5, 1.0/0.146);
 

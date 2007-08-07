@@ -1,11 +1,12 @@
 #define MAX_LOOPS 10000
+#define PLOT_RESOLUTION 6
 
 #define BASIS_S
 
 //#define USED_SAVED_RHS
 //#define SAVE_RHS
 
-#define RHS_QUADRATURE_GRANULARITY 4
+#define RHS_QUADRATURE_GRANULARITY 10
 
 #include <fstream>
 #include <iostream>
@@ -44,14 +45,11 @@
 #include <galerkin/cached_problem.h>
 #include <frame_support.h>
 #include <numerics/eigenvalues.h>
-//#include <biharmonic_rhs.h>
-//#include <numerics/bvp.h>
 
 using std::cout;
 using std::endl;
 
 using FrameTL::EvaluateFrame;
-//using FrameTL::EllipticEquation;
 using FrameTL::SimpleBiharmonicEquation;
 using FrameTL::AggregatedFrame;
 using MathTL::ConstantFunction;
@@ -68,35 +66,34 @@ using namespace WaveletTL;
 
 //#define TWO_DIMENSIONS
 
+/* functions for saving the and loading the (pre)computed right-hand side */
 template <class C>
-  void Rhs_output (const Vector<C> v, const int jmax) 
-  {
+void Rhs_output (const Vector<C> v, const int jmax) 
+{
+  SparseMatrix<C> S = SparseMatrix<C>(v.size());
 
-    SparseMatrix<C> S = SparseMatrix<C>(v.size());
+  for(unsigned int i=0; i< v.size(); i++)
+    S.set_entry( 0, i, v[i]);
 
-    for(unsigned int i=0; i< v.size(); i++)
-      S.set_entry( 0, i, v[i]);
-
-    ostringstream filename;
-    filename << "Rhs_2D_" << BASIS_NAME << "_jmax" << jmax << "_N" << RHS_QUADRATURE_GRANULARITY << "_out";
-    S.matlab_output(filename.str().c_str(), "Matrix", 1);
- 
-  }
+  ostringstream filename;
+  filename << "Rhs_2D_" << BASIS_NAME << "_jmax" << jmax << "_N" << RHS_QUADRATURE_GRANULARITY << "_out";
+  S.matlab_output(filename.str().c_str(), "Matrix", 1);
+ }
   
-  template <class C>
-  void Rhs_input(Vector<C> &v, const int jmax)
-  {
-    SparseMatrix<C> S;
-    ostringstream filename;
-    filename << "Rhs_2D_" << BASIS_NAME << "_jmax" << jmax << "_N" << RHS_QUADRATURE_GRANULARITY << "_out";
-    S.matlab_input(filename.str().c_str());
-    v.resize(S.row_dimension());
-    for(unsigned int i=0; i< S.row_dimension(); i++)
-     v[i] = S.get_entry( 0, i);
-    
-  }
+template <class C>
+void Rhs_input(Vector<C> &v, const int jmax)
+{
+  SparseMatrix<C> S;
+  ostringstream filename;
+  filename << "Rhs_2D_" << BASIS_NAME << "_jmax" << jmax << "_N" << RHS_QUADRATURE_GRANULARITY << "_out";
+  S.matlab_input(filename.str().c_str());
+  v.resize(S.row_dimension());
+  for(unsigned int i=0; i< S.row_dimension(); i++)
+   v[i] = S.get_entry( 0, i);
+}
 
 
+/* generates a time-stamp */
 std::ostream& current_time(std::ostream& s)
 {
   time_t rawtime = time(NULL);
@@ -108,13 +105,14 @@ std::ostream& current_time(std::ostream& s)
 }
 
 
+/* MAIN */
 int main()
 {
   
   cout << "Testing class SimpleBiharmonicEquation in 2D ..." << endl;
   
   const int DIM = 2;
-  const int jmax = 3;
+  const int jmax = 4;
   #ifdef BASIS_DS
   typedef DSBasis<4,6> Basis1D;
   #endif
@@ -248,7 +246,7 @@ int main()
   CornerSingularityBiharmonicRHS singRhs(origin, 0.5, 1.5);
   Functional<Basis1D, DIM> rhs(&singRhs, &frame);
   
-  SimpleBiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&rhs, &frame,jmax, TrivialAffine);
+  SimpleBiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&rhs, &frame, jmax, TrivialAffine, false);
 
   CachedProblem<SimpleBiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 7, 1.0/0.01);
 
@@ -405,9 +403,9 @@ int main()
   u.scale(&discrete_biharmonic,-1);
  
   EvaluateFrame<Basis1D,2,2> evalObj;
-  Array1D<SampledMapping<2> > U1 = evalObj.evaluate(frame, u, true, jmax);//expand in primal basis
+  Array1D<SampledMapping<2> > U1 = evalObj.evaluate(frame, u, true, PLOT_RESOLUTION); //expand in primal basis
   
-  Array1D<SampledMapping<2> > Error1 = evalObj.evaluate_difference(frame, u, sing2D, 6);
+  Array1D<SampledMapping<2> > Error1 = evalObj.evaluate_difference(frame, u, sing2D, PLOT_RESOLUTION);
 
   ostringstream filename_error;
   filename_error << "biharmonic_2D_" << BASIS_NAME << "_jmax" << jmax << "_error.m";
@@ -422,7 +420,6 @@ int main()
   ofs51.close();
   cout << "Minimum:" << min << " im Schritt " << z << endl;
 #endif
-  
 
   return 0;
 }

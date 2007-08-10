@@ -112,7 +112,7 @@ int main()
   cout << "Testing class SimpleBiharmonicEquation in 2D ..." << endl;
   
   const int DIM = 2;
-  const int jmax = 4;
+  const int jmax = 5;
   #ifdef BASIS_DS
   typedef DSBasis<4,6> Basis1D;
   #endif

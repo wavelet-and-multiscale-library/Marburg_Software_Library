@@ -36,8 +36,8 @@ namespace FrameTL
     cout << "- Evaluating current approximation after " << iteration << " iterations ..." << endl;
     InfiniteVector<double, typename PROBLEM::Index> u(u_epsilon);
     u.scale(&problem, -1); // undo preconditioning
-    EvaluateFrame<Basis1D,1,1> evalObj;
-    Array1D<SampledMapping<1> > U = evalObj.evaluate(problem.basis(), u, true, 11); // expand in primal basis
+    EvaluateFrame<Basis1D,PROBLEM::space_dimension,PROBLEM::space_dimension> evalObj;
+    Array1D<SampledMapping<PROBLEM::space_dimension> > U = evalObj.evaluate(problem.basis(), u, true, 11); // expand in primal basis
     
     cout << "- Plotting current approximation after " << iteration << " iterations ..." << endl;
     std::ostringstream filename;
@@ -60,7 +60,7 @@ namespace FrameTL
       origin[1] = 0.0;
       CornerSingularityBiharmonic exact_solution(origin, 0.5, 1.5);
     #endif
-    Array1D<SampledMapping<1> > error = evalObj.evaluate_difference(problem.basis(), u, exact_solution, 11);
+    Array1D<SampledMapping<PROBLEM::space_dimension> > error = evalObj.evaluate_difference(problem.basis(), u, exact_solution, 11);
     std::ostringstream filename_err;
     filename_err << "steep_1D_bi_" << BASIS_NAME << "_error_out_it" << iteration << ".m";
     std::ofstream ofs_error(filename_err.str().c_str());
@@ -144,10 +144,17 @@ namespace FrameTL
         plot_u_epsilon(problem, u_epsilon, loop+1);
       #endif
       // step down accuracy eta
-      if (PROBLEM::space_dimension == 1)
+      #ifdef ETA_STEP
+        eta *= ETA_STEP;
+      #else
+        #ifdef BASIS_S
         eta *= 0.9995;
-      else
+        #else
+        //if (PROBLEM::space_dimension == 1)
+        //else
         eta *= 0.995;
+        #endif
+      #endif
     }
 
     #ifdef SAVE_LOG

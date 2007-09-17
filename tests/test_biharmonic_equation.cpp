@@ -12,10 +12,11 @@
 #define BASIS_DS 2
 #define BASIS_ADAPTED_S 3
 
-#define BASIS BASIS_ADAPTED_S
+#define BASIS BASIS_S
 
 
-#define JMAX_END 15
+#define JMAX_START 17 // basis.j0()
+#define JMAX_END 25
 #define JMAX_STEP 1
 
 
@@ -142,7 +143,7 @@ int main()
   fs << "BASIS = " << BASIS_NAME << endl;
   fs << "RESOLUTION = " << RESOLUTION << endl;
   #endif // SAVE_RESULTS
-  for (int jmax = basis.j0(); jmax <= JMAX_END; jmax+=JMAX_STEP) {
+  for (int jmax = JMAX_START; jmax <= JMAX_END; jmax+=JMAX_STEP) {
     cout << "jmax = " << jmax << endl;
     t_start = clock(); // start counting time
     Lambda.clear();

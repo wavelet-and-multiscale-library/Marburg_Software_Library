@@ -6,7 +6,8 @@
 
 #define BASIS BASIS_S
 
-#define JMAX_END 16
+#define JMAX_START 18 // basis.j0()
+#define JMAX_END 25 // 16
 #define JMAX_STEP 1
 
 #define SAVE_RESULTS
@@ -77,8 +78,10 @@ int main()
   ostringstream filename;
   filename << "riesz_constants_" << BASIS_NAME << ".dat";
   fs.open(filename.str().c_str());
+  fs << "BASIS = " << BASIS_NAME << endl;
+  fs << "jmax\tC_1\tC_2\tkappa" << endl;
   #endif // SAVE_RESULTS
-  for (int jmax = basis.j0(); jmax <= JMAX_END; jmax += JMAX_STEP) {
+  for (int jmax = JMAX_START; jmax <= JMAX_END; jmax += JMAX_STEP) {
     cout << "jmax = " << jmax << endl;
     Lambda.clear();
     for (lambda = basis.first_generator(basis.j0()); lambda <= basis.last_wavelet(jmax); ++lambda)

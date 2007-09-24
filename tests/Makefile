@@ -57,7 +57,7 @@ CXXFLAGS += -I$(MATHTL_DIR)
 #CXXFLAGS += -fastsse -I$(MATHTL_DIR)
 endif
 
-EXEOBJF =  test_corner_singularity_biharmonic.o\
+EXEOBJF = \
  test_random.o test_tools.o\
  test_tensor.o test_point.o test_array1d.o test_fixed_array1d.o\
  test_vector.o test_infinite_vector.o test_vectorspeed.o test_matrix.o\
@@ -77,6 +77,7 @@ EXEOBJF =  test_corner_singularity_biharmonic.o\
  test_chart.o test_atlas.o\
  test_corner_singularity.o\
  test_map_tools.o\
+ test_corner_singularity_biharmonic.o\
  test_gram_schmidt.o test_piecewise.o\
  test_fixed_vector.o test_fixed_matrix.o
 

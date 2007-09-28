@@ -30,7 +30,7 @@ int main()
   // Grid<2> grid(Point<2>(-1.0, -1.0), Point<2>(0.0, 1.0), 1<<6, 1<<6); // only patches 0+1
   //   Grid<1> grid(0.0,1.0,1<<10);
   SampledMapping<2> h(grid, s);
-  std::ofstream fs("corner_maple.m");
+  std::ofstream fs("corner_biharmonic.m");
 
   if (matlab)
     h.matlab_output(fs);
@@ -43,17 +43,17 @@ int main()
     fs << "mesh(x,y,z)" << endl;
 
   fs.close();
-//   cout << "  ...done, see file corner.m!" << endl;
+  cout << "  ...done, see file corner_biharmonic.m!" << endl;
 
-  //CornerSingularityBiharmonicRHS rhs(origin, 0.5, 1.5);
-  CornerSingularityBiharmonic rhs(origin, 0.5, 1.5);
+  CornerSingularityBiharmonicRHS rhs(origin, 0.5, 1.5);
+  //CornerSingularityBiharmonic rhs(origin, 0.5, 1.5);
   if (matlab)
     cout << "- Matlab output of the corner singularity rhs on a 2D grid..." << endl;
   else
     cout << "- Octave output of the corner singularity rhs on a 2D grid..." << endl;
   
   SampledMapping<2> h_rhs(grid, rhs);
-  std::ofstream fs_rhs("corner_rhs_maple.m");
+  std::ofstream fs_rhs("corner_biharmonic_rhs.m");
   if (matlab)
     h_rhs.matlab_output(fs_rhs);
   else
@@ -65,7 +65,7 @@ int main()
     fs_rhs << "mesh(x,y,z)" << endl;
   
   fs_rhs.close();
-  cout << "  ...done, see file corner_rhs.m!" << endl;
+  cout << "  ...done, see file corner_biharmonic_rhs.m!" << endl;
 #endif
   
     //  Atez zeta;//(double r0 0.01 , double r1 = 0.99);

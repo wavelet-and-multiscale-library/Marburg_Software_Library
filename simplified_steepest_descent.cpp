@@ -71,6 +71,25 @@ namespace FrameTL
   }
 #endif // PLOT_U_EPSILON
 
+#ifdef SAVE_ASYMPTOTIC
+  template <class PROBLEM>
+  void save_asymptotic(const map<double,double>& asymptotic_res, const map<double,double>& asymptotic_time, const int jmax)
+  {
+    cout << "Saving asymptotic ..." << endl;
+    std::ostringstream filename_asymptotic;
+    filename_asymptotic << "steep_biharmonic_" << PROBLEM::space_dimension << "D_" << BASIS_NAME << "_jmax" << jmax << "_asymptotic.m";
+    std::ofstream os_asymptotic(filename_asymptotic.str().c_str());
+    matlab_output(asymptotic_res, os_asymptotic);
+    os_asymptotic.close();
+    std::ostringstream filename_asymptotic_time;
+    filename_asymptotic_time << "steep_biharmonic_" << PROBLEM::space_dimension << "D_" << BASIS_NAME << "_jmax" << jmax << "_asymptotic_time.m";
+    std::ofstream os_asymptotic_time(filename_asymptotic_time.str().c_str());
+    matlab_output(asymptotic_time, os_asymptotic_time);
+    os_asymptotic_time.close();
+  }
+#endif // SAVE_ASYMPTOTIC
+
+
   template <class PROBLEM>
   void
   simplified_steepest_descent_SOLVE(const PROBLEM& problem, const double epsilon,
@@ -81,7 +100,7 @@ namespace FrameTL
     InfiniteVector<double, typename PROBLEM::Index> residual, applied_u, rhs, applied_res;
     double res_norm = 100;
     double alpha;
-    double eta = 1.;
+    double eta = 1.; // 1.e-2;
     #ifdef SAVE_ASYMPTOTIC
     map<double,double> asymptotic_res;
     map<double,double> asymptotic_time;
@@ -104,7 +123,7 @@ namespace FrameTL
     clock_t time_now;
     time = 0;
     #endif
-                                
+
     for (loop = 0; loop < MAX_LOOPS && res_norm > epsilon; loop++) {
       // compute residual
       //APPLY(problem, u_epsilon, eta, applied_u, jmax, COMPRESSION_STRATEGY);
@@ -119,7 +138,7 @@ namespace FrameTL
       residual = rhs - applied_u;
       //cout << "residual: " << endl << residual << endl;
       // compute acceleration parameter alpha
-      APPLY(problem, residual, eta, applied_res, jmax, COMPRESSION_STRATEGY);
+      APPLY(problem, residual, eta/10., applied_res, jmax, COMPRESSION_STRATEGY);
       alpha = residual*residual / (residual*applied_res);
       //cout << "alpha = " << alpha << endl;
       // compute l_2 norm of residual
@@ -138,11 +157,15 @@ namespace FrameTL
       time_now = clock();
       time += (double) (time_now - time_start) / (double)CLOCKS_PER_SEC;
       asymptotic_time[time] = res_norm;
-      #endif
+      #endif // SAVE_ASYMPTOTIC
+      #if (SAVE_ASYMPTOTIC > 1)
+      if (loop % SAVE_ASYMPTOTIC == SAVE_ASYMPTOTIC-1) // save asymptotic data each SAVE_ASYMPTOTIC steps
+        save_asymptotic<PROBLEM>(asymptotic_res, asymptotic_time, jmax);
+      #endif // SAVE_ASYMPTOTIC > 1
       #ifdef PLOT_U_EPSILON
       if (loop % PLOT_U_EPSILON == PLOT_U_EPSILON-1) // plot u_epsilon each PLOT_U_EPSILON steps
         plot_u_epsilon(problem, u_epsilon, loop+1);
-      #endif
+      #endif // PLOT_U_EPSILON
       // step down accuracy eta
       #ifdef ETA_STEP
         eta *= ETA_STEP;
@@ -161,17 +184,7 @@ namespace FrameTL
     fs.close();
     #endif // SAVE_LOG
     #ifdef SAVE_ASYMPTOTIC
-    cout << "Saving asymptotic ..." << endl;
-    std::ostringstream filename_asymptotic;
-    filename_asymptotic << "steep_biharmonic_" << PROBLEM::space_dimension << "D_" << BASIS_NAME << "_jmax" << jmax << "_asymptotic.m";
-    std::ofstream os_asymptotic(filename_asymptotic.str().c_str());
-    matlab_output(asymptotic_res, os_asymptotic);
-    os_asymptotic.close();
-    std::ostringstream filename_asymptotic_time;
-    filename_asymptotic_time << "steep_biharmonic_" << PROBLEM::space_dimension << "D_" << BASIS_NAME << "_jmax" << jmax << "_asymptotic_time.m";
-    std::ofstream os_asymptotic_time(filename_asymptotic_time.str().c_str());
-    matlab_output(asymptotic_time, os_asymptotic_time);
-    os_asymptotic_time.close();
+    save_asymptotic<PROBLEM>(asymptotic_res, asymptotic_time, jmax);
     #endif
   }
 

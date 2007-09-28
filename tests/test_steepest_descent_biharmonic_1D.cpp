@@ -7,7 +7,13 @@
 //#define CONSTANT_RHS
 
 // choose which basis to use
-#define BASIS_S
+#define BASIS_P
+
+//#ifdef BASIS_S
+//#define MAX_LOOPS 10000
+//#else
+//#define MAX_LOOPS 7000
+//#endif
 
 // tweaking the adaptive algorithm
 #ifdef BASIS_S
@@ -16,7 +22,8 @@
  #define ETA_STEP 0.995;
 #endif
 
-#define SAVE_ASYMPTOTIC
+#define SAVE_ASYMPTOTIC 10
+#define SAVE_LOG
 
 #include <fstream>
 #include <iostream>
@@ -77,7 +84,7 @@ int main()
   cout << "Testing steepest descent with the biharmonic equation in 1D ..." << endl;
   
   const int DIM = 1;
-  const int jmax = 14;
+  const int jmax = 13;
   const double epsilon = 1e-3;
 
   // set up frame ***********************************************************

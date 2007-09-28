@@ -38,6 +38,12 @@ namespace FrameTL
       : g_(g), frame_(frame)
     { }
 
+    /*
+      virtual destructor
+     */
+    virtual ~Functional()
+    { }
+
     /*!
       Evaluate the functional with the wavelet with given index lambda
       Here, the functional \psi_\lambda -> \int f(x) \psi_\lambda(x) dx

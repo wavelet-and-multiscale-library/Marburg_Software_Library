@@ -79,6 +79,12 @@ namespace FrameTL
     {}
 
     /*!
+      Virtual destructor
+     */
+    virtual ~Biharmonic1D_RHS()
+    {}
+
+    /*!
       Evaluate the functional with the wavelet with given index lambda
      */
     virtual double evaluate(const typename AggregatedFrame<IBASIS, 1>::Index& lambda) const;

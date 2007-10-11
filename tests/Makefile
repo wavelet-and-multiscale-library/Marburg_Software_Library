@@ -69,7 +69,7 @@ EXEOBJF = \
  test_quadrature.o test_gauss_quadrature.o test_extrapolation.o\
  test_recursion.o\
  test_grid.o test_sampled_mapping.o test_colormap.o\
- test_splines.o test_bezier.o\
+ test_splines.o test_bezier.o test_up_function.o\
  test_one_step_scheme.o test_rosenbrock.o\
  test_differences.o\
  test_multiindex.o test_multi_lp.o\

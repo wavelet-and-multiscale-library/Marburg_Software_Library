@@ -80,26 +80,31 @@ endif
 
 # set 1 of test programs: stuff on R and R^d
 EXEOBJF1 = \
-  test_refinable.o test_regularity.o test_dm.o\
-  test_r_basis.o test_cdf_expansion.o
+  test_refinable.o test_r_basis.o\
+  test_regularity.o\
+  test_dm.o\
+  test_cdf_expansion.o
 
-# set 2 of test programs: wavelet bases on the interval ([DS],[P],[JL],periodic,[A],[S])
+# set 2 of test programs: wavelet bases on the interval ([DS],[P],[JL],[A],[S])
 EXEOBJF2 = \
   test_ds_basis.o test_ds_support.o test_ds_expansion.o\
   test_p_basis.o test_p_support.o test_p_expansion.o\
   test_jl_basis.o test_jl_support.o\
-  test_periodic.o\
   test_spline_basis.o test_spline_support.o test_spline_expansion.o\
   test_i_indexplot.o\
   test_a_basis.o\
   test_s_basis.o test_s_support.o
+
+# set 2a of test programs: wavelet bases on the interval with improved performance (periodic)
+EXEOBJF2a = \
+  test_periodic.o
 
 # set 3 of test programs: wavelet bases on general higher-dim. domains ((mapped) cube, tensor prod.)
 EXEOBJF3 = \
   test_cube_index.o test_cube_support.o test_cube_basis.o\
   test_cube_indexplot.o\
   test_mapped_cube_basis.o\
-  test_tp_basis.o
+#  test_tp_basis.o
 
 # set 4 of test programs: wavelet bases on the L-domain
 EXEOBJF4 = \
@@ -114,12 +119,13 @@ EXEOBJF4 = \
 
 # set 5 of test programs: adaptive wavelet schemes for elliptic equations
 EXEOBJF5 = \
-  test_sturm_bvp.o\
-  test_cdd1.o\
-  test_cdd1_cube.o test_cdd2.o test_duv.o\
-  test_cube_equation.o test_cdd1_ldomain.o\
-  test_cdd1_gramian.o test_cdd1_poisson1d.o test_cdd1_helm1d.o\
-  test_helmholtz_equation.o
+  test_cdd1_cube.o\
+  test_cdd1.o
+#  test_sturm_bvp.o\
+#  test_cdd2.o test_duv.o\
+#  test_cube_equation.o test_cdd1_ldomain.o\
+#  test_cdd1_gramian.o test_cdd1_poisson1d.o test_cdd1_helm1d.o\
+#  test_helmholtz_equation.o
 
 # set 6 of test programs: adaptive wavelet schemes for parabolic equations
 EXEOBJF6 = \
@@ -133,6 +139,7 @@ EXEOBJF7 = \
 
 EXES1 = $(EXEOBJF1:.o=)
 EXES2 = $(EXEOBJF2:.o=)
+EXES2a = $(EXEOBJF2a:.o=)
 EXES3 = $(EXEOBJF3:.o=)
 EXES4 = $(EXEOBJF4:.o=)
 EXES5 = $(EXEOBJF5:.o=)
@@ -141,10 +148,11 @@ EXES7 = $(EXEOBJF7:.o=)
 
 all:: tests
 
-tests:: tests1 tests2 tests3 tests4 tests5 tests6 tests7
+tests:: tests1 tests2 tests2a tests3 tests4 tests5 tests6 tests7
 
 tests1:: $(EXES1)
 tests2:: $(EXES2)
+tests2a:: $(EXES2a)
 tests3:: $(EXES3)
 tests4:: $(EXES4)
 tests5:: $(EXES5)
@@ -154,6 +162,7 @@ tests7:: $(EXES7)
 clean::
 	rm -f $(EXEOBJF1) $(EXES1)
 	rm -f $(EXEOBJF2) $(EXES2)
+	rm -f $(EXEOBJF2a) $(EXES2a)
 	rm -f $(EXEOBJF3) $(EXES3)
 	rm -f $(EXEOBJF4) $(EXES4)
 	rm -f $(EXEOBJF5) $(EXES5)
@@ -185,6 +194,20 @@ else
 endif
 
 $(EXES2): %: %.o
+ifeq ($(DEBUGMODE),on)
+	$(CXX) $(LDFLAGS) $< -g -o $@
+else
+	$(CXX) $(LDFLAGS) $< -o $@
+endif
+
+$(EXEOBJF2a): %.o: %.cpp
+ifeq ($(DEBUGMODE),on)
+	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
+else
+	$(CXX) $(CXXFLAGS) -c -DNDEBUG -o $@ $<
+endif
+
+$(EXES2a): %: %.o
 ifeq ($(DEBUGMODE),on)
 	$(CXX) $(LDFLAGS) $< -g -o $@
 else

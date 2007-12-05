@@ -263,4 +263,19 @@ namespace WaveletTL
     return ind.number();
   }
 
+
+
+
+  //
+  //
+  // from here on new version of IntervalIndex, without references to an instance of the basis
+
+  template <class IBASIS>
+  IntervalIndex2<IBASIS>::IntervalIndex2()
+  {
+    k_ = IBASIS::DeltaLmin(); // leftmost
+    e_ = 0;                   // generator
+    j_ = IBASIS::j0();        // on the coarsest level
+  }
+
 }

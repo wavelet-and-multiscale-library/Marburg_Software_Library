@@ -16,6 +16,7 @@
 #include <algebra/infinite_vector.h>
 
 #include <interval/i_index.h>
+#include <interval/i_basis.h>
 
 using MathTL::InfiniteVector;
 
@@ -24,7 +25,7 @@ namespace WaveletTL
   /*!
     Template class for a periodic, biorthogonal wavelet basis on the unit interval [0,1],
     derived from a biorthogonal wavelet basis on R (which is specified as a
-    template parameter).
+    template parameter). The wavelet basis on R should allow for point evaluations.
 
     The periodized scaling functions (and analogously the wavelets) look like
 
@@ -41,12 +42,12 @@ namespace WaveletTL
     //! default constructor
     PeriodicBasis();
     
-    //! coarsest possible level j0
-    inline const int j0() const { return j0_; }
-
     //! wavelet index class
-    typedef IntervalIndex<PeriodicBasis<RBASIS> > Index;
+    typedef IntervalIndex2<PeriodicBasis<RBASIS> > Index;
 
+    //! coarsest possible level j0
+    static const int j0() const { return j0_; }
+    
     //! size_type, for convenience
     typedef Vector<double>::size_type size_type;
 

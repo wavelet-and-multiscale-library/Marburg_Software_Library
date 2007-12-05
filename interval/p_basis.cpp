@@ -220,7 +220,7 @@ namespace WaveletTL
 	ML_.set_entry(row-s0, column-s0, ML_0.get_entry(row,column));
     for (int k = d; k <= num_dual_bound_gen_L+s0; k++)
       for (int n = 2*k-d; n <= 2*k; n++)
- 	ML_.set_entry(n-1-s0,k-1-s0,cdf.a().get_coefficient(MultiIndex<int,1>(-(d/2)+n+d-2*k)));
+ 	ML_.set_entry(n-1-s0,k-1-s0,cdf.a().a(-(d/2)+n+d-2*k));
 //     cout << "ML=" << endl << ML_;
 
     MR_.resize(num_rows_boundref_R, num_dual_bound_gen_R);
@@ -229,7 +229,7 @@ namespace WaveletTL
 	MR_.set_entry(row-s1, column-s1, ML_0.get_entry(row,column));
     for (int k = d; k <= num_dual_bound_gen_R+s1; k++)
       for (int n = 2*k-d; n <= 2*k; n++)
- 	MR_.set_entry(n-1-s1,k-1-s1,cdf.a().get_coefficient(MultiIndex<int,1>(-(d/2)+n+d-2*k)));
+ 	MR_.set_entry(n-1-s1,k-1-s1,cdf.a().a(-(d/2)+n+d-2*k));
 //     cout << "MR=" << endl << MR_;
 
     Matrix<double> DTilde;
@@ -963,7 +963,7 @@ namespace WaveletTL
 	  double help = 0;
 	  for (unsigned int s = 0; s < r; s++)
 	    help += binomial(r, s) * intpower(k, r-s) * alpha(0, s);
-	  result += cdf.a().get_coefficient(MultiIndex<int,1>(k)) * help;
+	  result += cdf.a().a(k) * help;
 	}
 	result /= ldexp(1.0, r+1) - 2.0;
       } else {
@@ -981,7 +981,7 @@ namespace WaveletTL
     // [DKU] (3.2.31)
     double result = 0;
     for (int q = (int)ceil((m-ell2T<d,dT>())/2.0); q < ellT_l(); q++)
-      result += alpha(q, r) * cdf.aT().get_coefficient(MultiIndex<int,1>(m-2*q));
+      result += alpha(q, r) * cdf.aT().a(m-2*q);
     return result;
   }
 
@@ -991,7 +991,7 @@ namespace WaveletTL
     // [DKU] (3.2.31)
     double result = 0;
     for (int q = (int)ceil((m-ell2T<d,dT>())/2.0); q < ellT_r(); q++)
-      result += alpha(q, r) * cdf.aT().get_coefficient(MultiIndex<int,1>(m-2*q));
+      result += alpha(q, r) * cdf.aT().a(m-2*q);
     return result;
   }
 
@@ -1062,9 +1062,8 @@ namespace WaveletTL
     int startrow = (s0 >= d-2) ? d+ell_l()+ell1<d>()-2*s0 : d+ell_l()+ell1<d>()-2*s0-(d-2-s0);
     for (int col = d-s0; col < nj-(d-s1); col++, startrow+=2) {
       int row = startrow;
-      for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf.a().begin());
-	   it != cdf.a().end(); ++it, row++)
-	Mj0.set_entry(row, col, *it);
+      for (int k = cdf.a().abegin(); k <= cdf.a().aend(); k++, row++)
+	Mj0.set_entry(row, col, cdf.a().a(k));
     }
 
     Mj0.scale(M_SQRT1_2);
@@ -1098,9 +1097,8 @@ namespace WaveletTL
 
     for (unsigned int col = MLTp.column_dimension(); col < nj-MRTp.column_dimension(); col++, startrow+=2) {
       int row = startrow;
-      for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf.aT().begin());
-	   it != cdf.aT().end(); ++it, row++)
-	Mj0Tp.set_entry(row, col, *it);
+      for (int k = cdf.aT().abegin(); k <= cdf.aT().aend(); k++, row++)
+	Mj0Tp.set_entry(row, col, cdf.aT().a(k));
     }
 
     Mj0Tp.scale(M_SQRT1_2);
@@ -1468,9 +1466,8 @@ namespace WaveletTL
     int startrow = d-1-s0;
     for (int col = d-1-s0; col <= nj-d+s1; col++, startrow+=2) {
       int row = startrow;
-      for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf.a().begin());
- 	   it != cdf.a().end(); ++it, row++) {
-  	A.set_entry(row, col, *it);
+      for (int k = cdf.a().abegin(); k <= cdf.a().aend(); k++, row++) {
+  	A.set_entry(row, col, cdf.a().a(k));
       }
     }
     

@@ -1,5 +1,6 @@
 // implementation for cdf_mask.h
 
+#include <cassert>
 #include <cmath>
 #include <Rd/cdf_utils.h>
 #include <algebra/polynomial.h>
@@ -20,6 +21,17 @@ namespace WaveletTL
     // the coefficients of which can be calculated in closed form (faster):
     for (int k(ell1<d>()); k <= ell2<d>(); k++)
       set_coefficient(MultiIndex<int, 1>(k), ldexp(1., 1 - d) * binomial(d, k + d/2));
+  }
+  
+  template <int d>
+  CDFRefinementMask_primal<d>::CDFRefinementMask_primal()
+  {
+    // The primal generators are B-splines of order d, centered around (d mod 2)/2.
+    // So in z-notation, the mask of the primal generators is just
+    //   a(z) = (1+z)^d * z^{-floor(d/2)},
+    // the coefficients of which can be calculated in closed form (faster):
+    for (int k(ell1<d>()); k <= ell2<d>(); k++)
+      RRefinementMask<d+1>::coeffs[k-ell1<d>()] = ldexp(1., 1 - d) * binomial(d, k + d/2);
   }
   
   template <int d, int dt>
@@ -74,6 +86,30 @@ namespace WaveletTL
       set_coefficient(MultiIndex<int, 1>(k), help);
     }
 #endif
-	   
   }
+
+  template <int d, int dt>
+  CDFRefinementMask_dual<d, dt>::CDFRefinementMask_dual()
+  {
+    assert(d >= 1);
+    assert(dt >= 0);
+    assert((d%2) == (dt%2));
+    
+    // Construct the mask of the dual generator, cf. [CDF] for details.
+    // Here we use the explicit formula from [P]
+    for (int k(ell1T<d,dt>()); k <= ell2T<d,dt>(); k++) {
+      double help = 0;
+      for (int n = 0; n <= (d+dt)/2-1; n++)
+	for (int ell = 0; ell <= 2*n; ell++)
+	  help +=
+	    ldexp(1.0, 1-dt-2*n) // typo in [P]
+	    * minus1power(n+ell)
+	    * binomial(dt, k+dt/2-ell+n)
+	    * binomial((d+dt)/2-1+n, n)
+	    * binomial(2*n, ell);
+      
+      RRefinementMask<d+2*dt-1>::coeffs[k-ell1T<d,dt>()] = help;
+    }
+  }
+  
 }

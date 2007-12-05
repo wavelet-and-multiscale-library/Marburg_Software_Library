@@ -20,7 +20,7 @@
 #include <galerkin/sturm_equation.h>
 #include <galerkin/cached_problem.h>
 
-#define _WAVELETTL_CDD1_VERBOSITY 1
+#define _WAVELETTL_CDD1_VERBOSITY 2
 #include <adaptive/cdd1.h>
 
 using namespace std;
@@ -116,7 +116,7 @@ int main()
 
   SturmEquation<Basis> problem(T, basis);
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem);
-  CachedProblemFromFile<SturmEquation<Basis> > cproblem(&problem, "P_3_3_10_A", 10);
+//   CachedProblemFromFile<SturmEquation<Basis> > cproblem(&problem, "P_3_3_10_A", 10);
   
   // initialization with some precomputed DSBasis eigenvalue bounds:
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.34801,  13.3113 ); // d=2, dT=2 (diag-precond.)
@@ -138,7 +138,7 @@ int main()
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  1.88912, 26.2107 ); // d=3, dT=3 (diag-precond.)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  1.87567, 6.78415 ); // d=3, dT=3 (diag-precond.&j0-reduction)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.37738, 26.1895 ); // d=3, dT=3 (2^j-precond.)
-//   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.36044, 6.73983 ); // d=3, dT=3 (2^j-precond.&j0-reduction)
+   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.36044, 6.73983 ); // d=3, dT=3 (2^j-precond.&j0-reduction)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.09306, 104.014 ); // d=3, dT=5 (diag-precond.)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.09369, 26.2107 ); // d=3, dT=5 (diag-precond.&j0-reduction)
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem,  2.7267 , 104.003 ); // d=3, dT=5 (2^j-precond.)

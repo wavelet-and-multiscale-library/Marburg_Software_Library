@@ -271,6 +271,7 @@ namespace WaveletTL
 
     double r = 0;
 
+#if 0
     // first compute supp(psi_lambda)
     typename CUBEBASIS::Support supp;
     support(basis_, lambda, supp);
@@ -327,6 +328,19 @@ namespace WaveletTL
       }
       if (exit) break;
     }
+#endif
+
+//     r = 1;
+//     for (unsigned int i = 0; i < DIM; i++) {
+//       r *= evaluate(*basis_.bases()[i], 0,
+// 		    typename IBASIS::Index(lambda.j(),
+// 					   lambda.e()[i],
+// 					   lambda.k()[i],
+// 					   basis_.bases()[i]),
+// 		    0.5);
+//     }
+
+    r=42;
     
     return r;
   }

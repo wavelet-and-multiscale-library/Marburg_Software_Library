@@ -8,17 +8,6 @@ namespace WaveletTL
   template <class PRIMALMASK, class DUALMASK>
   RBasis<PRIMALMASK, DUALMASK>::RBasis()
   {
-    // setup primal wavelet coefficients
-    //   b_k = (-1)^k*aT_{1-k}
-    for (typename PRIMALMASK::const_iterator it(aT_.begin()); it != aT_.end(); ++it)
-      b_.set_coefficient(MultiIndex<int, 1>(1-it.index()[0]),
-			 (it.index()[0]%2 == 0 ? -(*it) : *it));
-    
-    // setup dual wavelet coefficients
-    //   bT_k = (-1)^k*a_{1-k}
-    for (typename DUALMASK::const_iterator it(a_.begin()); it != a_.end(); ++it)
-      bT_.set_coefficient(MultiIndex<int, 1>(1-it.index()[0]),
-			  (it.index()[0]%2 == 0 ? -(*it) : *it));
   }
 
   template <class PRIMALMASK, class DUALMASK>
@@ -106,30 +95,30 @@ namespace WaveletTL
 	  {
 	    // j>j0, perform multiscale decomposition
 	    
-	    const int aTbegin = aT().begin().index()[0];
-	    const int aTend   = aT().rbegin().index()[0];
-	    const int bTbegin = bT().begin().index()[0];
-	    const int bTend   = bT().rbegin().index()[0];
+	    const int aTbegin = aT().abegin();
+	    const int aTend   = aT().aend();
+	    const int bTbegin = 1-a().aend();
+	    const int bTend   = 1-a().abegin();
 	    
 	    // compute d_{j-1}
   	    for (int l((int)ceil((lambda.k()-bTend)/2.0));
  		 l <= (int)floor((lambda.k()-bTbegin)/2.0); l++)
   	      c[Index(lambda.j()-1, 1, l)] =
-		M_SQRT1_2 * bT().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*l));
-
+		M_SQRT1_2 * bT(lambda.k()-2*l);
+	    
  	    // compute c_{j_0} via recursion
 	    if (lambda.j() == j0-1) {
 	      for (int l((int)ceil((lambda.k()-aTend)/2.0));
 		   l <= (int)floor((lambda.k()-aTbegin)/2.0); l++) {
 		c.add_coefficient(Index(lambda.j()-1, 0, l),
-				  M_SQRT1_2 * aT().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*l)));
+				  M_SQRT1_2 * aT(lambda.k()-2*l));
 	      }
 	    } else {
 	      for (int l((int)ceil((lambda.k()-aTend)/2.0));
 		   l <= (int)floor((lambda.k()-aTbegin)/2.0); l++) {
 		InfiniteVector<double, Index> d;
 		decompose_1(Index(lambda.j()-1, 0, l), j0, d);
-		c.add(M_SQRT1_2 * aT().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*l)), d);
+		c.add(M_SQRT1_2 * aT(lambda.k()-2*l), d);
 	      }
 	    }
 	  }
@@ -161,30 +150,30 @@ namespace WaveletTL
 	  {
 	    // j>j0, perform multiscale decomposition
 	    
-	    const int abegin = a().begin().index()[0];
-	    const int aend   = a().rbegin().index()[0];
-	    const int bbegin = b().begin().index()[0];
-	    const int bend   = b().rbegin().index()[0];
+	    const int abegin = a().abegin();
+	    const int aend   = a().aend();
+	    const int bbegin = 1-aT().aend();
+	    const int bend   = 1-aT().abegin();
 	    
 	    // compute d_{j-1}
  	    for (int l((int)ceil((lambda.k()-bend)/2.0));
 		 l <= (int)floor((lambda.k()-bbegin)/2.0); l++)
  	      c[Index(lambda.j()-1, 1, l)] =
-		M_SQRT1_2 * b().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*l));
+		M_SQRT1_2 * b(lambda.k()-2*l);
 	    
 	    // compute c_{j_0} via recursion
 	    if (lambda.j() == j0-1) {
 	      for (int l((int)ceil((lambda.k()-aend)/2.0));
 		   l <= (int)floor((lambda.k()-abegin)/2.0); l++) {
 		c.add_coefficient(Index(lambda.j()-1, 0, l),
-				  M_SQRT1_2 * a().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*l)));
+				  M_SQRT1_2 * a(lambda.k()-2*l));
 	      }
 	    } else {
 	      for (int l((int)ceil((lambda.k()-aend)/2.0));
 		   l <= (int)floor((lambda.k()-abegin)/2.0); l++) {
 		InfiniteVector<double, Index> d;
 		decompose_t_1(Index(lambda.j()-1, 0, l), j0, d);
-		c.add(M_SQRT1_2 * a().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*l)), d);
+		c.add(M_SQRT1_2 * a(lambda.k()-2*l), d);
 	      }
 	    }
 	  }
@@ -206,22 +195,22 @@ namespace WaveletTL
       {
 	// reconstruct by recursion
 
-	const int abegin = a().begin().index()[0];
-	const int aend   = a().rbegin().index()[0];
-	const int bbegin = b().begin().index()[0];
-	const int bend   = b().rbegin().index()[0];
+	const int abegin = a().abegin();
+	const int aend   = a().aend();
+	const int bbegin = 1-aT().aend();
+	const int bend   = 1-aT().abegin();
 
 	if (lambda.e() == 0)
 	  {
 	    if (lambda.j()+1>=j) {
 	      for (int l(2*lambda.k()+abegin); l <= 2*lambda.k()+aend; l++)
 		c[Index(lambda.j()+1, 0, l)]
-		  += M_SQRT1_2 * a().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k()));
+		  += M_SQRT1_2 * a(l-2*lambda.k());
 	    } else {
 	      for (int l(2*lambda.k()+abegin); l <= 2*lambda.k()+aend; l++) {
 		InfiniteVector<double, Index> d;
 		reconstruct_1(Index(lambda.j()+1, 0, l), j, d);
-		c.add(M_SQRT1_2 * a().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k())), d);
+		c.add(M_SQRT1_2 * a(l-2*lambda.k()), d);
 	      }
 	    }
  	  }
@@ -230,12 +219,12 @@ namespace WaveletTL
 	    if (lambda.j()+1>=j) {
 	      for (int l(2*lambda.k()+bbegin); l <= 2*lambda.k()+bend; l++)
 		c[Index(lambda.j()+1, 0, l)]
-		  += M_SQRT1_2 * b().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k()));
+		  += M_SQRT1_2 * b(l-2*lambda.k());
 	    } else {
 	      for (int l(2*lambda.k()+bbegin); l <= 2*lambda.k()+bend; l++) {
 		InfiniteVector<double, Index> d;
 		reconstruct_1(Index(lambda.j()+1, 0, l), j, d);
-		c.add(M_SQRT1_2 * b().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k())), d);
+		c.add(M_SQRT1_2 * b(l-2*lambda.k()), d);
  	      }
 	    }
 	  }
@@ -257,23 +246,23 @@ namespace WaveletTL
       {
 	// reconstruct by recursion
 
-	const int aTbegin = aT().begin().index()[0];
-	const int aTend   = aT().rbegin().index()[0];
-	const int bTbegin = bT().begin().index()[0];
-	const int bTend   = bT().rbegin().index()[0];
+	const int aTbegin = aT().abegin();
+	const int aTend   = aT().aend();
+	const int bTbegin = 1-a().aend();
+	const int bTend   = 1-a().abegin();
 	    
 	if (lambda.e() == 0)
 	  {
 	    if (lambda.j()+1>=j) {
 	      for (int l(2*lambda.k()+aTbegin); l <= 2*lambda.k()+aTend; l++) {
 		c[Index(lambda.j()+1, 0, l)]
-		  += M_SQRT1_2 * aT().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k()));
+		  += M_SQRT1_2 * aT(l-2*lambda.k());
 	      }
 	    } else {
 	      for (int l(2*lambda.k()+aTbegin); l <= 2*lambda.k()+aTend; l++) {
  		InfiniteVector<double, Index> d;
  		reconstruct_t_1(Index(lambda.j()+1, 0, l), j, d);
- 		c.add(M_SQRT1_2 * aT().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k())), d);
+ 		c.add(M_SQRT1_2 * aT(l-2*lambda.k()), d);
  	      }
 	    }
  	  }
@@ -282,13 +271,13 @@ namespace WaveletTL
 	    if (lambda.j()+1>=j) {
 	      for (int l(2*lambda.k()+bTbegin); l <= 2*lambda.k()+bTend; l++) {
 		c[Index(lambda.j()+1, 0, l)]
-		  += M_SQRT1_2 * bT().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k()));
+		  += M_SQRT1_2 * bT(l-2*lambda.k());
 	      }
 	    } else {
 	      for (int l(2*lambda.k()+bTbegin); l <= 2*lambda.k()+bTend; l++) {
  		InfiniteVector<double, Index> d;
  		reconstruct_t_1(Index(lambda.j()+1, 0, l), j, d);
- 		c.add(M_SQRT1_2 * bT().get_coefficient(MultiIndex<int, 1>(l-2*lambda.k())), d);
+ 		c.add(M_SQRT1_2 * bT(l-2*lambda.k()), d);
  	      }
 	    }
 	  }
@@ -311,20 +300,20 @@ namespace WaveletTL
       }
     
     return (primal
-	    ? a().evaluate(MultiIndex<int, 1>(derivative),
+	    ? a().evaluate(derivative,
 			   lambda.j(),
-			   MultiIndex<int, 1>(lambda.k()),
-			   MultiIndex<int, 1>(A),
-			   MultiIndex<int, 1>(B),
+			   lambda.k(),
+			   A,
+			   B,
 			   resolution)
- 	    : aT().evaluate(MultiIndex<int, 1>(derivative),
+ 	    : aT().evaluate(derivative,
 			    lambda.j(),
-			    MultiIndex<int, 1>(lambda.k()),
-			    MultiIndex<int, 1>(A),
-			    MultiIndex<int, 1>(B),
+			    lambda.k(),
+			    A,
+			    B,
 			    resolution));
   }
-
+  
   template <class PRIMALMASK, class DUALMASK>
   SampledMapping<1>
   RBasis<PRIMALMASK, DUALMASK>::evaluate(const unsigned int derivative,

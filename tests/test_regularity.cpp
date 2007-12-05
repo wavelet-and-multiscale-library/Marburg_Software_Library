@@ -16,8 +16,10 @@ int main()
 {
   cout << "Computing the (critical) Sobolev regularity of some univariate refinable functions..." << endl;
 
-  cout << "- Sobolev regularity of the Haar function: " << endl;
-  cout << Sobolev_regularity<HaarMask>() << endl;
+  cout << "UNDER CONSTRUCTION!!!" << endl;
+
+//   cout << "- Sobolev regularity of the Haar function: " << endl;
+//   cout << Sobolev_regularity<HaarMask>() << endl;
 
   return 0;
 }

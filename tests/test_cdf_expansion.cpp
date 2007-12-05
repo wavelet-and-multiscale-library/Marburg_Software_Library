@@ -4,10 +4,8 @@
 #include <algebra/vector.h>
 #include <numerics/gauss_data.h>
 
-#include <Rd/r_index.h>
 #include <Rd/cdf_basis.h>
 #include <Rd/cdf_utils.h>
-#include <Rd/cdf_evaluate.h>
 
 using namespace std;
 using namespace WaveletTL;
@@ -34,6 +32,8 @@ class TestPolynomial
 template <int d, int dT>
 double integrate(const Function<1>& f, const RIndex& lambda)
 {
+  CDFBasis<d,dT> basis;
+  
   double r = 0;
 
   const int j = lambda.j() + lambda.e();
@@ -60,10 +60,10 @@ double integrate(const Function<1>& f, const RIndex& lambda)
 	  const double t = gauss_points[(patch-k1)*N_Gauss+n];
 	  
 	  const double ft = f.value(Point<1>(t));
-	  if (ft != 0)
-	    r += ft
-	      * evaluate<d,dT>(0, lambda, t)
-	      * gauss_weight;
+ 	  if (ft != 0)
+ 	    r += ft
+ 	      * basis.evaluate(0, lambda, t)
+ 	      * gauss_weight;
 	}
     }
   
@@ -86,17 +86,18 @@ int main()
 
   const int d = 2;
   const int dT = 4; // be sure to use a continuous dual here!
+  CDFBasis<d,dT> basis;
+  typedef CDFBasis<d,dT>::Index Index;
 
-  InfiniteVector<double,RIndex> coeffs;
+  InfiniteVector<double,Index> coeffs;
   const int j = 1;
   for (int k = -12*(1<<j); k <= 12*(1<<j); k++)
-    coeffs[RIndex(j,0,k)] = integrate<d,dT>(p,RIndex(j,0,k));
+    coeffs[Index(j,0,k)] = integrate<d,dT>(p,Index(j,0,k));
 
-  cout << "- integrals of p against some primal generators:" << endl
-       << coeffs << endl;
+//   cout << "- integrals of p against some primal generators:" << endl
+//        << coeffs << endl;
 
   cout << "- evaluating this linear combination of dual generators yields the pointwise error on [-8,8]" << endl;
-  CDFBasis<d,dT> basis;
   SampledMapping<1> s2(basis.evaluate(0, coeffs, false, -8, 8, 3));
   Vector<double> error(s2.points().size());
   for (unsigned int i = 0; i < error.size(); i++)

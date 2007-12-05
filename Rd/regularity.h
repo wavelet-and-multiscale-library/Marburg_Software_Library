@@ -40,6 +40,8 @@ namespace WaveletTL
     refinable function, see [V] or [JZ] for details.
     The template parameter class MASK should provide a method Strang_Fix_order().
 
+    UNDER CONSTRUCTION!!!
+
     References:
 
     [JZ] Jia/Zhang: Spectral properties of the transition operator associated to a

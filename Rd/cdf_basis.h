@@ -11,17 +11,36 @@
 #define _WAVELETTL_CDF_BASIS_H
 
 #include <Rd/cdf_mask.h>
-#include <Rd/cdf_utils.h>
 #include <Rd/r_basis.h>
 
 namespace WaveletTL
 {
-  // since C++ does not allow typedef template, we use this simple wrapper class:
+  /*!
+    Biorthogonal wavelet basis on R as introduced in [CDF].
+    In addition to the generic routines from RBasis,
+    point evaluation of the primal generators and wavelets is provided.
+
+    References:
+    [CDF] Cohen, Daubechies, Feauveau: Biorthogonal bases of compactly supported wavelets,
+          Comm. Pure Appl. Math. 45(1992), 485--560.
+   */
   template <int d, int dt>
   class CDFBasis
-    : public RBasis<CDFMask_primal<d>, CDFMask_dual<d, dt> >
+    : public virtual RBasis<CDFRefinementMask_primal<d>, CDFRefinementMask_dual<d, dt> >
   {
+  public:
+    // use generic point evaluation routines on dyadic grids from RBasis
+    using RBasis<CDFRefinementMask_primal<d>, CDFRefinementMask_dual<d, dt> >::evaluate;
+
+    /*!
+      point evaluation of (derivatives of) primal generators and wavelets
+    */
+    double evaluate(const unsigned int derivative,
+		    const RIndex& lambda,
+		    const double x) const;
   };
 }
+
+#include <Rd/cdf_basis.cpp>
 
 #endif

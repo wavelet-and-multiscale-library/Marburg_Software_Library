@@ -10,34 +10,25 @@
 #ifndef _WAVELETTL_HAAR_MASK_H
 #define _WAVELETTL_HAAR_MASK_H
 
-#include <iostream>
-#include <algebra/multi_laurent_polynomial.h>
-#include <utils/multiindex.h>
-
-using MathTL::MultivariateLaurentPolynomial;
-using MathTL::MultiIndex;
+#include <Rd/r_mask.h>
 
 namespace WaveletTL
 {
   class HaarMask
-    : public virtual MultivariateLaurentPolynomial<double, 1>
+    : public virtual RRefinementMask<2>
   {
   public:
-    HaarMask()
-    {
-      set_coefficient(MultiIndex<int, 1>(0), 1);
-      set_coefficient(MultiIndex<int, 1>(1), 1);
-    }
-
-    /*!
-      Strang-Fix order, i.e., degree of polynomial reproduction (+1)
-    */
+    //! default constructor, sets up the mask
+    HaarMask() { RRefinementMask<2>::coeffs[0] = RRefinementMask<2>::coeffs[1] = 1.0; }
+    
+    //! Strang-Fix order, i.e., degree of polynomial reproduction (+1)
     static unsigned int Strang_Fix_order() { return 1; }
+    
+    //! critical L_2 Sobolev regularity
+    static double regularity() { return 0.5; }  
 
-    /*!
-      critical Sobolev regularity
-    */
-    static double regularity() { return 0.5; }
+    //! index of first nontrivial refinement coefficient (inherited from RRefinementMask)
+    const int abegin() const { return 0; }
   };
 }
 

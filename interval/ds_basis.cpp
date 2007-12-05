@@ -5,7 +5,6 @@
 
 #include <numerics/matrix_decomp.h>
 
-#include <Rd/haar_mask.h>
 #include <Rd/cdf_mask.h>
 #include <Rd/dm_mask.h>
 #include <Rd/refinable.h>
@@ -660,7 +659,7 @@ namespace WaveletTL
 	  double help = 0;
 	  for (unsigned int s = 0; s < r; s++)
 	    help += binomial(r, s) * intpower(k, r-s) * alpha(0, s);
-	  result += cdf.a().get_coefficient(MultiIndex<int,1>(k)) * help;
+	  result += cdf.a().a(k) * help;
 	}
 	result /= (double)((1<<(r+1))-2);
       } else {
@@ -685,7 +684,7 @@ namespace WaveletTL
 	  double help = 0;
 	  for (unsigned int s = 0; s < r; s++)
 	    help += binomial(r, s) * intpower(k, r-s) * alphaT(0, s);
-	  result += cdf.aT().get_coefficient(MultiIndex<int,1>(k)) * help;
+	  result += cdf.aT().a(k) * help;
 	}
 	result /= (double)((1<<(r+1))-2);
       } else {
@@ -703,7 +702,7 @@ namespace WaveletTL
     // [DKU] (3.2.31)
     double result = 0;
     for (int q = (int)ceil((m-ell2T<d,dT>())/2.0); q < ellT_l()-sT0; q++)
-      result += alpha(q, r) * cdf.aT().get_coefficient(MultiIndex<int,1>(m-2*q));
+      result += alpha(q, r) * cdf.aT().a(m-2*q);
     return result * M_SQRT1_2;
   }
 
@@ -713,7 +712,7 @@ namespace WaveletTL
     // [DKU] (3.2.31)
     double result = 0;
     for (int q = (int)ceil((m-ell2<d>())/2.0); q < ell_l()-s0; q++)
-      result += alphaT(q, r) * cdf.a().get_coefficient(MultiIndex<int,1>(m-2*q));
+      result += alphaT(q, r) * cdf.a().a(m-2*q);
     return result * M_SQRT1_2;
   }
 
@@ -723,7 +722,7 @@ namespace WaveletTL
     // [DKU] (3.2.31)
     double result = 0;
     for (int q = (int)ceil((m-ell2T<d,dT>())/2.0); q < ellT_r()-sT1; q++)
-      result += alpha(q, r) * cdf.aT().get_coefficient(MultiIndex<int,1>(m-2*q));
+      result += alpha(q, r) * cdf.aT().a(m-2*q);
     return result * M_SQRT1_2;
   }
 
@@ -733,7 +732,7 @@ namespace WaveletTL
     // [DKU] (3.2.31)
     double result = 0;
     for (int q = (int)ceil((m-ell2<d>())/2.0); q < ell_r()-s1; q++)
-      result += alphaT(q, r) * cdf.a().get_coefficient(MultiIndex<int,1>(m-2*q));
+      result += alphaT(q, r) * cdf.a().a(m-2*q);
     return result * M_SQRT1_2;
   }
 
@@ -751,7 +750,7 @@ namespace WaveletTL
     // 1. compute the integrals
     //      z(s,t) = \int_0^1\phi(x-s)\tilde\phi(x-t)\,dx
     //    exactly with the [DM] trick
-    MultivariateRefinableFunction<DMMask2<HaarMask, CDFMask_primal<d>, CDFMask_dual<d,dT> >,2> zmask;
+    MultivariateRefinableFunction<DMMask2<CDFMask_primal<1>, CDFMask_primal<d>, CDFMask_dual<d,dT> >,2> zmask;
     InfiniteVector<double, MultiIndex<int,2> > zvalues(zmask.evaluate());
 
     //     cout << "z=" << endl << zvalues << endl;
@@ -1160,7 +1159,7 @@ namespace WaveletTL
     //     cout << "CRAT=" << endl << CRAT << endl;
 
     // z(s,t) = \int_0^1\phi(x-s)\tilde\phi(x-t)\,dx
-    MultivariateRefinableFunction<DMMask2<HaarMask, CDFMask_primal<d>, CDFMask_dual<d,dT> >,2> zmask;
+    MultivariateRefinableFunction<DMMask2<CDFMask_primal<1>, CDFMask_primal<d>, CDFMask_dual<d,dT> >,2> zmask;
     InfiniteVector<double, MultiIndex<int,2> > z(zmask.evaluate());
 
     //     cout << "z=" << endl << z << endl;
@@ -1463,9 +1462,8 @@ namespace WaveletTL
     int startrow = d+ell_l()+ell1<d>()-2*s0;
     for (int col = d-s0; col < nj-(d-s1); col++, startrow+=2) {
       int row = startrow;
-      for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf.a().begin());
-	   it != cdf.a().end(); ++it, row++)
-	Mj0.set_entry(row, col, M_SQRT1_2 * *it);
+      for (int k = cdf.a().abegin(); k <= cdf.a().aend(); k++, row++)
+	Mj0.set_entry(row, col, M_SQRT1_2 * cdf.a().a(k));
     }
 
     //     cout << "Mj0=" << endl << Mj0 << endl;
@@ -1491,9 +1489,8 @@ namespace WaveletTL
     int startrow = dT+ellT_l()+ell1T<d,dT>()-2*sT0;
     for (int col = dT-sT0; col < nj-(dT-sT1); col++, startrow+=2) {
       int row = startrow;
-      for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf.aT().begin());
-	   it != cdf.aT().end(); ++it, row++)
-	Mj0Tp.set_entry(row, col, M_SQRT1_2 * *it);
+      for (int k = cdf.aT().abegin(); k <= cdf.aT().aend(); k++, row++)
+	Mj0Tp.set_entry(row, col, M_SQRT1_2 * cdf.aT().a(k));
     }
     
     //     cout << "Mj0Tp=" << endl << Mj0Tp << endl;
@@ -1566,9 +1563,8 @@ namespace WaveletTL
     int startrow = d+ell_l()+ell1<d>()-2*s0;
     for (int col = d-s0; col < nj-(d-s1); col++, startrow+=2) {
       int row = startrow;
-      for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(cdf.a().begin());
-	   it != cdf.a().end(); ++it, row++) {
-	A.set_entry(row, col, M_SQRT1_2 * *it);
+      for (int k = cdf.a().abegin(); k <= cdf.a().aend(); k++, row++) {
+	A.set_entry(row, col, M_SQRT1_2 * cdf.a().a(k));
       }
     }
     

@@ -46,19 +46,11 @@ int main()
   cout << "- constructing a CDF basis with d=";
   const int d = 2, dt = 2;
   cout << d << ", dt=" << dt << endl;
-  RBasis<CDFMask_primal<d>, CDFMask_dual<d, dt> > basis;
+  RBasis<CDFRefinementMask_primal<d>, CDFRefinementMask_dual<d, dt> > basis;
   cout << "  + primal mask:" << endl;
   cout << basis.a() << endl;
   cout << "  + dual mask:" << endl;
   cout << basis.aT() << endl;
-  cout << "  + primal wavelet mask:" << endl;
-  for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(basis.b().begin());
-       it != basis.b().end(); ++it)
-    cout << "k=" << it.index()[0] << ": " << *it << endl;
-  cout << "  + dual wavelet mask:" << endl;
-  for (MultivariateLaurentPolynomial<double, 1>::const_iterator it(basis.bT().begin());
-       it != basis.bT().end(); ++it)
-    cout << "k=" << it.index()[0] << ": " << *it << endl;
 
   InfiniteVector<double, RIndex> coeff;
   coeff[RIndex(2,0,0)] = 1.0;

@@ -25,6 +25,9 @@ tests1::
 tests2::
 	cd tests; $(MAKE) tests2
 
+tests2a::
+	cd tests; $(MAKE) tests2a
+
 tests3::
 	cd tests; $(MAKE) tests3
 

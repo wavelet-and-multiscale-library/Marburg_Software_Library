@@ -13,11 +13,20 @@
 #include <Rd/refinable.h>
 #include <Rd/r_index.h>
 #include <algebra/infinite_vector.h>
+#include <utils/tiny_tools.h>
 
 namespace WaveletTL
 {
   /*!
-    Abstract base class for (bi)orthogonal wavelet bases in L_2(\mathbb R).
+    Base class for (bi)orthogonal wavelet bases in L_2(\mathbb R).
+
+    Minimal signature of the mask template parameters modelling 1D refinable functions:
+    
+    const int abegin() const;          // inherited from RRefinementMask
+    const int aend() const;            // dito
+    const double a(const int k) const; // dito
+    static double regularity() const;
+    static unsigned int primal_polynomial_order();
   */
   template <class PRIMALMASK, class DUALMASK = PRIMALMASK>
   class RBasis
@@ -50,24 +59,34 @@ namespace WaveletTL
     static inline unsigned int primal_vanishing_moments() { return DUALMASK::Strang_Fix_order(); }
 
     /*!
-      reading access to the primal mask
+      reading access to the primal refinement mask (a_k)
     */
-    inline const RefinableFunction<PRIMALMASK>& a() const { return a_; }
+    inline const RefinableFunction<PRIMALMASK>& a() const { return primal; }
 
     /*!
-      reading access to the dual mask
+      reading access to the primal refinement mask (a_k)
     */
-    inline const RefinableFunction<DUALMASK>& aT() const { return aT_; }
+    inline const double a(const int k) const { return primal.a(k); }
 
     /*!
-      reading access to the primal wavelet coefficients
+      reading access to the dual refinement mask (aT_k)
     */
-    inline const MultivariateLaurentPolynomial<double, 1>& b() const { return b_; }
+    inline const RefinableFunction<DUALMASK>& aT() const { return dual; }
+
+    /*!
+      reading access to the dual refinement mask (aT_k)
+    */
+    inline const double aT(const int k) const { return dual.a(k); }
+
+    /*!
+      reading access to the primal wavelet mask (b_k)
+    */
+    inline const double b(const int k) const { return minus1power(k)*aT(1-k); }
 
     /*!
       reading access to the dual wavelet coefficients
     */
-    inline const MultivariateLaurentPolynomial<double, 1>& bT() const { return bT_; }
+    inline const double bT(const int k) const { return minus1power(k)*a(1-k); }
 
     //! DECOMPOSE routine, simple version
     /*!
@@ -183,25 +202,11 @@ namespace WaveletTL
 			       const int resolution) const;
 
   protected:
-    /*!
-      one instance of the primal mask
-    */
-    RefinableFunction<PRIMALMASK> a_;
+    //! one instance of a refinable function according to the primal mask
+    RefinableFunction<PRIMALMASK> primal;
 
-    /*!
-      one instance of the dual mask
-    */
-    RefinableFunction<DUALMASK> aT_;
-
-    /*!
-      primal wavelet coefficients
-    */
-    MultivariateLaurentPolynomial<double, 1> b_;
-
-    /*!
-      dual wavelet coefficients
-    */
-    MultivariateLaurentPolynomial<double, 1> bT_;
+    //! one instance of a refinable function according to the dual mask
+    RefinableFunction<DUALMASK> dual;
   };
 }
 

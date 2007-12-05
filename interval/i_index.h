@@ -189,6 +189,28 @@ namespace WaveletTL
   template <class IBASIS>
   int last_wavelet_num(const IBASIS* basis, const int j);
 
+
+  
+  
+  //
+  //
+  // from here on new version of IntervalIndex, without references to an instance of the basis
+
+
+  template <class IBASIS>
+  class IntervalIndex2
+  {
+  public:
+    /*!
+      default constructor
+    */
+    IntervalIndex2();
+
+  protected:
+    //! scale, type, translation
+    int j_, e_, k_;  
+  };
+
 }
 
 // include implementation

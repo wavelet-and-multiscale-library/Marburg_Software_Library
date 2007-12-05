@@ -171,6 +171,14 @@ namespace MathTL
 		   const int resolution);
 
     /*!
+      constructor from given values on 2^{-resolution}\mathbb Z, clipped to [a,b]
+    */
+    SampledMapping(const int a,
+		   const int b,
+		   const InfiniteVector<C, int>& values,
+		   const int resolution);
+
+    /*!
       constructor from given tensor product values on a uniform subgrid
       of the cuboid <a,b>, a,b integer vectors,
       the number of grid points in the i-th direction is taken from the length

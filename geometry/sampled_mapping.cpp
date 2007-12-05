@@ -49,6 +49,18 @@ namespace MathTL
   }
 
   template <class C>
+  SampledMapping<1,C>::SampledMapping(const int a,
+				      const int b,
+				      const InfiniteVector<C, int>& values,
+				      const int resolution)
+    : Grid<1>(a, b, (1<<resolution)*(b-a))
+  {
+    values_.resize(Grid<1>::size());
+    for (int k(a<<resolution), n(0); k <= (b<<resolution); k++, n++)
+      values_[n] = values.get_coefficient(k);
+  }
+  
+  template <class C>
   SampledMapping<1,C>::SampledMapping(const Point<1,C>& a,
 				      const Point<1,C>& b,
 				      const FixedArray1D<Array1D<C>,1>& values)

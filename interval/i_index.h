@@ -201,15 +201,43 @@ namespace WaveletTL
   class IntervalIndex2
   {
   public:
-    /*!
-      default constructor
-    */
+    //! default constructor
     IntervalIndex2();
+
+    //! scale j
+    const int j() const { return j_; }
+
+    //! type index type
+    typedef int type_type;
+
+    //! type e
+    const type_type& e() const { return e_; }
+
+    //! translation index type
+    typedef int translation_type;
+
+    //! translation index k
+    const translation_type& k() const { return k_; }
 
   protected:
     //! scale, type, translation
     int j_, e_, k_;  
   };
+
+  //! stream output
+  template <class IBASIS>
+  std::ostream& operator << (std::ostream& os, const IntervalIndex2<IBASIS>& lambda)
+  {
+    using namespace std;
+    os << "("
+       << lambda.j()
+       << ","
+       << lambda.e()
+       << ","
+       << lambda.k()
+       << ")";
+    return os;
+  }
 
 }
 

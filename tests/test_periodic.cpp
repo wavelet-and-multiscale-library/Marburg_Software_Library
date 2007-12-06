@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <Rd/daubechies_mask.h>
 #include <Rd/r_basis.h>
 #include <Rd/cdf_basis.h>
 #include <interval/periodic.h>
@@ -13,7 +12,9 @@ int main()
 {
   cout << "Testing periodic wavelet bases ..." << endl;
 
-  typedef PeriodicBasis<RBasis<DaubechiesMask<3> > > Basis;
+  cout << "* a periodic Haar basis:" << endl;
+
+  typedef PeriodicBasis<CDFBasis<1, 1> > Basis;
   typedef Basis::Index Index;
   Basis basis;
 
@@ -75,6 +76,7 @@ int main()
 #endif
 
 
+#if 0
   // ---------------------------------------------------------------------------
 
   cout << "* a periodic CDF basis:" << endl;
@@ -90,7 +92,6 @@ int main()
   cout << "- leftmost wavelet on the coarsest level: " << first_wavelet(&basis2, basis2.j0()) << endl;
   cout << "- rightmost wavelet on the coarsest level: " << last_wavelet(&basis2, basis2.j0()) << endl;
 
-#if 0
   for (int level = basis2.j0()+1; level <= basis2.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -113,9 +114,7 @@ int main()
 	  if (index == last_generator(&basis2, level)) break;
 	}
     }
-#endif
 
-#if 0
   for (int level = basis2.j0()+1; level <= basis2.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -142,7 +141,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   cout << "- create some test index set..." << endl;
   InfiniteVector<double, Index2> gcoeffs, coeffs;
   gcoeffs[++(++first_generator(&basis2, basis2.j0()+3))] = 1.0;

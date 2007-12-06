@@ -5,13 +5,6 @@
 namespace WaveletTL
 {
   template <class RBASIS>
-  PeriodicBasis<RBASIS>::PeriodicBasis() {
-    const int alength  = rbasis.a().rbegin().index()[0] - rbasis.a().begin().index()[0];
-    const int aTlength = rbasis.aT().rbegin().index()[0] - rbasis.aT().begin().index()[0];
-    j0_ = (int) ceil(log((double) std::max(alength, aTlength))/M_LN2);
-  }
-
-  template <class RBASIS>
   void
   PeriodicBasis<RBASIS>::decompose(const InfiniteVector<double, Index>& c,
 				   const int j0,

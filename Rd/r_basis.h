@@ -32,62 +32,46 @@ namespace WaveletTL
   class RBasis
   {
   public:
-    /*!
-      default constructor
-    */
+    //! default constructor
     RBasis();
 
-    /*!
-      wavelet index class
-    */
+    //! provide access to the template parameters
+    typedef PRIMALMASK primal_mask;
+    typedef DUALMASK   dual_mask;
+    
+    //! wavelet index class
     typedef RIndex Index;
 
-    /*!
-      critical Sobolev regularity for the primal generators/wavelets
-    */
-    static inline double primal_regularity() { return PRIMALMASK::regularity(); }
+    //! critical Sobolev regularity for the primal generators/wavelets
+    static inline double primal_regularity() { return primal_mask::regularity(); }
 
-    /*!
+    /*/
       degree of polynomial reproduction for the primal generators/wavelets
       == number of vanishing moments for the dual wavelets
     */
-    static unsigned int primal_polynomial_degree() { return DUALMASK::Strang_Fix_order(); }
+    static unsigned int primal_polynomial_degree() { return dual_mask::Strang_Fix_order(); }
 
-    /*!
-      number of vanishing moments for the primal wavelets
-    */
-    static inline unsigned int primal_vanishing_moments() { return DUALMASK::Strang_Fix_order(); }
+    //! number of vanishing moments for the primal wavelets
+    static inline unsigned int primal_vanishing_moments() { return dual_mask::Strang_Fix_order(); }
 
-    /*!
-      reading access to the primal refinement mask (a_k)
-    */
+    //! reading access to the primal refinement mask (a_k)
     inline const RefinableFunction<PRIMALMASK>& a() const { return primal; }
 
-    /*!
-      reading access to the primal refinement mask (a_k)
-    */
+    //! reading access to the primal refinement mask (a_k)
     inline const double a(const int k) const { return primal.a(k); }
 
-    /*!
-      reading access to the dual refinement mask (aT_k)
-    */
+    //! reading access to the dual refinement mask (aT_k)
     inline const RefinableFunction<DUALMASK>& aT() const { return dual; }
 
-    /*!
-      reading access to the dual refinement mask (aT_k)
-    */
+    //! reading access to the dual refinement mask (aT_k)
     inline const double aT(const int k) const { return dual.a(k); }
 
-    /*!
-      reading access to the primal wavelet mask (b_k)
-    */
+    //! reading access to the primal wavelet mask (b_k)
     inline const double b(const int k) const { return minus1power(k)*aT(1-k); }
 
-    /*!
-      reading access to the dual wavelet coefficients
-    */
+    //! reading access to the dual wavelet coefficients
     inline const double bT(const int k) const { return minus1power(k)*a(1-k); }
-
+    
     //! DECOMPOSE routine, simple version
     /*!
       Constructs for a given single wavelet index lambda a coefficient set c,

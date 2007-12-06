@@ -39,6 +39,9 @@ namespace WaveletTL
     friend std::ostream& operator << <L>(std::ostream& os, const RRefinementMask<L>& m);
 
   public:
+    //! make template argument accessible
+    static const unsigned int length = L;
+    
     //! virtual destructor
     virtual ~RRefinementMask() {}
     

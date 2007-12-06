@@ -16,7 +16,6 @@
 #include <algebra/infinite_vector.h>
 
 #include <interval/i_index.h>
-#include <interval/i_basis.h>
 
 using MathTL::InfiniteVector;
 
@@ -39,14 +38,19 @@ namespace WaveletTL
   class PeriodicBasis
   {
   public:
-    //! default constructor
-    PeriodicBasis();
-    
     //! wavelet index class
     typedef IntervalIndex2<PeriodicBasis<RBASIS> > Index;
 
-    //! coarsest possible level j0
-    static const int j0() const { return j0_; }
+    /*!
+      coarsest possible level j0;
+      j0 is chosen such large that the primal and dual wavelets on level j0
+      do not "touch themselves". Note that
+        |\supp\psi| = |\supp\tilde\psi| = (L+Lt)/2 - 1
+      so that it suffices to choose 2^{-j0}((L+Lt)/2-1) <= 1
+    */
+    static const int j0() {
+      return (int) ceil(log((RBASIS::primal_mask::length + RBASIS::dual_mask::length)/2-1)/M_LN2);
+    }
     
     //! size_type, for convenience
     typedef Vector<double>::size_type size_type;
@@ -77,18 +81,18 @@ namespace WaveletTL
     static inline unsigned int primal_vanishing_moments() { return RBASIS::primal_vanishing_moments(); }
 
     //! bounds for the generator indices
-    inline const int DeltaLmin() const { return 0; }
-    inline const int DeltaRmax(const int j) const { return (1<<j) - 1; }
+    static const int DeltaLmin() { return 0; }
+    static const int DeltaRmax(const int j) { return (1<<j) - 1; }
 
     //! bounds for the wavelet indices
-    inline const int Nablamin() const { return 0; }
-    inline const int Nablamax(const int j) const { return (1<<j) - 1; }
+    static const int Nablamin() { return 0; }
+    static const int Nablamax(const int j) { return (1<<j) - 1; }
     
     //! size of Delta_j
-    inline const int Deltasize(const int j) const { return 1<<j; }
+    static const int Deltasize(const int j) { return 1<<j; }
     
     //! size of Nabla_j
-    inline const int Nablasize(const int j) const { return 1<<j; }
+    static const int Nablasize(const int j) { return 1<<j; }
 
     //! DECOMPOSE routine, simple version
     /*!
@@ -173,9 +177,6 @@ namespace WaveletTL
   protected:
     //! an instance of the corresponding basis on R
     RBASIS rbasis;
-
-    //! coarsest possible level
-    int j0_;
   };
 }
 

@@ -154,7 +154,7 @@ int main()
   
   cout << "* plotting the coefficient set..." << endl;
   std::ofstream fs("coefficient_plot.m");
-  plot_indices(&basis2, coeffs, basis2.j0()+2, fs);
+  plot_indices2(&basis2, coeffs, basis2.j0()+2, fs);
   fs.close();
   cout << "  ...done!" << endl;
 #endif

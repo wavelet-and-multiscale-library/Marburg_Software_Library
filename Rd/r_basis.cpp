@@ -95,10 +95,10 @@ namespace WaveletTL
 	  {
 	    // j>j0, perform multiscale decomposition
 	    
-	    const int aTbegin = aT().abegin();
-	    const int aTend   = aT().aend();
-	    const int bTbegin = 1-a().aend();
-	    const int bTend   = 1-a().abegin();
+	    const int aTbegin = aT().begin();
+	    const int aTend   = aT().end();
+	    const int bTbegin = 1-a().end();
+	    const int bTend   = 1-a().begin();
 	    
 	    // compute d_{j-1}
   	    for (int l((int)ceil((lambda.k()-bTend)/2.0));
@@ -150,10 +150,10 @@ namespace WaveletTL
 	  {
 	    // j>j0, perform multiscale decomposition
 	    
-	    const int abegin = a().abegin();
-	    const int aend   = a().aend();
-	    const int bbegin = 1-aT().aend();
-	    const int bend   = 1-aT().abegin();
+	    const int abegin = a().begin();
+	    const int aend   = a().end();
+	    const int bbegin = 1-aT().end();
+	    const int bend   = 1-aT().begin();
 	    
 	    // compute d_{j-1}
  	    for (int l((int)ceil((lambda.k()-bend)/2.0));
@@ -195,10 +195,10 @@ namespace WaveletTL
       {
 	// reconstruct by recursion
 
-	const int abegin = a().abegin();
-	const int aend   = a().aend();
-	const int bbegin = 1-aT().aend();
-	const int bend   = 1-aT().abegin();
+	const int abegin = a().begin();
+	const int aend   = a().end();
+	const int bbegin = 1-aT().end();
+	const int bend   = 1-aT().begin();
 
 	if (lambda.e() == 0)
 	  {
@@ -246,10 +246,10 @@ namespace WaveletTL
       {
 	// reconstruct by recursion
 
-	const int aTbegin = aT().abegin();
-	const int aTend   = aT().aend();
-	const int bTbegin = 1-a().aend();
-	const int bTend   = 1-a().abegin();
+	const int aTbegin = aT().begin();
+	const int aTend   = aT().end();
+	const int bTbegin = 1-a().end();
+	const int bTend   = 1-a().begin();
 	    
 	if (lambda.e() == 0)
 	  {

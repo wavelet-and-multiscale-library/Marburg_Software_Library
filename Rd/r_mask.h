@@ -12,31 +12,33 @@
 
 #include <iostream>
 #include <utils/fixed_array1d.h>
+#include <algebra/infinite_vector.h>
 #include <geometry/sampled_mapping.h>
 
 using MathTL::FixedArray1D;
+using MathTL::InfiniteVector;
 using MathTL::SampledMapping;
 
 namespace WaveletTL
 {
   /*!
-    base class for 1D refinement masks of length L
+    base class for 1D refinement masks of length L and offset BEGIN
   */
-  template <unsigned int L>
+  template <unsigned int L, int BEGIN>
   class RRefinementMask;
 
   //! stream output for a refinement mask
-  template <unsigned int L>
-  std::ostream& operator << (std::ostream& os, const RRefinementMask<L>& m)
+  template <unsigned int L, int BEGIN>
+  std::ostream& operator << (std::ostream& os, const RRefinementMask<L, BEGIN>& m)
   {
     os << m.coeffs;
     return os;
   }
 
-  template <unsigned int L>
+  template <unsigned int L, int BEGIN>
   class RRefinementMask
   {
-    friend std::ostream& operator << <L>(std::ostream& os, const RRefinementMask<L>& m);
+    friend std::ostream& operator << <L, BEGIN> (std::ostream& os, const RRefinementMask<L, BEGIN>& m);
 
   public:
     //! make template argument accessible
@@ -46,13 +48,46 @@ namespace WaveletTL
     virtual ~RRefinementMask() {}
     
     //! index of first nontrivial refinement coefficient
-    virtual const int abegin() const = 0;
+    static int begin() { return BEGIN; }
 
     //! index of last nontrivial refinement coefficient
-    const int aend() const { return abegin()+L-1; }
+    static int end() { return begin()+L-1; }
     
     //! k-th refinement coefficient
-    const double a(const int k) const { return (k<abegin() ? 0 : (k>aend() ? 0 : coeffs[k-abegin()])); }
+    double a(const int k) const { return (k<begin() ? 0 : (k>end() ? 0 : coeffs[k-begin()])); }
+    
+    /*!
+      Evaluate the refinable function \phi on the dyadic grid 2^{-resolution}\mathbb Z.
+      We assume that \phi is zero at the boundary of its support.
+    */
+    InfiniteVector<double, int>
+    evaluate(const int resolution = 0) const;
+
+    /*!
+      Evaluate the mu-th derivative of the refinable function \phi
+      on the dyadic grid 2^{-resolution}\mathbb Z.
+      We assume that the derivative of \phi is zero at the boundary of its support (!).
+    */
+    InfiniteVector<double, int>
+    evaluate(const int mu, const int resolution) const;
+    
+    /*!
+      Evaluate the mu-th derivative of a dilated and translated version
+      of the refinable function \phi
+      
+      (d/dx)^\mu \phi_{j,k}(x) = 2^{j\mu} * 2^{jd/2} * \phi^{(\mu)}(2^j*x-k)
+      
+      on a dyadic subgrid of the interval [a,b].
+      
+      We assume that \partial^\mu\phi is zero at the boundary of its support.
+    */
+    SampledMapping<1>
+    evaluate(const int mu,
+	     const int j,
+	     const int k,
+	     const int a,
+	     const int b,
+	     const int resolution) const;
 
   protected:
     //! refinement coefficients
@@ -60,5 +95,7 @@ namespace WaveletTL
   };
   
 }
+
+#include <Rd/r_mask.cpp>
 
 #endif

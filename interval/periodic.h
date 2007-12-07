@@ -94,6 +94,8 @@ namespace WaveletTL
     //! size of Nabla_j
     static const int Nablasize(const int j) { return 1<<j; }
 
+
+
     //! DECOMPOSE routine, simple version
     /*!
       Constructs for a given single wavelet index lambda a coefficient set c,
@@ -103,8 +105,8 @@ namespace WaveletTL
       generator level jmin.
      */
     void decompose_1(const Index& lambda, const int jmin,
-		     InfiniteVector<double, Index>& c) const;
-
+		     InfiniteVector<double, Index>& c);
+    
     //! dual DECOMPOSE routine, simple version
     /*!
       Constructs for a given single wavelet index lambda a coefficient set c,
@@ -114,8 +116,8 @@ namespace WaveletTL
       generator level jmin.
      */
     void decompose_t_1(const Index& lambda, const int jmin,
-		       InfiniteVector<double, Index>& c) const;
-
+		       InfiniteVector<double, Index>& c);
+    
     //! DECOMPOSE routine, full version
     /*!
       constructs for a given coefficient set c another one v with level >= jmin,
@@ -123,8 +125,8 @@ namespace WaveletTL
         \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
     */
     void decompose(const InfiniteVector<double, Index>& c, const int jmin,
-		   InfiniteVector<double, Index>& v) const;
-
+			  InfiniteVector<double, Index>& v);
+    
     //! dual DECOMPOSE routine, full version
     /*!
       constructs for a given coefficient set c another one v with level >= jmin,
@@ -132,7 +134,7 @@ namespace WaveletTL
         \sum_{\lambda}c_\lambda\tilde\psi_lambda = \sum_{\lambda'}d_{\lambda'}\tilde\psi_{\lambda'}
     */
     void decompose_t(const InfiniteVector<double, Index>& c, const int jmin,
-		     InfiniteVector<double, Index>& v) const;
+		     InfiniteVector<double, Index>& v);
 
     //! RECONSTRUCT routine, simple version
     /*!
@@ -142,8 +144,8 @@ namespace WaveletTL
       where always |\lambda'|>=j
      */
     void reconstruct_1(const Index& lambda, const int j,
-		       InfiniteVector<double, Index>& c) const;
-
+		       InfiniteVector<double, Index>& c);
+    
     //! RECONSTRUCT routine, full version
     /*!
       Constructs for a given coefficient set c another one v,
@@ -152,7 +154,7 @@ namespace WaveletTL
       where always |\lambda'|>=j
     */
     void reconstruct(const InfiniteVector<double, Index>& c, const int j,
-		     InfiniteVector<double, Index>& v) const;
+			    InfiniteVector<double, Index>& v);
 
     //! dual RECONSTRUCT routine, simple version
     /*!
@@ -162,7 +164,7 @@ namespace WaveletTL
       where always |\lambda'|>=j
      */
     void reconstruct_t_1(const Index& lambda, const int j,
-			 InfiniteVector<double, Index>& c) const;
+			 InfiniteVector<double, Index>& c);
 
     //! dual RECONSTRUCT routine, full version
     /*!
@@ -172,11 +174,11 @@ namespace WaveletTL
       where always |\lambda'|>=j
     */
     void reconstruct_t(const InfiniteVector<double, Index>& c, const int j,
-		       InfiniteVector<double, Index>& v) const;
+		       InfiniteVector<double, Index>& v);
 
-  protected:
-    //! an instance of the corresponding basis on R
-    RBASIS rbasis;
+  private:
+    //! an instance of RBASIS
+    RBASIS r_basis;
   };
 }
 

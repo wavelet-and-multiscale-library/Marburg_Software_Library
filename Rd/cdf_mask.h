@@ -53,7 +53,7 @@ namespace WaveletTL
   */
   template <int d>
   class CDFRefinementMask_primal
-    : public RRefinementMask<d+1>
+    : public RRefinementMask<d+1, -(d/2)> // ell_1 = -(d/2)
   {
   public:
     //! default constructor, sets up the mask coefficients
@@ -64,9 +64,6 @@ namespace WaveletTL
     
     //! critical L_2 Sobolev regularity
     static double regularity() { return d - 0.5; }  
-
-    //! index of first nontrivial refinement coefficient (inherited from RRefinementMask)
-    const int abegin() const { return ell1<d>(); }
   };
 
   /*!
@@ -98,7 +95,7 @@ namespace WaveletTL
   */
   template <int d, int dt>
   class CDFRefinementMask_dual
-    : public virtual RRefinementMask<d+2*dt-1>
+    : public virtual RRefinementMask<d+2*dt-1, -(d/2)-dt+1> // ellT1 = -(d/2)-dt+1
   {
   public:
     //! default constructor, sets up the mask coefficients
@@ -109,9 +106,6 @@ namespace WaveletTL
 
     //! critical L_2 Sobolev regularity (at least a crude lower estimate)
     static double regularity() { return 1.0; }
-
-    //! index of first nontrivial refinement coefficient (inherited from RRefinementMask)
-    const int abegin() const { return ell1T<d,dt>(); }
   };
 }
 

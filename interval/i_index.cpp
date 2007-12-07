@@ -278,4 +278,99 @@ namespace WaveletTL
     j_ = IBASIS::j0();        // on the coarsest level
   }
 
+  template <class IBASIS>
+  IntervalIndex2<IBASIS>::IntervalIndex2(const int j, const int e, const int k)
+    : j_(j), e_(e), k_(k)
+  {
+  }
+
+  template <class IBASIS>
+  IntervalIndex2<IBASIS>&
+  IntervalIndex2<IBASIS>::operator = (const IntervalIndex2<IBASIS>& lambda)
+  {
+    j_ = lambda.j();
+    e_ = lambda.e();
+    k_ = lambda.k();
+    
+    return *this;
+  }
+
+  template <class IBASIS>
+  bool
+  IntervalIndex2<IBASIS>::operator == (const IntervalIndex2<IBASIS>& lambda) const
+  {
+    return (j_ == lambda.j() &&
+	    e_ == lambda.e() &&
+	    k_ == lambda.k());
+  }
+  
+  template <class IBASIS>
+  bool
+  IntervalIndex2<IBASIS>::operator < (const IntervalIndex2<IBASIS>& lambda) const
+  {
+    return (j_ < lambda.j() ||
+	    (j_ == lambda.j() && (e_ < lambda.e() ||
+				  (e_ == lambda.e() && k_ < lambda.k()))));
+  }
+  
+  template <class IBASIS>
+  IntervalIndex2<IBASIS>&
+  IntervalIndex2<IBASIS>::operator ++ ()
+  {
+    switch (e_) {
+    case 0:
+      if (k_ == IBASIS::DeltaRmax(j_)) {
+	e_ = 1;
+	k_ = IBASIS::Nablamin();
+      }
+      else
+	k_++;
+      break;
+    case 1:
+      if (k_ == IBASIS::Nablamax(j_)) {
+	j_++;
+	k_ = IBASIS::Nablamin();
+      }
+      else
+	k_++;
+      break;
+    default:
+      break;
+    }
+    
+    return *this;
+  }
+  
+  template <class IBASIS>
+  inline
+  IntervalIndex2<IBASIS> first_generator(const int j)
+  {
+    assert(j >= IBASIS::j0());
+    return IntervalIndex2<IBASIS>(j, 0, IBASIS::DeltaLmin());
+  }
+  
+  template <class IBASIS>
+  inline
+  IntervalIndex2<IBASIS> last_generator(const int j)
+  {
+    assert(j >= IBASIS::j0());
+    return IntervalIndex2<IBASIS>(j, 0, IBASIS::DeltaRmax(j));
+  }
+
+  template <class IBASIS>
+  inline
+  IntervalIndex2<IBASIS> first_wavelet(const int j)
+  {
+    assert(j >= IBASIS::j0());
+    return IntervalIndex2<IBASIS>(j, 1, IBASIS::Nablamin());
+  }
+  
+  template <class IBASIS>
+  inline
+  IntervalIndex2<IBASIS> last_wavelet(const int j)
+  {
+    assert(j >= IBASIS::j0());
+    return IntervalIndex2<IBASIS>(j, 1, IBASIS::Nablamax(j));
+  }
+
 }

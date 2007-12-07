@@ -204,6 +204,29 @@ namespace WaveletTL
     //! default constructor
     IntervalIndex2();
 
+    //! constructor with specified parameters
+    IntervalIndex2(const int j, const int e, const int k);
+
+    //! assignment
+    IntervalIndex2& operator = (const IntervalIndex2& lambda);
+
+    //! check equality
+    bool operator == (const IntervalIndex2& lambda) const;
+
+    //! check non-equality
+    bool operator != (const IntervalIndex2& lambda) const
+    { return !(*this == lambda); }
+
+    //! preincrement
+    IntervalIndex2& operator ++ ();
+    
+    //! lexicographic order <
+    bool operator < (const IntervalIndex2& lambda) const;
+
+    //! lexicographic order <=
+    bool operator <= (const IntervalIndex2& lambda) const
+    { return (*this < lambda || *this == lambda); }
+
     //! scale j
     const int j() const { return j_; }
 
@@ -238,6 +261,30 @@ namespace WaveletTL
        << ")";
     return os;
   }
+
+  /*!
+    index of first (leftmost) generator on level j >= j0
+  */
+  template <class IBASIS>
+  IntervalIndex2<IBASIS> first_generator(const int j);
+
+  /*!
+    index of last (rightmost) generator on level j >= j0
+  */
+  template <class IBASIS>
+  IntervalIndex2<IBASIS> last_generator(const int j);
+
+  /*!
+    index of first (leftmost) wavelet on level j >= j0
+  */
+  template <class IBASIS>
+  IntervalIndex2<IBASIS> first_wavelet(const int j);
+
+  /*!
+    index of last (rightmost) wavelet on level j >= j0
+  */
+  template <class IBASIS>
+  IntervalIndex2<IBASIS> last_wavelet(const int j);
 
 }
 

@@ -35,36 +35,36 @@ namespace WaveletTL
     //! default constructor
     RBasis();
 
-    //! provide access to the template parameters
-    typedef PRIMALMASK primal_mask;
-    typedef DUALMASK   dual_mask;
-    
     //! wavelet index class
     typedef RIndex Index;
 
+    //! make template arguments accessible
+    typedef PRIMALMASK primal_mask;
+    typedef DUALMASK   dual_mask;
+
     //! critical Sobolev regularity for the primal generators/wavelets
-    static inline double primal_regularity() { return primal_mask::regularity(); }
+    static inline double primal_regularity() { return PRIMALMASK::regularity(); }
 
     /*/
       degree of polynomial reproduction for the primal generators/wavelets
       == number of vanishing moments for the dual wavelets
     */
-    static unsigned int primal_polynomial_degree() { return dual_mask::Strang_Fix_order(); }
+    static unsigned int primal_polynomial_degree() { return DUALMASK::Strang_Fix_order(); }
 
     //! number of vanishing moments for the primal wavelets
-    static inline unsigned int primal_vanishing_moments() { return dual_mask::Strang_Fix_order(); }
+    static inline unsigned int primal_vanishing_moments() { return DUALMASK::Strang_Fix_order(); }
 
     //! reading access to the primal refinement mask (a_k)
-    inline const RefinableFunction<PRIMALMASK>& a() const { return primal; }
+    inline const PRIMALMASK& a() const { return primal_mask_; }
 
     //! reading access to the primal refinement mask (a_k)
-    inline const double a(const int k) const { return primal.a(k); }
+    inline const double a(const int k) const { return a().a(k); }
 
     //! reading access to the dual refinement mask (aT_k)
-    inline const RefinableFunction<DUALMASK>& aT() const { return dual; }
+    inline const DUALMASK& aT() const { return dual_mask_; }
 
     //! reading access to the dual refinement mask (aT_k)
-    inline const double aT(const int k) const { return dual.a(k); }
+    inline const double aT(const int k) const { return aT().a(k); }
 
     //! reading access to the primal wavelet mask (b_k)
     inline const double b(const int k) const { return minus1power(k)*aT(1-k); }
@@ -186,11 +186,11 @@ namespace WaveletTL
 			       const int resolution) const;
 
   protected:
-    //! one instance of a refinable function according to the primal mask
-    RefinableFunction<PRIMALMASK> primal;
+    //! one instance of the primal mask
+    PRIMALMASK primal_mask_;
 
-    //! one instance of a refinable function according to the dual mask
-    RefinableFunction<DUALMASK> dual;
+    //! one instance of the dual mask
+    DUALMASK dual_mask_;
   };
 }
 

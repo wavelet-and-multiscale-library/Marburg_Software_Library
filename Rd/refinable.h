@@ -91,54 +91,6 @@ namespace WaveletTL
     */
     double moment(const MultiIndex<int, DIMENSION>& alpha) const;
   };
-
-  /*!
-    For univariate refinable functions, we provide a special class RefinableFunction.
-    Here the template parameter MASK should have the following signature:
-
-    const int abegin() const;          // typically inherited from RRefinementMask
-    const int aend() const;            // dito
-    const double a(const int k) const; // dito
-  */
-  template <class MASK>
-  class RefinableFunction
-    : public MASK
-  {
-  public:
-    /*!
-      Evaluate the refinable function \phi on the dyadic grid 2^{-resolution}\mathbb Z.
-      We assume that \phi is zero at the boundary of its support.
-    */
-    InfiniteVector<double, int>
-    evaluate(const int resolution = 0) const;
-
-    /*!
-      Evaluate the mu-th derivative of the refinable function \phi
-      on the dyadic grid 2^{-resolution}\mathbb Z.
-      We assume that the derivative of \phi is zero at the boundary of its support (!).
-    */
-    InfiniteVector<double, int>
-    evaluate(const int mu, const int resolution) const;
-    
-    /*!
-      Evaluate the mu-th derivative of a dilated and translated version
-      of the refinable function \phi
-      
-      (d/dx)^\mu \phi_{j,k}(x) = 2^{j\mu} * 2^{jd/2} * \phi^{(\mu)}(2^j*x-k)
-      
-      on a dyadic subgrid of the interval [a,b].
-      
-      We assume that \partial^\mu\phi is zero at the boundary of its support.
-    */
-    SampledMapping<1>
-    evaluate(const int mu,
-	     const int j,
-	     const int k,
-	     const int a,
-	     const int b,
-	     const int resolution) const;
-  };
-
 }
 
 #include <Rd/refinable.cpp>

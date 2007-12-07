@@ -23,7 +23,8 @@ namespace WaveletTL
     for (int i = 0; i < n_generators; i++) {
       double x = i * h0;
       double y = j0-0.5;
-      const double c = coeffs.get_coefficient(Index(j0,0,basis->DeltaLmin()+i,basis));
+//       const double c = coeffs.get_coefficient(Index(j0,0,basis->DeltaLmin()+i,basis));
+      const double c = coeffs.get_coefficient(Index(j0,0,basis->DeltaLmin()+i));
       if (c == 0) {
 // 	// draw an empty rectangle
 // 	os << "rectangle('position',["
@@ -61,7 +62,8 @@ namespace WaveletTL
       for (int i = 0; i < n_wavelets; i++) {
  	double x = i * hj;
  	double y = j+0.5;
- 	const double c = coeffs.get_coefficient(Index(j,1,basis->Nablamin()+i,basis));
+//  	const double c = coeffs.get_coefficient(Index(j,1,basis->Nablamin()+i,basis));
+ 	const double c = coeffs.get_coefficient(Index(j,1,basis->Nablamin()+i));
  	if (c == 0) {
 	  if (j <= 6) {
 // 	    // draw an empty rectangle

@@ -1462,7 +1462,7 @@ namespace WaveletTL
     int startrow = d+ell_l()+ell1<d>()-2*s0;
     for (int col = d-s0; col < nj-(d-s1); col++, startrow+=2) {
       int row = startrow;
-      for (int k = cdf.a().abegin(); k <= cdf.a().aend(); k++, row++)
+      for (int k = cdf.a().begin(); k <= cdf.a().end(); k++, row++)
 	Mj0.set_entry(row, col, M_SQRT1_2 * cdf.a().a(k));
     }
 
@@ -1489,7 +1489,7 @@ namespace WaveletTL
     int startrow = dT+ellT_l()+ell1T<d,dT>()-2*sT0;
     for (int col = dT-sT0; col < nj-(dT-sT1); col++, startrow+=2) {
       int row = startrow;
-      for (int k = cdf.aT().abegin(); k <= cdf.aT().aend(); k++, row++)
+      for (int k = cdf.aT().begin(); k <= cdf.aT().end(); k++, row++)
 	Mj0Tp.set_entry(row, col, M_SQRT1_2 * cdf.aT().a(k));
     }
     
@@ -1563,7 +1563,7 @@ namespace WaveletTL
     int startrow = d+ell_l()+ell1<d>()-2*s0;
     for (int col = d-s0; col < nj-(d-s1); col++, startrow+=2) {
       int row = startrow;
-      for (int k = cdf.a().abegin(); k <= cdf.a().aend(); k++, row++) {
+      for (int k = cdf.a().begin(); k <= cdf.a().end(); k++, row++) {
 	A.set_entry(row, col, M_SQRT1_2 * cdf.a().a(k));
       }
     }

@@ -8,7 +8,7 @@ namespace WaveletTL
   void
   PeriodicBasis<RBASIS>::decompose(const InfiniteVector<double, Index>& c,
 				   const int j0,
-				   InfiniteVector<double, Index>& d) const {
+				   InfiniteVector<double, Index>& d) {
     InfiniteVector<double, Index> help;
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
 	 it != itend; ++it) {
@@ -21,7 +21,7 @@ namespace WaveletTL
   void
   PeriodicBasis<RBASIS>::decompose_t(const InfiniteVector<double, Index>& c,
 				     const int j0,
-				     InfiniteVector<double, Index>& d) const {
+				     InfiniteVector<double, Index>& d) {
     InfiniteVector<double, Index> help;
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
 	 it != itend; ++it) {
@@ -34,7 +34,7 @@ namespace WaveletTL
   void
   PeriodicBasis<RBASIS>::reconstruct(const InfiniteVector<double, Index>& c,
 				     const int j,
-				     InfiniteVector<double, Index>& d) const {
+				     InfiniteVector<double, Index>& d) {
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
 	 it != itend; ++it) {
       InfiniteVector<double, Index> help;
@@ -47,7 +47,7 @@ namespace WaveletTL
   void
   PeriodicBasis<RBASIS>::reconstruct_t(const InfiniteVector<double, Index>& c,
 				       const int j,
-				       InfiniteVector<double, Index>& d) const {
+				       InfiniteVector<double, Index>& d) {
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
 	 it != itend; ++it) {
       InfiniteVector<double, Index> help;
@@ -60,7 +60,7 @@ namespace WaveletTL
   void
   PeriodicBasis<RBASIS>::decompose_1(const Index& lambda,
 				     const int j0,
-				     InfiniteVector<double, Index>& c) const {
+				     InfiniteVector<double, Index>& c) {
     assert(lambda.j() >= j0);
     c.clear();
     if (lambda.e() == 1) {
@@ -74,10 +74,10 @@ namespace WaveletTL
       }	else {
 	// j>j0, perform multiscale decomposition
 	
-	const int aTbegin = rbasis.aT().begin().index()[0];
-	const int aTend   = rbasis.aT().rbegin().index()[0];
-	const int bTbegin = rbasis.bT().begin().index()[0];
-	const int bTend   = rbasis.bT().rbegin().index()[0];
+	static const int aTbegin = RBASIS::dual_mask::begin();
+	static const int aTend   = RBASIS::dual_mask::end();
+	static const int bTbegin = 1-RBASIS::primal_mask::end();
+	static const int bTend   = 1-RBASIS::primal_mask::begin();
 	
 	// compute d_{j-1}
 	for (int n = 0; n < 1<<(lambda.j()-1); n++) {
@@ -85,9 +85,9 @@ namespace WaveletTL
 	  for (int m = (int) ceil(ldexp(1.0, 1-lambda.j()) * ((lambda.k() - bTend) / 2.0 - n));
 	       m <= (int) floor(ldexp(1.0, 1-lambda.j()) * ((lambda.k() - bTbegin) / 2.0 - n));
 	       m++)
-	    cn += rbasis.bT().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*((1<<(lambda.j()-1))*m+n)));
+	    cn += r_basis.bT(lambda.k()-2*((1<<(lambda.j()-1))*m+n));
 	  if (cn != 0)
-	    c[Index(lambda.j()-1, 1, n, this)] = M_SQRT1_2 * cn;
+	    c[Index(lambda.j()-1, 1, n)] = M_SQRT1_2 * cn;
 	}
 	
 	// compute c_{j_0} via recursion
@@ -96,9 +96,9 @@ namespace WaveletTL
 	  for (int m = (int) ceil(ldexp(1.0, 1-lambda.j()) * ((lambda.k() - aTend) / 2.0 - n));
 	       m <= (int) floor(ldexp(1.0, 1-lambda.j()) * ((lambda.k() - aTbegin) / 2.0 - n));
 	       m++)
-	    cn += rbasis.aT().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*((1<<(lambda.j()-1))*m+n)));
+	    cn += r_basis.aT(lambda.k()-2*((1<<(lambda.j()-1))*m+n));
 	  InfiniteVector<double,Index> d;
-	  decompose_1(Index(lambda.j()-1, 0, n, this), j0, d);
+	  decompose_1(Index(lambda.j()-1, 0, n), j0, d);
 	  c.add(M_SQRT1_2 * cn, d);
 	}
       }
@@ -109,7 +109,7 @@ namespace WaveletTL
   void
   PeriodicBasis<RBASIS>::decompose_t_1(const Index& lambda,
 				       const int j0,
-				       InfiniteVector<double, Index>& c) const {
+				       InfiniteVector<double, Index>& c) {
     assert(lambda.j() >= j0);
     c.clear();
     if (lambda.e() == 1) {
@@ -123,10 +123,10 @@ namespace WaveletTL
       }	else {
 	// j>j0, perform multiscale decomposition
 	
-	const int abegin = rbasis.a().begin().index()[0];
-	const int aend   = rbasis.a().rbegin().index()[0];
-	const int bbegin = rbasis.b().begin().index()[0];
-	const int bend   = rbasis.b().rbegin().index()[0];
+	const int abegin = RBASIS::primal_mask::begin();
+	const int aend   = RBASIS::primal_mask::end();
+	const int bbegin = 1-RBASIS::dual_mask::end();
+	const int bend   = 1-RBASIS::dual_mask::begin();
 	
 	// compute d_{j-1}
 	for (int n = 0; n < 1<<(lambda.j()-1); n++) {
@@ -134,9 +134,9 @@ namespace WaveletTL
 	  for (int m = (int) ceil(ldexp(1.0, 1-lambda.j()) * ((lambda.k() - bend) / 2.0 - n));
 	       m <= (int) floor(ldexp(1.0, 1-lambda.j()) * ((lambda.k() - bbegin) / 2.0 - n));
 	       m++)
-	    cn += rbasis.b().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*((1<<(lambda.j()-1))*m+n)));
+	    cn += r_basis.b(lambda.k()-2*((1<<(lambda.j()-1))*m+n));
 	  if (cn != 0)
-	    c[Index(lambda.j()-1, 1, n, this)] = M_SQRT1_2 * cn;
+	    c[Index(lambda.j()-1, 1, n)] = M_SQRT1_2 * cn;
 	}
 	
 	// compute c_{j_0} via recursion
@@ -145,9 +145,9 @@ namespace WaveletTL
 	  for (int m = (int) ceil(ldexp(1.0, 1-lambda.j()) * ((lambda.k() - aend) / 2.0 - n));
 	       m <= (int) floor(ldexp(1.0, 1-lambda.j()) * ((lambda.k() - abegin) / 2.0 - n));
 	       m++)
-	    cn += rbasis.a().get_coefficient(MultiIndex<int, 1>(lambda.k()-2*((1<<(lambda.j()-1))*m+n)));
+	    cn += r_basis.a(lambda.k()-2*((1<<(lambda.j()-1))*m+n));
 	  InfiniteVector<double,Index> d;
-	  decompose_t_1(Index(lambda.j()-1, 0, n, this), j0, d);
+	  decompose_t_1(Index(lambda.j()-1, 0, n), j0, d);
 	  c.add(M_SQRT1_2 * cn, d);
 	}
       }
@@ -158,17 +158,17 @@ namespace WaveletTL
   void
   PeriodicBasis<RBASIS>::reconstruct_1(const Index& lambda,
 				       const int j,
-				       InfiniteVector<double, Index>& c) const {
+				       InfiniteVector<double, Index>& c) {
     if (lambda.j() >= j) {
       // then we can just copy \psi_\lambda
       c.set_coefficient(lambda, 1.0);
     } else {
       // reconstruct by recursion
       
-      const int abegin = rbasis.a().begin().index()[0];
-      const int aend   = rbasis.a().rbegin().index()[0];
-      const int bbegin = rbasis.b().begin().index()[0];
-      const int bend   = rbasis.b().rbegin().index()[0];
+      const int abegin = RBASIS::primal_mask::begin();
+      const int aend   = RBASIS::primal_mask::end();
+      const int bbegin = 1-RBASIS::dual_mask::end();
+      const int bend   = 1-RBASIS::dual_mask::begin();
       
       if (lambda.e() == 0) {
 	for (int n = 0; n < 1<<(lambda.j()+1); n++) {
@@ -176,10 +176,10 @@ namespace WaveletTL
 	  for (int m = (int) ceil(ldexp(1.0, -lambda.j()-1) * (abegin+2*lambda.k()-n));
 	       m <= (int) floor(ldexp(1.0, -lambda.j()-1) * (aend+2*lambda.k()-n));
 	       m++)
-	    cn += rbasis.a().get_coefficient(MultiIndex<int, 1>((1<<(lambda.j()+1))*m+n-2*lambda.k()));
+	    cn += r_basis.a((1<<(lambda.j()+1))*m+n-2*lambda.k());
 	  if (cn != 0) {
 	    InfiniteVector<double,Index> d;
-	    reconstruct_1(Index(lambda.j()+1, 0, n, this), j, d);
+	    reconstruct_1(Index(lambda.j()+1, 0, n), j, d);
 	    c.add(M_SQRT1_2 * cn, d);
 	  }
 	}
@@ -189,10 +189,10 @@ namespace WaveletTL
 	  for (int m = (int) ceil(ldexp(1.0, -lambda.j()-1) * (bbegin+2*lambda.k()-n));
 	       m <= (int) floor(ldexp(1.0, -lambda.j()-1) * (bend+2*lambda.k()-n));
 	       m++)
-	    cn += rbasis.b().get_coefficient(MultiIndex<int, 1>((1<<(lambda.j()+1))*m+n-2*lambda.k()));
+	    cn += r_basis.b((1<<(lambda.j()+1))*m+n-2*lambda.k());
 	  if (cn != 0) {
 	    InfiniteVector<double,Index> d;
-	    reconstruct_1(Index(lambda.j()+1, 0, n, this), j, d);
+	    reconstruct_1(Index(lambda.j()+1, 0, n), j, d);
 	    c.add(M_SQRT1_2 * cn, d);
 	  }
 	}
@@ -204,28 +204,28 @@ namespace WaveletTL
   void
   PeriodicBasis<RBASIS>::reconstruct_t_1(const Index& lambda,
 					 const int j,
-					 InfiniteVector<double, Index>& c) const {
+					 InfiniteVector<double, Index>& c) {
     if (lambda.j() >= j) {
       // then we can just copy \psi_\lambda
       c.set_coefficient(lambda, 1.0);
     } else {
       // reconstruct by recursion
-      
-      const int aTbegin = rbasis.aT().begin().index()[0];
-      const int aTend   = rbasis.aT().rbegin().index()[0];
-      const int bTbegin = rbasis.bT().begin().index()[0];
-      const int bTend   = rbasis.bT().rbegin().index()[0];
-      
+   
+      const int aTbegin = RBASIS::dual_mask::begin();
+      const int aTend   = RBASIS::dual_mask::end();
+      const int bTbegin = 1-RBASIS::primal_mask::end();
+      const int bTend   = 1-RBASIS::primal_mask::begin();
+   
       if (lambda.e() == 0) {
 	for (int n = 0; n < 1<<(lambda.j()+1); n++) {
 	  double cn = 0;
 	  for (int m = (int) ceil(ldexp(1.0, -lambda.j()-1) * (aTbegin+2*lambda.k()-n));
 	       m <= (int) floor(ldexp(1.0, -lambda.j()-1) * (aTend+2*lambda.k()-n));
 	       m++)
-	    cn += rbasis.aT().get_coefficient(MultiIndex<int, 1>((1<<(lambda.j()+1))*m+n-2*lambda.k()));
+	    cn += r_basis.aT((1<<(lambda.j()+1))*m+n-2*lambda.k());
 	  if (cn != 0) {
 	    InfiniteVector<double,Index> d;
-	    reconstruct_t_1(Index(lambda.j()+1, 0, n, this), j, d);
+	    reconstruct_t_1(Index(lambda.j()+1, 0, n), j, d);
 	    c.add(M_SQRT1_2 * cn, d);
 	  }
 	}
@@ -235,10 +235,10 @@ namespace WaveletTL
 	  for (int m = (int) ceil(ldexp(1.0, -lambda.j()-1) * (bTbegin+2*lambda.k()-n));
 	       m <= (int) floor(ldexp(1.0, -lambda.j()-1) * (bTend+2*lambda.k()-n));
 	       m++)
-	    cn += rbasis.bT().get_coefficient(MultiIndex<int, 1>((1<<(lambda.j()+1))*m+n-2*lambda.k()));
+	    cn += r_basis.bT((1<<(lambda.j()+1))*m+n-2*lambda.k());
 	  if (cn != 0) {
 	    InfiniteVector<double,Index> d;
-	    reconstruct_t_1(Index(lambda.j()+1, 0, n, this), j, d);
+	    reconstruct_t_1(Index(lambda.j()+1, 0, n), j, d);
 	    c.add(M_SQRT1_2 * cn, d);
 	  }
 	}

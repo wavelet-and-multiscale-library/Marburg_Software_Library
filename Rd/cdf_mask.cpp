@@ -17,10 +17,10 @@ namespace WaveletTL
   {
     // The primal generators are B-splines of order d, centered around (d mod 2)/2.
     // So in z-notation, the mask of the primal generators is just
-    //   a(z) = (1+z)^d * z^{-floor(d/2)},
+    //   a(z) = 2^{1-d} * (1+z)^d * z^{-floor(d/2)},
     // the coefficients of which can be calculated in closed form (faster):
     for (int k(ell1<d>()); k <= ell2<d>(); k++)
-      set_coefficient(MultiIndex<int, 1>(k), ldexp(1., 1 - d) * binomial(d, k + d/2));
+      set_coefficient(MultiIndex<int, 1>(k), ldexp(1., 1 - d) * binomial(d, k-ell1<d>()));
   }
   
   template <int d>
@@ -31,7 +31,7 @@ namespace WaveletTL
     //   a(z) = (1+z)^d * z^{-floor(d/2)},
     // the coefficients of which can be calculated in closed form (faster):
     for (int k(ell1<d>()); k <= ell2<d>(); k++)
-      RRefinementMask<d+1,-(d/2)>::coeffs[k-ell1<d>()] = ldexp(1., 1 - d) * binomial(d, k + d/2);
+      RRefinementMask<d+1,-(d/2)>::coeffs[k-ell1<d>()] = ldexp(1., 1 - d) * binomial(d, k-ell1<d>());
   }
   
   template <int d, int dt>

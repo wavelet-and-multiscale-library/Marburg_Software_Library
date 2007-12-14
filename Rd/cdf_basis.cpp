@@ -171,4 +171,62 @@ namespace WaveletTL
     return 0.;
   }
   
+  template <>
+  double
+  CDFBasis<2,4>::evaluate(const unsigned int derivative,
+ 			  const RIndex& lambda,
+ 			  const double x) const
+  {
+    const int j = lambda.j();
+    const double y = (1<<j)*x-lambda.k();
+    const double factor = twotothejhalf(j);
+    if (lambda.e() == 0) // generator
+      {
+	if (y >= -1 && y <= 1) {
+	  switch (derivative) {
+	  case 0:
+	    return (y <= 0 ? factor*(y+1) : factor*(-y+1));
+	  case 1:
+	    return (y <= 0 ? (1<<j)*factor : -(1<<j)*factor);
+	  }
+	}
+      }
+    else // wavelet
+      {
+	if (y >= -2 && y <= 3) {
+	  switch (derivative) {
+	  case 0:
+	    switch((int) floor(y)) {
+	    case -2:
+	      return factor*(-0.09375*y-0.1875); // -(3/32)*y-3/16
+	    case -1:
+	      return factor*(0.6874*y+0.59375);  // (11/16)*y+19/32
+	    case 0:
+	      return (y < 0.5
+		      ? factor*(-4*y+0.59375)    // -4*y+19/32
+		      : factor*(4*y-3.40625));   // 4*y-109/32
+	    case 1:
+	      return factor*(-0.6874*y+1.28125); // -(11/16)*y+41/32
+	    case 2:
+	      return factor*(0.09375*y-0.28125); // (3/32)*y-9/32
+	    }
+	  case 1:
+	    switch((int) floor(y)) {
+	    case -2:
+	      return -(1<<j)*factor*0.09375;
+	    case -1:
+	      return (1<<j)*factor*0.6874;
+	    case 0:
+	      return (y < 0.5 ? -(1<<j)*factor*4 : (1<<j)*factor*4);
+	    case 1:
+	      return -(1<<j)*factor*0.6874;
+	    case 2:
+	      return (1<<j)*factor*0.09375;
+	    }
+	  }
+	}
+      }
+    return 0.;
+  }
+  
 }

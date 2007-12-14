@@ -131,23 +131,27 @@ namespace WaveletTL
   {
     const int j = lambda.j();
     const double y = (1<<j)*x-lambda.k();
-    const double factor = twotothejhalf(j);
     if (lambda.e() == 0) // generator
       {
-	if (y >= -1 && y <= 1) {
+	if (y >= -1 && y < 1) {
 	  switch (derivative) {
-	  case 0:
+	  case 0: {
+	    const double factor = twotothejhalf(j);
 	    return (y <= 0 ? factor*(y+1) : factor*(-y+1));
-	  case 1:
-	    return (y <= 0 ? (1<<j)*factor : -(1<<j)*factor);
+	  }
+	  case 1: {
+	    const double factor = twotothejhalf(3*j);
+	    return (y <= 0 ? factor : -factor);
+	  }
 	  }
 	}
       }
     else // wavelet
       {
-	if (y >= -1 && y <= 2) {
+	if (y >= -1 && y < 2) {
 	  switch (derivative) {
-	  case 0:
+	  case 0: {
+	    const double factor = twotothejhalf(j);
 	    switch((int) floor(y)) {
 	    case -1:
 	      return factor*(0.5*y+0.5);
@@ -156,15 +160,18 @@ namespace WaveletTL
 	    case 1:
 	      return factor*(-0.5*y+1);
 	    }
-	  case 1:
+	  }
+	  case 1: {
+	    const double factor = twotothejhalf(3*j);
 	    switch((int) floor(y)) {
 	    case -1:
-	      return (1<<j)*factor*0.5;
+	      return factor*0.5;
 	    case 0:
-	      return (y < 0.5 ? -(1<<j)*factor*4 : (1<<j)*factor*4);
+	      return (y < 0.5 ? -factor*4 : factor*4);
 	    case 1:
-	      return -(1<<j)*factor*0.5;
+	      return -factor*0.5;
 	    }
+	  }
 	  }
 	}
       }
@@ -179,23 +186,27 @@ namespace WaveletTL
   {
     const int j = lambda.j();
     const double y = (1<<j)*x-lambda.k();
-    const double factor = twotothejhalf(j);
     if (lambda.e() == 0) // generator
       {
-	if (y >= -1 && y <= 1) {
+	if (y >= -1 && y < 1) {
 	  switch (derivative) {
-	  case 0:
+	  case 0: {
+	    const double factor = twotothejhalf(j);
 	    return (y <= 0 ? factor*(y+1) : factor*(-y+1));
-	  case 1:
-	    return (y <= 0 ? (1<<j)*factor : -(1<<j)*factor);
+	  }
+	  case 1: {
+	    const double factor = twotothejhalf(3*j);
+	    return (y <= 0 ? factor : -factor);
+	  }
 	  }
 	}
       }
     else // wavelet
       {
-	if (y >= -2 && y <= 3) {
+	if (y >= -2 && y < 3) {
 	  switch (derivative) {
-	  case 0:
+	  case 0: {
+	    const double factor = twotothejhalf(j);	    
 	    switch((int) floor(y)) {
 	    case -2:
 	      return factor*(-0.09375*y-0.1875); // -(3/32)*y-3/16
@@ -210,7 +221,9 @@ namespace WaveletTL
 	    case 2:
 	      return factor*(0.09375*y-0.28125); // (3/32)*y-9/32
 	    }
-	  case 1:
+	  }
+	  case 1: {
+	    const double factor = twotothejhalf(3*j);	    
 	    switch((int) floor(y)) {
 	    case -2:
 	      return -(1<<j)*factor*0.09375;
@@ -223,6 +236,114 @@ namespace WaveletTL
 	    case 2:
 	      return (1<<j)*factor*0.09375;
 	    }
+	  }
+	  }
+	}
+      }
+    return 0.;
+  }
+  
+  template <>
+  double
+  CDFBasis<3,3>::evaluate(const unsigned int derivative,
+ 			  const RIndex& lambda,
+ 			  const double x) const
+  {
+    const int j = lambda.j();
+    const double y = (1<<j)*x-lambda.k();
+    if (lambda.e() == 0) // generator
+      {
+	if (y >= -1 && y < 2) {
+	  switch (derivative) {
+	  case 0: {
+	    const double factor = twotothejhalf(j);
+	    switch((int) floor(y)) {
+	    case -1:
+	      return factor*(0.5*y*y+y+0.5);
+	    case 0:
+	      return factor*(-y*y+y+0.5);
+	    case 1:
+	      return factor*(0.5*y*y-2*y+2);
+	    }
+	  }
+	  case 1: {
+	    const double factor = twotothejhalf(3*j);
+	    switch((int) floor(y)) {
+	    case -1:
+	      return factor*(y+1);
+	    case 0:
+	      return factor*(-2*y+1);
+	    case 1:
+	      return factor*(y-2);
+	    }
+	  }
+	  case 2: {
+	    const double factor = twotothejhalf(5*j);
+	    switch((int) floor(y)) {
+	    case -1:
+	      return factor;
+	    case 0:
+	      return -2*factor;
+	    case 1:
+	      return factor;
+	    }
+	  }
+	  }
+	}
+      }
+    else // wavelet
+      {
+	if (y >= -2 && y < 3) {
+	  switch (derivative) {
+	  case 0: {
+	    const double factor = twotothejhalf(j);
+	    switch((int) floor(y)) {
+	    case -2:
+	      return factor*(-0.1875*y*y-0.75*y-0.75);   // -(3/16)*y^2-(3/4)*y-(3/4)
+	    case -1:
+	      return factor*(1.375*y*y+2.375*y+0.8125);  // (11/8)*y^2+(19/8)*y+(13/16)
+	    case 0:
+	      return (y < 0.5
+		      ? factor*(-8*y*y+2.375*y+0.8125)   // -8*y^2+(19/8)*y+(13/16)
+		      : factor*(8*y*y-13.625*y+4.8125)); // 8*y^2-(109/8)*y+(77/16)
+	    case 1:
+	      return factor*(-1.375*y*y+5.125*y-4.5625); // -(11/8)*y^2+(41/8)*y-(73/16)
+	    case 2:
+	      return factor*(0.1875*y*y-1.125*y+1.6875); // (3/16)*y^2-(9/8)*y+(27/16)
+	    }
+	  }
+	  case 1: {
+	    const double factor = twotothejhalf(3*j);
+	    switch((int) floor(y)) {
+	    case -2:
+	      return factor*(-0.375*y-0.75);
+	    case -1:
+	      return factor*(2.75*y+2.375);
+	    case 0:
+	      return (y < 0.5
+		      ? factor*(-16*y+2.375)
+		      : factor*(16*y-13.625));
+	    case 1:
+	      return factor*(-2.75*y+5.125);
+	    case 2:
+	      return factor*(0.375*y-1.125);
+	    }
+	  }
+	  case 2: {
+	    const double factor = twotothejhalf(5*j);
+	    switch((int) floor(y)) {
+	    case -2:
+	      return -factor*0.375;
+	    case -1:
+	      return factor*2.75;
+	    case 0:
+	      return (y < 0.5 ? -factor*16 : factor*16);
+	    case 1:
+	      return -factor*2.75;
+	    case 2:
+	      return factor*0.375;
+	    }
+	  }
 	  }
 	}
       }

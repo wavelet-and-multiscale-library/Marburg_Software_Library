@@ -44,7 +44,7 @@ namespace WaveletTL
     /*!
       coarsest possible level j0;
       j0 is chosen such large that the primal and dual wavelets on level j0
-      do not "touch themselves". Note that
+      do not "overlap themselves". Note that
         |\supp\psi| = |\supp\tilde\psi| = (L+Lt)/2 - 1
       so that it suffices to choose 2^{-j0}((L+Lt)/2-1) <= 1
     */
@@ -71,7 +71,7 @@ namespace WaveletTL
       Note that due to the periodization, it may happen that k2<k1.
       (j == lambda.j()+lambda.e() is implicitly assumed for performance reasons)
     */
-    void support(const Index& lambda, int& k1, int& k2) const;
+    static void support(const Index& lambda, int& k1, int& k2);
 
     //! space dimension of the underlying domain
     static const int space_dimension = 1;
@@ -116,7 +116,6 @@ namespace WaveletTL
 
     //! index of last (rightmost) wavelet on level j >= j0
     Index last_wavelet(const int j) const;
-
 
     //! DECOMPOSE routine, simple version
     /*!

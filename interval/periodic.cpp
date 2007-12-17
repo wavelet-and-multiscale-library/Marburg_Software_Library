@@ -43,7 +43,7 @@ namespace WaveletTL
   
   template <class RBASIS>
   void
-  PeriodicBasis<RBASIS>::support(const Index& lambda, int& k1, int& k2) const
+  PeriodicBasis<RBASIS>::support(const Index& lambda, int& k1, int& k2)
   {
     if (lambda.e() == 0) // generator
       {
@@ -60,7 +60,7 @@ namespace WaveletTL
 	k2 = dyadic_modulo(RBASIS::primal_mask::end()+1-RBASIS::dual_mask::begin()+2*lambda.k(), lambda.j()+1);
       }
   }
-  
+
   template <class RBASIS>
   void
   PeriodicBasis<RBASIS>::decompose(const InfiniteVector<double, Index>& c,

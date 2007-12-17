@@ -66,6 +66,17 @@ namespace WaveletTL
     } Support;
 
     /*!
+      Compute an interval 2^{-j}[k1,k2] which contains the support of a
+      single primal spline generator or wavelet \psi_\lambda.
+      Note that due to the periodization, it may happen that k2<k1.
+      (j == lambda.j()+lambda.e() is implicitly assumed for performance reasons)
+    */
+    void support(const Index& lambda, int& k1, int& k2) const;
+
+    //! space dimension of the underlying domain
+    static const int space_dimension = 1;
+
+    /*!
       critical Sobolev regularity for the primal generators/wavelets
     */
     static inline double primal_regularity() { return RBASIS::primal_regularity(); }

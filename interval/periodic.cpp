@@ -6,6 +6,30 @@ namespace WaveletTL
 {
   template <class RBASIS>
   void
+  PeriodicBasis<RBASIS>::support(const Index& lambda, int& k1, int& k2) const
+  {
+    if (lambda.e() == 0) // generator
+      {
+	// For the generators on the real line, we have
+        //   \supp\phi_{j,k} = 2^{-j}[ell1+k,ell2+k]
+	// To obtain the support of the periodized generators, we assume that 0 <= ell_1+2^j
+	const int help = 1<<lambda.j();
+	k1 = (RBASIS::primal_mask::begin()+lambda.k()+help) % help;
+	k2 = (RBASIS::primal_mask::end()  +lambda.k()+help) % help;
+      }
+    else // wavelet
+      {
+	// For the wavelets on the real line, we have
+        //   \supp\phi_{j,k} = 2^{-(j+1)}[ell1+1-ell2T+2*k,ell2+1-ell1T+2*k] =: 2^{-(j+1)}[c1,c2]
+	// To obtain the support of the periodized generators, we assume that 0 <= c1+2^(j+1)
+	const int help = 1<<(lambda.j()+1);
+	k1 = (RBASIS::primal_mask::begin()+1-RBASIS::dual_mask::end()+2*lambda.k()+help) % help;
+	k2 = (RBASIS::primal_mask::end()+1-RBASIS::dual_mask::begin()+2*lambda.k()+help) % help;
+      }
+  }
+  
+  template <class RBASIS>
+  void
   PeriodicBasis<RBASIS>::decompose(const InfiniteVector<double, Index>& c,
 				   const int j0,
 				   InfiniteVector<double, Index>& d) {

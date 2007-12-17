@@ -25,7 +25,7 @@ int main()
   cout << "- leftmost wavelet on the coarsest level: " << first_wavelet(&basis, basis.j0()) << endl;
   cout << "- rightmost wavelet on the coarsest level: " << last_wavelet(&basis, basis.j0()) << endl;
 
-#if 1
+#if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -50,7 +50,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "
@@ -76,12 +76,11 @@ int main()
 #endif
 
 
-#if 1
   // ---------------------------------------------------------------------------
 
   cout << "* a periodic CDF basis:" << endl;
 
-  typedef PeriodicBasis<CDFBasis<2, 2> > Basis2;
+  typedef PeriodicBasis<CDFBasis<2,2> > Basis2;
   typedef Basis2::Index Index2;
   Basis2 basis2;
 
@@ -92,6 +91,7 @@ int main()
   cout << "- leftmost wavelet on the coarsest level: " << first_wavelet(&basis2, basis2.j0()) << endl;
   cout << "- rightmost wavelet on the coarsest level: " << last_wavelet(&basis2, basis2.j0()) << endl;
 
+#if 0
   for (int level = basis2.j0()+1; level <= basis2.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -141,7 +141,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   cout << "- create some test index set..." << endl;
   InfiniteVector<double, Index2> gcoeffs, coeffs;
   gcoeffs[++(++first_generator<Basis2>(basis2.j0()+3))] = 1.0;

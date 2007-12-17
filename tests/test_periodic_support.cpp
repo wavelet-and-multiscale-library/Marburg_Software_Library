@@ -22,7 +22,7 @@ int main()
   for (int level = basis.j0(); level <= basis.j0()+1; level++) {
     cout << "- computing the supports of all generators and wavelets on level j=" << level << ":" << endl;
     
-    Index lambda(first_generator<Basis>(level));
+    Index lambda(basis.first_generator(level));
     for (;; ++lambda) {
       int k1, k2;
       basis.support(lambda, k1, k2);
@@ -35,7 +35,7 @@ int main()
 	   << "]"
 	   << endl;
       
-      if (lambda == last_wavelet<Basis>(level)) break;
+      if (lambda == basis.last_wavelet(level)) break;
     }
   }
 #endif

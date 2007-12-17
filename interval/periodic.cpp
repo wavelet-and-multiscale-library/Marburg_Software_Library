@@ -5,6 +5,42 @@
 namespace WaveletTL
 {
   template <class RBASIS>
+  inline
+  typename PeriodicBasis<RBASIS>::Index
+  PeriodicBasis<RBASIS>::first_generator(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 0, PeriodicBasis<RBASIS>::DeltaLmin());
+  }
+  
+  template <class RBASIS>
+  inline
+  typename PeriodicBasis<RBASIS>::Index
+  PeriodicBasis<RBASIS>::last_generator(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 0, PeriodicBasis<RBASIS>::DeltaRmax(j));
+  }
+
+  template <class RBASIS>
+  inline
+  typename PeriodicBasis<RBASIS>::Index
+  PeriodicBasis<RBASIS>::first_wavelet(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 1, PeriodicBasis<RBASIS>::Nablamin());
+  }
+  
+  template <class RBASIS>
+  inline
+  typename PeriodicBasis<RBASIS>::Index
+  PeriodicBasis<RBASIS>::last_wavelet(const int j) const
+  {
+    assert(j >= j0());
+    return Index(j, 1, PeriodicBasis<RBASIS>::Nablamax(j));
+  }
+  
+  template <class RBASIS>
   void
   PeriodicBasis<RBASIS>::support(const Index& lambda, int& k1, int& k2) const
   {

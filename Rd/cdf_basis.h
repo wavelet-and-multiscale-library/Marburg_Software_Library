@@ -29,12 +29,15 @@ namespace WaveletTL
     : public virtual RBasis<CDFRefinementMask_primal<d>, CDFRefinementMask_dual<d, dt> >
   {
   public:
-    // use generic point evaluation routines on dyadic grids from RBasis
-    using RBasis<CDFRefinementMask_primal<d>, CDFRefinementMask_dual<d, dt> >::evaluate;
-
     // provide masks
     using RBasis<CDFRefinementMask_primal<d>, CDFRefinementMask_dual<d, dt> >::primal_mask;
     using RBasis<CDFRefinementMask_primal<d>, CDFRefinementMask_dual<d, dt> >::dual_mask;
+
+    // use generic point evaluation routines on dyadic grids from RBasis
+    using RBasis<CDFRefinementMask_primal<d>, CDFRefinementMask_dual<d, dt> >::evaluate;
+
+    // use support routines from RBasis
+    using RBasis<CDFRefinementMask_primal<d>, CDFRefinementMask_dual<d, dt> >::support;
 
     //! point evaluation of (derivatives of) primal generators and wavelets
     double evaluate(const unsigned int derivative,

@@ -83,7 +83,8 @@ EXEOBJF1 = \
   test_refinable.o test_r_basis.o\
   test_regularity.o\
   test_dm.o\
-  test_cdf_basis.o test_cdf_expansion.o
+  test_cdf_basis.o test_cdf_expansion.o\
+  test_r_support.o
 
 # set 2 of test programs: wavelet bases on the interval ([DS],[P],[JL],[A],[S])
 EXEOBJF2 = \

@@ -12,6 +12,22 @@ namespace WaveletTL
 
   template <class PRIMALMASK, class DUALMASK>
   void
+  RBasis<PRIMALMASK, DUALMASK>::support(const Index& lambda, int& k1, int& k2)
+  {
+    if (lambda.e() == 0) // generator
+      {
+	k1 = PRIMALMASK::begin()+lambda.k();
+	k2 = PRIMALMASK::end()  +lambda.k();
+      }
+    else // wavelet
+      {
+	k1 = PRIMALMASK::begin()+1-DUALMASK::end()+2*lambda.k();
+	k2 = PRIMALMASK::end()+1-DUALMASK::begin()+2*lambda.k();
+      }
+  }
+  
+  template <class PRIMALMASK, class DUALMASK>
+  void
   RBasis<PRIMALMASK, DUALMASK>::decompose(const InfiniteVector<double, Index>& c,
 					  const int j0,
 					  InfiniteVector<double, Index>& d) const

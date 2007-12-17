@@ -42,6 +42,11 @@ namespace WaveletTL
     typedef PRIMALMASK primal_mask;
     typedef DUALMASK   dual_mask;
 
+    /*!
+      coarsest possible level j0: we restrict ourselves to j>=0
+    */
+    static const int j0() { return 0; }
+
     //! critical Sobolev regularity for the primal generators/wavelets
     static inline double primal_regularity() { return PRIMALMASK::regularity(); }
 
@@ -72,6 +77,23 @@ namespace WaveletTL
     //! reading access to the dual wavelet coefficients
     inline const double bT(const int k) const { return minus1power(k)*a(1-k); }
     
+    /*!
+      geometric type of the support sets
+      (note that if k1 > k2, the support consists of two intervals instead of one)
+    */
+    typedef struct {
+      int j;
+      int k1;
+      int k2;
+    } Support;
+
+    /*!
+      Compute an interval 2^{-j}[k1,k2] which contains the support of a
+      single primal spline generator or wavelet \psi_\lambda.
+      (j == lambda.j()+lambda.e() is implicitly assumed for performance reasons)
+    */
+    static void support(const Index& lambda, int& k1, int& k2);
+
     //! DECOMPOSE routine, simple version
     /*!
       Constructs for a given single wavelet index lambda a coefficient set c,

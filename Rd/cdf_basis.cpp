@@ -350,4 +350,123 @@ namespace WaveletTL
     return 0.;
   }
   
+  template <>
+  double
+  CDFBasis<3,5>::evaluate(const unsigned int derivative,
+ 			  const RIndex& lambda,
+ 			  const double x) const
+  {
+    const int j = lambda.j();
+    const double y = (1<<j)*x-lambda.k();
+    if (lambda.e() == 0) // generator
+      {
+	if (y >= -1 && y < 2) {
+	  switch (derivative) {
+	  case 0: {
+	    const double factor = twotothejhalf(j);
+	    switch((int) floor(y)) {
+	    case -1:
+	      return factor*(0.5*y*y+y+0.5);
+	    case 0:
+	      return factor*(-y*y+y+0.5);
+	    case 1:
+	      return factor*(0.5*y*y-2*y+2);
+	    }
+	  }
+	  case 1: {
+	    const double factor = twotothejhalf(3*j);
+	    switch((int) floor(y)) {
+	    case -1:
+	      return factor*(y+1);
+	    case 0:
+	      return factor*(-2*y+1);
+	    case 1:
+	      return factor*(y-2);
+	    }
+	  }
+	  case 2: {
+	    const double factor = twotothejhalf(5*j);
+	    switch((int) floor(y)) {
+	    case -1:
+	      return factor;
+	    case 0:
+	      return -2*factor;
+	    case 1:
+	      return factor;
+	    }
+	  }
+	  }
+	}
+      }
+    else // wavelet
+      {
+	if (y >= -3 && y < 4) {
+ 	  switch (derivative) {
+ 	  case 0: {
+ 	    const double factor = twotothejhalf(j);
+ 	    switch((int) floor(y)) {
+ 	    case -3:
+ 	      return factor*(0.0390625*y*y+0.234375*y+0.3515625);  // (5/128)*y^2+(15/64)*y+(45/128)
+ 	    case -2:
+ 	      return factor*(-0.34375*y*y-1.296875*y-1.1796875);   // -(11/32)*y^2-(83/64)*y-(151/128)
+	    case -1:
+ 	      return factor*(1.5703125*y*y+2.53125*y+0.734375);    // (201/128)*y^2+(81/32)*y+(47/64)
+ 	    case 0:
+ 	      return (y < 0.5
+ 		      ? factor*(-8*y*y+2.53125*y+0.734375)         // -8*y^2+(81/32)*y+(47/64)
+ 		      : factor*(8*y*y-13.46875*y+4.734375));       // 8*y^2-(431/32)*y+(303/64)
+ 	    case 1:
+ 	      return factor*(-1.5703125*y*y+5.671875*y-4.8359375); // -(201/128)*y^2+(363/64)*y-(619/128)
+ 	    case 2:
+ 	      return factor*(0.34375*y*y-1.984375*y+2.8203125);    // (11/32)*y^2-(127/64)*y+(361/128)
+ 	    case 3:
+ 	      return factor*(-0.0390625*y*y+0.3125*y-0.625); // (-5/128)*y^2+(5/16)*y-(5/8)
+ 	    }
+	  }
+ 	  case 1: {
+ 	    const double factor = twotothejhalf(3*j);
+ 	    switch((int) floor(y)) {
+ 	    case -3:
+ 	      return factor*(0.078125*y+0.234375);
+ 	    case -2:
+ 	      return factor*(-0.6875*y-1.296875);
+	    case -1:
+ 	      return factor*(3.140625*y+2.53125);
+ 	    case 0:
+ 	      return (y < 0.5
+ 		      ? factor*(-16*y+2.53125)
+ 		      : factor*(16*y-13.46875));
+ 	    case 1:
+ 	      return factor*(-3.140625*y+5.671875);
+ 	    case 2:
+ 	      return factor*(0.6875*y-1.984375);
+ 	    case 3:
+ 	      return factor*(-0.078125*y+0.3125);
+ 	    }
+ 	  }
+ 	  case 2: {
+ 	    const double factor = twotothejhalf(5*j);
+ 	    switch((int) floor(y)) {
+ 	    case -3:
+ 	      return factor*0.078125;
+ 	    case -2:
+ 	      return -factor*0.6875;
+	    case -1:
+ 	      return factor*3.140625;
+ 	    case 0:
+ 	      return (y < 0.5 ? -factor*16 : factor*16);
+ 	    case 1:
+ 	      return -factor*3.140625;
+ 	    case 2:
+ 	      return factor*0.6875;
+ 	    case 3:
+ 	      return -factor*0.078125;
+ 	    }
+ 	  }
+ 	  }
+	}
+      }
+    return 0.;
+  }
+  
 }

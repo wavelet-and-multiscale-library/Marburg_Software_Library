@@ -234,13 +234,13 @@ namespace WaveletTL
     typedef int type_type;
 
     //! type e
-    const type_type& e() const { return e_; }
+    const type_type e() const { return e_; }
 
     //! translation index type
     typedef int translation_type;
 
     //! translation index k
-    const translation_type& k() const { return k_; }
+    const translation_type k() const { return k_; }
 
   protected:
     //! scale, type, translation

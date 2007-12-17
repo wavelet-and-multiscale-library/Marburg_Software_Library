@@ -119,11 +119,24 @@ private:
 
 /*!
   fast routine to compute 2^(j/2) without a sqrt() call
+  (we assume that j>=0)
 */
 inline
 double twotothejhalf(const int j)
 {
   return j%2 ? M_SQRT2 * (1<<(j>>1)) : 1<<(j>>1);
+}
+
+/*!
+  dyadic modulo x |-> x mod 2^j >= 0
+  (we assume that j>=0)
+*/
+inline
+int dyadic_modulo (const int x, const int j)
+{
+  return (x >= 0
+	  ? x-((x>>j)<<j)
+	  : (x+(((-x)>>j)<<j)) ? x+((((-x)>>j)+1)<<j) : 0);
 }
 
 #endif

@@ -14,5 +14,15 @@ int main()
     cout << "* 2^{" << j << "/2}= " << x2 << ", error: " << fabs(x2-x1) << endl;
   }
 
+  cout << endl
+       << "- checking positive dyadic modulo routine:" << endl;
+  
+  const int expo = 3;
+  for (int j = -10; j <= 10; j++) {
+    cout << j << " modulo 2^" << expo << "="
+	 << dyadic_modulo(j,expo)
+	 << endl;
+  }
+
   return 0;
 }

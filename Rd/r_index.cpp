@@ -3,17 +3,13 @@
 namespace WaveletTL
 {
   RIndex::RIndex(const RIndex& lambda)
+    : j_(lambda.j()), e_(lambda.e()), k_(lambda.k())
   {
-    j_ = lambda.j();
-    e_ = lambda.e();
-    k_ = lambda.k();
   }
 
   RIndex::RIndex(const int j, const int e, const int k)
+    : j_(j), e_(e), k_(k)
   {
-    j_ = j;
-    e_ = e;
-    k_ = k;
   }
 
   RIndex& RIndex::operator = (const RIndex& lambda)

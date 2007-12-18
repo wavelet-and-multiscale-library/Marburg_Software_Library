@@ -11,6 +11,8 @@
 #define _WAVELETTL_I_INDEX_H
 
 #include <iostream>
+#include <Rd/r_index.h>
+
 using std::cout;
 using std::endl;
 
@@ -199,6 +201,7 @@ namespace WaveletTL
 
   template <class IBASIS>
   class IntervalIndex2
+    : public RIndex
   {
   public:
     //! default constructor
@@ -206,6 +209,9 @@ namespace WaveletTL
 
     //! constructor with specified parameters
     IntervalIndex2(const int j, const int e, const int k);
+
+    //! constructor from an RIndex
+    IntervalIndex2(const RIndex& lambda);
 
     //! assignment
     IntervalIndex2& operator = (const IntervalIndex2& lambda);
@@ -226,25 +232,6 @@ namespace WaveletTL
     //! lexicographic order <=
     bool operator <= (const IntervalIndex2& lambda) const
     { return (*this < lambda || *this == lambda); }
-
-    //! scale j
-    const int j() const { return j_; }
-
-    //! type index type
-    typedef int type_type;
-
-    //! type e
-    const type_type e() const { return e_; }
-
-    //! translation index type
-    typedef int translation_type;
-
-    //! translation index k
-    const translation_type k() const { return k_; }
-
-  protected:
-    //! scale, type, translation
-    int j_, e_, k_;  
   };
 
   //! stream output

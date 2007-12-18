@@ -8,7 +8,7 @@ namespace WaveletTL
   template <class RBASIS>
   inline
   typename PeriodicBasis<RBASIS>::Index
-  PeriodicBasis<RBASIS>::first_generator(const int j) const
+  PeriodicBasis<RBASIS>::first_generator(const int j)
   {
     assert(j >= j0());
     return Index(j, 0, PeriodicBasis<RBASIS>::DeltaLmin());
@@ -17,7 +17,7 @@ namespace WaveletTL
   template <class RBASIS>
   inline
   typename PeriodicBasis<RBASIS>::Index
-  PeriodicBasis<RBASIS>::last_generator(const int j) const
+  PeriodicBasis<RBASIS>::last_generator(const int j)
   {
     assert(j >= j0());
     return Index(j, 0, PeriodicBasis<RBASIS>::DeltaRmax(j));
@@ -26,7 +26,7 @@ namespace WaveletTL
   template <class RBASIS>
   inline
   typename PeriodicBasis<RBASIS>::Index
-  PeriodicBasis<RBASIS>::first_wavelet(const int j) const
+  PeriodicBasis<RBASIS>::first_wavelet(const int j)
   {
     assert(j >= j0());
     return Index(j, 1, PeriodicBasis<RBASIS>::Nablamin());
@@ -35,7 +35,7 @@ namespace WaveletTL
   template <class RBASIS>
   inline
   typename PeriodicBasis<RBASIS>::Index
-  PeriodicBasis<RBASIS>::last_wavelet(const int j) const
+  PeriodicBasis<RBASIS>::last_wavelet(const int j)
   {
     assert(j >= j0());
     return Index(j, 1, PeriodicBasis<RBASIS>::Nablamax(j));
@@ -59,6 +59,47 @@ namespace WaveletTL
 	k1 = dyadic_modulo(RBASIS::primal_mask::begin()+1-RBASIS::dual_mask::end()+2*lambda.k(), lambda.j()+1);
 	k2 = dyadic_modulo(RBASIS::primal_mask::end()+1-RBASIS::dual_mask::begin()+2*lambda.k(), lambda.j()+1);
       }
+  }
+
+  template <class RBASIS>
+  inline
+  double
+  PeriodicBasis<RBASIS>::evaluate
+  (const unsigned int derivative, const Index& lambda, const double x) const
+  {
+    return r_basis.evaluate(derivative, lambda,
+			    x-(int)floor(x-ldexp(1.0,-lambda.j())
+					 *((lambda.e() == 0
+					    ? RBASIS::primal_mask::begin()
+					    : (RBASIS::primal_mask::begin()+1-RBASIS::dual_mask::end())/2)
+					   +lambda.k())));
+  }
+  
+  template <class RBASIS>
+  inline
+  void
+  PeriodicBasis<RBASIS>::evaluate(const unsigned int derivative,
+				  const Index& lambda,
+				  const Array1D<double>& points,
+				  Array1D<double>& values) const
+  {
+    values.resize(points.size());
+    for (unsigned int i = 0; i < points.size(); i++)
+      values[i] = evaluate(derivative, lambda, points[i]);
+  }
+    
+  template <class RBASIS>
+  inline
+  void
+  PeriodicBasis<RBASIS>::evaluate(const Index& lambda,
+				  const Array1D<double>& points,
+				  Array1D<double>& funcvalues,
+				  Array1D<double>& dervalues) const
+  {
+    funcvalues.resize(points.size());
+    dervalues.resize(points.size());
+    evaluate(0, lambda, points, funcvalues);
+    evaluate(1, lambda, points, dervalues );
   }
 
   template <class RBASIS>

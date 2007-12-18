@@ -106,16 +106,48 @@ namespace WaveletTL
     static const int Nablasize(const int j) { return 1<<j; }
 
     //! index of first (leftmost) generator on level j >= j0
-    Index first_generator(const int j) const;
+    static Index first_generator(const int j);
 
     //! index of last (rightmost) generator on level j >= j0
-    Index last_generator(const int j) const;
+    static Index last_generator(const int j);
 
     //! index of first (leftmost) wavelet on level j >= j0
-    Index first_wavelet(const int j) const;
+    static Index first_wavelet(const int j);
 
     //! index of last (rightmost) wavelet on level j >= j0
-    Index last_wavelet(const int j) const;
+    static Index last_wavelet(const int j);
+
+    /*!
+      point evaluation of (derivatives) of a single primal generator
+      or wavelet \psi_\lambda
+    */
+    double evaluate(const unsigned int derivative,
+		    const Index& lambda,
+		    const double x) const;
+    
+    /*!
+      point evaluation of (derivatives) of a single primal generator
+      or wavelet \psi_\lambda at several points simultaneously
+    */
+    void evaluate(const unsigned int derivative,
+		  const Index& lambda,
+		  const Array1D<double>& points,
+		  Array1D<double>& values) const;
+    
+    /*!
+      point evaluation of 0-th and first derivative of a single primal generator
+      or wavelet \psi_\lambda at several points simultaneously
+    */
+    void evaluate(const Index& lambda,
+		  const Array1D<double>& points,
+		  Array1D<double>& funcvalues,
+		  Array1D<double>& dervalues) const;
+    
+    
+    //
+    //
+    // wavelet transform routines, for completeness
+
 
     //! DECOMPOSE routine, simple version
     /*!

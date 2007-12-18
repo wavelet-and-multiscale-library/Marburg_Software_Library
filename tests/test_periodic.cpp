@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <utils/array1d.h>
 #include <Rd/r_basis.h>
 #include <Rd/cdf_basis.h>
 #include <interval/periodic.h>
@@ -91,7 +92,7 @@ int main()
   cout << "- leftmost wavelet on the coarsest level: " << first_wavelet(&basis2, basis2.j0()) << endl;
   cout << "- rightmost wavelet on the coarsest level: " << last_wavelet(&basis2, basis2.j0()) << endl;
 
-#if 1
+#if 0
   for (int level = basis2.j0()+1; level <= basis2.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -141,7 +142,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   cout << "- create some test index set..." << endl;
   InfiniteVector<double, Index2> gcoeffs, coeffs;
   gcoeffs[++(++basis2.first_generator(basis2.j0()+3))] = 1.0;
@@ -157,6 +158,23 @@ int main()
   plot_indices2(&basis2, coeffs, basis2.j0()+2, fs);
   fs.close();
   cout << "  ...done!" << endl;
+#endif
+
+#if 1
+  cout << "* point evaluation of periodic CDF functions:" << endl;
+  int N = 32;
+  Array1D<double> points(N+1), values(N+1), dervalues(N+1);
+  double h = 1.0/N;
+  for (int i = 0; i <= N; i++) points[i] = i*h;
+  const int level = basis2.j0();
+  for (Index2 lambda(basis2.first_generator(level));; ++lambda) {
+    cout << lambda << endl;
+    basis2.evaluate(lambda, points, values, dervalues);
+    cout << "points: " << points << endl;
+    cout << "values: " << values << endl;
+    cout << "values of first derivative: " << dervalues << endl;
+    if (lambda == basis2.last_wavelet(level)) break;
+  }
 #endif
 
   return 0;

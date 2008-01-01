@@ -157,11 +157,11 @@ int main()
 //     cout << *it << endl;
 
   // choose another rhs
-  const unsigned int N = 2;
+  const unsigned int N = 1;
   myRHS<N> rhs;
   poisson.set_f(&rhs);
   eq.set_bvp(&poisson);
-  eq.RHS(1e-4, coeffs);
+  eq.RHS(1e-8, coeffs);
   
 #if 1
   cout << "- set up (preconditioned) stiffness matrix..." << endl;

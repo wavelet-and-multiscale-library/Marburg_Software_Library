@@ -47,65 +47,65 @@ namespace WaveletTL
 //     */
 //     IntervalGramian(const IntervalGramian&);
 
-//     /*!
-//       make template argument accessible
-//     */
-//     typedef WBASIS WaveletBasis;
+    /*!
+      make template argument accessible
+    */
+    typedef PeriodicBasis<RBASIS> WaveletBasis;
 
-//     /*!
-//       wavelet index class
-//     */
-//     typedef typename WaveletBasis::Index Index;
+    /*!
+      wavelet index class
+    */
+    typedef typename WaveletBasis::Index Index;
 
 //     /*!
 //       read access to the basis
 //     */
 //     const WaveletBasis& basis() const { return basis_; }
     
-//     /*!
-//       index type of vectors and matrices
-//     */
-//     typedef typename Vector<double>::size_type size_type;
+    /*!
+      index type of vectors and matrices
+    */
+    typedef typename Vector<double>::size_type size_type;
 
-//     /*!
-//       space dimension of the problem
-//     */
-//     static const int space_dimension = 1;
+    /*!
+      space dimension of the problem
+    */
+    static const int space_dimension = 1;
 
-//     /*!
-//       identity operator is local
-//     */
-//     static bool local_operator() { return true; }
+    /*!
+      identity operator is local
+    */
+    static bool local_operator() { return true; }
 
-//     /*!
-//       (half) order t of the operator
-//     */
-//     static double operator_order() { return 0; }
+    /*!
+      (half) order t of the operator
+    */
+    static double operator_order() { return 0; }
 
-//     /*!
-//       evaluate the diagonal preconditioner D (essentially, we don't need any)
-//     */
-//     double D(const typename WaveletBasis::Index& lambda) const { return 1; }
+    /*!
+      evaluate the diagonal preconditioner D (essentially, we don't need any)
+    */
+    double D(const typename WaveletBasis::Index& lambda) const { return 1; }
 
-//     /*!
-//       evaluate the (unpreconditioned) bilinear form a
-//     */
-//     double a(const Index& lambda,
-// 	     const Index& nu) const {
-//       return a(lambda, nu, WaveletBasis::primal_polynomial_degree()*WaveletBasis::primal_polynomial_degree());
-//     }
+    /*!
+      evaluate the (unpreconditioned) bilinear form a
+    */
+    double a(const Index& lambda,
+ 	     const Index& nu) const {
+      return a(lambda, nu, WaveletBasis::primal_polynomial_degree()*WaveletBasis::primal_polynomial_degree());
+    }
     
-//     /*!
-//       evaluate the inner product a;
-//       you can specify the order p of the quadrature rule, i.e.,
-//       (piecewise) polynomials of maximal degree p will be integrated exactly.
-//       Internally, we use an m-point composite tensor product Gauss rule adapted
-//       to the singular supports of the spline wavelets involved,
-//       so that m = (p+1)/2;
-//     */
-//     double a(const typename WaveletBasis::Index& lambda,
-//  	     const typename WaveletBasis::Index& nu,
-//  	     const unsigned int p) const;
+    /*!
+      evaluate the inner product a;
+      you can specify the order p of the quadrature rule, i.e.,
+      (piecewise) polynomials of maximal degree p will be integrated exactly.
+      Internally, we use an m-point composite tensor product Gauss rule adapted
+      to the singular supports of the spline wavelets involved,
+      so that m = (p+1)/2;
+    */
+    double a(const typename WaveletBasis::Index& lambda,
+  	     const typename WaveletBasis::Index& nu,
+  	     const unsigned int p) const;
 
 //     /*!
 //       estimate the spectral norm ||A||

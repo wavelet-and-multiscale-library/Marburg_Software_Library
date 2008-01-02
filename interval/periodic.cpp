@@ -63,6 +63,28 @@ namespace WaveletTL
   }
 
   template <class RBASIS>
+  bool
+  PeriodicBasis<RBASIS>::intersect_supports(const Index& lambda, const Index& mu)
+  {
+    const int j_lambda = lambda.j()+lambda.e();
+    const int j_mu     = mu.j()    +mu.e();
+    const int j = std::max(j_lambda, j_mu);
+
+    int k1_lambda, k2_lambda, k1_mu, k2_mu;
+    support(lambda, k1_lambda, k2_lambda);
+    support(mu    , k1_mu    , k2_mu    );
+
+    k1_lambda <<= j-j_lambda;
+    k2_lambda <<= j-j_lambda;
+    k1_mu     <<= j-j_mu;
+    k2_mu     <<= j-j_mu;
+    
+    // TODO!!!
+
+    return true;
+  }
+
+  template <class RBASIS>
   inline
   double
   PeriodicBasis<RBASIS>::evaluate

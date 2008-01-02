@@ -5,6 +5,9 @@
 #include <Rd/cdf_basis.h>
 #include <interval/periodic.h>
 #include <galerkin/periodic_gramian.h>
+#include <galerkin/galerkin_utils.h>
+#include <algebra/sparse_matrix.h>
+#include <algebra/vector.h>
 
 using namespace std;
 using namespace WaveletTL;
@@ -44,12 +47,13 @@ int main()
 
   cout << "* a periodic CDF basis:" << endl;
 
-  typedef CDFBasis<2,4> RBasis;
+  typedef CDFBasis<2,2> RBasis;
   typedef PeriodicBasis<RBasis> Basis;
   typedef Basis::Index Index;
   Basis basis;
 
-  PeriodicIntervalGramian<RBasis> G;
+  typedef PeriodicIntervalGramian<RBasis> Problem;
+  Problem G;
   
   const unsigned int testcase=1;
   Function<1>* u = 0;
@@ -80,9 +84,24 @@ int main()
     // compute expansion coefficients of u in the dual basis
     u_products.clear();
     basis.expand(u, false, j, u_products);
-    
-    cout << "  inner products of u against all wavelets on level " << j << ":" << endl
-	 << u_products << endl;
+//     cout << "  inner products of u against all wavelets on level " << j << ":" << endl
+// 	 << u_products << endl;
+
+    // setup the set Lambda of active wavelets
+    set<Index> Lambda;
+    for (Index lambda = basis.first_generator(basis.j0());; ++lambda) {
+      Lambda.insert(lambda);
+      if (lambda == basis.last_wavelet(j)) break;
+    }
+//     cout << "  active wavelet set:" << endl;
+//     for (set<Index>::const_iterator it(Lambda.begin()); it != Lambda.end(); ++it) {
+//       cout << *it << endl;
+//     }
+
+    SparseMatrix<double> A;
+    setup_stiffness_matrix(G, Lambda, A);
+    cout << "  stiffness matrix:" << endl
+	 << A;
   }
 
   if (u) delete u;

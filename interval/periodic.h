@@ -73,6 +73,11 @@ namespace WaveletTL
     */
     static void support(const Index& lambda, int& k1, int& k2);
 
+    /*!
+      check whether the support sets of psi_lambda and psi_mu intersect
+    */
+    static bool intersect_supports(const Index& lambda, const Index& mu);
+
     //! space dimension of the underlying domain
     static const int space_dimension = 1;
 

@@ -142,7 +142,36 @@ namespace WaveletTL
 		  const Array1D<double>& points,
 		  Array1D<double>& funcvalues,
 		  Array1D<double>& dervalues) const;
+
+    /*!
+      For a given function, compute all integrals w.r.t. the primal
+      or dual generators/wavelets \psi_\lambda with |\lambda|\le jmax.
+      - When integrating against the primal functions, the integrand has to be smooth
+        to be accurately reproduced by the dual basis.
+      - When integration against dual functions is specified,
+        we integrate against the primal ones instead and multiply the resulting
+        coefficients with the inverse of the primal gramian.
+
+      Maybe a thresholding of the returned coefficients is helpful (e.g. for
+      expansions of spline functions).
+    */
+    void
+    expand
+    (const Function<1>* f,
+     const bool primal,
+     const int jmax,
+     InfiniteVector<double, Index>& coeffs) const;
+
+    /*!
+      helper function, integrate a smooth function f against a
+      periodic primal generator or wavelet
+    */
+    double
+    integrate
+    (const Function<1>* f,
+     const Index& lambda) const;
     
+
     
     //
     //

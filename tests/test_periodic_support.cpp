@@ -10,8 +10,8 @@ int main()
 {
   cout << "Testing support calculation of periodic spline generators and wavelets..." << endl;
 
-  const int d  = 1;
-  const int dt = 1;
+  const int d  = 2;
+  const int dt = 2;
 
   typedef PeriodicBasis<CDFBasis<d,dt> > Basis;
   typedef Basis::Index Index;

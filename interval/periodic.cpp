@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <utils/tiny_tools.h>
+#include <numerics/gauss_data.h>
 
 namespace WaveletTL
 {
@@ -101,6 +102,66 @@ namespace WaveletTL
     evaluate(0, lambda, points, funcvalues);
     evaluate(1, lambda, points, dervalues );
   }
+
+  template <class RBASIS>
+  void
+  PeriodicBasis<RBASIS>::expand(const Function<1>* f,
+				const bool primal,
+				const int jmax,
+				InfiniteVector<double, Index>& coeffs) const
+  {
+    assert(!primal);
+    
+    for (Index lambda = first_generator(j0());;++lambda)
+      {
+	coeffs.set_coefficient(lambda, integrate(f, lambda));
+	if (lambda == last_wavelet(jmax))
+	  break;
+      }
+  }
+
+  template <class RBASIS>
+  double
+  PeriodicBasis<RBASIS>::integrate(const Function<1>* f,
+				   const Index& lambda) const
+  {
+    double r = 0;
+
+    // first we compute the support of psi_lambda
+    const int j = lambda.j()+lambda.e();
+    int k1, k2;
+    support(lambda, k1, k2); // note: k2 may be less or equal to k1 in the case of overlap
+    const int length = (k2 > k1 ? k2-k1 : k2+(1<<j)-k1); // number of subintervals
+    
+    // setup Gauss points and weights for a composite quadrature formula:
+    const unsigned int N_Gauss = 5;
+    const double h = ldexp(1.0, -j);
+
+    Array1D<double> gauss_points (N_Gauss*(length));
+    int k = k1;
+    for (int patch = 0; patch < length; patch++, k = dyadic_modulo(++k,j)) // work on 2^{-j}[k,k+1]
+      for (unsigned int n = 0; n < N_Gauss; n++)
+ 	gauss_points[patch*N_Gauss+n] = h*(2*k+1+GaussPoints[N_Gauss-1][n])/2;
+    
+    // add all integral shares
+    for (unsigned int n = 0; n < N_Gauss; n++)
+      {
+ 	const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
+ 	for (int patch = k1; patch < k1+length; patch++)
+ 	  {
+ 	    const double t = gauss_points[(patch-k1)*N_Gauss+n];
+	    
+ 	    const double ft = f->value(Point<1>(t));
+ 	    if (ft != 0)
+ 	      r += ft
+ 		* evaluate(0, lambda, t)
+ 		* gauss_weight;
+ 	  }
+      }
+    
+    return r;
+  }
+  
 
   template <class RBASIS>
   void

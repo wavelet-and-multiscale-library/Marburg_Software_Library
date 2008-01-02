@@ -211,13 +211,13 @@ namespace WaveletTL
 	    case -2:
 	      return factor*(-0.09375*y-0.1875); // -(3/32)*y-3/16
 	    case -1:
-	      return factor*(0.6874*y+0.59375);  // (11/16)*y+19/32
+	      return factor*(0.6875*y+0.59375);  // (11/16)*y+19/32
 	    case 0:
 	      return (y < 0.5
 		      ? factor*(-4*y+0.59375)    // -4*y+19/32
 		      : factor*(4*y-3.40625));   // 4*y-109/32
 	    case 1:
-	      return factor*(-0.6874*y+1.28125); // -(11/16)*y+41/32
+	      return factor*(-0.6875*y+1.28125); // -(11/16)*y+41/32
 	    case 2:
 	      return factor*(0.09375*y-0.28125); // (3/32)*y-9/32
 	    }

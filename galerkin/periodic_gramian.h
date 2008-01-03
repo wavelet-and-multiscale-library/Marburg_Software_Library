@@ -36,11 +36,11 @@ namespace WaveletTL
   class PeriodicIntervalGramian
   {
   public:
-//     /*!
-//       constructor from a given wavelet basis and a given right-hand side y
-//     */
-//     PeriodicIntervalGramian(const PeriodicBasis<RBASIS>& basis,
-// 			    const InfiniteVector<double, typename PeriodicBasis<RBASIS>::Index>& y);
+    /*!
+      constructor from a given wavelet basis and a given right-hand side y
+    */
+    PeriodicIntervalGramian(const PeriodicBasis<RBASIS>& basis,
+ 			    const InfiniteVector<double, typename PeriodicBasis<RBASIS>::Index>& y);
     
 //     /*!
 //       copy constructor
@@ -160,11 +160,11 @@ namespace WaveletTL
 //       y_ = y;
 //     }
 
-//   protected:
-//     const WaveletBasis& basis_;
+  protected:
+    const WaveletBasis& basis_;
     
-//     // rhs, mutable to have 'const' method
-//     mutable InfiniteVector<double, typename WBASIS::Index> y_;
+    // rhs, mutable to have 'const' method
+    mutable InfiniteVector<double, typename WaveletBasis::Index> y_;
     
 //     // estimates for ||A|| and ||A^{-1}||
 //     mutable double normA, normAinv;

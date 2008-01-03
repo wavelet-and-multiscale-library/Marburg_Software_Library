@@ -66,24 +66,58 @@ namespace WaveletTL
   bool
   PeriodicBasis<RBASIS>::intersect_supports(const Index& lambda, const Index& mu)
   {
-    const int j_lambda = lambda.j()+lambda.e();
-    const int j_mu     = mu.j()    +mu.e();
-    const int j = std::max(j_lambda, j_mu);
+    // A note on the strategy:
+    // Both supp(psi_lambda) and supp(psi_mu) are subintervals of the circle.
+    // In order to decide whether they intersect or not, we compute the distance
+    // between the respective midpoints.
 
-    int k1_lambda, k2_lambda, k1_mu, k2_mu;
+//     cout << "intersect_supports() called with "
+//  	 << "lambda=" << lambda
+//  	 << ", mu=" << mu << endl;
+
+    // compute dyadic coordinate of the midpoint of supp(psi_lambda)
+    const int j_lambda = lambda.j()+1; // independent from lambda.e()!
+    int k1_lambda, k2_lambda;
     support(lambda, k1_lambda, k2_lambda);
-    support(mu    , k1_mu    , k2_mu    );
+    if (lambda.e()==0) {
+      k1_lambda <<= 1;
+      k2_lambda <<= 1;
+    }
+    int length_lambda = k2_lambda-k1_lambda+(k2_lambda>k1_lambda ? 0 : 1<<j_lambda);
+    int mid_lambda = dyadic_modulo((k2_lambda+k1_lambda+(k2_lambda>k1_lambda ? 0 : 1<<j_lambda))/2, j_lambda);
 
-    k1_lambda <<= j-j_lambda;
-    k2_lambda <<= j-j_lambda;
-    k1_mu     <<= j-j_mu;
-    k2_mu     <<= j-j_mu;
+    // do the same for supp(psi_mu)
+    const int j_mu = mu.j()+1;
+    int k1_mu, k2_mu;
+    support(mu, k1_mu, k2_mu);
+    if (mu.e()==0) {
+      k1_mu <<= 1;
+      k2_mu <<= 1;
+    }
+    int length_mu = k2_mu-k1_mu+(k2_mu>k1_mu ? 0 : 1<<j_mu);
+    int mid_mu = dyadic_modulo((k2_mu+k1_mu+(k2_mu>k1_mu ? 0 : 1<<j_mu))/2, j_mu);
     
-    // TODO!!!
+    const int j = std::max(j_lambda, j_mu);
+    mid_lambda    <<= (j-j_lambda);
+    length_lambda <<= (j-j_lambda);
+    mid_mu        <<= (j-j_mu);
+    length_mu     <<= (j-j_mu);
 
-    return true;
+//     cout << "j_lambda=" << j_lambda << ", k1_lambda=" << k1_lambda << ", k2_lambda=" << k2_lambda << endl;
+//     cout << "mid_lambda=" << mid_lambda << endl;
+//     cout << "j_mu=" << j_mu << ", k1_mu=" << k1_mu << ", k2_mu=" << k2_mu << endl;
+//     cout << "mid_mu=" << mid_mu << endl;
+
+    const int dist_midpoints =
+      mid_lambda > mid_mu
+      ? std::min(mid_lambda-mid_mu, mid_mu+(1<<j)-mid_lambda)
+      : std::min(mid_mu-mid_lambda, mid_lambda+(1<<j)-mid_mu);
+    
+//     cout << "dist_midpoints=" << dist_midpoints << endl;
+
+    return (2*dist_midpoints < length_lambda+length_mu);
   }
-
+  
   template <class RBASIS>
   inline
   double
@@ -142,6 +176,26 @@ namespace WaveletTL
       }
   }
 
+  template <class RBASIS>
+  void
+  PeriodicBasis<RBASIS>::expand(const Function<1>* f,
+				const bool primal,
+				const int jmax,
+				Vector<double>& coeffs) const
+  {
+    assert(!primal);
+
+    coeffs.resize(Deltasize(jmax+1));
+
+    int id = 0;
+    for (Index lambda = first_generator(j0());;++lambda, ++id)
+      {
+	coeffs[id] = integrate(f, lambda);
+	if (lambda == last_wavelet(jmax))
+	  break;
+      }   
+  }
+  
   template <class RBASIS>
   double
   PeriodicBasis<RBASIS>::integrate(const Function<1>* f,

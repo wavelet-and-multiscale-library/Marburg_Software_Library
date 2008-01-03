@@ -168,6 +168,16 @@ namespace WaveletTL
      InfiniteVector<double, Index>& coeffs) const;
 
     /*!
+      analogous routine for Vector<double> output
+    */
+    void
+    expand
+    (const Function<1>* f,
+     const bool primal,
+     const int jmax,
+     Vector<double>& coeffs) const;
+
+    /*!
       helper function, integrate a smooth function f against a
       periodic primal generator or wavelet
     */

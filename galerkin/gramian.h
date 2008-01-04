@@ -45,11 +45,6 @@ namespace WaveletTL
 	    const InfiniteVector<double, typename WBASIS::Index>& y);
     
     /*!
-      copy constructor
-    */
-    IntervalGramian(const IntervalGramian&);
-
-    /*!
       make template argument accessible
     */
     typedef WBASIS WaveletBasis;
@@ -191,11 +186,6 @@ namespace WaveletTL
     IntervalGramian(const SplineBasis<d,dT,P_construction>& basis,
 		    const InfiniteVector<double, typename WaveletBasis::Index>& y);
     
-    /*!
-      copy constructor
-    */
-    IntervalGramian(const IntervalGramian&);
-
     /*!
       wavelet index class
     */

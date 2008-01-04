@@ -6,7 +6,9 @@ namespace WaveletTL
   PeriodicIntervalGramian<RBASIS>::PeriodicIntervalGramian
   (const PeriodicBasis<RBASIS>& basis,
    const InfiniteVector<double, typename PeriodicBasis<RBASIS>::Index>& y)
-    : basis_(basis), y_(y)
+    : basis_(basis), y_(y),
+      normA(1.0),
+      normAinv(ldexp(1.0, 2*(RBASIS::primal_polynomial_degree()-1))) // lower bound from [Bittner]
   {
   }
   

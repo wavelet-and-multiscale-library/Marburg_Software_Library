@@ -42,11 +42,6 @@ namespace WaveletTL
     PeriodicIntervalGramian(const PeriodicBasis<RBASIS>& basis,
  			    const InfiniteVector<double, typename PeriodicBasis<RBASIS>::Index>& y);
     
-//     /*!
-//       copy constructor
-//     */
-//     IntervalGramian(const IntervalGramian&);
-
     /*!
       make template argument accessible
     */
@@ -57,10 +52,10 @@ namespace WaveletTL
     */
     typedef typename WaveletBasis::Index Index;
 
-//     /*!
-//       read access to the basis
-//     */
-//     const WaveletBasis& basis() const { return basis_; }
+    /*!
+      read access to the basis
+    */
+    const WaveletBasis& basis() const { return basis_; }
     
     /*!
       index type of vectors and matrices
@@ -107,58 +102,62 @@ namespace WaveletTL
   	     const typename WaveletBasis::Index& nu,
   	     const unsigned int p) const;
 
-//     /*!
-//       estimate the spectral norm ||A||
-//     */
-//     double norm_A() const;
+    /*!
+      estimate the spectral norm ||A||
+    */
+    double norm_A() const {
+      return normA;
+    }
 
-//     /*!
-//       estimate the spectral norm ||A^{-1}||
-//     */
-//     double norm_Ainv() const;
+    /*!
+      estimate the spectral norm ||A^{-1}||
+    */
+    double norm_Ainv() const {
+      return normAinv;
+    }
 
-//     /*!
-//       estimate compressibility exponent s^*
-//     */
-//     double s_star() const {
-//       return WaveletBasis::primal_vanishing_moments();
-//     }
+    /*!
+      estimate compressibility exponent s^*
+    */
+    double s_star() const {
+      return WaveletBasis::primal_vanishing_moments();
+    }
     
-//     /*!
-//       estimate the compression constants alpha_k in
-//       ||A-A_k|| <= alpha_k * 2^{-s*k}
-//     */
-//     double alphak(const unsigned int k) const {
-//       return 2*norm_A(); // suboptimal
-//     }
+    /*!
+      estimate the compression constants alpha_k in
+        ||A-A_k|| <= alpha_k * 2^{-s*k}
+    */
+    double alphak(const unsigned int k) const {
+      return 2*norm_A(); // suboptimal
+    }
 
-//     /*!
-//       evaluate the (unpreconditioned) right-hand side f
-//     */
-//     double f(const typename WaveletBasis::Index& lambda) const {
-//       return y_.get_coefficient(lambda);
-//     }
+    /*!
+      evaluate the (unpreconditioned) right-hand side f
+    */
+    double f(const typename WaveletBasis::Index& lambda) const {
+      return y_.get_coefficient(lambda);
+    }
 
-//     /*!
-//       approximate the wavelet coefficient set of the preconditioned right-hand side F
-//       within a prescribed \ell_2 error tolerance
-//     */
-//     void RHS(const double eta,
-//  	     InfiniteVector<double,typename WaveletBasis::Index>& coeffs) const {
-//       coeffs = y_; // dirty
-//     }
+    /*!
+      approximate the wavelet coefficient set of the preconditioned right-hand side F
+      within a prescribed \ell_2 error tolerance
+    */
+    void RHS(const double eta,
+ 	     InfiniteVector<double,typename WaveletBasis::Index>& coeffs) const {
+      coeffs = y_; // dirty
+    }
 
-//     /*!
-//       compute (or estimate) ||F||_2
-//     */
-//     double F_norm() const { return l2_norm(y_); }
+    /*!
+      compute (or estimate) ||F||_2
+    */
+    double F_norm() const { return l2_norm(y_); }
 
-//     /*!
-//       set right-hand side y
-//     */
-//     void set_rhs(const InfiniteVector<double, typename WaveletBasis::Index>& y) const {
-//       y_ = y;
-//     }
+    /*!
+      set right-hand side y
+    */
+    void set_rhs(const InfiniteVector<double, typename WaveletBasis::Index>& y) const {
+      y_ = y;
+    }
 
   protected:
     const WaveletBasis& basis_;
@@ -166,8 +165,8 @@ namespace WaveletTL
     // rhs, mutable to have 'const' method
     mutable InfiniteVector<double, typename WaveletBasis::Index> y_;
     
-//     // estimates for ||A|| and ||A^{-1}||
-//     mutable double normA, normAinv;
+    // estimates for ||A|| and ||A^{-1}||
+    mutable double normA, normAinv;
   };
 
 }

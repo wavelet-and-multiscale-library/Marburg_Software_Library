@@ -91,9 +91,9 @@ int main()
   cout << "* Gramian matrix on next level j0+1=" << basis.j0()+1 << ":" << endl
        << G;
 
-#if 0
+#if 1
 
-  const unsigned int testcase=1;
+  const unsigned int testcase=2;
   Function<1>* u = 0;
 
   switch(testcase) {

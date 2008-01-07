@@ -88,7 +88,7 @@ int main()
   Basis basis(basis1d);
 
 
-  const int jmax = 5;
+  const int jmax = 4;
   basis.set_jmax(jmax);
 
 //   CornerSingularity    u_sing(Point<2>(0,0), 0.5, 1.5);

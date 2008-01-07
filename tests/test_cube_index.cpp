@@ -22,7 +22,7 @@ int main()
   cout << "Testing the index class of wavelet bases on the cube..." << endl;
 
 //   typedef DSBasis<3,3> Basis1D;
-  typedef PBasis<2,2> Basis1D;
+  typedef PBasis<3,3> Basis1D;
 //   typedef JLBasis Basis1D; // does not work so far!
 
 #if 0

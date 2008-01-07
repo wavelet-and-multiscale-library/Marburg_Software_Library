@@ -266,6 +266,11 @@ namespace WaveletTL
   void
   CubeIndex<IBASIS,DIM,CUBEBASIS>::set_number()
   {
+    if (basis_ == 0) {
+      num_ = -1;
+      return;
+    }
+      
     type_type gen_type;
     assert( e_ != gen_type || j_ == basis_->j0() );
     int result = 0;

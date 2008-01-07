@@ -14,6 +14,8 @@
 #include <interval/jl_support.h>
 #include <interval/jl_evaluate.h>
 
+#include <cube/cube_indexplot.h>
+
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
 
 #include <cube/cube_basis.h>
@@ -71,6 +73,7 @@ int main()
 #if 1
   const int d  = 3;
   const int dT = 3;
+  const int jmax = 5;
 //   typedef DSBasis<d,dT> Basis1D;
   typedef PBasis<d,dT> Basis1D;
 #else
@@ -115,14 +118,38 @@ int main()
 //   cout << "* estimate for normA: " << normA << endl;
 //   cout << "* estimate for normAinv: " << normAinv << endl;
 
-  InfiniteVector<double, Index> u_epsilon;
+   InfiniteVector<double, Index> u_epsilon, f, w, r;
 
-//   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 5);
-  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 5);
+
+//   Index ind;
+
+
+//   for (int i = 0; i < 100; i++) {
+//     APPLY(cproblem, u_epsilon, 0.01, w, 3, CDD1);
+//     cproblem.RHS(0.01, f);
+//     r = f-w;
+//     //r.COARSE(0.0001,w);
+//     r = w;
+//     r *= 0.2;
+//     u_epsilon = u_epsilon + r;
+//     cout << l2_norm(r) << endl;
+//   }
+
+
+
+
+   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, jmax);
+//   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, jmax, CDD1);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 7);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 10);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 6, CDD1);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon);
+   
+   std::ofstream plotstream;
+   plotstream.open("cube_indexplot_cdd1.m");
+   plot_indices(&cproblem.basis(), u_epsilon, jmax, plotstream, "jet", true, true);
+
+   plotstream.close();
   
   return 0;
 }

@@ -717,7 +717,7 @@ namespace WaveletTL
   CubeBasis<IBASIS,DIM>::setup_full_collection()
   {
     if (jmax_ == -1 || jmax_ < j0_) {
-      cout << "CubeBasis<IBASIS,DIM>::setup_full_collection(): specify a mximal level of resolution first!" << endl;
+      cout << "CubeBasis<IBASIS,DIM>::setup_full_collection(): specify a maximal level of resolution first!" << endl;
       abort();
     }   
     
@@ -732,6 +732,7 @@ namespace WaveletTL
     full_collection.resize(degrees_of_freedom);
     int k = 0;
     for (Index ind = first_generator(j0_); ind <= last_wavelet(jmax_); ++ind) {
+      //cout << ind << " " << ind.number() << endl;
       full_collection[k] = ind;
       k++;
     }

@@ -51,7 +51,6 @@ namespace WaveletTL
 		  const CompressionStrategy strategy)
   {
     // INIT, cf. [BB+] 
-
     CDD1Parameters params;
 
     params.c1 = c1;
@@ -90,9 +89,11 @@ namespace WaveletTL
 //     u_epsilon.clear();
     u_epsilon = guess;
     double delta = params.F;
-    
     InfiniteVector<double,Index> v_hat, r_hat, u_bar, F;
+
     P.RHS(2*params.q2*epsilon, F);
+
+
     while (delta > epsilon) { // sqrt(params.c1)*epsilon) { // check the additional factor c1^{1/2} in [BB+] !?
 #if _WAVELETTL_CDD1_VERBOSITY >= 1
       cout << "CDD1_SOLVE: delta=" << delta << endl;
@@ -348,10 +349,9 @@ namespace WaveletTL
     typedef typename PROBLEM::WaveletBasis::Index Index;
     InfiniteVector<double,Index> w;
     APPLY(P, v, eta1, w, jmax, strategy);
-//     APPLY(P, v, eta1/100, w, jmax, strategy);
     F.COARSE(eta2, r);
-//     F.COARSE(0, r);
     r -= w;
     r.support(Lambda_tilde);
+
   }
 }

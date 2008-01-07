@@ -31,15 +31,15 @@ namespace WaveletTL
     to which these values shall be clipped.
     You can choose a Matlab colormap and toggle the boxes and a colorbar on or off.
   */
-  template <class IBASIS>
-  void plot_indices(const CubeBasis<IBASIS,2>* basis,
-		    const InfiniteVector<double, typename CubeBasis<IBASIS,2>::Index>& coeffs,
+  template <class CUBEBASIS>
+  void plot_indices(const CUBEBASIS* basis,
+		    const InfiniteVector<double, typename CUBEBASIS::Index>& coeffs,
 		    const int jmax,
 		    std::ostream& os,
 		    const char* colormap = "cool",
 		    bool boxed = false,
 		    bool colorbar = true,
-		    const double a = -6);
+		    const double aa = -6);
 }
 
 // include implementation

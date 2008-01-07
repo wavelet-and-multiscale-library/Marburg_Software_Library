@@ -373,13 +373,13 @@ namespace WaveletTL
 
     //cout << "size = " << v.size() << endl;
     if (v.size() > 0) {
+      
       // compute the number of bins V_0,...,V_q
       const double norm_v_sqr = l2_norm_sqr(v);
       const double norm_v = sqrt(norm_v_sqr);
       const double norm_A = P.norm_A();
 
       const unsigned int q = (unsigned int) std::max(ceil(log(sqrt((double)v.size())*norm_v*norm_A*2/eta)/M_LN2), 0.);
-      
       // Setup the bins: The i-th bin contains the entries of v with modulus in the interval
       // (2^{-(i+1)}||v||,2^{-i}||v||], 0 <= i <= q-1, the remaining elements (with even smaller modulus)
       // are collected in the q-th bin.
@@ -389,6 +389,7 @@ namespace WaveletTL
  	const unsigned int i = std::min(q, (unsigned int)floor(-log(fabs(*it)/norm_v)/M_LN2));
 	bins[i].push_back(std::make_pair(it.index(), *it));
       }
+      
       // glue all the bins together
       Array1D<std::pair<Index, double> > v_binned(v.size());
       for (unsigned int bin = 0, id = 0; bin <= q; bin++)
@@ -437,7 +438,7 @@ namespace WaveletTL
 	J++;
       }
 
-      cout << "J = " << J << endl;
+      //cout << "J = " << J << endl;
 
       // hack: We let 'add_compressed_column' and 'add_level'
       // in cached_problem.cpp/.h work on full vectors. We do this because the call of 
@@ -564,7 +565,7 @@ namespace WaveletTL
       // Below we will then copy ww into the sparse vector w.
       // Probably this will be handled in a more elegant way in the near future.
 
-      cout << "done binning in apply..." << endl;
+      //cout << "done binning in apply..." << endl;
 
       Vector<double> ww(P.basis().degrees_of_freedom());
 
@@ -589,7 +590,7 @@ namespace WaveletTL
       }
     }
   
-    cout << "done apply" << endl;
+    //cout << "done apply" << endl;
   }  
 
 

@@ -63,6 +63,31 @@ int main()
 
   fs_rhs.close();
   cout << "  ...done, see file corner_rhs.m!" << endl;
+
+
+  // we plot the first component of the gradient of the corner singularity
+  CornerSingularityGradient corner_grad(origin, 0.5, 1.5);
+  if (matlab)
+    cout << "- Matlab output of the corner singularity rhs on a 2D grid..." << endl;
+  else
+    cout << "- Octave output of the corner singularity rhs on a 2D grid..." << endl;
+
+  SampledMapping<2> h_rhs2(grid, corner_grad);
+  std::ofstream fs_rhs2("corner_gradient.m");
+  if (matlab)
+    h_rhs2.matlab_output(fs_rhs2);
+  else
+    h_rhs2.octave_output(fs_rhs2);
+
+  if (matlab)
+    fs_rhs2 << "surf(x,y,z)" << endl;
+  else
+    fs_rhs2 << "mesh(x,y,z)" << endl;
+  
+  fs_rhs2.close();
+  cout << "  ...done, see file corner_gradient.m!" << endl;
+
+
 #endif
 
 #if 0

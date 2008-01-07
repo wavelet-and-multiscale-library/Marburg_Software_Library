@@ -353,6 +353,19 @@ namespace MathTL
 
   template <class C>
   void
+  SampledMapping<2,C>::gnuplot_output(std::ostream& os) const
+  {
+    
+    
+    for (int i = 0; i < gridy_.row_dimension(); i++) {
+      for (int j = 0; j < gridx_.column_dimension(); j++) {
+	os << gridx_.get_entry(i,j) << "\t" << gridy_.get_entry(i,j) << "\t" << values_.get_entry(i,j) << endl;
+      }
+    }
+  }
+
+  template <class C>
+  void
   SampledMapping<2,C>::octave_output(std::ostream& os) const
   {
     Grid<2>::octave_output(os);
@@ -390,6 +403,28 @@ namespace MathTL
     }// end switch
 
   }
+
+  template <unsigned int DIM, class C>
+  void gnuplot_output(std::ostream& os,
+		      const Array1D<SampledMapping<DIM,C> >& values)
+  {
+    switch (DIM) {
+    case 1: {
+      for (unsigned int i = 0; i < values.size(); i++) {
+	values[i].gnuplot_output(os);
+      }
+      break;
+    }
+    case 2: {
+      for (unsigned int i = 0; i < values.size(); i++) {
+	values[i].gnuplot_output(os);
+      }
+      break;
+    }      
+    }// end switch
+
+  }
+
 
   template <unsigned int DIM, class C>
   void octave_output(std::ostream& os,

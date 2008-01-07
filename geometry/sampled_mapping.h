@@ -354,6 +354,12 @@ namespace MathTL
       Matlab output of the sampled mapping onto a stream
     */
     void matlab_output(std::ostream& os) const;
+       
+    /*!
+      Matlab output of the sampled mapping onto a stream
+    */
+    void gnuplot_output(std::ostream& os) const;
+
 
     /*!
       Octave-compatible output of the sampled mapping onto a stream

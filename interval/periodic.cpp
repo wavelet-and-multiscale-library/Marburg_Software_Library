@@ -73,11 +73,14 @@ namespace WaveletTL
 
     // compute dyadic coordinate of the midpoint of supp(psi_lambda)
     const int j_lambda = lambda.j()+1; // independent from lambda.e()!
+
     int k1_lambda, k2_lambda;
-    support(lambda, k1_lambda, k2_lambda);
-    if (lambda.e()==0) {
-      k1_lambda <<= 1;
-      k2_lambda <<= 1;
+    if (lambda.e() == 0) {
+      k1_lambda = 2*dyadic_modulo(RBASIS::primal_mask::begin()+lambda.k(), lambda.j());
+      k2_lambda = 2*dyadic_modulo(RBASIS::primal_mask::end()  +lambda.k(), lambda.j());
+    } else {
+      k1_lambda = dyadic_modulo(RBASIS::primal_mask::begin()+1-RBASIS::dual_mask::end()+2*lambda.k(), lambda.j()+1);
+      k2_lambda = dyadic_modulo(RBASIS::primal_mask::end()+1-RBASIS::dual_mask::begin()+2*lambda.k(), lambda.j()+1);
     }
     int length_lambda = k2_lambda-k1_lambda+(k2_lambda>k1_lambda ? 0 : 1<<j_lambda);
     int mid_lambda = dyadic_modulo((k2_lambda+k1_lambda+(k2_lambda>k1_lambda ? 0 : 1<<j_lambda))/2, j_lambda);
@@ -85,10 +88,12 @@ namespace WaveletTL
     // do the same for supp(psi_mu)
     const int j_mu = mu.j()+1;
     int k1_mu, k2_mu;
-    support(mu, k1_mu, k2_mu);
-    if (mu.e()==0) {
-      k1_mu <<= 1;
-      k2_mu <<= 1;
+    if (mu.e() == 0) {
+      k1_mu = 2*dyadic_modulo(RBASIS::primal_mask::begin()+mu.k(), mu.j());
+      k2_mu = 2*dyadic_modulo(RBASIS::primal_mask::end()  +mu.k(), mu.j());
+    } else {
+      k1_mu = dyadic_modulo(RBASIS::primal_mask::begin()+1-RBASIS::dual_mask::end()+2*mu.k(), mu.j()+1);
+      k2_mu = dyadic_modulo(RBASIS::primal_mask::end()+1-RBASIS::dual_mask::begin()+2*mu.k(), mu.j()+1);
     }
     int length_mu = k2_mu-k1_mu+(k2_mu>k1_mu ? 0 : 1<<j_mu);
     int mid_mu = dyadic_modulo((k2_mu+k1_mu+(k2_mu>k1_mu ? 0 : 1<<j_mu))/2, j_mu);

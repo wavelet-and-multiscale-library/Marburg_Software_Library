@@ -47,19 +47,11 @@ namespace WaveletTL
    	basis_.evaluate(0, lambda, gauss_points, func1values);
   	basis_.evaluate(0, mu, gauss_points, func2values);
 	
-// 	cout << "a() called with lambda=" << lambda << ", mu=" << mu << endl;
-// 	cout << "gauss_points: " << gauss_points << endl;
-// 	cout << "values of psi_lambda there: " << func1values << endl;
-// 	cout << "values of psi_mu there: " << func2values << endl;
-
   	// - add all integral shares
 	for (int patch = k1, id = 0; patch < k1+length; patch++)
 	  for (unsigned int n = 0; n < N_Gauss; n++, id++) {
-	    const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
-	    r += func1values[id] * func2values[id] * gauss_weight;
+	    r += func1values[id] * func2values[id] * GaussWeights[N_Gauss-1][n] * h;
 	  }
-
-// 	cout << "r=" << r << endl;
       }
     
     return r;

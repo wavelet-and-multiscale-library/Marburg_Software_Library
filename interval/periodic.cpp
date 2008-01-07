@@ -71,10 +71,6 @@ namespace WaveletTL
     // In order to decide whether they intersect or not, we compute the distance
     // between the respective midpoints.
 
-//     cout << "intersect_supports() called with "
-//  	 << "lambda=" << lambda
-//  	 << ", mu=" << mu << endl;
-
     // compute dyadic coordinate of the midpoint of supp(psi_lambda)
     const int j_lambda = lambda.j()+1; // independent from lambda.e()!
     int k1_lambda, k2_lambda;
@@ -103,18 +99,11 @@ namespace WaveletTL
     mid_mu        <<= (j-j_mu);
     length_mu     <<= (j-j_mu);
 
-//     cout << "j_lambda=" << j_lambda << ", k1_lambda=" << k1_lambda << ", k2_lambda=" << k2_lambda << endl;
-//     cout << "mid_lambda=" << mid_lambda << endl;
-//     cout << "j_mu=" << j_mu << ", k1_mu=" << k1_mu << ", k2_mu=" << k2_mu << endl;
-//     cout << "mid_mu=" << mid_mu << endl;
-
     const int dist_midpoints =
       mid_lambda > mid_mu
       ? std::min(mid_lambda-mid_mu, mid_mu+(1<<j)-mid_lambda)
       : std::min(mid_mu-mid_lambda, mid_lambda+(1<<j)-mid_mu);
     
-//     cout << "dist_midpoints=" << dist_midpoints << endl;
-
     return (2*dist_midpoints < length_lambda+length_mu);
   }
   
@@ -309,10 +298,10 @@ namespace WaveletTL
       }	else {
 	// j>j0, perform multiscale decomposition
 	
-	static const int aTbegin = RBASIS::dual_mask::begin();
-	static const int aTend   = RBASIS::dual_mask::end();
-	static const int bTbegin = 1-RBASIS::primal_mask::end();
-	static const int bTend   = 1-RBASIS::primal_mask::begin();
+	const int aTbegin = RBASIS::dual_mask::begin();
+	const int aTend   = RBASIS::dual_mask::end();
+	const int bTbegin = 1-RBASIS::primal_mask::end();
+	const int bTend   = 1-RBASIS::primal_mask::begin();
 	
 	// compute d_{j-1}
 	for (int n = 0; n < 1<<(lambda.j()-1); n++) {

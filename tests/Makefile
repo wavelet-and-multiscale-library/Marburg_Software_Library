@@ -108,6 +108,10 @@ EXEOBJF3 = \
   test_mapped_cube_basis.o\
 #  test_tp_basis.o
 
+# set 3a of test programs: wavelet bases on the ring domain
+EXEOBJF3a = \
+  test_ring_basis.o
+
 # set 4 of test programs: wavelet bases on the L-domain
 EXEOBJF4 = \
   test_ldomain_index.o test_ldomain_support.o test_ldomain_basis.o\
@@ -143,6 +147,7 @@ EXES1 = $(EXEOBJF1:.o=)
 EXES2 = $(EXEOBJF2:.o=)
 EXES2a = $(EXEOBJF2a:.o=)
 EXES3 = $(EXEOBJF3:.o=)
+EXES3a = $(EXEOBJF3a:.o=)
 EXES4 = $(EXEOBJF4:.o=)
 EXES5 = $(EXEOBJF5:.o=)
 EXES6 = $(EXEOBJF6:.o=)
@@ -150,12 +155,13 @@ EXES7 = $(EXEOBJF7:.o=)
 
 all:: tests
 
-tests:: tests1 tests2 tests2a tests3 tests4 tests5 tests6 tests7
+tests:: tests1 tests2 tests2a tests3 tests3a tests4 tests5 tests6 tests7
 
 tests1:: $(EXES1)
 tests2:: $(EXES2)
 tests2a:: $(EXES2a)
 tests3:: $(EXES3)
+tests3a:: $(EXES3a)
 tests4:: $(EXES4)
 tests5:: $(EXES5)
 tests6:: $(EXES6)
@@ -166,6 +172,7 @@ clean::
 	rm -f $(EXEOBJF2) $(EXES2)
 	rm -f $(EXEOBJF2a) $(EXES2a)
 	rm -f $(EXEOBJF3) $(EXES3)
+	rm -f $(EXEOBJF3a) $(EXES3a)
 	rm -f $(EXEOBJF4) $(EXES4)
 	rm -f $(EXEOBJF5) $(EXES5)
 	rm -f $(EXEOBJF6) $(EXES6)
@@ -224,6 +231,20 @@ else
 endif
 
 $(EXES3): %: %.o
+ifeq ($(DEBUGMODE),on)
+	$(CXX) $(LDFLAGS) $< -g -o $@
+else
+	$(CXX) $(LDFLAGS) $< -o $@
+endif
+
+$(EXEOBJF3a): %.o: %.cpp
+ifeq ($(DEBUGMODE),on)
+	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
+else
+	$(CXX) $(CXXFLAGS) -c -DNDEBUG -o $@ $<
+endif
+
+$(EXES3a): %: %.o
 ifeq ($(DEBUGMODE),on)
 	$(CXX) $(LDFLAGS) $< -g -o $@
 else

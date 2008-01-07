@@ -1,6 +1,7 @@
 // implementation of PeriodicBasis methods
 
 #include <cmath>
+#include <geometry/point.h>
 #include <utils/tiny_tools.h>
 #include <numerics/gauss_data.h>
 
@@ -79,8 +80,8 @@ namespace WaveletTL
       k1_lambda = 2*dyadic_modulo(RBASIS::primal_mask::begin()+lambda.k(), lambda.j());
       k2_lambda = 2*dyadic_modulo(RBASIS::primal_mask::end()  +lambda.k(), lambda.j());
     } else {
-      k1_lambda = dyadic_modulo(RBASIS::primal_mask::begin()+1-RBASIS::dual_mask::end()+2*lambda.k(), lambda.j()+1);
-      k2_lambda = dyadic_modulo(RBASIS::primal_mask::end()+1-RBASIS::dual_mask::begin()+2*lambda.k(), lambda.j()+1);
+      k1_lambda = dyadic_modulo(RBASIS::primal_mask::begin()+1-RBASIS::dual_mask::end()+2*lambda.k(), j_lambda);
+      k2_lambda = dyadic_modulo(RBASIS::primal_mask::end()+1-RBASIS::dual_mask::begin()+2*lambda.k(), j_lambda);
     }
     int length_lambda = k2_lambda-k1_lambda+(k2_lambda>k1_lambda ? 0 : 1<<j_lambda);
     int mid_lambda = dyadic_modulo((k2_lambda+k1_lambda+(k2_lambda>k1_lambda ? 0 : 1<<j_lambda))/2, j_lambda);
@@ -221,7 +222,7 @@ namespace WaveletTL
  	  {
  	    const double t = gauss_points[(patch-k1)*N_Gauss+n];
 	    
- 	    const double ft = f->value(Point<1>(t));
+ 	    const double ft = f->value(MathTL::Point<1>(t));
  	    if (ft != 0)
  	      r += ft
  		* evaluate(0, lambda, t)

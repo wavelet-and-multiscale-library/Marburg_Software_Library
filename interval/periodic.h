@@ -14,10 +14,15 @@
 
 #include <algebra/vector.h>
 #include <algebra/infinite_vector.h>
+#include <utils/array1d.h>
+#include <utils/function.h>
 
 #include <interval/i_index.h>
 
+using MathTL::Vector;
 using MathTL::InfiniteVector;
+using MathTL::Array1D;
+using MathTL::Function;
 
 namespace WaveletTL
 {

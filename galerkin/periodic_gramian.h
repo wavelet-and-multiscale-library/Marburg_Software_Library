@@ -86,8 +86,8 @@ namespace WaveletTL
       evaluate the (unpreconditioned) bilinear form a
     */
     double a(const Index& lambda,
- 	     const Index& nu) const {
-      return a(lambda, nu, WaveletBasis::primal_polynomial_degree()*WaveletBasis::primal_polynomial_degree());
+	     const Index& nu) const {
+      return a(lambda, nu, 2*WaveletBasis::primal_polynomial_degree());
     }
     
     /*!

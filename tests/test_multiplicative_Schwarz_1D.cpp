@@ -1,5 +1,12 @@
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
+#define _WAVELETTL_CDD1_VERBOSITY 0
+
 #define OVERLAP 0.7
+#define JMAX 10
+
+#define PRECOMP
+
+#define COMPUTECONSTANTS
 
 #define SPARSE
 //#define FULL
@@ -115,7 +122,7 @@ int main()
   
   const int DIM = 1;
 
-  const int jmax = 12;
+  const int jmax = JMAX;
   
   const int d = 3, dT = 3;
 
@@ -272,17 +279,81 @@ int main()
 
   //CachedProblem<BiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 4.19, 1.0/0.146);
 
-  const double epsilon = 0.00005;
+  const double epsilon = 1.0e-4;
 
   Array1D<InfiniteVector<double, Index> > approximations(frame.n_p()+1);
+
+  cout << "precompute the energy norm of the exact solution ..." << endl;
+  Singularity1D_2_prime<double> exact1D_der;
+  InfiniteVector<double, Index> full_vector_zero;
+  double H1err = error_H_scale_interval<Basis1D>(1, frame, full_vector_zero, exact1D_der);
+  cout << "H1err = " << H1err << endl;
+
+
+  // ##########################################################################################
+  // estimate extremal eigenvalues of local stiffness matrices and largest eigenvalue
+  // of whole stiffness matrix
   
+#ifdef COMPUTECONSTANTS
+  set<Index> Lambda_0;
+  set<Index> Lambda_1;
+  set<Index> Lambda;
+  for (FrameIndex<Basis1D,DIM,DIM> lambda = FrameTL::first_generator<Basis1D,DIM,DIM,Frame1D>(&frame, frame.j0());
+       lambda <= FrameTL::last_wavelet<Basis1D,DIM,DIM,Frame1D>(&frame, jmax); ++lambda) {
+    Lambda.insert(lambda);
+    if (lambda.p() == 0)
+      Lambda_0.insert(lambda);
+    else {
+      Lambda_1.insert(lambda);
+    }
+  }
+  
+  SparseMatrix<double> stiff;
+  
+  // starting vector for Power and Inverse Power Iteration
+  Vector<double> x(Lambda_0.size()); x = 1;
+  // number of iterations in Power and Inverse Power Iteration
+  unsigned int iter= 0;  
+
+  WaveletTL::setup_stiffness_matrix(problem, Lambda_0, stiff);
+
+  cout << "computing smallest eigenvalue of stiffness matrix on patch 0" << endl;
+  double lmin = InversePowerIteration(stiff, x, 0.01, 1000, iter);
+  cout << "smallest eigenvalue of stiffness matrix on patch 0 is " << lmin << endl;
+
+  cout << "computing largest eigenvalue of stiffness matrix on patch 0" << endl;
+  double lmax = PowerIteration(stiff, x, 0.01, 1000, iter);
+  cout << "largest eigenvalue of stiffness matrix on patch 0 is " << lmax << endl;
+
+  WaveletTL::setup_stiffness_matrix(problem, Lambda_1, stiff);
+
+  x.resize(Lambda_1.size()); x = 1;
+  cout << "computing smallest eigenvalue of stiffness matrix on patch 1" << endl;
+  lmin = InversePowerIteration(stiff, x, 0.01, 1000, iter);
+  cout << "smallest eigenvalue of stiffness matrix on patch 1 is " << lmin << endl;
+
+  cout << "computing largest eigenvalue of stiffness matrix on patch 1" << endl;
+  lmax = PowerIteration(stiff, x, 0.01, 1000, iter);
+  cout << "largest eigenvalue of stiffness matrix on patch 1 is " << lmax << endl;
+
+  x.resize(Lambda.size()); x = 1;
+  WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
+  cout << "computing largest eigenvalue of whole stiffness matrix" << endl;
+  lmax = PowerIteration(stiff, x, 0.01, 1000, iter);
+  cout << "largest eigenvalue of whole stiffness matrix is " << lmax << endl;
+
+
+#endif
+  // ##########################################################################################
+
+
   clock_t tstart, tend;
   double time;
   tstart = clock();
 
   //multiplicative_Schwarz_SOLVE(problem, epsilon, u_epsilon0, u_epsilon1, u_epsilon);
-  adaptive_multiplicative_Schwarz_SOLVE(problem, epsilon, approximations);
-
+  //adaptive_multiplicative_Schwarz_SOLVE(problem, epsilon, approximations);
+  MultSchw(problem, epsilon, approximations);
 
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
@@ -296,21 +367,23 @@ int main()
   
   EvaluateFrame<Basis1D,1,1> evalObj;
 
-  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, approximations[frame.n_p()], true, 10);//expand in primal basis
+  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, approximations[frame.n_p()], true, 11);//expand in primal basis
   cout << "...finished plotting global approximate solution" << endl;
-  Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, approximations[frame.n_p()], exactSolution1D, 12);
+  Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, approximations[frame.n_p()], exactSolution1D, 11);
   cout << "...finished plotting global error" << endl;
 
   char filename1[50];
   sprintf(filename1, "%s%d%s%d%s", "approx1D_global_d", d, "_dT", dT, ".m");
   std::ofstream ofs(filename1);
   matlab_output(ofs,U);
+  //uplot_output(ofs,U);
   ofs.close();
 
   char filename2[50];
   sprintf(filename2, "%s%d%s%d%s", "error1D_global_d", d, "_dT", dT, ".m");
   std::ofstream ofs1(filename2);
   matlab_output(ofs1,Error);
+  //gnuplot_output(ofs1,Error);
   ofs1.close();
 
 
@@ -320,9 +393,10 @@ int main()
     char filename3[50];
     sprintf(filename3, "%s%d%s%d%s%d%s", "approx1D_local_on_patch_" , i , "_d" , d ,  "_dT", dT, ".m");
 
-    U = evalObj.evaluate(frame, approximations[i], true, 10);//expand in primal basis
+    U = evalObj.evaluate(frame, approximations[i], true, 8);//expand in primal basis
     std::ofstream ofsloc(filename3);
     matlab_output(ofsloc,U);
+    //gnuplot_output(ofsloc,U);
     ofsloc.close();
   }
 
@@ -342,10 +416,10 @@ int main()
   }
 
   std::ofstream ofs7("indices_patch_0.m");
-  WaveletTL::plot_indices<Basis1D>(frame.bases()[0]->bases()[0], indices[0], 13, ofs7, "jet", true, -16);
+  WaveletTL::plot_indices<Basis1D>(frame.bases()[0]->bases()[0], indices[0], JMAX, ofs7, "jet", true, -16);
 
   std::ofstream ofs8("indices_patch_1.m");
-  WaveletTL::plot_indices<Basis1D>(frame.bases()[1]->bases()[0], indices[1], 13, ofs8, "jet", true, -16);
+  WaveletTL::plot_indices<Basis1D>(frame.bases()[1]->bases()[0], indices[1], JMAX, ofs8, "jet", true, -16);
 
   return 0;
 }

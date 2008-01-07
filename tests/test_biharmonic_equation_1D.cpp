@@ -1,6 +1,6 @@
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
 
-#define ADAPTED_BASIS
+//#define ADAPTED_BASIS
 
 #include <fstream>
 #include <iostream>
@@ -103,17 +103,13 @@ int main()
   cout << "Testing class BiharmonicEquation ..." << endl;
   
   const int DIM = 1;
-<<<<<<< test_biharmonic_equation_1D.cpp
-  int jmax = 12;
-=======
-  int jmax = 10;
->>>>>>> 1.6
+  int jmax = 8;
 
   #ifdef ADAPTED_BASIS
   typedef AdaptedBasis<SBasis> Basis1D;
   #else
   //typedef DSBasis<2,2> Basis1D;
-  typedef PBasis<4,4> Basis1D;
+  typedef PBasis<3,3> Basis1D;
   #endif
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;

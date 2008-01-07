@@ -84,6 +84,11 @@ namespace FrameTL
     */
     typedef FrameIndex<IBASIS, DIM_d, DIM_m> Index;
 
+
+    //! interval basis
+    typedef IBASIS IntervalBasis;
+
+
     /*!
       access to the local bases
      */
@@ -184,10 +189,15 @@ namespace FrameTL
 
 
     /*!
-      point evaluation of (derivatives) of a single frame generator or wavelet
+      point evaluation of a single frame element
     */
-    double evaluate(const bool primal, const unsigned int derivative,
-                    const Index& lambda, const Point<DIM_m> x) const;
+    double evaluate(const Index& lambda, const Point<DIM_m>& x) const;
+
+    /*!
+      point evaluation of the gradient of a single frame element
+    */
+    void evaluate_gradient(const Index& lambda, const Point<DIM_d>& x, Vector<double>& values) const;
+
 
 
   protected:

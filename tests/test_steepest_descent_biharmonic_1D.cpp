@@ -7,7 +7,11 @@
 //#define CONSTANT_RHS
 
 // choose which basis to use
+<<<<<<< test_steepest_descent_biharmonic_1D.cpp
+//#define BASIS_S
+=======
 #define BASIS_P
+>>>>>>> 1.3
 
 //#ifdef BASIS_S
 //#define MAX_LOOPS 10000
@@ -24,6 +28,11 @@
 
 #define SAVE_ASYMPTOTIC 10
 #define SAVE_LOG
+
+#define SPARSE
+//#define FULL
+#define ONE_D
+#define OVERLAP 0.7
 
 #include <fstream>
 #include <iostream>
@@ -54,21 +63,24 @@
 
 #include <galerkin/cached_problem.h>
 
+#include <interval/i_indexplot.h>
+
 // typedefs for choice of basis
 #ifdef BASIS_S
  #define D_PRIMAL 4
  #define D_DUAL 2
  typedef AdaptedBasis<SBasis> Basis1D;
 #else
- #define D_PRIMAL 4
- #define D_DUAL 4
+ #define D_PRIMAL 3
+ #define D_DUAL 3
  typedef PBasis<D_PRIMAL,D_DUAL> Basis1D;
 #endif
 typedef CubeBasis<Basis1D,1> IntervalBasis;
 typedef AggregatedFrame<Basis1D,1,1> Frame1D;
 typedef Frame1D::Index Index;
 
-#include <simplified_steepest_descent.h>
+//#include <simplified_steepest_descent.h>
+#include <adaptive_multiplicative_Schwarz.h>
 
 using std::cout;
 using std::endl;
@@ -84,7 +96,7 @@ int main()
   cout << "Testing steepest descent with the biharmonic equation in 1D ..." << endl;
   
   const int DIM = 1;
-  const int jmax = 13;
+  const int jmax = 11;
   const double epsilon = 1e-3;
 
   // set up frame ***********************************************************
@@ -177,7 +189,8 @@ int main()
 
   SimpleBiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&rhs, &frame, jmax, TrivialAffine);
  
-  CachedProblem<SimpleBiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 5, 1.0/0.146);
+  //CachedProblem<SimpleBiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 5, 1.0/0.146);
+  CachedProblemLocal<SimpleBiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 5, 1.0/0.146);
 
 
   // start adapted solver ***************************************************
@@ -186,8 +199,12 @@ int main()
   tstart = clock();
 
   InfiniteVector<double, Index> u_epsilon;
-  simplified_steepest_descent_SOLVE(problem, epsilon, u_epsilon, jmax);
+  //simplified_steepest_descent_SOLVE(problem, epsilon, u_epsilon, jmax);
 
+  Array1D<InfiniteVector<double, Index> > approximations(frame.n_p()+1);
+  adaptive_multiplicative_Schwarz_SOLVE(problem, epsilon, approximations);
+  for (int i = 0; i <= frame.n_p(); i++)
+    approximations[i].scale(&discrete_biharmonic,-1);
   tend = clock();
   time = (double)((tend-tstart)/CLOCKS_PER_SEC);
   cout << "  ... done, time needed: " << time << " seconds" << endl;
@@ -201,10 +218,16 @@ int main()
   cout << "Evaluating solution ..." << endl;
   EvaluateFrame<Basis1D,1,1> evalObj;
 
-  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u_epsilon, true, 11); // expand in primal basis
+  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, approximations[frame.n_p()], true, 11); // expand in primal basis
   cout << "... finished plotting approximate solution" << endl;
-  Array1D<SampledMapping<1> > error = evalObj.evaluate_difference(frame, u_epsilon, exact_solution, 11);
+  Array1D<SampledMapping<1> > error = evalObj.evaluate_difference(frame, approximations[frame.n_p()], exact_solution, 11);
   cout << "... finished plotting error" << endl;
+
+
+//   Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u_epsilon, true, 11); // expand in primal basis
+//   cout << "... finished plotting approximate solution" << endl;
+//   Array1D<SampledMapping<1> > error = evalObj.evaluate_difference(frame, u_epsilon, exact_solution, 11);
+//   cout << "... finished plotting error" << endl;
   
   std::ofstream ofs_approx("steep_1D_bi_approx_sol_out.m");
   matlab_output(ofs_approx,U);
@@ -213,6 +236,43 @@ int main()
   std::ofstream ofs_error("steep_1D_bi_error_out.m");
   matlab_output(ofs_error,error);
   ofs_error.close();
+
+
+  const int d = D_PRIMAL;
+  const int dT = D_DUAL;
+  for (int i = 0; i < frame.n_p(); i++) {
+    cout << "plotting local approximation on patch " << i << endl;
+
+    char filename3[50];
+    sprintf(filename3, "%s%d%s%d%s%d%s", "approx1D_local_on_patch_" , i , "_d" , d ,  "_dT", dT, ".m");
+
+    U = evalObj.evaluate(frame, approximations[i], true, 8);//expand in primal basis
+    std::ofstream ofsloc(filename3);
+    //matlab_output(ofsloc,U);
+    gnuplot_output(ofsloc,U);
+    ofsloc.close();
+  }
+
+  typedef Basis1D::Index Index1D;
+
+  FixedArray1D<InfiniteVector<double, Index1D>, 2> indices;
+ 
+  InfiniteVector<double, Index>::const_iterator it = approximations[frame.n_p()].begin();
+  for (; it!= approximations[frame.n_p()].end(); ++it) {
+    //cout << *it << endl;
+    Index ind(it.index());
+    //cout << "level = " << ind.j() << endl;
+    indices[ind.p()].set_coefficient(Index1D(ind.j(),ind.e()[0],ind.k()[0],
+					     frame.bases()[0]->bases()[0]), *it);
+  
+    //cout << log10(fabs(*it)) << endl;
+  }
+
+  std::ofstream ofs7("indices_patch_0.m");
+  WaveletTL::plot_indices<Basis1D>(frame.bases()[0]->bases()[0], indices[0], 13, ofs7, "jet", true, -16);
+
+  std::ofstream ofs8("indices_patch_1.m");
+  WaveletTL::plot_indices<Basis1D>(frame.bases()[1]->bases()[0], indices[1], 13, ofs8, "jet", true, -16);
 
   return 0;
 }

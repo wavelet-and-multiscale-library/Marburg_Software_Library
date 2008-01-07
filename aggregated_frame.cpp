@@ -322,23 +322,84 @@ namespace FrameTL
 
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   double
-  AggregatedFrame<IBASIS,DIM_d,DIM_m>::evaluate(const bool primal, const unsigned int derivative,
-                                                const Index& lambda, Point<DIM_m> x) const
+  AggregatedFrame<IBASIS,DIM_d,DIM_m>::evaluate(const Index& lambda, const Point<DIM_m>& x) const
   {
     double value;
     Point<DIM_d> p_d;
     const Chart<DIM_d,DIM_m>* chart(atlas_->charts()[lambda.p()]);
 
     chart->map_point_inv(x, p_d);
-    value = lifted_bases[lambda.p()]->evaluate(primal, derivative,
-                              typename CubeBasis<IBASIS,DIM_d>::Index(lambda.j(),
-                                                        lambda.e(),
-                                                        lambda.k(),
-                                                        lifted_bases[lambda.p()]),
-                              p_d);
+    value = lifted_bases[lambda.p()]->evaluate(1, 0,
+					       typename CubeBasis<IBASIS,DIM_d>::Index(lambda.j(),
+										       lambda.e(),
+										       lambda.k(),
+										       lifted_bases[lambda.p()]),
+					       p_d);
     value /= chart->Gram_factor(p_d);
 
     return value;
   }
 
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  void
+  AggregatedFrame<IBASIS,DIM_d,DIM_m>::evaluate_gradient(const Index& lambda,
+							 const Point<DIM_d>& x, Vector<double>& values) const
+  {
+    typedef typename IBASIS::Index Index_1D;
+
+    Point<DIM_d> p_d;
+    const Chart<DIM_d,DIM_m>* chart(atlas_->charts()[lambda.p()]);
+
+    chart->map_point_inv(x, p_d);
+    
+    double gram_factor = chart->Gram_factor(p_d); // = | det D Kappa |^{1/2}
+   
+    FixedArray1D<IBASIS*,DIM_d> bases1D_lambda = bases()[lambda.p()]->bases();
+
+    double wavVal = 1.;
+    Vector<double> cube_wavelet_components(DIM_d);
+    for (unsigned int i = 0; i < DIM_d; i++) {
+      cube_wavelet_components[i] = WaveletTL::evaluate(*(bases1D_lambda[i]), 0,
+				    Index_1D(lambda.j(), lambda.e()[i], lambda.k()[i], bases1D_lambda[i]),
+				    p_d[i]);
+      wavVal *= cube_wavelet_components[i];
+    }
+
+    Vector<double> gradient_cube_wavelet(DIM_d);
+    double d = 1.;
+
+    for (unsigned int i = 0; i < DIM_d; i++) {
+      gradient_cube_wavelet[i] = 0.;
+      d = WaveletTL::evaluate(*(bases1D_lambda[i]), 1,
+			      Index_1D(lambda.j(), lambda.e()[i], lambda.k()[i], bases1D_lambda[i]),
+			      p_d[i]);
+      
+      for (unsigned int j = 0; j < DIM_d; j++) {
+	if (j != i) {
+	  d *= cube_wavelet_components[j];
+	}
+      }
+      gradient_cube_wavelet[i] = d;
+    }
+
+
+    Vector<double> tmp(DIM_d);
+    for (unsigned int i = 0; i < DIM_d; i++) {
+      tmp[i] = (
+		(gradient_cube_wavelet[i] * gram_factor) - (wavVal * chart->Gram_D_factor(i, p_d))
+		)
+	/ (gram_factor*gram_factor);
+    }
+    
+    d = 0.;
+    for (unsigned int i = 0; i < DIM_d; i++) {
+      for (unsigned int j = 0; j < DIM_d; j++) {
+	d += tmp[j] * chart->Dkappa_inv(j, i, p_d);
+      }
+      values[i] = d;
+      d=0.;
+    }
+
+
+  }
 }

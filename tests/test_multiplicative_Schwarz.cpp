@@ -1,9 +1,18 @@
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
+#define _WAVELETTL_CDD1_VERBOSITY 1
+
+#define H_1_semi_norm_singularity 1.6544 // preprocessed with high granularity
 
 #define OVERLAP 1.
 
-//#define SPARSE
-#define FULL
+#define JMAX 5;
+
+#define PRECOMP
+
+#define COMPUTECONSTANTS
+
+#define SPARSE
+//#define FULL
 #define TWO_D
 
 #include <fstream>
@@ -25,10 +34,14 @@
 #include <frame_support.h>
 #include <frame_index.h>
 #include <adaptive_multiplicative_Schwarz.h>
+#include <error_H_scale.h>
 //#include <multiplicative_Schwarz.h>
 //#include <additive_Schwarz.h>
 //#include <additive_Schwarz_SD.h>
 #include <galerkin/cached_problem.h>
+#include <cube/cube_indexplot.h>
+
+#include <adaptive/cdd1.h>
 
 using std::cout;
 using std::endl;
@@ -54,14 +67,16 @@ using namespace MathTL;
 using namespace WaveletTL;
 
 
+
+
+
 int main(int argc, char* argv[])
 {
- 
   cout << "testing multiplicative schwarz algorithm in 2D..." << endl;
 
   const int DIM = 2;
 
-  const int jmax = 5;
+  const int jmax = JMAX;
   
   const int d = 3, dT = 3;
 
@@ -69,9 +84,29 @@ int main(int argc, char* argv[])
   typedef PBasis<d,dT> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
   typedef CubeBasis<Basis1D> Basis;
+  typedef MappedCubeBasis<Basis1D,2,2> MappedBasis;
   typedef Frame2D::Index Index;
+  typedef CubeIndex<Basis1D,2,MappedCubeBasis<Basis1D,2,2> > CIndex;
+
+
 
 //   //##############################  
+//   Matrix<double> A(DIM,DIM);
+//   A(0,0) = 0.7;
+//   A(1,1) = 1.0;
+//   Point<2> b;
+//   b[0] = 0.;
+//   b[1] = 0.;
+//   AffineLinearMapping<2> affineP(A,b);
+
+//   Matrix<double> A2(DIM,DIM);
+//   A2(0,0) = 0.7;
+//   A2(1,1) = 1.0;
+//   Point<2> b2;
+//   b2[0] = 0.3;
+//   b2[1] = 0.;
+//   AffineLinearMapping<2> affineP2(A2,b2);
+
   Matrix<double> A(DIM,DIM);
   A(0,0) = 1. + OVERLAP;
   A(1,1) = 1.0;
@@ -120,14 +155,14 @@ int main(int argc, char* argv[])
   bound_1[0] = 1;//2
   bound_1[1] = 1;
   bound_1[2] = 1;
-  bound_1[3] = 2;//2;
+  bound_1[3] = 1;//2;
 
   bc[0] = bound_1;
 
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
   bound_2[0] = 1;
-  bound_2[1] = 2;//2;
+  bound_2[1] = 1;//2;
   bound_2[2] = 1;
   bound_2[3] = 1;
 
@@ -171,10 +206,22 @@ int main(int argc, char* argv[])
 
   CornerSingularity sing2D(origin, 0.5, 1.5);
   CornerSingularityRHS singRhs(origin, 0.5, 1.5);
+
+  SimpleTest<double> simple_sol;
+  SimpleTestRHS<double> simple_sol_rhs;
+  
+
+
+#if 0
+  CornerSingularityGradient singGrad(origin, 0.5, 1.5);
+  cout << "H1 norm of singularity function = " << H_1_semi_norm_Lshaped<2>(singGrad) << endl;
+#endif
+  
+
   
   PoissonBVP<DIM> poisson(&singRhs);
   //PoissonBVP<DIM> poisson(&const_fun);
-
+  //PoissonBVP<DIM> poisson(&simple_sol_rhs);
 
   clock_t tstart, tend;
   double time;
@@ -239,19 +286,69 @@ int main(int argc, char* argv[])
 
   Array1D<InfiniteVector<double, Index> > approximations(frame.n_p()+1);
 
-//   set<Index> Lambda;
-//   for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
-//        lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, jmax); ++lambda) {
-//     Lambda.insert(lambda);
-//     //cout << lambda << endl;
-//   }
+
+  // ##########################################################################################
+  // estimate extremal eigenvalues of local stiffness matrices and largest eigenvalue
+  // of whole stiffness matrix
   
-//   SparseMatrix<double> stiff;
+#ifdef COMPUTECONSTANTS
+  set<Index> Lambda_0;
+  set<Index> Lambda_1;
+  set<Index> Lambda;
+  for (FrameIndex<Basis1D,DIM,DIM> lambda = FrameTL::first_generator<Basis1D,DIM,DIM,Frame2D>(&frame, frame.j0());
+       lambda <= FrameTL::last_wavelet<Basis1D,DIM,DIM,Frame2D>(&frame, jmax); ++lambda) {
+    Lambda.insert(lambda);
+    if (lambda.p() == 0)
+      Lambda_0.insert(lambda);
+    else {
+      Lambda_1.insert(lambda);
+    }
+  }
   
-//   WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
+  SparseMatrix<double> stiff;
+  
+  // starting vector for Power and Inverse Power Iteration
+  Vector<double> x(Lambda_0.size()); x = 1;
+  // number of iterations in Power and Inverse Power Iteration
+  unsigned int iter= 0;  
+
+  WaveletTL::setup_stiffness_matrix(problem, Lambda_0, stiff);
+
+  cout << "computing smallest eigenvalue of stiffness matrix on patch 0" << endl;
+  double lmin = InversePowerIteration(stiff, x, 0.01, 1000, iter);
+  cout << "smallest eigenvalue of stiffness matrix on patch 0 is " << lmin << endl;
+
+  cout << "computing largest eigenvalue of stiffness matrix on patch 0" << endl;
+  double lmax = PowerIteration(stiff, x, 0.01, 1000, iter);
+  cout << "largest eigenvalue of stiffness matrix on patch 0 is " << lmax << endl;
+
+  WaveletTL::setup_stiffness_matrix(problem, Lambda_1, stiff);
+
+  x.resize(Lambda_1.size()); x = 1;
+  cout << "computing smallest eigenvalue of stiffness matrix on patch 1" << endl;
+  lmin = InversePowerIteration(stiff, x, 0.01, 1000, iter);
+  cout << "smallest eigenvalue of stiffness matrix on patch 1 is " << lmin << endl;
+
+  cout << "computing largest eigenvalue of stiffness matrix on patch 1" << endl;
+  lmax = PowerIteration(stiff, x, 0.01, 1000, iter);
+  cout << "largest eigenvalue of stiffness matrix on patch 1 is " << lmax << endl;
+
+  x.resize(Lambda.size()); x = 1;
+  WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
+  cout << "computing largest eigenvalue of whole stiffness matrix" << endl;
+  lmax = PowerIteration(stiff, x, 0.01, 1000, iter);
+  cout << "largest eigenvalue of whole stiffness matrix is " << lmax << endl;
 
 
-  adaptive_multiplicative_Schwarz_SOLVE(problem, epsilon, approximations);
+#endif
+  // ##########################################################################################
+
+
+  cout << "adaptive algorithm started..." << endl;
+  MultSchw(problem, epsilon, approximations);
+  //adaptive_multiplicative_Schwarz_SOLVE(problem, epsilon, approximations);
+  //CDD1_SOLVE(problem, 1e-2, approximations[frame.n_p()], jmax);
+
 
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
@@ -268,19 +365,22 @@ int main(int argc, char* argv[])
 
   Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, approximations[frame.n_p()], true, 5);//expand in primal basis
   cout << "...finished plotting global approximate solution" << endl;
-  Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(frame, approximations[frame.n_p()], sing2D, 5);
+  Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(frame, approximations[frame.n_p()], sing2D, 6);
+  //Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(frame, approximations[frame.n_p()], simple_sol, 5);
   cout << "...finished plotting global error" << endl;
 
   char filename1[50];
   sprintf(filename1, "%s%d%s%d%s", "approx2D_global_d", d, "_dT", dT, ".m");
   std::ofstream ofs(filename1);
   matlab_output(ofs,U);
+  //gnuplot_output(ofs,U);
   ofs.close();
 
   char filename2[50];
   sprintf(filename2, "%s%d%s%d%s", "error2D_global_d", d, "_dT", dT, ".m");
   std::ofstream ofs1(filename2);
   matlab_output(ofs1,Error);
+  //gnuplot_output(ofs1,Error);
   ofs1.close();
 
 
@@ -290,12 +390,36 @@ int main(int argc, char* argv[])
     char filename3[50];
     sprintf(filename3, "%s%d%s%d%s%d%s", "approx2D_local_on_patch_" , i , "_d" , d ,  "_dT", dT, ".m");
 
-    U = evalObj.evaluate(frame, approximations[i], true, 5);//expand in primal basis
+    U = evalObj.evaluate(frame, approximations[i], true, 6);//expand in primal basis
     std::ofstream ofsloc(filename3);
     matlab_output(ofsloc,U);
+    //gnuplot_output(ofsloc,U);
     ofsloc.close();
   
   }
+
+  cout << "potting sets of active wavelet indices..." << endl;
+  Array1D<InfiniteVector<double, CIndex> > approximations_cube(frame.n_p());
+  
+  // convert indices to CubeIndices
+  for (int i = 0; i < frame.n_p(); i++) {
+    MappedBasis* mapped_basis = frame.bases()[i];
+    std::ofstream plotstream;
+    char filename4[50];
+    sprintf(filename4, "%s%d%s%d%s%d%s", "coefficient_plot_2D_patch_" , i , "_d" , d ,  "_dT", dT, ".m");
+    plotstream.open(filename4);
+    for (InfiniteVector<double, Index>::const_iterator it = approximations[frame.n_p()].begin(),
+	   itend = approximations[frame.n_p()].end(); it != itend; ++it)
+      if (it.index().p() == i) {
+	approximations_cube[i].set_coefficient(CIndex(it.index().j(),it.index().e(),it.index().k(), mapped_basis),*it);
+      }
+
+    plot_indices(frame.bases()[i], approximations_cube[i], jmax, plotstream, "jet", false, true);
+    plotstream.close();
+
+  }
+  
+
   return 0;
 
 }

@@ -14,10 +14,20 @@
 
 namespace FrameTL
 {
-//   template <class PROBLEM>
-//   void  adaptive_multiplicative_Schwarz_sparse_SOLVE(const PROBLEM& P,  const double epsilon,
-// 						     InfiniteVector<double, typename PROBLEM::Index>& u_epsilon);
 
+
+  /*!
+    adaptive multiplicative Schwarz method from [DRSW]
+   */
+  template <class PROBLEM>
+  void  MultSchw(const PROBLEM& P, const double epsilon,
+		 Array1D<InfiniteVector<double, typename PROBLEM::Index> >& approximations);
+
+
+  /*!
+    adaptive multiplicative Schwarz method from [DRSW]
+    tuned version
+   */
   template <class PROBLEM>
   void  adaptive_multiplicative_Schwarz_SOLVE(const PROBLEM& P,  const double epsilon,
 					      Array1D<InfiniteVector<double, typename PROBLEM::Index> >& approximations);

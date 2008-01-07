@@ -323,9 +323,11 @@
   FrameIndex<IBASIS, DIM_d, DIM_m>::set_number()
   {
     //cout << "setting number of " << *this << endl;
-
-
-
+    if(frame_ == 0) {
+      num_ = -1;
+      return;
+    }
+    
     type_type gen_type;
     assert( e_ != gen_type || j_ == frame_->j0() );
 

@@ -184,6 +184,14 @@ namespace FrameTL
     void RHS(const double eta, InfiniteVector<double, 
 	     typename AggregatedFrame<IBASIS,DIM>::Index>& coeffs) const;
 
+    /*!
+      approximate the wavelet coefficient set of the preconditioned right-hand side F restricted
+      to patch p within a prescribed \ell_2 error tolerance
+    */
+    void RHS(const double eta, const int p,
+	     InfiniteVector<double, 
+	     typename AggregatedFrame<IBASIS,DIM>::Index>& coeffs) const;
+
    /*!
       compute (or estimate) ||F||_2
     */
@@ -235,12 +243,17 @@ namespace FrameTL
     // right-hand side coefficients on a fine level, sorted by modulus
     Array1D<std::pair<typename AggregatedFrame<IBASIS,DIM>::Index,double> > fcoeffs;
 
+    // patchwise right-hand side coefficients on a fine level, sorted by modulus
+    Array1D<Array1D<std::pair<typename AggregatedFrame<IBASIS,DIM>::Index,double> > > fcoeffs_patch;
+
     // right-hand side coefficients on a fine level, sorted by modulus
     // square root of coefficients on diagonal of stiffness matrix
     Array1D<double> stiff_diagonal;
 
     // (squared) \ell_2 norm of the precomputed right-hand side
     double fnorm_sqr;
+
+    Array1D<double> fnorms_sqr_patch;
 
     mutable double normA, normAinv;
 

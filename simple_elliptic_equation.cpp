@@ -17,7 +17,6 @@ namespace FrameTL
 							     const int jmax)
     : ell_bvp_(ell_bvp), frame_(frame), jmax_(jmax)
   {
-    
     compute_diagonal();
     compute_rhs();
   }
@@ -57,28 +56,76 @@ namespace FrameTL
     typedef AggregatedFrame<IBASIS,DIM> Frame;
     typedef typename Frame::Index Index;
 
-     fnorms_sqr_patch.resize(frame_->n_p());
-     for (unsigned int i = 0; i < fnorms_sqr_patch.size(); i++)
-       fnorms_sqr_patch[i] = 0.;
-     
+    SparseMatrix<double> rhs(1,frame_->degrees_of_freedom());
+    char filename[50];
+    char matrixname[50];
+
+    int d = IBASIS::primal_polynomial_degree();
+    int dT = IBASIS::primal_vanishing_moments();
     
+#ifdef ONE_D
+    sprintf(filename, "%s%d%s%d", "rhs_poisson_interval_lap07_d", d, "_dT", dT);
+    sprintf(matrixname, "%s%d%s%d", "rhs_poisson_1D_lap07_d", d, "_dT", dT);
+#endif
+#ifdef TWO_D
+    sprintf(filename, "%s%d%s%d", "rhs_poisson_lshaped_lap1_d", d, "_dT", dT);
+    sprintf(matrixname, "%s%d%s%d", "rhs_poisson_2D_lap1_d", d, "_dT", dT);
+#endif
+
+    fnorms_sqr_patch.resize(frame_->n_p());
+    for (unsigned int i = 0; i < fnorms_sqr_patch.size(); i++)
+      fnorms_sqr_patch[i] = 0.;
+
+
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
     Array1D<InfiniteVector<double,Index> > fhelp_patch(frame_->n_p());
 
+#ifdef PRECOMP
+    // we read in the right hand side from file
+    // we assume that ot had been precomputed on a sufficiently high level
+    
+    cout << "reading in right hand side from file " << filename << "..." << endl;
+    rhs.matlab_input(filename);
+    cout << "...ready" << endl;
+#endif
+
+#ifndef PRECOMP
+    std::list<Vector<double>::size_type> indices;
+    std::list<double> entries;
+#endif    
+
     for (int i = 0; i < frame_->degrees_of_freedom(); i++)
       {
+#ifdef PRECOMP
+	double coeff = rhs.get_entry(0,i);
+#else	
 	double coeff = f(*(frame_->get_wavelet(i)))/D(*(frame_->get_wavelet(i)));
+	if (fabs(coeff)>1e-15) {
+	  indices.push_back(i);
+	  entries.push_back(coeff);
+	  //rhs.set_entry(0, i, coeff);
+	}
+#endif
 	//cout << D(*(frame_->get_wavelet(i))) << endl;
 	if (fabs(coeff)>1e-15) {
 	  fhelp.set_coefficient(*(frame_->get_wavelet(i)), coeff);
 	  fhelp_patch[frame_->get_wavelet(i)->p()].set_coefficient(*(frame_->get_wavelet(i)), coeff);
-
+	  
 	  fnorms_sqr_patch[frame_->get_wavelet(i)->p()] += coeff*coeff;
 	  if (i % 100 == 0)
 	    cout << *(frame_->get_wavelet(i)) << " " << coeff << endl;
 	}
       }
+
+#ifndef PRECOMP
+    rhs.set_row(0, indices, entries);
+    // write right hand side to file
+    cout << "writing right hand side into file..." << filename << "..." << endl;
+    rhs.matlab_output(filename, matrixname, 1);
+    cout << "...ready" << endl;
+#endif
+    
     fnorm_sqr = l2_norm_sqr(fhelp);
     for (unsigned int i = 0; i < fnorms_sqr_patch.size(); i++)
       cout << fnorms_sqr_patch[i] << endl;
@@ -96,10 +143,6 @@ namespace FrameTL
       fcoeffs[id] = std::pair<Index,double>(it.index(), *it);
     sort(fcoeffs.begin(), fcoeffs.end(), typename InfiniteVector<double,Index>::decreasing_order());
 
-//     for (int i = 0; i < fcoeffs.size(); i++) {
-//       cout << fcoeffs[i].first << " " << fcoeffs[i].second << endl;
-//     }
-
 
     fcoeffs_patch.resize(frame_->n_p());
     for (int i = 0; i < frame_->n_p(); i++) {
@@ -112,19 +155,60 @@ namespace FrameTL
       }
       sort(fcoeffs_patch[i].begin(), fcoeffs_patch[i].end(), typename InfiniteVector<double,Index>::decreasing_order());
     }
-}
+  }
 
   template <class IBASIS, unsigned int DIM>
   void
   SimpleEllipticEquation<IBASIS,DIM>::compute_diagonal()
   {
     cout << "SimpleEllipticEquation(): precompute diagonal of stiffness matrix..." << endl;
+
+    SparseMatrix<double> diag(1,frame_->degrees_of_freedom());
+    char filename[50];
+    char matrixname[50];
+
+    int d = IBASIS::primal_polynomial_degree();
+    int dT = IBASIS::primal_vanishing_moments();
     
+#ifdef ONE_D
+    sprintf(filename, "%s%d%s%d", "stiff_diagonal_poisson_interval_lap07_d", d, "_dT", dT);
+    sprintf(matrixname, "%s%d%s%d", "stiff_diagonal_poisson_1D_lap07_d", d, "_dT", dT);
+#endif
+#ifdef TWO_D
+    sprintf(filename, "%s%d%s%d", "stiff_diagonal_poisson_lshaped_lap1_d", d, "_dT", dT);
+    sprintf(matrixname, "%s%d%s%d", "stiff_diagonal_poisson_2D_lap1_d", d, "_dT", dT);
+#endif
+
+#ifndef PRECOMP
+    std::list<Vector<double>::size_type> indices;
+    std::list<double> entries;
+#endif
+    
+#ifdef PRECOMP
+    cout << "reading in diagonal of unpreconditioned stiffness matrix from file "
+	 << filename << "..." << endl;
+    diag.matlab_input(filename);
+    cout << "...ready" << endl;
+#endif
+
+
     stiff_diagonal.resize(frame_->degrees_of_freedom());
     for (int i = 0; i < frame_->degrees_of_freedom(); i++) {
+#ifdef PRECOMP
+      stiff_diagonal[i] = diag.get_entry(0,i);
+#endif
+#ifndef PRECOMP
       stiff_diagonal[i] = sqrt(a(*(frame_->get_wavelet(i)),*(frame_->get_wavelet(i))));
+      indices.push_back(i);
+      entries.push_back(stiff_diagonal[i]);
+#endif
       //cout << stiff_diagonal[i] << " " << *(frame_->get_wavelet(i)) << endl;
     }
+
+#ifndef PRECOMP
+    diag.set_row(0,indices, entries);
+    diag.matlab_output(filename, matrixname, 1);
+#endif
 
     cout << "... done, diagonal of stiffness matrix computed" << endl;
   }
@@ -395,7 +479,38 @@ namespace FrameTL
   double
   SimpleEllipticEquation<IBASIS,DIM>::f(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda) const
   {
+//     double r = 1.;
 
+//     const unsigned int p = lambda.p();
+ 
+//     typedef WaveletTL::CubeBasis<IBASIS,DIM> CUBEBASIS;
+//     const Chart<DIM>* chart = frame_->atlas()->charts()[p];
+
+//     Point<2> x(0.5,0.5);
+//     Point<2> x_cube;
+//     double wav_val = 0.;
+
+//     //   if (p == 1) {
+//       chart->map_point_inv(x,x_cube);    
+//       for (unsigned int i = 0; i < DIM; i++) {
+// 	wav_val = WaveletTL::evaluate(*(frame_->bases()[p]->bases()[i]), 0,
+// 				      typename IBASIS::Index(lambda.j(),
+// 							     lambda.e()[i],
+// 							     lambda.k()[i],
+// 							     frame_->bases()[p]->bases()[i]),
+// 				      x_cube[i]);
+// 	r *= wav_val;
+//       }
+      
+      
+//       r /= chart->Gram_factor(x);
+//       return r;
+//       //    }
+   
+
+//     if (lambda.j() > basis().j0())
+//       return 0.;
+      
     //\int_\Omega f(Kappa(x)) \psi^\Box (x) \sqrt(\sqrt(det ((D Kappa)^T(x) (D Kappa)(x)) ))
     //recall: \sqrt(\sqrt(...)) = Gram_factor
 
@@ -477,10 +592,10 @@ namespace FrameTL
       if (exit) break;
     }
 
-#if 0
+#ifdef TWO_D
     return r;
 #endif
-#if 1
+#ifdef ONE_D
     assert(DIM == 1);
     double tmp = 1;
     Point<DIM> p1;
@@ -515,6 +630,7 @@ namespace FrameTL
       coarsenorm += it->second * it->second;
       coeffs.set_coefficient(it->first, it->second);
       ++it;
+      
     } while (it != fcoeffs.end() && coarsenorm < bound);
   }
 
@@ -527,6 +643,10 @@ namespace FrameTL
   {
     cout.precision(12);
     coeffs.clear();
+
+    if (fnorms_sqr_patch[p] < 1.0e-15)
+      return;
+
     double coarsenorm(0);
     double bound(fnorms_sqr_patch[p] - eta*eta);
     typedef typename AggregatedFrame<IBASIS,DIM>::Index Index;

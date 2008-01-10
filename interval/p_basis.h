@@ -279,7 +279,18 @@ namespace WaveletTL
       point evaluation of (derivatives) of a single primal or dual
       generator or wavelet \psi_\lambda or \tilde\psi_\lambda
     */
-    inline double evaluate(const bool primal, const unsigned int derivative, const Index& lambda, const double x) const;
+    double evaluate(const unsigned int derivative, const Index& lambda, const double x) const;
+
+    /*!
+      point evaluation of (derivatives) of a single primal generator
+      or wavelet \psi_\lambda at several points simultaneously
+    */
+    void
+    evaluate
+    (const unsigned int derivative,
+     const Index& lambda,
+     const Array1D<double>& points, Array1D<double>& values) const;
+
 
     //! read access to the internal instance of the CDF basis
     const CDFBasis<d,dT>& get_CDF_basis() const { return cdf; }

@@ -13,40 +13,41 @@ int main()
   cout << "Testing setup of SplineBasisData objects..." << endl;
 
 #if 1
-  SplineBasisData<2,2,P_construction> sd22nobc("",0,0,0,0); // PBasis, no b.c.'s
+  SplineBasisData<2,2,P_construction,0,0,0,0> sd22nobc; // PBasis, no b.c.'s
   sd22nobc.check();
-
-  SplineBasisData<2,2,P_construction> sd22("",1,1,0,0); // PBasis, complementary b.c.'s
+  
+  SplineBasisData<2,2,P_construction,1,1,0,0> sd22; // PBasis, complementary b.c.'s
   sd22.check();
-
-  SplineBasisData<2,2,P_construction> sd22bcleft("",1,0,0,0); // PBasis, complementary b.c.'s at x=0
+ 
+  SplineBasisData<2,2,P_construction,1,0,0,0> sd22bcleft; // PBasis, complementary b.c.'s at x=0
   sd22bcleft.check();
-
-  SplineBasisData<2,2,P_construction> sd22bcright("",0,1,0,0); // PBasis, complementary b.c.'s at x=1
+  
+  SplineBasisData<2,2,P_construction,0,1,0,0> sd22bcright; // PBasis, complementary b.c.'s at x=1
   sd22bcright.check();
-
-  SplineBasisData<3,3,P_construction> sd33("",1,1,0,0); // PBasis, complementary b.c.'s
+  
+  SplineBasisData<3,3,P_construction,1,1,0,0> sd33; // PBasis, complementary b.c.'s
   sd33.check();
 #endif
-
+ 
 #if 1
-  SplineBasisData<2,2,DS_construction> sb22nobc("bio5",0,0,0,0); // DSBasis, no b.c.'s
+  SplineBasisData<2,2,DS_construction_bio5,0,0,0,0> sb22nobc; // DSBasis, no b.c.'s
   sb22nobc.check();
-
-  SplineBasisData<2,2,DS_construction> sb22nobc_energy("bio5-energy",0,0,0,0); // DSBasis, no b.c.'s
+  
+  SplineBasisData<2,2,DS_construction_bio5e,0,0,0,0> sb22nobc_energy; // DSBasis, no b.c.'s
   sb22nobc_energy.check();
-
-  SplineBasisData<3,3,DS_construction> sb33nobc("bio5",0,0,0,0); // DSBasis, no b.c.'s
+  
+  SplineBasisData<3,3,DS_construction_bio5,0,0,0,0> sb33nobc; // DSBasis, no b.c.'s
   sb33nobc.check();
-
-  SplineBasisData<3,3,DS_construction> sb33nobc_energy("bio5-energy",0,0,0,0); // DSBasis, no b.c.'s
+  
+  SplineBasisData<3,3,DS_construction_bio5e,0,0,0,0> sb33nobc_energy; // DSBasis, no b.c.'s
   sb33nobc_energy.check();
 #endif
 
 #if 1
   cout << "Testing SplineBasis..." << endl;
-//   SplineBasis<3,3,P_construction> basis("",1,1,0,0); // PBasis, complementary b.c.'s
-  SplineBasis<3,3,DS_construction> basis("bio5-energy",0,0,0,0); // DSBasis, no b.c.'s
+//   typedef SplineBasis<3,3,P_construction,1,1,0,0> SBasis; // PBasis, complementary b.c.'s
+  typedef SplineBasis<3,3,DS_construction_bio5e,0,0,0,0> SBasis; // DSBasis, no b.c.'s
+  SBasis basis;
 
   const int j0 = basis.j0();
   Vector<double> x(basis.Deltasize(j0+1));
@@ -61,7 +62,7 @@ int main()
   cout << "* applying Gj^T to x yields y=Gj^T*x=" << y << endl;
   basis.apply_Mj_transposed(j0, x, y);
   cout << "* applying Mj^T to y yields x=Mj^T*y=" << x << endl;
-
+ 
   x.scale(0); y.scale(0);
   x[0] = 1;
   basis.apply_Tj(j0, x, y);
@@ -82,26 +83,25 @@ int main()
   cout << "* applying T_{j0+2} to x yields y=" << y << endl;
   basis.apply_Tjinv(j0+2, y, x);
   cout << "* applying T_{j0+2}^{-1} to y yields x=" << x << endl;
-
-
+  
+  
   cout << "* point evaluation of spline wavelets:" << endl;
-//   typedef SplineBasis<3,3,P_construction>::Index Index;
-  typedef SplineBasis<3,3,DS_construction>::Index Index;
+  typedef SBasis::Index Index;
   int N = 32;
   Array1D<double> points(N+1), values(N+1), dervalues(N+1);
   double h = 1.0/N;
   for (int i = 0; i <= N; i++) points[i] = i*h;
   const int level = basis.j0();
-  for (Index lambda(first_generator(&basis, level));; ++lambda) {
+  for (Index lambda(basis.first_generator(level));; ++lambda) {
     cout << lambda << endl;
-    evaluate(basis, lambda, points, values, dervalues);
+    basis.evaluate(lambda, points, values, dervalues);
     cout << "values: " << values << endl;
     cout << "values of first derivative: " << dervalues << endl;
-//     if (lambda == last_generator(&basis, level)) break;
-    if (lambda == last_wavelet(&basis, level)) break;
+//     if (lambda == basis.last_generator(level)) break;
+    if (lambda == basis.last_wavelet(level)) break;
   }
-
-#endif
   
+#endif
+
   return 0;
 }

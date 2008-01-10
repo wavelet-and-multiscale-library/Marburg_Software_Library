@@ -19,31 +19,31 @@ using MathTL::InfiniteVector;
 
 namespace WaveletTL
 {
-//   template <int d, int dT, SplineBasisFlavor flavor> class SplineBasis;
-//   template <int d, int dT> class SplineBasis<d,dT,DS_construction>;
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1> class SplineBasis;
+  template <int d, int dT, int s0, int s1, int sT0, int sT1> class SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>;
 
   /*!
     Evaluate a single primal/dual generator or wavelet \psi_\lambda
     on a dyadic subgrid of [0,1].
   */
-  template <int d, int dT, SplineBasisFlavor flavor>
-  SampledMapping<1> evaluate(const SplineBasis<d,dT,flavor>& basis,
-			     const typename SplineBasis<d,dT,flavor>::Index& lambda,
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  SampledMapping<1> evaluate(const SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>& basis,
+			     const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index& lambda,
 			     const int resolution);
 
   /*!
     Evaluate an arbitrary linear combination of primal wavelets
     on a dyadic subgrid of [0,1].
   */
-  template <int d, int dT, SplineBasisFlavor flavor>
-  SampledMapping<1> evaluate(const SplineBasis<d,dT,flavor>& basis,
-			     const InfiniteVector<double, typename SplineBasis<d,dT,flavor>::Index>& coeffs,
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  SampledMapping<1> evaluate(const SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>& basis,
+			     const InfiniteVector<double, typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index>& coeffs,
 			     const int resolution);
 
   //! for compatibility also with useless "primal" parameter
-  template <int d, int dT, SplineBasisFlavor flavor>
-  SampledMapping<1> evaluate(const SplineBasis<d,dT,flavor>& basis,
-			     const InfiniteVector<double, typename SplineBasis<d,dT,flavor>::Index>& coeffs,
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  SampledMapping<1> evaluate(const SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>& basis,
+			     const InfiniteVector<double, typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index>& coeffs,
 			     const bool primal,
 			     const int resolution)
   {
@@ -54,27 +54,27 @@ namespace WaveletTL
     point evaluation of (derivatives) of a single primal generator
     or wavelet \psi_\lambda
   */
-  template <int d, int dT, SplineBasisFlavor flavor>
-  double evaluate(const SplineBasis<d,dT,flavor>& basis, const unsigned int derivative,
-		  const typename SplineBasis<d,dT,flavor>::Index& lambda,
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  double evaluate(const SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>& basis, const unsigned int derivative,
+		  const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index& lambda,
 		  const double x);
 
   /*!
     point evaluation of (derivatives) of a single primal generator
     or wavelet \psi_\lambda at several points simultaneously
   */
-  template <int d, int dT, SplineBasisFlavor flavor>
-  void evaluate(const SplineBasis<d,dT,flavor>& basis, const unsigned int derivative,
-		const typename SplineBasis<d,dT,flavor>::Index& lambda,
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  void evaluate(const SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>& basis, const unsigned int derivative,
+		const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index& lambda,
 		const Array1D<double>& points, Array1D<double>& values);
 
   /*!
     point evaluation of 0-th and first derivative of a single primal generator
     or wavelet \psi_\lambda at several points simultaneously
   */
-  template <int d, int dT, SplineBasisFlavor flavor>
-  void evaluate(const SplineBasis<d,dT,flavor>& basis,
-		const typename SplineBasis<d,dT,flavor>::Index& lambda,
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  void evaluate(const SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>& basis,
+		const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index& lambda,
 		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);
 
 }

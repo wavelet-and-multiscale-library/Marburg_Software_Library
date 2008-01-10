@@ -7,7 +7,7 @@
 
 #include <interval/p_basis.h>
 #include <interval/p_expansion.h>
-#include <interval/spline_expansion.h>
+// #include <interval/spline_expansion.h>
 
 using namespace std;
 using namespace WaveletTL;
@@ -78,11 +78,13 @@ int main()
   cout << "- integrals of p against all primal generators on level j0:" << endl
        << coeffs << endl;
 
+#if 0
   Vector<double> coeffs_full;
   SplineBasis<d,dT,P_construction> sb("",1,1,0,0);
   expand(&p, sb, true, j0, coeffs_full);
   cout << "- using SplineBasis<d,dT> and FullGramian:" << endl
        << coeffs_full << endl;
+#endif
 
   cout << "- evaluation of this linear combination of dual generators yields the pointwise error on [-1,1]:" << endl;
   SampledMapping<1> s2(evaluate(basis, coeffs, false, 6));
@@ -112,6 +114,7 @@ int main()
 //   cout << error << endl;
   cout << "(max. error: " << linfty_norm(error) << ")" << endl;
 
+#if 0
   cout << " - now the same with SplineBasis:" << endl;
   expand(&hat, sb, false, jmax, coeffs_full);
   dual_coeffs.clear();
@@ -124,7 +127,7 @@ int main()
     error[i] = fabs(s3a.values()[i]-hat.value(Point<1>(s3a.points()[i])));
 //   cout << error << endl;
   cout << "(max. error: " << linfty_norm(error) << ")" << endl;
-
+#endif
 
   return 0;
 }

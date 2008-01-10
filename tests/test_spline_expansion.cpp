@@ -73,45 +73,45 @@ int main()
   s.matlab_output(cout);
 
 #if 1
-//   typedef SplineBasis<2,2,P_construction> Basis;
-  typedef SplineBasis<3,3,P_construction> Basis;
-  typedef Basis::Index Index;
-//   Basis basis("",0,0,0,0); // PBasis, no b.c.'s
-  Basis basis("",1,1,0,0); // PBasis, homogeneous b.c.'s
+//   typedef SplineBasis<2,2,P_construction,0,0,0,0> Basis; // PBasis, no b.c.'s
+  typedef SplineBasis<2,2,P_construction,1,1,0,0> Basis; // PBasis, homogeneous b.c.'s
+//   typedef SplineBasis<3,3,P_construction,1,1,0,0> Basis; // PBasis, homogeneous b.c.'s
 #else
-  typedef SplineBasis<3,3,DS_construction> Basis;
-  typedef Basis::Index Index;
-  Basis basis("bio5",0,0,0,0); // DSBasis, no b.c.'s
-//   Basis basis("bio5-energy",0,0,0,0); // DSBasis, no b.c.'s
+//   typedef SplineBasis<3,3,DS_construction_bio5,0,0,0,0> Basis; // DSBasis, no b.c.'s
+  typedef SplineBasis<3,3,DS_construction_bio5e,0,0,0,0> Basis; // DSBasis, no b.c.'s
 #endif
 
-  InfiniteVector<double,Index> coeffs;
+  Basis basis;
+ 
+  typedef Basis::Index Index;
 
+  InfiniteVector<double,Index> coeffs;
+  
   const int j0 = basis.j0();
   const int jmax = 10;
-
+  
   expand(&p, basis, true, j0, coeffs);
   cout << "- integrals of p against all primal generators on level j0:" << endl
        << coeffs << endl;
-
+ 
   Hat hat;
   cout << "- sample values of the hat function:" << endl;
   SampledMapping<1> shat(Grid<1>(0.0, 1.0, 10), hat);
   shat.matlab_output(cout);
-
+  
   InfiniteVector<double,Index> dual_coeffs;
   expand(&hat, basis, false, jmax, dual_coeffs);
   cout << "- (approx.) expansion coefficients of the hat fct. in the primal basis:" << endl
        << dual_coeffs;
-
+  
   cout << "- pointwise error:" << endl;
   SampledMapping<1> s3(basis.evaluate(dual_coeffs, jmax+1));
   Vector<double> error(s3.points().size());
   for (unsigned int i = 0; i < error.size(); i++)
     error[i] = fabs(s3.values()[i]-hat.value(Point<1>(s3.points()[i])));
-//   cout << error << endl;
+  //   cout << error << endl;
   cout << "(max. error: " << linfty_norm(error) << ")" << endl;
-
+  
   cout << "- expand a Gaussian..." << endl;
   Gaussian g;
   g.set_time(0);

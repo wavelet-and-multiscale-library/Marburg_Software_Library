@@ -7,7 +7,7 @@ using namespace MathTL;
 namespace WaveletTL
 {
   template <int d, int dT>
-  FullHelmholtz<d,dT>::FullHelmholtz(const SplineBasis<d,dT,P_construction>& sb,
+  FullHelmholtz<d,dT>::FullHelmholtz(const SplineBasis<d,dT,P_construction,1,1,0,0>& sb,
 				     const double alpha,
 				     const PreconditioningType precond)
     : G_(sb), A_(sb, no_precond), sb_(sb), alpha_(alpha), precond_(precond), j_(-1)

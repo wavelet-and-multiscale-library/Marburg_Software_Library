@@ -204,12 +204,21 @@ namespace WaveletTL
     : public RIndex
   {
   public:
+    using RIndex::j;
+    using RIndex::type_type;
+    using RIndex::e;
+    using RIndex::translation_type;
+    using RIndex::k;
+
     //! default constructor
     IntervalIndex2();
 
     //! constructor with specified parameters
     IntervalIndex2(const int j, const int e, const int k);
 
+    //! copy index from const pointer
+    IntervalIndex2(const IntervalIndex2* lambda);
+  
     //! constructor from an RIndex
     IntervalIndex2(const RIndex& lambda);
 
@@ -232,6 +241,13 @@ namespace WaveletTL
     //! lexicographic order <=
     bool operator <= (const IntervalIndex2& lambda) const
     { return (*this < lambda || *this == lambda); }
+    
+    //! number
+    const int number() const {
+      return (e() == 0
+  	      ? k() - IBASIS::DeltaLmin()
+  	      : IBASIS::Deltasize(j()) + k() - IBASIS::Nablamin());
+    }
   };
 
   //! stream output

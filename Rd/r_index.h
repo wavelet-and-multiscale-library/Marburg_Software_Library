@@ -60,9 +60,15 @@ namespace WaveletTL
     //! type e
     int e() const { return e_; }
 
+    //! type index type
+    typedef int type_type;
+
     //! translation index k
     int k() const { return k_; }
   
+    //! translation index type
+    typedef int translation_type;
+
   protected:
     //! scale, type, translation
     int j_, e_, k_;

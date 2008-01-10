@@ -4,18 +4,18 @@
 
 namespace WaveletTL
 {
-  template <int d, int dT, SplineBasisFlavor flavor>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
   inline
-  void support(const SplineBasis<d,dT,flavor>& basis,
-	       const typename SplineBasis<d,dT,flavor>::Index& lambda,
+  void support(const SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>& basis,
+	       const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index& lambda,
 	       int& k1, int& k2)
   {
     basis.support(lambda, k1, k2);
   }
   
-  template <int d, int dT, SplineBasisFlavor flavor>
-  bool intersect_supports(const SplineBasis<d,dT,flavor>& basis,
-			  const typename SplineBasis<d,dT,flavor>::Index& lambda,
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  bool intersect_supports(const SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>& basis,
+			  const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index& lambda,
 			  const int m, const int a, const int b,
 			  int& j, int& k1, int& k2)
   {
@@ -41,12 +41,12 @@ namespace WaveletTL
     return true;
   }
 
-  template <int d, int dT, SplineBasisFlavor flavor>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
   inline
-  bool intersect_supports(const SplineBasis<d,dT,flavor>& basis,
-			  const typename SplineBasis<d,dT,flavor>::Index& lambda,
-			  const typename SplineBasis<d,dT,flavor>::Index& nu,
-			  typename SplineBasis<d,dT,flavor>::Support& supp)
+  bool intersect_supports(const SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>& basis,
+			  const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index& lambda,
+			  const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index& nu,
+			  typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Support& supp)
   {
     // universal routine for any value of "flavor"
     int k1_nu, k2_nu;
@@ -56,15 +56,15 @@ namespace WaveletTL
   }
 
   // special variant of intersecting_wavelets() for flavor==P_construction:
-  template <int d, int dT>
-  void intersecting_wavelets(const SplineBasis<d,dT,P_construction>& basis,
-			     const typename SplineBasis<d,dT,P_construction>::Index& lambda,
+  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  void intersecting_wavelets(const SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>& basis,
+			     const typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index& lambda,
 			     const int j, const bool generators,
-			     std::list<std::pair<typename SplineBasis<d,dT,P_construction>::Index,
-			     typename SplineBasis<d,dT,P_construction>::Support> >& intersecting)
+			     std::list<std::pair<typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index,
+			     typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Support> >& intersecting)
   {
-    typedef typename SplineBasis<d,dT,P_construction>::Index Index;
-    typedef typename SplineBasis<d,dT,P_construction>::Support Support;
+    typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index Index;
+    typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Support Support;
 
     intersecting.clear();
 
@@ -87,7 +87,7 @@ namespace WaveletTL
       // so that ...
       const int lastk  = std::min(basis.DeltaRmax(j), (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda-ell1<d>())-1);
       
-      Index nu(j, 0, firstk, &basis);
+      Index nu(j, 0, firstk);
       for (int k = firstk; k <= lastk; k++, ++nu) {
 	intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2);
 	intersecting.push_back(std::make_pair(nu, supp));
@@ -109,7 +109,7 @@ namespace WaveletTL
 			 ? (1<<j)-1
 			 : (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda+(d+dT)/2)-2);
 
-      Index nu(j, 1, firstk, &basis);
+      Index nu(j, 1, firstk);
       for (int k = firstk; k <= lastk; k++, ++nu) {
 	intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2);
 	intersecting.push_back(std::make_pair(nu, supp));
@@ -119,31 +119,31 @@ namespace WaveletTL
     // old code, a brute force solution
     Support supp;
     if (generators) {
-      for (Index nu = first_generator(&basis, j);; ++nu) {
+      for (Index nu = basis.first_generator(j);; ++nu) {
 	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
 	  intersecting.push_back(std::make_pair(nu, supp));
-	if (nu == last_generator(&basis, j)) break;
+	if (nu == basis.last_generator(j)) break;
       }
     } else {
-      for (Index nu = first_wavelet(&basis, j);; ++nu) {
+      for (Index nu = basis.first_wavelet(j);; ++nu) {
 	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
 	  intersecting.push_back(std::make_pair(nu, supp));
-	if (nu == last_wavelet(&basis, j)) break;
+	if (nu == basis.last_wavelet(j)) break;
       }
     }
 #endif
   }
 
-  // special variant of intersecting_wavelets() for flavor==DS_construction:
-  template <int d, int dT>
-  void intersecting_wavelets(const SplineBasis<d,dT,DS_construction>& basis,
-			     const typename SplineBasis<d,dT,DS_construction>::Index& lambda,
+  // generic variant of intersecting_wavelets() for DS type wavelets
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  void intersecting_wavelets(const SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>& basis,
+			     const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index& lambda,
 			     const int j, const bool generators,
-			     std::list<std::pair<typename SplineBasis<d,dT,DS_construction>::Index,
-			     typename SplineBasis<d,dT,DS_construction>::Support> >& intersecting)
+			     std::list<std::pair<typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index,
+			     typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Support> >& intersecting)
   {
-    typedef typename SplineBasis<d,dT,DS_construction>::Index Index;
-    typedef typename SplineBasis<d,dT,DS_construction>::Support Support;
+    typedef typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index Index;
+    typedef typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Support Support;
 
     intersecting.clear();
 
@@ -169,15 +169,15 @@ namespace WaveletTL
     }
   }
 
-  // special variant of intersecting_wavelets() for flavor==P_construction:
-  template <int d, int dT>
-  void intersecting_wavelets(const SplineBasis<d,dT,P_construction>& basis,
-			     const typename SplineBasis<d,dT,P_construction>::Index& lambda,
+  // special variant of intersecting_wavelets() for flavor==P_construction
+  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  void intersecting_wavelets(const SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>& basis,
+			     const typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index& lambda,
 			     const int j, const bool generators,
-			     std::list<typename SplineBasis<d,dT,P_construction>::Index>& intersecting)
+			     std::list<typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index>& intersecting)
   {
-    typedef typename SplineBasis<d,dT,P_construction>::Index Index;
-    typedef typename SplineBasis<d,dT,P_construction>::Support Support;
+    typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index Index;
+    typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Support Support;
 
     intersecting.clear();
 
@@ -200,7 +200,7 @@ namespace WaveletTL
       const int lastk  = std::min(basis.DeltaRmax(j), (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda-ell1<d>())-1);
 
       for (int k = firstk; k <= lastk; k++)
-	intersecting.push_back(Index(j, 0, k, &basis));
+	intersecting.push_back(Index(j, 0, k));
       
     } else {
       // if the left boundary wavelets are not involved, then
@@ -220,36 +220,36 @@ namespace WaveletTL
 			 : (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda+(d+dT)/2)-2);
 
       for (int k = firstk; k <= lastk; k++)
-	intersecting.push_back(Index(j, 1, k, &basis));
+	intersecting.push_back(Index(j, 1, k));
     }
 #else
     // old code, a brute force solution
     Support supp;
     if (generators) {
-      for (Index nu = first_generator(&basis, j);; ++nu) {
+      for (Index nu = basis.first_generator(j);; ++nu) {
 	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
 	  intersecting.push_back(nu);
-	if (nu == last_generator(&basis, j)) break;
+	if (nu == basis.last_generator(j)) break;
       }
     } else {
-      for (Index nu = first_wavelet(&basis, j);; ++nu) {
+      for (Index nu = basis.first_wavelet(j);; ++nu) {
 	if (intersect_supports(basis, nu, j_lambda, k1_lambda, k2_lambda, supp.j, supp.k1, supp.k2))
 	  intersecting.push_back(nu);
-	if (nu == last_wavelet(&basis, j)) break;
+	if (nu == basis.last_wavelet(j)) break;
       }
     }
 #endif
   }
 
-  // special variant of intersecting_wavelets() for flavor==DS_construction:
-  template <int d, int dT>
-  void intersecting_wavelets(const SplineBasis<d,dT,DS_construction>& basis,
-			     const typename SplineBasis<d,dT,DS_construction>::Index& lambda,
+  // generic variant of intersecting_wavelets() for DS type wavelets
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  void intersecting_wavelets(const SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>& basis,
+			     const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index& lambda,
 			     const int j, const bool generators,
-			     std::list<typename SplineBasis<d,dT,DS_construction>::Index>& intersecting)
+			     std::list<typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index>& intersecting)
   {
-    typedef typename SplineBasis<d,dT,DS_construction>::Index Index;
-    typedef typename SplineBasis<d,dT,DS_construction>::Support Support;
+    typedef typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index Index;
+    typedef typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Support Support;
 
     intersecting.clear();
     
@@ -277,9 +277,9 @@ namespace WaveletTL
 
 
 
-  template <int d, int dT, SplineBasisFlavor flavor>
-  bool intersect_singular_support(const SplineBasis<d,dT,flavor>& basis,
-				  const typename SplineBasis<d,dT,flavor>::Index& lambda,
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  bool intersect_singular_support(const SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>& basis,
+				  const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index& lambda,
 				  const int m, const int a, const int b,
 				  int& j, int& k1, int& k2)
   {
@@ -324,11 +324,11 @@ namespace WaveletTL
     return true;
   }
 
-  template <int d, int dT, SplineBasisFlavor flavor>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
   inline
-  bool intersect_singular_support(const SplineBasis<d,dT,flavor>& basis,
-				  const typename SplineBasis<d,dT,flavor>::Index& lambda,
-				  const typename SplineBasis<d,dT,flavor>::Index& nu,
+  bool intersect_singular_support(const SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>& basis,
+				  const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index& lambda,
+				  const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index& nu,
 				  int& j, int& k1, int& k2)
   {
     // universal routine for any value of "flavor"
@@ -344,11 +344,11 @@ namespace WaveletTL
     return intersect_singular_support(basis, lambda, j_nu, k1_nu, k2_nu, j, k1, k2);
   }
 
-  template <int d, int dT, SplineBasisFlavor flavor>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
   inline
-  bool intersect_singular_support(const SplineBasis<d,dT,flavor>& basis,
-				  const typename SplineBasis<d,dT,flavor>::Index& lambda,
-				  const typename SplineBasis<d,dT,flavor>::Index& nu)
+  bool intersect_singular_support(const SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>& basis,
+				  const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index& lambda,
+				  const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index& nu)
   {
     // universal routine for any value of "flavor"
 

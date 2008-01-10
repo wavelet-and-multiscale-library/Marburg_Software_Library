@@ -285,6 +285,12 @@ namespace WaveletTL
   }
 
   template <class IBASIS>
+  IntervalIndex2<IBASIS>::IntervalIndex2(const IntervalIndex2<IBASIS>* lambda)
+    : RIndex(*lambda)
+  {
+  }
+
+  template <class IBASIS>
   IntervalIndex2<IBASIS>::IntervalIndex2(const RIndex& lambda)
     : RIndex(lambda)
   {
@@ -295,7 +301,8 @@ namespace WaveletTL
   IntervalIndex2<IBASIS>&
   IntervalIndex2<IBASIS>::operator = (const IntervalIndex2<IBASIS>& lambda)
   {
-    return RIndex::operator = (lambda);
+    RIndex::operator = (lambda);
+    return *this;
   }
   
   template <class IBASIS>

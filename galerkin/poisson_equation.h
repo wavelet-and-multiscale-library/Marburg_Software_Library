@@ -28,13 +28,13 @@ namespace WaveletTL
   */
   template <int d, int dT>
   class PoissonEquation1D
-    :  public FullyDiagonalEnergyNormPreconditioner<typename SplineBasis<d,dT,P_construction>::Index>
+    :  public FullyDiagonalEnergyNormPreconditioner<typename SplineBasis<d,dT,P_construction,1,1,0,0>::Index>
   {
   public:
     /*!
       type of the wavelet basis
     */
-    typedef SplineBasis<d,dT,P_construction> WaveletBasis;
+    typedef SplineBasis<d,dT,P_construction,1,1,0,0> WaveletBasis;
 
     /*!
       constructor from a given wavelet basis and a right-hand side y

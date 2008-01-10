@@ -28,7 +28,7 @@ int main()
   const unsigned int d = 2;
   const unsigned int dT = 2;
 
-  SplineBasis<d,dT,P_construction> basis("",1,1,0,0); // PBasis, complementary b.c.'s
+  SplineBasis<d,dT,P_construction,1,1,0,0> basis; // PBasis, complementary b.c.'s
 //   FullLaplacian<d,dT> delta(basis, dyadic);
   FullLaplacian<d,dT> delta(basis, energy);
 

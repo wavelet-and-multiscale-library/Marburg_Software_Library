@@ -16,12 +16,13 @@ int main()
   const int d  = 2;
   const int dT = 2;
 
-#if 0
+#if 1
   typedef DSBasis<d,dT,BernsteinSVD> Basis1D;
   Basis1D basis1d;
 #else
-  typedef SplineBasis<d,dT,DS_construction> Basis1D;
-  Basis1D basis1d("bio5-energy",0,0,0,0);
+  // this branch does not work at the moment!!!
+  typedef SplineBasis<d,dT,DS_construction_bio5e> Basis1D;
+  Basis1D basis1d;
 #endif
   typedef LDomainBasis<Basis1D> Basis;
   Basis basis(basis1d);

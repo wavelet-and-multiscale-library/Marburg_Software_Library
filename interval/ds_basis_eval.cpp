@@ -116,4 +116,26 @@ namespace WaveletTL
     
     return result;
   }
+
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  inline
+  double
+  DSBasis<d,dT,BIO>::evaluate(const unsigned int derivative,
+			      const Index& lambda, const double x) const
+  {
+    return WaveletTL::evaluate(*this, derivative, lambda, x);
+  }
+
+  template <int d, int dT, DSBiorthogonalizationMethod BIO>
+  inline
+  void
+  DSBasis<d,dT,BIO>::evaluate
+  (const unsigned int derivative,
+   const Index& lambda,
+   const Array1D<double>& points, Array1D<double>& values) const
+  {
+    WaveletTL::evaluate(*this, derivative, lambda, points, values);
+  }
+
+
 }

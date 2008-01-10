@@ -12,7 +12,6 @@
 
 #include <algebra/infinite_vector.h>
 #include <interval/p_basis.h>
-#include <interval/spline_basis.h>
 
 using MathTL::SampledMapping;
 using MathTL::InfiniteVector;

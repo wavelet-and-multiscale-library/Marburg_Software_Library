@@ -80,52 +80,52 @@ int main()
   const int d  = 2;
   const int dT = 2;
   
-  typedef SplineBasis<d,dT,DS_construction> Basis1D;
-  Basis1D basis1d("bio5-energy",0,0,0,0);
-  
-  typedef LDomainBasis<Basis1D> Basis;
-  typedef Basis::Index Index;
-  Basis basis(basis1d);
-
-
-  const int jmax = 4;
-  basis.set_jmax(jmax);
-
-//   CornerSingularity    u_sing(Point<2>(0,0), 0.5, 1.5);
-//   CornerSingularityRHS f_sing(Point<2>(0,0), 0.5, 1.5);
-
-//   myRHS rhs; // alpha=0
-  mySum rhs; // alpha=1
-
-  InfiniteVector<double,Index> rhs_coeffs;
-  cout << "expanding right-hand side" << endl;
-  expand(&rhs, basis, true, jmax, rhs_coeffs);
-  cout << "done expanding right-hand side" << endl;
-
-  typedef LDomainHelmholtzEquation<d,dT> Problem;
-  Problem problem(basis,
-		  "DS_B_2_2_5_G",
-		  "DS_B_2_2_5_A",
-		  jmax,
-		  1.0,
-		  rhs_coeffs);
-
-//   double normA = problem.norm_A();
-//   double normAinv = problem.norm_Ainv();
-
-//   cout << "* estimate for normA: " << normA << endl;
-//   cout << "* estimate for normAinv: " << normAinv << endl;
-
-  InfiniteVector<double, Index> u_epsilon;
-
-  CDD1_SOLVE(problem, 1e-2, u_epsilon, u_epsilon, 1.0, 1.0, jmax);
-//   CDD1_SOLVE(problem, 1e-2, u_epsilon, u_epsilon, 4);
-
-//   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 5);
-// //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 7);
-// //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 10);
-// //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 6, CDD1);
-// //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon);
+//   typedef SplineBasis<d,dT,DS_construction> Basis1D;
+//   Basis1D basis1d("bio5-energy",0,0,0,0);
+//   
+//   typedef LDomainBasis<Basis1D> Basis;
+//   typedef Basis::Index Index;
+//   Basis basis(basis1d);
+// 
+// 
+//   const int jmax = 4;
+//   basis.set_jmax(jmax);
+// 
+// //   CornerSingularity    u_sing(Point<2>(0,0), 0.5, 1.5);
+// //   CornerSingularityRHS f_sing(Point<2>(0,0), 0.5, 1.5);
+// 
+// //   myRHS rhs; // alpha=0
+//   mySum rhs; // alpha=1
+// 
+//   InfiniteVector<double,Index> rhs_coeffs;
+//   cout << "expanding right-hand side" << endl;
+//   expand(&rhs, basis, true, jmax, rhs_coeffs);
+//   cout << "done expanding right-hand side" << endl;
+// 
+//   typedef LDomainHelmholtzEquation<d,dT> Problem;
+//   Problem problem(basis,
+// 		  "DS_B_2_2_5_G",
+// 		  "DS_B_2_2_5_A",
+// 		  jmax,
+// 		  1.0,
+// 		  rhs_coeffs);
+// 
+// //   double normA = problem.norm_A();
+// //   double normAinv = problem.norm_Ainv();
+// 
+// //   cout << "* estimate for normA: " << normA << endl;
+// //   cout << "* estimate for normAinv: " << normAinv << endl;
+// 
+//   InfiniteVector<double, Index> u_epsilon;
+// 
+//   CDD1_SOLVE(problem, 1e-2, u_epsilon, u_epsilon, 1.0, 1.0, jmax);
+// //   CDD1_SOLVE(problem, 1e-2, u_epsilon, u_epsilon, 4);
+// 
+// //   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 5);
+// // //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 7);
+// // //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 10);
+// // //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 6, CDD1);
+// // //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon);
   
   return 0;
 }

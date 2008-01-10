@@ -21,7 +21,7 @@ using namespace MathTL;
 namespace WaveletTL
 {
   /*!
-    The following class models Gramian matrices of primal spline wavelets
+    The following class models Gramian matrices of primal spline wavelets from [P]
     on a level j. We use the decomposition
 
       <Psi_j,Psi_j>^T = T_{j-1} * <Phi_j,Phi_j>^T * T_{j-1}^T
@@ -29,7 +29,7 @@ namespace WaveletTL
     where T_j models the multiscale transformation within V_{j+1}
     (T_j=I for j==j0-1).
   */
-  template <int d, int dT>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1>
   class FullGramian
   {
   public:
@@ -41,7 +41,7 @@ namespace WaveletTL
     /*!
       constructor taking an information object on some spline wavelet basis
     */
-    FullGramian(const SplineBasis<d,dT,P_construction>& sb);
+    FullGramian(const SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>& sb);
 
     /*!
       row dimension
@@ -92,15 +92,15 @@ namespace WaveletTL
 	       const unsigned int precision = 3) const;
 
   protected:
-    const SplineBasis<d,dT,P_construction>& sb_;
+    const SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>& sb_;
     mutable int j_;
   };
 
   /*!
     Matlab-style stream output
   */
-  template <int d, int dT>
-  std::ostream& operator << (std::ostream& os, const FullGramian<d,dT>& M);
+  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  std::ostream& operator << (std::ostream& os, const FullGramian<d,dT,s0,s1,sT0,sT1>& M);
 }
 
 #include <galerkin/full_gramian.cpp>

@@ -4,7 +4,7 @@
 #include <geometry/sampled_mapping.h>
 #include <utils/fixed_array1d.h>
 
-#include <interval/spline_basis.h>
+#include <interval/p_basis.h>
 #include <cube/cube_basis.h>
 #include <cube/cube_support.h>
 #include <cube/cube_expansion.h>
@@ -77,8 +77,8 @@ int main()
 
 #endif
 
-  typedef SplineBasis<2,2,P_construction> Basis1D;
-  Basis1D basis1d("",1,1,0,0); // PBasis, complementary b.c.'s
+  typedef PBasis<2,2> Basis1D;
+  Basis1D basis1d(1,1); // PBasis, complementary b.c.'s
   
   FixedArray1D<Basis1D*,2> bases1d;
   bases1d[0] = bases1d[1] = &basis1d;

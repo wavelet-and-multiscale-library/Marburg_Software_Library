@@ -372,6 +372,23 @@ namespace WaveletTL
       return evaluate(coeffs, true, resolution);
     }
 
+    /*!
+      point evaluation of (derivatives) of a single primal or dual
+      generator or wavelet \psi_\lambda or \tilde\psi_\lambda
+    */
+    double evaluate(const unsigned int derivative, const Index& lambda, const double x) const;
+
+    /*!
+      point evaluation of (derivatives) of a single primal generator
+      or wavelet \psi_\lambda at several points simultaneously
+    */
+    void
+    evaluate
+    (const unsigned int derivative,
+     const Index& lambda,
+     const Array1D<double>& points, Array1D<double>& values) const;
+
+
     //! get the wavelet index corresponding to a specified number
     const inline Index* get_wavelet (const int number) const {
       return &full_collection[number];

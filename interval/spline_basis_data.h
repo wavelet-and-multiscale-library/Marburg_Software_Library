@@ -20,70 +20,26 @@ using namespace MathTL;
 namespace WaveletTL
 {
   /*!
-    The following structure holds all the pieces of information
+    A class to hold all the pieces of information
     needed for the construction of a spline wavelet basis on the interval.
-    The primal functions are either B-splines or linear combinations thereof.
-   */
-  template <int d, int dT, SplineBasisFlavor flavor>
+  */
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
   class SplineBasisData
   {
   public:
-    //! constructor from the primal and dual boundary condition orders
-    SplineBasisData(const char* options,
-		    const int s0, const int s1, const int sT0, const int sT1);
+    //! default constructor
+    SplineBasisData();
 
     //! destructor
     virtual ~SplineBasisData();
 
+    //! coarsest level
+    static const int j0();
+
     //! check integrity of the internal data
     void check() const;
 
-    //! options
-    std::string options_;
-
-    //! boundary condition orders
-    const int s0_, s1_, sT0_, sT1_;
-
-    //! coarsest level
-    int j0_;
-    
-    //! refinement matrices
-    QuasiStationaryMatrix<double> Mj0_, Mj1_, Mj0T_, Mj1T_;
-  };
-
-  /*!
-    template specialization to SplineBasisFlavor==DS_construction,
-    here we have to store further matrices for the spline expansion of the generators
-  */
-  template <int d, int dT>
-  class SplineBasisData<d,dT,DS_construction>
-  {
-  public:
-    /*!
-      constructor from the primal and dual boundary condition orders;
-      the variable "options" should be set to the appropriate
-      biorthogonalization method:
-        "bio5"        <-> BernsteinSVD
-        "bio5-energy" <-> BernsteinSVD + energy inner product orthogonalization from [Ba01]
-    */
-    SplineBasisData(const char* options,
-		    const int s0, const int s1, const int sT0, const int sT1);
- 
-    //! destructor
-    virtual ~SplineBasisData();
- 
-    //! check integrity of the internal data
-    void check() const;
-
-    //! options
-    std::string options_;
-
-    //! boundary condition orders
-    const int s0_, s1_, sT0_, sT1_;
-
-    //! coarsest level
-    int j0_;
- 
+  protected:
     //! refinement matrices
     QuasiStationaryMatrix<double> Mj0_, Mj1_, Mj0T_, Mj1T_;
 
@@ -97,6 +53,31 @@ namespace WaveletTL
       the first and last row is zero, we don't store it
     */
     QuasiStationaryMatrix<double> Mj1c_;
+  };
+
+  /*!
+    template specialization to SplineBasisFlavor==P_construction,
+    here we do not have to store neither the CLA* matrices nor Mj1c
+  */
+  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  class SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>
+  {
+  public:
+    //! default constructor
+    SplineBasisData();
+    
+    //! destructor
+    virtual ~SplineBasisData();
+    
+    //! coarsest level
+    static const int j0();
+
+    //! check integrity of the internal data
+    void check() const;
+ 
+  protected:
+    //! refinement matrices
+    QuasiStationaryMatrix<double> Mj0_, Mj1_, Mj0T_, Mj1T_;
   };
 
 }

@@ -77,9 +77,10 @@ int main()
   // for DSBasis+PBasis+SplineBasis
   const int d  = 3;
   const int dT = 3;
+
 //   typedef DSBasis<d,dT> Basis;
 //   typedef PBasis<d,dT> Basis;
-  typedef SplineBasis<d,dT,P_construction> Basis;
+  typedef SplineBasis<d,dT,P_construction,1,1,0,0> Basis; // PBasis, complementary b.c.'s
   typedef Basis::Index Index;
 
 #if 0
@@ -90,7 +91,7 @@ int main()
 //   Basis basis(1, 1); // complementary b.c.'s
 #else
   // for SplineBasis
-  Basis basis("",1,1,0,0); // PBasis, complementary b.c.'s
+  Basis basis; // PBasis, complementary b.c.'s
 #endif
 
   TestFunction<5> f;

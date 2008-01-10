@@ -19,10 +19,11 @@ int main()
   const int d  = 3;
   const int dT = 3;
 
-  typedef SplineBasis<d,dT,P_construction> Basis;
+  typedef SplineBasis<d,dT,P_construction,1,1,0,0> Basis; // PBasis, complementary b.c.'s
+  Basis basis;  
+
   typedef Basis::Index Index;
 
-  Basis basis("",1,1,0,0); // PBasis, complementary b.c.'s  
 
   const unsigned int solution = 1;
   double kink = 0; // for Solution3;

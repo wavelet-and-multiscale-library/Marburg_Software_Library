@@ -88,8 +88,10 @@ int main()
   const int dT = 3; // be sure to use a continuous dual here, otherwise the RHS test will fail
 //   typedef DSBasis<d,dT> Basis; Basis basis(true, true);
 //   typedef PBasis<d,dT> Basis;
-//   typedef JLBasis Basis; Basis basis;
-  typedef SplineBasis<d,dT,P_construction> Basis; Basis basis("",1,1,0,0);
+//   typedef JLBasis Basis;
+  typedef SplineBasis<d,dT,P_construction,1,1,0,0> Basis;
+
+  Basis basis;
   typedef Basis::Index Index;
 
   SturmEquation<Basis> eq(T, basis);

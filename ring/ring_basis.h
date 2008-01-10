@@ -16,6 +16,8 @@
 #include <algebra/infinite_vector.h>
 #include <utils/array1d.h>
 #include <utils/function.h>
+#include <Rd/cdf_basis.h>
+#include <interval/periodic.h>
 
 using MathTL::Vector;
 using MathTL::InfiniteVector;
@@ -27,15 +29,27 @@ namespace WaveletTL
   /*!
     Template class for a wavelet basis on the ring-shaped domain
       R = {(x,y) : r_1 <= ||(x,y)|| <= r_0 }
+    with complementary boundary conditions of order s0 at the interior boundary
+    and of order s1 at the outer boundary.
   */
-  template <int d, int dt>
+  template <int d, int dt, int s0=0, int s1=0>
   class RingBasis
   {
   public:
+    /*!
+      coarsest possible level j0;
+    */
+    static const int j0() {
+      return PeriodicBasis<CDFBasis<d,dt> >::j0();
+    }
+
+  protected:
+    //! an instance of the periodic basis
+    PeriodicBasis<CDFBasis<d,dt> > periodic_basis;
   };
 }
 
 // include implementation
-#include <interval/ring_basis.cpp>
+#include <ring/ring_basis.cpp>
 
 #endif

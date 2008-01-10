@@ -15,8 +15,8 @@
 #include <utils/array1d.h>
 #include <algebra/infinite_vector.h>
 #include <algebra/vector.h>
-#include <interval/spline_basis.h>
-#include <galerkin/full_gramian.h>
+// #include <interval/spline_basis.h>
+// #include <galerkin/full_gramian.h>
 #include <adaptive/compression.h>
 
 using MathTL::InfiniteVector;
@@ -168,152 +168,152 @@ namespace WaveletTL
   };
 
   
-  /*!
-    template specialization to SplineBasis
-  */
-  template <int d, int dT>
-  class IntervalGramian<SplineBasis<d,dT,P_construction> >
-  {
-  public:
-    /*!
-      make template argument accessible
-    */
-    typedef SplineBasis<d,dT,P_construction> WaveletBasis;
-
-    /*!
-      constructor from a given wavelet basis and a given right-hand side y
-    */
-    IntervalGramian(const SplineBasis<d,dT,P_construction>& basis,
-		    const InfiniteVector<double, typename WaveletBasis::Index>& y);
-    
-    /*!
-      wavelet index class
-    */
-    typedef typename WaveletBasis::Index Index;
-
-    /*!
-      read access to the basis
-    */
-    const WaveletBasis& basis() const { return basis_; }
-    
-    /*!
-      index type of vectors and matrices
-    */
-    typedef typename Vector<double>::size_type size_type;
-
-    /*!
-      space dimension of the problem
-    */
-    static const int space_dimension = 1;
-
-    /*!
-      identity operator is local
-    */
-    static bool local_operator() { return true; }
-
-    /*!
-      (half) order t of the operator
-    */
-    static double operator_order() { return 0; }
-
-    /*!
-      evaluate the diagonal preconditioner D (essentially, we don't need any)
-    */
-    double D(const typename WaveletBasis::Index& lambda) const { return 1; }
-
-    /*!
-      evaluate the (unpreconditioned) bilinear form a
-    */
-    double a(const Index& lambda,
-	     const Index& nu) const {
-      return a(lambda, nu, 4);
-    }
-    
-    /*!
-      evaluate the inner product a;
-      you can specify the order p of the quadrature rule, i.e.,
-      (piecewise) polynomials of maximal degree p will be integrated exactly.
-      Internally, we use an m-point composite tensor product Gauss rule adapted
-      to the singular supports of the spline wavelets involved,
-      so that m = (p+1)/2;
-    */
-    double a(const typename WaveletBasis::Index& lambda,
- 	     const typename WaveletBasis::Index& nu,
- 	     const unsigned int p) const;
-
-    /*!
-      estimate the spectral norm ||A||
-    */
-    double norm_A() const;
-
-    /*!
-      estimate the spectral norm ||A^{-1}||
-    */
-    double norm_Ainv() const;
-
-    /*!
-      estimate compressibility exponent s^*
-    */
-    double s_star() const {
-      return WaveletBasis::primal_vanishing_moments();
-    }
-    
-    /*!
-      estimate the compression constants alpha_k in
-      ||A-A_k|| <= alpha_k * 2^{-s*k}
-    */
-    double alphak(const unsigned int k) const {
-      return 2*norm_A(); // suboptimal
-    }
-
-    /*!
-      evaluate the (unpreconditioned) right-hand side f
-    */
-    double f(const typename WaveletBasis::Index& lambda) const {
-      return y_.get_coefficient(lambda);
-    }
-
-    /*!
-      approximate the wavelet coefficient set of the preconditioned right-hand side F
-      within a prescribed \ell_2 error tolerance
-    */
-    void RHS(const double eta,
- 	     InfiniteVector<double,typename WaveletBasis::Index>& coeffs) const {
-      coeffs = y_; // dirty
-    }
-
-    /*!
-      compute (or estimate) ||F||_2
-    */
-    double F_norm() const { return l2_norm(y_); }
-
-    /*!
-      set right-hand side y
-    */
-    void set_rhs(const InfiniteVector<double, typename WaveletBasis::Index>& y) const {
-      y_ = y;
-    }
-
-    /*!
-      w += factor * (stiffness matrix entries in column lambda on level j)
-    */
-    void add_level (const Index& lambda,
-		    InfiniteVector<double, Index>& w, const int j,
-		    const double factor,
-		    const int J,
-		    const CompressionStrategy strategy = St04a) const;
-
-  protected:
-    const WaveletBasis& basis_;
-    mutable FullGramian<d,dT> G_;
-    
-    // rhs, mutable to have 'const' method
-    mutable InfiniteVector<double, typename WaveletBasis::Index> y_;
-    
-    // estimates for ||A|| and ||A^{-1}||
-    mutable double normA, normAinv;
-  };
-
+//   /*!
+//     template specialization to SplineBasis
+//   */
+//   template <int d, int dT>
+//   class IntervalGramian<SplineBasis<d,dT,P_construction> >
+//   {
+//   public:
+//     /*!
+//       make template argument accessible
+//     */
+//     typedef SplineBasis<d,dT,P_construction> WaveletBasis;
+// 
+//     /*!
+//       constructor from a given wavelet basis and a given right-hand side y
+//     */
+//     IntervalGramian(const SplineBasis<d,dT,P_construction>& basis,
+// 		    const InfiniteVector<double, typename WaveletBasis::Index>& y);
+//     
+//     /*!
+//       wavelet index class
+//     */
+//     typedef typename WaveletBasis::Index Index;
+// 
+//     /*!
+//       read access to the basis
+//     */
+//     const WaveletBasis& basis() const { return basis_; }
+//     
+//     /*!
+//       index type of vectors and matrices
+//     */
+//     typedef typename Vector<double>::size_type size_type;
+// 
+//     /*!
+//       space dimension of the problem
+//     */
+//     static const int space_dimension = 1;
+// 
+//     /*!
+//       identity operator is local
+//     */
+//     static bool local_operator() { return true; }
+// 
+//     /*!
+//       (half) order t of the operator
+//     */
+//     static double operator_order() { return 0; }
+// 
+//     /*!
+//       evaluate the diagonal preconditioner D (essentially, we don't need any)
+//     */
+//     double D(const typename WaveletBasis::Index& lambda) const { return 1; }
+// 
+//     /*!
+//       evaluate the (unpreconditioned) bilinear form a
+//     */
+//     double a(const Index& lambda,
+// 	     const Index& nu) const {
+//       return a(lambda, nu, 4);
+//     }
+//     
+//     /*!
+//       evaluate the inner product a;
+//       you can specify the order p of the quadrature rule, i.e.,
+//       (piecewise) polynomials of maximal degree p will be integrated exactly.
+//       Internally, we use an m-point composite tensor product Gauss rule adapted
+//       to the singular supports of the spline wavelets involved,
+//       so that m = (p+1)/2;
+//     */
+//     double a(const typename WaveletBasis::Index& lambda,
+//  	     const typename WaveletBasis::Index& nu,
+//  	     const unsigned int p) const;
+// 
+//     /*!
+//       estimate the spectral norm ||A||
+//     */
+//     double norm_A() const;
+// 
+//     /*!
+//       estimate the spectral norm ||A^{-1}||
+//     */
+//     double norm_Ainv() const;
+// 
+//     /*!
+//       estimate compressibility exponent s^*
+//     */
+//     double s_star() const {
+//       return WaveletBasis::primal_vanishing_moments();
+//     }
+//     
+//     /*!
+//       estimate the compression constants alpha_k in
+//       ||A-A_k|| <= alpha_k * 2^{-s*k}
+//     */
+//     double alphak(const unsigned int k) const {
+//       return 2*norm_A(); // suboptimal
+//     }
+// 
+//     /*!
+//       evaluate the (unpreconditioned) right-hand side f
+//     */
+//     double f(const typename WaveletBasis::Index& lambda) const {
+//       return y_.get_coefficient(lambda);
+//     }
+// 
+//     /*!
+//       approximate the wavelet coefficient set of the preconditioned right-hand side F
+//       within a prescribed \ell_2 error tolerance
+//     */
+//     void RHS(const double eta,
+//  	     InfiniteVector<double,typename WaveletBasis::Index>& coeffs) const {
+//       coeffs = y_; // dirty
+//     }
+// 
+//     /*!
+//       compute (or estimate) ||F||_2
+//     */
+//     double F_norm() const { return l2_norm(y_); }
+// 
+//     /*!
+//       set right-hand side y
+//     */
+//     void set_rhs(const InfiniteVector<double, typename WaveletBasis::Index>& y) const {
+//       y_ = y;
+//     }
+// 
+//     /*!
+//       w += factor * (stiffness matrix entries in column lambda on level j)
+//     */
+//     void add_level (const Index& lambda,
+// 		    InfiniteVector<double, Index>& w, const int j,
+// 		    const double factor,
+// 		    const int J,
+// 		    const CompressionStrategy strategy = St04a) const;
+// 
+//   protected:
+//     const WaveletBasis& basis_;
+//     mutable FullGramian<d,dT> G_;
+//     
+//     // rhs, mutable to have 'const' method
+//     mutable InfiniteVector<double, typename WaveletBasis::Index> y_;
+//     
+//     // estimates for ||A|| and ||A^{-1}||
+//     mutable double normA, normAinv;
+//   };
+// 
 
 }
 

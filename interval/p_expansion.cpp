@@ -11,7 +11,6 @@
 #include <numerics/quadrature.h>
 #include <galerkin/gramian.h>
 #include <galerkin/cached_problem.h>
-#include <galerkin/full_gramian.h>
 #include <interval/interval_bspline.h>
 #include <adaptive/cdd1.h>
 

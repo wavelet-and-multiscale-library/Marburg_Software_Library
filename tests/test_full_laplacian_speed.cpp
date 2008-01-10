@@ -24,7 +24,7 @@ int main() {
   const unsigned int d = 3;
   const unsigned int dT = 3;
 
-  SplineBasis<d,dT,P_construction> basis("",1,1,0,0); // PBasis, complementary b.c.'s
+  SplineBasis<d,dT,P_construction,1,1,0,0> basis; // PBasis, complementary b.c.'s
   FullLaplacian<d,dT> delta(basis, dyadic);
 
   const int j0 = basis.j0();

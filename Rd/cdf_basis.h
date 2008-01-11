@@ -10,6 +10,7 @@
 #ifndef _WAVELETTL_CDF_BASIS_H
 #define _WAVELETTL_CDF_BASIS_H
 
+#include <utils/array1d.h>
 #include <Rd/cdf_mask.h>
 #include <Rd/r_basis.h>
 
@@ -40,9 +41,18 @@ namespace WaveletTL
     using RBasis<CDFRefinementMask_primal<d>, CDFRefinementMask_dual<d, dt> >::support;
 
     //! point evaluation of (derivatives of) primal generators and wavelets
-    double evaluate(const unsigned int derivative,
-		    const RIndex& lambda,
-		    const double x) const;
+    static double evaluate(const unsigned int derivative,
+			   const RIndex& lambda,
+			   const double x);
+
+    /*!
+      point evaluation of (derivatives) of a single primal generator
+      or wavelet \psi_\lambda at several points simultaneously
+    */
+    static void evaluate
+    (const unsigned int derivative,
+     const RIndex& lambda,
+     const Array1D<double>& points, Array1D<double>& values);
   };
 }
 

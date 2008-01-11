@@ -29,8 +29,9 @@ using MathTL::CG;
   test function
   N=1: f(x)=1
   N=2: f(x)=exp(x)
-  N=3: f(x)=chi_{[0,0.5)}(x)
+  N=3: f(x)=chi_{[0,0.6)}(x)
   N=4: f(x)=x*(1-x)
+  N=5: f(x)=x^2*(1-x)
 */
 template <unsigned int N>
 class TestFunction
@@ -48,7 +49,7 @@ class TestFunction
       return exp(p[0]);
       break;
     case 3:
-      return (p[0] < 0.5 ? 1.0 : 0.0);
+      return (p[0] < 0.6 ? 1.0 : 0.0);
       break;
     case 4:
       return p[0]*(1-p[0]);
@@ -75,8 +76,8 @@ int main()
   cout << "Testing adaptive wavelet-Galerkin methods for the identity operator with CDD1_SOLVE ..." << endl;
 
   // for DSBasis+PBasis+SplineBasis
-  const int d  = 3;
-  const int dT = 3;
+  const int d  = 2;
+  const int dT = 2;
 
 //   typedef DSBasis<d,dT> Basis;
 //   typedef PBasis<d,dT> Basis;

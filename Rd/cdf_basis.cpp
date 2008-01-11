@@ -10,7 +10,7 @@ namespace WaveletTL
   double
   CDFBasis<d,dt>::evaluate(const unsigned int derivative,
 			   const RIndex& lambda,
-			   const double x) const
+			   const double x)
   {
     assert(derivative <= 1); // we only support derivatives up to the first order
 
@@ -36,6 +36,19 @@ namespace WaveletTL
     return r;
   }
 
+  template <int d, int dt>
+  void
+  CDFBasis<d,dt>::evaluate
+  (const unsigned int derivative,
+   const RIndex& lambda,
+   const Array1D<double>& points, Array1D<double>& values)
+  {
+    values.resize(points.size());
+    for (unsigned int i(0); i < values.size(); i++) {
+      values[i] = evaluate(derivative, lambda, points[i]);
+    }
+  }
+
   //
   // some fast template specializations without reconstruct_1() calls
 
@@ -43,7 +56,7 @@ namespace WaveletTL
   double
   CDFBasis<1,1>::evaluate(const unsigned int derivative,
  			  const RIndex& lambda,
- 			  const double x) const
+ 			  const double x)
   {
     if (derivative == 0) {
       const double y = (1<<lambda.j())*x-lambda.k();
@@ -63,7 +76,7 @@ namespace WaveletTL
   double
   CDFBasis<1,3>::evaluate(const unsigned int derivative,
 			  const RIndex& lambda,
-			  const double x) const
+			  const double x)
   {
     if (derivative == 0) {
       const double y = (1<<lambda.j())*x-lambda.k();
@@ -93,7 +106,7 @@ namespace WaveletTL
   double
   CDFBasis<1,5>::evaluate(const unsigned int derivative,
 			  const RIndex& lambda,
-			  const double x) const
+			  const double x)
   {
     if (derivative == 0) {
       const double y = (1<<lambda.j())*x-lambda.k();
@@ -127,7 +140,7 @@ namespace WaveletTL
   double
   CDFBasis<2,2>::evaluate(const unsigned int derivative,
  			  const RIndex& lambda,
- 			  const double x) const
+ 			  const double x)
   {
     const int j = lambda.j();
     const double y = (1<<j)*x-lambda.k();
@@ -182,7 +195,7 @@ namespace WaveletTL
   double
   CDFBasis<2,4>::evaluate(const unsigned int derivative,
  			  const RIndex& lambda,
- 			  const double x) const
+ 			  const double x)
   {
     const int j = lambda.j();
     const double y = (1<<j)*x-lambda.k();
@@ -247,7 +260,7 @@ namespace WaveletTL
   double
   CDFBasis<3,3>::evaluate(const unsigned int derivative,
  			  const RIndex& lambda,
- 			  const double x) const
+ 			  const double x)
   {
     const int j = lambda.j();
     const double y = (1<<j)*x-lambda.k();
@@ -354,7 +367,7 @@ namespace WaveletTL
   double
   CDFBasis<3,5>::evaluate(const unsigned int derivative,
  			  const RIndex& lambda,
- 			  const double x) const
+ 			  const double x)
   {
     const int j = lambda.j();
     const double y = (1<<j)*x-lambda.k();

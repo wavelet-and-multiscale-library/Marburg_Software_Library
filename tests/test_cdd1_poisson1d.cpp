@@ -24,8 +24,8 @@ int main()
 {
   cout << "Testing adaptive wavelet-Galerkin methods for the 1D Poisson equation ..." << endl;
 
-  const int d  = 2;
-  const int dT = 2;
+  const int d  = 3;
+  const int dT = 3;
 
   typedef SplineBasis<d,dT,P_construction,1,1,0,0> Basis;
   typedef Basis::Index Index;
@@ -33,7 +33,6 @@ int main()
   Basis basis; // PBasis, complementary b.c.'s
 
   const unsigned int solution = 1;
-//   double kink = 0; // for Solution3;
 
   Function<1> *uexact = 0, *f = 0;
   switch(solution) {
@@ -41,15 +40,6 @@ int main()
     uexact = new Solution1();
     f = new ConstantFunction<1>(Vector<double>(1, "1"));
     break;
-//   case 2:
-//     uexact = new Solution2();
-//     f = new RHS2();
-//     break;
-//   case 3:
-//     kink = 5./7.;
-//     uexact = new Solution3(kink);
-//     f = new RHS3_part(kink);
-//     break;
   default:
     break;
   }
@@ -74,9 +64,9 @@ int main()
 //   cout << "* estimate for normAinv: " << normAinv << endl;
   
   InfiniteVector<double, Index> u_epsilon;
-// //   CDD1_SOLVE(problem, 1e-4, u_epsilon, jmax);
-  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, jmax);
-// //   CDD1_SOLVE(cproblem, 1e-6, u_epsilon, jmax);
+//   CDD1_SOLVE(problem, 1e-4, u_epsilon, jmax);
+//   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, jmax);
+  CDD1_SOLVE(cproblem, 1e-2, u_epsilon, jmax);
 // // //   CDD1_SOLVE(cproblem, 1e-7, u_epsilon, 12);
 // // //   CDD1_SOLVE(cproblem, 1e-5, u_epsilon, 20);
 // // //   CDD1_SOLVE(cproblem, 1e-10, u_epsilon, 20);

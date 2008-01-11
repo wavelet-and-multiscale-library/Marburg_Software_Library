@@ -20,7 +20,7 @@
 #include <galerkin/sturm_equation.h>
 #include <galerkin/cached_problem.h>
 
-#define _WAVELETTL_CDD1_VERBOSITY 2
+#define _WAVELETTL_CDD1_VERBOSITY 1
 #include <adaptive/cdd1.h>
 
 using namespace std;
@@ -105,14 +105,14 @@ int main()
   const int d  = 3;
   const int dT = 3;
 //   typedef DSBasis<d,dT> Basis; Basis basis(true, true);
-  typedef PBasis<d,dT> Basis; Basis basis(true, true);
-//   typedef SplineBasis<d,dT,P_construction> Basis; Basis basis("",1,1,0,0);
+//   typedef PBasis<d,dT> Basis; Basis basis(true, true);
+  typedef SplineBasis<d,dT,P_construction,1,1,0,0> Basis; Basis basis;
 #else
   typedef JLBasis Basis; Basis basis;
 #endif
   typedef Basis::Index Index;
 
-  basis.set_jmax(10);
+  basis.set_jmax(8);
 
   SturmEquation<Basis> problem(T, basis);
 //   CachedProblem<SturmEquation<Basis> > cproblem(&problem);
@@ -161,7 +161,7 @@ int main()
 //   cout << "* estimate for normAinv: " << normAinv << endl;
 
   InfiniteVector<double, Index> u_epsilon;
-  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, u_epsilon, 10);
+  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, u_epsilon, 8);
 //    CDD1_SOLVE(cproblem, 1e-4, u_epsilon, u_epsilon, 1.0, 1.0, 10);
 //   CDD1_SOLVE(cproblem, 1e-5, u_epsilon, 20);
 //   CDD1_SOLVE(cproblem, 1e-10, u_epsilon, 20);

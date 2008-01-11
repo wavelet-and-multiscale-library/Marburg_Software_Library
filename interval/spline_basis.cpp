@@ -10,6 +10,7 @@
 
 #include <Rd/r_index.h>
 #include <Rd/cdf_utils.h>
+#include <Rd/cdf_basis.h>
 #include <interval/interval_bspline.h>
 #include <galerkin/full_gramian.h>
 
@@ -141,8 +142,9 @@ namespace WaveletTL
  	
  	typedef typename Vector<double>::size_type size_type;
  	std::map<size_type,double> wc, gc;
- 	wc.insert(std::pair<size_type,double>(Deltasize(lambda.j())+lambda.k()-Nablamin(), 1.0));
- 	apply_Mj(lambda.j(), wc, gc);
+	wc[lambda.k()-Nablamin()] = 1.0;
+	SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_.set_level(lambda.j());
+	SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_.apply(wc, gc, 0, 0);
  	int dummy;
   	support(Index(lambda.j()+1, 0, DeltaLmin()+gc.begin()->first), k1, dummy);
   	support(Index(lambda.j()+1, 0, DeltaLmin()+gc.rbegin()->first), dummy, k2);
@@ -172,6 +174,8 @@ namespace WaveletTL
 	    k2 = 1<<(lambda.j()+1);
 	  } else {
 	    // interior wavelet (CDF)
+	    // note: despite the fact that the wavelets in the right half of the interval
+	    //       are reflected CDF wavelets, their support does not "see" the reflection!
 	    k1 = 2*(lambda.k()-(d+dT)/2+1);
 	    k2 = k1+2*(d+dT)-2;
 	  }
@@ -604,10 +608,10 @@ namespace WaveletTL
     } else {
       // wavelet, switch to generator representation
       typedef typename Vector<double>::size_type size_type;
-      size_type number_lambda = Deltasize(lambda.j())+lambda.k()-Nablamin();
       std::map<size_type,double> wc, gc;
-      wc[number_lambda] = 1.0;
-      apply_Mj(lambda.j(), wc, gc);
+      wc[lambda.k()-Nablamin()] = 1.0;
+      SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_.set_level(lambda.j());
+      SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_.apply(wc, gc, 0, 0);
       typedef typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index Index;
       for (typename std::map<size_type,double>::const_iterator it(gc.begin());
 	   it != gc.end(); ++it) {
@@ -647,10 +651,10 @@ namespace WaveletTL
     } else {
       // wavelet, switch to generator representation
       typedef typename Vector<double>::size_type size_type;
-      size_type number_lambda = Deltasize(lambda.j())+lambda.k()-Nablamin();
       std::map<size_type,double> wc, gc;
-      wc[number_lambda] = 1.0;
-      apply_Mj(lambda.j(), wc, gc);
+      wc[lambda.k()-Nablamin()] = 1.0;
+      SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_.set_level(lambda.j());
+      SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_.apply(wc, gc, 0, 0);
       typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index Index;
       for (typename std::map<size_type,double>::const_iterator it(gc.begin());
 	   it != gc.end(); ++it) {
@@ -745,8 +749,9 @@ namespace WaveletTL
       // wavelet, switch to generator representation
       typedef typename Vector<double>::size_type size_type;
       std::map<size_type,double> wc, gc;
-      wc.insert(std::pair<size_type,double>(Deltasize(lambda.j())+lambda.k()-Nablamin(), 1.0));
-      apply_Mj(lambda.j(), wc, gc);
+      wc[lambda.k()-Nablamin()] = 1.0;
+      SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_.set_level(lambda.j());
+      SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_.apply(wc, gc, 0, 0);
       typedef typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index Index;
       Array1D<double> help(points.size());
       for (typename std::map<size_type,double>::const_iterator it(gc.begin());
@@ -855,12 +860,48 @@ namespace WaveletTL
 								   points[m]));
       }
     } else {
-      // wavelet, switch to generator representation
+#if 1
+      // new version, determine first whether we have an interior wavelet
       typedef typename Vector<double>::size_type size_type;
-      size_type number_lambda = Deltasize(lambda.j())+lambda.k()-Nablamin();
+      const size_type w_number = lambda.k()-Nablamin();
+      if (w_number >= SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.ML_column_dimension()
+	  && w_number < Nablasize(lambda.j())-SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.MR_column_dimension())
+	{
+	  // an interior wavelet
+	  CDFBasis<d,dT>::evaluate(derivative, RIndex(lambda.j(),lambda.e(),lambda.k()), points, values);
+	  if (w_number < (size_type)Nablasize(lambda.j()-1)) {
+	    // left half
+	    for (unsigned int i = 0; i < values.size(); i++)
+	      values[i] *= SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::CDF_factor;
+	  } else {
+ 	    // right half, reflect at 0.5 for d odd (i.e., multiply by (-1)^d)
+ 	    for (unsigned int i = 0; i < values.size(); i++)
+ 	      values[i] *= minus1power(d)*SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::CDF_factor;
+	  }
+	}
+      else
+	{
+	  // boundary wavelet, use old code
+	  std::map<size_type,double> wc, gc;
+	  wc[w_number] = 1.0;
+	  SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.set_level(lambda.j());
+	  SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.apply(wc, gc, 0, 0);
+	  typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index Index;
+	  Array1D<double> help(points.size());
+	  for (typename std::map<size_type,double>::const_iterator it(gc.begin());
+	       it != gc.end(); ++it) {
+	    evaluate(derivative, Index(lambda.j()+1, 0, DeltaLmin()+it->first), points, help);
+	    for (unsigned int i = 0; i < points.size(); i++)
+	      values[i] += it->second * help[i];
+	  }
+	}
+#else
+      // old version, switch to generator representation for all wavelets
+      typedef typename Vector<double>::size_type size_type;
       std::map<size_type,double> wc, gc;
-      wc[number_lambda] = 1.0;
-      apply_Mj(lambda.j(), wc, gc);
+      wc[lambda.k()-Nablamin()] = 1.0;
+      SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.set_level(lambda.j());
+      SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.apply(wc, gc, 0, 0);
       typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index Index;
       Array1D<double> help(points.size());
       for (typename std::map<size_type,double>::const_iterator it(gc.begin());
@@ -869,6 +910,7 @@ namespace WaveletTL
 	for (unsigned int i = 0; i < points.size(); i++)
 	  values[i] += it->second * help[i];
       }
+#endif
     }
   }
   
@@ -923,8 +965,9 @@ namespace WaveletTL
       // wavelet, switch to generator representation
       typedef typename Vector<double>::size_type size_type;
       std::map<size_type,double> wc, gc;
-      wc.insert(std::pair<size_type,double>(Deltasize(lambda.j())+lambda.k()-Nablamin(), 1.0));
-      apply_Mj(lambda.j(), wc, gc);
+      wc[lambda.k()-Nablamin()] = 1.0;
+      SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_.set_level(lambda.j());
+      SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_.apply(wc, gc, 0, 0);
       typedef typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index Index;
       Array1D<double> help1, help2;
       for (typename std::map<size_type,double>::const_iterator it(gc.begin());
@@ -974,12 +1017,12 @@ namespace WaveletTL
 	}
       }
     } else {
-      // wavelet, switch to generator representation
+      // old version, switch to generator representation for all wavelets
       typedef typename Vector<double>::size_type size_type;
-      size_type number_lambda = Deltasize(lambda.j())+lambda.k()-Nablamin();
       std::map<size_type,double> wc, gc;
-      wc[number_lambda] = 1.0;
-      apply_Mj(lambda.j(), wc, gc);
+      wc[lambda.k()-Nablamin()] = 1.0;
+      SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.set_level(lambda.j());
+      SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.apply(wc, gc, 0, 0);
       typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index Index;
       Array1D<double> help1, help2;
       for (typename std::map<size_type,double>::const_iterator it(gc.begin());

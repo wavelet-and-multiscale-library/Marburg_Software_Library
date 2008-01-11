@@ -1033,6 +1033,8 @@ namespace WaveletTL
 	    k2 = 1<<(lambda.j()+1);
 	  } else {
 	    // interior wavelet (CDF)
+	    // note: despite the fact that the wavelets in the right half of the interval
+	    //       are reflected CDF wavelets, their support does not "see" the reflection!
 	    k1 = 2*(lambda.k()-(d+dT)/2+1);
 	    k2 = k1+2*(d+dT)-2;
 	  }

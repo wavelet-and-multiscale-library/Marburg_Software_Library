@@ -54,7 +54,7 @@ int main()
     break;
   }
 
-  const int jmax = 9;
+  const int jmax = 8;
   basis.set_jmax(jmax);
 
   typedef HelmholtzEquation1D<d,dT> Problem;

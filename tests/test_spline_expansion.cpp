@@ -1,4 +1,5 @@
 #include <iostream>
+#include <time.h>
 
 #include <utils/function.h>
 #include <algebra/vector.h>
@@ -111,12 +112,18 @@ int main()
     error[i] = fabs(s3.values()[i]-hat.value(Point<1>(s3.points()[i])));
   //   cout << error << endl;
   cout << "(max. error: " << linfty_norm(error) << ")" << endl;
-  
+
   cout << "- expand a Gaussian..." << endl;
+  clock_t tstart, tend;
   Gaussian g;
   g.set_time(0);
   InfiniteVector<double,Index> g_coeffs;
+  tstart = clock();
   expand(&g, basis, false, jmax, g_coeffs);
+  tend = clock();
+  cout << "  ... done, time needed: "
+       << (double)(tend-tstart)/CLOCKS_PER_SEC
+       << "s" << endl;
   cout << "- pointwise error:" << endl;
   SampledMapping<1> gs(basis.evaluate(g_coeffs, jmax+1));
   error.resize(gs.points().size());

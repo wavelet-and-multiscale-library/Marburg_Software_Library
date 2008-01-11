@@ -631,6 +631,7 @@ namespace WaveletTL
     Matrix<double> Mj1T_lr(0); // empty corner blocks
     Vector<double> Mj1T_band_lr(3, "-1 2 -1");
     Mj1T_ = QuasiStationaryMatrix<double>(j0(), 9, 4, Mj1T_lr, Mj1T_lr, Mj1T_band_lr, Mj1T_band_lr, 0, 0, M_SQRT1_2);
+    CDF_factor = -0.5;
   }
 
   template <>
@@ -658,6 +659,7 @@ namespace WaveletTL
     Matrix<double> Mj1T_r; Mj1T_l.mirror(Mj1T_r);
     Vector<double> Mj1T_band_lr(3, "-1 2 -1");
     Mj1T_ = QuasiStationaryMatrix<double>(j0(), 15, 8, Mj1T_l, Mj1T_r, Mj1T_band_lr, Mj1T_band_lr, 1, 1, M_SQRT1_2);
+    CDF_factor = -0.5;
   }
 
   template <>
@@ -686,6 +688,7 @@ namespace WaveletTL
     Matrix<double> Mj1T_r(0); // empty corner block
     Vector<double> Mj1T_band_lr(3, "-1 2 -1");
     Mj1T_ = QuasiStationaryMatrix<double>(j0(), 8, 4, Mj1T_l, Mj1T_r, Mj1T_band_lr, Mj1T_band_lr, 1, 0, M_SQRT1_2);
+    CDF_factor = -0.5;
   }
 
   template <>
@@ -714,6 +717,7 @@ namespace WaveletTL
     Matrix<double> Mj1T_r(2, 1, "-1 2");
     Vector<double> Mj1T_band_lr(3, "-1 2 -1");
     Mj1T_ = QuasiStationaryMatrix<double>(j0(), 8, 4, Mj1T_l, Mj1T_r, Mj1T_band_lr, Mj1T_band_lr, 0, 1, M_SQRT1_2);
+    CDF_factor = -0.5;
   }
 
   template <>
@@ -762,6 +766,7 @@ namespace WaveletTL
     Vector<double> Mj1T_band_l(4, "-0.75 2.25 -2.25 0.75");
     Vector<double> Mj1T_band_r(4, "0.75 -2.25 2.25 -0.75");
     Mj1T_ = QuasiStationaryMatrix<double>(j0(), 16, 8, Mj1T_l, Mj1T_r, Mj1T_band_l, Mj1T_band_r, 1, 1, M_SQRT1_2);
+    CDF_factor = 1./3.;
   }
 
 }

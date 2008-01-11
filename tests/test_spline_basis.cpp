@@ -45,8 +45,8 @@ int main()
 
 #if 1
   cout << "Testing SplineBasis..." << endl;
-//   typedef SplineBasis<3,3,P_construction,1,1,0,0> SBasis; // PBasis, complementary b.c.'s
-  typedef SplineBasis<3,3,DS_construction_bio5e,0,0,0,0> SBasis; // DSBasis, no b.c.'s
+  typedef SplineBasis<3,3,P_construction,1,1,0,0> SBasis; // PBasis, complementary b.c.'s
+//   typedef SplineBasis<3,3,DS_construction_bio5e,0,0,0,0> SBasis; // DSBasis, no b.c.'s
   SBasis basis;
 
   const int j0 = basis.j0();

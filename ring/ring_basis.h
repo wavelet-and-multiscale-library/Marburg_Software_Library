@@ -18,6 +18,7 @@
 #include <utils/function.h>
 #include <Rd/cdf_basis.h>
 #include <interval/periodic.h>
+#include <interval/spline_basis.h>
 
 using MathTL::Vector;
 using MathTL::InfiniteVector;
@@ -28,7 +29,7 @@ namespace WaveletTL
 {
   /*!
     Template class for a wavelet basis on the ring-shaped domain
-      R = {(x,y) : r_1 <= ||(x,y)|| <= r_0 }
+      R = {(x,y) : r_0 <= ||(x,y)|| <= r_1 }
     with complementary boundary conditions of order s0 at the interior boundary
     and of order s1 at the outer boundary.
   */
@@ -37,15 +38,19 @@ namespace WaveletTL
   {
   public:
     /*!
-      coarsest possible level j0;
+      coarsest possible level j0; we may assume that the interval basis in radial direction
+      has a larger minimal level than the corresponding periodic basis
     */
     static const int j0() {
-      return PeriodicBasis<CDFBasis<d,dt> >::j0();
+      return SplineBasis<d,dt,P_construction,s0,s1,0,0>::j0();
     }
 
   protected:
-    //! an instance of the periodic basis
+    //! an instance of the periodic basis (angular direction)
     PeriodicBasis<CDFBasis<d,dt> > periodic_basis;
+
+    //! an instance of the nonperiodic basis (radial direction)
+    SplineBasis<d,dt,P_construction,s0,s1,0,0> nonperiodic_basis;
   };
 }
 

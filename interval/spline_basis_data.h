@@ -43,13 +43,21 @@ namespace WaveletTL
     //! refinement matrices
     QuasiStationaryMatrix<double> Mj0_, Mj1_, Mj0T_, Mj1T_;
 
+    /*!
+      The interior wavelets are CDF wavelets, multiplied by this factor, see also
+      [Pr06, Abb. 5.1 & (5.12)].
+      Note that the interior wavelets from the right half of the interval are
+      also reflected at 0.5 whenever d%2 != 0
+    */
+    int CDF_factor;
+    
     //! expansion coefficients of the primal generators w.r.t. restricted cardinal B-splines
     Matrix<double> CLA_, CRA_, CLAT_, CRAT_;
-
+    
     /*!
       initial stable completion with homogeneous b.c.'s (for composite basis),
       available for bio5(-energy)
-
+      
       the first and last row is zero, we don't store it
     */
     QuasiStationaryMatrix<double> Mj1c_;
@@ -78,6 +86,13 @@ namespace WaveletTL
   protected:
     //! refinement matrices
     QuasiStationaryMatrix<double> Mj0_, Mj1_, Mj0T_, Mj1T_;
+
+    /*!
+      The interior wavelets are CDF wavelets, multiplied by the following factor.
+      Note that the interior wavelets from the right half of the interval are
+      also reflected at 0.5 whenever d%2 != 0
+    */
+    double CDF_factor;    
   };
 
 }

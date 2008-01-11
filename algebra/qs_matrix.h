@@ -67,6 +67,16 @@ namespace MathTL
     const size_type column_dimension() const;
 
     /*!
+      column dimension of upper left block
+    */
+    const size_type ML_column_dimension() const { return ML_.column_dimension(); }
+
+    /*!
+      column dimension of lower right block
+    */
+    const size_type MR_column_dimension() const { return MR_.column_dimension(); }
+
+    /*!
       set level j
     */
     void set_level(const int j) const;

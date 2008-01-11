@@ -653,8 +653,8 @@ namespace WaveletTL
       typedef typename Vector<double>::size_type size_type;
       std::map<size_type,double> wc, gc;
       wc[lambda.k()-Nablamin()] = 1.0;
-      SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_.set_level(lambda.j());
-      SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_.apply(wc, gc, 0, 0);
+      SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.set_level(lambda.j());
+      SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.apply(wc, gc, 0, 0);
       typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index Index;
       for (typename std::map<size_type,double>::const_iterator it(gc.begin());
 	   it != gc.end(); ++it) {

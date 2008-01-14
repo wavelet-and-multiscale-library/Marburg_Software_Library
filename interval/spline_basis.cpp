@@ -1063,6 +1063,7 @@ namespace WaveletTL
    const int jmax,
    InfiniteVector<double, typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index>& coeffs) const
   {
+    coeffs.clear();
     Vector<double> coeffs_vector;
     expand(f, primal, jmax, coeffs_vector);
     typedef typename Vector<double>::size_type size_type;

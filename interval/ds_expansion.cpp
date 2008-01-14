@@ -99,6 +99,7 @@ namespace WaveletTL
     typedef typename DSBasis<d,dT,BIO>::Index Index;
     const int j0 = basis.j0();
 
+    coeffs.clear();
     for (Index lambda = first_generator(&basis, j0);;++lambda)
       {
 	coeffs.set_coefficient(lambda, integrate(f, basis, lambda));

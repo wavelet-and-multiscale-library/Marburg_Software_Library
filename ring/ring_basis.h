@@ -40,6 +40,9 @@ namespace WaveletTL
   class RingBasis
   {
   public:
+    //! default constructor, also sets r0 and r1
+    RingBasis(const double r0 = 1.0, const double r1 = 2.0);
+    
     /*!
       coarsest possible level j0; we may assume that the interval basis in radial direction
       has a larger minimal level than the corresponding periodic basis
@@ -77,12 +80,37 @@ namespace WaveletTL
     SampledMapping<2> evaluate(const InfiniteVector<double,Index>& coeffs,
  			       const int resolution) const;
     
+
+    /*!
+      For a given function, compute all integrals w.r.t. the primal
+      or dual generators/wavelets \psi_\lambda with |\lambda|\le jmax.
+    */
+    void
+    expand
+    (const Function<2>* f,
+     const bool primal,
+     const int jmax,
+     InfiniteVector<double, Index>& coeffs) const;
+
+    /*!
+      helper function, integrate a smooth function f against a
+      primal generator or wavelet
+    */
+    double
+    integrate
+    (const Function<2>* f,
+     const Index& lambda) const;
+
+
   protected:
     //! an instance of the periodic basis (angular direction)
     PeriodicBasis<CDFBasis<d,dt> > basis0;
 
     //! an instance of the nonperiodic basis (radial direction)
     SplineBasis<d,dt,P_construction,s0,s1,0,0> basis1;
+
+    //! radii
+    double r0_, r1_;
   };
 }
 

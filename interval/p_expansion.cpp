@@ -102,6 +102,8 @@ namespace WaveletTL
     const int j0 = basis.j0();
     assert(jmax >= j0);
     
+    coeffs.clear()
+
     for (Index lambda = first_generator(&basis, j0);;++lambda)
       {
  	coeffs.set_coefficient(lambda, integrate(f, basis, lambda));

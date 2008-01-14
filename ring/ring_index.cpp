@@ -34,12 +34,34 @@ namespace WaveletTL
   }
 
   template <int d, int dt, int s0, int s1>
+  RingIndex<d,dt,s0,s1>&
+  RingIndex<d,dt,s0,s1>::operator = (const RingIndex<d,dt,s0,s1>& lambda)
+  {
+    j_ = lambda.j();
+    e_ = lambda.e();
+    k_ = lambda.k();
+    
+    return *this;
+  }
+
+  template <int d, int dt, int s0, int s1>
+  inline
   bool
   RingIndex<d,dt,s0,s1>::operator == (const RingIndex& lambda) const
   {
     return (j_ == lambda.j() &&
 	    e_ == lambda.e() &&
 	    k_ == lambda.k());
+  }
+
+  template <int d, int dt, int s0, int s1>
+  inline
+  bool
+  RingIndex<d,dt,s0,s1>::operator < (const RingIndex& lambda) const
+  {
+    return (j_ < lambda.j() ||
+	    (j_ == lambda.j() && (e_ < lambda.e() ||
+				  (e_ == lambda.e() && k_ < lambda.k()))));
   }
 
   template <int d, int dt, int s0, int s1>

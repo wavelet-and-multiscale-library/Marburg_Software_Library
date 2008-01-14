@@ -16,6 +16,8 @@
 #include <algebra/infinite_vector.h>
 #include <utils/array1d.h>
 #include <utils/function.h>
+#include <geometry/sampled_mapping.h>
+
 #include <Rd/cdf_basis.h>
 #include <interval/periodic.h>
 #include <interval/spline_basis.h>
@@ -61,12 +63,26 @@ namespace WaveletTL
     //! index of last wavelet on level j >= j0
     static Index last_wavelet(const int j);
 
+
+    /*!
+      Evaluate a single primal/dual generator or wavelet \psi_\lambda
+      on a "dyadic" subgrid of the ring, pulled back to the unit square
+    */
+    SampledMapping<2> evaluate(const Index& lambda,
+			       const int resolution) const;
+    
+//     /*!
+//       Evaluate an arbitrary linear combination of primal/dual wavelets
+//     */
+//     SampledMapping<2> evaluate(const InfiniteVector<double,Index>& coeffs,
+// 			       const int resolution) const;
+    
   protected:
     //! an instance of the periodic basis (angular direction)
-    PeriodicBasis<CDFBasis<d,dt> > periodic_basis;
+    PeriodicBasis<CDFBasis<d,dt> > basis0;
 
     //! an instance of the nonperiodic basis (radial direction)
-    SplineBasis<d,dt,P_construction,s0,s1,0,0> nonperiodic_basis;
+    SplineBasis<d,dt,P_construction,s0,s1,0,0> basis1;
   };
 }
 

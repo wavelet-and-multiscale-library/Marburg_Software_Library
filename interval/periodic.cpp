@@ -2,8 +2,13 @@
 
 #include <cmath>
 #include <geometry/point.h>
+#include <geometry/grid.h>
 #include <utils/tiny_tools.h>
 #include <numerics/gauss_data.h>
+
+using MathTL::Grid;
+using MathTL::SampledMapping;
+using MathTL::Point;
 
 namespace WaveletTL
 {
@@ -112,6 +117,80 @@ namespace WaveletTL
     
     return (2*dist_midpoints < length_lambda+length_mu);
   }
+
+  //
+  //
+  // point evaluation subroutines
+
+  template <class RBASIS>
+  SampledMapping<1>
+  PeriodicBasis<RBASIS>::evaluate
+  (const typename PeriodicBasis<RBASIS>::Index& lambda,
+   const int resolution) const
+  {
+    Grid<1> grid(0, 1, 1<<resolution);
+    Array1D<double> values((1<<resolution)+1);
+    for (unsigned int i(0); i < values.size(); i++) {
+      const double x = i*ldexp(1.0, -resolution);
+      values[i] = evaluate(0, lambda, x);
+    }     
+    return SampledMapping<1>(grid, values);
+  }
+
+//   template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+//   SampledMapping<1>
+//   SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::evaluate
+//   (const InfiniteVector<double, typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index>& coeffs,
+//    const int resolution) const
+//   {
+//     Grid<1> grid(0, 1, 1<<resolution);
+//     SampledMapping<1> result(grid); // zero
+//     if (coeffs.size() > 0) {
+//       // determine maximal level
+//       int jmax(0);
+//       typedef typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index Index;
+//       for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
+//   	     itend(coeffs.end()); it != itend; ++it)
+//   	jmax = std::max(it.index().j()+it.index().e(), jmax);
+      
+//       // insert coefficients into a dense vector
+//       Vector<double> wcoeffs(Deltasize(jmax));
+//       for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
+//  	     itend(coeffs.end()); it != itend; ++it) {
+//  	// determine number of the wavelet
+//  	typedef typename Vector<double>::size_type size_type;
+//  	size_type number = 0;
+//  	if (it.index().e() == 0) {
+//  	  number = it.index().k()-DeltaLmin();
+//  	} else {
+//  	  number = Deltasize(it.index().j())+it.index().k()-Nablamin();
+//  	}
+//  	wcoeffs[number] = *it;
+//       }
+      
+//       // switch to generator representation
+//       Vector<double> gcoeffs(wcoeffs.size(), false);
+//       if (jmax == j0())
+//  	gcoeffs = wcoeffs;
+//       else
+//  	apply_Tj(jmax-1, wcoeffs, gcoeffs);
+      
+//       Array1D<double> values((1<<resolution)+1);
+//       for (unsigned int i(0); i < values.size(); i++) {
+//  	values[i] = 0;
+//  	const double x = i*ldexp(1.0, -resolution);
+//  	for (unsigned int k = 0; k < gcoeffs.size(); k++) {
+// 	  values[i] += gcoeffs[k] * evaluate(0, Index(jmax, 0, DeltaLmin()+k), x);
+//  	}
+//       }
+      
+//       return SampledMapping<1>(grid, values);
+//     }
+    
+//     return result;
+//   }
+
+
   
   template <class RBASIS>
   inline

@@ -514,6 +514,21 @@ namespace WaveletTL
   template <int d, int dT, int s0, int s1, int sT0, int sT1>
   SampledMapping<1>
   SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::evaluate
+  (const typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index& lambda,
+   const int resolution) const
+  {
+    Grid<1> grid(0, 1, 1<<resolution);
+    Array1D<double> values((1<<resolution)+1);
+    for (unsigned int i(0); i < values.size(); i++) {
+      const double x = i*ldexp(1.0, -resolution);
+      values[i] = evaluate(0, lambda, x);
+    }     
+    return SampledMapping<1>(grid, values);
+  }
+
+  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  SampledMapping<1>
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::evaluate
   (const InfiniteVector<double, typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index>& coeffs,
    const int resolution) const
   {

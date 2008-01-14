@@ -16,6 +16,7 @@
 #include <algebra/infinite_vector.h>
 #include <utils/array1d.h>
 #include <utils/function.h>
+#include <geometry/sampled_mapping.h>
 
 #include <interval/i_index.h>
 
@@ -23,6 +24,7 @@ using MathTL::Vector;
 using MathTL::InfiniteVector;
 using MathTL::Array1D;
 using MathTL::Function;
+using MathTL::SampledMapping;
 
 namespace WaveletTL
 {
@@ -127,6 +129,24 @@ namespace WaveletTL
     //! index of last (rightmost) wavelet on level j >= j0
     static Index last_wavelet(const int j);
 
+    /*!
+      Evaluate a single primal/dual generator or wavelet \psi_\lambda
+      on a dyadic subgrid of [0,1].
+    */
+    SampledMapping<1>
+    evaluate
+    (const Index& lambda,
+     const int resolution) const;
+
+    /*!
+      Evaluate an arbitrary linear combination of primal wavelets
+      on a dyadic subgrid of [0,1].
+    */
+    SampledMapping<1>
+    evaluate
+    (const InfiniteVector<double, Index>& coeffs,
+     const int resolution) const;
+    
     /*!
       point evaluation of (derivatives) of a single primal generator
       or wavelet \psi_\lambda

@@ -1,4 +1,4 @@
-// implementation for ring.h
+// implementation for ring_index.h
 
 #include <interval/periodic.h>
 #include <interval/spline_basis.h>
@@ -12,4 +12,13 @@ namespace WaveletTL
 	 SplineBasis<d,dt,P_construction,s0,s1,0,0>::DeltaLmin())
   {
   }
+
+  template <int d, int dt, int s0, int s1>
+  RingIndex<d,dt,s0,s1>::RingIndex(const int j,
+				   const type_type& e,
+				   const translation_type& k)
+    : j_(j), e_(e), k_(k)
+  {
+  }
+  
 }

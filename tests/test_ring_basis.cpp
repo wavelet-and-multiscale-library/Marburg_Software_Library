@@ -19,6 +19,10 @@ int main()
 
   cout << "- j0=" << basis.j0() << endl;
   cout << "- the default wavelet index: " << Index() << endl;
+  cout << "- first generator on the coarsest level: " << basis.first_generator(basis.j0()) << endl;
+  cout << "- last generator on the coarsest level: " << basis.last_generator(basis.j0()) << endl;
+  cout << "- first wavelet on the coarsest level: " << basis.first_wavelet(basis.j0()) << endl;
+  cout << "- last wavelet on the coarsest level: " << basis.last_wavelet(basis.j0()) << endl;
 
   return 0;
 }

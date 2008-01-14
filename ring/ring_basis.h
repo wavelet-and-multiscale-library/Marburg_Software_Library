@@ -49,6 +49,18 @@ namespace WaveletTL
     //! wavelet index class
     typedef RingIndex<d,dt,s0,s1> Index;
 
+    //! index of first generator on level j >= j0
+    static Index first_generator(const int j);
+
+    //! index of last generator on level j >= j0
+    static Index last_generator(const int j);
+
+    //! index of first wavelet on level j >= j0
+    static Index first_wavelet(const int j);
+
+    //! index of last wavelet on level j >= j0
+    static Index last_wavelet(const int j);
+
   protected:
     //! an instance of the periodic basis (angular direction)
     PeriodicBasis<CDFBasis<d,dt> > periodic_basis;

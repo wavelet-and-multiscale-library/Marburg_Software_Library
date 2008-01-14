@@ -1,4 +1,7 @@
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
 #include <interval/periodic.h>
 #include <ring/ring_basis.h>
 
@@ -32,7 +35,7 @@ int main()
   }
 #endif
 
-#if 1
+#if 0
   cout << "- evaluating a primal generator..." << endl;
   Index lambda(basis.first_generator(basis.j0()));
 //   for (int i = 1; i <= 6; i++, ++lambda);
@@ -51,6 +54,18 @@ int main()
   cout << "  ...done, see file ring_wavelet2.m!" << endl;
 #endif
 
+#if 0
+  cout << "- evaluating a whole lot of primal generators/wavelets..." << endl;
+  Index mu(basis.first_generator(basis.j0()));
+  for (int i = 1; i <= 64; i++, ++mu) {
+    cout << "  * mu=" << mu << endl;
+    ostringstream os;
+    os << "ring_wavelet_" << mu << ".m";
+    ofstream psistream(os.str().c_str());
+    basis.evaluate(mu, 6).matlab_output(psistream);
+    psistream.close();
+  }
+#endif
   
   return 0;
 }

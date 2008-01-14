@@ -82,20 +82,20 @@ namespace WaveletTL
     return result; // gcc 2.95 does not like these two lines melted into one
   }
     
-//   template <int d, int dt, int s0, int s1>
-//   SampledMapping<2>
-//   RingBasis<d,dt,s0,s1>::evaluate(const InfiniteVector<double, typename RingBasis<d,dt,s0,s1>::Index>& coeffs,
-// 				  const int resolution) const
-//   {
-//     Grid<2> grid(Point<2>(0), Point<2>(1), 1<<resolution);
-//     SampledMapping<2> result(grid); // zero
-      
-//     typedef typename RingBasis<d,dt,s0,s1>::Index Index;
-//     for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
-//  	   itend(coeffs.end()); it != itend; ++it)
-//       result.add(*it, evaluate(it.index(), resolution));
+  template <int d, int dt, int s0, int s1>
+  SampledMapping<2>
+  RingBasis<d,dt,s0,s1>::evaluate(const InfiniteVector<double, typename RingBasis<d,dt,s0,s1>::Index>& coeffs,
+ 				  const int resolution) const
+  {
+    Grid<2> grid(Point<2>(0), Point<2>(1), 1<<resolution);
+    SampledMapping<2> result(grid); // zero
     
-//     return result;
-//   }
+    typedef typename RingBasis<d,dt,s0,s1>::Index Index;
+    for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
+  	   itend(coeffs.end()); it != itend; ++it)
+      result.add(*it, evaluate(it.index(), resolution));
+    
+    return result;
+  }
   
 }

@@ -71,11 +71,11 @@ namespace WaveletTL
     SampledMapping<2> evaluate(const Index& lambda,
 			       const int resolution) const;
     
-//     /*!
-//       Evaluate an arbitrary linear combination of primal/dual wavelets
-//     */
-//     SampledMapping<2> evaluate(const InfiniteVector<double,Index>& coeffs,
-// 			       const int resolution) const;
+    /*!
+      Evaluate an arbitrary linear combination of primal/dual wavelets
+    */
+    SampledMapping<2> evaluate(const InfiniteVector<double,Index>& coeffs,
+ 			       const int resolution) const;
     
   protected:
     //! an instance of the periodic basis (angular direction)

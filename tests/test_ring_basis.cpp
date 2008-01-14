@@ -2,10 +2,12 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <algebra/infinite_vector.h>
 #include <interval/periodic.h>
 #include <ring/ring_basis.h>
 
 using namespace std;
+using namespace MathTL;
 using namespace WaveletTL;
 
 int main()
@@ -35,7 +37,7 @@ int main()
   }
 #endif
 
-#if 0
+#if 1
   cout << "- evaluating a primal generator..." << endl;
   Index lambda(basis.first_generator(basis.j0()));
 //   for (int i = 1; i <= 6; i++, ++lambda);
@@ -48,8 +50,10 @@ int main()
   cout << "- evaluating a primal wavelet:" << endl;
   lambda = ++basis.first_wavelet(basis.j0());
   cout << "  (lambda=" << lambda << " )" << endl;
+  InfiniteVector<double,Index> coeffs;
+  coeffs[lambda] = 1.0;
   std::ofstream psistream2("ring_wavelet2.m");
-  basis.evaluate(lambda, 6).matlab_output(psistream2);
+  basis.evaluate(coeffs, 6).matlab_output(psistream2);
   psistream2.close();
   cout << "  ...done, see file ring_wavelet2.m!" << endl;
 #endif

@@ -12,12 +12,13 @@ int main()
   const int d  = 2;
   const int dt = 2;
 
-  typedef RingBasis<d,dt> Basis;
+  typedef RingBasis<d,dt,1,0> Basis;
   Basis basis;
 
-//   typedef Basis::Index Index;
+  typedef Basis::Index Index;
 
   cout << "- j0=" << basis.j0() << endl;
+  cout << "- the default wavelet index: " << Index() << endl;
 
   return 0;
 }

@@ -19,6 +19,7 @@
 #include <Rd/cdf_basis.h>
 #include <interval/periodic.h>
 #include <interval/spline_basis.h>
+#include <ring/ring_index.h>
 
 using MathTL::Vector;
 using MathTL::InfiniteVector;
@@ -44,6 +45,9 @@ namespace WaveletTL
     static const int j0() {
       return SplineBasis<d,dt,P_construction,s0,s1,0,0>::j0();
     }
+
+    //! wavelet index class
+    typedef RingIndex<d,dt,s0,s1> Index;
 
   protected:
     //! an instance of the periodic basis (angular direction)

@@ -24,5 +24,13 @@ int main()
   cout << "- first wavelet on the coarsest level: " << basis.first_wavelet(basis.j0()) << endl;
   cout << "- last wavelet on the coarsest level: " << basis.last_wavelet(basis.j0()) << endl;
 
+#if 1
+  cout << "- testing iterator functionality:" << endl;
+  for (Index lambda = basis.first_generator(basis.j0());; ++lambda) {
+    cout << lambda << endl;
+    if (lambda == basis.last_wavelet(basis.j0()+1)) break;
+  }
+#endif
+  
   return 0;
 }

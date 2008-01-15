@@ -102,12 +102,11 @@ namespace WaveletTL
     const int j0 = basis.j0();
     assert(jmax >= j0);
     
-    coeffs.clear()
-
-    for (Index lambda = first_generator(&basis, j0);;++lambda)
+    coeffs.clear();
+    for (Index lambda = basis.first_generator(j0);;++lambda)
       {
  	coeffs.set_coefficient(lambda, integrate(f, basis, lambda));
- 	if (lambda == last_wavelet(&basis, jmax))
+ 	if (lambda == basis.last_wavelet(jmax))
  	  break;
       }
 

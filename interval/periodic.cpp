@@ -287,7 +287,7 @@ namespace WaveletTL
     const unsigned int N_Gauss = 5;
     const double h = ldexp(1.0, -j);
 
-    Array1D<double> gauss_points (N_Gauss*(length));
+    Array1D<double> gauss_points (N_Gauss*length);
     int k = k1;
     for (int patch = 0; patch < length; patch++, k = dyadic_modulo(++k,j)) // work on 2^{-j}[k,k+1]
       for (unsigned int n = 0; n < N_Gauss; n++)

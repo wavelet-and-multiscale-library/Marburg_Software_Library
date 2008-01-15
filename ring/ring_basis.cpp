@@ -135,8 +135,8 @@ namespace WaveletTL
    const typename RingBasis<d,dt,s0,s1>::Index& lambda) const
   {
     // We have to compute
-    //   int_R f(x) psi_lambda(x) dx = int_{r=r0}^r1 int_0^{2*pi} f(x) psi_lambda(x) dphi r dr
-    // with x=x(r,phi)=(r*cos(phi), r*sin(phi)).
+    //   int_R f(x) psi_lambda(x) dx = 2*pi*int_{r=r0}^r1 int_0^{1} f(x) psi_lambda(x) dphi r dr
+    // with x=x(r,phi)=r*(cos(2*pi*phi),sin(2*pi*phi)).
 
     double r = 0;
 
@@ -146,104 +146,112 @@ namespace WaveletTL
     // first compute supp(psi_lambda)
     const unsigned int jplus = multi_degree(lambda.e()) > 0 ? 1 : 0;
     int j = lambda.j() + jplus;
-    int k1[2], k2[2], length0;
+    int k1[2], k2[2], length[2];
     basis0.support(typename Basis0::Index(lambda.j(), lambda.e()[0], lambda.k()[0]), k1[0], k2[0]);
-    if (lambda.e()[0] == 0 && jplus > 0) {
-      k1[0] *= 2;
-      k2[0] *= 2;
-    }
-    length0 = (k2[0] > k1[0] ? k2[0]-k1[0] : k2[0]+(1<<j)-k1[0]); // number of subintervals
     basis1.support(typename Basis1::Index(lambda.j(), lambda.e()[1], lambda.k()[1]), k1[1], k2[1]);
-    if (lambda.e()[1] == 0 && jplus > 0) {
-      k1[1] *= 2;
-      k2[1] *= 2;
+    if (jplus > 0) {
+      if (lambda.e()[0] == 0) {
+	k1[0] *= 2;
+	k2[0] *= 2;	
+      } else {
+	k1[1] *= 2;
+	k2[1] *= 2;
+      }
     }
+    length[0] = (k2[0] > k1[0] ? k2[0]-k1[0] : k2[0]+(1<<j)-k1[0]); // number of "angular" subintervals
+    length[1] = k2[1]-k1[1];
 
-    cout << "RingBasis::integrate() called with lambda=" << lambda
-	 << ", j=" << j
-	 << ", k1[0]=" << k1[0]
-	 << ", k2[0]=" << k2[0]
-	 << ", k1[1]=" << k1[1]
-	 << ", k2[1]=" << k2[1]
-	 << endl;
+//     cout << "RingBasis::integrate() called with lambda=" << lambda
+//   	 << ", j=" << j
+//  	 << ", k1[0]=" << k1[0]
+//  	 << ", k2[0]=" << k2[0]
+//  	 << ", k1[1]=" << k1[1]
+//  	 << ", k2[1]=" << k2[1]
+//   	 << endl;
 
-    r = 42;
+    // setup Gauss points and weights for a composite quadrature formula:
+    const int N_Gauss = 5;
+    const double h = 1.0/(1<<j); // granularity for the quadrature
+    FixedArray1D<Array1D<double>,2> gauss_points, gauss_weights, v_values;
+    for (int i = 0; i < 2; i++) {
+      const unsigned int lengthi = N_Gauss*length[i];
+      gauss_points[i].resize(lengthi);
+      gauss_weights[i].resize(lengthi);
+      v_values[i].resize(lengthi);
+    }
+    
+    // angular direction
+    int k = k1[0];
+    for (int patch = 0; patch < length[0]; patch++, k = dyadic_modulo(++k,j)) // work on 2^{-j}[k,k+1]
+      for (int n = 0; n < N_Gauss; n++) {
+ 	gauss_points[0][patch*N_Gauss+n] = h*(2*k+1+GaussPoints[N_Gauss-1][n])/2;
+	gauss_weights[0][patch*N_Gauss+n] = h*GaussWeights[N_Gauss-1][n];
+      }
+
+//     cout << "angular Gauss points: " << gauss_points[0] << endl;
+//     cout << "angular Gauss weights: " << gauss_weights[0] << endl;
+
+    // radial direction
+    for (int patch = k1[1]; patch < k2[1]; patch++)
+      for (int n = 0; n < N_Gauss; n++) {
+	gauss_points[1][(patch-k1[1])*N_Gauss+n]
+	  = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
+	gauss_weights[1][(patch-k1[1])*N_Gauss+n]
+	  = h*GaussWeights[N_Gauss-1][n];
+      }
+    
+//     cout << "radial Gauss points: " << gauss_points[1] << endl;
+//     cout << "radial Gauss weights: " << gauss_weights[1] << endl;
+    
+    // compute the point values of the wavelet (where we use that it is a tensor product)
+    v_values[0].resize(gauss_points[0].size());
+    v_values[1].resize(gauss_points[1].size());
+    basis0.evaluate(0, typename Basis0::Index(lambda.j(), lambda.e()[0], lambda.k()[0]),
+		    gauss_points[0], v_values[0]);
+    basis1.evaluate(0, typename Basis1::Index(lambda.j(), lambda.e()[1], lambda.k()[1]),
+		    gauss_points[1], v_values[1]);
+
+//     cout << "angular point values of psi_lambda: " << v_values[0] << endl;
+//     cout << "radial point values of psi_lambda: " << v_values[1] << endl;
+
+    // iterate over all points, evaluate f, and sum up the integral shares
+    int index[2]; // current multiindex for the point values
+    for (unsigned int i = 0; i < 2; i++)
+      index[i] = 0;
+    
+    Point<2> x;
+    Point<2> x_ring;
+    
+    while (true) {
+      // read (r,phi)
+      for (unsigned int i = 0; i < 2; i++)
+ 	x[i] = gauss_points[i][index[i]];
+      
+      // compute x=x(r,phi)=r*(cos(2*pi*phi),sin(2*pi*phi))
+      const double arg = 2*M_PI*x[0];
+      x_ring[0] = x[1]*cos(arg);
+      x_ring[1] = x[1]*sin(arg);
+      
+      double share = 2*M_PI * f->value(x_ring) * x[1]; // 2*pi*f(x)*r
+      for (unsigned int i = 0; i < 2; i++)
+ 	share *= gauss_weights[i][index[i]] * v_values[i][index[i]];
+      r += share;
+      
+      // "++index"
+      bool exit = false;
+      for (unsigned int i = 0; i < 2; i++) {
+ 	if (index[i] == N_Gauss*length[i]-1) {
+ 	  index[i] = 0;
+ 	  exit = (i == 1);
+ 	} else {
+ 	  index[i]++;
+ 	  break;
+ 	}
+      }
+      if (exit) break;
+    }
 
     return r;
   }
-
-
-
-//   template <class IBASIS, unsigned int DIM>
-//   double
-//   CubeBasis<IBASIS,DIM>::integrate
-//   (const Function<DIM>* f,
-//    const Index& lambda) const
-//   {
-//     // f(v) = \int_0^1 g(t)v(t) dt
-    
-//     double r = 0;
-    
-//     // first compute supp(psi_lambda)
-//     Support supp;
-//     support(lambda, supp);
-    
-//     // setup Gauss points and weights for a composite quadrature formula:
-//     const int N_Gauss = 5;
-//     const double h = ldexp(1.0, -supp.j); // granularity for the quadrature
-//     FixedArray1D<Array1D<double>,DIM> gauss_points, gauss_weights, v_values;
-//     for (unsigned int i = 0; i < DIM; i++) {
-//       gauss_points[i].resize(N_Gauss*(supp.b[i]-supp.a[i]));
-//       gauss_weights[i].resize(N_Gauss*(supp.b[i]-supp.a[i]));
-//       for (int patch = supp.a[i]; patch < supp.b[i]; patch++)
-// 	for (int n = 0; n < N_Gauss; n++) {
-// 	  gauss_points[i][(patch-supp.a[i])*N_Gauss+n]
-// 	    = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
-// 	  gauss_weights[i][(patch-supp.a[i])*N_Gauss+n]
-// 	    = h*GaussWeights[N_Gauss-1][n];
-// 	}
-//     }
-
-//     // compute the point values of the integrand (where we use that it is a tensor product)
-//     for (unsigned int i = 0; i < DIM; i++)
-//       bases()[i]->evaluate(0,
-// 			   typename IBASIS::Index(lambda.j(),
-// 						  lambda.e()[i],
-// 						  lambda.k()[i],
-// 						  bases()[i]),
-// 			   gauss_points[i], v_values[i]);
-    
-//     // iterate over all points and sum up the integral shares
-//     int index[DIM]; // current multiindex for the point values
-//     for (unsigned int i = 0; i < DIM; i++)
-//       index[i] = 0;
-    
-//     Point<DIM> x;
-//     while (true) {
-//       for (unsigned int i = 0; i < DIM; i++)
-// 	x[i] = gauss_points[i][index[i]];
-//       double share = f->value(x);
-//       for (unsigned int i = 0; i < DIM; i++)
-// 	share *= gauss_weights[i][index[i]] * v_values[i][index[i]];
-//       r += share;
-
-//       // "++index"
-//       bool exit = false;
-//       for (unsigned int i = 0; i < DIM; i++) {
-// 	if (index[i] == N_Gauss*(supp.b[i]-supp.a[i])-1) {
-// 	  index[i] = 0;
-// 	  exit = (i == DIM-1);
-// 	} else {
-// 	  index[i]++;
-// 	  break;
-// 	}
-//       }
-//       if (exit) break;
-//     }
-    
-//     return r;
-//   }
-
-
 
 }

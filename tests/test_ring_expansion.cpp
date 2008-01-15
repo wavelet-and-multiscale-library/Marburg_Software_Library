@@ -11,7 +11,7 @@ using namespace std;
 using namespace MathTL;
 using namespace WaveletTL;
 
-// the constant function
+// the constant function f(x)=23
 class RingFunction1
   : public Function<2>
 {
@@ -53,7 +53,7 @@ int main()
   cout << "- integrals of the test function u against all wavelets up to level jmax="
        << j0 << ":" << endl
        << coeffs << endl;
-
+  
   if (u) delete u;
   
   return 0;

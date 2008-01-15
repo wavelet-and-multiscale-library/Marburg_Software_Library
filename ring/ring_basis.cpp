@@ -135,9 +135,11 @@ namespace WaveletTL
    const typename RingBasis<d,dt,s0,s1>::Index& lambda) const
   {
     // We have to compute
-    //   int_R f(x) psi_lambda(x) dx = 2*pi*int_{r=r0}^r1 int_0^{1} f(x) psi_lambda(x) dphi r dr
-    // with x=x(r,phi)=r*(cos(2*pi*phi),sin(2*pi*phi)).
-
+    //   int_R f(x) psi_lambda(x) dx
+    //   = 2*pi * int_{r0}^{r1} int_0^1 f(x) psi_lambda(x) dphi r dr
+    //   = 2*pi*(r1-r0) * int_0^1 int_0^1 f(x) psi_lambda(x) dphi (r0+s*(r1-r0)) ds
+    // with x=x(s,phi)=r(s)*(cos(2*pi*phi),sin(2*pi*phi)), r(s)=r0+s*(r1-r0)
+    
     double r = 0;
 
     typedef PeriodicBasis<CDFBasis<d,dt> >             Basis0;
@@ -162,12 +164,12 @@ namespace WaveletTL
     length[1] = k2[1]-k1[1];
 
 //     cout << "RingBasis::integrate() called with lambda=" << lambda
-//   	 << ", j=" << j
+//    	 << ", j=" << j
 //  	 << ", k1[0]=" << k1[0]
 //  	 << ", k2[0]=" << k2[0]
 //  	 << ", k1[1]=" << k1[1]
 //  	 << ", k2[1]=" << k2[1]
-//   	 << endl;
+//    	 << endl;
 
     // setup Gauss points and weights for a composite quadrature formula:
     const int N_Gauss = 5;
@@ -223,16 +225,17 @@ namespace WaveletTL
     Point<2> x_ring;
     
     while (true) {
-      // read (r,phi)
+      // read (r,s)
       for (unsigned int i = 0; i < 2; i++)
  	x[i] = gauss_points[i][index[i]];
       
-      // compute x=x(r,phi)=r*(cos(2*pi*phi),sin(2*pi*phi))
+      // compute x=x(r,s)=r(s)*(cos(2*pi*phi),sin(2*pi*phi))
       const double arg = 2*M_PI*x[0];
-      x_ring[0] = x[1]*cos(arg);
-      x_ring[1] = x[1]*sin(arg);
+      const double rofs = r0_+x[1]*(r1_-r0_);
+      x_ring[0] = rofs*cos(arg);
+      x_ring[1] = rofs*sin(arg);
       
-      double share = 2*M_PI * f->value(x_ring) * x[1]; // 2*pi*f(x)*r
+      double share = 2*M_PI * f->value(x_ring) * rofs; // 2*pi*f(x)*r(s)
       for (unsigned int i = 0; i < 2; i++)
  	share *= gauss_weights[i][index[i]] * v_values[i][index[i]];
       r += share;
@@ -251,6 +254,39 @@ namespace WaveletTL
       if (exit) break;
     }
 
+    return r;
+  }
+
+  template <int d, int dt, int s0, int s1>
+  double
+  RingBasis<d,dt,s0,s1>::integrate
+  (const Index& lambda,
+   const Index& mu) const
+  {
+    // We have to compute
+    //   int_R psi_lambda(x) psi_mu(x) dx
+    //   = 2*pi*int_{r=r0}^r1 int_0^{1} psi_lambda(x) psi_mu(x) dphi r dr
+    // with x=x(r,phi)=r*(cos(2*pi*phi),sin(2*pi*phi)).
+    // By the tensor product structure, the integral decouples into a product
+    // of two 1D integrals.
+
+    double r = 0;
+
+    typedef PeriodicBasis<CDFBasis<d,dt> >             Basis0;
+    typedef SplineBasis<d,dt,P_construction,s0,s1,0,0> Basis1;
+    typedef typename Basis0::Index Index0;
+    typedef typename Basis1::Index Index1;
+
+    // first decide whether supp(psi_lambda) and supp(psi_mu) intersect
+    Index0 lambda0(lambda.j(), lambda.e()[0], lambda.k()[0]);
+    Index1 lambda1(lambda.j(), lambda.e()[1], lambda.k()[1]);
+    Index0 mu0(mu.j(), mu.e()[0], mu.k()[0]);
+    Index1 mu1(mu.j(), mu.e()[1], mu.k()[1]);
+
+    if (intersect_supports<d,dt,s0,s1>(lambda0, mu0)) {
+      r = 42;
+    }
+    
     return r;
   }
 

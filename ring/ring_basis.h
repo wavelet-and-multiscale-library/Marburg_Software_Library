@@ -102,13 +102,13 @@ namespace WaveletTL
      const Index& lambda) const;
 
     /*!
-      helper function, integrate two primal generators or wavelets
-      against each other (for the Gramian)
+      helper function, compute the r-weighted integral between
+      two primal generators or wavelets from the "radial" 1D basis
     */
     double
-    integrate
-    (const Index& lambda,
-     const Index& mu) const;
+    integrate_radial
+    (const typename SplineBasis<d,dt,P_construction,s0,s1,0,0>::Index& lambda,
+     const typename SplineBasis<d,dt,P_construction,s0,s1,0,0>::Index& mu) const;
 
   protected:
     //! an instance of the periodic basis (angular direction)

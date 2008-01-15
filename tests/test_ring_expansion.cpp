@@ -55,7 +55,7 @@ int main()
   typedef Basis::Index Index;
 
   Function<2>* u = 0;
-  const int testcase = 1;
+  const int testcase = 2;
   switch(testcase) {
   case 2:
     u = new RingFunction2();
@@ -64,7 +64,7 @@ int main()
     u = new RingFunction1();
   }
 
-#if 1
+#if 0
   // plot the test function
   cout << "- plotting the test function..." << endl;
   const int N = 50;
@@ -90,10 +90,19 @@ int main()
   const int j0 = basis.j0();
   const int jmax = j0+1;
   
+#if 0
   basis.expand(u, true, j0, coeffs);
   cout << "- integrals of the test function u against all wavelets up to level jmax="
        << j0 << ":" << endl
        << coeffs << endl;
+#endif
+
+#if 1
+  basis.expand(u, false, j0, coeffs);
+  cout << "- approximate expansion coefficients of the test function in the primal basis:" << endl
+       << coeffs << endl;
+#endif
+  
   
   if (u) delete u;
   

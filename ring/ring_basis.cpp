@@ -1,5 +1,10 @@
 // implementation for ring_basis.h
 
+#include <set>
+#include <numerics/quadrature.h>
+#include <numerics/iteratsolv.h>
+#include <algebra/sparse_matrix.h>
+
 namespace WaveletTL
 {
   template <int d, int dt, int s0, int s1>
@@ -117,16 +122,156 @@ namespace WaveletTL
   {
     typedef typename RingBasis<d,dt,s0,s1>::Index Index;
 
-    assert(primal); // for the moment
-
     coeffs.clear();
     for (Index lambda = first_generator(j0());;++lambda) {
       coeffs.set_coefficient(lambda, integrate(f, lambda));
       if (lambda == last_wavelet(jmax))
 	break;
     }
-    
+
+    if (!primal) {
+      // In the following, we setup the Gramian matrix A_Lambda, using all wavelets
+      // up to the maximal level jmax. By the tensor product structure of the basis,
+      // A_Lambda can be written as the Kronecker product of two 1D matrices:
+      //   int_R psi_lambda(x) psi_mu(x) dx
+      //   = 2*pi * int_{r0}^{r1} int_0^1 psi_lambda(x) psi_mu(x) dphi r dr
+      //   = 2*pi*(r1-r0) * int_0^1 int_0^1 psi_lambda(x) psi_mu(x) dphi (r0+s*(r1-r0)) ds
+      // with x=x(s,phi)=r(s)*(cos(2*pi*phi),sin(2*pi*phi)), r(s)=r0+s*(r1-r0).
+
+      typedef PeriodicBasis<CDFBasis<d,dt> >             Basis0;
+      typedef SplineBasis<d,dt,P_construction,s0,s1,0,0> Basis1;
+      typedef typename Basis0::Index Index0;
+      typedef typename Basis1::Index Index1;
+      typedef typename SparseMatrix<double>::size_type size_type;     
+      
+      // setup active wavelet index set in angular direction
+      std::set<Index0> Lambda0;
+      for (Index0 lambda = basis0.first_generator(j0());; ++lambda) {
+	Lambda0.insert(lambda);
+	if (lambda == basis0.last_wavelet(jmax)) break;
+      }
+//       cout << "active index set in angular direction:" << endl;
+//       for (typename std::set<Index0>::const_iterator it(Lambda0.begin()), itend(Lambda0.end());
+//  	   it != itend; ++it)
+//  	cout << *it << endl;
+
+      // setup angular Gramian
+      SparseMatrix<double> A_Lambda0(Lambda0.size());
+      size_type row = 0;
+      for (typename std::set<Index0>::const_iterator it1(Lambda0.begin()), itend(Lambda0.end());
+ 	   it1 != itend; ++it1, ++row)
+ 	{
+ 	  std::list<size_type> indices;
+ 	  std::list<double> entries;
+	  
+ 	  size_type column = 0;
+ 	  for (typename std::set<Index0>::const_iterator it2(Lambda0.begin());
+ 	       it2 != itend; ++it2, ++column)
+ 	    {
+	      double entry = basis0.integrate(*it2, *it1);
+	      
+ 	      if (entry != 0) {
+ 		indices.push_back(column);
+ 		entries.push_back(2*M_PI*entry);
+ 	      }
+ 	    }
+ 	  A_Lambda0.set_row(row, indices, entries);
+ 	} 
+      cout << "A_Lambda0=" << endl << A_Lambda0;
+
+      // setup active wavelet index set in radial direction
+      std::set<Index1> Lambda1;
+      for (Index1 lambda = basis1.first_generator(j0());; ++lambda) {
+	Lambda1.insert(lambda);
+	if (lambda == basis1.last_wavelet(jmax)) break;
+      }
+      cout << "active index set in radial direction:" << endl;
+      for (typename std::set<Index1>::const_iterator it(Lambda1.begin()), itend(Lambda1.end());
+  	   it != itend; ++it)
+  	cout << *it << endl;
+
+      // setup radial Gramian
+      SparseMatrix<double> A_Lambda1(Lambda1.size());
+      row = 0;
+      for (typename std::set<Index1>::const_iterator it1(Lambda1.begin()), itend(Lambda1.end());
+ 	   it1 != itend; ++it1, ++row)
+ 	{
+ 	  std::list<size_type> indices;
+ 	  std::list<double> entries;
+	  
+ 	  size_type column = 0;
+ 	  for (typename std::set<Index1>::const_iterator it2(Lambda1.begin());
+ 	       it2 != itend; ++it2, ++column)
+ 	    {
+	      double entry = integrate_radial(*it2, *it1);
+	      
+ 	      if (entry != 0) {
+ 		indices.push_back(column);
+ 		entries.push_back((r1_-r0_)*entry);
+ 	      }
+ 	    }
+ 	  A_Lambda1.set_row(row, indices, entries);
+ 	} 
+      cout << "A_Lambda1=" << endl << A_Lambda1;
+      
+      
+    }
   }
+
+//     if (!primal) {
+//       // setup active index set
+//       std::set<Index> Lambda;
+//       for (Index lambda = first_generator(j0());; ++lambda) {
+//  	Lambda.insert(lambda);
+// 	if (lambda == last_wavelet(jmax)) break;
+//       }
+      
+//       // setup Gramian A_Lambda
+//       SparseMatrix<double> A_Lambda(Lambda.size());
+//       typedef typename SparseMatrix<double>::size_type size_type;     
+//       size_type row = 0;
+//       for (typename std::set<Index>::const_iterator it1(Lambda.begin()), itend(Lambda.end());
+// 	   it1 != itend; ++it1, ++row)
+// 	{
+// 	  std::list<size_type> indices;
+// 	  std::list<double> entries;
+	  
+// 	  size_type column = 0;
+// 	  for (typename std::set<Index>::const_iterator it2(Lambda.begin());
+// 	       it2 != itend; ++it2, ++column)
+// 	    {
+// 	      double entry = integrate(*it2, *it1);
+	      
+// 	      if (entry != 0) {
+// 		indices.push_back(column);
+// 		entries.push_back(entry);
+// 	      }
+// 	    }
+// 	  A_Lambda.set_row(row, indices, entries);
+// 	} 
+ 
+//       // solve A_Lambda*x = b
+//       Vector<double> b(Lambda.size());
+//       row = 0;
+//       for (typename std::set<Index>::const_iterator it(Lambda.begin()), itend(Lambda.end());
+// 	   it != itend; ++it, ++row)
+// 	b[row] = coeffs.get_coefficient(*it);
+      
+//       Vector<double> x(b);
+//       unsigned int iterations;
+//       CG(A_Lambda, b, x, 1e-15, 500, iterations);
+      
+//       coeffs.clear();
+//       row = 0;
+//       for (typename std::set<Index>::const_iterator it(Lambda.begin()), itend(Lambda.end());
+// 	   it != itend; ++it, ++row)
+// 	coeffs.set_coefficient(*it, x[row]);
+//     }
+
+
+
+
+
 
   template <int d, int dt, int s0, int s1>
   double
@@ -138,7 +283,7 @@ namespace WaveletTL
     //   int_R f(x) psi_lambda(x) dx
     //   = 2*pi * int_{r0}^{r1} int_0^1 f(x) psi_lambda(x) dphi r dr
     //   = 2*pi*(r1-r0) * int_0^1 int_0^1 f(x) psi_lambda(x) dphi (r0+s*(r1-r0)) ds
-    // with x=x(s,phi)=r(s)*(cos(2*pi*phi),sin(2*pi*phi)), r(s)=r0+s*(r1-r0)
+    // with x=x(s,phi)=r(s)*(cos(2*pi*phi),sin(2*pi*phi)), r(s)=r0+s*(r1-r0).
     
     double r = 0;
 
@@ -259,35 +404,85 @@ namespace WaveletTL
 
   template <int d, int dt, int s0, int s1>
   double
-  RingBasis<d,dt,s0,s1>::integrate
-  (const Index& lambda,
-   const Index& mu) const
+  RingBasis<d,dt,s0,s1>::integrate_radial
+  (const typename SplineBasis<d,dt,P_construction,s0,s1,0,0>::Index& lambda,
+   const typename SplineBasis<d,dt,P_construction,s0,s1,0,0>::Index& mu) const
   {
-    // We have to compute
-    //   int_R psi_lambda(x) psi_mu(x) dx
-    //   = 2*pi*int_{r=r0}^r1 int_0^{1} psi_lambda(x) psi_mu(x) dphi r dr
-    // with x=x(r,phi)=r*(cos(2*pi*phi),sin(2*pi*phi)).
-    // By the tensor product structure, the integral decouples into a product
-    // of two 1D integrals.
-
     double r = 0;
+    
+    // First we compute the support intersection of \psi_\lambda and \psi_\mu:
+    typedef typename SplineBasis<d,dt,P_construction,s0,s1,0,0>::Support Support;
+    Support supp;
 
-    typedef PeriodicBasis<CDFBasis<d,dt> >             Basis0;
-    typedef SplineBasis<d,dt,P_construction,s0,s1,0,0> Basis1;
-    typedef typename Basis0::Index Index0;
-    typedef typename Basis1::Index Index1;
-
-    // first decide whether supp(psi_lambda) and supp(psi_mu) intersect
-    Index0 lambda0(lambda.j(), lambda.e()[0], lambda.k()[0]);
-    Index1 lambda1(lambda.j(), lambda.e()[1], lambda.k()[1]);
-    Index0 mu0(mu.j(), mu.e()[0], mu.k()[0]);
-    Index1 mu1(mu.j(), mu.e()[1], mu.k()[1]);
-
-    if (intersect_supports<d,dt,s0,s1>(lambda0, mu0)) {
-      r = 42;
-    }
+    cout << "call intersect_supports() called with lambda=" << lambda
+ 	 << ", mu=" << mu << endl;
+    
+    if (basis1.intersect_supports(lambda, mu, supp))
+      {
+	cout << "intersection: supp.j=" << supp.j
+	     << ", supp.k1=" << supp.k1
+	     << ", supp.k2=" << supp.k2 << endl;
+	r = 42;
+//  	// Set up Gauss points and weights for a composite quadrature formula:
+//  	const unsigned int N_Gauss = d;
+//  	const double h = ldexp(1.0, -supp.j);
+//  	Array1D<double> gauss_points (N_Gauss*(supp.k2-supp.k1)), func1values, func2values;
+//  	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++) // refers to 2^{-j}[patch,patch+1]
+//  	  for (unsigned int n = 0; n < N_Gauss; n++, id++)
+//  	    gauss_points[id] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
+	
+//  	// - compute point values of the integrands
+//   	evaluate(0, lambda, gauss_points, func1values);
+//  	evaluate(0, mu, gauss_points, func2values);
+	
+//  	// - add all integral shares
+//  	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++)
+//  	  for (unsigned int n = 0; n < N_Gauss; n++, id++) {
+//  	    const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
+// 	    r += func1values[id] * func2values[id] * gauss_weight;
+//  	  }
+      }
+    else
+      {
+	cout << "no intersection!" << endl;
+      }
     
     return r;
   }
+
+
+//   template <int d, int dt, int s0, int s1>
+//   double
+//   RingBasis<d,dt,s0,s1>::integrate
+//   (const Index& lambda,
+//    const Index& mu) const
+//   {
+//     // We have to compute
+//     //   int_R psi_lambda(x) psi_mu(x) dx
+//     //   = 2*pi * int_{r0}^{r1} int_0^1 psi_lambda(x) psi_mu(x) dphi r dr
+//     //   = 2*pi*(r1-r0) * int_0^1 int_0^1 psi_lambda(x) psi_mu(x) dphi (r0+s*(r1-r0)) ds
+//     // with x=x(s,phi)=r(s)*(cos(2*pi*phi),sin(2*pi*phi)), r(s)=r0+s*(r1-r0).
+//     // By the tensor product structure, the integral decouples into a product
+//     // of two 1D integrals.
+
+//     double r = 0;
+
+//     typedef PeriodicBasis<CDFBasis<d,dt> >             Basis0;
+//     typedef SplineBasis<d,dt,P_construction,s0,s1,0,0> Basis1;
+//     typedef typename Basis0::Index Index0;
+//     typedef typename Basis1::Index Index1;
+
+//     // first decide whether supp(psi_lambda) and supp(psi_mu) intersect
+//     Index0 lambda0(lambda.j(), lambda.e()[0], lambda.k()[0]);
+//     Index1 lambda1(lambda.j(), lambda.e()[1], lambda.k()[1]);
+//     Index0 mu0(mu.j(), mu.e()[0], mu.k()[0]);
+//     Index1 mu1(mu.j(), mu.e()[1], mu.k()[1]);
+
+//     if (intersect_supports<d,dt,s0,s1>(lambda0, mu0)) {
+//       r = 42;
+//     }
+    
+//     return r;
+//   }
 
 }

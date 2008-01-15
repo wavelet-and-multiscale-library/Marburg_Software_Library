@@ -211,6 +211,14 @@ namespace WaveletTL
     (const Function<1>* f,
      const Index& lambda) const;
     
+    /*!
+      helper function, integrate two primal generators or wavelets
+      against each other (for the Gramian)
+    */
+    double
+    integrate
+    (const Index& lambda,
+     const Index& mu) const;
 
     
     //

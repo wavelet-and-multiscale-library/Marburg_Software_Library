@@ -294,6 +294,16 @@ namespace WaveletTL
     */
     void support(const Index& lambda, int& k1, int& k2) const;
 
+    /*!
+      Decide whether the supports of two generators/wavelets \psi_\lambda and
+      \psi_\nu have an intersection of positive measure and compute it
+      in the form 2^{-j}[k1,k2]. If the return value is false, the computed
+      support intersection will have no meaningful values, for performance reasons.
+    */
+    bool intersect_supports(const Index& lambda,
+			    const Index& nu,
+			    Support& supp) const;
+
     //! space dimension of the underlying domain
     static const int space_dimension = 1;
 

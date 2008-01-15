@@ -85,22 +85,8 @@ namespace WaveletTL
     /*!
       evaluate the (unpreconditioned) bilinear form a
     */
-    double a(const Index& lambda,
-	     const Index& nu) const {
-      return a(lambda, nu, 2*WaveletBasis::primal_polynomial_degree());
-    }
-    
-    /*!
-      evaluate the inner product a;
-      you can specify the order p of the quadrature rule, i.e.,
-      (piecewise) polynomials of maximal degree p will be integrated exactly.
-      Internally, we use an m-point composite tensor product Gauss rule adapted
-      to the singular supports of the spline wavelets involved,
-      so that m = (p+1)/2;
-    */
     double a(const typename WaveletBasis::Index& lambda,
-  	     const typename WaveletBasis::Index& nu,
-  	     const unsigned int p) const;
+  	     const typename WaveletBasis::Index& nu) const;
 
     /*!
       estimate the spectral norm ||A||

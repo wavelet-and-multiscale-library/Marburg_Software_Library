@@ -183,6 +183,47 @@ namespace WaveletTL
       }
   }
   
+  template <int d, int dT, int s0, int s1, int sT0, int sT1> 
+  bool
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::intersect_supports(const Index& lambda,
+								     const Index& nu,
+								     Support& supp) const
+  {
+    // buggy!
+
+//     cout << "intersect_supports() called with lambda=" << lambda
+// 	 << ", nu=" << nu << endl;
+
+    // first determine the support of psi_nu
+    int k1_nu, k2_nu;
+    support(nu, k1_nu, k2_nu);
+    const int m = nu.j()+nu.e();
+//     cout << "k1_nu=" << k1_nu << ", k2_nu=" << k2_nu << endl;
+
+    // check whether supp(psi_lambda) intersects 2^{-m}[k1_nu,k2_nu]
+    const int j_lambda = lambda.j() + lambda.e();
+    supp.j = std::max(j_lambda, m);
+    int k1_lambda, k2_lambda;
+    support(lambda, k1_lambda, k2_lambda);
+//     cout << "k1_lambda=" << k1_lambda << ", k2_lambda=" << k2_lambda << endl;
+    const int jmb = k2_nu<<(supp.j-m);
+    const int jjk1 = k1_lambda<<(supp.j-j_lambda);
+    if (jjk1 >= jmb)
+      return false;
+    else {
+      const int jma = k1_nu<<(supp.j-m);
+      const int jjk2 = k2_lambda<<(supp.j-j_lambda);   
+      if (jma >= jjk2)
+	return false;
+      else {
+	supp.k1 = std::max(jjk1, jma);
+	supp.k2 = std::min(jjk2, jmb);
+	return true;
+      }
+    }
+    return false;
+  }
+
   template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
   template <class V>
   void

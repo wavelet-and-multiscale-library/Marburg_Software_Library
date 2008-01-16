@@ -42,6 +42,21 @@ public:
   }
 };
 
+// quadratic polynomial in r
+class RingFunction3
+  : public Function<2>
+{
+public:
+  inline double value(const Point<2>& p, const unsigned int component = 0) const {
+    const double r = sqrt(p[0]*p[0]+p[1]*p[1]);
+    return (2-r)*(r-1);
+  }
+  void vector_value(const Point<2> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
 int main()
 {
   cout << "Testing wavelet bases on the ring-shaped domain ..." << endl;
@@ -57,18 +72,26 @@ int main()
   Function<2>* u = 0;
   const int testcase = 2;
   switch(testcase) {
+  case 1:
+    u = new RingFunction1();
+    break;
   case 2:
     u = new RingFunction2();
     break;
-  default: // also for testcase 1
+  case 3:
+    u = new RingFunction3();
+    break;
+  default:
     u = new RingFunction1();
   }
+
+  const int resi = 6;
 
 #if 1
   {
     // plot the test function
     cout << "- plotting the test function..." << endl;
-    const int N = 1<<6;
+    const int N = 1<<resi;
     Matrix<double> gridx(N+1), gridy(N+1);
     for (int i = 0; i <= N; i++) {
       const double phi = i/(double)N;
@@ -90,22 +113,21 @@ int main()
   InfiniteVector<double,Index> coeffs;
   
   const int j0 = basis.j0();
-  const int jmax = j0;
+  const int jmax = j0+1;
   
-#if 0
-  basis.expand(u, true, j0, coeffs);
+#if 1
+  basis.expand(u, true, jmax, coeffs);
   cout << "- integrals of the test function u against all wavelets up to level jmax="
-       << j0 << ":" << endl
+       << jmax << ":" << endl
        << coeffs << endl;
 #endif
 
 #if 1
-  basis.expand(u, false, j0, coeffs);
+  basis.expand(u, false, jmax, coeffs);
   cout << "- approximate expansion coefficients of the test function in the primal basis:" << endl
        << coeffs << endl;
   if (true) {
     cout << "- compute L_infty error on a subgrid..." << endl;
-    const int resi = 6;
     Matrix<double> gridx((1<<resi)+1), gridy((1<<resi)+1);
     for (int i = 0; i <= 1<<resi; i++) {
       const double phi = i/(double)(1<<resi);

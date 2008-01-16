@@ -333,7 +333,7 @@ namespace WaveletTL
 	length = (k2 > k1 ? k2-k1 : k2+(1<<j)-k1); // number of subintervals
 	
 	// setup Gauss points and weights for a composite quadrature formula:
- 	const unsigned int N_Gauss = primal_polynomial_degree();
+ 	const unsigned int N_Gauss = primal_polynomial_degree()+1;
 	const double h = 1.0/(1<<j);
 	
 	Array1D<double> gauss_points (N_Gauss*(length)), func1values, func2values;

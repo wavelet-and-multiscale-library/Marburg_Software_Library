@@ -424,7 +424,7 @@ namespace WaveletTL
     if (basis1.intersect_supports(lambda, mu, supp))
       {
   	// Set up Gauss points and weights for a composite quadrature formula:
-  	const unsigned int N_Gauss = d+1;
+  	const unsigned int N_Gauss = d+2;
   	const double h = 1.0/(1<<supp.j);
   	Array1D<double> gauss_points (N_Gauss*(supp.k2-supp.k1)), func1values, func2values;
   	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++) // refers to 2^{-j}[patch,patch+1]
@@ -446,5 +446,5 @@ namespace WaveletTL
     
     return r;
   }
-
+  
 }

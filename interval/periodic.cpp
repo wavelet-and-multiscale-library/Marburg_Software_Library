@@ -199,11 +199,11 @@ namespace WaveletTL
   (const unsigned int derivative, const Index& lambda, const double x) const
   {
     return r_basis.evaluate(derivative, lambda,
-			    x-(int)floor(x-ldexp(1.0,-lambda.j())
-					 *((lambda.e() == 0
-					    ? RBASIS::primal_mask::begin()
-					    : (RBASIS::primal_mask::begin()+1-RBASIS::dual_mask::end())/2)
-					   +lambda.k())));
+			    x-floor(x-ldexp(1.0,-lambda.j())
+				    *((lambda.e() == 0
+				       ? RBASIS::primal_mask::begin()
+				       : (RBASIS::primal_mask::begin()+1-RBASIS::dual_mask::end())/2)
+				      +lambda.k())));
   }
   
   template <class RBASIS>
@@ -285,7 +285,7 @@ namespace WaveletTL
     
     // setup Gauss points and weights for a composite quadrature formula:
     const unsigned int N_Gauss = 5;
-    const double h = ldexp(1.0, -j);
+    const double h = 1.0/(1<<j);
 
     Array1D<double> gauss_points (N_Gauss*length);
     int k = k1;

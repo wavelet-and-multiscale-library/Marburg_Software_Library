@@ -92,14 +92,14 @@ namespace WaveletTL
     const int j_lambda = lambda.j() + lambda.e();
     j = std::max(j_lambda, m);
     int k1_lambda, k2_lambda;
-    support(basis, lambda, k1_lambda, k2_lambda);
-    const int jmb = (1<<(j-m)) * b;
-    const int jjk1 = (1<<(j-j_lambda)) * k1_lambda;
+    basis.support(lambda, k1_lambda, k2_lambda);
+    const int jmb = b<<(j-m);
+    const int jjk1 = k1_lambda<<(j-j_lambda);
     if (jjk1 >= jmb)
       return false;
     else {
-      const int jma = (1<<(j-m)) * a;
-      const int jjk2 = (1<<(j-j_lambda)) * k2_lambda;
+      const int jma = a<<(j-m);
+      const int jjk2 = k2_lambda<<(j-j_lambda);
       if (jma >= jjk2)
 	return false;
       else {

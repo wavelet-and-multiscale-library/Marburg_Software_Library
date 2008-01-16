@@ -76,8 +76,8 @@ int main()
   cout << "Testing adaptive wavelet-Galerkin methods for the identity operator with CDD1_SOLVE ..." << endl;
 
   // for DSBasis+PBasis+SplineBasis
-  const int d  = 2;
-  const int dT = 2;
+  const int d  = 3;
+  const int dT = 3;
 
 //   typedef DSBasis<d,dT> Basis;
 //   typedef PBasis<d,dT> Basis;
@@ -86,10 +86,10 @@ int main()
 
 #if 0
   // for DSBasis+PBasis
-  Basis basis(0, 0); // no b.c.'s
+//   Basis basis(0, 0); // no b.c.'s
 //   Basis basis(1, 0); // complementary b.c. at x=0
 //   Basis basis(0, 1); // complementary b.c. at x=1
-//   Basis basis(1, 1); // complementary b.c.'s
+  Basis basis(1, 1); // complementary b.c.'s
 #else
   // for SplineBasis
   Basis basis; // PBasis, complementary b.c.'s
@@ -97,8 +97,8 @@ int main()
 
   TestFunction<5> f;
 
-  const int jmax = 12;
-  basis.set_jmax(12);
+  const int jmax = 15;
+  basis.set_jmax(15);
 
   IntervalGramian<Basis> problem(basis, InfiniteVector<double,Index>());
 
@@ -127,8 +127,8 @@ int main()
 //   CDD1_SOLVE(problem, 1e-4, u_epsilon, jmax);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, jmax);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 12);
-//   CDD1_SOLVE(problem, 1e-7, u_epsilon, jmax);
-  CDD1_SOLVE(cproblem, 1e-4, u_epsilon, jmax);
+  CDD1_SOLVE(cproblem, 1e-6, u_epsilon, jmax);
+//   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, jmax);
 //   CDD1_SOLVE(cproblem, 1e-10, u_epsilon, 20);
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon, 20);
 //   CDD1_SOLVE(cproblem, 1e-2, u_epsilon, 10);

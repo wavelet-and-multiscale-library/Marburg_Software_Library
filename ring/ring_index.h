@@ -108,63 +108,6 @@ namespace WaveletTL
        << ")";
     return os;
   }
-
-/*   /\*! */
-/*     index of first generator on level j >= j0 */
-/*   *\/ */
-/*   template <class IBASIS, unsigned int DIM, class CUBEBASIS> */
-/*   CubeIndex<IBASIS,DIM,CUBEBASIS> */
-/*   first_generator(const CUBEBASIS* basis, const int j); */
-
-/*   /\*! */
-/*     index of last generator on level j >= j0 */
-/*   *\/ */
-/*   template <class IBASIS, unsigned int DIM, class CUBEBASIS> */
-/*   CubeIndex<IBASIS,DIM,CUBEBASIS> */
-/*   last_generator(const CUBEBASIS* basis, const int j); */
-
-/*   /\*! */
-/*     index of first wavelet on level j >= j0 */
-/*   *\/ */
-/*   template <class IBASIS, unsigned int DIM, class CUBEBASIS> */
-/*   CubeIndex<IBASIS,DIM,CUBEBASIS> */
-/*   first_wavelet(const CUBEBASIS* basis, const int j); */
-  
-/*   /\*! */
-/*     index of last wavelet on level j >= j0 */
-/*   *\/ */
-/*   template <class IBASIS, unsigned int DIM, class CUBEBASIS> */
-/*   CubeIndex<IBASIS,DIM,CUBEBASIS> */
-/*   last_wavelet(const CUBEBASIS* basis, const int j); */
-
-/*   /\*! */
-/*     number of first generator on level j0 */
-/*   *\/ */
-/*   template <class IBASIS, unsigned int DIM, class CUBEBASIS> */
-/*   const int */
-/*   first_generator_num(const CUBEBASIS* basis); */
-
-/*   /\*! */
-/*     number of last generator on level j0 */
-/*   *\/ */
-/*   template <class IBASIS, unsigned int DIM, class CUBEBASIS> */
-/*   const int */
-/*   last_generator_num(const CUBEBASIS* basis); */
-
-/*   /\*! */
-/*     number of first wavelet on level j >= j0 */
-/*   *\/ */
-/*   template <class IBASIS, unsigned int DIM, class CUBEBASIS> */
-/*   const int */
-/*   first_wavelet_num(const CUBEBASIS* basis, const int j); */
-  
-/*   /\*! */
-/*     number of last wavelet on level j >= j0 */
-/*   *\/ */
-/*   template <class IBASIS, unsigned int DIM, class CUBEBASIS> */
-/*   const int */
-/*   last_wavelet_num(const CUBEBASIS* basis, const int j); */
-
 }
 
 #include <ring/ring_index.cpp>

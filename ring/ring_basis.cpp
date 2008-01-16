@@ -4,7 +4,6 @@
 #include <numerics/quadrature.h>
 #include <numerics/iteratsolv.h>
 #include <algebra/sparse_matrix.h>
-#include <algebra/kronecker_matrix.h>
 
 namespace WaveletTL
 {
@@ -135,20 +134,31 @@ namespace WaveletTL
     if (!primal) {
       // In the following, we setup the Gramian matrix A_Lambda, using all wavelets
       // up to the maximal level jmax. By the tensor product structure of the basis,
-      // A_Lambda can be written as the Kronecker product of two 1D matrices:
+      // the entries of A_Lambda can be written as product of 1D integrals:
       //   int_R psi_lambda(x) psi_mu(x) dx
       //   = 2*pi * int_{r0}^{r1} int_0^1 psi_lambda(x) psi_mu(x) dphi r dr
       //   = 2*pi*(r1-r0) * int_0^1 int_0^1 psi_lambda(x) psi_mu(x) dphi (r0+s*(r1-r0)) ds
       // with x=x(s,phi)=r(s)*(cos(2*pi*phi),sin(2*pi*phi)), r(s)=r0+s*(r1-r0).
-
-      // No, it is only partly true that A_Lambda is the Kronecker product of 1D Gramians!
-      // We will fix this in the next revision of this routine...
+      // Although A_Lambda is not a Kronecker product of the 1D Gramians (since the
+      // order of 2D indices is defined somehow diffently), it does count to
+      // setup the 1D Gramians first.
 
       typedef PeriodicBasis<CDFBasis<d,dt> >             Basis0;
       typedef SplineBasis<d,dt,P_construction,s0,s1,0,0> Basis1;
       typedef typename Basis0::Index Index0;
       typedef typename Basis1::Index Index1;
       typedef typename SparseMatrix<double>::size_type size_type;     
+
+      // setup active wavelet index set
+      std::set<Index> Lambda;
+      for (Index lambda = first_generator(j0());; ++lambda) {
+	Lambda.insert(lambda);
+	if (lambda == last_wavelet(jmax)) break;
+      }
+//       cout << "active index set:" << endl;
+//       for (typename std::set<Index>::const_iterator it(Lambda.begin()), itend(Lambda.end());
+//   	   it != itend; ++it)
+//   	cout << *it << endl;
       
       // setup active wavelet index set in angular direction
       std::set<Index0> Lambda0;
@@ -176,7 +186,7 @@ namespace WaveletTL
  	    {
 	      double entry = basis0.integrate(*it2, *it1);
 	      
- 	      if (fabs(entry) > 1e-16) {
+ 	      if (fabs(entry) > 1e-15) {
  		indices.push_back(column);
  		entries.push_back(2*M_PI*entry);
  	      }
@@ -211,7 +221,7 @@ namespace WaveletTL
  	    {
 	      double entry = integrate_radial(*it2, *it1);
 	      
- 	      if (fabs(entry) > 1e-16) {
+ 	      if (fabs(entry) > 1e-15) {
  		indices.push_back(column);
  		entries.push_back(entry);
  	      }
@@ -220,9 +230,32 @@ namespace WaveletTL
  	} 
 //       cout << "A_Lambda1=" << endl << A_Lambda1;
       
-      KroneckerMatrix<double,SparseMatrix<double>,SparseMatrix<double> > A_Lambda
-	(A_Lambda0, A_Lambda1);
-//       cout << "kron(A_Lambda0,A_Lambda1)=" << endl << A_Lambda;
+      // setup global Gramian A_Lambda
+      SparseMatrix<double> A_Lambda(Lambda.size());
+      row = 0;
+      for (typename std::set<Index>::const_iterator it1(Lambda.begin()), itend(Lambda.end());
+	   it1 != itend; ++it1, ++row)
+	{
+	  std::list<size_type> indices;
+	  std::list<double> entries;
+	  
+	  size_type column = 0;
+	  for (typename std::set<Index>::const_iterator it2(Lambda.begin());
+	       it2 != itend; ++it2, ++column)
+	    {
+	      double entry
+		= A_Lambda0.get_entry(Index0(it2->j(), it2->e()[0], it2->k()[0]).number(),
+				      Index0(it1->j(), it1->e()[0], it1->k()[0]).number())
+		* A_Lambda1.get_entry(Index1(it2->j(), it2->e()[1], it2->k()[1]).number(),
+				      Index1(it1->j(), it1->e()[1], it1->k()[1]).number());
+	      
+	      if (fabs(entry) > 1e-15) {
+		indices.push_back(column);
+		entries.push_back(entry);
+	      }
+	    }
+	  A_Lambda.set_row(row, indices, entries);
+	} 
 
       // solve A_Lambda*x = b
       Vector<double> b(A_Lambda.row_dimension());
@@ -231,18 +264,19 @@ namespace WaveletTL
  	b[row] = coeffs.get_coefficient(lambda);
 	if (lambda == last_wavelet(jmax)) break;
       }
-
-      cout << "b=" << b << endl;
-
+      
+//       cout << "b=" << b << endl;
+      
       Vector<double> x(b);
       unsigned int iterations;
       CG(A_Lambda, b, x, 1e-15, 500, iterations);
       
       coeffs.clear();
       row = 0;
-      for (Index lambda = first_generator(j0());; ++lambda, ++row) {
- 	coeffs.set_coefficient(lambda, x[row]);
-	if (lambda == last_wavelet(jmax)) break;
+      for (typename std::set<Index>::const_iterator it(Lambda.begin()), itend(Lambda.end());
+	   it != itend; ++it, ++row) {
+	if (fabs(x[row]) > 1e-15)
+	  coeffs.set_coefficient(*it, x[row]);
       }
     }
   }

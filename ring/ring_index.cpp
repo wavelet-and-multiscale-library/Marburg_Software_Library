@@ -102,8 +102,8 @@ namespace WaveletTL
       }
      
       if (!jplusplus) { // then choose lowest translation index k=k(j,e)
-	k_[0] = (e_[0] == 0 ? Basis0::DeltaLmin() : Basis1::Nablamin());
-	k_[1] = (e_[1] == 0 ? Basis1::DeltaLmin() : Basis0::Nablamin());
+	k_[0] = (e_[0] == 0 ? Basis0::DeltaLmin() : Basis0::Nablamin());
+	k_[1] = (e_[1] == 0 ? Basis1::DeltaLmin() : Basis1::Nablamin());
       }
     }
 

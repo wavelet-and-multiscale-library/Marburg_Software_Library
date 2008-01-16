@@ -42,7 +42,7 @@ namespace WaveletTL
       constructor from a given wavelet basis and a given right-hand side y
     */
     IntervalGramian(const WBASIS& basis,
-	    const InfiniteVector<double, typename WBASIS::Index>& y);
+		    const InfiniteVector<double, typename WBASIS::Index>& y);
     
     /*!
       make template argument accessible

@@ -334,7 +334,7 @@ namespace WaveletTL
 	
 	// setup Gauss points and weights for a composite quadrature formula:
  	const unsigned int N_Gauss = primal_polynomial_degree();
-	const double h = ldexp(1.0, -j);
+	const double h = 1.0/(1<<j);
 	
 	Array1D<double> gauss_points (N_Gauss*(length)), func1values, func2values;
 	int k = k1;

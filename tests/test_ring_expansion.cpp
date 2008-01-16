@@ -49,7 +49,7 @@ int main()
   const int d  = 2;
   const int dt = 2;
 
-  typedef RingBasis<d,dt,1,0> Basis;
+  typedef RingBasis<d,dt,0,0> Basis;
   Basis basis;
 
   typedef Basis::Index Index;

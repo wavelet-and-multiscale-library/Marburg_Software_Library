@@ -4,6 +4,7 @@
 #include <numerics/quadrature.h>
 #include <numerics/iteratsolv.h>
 #include <algebra/sparse_matrix.h>
+#include <algebra/kronecker_matrix.h>
 
 namespace WaveletTL
 {
@@ -124,7 +125,9 @@ namespace WaveletTL
 
     coeffs.clear();
     for (Index lambda = first_generator(j0());;++lambda) {
-      coeffs.set_coefficient(lambda, integrate(f, lambda));
+      double integral = integrate(f, lambda);
+      if (fabs(integral) < 1e-15) integral = 0;
+      coeffs.set_coefficient(lambda, integral);
       if (lambda == last_wavelet(jmax))
 	break;
     }
@@ -137,6 +140,9 @@ namespace WaveletTL
       //   = 2*pi * int_{r0}^{r1} int_0^1 psi_lambda(x) psi_mu(x) dphi r dr
       //   = 2*pi*(r1-r0) * int_0^1 int_0^1 psi_lambda(x) psi_mu(x) dphi (r0+s*(r1-r0)) ds
       // with x=x(s,phi)=r(s)*(cos(2*pi*phi),sin(2*pi*phi)), r(s)=r0+s*(r1-r0).
+
+      // No, it is only partly true that A_Lambda is the Kronecker product of 1D Gramians!
+      // We will fix this in the next revision of this routine...
 
       typedef PeriodicBasis<CDFBasis<d,dt> >             Basis0;
       typedef SplineBasis<d,dt,P_construction,s0,s1,0,0> Basis1;
@@ -170,14 +176,14 @@ namespace WaveletTL
  	    {
 	      double entry = basis0.integrate(*it2, *it1);
 	      
- 	      if (entry != 0) {
+ 	      if (fabs(entry) > 1e-16) {
  		indices.push_back(column);
  		entries.push_back(2*M_PI*entry);
  	      }
  	    }
  	  A_Lambda0.set_row(row, indices, entries);
  	} 
-      cout << "A_Lambda0=" << endl << A_Lambda0;
+//       cout << "A_Lambda0=" << endl << A_Lambda0;
 
       // setup active wavelet index set in radial direction
       std::set<Index1> Lambda1;
@@ -185,10 +191,10 @@ namespace WaveletTL
 	Lambda1.insert(lambda);
 	if (lambda == basis1.last_wavelet(jmax)) break;
       }
-      cout << "active index set in radial direction:" << endl;
-      for (typename std::set<Index1>::const_iterator it(Lambda1.begin()), itend(Lambda1.end());
-  	   it != itend; ++it)
-  	cout << *it << endl;
+//       cout << "active index set in radial direction:" << endl;
+//       for (typename std::set<Index1>::const_iterator it(Lambda1.begin()), itend(Lambda1.end());
+//   	   it != itend; ++it)
+//   	cout << *it << endl;
 
       // setup radial Gramian
       SparseMatrix<double> A_Lambda1(Lambda1.size());
@@ -205,73 +211,41 @@ namespace WaveletTL
  	    {
 	      double entry = integrate_radial(*it2, *it1);
 	      
- 	      if (entry != 0) {
+ 	      if (fabs(entry) > 1e-16) {
  		indices.push_back(column);
- 		entries.push_back((r1_-r0_)*entry);
+ 		entries.push_back(entry);
  	      }
  	    }
  	  A_Lambda1.set_row(row, indices, entries);
  	} 
-      cout << "A_Lambda1=" << endl << A_Lambda1;
+//       cout << "A_Lambda1=" << endl << A_Lambda1;
       
+      KroneckerMatrix<double,SparseMatrix<double>,SparseMatrix<double> > A_Lambda
+	(A_Lambda0, A_Lambda1);
+//       cout << "kron(A_Lambda0,A_Lambda1)=" << endl << A_Lambda;
+
+      // solve A_Lambda*x = b
+      Vector<double> b(A_Lambda.row_dimension());
+      row = 0;
+      for (Index lambda = first_generator(j0());; ++lambda, ++row) {
+ 	b[row] = coeffs.get_coefficient(lambda);
+	if (lambda == last_wavelet(jmax)) break;
+      }
+
+      cout << "b=" << b << endl;
+
+      Vector<double> x(b);
+      unsigned int iterations;
+      CG(A_Lambda, b, x, 1e-15, 500, iterations);
       
+      coeffs.clear();
+      row = 0;
+      for (Index lambda = first_generator(j0());; ++lambda, ++row) {
+ 	coeffs.set_coefficient(lambda, x[row]);
+	if (lambda == last_wavelet(jmax)) break;
+      }
     }
   }
-
-//     if (!primal) {
-//       // setup active index set
-//       std::set<Index> Lambda;
-//       for (Index lambda = first_generator(j0());; ++lambda) {
-//  	Lambda.insert(lambda);
-// 	if (lambda == last_wavelet(jmax)) break;
-//       }
-      
-//       // setup Gramian A_Lambda
-//       SparseMatrix<double> A_Lambda(Lambda.size());
-//       typedef typename SparseMatrix<double>::size_type size_type;     
-//       size_type row = 0;
-//       for (typename std::set<Index>::const_iterator it1(Lambda.begin()), itend(Lambda.end());
-// 	   it1 != itend; ++it1, ++row)
-// 	{
-// 	  std::list<size_type> indices;
-// 	  std::list<double> entries;
-	  
-// 	  size_type column = 0;
-// 	  for (typename std::set<Index>::const_iterator it2(Lambda.begin());
-// 	       it2 != itend; ++it2, ++column)
-// 	    {
-// 	      double entry = integrate(*it2, *it1);
-	      
-// 	      if (entry != 0) {
-// 		indices.push_back(column);
-// 		entries.push_back(entry);
-// 	      }
-// 	    }
-// 	  A_Lambda.set_row(row, indices, entries);
-// 	} 
- 
-//       // solve A_Lambda*x = b
-//       Vector<double> b(Lambda.size());
-//       row = 0;
-//       for (typename std::set<Index>::const_iterator it(Lambda.begin()), itend(Lambda.end());
-// 	   it != itend; ++it, ++row)
-// 	b[row] = coeffs.get_coefficient(*it);
-      
-//       Vector<double> x(b);
-//       unsigned int iterations;
-//       CG(A_Lambda, b, x, 1e-15, 500, iterations);
-      
-//       coeffs.clear();
-//       row = 0;
-//       for (typename std::set<Index>::const_iterator it(Lambda.begin()), itend(Lambda.end());
-// 	   it != itend; ++it, ++row)
-// 	coeffs.set_coefficient(*it, x[row]);
-//     }
-
-
-
-
-
 
   template <int d, int dt, int s0, int s1>
   double
@@ -413,76 +387,30 @@ namespace WaveletTL
     // First we compute the support intersection of \psi_\lambda and \psi_\mu:
     typedef typename SplineBasis<d,dt,P_construction,s0,s1,0,0>::Support Support;
     Support supp;
-
-    cout << "call intersect_supports() called with lambda=" << lambda
- 	 << ", mu=" << mu << endl;
-    
     if (basis1.intersect_supports(lambda, mu, supp))
       {
-	cout << "intersection: supp.j=" << supp.j
-	     << ", supp.k1=" << supp.k1
-	     << ", supp.k2=" << supp.k2 << endl;
-	r = 42;
-//  	// Set up Gauss points and weights for a composite quadrature formula:
-//  	const unsigned int N_Gauss = d;
-//  	const double h = ldexp(1.0, -supp.j);
-//  	Array1D<double> gauss_points (N_Gauss*(supp.k2-supp.k1)), func1values, func2values;
-//  	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++) // refers to 2^{-j}[patch,patch+1]
-//  	  for (unsigned int n = 0; n < N_Gauss; n++, id++)
-//  	    gauss_points[id] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
+  	// Set up Gauss points and weights for a composite quadrature formula:
+  	const unsigned int N_Gauss = d+1;
+  	const double h = 1.0/(1<<supp.j);
+  	Array1D<double> gauss_points (N_Gauss*(supp.k2-supp.k1)), func1values, func2values;
+  	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++) // refers to 2^{-j}[patch,patch+1]
+  	  for (unsigned int n = 0; n < N_Gauss; n++, id++)
+  	    gauss_points[id] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
 	
-//  	// - compute point values of the integrands
-//   	evaluate(0, lambda, gauss_points, func1values);
-//  	evaluate(0, mu, gauss_points, func2values);
+  	// - compute point values of the wavelets
+   	basis1.evaluate(0, lambda, gauss_points, func1values);
+  	basis1.evaluate(0, mu, gauss_points, func2values);
 	
-//  	// - add all integral shares
-//  	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++)
-//  	  for (unsigned int n = 0; n < N_Gauss; n++, id++) {
-//  	    const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
-// 	    r += func1values[id] * func2values[id] * gauss_weight;
-//  	  }
-      }
-    else
-      {
-	cout << "no intersection!" << endl;
+  	// - add all integral shares
+  	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++)
+  	  for (unsigned int n = 0; n < N_Gauss; n++, id++) {
+  	    const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
+ 	    r += (r1_-r0_) * func1values[id] * func2values[id]
+	      * (r0_+gauss_points[id]*(r1_-r0_)) * gauss_weight;
+  	  }
       }
     
     return r;
   }
-
-
-//   template <int d, int dt, int s0, int s1>
-//   double
-//   RingBasis<d,dt,s0,s1>::integrate
-//   (const Index& lambda,
-//    const Index& mu) const
-//   {
-//     // We have to compute
-//     //   int_R psi_lambda(x) psi_mu(x) dx
-//     //   = 2*pi * int_{r0}^{r1} int_0^1 psi_lambda(x) psi_mu(x) dphi r dr
-//     //   = 2*pi*(r1-r0) * int_0^1 int_0^1 psi_lambda(x) psi_mu(x) dphi (r0+s*(r1-r0)) ds
-//     // with x=x(s,phi)=r(s)*(cos(2*pi*phi),sin(2*pi*phi)), r(s)=r0+s*(r1-r0).
-//     // By the tensor product structure, the integral decouples into a product
-//     // of two 1D integrals.
-
-//     double r = 0;
-
-//     typedef PeriodicBasis<CDFBasis<d,dt> >             Basis0;
-//     typedef SplineBasis<d,dt,P_construction,s0,s1,0,0> Basis1;
-//     typedef typename Basis0::Index Index0;
-//     typedef typename Basis1::Index Index1;
-
-//     // first decide whether supp(psi_lambda) and supp(psi_mu) intersect
-//     Index0 lambda0(lambda.j(), lambda.e()[0], lambda.k()[0]);
-//     Index1 lambda1(lambda.j(), lambda.e()[1], lambda.k()[1]);
-//     Index0 mu0(mu.j(), mu.e()[0], mu.k()[0]);
-//     Index1 mu1(mu.j(), mu.e()[1], mu.k()[1]);
-
-//     if (intersect_supports<d,dt,s0,s1>(lambda0, mu0)) {
-//       r = 42;
-//     }
-    
-//     return r;
-//   }
 
 }

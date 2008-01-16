@@ -189,23 +189,17 @@ namespace WaveletTL
 								     const Index& nu,
 								     Support& supp) const
   {
-    // buggy!
-
-//     cout << "intersect_supports() called with lambda=" << lambda
-// 	 << ", nu=" << nu << endl;
-
     // first determine the support of psi_nu
     int k1_nu, k2_nu;
     support(nu, k1_nu, k2_nu);
     const int m = nu.j()+nu.e();
-//     cout << "k1_nu=" << k1_nu << ", k2_nu=" << k2_nu << endl;
 
     // check whether supp(psi_lambda) intersects 2^{-m}[k1_nu,k2_nu]
     const int j_lambda = lambda.j() + lambda.e();
     supp.j = std::max(j_lambda, m);
     int k1_lambda, k2_lambda;
     support(lambda, k1_lambda, k2_lambda);
-//     cout << "k1_lambda=" << k1_lambda << ", k2_lambda=" << k2_lambda << endl;
+
     const int jmb = k2_nu<<(supp.j-m);
     const int jjk1 = k1_lambda<<(supp.j-j_lambda);
     if (jjk1 >= jmb)

@@ -56,7 +56,9 @@ int main()
   Grid<2> grid(gridx, gridy);
 
   cout << "- evaluating a primal generator..." << endl;
-  Index lambda(basis.first_generator(basis.j0()));
+  Index lambda;
+//   lambda = basis.first_generator(basis.j0());
+  lambda = basis.first_wavelet(basis.j0());
 //   for (int i = 1; i <= 6; i++, ++lambda);
   cout << "  (lambda=" << lambda << " )" << endl;
   std::ofstream psistream("ring_wavelet.m");
@@ -73,7 +75,13 @@ int main()
   cout << "  ...done, see file ring_wavelet.m!" << endl;
   
   cout << "- evaluating a primal wavelet:" << endl;
-  lambda = ++basis.first_wavelet(basis.j0());
+//   for (int i = 0; i < basis.Deltasize(basis.j0()); ++i, ++lambda);
+  for (int i = 0;
+       i < basis.Nabla01size(basis.j0())
+	 +basis.Nabla10size(basis.j0())
+	 +basis.Nabla11size(basis.j0());
+       ++i, ++lambda);
+  //   lambda = ++basis.first_wavelet(basis.j0());
   cout << "  (lambda=" << lambda << " )" << endl;
   InfiniteVector<double,Index> coeffs;
   coeffs[lambda] = 1.0;
@@ -99,7 +107,7 @@ int main()
     ostringstream os;
     os << "ring_wavelet_" << mu << ".m";
     ofstream psistream(os.str().c_str());
-    basis.evaluate(mu, 6).matlab_output(psistream);
+    basis.evaluate(mu, resi).matlab_output(psistream);
     psistream.close();
   }
 #endif

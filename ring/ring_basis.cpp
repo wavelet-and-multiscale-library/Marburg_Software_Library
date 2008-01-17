@@ -68,7 +68,45 @@ namespace WaveletTL
     
     return Index(j, e, k);
   }
+
+  template <int d, int dt, int s0, int s1>
+  inline int
+  RingBasis<d,dt,s0,s1>::Deltasize(const int j)
+  {
+    assert(j >= j0());
+
+    typedef PeriodicBasis<CDFBasis<d,dt> >             Basis0;
+    typedef SplineBasis<d,dt,P_construction,s0,s1,0,0> Basis1;
+
+    return Basis0::Deltasize(j) * Basis1::Deltasize(j);
+  }
   
+  template <int d, int dt, int s0, int s1>
+  inline int
+  RingBasis<d,dt,s0,s1>::Nabla01size(const int j)
+  {
+    assert(j >= j0());
+
+    return 1<<(2*j);
+  }
+
+  template <int d, int dt, int s0, int s1>
+  inline int
+  RingBasis<d,dt,s0,s1>::Nabla10size(const int j)
+  {
+    assert(j >= j0());
+
+    return 1<<(2*j);
+  }
+
+  template <int d, int dt, int s0, int s1>
+  inline int
+  RingBasis<d,dt,s0,s1>::Nabla11size(const int j)
+  {
+    assert(j >= j0());
+
+    return 1<<(2*j);
+  }
   
   //
   //
@@ -89,9 +127,8 @@ namespace WaveletTL
     values[1] = basis1.evaluate(typename Basis1::Index(lambda.j(), lambda.e()[1], lambda.k()[1]),
 				resolution).values();
     // multiply by the normalization factor r^{-1/2}
-    for (int i = 0; i <= 1<<resolution; i++) {
-      const double r = r0_+i*ldexp(1.0, -resolution)*(r1_-r0_);
-      values[1][i] /= sqrt(r);
+    for (unsigned int i = 0; i < values[1].size(); i++) {
+      values[1][i] /= sqrt(r0_+i*ldexp(1.0, -resolution)*(r1_-r0_));
     }
     
     SampledMapping<2> result(Point<2>(0), Point<2>(1), values);

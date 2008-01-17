@@ -77,6 +77,14 @@ namespace WaveletTL
     //! index of last wavelet on level j >= j0
     static Index last_wavelet(const int j);
 
+    //! size of Delta_j
+    static int Deltasize(const int j);
+
+    //! sizes of the different wavelet index sets
+    static int Nabla01size(const int j);
+    static int Nabla10size(const int j);
+    static int Nabla11size(const int j);
+
     const RingChart& chart() const { return chart_; }
 
     /*!

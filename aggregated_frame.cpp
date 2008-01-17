@@ -329,7 +329,7 @@ namespace FrameTL
     const Chart<DIM_d,DIM_m>* chart(atlas_->charts()[lambda.p()]);
 
     chart->map_point_inv(x, p_d);
-    value = lifted_bases[lambda.p()]->evaluate(1, 0,
+    value = lifted_bases[lambda.p()]->evaluate(0,
 					       typename CubeBasis<IBASIS,DIM_d>::Index(lambda.j(),
 										       lambda.e(),
 										       lambda.k(),

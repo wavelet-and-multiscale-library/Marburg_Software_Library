@@ -93,7 +93,7 @@ int main()
   const double r0 = 0.5;
   const double r1 = 2.0;
 
-  typedef RingBasis<d,dt,0,0> Basis;
+  typedef RingBasis<d,dt,1,1> Basis;
   Basis basis(r0, r1);
 
   typedef Basis::Index Index;

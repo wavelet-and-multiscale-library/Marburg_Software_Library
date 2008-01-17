@@ -182,9 +182,9 @@ namespace WaveletTL
       //   = 2*pi * int_{r0}^{r1} int_0^1 psi_lambda(x) psi_mu(x) dphi r dr
       //   = 2*pi*(r1-r0) * int_0^1 int_0^1 psi_lambda(x) psi_mu(x) dphi (r0+s*(r1-r0)) ds
       // with x=x(s,phi)=r(s)*(cos(2*pi*phi),sin(2*pi*phi)), r(s)=r0+s*(r1-r0).
-      // Although A_Lambda is not a Kronecker product of the 1D Gramians (since the
-      // order of 2D indices is defined somehow diffently), it does count to
-      // setup the 1D Gramians first. Note that due to the normalization of the mapped
+      // Note that A_Lambda is not exactly a Kronecker product of the 1D Gramians,
+      // since the order of 2D indices is defined somehow diffently.
+      // Note also that due to the normalization of the mapped
       // wavelets, it suffices to compute the (1D) integrals
       //   int_0^1 int_0^1 psi^0_lambda(phi,s) psi^0_mu(phi,s) dphi ds,
       // since both the 2*pi*(r1-r0) and the r(s) completely cancel out.
@@ -206,79 +206,12 @@ namespace WaveletTL
 //   	   it != itend; ++it)
 //   	cout << *it << endl;
       
-      // setup active wavelet index set in angular direction
-      std::set<Index0> Lambda0;
-      for (Index0 lambda = basis0.first_generator(j0());; ++lambda) {
-	Lambda0.insert(lambda);
-	if (lambda == basis0.last_wavelet(jmax)) break;
-      }
-//       cout << "active index set in angular direction:" << endl;
-//       for (typename std::set<Index0>::const_iterator it(Lambda0.begin()), itend(Lambda0.end());
-//  	   it != itend; ++it)
-//  	cout << *it << endl;
-
-      // setup angular Gramian
-      SparseMatrix<double> A_Lambda0(Lambda0.size());
-      size_type row = 0;
-      for (typename std::set<Index0>::const_iterator it1(Lambda0.begin()), itend(Lambda0.end());
- 	   it1 != itend; ++it1, ++row)
- 	{
- 	  std::list<size_type> indices;
- 	  std::list<double> entries;
-	  
- 	  size_type column = 0;
- 	  for (typename std::set<Index0>::const_iterator it2(Lambda0.begin());
- 	       it2 != itend; ++it2, ++column)
- 	    {
-	      double entry = basis0.integrate(*it2, *it1);
-	      
- 	      if (fabs(entry) > 1e-15) {
- 		indices.push_back(column);
- 		entries.push_back(entry);
- 	      }
- 	    }
- 	  A_Lambda0.set_row(row, indices, entries);
- 	} 
-//       cout << "A_Lambda0=" << endl << A_Lambda0;
-
-      // setup active wavelet index set in radial direction
-      std::set<Index1> Lambda1;
-      for (Index1 lambda = basis1.first_generator(j0());; ++lambda) {
-	Lambda1.insert(lambda);
-	if (lambda == basis1.last_wavelet(jmax)) break;
-      }
-//       cout << "active index set in radial direction:" << endl;
-//       for (typename std::set<Index1>::const_iterator it(Lambda1.begin()), itend(Lambda1.end());
-//   	   it != itend; ++it)
-//   	cout << *it << endl;
-
-      // setup radial Gramian
-      SparseMatrix<double> A_Lambda1(Lambda1.size());
-      row = 0;
-      for (typename std::set<Index1>::const_iterator it1(Lambda1.begin()), itend(Lambda1.end());
- 	   it1 != itend; ++it1, ++row)
- 	{
- 	  std::list<size_type> indices;
- 	  std::list<double> entries;
-	  
- 	  size_type column = 0;
- 	  for (typename std::set<Index1>::const_iterator it2(Lambda1.begin());
- 	       it2 != itend; ++it2, ++column)
- 	    {
-	      double entry = basis1.integrate(*it2, *it1);
-	      
- 	      if (fabs(entry) > 1e-15) {
- 		indices.push_back(column);
- 		entries.push_back(entry);
- 	      }
- 	    }
- 	  A_Lambda1.set_row(row, indices, entries);
- 	} 
-//       cout << "A_Lambda1=" << endl << A_Lambda1;
+//       double entry = basis0.integrate(*it2, *it1);
+//      double entry = basis1.integrate(*it2, *it1);
       
       // setup global Gramian A_Lambda
       SparseMatrix<double> A_Lambda(Lambda.size());
-      row = 0;
+      size_type row = 0;
       for (typename std::set<Index>::const_iterator it1(Lambda.begin()), itend(Lambda.end());
 	   it1 != itend; ++it1, ++row)
 	{
@@ -290,10 +223,10 @@ namespace WaveletTL
 	       it2 != itend; ++it2, ++column)
 	    {
 	      double entry
-		= A_Lambda0.get_entry(Index0(it2->j(), it2->e()[0], it2->k()[0]).number(),
-				      Index0(it1->j(), it1->e()[0], it1->k()[0]).number())
-		* A_Lambda1.get_entry(Index1(it2->j(), it2->e()[1], it2->k()[1]).number(),
-				      Index1(it1->j(), it1->e()[1], it1->k()[1]).number());
+		= basis0.integrate(Index0(it2->j(), it2->e()[0], it2->k()[0]),
+				   Index0(it1->j(), it1->e()[0], it1->k()[0]))
+		* basis1.integrate(Index1(it2->j(), it2->e()[1], it2->k()[1]),
+				   Index1(it1->j(), it1->e()[1], it1->k()[1]));
 	      
 	      if (fabs(entry) > 1e-15) {
 		indices.push_back(column);
@@ -302,7 +235,7 @@ namespace WaveletTL
 	    }
 	  A_Lambda.set_row(row, indices, entries);
 	} 
-
+      
       // solve A_Lambda*x = b
       Vector<double> b(A_Lambda.row_dimension());
       row = 0;

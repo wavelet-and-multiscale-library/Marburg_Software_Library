@@ -35,7 +35,7 @@ namespace MathTL
   inline
   RingChart::Gram_factor(const Point<2>& x) const
   {
-    return 2*M_PI*(r1_-r0_)*(r0_+x[1]*(r1_-r0_));
+    return sqrt(2*M_PI*(r1_-r0_)*(r0_+x[1]*(r1_-r0_)));
   }
   
   const double

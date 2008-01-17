@@ -126,9 +126,10 @@ namespace WaveletTL
 				resolution).values();
     values[1] = basis1.evaluate(typename Basis1::Index(lambda.j(), lambda.e()[1], lambda.k()[1]),
 				resolution).values();
-    // multiply by the normalization factor r^{-1/2}
+    // adjust "radial" values by the normalization factor
+    const double help = sqrt(2*M_PI*(r1_-r0_));
     for (unsigned int i = 0; i < values[1].size(); i++) {
-      values[1][i] /= sqrt(r0_+i*ldexp(1.0, -resolution)*(r1_-r0_));
+      values[1][i] /= help*sqrt(r0_+i*ldexp(1.0, -resolution)*(r1_-r0_));
     }
     
     SampledMapping<2> result(Point<2>(0), Point<2>(1), values);
@@ -183,7 +184,10 @@ namespace WaveletTL
       // with x=x(s,phi)=r(s)*(cos(2*pi*phi),sin(2*pi*phi)), r(s)=r0+s*(r1-r0).
       // Although A_Lambda is not a Kronecker product of the 1D Gramians (since the
       // order of 2D indices is defined somehow diffently), it does count to
-      // setup the 1D Gramians first.
+      // setup the 1D Gramians first. Note that due to the normalization of the mapped
+      // wavelets, it suffices to compute the (1D) integrals
+      //   int_0^1 int_0^1 psi^0_lambda(phi,s) psi^0_mu(phi,s) dphi ds,
+      // since both the 2*pi*(r1-r0) and the r(s) completely cancel out.
 
       typedef PeriodicBasis<CDFBasis<d,dt> >             Basis0;
       typedef SplineBasis<d,dt,P_construction,s0,s1,0,0> Basis1;
@@ -230,7 +234,7 @@ namespace WaveletTL
 	      
  	      if (fabs(entry) > 1e-15) {
  		indices.push_back(column);
- 		entries.push_back(2*M_PI*entry);
+ 		entries.push_back(entry);
  	      }
  	    }
  	  A_Lambda0.set_row(row, indices, entries);
@@ -261,7 +265,7 @@ namespace WaveletTL
  	  for (typename std::set<Index1>::const_iterator it2(Lambda1.begin());
  	       it2 != itend; ++it2, ++column)
  	    {
-	      double entry = integrate_radial(*it2, *it1);
+	      double entry = basis1.integrate(*it2, *it1);
 	      
  	      if (fabs(entry) > 1e-15) {
  		indices.push_back(column);
@@ -332,9 +336,12 @@ namespace WaveletTL
     // We have to compute
     //   int_R f(x) psi_lambda(x) dx
     //   = 2*pi * int_{r0}^{r1} int_0^1 f(x) psi_lambda(x) dphi r dr
-    //   = 2*pi*(r1-r0) * int_0^1 int_0^1 f(x) psi_lambda(x) dphi (r0+s*(r1-r0)) ds
+    //   = 2*pi*(r1-r0) * int_0^1 int_0^1 f(x(s,phi)) psi_lambda(x(s,phi)) dphi (r0+s*(r1-r0)) ds
     // with x=x(s,phi)=r(s)*(cos(2*pi*phi),sin(2*pi*phi)), r(s)=r0+s*(r1-r0).
-    
+    // Note that due to the normalization of the mapped
+    // wavelets, it suffices to compute the integrals
+    //   sqrt(2*pi*(r1-r0)) int_0^1 int_0^1 f(x(s,phi)) psi^0_lambda(s,phi) dphi sqrt(r0+s*(r1-r0)) ds.
+
     double r = 0;
 
     typedef PeriodicBasis<CDFBasis<d,dt> >             Basis0;
@@ -346,13 +353,12 @@ namespace WaveletTL
     int k1[2], k2[2], length[2];
     basis0.support(typename Basis0::Index(lambda.j(), lambda.e()[0], lambda.k()[0]), k1[0], k2[0]);
     basis1.support(typename Basis1::Index(lambda.j(), lambda.e()[1], lambda.k()[1]), k1[1], k2[1]);
-    if (jplus > 0) {
-      if (lambda.e()[0] == 0) {
-	k1[0] *= 2;
-	k2[0] *= 2;	
-      } else {
-	k1[1] *= 2;
-	k2[1] *= 2;
+    if (jplus > 0) { // in case of a wavelet, adjust the granularity of eventual generator factors
+      for (int i = 0; i < 2; i++) {
+	if (lambda.e()[i] == 0) {
+	  k1[i] *= 2;
+	  k2[i] *= 2;	
+	}
       }
     }
     length[0] = (k2[0] > k1[0] ? k2[0]-k1[0] : k2[0]+(1<<j)-k1[0]); // number of "angular" subintervals
@@ -420,17 +426,15 @@ namespace WaveletTL
     Point<2> x_ring;
     
     while (true) {
-      // read (r,s)
+      // read (phi,s)
       for (unsigned int i = 0; i < 2; i++)
  	x[i] = gauss_points[i][index[i]];
       
-      // compute x=x(r,s)=r(s)*(cos(2*pi*phi),sin(2*pi*phi))
-      const double arg = 2*M_PI*x[0];
-      const double rofs = r0_+x[1]*(r1_-r0_);
-      x_ring[0] = rofs*cos(arg);
-      x_ring[1] = rofs*sin(arg);
+      // map x into the ring
+      chart_.map_point(x, x_ring);
       
-      double share = 2*M_PI * f->value(x_ring) * rofs; // 2*pi*f(x)*r(s)
+      // compute integral share
+      double share = f->value(x_ring) * chart_.Gram_factor(x); // sqrt(2*pi*(r1-r0))*f(x)*sqrt(r(s))
       for (unsigned int i = 0; i < 2; i++)
  	share *= gauss_weights[i][index[i]] * v_values[i][index[i]];
       r += share;
@@ -449,43 +453,6 @@ namespace WaveletTL
       if (exit) break;
     }
 
-    return r;
-  }
-
-  template <int d, int dt, int s0, int s1>
-  double
-  RingBasis<d,dt,s0,s1>::integrate_radial
-  (const typename SplineBasis<d,dt,P_construction,s0,s1,0,0>::Index& lambda,
-   const typename SplineBasis<d,dt,P_construction,s0,s1,0,0>::Index& mu) const
-  {
-    double r = 0;
-    
-    // First we compute the support intersection of \psi_\lambda and \psi_\mu:
-    typedef typename SplineBasis<d,dt,P_construction,s0,s1,0,0>::Support Support;
-    Support supp;
-    if (basis1.intersect_supports(lambda, mu, supp))
-      {
-  	// Set up Gauss points and weights for a composite quadrature formula:
-  	const unsigned int N_Gauss = d+2;
-  	const double h = 1.0/(1<<supp.j);
-  	Array1D<double> gauss_points (N_Gauss*(supp.k2-supp.k1)), func1values, func2values;
-  	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++) // refers to 2^{-j}[patch,patch+1]
-  	  for (unsigned int n = 0; n < N_Gauss; n++, id++)
-  	    gauss_points[id] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
-	
-  	// - compute point values of the wavelets
-   	basis1.evaluate(0, lambda, gauss_points, func1values);
-  	basis1.evaluate(0, mu, gauss_points, func2values);
-	
-  	// - add all integral shares
-  	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++)
-  	  for (unsigned int n = 0; n < N_Gauss; n++, id++) {
-  	    const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
- 	    r += (r1_-r0_) * func1values[id] * func2values[id]
-	      * (r0_+gauss_points[id]*(r1_-r0_)) * gauss_weight;
-  	  }
-      }
-    
     return r;
   }
   

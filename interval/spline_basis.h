@@ -471,6 +471,16 @@ namespace WaveletTL
      const int jmax,
      Vector<double>& coeffs) const;
     
+    /*!
+      helper function, integrate two primal generators or wavelets
+      against each other (for the Gramian)
+    */
+    double
+    integrate
+    (const Index& lambda,
+     const Index& mu) const;
+
+    //! set maximal level
     void set_jmax(const int jmax) {
       jmax_ = jmax;
       setup_full_collection();

@@ -1168,7 +1168,7 @@ namespace WaveletTL
       {
  	// Set up Gauss points and weights for a composite quadrature formula:
  	const unsigned int N_Gauss = d;
- 	const double h = ldexp(1.0, -supp.j);
+ 	const double h = 1.0/(1<<supp.j);
  	Array1D<double> gauss_points (N_Gauss*(supp.k2-supp.k1)), func1values, func2values;
  	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++) // refers to 2^{-j}[patch,patch+1]
  	  for (unsigned int n = 0; n < N_Gauss; n++, id++)
@@ -1181,8 +1181,43 @@ namespace WaveletTL
  	// - add all integral shares
  	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++)
  	  for (unsigned int n = 0; n < N_Gauss; n++, id++) {
- 	    const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
-	    r += func1values[id] * func2values[id] * gauss_weight;
+	    r += func1values[id] * func2values[id] * GaussWeights[N_Gauss-1][n] * h;
+ 	  }
+      }
+    
+    return r;
+  }
+
+  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  double
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::integrate
+  (const typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index& lambda,
+   const typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index& mu) const
+  {
+    double r = 0;
+    
+    // First we compute the support intersection of \psi_\lambda and \psi_\mu:
+    typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Support Support;
+    Support supp;
+    
+    if (intersect_supports(lambda, mu, supp))
+      {
+ 	// Set up Gauss points and weights for a composite quadrature formula:
+ 	const unsigned int N_Gauss = d;
+ 	const double h = 1.0/(1<<supp.j);
+ 	Array1D<double> gauss_points (N_Gauss*(supp.k2-supp.k1)), func1values, func2values;
+ 	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++) // refers to 2^{-j}[patch,patch+1]
+ 	  for (unsigned int n = 0; n < N_Gauss; n++, id++)
+ 	    gauss_points[id] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
+	
+ 	// - compute point values of the integrands
+  	evaluate(0, lambda, gauss_points, func1values);
+ 	evaluate(0, mu, gauss_points, func2values);
+	
+ 	// - add all integral shares
+ 	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++)
+ 	  for (unsigned int n = 0; n < N_Gauss; n++, id++) {
+	    r += func1values[id] * func2values[id] * GaussWeights[N_Gauss-1][n] * h;
  	  }
       }
     

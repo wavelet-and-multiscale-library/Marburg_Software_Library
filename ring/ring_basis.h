@@ -121,15 +121,6 @@ namespace WaveletTL
     (const Function<2>* f,
      const Index& lambda) const;
 
-    /*!
-      helper function, compute the r-weighted integral between
-      two primal generators or wavelets from the "radial" 1D basis
-    */
-    double
-    integrate_radial
-    (const typename SplineBasis<d,dt,P_construction,s0,s1,0,0>::Index& lambda,
-     const typename SplineBasis<d,dt,P_construction,s0,s1,0,0>::Index& mu) const;
-
   protected:
     //! an instance of the periodic basis (angular direction)
     PeriodicBasis<CDFBasis<d,dt> > basis0;

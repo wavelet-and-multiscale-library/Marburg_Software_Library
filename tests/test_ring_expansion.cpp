@@ -13,37 +13,63 @@ using namespace std;
 using namespace MathTL;
 using namespace WaveletTL;
 
-// the constant function f(x)=23
+// the constant function f(x)=23, divided by sqrt(2*Pi*(r1-r0)*r)
 class RingFunction1
   : public Function<2>
 {
 public:
+  RingFunction1(const double r0, const double r1) : r0_(r0), r1_(r1) {}
   inline double value(const Point<2>& p, const unsigned int component = 0) const {
-    return 23;
+    const double r = sqrt(p[0]*p[0]+p[1]*p[1]);
+    return 23/sqrt(2*M_PI*(r1_-r0_)*r);
   }
   void vector_value(const Point<2> &p, Vector<double>& values) const {
     values.resize(1, false);
     values[0] = value(p);
   }
+private:
+  double r0_, r1_;
 };
 
-// the radial hat function
+// a linear polynomial in r, divided by sqrt(2*Pi*(r1-r0)*r)
 class RingFunction2
   : public Function<2>
 {
 public:
+  RingFunction2(const double r0, const double r1) : r0_(r0), r1_(r1) {}
   inline double value(const Point<2>& p, const unsigned int component = 0) const {
     const double r = sqrt(p[0]*p[0]+p[1]*p[1]);
-    return max(1-2*fabs(1.5-r),0.);
+    return (2*r-1)/sqrt(2*M_PI*(r1_-r0_)*r);
   }
   void vector_value(const Point<2> &p, Vector<double>& values) const {
     values.resize(1, false);
     values[0] = value(p);
   }
+private:
+  double r0_, r1_;
 };
 
-// quadratic polynomial in r
+// the hat function in r, divided by sqrt(2*Pi*(r1-r0)*r)
 class RingFunction3
+  : public Function<2>
+{
+public:
+  RingFunction3(const double r0, const double r1) : r0_(r0), r1_(r1) {}
+  inline double value(const Point<2>& p, const unsigned int component = 0) const {
+    const double r = sqrt(p[0]*p[0]+p[1]*p[1]);
+    const double s = (r-r0_)/(r1_-r0_);
+    return max(1-2*fabs(s-0.5),0.)/sqrt(2*M_PI*(r1_-r0_)*r);
+  }
+  void vector_value(const Point<2> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+private:
+  double r0_, r1_;
+};
+
+// a quadratic polynomial in r
+class RingFunction4
   : public Function<2>
 {
 public:
@@ -64,44 +90,54 @@ int main()
   const int d  = 2;
   const int dt = 2;
 
-  typedef RingBasis<d,dt,1,1> Basis;
-  Basis basis;
+  const double r0 = 0.5;
+  const double r1 = 2.0;
+
+  typedef RingBasis<d,dt,0,0> Basis;
+  Basis basis(r0, r1);
 
   typedef Basis::Index Index;
 
+  const int j0 = basis.j0();
+  const int jmax = j0;
+
   Function<2>* u = 0;
-  const int testcase = 2;
+  const int testcase = 3;
   switch(testcase) {
   case 1:
-    u = new RingFunction1();
+    u = new RingFunction1(r0, r1);
     break;
   case 2:
-    u = new RingFunction2();
+    u = new RingFunction2(r0, r1);
     break;
   case 3:
-    u = new RingFunction3();
+    u = new RingFunction3(r0, r1);
+    break;
+  case 4:
+    u = new RingFunction4();
     break;
   default:
-    u = new RingFunction1();
+    u = new RingFunction1(r0, r1);
   }
 
   const int resi = 6;
+  Point<2> sphi, y;
+  Matrix<double> gridx((1<<resi)+1), gridy((1<<resi)+1);
+  for (int i = 0; i <= 1<<resi; i++) {
+    sphi[0] = i/(double)(1<<resi);
+    for (int j = 0; j <= 1<<resi; j++) {
+      sphi[1] = j/(double)(1<<resi);
+      basis.chart().map_point(sphi, y);
+      gridx.set_entry(j, i, y[0]);
+      gridy.set_entry(j, i, y[1]);
+    }
+  }
+  Grid<2> grid(gridx, gridy);
 
 #if 1
   {
     // plot the test function
     cout << "- plotting the test function..." << endl;
-    const int N = 1<<resi;
-    Matrix<double> gridx(N+1), gridy(N+1);
-    for (int i = 0; i <= N; i++) {
-      const double phi = i/(double)N;
-      for (int j = 0; j <= N; j++) {
-	const double r = 1.0+j/(double)N;
-	gridx.set_entry(j, i, r*cos(2*M_PI*phi));
-	gridy.set_entry(j, i, r*sin(2*M_PI*phi));
-      }
-    }
-    Grid<2> grid(gridx, gridy);
     SampledMapping<2> rf(grid, *u);
     std::ofstream rfstream("test_function.m");
     rf.matlab_output(rfstream);
@@ -111,9 +147,6 @@ int main()
 #endif
   
   InfiniteVector<double,Index> coeffs;
-  
-  const int j0 = basis.j0();
-  const int jmax = j0+1;
   
 #if 1
   basis.expand(u, true, jmax, coeffs);
@@ -128,16 +161,6 @@ int main()
        << coeffs << endl;
   if (true) {
     cout << "- compute L_infty error on a subgrid..." << endl;
-    Matrix<double> gridx((1<<resi)+1), gridy((1<<resi)+1);
-    for (int i = 0; i <= 1<<resi; i++) {
-      const double phi = i/(double)(1<<resi);
-      for (int j = 0; j <= 1<<resi; j++) {
-	const double r = 1.0+j/(double)(1<<resi);
-	gridx.set_entry(j, i, r*cos(2*M_PI*phi));
-	gridy.set_entry(j, i, r*sin(2*M_PI*phi));
-      }
-    }
-    Grid<2> grid(gridx, gridy);
     SampledMapping<2> rf(grid, *u);
     SampledMapping<2> rf0(basis.evaluate(coeffs, resi));
     cout << "  ... done, result: "

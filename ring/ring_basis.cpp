@@ -9,7 +9,7 @@ namespace WaveletTL
 {
   template <int d, int dt, int s0, int s1>
   RingBasis<d,dt,s0,s1>::RingBasis(const double r0, const double r1)
-    : r0_(r0), r1_(r1)
+    : r0_(r0), r1_(r1), chart_(r0,r1)
   {
   }
 
@@ -88,7 +88,7 @@ namespace WaveletTL
 				resolution).values();
     values[1] = basis1.evaluate(typename Basis1::Index(lambda.j(), lambda.e()[1], lambda.k()[1]),
 				resolution).values();
-    // divide by the normalization factor r^{1/2}
+    // multiply by the normalization factor r^{-1/2}
     for (int i = 0; i <= 1<<resolution; i++) {
       const double r = r0_+i*ldexp(1.0, -resolution)*(r1_-r0_);
       values[1][i] /= sqrt(r);

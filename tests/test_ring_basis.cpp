@@ -42,14 +42,15 @@ int main()
 
 #if 1
   const int resi = 6;
+  Point<2> sphi, y;
   Matrix<double> gridx((1<<resi)+1), gridy((1<<resi)+1);
   for (int i = 0; i <= 1<<resi; i++) {
-    const double phi = i/(double)(1<<resi);
+    sphi[0] = i/(double)(1<<resi);
     for (int j = 0; j <= 1<<resi; j++) {
-      const double s = j/(double)(1<<resi);
-      const double r = r0+s*(r1-r0);
-      gridx.set_entry(j, i, r*cos(2*M_PI*phi));
-      gridy.set_entry(j, i, r*sin(2*M_PI*phi));
+      sphi[1] = j/(double)(1<<resi);
+      basis.chart().map_point(sphi, y);
+      gridx.set_entry(j, i, y[0]);
+      gridy.set_entry(j, i, y[1]);
     }
   }
   Grid<2> grid(gridx, gridy);
@@ -59,7 +60,7 @@ int main()
 //   for (int i = 1; i <= 6; i++, ++lambda);
   cout << "  (lambda=" << lambda << " )" << endl;
   std::ofstream psistream("ring_wavelet.m");
-  SampledMapping<2> psism = basis.evaluate(lambda, 6);
+  SampledMapping<2> psism = basis.evaluate(lambda, resi);
   if (false) {
     // plot in the parameter domain
     psism.matlab_output(psistream);
@@ -76,9 +77,17 @@ int main()
   cout << "  (lambda=" << lambda << " )" << endl;
   InfiniteVector<double,Index> coeffs;
   coeffs[lambda] = 1.0;
-  std::ofstream psistream2("ring_wavelet2.m");
-  basis.evaluate(coeffs, 6).matlab_output(psistream2);
-  psistream2.close();
+  std::ofstream psi2stream("ring_wavelet2.m");
+  SampledMapping<2> psi2sm = basis.evaluate(coeffs, resi);
+  if (false) {
+    // plot in the parameter domain
+    psi2sm.matlab_output(psi2stream);
+  } else {
+    // plot in "world coordinates" on the ring
+    SampledMapping<2> help(grid,psi2sm.values());
+    help.matlab_output(psi2stream);
+  }
+  psi2stream.close();
   cout << "  ...done, see file ring_wavelet2.m!" << endl;
 #endif
 

@@ -17,6 +17,7 @@
 #include <utils/array1d.h>
 #include <utils/function.h>
 #include <geometry/sampled_mapping.h>
+#include <geometry/ring_chart.h>
 
 #include <Rd/cdf_basis.h>
 #include <interval/periodic.h>
@@ -76,6 +77,7 @@ namespace WaveletTL
     //! index of last wavelet on level j >= j0
     static Index last_wavelet(const int j);
 
+    const RingChart& chart() const { return chart_; }
 
     /*!
       Evaluate a single primal/dual generator or wavelet \psi_\lambda
@@ -129,6 +131,9 @@ namespace WaveletTL
 
     //! radii
     double r0_, r1_;
+
+    //! an instance of the corresponding chart
+    RingChart chart_;
   };
 }
 

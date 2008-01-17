@@ -38,8 +38,9 @@ namespace MathTL
      */
     virtual void map_point(const Point<DIM_d>& x, Point<DIM_m>& y) const = 0;
 
-
     /*!
+      special 1D version
+      TODO: remove this member in this generic branch!
      */
     virtual double map_point(const double, const int) const = 0;
 
@@ -49,6 +50,8 @@ namespace MathTL
     virtual void map_point_inv(const Point<DIM_d>& x, Point<DIM_m>& y) const = 0;
 
     /*!
+      special 1D version
+      TODO: remove this member in this generic branch!
      */
     virtual double map_point_inv(const double, const int) const = 0;
 
@@ -73,14 +76,16 @@ namespace MathTL
 				    const Point<DIM_d>& x) const = 0;
 
     /*!
+      return the i-th diagonal element in the case of kappa not depending on x
+      TODO: shift this virtual method into a subclass of Chart
+    */
+    virtual const double a_i(const int i) const = 0;
+    
+    /*!
       checks whether a special point x lies in the patch represented by this
       parametrization
     */
     virtual const bool in_patch(const Point<DIM_m>& x) const = 0;
-
-    /*!
-    */
-    virtual const double a_i(const int i) const = 0;    
 
     /*!
       returns a string representation of this object
@@ -88,9 +93,7 @@ namespace MathTL
     virtual const string to_string() const = 0;
   };
   
-  /*!
-    stream output for arbitrary charts
-  */
+  //! stream output for arbitrary charts
   template <unsigned int DIM_d, unsigned int DIM_m>
   std::ostream& operator << (std::ostream& s, const Chart<DIM_d,DIM_m>&);
 

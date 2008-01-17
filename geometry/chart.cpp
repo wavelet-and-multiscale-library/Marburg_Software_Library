@@ -569,6 +569,7 @@ namespace MathTL
     return 0.5 * (1.0 / Gram_factor(p)) * sgn_det_D * partial_i_det_DKappa;
    
   }
+
   //(dim = i, j = direc)
   inline
   const double LinearBezierMapping::partial_i_Kappa_j(const unsigned int i, const unsigned int j,

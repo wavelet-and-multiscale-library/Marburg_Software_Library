@@ -1,6 +1,7 @@
 #include <iostream>
 #include <time.h>
 #include <geometry/chart.h>
+#include <geometry/ring_chart.h>
 #include <geometry/point.h>
 #include <algebra/matrix.h>
 #include <algebra/vector.h>
@@ -50,6 +51,31 @@ int main()
   cout << "  y=" << y2 << " is mapped back to x=" << x2 << endl;
 
   cout << kappa_2 << endl;
+
+  const double r0 = 0.5;
+  const double r1 = 2.0;
+  cout << "* RingChart with r0=" << r0 << " and r1=" << r1 << ":" << endl;
+  RingChart rc(r0, r1);
+//   cout << rc.to_string() << endl;
+  Point<2> x3, y3;
+  x3[0] = 0;
+  x3[1] = 1;
+  rc.map_point(x3, y3);
+  cout << "x=" << x3 << " is mapped to y=" << y3 << endl;
+  rc.map_point_inv(y3, x3);
+  cout << "  y=" << y3 << " is mapped back to x=" << x3 << endl;
+  x3[0] = 0.5;
+  x3[1] = 0.75;
+  rc.map_point(x3, y3);
+  cout << "x=" << x3 << " is mapped to y=" << y3 << endl;
+  rc.map_point_inv(y3, x3);
+  cout << "  y=" << y3 << " is mapped back to x=" << x3 << endl;
+  x3[0] = 0.25;
+  x3[1] = 0.5;
+  rc.map_point(x3, y3);
+  cout << "x=" << x3 << " is mapped to y=" << y3 << endl;
+  rc.map_point_inv(y3, x3);
+  cout << "  y=" << y3 << " is mapped back to x=" << x3 << endl;
 
   //############## tests Manuel ###############
   cout << "Testing class LinearBezierMapping..." << endl;

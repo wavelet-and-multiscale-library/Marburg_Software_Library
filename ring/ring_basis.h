@@ -35,13 +35,23 @@ namespace WaveletTL
       R = {(x,y) : r_0 <= ||(x,y)|| <= r_1 }
     with complementary boundary conditions of order s0 at the interior boundary
     and of order s1 at the outer boundary.
+
+    The basis functions psi_lambda are constructed in such a way that we use the chart
+      kappa: (0,1)^2 -> R,
+      kappa(s,phi) = r(s)(cos(2*pi*phi),sin(2*pi*phi))
+    with
+      r(s) = r_0+s*(r_1-r_0).
+    The wavelets are then defined as
+      psi_lambda(x,y) = psi^0_lambda(kappa^{-1}(x,y))/|det Dkappa(kappa^{-1}(x,y))|^{1/2},
+    i.e.,
+      psi_lambda(kappa(s,phi)) = psi^0_lambda(s,phi)/(r(s))^{1/2}.
   */
   template <int d, int dt, int s0=0, int s1=0>
   class RingBasis
   {
   public:
     //! default constructor, also sets r0 and r1
-    RingBasis(const double r0 = 1.0, const double r1 = 2.0);
+    RingBasis(const double r0 = 0.5, const double r1 = 2.0);
     
     /*!
       coarsest possible level j0; we may assume that the interval basis in radial direction

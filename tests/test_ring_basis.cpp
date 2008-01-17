@@ -17,8 +17,11 @@ int main()
   const int d  = 2;
   const int dt = 2;
 
+  const double r0 = 0.5;
+  const double r1 = 2.0;
+
   typedef RingBasis<d,dt,1,0> Basis;
-  Basis basis;
+  Basis basis(r0, r1);
 
   typedef Basis::Index Index;
 
@@ -38,12 +41,33 @@ int main()
 #endif
 
 #if 1
+  const int resi = 6;
+  Matrix<double> gridx((1<<resi)+1), gridy((1<<resi)+1);
+  for (int i = 0; i <= 1<<resi; i++) {
+    const double phi = i/(double)(1<<resi);
+    for (int j = 0; j <= 1<<resi; j++) {
+      const double s = j/(double)(1<<resi);
+      const double r = r0+s*(r1-r0);
+      gridx.set_entry(j, i, r*cos(2*M_PI*phi));
+      gridy.set_entry(j, i, r*sin(2*M_PI*phi));
+    }
+  }
+  Grid<2> grid(gridx, gridy);
+
   cout << "- evaluating a primal generator..." << endl;
   Index lambda(basis.first_generator(basis.j0()));
 //   for (int i = 1; i <= 6; i++, ++lambda);
   cout << "  (lambda=" << lambda << " )" << endl;
   std::ofstream psistream("ring_wavelet.m");
-  basis.evaluate(lambda, 6).matlab_output(psistream);
+  SampledMapping<2> psism = basis.evaluate(lambda, 6);
+  if (false) {
+    // plot in the parameter domain
+    psism.matlab_output(psistream);
+  } else {
+    // plot in "world coordinates" on the ring
+    SampledMapping<2> help(grid,psism.values());
+    help.matlab_output(psistream);
+  }
   psistream.close();
   cout << "  ...done, see file ring_wavelet.m!" << endl;
   

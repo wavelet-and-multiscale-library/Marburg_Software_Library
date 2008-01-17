@@ -700,12 +700,12 @@ namespace WaveletTL
 
   template <class IBASIS, unsigned int DIM>
   double
-  CubeBasis<IBASIS,DIM>::evaluate(const bool primal, const unsigned int derivative, const Index& lambda, const Point<DIM> x) const
+  CubeBasis<IBASIS,DIM>::evaluate(const unsigned int derivative, const Index& lambda, const Point<DIM> x) const
   {
     double value = 1.0;
 
     for (unsigned int i = 0; i < DIM; i++) // loop through components of the tensor product
-      value *= bases_[i]->evaluate(primal, derivative,
+      value *= bases_[i]->evaluate(derivative,
                                    typename IBASIS::Index(lambda.j(), lambda.e()[i], lambda.k()[i], bases_[i]),
                                    x[i]);
 

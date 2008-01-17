@@ -88,7 +88,12 @@ namespace WaveletTL
 				resolution).values();
     values[1] = basis1.evaluate(typename Basis1::Index(lambda.j(), lambda.e()[1], lambda.k()[1]),
 				resolution).values();
-
+    // divide by the normalization factor r^{1/2}
+    for (int i = 0; i <= 1<<resolution; i++) {
+      const double r = r0_+i*ldexp(1.0, -resolution)*(r1_-r0_);
+      values[1][i] /= sqrt(r);
+    }
+    
     SampledMapping<2> result(Point<2>(0), Point<2>(1), values);
     return result; // gcc 2.95 does not like these two lines melted into one
   }

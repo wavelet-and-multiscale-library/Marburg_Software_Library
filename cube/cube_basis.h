@@ -237,8 +237,8 @@ namespace WaveletTL
     (const Function<DIM>* f,
      const Index& lambda) const;
 
-    //! point evaluation of (derivatives of) generators or wavelets \psi_\lambda
-    double evaluate(const bool primal, const unsigned int derivative, const Index& lambda, const Point<DIM> x) const;
+    //! point evaluation of (derivatives of) primal generators or wavelets \psi_\lambda
+    double evaluate(const unsigned int derivative, const Index& lambda, const Point<DIM> x) const;
 
     //! setup full collection of wavelets between j0_ and jmax_ as long as a jmax_ has been specified
     void setup_full_collection();

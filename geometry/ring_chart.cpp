@@ -45,7 +45,7 @@ namespace MathTL
     if (i==1) {
       return pow(r1_-r0_,1.5)/(M_2_SQRTPI*sqrt(r0_+x[1]*(r1_-r0_)));
     }
-    return 0; // det Dkappa does not depend on phi
+    return 0; // det Dkappa does not depend on phi(=x[0])
   }
 
   const double
@@ -53,10 +53,20 @@ namespace MathTL
 			const unsigned int j,
 			const Point<2>& x) const
   {
-    // todo
+    const double rsq = x[0]*x[0]+y[0]*y[0];
+    switch(2*i+j) {
+    case 0: // d/dx_1(kappa^{-1}(x))_1
+      return -x[1]/(2*M_PI*rsq);
+    case 1: // d/dx_2(kappa^{-1}(x))_1
+      return x[0]/(2*M_PI*rsq);
+    case 2: // d/dx_1(kappa^{-1}(x))_2
+      return x[0]/((r1_-r0_)*sqrt(rsq));
+    case 3: // d/dx_2(kappa^{-1}(x))_2
+      return x[1]/((r1_-r0_)*sqrt(rsq));
+    }
     return 0;
   }
-
+  
   const bool
   RingChart::in_patch(const Point<2>& x) const
   {

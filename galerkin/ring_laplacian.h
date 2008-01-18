@@ -58,9 +58,9 @@ namespace WaveletTL
     //! (half) order t of the operator
     static double operator_order() { return 1; }
 
-    //! evaluate the diagonal preconditioner D (essentially, we don't need any)
-    double D(const Index& lambda) const;
-
+    //! evaluate the diagonal preconditioner D
+    double D(const Index& lambda) const { return sqrt(a(lambda,lambda)); }
+    
     //! evaluate the (unpreconditioned) bilinear form a
     double a(const Index& lambda,
  	     const Index& nu) const;

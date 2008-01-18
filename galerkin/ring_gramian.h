@@ -31,7 +31,7 @@ namespace WaveletTL
   {
   public:
     //! wavelet basis class
-    typedef typename WaveletTL::RingBasis<d,dt,s0,s1> WaveletBasis;
+    typedef RingBasis<d,dt,s0,s1> WaveletBasis;
 
     //! wavelet index class
     typedef typename WaveletBasis::Index Index;

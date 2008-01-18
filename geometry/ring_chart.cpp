@@ -53,7 +53,7 @@ namespace MathTL
 			const unsigned int j,
 			const Point<2>& x) const
   {
-    const double rsq = x[0]*x[0]+y[0]*y[0];
+    const double rsq = x[0]*x[0]+x[1]*x[1];
     switch(2*i+j) {
     case 0: // d/dx_1(kappa^{-1}(x))_1
       return -x[1]/(2*M_PI*rsq);

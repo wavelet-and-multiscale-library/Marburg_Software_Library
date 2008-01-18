@@ -20,20 +20,22 @@ int main()
 
   const int d  = 2;
   const int dt = 2;
+  const int s0 = 0;
+  const int s1 = 0;
 
   const double r0 = 0.5;
   const double r1 = 2.0;
 
-  typedef RingBasis<d,dt,1,1> Basis;
+  typedef RingBasis<d,dt,s0,s1> Basis;
   Basis basis(r0, r1);
 
   typedef Basis::Index Index;
 
   const int j0 = basis.j0();
-  const int jmax = j0;
+  const int jmax = j0+3;
 
   Function<2>* u = 0;
-  const int testcase = 3;
+  const int testcase = 5;
   switch(testcase) {
   case 1:
     u = new RingFunction1(r0, r1);
@@ -46,6 +48,9 @@ int main()
     break;
   case 4:
     u = new RingFunction4(r0, r1);
+    break;
+  case 5:
+    u = new RingFunction4_RHS(r0, r1);
     break;
   default:
     u = new RingFunction1(r0, r1);

@@ -18,12 +18,12 @@ using namespace WaveletTL;
 
 int main()
 {
-  cout << "Testing wavelet bases on the ring-shaped domain ..." << endl;
+  cout << "Testing Gramian matrices of wavelet bases on the ring-shaped domain ..." << endl;
 
-  const int d  = 3;
-  const int dt = 3;
-  const int s0 = 1;
-  const int s1 = 1;
+  const int d  = 2;
+  const int dt = 2;
+  const int s0 = 0;
+  const int s1 = 0;
 
   const double r0 = 0.5;
   const double r1 = 2.0;
@@ -37,7 +37,7 @@ int main()
   const int jmax = j0+1;
 
   Function<2>* u = 0;
-  const int testcase = 4;
+  const int testcase = 5;
   switch(testcase) {
   case 1:
     u = new RingFunction1(r0, r1);
@@ -50,6 +50,9 @@ int main()
     break;
   case 4:
     u = new RingFunction4(r0, r1);
+    break;
+  case 5:
+    u = new RingFunction4_RHS(r0, r1);
     break;
   default:
     u = new RingFunction1(r0, r1);

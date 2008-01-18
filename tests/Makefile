@@ -111,7 +111,7 @@ EXEOBJF3 = \
 # set 3a of test programs: wavelet bases on the ring domain
 EXEOBJF3a = \
   test_ring_basis.o test_ring_expansion.o\
-  test_ring_gramian.o
+  test_ring_gramian.o test_ring_laplacian.o
 
 # set 4 of test programs: wavelet bases on the L-domain
 EXEOBJF4 = \

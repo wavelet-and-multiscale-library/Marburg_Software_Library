@@ -8,6 +8,14 @@ namespace WaveletTL
     : basis_(basis), y_(y)
   {
   }
-
+  
+  template <int d, int dt, int s0, int s1>
+  inline
+  double
+  RingGramian<d,dt,s0,s1>::a(const Index& lambda,
+			     const Index& nu) const
+  {
+    return basis_.integrate(lambda, nu);
+  }
 
 }

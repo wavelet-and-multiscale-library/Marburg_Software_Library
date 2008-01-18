@@ -188,7 +188,7 @@ namespace WaveletTL
       // wavelets, it suffices to compute the (1D) integrals
       //   int_0^1 int_0^1 psi^0_lambda(phi,s) psi^0_mu(phi,s) dphi ds,
       // since both the 2*pi*(r1-r0) and the r(s) completely cancel out.
-
+      
       typedef PeriodicBasis<CDFBasis<d,dt> >             Basis0;
       typedef SplineBasis<d,dt,P_construction,s0,s1,0,0> Basis1;
       typedef typename Basis0::Index Index0;
@@ -206,9 +206,6 @@ namespace WaveletTL
 //   	   it != itend; ++it)
 //   	cout << *it << endl;
       
-//       double entry = basis0.integrate(*it2, *it1);
-//      double entry = basis1.integrate(*it2, *it1);
-      
       // setup global Gramian A_Lambda
       SparseMatrix<double> A_Lambda(Lambda.size());
       size_type row = 0;
@@ -222,11 +219,7 @@ namespace WaveletTL
 	  for (typename std::set<Index>::const_iterator it2(Lambda.begin());
 	       it2 != itend; ++it2, ++column)
 	    {
-	      double entry
-		= basis0.integrate(Index0(it2->j(), it2->e()[0], it2->k()[0]),
-				   Index0(it1->j(), it1->e()[0], it1->k()[0]))
-		* basis1.integrate(Index1(it2->j(), it2->e()[1], it2->k()[1]),
-				   Index1(it1->j(), it1->e()[1], it1->k()[1]));
+	      double entry = integrate(*it2, *it1);
 	      
 	      if (fabs(entry) > 1e-15) {
 		indices.push_back(column);
@@ -388,5 +381,22 @@ namespace WaveletTL
 
     return r;
   }
-  
+
+  template <int d, int dt, int s0, int s1>
+  inline
+  double
+  RingBasis<d,dt,s0,s1>::integrate(const Index& lambda,
+				   const Index& mu) const
+  {
+    typedef PeriodicBasis<CDFBasis<d,dt> >             Basis0;
+    typedef SplineBasis<d,dt,P_construction,s0,s1,0,0> Basis1;
+    typedef typename Basis0::Index Index0;
+    typedef typename Basis1::Index Index1;
+    
+    return
+      basis0.integrate(Index0(lambda.j(), lambda.e()[0], lambda.k()[0]),
+		       Index0(mu.j(), mu.e()[0], mu.k()[0]))
+      * basis1.integrate(Index1(lambda.j(), lambda.e()[1], lambda.k()[1]),
+			 Index1(mu.j(), mu.e()[1], mu.k()[1]));
+  }
 }

@@ -45,7 +45,7 @@ int main()
     u = new RingFunction3(r0, r1);
     break;
   case 4:
-    u = new RingFunction4();
+    u = new RingFunction4(r0, r1);
     break;
   default:
     u = new RingFunction1(r0, r1);

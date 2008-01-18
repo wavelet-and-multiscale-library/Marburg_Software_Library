@@ -64,19 +64,22 @@ namespace WaveletTL
     double r0_, r1_;
   };
 
-  // a quadratic polynomial in r
+  // a quadratic polynomial in r, divided by sqrt(2*Pi*(r1-r0)*r)
   class RingFunction4
     : public Function<2>
   {
   public:
+    RingFunction4(const double r0, const double r1) : r0_(r0), r1_(r1) {}
     inline double value(const Point<2>& p, const unsigned int component = 0) const {
       const double r = sqrt(p[0]*p[0]+p[1]*p[1]);
-      return (2-r)*(r-1);
+      return (r1_-r)*(r-r0_)/sqrt(2*M_PI*(r1_-r0_)*r);
     }
     void vector_value(const Point<2> &p, Vector<double>& values) const {
       values.resize(1, false);
       values[0] = value(p);
     }
+  private:
+    double r0_, r1_;
   };
 
 }

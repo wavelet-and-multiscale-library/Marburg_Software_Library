@@ -51,6 +51,21 @@ namespace WaveletTL
   class RingBasis
   {
   public:
+    //! wavelet index class
+    typedef RingIndex<d,dt,s0,s1> Index;
+
+    //! type of 1D basis in angular direction
+    typedef PeriodicBasis<CDFBasis<d,dt> > Basis0;
+    
+    //! type of 1D indices in angular direction
+    typedef typename Basis0::Index Index0;
+    
+    //! type of 1D basis in radial direction
+    typedef SplineBasis<d,dt,P_construction,s0,s1,0,0> Basis1;
+
+    //! type of 1D indices in radial direction
+    typedef typename Basis1::Index Index1;
+
     //! default constructor, also sets r0 and r1
     RingBasis(const double r0 = 0.5, const double r1 = 2.0);
     
@@ -59,11 +74,8 @@ namespace WaveletTL
       has a larger minimal level than the corresponding periodic basis
     */
     static const int j0() {
-      return SplineBasis<d,dt,P_construction,s0,s1,0,0>::j0();
+      return Basis1::j0();
     }
-
-    //! wavelet index class
-    typedef RingIndex<d,dt,s0,s1> Index;
 
     //! index of first generator on level j >= j0
     static Index first_generator(const int j);
@@ -85,7 +97,12 @@ namespace WaveletTL
     static int Nabla10size(const int j);
     static int Nabla11size(const int j);
 
+    //! the chart
     const RingChart& chart() const { return chart_; }
+
+    //! the radii
+    const double r0() const { return r0_; }
+    const double r1() const { return r1_; }
 
     /*!
       Evaluate a single primal/dual generator or wavelet \psi_\lambda
@@ -130,12 +147,28 @@ namespace WaveletTL
     (const Index& lambda,
      const Index& mu) const;
 
+    /*!
+      helper function for RingLaplacian, compute various 1D integrals
+      in angular direction (cf. RingLaplacian::a())
+    */
+    void angular_integrals(const Index0& lambda,
+			   const Index0& mu,
+			   double& I1, double& I2) const;
+
+    /*!
+      helper function for RingLaplacian, compute various 1D integrals
+      in radial direction (cf. RingLaplacian::a())
+    */
+    void radial_integrals(const Index1& lambda,
+			  const Index1& mu,
+			  double& I3, double& I4, double& I5, double& I6) const;
+
   protected:
     //! an instance of the periodic basis (angular direction)
-    PeriodicBasis<CDFBasis<d,dt> > basis0;
+    Basis0 basis0;
 
     //! an instance of the nonperiodic basis (radial direction)
-    SplineBasis<d,dt,P_construction,s0,s1,0,0> basis1;
+    Basis1 basis1;
 
     //! radii
     double r0_, r1_;

@@ -20,10 +20,10 @@ int main()
 {
   cout << "Testing Gramian matrices of wavelet bases on the ring-shaped domain ..." << endl;
 
-  const int d  = 2;
-  const int dt = 2;
-  const int s0 = 0;
-  const int s1 = 0;
+  const int d  = 3;
+  const int dt = 3;
+  const int s0 = 1;
+  const int s1 = 1;
 
   const double r0 = 0.5;
   const double r1 = 2.0;
@@ -37,7 +37,7 @@ int main()
   const int jmax = j0+1;
 
   Function<2>* u = 0;
-  const int testcase = 5;
+  const int testcase = 4;
   switch(testcase) {
   case 1:
     u = new RingFunction1(r0, r1);

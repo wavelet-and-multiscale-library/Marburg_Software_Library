@@ -20,8 +20,8 @@ int main()
 {
   cout << "Testing discretizations of the Laplacian with wavelet bases on the ring-shaped domain ..." << endl;
 
-  const int d  = 2;
-  const int dt = 2;
+  const int d  = 3;
+  const int dt = 3;
   const int s0 = 1;
   const int s1 = 1;
 
@@ -34,7 +34,7 @@ int main()
   typedef Basis::Index Index;
 
   const int j0 = basis.j0();
-  const int jmax = j0+1;
+  const int jmax = j0;
 
   Function<2> *uexact = 0, *f = 0;
   const int testcase = 4;
@@ -62,7 +62,7 @@ int main()
   }
   Grid<2> grid(gridx, gridy);
 
-#if 0
+#if 1
   {
     // plot solution and right-hand side
     cout << "- plotting the exact solution..." << endl;

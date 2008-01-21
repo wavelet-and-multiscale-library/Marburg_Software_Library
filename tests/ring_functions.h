@@ -90,7 +90,7 @@ namespace WaveletTL
     RingFunction4_RHS(const double r0, const double r1) : r0_(r0), r1_(r1) {}
     inline double value(const Point<2>& p, const unsigned int component = 0) const {
       const double r = sqrt(p[0]*p[0]+p[1]*p[1]);
-      return -(-9*r*r+(r0_+r1_)*r-r0_*r1_)/(8*r*r*sqrt(r)*M_PI*(r1_-r0_));
+      return -(-9*r*r+(r0_+r1_)*r-r0_*r1_)/(4*r*r*sqrt(2*M_PI*(r1_-r0_)*r));
     }
     void vector_value(const Point<2> &p, Vector<double>& values) const {
       values.resize(1, false);

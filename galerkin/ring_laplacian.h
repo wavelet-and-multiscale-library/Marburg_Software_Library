@@ -43,7 +43,7 @@ namespace WaveletTL
     
     //! constructor from a given wavelet basis and a given right-hand side y
     RingLaplacian(const WaveletBasis& basis,
-		const InfiniteVector<double,Index>& y);
+		  const InfiniteVector<double,Index>& y);
 
     //! read access to the basis
     const WaveletBasis& basis() const { return basis_; }
@@ -63,7 +63,7 @@ namespace WaveletTL
     
     //! evaluate the (unpreconditioned) bilinear form a
     double a(const Index& lambda,
- 	     const Index& nu) const;
+ 	     const Index& mu) const;
 
     //! estimate the spectral norm ||A||
     double norm_A() const;

@@ -34,12 +34,12 @@ int main()
   typedef Basis::Index Index;
 
   const int j0 = basis.j0();
-  const int jmax = j0+4;
+  const int jmax = j0+2;
 
   cout << "j0=" << j0 << ", jmax=" << jmax << endl;
 
   Function<2>* u = 0;
-  const int testcase = 4;
+  const int testcase = 3;
   switch(testcase) {
   case 1:
     u = new RingFunction1(r0, r1);

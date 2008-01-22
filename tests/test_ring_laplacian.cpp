@@ -8,6 +8,7 @@
 #include <numerics/iteratsolv.h>
 #include <ring/ring_basis.h>
 #include <galerkin/galerkin_utils.h>
+#include <galerkin/ring_gramian.h>
 #include <galerkin/ring_laplacian.h>
 #include "ring_functions.h"
 
@@ -20,8 +21,8 @@ int main()
 {
   cout << "Testing discretizations of the Laplacian with wavelet bases on the ring-shaped domain ..." << endl;
 
-  const int d  = 2;
-  const int dt = 2;
+  const int d  = 3;
+  const int dt = 3;
   const int s0 = 1;
   const int s1 = 1;
 
@@ -34,7 +35,7 @@ int main()
   typedef Basis::Index Index;
 
   const int j0 = basis.j0();
-  const int jmax = j0+4;
+  const int jmax = j0+1;
 
   cout << "j0=" << j0 << ", jmax=" << jmax << endl;
 

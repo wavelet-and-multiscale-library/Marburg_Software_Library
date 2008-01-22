@@ -723,6 +723,140 @@ namespace WaveletTL
   template <>
   inline
   const int
+  SplineBasisData<3,3,P_construction,1,0,0,0>::j0() {
+    return 3;
+  }
+
+  template <>
+  SplineBasisData<3,3,P_construction,1,0,0,0>::SplineBasisData()
+  {
+    Matrix<double> Mj0_l(3, 1, "0.5 0.75 0.25");
+    Matrix<double> Mj0_r(4, 2, "0.25 0 0.75 0 0.5 0.5 0 1");
+    Vector<double> Mj0_band_lr(4, "0.25 0.75 0.75 0.25");
+    Mj0_ = QuasiStationaryMatrix<double>(j0(), 17, 9, Mj0_l, Mj0_r, Mj0_band_lr, Mj0_band_lr, 1, 2, M_SQRT1_2);
+    std::ostringstream entries;
+    entries << "5.4375 -2.09375 0.46875 "
+	    << "4.21875 0.328125 -0.140625 "
+	    << "0.46875 3.203125 -0.515625 "
+	    << "-2.109375 4.9921875 -0.8671875 "
+	    << "0.703125 -0.9140625 4.2890625 "
+	    << "0 -0.84375 4.21875 "
+	    << "0 0.28125 -0.65625 "
+	    << "0 0 -0.84375 "
+	    << "0 0 0.28125";
+    Matrix<double> Mj0T_l(9, 3, entries.str().c_str()); Mj0T_l.scale(1./3.);
+    entries.str("");
+    entries << "0.84375 0 0 0 "
+	    << "-2.53125 0 0 0 "
+	    << "-1.96875 0.84375 0 0 "
+	    << "12.65625 -2.53125 0 0 "
+	    << "12.8671875 -2.7421875 2.109375 0 "
+	    << "-2.6015625 14.9765625 -6.328125 0 "
+	    << "-1.828125 10.765625 -1.03125 2.25 "
+	    << "0.421875 -2.484375 19.96875 -6.75 "
+	    << "0.28125 -1.65625 6.5625 9 "
+	    << "-0.140625 0.828125 -3.28125 13.5";
+    Matrix<double> Mj0T_r(10, 4, entries.str().c_str()); Mj0T_r.scale(1./9.);
+    Vector<double> Mj0T_band_lr(8, "0.09375 -0.28125 -0.21875 1.40625 1.40625 -0.21875 -0.28125 0.09375");
+    Mj0T_ = QuasiStationaryMatrix<double>(j0(), 17, 9, Mj0T_l, Mj0T_r, Mj0T_band_lr, Mj0T_band_lr, 3, 4, M_SQRT1_2);
+    entries.str("");
+    entries << "-1.23046875 -0.46875 "
+	    << "1.3330078125 -0.1171875 "
+	    << "-0.0791015625 1.5234375 "
+	    << "-0.544921875 -1.171875 "
+	    << "-0.064453125 -0.203125 "
+	    << "0.1318359375 0.2109375 "
+	    << "0.0439453125 0.0703125";
+    Matrix<double> Mj1_l(7, 2, entries.str().c_str()); Mj1_l.scale(1./3.);
+    entries.str("");
+    entries << "-0.6328125 0.0703125 "
+	    << "-1.8984375 0.2109375 "
+	    << "1.828125 -0.203125 "
+	    << "10.546875 -1.171875 "
+	    << "-13.7109375 0.3984375 "
+	    << "1.0546875 4.5078125 "
+	    << "4.21875 -10.21875 "
+	    << "0 9";
+    Matrix<double> Mj1_r(8, 2, entries.str().c_str()); Mj1_r.scale(1./27.);
+    Vector<double> Mj1_band_lr(8, "-0.09375 -0.28125 0.21875 1.40625 -1.40625 -0.21875 0.28125 0.09375"); Mj1_band_lr.scale(1./3.);
+    Mj1_ = QuasiStationaryMatrix<double>(j0(), 17, 8, Mj1_l, Mj1_r, Mj1_band_lr, Mj1_band_lr, 1, 2, M_SQRT1_2);
+    Matrix<double> Mj1T_l(3, 1, "-8 6 -2"); Mj1T_l.scale(1./3.);
+    Matrix<double> Mj1T_r(4, 1, "-2.25 6.75 -9 4.5"); Mj1T_r.scale(1./3.);
+    Vector<double> Mj1T_band_lr(4, "-0.75 2.25 -2.25 0.75");
+    Mj1T_ = QuasiStationaryMatrix<double>(j0(), 17, 8, Mj1T_l, Mj1T_r, Mj1T_band_lr, Mj1T_band_lr, 1, 2, M_SQRT1_2);
+    CDF_factor = 1./3.;
+  }
+
+  template <>
+  inline
+  const int
+  SplineBasisData<3,3,P_construction,0,1,0,0>::j0() {
+    return 3;
+  }
+
+  template <>
+  SplineBasisData<3,3,P_construction,0,1,0,0>::SplineBasisData()
+  {
+    Matrix<double> Mj0_l(4, 2, "1 0 0.5 0.5 0 0.75 0 0.25");
+    Matrix<double> Mj0_r(3, 1, "0.25 0.75 0.5");
+    Vector<double> Mj0_band_lr(4, "0.25 0.75 0.75 0.25");
+    Mj0_ = QuasiStationaryMatrix<double>(j0(), 17, 9, Mj0_l, Mj0_r, Mj0_band_lr, Mj0_band_lr, 2, 1, M_SQRT1_2);
+    std::ostringstream entries;
+    entries << "13.5 -3.28125 0.828125 -0.140625 "
+	    << "9 6.5625 -1.65625 0.28125 "
+	    << "-6.75 19.96875 -2.484375 0.421875 "
+	    << "2.25 -1.03125 10.765625 -1.828125 "
+	    << "0 -6.328125 14.9765625 -2.6015625 "
+	    << "0 2.109375 -2.7421875 12.8671875 "
+	    << "0 0 -2.53125 12.65625 "
+	    << "0 0 0.84375 -1.96875 "
+	    << "0 0 0 -2.53125 "
+	    << "0 0 0 0.84375";
+    Matrix<double> Mj0T_l(10, 4, entries.str().c_str()); Mj0T_l.scale(1./9.);
+    entries.str("");
+    entries << "0.28125 0 0 "
+	    << "-0.84375 0 0 "
+	    << "-0.65625 0.28125 0 "
+	    << "4.21875 -0.84375 0 "
+	    << "4.2890625 -0.9140625 0.703125 "
+	    << "-0.8671875 4.9921875 -2.109375 "
+	    << "-0.515625 3.203125 0.46875 "
+	    << "-0.140625 0.328125 4.21875 "
+	    << "0.46875 -2.09375 5.4375";
+    Matrix<double> Mj0T_r(9, 3, entries.str().c_str()); Mj0T_r.scale(1./3.);
+    Vector<double> Mj0T_band_lr(8, "0.09375 -0.28125 -0.21875 1.40625 1.40625 -0.21875 -0.28125 0.09375");
+    Mj0T_ = QuasiStationaryMatrix<double>(j0(), 17, 9, Mj0T_l, Mj0T_r, Mj0T_band_lr, Mj0T_band_lr, 4, 3, M_SQRT1_2);
+    entries.str("");
+    entries << "10.125 0 "
+	    << "-11.49609375 -4.21875 "
+	    << "5.0712890625 -1.0546875 "
+	    << "0.4482421875 13.7109375 "
+	    << "-1.318359375 -10.546875 "
+	    << "-0.228515625 -1.828125 "
+	    << "0.2373046875 1.8984375 "
+	    << "0.0791015625 0.6328125";
+    Matrix<double> Mj1_l(8, 2, entries.str().c_str()); Mj1_l.scale(1./27.);
+    entries.str("");
+    entries << "-0.2109375 0.1171875 "
+	    << "-0.6328125 0.3515625 "
+	    << "0.609375 -0.171875 "
+	    << "3.515625 -1.453125 "
+	    << "-4.5703125 -0.2109375 "
+	    << "0.3515625 3.5546875 "
+	    << "1.40625 -3.28125";
+    Matrix<double> Mj1_r(7, 2, entries.str().c_str()); Mj1_r.scale(1./9.);
+    Vector<double> Mj1_band_lr(8, "-0.09375 -0.28125 0.21875 1.40625 -1.40625 -0.21875 0.28125 0.09375"); Mj1_band_lr.scale(1./3.);
+    Mj1_ = QuasiStationaryMatrix<double>(j0(), 17, 8, Mj1_l, Mj1_r, Mj1_band_lr, Mj1_band_lr, 2, 1, M_SQRT1_2);
+    Matrix<double> Mj1T_l(4, 1, "4 -8 6 -2"); Mj1T_l.scale(1./3.);
+    Matrix<double> Mj1T_r(3, 1, "-0.75 2.25 -3");
+    Vector<double> Mj1T_band_lr(4, "-0.75 2.25 -2.25 0.75");
+    Mj1T_ = QuasiStationaryMatrix<double>(j0(), 17, 8, Mj1T_l, Mj1T_r, Mj1T_band_lr, Mj1T_band_lr, 2, 1, M_SQRT1_2);
+    CDF_factor = 1./3.;
+  }
+
+  template <>
+  inline
+  const int
   SplineBasisData<3,3,P_construction,1,1,0,0>::j0() {
     return 3;
   }

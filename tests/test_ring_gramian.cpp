@@ -39,7 +39,7 @@ int main()
   cout << "j0=" << j0 << ", jmax=" << jmax << endl;
 
   Function<2>* u = 0;
-  const int testcase = 3;
+  const int testcase = 4;
   switch(testcase) {
   case 1:
     u = new RingFunction1(r0, r1);

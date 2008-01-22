@@ -175,7 +175,7 @@ namespace WaveletTL
 	  } else {
 	    // interior wavelet (CDF)
 	    // note: despite the fact that the wavelets in the right half of the interval
-	    //       are reflected CDF wavelets, their support does not "see" the reflection!
+	    //       may be reflected CDF wavelets, their support does not "see" the reflection!
 	    k1 = 2*(lambda.k()-(d+dT)/2+1);
 	    k2 = k1+2*(d+dT)-2;
 	  }
@@ -924,9 +924,13 @@ namespace WaveletTL
 	    for (unsigned int i = 0; i < values.size(); i++)
 	      values[i] *= SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::CDF_factor;
 	  } else {
- 	    // right half, reflect at 0.5 for d odd (i.e., multiply by (-1)^d)
- 	    for (unsigned int i = 0; i < values.size(); i++)
- 	      values[i] *= minus1power(d)*SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::CDF_factor;
+ 	    // right half, reflect at 0.5 for d odd and s0==s1 (i.e., multiply by (-1)^d)
+	    if (s0 == s1)
+	      for (unsigned int i = 0; i < values.size(); i++)
+		values[i] *= minus1power(d)*SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::CDF_factor;
+	    else
+	      for (unsigned int i = 0; i < values.size(); i++)
+		values[i] *= SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::CDF_factor;	      
 	  }
 	}
       else
@@ -1067,6 +1071,57 @@ namespace WaveletTL
 	}
       }
     } else {
+#if 1
+      // new version, determine first whether we have an interior wavelet
+      typedef typename Vector<double>::size_type size_type;
+      const size_type w_number = lambda.k()-Nablamin();
+      if (w_number >= SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.ML_column_dimension()
+	  && w_number < Nablasize(lambda.j())-SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.MR_column_dimension())
+	{
+	  // an interior wavelet
+	  const RIndex lambda_R(lambda.j(),lambda.e(),lambda.k());
+	  CDFBasis<d,dT>::evaluate(0, lambda_R, points, funcvalues);
+	  CDFBasis<d,dT>::evaluate(1, lambda_R, points, dervalues);
+	  if (w_number < (size_type)Nablasize(lambda.j()-1)) {
+	    // left half
+	    for (unsigned int i = 0; i < funcvalues.size(); i++)
+	      funcvalues[i] *= SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::CDF_factor;
+	    for (unsigned int i = 0; i < funcvalues.size(); i++)
+	      dervalues[i]  *= SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::CDF_factor;
+	  } else {
+ 	    // right half, reflect at 0.5 for d odd and s0==s1 (i.e., multiply by (-1)^d)
+	    if (s0 == s1) {
+	      for (unsigned int i = 0; i < funcvalues.size(); i++)
+		funcvalues[i] *= minus1power(d)*SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::CDF_factor;
+	      for (unsigned int i = 0; i < funcvalues.size(); i++)
+		dervalues[i]  *= minus1power(d)*SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::CDF_factor;
+	    } else {
+	      for (unsigned int i = 0; i < funcvalues.size(); i++)
+		funcvalues[i] *= SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::CDF_factor;
+	      for (unsigned int i = 0; i < funcvalues.size(); i++)
+		dervalues[i] *= SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::CDF_factor;
+	    }
+	  }
+	}
+      else
+	{
+	  // boundary wavelet, use old code
+	  std::map<size_type,double> wc, gc;
+	  wc[w_number] = 1.0;
+	  SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.set_level(lambda.j());
+	  SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.apply(wc, gc, 0, 0);
+	  typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index Index;
+	  Array1D<double> fhelp(points.size()), dhelp(points.size());
+	  for (typename std::map<size_type,double>::const_iterator it(gc.begin());
+	       it != gc.end(); ++it) {
+	    evaluate(Index(lambda.j()+1, 0, DeltaLmin()+it->first), points, fhelp, dhelp);
+	    for (unsigned int i = 0; i < points.size(); i++)
+	      funcvalues[i] += it->second * fhelp[i];
+	    for (unsigned int i = 0; i < points.size(); i++)
+	      dervalues[i] += it->second * dhelp[i];
+	  }
+	}
+#else
       // old version, switch to generator representation for all wavelets
       typedef typename Vector<double>::size_type size_type;
       std::map<size_type,double> wc, gc;
@@ -1074,15 +1129,16 @@ namespace WaveletTL
       SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.set_level(lambda.j());
       SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.apply(wc, gc, 0, 0);
       typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index Index;
-      Array1D<double> help1, help2;
+      Array1D<double> fhelp(points.size()), dhelp(points.size());
       for (typename std::map<size_type,double>::const_iterator it(gc.begin());
 	   it != gc.end(); ++it) {
-	evaluate(Index(lambda.j()+1, 0, DeltaLmin()+it->first), points, help1, help2);
-	for (unsigned int i = 0; i < npoints; i++) {
-	  funcvalues[i] += it->second * help1[i];
-	  dervalues[i]  += it->second * help2[i];
+	evaluate(Index(lambda.j()+1, 0, DeltaLmin()+it->first), points, fhelp, dhelp);
+	for (unsigned int i = 0; i < points.size(); i++) {
+	  funcvalues[i] += it->second * fhelp[i];
+	  dervalues[i] += it->second * dhelp[i];
 	}
       }
+#endif
     }
   }
   

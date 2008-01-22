@@ -31,8 +31,9 @@ namespace MathTL
     y[1] = (sqrt(x[0]*x[0]+x[1]*x[1])-r0_)/(r1_-r0_);
   }
   
-  const double
+  const
   inline
+  double
   RingChart::Gram_factor(const Point<2>& x) const
   {
     return sqrt(2*M_PI*(r1_-r0_)*(r0_+x[1]*(r1_-r0_)));

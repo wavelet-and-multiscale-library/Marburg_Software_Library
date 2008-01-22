@@ -11,7 +11,7 @@
 #define _WAVELETTL_RING_GRAMIAN_H
 
 #include <set>
-#include <utils/fixed_array1d.h>
+#include <map>
 #include <utils/array1d.h>
 #include <algebra/infinite_vector.h>
 #include <algebra/vector.h>
@@ -36,6 +36,18 @@ namespace WaveletTL
     //! wavelet index class
     typedef typename WaveletBasis::Index Index;
     
+    //! type of 1D basis in angular direction
+    typedef PeriodicBasis<CDFBasis<d,dt> > Basis0;
+    
+    //! type of 1D indices in angular direction
+    typedef typename Basis0::Index Index0;
+    
+    //! type of 1D basis in radial direction
+    typedef SplineBasis<d,dt,P_construction,s0,s1,0,0> Basis1;
+
+    //! type of 1D indices in radial direction
+    typedef typename Basis1::Index Index1;
+
     //! index type of vectors and matrices
     typedef typename Vector<double>::size_type size_type;
     
@@ -107,11 +119,29 @@ namespace WaveletTL
   protected:
     const WaveletBasis& basis_;
     
-    // rhs, mutable to have 'const' method
+    //! rhs, mutable to have 'const' method
     mutable InfiniteVector<double,Index> y_;
     
-    // estimates for ||A|| and ||A^{-1}||
+    //! estimates for ||A|| and ||A^{-1}||
     mutable double normA, normAinv;
+
+    // class for columns of 1D integral cache in angular direction
+    typedef std::map<Index0,double> Column1D_0;
+
+    // class for columns of 1D integral cache in radial direction
+    typedef std::map<Index1,double> Column1D_1;
+
+    // class for 1D integral cache in angular direction
+    typedef std::map<Index0,Column1D_0> One_D_IntegralCache0;
+    
+    // class for 1D integral cache in radial direction
+    typedef std::map<Index1,Column1D_1> One_D_IntegralCache1;
+    
+    //! cache for 1D integrals in angular direction
+    mutable One_D_IntegralCache0 one_d_integrals0;
+    
+    //! cache for 1D integrals in radial direction
+    mutable One_D_IntegralCache1 one_d_integrals1;
   };
   
 }

@@ -104,6 +104,10 @@ namespace WaveletTL
     const double r0() const { return r0_; }
     const double r1() const { return r1_; }
 
+    //! the 1D bases
+    const Basis0& basis0() const { return basis0_; }
+    const Basis1& basis1() const { return basis1_; }
+
     /*!
       Evaluate a single primal/dual generator or wavelet \psi_\lambda
       on a "dyadic" subgrid of the ring, pulled back to the unit square
@@ -147,28 +151,12 @@ namespace WaveletTL
     (const Index& lambda,
      const Index& mu) const;
 
-    /*!
-      helper function for RingLaplacian, compute various 1D integrals
-      in angular direction (cf. RingLaplacian::a())
-    */
-    void angular_integrals(const Index0& lambda,
-			   const Index0& mu,
-			   double& I1, double& I2) const;
-
-    /*!
-      helper function for RingLaplacian, compute various 1D integrals
-      in radial direction (cf. RingLaplacian::a())
-    */
-    void radial_integrals(const Index1& lambda,
-			  const Index1& mu,
-			  double& I3, double& I4, double& I5, double& I6) const;
-
   protected:
     //! an instance of the periodic basis (angular direction)
-    Basis0 basis0;
+    Basis0 basis0_;
 
     //! an instance of the nonperiodic basis (radial direction)
-    Basis1 basis1;
+    Basis1 basis1_;
 
     //! radii
     double r0_, r1_;

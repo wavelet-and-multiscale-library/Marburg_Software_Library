@@ -20,8 +20,8 @@ int main()
 {
   cout << "Testing Gramian matrices of wavelet bases on the ring-shaped domain ..." << endl;
 
-  const int d  = 3;
-  const int dt = 3;
+  const int d  = 2;
+  const int dt = 2;
   const int s0 = 1;
   const int s1 = 1;
 
@@ -34,7 +34,9 @@ int main()
   typedef Basis::Index Index;
 
   const int j0 = basis.j0();
-  const int jmax = j0+1;
+  const int jmax = j0+4;
+
+  cout << "j0=" << j0 << ", jmax=" << jmax << endl;
 
   Function<2>* u = 0;
   const int testcase = 4;
@@ -150,6 +152,10 @@ int main()
   cout << "  ...done, see file exp_error.m!" << endl;
 #endif
   
+#if 0
+  // infinite loop to measure the memory consumption
+  while (true) {}
+#endif
 
   if (u) delete u;
 

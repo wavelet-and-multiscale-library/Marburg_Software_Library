@@ -11,6 +11,7 @@
 #define _WAVELETTL_RING_LAPLACIAN_H
 
 #include <set>
+#include <map>
 #include <utils/fixed_array1d.h>
 #include <utils/array1d.h>
 #include <algebra/infinite_vector.h>
@@ -38,6 +39,18 @@ namespace WaveletTL
     //! wavelet index class
     typedef typename WaveletBasis::Index Index;
     
+    //! type of 1D basis in angular direction
+    typedef PeriodicBasis<CDFBasis<d,dt> > Basis0;
+    
+    //! type of 1D indices in angular direction
+    typedef typename Basis0::Index Index0;
+    
+    //! type of 1D basis in radial direction
+    typedef SplineBasis<d,dt,P_construction,s0,s1,0,0> Basis1;
+
+    //! type of 1D indices in radial direction
+    typedef typename Basis1::Index Index1;
+  
     //! index type of vectors and matrices
     typedef typename Vector<double>::size_type size_type;
     
@@ -114,6 +127,40 @@ namespace WaveletTL
     
     // estimates for ||A|| and ||A^{-1}||
     mutable double normA, normAinv;
+
+    // class for columns of 1D integral cache in angular direction
+    typedef std::map<Index0,FixedArray1D<double,2> > Column1D_0;
+
+    // class for columns of 1D integral cache in radial direction
+    typedef std::map<Index1,FixedArray1D<double,4> > Column1D_1;
+
+    // class for 1D integral cache in angular direction
+    typedef std::map<Index0,Column1D_0> One_D_IntegralCache0;
+    
+    // class for 1D integral cache in radial direction
+    typedef std::map<Index1,Column1D_1> One_D_IntegralCache1;
+
+    //! cache for 1D integrals in angular direction
+    mutable One_D_IntegralCache0 i12_cache;
+    
+    //! cache for 1D integrals in radial direction
+    mutable One_D_IntegralCache1 i3456_cache;
+
+    /*!
+      helper function for RingLaplacian, compute various 1D integrals
+      in angular direction (cf. RingLaplacian::a())
+    */
+    void angular_integrals(const Index0& lambda,
+			   const Index0& mu,
+			   double& I1, double& I2) const;
+
+    /*!
+      helper function for RingLaplacian, compute various 1D integrals
+      in radial direction (cf. RingLaplacian::a())
+    */
+    void radial_integrals(const Index1& lambda,
+			  const Index1& mu,
+			  double& I3, double& I4, double& I5, double& I6) const;
   };
   
 }

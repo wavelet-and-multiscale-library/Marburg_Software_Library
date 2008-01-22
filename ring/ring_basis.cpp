@@ -116,10 +116,10 @@ namespace WaveletTL
   {
     FixedArray1D<Array1D<double>,2> values; // point values of the factors within psi_lambda
 
-    values[0] = basis0.evaluate(Index0(lambda.j(), lambda.e()[0], lambda.k()[0]),
-				resolution).values();
-    values[1] = basis1.evaluate(Index1(lambda.j(), lambda.e()[1], lambda.k()[1]),
-				resolution).values();
+    values[0] = basis0_.evaluate(Index0(lambda.j(), lambda.e()[0], lambda.k()[0]),
+				 resolution).values();
+    values[1] = basis1_.evaluate(Index1(lambda.j(), lambda.e()[1], lambda.k()[1]),
+				 resolution).values();
     // adjust "radial" values by the normalization factor
     const double help = sqrt(2*M_PI*(r1_-r0_));
     for (unsigned int i = 0; i < values[1].size(); i++) {
@@ -264,8 +264,8 @@ namespace WaveletTL
     const unsigned int jplus = multi_degree(lambda.e()) > 0 ? 1 : 0;
     int j = lambda.j() + jplus;
     int k1[2], k2[2], length[2];
-    basis0.support(Index0(lambda.j(), lambda.e()[0], lambda.k()[0]), k1[0], k2[0]);
-    basis1.support(Index1(lambda.j(), lambda.e()[1], lambda.k()[1]), k1[1], k2[1]);
+    basis0_.support(Index0(lambda.j(), lambda.e()[0], lambda.k()[0]), k1[0], k2[0]);
+    basis1_.support(Index1(lambda.j(), lambda.e()[1], lambda.k()[1]), k1[1], k2[1]);
     if (jplus > 0) { // in case of a wavelet, adjust the granularity of eventual generator factors
       for (int i = 0; i < 2; i++) {
 	if (lambda.e()[i] == 0) {
@@ -322,10 +322,10 @@ namespace WaveletTL
     // compute the point values of the wavelet (where we use that it is a tensor product)
     v_values[0].resize(gauss_points[0].size());
     v_values[1].resize(gauss_points[1].size());
-    basis0.evaluate(0, Index0(lambda.j(), lambda.e()[0], lambda.k()[0]),
-		    gauss_points[0], v_values[0]);
-    basis1.evaluate(0, Index1(lambda.j(), lambda.e()[1], lambda.k()[1]),
-		    gauss_points[1], v_values[1]);
+    basis0_.evaluate(0, Index0(lambda.j(), lambda.e()[0], lambda.k()[0]),
+		     gauss_points[0], v_values[0]);
+    basis1_.evaluate(0, Index1(lambda.j(), lambda.e()[1], lambda.k()[1]),
+		     gauss_points[1], v_values[1]);
 
 //     cout << "angular point values of psi_lambda: " << v_values[0] << endl;
 //     cout << "radial point values of psi_lambda: " << v_values[1] << endl;
@@ -376,106 +376,10 @@ namespace WaveletTL
 				   const Index& mu) const
   {
     return
-      basis0.integrate(Index0(lambda.j(), lambda.e()[0], lambda.k()[0]),
-		       Index0(mu.j(), mu.e()[0], mu.k()[0]))
-      * basis1.integrate(Index1(lambda.j(), lambda.e()[1], lambda.k()[1]),
-			 Index1(mu.j(), mu.e()[1], mu.k()[1]));
+      basis0_.integrate(Index0(lambda.j(), lambda.e()[0], lambda.k()[0]),
+			Index0(mu.j(), mu.e()[0], mu.k()[0]))
+      * basis1_.integrate(Index1(lambda.j(), lambda.e()[1], lambda.k()[1]),
+			  Index1(mu.j(), mu.e()[1], mu.k()[1]));
   }
 
-  template <int d, int dt, int s0, int s1>
-  void
-  RingBasis<d,dt,s0,s1>::angular_integrals
-  (const Index0& lambda,
-   const Index0& mu,
-   double& I1, double& I2) const
-  {
-    // I1 = int_0^1 f1'(phi) g1'(phi) dphi
-    // I2 = int_0^1 f1(phi) g1(phi) dphi
-
-    I1 = I2 = 0;
-    
-    if (basis0.intersect_supports(lambda, mu))
-      {
-	// first we determine the support over which to integrate
-	int j, k1, k2, length;
-	if (lambda.j()+lambda.e() >= mu.j()+mu.e()) {
-	  j = lambda.j()+lambda.e();
-	  basis0.support(lambda, k1, k2); // note: k2 may be less or equal to k1 in the case of overlap
-	} else {
-	  j = mu.j()+mu.e();
-	  basis0.support(mu, k1, k2); // note: k2 may be less or equal to k1 in the case of overlap
-	}
-	length = (k2 > k1 ? k2-k1 : k2+(1<<j)-k1); // number of subintervals
-	
-	// setup Gauss points and weights for a composite quadrature formula:
- 	const unsigned int N_Gauss = d+1;
-	const double h = 1.0/(1<<j);
-	
-	Array1D<double> gauss_points (N_Gauss*(length)),
-	  func1values, func2values, der1values, der2values;
-	int k = k1;
-	for (int patch = 0; patch < length; patch++, k = dyadic_modulo(++k,j)) // work on 2^{-j}[k,k+1]
-	  for (unsigned int n = 0; n < N_Gauss; n++)
-	    gauss_points[patch*N_Gauss+n] = h*(2*k+1+GaussPoints[N_Gauss-1][n])/2;
-
-   	// - compute point values of the integrands
-    	basis0.evaluate(lambda, gauss_points, func1values, der1values);
-   	basis0.evaluate(mu, gauss_points, func2values, der2values);
-	
-   	// - add all integral shares
- 	for (int patch = k1, id = 0; patch < k1+length; patch++)
- 	  for (unsigned int n = 0; n < N_Gauss; n++, id++) {
- 	    const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
- 	    I1 += gauss_weight * der1values[id] * der2values[id];
- 	    I2 += gauss_weight * func1values[id] * func2values[id];
- 	  }
-      }
-  }
-  
-  template <int d, int dt, int s0, int s1>
-  void
-  RingBasis<d,dt,s0,s1>::radial_integrals
-  (const Index1& lambda,
-   const Index1& mu,
-   double& I3, double& I4, double& I5, double& I6) const
-  {
-    // I3 = int_0^1 f2(s) g2(s) r(s)^{-2} ds
-    // I4 = int_0^1 f2'(s) g2'(s) ds
-    // I5 = int_0^1 f2(s) g2'(s) r(s)^{-1} ds
-    // I6 = int_0^1 f2'(s) g2(s) r(s)^{-1} ds
-
-    I3 = I4 = I5 = I6 = 0;
-
-    // First we compute the support intersection of \psi_\lambda and \psi_\mu:
-    typedef typename Basis1::Support Support;
-    Support supp;
-    
-    if (basis1.intersect_supports(lambda, mu, supp))
-      {
- 	// Set up Gauss points and weights for a composite quadrature formula:
- 	const unsigned int N_Gauss = d+4;
- 	const double h = 1.0/(1<<supp.j);
- 	Array1D<double> gauss_points (N_Gauss*(supp.k2-supp.k1)),
-	  func1values, func2values, der1values, der2values;
-	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++) // refers to 2^{-j}[patch,patch+1]
- 	  for (unsigned int n = 0; n < N_Gauss; n++, id++)
- 	    gauss_points[id] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
-	
- 	// - compute point values of the integrands
-  	basis1.evaluate(lambda, gauss_points, func1values, der1values);
- 	basis1.evaluate(mu, gauss_points, func2values, der2values);
-	
- 	// - add all integral shares
- 	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++)
- 	  for (unsigned int n = 0; n < N_Gauss; n++, id++) {
-	    const double rofs = r0_+gauss_points[id]*(r1_-r0_);
-	    const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
-	    I3 += gauss_weight * func1values[id] * func2values[id] / (rofs*rofs);
-	    I4 += gauss_weight * der1values[id] * der2values[id];
-	    I5 += gauss_weight * func1values[id] * der2values[id] / rofs;
-	    I6 += gauss_weight * der1values[id] * func2values[id] / rofs;
- 	  }
-      }
-  }
-  
 }

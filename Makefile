@@ -13,6 +13,7 @@ all:: tests
 # set 2a: periodic wavelet bases on the interval
 # set 3: wavelet bases on general higher-dim. domains ((mapped) cube, tensor prod.)
 # set 3a: wavelet bases on the ring domain
+# set 3b: generic tensor product wavelet bases
 # set 4: wavelet bases on the L-domain
 # set 5: adaptive wavelet schemes for elliptic equations
 # set 6: adaptive wavelet schemes for parabolic equations
@@ -35,6 +36,9 @@ tests3::
 
 tests3a::
 	cd tests; $(MAKE) tests3a
+
+tests3b::
+	cd tests; $(MAKE) tests3b
 
 tests4::
 	cd tests; $(MAKE) tests4

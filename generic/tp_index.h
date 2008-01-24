@@ -30,18 +30,15 @@ namespace WaveletTL
   {
   public:
     /*!
-      constructor with a given tensor product basis
-      (also serves as a default constructor, but yields an invalid index pair
-      in this case, because the underlying bases must be specified to work correctly)
+      default constructor
      */
-    TensorProductIndex(const TensorProductBasis<BASIS1,BASIS2>* basis = 0);
+    TensorProductIndex();
 
     //! copy constructor
     TensorProductIndex(const TensorProductIndex& lambda);
   
     //! constructor from a tensor product basis and two single indices
-    TensorProductIndex(const TensorProductBasis<BASIS1,BASIS2>* basis,
-		       const typename BASIS1::Index& index1,
+    TensorProductIndex(const typename BASIS1::Index& index1,
 		       const typename BASIS2::Index& index2);
 
     //! assignment
@@ -74,9 +71,6 @@ namespace WaveletTL
     const typename BASIS2::Index& index2() const { return index2_; }
 
   protected:
-    //! pointer to the underlying basis
-    const TensorProductBasis<BASIS1,BASIS2>* basis_;
-
     //! current entries
     typename BASIS1::Index index1_;
     typename BASIS2::Index index2_;
@@ -96,33 +90,33 @@ namespace WaveletTL
     return os;
   }
 
-  /*!
-    index of first generator on level j >= j0
-  */
-  template <class BASIS1, class BASIS2>
-  TensorProductIndex<BASIS1,BASIS2>
-  first_generator(const TensorProductBasis<BASIS1,BASIS2>* basis, const int j);
+//   /*!
+//     index of first generator on level j >= j0
+//   */
+//   template <class BASIS1, class BASIS2>
+//   TensorProductIndex<BASIS1,BASIS2>
+//   first_generator(const int j);
 
-  /*!
-    index of last generator on level j >= j0
-  */
-  template <class BASIS1, class BASIS2>
-  TensorProductIndex<BASIS1,BASIS2>
-  last_generator(const TensorProductBasis<BASIS1,BASIS2>* basis, const int j);
+//   /*!
+//     index of last generator on level j >= j0
+//   */
+//   template <class BASIS1, class BASIS2>
+//   TensorProductIndex<BASIS1,BASIS2>
+//   last_generator(const int j);
 
-  /*!
-    index of first wavelet on level j >= j0
-  */
-  template <class BASIS1, class BASIS2>
-  TensorProductIndex<BASIS1,BASIS2>
-  first_wavelet(const TensorProductBasis<BASIS1,BASIS2>* basis, const int j);
+//   /*!
+//     index of first wavelet on level j >= j0
+//   */
+//   template <class BASIS1, class BASIS2>
+//   TensorProductIndex<BASIS1,BASIS2>
+//   first_wavelet(const int j);
 
-  /*!
-    index of last wavelet on level j >= j0
-  */
-  template <class BASIS1, class BASIS2>
-  TensorProductIndex<BASIS1,BASIS2>
-  last_wavelet(const TensorProductBasis<BASIS1,BASIS2>* basis, const int j);
+//   /*!
+//     index of last wavelet on level j >= j0
+//   */
+//   template <class BASIS1, class BASIS2>
+//   TensorProductIndex<BASIS1,BASIS2>
+//   last_wavelet(const int j);
 }
 
 // include implementation

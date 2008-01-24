@@ -4,7 +4,7 @@
 #include <algebra/sparse_matrix.h>
 #include <utils/array1d.h>
 
-#include <interval/ds_basis.h>
+#include <interval/spline_basis.h>
 #include <generic/tp_basis.h>
 #include <Rd/haar_mask.h>
 #include <Rd/r_basis.h>
@@ -18,17 +18,17 @@ int main()
   cout << "Testing tensor product wavelet bases..." << endl;
 
 #if 1
-  typedef DSBasis<2,2> Basis1;
+  typedef SplineBasis<2,2,P_construction,0,0,0,0,SplineBasisData_j0<2,2,P_construction,0,0,0,0>::j0> Basis1;
   typedef Basis1::Index Index1;
 
-  typedef DSBasis<2,2> Basis2;
+  typedef SplineBasis<2,2,P_construction,1,0,0,0,SplineBasisData_j0<2,2,P_construction,1,0,0,0>::j0> Basis2;
   typedef Basis2::Index Index2;
 
   typedef TensorProductBasis<Basis1,Basis2> Basis;
   typedef Basis::Index Index;
   Basis basis;
   
-  cout << "* a tensor product of 2 DSBasis<2,2> bases:" << endl;
+  cout << "* a tensor product of two PBasis<2,2> bases:" << endl;
 #else
   typedef PeriodicBasis<RBasis<HaarMask> > Basis1;
   typedef Basis1::Index Index1;
@@ -45,16 +45,16 @@ int main()
 
   cout << "- j0=" << basis.j0() << endl;
   cout << "- the default wavelet index: " << Index() << endl;
-  cout << "- first generator on the coarsest level: " << first_generator(&basis, basis.j0()) << endl;
-  cout << "- last generator on the coarsest level: " << last_generator(&basis, basis.j0()) << endl;
-  cout << "- first wavelet on the coarsest level: " << first_wavelet(&basis, basis.j0()) << endl;
-  cout << "- last wavelet on the coarsest level: " << last_wavelet(&basis, basis.j0()) << endl;
+  cout << "- first generator on the coarsest level: " << basis.first_generator(basis.j0()) << endl;
+  cout << "- last generator on the coarsest level: " << basis.last_generator(basis.j0()) << endl;
+  cout << "- first wavelet on the coarsest level: " << basis.first_wavelet(basis.j0()) << endl;
+  cout << "- last wavelet on the coarsest level: " << basis.last_wavelet(basis.j0()) << endl;
 
-#if 0
+#if 1
   cout << "- testing iterator functionality:" << endl;
-  for (Index index(first_generator(&basis, basis.j0()));; ++index) {
+  for (Index index(basis.first_generator(basis.j0()));; ++index) {
     cout << index << endl;
-    if (index == last_wavelet(&basis, basis.j0()+1)) break;
+    if (index == basis.last_wavelet(basis.j0()+1)) break;
   }
 #endif
 
@@ -63,7 +63,7 @@ int main()
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
 	   << level << ":" << endl;
-      Index index(first_generator(&basis, level));
+      Index index(basis.first_generator(level));
       for (;; ++index)
 	{
  	  InfiniteVector<double, Index> origcoeff;
@@ -84,17 +84,17 @@ int main()
  	  cout << "* generator: " << index
  	       << ", max. error: " << linfty_norm(origcoeff-transformcoeff) << endl;
 	  
-	  if (index == last_generator(&basis, level)) break;
+	  if (index == basis.last_generator(level)) break;
 	}
     }
 #endif
   
-#if 1
+#if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "
 	   << level << ":" << endl;
-      Index index(first_generator(&basis, level));
+      Index index(basis.first_generator(level));
       for (;; ++index)
 	{
 	  InfiniteVector<double, Index> origcoeff;
@@ -109,7 +109,7 @@ int main()
 	  cout << "* generator: " << index
 	       << ", max. error: " << linfty_norm(origcoeff-transformcoeff) << endl;
 	  
-	  if (index == last_generator(&basis, level)) break;
+	  if (index == basis.last_generator(level)) break;
 	}
     }
 #endif

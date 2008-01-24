@@ -12,7 +12,7 @@ int main()
 {
   cout << "Testing setup of SplineBasisData objects..." << endl;
 
-#if 1
+#if 0
   // PBasis, no b.c.'s
   SplineBasisData<2,2,P_construction,0,0,0,0> sd22nobc(SplineBasisData_j0<2,2,P_construction,0,0,0,0>::j0);
   sd22nobc.check();
@@ -42,7 +42,7 @@ int main()
   sd33.check();
 #endif
  
-#if 1
+#if 0
   // DSBasis, no b.c.'s
   SplineBasisData<2,2,DS_construction_bio5,0,0,0,0> sb22nobc(SplineBasisData_j0<2,2,DS_construction_bio5,0,0,0,0>::j0);
   sb22nobc.check();
@@ -66,6 +66,7 @@ int main()
   typedef SplineBasis<3,3,P_construction,1,1,0,0,SplineBasisData_j0<3,3,P_construction,1,1,0,0>::j0> SBasis;
   //   typedef SplineBasis<3,3,DS_construction_bio5e,0,0,0,0> SBasis; // DSBasis, no b.c.'s
   SBasis basis;
+  typedef SBasis::Index Index;
 
   const int j0 = basis.j0();
   Vector<double> x(basis.Deltasize(j0+1));
@@ -101,8 +102,40 @@ int main()
   cout << "* applying T_{j0+2} to x yields y=" << y << endl;
   basis.apply_Tjinv(j0+2, y, x);
   cout << "* applying T_{j0+2}^{-1} to y yields x=" << x << endl;
+#endif
   
-  
+#if 1
+  for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
+    {
+      cout << "- checking decompose() and reconstruct() for some/all generators on the level "
+	   << level << ":" << endl;
+      Index index(basis.first_generator(level));
+      for (;; ++index)
+	{
+	  InfiniteVector<double, Index> origcoeff;
+	  origcoeff[index] = 1.0;
+	  
+  	  cout << "* original coeffs:" << endl << origcoeff;
+
+	  InfiniteVector<double, Index> wcoeff;
+	  basis.decompose(origcoeff, basis.j0(), wcoeff);
+
+  	  cout << "* after decompose():" << endl << wcoeff;
+	  
+	  InfiniteVector<double, Index> transformcoeff;
+	  basis.reconstruct(wcoeff, level, transformcoeff);
+
+	  cout << "* after reconstruct():" << endl << transformcoeff;
+	  
+	  cout << "* generator: " << index
+	       << ", max. error: " << linfty_norm(origcoeff-transformcoeff) << endl;
+	  
+	  if (index == basis.last_generator(level)) break;
+	}
+    }
+#endif
+
+#if 0  
   cout << "* point evaluation of spline wavelets:" << endl;
   typedef SBasis::Index Index;
   int N = 32;
@@ -118,7 +151,6 @@ int main()
 //     if (lambda == basis.last_generator(level)) break;
     if (lambda == basis.last_wavelet(level)) break;
   }
-  
 #endif
 
   return 0;

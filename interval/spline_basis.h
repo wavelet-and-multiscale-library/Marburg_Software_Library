@@ -101,16 +101,28 @@ namespace WaveletTL
     static const int Nablasize(const int j) { return 1<<j; }
     
     //! index of first (leftmost) generator on level j >= j0
-    Index first_generator(const int j) const;
+    static Index first_generator(const int j);
 
     //! index of last (rightmost) generator on level j >= j0
-    Index last_generator(const int j) const;
+    static Index last_generator(const int j);
 
     //! index of first (leftmost) wavelet on level j >= j0
-    Index first_wavelet(const int j) const;
+    static Index first_wavelet(const int j);
 
     //! index of last (rightmost) wavelet on level j >= j0
-    Index last_wavelet(const int j) const;
+    static Index last_wavelet(const int j);
+
+    /*!
+      index of first function with type e
+      (mainly for TensorProductBasis)
+    */
+    static Index first_index(const int j, const int e);
+
+    /*!
+      index of last function with type e
+      (mainly for TensorProductBasis)
+    */
+    static Index last_index(const int j, const int e);
 
     /*!
       apply Mj=(Mj0 Mj1) to some vector x ("reconstruct");
@@ -259,6 +271,46 @@ namespace WaveletTL
     //! number of wavelets between coarsest and finest level
     const int degrees_of_freedom() const { return full_collection.size(); };
 
+    //! DECOMPOSE routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+      \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
+      where the multiscale decomposition starts with the coarsest
+      generator level jmin.
+    */
+    void decompose_1(const Index& lambda, const int jmin,
+		     InfiniteVector<double, Index>& c) const;
+
+    //! DECOMPOSE routine, full version
+    /*!
+      constructs for a given coefficient set c another one v with level >= jmin,
+      such that
+      \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
+    */
+    void decompose(const InfiniteVector<double, Index>& c, const int jmin,
+		   InfiniteVector<double, Index>& v) const;
+
+    //! RECONSTRUCT routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+      \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
+      where always |\lambda'|>=j
+    */
+    void reconstruct_1(const Index& lambda, const int j,
+		       InfiniteVector<double, Index>& c) const;
+
+    //! RECONSTRUCT routine, full version
+    /*!
+      Constructs for a given coefficient set c another one v,
+      such that
+      \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
+      where always |\lambda'|>=j
+    */
+    void reconstruct(const InfiniteVector<double, Index>& c, const int j,
+		     InfiniteVector<double, Index>& v) const;
+
   protected:
     //! finest possible level
     int jmax_;
@@ -360,17 +412,29 @@ namespace WaveletTL
     static const int Nablasize(const int j) { return 1<<j; }
     
     //! index of first (leftmost) generator on level j >= j0
-    Index first_generator(const int j) const;
+    static Index first_generator(const int j);
 
     //! index of last (rightmost) generator on level j >= j0
-    Index last_generator(const int j) const;
+    static Index last_generator(const int j);
 
     //! index of first (leftmost) wavelet on level j >= j0
-    Index first_wavelet(const int j) const;
+    static Index first_wavelet(const int j);
 
     //! index of last (rightmost) wavelet on level j >= j0
-    Index last_wavelet(const int j) const;
+    static Index last_wavelet(const int j);
  
+    /*!
+      index of first function with type e
+      (mainly for TensorProductBasis)
+    */
+    static Index first_index(const int j, const int e);
+
+    /*!
+      index of last function with type e
+      (mainly for TensorProductBasis)
+    */
+    static Index last_index(const int j, const int e);
+
     /*!
       apply Mj=(Mj0 Mj1) to some vector x ("reconstruct");
       the routine writes only into the first part of y, i.e,
@@ -509,6 +573,46 @@ namespace WaveletTL
 
     //! number of wavelets between coarsest and finest level
     const int degrees_of_freedom() const { return full_collection.size(); };
+
+    //! DECOMPOSE routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+      \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
+      where the multiscale decomposition starts with the coarsest
+      generator level jmin.
+    */
+    void decompose_1(const Index& lambda, const int jmin,
+		     InfiniteVector<double, Index>& c) const;
+
+    //! DECOMPOSE routine, full version
+    /*!
+      constructs for a given coefficient set c another one v with level >= jmin,
+      such that
+      \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
+    */
+    void decompose(const InfiniteVector<double, Index>& c, const int jmin,
+		   InfiniteVector<double, Index>& v) const;
+
+    //! RECONSTRUCT routine, simple version
+    /*!
+      Constructs for a given single wavelet index lambda a coefficient set c,
+      such that
+      \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
+      where always |\lambda'|>=j
+    */
+    void reconstruct_1(const Index& lambda, const int j,
+		       InfiniteVector<double, Index>& c) const;
+
+    //! RECONSTRUCT routine, full version
+    /*!
+      Constructs for a given coefficient set c another one v,
+      such that
+      \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
+      where always |\lambda'|>=j
+    */
+    void reconstruct(const InfiniteVector<double, Index>& c, const int j,
+		     InfiniteVector<double, Index>& v) const;
 
   protected:
     //! finest possible level

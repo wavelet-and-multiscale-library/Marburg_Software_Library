@@ -10,6 +10,7 @@
 #ifndef _WAVELETTL_TP_BASIS_H
 #define _WAVELETTL_TP_BASIS_H
 
+#include <cassert>
 #include <algebra/vector.h>
 #include <algebra/infinite_vector.h>
 
@@ -30,8 +31,15 @@ namespace WaveletTL
     //! default constructor
     TensorProductBasis();
 
+    //! space dimension of the underlying domain
+    static const int space_dimension = BASIS1::space_dimension+BASIS2::space_dimension;
+
     //! coarsest possible level j0
-    inline const int j0() const { return j0_; }    
+    static const int j0()
+    {
+      assert(BASIS1::j0() == BASIS2::j0());
+      return  BASIS1::j0();
+    }    
 
     //! wavelet index class
     typedef TensorProductIndex<BASIS1,BASIS2> Index;
@@ -41,6 +49,19 @@ namespace WaveletTL
 
     //! read access to the second basis
     const BASIS2& basis2() const { return basis2_; }
+
+    //! index of first generator on level j >= j0
+    static Index first_generator(const int j);
+      
+    //! index of last generator on level j >= j0
+    static Index last_generator(const int j);
+      
+    //! index of first wavelet on level j >= j0
+    static Index first_wavelet(const int j);
+      
+    //! index of last wavelet on level j >= j0
+    static Index last_wavelet(const int j);
+
 
     //! DECOMPOSE routine, simple version
     /*!
@@ -53,17 +74,6 @@ namespace WaveletTL
     void decompose_1(const Index& lambda, const int jmin,
 		     InfiniteVector<double, Index>& c) const;
 
-    //! dual DECOMPOSE routine, simple version
-    /*!
-      Constructs for a given single wavelet index lambda a coefficient set c,
-      such that
-        \tilde\psi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
-      where the multiscale decomposition starts with the coarsest
-      generator level jmin.
-     */
-    void decompose_t_1(const Index& lambda, const int jmin,
-		       InfiniteVector<double, Index>& c) const;
-
     //! DECOMPOSE routine, full version
     /*!
       constructs for a given coefficient set c another one v with level >= jmin,
@@ -73,14 +83,25 @@ namespace WaveletTL
     void decompose(const InfiniteVector<double, Index>& c, const int jmin,
 		   InfiniteVector<double, Index>& v) const;
 
-    //! dual DECOMPOSE routine, full version
-    /*!
-      constructs for a given coefficient set c another one v with level >= jmin,
-      such that
-        \sum_{\lambda}c_\lambda\tilde\psi_lambda = \sum_{\lambda'}d_{\lambda'}\tilde\psi_{\lambda'}
-    */
-    void decompose_t(const InfiniteVector<double, Index>& c, const int jmin,
-		     InfiniteVector<double, Index>& v) const;
+//     //! dual DECOMPOSE routine, simple version
+//     /*!
+//       Constructs for a given single wavelet index lambda a coefficient set c,
+//       such that
+//         \tilde\psi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
+//       where the multiscale decomposition starts with the coarsest
+//       generator level jmin.
+//      */
+//     void decompose_t_1(const Index& lambda, const int jmin,
+// 		       InfiniteVector<double, Index>& c) const;
+
+//     //! dual DECOMPOSE routine, full version
+//     /*!
+//       constructs for a given coefficient set c another one v with level >= jmin,
+//       such that
+//         \sum_{\lambda}c_\lambda\tilde\psi_lambda = \sum_{\lambda'}d_{\lambda'}\tilde\psi_{\lambda'}
+//     */
+//     void decompose_t(const InfiniteVector<double, Index>& c, const int jmin,
+// 		     InfiniteVector<double, Index>& v) const;
 
     //! RECONSTRUCT routine, simple version
     /*!
@@ -102,30 +123,27 @@ namespace WaveletTL
     void reconstruct(const InfiniteVector<double, Index>& c, const int j,
 		     InfiniteVector<double, Index>& v) const;
 
-    //! dual RECONSTRUCT routine, simple version
-    /*!
-      Constructs for a given single wavelet index lambda a coefficient set c,
-      such that
-        \tilde\psi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
-      where always |\lambda'|>=j
-     */
-    void reconstruct_t_1(const Index& lambda, const int j,
-			 InfiniteVector<double, Index>& c) const;
+//     //! dual RECONSTRUCT routine, simple version
+//     /*!
+//       Constructs for a given single wavelet index lambda a coefficient set c,
+//       such that
+//         \tilde\psi_lambda = \sum_{\lambda'}c_{\lambda'}\tilde\psi_{\lambda'}
+//       where always |\lambda'|>=j
+//      */
+//     void reconstruct_t_1(const Index& lambda, const int j,
+// 			 InfiniteVector<double, Index>& c) const;
 
-    //! dual RECONSTRUCT routine, full version
-    /*!
-      Constructs for a given coefficient set c another one v,
-      such that
-        \sum_{\lambda}c_\lambda\tilde\psi_\lambda = \sum_{\lambda'}v_{\lambda'}\tilde\psi_{\lambda'}
-      where always |\lambda'|>=j
-    */
-    void reconstruct_t(const InfiniteVector<double, Index>& c, const int j,
-		       InfiniteVector<double, Index>& v) const;
+//     //! dual RECONSTRUCT routine, full version
+//     /*!
+//       Constructs for a given coefficient set c another one v,
+//       such that
+//         \sum_{\lambda}c_\lambda\tilde\psi_\lambda = \sum_{\lambda'}v_{\lambda'}\tilde\psi_{\lambda'}
+//       where always |\lambda'|>=j
+//     */
+//     void reconstruct_t(const InfiniteVector<double, Index>& c, const int j,
+// 		       InfiniteVector<double, Index>& v) const;
 
   protected:
-    //! coarsest possible level j0
-    int j0_;
-
     //! instances of the two 1D bases
     BASIS1 basis1_;
     BASIS2 basis2_;

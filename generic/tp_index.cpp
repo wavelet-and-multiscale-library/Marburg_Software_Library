@@ -5,24 +5,20 @@
 namespace WaveletTL
 {
   template <class BASIS1, class BASIS2>
-  TensorProductIndex<BASIS1,BASIS2>::TensorProductIndex(const TensorProductBasis<BASIS1,BASIS2>* basis)
-    : basis_(basis),
-      index1_(basis == 0 ? 0 : &basis->basis1()),
-      index2_(basis == 0 ? 0 : &basis->basis2())
+  TensorProductIndex<BASIS1,BASIS2>::TensorProductIndex()
   {
   }
 
   template <class BASIS1, class BASIS2>
   TensorProductIndex<BASIS1,BASIS2>::TensorProductIndex(const TensorProductIndex<BASIS1,BASIS2>& lambda)
-    : basis_(lambda.basis_), index1_(lambda.index1_), index2_(lambda.index2_)
+    : index1_(lambda.index1_), index2_(lambda.index2_)
   {
   }
 
   template <class BASIS1, class BASIS2>
-  TensorProductIndex<BASIS1,BASIS2>::TensorProductIndex(const TensorProductBasis<BASIS1,BASIS2>* basis,
-							const typename BASIS1::Index& index1,
+  TensorProductIndex<BASIS1,BASIS2>::TensorProductIndex(const typename BASIS1::Index& index1,
 							const typename BASIS2::Index& index2)
-    : basis_(basis), index1_(index1), index2_(index2)
+    : index1_(index1), index2_(index2)
   {
   }
   
@@ -52,23 +48,23 @@ namespace WaveletTL
   TensorProductIndex<BASIS1,BASIS2>&
   TensorProductIndex<BASIS1,BASIS2>::operator ++ ()
   {
-    if (index2() == last_index(&basis_->basis2(), j(), index2().e())) {
-      if (index1() == last_index(&basis_->basis1(), j(), index1().e())) {
-	if (index2() == last_wavelet(&basis_->basis2(), j())) {
- 	  if (index1() == last_wavelet(&basis_->basis1(), j())) {
- 	    index1_ = first_generator(&basis_->basis1(), j()+1); // increments j
-	    index2_ = first_wavelet(&basis_->basis2(), j()); // no generators on higher scales
+    if (index2() == BASIS2::last_index(j(), index2().e())) {
+      if (index1() == BASIS1::last_index(j(), index1().e())) {
+	if (index2() == BASIS2::last_wavelet(j())) {
+ 	  if (index1() == BASIS1::last_wavelet(j())) {
+ 	    index1_ = BASIS1::first_generator(j()+1); // increments j
+	    index2_ = BASIS2::first_wavelet(j()); // no generators on higher scales
 	  } else {
 	    ++index1_;
-	    index2_ = first_generator(&basis_->basis2(), j());
+	    index2_ = BASIS2::first_generator(j());
 	  }
 	} else {
 	  ++index2_;
-	  index1_ = first_index(&basis_->basis1(), j(), index1().e());
+	  index1_ = BASIS1::first_index(j(), index1().e());
 	}
       } else {
 	++index1_;
-	index2_ = first_index(&basis_->basis2(), j(), index2().e());
+	index2_ = BASIS2::first_index(j(), index2().e());
       }
     } else
       ++index2_;
@@ -76,43 +72,40 @@ namespace WaveletTL
     return *this;
   }
 
-  template <class BASIS1, class BASIS2>
-  TensorProductIndex<BASIS1,BASIS2>
-  first_generator(const TensorProductBasis<BASIS1,BASIS2>* basis, const int j)
-  {
-    assert(j >= basis->j0());
-    return TensorProductIndex<BASIS1,BASIS2>(basis,
-					     first_generator(&basis->basis1(), j),
-					     first_generator(&basis->basis2(), j));
-  }
+//   template <class BASIS1, class BASIS2>
+//   TensorProductIndex<BASIS1,BASIS2>
+//   first_generator(const int j)
+//   {
+//     assert(j >= basis->j0());
+//     return TensorProductIndex<BASIS1,BASIS2>(first_generator(&basis->basis1(), j),
+// 					     first_generator(&basis->basis2(), j));
+//   }
 
-  template <class BASIS1, class BASIS2>
-  TensorProductIndex<BASIS1,BASIS2>
-  last_generator(const TensorProductBasis<BASIS1,BASIS2>* basis, const int j)
-  {
-    assert(j >= basis->j0());
-    return TensorProductIndex<BASIS1,BASIS2>(basis,
-					     last_generator(&basis->basis1(), j),
-					     last_generator(&basis->basis2(), j));
-  }
+//   template <class BASIS1, class BASIS2>
+//   TensorProductIndex<BASIS1,BASIS2>
+//   last_generator(const int j)
+//   {
+//     assert(j >= basis->j0());
+//     return TensorProductIndex<BASIS1,BASIS2>(last_generator(&basis->basis1(), j),
+// 					     last_generator(&basis->basis2(), j));
+//   }
 
-  template <class BASIS1, class BASIS2>
-  TensorProductIndex<BASIS1,BASIS2>
-  first_wavelet(const TensorProductBasis<BASIS1,BASIS2>* basis, const int j)
-  {
-    assert(j >= basis->j0());
-    return TensorProductIndex<BASIS1,BASIS2>(basis,
-					     first_generator(&basis->basis1(), j),
-					     first_wavelet(&basis->basis2(), j));
-  }
+//   template <class BASIS1, class BASIS2>
+//   TensorProductIndex<BASIS1,BASIS2>
+//   first_wavelet(const int j)
+//   {
+//     assert(j >= basis->j0());
+//     return TensorProductIndex<BASIS1,BASIS2>(basis,
+// 					     first_generator(&basis->basis1(), j),
+// 					     first_wavelet(&basis->basis2(), j));
+//   }
 
-  template <class BASIS1, class BASIS2>
-  TensorProductIndex<BASIS1,BASIS2>
-  last_wavelet(const TensorProductBasis<BASIS1,BASIS2>* basis, const int j)
-  {
-    assert(j >= basis->j0());
-    return TensorProductIndex<BASIS1,BASIS2>(basis,
-					     last_wavelet(&basis->basis1(), j),
-					     last_wavelet(&basis->basis2(), j));
-  }
+//   template <class BASIS1, class BASIS2>
+//   TensorProductIndex<BASIS1,BASIS2>
+//   last_wavelet(const int j)
+//   {
+//     assert(j >= basis->j0());
+//     return TensorProductIndex<BASIS1,BASIS2>(last_wavelet(&basis->basis1(), j),
+// 					     last_wavelet(&basis->basis2(), j));
+//   }
 }

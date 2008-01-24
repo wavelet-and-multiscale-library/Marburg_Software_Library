@@ -56,7 +56,7 @@ namespace WaveletTL
       so that it suffices to choose 2^{-j0}((L+Lt)/2-1) <= 1
     */
     static const int j0() {
-      return (int) ceil(log((RBASIS::primal_mask::length + RBASIS::dual_mask::length)/2-1)/M_LN2);
+      return (int) ceil(log((RBASIS::primal_mask::length + RBASIS::dual_mask::length)/2-1.)/M_LN2);
     }
     
     //! size_type, for convenience

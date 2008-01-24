@@ -37,7 +37,7 @@ namespace WaveletTL
     a = aa;
 
     //const double threshold = pow(10,aa);
-    const double threshold = pow(10,-15);
+    const double threshold = 1e-15;
 
     cout << "linfinity norm of coefficients = " << maxnorm << endl;
     cout << "number of coefficients" << coeffs.size() << endl;

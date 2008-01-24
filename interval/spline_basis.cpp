@@ -16,116 +16,128 @@
 
 namespace WaveletTL
 {
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
-  const int SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::DeltaLmin() {
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::SplineBasis()
+    : SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>(J0)
+  {
+  }
+
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::SplineBasis()
+    : SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>(J0)
+  {
+  }
+
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
+  const int SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::DeltaLmin() {
     return ell2T<d,dT>()+s0+sT0-dT; // cf. DSBasis<d,dT>
   }
 
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
-  const int SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::DeltaRmax_offset() {
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
+  const int SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::DeltaRmax_offset() {
     return -(d%2)-(ell2T<d,dT>()+s1+sT1-dT); // cf. DSBasis<d,dT>
   }
 
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
-  const int SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::DeltaLmin() {
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
+  const int SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::DeltaLmin() {
     return 1-d-ell1<d>()+s0; // cf. PBasis<d,dT>
   }
   
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
-  const int SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::DeltaRmax_offset() {
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
+  const int SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::DeltaRmax_offset() {
     return -1-ell1<d>()-s1; // cf. PBasis<d,dT>
   }
   
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   inline
-  typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index
-  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::first_generator(const int j) const
+  typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::Index
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::first_generator(const int j) const
   {
     assert(j >= j0());
     return Index(j, 0, DeltaLmin());
   }
   
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   inline
-  typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::first_generator(const int j) const
+  typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::first_generator(const int j) const
   {
     assert(j >= j0());
     return Index(j, 0, DeltaLmin());
   }
   
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   inline
-  typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index
-  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::last_generator(const int j) const
+  typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::Index
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::last_generator(const int j) const
   {
     assert(j >= j0());
     return Index(j, 0, DeltaRmax(j));
   }
 
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   inline
-  typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::last_generator(const int j) const
+  typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::last_generator(const int j) const
   {
     assert(j >= j0());
     return Index(j, 0, DeltaRmax(j));
   }
 
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   inline
-  typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index
-  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::first_wavelet(const int j) const
+  typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::Index
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::first_wavelet(const int j) const
   {
     assert(j >= j0());
     return Index(j, 1, Nablamin());
   }
   
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   inline
-  typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::first_wavelet(const int j) const
+  typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::first_wavelet(const int j) const
   {
     assert(j >= j0());
     return Index(j, 1, Nablamin());
   }
   
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   inline
-  typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index
-  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::last_wavelet(const int j) const
+  typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::Index
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::last_wavelet(const int j) const
   {
     assert(j >= j0());
     return Index(j, 1, Nablamax(j));
   }
 
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   inline
-  typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::last_wavelet(const int j) const
+  typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::last_wavelet(const int j) const
   {
     assert(j >= j0());
     return Index(j, 1, Nablamax(j));
   }
 
   // generic support routine for all DS-type wavelet bases
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   void
-  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::support(const Index& lambda, int& k1, int& k2) const {
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::support(const Index& lambda, int& k1, int& k2) const {
     if (lambda.e() == 0) // generator
       {
- 	if (lambda.k() < DeltaLmin()+(int)SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::CLA_.column_dimension())
+ 	if (lambda.k() < DeltaLmin()+(int)SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::CLA_.column_dimension())
  	  {
  	    // left boundary generator
  	    k1 = 0;
- 	    k2 = SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::CLA_.row_dimension();
+ 	    k2 = SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::CLA_.row_dimension();
  	  }
  	else
  	  {
- 	    if (lambda.k() > DeltaRmax(lambda.j())-(int)SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::CRA_.column_dimension())
+ 	    if (lambda.k() > DeltaRmax(lambda.j())-(int)SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::CRA_.column_dimension())
  	      {
  		// right boundary generator
- 		k1 = (1<<lambda.j()) - SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::CRA_.row_dimension();
+ 		k1 = (1<<lambda.j()) - SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::CRA_.row_dimension();
  		k2 = 1<<lambda.j();
  	      }
  	    else
@@ -151,9 +163,9 @@ namespace WaveletTL
       }
   }  
 
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   void
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::support(const Index& lambda, int& k1, int& k2) const {
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::support(const Index& lambda, int& k1, int& k2) const {
     if (lambda.e() == 0) // generator
       {
 	// phi_{j,k}(x) = 2^{j/2} B_{j,k-ell_1}
@@ -183,9 +195,9 @@ namespace WaveletTL
       }
   }
   
-  template <int d, int dT, int s0, int s1, int sT0, int sT1> 
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0> 
   bool
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::intersect_supports(const Index& lambda,
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::intersect_supports(const Index& lambda,
 								     const Index& nu,
 								     Support& supp) const
   {
@@ -218,10 +230,10 @@ namespace WaveletTL
     return false;
   }
 
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   template <class V>
   void
-  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::apply_Mj(const int j, const V& x, V& y) const
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::apply_Mj(const int j, const V& x, V& y) const
   {
     SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj0_.set_level(j);
     SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_.set_level(j);
@@ -234,10 +246,10 @@ namespace WaveletTL
        SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj0_.column_dimension(), 0, true);
   }
 
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   template <class V>
   void
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::apply_Mj(const int j, const V& x, V& y) const
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::apply_Mj(const int j, const V& x, V& y) const
   {
     SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj0_.set_level(j);
     SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.set_level(j);
@@ -250,10 +262,10 @@ namespace WaveletTL
        SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj0_.column_dimension(), 0, true);
   }
   
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   template <class V>
   void
-  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::apply_Mj_transposed(const int j, const V& x, V& y) const
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::apply_Mj_transposed(const int j, const V& x, V& y) const
   {
     SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj0_.set_level(j);
     SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_.set_level(j);
@@ -266,10 +278,10 @@ namespace WaveletTL
        SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj0_.column_dimension());
   }
 
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   template <class V>
   void
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::apply_Mj_transposed(const int j, const V& x, V& y) const
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::apply_Mj_transposed(const int j, const V& x, V& y) const
   {
     SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj0_.set_level(j);
     SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.set_level(j);
@@ -282,10 +294,10 @@ namespace WaveletTL
        SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj0_.column_dimension());
   }
 
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   template <class V>
   void
-  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::apply_Gj(const int j, const V& x, V& y) const
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::apply_Gj(const int j, const V& x, V& y) const
   {
     SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj0T_.set_level(j);
     SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1T_.set_level(j);
@@ -298,10 +310,10 @@ namespace WaveletTL
        SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj0T_.column_dimension());
   }
   
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   template <class V>
   void
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::apply_Gj(const int j, const V& x, V& y) const
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::apply_Gj(const int j, const V& x, V& y) const
   {
     SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj0T_.set_level(j);
     SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1T_.set_level(j);
@@ -314,10 +326,10 @@ namespace WaveletTL
        SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj0T_.column_dimension());
   }
   
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   template <class V>
   void
-  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::apply_Gj_transposed(const int j, const V& x, V& y) const
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::apply_Gj_transposed(const int j, const V& x, V& y) const
   {
     SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj0T_.set_level(j);
     SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1T_.set_level(j);
@@ -330,10 +342,10 @@ namespace WaveletTL
        SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj0T_.column_dimension(), 0, true);
   }
   
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   template <class V>
   void
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::apply_Gj_transposed(const int j, const V& x, V& y) const
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::apply_Gj_transposed(const int j, const V& x, V& y) const
   {
     SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj0T_.set_level(j);
     SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1T_.set_level(j);
@@ -346,10 +358,10 @@ namespace WaveletTL
        SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj0T_.column_dimension(), 0, true);
   }
   
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   template <class V>
   void
-  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::apply_Tj(const int j, const V& x, V& y) const
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::apply_Tj(const int j, const V& x, V& y) const
   { 
     y = x;
     V z(x);
@@ -360,10 +372,10 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   template <class V>
   void
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::apply_Tj(const int j, const V& x, V& y) const
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::apply_Tj(const int j, const V& x, V& y) const
   { 
     y = x;
     V z(x);
@@ -374,10 +386,10 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   template <class V>
   void
-  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::apply_Tj_transposed(const int j, const V& x, V& y) const
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::apply_Tj_transposed(const int j, const V& x, V& y) const
   { 
     V z;
     apply_Mj_transposed(j, x, y);
@@ -389,10 +401,10 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   template <class V>
   void
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::apply_Tj_transposed(const int j, const V& x, V& y) const
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::apply_Tj_transposed(const int j, const V& x, V& y) const
   { 
     V z;
     apply_Mj_transposed(j, x, y);
@@ -404,9 +416,9 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   void
-  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::apply_Tj_transposed(const int j,
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::apply_Tj_transposed(const int j,
 						const Vector<double>& x,
 						Vector<double>& y) const
   { 
@@ -420,9 +432,9 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   void
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::apply_Tj_transposed(const int j,
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::apply_Tj_transposed(const int j,
 								      const Vector<double>& x,
 								      Vector<double>& y) const
   { 
@@ -436,9 +448,9 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   void
-  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::apply_Tjinv(const int j, const Vector<double>& x, Vector<double>& y) const
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::apply_Tjinv(const int j, const Vector<double>& x, Vector<double>& y) const
   { 
     // T_j^{-1}=diag(G_{j0},I)*...*diag(G_{j-1},I)*G_j
     Vector<double> z(x.size(), false);
@@ -451,9 +463,9 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   void
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::apply_Tjinv(const int j, const Vector<double>& x, Vector<double>& y) const
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::apply_Tjinv(const int j, const Vector<double>& x, Vector<double>& y) const
   { 
     // T_j^{-1}=diag(G_{j0},I)*...*diag(G_{j-1},I)*G_j
     Vector<double> z(x.size(), false);
@@ -470,10 +482,10 @@ namespace WaveletTL
   //
   // point evaluation subroutines
 
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   SampledMapping<1>
-  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::evaluate
-  (const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index& lambda,
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::evaluate
+  (const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::Index& lambda,
    const int resolution) const
   {
     // treat generator case separately
@@ -488,15 +500,15 @@ namespace WaveletTL
       return SampledMapping<1>(grid, values);
     }
     
-    InfiniteVector<double, typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index> coeffs;
+    InfiniteVector<double, typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::Index> coeffs;
     coeffs.set_coefficient(lambda, 1.0);
     return evaluate(coeffs, resolution);
   }
 
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   SampledMapping<1>
-  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::evaluate
-  (const InfiniteVector<double, typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index>& coeffs,
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::evaluate
+  (const InfiniteVector<double, typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::Index>& coeffs,
    const int resolution) const
   {
     Grid<1> grid(0, 1, 1<<resolution);
@@ -504,7 +516,7 @@ namespace WaveletTL
     if (coeffs.size() > 0) {
       // determine maximal level
       int jmax(0);
-      typedef typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index Index;
+      typedef typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::Index Index;
       for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
   	     itend(coeffs.end()); it != itend; ++it)
   	jmax = std::max(it.index().j()+it.index().e(), jmax);
@@ -546,10 +558,10 @@ namespace WaveletTL
     return result;
   }
 
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   SampledMapping<1>
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::evaluate
-  (const typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index& lambda,
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::evaluate
+  (const typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index& lambda,
    const int resolution) const
   {
     Grid<1> grid(0, 1, 1<<resolution);
@@ -561,10 +573,10 @@ namespace WaveletTL
     return SampledMapping<1>(grid, values);
   }
 
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   SampledMapping<1>
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::evaluate
-  (const InfiniteVector<double, typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index>& coeffs,
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::evaluate
+  (const InfiniteVector<double, typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index>& coeffs,
    const int resolution) const
   {
     Grid<1> grid(0, 1, 1<<resolution);
@@ -572,7 +584,7 @@ namespace WaveletTL
     if (coeffs.size() > 0) {
       // determine maximal level
       int jmax(0);
-      typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index Index;
+      typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index Index;
       for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
 	     itend(coeffs.end()); it != itend; ++it)
 	jmax = std::max(it.index().j()+it.index().e(), jmax);
@@ -616,11 +628,11 @@ namespace WaveletTL
     return result;
   }
   
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   double
-  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::evaluate
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::evaluate
   (const unsigned int derivative,
-   const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index& lambda,
+   const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::Index& lambda,
    const double x) const
   {
     assert(derivative <= 1); // we only support derivatives up to the first order
@@ -662,7 +674,7 @@ namespace WaveletTL
       wc[lambda.k()-Nablamin()] = 1.0;
       SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_.set_level(lambda.j());
       SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_.apply(wc, gc, 0, 0);
-      typedef typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index Index;
+      typedef typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::Index Index;
       for (typename std::map<size_type,double>::const_iterator it(gc.begin());
 	   it != gc.end(); ++it) {
 	r += it->second * evaluate(derivative, Index(lambda.j()+1, 0, DeltaLmin()+it->first), x);
@@ -672,11 +684,11 @@ namespace WaveletTL
     return r;
   }
   
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   double
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::evaluate
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::evaluate
   (const unsigned int derivative,
-   const typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index& lambda,
+   const typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index& lambda,
    const double x) const
   {
     assert(derivative <= 1); // we only support derivatives up to the first order
@@ -705,7 +717,7 @@ namespace WaveletTL
       wc[lambda.k()-Nablamin()] = 1.0;
       SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.set_level(lambda.j());
       SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.apply(wc, gc, 0, 0);
-      typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index Index;
+      typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index Index;
       for (typename std::map<size_type,double>::const_iterator it(gc.begin());
 	   it != gc.end(); ++it) {
 	r += it->second * evaluate(derivative, Index(lambda.j()+1, 0, DeltaLmin()+it->first), x);
@@ -715,11 +727,11 @@ namespace WaveletTL
     return r;
   }
   
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   void
-  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::evaluate
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::evaluate
   (const unsigned int derivative,
-   const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index& lambda,
+   const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::Index& lambda,
    const Array1D<double>& points, Array1D<double>& values) const
   {
     assert(derivative <= 1); // we only support derivatives up to the first order
@@ -802,7 +814,7 @@ namespace WaveletTL
       wc[lambda.k()-Nablamin()] = 1.0;
       SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_.set_level(lambda.j());
       SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_.apply(wc, gc, 0, 0);
-      typedef typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index Index;
+      typedef typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::Index Index;
       Array1D<double> help(points.size());
       for (typename std::map<size_type,double>::const_iterator it(gc.begin());
 	   it != gc.end(); ++it) {
@@ -875,11 +887,11 @@ namespace WaveletTL
 //     }
 //   }
   
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   void
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::evaluate
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::evaluate
   (const unsigned int derivative,
-   const typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index& lambda,
+   const typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index& lambda,
    const Array1D<double>& points, Array1D<double>& values) const
   {
     assert(derivative <= 1); // we only support derivatives up to the first order
@@ -940,7 +952,7 @@ namespace WaveletTL
 	  wc[w_number] = 1.0;
 	  SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.set_level(lambda.j());
 	  SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.apply(wc, gc, 0, 0);
-	  typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index Index;
+	  typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index Index;
 	  Array1D<double> help(points.size());
 	  for (typename std::map<size_type,double>::const_iterator it(gc.begin());
 	       it != gc.end(); ++it) {
@@ -956,7 +968,7 @@ namespace WaveletTL
       wc[lambda.k()-Nablamin()] = 1.0;
       SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.set_level(lambda.j());
       SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.apply(wc, gc, 0, 0);
-      typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index Index;
+      typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index Index;
       Array1D<double> help(points.size());
       for (typename std::map<size_type,double>::const_iterator it(gc.begin());
 	   it != gc.end(); ++it) {
@@ -968,10 +980,10 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   void
-  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::evaluate
-  (const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index& lambda,
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::evaluate
+  (const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::Index& lambda,
    const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues) const
   {
     const unsigned int npoints(points.size());
@@ -1022,7 +1034,7 @@ namespace WaveletTL
       wc[lambda.k()-Nablamin()] = 1.0;
       SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_.set_level(lambda.j());
       SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_.apply(wc, gc, 0, 0);
-      typedef typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index Index;
+      typedef typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::Index Index;
       Array1D<double> help1, help2;
       for (typename std::map<size_type,double>::const_iterator it(gc.begin());
 	   it != gc.end(); ++it) {
@@ -1035,10 +1047,10 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   void
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::evaluate
-  (const typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index& lambda,
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::evaluate
+  (const typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index& lambda,
    const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues) const
   {
     const unsigned int npoints(points.size());
@@ -1110,7 +1122,7 @@ namespace WaveletTL
 	  wc[w_number] = 1.0;
 	  SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.set_level(lambda.j());
 	  SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.apply(wc, gc, 0, 0);
-	  typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index Index;
+	  typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index Index;
 	  Array1D<double> fhelp(points.size()), dhelp(points.size());
 	  for (typename std::map<size_type,double>::const_iterator it(gc.begin());
 	       it != gc.end(); ++it) {
@@ -1128,7 +1140,7 @@ namespace WaveletTL
       wc[lambda.k()-Nablamin()] = 1.0;
       SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.set_level(lambda.j());
       SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.apply(wc, gc, 0, 0);
-      typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index Index;
+      typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index Index;
       Array1D<double> fhelp(points.size()), dhelp(points.size());
       for (typename std::map<size_type,double>::const_iterator it(gc.begin());
 	   it != gc.end(); ++it) {
@@ -1146,19 +1158,19 @@ namespace WaveletTL
   //
   // expansion subroutines
 
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   void
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::expand
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::expand
   (const Function<1>* f,
    const bool primal,
    const int jmax,
-   InfiniteVector<double, typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index>& coeffs) const
+   InfiniteVector<double, typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index>& coeffs) const
   {
     coeffs.clear();
     Vector<double> coeffs_vector;
     expand(f, primal, jmax, coeffs_vector);
     typedef typename Vector<double>::size_type size_type;
-    typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index Index;
+    typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index Index;
     size_type i(0);
     for (Index lambda(first_generator(j0()));
 	 i < coeffs_vector.size(); ++lambda, i++)
@@ -1169,11 +1181,11 @@ namespace WaveletTL
       } 
   }
   
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   double
-  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::integrate
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::integrate
   (const Function<1>* f,
-   const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index& lambda) const
+   const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::Index& lambda) const
   {
     double r = 0;
     
@@ -1208,16 +1220,16 @@ namespace WaveletTL
     return r;
   }
   
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   double
-  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::integrate
-  (const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index& lambda,
-   const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index& mu) const
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::integrate
+  (const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::Index& lambda,
+   const typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::Index& mu) const
   {
     double r = 0;
     
     // First we compute the support intersection of \psi_\lambda and \psi_\mu:
-    typedef typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Support Support;
+    typedef typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::Support Support;
     Support supp;
     
     if (intersect_supports(*this, lambda, mu, supp))
@@ -1244,16 +1256,16 @@ namespace WaveletTL
     return r;
   }
 
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   double
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::integrate
-  (const typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index& lambda,
-   const typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Index& mu) const
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::integrate
+  (const typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index& lambda,
+   const typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index& mu) const
   {
     double r = 0;
     
     // First we compute the support intersection of \psi_\lambda and \psi_\mu:
-    typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::Support Support;
+    typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Support Support;
     Support supp;
     
     if (intersect_supports(lambda, mu, supp))
@@ -1281,15 +1293,15 @@ namespace WaveletTL
   }
 
   // generic expansion routine for DS-type wavelet bases
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   void
-  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::expand
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::expand
   (const Function<1>* f,
    const bool primal,
    const int jmax,
-   InfiniteVector<double, typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index>& coeffs) const
+   InfiniteVector<double, typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::Index>& coeffs) const
   {
-    typedef typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index Index;
+    typedef typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::Index Index;
     
     for (Index lambda = first_generator(j0());;++lambda)
       {
@@ -1349,9 +1361,9 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   void
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::expand
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::expand
   (const Function<1>* f,
    const bool primal,
    const int jmax,
@@ -1379,7 +1391,7 @@ namespace WaveletTL
     apply_Tj_transposed(jmax, coeffs_phijk, rhs);
     
     if (!primal) {
-      FullGramian<d,dT,s0,s1,sT0,sT1> G(*this);
+      FullGramian<d,dT,s0,s1,sT0,sT1,J0> G(*this);
       G.set_level(jmax+1);
       unsigned int iterations;
       CG(G, rhs, coeffs, 1e-15, 500, iterations);
@@ -1388,12 +1400,12 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   void
-  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::setup_full_collection()
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::setup_full_collection()
   {
     if (jmax_ == -1 || jmax_ < j0()) {
-      cout << "SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::setup_full_collection(): specify a mximal level of resolution first!" << endl;
+      cout << "SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::setup_full_collection(): specify a mximal level of resolution first!" << endl;
       abort();
     }   
 
@@ -1410,12 +1422,12 @@ namespace WaveletTL
     cout << "done setting up collection of wavelet indices..." << endl;
   }
 
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   void
-  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>::setup_full_collection()
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::setup_full_collection()
   {
     if (jmax_ == -1 || jmax_ < j0()) {
-      cout << "SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::setup_full_collection(): specify a mximal level of resolution first!" << endl;
+      cout << "SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::setup_full_collection(): specify a mximal level of resolution first!" << endl;
       abort();
     }   
 

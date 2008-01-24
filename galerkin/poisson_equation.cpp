@@ -9,8 +9,8 @@ using namespace MathTL;
 
 namespace WaveletTL
 {
-  template <int d, int dT>
-  PoissonEquation1D<d,dT>::PoissonEquation1D
+  template <int d, int dT, int J0>
+  PoissonEquation1D<d,dT,J0>::PoissonEquation1D
   (const WaveletBasis& basis,
    const InfiniteVector<double, typename WaveletBasis::Index>& y)
     : basis_(basis),
@@ -20,20 +20,20 @@ namespace WaveletTL
   {
   }
   
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   inline
   double
-  PoissonEquation1D<d,dT>::a(const typename WaveletBasis::Index& lambda,
-			     const typename WaveletBasis::Index& nu) const
+  PoissonEquation1D<d,dT,J0>::a(const typename WaveletBasis::Index& lambda,
+				const typename WaveletBasis::Index& nu) const
   {
     return a(lambda, nu, WaveletBasis::primal_polynomial_degree()*WaveletBasis::primal_polynomial_degree());
   }
   
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   double
-  PoissonEquation1D<d,dT>::a(const typename WaveletBasis::Index& lambda,
-			     const typename WaveletBasis::Index& nu,
-			     const unsigned int p) const
+  PoissonEquation1D<d,dT,J0>::a(const typename WaveletBasis::Index& lambda,
+				const typename WaveletBasis::Index& nu,
+				const unsigned int p) const
   {
     double r = 0;
     
@@ -85,12 +85,12 @@ namespace WaveletTL
     return r;
   }
 
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   double
-  PoissonEquation1D<d,dT>::norm_A() const
+  PoissonEquation1D<d,dT,J0>::norm_A() const
   {
     if (normA == 0.0) {
-      FullLaplacian<d,dT> A(basis(), energy);
+      FullLaplacian<d,dT,J0> A(basis(), energy);
       A.set_level(basis().j0()+4);
       double help;
       unsigned int iterations;
@@ -101,12 +101,12 @@ namespace WaveletTL
     return normA;
   }
    
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   double
-  PoissonEquation1D<d,dT>::norm_Ainv() const
+  PoissonEquation1D<d,dT,J0>::norm_Ainv() const
   {
     if (normAinv == 0.0) {
-      FullLaplacian<d,dT> A(basis(), energy);
+      FullLaplacian<d,dT,J0> A(basis(), energy);
       A.set_level(basis().j0()+4);
       double help;
       unsigned int iterations;
@@ -117,10 +117,10 @@ namespace WaveletTL
     return normAinv;
   }
   
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   inline
   double
-  PoissonEquation1D<d,dT>::D(const typename WaveletBasis::Index& lambda) const
+  PoissonEquation1D<d,dT,J0>::D(const typename WaveletBasis::Index& lambda) const
   {
 #if 0
     // determine number of index lambda
@@ -137,7 +137,5 @@ namespace WaveletTL
     return sqrt(a(lambda, lambda));
 #endif
   }
-  
 
-  
 }

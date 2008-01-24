@@ -26,15 +26,15 @@ namespace WaveletTL
   /*!
     The Poisson equation -u''=f, u(0)=u(1)=0 in one space dimension.
   */
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   class PoissonEquation1D
-    :  public FullyDiagonalEnergyNormPreconditioner<typename SplineBasis<d,dT,P_construction,1,1,0,0>::Index>
+    :  public FullyDiagonalEnergyNormPreconditioner<typename SplineBasis<d,dT,P_construction,1,1,0,0,J0>::Index>
   {
   public:
     /*!
       type of the wavelet basis
     */
-    typedef SplineBasis<d,dT,P_construction,1,1,0,0> WaveletBasis;
+    typedef SplineBasis<d,dT,P_construction,1,1,0,0,J0> WaveletBasis;
 
     /*!
       constructor from a given wavelet basis and a right-hand side y
@@ -162,7 +162,7 @@ namespace WaveletTL
 
   protected:
     const WaveletBasis& basis_;
-    mutable FullLaplacian<d,dT> A_;
+    mutable FullLaplacian<d,dT,J0> A_;
     
     // rhs, mutable to have 'const' method
     mutable InfiniteVector<double, typename WaveletBasis::Index> y_;

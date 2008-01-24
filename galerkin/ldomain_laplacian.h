@@ -24,7 +24,7 @@ using MathTL::EllipticBVP;
 
 namespace WaveletTL
 {
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1> class SplineBasis;
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0> class SplineBasis;
  
   template <class IBASIS> class LDomainBasis;
 

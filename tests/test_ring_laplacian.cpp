@@ -163,7 +163,7 @@ int main()
   }
 #endif
 
-#if 1
+#if 0
   // infinite loop to measure the memory consumption
   while (true) {}
 #endif

@@ -89,7 +89,7 @@ int main()
 //   typedef DSBasis<d,dT> Basis; Basis basis(true, true);
 //   typedef PBasis<d,dT> Basis;
 //   typedef JLBasis Basis;
-  typedef SplineBasis<d,dT,P_construction,1,1,0,0> Basis;
+  typedef SplineBasis<d,dT,P_construction,1,1,0,0,SplineBasisData_j0<d,dT,P_construction,1,1,0,0>::j0> Basis;
 
   Basis basis;
   typedef Basis::Index Index;

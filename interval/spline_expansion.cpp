@@ -2,11 +2,11 @@
 
 namespace WaveletTL
 {
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   inline
   void
   expand(const Function<1>* f,
-	 const SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>& basis,
+	 const SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>& basis,
 	 const bool primal,
 	 const int jmax,
 	 Vector<double>& coeffs)
@@ -14,14 +14,14 @@ namespace WaveletTL
     basis.expand(f, primal, jmax, coeffs);
   }
 
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   inline
   void
   expand(const Function<1>* f,
-	 const SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>& basis,
+	 const SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>& basis,
 	 const bool primal,
 	 const int jmax,
-	 InfiniteVector<double, typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index>& coeffs)
+	 InfiniteVector<double, typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::Index>& coeffs)
   {
     basis.expand(f, primal, jmax, coeffs);
   }

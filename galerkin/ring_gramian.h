@@ -37,13 +37,13 @@ namespace WaveletTL
     typedef typename WaveletBasis::Index Index;
     
     //! type of 1D basis in angular direction
-    typedef PeriodicBasis<CDFBasis<d,dt> > Basis0;
+    typedef typename RingBasis<d,dt,s0,s1>::Basis0 Basis0;
     
     //! type of 1D indices in angular direction
     typedef typename Basis0::Index Index0;
     
     //! type of 1D basis in radial direction
-    typedef SplineBasis<d,dt,P_construction,s0,s1,0,0> Basis1;
+    typedef typename RingBasis<d,dt,s0,s1>::Basis1 Basis1;
 
     //! type of 1D indices in radial direction
     typedef typename Basis1::Index Index1;

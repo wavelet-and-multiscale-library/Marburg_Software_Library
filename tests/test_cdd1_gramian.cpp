@@ -81,7 +81,9 @@ int main()
 
 //   typedef DSBasis<d,dT> Basis;
 //   typedef PBasis<d,dT> Basis;
-  typedef SplineBasis<d,dT,P_construction,1,1,0,0> Basis; // PBasis, complementary b.c.'s
+  
+  // PBasis, complementary b.c.'s
+  typedef SplineBasis<d,dT,P_construction,1,1,0,0,SplineBasisData_j0<d,dT,P_construction,1,1,0,0>::j0> Basis;
   typedef Basis::Index Index;
 
 #if 0

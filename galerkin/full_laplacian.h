@@ -42,7 +42,7 @@ namespace WaveletTL
     (in the case dyadic==true) or
       (D)_{\lambda,\lambda}=a(\psi_\lambda,\psi_\lambda)
   */
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   class FullLaplacian
   {
   public:
@@ -54,7 +54,7 @@ namespace WaveletTL
     /*!
       constructor taking an information object on some spline wavelet basis
     */
-    FullLaplacian(const SplineBasis<d,dT,P_construction,1,1,0,0>& sb,
+    FullLaplacian(const SplineBasis<d,dT,P_construction,1,1,0,0,J0>& sb,
 		  const PreconditioningType precond = dyadic);
 
     /*!
@@ -113,7 +113,7 @@ namespace WaveletTL
 	       const unsigned int precision = 3) const;
 
   protected:
-    const SplineBasis<d,dT,P_construction,1,1,0,0>& sb_;
+    const SplineBasis<d,dT,P_construction,1,1,0,0,J0>& sb_;
     PreconditioningType precond_;
     mutable int j_;
 
@@ -124,8 +124,8 @@ namespace WaveletTL
   /*!
     Matlab-style stream output
   */
-  template <int d, int dT>
-  std::ostream& operator << (std::ostream& os, const FullLaplacian<d,dT>& M);
+  template <int d, int dT, int J0>
+  std::ostream& operator << (std::ostream& os, const FullLaplacian<d,dT,J0>& M);
 }
 
 #include <galerkin/full_laplacian.cpp>

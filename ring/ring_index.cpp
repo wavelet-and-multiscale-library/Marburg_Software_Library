@@ -9,7 +9,7 @@ namespace WaveletTL
   RingIndex<d,dt,s0,s1>::RingIndex()
     : j_(RingBasis<d,dt,s0,s1>::j0()),
       k_(PeriodicBasis<CDFBasis<d,dt> >::DeltaLmin(),
-	 SplineBasis<d,dt,P_construction,s0,s1,0,0>::DeltaLmin())
+	 SplineBasis<d,dt,P_construction,s0,s1,0,0,SplineBasisData_j0<d,dt,P_construction,s0,s1,0,0>::j0>::DeltaLmin())
   {
   }
 
@@ -70,8 +70,8 @@ namespace WaveletTL
   {
     bool eplusplus = false;
 
-    typedef PeriodicBasis<CDFBasis<d,dt> >             Basis0;
-    typedef SplineBasis<d,dt,P_construction,s0,s1,0,0> Basis1;
+    typedef PeriodicBasis<CDFBasis<d,dt> > Basis0;
+    typedef SplineBasis<d,dt,P_construction,s0,s1,0,0,SplineBasisData_j0<d,dt,P_construction,s0,s1,0,0>::j0> Basis1;
 
     // increment k
     int last_index = (e_[1] == 0 ? Basis1::DeltaRmax(j_) : Basis1::Nablamax(j_));

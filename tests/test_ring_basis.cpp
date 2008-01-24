@@ -16,11 +16,14 @@ int main()
 
   const int d  = 2;
   const int dt = 2;
+  const int s0 = 1;
+  const int s1 = 0;
+  const int J0 = SplineBasisData_j0<d,dt,P_construction,s0,s1,0,0>::j0;
 
   const double r0 = 0.5;
   const double r1 = 2.0;
-
-  typedef RingBasis<d,dt,1,0> Basis;
+  
+  typedef RingBasis<d,dt,s0,s1> Basis;
   Basis basis(r0, r1);
 
   typedef Basis::Index Index;

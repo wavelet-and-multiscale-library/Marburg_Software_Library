@@ -117,8 +117,8 @@ namespace WaveletTL
     return normAinv;
   }
 
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
-  IntervalGramian<SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1> >::IntervalGramian
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
+  IntervalGramian<SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0> >::IntervalGramian
   (const WaveletBasis& basis,
    const InfiniteVector<double, typename WaveletBasis::Index>& y)
     : basis_(basis),
@@ -128,9 +128,9 @@ namespace WaveletTL
   {
   }
   
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   double
-  IntervalGramian<SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1> >::a
+  IntervalGramian<SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0> >::a
   (const typename WaveletBasis::Index& lambda,
    const typename WaveletBasis::Index& nu) const
   {
@@ -184,9 +184,9 @@ namespace WaveletTL
     return r;
   }
   
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   double
-  IntervalGramian<SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1> >::norm_A() const
+  IntervalGramian<SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0> >::norm_A() const
   {
     if (normA == 0.0) {
       G_.set_level(basis().j0()+4);
@@ -199,9 +199,9 @@ namespace WaveletTL
     return normA;
   }
   
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   double
-  IntervalGramian<SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1> >::norm_Ainv() const
+  IntervalGramian<SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0> >::norm_Ainv() const
   {
     if (normAinv == 0.0) {
       G_.set_level(basis().j0()+4);
@@ -214,9 +214,9 @@ namespace WaveletTL
     return normAinv;
   }
     
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   void
-  IntervalGramian<SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1> >::add_level
+  IntervalGramian<SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0> >::add_level
   (const Index& lambda,
    InfiniteVector<double, Index>& w, const int j,
    const double factor,

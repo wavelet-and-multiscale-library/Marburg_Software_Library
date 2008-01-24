@@ -13,46 +13,58 @@ int main()
   cout << "Testing setup of SplineBasisData objects..." << endl;
 
 #if 1
-  SplineBasisData<2,2,P_construction,0,0,0,0> sd22nobc; // PBasis, no b.c.'s
+  // PBasis, no b.c.'s
+  SplineBasisData<2,2,P_construction,0,0,0,0> sd22nobc(SplineBasisData_j0<2,2,P_construction,0,0,0,0>::j0);
   sd22nobc.check();
   
-  SplineBasisData<2,2,P_construction,1,1,0,0> sd22; // PBasis, complementary b.c.'s
+  // PBasis, complementary b.c.'s
+  SplineBasisData<2,2,P_construction,1,1,0,0> sd22(SplineBasisData_j0<2,2,P_construction,1,1,0,0>::j0); 
   sd22.check();
- 
-  SplineBasisData<2,2,P_construction,1,0,0,0> sd22bcleft; // PBasis, complementary b.c.'s at x=0
+  
+  // PBasis, complementary b.c.'s at x=0
+  SplineBasisData<2,2,P_construction,1,0,0,0> sd22bcleft(SplineBasisData_j0<2,2,P_construction,1,0,0,0>::j0);
   sd22bcleft.check();
   
-  SplineBasisData<2,2,P_construction,0,1,0,0> sd22bcright; // PBasis, complementary b.c.'s at x=1
+  // PBasis, complementary b.c.'s at x=1
+  SplineBasisData<2,2,P_construction,0,1,0,0> sd22bcright(SplineBasisData_j0<2,2,P_construction,0,1,0,0>::j0);
   sd22bcright.check();
   
-  SplineBasisData<3,3,P_construction,1,0,0,0> sd33bcleft; // PBasis, complementary b.c.'s at x=0
+  // PBasis, complementary b.c.'s at x=0
+  SplineBasisData<3,3,P_construction,1,0,0,0> sd33bcleft(SplineBasisData_j0<3,3,P_construction,1,0,0,0>::j0);
   sd33bcleft.check();
 
-  SplineBasisData<3,3,P_construction,0,1,0,0> sd33bcright; // PBasis, complementary b.c.'s at x=1
+  // PBasis, complementary b.c.'s at x=1
+  SplineBasisData<3,3,P_construction,0,1,0,0> sd33bcright(SplineBasisData_j0<3,3,P_construction,0,1,0,0>::j0); 
   sd33bcright.check();
-
-  SplineBasisData<3,3,P_construction,1,1,0,0> sd33; // PBasis, complementary b.c.'s
+  
+  // PBasis, complementary b.c.'s
+  SplineBasisData<3,3,P_construction,1,1,0,0> sd33(SplineBasisData_j0<3,3,P_construction,1,1,0,0>::j0);
   sd33.check();
 #endif
  
-#if 0
-  SplineBasisData<2,2,DS_construction_bio5,0,0,0,0> sb22nobc; // DSBasis, no b.c.'s
+#if 1
+  // DSBasis, no b.c.'s
+  SplineBasisData<2,2,DS_construction_bio5,0,0,0,0> sb22nobc(SplineBasisData_j0<2,2,DS_construction_bio5,0,0,0,0>::j0);
   sb22nobc.check();
   
-  SplineBasisData<2,2,DS_construction_bio5e,0,0,0,0> sb22nobc_energy; // DSBasis, no b.c.'s
+  // DSBasis, no b.c.'s
+  SplineBasisData<2,2,DS_construction_bio5e,0,0,0,0> sb22nobc_energy(SplineBasisData_j0<2,2,DS_construction_bio5e,0,0,0,0>::j0);
   sb22nobc_energy.check();
   
-  SplineBasisData<3,3,DS_construction_bio5,0,0,0,0> sb33nobc; // DSBasis, no b.c.'s
+  // DSBasis, no b.c.'s
+  SplineBasisData<3,3,DS_construction_bio5,0,0,0,0> sb33nobc(SplineBasisData_j0<3,3,DS_construction_bio5,0,0,0,0>::j0);
   sb33nobc.check();
   
-  SplineBasisData<3,3,DS_construction_bio5e,0,0,0,0> sb33nobc_energy; // DSBasis, no b.c.'s
+  // DSBasis, no b.c.'s
+  SplineBasisData<3,3,DS_construction_bio5e,0,0,0,0> sb33nobc_energy(SplineBasisData_j0<3,3,DS_construction_bio5e,0,0,0,0>::j0); 
   sb33nobc_energy.check();
 #endif
 
-#if 0
+#if 1
   cout << "Testing SplineBasis..." << endl;
-  typedef SplineBasis<3,3,P_construction,1,1,0,0> SBasis; // PBasis, complementary b.c.'s
-//   typedef SplineBasis<3,3,DS_construction_bio5e,0,0,0,0> SBasis; // DSBasis, no b.c.'s
+  // PBasis, complementary b.c.'s
+  typedef SplineBasis<3,3,P_construction,1,1,0,0,SplineBasisData_j0<3,3,P_construction,1,1,0,0>::j0> SBasis;
+  //   typedef SplineBasis<3,3,DS_construction_bio5e,0,0,0,0> SBasis; // DSBasis, no b.c.'s
   SBasis basis;
 
   const int j0 = basis.j0();

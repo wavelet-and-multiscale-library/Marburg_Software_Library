@@ -21,11 +21,18 @@ using namespace WaveletTL;
 int main() {
   cout << "Testing speed of FullLaplacian ..." << endl;
 
-  const unsigned int d = 3;
-  const unsigned int dT = 3;
+  const int d  = 3;
+  const int dT = 3;
+  const int s0 = 1;
+  const int s1 = 1;
+  const int J0 = SplineBasisData_j0<d,dT,P_construction,s0,s1,0,0>::j0;
+  
+  // PBasis, complementary b.c.'s
+  typedef SplineBasis<d,dT,P_construction,s0,s1,0,0,J0> Basis;
 
-  SplineBasis<d,dT,P_construction,1,1,0,0> basis; // PBasis, complementary b.c.'s
-  FullLaplacian<d,dT> delta(basis, dyadic);
+  Basis basis;
+
+  FullLaplacian<d,dT,J0> delta(basis, dyadic);
 
   const int j0 = basis.j0();
   const int jmax = 10;
@@ -54,7 +61,7 @@ int main() {
     cout << "- time for to_sparse(): " << time2 << "s" << endl;
   }
 
-  FullLaplacian<d,dT> delta2(basis, energy);
+  FullLaplacian<d,dT,J0> delta2(basis, energy);
   cout << "speed measurements for energy preconditioning:" << endl;
   for (int j = j0; j <= jmax; j++) {
     cout << "j=" << j << ":" << endl;

@@ -74,9 +74,10 @@ int main()
   s.matlab_output(cout);
 
 #if 1
-//   typedef SplineBasis<2,2,P_construction,0,0,0,0> Basis; // PBasis, no b.c.'s
-  typedef SplineBasis<2,2,P_construction,1,1,0,0> Basis; // PBasis, homogeneous b.c.'s
+//   const int d = 2, dt = 2, s0 = 0, s1 = 0, sT0 = 0, sT1 = 0; // PBasis, no b.c.'s
+  const int d = 2, dt = 2, s0 = 1, s1 = 1, sT0 = 0, sT1 = 0; // PBasis, homogeneous b.c.'s
 //   typedef SplineBasis<3,3,P_construction,1,1,0,0> Basis; // PBasis, homogeneous b.c.'s
+  typedef SplineBasis<d,dt,P_construction,s0,s1,sT0,sT1,SplineBasisData_j0<d,dt,P_construction,s0,s1,sT0,sT1>::j0> Basis; 
 #else
 //   typedef SplineBasis<3,3,DS_construction_bio5,0,0,0,0> Basis; // DSBasis, no b.c.'s
   typedef SplineBasis<3,3,DS_construction_bio5e,0,0,0,0> Basis; // DSBasis, no b.c.'s

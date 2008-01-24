@@ -22,7 +22,7 @@ namespace WaveletTL
     typename Index::type_type e;
     typename Index::translation_type k
       (PeriodicBasis<CDFBasis<d,dt> >::DeltaLmin(),
-       SplineBasis<d,dt,P_construction,s0,s1,0,0>::DeltaLmin());
+       SplineBasis<d,dt,P_construction,s0,s1,0,0,SplineBasisData_j0<d,dt,P_construction,s0,s1,0,0>::j0>::DeltaLmin());
     
     return Index(j, e, k);
   }
@@ -36,7 +36,7 @@ namespace WaveletTL
     typename Index::type_type e;
     typename Index::translation_type k
       (PeriodicBasis<CDFBasis<d,dt> >::DeltaRmax(j),
-       SplineBasis<d,dt,P_construction,s0,s1,0,0>::DeltaRmax(j));
+       SplineBasis<d,dt,P_construction,s0,s1,0,0,SplineBasisData_j0<d,dt,P_construction,s0,s1,0,0>::j0>::DeltaRmax(j));
     
     return Index(j, e, k);
   }
@@ -50,7 +50,7 @@ namespace WaveletTL
     typename Index::type_type e(0, 1);
     typename Index::translation_type k
       (PeriodicBasis<CDFBasis<d,dt> >::DeltaLmin(),
-       SplineBasis<d,dt,P_construction,s0,s1,0,0>::Nablamin());
+       SplineBasis<d,dt,P_construction,s0,s1,0,0,SplineBasisData_j0<d,dt,P_construction,s0,s1,0,0>::j0>::Nablamin());
 
     return Index(j, e, k);
   }
@@ -64,7 +64,7 @@ namespace WaveletTL
     typename Index::type_type e(1, 1);
     typename Index::translation_type k
       (PeriodicBasis<CDFBasis<d,dt> >::Nablamax(j),
-       SplineBasis<d,dt,P_construction,s0,s1,0,0>::Nablamax(j));
+       SplineBasis<d,dt,P_construction,s0,s1,0,0,SplineBasisData_j0<d,dt,P_construction,s0,s1,0,0>::j0>::Nablamax(j));
     
     return Index(j, e, k);
   }

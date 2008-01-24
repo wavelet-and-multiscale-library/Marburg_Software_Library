@@ -25,12 +25,19 @@ int main()
 {
   cout << "Testing FullLaplacian ..." << endl;
 
-  const unsigned int d = 2;
-  const unsigned int dT = 2;
+  const int d  = 2;
+  const int dT = 2;
+  const int s0 = 1;
+  const int s1 = 1;
+  const int J0 = SplineBasisData_j0<d,dT,P_construction,s0,s1,0,0>::j0;
+  
+  // PBasis, complementary b.c.'s
+  typedef SplineBasis<d,dT,P_construction,s0,s1,0,0,J0> Basis;
 
-  SplineBasis<d,dT,P_construction,1,1,0,0> basis; // PBasis, complementary b.c.'s
-//   FullLaplacian<d,dT> delta(basis, dyadic);
-  FullLaplacian<d,dT> delta(basis, energy);
+  Basis basis;
+
+//   FullLaplacian<d,dT,J0> delta(basis, dyadic);
+  FullLaplacian<d,dT,J0> delta(basis, energy);
 
   cout << "* stiffness matrix on coarsest level j0=" << basis.j0() << ":" << endl
        << delta;

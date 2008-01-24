@@ -40,15 +40,15 @@ namespace WaveletTL
     Internally, HelmholtzEquation1D holds two distinct caches for the
     Gramian (identity) part of the stiffness matrix and the Laplacian part.
   */
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   class HelmholtzEquation1D
-    :  public FullyDiagonalEnergyNormPreconditioner<typename SplineBasis<d,dT,P_construction,1,1,0,0>::Index>
+    :  public FullyDiagonalEnergyNormPreconditioner<typename SplineBasis<d,dT,P_construction,1,1,0,0,J0>::Index>
   {
   public:
     /*!
       type of the wavelet basis
     */
-    typedef SplineBasis<d,dT,P_construction,1,1,0,0> WaveletBasis;
+    typedef SplineBasis<d,dT,P_construction,1,1,0,0,J0> WaveletBasis;
 
     /*!
       constructor from a given wavelet basis and a right-hand side y
@@ -174,13 +174,13 @@ namespace WaveletTL
     mutable InfiniteVector<double, typename WaveletBasis::Index> y_;
     mutable InfiniteVector<double, typename WaveletBasis::Index> y_precond;
 
-    mutable FullHelmholtz<d,dT> H_;
+    mutable FullHelmholtz<d,dT,J0> H_;
 
   public:
     IntervalGramian<WaveletBasis> G_;
     CachedProblem<IntervalGramian<WaveletBasis> > GC_;
-    PoissonEquation1D<d,dT> A_;
-    CachedProblem<PoissonEquation1D<d,dT> > AC_;
+    PoissonEquation1D<d,dT,J0> A_;
+    CachedProblem<PoissonEquation1D<d,dT,J0> > AC_;
     
     // estimates for ||A|| and ||A^{-1}||
     mutable double normA, normAinv;

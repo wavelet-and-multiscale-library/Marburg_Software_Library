@@ -18,7 +18,7 @@ using MathTL::InfiniteVector;
 
 namespace WaveletTL
 {
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1> class SplineBasis;
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0> class SplineBasis;
 
   /*!
     For a given function, compute all integrals w.r.t. the primal
@@ -32,21 +32,21 @@ namespace WaveletTL
     Maybe a thresholding of the returned coefficients is helpful (e.g. for
     expansions of spline functions).
   */
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   void
   expand(const Function<1>* f,
-	 const SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>& basis,
+	 const SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>& basis,
 	 const bool primal,
 	 const int jmax,
-	 InfiniteVector<double, typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index>& coeffs);
+	 InfiniteVector<double, typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::Index>& coeffs);
 
   /*!
     analogous routine for Vector<double> output
   */
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   void
   expand(const Function<1>* f,
-	 const SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>& basis,
+	 const SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>& basis,
 	 const bool primal,
 	 const int jmax,
 	 Vector<double>& coeffs);

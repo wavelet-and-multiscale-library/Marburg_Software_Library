@@ -6,34 +6,34 @@ using namespace MathTL;
 
 namespace WaveletTL
 {
-  template <int d, int dT>
-  FullHelmholtz<d,dT>::FullHelmholtz(const SplineBasis<d,dT,P_construction,1,1,0,0>& sb,
-				     const double alpha,
-				     const PreconditioningType precond)
+  template <int d, int dT, int J0>
+  FullHelmholtz<d,dT,J0>::FullHelmholtz(const SplineBasis<d,dT,P_construction,1,1,0,0,J0>& sb,
+					const double alpha,
+					const PreconditioningType precond)
     : G_(sb), A_(sb, no_precond), sb_(sb), alpha_(alpha), precond_(precond), j_(-1)
   {
     set_level(sb_.j0());
   }
 
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   inline
-  const typename FullHelmholtz<d,dT>::size_type
-  FullHelmholtz<d,dT>::row_dimension() const
+  const typename FullHelmholtz<d,dT,J0>::size_type
+  FullHelmholtz<d,dT,J0>::row_dimension() const
   {
     return sb_.Deltasize(j_);
   }  
   
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   inline
-  const typename FullHelmholtz<d,dT>::size_type
-  FullHelmholtz<d,dT>::column_dimension() const
+  const typename FullHelmholtz<d,dT,J0>::size_type
+  FullHelmholtz<d,dT,J0>::column_dimension() const
   {
     return row_dimension(); // square
   }  
   
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   void
-  FullHelmholtz<d,dT>::set_level(const int j) const
+  FullHelmholtz<d,dT,J0>::set_level(const int j) const
   {
     assert(j >= sb_.j0());
     if (j_ != j) {
@@ -44,18 +44,18 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   void
-  FullHelmholtz<d,dT>::set_alpha(const double alpha) const
+  FullHelmholtz<d,dT,J0>::set_alpha(const double alpha) const
   {
     assert(alpha >= 0);
     alpha_ = alpha;
     setup_D();
   }
 
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   void
-  FullHelmholtz<d,dT>::setup_D() const
+  FullHelmholtz<d,dT,J0>::setup_D() const
   {
     D_.resize(sb_.Deltasize(j_));
     if (precond_ == no_precond) {
@@ -75,33 +75,33 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   inline
   double
-  FullHelmholtz<d,dT>::D(const size_type k) const {
+  FullHelmholtz<d,dT,J0>::D(const size_type k) const {
     return D_[k];
   }
   
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   inline
   const double
-  FullHelmholtz<d,dT>::get_entry(const size_type row, const size_type column) const
+  FullHelmholtz<d,dT,J0>::get_entry(const size_type row, const size_type column) const
   {
     return (alpha_*G_.get_entry(row,column)+A_.get_entry(row,column))/(D(row)*D(column));
   }
 
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   inline
   const double
-  FullHelmholtz<d,dT>::diagonal(const size_type row) const
+  FullHelmholtz<d,dT,J0>::diagonal(const size_type row) const
   {
     return (alpha_*G_.diagonal(row)+A_.diagonal(row));
   }
   
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   template <class VECTOR>
-  void FullHelmholtz<d,dT>::apply(const VECTOR& x, VECTOR& Mx,
-				  const bool preconditioning) const
+  void FullHelmholtz<d,dT,J0>::apply(const VECTOR& x, VECTOR& Mx,
+				     const bool preconditioning) const
   {
     assert(Mx.size() == row_dimension());
 
@@ -129,10 +129,10 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT>
-  void FullHelmholtz<d,dT>::apply(const std::map<size_type,double>& x,
-				  std::map<size_type,double>& Mx,
-				  const bool preconditioning) const
+  template <int d, int dT, int J0>
+  void FullHelmholtz<d,dT,J0>::apply(const std::map<size_type,double>& x,
+				     std::map<size_type,double>& Mx,
+				     const bool preconditioning) const
   {
     std::map<size_type,double> y(x), yhelp;
 
@@ -159,19 +159,19 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT>
-  void FullHelmholtz<d,dT>::print(std::ostream &os,
-				  const unsigned int tabwidth,
-				  const unsigned int precision) const
+  template <int d, int dT, int J0>
+  void FullHelmholtz<d,dT,J0>::print(std::ostream &os,
+				     const unsigned int tabwidth,
+				     const unsigned int precision) const
   {
     if (row_dimension() == 0)
       os << "[]" << std::endl; // Matlab style
     else
       {
 	unsigned int old_precision = os.precision(precision);
-	for (typename FullHelmholtz<d,dT>::size_type i(0); i < row_dimension(); ++i)
+	for (typename FullHelmholtz<d,dT,J0>::size_type i(0); i < row_dimension(); ++i)
 	  {
-	    for (typename FullHelmholtz<d,dT>::size_type j(0); j < column_dimension(); ++j)
+	    for (typename FullHelmholtz<d,dT,J0>::size_type j(0); j < column_dimension(); ++j)
 	      os << std::setw(tabwidth) << std::setprecision(precision)
 		 << get_entry(i, j);
 	    os << std::endl;
@@ -180,9 +180,9 @@ namespace WaveletTL
       }
   }
   
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   inline
-  std::ostream& operator << (std::ostream& os, const FullHelmholtz<d,dT>& M)
+  std::ostream& operator << (std::ostream& os, const FullHelmholtz<d,dT,J0>& M)
   {
     M.print(os);
     return os;

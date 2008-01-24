@@ -78,11 +78,18 @@ int main()
 {
   cout << "Testing FullGramian ..." << endl;
 
-  const unsigned int d = 3;
-  const unsigned int dT = 3;
+  const int d  = 3;
+  const int dT = 3;
+  const int s0 = 1;
+  const int s1 = 1;
+  const int J0 = SplineBasisData_j0<d,dT,P_construction,s0,s1,0,0>::j0;
+  
+  // PBasis, complementary b.c.'s
+  typedef SplineBasis<d,dT,P_construction,s0,s1,0,0,J0> Basis;
 
-  SplineBasis<d,dT,P_construction,1,1,0,0> basis; // PBasis, complementary b.c.'s
-  FullGramian<d,dT,1,1,0,0> G(basis);
+  Basis basis;
+
+  FullGramian<d,dT,s0,s1,0,0,J0> G(basis);
 
   cout << "* Gramian matrix on coarsest level j0=" << basis.j0() << ":" << endl
        << G;

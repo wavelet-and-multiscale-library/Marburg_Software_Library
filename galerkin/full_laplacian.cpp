@@ -5,33 +5,33 @@
 
 namespace WaveletTL
 {
-  template <int d, int dT>
-  FullLaplacian<d,dT>::FullLaplacian(const SplineBasis<d,dT,P_construction,1,1,0,0>& sb,
-				     const PreconditioningType precond)
+  template <int d, int dT, int J0>
+  FullLaplacian<d,dT,J0>::FullLaplacian(const SplineBasis<d,dT,P_construction,1,1,0,0,J0>& sb,
+					const PreconditioningType precond)
     : sb_(sb), precond_(precond), j_(-1)
   {
     set_level(sb_.j0());
   }
 
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   inline
-  const typename FullLaplacian<d,dT>::size_type
-  FullLaplacian<d,dT>::row_dimension() const
+  const typename FullLaplacian<d,dT,J0>::size_type
+  FullLaplacian<d,dT,J0>::row_dimension() const
   {
     return sb_.Deltasize(j_);
   }  
   
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   inline
-  const typename FullLaplacian<d,dT>::size_type
-  FullLaplacian<d,dT>::column_dimension() const
+  const typename FullLaplacian<d,dT,J0>::size_type
+  FullLaplacian<d,dT,J0>::column_dimension() const
   {
     return row_dimension(); // square
   }  
 
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   void
-  FullLaplacian<d,dT>::set_level(const int j) const
+  FullLaplacian<d,dT,J0>::set_level(const int j) const
   {
     assert(j >= sb_.j0());
     if (j_ != j) {
@@ -40,9 +40,9 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   void
-  FullLaplacian<d,dT>::setup_D() const
+  FullLaplacian<d,dT,J0>::setup_D() const
   {
     D_.resize(sb_.Deltasize(j_));
     if (precond_ == no_precond) {
@@ -62,15 +62,15 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   inline
   double
-  FullLaplacian<d,dT>::D(const size_type k) const {
+  FullLaplacian<d,dT,J0>::D(const size_type k) const {
     return D_[k];
   }
   
-  template <int d, int dT>
-  const double FullLaplacian<d,dT>::get_entry(const size_type row, const size_type col) const
+  template <int d, int dT, int J0>
+  const double FullLaplacian<d,dT,J0>::get_entry(const size_type row, const size_type col) const
   {
     assert(row < row_dimension() && col < column_dimension());
 
@@ -189,9 +189,9 @@ namespace WaveletTL
 #endif
   }
 
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   const double
-  FullLaplacian<d,dT>::diagonal(const size_type row) const
+  FullLaplacian<d,dT,J0>::diagonal(const size_type row) const
   {
     std::map<size_type,double> e_k; e_k[row] = 1.0;
     std::map<size_type,double> y;
@@ -284,10 +284,10 @@ namespace WaveletTL
     return r;
   }
 
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   template <class VECTOR>
-  void FullLaplacian<d,dT>::apply(const VECTOR& x, VECTOR& Mx,
-				  const bool preconditioning) const
+  void FullLaplacian<d,dT,J0>::apply(const VECTOR& x, VECTOR& Mx,
+				     const bool preconditioning) const
   {
     assert(Mx.size() == row_dimension());
 
@@ -342,10 +342,10 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT>
-  void FullLaplacian<d,dT>::apply(const std::map<size_type,double>& x,
-				  std::map<size_type,double>& Mx,
-				  const bool preconditioning) const
+  template <int d, int dT, int J0>
+  void FullLaplacian<d,dT,J0>::apply(const std::map<size_type,double>& x,
+				     std::map<size_type,double>& Mx,
+				     const bool preconditioning) const
   {
     std::map<size_type,double> y(x);
 
@@ -438,9 +438,9 @@ namespace WaveletTL
     }  
   }
 
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   void
-  FullLaplacian<d,dT>::to_sparse(SparseMatrix<double>& S) const
+  FullLaplacian<d,dT,J0>::to_sparse(SparseMatrix<double>& S) const
   {
     // we utilize that the stiffness matrix is symmetric
     const size_type m = row_dimension();
@@ -459,19 +459,19 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT>
-  void FullLaplacian<d,dT>::print(std::ostream &os,
-				  const unsigned int tabwidth,
-				  const unsigned int precision) const
+  template <int d, int dT, int J0>
+  void FullLaplacian<d,dT,J0>::print(std::ostream &os,
+				     const unsigned int tabwidth,
+				     const unsigned int precision) const
   {
     if (row_dimension() == 0)
       os << "[]" << std::endl; // Matlab style
     else
       {
 	unsigned int old_precision = os.precision(precision);
-	for (typename FullLaplacian<d,dT>::size_type i(0); i < row_dimension(); ++i)
+	for (typename FullLaplacian<d,dT,J0>::size_type i(0); i < row_dimension(); ++i)
 	  {
-	    for (typename FullLaplacian<d,dT>::size_type j(0); j < column_dimension(); ++j)
+	    for (typename FullLaplacian<d,dT,J0>::size_type j(0); j < column_dimension(); ++j)
 	      os << std::setw(tabwidth) << std::setprecision(precision)
 		 << get_entry(i, j);
 	    os << std::endl;
@@ -480,9 +480,9 @@ namespace WaveletTL
       }
   }
 
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   inline
-  std::ostream& operator << (std::ostream& os, const FullLaplacian<d,dT>& M)
+  std::ostream& operator << (std::ostream& os, const FullLaplacian<d,dT,J0>& M)
   {
     M.print(os);
     return os;

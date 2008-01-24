@@ -29,7 +29,7 @@ namespace WaveletTL
     where T_j models the multiscale transformation within V_{j+1}
     (T_j=I for j==j0-1).
   */
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   class FullGramian
   {
   public:
@@ -41,7 +41,7 @@ namespace WaveletTL
     /*!
       constructor taking an information object on some spline wavelet basis
     */
-    FullGramian(const SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>& sb);
+    FullGramian(const SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>& sb);
 
     /*!
       row dimension
@@ -92,15 +92,15 @@ namespace WaveletTL
 	       const unsigned int precision = 3) const;
 
   protected:
-    const SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>& sb_;
+    const SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>& sb_;
     mutable int j_;
   };
 
   /*!
     Matlab-style stream output
   */
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
-  std::ostream& operator << (std::ostream& os, const FullGramian<d,dT,s0,s1,sT0,sT1>& M);
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
+  std::ostream& operator << (std::ostream& os, const FullGramian<d,dT,s0,s1,sT0,sT1,J0>& M);
 }
 
 #include <galerkin/full_gramian.cpp>

@@ -9,8 +9,8 @@ using namespace MathTL;
 
 namespace WaveletTL
 {
-  template <int d, int dT>
-  HelmholtzEquation1D<d,dT>::HelmholtzEquation1D
+  template <int d, int dT, int J0>
+  HelmholtzEquation1D<d,dT,J0>::HelmholtzEquation1D
   (const WaveletBasis& basis,
    const double alpha,
    const InfiniteVector<double,Index>& y)
@@ -26,9 +26,9 @@ namespace WaveletTL
     y_precond.scale(this, -1);
   }
 
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   void
-  HelmholtzEquation1D<d,dT>::set_alpha(const double alpha) const
+  HelmholtzEquation1D<d,dT,J0>::set_alpha(const double alpha) const
   {
     assert(alpha >= 0);
     alpha_ = alpha;
@@ -37,19 +37,19 @@ namespace WaveletTL
     y_precond.scale(this, -1);
   }
   
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   void
-  HelmholtzEquation1D<d,dT>::set_rhs(const InfiniteVector<double,Index>& y) const
+  HelmholtzEquation1D<d,dT,J0>::set_rhs(const InfiniteVector<double,Index>& y) const
   {
     y_ = y;
     y_precond = y_;
     y_precond.scale(this, -1);
   }
 
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   inline
   double
-  HelmholtzEquation1D<d,dT>::D(const typename WaveletBasis::Index& lambda) const
+  HelmholtzEquation1D<d,dT,J0>::D(const typename WaveletBasis::Index& lambda) const
   {
 #if 1
     // determine number of index lambda
@@ -67,21 +67,21 @@ namespace WaveletTL
 #endif
   }
   
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   inline
   double
-  HelmholtzEquation1D<d,dT>::a(const typename WaveletBasis::Index& lambda,
-			       const typename WaveletBasis::Index& nu) const
+  HelmholtzEquation1D<d,dT,J0>::a(const typename WaveletBasis::Index& lambda,
+				  const typename WaveletBasis::Index& nu) const
   {
     return alpha_ * GC_.a(lambda, nu) + A_.a(lambda, nu);
   }
   
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   double
-  HelmholtzEquation1D<d,dT>::norm_A() const
+  HelmholtzEquation1D<d,dT,J0>::norm_A() const
   {
     if (normA == 0.0) {
-      FullHelmholtz<d,dT> A(basis_, alpha_, energy);
+      FullHelmholtz<d,dT,J0> A(basis_, alpha_, energy);
       A.set_level(basis().j0()+4);
       double help;
       unsigned int iterations;
@@ -92,12 +92,12 @@ namespace WaveletTL
     return normA;
   }
    
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   double
-  HelmholtzEquation1D<d,dT>::norm_Ainv() const
+  HelmholtzEquation1D<d,dT,J0>::norm_Ainv() const
   {
     if (normAinv == 0.0) {
-      FullHelmholtz<d,dT> A(basis_, alpha_, energy);
+      FullHelmholtz<d,dT,J0> A(basis_, alpha_, energy);
       A.set_level(basis().j0()+4);
       double help;
       unsigned int iterations;
@@ -108,15 +108,15 @@ namespace WaveletTL
     return normAinv;
   }
 
-  template <int d, int dT>
+  template <int d, int dT, int J0>
   void
-  HelmholtzEquation1D<d,dT>::add_level (const Index& lambda,
-					//InfiniteVector<double, Index>& w,
-					Vector<double>& w,
-					const int j,
-					const double factor,
-					const int J,
-					const CompressionStrategy strategy) const
+  HelmholtzEquation1D<d,dT,J0>::add_level (const Index& lambda,
+					   //InfiniteVector<double, Index>& w,
+					   Vector<double>& w,
+					   const int j,
+					   const double factor,
+					   const int J,
+					   const CompressionStrategy strategy) const
   {
     // We have to compute a (level-)part of the lambda-th column of 
     //   D_alpha^{-1}<(alpha*I-A)Psi,Psi>^T D_alpha^{-1}

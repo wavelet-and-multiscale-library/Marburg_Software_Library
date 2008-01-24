@@ -24,17 +24,22 @@ namespace WaveletTL
 {
   /*!
     Template class for spline wavelet bases on the interval.
+
+    If unsure about the suitable value of J0, choose
+      J0 = SplineBasisData_j0<d,dT,flavor,s0,s1,sT0,sT1>::j0>
   */
-  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   class SplineBasis
     : public SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>
   {
   public:
-    using SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::j0;
     using SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::check;
 
+    //! default constructor
+    SplineBasis();
+
     //! wavelet index class
-    typedef IntervalIndex2<SplineBasis<d,dT,flavor,s0,s1,sT0,sT1> > Index;
+    typedef IntervalIndex2<SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0> > Index;
     
     //! size_type, for convenience
     typedef Vector<double>::size_type size_type;
@@ -55,6 +60,9 @@ namespace WaveletTL
 
     //! space dimension of the underlying domain
     static const int space_dimension = 1;
+
+    //! coarsest level
+    static const int j0() { return J0; }
 
     //! critical Sobolev regularity for the primal generators/wavelets
     static double primal_regularity() { return d - 0.5; }
@@ -265,17 +273,22 @@ namespace WaveletTL
 
   /*!
     template specialization to flavor==P_construction
+
+    If unsure about the suitable value of J0, choose
+      J0 = SplineBasisData_j0<d,dT,P_construction,s0,s1,sT0,sT1>::j0>
   */
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
-  class SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
+  class SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>
     : public SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>
   {
   public:
-    using SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::j0;
     using SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::check;
 
+    //! default constructor
+    SplineBasis();
+
     //! wavelet index class
-    typedef IntervalIndex2<SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1> > Index;
+    typedef IntervalIndex2<SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0> > Index;
     
     //! size_type, for convenience
     typedef Vector<double>::size_type size_type;
@@ -306,6 +319,9 @@ namespace WaveletTL
 
     //! space dimension of the underlying domain
     static const int space_dimension = 1;
+
+    //! coarsest level
+    static const int j0() { return J0; }
 
     //! critical Sobolev regularity for the primal generators/wavelets
     static double primal_regularity() { return d - 0.5; }

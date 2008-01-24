@@ -5,37 +5,37 @@
 
 namespace WaveletTL
 {
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
-  FullGramian<d,dT,s0,s1,sT0,sT1>::FullGramian(const SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>& sb)
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
+  FullGramian<d,dT,s0,s1,sT0,sT1,J0>::FullGramian(const SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>& sb)
     : sb_(sb), j_(sb.j0())
   {
   }
 
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   inline
-  const typename FullGramian<d,dT,s0,s1,sT0,sT1>::size_type
-  FullGramian<d,dT,s0,s1,sT0,sT1>::row_dimension() const
+  const typename FullGramian<d,dT,s0,s1,sT0,sT1,J0>::size_type
+  FullGramian<d,dT,s0,s1,sT0,sT1,J0>::row_dimension() const
   {
     return sb_.Deltasize(j_);
   }  
   
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   inline
-  const typename FullGramian<d,dT,s0,s1,sT0,sT1>::size_type
-  FullGramian<d,dT,s0,s1,sT0,sT1>::column_dimension() const
+  const typename FullGramian<d,dT,s0,s1,sT0,sT1,J0>::size_type
+  FullGramian<d,dT,s0,s1,sT0,sT1,J0>::column_dimension() const
   {
     return row_dimension(); // square
   }  
 
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
-  void FullGramian<d,dT,s0,s1,sT0,sT1>::set_level(const int j) const
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
+  void FullGramian<d,dT,s0,s1,sT0,sT1,J0>::set_level(const int j) const
   {
     assert(j >= sb_.j0());
     j_ = j;
   }
 
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
-  const double FullGramian<d,dT,s0,s1,sT0,sT1>::get_entry(const size_type row, const size_type col) const
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
+  const double FullGramian<d,dT,s0,s1,sT0,sT1,J0>::get_entry(const size_type row, const size_type col) const
   {
     assert(row < row_dimension() && col < column_dimension());
     
@@ -153,9 +153,9 @@ namespace WaveletTL
 #endif
   }
 
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   const double
-  FullGramian<d,dT,s0,s1,sT0,sT1>::diagonal(const size_type row) const
+  FullGramian<d,dT,s0,s1,sT0,sT1,J0>::diagonal(const size_type row) const
   {
     std::map<size_type,double> e_k; e_k[row] = 1.0;
     std::map<size_type,double> y;
@@ -247,9 +247,9 @@ namespace WaveletTL
     return r;
   }
   
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   template <class VECTOR>
-  void FullGramian<d,dT,s0,s1,sT0,sT1>::apply(const VECTOR& x, VECTOR& Mx) const
+  void FullGramian<d,dT,s0,s1,sT0,sT1,J0>::apply(const VECTOR& x, VECTOR& Mx) const
   {
     assert(Mx.size() == row_dimension());
 
@@ -291,8 +291,8 @@ namespace WaveletTL
       Mx.swap(y);
   }
 
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
-  void FullGramian<d,dT,s0,s1,sT0,sT1>::apply(const std::map<size_type,double>& x,
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
+  void FullGramian<d,dT,s0,s1,sT0,sT1,J0>::apply(const std::map<size_type,double>& x,
 				std::map<size_type,double>& Mx) const
   {
     std::map<size_type,double> y; // no initialization necessary
@@ -376,9 +376,9 @@ namespace WaveletTL
     }  
   }
   
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   void
-  FullGramian<d,dT,s0,s1,sT0,sT1>::to_sparse(SparseMatrix<double>& S) const
+  FullGramian<d,dT,s0,s1,sT0,sT1,J0>::to_sparse(SparseMatrix<double>& S) const
   {
     // we utilize that the Gramian is symmetric
     const size_type m = row_dimension();
@@ -397,8 +397,8 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
-  void FullGramian<d,dT,s0,s1,sT0,sT1>::print(std::ostream &os,
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
+  void FullGramian<d,dT,s0,s1,sT0,sT1,J0>::print(std::ostream &os,
 				  const unsigned int tabwidth,
 				  const unsigned int precision) const
   {
@@ -418,9 +418,9 @@ namespace WaveletTL
       }
   }
 
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   inline
-  std::ostream& operator << (std::ostream& os, const FullGramian<d,dT,s0,s1,sT0,sT1>& M)
+  std::ostream& operator << (std::ostream& os, const FullGramian<d,dT,s0,s1,sT0,sT1,J0>& M)
   {
     M.print(os);
     return os;

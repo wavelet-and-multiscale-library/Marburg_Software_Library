@@ -20,21 +20,30 @@ using namespace MathTL;
 namespace WaveletTL
 {
   /*!
-    A class to hold all the pieces of information
+    A helper class to provide the coarsest possible level j0
+    of a spline wavelet basis on the interval
+  */
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
+  struct SplineBasisData_j0
+  {
+  public:
+    static const int j0;
+  };
+  
+  /*!
+    A helper class to hold all the pieces of information (apart from j0)
     needed for the construction of a spline wavelet basis on the interval.
+
   */
   template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
   class SplineBasisData
   {
   public:
-    //! default constructor
-    SplineBasisData();
+    //! constructor for a given coarsest level
+    SplineBasisData(const int j0);
 
     //! destructor
     virtual ~SplineBasisData();
-
-    //! coarsest level
-    static const int j0();
 
     //! check integrity of the internal data
     void check() const;
@@ -71,15 +80,12 @@ namespace WaveletTL
   class SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>
   {
   public:
-    //! default constructor
-    SplineBasisData();
+    //! constructor for a given coarsest level
+    SplineBasisData(const int j0);
     
     //! destructor
     virtual ~SplineBasisData();
     
-    //! coarsest level
-    static const int j0();
-
     //! check integrity of the internal data
     void check() const;
  

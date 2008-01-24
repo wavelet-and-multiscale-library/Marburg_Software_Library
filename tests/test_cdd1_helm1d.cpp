@@ -26,11 +26,15 @@ int main()
 
   const int d  = 3;
   const int dT = 3;
+  const int s0 = 1;
+  const int s1 = 1;
 
-  typedef SplineBasis<d,dT,P_construction,1,1,0,0> Basis; // PBasis, complementary b.c.'s
-  Basis basis; 
+  const int J0 = SplineBasisData_j0<d,dT,P_construction,s0,s1,0,0>::j0;
 
+  typedef SplineBasis<d,dT,P_construction,s0,s1,0,0,J0> Basis;
   typedef Basis::Index Index;
+
+  Basis basis; // PBasis, complementary b.c.'s
 
   const unsigned int solution = 1;
   double kink = 0; // for Solution3;
@@ -57,7 +61,7 @@ int main()
   const int jmax = 8;
   basis.set_jmax(jmax);
 
-  typedef HelmholtzEquation1D<d,dT> Problem;
+  typedef HelmholtzEquation1D<d,dT,J0> Problem;
   Problem problem(basis, 1.0, InfiniteVector<double,Index>());
 
   InfiniteVector<double,Index> fcoeffs;

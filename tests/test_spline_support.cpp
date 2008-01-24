@@ -11,7 +11,8 @@ int main()
   cout << "Testing support calculation of SplineBasis generators and wavelets..." << endl;
   
 #if 1
-  typedef SplineBasis<2,2,P_construction,0,0,0,0> Basis; // PBasis, no b.c.'s
+  // PBasis, no b.c.'s
+  typedef SplineBasis<2,2,P_construction,0,0,0,0,SplineBasisData_j0<2,2,P_construction,0,0,0,0>::j0> Basis;
 #else
   typedef SplineBasis<3,3,DS_construction_bio5,0,0,0,0> Basis; // DSBasis, no b.c.'s
 //   typedef SplineBasis<3,3,DS_construction_bio5e,0,0,0,0> Basis; // DSBasis, no b.c.'s

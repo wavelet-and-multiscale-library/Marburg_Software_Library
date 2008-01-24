@@ -157,19 +157,19 @@ namespace WaveletTL
   /*!
     template specialization to SplineBasis
   */
-  template <int d, int dT, int s0, int s1, int sT0, int sT1>
-  class IntervalGramian<SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1> >
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
+  class IntervalGramian<SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0> >
   {
   public:
     /*!
       make template argument accessible
     */
-    typedef SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1> WaveletBasis;
+    typedef SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0> WaveletBasis;
     
     /*!
       constructor from a given wavelet basis and a given right-hand side y
     */
-    IntervalGramian(const SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1>& basis,
+    IntervalGramian(const SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>& basis,
  		    const InfiniteVector<double, typename WaveletBasis::Index>& y);
     
     /*!
@@ -277,7 +277,7 @@ namespace WaveletTL
 
   protected:
     const WaveletBasis& basis_;
-    mutable FullGramian<d,dT,s0,s1,sT0,sT1> G_;
+    mutable FullGramian<d,dT,s0,s1,sT0,sT1,J0> G_;
     
     // rhs, mutable to have 'const' method
     mutable InfiniteVector<double, typename WaveletBasis::Index> y_;

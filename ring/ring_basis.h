@@ -47,7 +47,7 @@ namespace WaveletTL
     i.e.,
       psi_lambda(kappa(s,phi)) = psi^0_lambda(s,phi)/(r(s))^{1/2}.
   */
-  template <int d, int dt, int s0=0, int s1=0>
+  template <int d, int dt, int s0, int s1>
   class RingBasis
   {
   public:
@@ -61,7 +61,8 @@ namespace WaveletTL
     typedef typename Basis0::Index Index0;
     
     //! type of 1D basis in radial direction
-    typedef SplineBasis<d,dt,P_construction,s0,s1,0,0> Basis1;
+    typedef SplineBasis<d,dt,P_construction,s0,s1,0,0,
+			SplineBasisData_j0<d,dt,P_construction,s0,s1,0,0>::j0> Basis1;
 
     //! type of 1D indices in radial direction
     typedef typename Basis1::Index Index1;

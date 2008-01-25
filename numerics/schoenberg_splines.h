@@ -149,12 +149,15 @@ namespace MathTL
     return 0.;
   }
 
-template <int d>
+  /*!
+    evaluate the second derivative N_{k,d}''(x) of an arbitrary Schoenberg B-spline
+  */
+  template <int d>
   inline
   double EvaluateSchoenbergBSpline_xx(const int k, const double x)
   {
     double r(0);
-
+    
     if (k == 1-d) {
       r = (1-d) * EvaluateSchoenbergBSpline_x<d-1>(2-d, x);
     } else {
@@ -194,7 +197,11 @@ template <int d>
 #endif
   }
 
-template <int d>
+  /*!
+    evaluate the second derivative of a primal [P] function
+      phi_{j,k}''(x) = 2^{5*j/2}N_{k-d/2,d}''(2^jx)
+  */
+  template <int d>
   inline
   double EvaluateSchoenbergBSpline_td_xx(const int j, const int k, const double x)
   {
@@ -205,7 +212,6 @@ template <int d>
     return twotothejhalf(5*j) * EvaluateSchoenbergBSpline_xx<d>(k-(d/2), (1<<j) * x);
 #endif
   }
-
 
   /*!
     a translated and dilated Schoenberg B-spline as a function object

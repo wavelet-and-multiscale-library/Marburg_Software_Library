@@ -39,8 +39,11 @@ namespace WaveletTL
   class SplineBasisData
   {
   public:
-    //! constructor for a given coarsest level
-    SplineBasisData(const int j0);
+    /*!
+      default constructor
+      (yields matrix for j0==SplineBasisData_j0<d,dT,flavor,s0,s1,sT0,sT1>)
+    */
+    SplineBasisData();
 
     //! destructor
     virtual ~SplineBasisData();
@@ -80,8 +83,11 @@ namespace WaveletTL
   class SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>
   {
   public:
-    //! constructor for a given coarsest level
-    SplineBasisData(const int j0);
+    /*!
+      default constructor
+      (yields matrix for j0==SplineBasisData_j0<d,dT,flavor,s0,s1,sT0,sT1>)
+    */
+    SplineBasisData();
     
     //! destructor
     virtual ~SplineBasisData();

@@ -20,9 +20,8 @@ int main()
 {
   cout << "Testing wavelet bases from [P] ..." << endl;
 
-  const int d  = 3;
-  const int dT = 3;
-
+  const int d  = 2;
+  const int dT = 2;
 
   typedef PBasis<d,dT> Basis;
   typedef Basis::Index Index;
@@ -51,7 +50,7 @@ int main()
 
   //  abort();  
 
-#if 1
+#if 0
   {
     SparseMatrix<double> M;
     const int j = basis.j0();
@@ -324,27 +323,33 @@ int main()
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
 	   << level << ":" << endl;
-      Index index(first_generator(&basis, level));
+      Index index(basis.first_generator(level));
       for (;; ++index)
 	{
 	  InfiniteVector<double, Index> origcoeff;
 	  origcoeff[index] = 1.0;
 	  
+  	  cout << "* original coeffs:" << endl << origcoeff;
+
 	  InfiniteVector<double, Index> wcoeff;
 	  basis.decompose(origcoeff, basis.j0(), wcoeff);
+
+  	  cout << "* after decompose():" << endl << wcoeff;
 	  
 	  InfiniteVector<double, Index> transformcoeff;
 	  basis.reconstruct(wcoeff, level, transformcoeff);
+
+	  cout << "* after reconstruct():" << endl << transformcoeff;
 	  
 	  cout << "* generator: " << index
 	       << ", max. error: " << linfty_norm(origcoeff-transformcoeff) << endl;
 	  
-	  if (index == last_generator(&basis, level)) break;
+	  if (index == basis.last_generator(level)) break;
 	}
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "

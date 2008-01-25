@@ -14,57 +14,65 @@ int main()
 
 #if 0
   // PBasis, no b.c.'s
-  SplineBasisData<2,2,P_construction,0,0,0,0> sd22nobc(SplineBasisData_j0<2,2,P_construction,0,0,0,0>::j0);
+  SplineBasisData<2,2,P_construction,0,0,0,0> sd22nobc;
   sd22nobc.check();
   
   // PBasis, complementary b.c.'s
-  SplineBasisData<2,2,P_construction,1,1,0,0> sd22(SplineBasisData_j0<2,2,P_construction,1,1,0,0>::j0); 
+  SplineBasisData<2,2,P_construction,1,1,0,0> sd22;
   sd22.check();
   
   // PBasis, complementary b.c.'s at x=0
-  SplineBasisData<2,2,P_construction,1,0,0,0> sd22bcleft(SplineBasisData_j0<2,2,P_construction,1,0,0,0>::j0);
+  SplineBasisData<2,2,P_construction,1,0,0,0> sd22bcleft;
   sd22bcleft.check();
   
   // PBasis, complementary b.c.'s at x=1
-  SplineBasisData<2,2,P_construction,0,1,0,0> sd22bcright(SplineBasisData_j0<2,2,P_construction,0,1,0,0>::j0);
+  SplineBasisData<2,2,P_construction,0,1,0,0> sd22bcright;
   sd22bcright.check();
   
   // PBasis, complementary b.c.'s at x=0
-  SplineBasisData<3,3,P_construction,1,0,0,0> sd33bcleft(SplineBasisData_j0<3,3,P_construction,1,0,0,0>::j0);
+  SplineBasisData<3,3,P_construction,1,0,0,0> sd33bcleft;
   sd33bcleft.check();
 
   // PBasis, complementary b.c.'s at x=1
-  SplineBasisData<3,3,P_construction,0,1,0,0> sd33bcright(SplineBasisData_j0<3,3,P_construction,0,1,0,0>::j0); 
+  SplineBasisData<3,3,P_construction,0,1,0,0> sd33bcright;
   sd33bcright.check();
   
   // PBasis, complementary b.c.'s
-  SplineBasisData<3,3,P_construction,1,1,0,0> sd33(SplineBasisData_j0<3,3,P_construction,1,1,0,0>::j0);
+  SplineBasisData<3,3,P_construction,1,1,0,0> sd33;
   sd33.check();
 #endif
  
 #if 0
   // DSBasis, no b.c.'s
-  SplineBasisData<2,2,DS_construction_bio5,0,0,0,0> sb22nobc(SplineBasisData_j0<2,2,DS_construction_bio5,0,0,0,0>::j0);
+  SplineBasisData<2,2,DS_construction_bio5,0,0,0,0> sb22nobc;
   sb22nobc.check();
   
   // DSBasis, no b.c.'s
-  SplineBasisData<2,2,DS_construction_bio5e,0,0,0,0> sb22nobc_energy(SplineBasisData_j0<2,2,DS_construction_bio5e,0,0,0,0>::j0);
+  SplineBasisData<2,2,DS_construction_bio5e,0,0,0,0> sb22nobc_energy;
   sb22nobc_energy.check();
   
   // DSBasis, no b.c.'s
-  SplineBasisData<3,3,DS_construction_bio5,0,0,0,0> sb33nobc(SplineBasisData_j0<3,3,DS_construction_bio5,0,0,0,0>::j0);
+  SplineBasisData<3,3,DS_construction_bio5,0,0,0,0> sb33nobc;
   sb33nobc.check();
   
   // DSBasis, no b.c.'s
-  SplineBasisData<3,3,DS_construction_bio5e,0,0,0,0> sb33nobc_energy(SplineBasisData_j0<3,3,DS_construction_bio5e,0,0,0,0>::j0); 
+  SplineBasisData<3,3,DS_construction_bio5e,0,0,0,0> sb33nobc_energy;
   sb33nobc_energy.check();
 #endif
 
 #if 1
   cout << "Testing SplineBasis..." << endl;
-  // PBasis, complementary b.c.'s
-  typedef SplineBasis<3,3,P_construction,1,1,0,0,SplineBasisData_j0<3,3,P_construction,1,1,0,0>::j0> SBasis;
+
+  const int d  = 2;
+  const int dt = 2;
+  const int s0 = 0;
+  const int s1 = 1;
+  const int J0 = SplineBasisData_j0<d,dt,P_construction,s0,s1,0,0>::j0+1;
+
+  typedef SplineBasis<d,dt,P_construction,s0,s1,0,0,J0> SBasis;
+
   //   typedef SplineBasis<3,3,DS_construction_bio5e,0,0,0,0> SBasis; // DSBasis, no b.c.'s
+
   SBasis basis;
   typedef SBasis::Index Index;
 
@@ -115,17 +123,17 @@ int main()
 	  InfiniteVector<double, Index> origcoeff;
 	  origcoeff[index] = 1.0;
 	  
-  	  cout << "* original coeffs:" << endl << origcoeff;
+   	  cout << "* original coeffs:" << endl << origcoeff;
 
 	  InfiniteVector<double, Index> wcoeff;
 	  basis.decompose(origcoeff, basis.j0(), wcoeff);
 
-  	  cout << "* after decompose():" << endl << wcoeff;
+   	  cout << "* after decompose():" << endl << wcoeff;
 	  
 	  InfiniteVector<double, Index> transformcoeff;
 	  basis.reconstruct(wcoeff, level, transformcoeff);
 
-	  cout << "* after reconstruct():" << endl << transformcoeff;
+ 	  cout << "* after reconstruct():" << endl << transformcoeff;
 	  
 	  cout << "* generator: " << index
 	       << ", max. error: " << linfty_norm(origcoeff-transformcoeff) << endl;

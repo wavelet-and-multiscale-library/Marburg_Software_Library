@@ -266,8 +266,9 @@ namespace WaveletTL
   // some precomputed data for DS bases
 
   template <>
-  SplineBasisData<2,2,DS_construction_bio5,0,0,0,0>::SplineBasisData(const int j0)
+  SplineBasisData<2,2,DS_construction_bio5,0,0,0,0>::SplineBasisData()
   {
+    const int j0 = SplineBasisData_j0<2,2,DS_construction_bio5,0,0,0,0>::j0;
     std::ostringstream entries;
     entries << "0.707106781186547 0 "
 	    << "0.288735268984507 0.353553390593274 "
@@ -329,8 +330,9 @@ namespace WaveletTL
   }
 
   template <>
-  SplineBasisData<2,2,DS_construction_bio5e,0,0,0,0>::SplineBasisData(const int j0)
+  SplineBasisData<2,2,DS_construction_bio5e,0,0,0,0>::SplineBasisData()
   {
+    const int j0 = SplineBasisData_j0<2,2,DS_construction_bio5e,0,0,0,0>::j0;
     std::ostringstream entries;
     entries << "0.707106781186547 0 "
 	    << "0.288735268984507 0.353553390593274 "
@@ -392,8 +394,9 @@ namespace WaveletTL
   }
 
   template <>
-  SplineBasisData<3,3,DS_construction_bio5,0,0,0,0>::SplineBasisData(const int j0)
+  SplineBasisData<3,3,DS_construction_bio5,0,0,0,0>::SplineBasisData()
   {
+    const int j0 = SplineBasisData_j0<3,3,DS_construction_bio5,0,0,0,0>::j0;
     std::ostringstream entries;
     entries << "0.707106781186398 0 0 "
 	    << "0.690720459146663 0.353553390593505 0 "
@@ -505,8 +508,9 @@ namespace WaveletTL
   }
 
   template <>
-  SplineBasisData<3,3,DS_construction_bio5e,0,0,0,0>::SplineBasisData(const int j0)
+  SplineBasisData<3,3,DS_construction_bio5e,0,0,0,0>::SplineBasisData()
   {
+    const int j0 = SplineBasisData_j0<3,3,DS_construction_bio5e,0,0,0,0>::j0;
     std::ostringstream entries;
     entries << "0.707106781186398 0 0 "
 	    << "0.690720459146663 0.353553390593505 0 "
@@ -624,8 +628,9 @@ namespace WaveletTL
   // some precomputed data for P bases
 
   template <>
-  SplineBasisData<2,2,P_construction,0,0,0,0>::SplineBasisData(const int j0)
+  SplineBasisData<2,2,P_construction,0,0,0,0>::SplineBasisData()
   {
+    const int j0 = SplineBasisData_j0<2,2,P_construction,0,0,0,0>::j0;
     Matrix<double> Mj0_l(2, 1, "1 0.5");
     Matrix<double> Mj0_r; Mj0_l.mirror(Mj0_r);
     Vector<double> Mj0_band_lr(3, "0.5 1.0 0.5");
@@ -645,8 +650,9 @@ namespace WaveletTL
   }
 
   template <>
-  SplineBasisData<2,2,P_construction,1,1,0,0>::SplineBasisData(const int j0)
+  SplineBasisData<2,2,P_construction,1,1,0,0>::SplineBasisData()
   {
+    const int j0 = SplineBasisData_j0<2,2,P_construction,1,1,0,0>::j0;
     Matrix<double> Mj0_lr(0); // empty corner blocks
     Vector<double> Mj0_band_lr(3, "0.5 1.0 0.5");
     Mj0_ = QuasiStationaryMatrix<double>(j0, 15, 7, Mj0_lr, Mj0_lr, Mj0_band_lr, Mj0_band_lr, 0, 0, M_SQRT1_2);
@@ -666,8 +672,9 @@ namespace WaveletTL
   }
 
   template <>
-  SplineBasisData<2,2,P_construction,1,0,0,0>::SplineBasisData(const int j0)
+  SplineBasisData<2,2,P_construction,1,0,0,0>::SplineBasisData()
   {
+    const int j0 = SplineBasisData_j0<2,2,P_construction,1,0,0,0>::j0;
     Matrix<double> Mj0_l(0); // empty corner block
     Matrix<double> Mj0_r(2, 1, "0.5 1");
     Vector<double> Mj0_band_lr(3, "0.5 1.0 0.5");
@@ -688,8 +695,9 @@ namespace WaveletTL
   }
 
   template <>
-  SplineBasisData<2,2,P_construction,0,1,0,0>::SplineBasisData(const int j0)
+  SplineBasisData<2,2,P_construction,0,1,0,0>::SplineBasisData()
   {
+    const int j0 = SplineBasisData_j0<2,2,P_construction,0,1,0,0>::j0;
     Matrix<double> Mj0_l(2, 1, "1 0.5");
     Matrix<double> Mj0_r(0); // empty corner block
     Vector<double> Mj0_band_lr(3, "0.5 1.0 0.5");
@@ -710,8 +718,9 @@ namespace WaveletTL
   }
 
   template <>
-  SplineBasisData<3,3,P_construction,1,0,0,0>::SplineBasisData(const int j0)
+  SplineBasisData<3,3,P_construction,1,0,0,0>::SplineBasisData()
   {
+    const int j0 = SplineBasisData_j0<3,3,P_construction,1,0,0,0>::j0;
     Matrix<double> Mj0_l(3, 1, "0.5 0.75 0.25");
     Matrix<double> Mj0_r(4, 2, "0.25 0 0.75 0 0.5 0.5 0 1");
     Vector<double> Mj0_band_lr(4, "0.25 0.75 0.75 0.25");
@@ -770,8 +779,9 @@ namespace WaveletTL
   }
 
   template <>
-  SplineBasisData<3,3,P_construction,0,1,0,0>::SplineBasisData(const int j0)
+  SplineBasisData<3,3,P_construction,0,1,0,0>::SplineBasisData()
   {
+    const int j0 = SplineBasisData_j0<3,3,P_construction,0,1,0,0>::j0;
     Matrix<double> Mj0_l(4, 2, "1 0 0.5 0.5 0 0.75 0 0.25");
     Matrix<double> Mj0_r(3, 1, "0.25 0.75 0.5");
     Vector<double> Mj0_band_lr(4, "0.25 0.75 0.75 0.25");
@@ -830,8 +840,9 @@ namespace WaveletTL
   }
 
   template <>
-  SplineBasisData<3,3,P_construction,1,1,0,0>::SplineBasisData(const int j0)
+  SplineBasisData<3,3,P_construction,1,1,0,0>::SplineBasisData()
   {
+    const int j0 = SplineBasisData_j0<3,3,P_construction,1,1,0,0>::j0;
     Matrix<double> Mj0_l(3, 1, "0.5 0.75 0.25");
     Matrix<double> Mj0_r; Mj0_l.mirror(Mj0_r);
     Vector<double> Mj0_band_lr(4, "0.25 0.75 0.75 0.25");

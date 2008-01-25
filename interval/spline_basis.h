@@ -315,7 +315,7 @@ namespace WaveletTL
     //! finest possible level
     int jmax_;
 
-    //! setup full collectin of wavelets between j0_ and jmax_ as long as a jmax_ has been specified
+    //! setup full collectin of wavelets between j0 and jmax_ as long as a jmax_ has been specified
     void setup_full_collection();
 
     //! collection of all wavelets between coarsest and finest level
@@ -618,7 +618,7 @@ namespace WaveletTL
     //! finest possible level
     int jmax_;
     
-    //! setup full collectin of wavelets between j0_ and jmax_ as long as a jmax_ has been specified
+    //! setup full collectin of wavelets between j0 and jmax_ as long as a jmax_ has been specified
     void setup_full_collection();
     
     //! collection of all wavelets between coarsest and finest level

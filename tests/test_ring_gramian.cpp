@@ -20,9 +20,9 @@ int main()
 {
   cout << "Testing Gramian matrices of wavelet bases on the ring-shaped domain ..." << endl;
 
-  const int d  = 3;
-  const int dt = 3;
-  const int s0 = 0;
+  const int d  = 2;
+  const int dt = 2;
+  const int s0 = 1;
   const int s1 = 1;
   const int J0 = SplineBasisData_j0<d,dt,P_construction,s0,s1,0,0>::j0;
 
@@ -35,7 +35,7 @@ int main()
   typedef Basis::Index Index;
 
   const int j0 = basis.j0();
-  const int jmax = j0+2;
+  const int jmax = j0+3;
 
   cout << "j0=" << j0 << ", jmax=" << jmax << endl;
 

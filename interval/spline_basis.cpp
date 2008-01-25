@@ -675,28 +675,49 @@ namespace WaveletTL
       // generator
       if (lambda.k() < DeltaLmin()+(int)SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::CLA_.column_dimension()) {
 	// left boundary generator
-	for (unsigned int i(0); i < SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::CLA_.row_dimension(); i++) {
-	  double help(SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::CLA_.get_entry(i, lambda.k()-DeltaLmin()));
-	  if (help != 0)
-	    r += help * (derivative == 0
-			 ? EvaluateCardinalBSpline_td<d>  (lambda.j(), 1-ell2<d>()+i, x)
-			 : EvaluateCardinalBSpline_td_x<d>(lambda.j(), 1-ell2<d>()+i, x));
-	}
+ 	switch(derivative) {
+ 	case 0:
+ 	  for (unsigned int i(0); i < SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::CLA_.row_dimension(); i++) {
+ 	    double help(SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::CLA_.get_entry(i, lambda.k()-DeltaLmin()));
+ 	    if (help != 0)
+ 	      r += help * EvaluateCardinalBSpline_td<d>(lambda.j(), 1-ell2<d>()+i, x);
+ 	  }
+ 	  break;
+ 	case 1:
+ 	  for (unsigned int i(0); i < SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::CLA_.row_dimension(); i++) {
+ 	    double help(SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::CLA_.get_entry(i, lambda.k()-DeltaLmin()));
+ 	    if (help != 0)
+ 	      r += help * EvaluateCardinalBSpline_td_x<d>(lambda.j(), 1-ell2<d>()+i, x);
+ 	  }
+ 	  break;
+ 	}
       }	else {
 	if (lambda.k() > DeltaRmax(lambda.j())-(int)SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::CRA_.column_dimension()) {
 	  // right boundary generator
-	  for (unsigned int i(0); i < SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::CRA_.row_dimension(); i++) {
-	    double help(SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::CRA_.get_entry(i, DeltaRmax(lambda.j())-lambda.k()));
-	    if (help != 0)
-	      r += help * (derivative == 0
-			   ? EvaluateCardinalBSpline_td<d>  (lambda.j(), (1<<lambda.j())-(d%2)-(1-ell2<d>()+i), x)
-			   : EvaluateCardinalBSpline_td_x<d>(lambda.j(), (1<<lambda.j())-(d%2)-(1-ell2<d>()+i), x));
+	  switch(derivative) {
+	  case 0:
+	    for (unsigned int i(0); i < SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::CRA_.row_dimension(); i++) {
+	      double help(SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::CRA_.get_entry(i, DeltaRmax(lambda.j())-lambda.k()));
+	      if (help != 0)
+		r += help * EvaluateCardinalBSpline_td<d>  (lambda.j(), (1<<lambda.j())-(d%2)-(1-ell2<d>()+i), x);
+	    }
+	    break;
+	  case 1:
+	    for (unsigned int i(0); i < SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::CRA_.row_dimension(); i++) {
+	      double help(SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::CRA_.get_entry(i, DeltaRmax(lambda.j())-lambda.k()));
+	      if (help != 0)
+		r += help * EvaluateCardinalBSpline_td_x<d>(lambda.j(), (1<<lambda.j())-(d%2)-(1-ell2<d>()+i), x);
+	    }
+	    break;
 	  }
 	} else {
 	  // inner generator
-	  r = (derivative == 0
-	       ? EvaluateCardinalBSpline_td<d>  (lambda.j(), lambda.k(), x)
-	       : EvaluateCardinalBSpline_td_x<d>(lambda.j(), lambda.k(), x));
+	  switch(derivative) {
+	  case 0:
+	    return EvaluateCardinalBSpline_td<d>(lambda.j(), lambda.k(), x);
+	  case 1:
+	    return EvaluateCardinalBSpline_td_x<d>(lambda.j(), lambda.k(), x);
+	  }
 	}
       }
     } else {
@@ -723,24 +744,36 @@ namespace WaveletTL
    const typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index& lambda,
    const double x) const
   {
-    assert(derivative <= 1); // we only support derivatives up to the first order
+    assert(derivative <= 2); // we only support derivatives up to the second order
 
     double r = 0;
 
     if (lambda.e() == 0) {
       // generator
       if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) {
-	r = (derivative == 0
-	     ? MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
+	switch(derivative) {
+	case 0:
+	  return MathTL::EvaluateSchoenbergBSpline_td<d>(lambda.j(),
 							 (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
-							 1-x)
-	     : -MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
-							  (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
-							  1-x));
+							 1-x);
+	case 1:
+	  return -MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
+							    (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
+							    1-x);
+	case 2:
+	  return MathTL::EvaluateSchoenbergBSpline_td_xx<d>(lambda.j(),
+							    (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
+							    1-x);
+	}
       } else {
-	r = (derivative == 0
-	     ? MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), x)
-	     : MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), lambda.k(), x));
+	switch(derivative) {
+	case 0:
+	  return MathTL::EvaluateSchoenbergBSpline_td<d>(lambda.j(), lambda.k(), x);
+	case 1:
+	  return MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), lambda.k(), x);
+	case 2:
+	  return MathTL::EvaluateSchoenbergBSpline_td_xx<d>(lambda.j(), lambda.k(), x);
+	}
       }
     } else {
       // wavelet, switch to generator representation
@@ -793,8 +826,6 @@ namespace WaveletTL
 		values[m] += help * EvaluateCardinalBSpline_td_x<d>(lambda.j(), 1-ell2<d>()+i, points[m]);
 	  }
 	  break;
-	default:
-	  break;
 	}
       }	else {
 	if (lambda.k() > DeltaRmax(lambda.j())-(int)SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::CRA_.column_dimension()) {
@@ -820,8 +851,6 @@ namespace WaveletTL
 	      }
 	    }
 	    break;
-	  default:
-	    break;
 	  }
 	} else {
 	  // inner generator
@@ -833,8 +862,6 @@ namespace WaveletTL
 	  case 1:
 	    for (unsigned int m(0); m < points.size(); m++)
 	      values[m] = EvaluateCardinalBSpline_td_x<d>(lambda.j(), lambda.k(), points[m]);
-	    break;
-	  default:
 	    break;
 	  }
 	}
@@ -926,7 +953,7 @@ namespace WaveletTL
    const typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index& lambda,
    const Array1D<double>& points, Array1D<double>& values) const
   {
-    assert(derivative <= 1); // we only support derivatives up to the first order
+    assert(derivative <= 2); // we only support derivatives up to the second order
 
     values.resize(points.size());
     for (unsigned int i(0); i < values.size(); i++)
@@ -935,23 +962,47 @@ namespace WaveletTL
     if (lambda.e() == 0) {
       // generator
       if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) {
-	for (unsigned int m(0); m < points.size(); m++)
-	  values[m] = (derivative == 0
-		       ? MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
+	switch(derivative) {
+	case 0:
+	  for (unsigned int m(0); m < points.size(); m++)
+	    values[m] = MathTL::EvaluateSchoenbergBSpline_td<d>(lambda.j(),
+								(1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
+								1-points[m]);
+	  break;
+	case 1:
+	  for (unsigned int m(0); m < points.size(); m++)
+	    values[m] = -MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
 								   (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
-								   1-points[m])
-		       : -MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
-							    (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
-							    1-points[m]));
+								   1-points[m]);
+	  break;
+	case 2:
+	  for (unsigned int m(0); m < points.size(); m++)
+	    values[m] = MathTL::EvaluateSchoenbergBSpline_td_xx<d>(lambda.j(),
+								   (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
+								   1-points[m]);
+	  break;
+	}
       } else {
-	for (unsigned int m(0); m < points.size(); m++)
-	  values[m] = (derivative == 0
-		       ? MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
+	switch(derivative) {
+	case 0:
+	  for (unsigned int m(0); m < points.size(); m++)
+	    values[m] = MathTL::EvaluateSchoenbergBSpline_td<d>(lambda.j(),
+								lambda.k(),
+								points[m]);
+	  break;
+	case 1:
+	  for (unsigned int m(0); m < points.size(); m++)
+	    values[m] = MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
+								  lambda.k(),
+								  points[m]);
+	  break;
+	case 2:
+	  for (unsigned int m(0); m < points.size(); m++)
+	    values[m] = MathTL::EvaluateSchoenbergBSpline_td_xx<d>(lambda.j(),
 								   lambda.k(),
-								   points[m])
-		       : MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
-								   lambda.k(),
-								   points[m]));
+								   points[m]);
+	  break;
+	}
       }
     } else {
 #if 1

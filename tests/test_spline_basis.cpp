@@ -63,11 +63,11 @@ int main()
 #if 1
   cout << "Testing SplineBasis..." << endl;
 
-  const int d  = 2;
-  const int dt = 2;
-  const int s0 = 0;
+  const int d  = 3;
+  const int dt = 3;
+  const int s0 = 1;
   const int s1 = 1;
-  const int J0 = SplineBasisData_j0<d,dt,P_construction,s0,s1,0,0>::j0+1;
+  const int J0 = SplineBasisData_j0<d,dt,P_construction,s0,s1,0,0>::j0;
 
   typedef SplineBasis<d,dt,P_construction,s0,s1,0,0,J0> SBasis;
 
@@ -112,7 +112,7 @@ int main()
   cout << "* applying T_{j0+2}^{-1} to y yields x=" << x << endl;
 #endif
   
-#if 1
+#if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -143,19 +143,21 @@ int main()
     }
 #endif
 
-#if 0  
+#if 1
   cout << "* point evaluation of spline wavelets:" << endl;
   typedef SBasis::Index Index;
   int N = 32;
-  Array1D<double> points(N+1), values(N+1), dervalues(N+1);
+  Array1D<double> points(N+1), values(N+1), dervalues(N+1), der2values(N+1);
   double h = 1.0/N;
   for (int i = 0; i <= N; i++) points[i] = i*h;
   const int level = basis.j0();
   for (Index lambda(basis.first_generator(level));; ++lambda) {
     cout << lambda << endl;
     basis.evaluate(lambda, points, values, dervalues);
+    basis.evaluate(2, lambda, points, der2values);
     cout << "values: " << values << endl;
     cout << "values of first derivative: " << dervalues << endl;
+    cout << "values of second derivative: " << der2values << endl;
 //     if (lambda == basis.last_generator(level)) break;
     if (lambda == basis.last_wavelet(level)) break;
   }

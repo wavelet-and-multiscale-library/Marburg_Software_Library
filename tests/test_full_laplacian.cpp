@@ -27,7 +27,7 @@ int main()
 
   const int d  = 2;
   const int dT = 2;
-  const int s0 = 1;
+  const int s0 = 0;
   const int s1 = 1;
   const int J0 = SplineBasisData_j0<d,dT,P_construction,s0,s1,0,0>::j0;
   
@@ -37,7 +37,7 @@ int main()
   Basis basis;
 
 //   FullLaplacian<d,dT,J0> delta(basis, dyadic);
-  FullLaplacian<d,dT,J0> delta(basis, energy);
+  FullLaplacian<d,dT,s0,s1,J0> delta(basis, energy);
 
   cout << "* stiffness matrix on coarsest level j0=" << basis.j0() << ":" << endl
        << delta;
@@ -59,7 +59,7 @@ int main()
        << "  " << diagonal << endl;
   
 #if 1
-  const unsigned int solution = 1;
+  const unsigned int solution = 9;
   double kink = 0; // for Solution4;
 
   Function<1> *uexact = 0;
@@ -80,6 +80,18 @@ int main()
   case 5:
     kink = 5./7.;
     uexact = new Solution4(kink);
+    break;
+  case 6:
+    uexact = new Solution5();
+    break;
+  case 7:
+    uexact = new Hat();
+    break;
+  case 8:
+    uexact = new LeftHat();
+    break;
+  case 9:
+    uexact = new RightHat();
     break;
   default:
     break;
@@ -181,6 +193,42 @@ int main()
 		  += composite.integrate(integrand,
 					 Point<1>(std::max(kink, (k+ell1<d>())*ldexp(1.0, -j))),
 					 Point<1>(std::min(1.0, (k+ell2<d>())*ldexp(1.0, -j))));
+	    }
+	  } else {
+	    if (solution == 6) {
+	      if (d == 2) {
+		// exact right-hand side is known
+		rhs_phijk = sqrt(ldexp(1.0, -j));
+	      } else {
+		// perform quadrature with a composite rule on [0,1]
+		cout << "  solution 1, quadrature for rhs..." << endl;
+		SimpsonRule simpson;
+		CompositeRule<1> composite(simpson, 12);
+		SchoenbergIntervalBSpline_td<d> sbs(j,0);
+		for (int k = basis.DeltaLmin(); k <= basis.DeltaRmax(j); k++) {
+		  sbs.set_k(k);
+		  rhs_phijk[k-basis.DeltaLmin()]
+		    = composite.integrate(sbs, // against f=1
+					  Point<1>(std::max(0.0, (k+ell1<d>())*ldexp(1.0, -j))),
+					  Point<1>(std::min(1.0, (k+ell2<d>())*ldexp(1.0, -j))));
+		}
+	      }
+	    } else {
+	      if (solution == 7) {
+		SchoenbergIntervalBSpline_td<d> sbs(j,0);
+		for (int k = basis.DeltaLmin(); k <= basis.DeltaRmax(j); k++) {
+		  sbs.set_k(k);
+		  rhs_phijk[k-basis.DeltaLmin()] = 2*sbs.value(Point<1>(0.5));
+		}
+	      } else {
+		if (solution == 8 || solution == 9) {
+		  SchoenbergIntervalBSpline_td<d> sbs(j,0);
+		  for (int k = basis.DeltaLmin(); k <= basis.DeltaRmax(j); k++) {
+		    sbs.set_k(k);
+		    rhs_phijk[k-basis.DeltaLmin()] = sbs.value(Point<1>(0.5));
+		  }
+		}
+	      }
 	    }
 	  }
 	}

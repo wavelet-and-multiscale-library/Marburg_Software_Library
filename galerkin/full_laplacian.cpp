@@ -5,33 +5,33 @@
 
 namespace WaveletTL
 {
-  template <int d, int dT, int J0>
-  FullLaplacian<d,dT,J0>::FullLaplacian(const SplineBasis<d,dT,P_construction,1,1,0,0,J0>& sb,
-					const PreconditioningType precond)
+  template <int d, int dT, int s0, int s1, int J0>
+  FullLaplacian<d,dT,s0,s1,J0>::FullLaplacian(const SplineBasis<d,dT,P_construction,s0,s1,0,0,J0>& sb,
+					      const PreconditioningType precond)
     : sb_(sb), precond_(precond), j_(-1)
   {
     set_level(sb_.j0());
   }
 
-  template <int d, int dT, int J0>
+  template <int d, int dT, int s0, int s1, int J0>
   inline
-  const typename FullLaplacian<d,dT,J0>::size_type
-  FullLaplacian<d,dT,J0>::row_dimension() const
+  const typename FullLaplacian<d,dT,s0,s1,J0>::size_type
+  FullLaplacian<d,dT,s0,s1,J0>::row_dimension() const
   {
     return sb_.Deltasize(j_);
   }  
   
-  template <int d, int dT, int J0>
+  template <int d, int dT, int s0, int s1, int J0>
   inline
-  const typename FullLaplacian<d,dT,J0>::size_type
-  FullLaplacian<d,dT,J0>::column_dimension() const
+  const typename FullLaplacian<d,dT,s0,s1,J0>::size_type
+  FullLaplacian<d,dT,s0,s1,J0>::column_dimension() const
   {
     return row_dimension(); // square
   }  
 
-  template <int d, int dT, int J0>
+  template <int d, int dT, int s0, int s1, int J0>
   void
-  FullLaplacian<d,dT,J0>::set_level(const int j) const
+  FullLaplacian<d,dT,s0,s1,J0>::set_level(const int j) const
   {
     assert(j >= sb_.j0());
     if (j_ != j) {
@@ -40,9 +40,9 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT, int J0>
+  template <int d, int dT, int s0, int s1, int J0>
   void
-  FullLaplacian<d,dT,J0>::setup_D() const
+  FullLaplacian<d,dT,s0,s1,J0>::setup_D() const
   {
     D_.resize(sb_.Deltasize(j_));
     if (precond_ == no_precond) {
@@ -62,15 +62,15 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT, int J0>
+  template <int d, int dT, int s0, int s1, int J0>
   inline
   double
-  FullLaplacian<d,dT,J0>::D(const size_type k) const {
+  FullLaplacian<d,dT,s0,s1,J0>::D(const size_type k) const {
     return D_[k];
   }
   
-  template <int d, int dT, int J0>
-  const double FullLaplacian<d,dT,J0>::get_entry(const size_type row, const size_type col) const
+  template <int d, int dT, int s0, int s1, int J0>
+  const double FullLaplacian<d,dT,s0,s1,J0>::get_entry(const size_type row, const size_type col) const
   {
     assert(row < row_dimension() && col < column_dimension());
 
@@ -111,14 +111,40 @@ namespace WaveletTL
     std::map<size_type,double> Ay;
     const double factor = ldexp(1.0, 2*j); // not "1<<(2*j_)" !
     if (d == 2) {
-      // apply 2^{2j}*tridiag(-1,2,-1)
-      for (std::map<size_type,double>::const_iterator it(y_row.begin());
-	   it != y_row.end(); ++it) {
-	Ay[it->first] += factor * 2*it->second;
-	if (it->first > 0)
-	  Ay[it->first-1] -= factor * it->second;
-	if (it->first < column_dimension()-1)
-	  Ay[it->first+1] -= factor * it->second;
+      if (s0==1 && s1==1) {
+	// homogeneous b.c., apply 2^{2j}*tridiag(-1,2,-1)
+	for (std::map<size_type,double>::const_iterator it(y_row.begin());
+	     it != y_row.end(); ++it) {
+	  Ay[it->first] += factor * 2*it->second;
+	  if (it->first > 0)
+	    Ay[it->first-1] -= factor * it->second;
+	  if (it->first < column_dimension()-1)
+	    Ay[it->first+1] -= factor * it->second;
+	}
+      } else {
+	if (s0==1) {
+	  // homogeneous b.c. only at x=0, make a modification at right boundary
+	  for (std::map<size_type,double>::const_iterator it(y_row.begin());
+	       it != y_row.end(); ++it) {
+	    Ay[it->first] +=
+	      factor * (it->first == column_dimension()-1 ? 1 : 2)*it->second;
+	    if (it->first > 0)
+	      Ay[it->first-1] -= factor * it->second;
+	    if (it->first < column_dimension()-1)
+	      Ay[it->first+1] -= factor * it->second;
+	  }
+	} else {
+	  // homogeneous b.c. only at x=1, make a modification at left boundary
+	  for (std::map<size_type,double>::const_iterator it(y_row.begin());
+	       it != y_row.end(); ++it) {
+	    Ay[it->first] +=
+	      factor * (it->first == 0 ? 1 : 2) * it->second;
+	    if (it->first > 0)
+	      Ay[it->first-1] -= factor * it->second;
+	    if (it->first < column_dimension()-1)
+	      Ay[it->first+1] -= factor * it->second;
+	  }
+	}
       }
     } else {
       if (d == 3) {
@@ -189,9 +215,9 @@ namespace WaveletTL
 #endif
   }
 
-  template <int d, int dT, int J0>
+  template <int d, int dT, int s0, int s1, int J0>
   const double
-  FullLaplacian<d,dT,J0>::diagonal(const size_type row) const
+  FullLaplacian<d,dT,s0,s1,J0>::diagonal(const size_type row) const
   {
     std::map<size_type,double> e_k; e_k[row] = 1.0;
     std::map<size_type,double> y;
@@ -213,14 +239,40 @@ namespace WaveletTL
     std::map<size_type,double> Ay;
     const double factor = ldexp(1.0, 2*jrow); // not "1<<(2*j_)" !
     if (d == 2) {
-      // apply 2^{2j}*tridiag(-1,2,-1)
-      for (std::map<size_type,double>::const_iterator it(y.begin());
-	   it != y.end(); ++it) {
-	Ay[it->first] += factor * 2*it->second;
-	if (it->first > 0)
-	  Ay[it->first-1] -= factor * it->second;
-	if (it->first < column_dimension()-1)
-	  Ay[it->first+1] -= factor * it->second;
+      if (s0==1 && s1==1) {
+	// homogeneous b.c., apply 2^{2j}*tridiag(-1,2,-1)
+	for (std::map<size_type,double>::const_iterator it(y.begin());
+	     it != y.end(); ++it) {
+	  Ay[it->first] += factor * 2*it->second;
+	  if (it->first > 0)
+	    Ay[it->first-1] -= factor * it->second;
+	  if (it->first < column_dimension()-1)
+	    Ay[it->first+1] -= factor * it->second;
+	}
+      } else {
+	if (s0==1) {
+	  // homogeneous b.c. only at x=0, make a modification at right boundary
+	  for (std::map<size_type,double>::const_iterator it(y.begin());
+	       it != y.end(); ++it) {
+	    Ay[it->first] +=
+	      factor * (it->first == column_dimension()-1 ? 1 : 2)*it->second;
+	    if (it->first > 0)
+	      Ay[it->first-1] -= factor * it->second;
+	    if (it->first < column_dimension()-1)
+	      Ay[it->first+1] -= factor * it->second;
+	  }
+	} else {
+	  // homogeneous b.c. only at x=1, make a modification at left boundary
+	  for (std::map<size_type,double>::const_iterator it(y.begin());
+	       it != y.end(); ++it) {
+	    Ay[it->first] +=
+	      factor * (it->first == 0 ? 1 : 2) * it->second;
+	    if (it->first > 0)
+	      Ay[it->first-1] -= factor * it->second;
+	    if (it->first < column_dimension()-1)
+	      Ay[it->first+1] -= factor * it->second;
+	  }
+	}
       }
     } else {
       if (d == 3) {
@@ -284,10 +336,10 @@ namespace WaveletTL
     return r;
   }
 
-  template <int d, int dT, int J0>
+  template <int d, int dT, int s0, int s1, int J0>
   template <class VECTOR>
-  void FullLaplacian<d,dT,J0>::apply(const VECTOR& x, VECTOR& Mx,
-				     const bool preconditioning) const
+  void FullLaplacian<d,dT,s0,s1,J0>::apply(const VECTOR& x, VECTOR& Mx,
+					   const bool preconditioning) const
   {
     assert(Mx.size() == row_dimension());
 
@@ -309,12 +361,30 @@ namespace WaveletTL
     // apply Laplacian w.r.t the B-Splines in V_j
     const double factor = ldexp(1.0, 2*j_); // not "1<<(2*j_)" !
     if (d == 2) {
-      // apply 2^{2j}*tridiag(-1,2,-1)
-      y[0] = factor * (2*Mx[0] - Mx[1]);
-      const size_type m = row_dimension();
-      y[m-1] = factor * (2*Mx[m-1]-Mx[m-2]);
-      for (size_type i(1); i < m-1; i++)
-	y[i] = factor * (2*Mx[i] - Mx[i-1] - Mx[i+1]);
+      if (s0==1 && s1==1) {
+	// homogeneous b.c., apply 2^{2j}*tridiag(-1,2,-1)
+	y[0] = factor * (2*Mx[0] - Mx[1]);
+	const size_type m = row_dimension();
+	y[m-1] = factor * (2*Mx[m-1]-Mx[m-2]);
+	for (size_type i(1); i < m-1; i++)
+	  y[i] = factor * (2*Mx[i] - Mx[i-1] - Mx[i+1]);
+      } else {
+	if (s0==1) {
+	  // homogeneous b.c. at x=0
+	  y[0] = factor * (2*Mx[0] - Mx[1]);
+	  const size_type m = row_dimension();
+	  y[m-1] = factor * (Mx[m-1]-Mx[m-2]);
+	  for (size_type i(1); i < m-1; i++)
+	    y[i] = factor * (2*Mx[i] - Mx[i-1] - Mx[i+1]);
+	} else {
+	  // homogeneous b.c. at x=1
+	  y[0] = factor * (Mx[0] - Mx[1]);
+	  const size_type m = row_dimension();
+	  y[m-1] = factor * (2*Mx[m-1]-Mx[m-2]);
+	  for (size_type i(1); i < m-1; i++)
+	    y[i] = factor * (2*Mx[i] - Mx[i-1] - Mx[i+1]);
+	}
+      }
     } else {
       if (d == 3) {
 	// cf. [P, Bsp. 3.26]
@@ -342,10 +412,10 @@ namespace WaveletTL
     }
   }
 
-  template <int d, int dT, int J0>
-  void FullLaplacian<d,dT,J0>::apply(const std::map<size_type,double>& x,
-				     std::map<size_type,double>& Mx,
-				     const bool preconditioning) const
+  template <int d, int dT, int s0, int s1, int J0>
+  void FullLaplacian<d,dT,s0,s1,J0>::apply(const std::map<size_type,double>& x,
+					   std::map<size_type,double>& Mx,
+					   const bool preconditioning) const
   {
     std::map<size_type,double> y(x);
 
@@ -364,14 +434,40 @@ namespace WaveletTL
     const double factor = ldexp(1.0, 2*j_); // not "1<<(2*j_)" !
     y.clear();
     if (d == 2) {
-      // apply 2^{2j}*tridiag(-1,2,-1)
-      for (std::map<size_type,double>::const_iterator it(Mx.begin());
-	   it != Mx.end(); ++it) {
-	y[it->first] += factor * 2*it->second;
-	if (it->first > 0)
-	  y[it->first-1] -= factor * it->second;
-	if (it->first < column_dimension()-1)
-	  y[it->first+1] -= factor * it->second;
+      if (s0==1 && s1==1) {
+	// homogeneous b.c., apply 2^{2j}*tridiag(-1,2,-1)
+	for (std::map<size_type,double>::const_iterator it(Mx.begin());
+	     it != Mx.end(); ++it) {
+	  y[it->first] += factor * 2*it->second;
+	  if (it->first > 0)
+	    y[it->first-1] -= factor * it->second;
+	  if (it->first < column_dimension()-1)
+	    y[it->first+1] -= factor * it->second;
+	}
+      } else {
+	if (s0==1) {
+	  // homogeneous b.c. only at x=0, make a modification at right boundary
+	  for (std::map<size_type,double>::const_iterator it(Mx.begin());
+	       it != Mx.end(); ++it) {
+	    y[it->first] +=
+	      factor * (it->first == column_dimension()-1 ? 1 : 2)*it->second;
+	    if (it->first > 0)
+	      y[it->first-1] -= factor * it->second;
+	    if (it->first < column_dimension()-1)
+	      y[it->first+1] -= factor * it->second;
+	  }
+	} else {
+	  // homogeneous b.c. only at x=1, make a modification at left boundary
+	  for (std::map<size_type,double>::const_iterator it(Mx.begin());
+	       it != Mx.end(); ++it) {
+	    y[it->first] +=
+	      factor * (it->first == 0 ? 1 : 2)*it->second;
+	    if (it->first > 0)
+	      y[it->first-1] -= factor * it->second;
+	    if (it->first < column_dimension()-1)
+	      y[it->first+1] -= factor * it->second;
+	  }
+	}
       }
     } else {
       if (d == 3) {
@@ -438,9 +534,9 @@ namespace WaveletTL
     }  
   }
 
-  template <int d, int dT, int J0>
+  template <int d, int dT, int s0, int s1, int J0>
   void
-  FullLaplacian<d,dT,J0>::to_sparse(SparseMatrix<double>& S) const
+  FullLaplacian<d,dT,s0,s1,J0>::to_sparse(SparseMatrix<double>& S) const
   {
     // we utilize that the stiffness matrix is symmetric
     const size_type m = row_dimension();
@@ -459,19 +555,19 @@ namespace WaveletTL
     }
   }
   
-  template <int d, int dT, int J0>
-  void FullLaplacian<d,dT,J0>::print(std::ostream &os,
-				     const unsigned int tabwidth,
-				     const unsigned int precision) const
+  template <int d, int dT, int s0, int s1, int J0>
+  void FullLaplacian<d,dT,s0,s1,J0>::print(std::ostream &os,
+					   const unsigned int tabwidth,
+					   const unsigned int precision) const
   {
     if (row_dimension() == 0)
       os << "[]" << std::endl; // Matlab style
     else
       {
 	unsigned int old_precision = os.precision(precision);
-	for (typename FullLaplacian<d,dT,J0>::size_type i(0); i < row_dimension(); ++i)
+	for (typename FullLaplacian<d,dT,s0,s1,J0>::size_type i(0); i < row_dimension(); ++i)
 	  {
-	    for (typename FullLaplacian<d,dT,J0>::size_type j(0); j < column_dimension(); ++j)
+	    for (typename FullLaplacian<d,dT,s0,s1,J0>::size_type j(0); j < column_dimension(); ++j)
 	      os << std::setw(tabwidth) << std::setprecision(precision)
 		 << get_entry(i, j);
 	    os << std::endl;
@@ -480,9 +576,9 @@ namespace WaveletTL
       }
   }
 
-  template <int d, int dT, int J0>
+  template <int d, int dT, int s0, int s1, int J0>
   inline
-  std::ostream& operator << (std::ostream& os, const FullLaplacian<d,dT,J0>& M)
+  std::ostream& operator << (std::ostream& os, const FullLaplacian<d,dT,s0,s1,J0>& M)
   {
     M.print(os);
     return os;

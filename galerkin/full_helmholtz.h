@@ -106,7 +106,7 @@ namespace WaveletTL
 	       const unsigned int precision = 3) const;
 
     FullGramian<d,dT,1,1,0,0,J0> G_;
-    FullLaplacian<d,dT,J0> A_;
+    FullLaplacian<d,dT,1,1,J0> A_;
     const SplineBasis<d,dT,P_construction,1,1,0,0,J0>& sb_;
 
   protected:
@@ -123,7 +123,7 @@ namespace WaveletTL
     Matlab-style stream output
   */
   template <int d, int dT, int J0>
-  std::ostream& operator << (std::ostream& os, const FullLaplacian<d,dT,J0>& M);
+  std::ostream& operator << (std::ostream& os, const FullHelmholtz<d,dT,J0>& M);
 }
 
 #include <galerkin/full_helmholtz.cpp>

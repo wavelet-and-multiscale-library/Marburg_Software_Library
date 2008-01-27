@@ -123,6 +123,88 @@ namespace WaveletTL
   protected:
     double a_;
   };
+
+  // exact solution of -u''=1, u(0)=0, u'(1)=0
+  class Solution5 : public Function<1> {
+  public:
+    inline double value(const Point<1>& p, const unsigned int component = 0) const {
+      return 0.5*p[0]*(2-p[0]);
+    }
+  
+    void vector_value(const Point<1> &p, Vector<double>& values) const {
+      values.resize(1, false);
+      values[0] = value(p);
+    }
+  };
+
+  // hat function
+  class Hat : public Function<1>
+  {
+  public:
+    inline double value(const Point<1>& p,
+			const unsigned int component = 0) const
+    {
+      return std::max(0.0,0.5-abs(p[0]-0.5));
+    }
+    
+    void vector_value(const Point<1> &p,
+		      Vector<double>& values) const
+    {
+      values.resize(1, false);
+      values[0] = value(p);
+    }
+  };
+
+  // "left" hat function
+  class LeftHat : public Function<1>
+  {
+  public:
+    inline double value(const Point<1>& p,
+			const unsigned int component = 0) const
+    {
+      const double x = p[0];
+      if (x >= 0 && x <= 1) {
+	if (x >= 0.5)
+	  return 0.5;
+	else
+	  return x;
+      }
+      return 0;
+    }
+    
+    void vector_value(const Point<1> &p,
+		      Vector<double>& values) const
+    {
+      values.resize(1, false);
+      values[0] = value(p);
+    }
+  };
+
+  // "right" hat function
+  class RightHat : public Function<1>
+  {
+  public:
+    inline double value(const Point<1>& p,
+			const unsigned int component = 0) const
+    {
+      const double x = p[0];
+      if (x >= 0 && x <= 1) {
+	if (x >= 0.5)
+	  return 1-x;
+	else
+	  return 0.5;
+      }
+      return 0;
+    }
+    
+    void vector_value(const Point<1> &p,
+		      Vector<double>& values) const
+    {
+      values.resize(1, false);
+      values[0] = value(p);
+    }
+  };
+
 }
 
 #endif

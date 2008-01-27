@@ -32,7 +32,7 @@ int main() {
 
   Basis basis;
 
-  FullLaplacian<d,dT,J0> delta(basis, dyadic);
+  FullLaplacian<d,dT,s0,s1,J0> delta(basis, dyadic);
 
   const int j0 = basis.j0();
   const int jmax = 10;
@@ -61,7 +61,7 @@ int main() {
     cout << "- time for to_sparse(): " << time2 << "s" << endl;
   }
 
-  FullLaplacian<d,dT,J0> delta2(basis, energy);
+  FullLaplacian<d,dT,s0,s1,J0> delta2(basis, energy);
   cout << "speed measurements for energy preconditioning:" << endl;
   for (int j = j0; j <= jmax; j++) {
     cout << "j=" << j << ":" << endl;

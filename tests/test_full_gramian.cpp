@@ -8,12 +8,31 @@
 #include <Rd/cdf_utils.h>
 #include <numerics/iteratsolv.h>
 #include <numerics/quadrature.h>
+#include <numerics/gauss_quadrature.h>
 #include <numerics/schoenberg_splines.h>
 #include <interval/interval_bspline.h>
 
 using namespace std;
 using namespace MathTL;
 using namespace WaveletTL;
+
+// hat function
+class Hat : public Function<1>
+{
+  public:
+  inline double value(const Point<1>& p,
+		      const unsigned int component = 0) const
+  {
+    return std::max(0.0,0.5-abs(p[0]-0.5));
+  }
+  
+  void vector_value(const Point<1> &p,
+		    Vector<double>& values) const
+  {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
 
 // polynomial
 class Function1 : public Function<1> {
@@ -81,7 +100,7 @@ int main()
   const int d  = 3;
   const int dT = 3;
   const int s0 = 1;
-  const int s1 = 1;
+  const int s1 = 0;
   const int J0 = SplineBasisData_j0<d,dT,P_construction,s0,s1,0,0>::j0;
   
   // PBasis, complementary b.c.'s
@@ -100,10 +119,13 @@ int main()
 
 #if 1
 
-  const unsigned int testcase=2;
+  const unsigned int testcase=1;
   Function<1>* u = 0;
 
   switch(testcase) {
+  case 0:
+    u = new Hat();
+    break;
   case 1:
     u = new Function1();
     break;
@@ -123,7 +145,7 @@ int main()
   cout << "* compute approximate expansions of the test function for several levels..." << endl;
   const int jmin = basis.j0();
 //   const int jmax = jmin;
-  const int jmax = 20;
+  const int jmax = 10;
   Vector<double> js(jmax-jmin+1);
   Vector<double> Linfty_errors(jmax-jmin+1), L2_errors(jmax-jmin+1);
 
@@ -135,8 +157,10 @@ int main()
 
     // compute integrals w.r.t. the primal generators on level j
     Vector<double> coeffs_phijk(G.row_dimension());
-    SimpsonRule simpson;
-    CompositeRule<1> composite(simpson, 12);
+//     SimpsonRule simpson;
+    GaussLegendreRule gauss(5);
+//     CompositeRule<1> composite(simpson, 12);
+    CompositeRule<1> composite(gauss, d*(d-1)); // more exact than the Simpson rule
     SchoenbergIntervalBSpline_td<d> sbs(j,0);
     for (int k = basis.DeltaLmin(); k <= basis.DeltaRmax(j); k++) {
       sbs.set_k(k);

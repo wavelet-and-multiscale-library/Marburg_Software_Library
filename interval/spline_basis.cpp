@@ -6,6 +6,7 @@
 #include <numerics/schoenberg_splines.h>
 #include <numerics/gauss_data.h>
 #include <numerics/quadrature.h>
+#include <numerics/gauss_quadrature.h>
 #include <numerics/iteratsolv.h>
 
 #include <Rd/r_index.h>
@@ -1458,8 +1459,10 @@ namespace WaveletTL
 
     // 1. compute integrals w.r.t. the primal generators on level jmax
     Vector<double> coeffs_phijk(coeffs.size(), false);
-    SimpsonRule simpson;
-    CompositeRule<1> composite(simpson, 24); // should be sufficient for many cases
+//     SimpsonRule simpson;
+    GaussLegendreRule gauss(5);
+//     CompositeRule<1> composite(simpson, 24);
+    CompositeRule<1> composite(gauss, d*(d-1)); // more exact than the Simpson rule
     SchoenbergIntervalBSpline_td<d> sbs(jmax+1,0);
     for (int k = DeltaLmin(); k <= DeltaRmax(jmax+1); k++) {
       sbs.set_k(k);

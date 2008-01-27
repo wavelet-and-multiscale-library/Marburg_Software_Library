@@ -28,6 +28,9 @@ namespace WaveletTL
 
     where T_j models the multiscale transformation within V_{j+1}
     (T_j=I for j==j0-1).
+
+    We assume that the basis has homogeneous b.c. at least at one interval end,
+    i.e., that s0+s1>=1.
   */
   template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
   class FullGramian

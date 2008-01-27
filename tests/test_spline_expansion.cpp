@@ -64,6 +64,20 @@ public:
   }
 };
 
+class Quadratic
+  : public Function<1> {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    const double x = p[0];
+    return x*(1-x);
+  }
+  
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
 int main()
 {
   cout << "Test expansion of a polynomial in a SplineBasis..." << endl;
@@ -75,8 +89,10 @@ int main()
 
 #if 1
 //   const int d = 2, dt = 2, s0 = 0, s1 = 0, sT0 = 0, sT1 = 0; // PBasis, no b.c.'s
-  const int d = 2, dt = 2, s0 = 1, s1 = 1, sT0 = 0, sT1 = 0; // PBasis, homogeneous b.c.'s
-//   typedef SplineBasis<3,3,P_construction,1,1,0,0> Basis; // PBasis, homogeneous b.c.'s
+//   const int d = 2, dt = 2, s0 = 1, s1 = 1, sT0 = 0, sT1 = 0; // PBasis, homogeneous b.c.'s
+//   const int d = 2, dt = 2, s0 = 1, s1 = 0, sT0 = 0, sT1 = 0; // PBasis, homogeneous b.c. at x=0
+//   const int d = 2, dt = 2, s0 = 0, s1 = 1, sT0 = 0, sT1 = 0; // PBasis, homogeneous b.c. at x=1
+  const int d = 3, dt = 3, s0 = 1, s1 = 1, sT0 = 0, sT1 = 0; // PBasis, homogeneous b.c.'s
   typedef SplineBasis<d,dt,P_construction,s0,s1,sT0,sT1,SplineBasisData_j0<d,dt,P_construction,s0,s1,sT0,sT1>::j0> Basis; 
 #else
 //   typedef SplineBasis<3,3,DS_construction_bio5,0,0,0,0> Basis; // DSBasis, no b.c.'s
@@ -114,9 +130,21 @@ int main()
   //   cout << error << endl;
   cout << "(max. error: " << linfty_norm(error) << ")" << endl;
 
+  cout << "- expand a quadratic polynomial..." << endl;
+  Quadratic q;
+  InfiniteVector<double,Index> q_coeffs;
+  basis.expand(&q, false, jmax, q_coeffs);
+  cout << "- pointwise error:" << endl;
+  SampledMapping<1> qs(basis.evaluate(q_coeffs, jmax+1));
+  error.resize(qs.points().size());
+  for (unsigned int i = 0; i < error.size(); i++)
+    error[i] = fabs(qs.values()[i]-q.value(Point<1>(qs.points()[i])));
+  cout << "(max. error: " << linfty_norm(error) << ")" << endl;
+  
   cout << "- expand a Gaussian..." << endl;
   clock_t tstart, tend;
   Gaussian g;
+  
   g.set_time(0);
   InfiniteVector<double,Index> g_coeffs;
   tstart = clock();

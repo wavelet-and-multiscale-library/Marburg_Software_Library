@@ -75,55 +75,182 @@ namespace WaveletTL
     // compute Ay_row (see "apply")
     std::map<size_type,double> Ay;
     if (d == 2) {
-      // apply tridiag(1/6,2/3,1/6)
-      for (std::map<size_type,double>::const_iterator it(y_row.begin());
-	   it != y_row.end(); ++it) {
-	Ay[it->first] += 2*it->second/3;
-	if (it->first > 0)
-	  Ay[it->first-1] += it->second/6;
-	if (it->first < column_dimension()-1)
-	  Ay[it->first+1] += it->second/6;
+      if (s0==1 && s1==1) {
+	// homogeneous b.c., apply tridiag(1/6,2/3,1/6)
+	for (std::map<size_type,double>::const_iterator it(y_row.begin());
+	     it != y_row.end(); ++it) {
+	  Ay[it->first] += 2*it->second/3;
+	  if (it->first > 0)
+	    Ay[it->first-1] += it->second/6;
+	  if (it->first < column_dimension()-1)
+	    Ay[it->first+1] += it->second/6;
+	}
+      } else {
+	if (s0==1) {
+	  // homogeneous b.c. only at x=0, make a modification at right boundary
+	  for (std::map<size_type,double>::const_iterator it(y_row.begin());
+	       it != y_row.end(); ++it) {
+	    Ay[it->first] +=
+	      (it->first == column_dimension()-1 ? 1 : 2)*it->second/3;
+	    if (it->first > 0)
+	      Ay[it->first-1] += it->second/6;
+	    if (it->first < column_dimension()-1)
+	      Ay[it->first+1] += it->second/6;
+	  }
+	} else {
+	  // homogeneous b.c. only at x=1, make a modification at left boundary
+	  for (std::map<size_type,double>::const_iterator it(y_row.begin());
+	       it != y_row.end(); ++it) {
+	    Ay[it->first] +=
+	      (it->first == 0 ? 1 : 2)*it->second/3;
+	    if (it->first > 0)
+	      Ay[it->first-1] += it->second/6;
+	    if (it->first < column_dimension()-1)
+	      Ay[it->first+1] += it->second/6;
+	  }
+	}
       }
     } else {
       if (d == 3) {
 	// cf. [P, Bsp. 3.23]
-	for (std::map<size_type,double>::const_iterator it(y_row.begin());
-	     it != y_row.end(); ++it) {
-	  const size_type m = sb_.Deltasize(j);
-	  switch(it->first) {
-	  case 0:
-	    Ay[0] += it->second/3;
-	    Ay[1] += 5*it->second/24;
-	    Ay[2] += it->second/120;
-	    break;
-	  case 1:
-	    Ay[0] += 5*it->second/24;
-	    Ay[1] += 11*it->second/20;
-	    Ay[2] += 13*it->second/60;
-	    Ay[3] += it->second/120;
-	    break;
-	  default: // >= 2
-	    switch(m-1-it->first) {
-	    case 0: // m-1
-	      Ay[m-1] += it->second/3;
-	      Ay[m-2] += 5*it->second/24;
-	      Ay[m-3] += it->second/120;
+	if (s0==1 && s1==1) {
+	  // homogeneous b.c.
+	  for (std::map<size_type,double>::const_iterator it(y_row.begin());
+	       it != y_row.end(); ++it) {
+	    const size_type m = sb_.Deltasize(j);
+	    switch(it->first) {
+	    case 0:
+	      Ay[0] += it->second/3;
+	      Ay[1] += 5*it->second/24;
+	      Ay[2] += it->second/120;
 	      break;
-	    case 1: // m-2
-	      Ay[m-1] += 5*it->second/24;
-	      Ay[m-2] += 11*it->second/20;
-	      Ay[m-3] += 13*it->second/60;
-	      Ay[m-4] += it->second/120;
+	    case 1:
+	      Ay[0] += 5*it->second/24;
+	      Ay[1] += 11*it->second/20;
+	      Ay[2] += 13*it->second/60;
+	      Ay[3] += it->second/120;
 	      break;
-	    default: // < m-2
-	      Ay[it->first-2] += it->second/120;
-	      Ay[it->first-1] += 13*it->second/60;
-	      Ay[it->first]   += 11*it->second/20;
-	      Ay[it->first+1] += 13*it->second/60;
-	      Ay[it->first+2] += it->second/120;
+	    default: // >= 2
+	      switch(m-1-it->first) {
+	      case 0: // m-1
+		Ay[m-1] += it->second/3;
+		Ay[m-2] += 5*it->second/24;
+		Ay[m-3] += it->second/120;
+		break;
+	      case 1: // m-2
+		Ay[m-1] += 5*it->second/24;
+		Ay[m-2] += 11*it->second/20;
+		Ay[m-3] += 13*it->second/60;
+		Ay[m-4] += it->second/120;
+		break;
+	      default: // < m-2
+		Ay[it->first-2] += it->second/120;
+		Ay[it->first-1] += 13*it->second/60;
+		Ay[it->first]   += 11*it->second/20;
+		Ay[it->first+1] += 13*it->second/60;
+		Ay[it->first+2] += it->second/120;
+		break;
+	      }
 	      break;
 	    }
-	    break;
+	  }
+	} else {
+	  if (s0==1) {
+	    // homogeneous b.c. at x=0
+	    for (std::map<size_type,double>::const_iterator it(y_row.begin());
+		 it != y_row.end(); ++it) {
+	      const size_type m = sb_.Deltasize(j);
+	      switch(it->first) {
+	      case 0:
+		Ay[0] += it->second/3;
+		Ay[1] += 5*it->second/24;
+		Ay[2] += it->second/120;
+		break;
+	      case 1:
+		Ay[0] += 5*it->second/24;
+		Ay[1] += 11*it->second/20;
+		Ay[2] += 13*it->second/60;
+		Ay[3] += it->second/120;
+		break;
+	      default: // >= 2
+		switch(m-1-it->first) {
+		case 0: // m-1
+		  Ay[m-1] += it->second/5;
+		  Ay[m-2] += 7*it->second/60;
+		  Ay[m-3] += it->second/60;
+		  break;
+		case 1: // m-2
+		  Ay[m-1] += 7*it->second/60;
+		  Ay[m-2] += it->second/3;
+		  Ay[m-3] += 5*it->second/24;
+		  Ay[m-4] += it->second/120;
+		  break;
+		case 2: // m-3
+		  Ay[m-1] += it->second/60;
+		  Ay[m-2] += 5*it->second/24;
+		  Ay[m-3] += 11*it->second/20;
+		  Ay[m-4] += 13*it->second/60;
+		  Ay[m-5] += it->second/120;
+		  break;
+		default: // < m-3
+		  Ay[it->first-2] += it->second/120;
+		  Ay[it->first-1] += 13*it->second/60;
+		  Ay[it->first]   += 11*it->second/20;
+		  Ay[it->first+1] += 13*it->second/60;
+		  Ay[it->first+2] += it->second/120;
+		  break;
+		}
+		break;
+	      }
+	    }
+	  } else {
+	    // homogeneous b.c. at x=1
+	    for (std::map<size_type,double>::const_iterator it(y_row.begin());
+		 it != y_row.end(); ++it) {
+	      const size_type m = sb_.Deltasize(j);
+	      switch(it->first) {
+	      case 0:
+		Ay[0] += it->second/5;
+		Ay[1] += 7*it->second/60;
+		Ay[2] += it->second/60;
+		break;
+	      case 1:
+		Ay[0] += 7*it->second/60;
+		Ay[1] += it->second/3;
+		Ay[2] += 5*it->second/24;
+		Ay[3] += it->second/120;
+		break;
+	      case 2:
+		Ay[0] += it->second/60;
+		Ay[1] += 5*it->second/24;
+		Ay[2] += 11*it->second/20;
+		Ay[3] += 13*it->second/60;
+		Ay[4] += it->second/120;
+		break;
+	    default: // >= 2
+	      switch(m-1-it->first) {
+	      case 0: // m-1
+		Ay[m-1] += it->second/3;
+		Ay[m-2] += 5*it->second/24;
+		Ay[m-3] += it->second/120;
+		break;
+	      case 1: // m-2
+		Ay[m-1] += 5*it->second/24;
+		Ay[m-2] += 11*it->second/20;
+		Ay[m-3] += 13*it->second/60;
+		Ay[m-4] += it->second/120;
+		break;
+	      default: // < m-2
+		Ay[it->first-2] += it->second/120;
+		Ay[it->first-1] += 13*it->second/60;
+		Ay[it->first]   += 11*it->second/20;
+		Ay[it->first+1] += 13*it->second/60;
+		Ay[it->first+2] += it->second/120;
+		break;
+	      }
+	      break;
+	      }
+	    }
 	  }
 	}
       }
@@ -176,55 +303,182 @@ namespace WaveletTL
     // compute Ay (see "apply")
     std::map<size_type,double> Ay;
     if (d == 2) {
-      // apply tridiag(1/6,2/3,1/6)
-      for (std::map<size_type,double>::const_iterator it(y.begin());
-	   it != y.end(); ++it) {
-	Ay[it->first] += 2*it->second/3;
-	if (it->first > 0)
-	  Ay[it->first-1] += it->second/6;
-	if (it->first < column_dimension()-1)
-	  Ay[it->first+1] += it->second/6;
+      if (s0==1 && s1==1) {
+	// homogeneous b.c., apply tridiag(1/6,2/3,1/6)
+	for (std::map<size_type,double>::const_iterator it(y.begin());
+	     it != y.end(); ++it) {
+	  Ay[it->first] += 2*it->second/3;
+	  if (it->first > 0)
+	    Ay[it->first-1] += it->second/6;
+	  if (it->first < column_dimension()-1)
+	    Ay[it->first+1] += it->second/6;
+	}
+      } else {
+	if (s0==1) {
+	  // homogeneous b.c. only at x=0, make a modification at right boundary
+	  for (std::map<size_type,double>::const_iterator it(y.begin());
+	       it != y.end(); ++it) {
+	    Ay[it->first] +=
+	      (it->first == column_dimension()-1 ? 1 : 2)*it->second/3;
+	    if (it->first > 0)
+	      Ay[it->first-1] += it->second/6;
+	    if (it->first < column_dimension()-1)
+	      Ay[it->first+1] += it->second/6;
+	  }
+	} else {
+	  // homogeneous b.c. only at x=1, make a modification at left boundary
+	  for (std::map<size_type,double>::const_iterator it(y.begin());
+	       it != y.end(); ++it) {
+	    Ay[it->first] +=
+	      (it->first == 0 ? 1 : 2)*it->second/3;
+	    if (it->first > 0)
+	      Ay[it->first-1] += it->second/6;
+	    if (it->first < column_dimension()-1)
+	      Ay[it->first+1] += it->second/6;
+	  }
+	}
       }
     } else {
       if (d == 3) {
 	// cf. [P, Bsp. 3.23]
-	for (std::map<size_type,double>::const_iterator it(y.begin());
-	     it != y.end(); ++it) {
-	  const size_type m = sb_.Deltasize(jrow);
-	  switch(it->first) {
-	  case 0:
-	    Ay[0] += it->second/3;
-	    Ay[1] += 5*it->second/24;
-	    Ay[2] += it->second/120;
-	    break;
-	  case 1:
-	    Ay[0] += 5*it->second/24;
-	    Ay[1] += 11*it->second/20;
-	    Ay[2] += 13*it->second/60;
-	    Ay[3] += it->second/120;
-	    break;
-	  default: // >= 2
-	    switch(m-1-it->first) {
-	    case 0: // m-1
-	      Ay[m-1] += it->second/3;
-	      Ay[m-2] += 5*it->second/24;
-	      Ay[m-3] += it->second/120;
+	if (s0==1 && s1==1) {
+	  // homogeneous b.c.
+	  for (std::map<size_type,double>::const_iterator it(y.begin());
+	       it != y.end(); ++it) {
+	    const size_type m = sb_.Deltasize(jrow);
+	    switch(it->first) {
+	    case 0:
+	      Ay[0] += it->second/3;
+	      Ay[1] += 5*it->second/24;
+	      Ay[2] += it->second/120;
 	      break;
-	    case 1: // m-2
-	      Ay[m-1] += 5*it->second/24;
-	      Ay[m-2] += 11*it->second/20;
-	      Ay[m-3] += 13*it->second/60;
-	      Ay[m-4] += it->second/120;
+	    case 1:
+	      Ay[0] += 5*it->second/24;
+	      Ay[1] += 11*it->second/20;
+	      Ay[2] += 13*it->second/60;
+	      Ay[3] += it->second/120;
 	      break;
-	    default: // < m-2
-	      Ay[it->first-2] += it->second/120;
-	      Ay[it->first-1] += 13*it->second/60;
-	      Ay[it->first]   += 11*it->second/20;
-	      Ay[it->first+1] += 13*it->second/60;
-	      Ay[it->first+2] += it->second/120;
+	    default: // >= 2
+	      switch(m-1-it->first) {
+	      case 0: // m-1
+		Ay[m-1] += it->second/3;
+		Ay[m-2] += 5*it->second/24;
+		Ay[m-3] += it->second/120;
+		break;
+	      case 1: // m-2
+		Ay[m-1] += 5*it->second/24;
+		Ay[m-2] += 11*it->second/20;
+		Ay[m-3] += 13*it->second/60;
+		Ay[m-4] += it->second/120;
+		break;
+	      default: // < m-2
+		Ay[it->first-2] += it->second/120;
+		Ay[it->first-1] += 13*it->second/60;
+		Ay[it->first]   += 11*it->second/20;
+		Ay[it->first+1] += 13*it->second/60;
+		Ay[it->first+2] += it->second/120;
+		break;
+	      }
 	      break;
 	    }
-	    break;
+	  }
+	} else {
+	  if (s0==1) {
+	    // homogeneous b.c. at x=0
+	    for (std::map<size_type,double>::const_iterator it(y.begin());
+		 it != y.end(); ++it) {
+	      const size_type m = sb_.Deltasize(jrow);
+	      switch(it->first) {
+	      case 0:
+		Ay[0] += it->second/3;
+		Ay[1] += 5*it->second/24;
+		Ay[2] += it->second/120;
+		break;
+	      case 1:
+		Ay[0] += 5*it->second/24;
+		Ay[1] += 11*it->second/20;
+		Ay[2] += 13*it->second/60;
+		Ay[3] += it->second/120;
+		break;
+	      default: // >= 2
+		switch(m-1-it->first) {
+		case 0: // m-1
+		  Ay[m-1] += it->second/5;
+		  Ay[m-2] += 7*it->second/60;
+		  Ay[m-3] += it->second/60;
+		  break;
+		case 1: // m-2
+		  Ay[m-1] += 7*it->second/60;
+		  Ay[m-2] += it->second/3;
+		  Ay[m-3] += 5*it->second/24;
+		  Ay[m-4] += it->second/120;
+		  break;
+		case 2: // m-3
+		  Ay[m-1] += it->second/60;
+		  Ay[m-2] += 5*it->second/24;
+		  Ay[m-3] += 11*it->second/20;
+		  Ay[m-4] += 13*it->second/60;
+		  Ay[m-5] += it->second/120;
+		  break;
+		default: // < m-3
+		  Ay[it->first-2] += it->second/120;
+		  Ay[it->first-1] += 13*it->second/60;
+		  Ay[it->first]   += 11*it->second/20;
+		  Ay[it->first+1] += 13*it->second/60;
+		  Ay[it->first+2] += it->second/120;
+		  break;
+		}
+		break;
+	      }
+	    }
+	  } else {
+	    // homogeneous b.c. at x=1
+	    for (std::map<size_type,double>::const_iterator it(y.begin());
+		 it != y.end(); ++it) {
+	      const size_type m = sb_.Deltasize(jrow);
+	      switch(it->first) {
+	      case 0:
+		Ay[0] += it->second/5;
+		Ay[1] += 7*it->second/60;
+		Ay[2] += it->second/60;
+		break;
+	      case 1:
+		Ay[0] += 7*it->second/60;
+		Ay[1] += it->second/3;
+		Ay[2] += 5*it->second/24;
+		Ay[3] += it->second/120;
+		break;
+	      case 2:
+		Ay[0] += it->second/60;
+		Ay[1] += 5*it->second/24;
+		Ay[2] += 11*it->second/20;
+		Ay[3] += 13*it->second/60;
+		Ay[4] += it->second/120;
+		break;
+	    default: // >= 2
+	      switch(m-1-it->first) {
+	      case 0: // m-1
+		Ay[m-1] += it->second/3;
+		Ay[m-2] += 5*it->second/24;
+		Ay[m-3] += it->second/120;
+		break;
+	      case 1: // m-2
+		Ay[m-1] += 5*it->second/24;
+		Ay[m-2] += 11*it->second/20;
+		Ay[m-3] += 13*it->second/60;
+		Ay[m-4] += it->second/120;
+		break;
+	      default: // < m-2
+		Ay[it->first-2] += it->second/120;
+		Ay[it->first-1] += 13*it->second/60;
+		Ay[it->first]   += 11*it->second/20;
+		Ay[it->first+1] += 13*it->second/60;
+		Ay[it->first+2] += it->second/120;
+		break;
+	      }
+	      break;
+	      }
+	    }
 	  }
 	}
       }
@@ -264,22 +518,65 @@ namespace WaveletTL
 
     // apply Gramian w.r.t the B-Splines in V_j
     if (d == 2) {
-      // apply tridiag(1/6,2/3,1/6)
-      y[0] = (4*Mx[0] + Mx[1])/6;
-      const size_type m = row_dimension();
-      y[m-1] = (4*Mx[m-1] + Mx[m-2])/6;
-      for (size_type i(1); i < m-1; i++)
-	y[i] = (Mx[i-1] + 4*Mx[i] + Mx[i+1])/6;
+      if (s0==1 && s1==1) {
+	// homogeneous b.c., apply tridiag(1/6,2/3,1/6)
+	y[0] = (4*Mx[0] + Mx[1])/6;
+	const size_type m = row_dimension();
+	y[m-1] = (4*Mx[m-1] + Mx[m-2])/6;
+	for (size_type i(1); i < m-1; i++)
+	  y[i] = (Mx[i-1] + 4*Mx[i] + Mx[i+1])/6;
+      } else {
+	if (s0==1) {
+	  // homogeneous b.c. at x=0
+	  y[0] = (4*Mx[0] + Mx[1])/6;
+	  const size_type m = row_dimension();
+	  y[m-1] = (2*Mx[m-1] + Mx[m-2])/6;
+	  for (size_type i(1); i < m-1; i++)
+	    y[i] = (Mx[i-1] + 4*Mx[i] + Mx[i+1])/6;
+	} else {
+	  // homogeneous b.c. at x=1
+	  y[0] = (2*Mx[0] + Mx[1])/6;
+	  const size_type m = row_dimension();
+	  y[m-1] = (4*Mx[m-1] + Mx[m-2])/6;
+	  for (size_type i(1); i < m-1; i++)
+	    y[i] = (Mx[i-1] + 4*Mx[i] + Mx[i+1])/6;
+	}
+      }
     } else {
       if (d == 3) {
 	// cf. [P, Bsp. 3.23]
-	y[0] = Mx[0]/3 + 5*Mx[1]/24 + Mx[2]/120;
-	y[1] = 5*Mx[0]/24 + 11*Mx[1]/20 + 13*Mx[2]/60 + Mx[3]/120;
-	const size_type m = row_dimension();
-	y[m-1] = Mx[m-3]/120 + 5*Mx[m-2]/24 + Mx[m-1]/3;
-	y[m-2] = Mx[m-4]/120 + 13*Mx[m-3]/60 + 11*Mx[m-2]/20 + 5*Mx[m-1]/24;
-	for (size_type i(2); i < m-2; i++)
-	  y[i] = Mx[i-2]/120 + 13*Mx[i-1]/60 + 11*Mx[i]/20 + 13*Mx[i+1]/60 + Mx[i+2]/120;
+	if (s0==1 && s1==1) {
+	  // homogeneous b.c.
+	  y[0] = Mx[0]/3 + 5*Mx[1]/24 + Mx[2]/120;
+	  y[1] = 5*Mx[0]/24 + 11*Mx[1]/20 + 13*Mx[2]/60 + Mx[3]/120;
+	  const size_type m = row_dimension();
+	  y[m-1] = Mx[m-3]/120 + 5*Mx[m-2]/24 + Mx[m-1]/3;
+	  y[m-2] = Mx[m-4]/120 + 13*Mx[m-3]/60 + 11*Mx[m-2]/20 + 5*Mx[m-1]/24;
+	  for (size_type i(2); i < m-2; i++)
+	    y[i] = Mx[i-2]/120 + 13*Mx[i-1]/60 + 11*Mx[i]/20 + 13*Mx[i+1]/60 + Mx[i+2]/120;
+	} else {
+	  if (s0==1) {
+	    // homogeneous b.c. at x=0	    
+	    y[0] = Mx[0]/3 + 5*Mx[1]/24 + Mx[2]/120;
+	    y[1] = 5*Mx[0]/24 + 11*Mx[1]/20 + 13*Mx[2]/60 + Mx[3]/120;
+	    const size_type m = row_dimension();
+	    y[m-1] = Mx[m-3]/60 + 7*Mx[m-2]/60 + Mx[m-1]/5;
+	    y[m-2] = Mx[m-4]/120 + 5*Mx[m-3]/24 + Mx[m-2]/3 + 7*Mx[m-1]/60;
+	    y[m-3] = Mx[m-5]/120 + 13*Mx[m-4]/60 + 11*Mx[m-3]/20 + 5*Mx[m-2]/24 + Mx[m-1]/60;
+	    for (size_type i(2); i < m-3; i++)
+	      y[i] = Mx[i-2]/120 + 13*Mx[i-1]/60 + 11*Mx[i]/20 + 13*Mx[i+1]/60 + Mx[i+2]/120;
+	  } else {
+	    // homogeneous b.c. at x=1
+	    y[0] = Mx[0]/5 + 7*Mx[1]/60 + Mx[2]/60;
+	    y[1] = 7*Mx[0]/60 + Mx[1]/3 + 5*Mx[2]/24 + Mx[3]/120;
+	    y[2] = Mx[0]/60 + 5*Mx[1]/24 + 11*Mx[2]/20 + 13*Mx[3]/60 + Mx[4]/120;
+	    const size_type m = row_dimension();
+	    y[m-1] = Mx[m-3]/120 + 5*Mx[m-2]/24 + Mx[m-1]/3;
+	    y[m-2] = Mx[m-4]/120 + 13*Mx[m-3]/60 + 11*Mx[m-2]/20 + 5*Mx[m-1]/24;
+	    for (size_type i(3); i < m-2; i++)
+	      y[i] = Mx[i-2]/120 + 13*Mx[i-1]/60 + 11*Mx[i]/20 + 13*Mx[i+1]/60 + Mx[i+2]/120;
+	  }
+	}
       }
     }
     
@@ -306,55 +603,182 @@ namespace WaveletTL
 
     // apply Gramian w.r.t the B-Splines in V_j
     if (d == 2) {
-      // apply tridiag(1/6,2/3,1/6)
-      for (std::map<size_type,double>::const_iterator it(Mx.begin());
-	   it != Mx.end(); ++it) {
-	y[it->first] += 2*it->second/3;
-	if (it->first > 0)
-	  y[it->first-1] += it->second/6;
-	if (it->first < column_dimension()-1)
-	  y[it->first+1] += it->second/6;
+      if (s0==1 && s1==1) {
+	// homogeneous b.c., apply tridiag(1/6,2/3,1/6)
+	for (std::map<size_type,double>::const_iterator it(Mx.begin());
+	     it != Mx.end(); ++it) {
+	  y[it->first] += 2*it->second/3;
+	  if (it->first > 0)
+	    y[it->first-1] += it->second/6;
+	  if (it->first < column_dimension()-1)
+	    y[it->first+1] += it->second/6;
+	}
+      } else {
+	if (s0==1) {
+	  // homogeneous b.c. only at x=0, make a modification at right boundary
+	  for (std::map<size_type,double>::const_iterator it(Mx.begin());
+	       it != Mx.end(); ++it) {
+	    y[it->first] +=
+	      (it->first == column_dimension()-1 ? 1 : 2)*it->second/3;
+	    if (it->first > 0)
+	      y[it->first-1] += it->second/6;
+	    if (it->first < column_dimension()-1)
+	      y[it->first+1] += it->second/6;
+	  }
+	} else {
+	  // homogeneous b.c. only at x=1, make a modification at left boundary
+	  for (std::map<size_type,double>::const_iterator it(Mx.begin());
+	       it != Mx.end(); ++it) {
+	    y[it->first] +=
+	      (it->first == 0 ? 1 : 2)*it->second/3;
+	    if (it->first > 0)
+	      y[it->first-1] += it->second/6;
+	    if (it->first < column_dimension()-1)
+	      y[it->first+1] += it->second/6;
+	  }
+	}
       }
     } else {
       if (d == 3) {
 	// cf. [P, Bsp. 3.23]
-	for (std::map<size_type,double>::const_iterator it(Mx.begin());
-	     it != Mx.end(); ++it) {
-	  const size_type m = row_dimension();
-	  switch(it->first) {
-	  case 0:
-	    y[0] += it->second/3;
-	    y[1] += 5*it->second/24;
-	    y[2] += it->second/120;
-	    break;
-	  case 1:
-	    y[0] += 5*it->second/24;
-	    y[1] += 11*it->second/20;
-	    y[2] += 13*it->second/60;
-	    y[3] += it->second/120;
-	    break;
-	  default: // >= 2
-	    switch(m-1-it->first) {
-	    case 0: // m-1
-	      y[m-1] += it->second/3;
-	      y[m-2] += 5*it->second/24;
-	      y[m-3] += it->second/120;
+	if (s0==1 && s1==1) {
+	  // homogeneous b.c.
+	  for (std::map<size_type,double>::const_iterator it(Mx.begin());
+	       it != Mx.end(); ++it) {
+	    const size_type m = row_dimension();
+	    switch(it->first) {
+	    case 0:
+	      y[0] += it->second/3;
+	      y[1] += 5*it->second/24;
+	      y[2] += it->second/120;
 	      break;
-	    case 1: // m-2
-	      y[m-1] += 5*it->second/24;
-	      y[m-2] += 11*it->second/20;
-	      y[m-3] += 13*it->second/60;
-	      y[m-4] += it->second/120;
+	    case 1:
+	      y[0] += 5*it->second/24;
+	      y[1] += 11*it->second/20;
+	      y[2] += 13*it->second/60;
+	      y[3] += it->second/120;
 	      break;
-	    default: // < m-2
-	      y[it->first-2] += it->second/120;
-	      y[it->first-1] += 13*it->second/60;
-	      y[it->first]   += 11*it->second/20;
-	      y[it->first+1] += 13*it->second/60;
-	      y[it->first+2] += it->second/120;
+	    default: // >= 2
+	      switch(m-1-it->first) {
+	      case 0: // m-1
+		y[m-1] += it->second/3;
+		y[m-2] += 5*it->second/24;
+		y[m-3] += it->second/120;
+		break;
+	      case 1: // m-2
+		y[m-1] += 5*it->second/24;
+		y[m-2] += 11*it->second/20;
+		y[m-3] += 13*it->second/60;
+		y[m-4] += it->second/120;
+		break;
+	      default: // < m-2
+		y[it->first-2] += it->second/120;
+		y[it->first-1] += 13*it->second/60;
+		y[it->first]   += 11*it->second/20;
+		y[it->first+1] += 13*it->second/60;
+		y[it->first+2] += it->second/120;
+		break;
+	      }
 	      break;
 	    }
-	    break;
+	  }
+	} else {
+	  if (s0==1) {
+	    // homogeneous b.c. at x=0
+	    for (std::map<size_type,double>::const_iterator it(Mx.begin());
+		 it != Mx.end(); ++it) {
+	      const size_type m = row_dimension();
+	      switch(it->first) {
+	      case 0:
+		y[0] += it->second/3;
+		y[1] += 5*it->second/24;
+		y[2] += it->second/120;
+		break;
+	      case 1:
+		y[0] += 5*it->second/24;
+		y[1] += 11*it->second/20;
+		y[2] += 13*it->second/60;
+		y[3] += it->second/120;
+		break;
+	      default: // >= 2
+		switch(m-1-it->first) {
+		case 0: // m-1
+		  y[m-1] += it->second/5;
+		  y[m-2] += 7*it->second/60;
+		  y[m-3] += it->second/60;
+		  break;
+		case 1: // m-2
+		  y[m-1] += 7*it->second/60;
+		  y[m-2] += it->second/3;
+		  y[m-3] += 5*it->second/24;
+		  y[m-4] += it->second/120;
+		  break;
+		case 2: // m-3
+		  y[m-1] += it->second/60;
+		  y[m-2] += 5*it->second/24;
+		  y[m-3] += 11*it->second/20;
+		  y[m-4] += 13*it->second/60;
+		  y[m-5] += it->second/120;
+		  break;
+		default: // < m-3
+		  y[it->first-2] += it->second/120;
+		  y[it->first-1] += 13*it->second/60;
+		  y[it->first]   += 11*it->second/20;
+		  y[it->first+1] += 13*it->second/60;
+		  y[it->first+2] += it->second/120;
+		  break;
+		}
+		break;
+	      }
+	    }
+	  } else {
+	    // homogeneous b.c. at x=1
+	    for (std::map<size_type,double>::const_iterator it(Mx.begin());
+		 it != Mx.end(); ++it) {
+	      const size_type m = row_dimension();
+	      switch(it->first) {
+	      case 0:
+		y[0] += it->second/5;
+		y[1] += 7*it->second/60;
+		y[2] += it->second/60;
+		break;
+	      case 1:
+		y[0] += 7*it->second/60;
+		y[1] += it->second/3;
+		y[2] += 5*it->second/24;
+		y[3] += it->second/120;
+		break;
+	      case 2:
+		y[0] += it->second/60;
+		y[1] += 5*it->second/24;
+		y[2] += 11*it->second/20;
+		y[3] += 13*it->second/60;
+		y[4] += it->second/120;
+		break;
+	    default: // >= 2
+	      switch(m-1-it->first) {
+	      case 0: // m-1
+		y[m-1] += it->second/3;
+		y[m-2] += 5*it->second/24;
+		y[m-3] += it->second/120;
+		break;
+	      case 1: // m-2
+		y[m-1] += 5*it->second/24;
+		y[m-2] += 11*it->second/20;
+		y[m-3] += 13*it->second/60;
+		y[m-4] += it->second/120;
+		break;
+	      default: // < m-2
+		y[it->first-2] += it->second/120;
+		y[it->first-1] += 13*it->second/60;
+		y[it->first]   += 11*it->second/20;
+		y[it->first+1] += 13*it->second/60;
+		y[it->first+2] += it->second/120;
+		break;
+	      }
+	      break;
+	      }
+	    }
 	  }
 	}
       }

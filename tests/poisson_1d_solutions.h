@@ -157,7 +157,12 @@ namespace WaveletTL
     inline double value(const Point<1>& p,
 			const unsigned int component = 0) const
     {
-      return std::max(0.0,0.5-abs(p[0]-0.5));
+      const double x = p[0];
+      if (0. <= x && x < 0.5)
+	return x;
+      if (0.5 <= x && x <= 1.0)
+	return 1-x;
+      return 0;
     }
     
     void vector_value(const Point<1> &p,

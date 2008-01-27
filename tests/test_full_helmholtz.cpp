@@ -14,6 +14,7 @@
 #include <Rd/cdf_utils.h>
 #include <numerics/iteratsolv.h>
 #include <numerics/quadrature.h>
+#include <numerics/gauss_quadrature.h>
 #include <numerics/schoenberg_splines.h>
 #include <interval/interval_bspline.h>
 #include <interval/p_expansion.h>
@@ -29,7 +30,7 @@ int main()
 
   const int d  = 2;
   const int dT = 2;
-  const int s0 = 1;
+  const int s0 = 0;
   const int s1 = 1;
   const int J0 = SplineBasisData_j0<d,dT,P_construction,s0,s1,0,0>::j0;
   
@@ -39,7 +40,7 @@ int main()
   Basis basis;
 
 //   FullHelmholtz<d,dT,J0> A(basis, 1.0, dyadic);
-  FullHelmholtz<d,dT,J0> A(basis, 1.0, energy);
+  FullHelmholtz<d,dT,s0,s1,J0> A(basis, 1.0, energy);
 
   cout << "* stiffness matrix on coarsest level j0=" << basis.j0() << ":" << endl
        << A;
@@ -61,7 +62,7 @@ int main()
        << "  " << diagonal << endl;
   
 // #if 1
-  const unsigned int solution = 1;
+  const unsigned int solution = 6;
   double kink = 0; // for Solution3;
 
   Function<1> *uexact = 0, *f = 0;
@@ -79,9 +80,32 @@ int main()
     uexact = new Solution3(kink);
     f = new RHS3_part(kink);
     break;
+  case 4:
+    uexact = new Hat();
+    f = new Hat(); // plus 2*phi(0.5)
+    break;
+  case 5:
+    uexact = new LeftHat();
+    f = new LeftHat(); // plus phi(0.5)
+    break;
+  case 6:
+    uexact = new RightHat();
+    f = new RightHat(); // plus phi(0.5)
+    break;
   default:
     break;
   }
+  
+  const unsigned int N = 100;
+  const double h = 1./N;
+
+  // evaluate exact solution
+  Vector<double> uexact_values(N+1);
+  for (unsigned int i = 0; i <= N; i++) {
+    const double x = i*h;
+    uexact_values[i] = uexact->value(Point<1>(x));
+  }
+  cout << "  point values of exact solution: " << uexact_values << endl;
 
   // setup (approximate) coefficients of u in the primal basis on a sufficiently high level
   const int jref = 16;
@@ -91,7 +115,7 @@ int main()
   cout << "* compute wavelet-Galerkin approximations for several levels..." << endl;
   const int jmin = basis.j0();
 //   const int jmax = jmin+5;
-  const int jmax = 15;
+  const int jmax = 10;
   Vector<double> js(jmax-jmin+1);
   Vector<double> Linfty_errors(jmax-jmin+1), L2_errors(jmax-jmin+1),
     discr_L2_errors(jmax-jmin+1), discr_H1_errors(jmax-jmin+1);
@@ -142,6 +166,40 @@ int main()
 				     Point<1>(std::max(kink, (k+ell1<d>())*ldexp(1.0, -j))),
 				     Point<1>(std::min(1.0, (k+ell2<d>())*ldexp(1.0, -j))));
  	}
+      } else {
+	if (solution == 4) {
+	  // perform quadrature with a composite rule on [0,1]
+	  cout << "  solution " << solution << ", quadrature for rhs..." << endl;
+	  GaussLegendreRule gauss(d);
+	  CompositeRule<1> composite(gauss, d*(d-1));
+	  SchoenbergIntervalBSpline_td<d> sbs(j,0);
+	  for (int k = basis.DeltaLmin(); k <= basis.DeltaRmax(j); k++) {
+	    sbs.set_k(k);
+	    ProductFunction<1> integrand(f, &sbs);
+	    rhs_phijk[k-basis.DeltaLmin()]
+	      = composite.integrate(integrand,
+				    Point<1>(std::max(0.0, (k+ell1<d>())*ldexp(1.0, -j))),
+				    Point<1>(std::min(1.0, (k+ell2<d>())*ldexp(1.0, -j))))
+	      + 2*sbs.value(Point<1>(0.5));
+	  }
+	} else {
+	  if (solution == 5 || solution == 6) {
+	    // perform quadrature with a composite rule on [0,1]
+	    cout << "  solution " << solution << ", quadrature for rhs..." << endl;
+	    GaussLegendreRule gauss(d);
+	    CompositeRule<1> composite(gauss, d*(d-1));
+	    SchoenbergIntervalBSpline_td<d> sbs(j,0);
+	    for (int k = basis.DeltaLmin(); k <= basis.DeltaRmax(j); k++) {
+	      sbs.set_k(k);
+	      ProductFunction<1> integrand(f, &sbs);
+	      rhs_phijk[k-basis.DeltaLmin()]
+		= composite.integrate(integrand,
+				      Point<1>(std::max(0.0, (k+ell1<d>())*ldexp(1.0, -j))),
+				      Point<1>(std::min(1.0, (k+ell2<d>())*ldexp(1.0, -j))))
+		+ sbs.value(Point<1>(0.5));
+	    }
+	  }
+	}
       }
     }
 //     cout << "  rhs in phi_{j,k} basis: " << rhs_phijk << endl;
@@ -187,8 +245,6 @@ int main()
 //     cout << "  solution coefficients in phi_{j,k} basis: " << ulambda_phijk << endl;
 
     // evaluate linear combination of Schoenberg B-splines on a grid
-    const unsigned int N = 100;
-    const double h = 1./N;
     Vector<double> ulambda_values(N+1);
     for (unsigned int i = 0; i <= N; i++) {
       const double x = i*h;
@@ -199,15 +255,7 @@ int main()
 	  ulambda_phijk[k] * sbs.value(Point<1>(x));
       }
     }
-//     cout << "  point values of Galerkin solution: " << ulambda_values << endl;
-
-    // evaluate exact solution
-    Vector<double> uexact_values(N+1);
-    for (unsigned int i = 0; i <= N; i++) {
-      const double x = i*h;
-      uexact_values[i] = uexact->value(Point<1>(x));
-    }
-//     cout << "  point values of exact solution: " << uexact_values << endl;
+    cout << "  point values of Galerkin solution: " << ulambda_values << endl;
 
     // compute some errors
     const double Linfty_error = linfty_norm(ulambda_values-uexact_values);

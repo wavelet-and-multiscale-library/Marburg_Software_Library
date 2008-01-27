@@ -1,6 +1,7 @@
 #ifndef _HELMHOLTZ_1D_SOL
 #define _HELMHOLTZ_1D_SOL
 
+#include <cmath>
 #include <utils/function.h>
 
 using namespace MathTL;
@@ -107,6 +108,79 @@ namespace WaveletTL
     double a_;
   };
 
+  // hat function
+  class Hat : public Function<1>
+  {
+  public:
+    inline double value(const Point<1>& p,
+			const unsigned int component = 0) const
+    {
+      const double x = p[0];
+      if (0. <= x && x < 0.5)
+	return x;
+      if (0.5 <= x && x <= 1.0)
+	return 1-x;
+      return 0;
+    }
+    
+    void vector_value(const Point<1> &p,
+		      Vector<double>& values) const
+    {
+      values.resize(1, false);
+      values[0] = value(p);
+    }
+  };
+
+  // "left" hat function
+  class LeftHat : public Function<1>
+  {
+  public:
+    inline double value(const Point<1>& p,
+			const unsigned int component = 0) const
+    {
+      const double x = p[0];
+      if (x >= 0 && x <= 1) {
+	if (x >= 0.5)
+	  return 0.5;
+	else
+	  return x;
+      }
+      return 0;
+    }
+    
+    void vector_value(const Point<1> &p,
+		      Vector<double>& values) const
+    {
+      values.resize(1, false);
+      values[0] = value(p);
+    }
+  };
+
+  // "right" hat function
+  class RightHat : public Function<1>
+  {
+  public:
+    inline double value(const Point<1>& p,
+			const unsigned int component = 0) const
+    {
+      const double x = p[0];
+      if (x >= 0 && x <= 1) {
+	if (x >= 0.5)
+	  return 1-x;
+	else
+	  return 0.5;
+      }
+      return 0;
+    }
+    
+    void vector_value(const Point<1> &p,
+		      Vector<double>& values) const
+    {
+      values.resize(1, false);
+      values[0] = value(p);
+    }
+  };
+  
 }
 
 #endif

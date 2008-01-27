@@ -28,8 +28,11 @@ namespace WaveletTL
 
     Same as in FullLaplacian, there are two possible preconditioning
     strategies available.
+
+    We assume that the basis has homogeneous b.c. at least at one interval end,
+    i.e., that s0+s1>=1.
   */
-  template <int d, int dT, int J0>
+  template <int d, int dT, int s0, int s1, int J0>
   class FullHelmholtz
   {
   public:
@@ -41,7 +44,7 @@ namespace WaveletTL
     /*!
       constructor taking an information object on some spline wavelet basis
     */
-    FullHelmholtz(const SplineBasis<d,dT,P_construction,1,1,0,0,J0>& sb,
+    FullHelmholtz(const SplineBasis<d,dT,P_construction,s0,s1,0,0,J0>& sb,
 		  const double alpha,
 		  const PreconditioningType precond = dyadic);
     
@@ -105,9 +108,9 @@ namespace WaveletTL
 	       const unsigned int tabwidth = 8,
 	       const unsigned int precision = 3) const;
 
-    FullGramian<d,dT,1,1,0,0,J0> G_;
-    FullLaplacian<d,dT,1,1,J0> A_;
-    const SplineBasis<d,dT,P_construction,1,1,0,0,J0>& sb_;
+    FullGramian<d,dT,s0,s1,0,0,J0> G_;
+    FullLaplacian<d,dT,s0,s1,J0> A_;
+    const SplineBasis<d,dT,P_construction,s0,s1,0,0,J0>& sb_;
 
   protected:
     mutable double alpha_;
@@ -122,8 +125,8 @@ namespace WaveletTL
   /*!
     Matlab-style stream output
   */
-  template <int d, int dT, int J0>
-  std::ostream& operator << (std::ostream& os, const FullHelmholtz<d,dT,J0>& M);
+  template <int d, int dT, int s0, int s1, int J0>
+  std::ostream& operator << (std::ostream& os, const FullHelmholtz<d,dT,s0,s1,J0>& M);
 }
 
 #include <galerkin/full_helmholtz.cpp>

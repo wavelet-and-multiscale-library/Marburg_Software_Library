@@ -25,9 +25,9 @@ int main()
 {
   cout << "Testing FullLaplacian ..." << endl;
 
-  const int d  = 3;
-  const int dT = 3;
-  const int s0 = 0;
+  const int d  = 2;
+  const int dT = 2;
+  const int s0 = 1;
   const int s1 = 1;
   const int J0 = SplineBasisData_j0<d,dT,P_construction,s0,s1,0,0>::j0;
   
@@ -59,7 +59,7 @@ int main()
        << "  " << diagonal << endl;
   
 #if 1
-  const unsigned int solution = 10;
+  const unsigned int solution = 7;
   double kink = 0; // for Solution4;
 
   Function<1> *uexact = 0;

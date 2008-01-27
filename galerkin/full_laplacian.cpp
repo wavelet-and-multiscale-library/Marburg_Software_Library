@@ -149,43 +149,143 @@ namespace WaveletTL
     } else {
       if (d == 3) {
 	// cf. [P, Bsp. 3.26]
-	for (std::map<size_type,double>::const_iterator it(y_row.begin());
-	     it != y_row.end(); ++it) {
-	  const size_type m = sb_.Deltasize(j);
-	  switch(it->first) {
-	  case 0:
-	    Ay[0] += factor * 4*it->second/3;
-	    Ay[1] -= factor * it->second/6;
-	    Ay[2] -= factor * it->second/6;
-	    break;
-	  case 1:
-	    Ay[0] -= factor * it->second/6;
-	    Ay[1] += factor * it->second;
-	    Ay[2] -= factor * it->second/3;
-	    Ay[3] -= factor * it->second/6;
-	    break;
-	  default: // >= 2
-	    switch(m-1-it->first) {
-	    case 0: // m-1
-	      Ay[m-1] += factor * 4*it->second/3;
-	      Ay[m-2] -= factor * it->second/6;
-	      Ay[m-3] -= factor * it->second/6;
+	if (s0==1 && s1==1) {
+	  // homogeneous b.c.
+	  for (std::map<size_type,double>::const_iterator it(y_row.begin());
+	       it != y_row.end(); ++it) {
+	    const size_type m = sb_.Deltasize(j);
+	    switch(it->first) {
+	    case 0:
+	      Ay[0] += factor * 4*it->second/3;
+	      Ay[1] -= factor * it->second/6;
+	      Ay[2] -= factor * it->second/6;
 	      break;
-	    case 1: // m-2
-	      Ay[m-1] -= factor * it->second/6;
-	      Ay[m-2] += factor * it->second;
-	      Ay[m-3] -= factor * it->second/3;
-	      Ay[m-4] -= factor * it->second/6;
+	    case 1:
+	      Ay[0] -= factor * it->second/6;
+	      Ay[1] += factor * it->second;
+	      Ay[2] -= factor * it->second/3;
+	      Ay[3] -= factor * it->second/6;
 	      break;
-	    default: // < m-2
-	      Ay[it->first-2] -= factor * it->second/6;
-	      Ay[it->first-1] -= factor * it->second/3;
-	      Ay[it->first]   += factor * it->second;
-	      Ay[it->first+1] -= factor * it->second/3;
-	      Ay[it->first+2] -= factor * it->second/6;
+	    default: // >= 2
+	      switch(m-1-it->first) {
+	      case 0: // m-1
+		Ay[m-1] += factor * 4*it->second/3;
+		Ay[m-2] -= factor * it->second/6;
+		Ay[m-3] -= factor * it->second/6;
+		break;
+	      case 1: // m-2
+		Ay[m-1] -= factor * it->second/6;
+		Ay[m-2] += factor * it->second;
+		Ay[m-3] -= factor * it->second/3;
+		Ay[m-4] -= factor * it->second/6;
+		break;
+	      default: // < m-2
+		Ay[it->first-2] -= factor * it->second/6;
+		Ay[it->first-1] -= factor * it->second/3;
+		Ay[it->first]   += factor * it->second;
+		Ay[it->first+1] -= factor * it->second/3;
+		Ay[it->first+2] -= factor * it->second/6;
+		break;
+	      }
 	      break;
 	    }
-	    break;
+	  }
+	} else {
+	  if (s0==1) {
+	    // homogeneous b.c. at x=0
+	    for (std::map<size_type,double>::const_iterator it(y_row.begin());
+		 it != y_row.end(); ++it) {
+	      const size_type m = sb_.Deltasize(j);
+	      switch(it->first) {
+	      case 0:
+		Ay[0] += factor * 4*it->second/3;
+		Ay[1] -= factor * it->second/6;
+		Ay[2] -= factor * it->second/6;
+		break;
+	      case 1:
+		Ay[0] -= factor * it->second/6;
+		Ay[1] += factor * it->second;
+		Ay[2] -= factor * it->second/3;
+		Ay[3] -= factor * it->second/6;
+		break;
+	      default: // >= 2
+		switch(m-1-it->first) {
+		case 0: // m-1
+		  Ay[m-1] += factor * 4*it->second/3;
+		  Ay[m-2] -= factor * it->second;
+		  Ay[m-3] -= factor * it->second/3;
+		  break;
+		case 1: // m-2
+		  Ay[m-1] -= factor * it->second;
+		  Ay[m-2] += 4*factor * it->second/3;
+		  Ay[m-3] -= factor * it->second/6;
+		  Ay[m-4] -= factor * it->second/6;
+		  break;
+		case 2: // m-3
+		  Ay[m-1] -= factor * it->second/3;
+		  Ay[m-2] -= factor * it->second/6;
+		  Ay[m-3] += factor * it->second;
+		  Ay[m-4] -= factor * it->second/3;
+		  Ay[m-5] -= factor * it->second/6;
+		  break;
+		default: // < m-3
+		  Ay[it->first-2] -= factor * it->second/6;
+		  Ay[it->first-1] -= factor * it->second/3;
+		  Ay[it->first]   += factor * it->second;
+		  Ay[it->first+1] -= factor * it->second/3;
+		  Ay[it->first+2] -= factor * it->second/6;
+		  break;
+		}
+		break;
+	      }
+	    }
+	  } else {
+	    // homogeneous b.c. at x=1
+	    for (std::map<size_type,double>::const_iterator it(y_row.begin());
+		 it != y_row.end(); ++it) {
+	      const size_type m = sb_.Deltasize(j);
+	      switch(it->first) {
+	      case 0:
+		Ay[0] += factor * 4*it->second/3;
+		Ay[1] -= factor * it->second;
+		Ay[2] -= factor * it->second/3;
+		break;
+	      case 1:
+		Ay[0] -= factor * it->second;
+		Ay[1] += 4*factor * it->second/3;
+		Ay[2] -= factor * it->second/6;
+		Ay[3] -= factor * it->second/6;
+		break;
+	      case 2:
+		Ay[0] -= factor * it->second/3;
+		Ay[1] -= factor * it->second/6;
+		Ay[2] += factor * it->second;
+		Ay[3] -= factor * it->second/3;
+		Ay[4] -= factor * it->second/6;
+	      default: // >= 2
+		switch(m-1-it->first) {
+		case 0: // m-1
+		  Ay[m-1] += factor * 4*it->second/3;
+		  Ay[m-2] -= factor * it->second/6;
+		  Ay[m-3] -= factor * it->second/6;
+		  break;
+		case 1: // m-2
+		  Ay[m-1] -= factor * it->second/6;
+		  Ay[m-2] += factor * it->second;
+		  Ay[m-3] -= factor * it->second/3;
+		  Ay[m-4] -= factor * it->second/6;
+		  break;
+		default: // < m-2
+		  Ay[it->first-2] -= factor * it->second/6;
+		  Ay[it->first-1] -= factor * it->second/3;
+		  Ay[it->first]   += factor * it->second;
+		  Ay[it->first+1] -= factor * it->second/3;
+		  Ay[it->first+2] -= factor * it->second/6;
+		  break;
+		}
+		break;
+	      }
+	    }
 	  }
 	}
       }
@@ -277,43 +377,143 @@ namespace WaveletTL
     } else {
       if (d == 3) {
 	// cf. [P, Bsp. 3.26]
-	for (std::map<size_type,double>::const_iterator it(y.begin());
-	     it != y.end(); ++it) {
-	  const size_type m = sb_.Deltasize(jrow);
-	  switch(it->first) {
-	  case 0:
-	    Ay[0] += factor * 4*it->second/3;
-	    Ay[1] -= factor * it->second/6;
-	    Ay[2] -= factor * it->second/6;
-	    break;
-	  case 1:
-	    Ay[0] -= factor * it->second/6;
-	    Ay[1] += factor * it->second;
-	    Ay[2] -= factor * it->second/3;
-	    Ay[3] -= factor * it->second/6;
-	    break;
-	  default: // >= 2
-	    switch(m-1-it->first) {
-	    case 0: // m-1
-	      Ay[m-1] += factor * 4*it->second/3;
-	      Ay[m-2] -= factor * it->second/6;
-	      Ay[m-3] -= factor * it->second/6;
+	if (s0==1 && s1==1) {
+	  // homogeneous b.c.
+	  for (std::map<size_type,double>::const_iterator it(y.begin());
+	       it != y.end(); ++it) {
+	    const size_type m = sb_.Deltasize(jrow);
+	    switch(it->first) {
+	    case 0:
+	      Ay[0] += factor * 4*it->second/3;
+	      Ay[1] -= factor * it->second/6;
+	      Ay[2] -= factor * it->second/6;
 	      break;
-	    case 1: // m-2
-	      Ay[m-1] -= factor * it->second/6;
-	      Ay[m-2] += factor * it->second;
-	      Ay[m-3] -= factor * it->second/3;
-	      Ay[m-4] -= factor * it->second/6;
+	    case 1:
+	      Ay[0] -= factor * it->second/6;
+	      Ay[1] += factor * it->second;
+	      Ay[2] -= factor * it->second/3;
+	      Ay[3] -= factor * it->second/6;
 	      break;
-	    default: // < m-2
-	      Ay[it->first-2] -= factor * it->second/6;
-	      Ay[it->first-1] -= factor * it->second/3;
-	      Ay[it->first]   += factor * it->second;
-	      Ay[it->first+1] -= factor * it->second/3;
-	      Ay[it->first+2] -= factor * it->second/6;
+	    default: // >= 2
+	      switch(m-1-it->first) {
+	      case 0: // m-1
+		Ay[m-1] += factor * 4*it->second/3;
+		Ay[m-2] -= factor * it->second/6;
+		Ay[m-3] -= factor * it->second/6;
+		break;
+	      case 1: // m-2
+		Ay[m-1] -= factor * it->second/6;
+		Ay[m-2] += factor * it->second;
+		Ay[m-3] -= factor * it->second/3;
+		Ay[m-4] -= factor * it->second/6;
+		break;
+	      default: // < m-2
+		Ay[it->first-2] -= factor * it->second/6;
+		Ay[it->first-1] -= factor * it->second/3;
+		Ay[it->first]   += factor * it->second;
+		Ay[it->first+1] -= factor * it->second/3;
+		Ay[it->first+2] -= factor * it->second/6;
+		break;
+	      }
 	      break;
 	    }
-	    break;
+	  }
+	} else {
+	  if (s0==1) {
+	    // homogeneous b.c. at x=0
+	    for (std::map<size_type,double>::const_iterator it(y.begin());
+		 it != y.end(); ++it) {
+	      const size_type m = sb_.Deltasize(jrow);
+	      switch(it->first) {
+	      case 0:
+		Ay[0] += factor * 4*it->second/3;
+		Ay[1] -= factor * it->second/6;
+		Ay[2] -= factor * it->second/6;
+		break;
+	      case 1:
+		Ay[0] -= factor * it->second/6;
+		Ay[1] += factor * it->second;
+		Ay[2] -= factor * it->second/3;
+		Ay[3] -= factor * it->second/6;
+		break;
+	      default: // >= 2
+		switch(m-1-it->first) {
+		case 0: // m-1
+		  Ay[m-1] += factor * 4*it->second/3;
+		  Ay[m-2] -= factor * it->second;
+		  Ay[m-3] -= factor * it->second/3;
+		  break;
+		case 1: // m-2
+		  Ay[m-1] -= factor * it->second;
+		  Ay[m-2] += 4*factor * it->second/3;
+		  Ay[m-3] -= factor * it->second/6;
+		  Ay[m-4] -= factor * it->second/6;
+		  break;
+		case 2: // m-3
+		  Ay[m-1] -= factor * it->second/3;
+		  Ay[m-2] -= factor * it->second/6;
+		  Ay[m-3] += factor * it->second;
+		  Ay[m-4] -= factor * it->second/3;
+		  Ay[m-5] -= factor * it->second/6;
+		  break;
+		default: // < m-3
+		  Ay[it->first-2] -= factor * it->second/6;
+		  Ay[it->first-1] -= factor * it->second/3;
+		  Ay[it->first]   += factor * it->second;
+		  Ay[it->first+1] -= factor * it->second/3;
+		  Ay[it->first+2] -= factor * it->second/6;
+		  break;
+		}
+		break;
+	      }
+	    }
+	  } else {
+	    // homogeneous b.c. at x=1
+	    for (std::map<size_type,double>::const_iterator it(y.begin());
+		 it != y.end(); ++it) {
+	      const size_type m = sb_.Deltasize(jrow);
+	      switch(it->first) {
+	      case 0:
+		Ay[0] += factor * 4*it->second/3;
+		Ay[1] -= factor * it->second;
+		Ay[2] -= factor * it->second/3;
+		break;
+	      case 1:
+		Ay[0] -= factor * it->second;
+		Ay[1] += 4*factor * it->second/3;
+		Ay[2] -= factor * it->second/6;
+		Ay[3] -= factor * it->second/6;
+		break;
+	      case 2:
+		Ay[0] -= factor * it->second/3;
+		Ay[1] -= factor * it->second/6;
+		Ay[2] += factor * it->second;
+		Ay[3] -= factor * it->second/3;
+		Ay[4] -= factor * it->second/6;
+	      default: // >= 2
+		switch(m-1-it->first) {
+		case 0: // m-1
+		  Ay[m-1] += factor * 4*it->second/3;
+		  Ay[m-2] -= factor * it->second/6;
+		  Ay[m-3] -= factor * it->second/6;
+		  break;
+		case 1: // m-2
+		  Ay[m-1] -= factor * it->second/6;
+		  Ay[m-2] += factor * it->second;
+		  Ay[m-3] -= factor * it->second/3;
+		  Ay[m-4] -= factor * it->second/6;
+		  break;
+		default: // < m-2
+		  Ay[it->first-2] -= factor * it->second/6;
+		  Ay[it->first-1] -= factor * it->second/3;
+		  Ay[it->first]   += factor * it->second;
+		  Ay[it->first+1] -= factor * it->second/3;
+		  Ay[it->first+2] -= factor * it->second/6;
+		  break;
+		}
+		break;
+	      }
+	    }
 	  }
 	}
       }
@@ -388,13 +588,38 @@ namespace WaveletTL
     } else {
       if (d == 3) {
 	// cf. [P, Bsp. 3.26]
-	y[0] = factor * (4*Mx[0]/3 - Mx[1]/6 - Mx[2]/6);
-	y[1] = factor * (-Mx[0]/6 + Mx[1] - Mx[2]/3 - Mx[3]/6);
-	const size_type m = row_dimension();
-	y[m-1] = factor * (-Mx[m-3]/6 - Mx[m-2]/6 + 4*Mx[m-1]/3);
-	y[m-2] = factor * (-Mx[m-4]/6 - Mx[m-3]/3 + Mx[m-2] - Mx[m-1]/6);
-	for (size_type i(2); i < m-2; i++)
-	  y[i] = factor * (-Mx[i-2]/6 - Mx[i-1]/3 + Mx[i] - Mx[i+1]/3 - Mx[i+2]/6);
+	if (s0==1 && s1==1) {
+	  // homogeneous b.c.
+	  y[0] = factor * (4*Mx[0]/3 - Mx[1]/6 - Mx[2]/6);
+	  y[1] = factor * (-Mx[0]/6 + Mx[1] - Mx[2]/3 - Mx[3]/6);
+	  const size_type m = row_dimension();
+	  y[m-1] = factor * (-Mx[m-3]/6 - Mx[m-2]/6 + 4*Mx[m-1]/3);
+	  y[m-2] = factor * (-Mx[m-4]/6 - Mx[m-3]/3 + Mx[m-2] - Mx[m-1]/6);
+	  for (size_type i(2); i < m-2; i++)
+	    y[i] = factor * (-Mx[i-2]/6 - Mx[i-1]/3 + Mx[i] - Mx[i+1]/3 - Mx[i+2]/6);
+	} else {
+	  if (s0==1) {
+	    // homogeneous b.c. at x=0	    
+	    y[0] = factor * (4*Mx[0]/3 - Mx[1]/6 - Mx[2]/6);
+	    y[1] = factor * (-Mx[0]/6 + Mx[1] - Mx[2]/3 - Mx[3]/6);
+	    const size_type m = row_dimension();
+	    y[m-1] = factor * (-Mx[m-3]/3 - Mx[m-2] + 4*Mx[m-1]/3);
+	    y[m-2] = factor * (-Mx[m-4]/6 - Mx[m-3]/6 + 4*Mx[m-2]/3 - Mx[m-1]);
+	    y[m-3] = factor * (-Mx[m-5]/6 - Mx[m-4]/3 + Mx[m-3] - Mx[m-2]/6 - Mx[m-1]/3);
+	    for (size_type i(2); i < m-3; i++)
+	      y[i] = factor * (-Mx[i-2]/6 - Mx[i-1]/3 + Mx[i] - Mx[i+1]/3 - Mx[i+2]/6);
+	  } else {
+	    // homogeneous b.c. at x=1
+	    y[0] = factor * (4*Mx[0]/3 - Mx[1] - Mx[2]/3);
+	    y[1] = factor * (-Mx[0] + 4*Mx[1]/3 - Mx[2]/6 - Mx[3]/6);
+	    y[2] = factor * (-Mx[0]/3 - Mx[1]/6 + Mx[2] - Mx[3]/3 - Mx[4]/6);
+	    const size_type m = row_dimension();
+	    y[m-1] = factor * (-Mx[m-3]/6 - Mx[m-2]/6 + 4*Mx[m-1]/3);
+	    y[m-2] = factor * (-Mx[m-4]/6 - Mx[m-3]/3 + Mx[m-2] - Mx[m-1]/6);
+	    for (size_type i(3); i < m-2; i++)
+	      y[i] = factor * (-Mx[i-2]/6 - Mx[i-1]/3 + Mx[i] - Mx[i+1]/3 - Mx[i+2]/6);
+	  }
+	}
       }
     }
     
@@ -472,43 +697,143 @@ namespace WaveletTL
     } else {
       if (d == 3) {
 	// cf. [P, Bsp. 3.26]
-	for (std::map<size_type,double>::const_iterator it(Mx.begin());
-	     it != Mx.end(); ++it) {
-	  const size_type m = row_dimension();
-	  switch(it->first) {
-	  case 0:
-	    y[0] += factor * 4*it->second/3;
-	    y[1] -= factor * it->second/6;
-	    y[2] -= factor * it->second/6;
-	    break;
-	  case 1:
-	    y[0] -= factor * it->second/6;
-	    y[1] += factor * it->second;
-	    y[2] -= factor * it->second/3;
-	    y[3] -= factor * it->second/6;
-	    break;
-	  default: // >= 2
-	    switch(m-1-it->first) {
-	    case 0: // m-1
-	      y[m-1] += factor * 4*it->second/3;
-	      y[m-2] -= factor * it->second/6;
-	      y[m-3] -= factor * it->second/6;
+	if (s0==1 && s1==1) {
+	  // homogeneous b.c.
+	  for (std::map<size_type,double>::const_iterator it(Mx.begin());
+	       it != Mx.end(); ++it) {
+	    const size_type m = row_dimension();
+	    switch(it->first) {
+	    case 0:
+	      y[0] += factor * 4*it->second/3;
+	      y[1] -= factor * it->second/6;
+	      y[2] -= factor * it->second/6;
 	      break;
-	    case 1: // m-2
-	      y[m-1] -= factor * it->second/6;
-	      y[m-2] += factor * it->second;
-	      y[m-3] -= factor * it->second/3;
-	      y[m-4] -= factor * it->second/6;
+	    case 1:
+	      y[0] -= factor * it->second/6;
+	      y[1] += factor * it->second;
+	      y[2] -= factor * it->second/3;
+	      y[3] -= factor * it->second/6;
 	      break;
-	    default: // < m-2
-	      y[it->first-2] -= factor * it->second/6;
-	      y[it->first-1] -= factor * it->second/3;
-	      y[it->first]   += factor * it->second;
-	      y[it->first+1] -= factor * it->second/3;
-	      y[it->first+2] -= factor * it->second/6;
+	    default: // >= 2
+	      switch(m-1-it->first) {
+	      case 0: // m-1
+		y[m-1] += factor * 4*it->second/3;
+		y[m-2] -= factor * it->second/6;
+		y[m-3] -= factor * it->second/6;
+		break;
+	      case 1: // m-2
+		y[m-1] -= factor * it->second/6;
+		y[m-2] += factor * it->second;
+		y[m-3] -= factor * it->second/3;
+		y[m-4] -= factor * it->second/6;
+		break;
+	      default: // < m-2
+		y[it->first-2] -= factor * it->second/6;
+		y[it->first-1] -= factor * it->second/3;
+		y[it->first]   += factor * it->second;
+		y[it->first+1] -= factor * it->second/3;
+		y[it->first+2] -= factor * it->second/6;
+		break;
+	      }
 	      break;
 	    }
-	    break;
+	  }
+	} else {
+	  if (s0==1) {
+	    // homogeneous b.c. at x=0
+	    for (std::map<size_type,double>::const_iterator it(Mx.begin());
+		 it != Mx.end(); ++it) {
+	      const size_type m = row_dimension();
+	      switch(it->first) {
+	      case 0:
+		y[0] += factor * 4*it->second/3;
+		y[1] -= factor * it->second/6;
+		y[2] -= factor * it->second/6;
+		break;
+	      case 1:
+		y[0] -= factor * it->second/6;
+		y[1] += factor * it->second;
+		y[2] -= factor * it->second/3;
+		y[3] -= factor * it->second/6;
+		break;
+	      default: // >= 2
+		switch(m-1-it->first) {
+		case 0: // m-1
+		  y[m-1] += factor * 4*it->second/3;
+		  y[m-2] -= factor * it->second;
+		  y[m-3] -= factor * it->second/3;
+		  break;
+		case 1: // m-2
+		  y[m-1] -= factor * it->second;
+		  y[m-2] += 4*factor * it->second/3;
+		  y[m-3] -= factor * it->second/6;
+		  y[m-4] -= factor * it->second/6;
+		  break;
+		case 2: // m-3
+		  y[m-1] -= factor * it->second/3;
+		  y[m-2] -= factor * it->second/6;
+		  y[m-3] += factor * it->second;
+		  y[m-4] -= factor * it->second/3;
+		  y[m-5] -= factor * it->second/6;
+		  break;
+		default: // < m-3
+		  y[it->first-2] -= factor * it->second/6;
+		  y[it->first-1] -= factor * it->second/3;
+		  y[it->first]   += factor * it->second;
+		  y[it->first+1] -= factor * it->second/3;
+		  y[it->first+2] -= factor * it->second/6;
+		  break;
+		}
+		break;
+	      }
+	    }
+	  } else {
+	    // homogeneous b.c. at x=1
+	    for (std::map<size_type,double>::const_iterator it(Mx.begin());
+		 it != Mx.end(); ++it) {
+	      const size_type m = row_dimension();
+	      switch(it->first) {
+	      case 0:
+		y[0] += factor * 4*it->second/3;
+		y[1] -= factor * it->second;
+		y[2] -= factor * it->second/3;
+		break;
+	      case 1:
+		y[0] -= factor * it->second;
+		y[1] += 4*factor * it->second/3;
+		y[2] -= factor * it->second/6;
+		y[3] -= factor * it->second/6;
+		break;
+	      case 2:
+		y[0] -= factor * it->second/3;
+		y[1] -= factor * it->second/6;
+		y[2] += factor * it->second;
+		y[3] -= factor * it->second/3;
+		y[4] -= factor * it->second/6;
+	      default: // >= 2
+		switch(m-1-it->first) {
+		case 0: // m-1
+		  y[m-1] += factor * 4*it->second/3;
+		  y[m-2] -= factor * it->second/6;
+		  y[m-3] -= factor * it->second/6;
+		  break;
+		case 1: // m-2
+		  y[m-1] -= factor * it->second/6;
+		  y[m-2] += factor * it->second;
+		  y[m-3] -= factor * it->second/3;
+		  y[m-4] -= factor * it->second/6;
+		  break;
+		default: // < m-2
+		  y[it->first-2] -= factor * it->second/6;
+		  y[it->first-1] -= factor * it->second/3;
+		  y[it->first]   += factor * it->second;
+		  y[it->first+1] -= factor * it->second/3;
+		  y[it->first+2] -= factor * it->second/6;
+		  break;
+		}
+		break;
+	      }
+	    }
 	  }
 	}
       }

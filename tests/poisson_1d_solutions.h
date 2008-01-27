@@ -137,6 +137,19 @@ namespace WaveletTL
     }
   };
 
+  // exact solution of -u''=1, u'(0)=0, u(1)=0
+  class Solution6 : public Function<1> {
+  public:
+    inline double value(const Point<1>& p, const unsigned int component = 0) const {
+      return 0.5*(1-p[0]*p[0]);
+    }
+  
+    void vector_value(const Point<1> &p, Vector<double>& values) const {
+      values.resize(1, false);
+      values[0] = value(p);
+    }
+  };
+
   // hat function
   class Hat : public Function<1>
   {
@@ -204,6 +217,8 @@ namespace WaveletTL
       values[0] = value(p);
     }
   };
+
+  
 
 }
 

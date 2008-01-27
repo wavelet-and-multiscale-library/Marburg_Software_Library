@@ -25,8 +25,8 @@ int main()
 {
   cout << "Testing FullLaplacian ..." << endl;
 
-  const int d  = 2;
-  const int dT = 2;
+  const int d  = 3;
+  const int dT = 3;
   const int s0 = 0;
   const int s1 = 1;
   const int J0 = SplineBasisData_j0<d,dT,P_construction,s0,s1,0,0>::j0;
@@ -59,7 +59,7 @@ int main()
        << "  " << diagonal << endl;
   
 #if 1
-  const unsigned int solution = 9;
+  const unsigned int solution = 10;
   double kink = 0; // for Solution4;
 
   Function<1> *uexact = 0;
@@ -92,6 +92,9 @@ int main()
     break;
   case 9:
     uexact = new RightHat();
+    break;
+  case 10:
+    uexact = new Solution6();
     break;
   default:
     break;
@@ -195,7 +198,7 @@ int main()
 					 Point<1>(std::min(1.0, (k+ell2<d>())*ldexp(1.0, -j))));
 	    }
 	  } else {
-	    if (solution == 6) {
+	    if (solution == 6 || solution == 10) {
 	      if (d == 2) {
 		// exact right-hand side is known
 		rhs_phijk = sqrt(ldexp(1.0, -j));

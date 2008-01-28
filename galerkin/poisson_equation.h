@@ -162,7 +162,7 @@ namespace WaveletTL
 
   protected:
     const WaveletBasis& basis_;
-    mutable FullLaplacian<d,dT,J0> A_;
+    mutable FullLaplacian<d,dT,1,1,J0> A_;
     
     // rhs, mutable to have 'const' method
     mutable InfiniteVector<double, typename WaveletBasis::Index> y_;

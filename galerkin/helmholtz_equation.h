@@ -174,7 +174,7 @@ namespace WaveletTL
     mutable InfiniteVector<double, typename WaveletBasis::Index> y_;
     mutable InfiniteVector<double, typename WaveletBasis::Index> y_precond;
 
-    mutable FullHelmholtz<d,dT,J0> H_;
+    mutable FullHelmholtz<d,dT,1,1,J0> H_;
 
   public:
     IntervalGramian<WaveletBasis> G_;

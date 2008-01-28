@@ -81,7 +81,7 @@ namespace WaveletTL
   HelmholtzEquation1D<d,dT,J0>::norm_A() const
   {
     if (normA == 0.0) {
-      FullHelmholtz<d,dT,J0> A(basis_, alpha_, energy);
+      FullHelmholtz<d,dT,1,1,J0> A(basis_, alpha_, energy);
       A.set_level(basis().j0()+4);
       double help;
       unsigned int iterations;
@@ -97,7 +97,7 @@ namespace WaveletTL
   HelmholtzEquation1D<d,dT,J0>::norm_Ainv() const
   {
     if (normAinv == 0.0) {
-      FullHelmholtz<d,dT,J0> A(basis_, alpha_, energy);
+      FullHelmholtz<d,dT,1,1,J0> A(basis_, alpha_, energy);
       A.set_level(basis().j0()+4);
       double help;
       unsigned int iterations;

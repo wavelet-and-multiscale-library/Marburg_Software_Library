@@ -20,16 +20,16 @@ int main()
 {
   cout << "Testing wavelet bases from [P] ..." << endl;
 
-  const int d  = 2;
-  const int dT = 2;
+  const int d  = 3;
+  const int dT = 3;
 
   typedef PBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
-//   Basis basis; // no b.c.'s
+  Basis basis; // no b.c.'s
 //   Basis basis(1, 1); // 1st order complementary b.c.'s at x=0 and x=1
 //   Basis basis(1, 0); // complementary b.c. at x=0
-  Basis basis(0, 1); // complementary b.c. at x=1
+//   Basis basis(0, 1); // complementary b.c. at x=1
 //   Basis basis(3, 3);
 //Array1D<int>() Ar;
 //evaluate(Basis,2,Index,Ar,Ar);
@@ -50,7 +50,7 @@ int main()
 
   //  abort();  
 
-#if 0
+#if 1
   {
     SparseMatrix<double> M;
     const int j = basis.j0();

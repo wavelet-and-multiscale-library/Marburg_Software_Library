@@ -41,6 +41,10 @@ namespace WaveletTL
 
   template <>
   const int
+  SplineBasisData_j0<3,3,P_construction,0,0,0,0>::j0 = 3;
+
+  template <>
+  const int
   SplineBasisData_j0<3,3,P_construction,1,0,0,0>::j0 = 3;
 
   template <>
@@ -715,6 +719,60 @@ namespace WaveletTL
     Vector<double> Mj1T_band_lr(3, "-1 2 -1");
     Mj1T_ = QuasiStationaryMatrix<double>(j0, 8, 4, Mj1T_l, Mj1T_r, Mj1T_band_lr, Mj1T_band_lr, 0, 1, M_SQRT1_2);
     CDF_factor = -0.5;
+  }
+
+  template <>
+  SplineBasisData<3,3,P_construction,0,0,0,0>::SplineBasisData()
+  {
+    const int j0 = SplineBasisData_j0<3,3,P_construction,0,0,0,0>::j0;
+    Matrix<double> Mj0_l(4, 2, "1 0 0.5 0.5 0 0.75 0 0.25");
+    Matrix<double> Mj0_r; Mj0_l.mirror(Mj0_r);
+    Vector<double> Mj0_band_lr(4, "0.25 0.75 0.75 0.25");
+    Mj0_ = QuasiStationaryMatrix<double>(j0, 18, 10, Mj0_l, Mj0_r, Mj0_band_lr, Mj0_band_lr, 2, 2, M_SQRT1_2);
+    std::ostringstream entries;
+    entries << "13.5 -3.28125 0.828125 -0.140625 "
+	    << "9 6.5625 -1.65625 0.28125 "
+	    << "-6.75 19.96875 -2.484375 0.421875 "
+	    << "2.25 -1.03125 10.765625 -1.828125 "
+	    << "0 -6.328125 14.9765625 -2.6015625 "
+	    << "0 2.109375 -2.7421875 12.8671875 "
+	    << "0 0 -2.53125 12.65625 "
+	    << "0 0 0.84375 -1.96875 "
+	    << "0 0 0 -2.53125 "
+	    << "0 0 0 0.84375";
+    Matrix<double> Mj0T_l(10, 4, entries.str().c_str()); Mj0T_l.scale(1./9.);
+    Matrix<double> Mj0T_r(10, 4); Mj0T_l.mirror(Mj0T_r);
+    Vector<double> Mj0T_band_lr(8, "0.09375 -0.28125 -0.21875 1.40625 1.40625 -0.21875 -0.28125 0.09375");
+    Mj0T_ = QuasiStationaryMatrix<double>(j0, 18, 10, Mj0T_l, Mj0T_r, Mj0T_band_lr, Mj0T_band_lr, 4, 4, M_SQRT1_2);
+    entries.str("");
+    entries << "1.125 0 "
+	    << "-1.27734375 -0.46875 "
+	    << "0.5634765625 -0.1171875 "
+	    << "0.0498046875 1.5234375 "
+	    << "-0.146484375 -1.171875 "
+	    << "-0.025390625 -0.203125 "
+	    << "0.0263671875 0.2109375 "
+	    << "0.0087890625 0.0703125";
+    Matrix<double> Mj1_l(8, 2, entries.str().c_str()); Mj1_l.scale(1./3.);
+    entries.str("");
+    entries << "0.0703125 0.0087890625 "
+	    << "0.2109375 0.0263671875 "
+	    << "-0.203125 -0.025390625 "
+	    << "-1.171875 -0.146484375 "
+	    << "1.5234375 0.0498046875 "
+	    << "-0.1171875 0.5634765625 "
+	    << "-0.46875 -1.27734375 "
+	    << "0 1.125";
+    Matrix<double> Mj1_r(8, 2, entries.str().c_str()); Mj1_r.scale(1./3.);
+    Vector<double> Mj1_band_l(8, "-0.09375 -0.28125 0.21875 1.40625 -1.40625 -0.21875 0.28125 0.09375"); Mj1_band_l.scale(1./3.);
+    Vector<double> Mj1_band_r(8, "0.09375 0.28125 -0.21875 -1.40625 1.40625 0.21875 -0.28125 -0.09375"); Mj1_band_r.scale(1./3.);
+    Mj1_ = QuasiStationaryMatrix<double>(j0, 18, 8, Mj1_l, Mj1_r, Mj1_band_l, Mj1_band_r, 2, 2, M_SQRT1_2);
+    Matrix<double> Mj1T_l(4, 1, "4 -8 6 -2"); Mj1T_l.scale(1./3.);
+    Matrix<double> Mj1T_r; Mj1T_l.mirror(Mj1T_r);
+    Vector<double> Mj1T_band_l(4, "-0.75 2.25 -2.25 0.75");
+    Vector<double> Mj1T_band_r(4, "0.75 -2.25 2.25 -0.75");
+    Mj1T_ = QuasiStationaryMatrix<double>(j0, 18, 8, Mj1T_l, Mj1T_r, Mj1T_band_l, Mj1T_band_r, 2, 2, M_SQRT1_2);
+    CDF_factor = 1./3.;
   }
 
   template <>

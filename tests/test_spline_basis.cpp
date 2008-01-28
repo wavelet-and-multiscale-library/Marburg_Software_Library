@@ -12,7 +12,7 @@ int main()
 {
   cout << "Testing setup of SplineBasisData objects..." << endl;
 
-#if 0
+#if 1
   // PBasis, no b.c.'s
   SplineBasisData<2,2,P_construction,0,0,0,0> sd22nobc;
   sd22nobc.check();
@@ -29,6 +29,10 @@ int main()
   SplineBasisData<2,2,P_construction,0,1,0,0> sd22bcright;
   sd22bcright.check();
   
+  // PBasis, no b.c.'s
+  SplineBasisData<3,3,P_construction,0,0,0,0> sd33nobc;
+  sd33nobc.check();
+
   // PBasis, complementary b.c.'s at x=0
   SplineBasisData<3,3,P_construction,1,0,0,0> sd33bcleft;
   sd33bcleft.check();

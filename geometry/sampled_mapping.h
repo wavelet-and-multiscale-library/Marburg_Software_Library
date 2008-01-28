@@ -284,6 +284,13 @@ namespace MathTL
     SampledMapping(const Grid<2>& grid, const Function<2,C>& f);
 
     /*!
+      constructor from a fixed grid and a Function object,
+      here we take the time variable as y-axis
+      (note that the parameter f is not const due to the set_time() calls)
+    */
+    SampledMapping(const Grid<2>& grid, Function<1,C>& f);
+
+    /*!
       constructor from given values on 2^{-resolution}\mathbb Z^2,
       clipped to [a,b]^2
       (CURRENTLY NOT IMPLEMENTED!)

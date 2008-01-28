@@ -208,6 +208,18 @@ namespace MathTL
   }
   
   template <class C>
+  SampledMapping<2,C>::SampledMapping(const Grid<2>& grid, Function<1,C>& f)
+    : Grid<2>(grid), values_()
+  {
+    values_.resize(gridx_.row_dimension(), gridx_.column_dimension());
+    for (unsigned int m(0); m < values_.row_dimension(); m++)
+      for (unsigned int n(0); n < values_.column_dimension(); n++) {
+	f.set_time(gridy_(m,n));
+	values_(m,n) = f.value(Point<1,C>(gridx_(m,n)));
+      }
+  }
+  
+  template <class C>
   SampledMapping<2,C>::SampledMapping(const MultiIndex<int,2>& a,
 				      const MultiIndex<int,2>& b,
 				      const InfiniteVector<C, MultiIndex<int,2> >& values,

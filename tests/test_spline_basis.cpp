@@ -12,7 +12,7 @@ int main()
 {
   cout << "Testing setup of SplineBasisData objects..." << endl;
 
-#if 1
+#if 0
   // PBasis, no b.c.'s
   SplineBasisData<2,2,P_construction,0,0,0,0> sd22nobc;
   sd22nobc.check();
@@ -67,10 +67,10 @@ int main()
 #if 1
   cout << "Testing SplineBasis..." << endl;
 
-  const int d  = 3;
-  const int dt = 3;
-  const int s0 = 1;
-  const int s1 = 1;
+  const int d  = 2;
+  const int dt = 2;
+  const int s0 = 0;
+  const int s1 = 0;
   const int J0 = SplineBasisData_j0<d,dt,P_construction,s0,s1,0,0>::j0;
 
   typedef SplineBasis<d,dt,P_construction,s0,s1,0,0,J0> SBasis;
@@ -150,7 +150,7 @@ int main()
 #if 1
   cout << "* point evaluation of spline wavelets:" << endl;
   typedef SBasis::Index Index;
-  int N = 32;
+  int N = 1<<6;
   Array1D<double> points(N+1), values(N+1), dervalues(N+1), der2values(N+1);
   double h = 1.0/N;
   for (int i = 0; i <= N; i++) points[i] = i*h;
@@ -161,7 +161,7 @@ int main()
     basis.evaluate(2, lambda, points, der2values);
     cout << "values: " << values << endl;
     cout << "values of first derivative: " << dervalues << endl;
-    cout << "values of second derivative: " << der2values << endl;
+//     cout << "values of second derivative: " << der2values << endl;
 //     if (lambda == basis.last_generator(level)) break;
     if (lambda == basis.last_wavelet(level)) break;
   }

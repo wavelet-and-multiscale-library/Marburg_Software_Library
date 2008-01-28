@@ -150,11 +150,11 @@ namespace WaveletTL
 	  switch (derivative) {
 	  case 0: {
 	    const double factor = twotothejhalf(j);
-	    return (y <= 0 ? factor*(y+1) : factor*(-y+1));
+	    return (y < 0 ? factor*(y+1) : factor*(-y+1));
 	  }
 	  case 1: {
 	    const double factor = twotothejhalf(3*j);
-	    return (y <= 0 ? factor : -factor);
+	    return (y < 0 ? factor : -factor);
 	  }
 	  }
 	}
@@ -205,11 +205,11 @@ namespace WaveletTL
 	  switch (derivative) {
 	  case 0: {
 	    const double factor = twotothejhalf(j);
-	    return (y <= 0 ? factor*(y+1) : factor*(-y+1));
+	    return (y < 0 ? factor*(y+1) : factor*(-y+1));
 	  }
 	  case 1: {
 	    const double factor = twotothejhalf(3*j);
-	    return (y <= 0 ? factor : -factor);
+	    return (y < 0 ? factor : -factor);
 	  }
 	  }
 	}

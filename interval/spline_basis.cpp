@@ -777,6 +777,33 @@ namespace WaveletTL
 	}
       }
     } else {
+#if 1
+      // new version, determine first whether we have an interior wavelet
+      typedef typename Vector<double>::size_type size_type;
+      const size_type w_number = lambda.k()-Nablamin();
+      if (w_number >= SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.ML_column_dimension()
+	  && w_number < Nablasize(lambda.j())-SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.MR_column_dimension())
+	{
+	  // an interior wavelet
+	  r = CDFBasis<d,dT>::evaluate(derivative, RIndex(lambda.j(),lambda.e(),lambda.k()), x)
+	    * SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::CDF_factor;
+	  if (w_number >= (size_type)Nablasize(lambda.j()-1) && s0==s1)
+ 	    // right half, reflect at 0.5 for d odd and s0==s1 (i.e., multiply by (-1)^d)
+	    r *= minus1power(d);
+	}
+      else
+	{
+	  // boundary wavelet, use old code
+	  std::map<size_type,double> wc, gc;
+	  wc[w_number] = 1.0;
+	  SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.set_level(lambda.j());
+	  SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.apply(wc, gc, 0, 0);
+	  typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index Index;
+	  for (typename std::map<size_type,double>::const_iterator it(gc.begin());
+	       it != gc.end(); ++it)
+	    r += it->second * evaluate(derivative, Index(lambda.j()+1, 0, DeltaLmin()+it->first), x);
+	}
+#else
       // wavelet, switch to generator representation
       typedef typename Vector<double>::size_type size_type;
       std::map<size_type,double> wc, gc;
@@ -788,6 +815,7 @@ namespace WaveletTL
 	   it != gc.end(); ++it) {
 	r += it->second * evaluate(derivative, Index(lambda.j()+1, 0, DeltaLmin()+it->first), x);
       }
+#endif
     }
     
     return r;

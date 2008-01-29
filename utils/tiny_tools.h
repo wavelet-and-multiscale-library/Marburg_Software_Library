@@ -24,6 +24,13 @@ inline R abs(const R a)
   return  (a > 0 ? a : -a);
 }
 
+//! signum function
+template <class R>
+inline R sign(const R a)
+{
+  return (a > 0 ? 1. : (a < 0 ? -1. : 0.));
+}
+
 //! stable computation of hypotenuse
 /*!
   stable computation of the hypotenuse length for scalars a and b;

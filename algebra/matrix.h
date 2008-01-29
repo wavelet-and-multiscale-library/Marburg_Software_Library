@@ -187,12 +187,12 @@ namespace MathTL
 
     /*!
       write access to a subblock;
-      if the mirror flag is set, rows and columns of the block are mirrored before writing
+      if the "reflect" flag is set, rows and columns of the block are reflected before writing
     */
     template <class MATRIX>
     void set_block(const size_type firstrow, const size_type firstcolumn,
 		   const MATRIX& M,
-		   const bool mirror = false);
+		   const bool reflect = false);
 
     /*!
       equality test with another matrix
@@ -214,12 +214,12 @@ namespace MathTL
     /*!
       swap entries of two matrices
     */
-    void swap (Matrix<C>& M);
+    void swap(Matrix<C>& M);
 
     /*!
-      create mirrored matrix (flip row and column numbers)
+      create reflected matrix (flip row and column numbers)
     */
-    void mirror (Matrix<C>& M) const;
+    void reflect(Matrix<C>& M) const;
     
     /*!
       in place scaling *this *= s

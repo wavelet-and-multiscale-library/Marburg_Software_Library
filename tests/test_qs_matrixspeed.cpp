@@ -17,7 +17,7 @@ int main()
 
   int j0 = 3;
   Matrix<double> M_l(5, 1, "0.625 -0.75 -0.25 0.25 0.125");
-  Matrix<double> M_r; M_l.mirror(M_r);
+  Matrix<double> M_r; M_l.reflect(M_r);
   Vector<double> M_band_lr(5, "-0.125 -0.25 0.75 -0.25 -0.125");
   QuasiStationaryMatrix<double> M(j0, 15, 8, M_l, M_r, M_band_lr, M_band_lr, 0, 0, M_SQRT1_2);
 

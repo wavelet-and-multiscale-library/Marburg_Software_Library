@@ -340,7 +340,7 @@ namespace MathTL
   template <class C>
   template <class MATRIX>
   void SparseMatrix<C>::set_block(const size_type firstrow, const size_type firstcolumn,
-				  const MATRIX& M, const bool mirror)
+				  const MATRIX& M, const bool reflect)
   {
     assert(firstrow+M.row_dimension() <= row_dimension());
     assert(firstcolumn+M.column_dimension() <= column_dimension());
@@ -349,7 +349,7 @@ namespace MathTL
     for (size_type row(0); row < M.row_dimension(); row++)
       for (size_type column(0); column < M.column_dimension(); column++)
 	{
-	  if (mirror)
+	  if (reflect)
 	    set_entry(firstrow+M.row_dimension()-1-row,
 		      firstcolumn+M.column_dimension()-1-column,
 		      M.get_entry(row, column));

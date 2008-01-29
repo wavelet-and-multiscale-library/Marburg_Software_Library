@@ -266,7 +266,7 @@ namespace MathTL
   template <class C>
   template <class MATRIX>
   void Matrix<C>::set_block(const size_type firstrow, const size_type firstcolumn,
-			    const MATRIX& M, const bool mirror)
+			    const MATRIX& M, const bool reflect)
   {
     assert(firstrow+M.row_dimension() <= row_dimension());
     assert(firstcolumn+M.column_dimension() <= column_dimension());
@@ -274,7 +274,7 @@ namespace MathTL
     for (size_type row(0); row < M.row_dimension(); row++)
       for (size_type column(0); column < M.column_dimension(); column++)
 	{
-	  if (mirror)
+	  if (reflect)
 	    set_entry(firstrow+M.row_dimension()-1-row,
 		      firstcolumn+M.column_dimension()-1-column,
 		      M.get_entry(row, column));
@@ -326,7 +326,7 @@ namespace MathTL
   }
 
   template <class C>
-  void Matrix<C>::mirror(Matrix<C>& M) const
+  void Matrix<C>::reflect(Matrix<C>& M) const
   {
     M.resize(rowdim_, coldim_);
     for (typename Matrix<C>::size_type j(0); j < rowdim_; j++)

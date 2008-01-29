@@ -59,8 +59,8 @@ int main()
   cout << "- O scaled by -2.0:" << endl << O;
 
   Matrix<double> Q;
-  O.mirror(Q);
-  cout << "- O mirrored:" << endl << Q;
+  O.reflect(Q);
+  cout << "- O reflected:" << endl << Q;
 
   Q.diagonal(4, -12.34);
   cout << "- Q is now a diagonal matrix:" << endl << Q;
@@ -333,7 +333,7 @@ int main()
   Y.set_block(1, 1, sub3);
   cout << Y;
 
-  cout << "- putting a block into this matrix in mirror mode:" << endl;
+  cout << "- putting a block into this matrix in reflect mode:" << endl;
   Matrix<double> sub4(2, 2, "1 2 3 4");
   Y.set_block(0, 0, sub4, true);
   cout << Y;

@@ -1717,7 +1717,7 @@ namespace WaveletTL
     SparseMatrix<double> Hj1(Deltasize(j0()+1), 1<<j0()),
       Hj1T(Deltasize(j0()+1), 1<<j0());
     
-    // copy left halves of Mj1, Mj1T, right halves are mirrored
+    // copy left halves of Mj1, Mj1T, right halves are reflected
     for (int i = 0; i < Deltasize(j0()+1); i++)
       for (int j = 0; j < 1<<(j0()-1); j++) {
 	double help = Mj1.get_entry(i, j);

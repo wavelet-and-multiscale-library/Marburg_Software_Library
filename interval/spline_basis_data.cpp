@@ -279,7 +279,7 @@ namespace WaveletTL
 	    << "-0.117851130197758 1.01015254455221 "
 	    << "-0.0589255650988791 0.505076272276106";
     Matrix<double> Mj0_l(4, 2, entries.str().c_str());
-    Matrix<double> Mj0_r; Mj0_l.mirror(Mj0_r);
+    Matrix<double> Mj0_r; Mj0_l.reflect(Mj0_r);
     Vector<double> Mj0_band_lr(3, "0.35355339059327 0.70710678118655 0.35355339059327");
     Mj0_ = QuasiStationaryMatrix<double>(j0, 17, 9, Mj0_l, Mj0_r, Mj0_band_lr, Mj0_band_lr, 3, 3, 1.0);
 //     Mj0_ = QuasiStationaryMatrix<double>(j0, 9, 5, Mj0_l, Mj0_r, Mj0_band_lr, Mj0_band_lr, 3, 3, 1.0);
@@ -290,7 +290,7 @@ namespace WaveletTL
 	    << "0 0.247487373415291 "
 	    << "0 -0.123743686707646";
     Matrix<double> Mj0T_l(5, 2, entries.str().c_str());
-    Matrix<double> Mj0T_r; Mj0T_l.mirror(Mj0T_r);
+    Matrix<double> Mj0T_r; Mj0T_l.reflect(Mj0T_r);
     Vector<double> Mj0T_band_lr(5, "-0.17677669529664 0.35355339059327 1.06066017177982 0.35355339059327 -0.17677669529664");
     Mj0T_ = QuasiStationaryMatrix<double>(j0, 17, 9, Mj0T_l, Mj0T_r, Mj0T_band_lr, Mj0T_band_lr, 2, 2, 1.0);
 //     Mj0T_ = QuasiStationaryMatrix<double>(j0, 9, 5, Mj0T_l, Mj0T_r, Mj0T_band_lr, Mj0T_band_lr, 2, 2, 1.0);
@@ -302,7 +302,7 @@ namespace WaveletTL
 	    << "0.125 -0.25 "
 	    << "0.0625 -0.125";
     Matrix<double> Mj1_l(6, 2, entries.str().c_str());
-    Matrix<double> Mj1_r; Mj1_l.mirror(Mj1_r);
+    Matrix<double> Mj1_r; Mj1_l.reflect(Mj1_r);
     Vector<double> Mj1_band_lr(5, "-0.125 -0.25 0.75 -0.25 -0.125");
     Mj1_ = QuasiStationaryMatrix<double>(j0, 17, 8, Mj1_l, Mj1_r, Mj1_band_lr, Mj1_band_lr, 3, 3, 1.0);
 //     Mj1_ = QuasiStationaryMatrix<double>(j0, 9, 4, Mj1_l, Mj1_r, Mj1_band_lr, Mj1_band_lr, 3, 3, 1.0);
@@ -313,7 +313,7 @@ namespace WaveletTL
 	    << "0 1 "
 	    << "0 -0.5";
     Matrix<double> Mj1T_l(5, 2, entries.str().c_str());
-    Matrix<double> Mj1T_r; Mj1T_l.mirror(Mj1T_r);
+    Matrix<double> Mj1T_r; Mj1T_l.reflect(Mj1T_r);
     Vector<double> Mj1T_band_lr(3, "-0.5 1 -0.5");
     Mj1T_ = QuasiStationaryMatrix<double>(j0, 17, 8, Mj1T_l, Mj1T_r, Mj1T_band_lr, Mj1T_band_lr, 4, 4, 1.0);
 //     Mj1T_ = QuasiStationaryMatrix<double>(j0, 9, 4, Mj1T_l, Mj1T_r, Mj1T_band_lr, Mj1T_band_lr, 4, 4, 1.0);
@@ -324,7 +324,7 @@ namespace WaveletTL
 	    << "0.125 -0.25 "
 	    << "0.0625 -0.125";
     Matrix<double> Mj1c_l(5, 2, entries.str().c_str());
-    Matrix<double> Mj1c_r; Mj1c_l.mirror(Mj1c_r);
+    Matrix<double> Mj1c_r; Mj1c_l.reflect(Mj1c_r);
     Mj1c_ = QuasiStationaryMatrix<double>(j0, 15, 8, Mj1c_l, Mj1c_r, Mj1_band_lr, Mj1_band_lr, 2, 2, 1.0);
 //     Mj1c_ = QuasiStationaryMatrix<double>(j0, 7, 4, Mj1c_l, Mj1c_r, Mj1_band_lr, Mj1_band_lr, 2, 2, 1.0);
     CLA_ = Matrix<double>(2, 2, "1 0 -0.166666666666667 1.42857142857143");
@@ -343,7 +343,7 @@ namespace WaveletTL
 	    << "-0.117851130197758 1.01015254455221 "
 	    << "-0.0589255650988791 0.505076272276106";
     Matrix<double> Mj0_l(4, 2, entries.str().c_str());
-    Matrix<double> Mj0_r; Mj0_l.mirror(Mj0_r);
+    Matrix<double> Mj0_r; Mj0_l.reflect(Mj0_r);
     Vector<double> Mj0_band_lr(3, "0.35355339059327 0.70710678118655 0.35355339059327");
     Mj0_ = QuasiStationaryMatrix<double>(j0, 17, 9, Mj0_l, Mj0_r, Mj0_band_lr, Mj0_band_lr, 3, 3, 1.0);
 //     Mj0_ = QuasiStationaryMatrix<double>(j0, 9, 5, Mj0_l, Mj0_r, Mj0_band_lr, Mj0_band_lr, 3, 3, 1.0);
@@ -354,7 +354,7 @@ namespace WaveletTL
 	    << "0 0.247487373415291 "
 	    << "0 -0.123743686707646";
     Matrix<double> Mj0T_l(5, 2, entries.str().c_str());
-    Matrix<double> Mj0T_r; Mj0T_l.mirror(Mj0T_r);
+    Matrix<double> Mj0T_r; Mj0T_l.reflect(Mj0T_r);
     Vector<double> Mj0T_band_lr(5, "-0.17677669529664 0.35355339059327 1.06066017177982 0.35355339059327 -0.17677669529664");
     Mj0T_ = QuasiStationaryMatrix<double>(j0, 17, 9, Mj0T_l, Mj0T_r, Mj0T_band_lr, Mj0T_band_lr, 2, 2, 1.0);
 //     Mj0T_ = QuasiStationaryMatrix<double>(j0, 9, 5, Mj0T_l, Mj0T_r, Mj0T_band_lr, Mj0T_band_lr, 2, 2, 1.0);
@@ -366,7 +366,7 @@ namespace WaveletTL
 	    << "0.125 -0.0108798534972311 "
 	    << "0.0625 -0.00543992674861556";
     Matrix<double> Mj1_l(6, 2, entries.str().c_str());
-    Matrix<double> Mj1_r; Mj1_l.mirror(Mj1_r);
+    Matrix<double> Mj1_r; Mj1_l.reflect(Mj1_r);
     Vector<double> Mj1_band_lr(5, "-0.125 -0.25 0.75 -0.25 -0.125");
     Mj1_ = QuasiStationaryMatrix<double>(j0, 17, 8, Mj1_l, Mj1_r, Mj1_band_lr, Mj1_band_lr, 3, 3, 1.0);
 //     Mj1_ = QuasiStationaryMatrix<double>(j0, 9, 4, Mj1_l, Mj1_r, Mj1_band_lr, Mj1_band_lr, 3, 3, 1.0);
@@ -377,7 +377,7 @@ namespace WaveletTL
 	    << "0 22.9782505861521 "
 	    << "0 -11.4891252930761";
     Matrix<double> Mj1T_l(5, 2, entries.str().c_str());
-    Matrix<double> Mj1T_r; Mj1T_l.mirror(Mj1T_r);
+    Matrix<double> Mj1T_r; Mj1T_l.reflect(Mj1T_r);
     Vector<double> Mj1T_band_lr(3, "-0.5 1 -0.5");
     Mj1T_ = QuasiStationaryMatrix<double>(j0, 17, 8, Mj1T_l, Mj1T_r, Mj1T_band_lr, Mj1T_band_lr, 4, 4, 1.0);
 //     Mj1T_ = QuasiStationaryMatrix<double>(j0, 9, 4, Mj1T_l, Mj1T_r, Mj1T_band_lr, Mj1T_band_lr, 4, 4, 1.0);
@@ -388,7 +388,7 @@ namespace WaveletTL
 	    << "0.125 -0.0108798534972311 "
 	    << "0.0625 -0.00543992674861556 ";
     Matrix<double> Mj1c_l(5, 2, entries.str().c_str());
-    Matrix<double> Mj1c_r; Mj1c_l.mirror(Mj1c_r);
+    Matrix<double> Mj1c_r; Mj1c_l.reflect(Mj1c_r);
     Mj1c_ = QuasiStationaryMatrix<double>(j0, 15, 8, Mj1c_l, Mj1c_r, Mj1_band_lr, Mj1_band_lr, 2, 2, 1.0);
 //     Mj1c_ = QuasiStationaryMatrix<double>(j0, 7, 4, Mj1c_l, Mj1c_r, Mj1_band_lr, Mj1_band_lr, 2, 2, 1.0);
     CLA_ = Matrix<double>(2, 2, "1 0 -0.166666666666667 1.42857142857143");
@@ -411,7 +411,7 @@ namespace WaveletTL
 	    << "0.064993644568729 0.073603152899181 0.464862018311131 "
 	    << "0.0216645481895764 0.024534384299727 0.15495400610371";
     Matrix<double> Mj0_l(8, 3, entries.str().c_str());
-    Matrix<double> Mj0_r; Mj0_l.mirror(Mj0_r);
+    Matrix<double> Mj0_r; Mj0_l.reflect(Mj0_r);
     Vector<double> Mj0_band_lr(4, "0.176776695296637 0.530330085889911 0.530330085889911 0.17677669529663");
     Mj0_ = QuasiStationaryMatrix<double>(j0, 30, 14, Mj0_l, Mj0_r, Mj0_band_lr, Mj0_band_lr, 6, 6, 1.0);
     entries.str("");
@@ -426,7 +426,7 @@ namespace WaveletTL
 	    << "-0.0397747564418011 0.111157750183301 -0.224400360517013 "
 	    << "0.013258252147267 -0.0370525833944338 0.0748001201723378";
     Matrix<double> Mj0T_l(10, 3, entries.str().c_str());
-    Matrix<double> Mj0T_r; Mj0T_l.mirror(Mj0T_r);
+    Matrix<double> Mj0T_r; Mj0T_l.reflect(Mj0T_r);
     entries.str("");
     entries << "0.0662912607362388 -0.198873782208717 "
 	    << "-0.154679608384557 0.994368911043582 "
@@ -448,7 +448,7 @@ namespace WaveletTL
 	    << "0 0 0 0 0.09375 "
 	    << "0 0 0 0 0.03125";
     Matrix<double> Mj1_l(12, 5, entries.str().c_str());
-    Matrix<double> Mj1_r; Mj1_l.mirror(Mj1_r);
+    Matrix<double> Mj1_r; Mj1_l.reflect(Mj1_r);
     entries.str("");
     entries << "-0.03125 -0.09375 "
 	    << "0.0729166666666666 0.46875 "
@@ -472,7 +472,7 @@ namespace WaveletTL
 	    << "0 0 0 1 "
 	    << "0 0 0 -0.333333333333333";
     Matrix<double> Mj1T_l(8, 4, entries.str().c_str());
-    Matrix<double> Mj1T_r; Mj1T_l.mirror(Mj1T_r);
+    Matrix<double> Mj1T_r; Mj1T_l.reflect(Mj1T_r);
     Vector<double> Mj1T_band_l(4, "-0.375 1.125 -1.125 0.375");
     Vector<double> Mj1T_band_r(4, "0.375 -1.125 1.125 -0.375");
     Mj1T_ = QuasiStationaryMatrix<double>(j0,30, 16, Mj1T_l, Mj1T_r, Mj1T_band_l, Mj1T_band_r, 6, 6, 1.0);
@@ -489,7 +489,7 @@ namespace WaveletTL
 	    << "0 0 0 0 0.09375 "
 	    << "0 0 0 0 0.03125";
     Matrix<double> Mj1c_l(11, 5, entries.str().c_str());
-    Matrix<double> Mj1c_r; Mj1c_l.mirror(Mj1c_r);
+    Matrix<double> Mj1c_r; Mj1c_l.reflect(Mj1c_r);
     Mj1c_ = QuasiStationaryMatrix<double>(j0, 28, 16, Mj1c_l, Mj1c_r, Mj1_band_l, Mj1_band_r, 5, 5, 1.0);
     entries.str("");
     entries << "1.52801418439628 -0.270270270270127 0 "
@@ -525,7 +525,7 @@ namespace WaveletTL
 	    << "0.064993644568729 0.073603152899181 0.464862018311131 "
 	    << "0.0216645481895764 0.024534384299727 0.15495400610371";
     Matrix<double> Mj0_l(8, 3, entries.str().c_str());
-    Matrix<double> Mj0_r; Mj0_l.mirror(Mj0_r);
+    Matrix<double> Mj0_r; Mj0_l.reflect(Mj0_r);
     Vector<double> Mj0_band_lr(4, "0.176776695296637 0.530330085889911 0.530330085889911 0.17677669529663");
     Mj0_ = QuasiStationaryMatrix<double>(j0, 30, 14, Mj0_l, Mj0_r, Mj0_band_lr, Mj0_band_lr, 6, 6, 1.0);
     entries.str("");
@@ -540,7 +540,7 @@ namespace WaveletTL
 	    << "-0.0397747564418011 0.111157750183301 -0.224400360517013 "
 	    << "0.013258252147267 -0.0370525833944338 0.0748001201723378";
     Matrix<double> Mj0T_l(10, 3, entries.str().c_str());
-    Matrix<double> Mj0T_r; Mj0T_l.mirror(Mj0T_r);
+    Matrix<double> Mj0T_r; Mj0T_l.reflect(Mj0T_r);
     entries.str("");
     entries << "0.0662912607362388 -0.198873782208717 "
 	    << "-0.154679608384557 0.994368911043582 "
@@ -562,7 +562,7 @@ namespace WaveletTL
 	    << "0 0.000729400532815903 -0.00035021132331243 0.00383633728034121 0.000136776150405294 "
 	    << "0 0.000243133510938634 -0.00011673710777081 0.00127877909344707 4.55920501350979e-05";
     Matrix<double> Mj1_l(12, 5, entries.str().c_str());
-    Matrix<double> Mj1_r; Mj1_l.mirror(Mj1_r);
+    Matrix<double> Mj1_r; Mj1_l.reflect(Mj1_r);
     entries.str("");
     entries << "-0.03125 -0.09375 "
 	    << "0.0729166666666666 0.46875 "
@@ -588,7 +588,7 @@ namespace WaveletTL
 	    << "0 -14.2506473855442 5.19750391090056 -24.3047763236522 -0.093407956247842 "
 	    << "0 4.75021579518141 -1.73250130363352 8.10159210788406 0.0311359854159473";
     Matrix<double> Mj1T_l(10, 5, entries.str().c_str());
-    Matrix<double> Mj1T_r; Mj1T_l.mirror(Mj1T_r);
+    Matrix<double> Mj1T_r; Mj1T_l.reflect(Mj1T_r);
     Vector<double> Mj1T_band_l(4, "-0.375 1.125 -1.125 0.375");
     Vector<double> Mj1T_band_r(4, "0.375 -1.125 1.125 -0.375");
     Mj1T_ = QuasiStationaryMatrix<double>(j0,30, 16, Mj1T_l, Mj1T_r, Mj1T_band_l, Mj1T_band_r, 8, 8, 1.0);
@@ -605,7 +605,7 @@ namespace WaveletTL
 	    << "0 0.000729400532815903 -0.00035021132331243 0.00383633728034121 0.000136776150405294 "
 	    << "0 0.000243133510938634 -0.00011673710777081 0.00127877909344707 4.5592050135098e-05";
     Matrix<double> Mj1c_l(11, 5, entries.str().c_str());
-    Matrix<double> Mj1c_r; Mj1c_l.mirror(Mj1c_r);
+    Matrix<double> Mj1c_r; Mj1c_l.reflect(Mj1c_r);
     Mj1c_ = QuasiStationaryMatrix<double>(j0, 28, 16, Mj1c_l, Mj1c_r, Mj1_band_l, Mj1_band_r, 5, 5, 1.0);
     entries.str("");
     entries << "1.52801418439628 -0.270270270270127 0 "
@@ -636,15 +636,15 @@ namespace WaveletTL
   {
     const int j0 = SplineBasisData_j0<2,2,P_construction,0,0,0,0>::j0;
     Matrix<double> Mj0_l(2, 1, "1 0.5");
-    Matrix<double> Mj0_r; Mj0_l.mirror(Mj0_r);
+    Matrix<double> Mj0_r; Mj0_l.reflect(Mj0_r);
     Vector<double> Mj0_band_lr(3, "0.5 1.0 0.5");
     Mj0_ = QuasiStationaryMatrix<double>(j0, 9, 5, Mj0_l, Mj0_r, Mj0_band_lr, Mj0_band_lr, 1, 1, M_SQRT1_2);
     Matrix<double> Mj0T_l(5, 2, "1.25 -0.125 1.5 0.25 -0.75 1.625 0 0.5 0 -0.25");
-    Matrix<double> Mj0T_r; Mj0T_l.mirror(Mj0T_r);
+    Matrix<double> Mj0T_r; Mj0T_l.reflect(Mj0T_r);
     Vector<double> Mj0T_band_lr(5, "-0.25 0.5 1.5 0.5 -0.25");
     Mj0T_ = QuasiStationaryMatrix<double>(j0, 9, 5, Mj0T_l, Mj0T_r, Mj0T_band_lr, Mj0T_band_lr, 2, 2, M_SQRT1_2);
     Matrix<double> Mj1_l(4, 1, "-0.75 0.5625 -0.125 -0.0625");
-    Matrix<double> Mj1_r; Mj1_l.mirror(Mj1_r);
+    Matrix<double> Mj1_r; Mj1_l.reflect(Mj1_r);
     Vector<double> Mj1_band_lr(5, "-0.125 -0.25 0.75 -0.25 -0.125");
     Mj1_ = QuasiStationaryMatrix<double>(j0, 9, 4, Mj1_l, Mj1_r, Mj1_band_lr, Mj1_band_lr, 1, 1, M_SQRT1_2);
     Matrix<double> Mj1T_lr(0); // empty corner blocks
@@ -661,15 +661,15 @@ namespace WaveletTL
     Vector<double> Mj0_band_lr(3, "0.5 1.0 0.5");
     Mj0_ = QuasiStationaryMatrix<double>(j0, 15, 7, Mj0_lr, Mj0_lr, Mj0_band_lr, Mj0_band_lr, 0, 0, M_SQRT1_2);
     Matrix<double> Mj0T_l(6, 2, "1.5 -0.5 1 0 0.5 0.5 -0.25 1.5 0 0.5 0 -0.25");
-    Matrix<double> Mj0T_r; Mj0T_l.mirror(Mj0T_r);
+    Matrix<double> Mj0T_r; Mj0T_l.reflect(Mj0T_r);
     Vector<double> Mj0T_band_lr(5, "-0.25 0.5 1.5 0.5 -0.25");
     Mj0T_ = QuasiStationaryMatrix<double>(j0, 15, 7, Mj0T_l, Mj0T_r, Mj0T_band_lr, Mj0T_band_lr, 3, 3, M_SQRT1_2);
     Matrix<double> Mj1_l(5, 1, "0.625 -0.75 -0.25 0.25 0.125");
-    Matrix<double> Mj1_r; Mj1_l.mirror(Mj1_r);
+    Matrix<double> Mj1_r; Mj1_l.reflect(Mj1_r);
     Vector<double> Mj1_band_lr(5, "-0.125 -0.25 0.75 -0.25 -0.125");
     Mj1_ = QuasiStationaryMatrix<double>(j0, 15, 8, Mj1_l, Mj1_r, Mj1_band_lr, Mj1_band_lr, 0, 0, M_SQRT1_2);
     Matrix<double> Mj1T_l(2, 1, "2 -1");
-    Matrix<double> Mj1T_r; Mj1T_l.mirror(Mj1T_r);
+    Matrix<double> Mj1T_r; Mj1T_l.reflect(Mj1T_r);
     Vector<double> Mj1T_band_lr(3, "-1 2 -1");
     Mj1T_ = QuasiStationaryMatrix<double>(j0, 15, 8, Mj1T_l, Mj1T_r, Mj1T_band_lr, Mj1T_band_lr, 1, 1, M_SQRT1_2);
     CDF_factor = -0.5;
@@ -726,7 +726,7 @@ namespace WaveletTL
   {
     const int j0 = SplineBasisData_j0<3,3,P_construction,0,0,0,0>::j0;
     Matrix<double> Mj0_l(4, 2, "1 0 0.5 0.5 0 0.75 0 0.25");
-    Matrix<double> Mj0_r; Mj0_l.mirror(Mj0_r);
+    Matrix<double> Mj0_r; Mj0_l.reflect(Mj0_r);
     Vector<double> Mj0_band_lr(4, "0.25 0.75 0.75 0.25");
     Mj0_ = QuasiStationaryMatrix<double>(j0, 18, 10, Mj0_l, Mj0_r, Mj0_band_lr, Mj0_band_lr, 2, 2, M_SQRT1_2);
     std::ostringstream entries;
@@ -741,7 +741,7 @@ namespace WaveletTL
 	    << "0 0 0 -2.53125 "
 	    << "0 0 0 0.84375";
     Matrix<double> Mj0T_l(10, 4, entries.str().c_str()); Mj0T_l.scale(1./9.);
-    Matrix<double> Mj0T_r(10, 4); Mj0T_l.mirror(Mj0T_r);
+    Matrix<double> Mj0T_r(10, 4); Mj0T_l.reflect(Mj0T_r);
     Vector<double> Mj0T_band_lr(8, "0.09375 -0.28125 -0.21875 1.40625 1.40625 -0.21875 -0.28125 0.09375");
     Mj0T_ = QuasiStationaryMatrix<double>(j0, 18, 10, Mj0T_l, Mj0T_r, Mj0T_band_lr, Mj0T_band_lr, 4, 4, M_SQRT1_2);
     entries.str("");
@@ -768,7 +768,7 @@ namespace WaveletTL
     Vector<double> Mj1_band_r(8, "0.09375 0.28125 -0.21875 -1.40625 1.40625 0.21875 -0.28125 -0.09375"); Mj1_band_r.scale(1./3.);
     Mj1_ = QuasiStationaryMatrix<double>(j0, 18, 8, Mj1_l, Mj1_r, Mj1_band_l, Mj1_band_r, 2, 2, M_SQRT1_2);
     Matrix<double> Mj1T_l(4, 1, "4 -8 6 -2"); Mj1T_l.scale(1./3.);
-    Matrix<double> Mj1T_r; Mj1T_l.mirror(Mj1T_r);
+    Matrix<double> Mj1T_r; Mj1T_l.reflect(Mj1T_r);
     Vector<double> Mj1T_band_l(4, "-0.75 2.25 -2.25 0.75");
     Vector<double> Mj1T_band_r(4, "0.75 -2.25 2.25 -0.75");
     Mj1T_ = QuasiStationaryMatrix<double>(j0, 18, 8, Mj1T_l, Mj1T_r, Mj1T_band_l, Mj1T_band_r, 2, 2, M_SQRT1_2);
@@ -902,7 +902,7 @@ namespace WaveletTL
   {
     const int j0 = SplineBasisData_j0<3,3,P_construction,1,1,0,0>::j0;
     Matrix<double> Mj0_l(3, 1, "0.5 0.75 0.25");
-    Matrix<double> Mj0_r; Mj0_l.mirror(Mj0_r);
+    Matrix<double> Mj0_r; Mj0_l.reflect(Mj0_r);
     Vector<double> Mj0_band_lr(4, "0.25 0.75 0.75 0.25");
     Mj0_ = QuasiStationaryMatrix<double>(j0, 16, 8, Mj0_l, Mj0_r, Mj0_band_lr, Mj0_band_lr, 1, 1, M_SQRT1_2);
     std::ostringstream entries;
@@ -916,7 +916,7 @@ namespace WaveletTL
 	    << "0 0 -0.84375 "
 	    << "0 0 0.28125";
     Matrix<double> Mj0T_l(9, 3, entries.str().c_str()); Mj0T_l.scale(1./3.);
-    Matrix<double> Mj0T_r(9, 3); Mj0T_l.mirror(Mj0T_r);
+    Matrix<double> Mj0T_r(9, 3); Mj0T_l.reflect(Mj0T_r);
     Vector<double> Mj0T_band_lr(8, "0.09375 -0.28125 -0.21875 1.40625 1.40625 -0.21875 -0.28125 0.09375");
     Mj0T_ = QuasiStationaryMatrix<double>(j0, 16, 8, Mj0T_l, Mj0T_r, Mj0T_band_lr, Mj0T_band_lr, 3, 3, M_SQRT1_2);
     entries.str("");
@@ -928,12 +928,12 @@ namespace WaveletTL
 	    << "0.1318359375 0.2109375 "
 	    << "0.0439453125 0.0703125";
     Matrix<double> Mj1_l(7, 2, entries.str().c_str()); Mj1_l.scale(1./3.);
-    Matrix<double> Mj1_r(7, 2); Mj1_l.mirror(Mj1_r);
+    Matrix<double> Mj1_r(7, 2); Mj1_l.reflect(Mj1_r);
     Vector<double> Mj1_band_l(8, "-0.09375 -0.28125 0.21875 1.40625 -1.40625 -0.21875 0.28125 0.09375"); Mj1_band_l.scale(1./3.);
     Vector<double> Mj1_band_r(8, "0.09375 0.28125 -0.21875 -1.40625 1.40625 0.21875 -0.28125 -0.09375"); Mj1_band_r.scale(1./3.);
     Mj1_ = QuasiStationaryMatrix<double>(j0, 16, 8, Mj1_l, Mj1_r, Mj1_band_l, Mj1_band_r, 1, 1, M_SQRT1_2);
     Matrix<double> Mj1T_l(3, 1, "-8 6 -2"); Mj1T_l.scale(1./3.);
-    Matrix<double> Mj1T_r; Mj1T_l.mirror(Mj1T_r);
+    Matrix<double> Mj1T_r; Mj1T_l.reflect(Mj1T_r);
     Vector<double> Mj1T_band_l(4, "-0.75 2.25 -2.25 0.75");
     Vector<double> Mj1T_band_r(4, "0.75 -2.25 2.25 -0.75");
     Mj1T_ = QuasiStationaryMatrix<double>(j0, 16, 8, Mj1T_l, Mj1T_r, Mj1T_band_l, Mj1T_band_r, 1, 1, M_SQRT1_2);

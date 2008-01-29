@@ -28,8 +28,8 @@ int main()
 {
   cout << "Testing FullHelmholtz ..." << endl;
 
-  const int d  = 2;
-  const int dT = 2;
+  const int d  = 3;
+  const int dT = 3;
   const int s0 = 0;
   const int s1 = 1;
   const int J0 = SplineBasisData_j0<d,dT,P_construction,s0,s1,0,0>::j0;
@@ -62,7 +62,7 @@ int main()
        << "  " << diagonal << endl;
   
 // #if 1
-  const unsigned int solution = 6;
+  const unsigned int solution = 8;
   double kink = 0; // for Solution3;
 
   Function<1> *uexact = 0, *f = 0;
@@ -92,6 +92,14 @@ int main()
     uexact = new RightHat();
     f = new RightHat(); // plus phi(0.5)
     break;
+  case 7:
+    uexact = new Solution4();
+    f = new RHS4();
+    break;
+  case 8:
+    uexact = new Solution5();
+    f = new RHS5();
+    break;
   default:
     break;
   }
@@ -105,7 +113,7 @@ int main()
     const double x = i*h;
     uexact_values[i] = uexact->value(Point<1>(x));
   }
-  cout << "  point values of exact solution: " << uexact_values << endl;
+//   cout << "  point values of exact solution: " << uexact_values << endl;
 
   // setup (approximate) coefficients of u in the primal basis on a sufficiently high level
   const int jref = 16;
@@ -128,11 +136,11 @@ int main()
 
     // setup rhs in the phi_{j,k} basis,
     Vector<double> rhs_phijk(A.row_dimension(), false);
-    if (solution == 1 || solution == 2) {
+    if (solution == 1 || solution == 2 || solution == 7 || solution == 8) {
       // perform quadrature with a composite rule on [0,1]
       cout << "  solution " << solution << ", quadrature for rhs..." << endl;
-      SimpsonRule simpson;
-      CompositeRule<1> composite(simpson, 72);
+      GaussLegendreRule gauss(d);
+      CompositeRule<1> composite(gauss, d*(d-1));
       SchoenbergIntervalBSpline_td<d> sbs(j,0);
       for (int k = basis.DeltaLmin(); k <= basis.DeltaRmax(j); k++) {
 	sbs.set_k(k);
@@ -255,7 +263,7 @@ int main()
 	  ulambda_phijk[k] * sbs.value(Point<1>(x));
       }
     }
-    cout << "  point values of Galerkin solution: " << ulambda_values << endl;
+//     cout << "  point values of Galerkin solution: " << ulambda_values << endl;
 
     // compute some errors
     const double Linfty_error = linfty_norm(ulambda_values-uexact_values);

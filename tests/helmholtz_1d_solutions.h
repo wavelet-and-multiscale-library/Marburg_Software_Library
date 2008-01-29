@@ -181,6 +181,64 @@ namespace WaveletTL
     }
   };
   
+  // a smooth solution of -u''+u=f, u(0)=0, u'(1)=0
+  class Solution4 : public Function<1> {
+  public:
+    inline double value(const Point<1>& p, const unsigned int component = 0) const {
+      return p[0]*(p[0]-2);
+    }
+  
+    void vector_value(const Point<1> &p, Vector<double>& values) const {
+      values.resize(1, false);
+      values[0] = value(p);
+    }
+  };
+
+  // right-hand side for Solution4
+  class RHS4 : public Function<1> {
+  public:
+    inline double value(const Point<1>& p, const unsigned int component = 0) const {
+      return -2+p[0]*(p[0]-2);
+    }
+
+    void vector_value(const Point<1> &p, Vector<double>& values) const {
+      values.resize(1, false);
+      values[0] = value(p);
+    }
+
+  protected:
+    double a_;
+  };
+
+  // a smooth solution of -u''+u=f, u'(0)=0, u(1)=0
+  class Solution5 : public Function<1> {
+  public:
+    inline double value(const Point<1>& p, const unsigned int component = 0) const {
+      return (p[0]+1)*(p[0]-1);
+    }
+  
+    void vector_value(const Point<1> &p, Vector<double>& values) const {
+      values.resize(1, false);
+      values[0] = value(p);
+    }
+  };
+
+  // right-hand side for Solution4
+  class RHS5 : public Function<1> {
+  public:
+    inline double value(const Point<1>& p, const unsigned int component = 0) const {
+      return -2+(p[0]+1)*(p[0]-1);
+    }
+
+    void vector_value(const Point<1> &p, Vector<double>& values) const {
+      values.resize(1, false);
+      values[0] = value(p);
+    }
+
+  protected:
+    double a_;
+  };
+
 }
 
 #endif

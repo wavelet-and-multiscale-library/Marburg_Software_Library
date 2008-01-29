@@ -1488,7 +1488,7 @@ namespace WaveletTL
     // 1. compute integrals w.r.t. the primal generators on level jmax
     Vector<double> coeffs_phijk(coeffs.size(), false);
 //     SimpsonRule simpson;
-    GaussLegendreRule gauss(5);
+    GaussLegendreRule gauss(d+3);
 //     CompositeRule<1> composite(simpson, 24);
     CompositeRule<1> composite(gauss, d*(d-1)); // more exact than the Simpson rule
     SchoenbergIntervalBSpline_td<d> sbs(jmax+1,0);

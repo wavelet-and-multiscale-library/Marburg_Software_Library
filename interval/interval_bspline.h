@@ -19,7 +19,7 @@ namespace WaveletTL
 {
   /*!
     A translated and dilated Schoenberg B-spline as a function object,
-    depending on the current value of k, the function is mirrored
+    depending on the current value of k, the function is reflected
     at x=1/2, just as in the primal generators of PBasis.
   */
   template <int d>

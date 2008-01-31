@@ -24,7 +24,7 @@ namespace WaveletTL
     The template parameters BASISi may or may not allow the specification of
     boundary conditions.
   */
-  template <class BASIS1, class BASIS2>
+  template <class BASIS0, class BASIS1>
   class TensorProductBasis
   {
   public:
@@ -32,23 +32,23 @@ namespace WaveletTL
     TensorProductBasis();
 
     //! space dimension of the underlying domain
-    static const int space_dimension = BASIS1::space_dimension+BASIS2::space_dimension;
+    static const int space_dimension = BASIS0::space_dimension+BASIS1::space_dimension;
 
     //! coarsest possible level j0
     static const int j0()
     {
-      assert(BASIS1::j0() == BASIS2::j0());
-      return  BASIS1::j0();
+      assert(BASIS0::j0() == BASIS1::j0());
+      return  BASIS0::j0();
     }    
 
     //! wavelet index class
-    typedef TensorProductIndex<BASIS1,BASIS2> Index;
+    typedef TensorProductIndex<BASIS0,BASIS1> Index;
 
     //! read access to the first basis
-    const BASIS1& basis1() const { return basis1_; }
+    const BASIS0& basis0() const { return basis0_; }
 
     //! read access to the second basis
-    const BASIS2& basis2() const { return basis2_; }
+    const BASIS1& basis1() const { return basis1_; }
 
     //! index of first generator on level j >= j0
     static Index first_generator(const int j);
@@ -145,8 +145,8 @@ namespace WaveletTL
 
   protected:
     //! instances of the two 1D bases
+    BASIS0 basis0_;
     BASIS1 basis1_;
-    BASIS2 basis2_;
   };
 }
 

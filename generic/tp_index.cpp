@@ -4,108 +4,108 @@
 
 namespace WaveletTL
 {
-  template <class BASIS1, class BASIS2>
-  TensorProductIndex<BASIS1,BASIS2>::TensorProductIndex()
+  template <class BASIS0, class BASIS1>
+  TensorProductIndex<BASIS0,BASIS1>::TensorProductIndex()
   {
   }
 
-  template <class BASIS1, class BASIS2>
-  TensorProductIndex<BASIS1,BASIS2>::TensorProductIndex(const TensorProductIndex<BASIS1,BASIS2>& lambda)
-    : index1_(lambda.index1_), index2_(lambda.index2_)
+  template <class BASIS0, class BASIS1>
+  TensorProductIndex<BASIS0,BASIS1>::TensorProductIndex(const TensorProductIndex<BASIS0,BASIS1>& lambda)
+    : index0_(lambda.index0_), index1_(lambda.index1_)
   {
   }
 
-  template <class BASIS1, class BASIS2>
-  TensorProductIndex<BASIS1,BASIS2>::TensorProductIndex(const typename BASIS1::Index& index1,
-							const typename BASIS2::Index& index2)
-    : index1_(index1), index2_(index2)
+  template <class BASIS0, class BASIS1>
+  TensorProductIndex<BASIS0,BASIS1>::TensorProductIndex(const typename BASIS0::Index& index0,
+							const typename BASIS1::Index& index1)
+    : index0_(index0), index1_(index1)
   {
   }
   
-  template <class BASIS1, class BASIS2>
+  template <class BASIS0, class BASIS1>
   bool
-  TensorProductIndex<BASIS1,BASIS2>::operator == (const TensorProductIndex& lambda) const
+  TensorProductIndex<BASIS0,BASIS1>::operator == (const TensorProductIndex& lambda) const
   {
-    return index1_ == lambda.index1() && index2_ == lambda.index2();
+    return index0_ == lambda.index0() && index1_ == lambda.index1();
   }
 
-  template <class BASIS1, class BASIS2>
+  template <class BASIS0, class BASIS1>
   bool
-  TensorProductIndex<BASIS1,BASIS2>::operator < (const TensorProductIndex& lambda) const
+  TensorProductIndex<BASIS0,BASIS1>::operator < (const TensorProductIndex& lambda) const
   {
     // We want to have (j,e,k) < (j',e',k') iff
     //   j<j' or (j=j' and (e<e' or (e=e' and k<k')),
     // where e and k are already lexicographically ordered vectors, respectively
     return (j() < lambda.j() ||
-	    (j() == lambda.j() && ((index1().e() < lambda.index1().e() ||
-				    (index1().e() == lambda.index1().e() && index2().e() < lambda.index2().e())) ||
-				   ((index1().e() == lambda.index1().e() && index2().e() == lambda.index2().e()) &&
-				    (index1().k() < lambda.index1().k() ||
-				     (index1().k() == lambda.index1().k() && index2().k() < lambda.index2().k()))))));
+	    (j() == lambda.j() && ((index0().e() < lambda.index0().e() ||
+				    (index0().e() == lambda.index0().e() && index1().e() < lambda.index1().e())) ||
+				   ((index0().e() == lambda.index0().e() && index1().e() == lambda.index1().e()) &&
+				    (index0().k() < lambda.index0().k() ||
+				     (index0().k() == lambda.index0().k() && index1().k() < lambda.index1().k()))))));
   }
 
-  template <class BASIS1, class BASIS2>
-  TensorProductIndex<BASIS1,BASIS2>&
-  TensorProductIndex<BASIS1,BASIS2>::operator ++ ()
+  template <class BASIS0, class BASIS1>
+  TensorProductIndex<BASIS0,BASIS1>&
+  TensorProductIndex<BASIS0,BASIS1>::operator ++ ()
   {
-    if (index2() == BASIS2::last_index(j(), index2().e())) {
-      if (index1() == BASIS1::last_index(j(), index1().e())) {
-	if (index2() == BASIS2::last_wavelet(j())) {
- 	  if (index1() == BASIS1::last_wavelet(j())) {
- 	    index1_ = BASIS1::first_generator(j()+1); // increments j
-	    index2_ = BASIS2::first_wavelet(j()); // no generators on higher scales
+    if (index1() == BASIS1::last_index(j(), index1().e())) {
+      if (index0() == BASIS0::last_index(j(), index0().e())) {
+	if (index1() == BASIS1::last_wavelet(j())) {
+ 	  if (index0() == BASIS0::last_wavelet(j())) {
+ 	    index0_ = BASIS0::first_generator(j()+1); // increments j
+	    index1_ = BASIS1::first_wavelet(j()); // no generators on higher scales
 	  } else {
-	    ++index1_;
-	    index2_ = BASIS2::first_generator(j());
+	    ++index0_;
+	    index1_ = BASIS1::first_generator(j());
 	  }
 	} else {
-	  ++index2_;
-	  index1_ = BASIS1::first_index(j(), index1().e());
+	  ++index1_;
+	  index0_ = BASIS0::first_index(j(), index0().e());
 	}
       } else {
-	++index1_;
-	index2_ = BASIS2::first_index(j(), index2().e());
+	++index0_;
+	index1_ = BASIS1::first_index(j(), index1().e());
       }
     } else
-      ++index2_;
+      ++index1_;
     
     return *this;
   }
 
-//   template <class BASIS1, class BASIS2>
-//   TensorProductIndex<BASIS1,BASIS2>
+//   template <class BASIS0, class BASIS1>
+//   TensorProductIndex<BASIS0,BASIS1>
 //   first_generator(const int j)
 //   {
 //     assert(j >= basis->j0());
-//     return TensorProductIndex<BASIS1,BASIS2>(first_generator(&basis->basis1(), j),
+//     return TensorProductIndex<BASIS0,BASIS1>(first_generator(&basis->basis1(), j),
 // 					     first_generator(&basis->basis2(), j));
 //   }
 
-//   template <class BASIS1, class BASIS2>
-//   TensorProductIndex<BASIS1,BASIS2>
+//   template <class BASIS0, class BASIS1>
+//   TensorProductIndex<BASIS0,BASIS1>
 //   last_generator(const int j)
 //   {
 //     assert(j >= basis->j0());
-//     return TensorProductIndex<BASIS1,BASIS2>(last_generator(&basis->basis1(), j),
+//     return TensorProductIndex<BASIS0,BASIS1>(last_generator(&basis->basis1(), j),
 // 					     last_generator(&basis->basis2(), j));
 //   }
 
-//   template <class BASIS1, class BASIS2>
-//   TensorProductIndex<BASIS1,BASIS2>
+//   template <class BASIS0, class BASIS1>
+//   TensorProductIndex<BASIS0,BASIS1>
 //   first_wavelet(const int j)
 //   {
 //     assert(j >= basis->j0());
-//     return TensorProductIndex<BASIS1,BASIS2>(basis,
+//     return TensorProductIndex<BASIS0,BASIS1>(basis,
 // 					     first_generator(&basis->basis1(), j),
 // 					     first_wavelet(&basis->basis2(), j));
 //   }
 
-//   template <class BASIS1, class BASIS2>
-//   TensorProductIndex<BASIS1,BASIS2>
+//   template <class BASIS0, class BASIS1>
+//   TensorProductIndex<BASIS0,BASIS1>
 //   last_wavelet(const int j)
 //   {
 //     assert(j >= basis->j0());
-//     return TensorProductIndex<BASIS1,BASIS2>(last_wavelet(&basis->basis1(), j),
+//     return TensorProductIndex<BASIS0,BASIS1>(last_wavelet(&basis->basis1(), j),
 // 					     last_wavelet(&basis->basis2(), j));
 //   }
 }

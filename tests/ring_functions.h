@@ -100,7 +100,24 @@ namespace WaveletTL
     double r0_, r1_;
   };
   
-
+  // minus Laplace plus Identity of RingFunction4
+  class RingFunction4_RHS_Helmholtz
+    : public Function<2>
+  {
+  public:
+    RingFunction4_RHS_Helmholtz(const double r0, const double r1) : r0_(r0), r1_(r1) {}
+    inline double value(const Point<2>& p, const unsigned int component = 0) const {
+      const double r = sqrt(p[0]*p[0]+p[1]*p[1]);
+      return -(-9*r*r+(r0_+r1_)*r-r0_*r1_)/(4*r*r*sqrt(2*M_PI*(r1_-r0_)*r))
+	+ (r1_-r)*(r-r0_)/sqrt(2*M_PI*(r1_-r0_)*r);
+    }
+    void vector_value(const Point<2> &p, Vector<double>& values) const {
+      values.resize(1, false);
+      values[0] = value(p);
+    }
+  private:
+    double r0_, r1_;
+  };
 }
 
 #endif

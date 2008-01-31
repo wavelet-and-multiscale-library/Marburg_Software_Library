@@ -7,29 +7,34 @@
 // | Thorsten Raasch, Manuel Werner                                     |
 // +--------------------------------------------------------------------+
 
-#ifndef _WAVELETTL_RING_LAPLACIAN_H
-#define _WAVELETTL_RING_LAPLACIAN_H
+#ifndef _WAVELETTL_RING_HELMHOLTZ_H
+#define _WAVELETTL_RING_HELMHOLTZ_H
 
-#include <set>
-#include <map>
-#include <utils/fixed_array1d.h>
+#include <utils/function.h>
 #include <utils/array1d.h>
 #include <algebra/infinite_vector.h>
-#include <algebra/vector.h>
-#include <adaptive/compression.h>
+#include <interval/spline_basis.h>
 #include <ring/ring_basis.h>
+#include <galerkin/galerkin_utils.h>
 #include <galerkin/infinite_preconditioner.h>
+#include <galerkin/ring_gramian.h>
+#include <galerkin/ring_laplacian.h>
+#include <galerkin/cached_problem.h>
+// #include <adaptive/compression.h>
 
-using MathTL::InfiniteVector;
+using namespace MathTL;
 
 namespace WaveletTL
 {
   /*!
-    This class models the "polar coordinate" Laplacian matrix
+    This class models the Helmholtz equation -Delta u+alpha*u=f
     over a ring-shaped domain, to be used in adaptive algorithms.
+
+    Internally, RingHelmholtzEquation holds two distinct caches for the
+    Gramian (identity) part of the stiffness matrix and the Laplacian part.
   */
   template <int d, int dt, int s0, int s1>
-  class RingLaplacian
+  class RingHelmholtzEquation
     : public FullyDiagonalEnergyNormPreconditioner<typename RingBasis<d,dt,s0,s1>::Index>
   {
   public:
@@ -53,14 +58,22 @@ namespace WaveletTL
   
     //! index type of vectors and matrices
     typedef typename Vector<double>::size_type size_type;
-    
-    //! constructor from a given wavelet basis and a given right-hand side y
-    RingLaplacian(const WaveletBasis& basis,
-		  const InfiniteVector<double,Index>& y);
+
+    /*!
+      constructor from a given wavelet basis,
+      two filenames for the precomputed Gramian and Laplacian (plus corresponding jmax)
+      and a right-hand side y
+    */
+    RingHelmholtzEquation(const WaveletBasis& basis,
+			  const char* G_file,
+			  const char* A_file,
+			  const int jmax,
+			  const double alpha,
+			  const InfiniteVector<double, typename WaveletBasis::Index>& y);
 
     //! read access to the basis
     const WaveletBasis& basis() const { return basis_; }
-
+    
     //! space dimension of the problem
     static const int space_dimension = 2;
 
@@ -118,52 +131,29 @@ namespace WaveletTL
       y_ = y;
     }
 
+    /*!
+      set reaction coefficient alpha
+    */
+    void set_alpha(const double alpha) const;
+
   protected:
-    const WaveletBasis& basis_;
-    
-    // rhs, mutable to have 'const' method
-    mutable InfiniteVector<double,Index> y_;
-    
+    const WaveletBasis basis_;
+    mutable double alpha_;
+    mutable InfiniteVector<double, typename WaveletBasis::Index> y_;
+    mutable InfiniteVector<double, typename WaveletBasis::Index> y_precond;
+
+  public:
+    RingGramian<d,dt,s0,s1> G_;
+    CachedProblemFromFile<RingGramian<d,dt,s0,s1> > GC_;
+    RingLaplacian<d,dt,s0,s1> A_;
+    CachedProblemFromFile<RingLaplacian<d,dt,s0,s1> > AC_;
+
     // estimates for ||A|| and ||A^{-1}||
     mutable double normA, normAinv;
-
-    // class for columns of 1D integral cache in angular direction
-    typedef std::map<Index0,FixedArray1D<double,2> > Column1D_0;
-
-    // class for columns of 1D integral cache in radial direction
-    typedef std::map<Index1,FixedArray1D<double,4> > Column1D_1;
-
-    // class for 1D integral cache in angular direction
-    typedef std::map<Index0,Column1D_0> One_D_IntegralCache0;
-    
-    // class for 1D integral cache in radial direction
-    typedef std::map<Index1,Column1D_1> One_D_IntegralCache1;
-
-    //! cache for 1D integrals in angular direction
-    mutable One_D_IntegralCache0 i12_cache;
-    
-    //! cache for 1D integrals in radial direction
-    mutable One_D_IntegralCache1 i3456_cache;
-
-    /*!
-      helper function for RingLaplacian, compute various 1D integrals
-      in angular direction (cf. RingLaplacian::a())
-    */
-    void angular_integrals(const Index0& lambda,
-			   const Index0& mu,
-			   double& I1, double& I2) const;
-
-    /*!
-      helper function for RingLaplacian, compute various 1D integrals
-      in radial direction (cf. RingLaplacian::a())
-    */
-    void radial_integrals(const Index1& lambda,
-			  const Index1& mu,
-			  double& I3, double& I4, double& I5, double& I6) const;
   };
-  
+
 }
 
-#include <galerkin/ring_laplacian.cpp>
+#include <galerkin/ring_helmholtz.cpp>
 
 #endif

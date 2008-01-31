@@ -35,15 +35,20 @@ int main()
   cout << "- first wavelet on the coarsest level: " << basis.first_wavelet(basis.j0()) << endl;
   cout << "- last wavelet on the coarsest level: " << basis.last_wavelet(basis.j0()) << endl;
 
-#if 0
+#if 1
   cout << "- testing iterator functionality:" << endl;
-  for (Index lambda = basis.first_generator(basis.j0());; ++lambda) {
-    cout << lambda << endl;
+  int id = 0;
+  for (Index lambda = basis.first_generator(basis.j0());; ++lambda, id++) {
+    cout << lambda << " has the number " << lambda.number();
+    if (lambda.number()==id)
+      cout << " (ok)" << endl;
+    else
+      cout << " (ERROR!!!)" << endl;
     if (lambda == basis.last_wavelet(basis.j0()+1)) break;
   }
 #endif
 
-#if 1
+#if 0
   const int resi = 6;
   Point<2> sphi, y;
   Matrix<double> gridx((1<<resi)+1), gridy((1<<resi)+1);

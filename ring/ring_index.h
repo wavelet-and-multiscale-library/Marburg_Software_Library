@@ -81,6 +81,9 @@ namespace WaveletTL
     //! translation index k
     const translation_type& k() const { return k_; }
 
+    //! number
+    const int number() const;
+
   protected:
     //! scale
     int j_;

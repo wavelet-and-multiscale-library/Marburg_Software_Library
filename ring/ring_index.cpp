@@ -119,6 +119,79 @@ namespace WaveletTL
     
     return *this;
   }
-  
-  
+
+  template <int d, int dt, int s0, int s1>
+  const int
+  RingIndex<d,dt,s0,s1>::number() const
+  {
+    int result = 0;
+    
+    const int j0 = RingBasis<d,dt,s0,s1>::j0();
+
+    // determine how many wavelets there are with levels j0<=j'<j
+    if (j_ > j0)
+      result += RingBasis<d,dt,s0,s1>::Deltasize(j_);
+   
+    // determine how many wavelets there are with level j and type 0<=e'<e
+    const int ecode = e_[0]*2+e_[1];
+    switch(ecode) {
+    case 1: // e=(0,1)
+      if (j_ == j0)
+	result +=
+	  RingBasis<d,dt,s0,s1>::Basis0::Deltasize(j_)
+	  * RingBasis<d,dt,s0,s1>::Basis1::Deltasize(j_);
+      break;
+    case 2: // e=(1,0)
+      result +=
+	RingBasis<d,dt,s0,s1>::Basis0::Deltasize(j_)
+	* (j_ == j0
+	   ? RingBasis<d,dt,s0,s1>::Basis1::Deltasize(j_+1)
+	   : RingBasis<d,dt,s0,s1>::Basis1::Nablasize(j_));
+      break;
+    case 3: // e=(1,1)
+      result += (j_ == j0
+		 ? RingBasis<d,dt,s0,s1>::Basis0::Deltasize(j_)
+		 * RingBasis<d,dt,s0,s1>::Basis1::Deltasize(j_+1)
+		 + RingBasis<d,dt,s0,s1>::Basis0::Nablasize(j_)
+		 * RingBasis<d,dt,s0,s1>::Basis1::Deltasize(j_)
+		 : RingBasis<d,dt,s0,s1>::Basis0::Deltasize(j_)
+		 * RingBasis<d,dt,s0,s1>::Basis1::Nablasize(j_)
+		 + RingBasis<d,dt,s0,s1>::Basis0::Nablasize(j_)
+		 * RingBasis<d,dt,s0,s1>::Basis1::Deltasize(j_));
+      break;
+    case 0: // add nothing
+      break;
+    }
+
+    // determine how many wavelets there are with level j, type e and k'<k
+    switch(ecode) {
+    case 0: // e=(0,0)
+      result +=
+	(k_[0]-RingBasis<d,dt,s0,s1>::Basis0::DeltaLmin())
+	* RingBasis<d,dt,s0,s1>::Basis1::Deltasize(j_)
+	+ k_[1]-RingBasis<d,dt,s0,s1>::Basis1::DeltaLmin();
+      break;
+    case 1: // e=(0,1)
+      result +=
+	(k_[0]-RingBasis<d,dt,s0,s1>::Basis0::DeltaLmin())
+	* RingBasis<d,dt,s0,s1>::Basis1::Nablasize(j_)
+	+ k_[1]-RingBasis<d,dt,s0,s1>::Basis1::Nablamin();
+      break;
+    case 2:
+      result +=
+	(k_[0]-RingBasis<d,dt,s0,s1>::Basis0::Nablamin())
+	* RingBasis<d,dt,s0,s1>::Basis1::Deltasize(j_)
+	+ k_[1]-RingBasis<d,dt,s0,s1>::Basis1::DeltaLmin();	
+      break;
+    case 3:
+      result +=
+	(k_[0]-RingBasis<d,dt,s0,s1>::Basis0::Nablamin())
+	* RingBasis<d,dt,s0,s1>::Basis1::Nablasize(j_)
+	+ k_[1]-RingBasis<d,dt,s0,s1>::Basis1::Nablamin();
+      break;
+    }
+
+    return result;
+  }
+ 
 }

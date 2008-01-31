@@ -362,7 +362,7 @@ namespace WaveletTL
   void
   PeriodicBasis<RBASIS>::decompose(const InfiniteVector<double, Index>& c,
 				   const int j0,
-				   InfiniteVector<double, Index>& d) {
+				   InfiniteVector<double, Index>& d) const {
     InfiniteVector<double, Index> help;
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
 	 it != itend; ++it) {
@@ -375,7 +375,7 @@ namespace WaveletTL
   void
   PeriodicBasis<RBASIS>::decompose_t(const InfiniteVector<double, Index>& c,
 				     const int j0,
-				     InfiniteVector<double, Index>& d) {
+				     InfiniteVector<double, Index>& d) const {
     InfiniteVector<double, Index> help;
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
 	 it != itend; ++it) {
@@ -388,7 +388,7 @@ namespace WaveletTL
   void
   PeriodicBasis<RBASIS>::reconstruct(const InfiniteVector<double, Index>& c,
 				     const int j,
-				     InfiniteVector<double, Index>& d) {
+				     InfiniteVector<double, Index>& d) const {
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
 	 it != itend; ++it) {
       InfiniteVector<double, Index> help;
@@ -401,7 +401,7 @@ namespace WaveletTL
   void
   PeriodicBasis<RBASIS>::reconstruct_t(const InfiniteVector<double, Index>& c,
 				       const int j,
-				       InfiniteVector<double, Index>& d) {
+				       InfiniteVector<double, Index>& d) const {
     for (typename InfiniteVector<double, Index>::const_iterator it(c.begin()), itend(c.end());
 	 it != itend; ++it) {
       InfiniteVector<double, Index> help;
@@ -414,7 +414,7 @@ namespace WaveletTL
   void
   PeriodicBasis<RBASIS>::decompose_1(const Index& lambda,
 				     const int j0,
-				     InfiniteVector<double, Index>& c) {
+				     InfiniteVector<double, Index>& c) const {
     assert(lambda.j() >= j0);
     c.clear();
     if (lambda.e() == 1) {
@@ -463,7 +463,7 @@ namespace WaveletTL
   void
   PeriodicBasis<RBASIS>::decompose_t_1(const Index& lambda,
 				       const int j0,
-				       InfiniteVector<double, Index>& c) {
+				       InfiniteVector<double, Index>& c) const {
     assert(lambda.j() >= j0);
     c.clear();
     if (lambda.e() == 1) {
@@ -512,7 +512,7 @@ namespace WaveletTL
   void
   PeriodicBasis<RBASIS>::reconstruct_1(const Index& lambda,
 				       const int j,
-				       InfiniteVector<double, Index>& c) {
+				       InfiniteVector<double, Index>& c) const {
     if (lambda.j() >= j) {
       // then we can just copy \psi_\lambda
       c.set_coefficient(lambda, 1.0);
@@ -558,7 +558,7 @@ namespace WaveletTL
   void
   PeriodicBasis<RBASIS>::reconstruct_t_1(const Index& lambda,
 					 const int j,
-					 InfiniteVector<double, Index>& c) {
+					 InfiniteVector<double, Index>& c) const {
     if (lambda.j() >= j) {
       // then we can just copy \psi_\lambda
       c.set_coefficient(lambda, 1.0);

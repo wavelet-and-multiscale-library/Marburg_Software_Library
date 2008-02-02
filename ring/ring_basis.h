@@ -144,6 +144,17 @@ namespace WaveletTL
      InfiniteVector<double, Index>& coeffs) const;
 
     /*!
+      For a given function, compute all integrals w.r.t. the primal
+      or dual generators/wavelets \psi_\lambda with |\lambda|\le jmax.
+    */
+    void
+    expand
+    (const Function<2>* f,
+     const bool primal,
+     const int jmax,
+     Vector<double>& coeffs) const;
+
+    /*!
       helper function, integrate a smooth function f against a
       primal generator or wavelet
     */

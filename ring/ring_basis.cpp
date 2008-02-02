@@ -244,6 +244,21 @@ namespace WaveletTL
   }
 
   template <int d, int dt, int s0, int s1>
+  void
+  RingBasis<d,dt,s0,s1>::expand(const Function<2>* f,
+				const bool primal,
+				const int jmax,
+				Vector<double>& coeffs) const
+  {
+    InfiniteVector<double,Index> help;
+    expand(f, primal, jmax, help);
+    coeffs.resize(Deltasize(jmax+1));
+    for (typename InfiniteVector<double,Index>::const_iterator it(help.begin());
+	 it != help.end(); ++it)
+      coeffs[it.index().number()] = *it;
+  }
+
+  template <int d, int dt, int s0, int s1>
   double
   RingBasis<d,dt,s0,s1>::integrate
   (const Function<2>* f,

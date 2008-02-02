@@ -104,7 +104,7 @@ int main()
 
   // setup preconditioned right-hand side
   Vector<double> rhs(fcoeffs.size());
-  for (int i = 0; i < rhs.size(); i++)
+  for (unsigned int i = 0; i < rhs.size(); i++)
     rhs[i] = fcoeffs[i]/A.D(i);
 
   // solve Galerkin system

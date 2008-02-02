@@ -26,6 +26,8 @@ int main()
   typedef RingBasis<d,dt,s0,s1> Basis;
   Basis basis(r0, r1);
 
+  basis.set_jmax(4);
+
   typedef Basis::Index Index;
 
   cout << "- j0=" << basis.j0() << endl;

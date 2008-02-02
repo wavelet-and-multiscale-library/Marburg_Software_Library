@@ -382,4 +382,27 @@ namespace WaveletTL
 			  Index1(mu.j(), mu.e()[1], mu.k()[1]));
   }
 
+  template <int d, int dt, int s0, int s1>
+  void
+  RingBasis<d,dt,s0,s1>::setup_full_collection()
+  {
+    if (jmax_ == -1 || jmax_ < j0()) {
+      cout << "RingBasis::setup_full_collection(): specify a maximal level of resolution first!" << endl;
+      abort();
+    }   
+    
+    int degrees_of_freedom = Deltasize(jmax_+1);
+    cout << "total degrees of freedom between j0 and jmax_ is " << degrees_of_freedom << endl;
+
+    cout << "setting up collection of wavelet indices..." << endl;
+    full_collection.resize(degrees_of_freedom);
+    int k = 0;
+    for (Index ind = first_generator(j0()); ind <= last_wavelet(jmax_); ++ind) {
+      //cout << ind << " " << ind.number() << endl;
+      full_collection[k] = ind;
+      k++;
+    }
+    cout << "done setting up collection of wavelet indices..." << endl;
+  }
+
 }

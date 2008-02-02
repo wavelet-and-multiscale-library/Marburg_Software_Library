@@ -70,6 +70,15 @@ namespace WaveletTL
     //! default constructor, also sets r0 and r1
     RingBasis(const double r0 = 0.5, const double r1 = 2.0);
     
+    //! critical Sobolev regularity for the primal generators/wavelets
+    static double primal_regularity() { return Basis0::primal_regularity(); }
+    
+    //! degree of polynomial reproduction for the primal generators/wavelets
+    static unsigned int primal_polynomial_degree() { return d; }
+
+    //! number of vanishing moments for the primal wavelets
+    static unsigned int primal_vanishing_moments() { return dt; }
+
     /*!
       coarsest possible level j0; we may assume that the interval basis in radial direction
       has a larger minimal level than the corresponding periodic basis
@@ -152,6 +161,20 @@ namespace WaveletTL
     (const Index& lambda,
      const Index& mu) const;
 
+    //! set maximal level
+    void set_jmax(const int jmax) {
+      jmax_ = jmax;
+      setup_full_collection();
+    }
+
+    //! get the wavelet index corresponding to a specified number
+    const inline Index* get_wavelet (const int number) const {
+      return &full_collection[number];
+    }
+
+    //! number of wavelets between coarsest and finest level
+    const int degrees_of_freedom() const { return full_collection.size(); };
+
   protected:
     //! an instance of the periodic basis (angular direction)
     Basis0 basis0_;
@@ -164,6 +187,15 @@ namespace WaveletTL
 
     //! an instance of the corresponding chart
     RingChart chart_;
+
+    //! finest possible level
+    int jmax_;
+    
+    //! setup full collectin of wavelets between j0 and jmax_ as long as a jmax_ has been specified
+    void setup_full_collection();
+    
+    //! collection of all wavelets between coarsest and finest level
+    Array1D<Index> full_collection;
   };
 }
 

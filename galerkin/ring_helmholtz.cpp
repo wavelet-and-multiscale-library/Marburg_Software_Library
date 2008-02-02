@@ -31,5 +31,14 @@ namespace WaveletTL
     return alpha_ * GC_.a(lambda, mu) + A_.a(lambda, mu);
   }
   
+  template <int d, int dt, int s0, int s1>
+  void
+  RingHelmholtzEquation<d,dt,s0,s1>::set_alpha(const double alpha) const
+  {
+    assert(alpha >= 0);
+    alpha_ = alpha;
+    y_precond = y_;
+    y_precond.scale(this, -1);
+  }
 
 }

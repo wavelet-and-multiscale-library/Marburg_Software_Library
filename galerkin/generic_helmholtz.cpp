@@ -54,7 +54,7 @@ namespace WaveletTL
       if (precond_ == dyadic) {
 	for (int k(0); k < WBASIS::Deltasize(WBASIS::j0()); k++)
 	  D_[k] = alpha_ + (1<<WBASIS::j0());
-	for (int j = WBASIS::j0(); j < jmax_; j++) {
+	for (int j = WBASIS::j0(); j <= jmax_; j++) {
 	  for (int k(WBASIS::Deltasize(j)); k < WBASIS::Deltasize(j+1); k++)
 	    D_[k] = alpha_ + (1<<j);
 	}

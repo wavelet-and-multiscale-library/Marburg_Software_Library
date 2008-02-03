@@ -21,6 +21,8 @@ namespace WaveletTL
   /*!
     Generic class for the Helmholtz equation in a given wavelet basis,
     where the matrix components (Gramian+Laplacian) are read from a file.
+
+    Note: jmax means "in V_{jmax+1}" here!
   */
   template <class WBASIS>
   class GenericFullHelmholtz
@@ -81,12 +83,14 @@ namespace WaveletTL
     */
     void set_alpha(const double alpha) const;
 
+    
+    SparseMatrix<double> G_, A_;
+
   protected:
     const WBASIS& basis_;
     mutable double alpha_;
     const int jmax_;
     PreconditioningType precond_;
-    SparseMatrix<double> G_, A_;
     mutable Vector<double> D_;
     void setup_D() const;
   };

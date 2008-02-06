@@ -5,6 +5,7 @@
 #include <geometry/grid.h>
 #include <utils/tiny_tools.h>
 #include <numerics/gauss_data.h>
+#include <numerics/iteratsolv.h>
 
 using MathTL::Grid;
 using MathTL::SampledMapping;
@@ -240,14 +241,62 @@ namespace WaveletTL
 				const int jmax,
 				InfiniteVector<double, Index>& coeffs) const
   {
-    assert(!primal);
-    
     for (Index lambda = first_generator(j0());;++lambda)
       {
 	coeffs.set_coefficient(lambda, integrate(f, lambda));
 	if (lambda == last_wavelet(jmax))
 	  break;
       }
+
+    if (!primal) {
+      // setup active index set
+      std::set<Index> Lambda;
+      for (Index lambda = first_generator(j0());; ++lambda) {
+ 	Lambda.insert(lambda);
+	if (lambda == last_wavelet(jmax)) break;
+      }
+      
+      // setup Gramian A_Lambda
+      SparseMatrix<double> A_Lambda(Lambda.size());
+      typedef typename SparseMatrix<double>::size_type size_type;     
+      size_type row = 0;
+      for (typename std::set<Index>::const_iterator it1(Lambda.begin()), itend(Lambda.end());
+	   it1 != itend; ++it1, ++row)
+	{
+	  std::list<size_type> indices;
+	  std::list<double> entries;
+	  
+	  size_type column = 0;
+	  for (typename std::set<Index>::const_iterator it2(Lambda.begin());
+	       it2 != itend; ++it2, ++column)
+	    {
+	      double entry = integrate(*it2, *it1);
+	      
+	      if (entry != 0) {
+		indices.push_back(column);
+		entries.push_back(entry);
+	      }
+	    }
+	  A_Lambda.set_row(row, indices, entries);
+	} 
+      
+      // solve A_Lambda*x = b
+      Vector<double> b(Lambda.size());
+      row = 0;
+      for (typename std::set<Index>::const_iterator it(Lambda.begin()), itend(Lambda.end());
+	   it != itend; ++it, ++row)
+	b[row] = coeffs.get_coefficient(*it);
+      
+      Vector<double> x(b);
+      unsigned int iterations;
+      CG(A_Lambda, b, x, 1e-15, 500, iterations);
+      
+      coeffs.clear();
+      row = 0;
+      for (typename std::set<Index>::const_iterator it(Lambda.begin()), itend(Lambda.end());
+	   it != itend; ++it, ++row)
+	coeffs.set_coefficient(*it, x[row]);
+    }
   }
 
   template <class RBASIS>

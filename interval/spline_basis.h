@@ -34,7 +34,11 @@ namespace WaveletTL
   {
   public:
     using SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::check;
-
+    using SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj0_;
+    using SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_;
+    using SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj0T_;
+    using SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1T_;
+   
     //! default constructor
     SplineBasis();
 
@@ -44,6 +48,9 @@ namespace WaveletTL
     //! size_type, for convenience
     typedef Vector<double>::size_type size_type;
 
+    //! type of the matrices Mj0, Mj1, Mj0T, Mj1T
+    typedef QuasiStationaryMatrix<double> QuasiStationaryMatrixType;
+    
     //! geometric type of the support sets
     typedef struct {
       int j;
@@ -354,6 +361,10 @@ namespace WaveletTL
   {
   public:
     using SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::check;
+    using SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj0_;
+    using SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_;
+    using SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj0T_;
+    using SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1T_;
 
     //! default constructor
     SplineBasis();
@@ -364,6 +375,9 @@ namespace WaveletTL
     //! size_type, for convenience
     typedef Vector<double>::size_type size_type;
 
+    //! type of the matrices Mj0, Mj1, Mj0T, Mj1T
+    typedef QuasiStationaryMatrix<double> QuasiStationaryMatrixType;
+    
     //! geometric type of the support sets
     typedef struct {
       int j;

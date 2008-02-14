@@ -14,6 +14,7 @@
 
 #include <algebra/vector.h>
 #include <algebra/infinite_vector.h>
+#include <algebra/qs_matrix.h>
 #include <utils/array1d.h>
 #include <utils/function.h>
 #include <geometry/sampled_mapping.h>
@@ -47,6 +48,9 @@ namespace WaveletTL
   public:
     //! wavelet index class
     typedef IntervalIndex2<PeriodicBasis<RBASIS> > Index;
+
+    //! default constructor
+    PeriodicBasis();
 
     /*!
       coarsest possible level j0;
@@ -128,6 +132,26 @@ namespace WaveletTL
 
     //! index of last (rightmost) wavelet on level j >= j0
     static Index last_wavelet(const int j);
+
+    /*!
+      apply Mj=(Mj0 Mj1) to some vector x ("reconstruct");
+      the routine writes only into the first part of y, i.e,
+      y might be larger than necessary, which is helpful for apply_Tj
+    */
+    template <class V>
+    void apply_Mj(const int j, const V& x, V& y) const;
+
+    //! apply Mj^T to some vector x
+    template <class V>
+    void apply_Mj_transposed(const int j, const V& x, V& y) const;
+
+    //! apply Gj=(Mj0T Mj1T)^T to some vector x ("decompose")
+    template <class V>
+    void apply_Gj(const int j, const V& x, V& y) const;
+
+    //! apply G_j^T to some vector x
+    template <class V>
+    void apply_Gj_transposed(const int j, const V& x, V& y) const;
 
     /*!
       Evaluate a single primal/dual generator or wavelet \psi_\lambda
@@ -309,6 +333,9 @@ namespace WaveletTL
   private:
     //! an instance of RBASIS
     RBASIS r_basis;
+
+    //! refinement matrices
+    PeriodicQuasiStationaryMatrix<double> Mj0_, Mj1_, Mj0T_, Mj1T_;
   };
 }
 

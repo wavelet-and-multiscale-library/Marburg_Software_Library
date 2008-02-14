@@ -65,17 +65,29 @@ namespace WaveletTL
     //! reading access to the primal refinement mask (a_k)
     inline const double a(const int k) const { return a().a(k); }
 
+    //! get primal mask (a_k) and start offset
+    void get_a(Array1D<double>& a, int& offset) const;
+
     //! reading access to the dual refinement mask (aT_k)
     inline const DUALMASK& aT() const { return dual_mask_; }
 
     //! reading access to the dual refinement mask (aT_k)
     inline const double aT(const int k) const { return aT().a(k); }
 
+    //! get dual mask (aT_k) and start offset
+    void get_aT(Array1D<double>& aT, int& offset) const;
+
     //! reading access to the primal wavelet mask (b_k)
     inline const double b(const int k) const { return minus1power(k)*aT(1-k); }
 
+    //! get primal wavelet mask (b_k) and start offset
+    void get_b(Array1D<double>& b, int& offset) const;
+
     //! reading access to the dual wavelet coefficients
     inline const double bT(const int k) const { return minus1power(k)*a(1-k); }
+    
+    //! get dual wavelet mask (bT_k) and start offset
+    void get_bT(Array1D<double>& bT, int& offset) const;
     
     /*!
       geometric type of the support sets
@@ -207,10 +219,14 @@ namespace WaveletTL
 			       const int A, const int B,
 			       const int resolution) const;
 
+    //! bands and offsets for the 4 masks
+    int offset_a, offset_aT, offset_b, offset_bT;
+    Array1D<double> band_a, band_aT, band_b, band_bT;
+    
   protected:
     //! one instance of the primal mask
     PRIMALMASK primal_mask_;
-
+    
     //! one instance of the dual mask
     DUALMASK dual_mask_;
   };

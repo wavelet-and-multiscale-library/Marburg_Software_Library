@@ -26,7 +26,7 @@ int main()
   cout << "- leftmost wavelet on the coarsest level: " << first_wavelet(&basis, basis.j0()) << endl;
   cout << "- rightmost wavelet on the coarsest level: " << last_wavelet(&basis, basis.j0()) << endl;
 
-#if 1
+#if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -74,6 +74,24 @@ int main()
 	  if (index == basis.last_generator(level)) break;
 	}
     }
+#endif
+
+#if 1
+  {
+    const int j0 = basis.j0();
+    Vector<double> x(basis.Deltasize(j0+1));
+    x[0] = 1;
+    cout << "* a vector x=" << x << endl;
+    Vector<double> y(basis.Deltasize(j0+1));
+    basis.apply_Mj(j0, x, y);
+    cout << "* applying Mj=(Mj0 Mj1) to x yields y=Mj*x=" << y << endl;
+    basis.apply_Gj(j0, y, x);
+    cout << "* applying Gj=(Mj0T Mj1T)^T to y yields x=Gj*y=" << x << endl;
+    basis.apply_Gj_transposed(j0, x, y);
+    cout << "* applying Gj^T to x yields y=Gj^T*x=" << y << endl;
+    basis.apply_Mj_transposed(j0, x, y);
+    cout << "* applying Mj^T to y yields x=Mj^T*y=" << x << endl;
+  }
 #endif
 
 
@@ -160,7 +178,7 @@ int main()
   cout << "  ...done!" << endl;
 #endif
 
-#if 1
+#if 0
   cout << "* point evaluation of periodic CDF functions:" << endl;
   int N = 32;
   Array1D<double> points(N+1), values(N+1), dervalues(N+1);
@@ -174,6 +192,24 @@ int main()
     cout << "values: " << values << endl;
     cout << "values of first derivative: " << dervalues << endl;
     if (lambda == basis2.last_wavelet(level)) break;
+  }
+#endif
+
+#if 1
+  {
+    const int j0 = basis2.j0();
+    Vector<double> x(basis2.Deltasize(j0+1));
+    x[0] = 1;
+    cout << "* a vector x=" << x << endl;
+    Vector<double> y(basis2.Deltasize(j0+1));
+    basis2.apply_Mj(j0, x, y);
+    cout << "* applying Mj=(Mj0 Mj1) to x yields y=Mj*x=" << y << endl;
+    basis2.apply_Gj(j0, y, x);
+    cout << "* applying Gj=(Mj0T Mj1T)^T to y yields x=Gj*y=" << x << endl;
+    basis2.apply_Gj_transposed(j0, x, y);
+    cout << "* applying Gj^T to x yields y=Gj^T*x=" << y << endl;
+    basis2.apply_Mj_transposed(j0, x, y);
+    cout << "* applying Mj^T to y yields x=Mj^T*y=" << x << endl;
   }
 #endif
 

@@ -31,7 +31,7 @@ namespace WaveletTL
     //   a(z) = (1+z)^d * z^{-floor(d/2)},
     // the coefficients of which can be calculated in closed form (faster):
     for (int k(ell1<d>()); k <= ell2<d>(); k++)
-      RRefinementMask<d+1,-(d/2)>::coeffs[k-ell1<d>()] = ldexp(1., 1 - d) * binomial(d, k-ell1<d>());
+      RRefinementMask<d+1,-(d/2)>::coeffs_[k-ell1<d>()] = ldexp(1., 1 - d) * binomial(d, k-ell1<d>());
   }
   
   template <int d, int dt>
@@ -108,7 +108,7 @@ namespace WaveletTL
 	    * binomial((d+dt)/2-1+n, n)
 	    * binomial(2*n, ell);
       
-      RRefinementMask<d+2*dt-1,-(d/2)-dt+1>::coeffs[k-ell1T<d,dt>()] = help;
+      RRefinementMask<d+2*dt-1,-(d/2)-dt+1>::coeffs_[k-ell1T<d,dt>()] = help;
     }
   }
   

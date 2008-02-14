@@ -1,6 +1,7 @@
 // implementation of r_basis.h
 
 #include <cmath>
+#include <algorithm>
 #include <cassert>
 
 namespace WaveletTL
@@ -8,6 +9,58 @@ namespace WaveletTL
   template <class PRIMALMASK, class DUALMASK>
   RBasis<PRIMALMASK, DUALMASK>::RBasis()
   {
+    get_a (band_a , offset_a );
+    get_aT(band_aT, offset_aT);
+    get_b (band_b , offset_b );
+    get_bT(band_bT, offset_bT);
+  }
+  
+  template <class PRIMALMASK, class DUALMASK>
+  void
+  RBasis<PRIMALMASK, DUALMASK>::get_a(Array1D<double>& a, int& offset) const
+  {
+    a.resize(PRIMALMASK::length);
+    for (unsigned int i = 0; i < PRIMALMASK::length; i++)
+      a[i] = primal_mask().coeffs()[i];
+    offset = PRIMALMASK::begin();
+  }
+
+  template <class PRIMALMASK, class DUALMASK>
+  void
+  RBasis<PRIMALMASK, DUALMASK>::get_aT(Array1D<double>& aT, int& offset) const
+  {
+    aT.resize(DUALMASK::length);
+    for (unsigned int i = 0; i < DUALMASK::length; i++)
+      aT[i] = dual_mask().coeffs()[i];
+    offset = DUALMASK::begin();
+  }
+
+  template <class PRIMALMASK, class DUALMASK>
+  void
+  RBasis<PRIMALMASK, DUALMASK>::get_b(Array1D<double>& b, int& offset) const
+  {
+    // b_k=(-1)^k*aT(1-k)
+    b.resize(DUALMASK::length);
+    offset = 2-(DUALMASK::begin()+DUALMASK::length);
+    int sign = minus1power(offset);
+    for (unsigned int i = 0; i < DUALMASK::length; i++) {
+      b[i] = sign*dual_mask().coeffs()[DUALMASK::length-1-i];
+      sign = -sign;
+    }
+  }
+
+  template <class PRIMALMASK, class DUALMASK>
+  void
+  RBasis<PRIMALMASK, DUALMASK>::get_bT(Array1D<double>& bT, int& offset) const
+  {
+    // bT_k=(-1)^k*a(1-k)
+    bT.resize(PRIMALMASK::length);
+    offset = 2-(PRIMALMASK::begin()+PRIMALMASK::length);
+    int sign = minus1power(offset);
+    for (unsigned int i = 0; i < PRIMALMASK::length; i++) {
+      bT[i] = sign*primal_mask().coeffs()[PRIMALMASK::length-1-i];
+      sign = -sign;
+    }
   }
 
   template <class PRIMALMASK, class DUALMASK>

@@ -19,7 +19,7 @@ namespace WaveletTL
   {
   public:
     //! default constructor, sets up the mask
-    HaarMask() { RRefinementMask<2,0>::coeffs[0] = RRefinementMask<2,0>::coeffs[1] = 1.0; }
+    HaarMask() { RRefinementMask<2,0>::coeffs_[0] = RRefinementMask<2,0>::coeffs_[1] = 1.0; }
     
     //! Strang-Fix order, i.e., degree of polynomial reproduction (+1)
     static unsigned int Strang_Fix_order() { return 1; }

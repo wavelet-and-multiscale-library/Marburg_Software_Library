@@ -49,8 +49,26 @@ int main()
   RBasis<CDFRefinementMask_primal<d>, CDFRefinementMask_dual<d, dt> > basis;
   cout << "  + primal mask:" << endl;
   cout << basis.a() << endl;
+  Array1D<double> mask_test;
+  int offset_test;
+  mask_test = basis.band_a;
+  offset_test = basis.offset_a;
+//   basis.get_a(mask_test, offset_test);
+  cout << "  + output of get_a(): " << mask_test << " with offset " << offset_test << endl;
   cout << "  + dual mask:" << endl;
   cout << basis.aT() << endl;
+  mask_test = basis.band_aT;
+  offset_test = basis.offset_aT;
+//   basis.get_aT(mask_test, offset_test);
+  cout << "  + output of get_aT(): " << mask_test << " with offset " << offset_test << endl;
+  mask_test = basis.band_b;
+  offset_test = basis.offset_b;
+//   basis.get_b(mask_test, offset_test);
+  cout << "  + output of get_b(): " << mask_test << " with offset " << offset_test << endl;
+  mask_test = basis.band_bT;
+  offset_test = basis.offset_bT;
+//   basis.get_bT(mask_test, offset_test);
+  cout << "  + output of get_bT(): " << mask_test << " with offset " << offset_test << endl;
 
   InfiniteVector<double, RIndex> coeff;
   coeff[RIndex(2,0,0)] = 1.0;

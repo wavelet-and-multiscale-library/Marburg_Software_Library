@@ -1,6 +1,7 @@
 // implementation of PeriodicBasis methods
 
 #include <cmath>
+#include <algebra/sparse_matrix.h>
 #include <geometry/point.h>
 #include <geometry/grid.h>
 #include <utils/tiny_tools.h>
@@ -10,9 +11,24 @@
 using MathTL::Grid;
 using MathTL::SampledMapping;
 using MathTL::Point;
+using MathTL::SparseMatrix;
 
 namespace WaveletTL
 {
+  template <class RBASIS>
+  PeriodicBasis<RBASIS>::PeriodicBasis()
+    : r_basis(),
+      Mj0_(j0(), r_basis.offset_a, r_basis.band_a, M_SQRT1_2),
+      Mj1_(j0(), r_basis.offset_b, r_basis.band_b, M_SQRT1_2),
+      Mj0T_(j0(), r_basis.offset_aT, r_basis.band_aT, M_SQRT1_2),
+      Mj1T_(j0(), r_basis.offset_bT, r_basis.band_bT, M_SQRT1_2)
+  {
+    cout << "Mj0=" << endl << Mj0_ << endl;
+    cout << "Mj0T=" << endl << Mj0T_ << endl;
+    cout << "Mj1=" << endl << Mj1_ << endl;
+    cout << "Mj1T=" << endl << Mj1T_ << endl;
+  }
+  
   template <class RBASIS>
   inline
   typename PeriodicBasis<RBASIS>::Index
@@ -47,6 +63,58 @@ namespace WaveletTL
   {
     assert(j >= j0());
     return Index(j, 1, PeriodicBasis<RBASIS>::Nablamax(j));
+  }
+
+  template <class RBASIS>
+  template <class V>
+  void
+  PeriodicBasis<RBASIS>::apply_Mj(const int j, const V& x, V& y) const
+  {
+    Mj0_.set_level(j);
+    Mj1_.set_level(j);
+    
+    // decompose x=(x1 x2) appropriately
+    Mj0_.apply(x, y, 0, 0);                             // apply Mj0 to first block x1
+    Mj1_.apply(x, y, Mj0_.column_dimension(), 0, true); // apply Mj1 to second block x2 and add result
+  }
+
+  template <class RBASIS>
+  template <class V>
+  void
+  PeriodicBasis<RBASIS>::apply_Mj_transposed(const int j, const V& x, V& y) const
+  {
+    Mj0_.set_level(j);
+    Mj1_.set_level(j);
+
+    // y=(y1 y2) is a block vector
+    Mj0_.apply_transposed(x, y, 0, 0);                       // write into first block y1
+    Mj1_.apply_transposed(x, y, 0, Mj0_.column_dimension()); // write into second block y2
+  }
+
+  template <class RBASIS>
+  template <class V>
+  void
+  PeriodicBasis<RBASIS>::apply_Gj(const int j, const V& x, V& y) const
+  {
+    Mj0T_.set_level(j);
+    Mj1T_.set_level(j);
+
+    // y=(y1 y2) is a block vector
+    Mj0T_.apply_transposed(x, y, 0, 0);                        // write into first block y1
+    Mj1T_.apply_transposed(x, y, 0, Mj0T_.column_dimension()); // write into second block y2
+  }
+
+  template <class RBASIS>
+  template <class V>
+  void
+  PeriodicBasis<RBASIS>::apply_Gj_transposed(const int j, const V& x, V& y) const
+  {
+    Mj0T_.set_level(j);
+    Mj1T_.set_level(j);
+    
+    // decompose x=(x1 x2) appropriately
+    Mj0T_.apply(x, y, 0);                                 // apply Mj0T to first block x1
+    Mj1T_.apply(x, y, Mj0T_.column_dimension(), 0, true); // apply Mj1T to second block x2 and add result
   }
   
   template <class RBASIS>

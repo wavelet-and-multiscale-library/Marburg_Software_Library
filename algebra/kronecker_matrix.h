@@ -75,12 +75,6 @@ namespace MathTL
     //! special version for Vector<C> (requirement from MatrixBlock)
     void apply(const Vector<C>& x, Vector<C>& Mx) const;
 
-    //! apply version with offsets and addto-flag
-    void apply(const Vector<C>& x, Vector<C>& Mx,
-	       const size_type x_offset,
-	       const size_type Mx_offset,
-	       const bool add_to) const;
-
     /*!
       transposed matrix-vector multiplication Mtx = (*this)^T * x;
       we assume that the vector Mtx has the correct size and
@@ -92,12 +86,6 @@ namespace MathTL
     //! special version for Vector<C> (requirement from MatrixBlock)
     void apply_transposed(const Vector<C>& x, Vector<C>& Mtx) const;
     
-    //! apply_transposed version with offsets and addto-flag
-    void apply_transposed(const Vector<C>& x, Vector<C>& Mtx,
-			  const size_type x_offset,
-			  const size_type Mtx_offset,
-			  const bool add_to) const;
-
     /*!
       stream output with user-defined tabwidth and precision
       (cf. deal.II)
@@ -117,6 +105,49 @@ namespace MathTL
   */
   template <class C, class MATRIX1, class MATRIX2>
   std::ostream& operator << (std::ostream& os, const KroneckerMatrix<C,MATRIX1,MATRIX2>& M);
+
+  
+  /*!
+    A Kronecker helper class with limited functionality for situations where
+    you only want to quickly apply a Kronecker matrix (or its transpose) to a vector
+  */
+  template <class C, class MATRIX1, class MATRIX2>
+  class KroneckerHelper
+  {
+  public:
+    //! type of indexes and size type (cf. STL containers)
+    typedef typename Vector<C>::size_type size_type;
+    
+    //! default constructor from A and B
+    explicit KroneckerHelper(const MATRIX1& A, const MATRIX2& B,
+			     const double factor = 1.0);
+    
+    //! copy constructor
+    KroneckerHelper(const KroneckerHelper<C,MATRIX1,MATRIX2>& M);
+
+    //! row dimension
+    const size_type row_dimension() const;
+
+    //! column dimension
+    const size_type column_dimension() const;
+
+    //! apply version with offsets and addto-flag
+    void apply(const Vector<C>& x, Vector<C>& Mx,
+	       const size_type x_offset,
+	       const size_type Mx_offset,
+	       const bool add_to) const;
+    
+    //! apply_transposed version with offsets and addto-flag
+    void apply_transposed(const Vector<C>& x, Vector<C>& Mtx,
+			  const size_type x_offset,
+			  const size_type Mtx_offset,
+			  const bool add_to) const;
+
+  protected:
+    MATRIX1 A;
+    MATRIX2 B;
+    C factor_;
+  };  
 }
 
 // include implementation of inline functions

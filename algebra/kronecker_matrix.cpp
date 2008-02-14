@@ -220,65 +220,6 @@ namespace MathTL
   }
 
   template <class C, class MATRIX1, class MATRIX2>
-  void
-  KroneckerMatrix<C,MATRIX1,MATRIX2>::apply(const Vector<C>& x, Vector<C>& Mx,
-					    const size_type x_offset,
-					    const size_type Mx_offset,
-					    const bool add_to) const
-  {
-    assert(x.size() >= x_offset + column_dimension());
-    assert(Mx.size() >= Mx_offset + row_dimension());
-
-    // for readability:
-    const size_type m = A.row_dimension();
-    const size_type n = A.column_dimension();
-    const size_type p = B.row_dimension();
-    const size_type q = B.column_dimension();
-    
-    if (!add_to) {
-      // clear the range we want to write to
-      for (size_type i = 0; i < m; i++)
-	for (size_type k = 0; k < p; k++)
-	  Mx[Mx_offset+i*p+k] = 0;
-    }
-
-    // first decompose x[x_offset...x_offset+n*q-1] into the corresponding blocks
-    Array1D<Vector<C> > x_blocks(n);
-    for (size_type j = 0; j < n; j++) {
-      x_blocks[j].resize(q);
-      for (size_type l = 0; l < q; l++)
-	x_blocks[j][l] = factor_ * x[x_offset+j*q+l];
-    }
-
-    // apply B to these blocks
-    Array1D<Vector<C> > Bx_blocks(n);
-    for (size_type j = 0; j < n; j++) {
-      Bx_blocks[j].resize(p);
-      B.apply(x_blocks[j], Bx_blocks[j]);
-    }
-    
-    // resort the Bx[i] blocks
-    Array1D<Vector<C> > w_blocks(p);
-    for (size_type k = 0; k < p; k++) {
-      w_blocks[k].resize(n);
-      for (size_type j = 0; j < n; j++)
-	w_blocks[k][j] = Bx_blocks[j][k];
-    }
-    
-    // apply A to the w[k] blocks
-    Array1D<Vector<C> > Aw_blocks(p);
-    for (size_type k = 0; k < p; k++) {
-      Aw_blocks[k].resize(m);
-      A.apply(w_blocks[k], Aw_blocks[k]);
-    }
-    
-    // resort the Aw[k] blocks into the result, using the given offset
-    for (size_type i = 0; i < m; i++)
-      for (size_type k = 0; k < p; k++)
-	Mx[Mx_offset+i*p+k] += Aw_blocks[k][i];
-  }
-  
-  template <class C, class MATRIX1, class MATRIX2>
   template <class VECTOR>
   void
   KroneckerMatrix<C,MATRIX1,MATRIX2>::apply_transposed(const VECTOR& x, VECTOR& Mtx) const
@@ -420,8 +361,128 @@ namespace MathTL
   }
 
   template <class C, class MATRIX1, class MATRIX2>
+  void KroneckerMatrix<C,MATRIX1,MATRIX2>::print(std::ostream &os,
+						 const unsigned int tabwidth,
+						 const unsigned int precision) const
+  {
+    if (empty())
+      os << "[]" << std::endl; // Matlab style
+    else
+      {
+ 	unsigned int old_precision = os.precision(precision);
+ 	for (size_type i(0); i < row_dimension(); ++i) {
+	  for (size_type j(0); j < column_dimension(); ++j)
+	    os << std::setw(tabwidth) << std::setprecision(precision)
+	       << this->operator () (i, j);
+	  os << std::endl;
+	}
+ 	os.precision(old_precision);
+      }
+  }
+
+  template <class C, class MATRIX1, class MATRIX2>
+  inline
+  std::ostream& operator << (std::ostream& os, const KroneckerMatrix<C,MATRIX1,MATRIX2>& M)
+  {
+    M.print(os);
+    return os;
+  }
+
+  //
+  //
+  // imlementation for KroneckerHelper
+  template <class C, class MATRIX1, class MATRIX2>
+  KroneckerHelper<C,MATRIX1,MATRIX2>::KroneckerHelper(const MATRIX1& A_, const MATRIX2& B_,
+						      const double factor)
+    : A(A_), B(B_), factor_(factor)
+  {
+  }
+  
+  template <class C, class MATRIX1, class MATRIX2>
+  KroneckerHelper<C,MATRIX1,MATRIX2>::KroneckerHelper
+  (const KroneckerHelper<C,MATRIX1,MATRIX2>& M)
+    : A(M.A), B(M.B), factor_(M.factor_)
+  {
+  }
+
+  template <class C, class MATRIX1, class MATRIX2>
+  inline
+  const typename KroneckerHelper<C,MATRIX1,MATRIX2>::size_type
+  KroneckerHelper<C,MATRIX1,MATRIX2>::row_dimension() const
+  {
+    return A.row_dimension() * B.row_dimension();
+  }
+
+  template <class C, class MATRIX1, class MATRIX2>
+  inline
+  const typename KroneckerHelper<C,MATRIX1,MATRIX2>::size_type
+  KroneckerHelper<C,MATRIX1,MATRIX2>::column_dimension() const
+  {
+    return A.column_dimension() * B.column_dimension();
+  }
+
+  template <class C, class MATRIX1, class MATRIX2>
   void
-  KroneckerMatrix<C,MATRIX1,MATRIX2>::apply_transposed(const Vector<C>& x, Vector<C>& Mtx,
+  KroneckerHelper<C,MATRIX1,MATRIX2>::apply(const Vector<C>& x, Vector<C>& Mx,
+					    const size_type x_offset,
+					    const size_type Mx_offset,
+					    const bool add_to) const
+  {
+    assert(x.size() >= x_offset + column_dimension());
+    assert(Mx.size() >= Mx_offset + row_dimension());
+    
+    // for readability:
+    const size_type m = A.row_dimension();
+    const size_type n = A.column_dimension();
+    const size_type p = B.row_dimension();
+    const size_type q = B.column_dimension();
+    
+    if (!add_to) {
+      // clear the range we want to write to
+      for (size_type i = 0; i < m; i++)
+	for (size_type k = 0; k < p; k++)
+	  Mx[Mx_offset+i*p+k] = 0;
+    }
+
+    // first decompose x[x_offset...x_offset+n*q-1] into the corresponding blocks
+    Array1D<Vector<C> > x_blocks(n);
+    for (size_type j = 0; j < n; j++) {
+      x_blocks[j].resize(q);
+      for (size_type l = 0; l < q; l++)
+	x_blocks[j][l] = factor_ * x[x_offset+j*q+l];
+    }
+
+    // apply B to these blocks
+    Array1D<Vector<C> > Bx_blocks(n);
+    for (size_type j = 0; j < n; j++) {
+      Bx_blocks[j].resize(p);
+      B.apply(x_blocks[j], Bx_blocks[j]);
+    }
+    
+    // resort the Bx[i] blocks
+    Array1D<Vector<C> > w_blocks(p);
+    for (size_type k = 0; k < p; k++) {
+      w_blocks[k].resize(n);
+      for (size_type j = 0; j < n; j++)
+	w_blocks[k][j] = Bx_blocks[j][k];
+    }
+    
+    // apply A to the w[k] blocks
+    Array1D<Vector<C> > Aw_blocks(p);
+    for (size_type k = 0; k < p; k++) {
+      Aw_blocks[k].resize(m);
+      A.apply(w_blocks[k], Aw_blocks[k]);
+    }
+    
+    // resort the Aw[k] blocks into the result, using the given offset
+    for (size_type i = 0; i < m; i++)
+      for (size_type k = 0; k < p; k++)
+	Mx[Mx_offset+i*p+k] += Aw_blocks[k][i];
+  }
+  
+  template <class C, class MATRIX1, class MATRIX2>
+  void
+  KroneckerHelper<C,MATRIX1,MATRIX2>::apply_transposed(const Vector<C>& x, Vector<C>& Mtx,
 						       const size_type x_offset,
 						       const size_type Mtx_offset,
 						       const bool add_to) const
@@ -476,33 +537,5 @@ namespace MathTL
     for (size_type j = 0; j < n; j++)
       for (size_type l = 0; l < q; l++)
  	Mtx[Mtx_offset+j*q+l] += ATw_blocks[l][j];
-  }
-  
-  template <class C, class MATRIX1, class MATRIX2>
-  void KroneckerMatrix<C,MATRIX1,MATRIX2>::print(std::ostream &os,
-						 const unsigned int tabwidth,
-						 const unsigned int precision) const
-  {
-    if (empty())
-      os << "[]" << std::endl; // Matlab style
-    else
-      {
- 	unsigned int old_precision = os.precision(precision);
- 	for (size_type i(0); i < row_dimension(); ++i) {
-	  for (size_type j(0); j < column_dimension(); ++j)
-	    os << std::setw(tabwidth) << std::setprecision(precision)
-	       << this->operator () (i, j);
-	  os << std::endl;
-	}
- 	os.precision(old_precision);
-      }
-  }
-
-  template <class C, class MATRIX1, class MATRIX2>
-  inline
-  std::ostream& operator << (std::ostream& os, const KroneckerMatrix<C,MATRIX1,MATRIX2>& M)
-  {
-    M.print(os);
-    return os;
   }
 }

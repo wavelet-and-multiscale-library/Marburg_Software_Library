@@ -1,10 +1,46 @@
 // implementation for tp_basis.h
 
+#include <algebra/kronecker_matrix.h>
+
+using MathTL::KroneckerMatrix;
+
 namespace WaveletTL
 {
   template <class BASIS0, class BASIS1>
   TensorProductBasis<BASIS0,BASIS1>::TensorProductBasis()
   {
+  }
+
+  template <class BASIS0, class BASIS1>
+  inline int
+  TensorProductBasis<BASIS0,BASIS1>::Deltasize(const int j)
+  {
+    assert(j >= j0());
+    return BASIS0::Deltasize(j) * BASIS1::Deltasize(j);
+  }
+  
+  template <class BASIS0, class BASIS1>
+  inline int
+  TensorProductBasis<BASIS0,BASIS1>::Nabla01size(const int j)
+  {
+    assert(j >= j0());
+    return BASIS0::Deltasize(j) * (1<<j);
+  }
+
+  template <class BASIS0, class BASIS1>
+  inline int
+  TensorProductBasis<BASIS0,BASIS1>::Nabla10size(const int j)
+  {
+    assert(j >= j0());
+    return BASIS1::Deltasize(j) * (1<<j);
+  }
+  
+  template <class BASIS0, class BASIS1>
+  inline int
+  TensorProductBasis<BASIS0,BASIS1>::Nabla11size(const int j)
+  {
+    assert(j >= j0());
+    return 1<<(2*j);
   }
 
   template <class BASIS0, class BASIS1>
@@ -43,6 +79,79 @@ namespace WaveletTL
  					     BASIS1::last_wavelet(j));
   }
 
+  template <class BASIS0, class BASIS1>
+  template <class V>
+  void
+  TensorProductBasis<BASIS0,BASIS1>::apply_Mj0(const int j, const V& x, V& y,
+					       const size_type x_offset, const size_type y_offset,
+					       const bool add_to) const
+  {
+    basis0_.Mj0_.set_level(j);
+    basis1_.Mj0_.set_level(j);
+
+    KroneckerHelper<double, typename BASIS0::QuasiStationaryMatrixType, typename BASIS1::QuasiStationaryMatrixType>
+      K(basis0_.Mj0_, basis1_.Mj0_);
+    K.apply(x, y, x_offset, y_offset, add_to);
+  }
+
+  template <class BASIS0, class BASIS1>
+  template <class V>
+  void
+  TensorProductBasis<BASIS0,BASIS1>::apply_Mj1_01(const int j, const V& x, V& y,
+						  const size_type x_offset, const size_type y_offset,
+						  const bool add_to) const
+  {
+    basis0_.Mj0_.set_level(j);
+    basis1_.Mj1_.set_level(j);
+
+    KroneckerHelper<double, typename BASIS0::QuasiStationaryMatrixType, typename BASIS1::QuasiStationaryMatrixType>
+      K(basis0_.Mj0_, basis1_.Mj1_);
+    K.apply(x, y, x_offset, y_offset, add_to);
+  }
+
+  template <class BASIS0, class BASIS1>
+  template <class V>
+  void
+  TensorProductBasis<BASIS0,BASIS1>::apply_Mj1_10(const int j, const V& x, V& y,
+						  const size_type x_offset, const size_type y_offset,
+						  const bool add_to) const
+  {
+    basis0_.Mj1_.set_level(j);
+    basis1_.Mj0_.set_level(j);
+
+    KroneckerHelper<double, typename BASIS0::QuasiStationaryMatrixType, typename BASIS1::QuasiStationaryMatrixType>
+      K(basis0_.Mj1_, basis1_.Mj0_);
+    K.apply(x, y, x_offset, y_offset, add_to);
+  }
+
+  template <class BASIS0, class BASIS1>
+  template <class V>
+  void
+  TensorProductBasis<BASIS0,BASIS1>::apply_Mj1_11(const int j, const V& x, V& y,
+						  const size_type x_offset, const size_type y_offset,
+						  const bool add_to) const
+  {
+    basis0_.Mj1_.set_level(j);
+    basis1_.Mj1_.set_level(j);
+
+    KroneckerHelper<double, typename BASIS0::QuasiStationaryMatrixType, typename BASIS1::QuasiStationaryMatrixType>
+      K(basis0_.Mj1_, basis1_.Mj1_);
+    K.apply(x, y, x_offset, y_offset, add_to);
+  }
+  
+  template <class BASIS0, class BASIS1>
+  template <class V>
+  inline
+  void
+  TensorProductBasis<BASIS0,BASIS1>::apply_Mj(const int j, const V& x, V& y) const
+  {
+    // decompose x appropriately
+    apply_Mj0   (j, x, y, 0, 0, false);                                         // apply Mj0
+    apply_Mj1_01(j, x, y, Deltasize(j), 0, true);                               // apply Mj1, e=(0,1)
+    apply_Mj1_10(j, x, y, Deltasize(j)+Nabla01size(j), 0, true);                // apply Mj1, e=(1,0)
+    apply_Mj1_11(j, x, y, Deltasize(j)+Nabla01size(j)+Nabla10size(j), 0, true); // apply Mj1, e=(1,1)
+  }
+  
   template <class BASIS0, class BASIS1>
   void
   TensorProductBasis<BASIS0,BASIS1>::decompose(const InfiniteVector<double, Index>& c,

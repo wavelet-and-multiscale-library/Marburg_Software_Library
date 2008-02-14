@@ -23,10 +23,10 @@ namespace WaveletTL
       Mj0T_(j0(), r_basis.offset_aT, r_basis.band_aT, M_SQRT1_2),
       Mj1T_(j0(), r_basis.offset_bT, r_basis.band_bT, M_SQRT1_2)
   {
-    cout << "Mj0=" << endl << Mj0_ << endl;
-    cout << "Mj0T=" << endl << Mj0T_ << endl;
-    cout << "Mj1=" << endl << Mj1_ << endl;
-    cout << "Mj1T=" << endl << Mj1T_ << endl;
+//     cout << "Mj0=" << endl << Mj0_ << endl;
+//     cout << "Mj0T=" << endl << Mj0T_ << endl;
+//     cout << "Mj1=" << endl << Mj1_ << endl;
+//     cout << "Mj1T=" << endl << Mj1T_ << endl;
   }
   
   template <class RBASIS>
@@ -66,6 +66,46 @@ namespace WaveletTL
   }
 
   template <class RBASIS>
+  inline
+  typename PeriodicBasis<RBASIS>::Index
+  PeriodicBasis<RBASIS>::first_index(const int j, const int e)
+  {
+    return (e == 0 ? first_generator(j) : first_wavelet(j));
+  }
+  
+  template <class RBASIS>
+  inline
+  typename PeriodicBasis<RBASIS>::Index
+  PeriodicBasis<RBASIS>::last_index(const int j, const int e)
+  {
+    return (e == 0 ? last_generator(j) : last_wavelet(j));
+  }
+
+  template <class RBASIS>
+  template <class V>
+  inline
+  void
+  PeriodicBasis<RBASIS>::apply_Mj0(const int j, const V& x, V& y,
+				   const size_type x_offset, const size_type y_offset,
+				   const bool add_to) const
+  {
+    Mj0_.set_level(j);
+    Mj0_.apply(x, y, x_offset, y_offset, add_to);
+  }
+
+  template <class RBASIS>
+  template <class V>
+  inline
+  void
+  PeriodicBasis<RBASIS>::apply_Mj1(const int j, const V& x, V& y,
+				   const size_type x_offset, const size_type y_offset,
+				   const bool add_to) const
+  {
+    Mj1_.set_level(j);
+    Mj1_.apply(x, y, x_offset, y_offset, add_to);
+  }
+
+  template <class RBASIS>
   template <class V>
   void
   PeriodicBasis<RBASIS>::apply_Mj(const int j, const V& x, V& y) const
@@ -74,7 +114,7 @@ namespace WaveletTL
     Mj1_.set_level(j);
     
     // decompose x=(x1 x2) appropriately
-    Mj0_.apply(x, y, 0, 0);                             // apply Mj0 to first block x1
+    Mj0_.apply(x, y, 0, 0, false);                      // apply Mj0 to first block x1
     Mj1_.apply(x, y, Mj0_.column_dimension(), 0, true); // apply Mj1 to second block x2 and add result
   }
 
@@ -87,8 +127,8 @@ namespace WaveletTL
     Mj1_.set_level(j);
 
     // y=(y1 y2) is a block vector
-    Mj0_.apply_transposed(x, y, 0, 0);                       // write into first block y1
-    Mj1_.apply_transposed(x, y, 0, Mj0_.column_dimension()); // write into second block y2
+    Mj0_.apply_transposed(x, y, 0, 0, false);                       // write into first block y1
+    Mj1_.apply_transposed(x, y, 0, Mj0_.column_dimension(), false); // write into second block y2
   }
 
   template <class RBASIS>
@@ -100,8 +140,8 @@ namespace WaveletTL
     Mj1T_.set_level(j);
 
     // y=(y1 y2) is a block vector
-    Mj0T_.apply_transposed(x, y, 0, 0);                        // write into first block y1
-    Mj1T_.apply_transposed(x, y, 0, Mj0T_.column_dimension()); // write into second block y2
+    Mj0T_.apply_transposed(x, y, 0, 0, false);                        // write into first block y1
+    Mj1T_.apply_transposed(x, y, 0, Mj0T_.column_dimension(), false); // write into second block y2
   }
 
   template <class RBASIS>
@@ -113,7 +153,7 @@ namespace WaveletTL
     Mj1T_.set_level(j);
     
     // decompose x=(x1 x2) appropriately
-    Mj0T_.apply(x, y, 0);                                 // apply Mj0T to first block x1
+    Mj0T_.apply(x, y, 0, 0, false);                       // apply Mj0T to first block x1
     Mj1T_.apply(x, y, Mj0T_.column_dimension(), 0, true); // apply Mj1T to second block x2 and add result
   }
   

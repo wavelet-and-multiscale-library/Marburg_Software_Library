@@ -28,6 +28,9 @@ namespace WaveletTL
   class TensorProductBasis
   {
   public:
+    //! size_type, for convenience
+    typedef Vector<double>::size_type size_type;
+
     //! default constructor
     TensorProductBasis();
 
@@ -38,7 +41,7 @@ namespace WaveletTL
     static const int j0()
     {
       assert(BASIS0::j0() == BASIS1::j0());
-      return  BASIS0::j0();
+      return BASIS0::j0();
     }    
 
     //! wavelet index class
@@ -49,6 +52,14 @@ namespace WaveletTL
 
     //! read access to the second basis
     const BASIS1& basis1() const { return basis1_; }
+
+    //! size of Delta_j
+    static int Deltasize(const int j);
+
+    //! sizes of the different wavelet index sets
+    static int Nabla01size(const int j);
+    static int Nabla10size(const int j);
+    static int Nabla11size(const int j);
 
     //! index of first generator on level j >= j0
     static Index first_generator(const int j);
@@ -62,6 +73,48 @@ namespace WaveletTL
     //! index of last wavelet on level j >= j0
     static Index last_wavelet(const int j);
 
+    /*!
+      apply Mj0 to some vector x (partial "reconstruct");
+      the routine writes only into the first part of y, i.e,
+      y might be larger than necessary, which is helpful for other routines;
+      offsets and an add_to flag can be specified also
+    */
+    template <class V>
+    void apply_Mj0(const int j, const V& x, V& y,
+		   const size_type x_offset, const size_type y_offset,
+		   const bool add_to) const;
+
+    /*!
+      an analogous routine for Mj1, e=(0,1)
+    */
+    template <class V>
+    void apply_Mj1_01(const int j, const V& x, V& y,
+		      const size_type x_offset, const size_type y_offset,
+		      const bool add_to) const;
+
+    /*!
+      an analogous routine for Mj1, e=(1,0)
+    */
+    template <class V>
+    void apply_Mj1_10(const int j, const V& x, V& y,
+		      const size_type x_offset, const size_type y_offset,
+		      const bool add_to) const;
+
+    /*!
+      an analogous routine for Mj1, e=(1,1)
+    */
+    template <class V>
+    void apply_Mj1_11(const int j, const V& x, V& y,
+		      const size_type x_offset, const size_type y_offset,
+		      const bool add_to) const;
+
+    /*!
+      apply Mj=(Mj0 Mj1) to some vector x ("reconstruct");
+      the routine writes only into the first part of y, i.e,
+      y might be larger than necessary, which is helpful for apply_Tj
+    */
+    template <class V>
+    void apply_Mj(const int j, const V& x, V& y) const;
 
     //! DECOMPOSE routine, simple version
     /*!

@@ -84,7 +84,7 @@ namespace WaveletTL
   {
     assert(j >= j0());
 
-    return 1<<(2*j);
+    return Basis0::Deltasize(j) * (1<<j);
   }
 
   template <int d, int dt, int s0, int s1>
@@ -93,15 +93,15 @@ namespace WaveletTL
   {
     assert(j >= j0());
 
-    return 1<<(2*j);
+    return Basis1::Deltasize(j) * (1<<j);
   }
-
+  
   template <int d, int dt, int s0, int s1>
   inline int
   RingBasis<d,dt,s0,s1>::Nabla11size(const int j)
   {
     assert(j >= j0());
-
+    
     return 1<<(2*j);
   }
   

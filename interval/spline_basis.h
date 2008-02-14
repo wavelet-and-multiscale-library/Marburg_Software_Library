@@ -125,6 +125,25 @@ namespace WaveletTL
     static Index last_index(const int j, const int e);
 
     /*!
+      apply Mj0 to some vector x (partial "reconstruct");
+      the routine writes only into the first part of y, i.e,
+      y might be larger than necessary, which is helpful for other routines;
+      offsets and an add_to flag can be specified also
+    */
+    template <class V>
+    void apply_Mj0(const int j, const V& x, V& y,
+		   const size_type x_offset, const size_type y_offset,
+		   const bool add_to) const;
+
+    /*!
+      an analogous routine for Mj1
+    */
+    template <class V>
+    void apply_Mj1(const int j, const V& x, V& y,
+		   const size_type x_offset, const size_type y_offset,
+		   const bool add_to) const;
+    
+    /*!
       apply Mj=(Mj0 Mj1) to some vector x ("reconstruct");
       the routine writes only into the first part of y, i.e,
       y might be larger than necessary, which is helpful for apply_Tj
@@ -435,6 +454,25 @@ namespace WaveletTL
     */
     static Index last_index(const int j, const int e);
 
+    /*!
+      apply Mj0 to some vector x (partial "reconstruct");
+      the routine writes only into the first part of y, i.e,
+      y might be larger than necessary, which is helpful for other routines;
+      offsets and an add_to flag can be specified also
+    */
+    template <class V>
+    void apply_Mj0(const int j, const V& x, V& y,
+		   const size_type x_offset, const size_type y_offset,
+		   const bool add_to) const;
+
+    /*!
+      an analogous routine for Mj1
+    */
+    template <class V>
+    void apply_Mj1(const int j, const V& x, V& y,
+		   const size_type x_offset, const size_type y_offset,
+		   const bool add_to) const;
+    
     /*!
       apply Mj=(Mj0 Mj1) to some vector x ("reconstruct");
       the routine writes only into the first part of y, i.e,

@@ -51,10 +51,10 @@ namespace WaveletTL
     //! check integrity of the internal data
     void check() const;
 
-  protected:
     //! refinement matrices
     QuasiStationaryMatrix<double> Mj0_, Mj1_, Mj0T_, Mj1T_;
 
+  protected:
     /*!
       The interior wavelets are CDF wavelets, multiplied by this factor, see also
       [Pr06, Abb. 5.1 & (5.12)].
@@ -95,10 +95,10 @@ namespace WaveletTL
     //! check integrity of the internal data
     void check() const;
  
-  protected:
     //! refinement matrices
     QuasiStationaryMatrix<double> Mj0_, Mj1_, Mj0T_, Mj1T_;
 
+  protected:
     /*!
       The interior wavelets are CDF wavelets, multiplied by the following factor.
       Note that the interior wavelets from the right half of the interval are

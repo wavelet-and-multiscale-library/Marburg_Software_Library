@@ -265,6 +265,54 @@ namespace WaveletTL
 
   template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
   template <class V>
+  inline
+  void
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::apply_Mj0(const int j, const V& x, V& y,
+						       const size_type x_offset, const size_type y_offset,
+						       const bool add_to) const
+  {
+    SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj0_.set_level(j);
+    SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj0_.apply(x, y, x_offset, y_offset, add_to);
+  }
+
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
+  template <class V>
+  inline
+  void
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::apply_Mj0(const int j, const V& x, V& y,
+							       const size_type x_offset, const size_type y_offset,
+							       const bool add_to) const
+  {
+    SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj0_.set_level(j);
+    SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj0_.apply(x, y, x_offset, y_offset, add_to);
+  }
+
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
+  template <class V>
+  inline
+  void
+  SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::apply_Mj1(const int j, const V& x, V& y,
+						       const size_type x_offset, const size_type y_offset,
+						       const bool add_to) const
+  {
+    SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_.set_level(j);
+    SplineBasisData<d,dT,flavor,s0,s1,sT0,sT1>::Mj1_.apply(x, y, x_offset, y_offset, add_to);
+  }
+
+  template <int d, int dT, int s0, int s1, int sT0, int sT1, int J0>
+  template <class V>
+  inline
+  void
+  SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::apply_Mj1(const int j, const V& x, V& y,
+							       const size_type x_offset, const size_type y_offset,
+							       const bool add_to) const
+  {
+    SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.set_level(j);
+    SplineBasisData<d,dT,P_construction,s0,s1,sT0,sT1>::Mj1_.apply(x, y, x_offset, y_offset, add_to);
+  }
+  
+  template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1, int J0>
+  template <class V>
   void
   SplineBasis<d,dT,flavor,s0,s1,sT0,sT1,J0>::apply_Mj(const int j, const V& x, V& y) const
   {

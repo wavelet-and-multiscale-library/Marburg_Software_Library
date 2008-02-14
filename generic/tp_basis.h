@@ -74,10 +74,7 @@ namespace WaveletTL
     static Index last_wavelet(const int j);
 
     /*!
-      apply Mj0 to some vector x (partial "reconstruct");
-      the routine writes only into the first part of y, i.e,
-      y might be larger than necessary, which is helpful for other routines;
-      offsets and an add_to flag can be specified also
+      apply Mj0 to some vector x (partial "reconstruct")
     */
     template <class V>
     void apply_Mj0(const int j, const V& x, V& y,
@@ -109,12 +106,48 @@ namespace WaveletTL
 		      const bool add_to) const;
 
     /*!
+      apply Mj0T^T to some vector x (partial "decompose")
+    */
+    template <class V>
+    void apply_Mj0T_transposed(const int j, const V& x, V& y,
+			       const size_type x_offset, const size_type y_offset,
+			       const bool add_to) const;
+
+    /*!
+      an analogous routine for Mj1T^T, e=(0,1)
+    */
+    template <class V>
+    void apply_Mj1T_01_transposed(const int j, const V& x, V& y,
+				  const size_type x_offset, const size_type y_offset,
+				  const bool add_to) const;
+
+    /*!
+      an analogous routine for Mj1T^T, e=(1,0)
+    */
+    template <class V>
+    void apply_Mj1T_10_transposed(const int j, const V& x, V& y,
+				  const size_type x_offset, const size_type y_offset,
+				  const bool add_to) const;
+
+    /*!
+      an analogous routine for Mj1T^T, e=(1,1)
+    */
+    template <class V>
+    void apply_Mj1T_11_transposed(const int j, const V& x, V& y,
+				  const size_type x_offset, const size_type y_offset,
+				  const bool add_to) const;
+
+    /*!
       apply Mj=(Mj0 Mj1) to some vector x ("reconstruct");
       the routine writes only into the first part of y, i.e,
       y might be larger than necessary, which is helpful for apply_Tj
     */
     template <class V>
     void apply_Mj(const int j, const V& x, V& y) const;
+
+    //! apply Gj=(Mj0T Mj1T)^T to some vector x ("decompose")
+    template <class V>
+    void apply_Gj(const int j, const V& x, V& y) const;
 
     //! DECOMPOSE routine, simple version
     /*!

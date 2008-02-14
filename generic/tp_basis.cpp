@@ -141,7 +141,66 @@ namespace WaveletTL
   
   template <class BASIS0, class BASIS1>
   template <class V>
-  inline
+  void
+  TensorProductBasis<BASIS0,BASIS1>::apply_Mj0T_transposed(const int j, const V& x, V& y,
+							   const size_type x_offset, const size_type y_offset,
+							   const bool add_to) const
+  {
+    basis0_.Mj0T_.set_level(j);
+    basis1_.Mj0T_.set_level(j);
+
+    KroneckerHelper<double, typename BASIS0::QuasiStationaryMatrixType, typename BASIS1::QuasiStationaryMatrixType>
+      K(basis0_.Mj0T_, basis1_.Mj0T_);
+    K.apply_transposed(x, y, x_offset, y_offset, add_to);
+  }
+
+  template <class BASIS0, class BASIS1>
+  template <class V>
+  void
+  TensorProductBasis<BASIS0,BASIS1>::apply_Mj1T_01_transposed(const int j, const V& x, V& y,
+							      const size_type x_offset, const size_type y_offset,
+							      const bool add_to) const
+  {
+    basis0_.Mj0T_.set_level(j);
+    basis1_.Mj1T_.set_level(j);
+
+    KroneckerHelper<double, typename BASIS0::QuasiStationaryMatrixType, typename BASIS1::QuasiStationaryMatrixType>
+      K(basis0_.Mj0T_, basis1_.Mj1T_);
+    K.apply_transposed(x, y, x_offset, y_offset, add_to);
+  }
+
+  template <class BASIS0, class BASIS1>
+  template <class V>
+  void
+  TensorProductBasis<BASIS0,BASIS1>::apply_Mj1T_10_transposed(const int j, const V& x, V& y,
+							      const size_type x_offset, const size_type y_offset,
+							      const bool add_to) const
+  {
+    basis0_.Mj1T_.set_level(j);
+    basis1_.Mj0T_.set_level(j);
+
+    KroneckerHelper<double, typename BASIS0::QuasiStationaryMatrixType, typename BASIS1::QuasiStationaryMatrixType>
+      K(basis0_.Mj1T_, basis1_.Mj0T_);
+    K.apply_transposed(x, y, x_offset, y_offset, add_to);
+  }
+  
+  template <class BASIS0, class BASIS1>
+  template <class V>
+  void
+  TensorProductBasis<BASIS0,BASIS1>::apply_Mj1T_11_transposed(const int j, const V& x, V& y,
+							      const size_type x_offset, const size_type y_offset,
+							      const bool add_to) const
+  {
+    basis0_.Mj1T_.set_level(j);
+    basis1_.Mj1T_.set_level(j);
+
+    KroneckerHelper<double, typename BASIS0::QuasiStationaryMatrixType, typename BASIS1::QuasiStationaryMatrixType>
+      K(basis0_.Mj1T_, basis1_.Mj1T_);
+    K.apply_transposed(x, y, x_offset, y_offset, add_to);
+  }
+  
+  template <class BASIS0, class BASIS1>
+  template <class V>
   void
   TensorProductBasis<BASIS0,BASIS1>::apply_Mj(const int j, const V& x, V& y) const
   {
@@ -151,7 +210,19 @@ namespace WaveletTL
     apply_Mj1_10(j, x, y, Deltasize(j)+Nabla01size(j), 0, true);                // apply Mj1, e=(1,0)
     apply_Mj1_11(j, x, y, Deltasize(j)+Nabla01size(j)+Nabla10size(j), 0, true); // apply Mj1, e=(1,1)
   }
-  
+
+  template <class BASIS0, class BASIS1>
+  template <class V>
+  void
+  TensorProductBasis<BASIS0,BASIS1>::apply_Gj(const int j, const V& x, V& y) const
+  {
+    // write into the block vector y
+    apply_Mj0T_transposed   (j, x, y, 0, 0, false);                                          // write Mj0T block
+    apply_Mj1T_01_transposed(j, x, y, 0, Deltasize(j), false);                               // write Mj1T block, e=(0,1)
+    apply_Mj1T_10_transposed(j, x, y, 0, Deltasize(j)+Nabla01size(j), false);                // write Mj1T block, e=(1,0)
+    apply_Mj1T_11_transposed(j, x, y, 0, Deltasize(j)+Nabla01size(j)+Nabla10size(j), false); // write Mj1T block, e=(1,1)
+  }
+
   template <class BASIS0, class BASIS1>
   void
   TensorProductBasis<BASIS0,BASIS1>::decompose(const InfiniteVector<double, Index>& c,

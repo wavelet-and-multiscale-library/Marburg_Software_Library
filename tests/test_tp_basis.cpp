@@ -123,8 +123,8 @@ int main()
     Vector<double> y(basis.Deltasize(j0+1));
     basis.apply_Mj(j0, x, y);
     cout << "* applying Mj=(Mj0 Mj1) to x yields y=Mj*x=" << y << endl;
-//     basis.apply_Gj(j0, y, x);
-//     cout << "* applying Gj=(Mj0T Mj1T)^T to y yields x=Gj*y=" << x << endl;
+    basis.apply_Gj(j0, y, x);
+    cout << "* applying Gj=(Mj0T Mj1T)^T to y yields x=Gj*y=" << x << endl;
 //     basis.apply_Gj_transposed(j0, x, y);
 //     cout << "* applying Gj^T to x yields y=Gj^T*x=" << y << endl;
 //     basis.apply_Mj_transposed(j0, x, y);

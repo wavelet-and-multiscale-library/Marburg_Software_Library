@@ -44,7 +44,7 @@ namespace MathTL
     offsetL_ = M.offsetL_;
     offsetR_ = M.offsetR_;
     factor_ = M.factor_;
-    j_ = j0_;
+    j_ = M.j_;
     return *this;
   }
 
@@ -750,4 +750,174 @@ namespace MathTL
     M.print(os);
     return os;
   }
+
+  //
+  //
+  // implementation for PeriodicQuasiStationaryMatrix
+
+  template <class C>
+  PeriodicQuasiStationaryMatrix<C>
+  ::PeriodicQuasiStationaryMatrix(const int j0,
+				  const int offset,
+				  const Array1D<C>& band,
+				  const double factor)
+    : j0_(j0), offset_(offset), band_(band), factor_(factor)
+  {
+//     cout << "PeriodicQuasiStationaryMatrix() called with offset=" << offset
+// 	 << ", band=" << band
+// 	 << ", factor=" << factor << endl;
+    j_ = j0_;
+  }
+  
+  template <class C>
+  void PeriodicQuasiStationaryMatrix<C>::set_level(const int j) const
+  {
+    assert(j >= j0_);
+    j_ = j;
+  }
+
+  template <class C>
+  void PeriodicQuasiStationaryMatrix<C>::print(std::ostream &os,
+					       const unsigned int tabwidth,
+					       const unsigned int precision) const
+  {
+    if (row_dimension() == 0)
+      os << "[]" << std::endl; // Matlab style
+    else
+      {
+	unsigned int old_precision = os.precision(precision);
+	for (typename QuasiStationaryMatrix<C>::size_type i(0); i < row_dimension(); ++i)
+	  {
+	    for (typename QuasiStationaryMatrix<C>::size_type j(0); j < column_dimension(); ++j)
+	      os << std::setw(tabwidth) << std::setprecision(precision)
+		 << get_entry(i, j);
+	    os << std::endl;
+	  }
+	os.precision(old_precision);
+      }
+  }
+
+  template <class C>
+  inline
+  std::ostream& operator << (std::ostream& os, const PeriodicQuasiStationaryMatrix<C>& M)
+  {
+    M.print(os);
+    return os;
+  }
+  
+  template <class C>
+  const C PeriodicQuasiStationaryMatrix<C>::get_entry(const size_type row, const size_type column) const
+  {
+    assert(row < row_dimension() && column < column_dimension());
+ 
+    int mask_index = row-2*(int)column;
+
+    if (mask_index < -(1<<j_)) {
+      mask_index += (1<<(j_+1));
+    } else {
+      if (mask_index >= 1<<j_) {
+  	mask_index -= (1<<(j_+1));
+      }
+    }
+    
+    if (mask_index >= offset_ && mask_index < offset_+(int)band_.size())
+      return factor_ * band_[mask_index-offset_];
+    
+    return 0;
+  }
+    
+  template <class C>
+  PeriodicQuasiStationaryMatrix<C>&
+  PeriodicQuasiStationaryMatrix<C>::operator = (const PeriodicQuasiStationaryMatrix<C>& M)
+  {
+    j0_ = M.j0_;
+    band_ = M.band_;
+    offset_ = M.offset_;
+    factor_ = M.factor_;
+    j_ = M.j_;
+    return *this;
+  }
+
+  template <class C>
+  template <class VECTOR>
+  void PeriodicQuasiStationaryMatrix<C>::apply(const VECTOR& x, VECTOR& Mx,
+					       const size_type x_offset,
+					       const size_type Mx_offset,
+					       const bool add_to) const
+  {
+    assert(x.size() >= x_offset + column_dimension());
+    assert(Mx.size() >= Mx_offset + row_dimension());
+
+    // for readability:
+    const size_type m = row_dimension();
+    const size_type n = column_dimension();
+
+    if (!add_to) {
+      // clear the range we want to write to
+      for (size_type i = Mx_offset; i < Mx_offset+m; i++)
+	Mx[i] = 0;
+    }
+    
+    // traverse all columns
+    for (size_type j(0); j < n; j++) {
+      // per column, _all_ entries of the band will occur, likely at "periodized" rows
+      for (size_type i(0); i < band_.size(); i++) {
+ 	Mx[Mx_offset+dyadic_modulo(offset_+(int)i+2*j, j_+1)]
+	  += factor_ * band_[i] * x[x_offset+j];
+      }
+    } 
+  }
+
+  template <class C>
+  void
+  PeriodicQuasiStationaryMatrix<C>::to_sparse(SparseMatrix<C>& S) const
+  {
+    // for readability:
+    const size_type m = row_dimension();
+    const size_type n = column_dimension();
+
+    S.resize(m, n);
+
+    // insert the entries columnwise
+    for (size_type j(0); j < n; j++) {
+      // per column, _all_ entries of the band will occur, likely at "periodized" rows
+      for (size_type i(0); i < band_.size(); i++) {
+	S.set_entry(dyadic_modulo(offset_+(int)i+2*j, j_+1), j, band_[i]);
+      }
+    } 
+    
+    S.scale(factor_);
+  }
+  
+  template <class C>
+  template <class VECTOR>
+  void PeriodicQuasiStationaryMatrix<C>::apply_transposed(const VECTOR& x, VECTOR& Mtx,
+							  const size_type x_offset,
+							  const size_type Mtx_offset,
+							  const bool add_to) const
+  {
+    assert(x.size() >= x_offset + row_dimension());
+    assert(Mtx.size() >= Mtx_offset + column_dimension());
+    
+    // for readability:
+    const size_type n = column_dimension();
+
+    if (!add_to) {
+      // clear the range we want to write to
+      for (size_type i = Mtx_offset; i < Mtx_offset+n; i++)
+	Mtx[i] = 0;
+    }
+    
+    // traverse all rows
+    for (size_type i(0); i < n; i++) {
+      // per row, _all_ entries of the band will occur, likely at "periodized" columns
+      for (size_type j(0); j < band_.size(); j++) {
+	const size_type col = dyadic_modulo(offset_+(int)j+2*i, j_+1);
+ 	Mtx[Mtx_offset+i]
+	  += factor_ * band_[j] * x[x_offset+col];
+      }
+    } 
+    
+  }
+  
 }

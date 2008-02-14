@@ -192,6 +192,111 @@ namespace MathTL
   */
   template <class C>
   std::ostream& operator << (std::ostream& os, const QuasiStationaryMatrix<C>& M);
+
+
+  /*!
+    This class models quasi-stationary matrices like M_{j,0}, M_{j,1} or their dual
+    counterparts for periodic bases.
+    The dimensions are hence always 2^{j+1} times 2^j.
+    Internally, we assume at the moment that the corresponding non-periodic filter (a_k)
+    is supported on a subset of the index interval
+      -2^j0,...,2^j0-1,
+    which is the case for the primal and dual CDF generator and wavelet filters.
+   */
+  template <class C>
+  class PeriodicQuasiStationaryMatrix
+  {
+  public:
+    /*!
+      type of indexes and size type (cf. STL containers)
+     */
+    typedef typename Vector<C>::size_type size_type;
+
+    /*!
+      constructor from the matrix ingredients
+      j0     : coarsest level
+      offset : offset for the band, i.e., band[i] corresponds to a(i+offset)
+      band   : band (will be (2^j)-periodized internally
+      factor : constant pre-factor
+     */
+    PeriodicQuasiStationaryMatrix(const int j0,
+				  const int offset,
+				  const Array1D<C>& band,
+				  const double factor = 1.0);
+
+    //! assignment
+    PeriodicQuasiStationaryMatrix<C>& operator = (const PeriodicQuasiStationaryMatrix<C>& M);
+    
+    /*!
+      row dimension
+    */
+    const size_type row_dimension() const { return 1<<(j_+1); }
+
+    /*!
+      column dimension
+    */
+    const size_type column_dimension() const { return 1<<j_; }
+
+    /*!
+      set level j
+    */
+    void set_level(const int j) const;
+
+    /*!
+      read-only access to a single matrix entry
+    */
+    const C get_entry(const size_type row, const size_type column) const;
+
+    /*!
+      construct a sparse matrix
+    */
+    void to_sparse(SparseMatrix<C>& S) const;
+
+    /*!
+      matrix-vector multiplication Mx = (*this) * x;
+      it is possible to specify an offset which parts
+      of the vectors shall be used, thus enabling in-place algorithms,
+      the flag "add_to" toggles whether the result
+      is added to Mx (true) or Mx is overwritten (false)
+    */
+    template <class VECTOR>
+    void apply(const VECTOR& x, VECTOR& Mx,
+	       const size_type x_offset = 0,
+	       const size_type Mx_offset = 0,
+	       const bool add_to = false) const;
+
+    /*!
+      transposed matrix-vector multiplication Mtx = (*this)^T * x;
+      again potentially with offsets for both input and output vector
+      and with an "add_to" flag
+    */
+    template <class VECTOR>
+    void apply_transposed(const VECTOR& x, VECTOR& Mtx,
+			  const size_type x_offset = 0,
+			  const size_type Mtx_offset = 0,
+			  const bool add_to = false) const;
+    
+    /*!
+      stream output with user-defined tabwidth and precision
+      (cf. deal.II)
+    */
+    void print(std::ostream& os,
+	       const unsigned int tabwidth = 8,
+	       const unsigned int precision = 3) const;
+
+  protected:
+    int j0_, offset_;
+    mutable int j_;
+    Array1D<C> band_;
+    double factor_;
+  };
+
+  /*!
+    Matlab-style stream output for quasi-stationary matrices
+  */
+  template <class C>
+  std::ostream& operator << (std::ostream& os, const PeriodicQuasiStationaryMatrix<C>& M);
+
 }
 
 #include <algebra/qs_matrix.cpp>

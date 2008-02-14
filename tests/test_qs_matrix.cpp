@@ -4,6 +4,7 @@
 #include <algebra/vector.h>
 #include <algebra/qs_matrix.h>
 #include <algebra/sparse_matrix.h>
+#include <utils/array1d.h>
 
 using namespace std;
 using namespace MathTL;
@@ -138,6 +139,35 @@ int main()
   for (std::map<size_t, double>::const_iterator it(Qtysparse.begin());
        it != Qtysparse.end(); ++it)
     cout << "Qty[" << it->first << "]=" << it->second << endl;
+
+  Array1D<double> periodic_band(5);
+  periodic_band[0] = -1;
+  periodic_band[1] = 2;
+  periodic_band[2] = 3;
+  periodic_band[3] = -4;
+  periodic_band[4] = 5;
+  PeriodicQuasiStationaryMatrix<double> Qp(2, -1, periodic_band, -2.0);
+  cout << "Qp=" << endl << Qp;
+  Qp.set_level(3);
+  cout << "Qp(3)=" << endl << Qp; 
+  PeriodicQuasiStationaryMatrix<double> Qphelp = Qp;
+  cout << "after assignment, Qphelp=" << endl << Qphelp;
+
+  SparseMatrix<double> Sp;
+  Qp.to_sparse(Sp);
+  cout << "Qp as a sparse matrix:" << endl << Sp;
+
+  Vector<double> xp(Qp.column_dimension());
+  xp[4] = xp[6] = 1; xp[0] = -2;
+  Vector<double> Qpxp(Qp.row_dimension());
+  Qp.apply(xp, Qpxp);
+  cout << "Qp applied to xp=" << xp << " yields Qpxp=" << Qpxp << endl;
+
+  Vector<double> yp(Qp.row_dimension());
+  yp[0] = yp[1] = 1; yp[4] = -1;
+  Vector<double> Qptyp(Qp.column_dimension());
+  Qp.apply_transposed(yp, Qptyp);
+  cout << "Qp^T applied to yp=" << yp << " yields Qp^Typ=" << Qptyp << endl;
 
   return 0;
 }

@@ -763,6 +763,9 @@ namespace MathTL
 				  const double factor)
     : j0_(j0), offset_(offset), band_(band), factor_(factor)
   {
+    cout << "PQSMatrix(), offset=" << offset
+	 << ", band=" << band
+	 << ", factor=" << factor << endl;
     j_ = j0_;
   }
   
@@ -807,16 +810,15 @@ namespace MathTL
   {
     assert(row < row_dimension() && column < column_dimension());
  
-    int mask_index = row-2*(int)column;
-
-    if (mask_index < -(1<<j_)) {
+    int mask_index = row-2*(int)column; // row relative to a0
+    if (mask_index < offset_) {
       mask_index += (1<<(j_+1));
     } else {
-      if (mask_index >= 1<<j_) {
-  	mask_index -= (1<<(j_+1));
+      if (mask_index >= offset_+(int)band_.size()) {
+	mask_index -= (1<<(j_+1));
       }
     }
-    
+
     if (mask_index >= offset_ && mask_index < offset_+(int)band_.size())
       return factor_ * band_[mask_index-offset_];
     

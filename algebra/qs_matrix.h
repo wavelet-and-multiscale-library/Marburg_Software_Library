@@ -199,8 +199,7 @@ namespace MathTL
     counterparts for periodic bases.
     The dimensions are hence always 2^{j+1} times 2^j.
     Internally, we assume at the moment that the corresponding non-periodic filter (a_k)
-    is supported on a subset of the index interval
-      -2^j0,...,2^j0-1,
+    has a nonpositive offset (starting index) and a length < 2^(j0+1),
     which is the case for the primal and dual CDF generator and wavelet filters.
    */
   template <class C>

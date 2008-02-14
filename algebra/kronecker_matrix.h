@@ -75,6 +75,12 @@ namespace MathTL
     //! special version for Vector<C> (requirement from MatrixBlock)
     void apply(const Vector<C>& x, Vector<C>& Mx) const;
 
+    //! apply version with offsets and addto-flag
+    void apply(const Vector<C>& x, Vector<C>& Mx,
+	       const size_type x_offset,
+	       const size_type Mx_offset,
+	       const bool add_to) const;
+
     /*!
       transposed matrix-vector multiplication Mtx = (*this)^T * x;
       we assume that the vector Mtx has the correct size and
@@ -86,6 +92,12 @@ namespace MathTL
     //! special version for Vector<C> (requirement from MatrixBlock)
     void apply_transposed(const Vector<C>& x, Vector<C>& Mtx) const;
     
+    //! apply_transposed version with offsets and addto-flag
+    void apply_transposed(const Vector<C>& x, Vector<C>& Mtx,
+			  const size_type x_offset,
+			  const size_type Mtx_offset,
+			  const bool add_to) const;
+
     /*!
       stream output with user-defined tabwidth and precision
       (cf. deal.II)
@@ -97,6 +109,7 @@ namespace MathTL
   protected:
     MATRIX1 A;
     MATRIX2 B;
+    C factor_;
   };
 
   /*!

@@ -438,8 +438,8 @@ int main()
   MATRIX M1(2, 3, "1 2 3 4 5 6"), M2(2, 2, "1 2 0 3");
   cout << "- a matrix M1=" << endl << M1;
   cout << "- a matrix M2=" << endl << M2;
-  KroneckerMatrix<double,MATRIX,MATRIX> K(M1,M2);
-  cout << "- Kronecker product K of M1 and M2:" << endl << K;
+  KroneckerMatrix<double,MATRIX,MATRIX> K(M1,M2,2.0);
+  cout << "- Kronecker product K of M1 and M2 with factor 2.0:" << endl << K;
 
   x.resize(6); x[3] = 1;
   K.apply(x, y);

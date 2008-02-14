@@ -763,9 +763,6 @@ namespace MathTL
 				  const double factor)
     : j0_(j0), offset_(offset), band_(band), factor_(factor)
   {
-//     cout << "PQSMatrix(), offset=" << offset
-// 	 << ", band=" << band
-// 	 << ", factor=" << factor << endl;
     j_ = j0_;
   }
   
@@ -911,12 +908,10 @@ namespace MathTL
     for (size_type i(0); i < n; i++) {
       // per row, _all_ entries of the band will occur, likely at "periodized" columns
       for (size_type j(0); j < band_.size(); j++) {
-	const size_type col = dyadic_modulo(offset_+(int)j+2*i, j_+1);
  	Mtx[Mtx_offset+i]
-	  += factor_ * band_[j] * x[x_offset+col];
+	  += factor_ * band_[j] * x[x_offset+dyadic_modulo(offset_+(int)j+2*i, j_+1)];
       }
     } 
-    
   }
   
 }

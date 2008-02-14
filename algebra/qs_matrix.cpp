@@ -763,9 +763,6 @@ namespace MathTL
 				  const double factor)
     : j0_(j0), offset_(offset), band_(band), factor_(factor)
   {
-//     cout << "PeriodicQuasiStationaryMatrix() called with offset=" << offset
-// 	 << ", band=" << band
-// 	 << ", factor=" << factor << endl;
     j_ = j0_;
   }
   

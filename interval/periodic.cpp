@@ -118,6 +118,36 @@ namespace WaveletTL
   }
   
   template <class RBASIS>
+  template <class V>
+  void
+  PeriodicBasis<RBASIS>::apply_Tj(const int j, const V& x, V& y) const
+  { 
+    y = x;
+    V z(x);
+    apply_Mj(j0(), z, y);
+    for (int k = j0()+1; k <= j; k++) {
+      apply_Mj(k, y, z);
+      y.swap(z);
+    }
+  }
+
+  template <class RBASIS>
+  template <class V>
+  void
+  PeriodicBasis<RBASIS>::apply_Tjinv(const int j, const V& x, V& y) const
+  { 
+    // T_j^{-1}=diag(G_{j0},I)*...*diag(G_{j-1},I)*G_j
+    V z(x);
+    apply_Gj(j, x, y);
+    for (int k = j-1; k >= j0(); k--) {
+      z.swap(y);
+      apply_Gj(k, z, y);
+      for (int i = Deltasize(k+1); i < Deltasize(j+1); i++)
+	y[i] = z[i];
+    }
+  }
+  
+  template <class RBASIS>
   void
   PeriodicBasis<RBASIS>::support(const Index& lambda, int& k1, int& k2)
   {

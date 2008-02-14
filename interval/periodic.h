@@ -153,6 +153,14 @@ namespace WaveletTL
     template <class V>
     void apply_Gj_transposed(const int j, const V& x, V& y) const;
 
+    //! apply Tj=Mj*diag(M_{j-1},I)*...*diag(M_{j_0},I), i.e., several "reconstructions" at once
+    template <class V>
+    void apply_Tj(const int j, const V& x, V& y) const;
+
+    //! apply Tj^{-1}, several "decompositions" at once
+    template <class V>
+    void apply_Tjinv(const int j, const V& x, V& y) const;
+
     /*!
       Evaluate a single primal/dual generator or wavelet \psi_\lambda
       on a dyadic subgrid of [0,1].

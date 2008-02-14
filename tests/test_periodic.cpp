@@ -91,6 +91,27 @@ int main()
     cout << "* applying Gj^T to x yields y=Gj^T*x=" << y << endl;
     basis.apply_Mj_transposed(j0, x, y);
     cout << "* applying Mj^T to y yields x=Mj^T*y=" << x << endl;
+
+    x.scale(0); y.scale(0);
+    x[0] = 1;
+    basis.apply_Tj(j0, x, y);
+    cout << "* applying T_{j0} to x yields y=" << y << endl;
+    x.resize(basis.Deltasize(j0+2));
+    x[3] = 1;
+    cout << "* x on the next level: " << x << endl;
+    y.resize(basis.Deltasize(j0+2));
+    basis.apply_Tj(j0+1, x, y);
+    cout << "* applying T_{j0+1} to x yields y=" << y << endl;
+    basis.apply_Tjinv(j0+1, y, x);
+    cout << "* applying T_{j0+1}^{-1} to y yields x=" << x << endl;
+    x.resize(basis.Deltasize(j0+3));
+    x[1] = 1;
+    cout << "* x on the next plus 1 level: " << x << endl;
+    y.resize(basis.Deltasize(j0+3));
+    basis.apply_Tj(j0+2, x, y);
+    cout << "* applying T_{j0+2} to x yields y=" << y << endl;
+    basis.apply_Tjinv(j0+2, y, x);
+    cout << "* applying T_{j0+2}^{-1} to y yields x=" << x << endl;
   }
 #endif
 
@@ -210,6 +231,27 @@ int main()
     cout << "* applying Gj^T to x yields y=Gj^T*x=" << y << endl;
     basis2.apply_Mj_transposed(j0, x, y);
     cout << "* applying Mj^T to y yields x=Mj^T*y=" << x << endl;
+
+    x.scale(0); y.scale(0);
+    x[0] = 1;
+    basis2.apply_Tj(j0, x, y);
+    cout << "* applying T_{j0} to x yields y=" << y << endl;
+    x.resize(basis2.Deltasize(j0+2));
+    x[3] = 1;
+    cout << "* x on the next level: " << x << endl;
+    y.resize(basis2.Deltasize(j0+2));
+    basis2.apply_Tj(j0+1, x, y);
+    cout << "* applying T_{j0+1} to x yields y=" << y << endl;
+    basis2.apply_Tjinv(j0+1, y, x);
+    cout << "* applying T_{j0+1}^{-1} to y yields x=" << x << endl;
+    x.resize(basis2.Deltasize(j0+3));
+    x[1] = 1;
+    cout << "* x on the next plus 1 level: " << x << endl;
+    y.resize(basis2.Deltasize(j0+3));
+    basis2.apply_Tj(j0+2, x, y);
+    cout << "* applying T_{j0+2} to x yields y=" << y << endl;
+    basis2.apply_Tjinv(j0+2, y, x);
+    cout << "* applying T_{j0+2}^{-1} to y yields x=" << x << endl;
   }
 #endif
 

@@ -127,13 +127,13 @@ namespace WaveletTL
     int result = 0;
     
     const int j0 = RingBasis<d,dt,s0,s1>::j0();
+    const int ecode = e_[0]*2+e_[1];
 
     // determine how many wavelets there are with levels j0<=j'<j
-    if (j_ > j0)
+    if (j_ > j0 && ecode > 0)
       result += RingBasis<d,dt,s0,s1>::Deltasize(j_);
    
     // determine how many wavelets there are with level j and type 0<=e'<e
-    const int ecode = e_[0]*2+e_[1];
     switch(ecode) {
     case 1: // e=(0,1)
       if (j_ == j0)

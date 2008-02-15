@@ -38,15 +38,32 @@ int main()
   cout << "- last wavelet on the coarsest level: " << basis.last_wavelet(basis.j0()) << endl;
 
 #if 1
-  cout << "- testing iterator functionality:" << endl;
-  int id = 0;
-  for (Index lambda = basis.first_generator(basis.j0());; ++lambda, id++) {
-    cout << lambda << " has the number " << lambda.number();
-    if (lambda.number()==id)
-      cout << " (ok)" << endl;
-    else
-      cout << " (ERROR!!!)" << endl;
-    if (lambda == basis.last_wavelet(basis.j0()+1)) break;
+  {
+    cout << "- testing iterator functionality:" << endl;
+    int id = 0;
+    for (Index lambda = basis.first_generator(basis.j0());; ++lambda, id++) {
+      cout << lambda << " has the number " << lambda.number();
+      if (lambda.number()==id)
+	cout << " (ok)" << endl;
+      else
+	cout << " (ERROR!!!)" << endl;
+      if (lambda == basis.last_wavelet(basis.j0()+1)) break;
+    }
+  }
+#endif
+
+#if 1
+  {
+    cout << "- testing iterator functionality for generators on a higher level:" << endl;
+    int id = 0;
+    for (Index lambda = basis.first_generator(basis.j0()+1);; ++lambda, id++) {
+      cout << lambda << " has the number " << lambda.number();
+      if (lambda.number()==id)
+	cout << " (ok)" << endl;
+      else
+	cout << " (ERROR!!!)" << endl;
+      if (lambda == basis.last_generator(basis.j0()+1)) break;
+    }
   }
 #endif
 

@@ -70,6 +70,9 @@ namespace WaveletTL
     //! read access to the second index
     const typename BASIS1::Index& index1() const { return index1_; }
 
+    //! number
+    const int number() const;
+
   protected:
     //! current entries
     typename BASIS0::Index index0_;

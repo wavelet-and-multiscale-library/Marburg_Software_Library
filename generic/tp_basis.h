@@ -20,7 +20,7 @@ namespace WaveletTL
 {
   /*!
     Template class for a tensor product wavelet basis from two wavelet bases
-    Psi, Xi over bounded domains.
+    Psi, Xi on an interval.
     The template parameters BASISi may or may not allow the specification of
     boundary conditions.
   */

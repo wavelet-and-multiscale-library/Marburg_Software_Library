@@ -52,9 +52,14 @@ int main()
 
 #if 1
   cout << "- testing iterator functionality:" << endl;
-  for (Index index(basis.first_generator(basis.j0()));; ++index) {
-    cout << index << endl;
-    if (index == basis.last_wavelet(basis.j0()+1)) break;
+  int id = 0;
+  for (Index lambda = basis.first_generator(basis.j0());; ++lambda, id++) {
+    cout << lambda << " has the number " << lambda.number();
+    if (lambda.number()==id)
+      cout << " (ok)" << endl;
+    else
+      cout << " (ERROR!!!)" << endl;
+    if (lambda == basis.last_wavelet(basis.j0()+1)) break;
   }
 #endif
 
@@ -114,7 +119,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   {
     const int j0 = basis.j0();
     Vector<double> x(basis.Deltasize(j0+1));

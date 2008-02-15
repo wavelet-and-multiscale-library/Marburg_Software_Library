@@ -81,13 +81,13 @@ namespace WaveletTL
     typedef TensorProductBasis<BASIS0,BASIS1> Basis;
 
     const int j0 = Basis::j0();
+    const int ecode = index0_.e()*2+index1_.e();
 
     // determine how many wavelets there are with levels j0<=j'<j
-    if (j() > j0)
+    if (j() > j0 && ecode > 0)
       result += Basis::Deltasize(j());
    
     // determine how many wavelets there are with level j and type 0<=e'<e
-    const int ecode = index0_.e()*2+index1_.e();
     switch(ecode) {
     case 1: // e=(0,1)
       if (j() == j0)

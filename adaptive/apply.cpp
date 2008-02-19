@@ -369,7 +369,7 @@ namespace WaveletTL
     // Remark: it is possible to perform binary binning without actually assembling
     // the bins, however, in this first version we do setup the bins to avoid
     // unnecessary difficulties
-    cout << "entering apply..." << endl;
+    //cout << "entering apply..." << endl;
 
     //cout << "size = " << v.size() << endl;
     if (v.size() > 0) {
@@ -446,7 +446,7 @@ namespace WaveletTL
       // Below we will then copy ww into the sparse vector w.
       // Probably this will be handled in a more elegant way in the near future.
 
-      cout << "done binning in apply..." << endl;
+      //cout << "done binning in apply..." << endl;
 
       Vector<double> ww(P.basis().degrees_of_freedom());
 
@@ -583,8 +583,8 @@ namespace WaveletTL
       }
       // copy ww into w
       for (unsigned int i = 0; i < ww.size(); i++) {
-	//if (fabs(ww[i]) > 1.0e-12) {
-	if (ww[i] != 0.) {
+	if (fabs(ww[i]) > 1.0e-16) {
+	  //if (ww[i] != 0.) {
 	  w.set_coefficient(*(P.basis().get_wavelet(i)), ww[i]);
 	}
       }
@@ -608,7 +608,7 @@ namespace WaveletTL
 	   double& nu,
 	   const CompressionStrategy strategy)
   {
-    unsigned int k = 0;
+    //    unsigned int k = 0;
     double zeta = 2.*xi;
     //double zeta = 2.*epsilon;
     double l2n = 0.;
@@ -632,10 +632,10 @@ namespace WaveletTL
 	  //cout << "in RES -1" << endl;
 	  P.RHS (zeta/2., tilde_r);
 	  InfiniteVector<double, typename PROBLEM::Index> help;
-	  cout << "zeta halbe = " << zeta/2. << endl;
+	  //cout << "zeta halbe = " << zeta/2. << endl;
 	  //cout << "before aply in RES " << endl;
 	  //APPLY(P, w, .0/*zeta/2.*/, help, jmax, strategy);
-	  cout << ++k << "calls of APPlY in RES" << endl;
+	  //cout << ++k << "calls of APPlY in RES" << endl;
 	  APPLY_COARSE(P, w, zeta/2., help, 0.000001, jmax, strategy);
 	  tilde_r -= help;
 

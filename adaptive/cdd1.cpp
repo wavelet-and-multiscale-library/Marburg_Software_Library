@@ -88,6 +88,8 @@ namespace WaveletTL
     set<Index> Lambda, Lambda_hat;
 //     u_epsilon.clear();
     u_epsilon = guess;
+    u_epsilon.support(Lambda);
+
     double delta = params.F;
     InfiniteVector<double,Index> v_hat, r_hat, u_bar, F;
 

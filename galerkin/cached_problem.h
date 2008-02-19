@@ -333,6 +333,11 @@ namespace WaveletTL
       compute (or estimate) ||F||_2
     */
     double F_norm() const { return problem->F_norm(); }
+
+    /*!
+      compute (or estimate) ||F^(i)||_2
+    */
+    double F_norm_local(const int patch) const { return problem->F_norm_local(patch); }
     
     /*!
       w += factor * (stiffness matrix entries in column lambda on level j restricted to the rows belonging to patch p)

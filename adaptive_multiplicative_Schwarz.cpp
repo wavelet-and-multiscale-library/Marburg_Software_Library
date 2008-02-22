@@ -352,6 +352,54 @@ namespace FrameTL
 
   }
 
+
+  template <class PROBLEM>
+  double compute_exact_residual_norm (const PROBLEM& P,
+				      InfiniteVector<double, typename PROBLEM::Index>& u_k) {
+    typedef typename PROBLEM::Index Index;
+    typedef typename PROBLEM::WaveletBasis::IntervalBasis Basis1D;
+    typedef typename PROBLEM::WaveletBasis Frame;
+    const int jmax = JMAX;
+    set<Index> Lambda1;
+    for (Index lambda = FrameTL::first_generator<Basis1D,1,1,Frame>(&P.basis(), P.basis().j0());
+	 lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame>(&P.basis(), jmax); ++lambda) {
+      Lambda1.insert(lambda);
+    }
+    set<Index> Lambda2;
+    u_k.support(Lambda2);
+    SparseMatrix<double> A(Lambda1.size(), Lambda2.size());
+    WaveletTL::setup_stiffness_matrix(P, Lambda1, Lambda2, A);
+
+    // copy u_k in vector
+    Vector<double> U_k(u_k.size());
+    Vector<double> A_U_k(Lambda1.size());
+    unsigned int id = 0;
+    typename set<Index>::const_iterator it = Lambda2.begin();
+    for (; it != Lambda2.end(); ++it, ++id) {
+      U_k[id] = u_k.get_coefficient(*it);
+    }
+
+    Vector<double> F(Lambda1.size());    
+    WaveletTL::setup_righthand_side(P, Lambda1, F);
+
+    A.apply(U_k, A_U_k);
+    return l2_norm(F-A_U_k);
+
+  }
+
+
+  // delete all entries corresponding to patch i
+  template <class PROBLEM>
+  void remove_i (const int i, InfiniteVector<double, typename PROBLEM::Index>& u)
+  {
+    typename InfiniteVector<double, typename PROBLEM::Index>::const_iterator it = u.begin();
+    for (; it != u.end(); ++it) {
+      if (it.index().p() == i)
+	u.set_coefficient(it.index(), 0.0);
+    }
+    u.compress();
+  }
+
   template <class PROBLEM>
   void  MultSchw(const PROBLEM& P, const double epsilon,
 		 Array1D<InfiniteVector<double, typename PROBLEM::Index> >& approximations)
@@ -380,29 +428,62 @@ namespace FrameTL
 
 #ifdef TWO_D    
     const double mu = 1.6544; // = energy norm of the exact solution
-    const double M = 1.; // spectral radius of stiffness matrix
+    
+    // (d,dt) = (2,2) jmin = 3
+    //const double M = sqrt(5.01773);
+    // (d,dt) = (2,2) jmin = 4
+    //const double M = sqrt(4.60975);
+
+    // (d,dt) = (3,3) jmin = 3
+    //const double M = sqrt(6.98681);
+
+    // (d,dt) = (3,3) jmin = 4
+    const double M = sqrt(6.98986);
+
+    // (d,dt) = (4,4) jmin = 4
+    //const double M = sqrt(12.3335);
+
+
     //const double rho = sqrt(1 - 1.0/4.0); // [Xu92] Theorem 4.4 with \omega_1=1, K_0 = K_1=1
-    const double rho = 0.2; // tuned
-    const double sigma = 4.;
+    const double rho = 0.2996;
+
 #endif
 #ifdef ONE_D
     const double mu = 7.44609; // = energy norm of the exact solution
-    const double M = 1.; // spectral radius of stiffness matrix
+
+    // (d,dt) = (2,2)
+    //const double M = sqrt(3.37459); // spectral radius of stiffness matrix
+
+    // (d,dt) = (3,3), jmin = 4
+    //const double M = sqrt(4.17833); // spectral radius of stiffness matrix
+        
+    // (d,dt) = (3,3), jmin = 3
+    const double M = sqrt(4.87718); // spectral radius of stiffness matrix
+
+    // (d,dt) = (4,4)
+    //const double M = sqrt(5.62803); // spectral radius of stiffness matrix
+
     //const double rho = sqrt(1 - 1.0/4.0); // [Xu92] Theorem 4.4 with \omega_1=1, K_0 = K_1=1
-    const double rho = 0.2; // tuned
-    const double sigma = 4.;
+    const double rho = 0.1837;
 #endif
- 
+
+    double rho_1 = pow(rho, 1./P.basis().n_p());
+    const double C = 0.5 * rho_1*((1./rho)-1) / (1-rho_1);
+
+    const double sigma = std::max(1./M, C + 1./M) + 0.1;//10.0
+    cout << "sigma = " << sigma << endl; 
+    //const int K = std::max(1,(int)ceil(log(1.0/(2.0 * M * sigma)) / log(rho)));
     const int K = std::max(1,(int)ceil(log(1.0/(2.0 * M * sigma)) / log(rho)));
 
-    const int L = (int)ceil(log(epsilon / mu ) / log(2.0*pow(rho,K)*M*sigma));
+    const int L = 41;//(int)ceil(log(epsilon / mu ) / log(2.0*pow(rho,K)*M*sigma));//39
 
-    cout << "mu = " << mu << endl
-	 << "M = " << M << endl
-	 << "rho = " <<  rho << endl
-	 << "sigma = " << sigma << endl
-	 << "K = " << K << endl
-	 << "L = " << L << endl;
+    cout << "epsilon = " << epsilon << endl
+      << "mu = " << mu << endl
+      << "M = " << M << endl
+      << "rho = " <<  rho << endl
+      << "sigma = " << sigma << endl
+      << "K = " << K << endl
+      << "L = " << L << endl;
 
     InfiniteVector<double, Index> f, w, r, tmp, tmp_w;
     InfiniteVector<double, Index> u_k, u_k_sparse,u_k_very_sparse;
@@ -410,36 +491,90 @@ namespace FrameTL
 
     Array1D<InfiniteVector<double, Index> > xks(P.basis().n_p()); // stores local approximations which are used as starting vectors
                                                                   // for the next cycle of local solves
-    map<double,double> log_10_H1_error;    
+
+    map<double,double> log_10_H1_error;
+    map<double,double> log_10_H1_error_time;
+    map<double,double> log_10_residual_error;
+    map<double,double> log_10_residual_error_time;
+    map<double,double> tolerances;
+    map<double,double> rho_estimates;
+    map<double,double> weak_ell_tau_norms;
+
+    const int m = P.basis().n_p();
+    int k = 0;
+
+    double H1err_old = 1;
+    double residual_norm_old = 1;
 
     double time = 0.;
     clock_t tstart, tend;
     tstart = clock();
-    const int m = P.basis().n_p();
-    int k = 0;
 
     for (int l = 1; l < L; l++) {
-      for (int p = 1; p <= K; p++) {
+      for (int p = 2; p <= K; p++) {// THAT WAS USED FOR THE 2D PLAIN DD CASE!!!
+	//for (int p = 1; p <= K; p++) {
 	for (int i = 0; i < P.basis().n_p(); i++) {
 	  k = (l-1)*m*K+(p-1)*m+i+1;
 	  cout << "################################" << endl;
 	  cout << "number of iteration = " << k << endl;
 	  cout << "################################" << endl;
-	  double local_eps = mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*pow(rho,p)/(m*K);
-	  cout << "tolerance for solution of local problem = " << local_eps << endl;
+ 	  double local_eps = mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*pow(rho,p)/(m*K);
+ 	  //double local_eps = 1.0e-15;//mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*pow(rho,p)/(m*K);
 
-	  // approximate right hand side for local problem
-	  P.RHS(local_eps, i, f);
-	  thin_out(P, i, u_k, u_k_sparse, u_k_very_sparse);
-	  APPLY(P, i, u_k_very_sparse, local_eps, w, jmax, CDD1);
-	  r = f-w;
+	  // write the tolerances
+	  tend = clock();
+	  time += ((double) (tend-tstart))/((double) CLOCKS_PER_SEC);
+	  tolerances[k] = local_eps;
+	  std::ofstream os2d("tolerances.m");
+	  matlab_output(tolerances,os2d);
+	  os2d.close();
+	  cout << "tolerance for solution of local problem = " << local_eps << endl;
+	  tstart = clock();
 
 	  precond_r_i.clear();
-
 	  // ####### solution of local problem #######
+
 	  set<Index> Lambda_i;
-	  r.support(Lambda_i);
+#if 1
+#ifdef SPARSE
+	  thin_out(P, i, u_k, u_k_sparse, u_k_very_sparse);
+#endif
+	  // CDD1
+	  cout << "entering CDD solver..." << endl;
+#ifdef SPARSE
+	  CDD1_LOCAL_SOLVE(P, i, 10.0*local_eps, xks[i], precond_r_i, u_k_very_sparse, jmax, CDD1);
+#endif
+#ifdef FULL
+	  //remove_i<PROBLEM>(i, u_k);
+	  CDD1_LOCAL_SOLVE(P, i, 5.0*local_eps, xks[i], precond_r_i, u_k, jmax, CDD1); // THAT WAS USED FOR THE 2D CASE
+	  //CDD1_LOCAL_SOLVE(P, i, 10.0*local_eps, xks[i], precond_r_i, u_k, jmax, CDD1); // THAT WAS USED FOR THE 1D CASE
+#endif
+	  cout << "CDD 1 solve completed, size of output is " << precond_r_i.size() << endl;
+
+	  xks[i] = precond_r_i;
+#else
+	  // approximate right hand side for local problem
+	  P.RHS(local_eps, i, f);
+	  cout << "fsize = " << f.size() << endl;
+#ifdef FULL
+	  APPLY(P, i, u_k, local_eps, w, jmax, CDD1);
+#endif
+#ifdef SPARSE
+	  APPLY(P, i, u_k_very_sparse, local_eps, w, jmax, CDD1);
+#endif
 	  
+	  r = f-w;
+	  r.COARSE(local_eps, tmp_w);
+	  r = tmp_w;
+	  tmp_w.clear();
+
+	  r.support(Lambda_i);
+// 	  for (Index lambda = FrameTL::first_generator<Basis1D,2,2,Frame>(&P.basis(), P.basis().j0());
+// 	       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame>(&P.basis(), jmax); ++lambda) {
+// 	    if (lambda.p() == i)
+// 	      Lambda_i.insert(lambda);
+// 	  }
+
 	  cout << "setting up full stiffness matrix..." << endl;
 	  cout << "size of local index set = " << Lambda_i.size() << endl;
 	  if (Lambda_i.size() > 0) {
@@ -462,66 +597,180 @@ namespace FrameTL
 		 it != itend; ++it, ++id)
 	    precond_r_i.set_coefficient(*it, xk[id]);
 	  }
+#endif
 	  // #########################################
 	  
+#ifdef SPARSE
 	  u_k = precond_r_i + u_k_sparse;
-	  
+#endif
+#ifdef FULL
+	  u_k = precond_r_i + u_k;
+#endif
+
 	  cout << "degrees of freedom: " << u_k.size() << endl;
-	  xks[i].clear();
-	  xks[i] = precond_r_i;
-	  
-	  tend = clock();
-	  time += ((double) (tend-tstart))/((double) CLOCKS_PER_SEC);
-	  
-	  if (k % 1 == 0) {
-	    tmp = u_k;
-	    tmp.scale(&P,-1);
-
-#ifdef ONE_D	    
-	    double H1err = error_H_scale_interval<Basis1D>(1, P.basis(), tmp, exact1D_prime);
-	    cout << "H_1 error = " <<  H1err << endl;
-	    
-	    log_10_H1_error[log10(u_k.size())] = log10(H1err);
-	    std::ofstream os2a("log_10_H1_error1D.m");
-	    matlab_output(log_10_H1_error,os2a);
-	    os2a.close();
-#endif
-	
-
-#ifdef TWO_D
-	   double H1err = error_H_scale_Lshaped<Basis1D>(1, P.basis(), tmp, singGrad);
-	   cout << "H_1 error = " <<  H1err << endl;
-	   
-	   log_10_H1_error[log10(u_k.size())] = log10(H1err);
-	   std::ofstream os2a("log_10_H1_error2D.m");
-	   matlab_output(log_10_H1_error,os2a);
-	   os2a.close();
-#endif
-	  }
-	  tstart = clock();
-	  
-
+ 	  xks[i].clear();
+ 	  xks[i] = precond_r_i;
+	  	  
       	}// end loop over patches
 	cout << "############## full cycle of local solves completed ##############"<< endl;
 	
       }// end loop K
-      double coarse_tol = (sigma - 1/M)*2.0*pow(rho,K)*M*sigma*mu*pow((2*pow(rho,K)*M*sigma),l-1);
+      double coarse_tol = (sigma - 1./M)*2.0*pow(rho,K)*mu*pow(2.0*pow(rho,K)*M*sigma,l-1);
       cout << "tolerance for coarsening = " << coarse_tol << endl;
+      cout << "norm of u_k = " << l2_norm(u_k) << endl;
       u_k.COARSE(coarse_tol, tmp_w);
       u_k = tmp_w;
       cout << "degrees of freedom after coarsening: " << u_k.size() << endl;
+     
+      tend = clock();
+      time += ((double) (tend-tstart))/((double) CLOCKS_PER_SEC);
+      
+      tmp = u_k;
+      tmp.scale(&P,-1);
+
+      //compute global residual
+      
+      P.RHS(1.0e-15, f);
+      cout << "fsize exact res = " << f.size() << endl;
+      tmp_w.clear(); 
+      for (int i = 0; i < P.basis().n_p(); i++) {
+      	APPLY(P, i, u_k, 1.0e-15, w, jmax, CDD1);
+      	tmp_w += w;
+      }
+      double residual_norm = l2_norm(f-tmp_w);
+      cout << "norm of global residual = " << residual_norm  << endl;
+
+      int d  = Basis1D::primal_polynomial_degree();
+      int dT = Basis1D::primal_vanishing_moments();
+      char name1[60];
+      char name2[60];
+      char name3[60];
+      char name4[60];
+	
+#ifdef ONE_D
+      //double residual_norm = compute_exact_residual_norm(P, u_k);      
+      //cout << "norm of global residual = " << residual_norm << endl;
+
+      double H1err = 0;//error_H_scale_interval<Basis1D>(1, P.basis(), tmp, exact1D_prime);
+      cout << "H_1 error = " <<  H1err << endl;
+      
+//       cout << "rho = " << H1err / H1err_old << endl;
+//       rho_estimates[k] = H1err / H1err_old;     
+//       H1err_old = H1err;
+      
+//       std::ofstream os2b("rho_estimates.m");
+//       matlab_output(rho_estimates,os2b);
+//       os2b.close();
+
+      sprintf(name1, "%s%d%s%d%s", "log_10_H1_error1D_j0_3_jmax_18_", d, "_dT", dT, ".m");
+      sprintf(name2, "%s%d%s%d%s", "log_10_H1_error1D_time_j0_3_jmax_18_", d, "_dT", dT, ".m");
+      
+      log_10_H1_error[log10(u_k.size())] = log10(H1err);
+      std::ofstream os2a(name1);
+      matlab_output(log_10_H1_error,os2a);
+      os2a.close();
+      
+      log_10_H1_error_time[log10(time)] = log10(H1err);
+      std::ofstream os2f(name2);
+      matlab_output(log_10_H1_error_time,os2f);
+      os2f.close();
+    
+      sprintf(name3, "%s%d%s%d%s", "log_10_residual_err1D_VF_j0_3_jmax_18_", d, "_dT", dT, ".m");
+      sprintf(name4, "%s%d%s%d%s", "log_10_residual_err1D_VF_time_j0_3_jmax_18_", d, "_dT", dT, ".m");
+//       sprintf(name3, "%s%d%s%d%s", "log_10_residual_err1D_j0_4_jmax_18_", d, "_dT", dT, ".m");
+//       sprintf(name4, "%s%d%s%d%s", "log_10_residual_err1D_time_j0_4_jmax_18_", d, "_dT", dT, ".m");
+            
+
+      log_10_residual_error[log10(u_k.size())] = log10(l2_norm(f-tmp_w));//log10(residual_norm);
+      std::ofstream os2c(name3);
+      matlab_output(log_10_residual_error,os2c);
+      os2c.close();
+
+      log_10_residual_error_time[log10(time)] = log10(l2_norm(f-tmp_w));//log10(residual_norm);
+      std::ofstream os2e(name4);
+      matlab_output(log_10_residual_error_time,os2e);
+      os2e.close();
+
+      weak_ell_tau_norms[k] = u_k.weak_norm(1./2.5);// (d,dT)=(2,2)=1./1.5 (d,dT)=(3,3)=1./2.5, (d,dT)=(4,4)=1./3.5
+      std::ofstream os2g("weak_ell_tau_norms.m");
+      matlab_output(weak_ell_tau_norms,os2g);
+      os2g.close();
+
+
+#endif
+	
+	
+#ifdef TWO_D
+      double H1err = 0.;//error_H_scale_Lshaped<Basis1D>(1, P.basis(), tmp, singGrad);
+      cout << "H_1 error = " <<  H1err << endl;
+      
+//       log_10_H1_error[log10(u_k.size())] = log10(H1err);
+//       std::ofstream os2a("log_10_H1_error2D.m");
+//       matlab_output(log_10_H1_error,os2a);
+//       os2a.close();
+
+      cout << "rho = " << residual_norm / residual_norm_old << endl;
+      rho_estimates[k] = residual_norm / residual_norm_old;     
+      residual_norm_old = residual_norm;
+      
+      std::ofstream os2b("rho_estimates.m");
+      matlab_output(rho_estimates,os2b);
+      os2b.close();
+      
+      sprintf(name1, "%s%d%s%d%s", "log_10_H1_error2D_j0_4_jmax_8_", d, "_dT", dT, ".m");
+      sprintf(name2, "%s%d%s%d%s", "log_10_H1_error2D_time_j0_4_jmax_8_", d, "_dT", dT, ".m");
+      
+      log_10_H1_error[log10(u_k.size())] = log10(H1err);
+      std::ofstream os2a(name1);
+      matlab_output(log_10_H1_error,os2a);
+      os2a.close();
+      
+      log_10_H1_error_time[log10(time)] = log10(H1err);
+      std::ofstream os2f(name2);
+      matlab_output(log_10_H1_error_time,os2f);
+      os2f.close();
+
+      
+      sprintf(name3, "%s%d%s%d%s", "log_10_residual_err2D_VFu_j0_4_jmax_8_", d, "_dT", dT, ".m");
+      sprintf(name4, "%s%d%s%d%s", "log_10_residual_err2D_VFu_time_j0_4_jmax_8_", d, "_dT", dT, ".m");
+            
+//       sprintf(name3, "%s%d%s%d%s", "log_10_residual_err2D_j0_4_jmax_8_lap", d, "_dT", dT, ".m");
+//       sprintf(name4, "%s%d%s%d%s", "log_10_residual_err2D_time_j0_4_jmax_8_lap", d, "_dT", dT, ".m");
+
+      log_10_residual_error[log10(u_k.size())] = log10(l2_norm(f-tmp_w));//log10(residual_norm);
+      std::ofstream os2c(name3);
+      matlab_output(log_10_residual_error,os2c);
+      os2c.close();
+
+      log_10_residual_error_time[log10(time)] = log10(l2_norm(f-tmp_w));//log10(residual_norm);
+      std::ofstream os2e(name4);
+      matlab_output(log_10_residual_error_time,os2e);
+      os2e.close();
+
+      weak_ell_tau_norms[k] = u_k.weak_norm(1./1.5);// (d,dt) = (2,2): (1./1.0),(d,dt) = (3,3): (1./1.5),(d,dt) = (4,4): (1./2.0)
+      std::ofstream os2g("weak_ell_tau_norms.m");
+      matlab_output(weak_ell_tau_norms,os2g);
+      os2g.close();
+      
+#endif
+       tstart = clock();
     }// end loop L
+    
 
 
+      
     // collect final approximation and its local parts
     approximations[P.basis().n_p()] = u_k;
     
     for (int i = 0; i < P.basis().n_p(); i++) {
+      approximations[i].clear();
       for (typename InfiniteVector<double, Index>::const_iterator it = u_k.begin(), itend = u_k.end();
 	   it != itend; ++it)
 	if (it.index().p() == i)
 	  approximations[i].set_coefficient(it.index(),*it);
     }
+
+
 
 
   }
@@ -797,5 +1046,5 @@ namespace FrameTL
  
 
 
-   }
+    }
 }

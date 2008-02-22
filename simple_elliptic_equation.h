@@ -211,6 +211,12 @@ namespace FrameTL
     double F_norm() const { return sqrt(fnorm_sqr); }
 
     /*!
+      compute (or estimate) ||F^(i)||_2
+    */
+    double F_norm_local(const int patch) const { return sqrt(fnorms_sqr_patch[patch]); }
+
+
+    /*!
       set the boundary value problem
     */
     void set_bvp(const EllipticBVP<DIM>*);

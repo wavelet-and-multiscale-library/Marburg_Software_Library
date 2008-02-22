@@ -14,78 +14,112 @@ namespace FrameTL
     typedef typename AggregatedFrame<IBASIS,1,1>::Index Index;
     typedef typename AggregatedFrame<IBASIS,1,1>::Support SuppType;
 
-    const int granularity = 1000;
+    const int granularity = 100000;
     const double dx = 1./granularity;
 
-    double approx = 0.;
+    double approx1 = 0.;
+    double approx2 = 0.;
     for (int i = 0; i < granularity; i++) {
-      Point<1> p(i*dx + dx*0.5);
+      Point<1> p1( i   *dx + dx/3.0);
+      Point<1> p2((i+1)*dx - dx/3.0);
       for(typename InfiniteVector<double,Index>::const_iterator it2(coeffs.begin()),
 	    itend(coeffs.end()); it2 != itend; ++it2) {
 	
-	if (in_support(frame, it2.index(), p)) {
-	  Point<1> p_0_1;
-	  frame.atlas()->charts()[it2.index().p()]->map_point_inv(p,p_0_1);
-	  double wavVal = 0.;
-	  switch (order) {
-	    // L_2 error
-	  case 0: {
-	    wavVal = WaveletTL::evaluate(*(frame.bases()[it2.index().p()]->bases()[0]), 0,
-					 typename IBASIS::Index(it2.index().j(),
-								it2.index().e()[0],
-								it2.index().k()[0],
-								frame.bases()[it2.index().p()]->bases()[0]),
+	//if (in_support(frame, it2.index(), p)) {
+	Point<1> p1_0_1;
+	frame.atlas()->charts()[it2.index().p()]->map_point_inv(p1,p1_0_1);
+	Point<1> p2_0_1;
+	frame.atlas()->charts()[it2.index().p()]->map_point_inv(p2,p2_0_1);
+
+	double wavVal1 = 0.;
+	double wavVal2 = 0.;
+	switch (order) {
+	  // L_2 error
+	case 0: {
+	  // 	    wavVal = WaveletTL::evaluate(*(frame.bases()[it2.index().p()]->bases()[0]), 0,
+	  // 					 typename IBASIS::Index(it2.index().j(),
+	  // 								it2.index().e()[0],
+	  // 								it2.index().k()[0],
+	  // 								frame.bases()[it2.index().p()]->bases()[0]),
 					 
-					 p_0_1[0]);
+	  // 					 p_0_1[0]);
 	    
-	    approx += (*it2)*( wavVal / frame.atlas()->charts()[(it2.index()).p()]->Gram_factor(p_0_1) );
-	    break;
-	  }// end case 0
-	  case 1: {
-	    wavVal = WaveletTL::evaluate(*(frame.bases()[it2.index().p()]->bases()[0]), 1,
-					 typename IBASIS::Index(it2.index().j(),
-								it2.index().e()[0],
-								it2.index().k()[0],
-								frame.bases()[it2.index().p()]->bases()[0]),
+	  // 	    approx += (*it2)*( wavVal / frame.atlas()->charts()[(it2.index()).p()]->Gram_factor(p_0_1) );
+	  break;
+	}// end case 0
+	case 1: {
+	  if (in_support(frame, it2.index(), p1)) {
+	    wavVal1 = WaveletTL::evaluate(*(frame.bases()[it2.index().p()]->bases()[0]), 1,
+					  typename IBASIS::Index(it2.index().j(),
+								 it2.index().e()[0],
+								 it2.index().k()[0],
+								 frame.bases()[it2.index().p()]->bases()[0]),
 					 
-					 p_0_1[0]);
-	    approx += (*it2)*(wavVal
-			      /
-			      (
-			       frame.atlas()->charts()[(it2.index()).p()]->Gram_factor(p_0_1)
-			       *
-			       frame.atlas()->charts()[it2.index().p()]->a_i(0)
-			       )
-			      );
-	    break;
-	  }// end case 1
-	  case 2: {
-	    wavVal = WaveletTL::evaluate(*(frame.bases()[it2.index().p()]->bases()[0]), 2,
-					 typename IBASIS::Index(it2.index().j(),
-								it2.index().e()[0],
-								it2.index().k()[0],
-								frame.bases()[it2.index().p()]->bases()[0]),
+					  p1_0_1[0]);
+
+	    approx1 += (*it2)*(wavVal1
+			       /
+			       (
+				frame.atlas()->charts()[(it2.index()).p()]->Gram_factor(p1_0_1)
+				*
+				frame.atlas()->charts()[it2.index().p()]->a_i(0)
+				)
+			       );
+	  }
+	  if (in_support(frame, it2.index(), p2)) {
+	    wavVal2 = WaveletTL::evaluate(*(frame.bases()[it2.index().p()]->bases()[0]), 1,
+					  typename IBASIS::Index(it2.index().j(),
+								 it2.index().e()[0],
+								 it2.index().k()[0],
+								 frame.bases()[it2.index().p()]->bases()[0]),
 					 
-					 p_0_1[0]);
+					  p2_0_1[0]);
+
 	    
-	    approx += (*it2)*(wavVal
-			      /
-			      (
-			       frame.atlas()->charts()[(it2.index()).p()]->Gram_factor(p_0_1)
-			       *
-			       frame.atlas()->charts()[it2.index().p()]->a_i(0)*frame.atlas()->charts()[it2.index().p()]->a_i(0)
-			       )
-			      );
+	    approx2 += (*it2)*(wavVal2
+			       /
+			       (
+				frame.atlas()->charts()[(it2.index()).p()]->Gram_factor(p2_0_1)
+				*
+				frame.atlas()->charts()[it2.index().p()]->a_i(0)
+				)
+			       );
+	  }
+
+	  break;
+	}// end case 1
+	case 2: {
+	  // 	    wavVal = WaveletTL::evaluate(*(frame.bases()[it2.index().p()]->bases()[0]), 2,
+	  // 					 typename IBASIS::Index(it2.index().j(),
+	  // 								it2.index().e()[0],
+	  // 								it2.index().k()[0],
+	  // 								frame.bases()[it2.index().p()]->bases()[0]),
+					 
+	  // 					 p_0_1[0]);
 	    
-	  }// end case 2
-	  }// end switch
-	}// end if
+	  // 	    approx += (*it2)*(wavVal
+	  // 			      /
+	  // 			      (
+	  // 			       frame.atlas()->charts()[(it2.index()).p()]->Gram_factor(p_0_1)
+	  // 			       *
+	  // 			       frame.atlas()->charts()[it2.index().p()]->a_i(0)*frame.atlas()->charts()[it2.index().p()]->a_i(0)
+	  // 			       )
+	  // 			      );
+	    
+	}// end case 2
+	}// end switch
+	//}// end if
       }
-      approx -= f.value(p);
-      approx *= approx;
-      approx *= dx;
-      res += approx;
-      approx = 0;
+      approx1 -= f.value(p1);
+      approx2 -= f.value(p2);
+      approx1 *= approx1;
+      approx2 *= approx2;
+      res += 0.5*(approx1+approx2)*dx;
+
+      //approx *= dx;
+      //res += approx;
+      approx1 = 0;
+      approx2 = 0;
     }
 
     return sqrt(res);  

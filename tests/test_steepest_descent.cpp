@@ -1,3 +1,8 @@
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
+
+#define JMAX 18
+#define ONE_D
+
 #include <fstream>
 #include <iostream>
 #include <time.h> 
@@ -101,7 +106,7 @@ int main()
   cout << "testing steepest descent in 1D..." << endl;
   
   const int DIM = 1;
-  const int jmax = 14;
+  const int jmax = JMAX;
 
   //typedef DSBasis<3,3> Basis1D;
   typedef PBasis<3,3> Basis1D;

@@ -101,7 +101,6 @@ namespace FrameTL
 	
       }
 
-    // just to get a better performance in the 
     if ( (typeid(*frame.atlas()->charts()[lambda.p()]) ==
 	  typeid(AffineLinearMapping<2>))
 	 )

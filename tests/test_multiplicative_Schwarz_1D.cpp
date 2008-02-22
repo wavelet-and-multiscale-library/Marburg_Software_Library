@@ -2,14 +2,14 @@
 #define _WAVELETTL_CDD1_VERBOSITY 0
 
 #define OVERLAP 0.7
-#define JMAX 10
+#define JMAX 18
 
-#define PRECOMP
+//#define PRECOMP
 
-#define COMPUTECONSTANTS
+//#define COMPUTECONSTANTS
 
-#define SPARSE
-//#define FULL
+//#define SPARSE
+#define FULL
 #define ONE_D
 
 #include <iostream>
@@ -149,33 +149,33 @@ int main()
   AffineLinearMapping<1> affineP2(A2,b2);
 
   //######### Three Patches ######  
-//   Matrix<double> A(DIM,DIM);
-//   A(0,0) = 0.8;
-//   Point<1> b;
-//   b[0] = 0.;
-//   AffineLinearMapping<1> affineP(A,b);
+  //   Matrix<double> A(DIM,DIM);
+  //   A(0,0) = 0.8;
+  //   Point<1> b;
+  //   b[0] = 0.;
+  //   AffineLinearMapping<1> affineP(A,b);
   
-//   Matrix<double> A2(DIM,DIM);
-//   A2(0,0) = 0.002;
-//   Point<1> b2;
-//   b2[0] = 0.5-0.001;
-//   AffineLinearMapping<1> affineP2(A2,b2);
+  //   Matrix<double> A2(DIM,DIM);
+  //   A2(0,0) = 0.002;
+  //   Point<1> b2;
+  //   b2[0] = 0.5-0.001;
+  //   AffineLinearMapping<1> affineP2(A2,b2);
   
-//   Matrix<double> A3(DIM,DIM);
-//   A3(0,0) = 0.8;
-//   Point<1> b3;
-//   b3[0] = 1-A3.get_entry(0,0);
-//   AffineLinearMapping<1> affineP3(A3,b3);
+  //   Matrix<double> A3(DIM,DIM);
+  //   A3(0,0) = 0.8;
+  //   Point<1> b3;
+  //   b3[0] = 1-A3.get_entry(0,0);
+  //   AffineLinearMapping<1> affineP3(A3,b3);
 
   //##############################  
 
-//   FixedArray1D<double,1> A3;
-//   A3[0] = 0.75;
-//   SimpleAffineLinearMapping<1> simlpeaffine1(A3,b);
+  //   FixedArray1D<double,1> A3;
+  //   A3[0] = 0.75;
+  //   SimpleAffineLinearMapping<1> simlpeaffine1(A3,b);
   
-//   FixedArray1D<double,1> A4;
-//   A4[0] = 0.75;
-//   SimpleAffineLinearMapping<1> simlpeaffine2(A4,b2);
+  //   FixedArray1D<double,1> A4;
+  //   A4[0] = 0.75;
+  //   SimpleAffineLinearMapping<1> simlpeaffine2(A4,b2);
 
   //##############################
   
@@ -194,11 +194,11 @@ int main()
   adj(1,0) = 1;
   adj(0,1) = 1;
 
-//   adj(2,2) = 1;
-//   adj(2,0) = 1;
-//   adj(2,1) = 1;
-//   adj(0,2) = 1;
-//   adj(1,2) = 1;
+  //   adj(2,2) = 1;
+  //   adj(2,0) = 1;
+  //   adj(2,1) = 1;
+  //   adj(0,2) = 1;
+  //   adj(1,2) = 1;
 
   
   //to specify primal boundary the conditions
@@ -208,7 +208,7 @@ int main()
   FixedArray1D<int,2*DIM> bound_1;
   bound_1[0] = 1;
   bound_1[1] = d-1;
-  
+
   bc[0] = bound_1;
   
   //primal boundary conditions for second patch: all Dirichlet
@@ -218,30 +218,56 @@ int main()
   
   bc[1] = bound_2;
 
-// //to specify primal boundary the conditions
-   Array1D<FixedArray1D<int,2*DIM> > bcT(2);
+  // //to specify primal boundary the conditions
+  Array1D<FixedArray1D<int,2*DIM> > bcT(2);
    
-   //   //dual boundary conditions for first patch
-   FixedArray1D<int,2*DIM> bound_3;
-   bound_3[0] = 0;
-   bound_3[1] = 0;
+  //   //dual boundary conditions for first patch
+  FixedArray1D<int,2*DIM> bound_3;
+  bound_3[0] = 0;
+  bound_3[1] = 0;
    
-   bcT[0] = bound_3;
+  bcT[0] = bound_3;
 
-   //dual boundary conditions for second patch
-   FixedArray1D<int,2*DIM> bound_4;
-   bound_4[0] = 0;
-   bound_4[1] = 0;
+  //dual boundary conditions for second patch
+  FixedArray1D<int,2*DIM> bound_4;
+  bound_4[0] = 0;
+  bound_4[1] = 0;
  
-   bcT[1] = bound_4;
+  bcT[1] = bound_4;
 
-   Atlas<DIM,DIM> interval(charts,adj);  
-   cout << interval << endl;
+  Atlas<DIM,DIM> interval(charts,adj);  
+  cout << interval << endl;
    
-   //finally a frame can be constructed
-   //Frame1D frame(&Lshaped, bc, bcT, jmax);
-   Frame1D frame(&interval, bc, jmax);
+  //finally a frame can be constructed
+  //Frame1D frame(&Lshaped, bc, bcT, jmax);
+  Frame1D frame(&interval, bc, jmax);
    
+  EvaluateFrame<Basis1D,1,1> evalObj;
+
+
+//   // ########## plotting local primal/dual frame elements #########
+  
+//   for (Index lambda = FrameTL::first_generator<Basis1D,1,1,Frame1D>(&frame, frame.j0());
+//        lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, jmax); ++lambda) {
+//     if (lambda.p() != 1)
+//       continue;
+
+//     cout << lambda << endl;
+//     //SampledMapping<1> dual = evalObj.evaluate(frame, lambda, true, 10);
+//     SampledMapping<1> dual = evalObj.evaluate(frame, lambda, true, 10);
+//     char fname[50];
+//     //sprintf(fname, "%s%d%s", "dual_wavelet_", lambda.number(), ".m");
+//     sprintf(fname, "%s%d%s", "primal_wavelet_", lambda.number(), ".m");
+//     std::ofstream of(fname);
+//     dual.matlab_output(of);
+//     of.close();
+//   }
+ 
+//   // #######################################################
+
+
+
+
   Vector<double> value(1);
   value[0] = 384;
   ConstantFunction<DIM> const_fun(value);
@@ -264,11 +290,11 @@ int main()
   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 4.19, 1.0/0.146);
 
 
-//   // (d,dT) = (3,5)
-//   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.6548, 1.0/0.146);
-//   discrete_poisson.set_norm_A(3.6548);
-//   optimistic guess:
-//   discrete_poisson.set_Ainv(1.0/0.146);
+  //   // (d,dT) = (3,5)
+  //   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.6548, 1.0/0.146);
+  //   discrete_poisson.set_norm_A(3.6548);
+  //   optimistic guess:
+  //   discrete_poisson.set_Ainv(1.0/0.146);
 
   // (d,dT) = (3,5)
   CachedProblemLocal<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.6548, 1.0/0.146);
@@ -279,7 +305,7 @@ int main()
 
   //CachedProblem<BiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 4.19, 1.0/0.146);
 
-  const double epsilon = 1.0e-4;
+  const double epsilon = 1.0e-5;
 
   Array1D<InfiniteVector<double, Index> > approximations(frame.n_p()+1);
 
@@ -288,7 +314,6 @@ int main()
   InfiniteVector<double, Index> full_vector_zero;
   double H1err = error_H_scale_interval<Basis1D>(1, frame, full_vector_zero, exact1D_der);
   cout << "H1err = " << H1err << endl;
-
 
   // ##########################################################################################
   // estimate extremal eigenvalues of local stiffness matrices and largest eigenvalue
@@ -341,6 +366,32 @@ int main()
   cout << "computing largest eigenvalue of whole stiffness matrix" << endl;
   lmax = PowerIteration(stiff, x, 0.01, 1000, iter);
   cout << "largest eigenvalue of whole stiffness matrix is " << lmax << endl;
+  abort();
+
+  // (d,dt) = (2,2), jmax = 11, jmin = 3:
+  // patch 0: \lambda_{\min}^0 = 0.0749363, \lambda_{\max}^0 = 2.50189
+  // patch 1: \lambda_{\min}^1 = 0.0749363, \lambda_{\max}^1 = 2.50189
+  // whole domain: \lambda_{\max} = 3.37459
+
+  // (d,dt) = (3,3), jmax = 11, jmin = 4:
+  // patch 0: \lambda_{\min}^0 = 0.01238440, \lambda_{\max}^0 = 2.75083
+  // patch 1: \lambda_{\min}^1 = 0.01238440, \lambda_{\max}^1 = 2.75083
+  // whole domain: \lambda_{\max} = 4.17833
+
+  // (d,dt) = (3,3), jmax = 11, jmin = 3:
+  // patch 0: \lambda_{\min}^0 = 0.0113602, \lambda_{\max}^0 = 2.75056
+  // patch 1: \lambda_{\min}^1 = 0.0113651, \lambda_{\max}^1 = 2.75094
+  // whole domain: \lambda_{\max} = 4.87718
+
+  // (d,dt) = (4,4), jmax = 11, jmin = 4:
+  // patch 0: \lambda_{\min}^0 = 0.00053711, \lambda_{\max}^0 = 3.83605
+  // patch 1: \lambda_{\min}^1 = 0.00405706, \lambda_{\max}^1 = 3.33542
+  // whole domain: \lambda_{\max} = 5.62803
+
+  // (d,dt) = (5,5), jmax = 11, jmin = 4:
+  // patch 0: \lambda_{\min}^0 = 1.63179e-05 , \lambda_{\max}^0 = 4.46068
+  // patch 1: \lambda_{\min}^1 = 0.00201216, \lambda_{\max}^1 = 4.74052
+  // whole domain: \lambda_{\max} = 7.37132
 
 
 #endif
@@ -364,8 +415,6 @@ int main()
  
   for (int i = 0; i <= frame.n_p(); i++)
     approximations[i].scale(&discrete_poisson,-1);
-  
-  EvaluateFrame<Basis1D,1,1> evalObj;
 
   Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, approximations[frame.n_p()], true, 11);//expand in primal basis
   cout << "...finished plotting global approximate solution" << endl;

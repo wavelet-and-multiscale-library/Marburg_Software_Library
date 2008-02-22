@@ -22,7 +22,7 @@ namespace FrameTL
 			const double epsilon,
 			const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& guess,
 			InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
-			InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& rhs,
+			const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_k_very_sparse,
 			const int jmax,
 			const CompressionStrategy strategy)
   {
@@ -30,7 +30,7 @@ namespace FrameTL
 //     CDD1_SOLVE(P, epsilon, guess, u_epsilon,
 // 	       1.0/P.norm_Ainv(), P.norm_A(),
 // 	       jmax, strategy);
-    CDD1_LOCAL_SOLVE(P, patch, epsilon, guess, u_epsilon, rhs, 1.0, 1.0, jmax, strategy);
+    CDD1_LOCAL_SOLVE(P, patch, epsilon, guess, u_epsilon, u_k_very_sparse, 1., 1., jmax, strategy);
 
 
   }
@@ -40,7 +40,7 @@ namespace FrameTL
 			const double epsilon,
 			const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& guess,
 			InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
-			InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& rhs,
+			const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_k_very_sparse,
 			const double c1,
 			const double c2,
 			const int jmax,
@@ -54,9 +54,15 @@ namespace FrameTL
     params.kappa = params.c2/params.c1;
     params.gamma = 0.8;
 
+    typedef typename PROBLEM::WaveletBasis::Index Index;
+    InfiniteVector<double,Index> w, f;
+    P.RHS(1.0e-15, patch, f);
+    APPLY(P, patch, u_k_very_sparse, 1.0e-15, w, jmax, CDD1);
 
-    //params.F = P.F_norm();
-    params.F = l2_norm(rhs);
+    params.F = l2_norm(f-w);
+
+    //params.F = P.F_norm_local(patch);
+    //params.F = l2_norm(rhs);
     
     // determination of q=q1=q2=q3,q4 according to [CDD1, (7.23)ff]
     params.q4 = 1. / (20. * params.kappa);
@@ -83,18 +89,29 @@ namespace FrameTL
     cout << "K=" << params.K << endl;
 #endif
 
-    typedef typename PROBLEM::WaveletBasis::Index Index;
+
     set<Index> Lambda, Lambda_hat;
 //     u_epsilon.clear();
     u_epsilon = guess;
+    u_epsilon.support(Lambda);
+
     double delta = params.F;
     InfiniteVector<double,Index> v_hat, r_hat, u_bar, F;
 
-    
-    F = rhs;
+    //F = rhs;
     //P.RHS(2*params.q2*epsilon, F);
+    
+    P.RHS(2*params.q2*epsilon / 2., patch, f);
+    APPLY(P, patch, u_k_very_sparse, 2*params.q2*epsilon / 2., w, jmax, CDD1);
 
-
+// #ifdef FULL
+//     InfiniteVector<double,Index> tmp;
+//     w.COARSE(2*params.q2*epsilon / 2.,tmp);
+//     w=tmp;
+// #endif
+    
+    F = f-w;
+    
     while (delta > epsilon) { // sqrt(params.c1)*epsilon) { // check the additional factor c1^{1/2} in [BB+] !?
 #if _WAVELETTL_CDD1_VERBOSITY >= 1
       cout << "CDD1_SOLVE: delta=" << delta << endl;
@@ -210,6 +227,9 @@ namespace FrameTL
 #endif
     
     u_bar.clear();
+    
+    cout << "... GALERKIN: Lambda_size=" << endl << Lambda.size() << endl;;
+    
     if (Lambda.size() > 0) {
       // setup A_Lambda and f_Lambda
       SparseMatrix<double> A_Lambda;
@@ -344,6 +364,14 @@ namespace FrameTL
 
     // TODO: speed up the following two lines
     APPLY(P, patch, v, eta1, w, jmax, strategy);
+// #ifdef FULL
+//     InfiniteVector<double,Index> tmp;
+//     w.COARSE(eta1,tmp);
+//      w=tmp;
+// #endif
+
+
+
     w.clip(Lambda);
 
     g.clip(Lambda);
@@ -366,8 +394,19 @@ namespace FrameTL
 		 const CompressionStrategy strategy)
   {
     typedef typename PROBLEM::WaveletBasis::Index Index;
+    
     InfiniteVector<double,Index> w;
+    
+
+
     APPLY(P, patch, v, eta1, w, jmax, strategy);
+
+// #ifdef FULL
+//     InfiniteVector<double,Index> tmp;
+//     w.COARSE(eta1,tmp);
+//     w=tmp;
+// #endif
+    
     F.COARSE(eta2, r);
     r -= w;
     r.support(Lambda_tilde);

@@ -110,12 +110,12 @@ namespace FrameTL
 //      typename IBASIS::Index ind (lambda.j(), lambda.e()[i], lambda.k()[i], frame.bases()[lambda.p()]->bases()[i]);
 //      values[i] = ((frame.bases()[lambda.p()]->bases()[i])->evaluate(ind, resolution)).values();
    }
-
-   SampledMapping<1> result(*(frame.atlas()->charts()[lambda.p()]),
-				values,
-				resolution);
    
-   return result; // gcc 2.95 does not like these two lines melted into one
+   SampledMapping<1> result(*(frame.atlas()->charts()[lambda.p()]),
+			    values,
+			    resolution);
+   
+   return result;
  }
 
 

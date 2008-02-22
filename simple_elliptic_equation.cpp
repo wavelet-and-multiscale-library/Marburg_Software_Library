@@ -81,7 +81,7 @@ namespace FrameTL
     InfiniteVector<double,Index> fhelp;
     Array1D<InfiniteVector<double,Index> > fhelp_patch(frame_->n_p());
 
-#ifdef PRECOMP
+#ifdef PRECOMP_RHS
     // we read in the right hand side from file
     // we assume that ot had been precomputed on a sufficiently high level
     
@@ -90,14 +90,14 @@ namespace FrameTL
     cout << "...ready" << endl;
 #endif
 
-#ifndef PRECOMP
+#ifndef PRECOMP_RHS
     std::list<Vector<double>::size_type> indices;
     std::list<double> entries;
 #endif    
 
     for (int i = 0; i < frame_->degrees_of_freedom(); i++)
       {
-#ifdef PRECOMP
+#ifdef PRECOMP_RHS
 	double coeff = rhs.get_entry(0,i);
 #else	
 	double coeff = f(*(frame_->get_wavelet(i)))/D(*(frame_->get_wavelet(i)));
@@ -118,7 +118,7 @@ namespace FrameTL
 	}
       }
 
-#ifndef PRECOMP
+#ifndef PRECOMP_RHS
     rhs.set_row(0, indices, entries);
     // write right hand side to file
     cout << "writing right hand side into file..." << filename << "..." << endl;
@@ -179,12 +179,12 @@ namespace FrameTL
     sprintf(matrixname, "%s%d%s%d", "stiff_diagonal_poisson_2D_lap1_d", d, "_dT", dT);
 #endif
 
-#ifndef PRECOMP
+#ifndef PRECOMP_DIAG
     std::list<Vector<double>::size_type> indices;
     std::list<double> entries;
 #endif
     
-#ifdef PRECOMP
+#ifdef PRECOMP_DIAG
     cout << "reading in diagonal of unpreconditioned stiffness matrix from file "
 	 << filename << "..." << endl;
     diag.matlab_input(filename);
@@ -194,10 +194,10 @@ namespace FrameTL
 
     stiff_diagonal.resize(frame_->degrees_of_freedom());
     for (int i = 0; i < frame_->degrees_of_freedom(); i++) {
-#ifdef PRECOMP
+#ifdef PRECOMP_DIAG
       stiff_diagonal[i] = diag.get_entry(0,i);
 #endif
-#ifndef PRECOMP
+#ifndef PRECOMP_DIAG
       stiff_diagonal[i] = sqrt(a(*(frame_->get_wavelet(i)),*(frame_->get_wavelet(i))));
       indices.push_back(i);
       entries.push_back(stiff_diagonal[i]);
@@ -205,7 +205,7 @@ namespace FrameTL
       //cout << stiff_diagonal[i] << " " << *(frame_->get_wavelet(i)) << endl;
     }
 
-#ifndef PRECOMP
+#ifndef PRECOMP_DIAG
     diag.set_row(0,indices, entries);
     diag.matlab_output(filename, matrixname, 1);
 #endif

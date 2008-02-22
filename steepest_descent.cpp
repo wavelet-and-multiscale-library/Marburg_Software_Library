@@ -80,7 +80,7 @@ public:
 //    Singularity1D_2<double> exactSolution1D;
 
     unsigned int loops = 0;
-    const int jmax = 7;
+    const int jmax = JMAX;
     typedef typename PROBLEM::Index Index;
 
     double a_inv     = P.norm_Ainv();
@@ -88,6 +88,7 @@ public:
     double kappa     = P.norm_A()*a_inv;
     //double kappa     = 1.;
     double omega_i   = a_inv*P.F_norm();
+
     //double omega_i   = 1;
     cout << "a_inv = " << a_inv << endl;
     cout << "omega_i = " << omega_i << endl;
@@ -112,7 +113,7 @@ public:
     double mu        = 1.0001; //shall be > 1
     //double mu        = 1./3.; //shall be > 1
     //beta in (0,1)
-    double beta      = 0.9;
+    double beta      = 0.98;
     //double beta      = 0.5;
     //let K be such that beta^K * omega <= epsilon
     unsigned int K   = (int) (log(epsilon/omega_i) / log(beta) + 1);

@@ -52,7 +52,7 @@ namespace FrameTL
 			const double epsilon,
 			const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& guess,
 			InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
-			InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& rhs,
+			const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_k_very_sparse,
 			const int jmax = 99,
 			const CompressionStrategy strategy = St04a);
 
@@ -65,7 +65,7 @@ namespace FrameTL
 			const double epsilon,
 			const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& guess,
 			InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
-			InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& rhs,
+			const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_k_very_sparse,
 			const double c1,
 			const double c2,
 			const int jmax = 99,

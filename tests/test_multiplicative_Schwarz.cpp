@@ -1,18 +1,19 @@
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
-#define _WAVELETTL_CDD1_VERBOSITY 1
+#define _WAVELETTL_CDD1_VERBOSITY 0
 
 #define H_1_semi_norm_singularity 1.6544 // preprocessed with high granularity
 
 #define OVERLAP 1.
 
-#define JMAX 5;
+#define JMAX 8
 
-#define PRECOMP
+#define PRECOMP_RHS
+//#define PRECOMP_DIAG
 
-#define COMPUTECONSTANTS
+//#define COMPUTECONSTANTS
 
-#define SPARSE
-//#define FULL
+//#define SPARSE
+#define FULL
 #define TWO_D
 
 #include <fstream>
@@ -282,7 +283,7 @@ int main(int argc, char* argv[])
 
 
 
-  const double epsilon = 0.01;
+  const double epsilon = 1.0e-2;
 
   Array1D<InfiniteVector<double, Index> > approximations(frame.n_p()+1);
 
@@ -339,7 +340,32 @@ int main(int argc, char* argv[])
   lmax = PowerIteration(stiff, x, 0.01, 1000, iter);
   cout << "largest eigenvalue of whole stiffness matrix is " << lmax << endl;
 
+  // (d,dt) = (2,2), jmax = 5, jmin = 3:
+  // patch 0: \lambda_{\min}^0 = 0.0961009, \lambda_{\max}^0 = 3.17632
+  // patch 1: \lambda_{\min}^1 = 0.0961009, \lambda_{\max}^1 = 3.17632
+  // whole domain: \lambda_{\max} = 5.01773
 
+  // (d,dt) = (2,2), jmax = 5, jmin = 4:
+  // patch 0: \lambda_{\min}^0 = 0.0277685, \lambda_{\max}^0 = 3.02486
+  // patch 1: \lambda_{\min}^1 = 0.0277685, \lambda_{\max}^1 = 3.02486
+  // whole domain: \lambda_{\max} = 4.60975
+
+  // (d,dt) = (3,3), jmax = 5, jmin = 3:
+  // patch 0: \lambda_{\min}^0 = 0.0748624, \lambda_{\max}^0 = 4.74753
+  // patch 1: \lambda_{\min}^1 = 0.0748624, \lambda_{\max}^1 = 4.74753
+  // whole domain: \lambda_{\max} = 6.98681
+
+  // (d,dt) = (3,3), jmax = 5, jmin = 4:
+  // patch 0: \lambda_{\min}^0 = 0.0664664, \lambda_{\max}^0 = 4.76616
+  // patch 1: \lambda_{\min}^1 = 0.0664664, \lambda_{\max}^1 = 4.76616
+  // whole domain: \lambda_{\max} = 6.98986
+
+    // (d,dt) = (4,4), jmax = 5, jmin = 4:
+  // patch 0: \lambda_{\min}^0 = 0.00285239 , \lambda_{\max}^0 = 8.5811
+  // patch 1: \lambda_{\min}^1 = 0.00285239  \lambda_{\max}^1 = 8.57653
+  // whole domain: \lambda_{\max} = 12.3335
+
+  abort();
 #endif
   // ##########################################################################################
 
@@ -363,7 +389,7 @@ int main(int argc, char* argv[])
   
   EvaluateFrame<Basis1D,2,2> evalObj;
 
-  Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, approximations[frame.n_p()], true, 5);//expand in primal basis
+  Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, approximations[frame.n_p()], true, 6);//expand in primal basis
   cout << "...finished plotting global approximate solution" << endl;
   Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(frame, approximations[frame.n_p()], sing2D, 6);
   //Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(frame, approximations[frame.n_p()], simple_sol, 5);

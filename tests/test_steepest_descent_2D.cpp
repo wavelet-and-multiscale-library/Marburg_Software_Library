@@ -1,3 +1,10 @@
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
+
+#define JMAX 8
+#define TWO_D
+
+#define PRECOMP_RHS
+
 #include <fstream>
 #include <iostream>
 #include <time.h> 
@@ -54,7 +61,7 @@ int main()
   cout << "testing steepest descent algorithm in 2D..." << endl;
 
   const int DIM = 2;
-  const int jmax = 7;
+  const int jmax = JMAX;
 
   const int d  = 3;
   const int dT = 3;

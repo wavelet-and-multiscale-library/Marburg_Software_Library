@@ -37,7 +37,7 @@ int main()
   cout << "- first wavelet on the coarsest level: " << basis.first_wavelet(basis.j0()) << endl;
   cout << "- last wavelet on the coarsest level: " << basis.last_wavelet(basis.j0()) << endl;
 
-#if 1
+#if 0
   {
     cout << "- testing iterator functionality:" << endl;
     int id = 0;
@@ -52,7 +52,7 @@ int main()
   }
 #endif
 
-#if 1
+#if 0
   {
     cout << "- testing iterator functionality for generators on a higher level:" << endl;
     int id = 0;
@@ -64,6 +64,41 @@ int main()
 	cout << " (ERROR!!!)" << endl;
       if (lambda == basis.last_generator(basis.j0()+1)) break;
     }
+  }
+#endif
+
+#if 1
+  {
+    const int j0 = basis.j0();
+    Vector<double> x(basis.Deltasize(j0+1));
+    x[3] = 1;
+    cout << "* a vector x=" << x << endl;
+    Vector<double> y(basis.Deltasize(j0+1));
+    basis.apply_Mj(j0, x, y);
+    cout << "* applying Mj=(Mj0 Mj1) to x yields y=Mj*x=" << y << endl;
+    basis.apply_Gj(j0, y, x);
+    cout << "* applying Gj=(Mj0T Mj1T)^T to y yields x=Gj*y=" << x << endl;
+
+    x.scale(0); y.scale(0);
+    x[0] = 1;
+    basis.apply_Tj(j0, x, y);
+    cout << "* applying T_{j0} to x=" << x << " yields y=" << y << endl;
+    x.resize(basis.Deltasize(j0+2));
+    x[3] = 1;
+    cout << "* x on the next level: " << x << endl;
+    y.resize(basis.Deltasize(j0+2));
+    basis.apply_Tj(j0+1, x, y);
+    cout << "* applying T_{j0+1} to x yields y=" << y << endl;
+    basis.apply_Tjinv(j0+1, y, x);
+    cout << "* applying T_{j0+1}^{-1} to y yields x=" << x << endl;
+    x.resize(basis.Deltasize(j0+3));
+    x[1] = 1;
+    cout << "* x on the next plus 1 level: " << x << endl;
+    y.resize(basis.Deltasize(j0+3));
+    basis.apply_Tj(j0+2, x, y);
+    cout << "* applying T_{j0+2} to x yields y=" << y << endl;
+    basis.apply_Tjinv(j0+2, y, x);
+    cout << "* applying T_{j0+2}^{-1} to y yields x=" << x << endl;
   }
 #endif
 

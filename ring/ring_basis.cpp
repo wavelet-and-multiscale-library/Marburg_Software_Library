@@ -4,6 +4,9 @@
 #include <numerics/quadrature.h>
 #include <numerics/iteratsolv.h>
 #include <algebra/sparse_matrix.h>
+#include <algebra/kronecker_matrix.h>
+
+using MathTL::KroneckerMatrix;
 
 namespace WaveletTL
 {
@@ -103,6 +106,180 @@ namespace WaveletTL
     assert(j >= j0());
     
     return 1<<(2*j);
+  }
+  
+  template <int d, int dt, int s0, int s1>
+  template <class V>
+  void
+  RingBasis<d,dt,s0,s1>::apply_Mj0(const int j, const V& x, V& y,
+				   const size_type x_offset, const size_type y_offset,
+				   const bool add_to) const
+  {
+    basis0_.Mj0_.set_level(j);
+    basis1_.Mj0_.set_level(j);
+
+    KroneckerHelper<double, typename Basis0::QuasiStationaryMatrixType, typename Basis1::QuasiStationaryMatrixType>
+      K(basis0_.Mj0_, basis1_.Mj0_);
+    K.apply(x, y, x_offset, y_offset, add_to);
+  }
+
+  template <int d, int dt, int s0, int s1>
+  template <class V>
+  void
+  RingBasis<d,dt,s0,s1>::apply_Mj1_01(const int j, const V& x, V& y,
+				      const size_type x_offset, const size_type y_offset,
+				      const bool add_to) const
+  {
+    basis0_.Mj0_.set_level(j);
+    basis1_.Mj1_.set_level(j);
+
+    KroneckerHelper<double, typename Basis0::QuasiStationaryMatrixType, typename Basis1::QuasiStationaryMatrixType>
+      K(basis0_.Mj0_, basis1_.Mj1_);
+    K.apply(x, y, x_offset, y_offset, add_to);
+  }
+
+  template <int d, int dt, int s0, int s1>
+  template <class V>
+  void
+  RingBasis<d,dt,s0,s1>::apply_Mj1_10(const int j, const V& x, V& y,
+				      const size_type x_offset, const size_type y_offset,
+				      const bool add_to) const
+  {
+    basis0_.Mj1_.set_level(j);
+    basis1_.Mj0_.set_level(j);
+
+    KroneckerHelper<double, typename Basis0::QuasiStationaryMatrixType, typename Basis1::QuasiStationaryMatrixType>
+      K(basis0_.Mj1_, basis1_.Mj0_);
+    K.apply(x, y, x_offset, y_offset, add_to);
+  }
+
+  template <int d, int dt, int s0, int s1>
+  template <class V>
+  void
+  RingBasis<d,dt,s0,s1>::apply_Mj1_11(const int j, const V& x, V& y,
+				      const size_type x_offset, const size_type y_offset,
+				      const bool add_to) const
+  {
+    basis0_.Mj1_.set_level(j);
+    basis1_.Mj1_.set_level(j);
+
+    KroneckerHelper<double, typename Basis0::QuasiStationaryMatrixType, typename Basis1::QuasiStationaryMatrixType>
+      K(basis0_.Mj1_, basis1_.Mj1_);
+    K.apply(x, y, x_offset, y_offset, add_to);
+  }
+  
+  template <int d, int dt, int s0, int s1>
+  template <class V>
+  void
+  RingBasis<d,dt,s0,s1>::apply_Mj0T_transposed(const int j, const V& x, V& y,
+					       const size_type x_offset, const size_type y_offset,
+					       const bool add_to) const
+  {
+    basis0_.Mj0T_.set_level(j);
+    basis1_.Mj0T_.set_level(j);
+
+    KroneckerHelper<double, typename Basis0::QuasiStationaryMatrixType, typename Basis1::QuasiStationaryMatrixType>
+      K(basis0_.Mj0T_, basis1_.Mj0T_);
+    K.apply_transposed(x, y, x_offset, y_offset, add_to);
+  }
+
+  template <int d, int dt, int s0, int s1>
+  template <class V>
+  void
+  RingBasis<d,dt,s0,s1>::apply_Mj1T_01_transposed(const int j, const V& x, V& y,
+						  const size_type x_offset, const size_type y_offset,
+						  const bool add_to) const
+  {
+    basis0_.Mj0T_.set_level(j);
+    basis1_.Mj1T_.set_level(j);
+
+    KroneckerHelper<double, typename Basis0::QuasiStationaryMatrixType, typename Basis1::QuasiStationaryMatrixType>
+      K(basis0_.Mj0T_, basis1_.Mj1T_);
+    K.apply_transposed(x, y, x_offset, y_offset, add_to);
+  }
+
+  template <int d, int dt, int s0, int s1>
+  template <class V>
+  void
+  RingBasis<d,dt,s0,s1>::apply_Mj1T_10_transposed(const int j, const V& x, V& y,
+						  const size_type x_offset, const size_type y_offset,
+						  const bool add_to) const
+  {
+    basis0_.Mj1T_.set_level(j);
+    basis1_.Mj0T_.set_level(j);
+
+    KroneckerHelper<double, typename Basis0::QuasiStationaryMatrixType, typename Basis1::QuasiStationaryMatrixType>
+      K(basis0_.Mj1T_, basis1_.Mj0T_);
+    K.apply_transposed(x, y, x_offset, y_offset, add_to);
+  }
+  
+  template <int d, int dt, int s0, int s1>
+  template <class V>
+  void
+  RingBasis<d,dt,s0,s1>::apply_Mj1T_11_transposed(const int j, const V& x, V& y,
+						  const size_type x_offset, const size_type y_offset,
+						  const bool add_to) const
+  {
+    basis0_.Mj1T_.set_level(j);
+    basis1_.Mj1T_.set_level(j);
+
+    KroneckerHelper<double, typename Basis0::QuasiStationaryMatrixType, typename Basis1::QuasiStationaryMatrixType>
+      K(basis0_.Mj1T_, basis1_.Mj1T_);
+    K.apply_transposed(x, y, x_offset, y_offset, add_to);
+  }
+  
+  template <int d, int dt, int s0, int s1>
+  template <class V>
+  void
+  RingBasis<d,dt,s0,s1>::apply_Mj(const int j, const V& x, V& y) const
+  {
+    // decompose x appropriately
+    apply_Mj0   (j, x, y, 0, 0, false);                                         // apply Mj0
+    apply_Mj1_01(j, x, y, Deltasize(j), 0, true);                               // apply Mj1, e=(0,1)
+    apply_Mj1_10(j, x, y, Deltasize(j)+Nabla01size(j), 0, true);                // apply Mj1, e=(1,0)
+    apply_Mj1_11(j, x, y, Deltasize(j)+Nabla01size(j)+Nabla10size(j), 0, true); // apply Mj1, e=(1,1)
+  }
+
+  template <int d, int dt, int s0, int s1>
+  template <class V>
+  void
+  RingBasis<d,dt,s0,s1>::apply_Gj(const int j, const V& x, V& y) const
+  {
+    // write into the block vector y
+    apply_Mj0T_transposed   (j, x, y, 0, 0, false);                                          // write Mj0T block
+    apply_Mj1T_01_transposed(j, x, y, 0, Deltasize(j), false);                               // write Mj1T block, e=(0,1)
+    apply_Mj1T_10_transposed(j, x, y, 0, Deltasize(j)+Nabla01size(j), false);                // write Mj1T block, e=(1,0)
+    apply_Mj1T_11_transposed(j, x, y, 0, Deltasize(j)+Nabla01size(j)+Nabla10size(j), false); // write Mj1T block, e=(1,1)
+  }
+
+  template <int d, int dt, int s0, int s1>
+  template <class V>
+  void
+  RingBasis<d,dt,s0,s1>::apply_Tj(const int j, const V& x, V& y) const
+  { 
+    y = x;
+    V z(x);
+    apply_Mj(j0(), z, y);
+    for (int k = j0()+1; k <= j; k++) {
+      apply_Mj(k, y, z);
+      y.swap(z);
+    }
+  }
+
+  template <int d, int dt, int s0, int s1>
+  template <class V>
+  void
+  RingBasis<d,dt,s0,s1>::apply_Tjinv(const int j, const V& x, V& y) const
+  { 
+    // T_j^{-1}=diag(G_{j0},I)*...*diag(G_{j-1},I)*G_j
+    V z(x);
+    apply_Gj(j, x, y);
+    for (int k = j-1; k >= j0(); k--) {
+      z.swap(y);
+      apply_Gj(k, z, y);
+      for (int i = Deltasize(k+1); i < Deltasize(j+1); i++)
+	y[i] = z[i];
+    }
   }
   
   //

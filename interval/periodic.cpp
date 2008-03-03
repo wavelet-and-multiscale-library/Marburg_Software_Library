@@ -444,7 +444,7 @@ namespace WaveletTL
 				const int jmax,
 				Vector<double>& coeffs) const
   {
-    assert(!primal);
+    assert(primal);
 
     coeffs.resize(Deltasize(jmax+1));
 

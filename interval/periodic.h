@@ -322,7 +322,7 @@ namespace WaveletTL
         \sum_{\lambda}c_\lambda\psi_lambda = \sum_{\lambda'}v_{\lambda'}\psi_{\lambda'}
     */
     void decompose(const InfiniteVector<double, Index>& c, const int jmin,
-			  InfiniteVector<double, Index>& v) const;
+		   InfiniteVector<double, Index>& v) const;
     
     //! dual DECOMPOSE routine, full version
     /*!
@@ -351,7 +351,7 @@ namespace WaveletTL
       where always |\lambda'|>=j
     */
     void reconstruct(const InfiniteVector<double, Index>& c, const int j,
-			    InfiniteVector<double, Index>& v) const;
+		     InfiniteVector<double, Index>& v) const;
 
     //! dual RECONSTRUCT routine, simple version
     /*!

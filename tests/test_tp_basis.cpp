@@ -21,14 +21,15 @@ int main()
   typedef SplineBasis<2,2,P_construction,0,0,0,0,SplineBasisData_j0<2,2,P_construction,0,0,0,0>::j0> Basis0;
   typedef Basis0::Index Index0;
 
-  typedef SplineBasis<2,2,P_construction,1,0,0,0,SplineBasisData_j0<2,2,P_construction,1,0,0,0>::j0> Basis1;
+//   typedef SplineBasis<2,2,P_construction,1,0,0,0,SplineBasisData_j0<2,2,P_construction,1,0,0,0>::j0> Basis1;
+  typedef PeriodicBasis<CDFBasis<2,2> > Basis1;
   typedef Basis1::Index Index1;
 
   typedef TensorProductBasis<Basis0,Basis1> Basis;
   typedef Basis::Index Index;
   Basis basis;
   
-  cout << "* a tensor product of two PBasis<2,2> bases:" << endl;
+  cout << "* a tensor product of two 1D bases:" << endl;
 #else
   typedef PeriodicBasis<RBasis<HaarMask> > Basis0;
   typedef Basis0::Index Index0;
@@ -80,7 +81,7 @@ int main()
   }
 #endif
 
-#if 0
+#if 1
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "

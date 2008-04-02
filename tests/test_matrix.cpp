@@ -477,6 +477,11 @@ int main()
   cout << "- decol(col(M))=" << endl << M;
 
 #if 1
+  cout << "- write M to a file..." << endl;
+  M.matlab_output("Mfile", "M", 0);
+#endif
+
+#if 0
   F1.resize(5,2);
   F1.set_entry(0,0,1);
   F1.set_entry(0,1,2);

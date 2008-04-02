@@ -262,6 +262,11 @@ namespace MathTL
 	       const unsigned int tabwidth = 10,
 	       const unsigned int precision = 3) const;
 
+    /*!
+      write matrix into Matlab file 
+    */
+    void matlab_output(const char *file, const char *Matrixname, const int binary) const;
+
   protected:
     /*!
       internal storage of densely populated matrices is just an

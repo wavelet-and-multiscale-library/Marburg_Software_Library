@@ -2,9 +2,9 @@
 
 #include <cassert>
 #include <iomanip>
+#include <iostream>
 #include <sstream>
 #include <fstream>
-#include <iostream>
 #include <algorithm>
 #include <algebra/vector.h>
 #include <algebra/matrix.h>
@@ -543,6 +543,8 @@ namespace MathTL
 	       << Matrixname << "=sparse(i,j,s,n,m);" << endl
 	       << "fclose(fid_vector);" << endl;
 
+	m_file.close();
+
 	int r=row_dimension(), c=column_dimension(), l=size();
 
 	bin_file.write((char*)(&r), sizeof(int));
@@ -577,6 +579,8 @@ namespace MathTL
             if (indices_[i])
 	      bin_file.write((char*)(entries_[i]), indices_[i][0]*sizeof(C));
 	  }   
+
+	bin_file.close();
       }
     else
       {
@@ -605,7 +609,9 @@ namespace MathTL
 		<< entries_[i][k-1] << ";" << endl;
 	    }
 	  }
-	}   
+	}
+
+	s.close();
       }
   }
   

@@ -1,6 +1,8 @@
 // implementation of MathTL::Matrix inline functions
 
+#include <iostream>
 #include <iomanip>
+#include <fstream>
 #include <sstream>
 
 namespace MathTL
@@ -500,4 +502,47 @@ namespace MathTL
     M.print(os);
     return os;
   }
+
+  template <class C>
+  void Matrix<C>::matlab_output (const char *file, const char *Matrixname, const int binary) const
+  {
+    if (binary)
+      {
+	// currently unsupported
+      }
+    else
+      {
+	char Filename[200];
+	Filename[0] = '\x0';
+	
+	strcat(Filename, file);
+	strcat(Filename, ".m");
+	
+	std::ofstream m_file(Filename);
+	
+	m_file << Matrixname << "=load('" << file << ".dat');" << std::endl;
+	
+	m_file.close();
+	
+	Filename[0] = '\x0';
+	
+	strcat(Filename, file);
+	strcat(Filename, ".dat");
+
+	std::ofstream dat_file(Filename);
+	
+	dat_file.setf(std::ios::scientific, std::ios::fixed);
+	dat_file.precision(15);
+	
+ 	for (typename Matrix<C>::size_type i(0); i < row_dimension(); ++i)
+ 	  {
+ 	    for (typename Matrix<C>::size_type j(0); j < column_dimension(); ++j)
+ 	      dat_file << this->operator () (i, j) << " ";
+ 	    dat_file << std::endl;
+ 	  }
+	
+	dat_file.close();
+      }
+  }
+  
 }

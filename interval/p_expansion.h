@@ -57,6 +57,18 @@ namespace WaveletTL
 	 const bool primal,
 	 const int jmax,
 	 InfiniteVector<double, typename PBasis<d,dT>::Index>& coeffs);
+
+  /*!
+    analogous routine for Vector<double> output
+  */
+  template <int d, int dT>
+  void
+  expand(const Function<1>* f,
+	 const PBasis<d,dT>& basis,
+	 const bool primal,
+	 const int jmax,
+	 Vector<double>& coeffs);
+
 }
 
 #include <interval/p_expansion.cpp>

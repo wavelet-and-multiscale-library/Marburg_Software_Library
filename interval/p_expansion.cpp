@@ -169,4 +169,64 @@ namespace WaveletTL
     }
   }
 
+  template <int d, int dT>
+  void
+  expand(const Function<1>* f,
+	 const PBasis<d,dT>& basis,
+	 const bool primal,
+	 const int jmax,
+	 Vector<double>& coeffs)
+  {
+    typedef typename PBasis<d,dT>::Index Index;
+    const int j0 = basis.j0();
+    assert(jmax >= j0);
+    
+    coeffs.resize(basis.Deltasize(jmax+1));
+    int id = 0;
+    for (Index lambda = basis.first_generator(j0);;++lambda, ++id)
+      {
+ 	coeffs[id] = integrate(f, basis, lambda);
+	if (lambda == basis.last_wavelet(jmax))
+	  break;
+      }
+    
+    if (!primal) {
+      // setup active index set
+      std::set<Index> Lambda;
+      for (Index lambda = basis.first_generator(j0);; ++lambda) {
+ 	Lambda.insert(lambda);
+	if (lambda == basis.last_wavelet(jmax)) break;
+      }
+      
+      // setup Gramian A_Lambda
+      SparseMatrix<double> A_Lambda(Lambda.size());
+      typedef typename SparseMatrix<double>::size_type size_type;     
+      size_type row = 0;
+      for (typename std::set<Index>::const_iterator it1(Lambda.begin()), itend(Lambda.end());
+	   it1 != itend; ++it1, ++row)
+	{
+	  std::list<size_type> indices;
+	  std::list<double> entries;
+	  
+	  size_type column = 0;
+	  for (typename std::set<Index>::const_iterator it2(Lambda.begin());
+	       it2 != itend; ++it2, ++column)
+	    {
+	      double entry = integrate(basis, *it2, *it1);
+	      
+	      if (entry != 0) {
+		indices.push_back(column);
+		entries.push_back(entry);
+	      }
+	    }
+	  A_Lambda.set_row(row, indices, entries);
+	} 
+      
+      // solve A_Lambda*x = b
+      Vector<double> b(coeffs);
+      
+      unsigned int iterations;
+      CG(A_Lambda, b, coeffs, 1e-15, 500, iterations);
+    }
+  }
 }

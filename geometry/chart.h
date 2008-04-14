@@ -47,7 +47,7 @@ namespace MathTL
     /*!
       inverse mapping y = kappa^{-1}(x)
      */
-    virtual void map_point_inv(const Point<DIM_d>& x, Point<DIM_m>& y) const = 0;
+    virtual void map_point_inv(const Point<DIM_m>& x, Point<DIM_d>& y) const = 0;
 
     /*!
       special 1D version

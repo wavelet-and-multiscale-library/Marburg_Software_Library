@@ -16,6 +16,9 @@
 
 #include <generic/tp_index.h>
 
+using MathTL::Vector;
+using MathTL::InfiniteVector;
+
 namespace WaveletTL
 {
   /*!

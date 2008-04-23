@@ -3,6 +3,7 @@
 #include <algebra/kronecker_matrix.h>
 
 using MathTL::KroneckerMatrix;
+using MathTL::KroneckerHelper;
 
 namespace WaveletTL
 {

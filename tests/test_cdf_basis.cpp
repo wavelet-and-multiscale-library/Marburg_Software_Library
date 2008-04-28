@@ -11,7 +11,7 @@ int main()
 {
   cout << "Test CDFBasis class..." << endl;
 
-  const int d = 3;
+  const int d = 1;
   const int dt = 3;
 
   CDFBasis<d,dt> basis;

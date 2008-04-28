@@ -12,7 +12,15 @@ int main()
 {
   cout << "Testing setup of SplineBasisData objects..." << endl;
 
-#if 0
+#if 1
+  // PBasis, no b.c.'s
+  SplineBasisData<1,1,P_construction,0,0,0,0> sd11nobc;
+  sd11nobc.check();
+
+  // PBasis, no b.c.'s
+  SplineBasisData<1,3,P_construction,0,0,0,0> sd13nobc;
+  sd13nobc.check();
+
   // PBasis, no b.c.'s
   SplineBasisData<2,2,P_construction,0,0,0,0> sd22nobc;
   sd22nobc.check();
@@ -67,8 +75,8 @@ int main()
 #if 1
   cout << "Testing SplineBasis..." << endl;
 
-  const int d  = 2;
-  const int dt = 2;
+  const int d  = 1;
+  const int dt = 3;
   const int s0 = 0;
   const int s1 = 0;
   const int J0 = SplineBasisData_j0<d,dt,P_construction,s0,s1,0,0>::j0;

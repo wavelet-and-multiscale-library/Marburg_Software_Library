@@ -25,6 +25,14 @@ namespace WaveletTL
 
   template <>
   const int
+  SplineBasisData_j0<1,1,P_construction,0,0,0,0>::j0 = 1; // for technical reasons, QuasiStationaryMatrix should have at least 2 columns
+
+  template <>
+  const int
+  SplineBasisData_j0<1,3,P_construction,0,0,0,0>::j0 = 3;
+
+  template <>
+  const int
   SplineBasisData_j0<2,2,P_construction,0,0,0,0>::j0 = 2;
 
   template <>
@@ -197,7 +205,21 @@ namespace WaveletTL
     for (int j = SplineBasisData_j0<d,dT,P_construction,s0,s1,sT0,sT1>::j0; j <= 8; j++) {
       cout << "* j=" << j;
       Mj0_.set_level(j);
+#if 0
+      {
+	SparseMatrix<double> S;
+	Mj0_.to_sparse(S);
+	cout << endl << "Mj0(j)=" << endl << S << endl;
+      }
+#endif 
       Mj0T_.set_level(j);
+#if 0
+      {
+	SparseMatrix<double> S;
+	Mj0T_.to_sparse(S);
+	cout << endl << "Mj0T(j)=" << endl << S << endl;
+      }
+#endif 
       Vector<double> x(Mj0T_.column_dimension()),
 	y(Mj0T_.row_dimension());
       double maxerr = 0;
@@ -630,6 +652,46 @@ namespace WaveletTL
   //
   //
   // some precomputed data for P bases
+
+  template <>
+  SplineBasisData<1,1,P_construction,0,0,0,0>::SplineBasisData()
+  {
+    const int j0 = SplineBasisData_j0<1,1,P_construction,0,0,0,0>::j0;
+    Matrix<double> Mj0_lr(0); // empty corner blocks
+    Vector<double> Mj0_band_lr(2, "1.0 1.0");
+    Mj0_ = QuasiStationaryMatrix<double>(j0, 4, 2, Mj0_lr, Mj0_lr, Mj0_band_lr, Mj0_band_lr, 0, 0, M_SQRT1_2);
+    Matrix<double> Mj0T_lr(0); // empty corner blocks
+    Vector<double> Mj0T_band_lr(2, "1.0 1.0");
+    Mj0T_ = QuasiStationaryMatrix<double>(j0, 4, 2, Mj0T_lr, Mj0T_lr, Mj0T_band_lr, Mj0T_band_lr, 0, 0, M_SQRT1_2);
+    Matrix<double> Mj1_lr(0); // empty corner blocks
+    Vector<double> Mj1_band_lr(2, "1.0 -1.0");
+    Mj1_ = QuasiStationaryMatrix<double>(j0, 4, 2, Mj1_lr, Mj1_lr, Mj1_band_lr, Mj1_band_lr, 0, 0, M_SQRT1_2);
+    Matrix<double> Mj1T_lr(0); // empty corner blocks
+    Vector<double> Mj1T_band_lr(2, "1.0 -1.0");
+    Mj1T_ = QuasiStationaryMatrix<double>(j0, 4, 2, Mj1T_lr, Mj1T_lr, Mj1T_band_lr, Mj1T_band_lr, 0, 0, M_SQRT1_2);
+    CDF_factor = 1.0;
+  }
+
+  template <>
+  SplineBasisData<1,3,P_construction,0,0,0,0>::SplineBasisData()
+  {
+    const int j0 = SplineBasisData_j0<1,3,P_construction,0,0,0,0>::j0;
+    Matrix<double> Mj0_lr(0); // empty corner blocks
+    Vector<double> Mj0_band_lr(2, "1.0 1.0");
+    Mj0_ = QuasiStationaryMatrix<double>(j0, 16, 8, Mj0_lr, Mj0_lr, Mj0_band_lr, Mj0_band_lr, 0, 0, M_SQRT1_2);
+    Matrix<double> Mj0T_l(4, 1, "1.0 1.0 0.125 -0.125");
+    Matrix<double> Mj0T_r(4, 1, "-0.125 0.125 1.0 1.0");
+    Vector<double> Mj0T_band_lr(6, "-0.125 0.125 1.0 1.0 0.125 -0.125");
+    Mj0T_ = QuasiStationaryMatrix<double>(j0, 16, 8, Mj0T_l, Mj0T_r, Mj0T_band_lr, Mj0T_band_lr, 0, 0, M_SQRT1_2);
+    Matrix<double> Mj1_l(4, 1, "1.0 -1.0 0.125 0.125");
+    Matrix<double> Mj1_r(4, 1, "-0.125 -0.125 1.0 -1.0");
+    Vector<double> Mj1_band_lr(6, "-0.125 -0.125 1.0 -1.0 0.125 0.125");
+    Mj1_ = QuasiStationaryMatrix<double>(j0, 16, 8, Mj1_l, Mj1_r, Mj1_band_lr, Mj1_band_lr, 0, 0, M_SQRT1_2);
+    Matrix<double> Mj1T_lr(0); // empty corner blocks
+    Vector<double> Mj1T_band_lr(2, "1.0 -1.0");
+    Mj1T_ = QuasiStationaryMatrix<double>(j0, 16, 8, Mj1T_lr, Mj1T_lr, Mj1T_band_lr, Mj1T_band_lr, 0, 0, M_SQRT1_2);
+    CDF_factor = 1.0;
+  }
 
   template <>
   SplineBasisData<2,2,P_construction,0,0,0,0>::SplineBasisData()

@@ -69,10 +69,6 @@ namespace WaveletTL
       
       At the moment, you may (only) specify the order of the primal (s) boundary conditions
       at the left and right end of the interval [0,1].
-      For technical reasons (easing the setup of the dual generators),
-      only the values si >= d-2 are currently implemented.
-      In other words, linear spline wavelets may or may not fulfill Dirichlet b.c.'s.
-      Higher order wavelet bases will always fulfill b.c.'s of order at least d-2.
       The dual wavelet basis will have no b.c.'s in either case and can reproduce the
       full range of polynomials of order dT.
 

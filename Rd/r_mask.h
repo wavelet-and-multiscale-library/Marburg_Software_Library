@@ -92,6 +92,11 @@ namespace WaveletTL
 	     const int b,
 	     const int resolution) const;
 
+    /*!
+      Compute the k-th moment of the refinable function \phi via the mask
+    */
+    const double moment(const unsigned int k) const;
+
   protected:
     //! refinement coefficients
     FixedArray1D<double,L> coeffs_;

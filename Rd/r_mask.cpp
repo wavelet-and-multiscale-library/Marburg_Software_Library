@@ -125,4 +125,28 @@ namespace WaveletTL
     return SampledMapping<1>(a, b, v, resolution);
   }
 
+  template <unsigned int L, int BEGIN>
+  const double
+  RRefinementMask<L,BEGIN>::moment(const unsigned int k) const
+  {
+    double r(1.0);
+	
+    if (k > 0)
+      {
+	r = 0.0;
+
+	for (unsigned int m = 0; m < k; m++) {
+	  double alsum = 0;
+	  for (int l = begin(); l <= end(); l++) {
+	    alsum += a(l) * intpower(l, k-m);
+	  }
+	  r += binomial(k, m) * moment(m) * alsum;
+	}
+
+	r /= (1<<(k+1))-2;
+      }
+    
+    return r;
+  }
+  
 }

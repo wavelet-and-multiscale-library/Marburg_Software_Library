@@ -664,11 +664,13 @@ namespace WaveletTL
     Vector<double> Mj0T_band_lr(2, "1.0 1.0");
     Mj0T_ = QuasiStationaryMatrix<double>(j0, 4, 2, Mj0T_lr, Mj0T_lr, Mj0T_band_lr, Mj0T_band_lr, 0, 0, M_SQRT1_2);
     Matrix<double> Mj1_lr(0); // empty corner blocks
-    Vector<double> Mj1_band_lr(2, "1.0 -1.0");
-    Mj1_ = QuasiStationaryMatrix<double>(j0, 4, 2, Mj1_lr, Mj1_lr, Mj1_band_lr, Mj1_band_lr, 0, 0, M_SQRT1_2);
+    Vector<double> Mj1_band_l(2, "1.0 -1.0");
+    Vector<double> Mj1_band_r(2, "-1.0 1.0"); // note: Haar wavelets are here antisymmetric w.r.t 0.5
+    Mj1_ = QuasiStationaryMatrix<double>(j0, 4, 2, Mj1_lr, Mj1_lr, Mj1_band_l, Mj1_band_r, 0, 0, M_SQRT1_2);
     Matrix<double> Mj1T_lr(0); // empty corner blocks
-    Vector<double> Mj1T_band_lr(2, "1.0 -1.0");
-    Mj1T_ = QuasiStationaryMatrix<double>(j0, 4, 2, Mj1T_lr, Mj1T_lr, Mj1T_band_lr, Mj1T_band_lr, 0, 0, M_SQRT1_2);
+    Vector<double> Mj1T_band_l(2, "1.0 -1.0");
+    Vector<double> Mj1T_band_r(2, "-1.0 1.0");
+    Mj1T_ = QuasiStationaryMatrix<double>(j0, 4, 2, Mj1T_lr, Mj1T_lr, Mj1T_band_l, Mj1T_band_r, 0, 0, M_SQRT1_2);
     CDF_factor = 1.0;
   }
 
@@ -679,17 +681,41 @@ namespace WaveletTL
     Matrix<double> Mj0_lr(0); // empty corner blocks
     Vector<double> Mj0_band_lr(2, "1.0 1.0");
     Mj0_ = QuasiStationaryMatrix<double>(j0, 16, 8, Mj0_lr, Mj0_lr, Mj0_band_lr, Mj0_band_lr, 0, 0, M_SQRT1_2);
-    Matrix<double> Mj0T_l(4, 1, "1.0 1.0 0.125 -0.125");
-    Matrix<double> Mj0T_r(4, 1, "-0.125 0.125 1.0 1.0");
+    std::ostringstream entries;
+    entries << "1.375 -0.5 0.125 "
+	    << "0.625 0.5 -0.125 "
+	    << "0.125 1 -0.125 "
+	    << "-0.125 1 0.125 "
+	    << "0 0.125 1 "
+	    << "0 -0.125 1 "
+	    << "0 0 0.125 "
+	    << "0 0 -0.125";
+    Matrix<double> Mj0T_l(8, 3, entries.str().c_str());
+    Matrix<double> Mj0T_r(8, 3); Mj0T_l.reflect(Mj0T_r);
     Vector<double> Mj0T_band_lr(6, "-0.125 0.125 1.0 1.0 0.125 -0.125");
-    Mj0T_ = QuasiStationaryMatrix<double>(j0, 16, 8, Mj0T_l, Mj0T_r, Mj0T_band_lr, Mj0T_band_lr, 0, 0, M_SQRT1_2);
-    Matrix<double> Mj1_l(4, 1, "1.0 -1.0 0.125 0.125");
-    Matrix<double> Mj1_r(4, 1, "-0.125 -0.125 1.0 -1.0");
-    Vector<double> Mj1_band_lr(6, "-0.125 -0.125 1.0 -1.0 0.125 0.125");
-    Mj1_ = QuasiStationaryMatrix<double>(j0, 16, 8, Mj1_l, Mj1_r, Mj1_band_lr, Mj1_band_lr, 0, 0, M_SQRT1_2);
-    Matrix<double> Mj1T_lr(0); // empty corner blocks
-    Vector<double> Mj1T_band_lr(2, "1.0 -1.0");
-    Mj1T_ = QuasiStationaryMatrix<double>(j0, 16, 8, Mj1T_lr, Mj1T_lr, Mj1T_band_lr, Mj1T_band_lr, 0, 0, M_SQRT1_2);
+    Mj0T_ = QuasiStationaryMatrix<double>(j0, 16, 8, Mj0T_l, Mj0T_r, Mj0T_band_lr, Mj0T_band_lr, 4, 4, M_SQRT1_2);
+    entries.str("");
+    entries << "0.3125 -0.0625 "
+	    << "-0.6875 -0.0625 "
+	    << "0.25 0.5 "
+	    << "0.25 -0.5 "
+	    << "-0.0625 0.0625 "
+	    << "-0.0625 0.0625";
+    Matrix<double> Mj1_l(6, 2, entries.str().c_str());
+    Matrix<double> Mj1_r(6, 2); Mj1_l.reflect(Mj1_r);
+    Vector<double> Mj1_band_l(6, "-0.125 -0.125 1.0 -1.0 0.125 0.125");
+    Vector<double> Mj1_band_r(6, "0.125 0.125 -1.0 1.0 -0.125 -0.125");
+    Mj1_ = QuasiStationaryMatrix<double>(j0, 16, 8, Mj1_l, Mj1_r, Mj1_band_l, Mj1_band_r, 2, 2, M_SQRT1_2);
+    entries.str("");
+    entries << "2 0 "
+	    << "-2 0 "
+	    << "0 2 "
+	    << "0 -2";
+    Matrix<double> Mj1T_l(4, 2, entries.str().c_str());
+    Matrix<double> Mj1T_r(4, 2); Mj1T_l.reflect(Mj1T_r);
+    Vector<double> Mj1T_band_l(2, "1.0 -1.0");
+    Vector<double> Mj1T_band_r(2, "-1.0 1.0");
+    Mj1T_ = QuasiStationaryMatrix<double>(j0, 16, 8, Mj1T_l, Mj1T_r, Mj1T_band_l, Mj1T_band_r, 4, 4, M_SQRT1_2);
     CDF_factor = 1.0;
   }
 

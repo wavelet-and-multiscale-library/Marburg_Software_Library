@@ -146,5 +146,16 @@ int main()
     cout << "k=" << it.index() << ": " << *it << endl;  
 #endif
 
+#if 1
+  {
+    cout << "- moments of a Haar function:" << endl;
+    HaarMask haar;
+    for (unsigned int n(0); n <= 4; n++)
+      {
+	cout << "    n=" << n << ": M_n=" << haar.moment(n) << endl;
+      }
+  }
+#endif
+
   return 0;
 }

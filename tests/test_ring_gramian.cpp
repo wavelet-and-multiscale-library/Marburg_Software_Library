@@ -24,7 +24,7 @@ int main()
   const int dt = 2;
   const int s0 = 1;
   const int s1 = 1;
-  const int J0 = SplineBasisData_j0<d,dt,P_construction,s0,s1,0,0>::j0;
+//   const int J0 = SplineBasisData_j0<d,dt,P_construction,s0,s1,0,0>::j0;
 
   const double r0 = 0.5;
   const double r1 = 2.0;

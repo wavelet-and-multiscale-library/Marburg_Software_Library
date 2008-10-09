@@ -202,7 +202,6 @@ namespace WaveletTL
   }
   
   template <class IBASIS>
-  inline
   IntervalIndex<IBASIS> last_wavelet(const IBASIS* basis, const int j)
   {
     assert(j >= basis->j0());

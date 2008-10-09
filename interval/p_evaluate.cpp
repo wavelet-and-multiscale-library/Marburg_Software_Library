@@ -66,12 +66,12 @@ namespace WaveletTL
 	      for (unsigned int i(0); i < CRAT.row_dimension(); i++) {
 		double v(CRAT(i, basis.DeltaRTmax(lambda.j())-lambda.k()));
 		if (v != 0)
-		  coeffs.set_coefficient(RIndex(lambda.j()+1, 0, (1<<lambda.j()+1)-ell1<d>()-ell2<d>()-(1-ell2T<d,dT>()+i)), v);
+		  coeffs.set_coefficient(RIndex(lambda.j()+1, 0, (1<<(lambda.j()+1))-ell1<d>()-ell2<d>()-(1-ell2T<d,dT>()+i)), v);
 	      }
 	      return basis.get_CDF_basis().evaluate(0, coeffs, primal, 0, 1, resolution);
 	    }
 	  }
-	   // inner generator
+	  // inner generator
 	  else {
 	    return basis.get_CDF_basis().evaluate(0, RIndex(lambda.j(), 0, lambda.k()),
 						  primal, 0, 1, resolution);

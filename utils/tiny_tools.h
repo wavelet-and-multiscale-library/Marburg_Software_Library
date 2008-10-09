@@ -55,7 +55,7 @@ inline R hypot(const R a, const R b)
 
 //! faculty of a (signed or unsigned) integer
 template <class I>
-I faculty (const I n)
+I faculty(const I n)
 {
   I r(1);
   for (I i(2); i <= n; r *= i, i++);
@@ -72,7 +72,7 @@ I faculty (const I n)
    (n) = 0 for n < k or k < 0
    (k)
  */
-inline int binomial (const int n, const int k)
+int binomial(const int n, const int k)
 {
   int r(1);
   

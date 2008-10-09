@@ -62,7 +62,7 @@ namespace MathTL
 
     for (iterations = 1; iterations < maxit && error > tol; iterations++)
       {
-	unsigned int ik, CGits;
+	unsigned int ik(0), CGits(0);
 	diff = lambdak;
 	qk = zk; qk.scale(1./linfty_norm(zk, ik)); // ||qk||_infty=1
 //  	if (iterations > 3) ATilde.set_lambda(lambdak);

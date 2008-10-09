@@ -57,6 +57,31 @@ namespace MathTL
     {
     public:
       /*!
+	make iterator category accessible
+      */
+      typedef typename std::map<I,C>::const_iterator::iterator_category iterator_category;
+
+      /*!
+	make value type accessible
+      */
+      typedef typename std::map<I,C>::const_iterator::value_type value_type;
+
+      /*!
+	make difference type accessible
+      */
+      typedef typename std::map<I,C>::const_iterator::difference_type difference_type;
+
+      /*!
+	make pointer type accessible
+      */
+      typedef typename std::map<I,C>::const_iterator::pointer pointer;
+
+      /*!
+	make reference type accessible
+      */
+      typedef typename std::map<I,C>::const_iterator::reference reference;
+
+      /*!
 	constructs a const_iterator from a map::const_iterator
       */
       const_iterator(const typename std::map<I,C>::const_iterator& entry);

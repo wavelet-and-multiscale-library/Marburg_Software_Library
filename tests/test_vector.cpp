@@ -61,6 +61,9 @@ int main()
   linfty_norm(v, vi);
   cout << "- ||x||_infinity is realized at index " << vi << endl;
 
+  cout << "- ell_0 norm of v: "
+       << l0_norm(v) << endl;
+
   cout << "- external arithmetic functionality:" << endl;
   Vector<double> a(dim), b(dim);
   a(1) = 23; a(2) = 10; b(1) = -1.5; b(2) = 3; b(4) = 8;

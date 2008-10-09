@@ -112,6 +112,21 @@ namespace MathTL
     
     return std::pow(r, 1.0/p);
   }
+
+  /*!
+    l_0 "norm", count the nontrivial entries
+  */
+  template <class VECTOR>
+  const unsigned int l0_norm(const VECTOR& v)
+  {
+    unsigned int r(0);
+
+    for (typename VECTOR::const_iterator it(v.begin()), itend(v.end());
+	 it != itend; ++it)
+      if (fabs(*it)>0) r++;
+
+    return r;
+  }
 }
 
 #endif

@@ -1538,7 +1538,7 @@ namespace WaveletTL
 //     SimpsonRule simpson;
     GaussLegendreRule gauss(d+3);
 //     CompositeRule<1> composite(simpson, 24);
-    CompositeRule<1> composite(gauss, d*(d-1)); // more exact than the Simpson rule
+    CompositeRule<1> composite(gauss, d*std::max(d-1,1)); // more exact than the Simpson rule
     SchoenbergIntervalBSpline_td<d> sbs(jmax+1,0);
     for (int k = DeltaLmin(); k <= DeltaRmax(jmax+1); k++) {
       sbs.set_k(k);
@@ -1551,8 +1551,8 @@ namespace WaveletTL
     // 2. transform rhs into that of psi_{j,k} basis: apply T_{j-1}^T
     Vector<double> rhs(coeffs.size(), false);
     apply_Tj_transposed(jmax, coeffs_phijk, rhs);
-    
-    if (!primal) {
+
+    if (!primal && !(d==1 && dT==1)) {
       FullGramian<d,dT,s0,s1,sT0,sT1,J0> G(*this);
       G.set_level(jmax+1);
       unsigned int iterations;

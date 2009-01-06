@@ -54,11 +54,10 @@ endif
 
 EXEOBJF = test_additive_Schwarz.o\
 test_additive_Schwarz_1D.o\
-test_multiplicative_Schwarz_1D.o
-#test_steepest_descent_2D.o
-#test_steepest_descent.o
-#test_multiplicative_Schwarz.o
-#test_multiplicative_Schwarz.o
+test_multiplicative_Schwarz_1D.o\
+test_steepest_descent_2D.o\
+test_steepest_descent.o\
+test_multiplicative_Schwarz.o\
 #test_biharmonic_equation_1D.o\
 #test_steepest_descent_biharmonic_1D.o
 #test_apply_1D.o \

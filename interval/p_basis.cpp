@@ -732,8 +732,9 @@ namespace WaveletTL
 #endif
 
     // construction of the wavelet basis: symmetrization for odd d and symmetric b.c.'s
-    if (d%2 && s0 == s1)
-      {
+    if (s0 == s1)
+    //if (d%2 && s0 == s1)
+	{
 	DS_symmetrization(Mj1, Mj1T);
 #if 0
 	{

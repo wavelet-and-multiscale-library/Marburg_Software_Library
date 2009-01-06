@@ -104,8 +104,12 @@ int main()
 #if 1
   const int d  = 3;
   const int dT = 3;
-//   typedef DSBasis<d,dT> Basis; Basis basis(true, true);
-//   typedef PBasis<d,dT> Basis; Basis basis(true, true);
+  //typedef DSBasis<d,dT> Basis; Basis basis(true, true);
+  //  typedef PBasis<d,dT> Basis; Basis basis(true, true);
+  //typedef SplineBasis<d,dT,P_construction> Basis; Basis basis("",1,1,0,0);
+  
+  //   typedef DSBasis<d,dT> Basis; Basis basis(true, true);
+  //   typedef PBasis<d,dT> Basis; Basis basis(true, true);
   typedef SplineBasis<d,dT,P_construction,1,1,0,0,SplineBasisData_j0<d,dT,P_construction,1,1,0,0>::j0> Basis; Basis basis;
 #else
   typedef JLBasis Basis; Basis basis;

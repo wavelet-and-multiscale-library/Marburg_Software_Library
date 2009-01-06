@@ -20,8 +20,8 @@ int main()
 {
   cout << "Testing wavelet bases from [P] ..." << endl;
 
-  const int d  = 3;
-  const int dT = 3;
+  const int d  = 4;
+  const int dT = 6;
 
   typedef PBasis<d,dT> Basis;
   typedef Basis::Index Index;

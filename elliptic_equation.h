@@ -205,7 +205,7 @@ namespace FrameTL
 
 
     /*!
-      w += factor * (stiffness matrix entries of in column lambda on level j)
+      w += factor * (stiffness matrix entries of column lambda on level j)
     */
     void add_level (const Index& lambda,
 		    InfiniteVector<double, Index>& w, const int j,

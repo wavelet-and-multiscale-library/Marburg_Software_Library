@@ -64,7 +64,8 @@ public:
 
   template <class PROBLEM>
   void steepest_descent_SOLVE(const PROBLEM& P,  const double epsilon,
-			      InfiniteVector<double, typename PROBLEM::Index>& u_epsilon)
+			      InfiniteVector<double, typename PROBLEM::Index>& u_epsilon,
+			      Array1D<InfiniteVector<double, typename PROBLEM::Index> >& approximations)
   {
     //typedef DSBasis<3,3> Basis1D;
     typedef PBasis<3,3> Basis1D;
@@ -213,11 +214,11 @@ public:
 // 	}
 
 	if (loops % 1 == 0) {
-	  std::ofstream os3("steep2D_asymptotic_P_33.m");
+	  std::ofstream os3("steep1D_asymptotic_DS_33.m");
 	  matlab_output(asymptotic,os3);
 	  os3.close();
 	  
-	  std::ofstream os4("steep2D_time_asymptotic_P_33.m");
+	  std::ofstream os4("steep1D_time_asymptotic_DS_33.m");
 	  matlab_output(time_asymptotic,os4);
 	  os4.close();
 	}
@@ -226,7 +227,7 @@ public:
 	// ######### end output #########
 
 
-	if (tmp < 1.0e-4 || loops == 40000) {
+	if (tmp < 1.0e-3 || loops == 1000) {
 	  u_epsilon = w;
 	  exit = true;
 	  break;
@@ -244,5 +245,16 @@ public:
     //       InfiniteVector<double, Index> tmp;
     //       w.COARSE(((3.*mu*omega_i)/(1+3.*mu)),tmp);
     //       w = tmp;
+  
+        // collect final approximation and its local parts
+    approximations[P.basis().n_p()] = u_epsilon;
+    
+    for (int i = 0; i < P.basis().n_p(); i++) {
+      approximations[i].clear();
+      for (typename InfiniteVector<double, Index>::const_iterator it = u_epsilon.begin(), itend = u_epsilon.end();
+	   it != itend; ++it)
+	if (it.index().p() == i)
+	  approximations[i].set_coefficient(it.index(),*it);
+    }
   }
 }

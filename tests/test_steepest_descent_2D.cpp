@@ -1,9 +1,9 @@
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
 
-#define JMAX 8
+#define JMAX 5
 #define TWO_D
 
-#define PRECOMP_RHS
+//#define PRECOMP_RHS
 
 #include <fstream>
 #include <iostream>
@@ -253,12 +253,13 @@ int main()
   const double epsilon = 1.0e-6;
 
   InfiniteVector<double, Index> u_epsilon;
+  Array1D<InfiniteVector<double, Index> > approximations(frame.n_p()+1);
 
   clock_t tstart, tend;
   double time;
   tstart = clock();
 
-  steepest_descent_SOLVE(problem, epsilon, u_epsilon);
+  steepest_descent_SOLVE(problem, epsilon, u_epsilon, approximations);
   //cg_SOLVE(problem, epsilon, u_epsilon);
   //richardson_SOLVE_CDD2(problem, epsilon, u_epsilon);
   //richardson_SOLVE(problem, epsilon, u_epsilon);
@@ -293,6 +294,28 @@ int main()
   std::ofstream ofs6("error_steep_2D_out.m");
   matlab_output(ofs6,Error);
   ofs6.close();
+
+  for (int i = 0; i <= frame.n_p(); i++)
+    approximations[i].scale(&discrete_poisson,-1);
+
+
+  for (int i = 0; i < frame.n_p(); i++) {
+    cout << "plotting local approximation on patch " << i << endl;
+
+    char filename3[50];
+    sprintf(filename3, "%s%d%s%d%s%d%s", "approx2Dsteep_local_on_patch_" , i , "_d" , d ,  "_dT", dT, ".m");
+
+    U = evalObj.evaluate(frame, approximations[i], true, 6);//expand in primal basis
+    std::ofstream ofsloc(filename3);
+    matlab_output(ofsloc,U);
+    //gnuplot_output(ofsloc,U);
+    ofsloc.close();
+  
+  }
+
+
+
+
 #endif
   //  problem.add_level(frame.first_generator(3),u_epsilon,3,1.);
 

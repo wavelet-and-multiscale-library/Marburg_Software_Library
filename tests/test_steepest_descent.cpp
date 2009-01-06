@@ -1,6 +1,6 @@
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
 
-#define JMAX 18
+#define JMAX 11
 #define ONE_D
 
 #include <fstream>
@@ -108,8 +108,10 @@ int main()
   const int DIM = 1;
   const int jmax = JMAX;
 
+  const int d = 3, dT = 3;
+
   //typedef DSBasis<3,3> Basis1D;
-  typedef PBasis<3,3> Basis1D;
+  typedef PBasis<d,dT> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
   typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
@@ -369,7 +371,9 @@ int main()
 //       cout << ind << endl;
 //     }
 
-  steepest_descent_SOLVE(problem, epsilon, u_epsilon);
+  Array1D<InfiniteVector<double, Index> > approximations(frame.n_p()+1);
+
+  steepest_descent_SOLVE(problem, epsilon, u_epsilon, approximations);
   //additive_Schwarz_SOLVE(problem, epsilon, u_epsilon);
 
   //  steepest_descent_SOLVE_basis(problem, epsilon, u_epsilon);
@@ -423,7 +427,44 @@ int main()
   matlab_output(ofs6,Error);
   ofs6.close();
 
+  for (int i = 0; i <= frame.n_p(); i++)
+    approximations[i].scale(&discrete_poisson,-1);
 
+  for (int i = 0; i < frame.n_p(); i++) {
+    cout << "plotting local approximation on patch " << i << endl;
+
+    char filename3[50];
+    sprintf(filename3, "%s%d%s%d%s%d%s", "approx1Dsteep_local_on_patch_" , i , "_d" , d ,  "_dT", dT, ".m");
+
+    U = evalObj.evaluate(frame, approximations[i], true, 10);//expand in primal basis
+    std::ofstream ofsloc(filename3);
+    matlab_output(ofsloc,U);
+    //gnuplot_output(ofsloc,U);
+    ofsloc.close();
+  }
+
+
+
+  typedef Basis1D::Index Index1D;
+
+  FixedArray1D<InfiniteVector<double, Index1D>, 2> indices;
+ 
+  InfiniteVector<double, Index>::const_iterator it = approximations[frame.n_p()].begin();
+  for (; it!= approximations[frame.n_p()].end(); ++it) {
+    //cout << *it << endl;
+    Index ind(it.index());
+    //cout << "level = " << ind.j() << endl;
+    indices[ind.p()].set_coefficient(Index1D(ind.j(),ind.e()[0],ind.k()[0],
+					     frame.bases()[0]->bases()[0]), *it);
+  
+    //cout << log10(fabs(*it)) << endl;
+  }
+
+  std::ofstream ofs7("indices_patch_0.m");
+  WaveletTL::plot_indices<Basis1D>(frame.bases()[0]->bases()[0], indices[0], JMAX, ofs7, "jet", true, -16);
+
+  std::ofstream ofs8("indices_patch_1.m");
+  WaveletTL::plot_indices<Basis1D>(frame.bases()[1]->bases()[0], indices[1], JMAX, ofs8, "jet", true, -16);
   // compute infinite vectors of 1D indices, one for each patch
   // and plot them
 #if 0
@@ -443,12 +484,12 @@ int main()
   }
 
   std::ofstream ofs7("indices_patch_0.m");
-  WaveletTL::plot_indices<Basis1D>(frame.bases()[0]->bases()[0], indices[0], 13, ofs7, "jet", true, -8);
+  WaveletTL::plot_indices<Basis1D>(frame.bases()[0]->bases()[0], indices[0], jmax, ofs7, "jet", true, -16);
 
 
 
   std::ofstream ofs8("indices_patch_1.m");
-  WaveletTL::plot_indices<Basis1D>(frame.bases()[1]->bases()[0], indices[1], 13, ofs8, "jet", true, -8);
+  WaveletTL::plot_indices<Basis1D>(frame.bases()[1]->bases()[0], indices[1], jmax, ofs8, "jet", true, -16);
 #endif
 
   return 0;

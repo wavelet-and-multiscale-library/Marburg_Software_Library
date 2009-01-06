@@ -2,14 +2,14 @@
 #define _WAVELETTL_CDD1_VERBOSITY 0
 
 #define OVERLAP 0.7
-#define JMAX 10
+#define JMAX 11
 
 //#define PRECOMP
 
 //#define COMPUTECONSTANTS
 
-//#define SPARSE
-#define FULL
+#define SPARSE
+//#define FULL
 #define ONE_D
 
 #include <iostream>
@@ -31,7 +31,7 @@
 #include <frame_support.h>
 #include <frame_index.h>
 //#include <steepest_descent.h>
-#include <adaptive_multiplicative_Schwarz.h>
+#include <adaptive_additive_Schwarz.h>
 //#include <multiplicative_Schwarz.h>
 //#include <additive_Schwarz.h>
 //#include <steepest_descent_basis.h>
@@ -404,7 +404,7 @@ int main()
 
   //multiplicative_Schwarz_SOLVE(problem, epsilon, u_epsilon0, u_epsilon1, u_epsilon);
   //adaptive_multiplicative_Schwarz_SOLVE(problem, epsilon, approximations);
-  MultSchw(problem, epsilon, approximations);
+  AddSchw(problem, epsilon, approximations);
 
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
@@ -415,6 +415,9 @@ int main()
  
   for (int i = 0; i <= frame.n_p(); i++)
     approximations[i].scale(&discrete_poisson,-1);
+
+  cout << approximations[frame.n_p()] << endl;
+
 
   Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, approximations[frame.n_p()], true, 11);//expand in primal basis
   cout << "...finished plotting global approximate solution" << endl;

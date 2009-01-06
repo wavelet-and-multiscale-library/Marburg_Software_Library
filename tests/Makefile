@@ -52,15 +52,17 @@ CXXFLAGS += -O3 -funroll-loops -fomit-frame-pointer -I$(FRAMETL_DIR) -I$(WAVELET
 endif
 
 
-EXEOBJF = test_multiplicative_Schwarz_1D.o
-#test_multiplicative_Schwarz.o
+EXEOBJF = test_additive_Schwarz.o\
+test_additive_Schwarz_1D.o\
+test_multiplicative_Schwarz_1D.o
 #test_steepest_descent_2D.o
+#test_steepest_descent.o
+#test_multiplicative_Schwarz.o
 #test_multiplicative_Schwarz.o
 #test_biharmonic_equation_1D.o\
 #test_steepest_descent_biharmonic_1D.o
 #test_apply_1D.o \
 #test_apply.o \
-#test_steepest_descent.o\
 #test_steepest_descent_2D.o\
 #test_simple_elliptic_equation.o\
 #test_elliptic_equation_1D.o\

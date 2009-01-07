@@ -624,13 +624,19 @@ namespace FrameTL
     coeffs.clear();
     double coarsenorm(0);
     double bound(fnorm_sqr - eta*eta);
+//     cout << "fnorm_sqr = " << fnorm_sqr << endl;
+//     cout << "eta*eta = " << eta*eta << endl;
+//     cout << "bound = " << bound << endl;
+
+
     typedef typename AggregatedFrame<IBASIS,DIM>::Index Index;
     typename Array1D<std::pair<Index, double> >::const_iterator it(fcoeffs.begin());
     do {
       coarsenorm += it->second * it->second;
       coeffs.set_coefficient(it->first, it->second);
       ++it;
-      
+      //      cout << "coarsenorm-bound = " << coarsenorm-bound << endl;
+
     } while (it != fcoeffs.end() && coarsenorm < bound);
   }
 

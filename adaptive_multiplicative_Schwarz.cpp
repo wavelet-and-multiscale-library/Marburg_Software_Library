@@ -404,6 +404,33 @@ namespace FrameTL
   void  MultSchw(const PROBLEM& P, const double epsilon,
 		 Array1D<InfiniteVector<double, typename PROBLEM::Index> >& approximations)
   {
+
+//     typedef typename PROBLEM::WaveletBasis::IntervalBasis Basis1D;
+//     const int jmax = JMAX;
+//     typedef typename PROBLEM::Index Index;
+//     typedef typename PROBLEM::WaveletBasis Frame;
+
+//     InfiniteVector<double, Index> f, w, r, tmp, tmp_w, u_k;
+//     double eps = 1;
+//     double alpha = 0.1;
+//     double res = 1.;
+//     while (res > 0.001) {
+//       P.RHS(1.0e-6, f);
+//       tmp_w.clear();
+//       for (int i = 0; i < P.basis().n_p(); i++) {
+// 	//cout << "before local apply" << endl;
+// 	APPLY(P, i, u_k, 1.0e-6, w, jmax, CDD1);
+// 	//cout << "after local apply" << endl;
+// 	tmp_w += w;
+// 	//cout << "after tmp_w += w" << endl;
+//       }
+//       u_k += alpha * (f-tmp_w);
+//       res = l2_norm(f-tmp_w);
+//       cout << "res= " << res << endl;
+//     }
+//     Vector<double> v(2);
+//     v(4)=1;
+
 #ifdef ONE_D
     Singularity1D_2<double> exact1D;
     Singularity1D_2_prime<double> exact1D_prime;
@@ -630,15 +657,18 @@ namespace FrameTL
 
       //compute global residual
       
-      P.RHS(1.0e-15, f);
+      P.RHS(1.0e-6, f);
       cout << "fsize exact res = " << f.size() << endl;
       tmp_w.clear(); 
       for (int i = 0; i < P.basis().n_p(); i++) {
-      	APPLY(P, i, u_k, 1.0e-15, w, jmax, CDD1);
+      	APPLY(P, i, u_k, 1.0e-6, w, jmax, CDD1);
       	tmp_w += w;
       }
       double residual_norm = l2_norm(f-tmp_w);
       cout << "norm of global residual = " << residual_norm  << endl;
+
+      //double residual_norm = compute_exact_residual_norm(P, u_k);      
+      //cout << "norm of global residual = " << residual_norm << endl;
 
       int d  = Basis1D::primal_polynomial_degree();
       int dT = Basis1D::primal_vanishing_moments();

@@ -2,7 +2,7 @@
 #define _WAVELETTL_CDD1_VERBOSITY 0
 
 #define OVERLAP 0.7
-#define JMAX 10
+#define JMAX 6
 
 //#define PRECOMP
 

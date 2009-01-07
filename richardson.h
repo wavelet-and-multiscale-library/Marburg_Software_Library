@@ -7,8 +7,8 @@
 // | Thorsten Raasch, Manuel Werner                                     |
 // +--------------------------------------------------------------------+
 
-#ifndef _FRAME_TL_STEEPEST_DESCENT_H
-#define _FRAME_TL_STEEPEST_DESCENT_H
+#ifndef _FRAME_TL_RICHARDSON_H
+#define _FRAME_TL_RICHARDSON_H
 
 #include <algebra/infinite_vector.h>
 
@@ -18,7 +18,8 @@ namespace FrameTL
   */
   template <class PROBLEM>
   void richardson_SOLVE(const PROBLEM& P, const double epsilon,
-			InfiniteVector<double, typename PROBLEM::Index>& u_epsilon);
+			InfiniteVector<double, typename PROBLEM::Index>& u_epsilon,
+			Array1D<InfiniteVector<double, typename PROBLEM::Index> >& approximations);
 }
 
 #include <richardson.cpp>

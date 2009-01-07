@@ -1,6 +1,6 @@
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
 
-#define JMAX 6
+#define JMAX 11
 #define ONE_D
 
 #include <fstream>
@@ -230,11 +230,20 @@ int main()
 //     discrete_poisson.set_Ainv(1.0/0.146);
 
   // (d,dT) = (3,3)
-  //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0581, 1.0/0.146);
-  CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0581, 1.0/0.146);
-  discrete_poisson.set_norm_A(5.0581);
-  //   // optimistic guess:
-  discrete_poisson.set_Ainv(1.0/0.146);
+    CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 1.0, 1.0);
+    discrete_poisson.set_norm_A(1.0);
+    // optimistic guess:
+    discrete_poisson.set_Ainv(1.0);
+
+//    CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0581, 1.0/0.146);
+//    discrete_poisson.set_norm_A(5.0581);
+//    // optimistic guess:
+//    discrete_poisson.set_Ainv(1.0/0.146);
+
+//   CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 1.0, 1.0);
+//   // most optimistic guess:
+//   discrete_poisson.set_norm_A(1.0);
+//   discrete_poisson.set_Ainv(1.0);
 
   //CachedProblem<BiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 4.19, 1.0/0.146);
 //   discrete_biharmonic.set_norm_A(5.0581);
@@ -310,8 +319,7 @@ int main()
   //  discrete_poisson.set_Ainv(1.0/(1.0e-3*0.672));
   
   
-  const double epsilon = 0.000001;
-
+  const double epsilon = 1.0e-6;
   InfiniteVector<double, Index> u_epsilon;
 
 

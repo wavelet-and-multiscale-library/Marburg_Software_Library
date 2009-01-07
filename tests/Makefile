@@ -43,8 +43,8 @@ endif
 #CXX = mpiCC
 
 #CXX = icpc
-#CXXFLAGS += -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
-CXXFLAGS += -O3 -funroll-loops -fomit-frame-pointer -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+CXXFLAGS +=  -O2 -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+#CXXFLAGS += -O3 -funroll-loops -fomit-frame-pointer -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -mcpu=pentium4 -msse3 -funroll-loops -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O4 -mcpu=pentium4 -msse3 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
@@ -52,12 +52,13 @@ CXXFLAGS += -O3 -funroll-loops -fomit-frame-pointer -I$(FRAMETL_DIR) -I$(WAVELET
 endif
 
 
-EXEOBJF = test_additive_Schwarz.o\
-test_additive_Schwarz_1D.o\
-test_multiplicative_Schwarz_1D.o\
-test_steepest_descent_2D.o\
-test_steepest_descent.o\
-test_multiplicative_Schwarz.o\
+EXEOBJF = test_steepest_descent.o\
+test_richardson.o\
+#test_multiplicative_Schwarz_1D.o\
+#test_additive_Schwarz.o\
+#test_additive_Schwarz_1D.o\
+#test_steepest_descent_2D.o\
+#test_multiplicative_Schwarz.o\
 #test_biharmonic_equation_1D.o\
 #test_steepest_descent_biharmonic_1D.o
 #test_apply_1D.o \

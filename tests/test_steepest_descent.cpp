@@ -1,6 +1,6 @@
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
 
-#define JMAX 11
+#define JMAX 6
 #define ONE_D
 
 #include <fstream>
@@ -314,73 +314,14 @@ int main()
 
   InfiniteVector<double, Index> u_epsilon;
 
-#if 0
-  
-  //la = (5,(1),0,(23))
-  //nu = (4,(0),1,(4))
-
-  //d=dt=3
-  MultiIndex<unsigned int,1> e1;
-  e1[0] = 1;
-  MultiIndex<int,1> k1;
-  k1[0] = 23;
-
-  MultiIndex<unsigned int,1> e2;
-  e2[0] = 0;
-  MultiIndex<int,1> k2;
-  k2[0] = 4;
-
-  Index ind_1(&frame, 5, e1, 0, k1);
-  Index ind_2(&frame, 4, e2, 1, k2);
- 
-  //d=dt=2
-//   MultiIndex<unsigned int,1> e1;
-//   e1[0] = 1;
-//   MultiIndex<int,1> k1;
-//   k1[0] = 11;
-
-//   MultiIndex<unsigned int,1> e2;
-//   e2[0] = 0;
-//   MultiIndex<int,1> k2;
-//   k2[0] = 4;
-
-//   Index ind_1(&frame, 6, e1, 1, k1);
-//   Index ind_2(&frame, 3, e2, 0, k2);
-
-  map<double,double> integral_values;
-
-  cout.precision(12);
-
-  for (unsigned int i = 0; i < 300; i++) {
-    double d = discrete_poisson.a_quad(ind_1, ind_2, 2, i+1);
-    cout << "Result = " << d << endl;
-    integral_values[i+1] = fabs(d);
-  }
-
-  std::ofstream os3("integral_values.m");
-  matlab_output(integral_values,os3);
-  os3.close();
-#endif
 
   clock_t tstart, tend;
   double time;
   tstart = clock();
-//   for (Index ind = FrameTL::first_generator<Basis1D,1,1,Frame1D>(&frame, frame.j0());
-//        ind <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+2); ++ind)
-//     {
-//       cout << ind << endl;
-//     }
 
   Array1D<InfiniteVector<double, Index> > approximations(frame.n_p()+1);
 
   steepest_descent_SOLVE(problem, epsilon, u_epsilon, approximations);
-  //additive_Schwarz_SOLVE(problem, epsilon, u_epsilon);
-
-  //  steepest_descent_SOLVE_basis(problem, epsilon, u_epsilon);
-  //richardson_SOLVE_CDD2(problem, epsilon, u_epsilon);
-  //CDD1_SOLVE(problem, epsilon, u_epsilon, 7, CDD1);
-
-  //steepest_descent_SOLVE(discrete_poisson, epsilon, u_epsilon);
 
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
@@ -391,26 +332,6 @@ int main()
   u_epsilon.scale(&discrete_poisson,-1);
   //u_epsilon.scale(&discrete_biharmonic,-1);
   
-  
-//   const int size = u_epsilon.size();
-//   Coefficient coeff_array[size];
-
-//   // time load uncritical:
-//   for (int i = 0; i< 10000; i++)
-//     to_array<Index>(u_epsilon, coeff_array);
-//   for (int i = 0; i < size; i++) {
-//     cout << coeff_array[i].num << "  " << coeff_array[i].val << endl;
-//   }
-  
-//   int count = size;
-//   array_to_map (coeff_array, &frame, u_epsilon, count);
-  
-//   //  u_epsilon.merge(u_epsilon);
-
-//   InfiniteVector<double, Index>::const_iterator it = u_epsilon.begin();
-//   for (; it != u_epsilon.end(); it++) {
-//     cout << it.index() << " " << *it << endl;
-//   }
 
   EvaluateFrame<Basis1D,1,1> evalObj;
 
@@ -429,7 +350,7 @@ int main()
 
   for (int i = 0; i <= frame.n_p(); i++)
     approximations[i].scale(&discrete_poisson,-1);
-
+  
   for (int i = 0; i < frame.n_p(); i++) {
     cout << "plotting local approximation on patch " << i << endl;
 
@@ -467,30 +388,6 @@ int main()
   WaveletTL::plot_indices<Basis1D>(frame.bases()[1]->bases()[0], indices[1], JMAX, ofs8, "jet", true, -16);
   // compute infinite vectors of 1D indices, one for each patch
   // and plot them
-#if 0
-  typedef Basis1D::Index Index1D;
-
-  FixedArray1D<InfiniteVector<double, Index1D>, 2> indices;
- 
-  InfiniteVector<double, Index>::const_iterator it = u_epsilon.begin();
-  for (; it!= u_epsilon.end(); ++it) {
-    //cout << *it << endl;
-    Index ind(it.index());
-    //cout << "level = " << ind.j() << endl;
-    indices[ind.p()].set_coefficient(Index1D(ind.j(),ind.e()[0],ind.k()[0],
-					     frame.bases()[0]->bases()[0]), *it);
-  
-    //cout << log10(fabs(*it)) << endl;
-  }
-
-  std::ofstream ofs7("indices_patch_0.m");
-  WaveletTL::plot_indices<Basis1D>(frame.bases()[0]->bases()[0], indices[0], jmax, ofs7, "jet", true, -16);
-
-
-
-  std::ofstream ofs8("indices_patch_1.m");
-  WaveletTL::plot_indices<Basis1D>(frame.bases()[1]->bases()[0], indices[1], jmax, ofs8, "jet", true, -16);
-#endif
 
   return 0;
 

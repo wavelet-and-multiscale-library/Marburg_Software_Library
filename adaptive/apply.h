@@ -119,7 +119,9 @@ namespace WaveletTL
 	   const int jmax,
 	   InfiniteVector<double, typename PROBLEM::Index>& tilde_r,
 	   double& nu,
-	   const CompressionStrategy strategy = St04a);
+	   unsigned int& niter,
+	   const CompressionStrategy strategy = St04a
+	   );
 
 }
 

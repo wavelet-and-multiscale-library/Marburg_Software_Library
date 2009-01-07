@@ -20,14 +20,15 @@ int main()
 {
   cout << "Testing wavelet bases from [P] ..." << endl;
 
+
   const int d  = 4;
   const int dT = 6;
 
   typedef PBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
-  Basis basis; // no b.c.'s
-//   Basis basis(1, 1); // 1st order complementary b.c.'s at x=0 and x=1
+  //  Basis basis; // no b.c.'s
+   Basis basis(1, 1); // 1st order complementary b.c.'s at x=0 and x=1
 //   Basis basis(1, 0); // complementary b.c. at x=0
 //   Basis basis(0, 1); // complementary b.c. at x=1
 //   Basis basis(3, 3);
@@ -241,7 +242,7 @@ int main()
     }
 #endif
 
-#if 0
+#if 1
   cout << "- checking access to single rows of the M_{j,i} matrices:" << endl;
   for (int level = basis.j0(); level <= basis.j0()+2; level++)
     {
@@ -349,7 +350,7 @@ int main()
     }
 #endif
 
-#if 0
+#if 1
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "

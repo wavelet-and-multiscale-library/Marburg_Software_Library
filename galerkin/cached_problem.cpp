@@ -619,10 +619,8 @@ namespace WaveletTL
 	  it = col.insert(lb, value_type(j, Block()));
 
 	  Block& block(it->second);	  
-
-
 	  IntersectingList nus;
-	   
+
 	  intersecting_wavelets_on_patch(basis(), nu,
 					 p,
 					 std::max(j, basis().j0()),

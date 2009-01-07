@@ -59,7 +59,7 @@ namespace WaveletTL
  	  IntersectingList nus;
 	  if (P.space_dimension == 1) {
 	    const double kjd = std::max((double)J, ceil(J*(P.operator_order()+P.basis().primal_vanishing_moments()) / 
-							((double) P.basis().primal_regularity()-P.operator_order())));
+							((double) P.basis().primal_regularity()-P.operator_order()-0.5)));
 	    const int maxlevel = std::min((int)floor(lambda.j()+kjd), jmax);
 
 	    for (int level = std::max(P.basis().j0()-1, (int)ceil(lambda.j()-kjd));

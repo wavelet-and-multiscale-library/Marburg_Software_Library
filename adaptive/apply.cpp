@@ -501,7 +501,7 @@ namespace WaveletTL
       const double norm_A = P.norm_A();
 
       const unsigned int q = (unsigned int) std::max(ceil(log(sqrt((double)v.size())*norm_v*norm_A*2/eta)/M_LN2), 0.);
-      
+     
       // Setup the bins: The i-th bin contains the entries of v with modulus in the interval
       // (2^{-(i+1)}||v||,2^{-i}||v||], 0 <= i <= q-1, the remaining elements (with even smaller modulus)
       // are collected in the q-th bin.
@@ -606,49 +606,27 @@ namespace WaveletTL
 	   const int jmax,
 	   InfiniteVector<double, typename PROBLEM::Index>& tilde_r,
 	   double& nu,
-	   const CompressionStrategy strategy)
+	   unsigned int& niter,
+	   const CompressionStrategy strategy
+	   )
   {
     //    unsigned int k = 0;
     double zeta = 2.*xi;
-    //double zeta = 2.*epsilon;
     double l2n = 0.;
-
-//      its++;
-
-//     if (its > 10) {
-//       InfiniteVector<double, typename PROBLEM::Index> help;
-//       zeta *= 1.0 / (1 << 6);
-//       P.RHS (zeta/2., tilde_r);
-//       cout << "zeta half = " << zeta/2. << endl;
-//       APPLY_COARSE(P, w, zeta/2., help, 0.00000001, jmax, strategy);
-//       tilde_r -= help;
-//       l2n = l2_norm(tilde_r);
-//       nu = l2n + zeta;
-//     }
-//    else
-//      {
-	do {
-	  zeta /= 2.;
-	  //cout << "in RES -1" << endl;
-	  P.RHS (zeta/2., tilde_r);
-	  InfiniteVector<double, typename PROBLEM::Index> help;
-	  //cout << "zeta halbe = " << zeta/2. << endl;
-	  //cout << "before aply in RES " << endl;
-	  //APPLY(P, w, .0/*zeta/2.*/, help, jmax, strategy);
-	  //cout << ++k << "calls of APPlY in RES" << endl;
-	  APPLY_COARSE(P, w, zeta/2., help, 0.000001, jmax, strategy);
-	  tilde_r -= help;
-
-	  l2n = l2_norm(tilde_r);
-
-	  nu = l2n + zeta;
-	  //if(k == 10)
-	  //	break;
-	  //cout << "NU = " << nu << "  EPS = " << epsilon << " ZETA = " << zeta << " " << "  DELTA*L2N = " << delta*l2n << endl;
-	}
-  	while ( (nu > epsilon) && (zeta > delta*l2n) );
-	//}
-
+    do {
+      zeta /= 2.;
+      P.RHS (zeta/2., tilde_r);
+      InfiniteVector<double, typename PROBLEM::Index> help;
+      //APPLY(P, w, .0/*zeta/2.*/, help, jmax, strategy);
+      APPLY_COARSE(P, w, zeta/2., help, 1.0e-6, jmax, strategy);
+      //APPLY_COARSE(P, w, zeta/2., help, 0.5, jmax, strategy);
+      tilde_r -= help;
+      l2n = l2_norm(tilde_r);
+      nu = l2n + zeta;
+      ++niter;
+    }
+    while ( (nu > epsilon) && (zeta > delta*l2n) );
+    
   }
 
 }

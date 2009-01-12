@@ -486,7 +486,7 @@ namespace WaveletTL
 //     cout << "Mj0T (without SQRT1_2)=" << endl << Mj0T;
 //     Mj0T.scale(M_SQRT1_2);
 
-#if 0
+#if 1
     cout << "PBasis(): check biorthogonality of Mj0, Mj0T:" << endl;
 //     cout << "Mj0=" << endl << Mj0 << endl << "Mj0T=" << endl << Mj0T << endl;
 
@@ -513,11 +513,11 @@ namespace WaveletTL
     SparseMatrix<double> A, H, Hinv;
     GSetup(A, H, Hinv); // [DKU, (4.1.1), (4.1.13)]
     
-#if 0
+#if 1
     SparseMatrix<double> Aold(A); // for the checks below
 #endif
     GElim (A, H, Hinv); // elimination [DKU, (4.1.4)ff.]
-#if 1
+#if 0
     // choose this branch if you don't want the interior wavelets to be the CDF ones
     // (in that case, the Riesz constants improve, but the condition numbers for
     // the Poisson equation will deteriorate)
@@ -526,7 +526,7 @@ namespace WaveletTL
     SparseMatrix<double> BB; double binv = BT(A, BB); // [DKU, (4.1.13)]
 //     cout << "b^{-1}=" << binv << endl;
 #endif
-#if 0
+#if 1
     cout << "PBasis(): check properties (4.1.15):" << endl;
     SparseMatrix<double> test4115 = transpose(BB)*A;
     for (unsigned int i = 0; i < test4115.row_dimension(); i++)
@@ -545,7 +545,7 @@ namespace WaveletTL
     cout << "* ||Fj^T*A||_infty: " << row_sum_norm(test4115) << endl;    
 #endif
 
-#if 0
+#if 1
     cout << "PBasis(): check factorization of A:" << endl;
     SparseMatrix<double> testAfact = Aold - Hinv*A;
     cout << "* in infty-norm: " << row_sum_norm(testAfact) << endl;
@@ -567,7 +567,7 @@ namespace WaveletTL
     SparseMatrix<double> help = H * PPinv;
     SparseMatrix<double> gj0ih = transpose(BB) * help; gj0ih.scale(M_SQRT2); // [P, Prop. 5.6]
     SparseMatrix<double> gj1ih = transpose(FF) * help; gj1ih.scale(M_SQRT2); // [DKU, (4.1.24)], [P, Prop. 5.6]
-#if 0
+#if 1
     cout << "PBasis(): check initial stable completion:" << endl;
     SparseMatrix<double> mj_initial(Mj0.row_dimension(),
 				    Mj0.column_dimension() + mj1ih.column_dimension());
@@ -623,7 +623,7 @@ namespace WaveletTL
     Mj0T.compress(1e-8);
     Mj1T.compress(1e-8);
 
-#if 0
+#if 1
     // adjust interior wavelets, such that they correspond to the CDF ones, cf. [P, pp. 121-123]
     // (if you want to enable this, binv should have been computed, see some lines above)
     const double scaling_factor = minus1power(d+1)*2*binv;
@@ -639,7 +639,7 @@ namespace WaveletTL
 //     cout << "Mj1T (without SQRT1_2)=" << endl << Mj1T;
 //     Mj1T.scale(M_SQRT1_2);
 
-#if 0
+#if 1
     cout << "PBasis(): check new stable completion:" << endl;
     
     SparseMatrix<double> mj_new(Mj0.row_dimension(),
@@ -732,11 +732,11 @@ namespace WaveletTL
 #endif
 
     // construction of the wavelet basis: symmetrization for odd d and symmetric b.c.'s
-    if (s0 == s1)
-    //if (d%2 && s0 == s1)
+    //if (s0 == s1)
+    if (d%2 && s0 == s1)
 	{
 	DS_symmetrization(Mj1, Mj1T);
-#if 0
+#if 1
 	{
 	  cout << "PBasis(): check [DS] symmetrization:" << endl;
 	  
@@ -1390,7 +1390,7 @@ namespace WaveletTL
  		       inv_CRT, true);
     //cout << "inv_CjpT= " << endl << inv_CjpT << endl;
 
-#if 0
+#if 1
     cout << "PBasis: testing setup of Cj:" << endl;
 
     SparseMatrix<double> test1 = CjT * inv_CjT;
@@ -1489,6 +1489,8 @@ namespace WaveletTL
   PBasis<d, dT>::GElim(SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv) {
     // IGPMlib reference: I_Basis_Bspline_s::gelim()
     
+    cout << "A=" << endl << A;
+
     const int firstcol = d-1-s0; // first column of A_j^{(d)} in Ahat_j^{(d)}
     const int lastcol  = Deltasize(j0())-d+s1; // last column
     const int firstrow = d-1-s0; // first row of A_j^{(d)} in Ahat_j^{(d)}
@@ -1498,6 +1500,70 @@ namespace WaveletTL
 
 //     cout << "A=" << endl << A;
 
+#if 1
+    int incr1 = 0;
+    int incr2 = 0;
+    // elimination (4.1.4)ff.:
+    for (int i = 1; i <= d; i++) {
+      help.diagonal(Deltasize(j0()+1), 1.0);
+
+      // row index of the entry in the first column of A_j^{(i)} (w.r.t. Ahat_j^{(i)})
+      const int elimrow = i%2 ? firstrow+(i-1)/2 : lastrow-(int)floor((i-1)/2.);
+      //cout << "i=" << i << ", i%2=" << i%2 << ", elimrow=" << elimrow << endl;
+
+      // factorization [P, p. 112]      
+      const int HhatLow = d-1-s0+incr1;
+      const int HhatUp  = Deltasize(j0()+1)-d+s1-incr2;
+
+      if (i%2)
+	incr1++;
+      else
+	incr2++;
+
+      if (i%2) // i odd, elimination from above (4.1.4a)
+	{
+	  assert(fabs(A.get_entry(elimrow+1, firstcol)) >= 1e-10);
+	  const double Uentry = -A.get_entry(elimrow, firstcol) / A.get_entry(elimrow+1, firstcol);
+	  
+	  // setup elimination matrix 'help' from upper left corner to lower right
+ 	  for (int k = HhatLow; k+1 <= lastrow; k+= 2)
+	    help.set_entry(k, k+1, Uentry);
+	}
+      else // i even, elimination from below (4.1.4b)
+	{
+	  assert(fabs(A.get_entry(elimrow-1, lastcol)) >= 1e-10);
+	  const double Lentry = -A.get_entry(elimrow, lastcol) / A.get_entry(elimrow-1, lastcol);
+
+	  // setup elimination matrix 'help' from lower right corner to upper left
+	  for (int k = HhatUp; k-1 >= firstcol; k-= 2)
+	    help.set_entry(k, k-1, Lentry);
+	}
+      //cout << "Hfactor=" << endl << help;
+     
+
+      A = help * A;
+      H = help * H;
+     
+      //cout << "A=" << endl << A;
+ 
+      A.compress(1e-14);
+
+
+      // invert help
+      if (i%2) {
+	for (int k = HhatLow; k+1 <= lastrow; k += 2)
+	  help.set_entry(k, k+1, -help.get_entry(k, k+1));
+      }	else {
+	for (int k = HhatUp; k-1 >= firstcol; k -= 2)
+	  help.set_entry(k, k-1, -help.get_entry(k, k-1));
+      }
+      
+      Hinv = Hinv * help;
+    }
+#endif
+
+    // HERE COMES THE DEPRECATED CODE. CAN BE REMOVED AS SOON AS ABOVE CODE IS ACCEPTED.
+#if 0
     // elimination (4.1.4)ff.:
     for (int i = 1; i <= d; i++) {
       help.diagonal(Deltasize(j0()+1), 1.0);
@@ -1527,15 +1593,16 @@ namespace WaveletTL
  	  for (int k = HhatLow; k+1 < Deltasize(j0()+1)-(d-1-s1); k+= 2)
 	    help.set_entry(k+1, k, Lentry);
 	}
-      
-//       cout << "Hfactor=" << endl << help;
+
+      cout << "A=" << endl << A;
+      cout << "Hfactor=" << endl << help;
 
       A = help * A;
       H = help * H;
       
       A.compress(1e-14);
 
-//       cout << "A=" << endl << A;
+
 
       // invert help
       if (i%2) {
@@ -1549,8 +1616,9 @@ namespace WaveletTL
       Hinv = Hinv * help;
     }
 
-//     cout << "finally, H=" << endl << H;
-//     cout << "finally, Hinv=" << endl << Hinv;
+    cout << "finally, H=" << endl << H;
+    cout << "finally, Hinv=" << endl << Hinv;
+#endif
   }
 
 

@@ -28,12 +28,12 @@ int main()
   typedef Basis::Index Index;
 
   //  Basis basis; // no b.c.'s
-   Basis basis(1, 1); // 1st order complementary b.c.'s at x=0 and x=1
-//   Basis basis(1, 0); // complementary b.c. at x=0
-//   Basis basis(0, 1); // complementary b.c. at x=1
-//   Basis basis(3, 3);
-//Array1D<int>() Ar;
-//evaluate(Basis,2,Index,Ar,Ar);
+  Basis basis(1, 1); // 1st order complementary b.c.'s at x=0 and x=1
+  
+  //   Basis basis(1, 0); // complementary b.c. at x=0
+  //   Basis basis(0, 1); // complementary b.c. at x=1
+  //Array1D<int>() Ar;
+  //evaluate(Basis,2,Index,Ar,Ar);
   cout << "- d=" << d << ", dT=" << dT << endl;
   cout << "- the (" << d << "," << dT << ") basis has j0=" << basis.j0() << endl;
   cout << "- the default wavelet index: " << Index() << endl;
@@ -319,7 +319,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose() and reconstruct() for some/all generators on the level "
@@ -402,7 +402,7 @@ int main()
 
 #if 1
   InfiniteVector<double, Index> coeff;
-  Index index(first_generator(&basis, basis.j0()));
+  Index index(last_wavelet(&basis, basis.j0()));
   coeff.set_coefficient(index,1.0);
  //  for (int i = 0;; ++index, i++) {
 //     //cout << index << endl;

@@ -1538,7 +1538,8 @@ namespace WaveletTL
 //     SimpsonRule simpson;
     GaussLegendreRule gauss(d+3);
 //     CompositeRule<1> composite(simpson, 24);
-    CompositeRule<1> composite(gauss, d*std::max(d-1,1)); // more exact than the Simpson rule
+//     CompositeRule<1> composite(gauss, d*std::max(d-1,1)); // more exact than the Simpson rule
+    CompositeRule<1> composite(gauss, 24); // more exact than the Simpson rule
     SchoenbergIntervalBSpline_td<d> sbs(jmax+1,0);
     for (int k = DeltaLmin(); k <= DeltaRmax(jmax+1); k++) {
       sbs.set_k(k);

@@ -1,7 +1,7 @@
 # +----------------------------------------------------------------+
 # | Makefile for some WaveletTL test programs                      |
 # |                                                                |
-# | Copyright (c) 2002-2008                                        |
+# | Copyright (c) 2002-2009                                        |
 # | Thorsten Raasch, Manuel Werner                                 |
 # +----------------------------------------------------------------+
 

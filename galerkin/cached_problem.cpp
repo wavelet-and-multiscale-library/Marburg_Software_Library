@@ -109,12 +109,95 @@ namespace WaveletTL
 	}
       }
     }
-    else {// TODO
+    else {
+      // for nonlocal operators, we put full level blocks into the cache, regardless of support intersections
+
+      const int lambda_num = lambda.number();
+      const int nu_num = nu.number();
       
+      // BE CAREFUL: KEY OF GENERATOR LEVEL IS j0-1 NOT j0 !!!!
+      typedef typename Index::type_type generator_type;
+      int j = (lambda.e() == generator_type()) ? (lambda.j()-1) : lambda.j();
+      
+      // search for column 'mu'
+      typename ColumnCache::iterator col_lb(entries_cache.lower_bound(nu_num));
+      typename ColumnCache::iterator col_it(col_lb);
+      
+      if (col_lb == entries_cache.end() ||
+	  entries_cache.key_comp()(nu_num, col_lb->first))
+	{
+	  // insert a new column
+	  typedef typename ColumnCache::value_type value_type;
+	  col_it = entries_cache.insert(col_lb, value_type(nu_num, Column()));
+	}
+      
+      Column& col(col_it->second);
+      
+      // check wether the level block which 'lambda' belongs to has already been calculated
+      typename Column::iterator lb(col.lower_bound(j));
+      typename Column::iterator it(lb);
+      
+      if (lb == col.end() ||
+	  col.key_comp()(j, lb->first))
+	{
+	  // no entries have ever been computed for this column and this level
+	  
+	  // compute whole level block
+	  
+	  // insert a new level
+	  typedef typename Column::value_type value_type;
+	  it = col.insert(lb, value_type(j, Block()));
+
+	  Block& block(it->second);	  
+
+	  // collect all indices in the level block
+	  typedef std::list<Index> IndexList;
+	  IndexList nus;
+	  if (j == (basis().j0()-1)) {
+	    // generators on level j0
+	    for (Index lambda1 = basis().first_generator(basis().j0());; ++lambda1) {
+	      nus.push_back(lambda1);
+	      if (lambda1 == basis().last_generator(basis().j0())) break;
+	    }
+	  } else {
+	    // wavelets on level j
+	    for (Index lambda1 = basis().first_wavelet(j);; ++lambda1) {
+	      nus.push_back(lambda1);
+	      if (lambda1 == basis().last_wavelet(j)) break;
+	    }
+	  }
+
+	  // compute entries
+	  for (typename IndexList::const_iterator it(nus.begin()), itend(nus.end());
+	       it != itend; ++it) {
+	    const double entry = problem->a(*it, nu);
+	    typedef typename Block::value_type value_type_block;
+	    if (fabs(entry) > 1e-16 ) {
+	      block.insert(block.end(), value_type_block((*it).number(), entry));
+	      if ((*it).number() == lambda_num) {
+		r = entry;
+	      }
+	    }
+	  } 
+	}
+      // level already exists --> extract row corresponding to 'lambda'
+      else {
+	Block& block(it->second);
+	
+	typename Block::iterator block_lb(block.lower_bound(lambda_num));
+ 	typename Block::iterator block_it(block_lb);
+	// level exists, but in row 'lambda' no entry is available ==> entry must be zero
+	if (block_lb == block.end() ||
+	    block.key_comp()(lambda_num, block_lb->first)) {
+	  r = 0;
+	}
+	else {
+	  r = block_it->second;
+	}
+      }
     }
-
+    
     return r;
-
   }
   
   template <class PROBLEM>

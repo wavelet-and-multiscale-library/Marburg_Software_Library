@@ -22,7 +22,7 @@ namespace WaveletTL
     //typedef typename WaveletBasis::Support Support;
     typedef std::list<Index> IntersectingList;
     
-    if (P.local_operator())
+//     if (P.local_operator()) 
       {
 	// differential operators
 	
@@ -86,10 +86,10 @@ namespace WaveletTL
 	  }
 	}
       }
-    else 
-      {
-	// integral operators: branch is not implemented so far
-      }
+//     else 
+//       {
+// 	// integral operators: branch is not implemented so far
+//       }
   }
 
 
@@ -109,7 +109,7 @@ namespace WaveletTL
     //typedef typename WaveletBasis::Support Support;
     typedef std::list<Index> IntersectingList;
     
-    if (P.local_operator())
+//     if (P.local_operator())
       {
 	// differential operators
 	
@@ -173,9 +173,9 @@ namespace WaveletTL
 	  }
 	}
       }
-    else 
-      {
-	// integral operators: branch is not implemented so far
-      }
+//     else 
+//       {
+// 	// integral operators: branch is not implemented so far
+//       }
   }
 }

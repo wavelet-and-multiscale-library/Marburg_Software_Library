@@ -26,7 +26,6 @@ namespace WaveletTL
       const int lambda_num = lambda.number();
       const int nu_num = nu.number();
 
-
       // BE CAREFUL: KEY OF GENERATOR LEVEL IS j0-1 NOT j0 !!!!
       typedef typename Index::type_type generator_type;
       int j = (lambda.e() == generator_type()) ? (lambda.j()-1) : lambda.j();
@@ -251,27 +250,27 @@ namespace WaveletTL
 	  // do the rest of the job
 	  const double d1 = problem->D(lambda);
 	  if (strategy == St04a) {
-	    for (typename IntersectingList::iterator it(nus.begin()), itend(nus.end());
-		 it != itend; ++it) {
+	    for (typename IntersectingList::iterator it2(nus.begin()), itend2(nus.end());
+		 it2 != itend2; ++it2) {
 	      if (abs(lambda.j()-j) <= J/((double) problem->space_dimension) ||
-		  intersect_singular_support(problem->basis(), lambda, *it)) {
-		const double entry = problem->a(*it, lambda);
+		  intersect_singular_support(problem->basis(), lambda, *it2)) {
+		const double entry = problem->a(*it2, lambda);
 		typedef typename Block::value_type value_type_block;
-		block.insert(block.end(), value_type_block((*it).number(), entry));
-		//w.add_coefficient(*it, (entry / (d1*problem->D(*it))) * factor);
-		w[(*it).number()] += (entry / (d1*problem->D(*it))) * factor;
+		block.insert(block.end(), value_type_block((*it2).number(), entry));
+		//w.add_coefficient(*it2, (entry / (d1*problem->D(*it2))) * factor);
+		w[(*it2).number()] += (entry / (d1*problem->D(*it2))) * factor;
 	      }
 	    }
 	  }
 	  else if (strategy == CDD1) {
-	    for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());
-		 it != itend; ++it) {
-	      const double entry = problem->a(*it, lambda);
+	    for (typename IntersectingList::const_iterator it2(nus.begin()), itend2(nus.end());
+		 it2 != itend2; ++it2) {
+	      const double entry = problem->a(*it2, lambda);
 	      typedef typename Block::value_type value_type_block;
 	      if (entry != 0.) {
-		block.insert(block.end(), value_type_block((*it).number(), entry));
-	      //w.add_coefficient(*it, (entry / (d1 * problem->D(*it))) * factor);
-		w[(*it).number()] += (entry / (d1*problem->D(*it))) * factor;
+		block.insert(block.end(), value_type_block((*it2).number(), entry));
+	      //w.add_coefficient(*it2, (entry / (d1 * problem->D(*it2))) * factor);
+		w[(*it2).number()] += (entry / (d1*problem->D(*it2))) * factor;
 	      }
 	    }
 	  }
@@ -286,24 +285,24 @@ namespace WaveletTL
 	// do the rest of the job
 	if (strategy == St04a) {
 	  
-	  for (typename Block::const_iterator it(block.begin()), itend(block.end());
-	       it != itend; ++it) {
+	  for (typename Block::const_iterator it2(block.begin()), itend2(block.end());
+	       it2 != itend2; ++it2) {
  	    if (abs(lambda.j()-j) <= J/((double) problem->space_dimension) ||
- 		intersect_singular_support(problem->basis(), lambda, *(problem->basis().get_wavelet(it->first)))) {
-// 	      w.add_coefficient(*(problem->basis().get_wavelet(it->first)),
-// 				(it->second / (d1*problem->D(*(problem->basis().get_wavelet(it->first))))) * factor);
+ 		intersect_singular_support(problem->basis(), lambda, *(problem->basis().get_wavelet(it2->first)))) {
+// 	      w.add_coefficient(*(problem->basis().get_wavelet(it2->first)),
+// 				(it2->second / (d1*problem->D(*(problem->basis().get_wavelet(it2->first))))) * factor);
 	      
-	      w[it->first] += (it->second / (d1*problem->D(*(problem->basis().get_wavelet(it->first))))) * factor;
+	      w[it2->first] += (it2->second / (d1*problem->D(*(problem->basis().get_wavelet(it2->first))))) * factor;
 
 	    }
 	  }
 	}
 	else if (strategy == CDD1) {
-	  for (typename Block::const_iterator it(block.begin()), itend(block.end());
-	       it != itend; ++it) {
-// 	    w.add_coefficient(*(problem->basis().get_wavelet(it->first)),
-// 			      (it->second / (d1 * problem->D( *(problem->basis().get_wavelet(it->first)) )))  * factor);
-	    w[it->first] += (it->second / (d1*problem->D(*(problem->basis().get_wavelet(it->first))))) * factor;
+	  for (typename Block::const_iterator it2(block.begin()), itend2(block.end());
+	       it2 != itend2; ++it2) {
+// 	    w.add_coefficient(*(problem->basis().get_wavelet(it2->first)),
+// 			      (it2->second / (d1 * problem->D( *(problem->basis().get_wavelet(it2->first)) )))  * factor);
+	    w[it2->first] += (it2->second / (d1*problem->D(*(problem->basis().get_wavelet(it2->first))))) * factor;
 	  }
 	}
       }// end else
@@ -312,7 +311,7 @@ namespace WaveletTL
       // for nonlocal operators, we put full level blocks into the cache, regardless of support intersections
 
       const int lambda_num = lambda.number();
-      
+
       // search for column 'lambda'
       typename ColumnCache::iterator col_lb(entries_cache.lower_bound(lambda_num));
       typename ColumnCache::iterator col_it(col_lb);
@@ -339,10 +338,10 @@ namespace WaveletTL
 	  // compute whole level block
 	  
 	  // insert a new level
-	  typedef typename Column::value_type value_type;
-	  it = col.insert(lb, value_type(j, Block()));
+ 	  typedef typename Column::value_type value_type;
+ 	  it = col.insert(lb, value_type(j, Block()));
 
-	  Block& block(it->second);  
+ 	  Block& block(it->second);  
 
 	  // collect all indices in the level block
 	  typedef std::list<Index> IndexList;
@@ -363,27 +362,30 @@ namespace WaveletTL
 
 	  // compute entries
 	  const double d1 = problem->D(lambda);
-	  for (typename IndexList::const_iterator it(nus.begin()), itend(nus.end());
-	       it != itend; ++it) {
-	    const double entry = problem->a(*it, lambda);
-	    typedef typename Block::value_type value_type_block;
+	  for (typename IndexList::const_iterator it2(nus.begin()), itend2(nus.end());
+	       it2 != itend2; ++it2) {
+	    const double entry = problem->a(*it2, lambda);
+ 	    typedef typename Block::value_type value_type_block;
 	    if (fabs(entry) > 1e-16) {
-	      block.insert(block.end(), value_type_block((*it).number(), entry));
-	      w[(*it).number()] += (entry / (d1*problem->D(*it))) * factor;
+  	      block.insert(block.end(), value_type_block((*it2).number(), entry));
+// 	      cout << "*it2=" << *it2 << endl;
+// 	      cout << "it2->number()=" << it2->number() << endl;
+// 	      cout << "w.size()=" << w.size() << endl;
+	      w[(*it2).number()] += (entry / (d1*problem->D(*it2))) * factor;
 	    }
 	  } 
 	}
       else {
-	// level already exists --> extract level from cache
+ 	// level already exists --> extract level from cache
 
-	Block& block(it->second);
+ 	Block& block(it->second);
 
-	const double d1 = problem->D(lambda);
+ 	const double d1 = problem->D(lambda);
 
-	for (typename Block::const_iterator it(block.begin()), itend(block.end());
-	     it != itend; ++it) {
-	  w[it->first] += (it->second / (d1*problem->D(*(problem->basis().get_wavelet(it->first))))) * factor;
-	}
+ 	for (typename Block::const_iterator it(block.begin()), itend(block.end());
+ 	     it != itend; ++it) {
+ 	  w[it->first] += (it->second / (d1*problem->D(*(problem->basis().get_wavelet(it->first))))) * factor;
+ 	}
       }
     }
   }

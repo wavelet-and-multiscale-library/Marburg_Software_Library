@@ -368,9 +368,6 @@ namespace WaveletTL
  	    typedef typename Block::value_type value_type_block;
 	    if (fabs(entry) > 1e-16) {
   	      block.insert(block.end(), value_type_block((*it2).number(), entry));
-// 	      cout << "*it2=" << *it2 << endl;
-// 	      cout << "it2->number()=" << it2->number() << endl;
-// 	      cout << "w.size()=" << w.size() << endl;
 	      w[(*it2).number()] += (entry / (d1*problem->D(*it2))) * factor;
 	    }
 	  } 

@@ -102,8 +102,8 @@ namespace WaveletTL
     /*!
       evaluate the diagonal preconditioner D
     */
-    double D(const Index& lambda) const { return 1; }
-
+    double D(const Index& lambda) const { return sqrt(a(lambda,lambda)); }
+    
     /*
       kernel function
     */

@@ -995,7 +995,7 @@ namespace WaveletTL
   {
     typedef typename Vector<double>::size_type size_type;
 
-    if (problem->local_operator()) {
+//     if (problem->local_operator()) {
       // remark: the following loop can still be optimized
       Index mu = (j == (basis().j0()-1)
  		  ? basis().first_generator(basis().j0())
@@ -1018,9 +1018,7 @@ namespace WaveletTL
 	                    (d1 * problem->D(mu));
 
       }
-    } else {
-      // integral operator case, TODO
-    }
+//     }
   }
 
   template <class PROBLEM>

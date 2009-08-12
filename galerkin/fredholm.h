@@ -198,11 +198,6 @@ namespace WaveletTL
     typedef typename WaveletBasis::Index Index;
     
     /*!
-      index type of vectors and matrices
-    */
-    typedef typename Vector<double>::size_type size_type;
-
-    /*!
       constructor from a given wavelet basis and a given right-hand side y
     */
     VolterraIntegralOperator(const WaveletBasis& basis,

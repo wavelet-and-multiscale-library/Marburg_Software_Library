@@ -67,9 +67,10 @@ public:
 			      InfiniteVector<double, typename PROBLEM::Index>& u_epsilon,
 			      Array1D<InfiniteVector<double, typename PROBLEM::Index> >& approximations)
   {
-    //typedef DSBasis<3,3> Basis1D;
-    typedef PBasis<3,3> Basis1D;
-
+    const int d  = PRIMALORDER;
+    const int dt = DUALORDER;
+    typedef PBasis<d,dt> Basis1D;
+  
 //     Point<2> origin;
 //     origin[0] = 0.0;
 //     origin[1] = 0.0;
@@ -118,7 +119,10 @@ public:
     //beta in (0,1)
     //double beta      = 0.98;
     //double beta      = 0.85;
-    double beta      = 0.85;
+
+    //double beta      = 0.85; // this was chosen for d=2,3
+    //double beta      = 0.75; // this was chosen for d=4
+    double beta      = 0.5; // this was chosen for d=4
     
     cout << "beta = " << beta << endl;
 
@@ -139,7 +143,7 @@ public:
     map<double,double> asymptotic;
     map<double,double> time_asymptotic;
     map<double,double> descent_params;
-
+    map<double,double> weak_ell_tau_norms;
 
     
     bool exit = 0;
@@ -150,7 +154,7 @@ public:
 
     //EvaluateFrame<Basis1D,2,2> evalObj;
 
-    double d = 0.5;
+    double dd = 0.5;
 
     for (unsigned int i = 1; i <= K; i++) {
       omega_i *= beta;
@@ -167,15 +171,15 @@ public:
 	//APPLY_COARSE(P, tilde_r, delta*l2_norm(tilde_r), z_i, 0.5, jmax, CDD1);
  	double g = z_i*tilde_r;
 	if  (g != 0.)
-	  d = (tilde_r*tilde_r)/g;
+	  dd = (tilde_r*tilde_r)/g;
 	
-	w += d*tilde_r;
- 	InfiniteVector<double, Index> tmp;
- 	w.COARSE(1.0/100.0*residual_norm, tmp);
- 	w = tmp;
+	w += dd*tilde_r;
+//  	InfiniteVector<double, Index> tmp;
+//  	w.COARSE(1.0/100.0*residual_norm, tmp);
+//  	w = tmp;
 
 
-	cout << "descent param = " << d << endl;
+	cout << "descent param = " << dd << endl;
 	++loops;
 	++niter;
 
@@ -194,7 +198,7 @@ public:
  	APPLY(P, w, 1.0e-6, Av, jmax, CDD1);
  	help = f-Av;
 	  
-	//residual_norm = l2_norm(help);
+	residual_norm = l2_norm(help);
 	double tmp1 = log10(residual_norm);
 	cout << "residual norm = " << residual_norm << endl;
 
@@ -202,44 +206,74 @@ public:
 	asymptotic[log10( (double)w.size() )] = tmp1;
 	time_asymptotic[log10(time)] = tmp1;
 	
-	descent_params[loops] = d;
-	
-
-
-// 	if ((loops <= 10) || ((loops % 10 == 0) && (loops <= 100))
-// 	    || ((loops % 50 == 0) && (loops <= 600))
-// 	    || ((loops % 200 == 0) && (loops <= 1000))
-// 	    || (loops % 500 == 0)
-// 	    ) {
-// 	  u_epsilon = w;
-// 	  u_epsilon.scale(&P,-1);  
-//  	  char filename1[50];
-//  	  char filename2[50];
-//  	  sprintf(filename1, "%s%d%s%d%s", "approx_sol_steep35_2D_2509out_", loops, "_nactive_", w.size(),".m");
-//  	  sprintf(filename2, "%s%d%s%d%s", "error_steep35_2D_2509out_", loops, "_nactive_", w.size(),".m");
-// 	  Array1D<SampledMapping<2> > U = evalObj.evaluate(P.basis(), u_epsilon, true, 6);
-// 	  cout << "done plotting approximate solution" << endl;
-// 	  Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(P.basis(), u_epsilon, sing2D, 6);
-// 	  cout << "done plotting pointwise error" << endl;
-// 	  std::ofstream ofs5(filename1);
-// 	  matlab_output(ofs5,U);
-// 	  ofs5.close();
-// 	  std::ofstream ofs6(filename2);
-// 	  matlab_output(ofs6,Error);
-// 	  ofs6.close();
-// 	}
+	descent_params[loops] = dd;
 
 	int d  = Basis1D::primal_polynomial_degree();
 	int dT = Basis1D::primal_vanishing_moments();
-	char name1[60];
-	char name2[60];
-	char name3[60];
-	
-	sprintf(name1, "%s%d%s%d%s", "./steepest_descent_results/steep1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name2, "%s%d%s%d%s", "./steepest_descent_results/steep1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name3, "%s%d%s%d%s", "./steepest_descent_results/steep1D_descent_params_P_jmax18_", d, "_dT", dT, ".m");
-	
-	
+
+	char name1[128];
+	char name2[128];
+	char name3[128];
+	char name4[128];
+
+
+#ifdef ONE_D
+	switch (d) {
+	case 2: {
+	  weak_ell_tau_norms[loops] = w.weak_norm(1./1.5);// (d,dT)=(2,2)=1./1.5 (d,dT)=(3,3)=1./2.5, (d,dT)=(4,6)=1./3.5
+	  sprintf(name1, "%s%d%s%d%s", "./sd_results22/steep1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name2, "%s%d%s%d%s", "./sd_results22/steep1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name3, "%s%d%s%d%s", "./sd_results22/steep1D_descent_params_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name4, "%s%d%s%d%s", "./sd_results22/steep1D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
+	  break;
+	}
+	case 3: {
+	  weak_ell_tau_norms[loops] = w.weak_norm(1./2.5);
+	  sprintf(name1, "%s%d%s%d%s", "./sd_results33_basis/steep1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name2, "%s%d%s%d%s", "./sd_results33_basis/steep1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name3, "%s%d%s%d%s", "./sd_results33_basis/steep1D_descent_params_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name4, "%s%d%s%d%s", "./sd_results33_basis/steep1D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
+	  break;
+	}
+	case 4: {
+	  weak_ell_tau_norms[loops] = w.weak_norm(1./3.5);
+	  sprintf(name1, "%s%d%s%d%s", "./sd_results46/steep1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name2, "%s%d%s%d%s", "./sd_results46/steep1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name3, "%s%d%s%d%s", "./sd_results46/steep1D_descent_params_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name4, "%s%d%s%d%s", "./sd_results46/steep1D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");  
+	  break;
+	}
+	};
+#endif
+#ifdef TWO_D
+	switch (d) {
+	case 2: {
+	  weak_ell_tau_norms[loops] = w.weak_norm(1./1.0);
+	  sprintf(name1, "%s%d%s%d%s", "./sd_results2D_22/steep2D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name2, "%s%d%s%d%s", "./sd_results2D_22/steep2D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name3, "%s%d%s%d%s", "./sd_results2D_22/steep2D_descent_params_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name4, "%s%d%s%d%s", "./sd_results2D_22/steep2D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
+	  break;
+	}
+	case 3: {
+	  weak_ell_tau_norms[loops] = w.weak_norm(1./1.5);
+	  sprintf(name1, "%s%d%s%d%s", "./sd_results2D_33/steep2D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name2, "%s%d%s%d%s", "./sd_results2D_33/steep2D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name3, "%s%d%s%d%s", "./sd_results2D_33/steep2D_descent_params_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name4, "%s%d%s%d%s", "./sd_results2D_33/steep2D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
+	  break;
+	}
+	case 4: {
+	  weak_ell_tau_norms[loops] = w.weak_norm(1./2.0);
+	  sprintf(name1, "%s%d%s%d%s", "./sd_results2D_46/steep2D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name2, "%s%d%s%d%s", "./sd_results2D_46/steep2D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name3, "%s%d%s%d%s", "./sd_results2D_46/steep2D_descent_params_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name4, "%s%d%s%d%s", "./sd_results2D_46/steep2D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");  
+	  break;
+	}
+	};
+
+#endif
 	std::ofstream os1(name1);
 	matlab_output(asymptotic,os1);
 	os1.close();
@@ -252,14 +286,37 @@ public:
 	matlab_output(descent_params,os3);
 	os3.close();
 	
+	std::ofstream os4(name4);
+	matlab_output(weak_ell_tau_norms,os4);
+	os3.close();
+
 	
 	tstart = clock();
 	// ############# end output #############
 
-	//if (residual_norm < 3.1623e-04 || loops == 1000) {
-	if (residual_norm < 1.0e-3 || loops == 1000) {
+#ifdef ONE_D
+	double tol=1.0;
+	switch (d) {
+	case 2: {
+	  tol=0.015;
+	  break;
+	}
+	case 3: {
+	  tol=3.1623e-04;
+	  break;
+	}
+	case 4: {
+	  tol=3.1623e-04;
+	  break;
+	}
+	}
+	if (residual_norm < tol || loops == 5000) {
+#endif
 
-	u_epsilon = w;
+#ifdef TWO_D
+	if (residual_norm < 0.01 || loops == 5000) {
+#endif
+	  u_epsilon = w;
 	  exit = true;
 	  break;
 	}

@@ -27,9 +27,10 @@ namespace FrameTL
 			const CompressionStrategy strategy)
   {
     // start with pessimistic parameters c1, c2
-//     CDD1_SOLVE(P, epsilon, guess, u_epsilon,
-// 	       1.0/P.norm_Ainv(), P.norm_A(),
-// 	       jmax, strategy);
+    //     CDD1_SOLVE(P, epsilon, guess, u_epsilon,
+    // 	       1.0/P.norm_Ainv(), P.norm_A(),
+    // 	       jmax, strategy);
+    
     CDD1_LOCAL_SOLVE(P, patch, epsilon, guess, u_epsilon, u_k_very_sparse, 1., 1., jmax, strategy);
 
 
@@ -56,8 +57,11 @@ namespace FrameTL
 
     typedef typename PROBLEM::WaveletBasis::Index Index;
     InfiniteVector<double,Index> w, f;
-    P.RHS(1.0e-15, patch, f);
-    APPLY(P, patch, u_k_very_sparse, 1.0e-15, w, jmax, CDD1);
+//     P.RHS(1.0e-6, patch, f);
+//     APPLY(P, patch, u_k_very_sparse, 1.0e-6, w, jmax, CDD1);
+
+    P.RHS(epsilon, patch, f);
+    APPLY(P, patch, u_k_very_sparse, epsilon, w, jmax, CDD1);
 
     params.F = l2_norm(f-w);
 
@@ -111,7 +115,10 @@ namespace FrameTL
 // #endif
     
     F = f-w;
-    
+    InfiniteVector<double,Index> tmp;
+    F.COARSE(2*params.q2*epsilon / 2.,tmp);
+    F=tmp;
+  
     while (delta > epsilon) { // sqrt(params.c1)*epsilon) { // check the additional factor c1^{1/2} in [BB+] !?
 #if _WAVELETTL_CDD1_VERBOSITY >= 1
       cout << "CDD1_SOLVE: delta=" << delta << endl;
@@ -364,6 +371,10 @@ namespace FrameTL
 
     // TODO: speed up the following two lines
     APPLY(P, patch, v, eta1, w, jmax, strategy);
+    InfiniteVector<double,Index> tmp;
+    w.COARSE(eta1,tmp);
+    w=tmp;
+
 // #ifdef FULL
 //     InfiniteVector<double,Index> tmp;
 //     w.COARSE(eta1,tmp);
@@ -400,6 +411,10 @@ namespace FrameTL
 
 
     APPLY(P, patch, v, eta1, w, jmax, strategy);
+    InfiniteVector<double,Index> tmp;
+    w.COARSE(eta1,tmp);
+    w=tmp;
+
 
 // #ifdef FULL
 //     InfiniteVector<double,Index> tmp;

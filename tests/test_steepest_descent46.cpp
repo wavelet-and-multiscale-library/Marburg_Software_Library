@@ -3,8 +3,9 @@
 #define JMAX 18
 #define ONE_D
 
-#define PRIMALORDER 3
-#define DUALORDER   3
+#define PRIMALORDER 4
+#define DUALORDER   6
+
 
 #include <fstream>
 #include <iostream>
@@ -24,8 +25,7 @@
 #include <galerkin/galerkin_utils.h>
 #include <frame_support.h>
 #include <frame_index.h>
-#include <richardson.h>
-//#include <steepest_descent.h>
+#include <steepest_descent.h>
 //#include <additive_Schwarz.h>
 //#include <steepest_descent_basis.h>
 //#include <richardson_CDD2.h>
@@ -107,7 +107,7 @@ public:
 int main()
 {
  
-  cout << "testing Richardson itaration in 1D..." << endl;
+  cout << "testing steepest descent in 1D..." << endl;
   
   const int DIM = 1;
   const int jmax = JMAX;
@@ -209,7 +209,8 @@ int main()
 
   Singularity1D_RHS_2<double> sing1D;
   Singularity1D_2<double> exactSolution1D;
- 
+
+  
   //PoissonBVP<DIM> poisson(&const_fun);
   PoissonBVP<DIM> poisson(&sing1D);
   //BiharmonicBVP<DIM> biharm(&const_fun);  
@@ -332,13 +333,13 @@ int main()
 
   Array1D<InfiniteVector<double, Index> > approximations(frame.n_p()+1);
 
-  richardson_SOLVE(problem, epsilon, u_epsilon, approximations);
+  steepest_descent_SOLVE(problem, epsilon, u_epsilon, approximations);
 
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
 
-  cout << "Richardson iteration done" << endl;
+  cout << "steepest descent done" << endl;
 
   u_epsilon.scale(&discrete_poisson,-1);
   //u_epsilon.scale(&discrete_biharmonic,-1);
@@ -351,11 +352,11 @@ int main()
   Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u_epsilon, exactSolution1D, 12);
   cout << "...finished plotting error" << endl;
   
-  std::ofstream ofs5("./Richardson_results33_alpha_0p15/approx_sol_rich_1D_out.m");
+  std::ofstream ofs5("./sd_results46/approx_sol_steep_1D_out.m");
   matlab_output(ofs5,U);
   ofs5.close();
 
-  std::ofstream ofs6("./Richardson_results33_alpha_0p15/error_rich_1D_out.m");
+  std::ofstream ofs6("sd_results46/error_steep_1D_out.m");
   matlab_output(ofs6,Error);
   ofs6.close();
 
@@ -366,7 +367,7 @@ int main()
     cout << "plotting local approximation on patch " << i << endl;
 
     char filename3[128];
-    sprintf(filename3, "%s%d%s%d%s%d%s", "./Richardson_results33_alpha_0p15/approx1Drich_local_on_patch_" , i , "_d" , d ,  "_dT", dT, ".m");
+    sprintf(filename3, "%s%d%s%d%s%d%s", "sd_results46/approx1Dsteep_local_on_patch_" , i , "_d" , d ,  "_dT", dT, ".m");
 
     U = evalObj.evaluate(frame, approximations[i], true, 12);//expand in primal basis
     std::ofstream ofsloc(filename3);
@@ -392,10 +393,10 @@ int main()
     //cout << log10(fabs(*it)) << endl;
   }
 
-  std::ofstream ofs7("./Richardson_results33_alpha_0p15/indices_patch_0.m");
+  std::ofstream ofs7("./sd_results46/indices_patch_0.m");
   WaveletTL::plot_indices<Basis1D>(frame.bases()[0]->bases()[0], indices[0], JMAX, ofs7, "jet", true, -16);
 
-  std::ofstream ofs8("./Richardson_results33_alpha_0p15/indices_patch_1.m");
+  std::ofstream ofs8("./sd_results46/indices_patch_1.m");
   WaveletTL::plot_indices<Basis1D>(frame.bases()[1]->bases()[0], indices[1], JMAX, ofs8, "jet", true, -16);
   // compute infinite vectors of 1D indices, one for each patch
   // and plot them

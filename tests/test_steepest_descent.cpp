@@ -1,6 +1,6 @@
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
 
-#define JMAX 11
+#define JMAX 18
 #define ONE_D
 
 #include <fstream>
@@ -161,13 +161,13 @@ int main()
   //primal boundary conditions for first patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_1;
   bound_1[0] = 1;
-  bound_1[1] = 2;
+  bound_1[1] = d-1;
   
   bc[0] = bound_1;
   
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
-  bound_2[0] = 2;
+  bound_2[0] = d-1;
   bound_2[1] = 1;
   
   bc[1] = bound_2;
@@ -343,16 +343,16 @@ int main()
 
   EvaluateFrame<Basis1D,1,1> evalObj;
 
-  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u_epsilon, true, 11);//expand in primal basis
+  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u_epsilon, true, 12);//expand in primal basis
   cout << "...finished plotting approximate solution" << endl;
-  Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u_epsilon, exactSolution1D, 11);
+  Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u_epsilon, exactSolution1D, 12);
   cout << "...finished plotting error" << endl;
   
-  std::ofstream ofs5("approx_sol_steep_1D_out.m");
+  std::ofstream ofs5("./sd_results33/approx_sol_steep_1D_out.m");
   matlab_output(ofs5,U);
   ofs5.close();
 
-  std::ofstream ofs6("error_steep_1D_out.m");
+  std::ofstream ofs6("sd_results33/error_steep_1D_out.m");
   matlab_output(ofs6,Error);
   ofs6.close();
 
@@ -362,8 +362,8 @@ int main()
   for (int i = 0; i < frame.n_p(); i++) {
     cout << "plotting local approximation on patch " << i << endl;
 
-    char filename3[50];
-    sprintf(filename3, "%s%d%s%d%s%d%s", "approx1Dsteep_local_on_patch_" , i , "_d" , d ,  "_dT", dT, ".m");
+    char filename3[128];
+    sprintf(filename3, "%s%d%s%d%s%d%s", "sd_results33/approx1Dsteep_local_on_patch_" , i , "_d" , d ,  "_dT", dT, ".m");
 
     U = evalObj.evaluate(frame, approximations[i], true, 10);//expand in primal basis
     std::ofstream ofsloc(filename3);
@@ -389,10 +389,10 @@ int main()
     //cout << log10(fabs(*it)) << endl;
   }
 
-  std::ofstream ofs7("indices_patch_0.m");
+  std::ofstream ofs7("./sd_results33/indices_patch_0.m");
   WaveletTL::plot_indices<Basis1D>(frame.bases()[0]->bases()[0], indices[0], JMAX, ofs7, "jet", true, -16);
 
-  std::ofstream ofs8("indices_patch_1.m");
+  std::ofstream ofs8("./sd_results33/indices_patch_1.m");
   WaveletTL::plot_indices<Basis1D>(frame.bases()[1]->bases()[0], indices[1], JMAX, ofs8, "jet", true, -16);
   // compute infinite vectors of 1D indices, one for each patch
   // and plot them

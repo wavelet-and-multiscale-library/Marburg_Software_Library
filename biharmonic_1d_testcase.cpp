@@ -46,8 +46,14 @@ namespace FrameTL
 
     result = -16.0 * Functional<IBASIS,1,1>::evaluate(lambda); // use super class for computing the integral part
 
-    result += 4.0 * Functional<IBASIS,1,1>::frame_->evaluate(true, 1, lambda, Point<1>(0.5)); // first derivative on 1/2
-    result -= 384.0 * Functional<IBASIS,1,1>::frame_->evaluate(true, 0, lambda, Point<1>(0.5)); // frame evaluated on 1/2
+    Vector<double> values(1);
+    Functional<IBASIS,1,1>::frame_->evaluate_gradient(lambda, Point<1>(0.5), values); // first derivative on 1/2
+    result += 4.0 * values[0];
+
+    result -= 384.0 * Functional<IBASIS,1,1>::frame_->evaluate(lambda, Point<1>(0.5)); // frame evaluated on 1/2
+
+//     result += 4.0 * Functional<IBASIS,1,1>::frame_->evaluate(true, 1, lambda, Point<1>(0.5)); // first derivative on 1/2
+//     result -= 384.0 * Functional<IBASIS,1,1>::frame_->evaluate(true, 0, lambda, Point<1>(0.5)); // frame evaluated on 1/2
 
     return result;
   }

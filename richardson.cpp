@@ -67,7 +67,11 @@ public:
 			Array1D<InfiniteVector<double, typename PROBLEM::Index> >& approximations)
   {
 
-    typedef PBasis<3,3> Basis1D;
+
+    const int d  = PRIMALORDER;
+    const int dt = DUALORDER;
+    typedef PBasis<d,dt> Basis1D;
+
 //     Singularity1D_RHS_2<double> sing1D;
 //     Singularity1D_2<double> exactSolution1D;
      
@@ -83,29 +87,41 @@ public:
     const double nu = P.norm_Ainv()*P.F_norm();
     typedef typename PROBLEM::Index Index;
 
-    cout << "CDD2_SOLVE: nu=" << nu << endl;
+    cout << "Rich_SOLVE: nu=" << nu << endl;
 
     // compute optimal relaxation parameter omega
     //const double omega = 2.0 / (P.norm_A() + 1.0/P.norm_Ainv());
-    const double omega = 0.4;
+    
+    // ####### 1D #######
+    //const double omega = 0.4;
     //const double omega = 0.15;
+
+    // ####### 2D #######
+    // bad one
+    const double omega = 0.05;
+    // good one
+    //const double omega = 0.25;
+
+    //const double omega = 0.3;
+
+
     //const double omega = 2.0/2.47-0.5;
-    cout << "CDD2_SOLVE: omega=" << omega << endl;
+    cout << "Rich_SOLVE: omega=" << omega << endl;
 
     // compute spectral norm rho
     const double cond_A = P.norm_A() * P.norm_Ainv();
     //const double rho = (cond_A - 1.0) / (cond_A + 1.0);
     const double rho = 0.8;
-    cout << "CDD2_SOLVE: rho=" << rho << endl;
+    cout << "Rich_SOLVE: rho=" << rho << endl;
     
     // desired error reduction factor theta < 1/3
     //const double theta = 2.0/7.0;
     const double theta = 0.333;
-    cout << "CDD2_SOLVE: theta=" << theta << endl;
+    cout << "Rich_SOLVE: theta=" << theta << endl;
 
     // compute minimal K such that 3*rho^K < theta
     const int K = (int) ceil(log(theta/3.0) / log(rho));
-    cout << "CDD2_SOLVE: K=" << K << endl;
+    cout << "Rich_SOLVE: K=" << K << endl;
     
     u_epsilon.clear();
 
@@ -114,6 +130,7 @@ public:
     map<double,double> asymptotic;
     map<double,double> time_asymptotic;
     map<double,double> log_10_L2_error;
+    map<double,double> weak_ell_tau_norms;
     
     bool exit = 0;
     unsigned int loops = 0;
@@ -130,10 +147,10 @@ public:
     
      while (epsilon_k > epsilon) {
       epsilon_k *= 3*pow(rho, K) / theta;
-      cout << "CDD2_SOLVE: epsilon_k=" << epsilon_k << endl;
+      cout << "Rich_SOLVE: epsilon_k=" << epsilon_k << endl;
       double eta = theta * epsilon_k / (6*omega*K);
       cout << "eta= " << eta << endl;
-      cout << "CDD2_SOLVE: eta=" << eta << endl;
+      cout << "Rich_SOLVE: eta=" << eta << endl;
       P.RHS(eta, f);
       for (int j = 1; j <= 1/*K*/; j++) {
 	APPLY_COARSE(P, v, eta, Av, 1.0e-6, jmax, CDD1);
@@ -154,19 +171,37 @@ public:
 	asymptotic[log10( (double)v.size() )] = tmp1;
 	time_asymptotic[log10(time)] = tmp1;
 
+
+#ifdef ONE_D
+	weak_ell_tau_norms[loops] = v.weak_norm(1./2.5); // d=3, dT=3
+#endif
+#ifdef TWO_D
+	weak_ell_tau_norms[loops] = v.weak_norm(1./1.5); // d=3, dT=3
+#endif
+
+
 	cout << "active indices: " << v.size() << endl;
  	cout << "loop: " << loops << endl;
 
 
 	int d  = Basis1D::primal_polynomial_degree();
 	int dT = Basis1D::primal_vanishing_moments();
-	char name1[60];
-	char name2[60];
-	char name3[60];
-	
-	sprintf(name1, "%s%d%s%d%s", "./Richardson_results/rich1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name2, "%s%d%s%d%s", "./Richardson_results/rich1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	
+	char name1[128];
+	char name2[128];
+	char name3[128];
+
+#ifdef ONE_D
+	sprintf(name1, "%s%d%s%d%s", "./Richardson_results33_alpha_0p15/rich1D_asymptotic_P_jmax18_d", d, "_dT", dT, ".m");
+	sprintf(name2, "%s%d%s%d%s", "./Richardson_results33_alpha_0p15/rich1D_time_asymptotic_P_jmax18_d", d, "_dT", dT, ".m");
+	sprintf(name3, "%s%d%s%d%s", "./Richardson_results33_alpha_0p15/rich1D_weak_ell_tau_norms_P_jmax18_d", d, "_dT", dT, ".m");
+#endif	
+
+#ifdef TWO_D
+	sprintf(name1, "%s%d%s%d%s", "./Richardson_results33_2D_alpha_0p05/rich2D_asymptotic_P_jmax18_d", d, "_dT", dT, ".m");
+	sprintf(name2, "%s%d%s%d%s", "./Richardson_results33_2D_alpha_0p05/rich2D_time_asymptotic_P_jmax18_d", d, "_dT", dT, ".m");
+	sprintf(name3, "%s%d%s%d%s", "./Richardson_results33_2D_alpha_0p05/rich2D_weak_ell_tau_norms_P_jmax18_d", d, "_dT", dT, ".m");
+#endif
+
 	std::ofstream os1(name1);
 	matlab_output(asymptotic,os1);
 	os1.close();
@@ -175,10 +210,19 @@ public:
 	matlab_output(time_asymptotic,os2);
 	os2.close();
 
+	std::ofstream os3(name3);
+	matlab_output(weak_ell_tau_norms,os3);
+	os3.close();
+
 	// ############ end output #############	
 	tstart = clock();
 
-	if (residual_norm < 1.0e-3 || loops == 1000) {
+#ifdef ONE_D
+	if (residual_norm < 3.1623e-04 || loops == 5000) {
+#endif
+#ifdef TWO_D
+	if (residual_norm < 0.01 || loops == 5000) {
+#endif
 	  u_epsilon = v;
 	  exit = true;
 	  break;

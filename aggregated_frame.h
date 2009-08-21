@@ -144,6 +144,11 @@ namespace FrameTL
     const Array1D<Array1D<Index> >* get_full_collection_levelwise() const { return &full_collection_levelwise; }
 
     /*!
+      access to collection of wavelet frame indices
+     */
+    const Array1D<Index>* get_full_collection() const { return &full_collection; }
+
+    /*!
       critical Sobolev regularity for the primal generators/wavelets
     */
     static double primal_regularity() { return IBASIS::primal_regularity(); }

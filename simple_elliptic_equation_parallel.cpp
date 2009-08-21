@@ -52,6 +52,7 @@ namespace FrameTL
   SimpleEllipticEquation<IBASIS,DIM>::compute_rhs()
   {
     cout << "SimpleEllipticEquation(): precompute right-hand side..." << endl;
+    int rank = MPI::COMM_WORLD.Get_rank();
 
     typedef AggregatedFrame<IBASIS,DIM> Frame;
     typedef typename Frame::Index Index;
@@ -72,14 +73,10 @@ namespace FrameTL
     sprintf(matrixname, "%s%d%s%d", "rhs_poisson_2D_lap1_d", d, "_dT", dT);
 #endif
 
-    fnorms_sqr_patch.resize(frame_->n_p());
-    for (unsigned int i = 0; i < fnorms_sqr_patch.size(); i++)
-      fnorms_sqr_patch[i] = 0.;
-
+    fnorms_sqr_patch = 0.;
 
     // precompute the right-hand side on a fine level
-    InfiniteVector<double,Index> fhelp;
-    Array1D<InfiniteVector<double,Index> > fhelp_patch(frame_->n_p());
+    InfiniteVector<double,Index> fhelp_patch;
 
 #ifdef PRECOMP_RHS
     // we read in the right hand side from file
@@ -97,6 +94,9 @@ namespace FrameTL
 
     for (int i = 0; i < frame_->degrees_of_freedom(); i++)
       {
+	if (frame_->get_wavelet(i)->p() != rank) {
+	  continue;
+	}
 #ifdef PRECOMP_RHS
 	double coeff = rhs.get_entry(0,i);
 #else	
@@ -109,61 +109,44 @@ namespace FrameTL
 #endif
 	//cout << D(*(frame_->get_wavelet(i))) << endl;
 	if (fabs(coeff)>1e-15) {
-	  fhelp.set_coefficient(*(frame_->get_wavelet(i)), coeff);
-	  fhelp_patch[frame_->get_wavelet(i)->p()].set_coefficient(*(frame_->get_wavelet(i)), coeff);
+	  fhelp_patch.set_coefficient(*(frame_->get_wavelet(i)), coeff);
 	  
-	  fnorms_sqr_patch[frame_->get_wavelet(i)->p()] += coeff*coeff;
+	  fnorms_sqr_patch += coeff*coeff;
 	  if (i % 100 == 0)
 	    cout << *(frame_->get_wavelet(i)) << " " << coeff << endl;
 	}
       }
-
+    
 #ifndef PRECOMP_RHS
     rhs.set_row(0, indices, entries);
     // write right hand side to file
-    cout << "writing right hand side into file..." << filename << "..." << endl;
-    rhs.matlab_output(filename, matrixname, 1);
-    cout << "...ready" << endl;
+//     cout << "writing right hand side into file..." << filename << "..." << endl;
+//     rhs.matlab_output(filename, matrixname, 1);
+//     cout << "...ready" << endl;
 #endif
     
-    fnorm_sqr = l2_norm_sqr(fhelp);
-    for (unsigned int i = 0; i < fnorms_sqr_patch.size(); i++)
-      cout << fnorms_sqr_patch[i] << endl;
+    cout << fnorms_sqr_patch << endl;
     
-
-    cout << "norm rhs sqr = " << fnorm_sqr << endl;
     cout << "... done, all integrals for right-hand side computed" << endl;
 
-    // sort the coefficients into fcoeffs
-    fcoeffs.resize(0); // clear eventual old values
-    fcoeffs.resize(fhelp.size());
-    unsigned int id(0);
-    for (typename InfiniteVector<double,Index>::const_iterator it(fhelp.begin()), itend(fhelp.end());
-	 it != itend; ++it, ++id)
-      fcoeffs[id] = std::pair<Index,double>(it.index(), *it);
-    sort(fcoeffs.begin(), fcoeffs.end(), typename InfiniteVector<double,Index>::decreasing_order());
-
-
-    fcoeffs_patch.resize(frame_->n_p());
-    for (int i = 0; i < frame_->n_p(); i++) {
-      //fcoeffs_patch[i].resize(0); // clear eventual old values
-      fcoeffs_patch[i].resize(fhelp_patch[i].size());
-      id = 0;
-      for (typename InfiniteVector<double,Index>::const_iterator it(fhelp_patch[i].begin()), itend(fhelp_patch[i].end());
-	   it != itend; ++it, ++id) {
-	(fcoeffs_patch[i])[id] = std::pair<Index,double>(it.index(), *it);
-      }
-      sort(fcoeffs_patch[i].begin(), fcoeffs_patch[i].end(), typename InfiniteVector<double,Index>::decreasing_order());
+    fcoeffs_patch.resize(fhelp_patch.size());
+    unsigned int id = 0;
+    for (typename InfiniteVector<double,Index>::const_iterator it(fhelp_patch.begin()), itend(fhelp_patch.end());
+	 it != itend; ++it, ++id) {
+      (fcoeffs_patch)[id] = std::pair<Index,double>(it.index(), *it);
     }
+    sort(fcoeffs_patch.begin(), fcoeffs_patch.end(), typename InfiniteVector<double,Index>::decreasing_order());
   }
 
   template <class IBASIS, unsigned int DIM>
   void
   SimpleEllipticEquation<IBASIS,DIM>::compute_diagonal()
   {
+    //int p = rank = MPI::COMM_WORLD.Get_rank ();
     cout << "SimpleEllipticEquation(): precompute diagonal of stiffness matrix..." << endl;
 
     SparseMatrix<double> diag(1,frame_->degrees_of_freedom());
+    //SparseMatrix<double> diag(1,frame_->degrees_of_freedom_on_patch(p));
     char filename[50];
     char matrixname[50];
 
@@ -207,7 +190,7 @@ namespace FrameTL
 
 #ifndef PRECOMP_DIAG
     diag.set_row(0,indices, entries);
-    diag.matlab_output(filename, matrixname, 1);
+//     diag.matlab_output(filename, matrixname, 1);
 #endif
 
     cout << "... done, diagonal of stiffness matrix computed" << endl;
@@ -335,8 +318,8 @@ namespace FrameTL
     const typename CUBEBASIS::Support* supp_mu =
       (jnu > jla) ? &(frame_->all_supports[la.number()]) : &(frame_->all_supports[nu.number()]);
 
-    //const int N_Gauss = 3;
-    const int N_Gauss = IBASIS::primal_polynomial_degree();
+    const int N_Gauss = 3;
+    
     //#if _FRAMETL_ADAPTIVE_COMPUTATION == 1
 //     bool b = intersect_supports_simple<IBASIS,DIM,DIM>(*frame_, lambda, mu, supp_lambda, supp_mu);
 //     return 0.;
@@ -621,23 +604,23 @@ namespace FrameTL
   (const double eta,
    InfiniteVector<double, typename AggregatedFrame<IBASIS,DIM>::Index>& coeffs) const
   {
-    coeffs.clear();
-    double coarsenorm(0);
-    double bound(fnorm_sqr - eta*eta);
-//     cout << "fnorm_sqr = " << fnorm_sqr << endl;
-//     cout << "eta*eta = " << eta*eta << endl;
-//     cout << "bound = " << bound << endl;
+//     coeffs.clear();
+//     double coarsenorm(0);
+//     double bound(fnorm_sqr - eta*eta);
+// //     cout << "fnorm_sqr = " << fnorm_sqr << endl;
+// //     cout << "eta*eta = " << eta*eta << endl;
+// //     cout << "bound = " << bound << endl;
 
 
-    typedef typename AggregatedFrame<IBASIS,DIM>::Index Index;
-    typename Array1D<std::pair<Index, double> >::const_iterator it(fcoeffs.begin());
-    do {
-      coarsenorm += it->second * it->second;
-      coeffs.set_coefficient(it->first, it->second);
-      ++it;
-      //      cout << "coarsenorm-bound = " << coarsenorm-bound << endl;
+//     typedef typename AggregatedFrame<IBASIS,DIM>::Index Index;
+//     typename Array1D<std::pair<Index, double> >::const_iterator it(fcoeffs.begin());
+//     do {
+//       coarsenorm += it->second * it->second;
+//       coeffs.set_coefficient(it->first, it->second);
+//       ++it;
+//       //      cout << "coarsenorm-bound = " << coarsenorm-bound << endl;
 
-    } while (it != fcoeffs.end() && coarsenorm < bound);
+//     } while (it != fcoeffs.end() && coarsenorm < bound);
   }
 
   template <class IBASIS, unsigned int DIM>
@@ -650,19 +633,19 @@ namespace FrameTL
     cout.precision(12);
     coeffs.clear();
 
-    if (fnorms_sqr_patch[p] < 1.0e-15)
+    if (fnorms_sqr_patch < 1.0e-15)
       return;
 
     double coarsenorm(0);
-    double bound(fnorms_sqr_patch[p] - eta*eta);
+    double bound(fnorms_sqr_patch - eta*eta);
     typedef typename AggregatedFrame<IBASIS,DIM>::Index Index;
-    typename Array1D<std::pair<Index, double> >::const_iterator it(fcoeffs_patch[p].begin());
+    typename Array1D<std::pair<Index, double> >::const_iterator it(fcoeffs_patch.begin());
     do {
       coarsenorm += it->second * it->second;
       //cout << it->first << " " << it->second << " " << coarsenorm  << " " << bound << endl;
       coeffs.set_coefficient(it->first, it->second);
       ++it;
-    } while (it != fcoeffs_patch[p].end() && coarsenorm < bound);
+    } while (it != fcoeffs_patch.end() && coarsenorm < bound);
   }
 
 

@@ -263,6 +263,75 @@ namespace FrameTL
 
 
   template <class PROBLEM>
+  void thin_out_ring (PROBLEM& P, const int i,
+		      const InfiniteVector<double, typename PROBLEM::Index>& u,
+		      InfiniteVector<double, typename PROBLEM::Index>& u_sparse,
+		      InfiniteVector<double, typename PROBLEM::Index>& u_very_sparse)
+  {
+#ifdef TWO_D 
+    typedef typename PROBLEM::WaveletBasis::Support SuppType;
+    u_sparse.clear();
+    u_very_sparse.clear();
+    typename InfiniteVector<double, typename PROBLEM::Index>::const_iterator it = u.begin();
+
+    switch (i) {
+    case 0: {
+      for (; it != u.end(); ++it) {
+	const SuppType* supp = &(P.basis().all_patch_supports[it.index().number()]);
+	if ((it.index().p() != i) && (supp->a[1] < 0.) && (0. < supp->b[1]) ) {
+	  u_very_sparse.set_coefficient(it.index(), *it);
+	}
+	if ((it.index().p() != i) && (supp->b[1] > 0.) ) {
+	  u_sparse.set_coefficient(it.index(), *it);
+	}
+      }
+      break;
+    }
+    case 1: {
+      for (; it != u.end(); ++it) {
+	const SuppType* supp = &(P.basis().all_patch_supports[it.index().number()]);
+	if ((it.index().p() != i) && (supp->a[0] < 1.0) && (1.0 < supp->b[0]) ) {
+	  u_very_sparse.set_coefficient(it.index(), *it);
+	}
+	if ((it.index().p() != i) && (supp->a[0] < 1.0) ) {
+	  u_sparse.set_coefficient(it.index(), *it);
+	}
+      }
+      break;
+    }
+    case 2: {
+      for (; it != u.end(); ++it) {
+	const SuppType* supp = &(P.basis().all_patch_supports[it.index().number()]);
+	if ((it.index().p() != i) && (supp->a[1] < 1.0) && (1.0 < supp->b[1]) ) {
+	  u_very_sparse.set_coefficient(it.index(), *it);
+	}
+	if ((it.index().p() != i) && (supp->a[1] < 1.0) ) {
+	  u_sparse.set_coefficient(it.index(), *it);
+	}
+      }
+      break;
+    }
+    case 3: {
+      for (; it != u.end(); ++it) {
+	const SuppType* supp = &(P.basis().all_patch_supports[it.index().number()]);
+	if ((it.index().p() != i) && (supp->a[0] < 0.0) && (0.0 < supp->b[0]) ) {
+	  u_very_sparse.set_coefficient(it.index(), *it);
+	}
+	if ((it.index().p() != i) && (supp->b[0] > 0.0) ) {
+	  u_sparse.set_coefficient(it.index(), *it);
+	}
+      }
+      break;
+    }
+    }
+#endif
+  
+
+  }
+
+
+
+  template <class PROBLEM>
   void thin_out (PROBLEM& P, const int i,
 		 const InfiniteVector<double, typename PROBLEM::Index>& u,
 		 InfiniteVector<double, typename PROBLEM::Index>& u_sparse,
@@ -306,28 +375,20 @@ namespace FrameTL
     if (i==0) {
       for (; it != u.end(); ++it) {
 	const SuppType* supp = &(P.basis().all_patch_supports[it.index().number()]);
-
+	
 	// check whether first line is intersected
 	if ((it.index().p() == 1) && (supp->b[0] > -OVERLAP) && (supp->a[1] < 0.) && (0. < supp->b[1]) ) {
 	  u_very_sparse.set_coefficient(it.index(), *it);
 	}
-
 	// check whether second line is intersected
 	if ((it.index().p() == 1) && (supp->a[1] < 0.) && (supp->a[0] < -OVERLAP) && (-OVERLAP < supp->b[0])) {
 	  u_very_sparse.set_coefficient(it.index(), *it);
 	}
-
-
-// 	if (it.index().p() == 0)
-// 	  u_very_sparse.set_coefficient(it.index(), *it);
-
-	if ((it.index().p() == 1) && !((supp->a[0] > -OVERLAP) && (supp->b[1] < 0.)) ) {
+	if ((it.index().p() == 1) && ((supp->a[0] < -OVERLAP) || (supp->b[1] > 0.)) ) {
 	  u_sparse.set_coefficient(it.index(), *it);
 	}
-
-
-//	if ((it.index().p() == 1) && ( (supp->b[1] > 0.)) ) {
-//	  u_sparse.set_coefficient(it.index(), *it);
+// 	if ((it.index().p() == 1) && !((supp->a[0] > -OVERLAP) && (supp->b[1] < 0.)) ) {
+// 	  u_sparse.set_coefficient(it.index(), *it);
 //	}
       }
     }
@@ -337,19 +398,13 @@ namespace FrameTL
 	if ((it.index().p() == 0) && (supp->a[0] < 0.) && (0. < supp->b[0])) {
 	  u_very_sparse.set_coefficient(it.index(), *it);
 	}
-// 	if (it.index().p() == 1)
-// 	  u_very_sparse.set_coefficient(it.index(), *it);
-
-	
 	if ( (it.index().p() == 0) && ( supp->b[0] > 0. ) ) {
-	  //cout << supp->a[0] << " " << supp->b[0] << " " << supp->a[1] << " " << supp->b[1] << endl;
 	  u_sparse.set_coefficient(it.index(), *it);
 	}
-
       }
     }
 #endif
-
+    
   }
 
 
@@ -405,32 +460,6 @@ namespace FrameTL
 		 Array1D<InfiniteVector<double, typename PROBLEM::Index> >& approximations)
   {
 
-//     typedef typename PROBLEM::WaveletBasis::IntervalBasis Basis1D;
-//     const int jmax = JMAX;
-//     typedef typename PROBLEM::Index Index;
-//     typedef typename PROBLEM::WaveletBasis Frame;
-
-//     InfiniteVector<double, Index> f, w, r, tmp, tmp_w, u_k;
-//     double eps = 1;
-//     double alpha = 0.1;
-//     double res = 1.;
-//     while (res > 0.001) {
-//       P.RHS(1.0e-6, f);
-//       tmp_w.clear();
-//       for (int i = 0; i < P.basis().n_p(); i++) {
-// 	//cout << "before local apply" << endl;
-// 	APPLY(P, i, u_k, 1.0e-6, w, jmax, CDD1);
-// 	//cout << "after local apply" << endl;
-// 	tmp_w += w;
-// 	//cout << "after tmp_w += w" << endl;
-//       }
-//       u_k += alpha * (f-tmp_w);
-//       res = l2_norm(f-tmp_w);
-//       cout << "res= " << res << endl;
-//     }
-//     Vector<double> v(2);
-//     v(4)=1;
-
 #ifdef ONE_D
     Singularity1D_2<double> exact1D;
     Singularity1D_2_prime<double> exact1D_prime;
@@ -453,9 +482,22 @@ namespace FrameTL
     typedef typename PROBLEM::Index Index;
     typedef typename PROBLEM::WaveletBasis Frame;
 
-#ifdef TWO_D    
-    const double mu = 1.6544; // = energy norm of the exact solution
-    
+    int d  = Basis1D::primal_polynomial_degree();
+    int dT = Basis1D::primal_vanishing_moments();
+
+
+#ifdef TWO_D
+#ifdef RINGDOMAIN
+    const double mu = 4.0*1.6544; // energy norm of the exact solution
+#else
+#ifdef BIHARMONIC
+    const double mu = H_2_semi_norm_singularity; // H^2 semi-norm of exact solution
+#else
+    const double mu = 1.6544; // energy norm of the exact solution
+#endif
+#endif
+    const double M = 1.0; // we choose the most optimistic case
+
     // (d,dt) = (2,2) jmin = 3
     //const double M = sqrt(5.01773);
     // (d,dt) = (2,2) jmin = 4
@@ -465,18 +507,25 @@ namespace FrameTL
     //const double M = sqrt(6.98681);
 
     // (d,dt) = (3,3) jmin = 4
-    const double M = sqrt(6.98986);
+    //const double M = sqrt(6.98986);
 
     // (d,dt) = (4,4) jmin = 4
     //const double M = sqrt(12.3335);
 
 
     //const double rho = sqrt(1 - 1.0/4.0); // [Xu92] Theorem 4.4 with \omega_1=1, K_0 = K_1=1
+#ifdef RINGDOMAIN
+    const double rho = 0.2;
+#else
     const double rho = 0.2996;
-
+#endif
+    //const double rho = 0.5;
+    //const double rho = 0.1;
+    //const double rho = 0.1;
 #endif
 #ifdef ONE_D
     const double mu = 7.44609; // = energy norm of the exact solution
+    const double M = 1.0; // we choose the most optimistic case
 
     // (d,dt) = (2,2)
     //const double M = sqrt(3.37459); // spectral radius of stiffness matrix
@@ -485,7 +534,7 @@ namespace FrameTL
     //const double M = sqrt(4.17833); // spectral radius of stiffness matrix
         
     // (d,dt) = (3,3), jmin = 3
-    const double M = sqrt(4.87718); // spectral radius of stiffness matrix
+    //const double M = sqrt(4.87718); // spectral radius of stiffness matrix
 
     // (d,dt) = (4,4)
     //const double M = sqrt(5.62803); // spectral radius of stiffness matrix
@@ -499,19 +548,54 @@ namespace FrameTL
 
     const double sigma = std::max(1./M, C + 1./M) + 0.1;//10.0
     cout << "sigma = " << sigma << endl; 
-    //const int K = std::max(1,(int)ceil(log(1.0/(2.0 * M * sigma)) / log(rho)));
     const int K = std::max(1,(int)ceil(log(1.0/(2.0 * M * sigma)) / log(rho)));
 
-    const int L = 41;//(int)ceil(log(epsilon / mu ) / log(2.0*pow(rho,K)*M*sigma));//39
-
+#ifdef ONE_D
+    int L;
+    switch (d) {
+    case 2: {
+      L = 10;
+      break;
+    }
+    case 3: {
+      L = 8; // for j0=4 use 8, // for j0=3 use 10, for FULL alg. take 8 also
+      break;
+    }
+    case 4: {
+      L = 9;
+      break;
+    }
+    };
+#endif
+#ifdef TWO_D
+    int L;
+    switch (d) {
+    case 2: {
+      L = 8; // formerly 7
+      break;
+    }
+    case 3: {
+#ifdef RINGDOMAIN
+      L = 7;
+#else
+      L = 11;
+#endif
+      break;
+    }
+    case 4: {
+      L = 11;
+      break;
+    }
+    };
+#endif
     cout << "epsilon = " << epsilon << endl
-      << "mu = " << mu << endl
-      << "M = " << M << endl
-      << "rho = " <<  rho << endl
-      << "sigma = " << sigma << endl
-      << "K = " << K << endl
-      << "L = " << L << endl;
-
+	 << "mu = " << mu << endl
+	 << "M = " << M << endl
+	 << "rho = " <<  rho << endl
+	 << "sigma = " << sigma << endl
+	 << "K = " << K << endl
+	 << "L = " << L << endl;
+    
     InfiniteVector<double, Index> f, w, r, tmp, tmp_w;
     InfiniteVector<double, Index> u_k, u_k_sparse,u_k_very_sparse;
     InfiniteVector<double, Index> precond_r_i;
@@ -521,6 +605,8 @@ namespace FrameTL
 
     map<double,double> log_10_H1_error;
     map<double,double> log_10_H1_error_time;
+    map<double,double> log_10_L2_error;
+    map<double,double> log_10_L2_error_time;
     map<double,double> log_10_residual_error;
     map<double,double> log_10_residual_error_time;
     map<double,double> tolerances;
@@ -530,24 +616,24 @@ namespace FrameTL
     const int m = P.basis().n_p();
     int k = 0;
 
-    double H1err_old = 1;
-    double residual_norm_old = 1;
-
     double time = 0.;
     clock_t tstart, tend;
     tstart = clock();
-
+    double local_eps = 1.0;
     for (int l = 1; l < L; l++) {
-      for (int p = 2; p <= K; p++) {// THAT WAS USED FOR THE 2D PLAIN DD CASE!!!
-	//for (int p = 1; p <= K; p++) {
-	for (int i = 0; i < P.basis().n_p(); i++) {
+      //for (int p = 2; p <= K; p++) {// THAT WAS USED FOR THE 2D PLAIN DD CASE!!!
+	for (int p = 1; p <= K; p++) {
+	  for (int i = 0; i < P.basis().n_p(); i++) {
 	  k = (l-1)*m*K+(p-1)*m+i+1;
 	  cout << "################################" << endl;
 	  cout << "number of iteration = " << k << endl;
 	  cout << "################################" << endl;
- 	  double local_eps = mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*pow(rho,p)/(m*K);
- 	  //double local_eps = 1.0e-15;//mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*pow(rho,p)/(m*K);
-
+#ifdef RINGDOMAIN
+ 	  local_eps = mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*pow(rho,p)/(m*K)*10;
+#else
+	  local_eps = mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*pow(rho,p)/(m*K)*100;
+#endif
+ 	  
 	  // write the tolerances
 	  tend = clock();
 	  time += ((double) (tend-tstart))/((double) CLOCKS_PER_SEC);
@@ -564,22 +650,27 @@ namespace FrameTL
 	  set<Index> Lambda_i;
 #if 1
 #ifdef SPARSE
+#ifdef RINGDOMAIN
+	  thin_out_ring(P, i, u_k, u_k_sparse, u_k_very_sparse);
+#else
 	  thin_out(P, i, u_k, u_k_sparse, u_k_very_sparse);
+#endif
 #endif
 	  // CDD1
 	  cout << "entering CDD solver..." << endl;
 #ifdef SPARSE
-	  CDD1_LOCAL_SOLVE(P, i, 10.0*local_eps, xks[i], precond_r_i, u_k_very_sparse, jmax, CDD1);
+	  CDD1_LOCAL_SOLVE(P, i, local_eps, xks[i], precond_r_i, u_k_very_sparse, jmax, CDD1);
+	  //CDD1_LOCAL_SOLVE(P, i, local_eps, xks[i], precond_r_i, u_k_very_sparse, jmax, CDD1);
 #endif
 #ifdef FULL
 	  //remove_i<PROBLEM>(i, u_k);
-	  CDD1_LOCAL_SOLVE(P, i, 5.0*local_eps, xks[i], precond_r_i, u_k, jmax, CDD1); // THAT WAS USED FOR THE 2D CASE
+	  CDD1_LOCAL_SOLVE(P, i, local_eps, xks[i], precond_r_i, u_k, jmax, CDD1); // THAT WAS USED FOR THE 2D CASE
 	  //CDD1_LOCAL_SOLVE(P, i, 10.0*local_eps, xks[i], precond_r_i, u_k, jmax, CDD1); // THAT WAS USED FOR THE 1D CASE
 #endif
 	  cout << "CDD 1 solve completed, size of output is " << precond_r_i.size() << endl;
 
 	  xks[i] = precond_r_i;
-#else
+#else // ######################################################################################################
 	  // approximate right hand side for local problem
 	  P.RHS(local_eps, i, f);
 	  cout << "fsize = " << f.size() << endl;
@@ -624,8 +715,7 @@ namespace FrameTL
 		 it != itend; ++it, ++id)
 	    precond_r_i.set_coefficient(*it, xk[id]);
 	  }
-#endif
-	  // #########################################
+#endif // ######################################################################################################
 	  
 #ifdef SPARSE
 	  u_k = precond_r_i + u_k_sparse;
@@ -642,13 +732,19 @@ namespace FrameTL
 	cout << "############## full cycle of local solves completed ##############"<< endl;
 	
       }// end loop K
+#ifdef RINGDOMAIN
+      double coarse_tol = (sigma - 1./M)*2.0*pow(rho,K)*mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*0.1;
+#else
       double coarse_tol = (sigma - 1./M)*2.0*pow(rho,K)*mu*pow(2.0*pow(rho,K)*M*sigma,l-1);
+#endif
+
       cout << "tolerance for coarsening = " << coarse_tol << endl;
       cout << "norm of u_k = " << l2_norm(u_k) << endl;
       u_k.COARSE(coarse_tol, tmp_w);
       u_k = tmp_w;
       cout << "degrees of freedom after coarsening: " << u_k.size() << endl;
-     
+
+      // ############# output #############
       tend = clock();
       time += ((double) (tend-tstart))/((double) CLOCKS_PER_SEC);
       
@@ -657,138 +753,189 @@ namespace FrameTL
 
       //compute global residual
       
-      P.RHS(1.0e-6, f);
+      P.RHS(1.0e-8, f);
       cout << "fsize exact res = " << f.size() << endl;
       tmp_w.clear(); 
       for (int i = 0; i < P.basis().n_p(); i++) {
-      	APPLY(P, i, u_k, 1.0e-6, w, jmax, CDD1);
+      	APPLY(P, i, u_k, 1.0e-8, w, jmax, CDD1);
       	tmp_w += w;
       }
       double residual_norm = l2_norm(f-tmp_w);
       cout << "norm of global residual = " << residual_norm  << endl;
 
-      //double residual_norm = compute_exact_residual_norm(P, u_k);      
-      //cout << "norm of global residual = " << residual_norm << endl;
+      char name1[128];
+      char name2[128];
+      char name3[128];
+      char name4[128];
+      char name5[128];
+      char name6[128];
+      char name7[128];
 
-      int d  = Basis1D::primal_polynomial_degree();
-      int dT = Basis1D::primal_vanishing_moments();
-      char name1[60];
-      char name2[60];
-      char name3[60];
-      char name4[60];
-	
 #ifdef ONE_D
-      //double residual_norm = compute_exact_residual_norm(P, u_k);      
-      //cout << "norm of global residual = " << residual_norm << endl;
-
-      double H1err = 0;//error_H_scale_interval<Basis1D>(1, P.basis(), tmp, exact1D_prime);
-      cout << "H_1 error = " <<  H1err << endl;
-      
-//       cout << "rho = " << H1err / H1err_old << endl;
-//       rho_estimates[k] = H1err / H1err_old;     
-//       H1err_old = H1err;
-      
-//       std::ofstream os2b("rho_estimates.m");
-//       matlab_output(rho_estimates,os2b);
-//       os2b.close();
-
-      sprintf(name1, "%s%d%s%d%s", "log_10_H1_error1D_j0_3_jmax_18_", d, "_dT", dT, ".m");
-      sprintf(name2, "%s%d%s%d%s", "log_10_H1_error1D_time_j0_3_jmax_18_", d, "_dT", dT, ".m");
-      
-      log_10_H1_error[log10(u_k.size())] = log10(H1err);
-      std::ofstream os2a(name1);
-      matlab_output(log_10_H1_error,os2a);
-      os2a.close();
-      
-      log_10_H1_error_time[log10(time)] = log10(H1err);
-      std::ofstream os2f(name2);
-      matlab_output(log_10_H1_error_time,os2f);
-      os2f.close();
     
-      sprintf(name3, "%s%d%s%d%s", "log_10_residual_err1D_VF_j0_3_jmax_18_", d, "_dT", dT, ".m");
-      sprintf(name4, "%s%d%s%d%s", "log_10_residual_err1D_VF_time_j0_3_jmax_18_", d, "_dT", dT, ".m");
-//       sprintf(name3, "%s%d%s%d%s", "log_10_residual_err1D_j0_4_jmax_18_", d, "_dT", dT, ".m");
-//       sprintf(name4, "%s%d%s%d%s", "log_10_residual_err1D_time_j0_4_jmax_18_", d, "_dT", dT, ".m");
-            
-
-      log_10_residual_error[log10(u_k.size())] = log10(l2_norm(f-tmp_w));//log10(residual_norm);
-      std::ofstream os2c(name3);
+      switch (d) {
+      case 2: {
+	weak_ell_tau_norms[k] = u_k.weak_norm(1./1.5);// (d,dT)=(2,2)=1./1.5 (d,dT)=(3,3)=1./2.5, (d,dT)=(4,6)=1./3.5
+	sprintf(name1, "%s%d%s%d%s", "./ms_results22/ms1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name2, "%s%d%s%d%s", "./ms_results22/ms1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name3, "%s%d%s%d%s", "./ms_results22/ms1D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name4, "%s%d%s%d%s", "./ms_results22/ms1D_H1err_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name5, "%s%d%s%d%s", "./ms_results22/ms1D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name6, "%s%d%s%d%s", "./ms_results22/ms1D_L2err_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name7, "%s%d%s%d%s", "./ms_results22/ms1D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
+	break;
+      }
+      case 3: {
+	weak_ell_tau_norms[k] = u_k.weak_norm(1./2.5);
+	sprintf(name1, "%s%d%s%d%s", "./ms_results33/ms1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name2, "%s%d%s%d%s", "./ms_results33/ms1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name3, "%s%d%s%d%s", "./ms_results33/ms1D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name4, "%s%d%s%d%s", "./ms_results33/ms1D_H1err_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name5, "%s%d%s%d%s", "./ms_results33/ms1D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name6, "%s%d%s%d%s", "./ms_results33/ms1D_L2err_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name7, "%s%d%s%d%s", "./ms_results33/ms1D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
+	break;
+      }
+      case 4: {
+	weak_ell_tau_norms[k] = u_k.weak_norm(1./3.5);
+	sprintf(name1, "%s%d%s%d%s", "./ms_results46/ms1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name2, "%s%d%s%d%s", "./ms_results46/ms1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name3, "%s%d%s%d%s", "./ms_results46/ms1D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");  
+	sprintf(name4, "%s%d%s%d%s", "./ms_results46/ms1D_H1err_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name5, "%s%d%s%d%s", "./ms_results46/ms1D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name6, "%s%d%s%d%s", "./ms_results46/ms1D_L2err_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name7, "%s%d%s%d%s", "./ms_results46/ms1D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
+	break;
+      }
+      };
+      log_10_residual_error[log10(u_k.size())] = log10(l2_norm(f-tmp_w));
+      std::ofstream os2c(name1);
       matlab_output(log_10_residual_error,os2c);
       os2c.close();
 
-      log_10_residual_error_time[log10(time)] = log10(l2_norm(f-tmp_w));//log10(residual_norm);
-      std::ofstream os2e(name4);
+      log_10_residual_error_time[log10(time)] = log10(l2_norm(f-tmp_w));
+      std::ofstream os2e(name2);
       matlab_output(log_10_residual_error_time,os2e);
       os2e.close();
 
-      weak_ell_tau_norms[k] = u_k.weak_norm(1./2.5);// (d,dT)=(2,2)=1./1.5 (d,dT)=(3,3)=1./2.5, (d,dT)=(4,4)=1./3.5
-      std::ofstream os2g("weak_ell_tau_norms.m");
+      std::ofstream os2g(name3);
       matlab_output(weak_ell_tau_norms,os2g);
       os2g.close();
+
+//       double H1err = error_H_scale_interval<Basis1D>(1,P.basis(), tmp, exact1D_prime);
+//       log_10_H1_error[log10(u_k.size())] = log10(H1err);
+//       std::ofstream os2h(name4);
+//       matlab_output(log_10_H1_error,os2h);
+//       os2h.close();
+
+//       log_10_H1_error_time[log10(time)] = log10(H1err);
+//       std::ofstream os2i(name5);
+//       matlab_output(log_10_H1_error_time,os2i);
+//       os2i.close();
+
+//       double L2err = error_H_scale_interval<Basis1D>(0, P.basis(), tmp, exact1D);
+//       log_10_L2_error[log10(u_k.size())] = log10(L2err);
+//       std::ofstream os2j(name6);
+//       matlab_output(log_10_L2_error,os2j);
+//       os2j.close();
+
+//       log_10_L2_error_time[log10(time)] = log10(L2err);
+//       std::ofstream os2k(name7);
+//       matlab_output(log_10_L2_error_time,os2k);
+//       os2k.close();
 
 
 #endif
 	
 	
 #ifdef TWO_D
-      double H1err = 0.;//error_H_scale_Lshaped<Basis1D>(1, P.basis(), tmp, singGrad);
-      cout << "H_1 error = " <<  H1err << endl;
-      
-//       log_10_H1_error[log10(u_k.size())] = log10(H1err);
-//       std::ofstream os2a("log_10_H1_error2D.m");
-//       matlab_output(log_10_H1_error,os2a);
-//       os2a.close();
-
-      cout << "rho = " << residual_norm / residual_norm_old << endl;
-      rho_estimates[k] = residual_norm / residual_norm_old;     
-      residual_norm_old = residual_norm;
-      
-      std::ofstream os2b("rho_estimates.m");
-      matlab_output(rho_estimates,os2b);
-      os2b.close();
-      
-      sprintf(name1, "%s%d%s%d%s", "log_10_H1_error2D_j0_4_jmax_8_", d, "_dT", dT, ".m");
-      sprintf(name2, "%s%d%s%d%s", "log_10_H1_error2D_time_j0_4_jmax_8_", d, "_dT", dT, ".m");
-      
-      log_10_H1_error[log10(u_k.size())] = log10(H1err);
-      std::ofstream os2a(name1);
-      matlab_output(log_10_H1_error,os2a);
-      os2a.close();
-      
-      log_10_H1_error_time[log10(time)] = log10(H1err);
-      std::ofstream os2f(name2);
-      matlab_output(log_10_H1_error_time,os2f);
-      os2f.close();
-
-      
-      sprintf(name3, "%s%d%s%d%s", "log_10_residual_err2D_VFu_j0_4_jmax_8_", d, "_dT", dT, ".m");
-      sprintf(name4, "%s%d%s%d%s", "log_10_residual_err2D_VFu_time_j0_4_jmax_8_", d, "_dT", dT, ".m");
-            
-//       sprintf(name3, "%s%d%s%d%s", "log_10_residual_err2D_j0_4_jmax_8_lap", d, "_dT", dT, ".m");
-//       sprintf(name4, "%s%d%s%d%s", "log_10_residual_err2D_time_j0_4_jmax_8_lap", d, "_dT", dT, ".m");
-
-      log_10_residual_error[log10(u_k.size())] = log10(l2_norm(f-tmp_w));//log10(residual_norm);
-      std::ofstream os2c(name3);
+      switch (d) {
+      case 2: {
+	weak_ell_tau_norms[k] = u_k.weak_norm(1./1.0);
+	sprintf(name1, "%s%d%s%d%s", "./ms_results2D_22/ms2D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name2, "%s%d%s%d%s", "./ms_results2D_22/ms2D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name3, "%s%d%s%d%s", "./ms_results2D_22/ms2D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name4, "%s%d%s%d%s", "./ms_results2D_22/ms2D_H1err_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name5, "%s%d%s%d%s", "./ms_results2D_22/ms2D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name6, "%s%d%s%d%s", "./ms_results2D_22/ms2D_L2err_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name7, "%s%d%s%d%s", "./ms_results2D_22/ms2D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
+	break;
+      }
+      case 3: {
+#ifdef BIHARMONIC
+	weak_ell_tau_norms[k] = u_k.weak_norm(1./1.0);
+#else
+	weak_ell_tau_norms[k] = u_k.weak_norm(1./1.5);
+#endif
+	sprintf(name1, "%s%d%s%d%s", "./ms_results2D_33_biharmL_v2/ms2D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name2, "%s%d%s%d%s", "./ms_results2D_33_biharmL_v2/ms2D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name3, "%s%d%s%d%s", "./ms_results2D_33_biharmL_v2/ms2D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name4, "%s%d%s%d%s", "./ms_results2D_33_biharmL_v2/ms2D_H1err_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name5, "%s%d%s%d%s", "./ms_results2D_33_biharmL_v2/ms2D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name6, "%s%d%s%d%s", "./ms_results2D_33_biharmL_v2/ms2D_L2err_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name7, "%s%d%s%d%s", "./ms_results2D_33_biharmL_v2/ms2D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
+	break;
+      }
+      case 4: {
+#ifdef BIHARMONIC
+	weak_ell_tau_norms[k] = u_k.weak_norm(1./1.5);
+#else
+	weak_ell_tau_norms[k] = u_k.weak_norm(1./2.0);
+#endif
+	sprintf(name1, "%s%d%s%d%s", "./ms_results2D_46_biharmL/ms2D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name2, "%s%d%s%d%s", "./ms_results2D_46_biharmL/ms2D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name3, "%s%d%s%d%s", "./ms_results2D_46_biharmL/ms2D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");  
+	sprintf(name4, "%s%d%s%d%s", "./ms_results2D_46_biharmL/ms2D_H1err_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name5, "%s%d%s%d%s", "./ms_results2D_46_biharmL/ms2D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name6, "%s%d%s%d%s", "./ms_results2D_46_biharmL/ms2D_L2err_P_jmax18_", d, "_dT", dT, ".m");
+	sprintf(name7, "%s%d%s%d%s", "./ms_results2D_46_biharmL/ms2D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
+	break;
+      }
+      };
+      log_10_residual_error[log10(u_k.size())] = log10(l2_norm(f-tmp_w));
+      std::ofstream os2c(name1);
       matlab_output(log_10_residual_error,os2c);
       os2c.close();
 
-      log_10_residual_error_time[log10(time)] = log10(l2_norm(f-tmp_w));//log10(residual_norm);
-      std::ofstream os2e(name4);
+      log_10_residual_error_time[log10(time)] = log10(l2_norm(f-tmp_w));
+      std::ofstream os2e(name2);
       matlab_output(log_10_residual_error_time,os2e);
       os2e.close();
 
-      weak_ell_tau_norms[k] = u_k.weak_norm(1./1.5);// (d,dt) = (2,2): (1./1.0),(d,dt) = (3,3): (1./1.5),(d,dt) = (4,4): (1./2.0)
-      std::ofstream os2g("weak_ell_tau_norms.m");
+      std::ofstream os2g(name3);
       matlab_output(weak_ell_tau_norms,os2g);
       os2g.close();
       
+//       double H1err = error_H_scale_Lshaped<Basis1D>(1, P.basis(), tmp, singGrad);
+//       log_10_H1_error[log10(u_k.size())] = log10(H1err);
+//       std::ofstream os2h(name4);
+//       matlab_output(log_10_H1_error,os2h);
+//       os2h.close();
+
+//       log_10_H1_error_time[log10(time)] = log10(H1err);
+//       std::ofstream os2i(name5);
+//       matlab_output(log_10_H1_error_time,os2i);
+//       os2i.close();
+
+//       double L2err = error_H_scale_Lshaped<Basis1D>(0, P.basis(), tmp, exact2D);
+//       log_10_L2_error[log10(u_k.size())] = log10(L2err);
+//       std::ofstream os2j(name6);
+//       matlab_output(log_10_L2_error,os2j);
+//       os2j.close();
+
+//       log_10_L2_error_time[log10(time)] = log10(L2err);
+//       std::ofstream os2k(name7);
+//       matlab_output(log_10_L2_error_time,os2k);
+//       os2k.close();
+
+
 #endif
        tstart = clock();
+       // ############# end output #############
+
     }// end loop L
     
-
-
-      
+    
     // collect final approximation and its local parts
     approximations[P.basis().n_p()] = u_k;
     

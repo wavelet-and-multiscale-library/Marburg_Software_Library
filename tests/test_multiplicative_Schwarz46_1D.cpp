@@ -4,8 +4,10 @@
 #define OVERLAP 0.7
 #define JMAX 18
 
-//#define PRECOMP
+#define PRIMALORDER 4
+#define DUALORDER   6
 
+//#define PRECOMP
 //#define COMPUTECONSTANTS
 
 #define SPARSE
@@ -112,8 +114,6 @@ public:
 };
 
 
-
-
 int main()
 {
 
@@ -124,7 +124,7 @@ int main()
 
   const int jmax = JMAX;
   
-  const int d = 2, dT = 2;
+  const int d = PRIMALORDER, dT = DUALORDER;
 
   //typedef SplineBasis<d,dT,P_construction> Basis1D;
 
@@ -289,21 +289,9 @@ int main()
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 4.19, 1.0/0.146);
 
-
-  //   // (d,dT) = (3,5)
-  //   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.6548, 1.0/0.146);
-  //   discrete_poisson.set_norm_A(3.6548);
-  //   optimistic guess:
-  //   discrete_poisson.set_Ainv(1.0/0.146);
-
-  // (d,dT) = (3,5)
-  CachedProblemLocal<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.6548, 1.0/0.146);
-  //CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 3.6548, 1.0/0.146);
-  discrete_poisson.set_norm_A(3.6548);
-  //optimistic guess:
-  discrete_poisson.set_Ainv(1.0/0.146);
-
-  //CachedProblem<BiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 4.19, 1.0/0.146);
+  CachedProblemLocal<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 1.0, 1.0);
+  discrete_poisson.set_norm_A(1.0);
+  discrete_poisson.set_Ainv(1.0);
 
   const double epsilon = 1.0e-5;
 
@@ -416,20 +404,20 @@ int main()
   for (int i = 0; i <= frame.n_p(); i++)
     approximations[i].scale(&discrete_poisson,-1);
 
-  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, approximations[frame.n_p()], true, 11);//expand in primal basis
+  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, approximations[frame.n_p()], true, 12);//expand in primal basis
   cout << "...finished plotting global approximate solution" << endl;
-  Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, approximations[frame.n_p()], exactSolution1D, 11);
+  Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, approximations[frame.n_p()], exactSolution1D, 12);
   cout << "...finished plotting global error" << endl;
 
-  char filename1[50];
-  sprintf(filename1, "%s%d%s%d%s", "approx1D_global_d", d, "_dT", dT, ".m");
+  char filename1[128];
+  sprintf(filename1, "%s%d%s%d%s", "./ms_results46/approx1D_global_d", d, "_dT", dT, ".m");
   std::ofstream ofs(filename1);
   matlab_output(ofs,U);
   //uplot_output(ofs,U);
   ofs.close();
 
-  char filename2[50];
-  sprintf(filename2, "%s%d%s%d%s", "error1D_global_d", d, "_dT", dT, ".m");
+  char filename2[128];
+  sprintf(filename2, "%s%d%s%d%s", "./ms_results46/error1D_global_d", d, "_dT", dT, ".m");
   std::ofstream ofs1(filename2);
   matlab_output(ofs1,Error);
   //gnuplot_output(ofs1,Error);
@@ -439,10 +427,10 @@ int main()
   for (int i = 0; i < frame.n_p(); i++) {
     cout << "plotting local approximation on patch " << i << endl;
 
-    char filename3[50];
-    sprintf(filename3, "%s%d%s%d%s%d%s", "approx1D_local_on_patch_" , i , "_d" , d ,  "_dT", dT, ".m");
+    char filename3[128];
+    sprintf(filename3, "%s%d%s%d%s%d%s", "./ms_results46/approx1D_local_on_patch_" , i , "_d" , d ,  "_dT", dT, ".m");
 
-    U = evalObj.evaluate(frame, approximations[i], true, 8);//expand in primal basis
+    U = evalObj.evaluate(frame, approximations[i], true, 12);//expand in primal basis
     std::ofstream ofsloc(filename3);
     matlab_output(ofsloc,U);
     //gnuplot_output(ofsloc,U);
@@ -460,14 +448,12 @@ int main()
     //cout << "level = " << ind.j() << endl;
     indices[ind.p()].set_coefficient(Index1D(ind.j(),ind.e()[0],ind.k()[0],
 					     frame.bases()[0]->bases()[0]), *it);
-  
-    //cout << log10(fabs(*it)) << endl;
   }
 
-  std::ofstream ofs7("indices_patch_0.m");
+  std::ofstream ofs7("./ms_results46/indices_patch_0.m");
   WaveletTL::plot_indices<Basis1D>(frame.bases()[0]->bases()[0], indices[0], JMAX, ofs7, "jet", true, -16);
 
-  std::ofstream ofs8("indices_patch_1.m");
+  std::ofstream ofs8("./ms_results46/indices_patch_1.m");
   WaveletTL::plot_indices<Basis1D>(frame.bases()[1]->bases()[0], indices[1], JMAX, ofs8, "jet", true, -16);
 
   return 0;

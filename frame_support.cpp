@@ -275,15 +275,17 @@ namespace FrameTL
 
       }
 
-    if ( (typeid(*frame.atlas()->charts()[lambda.p()]) ==
-	  typeid(AffineLinearMapping<2>) &&
-	  typeid(*frame.atlas()->charts()[mu.p()])     == 
-	  typeid(AffineLinearMapping<2>)
-	  ||
-	  (typeid(*frame.atlas()->charts()[lambda.p()]) ==
-	   typeid(SimpleAffineLinearMapping<2>) &&
-	   typeid(*frame.atlas()->charts()[mu.p()])     == 
-	   typeid(SimpleAffineLinearMapping<2>)))
+    if ( ( 
+	  (typeid(*frame.atlas()->charts()[lambda.p()])  == typeid(AffineLinearMapping<2>))
+	  &&
+	  (typeid(*frame.atlas()->charts()[mu.p()])      == typeid(AffineLinearMapping<2>))
+	  )
+	 ||
+	 (
+	  (typeid(*frame.atlas()->charts()[lambda.p()])  == typeid(SimpleAffineLinearMapping<2>))
+	  &&
+	  (typeid(*frame.atlas()->charts()[mu.p()])      == typeid(SimpleAffineLinearMapping<2>))
+	  )
 	 )
       {
 	const Chart<DIM_d,DIM_m>* chart_la = frame.atlas()->charts()[lambda.p()];
@@ -956,6 +958,33 @@ namespace FrameTL
 #endif
 
   }
+  
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  inline
+  void intersecting_wavelets (const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+			      const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+			      const int p,
+			      const std::set<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& Lambda,			      
+			      std::list<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& intersecting)
+  {
+    //intersecting.erase(intersecting.begin(),intersecting.end());
+
+    typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> Frame;
+    typedef typename Frame::Index Index;
+    typedef typename CubeBasis<IBASIS,DIM_d>::Index CubeIndex;
+    const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda = &((frame.all_supports)[lambda.number()]);
+    // loop over the Lambda
+    for (typename std::set<Index>::const_iterator it1(Lambda.begin()), itend(Lambda.end());
+	 it1 != itend; ++it1) {
+      const typename CubeBasis<IBASIS,DIM_d>::Support* supp_ind = &((frame.all_supports)[(*it1).number()]);
+      if ( (*it1).p()==p && intersect_supports_simple(frame, lambda, *it1, supp_lambda, supp_ind) ){
+	intersecting.push_back(*it1);
+      }
+    }
+  }
+
+
+
 
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   inline

@@ -1,3 +1,5 @@
+#define ONE_D
+
 #include <fstream>
 #include <iostream>
 #include <time.h> 
@@ -18,7 +20,7 @@
 #include <frame_index.h>
 #include <algebra/vector_norms.h>
 #include <utils/plot_tools.h>
-#include <steepest_descent.h>
+//#include <steepest_descent.h>
 
 using std::cout;
 using std::endl;
@@ -40,6 +42,63 @@ using namespace std;
 using namespace FrameTL;
 using namespace MathTL;
 using namespace WaveletTL;
+
+
+
+
+
+
+/*!
+*/
+template<class VALUE = double>
+class Singularity1D_RHS_2
+  : public Function<1, VALUE>
+{
+public:
+  Singularity1D_RHS_2() {};
+  virtual ~Singularity1D_RHS_2() {};
+  VALUE value(const Point<1>& p,
+	      const unsigned int component = 0) const
+  {
+    return -sin(3.*M_PI*p[0])*9.*M_PI*M_PI - 4.;
+  }
+  
+  void vector_value(const Point<1> &p,
+		    Vector<VALUE>& values) const { ; }
+  
+};
+
+/*!
+  special function with steep gradients
+  near the right end of the interval
+*/
+template<class VALUE = double>
+class Singularity1D_2
+  : public Function<1, VALUE>
+{
+public:
+  Singularity1D_2() {};
+  virtual ~Singularity1D_2() {};
+  VALUE value(const Point<1>& p,
+	      const unsigned int component = 0) const
+  {
+    if (0. <= p[0] && p[0] < 0.5)
+      return -sin(3.*M_PI*p[0]) + 2.*p[0]*p[0];
+
+    if (0.5 <= p[0] && p[0] <= 1.0)
+      return -sin(3.*M_PI*p[0]) + 2.*(1-p[0])*(1-p[0]);
+
+    return 0.;
+
+  }
+  
+  void vector_value(const Point<1> &p,
+		    Vector<VALUE>& values) const { ; }
+  
+};
+
+
+
 
 int main()
 {

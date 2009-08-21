@@ -15,15 +15,15 @@ namespace FrameTL
     // recall: \sqrt(\sqrt(...)) = Gram_factor
 
     // number of intervals in summed quadrature rule
-    #ifdef RHS_QUADRATURE_GRANULARITY
+#ifdef RHS_QUADRATURE_GRANULARITY
     const int N = RHS_QUADRATURE_GRANULARITY;
-    #else
+#else
     const int N = 1;
-    #endif
-
-
+#endif
+    
+    
     double r = 0;
-
+    
     const unsigned int p = lambda.p();
  
     typedef WaveletTL::CubeBasis<IBASIS,DIM_d> CUBEBASIS;
@@ -40,7 +40,7 @@ namespace FrameTL
     WaveletTL::support<IBASIS,DIM_d>(*(frame_->bases()[p]), lambda_c, supp); 
     const Chart<DIM_d>* chart = frame_->atlas()->charts()[p];
     // setup Gauss points and weights for a composite quadrature formula:
-    const int N_Gauss = 8;
+    const int N_Gauss = 6;
     //const double h = ldexp(1.0, -supp.j); // granularity for the quadrature
     const double h = 1.0 / (1 << supp.j); // granularity for the quadrature
     FixedArray1D<Array1D<double>,DIM_d> gauss_points, gauss_weights, v_values;

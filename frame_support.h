@@ -129,13 +129,20 @@ namespace FrameTL
     have a nontrivial intersection
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
-  void intersecting_wavelets(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
-			     const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
-			     const int p,
-			     const int j, const bool generators,
-			     std::list<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& intersecting);
+  void intersecting_wavelets_on_patch(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+				      const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+				      const int p,
+				      const int j, const bool generators,
+				      std::list<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& intersecting);
 
 
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  inline
+  void intersecting_wavelets (const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+			      const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+			      const int p,
+			      const std::set<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& Lambda,			      
+			      std::list<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& intersecting);
 
   /*!
     Decide whether the support of a given (primal) generator/wavelet \psi_\lambda

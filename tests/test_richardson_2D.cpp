@@ -1,15 +1,12 @@
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
 
-#define JMAX 5
+#define JMAX 8
 #define TWO_D
 
 //#define PRECOMP_RHS
 
 #define PRIMALORDER 3
 #define DUALORDER   3
-
-
-//#define PRECOMP_RHS
 
 #include <fstream>
 #include <iostream>
@@ -29,7 +26,7 @@
 #include <numerics/corner_singularity.h>
 #include <frame_support.h>
 #include <frame_index.h>
-#include <steepest_descent.h>
+#include <richardson.h>
 #include <galerkin/cached_problem.h>
 
 using std::cout;
@@ -64,8 +61,8 @@ int main()
   const int DIM = 2;
   const int jmax = JMAX;
 
-  const int d  = 3;
-  const int dT = 3;
+  const int d  = PRIMALORDER;
+  const int dT = DUALORDER;
 
   //typedef DSBasis<d,dT> Basis1D;
   typedef PBasis<d,dT> Basis1D;
@@ -122,14 +119,14 @@ int main()
   bound_1[0] = 1;
   bound_1[1] = 1;
   bound_1[2] = 1;
-  bound_1[3] = d-1;//2
+  bound_1[3] = 1;//2
 
   bc[0] = bound_1;
 
   //primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
   bound_2[0] = 1;
-  bound_2[1] = d-1;//2
+  bound_2[1] = 1;//2
   bound_2[2] = 1;
   bound_2[3] = 1;
 
@@ -263,22 +260,13 @@ int main()
   double time;
   tstart = clock();
 
-  steepest_descent_SOLVE(problem, epsilon, u_epsilon, approximations);
-  //cg_SOLVE(problem, epsilon, u_epsilon);
-  //richardson_SOLVE_CDD2(problem, epsilon, u_epsilon);
-  //richardson_SOLVE(problem, epsilon, u_epsilon);
-  //  steepest_descent_SOLVE(discrete_poisson, epsilon, u_epsilon);
- //  for (unsigned int i = 0; i < 50*20;i++)
-//     for (Index ind = FrameTL::first_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0());
-// 	 ind <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+2); ++ind)
-//       {
-// 	;
-//       }
+  richardson_SOLVE(problem, epsilon, u_epsilon, approximations);
+
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
 
-  cout << "steepest descent done" << endl;
+  cout << "Richardson done" << endl;
 
   //discrete_poisson.rescale(u_epsilon,-1);
   u_epsilon.scale(&problem,-1);
@@ -291,11 +279,11 @@ int main()
 
   cout << "done plotting pointwise error" << endl;
 
-  std::ofstream ofs5("approx_sol_steep_2D_out.m");
+  std::ofstream ofs5("./Richardson_results33_2D_alpha_0p05/approx_sol_rich_2D_out.m");
   matlab_output(ofs5,U);
   ofs5.close();
 
-  std::ofstream ofs6("error_steep_2D_out.m");
+  std::ofstream ofs6("./Richardson_results33_2D_alpha_0p05/error_rich_2D_out.m");
   matlab_output(ofs6,Error);
   ofs6.close();
 
@@ -307,7 +295,7 @@ int main()
     cout << "plotting local approximation on patch " << i << endl;
 
     char filename3[50];
-    sprintf(filename3, "%s%d%s%d%s%d%s", "approx2Dsteep_local_on_patch_" , i , "_d" , d ,  "_dT", dT, ".m");
+    sprintf(filename3, "%s%d%s%d%s%d%s", "./Richardson_results33_2D_alpha_0p05/approx2Drich_local_on_patch_" , i , "_d" , d ,  "_dT", dT, ".m");
 
     U = evalObj.evaluate(frame, approximations[i], true, 6);//expand in primal basis
     std::ofstream ofsloc(filename3);

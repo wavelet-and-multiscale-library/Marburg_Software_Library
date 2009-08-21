@@ -12,6 +12,13 @@ DEBUGMODE = off
 COMPILER = gnu
 #COMPILER = intel
 #COMPILER = pgi
+#COMPILER = mpi
+
+ifeq ($(COMPILER),mpi)
+CXX = mpiCC.mpich
+CXXFLAGS +=  -O2 -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+#CXXFLAGS +=  -O2 -I$(FRAMETL_DIR_PAR) -I$(WAVELETTL_DIR_PAR) -I$(MATHTL_DIR_PAR) -Wall -pipe
+endif
 
 ifeq ($(COMPILER),gnu)
 CXX = g++
@@ -19,7 +26,6 @@ CXX = g++
 #CXX = $(HOME)/gcc-4.1.0/bin/g++
 #CXX = $(HOME)/gcc-4.1.1/bin/g++
 #CXX = $(HOME)/gcc-4.2-20060610/bin/g++
-
 ifeq ($(CXX),g++-2.95)
 CXXFLAGS += -ftemplate-depth-40
 endif
@@ -52,22 +58,38 @@ CXXFLAGS +=  -O2 -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 endif
 
 
-EXEOBJF = test_steepest_descent.o\
+EXEOBJF = test_additive_Schwarz33_2D.o\
+test_multiplicative_Schwarz33_biharmonic_2D_v2.o\
+test_multiplicative_Schwarz46_biharmonic_2D.o\
+test_multiplicative_Schwarz33_2D_ring.o\
+test_additive_Schwarz33_2D_ring.o\
+test_additive_Schwarz33_1D.o\
+test_multiplicative_Schwarz22_2D.o\
+test_multiplicative_Schwarz33_2D_Full.o\
+test_multiplicative_Schwarz33_1D.o\
+test_multiplicative_Schwarz22_1D.o\
+test_multiplicative_Schwarz46_1D.o\
+test_multiplicative_Schwarz33_2D.o\
+test_multiplicative_Schwarz46_2D.o\
+test_multiplicative_Schwarz33_2D_j03.o\
+test_steepest_descent_biharmonic_1D.o\
+test_steepest_descent33.o\
+test_steepest_descent46.o\
+test_steepest_descent33_basis.o\
+test_richardson_2D.o\
+test_steepest_descent22_2D.o\
+test_steepest_descent46_2D.o\
 test_richardson.o\
-#test_multiplicative_Schwarz_1D.o\
-#test_additive_Schwarz.o\
-#test_additive_Schwarz_1D.o\
-#test_steepest_descent_2D.o\
-#test_multiplicative_Schwarz.o\
-#test_biharmonic_equation_1D.o\
-#test_steepest_descent_biharmonic_1D.o
-#test_apply_1D.o \
-#test_apply.o \
-#test_steepest_descent_2D.o\
-#test_simple_elliptic_equation.o\
-#test_elliptic_equation_1D.o\
-#test_elliptic_equation.o\
-#test_biharmonic_equation_1D.o
+test_steepest_descent22.o\
+test_additive_Schwarz.o\
+test_steepest_descent_2D.o\
+test_multiplicative_Schwarz.o\
+test_biharmonic_equation_1D.o\
+test_apply_1D.o \
+test_apply.o \
+test_simple_elliptic_equation.o\
+test_elliptic_equation_1D.o\
+test_elliptic_equation.o\
 
 
 

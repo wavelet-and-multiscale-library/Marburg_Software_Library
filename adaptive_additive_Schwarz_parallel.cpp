@@ -8,6 +8,7 @@
 #include <frame_evaluate.h>
 #include <cdd1_local.h>
 #include <error_H_scale.h>
+#include <parallel.h>
 
 using std::set;
 
@@ -203,9 +204,6 @@ namespace FrameTL
   
   };
 
-
-
-
   template <class PROBLEM>
   void split (PROBLEM& P, const int i,
 		 const InfiniteVector<double, typename PROBLEM::Index>& u,
@@ -260,6 +258,7 @@ namespace FrameTL
     }
 #endif
   }
+
 
   template <class PROBLEM>
   void thin_out_ring (PROBLEM& P, const int i,
@@ -324,8 +323,11 @@ namespace FrameTL
     }
     }
 #endif
- 
+  
+
   }
+
+
 
   template <class PROBLEM>
   void thin_out (PROBLEM& P, const int i,
@@ -622,7 +624,7 @@ namespace FrameTL
 #ifdef RINGDOMAIN
       L = 8;
 #else
-      L = 23; // j0=4, then take L=16, j0=3, then take L=14
+      L = 23;// formerly 16
 #endif
       break;
     }
@@ -662,8 +664,9 @@ namespace FrameTL
 #ifdef RINGDOMAIN
     const double alpha = 0.5;
 #else
-    const double alpha = 1.0/m;
+    const double alpha = 1.0/m; // 0.2
 #endif
+    int i = MPI::COMM_WORLD.Get_rank();
 
     int k = 0;
 
@@ -671,51 +674,68 @@ namespace FrameTL
     clock_t tstart, tend;
     tstart = clock();
     double local_eps = 1.0;
+
+    MPI::COMM_WORLD.Barrier();
     for (int l = 1; l < L; l++) {
       for (int p = 1; p <= K; p++) {
-	for (int i = 0; i < m; i++) {
-	  k = (l-1)*m*K+(p-1)*m+i+1;
-	  cout << "################################" << endl;
-	  cout << "number of iteration = " << k << endl;
-	  cout << "################################" << endl;
+	k = (l-1)*m*K+(p-1)*m+i+1;
+	cout << "################################" << endl;
+	cout << "number of iteration = " << k << endl;
+	cout << "################################" << endl;
 #ifdef RINGDOMAIN
-	  local_eps = 10.0*mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*pow(rho,p)/(alpha*m*K);
+	local_eps = 10.0  * mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*pow(rho,p)/(alpha*m*K);
 #else
-	  local_eps = 10.0*mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*pow(rho,p)/(alpha*m*K); 
-	  //local_eps = 100.0*mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*pow(rho,p)/(alpha*m*K); // Faktor 100 bei Test mit 2 Patches
+	local_eps = 10.0 * mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*pow(rho,p)/(alpha*m*K);
 #endif
-	  cout << "tolerance for solution of local problem = " << local_eps << endl;
-	  precond_r_i.clear();
-
-	  // ####### solution of local problem #######
+	cout << "tolerance for solution of local problem = " << local_eps << endl;
+	precond_r_i.clear();
+	
+	// ####### solution of local problem #######
 #ifdef RINGDOMAIN
-	  thin_out_ring(P, i, u_k, u_k_sparse, u_k_very_sparse);
+	thin_out_ring(P, i, u_k, u_k_sparse, u_k_very_sparse);
 #else
-	  thin_out(P, i, u_k, u_k_sparse, u_k_very_sparse);
+	thin_out(P, i, u_k, u_k_sparse, u_k_very_sparse);
 #endif
-	  tmp = u_k-u_k_sparse;
-	  tmp.compress(1.0e-15);
-	  tmp = u_k-((1./(m*alpha))*tmp);
-	  tmp.compress(1.0e-15);
-
-// 	  tmp = u_k;
-// 	  tmp=u_k-((1./(m*alpha))*(tmp-u_k_sparse));
-	  
-	  cout << "entering CDD solver..." << endl;
+	tmp = u_k-u_k_sparse;
+	tmp.compress(1.0e-15);
+	tmp = u_k-((1./(m*alpha))*tmp);
+	tmp.compress(1.0e-15);
+	
+	// 	  tmp = u_k;
+	// 	  tmp=u_k-((1./(m*alpha))*(tmp-u_k_sparse));
+	
+	cout << "entering CDD solver..." << endl;
 #ifdef RINGDOMAIN
-	  CDD1_LOCAL_SOLVE(P, i, local_eps, xks[i], precond_r_i, tmp, jmax, CDD1);
+	CDD1_LOCAL_SOLVE(P, i, local_eps, xks[i], precond_r_i, tmp, jmax, CDD1);
 #else
-	  CDD1_LOCAL_SOLVE(P, i, local_eps, xks[i], precond_r_i, tmp, jmax, CDD1);
+	CDD1_LOCAL_SOLVE(P, i, local_eps, xks[i], precond_r_i, tmp, jmax, CDD1);
 #endif
-	  xks[i] = precond_r_i;
-	  uks[i] = u_k_sparse + (m*alpha*precond_r_i);
-	  xks[i] = precond_r_i;	  
-	}
+	xks[i] = precond_r_i;
+	uks[i] = u_k_sparse + (m*alpha*precond_r_i);
+	xks[i] = precond_r_i;
+	
 	tmp.clear();
-	for (int j = 0; j < m; j++) {
-	  tmp = tmp + uks[j];
+	MPI::COMM_WORLD.Barrier();
+	if (i!=0) {
+	  // all slaves send the local contribution to master
+	  send_to_Master<PROBLEM>(uks[i]);
 	}
-	u_k = (1./m)*tmp;
+	else {
+	  // master receives all local contributions and merges them
+	  // into 'tmp', which is the same as summing up the uks[i] over i \neq 0
+	  receive_all_parts(P, tmp);
+	}
+	MPI::COMM_WORLD.Barrier();
+	// master adds its own contribution
+	if (i==0) {
+	  tmp = tmp + uks[0];
+	  u_k = (1./m)*tmp;
+	}
+ 	// now pass new global approximation to all slaves
+	MPI::COMM_WORLD.Barrier();
+ 	broadcast_vec_from_Master(P, u_k);
+	MPI::COMM_WORLD.Barrier();
+
 	cout << "degrees of freedom: " << u_k.size() << endl;
       }
 #ifdef RINGDOMAIN
@@ -728,185 +748,199 @@ namespace FrameTL
       u_k.COARSE(coarse_tol, tmp2);
       u_k = tmp2;
       cout << "degrees of freedom after coarsening: " << u_k.size() << endl;
-      // ############# output #############
-      tend = clock();
-      time += ((double) (tend-tstart))/((double) CLOCKS_PER_SEC);
+      if (i==0) {
+	// ############# output #############
+	tend = clock();
+	time += ((double) (tend-tstart))/((double) CLOCKS_PER_SEC);
+	
+	tmp = u_k;
+	tmp.scale(&P,-1);
+      }
+      P.RHS(1.0e-8, i, f);
+      cout << "fsize exact res on patch " << i << " = " << f.size() << endl;
       
-      tmp = u_k;
-      tmp.scale(&P,-1);
-      //compute global residual
-      tmp2.clear(); 
-      for (int i = 0; i < m; i++) {
-	P.RHS(1.0e-8, i, f);
-	cout << "fsize exact res = " << f.size() << endl;
-      	APPLY(P, i, u_k, 1.0e-8, w, jmax, CDD1);
-      	tmp2 += f-w;
+      // compute global residual
+      // every processor computes its contribution to 'A*u_k'
+      APPLY(P, i, u_k, 1.0e-8, w, jmax, CDD1);
+      tmp2.clear();
+      
+      MPI::COMM_WORLD.Barrier();
+      if (i!=0) {
+	// all slaves send the local contribution to master
+	send_to_Master<PROBLEM>(f-w);
       }
-      double residual_norm = l2_norm(tmp2);
-      cout << "norm of global residual = " << residual_norm  << endl;
+      else {
+	// master receives all local contributions and merges them
+	// into 'tmp', which is the same as summing up the uks[i] over i \neq 0
+	receive_all_parts(P, tmp2);
+	// master adds its own contribution
+	tmp2 += f-w;
+      }
+      
+      if (i==0) {
+	double residual_norm = l2_norm(tmp2);
+	cout << "norm of global residual = " << residual_norm  << endl;
 
-      char name1[128];
-      char name2[128];
-      char name3[128];
-      char name4[128];
-      char name5[128];
-      char name6[128];
-      char name7[128];
-
+	char name1[128];
+	char name2[128];
+	char name3[128];
+	char name4[128];
+	char name5[128];
+	char name6[128];
+	char name7[128];
+	
 #ifdef ONE_D
-    
-      switch (d) {
-      case 2: {
-	weak_ell_tau_norms[k] = u_k.weak_norm(1./1.5);// (d,dT)=(2,2)=1./1.5 (d,dT)=(3,3)=1./2.5, (d,dT)=(4,6)=1./3.5
-	sprintf(name1, "%s%d%s%d%s", "./as_results22/as1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name2, "%s%d%s%d%s", "./as_results22/as1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name3, "%s%d%s%d%s", "./as_results22/as1D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name4, "%s%d%s%d%s", "./as_results22/as1D_H1err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name5, "%s%d%s%d%s", "./as_results22/as1D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name6, "%s%d%s%d%s", "./as_results22/as1D_L2err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name7, "%s%d%s%d%s", "./as_results22/as1D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
-	break;
-      }
-      case 3: {
-	weak_ell_tau_norms[k] = u_k.weak_norm(1./2.5);
-	sprintf(name1, "%s%d%s%d%s", "./as_results33/as1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name2, "%s%d%s%d%s", "./as_results33/as1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name3, "%s%d%s%d%s", "./as_results33/as1D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name4, "%s%d%s%d%s", "./as_results33/as1D_H1err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name5, "%s%d%s%d%s", "./as_results33/as1D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name6, "%s%d%s%d%s", "./as_results33/as1D_L2err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name7, "%s%d%s%d%s", "./as_results33/as1D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
-	break;
-      }
-      case 4: {
-	weak_ell_tau_norms[k] = u_k.weak_norm(1./3.5);
-	sprintf(name1, "%s%d%s%d%s", "./as_results46/as1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name2, "%s%d%s%d%s", "./as_results46/as1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name3, "%s%d%s%d%s", "./as_results46/as1D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");  
-	sprintf(name4, "%s%d%s%d%s", "./as_results46/as1D_H1err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name5, "%s%d%s%d%s", "./as_results46/as1D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name6, "%s%d%s%d%s", "./as_results46/as1D_L2err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name7, "%s%d%s%d%s", "./as_results46/as1D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
-	break;
-      }
-      };
-      log_10_residual_error[log10(u_k.size())] = log10(residual_norm);
-      std::ofstream os2c(name1);
-      matlab_output(log_10_residual_error,os2c);
-      os2c.close();
-
-      log_10_residual_error_time[log10(time)] = log10(residual_norm);
-      std::ofstream os2e(name2);
-      matlab_output(log_10_residual_error_time,os2e);
-      os2e.close();
-
-      std::ofstream os2g(name3);
-      matlab_output(weak_ell_tau_norms,os2g);
-      os2g.close();
-
-//       double H1err = error_H_scale_interval<Basis1D>(1,P.basis(), tmp, exact1D_prime);
-//       log_10_H1_error[log10(u_k.size())] = log10(H1err);
-//       std::ofstream os2h(name4);
-//       matlab_output(log_10_H1_error,os2h);
-//       os2h.close();
-
-//       log_10_H1_error_time[log10(time)] = log10(H1err);
-//       std::ofstream os2i(name5);
-//       matlab_output(log_10_H1_error_time,os2i);
-//       os2i.close();
-
-//       double L2err = error_H_scale_interval<Basis1D>(0, P.basis(), tmp, exact1D);
-//       log_10_L2_error[log10(u_k.size())] = log10(L2err);
-//       std::ofstream os2j(name6);
-//       matlab_output(log_10_L2_error,os2j);
-//       os2j.close();
-
-//       log_10_L2_error_time[log10(time)] = log10(L2err);
-//       std::ofstream os2k(name7);
-//       matlab_output(log_10_L2_error_time,os2k);
-//       os2k.close();
-
-
+	
+	switch (d) {
+	case 2: {
+	  weak_ell_tau_norms[k] = u_k.weak_norm(1./1.5);// (d,dT)=(2,2)=1./1.5 (d,dT)=(3,3)=1./2.5, (d,dT)=(4,6)=1./3.5
+	  sprintf(name1, "%s%d%s%d%s", "./as_results22_par/as1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name2, "%s%d%s%d%s", "./as_results22_par/as1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name3, "%s%d%s%d%s", "./as_results22_par/as1D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name4, "%s%d%s%d%s", "./as_results22_par/as1D_H1err_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name5, "%s%d%s%d%s", "./as_results22_par/as1D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name6, "%s%d%s%d%s", "./as_results22_par/as1D_L2err_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name7, "%s%d%s%d%s", "./as_results22_par/as1D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
+	  break;
+	}
+	case 3: {
+	  weak_ell_tau_norms[k] = u_k.weak_norm(1./2.5);
+	  sprintf(name1, "%s%d%s%d%s", "./as_results33_par/as1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name2, "%s%d%s%d%s", "./as_results33_par/as1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name3, "%s%d%s%d%s", "./as_results33_par/as1D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name4, "%s%d%s%d%s", "./as_results33_par/as1D_H1err_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name5, "%s%d%s%d%s", "./as_results33_par/as1D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name6, "%s%d%s%d%s", "./as_results33_par/as1D_L2err_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name7, "%s%d%s%d%s", "./as_results33_par/as1D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
+	  break;
+	}
+	case 4: {
+	  weak_ell_tau_norms[k] = u_k.weak_norm(1./3.5);
+	  sprintf(name1, "%s%d%s%d%s", "./as_results46_par/as1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name2, "%s%d%s%d%s", "./as_results46_par/as1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name3, "%s%d%s%d%s", "./as_results46_par/as1D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");  
+	  sprintf(name4, "%s%d%s%d%s", "./as_results46_par/as1D_H1err_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name5, "%s%d%s%d%s", "./as_results46_par/as1D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name6, "%s%d%s%d%s", "./as_results46_par/as1D_L2err_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name7, "%s%d%s%d%s", "./as_results46_par/as1D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
+	  break;
+	}
+	};
+	log_10_residual_error[log10(u_k.size())] = log10(residual_norm);
+	std::ofstream os2c(name1);
+	matlab_output(log_10_residual_error,os2c);
+	os2c.close();
+	
+	log_10_residual_error_time[log10(time)] = log10(residual_norm);
+	std::ofstream os2e(name2);
+	matlab_output(log_10_residual_error_time,os2e);
+	os2e.close();
+	
+	std::ofstream os2g(name3);
+	matlab_output(weak_ell_tau_norms,os2g);
+	os2g.close();
+	
+	//       double H1err = error_H_scale_interval<Basis1D>(1,P.basis(), tmp, exact1D_prime);
+	//       log_10_H1_error[log10(u_k.size())] = log10(H1err);
+	//       std::ofstream os2h(name4);
+	//       matlab_output(log_10_H1_error,os2h);
+	//       os2h.close();
+	
+	//       log_10_H1_error_time[log10(time)] = log10(H1err);
+	//       std::ofstream os2i(name5);
+	//       matlab_output(log_10_H1_error_time,os2i);
+	//       os2i.close();
+	
+	//       double L2err = error_H_scale_interval<Basis1D>(0, P.basis(), tmp, exact1D);
+	//       log_10_L2_error[log10(u_k.size())] = log10(L2err);
+	//       std::ofstream os2j(name6);
+	//       matlab_output(log_10_L2_error,os2j);
+	//       os2j.close();
+	
+	//       log_10_L2_error_time[log10(time)] = log10(L2err);
+	//       std::ofstream os2k(name7);
+	//       matlab_output(log_10_L2_error_time,os2k);
+	//       os2k.close();
+	
+	
 #endif
 	
 	
 #ifdef TWO_D
-      switch (d) {
-      case 2: {
-	weak_ell_tau_norms[k] = u_k.weak_norm(1./1.0);
-	sprintf(name1, "%s%d%s%d%s", "./as_results2D_22/as2D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name2, "%s%d%s%d%s", "./as_results2D_22/as2D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name3, "%s%d%s%d%s", "./as_results2D_22/as2D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name4, "%s%d%s%d%s", "./as_results2D_22/as2D_H1err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name5, "%s%d%s%d%s", "./as_results2D_22/as2D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name6, "%s%d%s%d%s", "./as_results2D_22/as2D_L2err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name7, "%s%d%s%d%s", "./as_results2D_22/as2D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
-	break;
-      }
-      case 3: {
-	weak_ell_tau_norms[k] = u_k.weak_norm(1./1.5);
-	sprintf(name1, "%s%d%s%d%s", "./as_results2D_33_3patch/as2D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name2, "%s%d%s%d%s", "./as_results2D_33_3patch/as2D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name3, "%s%d%s%d%s", "./as_results2D_33_3patch/as2D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name4, "%s%d%s%d%s", "./as_results2D_33_3patch/as2D_H1err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name5, "%s%d%s%d%s", "./as_results2D_33_3patch/as2D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name6, "%s%d%s%d%s", "./as_results2D_33_3patch/as2D_L2err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name7, "%s%d%s%d%s", "./as_results2D_33_3patch/as2D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
-	break;
-      }
-      case 4: {
-	weak_ell_tau_norms[k] = u_k.weak_norm(1./2.0);
-	sprintf(name1, "%s%d%s%d%s", "./as_results2D_46/as2D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name2, "%s%d%s%d%s", "./as_results2D_46/as2D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name3, "%s%d%s%d%s", "./as_results2D_46/as2D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");  
-	sprintf(name4, "%s%d%s%d%s", "./as_results2D_46/as2D_H1err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name5, "%s%d%s%d%s", "./as_results2D_46/as2D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name6, "%s%d%s%d%s", "./as_results2D_46/as2D_L2err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name7, "%s%d%s%d%s", "./as_results2D_46/as2D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
-	break;
-      }
-      };
-      log_10_residual_error[log10(u_k.size())] = log10(residual_norm);
-      std::ofstream os2c(name1);
-      matlab_output(log_10_residual_error,os2c);
-      os2c.close();
-
-      log_10_residual_error_time[log10(time)] = log10(residual_norm);
-      std::ofstream os2e(name2);
-      matlab_output(log_10_residual_error_time,os2e);
-      os2e.close();
-
-      std::ofstream os2g(name3);
-      matlab_output(weak_ell_tau_norms,os2g);
-      os2g.close();
+	switch (d) {
+	case 2: {
+	  weak_ell_tau_norms[k] = u_k.weak_norm(1./1.0);
+	  sprintf(name1, "%s%d%s%d%s", "./as_results2D_22_par/as2D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name2, "%s%d%s%d%s", "./as_results2D_22_par/as2D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name3, "%s%d%s%d%s", "./as_results2D_22_par/as2D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name4, "%s%d%s%d%s", "./as_results2D_22_par/as2D_H1err_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name5, "%s%d%s%d%s", "./as_results2D_22_par/as2D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name6, "%s%d%s%d%s", "./as_results2D_22_par/as2D_L2err_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name7, "%s%d%s%d%s", "./as_results2D_22_par/as2D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
+	  break;
+	}
+	case 3: {
+	  weak_ell_tau_norms[k] = u_k.weak_norm(1./1.5);
+	  sprintf(name1, "%s%d%s%d%s", "./as_results2D_33_3patch_par/as2D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name2, "%s%d%s%d%s", "./as_results2D_33_3patch_par/as2D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name3, "%s%d%s%d%s", "./as_results2D_33_3patch_par/as2D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name4, "%s%d%s%d%s", "./as_results2D_33_3patch_par/as2D_H1err_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name5, "%s%d%s%d%s", "./as_results2D_33_3patch_par/as2D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name6, "%s%d%s%d%s", "./as_results2D_33_3patch_par/as2D_L2err_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name7, "%s%d%s%d%s", "./as_results2D_33_3patch_par/as2D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
+	  break;
+	}
+	case 4: {
+	  weak_ell_tau_norms[k] = u_k.weak_norm(1./2.0);
+	  sprintf(name1, "%s%d%s%d%s", "./as_results2D_46_par/as2D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name2, "%s%d%s%d%s", "./as_results2D_46_par/as2D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name3, "%s%d%s%d%s", "./as_results2D_46_par/as2D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");  
+	  sprintf(name4, "%s%d%s%d%s", "./as_results2D_46_par/as2D_H1err_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name5, "%s%d%s%d%s", "./as_results2D_46_par/as2D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name6, "%s%d%s%d%s", "./as_results2D_46_par/as2D_L2err_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name7, "%s%d%s%d%s", "./as_results2D_46_par/as2D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
+	  break;
+	}
+	};
+	log_10_residual_error[log10(u_k.size())] = log10(residual_norm);
+	std::ofstream os2c(name1);
+	matlab_output(log_10_residual_error,os2c);
+	os2c.close();
+	
+	log_10_residual_error_time[log10(time)] = log10(residual_norm);
+	std::ofstream os2e(name2);
+	matlab_output(log_10_residual_error_time,os2e);
+	os2e.close();
+	
+	std::ofstream os2g(name3);
+	matlab_output(weak_ell_tau_norms,os2g);
+	os2g.close();
       
-//       double H1err = error_H_scale_Lshaped<Basis1D>(1, P.basis(), tmp, singGrad);
-//       log_10_H1_error[log10(u_k.size())] = log10(H1err);
-//       std::ofstream os2h(name4);
-//       matlab_output(log_10_H1_error,os2h);
-//       os2h.close();
+	//       double H1err = error_H_scale_Lshaped<Basis1D>(1, P.basis(), tmp, singGrad);
+	//       log_10_H1_error[log10(u_k.size())] = log10(H1err);
+	//       std::ofstream os2h(name4);
+	//       matlab_output(log_10_H1_error,os2h);
+	//       os2h.close();
 
-//       log_10_H1_error_time[log10(time)] = log10(H1err);
-//       std::ofstream os2i(name5);
-//       matlab_output(log_10_H1_error_time,os2i);
-//       os2i.close();
+	//       log_10_H1_error_time[log10(time)] = log10(H1err);
+	//       std::ofstream os2i(name5);
+	//       matlab_output(log_10_H1_error_time,os2i);
+	//       os2i.close();
 
-//       double L2err = error_H_scale_Lshaped<Basis1D>(0, P.basis(), tmp, exact2D);
-//       log_10_L2_error[log10(u_k.size())] = log10(L2err);
-//       std::ofstream os2j(name6);
-//       matlab_output(log_10_L2_error,os2j);
-//       os2j.close();
+	//       double L2err = error_H_scale_Lshaped<Basis1D>(0, P.basis(), tmp, exact2D);
+	//       log_10_L2_error[log10(u_k.size())] = log10(L2err);
+	//       std::ofstream os2j(name6);
+	//       matlab_output(log_10_L2_error,os2j);
+	//       os2j.close();
 
-//       log_10_L2_error_time[log10(time)] = log10(L2err);
-//       std::ofstream os2k(name7);
-//       matlab_output(log_10_L2_error_time,os2k);
-//       os2k.close();
+	//       log_10_L2_error_time[log10(time)] = log10(L2err);
+	//       std::ofstream os2k(name7);
+	//       matlab_output(log_10_L2_error_time,os2k);
+	//       os2k.close();
 #endif
-       tstart = clock();
-       // ############# end output #############
-
-
-      // ############# end output #############
+	tstart = clock();
+	// ############# end output #############
+      }
     }// end loop L
     
     // collect final approximation and its local parts
@@ -923,4 +957,5 @@ namespace FrameTL
     
 
   }
+
 }

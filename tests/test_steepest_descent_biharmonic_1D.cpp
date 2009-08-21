@@ -3,15 +3,16 @@
 //#define _FRAMETL_SIMPLEBIHARMONICEQUATION_VERBOSITY 2
 //#define _WAVELETTL_INDEX_VERBOSITY 1
 
+#define JMAX 7
+
+#define ONE_D
+
 // choose which righthand side to use
 //#define CONSTANT_RHS
 
 // choose which basis to use
-<<<<<<< test_steepest_descent_biharmonic_1D.cpp
 //#define BASIS_S
-=======
 #define BASIS_P
->>>>>>> 1.3
 
 //#ifdef BASIS_S
 //#define MAX_LOOPS 10000

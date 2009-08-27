@@ -1,8 +1,10 @@
+#define ONE_D
+
 #include <fstream>
 #include <iostream>
 #include <time.h> 
 
-#define ADAPTED_BASIS
+//#define ADAPTED_BASIS
 
 #ifdef ADAPTED_BASIS
 #include <interval/s_basis.h>
@@ -57,7 +59,7 @@ int main()
   cout << "Testing class SimpleBiharmonicEquation ..." << endl;
   
   const int DIM = 1;
-  int jmax=7;
+  int jmax = 7;
 
   #ifdef ADAPTED_BASIS
   typedef AdaptedBasis<SBasis> Basis1D;
@@ -135,7 +137,7 @@ int main()
   Biharmonic1D_Solution exactSolution;
   Biharmonic1D_RHS<Basis1D> rhs(&frame);
 
-  SimpleBiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&rhs, &frame, jmax, TrivialAffine, false);
+  SimpleBiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&rhs, &frame, jmax);
  
   CachedProblem<SimpleBiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 5, 1.0/0.146);
 

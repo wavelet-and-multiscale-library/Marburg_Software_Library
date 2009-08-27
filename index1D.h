@@ -12,10 +12,10 @@
 
 namespace FrameTL
 {
+
   template <class IBASIS>
   class Index1D
   {
-
   public:
     Index1D (const typename IBASIS::Index& ind,
 	     const unsigned int p, const unsigned int dir,

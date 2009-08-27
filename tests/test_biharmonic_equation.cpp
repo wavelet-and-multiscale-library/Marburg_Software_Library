@@ -200,7 +200,7 @@ int main()
 
   BiharmonicBVP<DIM> biharmonic(&singRhs);
   
-  BiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharmonic, &frame,jmax, TrivialAffine);  
+  BiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharmonic, &frame, jmax);  
 
   CachedProblem<BiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 5.0048, 1.0/0.01);
 

@@ -19,11 +19,10 @@ using MathTL::Function;
 namespace FrameTL
 {
   /*!
-    basis class for representation of a functional with respect to a given
-    wavelet frame basis
-    The function to which the functional is to be applied is given as a
-    frame (index).
-    This class models functionals of the form v -> \int g(x) v(x) dx.
+    Base class for representation of a functional with respect to a given
+    wavelet (frame) basis. The function to which the functional is to be applied is given as a
+    (frame) index.
+    This class models functionals of the form \f$v \mapsto \int g(x) v(x) dx\f$.
     Other (more complicated) functionals need to be implemented in an
     inherited class.
    */
@@ -32,37 +31,37 @@ namespace FrameTL
   {
   public:
     /*!
-      Constructor with a given function f and an instance of a frame
+      Constructor with a given function f and an instance of a frame.
      */
     Functional(const Function<DIM_d>* g, const AggregatedFrame<IBASIS, DIM_d, DIM_m>* frame)
       : g_(g), frame_(frame)
     { }
 
     /*
-      virtual destructor
+      Virtual destructor.
      */
     virtual ~Functional()
     { }
 
     /*!
       Evaluate the functional with the wavelet with given index lambda
-      Here, the functional \psi_\lambda -> \int f(x) \psi_\lambda(x) dx
-      is evalueted.
+      Here, the functional \f$\psi_\lambda \mapsto \int f(x) \psi_\lambda(x) dx\f$
+      is evaluated.
      */
     virtual double evaluate(const typename AggregatedFrame<IBASIS, DIM_d, DIM_m>::Index& lambda) const;
 
-    //! reading access to the frame
+    //! Reading access to the frame.
     const AggregatedFrame<IBASIS, DIM_d, DIM_m>* frame() const { return frame_; }
 
-    //! reading access to the function g
+    //! Reading access to the function g.
     const Function<DIM_d>* g() const { return g_; }
 
 
   protected:
-    //! the function representing the simple functional
+    //! The function representing the simple functional.
     const Function<DIM_d>* g_;
 
-    //! an instance of the wavelet basis
+    //! An instance of the wavelet basis.
     const AggregatedFrame<IBASIS, DIM_d, DIM_m>* frame_;
   };
 }

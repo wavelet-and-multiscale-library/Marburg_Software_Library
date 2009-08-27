@@ -1,3 +1,6 @@
+#define TWO_D
+
+
 #include <map>
 #include <fstream>
 #include <iostream>
@@ -13,7 +16,6 @@
 #include <frame_evaluate.h>
 #include <cube/cube_basis.h>
 #include <cube/cube_index.h>
-//#include <galerkin_frame_utils.h>
 #include <galerkin/galerkin_utils.h>
 #include <galerkin/cached_problem.h>
 #include <frame_support.h>
@@ -39,12 +41,10 @@ using namespace FrameTL;
 using namespace MathTL;
 using namespace WaveletTL;
 
-#define _FRAMETL_ADAPTIVE_COMPUTATION  0
-
 int main()
 {
   
-  cout << "Testing class EllipticEquation..." << endl;
+  cout << "Testing class SimpleEllipticEquation..." << endl;
   
   const int DIM = 2;
   const int jmax = 4;
@@ -140,11 +140,6 @@ int main()
   //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT, jmax);
   AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, jmax);
 
-//   for (int i = 0; i < 480; i++) {
-//     const Index* ind = frame.get_wavelet(i);
-//     cout << (*ind) << endl;
-//   }
-
   Vector<double> value(1);
   value[0] = 1;
   
@@ -164,71 +159,11 @@ int main()
   SimpleEllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax);
   CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0048, 1.0/0.01);
 
-  double tmp = 0.0;
-  int c = 0;
-  //int d = 0;
-  
   cout.precision(12);
   
   InfiniteVector<double,Frame2D::Index> rhs;
-  Vector<double> v(225);
+  //Vector<double> v(225);
   
-  FixedArray1D<bool,4> bcn;
-  bcn[0] = bcn[1] = true;
-  bcn[2] = bcn[3] = true;
-  Basis basis(bcn);
-  
-
-  Point<2> x1;
-  x1[0] = -1;
-  x1[1] = -1;
-
-  Point<2> x2;
-  x2[0] = 1;
-  x2[1] = 1;
-
-//   Grid<2> grid(x1,x2,128);
-//   SampledMapping<2> rhsOut (grid,singRhs);
-
-//   std::ofstream ofs_si("si_rhs_out.m");
-//   rhsOut.matlab_output(ofs_si);
-//   ofs_si.close();
-
-
-//   FrameIndex<Basis1D,2,2> index = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
-  
-//   SampledMapping<2> wav_out = evalObj.evaluate(frame,index,1,5);
-
-//   std::ofstream ofs("wav_out.m");
-//   wav_out.matlab_output(ofs);
-//   ofs.close();
-  
-//   Array1D<SampledMapping<2> > expansion_out = evalObj.evaluate(frame,rhs, 1, 5);
-  
-//   std::ofstream ofs2("expan_out.m");
-//   expansion_out[0].matlab_output(ofs2);
-//   ofs2.close();
-  
-//   std::ofstream ofs3("full_expan_out.m");
-//   matlab_output(ofs3,expansion_out);
-//   ofs3.close();
-  
-  //###############################################
-  // testing correctness of routine for
-  // computation of right hand side
-  
-  
-//   cout << "++++++++++++++++++++++" << endl;
-//   cout << rhs << endl;
-
-//   Array1D<SampledMapping<2> > S = evalObj.evaluate(frame, rhs, false, 5);// expand in dual basis
-//   std::ofstream ofs4("rhs_out.m");
-//   matlab_output(ofs4,S);
-//   ofs4.close();
-  //###############################################   
-  //############### 2D galerkin scheme test ##################
-#if 1
-
   set<Index> Lambda;
   for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
        lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, jmax); ++lambda) {
@@ -257,7 +192,6 @@ int main()
 
   stiff.matlab_output("stiff_2D_out", "stiff",1);  
   
-  unsigned int iter= 0;
   Vector<double> x(Lambda.size()); x = 1;
   //double lmax = PowerIteration(stiff, x, 0.01, 1000, iter);
   double lmax = 1;
@@ -288,18 +222,6 @@ int main()
     xk = xk + resid;
   }
 
-  for (int i = 0; i < 450; i++) 
-    for (int j = 0; j < 450; j++) {
-      if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
-	cout << stiff.get_entry(i,j) << endl;
-	cout << stiff.get_entry(j,i) << endl;
-	cout << "i = " << i << " j = " << j << endl;
-	cout << "#######################" << endl;
-	abort();
-      }
-    }
-
-
   cout << "performing output..." << endl;
   
   InfiniteVector<double,Frame2D::Index> u;
@@ -315,123 +237,6 @@ int main()
   std::ofstream ofs5("approx_solution_out.m");
   matlab_output(ofs5,U);
   ofs5.close();
-  
-//   cout << "computing L_2 error..." << endl;
-//   double L2err = evalObj.L_2_error(frame, u, sing2D, 5, 0.0, 1.0);
-//   cout << "...done L_2 error = " << L2err  << endl;
-  
-
-#if 0
-  char filename1[50];
-  u.clear();
-  Lambda.clear();
-  int l = 0;
-  for (Index lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
-       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, frame.j0()); ++lambda) {
-
-    if (l != 193) {
-      l++;
-      continue;
-    }
-
-    Index mu = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
-   
-    
-    cout << "result = " << discrete_poisson.a(lambda,mu) << endl;
-
-    typedef WaveletTL::CubeBasis<Basis1D,DIM> CUBEBASIS;
-    
-    typedef CUBEBASIS::Index CubeIndex;
-    
-    CUBEBASIS::Support supp_lambda;
-    
-    WaveletTL::support<Basis1D,DIM>(*frame.bases()[lambda.p()], 
-				    CubeIndex(lambda.j(),
-					      lambda.e(),
-					      lambda.k(),
-					      frame.bases()[lambda.p()]),
-				    supp_lambda);
-    
-
-
-
-    double dx = 1./(1 << supp_lambda.j);
-//     cout << "l= " << l << " lambda:" << endl;
-//     for (unsigned int i = 0; i < 2; i++) {
-//       cout << "a_lambda = " << supp_lambda.a[i]*dx <<  " b= " << supp_lambda.b[i]*dx << " p = " << lambda.p() << endl;
-//       cout << "a_mu = " << supp_mu.a[i]*dx <<  " b= " << supp_mu.b[i]*dx << " p = " << mu.p() << endl;
-//     }    
-    
-//     if (l != 14) {
-//       l++;
-//       continue;
-//     }
-
-    cout << lambda << endl;
-    cout << "##################" << endl;
-    u.set_coefficient(lambda, 1);
-    
-    Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u, true, 7);//expand in primal basis
-    sprintf(filename1, "%s%d%s", "wav_", l, ".m");
-    
-    
-    std::ofstream ofs5(filename1);
-    matlab_output(ofs5,U);
-    ofs5.close();
-
-    u.clear();
-    ++l;
-
-  }
-#endif
-
-
-  
-  //cout << "lmin = " << lmin << endl;
-  //########## testing runtime type information functionality #############
-  //FrameTL::intersect_supports<Basis1D,2,2>(frame, index, index);
-  //FrameIndex<Basis1D,2,2> index2 = FrameTL::last_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0()); 
-  //discrete_poisson.a(index,index2,3);
-  //#######################################################################
-#endif
-  //################# end 2D galerkin scheme test ###################
-  
-  cout << "  ... done, time needed: " << time << " seconds" << endl;
-  
-#if 0
-  MultiIndex<unsigned int, 2> e1;
-  e1[0] = 0;
-  e1[1] = 0;
-  MultiIndex<int, 2> k1;
-  k1[0] = 1;
-  k1[1] = 1;
-  
-  MultiIndex<unsigned int, 2> e2;
-  e2[0] = 0;
-  e2[1] = 0;
-  MultiIndex<int, 2> k2;
-  k2[0] = 1;
-  k2[1] = 1;
-   
-  unsigned int p1 = 1, p2 = 0;
-  int j2 = 3;
-   
-
-  FrameIndex<Basis1D,2,2> la(&frame,j2,e1,p1,k1);
-  FrameIndex<Basis1D,2,2> mu(&frame,j2,e2,p2,k2);
-  cout << "val  " << discrete_poisson.a(la,mu,2) << endl;
-#endif
-
-  //    std::list<Index> intersecting;
-  //    FrameTL::intersecting_wavelets<Basis1D,2,2>(frame, la, 4, false, intersecting);
-
-  //    cout << intersecting.size() << endl;
-
-  //    for (std::list<Index>::const_iterator  it = intersecting.begin();
-  // 	it != intersecting.end(); ++it) {
-  //      cout << *it << endl;
-  //    }
-
 
    return 0;
 }

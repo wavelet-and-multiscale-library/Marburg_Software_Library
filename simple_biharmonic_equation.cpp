@@ -19,13 +19,13 @@ namespace FrameTL
   template <class IBASIS, unsigned int DIM>
   SimpleBiharmonicEquation<IBASIS,DIM>::SimpleBiharmonicEquation(const Functional<IBASIS,DIM>* rhs,
 								 const AggregatedFrame<IBASIS,DIM>* frame,
-								 const int jmax,
-								 QuadratureStrategy qstrat,
-								 const bool precompute_rhs)
-    : rhs_(rhs), frame_(frame),jmax_(jmax), qstrat_(qstrat)
+								 const int jmax)
+    : rhs_(rhs), frame_(frame),jmax_(jmax)
   {
+    // precomputation of the right-hand side up to the maximal level
     compute_diagonal();
-    compute_rhs(precompute_rhs);
+    // precomputation of the diagonal up to the maximal level
+    compute_rhs();
   }
 
   template <class IBASIS, unsigned int DIM>
@@ -35,14 +35,25 @@ namespace FrameTL
     return stiff_diagonal[lambda.number()];
   }
 
+
+  // For the computation of the right-hand side, we include the option
+  // to read in the data from file, because the computation of all coefficients
+  // up to a high level may take a while.
+  // The precomputation will only be performed in case the preprocessor macro
+  // PRECOMP_RHS is defined. Otherwise the coefficients are computed.
+  // First we read the data into a sparse matrix
+  // and copy it into fcoeffs and fcoeffs_patch afterwards.
+  // We should write file io routines directly for the Infinite vector classes to get
+  // rid of this hack.
   template <class IBASIS, unsigned int DIM>
   void
-  SimpleBiharmonicEquation<IBASIS,DIM>::compute_rhs(bool compute)
+  SimpleBiharmonicEquation<IBASIS,DIM>::compute_rhs()
   {
     cout << "BiharmonicEquation(): precompute right-hand side ..." << endl;
     typedef AggregatedFrame<IBASIS,DIM> Frame;
     typedef typename Frame::Index Index;
 
+    // the sparse matrix in which we shall put the right-hand side coefficients
     SparseMatrix<double> rhs(1,frame_->degrees_of_freedom());
     char filename[50];
     char matrixname[50];
@@ -50,12 +61,13 @@ namespace FrameTL
     int d = IBASIS::primal_polynomial_degree();
     int dT = IBASIS::primal_vanishing_moments();
     
+    // prepare filenames for 2D case
 #ifdef TWO_D
     sprintf(filename, "%s%d%s%d", "rhs_biharm_lshaped_lap1_d", d, "_dT", dT);
     sprintf(matrixname, "%s%d%s%d", "rhs_biharm_2D_lap1_d", d, "_dT", dT);
 #endif
 
-
+    // initialize array fnorms_sqr_patch
     fnorms_sqr_patch.resize(frame_->n_p());
     for (unsigned int i = 0; i < fnorms_sqr_patch.size(); i++)
       fnorms_sqr_patch[i] = 0.;
@@ -68,7 +80,6 @@ namespace FrameTL
 #ifdef PRECOMP_RHS
     // we read in the right hand side from file
     // we assume that ot had been precomputed on a sufficiently high level
-    
     cout << "reading in right hand side from file " << filename << "..." << endl;
     rhs.matlab_input(filename);
     cout << "...ready" << endl;
@@ -78,11 +89,13 @@ namespace FrameTL
     std::list<double> entries;
 #endif
 
+    // loop over all wavelets between minimal and maximal level
     for (int i = 0; i < frame_->degrees_of_freedom(); i++)
       {
 #ifdef PRECOMP_RHS
 	double coeff = rhs.get_entry(0,i);
 #else	
+	// computation of one right-hand side coefficient
 	double coeff = f(*(frame_->get_wavelet(i)))/D(*(frame_->get_wavelet(i)));
 	if (fabs(coeff)>1e-15) {
 	  indices.push_back(i);
@@ -90,7 +103,8 @@ namespace FrameTL
 	  //rhs.set_entry(0, i, coeff);
 	}
 #endif
-	//cout << D(*(frame_->get_wavelet(i))) << endl;
+	// put the coefficient into an InfiniteVector and successively
+	// compute the squared \ell_2 norm
 	if (fabs(coeff)>1e-15) {
 	  fhelp.set_coefficient(*(frame_->get_wavelet(i)), coeff);
 	  fhelp_patch[frame_->get_wavelet(i)->p()].set_coefficient(*(frame_->get_wavelet(i)), coeff);
@@ -101,6 +115,7 @@ namespace FrameTL
 	}
       }
 
+    // write the right-hand side into file in case ot has just been computed
 #ifndef PRECOMP_RHS
     rhs.set_row(0, indices, entries);
     // write right hand side to file
@@ -242,6 +257,10 @@ namespace FrameTL
 						   const int dir) const
   {
      double res = 0;
+
+     // If the dimension is larger that just 1, it makes sense to store the one dimensional
+     // integrals arising when we make use of the tensor product structure. This costs quite
+     // some memory, but really speeds up the algorithm!
 #ifdef TWO_D
     typename One_D_IntegralCache::iterator col_lb(one_d_integrals.lower_bound(lambda));
     typename One_D_IntegralCache::iterator col_it(col_lb);
@@ -265,6 +284,9 @@ namespace FrameTL
    
     Array1D<double> gauss_points_la, gauss_points_mu, gauss_weights,
       values_lambda, values_mu;
+
+    // Setup gauss knots and weights for each of the little pieces where the integrand is smooth.
+    // The gauss knots and weights for the interval [-1,1] are given in <numerics/gauss_data.h>.
     gauss_points_la.resize(N_Gauss*(irregular_grid[dir].size()-1));
     gauss_points_mu.resize(N_Gauss*(irregular_grid[dir].size()-1));
     gauss_weights.resize(N_Gauss*(irregular_grid[dir].size()-1));
@@ -303,6 +325,8 @@ namespace FrameTL
   
     for (unsigned int i = 0; i < values_lambda.size(); i++)
       res += gauss_weights[i] * values_lambda[i] * values_mu[i];
+
+// in the 2D case store the calculated value
 #ifdef TWO_D
 	typedef typename Column1D::value_type value_type;
 	it = col.insert(lb, value_type(mu, res));
@@ -493,8 +517,6 @@ namespace FrameTL
   double
   SimpleBiharmonicEquation<IBASIS,DIM>::s_star() const
   {
-    // cout << "Stern" << endl;
-    // notation from [St04a]
     const double t = operator_order();
     const int n = DIM;
     const int dT = frame_->bases()[0]->primal_vanishing_moments(); // we assume to have the same 'kind'
@@ -502,9 +524,11 @@ namespace FrameTL
                                                                    // patch 0 as reference case
     const double gamma = frame_->bases()[0]->primal_regularity();
     
+
+    // cf. Manuel's thesis Theorem 5.1 and Remark 5.2
     return (n == 1
-	    ? t+dT // [St04a], Th. 2.3 for n=1
-	    : std::min((t+dT)/(double)n, (gamma-t)/1./*(n-1.)*/)); // [St04a, Th. 2.3]
+	    ? t+dT 
+	    : std::min((t+dT)/(double)n, (gamma-t)/double(n-1)));
   }
 
   template <class IBASIS, unsigned int DIM>

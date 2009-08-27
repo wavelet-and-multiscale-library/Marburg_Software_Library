@@ -1,3 +1,7 @@
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
+
+#define TWO_D
+
 #include <map>
 #include <fstream>
 #include <iostream>
@@ -12,7 +16,6 @@
 #include <frame_evaluate.h>
 #include <cube/cube_basis.h>
 #include <cube/cube_index.h>
-//#include <galerkin_frame_utils.h>
 #include <galerkin/galerkin_utils.h>
 #include <galerkin/cached_problem.h>
 #include <frame_support.h>
@@ -38,8 +41,6 @@ using namespace FrameTL;
 using namespace MathTL;
 using namespace WaveletTL;
 
-//#define TWO_DIMENSIONS
-
 int main()
 {
   
@@ -56,25 +57,10 @@ int main()
 
   EvaluateFrame<Basis1D,2,2> evalObj;
 
-  //##############################  
-  Matrix<double> A(DIM,DIM);
-  A(0,0) = 2.;
-  A(1,1) = 1.0;
-  Point<2> b;
-  b[0] = -1.;
-  b[1] = -1.;
-  AffineLinearMapping<2> affineP(A,b);
-
-  Matrix<double> A2(DIM,DIM);
-  A2(0,0) = 1.;
-  A2(1,1) = 2.;
-  Point<2> b2;
-  b2[0] = -1.;
-  b2[1] = -1.;
-  AffineLinearMapping<2> affineP2(A2,b2);
-  //##############################
-
-  //##############################
+  // #####################################################################################
+  // We set up a distorted L-shaped domain similar to the one in Figure 5.4 right in
+  // Manuel's PhD thesis.
+  // #####################################################################################
   const double t = 2./3.;
   const double theta0 = 0.5-t*0.25;
   const double omega = 1.5+2*t*0.25;
@@ -95,45 +81,44 @@ int main()
   
 //   LinearBezierMapping bezierP2(Point<2>(-1.,-1.),Point<2>(-1.,0.),
 // 			       Point<2>(1.,-1.), Point<2>(1.,0.));
- 
 
-
-  //##############################
   Array1D<Chart<DIM,DIM>* > charts(2);
   charts[0] = &bezierP;
   charts[1] = &bezierP2;
- 
+  // #####################################################################################
+
+  // setup the adjacency relation of the patches
   SymmetricMatrix<bool> adj(2);
   adj(0,0) = 1;
   adj(1,1) = 1;
   adj(1,0) = 1;
   adj(0,1) = 1;
   
-  //to specify primal boundary the conditions
+  // to specify the primal boundary conditions
   Array1D<FixedArray1D<int,2*DIM> > bc(2);
 
-  //primal boundary conditions for first patch: all Dirichlet
+  // primal boundary conditions for first patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_1;
   bound_1[0] = 1;
   bound_1[1] = 1;
   bound_1[2] = 1;
-  bound_1[3] = 2;//2
+  bound_1[3] = 1;//2
 
   bc[0] = bound_1;
 
-  //primal boundary conditions for second patch: all Dirichlet
+  // primal boundary conditions for second patch: all Dirichlet
   FixedArray1D<int,2*DIM> bound_2;
   bound_2[0] = 1;
-  bound_2[1] = 2;//2
+  bound_2[1] = 1;//2
   bound_2[2] = 1;
   bound_2[3] = 1;
 
   bc[1] = bound_2;
 
-//to specify primal boundary the conditions
+  // to specify the dual boundary conditions
   Array1D<FixedArray1D<int,2*DIM> > bcT(2);
 
-  //dual boundary conditions for first patch
+  // dual boundary conditions for first patch
   FixedArray1D<int,2*DIM> bound_3;
   bound_3[0] = 0;
   bound_3[1] = 0;
@@ -142,7 +127,7 @@ int main()
 
   bcT[0] = bound_3;
 
-  //dual boundary conditions for second patch
+  // dual boundary conditions for second patch
   FixedArray1D<int,2*DIM> bound_4;
   bound_4[0] = 0;
   bound_4[1] = 0;
@@ -151,13 +136,17 @@ int main()
  
   bcT[1] = bound_4;
 
+  // create the atlas
   Atlas<DIM,DIM> Lshaped(charts,adj);  
   cout << Lshaped << endl;
 
-  //finally a frame can be constructed
-  //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT, jmax);
+  // finally, a frame can be constructed
+  // AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT, jmax);
   AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, jmax);
 
+  // #####################################################################################
+  // Setting up a constant function which can serve as the right-hand side.
+  // #####################################################################################
   Vector<double> value(1);
   value[0] = 1;
   
@@ -165,9 +154,14 @@ int main()
   Point<2> origin;
   origin[0] = 0.0;
   origin[1] = 0.0;
+  // #####################################################################################
 
-  CornerSingularityRHS singRhs(origin, 0.5, 1.5);
-  CornerSingularity sing2D(origin, 0.5, 1.5);
+  CornerSingularityRHS singRhs(origin, theta0, omega);
+  CornerSingularity sing2D(origin, theta0, omega);
+
+  // // L-shaped:
+  //  CornerSingularityRHS singRhs(origin, 0.5, 1.5);
+  // CornerSingularity sing2D(origin, 0.5, 1.5);
   
   PoissonBVP<DIM> poisson(&singRhs);
   //PoissonBVP<DIM> poisson(&const_fun);
@@ -175,6 +169,9 @@ int main()
   EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax);
   CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0048, 1.0/0.01);
 
+  // #####################################################################################
+  // Plotting exact solution and right-hand side.
+  // #####################################################################################
   double tmp = 0.0;
   int c = 0;
   int d = 0;
@@ -193,53 +190,31 @@ int main()
   Point<2> x1;
   x1[0] = -1;
   x1[1] = -1;
-
   Point<2> x2;
   x2[0] = 1;
   x2[1] = 1;
 
-//   Grid<2> grid(x1,x2,128);
-//   SampledMapping<2> rhsOut (grid,singRhs);
-
-//   std::ofstream ofs_si("si_rhs_out.m");
-//   rhsOut.matlab_output(ofs_si);
-//   ofs_si.close();
-
-
-//   FrameIndex<Basis1D,2,2> index = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
+  Grid<2> grid(x1,x2,128);
   
-//   SampledMapping<2> wav_out = evalObj.evaluate(frame,index,1,5);
-
-//   std::ofstream ofs("wav_out.m");
-//   wav_out.matlab_output(ofs);
-//   ofs.close();
+  SampledMapping<2> rhsOut (grid, singRhs);
+  std::ofstream ofs_rhs("sing_rhs_out.m");
+  rhsOut.matlab_output(ofs_rhs);
+  ofs_rhs.close();
   
-//   Array1D<SampledMapping<2> > expansion_out = evalObj.evaluate(frame,rhs, 1, 5);
+  SampledMapping<2> singout (grid, sing2D);
+  std::ofstream ofs_sing("sing_out.m");
+  singout.matlab_output(ofs_sing);
+  ofs_sing.close();
+  // #####################################################################################
   
-//   std::ofstream ofs2("expan_out.m");
-//   expansion_out[0].matlab_output(ofs2);
-//   ofs2.close();
-  
-//   std::ofstream ofs3("full_expan_out.m");
-//   matlab_output(ofs3,expansion_out);
-//   ofs3.close();
-  
-  //###############################################
-  // testing correctness of routine for
-  // computation of right hand side
-  
-  
-//   cout << "++++++++++++++++++++++" << endl;
-//   cout << rhs << endl;
-
-//   Array1D<SampledMapping<2> > S = evalObj.evaluate(frame, rhs, false, 5);// expand in dual basis
-//   std::ofstream ofs4("rhs_out.m");
-//   matlab_output(ofs4,S);
-//   ofs4.close();
-  //###############################################   
-  //############### 2D galerkin scheme test ##################
 #if 1
 
+  // #####################################################################################
+  // We set up a full stiffness matrix and right-hand side up to a maximal level
+  // and try to solve the projected problem.
+  // #####################################################################################
+
+  // setup Galerkin index set
   set<Index> Lambda;
   for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
        lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, jmax); ++lambda) {
@@ -247,10 +222,13 @@ int main()
     //cout << lambda << endl;
   }
   
+  // set up full right-hand side
   cout << "setting up full right hand side..." << endl;
   Vector<double> rh;
   WaveletTL::setup_righthand_side(discrete_poisson, Lambda, rh);
-  cout << rh << endl;
+  //cout << rh << endl;
+
+  // set up full stiffness matrix
   cout << "setting up full stiffness matrix..." << endl;
   SparseMatrix<double> stiff;
 
@@ -259,13 +237,15 @@ int main()
   tstart = clock();
 
   WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
-  //WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
-
+  
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
 
+  
+  // write the stiffness matrix into matab readable output
   stiff.matlab_output("stiff_2D_out", "stiff",1);  
+  
   
   unsigned int iter= 0;
   Vector<double> x(Lambda.size()); x = 1;
@@ -278,14 +258,14 @@ int main()
   
   cout << "performing iterative scheme to solve projected problem..." << endl;
   Vector<double> xk(Lambda.size()), err(Lambda.size()); xk = 0;
-  
- 
+
 
   //CG(stiff, rh, xk, 1.0e-6, 100, iter);
   //cout << "CG iterations needed: "  << iter << endl;
   //Richardson(stiff, rh, xk, 2. / lmax - 0.01, 0.0001, 2000, iter);
   double alpha_n = 2. / lmax - 0.001;
   
+  // simple non-adaptive steepest descent iteration
   Vector<double> resid(xk.size());
   Vector<double> help(xk.size());
   for (int i = 0; i < 500;i++) {
@@ -298,6 +278,7 @@ int main()
     xk = xk + resid;
   }
 
+//   // check parts of the matrix for symmetry
 //   for (int i = 0; i < 450; i++) 
 //     for (int j = 0; j < 450; j++) {
 //       if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
@@ -310,6 +291,11 @@ int main()
 //     }
 
 
+  // #####################################################################################
+
+  // #####################################################################################
+  // We sample the generated approximate solution.
+  // #####################################################################################
   cout << "performing output..." << endl;
   
   InfiniteVector<double,Frame2D::Index> u;
@@ -317,19 +303,22 @@ int main()
   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
     u.set_coefficient(*it, xk[i]);
   
+  // we have to apply the inverse diagonal scaling matrix D^{-1}
   u.scale(&discrete_poisson,-1);
   
-  
+  // sample the frame expansion given by the coefficients u
   Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u, true, 6);//expand in primal basis
   
+  // write matlab m-file
   std::ofstream ofs5("approx_solution_out.m");
   matlab_output(ofs5,U);
   ofs5.close();
-  
-//   cout << "computing L_2 error..." << endl;
-//   double L2err = evalObj.L_2_error(frame, u, sing2D, 5, 0.0, 1.0);
-//   cout << "...done L_2 error = " << L2err  << endl;
-  
+  // #####################################################################################
+ 
+
+  // #####################################################################################
+  // The rest of the code in this file can be neglected.
+  // #####################################################################################
 
 #if 0
   char filename1[50];
@@ -394,9 +383,6 @@ int main()
 
   }
 #endif
-
-
-  
   //cout << "lmin = " << lmin << endl;
   //########## testing runtime type information functionality #############
   //FrameTL::intersect_supports<Basis1D,2,2>(frame, index, index);
@@ -404,8 +390,7 @@ int main()
   //discrete_poisson.a(index,index2,3);
   //#######################################################################
 #endif
-  //################# end 2D galerkin scheme test ###################
-  
+ 
   cout << "  ... done, time needed: " << time << " seconds" << endl;
   
 #if 0

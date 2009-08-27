@@ -1,12 +1,14 @@
 # define _WAVELETTL_GALERKINUTILS_VERBOSITY  1
+
+# define ONE_D
+
 #include <fstream>
 #include <iostream>
 #include <time.h> 
 #include <interval/ds_basis.h>
 #include <interval/p_basis.h>
-//#include "elliptic_equation.h"
+//#include <elliptic_equation.h>
 #include <simple_elliptic_equation.h>
-//#include <biharmonic_equation.h>
 #include <algebra/sparse_matrix.h>
 #include <algebra/infinite_vector.h>
 #include <numerics/iteratsolv.h>
@@ -124,7 +126,7 @@ int main()
   cout << "Testing class EllipticEquation..." << endl;
   
   const int DIM   = 1;
-  const int jmax  = 8;
+  const int jmax  = 6;
 
   //typedef DSBasis<2,2> Basis1D;
   typedef PBasis<3,3> Basis1D;
@@ -148,58 +150,46 @@ int main()
   b2[0] = 1.0-A2.get_entry(0,0);
   AffineLinearMapping<1> affineP2(A2,b2);
 
-  FixedArray1D<double,1> A3;
-  A3[0] = 0.75;
-  SimpleAffineLinearMapping<1> simpleaffine1(A3,b);
-  
-  FixedArray1D<double,1> A4;
-  A4[0] = 0.75;
-  SimpleAffineLinearMapping<1> simpleaffine2(A4,b2);
-
-
   //##############################
   
   Array1D<Chart<DIM,DIM>* > charts(2);
   charts[0] = &affineP;
   charts[1] = &affineP2;
 
-  //charts[0] = &simpleaffine1;
-  //charts[1] = &simpleaffine2;
-  
   SymmetricMatrix<bool> adj(2);
   adj(0,0) = 1;
   adj(1,1) = 1;
   adj(1,0) = 1;
   adj(0,1) = 1;
   
-  //to specify primal boundary the conditions
+  // to specify the primal boundary conditions
   Array1D<FixedArray1D<int,2*DIM> > bc(2);
 
-  //primal boundary conditions for first patch: all Dirichlet
+  // primal boundary conditions for first patch
   FixedArray1D<int,2*DIM> bound_1;
   bound_1[0] = 1;
   bound_1[1] = 2;
 
   bc[0] = bound_1;
 
-  //primal boundary conditions for second patch: all Dirichlet
+  // primal boundary conditions for second patch
   FixedArray1D<int,2*DIM> bound_2;
   bound_2[0] = 2;
   bound_2[1] = 1;
 
   bc[1] = bound_2;
 
-//to specify primal boundary the conditions
+  // to specify the dual boundary conditions
   Array1D<FixedArray1D<int,2*DIM> > bcT(2);
 
-  //dual boundary conditions for first patch
+  // dual boundary conditions for first patch
   FixedArray1D<int,2*DIM> bound_3;
   bound_3[0] = 0;
   bound_3[1] = 0;
 
   bcT[0] = bound_3;
 
-  //dual boundary conditions for second patch
+  // dual boundary conditions for second patch
   FixedArray1D<int,2*DIM> bound_4;
   bound_4[0] = 0;
   bound_4[1] = 0;
@@ -221,12 +211,13 @@ int main()
   Singularity1D_RHS_2<double> sing1D;
   
   //PoissonBVP<DIM> poisson(&const_fun);
-  //PoissonBVP<DIM> poisson(&sing1D);
-  PoissonBVP<DIM> poisson(&exactSolution);
+  PoissonBVP<DIM> poisson(&sing1D);
+  //PoissonBVP<DIM> poisson(&exactSolution);
   //BiharmonicBVP<DIM> biharm(&const_fun);
   //IdentityBVP<DIM> trivial_bvp(&const_fun);
   //IdentityBVP<DIM> trivial_bvp(&exactSolution);
 
+  //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax);
   SimpleEllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax);
   //BiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharm, &frame, jmax);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
@@ -237,30 +228,11 @@ int main()
   CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 4.19, 1.0/0.146);
 
 
-//   cout << "val = " << sqrt(discrete_poisson.a(*(frame.get_wavelet(10279)),*(frame.get_wavelet(10279)) )) << endl;
   
 
-//  return 0.;
-
-
-
-  double tmp = 0.0;
-  int c = 0;
-  int d = 0;
-  
-  cout.precision(12);
-  
   //############### 1D galerkin scheme test ##################
 #if 1
 
-
-//   double val1 = discrete_poisson.a(*(frame.get_wavelet(1)), *(frame.get_wavelet(2)));
-//   cout << "value = " << val1 << endl;
-//   val1 = discrete_poisson.a(*(frame.get_wavelet(2)), *(frame.get_wavelet(1)));
-//   cout << "value = " << val1 << endl;
-//   abort();
-
-  int z = 0;
   set<Index> Lambda;
   for (Index lambda = FrameTL::first_generator<Basis1D,1,1,Frame1D>(&frame, frame.j0());
        lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, jmax); ++lambda) {
@@ -272,26 +244,8 @@ int main()
   cout << "setting up full right hand side..." << endl;
   Vector<double> rh;
   WaveletTL::setup_righthand_side(discrete_poisson, Lambda, rh);
+  //cout << rh << endl;
   
-//   cout << rh << endl;
-  
-//   Basis1D basis(3,3);
-
-//   InfiniteVector<double, IIndex> coeff;
-//   IIndex index(first_generator(&basis, basis.j0()));
-//   for (int i = 0;; ++index, i++) {
-//     coeff.set_coefficient(index, rh[i]);
-//     if (index == last_generator(&basis, basis.j0())) break;
-//   }
-
-//   SampledMapping<1> res = evaluate(basis, coeff, false, 8);
-  
-//   std::ofstream ofs4("reproduced_function.m");
-//   res.matlab_output(ofs4);
-//   ofs4.close();
-
-//   abort();
-
   cout << "setting up full stiffness matrix..." << endl;
   SparseMatrix<double> stiff;
   
@@ -315,22 +269,10 @@ int main()
   cout << "performing iterative scheme to solve projected problem..." << endl;
   Vector<double> xk(Lambda.size()); xk = 0;
 
-
-//   for (int i = 0; i < 200 ; i++) 
-//     for (int j = 0; j < 200 ; j++) {
-//       if (! (fabs(stiff.get_entry(i,j) -  stiff.get_entry(j,i)) < 1.0e-13)) {
-// 	cout << stiff.get_entry(i,j) << endl;
-// 	cout << stiff.get_entry(j,i) << endl;
-// 	cout << "i = " << i << " j = " << j << endl;
-// 	//abort();
-// 	cout << "#######################" << endl;
-//       }
-//     } 
-
   double alpha_n = 0.07;
   Vector<double> resid(xk.size());
   Vector<double> help(xk.size());
-  for (int i = 0; i < 3000; i++) {
+  for (int i = 0; i < 500; i++) {
     stiff.apply(xk,help);
     resid = rh - help;
     cout << ".loop = " << i << " " << " res = " << sqrt((resid*resid)) << endl;
@@ -373,6 +315,10 @@ int main()
    
 #endif
 	  
+  // #####################################################################################
+  // The rest of the code in this file can be neglected.
+  // #####################################################################################
+
   
 #if 0
   char filename1[50];

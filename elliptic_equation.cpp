@@ -19,8 +19,11 @@ namespace FrameTL
 						 const int jmax)
     : ell_bvp_(ell_bvp), frame_(frame), jmax_(jmax)
   {
-    
+ 
+    // precomputation of the right-hand side up to the maximal level
     compute_diagonal();
+
+    // precomputation of the diagonal up to the maximal level
     compute_rhs();
   }
 
@@ -28,7 +31,6 @@ namespace FrameTL
   double 
   EllipticEquation<IBASIS,DIM>::D(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda) const
   {
-    //return 1 << lambda.j();
     return stiff_diagonal.get_coefficient(lambda);
   }
 
@@ -57,7 +59,6 @@ namespace FrameTL
     typedef AggregatedFrame<IBASIS,DIM> Frame;
     typedef typename Frame::Index Index;
 
-    // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
     const int j0   = frame_->j0();
     for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
@@ -109,7 +110,7 @@ namespace FrameTL
   double
   EllipticEquation<IBASIS,DIM>::a_same_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
 					       const typename AggregatedFrame<IBASIS,DIM>::Index& mu,
-					       const unsigned int q_order) const
+					       const unsigned int n_Gauss_knots) const
   {
     double r = 0;
     
@@ -121,6 +122,9 @@ namespace FrameTL
 
     typename CUBEBASIS::Support supp_intersect;
  
+
+    // check whether the supports of the reference wavelets intersect,
+    // the intersection is returned in supp_intersect
     bool b = WaveletTL::intersect_supports<IBASIS,DIM>
       (
        *(frame_->bases()[p]), 
@@ -129,25 +133,35 @@ namespace FrameTL
        supp_intersect
        );
     
+    // no intersection ==> return zero
     if (! b)
       return 0.0;
 
+    // pointer to loca basis
     CUBEBASIS* local_cube_basis = frame_->bases()[p];
     const Chart<DIM>* chart = frame_->atlas()->charts()[p];
 
-    const int N_Gauss = q_order;
+    // number of Gauss quadrature knots
+    const int N_Gauss = n_Gauss_knots;
     //cout << "N_Gauss = " << N_Gauss << endl;
-    //const double h = ldexp(1.0, -supp_intersect.j); // granularity for the quadrature
+
+    // granularity for the quadrature
+    //const double h = ldexp(1.0, -supp_intersect.j); 
     const double h = 1.0 / (1 << supp_intersect.j);
     //cout << "h=" << h << endl;
+
+    // for each coordinate direction we shall need an array for
+    // the quadrature knots and weights, and some others
     FixedArray1D<Array1D<double>,DIM> gauss_points, gauss_weights,
       wav_values_lambda, wav_der_values_lambda, wav_values_mu, wav_der_values_mu;
 
  
-
     for (unsigned int i = 0; i < DIM; i++) {
       gauss_points[i].resize(N_Gauss*(supp_intersect.b[i]-supp_intersect.a[i]));
       gauss_weights[i].resize(N_Gauss*(supp_intersect.b[i]-supp_intersect.a[i]));
+
+      // set up Gauss knots and weights for coordinate direction i
+      // on each interval where the the integrand is a polynomial
       for (int patch = supp_intersect.a[i]; patch < supp_intersect.b[i]; patch++)
 	for (int n = 0; n < N_Gauss; n++) {
 	  gauss_points[i][(patch-supp_intersect.a[i])*N_Gauss+n]
@@ -195,6 +209,7 @@ namespace FrameTL
     Point<DIM> x;
     Point<DIM> x_patch;
 
+    // now we perform the quadrature
     // loop over all quadrature knots
     while (true) {
       for (unsigned int i = 0; i < DIM; i++)
@@ -267,7 +282,7 @@ namespace FrameTL
   double
   EllipticEquation<IBASIS,DIM>::a_different_patches(const typename AggregatedFrame<IBASIS,DIM>::Index& la,
 						    const typename AggregatedFrame<IBASIS,DIM>::Index& nu,
-						    const unsigned int q, const unsigned int N) const
+						    const unsigned int n_Gauss_knots, const unsigned int N) const
   {
     double r = 0.0;
   
@@ -284,7 +299,8 @@ namespace FrameTL
 
     typename CUBEBASIS::Support tmp_supp;
 
-
+    // we want to assume that the index lambda has the 
+    // larger level j of the two indices involved,
     // swap indices and supports if necessary
     if (supp_mu_.j > supp_lambda_.j) {
       tmp_ind = lambda;
@@ -302,31 +318,45 @@ namespace FrameTL
 
     FixedArray1D<Array1D<double>,DIM > irregular_grid;
 
-    const int N_Gauss = q;
+    // number of Gauss quadrature knots
+    const int N_Gauss = n_Gauss_knots;
 
+    // check whether the supports of the reference wavelets intersect,
+    // the intersection is returned in supp_intersect
     bool b = 0;
     b = intersect_supports<IBASIS,DIM,DIM>(*frame_, lambda, mu, supp_lambda, supp_mu);
+
+    // no intersection ==> return zero
     if ( !b )
       return 0.0;
     
     typedef typename IBASIS::Index Index_1D;
     
+    // get pointers to the parametric mappings
     const Chart<DIM>* chart_la = frame_->atlas()->charts()[lambda.p()];
     const Chart<DIM>* chart_mu = frame_->atlas()->charts()[mu.p()];
 
+    // get array of the one-dimensional bases from each spatial direction
     FixedArray1D<IBASIS*,DIM> bases1D_lambda = frame_->bases()[lambda.p()]->bases();
     FixedArray1D<IBASIS*,DIM> bases1D_mu     = frame_->bases()[mu.p()]->bases();
     
+    // for each coordinate direction we shall need an array for
+    // the quadrature knots and weights, and some others    
     FixedArray1D<Array1D<double>,DIM> gauss_points, gauss_points_mu, gauss_weights,
       wav_values_lambda, wav_der_values_lambda, wav_values_mu, wav_der_values_mu;
 
-    //const double h = ldexp(1.0, -std::max(supp_lambda->j,supp_mu->j));// granularity for the quadrature
-    const double h = 1.0 / (1 << std::max(supp_lambda->j,supp_mu->j));// granularity for the quadrature
+    //const double h = ldexp(1.0, -std::max(supp_lambda->j,supp_mu->j)); // granularity for the quadrature
+    const double h = 1.0 / (1 << std::max(supp_lambda->j,supp_mu->j)); // granularity for the quadrature
     //const int N = 4;
       
     for (unsigned int i = 0; i < DIM; i++) {
       gauss_points[i].resize(N * N_Gauss*(supp_lambda->b[i]-supp_lambda->a[i]));
       gauss_weights[i].resize(N * N_Gauss*(supp_lambda->b[i]-supp_lambda->a[i]));
+
+      // set up Gauss knots and weights for coordinate direction i
+      // We have a dyadic partition of the support of the higher level wavelet.
+      // With respect to this partition the wavelet is a piecewise polynomial.
+      // On each of the polynomial parts, we apply a composite quadrature rule.
       for (int patch = supp_lambda->a[i]; patch < supp_lambda->b[i]; patch++)
 	for (unsigned int m = 0; m < N; m++)
 	  for (int n = 0; n < N_Gauss; n++) {
@@ -336,14 +366,15 @@ namespace FrameTL
 	    gauss_weights[i][ N*(patch-supp_lambda->a[i])*N_Gauss + m*N_Gauss+n ]
 	      = (h*GaussWeights[N_Gauss-1][n])/N;
 	  }
-
     }
 
     for (unsigned int i = 0; i < DIM; i++) {
+      // compute function values at gauss_points[i] of the 1D wavelets given by the index lambda
       WaveletTL::evaluate(*(bases1D_lambda[i]), 0,
 			  Index_1D(lambda.j(), lambda.e()[i], lambda.k()[i], bases1D_lambda[i]),
 			  gauss_points[i], wav_values_lambda[i]);
       
+      // compute function values at gauss_points[i] of the derivatives of the 1D wavelets given by the index lambda
       WaveletTL::evaluate(*(bases1D_lambda[i]), 1,
 			  Index_1D(lambda.j(), lambda.e()[i], lambda.k()[i], bases1D_lambda[i]),
 			  gauss_points[i], wav_der_values_lambda[i]);
@@ -357,6 +388,7 @@ namespace FrameTL
     Point<DIM> x_patch;
     Point<DIM> y;
 
+    // now we perform the quadrature,
     // loop over all quadrature knots
     while (true) {      
       for (unsigned int i = 0; i < DIM; i++) {
@@ -439,7 +471,7 @@ namespace FrameTL
   EllipticEquation<IBASIS,DIM>::a(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
 				  const typename AggregatedFrame<IBASIS,DIM>::Index& nu) const
   {
-    //to be treated seperately
+    // we seperately treat the entries from diagonal blocks and non-diagonal blocks
     return lambda.p() == nu.p() ? a_same_patches(lambda, nu) : a_different_patches(lambda, nu);
     
   }
@@ -473,17 +505,18 @@ namespace FrameTL
   double
   EllipticEquation<IBASIS,DIM>::s_star() const
   {
-    // notation from [St04a]
     const int t = operator_order();
     const int n = DIM;
     const int dT = frame_->bases()[0]->primal_vanishing_moments(); // we assume to have the same 'kind'
                                                                    // of wavelets on each patch, so use
                                                                    // patch 0 as reference case
-    const double gamma = frame_->bases()[0]->primal_regularity();
+
+    const double gamma = frame_->bases()[0]->primal_regularity(); // = spline order - 0.5
     
+    // cf. Manuel's thesis Theorem 5.1 and Remark 5.2
     return (n == 1
-	    ? t+dT // [St04a], Th. 2.3 for n=1
-	    : std::min((t+dT)/(double)n, (gamma-t)/1./*(n-1.)*/)); // [St04a, Th. 2.3]
+	    ? t+dT 
+	    : std::min((t+dT)/(double)n, (gamma-t)/double(n-1)));
   }
 
   template <class IBASIS, unsigned int DIM>
@@ -501,13 +534,10 @@ namespace FrameTL
     typedef WaveletTL::CubeBasis<IBASIS,DIM> CUBEBASIS;
  
     // first compute supp(psi_lambda)
- 
     typename CUBEBASIS::Support supp;
-    
     typename CubeBasis<IBASIS,DIM>::Index lambda_c(lambda.j(),
 						   lambda.e(),
 						   lambda.k(),frame_->bases()[p]);
-    
     WaveletTL::support<IBASIS,DIM>(*(frame_->bases()[p]), lambda_c, supp);
 
     const Chart<DIM>* chart = frame_->atlas()->charts()[p];
@@ -572,10 +602,16 @@ namespace FrameTL
       if (exit) break;
     }
 
-#if 1
+#ifdef TWO_D
     return r;
 #endif
-#if 0
+
+// #####################################################################################
+// Attention! This is a bad hack! It is assumed that in case macro ONE_D is defined,
+// the right hand side is the special functional defines on page 105 of Manuels thesis.
+// We should use the class Functional instead!
+// #####################################################################################
+#ifdef ONE_D
     assert(DIM == 1);
     double tmp = 1;
     Point<DIM> p1;

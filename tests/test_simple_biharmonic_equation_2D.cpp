@@ -1,12 +1,14 @@
+#define TWO_D
+
 #define MAX_LOOPS 10000
 #define PLOT_RESOLUTION 6
 
-#define BASIS_S
+#define BASIS_P
 
 //#define USED_SAVED_RHS
 //#define SAVE_RHS
 
-#define RHS_QUADRATURE_GRANULARITY 10
+#define RHS_QUADRATURE_GRANULARITY 1
 
 #include <fstream>
 #include <iostream>
@@ -112,13 +114,13 @@ int main()
   cout << "Testing class SimpleBiharmonicEquation in 2D ..." << endl;
   
   const int DIM = 2;
-  const int jmax = 5;
+  const int jmax = 3;
   #ifdef BASIS_DS
   typedef DSBasis<4,6> Basis1D;
   #endif
   #ifdef BASIS_P
-  #define D_PRIMAL 4
-  #define D_DUAL 4
+#define D_PRIMAL 3 // 4
+#define D_DUAL 3 // 4
   typedef PBasis<D_PRIMAL,D_DUAL> Basis1D;
   #endif
   #ifdef BASIS_S
@@ -246,14 +248,10 @@ int main()
   CornerSingularityBiharmonicRHS singRhs(origin, 0.5, 1.5);
   Functional<Basis1D, DIM> rhs(&singRhs, &frame);
   
-  SimpleBiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&rhs, &frame, jmax, TrivialAffine, false);
+  SimpleBiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&rhs, &frame, jmax);
 
   CachedProblem<SimpleBiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 7, 1.0/0.01);
 
-//   double tmp = 0.0;
-//   int c = 0;
-//   int d = 0;
-  
   cout.precision(12);
 
   //############### 2D galerkin scheme test ##################

@@ -2,9 +2,19 @@
 
 #include <frame_support.h>
 #include <cube/cube_basis.h>
+#include <cube/cube_index.h>
+
+using WaveletTL::CubeBasis;
+using WaveletTL::CubeIndex;
 
 namespace FrameTL
 {
+
+  // forward declaration
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  void precompute_supports_simple(const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame,
+				  Array1D<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Support>& all_patch_supports);
+
   template<class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   AggregatedFrame<IBASIS,DIM_d,DIM_m>::AggregatedFrame(const Atlas<DIM_d, DIM_m>* atlas,
 						       const Array1D<FixedArray1D<int,2*DIM_d> >& bc,
@@ -14,9 +24,12 @@ namespace FrameTL
   {
     lifted_bases.resize((atlas_->charts()).size());
 
+
+    // create the the lifted cube bases with the specified boundary conditions
     for (unsigned int  i = 0; i < (atlas_->charts()).size(); ++i)
       lifted_bases[i] = new MappedCubeBasis<IBASIS,DIM_d,DIM_m>((atlas_->charts())[i],bc[i],bcT[i]);
     
+    // set the minimal level, it is assumed to be the same for all patches
     j0_ = lifted_bases[0]->j0();
     cout << "minimal level = " << j0_ << endl;
 
@@ -29,11 +42,13 @@ namespace FrameTL
     int count = 0;
     int degrees_of_freedom = 0;
 
-    // allocate memory for all indices on level
     for (int j = j0_-1; j <= jmax; j++) {
       int degees_of_freedom_on_lev = 0;
       Index first;
       Index last;
+      // #####################################################################################
+      // allocate memory for all indices on level 
+      // #####################################################################################
       if (j == j0_-1) {
 	// determine how many functions there are
 	for (unsigned int p = 0; p < n_p(); p++) {
@@ -66,8 +81,12 @@ namespace FrameTL
  	last = FrameTL::last_wavelet<IBASIS, DIM_d, DIM_m, FRAME>(this, j);
 	cout << "degrees of freedom on level = " << degees_of_freedom_on_lev << endl;
       }
+      // #####################################################################################
       int k = 0;
-      
+
+      // #####################################################################################
+      // setting up all wavelet indices between minimal and maximal level, level by level
+      // #####################################################################################
       full_collection_levelwise[count].resize(degees_of_freedom_on_lev);
       for (Index ind = first; ind <= last; ++ind) {
 	full_collection_levelwise[count][k] = ind;
@@ -75,9 +94,16 @@ namespace FrameTL
       }
       count++;
       degrees_of_freedom += degees_of_freedom_on_lev;
+      // #####################################################################################
     }
     cout << "done setting up full collection of wavelet indices level by level..." << endl;
+    
 
+
+
+    // #####################################################################################
+    // preprocessing all supports of the reference wavelets 
+    // #####################################################################################
     cout << "preprocessing all supports on cubes..." << endl;
     all_supports.resize(degrees_of_freedom);
 
@@ -109,8 +135,12 @@ namespace FrameTL
       }
     }
     cout << "done preprocessing all supports on cubes" << endl;
+    // #####################################################################################
 
 
+    // #####################################################################################
+    // setting up all wavelet indices between minimal and maximal level
+    // #####################################################################################
     cout << "setting up full collection of wavelet indices..." << endl;
     full_collection.resize(degrees_of_freedom);
     int k = 0;
@@ -120,12 +150,18 @@ namespace FrameTL
       k++;
     }
     cout << "done setting up full collection of wavelet indices..." << endl;
+    // #####################################################################################
 
+
+    // #####################################################################################
+    // preprocessing all supports of the frame elements on the patches,
+    // these are assumed to be rectangular
+    // #####################################################################################
     cout << "precomputing all support cubes on patches..." << endl;
     all_patch_supports.resize(degrees_of_freedom);
     precompute_supports_simple<IBASIS,DIM_d,DIM_m>(this, all_patch_supports);
     cout << "done precomputing all support cubes on patches..." << endl;
-
+    // #####################################################################################
 
   }
 
@@ -139,9 +175,11 @@ namespace FrameTL
     lifted_bases.resize((atlas_->charts()).size());
     cout << "boundary conditions = " << bc << endl;
 
+    // create the the lifted cube bases with the specified boundary conditions
     for (unsigned int  i = 0; i < (atlas_->charts()).size(); ++i)
       lifted_bases[i] = new MappedCubeBasis<IBASIS,DIM_d,DIM_m>((atlas_->charts())[i],bc[i]);
     
+    // set the minimal level, it is assumed to be the same for all patches
     j0_ = lifted_bases[0]->j0();
     cout << "minimal level = " << j0_ << endl;
 
@@ -154,13 +192,14 @@ namespace FrameTL
     int count = 0;
     int degrees_of_freedom = 0;
 
-    // allocate memory for all indices on level
     for (int j = j0_-1; j <= jmax; j++) {
       int degrees_of_freedom_on_lev = 0;
       Index first;
       Index last;
+      // #####################################################################################
+      // allocate memory for all indices on level 
+      // #####################################################################################
       if (j == j0_-1) {
-	// determine how many functions there are
 	for (int p = 0; p < n_p(); p++) {
 	  int tmp = 1;
 	  for (unsigned int i = 0; i < DIM_d; i++) {
@@ -191,8 +230,12 @@ namespace FrameTL
  	last = FrameTL::last_wavelet<IBASIS, DIM_d, DIM_m, FRAME>(this, j);
 	cout << "degrees of freedom on level = " << degrees_of_freedom_on_lev << endl;
       }
+      // #####################################################################################
       int k = 0;
       
+      // #####################################################################################
+      // setting up all wavelet indices between minimal and maximal level, level by level
+      // #####################################################################################
       full_collection_levelwise[count].resize(degrees_of_freedom_on_lev);
       for (Index ind = first; ind <= last; ++ind) {
 	full_collection_levelwise[count][k] = ind;
@@ -201,9 +244,14 @@ namespace FrameTL
       }
       count++;
       degrees_of_freedom += degrees_of_freedom_on_lev;
+      // #####################################################################################
     }
     cout << "done setting up collection of wavelet indices level by level..." << endl;
 
+
+    // #####################################################################################
+    // preprocessing all supports of the reference wavelets 
+    // #####################################################################################
     cout << "preprocessing all supports on cubes..." << endl;
     all_supports.resize(degrees_of_freedom);
 
@@ -234,7 +282,13 @@ namespace FrameTL
       }
     }
     cout << "done preprocessing all supports on cubes" << endl;
+    // #####################################################################################
 
+
+
+    // #####################################################################################
+    // setting up all wavelet indices between minimal and maximal level
+    // #####################################################################################
     cout << "setting up collection of wavelet indices..." << endl;
     full_collection.resize(degrees_of_freedom);
     int k = 0;
@@ -244,13 +298,20 @@ namespace FrameTL
       k++;
     }
     cout << "done setting up collection of wavelet indices..." << endl;
+    // #####################################################################################
 
+
+
+    // #####################################################################################
+    // preprocessing all supports of the frame elements on the patches,
+    // these are assumed to be rectangular
+    // #####################################################################################
     cout << "precomputing all support cubes on patches..." << endl;
     all_patch_supports.resize(degrees_of_freedom);
     precompute_supports_simple<IBASIS,DIM_d,DIM_m>(this, all_patch_supports);
     cout << "done precomputing all support cubes on patches..." << endl;
+    // #####################################################################################
   }
-
 
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   AggregatedFrame<IBASIS,DIM_d,DIM_m>::~AggregatedFrame()
@@ -259,6 +320,7 @@ namespace FrameTL
       delete lifted_bases[i];          
   }  
 
+  
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   FrameIndex<IBASIS,DIM_d,DIM_m>
   AggregatedFrame<IBASIS,DIM_d,DIM_m>::first_generator(const int j) const
@@ -325,16 +387,25 @@ namespace FrameTL
   AggregatedFrame<IBASIS,DIM_d,DIM_m>::evaluate(const Index& lambda, const Point<DIM_m>& x) const
   {
     double value;
+
+    // a DIM_d-dimensional point
     Point<DIM_d> p_d;
+
+    // get the parametric mapping corresponding to the frame element
     const Chart<DIM_d,DIM_m>* chart(atlas_->charts()[lambda.p()]);
 
+    // pull back the point x from the domain into the unit cube
     chart->map_point_inv(x, p_d);
+
+    // evaluate the reference wavelet on the unit cube
     value = lifted_bases[lambda.p()]->evaluate(0,
 					       typename CubeBasis<IBASIS,DIM_d>::Index(lambda.j(),
 										       lambda.e(),
 										       lambda.k(),
 										       lifted_bases[lambda.p()]),
 					       p_d);
+
+    // perform normalization according to eq. (2.3.9) in Manuel's PhD thesis.
     value /= chart->Gram_factor(p_d);
 
     return value;
@@ -347,9 +418,13 @@ namespace FrameTL
   {
     typedef typename IBASIS::Index Index_1D;
 
+    // a DIM_d-dimensional point
     Point<DIM_d> p_d;
+
+    // get the parametric mapping corresponding to the frame element
     const Chart<DIM_d,DIM_m>* chart(atlas_->charts()[lambda.p()]);
 
+    // pull back the point x from the domain into the unit cube
     chart->map_point_inv(x, p_d);
     
     double gram_factor = chart->Gram_factor(p_d); // = | det D Kappa |^{1/2}
@@ -358,16 +433,21 @@ namespace FrameTL
 
     double wavVal = 1.;
     Vector<double> cube_wavelet_components(DIM_d);
+    
+    // evaluate the tensor factors of the reference wavelet 
     for (unsigned int i = 0; i < DIM_d; i++) {
       cube_wavelet_components[i] = WaveletTL::evaluate(*(bases1D_lambda[i]), 0,
 				    Index_1D(lambda.j(), lambda.e()[i], lambda.k()[i], bases1D_lambda[i]),
 				    p_d[i]);
       wavVal *= cube_wavelet_components[i];
     }
+    // now wavVal is the function value of the reference cube wavelet
+    
 
     Vector<double> gradient_cube_wavelet(DIM_d);
     double d = 1.;
 
+    // compute the gradient of the reference cube wavelet
     for (unsigned int i = 0; i < DIM_d; i++) {
       gradient_cube_wavelet[i] = 0.;
       d = WaveletTL::evaluate(*(bases1D_lambda[i]), 1,
@@ -382,7 +462,8 @@ namespace FrameTL
       gradient_cube_wavelet[i] = d;
     }
 
-
+    // setup the gradient of the wavelet frame element
+    // we use quotient and chain rule to derive the gradient of eq. (2.3.9)
     Vector<double> tmp(DIM_d);
     for (unsigned int i = 0; i < DIM_d; i++) {
       tmp[i] = (

@@ -318,14 +318,9 @@ namespace FrameTL
     const typename CUBEBASIS::Support* supp_mu =
       (jnu > jla) ? &(frame_->all_supports[la.number()]) : &(frame_->all_supports[nu.number()]);
 
+
     const int N_Gauss = 3;
     
-    //#if _FRAMETL_ADAPTIVE_COMPUTATION == 1
-//     bool b = intersect_supports_simple<IBASIS,DIM,DIM>(*frame_, lambda, mu, supp_lambda, supp_mu);
-//     return 0.;
-//     if ( !b )
-//       return 0.0;
-    //#endif
     typedef typename IBASIS::Index Index_1D;
     
     const Chart<DIM>* chart_la = frame_->atlas()->charts()[lambda->p()];
@@ -367,8 +362,6 @@ namespace FrameTL
 						),
 			 mu->p(),i,1
 			 );
-//       t *= integrate(i1, i2, N_Gauss, i, supp_lambda, supp_mu);
-//       t *= 1./(chart_la->a_i(i) * chart_mu->a_i(i));
 
       t *= integrate(i1, i2, N_Gauss, i, supp_lambda, supp_mu) / (chart_la->a_i(i) * chart_mu->a_i(i));
      

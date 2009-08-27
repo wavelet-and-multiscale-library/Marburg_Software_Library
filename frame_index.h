@@ -19,7 +19,6 @@ using std::endl;
 
 using WaveletTL::CubeIndex;
 
-
 #include <utils/multiindex.h>
 
 using MathTL::MultiIndex;
@@ -30,65 +29,70 @@ namespace FrameTL
   /*!
     A simple type representing pairs of a frame index, given by
     its number, and a double valued coefficient in a frame expansion.
-    It shall be used as repacement for a pair of frame_index and
+    It shall be used as replacement for a pair of frame_index and
     coeffient value.
    */
   typedef struct {
     
-    // will be used to represent the number of a frame index
+    //! Will be used to represent the number of a frame index.
     int num;
 
-    // one coefficient of a frame expansion corresponding to the
-    // frame index given by 'num'
+    //! One coefficient of a frame expansion corresponding to the frame index given by 'num'.
     double val;
     
   } Coefficient;
   
 
-  //forward declaration of class AggregatedFrame
+  // forward declaration of class AggregatedFrame
   template<class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   class AggregatedFrame;
 
   /*!
-    This class represents (tensor product) multilevel indices.
-    The spatial dimension is passed as template parameter. Such a frame index
-    mainly consists of a CubeIndex and the respective patchnumber.
+    This class represents tensor product multilevel aggregated wavelet frame
+    indices. A FrameIndex mainly encodes level, type, patchnumber and shift parameter of an
+    aggregated wavelet frame element.
    */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m = DIM_d>
   class FrameIndex
   {
 
   public:
-    //! type index type
+    
+    //! The index type.
     typedef MultiIndex<int,DIM_d> type_type;
     
-    //! translation index type
+    //! The translation index type.
     typedef MultiIndex<int,DIM_d> translation_type;
 
     /*!
-      default constructor
+      Default constructor.
     */
     FrameIndex(const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame = 0);
 
     /*!
-      copy constructor
+      Copy constructor.
     */
     FrameIndex(const FrameIndex&);
 
     /*!
-      clone index from a given const pointer to another FrameIndex
+      Constructor. Clone index from a given const pointer to another FrameIndex.
      */
     FrameIndex(const FrameIndex*);
-
-
+    
     /*!
-      constructor
+      Constructor. Creates the FrameIndex from a given wavelet index of
+      a wavelet on the unit cube. Also the integer number (according to the
+      canonical lexicographical ordering "level, type, patch, shift parameter")
+      of this FrameIndex is calculated.
     */
     FrameIndex(const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame,
 	       const CubeIndex<IBASIS,DIM_d>&, const int patch);
 
     /*!
-      constructor
+      Constructor. Create a FrameIndex from the given level, type patchnumber
+      and shift parameter. Also the integer number (according to the
+      canonical lexicographical ordering "level, type, patch, shift parameter")
+      of this FrameIndex is calculated.
     */
     FrameIndex(const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame,
 	       const int j,
@@ -97,99 +101,101 @@ namespace FrameTL
 	       const translation_type& k);
 
     /*!
-      constructor
+      Constructor. From the given integer number (according to the
+      canonical lexicographical ordering "level, type, patch, shift parameter")
+      the a FrameIndex is reconstructed, i.e., level, type, patchnumber, and
+      shift parameter are determined.
     */
     FrameIndex(const int num,
 	       const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame);
 
     
-    //! check equality
+    //! Check for equality.
     bool operator == (const FrameIndex& lambda) const;
     
-    //! check non-equality
+    //! Check for non-equality.
     inline bool operator != (const FrameIndex& lambda) const
     { return !(*this == lambda); }
     
-    //! preincrement
+    //! Preincrement.
     FrameIndex& operator ++ ();
 
-    //! assignment
+    //! Assignment.
     FrameIndex& operator = (const FrameIndex&);
 
-    //! lexicographic order <
+    //! Lexicographic order < .
     bool operator < (const FrameIndex& lambda) const;
 
-    //! lexicographic order <=
+    //! Lexicographic order <= .
     bool operator <= (const FrameIndex& lambda) const
     { return (*this < lambda || *this == lambda); }
 
-    //! scale j
+    //! Scale j.
     const int j() const { return j_; }
 
-    //! type e
+    //! Type e.
     const type_type& e() const { return e_; }
 
-    //! translation index k
+    //! Translation index k.
     const translation_type& k() const { return k_; }
 
-    //! access to patchnumber
+    //! Access to patchnumber.
     const int p() const { return p_; }
 
     const int number() const { return num_; }
 
-    //! access to underlying frame
+    //! Access to underlying frame.
     const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame() const
     { return frame_; }
 
     /*!
-      inverse of constructor
-      'FrameIndex(const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame,
-      const unsigned int num)'
+      The integer number (according to the
+      canonical lexicographical ordering "level, type, patch, shift parameter")
+      of this FrameIndex is calculated and set.
     */
     void set_number();
 
   protected:
     
     /*!
-      pointer to corresponding frame
+      Pointer to corresponding frame.
      */
     const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame_;
 
-    //! scale
+    //! Scale.
     int j_;
     
-    //! type
-    //MultiIndex<unsigned int,DIM_d> e_;
+    //! Type.
     type_type e_;
 
     /*!
-      patchnumber
+      Patchnumber.
      */
     int p_;
 
-    //! translation
-    //MultiIndex<int,DIM_d> k_;
+    //! Translation index.
     translation_type k_;
-    
+
+    //! Number of this index.
     int num_;
 
   };
 
   /*!
-    stream output for FrameIndex
+    Stream output for FrameIndex.
    */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   std::ostream& operator << (std::ostream&, const FrameIndex<IBASIS, DIM_d, DIM_m>&);
 
   /*!
-    index of first generator on level j >= j0
+    Index of first generator on level \f$j \geq j_0\f$.
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
   FrameIndex<IBASIS,DIM_d,DIM_m>
   first_generator(const FRAME* frame, const int j);
 
   /*!
-    index of last generator on level j >= j0
+    Index of last generator on level \f$j \geq j_0\f$.
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
   FrameIndex<IBASIS,DIM_d,DIM_m>
@@ -197,47 +203,53 @@ namespace FrameTL
 
     
   /*!
-    index of first wavelet on level j >= j0
+    Index of first wavelet on level \f$j \geq j_0\f$.
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
   FrameIndex<IBASIS,DIM_d,DIM_m>
   first_wavelet(const FRAME* frame, const int j);
     
   /*!
-    index of last wavelet on level j >= j0
+    Index of last wavelet on level \f$j \geq j_0\f$.
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
   FrameIndex<IBASIS,DIM_d,DIM_m>
   last_wavelet(const FRAME* frame, const int j);
 
   /*!
-    number of first generator on level j0
+    Number of first generator on level \f$j_0\f$.
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
   int
   first_generator_num(const FRAME* frame);
 
   /*!
-    number of last generator on level j0
+    Number of last generator on level \f$j_0\f$.
     */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
   int
   last_generator_num(const FRAME* frame);
     
   /*!
-    number of first wavelet on level j >= j0
+    Number of first wavelet on level \f$j \geq j0\f$.
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
   int
   first_wavelet_num(const FRAME* frame, const int j);
     
   /*!
-    index of last wavelet on level j >= j0
+    Index of last wavelet on level \f$j \geq j0\f$.
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
   int
   last_wavelet_num(const FRAME* frame, const int j);
   
+
+  // The following are helpers for the parallel implementation, where,
+  // to send an InfiniteVector from one processor to another one,
+  // the InfiniteVector is first copied into an array of Coefficient's
+  // which is then sent to the recipient and copied there into an
+  // InfiniteVector again.
   template <class INDEX>
   void to_array (const InfiniteVector<double, INDEX>& ivec,
 		 Coefficient* coeff_array);

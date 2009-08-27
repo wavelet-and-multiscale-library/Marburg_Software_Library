@@ -30,40 +30,43 @@ namespace FrameTL
   /*!
     This class models the (preconditioned) infinite-dimensional matrix problem
     
-    Au = D^{-1}LD^{-1}u = D^{-1}F
+    \f$Au = D^{-1}LD^{-1}u = D^{-1}F\f$
 
     when reformulating a symmetric, second-order elliptic
     boundary value problem in divergence form over some domain
-    Omega in R^d with boundary Gamma=dOmega,
-    with homogeneous Dirichlet/Neumann/Robin boundary conditions
+    Omega in \f$R^d\f$ with boundary \f$\Gamma=\partial \Omega\f$,
+    with homogeneous Dirichlet boundary conditions
 
-    -div(a(x)grad u(x)) + q(x)u(x) = f(x) in Omega
-                             u(x) = 0 on Gamma_D
-                         du/dn(x) = 0 on Gamma\Gamma_D.
-    
+    \f$-\mbox{div}(a(x)\nabla u(x)) + q(x)u(x) = f(x)\f$ in \f$\Omega\f$<br>
+                             \f$u(x) = 0\f$ on \f$\Gamma\f$<br>
+                             
     The corresponding bilinear form in
 
-    L = (a(\psi_\nu,\psi_\lambda))_{\lambda,\nu}
+    \f$L = (a(\psi_\nu,\psi_\lambda))_{\lambda,\nu}\f$
 
     is
 
-    a(u,v) = \int_Omega <a(x)*grad u(x), grad v(x)>  dx +
-              \int_Omega q(x) * u(x) * v(x) dx
+    \f$a(u,v) = \int_\Omega \langle a(x) \nabla u(x), \nabla v(x)\rangle  dx +
+              \int_\Omega q(x) u(x) v(x) dx\f$
      
     and the right-hand side is
      
-    f(v) = \int_Omega f(x)*v(x)  dx.
+    \f$f(v) = \int_\Omega f(x) v(x)  dx\f$.
 
-    The evaluation of a(.,.) and f is possible for arguments \psi_\lambda
-    which stem from an aggregated wavelet frame \Psi=\{\psi_\lambda\} of the corresponding
-    function space over Omega.
+    The evaluation of \f$a(.,.)\f$ and \f$f\f$ is possible for arguments \f$\psi_\lambda\f$
+    which stem from an aggregated wavelet frame \f$\Psi=\{\psi_\lambda\}\f$ of the corresponding
+    function space over \f$\Omega\f$.
+
 
     WE ASSUME THAT THE COEFFICIENTS OF THE ELLIPTIC PDE ARE SEPERABLE AND SMOOTH AND THAT THE PATCHES
     OF THE UNDERLYING DOMAIN DECOMPOSITION ARE RECATANGULAR AND ALIGNED WITH THE CARTESIAN
     COORDINATES.
     FOR THIS SPECIAL CASE, a(.,.) CAN BE EXACTLY COMPUTED AT UNIT COST AND TENSOR PRODUCT
     STRUCTURE CAN BE EXPLOITED.
-  */
+
+    @tparam IBASIS The type of interval basis underlying the construction of the aggregated frame.
+    @tparam DIM The dimension of the underlying domain.
+   */
   template <class IBASIS, unsigned int DIM>
   class SimpleEllipticEquation
   //: public FullyDiagonalDyadicPreconditioner<typename AggregatedFrame<IBASIS,DIM>::Index>
@@ -72,112 +75,114 @@ namespace FrameTL
   public:
 
     /*!
-      constructor
+      Constructor. The diagonal of the stiffness matrix and the coefficients of the right-hand side
+      are precomputed between minimal and maximal level.
+      
+      @param ell_bvp The elliptic boundary value problem that is modeled.
+      @param frame Pointer to the aggragated frame that is used for discretization.
+      @param jmax The maximal level of resolution that is considered.
      */
     SimpleEllipticEquation(const EllipticBVP<DIM>* ell_bvp,
 			   const AggregatedFrame<IBASIS,DIM>* frame,
 			   const int jmax);
 
     
+    /*!
+      The frame type.
+     */
     typedef AggregatedFrame<IBASIS,DIM> Frame;
 
     /*!
-      dummy typedef to be compatible with WaveletTL
-      routines
+      Dummy typedef to be compatible with WaveletTL
+      routines.
      */
     typedef AggregatedFrame<IBASIS,DIM> WaveletBasis;
-    
+
     /*!
-      make template argument accessible
+      The index type.
     */
     typedef typename Frame::Index Index;
 
     /*!
-      read access to the frame
+      Read access to the frame.
     */
     const AggregatedFrame<IBASIS,DIM>& frame() const { return *frame_; }
 
     /*!
-      get the boundary value problem
+      Read access to the boundary value problem.
     */
     const EllipticBVP<DIM>&  get_bvp() const { return *ell_bvp_; }
 
-
     /*!
-      read access to the frame but with a somewhat weird
-      function name.
-      this is just a first hack to be able to use
-      routines in WaveletTL's compression.h
+      Read access to the frame. The routine is called basis() to be
+      compatible with the routines in WaveletTL's compression.h.
     */
     const AggregatedFrame<IBASIS,DIM>& basis() const { return *frame_; }  
 
     /*!
-      space dimension of the problem
+      Space dimension of the problem.
     */
     static const int space_dimension = DIM;
 
     /*!
-      differential operators are local
+      Differential operators are local.
     */
     static bool local_operator() { return true; }
 
     /*!
-      order of the operator
+      Order of the operator.
     */
     double operator_order() const { return 1; }
     
     /*!
-      evaluate the diagonal preconditioner D
+      Evaluate the diagonal preconditioner D.
     */
     double D(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda) const;
 
     /*!
-      rescale a coefficient vector by an integer power of D, c |-> D^{n}c
+      Rescale a coefficient vector by an integer power of D, \f$c \mapsto D^{n}c\f$.
     */
     void rescale(InfiniteVector<double, typename AggregatedFrame<IBASIS,DIM>::Index>& coeffs,
 		 const int n) const;
-
+    
     /*!
-      evaluate the (unpreconditioned) bilinear form a;
+      Evaluate the (unpreconditioned) bilinear form a.
     */
     double a(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda,
 	     const typename AggregatedFrame<IBASIS,DIM>::Index& nu) const;
 
     /*!
-      estimate the spectral norm ||A||
+      Estimate the spectral norm \f$\|A\|\f$.
     */
     double norm_A() const;
     
+
     /*!
-      returns spectral norm ||A^{-1}||
-      estimate for ||A^{-1}|| has to be
+      Returns spectral norm \f$\|A^{-1}\|\f$.
+      An estimate for \f$\|A^{-1}\|\f$ has to be
       externally computed and to be set
       during initialization of the program.
-      We assume this because ||A^{-1}|| quantity is hardly
-      available in the frame case and
-      quite complicated eigenvalue/eigenvector
-      methods have to applied that are not implemented so
-      far.
     */
     double norm_Ainv() const { return normAinv; };
 
     /*!
-      sets estimate for ||A||
+      Sets estimate for \f$\|A\|\f$.
     */
     void set_norm_A(const double _normA) { normA = _normA; }
+
     /*!
-      sets estimate for ||A^{-1}||
+      Sets estimate for \f$\|A^{-1}\|\f$.
     */
     void set_Ainv(const double nAinv) { normAinv = nAinv; };
 
     /*!
-      estimate compressibility exponent s^*
+      Estimate compressibility exponent \f$s^\ast\f$.
     */
     double s_star() const;
 
     /*!
-      estimate the compression constants alpha_k in
-        ||A-A_k|| <= alpha_k * 2^{-s*k}
+      Estimate the compression constants alpha_k in
+      \f$\|A-A_k\| \leq \alpha_k  2^{-sk}\f$
     */
     double alphak(const unsigned int k) const {
       //return pow(2,(-k))*norm_A(); // suboptimal
@@ -185,45 +190,38 @@ namespace FrameTL
     }
 
     /*!
-      evaluate the (unpreconditioned) right-hand side f
+      Evaluate the (unpreconditioned) right-hand side f.
     */
     double f(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda) const;
 
     /*!
-      approximate the wavelet coefficient set of the preconditioned right-hand side F
-      within a prescribed \ell_2 error tolerance
+      Approximate the wavelet coefficient set of the preconditioned right-hand side
+      within a prescribed \f$\ell_2\f$ error tolerance.
     */
     void RHS(const double eta, InfiniteVector<double, 
 	     typename AggregatedFrame<IBASIS,DIM>::Index>& coeffs) const;
 
     /*!
-      approximate the wavelet coefficient set of the preconditioned right-hand side F restricted
-      to patch p within a prescribed \ell_2 error tolerance
+      Approximate the wavelet coefficient set of the preconditioned right-hand side restricted
+      to patch p within a prescribed \f$\ell_2\f$ error tolerance.
     */
     void RHS(const double eta, const int p,
 	     InfiniteVector<double, 
 	     typename AggregatedFrame<IBASIS,DIM>::Index>& coeffs) const;
 
-
-//     /*!
-//       compute (or estimate) ||F||_2
-//     */
-//     double F_norm() const { return sqrt(fnorm_sqr); }
-
     /*!
-      compute (or estimate) ||F^(i)||_2
+      Compute the \f$\ell_2\f$ norm of the right-hand side coefficients on corresponding to a fixed patch.
     */
     double F_norm_local(const int patch) const { return sqrt(fnorms_sqr_patch); }
 
-
     /*!
-      set the boundary value problem
+      Set the boundary value problem.
     */
     void set_bvp(const EllipticBVP<DIM>*);
 
-
     /*!
-      w += factor * (stiffness matrix entries of in column lambda on level j)
+      Multiplies the stiffness matrix entries of column lambda on level j of the compressed martrix A_J
+      by factor and adds the result to w. 
     */
     void add_level (const Index& lambda,
 		    InfiniteVector<double, Index>& w, const int j,
@@ -234,29 +232,42 @@ namespace FrameTL
    protected:
     
     /*!
-      corresponding elliptic boundary value problem
-     */
+      The elliptic boundary value problem.
+    */
     const EllipticBVP<DIM>* ell_bvp_;
 
     /*!
-      underlying frame
-     */
+      The underlying aggregated frame.
+    */
     const AggregatedFrame<IBASIS,DIM>* frame_;
 
-    //#################### Caching ##################
+    // #####################################################################################
+    // Caching of appearing 1D integrals when making use of the tensor product structure of the wavelets
+    // during the evaluation of the bilinear form.
     typedef std::map<Index1D<IBASIS>,double > Column1D;
     typedef std::map<Index1D<IBASIS>,Column1D> One_D_IntegralCache;
     
-    /*!
-      cache for one dimensional integrals
-      ONLY USED TOGETHER WITH TrivialAffine QUADRATURE RULE OPTION
-     */
     mutable One_D_IntegralCache one_d_integrals;
-    //###############################################
+    // #####################################################################################
 
   private:
 
     /*!
+      Calculate integral of the product of the interval wavelets or generators
+      given by lambda and mu. The class Index1D<IBASIS> also includes
+      generators on levels above the coarsest one. This routine is used
+      during the evaluation of the bilinear form a(.,.) when use of the tensor
+      product structure of the multi-dimensional integrand is made.
+
+      @param lambda Index of first wavelet or generator.
+      @param mu Index of second wavelet or generator.
+      @param N_Gauss Number of Gauss quadrature knots to be used. This should be cosen equal
+      to the spline order in the constant coefficient case to be sure to integrate exactly.
+      @param dir The spatial direction under considerattion.
+      @param supp_lambda Support of the reference wavelet on the cube having the function given by lambda
+      as component in the direction dir.
+      @param supp_mu Support of the reference wavelet on the cube having the function given by mu
+      as component in the direction dir.
      */
     double integrate(const Index1D<IBASIS>& lambda,
 		     const Index1D<IBASIS>& mu,
@@ -265,34 +276,28 @@ namespace FrameTL
 		     const typename CubeBasis<IBASIS,DIM>::Support* supp_lambda,
 		     const typename CubeBasis<IBASIS,DIM>::Support* supp_mu) const;
 
-    // precompute the right-hand side
+    //! Precompute the right-hand side between minimal and maximal level.
     void compute_rhs();
 
-    // precompute diagonal of stiffness matrix
+    //! Precompute the diagonal of the stiffness matrix between minimal and maximal level.
     void compute_diagonal();
 
-
+    //! The maximal level of resolution.
     const int jmax_;
 
-    // right-hand side coefficients on a fine level, sorted by modulus
-    //Array1D<std::pair<typename AggregatedFrame<IBASIS,DIM>::Index,double> > fcoeffs;
-
-    // patchwise right-hand side coefficients on a fine level, sorted by modulus
-    //Array1D<Array1D<std::pair<typename AggregatedFrame<IBASIS,DIM>::Index,double> > > fcoeffs_patch;
+    //! Patchwise right-hand side coefficients on a fine level, sorted by modulus.
     Array1D<std::pair<typename AggregatedFrame<IBASIS,DIM>::Index, double> > fcoeffs_patch;
 
-
-    //     // right-hand side coefficients on a fine level, sorted by modulus
-    //     InfiniteVector<double,typename AggregatedFrame<IBASIS,DIM>::Index> stiff_diagonal;
-    
-    
-    // square root of coefficients on diagonal of stiffness matrix
+    //! Square root of coefficients on diagonal of stiffness matrix.
     Array1D<double> stiff_diagonal;
 
-
-    // (squared) \ell_2 norm of the precomputed right-hand side
+    //! (Squared) \f$\ell_2\f$ norm of the precomputed right-hand side.
     double fnorm_sqr;
-    //Array1D<double> fnorms_sqr_patch;
+    
+    /*! 
+      (Squared) \f$\ell_2\f$ norm of the respective precomputed right-hand side coefficients
+      on each patch.
+    */
     double fnorms_sqr_patch;
 
     // reminder: The keyword mutable can only be applied to non-static

@@ -192,9 +192,7 @@ int main()
   //IdentityBVP<DIM> trivial_bvp(&const_fun);
   //IdentityBVP<DIM> trivial_bvp(&exactSolution);
   
-  BiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharmonic, &frame, jmax, TrivialAffine);
-  //EllipticEquation<Basis1D,DIM> discrete_poisson(&trivial_bvp, &frame, TrivialAffine);
-  //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
+  BiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharmonic, &frame, jmax);
   
   CachedProblem<BiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 4.19, 1.0/0.146);
   

@@ -22,49 +22,49 @@ using MathTL::Point;
 namespace FrameTL
 {
   /*!
-    exact solution for the test case for the one-dimensional biharmonic equation
-    u(x) = -cos(2*Pi*x)+1 + p(x)
+    Exact solution for the test case for the one-dimensional biharmonic equation,
+    \f$u(x) = -\cos(2\pi x)+1 + p(x)\f$
     with
-    p(x) = 48*x^4-63*x^3+47/2*x^2, for 0 <= x < 1/2,
-    p(x) = 48*x^4-127*x^3+235/2*x^2-46*x+15/2, for 1/2 <= x <= 1
+    \f$p(x) = 48x^4-63x^3+47/2x^2\f$, for \f$0 \leq x < 1/2\f$,
+    \f$p(x) = 48x^4-127x^3+235/2x^2-46x+15/2\f$, for \f$1/2 \leq x \leq 1\f$
    */
   class Biharmonic1D_Solution
     : public Function<1>
   {
   public:
-    //! default constructor
+    //! Default constructor.
     Biharmonic1D_Solution()
     {
     }
 
-    //! point evaluation
+    //! Point evaluation.
     double value(const Point<1>& p, const unsigned int component = 0) const;
 
-    //! dummy concretisation for the compiler
+    //! Dummy concretisation for the compiler.
     void vector_value(const Point<1> &p, Vector<double>& values) const
     { ; }
   };
 
 
   /*! A class inheriting from Function<1>, modeling the function f of the
-    integrand in \int v(x) f(x) dx
+    integrand in \f$\int v(x) f(x) dx\f$.
    */
   class Biharmonic1D_RHS_Integrand
     : public Function<1>
   {
   public:
-    //! point evaluation
+    //! Point evaluation.
     double value(const Point<1>& p, const unsigned int component = 0) const;
 
-    //! dummy concretisation for the compiler
+    //! Dummy concretisation for the compiler.
     void vector_value(const Point<1> &p, Vector<double>& values) const
     { ; }
   };
 
 
   /*!
-    functional for the righthand side of the 1D test case for the biharmonic equation
-    v -> 4*v'(1/2) - 384*v(1/2) - 16 * \int_0^1 (cos(2*Pi*x)*Pi^4-72) * v(x) dx
+    Functional for the righthand side of the 1D test case for the biharmonic equation
+    \f$ v \mapsto 4v'(1/2) - 384v(1/2) - 16  \int_0^1 (\cos(2\pi x)\pi^4-72) * v(x) dx\f$.
    */
   template<class IBASIS>
   class Biharmonic1D_RHS
@@ -72,20 +72,20 @@ namespace FrameTL
   {
   public:
     /*!
-      Constructor with an instance of a frame
+      Constructor with an instance of a frame.
      */
     Biharmonic1D_RHS(const AggregatedFrame<IBASIS, 1>* frame)
       : Functional<IBASIS,1,1>(new Biharmonic1D_RHS_Integrand(), frame)
     {}
 
     /*!
-      Virtual destructor
+      Virtual destructor.
      */
     virtual ~Biharmonic1D_RHS()
     {}
 
     /*!
-      Evaluate the functional with the wavelet with given index lambda
+      Evaluate the functional with the wavelet with given index lambda.
      */
     virtual double evaluate(const typename AggregatedFrame<IBASIS, 1>::Index& lambda) const;
   };

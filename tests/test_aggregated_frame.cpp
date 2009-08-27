@@ -1,28 +1,31 @@
-
 #include <iostream>
-#include <time.h> 
-#include "aggregated_frame.h"
 #include <interval/ds_basis.h>
+#include <interval/p_basis.h>
+#include <frame_support.h>
+#include <frame_index.h>
+
 
 using std::cout;
 using std::endl;
 
+using FrameTL::FrameIndex;
 using FrameTL::AggregatedFrame;
-using MathTL::Atlas;
-using MathTL::AffineLinearMapping;
-using MathTL::Chart;
-using WaveletTL::DSBasis;
 
 using namespace FrameTL;
 using namespace MathTL;
 using namespace WaveletTL;
+
 
 int main()
 {
   
   cout << "Testing class AggregatedFrame..." << endl;
   
-  const unsigned int DIM = 2;
+  typedef PBasis<2,2> Basis1D;
+  typedef AggregatedFrame<Basis1D,2,2> Frame;
+  typedef Frame::Index Index;
+
+   const unsigned int DIM = 2;
 
   //##############################  
   Matrix<double> A(DIM,DIM);
@@ -36,7 +39,7 @@ int main()
 
   //##############################
   LinearBezierMapping bezierP(Point<2>(-1.,-1),Point<2>(-1.,1),
-			      Point<2>(1.,-1.), Point<2>(1,0));
+  			      Point<2>(1.,-1.), Point<2>(1,0));
   //##############################
   Array1D<Chart<DIM,DIM>* > charts(2);
   charts[0] = &affineP;
@@ -92,16 +95,18 @@ int main()
   Atlas<DIM,DIM> Lshaped(charts,adj);  
   cout << Lshaped << endl;
 
-  typedef DSBasis<2,2> Basis1D;
+// //   typedef DSBasis<2,2> Basis1D;
+// //   AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT, 5);
 
-  AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT);
+  const int jmax = 7;
+  Frame frame(&Lshaped, bc, jmax);
 
-  //const MappedCubeBasis<Basis1D, DIM, DIM>* cbas = frame.get_local_basis(0);
+//   //const MappedCubeBasis<Basis1D, DIM, DIM>* cbas = frame.get_local_basis(0);
 
-  //  cbas = frame.get_local_basis(1);
+//   //  cbas = frame.get_local_basis(1);
 
-  //should be caught by assert statement
-  //cbas = frame.get_local_basis(2);
+//   //should be caught by assert statement
+//   //cbas = frame.get_local_basis(2);
  
   
 

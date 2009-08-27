@@ -205,7 +205,7 @@ int main()
   //PoissonBVP<DIM> poisson(&const_fun);
   PoissonBVP<DIM> poisson(&sing1D);
 
-  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
+  EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, 10);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
 
   // (0,0.7) \cup (0.3,1) DSBasis

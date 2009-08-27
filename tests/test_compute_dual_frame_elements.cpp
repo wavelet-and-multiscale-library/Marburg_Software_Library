@@ -221,7 +221,7 @@ int main()
   IdentityBVP<DIM> trivial_bvp(&const_fun);
   //PoissonBVP<DIM> trivial_bvp(&sing1D);
 
-  EllipticEquation<Basis1D,DIM> discrete_poisson(&trivial_bvp, &frame, TrivialAffine);
+  EllipticEquation<Basis1D,DIM> discrete_poisson(&trivial_bvp, &frame, 6);
   //CachedProblem<EllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 4.19, 1.0/0.146);
 
   cout.precision(12);

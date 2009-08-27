@@ -58,7 +58,16 @@ CXXFLAGS +=  -O2 -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 endif
 
 
-EXEOBJF = test_additive_Schwarz33_2D.o\
+EXEOBJF = test_aggregated_frame.o\
+test_biharmonic_1d_testcase.o\
+test_elliptic_equation_1D.o\
+test_elliptic_equation.o\
+test_simple_elliptic_equation.o\
+test_simple_biharmonic_equation_1D.o\
+test_simple_biharmonic_equation_2D.o\
+test_biharmonic_equation_1D.o\
+test_biharmonic_equation.o\
+test_additive_Schwarz33_2D.o\
 test_multiplicative_Schwarz33_biharmonic_2D_v2.o\
 test_multiplicative_Schwarz46_biharmonic_2D.o\
 test_multiplicative_Schwarz33_2D_ring.o\
@@ -84,13 +93,9 @@ test_steepest_descent22.o\
 test_additive_Schwarz.o\
 test_steepest_descent_2D.o\
 test_multiplicative_Schwarz.o\
-test_biharmonic_equation_1D.o\
 test_apply_1D.o \
 test_apply.o \
-test_simple_elliptic_equation.o\
-test_elliptic_equation_1D.o\
-test_elliptic_equation.o\
-
+test_compute_dual_frame_elements.o
 
 
 EXES = $(EXEOBJF:.o=)

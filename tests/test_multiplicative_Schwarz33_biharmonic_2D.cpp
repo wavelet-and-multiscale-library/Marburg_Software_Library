@@ -217,7 +217,7 @@ int main()
   CornerSingularityBiharmonicRHS singRhs(origin, 0.5, 1.5);
   Functional<Basis1D, DIM> rhs(&singRhs, &frame);
   
-  SimpleBiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&rhs, &frame,jmax, TrivialAffine);
+  SimpleBiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&rhs, &frame, jmax);
 
   //CachedProblem<SimpleBiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 7, 1.0/0.01);
   CachedProblemLocal<SimpleBiharmonicEquation<Basis1D,DIM> > problem(&discrete_biharmonic, 7, 1.0/0.01);

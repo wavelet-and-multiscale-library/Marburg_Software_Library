@@ -1,0 +1,35 @@
+\hypertarget{classFrameTL_1_1Biharmonic1D__Solution}{
+\section{FrameTL::Biharmonic1D\_\-Solution Class Reference}
+\label{classFrameTL_1_1Biharmonic1D__Solution}\index{FrameTL::Biharmonic1D\_\-Solution@{FrameTL::Biharmonic1D\_\-Solution}}
+}
+{\tt \#include $<$biharmonic\_\-1d\_\-testcase.h$>$}
+
+Inherits MathTL::Function$<$ 1 $>$.
+
+\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+\hypertarget{classFrameTL_1_1Biharmonic1D__Solution_0ac47ada14854cf3055e551c24c15d23}{
+\hyperlink{classFrameTL_1_1Biharmonic1D__Solution_0ac47ada14854cf3055e551c24c15d23}{Biharmonic1D\_\-Solution} ()}
+\label{classFrameTL_1_1Biharmonic1D__Solution_0ac47ada14854cf3055e551c24c15d23}
+
+\begin{CompactList}\small\item\em Default constructor. \item\end{CompactList}\item 
+\hypertarget{classFrameTL_1_1Biharmonic1D__Solution_24f451d77510c4e288e0bdf7fb7b5034}{
+double \hyperlink{classFrameTL_1_1Biharmonic1D__Solution_24f451d77510c4e288e0bdf7fb7b5034}{value} (const Point$<$ 1 $>$ \&p, const unsigned int component=0) const }
+\label{classFrameTL_1_1Biharmonic1D__Solution_24f451d77510c4e288e0bdf7fb7b5034}
+
+\begin{CompactList}\small\item\em Point evaluation. \item\end{CompactList}\item 
+\hypertarget{classFrameTL_1_1Biharmonic1D__Solution_06eca619ffab0ade6671bcdd9bdd15ae}{
+void \hyperlink{classFrameTL_1_1Biharmonic1D__Solution_06eca619ffab0ade6671bcdd9bdd15ae}{vector\_\-value} (const Point$<$ 1 $>$ \&p, Vector$<$ double $>$ \&values) const }
+\label{classFrameTL_1_1Biharmonic1D__Solution_06eca619ffab0ade6671bcdd9bdd15ae}
+
+\begin{CompactList}\small\item\em Dummy concretisation for the compiler. \item\end{CompactList}\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+Exact solution for the test case for the one-dimensional biharmonic equation, $u(x) = -\cos(2\pi x)+1 + p(x)$ with $p(x) = 48x^4-63x^3+47/2x^2$, for $0 \leq x < 1/2$, $p(x) = 48x^4-127x^3+235/2x^2-46x+15/2$, for $1/2 \leq x \leq 1$ 
+
+The documentation for this class was generated from the following files:\begin{CompactItemize}
+\item 
+/home/werner/PROMOTION/source/FrameTL/biharmonic\_\-1d\_\-testcase.h\item 
+/home/werner/PROMOTION/source/FrameTL/biharmonic\_\-1d\_\-testcase.cpp\end{CompactItemize}

@@ -1,0 +1,48 @@
+\hypertarget{parallel_8h}{
+\section{/home/werner/PROMOTION/source/FrameTL/parallel.h File Reference}
+\label{parallel_8h}\index{/home/werner/PROMOTION/source/FrameTL/parallel.h@{/home/werner/PROMOTION/source/FrameTL/parallel.h}}
+}
+{\tt \#include $<$parallel.cpp$>$}\par
+\subsection*{Namespaces}
+\begin{CompactItemize}
+\item 
+namespace \hyperlink{namespaceFrameTL}{FrameTL}
+\end{CompactItemize}
+\subsection*{Defines}
+\begin{CompactItemize}
+\item 
+\hypertarget{parallel_8h_9b48d6bfa3d7790c546a05cea212f543}{
+\#define \textbf{NBLOCKS}~2}
+\label{parallel_8h_9b48d6bfa3d7790c546a05cea212f543}
+
+\item 
+\hypertarget{parallel_8h_3fa2d3bf1901157f734a584d47b25d8b}{
+\#define \textbf{MASTER}~0}
+\label{parallel_8h_3fa2d3bf1901157f734a584d47b25d8b}
+
+\end{CompactItemize}
+\subsection*{Functions}
+\begin{CompactItemize}
+\item 
+void \hyperlink{namespaceFrameTL_010a7b97f26561b6923f285c1cbb8d02}{FrameTL::setup\_\-coefficient\_\-datatype} ()
+\item 
+{\footnotesize template$<$class PROBLEM$>$ }\\void \hyperlink{namespaceFrameTL_868f995657a7f68345fe24340658282e}{FrameTL::send\_\-to\_\-Master} (const InfiniteVector$<$ double, typename PROBLEM::Index $>$ \&v)
+\item 
+{\footnotesize template$<$class PROBLEM$>$ }\\void \hyperlink{namespaceFrameTL_3ea47092508598512ecc54955117a16f}{FrameTL::receive\_\-all\_\-parts} (const PROBLEM \&P, InfiniteVector$<$ double, typename PROBLEM::Index $>$ \&v)
+\item 
+{\footnotesize template$<$class PROBLEM$>$ }\\void \hyperlink{namespaceFrameTL_99afa22a98a5b20d8326b2983bb19088}{FrameTL::broadcast\_\-vec\_\-from\_\-Master} (const PROBLEM \&P, InfiniteVector$<$ double, typename PROBLEM::Index $>$ \&v)
+\item 
+void \hyperlink{namespaceFrameTL_5b01ba18f76ca06fb77d8cbca90492e8}{FrameTL::broadcast\_\-double\_\-from\_\-Master} (double \&d)
+\end{CompactItemize}
+\subsection*{Variables}
+\begin{CompactItemize}
+\item 
+\hypertarget{namespaceFrameTL_ed8caef1981377375248b70b9df6b085}{
+MPI\_\-Datatype \textbf{FrameTL::coefficient\_\-datatype}}
+\label{namespaceFrameTL_ed8caef1981377375248b70b9df6b085}
+
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+Routines for the parallelization of adaptive frame domain decomposition methods. 

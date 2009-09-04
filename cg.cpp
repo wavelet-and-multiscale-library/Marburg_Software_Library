@@ -64,7 +64,7 @@ public:
 
   template <class PROBLEM>
   void cg_SOLVE(const PROBLEM& P,  const double epsilon,
-			      InfiniteVector<double, typename PROBLEM::Index>& u_epsilon)
+		InfiniteVector<double, typename PROBLEM::Index>& u_epsilon)
   {
     //typedef DSBasis<2,2> Basis1D;
     typedef PBasis<2,2> Basis1D;

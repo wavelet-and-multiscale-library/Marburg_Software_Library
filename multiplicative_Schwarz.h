@@ -7,8 +7,8 @@
 // | Thorsten Raasch, Manuel Werner                                     |
 // +--------------------------------------------------------------------+
 
-#ifndef _FRAME_TL_MULTIPLIKATIVE_H
-#define _FRAME_TL_MULTIPLIKATIVE_H
+#ifndef _FRAME_TL_MULTIPLICATIVE_SCHWARZ_H
+#define _FRAME_TL_MULTIPLICATIVE_SCHWARZ_H
 
 #include <algebra/infinite_vector.h>
 

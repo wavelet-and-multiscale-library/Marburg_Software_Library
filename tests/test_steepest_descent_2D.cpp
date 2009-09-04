@@ -256,14 +256,14 @@ int main()
 
   const double epsilon = 1.0e-6;
 
-  InfiniteVector<double, Index> u_epsilon;
+  //InfiniteVector<double, Index> u_epsilon;
   Array1D<InfiniteVector<double, Index> > approximations(frame.n_p()+1);
 
   clock_t tstart, tend;
   double time;
   tstart = clock();
 
-  steepest_descent_SOLVE(problem, epsilon, u_epsilon, approximations);
+  steepest_descent_SOLVE(problem, epsilon, approximations);
   //cg_SOLVE(problem, epsilon, u_epsilon);
   //richardson_SOLVE_CDD2(problem, epsilon, u_epsilon);
   //richardson_SOLVE(problem, epsilon, u_epsilon);
@@ -281,13 +281,16 @@ int main()
   cout << "steepest descent done" << endl;
 
   //discrete_poisson.rescale(u_epsilon,-1);
-  u_epsilon.scale(&problem,-1);
+  //u_epsilon.scale(&problem,-1);
+  for (int i = 0; i <= frame.n_p(); i++)
+    approximations[i].scale(&discrete_poisson,-1);
+
 #if 1
-  Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u_epsilon, true, 6);//expand in primal basis
+  Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, approximations[frame.n_p()], true, 6);//expand in primal basis
   
   cout << "done plotting approximate solution" << endl;
 
-  Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(frame, u_epsilon, sing2D, 6);
+  Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(frame, approximations[frame.n_p()], sing2D, 6);
 
   cout << "done plotting pointwise error" << endl;
 
@@ -298,10 +301,6 @@ int main()
   std::ofstream ofs6("error_steep_2D_out.m");
   matlab_output(ofs6,Error);
   ofs6.close();
-
-  for (int i = 0; i <= frame.n_p(); i++)
-    approximations[i].scale(&discrete_poisson,-1);
-
 
   for (int i = 0; i < frame.n_p(); i++) {
     cout << "plotting local approximation on patch " << i << endl;

@@ -20,36 +20,43 @@
 #include <index1D.h>
 #include <aggregated_frame.h>
 
-
-
 using WaveletTL::CubeBasis;
 using FrameTL::Index1D;
 
 namespace FrameTL
 {
+
   /*!
-    checks wether Point 'p' lies in the support of
-    the wavelet \psi_\lambda
+    \file frame_support.h
+    Routines for handling the supports of aggregated wavelet frame elements.
   */
+
+
+//   //
+//   //  Checks wether Point 'p' lies in the support of the wavelet \f$\psi_\lambda\f$,
+//   //  when the support of the corresponding cube wavelet is already known and
+//   //  the latter is passed as an argument.
+//   //
+//   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+//   bool in_support(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+// 		  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+// 		  const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda,
+// 		  const Point<DIM_m>& p);
+  
+   /*!
+     Checks wether Point 'p' lies in the support of
+     the wavelet frame element \f$\psi_\lambda\f$.
+   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   bool in_support(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 		  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 		  const Point<DIM_m>& p);
-
+  
   /*!
-    checks wether Point 'p' lies in the support of
-    the wavelet \psi_\lambda, when the support of the
-    corresponding cube wavelet is already known and
-    thus the latter is passed as an argument
-  */
-  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
-  bool in_support(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
-		  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
-		  const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda,
-		  const Point<DIM_m>& p);
-
-  /*!
-    checks wether the support of the wavelet frame elements intersect
+    Checks wether the support of the wavelet frame elements \f$\psi_\lambda\f$
+    and \f$\psi_\mu\f$ intersect.
+    The supports of the corresponding cube wavelets have to be passed as arguments
+    supp_lambda and supp_mu.
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   bool intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
@@ -58,23 +65,27 @@ namespace FrameTL
 			  const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda,
 			  const typename CubeBasis<IBASIS,DIM_d>::Support* supp_mu);
 
-
+  /*!
+    For the case of rectangular patches, the supports of all wavelets frame elements
+    between minimal and maximal level are computed. This routine is supposed to be called during
+    the initialization process of an AggregatedFrame in its constructor.
+   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   void precompute_supports_simple(const AggregatedFrame<IBASIS,DIM_d,DIM_m>* frame,
 				  Array1D<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Support>& all_patch_supports);
   /*!
-    checks wether the support of the wavelet frame elements intersect
+    Checks wether the support of the wavelet frame elements intersect.
+    WE ASSUME THAT THE PATCHES ARE RECTANGULAR AND THAT THEY ARE ALIGNED WITH THE
+    CARTESIAN GRID.
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   bool intersect_supports_simple(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 				 const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
-				 const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu,
-				 const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda,
-				 const typename CubeBasis<IBASIS,DIM_d>::Support* supp_mu);
+				 const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu);
 
 
   /*!
-    checks wether the support of the wavelet frame elements intersect   
+    Checks wether the support of the wavelet frame elements intersect.
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   bool intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
@@ -82,17 +93,28 @@ namespace FrameTL
 			  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu,
 			  const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda);
 
+  /*!
+    This function checks whether the supports of the two functions given by lambda and mu
+    intersect. It also generates an irregular partition of the support intersection pulled back
+    to the unit interval by the parametric mapping corresponding to lambda.
+   */
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  bool intersect_supports_1D(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+ 			     const Index1D<IBASIS>& lambda,
+ 			     const Index1D<IBASIS>& mu,
+ 			     const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda,
+ 			     const typename CubeBasis<IBASIS,DIM_d>::Support* supp_mu,
+			     const int dir,
+			     Array1D<double>& supp_intersect);
 
   /*!
     THIS ROUTINE IS INTENDED FOR THE SPECIAL CASE OF TRIVIAL
     PARAMETRIZATIONS, NAMELY AFFINE LINEAR MAPPINGS 'A x + B' WITH 'A' BEEING
     A DIAGONAL MATRIX.
-    The function checks wether two wavelets intersect and returns
-    an irregualar partition of the support intersection pulled back
-    to the unit cube by the chart corresponding to \psi_\lambda.
-    This is needed to be able to exactly compute the entries
-    of the stiffness matrix for the above case of very simple patch
-    parametrizations.
+    The function checks whether two wavelets intersect and returns an irregular partition of the
+    support intersection pulled back to the unit cube by the chart corresponding to \f$\psi_\lambda\f$.
+    This is needed to be able to exactly compute the entries of the stiffness matrix for the
+    above case of very simple patch parametrizations.
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   bool intersect_supports(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
@@ -102,20 +124,10 @@ namespace FrameTL
 			  const typename CubeBasis<IBASIS,DIM_d>::Support* supp_mu,
 			  FixedArray1D<Array1D<double>,DIM_d >& supp_intersect);
 
-  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
-  bool intersect_supports_1D(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
- 			     const Index1D<IBASIS>& lambda,
- 			     const Index1D<IBASIS>& mu,
- 			     const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda,
- 			     const typename CubeBasis<IBASIS,DIM_d>::Support* supp_mu,
-			     const int dir,
-			     Array1D<double>& supp_intersect);
-  
-
   /*!
-    For a given wavelet frame element \psi_\lambda, compute all generators/wavelets
-    \psi_\nu with level |\nu|=j, such that the respective supports
-    have a nontrivial intersection
+    For a given wavelet frame element \f$\psi_\lambda\f$, compute all generators/wavelets
+    \f$\psi_\nu\f$ with level \f$|\nu|=j\f$, such that the respective supports
+    have a nontrivial intersection.
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   void intersecting_wavelets(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
@@ -124,9 +136,10 @@ namespace FrameTL
 			     std::list<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& intersecting);
 
   /*!
-    For a given wavelet frame element \psi_\lambda, compute all generators/wavelets
-    \psi_\nu with level |\nu|=j, such that the respective supports
-    have a nontrivial intersection
+    For a given wavelet frame element \f$\psi_\lambda\f$, compute all generators/wavelets
+    \f$\psi_\nu\f$ with level \f$|\nu|=j\f$ on patch p, such that the respective supports
+    have a nontrivial intersection.
+    WE ASSUME AGAIN THAT ONLY RECTANGULAR PATCHTES ALIGNED WITH THE COORDINATE AXES ARE USED.
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   void intersecting_wavelets_on_patch(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
@@ -135,37 +148,35 @@ namespace FrameTL
 				      const int j, const bool generators,
 				      std::list<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& intersecting);
 
-
+  /*!
+    For a given wavelet frame element \f$\psi_\lambda\f$, compute all generators/wavelets from patch p
+    in the set Lambda, the supports of which intersect the one of \f$\psi_\lambda\f$.
+    WE ASSUME AGAIN THAT ONLY RECTANGULAR PATCHTES ALIGNED WITH THE COORDINATE AXES ARE USED.
+  */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   inline
   void intersecting_wavelets (const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 			      const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 			      const int p,
-			      const std::set<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& Lambda,			      
+			      const std::set<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& Lambda,	      
 			      std::list<typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index>& intersecting);
 
   /*!
-    Decide whether the support of a given (primal) generator/wavelet \psi_\lambda
-    intersects the singular support of another (primal) generator/wavelet \psi_\nu.
+    Decide whether the support of a given generator/wavelet \f$\psi_\lambda\f$
+    intersects the singular support of another generator/wavelet \f$\psi_\nu\f$.
   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   bool intersect_singular_support(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 				  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 				  const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& nu);
 
-
-
-  template <unsigned int DIM>
-  bool qudarangles_intersect (FixedArray1D<Point<DIM>, 4> poly1, FixedArray1D<Point<DIM>, 4> poly2);
-
   /*!
-    tests wether the line segments defined by the points
+    This routine tests whether the line segments defined by the points
     A and B as well as C and D intersect.
      0 = no intersection
      1 = infinitely many intersection points
      2 = single intersection point, but at least one knot involved
-     3 = single intersection point situated 
-         in the inner of both line segments
+     3 = single intersection point situated in the inner of both line segments
    */
   template <unsigned int DIM>
   int edgesIntersect (const Point<DIM>& A, const Point<DIM>& B,
@@ -181,6 +192,13 @@ namespace FrameTL
    */
   template <unsigned int DIM>
   unsigned short int pos_wrt_line (const Point<DIM>& p, const Point<DIM>& p1, const Point<DIM>&  p2);
+
+  /*!
+    This function checks whether the convex qudrangles given by the vertices in poly1 and poly2
+    have a non-trivial intersection.
+   */
+  template <unsigned int DIM>
+  bool quadrangles_intersect (FixedArray1D<Point<DIM>, 4> poly1, FixedArray1D<Point<DIM>, 4> poly2);
   
  
 }

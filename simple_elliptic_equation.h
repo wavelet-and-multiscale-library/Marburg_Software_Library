@@ -78,7 +78,7 @@ namespace FrameTL
       are precomputed between minimal and maximal level.
       
       @param ell_bvp The elliptic boundary value problem that is modeled.
-      @param frame Pointer to the aggragated frame that is used for discretization.
+      @param frame Pointer to the aggregated frame that is used for discretization.
       @param jmax The maximal level of resolution that is considered.
      */
     SimpleEllipticEquation(const EllipticBVP<DIM>* ell_bvp,

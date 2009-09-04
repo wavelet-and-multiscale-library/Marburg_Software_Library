@@ -8,7 +8,6 @@ using namespace std;
 namespace FrameTL
 {
 
-  // members of class Biharmonic1D_Solution
   double
   Poisson_Solution_Ring::value(const Point<2>& p, const unsigned int component) const
   {

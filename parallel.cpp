@@ -6,11 +6,6 @@
 namespace FrameTL
 {
 
-
-  /*
-    create mpi datatype, consisting of 
-    an int and a double
-   */
   void setup_coefficient_datatype () {
     int array_of_block_lenghts[NBLOCKS] = {1, 1};
     
@@ -31,9 +26,17 @@ namespace FrameTL
     MPI::Aint lb = 0;
     MPI::INT.Get_extent(lb, extent);
     array_of_displacements[0] = lb;
-    //MPI::DOUBLE.Get_extent(lb, extent);
-    //array_of_displacements[1] = extent;
-    array_of_displacements[1] = 8;
+
+    // #####################################################################################
+    // Here we have to very carefull. On our 32Bit systems in the group one has to put
+    // array_of_displacements[1] = extent; (and extent is equal to 4)
+    // On a 64Bit system like the Marc Cluster it has to be 
+    // array_of_displacements[1] = 8;
+    // #####################################################################################
+    //array_of_displacements[1] = 8;
+    MPI::DOUBLE.Get_extent(lb, extent);
+    array_of_displacements[1] = extent;
+    // #####################################################################################
     
     cout << "extent = " << extent << endl;
     cout << "NBLOCKS = "  << NBLOCKS <<  endl;
@@ -91,7 +94,6 @@ namespace FrameTL
     int current_support_size  = 0;
     if (p == MASTER) {
       current_support_size = v.size();
-      //cout << v << endl;
     }
     
     // tell the slaves about the support size of the current approximation
@@ -107,8 +109,6 @@ namespace FrameTL
     }
   }
 
-  /*
-   */
   void broadcast_double_from_Master (double& d)
   {
     //MPI::DOUBLE dd(d);

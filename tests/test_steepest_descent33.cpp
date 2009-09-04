@@ -323,7 +323,7 @@ int main()
   
   
   const double epsilon = 1.0e-6;
-  InfiniteVector<double, Index> u_epsilon;
+  //InfiniteVector<double, Index> u_epsilon;
 
 
   clock_t tstart, tend;
@@ -332,7 +332,7 @@ int main()
 
   Array1D<InfiniteVector<double, Index> > approximations(frame.n_p()+1);
 
-  steepest_descent_SOLVE(problem, epsilon, u_epsilon, approximations);
+  steepest_descent_SOLVE(problem, epsilon, approximations);
 
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
@@ -340,15 +340,17 @@ int main()
 
   cout << "steepest descent done" << endl;
 
-  u_epsilon.scale(&discrete_poisson,-1);
+  for (int i = 0; i <= frame.n_p(); i++)
+    approximations[i].scale(&discrete_poisson,-1);
+  //u_epsilon.scale(&discrete_poisson,-1);
   //u_epsilon.scale(&discrete_biharmonic,-1);
   
 
   EvaluateFrame<Basis1D,1,1> evalObj;
 
-  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, u_epsilon, true, 12);//expand in primal basis
+  Array1D<SampledMapping<1> > U = evalObj.evaluate(frame, approximations[frame.n_p()], true, 12);//expand in primal basis
   cout << "...finished plotting approximate solution" << endl;
-  Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, u_epsilon, exactSolution1D, 12);
+  Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, approximations[frame.n_p()], exactSolution1D, 12);
   cout << "...finished plotting error" << endl;
   
   std::ofstream ofs5("./sd_results33/approx_sol_steep_1D_out.m");
@@ -359,9 +361,6 @@ int main()
   matlab_output(ofs6,Error);
   ofs6.close();
 
-  for (int i = 0; i <= frame.n_p(); i++)
-    approximations[i].scale(&discrete_poisson,-1);
-  
   for (int i = 0; i < frame.n_p(); i++) {
     cout << "plotting local approximation on patch " << i << endl;
 

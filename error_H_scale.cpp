@@ -236,7 +236,7 @@ namespace FrameTL
     typedef typename Frame2D::Index Index;
     typedef typename Frame2D::Support SuppType;
     
-    const int granularity = 10; // formerly 200
+    const int granularity = 10; // formerly 200 (for the tests in the PhD thesis)
     
     
     double approx = 0.;
@@ -254,11 +254,9 @@ namespace FrameTL
     Point<2> b(0,0);
     double dx = (b[0]-a[0]) / granularity;
     double dy = (b[1]-a[1]) / granularity;
-    //cout << "dx,dy = " << dx << " " << dy << endl;
     for (int i = 0; i < granularity; i++) {
       for (int j = 0; j < granularity; j++) {
 	Point<2> p(a[0]+i*dx+dx*0.5, a[1]+j*dy+dy*0.5);
-	//cout << "p = " << p << endl;
 	 for(typename InfiniteVector<double,Index>::const_iterator it2(coeffs.begin()),
 	    itend(coeffs.end()); it2 != itend; ++it2) {
 	   if (in_support(frame, it2.index(), p)) {
@@ -282,17 +280,13 @@ namespace FrameTL
 	 case 0: {
 	   approx -= f.value(p);
 	   approx *= approx * dx * dy;
-	   //cout << "approx = " << approx << endl;
-	   //cout << "res before = " << res << endl;
 	   res += approx;
-	   //cout << "res after = " << res << endl;
 	   approx = 0.;
 	   break;
 	 }
 	 case 1: {
 	   f.vector_value(p, values_grad_f);
 	   res += l2_norm_sqr(approx_der-values_grad_f) * dx * dy;
-	   //res += (approx_der[0]-values_grad_f[0])*(approx_der[0]-values_grad_f[0])*dx*dy;
 	   approx_der *= 0.;
 	   break;
 	 }
@@ -310,7 +304,6 @@ namespace FrameTL
     for (int i = 0; i < granularity; i++) {
       for (int j = 0; j < granularity; j++) {
 	Point<2> p(a[0]+i*dx+dx*0.5, a[1]+j*dy+dy*0.5);
-	//cout << "p = " << p << endl;
 	 for(typename InfiniteVector<double,Index>::const_iterator it2(coeffs.begin()),
 	    itend(coeffs.end()); it2 != itend; ++it2) {
 	   if (in_support(frame, it2.index(), p)) {
@@ -358,7 +351,6 @@ namespace FrameTL
     for (int i = 0; i < granularity; i++) {
       for (int j = 0; j < granularity; j++) {
 	Point<2> p(a[0]+i*dx+dx*0.5, a[1]+j*dy+dy*0.5);
-	//cout << "p = " << p << endl;
 	for(typename InfiniteVector<double,Index>::const_iterator it2(coeffs.begin()),
 	    itend(coeffs.end()); it2 != itend; ++it2) {
 	   if (in_support(frame, it2.index(), p)) {
@@ -401,7 +393,7 @@ namespace FrameTL
   }
 
   double
-  H_1_semi_norm_Lshaped(const Function<2>& f)
+  H_1_semi_norm_Lshaped(const Function<2>& gradient)
   {
     double res = 0.;
     // split L shaped into three equally large cubes and apply a composite midpoint rule
@@ -417,7 +409,7 @@ namespace FrameTL
     for (int i = 0; i < granularity; i++) {
       for (int j = 0; j < granularity; j++) {
 	Point<2> x(a[0]+i*dx+dx*0.5, a[1]+j*dy+dy*0.5);
-	f.vector_value(x,values);
+	gradient.vector_value(x,values);
 	res += ((values[0]*values[0])+(values[1]*values[1]))*dx*dy;
       }
     }
@@ -432,7 +424,7 @@ namespace FrameTL
     for (int i = 0; i < granularity; i++) {
       for (int j = 0; j < granularity; j++) {
 	Point<2> x(a[0]+i*dx+dx*0.5, a[1]+j*dy+dy*0.5);
-	f.vector_value(x,values);
+	gradient.vector_value(x,values);
 	res += ((values[0]*values[0])+(values[1]*values[1]))*dx*dy;
       }
     }
@@ -448,7 +440,7 @@ namespace FrameTL
     for (int i = 0; i < granularity; i++) {
       for (int j = 0; j < granularity; j++) {
 	Point<2> x(a[0]+i*dx+dx*0.5, a[1]+j*dy+dy*0.5);
-	f.vector_value(x,values);
+	gradient.vector_value(x,values);
 	res += ((values[0]*values[0])+(values[1]*values[1]))*dx*dy;
       }
     }

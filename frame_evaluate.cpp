@@ -230,14 +230,8 @@ namespace FrameTL
 	
 	approx -= f.value(p);
 	approx *= approx;
-// 	if (approx > 0.1) {
-// 	  cout << p << endl;
-// 	  cout << approx << endl;
-// 	  //abort();
-// 	}
-	//cout << "approx = " << approx << endl;
+
 	res += gauss_weights[k*N_Gauss+n]*approx;
-// 	cout << gauss_weights[k*N_Gauss+n] << endl;
 	approx = 0;
       }// end for
     }//end for
@@ -325,7 +319,7 @@ namespace FrameTL
 				values,
 				resolution);
    
-   return result; // gcc 2.95 does not like these two lines melted into one
+   return result;
  }
 
   template <class IBASIS>

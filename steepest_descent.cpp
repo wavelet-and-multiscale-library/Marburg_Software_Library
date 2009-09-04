@@ -6,89 +6,53 @@
 #include <adaptive/apply.h>
 #include <numerics/corner_singularity.h>
 #include <frame_evaluate.h>
+#include <poisson_1d_testcase.h>
 
 using std::set;
 
 namespace FrameTL{
 
-/*!
-*/
-template<class VALUE = double>
-class Singularity1D_RHS_2
-  : public Function<1, VALUE>
-{
-public:
-  Singularity1D_RHS_2() {};
-  virtual ~Singularity1D_RHS_2() {};
-  VALUE value(const Point<1>& p,
-	      const unsigned int component = 0) const
-  {
-    return -sin(3.*M_PI*p[0])*9.*M_PI*M_PI - 4.;
-  }
-  
-  void vector_value(const Point<1> &p,
-		    Vector<VALUE>& values) const { ; }
-  
-};
-
-/*!
-  special function with steep gradients
-  near the right end of the interval
-*/
-template<class VALUE = double>
-class Singularity1D_2
-  : public Function<1, VALUE>
-{
-public:
-  Singularity1D_2() {};
-  virtual ~Singularity1D_2() {};
-  VALUE value(const Point<1>& p,
-	      const unsigned int component = 0) const
-  {
-    if (0. <= p[0] && p[0] < 0.5)
-      return -sin(3.*M_PI*p[0]) + 2.*p[0]*p[0];
-
-    if (0.5 <= p[0] && p[0] <= 1.0)
-      return -sin(3.*M_PI*p[0]) + 2.*(1-p[0])*(1-p[0]);
-
-    return 0.;
-
-  }
-  
-  void vector_value(const Point<1> &p,
-		    Vector<VALUE>& values) const { ; }
-  
-};
-
-
-
   template <class PROBLEM>
   void steepest_descent_SOLVE(const PROBLEM& P,  const double epsilon,
-			      InfiniteVector<double, typename PROBLEM::Index>& u_epsilon,
 			      Array1D<InfiniteVector<double, typename PROBLEM::Index> >& approximations)
   {
+
+    // promal and dual spline orders of the wavelets
     const int d  = PRIMALORDER;
     const int dt = DUALORDER;
     typedef PBasis<d,dt> Basis1D;
   
-//     Point<2> origin;
-//     origin[0] = 0.0;
-//     origin[1] = 0.0;
+    //     Point<2> origin;
+    //     origin[0] = 0.0;
+    //     origin[1] = 0.0;
     
-//     CornerSingularity sing2D(origin, 0.5, 1.5);
-//     CornerSingularityRHS singRhs(origin, 0.5, 1.5);
+    //     CornerSingularity sing2D(origin, 0.5, 1.5);
+    //     CornerSingularityRHS singRhs(origin, 0.5, 1.5);
 
-//    Singularity1D_RHS_2<double> sing1D;
-//    Singularity1D_2<double> exactSolution1D;
+    //    Singularity1D_RHS_2<double> sing1D;
+    //    Singularity1D_2<double> exactSolution1D;
 
     unsigned int loops = 0;
     unsigned int niter = 0;
 
+    // the maximal level
     const int jmax = JMAX;
     typedef typename PROBLEM::Index Index;
 
+    // #####################################################################################
+    // We have to set up the various constants steering the decay of the accuracy.
+    // However, most theoretical estimates turn out to be too pessimistic. To obtain
+    // a good performance, we have to manually choose them more optimistic.
+    // #####################################################################################
+
+    // norm of the pseudo inverse
     double a_inv     = P.norm_Ainv();
+    
+    // spectral condition number
     double kappa     = P.norm_A()*a_inv;
+
+    // upper bound for the \ell_2-norm of the exact discrete solution in the range of the
+    // stiffness matrix
     double omega_i   = a_inv*P.F_norm();
     cout << "a_inv = " << a_inv << endl;
     cout << "omega_i = " << omega_i << endl;
@@ -130,14 +94,18 @@ public:
     unsigned int K   = (int) (log(epsilon/omega_i) / log(beta) + 1);
     //let M be such that lambda^M <= ((1-delta) / (1+delta)) * (beta / ((1+3*mu)*kappa))
     int M            = std::max((int) ((log( ((1-delta)/(1+delta)) * (beta / ((1+3.0*mu)*kappa)) )
-    			       / log(lambda)) + 1),1);
+					/ log(lambda)) + 1),1);
 
     cout << "K = " << K << endl;
     cout << "M = " << M << endl;
+    // #####################################################################################
+    // End setting up constants.
+    // #####################################################################################
 
-
+    // InfiniteVector's used in the iterative algorithm
     InfiniteVector<double, Index> w, tilde_r, help, f, Av;
 
+    // map's used for generating output
     map<double,double> log_10_residual_norms;
     map<double,double> degrees_of_freedom;
     map<double,double> asymptotic;
@@ -149,13 +117,17 @@ public:
     bool exit = 0;
     double time = 0.;
     double residual_norm = 5.0;
+
+    // variables for runtime measurement
     clock_t tstart, tend;
+    // get the current time
     tstart = clock();
 
     //EvaluateFrame<Basis1D,2,2> evalObj;
 
     double dd = 0.5;
 
+    // the adaptive algorithm
     for (unsigned int i = 1; i <= K; i++) {
       omega_i *= beta;
       double xi_i = omega_i / ((1+3.0*mu)*C3*M);
@@ -167,6 +139,10 @@ public:
       while ( nu_i > omega_i/((1+3.*mu)*a_inv)) {
 
 	InfiniteVector<double, Index> z_i;
+
+	// Instead of using APPLY only, we use a call of apply followed by an 
+	// immeadiate call of COARSE. This is done to prevent that the number
+	// of non-zeros in the iterates grow very quickly.
 	APPLY_COARSE(P, tilde_r, delta*l2_norm(tilde_r), z_i, 1.0e-6, jmax, CDD1);
 	//APPLY_COARSE(P, tilde_r, delta*l2_norm(tilde_r), z_i, 0.5, jmax, CDD1);
  	double g = z_i*tilde_r;
@@ -174,9 +150,9 @@ public:
 	  dd = (tilde_r*tilde_r)/g;
 	
 	w += dd*tilde_r;
-//  	InfiniteVector<double, Index> tmp;
-//  	w.COARSE(1.0/100.0*residual_norm, tmp);
-//  	w = tmp;
+	//  	InfiniteVector<double, Index> tmp;
+	//  	w.COARSE(1.0/100.0*residual_norm, tmp);
+	//  	w = tmp;
 
 
 	cout << "descent param = " << dd << endl;
@@ -190,14 +166,19 @@ public:
 	     << nu_i << " epsilon = " << omega_i/((1+3.*mu)*a_inv) << endl;
 	cout << "xi: " << xi_i << endl; 
 
-	// ############# output #############
+
+	// take the elapsed time
 	tend = clock();
 	time += ((double) (tend-tstart))/((double) CLOCKS_PER_SEC);
 
+	// #####################################################################################
+	// Approximate the EXACT residual using a sufficiently small precision
+	// and perform output.
+	// #####################################################################################
   	P.RHS(1.0e-6,f);
  	APPLY(P, w, 1.0e-6, Av, jmax, CDD1);
  	help = f-Av;
-	  
+
 	residual_norm = l2_norm(help);
 	double tmp1 = log10(residual_norm);
 	cout << "residual norm = " << residual_norm << endl;
@@ -216,7 +197,7 @@ public:
 	char name3[128];
 	char name4[128];
 
-
+	// setup filenames for output files for the one-dimensional cases
 #ifdef ONE_D
 	switch (d) {
 	case 2: {
@@ -245,6 +226,7 @@ public:
 	}
 	};
 #endif
+	// setup filenames for output files for the two-dimensional cases
 #ifdef TWO_D
 	switch (d) {
 	case 2: {
@@ -274,6 +256,8 @@ public:
 	};
 
 #endif
+	
+	// perform matlab output
 	std::ofstream os1(name1);
 	matlab_output(asymptotic,os1);
 	os1.close();
@@ -290,10 +274,15 @@ public:
 	matlab_output(weak_ell_tau_norms,os4);
 	os3.close();
 
-	
-	tstart = clock();
-	// ############# end output #############
+	// #####################################################################################
+	// End performing output.
+	// #####################################################################################
 
+	// restart the stopwatch.
+	tstart = clock();
+
+
+	// create MANUAL stopping criterion for the one-dimensional case
 #ifdef ONE_D
 	double tol=1.0;
 	switch (d) {
@@ -313,39 +302,52 @@ public:
 	if (residual_norm < tol || loops == 5000) {
 #endif
 
+	  // create MANUAL stopping criterion for the two-dimensional case
 #ifdef TWO_D
-	if (residual_norm < 0.01 || loops == 5000) {
+	  if (residual_norm < 0.01 || loops == 5000) {
 #endif
-	  u_epsilon = w;
-	  exit = true;
-	  break;
-	}
+	    approximations[P.basis().n_p()] = w;
+	    //u_epsilon = w;
+	    exit = true;
+	    break;
+	  }
 
-      }//end while
+	}//end while
       
-      cout << "#######################" << endl;
-      cout << "exiting inner loop" << endl;
-      cout << "#######################" << endl;
-      cout << "number of calls of APPLY = " << niter << endl;
-
-      if (exit)
-	break;
-//       cout << "tolerance for COARSE = " << ((3.*mu*omega_i)/(1+3.*mu)) << endl;
-//       InfiniteVector<double, Index> tmp;
-//       w.COARSE(residual_norm, tmp);
-//       w = tmp;
-    }// end for 
-    
-    
-    // collect final approximation and its local parts
-    approximations[P.basis().n_p()] = u_epsilon;
-    
-    for (int i = 0; i < P.basis().n_p(); i++) {
-      approximations[i].clear();
-      for (typename InfiniteVector<double, Index>::const_iterator it = u_epsilon.begin(), itend = u_epsilon.end();
-	   it != itend; ++it)
-	if (it.index().p() == i)
-	  approximations[i].set_coefficient(it.index(),*it);
+	cout << "#######################" << endl;
+	cout << "exiting inner loop" << endl;
+	cout << "#######################" << endl;
+	cout << "number of calls of APPLY = " << niter << endl;
+      
+	if (exit)
+	  break;
+      
+      
+	// #####################################################################################
+	// Perform the coarsening. This can usually be dropped when COARSE is always applied
+	// directly after the APPLY. On the theoretical side, however, it is still mandatory
+	// for this algorithm.
+	// #####################################################################################
+	//       cout << "tolerance for COARSE = " << ((3.*mu*omega_i)/(1+3.*mu)) << endl;
+	//       InfiniteVector<double, Index> tmp;
+	//       w.COARSE(residual_norm, tmp);
+	//       w = tmp;
+      }// end for 
+      
+      // #####################################################################################
+      // The algorithm is finished.
+      // Collect final approximation and its local parts
+      // #####################################################################################
+      
+      
+      for (int i = 0; i < P.basis().n_p(); i++) {
+	approximations[i].clear();
+	//for (typename InfiniteVector<double, Index>::const_iterator it = u_epsilon.begin(), itend = u_epsilon.end();
+	for (typename InfiniteVector<double, Index>::const_iterator it = approximations[P.basis().n_p()].begin(),
+	       itend = approximations[P.basis().n_p()].end();
+	     it != itend; ++it)
+	  if (it.index().p() == i)
+	    approximations[i].set_coefficient(it.index(),*it);
+      }
     }
   }
-}

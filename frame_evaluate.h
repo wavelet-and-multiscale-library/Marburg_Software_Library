@@ -20,14 +20,17 @@ using FrameTL::AggregatedFrame;
 
 namespace FrameTL
 {
-
+  /*!
+    Abstract base class for classes providing functions for the point
+    evaluation of single frame elements or linear combinations of frame elements.
+   */
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   class EvaluateFrame
   {
 
   public:    
     /*!
-      Evaluate a single primal/dual generator or wavelet \psi_lambda
+      Evaluate a single primal/dual generator or wavelet \f$\psi_\lambda\f$
       on a dyadic grid of the patch given by 'patch'.
     */
     virtual SampledMapping<DIM_d> evaluate(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
@@ -37,7 +40,7 @@ namespace FrameTL
 					   const int resolution) const = 0;
     
     /*!
-      Evaluate a single primal/dual generator or wavelet \psi_\lambda
+      Evaluate a single primal/dual generator or wavelet \f$\psi_\lambda\f$
       on a dyadic subgrid of its corresponding patch.
     */
     virtual SampledMapping<DIM_d> evaluate(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,

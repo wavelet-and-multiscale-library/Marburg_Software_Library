@@ -22,7 +22,7 @@ namespace FrameTL
 			const double epsilon,
 			const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& guess,
 			InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
-			const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_k_very_sparse,
+			const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v_k,
 			const int jmax,
 			const CompressionStrategy strategy)
   {
@@ -31,9 +31,9 @@ namespace FrameTL
     // 	       1.0/P.norm_Ainv(), P.norm_A(),
     // 	       jmax, strategy);
     
-    CDD1_LOCAL_SOLVE(P, patch, epsilon, guess, u_epsilon, u_k_very_sparse, 1., 1., jmax, strategy);
-
-
+    // We presume that the spectryl norm of the diagonal block of the stiffness matrix as well as
+    // the spectral norm of its inverse are 1.
+    CDD1_LOCAL_SOLVE(P, patch, epsilon, guess, u_epsilon, v_k, 1., 1., jmax, strategy);
   }
   
   template <class PROBLEM>
@@ -41,7 +41,7 @@ namespace FrameTL
 			const double epsilon,
 			const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& guess,
 			InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
-			const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_k_very_sparse,
+			const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v_k,
 			const double c1,
 			const double c2,
 			const int jmax,
@@ -58,10 +58,10 @@ namespace FrameTL
     typedef typename PROBLEM::WaveletBasis::Index Index;
     InfiniteVector<double,Index> w, f;
 //     P.RHS(1.0e-6, patch, f);
-//     APPLY(P, patch, u_k_very_sparse, 1.0e-6, w, jmax, CDD1);
+//     APPLY(P, patch, v_k, 1.0e-6, w, jmax, CDD1);
 
     P.RHS(epsilon, patch, f);
-    APPLY(P, patch, u_k_very_sparse, epsilon, w, jmax, CDD1);
+    APPLY(P, patch, v_k, epsilon, w, jmax, CDD1);
 
     params.F = l2_norm(f-w);
 
@@ -106,7 +106,7 @@ namespace FrameTL
     //P.RHS(2*params.q2*epsilon, F);
     
     P.RHS(2*params.q2*epsilon / 2., patch, f);
-    APPLY(P, patch, u_k_very_sparse, 2*params.q2*epsilon / 2., w, jmax, CDD1);
+    APPLY(P, patch, v_k, 2*params.q2*epsilon / 2., w, jmax, CDD1);
 
 // #ifdef FULL
 //     InfiniteVector<double,Index> tmp;

@@ -8,18 +8,22 @@
 #include <frame_evaluate.h>
 #include <cdd1_local.h>
 #include <error_H_scale.h>
+#include <poisson_1d_testcase.h>
 
 using std::set;
 
 namespace FrameTL
 {
 
+
+  // forward declaration
   template <class IBASIS, int DIM>
   double
   H_1_error_interval(const AggregatedFrame<IBASIS,DIM,DIM>& frame,
 		     const InfiniteVector<double, typename AggregatedFrame<IBASIS,DIM,DIM>::Index>& coeffs,
 		     const Function<1>& f);
-
+  
+  // forward declaration
   template <class IBASIS, int DIM>
   double
   error_H_scale_interval (const int order,
@@ -27,84 +31,9 @@ namespace FrameTL
 			  const InfiniteVector<double, typename AggregatedFrame<IBASIS,DIM,DIM>::Index>& coeffs,
 			  const Function<1>& f);
 
-
-  /*!
-   */
-  template<class VALUE = double>
-  class Singularity1D_RHS_2
-    : public Function<1, VALUE>
-  {
-  public:
-    Singularity1D_RHS_2() {};
-    virtual ~Singularity1D_RHS_2() {};
-    VALUE value(const Point<1>& p,
-		const unsigned int component = 0) const
-    {
-      return -sin(3.*M_PI*p[0])*9.*M_PI*M_PI - 4.;
-    }
-  
-    void vector_value(const Point<1> &p,
-		      Vector<VALUE>& values) const { ; }
-  
-  };
-
-  /*!
-    special function with steep gradients
-    near the right end of the interval
-  */
-  template<class VALUE = double>
-  class Singularity1D_2
-    : public Function<1, VALUE>
-  {
-  public:
-    Singularity1D_2() {};
-    virtual ~Singularity1D_2() {};
-    VALUE value(const Point<1>& p,
-		const unsigned int component = 0) const
-    {
-      if (0. <= p[0] && p[0] < 0.5)
-	return -sin(3.*M_PI*p[0]) + 2.*p[0]*p[0];
-
-      if (0.5 <= p[0] && p[0] <= 1.0)
-	return -sin(3.*M_PI*p[0]) + 2.*(1-p[0])*(1-p[0]);
-
-      return 0.;
-
-    }
-  
-    void vector_value(const Point<1> &p,
-		      Vector<VALUE>& values) const { ; }
-  
-  };
-
-  /*!
-  */
-  template<class VALUE = double>
-  class Singularity1D_2_prime
-    : public Function<1, VALUE>
-  {
-  public:
-    Singularity1D_2_prime() {};
-    virtual ~Singularity1D_2_prime() {};
-    VALUE value(const Point<1>& p,
-		const unsigned int component = 0) const
-    {
-
-      if (0. <= p[0] && p[0] < 0.5)
-	return -cos(3.*M_PI*p[0])*3*M_PI + 4.*p[0];
-
-      if (0.5 <= p[0] && p[0] <= 1.0)
-	return -cos(3.*M_PI*p[0])*3*M_PI - 4.*(1-p[0]);
-
-      return 0.;
-
-    }
-  
-    void vector_value(const Point<1> &p,
-		      Vector<VALUE>& values) const { ; }
-  
-  };
-
+  // #####################################################################################
+  // Some dummy test cases. (Only for testing purposes.)
+  // #####################################################################################
 
   /*!
    */
@@ -202,15 +131,24 @@ namespace FrameTL
     }
   
   };
+  // #####################################################################################
 
 
 
-
+  // A helper routine for the adaptive algorithm. It works for two types
+  // of domain coverings. The first one is the unit interval covered by two
+  // subintervals [0,1-OVERLAP] \cup [OVERLAP,1]. A typical choice is OVERLAP=0.7.
+  // The second is the L-shaped domain (-1,1)^2\setminus [0,1)^2 covered by
+  // two patches [-OVERLAP,1]\times[-1,0] \cup [-1,0]\times[-1,1].
+  // We take the sequence u and put into u1 those coefficients of u
+  // that belong to patch 1-i and that corrrespond to wavelets the supports of which
+  // nontrivially intersect the overlapping region.
+  // Moreover, we put into u2 all those coefficients of u that correspond to patch 1-i.
   template <class PROBLEM>
   void split (PROBLEM& P, const int i,
-		 const InfiniteVector<double, typename PROBLEM::Index>& u,
-		 InfiniteVector<double, typename PROBLEM::Index>& u1,
-		 InfiniteVector<double, typename PROBLEM::Index>& u2)
+	      const InfiniteVector<double, typename PROBLEM::Index>& u,
+	      InfiniteVector<double, typename PROBLEM::Index>& u1,
+	      InfiniteVector<double, typename PROBLEM::Index>& u2)
   {
     typedef typename PROBLEM::WaveletBasis::Support SuppType;
     u1.clear();
@@ -261,7 +199,16 @@ namespace FrameTL
 #endif
   }
 
-
+  // A helper routine for the adaptive algorithm. It works for the case
+  // of the rectangular ring-shaped domain as in Sect. 7.2.3 of Manuel's
+  // PhD thesis, i.e. (-1,2)^2\setminus[0,1]^2, covered with 4 congruent
+  // rectangles.
+  // We put into u_sparse those coefficients of u that correspond to a patch
+  // different from i and that correspond to wavelets not being fully
+  // supported in patch i.
+  // We put into u_very_sparse those coefficients of u that correspond to a patch
+  // different from i and that correspond to wavelets which intersect with patch i
+  // but which are not fully contained in it.
   template <class PROBLEM>
   void thin_out_ring (PROBLEM& P, const int i,
 		      const InfiniteVector<double, typename PROBLEM::Index>& u,
@@ -330,7 +277,14 @@ namespace FrameTL
   }
 
 
-
+  // A helper routine for the adaptive algorithm. It works for the case
+  // of the L-shaped domain (-1,1)^2\setminus[0,1)^2, covered with the two rectangles
+  // [-OVERLAP,1]\times[-1,0] \cup [-1,0]\times[-1,1].
+  // We put into u_sparse those coefficients of u that correspond to the patch
+  // 1-i and that correspond to wavelets not being fully supported in patch i.
+  // We put into u_very_sparse those coefficients of u that correspond to the patch
+  // 1-i and that correspond to wavelets which intersect with patch i
+  // but which are not fully contained in it.
   template <class PROBLEM>
   void thin_out (PROBLEM& P, const int i,
 		 const InfiniteVector<double, typename PROBLEM::Index>& u,
@@ -407,43 +361,7 @@ namespace FrameTL
     
   }
 
-
-  template <class PROBLEM>
-  double compute_exact_residual_norm (const PROBLEM& P,
-				      InfiniteVector<double, typename PROBLEM::Index>& u_k) {
-    typedef typename PROBLEM::Index Index;
-    typedef typename PROBLEM::WaveletBasis::IntervalBasis Basis1D;
-    typedef typename PROBLEM::WaveletBasis Frame;
-    const int jmax = JMAX;
-    set<Index> Lambda1;
-    for (Index lambda = FrameTL::first_generator<Basis1D,1,1,Frame>(&P.basis(), P.basis().j0());
-	 lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame>(&P.basis(), jmax); ++lambda) {
-      Lambda1.insert(lambda);
-    }
-    set<Index> Lambda2;
-    u_k.support(Lambda2);
-    SparseMatrix<double> A(Lambda1.size(), Lambda2.size());
-    WaveletTL::setup_stiffness_matrix(P, Lambda1, Lambda2, A);
-
-    // copy u_k in vector
-    Vector<double> U_k(u_k.size());
-    Vector<double> A_U_k(Lambda1.size());
-    unsigned int id = 0;
-    typename set<Index>::const_iterator it = Lambda2.begin();
-    for (; it != Lambda2.end(); ++it, ++id) {
-      U_k[id] = u_k.get_coefficient(*it);
-    }
-
-    Vector<double> F(Lambda1.size());    
-    WaveletTL::setup_righthand_side(P, Lambda1, F);
-
-    A.apply(U_k, A_U_k);
-    return l2_norm(F-A_U_k);
-
-  }
-
-
-  // delete all entries corresponding to patch i
+  // Delete all coefficients of u corresponding to patch i.
   template <class PROBLEM>
   void remove_i (const int i, InfiniteVector<double, typename PROBLEM::Index>& u)
   {
@@ -455,16 +373,22 @@ namespace FrameTL
     u.compress();
   }
 
+  
   template <class PROBLEM>
   void  MultSchw(const PROBLEM& P, const double epsilon,
 		 Array1D<InfiniteVector<double, typename PROBLEM::Index> >& approximations)
   {
-
+    // Exact solution and its first order derivative for the
+    // one dimensional Poisson equation. This shall be used
+    // for the computation of L_2- and H^1-errors.
 #ifdef ONE_D
     Singularity1D_2<double> exact1D;
     Singularity1D_2_prime<double> exact1D_prime;
 #endif
-    
+
+    // Exact solution and its gradient for the
+    // two dimensional Poisson equation. This shall be used
+    // for the computation of L_2- and H^1-errors.
 #ifdef TWO_D
     SimpleTestGradient<double> simple_sol_grad;
     SimpleTest<double> simple_sol;
@@ -485,15 +409,27 @@ namespace FrameTL
     int d  = Basis1D::primal_polynomial_degree();
     int dT = Basis1D::primal_vanishing_moments();
 
-
 #ifdef TWO_D
 #ifdef RINGDOMAIN
-    const double mu = 4.0*1.6544; // energy norm of the exact solution
+    // Energy norm of the exact solution of the Poisson equation
+    // in the ring-shaped domain.
+    // 1.6544 is the estimate for the classical corner singularity.
+    // Since we have four of them, we simply take 4.0*1.6544.
+    const double mu = 4.0*1.6544;
 #else
 #ifdef BIHARMONIC
-    const double mu = H_2_semi_norm_singularity; // H^2 semi-norm of exact solution
+    // H^2 semi-norm of exact solution.
+    // H_2_semi_norm_singularity is a macro defined in the test file
+    // from where this routine is called. The estimate has been
+    // computed i matlab using the .m-file estim_H2_seminorm_biharmL.m
+    // in the directory diss/numerics/plotscripts. There, from a
+    // plot of the solution, using a difference formula, the H^2-seminorm
+    // has been estimated.
+    const double mu = H_2_semi_norm_singularity;
 #else
-    const double mu = 1.6544; // energy norm of the exact solution
+    // Energy norm of the exact solution of the Poisson equation
+    // in the L-shaped domain.
+    const double mu = 1.6544;
 #endif
 #endif
     const double M = 1.0; // we choose the most optimistic case
@@ -512,7 +448,9 @@ namespace FrameTL
     // (d,dt) = (4,4) jmin = 4
     //const double M = sqrt(12.3335);
 
-
+    // Next we have to set up the error reduction rate of the iterative solver.
+    // Instead of using theoretical upper bounds, we work with manually chosen
+    // values gained from some experiments with the full system matrix.
     //const double rho = sqrt(1 - 1.0/4.0); // [Xu92] Theorem 4.4 with \omega_1=1, K_0 = K_1=1
 #ifdef RINGDOMAIN
     const double rho = 0.2;
@@ -524,7 +462,9 @@ namespace FrameTL
     //const double rho = 0.1;
 #endif
 #ifdef ONE_D
-    const double mu = 7.44609; // = energy norm of the exact solution
+    // Energy norm of the exact solution of the Poisson equation
+    // from eq. (4.4.2) in Manuel's PhD thesis.
+    const double mu = 7.44609; 
     const double M = 1.0; // we choose the most optimistic case
 
     // (d,dt) = (2,2)
@@ -539,17 +479,27 @@ namespace FrameTL
     // (d,dt) = (4,4)
     //const double M = sqrt(5.62803); // spectral radius of stiffness matrix
 
+    // Next we have to set up the error reduction rate of the iterative solver.
+    // Instead of using theoretical upper bounds, we work with manually chosen
+    // values gained from some experiments with the full system matrix.
     //const double rho = sqrt(1 - 1.0/4.0); // [Xu92] Theorem 4.4 with \omega_1=1, K_0 = K_1=1
     const double rho = 0.1837;
 #endif
 
+    // #####################################################################################
+    // Setup of constants.
+    // #####################################################################################
     double rho_1 = pow(rho, 1./P.basis().n_p());
     const double C = 0.5 * rho_1*((1./rho)-1) / (1-rho_1);
 
     const double sigma = std::max(1./M, C + 1./M) + 0.1;//10.0
     cout << "sigma = " << sigma << endl; 
     const int K = std::max(1,(int)ceil(log(1.0/(2.0 * M * sigma)) / log(rho)));
+    // #####################################################################################
 
+    // #####################################################################################
+    // We manually set the outer loop index L instead of taking the theoretical one.
+    // #####################################################################################
 #ifdef ONE_D
     int L;
     switch (d) {
@@ -595,14 +545,18 @@ namespace FrameTL
 	 << "sigma = " << sigma << endl
 	 << "K = " << K << endl
 	 << "L = " << L << endl;
-    
+    // #####################################################################################
+    // End of constant setup.
+    // #####################################################################################
+
+    // InfiniteVector's used in the adaptive algorithm
     InfiniteVector<double, Index> f, w, r, tmp, tmp_w;
     InfiniteVector<double, Index> u_k, u_k_sparse,u_k_very_sparse;
     InfiniteVector<double, Index> precond_r_i;
 
     Array1D<InfiniteVector<double, Index> > xks(P.basis().n_p()); // stores local approximations which are used as starting vectors
                                                                   // for the next cycle of local solves
-
+    // map's used for generating output
     map<double,double> log_10_H1_error;
     map<double,double> log_10_H1_error_time;
     map<double,double> log_10_L2_error;
@@ -613,13 +567,19 @@ namespace FrameTL
     map<double,double> rho_estimates;
     map<double,double> weak_ell_tau_norms;
 
+    // number of patches
     const int m = P.basis().n_p();
     int k = 0;
 
+    // variables for runtime measurement
     double time = 0.;
     clock_t tstart, tend;
     tstart = clock();
     double local_eps = 1.0;
+
+    // #####################################################################################
+    // The adaptive algorithm.
+    // #####################################################################################
     for (int l = 1; l < L; l++) {
       //for (int p = 2; p <= K; p++) {// THAT WAS USED FOR THE 2D PLAIN DD CASE!!!
 	for (int p = 1; p <= K; p++) {
@@ -628,6 +588,10 @@ namespace FrameTL
 	  cout << "################################" << endl;
 	  cout << "number of iteration = " << k << endl;
 	  cout << "################################" << endl;
+
+	  // Setup tolerance for the solution of the local problems.
+	  // This needs to be manually tuned not to end up with
+	  // slow performance.
 #ifdef RINGDOMAIN
  	  local_eps = mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*pow(rho,p)/(m*K)*10;
 #else
@@ -645,32 +609,51 @@ namespace FrameTL
 	  tstart = clock();
 
 	  precond_r_i.clear();
-	  // ####### solution of local problem #######
 
+	  
+	  // #####################################################################################
+	  // Now follows the solution of the local problems.
+	  // #####################################################################################
 	  set<Index> Lambda_i;
-#if 1
+	  
+#if 1 // in this branch we perform the adaptive algorithm
 #ifdef SPARSE
+
 #ifdef RINGDOMAIN
+	  // Preparation for the ring-shaped domain case.
 	  thin_out_ring(P, i, u_k, u_k_sparse, u_k_very_sparse);
 #else
+	  // Preparation for the L-shaped domain case.
 	  thin_out(P, i, u_k, u_k_sparse, u_k_very_sparse);
 #endif
 #endif
 	  // CDD1
 	  cout << "entering CDD solver..." << endl;
 #ifdef SPARSE
+	  // Solution of the local problem in case we use the sparse version of the algorithm
+	  // as proposed in Stevenson, Werner 2009, where it is proposed to throw away
+	  // all degrees of freedom that are contained in the current subdomain before the local solve.
 	  CDD1_LOCAL_SOLVE(P, i, local_eps, xks[i], precond_r_i, u_k_very_sparse, jmax, CDD1);
 	  //CDD1_LOCAL_SOLVE(P, i, local_eps, xks[i], precond_r_i, u_k_very_sparse, jmax, CDD1);
 #endif
 #ifdef FULL
+	  // Solution of the local problem in case we use a plain multiplicative Schwarz adaptive 
+	  // method, i.e., without removing degrees of freedom in the overlapping region before 
+	  // the local solve as in the SPARSE-branch.
 	  //remove_i<PROBLEM>(i, u_k);
 	  CDD1_LOCAL_SOLVE(P, i, local_eps, xks[i], precond_r_i, u_k, jmax, CDD1); // THAT WAS USED FOR THE 2D CASE
 	  //CDD1_LOCAL_SOLVE(P, i, 10.0*local_eps, xks[i], precond_r_i, u_k, jmax, CDD1); // THAT WAS USED FOR THE 1D CASE
 #endif
 	  cout << "CDD 1 solve completed, size of output is " << precond_r_i.size() << endl;
 
+	  // Store the calculated local solution. These are always used as the initial guess in the
+	  // next call of CDD1_LOCAL_SOLVE.
 	  xks[i] = precond_r_i;
-#else // ######################################################################################################
+	  // ######################################################################################################
+#else // In this branch we use a different strategy for the solution of the local problem: Approximate the right-hand side
+      // for the local problem, apply COARSE to it, take the support of the right-hand side as Galerkin index set,
+      // and approximate the Galerkin solution with the cg solver.
+
 	  // approximate right hand side for local problem
 	  P.RHS(local_eps, i, f);
 	  cout << "fsize = " << f.size() << endl;
@@ -715,36 +698,44 @@ namespace FrameTL
 		 it != itend; ++it, ++id)
 	    precond_r_i.set_coefficient(*it, xk[id]);
 	  }
-#endif // ######################################################################################################
-	  
+#endif 
+	  // ######################################################################################################  
+
+	  // #####################################################################################
+	  // setup next global iterate
+	  // #####################################################################################
 #ifdef SPARSE
 	  u_k = precond_r_i + u_k_sparse;
 #endif
 #ifdef FULL
 	  u_k = precond_r_i + u_k;
 #endif
-
 	  cout << "degrees of freedom: " << u_k.size() << endl;
+	  // #####################################################################################
+
+
  	  xks[i].clear();
  	  xks[i] = precond_r_i;
-	  	  
       	}// end loop over patches
 	cout << "############## full cycle of local solves completed ##############"<< endl;
 	
-      }// end loop K
+	}// end loop p
+
+	// setup tolerance for coarsening
 #ifdef RINGDOMAIN
       double coarse_tol = (sigma - 1./M)*2.0*pow(rho,K)*mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*0.1;
 #else
       double coarse_tol = (sigma - 1./M)*2.0*pow(rho,K)*mu*pow(2.0*pow(rho,K)*M*sigma,l-1);
 #endif
-
       cout << "tolerance for coarsening = " << coarse_tol << endl;
       cout << "norm of u_k = " << l2_norm(u_k) << endl;
       u_k.COARSE(coarse_tol, tmp_w);
       u_k = tmp_w;
       cout << "degrees of freedom after coarsening: " << u_k.size() << endl;
 
-      // ############# output #############
+      // #####################################################################################
+      //  Approximate global EXACT residual and perform output.
+      // #####################################################################################
       tend = clock();
       time += ((double) (tend-tstart))/((double) CLOCKS_PER_SEC);
       
@@ -752,7 +743,6 @@ namespace FrameTL
       tmp.scale(&P,-1);
 
       //compute global residual
-      
       P.RHS(1.0e-8, f);
       cout << "fsize exact res = " << f.size() << endl;
       tmp_w.clear(); 
@@ -771,8 +761,8 @@ namespace FrameTL
       char name6[128];
       char name7[128];
 
+      	// setup filenames for output files for the one-dimensional cases
 #ifdef ONE_D
-    
       switch (d) {
       case 2: {
 	weak_ell_tau_norms[k] = u_k.weak_norm(1./1.5);// (d,dT)=(2,2)=1./1.5 (d,dT)=(3,3)=1./2.5, (d,dT)=(4,6)=1./3.5
@@ -808,6 +798,8 @@ namespace FrameTL
 	break;
       }
       };
+
+      // perform matlab output
       log_10_residual_error[log10(u_k.size())] = log10(l2_norm(f-tmp_w));
       std::ofstream os2c(name1);
       matlab_output(log_10_residual_error,os2c);
@@ -847,7 +839,7 @@ namespace FrameTL
 
 #endif
 	
-	
+	// setup filenames for output files for the two-dimensional cases
 #ifdef TWO_D
       switch (d) {
       case 2: {
@@ -892,6 +884,8 @@ namespace FrameTL
 	break;
       }
       };
+
+      // perform matlab output
       log_10_residual_error[log10(u_k.size())] = log10(l2_norm(f-tmp_w));
       std::ofstream os2c(name1);
       matlab_output(log_10_residual_error,os2c);
@@ -930,11 +924,19 @@ namespace FrameTL
 
 
 #endif
-       tstart = clock();
-       // ############# end output #############
+      // #####################################################################################
+      //  End performing output
+      // #####################################################################################
+
+      tstart = clock();
+
 
     }// end loop L
-    
+
+
+    // #####################################################################################
+    // The adaptive algorithm is finished here.
+    // #####################################################################################    
     
     // collect final approximation and its local parts
     approximations[P.basis().n_p()] = u_k;
@@ -951,6 +953,40 @@ namespace FrameTL
 
 
   }
+
+//   template <class PROBLEM>
+//   double compute_exact_residual_norm (const PROBLEM& P,
+// 				      InfiniteVector<double, typename PROBLEM::Index>& u_k) {
+//     typedef typename PROBLEM::Index Index;
+//     typedef typename PROBLEM::WaveletBasis::IntervalBasis Basis1D;
+//     typedef typename PROBLEM::WaveletBasis Frame;
+//     const int jmax = JMAX;
+//     set<Index> Lambda1;
+//     for (Index lambda = FrameTL::first_generator<Basis1D,1,1,Frame>(&P.basis(), P.basis().j0());
+// 	 lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame>(&P.basis(), jmax); ++lambda) {
+//       Lambda1.insert(lambda);
+//     }
+//     set<Index> Lambda2;
+//     u_k.support(Lambda2);
+//     SparseMatrix<double> A(Lambda1.size(), Lambda2.size());
+//     WaveletTL::setup_stiffness_matrix(P, Lambda1, Lambda2, A);
+
+//     // copy u_k in vector
+//     Vector<double> U_k(u_k.size());
+//     Vector<double> A_U_k(Lambda1.size());
+//     unsigned int id = 0;
+//     typename set<Index>::const_iterator it = Lambda2.begin();
+//     for (; it != Lambda2.end(); ++it, ++id) {
+//       U_k[id] = u_k.get_coefficient(*it);
+//     }
+
+//     Vector<double> F(Lambda1.size());    
+//     WaveletTL::setup_righthand_side(P, Lambda1, F);
+
+//     A.apply(U_k, A_U_k);
+//     return l2_norm(F-A_U_k);
+
+//   }
 
    template <class PROBLEM>
    void  adaptive_multiplicative_Schwarz_SOLVE(const PROBLEM& P, const double epsilon,

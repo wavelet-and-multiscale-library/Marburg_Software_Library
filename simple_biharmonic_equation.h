@@ -79,8 +79,8 @@ namespace FrameTL
       @param jmax The maximal level of resolution that is considered.
      */
     SimpleBiharmonicEquation(const Functional<IBASIS,DIM>* rhs,
-		       const AggregatedFrame<IBASIS,DIM>* frame,
-		       const int jmax);
+			     const AggregatedFrame<IBASIS,DIM>* frame,
+			     const int jmax);
 
     /*!
       The frame type.

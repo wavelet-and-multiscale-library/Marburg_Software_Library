@@ -9,12 +9,13 @@
 #include <cdd1_local.h>
 #include <error_H_scale.h>
 #include <parallel.h>
+#include <poisson_1d_testcase.h>
 
 using std::set;
 
 namespace FrameTL
 {
-
+  // forward declaration
   template <class IBASIS, int DIM>
   double
   H_1_error_interval(const AggregatedFrame<IBASIS,DIM,DIM>& frame,
@@ -28,84 +29,9 @@ namespace FrameTL
 			  const InfiniteVector<double, typename AggregatedFrame<IBASIS,DIM,DIM>::Index>& coeffs,
 			  const Function<1>& f);
 
-
-  /*!
-   */
-  template<class VALUE = double>
-  class Singularity1D_RHS_2
-    : public Function<1, VALUE>
-  {
-  public:
-    Singularity1D_RHS_2() {};
-    virtual ~Singularity1D_RHS_2() {};
-    VALUE value(const Point<1>& p,
-		const unsigned int component = 0) const
-    {
-      return (-sin(3.*M_PI*p[0])*9.*M_PI*M_PI - 4.);
-    }
-  
-    void vector_value(const Point<1> &p,
-		      Vector<VALUE>& values) const { ; }
-  
-  };
-
-  /*!
-    special function with steep gradients
-    near the right end of the interval
-  */
-  template<class VALUE = double>
-  class Singularity1D_2
-    : public Function<1, VALUE>
-  {
-  public:
-    Singularity1D_2() {};
-    virtual ~Singularity1D_2() {};
-    VALUE value(const Point<1>& p,
-		const unsigned int component = 0) const
-    {
-      if (0. <= p[0] && p[0] < 0.5)
-	return -sin(3.*M_PI*p[0]) + 2.*p[0]*p[0];
-
-      if (0.5 <= p[0] && p[0] <= 1.0)
-	return -sin(3.*M_PI*p[0]) + 2.*(1-p[0])*(1-p[0]);
-
-      return 0.;
-
-    }
-  
-    void vector_value(const Point<1> &p,
-		      Vector<VALUE>& values) const { ; }
-  
-  };
-
-  /*!
-  */
-  template<class VALUE = double>
-  class Singularity1D_2_prime
-    : public Function<1, VALUE>
-  {
-  public:
-    Singularity1D_2_prime() {};
-    virtual ~Singularity1D_2_prime() {};
-    VALUE value(const Point<1>& p,
-		const unsigned int component = 0) const
-    {
-
-      if (0. <= p[0] && p[0] < 0.5)
-	return -cos(3.*M_PI*p[0])*3*M_PI + 4.*p[0];
-
-      if (0.5 <= p[0] && p[0] <= 1.0)
-	return -cos(3.*M_PI*p[0])*3*M_PI - 4.*(1-p[0]);
-
-      return 0.;
-
-    }
-  
-    void vector_value(const Point<1> &p,
-		      Vector<VALUE>& values) const { ; }
-  
-  };
-
+  // #####################################################################################
+  // Some dummy test cases. (Only for testing purposes.)
+  // #####################################################################################
 
   /*!
    */
@@ -203,63 +129,18 @@ namespace FrameTL
     }
   
   };
+  // #####################################################################################
 
-  template <class PROBLEM>
-  void split (PROBLEM& P, const int i,
-		 const InfiniteVector<double, typename PROBLEM::Index>& u,
-		 InfiniteVector<double, typename PROBLEM::Index>& u1,
-		 InfiniteVector<double, typename PROBLEM::Index>& u2)
-  {
-    typedef typename PROBLEM::WaveletBasis::Support SuppType;
-    u1.clear();
-    u2.clear();
-    typename InfiniteVector<double, typename PROBLEM::Index>::const_iterator it = u.begin();
-#ifdef ONE_D
-    if (i==0) {
-      for (; it != u.end(); ++it) {
-	const SuppType* supp = &(P.basis().all_patch_supports[it.index().number()]);
-	if ((it.index().p() == 1) && (supp->a[0] < OVERLAP))
-	  u1.set_coefficient(it.index(), *it);
-	if (it.index().p() == 1)
-	  u2.set_coefficient(it.index(), *it);
-      }
-    }
-    else if (i==1) {
-      for (; it != u.end(); ++it) {
-	const SuppType* supp = &(P.basis().all_patch_supports[it.index().number()]);
-	if ((it.index().p() == 0) && (supp->b[0] > 1-OVERLAP))
-	  u1.set_coefficient(it.index(), *it);
-	
-	if (it.index().p() == 0)
-	  u2.set_coefficient(it.index(), *it);
-      }
-    }
-#endif
-#ifdef TWO_D
-    if (i==0) {
-      for (; it != u.end(); ++it) {
-	const SuppType* supp = &(P.basis().all_patch_supports[it.index().number()]);
-	if ((it.index().p() == 1) && (supp->b[0] > -OVERLAP) && (supp->a[1] < 0.)) {
-	  u1.set_coefficient(it.index(), *it);
-	}
-	if (it.index().p() == 1)
-	  u2.set_coefficient(it.index(), *it);
-      }
-    }
-    else if (i==1) {
-      for (; it != u.end(); ++it) {
-	const SuppType* supp = &(P.basis().all_patch_supports[it.index().number()]);
-	if ((it.index().p() == 0) && (supp->a[0] < 0.)) {
-	  u1.set_coefficient(it.index(), *it);
-	}
-	if (it.index().p() == 0)
-	  u2.set_coefficient(it.index(), *it);
-      }
-    }
-#endif
-  }
-
-
+  // A helper routine for the adaptive algorithm. It works for the case
+  // of the rectangular ring-shaped domain as in Sect. 7.2.3 of Manuel's
+  // PhD thesis, i.e. (-1,2)^2\setminus[0,1]^2, covered with 4 congruent
+  // rectangles.
+  // We put into u_sparse those coefficients of u that correspond to a patch
+  // different from i and that correspond to wavelets not being fully
+  // supported in patch i.
+  // We put into u_very_sparse those coefficients of u that correspond to a patch
+  // different from i and that correspond to wavelets which intersect with patch i
+  // but which are not fully contained in it.
   template <class PROBLEM>
   void thin_out_ring (PROBLEM& P, const int i,
 		      const InfiniteVector<double, typename PROBLEM::Index>& u,
@@ -327,8 +208,14 @@ namespace FrameTL
 
   }
 
-
-
+  // A helper routine for the adaptive algorithm. It works for the case
+  // of the L-shaped domain (-1,1)^2\setminus[0,1)^2, covered with the two rectangles
+  // [-OVERLAP,1]\times[-1,0] \cup [-1,0]\times[-1,1].
+  // We put into u_sparse those coefficients of u that correspond to the patch
+  // 1-i and that correspond to wavelets not being fully supported in patch i.
+  // We put into u_very_sparse those coefficients of u that correspond to the patch
+  // 1-i and that correspond to wavelets which intersect with patch i,
+  // but which are not fully contained in it.
   template <class PROBLEM>
   void thin_out (PROBLEM& P, const int i,
 		 const InfiniteVector<double, typename PROBLEM::Index>& u,
@@ -459,43 +346,7 @@ namespace FrameTL
     
   }
 
-
-  template <class PROBLEM>
-  double compute_exact_residual_norm (const PROBLEM& P,
-				      InfiniteVector<double, typename PROBLEM::Index>& u_k) {
-    typedef typename PROBLEM::Index Index;
-    typedef typename PROBLEM::WaveletBasis::IntervalBasis Basis1D;
-    typedef typename PROBLEM::WaveletBasis Frame;
-    const int jmax = JMAX;
-    set<Index> Lambda1;
-    for (Index lambda = FrameTL::first_generator<Basis1D,1,1,Frame>(&P.basis(), P.basis().j0());
-	 lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame>(&P.basis(), jmax); ++lambda) {
-      Lambda1.insert(lambda);
-    }
-    set<Index> Lambda2;
-    u_k.support(Lambda2);
-    SparseMatrix<double> A(Lambda1.size(), Lambda2.size());
-    WaveletTL::setup_stiffness_matrix(P, Lambda1, Lambda2, A);
-
-    // copy u_k in vector
-    Vector<double> U_k(u_k.size());
-    Vector<double> A_U_k(Lambda1.size());
-    unsigned int id = 0;
-    typename set<Index>::const_iterator it = Lambda2.begin();
-    for (; it != Lambda2.end(); ++it, ++id) {
-      U_k[id] = u_k.get_coefficient(*it);
-    }
-
-    Vector<double> F(Lambda1.size());    
-    WaveletTL::setup_righthand_side(P, Lambda1, F);
-
-    A.apply(U_k, A_U_k);
-    return l2_norm(F-A_U_k);
-
-  }
-
-
-  // delete all entries corresponding to patch i
+  // Delete all coefficients of u corresponding to patch i.
   template <class PROBLEM>
   void remove_i (const int i, InfiniteVector<double, typename PROBLEM::Index>& u)
   {
@@ -512,11 +363,16 @@ namespace FrameTL
 		 Array1D<InfiniteVector<double, typename PROBLEM::Index> >& approximations)
   {
 
+    // Exact solution and its first order derivative for the
+    // one dimensional Poisson equation. This shall be used
+    // for the computation of L_2- and H^1-errors.
 #ifdef ONE_D
     Singularity1D_2<double> exact1D;
     Singularity1D_2_prime<double> exact1D_prime;
 #endif
-    
+    // Exact solution and its gradient for the
+    // two dimensional Poisson equation. This shall be used
+    // for the computation of L_2- and H^1-errors.
 #ifdef TWO_D
     Point<2> origin;
     origin[0] = 0.0;
@@ -537,8 +393,14 @@ namespace FrameTL
 
 #ifdef TWO_D
 #ifdef RINGDOMAIN
+    // Energy norm of the exact solution of the Poisson equation
+    // in the ring-shaped domain.
+    // 1.6544 is the estimate for the classical corner singularity.
+    // Since we have four of them, we simply take 4.0*1.6544.
     const double mu = 4.0*1.6544; // energy norm of the exact solution
 #else
+    // Energy norm of the exact solution of the Poisson equation
+    // in the L-shaped domain.
     const double mu = 1.6544; // energy norm of the exact solution
 #endif
     const double M = 1.0; // we choose the most optimistic case
@@ -558,9 +420,10 @@ namespace FrameTL
     // (d,dt) = (4,4) jmin = 4
     //const double M = sqrt(12.3335);
 
-
+    // Next we have to set up the error reduction rate of the iterative solver.
+    // Instead of using theoretical upper bounds, we work with manually chosen
+    // values gained from some experiments with the full system matrix.
     //const double rho = sqrt(1 - 1.0/4.0); // [Xu92] Theorem 4.4 with \omega_1=1, K_0 = K_1=1
-
 #ifdef RINGDOMAIN
     const double rho = 0.2;
 #else
@@ -571,7 +434,9 @@ namespace FrameTL
 #endif
 
 #ifdef ONE_D
-    const double mu = 7.44609; // = energy norm of the exact solution
+    // Energy norm of the exact solution of the Poisson equation
+    // from eq. (4.4.2) in Manuel's PhD thesis.
+    const double mu = 7.44609;
     const double M = 1.0; // we choose the most optimistic case
 
     // (d,dt) = (2,2)
@@ -589,13 +454,22 @@ namespace FrameTL
     //const double rho = sqrt(1 - 1.0/4.0); // [Xu92] Theorem 4.4 with \omega_1=1, K_0 = K_1=1
     const double rho = 0.1837;
 #endif
+
+    // number of patches
     const int m = P.basis().n_p();
+
+    // #####################################################################################
+    // Setup of constants.
+    // #####################################################################################
     const double C = m;
 
     const double sigma = std::max(1./M, C + 1./M) + 0.1;//10.0
     const int K = std::max(1,(int)ceil(log(1.0/(2.0 * M * sigma)) / log(rho)));
+    // #####################################################################################
 
-
+    // #####################################################################################
+    // We manually set the outer loop index L instead of taking the theoretical one.
+    // #####################################################################################
 #ifdef ONE_D
     int L;
     switch (d) {
@@ -641,7 +515,11 @@ namespace FrameTL
 	 << "sigma = " << sigma << endl
 	 << "K = " << K << endl
 	 << "L = " << L << endl;
+    // #####################################################################################
+    // End of constant setup.
+    // #####################################################################################
 
+    // InfiniteVector's used in the adaptive algorithm
     InfiniteVector<double, Index> f, w, r, tmp, tmp2;
     InfiniteVector<double, Index> u_k, u_k_sparse,u_k_very_sparse;
     InfiniteVector<double, Index> precond_r_i;
@@ -649,7 +527,8 @@ namespace FrameTL
     Array1D<InfiniteVector<double, Index> > xks(m); // stores local approximations which are used as starting vectors
                                                                   // for the next cycle of local solves
     Array1D<InfiniteVector<double, Index> > uks(m);
-
+    
+    // map's used for generating output
     map<double,double> log_10_H1_error;
     map<double,double> log_10_H1_error_time;
     map<double,double> log_10_L2_error;
@@ -664,24 +543,43 @@ namespace FrameTL
 #ifdef RINGDOMAIN
     const double alpha = 0.5;
 #else
+    // if the relaxation parameter is chosen equal to 1/m, then
+    // the right-hand sides for the local auxiliary problems
+    // are as sparse as for the multiplicative algorithm, cf. Manuel's
+    // PhD thesis page 165/166 and Remark 6.4.
     const double alpha = 1.0/m; // 0.2
 #endif
+    
+    // Get the process id of the current processor.
+    // We need to have m processors, so that the id's are 0,...m-1.
     int i = MPI::COMM_WORLD.Get_rank();
 
     int k = 0;
 
+    // variables for runtime measurement
     double time = 0.;
     clock_t tstart, tend;
     tstart = clock();
     double local_eps = 1.0;
 
+    // Syncronize all processors.
+    // Each processor stops at this point and waits until all processors
+    // have reached this barrier.
     MPI::COMM_WORLD.Barrier();
+
+    // #####################################################################################
+    // The adaptive algorithm.
+    // #####################################################################################
     for (int l = 1; l < L; l++) {
       for (int p = 1; p <= K; p++) {
 	k = (l-1)*m*K+(p-1)*m+i+1;
 	cout << "################################" << endl;
 	cout << "number of iteration = " << k << endl;
 	cout << "################################" << endl;
+
+	// Setup tolerance for the solution of the local problems.
+	// This needs to be manually tuned not to end up with
+	// slow performance.
 #ifdef RINGDOMAIN
 	local_eps = 10.0  * mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*pow(rho,p)/(alpha*m*K);
 #else
@@ -690,10 +588,11 @@ namespace FrameTL
 	cout << "tolerance for solution of local problem = " << local_eps << endl;
 	precond_r_i.clear();
 	
-	// ####### solution of local problem #######
 #ifdef RINGDOMAIN
+	  // Preparation for the ring-shaped domain case.
 	thin_out_ring(P, i, u_k, u_k_sparse, u_k_very_sparse);
 #else
+	// Preparation for the L-shaped domain case.
 	thin_out(P, i, u_k, u_k_sparse, u_k_very_sparse);
 #endif
 	tmp = u_k-u_k_sparse;
@@ -705,39 +604,54 @@ namespace FrameTL
 	// 	  tmp=u_k-((1./(m*alpha))*(tmp-u_k_sparse));
 	
 	cout << "entering CDD solver..." << endl;
+
+	// Solution of the local problem in case we use the sparse version of the algorithm
+	// as proposed Manuel's PhD thesis, where it is proposed to throw away
+	// all degrees of freedom that are contained in the current subdomain before the local solve.
 #ifdef RINGDOMAIN
 	CDD1_LOCAL_SOLVE(P, i, local_eps, xks[i], precond_r_i, tmp, jmax, CDD1);
 #else
 	CDD1_LOCAL_SOLVE(P, i, local_eps, xks[i], precond_r_i, tmp, jmax, CDD1);
 #endif
+	// Store the calculated local solution. These are always used as the initial guess in the
+	// next call of CDD1_LOCAL_SOLVE.
 	xks[i] = precond_r_i;
+
+	  // setup global(!) intermediate approximation
 	uks[i] = u_k_sparse + (m*alpha*precond_r_i);
-	xks[i] = precond_r_i;
+	//xks[i] = precond_r_i;
 	
 	tmp.clear();
+
+	// syncronize processors after they have solved their local problem
 	MPI::COMM_WORLD.Barrier();
 	if (i!=0) {
-	  // all slaves send the local contribution to master
+	  // All slaves send the global intermediate approximation to the master
+	  // processor with rank 0.
 	  send_to_Master<PROBLEM>(uks[i]);
 	}
 	else {
-	  // master receives all local contributions and merges them
-	  // into 'tmp', which is the same as summing up the uks[i] over i \neq 0
+	  // The master receives all local contributions and merges them
+	  // into 'tmp', which means that we sum up the uks[i] over i \neq 0.
 	  receive_all_parts(P, tmp);
 	}
+
+	// syncronize (maybe this is used too frequently)
 	MPI::COMM_WORLD.Barrier();
-	// master adds its own contribution
+	// The master adds its own contribution.
 	if (i==0) {
 	  tmp = tmp + uks[0];
 	  u_k = (1./m)*tmp;
 	}
- 	// now pass new global approximation to all slaves
+ 	// Now pass new global approximation to all slaves.
 	MPI::COMM_WORLD.Barrier();
  	broadcast_vec_from_Master(P, u_k);
 	MPI::COMM_WORLD.Barrier();
 
 	cout << "degrees of freedom: " << u_k.size() << endl;
       }
+
+      // setup tolerance for coarsening
 #ifdef RINGDOMAIN
       double coarse_tol = (sigma - 1./M)*2.0*pow(rho,K)*mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*0.1;
 #else
@@ -748,19 +662,27 @@ namespace FrameTL
       u_k.COARSE(coarse_tol, tmp2);
       u_k = tmp2;
       cout << "degrees of freedom after coarsening: " << u_k.size() << endl;
+
+
+      // #####################################################################################
+      // Approximate global EXACT residual and perform output.
+      // #####################################################################################
       if (i==0) {
-	// ############# output #############
 	tend = clock();
 	time += ((double) (tend-tstart))/((double) CLOCKS_PER_SEC);
 	
 	tmp = u_k;
 	tmp.scale(&P,-1);
       }
+
+      // #####################################################################################
+      // We want to compute the global residual.
+      // To this end, every processor computes its contribution to 'A*u_k', i.e., all
+      // coefficients of A*u_k corresponding to the patch associated with the processor.
+      // #####################################################################################
       P.RHS(1.0e-8, i, f);
       cout << "fsize exact res on patch " << i << " = " << f.size() << endl;
-      
-      // compute global residual
-      // every processor computes its contribution to 'A*u_k'
+
       APPLY(P, i, u_k, 1.0e-8, w, jmax, CDD1);
       tmp2.clear();
       
@@ -770,13 +692,14 @@ namespace FrameTL
 	send_to_Master<PROBLEM>(f-w);
       }
       else {
-	// master receives all local contributions and merges them
-	// into 'tmp', which is the same as summing up the uks[i] over i \neq 0
+	// The master receives all local contributions and merges them
+	// into 'tmp', which is the same as summing up the uks[i] over i \neq 0.
 	receive_all_parts(P, tmp2);
-	// master adds its own contribution
+	// The master adds its own contribution.
 	tmp2 += f-w;
       }
       
+      // The master performs output.
       if (i==0) {
 	double residual_norm = l2_norm(tmp2);
 	cout << "norm of global residual = " << residual_norm  << endl;
@@ -789,6 +712,7 @@ namespace FrameTL
 	char name6[128];
 	char name7[128];
 	
+	// setup filenames for output files for the one-dimensional cases
 #ifdef ONE_D
 	
 	switch (d) {
@@ -865,7 +789,7 @@ namespace FrameTL
 	
 #endif
 	
-	
+	// setup filenames for output files for the two-dimensional cases
 #ifdef TWO_D
 	switch (d) {
 	case 2: {
@@ -938,9 +862,13 @@ namespace FrameTL
 	//       matlab_output(log_10_L2_error_time,os2k);
 	//       os2k.close();
 #endif
+
+      // #####################################################################################
+      //  End performing output
+      // #####################################################################################
+
 	tstart = clock();
-	// ############# end output #############
-      }
+      } // end if i==0
     }// end loop L
     
     // collect final approximation and its local parts

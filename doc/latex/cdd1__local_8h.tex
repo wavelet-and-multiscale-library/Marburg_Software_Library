@@ -2,41 +2,42 @@
 \section{/home/werner/PROMOTION/source/FrameTL/cdd1\_\-local.h File Reference}
 \label{cdd1__local_8h}\index{/home/werner/PROMOTION/source/FrameTL/cdd1\_\-local.h@{/home/werner/PROMOTION/source/FrameTL/cdd1\_\-local.h}}
 }
-(The routines are taken from WaveletTL/adaptive/cdd1.\{cpp,h\}. They are here adapted in order to be able to use them as a local solver for a frame domain decomposition method.) 
+(The routines are taken from WaveletTL/adaptive/cdd1.\{cpp,h\}. They are here adapted in order to be able to use them as a local solver for a frame domain decomposition method.)  
+
 
 {\tt \#include $<$set$>$}\par
 {\tt \#include $<$algebra/infinite\_\-vector.h$>$}\par
 {\tt \#include $<$adaptive/compression.h$>$}\par
 {\tt \#include $<$cdd1\_\-local.cpp$>$}\par
-\subsection*{Namespaces}
-\begin{CompactItemize}
-\item 
-namespace \hyperlink{namespaceFrameTL}{FrameTL}
-\end{CompactItemize}
 \subsection*{Classes}
 \begin{CompactItemize}
 \item 
 struct \textbf{FrameTL::CDD1Parameters}
 \end{CompactItemize}
+\subsection*{Namespaces}
+\begin{CompactItemize}
+\item 
+namespace \hyperlink{namespaceFrameTL}{FrameTL}
+\end{CompactItemize}
 \subsection*{Functions}
 \begin{CompactItemize}
 \item 
-{\footnotesize template$<$class PROBLEM$>$ }\\void \hyperlink{namespaceFrameTL_8a92efb82d1634c8cf05737d5164b731}{FrameTL::CDD1\_\-LOCAL\_\-SOLVE} (const PROBLEM \&P, const int patch, const double epsilon, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&guess, InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&u\_\-epsilon, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&v\_\-k, const int jmax, const CompressionStrategy strategy)
+{\footnotesize template$<$class PROBLEM $>$ }\\void \hyperlink{namespaceFrameTL_8a92efb82d1634c8cf05737d5164b731}{FrameTL::CDD1\_\-LOCAL\_\-SOLVE} (const PROBLEM \&P, const int patch, const double epsilon, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&guess, InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&u\_\-epsilon, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&v\_\-k, const int jmax, const CompressionStrategy strategy)
 \begin{CompactList}\small\item\em The routine ALGORITHMc from \mbox{[}BB+\mbox{]}, with a given initial guess for u\_\-epsilon. \item\end{CompactList}\item 
 \hypertarget{namespaceFrameTL_f1d8dd5608d705fbf2563b8a266d14a9}{
-{\footnotesize template$<$class PROBLEM$>$ }\\void \hyperlink{namespaceFrameTL_f1d8dd5608d705fbf2563b8a266d14a9}{FrameTL::CDD1\_\-LOCAL\_\-SOLVE} (const PROBLEM \&P, const int patch, const double epsilon, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&guess, InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&u\_\-epsilon, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&v\_\-k, const double c1, const double c2, const int jmax, const CompressionStrategy strategy)}
+{\footnotesize template$<$class PROBLEM $>$ }\\void \hyperlink{namespaceFrameTL_f1d8dd5608d705fbf2563b8a266d14a9}{FrameTL::CDD1\_\-LOCAL\_\-SOLVE} (const PROBLEM \&P, const int patch, const double epsilon, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&guess, InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&u\_\-epsilon, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&v\_\-k, const double c1, const double c2, const int jmax, const CompressionStrategy strategy)}
 \label{namespaceFrameTL_f1d8dd5608d705fbf2563b8a266d14a9}
 
 \begin{CompactList}\small\item\em The routine ALGORITHMc from \mbox{[}BB+\mbox{]}, with a given initial guess for u\_\-epsilon and for the parameters c1,c2. \item\end{CompactList}\item 
-{\footnotesize template$<$class PROBLEM$>$ }\\void \hyperlink{namespaceFrameTL_d25b2eb9873b17224cdc0ddc9b0d04b1}{FrameTL::NPROG} (const PROBLEM \&P, const int patch, const CDD1Parameters \&params, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&F, const set$<$ typename PROBLEM::WaveletBasis::Index $>$ \&Lambda, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&v, const double delta, InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&v\_\-hat, set$<$ typename PROBLEM::WaveletBasis::Index $>$ \&Lambda\_\-hat, InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&r\_\-hat, InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&u\_\-Lambda\_\-k, const int jmax, const CompressionStrategy strategy)
+{\footnotesize template$<$class PROBLEM $>$ }\\void \hyperlink{namespaceFrameTL_d25b2eb9873b17224cdc0ddc9b0d04b1}{FrameTL::NPROG} (const PROBLEM \&P, const int patch, const CDD1Parameters \&params, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&F, const set$<$ typename PROBLEM::WaveletBasis::Index $>$ \&Lambda, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&v, const double delta, InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&v\_\-hat, set$<$ typename PROBLEM::WaveletBasis::Index $>$ \&Lambda\_\-hat, InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&r\_\-hat, InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&u\_\-Lambda\_\-k, const int jmax, const CompressionStrategy strategy)
 \begin{CompactList}\small\item\em NPROG. \item\end{CompactList}\item 
-{\footnotesize template$<$class PROBLEM$>$ }\\void \hyperlink{namespaceFrameTL_5338ae7f2ce93a8449560cc020fa212a}{FrameTL::GALERKIN} (const PROBLEM \&P, const int patch, const CDD1Parameters \&params, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&F, const set$<$ typename PROBLEM::WaveletBasis::Index $>$ \&Lambda, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&v, const double delta, const double eta, InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&u\_\-bar, const int jmax, const CompressionStrategy strategy)
+{\footnotesize template$<$class PROBLEM $>$ }\\void \hyperlink{namespaceFrameTL_5338ae7f2ce93a8449560cc020fa212a}{FrameTL::GALERKIN} (const PROBLEM \&P, const int patch, const CDD1Parameters \&params, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&F, const set$<$ typename PROBLEM::WaveletBasis::Index $>$ \&Lambda, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&v, const double delta, const double eta, InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&u\_\-bar, const int jmax, const CompressionStrategy strategy)
 \begin{CompactList}\small\item\em GALERKIN. \item\end{CompactList}\item 
-{\footnotesize template$<$class PROBLEM$>$ }\\void \hyperlink{namespaceFrameTL_f3d9112d64f468a664317686725617bd}{FrameTL::NGROW} (const PROBLEM \&P, const int patch, const CDD1Parameters \&params, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&F, const set$<$ typename PROBLEM::WaveletBasis::Index $>$ \&Lambda, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&u\_\-bar, const double xi1, const double xi2, set$<$ typename PROBLEM::WaveletBasis::Index $>$ \&Lambda\_\-tilde, InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&r, const int jmax, const CompressionStrategy strategy)
+{\footnotesize template$<$class PROBLEM $>$ }\\void \hyperlink{namespaceFrameTL_f3d9112d64f468a664317686725617bd}{FrameTL::NGROW} (const PROBLEM \&P, const int patch, const CDD1Parameters \&params, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&F, const set$<$ typename PROBLEM::WaveletBasis::Index $>$ \&Lambda, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&u\_\-bar, const double xi1, const double xi2, set$<$ typename PROBLEM::WaveletBasis::Index $>$ \&Lambda\_\-tilde, InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&r, const int jmax, const CompressionStrategy strategy)
 \begin{CompactList}\small\item\em NGROW. \item\end{CompactList}\item 
-{\footnotesize template$<$class PROBLEM$>$ }\\void \hyperlink{namespaceFrameTL_cd7462527bff134a7c142ee0471d6ab2}{FrameTL::INRESIDUAL} (const PROBLEM \&P, const int patch, const CDD1Parameters \&params, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&F, const set$<$ typename PROBLEM::WaveletBasis::Index $>$ \&Lambda, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&v, const double eta1, const double eta2, InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&r, const int jmax, const CompressionStrategy strategy)
+{\footnotesize template$<$class PROBLEM $>$ }\\void \hyperlink{namespaceFrameTL_cd7462527bff134a7c142ee0471d6ab2}{FrameTL::INRESIDUAL} (const PROBLEM \&P, const int patch, const CDD1Parameters \&params, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&F, const set$<$ typename PROBLEM::WaveletBasis::Index $>$ \&Lambda, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&v, const double eta1, const double eta2, InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&r, const int jmax, const CompressionStrategy strategy)
 \begin{CompactList}\small\item\em INRESIDUAL. \item\end{CompactList}\item 
-{\footnotesize template$<$class PROBLEM$>$ }\\void \hyperlink{namespaceFrameTL_e86daf5e125e66504844e002ba3dc4b5}{FrameTL::NRESIDUAL} (const PROBLEM \&P, const int patch, const CDD1Parameters \&params, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&F, const set$<$ typename PROBLEM::WaveletBasis::Index $>$ \&Lambda, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&v, const double eta1, const double eta2, InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&r, set$<$ typename PROBLEM::WaveletBasis::Index $>$ \&Lambda\_\-tilde, const int jmax, const CompressionStrategy strategy)
+{\footnotesize template$<$class PROBLEM $>$ }\\void \hyperlink{namespaceFrameTL_e86daf5e125e66504844e002ba3dc4b5}{FrameTL::NRESIDUAL} (const PROBLEM \&P, const int patch, const CDD1Parameters \&params, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&F, const set$<$ typename PROBLEM::WaveletBasis::Index $>$ \&Lambda, const InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&v, const double eta1, const double eta2, InfiniteVector$<$ double, typename PROBLEM::WaveletBasis::Index $>$ \&r, set$<$ typename PROBLEM::WaveletBasis::Index $>$ \&Lambda\_\-tilde, const int jmax, const CompressionStrategy strategy)
 \begin{CompactList}\small\item\em NRESIDUAL. \item\end{CompactList}\end{CompactItemize}
 
 

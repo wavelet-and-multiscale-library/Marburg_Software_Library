@@ -14,8 +14,6 @@
 using std::cout;
 using std::endl;
 
-#include "utils/multiindex.h"
-
 #include <utils/multiindex.h>
 #include <utils/fixed_array1d.h>
 
@@ -196,7 +194,7 @@ namespace WaveletTL
 	last_wavelet_num(const TENSORBASIS* basis, const typename TensorIndex<IBASIS,DIM,TENSORBASIS>::level_type j);
 }
 
-#include "tbasis_index.cpp"
+#include <cube/tbasis_index.cpp>
 
-#endif /*TBASIS_INDEX_H_*/
+#endif /*_WAVELETTL_TBASIS_INDEX_H_*/
 

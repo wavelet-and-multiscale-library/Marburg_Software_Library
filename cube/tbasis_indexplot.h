@@ -7,11 +7,11 @@
 // | Thorsten Raasch, Manuel Werner, Ulrich Friedrich                   |
 // +--------------------------------------------------------------------+
 
-#ifndef _TBASIS_INDEXPLOT_H
-#define	_TBASIS_INDEXPLOT_H
+#ifndef _WAVELETTL_TBASIS_INDEXPLOT_H
+#define	_WAVELETTL_TBASIS_INDEXPLOT_H
 
 #include <iostream>
-#include "tbasis_index.h"
+#include <cube/tbasis_index.h>
 #include <algebra/infinite_vector.h>
 
 using MathTL::InfiniteVector;
@@ -44,7 +44,7 @@ namespace WaveletTL
 }
 
 // include implementation
-#include "tbasis_indexplot.cpp"
+#include <cube/tbasis_indexplot.cpp>
 
-#endif	/* _TBASIS_INDEXPLOT_H */
+#endif	/* _WAVELETTL_TBASIS_INDEXPLOT_H */
 

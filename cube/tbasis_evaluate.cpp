@@ -20,7 +20,6 @@ namespace WaveletTL
     FixedArray1D<Array1D<double>,DIM> values; // point values of the factors within psi_lambda
     for (unsigned int i = 0; i < DIM; i++)
     {
-        // cout << "i="<<i<<" lambda.j()[i]="<<lambda.j()[i]<< " lambda.e()[i]="<<lambda.e()[i]<< "lambda.k()[i]="<<lambda.k()[i]<< " primal="<<primal<<" resolution="<<resolution<<endl;
         values[i] = evaluate(*(basis.bases()[i]),
 			   typename IBASIS::Index(lambda.j()[i],
 						  lambda.e()[i],
@@ -48,7 +47,6 @@ namespace WaveletTL
     for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
 	   itend(coeffs.end()); it != itend; ++it)
            {
-               // cout << "it.index =" << it.index() << endl;
                result.add(*it, evaluate(basis, it.index(), primal, resolution));
            }
 
@@ -70,7 +68,6 @@ namespace WaveletTL
     for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
 	   itend(coeffs.end()); it != itend; ++it)
            {
-               // cout << "it.index =" << it.index() << endl;
                result.add(*it, evaluate(basis, it.index(), primal, resolution));
            }
       

@@ -7,12 +7,12 @@
 // | Thorsten Raasch, Manuel Werner, Ulrich Friedrich                   |
 // +--------------------------------------------------------------------+
 
-#ifndef _TBASIS_EVALUATE_H
-#define	_TBASIS_EVALUATE_H
+#ifndef _WAVELETTL_TBASIS_EVALUATE_H
+#define	_WAVELETTL_TBASIS_EVALUATE_H
 
 #include <geometry/sampled_mapping.h>
 #include <algebra/infinite_vector.h>
-#include "tbasis.h"
+#include <cube/tbasis.h>
 
 using MathTL::SampledMapping;
 using MathTL::InfiniteVector;
@@ -42,7 +42,7 @@ namespace WaveletTL
 			       const int resolution);
 }
 
-#include "tbasis_evaluate.cpp"
+#include <cube/tbasis_evaluate.cpp>
 
-#endif	/* _TBASIS_EVALUATE_H */
+#endif	/* _WAVELETTL_TBASIS_EVALUATE_H */
 

@@ -34,44 +34,27 @@ namespace WaveletTL
         Array1D<int> number_of_rows;
         number_of_rows.resize(maxrange+1);
         number_of_rows[0]=2;
-        for (unsigned int i=1;i<=maxrange;i++)
+        for (int i=1;i<=maxrange;i++)
             {
                 number_of_rows[i]=1;
             }
-        //for (unsigned int d=0;d<=DIM;d++)
-        //    cout << "erster lauf: number_of_rows["<<d<<"] = "<<number_of_rows[d]<< endl;
-        for (unsigned int d=1; d<DIM; d++)
+        for (int d=1; d<DIM; d++)
         {
             Array1D<int> temp_nor;
             temp_nor.resize(maxrange+1);
-            //cout << "indexplot: 1<<"<<(d+1)<<"="<<(1<<(d+1))<<endl;
             temp_nor[0]= 1<<(d+1);
-            for (unsigned int i=1;i<=maxrange;i++)
+            for (int i=1;i<=maxrange;i++)
             {
                 temp_nor[i]=0;
-                for (unsigned int j=0; j<i;j++)
+                for (int j=0; j<i;j++)
                 {
-                    //cout << "A:temp_nor["<<i<<"]="<<temp_nor[i] << endl;
                     temp_nor[i]+=number_of_rows[j];
-                    //int temp_n = number_of_rows[j];
-                    //cout << "i="<<i<<" j="<<j<<" nor["<<j<<"]= "<< temp_n<<endl;
-                    //cout << "B:temp_nor["<<i<<"]="<<temp_nor[i] << endl;
                 }
                 temp_nor[i]+=2*number_of_rows[i];
-                //cout << "C:temp_nor["<<i<<"]="<<temp_nor[i] << endl;
             }
-            for (unsigned int i=0;i<=maxrange;i++)
+            for (int i=0;i<=maxrange;i++)
                 number_of_rows[i]=temp_nor[i];
         }
-        //for (unsigned int d=0;d<=DIM;d++)
-        //    cout << "number_of_rows["<<d<<"] = "<<number_of_rows[d]<< endl;
-
-/*
-        // determine smallest coefficient
-        double a = 0.;
-        a = aa;
-        //const double threshold = pow(10,aa);
-*/
 
         const double threshold = 1e-15;
         cout << "linfinity norm of coefficients = " << maxnorm << endl;
@@ -85,23 +68,18 @@ namespace WaveletTL
         // if ++lambda leads to an increased sublevel we need to plot a new row
         // if ++lambda leads to an increased level we need to start a new column
         MathTL::FixedArray1D<std::map<int, int>,DIM> sizes;
-        //typename InfiniteVector<double, typename TENSORBASIS::Index>::const_iterator cstart = coeffs.begin(), cend=coeffs.end(), it=TENSORBASIS::first_generator();
         level_type currentlevel;
         type_type currenttype;
         translation_type current_k;
-        for (unsigned int i=0; i < DIM; i++)
+        for (int i=0; i < DIM; i++)
         {
             currentlevel[i]=j0[i];
             currenttype[i]=0;
             current_k[i]=basis->bases()[i]->DeltaLmin();
             sizes[i][0] = basis->bases()[i]->Deltasize(j0[i]); // Number of generators on level j0
             sizes[i][1] = basis->bases()[i]->Nablasize(j0[i]); // Number of Wavelets on level j0
-            //cout << "sizes["<<i<<"][0]"<<sizes[i][0] <<endl;
-            //cout << "sizes["<<i<<"][1]"<<sizes[i][1] <<endl;
         }
 
-        // bool startbox;
-        //int boxstep(1);
         int row(1),column(1);
         bool atmaxrange = false;
         int range(0); // determines wether a new entry has to be computed in "sizes"
@@ -122,21 +100,18 @@ namespace WaveletTL
             os << "axis([0,1,0,1]);" << endl;
 
             // based on tbasis_index :: operator ++
-            //FixedArray1D<int,DIM> count;
             FixedArray1D<double,DIM> pos;
-            //for (unsigned int i=0;i<DIM;i++) count[i]=0;
             bool jplusplus = false;
             while (!jplusplus)
             {
                 // determine current position
-                for (unsigned int i=0; i<DIM;i++)
+                for (int i=0; i<DIM;i++)
                     pos[i] = (current_k[i]-((currenttype[i] == 0) ? basis->bases()[i]->DeltaLmin() : basis->bases()[i]->Nablamin()))
                              * (1. / sizes[i][currentlevel[i]-j0[i]+currenttype[i]]);
                 const double c = coeffs.get_coefficient(Index(currentlevel, currenttype, current_k, basis));
                 if (fabs(c) < threshold) {
                 } else
                 {
-                    //count++;
                     double col = (std::max(log10(fabs(c)/maxnorm),aa)+(-aa))/(-aa);
                     // this part is for 2 space dimensions
                     os << "Y=ceil(" << col << " * length(colormap));" << endl;
@@ -171,7 +146,7 @@ namespace WaveletTL
             // current sublevel has been drawn. Increase sublevel or level if needed
 
             // determine next (sub)level index
-            // "small loop" "currenttype++" (currentlevel fest)
+            // "small loop" "currenttype++" (currentlevel is fixed)
             // iterate over all combinations of generators/wavelets for all dimensions with currentlevel[i]=j0[i]
             // this looks like binary addition: (in 3 Dim:) gwg is followed by gww (g=0,w=1)
             bool done = true;
@@ -179,6 +154,7 @@ namespace WaveletTL
             {
                 // find first position on level j0
                 if (currentlevel[i] == j0[i])
+                {
                     if (currenttype[i] == 1)
                     {
                         currenttype[i]=0;
@@ -191,6 +167,7 @@ namespace WaveletTL
                         done = false;
                         break;
                     }
+                }
             }
             // done == true bedeutet, dass alle Komponenten auf level j0() wavelets waren.
             // "big loop" "currentlevel++"
@@ -204,11 +181,7 @@ namespace WaveletTL
                         {
                             // increase left neighbor
                             currentlevel[i-1]=currentlevel[i-1]+1;
-
-
                             if (currentlevel[i-1]-j0[i] == range) sizes[i-1][range+1]=basis ->bases()[i]->Nablasize(currentlevel[i-1]); // if needed compute and store new size information
-
-
                             currenttype[i-1]=1;
                             current_k[i-1]=basis->bases()[i-1]->Nablamin();
                             int temp = currentlevel[i]-j0[i];
@@ -243,7 +216,6 @@ namespace WaveletTL
                             current_k[0]=basis->bases()[i]->DeltaLmin();
                             sizes[DIM-1][range+1]=basis ->bases()[DIM-1]->Nablasize(currentlevel[DIM-1]); // if needed compute and store new size information
                         }
-                        //atmaxrange = (multi_degree(currentlevel) == multidegree(j0)+maxrange);
                         atmaxrange = (range > maxrange);
                         break; // unnoetig, da i==0 gilt.
                     }

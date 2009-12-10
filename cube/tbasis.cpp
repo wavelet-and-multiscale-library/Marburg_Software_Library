@@ -1,7 +1,6 @@
 // implementation for tbasis.h
 #include <numerics/gauss_data.h>
 
-
 namespace WaveletTL
 {
   	template <class IBASIS, unsigned int DIM>
@@ -183,7 +182,6 @@ namespace WaveletTL
                 e[DIM-1] = 1;
                 k[DIM-1] = bases_[DIM-1]->Nablamin();
             }
-            //cout << "in first_wavelet. j,e,k = "<<j<<", "<<e<<" ,"<<k<<endl;
             return TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(j, e, k, this);
         }
 
@@ -318,11 +316,7 @@ namespace WaveletTL
             cout << "setting up collection of wavelet indices..." << endl;
             full_collection.resize(degrees_of_freedom);
             int k = 0;
-            //cout << "first_gen = " << first_generator() << endl;
-            //cout << "last_wave = " << last_wavelet(jmax_) << endl;
-            //cout << "++ test " << ++first_generator() << endl;
             for (Index ind = first_generator(); ind <= last_wavelet(jmax_); ++ind) {
-                //cout << ind << " " << ind.number() << endl;
                 full_collection[k] = ind;
                 k++;
             }
@@ -330,4 +324,3 @@ namespace WaveletTL
         }
 
 }
-

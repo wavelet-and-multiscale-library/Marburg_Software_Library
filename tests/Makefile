@@ -106,6 +106,7 @@ EXEOBJF3 = \
   test_cube_index.o test_cube_support.o test_cube_basis.o\
   test_cube_indexplot.o\
   test_mapped_cube_basis.o\
+  test_tbasis.o test_tbasis_index.o test_tbasis_support.o test_tbasis_indexplot.o
 
 # set 3a of test programs: wavelet bases on the ring domain
 EXEOBJF3a = \

@@ -7,23 +7,21 @@
 // | Thorsten Raasch, Manuel Werner, Ulrich Friedrich                   |
 // +--------------------------------------------------------------------+
 
-#ifndef TBASIS_H_
-#define TBASIS_H_
+#ifndef _WAVELETTL_TBASIS_H_
+#define _WAVELETTL_TBASIS_H_
 
 #include <list>
-//#include <algebra/vector.h>
 
 #include <algebra/infinite_vector.h>
 #include <utils/fixed_array1d.h>
 #include <utils/multiindex.h>
-#include "tbasis_index.h"
+#include <cube/tbasis_index.h>
 #include <utils/function.h>
 #include <geometry/point.h>
 #include <utils/array1d.h>
 
 // for convenience, include also some functionality
-#include "tbasis_support.h"
-//#include "tbasis_evaluate.h"
+#include <cube/tbasis_support.h>
 
 using std::list;
 using MathTL::Point;
@@ -211,6 +209,6 @@ namespace WaveletTL
   	};
 }
 
-#include "tbasis.cpp"
+#include <cube/tbasis.cpp>
 
-#endif /*TBASIS_H_*/
+#endif /*_WAVELETTL_TBASIS_H_*/

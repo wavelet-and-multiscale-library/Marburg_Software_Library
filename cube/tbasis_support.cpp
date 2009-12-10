@@ -169,8 +169,8 @@ namespace WaveletTL
                                     const typename TensorBasis<IBASIS,DIM>::Index& mu)
     {
         // we have intersection of the singular supports if and only if
-        // (cube_support)   one of the components has this property in one dimension
-        // (tbasis_support) all of the components have this property
+        // (cube_support:)   one of the components has this property in one dimension
+        // (tbasis_support:) all of the components have this property
         typedef typename IBASIS::Index Index1D;
         for (unsigned int i = 0; i < DIM; i++) {
             if (!(intersect_singular_support(*basis.bases()[i],

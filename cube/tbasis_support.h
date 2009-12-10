@@ -6,8 +6,8 @@
 // | Copyright (c) 2002-2009                                            |
 // | Thorsten Raasch, Manuel Werner, Ulrich Friedrich                   |
 // +--------------------------------------------------------------------+
-#ifndef _TBASIS_SUPPORT_H
-#define	_TBASIS_SUPPORT_H
+#ifndef _WAVELETTL_TBASIS_SUPPORT_H
+#define	_WAVELETTL_TBASIS_SUPPORT_H
 
 #include <list>
 #include <set>
@@ -66,8 +66,8 @@ namespace WaveletTL
 				  const typename TensorBasis<IBASIS,DIM>::Index& nu);
 }
 
-#include "tbasis_support.cpp"
+#include <cube/tbasis_support.cpp>
 
 
-#endif	/* _TBASIS_SUPPORT_H */
+#endif	/* _WAVELETTL_TBASIS_SUPPORT_H */
 

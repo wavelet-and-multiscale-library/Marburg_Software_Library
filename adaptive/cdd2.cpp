@@ -50,7 +50,5 @@ namespace WaveletTL
       }
       v.COARSE((1-theta)*epsilon_k, u_epsilon);
     } 
-    
-    set<Index> Lambda;
   }
 }

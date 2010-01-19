@@ -1,7 +1,7 @@
 #include <iostream>
 #include <utils/function.h>
-#include <interval/spline_basis.h>
-#include <interval/spline_expansion.h>
+#include <interval/p_basis.h>
+#include <interval/p_expansion.h>
 #include <interval/i_indexplot.h>
 
 using namespace std;
@@ -119,11 +119,12 @@ int main() {
 //   Function<1>* f = new CutPwr();
 //   Function<1>* f = new Kink(0.5);
 
-//   typedef SplineBasis<2,2,P_construction> Basis;
-  typedef SplineBasis<3,3,P_construction> Basis;
+  const int d = 2;
+  const int dt = 2;
+
+  typedef PBasis<d,dt> Basis;
   typedef Basis::Index Index;
-//   Basis basis("",0,0,0,0); // PBasis, no b.c.'s
-  Basis basis("",1,1,0,0); // PBasis, homogeneous b.c.'s
+  Basis basis(0,0); // PBasis, no b.c.'s
 
 //   const int j0 = basis.j0();
   const int jmax = 9;

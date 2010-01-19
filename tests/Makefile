@@ -94,7 +94,7 @@ EXEOBJF2 = \
   test_spline_basis.o test_spline_support.o test_spline_expansion.o\
   test_a_basis.o\
   test_s_basis.o test_s_support.o\
-#  test_i_indexplot.o\ (temporarily commented out)
+  test_i_indexplot.o\
 
 # set 2a of test programs: wavelet bases on the interval with improved performance (periodic)
 EXEOBJF2a = \

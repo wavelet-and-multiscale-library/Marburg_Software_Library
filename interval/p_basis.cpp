@@ -191,7 +191,7 @@ namespace WaveletTL
     // (at the end of the setup, j0 may be reduced by one, see below)
     j0_ = (int) ceil(log(ell2T<d,dT>()-ell1T<d,dT>()+std::max(s0,s1)+1.-d)/M_LN2+1);
     //cout << "minLev = " << j0_ << endl;
-    j0_ = 5;
+    //j0_ = 5;
 #else
     // choose j0 s.th. the supports of the primal boundary generators do not overlap
     // the supports of the dual boundary generators from the other endpoint

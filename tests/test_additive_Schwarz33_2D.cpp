@@ -7,12 +7,12 @@
 
 #define PATCHES 3
 
-#define JMAX 8
+#define JMAX 4
 
 #define PRIMALORDER 3
 #define DUALORDER   3
 
-#define PRECOMP_RHS
+//#define PRECOMP_RHS
 //#define PRECOMP_DIAG
 
 //#define COMPUTECONSTANTS
@@ -474,7 +474,7 @@ int main(int argc, char* argv[])
       
     }
     
-    cout << "potting sets of active wavelet indices..." << endl;
+    cout << "plotting sets of active wavelet indices..." << endl;
     Array1D<InfiniteVector<double, CIndex> > approximations_cube(frame.n_p());
     
     // convert indices to CubeIndices

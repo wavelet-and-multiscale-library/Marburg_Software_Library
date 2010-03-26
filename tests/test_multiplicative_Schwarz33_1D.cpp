@@ -2,7 +2,7 @@
 #define _WAVELETTL_CDD1_VERBOSITY 0
 
 #define OVERLAP 0.7
-#define JMAX 10
+#define JMAX 20
 
 #define PRIMALORDER 3
 #define DUALORDER   3
@@ -10,8 +10,8 @@
 //#define PRECOMP
 //#define COMPUTECONSTANTS
 
-//#define SPARSE
-#define FULL
+#define SPARSE
+//#define FULL
 #define ONE_D
 
 #include <iostream>

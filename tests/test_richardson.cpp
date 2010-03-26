@@ -36,20 +36,20 @@
 using std::cout;
 using std::endl;
 
-using FrameTL::FrameIndex;
-//using FrameTL::EllipticEquation;
-using FrameTL::SimpleEllipticEquation;
-using FrameTL::BiharmonicEquation;
-using FrameTL::EvaluateFrame;
-using FrameTL::AggregatedFrame;
-using MathTL::EllipticBVP;
-using MathTL::PoissonBVP;
-using MathTL::ConstantFunction;
-using MathTL::SparseMatrix;
-using MathTL::InfiniteVector;
-using WaveletTL::CubeBasis;
-using WaveletTL::CubeIndex;
-using WaveletTL::CachedProblem;
+// using FrameTL::FrameIndex;
+// //using FrameTL::EllipticEquation;
+// using FrameTL::SimpleEllipticEquation;
+// using FrameTL::BiharmonicEquation;
+// using FrameTL::EvaluateFrame;
+// using FrameTL::AggregatedFrame;
+// using MathTL::EllipticBVP;
+// using MathTL::PoissonBVP;
+// using MathTL::ConstantFunction;
+// using MathTL::SparseMatrix;
+// using MathTL::InfiniteVector;
+// using WaveletTL::CubeBasis;
+// using WaveletTL::CubeIndex;
+// using WaveletTL::CachedProblem;
 
 using namespace std;
 using namespace FrameTL;
@@ -57,52 +57,52 @@ using namespace MathTL;
 using namespace WaveletTL;
 
 
-/*!
-  special function with steep gradients
-  near the right end of the interval
-*/
-template<class VALUE = double>
-class Singularity1D_RHS
-  : public Function<1, VALUE>
-{
-public:
-  Singularity1D_RHS() {};
-  virtual ~Singularity1D_RHS() {};
-  VALUE value(const Point<1>& p,
-	      const unsigned int component = 0) const
-  {
-    return  -100*exp(5*p[0])*(1-(exp(5*p[0])-1)/(exp(5.)-1))/(exp(5.)-1)+200*exp(10*p[0]) / 
-      ((exp(5.)-1)*(exp(5.)-1))+100*(exp(5*p[0])-1)*exp(5*p[0])/((exp(5.)-1)*(exp(5.)-1));
-  }
+// /*!
+//   special function with steep gradients
+//   near the right end of the interval
+// */
+// template<class VALUE = double>
+// class Singularity1D_RHS
+//   : public Function<1, VALUE>
+// {
+// public:
+//   Singularity1D_RHS() {};
+//   virtual ~Singularity1D_RHS() {};
+//   VALUE value(const Point<1>& p,
+// 	      const unsigned int component = 0) const
+//   {
+//     return  -100*exp(5*p[0])*(1-(exp(5*p[0])-1)/(exp(5.)-1))/(exp(5.)-1)+200*exp(10*p[0]) / 
+//       ((exp(5.)-1)*(exp(5.)-1))+100*(exp(5*p[0])-1)*exp(5*p[0])/((exp(5.)-1)*(exp(5.)-1));
+//   }
   
-  void vector_value(const Point<1> &p,
-		    Vector<VALUE>& values) const { ; }
+//   void vector_value(const Point<1> &p,
+// 		    Vector<VALUE>& values) const { ; }
   
-};
+// };
 
-/*!
-  special function with steep gradients
-  near the right end of the interval
-*/
-template<class VALUE = double>
-class Singularity1D
-  : public Function<1, VALUE>
-{
-public:
-  Singularity1D() {};
-  virtual ~Singularity1D() {};
-  VALUE value(const Point<1>& p,
-	      const unsigned int component = 0) const
-  {
-    double res = 1.0 / (exp(5.) - 1.0);
-    res = (exp(5.*p[0]) - 1.0) * res;
-    return  (4.0 * res * (1.0 - res));
-  }
+// /*!
+//   special function with steep gradients
+//   near the right end of the interval
+// */
+// template<class VALUE = double>
+// class Singularity1D
+//   : public Function<1, VALUE>
+// {
+// public:
+//   Singularity1D() {};
+//   virtual ~Singularity1D() {};
+//   VALUE value(const Point<1>& p,
+// 	      const unsigned int component = 0) const
+//   {
+//     double res = 1.0 / (exp(5.) - 1.0);
+//     res = (exp(5.*p[0]) - 1.0) * res;
+//     return  (4.0 * res * (1.0 - res));
+//   }
   
-  void vector_value(const Point<1> &p,
-		    Vector<VALUE>& values) const { ; }
+//   void vector_value(const Point<1> &p,
+// 		    Vector<VALUE>& values) const { ; }
   
-};
+// };
 
 int main()
 {
@@ -135,13 +135,13 @@ int main()
   AffineLinearMapping<1> affineP2(A2,b2);
 
 
-  FixedArray1D<double,1> A3;
-  A3[0] = 0.75;
-  SimpleAffineLinearMapping<1> simlpeaffine1(A3,b);
+//   FixedArray1D<double,1> A3;
+//   A3[0] = 0.75;
+//   SimpleAffineLinearMapping<1> simlpeaffine1(A3,b);
   
-  FixedArray1D<double,1> A4;
-  A4[0] = 0.75;
-  SimpleAffineLinearMapping<1> simlpeaffine2(A4,b2);
+//   FixedArray1D<double,1> A4;
+//   A4[0] = 0.75;
+//   SimpleAffineLinearMapping<1> simlpeaffine2(A4,b2);
 
   //##############################
   
@@ -193,12 +193,12 @@ int main()
  
   bcT[1] = bound_4;
 
-  Atlas<DIM,DIM> Lshaped(charts,adj);  
-  cout << Lshaped << endl;
+  Atlas<DIM,DIM> interval_domain(charts,adj);  
+  cout << interval_domain << endl;
 
   //finally a frame can be constructed
   //Frame1D frame(&Lshaped, bc, bcT, jmax);
-  Frame1D frame(&Lshaped, bc, jmax);
+  Frame1D frame(&interval_domain, bc, jmax);
 
 //   Vector<double> value(1);
 //   value[0] = 384;

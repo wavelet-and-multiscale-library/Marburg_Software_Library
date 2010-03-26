@@ -5,7 +5,7 @@
 
 #define OVERLAP 1.
 
-#define JMAX 4
+#define JMAX 5
 
 #define PRIMALORDER 3
 #define DUALORDER   3

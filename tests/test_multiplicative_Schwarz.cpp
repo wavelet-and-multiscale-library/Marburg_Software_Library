@@ -5,15 +5,15 @@
 
 #define OVERLAP 1.
 
-#define JMAX 8
+#define JMAX 4
 
 #define PRECOMP_RHS
 //#define PRECOMP_DIAG
 
 //#define COMPUTECONSTANTS
 
-//#define SPARSE
-#define FULL
+#define SPARSE
+//#define FULL
 #define TWO_D
 
 #include <fstream>

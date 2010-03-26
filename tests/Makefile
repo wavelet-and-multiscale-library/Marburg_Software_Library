@@ -81,7 +81,6 @@ test_additive_Schwarz33_1D.o\
 test_additive_Schwarz.o\
 test_multiplicative_Schwarz22_2D.o\
 test_multiplicative_Schwarz33_2D_Full.o\
-test_multiplicative_Schwarz33_1D.o\
 test_multiplicative_Schwarz22_1D.o\
 test_multiplicative_Schwarz46_1D.o\
 test_multiplicative_Schwarz33_2D.o\

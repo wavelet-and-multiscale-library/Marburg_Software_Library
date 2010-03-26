@@ -80,8 +80,8 @@ int main()
 
   TestProblem<1> T;
 
-  const int d  = 2;
-  const int dT = 4;
+  const int d  = 3;
+  const int dT = 3;
   typedef DSBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
@@ -91,7 +91,7 @@ int main()
   InfiniteVector<double, Index> F_eta;
   cproblem.RHS(1e-6, F_eta);
   const double nu = cproblem.norm_Ainv() * l2_norm(F_eta);
-
+  cout << "nu = " << nu << endl;
   InfiniteVector<double, Index> u_epsilon;
   CDD2_SOLVE(cproblem, nu, 1e-1, u_epsilon);
   

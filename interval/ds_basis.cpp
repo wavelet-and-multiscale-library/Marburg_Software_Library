@@ -20,7 +20,6 @@ namespace WaveletTL
     this->s1 = bc_right ? 1 : 0;
     this->sT0 = 0;
     this->sT1 = 0;
-
     setup();
   }
   
@@ -32,7 +31,6 @@ namespace WaveletTL
     this->s1 = s1;
     this->sT0 = sT0;
     this->sT1 = sT1;
-
     setup();
   }
 
@@ -442,6 +440,7 @@ namespace WaveletTL
     cout << "total degrees of freedom between j0_ and jmax_ is " << degrees_of_freedom << endl;
 
     cout << "setting up collection of wavelet indices..." << endl;
+    //cout << "jmax= " << jmax_ << endl;
     full_collection.resize(degrees_of_freedom);
     int k = 0;
     for (Index ind = first_generator(j0_); ind <= last_wavelet(jmax_); ++ind) {

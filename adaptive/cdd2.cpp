@@ -40,15 +40,20 @@ namespace WaveletTL
     while (epsilon_k > epsilon) {
       epsilon_k *= 3*pow(rho, K) / theta;
       cout << "CDD2_SOLVE: epsilon_k=" << epsilon_k << endl;
-      const double eta = theta * epsilon_k / (6*omega*K);
+      const double eta = theta * epsilon_k / (6*omega*K)*10;
+      cout << "eta = " << eta << endl;
       P.RHS(eta, f);
       v = u_epsilon;
-      for (int j = 1; j <= K; j++) {
-	APPLY(P, v, eta, Av);
+      for (int j = 1; j <= 1/*K*/; j++) {
+	APPLY(P, v, eta, Av, 12, CDD1);
+	//Av.COARSE(eta, Av);
+	cout << "Number of degrees of freedom " << Av.size() << endl;
 	cout << "current residual error ||f-Av||=" << l2_norm(f - Av) << endl;
 	v += omega * (f - Av);
       }
-      v.COARSE((1-theta)*epsilon_k, u_epsilon);
+      cout << "coarse tol = " << (1-theta)*epsilon_k << endl;
+      //v.COARSE((1-theta)*epsilon_k, u_epsilon);
+      v.COARSE(1.0e-6, u_epsilon);
     } 
   }
 }

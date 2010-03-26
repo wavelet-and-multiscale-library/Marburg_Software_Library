@@ -90,7 +90,7 @@ namespace WaveletTL
 
 
   /*!
-    APPLY with successive COARSE
+    APPLY with successive COARSE.
   */
   template <class PROBLEM>
   void APPLY_COARSE(const PROBLEM& P,

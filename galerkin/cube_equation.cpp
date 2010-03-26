@@ -270,19 +270,19 @@ namespace WaveletTL
     // f(v) = \int_0^1 g(t)v(t) dt
 
 
-    double r = 1.;
-    for (unsigned int i = 0; i < DIM; i++)
-      r *= evaluate(*basis_.bases()[i], 0,
-		    typename IBASIS::Index(lambda.j(),
-					   lambda.e()[i],
-					   lambda.k()[i],
-					   basis_.bases()[i]),
-		    0.5);
+//     double r = 1.;
+//     for (unsigned int i = 0; i < DIM; i++)
+//       r *= evaluate(*basis_.bases()[i], 0,
+// 		    typename IBASIS::Index(lambda.j(),
+// 					   lambda.e()[i],
+// 					   lambda.k()[i],
+// 					   basis_.bases()[i]),
+// 		    0.5);
 
-    return r;
+//     return r;
 
 
-#if 0
+#if 1
     double r = 0;
 
     // first compute supp(psi_lambda)

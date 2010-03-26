@@ -130,7 +130,6 @@ namespace WaveletTL
   {
     assert(derivative <= 2); // we only support derivatives up to the second order
     double r = 0;
-
     if (lambda.e() == 0) {
       // generator
       if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) {
@@ -176,7 +175,7 @@ namespace WaveletTL
   evaluate(const PBasis<d,dT>& basis, const unsigned int derivative,
 	   const typename PBasis<d,dT>::Index& lambda,
 	   const Array1D<double>& points, Array1D<double>& values)
-  {
+  {   
     assert(derivative <= 2); // we only support derivatives up to the second order
 
     values.resize(points.size());

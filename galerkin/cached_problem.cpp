@@ -750,9 +750,13 @@ namespace WaveletTL
 	  entries_cache[p].key_comp()(nu_num, col_lb->first))
 	
 	{
+#ifdef ONE_D
+	  return problem->a(lambda, nu);
+#else
 	  // insert a new column
 	  typedef typename ColumnCache::value_type value_type;
 	  col_it = entries_cache[p].insert(col_lb, value_type(nu_num, Column()));
+#endif
 	}
 	  
       Column& col(col_it->second);
@@ -767,6 +771,9 @@ namespace WaveletTL
       if (lb == col.end() ||
 	  col.key_comp()(j, lb->first))
 	{
+#ifdef ONE_D
+	  return problem->a(lambda, nu);
+#else
 	  // compute whole level block
 	  // #### ONLY CDD COMPRESSION STRATEGY IMPLEMENTED ####
 	  // #### MAYBE WE ADD TRUNK FOR STEVENSON APPROACH ####
@@ -778,7 +785,7 @@ namespace WaveletTL
 
 	  Block& block(it->second);	  
 	  IntersectingList nus;
-
+	  
 	  intersecting_wavelets_on_patch(basis(), nu,
 					 p,
 					 std::max(j, basis().j0()),
@@ -795,12 +802,13 @@ namespace WaveletTL
 		r = entry;
 	      }
 	    }
-	  } 
+	  }
+#endif	  
 	}
       // level already exists --> extract row corresponding to 'lambda'
       else {
 	Block& block(it->second);
-
+	
  	//typename Block::iterator block_lb(block.lower_bound(lambda));
 	typename Block::iterator block_lb(block.lower_bound(lambda_num));
  	typename Block::iterator block_it(block_lb);

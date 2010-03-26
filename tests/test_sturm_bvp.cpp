@@ -86,12 +86,12 @@ int main()
 
   const int d  = 3;
   const int dT = 3; // be sure to use a continuous dual here, otherwise the RHS test will fail
-//   typedef DSBasis<d,dT> Basis; Basis basis(true, true);
-//   typedef PBasis<d,dT> Basis;
+  //typedef DSBasis<d,dT> Basis; Basis basis(true, true);
+  typedef PBasis<d,dT> Basis;
 //   typedef JLBasis Basis;
-  typedef SplineBasis<d,dT,P_construction,1,1,0,0,SplineBasisData_j0<d,dT,P_construction,1,1,0,0>::j0> Basis;
+  //typedef SplineBasis<d,dT,P_construction,1,1,0,0,SplineBasisData_j0<d,dT,P_construction,1,1,0,0>::j0> Basis;
 
-  Basis basis;
+  Basis basis(1,1);
   typedef Basis::Index Index;
 
   SturmEquation<Basis> eq(T, basis);
@@ -123,7 +123,7 @@ int main()
 #endif  
 
   set<Index> Lambda;
-  const int jmax = 6; // eq.basis().j0()+3;
+  const int jmax = 8; // eq.basis().j0()+3;
   for (Index lambda = eq.basis().first_generator(eq.basis().j0());; ++lambda) {
     Lambda.insert(lambda);
     if (lambda == eq.basis().last_wavelet(jmax)) break;

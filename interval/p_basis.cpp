@@ -191,7 +191,7 @@ namespace WaveletTL
     // (at the end of the setup, j0 may be reduced by one, see below)
     j0_ = (int) ceil(log(ell2T<d,dT>()-ell1T<d,dT>()+std::max(s0,s1)+1.-d)/M_LN2+1);
     //cout << "minLev = " << j0_ << endl;
-    //j0_ = 5;
+    j0_ = 5;
 #else
     // choose j0 s.th. the supports of the primal boundary generators do not overlap
     // the supports of the dual boundary generators from the other endpoint
@@ -486,7 +486,7 @@ namespace WaveletTL
 //     cout << "Mj0T (without SQRT1_2)=" << endl << Mj0T;
 //     Mj0T.scale(M_SQRT1_2);
 
-#if 1
+#if 0
     cout << "PBasis(): check biorthogonality of Mj0, Mj0T:" << endl;
 //     cout << "Mj0=" << endl << Mj0 << endl << "Mj0T=" << endl << Mj0T << endl;
 
@@ -513,7 +513,7 @@ namespace WaveletTL
     SparseMatrix<double> A, H, Hinv;
     GSetup(A, H, Hinv); // [DKU, (4.1.1), (4.1.13)]
     
-#if 1
+#if 0
     SparseMatrix<double> Aold(A); // for the checks below
 #endif
     GElim (A, H, Hinv); // elimination [DKU, (4.1.4)ff.]
@@ -526,7 +526,7 @@ namespace WaveletTL
     SparseMatrix<double> BB; double binv = BT(A, BB); // [DKU, (4.1.13)]
 //     cout << "b^{-1}=" << binv << endl;
 #endif
-#if 1
+#if 0
     cout << "PBasis(): check properties (4.1.15):" << endl;
     SparseMatrix<double> test4115 = transpose(BB)*A;
     for (unsigned int i = 0; i < test4115.row_dimension(); i++)
@@ -545,7 +545,7 @@ namespace WaveletTL
     cout << "* ||Fj^T*A||_infty: " << row_sum_norm(test4115) << endl;    
 #endif
 
-#if 1
+#if 0
     cout << "PBasis(): check factorization of A:" << endl;
     SparseMatrix<double> testAfact = Aold - Hinv*A;
     cout << "* in infty-norm: " << row_sum_norm(testAfact) << endl;
@@ -567,7 +567,7 @@ namespace WaveletTL
     SparseMatrix<double> help = H * PPinv;
     SparseMatrix<double> gj0ih = transpose(BB) * help; gj0ih.scale(M_SQRT2); // [P, Prop. 5.6]
     SparseMatrix<double> gj1ih = transpose(FF) * help; gj1ih.scale(M_SQRT2); // [DKU, (4.1.24)], [P, Prop. 5.6]
-#if 1
+#if 0
     cout << "PBasis(): check initial stable completion:" << endl;
     SparseMatrix<double> mj_initial(Mj0.row_dimension(),
 				    Mj0.column_dimension() + mj1ih.column_dimension());
@@ -639,7 +639,7 @@ namespace WaveletTL
 //     cout << "Mj1T (without SQRT1_2)=" << endl << Mj1T;
 //     Mj1T.scale(M_SQRT1_2);
 
-#if 1
+#if 0
     cout << "PBasis(): check new stable completion:" << endl;
     
     SparseMatrix<double> mj_new(Mj0.row_dimension(),
@@ -736,7 +736,7 @@ namespace WaveletTL
     if (d%2 && s0 == s1)
 	{
 	DS_symmetrization(Mj1, Mj1T);
-#if 1
+#if 0
 	{
 	  cout << "PBasis(): check [DS] symmetrization:" << endl;
 	  
@@ -848,8 +848,8 @@ namespace WaveletTL
       for (int row = 0; row < Deltasize(j0_); row++)
 	Mj1_reduced.set_entry(row, col, Mj1.get_entry(row+(1<<j0_), col+(1<<(j0_-1))));
 
-//     cout << "Mj1:" << endl << Mj1;
-//     cout << "Mj1 reduced:" << endl << Mj1_reduced;
+//      cout << "Mj1:" << endl << Mj1;
+//      cout << "Mj1 reduced:" << endl << Mj1_reduced;
 
     SparseMatrix<double> Mj0T_reduced(Deltasize(j0_), Deltasize(j0_-1));
     for (int col = 0; col < Deltasize(j0_-1)/2; col++)
@@ -1390,7 +1390,7 @@ namespace WaveletTL
  		       inv_CRT, true);
     //cout << "inv_CjpT= " << endl << inv_CjpT << endl;
 
-#if 1
+#if 0
     cout << "PBasis: testing setup of Cj:" << endl;
 
     SparseMatrix<double> test1 = CjT * inv_CjT;
@@ -1489,7 +1489,7 @@ namespace WaveletTL
   PBasis<d, dT>::GElim(SparseMatrix<double>& A, SparseMatrix<double>& H, SparseMatrix<double>& Hinv) {
     // IGPMlib reference: I_Basis_Bspline_s::gelim()
     
-    cout << "A=" << endl << A;
+//     cout << "A=" << endl << A;
 
     const int firstcol = d-1-s0; // first column of A_j^{(d)} in Ahat_j^{(d)}
     const int lastcol  = Deltasize(j0())-d+s1; // last column
@@ -1594,8 +1594,8 @@ namespace WaveletTL
 	    help.set_entry(k+1, k, Lentry);
 	}
 
-      cout << "A=" << endl << A;
-      cout << "Hfactor=" << endl << help;
+//       cout << "A=" << endl << A;
+//       cout << "Hfactor=" << endl << help;
 
       A = help * A;
       H = help * H;
@@ -1616,8 +1616,8 @@ namespace WaveletTL
       Hinv = Hinv * help;
     }
 
-    cout << "finally, H=" << endl << H;
-    cout << "finally, Hinv=" << endl << Hinv;
+//     cout << "finally, H=" << endl << H;
+//     cout << "finally, Hinv=" << endl << Hinv;
 #endif
   }
 

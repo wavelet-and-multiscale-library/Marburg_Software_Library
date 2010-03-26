@@ -64,8 +64,8 @@ namespace WaveletTL
   */
   template <class IBASIS, unsigned int DIM, class CUBEBASIS = CubeBasis<IBASIS,DIM> >
   class CubeEquation
-//     : public FullyDiagonalDyadicPreconditioner<typename CUBEBASIS::Index>
-    : public FullyDiagonalEnergyNormPreconditioner<typename CUBEBASIS::Index>
+     : public FullyDiagonalDyadicPreconditioner<typename CUBEBASIS::Index>
+  //    : public FullyDiagonalEnergyNormPreconditioner<typename CUBEBASIS::Index>
   {
   public:
 

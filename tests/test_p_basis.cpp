@@ -21,14 +21,14 @@ int main()
   cout << "Testing wavelet bases from [P] ..." << endl;
 
 
-  const int d  = 4;
-  const int dT = 6;
+  const int d  = 3;
+  const int dT = 5;
 
   typedef PBasis<d,dT> Basis;
   typedef Basis::Index Index;
 
   //  Basis basis; // no b.c.'s
-  Basis basis(1, 1); // 1st order complementary b.c.'s at x=0 and x=1
+  Basis basis(0,0); // 1st order complementary b.c.'s at x=0 and x=1
   
   //   Basis basis(1, 0); // complementary b.c. at x=0
   //   Basis basis(0, 1); // complementary b.c. at x=1
@@ -51,7 +51,7 @@ int main()
 
   //  abort();  
 
-#if 1
+#if 0
   {
     SparseMatrix<double> M;
     const int j = basis.j0();
@@ -99,16 +99,19 @@ int main()
 #endif
 
 
-#if 0
+#if 1
   
   typedef CubeBasis<Basis,1> CBasis;
   typedef CBasis::Index CIndex;
 
+  //CBasis.set_jmax()
+
   FixedArray1D<int,2> bc;
-  bc[0] = 1;
-  bc[1] = 2;
+  bc[0] = 0;
+  bc[1] = 0;
   
   CBasis cbasis(bc);
+  cbasis.set_jmax(cbasis.j0());
 
   set<CIndex> Lambda;
   for (CIndex lambda(first_generator<Basis,1,CBasis>(&cbasis, cbasis.j0()));; ++lambda) {
@@ -117,24 +120,28 @@ int main()
     if (lambda == last_generator<Basis,1,CBasis>(&cbasis, cbasis.j0())) break;
   }
 
+
    Vector<double> value(1);
    value[0] = 1;
    ConstantFunction<1> const_fun(value);
    IdentityBVP<1> trivial_bvp(&const_fun);
-   
+   trivial_bvp.set_f(&const_fun);
 
    CubeEquation<Basis,1,CBasis> eq(&trivial_bvp, bc);
-
+   
 
    cout << "setting up full right hand side..." << endl;
    Vector<double> rh;
    WaveletTL::setup_righthand_side(eq, Lambda, rh);
+   
+   cout << rh << endl;
+   
    cout << "...done setting up full right hand side" << endl;
 
    InfiniteVector<double, Index> coeff;
    Index index(first_generator(&basis, basis.j0()));
    for (int i = 0;; ++index, i++) {
-     //cout << index << endl;
+     cout << index << endl;
      coeff.set_coefficient(index, rh[i]);
      if (index == last_generator(&basis, basis.j0())) break;
    }
@@ -148,18 +155,19 @@ int main()
 //    ++index;
 //    ++index;
 //    coeff.set_coefficient(index, 1.);
-   
-   cout << "evaluating expansion in dual basis..." << endl;
-   SampledMapping<1> res = evaluate(basis, coeff, false, 8);
+
+
+
+   SampledMapping<1> res = evaluate(basis, coeff, false, 6);
 
    cout << "...done evaluating expansion in dual basis" << endl;
 
-   
+
    std::ofstream ofs5("reproduced_function.m");
    res.matlab_output(ofs5);
    ofs5.close();
 
-   //   abort();
+      abort();
 
 #endif
 
@@ -251,6 +259,10 @@ int main()
       SparseMatrix<double> mj0, mj0_t, mj1, mj1_t, mj0T, mj0T_t, mj1T, mj1T_t;
       basis.assemble_Mj0(level, mj0); mj0_t = transpose(mj0);
       basis.assemble_Mj1(level, mj1); mj1_t = transpose(mj1);
+
+      //cout << "#########################" << endl;
+      //cout << mj1 << endl;
+
       basis.assemble_Mj0T(level, mj0T); mj0T_t = transpose(mj0T);
       basis.assemble_Mj1T(level, mj1T); mj1T_t = transpose(mj1T);
       for (size_t row = 0; row < mj0.row_dimension(); row++)
@@ -272,8 +284,17 @@ int main()
       for (size_t row = 0; row < mj1.row_dimension(); row++)
 	{
 	  mj1.get_row(row, v);
+	  
 	  basis.Mj1_get_row(level, row, w);
+	  
 	  maxerr = max(maxerr, linfty_norm(v-w));
+	  if ( linfty_norm(v-w)> 1.0e-10) {
+	    cout << "########" << endl;
+	    cout << "row = " << row << endl;
+	    cout << "maxerr= " << maxerr << endl;
+	    cout << "v= " << v << endl;
+	    cout << "w= " << w << endl;
+	  }
 	}
       cout << "* j=" << level << ", max. error in Mj1: " << maxerr << endl;
       maxerr = 0.0;
@@ -350,7 +371,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
   for (int level = basis.j0()+1; level <= basis.j0()+2; level++)
     {
       cout << "- checking decompose_t() and reconstruct_t() for some/all generators on the level "
@@ -400,7 +421,7 @@ int main()
   }
 #endif
 
-#if 1
+#if 0
   InfiniteVector<double, Index> coeff;
   Index index(last_wavelet(&basis, basis.j0()));
   coeff.set_coefficient(index,1.0);

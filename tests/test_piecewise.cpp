@@ -5,6 +5,7 @@
 #include <utils/array1d.h>
 #include <numerics/gram_schmidt.h>
 
+
 using namespace std;
 using namespace MathTL;
 
@@ -12,6 +13,7 @@ int main()
 {
   cout << "Testing Piecewise ..." << endl;
 
+#if 1
   Piecewise<double> p, r;
   Polynomial<double> q;
   q = 2;
@@ -55,7 +57,7 @@ int main()
 
   cout << "s'(0.14) symbolically/direct:" << endl << s.differentiate()(0.14)
        << "/" << s.derivative(0.14) << endl;
-
+#endif
 
 //   double x=2.7;
 //   cout << "At x=" << x << ", it takes the value" << endl << p(x) << endl;
@@ -79,6 +81,7 @@ int main()
 //   int k=2;
 //   cout << "p shifted by k=" << k << ":" << endl << p.shift(k) << endl << p << endl;
 
+#if 1
   s.dilate_me(1);
   cout << "s dilated by 2: " << s << endl;
 
@@ -110,6 +113,7 @@ int main()
   gramSchmidtProcess(b);
   cout << "Gram-Schmidt process ..." << endl;
   cout << b << endl;
+#endif
 
   return 0;
 }

@@ -79,7 +79,8 @@ EXEOBJF = \
  test_map_tools.o\
  test_corner_singularity_biharmonic.o\
  test_gram_schmidt.o test_piecewise.o\
- test_fixed_vector.o test_fixed_matrix.o
+ test_fixed_vector.o test_fixed_matrix.o\
+ test_cardinalsplines.o
 
 
 EXES = $(EXEOBJF:.o=)

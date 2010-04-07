@@ -322,6 +322,17 @@ namespace MathTL
       return C(0);
   }
 
+  /*! point evaluation of second derivative */
+  template <class C>
+  C Piecewise<C>::secondDerivative(const C x) const
+  {
+    int k = (int) floor(ldexp(1.0, granularity)*x);
+    typename Piecewise<C>::PiecesType::const_iterator iter = expansion.find(k);
+    if (iter != expansion.end())
+      return (iter->second).value(x,2); // evaluate second derivative
+    else
+      return C(0);
+  }
 
   /*
     sums

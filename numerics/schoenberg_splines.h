@@ -213,6 +213,160 @@ namespace MathTL
 #endif
   }
 
+
+/*
+   expand a Schoenbergspline as a Picewise Polynomial funktion 
+   f = 1 falls es sich um einen Generator an der rechten Intervall Grenze handelt
+   f = 0 sonst
+*/
+template <int d>
+  Piecewise<double> ExpandSchoenbergBspline(const int j, const int k, const int f)
+{
+  Piecewise<double> r(j);
+  Polynomial<double> p, q;
+  if (f==0){
+    p.set_coefficient(0, floor((double) d/2.0) -k);  //floor((double) d/2.0)
+    p.set_coefficient(1, ldexp(1.0, j)); // p(x)=2^jx-k+floor(d/2)
+  }
+  else{
+    p.set_coefficient(0, floor((double) d/2.0) + ldexp(1.0, j) -k);
+    p.set_coefficient(1, -ldexp(1.0, j));
+  }
+  double factor = sqrt(ldexp(1.0, j));
+  int m, n;
+  SparseMatrix<double> coeffs(d, d);
+  switch(d) // precalculated entries for 1<=d<=4
+    {
+    case 1:
+      {
+	if (k>=0) {coeffs.set_entry(0, 0, 1);} // k-floor((double) d/2.0) >=0
+	else {coeffs.set_entry(0, 0, 0);}
+      }
+      break;
+    case 2:
+      {
+        if (k>=1) {   // k-floor((double) d/2.0) >=0
+	coeffs.set_entry(1, 0, 1);
+
+	coeffs.set_entry(0, 1, 2);
+	coeffs.set_entry(1, 1, -1);}
+        else if (k>= 0) {  // k-floor((double) d/2.0) >=-1
+	coeffs.set_entry(0, 1, 2);
+	coeffs.set_entry(1, 1, -1);}
+      }
+      break;
+    case 3:
+      {
+        if (k>=1) { // k-floor((double) d/2.0) >=0
+	coeffs.set_entry(2, 0, 0.5);
+
+	coeffs.set_entry(0, 1, -1.5);
+	coeffs.set_entry(1, 1, 3);
+	coeffs.set_entry(2, 1, -1);
+
+	coeffs.set_entry(0, 2, 4.5);
+	coeffs.set_entry(1, 2, -3);
+	coeffs.set_entry(2, 2, 0.5);
+	}
+	else if (k>=0){ // k-floor((double) d/2.0) >=-1
+	coeffs.set_entry(0, 1, -3.5);
+	coeffs.set_entry(1, 1, 5.0);
+	coeffs.set_entry(2, 1, -1.5);
+
+	coeffs.set_entry(0, 2, 4.5);
+	coeffs.set_entry(1, 2, -3);
+	coeffs.set_entry(2, 2, 0.5);
+	}
+	else if (k>=-1){ // k-floor((double) d/2.0) >=-2
+	coeffs.set_entry(0, 2, 9);
+	coeffs.set_entry(1, 2, -6);
+	coeffs.set_entry(2, 2, 1);}
+      }
+      break;
+    case 4:
+      {
+	if (k>=2) { // k-floor((double) d/2.0) >=0
+	coeffs.set_entry(3, 0, 1.0/6.0);
+
+	coeffs.set_entry(0, 1, 2.0/3.0);
+	coeffs.set_entry(1, 1, -2);
+	coeffs.set_entry(2, 1, 2);
+	coeffs.set_entry(3, 1, -0.5);
+
+	coeffs.set_entry(0, 2, -22.0/3.0);
+	coeffs.set_entry(1, 2, 10);
+	coeffs.set_entry(2, 2, -4);
+	coeffs.set_entry(3, 2, 0.5);
+
+	coeffs.set_entry(0, 3, 32.0/3.0);
+	coeffs.set_entry(1, 3, -8);
+	coeffs.set_entry(2, 3, 2);
+	coeffs.set_entry(3, 3, -1.0/6.0);
+	}
+	else if (k>=1){ // k-floor((double) d/2.0) >=-1
+	coeffs.set_entry(0, 1, 29.0/12.0);
+	coeffs.set_entry(1, 1, -5.75);
+	coeffs.set_entry(2, 1, 4.25);
+	coeffs.set_entry(3, 1, -5.5/6.0);
+
+	coeffs.set_entry(0, 2, -115.0/12.0); 
+	coeffs.set_entry(1, 2, 12.25); 
+	coeffs.set_entry(2, 2, -4.75);
+	coeffs.set_entry(3, 2, 7.0/12.0);
+
+	coeffs.set_entry(0, 3, 32.0/3.0);
+	coeffs.set_entry(1, 3, -8);
+	coeffs.set_entry(2, 3, 2);
+	coeffs.set_entry(3, 3, -1.0/6.0);
+	}
+	else if (k>=0){ // k-floor((double) d/2.0) >=-2
+	coeffs.set_entry(0, 2, -38.0); 
+	coeffs.set_entry(1, 2, 42.0); 
+	coeffs.set_entry(2, 2, -15.0);
+	coeffs.set_entry(3, 2, 21.0/12.0);
+
+	coeffs.set_entry(0, 3, 16.0);
+	coeffs.set_entry(1, 3, -12.0);
+	coeffs.set_entry(2, 3, 3.0);
+	coeffs.set_entry(3, 3, -0.25);
+	}
+	else if (k>=-1){ // k-floor((double) d/2.0) >=-3
+	coeffs.set_entry(0, 3, 64.0);
+	coeffs.set_entry(1, 3, -48.0);
+	coeffs.set_entry(2, 3, 12.0);
+	coeffs.set_entry(3, 3, -1.0);
+	}
+      }
+      break;
+    default:
+    {
+      return r;
+      //coeffs = localBSplineCoeffs(d);
+    }
+}
+  for (n=0; n<=d-1; n++)
+    {
+     // coeffs.findc(n, ind);
+     // CoeffsType col;
+      for (m=0; m<=d-1; m++)
+	q.set_coefficient(m, coeffs.get_entry(m, n));
+      if (f==0){
+        r.set_local_expansion(n + k - floor((double) d/2.0), q.substitute_into(p));  //(int)floor((double) d/2.0)
+      } 
+      else {
+        r.set_local_expansion((int)ldexp(1.0, j) - n - k + floor((double) d/2.0) -1, q.substitute_into(p));
+      }
+    }
+  r *= factor;
+
+  return r;
+   
+}
+
+
+
+
+
   /*!
     a translated and dilated Schoenberg B-spline as a function object
   */

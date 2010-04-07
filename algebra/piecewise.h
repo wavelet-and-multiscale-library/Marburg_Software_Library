@@ -184,6 +184,11 @@ namespace MathTL
     C derivative (const C x) const;
 
     /*!
+      point evaluation of second derivative
+    */
+    C secondDerivative (const C x) const;
+
+    /*!
       in-place multiplication with a constant
     */
     Piecewise<C>& scale (const C c);

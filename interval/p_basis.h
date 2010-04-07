@@ -1,3 +1,5 @@
+
+
 // -*- c++ -*-
 
 // +--------------------------------------------------------------------+
@@ -10,6 +12,9 @@
 #ifndef _WAVELETTL_P_BASIS_H
 #define _WAVELETTL_P_BASIS_H
 
+#define _PP_AUSWERTUNG_DER_WAVELETS   //Auskommentieren von dieser Zeile führt zum alten code
+
+#include <iostream>
 #include <algebra/vector.h>
 #include <algebra/matrix.h>
 #include <algebra/sparse_matrix.h>
@@ -60,6 +65,8 @@ namespace WaveletTL
         Stabile biorthogonale Wavelet-Basen auf dem Intervall
 	Dissertation, Univ. Duisburg-Essen, 2006
   */
+
+
   template <int d, int dT>
   class PBasis
   {
@@ -190,6 +197,15 @@ namespace WaveletTL
 
     //! index of last (rightmost) wavelet on level j >= j0
     Index last_wavelet(const int j) const;
+
+
+#ifdef _PP_AUSWERTUNG_DER_WAVELETS
+    /*
+      Compute the Picewiese expansion of all wavelets and Generatoren
+      for given j, d
+    */
+    void waveletPP(const int j,Array1D<Piecewise<double> >& wavelets) const;
+#endif
 
     //! DECOMPOSE routine, simple version
     /*!
@@ -363,6 +379,25 @@ namespace WaveletTL
 
     //! number of wavelets between coarsest and finest level
     const int degrees_of_freedom() const { return full_collection.size(); };
+
+    //! Wavelets eines bestimmten levels
+
+#ifdef _PP_AUSWERTUNG_DER_WAVELETS
+
+    Array1D<Array1D<Piecewise<double> > > wavelets;
+
+    void setWavelets(){
+    int jmax = 12;  // wählen des max levels   12: 2,41 sek
+                    //                         16: 37,0 sek
+                    //  Pro Level erhähung verdopelt sich die Zeit
+    wavelets.resize(jmax+1);
+    for(int i = 3; i<=jmax; i++){
+       waveletPP(i,wavelets[i]);
+    }
+    }
+
+#endif
+
 
 
   protected:

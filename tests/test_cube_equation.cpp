@@ -99,8 +99,8 @@ int main()
   PoissonBVP<2> poisson(&constant_rhs);
 
 #if 1
-  const int d  = 3;
-  const int dT = 3; // be sure to use a continuous dual here, otherwise the RHS test will fail
+  const int d  = 2;
+  const int dT = 2; // be sure to use a continuous dual here, otherwise the RHS test will fail
 //   typedef DSBasis<d,dT> Basis1D;
   typedef PBasis<d,dT> Basis1D;
 #else

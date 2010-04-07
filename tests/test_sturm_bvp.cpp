@@ -1,4 +1,5 @@
 #include <iostream>
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
 #include <fstream>
 #include <map>
 #include <time.h>
@@ -84,15 +85,33 @@ int main()
 
   TestProblem<1> T;
 
+<<<<<<< test_sturm_bvp.cpp
+  const int d  = 4;
+  const int dT = 4; // be sure to use a continuous dual here, otherwise the RHS test will fail
+//   typedef DSBasis<d,dT> Basis; Basis basis(true, true);
+//   typedef PBasis<d,dT> Basis;
+=======
   const int d  = 3;
   const int dT = 3; // be sure to use a continuous dual here, otherwise the RHS test will fail
   //typedef DSBasis<d,dT> Basis; Basis basis(true, true);
   typedef PBasis<d,dT> Basis;
+>>>>>>> 1.34
 //   typedef JLBasis Basis;
+<<<<<<< test_sturm_bvp.cpp
+=======
   //typedef SplineBasis<d,dT,P_construction,1,1,0,0,SplineBasisData_j0<d,dT,P_construction,1,1,0,0>::j0> Basis;
+>>>>>>> 1.34
+
+<<<<<<< test_sturm_bvp.cpp
+//  typedef SplineBasis<d,dT,P_construction,1,1,0,0,SplineBasisData_j0<d,dT,P_construction,1,1,0,0>::j0> Basis;
+  typedef PBasis<d,dT> Basis;
 
   Basis basis(1,1);
+=======
+  Basis basis(1,1);
+>>>>>>> 1.34
   typedef Basis::Index Index;
+
 
   SturmEquation<Basis> eq(T, basis);
 
@@ -123,7 +142,12 @@ int main()
 #endif  
 
   set<Index> Lambda;
+<<<<<<< test_sturm_bvp.cpp
+//  eq.basis().setWavelets();
+  const int jmax = 12; // eq.basis().j0()+3;
+=======
   const int jmax = 8; // eq.basis().j0()+3;
+>>>>>>> 1.34
   for (Index lambda = eq.basis().first_generator(eq.basis().j0());; ++lambda) {
     Lambda.insert(lambda);
     if (lambda == eq.basis().last_wavelet(jmax)) break;
@@ -137,7 +161,7 @@ int main()
   cout << "- set up (preconditioned) stiffness matrix (j0=" << eq.basis().j0() << ",jmax=" << jmax << ")..." << endl;
   clock_t tstart, tend;
   double time;
-  tstart = clock();
+  tstart = clock(); 
   SparseMatrix<double> A;
   setup_stiffness_matrix(eq, Lambda, A);
   tend = clock();
@@ -159,19 +183,19 @@ int main()
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
-  cout << "- right hand side: " << b << endl;
+//  cout << "- right hand side: " << b << endl;
 
   Vector<double> x(Lambda.size()), err(Lambda.size()); x = 0;
   unsigned int iterations;
   CG(A, b, x, 1e-8, 200, iterations);
   
-  cout << "- solution coefficients: " << x;
-  cout << " with residual (infinity) norm ";
+  //cout << "- solution coefficients: " << x;
+//  cout << " with residual (infinity) norm ";
   A.apply(x, err);
   err -= b;
-  cout << linfty_norm(err) << endl;
+//  cout << linfty_norm(err) << endl;
   
-  cout << "- point values of the solution:" << endl;
+//  cout << "- point values of the solution:" << endl;
   InfiniteVector<double,Index> u;
   unsigned int i = 0;
   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
@@ -179,6 +203,8 @@ int main()
   
   u.scale(&eq, -1);
   SampledMapping<1> s(evaluate(eq.basis(), u, true, 7));
+  cout << "  ... done, time needed: " << time << " seconds" << endl;
+//  cout << "- right hand side: " << b << endl;
   s.matlab_output(cout);
 #endif
 

@@ -84,7 +84,7 @@ EXEOBJF1 = \
   test_regularity.o\
   test_dm.o\
   test_cdf_basis.o test_cdf_expansion.o\
-  test_r_support.o
+  test_r_support.o\
 
 # set 2 of test programs: wavelet bases on the interval ([DS],[P],[JL],[A],[S])
 EXEOBJF2 = \
@@ -93,13 +93,19 @@ EXEOBJF2 = \
   test_jl_basis.o test_jl_support.o\
   test_spline_basis.o test_spline_support.o test_spline_expansion.o\
   test_a_basis.o\
+<<<<<<< Makefile
+  test_s_basis.o\
+  test_s_support.o\
+#  test_i_indexplot.o\ (temporarily commented out)
+=======
   test_s_basis.o test_s_support.o\
   test_i_indexplot.o\
+>>>>>>> 1.196
 
 # set 2a of test programs: wavelet bases on the interval with improved performance (periodic)
 EXEOBJF2a = \
   test_periodic.o test_periodic_support.o\
-  test_periodic_gramian.o
+  test_periodic_gramian.o\
 
 # set 3 of test programs: wavelet bases on general higher-dim. domains ((mapped) cube, tensor prod.)
 EXEOBJF3 = \
@@ -136,7 +142,7 @@ EXEOBJF5 = \
   test_cdd2.o test_duv.o\
   test_cube_equation.o test_cdd1_ldomain.o\
   test_cdd1_gramian.o test_cdd1_poisson1d.o test_cdd1_helm1d.o\
-  test_helmholtz_equation.o
+  test_helmholtz_equation.o\
 
 # set 6 of test programs: adaptive wavelet schemes for parabolic equations
 EXEOBJF6 = \
@@ -147,6 +153,12 @@ EXEOBJF7 = \
   test_full_laplacian.o test_full_laplacian_speed.o\
   test_full_gramian.o test_full_helmholtz.o\
   test_full_ring_helmholtz.o
+
+# set 8 of test programs: ExpandASPP	
+EXEOBJF8 = \
+  test_expandWavelet.o\
+  test_cube_equation.o\
+  test_sturm_bvp.o\
 
 
 EXES1 = $(EXEOBJF1:.o=)
@@ -159,10 +171,11 @@ EXES4 = $(EXEOBJF4:.o=)
 EXES5 = $(EXEOBJF5:.o=)
 EXES6 = $(EXEOBJF6:.o=)
 EXES7 = $(EXEOBJF7:.o=)
+EXES8 = $(EXEOBJF8:.o=)
 
 all:: tests
 
-tests:: tests1 tests2 tests2a tests3 tests3a tests3b tests4 tests5 tests6 tests7
+tests:: tests1 tests2 tests2a tests3 tests3a tests3b tests4 tests5 tests6 tests7 tests8
 
 tests1:: $(EXES1)
 tests2:: $(EXES2)
@@ -174,6 +187,7 @@ tests4:: $(EXES4)
 tests5:: $(EXES5)
 tests6:: $(EXES6)
 tests7:: $(EXES7)
+tests8:: $(EXES8)
 
 clean::
 	rm -f $(EXEOBJF1) $(EXES1)
@@ -186,6 +200,7 @@ clean::
 	rm -f $(EXEOBJF5) $(EXES5)
 	rm -f $(EXEOBJF6) $(EXES6)
 	rm -f $(EXEOBJF7) $(EXES7)
+	rm -f $(EXEOBJF8) $(EXES8)
 
 veryclean:: clean
 	rm -f *~
@@ -324,6 +339,20 @@ else
 endif
 
 $(EXES7): %: %.o
+ifeq ($(DEBUGMODE),on)
+	$(CXX) $(LDFLAGS) $< -g -o $@
+else
+	$(CXX) $(LDFLAGS) $< -o $@
+endif
+
+$(EXEOBJF8): %.o: %.cpp
+ifeq ($(DEBUGMODE),on)
+	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
+else
+	$(CXX) $(CXXFLAGS) -c -DNDEBUG -o $@ $<
+endif
+
+$(EXES8): %: %.o
 ifeq ($(DEBUGMODE),on)
 	$(CXX) $(LDFLAGS) $< -g -o $@
 else

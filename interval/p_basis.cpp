@@ -1,5 +1,5 @@
 // implementation for p_basis.h
-
+#include <iostream>
 #include <cassert>
 #include <cmath>
 #include <numerics/schoenberg_splines.h>
@@ -18,6 +18,9 @@ namespace WaveletTL
     this->s1 = s1;
 
     setup();
+#ifdef _PP_AUSWERTUNG_DER_WAVELETS
+    setWavelets();
+#endif
   }
 
   template <int d, int dT>
@@ -26,6 +29,9 @@ namespace WaveletTL
     this->s1 = bc_right ? 1 : 0;
 
     setup();
+#ifdef _PP_AUSWERTUNG_DER_WAVELETS
+    setWavelets();
+#endif
   }
 
   template <int d, int dT>
@@ -2764,5 +2770,23 @@ namespace WaveletTL
     WaveletTL::evaluate(*this, derivative, lambda, points, values);
   }
 
+
+#ifdef _PP_AUSWERTUNG_DER_WAVELETS
+
+   /* Compute the Picewiese expansion of all wavelets and Generatoren for given j, d */
+  template <int d, int dT>
+  inline
+  void
+  PBasis<d,dT>::waveletPP(const int j, Array1D<Piecewise<double> >& wavelets) const
+  {
+   int i = std::max((1<<j),(1<<d));
+   wavelets.resize(i); //-ell1<d>()
+   for(int k=0; k<=(i-1); k++){
+     Index lambda1(j,1,k,this);
+     wavelets[k] = expandAsPP(*this,lambda1);
+   }
+
+  }
+#endif
 
 }

@@ -1,6 +1,18 @@
 // implementation for tbasis.h
 #include <numerics/gauss_data.h>
 
+#include "tbasis_index.h"
+
+/*
+#include <utils/array1d.h>
+#include <utils/fixed_array1d.h>
+#include <geometry/point.h>
+#include <geometry/grid.h>
+#include <geometry/sampled_mapping.h>
+
+using namespace MathTL;
+*/
+
 namespace WaveletTL
 {
   	template <class IBASIS, unsigned int DIM>
@@ -143,6 +155,32 @@ namespace WaveletTL
 
         template <class IBASIS, unsigned int DIM>
         typename TensorBasis<IBASIS,DIM>::Index
+        TensorBasis<IBASIS,DIM>::first_generator(const unsigned int j) const
+        {
+            typename Index::type_type e;
+            typename Index::translation_type k;
+            for (unsigned int i = 0; i < DIM; i++) {
+                e[i]=0;
+                k[i]=bases_[i]->DeltaLmin();
+            }
+            return Index(j0_, e, k, this);
+        }
+
+        template <class IBASIS, unsigned int DIM>
+        typename TensorBasis<IBASIS,DIM>::Index
+        TensorBasis<IBASIS,DIM>::first_generator(const MultiIndex<int,DIM> j) const
+        {
+            typename Index::type_type e;
+            typename Index::translation_type k;
+            for (unsigned int i = 0; i < DIM; i++) {
+                e[i]=0;
+                k[i]=bases_[i]->DeltaLmin();
+            }
+            return Index(j0_, e, k, this);
+        }
+
+        template <class IBASIS, unsigned int DIM>
+        typename TensorBasis<IBASIS,DIM>::Index
         TensorBasis<IBASIS,DIM>::last_generator() const
         {
             typename TensorIndex<IBASIS,DIM,TensorIndex<IBASIS,DIM> >::type_type e;
@@ -166,7 +204,7 @@ namespace WaveletTL
             typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::translation_type k;
             bool first_level = true;
             for (unsigned int i = 0; i < DIM; i++) {
-                if (j[i] == j0[i])
+                if (j[i] == j0_[i])
                 {
                     e[i] = 0;
                     k[i] = bases_[i]->DeltaLmin();
@@ -187,9 +225,30 @@ namespace WaveletTL
 
         template <class IBASIS, unsigned int DIM>
         typename TensorBasis<IBASIS,DIM>::Index
+        TensorBasis<IBASIS,DIM>::first_wavelet(const int level) const
+        {
+            assert(level >= multi_degree(j0_) );
+            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::level_type j;
+            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::type_type e;
+            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::translation_type k;
+
+            j[DIM-1] = j0_[DIM-1] + level - multi_degree(j0_);
+            e[DIM-1] = 1;
+            k[DIM-1] = bases_[DIM-1]->Nablamin();
+
+            for (unsigned int i = 0; i < DIM-1; i++)
+            {
+                j[i] = j0_[i];
+                e[i] = 0;
+                k[i] = bases_[i]->DeltaLmin();
+            }
+            return TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(j, e, k, this);
+        }
+
+        template <class IBASIS, unsigned int DIM>
+        typename TensorBasis<IBASIS,DIM>::Index
         TensorBasis<IBASIS,DIM>::last_wavelet(const MultiIndex<int,DIM> j) const
         {
-
             assert(multi_degree(j) > multi_degree(j0_)
                     || ((multi_degree(j) == multi_degree(j0_)) && (j0_ <= j))
                   );
@@ -198,6 +257,25 @@ namespace WaveletTL
             for (unsigned int i = 0; i < DIM; i++) {
                 e[i] = 1;
                 k[i] = bases_[i]->Nablamax(j[i]);
+            }
+            return TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(j, e, k, this);
+        }
+
+        template <class IBASIS, unsigned int DIM>
+        typename TensorBasis<IBASIS,DIM>::Index
+        TensorBasis<IBASIS,DIM>::last_wavelet(const int level) const
+        {
+            assert(level >= multi_degree(j0_));
+            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::level_type j;
+            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::type_type e;
+            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::translation_type k;
+            j[0]= j0_[0]+level-multi_degree(j0_);
+            e[0]=1;
+            k[0]= bases_[0]->Nablamax(j[0]);
+            for (unsigned int i = 1; i < DIM; i++) {
+                j[i] = j0_[i];
+                e[i] = 1;
+                k[i] = bases_[i]->Nablamax(j0_[i]);
             }
             return TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(j, e, k, this);
         }
@@ -307,7 +385,7 @@ namespace WaveletTL
         void
         TensorBasis<IBASIS,DIM>::setup_full_collection()
         {
-            if (jmax_ < j0_) {
+            if (jmax_ < multi_degree(j0_) ) {
                 cout << "TensorBasis<IBASIS,DIM>::setup_full_collection(): specify a maximal level jmax_ first!" << endl;
                 abort();
             }
@@ -316,7 +394,7 @@ namespace WaveletTL
             cout << "setting up collection of wavelet indices..." << endl;
             full_collection.resize(degrees_of_freedom);
             int k = 0;
-            for (Index ind = first_generator(); ind <= last_wavelet(jmax_); ++ind) {
+            for (Index ind = first_generator(), itend = last_wavelet(jmax_); ind <= itend; ++ind) {
                 full_collection[k] = ind;
                 k++;
             }

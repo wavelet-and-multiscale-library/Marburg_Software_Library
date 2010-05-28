@@ -94,28 +94,36 @@ public:
 int main()
 {
   cout << "Testing wavelet-Galerkin solution of an elliptic equation on the cube ..." << endl;
-
-  ConstantFunction<2> constant_rhs(Vector<double>(1, "1.0"));
-  PoissonBVP<2> poisson(&constant_rhs);
-
 #if 1
-  const int d  = 2;
-  const int dT = 2; // be sure to use a continuous dual here, otherwise the RHS test will fail
-//   typedef DSBasis<d,dT> Basis1D;
+  const int d  = 3;
+  const int dT = 3; // be sure to use a continuous dual here, otherwise the RHS test will fail
+  const int dim = 2;
+  const int radius = 6; // range for the Level in the indexset of the stiffness matrix
+
+  ConstantFunction<dim> constant_rhs(Vector<double>(1, "1.0"));
+  PoissonBVP<dim> poisson(&constant_rhs);
+  //typedef DSBasis<d,dT> Basis1D;
   typedef PBasis<d,dT> Basis1D;
 #else
   typedef JLBasis Basis1D; // does not work at the moment
 #endif
-  typedef CubeBasis<Basis1D,2> CBasis;
+  typedef CubeBasis<Basis1D,dim> CBasis;
   typedef CBasis::Index Index;
 
-  FixedArray1D<bool,4> bc;
-  bc[0] = bc[1] = bc[2] = bc[3] = true;
+  FixedArray1D<bool,(2*dim)> bc;
+  if (dim==1)
+  {
+      bc[0] = bc[1] = true;
+  }
+  else
+  {
+      bc[0] = bc[1] = bc[2] = bc[3] = true;
+  }
 
-  CubeEquation<Basis1D,2,CBasis> eq(&poisson, bc);
-
+  //TensorEquation<Basis1D,dim,Basis> eq(&poisson, bc);
+  CubeEquation<Basis1D,dim,CBasis> eq(&poisson, bc);
   InfiniteVector<double, Index> coeffs;
-
+  
 #if 0
   coeffs[first_generator<Basis1D,2,CBasis>(&eq.basis(), eq.basis().j0())] = 1.0;
   coeffs[last_generator<Basis1D,2,CBasis>(&eq.basis(), eq.basis().j0())] = 2.0;
@@ -149,7 +157,7 @@ int main()
   set<Index> Lambda;
   for (Index lambda = first_generator<Basis1D,2,CBasis>(&eq.basis(), eq.basis().j0());; ++lambda) {
     Lambda.insert(lambda);
-    if (lambda == last_wavelet<Basis1D,2,CBasis>(&eq.basis(), eq.basis().j0()+1)) break;
+    if (lambda == last_wavelet<Basis1D,2,CBasis>(&eq.basis(), eq.basis().j0()+0)) break;
   }
   
 //   cout << "- set up stiffness matrix with respect to the index set Lambda=" << endl;
@@ -157,7 +165,7 @@ int main()
 //     cout << *it << endl;
 
   // choose another rhs
-  const unsigned int N = 1;
+  const unsigned int N = 2;
   myRHS<N> rhs;
   poisson.set_f(&rhs);
   eq.set_bvp(&poisson);
@@ -170,7 +178,23 @@ int main()
   tstart = clock();
   SparseMatrix<double> A;
   setup_stiffness_matrix(eq, Lambda, A);
+  
+      double help, normA;
+      unsigned int iterations2;
+      
+      LanczosIteration(A, 1e-6, help, normA, 200, iterations2);
+      double normAinv ( 1./help);
+      
+      cout << "normA = "<<normA<<endl;
+      cout << "normAinv = "<<normAinv<<endl;
+      
   A.compress(1e-15);
+      LanczosIteration(A, 1e-6, help, normA, 200, iterations2);
+      normAinv = ( 1./help);
+
+      cout << "normA = "<<normA<<endl;
+      cout << "normAinv = "<<normAinv<<endl;
+
 
 //   cout << "  output in file \"stiff_out.m\"..." << endl;
 //   std::ofstream ofs("stiff_out.m");
@@ -224,10 +248,10 @@ int main()
   u_Lambda_error_stream.close();
   cout << "  ... done, see file 'u_lambda_error.m', pointwise maximal error: " << maximum_norm(s.values()) << endl;
   
-//   SampledMapping<2> sexact(s, u_Lambda);
-//   std::ofstream u_exact_stream("u_exact.m");
-//   sexact.matlab_output(u_exact_stream);
-//   u_exact_stream.close();
+  SampledMapping<2> sexact(s, u_Lambda);
+  std::ofstream u_exact_stream("u_exact.m");
+  sexact.matlab_output(u_exact_stream);
+  u_exact_stream.close();
 
 //   SampledMapping<2> srhs(s, rhs);
 //   std::ofstream rhs_stream("rhs.m");

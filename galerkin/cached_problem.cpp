@@ -562,6 +562,7 @@ namespace WaveletTL
 	    typedef typename Column::value_type value_type;
 	    it = col.insert(lb, value_type(j, Block()));
 	    std::list<Index> nus;
+
 	    intersecting_wavelets(basis(), *(problem->basis().get_wavelet(col_it->first)),
 				  std::max(j, basis().j0()),
 				  j == (basis().j0()-1),

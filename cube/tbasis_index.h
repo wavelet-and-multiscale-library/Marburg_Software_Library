@@ -101,7 +101,7 @@ namespace WaveletTL
     	// Underlying basis
     	const TENSORBASIS* basis() const { return basis_; }
 
-    	const int number() const { return num_; }
+    	const unsigned long int number() const { return num_; }
 
 	protected:
 
@@ -118,7 +118,7 @@ namespace WaveletTL
     	MultiIndex<int,DIM> k_;
 
     	// Number of the index, only for the elements of a wavelet bases
-    	int num_;
+    	unsigned long int num_;
 
 	};
 
@@ -152,11 +152,18 @@ namespace WaveletTL
 	last_generator(const TENSORBASIS* basis);
 
 	/*
-     * index of first wavelet on level j >= j0
-     */
+         * index of first wavelet on level j >= j0
+         */
 	template <class IBASIS, unsigned int DIM, class TENSORBASIS>
 	TensorIndex<IBASIS,DIM,TENSORBASIS>
 	first_wavelet(const TENSORBASIS* basis, const typename TensorIndex<IBASIS,DIM,TENSORBASIS>::level_type j);
+ 
+        /*
+         * Index of first wavelet on level j >= ||j0||_1
+         */
+        template <class IBASIS, unsigned int DIM, class TENSORBASIS>
+	TensorIndex<IBASIS,DIM,TENSORBASIS> 
+        first_wavelet(const int level);
 
 	/*
   	 * index of last wavelet on level j >= j0
@@ -165,9 +172,16 @@ namespace WaveletTL
 	TensorIndex<IBASIS,DIM,TENSORBASIS>
 	last_wavelet(const TENSORBASIS* basis, const typename TensorIndex<IBASIS,DIM,TENSORBASIS>::level_type j);
 
+        /*
+         * Index of last wavelet on level j >= ||j0||_1
+         */
+        template <class IBASIS, unsigned int DIM, class TENSORBASIS>
+	TensorIndex<IBASIS,DIM,TENSORBASIS>
+	last_wavelet(const TENSORBASIS* basis, const unsigned int level);
+
 	/*
-     * number of first generator on level j0
-     */
+         * number of first generator on level j0
+         */
 	template <class IBASIS, unsigned int DIM, class TENSORBASIS>
 	const int
 	first_generator_num(const TENSORBASIS* basis);
@@ -192,6 +206,10 @@ namespace WaveletTL
 	template <class IBASIS, unsigned int DIM, class TENSORBASIS>
 	const int
 	last_wavelet_num(const TENSORBASIS* basis, const typename TensorIndex<IBASIS,DIM,TENSORBASIS>::level_type j);
+
+        template <class IBASIS, unsigned int DIM, class TENSORBASIS>
+	const int
+	last_wavelet_num(const TENSORBASIS* basis, const unsigned int level);
 }
 
 #include <cube/tbasis_index.cpp>

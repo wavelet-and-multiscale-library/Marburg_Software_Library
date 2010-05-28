@@ -45,16 +45,30 @@ namespace WaveletTL
 			  const typename TensorBasis<IBASIS,DIM>::Index& mu,
 			  typename TensorBasis<IBASIS,DIM>::Support& supp);
 
-  /*!
-    For a given wavelet \psi_\lambda, compute all generators/wavelets
-    \psi_\nu with level |\nu|=j (multiindex), such that the respective supports
-    have a nontrivial intersection
-  */
-  template <class IBASIS, unsigned int DIM>
-  void intersecting_wavelets(const TensorBasis<IBASIS,DIM>& basis,
-			     const typename TensorBasis<IBASIS,DIM>::Index& lambda,
-			     const MultiIndex<int,DIM> j, const bool generators,
-			     std::list<typename TensorBasis<IBASIS,DIM>::Index>& intersecting);
+  
+    /*
+     * For a given wavelet \psi_\lambda, compute all generators/wavelets
+     * \psi_\nu with level |\nu|=j (multiindex), such that the respective supports
+     * have a nontrivial intersection.
+     * OUTPUT IS NOT(!) SORTED
+     */
+    template <class IBASIS, unsigned int DIM>
+    void intersecting_wavelets(const TensorBasis<IBASIS,DIM>& basis,
+                               const typename TensorBasis<IBASIS,DIM>::Index& lambda,
+                               const MultiIndex<int,DIM> j, const bool generators,
+                               std::list<typename TensorBasis<IBASIS,DIM>::Index>& intersecting);
+
+    /*
+     * For a given wavelet \psi_\lambda, compute all generators & wavelets
+     * \psi_\nu with level |\nu|=j (multiindex), such that the respective supports
+     * have a nontrivial intersection.
+     * OUTPUT IS SORTED
+     */
+    template <class IBASIS, unsigned int DIM>
+    void intersecting_elements(const TensorBasis<IBASIS,DIM>& basis,
+                               const typename TensorBasis<IBASIS,DIM>::Index& lambda,
+                               const MultiIndex<int,DIM> j,
+                               std::list<typename TensorBasis<IBASIS,DIM>::Index>& intersecting);
 
   /*!
     Decide whether the support of a given (primal) generator/wavelet \psi_\lambda

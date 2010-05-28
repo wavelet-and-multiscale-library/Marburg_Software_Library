@@ -70,6 +70,11 @@ namespace WaveletTL
     //! scale j
     const int j() const { return j_; }
 
+    /*
+     * for convenience: level_type (=int)
+    */
+    typedef int level_type;
+
     //! type index type
     typedef int type_type;
 

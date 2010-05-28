@@ -19,7 +19,8 @@ namespace WaveletTL
   //! enum for the different compression strategies, see below
   enum CompressionStrategy {
     CDD1,
-    St04a
+    St04a,
+    tensor_simple
   };
 
   /*!

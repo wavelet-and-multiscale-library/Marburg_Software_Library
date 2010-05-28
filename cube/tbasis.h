@@ -84,16 +84,20 @@ namespace WaveletTL
     	//! Coarsest possible level j0
     	inline const MultiIndex<int,DIM> j0() const { return j0_; }
 
-    	void set_jmax(const MultiIndex<int,DIM> jmax) {
-      		jmax_ = jmax;
+    	inline void set_jmax(const MultiIndex<int,DIM> jmax) {
+      		jmax_ = multi_degree(jmax);
       		setup_full_collection();
     	}
 
+        inline void set_jmax(const int jmax) {
+      		jmax_ = jmax;
+      		setup_full_collection();
+    	}
     	//! Wavelet index class
     	typedef TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> > Index;
 
     	//! Read access to the bases
-    	const FixedArray1D<IBASIS*,DIM>& bases() const { return bases_; }
+    	inline const FixedArray1D<IBASIS*,DIM>& bases() const { return bases_; }
 
     	/*
     	 * Geometric type of the support sets
@@ -117,31 +121,41 @@ namespace WaveletTL
     	 * Critical Sobolev regularity for the primal generators/wavelets.
     	 * We assume the same regularity in each dimension.
     	 */
-    	static double primal_regularity() { return IBASIS::primal_regularity(); }
+    	inline static double primal_regularity() { return IBASIS::primal_regularity(); }
 
     	/*
     	 * Degree of polynomial reproduction for the primal generators/wavelets
     	 * We assume the same polynomial degree in each dimension.
     	 * */
-    	static unsigned int primal_polynomial_degree() { return IBASIS::primal_polynomial_degree(); }
+    	inline static unsigned int primal_polynomial_degree() { return IBASIS::primal_polynomial_degree(); }
 
     	/*
     	 * Number of vanishing moments for the primal wavelets.
     	 * We assume the same number of vanishing moments in each dimension.
     	 */
-    	static unsigned int primal_vanishing_moments() { return IBASIS::primal_vanishing_moments(); }
+    	inline static unsigned int primal_vanishing_moments() { return IBASIS::primal_vanishing_moments(); }
 
-    	//! Index of first generator on level j0
+    	//! Index of first generator 
     	Index first_generator() const;
 
-	    //! Index of last generator on level j0
+        // For compatibility reasons, returns the same as first_generator()
+        Index first_generator(const unsigned int j) const;
+        Index first_generator(const MultiIndex<int,DIM> j) const;
+
+        //! Index of last generator on level j0
     	Index last_generator() const;
 
     	//! Index of first wavelet on level j >= j0
     	Index first_wavelet(const MultiIndex<int,DIM> j) const;
+        
+        //! Index of first wavelet on level j >= ||j0||_1
+        Index first_wavelet(const int level) const;
 
-    	//! Index of last wavelet on level j >= j0
+    	//! Index of last wavelet on sublevel j >= j0
     	Index last_wavelet(const MultiIndex<int,DIM> j) const;
+
+        //! Index of last wavelet on level j >= ||j0||_1
+    	Index last_wavelet(const int level) const;
 
     	/*
     	 * For a given function, compute all integrals w.r.t. the primal
@@ -192,8 +206,8 @@ namespace WaveletTL
     	//int j0_[DIM];
 
     	//! Finest possible level j0
-    	MultiIndex<int,DIM> jmax_;
-    	//int jmax_[DIM];
+    	//MultiIndex<int,DIM> jmax_;
+    	unsigned int jmax_;
 
     	/*
     	 * The instances of the 1D bases (in general, we will of course

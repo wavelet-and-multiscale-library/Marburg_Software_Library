@@ -361,15 +361,16 @@ namespace WaveletTL
 	bool
 	TensorIndex<IBASIS,DIM,TENSORBASIS>::operator < (const TensorIndex& lambda) const
 	{
-            // Ordering by level (1-norm of) j
-            // then standard lexicographic order on (j,e,k),
-            // we assume that e and k are already lexicographically ordered (cf. MultiIndex)
+            // Ordering primary by level j as in MultiIndex
+            // (ordering of \N^dim, that is the distance from 0, that is the same as
+            // ordering first by 1-norm of j and in the case of equal norms lexicographical in j.)
+            // secondly and tertiaryly lexicographical in e and k.
             return ( multi_degree(j_) < multi_degree(lambda.j()) ||
                     (multi_degree(j_) == multi_degree(lambda.j()) &&
                      (j_ < lambda.j() ||
-                      (j_ == lambda.j() &&
-                       (e_ < lambda.e() ||
-                        (e_ == lambda.e() && k_ < lambda.k())
+                      (j_ == lambda.j() && 
+                       (e_.lex(lambda.e()) ||
+                        (e_ == lambda.e() && k_.lex(lambda.k()))
                        )
                       )
                      )
@@ -430,6 +431,29 @@ namespace WaveletTL
             return TensorIndex<IBASIS,DIM,TENSORBASIS>(j, e, k, basis);
         }
 
+
+        template <class IBASIS, unsigned int DIM, class TENSORBASIS>
+        TensorIndex<IBASIS,DIM,TENSORBASIS>
+        first_wavelet(const TENSORBASIS* basis, const int level)
+        {
+            assert(level >= multi_degree(basis->j0()) );
+            typename TensorIndex<IBASIS,DIM,TENSORBASIS>::level_type j;
+            typename TensorIndex<IBASIS,DIM,TENSORBASIS>::type_type e;
+            typename TensorIndex<IBASIS,DIM,TENSORBASIS>::translation_type k;
+
+            j[DIM-1] = basis->jo()[DIM-1] + level - multi_degree(basis->j0());
+            e[DIM-1] = 1;
+            k[DIM-1] = basis->basis()[DIM-1]->Nablamin();
+
+            for (unsigned int i = 0; i < DIM-1; i++)
+            {
+                j[i] = basis->j0()[i];
+                e[i] = 0;
+                k[i] = basis->bases[i]->DeltaLmin();
+            }
+            return TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(j, e, k, basis);
+        }
+
   	template <class IBASIS, unsigned int DIM, class TENSORBASIS>
   	TensorIndex<IBASIS,DIM,TENSORBASIS>
   	last_wavelet(const TENSORBASIS* basis, const typename TensorIndex<IBASIS,DIM,TENSORBASIS>::level_type j)
@@ -444,6 +468,26 @@ namespace WaveletTL
                 k[i] = basis->bases()[i]->Nablamax(j[i]);
             }
             return TensorIndex<IBASIS,DIM,TENSORBASIS>(j, e, k, basis);
+	}
+
+        // PERFORMANCE !! viele Aufrufe von j0()
+        template <class IBASIS, unsigned int DIM, class TENSORBASIS>
+  	TensorIndex<IBASIS,DIM,TENSORBASIS>
+  	last_wavelet(const TENSORBASIS* basis, const unsigned int level)
+  	{
+            assert(level >= multi_degree(basis->j0()) );
+            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::level_type j;
+            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::type_type e;
+            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::translation_type k;
+            j[0]= basis->j0()[0]+level-multi_degree(basis->j0());
+            e[0]=1;
+            k[0]= basis->bases()[0]->Nablamax(j[0]);
+            for (unsigned int i = 1; i < DIM; i++) {
+                j[i] = basis->j0()[i];
+                e[i] = 1;
+                k[i] = basis->bases()[i]->Nablamax(basis->bases()[i]->j0());
+            }
+            return TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(j, e, k, basis);
 	}
 
 	template <class IBASIS, unsigned int DIM, class TENSORBASIS>
@@ -482,6 +526,17 @@ namespace WaveletTL
             // for (unsigned int i = 0; i < DIM; i++)
             //     assert(j[i] >= (basis->bases()[i]->j0()));
             TensorIndex<IBASIS,DIM,TENSORBASIS> temp (last_wavelet<IBASIS,DIM,TENSORBASIS>(basis,j));
+            return temp.number();
+	}
+
+        template <class IBASIS, unsigned int DIM, class TENSORBASIS>
+	const int
+	last_wavelet_num(const TENSORBASIS* basis, const unsigned int level)
+	{
+            // Assertions are checked in last_wavelet
+            // for (unsigned int i = 0; i < DIM; i++)
+            //     assert(j[i] >= (basis->bases()[i]->j0()));
+            TensorIndex<IBASIS,DIM,TENSORBASIS> temp (last_wavelet<IBASIS,DIM,TENSORBASIS>(basis,level));
             return temp.number();
 	}
 }

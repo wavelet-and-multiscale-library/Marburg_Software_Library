@@ -40,6 +40,13 @@ namespace WaveletTL
   template <class PROBLEM>
   void CDD2_SOLVE(const PROBLEM& P, const double nu, const double epsilon,
 		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon);
+
+  /* same as above, but with different APPLY routine */
+  #if 1
+  template <class PROBLEM>
+  void CDD2_SOLVE_TENSOR(const PROBLEM& P, const double nu, const double epsilon,
+		         InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon);
+ #endif
 }
 
 #include <adaptive/cdd2.cpp>

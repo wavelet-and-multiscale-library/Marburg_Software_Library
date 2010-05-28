@@ -85,33 +85,17 @@ int main()
 
   TestProblem<1> T;
 
-<<<<<<< test_sturm_bvp.cpp
   const int d  = 4;
   const int dT = 4; // be sure to use a continuous dual here, otherwise the RHS test will fail
-//   typedef DSBasis<d,dT> Basis; Basis basis(true, true);
-//   typedef PBasis<d,dT> Basis;
-=======
-  const int d  = 3;
-  const int dT = 3; // be sure to use a continuous dual here, otherwise the RHS test will fail
-  //typedef DSBasis<d,dT> Basis; Basis basis(true, true);
-  typedef PBasis<d,dT> Basis;
->>>>>>> 1.34
-//   typedef JLBasis Basis;
-<<<<<<< test_sturm_bvp.cpp
-=======
-  //typedef SplineBasis<d,dT,P_construction,1,1,0,0,SplineBasisData_j0<d,dT,P_construction,1,1,0,0>::j0> Basis;
->>>>>>> 1.34
 
-<<<<<<< test_sturm_bvp.cpp
-//  typedef SplineBasis<d,dT,P_construction,1,1,0,0,SplineBasisData_j0<d,dT,P_construction,1,1,0,0>::j0> Basis;
+  // typedef DSBasis<d,dT> Basis; //Basis basis(true, true);
+  // typedef PBasis<d,dT> Basis;
+  // typedef JLBasis Basis;
+  // typedef SplineBasis<d,dT,P_construction,1,1,0,0,SplineBasisData_j0<d,dT,P_construction,1,1,0,0>::j0> Basis;
   typedef PBasis<d,dT> Basis;
 
   Basis basis(1,1);
-=======
-  Basis basis(1,1);
->>>>>>> 1.34
   typedef Basis::Index Index;
-
 
   SturmEquation<Basis> eq(T, basis);
 
@@ -142,12 +126,8 @@ int main()
 #endif  
 
   set<Index> Lambda;
-<<<<<<< test_sturm_bvp.cpp
 //  eq.basis().setWavelets();
   const int jmax = 12; // eq.basis().j0()+3;
-=======
-  const int jmax = 8; // eq.basis().j0()+3;
->>>>>>> 1.34
   for (Index lambda = eq.basis().first_generator(eq.basis().j0());; ++lambda) {
     Lambda.insert(lambda);
     if (lambda == eq.basis().last_wavelet(jmax)) break;
@@ -183,6 +163,7 @@ int main()
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
+
 //  cout << "- right hand side: " << b << endl;
 
   Vector<double> x(Lambda.size()), err(Lambda.size()); x = 0;
@@ -191,6 +172,7 @@ int main()
   
   //cout << "- solution coefficients: " << x;
 //  cout << " with residual (infinity) norm ";
+
   A.apply(x, err);
   err -= b;
 //  cout << linfty_norm(err) << endl;
@@ -202,15 +184,25 @@ int main()
     u.set_coefficient(*it, x[i]);
   
   u.scale(&eq, -1);
+
   SampledMapping<1> s(evaluate(eq.basis(), u, true, 7));
   cout << "  ... done, time needed: " << time << " seconds" << endl;
 //  cout << "- right hand side: " << b << endl;
   s.matlab_output(cout);
+
 #endif
 
-#if 0
+#if 1
   cout << "- estimate for ||D^{-1}AD^{-1}||: " << eq.norm_A() << endl;
   cout << "- estimate for ||(D^{-1}AD^{-1})^{-1}||: " << eq.norm_Ainv() << endl;
+  // von Ulli importiert:
+      double help, normA;
+      unsigned int iterations2;
+      LanczosIteration(A, 1e-6, help, normA, 200, iterations2);
+      double normAinv ( 1./help);
+      cout << "normA = "<<normA<<endl;
+      cout << "normAinv = "<<normAinv<<endl;
+      cout << "kond = "<<(normA*normAinv)<<endl;
 #endif
 
 #if 0

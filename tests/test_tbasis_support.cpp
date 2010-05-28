@@ -36,7 +36,7 @@ int main()
     Basis basis(bc);
 #endif
 
-#if 1
+#if 0
     cout << "- testing calculation of supports:" << endl;
     Basis::Support supp;
     for (Index lambda(first_generator<Basis1D,2,Basis>(&basis));; ++lambda) {
@@ -50,6 +50,60 @@ int main()
         if (lambda.number() == 20) break;
     }
 #endif
+
+#if 1
+    Index lambda = first_generator<Basis1D,2,Basis>(&basis);
+    typedef TensorIndex<Basis1D,2,Basis>::level_type level_type;
+    level_type lambda_j(basis.j0());
+    
+    typedef std::list<Index> SupportList;
+    SupportList nus;
+    cout << "intersecting generators" << endl;
+    intersecting_wavelets<Basis1D,2>(basis, lambda, lambda_j, true, nus);
+    for (SupportList::const_iterator it(nus.begin()); it != nus.end(); ++it)
+    {
+        Basis::Support supp;
+        intersect_supports(basis, lambda, *it, supp);
+        cout << "    nu=" << *it
+             << " with support intersection "
+             << "2^{-{" << supp.j[0] << ", " << supp.j[1] << "}}"
+             << "[" << supp.a[0] << "," << supp.b[0]
+             << "]x[" << supp.a[1] << "," << supp.b[1] << "]"
+             << " and .number()" << (*it).number()
+             << endl;
+    }
+    lambda_j[0]++;
+    cout << "intersecting wavelets on level " << lambda_j<< endl;
+    intersecting_wavelets<Basis1D,2>(basis, lambda, lambda_j, false, nus);
+    for (SupportList::const_iterator it(nus.begin()); it != nus.end(); ++it)
+    {
+        Basis::Support supp;
+        intersect_supports(basis, lambda, *it, supp);
+        cout << "    nu=" << *it
+             << " with support intersection "
+             << "2^{-{" << supp.j[0] << ", " << supp.j[1] << "}}"
+             << "[" << supp.a[0] << "," << supp.b[0]
+             << "]x[" << supp.a[1] << "," << supp.b[1] << "]"
+             << " and .number()" << (*it).number()
+             << endl;
+    }
+    
+    cout << " Testing intersecting_elements on level "<< lambda_j <<endl;
+    intersecting_elements<Basis1D,2>(basis, lambda, lambda_j, nus);
+    for (SupportList::const_iterator it(nus.begin()); it != nus.end(); ++it)
+    {
+        Basis::Support supp;
+        intersect_supports(basis, lambda, *it, supp);
+        cout << "    nu=" << *it
+             << " with support intersection "
+             << "2^{-{" << supp.j[0] << ", " << supp.j[1] << "}}"
+             << "[" << supp.a[0] << "," << supp.b[0]
+             << "]x[" << supp.a[1] << "," << supp.b[1] << "]"
+             << " and .number()" << (*it).number()
+             << endl;
+    }
+#endif
+
 #if 0
     unsigned int von(143),bis(143);
     cout << "- compute all intersecting wavelets"<<endl;
@@ -125,7 +179,7 @@ int main()
         if (lambda == last_wavelet<Basis1D,2,Basis>(&basis, basis.j0())) break;
     }
 #endif
-#if 1
+#if 0
     Index lambda(51,&basis);
     cout << "Testing intersect_singular_support with lambda = " << lambda << endl;
 

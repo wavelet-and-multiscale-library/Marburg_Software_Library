@@ -1,6 +1,7 @@
 #include <iostream>
 
-#include <interval/ds_basis.h>
+//#include <interval/ds_basis.h>
+#include <interval/p_basis.h>
 #include <utils/fixed_array1d.h>
 #include <cube/tbasis.h>
 #include <utils/multiindex.h>
@@ -13,9 +14,10 @@ using MathTL::FixedArray1D;
 int main()
 {
     cout << "Testing tbasis_index" << endl;
-    typedef DSBasis<2,2> Basis1d;
+#if 0
+    //typedef DSBasis<2,2> Basis1d;
+    typedef PBasis<2,2> Basis1d;
     typedef TensorBasis<Basis1d,2> Basis;
-    //typedef CubeBasis<Basis1d,2> Basis;
     typedef Basis::Index Index;
     Basis basisH;
     FixedArray1D<int,4> s; //,st;
@@ -32,6 +34,41 @@ int main()
     FixedArray1D<Basis1d*,2> basesArray;
     basesArray[0] = basesArray[1] = &bas11;
     Basis basisBas(basesArray);
+    const unsigned int dim = 2;
+#else
+    //typedef DSBasis<2,2> Basis1d;
+    const unsigned int dim = 3;
+    typedef PBasis<2,2> Basis1d;
+    typedef TensorBasis<Basis1d,dim> Basis;
+    typedef Basis::Index Index;
+    Basis basisH;
+    FixedArray1D<int,2*dim> s; //,st;
+    for (int i(0);i<(2*dim);i++) //s[0]=s[1]=s[2]=s[3]=s[4]=s[5]=0;
+    {
+        s[i]=0;
+    }
+    // st[0]=st[1]=st[2]=st[3]=0;
+    Basis basisS(s);
+    FixedArray1D<bool,2*dim> bc;
+    for (int i=0;i<2*dim;i++)
+    {
+        bc[i]=true;
+    }
+    //bc[0]=bc[1]=bc[2]=bc[3]=bc[4]=bc[5]=true;
+    Basis basisBC(bc);
+    Basis1d bas11(true,true);
+    Basis1d bas00(false,false);
+    bas11.set_jmax(5);
+    bas00.set_jmax(5);
+    FixedArray1D<Basis1d*,dim> basesArray;
+    for(int i=0;i<dim;i++)
+    {
+        basesArray[i] = &bas11;
+    }
+    //basesArray[0] = basesArray[1] = basesArray[2]= &bas11;
+    Basis basisBas(basesArray);
+    
+#endif
 
     // Run tests with this basis:
     //Basis basis;
@@ -53,10 +90,10 @@ int main()
          << "Nablasize4= " << bas11.Nablasize(4)<< endl
          << "Nablasize5= " << bas11.Nablasize(5)<< endl
          << "Nablasize6= " << bas11.Nablasize(6)<< endl;
-    cout     << TensorIndex<Basis1d,2> (1600,&basisH) << " "
-             << TensorIndex<Basis1d,2> (1600,&basisS) << " "
-             << TensorIndex<Basis1d,2> (1600,&basisBC) << " "
-             << TensorIndex<Basis1d,2> (1600,&basisBas) << endl;
+    cout     << TensorIndex<Basis1d,dim> (1600,&basisH) << " "
+             << TensorIndex<Basis1d,dim> (1600,&basisS) << " "
+             << TensorIndex<Basis1d,dim> (1600,&basisBC) << " "
+             << TensorIndex<Basis1d,dim> (1600,&basisBas) << endl;
     
     cout << "DeltaLmax()  " << basis.bases()[0]->DeltaLmax() << " " << basis.bases()[1]->DeltaLmax() << endl
          << "DeltLmin()   " << basis.bases()[0]->DeltaLmin() << " " << basis.bases()[1]->DeltaLmin() << endl
@@ -86,13 +123,30 @@ int main()
 */
     cout << "Testing first/last routines" << endl;
 
+    Index temp(first_generator<Basis1d,dim,Basis> (&basis));
+    typedef Index::level_type index_lt;
+    index_lt temp2(temp.j());
+    cout << "first gen: " << temp << endl << "first_gen.j()= " << temp2 << endl << "first_gen.j.number= "<< temp2.number() << endl;
 
-    cout << "first_generator = " << first_generator<Basis1d,2,Basis> (&basis) << " .number()= "<< first_generator<Basis1d,2,Basis> (&basis).number() << endl;
-    cout << "last_generator = " << last_generator<Basis1d,2,Basis> (&basis) << " .number()= "<< last_generator<Basis1d,2,Basis> (&basis).number() << endl;
+      typedef std::map<index_lt,int> map_type;
+      typedef map_type::iterator map_it;
+      map_type mapp((indexmapping(temp2)));
 
-		TensorIndex<Basis1d,2,Basis>::level_type j;
-		TensorIndex<Basis1d,2,Basis>::type_type e;
-		TensorIndex<Basis1d,2,Basis>::translation_type k;
+      for (map_it mit(mapp.begin()), mit_end(mapp.end()); mit!=mit_end;mit++)
+      {
+          cout << (*mit).first << " => " << (*mit).second << endl;
+      }
+
+
+
+    //cout << "indexnumbers for temp="<<temp2<< " gives " << endl << indexnumbers(temp2) << endl;
+    
+    cout << "first_generator = " << first_generator<Basis1d,dim,Basis> (&basis) << " .number()= "<< first_generator<Basis1d,dim,Basis> (&basis).number() << " .j()++" << first_generator<Basis1d,dim,Basis> (&basis).j() << endl;
+    cout << "last_generator = " << last_generator<Basis1d,dim,Basis> (&basis) << " .number()= "<< last_generator<Basis1d,dim,Basis> (&basis).number() << endl;
+
+		TensorIndex<Basis1d,dim,Basis>::level_type j;
+		TensorIndex<Basis1d,dim,Basis>::type_type e;
+		TensorIndex<Basis1d,dim,Basis>::translation_type k;
 /*
                 j = basis.j0();
 		for (unsigned int i = 0; i < 2; i++)
@@ -104,29 +158,30 @@ int main()
                 cout << "last generator?? "<<  temp_lg << " .number()= "<< temp_lg.number() << endl;
 */
 
-    //typedef TensorIndex<Basis1d,2,Basis>::level_type level_type;
+    //typedef TensorIndex<Basis1d,dim,Basis>::level_type level_type;
     //level_type j;
-    j[0]=3;j[1]=3;
-    TensorIndex<Basis1d,2,Basis> temp_fw;
+    for (unsigned int k=0;k<dim;k++) j[k]=3;
+    // j[0]=3;j[1]=3;
+    TensorIndex<Basis1d,dim,Basis> temp_fw;
     //first_wavelet<Basis1d,2,Basis> (&basis,j);
 
-    temp_fw = first_wavelet<Basis1d,2,Basis> (&basis,j);
+    temp_fw = first_wavelet<Basis1d,dim,Basis> (&basis,j);
     cout << "first_wavelet("<<j<<") = " << temp_fw;
     cout << " .number()= "<< temp_fw.number() << endl;
 
-    cout << "last_wavelet("<<j<<") = " << last_wavelet<Basis1d,2,Basis> (&basis,j) << " .number()= "<< last_wavelet<Basis1d,2,Basis> (&basis,j).number() << endl;
+    cout << "last_wavelet("<<j<<") = " << last_wavelet<Basis1d,dim,Basis> (&basis,j) << " .number()= "<< last_wavelet<Basis1d,dim,Basis> (&basis,j).number() << endl;
     j[0]=6;j[1]=4;
-    cout << "first_wavelet("<<j<<") = " << first_wavelet<Basis1d,2,Basis> (&basis,j) << " .number()= "<< first_wavelet<Basis1d,2,Basis> (&basis,j).number() << endl;
-    cout << "last_wavelet("<<j<<") = " << last_wavelet<Basis1d,2,Basis> (&basis,j) << " .number()= "<< last_wavelet<Basis1d,2,Basis> (&basis,j).number() << endl;
+    cout << "first_wavelet("<<j<<") = " << first_wavelet<Basis1d,dim,Basis> (&basis,j) << " .number()= "<< first_wavelet<Basis1d,dim,Basis> (&basis,j).number() << endl;
+    cout << "last_wavelet("<<j<<") = " << last_wavelet<Basis1d,dim,Basis> (&basis,j) << " .number()= "<< last_wavelet<Basis1d,dim,Basis> (&basis,j).number() << endl;
 
-    cout << "first_generator_num = " << first_generator_num<Basis1d,2,Basis> (&basis) << endl;
-    cout << "last_generator_num = " << last_generator_num<Basis1d,2,Basis> (&basis) << endl;
+    cout << "first_generator_num = " << first_generator_num<Basis1d,dim,Basis> (&basis) << endl;
+    cout << "last_generator_num = " << last_generator_num<Basis1d,dim,Basis> (&basis) << endl;
     j[0]=3;j[1]=3;
-    cout << "first_wavelet_num("<<j<<") = " << first_wavelet_num<Basis1d,2,Basis> (&basis,j) << endl;
-    cout << "last_wavelet_num("<<j<<") = " << last_wavelet_num<Basis1d,2,Basis> (&basis,j) << endl;
+    cout << "first_wavelet_num("<<j<<") = " << first_wavelet_num<Basis1d,dim,Basis> (&basis,j) << endl;
+    cout << "last_wavelet_num("<<j<<") = " << last_wavelet_num<Basis1d,dim,Basis> (&basis,j) << endl;
     j[0]=6;j[1]=4;
-    cout << "first_wavelet_num("<<j<<") = " << first_wavelet_num<Basis1d,2,Basis> (&basis,j) << endl;
-    cout << "last_wavelet_num("<<j<<") = " << last_wavelet_num<Basis1d,2,Basis> (&basis,j) << endl;
+    cout << "first_wavelet_num("<<j<<") = " << first_wavelet_num<Basis1d,dim,Basis> (&basis,j) << endl;
+    cout << "last_wavelet_num("<<j<<") = " << last_wavelet_num<Basis1d,dim,Basis> (&basis,j) << endl;
 
 #endif
 
@@ -138,34 +193,33 @@ int main()
     	// TensorIndex(const TensorIndex& lambda);
     	// TensorIndex(const TensorIndex* lambda);
     	// TensorIndex(const int number, const TENSORBASIS* basis);
-    int i=0, imax(4000);
+    
     cout << "Testing ++ and construction by number" << endl;    
     
-    /*
-        cout << "by number" << endl;
-    for (unsigned int i = 499; i < 1000; i++)
-        cout << "i= "<<i<<" index = "<< TensorIndex<Basis1d,2> (i,&basis) << endl;
-    */
 /*
-    for (TensorIndex<Basis1d,2> it(first_generator<Basis1d,2,Basis> (&basis));i<imax;++i, ++it)
+    cout << "by number" << endl;
+    for (unsigned int i = 0; i < 20; i++)
     {
-        cout << " it= "<< it << " index= "<< TensorIndex<Basis1d,2> (i, &basis) <<"i/it.n/ind.n="<<i<<" "<< it.number()<<" "<<TensorIndex<Basis1d,2> (i, &basisH).number()<<endl;
+        cout << "i= "<<i<<" index = "<< TensorIndex<Basis1d,dim> (i,&basis) << endl;
     }
-    */
-    for (TensorIndex<Basis1d,2> it(first_generator<Basis1d,2,Basis> (&basis));i<imax;++i, ++it)
-        if (it != TensorIndex<Basis1d,2> (i, &basis))
+*/
+    int i=0, imax(2000);
+    for (TensorIndex<Basis1d,dim> it(first_generator<Basis1d,dim,Basis> (&basis));i<imax;++i, ++it)
+    {
+        if (it != TensorIndex<Basis1d,dim> (i, &basis))
         {
             cout << "Problem entdeckt fuer Index Nummer "<<i<<endl;
-            cout << " it= "<< it << " index= "<< TensorIndex<Basis1d,2> (i, &basis) <<"i/it.n/ind.n="<<i<<" "<< it.number()<<" "<<TensorIndex<Basis1d,2> (i, &basisH).number()<<endl;
+            cout << " it= "<< it << " index= "<< TensorIndex<Basis1d,dim> (i, &basis) <<"i/it.n/ind.n="<<i<<" "<< it.number()<<" "<<TensorIndex<Basis1d,dim> (i, &basisH).number()<<endl;
             break;
         }
-
+        //cout << it << " #"<<it.number()<<endl;
+    }
     
     cout << "Testing copy constructors" << endl;
-    for (TensorIndex<Basis1d,2> it(first_generator<Basis1d,2,Basis> (&basis));it.number()<imax;++it)
+    for (TensorIndex<Basis1d,dim> it(first_generator<Basis1d,dim,Basis> (&basis));it.number()<imax;++it)
     {
-        TensorIndex<Basis1d,2> temp_index1(it);
-        TensorIndex<Basis1d,2> temp_index2(&it);
+        TensorIndex<Basis1d,dim> temp_index1(it);
+        TensorIndex<Basis1d,dim> temp_index2(&it);
         if (temp_index1 != it || temp_index1.number() != it.number())
         {
             cout << "1::Problem entdeckt fuer Index Nummer it.n/t_it.n"<<it.number()<< " "<<temp_index1.number() << endl;
@@ -182,9 +236,10 @@ int main()
 
     cout << "Testing constructor by j,e,k" << endl;
     // TensorIndex(const level_type& j, const type_type& e, const translation_type& k, const TENSORBASIS* basis);
-    for (TensorIndex<Basis1d,2> it(first_generator<Basis1d,2,Basis> (&basis));it.number()<imax;++it)
+    for (TensorIndex<Basis1d,dim> it(first_generator<Basis1d,dim,Basis> (&basis));it.number()<imax;++it)
     {
-        TensorIndex<Basis1d,2> temp_index(it.j(),it.e(),it.k(),&basis);
+        TensorIndex<Basis1d,dim> temp_index(it.j(),it.e(),it.k(),&basis);
+        //cout << temp_index << endl;
         if (temp_index != it || temp_index.number() != it.number())
         {
             cout << "Problem entdeckt fuer Index Nummer it.n/t_it.n"<<it.number()<< " "<<temp_index.number() << endl;
@@ -194,22 +249,24 @@ int main()
     }
 #endif
 
-#if 0
+#if 1
+    const int step(1),maxnumber(2000);
+
     bool error = false;
     cout << "Testing operator <=" << endl;
-    for (int i=0;i<200;i++)
+    for (int i=0;i<maxnumber/step;i++)
     {
-        cout << i << endl;
-        TensorIndex<Basis1d,2> outer(i*20,&basis);
-        for (int j=0;j<4000;j++)
+        //cout << i << endl;
+        TensorIndex<Basis1d,dim> outer(i*step,&basis);
+        for (int j=0;j<maxnumber;j++)
         {
-            TensorIndex<Basis1d,2> inner(j,&basis);
-            if ((outer<=inner) != (i*20 <= j))
+            TensorIndex<Basis1d,dim> inner(j,&basis);
+            if ((outer<=inner) != (i*step <= j))
             {
-                cout << "Problem entdeckt fuer (i*10,j) = (" << (i*20) <<", "<<j<<")"<<endl;
+                cout << "Problem entdeckt fuer (i*"<<step<<",j) = (" << (i*step) <<", "<<j<<")"<<endl;
                 cout << " outer <= inner "<< outer << " <= "<< inner << " = " << (outer <= inner) << endl;
-                cout << " i*10 <= j "<< (i*20) << " <= "<< j << " = " << (i*20 <= j) << endl;
-                cout << "((outer<=inner) != (i*20 <= j)) = " << ((outer<=inner) != (i*20 <= j)) << endl;
+                cout << " i*"<<step<<" <= j "<< (i*step) << " <= "<< j << " = " << (i*step <= j) << endl;
+                cout << "((outer<=inner) != (i*"<<step<<" <= j)) = " << ((outer<=inner) != (i*step <= j)) << endl;
                 error = true;
                 break;
             }

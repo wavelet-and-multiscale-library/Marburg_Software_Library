@@ -26,10 +26,20 @@ namespace WaveletTL
   /*!
     For a given compressible matrix A stemming from the discretization of
     a differential or integral operator in wavelet coordinates, realize the column
-    compression stragegies from [CDD1] or [St04a].
+    compression stragegies from [CDD1], [St04a] or [DSS09].
+
+    Isotropic wavelets: (eg. cubeequation)
     The lambda-th column of A will be compressed by the J-th truncation rule
     from [CDD1, Prop. 3.4] or [St04a, Th. 2.3 and Th. 3.3]
     It is also possible to specify a fixed maximal level jmax.
+
+    Anisotropic wavelets: (eg. tbasis_equation)
+    The lambda-th column of A will be compressed by the rule from [DSS09],
+    modified for the biorthogonal setting of tbasis. We use that in this case the
+    matrix is compressible with s^*=\infty. The meaning of alphak(int x) is assumed
+    to be constant.
+    You can specify jmax, but observe the meaning ||level_of_lambda||_1 <= jmax
+    in this setting.
 
     For integral equations, both a compression in scale and space has to be performed, while
     for differential equations, only a compression in scale is needed,
@@ -48,6 +58,8 @@ namespace WaveletTL
             Adaptive Wavelet Methods for Elliptic Operator Equations - Convergence Rates
     [St04a] Stevenson:
             On the compressibility of operators in wavelet coordinates
+    [DSS09] Dijkema/Schwab/Stevenson:
+            An Adaptive Wavelet Method for Solving High-Dimensional Elliptic PDES
   */
   template <class PROBLEM>
   void add_compressed_column(const PROBLEM& P,

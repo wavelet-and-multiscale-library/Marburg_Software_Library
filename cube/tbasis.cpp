@@ -393,11 +393,17 @@ namespace WaveletTL
             cout << "total degrees of freedom between j0_ and jmax_ is " << degrees_of_freedom << endl;
             cout << "setting up collection of wavelet indices..." << endl;
             full_collection.resize(degrees_of_freedom);
-            int k = 0;
+            Index ind = first_generator();
+            for (int k = 0; k < degrees_of_freedom; k++) {
+                full_collection[k] = ind;
+                ++ind;
+            }
+            /*
+            int k=0;
             for (Index ind = first_generator(), itend = last_wavelet(jmax_); ind <= itend; ++ind) {
                 full_collection[k] = ind;
                 k++;
-            }
+            }*/
             cout << "done setting up collection of wavelet indices..." << endl;
         }
 

@@ -67,8 +67,10 @@ namespace WaveletTL
                             }
                         }
                     }
-                    // done == true bedeutet, dass alle Komponenten auf level j0() wavelets waren.
-                    // Jetzt "big loop" also einmal currentlevel erhoehen
+                    // done == true means that all components with currentlevel[i]=j0[i] were wavelets.
+                    // the level j has to be increased.
+                    // iterate "big loop", meaning: "currentlevel++"
+
                     if (done == true)
                     {
                     for (int i(DIM-1); i >= 0; i--)
@@ -95,11 +97,12 @@ namespace WaveletTL
                             {
                                 currenttype[i] = 1;
                                 currentlevel[i]=currentlevel[i]+1;
-                                sizes[0][range]=basis ->bases()[0]->Nablasize(currentlevel[0]); // if needed compute and store new size information
+                                sizes[0][range+1]=basis ->bases()[0]->Nablasize(currentlevel[0]); // if needed compute and store new size information
                             }
                             else
                             {
-                                currentlevel[DIM-1]=j0[DIM-1]+currentlevel[0]-j0[0]+1; currenttype[DIM-1]=1;
+                                //currentlevel[DIM-1]=j0[DIM-1]+currentlevel[0]-j0[0]+1; currenttype[DIM-1]=1;
+                                currentlevel[DIM-1]=j0[DIM-1]+range; currenttype[DIM-1]=1;
 				currenttype[0]=0; currentlevel[0]=j0[0];
                                 sizes[DIM-1][range+1]=basis ->bases()[DIM-1]->Nablasize(currentlevel[DIM-1]); // if needed compute and store new size information
                             }
@@ -175,49 +178,52 @@ namespace WaveletTL
                             }
                         }
                     }
-                    // done == true bedeutet, dass alle Komponenten auf level j0() wavelets waren.
-                    // "big loop" "currentlevel++"
+                    // done == true means that all components with currentlevel[i]=j0[i] were wavelets.
+                    // the level j has to be increased.
+                    // iterate "big loop", meaning: "currentlevel++"
                     if (done == true)
                     {
-                    for (int i(DIM-1); i >= 0; i--)
-                    {
-                        if (i != 0)
+                        for (int i(DIM-1); i >= 0; i--)
                         {
-                            if (currentlevel[i] != j0[i])
+                            if (i != 0)
                             {
-                                // increase left neighbor
-                                currentlevel[i-1]=currentlevel[i-1]+1;
-                                if (currentlevel[i-1]-j0[i] == range) 
+                                if (currentlevel[i] != j0[i])
                                 {
-                                    sizes[i-1][range+1]=basis ->bases()[i]->Nablasize(currentlevel[i-1]); // if needed compute and store new size information
+                                    // increase left neighbor
+                                    currentlevel[i-1]=currentlevel[i-1]+1;
+                                    if (currentlevel[i-1]-j0[i] == range)
+                                    {
+                                        sizes[i-1][range+1]=basis ->bases()[i]->Nablasize(currentlevel[i-1]); // if needed compute and store new size information
+                                    }
+                                    currenttype[i-1]=1;
+                                    int temp = currentlevel[i]-j0[i];
+                                    currentlevel[i]=j0[i];
+                                    currenttype[i]=0;
+                                    currentlevel[DIM-1]=j0[DIM-1]+temp-1;
+                                    currenttype[DIM-1]= (temp == 1?0:1);
+                                    break;
                                 }
-                                currenttype[i-1]=1;
-                                int temp = currentlevel[i]-j0[i];
-                                currentlevel[i]=j0[i];
-                                currenttype[i]=0;
-                                currentlevel[DIM-1]=j0[DIM-1]+temp-1;
-                                currenttype[DIM-1]= (temp == 1?0:1);
-  				break;
-                            }
-  			} else // i == 0. "big loop" arrived at the last index. We have to increase the level!
-  			{
-                            range = range +1;
-                            if (DIM == 1)
+                            } else // i == 0. "big loop" arrived at the last index. We have to increase range!
                             {
-                                currenttype[i] = 1;
-                                currentlevel[i]=currentlevel[i]+1;
-                                sizes[0][range]=basis ->bases()[0]->Nablasize(currentlevel[0]); // if needed compute and store new size information
+                                range = range +1;
+                                if (DIM == 1)
+                                {
+                                    currenttype[i] = 1;
+                                    currentlevel[i]=currentlevel[i]+1;
+                                    sizes[0][range+1]=basis ->bases()[0]->Nablasize(currentlevel[0]); // if needed compute and store new size information
+                                    //double temp1(currenttype[i]), temp2(currentlevel[i]), temp3(basis ->bases()[0]->Nablasize(currentlevel[0])), temp4(sizes[0][range+1]);
+                                    //cout << temp1 << " " << temp2 << " " << temp3 << " " << temp4 << endl;
+                                }
+                                else
+                                {
+                                    //currentlevel[DIM-1]=j0[DIM-1]+currentlevel[0]-j0[0]+1; currenttype[DIM-1]=1;
+                                    currentlevel[DIM-1]=j0[DIM-1]+range; currenttype[DIM-1]=1;
+                                    currenttype[0]=0; currentlevel[0]=j0[0];
+                                    sizes[DIM-1][range+1]=basis ->bases()[DIM-1]->Nablasize(currentlevel[DIM-1]); // if needed compute and store new size information
+                                }
+                            break; // unnoetig, da i==0 gilt.
                             }
-                            else
-                            {
-                                currentlevel[DIM-1]=j0[DIM-1]+currentlevel[0]-j0[0]+1; currenttype[DIM-1]=1;
-				currenttype[0]=0; currentlevel[0]=j0[0];
-                                sizes[DIM-1][range+1]=basis ->bases()[DIM-1]->Nablasize(currentlevel[DIM-1]); // if needed compute and store new size information
-                            }
-  			break; // unnoetig, da i==0 gilt.
-  			}
-                    } // end of "big loop"
-
+                        } // end of "big loop"
                     }
                     // compute number of functions on this level
                     oncurrentlevel = 1;

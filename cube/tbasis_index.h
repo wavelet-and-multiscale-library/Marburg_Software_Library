@@ -30,23 +30,24 @@ namespace WaveletTL
   	template <class IBASIS, unsigned int DIM, class TENSORBASIS = TensorBasis<IBASIS,DIM> >
   	class TensorIndex
 	{
-		public:
-		// level index type
-		typedef MultiIndex<int,DIM> level_type;
-		// type index type
-		typedef MultiIndex<int,DIM> type_type;
-		// translation index type
-		typedef MultiIndex<int,DIM> translation_type;
+        public:
+            // level index type
+            typedef MultiIndex<int,DIM> level_type;
+            // type index type
+            typedef MultiIndex<int,DIM> type_type;
+            // translation index type
+            typedef MultiIndex<int,DIM> translation_type;
 
-		/*
-		 * Constructor with a given tensor basis
-		 * (also serves as a default constructor, but yields an invalid index
-		 * in this case, because the underlying bases must be specified to work correctly)
-    	*/
+            /*
+             * Constructor with a given tensor basis
+             * (also serves as a default constructor, but yields an invalid index
+             * in this case, because the underlying bases must be specified to work correctly)
+             */
     	TensorIndex(const TENSORBASIS* basis = 0);
 
 	    /*
 	     * Constructor with given j,e,k
+             * Code is similar to Tensorindex(int,Basis). Apply any changes also there!
     	*/
     	TensorIndex(const level_type& j, const type_type& e, const translation_type& k, const TENSORBASIS* basis);
 
@@ -62,7 +63,13 @@ namespace WaveletTL
 	     * w.r.t. the tuple ( j , k ). According to this ordering there exists a mapping from the
 	     * totality of wavelet indices into the nonnegative integers. This routine creates an index
 	     * from the given number corresponding to this ordering.
-	     * This constructor cannot be used for generators on levels j > j0 (multi index)
+	     * This constructor cannot be used for generators on levels j != j0 (multi index)
+             * Example for level ordering for dim=3: (j,e) =
+             * (333,000)->(333,001)->(333,010)->(333,100)->(333,101)->(333,110)->(333,111)-> (range =0)
+             * (334,001)->(334,011)->(334,101)->(334,111)->(343,010)->...->(433,111)->  (range=1)
+             * (335,001)-> ... (range=2)
+             *
+             * Code is similar to Tensorindex(j,e,k,Basis). Apply any changes also there!
     	*/
     	TensorIndex(const int number, const TENSORBASIS* basis);
 

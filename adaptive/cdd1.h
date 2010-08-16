@@ -45,7 +45,12 @@ namespace WaveletTL
   void CDD1_SOLVE(const PROBLEM& P, const double epsilon,
 		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
 		  const int jmax = 99,
+#if _WAVELETTL_USE_TBASIS == 1
+                  const CompressionStrategy strategy = tensor_simple);
+#else
 		  const CompressionStrategy strategy = St04a);
+#endif
+
   /*!
     the routine ALGORITHMc from [BB+],
     with a given initial guess for u_epsilon
@@ -55,7 +60,12 @@ namespace WaveletTL
 		  const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& guess,
 		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
 		  const int jmax = 99,
+#if _WAVELETTL_USE_TBASIS == 1
+                  const CompressionStrategy strategy = tensor_simple);
+#else
 		  const CompressionStrategy strategy = St04a);
+#endif
+
   /*!
     the routine ALGORITHMc from [BB+],
     with a given initial guess for u_epsilon and for the parameters c1,c2
@@ -67,7 +77,12 @@ namespace WaveletTL
 		  const double c1,
 		  const double c2,
 		  const int jmax = 99,
+#if _WAVELETTL_USE_TBASIS == 1
+                  const CompressionStrategy strategy = tensor_simple);
+#else
 		  const CompressionStrategy strategy = St04a);
+#endif
+
 
   /*!
     the parameters chosen or computed in the INIT phase of ALGORITHMc
@@ -97,6 +112,9 @@ namespace WaveletTL
 	     const set<typename PROBLEM::WaveletBasis::Index>& Lambda,
 	     const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
 	     const double delta,
+#if _WAVELETTL_USE_TBASIS == 1
+             Array1D<int>& jp_guess,
+#endif
 	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v_hat,
 	     set<typename PROBLEM::WaveletBasis::Index>& Lambda_hat,
 	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r_hat,
@@ -137,6 +155,9 @@ namespace WaveletTL
  	     const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& ubar,
  	     const double xi1,
  	     const double xi2,
+#if _WAVELETTL_USE_TBASIS == 1
+             Array1D<int>& jp_guess,
+#endif
  	     set<typename PROBLEM::WaveletBasis::Index>& Lambda_tilde,
  	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r,
 	     const int jmax = 99,
@@ -147,6 +168,8 @@ namespace WaveletTL
     Given an index set Lambda, an approximation v to the exact Galerkin solution
     u_Lambda of Au = F, calculate an approximate INternal residual r, such that
       ||r - (A_Lambda v - P_Lambda f)||_2 <= eta_1 + eta_2
+
+    If using TBasis an initial for the computational effort per bin is submitted and modified.
   */
   template <class PROBLEM>
   void INRESIDUAL(const PROBLEM& P, const CDD1Parameters& params,
@@ -155,6 +178,9 @@ namespace WaveletTL
 		  const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
 		  const double eta1,
 		  const double eta2,
+#if _WAVELETTL_USE_TBASIS == 1
+                  Array1D<int>& jp_guess,
+#endif
 		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r,
 		  const int jmax = 99,
 		  const CompressionStrategy strategy = St04a);
@@ -166,6 +192,8 @@ namespace WaveletTL
     in J\Lambda), such that
       ||r - r_Lambda||_2 <= eta_1 + eta_2 + c_2 * ||v-u_Lambda||_2
     The routine also returns the support set Lambda_tilde of the approximate residual r.
+
+   If using TBasis an initial for the computational effort per bin is submitted and modified.
   */
   template <class PROBLEM>
   void NRESIDUAL(const PROBLEM& P, const CDD1Parameters& params,
@@ -174,6 +202,9 @@ namespace WaveletTL
 		 const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
 		 const double eta1,
 		 const double eta2,
+#if _WAVELETTL_USE_TBASIS == 1
+                 Array1D<int>& jp_guess,
+#endif
 		 InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r,
 		 set<typename PROBLEM::WaveletBasis::Index>& Lambda_tilde,
 		 const int jmax = 99,

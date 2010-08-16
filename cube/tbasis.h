@@ -89,6 +89,10 @@ namespace WaveletTL
       		setup_full_collection();
     	}
 
+        inline const unsigned int get_jmax() const {
+            return jmax_;
+        }
+
         inline void set_jmax(const int jmax) {
       		jmax_ = jmax;
       		setup_full_collection();
@@ -186,7 +190,11 @@ namespace WaveletTL
                         const Index& lambda,
                         const Point<DIM> x) const;
 
-    	//! Setup full collection of wavelets between j0_ and jmax_ as long as a jmax_ has been specified
+    	/*!
+         * Setup full collection of wavelets between j0_ and jmax_.
+         * This codes the mapping \N -> wavelet_indices
+         * jmax_ has to be specified previously.
+         */
     	void setup_full_collection();
 
     	//! Collection of all wavelets between coarsest and finest level

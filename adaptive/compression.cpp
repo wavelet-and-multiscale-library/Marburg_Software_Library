@@ -17,6 +17,7 @@ namespace WaveletTL
 			const int jmax,
 			const CompressionStrategy strategy)
   {
+#if _WAVELETTL_USE_TBASIS == 0
     //typedef typename PROBLEM::WaveletBasis WaveletBasis;
     typedef typename PROBLEM::Index Index;
     //typedef typename WaveletBasis::Support Support;
@@ -89,7 +90,20 @@ namespace WaveletTL
 //     else 
 //       {
 // 	// integral operators: branch is not implemented so far
-//       }
+//       } 
+#else
+    //     if (P.local_operator())
+        if (strategy == tensor_simple)
+        {
+            // Strategy from [DSS] (works also for biorthogonal bases)
+            // take all (indizes in all) levels nu with ||nu-lambda||_1 <= J
+            // additionally demand ||nu||_1 <= jmax to limit computational effort
+            //
+            // for local operator supports have to overlap
+            // add all indizes within a 1-ball of range J around lambda:
+            P.add_ball(lambda,w,J,factor,jmax);
+        }
+#endif
   }
 
 
@@ -104,6 +118,7 @@ namespace WaveletTL
 			const int jmax,
 			const CompressionStrategy strategy)
   {
+#if _WAVELETTL_USE_TBASIS == 0
     //typedef typename PROBLEM::WaveletBasis WaveletBasis;
     typedef typename PROBLEM::Index Index;
     //typedef typename WaveletBasis::Support Support;
@@ -177,5 +192,6 @@ namespace WaveletTL
 //       {
 // 	// integral operators: branch is not implemented so far
 //       }
+#endif
   }
 }

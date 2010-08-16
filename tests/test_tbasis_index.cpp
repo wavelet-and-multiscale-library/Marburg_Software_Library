@@ -1,7 +1,7 @@
 #include <iostream>
 
-//#include <interval/ds_basis.h>
-#include <interval/p_basis.h>
+//#include <interval/p_basis.h>
+#include <interval/ds_basis.h>
 #include <utils/fixed_array1d.h>
 #include <cube/tbasis.h>
 #include <utils/multiindex.h>
@@ -36,9 +36,12 @@ int main()
     Basis basisBas(basesArray);
     const unsigned int dim = 2;
 #else
-    //typedef DSBasis<2,2> Basis1d;
-    const unsigned int dim = 3;
-    typedef PBasis<2,2> Basis1d;
+
+    const int d  = 2;
+    const int dT = 2;
+    const unsigned int dim = 2;
+    //typedef PBasis<d,dT> Basis1d;
+    typedef DSBasis<2,2> Basis1d;
     typedef TensorBasis<Basis1d,dim> Basis;
     typedef Basis::Index Index;
     Basis basisH;
@@ -90,24 +93,24 @@ int main()
          << "Nablasize4= " << bas11.Nablasize(4)<< endl
          << "Nablasize5= " << bas11.Nablasize(5)<< endl
          << "Nablasize6= " << bas11.Nablasize(6)<< endl;
-    cout     << TensorIndex<Basis1d,dim> (1600,&basisH) << " "
-             << TensorIndex<Basis1d,dim> (1600,&basisS) << " "
-             << TensorIndex<Basis1d,dim> (1600,&basisBC) << " "
-             << TensorIndex<Basis1d,dim> (1600,&basisBas) << endl;
+    cout << TensorIndex<Basis1d,dim> (1600,&basisH) << " ";
+    cout << TensorIndex<Basis1d,dim> (1600,&basisS) << " ";
+    cout << TensorIndex<Basis1d,dim> (1600,&basisBC) << " ";
+    cout << TensorIndex<Basis1d,dim> (1600,&basisBas) << endl;
     
-    cout << "DeltaLmax()  " << basis.bases()[0]->DeltaLmax() << " " << basis.bases()[1]->DeltaLmax() << endl
-         << "DeltLmin()   " << basis.bases()[0]->DeltaLmin() << " " << basis.bases()[1]->DeltaLmin() << endl
-         << "Deltasize(3) " << basis.bases()[0]->Deltasize(3)<< " " << basis.bases()[1]->Deltasize(3)<< endl
-         << "Nablamin()   " << basis.bases()[0]->Nablamin()  << " " << basis.bases()[1]->Nablamin()  << endl
-         << "Nablamax(3)  " << basis.bases()[0]->Nablamax(3) << " " << basis.bases()[1]->Nablamax(3) << endl
-         << "Nablasize(3) " << basis.bases()[0]->Nablasize(3)<< " " << basis.bases()[1]->Nablasize(3)<< endl
-         << "Nablamax(4)  " << basis.bases()[0]->Nablamax(4) << " " << basis.bases()[1]->Nablamax(4) << endl
-         << "Nablasize(4) " << basis.bases()[0]->Nablasize(4)<< " " << basis.bases()[1]->Nablasize(4)<< endl
-         << "Nablamax(5)  " << basis.bases()[0]->Nablamax(5) << " " << basis.bases()[1]->Nablamax(5) << endl
-         << "Nablasize(5) " << basis.bases()[0]->Nablasize(5)<< " " << basis.bases()[1]->Nablasize(5)<< endl
-         << "Nablamax(6)  " << basis.bases()[0]->Nablamax(6) << " " << basis.bases()[1]->Nablamax(6) << endl
-         << "Nablasize(6) " << basis.bases()[0]->Nablasize(6)<< " " << basis.bases()[1]->Nablasize(6)<< endl;
-     
+    cout << "DeltaLmax()  " << basis.bases()[0]->DeltaLmax();  if (dim > 1) cout << " " << basis.bases()[1]->DeltaLmax() << endl;
+    cout << "DeltLmin()   " << basis.bases()[0]->DeltaLmin();  if (dim > 1) cout << " " << basis.bases()[1]->DeltaLmin() << endl;
+    cout << "Deltasize(3) " << basis.bases()[0]->Deltasize(3); if (dim > 1) cout<< " " << basis.bases()[1]->Deltasize(3)<< endl;
+    cout << "Nablamin()   " << basis.bases()[0]->Nablamin();   if (dim > 1) cout  << " " << basis.bases()[1]->Nablamin()  << endl;
+    cout << "Nablamax(3)  " << basis.bases()[0]->Nablamax(3);  if (dim > 1) cout << " " << basis.bases()[1]->Nablamax(3) << endl;
+    cout << "Nablasize(3) " << basis.bases()[0]->Nablasize(3); if (dim > 1) cout<< " " << basis.bases()[1]->Nablasize(3)<< endl;
+    cout << "Nablamax(4)  " << basis.bases()[0]->Nablamax(4);  if (dim > 1) cout << " " << basis.bases()[1]->Nablamax(4) << endl;
+    cout << "Nablasize(4) " << basis.bases()[0]->Nablasize(4); if (dim > 1) cout<< " " << basis.bases()[1]->Nablasize(4)<< endl;
+    cout << "Nablamax(5)  " << basis.bases()[0]->Nablamax(5);  if (dim > 1) cout << " " << basis.bases()[1]->Nablamax(5) << endl;
+    cout << "Nablasize(5) " << basis.bases()[0]->Nablasize(5); if (dim > 1) cout<< " " << basis.bases()[1]->Nablasize(5)<< endl;
+    cout << "Nablamax(6)  " << basis.bases()[0]->Nablamax(6);  if (dim > 1) cout << " " << basis.bases()[1]->Nablamax(6) << endl;
+    cout << "Nablasize(6) " << basis.bases()[0]->Nablasize(6); if (dim > 1) cout<< " " << basis.bases()[1]->Nablasize(6)<< endl;
+
 
 #if 1
 
@@ -170,16 +173,19 @@ int main()
     cout << " .number()= "<< temp_fw.number() << endl;
 
     cout << "last_wavelet("<<j<<") = " << last_wavelet<Basis1d,dim,Basis> (&basis,j) << " .number()= "<< last_wavelet<Basis1d,dim,Basis> (&basis,j).number() << endl;
-    j[0]=6;j[1]=4;
+    j[0]=6;
+    if (dim > 1) j[1]=4;
     cout << "first_wavelet("<<j<<") = " << first_wavelet<Basis1d,dim,Basis> (&basis,j) << " .number()= "<< first_wavelet<Basis1d,dim,Basis> (&basis,j).number() << endl;
     cout << "last_wavelet("<<j<<") = " << last_wavelet<Basis1d,dim,Basis> (&basis,j) << " .number()= "<< last_wavelet<Basis1d,dim,Basis> (&basis,j).number() << endl;
 
     cout << "first_generator_num = " << first_generator_num<Basis1d,dim,Basis> (&basis) << endl;
     cout << "last_generator_num = " << last_generator_num<Basis1d,dim,Basis> (&basis) << endl;
-    j[0]=3;j[1]=3;
+    j[0]=3;
+    if (dim > 1) j[1]=3;
     cout << "first_wavelet_num("<<j<<") = " << first_wavelet_num<Basis1d,dim,Basis> (&basis,j) << endl;
     cout << "last_wavelet_num("<<j<<") = " << last_wavelet_num<Basis1d,dim,Basis> (&basis,j) << endl;
-    j[0]=6;j[1]=4;
+    j[0]=6;
+    if (dim > 1) j[1]=4;
     cout << "first_wavelet_num("<<j<<") = " << first_wavelet_num<Basis1d,dim,Basis> (&basis,j) << endl;
     cout << "last_wavelet_num("<<j<<") = " << last_wavelet_num<Basis1d,dim,Basis> (&basis,j) << endl;
 
@@ -203,16 +209,16 @@ int main()
         cout << "i= "<<i<<" index = "<< TensorIndex<Basis1d,dim> (i,&basis) << endl;
     }
 */
+    TensorIndex<Basis1d,dim> (15, &basis);
     int i=0, imax(2000);
     for (TensorIndex<Basis1d,dim> it(first_generator<Basis1d,dim,Basis> (&basis));i<imax;++i, ++it)
     {
         if (it != TensorIndex<Basis1d,dim> (i, &basis))
         {
-            cout << "Problem entdeckt fuer Index Nummer "<<i<<endl;
-            cout << " it= "<< it << " index= "<< TensorIndex<Basis1d,dim> (i, &basis) <<"i/it.n/ind.n="<<i<<" "<< it.number()<<" "<<TensorIndex<Basis1d,dim> (i, &basisH).number()<<endl;
+            cout << "Problem entdeckt!"<<i<<endl;
+            cout << "i = "<< i <<" it= ("<<it.number()<<") = "<< it << " index= ("<< TensorIndex<Basis1d,dim> (i, &basis).number() << ") = "<<TensorIndex<Basis1d,dim> (i, &basis) <<endl;
             break;
         }
-        //cout << it << " #"<<it.number()<<endl;
     }
     
     cout << "Testing copy constructors" << endl;
@@ -242,14 +248,14 @@ int main()
         //cout << temp_index << endl;
         if (temp_index != it || temp_index.number() != it.number())
         {
-            cout << "Problem entdeckt fuer Index Nummer it.n/t_it.n"<<it.number()<< " "<<temp_index.number() << endl;
-            cout << " it= "<< it << " temp_index= "<< temp_index<< "it.n, t_i.n = " << it.number() << ", " << temp_index.number() << endl;
+            cout << "Problem entdeckt!"<<endl;
+            cout << " it= ("<<it.number()<<") = "<< it << " copy= ("<< temp_index.number() << ") = "<<temp_index <<endl;
             break;
         }
     }
 #endif
 
-#if 1
+#if 0
     const int step(1),maxnumber(2000);
 
     bool error = false;
@@ -273,6 +279,7 @@ int main()
         }
         if (error == true) break;
     }
+#elsecout << "skipping test of <= operator" << endl;
 #endif
 
     return 0;

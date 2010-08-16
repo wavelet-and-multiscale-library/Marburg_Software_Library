@@ -16,7 +16,7 @@
 #include <interval/jl_support.h>
 #include <interval/jl_evaluate.h>
 
-#define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
 
 #include <cube/cube_basis.h>
 #include <galerkin/cube_equation.h>
@@ -98,7 +98,6 @@ int main()
   const int d  = 3;
   const int dT = 3; // be sure to use a continuous dual here, otherwise the RHS test will fail
   const int dim = 2;
-  const int radius = 6; // range for the Level in the indexset of the stiffness matrix
 
   ConstantFunction<dim> constant_rhs(Vector<double>(1, "1.0"));
   PoissonBVP<dim> poisson(&constant_rhs);
@@ -120,10 +119,30 @@ int main()
       bc[0] = bc[1] = bc[2] = bc[3] = true;
   }
 
-  //TensorEquation<Basis1D,dim,Basis> eq(&poisson, bc);
   CubeEquation<Basis1D,dim,CBasis> eq(&poisson, bc);
   InfiniteVector<double, Index> coeffs;
-  
+
+#if 1
+  cout << "for the statistic: " << endl;
+  cout << "compute ctproblem.normA" << endl;
+  //ctproblem.norm_A();
+  eq.norm_A();
+  cout << "... done. computing ctproblem.normAinv"<<endl;
+  eq.norm_Ainv();
+  //ctproblem.norm_Ainv();
+  cout << "... done." << endl;
+  //cout << "normA = " << ctproblem.norm_A() << " normAinv = " << ctproblem.norm_Ainv() << " kondition = " << ctproblem.norm_A()*ctproblem.norm_Ainv() << endl;
+  cout << "normA = " << eq.norm_A() << " normAinv = " << eq.norm_Ainv() << " kondition = " << eq.norm_A()*eq.norm_Ainv() << endl;
+  const int j0 = eq.basis().j0();
+  const int jmax = j0+2;
+  cout << "number of first generator = " << eq.basis().first_generator(j0).number() << endl;
+  cout << "number of last generator = " << eq.basis().last_generator(j0).number() << endl;
+  cout << "number of first wavelet = " << eq.basis().first_wavelet(j0).number() << endl;
+  cout << "number of last wavelet = " << eq.basis().last_wavelet(jmax).number() << endl;
+  return 0;
+#endif
+
+#if 0
 #if 0
   coeffs[first_generator<Basis1D,2,CBasis>(&eq.basis(), eq.basis().j0())] = 1.0;
   coeffs[last_generator<Basis1D,2,CBasis>(&eq.basis(), eq.basis().j0())] = 2.0;
@@ -260,4 +279,5 @@ int main()
 #endif
   
   return 0;
+#endif
 }

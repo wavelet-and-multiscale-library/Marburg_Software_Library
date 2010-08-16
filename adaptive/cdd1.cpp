@@ -7,7 +7,11 @@
 #include <algebra/sparse_matrix.h>
 #include <algebra/vector.h>
 #include <numerics/iteratsolv.h>
+#if _WAVELETTL_USE_TBASIS == 1
+#include <adaptive/apply_tensor.h>
+#else
 #include <adaptive/apply.h>
+#endif
 
 using std::set;
 using MathTL::SparseMatrix;
@@ -100,7 +104,14 @@ namespace WaveletTL
 #if _WAVELETTL_CDD1_VERBOSITY >= 1
       cout << "CDD1_SOLVE: delta=" << delta << endl;
 #endif
+#if _WAVELETTL_USE_TBASIS == 1
+      Array1D<int> jp_guess(0);
+      NPROG(P, params, F, Lambda, u_epsilon, delta, jp_guess, v_hat, Lambda_hat, r_hat, u_bar, jmax, strategy);
+#else
       NPROG(P, params, F, Lambda, u_epsilon, delta, v_hat, Lambda_hat, r_hat, u_bar, jmax, strategy);
+#endif
+
+      
       if (l2_norm(r_hat)+(params.q1+params.q2+(1+1./params.kappa)*params.q3)*delta <= params.c1*epsilon)
 	{
 	  u_epsilon.swap(u_bar);
@@ -126,6 +137,9 @@ namespace WaveletTL
 	     const set<typename PROBLEM::WaveletBasis::Index>& Lambda,
 	     const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
 	     const double delta,
+#if _WAVELETTL_USE_TBASIS == 1
+             Array1D<int>& jp_guess,
+#endif
 	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v_hat,
 	     set<typename PROBLEM::WaveletBasis::Index>& Lambda_hat,
 	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r_hat,
@@ -141,7 +155,11 @@ namespace WaveletTL
 #if _WAVELETTL_CDD1_VERBOSITY >= 1
       cout << "NPROG: k=" << k << " (K=" << params.K << ")" << endl;
 #endif
+#if _WAVELETTL_USE_TBASIS == 1
+      NGROW(P, params, F, Lambda_k, u_Lambda_k, params.q1*delta, params.q2*delta, jp_guess, Lambda_kplus1, r_hat, jmax, strategy);
+#else
       NGROW(P, params, F, Lambda_k, u_Lambda_k, params.q1*delta, params.q2*delta, Lambda_kplus1, r_hat, jmax, strategy);
+#endif
       if (l2_norm(r_hat) <= params.c1*delta/20. || k == params.K || Lambda_k.size() == Lambda_kplus1.size()) {
 //  	u_Lambda_k.COARSE(2.*delta/5., v_hat);
  	v_hat = u_Lambda_k;
@@ -150,6 +168,9 @@ namespace WaveletTL
       }
       GALERKIN(P, params, F, Lambda_kplus1, u_Lambda_k, params.q0*delta, params.q3*delta/params.c2, v_hat, jmax, strategy);
       u_Lambda_k.swap(v_hat);
+#if _WAVELETTL_CDD1_VERBOSITY >= 2
+      cout << "u_Lambda_k = " << endl << u_Lambda_k << endl;
+#endif
       Lambda_k.swap(Lambda_kplus1);
       k++;
     }
@@ -253,6 +274,9 @@ namespace WaveletTL
  	     const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_bar,
  	     const double xi1,
  	     const double xi2,
+#if _WAVELETTL_USE_TBASIS == 1
+             Array1D<int>& jp_guess,
+#endif
  	     set<typename PROBLEM::WaveletBasis::Index>& Lambda_tilde,
  	     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r,
 	     const int jmax,
@@ -264,14 +288,19 @@ namespace WaveletTL
 
     typedef typename PROBLEM::WaveletBasis::Index Index;
     set<Index> Lambda_c;
+#if _WAVELETTL_USE_TBASIS == 1
+    NRESIDUAL(P, params, F, Lambda, u_bar, xi1, xi2, jp_guess, r, Lambda_c, jmax, strategy);
+#else
     NRESIDUAL(P, params, F, Lambda, u_bar, xi1, xi2, r, Lambda_c, jmax, strategy);
+#endif
+    
     const double residual_norm = l2_norm(r);
 
 #if _WAVELETTL_CDD1_VERBOSITY >= 2
     cout << "* NGROW: current residual is " << endl << r << endl;
 #endif
 
-#if _WAVELETTL_CDD1_VERBOSITY >= 1
+#if _WAVELETTL_CDD1_VERBOSITY >= 0
     cout << "* NGROW: current residual norm is " << residual_norm << endl;
 #endif
 
@@ -320,15 +349,21 @@ namespace WaveletTL
 		  const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
 		  const double eta1,
 		  const double eta2,
+#if _WAVELETTL_USE_TBASIS == 1
+                  Array1D<int>& jp_guess,
+#endif
 		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r,
 		  const int jmax,
 		  const CompressionStrategy strategy)
   {
     typedef typename PROBLEM::WaveletBasis::Index Index;
     InfiniteVector<double,Index> w, g(F);
-
     // TODO: speed up the following two lines
+#if _WAVELETTL_USE_TBASIS == 1
+    APPLY(P,v,eta1,jp_guess,w,jmax,strategy);
+#else
     APPLY(P, v, eta1, w, jmax, strategy);
+#endif
     w.clip(Lambda);
 
     g.clip(Lambda);
@@ -343,6 +378,9 @@ namespace WaveletTL
 		 const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
 		 const double eta1,
 		 const double eta2,
+#if _WAVELETTL_USE_TBASIS == 1
+                 Array1D<int>& jp_guess,
+#endif
 		 InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r,
 		 set<typename PROBLEM::WaveletBasis::Index>& Lambda_tilde,
 		 const int jmax,
@@ -350,10 +388,24 @@ namespace WaveletTL
   {
     typedef typename PROBLEM::WaveletBasis::Index Index;
     InfiniteVector<double,Index> w;
+#if _WAVELETTL_USE_TBASIS == 1
+    APPLY(P,v,eta1,jp_guess,w,jmax,strategy);
+#else
     APPLY(P, v, eta1, w, jmax, strategy);
+#endif
+
     F.COARSE(eta2, r);
+#if _WAVELETTL_CDD1_VERBOSITY >= 2
+    cout << "NRESIDUAL: v = "<<endl << v << endl<<"NRESIDUAL: w = "<< endl << w << endl<<"NRESIDUAL: F.coarse("<<eta2<<")= "<<endl <<r<<endl;
+#endif
     r -= w;
     r.support(Lambda_tilde);
-
+#if _WAVELETTL_CDD1_VERBOSITY >= 2
+    cout << "NRESIDUAL: r = "<<endl << r << endl;
+    cout << "NRESIDUAL: Lambda_tilde is..." << endl;
+    for (typename set<typename PROBLEM::WaveletBasis::Index>::const_iterator it(Lambda_tilde.begin());
+	 it != Lambda_tilde.end(); ++it)
+      cout << *it << endl;
+#endif
   }
 }

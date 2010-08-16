@@ -48,9 +48,80 @@ namespace MathTL
   inline
   bool MultiIndex<I, DIMENSION>::operator < (const MultiIndex& lambda) const
   {
-    return std::lexicographical_compare(FixedArray1D<I, DIMENSION>::begin(),
-					FixedArray1D<I, DIMENSION>::end(),
-					lambda.begin(), lambda.end());
+         
+      unsigned int r1(FixedArray1D<I,DIMENSION>::operator [] (0)),r2(multi_degree(lambda));
+      for (unsigned int i(1); i < DIMENSION; i++)
+      {
+          r1 += FixedArray1D<I,DIMENSION>::operator [] (i);
+      }
+      return (r1<r2) || ((r1==r2) && (std::lexicographical_compare(FixedArray1D<I, DIMENSION>::begin(),
+                                                                   FixedArray1D<I, DIMENSION>::end(),
+                                                                   lambda.begin(), lambda.end()) ));
+  }
+  
+  template <class I, unsigned int DIMENSION>
+  inline
+  bool MultiIndex<I, DIMENSION>::lex (const MultiIndex<I, DIMENSION>& lambda) const
+  {
+      return std::lexicographical_compare(FixedArray1D<I, DIMENSION>::begin(),
+                                          FixedArray1D<I, DIMENSION>::end(),
+                                          lambda.begin(), lambda.end());
+  }
+  
+  template<class I, unsigned int DIMENSION>
+  MultiIndex<I, DIMENSION>&
+  MultiIndex<I, DIMENSION>::operator ++ ()
+  {
+  	bool is_zero = true;
+  	for (int i(DIMENSION-1); i >= 0; i--)
+  	{
+  		I value (FixedArray1D<I, DIMENSION>::operator [] (i));
+  		if (value != 0)
+  		{
+  			is_zero = false;
+  			if (i != 0)
+  			{
+  				FixedArray1D<I,DIMENSION>::operator [] (i-1) = FixedArray1D<I,DIMENSION>::operator [] (i-1) +1;
+  				FixedArray1D<I,DIMENSION>::operator [] (i) = 0;
+  				FixedArray1D<I,DIMENSION>::operator [] (DIMENSION-1) = value -1;
+  			} else
+  			{
+  				FixedArray1D<I,DIMENSION>::operator [] (0) = 0;
+  				FixedArray1D<I,DIMENSION>::operator [] (DIMENSION-1) = value +1;
+  			}
+  			break;
+  		}
+  	}
+  	if (is_zero==true) FixedArray1D<I,DIMENSION>::operator [] (DIMENSION-1) = 1;
+  	return *this;
+  }
+
+  template<class I, unsigned int DIMENSION>
+  std::map<MultiIndex<I,DIMENSION>,int>
+  indexmapping(const MultiIndex<I, DIMENSION>& lambda)
+  {
+
+      typedef std::map<MultiIndex<I, DIMENSION>,int> map_type;
+      typedef typename map_type::iterator map_it;
+
+      MultiIndex<I, DIMENSION> temp;
+      int num(0);
+      map_type r;
+      //pair <map_it,bool> res;
+
+      map_it it;
+      it=r.begin();
+      //typedef typename set_type::value_type value_type;
+      //cout << "computing indexnumbers fr lambda = "<<lambda<<endl;
+      it = r.insert(it, std::pair<MultiIndex<I,DIMENSION>,int>(temp,num));
+      while (temp < lambda)
+      {
+          //cout << "inserting temp,num=" << temp << " , " << num << endl;
+          it=r.insert(it, std::pair<MultiIndex<I,DIMENSION>,int>(temp,num));
+          ++temp;
+          num++;
+      }
+      return r;
   }
 
   template<class I, unsigned int DIMENSION>
@@ -149,4 +220,5 @@ namespace MathTL
       r *= binomial(beta[i], alpha[i]);
     return r;
   }
+
 }

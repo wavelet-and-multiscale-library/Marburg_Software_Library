@@ -72,7 +72,8 @@ I faculty(const I n)
    (n) = 0 for n < k or k < 0
    (k)
  */
-int binomial(const int n, const int k)
+
+inline int binomial(const int n, const int k)
 {
   int r(1);
   

@@ -4,7 +4,7 @@
 // | This file is part of MathTL - the Mathematical Template Library    |
 // |                                                                    |
 // | Copyright (c) 2002-2009                                            |
-// | Thorsten Raasch, Manuel Werner                                     |
+// | Thorsten Raasch, Manuel Werner, Ulrich Friedrich                   |
 // +--------------------------------------------------------------------+
 
 #ifndef _MATHTL_MULTIINDEX_H
@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <set>
+#include <map>
 #include <utils/fixed_array1d.h>
 
 namespace MathTL
@@ -52,14 +53,67 @@ namespace MathTL
     inline bool operator != (const MultiIndex& lambda) const
     { return !(*this == lambda); }
 
-    //! lexicographic order <
+    /*
+     * MultiIndices are ordered same as \N^dim is ordered.
+     * This is not the lexicographic order!
+     * This does not work for multiindices with negative entries.
+     * Explicitly: indices are ordered primarily by their 1 norm, secondly lexicographically.
+     */
     bool operator < (const MultiIndex& lambda) const;
 
-    //! lexicographic order <=
+    /*
+     * Lexicographical ordering
+     */
+    bool lex (const MultiIndex& lambda) const;
+
+    //! ordered by distance from 0
     bool operator <= (const MultiIndex& lambda) const
     { return (*this < lambda || *this == lambda); }
+
+    //! ordered by distance from 0
+    bool operator >= (const MultiIndex& lambda) const
+    { return (lambda < *this || *this == lambda); }
+ 
+    /*
+     * Preincrement. Works only for nonnegative entries!
+     * Ordering given by numbering of \N^dim, i.e.
+     * (0,0,0),(0,0,1),(0,1,0),(1,0,0),(0,0,2),(0,1,1),(0,2,0),(1,0,1),(1,1,0),(2,0,0),(0,0,3),...
+     * This ordering is used for the operator <.
+     */
+    MultiIndex& operator ++ ();
     
+	// Postincrement. Works only for nonnegative entries!
+    MultiIndex operator ++ (int)    
+    {
+    	MultiIndex temp (*this);
+    	++*this;
+    	return temp;
+    };
+
+    /*
+     * Return Number of MulitiIndex
+     */
+    unsigned long int number()
+    {
+        MultiIndex temp;
+        unsigned long int num(0);
+        while ((temp) < (*this))
+        {
+            //++*this;
+            ++temp;
+            num++;
+        }
+        return num;
+    };       
   };
+
+
+  /*
+   * Return numbers of all MultiIndex from 0 to lambda
+   */
+  template <class I, unsigned int DIMENSION>
+  std::map<MultiIndex<I, DIMENSION>,int>
+  indexmapping(const MultiIndex<I, DIMENSION>& lambda);
 
   /*!
     For two multiindices \alpha and \beta, return the set
@@ -126,7 +180,8 @@ namespace MathTL
       }
     
     return os;
-  }
+  }  
+
 }
 
 #include <utils/multiindex.cpp>

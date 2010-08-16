@@ -21,13 +21,16 @@ int main()
   lambda2[2] = 4;
   cout << "- a nontrivial 3-index lambda2: " << lambda2 << endl;
 
-  lambda[0] = 3;
-  lambda[1] = 1;
+  lambda[0] = 0;
+  lambda[1] = 0;
+  lambda[2] = 9;
   cout << "  * changed lambda into " << lambda << endl;
   cout << "  * check equality: " << (lambda==lambda2) << endl;
   cout << "  * check non-equality: " << (lambda!=lambda2) << endl;
-  cout << "  * check lex. order operator <: "
-       << (lambda2 < lambda) << ", " << (lambda < lambda2) << endl;
+  cout << "  * check lex. order operator h2.lex(h): "
+       << (lambda2.lex(lambda)) << ", h.lex(h2)" << (lambda.lex(lambda2)) << endl;
+  cout << "  * check ordering operator < h2 < h:"
+       << (lambda2 < lambda) << ", h < h2 " << (lambda < lambda2) << endl;
 
   cout << "  * making a set out of the two multiindices:" << endl;
   set<MIndex3> M;

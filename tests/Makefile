@@ -137,6 +137,7 @@ EXEOBJF5 = \
   test_cube_equation.o test_cdd1_ldomain.o\
   test_cdd1_gramian.o test_cdd1_poisson1d.o test_cdd1_helm1d.o\
   test_helmholtz_equation.o\
+  test_tbasis_equation.o test_cached_tproblem.o\
 
 # set 6 of test programs: adaptive wavelet schemes for parabolic equations
 EXEOBJF6 = \

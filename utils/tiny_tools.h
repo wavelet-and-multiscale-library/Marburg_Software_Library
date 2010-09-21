@@ -86,7 +86,7 @@ inline int binomial(const int n, const int k)
   for (int i(k+1); i <= n; i++)
     r *= i;
   
-  for (int i(1); i <= n-k; i++)
+  for (int i(2); i+k <= n; i++)
     r /= i; // always possible without remainder
   
   return r;

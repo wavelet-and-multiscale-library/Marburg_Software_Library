@@ -80,7 +80,7 @@ namespace WaveletTL
 	    ldexp(1.0, 1-dt-2*n) // typo in [P]
 	    * minus1power(n+ell)
 	    * binomial(dt, k+dt/2-ell+n)
-	    * binomial((d+dt)/2-1+n, n)
+	    * binomial((d+dt)/2-1u+n, n)
 	    * binomial(2*n, ell);
       
       set_coefficient(MultiIndex<int, 1>(k), help);
@@ -105,7 +105,7 @@ namespace WaveletTL
 	    ldexp(1.0, 1-dt-2*n) // typo in [P]
 	    * minus1power(n+ell)
 	    * binomial(dt, (k+dt/2+n)-ell)
-	    * binomial((d+dt)/2+n-1, n)
+	    * binomial((d+dt)/2+n-1u, n)
 	    * binomial(2*n, ell);
       
       RRefinementMask<d+2*dt-1,-(d/2)-dt+1>::coeffs_[k-ell1T<d,dt>()] = help;

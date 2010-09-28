@@ -283,7 +283,7 @@ namespace FrameTL
 		 InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r,
 		 set<typename PROBLEM::WaveletBasis::Index>& Lambda_tilde,
 		 const int jmax = 99,
-		 const CompressionStrategy strategy = St04a);
+        	 const CompressionStrategy strategy = St04a);
 }
 
  #include <cdd1_local.cpp>

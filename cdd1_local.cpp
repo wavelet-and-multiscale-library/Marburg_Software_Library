@@ -54,6 +54,10 @@ namespace FrameTL
     params.c2 = c2;
     params.kappa = params.c2/params.c1;
     params.gamma = 0.8;
+    // Adjustment to reduce degrees of freedom
+#ifdef PROJECTOR
+    params.gamma = 0.4;
+#endif
 
     typedef typename PROBLEM::WaveletBasis::Index Index;
     InfiniteVector<double,Index> w, f;

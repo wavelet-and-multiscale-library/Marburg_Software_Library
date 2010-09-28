@@ -90,12 +90,9 @@ test_multiplicative_Schwarz33_2D_j03.o\
 test_multiplicative_Schwarz.o
 
 EXEOBJF3 = test_richardson.o\
-test_CG.o\
-test_CG_2D.o\
 test_richardson_projector_1D.o\
 test_richardson_projector_2D.o\
 test_richardson_projector_constfun_2D.o\
-test.o\
 test_steepest_descent_biharmonic_1D.o\
 test_steepest_descent33.o\
 test_steepest_descent46.o\

@@ -84,4 +84,12 @@ namespace WaveletTL
   {
     return sqrt(a(lambda, lambda));
   };
+
+  template <class INDEX>
+  inline
+  double
+  TrivialPreconditioner<INDEX>::diag(const INDEX& lambda) const
+  {
+    return 1;
+  };
 }

@@ -85,7 +85,12 @@ namespace WaveletTL
     double D(const Index& lambda) const {
       return problem->D(lambda);
     }
-    
+
+    /*
+     * access to the undelying problem
+     */
+    const PROBLEM* get_problem() const {return problem;}
+
     /*!
       evaluate the (unpreconditioned) bilinear form a
       (cached)
@@ -247,6 +252,11 @@ namespace WaveletTL
       (half) order t of the operator
     */
     double operator_order() const { return problem->operator_order(); }
+
+    /*
+     * access to the undelying problem
+     */
+    const PROBLEM* get_problem() const {return problem;}
     
     /*!
       evaluate the diagonal preconditioner D

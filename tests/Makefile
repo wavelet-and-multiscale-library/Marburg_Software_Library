@@ -132,12 +132,15 @@ EXEOBJF4 = \
 EXEOBJF5 = \
   test_cdd1_cube.o\
   test_cdd1.o\
-  test_sturm_bvp.o\
   test_cdd2.o test_duv.o\
-  test_cube_equation.o test_cdd1_ldomain.o\
+  test_cdd1_ldomain.o\
   test_cdd1_gramian.o test_cdd1_poisson1d.o test_cdd1_helm1d.o\
   test_helmholtz_equation.o\
-  test_tbasis_equation.o test_cached_tproblem.o\
+  test_tbasis_equation.o test_cached_tproblem.o
+
+EXEOBJ5b = \
+  test_cube_equation.o\
+  test_sturm_bvp.o
 
 # set 6 of test programs: adaptive wavelet schemes for parabolic equations
 EXEOBJF6 = \
@@ -151,10 +154,7 @@ EXEOBJF7 = \
 
 # set 8 of test programs: ExpandASPP	
 EXEOBJF8 = \
-  test_expandWavelet.o\
-  test_cube_equation.o\
-  test_sturm_bvp.o\
-
+  test_expandWavelet.o
 
 EXES1 = $(EXEOBJF1:.o=)
 EXES2 = $(EXEOBJF2:.o=)
@@ -163,10 +163,10 @@ EXES3 = $(EXEOBJF3:.o=)
 EXES3a = $(EXEOBJF3a:.o=)
 EXES3b = $(EXEOBJF3b:.o=)
 EXES4 = $(EXEOBJF4:.o=)
-EXES5 = $(EXEOBJF5:.o=)
+EXES5 = $(EXEOBJF5:.o=) $(EXEOBJF5b:.o=)
 EXES6 = $(EXEOBJF6:.o=)
 EXES7 = $(EXEOBJF7:.o=)
-EXES8 = $(EXEOBJF8:.o=)
+EXES8 = $(EXEOBJF8:.o=) $(EXEOBJF5b:.o=)
 
 all:: tests
 

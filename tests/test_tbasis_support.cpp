@@ -20,8 +20,8 @@ using namespace WaveletTL;
 int main()
 {
     cout << "Testing support calculations for wavelet bases on the cube..." << endl;
-    typedef DSBasis<2,2> Basis1D;
-//  typedef PBasis<2,2> Basis1D;
+//  typedef DSBasis<2,2> Basis1D;
+    typedef PBasis<2,2> Basis1D;
 //   typedef JLBasis Basis1D;
 
     const unsigned int DIM = 2;
@@ -35,6 +35,17 @@ int main()
     bc[2] = bc[3] = true;
     Basis basis(bc);
 #endif
+
+    basis.set_jmax(9);
+
+  //! The index type.
+  typedef TensorIndex<Basis1D,2,Basis>::type_type type_type;
+    
+  //! The translation index type.
+  typedef TensorIndex<Basis1D,2,Basis>::translation_type translation_type;
+
+  //! The level type.
+  typedef TensorIndex<Basis1D,2,Basis>::level_type level_type;
 
 #if 0
     cout << "- testing calculation of supports:" << endl;
@@ -52,14 +63,22 @@ int main()
 #endif
 
 #if 1
-    Index lambda = first_generator<Basis1D,2,Basis>(&basis);
-    typedef TensorIndex<Basis1D,2,Basis>::level_type level_type;
-    level_type lambda_j(basis.j0());
+
+    type_type e(1,1);
+    translation_type k(3,3);
+    level_type j(3,2);
+cout << "Beginn         Lambda" << endl;
+
+    Index lambda(j,e,k,&basis);
+cout << "Ende         Lambda"  << endl;
+//    typedef TensorIndex<Basis1D,2,Basis>::level_type level_type;
+    level_type lambda_j1(2,2);
     
     typedef std::list<Index> SupportList;
     SupportList nus;
+
     cout << "intersecting generators" << endl;
-    intersecting_wavelets<Basis1D,2>(basis, lambda, lambda_j, true, nus);
+    intersecting_wavelets<Basis1D,2>(basis, lambda, lambda_j1, true, nus);
     for (SupportList::const_iterator it(nus.begin()); it != nus.end(); ++it)
     {
         Basis::Support supp;
@@ -72,9 +91,13 @@ int main()
              << " and .number()" << (*it).number()
              << endl;
     }
-    lambda_j[0]++;
-    cout << "intersecting wavelets on level " << lambda_j<< endl;
-    intersecting_wavelets<Basis1D,2>(basis, lambda, lambda_j, false, nus);
+    level_type lambda_j2(2,2);
+
+    cout << "Mein test  : " << basis.get_wavelet(153)->number()<< endl;
+
+
+    cout << "intersecting wavelets on level " << lambda_j2<< endl;
+    intersecting_wavelets<Basis1D,2>(basis, lambda, lambda_j2, false, nus);
     for (SupportList::const_iterator it(nus.begin()); it != nus.end(); ++it)
     {
         Basis::Support supp;
@@ -87,7 +110,7 @@ int main()
              << " and .number()" << (*it).number()
              << endl;
     }
-    
+/*    
     cout << " Testing intersecting_elements on level "<< lambda_j <<endl;
     intersecting_elements<Basis1D,2>(basis, lambda, lambda_j, nus);
     for (SupportList::const_iterator it(nus.begin()); it != nus.end(); ++it)
@@ -102,6 +125,7 @@ int main()
              << " and .number()" << (*it).number()
              << endl;
     }
+*/
 #endif
 
 #if 0

@@ -93,8 +93,10 @@ EXEOBJF2 = \
   test_jl_basis.o test_jl_support.o\
   test_spline_basis.o test_spline_support.o test_spline_expansion.o\
   test_a_basis.o\
-  test_s_basis.o test_s_support.o\
+  test_s_basis.o\
+  test_s_support.o\
   test_i_indexplot.o\
+#  test_i_indexplot.o\ (temporarily commented out)
 
 # set 2a of test programs: wavelet bases on the interval with improved performance (periodic)
 EXEOBJF2a = \
@@ -154,7 +156,7 @@ EXEOBJF7 = \
 
 # set 8 of test programs: ExpandASPP	
 EXEOBJF8 = \
-  test_expandWavelet.o
+  test_expandWavelet.o\
 
 EXES1 = $(EXEOBJF1:.o=)
 EXES2 = $(EXEOBJF2:.o=)

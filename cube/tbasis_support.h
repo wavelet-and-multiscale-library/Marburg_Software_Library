@@ -50,7 +50,6 @@ namespace WaveletTL
      * For a given wavelet \psi_\lambda, compute all generators/wavelets
      * \psi_\nu with level |\nu|=j (multiindex), such that the respective supports
      * have a nontrivial intersection.
-     * OUTPUT IS NOT(!) SORTED
      */
     template <class IBASIS, unsigned int DIM>
     void intersecting_wavelets(const TensorBasis<IBASIS,DIM>& basis,
@@ -62,7 +61,6 @@ namespace WaveletTL
      * For a given wavelet \psi_\lambda, compute all generators & wavelets
      * \psi_\nu with level |\nu|=j (multiindex), such that the respective supports
      * have a nontrivial intersection.
-     * OUTPUT IS SORTED
      */
     template <class IBASIS, unsigned int DIM>
     void intersecting_elements(const TensorBasis<IBASIS,DIM>& basis,

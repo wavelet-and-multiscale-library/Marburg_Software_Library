@@ -51,6 +51,19 @@ namespace WaveletTL
 			  const typename PBasis<d,dT>::Index& nu,
 			  typename PBasis<d,dT>::Support& supp);
 
+
+
+  /*
+    For a given wavelet \psi_\lambda, compute the maximal an minimal translation Parameter k such that
+    these wavelets intersect
+  */
+  template <int d, int dT>
+  void get_translation_wavelets(const PBasis<d,dT>& basis,
+			     const typename PBasis<d,dT>::Index& lambda,
+			     const int j, const bool generators,
+			     int & mink, int& maxk);
+   
+
   /*!
     For a given wavelet \psi_\lambda, compute all generators/wavelets
     \psi_\nu with level |\nu|=j, such that the respective supports

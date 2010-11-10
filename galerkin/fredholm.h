@@ -180,7 +180,8 @@ namespace WaveletTL
   };
 
   /*!
-    example: Volterra integration operator
+    example: Volterra integration operator,
+             k(s,t) = chi_{(-infty,0]}(s-t)
   */
   template <int d, int dT, int J0>
   class VolterraIntegralOperator
@@ -210,6 +211,40 @@ namespace WaveletTL
       return 1.0 - std::max(s,t);
     }
   };
+  
+  /*!
+    example: Convolution with a hat function,
+             k(s,t) = 1-|s-t|
+  */
+  template <int d, int dT, int J0>
+  class HatConvolutionOperator
+    :  public FredholmIntegralOperator<d,dT,J0>
+  {
+  public:
+    /*!
+      type of the wavelet basis
+    */
+    typedef SplineBasis<d,dT,P_construction,0,0,0,0,J0> WaveletBasis;
+    
+    /*!
+      wavelet index class
+    */
+    typedef typename WaveletBasis::Index Index;
+    
+    /*!
+      constructor from a given wavelet basis and a given right-hand side y
+    */
+    HatConvolutionOperator(const WaveletBasis& basis,
+			   const InfiniteVector<double,Index>& y);
+    
+    /*
+      kernel function
+    */
+    double g(const double s, const double t) const {
+      return 1.0 - std::max(s,t); // change this!!!
+    }
+  };
+
 }
 
 #include <galerkin/fredholm.cpp>

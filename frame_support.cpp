@@ -6,14 +6,21 @@
 #include <cube/cube_support.h>
 #include <map>
 #include <time.h>
+#include <math.h>
+#include <iostream>
 
 using namespace WaveletTL;
 
 using std::type_info;
 using std::map;
 
+
 namespace FrameTL
 {
+
+//        Attention the calculation of the support between two Patches only works if the cube is mapped on a rectangle!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
   // #####################################################################################
   // First some helpers.
   // #####################################################################################
@@ -436,6 +443,27 @@ namespace FrameTL
   }
 
 
+ template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  void
+  support(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+				 const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+				 typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Support& SuppType)
+  {
+    SuppType = frame.all_patch_supports[lambda.number()];
+  }
+
+
+ template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  void
+  support_on_cube(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+				 const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+				 typename CubeBasis<IBASIS,DIM_d>::Support& SuppType)
+  {
+    SuppType = (frame.all_supports)[lambda.number()];
+  }
+
+
+
   /*!
     This function checks whether the convex qudrangles given by the vertices in poly1 and poly2
     have a non-trivial intersection.
@@ -767,6 +795,258 @@ namespace FrameTL
   {
     //intersecting.erase(intersecting.begin(),intersecting.end());
 
+#if 1
+
+    typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> Frame;
+    typedef typename Frame::Index Index;
+
+    typedef typename CubeBasis<IBASIS,DIM_d>::Index CubeIndex;
+
+    int k = -1;
+	if ( generators ) {
+      k=0;
+    }
+    else {
+      k=j-frame.j0()+1;
+    }
+    std::list<typename Frame::Index> intersect_diff;
+
+
+    if (! generators) {
+      unsigned int p = lambda.p();
+      FixedArray1D<int,DIM_d>
+      minkwavelet, maxkwavelet, minkgen, maxkgen;
+      typedef typename IBASIS::Index Index1D;
+      int minkkkk;
+      int maxkkkk;
+
+      // prepare all intersecting wavelets and generators in the i-th coordinate direction
+      for (unsigned int i = 0; i < DIM_d; i++) {
+        get_translation_wavelets(*frame.bases()[p]->bases()[i],
+	    	Index1D(lambda.j(),
+		    lambda.e()[i],
+		    lambda.k()[i],
+		    frame.bases()[p]->bases()[i]),
+		    j, true, minkkkk,maxkkkk);
+        minkgen[i]=minkkkk;
+        maxkgen[i] = maxkkkk;
+        if (!(generators))
+	  get_translation_wavelets(*frame.bases()[p]->bases()[i],
+		      Index1D(lambda.j(),
+			      lambda.e()[i],
+			      lambda.k()[i],
+			      frame.bases()[p]->bases()[i]),
+		      j, false, minkkkk,maxkkkk);
+        minkwavelet[i] = minkkkk;
+        maxkwavelet[i] = maxkkkk;
+       } // end for
+
+      unsigned int result = 0;
+      int deltaresult = 0;
+      const Array1D<Array1D<Index> >* full_collection_levelwise = frame.get_full_collection_levelwise();
+
+      MultiIndex<int,DIM_d> type;
+      type[DIM_d-1] = 1;
+      unsigned int tmp = 1;
+      bool exit = 0;
+
+      while(!exit){
+      FixedArray1D<int,DIM_d> help1, help2;
+      
+      for(unsigned int i = 0; i<DIM_d; i++)
+         help1[i]=0;
+
+      // berechnet wie viele Indizes von dem jeweiligen Typ in Patches vor p liegen 
+      for (unsigned int pp = 0; pp < p; pp++) {
+	    tmp = 1;
+	    for (unsigned int i = 0; i < DIM_d; i++) {
+	      if (type[i] == 0)
+	        tmp *= ((frame.bases()[pp])->bases())[i]->Deltasize(j);
+	      else
+	        tmp *= ((frame.bases()[pp])->bases())[i]->Nablasize(j);
+	    }
+            // fügt die Indizes aus diesen Patches ein falls sie sich überlappen
+            for (unsigned int i = result; i < result + tmp; i++) {
+              const Index* ind = &((*full_collection_levelwise)[k][i]);
+              if ( intersect_supports_simple(frame, lambda, *ind) ){
+	        intersecting.push_back(*ind);
+              }
+            }
+            result += tmp;
+	  }
+
+
+
+      // berechnet wie viele indices mit einem zu keinem translationstyp es gibt, so dass sich die Wavelets nicht schneiden
+      unsigned int result2 = 0;
+      for (unsigned int i = 0; i < DIM_d; i++) {  // begin for1
+        int tmp = 1;
+
+        for (unsigned int l = i+1; l < DIM_d; l++) {
+	  if (type[l] == 0)
+	    tmp *= ((frame.bases()[p])->bases())[l]->Deltasize(j);
+	  else
+	    tmp *= ((frame.bases()[p])->bases())[l]->Nablasize(j);
+        }
+
+        help2[i] = tmp;
+
+        if (type[i] == 0) {
+	  if (minkgen[i] == ((frame.bases()[p])->bases())[i]->DeltaLmin())
+	    continue;
+        }
+        else
+	  if (minkwavelet[i] == ((frame.bases()[p])->bases())[i]->Nablamin())
+	    continue;
+      
+        
+        if (type[i] == 0) {
+	tmp *= minkgen[i]-((frame.bases()[p])->bases())[i]->DeltaLmin();
+        }
+        else
+	  tmp *= minkwavelet[i]-((frame.bases()[p])->bases())[i]->Nablamin();
+
+        result2 += tmp;
+      }  // end for1
+
+      int tmp = 0;
+
+      if (type[DIM_d-1] == 0) {
+	tmp = maxkgen[DIM_d-1] - minkgen[DIM_d-1]+1;
+      }
+      else{
+	tmp = maxkwavelet[DIM_d-1] - minkwavelet[DIM_d-1]+1; 
+      }
+     
+      bool exit2 = 0;
+      
+      while(!exit2){
+
+      // fügt die Indizes aus diesem Patch ein falls sie sich überlappen
+      for (unsigned int i = result + result2; i < result + result2 + tmp; i++) {
+        const Index* ind = &((*full_collection_levelwise)[k][i]);
+	intersecting.push_back(*ind);
+      }
+
+      for (unsigned int i = DIM_d-2; i >= 0; i--) {
+            if(type[i]==0){
+	      if ( help1[i] < maxkgen[i]-minkgen[i]) {
+	        help1[i]++;
+                result2 = result2 + help2[i];
+                for (unsigned int j = i+1; j<=DIM_d-2;j++){
+                    if(type[i] == 0){
+                       result2 = result2 - help2[j]*(maxkgen[j] - minkgen[j]+1);
+                    } 
+                    else
+                       result2 = result2 - help2[j]*(maxkwavelet[j] - minkwavelet[j]+1);
+                }
+                break;
+              }
+              else {
+                 help1[i]=0;
+                 exit2 = (i==0);
+                 break;
+              }
+            }
+            else {
+              if ( help1[i] < maxkwavelet[i] - minkwavelet[i]) {
+	        help1[i]++;
+                result2 = result2 + help2[i];
+                for (unsigned int j = i+1; j<=DIM_d-2;j++){
+                    if(type[i] == 0){
+                       result2 = result2 - help2[j]*(maxkgen[j] - minkgen[j]+1);
+                    }
+                    else
+                       result2 = result2 - help2[j]*(maxkwavelet[j] - minkwavelet[j]+1);
+                }
+                break;
+              }
+              else {
+                 help1[i]=0;
+                 exit2 = (i==0);
+                 break;
+              }
+	    }
+	  } //end for
+      } //end while 2
+
+
+      // berechnet wie viele Indizes von dem jeweiligen Typ in Patches p liegen 
+      tmp = 1;
+      for (unsigned int i = 0; i < DIM_d; i++) {
+	      if (type[i] == 0)
+	        tmp *= ((frame.bases()[p])->bases())[i]->Deltasize(j);
+	      else
+	        tmp *= ((frame.bases()[p])->bases())[i]->Nablasize(j);
+	    }
+         
+      result += tmp;
+
+      // berechnet wie viele Indizes von dem jeweiligen Typ in Patches nach p liegen     
+      for (int pp = p+1; pp < frame.n_p(); pp++) {
+	    tmp = 1;
+	    for (unsigned int i = 0; i < DIM_d; i++) {
+	      if (type[i] == 0)
+	        tmp *= ((frame.bases()[pp])->bases())[i]->Deltasize(j);
+	      else
+	        tmp *= ((frame.bases()[pp])->bases())[i]->Nablasize(j);
+	    }
+
+            // fügt die Indizes aus diesen Patches ein falls sie sich überlappen
+            for (unsigned int i = result; i < result + tmp; i++) {
+               const Index* ind = &((*full_collection_levelwise)[k][i]);
+               if ( intersect_supports_simple(frame, lambda, *ind) ){
+	          intersecting.push_back(*ind);
+                }
+             }
+	    result += tmp;
+	  }
+
+     // berechnet den nächsten Typ 
+     for (unsigned int i = DIM_d-1; i >= 0; i--) {
+	    if ( type[i] == 1 ) {
+	      type[i] = 0;
+              exit = (i == 0);
+	      if(exit)
+               break;
+	    }
+	    else {
+	      type[i]++;
+	      break;
+	    }
+	  } //end for
+       } // end while 1
+      } // end if
+    // } // end if
+    
+//*/
+    else{  //if generator
+
+    typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> Frame;
+    typedef typename Frame::Index Index;
+
+    typedef typename CubeBasis<IBASIS,DIM_d>::Index CubeIndex;
+
+    int k = -1;
+	if ( generators ) {
+      k=0;
+    }
+    else {
+      k=j-frame.j0()+1;
+    }
+    std::list<typename Frame::Index> intersect_diff;
+
+    const Array1D<Array1D<Index> >* full_collection_levelwise = frame.get_full_collection_levelwise();
+
+    for (unsigned int i = 0; i < (*full_collection_levelwise)[k].size(); i++) {
+      const Index* ind = &((*full_collection_levelwise)[k][i]);
+      if ( intersect_supports_simple(frame, lambda, *ind) ){
+	intersecting.push_back(*ind);
+      }
+    }
+    } //end else
+#else
+
     typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> Frame;
     typedef typename Frame::Index Index;
 
@@ -792,6 +1072,7 @@ namespace FrameTL
 	intersecting.push_back(*ind);
       }
     }
+#endif
   }
   
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
@@ -831,6 +1112,290 @@ namespace FrameTL
   {
     //intersecting.erase(intersecting.begin(),intersecting.end());
 
+#if 1
+
+    typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> Frame;
+    typedef typename Frame::Index Index;
+
+    typedef typename CubeBasis<IBASIS,DIM_d>::Index CubeIndex;
+
+    int k = -1;
+	if ( generators ) {
+      k=0;
+    }
+    else {
+      k=j-frame.j0()+1;
+    }
+    std::list<typename Frame::Index> intersect_diff;
+
+
+    if (! generators) {
+      if(p == lambda.p()){
+
+        FixedArray1D<int,DIM_d>
+            minkwavelet, maxkwavelet, minkgen, maxkgen;
+        typedef typename IBASIS::Index Index1D;
+        int minkkkk;
+        int maxkkkk;
+
+        // prepare all intersecting wavelets and generators in the i-th coordinate direction
+        for (unsigned int i = 0; i < DIM_d; i++) {
+          get_translation_wavelets(*frame.bases()[p]->bases()[i],
+			    Index1D(lambda.j(),
+				    lambda.e()[i],
+				    lambda.k()[i],
+				    frame.bases()[p]->bases()[i]),
+			    j, true, minkkkk,maxkkkk);
+          minkgen[i]=minkkkk;
+          maxkgen[i] = maxkkkk;
+          if (!(generators))
+	     get_translation_wavelets(*frame.bases()[p]->bases()[i],
+			      Index1D(lambda.j(),
+				      lambda.e()[i],
+				      lambda.k()[i],
+				      frame.bases()[p]->bases()[i]),
+			      j, false, minkkkk,maxkkkk);
+          minkwavelet[i] = minkkkk;
+          maxkwavelet[i] = maxkkkk;
+         } // end for
+
+        unsigned int result = 0;
+        int deltaresult = 0;
+        const Array1D<Array1D<Index> >* full_collection_levelwise = frame.get_full_collection_levelwise();
+
+        MultiIndex<int,DIM_d> type;
+        type[DIM_d-1] = 1;
+        unsigned int tmp = 1;
+        bool exit = 0;
+
+      while(!exit){
+      FixedArray1D<int,DIM_d> help1, help2;
+      
+      for(unsigned int i = 0; i<DIM_d; i++)
+         help1[i]=0;
+
+      // berechnet wie viele Indizes von dem jeweiligen Typ in Patches vor p liegen 
+      for (int pp = 0; pp < p; pp++) {
+	    tmp = 1;
+	    for (unsigned int i = 0; i < DIM_d; i++) {
+	      if (type[i] == 0)
+	        tmp *= ((frame.bases()[pp])->bases())[i]->Deltasize(j);
+	      else
+	        tmp *= ((frame.bases()[pp])->bases())[i]->Nablasize(j);
+	    }
+	    result += tmp;
+	  }
+
+      // berechnet wie viele indices mit einem zu keinem translationstyp es gibt, so dass sich die Wavelets nicht schneiden
+      unsigned int result2 = 0;
+      for (unsigned int i = 0; i < DIM_d; i++) {  // begin for1
+        int tmp = 1;
+
+        for (unsigned int l = i+1; l < DIM_d; l++) {
+	  if (type[l] == 0)
+	    tmp *= ((frame.bases()[p])->bases())[l]->Deltasize(j);
+	  else
+	    tmp *= ((frame.bases()[p])->bases())[l]->Nablasize(j);
+        }
+
+        help2[i] = tmp;
+
+        if (type[i] == 0) {
+	  if (minkgen[i] == ((frame.bases()[p])->bases())[i]->DeltaLmin())
+	    continue;
+        }
+        else
+	  if (minkwavelet[i] == ((frame.bases()[p])->bases())[i]->Nablamin())
+	    continue;
+      
+        
+        if (type[i] == 0) {
+	tmp *= minkgen[i]-((frame.bases()[p])->bases())[i]->DeltaLmin();
+        }
+        else
+	  tmp *= minkwavelet[i]-((frame.bases()[p])->bases())[i]->Nablamin();
+
+        result2 += tmp;
+      }  // end for1
+
+      int tmp = 0;
+
+      if (type[DIM_d-1] == 0) {
+	tmp = maxkgen[DIM_d-1] - minkgen[DIM_d-1]+1;
+      }
+      else{
+	tmp = maxkwavelet[DIM_d-1] - minkwavelet[DIM_d-1]+1; 
+      }
+     
+      bool exit2 = 0;
+      
+      while(!exit2){
+
+      // fügt die Indizes aus diesem Patch ein falls sie sich überlappen
+      for (unsigned int i = result + result2; i < result + result2 + tmp; i++) {
+        const Index* ind = &((*full_collection_levelwise)[k][i]);
+	intersecting.push_back(*ind);
+      }
+
+      for (unsigned int i = DIM_d-2; i >= 0; i--) {
+            if(type[i]==0){
+	      if ( help1[i] < maxkgen[i]-minkgen[i]) {
+	        help1[i]++;
+                result2 = result2 + help2[i];
+                for (unsigned int j = i+1; j<=DIM_d-2;j++){
+                    if(type[i] == 0){
+                       result2 = result2 - help2[j]*(maxkgen[j] - minkgen[j]+1);
+                    } 
+                    else
+                       result2 = result2 - help2[j]*(maxkwavelet[j] - minkwavelet[j]+1);
+                }
+                break;
+              }
+              else {
+                 help1[i]=0;
+                 exit2 = (i==0);
+                 break;
+              }
+            }
+            else {
+              if ( help1[i] < maxkwavelet[i] - minkwavelet[i]) {
+	        help1[i]++;
+                result2 = result2 + help2[i];
+                for (unsigned int j = i+1; j<=DIM_d-2;j++){
+                    if(type[i] == 0){
+                       result2 = result2 - help2[j]*(maxkgen[j] - minkgen[j]+1);
+                    }
+                    else
+                       result2 = result2 - help2[j]*(maxkwavelet[j] - minkwavelet[j]+1);
+                }
+                break;
+              }
+              else {
+                 help1[i]=0;
+                 exit2 = (i==0);
+                 break;
+              }
+	    }
+	  } //end for
+      } //end while 2
+
+
+      // berechnet wie viele Indizes von dem jeweiligen Typ in Patches p liegen 
+      tmp = 1;
+      for (unsigned int i = 0; i < DIM_d; i++) {
+	      if (type[i] == 0)
+	        tmp *= ((frame.bases()[p])->bases())[i]->Deltasize(j);
+	      else
+	        tmp *= ((frame.bases()[p])->bases())[i]->Nablasize(j);
+	    }
+         
+
+      // berechnet wie viele Indizes von dem jeweiligen Typ in Patches nach p liegen     
+      result += tmp;
+      for (int pp = p+1; pp < frame.n_p(); pp++) {
+	    tmp = 1;
+	    for (unsigned int i = 0; i < DIM_d; i++) {
+	      if (type[i] == 0)
+	        tmp *= ((frame.bases()[pp])->bases())[i]->Deltasize(j);
+	      else
+	        tmp *= ((frame.bases()[pp])->bases())[i]->Nablasize(j);
+	    }
+	    result += tmp;
+	  }
+     
+
+     // berechnet den nächsten Typ 
+     for (unsigned int i = DIM_d-1; i >= 0; i--) {
+	    if ( type[i] == 1 ) {
+	      type[i] = 0;
+              exit = (i == 0);
+	      if(exit)
+               break;
+	    }
+	    else {
+	      type[i]++;
+	      break;
+	    }
+	  } //end for
+       } // end while 1
+    //  } // end if
+    // } // end if
+    
+//*/
+    }  // end if von if(lamda.p() == p) //////////////////////////////////////////////////////////////////////////////////////////
+
+     else{  
+        unsigned int result = 0;
+        int deltaresult = 0;
+        const Array1D<Array1D<Index> >* full_collection_levelwise = frame.get_full_collection_levelwise();
+
+        MultiIndex<int,DIM_d> type;
+        type[DIM_d-1] = 1;
+        unsigned int tmp = 1;
+        bool exit = 0;
+
+      while(!exit){
+
+      // berechnet wie viele Indizes von dem jeweiligen Typ in Patches vor p liegen 
+      for (int pp = 0; pp < p; pp++) {
+	    tmp = 1;
+	    for (unsigned int i = 0; i < DIM_d; i++) {
+	      if (type[i] == 0)
+	        tmp *= ((frame.bases()[pp])->bases())[i]->Deltasize(j);
+	      else
+	        tmp *= ((frame.bases()[pp])->bases())[i]->Nablasize(j);
+	    }
+	    result += tmp;
+	  }
+      // berechnet wie viele Indizes von dem jeweiligen Typ in Patches p liegen 
+      tmp = 1;
+      for (unsigned int i = 0; i < DIM_d; i++) {
+	      if (type[i] == 0)
+	        tmp *= ((frame.bases()[p])->bases())[i]->Deltasize(j);
+	      else
+	        tmp *= ((frame.bases()[p])->bases())[i]->Nablasize(j);
+	    }
+      
+      // fügt die Indizes aus diesem Patch ein falls sie sich überlappen
+      for (unsigned int i = result; i < result + tmp; i++) {
+        const Index* ind = &((*full_collection_levelwise)[k][i]);
+        if ( intersect_supports_simple(frame, lambda, *ind) ){
+	  intersecting.push_back(*ind);
+        }
+      }
+
+      // berechnet wie viele Indizes von dem jeweiligen Typ in Patches nach p liegen     
+      result += tmp;
+      for (int pp = p+1; pp < frame.n_p(); pp++) {
+	    tmp = 1;
+	    for (unsigned int i = 0; i < DIM_d; i++) {
+	      if (type[i] == 0)
+	        tmp *= ((frame.bases()[pp])->bases())[i]->Deltasize(j);
+	      else
+	        tmp *= ((frame.bases()[pp])->bases())[i]->Nablasize(j);
+	    }
+	    result += tmp;
+	  }
+
+     // berechnet den nächsten Typ 
+     for (unsigned int i = DIM_d-1; i >= 0; i--) {
+	    if ( type[i] == 1 ) {
+	      type[i] = 0;
+              exit = (i == 0);
+	      if(exit)
+               break;
+	    }
+	    else {
+	      type[i]++;
+	      break;
+	    }
+	  } //end for
+       } // end while
+      } // end else  // lambda.p = p
+     } // end if
+
+    else{  //if generator
+
     typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> Frame;
     typedef typename Frame::Index Index;
 
@@ -853,6 +1418,32 @@ namespace FrameTL
 	intersecting.push_back(*ind);
       }
     }
+    } //end else
+#else
+
+    typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> Frame;
+    typedef typename Frame::Index Index;
+
+    typedef typename CubeBasis<IBASIS,DIM_d>::Index CubeIndex;
+
+    int k = -1;
+	if ( generators ) {
+      k=0;
+    }
+    else {
+      k=j-frame.j0()+1;
+    }
+    std::list<typename Frame::Index> intersect_diff;
+
+    const Array1D<Array1D<Index> >* full_collection_levelwise = frame.get_full_collection_levelwise();
+    for (unsigned int i = 0; i < (*full_collection_levelwise)[k].size(); i++) {
+      const Index* ind = &((*full_collection_levelwise)[k][i]);
+      if ( (ind->p() == p) && 
+	   intersect_supports_simple(frame, lambda, *ind) ){
+	intersecting.push_back(*ind);
+      }
+    }
+#endif
   }
   
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>

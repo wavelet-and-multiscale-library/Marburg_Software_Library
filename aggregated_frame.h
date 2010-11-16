@@ -93,7 +93,7 @@ namespace FrameTL
      */
     AggregatedFrame(const Atlas<DIM_d, DIM_m>*,
 		    const Array1D<FixedArray1D<int,2*DIM_d> >&,
-		    const int);
+		    const int jmax);
 
     /*!
       Frame index class.

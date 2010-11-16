@@ -104,21 +104,25 @@ test_steepest_descent46_2D.o\
 test_steepest_descent22.o\
 test_steepest_descent_2D.o
 
+EXEOBJF4 = test_frame_support.o\
+
 EXES1 = $(EXEOBJF1:.o=)
 EXES2 = $(EXEOBJF2:.o=)
 EXES3 = $(EXEOBJF3:.o=)
+EXES4 = $(EXEOBJF4:.o=)
 
 
 all:: tests
 
-tests:: tests1 tests2 tests3
+tests:: tests1 tests2 tests3 tests4
 
 tests1:: $(EXES1)
 tests2:: $(EXES2)
 tests3:: $(EXES3)
+tests4:: $(EXES4)
 
 clean::
-	rm -f $(EXEOBJF1) $(EXEOBJF2) $(EXEOBJF3) $(EXES1) $(EXES2) $(EXES3)
+	rm -f $(EXEOBJF1) $(EXEOBJF2) $(EXEOBJF3) $(EXEOBJF4) $(EXES1) $(EXES2) $(EXES3) $(EXES4)
 
 clean1::
 	rm -f $(EXEOBJF1) $(EXES1)
@@ -126,6 +130,9 @@ clean2::
 	rm -f $(EXEOBJF2) $(EXES2)
 clean3::
 	rm -f $(EXEOBJF3) $(EXES3)
+clean4::
+	rm -f $(EXEOBJF4) $(EXES4)
+
 
 
 veryclean:: clean
@@ -152,5 +159,13 @@ $(EXEOBJF3): %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $< 
 
 $(EXES3): %: %.o
+#	$(CXX) $< -g -o $@
+	$(CXX) $< -o $@
+
+$(EXEOBJF4): %.o: %.cpp
+#	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -o $@ $< 
+
+$(EXES4): %: %.o
 #	$(CXX) $< -g -o $@
 	$(CXX) $< -o $@

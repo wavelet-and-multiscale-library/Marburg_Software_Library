@@ -26,6 +26,8 @@ using FrameTL::Index1D;
 namespace FrameTL
 {
 
+//        Attention the calculation of the support between two Patches only works if the cube is mapped on a rectangle!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
   /*!
     \file frame_support.h
     Routines for handling the supports of aggregated wavelet frame elements.
@@ -82,6 +84,22 @@ namespace FrameTL
   bool intersect_supports_simple(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
 				 const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
 				 const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& mu);
+
+  /*!
+    Gives the support of a wavelet or generator.
+  */
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  void support(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+				 const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+				 typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Support& SuppType);
+
+  /*!
+    Gives the support of a wavelet or generator on the unit cube.
+  */
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
+  void support_on_cube(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
+				 const typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Index& lambda,
+				 typename AggregatedFrame<IBASIS,DIM_d,DIM_m>::Support& SuppType);
 
 
   /*!

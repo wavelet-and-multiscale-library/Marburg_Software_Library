@@ -16,22 +16,31 @@ namespace WaveletTL
     
     this->s0 = s0;
     this->s1 = s1;
-
+    primal = d;
+    dual = dT;
+    evaluate_with_pre_computation = false;
     setup();
-#ifdef _PP_AUSWERTUNG_DER_WAVELETS
-    setWavelets();
+
+#ifdef _PRE_COMPUTE_WAVELETS
+    pre_compute_wavelets();
 #endif
+
   }
 
   template <int d, int dT>
   PBasis<d,dT>::PBasis(const bool bc_left, const bool bc_right) {
     this->s0 = bc_left ? 1 : 0;
     this->s1 = bc_right ? 1 : 0;
+    primal = d;
+    dual = dT;
+    evaluate_with_pre_computation = false;
 
     setup();
-#ifdef _PP_AUSWERTUNG_DER_WAVELETS
-    setWavelets();
+
+#ifdef _PRE_COMPUTE_WAVELETS
+    pre_compute_wavelets();
 #endif
+
   }
 
   template <int d, int dT>
@@ -2770,9 +2779,6 @@ namespace WaveletTL
     WaveletTL::evaluate(*this, derivative, lambda, points, values);
   }
 
-
-#ifdef _PP_AUSWERTUNG_DER_WAVELETS
-
    /* Compute the Picewiese expansion of all wavelets and Generatoren for given j, d */
   template <int d, int dT>
   inline
@@ -2787,6 +2793,5 @@ namespace WaveletTL
    }
 
   }
-#endif
 
 }

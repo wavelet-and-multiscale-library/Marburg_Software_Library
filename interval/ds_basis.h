@@ -396,7 +396,22 @@ namespace WaveletTL
 
     const int degrees_of_freedom() const { return full_collection.size(); };
 
+
+
+    //! the primal order
+    int get_primalorder() const{return primal;};
+
+    //! the dual order
+    int get_dualorder() const{return dual;};
+
+
   protected:
+    //! the dual order
+    int dual;
+
+    //! the primal order
+    int primal;
+
     //! coarsest possible level
     int j0_;
 

@@ -165,7 +165,7 @@ namespace WaveletTL
 
       // prepare all intersecting wavelets and generators in the i-th coordinate direction
       for (unsigned int i = 0; i < DIM; i++) {
-        get_translation_wavelets(*(basis.bases()[i]),
+        get_intersecting_wavelets_on_level(*(basis.bases()[i]),
 	    	Index1D(lambda.j()[i],
 		    lambda.e()[i],
 		    lambda.k()[i],
@@ -174,7 +174,7 @@ namespace WaveletTL
         minkgen[i] = minkkkk;
         maxkgen[i] = maxkkkk;
         if (!(generators))
-	  get_translation_wavelets(*basis.bases()[i],
+	  get_intersecting_wavelets_on_level(*basis.bases()[i],
 		      Index1D(lambda.j()[i],
 			      lambda.e()[i],
 			      lambda.k()[i],

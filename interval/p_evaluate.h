@@ -51,13 +51,13 @@ namespace WaveletTL
 		  const double x);
 
 
-#ifdef _PP_AUSWERTUNG_DER_WAVELETS
+
   /*!
     Expand of a single primal [P] generator or wavelet \psi_\lambda as a PP Funktion
   */
   template <int d, int dT>
   Piecewise<double> expandAsPP(const PBasis<d,dT>& basis, const typename PBasis<d,dT>::Index& lambda);
-#endif
+
 
   /*!
     point evaluation of (derivatives) of a single primal [P] generator

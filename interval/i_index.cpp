@@ -92,6 +92,8 @@ namespace WaveletTL
  
   }
 
+
+
   template <class IBASIS>
   IntervalIndex<IBASIS>&
   IntervalIndex<IBASIS>::operator = (const IntervalIndex<IBASIS>& lambda)
@@ -174,6 +176,28 @@ namespace WaveletTL
     else
       result += k_ - basis_->Nablamin();
 //     num_ = result;
+  }
+
+  template <class IBASIS>
+  void get_IIndex(const IBASIS* basis, const int num, int& j, int& e, int& k)
+  {
+    j0 = basis->j0();
+    if (num < basis->Deltasize(j0)){
+       j = j0;
+       e = 0;
+       k = basis->DeltaLmin() + num;
+    }
+    else if (num < basis->Deltasize(j0+1)){
+       j = j0;
+       e = 1;
+       k = basis->Nablamin() + num - basis->Deltasize(j0);
+    }
+    else{
+       j = floor(std::log(num - basis->Deltasize(j0+1))/std::log(2))+j0;
+       e = 1;
+       k = basis->Nablamin() + num - basis->Deltasize(j-1); //- basis->Nablasize(j0)*pow(2,j-j0-1);
+    }
+    
   }
 
 

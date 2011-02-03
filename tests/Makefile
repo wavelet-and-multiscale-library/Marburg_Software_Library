@@ -157,6 +157,7 @@ EXEOBJF7 = \
 # set 8 of test programs: ExpandASPP	
 EXEOBJF8 = \
   test_expandWavelet.o\
+  test_support.o\
 
 EXES1 = $(EXEOBJF1:.o=)
 EXES2 = $(EXEOBJF2:.o=)

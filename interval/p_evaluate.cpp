@@ -170,7 +170,6 @@ namespace WaveletTL
     return r;
   }
 
-#ifdef _PP_AUSWERTUNG_DER_WAVELETS
   template <int d, int dT>
   Piecewise<double> expandAsPP(const PBasis<d,dT>& basis, const typename PBasis<d,dT>::Index& lambda)
   {
@@ -203,7 +202,7 @@ namespace WaveletTL
     return r;
 
   }
-#endif
+
   
   template <int d, int dT>
   void
@@ -213,7 +212,7 @@ namespace WaveletTL
   {   
     assert(derivative <= 2); // we only support derivatives up to the second order
 
-#ifdef _PP_AUSWERTUNG_DER_WAVELETS // auswertung mit vorheriger umwandlung in PP
+    if(basis.get_evaluate_with_pre_computation()){ // with pre compuatation 
     values.resize(points.size());
     for (unsigned int i(0); i < values.size(); i++)
       values[i] = 0;
@@ -292,12 +291,9 @@ namespace WaveletTL
           }
       }
 
-
-
-
-#endif
-
-#ifndef _PP_AUSWERTUNG_DER_WAVELETS  // auswertung ohne vorheriger umwandlung in PP
+    }
+    else // not with pre computation
+    {
     values.resize(points.size());
     for (unsigned int i(0); i < values.size(); i++)
       values[i] = 0;
@@ -366,7 +362,7 @@ namespace WaveletTL
 	    values[i] += *it * help[i];
 	}
     }
-#endif
+   }
   }
 
   template <int d, int dT>
@@ -374,7 +370,7 @@ namespace WaveletTL
 		const typename PBasis<d,dT>::Index& lambda,
 		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues)
   {
-#ifdef _PP_AUSWERTUNG_DER_WAVELETS   // auswertung mit vorheriger umwandlung in PP
+    if(basis.get_evaluate_with_pre_computation()){ // with pre compuatation 
     const unsigned int npoints(points.size());
     funcvalues.resize(npoints);
     dervalues.resize(npoints);
@@ -407,9 +403,8 @@ namespace WaveletTL
 	     dervalues[m] = basis.wavelets[lambda.j()][lambda.k()].derivative(points[m]);
 	  }
       }
-#endif   
-
-#ifndef _PP_AUSWERTUNG_DER_WAVELETS   // auswertung ohne vorheriger umwandlung in PP
+    }
+    else{  //without pre computation
     const unsigned int npoints(points.size());
     funcvalues.resize(npoints);
     dervalues.resize(npoints);
@@ -455,6 +450,6 @@ namespace WaveletTL
 	  }
 	}
     }
-#endif
+   }
   }
 }

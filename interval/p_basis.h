@@ -12,7 +12,10 @@
 #ifndef _WAVELETTL_P_BASIS_H
 #define _WAVELETTL_P_BASIS_H
 
-#define _PP_AUSWERTUNG_DER_WAVELETS   //Auskommentieren von dieser Zeile führt zum alten code
+#ifndef JMAX 
+#define JMAX 12
+#endif
+
 
 #include <iostream>
 #include <algebra/vector.h>
@@ -31,6 +34,17 @@ using MathTL::Matrix;
 
 namespace WaveletTL
 {
+  /*!
+     If you want to evaluate the wavelets with pre computation of the 
+     PP expansion of the wavelets you must call the method:
+         void pre_compute_wavelets()
+         or define the makro _PRE_COMPUTE_WAVELETS
+     Normaly the evaluation of the wavelets is done without pre computation of the 
+     PP expansion of the wavelets.
+     For high Maxlevels like 17 or 18 it take a long time and it could have problems with the memory.
+  */
+
+
   /*!
     Template class for the wavelet bases on the interval as introduced in [P].
 
@@ -199,13 +213,13 @@ namespace WaveletTL
     Index last_wavelet(const int j) const;
 
 
-#ifdef _PP_AUSWERTUNG_DER_WAVELETS
+
     /*
       Compute the Picewiese expansion of all wavelets and Generatoren
       for given j, d
     */
     void waveletPP(const int j,Array1D<Piecewise<double> >& wavelets) const;
-#endif
+
 
     //! DECOMPOSE routine, simple version
     /*!
@@ -382,25 +396,40 @@ namespace WaveletTL
 
     //! Wavelets eines bestimmten levels
 
-#ifdef _PP_AUSWERTUNG_DER_WAVELETS
 
     Array1D<Array1D<Piecewise<double> > > wavelets;
 
-    void setWavelets(){
-    int jmax = 12;  // wählen des max levels   12: 2,41 sek
+    void pre_compute_wavelets(){
+    int jmax = JMAX;  // wählen des max levels   12: 2,41 sek
                     //                         16: 37,0 sek
                     //  Pro Level erhähung verdopelt sich die Zeit
+    evaluate_with_pre_computation = true;
     wavelets.resize(jmax+1);
-    for(int i = 3; i<=jmax; i++){
+    for(int i = j0_; i<=jmax; i++){
        waveletPP(i,wavelets[i]);
     }
     }
 
-#endif
+    //! the primal order
+    int get_primalorder() const{return primal;};
 
+    //! the dual order
+    int get_dualorder() const{return dual;};
+
+    //! evaluate_with_pre_computation
+    bool get_evaluate_with_pre_computation() const {return evaluate_with_pre_computation;};
 
 
   protected:
+    //! evaluate_with_pre_computation
+    bool evaluate_with_pre_computation;
+
+    //! the dual order
+    int dual;
+
+    //! the primal order
+    int primal;
+
     //! coarsest possible level
     int j0_;
 

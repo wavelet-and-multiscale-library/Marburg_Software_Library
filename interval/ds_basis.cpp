@@ -20,6 +20,8 @@ namespace WaveletTL
     this->s1 = bc_right ? 1 : 0;
     this->sT0 = 0;
     this->sT1 = 0;
+    primal = d;
+    dual = dT;
     setup();
   }
   
@@ -31,6 +33,8 @@ namespace WaveletTL
     this->s1 = s1;
     this->sT0 = sT0;
     this->sT1 = sT1;
+    primal = d;
+    dual = dT;
     setup();
   }
 

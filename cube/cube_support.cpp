@@ -168,8 +168,8 @@ namespace WaveletTL
     }
     //std::list<typename Frame::Index> intersect_diff;
 
-
-    if (! generators) {
+//! generators
+    if (true) {
       FixedArray1D<int,DIM>
       minkwavelet, maxkwavelet, minkgen, maxkgen;
       typedef typename IBASIS::Index Index1D;
@@ -178,7 +178,7 @@ namespace WaveletTL
 
       // prepare all intersecting wavelets and generators in the i-th coordinate direction
       for (unsigned int i = 0; i < DIM; i++) {
-        get_translation_wavelets(*basis.bases()[i],
+        get_intersecting_wavelets_on_level(*basis.bases()[i],
 	    	Index1D(lambda.j(),
 		    lambda.e()[i],
 		    lambda.k()[i],
@@ -187,7 +187,7 @@ namespace WaveletTL
         minkgen[i]=minkkkk;
         maxkgen[i] = maxkkkk;
         if (!(generators))
-	  get_translation_wavelets(*basis.bases()[i],
+	  get_intersecting_wavelets_on_level(*basis.bases()[i],
 		      Index1D(lambda.j(),
 			      lambda.e()[i],
 			      lambda.k()[i],
@@ -371,10 +371,10 @@ namespace WaveletTL
     typedef typename CubeBasis<IBASIS,DIM>::Support Support;
     Support supp;
     if (generators) {
-      for (Index mu = first_generator<IBASIS,DIM>(&basis, j);; ++mu) {
+      for (Index mu = basis.first_generator (j);; ++mu) {
 	if (intersect_supports(basis, lambda, mu, supp))
 	  intersecting.push_back(mu);
-	if (mu == last_generator<IBASIS,DIM>(&basis, j)) break;
+	if (mu == basis.last_generator(j)) break;
       }
     } 
     }

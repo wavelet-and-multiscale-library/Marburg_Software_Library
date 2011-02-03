@@ -1,7 +1,8 @@
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
 
-#define JMAX 18
+#define JMAX 13
 #define ONE_D
+//#define _PRE_COMPUTE_WAVELETS
 
 #define PRIMALORDER 3
 #define DUALORDER   3
@@ -199,6 +200,7 @@ int main()
   //finally a frame can be constructed
   //Frame1D frame(&Lshaped, bc, bcT, jmax);
   Frame1D frame(&interval_domain, bc, jmax);
+  //frame.bases()[0]->bases()[0].pre_compute_wavelets();
 
 //   Vector<double> value(1);
 //   value[0] = 384;
@@ -212,8 +214,9 @@ int main()
  
   //PoissonBVP<DIM> poisson(&const_fun);
   PoissonBVP<DIM> poisson(&sing1D);
-  //BiharmonicBVP<DIM> biharm(&const_fun);  
+  //BiharmonicBVP<DIM> biharm(&const_fun);
   SimpleEllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax);
+
   // EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
   //BiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharm, &frame, jmax);

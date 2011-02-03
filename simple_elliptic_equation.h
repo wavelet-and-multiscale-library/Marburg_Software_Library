@@ -84,7 +84,6 @@ namespace FrameTL
     SimpleEllipticEquation(const EllipticBVP<DIM>* ell_bvp,
 			   const AggregatedFrame<IBASIS,DIM>* frame,
 			   const int jmax);
-
     /*!
       The frame type.
      */

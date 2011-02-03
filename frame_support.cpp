@@ -822,7 +822,7 @@ namespace FrameTL
 
       // prepare all intersecting wavelets and generators in the i-th coordinate direction
       for (unsigned int i = 0; i < DIM_d; i++) {
-        get_translation_wavelets(*frame.bases()[p]->bases()[i],
+        get_intersecting_wavelets_on_level(*frame.bases()[p]->bases()[i],
 	    	Index1D(lambda.j(),
 		    lambda.e()[i],
 		    lambda.k()[i],
@@ -831,7 +831,7 @@ namespace FrameTL
         minkgen[i]=minkkkk;
         maxkgen[i] = maxkkkk;
         if (!(generators))
-	  get_translation_wavelets(*frame.bases()[p]->bases()[i],
+	  get_intersecting_wavelets_on_level(*frame.bases()[p]->bases()[i],
 		      Index1D(lambda.j(),
 			      lambda.e()[i],
 			      lambda.k()[i],
@@ -871,7 +871,7 @@ namespace FrameTL
               if ( intersect_supports_simple(frame, lambda, *ind) ){
 	        intersecting.push_back(*ind);
               }
-            }
+            } 
             result += tmp;
 	  }
 
@@ -919,7 +919,7 @@ namespace FrameTL
       }
      
       bool exit2 = 0;
-      
+   
       while(!exit2){
 
       // fügt die Indizes aus diesem Patch ein falls sie sich überlappen
@@ -927,6 +927,12 @@ namespace FrameTL
         const Index* ind = &((*full_collection_levelwise)[k][i]);
 	intersecting.push_back(*ind);
       }
+      if(DIM_d ==1)
+        {
+         exit2 =1;
+         break;
+        }
+                
 
       for (unsigned int i = DIM_d-2; i >= 0; i--) {
             if(type[i]==0){
@@ -967,7 +973,7 @@ namespace FrameTL
                  break;
               }
 	    }
-	  } //end for
+	  } //end for 
       } //end while 2
 
 
@@ -1100,8 +1106,6 @@ namespace FrameTL
   }
 
 
-
-
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   inline
   void intersecting_wavelets_on_patch (const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,
@@ -1140,7 +1144,7 @@ namespace FrameTL
 
         // prepare all intersecting wavelets and generators in the i-th coordinate direction
         for (unsigned int i = 0; i < DIM_d; i++) {
-          get_translation_wavelets(*frame.bases()[p]->bases()[i],
+          get_intersecting_wavelets_on_level(*frame.bases()[p]->bases()[i],
 			    Index1D(lambda.j(),
 				    lambda.e()[i],
 				    lambda.k()[i],
@@ -1149,7 +1153,7 @@ namespace FrameTL
           minkgen[i]=minkkkk;
           maxkgen[i] = maxkkkk;
           if (!(generators))
-	     get_translation_wavelets(*frame.bases()[p]->bases()[i],
+	     get_intersecting_wavelets_on_level(*frame.bases()[p]->bases()[i],
 			      Index1D(lambda.j(),
 				      lambda.e()[i],
 				      lambda.k()[i],
@@ -1236,6 +1240,12 @@ namespace FrameTL
         const Index* ind = &((*full_collection_levelwise)[k][i]);
 	intersecting.push_back(*ind);
       }
+
+      if(DIM_d ==1)
+        {
+         exit2 =1;
+         break;
+        }
 
       for (unsigned int i = DIM_d-2; i >= 0; i--) {
             if(type[i]==0){
@@ -1445,7 +1455,7 @@ namespace FrameTL
     }
 #endif
   }
-  
+
   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m>
   inline
   bool intersect_singular_support(const AggregatedFrame<IBASIS,DIM_d,DIM_m>& frame,

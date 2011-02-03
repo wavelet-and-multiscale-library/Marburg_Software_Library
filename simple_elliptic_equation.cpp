@@ -1,6 +1,7 @@
 // implementation for simple_elliptic_equation.h
 
 #include <list>
+#include <iostream>
 #include <numerics/gauss_data.h>
 #include <frame_index.h>
 #include <frame_support.h>
@@ -205,25 +206,21 @@ namespace FrameTL
     sprintf(filename, "%s%d%s%d", "stiff_diagonal_poisson_lshaped_lap1_d", d, "_dT", dT);
     sprintf(matrixname, "%s%d%s%d", "stiff_diagonal_poisson_2D_lap1_d", d, "_dT", dT);
 #endif
-
 #ifndef PRECOMP_DIAG
     std::list<Vector<double>::size_type> indices;
     std::list<double> entries;
 #endif
-    
 #ifdef PRECOMP_DIAG
     cout << "reading in diagonal of unpreconditioned stiffness matrix from file "
 	 << filename << "..." << endl;
     diag.matlab_input(filename);
     cout << "...ready" << endl;
 #endif
-
-
     stiff_diagonal.resize(frame_->degrees_of_freedom());
     for (int i = 0; i < frame_->degrees_of_freedom(); i++) {
 #ifdef PRECOMP_DIAG
       stiff_diagonal[i] = diag.get_entry(0,i);
-#endif
+#endif 
 #ifndef PRECOMP_DIAG
       stiff_diagonal[i] = sqrt(a(*(frame_->get_wavelet(i)),*(frame_->get_wavelet(i))));
       indices.push_back(i);
@@ -231,7 +228,6 @@ namespace FrameTL
 #endif
       //cout << stiff_diagonal[i] << " " << *(frame_->get_wavelet(i)) << endl;
     }
-
 #ifndef PRECOMP_DIAG
     diag.set_row(0,indices, entries);
     diag.matlab_output(filename, matrixname, 1);
@@ -282,7 +278,7 @@ namespace FrameTL
 
 	// Check whether the supports of the two functions intersect and compute the intersection
 	// of the two singular supports. We obtain a non-uniform grid with respect to which the
-	// present integrand is a piecewise polynomial; see §6.3, page 57-62 in Manuel diploma thesis.
+	// present integrand is a piecewise polynomial; see ï¿½6.3, page 57-62 in Manuel diploma thesis.
 	bool b = intersect_supports_1D<IBASIS,DIM>(*frame_, lambda, mu, supp_lambda, supp_mu, dir, irregular_grid);
 	if (!b)
 	  return 0.0;

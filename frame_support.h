@@ -217,7 +217,7 @@ namespace FrameTL
    */
   template <unsigned int DIM>
   bool quadrangles_intersect (FixedArray1D<Point<DIM>, 4> poly1, FixedArray1D<Point<DIM>, 4> poly2);
-  
+
  
 }
 #include <frame_support.cpp>

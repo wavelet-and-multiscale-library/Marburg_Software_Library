@@ -108,8 +108,13 @@ namespace WaveletTL
       inverse of constructor
       'CubeIndex(const unsigned int number,
                  const CUBEBASIS* basis)'
-    */
+    */    
     void set_number();
+
+    /*
+     get the level, type and translations parameter k frome the number and the basis
+    */
+    void get_Index_Parameter(const CUBEBASIS* basis, const int num, int& j, type_type& e, translation_type& k) const;
 
   protected:
     

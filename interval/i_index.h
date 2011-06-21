@@ -102,12 +102,6 @@ namespace WaveletTL
     */
     void set_number();
 
-    /*
-     get the level, type and translations parameter k frome the number and the basis
-    */
-    template <class IBasis>
-    void get_IIndex(const IBASIS*, const int num, int& j, int& e, int& k);
-
 
     //! underlying basis
     const IBASIS* basis() const { return basis_; }

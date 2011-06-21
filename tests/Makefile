@@ -158,6 +158,7 @@ EXEOBJF7 = \
 EXEOBJF8 = \
   test_expandWavelet.o\
   test_support.o\
+  test_i_index.o\
 
 EXES1 = $(EXEOBJF1:.o=)
 EXES2 = $(EXEOBJF2:.o=)

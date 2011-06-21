@@ -138,6 +138,460 @@ namespace WaveletTL
 	TensorIndex<IBASIS, DIM, TENSORBASIS>::TensorIndex(const int number, const TENSORBASIS* basis)
 	: basis_(basis), num_(number)
 	{
+          /* 
+            This implementation for DIM = 2,3 assumes that Nablasize(j) = Deltasize(j0) + sum_{l=0}^{j-j0} 2^l * Nablasize(j0)
+            and uses a lot of div and mod
+          */
+          if(DIM == 2)
+          {
+          level_type j0 = basis->j0();
+          int Nabla1 = basis->bases()[0]->Nablasize(j0[0]);
+          int Nabla2 = basis->bases()[1]->Nablasize(j0[1]);
+          int Delta1 = basis->bases()[0]->Deltasize(j0[0]);
+          int Delta2 = basis->bases()[1]->Deltasize(j0[1]);
+          int act_num = num_;
+          int i = 0; 
+          if (act_num < Delta1*Delta2) 
+          {
+            j_ = j0;
+            e_[0]=0;
+            e_[1]=0;
+            k_[0] = basis->bases()[0]->DeltaLmin() + act_num/Delta2;
+            k_[1] = basis->bases()[1]->DeltaLmin() + (act_num % Delta2);
+          }
+          else
+          {
+            act_num -= Delta1*Delta2;
+            // computes the outer level
+            while(true)
+            {
+              int tmp = (Delta1*Nabla2 + Delta2*Nabla1 + (i+1)*Nabla1*Nabla2)<<i;
+              if(act_num < tmp)
+                break;
+              act_num -= tmp;
+              i++;
+            }
+            if(act_num < (Delta1*Nabla2)<<i)
+            {
+              j_[0] = j0[0];
+              j_[1] = j0[1] + i;
+              e_[0]=0;
+              e_[1]=1;
+              k_[0] = basis->bases()[0]->DeltaLmin() + act_num/(Nabla2<<i);
+              k_[1] = basis->bases()[1]->Nablamin() + (act_num % (Nabla2<<i));
+            }
+            else if ((act_num - ((Delta1*Nabla2)<<i)) / ((Nabla1*Nabla2)<<i) < i)
+            {
+              unsigned int tmp2 = (act_num - ((Delta1*Nabla2)<<i)) / ((Nabla1*Nabla2)<<i);
+              j_[0] = j0[0] + tmp2;
+              j_[1] = j0[1] + i - tmp2;
+              e_[0]=1;
+              e_[1]=1;
+              act_num -= (Delta1*Nabla2 + tmp2 * (Nabla1*Nabla2))<<i;
+              k_[0] = basis->bases()[0]->Nablamin() + act_num/(Nabla2<<(i-tmp2));
+              k_[1] = basis->bases()[1]->Nablamin() + (act_num % (Nabla2<<(i-tmp2)));
+            }
+            else if (act_num < (Delta1*Nabla2 + (i) * Nabla1*Nabla2 + Delta2*Nabla1)<<i ) 
+            {
+              j_[0] = j0[0] + i;
+              j_[1] = j0[1];
+              e_[0]=1;
+              e_[1]=0;
+              act_num -= (Delta1*Nabla2 + (i) * (Nabla1*Nabla2))<<i;
+              k_[0] = basis->bases()[0]->Nablamin() + act_num/Delta2;
+              k_[1] = basis->bases()[1]->DeltaLmin() + (act_num % Delta2);
+            }
+            else
+            {
+              j_[0] = j0[0] + i;
+              j_[1] = j0[1];
+              e_[0]=1;
+              e_[1]=1;
+              act_num -= (Delta1*Nabla2 + (i) * (Nabla1*Nabla2) + Delta2*Nabla1)<<i;
+              k_[0] = basis->bases()[0]->Nablamin() + act_num/Nabla2;
+              k_[1] = basis->bases()[1]->Nablamin() + (act_num % Nabla2);
+            }
+          }
+          }
+          else if(DIM == 3)
+          {
+          level_type j0 = basis->j0();
+          int Nabla1 = basis->bases()[0]->Nablasize(j0[0]);
+          int Nabla2 = basis->bases()[1]->Nablasize(j0[1]);
+          int Nabla3 = basis->bases()[2]->Nablasize(j0[2]);
+          int Delta1 = basis->bases()[0]->Deltasize(j0[0]);
+          int Delta2 = basis->bases()[1]->Deltasize(j0[1]);
+          int Delta3 = basis->bases()[2]->Deltasize(j0[2]);
+          int act_num = num_;
+          int i = 0; 
+          if (act_num < Delta1*Delta2*Delta3) 
+          {
+            j_ = j0;
+            e_[0]=0;
+            e_[1]=0;
+            e_[2]=0;
+            k_[0] = basis->bases()[0]->DeltaLmin() + (act_num/(Delta3*Delta2));
+            k_[1] = basis->bases()[1]->DeltaLmin() + (act_num/Delta3) % Delta2;
+            k_[2] = basis->bases()[2]->DeltaLmin() + (act_num % Delta3);
+          }
+          else
+          {
+            act_num -= Delta1*Delta2*Delta3;
+            while(true)
+            {
+              int tmp = (Delta1*Nabla2*Delta3 + Delta2*Nabla1*Delta3 + Delta2*Nabla3*Delta1 
+                        + (i+1) * (Nabla1*Nabla2*Delta3 + Nabla1*Nabla3*Delta2 + Nabla3*Nabla2*Delta1)
+                        + ((i+1)*(i+2)/2)*Nabla1*Nabla2*Nabla3) <<i;
+              if(act_num < tmp)
+                break;
+              act_num -= tmp;
+              i++;
+            }
+            if(i == 0)
+            {
+              if (act_num < Delta1*Delta2*Nabla3)
+              {
+                j_ = j0;
+                e_[0] = 0;
+                e_[1] = 0;
+                e_[2] = 1;
+                k_[0] = basis->bases()[0]->DeltaLmin() + (act_num/(Nabla3*Delta2));
+                k_[1] = basis->bases()[1]->DeltaLmin() + (act_num/Nabla3) % Delta2;
+                k_[2] = basis->bases()[2]->Nablamin() + (act_num % Nabla3);
+              }
+              else
+              {
+              act_num -= Delta1*Delta2*Nabla3;
+              if(act_num < Delta1*Nabla2*Delta3)
+              {
+                j_ = j0;
+                e_[0] = 0;
+                e_[1] = 1;
+                e_[2] = 0;
+                k_[0] = basis->bases()[0]->DeltaLmin() + (act_num/(Delta3*Nabla2));
+                k_[1] = basis->bases()[1]->Nablamin() + (act_num/Delta3) % Nabla2;
+                k_[2] = basis->bases()[2]->DeltaLmin() + (act_num % Delta3);
+              }
+              else
+              {
+              act_num -= Delta1*Nabla2*Delta3;
+              if(act_num < Delta1*Nabla2*Nabla3)
+              {
+                j_ = j0;
+                e_[0] = 0;
+                e_[1] = 1;
+                e_[2] = 1;
+                k_[0] = basis->bases()[0]->DeltaLmin() + (act_num/(Nabla3*Nabla2));
+                k_[1] = basis->bases()[1]->Nablamin() + (act_num/Nabla3) % Nabla2;
+                k_[2] = basis->bases()[2]->Nablamin() + (act_num % Nabla3);
+              }
+              else
+              {
+              act_num -= Delta1*Nabla2*Nabla3;
+              if(act_num < Nabla1*Delta2*Delta3)
+              {
+                j_ = j0;
+                e_[0] = 1;
+                e_[1] = 0;
+                e_[2] = 0;
+                k_[0] = basis->bases()[0]->Nablamin() + (act_num/(Delta3*Delta2));
+                k_[1] = basis->bases()[1]->DeltaLmin() + (act_num/Delta3) % Delta2;
+                k_[2] = basis->bases()[2]->DeltaLmin() + (act_num % Delta3);
+              }
+              else
+              {
+              act_num -= Nabla1*Delta2*Delta3;
+              if(act_num < Nabla1*Delta2*Nabla3)
+              {
+                j_ = j0;
+                e_[0] = 1;
+                e_[1] = 0;
+                e_[2] = 1;
+                k_[0] = basis->bases()[0]->Nablamin() + (act_num/(Nabla3*Delta2));
+                k_[1] = basis->bases()[1]->DeltaLmin() + (act_num/Nabla3) % Delta2;
+                k_[2] = basis->bases()[2]->Nablamin() + (act_num % Nabla3);
+              }
+              else
+              {
+              act_num -= Nabla1*Delta2*Nabla3;
+              if(act_num < Nabla1*Nabla2*Delta3)
+              {
+                j_ = j0;
+                e_[0] = 1;
+                e_[1] = 1;
+                e_[2] = 0;
+                k_[0] = basis->bases()[0]->Nablamin() + (act_num/(Delta3*Nabla2));
+                k_[1] = basis->bases()[1]->Nablamin() + (act_num/Delta3) % Nabla2;
+                k_[2] = basis->bases()[2]->DeltaLmin() + (act_num % Delta3);
+              }
+              else
+              {
+              act_num -= Nabla1*Nabla2*Delta3;
+                j_ = j0;
+                e_[0] = 1;
+                e_[1] = 1;
+                e_[2] = 1;
+                k_[0] = basis->bases()[0]->Nablamin() + (act_num/(Nabla3*Nabla2));
+                k_[1] = basis->bases()[1]->Nablamin() + (act_num/Nabla3) % Nabla2;
+                k_[2] = basis->bases()[2]->Nablamin() + (act_num % Nabla3);
+              }}}}}}
+            }
+            else
+            {            
+              if(act_num < ((Delta1+Nabla1) * (Delta2 + Nabla2) * Nabla3)<<i)
+              {
+                if(act_num < (Delta1 * Delta2 * Nabla3)<<i)
+                {
+                  j_[0] = j0[0];
+                  j_[1] = j0[1];
+                  j_[2] = j0[2] + i;
+                  e_[0]=0;
+                  e_[1]=0;
+                  e_[2]=1;
+                  k_[0] = basis->bases()[0]->DeltaLmin() + act_num/((Delta2*Nabla3)<<i);
+                  k_[1] = basis->bases()[1]->DeltaLmin() + (act_num/(Nabla3<<i)) % Delta2;
+                  k_[2] = basis->bases()[2]->Nablamin() + (act_num % (Nabla3<<i));
+                }
+                else
+                {
+                act_num -= (Delta1 * Delta2 * Nabla3)<<i;
+                if(act_num < (Delta1 * Nabla2 * Nabla3)<<i)
+                {
+                  j_[0] = j0[0];
+                  j_[1] = j0[1];
+                  j_[2] = j0[2] + i;
+                  e_[0]=0;
+                  e_[1]=1;
+                  e_[2]=1;
+                  k_[0] = basis->bases()[0]->DeltaLmin() + act_num/((Nabla2*Nabla3)<<i);
+                  k_[1] = basis->bases()[1]->Nablamin() + (act_num/(Nabla3<<i)) % Nabla2;
+                  k_[2] = basis->bases()[2]->Nablamin() + (act_num % (Nabla3<<i));
+                }
+                else
+                {
+                act_num -= (Delta1 * Nabla2 * Nabla3)<<i;
+                if(act_num < (Nabla1 * Delta2 * Nabla3)<<i)
+                {
+                  j_[0] = j0[0];
+                  j_[1] = j0[1];
+                  j_[2] = j0[2] + i;
+                  e_[0]=1;
+                  e_[1]=0;
+                  e_[2]=1;
+                  k_[0] = basis->bases()[0]->Nablamin() + act_num/((Delta2*Nabla3)<<i);
+                  k_[1] = basis->bases()[1]->DeltaLmin() + (act_num/(Nabla3<<i)) % Delta2;
+                  k_[2] = basis->bases()[2]->Nablamin() + (act_num % (Nabla3<<i));
+                }
+                else
+                {
+                act_num -= (Nabla1 * Delta2 * Nabla3)<<i;
+                  j_[0] = j0[0];
+                  j_[1] = j0[1];
+                  j_[2] = j0[2] + i;
+                  e_[0]=1;
+                  e_[1]=1;
+                  e_[2]=1;
+                  k_[0] = basis->bases()[0]->Nablamin() + act_num/((Nabla2*Nabla3)<<i);
+                  k_[1] = basis->bases()[1]->Nablamin() + (act_num/(Nabla3<<i)) % Nabla2;
+                  k_[2] = basis->bases()[2]->Nablamin() + (act_num % (Nabla3<<i));
+                }}}
+              }
+              else if(((act_num - (((Delta1+Nabla1) * (Delta2 + Nabla2) * Nabla3)<<i))/(((Delta1+Nabla1)*Nabla2*Nabla3)<<i)) < (i-1))
+              {
+                unsigned int tmp2 = (act_num - (((Delta1+Nabla1) * (Delta2 + Nabla2) * Nabla3)<<i))/(((Delta1+Nabla1)*Nabla2*Nabla3)<<i);
+                j_[0] = j0[0];
+                j_[1] = j0[1] + tmp2+1;
+                j_[2] = j0[2] + i - tmp2 -1;
+                act_num -= ((Delta1+Nabla1) * (Delta2 + Nabla2) * Nabla3 + tmp2 * (Delta1+Nabla1)*Nabla2*Nabla3)<<i;
+                if(act_num < Delta1*Nabla2*Nabla3 <<i)
+                {
+                  e_[0] = 0;
+                  k_[0] = basis->bases()[0]->DeltaLmin() + act_num/((Nabla2*Nabla3)<<i);
+                }
+                else
+                {
+                  e_[0] = 1;
+                  act_num -= Delta1*Nabla2*Nabla3 <<i;
+                  k_[0] = basis->bases()[0]->Nablamin() + act_num/((Nabla2*Nabla3)<<i);
+                }
+                e_[1] = 1;
+                e_[2] = 1;
+                k_[1] = basis->bases()[1]->Nablamin() + (act_num/(Nabla3<<(i-tmp2-1))) % (Nabla2 <<(tmp2+1));
+                k_[2] = basis->bases()[2]->Nablamin() + (act_num % (Nabla3<<(i-tmp2-1)));
+              } 
+              else if((act_num -(((Delta1+Nabla1) * (Delta2 + Nabla2) * Nabla3 + (i-1) * (Delta1+Nabla1)*Nabla2*Nabla3)<<i)) 
+                          < ((Nabla2*(Delta1+Nabla1)*(Delta3+Nabla3))<<i ) )
+              {
+                j_[0] = j0[0];
+                j_[1] = j0[1] + i;
+                j_[2] = j0[2];
+                e_[1] = 1;
+                act_num -= ((Delta1+Nabla1) * (Delta2 + Nabla2) * Nabla3 + (i-1)*((Delta1+Nabla1)*Nabla2*Nabla3))<<i;
+                if(act_num < (Delta1*Nabla2*Delta3) <<i)
+                {
+                  e_[0] = 0;
+                  e_[2] = 0;
+                  k_[0] = basis->bases()[0]->DeltaLmin() + act_num/((Nabla2*Delta3)<<i);
+                  k_[1] = basis->bases()[1]->Nablamin() + (act_num/Delta3) % (Nabla2 <<i);
+                  k_[2] = basis->bases()[2]->DeltaLmin() + (act_num % Delta3);
+                }
+                else 
+                {
+                act_num -= (Delta1*Nabla2*Delta3) <<i;
+                if(act_num < (Delta1*Nabla2*Nabla3) <<i)
+                {
+                  e_[0] = 0;
+                  e_[2] = 1;
+                  k_[0] = basis->bases()[0]->DeltaLmin() + act_num/((Nabla2*Nabla3)<<i);
+                  k_[1] = basis->bases()[1]->Nablamin() + (act_num/Nabla3) % (Nabla2 <<i);
+                  k_[2] = basis->bases()[2]->Nablamin() + (act_num % Nabla3);
+                }
+                else 
+                {
+                act_num -= (Delta1*Nabla2*Nabla3) <<i;
+                if(act_num < (Nabla1*Nabla2*Delta3) <<i)
+                {
+                  e_[0] = 1;
+                  e_[2] = 0;
+                  k_[0] = basis->bases()[0]->Nablamin() + act_num/((Nabla2*Delta3)<<i);
+                  k_[1] = basis->bases()[1]->Nablamin() + (act_num/Delta3) % (Nabla2 <<i);
+                  k_[2] = basis->bases()[2]->DeltaLmin() + (act_num % Delta3);
+                }
+                else 
+                {
+                act_num -= (Nabla1*Nabla2*Delta3) <<i;
+                  e_[0] = 1;
+                  e_[2] = 1;
+                  k_[0] = basis->bases()[0]->Nablamin() + act_num/((Nabla2*Nabla3)<<i);
+                  k_[1] = basis->bases()[1]->Nablamin() + (act_num/Nabla3) % (Nabla2 <<i);
+                  k_[2] = basis->bases()[2]->Nablamin() + (act_num % Nabla3);
+                }}}
+              }
+              else
+              {
+                act_num -= ((Delta1+Nabla1) * (Delta2 + Nabla2) * Nabla3 
+                           + (i-1) * (Delta1+Nabla1)*Nabla2*Nabla3 
+                           + Nabla2*(Delta1+Nabla1)*(Delta3+Nabla3))<<i;
+                int l = 1;
+                while(true)
+                {
+                  int tmp = (Nabla1*Nabla2*Delta3 + Nabla1*Delta2*Nabla3 + (i+1-l)*Nabla1*Nabla2*Nabla3)<<i;
+                  if (l == i)
+                    tmp += Nabla1*Delta2*Delta3<<i;
+                  if (act_num < tmp)
+                    break;
+                  act_num -= tmp;
+                  l++;
+                }
+                j_[0] = j0[0] + l;
+                e_[0] = 1;
+                if(l < i)
+                {
+                  if(act_num < (Nabla1*Delta2*Nabla3)<<i)
+                  {
+                    j_[1] = j0[1];
+                    j_[2] = j0[2] + i - l;
+                    e_[1] = 0;
+                    e_[2] = 1;
+                    k_[0] = basis->bases()[0]->Nablamin() + act_num/((Delta2*Nabla3)<<(i-l));
+                    k_[1] = basis->bases()[1]->DeltaLmin() + (act_num/(Nabla3<<(i-l))) % Delta2;
+                    k_[2] = basis->bases()[2]->Nablamin() + (act_num % (Nabla3<<(i-l)));
+                  }
+                  else if( ((act_num - ((Nabla1*Delta2*Nabla3)<<i))/((Nabla1*Nabla2*Nabla3)<<i)) < (i-l) )
+                  {
+                    unsigned int tmp2 = ((act_num - ((Nabla1*Delta2*Nabla3)<<i))/((Nabla1*Nabla2*Nabla3)<<i));
+                    j_[1] = j0[1] + tmp2;
+                    j_[2] = j0[2] + i - l - tmp2;
+                    e_[1] = 1;
+                    e_[2] = 1;
+                    act_num -= (Nabla1*Delta2*Nabla3 + tmp2*Nabla1*Nabla2*Nabla3)<<i;
+                    k_[0] = basis->bases()[0]->Nablamin() + act_num/((Nabla2*Nabla3)<<(i-l));
+                    k_[1] = basis->bases()[1]->Nablamin() + (act_num/(Nabla3<<(i-l-tmp2))) % (Nabla2<<tmp2);
+                    k_[2] = basis->bases()[2]->Nablamin() + (act_num % (Nabla3<<(i-l-tmp2)));
+                  } 
+                  else
+                  {
+                    act_num -= (Nabla1*Delta2*Nabla3 + (i-l)*Nabla1*Nabla2*Nabla3)<<i;
+                    if(act_num < Nabla1*Nabla2*Delta3<<i)
+                    {
+                      j_[1] = j0[1] + i - l;
+                      j_[2] = j0[2];
+                      e_[1] = 1;
+                      e_[2] = 0;
+                      k_[0] = basis->bases()[0]->Nablamin() + act_num/((Nabla2*Delta3)<<(i-l));
+                      k_[1] = basis->bases()[1]->Nablamin() + (act_num/Delta3) % (Nabla2<<(i-l));
+                      k_[2] = basis->bases()[2]->DeltaLmin() + (act_num % Delta3);
+                    }
+                    else
+                    {
+                      j_[1] = j0[1] + i - l;
+                      j_[2] = j0[2];
+                      e_[1] = 1;
+                      e_[2] = 1;
+                      act_num -= Nabla1*Nabla2*Delta3<<i;
+                      k_[0] = basis->bases()[0]->Nablamin() + act_num/((Nabla2*Nabla3)<<(i-l));
+                      k_[1] = basis->bases()[1]->Nablamin() + (act_num/Nabla3) % (Nabla2<<(i-l));
+                      k_[2] = basis->bases()[2]->Nablamin() + (act_num % Nabla3);
+                    }
+                  }
+                }
+                else
+                {
+                  if(act_num < (Nabla1*Delta2*Delta3)<<i)
+                  {
+                    j_[1] = j0[1];
+                    j_[2] = j0[2];
+                    e_[1] = 0;
+                    e_[2] = 0;
+                    k_[0] = basis->bases()[0]->Nablamin() + act_num/(Delta2*Delta3);
+                    k_[1] = basis->bases()[1]->DeltaLmin() + (act_num/Delta3) % Delta2;
+                    k_[2] = basis->bases()[2]->DeltaLmin() + (act_num % Delta3);
+                  }
+                  else 
+                  {
+                  act_num -= Nabla1*Delta2*Delta3<<i;
+                  if(act_num < (Nabla1*Delta2*Nabla3)<<i)
+                  {
+                    j_[1] = j0[1];
+                    j_[2] = j0[2];
+                    e_[1] = 0;
+                    e_[2] = 1;
+                    k_[0] = basis->bases()[0]->Nablamin() + act_num/(Delta2*Nabla3);
+                    k_[1] = basis->bases()[1]->DeltaLmin() + (act_num/Nabla3) % Delta2;
+                    k_[2] = basis->bases()[2]->Nablamin() + (act_num % Nabla3);
+                  }
+                  else
+                  {
+                  act_num -= Nabla1*Delta2*Nabla3<<i;
+                  if(act_num < (Nabla1*Nabla2*Delta3)<<i)
+                  {
+                    j_[1] = j0[1];
+                    j_[2] = j0[2];
+                    e_[1] = 1;
+                    e_[2] = 0;
+                    k_[0] = basis->bases()[0]->Nablamin() + act_num/(Nabla2*Delta3);
+                    k_[1] = basis->bases()[1]->Nablamin() + (act_num/Delta3) % Nabla2;
+                    k_[2] = basis->bases()[2]->DeltaLmin() + (act_num % Delta3);
+                  }
+                  else
+                  {
+                  act_num -= Nabla1*Nabla2*Delta3<<i;
+                    j_[1] = j0[1];
+                    j_[2] = j0[2];
+                    e_[1] = 1;
+                    e_[2] = 1;
+                    k_[0] = basis->bases()[0]->Nablamin() + act_num/(Nabla2*Nabla3);
+                    k_[1] = basis->bases()[1]->Nablamin() + (act_num/Nabla3) % Nabla2;
+                    k_[2] = basis->bases()[2]->Nablamin() + (act_num % Nabla3);
+                  }}}
+                }
+              }
+            }
+          }
+          }
+          else //DIM >3
+          {
+
                 MathTL::FixedArray1D<std::map<int, int>,DIM> sizes; // Store number of basis elements. Generators on level j0 (0), wavelets on level j0 (1), j0+1 (2), ...
 		int remains = number+1; // numbering begins at 0
 		int oncurrentlevel(1); // number of base elements on current level j
@@ -191,9 +645,9 @@ namespace WaveletTL
                                 {
                                     // increase left neighbor
                                     currentlevel[i-1]=currentlevel[i-1]+1;
-                                    if (currentlevel[i-1]-j0[i] == range)
+                                    if (currentlevel[i-1]-j0[i-1] == range)
                                     {
-                                        sizes[i-1][range+1]=basis ->bases()[i]->Nablasize(currentlevel[i-1]); // if needed compute and store new size information
+                                      sizes[i-1][range+1]=basis ->bases()[i]->Nablasize(currentlevel[i-1]); // if needed compute and store new size information
                                     }
                                     currenttype[i-1]=1;
                                     int temp = currentlevel[i]-j0[i];
@@ -203,6 +657,7 @@ namespace WaveletTL
                                     currenttype[DIM-1]= (temp == 1?0:1);
                                     break;
                                 }
+
                             } else // i == 0. "big loop" arrived at the last index. We have to increase range!
                             {
                                 range = range +1;
@@ -218,7 +673,10 @@ namespace WaveletTL
                                 {
                                     //currentlevel[DIM-1]=j0[DIM-1]+currentlevel[0]-j0[0]+1; currenttype[DIM-1]=1;
                                     currentlevel[DIM-1]=j0[DIM-1]+range; currenttype[DIM-1]=1;
-                                    currenttype[0]=0; currentlevel[0]=j0[0];
+                                    for(int i(DIM-2); i>=0; i--)
+                                    {
+                                      currenttype[i]=0; currentlevel[i]=j0[i];
+                                    }
                                     sizes[DIM-1][range+1]=basis ->bases()[DIM-1]->Nablasize(currentlevel[DIM-1]); // if needed compute and store new size information
                                 }
                             break; // unnoetig, da i==0 gilt.
@@ -245,6 +703,8 @@ namespace WaveletTL
 			remains = remains / modul;
 		}
                 k_[0]=remains +(e_[0] == 0 ? basis->bases()[0]->DeltaLmin():basis->bases()[0]->Nablamin());
+
+          } //end DIM >3
         }
 
 	template <class IBASIS, unsigned int DIM, class TENSORBASIS>
@@ -361,6 +821,7 @@ namespace WaveletTL
                 } 
             } // end of "big loop"
             return *this;
+         
   	}
 
 	template <class IBASIS, unsigned int DIM, class TENSORBASIS>

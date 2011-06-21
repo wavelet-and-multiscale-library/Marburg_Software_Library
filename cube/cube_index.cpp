@@ -1,4 +1,5 @@
 // implementation for cube_index.h
+#include <cmath>
 
 namespace WaveletTL
 {
@@ -48,6 +49,204 @@ namespace WaveletTL
     : basis_(basis)
   {
     num_ = num; 
+
+  if(DIM == 2 && false)
+  {
+    int j0 = basis->j0();
+    int Nabla1 = basis->bases()[0]->Nablasize(j0);
+    int Nabla2 = basis->bases()[1]->Nablasize(j0);
+    int Delta1 = basis->bases()[0]->Deltasize(j0);
+    int Delta2 = basis->bases()[1]->Deltasize(j0);
+    double tmp2 = (double)(Delta1*Nabla2 + Delta2*Nabla1)/(2.*Nabla1*Nabla2);
+    double tmp;
+    int act_num = num_;
+
+    if (act_num < Delta1*Delta2) 
+    {
+      j_ = j0;
+      e_[0]=0;
+      e_[1]=0;
+      k_[0] = basis->bases()[0]->DeltaLmin() + act_num/Delta2;
+      k_[1] = basis->bases()[1]->DeltaLmin() + (act_num % Delta2);
+    }
+    else
+    {
+      tmp = std::sqrt(tmp2*tmp2 + (double)(num-Delta1*Delta2)/(Nabla1*Nabla2) ) +1. -tmp2;
+      j_ = floor(log2(tmp)) + j0;
+      act_num -= (Delta1 - Nabla1 + Nabla1*(1<<(j_-j0)))*(Delta2 - Nabla2 + Nabla2*(1<<(j_-j0)));
+      if(act_num < (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(1<<(j_-j0))*Nabla2)
+      {
+        e_[0]=0;
+        e_[1]=1;
+        k_[0] = basis->bases()[0]->DeltaLmin() + act_num/((1<<(j_-j0))*Nabla2);
+        k_[1] = basis->bases()[1]->Nablamin() + (act_num % ((1<<(j_-j0))*Nabla2));
+      }
+      else if (act_num < (Delta1 - Nabla1 + (1<<(j_-j0))*Nabla1)*(1<<(j_-j0))*Nabla2 + (1<<(j_-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2))
+      {
+        e_[0]=1;
+        e_[1]=0;
+        act_num -= (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(1<<(j_-j0))*Nabla2;
+        k_[0] = basis->bases()[0]->Nablamin() + act_num/(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2);
+        k_[1] = basis->bases()[1]->DeltaLmin() + (act_num % (Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2));
+      }
+      else
+      {
+        e_[0]=1;
+        e_[1]=1;
+        act_num -= (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(1<<(j_-j0))*Nabla2 + (1<<(j_-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2);
+        k_[0] = basis->bases()[0]->Nablamin() + act_num/((1<<(j_-j0))*Nabla2);
+        k_[1] = basis->bases()[1]->Nablamin() + (act_num % ((1<<(j_-j0))*Nabla2));
+      }
+    }
+  } //end if (DIM == 2)
+  else if (DIM == 3)
+  {
+    int j0 = basis->j0();
+    int Nabla1 = basis->bases()[0]->Nablasize(j0);
+    int Nabla2 = basis->bases()[1]->Nablasize(j0);
+    int Nabla3 = basis->bases()[2]->Nablasize(j0);
+    int Delta1 = basis->bases()[0]->Deltasize(j0);
+    int Delta2 = basis->bases()[1]->Deltasize(j0);
+    int Delta3 = basis->bases()[2]->Deltasize(j0);
+    int act_num = num_;
+
+    //Benötigt fürs Lösen der qubischen Gleichung schon normiert
+    double a = (double)(Delta1*Nabla2*Nabla3 + Delta2*Nabla1*Nabla3 + Delta3*Nabla2*Nabla1)/(Nabla1*Nabla2*Nabla3);
+    double b = (double)(Delta1*Delta2*Nabla3 + Delta3*Delta1*Nabla2 + Delta3*Delta2*Nabla1)/(Nabla1*Nabla2*Nabla3);
+    double c = (double) (Delta1*Delta2*Delta3 - num)/(Nabla1*Nabla2*Nabla3);
+    //Hilfsvariablen der Cardanischen Formeln
+    double p = b - (a*a)/3.;
+    double q = (2.*a*a*a)/27. - (a*b)/3. + c;
+    //Diskriminante
+    double D = (q*q)/4. + (p*p*p)/27.;
+    //std::cout << "D = " << D << std::endl;
+    //Hilfsvariablen der Lösung
+    double u = pow(sqrt(D) -q/2.,1./3.);
+    double v = pow(-sqrt(D) -q/2.,1./3.);
+    double z = u + v;
+    double x = z - a/3. +1.00001 ;
+
+
+    if (num < Delta1*Delta2*Delta3) 
+    {
+      j_ = j0;
+      e_[0]=0;
+      e_[1]=0;
+      e_[2]=0;
+      k_[0] = basis->bases()[0]->DeltaLmin() + act_num/(Delta3*Delta2);
+      k_[1] = basis->bases()[1]->DeltaLmin() + (act_num/Delta3 % Delta2);
+      k_[2] = basis->bases()[2]->DeltaLmin() + (act_num % (Delta3));
+    }
+    else
+    {
+      j_ = floor(log2(x)) + j0;
+      act_num -= (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3);
+      if (act_num < (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(1<<(j_-j0))*Nabla3)
+      {
+        e_[0]=0;
+        e_[1]=0;
+        e_[2]=1;
+        k_[0] = basis->bases()[0]->DeltaLmin() + act_num/((1<<(j_-j0))*Nabla3*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2));
+        k_[1] = basis->bases()[1]->DeltaLmin() + (act_num/((1<<(j_-j0))*Nabla3) % (Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2));
+        k_[2] = basis->bases()[2]->Nablamin() +  (act_num % ((1<<(j_-j0))*Nabla3));
+      }
+      else if (act_num < (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(1<<(j_-j0))*Nabla3
+                          + (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(1<<(j_-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3))
+      {
+        e_[0]=0;
+        e_[1]=1;
+        e_[2]=0;
+        act_num -= (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(1<<(j_-j0))*Nabla3;
+        k_[0] = basis->bases()[0]->DeltaLmin() + act_num/((Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3)*(1<<(j_-j0))*Nabla2);
+        k_[1] = basis->bases()[1]->Nablamin() + act_num/((Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3)) % ((1<<(j_-j0))*Nabla2);
+        k_[2] = basis->bases()[2]->DeltaLmin() +  (act_num % ((Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3)));
+      }
+      else if (act_num < (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(1<<(j_-j0))*Nabla3
+                          + (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(1<<(j_-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3)
+                          + (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(1<<(j_-j0))*Nabla2*(1<<(j_-j0))*Nabla3)
+      {
+        e_[0]=0;
+        e_[1]=1;
+        e_[2]=1;
+        act_num -= (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(1<<(j_-j0))*Nabla3
+                    + (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(1<<(j_-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3);
+        k_[0] = basis->bases()[0]->DeltaLmin() + act_num/((1<<(j_-j0))*Nabla3*(1<<(j_-j0))*Nabla2);
+        k_[1] = basis->bases()[1]->Nablamin() + act_num/((1<<(j_-j0))*Nabla3) % ((1<<(j_-j0))*Nabla2);
+        k_[2] = basis->bases()[2]->Nablamin() +  (act_num % ((1<<(j_-j0))*Nabla3));
+      }
+      else if (act_num < (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(1<<(j_-j0))*Nabla3
+                          + (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(1<<(j_-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3)
+                          + (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(1<<(j_-j0))*Nabla2*(1<<(j_-j0))*Nabla3
+                          + (1<<(j_-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3))
+      {
+        e_[0]=1;
+        e_[1]=0;
+        e_[2]=0;
+        act_num -= (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(1<<(j_-j0))*Nabla3
+                    + (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(1<<(j_-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3)
+                    + (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(1<<(j_-j0))*Nabla2*(1<<(j_-j0))*Nabla3;
+        k_[0] = basis->bases()[0]->Nablamin() + act_num/((Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3)*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2));
+        k_[1] = basis->bases()[1]->DeltaLmin() + act_num/((Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3)) % ((Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2));
+        k_[2] = basis->bases()[2]->DeltaLmin() +  (act_num % ((Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3)));
+      }
+      else if (act_num < (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(1<<(j_-j0))*Nabla3
+                          + (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(1<<(j_-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3)
+                          + (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(1<<(j_-j0))*Nabla2*(1<<(j_-j0))*Nabla3
+                          + (1<<(j_-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3)
+                          + (1<<(j_-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(1<<(j_-j0))*Nabla3)
+      {
+        e_[0]=1;
+        e_[1]=0;
+        e_[2]=1;
+        act_num -= (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(1<<(j_-j0))*Nabla3
+                    + (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(1<<(j_-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3)
+                    + (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(1<<(j_-j0))*Nabla2*(1<<(j_-j0))*Nabla3
+                    + (1<<(j_-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3);
+        k_[0] = basis->bases()[0]->Nablamin() + act_num/((1<<(j_-j0))*Nabla3*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2));
+        k_[1] = basis->bases()[1]->DeltaLmin() + act_num/((1<<(j_-j0))*Nabla3) % ((Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2));
+        k_[2] = basis->bases()[2]->Nablamin() +  (act_num % ((1<<(j_-j0))*Nabla3));
+      }
+      else if (act_num < (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(1<<(j_-j0))*Nabla3
+                          + (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(1<<(j_-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3)
+                          + (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(1<<(j_-j0))*Nabla2*(1<<(j_-j0))*Nabla3
+                          + (1<<(j_-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3)
+                          + (1<<(j_-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(1<<(j_-j0))*Nabla3
+                          + (1<<(j_-j0))*Nabla1*(1<<(j_-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3))
+      {
+        e_[0]=1;
+        e_[1]=1;
+        e_[2]=0;
+        act_num -= (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(1<<(j_-j0))*Nabla3
+                    + (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(1<<(j_-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3)
+                    + (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(1<<(j_-j0))*Nabla2*(1<<(j_-j0))*Nabla3
+                    + (1<<(j_-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3)
+                    + (1<<(j_-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(1<<(j_-j0))*Nabla3;
+        k_[0] = basis->bases()[0]->Nablamin() + act_num/((Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3)*(1<<(j_-j0))*Nabla2);
+        k_[1] = basis->bases()[1]->Nablamin() + act_num/((Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3)) % ((1<<(j_-j0))*Nabla2);
+        k_[2] = basis->bases()[2]->DeltaLmin() +  (act_num % ((Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3)));
+      }
+      else 
+      {
+        e_[0]=1;
+        e_[1]=1;
+        e_[2]=1;
+        act_num -= (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(1<<(j_-j0))*Nabla3
+                    + (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(1<<(j_-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3)
+                    + (Delta1 - Nabla1 +(1<<(j_-j0))*Nabla1)*(1<<(j_-j0))*Nabla2*(1<<(j_-j0))*Nabla3
+                    + (1<<(j_-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3)
+                    + (1<<(j_-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j_-j0))*Nabla2)*(1<<(j_-j0))*Nabla3
+                    + (1<<(j_-j0))*Nabla1*(1<<(j_-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j_-j0))*Nabla3);
+        k_[0] = basis->bases()[0]->Nablamin() + act_num/((1<<(j_-j0))*Nabla3*(1<<(j_-j0))*Nabla2);
+        k_[1] = basis->bases()[1]->Nablamin() + act_num/((1<<(j_-j0))*Nabla3) % ((1<<(j_-j0))*Nabla2);
+        k_[2] = basis->bases()[2]->Nablamin() +  (act_num % ((1<<(j_-j0))*Nabla3));
+      }
+    }
+
+    //act_num -= tmp2;
+
+  }//else DIM == 3
+  else  
+  {
 
     // to be decreased successively
     int act_num = num_;
@@ -170,6 +369,7 @@ namespace WaveletTL
 	}
       }
     }
+   }//end DIM >3
   }
     
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
@@ -260,6 +460,208 @@ namespace WaveletTL
     }
     
     return *this;
+  }
+
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  void
+  CubeIndex<IBASIS,DIM,CUBEBASIS>::get_Index_Parameter(const CUBEBASIS* basis, const int num, int& j, type_type& e, translation_type& k) const
+  {
+
+  if(DIM == 2)
+  {
+    int j0 = basis->j0();
+    int Nabla1 = basis->bases()[0]->Nablasize(j0);
+    int Nabla2 = basis->bases()[1]->Nablasize(j0);
+    int Delta1 = basis->bases()[0]->Deltasize(j0);
+    int Delta2 = basis->bases()[1]->Deltasize(j0);
+    double tmp2 = (double)(Delta1*Nabla2 + Delta2*Nabla1)/(2.*Nabla1*Nabla2);
+    double tmp;
+    int act_num = num;
+
+    if (num < Delta1*Delta2) 
+    {
+      j = j0;
+      e[0]=0;
+      e[1]=0;
+      k[0] = basis->bases()[0]->DeltaLmin() + act_num/Delta2;
+      k[1] = basis->bases()[1]->DeltaLmin() + (act_num % Delta2);
+    }
+    else
+    {
+      tmp = std::sqrt(tmp2*tmp2 + (double)(num-Delta1*Delta2)/(Nabla1*Nabla2) ) +1. -tmp2;
+      j = floor(log2(tmp)) + j0;
+      act_num -= (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2);
+      if(act_num < (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(1<<(j-j0))*Nabla2)
+      {
+        e[0]=0;
+        e[1]=1;
+        k[0] = basis->bases()[0]->DeltaLmin() + act_num/((1<<(j-j0))*Nabla2);
+        k[1] = basis->bases()[1]->Nablamin() + (act_num % ((1<<(j-j0))*Nabla2));
+      }
+      else if (act_num < (Delta1 - Nabla1 + (1<<(j-j0))*Nabla1)*(1<<(j-j0))*Nabla2 + (1<<(j-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2))
+      {
+        e[0]=1;
+        e[1]=0;
+        act_num -= (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(1<<(j-j0))*Nabla2;
+        k[0] = basis->bases()[0]->Nablamin() + act_num/(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2);
+        k[1] = basis->bases()[1]->DeltaLmin() + (act_num % (Delta2 - Nabla2 +(1<<(j-j0))*Nabla2));
+      }
+      else
+      {
+        e[0]=1;
+        e[1]=1;
+        act_num -= (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(1<<(j-j0))*Nabla2 + (1<<(j-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2);
+        k[0] = basis->bases()[0]->Nablamin() + act_num/((1<<(j-j0))*Nabla2);
+        k[1] = basis->bases()[1]->Nablamin() + (act_num % ((1<<(j-j0))*Nabla2));
+      }
+    }
+  } //end if (DIM == 2)
+  else if (DIM == 3)
+  {
+    int j0 = basis->j0();
+    int Nabla1 = basis->bases()[0]->Nablasize(j0);
+    int Nabla2 = basis->bases()[1]->Nablasize(j0);
+    int Nabla3 = basis->bases()[2]->Nablasize(j0);
+    int Delta1 = basis->bases()[0]->Deltasize(j0);
+    int Delta2 = basis->bases()[1]->Deltasize(j0);
+    int Delta3 = basis->bases()[2]->Deltasize(j0);
+    int act_num = num;
+
+    //Benötigt fürs Lösen der qubischen Gleichung schon normiert
+    double a = (double)(Delta1*Nabla2*Nabla3 + Delta2*Nabla1*Nabla3 + Delta3*Nabla2*Nabla1)/(Nabla1*Nabla2*Nabla3);
+    double b = (double)(Delta1*Delta2*Nabla3 + Delta3*Delta1*Nabla2 + Delta3*Delta2*Nabla1)/(Nabla1*Nabla2*Nabla3);
+    double c = (double) (Delta1*Delta2*Delta3 - num)/(Nabla1*Nabla2*Nabla3);
+    //Hilfsvariablen der Cardanischen Formeln
+    double p = b - (a*a)/3.;
+    double q = (2.*a*a*a)/27. - (a*b)/3. + c;
+    //Diskriminante
+    double D = (q*q)/4. + (p*p*p)/27.;
+    //std::cout << "D = " << D << std::endl;
+    //Hilfsvariablen der Lösung
+    double u = pow(sqrt(D) -q/2.,1./3.);
+    double v = pow(-sqrt(D) -q/2.,1./3.);
+    double z = u + v;
+    double x = z - a/3. +1.00001 ;
+
+
+    if (num < Delta1*Delta2*Delta3) 
+    {
+      j = j0;
+      e[0]=0;
+      e[1]=0;
+      e[2]=0;
+      k[0] = basis->bases()[0]->DeltaLmin() + act_num/(Delta3*Delta2);
+      k[1] = basis->bases()[1]->DeltaLmin() + (act_num/Delta3 % Delta2);
+      k[2] = basis->bases()[2]->DeltaLmin() + (act_num % (Delta3));
+    }
+    else
+    {
+      j = floor(log2(x)) + j0;
+      act_num -= (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(Delta3 - Nabla3 +(1<<(j-j0))*Nabla3);
+      if (act_num < (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(1<<(j-j0))*Nabla3)
+      {
+        e[0]=0;
+        e[1]=0;
+        e[2]=1;
+        k[0] = basis->bases()[0]->DeltaLmin() + act_num/((1<<(j-j0))*Nabla3*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2));
+        k[1] = basis->bases()[1]->DeltaLmin() + (act_num/((1<<(j-j0))*Nabla3) % (Delta2 - Nabla2 +(1<<(j-j0))*Nabla2));
+        k[2] = basis->bases()[2]->Nablamin() +  (act_num % ((1<<(j-j0))*Nabla3));
+      }
+      else if (act_num < (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(1<<(j-j0))*Nabla3
+                          + (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(1<<(j-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j-j0))*Nabla3))
+      {
+        e[0]=0;
+        e[1]=1;
+        e[2]=0;
+        act_num -= (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(1<<(j-j0))*Nabla3;
+        k[0] = basis->bases()[0]->DeltaLmin() + act_num/((Delta3 - Nabla3 +(1<<(j-j0))*Nabla3)*(1<<(j-j0))*Nabla2);
+        k[1] = basis->bases()[1]->Nablamin() + act_num/((Delta3 - Nabla3 +(1<<(j-j0))*Nabla3)) % ((1<<(j-j0))*Nabla2);
+        k[2] = basis->bases()[2]->DeltaLmin() +  (act_num % ((Delta3 - Nabla3 +(1<<(j-j0))*Nabla3)));
+      }
+      else if (act_num < (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(1<<(j-j0))*Nabla3
+                          + (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(1<<(j-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j-j0))*Nabla3)
+                          + (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(1<<(j-j0))*Nabla2*(1<<(j-j0))*Nabla3)
+      {
+        e[0]=0;
+        e[1]=1;
+        e[2]=1;
+        act_num -= (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(1<<(j-j0))*Nabla3
+                    + (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(1<<(j-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j-j0))*Nabla3);
+        k[0] = basis->bases()[0]->DeltaLmin() + act_num/((1<<(j-j0))*Nabla3*(1<<(j-j0))*Nabla2);
+        k[1] = basis->bases()[1]->Nablamin() + act_num/((1<<(j-j0))*Nabla3) % ((1<<(j-j0))*Nabla2);
+        k[2] = basis->bases()[2]->Nablamin() +  (act_num % ((1<<(j-j0))*Nabla3));
+      }
+      else if (act_num < (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(1<<(j-j0))*Nabla3
+                          + (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(1<<(j-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j-j0))*Nabla3)
+                          + (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(1<<(j-j0))*Nabla2*(1<<(j-j0))*Nabla3
+                          + (1<<(j-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(Delta3 - Nabla3 +(1<<(j-j0))*Nabla3))
+      {
+        e[0]=1;
+        e[1]=0;
+        e[2]=0;
+        act_num -= (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(1<<(j-j0))*Nabla3
+                    + (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(1<<(j-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j-j0))*Nabla3)
+                    + (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(1<<(j-j0))*Nabla2*(1<<(j-j0))*Nabla3;
+        k[0] = basis->bases()[0]->Nablamin() + act_num/((Delta3 - Nabla3 +(1<<(j-j0))*Nabla3)*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2));
+        k[1] = basis->bases()[1]->DeltaLmin() + act_num/((Delta3 - Nabla3 +(1<<(j-j0))*Nabla3)) % ((Delta2 - Nabla2 +(1<<(j-j0))*Nabla2));
+        k[2] = basis->bases()[2]->DeltaLmin() +  (act_num % ((Delta3 - Nabla3 +(1<<(j-j0))*Nabla3)));
+      }
+      else if (act_num < (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(1<<(j-j0))*Nabla3
+                          + (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(1<<(j-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j-j0))*Nabla3)
+                          + (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(1<<(j-j0))*Nabla2*(1<<(j-j0))*Nabla3
+                          + (1<<(j-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(Delta3 - Nabla3 +(1<<(j-j0))*Nabla3)
+                          + (1<<(j-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(1<<(j-j0))*Nabla3)
+      {
+        e[0]=1;
+        e[1]=0;
+        e[2]=1;
+        act_num -= (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(1<<(j-j0))*Nabla3
+                    + (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(1<<(j-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j-j0))*Nabla3)
+                    + (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(1<<(j-j0))*Nabla2*(1<<(j-j0))*Nabla3
+                    + (1<<(j-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(Delta3 - Nabla3 +(1<<(j-j0))*Nabla3);
+        k[0] = basis->bases()[0]->Nablamin() + act_num/((1<<(j-j0))*Nabla3*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2));
+        k[1] = basis->bases()[1]->DeltaLmin() + act_num/((1<<(j-j0))*Nabla3) % ((Delta2 - Nabla2 +(1<<(j-j0))*Nabla2));
+        k[2] = basis->bases()[2]->Nablamin() +  (act_num % ((1<<(j-j0))*Nabla3));
+      }
+      else if (act_num < (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(1<<(j-j0))*Nabla3
+                          + (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(1<<(j-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j-j0))*Nabla3)
+                          + (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(1<<(j-j0))*Nabla2*(1<<(j-j0))*Nabla3
+                          + (1<<(j-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(Delta3 - Nabla3 +(1<<(j-j0))*Nabla3)
+                          + (1<<(j-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(1<<(j-j0))*Nabla3
+                          + (1<<(j-j0))*Nabla1*(1<<(j-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j-j0))*Nabla3))
+      {
+        e[0]=1;
+        e[1]=1;
+        e[2]=0;
+        act_num -= (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(1<<(j-j0))*Nabla3
+                    + (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(1<<(j-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j-j0))*Nabla3)
+                    + (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(1<<(j-j0))*Nabla2*(1<<(j-j0))*Nabla3
+                    + (1<<(j-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(Delta3 - Nabla3 +(1<<(j-j0))*Nabla3)
+                    + (1<<(j-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(1<<(j-j0))*Nabla3;
+        k[0] = basis->bases()[0]->Nablamin() + act_num/((Delta3 - Nabla3 +(1<<(j-j0))*Nabla3)*(1<<(j-j0))*Nabla2);
+        k[1] = basis->bases()[1]->Nablamin() + act_num/((Delta3 - Nabla3 +(1<<(j-j0))*Nabla3)) % ((1<<(j-j0))*Nabla2);
+        k[2] = basis->bases()[2]->DeltaLmin() +  (act_num % ((Delta3 - Nabla3 +(1<<(j-j0))*Nabla3)));
+      }
+      else 
+      {
+        e[0]=1;
+        e[1]=1;
+        e[2]=1;
+        act_num -= (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(1<<(j-j0))*Nabla3
+                    + (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(1<<(j-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j-j0))*Nabla3)
+                    + (Delta1 - Nabla1 +(1<<(j-j0))*Nabla1)*(1<<(j-j0))*Nabla2*(1<<(j-j0))*Nabla3
+                    + (1<<(j-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(Delta3 - Nabla3 +(1<<(j-j0))*Nabla3)
+                    + (1<<(j-j0))*Nabla1*(Delta2 - Nabla2 +(1<<(j-j0))*Nabla2)*(1<<(j-j0))*Nabla3
+                    + (1<<(j-j0))*Nabla1*(1<<(j-j0))*Nabla2*(Delta3 - Nabla3 +(1<<(j-j0))*Nabla3);
+        k[0] = basis->bases()[0]->Nablamin() + act_num/((1<<(j-j0))*Nabla3*(1<<(j-j0))*Nabla2);
+        k[1] = basis->bases()[1]->Nablamin() + act_num/((1<<(j-j0))*Nabla3) % ((1<<(j-j0))*Nabla2);
+        k[2] = basis->bases()[2]->Nablamin() +  (act_num % ((1<<(j-j0))*Nabla3));
+      }
+    }
+
+    //act_num -= tmp2;
+
+  }//else DIM == 3
   }
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>

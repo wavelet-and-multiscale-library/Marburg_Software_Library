@@ -1,6 +1,7 @@
 // implementation for i_index.h
 
 #include <cassert>
+#include <cmath>
 
 namespace WaveletTL
 {
@@ -58,6 +59,34 @@ namespace WaveletTL
 				       const IBASIS* basis)
   :  basis_(basis)
   {
+    if(true)
+    {
+    int j0 = basis->j0();
+    int nabla = basis->Nablasize(j0);
+    double tmp;
+    int delta = basis->Deltasize(j0);
+
+    // using that delta(j0) + sum_{l=0}^{j} 2^l *nabla = Deltasize(j+j0) 
+    if (num < delta) 
+    {
+      j_ = j0;
+      e_ = 0;
+    }
+    else 
+    {
+      tmp = num - delta;
+      tmp = (double)tmp/nabla +1.;
+      j_ = floor(log2(tmp)) + j0;
+      e_ = 1;
+    }
+
+    if (e_ == 0)
+      k_ = basis_->DeltaLmin() + num;
+    else
+      k_ = basis_->Nablamin()  + num -delta +nabla -(1<<(j_-j0))*nabla ;
+    }
+    else
+    {
     // num_ = num; 
     int num_ = num; 
     
@@ -89,7 +118,7 @@ namespace WaveletTL
       k_ = basis_->DeltaLmin() + act_num;
     else
       k_ = basis_->Nablamin()  + act_num;
- 
+    }
   }
 
 
@@ -176,28 +205,6 @@ namespace WaveletTL
     else
       result += k_ - basis_->Nablamin();
 //     num_ = result;
-  }
-
-  template <class IBASIS>
-  void get_IIndex(const IBASIS* basis, const int num, int& j, int& e, int& k)
-  {
-    j0 = basis->j0();
-    if (num < basis->Deltasize(j0)){
-       j = j0;
-       e = 0;
-       k = basis->DeltaLmin() + num;
-    }
-    else if (num < basis->Deltasize(j0+1)){
-       j = j0;
-       e = 1;
-       k = basis->Nablamin() + num - basis->Deltasize(j0);
-    }
-    else{
-       j = floor(std::log(num - basis->Deltasize(j0+1))/std::log(2))+j0;
-       e = 1;
-       k = basis->Nablamin() + num - basis->Deltasize(j-1); //- basis->Nablasize(j0)*pow(2,j-j0-1);
-    }
-    
   }
 
 

@@ -53,9 +53,9 @@ inline R hypot(const R a, const R b)
   return r;
 }
 
-//! faculty of a (signed or unsigned) integer
+//! factorial of a (signed or unsigned) integer
 template <class I>
-I faculty(const I n)
+I factorial(const I n)
 {
   I r(1);
   for (I i(2); i <= n; r *= i, i++);

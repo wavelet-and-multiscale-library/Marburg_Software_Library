@@ -193,11 +193,11 @@ namespace MathTL
   }
 
   template<class I, unsigned int DIMENSION>
-  unsigned int multi_faculty(const MultiIndex<I, DIMENSION>& alpha)
+  unsigned int multi_factorial(const MultiIndex<I, DIMENSION>& alpha)
   {
-    unsigned int r(faculty(alpha[0]));
+    unsigned int r(factorial(alpha[0]));
     for (unsigned int i(1); i < DIMENSION; i++)
-      r *= faculty(alpha[i]);
+      r *= factorial(alpha[i]);
     return r;
   }
 

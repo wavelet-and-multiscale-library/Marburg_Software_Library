@@ -134,11 +134,11 @@ namespace MathTL
   unsigned int multi_degree(const MultiIndex<I, DIMENSION>& alpha);
 
   /*!
-    faculty of a multiindex \alpha\in\mathbb N^d
+    factorial of a multiindex \alpha\in\mathbb N^d
     (I should be "int" or "unsigned int")
   */
   template <class I, unsigned int DIMENSION>
-  unsigned int multi_faculty(const MultiIndex<I, DIMENSION>& alpha);
+  unsigned int multi_factorial(const MultiIndex<I, DIMENSION>& alpha);
 
   /*!
     \beta-th power of a multiindex \alpha

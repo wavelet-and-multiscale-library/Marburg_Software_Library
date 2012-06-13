@@ -107,7 +107,7 @@ namespace MathTL
 	  horner[n-1] += x*horner[n];
       }
 
-    return horner[derivative] * faculty(derivative);
+    return horner[derivative] * factorial(derivative);
   }
 
   template <class C>

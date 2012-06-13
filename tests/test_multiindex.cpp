@@ -102,7 +102,7 @@ int main()
   gamma[0] = 3; gamma[1] = 2;
   delta[0] = 1; delta[1] = 4;
   cout << "- the 2-index gamma=" << gamma << " has degree "
-       << multi_degree(gamma) << " and faculty " << multi_faculty(gamma) << endl;
+       << multi_degree(gamma) << " and factorial " << multi_factorial(gamma) << endl;
   cout << "- another 2-index delta=" << delta << " yields gamma^delta="
        << multi_power(gamma, delta) << endl;
 

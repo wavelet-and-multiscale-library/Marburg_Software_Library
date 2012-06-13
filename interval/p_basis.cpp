@@ -295,7 +295,7 @@ namespace WaveletTL
 	  }
 	}
 	for (int l = 0; l <= dT-1; l++) {
-	  DTilde_3.set_entry(n,l, faculty(l)*divided_differences[l]);
+	  DTilde_3.set_entry(n,l, factorial(l)*divided_differences[l]);
 	}
       }
 //       cout << "DTilde_3 = " << endl << DTilde_3 << endl;

@@ -63,7 +63,7 @@ namespace WaveletTL
 	// (3.23)
 	for (int n = 0; n < suppright-suppleft-1; n++)
 	  A(suppright-suppleft-1+nu, n) = minus1power(nu) * intpower(suppleft+1+n, nu);
-	b[suppright-suppleft-1+nu] = (nu == mu ? faculty(mu) : 0);
+	b[suppright-suppleft-1+nu] = (nu == mu ? factorial(mu) : 0);
       }
 
       // the system matrix is rectangular, but Ax=b is solvable via a QU decomposition

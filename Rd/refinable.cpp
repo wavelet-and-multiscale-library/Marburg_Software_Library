@@ -73,7 +73,7 @@ namespace WaveletTL
       // (3.23) orthogonality condition
       //   \sum_\alpha (-\alpha)^\nu V_\alpha = \mu!\delta_{\mu,\nu}, |\nu|\le|\mu|
 	
-      unsigned int degmu(multi_degree(mu)), facmu(multi_faculty(mu));
+      unsigned int degmu(multi_degree(mu)), facmu(multi_factorial(mu));
 	
       // we also collect all \nu\in\mathbb N^d, such that |\nu|\le\mu|
       std::set<MultiIndex<int, DIMENSION> > nus;

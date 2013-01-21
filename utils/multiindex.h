@@ -18,8 +18,10 @@
 namespace MathTL
 {
   /*!
-    Template class for (homogeneous) multiindices of a priori known length.
-    The class is designed to be used as index class in a std::map<I,.>.
+   * Template class for (homogeneous) multiindices of a priori known length with values in \N^d.
+   * The class is designed to be used as index class in a std::map<I,.>.
+   * Values in \Z^d are not prohibited, but also not supported. 
+   * The ordering and numbering will be wrong in this case!
   */
   template <class I, unsigned int DIMENSION>
   class MultiIndex
@@ -91,25 +93,18 @@ namespace MathTL
     };
 
     /*
-     * Return Number of MulitiIndex
+     * Return Number of MulitiIndex.
+     * Counting begins at 0.
      */
-    unsigned long int number()
-    {
-        MultiIndex temp;
-        unsigned long int num(0);
-        while ((temp) < (*this))
-        {
-            //++*this;
-            ++temp;
-            num++;
-        }
-        return num;
-    };       
+    unsigned long int number();
+    
   };
 
 
   /*
-   * Return numbers of all MultiIndex from 0 to lambda
+   * Returns the mapping from the multiindices to the natural numbers according 
+   * to the ordering <.
+   * Output contains multiindices ranging from 0 to lambda, excluding lambda.
    */
   template <class I, unsigned int DIMENSION>
   std::map<MultiIndex<I, DIMENSION>,int>
@@ -127,29 +122,33 @@ namespace MathTL
 		 const MultiIndex<I, DIMENSION>& beta);
 
   /*!
-    degree of a multiindex \alpha\in\mathbb N^d
-    (I should be "int" or "unsigned int")
+   * degree of a multiindex \alpha\in\mathbb N^d, i.e.,
+   * the \ell_1 norm 
+   * (I should be "int" or "unsigned int")
   */
   template <class I, unsigned int DIMENSION>
   unsigned int multi_degree(const MultiIndex<I, DIMENSION>& alpha);
 
   /*!
-    factorial of a multiindex \alpha\in\mathbb N^d
-    (I should be "int" or "unsigned int")
+   * factorial of a multiindex \alpha\in\mathbb N^d, i.e.,
+   * alpha ! = alpha_1! * ... * alpha_n!
+   * (I should be "int" or "unsigned int")
   */
   template <class I, unsigned int DIMENSION>
   unsigned int multi_factorial(const MultiIndex<I, DIMENSION>& alpha);
 
   /*!
-    \beta-th power of a multiindex \alpha
-    (I should be "int" or "unsigned int")
+   * \beta-th power of a multiindex \alpha, i.e.,
+   * alpha^beta = alpha_1^beta_1 * ... * alpha_n^beta_n
+   * (I should be "int" or "unsigned int")
   */
   template <class I, unsigned int DIMENSION>
   int multi_power(const MultiIndex<I, DIMENSION>& alpha,
 		  const MultiIndex<I, DIMENSION>& beta);
   
   /*!
-    binomial \beta over \alpha of two multiindices
+   * binomial \beta over \alpha of two multiindices, i.e.,
+   * (alpha beta) = (alpha_1 beta_1) * ... * (alpha_n beta_n)
   */
   template <class I, unsigned int DIMENSION>
   int multi_binomial(const MultiIndex<I, DIMENSION>& beta,

@@ -379,7 +379,7 @@ namespace MathTL
       of template functions is not allowed in C++)
     */
     const double wrmsqr_norm(const double atol, const double rtol,
-			     const InfiniteVector<C,I>& v, const InfiniteVector<C,I>& w) const;
+			     const InfiniteVector<C,I>& v, const InfiniteVector<C,I>& w) const; 
   };
   
   /*!

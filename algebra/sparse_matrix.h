@@ -154,7 +154,8 @@ namespace MathTL
     template <class MATRIX>
     void set_block(const size_type firstrow, const size_type firstcolumn,
 		   const MATRIX& M,
-		   const bool reflect = false);
+		   const bool reflect = false,
+                   const double factor = 1.0);
 
     /*!
       assignment from another sparse matrix
@@ -165,6 +166,11 @@ namespace MathTL
       in place scaling *this *= s
     */
     void scale(const C s);
+
+    /*!
+      in place summation *this += s*M
+    */
+    void add(const C s, const SparseMatrix<C>& M);
 
     /*!
       yields an n-by-n diagonal matrix
@@ -209,8 +215,16 @@ namespace MathTL
 
     /*!
       write matlab sparse matrix format
+     * row/column numbering starts at 0, thus the highest possible value is row/column_dimension()-1
+     *
+     * row/columnstart = number of first row/column to be saved
+     * row/columnend = number of last row/column to be saved
+     * caution: size of original matrix is not stored, so storing a mxn matrix
+     * and then loading it will result in a mxn matrix, NOT in a kxl matrix
+     * where only a mxn part is filled
     */
-    void matlab_output(const char *file, const char *Matrixname, const int binary) const;
+    void matlab_output(const char *file, const char *Matrixname, const int binary, const int rowend = -1, const int columnend = -1) const;
+    void matlab_output(const char *file, const char *Matrixname, const int binary, const int rowstart, const int rowend, const int columnstart, const int columnend) const;
 
     /*!
       read from matlab sparse matrix format (in binary==1 format)

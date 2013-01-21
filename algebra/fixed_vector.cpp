@@ -6,10 +6,19 @@
 
 namespace MathTL
 {
-  template <class C, unsigned int SIZE>
-  inline
-  FixedVector<C, SIZE>::FixedVector(const C c)
-  {
+
+   template <class C, unsigned int SIZE>
+   inline
+   FixedVector<C, SIZE>::FixedVector()
+   {
+    values_ = new C[SIZE];
+    (*this).operator = (C());
+   }
+
+   template <class C, unsigned int SIZE>
+   inline
+   FixedVector<C, SIZE>::FixedVector(const C c)
+   {
     values_ = new C[SIZE];
     (*this).operator = (c);
    }

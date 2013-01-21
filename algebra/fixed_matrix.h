@@ -145,9 +145,9 @@ namespace MathTL
     void operator *= (const C s);
 
     /*!
-      in place addition *this += M
+      in place addition *this += s*M
     */
-    void add(const FixedMatrix<C, ROW_DIM, COL_DIM>& M);
+    void add(const FixedMatrix<C, ROW_DIM, COL_DIM>& M, const C s = 1);
 
     /*!
       in place addition *this += M

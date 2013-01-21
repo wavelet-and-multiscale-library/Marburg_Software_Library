@@ -340,11 +340,13 @@ namespace MathTL
   template <class C>
   template <class MATRIX>
   void SparseMatrix<C>::set_block(const size_type firstrow, const size_type firstcolumn,
-				  const MATRIX& M, const bool reflect)
+				  const MATRIX& M, const bool reflect, const double factor)
   {
     assert(firstrow+M.row_dimension() <= row_dimension());
     assert(firstcolumn+M.column_dimension() <= column_dimension());
 
+    if (factor != 0)
+    {
     // the following code can be optimized
     for (size_type row(0); row < M.row_dimension(); row++)
       for (size_type column(0); column < M.column_dimension(); column++)
@@ -352,10 +354,11 @@ namespace MathTL
 	  if (reflect)
 	    set_entry(firstrow+M.row_dimension()-1-row,
 		      firstcolumn+M.column_dimension()-1-column,
-		      M.get_entry(row, column));
+		      factor*M.get_entry(row, column));
 	  else
-	    set_entry(row+firstrow, column+firstcolumn, M.get_entry(row, column));
+	    set_entry(row+firstrow, column+firstcolumn, factor*M.get_entry(row, column));
 	}
+    }
   }
 
   template <class C>
@@ -397,6 +400,216 @@ namespace MathTL
     }
   }
   
+  template <class C>
+  void SparseMatrix<C>::add(const C s, const SparseMatrix<C>& M)
+  {
+      assert(M.column_dimension() == column_dimension());
+      assert(M.row_dimension() == row_dimension());
+      for (size_type row(0); row < row_dimension(); row++)
+      {
+          if (indices_[row])
+          {
+              if (M.indices_[row])
+              {
+                  size_type count(0);
+                  size_type it1(1),it2(1);
+                  size_type ind1(indices_[row][it1]), ind2(M.indices_[row][it2]);
+                  // geht bestimmt huebscher, zB unter Verwendung von std::set, aber ist das dann schneller?
+                  bool done = false;
+                  while(!done)
+                  {
+                      if (ind1 == ind2)
+                      {
+                          ++count;
+
+                          if (it1 == indices_[row][0])
+                          {
+                              count += M.indices_[row][0]-it2;
+                              done = true;
+                          }
+                          if (it2 == M.indices_[row][0])
+                          {
+                              count += indices_[row][0]-it1;
+                              done = true;
+                          }
+                          if (!done)
+                          {
+                              ++it1;
+                              ++it2;
+                              ind1 = indices_[row][it1];
+                              ind2 = M.indices_[row][it2];
+                          }
+                      }
+                      else if (ind1 < ind2)
+                      {
+                          ++count;
+                          if (it1 == indices_[row][0])
+                          {
+                              count += M.indices_[row][0]-it2 + 1;
+                              done = true;
+                          }
+                          if (!done)
+                          {
+                              ++it1;
+                              ind1 = indices_[row][it1];
+                          }
+                      }
+                      else if(ind1 > ind2)
+                      {
+                          ++count;
+                          if (it2 == M.indices_[row][0])
+                          {
+                              count += indices_[row][0]-it1 + 1;
+                              done = true;
+                          }
+                          if (!done)
+                          {
+                              ++it2;
+                              ind2 = M.indices_[row][it2];
+                          }
+                      }
+                  }
+
+                  size_type* helpi = new size_type[count+1];
+                  C*         helpd = new C        [count];
+
+                  assert(helpi != NULL);
+                  assert(helpd != NULL);
+
+                  helpi[0] = count;
+                  
+                  it1=1;
+                  it2=1;
+                  ind1=indices_[row][1];
+                  ind2=M.indices_[row][1];
+                  count=0;
+                  done = false;
+                  while(!done)
+                  {
+                      if (ind1 == ind2)
+                      {
+                          ++count;
+                          helpi[count] = ind1;
+                          helpd[count-1]  = entries_[row][it1-1];
+                          helpd[count-1] += s*M.entries_[row][it2-1];
+
+                          //cout << " ind1 == ind2 == " << ind1 << " helpd[" << count-1 << "] = " << helpd[count-1] << endl;
+                          if (it1 == indices_[row][0])
+                          {
+                              ++it2; // old value has already contributed
+                              while (it2 <= M.indices_[row][0])
+                              {
+                                  ++count;
+                                  ind2 = M.indices_[row][it2];
+                                  helpi[count] = ind2;
+                                  helpd[count-1] = M.entries_[row][it2-1];
+                                  ++it2;
+                              }
+                              done = true;
+                          }
+                          if (it2 == M.indices_[row][0])
+                          {
+                              ++it1; // old value has already contributed
+                              while (it1 <= indices_[row][0])
+                              {
+                                  ++count;
+                                  ind1 = indices_[row][it1];
+                                  helpi[count] = ind1;
+                                  helpd[count-1] = entries_[row][it1-1];
+                                  ++it1;
+                              }
+                              done = true;
+                          }
+                          if (!done)
+                          {
+                              ++it1;
+                              ++it2;
+                              ind1 = indices_[row][it1];
+                              ind2 = M.indices_[row][it2];
+                          }
+                      }
+                      else if (ind1 < ind2)
+                      {
+                          ++count;
+                          helpi[count] = ind1;
+                          helpd[count-1] = entries_[row][it1-1];
+                          //cout << " ind1 == " << ind1 << " < ind2 == " << ind2 << " helpd[" << count-1 << "] = " << helpd[count-1] << endl;
+                          if (it1 == indices_[row][0])
+                          {
+                              while (it2 <= M.indices_[row][0])
+                              {
+                                  ++count;
+                                  ind2 = M.indices_[row][it2];
+                                  helpi[count] = ind2;
+                                  helpd[count-1] = M.entries_[row][it2-1];
+                                  ++it2;
+                              }
+                              done = true;
+                          }
+                          if (!done)
+                          {
+                              ++it1;
+                              ind1 = indices_[row][it1];
+                          }
+                      }
+                      else if(ind1 > ind2)
+                      {
+                          ++count;
+                          helpi[count] = ind2;
+                          helpd[count-1] = M.entries_[row][it2-1];
+                          //cout << " ind1 == " << ind1 << " > ind2 == " << ind2 << " helpd[" << count-1 << "] = " << helpd[count-1] << endl;
+                          if (it2 == M.indices_[row][0])
+                          {
+                              while (it1 <= indices_[row][0])
+                              {
+                                  ++count;
+                                  ind1 = indices_[row][it1];
+                                  helpi[count] = ind1;
+                                  helpd[count-1] = entries_[row][it1-1];
+                                  ++it1;
+                              }
+                              done = true;
+                          }
+                          if (!done)
+                          {
+                              ++it2;
+                              ind2 = M.indices_[row][it2];
+                          }
+                      }
+                  }
+
+                  delete[] indices_[row];
+                  delete[] entries_[row];
+
+                  
+                  indices_[row] = helpi;
+                  entries_[row] = helpd;
+
+              }
+              // else nothing to do
+          }
+          else
+          {
+              if (M.indices_[row])
+              {
+                  indices_[row] = new size_type[M.indices_[row][0]+1];
+                  entries_[row] = new C[M.indices_[row][0]];
+
+                  assert(indices_[row] != NULL);
+                  assert(entries_[row] != NULL);
+
+                  indices_[row][0]=M.indices_[row][0];
+                  for (size_type j(0); j < indices_[row][0];++j)
+                  {
+                      indices_[row][j+1] = M.indices_[row][j+1];
+                      entries_[row][j] = M.entries_[row][j];
+                  }
+              }
+              // else // nothing to do
+          }
+      }
+  }
+
   template <class C>
   void SparseMatrix<C>::diagonal(const size_type n, const C diag)
   {
@@ -508,8 +721,23 @@ namespace MathTL
   }
 
   template <class C>
-  void SparseMatrix<C>::matlab_output (const char *file, const char *Matrixname, const int binary) const
+  void SparseMatrix<C>::matlab_output (const char *file, const char *Matrixname, const int binary, const int rowend, const int columnend) const
   {
+      if ((rowend == -1) && (columnend == -1))
+      {
+          matlab_output(file, Matrixname, binary, 0, row_dimension()-1, 0, column_dimension()-1);
+      }
+      else
+      {
+          matlab_output(file, Matrixname, binary, 0, rowend, 0, columnend);
+      }
+  }
+  template <class C>
+  void SparseMatrix<C>::matlab_output (const char *file, const char *Matrixname, const int binary, const int rowstart, const int rowend, const int columnstart, const int columnend) const
+  {
+      int r = 1+rowend-rowstart, c = 1+columnend-columnstart; // number of rows/columns
+      
+    assert ((rowstart >= 0)&&(rowend < row_dimension()) && (columnstart >= 0) && (columnend < column_dimension()));
     if (binary)
       {
 	unsigned int i,j;
@@ -545,46 +773,100 @@ namespace MathTL
 
 	m_file.close();
 
-	int r=row_dimension(), c=column_dimension(), l=size();
+
+        // compute the number of nontrivial entries
+        int l(0);
+        for (i=rowstart; i <= rowend; ++i)
+        {
+            if (indices_[i])
+            {
+                for (j = 1; j <=indices_[i][0];++j)
+                {
+                    if (indices_[i][j] > columnend)
+                    {
+                        break;
+                    }
+                    if (indices_[i][j] >= columnstart)
+                    {
+                        ++l;
+                    }
+                }
+            }
+        }
 
 	bin_file.write((char*)(&r), sizeof(int));
 	bin_file.write((char*)(&c), sizeof(int));
 	bin_file.write((char*)(&l), sizeof(int));
 
-	for (i=0; i<row_dimension(); i++)
-	  {
+	for (i=rowstart; i<=rowend; i++)
+        {
 	    if (indices_[i])
-	      {
-		int ii=i+1;
-	       
-		for (j=1; j<=indices_[i][0]; j++)
-		  bin_file.write((char*)(&ii), sizeof(int));
-	      }
-	  }   
+            {
+		int ii=i+1-rowstart;
 
-	for (i=0; i<row_dimension(); i++)
-	  {
+		for (j=1; j<=indices_[i][0]; j++)
+                {
+                    if (indices_[i][j] > columnend)
+                    {
+                        break;
+                    }
+                    if (indices_[i][j] >= columnstart)
+                    {
+                        bin_file.write((char*)(&ii), sizeof(int));
+                    }
+                }
+            }
+        }
+
+	for (i=rowstart; i<=rowend; i++)
+	{
 	    if (indices_[i])
-	      {               
+	    {
+                //cout << "indices_[i] = " << (*indices_[i]) << endl;
+                //cout << "stored = ";
 		for (j=1; j<=indices_[i][0]; j++)
-		  {
-                    int jj=indices_[i][j]+1;
-                    bin_file.write((char*)(&jj), sizeof(int));
-		  }
-	      }
-	  }   
+		{
+                    //int tempi = indices_[i][j];
+                    if (indices_[i][j] > columnend)
+                    {
+                        break;
+                    }
+                    if (indices_[i][j] >= columnstart)
+                    {
+                        int jj=indices_[i][j]+1-columnstart;
+                        //cout << jj << " ";
+                        bin_file.write((char*)(&jj), sizeof(int));
+                    }
+		}
+                //cout << endl;
+	    }
+	}   
 
-        for (i=0; i<row_dimension(); i++)
-	  {
+        for (i=rowstart; i<=rowend; i++)
+	{
             if (indices_[i])
-	      bin_file.write((char*)(entries_[i]), indices_[i][0]*sizeof(C));
-	  }   
+            {
+                //bin_file.write((char*)(entries_[i]), indices_[i][0]*sizeof(C));
+                for (j=1; j<=indices_[i][0]; j++)
+		{
+                    if (indices_[i][j] > columnend)
+                    {
+                        break;
+                    }
+                    if (indices_[i][j] >= columnstart)
+                    {
+                        C temp(entries_[i][j-1]);
+                        bin_file.write((char*)(&temp), sizeof(C));
+                    }
+		}
+            }
+	}   
 
 	bin_file.close();
       }
     else
       {
-	unsigned int i;
+	unsigned int i,j;
 	 
 	char *Filename = new char[200];
 	Filename[0] = '\x0';
@@ -600,13 +882,21 @@ namespace MathTL
 	s.setf(std::ios::scientific, std::ios::fixed);
 	s.precision(15);
 	 
-	s << Matrixname << "=sparse(" << row_dimension() << "," << column_dimension() << ");" << endl;
+	s << Matrixname << "=sparse(" << (r+1) << "," << (c+1) << ");" << endl;
 	
-	for (i=0; i<row_dimension(); i++) {
+	for (i=rowstart; i<=rowend; i++) {
 	  if (indices_[i]) {
-	    for (size_type k(1); k <= indices_[i][0]; k++) {
-	      s << Matrixname << "(" << i+1 << "," << indices_[i][k]+1 << ")="
-		<< entries_[i][k-1] << ";" << endl;
+	    for (j = 1; j <= indices_[i][0]; j++)
+            {
+                if (indices_[i][j] > columnend)
+                {
+                    break;
+                }
+                if (indices_[i][j] >= columnstart)
+                {
+                    s << Matrixname << "(" << i+1 << "," << indices_[i][j]+1 << ")="
+                      << entries_[i][j-1] << ";" << endl;
+                }
 	    }
 	  }
 	}

@@ -94,6 +94,9 @@ namespace MathTL
 
     /*!
       resize the array
+
+      Warning: the initialization of the entries depends on the compiler (and even on the compiler options).
+      It may very well be something like NAN!
     */
     void resize(const size_type s);
 

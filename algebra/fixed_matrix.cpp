@@ -3,6 +3,8 @@
 #include <iomanip>
 #include <sstream>
 
+#include "fixed_vector.h"
+
 namespace MathTL
 {
   template <class C, unsigned int ROW_DIM, unsigned int COL_DIM>
@@ -165,6 +167,12 @@ namespace MathTL
   void FixedMatrix<C, ROW_DIM, COL_DIM>::scale(const C s)
   {
     entries_.scale(s);
+  }
+
+  template <class C, unsigned int ROW_DIM, unsigned int COL_DIM>
+  void FixedMatrix<C, ROW_DIM, COL_DIM>::add(const FixedMatrix<C, ROW_DIM, COL_DIM>& M, const C s)
+  {
+      entries_.add(s, M.entries_);
   }
 
   template <class C, unsigned int ROW_DIM, unsigned int COL_DIM>

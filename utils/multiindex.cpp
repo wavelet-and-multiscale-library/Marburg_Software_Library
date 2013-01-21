@@ -96,6 +96,42 @@ namespace MathTL
   	return *this;
   }
 
+    template<class I, unsigned int DIMENSION>
+    unsigned long int MultiIndex<I, DIMENSION>::number()
+    {
+        unsigned long int num;
+        unsigned int level,a,b;
+        switch (DIMENSION)
+        {
+            case 1:
+                num = (FixedArray1D<I, DIMENSION>::operator [] (0));
+                break;
+            case 2:
+                level = multi_degree(*this);
+                num = (level*(level+1)/2 + (FixedArray1D<I, DIMENSION>::operator [] (0)) );
+                break;
+            case 3:
+                //lambda = (a,b,c)
+                level = multi_degree(*this);
+                a = FixedArray1D<I, DIMENSION>::operator [] (0);
+                b = FixedArray1D<I, DIMENSION>::operator [] (1);
+                num = level*(level+1)*(level+2)/6 + a*(2*level-a+3)/2 + b;
+                break;
+            default:
+                // much slower, but works in every dimension
+                MultiIndex temp;
+                num = 0;
+                while ((temp) < (*this))
+                {
+                    ++temp;
+                    num++;
+                }
+                break;
+        }
+        return num;
+    };
+    
+    
   template<class I, unsigned int DIMENSION>
   std::map<MultiIndex<I,DIMENSION>,int>
   indexmapping(const MultiIndex<I, DIMENSION>& lambda)

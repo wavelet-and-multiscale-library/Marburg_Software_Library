@@ -15,7 +15,8 @@ namespace WaveletTL
 			//InfiniteVector<double, typename PROBLEM::Index>& w,
 			Vector<double>& w,
 			const int jmax,
-			const CompressionStrategy strategy)
+			const CompressionStrategy strategy,
+                        const bool preconditioning)
   {
 #if _WAVELETTL_USE_TBASIS == 0
     //typedef typename PROBLEM::WaveletBasis WaveletBasis;
@@ -101,7 +102,7 @@ namespace WaveletTL
             //
             // for local operator supports have to overlap
             // add all indizes within a 1-ball of range J around lambda:
-            P.add_ball(lambda,w,J,factor,jmax);
+            P.add_ball(lambda,w,J,factor,jmax,strategy,preconditioning);
         }
 #endif
   }
@@ -116,7 +117,8 @@ namespace WaveletTL
 			const int J,
 			Vector<double>& w,
 			const int jmax,
-			const CompressionStrategy strategy)
+			const CompressionStrategy strategy,
+                        const bool preconditioning)
   {
 #if _WAVELETTL_USE_TBASIS == 0
     //typedef typename PROBLEM::WaveletBasis WaveletBasis;
@@ -192,6 +194,9 @@ namespace WaveletTL
 //       {
 // 	// integral operators: branch is not implemented so far
 //       }
+#else
+    cout << "compression.cpp:: branch not jet implemented" << endl;
+    abort();
 #endif
   }
 }

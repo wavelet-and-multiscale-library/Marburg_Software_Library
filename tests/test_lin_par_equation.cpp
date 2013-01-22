@@ -504,7 +504,7 @@ int main()
   }
 #endif
 
-#if 0
+#if 1
   // einzelner Testlauf mit konstanter Schrittweite, Ausgabe der ell_2-Fehler
   cout << "* testing linearly-implicit scheme (with constant stepsizes):" << endl;
 

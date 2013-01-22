@@ -10,8 +10,8 @@
 #include <numerics/bezier.h>
 #include <geometry/sampled_mapping.h>
 
-#include <interval/ds_basis.h>
-//#include <interval/p_basis.h>
+//#include <interval/ds_basis.h>
+#include <interval/p_basis.h>
 //#include <interval/jl_basis.h>
 //#include <interval/jl_support.h>
 //#include <interval/jl_evaluate.h>
@@ -107,8 +107,8 @@ int main()
 
   ConstantFunction<dim> constant_rhs(Vector<double>(1, "1.0"));
   PoissonBVP<dim> poisson(&constant_rhs);
-  typedef DSBasis<d,dT> Basis1D;
-  //typedef PBasis<d,dT> Basis1D;
+  //typedef DSBasis<d,dT> Basis1D;
+  typedef PBasis<d,dT> Basis1D;
 #else
   typedef JLBasis Basis1D; // does not work at the moment
 #endif

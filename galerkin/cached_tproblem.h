@@ -16,6 +16,8 @@
 #include <galerkin/infinite_preconditioner.h>
 
 using MathTL::InfiniteVector;
+using std::max;
+using std::min;
 
 namespace WaveletTL
 {
@@ -64,7 +66,7 @@ namespace WaveletTL
          * you can specify the estimates for ||A|| and ||A^{-1}||
          * (if zero, CachedTProblem will compute the estimates)
          */
-        CachedTProblem(const PROBLEM* P,
+        CachedTProblem(PROBLEM* P,
                        const double normA = 0.0,
                        const double normAinv = 0.0);
 
@@ -110,6 +112,12 @@ namespace WaveletTL
          * estimate the spectral norm ||A||
          */
         double norm_A() const;
+
+
+        /*
+         * estimate the spectral norm ||A|| and ||A^{-1}|| for given offset
+         */
+        void normtest(unsigned int offset) const;
 
         /*
          * estimate the spectral norm ||A^{-1}||
@@ -158,6 +166,20 @@ namespace WaveletTL
         inline double f(const Index& lambda) const {
             return problem->f(lambda);
         }
+
+        /*
+         * change the righthandside f
+         */
+        void set_f(const Function<PROBLEM::space_dimension>* fnew);
+
+
+        /*
+         * read access to the stored preconditioned coefficients of the righthand side
+         */
+        //inline double get_fcoeffs(unsigned int i) const
+        //{
+        //    return problem->fcoeffs[i].second;
+        //}
 
         /*
          * approximate the wavelet coefficient set of the preconditioned right-hand side F
@@ -210,7 +232,8 @@ namespace WaveletTL
                      const int radius,
                      const double factor,
                      const int maxlevel,
-                     const CompressionStrategy strategy = tensor_simple) const;
+                     const CompressionStrategy strategy = tensor_simple,
+                     const bool precond = true) const;
 
         /*
          * Variant where only entries with levels given by levelwindow are added
@@ -240,7 +263,8 @@ namespace WaveletTL
                                const int current_dim,
                                const int maxlevel,
                                const bool legal,
-                               const double precond) const;
+                               const double d1,
+                               const bool precond) const;
 
         /*
          * Variant where only entries with levels given by levelwindow are added
@@ -260,7 +284,7 @@ namespace WaveletTL
          */
     protected:
         //! the underlying (uncached) problem
-        const PROBLEM* problem;
+        PROBLEM* problem;
 
         // type of one block in one column of stiffness matrix  A
         // entries are indexed by the number of the wavelet.
@@ -282,6 +306,234 @@ namespace WaveletTL
 
         // estimates for ||A|| and ||A^{-1}||
         mutable double normA, normAinv;
+    };
+
+
+    /*!
+     * problem which uses a precomputed SparseMatrix. Uses adaptive matrix-vextor multiplication.
+     */
+
+    template <class PROBLEM>
+
+    class CompressedProblemFromMatrix
+    : public FullyDiagonalEnergyNormPreconditioner<typename PROBLEM::Index>
+    {
+    public:
+        /*
+         * make wavelet basis type accessible
+         */
+        typedef typename PROBLEM::WaveletBasis WaveletBasis;
+
+        /*
+         * wavelet index class
+         */
+        typedef typename PROBLEM::Index Index;
+
+        /*
+         * type corresponding to the levels of the wavelet basis
+         */
+        typedef typename Index::level_type index_lt;
+
+        /*!
+         * constructor from an uncached problem and a filename,
+         * you can specify the estimates for ||A|| and ||A^{-1}||
+         * (if zero, CachedProblem will compute the estimates)
+         * the stiffness matrix is given by matrix.
+         * preconditioned specifies, whether the entries of matrix are preconditioned.
+         * To accieve that setup_stiffness_matrix and setup_rhs still work correctly, f() is modified.
+         */
+        CompressedProblemFromMatrix(PROBLEM* P,
+                                    const SparseMatrix<double>* matrix,
+                                    const double normA = 0.0,
+                                    const double normAinv = 0.0,
+                                    const bool preconditioned = false);
+
+        /*
+         * Dummy constructor.
+         * Does not yield a meaningful CompressedProblemFromFile.
+         * You need to set all fields by hand!
+         */
+        CompressedProblemFromMatrix() {};
+
+
+        /*!
+         * read access to the basis
+         */
+        const WaveletBasis& basis() const
+        {
+            return problem->basis();
+        }
+
+        /*!
+         * space dimension of the problem
+         */
+        static const int space_dimension = PROBLEM::space_dimension;
+
+        /*!
+         * locality of the operator
+         */
+        static bool local_operator()
+        {
+            return PROBLEM::local_operator();
+        }
+
+        /*!
+         * (half) order t of the operator
+         */
+        double operator_order() const
+        {
+            return problem->operator_order();
+        }
+
+        /*!
+         * evaluate the diagonal preconditioner D
+         * (precomputed)
+         */
+        inline double D(const Index& lambda) const
+        {
+            //return problem->D(lambda);
+            return sqrt(a(lambda,lambda));
+        }
+
+        /*!
+         * evaluate the (unpreconditioned) bilinear form a
+         * (precomputed)
+         */
+        double a(const Index& lambda,
+                 const Index& nu) const;
+
+        /*!
+         * estimate the spectral norm ||A||
+         */
+        double norm_A() const;
+
+        /*!
+         * estimate the spectral norm ||A^{-1}||
+         */
+        double norm_Ainv() const;
+
+        /*!
+         * estimate compressibility exponent s^*
+         * (we assume that the coefficients a(x),q(x) are smooth)
+         */
+        //double s_star() const
+        //{
+        //    return problem->s_star();
+        //}
+
+        /*
+         * estimate the compression constants alpha_k in
+         * ||A-A_k|| <= alpha_k * 2^{-rho*k}
+         *
+         * we assume they are independent of k and hadcode some results from the theory.
+         *
+         * rho tends to 1/2 for tbasis
+         *
+         * influences jp_tilde in apply_tensor.cpp
+         */
+        inline double alphak(const unsigned int k) const {
+            switch (space_dimension){
+                case 1:
+                    return 2.4;
+                    break;
+                case 2:
+                    return 8.2;
+                    break;
+                default:
+                    return 48.0;
+            }
+            //return 2*norm_A(); // pessimistic
+        }
+
+        /*!
+         * evaluate the (unpreconditioned) right-hand side f
+         * adaption for the case that the precomputed matrix is already preconditioned is necessary for setup_righthand_side
+         */
+        double f(const Index& lambda) const
+        {
+            return (preconditioned? problem->f(lambda) / problem->D(lambda)
+                                  : problem->f(lambda) );
+        }
+
+        /*
+         * change the righthandside f
+         */
+        void set_f(const Function<PROBLEM::space_dimension>* fnew);
+
+        /*!
+         * approximate the wavelet coefficient set of the preconditioned right-hand side F
+         * within a prescribed \ell_2 error tolerance
+         */
+        void RHS(const double eta,
+        InfiniteVector<double, Index>& coeffs) const
+        {
+            problem->RHS(eta, coeffs);
+        }
+
+        /*
+         * applys the galerkin system matrix corresponding to the given index set
+         * 'window' to vector x. Missing entries will be computed
+         * The k-th entry of x is associated to the k-th entry of window.
+         * Longer Vectors x may be inserted into apply. res will have the same
+         * length than x but all entries beyond length(window) will be 0
+         */
+        /*
+        void apply(const std::set<int>& window,
+                   const Vector<double>& x,
+                   Vector<double>& res) const;
+         */
+
+        /*
+         * applys the galerkin system matrix corresponding to the given index set
+         * 'window' to vector x. Missing entries will be computed
+         */
+        /*
+        bool CG(const std::set<int>& window,
+                const Vector<double> &b,
+                Vector<double> &xk,
+                const double tol,
+                const unsigned int maxiter,
+                unsigned int& iterations);
+        */
+
+
+        /*!
+         * compute (or estimate) ||F||_2
+         */
+        inline double F_norm() const { return problem->F_norm(); }
+
+        /*
+         * Called by add_compresed_column
+         * w += factor * (stiffness matrix entries in column lambda with ||nu-lambda|| <= range && ||nu|| <= maxlevel)
+         * only works for spacedimensions of 1 and 2
+         *
+         * "strategy" argument ist needed for compatibility with compression.h .
+         * There is only 1 strategy for TBasis at the moment
+         */
+        void add_ball(const Index& lambda,
+                     //InfiniteVector<double, Index>& w,
+                     Vector<double>& w,
+                     const int radius,
+                     const double factor,
+                     const int maxlevel,
+                     const CompressionStrategy strategy = tensor_simple,
+                     const bool precond = true) const;
+
+    //protected:
+        //! the underlying (uncached) problem
+        PROBLEM* problem;
+
+        //! maximal level
+        //const int jmax_;
+
+        // entries cache for A (mutable to overcome the constness of add_column())
+        const SparseMatrix<double>* entries_cache;
+
+        // estimates for ||A|| and ||A^{-1}||
+        mutable double normA, normAinv;
+
+        // flag to determine whether the stored matrix is already preconditioned
+        bool preconditioned;
     };
 
 }

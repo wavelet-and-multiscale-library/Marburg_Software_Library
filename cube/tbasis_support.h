@@ -47,9 +47,10 @@ namespace WaveletTL
 
   
     /*
-     * For a given wavelet \psi_\lambda, compute all generators/wavelets
+     * For a given wavelet \psi_\lambda, compute all generators OR wavelets
      * \psi_\nu with level |\nu|=j (multiindex), such that the respective supports
      * have a nontrivial intersection.
+     * OUTPUT IS NOT(!) SORTED
      */
     template <class IBASIS, unsigned int DIM>
     void intersecting_wavelets(const TensorBasis<IBASIS,DIM>& basis,
@@ -58,9 +59,10 @@ namespace WaveletTL
                                std::list<typename TensorBasis<IBASIS,DIM>::Index>& intersecting);
 
     /*
-     * For a given wavelet \psi_\lambda, compute all generators & wavelets
+     * For a given wavelet \psi_\lambda, compute all generators AND wavelets
      * \psi_\nu with level |\nu|=j (multiindex), such that the respective supports
      * have a nontrivial intersection.
+     * OUTPUT IS SORTED
      */
     template <class IBASIS, unsigned int DIM>
     void intersecting_elements(const TensorBasis<IBASIS,DIM>& basis,
@@ -69,8 +71,12 @@ namespace WaveletTL
                                std::list<typename TensorBasis<IBASIS,DIM>::Index>& intersecting);
 
   /*!
-    Decide whether the support of a given (primal) generator/wavelet \psi_\lambda
-    intersects the singular support of another (primal) generator/wavelet \psi_\nu.
+   * Decide whether the support of a given (primal) generator/wavelet \psi_\lambda
+   * intersects the singular support of another (primal) generator/wavelet \psi_\nu..
+   *
+   * Note: We have intersection of the singular supports if and only if:
+   * (cube_support:)   one of the components has this property in one dimension
+   * (tbasis_support:) all of the components have this property
   */
   template <class IBASIS, unsigned int DIM>
   bool intersect_singular_support(const TensorBasis<IBASIS,DIM>& basis,

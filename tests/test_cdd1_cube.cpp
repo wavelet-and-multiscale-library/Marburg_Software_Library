@@ -150,6 +150,13 @@ int main()
    plot_indices(&cproblem.basis(), u_epsilon, jmax, plotstream, "jet", true, true);
 
    plotstream.close();
+
+   u_epsilon.scale(&cproblem, -1);
+   cout << "saving computed solution to u_adaptCDD1_cube.m" << endl;
+   SampledMapping<2> s(evaluate(cproblem.basis(), u_epsilon, true, d+2+2+1));
+   std::ofstream u_stream("u_adaptCDD1_cube.m");
+   s.matlab_output(u_stream);
+   u_stream.close();
   
   return 0;
 }

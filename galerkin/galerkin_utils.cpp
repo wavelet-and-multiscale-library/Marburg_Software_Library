@@ -111,7 +111,7 @@ namespace WaveletTL
 #endif
 	    if (fabs(entry) > 1e-15) {
 		indices.push_back(column);
-		entries.push_back(entry / (d1 * (preconditioned ? P.D(*it2) : 1.0)));
+		entries.push_back(entry / (preconditioned ? d1 * P.D(*it2) : 1.0));
 	    }
 	    // 	    }
 	  }
@@ -170,7 +170,7 @@ namespace WaveletTL
 #endif
 	    if (fabs(entry) > 1e-15) {
 		indices.push_back(column);
-		entries.push_back(entry / (d1 * (preconditioned ? P.D(*it2) : 1.0)));
+		entries.push_back(entry / (preconditioned ? d1 * P.D(*it2) : 1.0));
 	    }
 	    // 	    }
 	  }

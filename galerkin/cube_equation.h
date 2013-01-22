@@ -201,7 +201,7 @@ namespace WaveletTL
     */
     void set_bvp(const EllipticBVP<DIM>*);
 
-  protected:
+  //protected:
     const EllipticBVP<DIM>* bvp_;
     CUBEBASIS basis_;
 

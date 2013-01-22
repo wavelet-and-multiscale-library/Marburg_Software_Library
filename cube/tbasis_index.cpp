@@ -5,28 +5,38 @@ namespace WaveletTL
 	template <class IBASIS, unsigned int DIM, class TENSORBASIS>
 	TensorIndex<IBASIS,DIM,TENSORBASIS>::TensorIndex(const TENSORBASIS* basis)
 	:basis_(basis)
-	{
-		if (basis_ == 0) {
-      		//j_ = 0; // invalid (e and k are initialized by zero automatically)
-      		num_ = -1;
-    	} else {
-    		for (unsigned int i = 0; i < DIM; i++) {
-    			j_[i] = basis_->bases()[i]->j0(); // coarsest level;
-      			// e_ is zero by default: generator
-				k_[i] = basis_->bases()[i]->DeltaLmin();
+        {
+            if (basis_ != 0)
+            {
+    		for (unsigned int i = 0; i < DIM; i++) 
+                {
+                    j_[i] = basis_->bases()[i]->j0(); // coarsest level;
+                    // e_ is zero by default: generator
+                    k_[i] = basis_->bases()[i]->DeltaLmin();
     		}
-      		num_ = 1;
-		}
+      		num_ = 0;
+#if _TBASIS_DEBUGLEVEL_ >= 1
+                cout << "TensorIndex: Constructor from basis: num_ = 0 instead of 1" << endl;
+                abort();
+#endif
+            }
+            else 
+            {
+      		//j_ = 0; // invalid (e and k are initialized by zero automatically)
+                num_ = -1;
+            }
 	}
 
 	template <class IBASIS, unsigned int DIM, class TENSORBASIS>
 	TensorIndex<IBASIS,DIM,TENSORBASIS>:: TensorIndex(const level_type& j, const type_type& e, const translation_type& k, const TENSORBASIS* basis)
 	: basis_(basis), j_(j), e_(e), k_(k)
 	{
-		MathTL::FixedArray1D<std::map<int, int>,DIM> sizes; // store number of basis elements. Generators on level j0 (0), wavelets on level j0 (1), j0+1 (2), ...
+            if (basis != 0)
+            {
+                MathTL::FixedArray1D<std::map<int, int>,DIM> sizes; // store number of basis elements. Generators on level j0 (0), wavelets on level j0 (1), j0+1 (2), ...
                 int uptothislevel(0); // number of basis function below the current level
 		int oncurrentlevel(1); // number of base elements on current level j
-		int range(0); // determines wether a new entry has to be computed in "sizes"
+		int range(0); // determines whether a new entry has to be computed in "sizes"
 		level_type currentlevel, j0(basis_->j0());
 		type_type currenttype;		
 		for (unsigned int i=0; i < DIM; i++) {
@@ -49,7 +59,7 @@ namespace WaveletTL
                     // increase index = (currentlevel,currenttype)
                     // "small loop"
                     // iterate over all combinations of generators/wavelets for all dimensions with currentlevel[i]=j0[i]
-                    // this looks like binary addition: (in 3 Dim:) gwg is followed by gww (g=0,w=1)
+                    // this looks like binary addition: (in 3 Dim:) all wavelets of type "gwg" are followed by those of type "gww" (g=0,w=1)
                     bool done = true;
                     for (int i(DIM-1); i >= 0; i--)
                     {
@@ -81,7 +91,7 @@ namespace WaveletTL
                             {
                                 // increase left neighbor
                                 currentlevel[i-1]=currentlevel[i-1]+1;
-                                if (currentlevel[i-1]-j0[i] == range) sizes[i-1][range+1]=basis ->bases()[i]->Nablasize(currentlevel[i-1]); // if needed compute and store new size information
+                                if (currentlevel[i-1]-j0[i-1] == range) sizes[i-1][range+1]=basis ->bases()[i-1]->Nablasize(currentlevel[i-1]); // if needed compute and store new size information
                                 currenttype[i-1]=1;
                                 int temp = currentlevel[i]-j0[i];
                                 currentlevel[i]=j0[i];
@@ -123,8 +133,27 @@ namespace WaveletTL
                     oncurrentlevel *= sizes[i][currentlevel[i]+currenttype[i]-j0[i]];
                     oncurrentlevel += ktemp[i];
 		}
-		num_ =uptothislevel+oncurrentlevel;
+		num_ = uptothislevel+oncurrentlevel;
+            }
+            else
+            {
+                num_ = -1;
+#if _TBASIS_DEBUGLEVEL_ >= 1
+                cout << "TensorIndex(j,e,k, basis) with basis = 0" << endl;
+                abort();
+#endif
+            }
 	}
+
+        template <class IBASIS, unsigned int DIM, class TENSORBASIS>
+	TensorIndex<IBASIS, DIM, TENSORBASIS>::TensorIndex(const int& j, const int& e, const int& k, const TENSORBASIS* basis)
+	: basis_(basis), num_(0)//, j_(j), e_(e), k_(k)
+        {
+            assert (DIM == 1);
+            j_[0]=j;
+            e_[0]=e;
+            k_[0]=k;
+        }
 
 	template <class IBASIS, unsigned int DIM, class TENSORBASIS>
 	TensorIndex<IBASIS, DIM, TENSORBASIS>::TensorIndex(const TensorIndex& lambda)
@@ -133,6 +162,10 @@ namespace WaveletTL
 	template <class IBASIS, unsigned int DIM, class TENSORBASIS>
 	TensorIndex<IBASIS, DIM, TENSORBASIS>::TensorIndex(const TensorIndex* lambda)
 	: basis_(lambda->basis_), j_(lambda->j_), e_(lambda->e_), k_(lambda->k_), num_(lambda->num_) {}
+
+        template <class IBASIS, unsigned int DIM, class TENSORBASIS>
+        TensorIndex<IBASIS,DIM,TENSORBASIS>:: TensorIndex(const level_type& j, const type_type& e, const translation_type& k, const int number, const TENSORBASIS* basis)
+        : basis_(basis), j_(j), e_(e), k_(k), num_(number) {}
 
 	template <class IBASIS, unsigned int DIM, class TENSORBASIS>
 	TensorIndex<IBASIS, DIM, TENSORBASIS>::TensorIndex(const int number, const TENSORBASIS* basis)
@@ -605,12 +638,13 @@ namespace WaveletTL
                         sizes[i][1] = basis_->bases()[i]->Nablasize(j0[i]); // N o Wavelets
                         oncurrentlevel *= sizes[i][0];
 		}
-
+                
                 // iterate over all levels. Add up number of basis functions till looked for level is reached
 		while (remains > oncurrentlevel) // break if we are at the right level
 		{
                     // else substract number of basis functions on current_index=(currentlevel,currentindex) and increase current_index
                     remains -= oncurrentlevel;
+                    
                     // increase index = (currentlevel,currenttype)
                     // "small loop" "currenttype++" (currentlevel fest)
                     // iterate over all combinations of generators/wavelets for all dimensions with currentlevel[i]=j0[i]
@@ -647,7 +681,7 @@ namespace WaveletTL
                                     currentlevel[i-1]=currentlevel[i-1]+1;
                                     if (currentlevel[i-1]-j0[i-1] == range)
                                     {
-                                      sizes[i-1][range+1]=basis ->bases()[i]->Nablasize(currentlevel[i-1]); // if needed compute and store new size information
+                                        sizes[i-1][range+1]=basis ->bases()[i-1]->Nablasize(currentlevel[i-1]); // if needed compute and store new size information
                                     }
                                     currenttype[i-1]=1;
                                     int temp = currentlevel[i]-j0[i];
@@ -663,11 +697,9 @@ namespace WaveletTL
                                 range = range +1;
                                 if (DIM == 1)
                                 {
-                                    currenttype[i] = 1;
-                                    currentlevel[i]=currentlevel[i]+1;
+                                    currenttype[0] = 1;
+                                    currentlevel[0]=currentlevel[0]+1;
                                     sizes[0][range+1]=basis ->bases()[0]->Nablasize(currentlevel[0]); // if needed compute and store new size information
-                                    //double temp1(currenttype[i]), temp2(currentlevel[i]), temp3(basis ->bases()[0]->Nablasize(currentlevel[0])), temp4(sizes[0][range+1]);
-                                    //cout << temp1 << " " << temp2 << " " << temp3 << " " << temp4 << endl;
                                 }
                                 else
                                 {
@@ -711,12 +743,12 @@ namespace WaveletTL
   	TensorIndex<IBASIS,DIM,TENSORBASIS>&
   	TensorIndex<IBASIS,DIM,TENSORBASIS>::operator = (const TensorIndex<IBASIS,DIM,TENSORBASIS>& lambda)
   	{
-    	j_ = lambda.j();
-    	e_ = lambda.e();
-    	k_ = lambda.k();
-    	basis_ = lambda.basis();
-    	num_ = lambda.number();
-    	return *this;
+            j_ = lambda.j();
+            e_ = lambda.e();
+            k_ = lambda.k();
+            basis_ = lambda.basis();
+            num_ = lambda.number();
+            return *this;
   	}
 
 	template <class IBASIS, unsigned int DIM, class TENSORBASIS>
@@ -849,7 +881,7 @@ namespace WaveletTL
 	TensorIndex<IBASIS,DIM,TENSORBASIS>
 	first_generator(const TENSORBASIS* basis)
 	{
-    	return TensorIndex<IBASIS,DIM,TENSORBASIS>(0, basis);
+            return TensorIndex<IBASIS,DIM,TENSORBASIS>(0, basis);
 	}
 
 	template <class IBASIS, unsigned int DIM, class TENSORBASIS>
@@ -865,20 +897,23 @@ namespace WaveletTL
 			e[i] = 0;
 			k[i] = basis->bases()[i]->DeltaRmax(j[i]);
 		}
-		return TensorIndex<IBASIS,DIM,TENSORBASIS>(j, e, k, basis);
+                return TensorIndex<IBASIS,DIM,TENSORBASIS>(j, e, k, last_generator_num<IBASIS,DIM,TENSORBASIS>(basis), basis);
 	}
 
   	template <class IBASIS, unsigned int DIM, class TENSORBASIS>
   	TensorIndex<IBASIS,DIM,TENSORBASIS>
   	first_wavelet(const TENSORBASIS* basis, const typename TensorIndex<IBASIS,DIM,TENSORBASIS>::level_type j)
   	{
+#if _TBASIS_DEBUGLEVEL_ >= 1
             assert(multi_degree(j) > multi_degree(basis->j0())
                     || ((multi_degree(j) == multi_degree(basis->j0())) && (basis->j0() <= j))
                   );
+#endif
             typename TensorIndex<IBASIS,DIM,TENSORBASIS>::type_type e;
             typename TensorIndex<IBASIS,DIM,TENSORBASIS>::translation_type k;
-            bool first_level = true;
-            for (unsigned int i = 0; i < DIM; i++) {
+            
+            bool sofar_only_generators = true;
+            for (unsigned int i = 0; i < DIM-1; i++) {
                 if (j[i] == basis->bases()[i]->j0())
                 {
                     e[i] = 0;
@@ -887,13 +922,18 @@ namespace WaveletTL
                 {
                     e[i] = 1;
                     k[i] = basis->bases()[i]->Nablamin();
-                    first_level = false;
+                    sofar_only_generators = false;
                 }
             }
-            if (first_level == true)
+            if ( (sofar_only_generators == true) || (j[DIM-1] != basis->bases()[DIM-1]->j0()) )
             {
                 e[DIM-1] = 1;
                 k[DIM-1] = basis->bases()[DIM-1]->Nablamin();
+                //sofar_only_generators = false;
+            } else
+            {
+                e[DIM-1] = 0;
+                k[DIM-1] = basis->bases()[DIM-1]->DeltaLmin();
             }
             return TensorIndex<IBASIS,DIM,TENSORBASIS>(j, e, k, basis);
         }
@@ -903,21 +943,25 @@ namespace WaveletTL
         TensorIndex<IBASIS,DIM,TENSORBASIS>
         first_wavelet(const TENSORBASIS* basis, const int level)
         {
+#if _TBASIS_DEBUGLEVEL_ >= 1
             assert(level >= multi_degree(basis->j0()) );
+#endif
             typename TensorIndex<IBASIS,DIM,TENSORBASIS>::level_type j;
             typename TensorIndex<IBASIS,DIM,TENSORBASIS>::type_type e;
             typename TensorIndex<IBASIS,DIM,TENSORBASIS>::translation_type k;
 
-            j[DIM-1] = basis->jo()[DIM-1] + level - multi_degree(basis->j0());
-            e[DIM-1] = 1;
-            k[DIM-1] = basis->basis()[DIM-1]->Nablamin();
-
+            int temp_i;
+            j[DIM-1] = level;
             for (unsigned int i = 0; i < DIM-1; i++)
             {
-                j[i] = basis->j0()[i];
+                temp_i = basis->j0()[i];
+                j[DIM-1] -= temp_i;
+                j[i] = temp_i;
                 e[i] = 0;
-                k[i] = basis->bases[i]->DeltaLmin();
+                k[i] = basis->bases()[i]->DeltaLmin();
             }
+            e[DIM-1] = 1;
+            k[DIM-1] = basis->bases()[DIM-1]->Nablamin();
             return TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(j, e, k, basis);
         }
 
@@ -925,9 +969,11 @@ namespace WaveletTL
   	TensorIndex<IBASIS,DIM,TENSORBASIS>
   	last_wavelet(const TENSORBASIS* basis, const typename TensorIndex<IBASIS,DIM,TENSORBASIS>::level_type j)
   	{
+#if _TBASIS_DEBUGLEVEL_ >= 1
             assert(multi_degree(j) > multi_degree(basis->j0())
                     || ((multi_degree(j) == multi_degree(basis->j0())) && (basis->j0() <= j))
                   );
+#endif
             typename TensorIndex<IBASIS,DIM,TENSORBASIS>::type_type e;
             typename TensorIndex<IBASIS,DIM,TENSORBASIS>::translation_type k;
             for (unsigned int i = 0; i < DIM; i++) {
@@ -937,12 +983,13 @@ namespace WaveletTL
             return TensorIndex<IBASIS,DIM,TENSORBASIS>(j, e, k, basis);
 	}
 
-        // PERFORMANCE !! viele Aufrufe von j0()
         template <class IBASIS, unsigned int DIM, class TENSORBASIS>
   	TensorIndex<IBASIS,DIM,TENSORBASIS>
   	last_wavelet(const TENSORBASIS* basis, const unsigned int level)
   	{
+#if _TBASIS_DEBUGLEVEL_ >= 1
             assert(level >= multi_degree(basis->j0()) );
+#endif
             typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::level_type j;
             typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::type_type e;
             typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::translation_type k;
@@ -954,6 +1001,23 @@ namespace WaveletTL
                 e[i] = 1;
                 k[i] = basis->bases()[i]->Nablamax(basis->bases()[i]->j0());
             }
+            TODO 
+                    
+            return TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(j, e, k, basis);
+            
+            int temp_i;
+            j[0] = level;
+            for (unsigned int i = DIM -1 ; i > 0 ; i--)
+            {
+                temp_i = basis ->j0()[i];
+                j[0] -= temp_i;
+                j[i] = temp_i;
+                e[i] = 1;
+                k[i] = basis->bases()[i]->Nablamax(temp_i);
+                assert(basis->bases()[i]->j0() == basis -> j0()[i] );
+            }
+            e[0]=1;
+            k[0]= basis->bases()[0]->Nablamax(j[0]);
             return TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(j, e, k, basis);
 	}
 

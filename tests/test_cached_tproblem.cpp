@@ -2,7 +2,7 @@
 #define _WAVELETTL_CACHEDPROBLEM_VERBOSITY 0
 // normA uses setup_stiffness_matrix. here the verbosity of the call is controled:
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
-// Code in CDD1.h uses APPLY or APPLY_CAched, depending on this makro
+// switch between isotropic and anisotropic Wavelets (in cdd1.h)
 #define _WAVELETTL_USE_TBASIS 1
 // for verbose output of CDD1
 #define _WAVELETTL_CDD1_VERBOSITY 0
@@ -150,7 +150,7 @@ int main()
   const int d  = 3;
   const int dT = 3;
   const int dim = 2;
-  const int offset = 0; // Radius for the index set Lambda
+  const int offset = 2; // Radius for the index set Lambda
   
   //typedef DSBasis<d,dT> Basis1d;
   typedef PBasis<d,dT> Basis1d;
@@ -162,12 +162,12 @@ int main()
   //typedef CachedTProblem<TensorEquation<Basis1d,dim,TBasis> >::Index CachIndex;
 
   // uncoment for constant RHS ...
-  //ConstantFunction<dim> constant_rhs(Vector<double>(1, "2.0"));
-  //PoissonBVP<dim> poisson(&constant_rhs);
+  ConstantFunction<dim> constant_rhs(Vector<double>(1, "2.0"));
+  PoissonBVP<dim> poisson(&constant_rhs);
 
   // uncomment in 2 space dimensions
-  TestRHS<2> rhs;
-  PoissonBVP<dim> poisson(&rhs);
+  //TestRHS<2> rhs;
+  //PoissonBVP<dim> poisson(&rhs);
 
   FixedArray1D<bool,(2*dim)> bc;
   if (dim==1)
@@ -179,6 +179,8 @@ int main()
       bc[0] = bc[1] = bc[2] = bc[3] = true;
   }
 
+  //bc[1]=false;
+
   clock_t tstart, tend;
   double time;
 
@@ -187,7 +189,8 @@ int main()
   eq.set_jmax(multi_degree(eq.basis().j0())+offset); //calls setup_full_collection
 
   cout << "main:: setting up problem" << endl;
-  CachedTProblem<TensorEquation<Basis1d,dim,TBasis> > ctproblem(&eq);
+  //CachedTProblem<TensorEquation<Basis1d,dim,TBasis> > ctproblem(&eq);
+  CachedTProblem<TensorEquation<Basis1d,dim,TBasis> > ctproblem(&eq,5.5,35.0);
 
   tstart = clock();
   
@@ -456,13 +459,22 @@ int main()
 #endif
 
 #if 0
+
+  clock_t tstart2, tend2;
+  tstart2 = clock();
   cout << "for the statistic: " << endl;
-  cout << "compute ctproblem.normA" << endl;
-  ctproblem.norm_A();
-  cout << "... done. computing ctproblem.normAinv"<<endl;
-  ctproblem.norm_Ainv();
-  cout << "... done." << endl;
-  cout << "normA = " << ctproblem.norm_A() << " normAinv = " << ctproblem.norm_Ainv() << " kondition = " << ctproblem.norm_A()*ctproblem.norm_Ainv() << endl;
+  cout << "compute ctproblem.normA for d = " << d << " dT = " << dT << " dim = " << dim << endl;
+  for (unsigned int offs=0; offs < 20; offs++)
+  {
+      tstart = clock();
+      ctproblem.normtest(offs);
+      tend = clock();
+      time = (double)(tend-tstart)/CLOCKS_PER_SEC;
+      cout << "  time needed: " << time << " seconds" << endl;
+  }
+  tend = clock();
+  time = (double)(tend-tstart2)/CLOCKS_PER_SEC;
+  cout << "statistic part finished. Total time needed: " << time << " seconds" << endl;
 #endif
 
 #if 0 // I forgot to implement&call set_jmax for thee underlying equation!
@@ -785,7 +797,7 @@ int main()
   cout << "skipping CDD2 test"<<endl;
 #endif
   
-# if 1
+# if 0
   cout << "Testing adaptive wavelet-Galerkin solution of a Sturm b.v.p. with CDD1_SOLVE ..." << endl;
   tstart = clock();
   cout << "main:: setting up RHS" << endl;

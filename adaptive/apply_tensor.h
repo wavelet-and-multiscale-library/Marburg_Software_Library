@@ -16,7 +16,7 @@
 namespace WaveletTL
 {
     /*!
-    Theese APPLY routines are tailored for the case that the
+    These APPLY routines are tailored for the case that the
     underlying wavelet basis has a vector valued minimal level j, e.g.
     bases of tensor structure type as modeled by tbasis.
 
@@ -64,7 +64,8 @@ namespace WaveletTL
           const double eta,
           InfiniteVector<double, typename PROBLEM::Index>& w,
           const int jmax = 99,
-          const CompressionStrategy strategy = tensor_simple);
+          const CompressionStrategy strategy = tensor_simple,
+          const bool preconditioning = true);
 
   /*
    * Same as above but with an initial guess for the solution of the
@@ -79,7 +80,8 @@ namespace WaveletTL
           Array1D<int>& jp_guess,
           InfiniteVector<double, typename PROBLEM::Index>& w,
           const int jmax = 99,
-          const CompressionStrategy strategy = tensor_simple);
+          const CompressionStrategy strategy = tensor_simple,
+          const bool preconditioning = true);
 }
 
 #include <adaptive/apply_tensor.cpp>

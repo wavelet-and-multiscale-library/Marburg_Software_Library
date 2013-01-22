@@ -97,7 +97,7 @@ int main()
 #if 1
   const int d  = 3;
   const int dT = 3; // be sure to use a continuous dual here, otherwise the RHS test will fail
-  const int dim = 2;
+  const int dim = 3;
 
   ConstantFunction<dim> constant_rhs(Vector<double>(1, "1.0"));
   PoissonBVP<dim> poisson(&constant_rhs);

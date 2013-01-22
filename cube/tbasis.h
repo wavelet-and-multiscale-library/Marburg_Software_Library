@@ -4,11 +4,12 @@
 // | This file is part of WaveletTL - the Wavelet Template Library      |
 // |                                                                    |
 // | Copyright (c) 2002-2009                                            |
-// | Thorsten Raasch, Manuel Werner, Ulrich Friedrich                   |
+// | Ulrich Friedrich                                                   |
 // +--------------------------------------------------------------------+
 
 #ifndef _WAVELETTL_TBASIS_H_
 #define _WAVELETTL_TBASIS_H_
+#define _TBASIS_DEBUGLEVEL_  1
 
 #include <list>
 
@@ -19,6 +20,8 @@
 #include <utils/function.h>
 #include <geometry/point.h>
 #include <utils/array1d.h>
+
+#include <numerics/gauss_data.h>
 
 // for convenience, include also some functionality
 #include <cube/tbasis_support.h>
@@ -43,6 +46,9 @@ namespace WaveletTL
     class TensorBasis
     {
     public:
+    	//! Interval basis
+    	typedef IBASIS IntervalBasis;
+        
         //! Default constructor (no b.c.'s)
         TensorBasis();
 
@@ -78,9 +84,6 @@ namespace WaveletTL
     	//! Destructor
     	~TensorBasis();
 
-    	//! Interval basis
-    	typedef IBASIS IntervalBasis;
-
     	//! Coarsest possible level j0
     	inline const MultiIndex<int,DIM> j0() const { return j0_; }
 
@@ -105,6 +108,7 @@ namespace WaveletTL
 
     	/*
     	 * Geometric type of the support sets
+         * (j,a,b) <-> 2^{-j_1}[a_1,b_1]x...x2^{-j_DIM}[a_n,b_DIM]
     	 */
     	typedef struct {
       		int j[DIM];
@@ -142,26 +146,35 @@ namespace WaveletTL
     	//! Index of first generator 
     	Index first_generator() const;
 
-        // For compatibility reasons, returns the same as first_generator()
+        /*! 
+         * For compatibility reasons, returns the same (!) as first_generator()
+         * parameter j is ignored !
+         */
         Index first_generator(const unsigned int j) const;
         Index first_generator(const MultiIndex<int,DIM> j) const;
 
         //! Index of last generator on level j0
     	Index last_generator() const;
 
-    	//! Index of first wavelet on level j >= j0
+    	/*! 
+         * Index of first wavelet on level j >= j0.
+         * Method does not check, whether j is valid, i.e., if j-j0 is nonnegative
+         */
     	Index first_wavelet(const MultiIndex<int,DIM> j) const;
         
         //! Index of first wavelet on level j >= ||j0||_1
-        Index first_wavelet(const int level) const;
+        Index first_wavelet(const int levelsum) const;
 
-    	//! Index of last wavelet on sublevel j >= j0
+    	/*! 
+         * Index of last wavelet on sublevel j >= j0.
+         * Method does not check, whether j is valid, i.e., if j-j0 is nonnegative
+         */
     	Index last_wavelet(const MultiIndex<int,DIM> j) const;
 
         //! Index of last wavelet on level j >= ||j0||_1
-    	Index last_wavelet(const int level) const;
+    	Index last_wavelet(const int levelsum) const;
 
-    	/*
+    	/*!
     	 * For a given function, compute all integrals w.r.t. the primal
     	 * or dual generators/wavelets \psi_\lambda with |\lambda|\le jmax.
     	 * - When integrating against the primal functions, the integrand has to be smooth
@@ -172,12 +185,22 @@ namespace WaveletTL
     	 *
     	 * Maybe a thresholding of the returned coefficients is helpful (e.g. for
     	 * expansions of spline functions).
+         * 
+         * For the special case that f is a tensor a faster routine can be developed.
     	 */
     	void expand(const Function<DIM>* f,
                     const bool primal,
                     const MultiIndex<int,DIM> jmax,
                     InfiniteVector<double,Index>& coeffs) const;
 
+        /*!
+         * As above, but with integer max level
+         */
+
+        void expand(const Function<DIM>* f,
+                    const bool primal,
+                    const unsigned int jmax,
+                    InfiniteVector<double,Index>& coeffs) const;
     	/*
     	 * Helper function, integrate a smooth function f against a
     	 * primal generator or wavelet
@@ -191,14 +214,14 @@ namespace WaveletTL
                         const Point<DIM> x) const;
 
     	/*!
-         * Setup full collection of wavelets between j0_ and jmax_.
+         * Compute all wavelet indices between beginning at j0_ and the last_wavelet 
+         * with \|level\|\leq jmax_, i.e.,
+         * degrees_of_freedom = last_wavelet_num<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(this, jmax_) +1
+         * many wavelet indices are computed. They are stored in full_collection
          * This codes the mapping \N -> wavelet_indices
-         * jmax_ has to be specified previously.
          */
     	void setup_full_collection();
 
-    	//! Collection of all wavelets between coarsest and finest level
-    	Array1D<Index> full_collection;
 
     	//! Number of wavelets between coarsest and finest level
     	const int degrees_of_freedom() const { return full_collection.size(); };
@@ -209,17 +232,20 @@ namespace WaveletTL
     	}
 
     protected:
+    	//! Collection of all wavelets between coarsest and finest level
+    	Array1D<Index> full_collection;
+        
         //! Coarsest possible level j0
     	MultiIndex<int,DIM> j0_;
     	//int j0_[DIM];
 
     	//! Finest possible level j0
     	//MultiIndex<int,DIM> jmax_;
+        // wavelet indices with \|level\|\leq jmax_ are stored in full_collection
     	unsigned int jmax_;
 
     	/*
-    	 * The instances of the 1D bases (in general, we will of course
-    	 * need strictly less than DIM instances)
+    	 * The instances of the 1D bases
     	 */
     	list<IBASIS*> bases_infact;
 

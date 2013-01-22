@@ -76,8 +76,9 @@ namespace WaveletTL
          * constructor from a boundary value problem and specified b.c.'s
          */
 
-        TensorEquation(const EllipticBVP<DIM>* bvp,
-                       const FixedArray1D<bool,2*DIM>& bc);
+        TensorEquation(EllipticBVP<DIM>* bvp,
+                       const FixedArray1D<bool,2*DIM>& bc,
+                       const bool precompute = true);
 
 //     /*!
 //     */
@@ -96,7 +97,8 @@ namespace WaveletTL
          * constructor from a boundary value problem and specified b.c.'s
          */
         TensorEquation(const EllipticBVP<DIM>* bvp,
-                       const FixedArray1D<int,2*DIM>& bc);
+                       const FixedArray1D<int,2*DIM>& bc,
+                       const bool precompute = true);
 
         /*
          * copy constructor
@@ -161,6 +163,7 @@ namespace WaveletTL
                     
         /*
          * estimate the spectral norm ||A||
+         * PERFORMANCE :: use setup_full_collection
          */
         double norm_A() const;
 
@@ -207,22 +210,28 @@ namespace WaveletTL
         void set_bvp(const EllipticBVP<DIM>*);
 
         /*
+         * set or change the righthandside
+         */
+        void set_f(const Function<DIM>* fnew);
+        
+        /*
          * set the maximal wavelet level jmax.
          * modifies
          *   basis_.full_collection, fcoeffs, fnorm_sqr
          */
-        inline void set_jmax(const unsigned int jmax)
+        inline void set_jmax(const unsigned int jmax, const bool computerhs = true)
         {
             basis_.set_jmax(jmax);
-            compute_rhs();
+            if (computerhs) compute_rhs();
         }
 
-    protected:
-        const EllipticBVP<DIM>* bvp_;
+    //protected:
+        EllipticBVP<DIM>* bvp_;
         TENSORBASIS basis_;
         // right-hand side coefficients on a fine level, sorted by modulus
         Array1D<std::pair<typename WaveletBasis::Index,double> > fcoeffs;
         // precompute the right-hand side
+        // TODO PERFORMANCE:: use setup_full_collection entries
         void compute_rhs();
         // (squared) \ell_2 norm of the precomputed right-hand side
         double fnorm_sqr;

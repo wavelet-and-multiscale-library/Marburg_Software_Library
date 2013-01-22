@@ -4,22 +4,31 @@ namespace WaveletTL
 {
     //PERFORMANCE : wozu compute_rhs? welches jmax in den Konstruktoren? (wenn überhaupt)
     template <class IBASIS, unsigned int DIM, class TENSORBASIS>
-    TensorEquation<IBASIS,DIM,TENSORBASIS>::TensorEquation(const EllipticBVP<DIM>* bvp,
-                                                     const FixedArray1D<bool,2*DIM>& bc)
+    TensorEquation<IBASIS,DIM,TENSORBASIS>::TensorEquation(EllipticBVP<DIM>* bvp,
+                                                           const FixedArray1D<bool,2*DIM>& bc,
+                                                           const bool precompute)
     : bvp_(bvp), basis_(bc), normA(0.0), normAinv(0.0)
     {
-        basis_.set_jmax(multi_degree(basis_.j0())); // for a first quick hack
-        compute_rhs();
-        cout << "maximal level is set to "<<multi_degree(basis_.j0())<< ". You may want to increase that." << endl;
+        if (precompute == true)
+        {
+            cout << "maximal level is set to "<<multi_degree(basis_.j0())<< ". You may want to increase that." << endl;
+            basis_.set_jmax(multi_degree(basis_.j0())); // for a first quick hack
+            compute_rhs();
+        }
     }
 
     template <class IBASIS, unsigned int DIM, class TENSORBASIS>
     TensorEquation<IBASIS,DIM,TENSORBASIS>::TensorEquation(const EllipticBVP<DIM>* bvp,
-                                                     const FixedArray1D<int,2*DIM>& bc)
+                                                     const FixedArray1D<int,2*DIM>& bc,
+                                                     const bool precompute)
     : bvp_(bvp), basis_(bc), normA(0.0), normAinv(0.0)
     {
-        compute_rhs();
-        basis_.set_jmax(multi_degree(basis_.j0())+1); // for a first quick hack
+        if (precompute == true)
+        {
+            cout << "maximal level is set to "<<multi_degree(basis_.j0())<< ". You may want to increase that." << endl;
+            basis_.set_jmax(multi_degree(basis_.j0())); // for a first quick hack
+            compute_rhs();
+        }
     }
 
     template <class IBASIS, unsigned int DIM, class TENSORBASIS>
@@ -28,7 +37,8 @@ namespace WaveletTL
       fcoeffs(eq.fcoeffs), fnorm_sqr(eq.fnorm_sqr),
       normA(eq.normA), normAinv(eq.normAinv)
     {
-        basis_.set_jmax(multi_degree(basis_.j0())+1); // for a first quick hack
+        basis_.set_jmax(multi_degree(basis_.j0())); // for a first quick hack
+        cout << "maximal level is set to "<<multi_degree(basis_.j0())<< ". You may want to increase that." << endl;
     }
 
 // TODO PERFORMANCE:: use setup_full_collection entries
@@ -36,7 +46,7 @@ namespace WaveletTL
     void
     TensorEquation<IBASIS,DIM,TENSORBASIS>::compute_rhs()
     {
-        cout << "TensorEquation(): precompute right-hand side..." << endl;
+        //cout << "TensorEquation(): precompute right-hand side..." << endl;
         typedef typename WaveletBasis::Index Index;
         // precompute the right-hand side on a fine level
         InfiniteVector<double,Index> fhelp;
@@ -50,7 +60,7 @@ namespace WaveletTL
                 fnorm_sqr += coeff*coeff;
             }
         }
-        cout << "... done, sort the entries in modulus..." << endl;
+        //cout << "... done, sort the entries in modulus..." << endl;
         // sort the coefficients into fcoeffs
         fcoeffs.resize(0); // clear eventual old values
         fcoeffs.resize(fhelp.size());
@@ -61,7 +71,7 @@ namespace WaveletTL
             fcoeffs[id] = std::pair<Index,double>(it.index(), *it);
         }
         sort(fcoeffs.begin(), fcoeffs.end(), typename InfiniteVector<double,Index>::decreasing_order());
-        cout << "... done, all integrals for right-hand side computed!" << endl;
+        //cout << "... done, all integrals for right-hand side computed!" << endl;
     }
 
     template <class IBASIS, unsigned int DIM, class TENSORBASIS>
@@ -342,12 +352,12 @@ namespace WaveletTL
         double bound(fnorm_sqr - eta*eta);
         typedef typename WaveletBasis::Index Index;
         typename Array1D<std::pair<Index, double> >::const_iterator it(fcoeffs.begin());
-        do
+        while (it != fcoeffs.end() && coarsenorm < bound)
         {
             coarsenorm += it->second * it->second;
             coeffs.set_coefficient(it->first, it->second);
             ++it;
-        } while (it != fcoeffs.end() && coarsenorm < bound);
+        }
     }
 
     template <class IBASIS, unsigned int DIM, class TENSORBASIS>
@@ -355,6 +365,15 @@ namespace WaveletTL
     TensorEquation<IBASIS,DIM,TENSORBASIS>::set_bvp(const EllipticBVP<DIM>* bvp)
     {
         bvp_ = bvp;
+        compute_rhs();
+    }
+
+
+    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
+    void
+    TensorEquation<IBASIS,DIM,TENSORBASIS>::set_f(const Function<DIM>* fnew)
+    {
+        bvp_->set_f(fnew);
         compute_rhs();
     }
 
@@ -375,7 +394,7 @@ namespace WaveletTL
          */
 //    }
 
-    // PERFORMANCE :: benutze setup_full_collection Einträge!
+    // PERFORMANCE :: use setup_full_collection
     template <class IBASIS, unsigned int DIM, class TENSORBASIS>
     double
     TensorEquation<IBASIS,DIM,TENSORBASIS>::norm_A() const

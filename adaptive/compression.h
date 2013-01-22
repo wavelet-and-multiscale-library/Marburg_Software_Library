@@ -12,6 +12,7 @@
 
 #include <algebra/infinite_vector.h>
 
+
 using std::set;
 
 namespace WaveletTL
@@ -69,7 +70,8 @@ namespace WaveletTL
 			     //InfiniteVector<double, typename PROBLEM::Index>& w,
 			     Vector<double>& w,
 			     const int jmax = 999,
-			     const CompressionStrategy strategy = St04a);
+			     const CompressionStrategy strategy = St04a,
+                             const bool preconditioning = true); // only relevant for the anisotropic case
   /*
    */
   template <class PROBLEM>
@@ -81,8 +83,9 @@ namespace WaveletTL
 			     //InfiniteVector<double, typename PROBLEM::Index>& w,
 			     Vector<double>& w,
 			     const int jmax = 999,
-			     const CompressionStrategy strategy = St04a);
-
+			     const CompressionStrategy strategy = St04a,
+                             const bool preconditioning = true); // only relevant for the anisotropic case);
+  
 }
 
 #include <adaptive/compression.cpp>

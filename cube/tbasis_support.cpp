@@ -27,19 +27,20 @@ namespace WaveletTL
                        typename TensorBasis<IBASIS,DIM>::Support& supp)
     {
         typename TensorBasis<IBASIS,DIM>::Support supp_lambda;
-        WaveletTL::support<IBASIS,DIM>(basis, lambda, supp_lambda);
+        basis.support(lambda, supp_lambda);
         typename TensorBasis<IBASIS,DIM>::Support supp_mu;
-        WaveletTL::support<IBASIS,DIM>(basis, mu, supp_mu);
+        basis.support(mu, supp_mu);
         // determine support intersection granularity,
         // adjust single support granularities if necessary
         for (unsigned int i=0;i<DIM;i++)
         {
-            supp.j[i] = std::max(supp_lambda.j[i], supp_mu.j[i]);
             if (supp_lambda.j[i] > supp_mu.j[i]) {
+                supp.j[i] = supp_lambda.j[i];
                 const int adjust = 1<<(supp_lambda.j[i]-supp_mu.j[i]);
                 supp_mu.a[i] *= adjust;
                 supp_mu.b[i] *= adjust;
             } else {
+                supp.j[i] = supp_mu.j[i];
                 const int adjust = 1<<(supp_mu.j[i]-supp_lambda.j[i]);
                 supp_lambda.a[i] *= adjust;
                 supp_lambda.b[i] *= adjust;
@@ -265,7 +266,7 @@ namespace WaveletTL
                             {
                                 // increase left neighbor
                                 currentlevel[i-1]=currentlevel[i-1]+1;
-                                if (currentlevel[i-1]-j0[i] == range) sizes[i-1][range+1]=basis.bases()[i]->Nablasize(currentlevel[i-1]); // if needed compute and store new size information
+                                if (currentlevel[i-1]-j0[i-1] == range) sizes[i-1][range+1]=basis.bases()[i-1]->Nablasize(currentlevel[i-1]); // if needed compute and store new size information
                                 currenttype[i-1]=1;
                                 int temp = currentlevel[i]-j0[i];
                                 currentlevel[i]=j0[i];
@@ -479,7 +480,7 @@ namespace WaveletTL
         }
         // generate all tensor product indices
 
-        // Iteration over the type-vektor e
+        // Iteration over the type-vector e
 
         typename Index::type_type min_type,current_type;
         for (unsigned int i=0;i<DIM;i++)
@@ -487,7 +488,6 @@ namespace WaveletTL
             min_type[i]=(j[i]==basis.j0()[i]) ?0:1;
             current_type[i]=min_type[i];
         }
-//        cout << "tbasis type " << current_type << cout;cout.flush();
 
         
         // --------------------------------------------
@@ -498,7 +498,7 @@ namespace WaveletTL
 
         list_type temp_indices;
         FixedArray1D<Index1D,DIM> helpindex;
-        if (j[0] == basis.j0()[0])
+        if (min_type[0] == 0)
         {
             for (typename std::list<Index1D>::const_iterator it(intersecting_1d_generators[0].begin()),
                     itend(intersecting_1d_generators[0].end());
@@ -523,16 +523,16 @@ namespace WaveletTL
 
         for (int i = 1; i < DIM; i++)
         {
-            type_storage bisher;
-            bisher.swap(storage);
-            for (typename type_storage::const_iterator it(bisher.begin()), itend(bisher.end()); it != itend; ++it)
+            type_storage sofar;
+            sofar.swap(storage);
+            for (typename type_storage::const_iterator it(sofar.begin()), itend(sofar.end()); it != itend; ++it)
             {
-                // combine every element in "it" with every generator and wavelet in direction i
+                // combine every element in "it" with every generator (if applicable) and wavelet in direction i
 
                 //list_type sofar1;
                 //sofar1.swap(indices1);
 
-                if (j[i]==basis.j0()[i])
+                if (min_type[i] == 0)
                 { // add all possible generators
                     for (typename list_type::const_iterator itready((*it).begin()), itreadyend((*it).end()); itready != itreadyend; ++itready)
                     {
@@ -540,9 +540,9 @@ namespace WaveletTL
                         //unsigned int esum = 0;
                         //for (unsigned int k = 0; k < i; k++)
                         //esum += helpindex[k].e();
-                        for (typename std::list<Index1D>::const_iterator it(intersecting_1d_generators[i].begin()), itend(intersecting_1d_generators[i].end()); it != itend; ++it)
+                        for (typename std::list<Index1D>::const_iterator it2(intersecting_1d_generators[i].begin()), itend2(intersecting_1d_generators[i].end()); it2 != itend2; ++it2)
                         {
-                            helpindex[i] = *it;
+                            helpindex[i] = *it2;
                             temp_indices.push_back(helpindex);
                         }
                     }
@@ -553,9 +553,9 @@ namespace WaveletTL
                 for (typename list_type::const_iterator itready((*it).begin()), itreadyend((*it).end()); itready != itreadyend; ++itready)
                 {
                     helpindex = *itready;
-                    for (typename std::list<Index1D>::const_iterator it(intersecting_1d_wavelets[i].begin()), itend(intersecting_1d_wavelets[i].end()); it != itend; ++it)
+                    for (typename std::list<Index1D>::const_iterator it2(intersecting_1d_wavelets[i].begin()), itend2(intersecting_1d_wavelets[i].end()); it2 != itend2; ++it2)
                     {
-                        helpindex[i] = *it;
+                        helpindex[i] = *it2;
                         temp_indices.push_back(helpindex);
                     }
                 }
@@ -587,9 +587,6 @@ namespace WaveletTL
                                     const typename TensorBasis<IBASIS,DIM>::Index& lambda,
                                     const typename TensorBasis<IBASIS,DIM>::Index& mu)
     {
-        // we have intersection of the singular supports if and only if
-        // (cube_support:)   one of the components has this property in one dimension
-        // (tbasis_support:) all of the components have this property
         typedef typename IBASIS::Index Index1D;
         for (unsigned int i = 0; i < DIM; i++) {
             if (!(intersect_singular_support(*basis.bases()[i],
@@ -601,4 +598,3 @@ namespace WaveletTL
         return true;
     }
 }
-

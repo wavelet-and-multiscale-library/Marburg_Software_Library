@@ -400,14 +400,14 @@ namespace WaveletTL
     Array1D<Array1D<Piecewise<double> > > wavelets;
 
     void pre_compute_wavelets(){
-    int jmax = JMAX;  // wählen des max levels   12: 2,41 sek
-                    //                         16: 37,0 sek
-                    //  Pro Level erhähung verdopelt sich die Zeit
-    evaluate_with_pre_computation = true;
-    wavelets.resize(jmax+1);
-    for(int i = j0_; i<=jmax; i++){
-       waveletPP(i,wavelets[i]);
-    }
+        int jmax = JMAX;  // wählen des max levels   12: 2,41 sek
+                          //                         16: 37,0 sek
+                          //  Pro Level erhähung verdopelt sich die Zeit
+        evaluate_with_pre_computation = true;
+        wavelets.resize(jmax+1);
+        for(int i = j0_; i<=jmax; i++){
+            waveletPP(i,wavelets[i]);
+        }
     }
 
     //! the primal order

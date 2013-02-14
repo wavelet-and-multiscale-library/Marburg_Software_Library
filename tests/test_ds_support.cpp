@@ -26,6 +26,51 @@ int main()
 //   for (int i = 1; i <= 4; i++, ++lambda);
 //   lambda = last_wavelet(&basis, basis.j0()+1);
 
+  cout << "get_intersecting_wavelets_on_level does NOT work!!" << endl;
+  cout << "The following code was moved from test_tbasis_support and may not compile correctly"
+  abort();
+#if 0
+    /*
+     * get_intersecting_wavelets_on_level does not work for DSBasis!
+     * The following code is copied to the dsbasis_testfile
+     */
+    int tempA, tempB;
+    //Index temp_mu(4,1,6,TBasisArray[0]->bases()[1]);
+    Index first(basis.get_wavelet(0));
+    //typedef Basis1D::Support Support1D;
+    //Support1D supp1d;
+    basis.support(first, tempA, tempB);
+    cout << "wavelet = " << first << "; 1d support = (" << tempA << ", " << tempB << ")" << endl;
+            
+            
+    Index temp_mu(basis.get_wavelet(20));
+    cout << "temp_mu = " << temp_mu << endl;
+    
+    get_intersecting_wavelets_on_level(basis,
+                    temp_mu,
+            4,true,tempA,tempB);
+    cout << "temp_mu -> get_intersecting_wavelets (4, true) (min, max) = (" << tempA << ", " << tempB << ")" << endl;
+    get_intersecting_wavelets_on_level(basis,
+                    temp_mu,
+            4,false,tempA,tempB);
+    cout << "temp_mu -> get_intersecting_wavelets (4, true) (min, max) = (" << tempA << ", " << tempB << ")" << endl;
+     
+    cout << "evaluate wavelet mu = " << temp_mu << endl;
+    for (unsigned int i=0; i< 100; ++i)
+    {
+        cout << "f(" << (0.01*i) << ") = " << basis.evaluate(0, temp_mu, 0.01*i) << endl;
+    }
+
+    cout << "min = " << tempA << "; max = " << tempB << endl;
+    for (unsigned int i = 0; i< 40; ++i)
+    {
+        Index temp_index(basis.get_wavelet(i));
+        basis.support(temp_index, tempA, tempB);
+        cout << "N = " << i << "; lam = " << temp_index << "; k1 = " << tempA << "; k2 = " << tempB << endl;
+    }
+    abort();
+#endif
+    
 #if 0
   cout << "- point values at dyadic points of the " << lambda << " generator/wavelet:" << endl;
   evaluate(basis, lambda, true, 6).matlab_output(cout);

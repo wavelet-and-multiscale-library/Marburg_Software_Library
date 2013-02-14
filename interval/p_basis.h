@@ -125,11 +125,28 @@ namespace WaveletTL
     } Support;
 
     /*!
-      Compute an interval 2^{-j}[k1,k2] which contains the support of a
-      single primal [P] generator or wavelet \psi_\lambda.
-      (j == lambda.j()+lambda.e() is neglected for performance reasons)
+     * Compute an interval 2^{-j}[k1,k2] which contains the support of a
+     * single primal [P] generator or wavelet \psi_\lambda.
+     * (j == lambda.j()+lambda.e() is neglected for performance reasons)
+     * 
+     * 2nd version is a clone of the first one.
+     * 
+     * // edit (Ulrich): 
+     * This is for left boundary Wavelets. The analogous statements hold for the right boundary:
+     * The computation of the support of the boundary wavelets was overestimated in previous versions:
+     * Old code from Thorsten or Manuel:
+     *     k2 = 2*(d+dT)-2; // overestimate, TODO 
+     * I dont know where this formula comes from, but it works (with an overestimation)
+     * To be precise: it is correct (!) for d=dt=2 and BC s=1 and d=dt 33 or 35 with BC 2
+     * This is the formula in [P] for free boundary conditions
+     *     k2 = 2*(d+dT)-4; 
+     * It is precise for d=dt=2 and BC s=0 and d=dt 33 or 35 with BC 0 or 1,
+     * so not only for free BC.
+     * I have not testet other combinations of d/dt and BCs 
+     * 
     */
     void support(const Index& lambda, int& k1, int& k2) const;
+    void support(const int j_, const int e_, const int k_, int& k1, int& k2) const;
 
     //! space dimension of the underlying domain
     static const int space_dimension = 1;
@@ -267,9 +284,25 @@ namespace WaveletTL
       such that
       \psi_lambda = \sum_{\lambda'}c_{\lambda'}\psi_{\lambda'}
       where always |\lambda'|>=j
+     * 
+     * 
+     * InfiniteVector<double,int> - version:
+     * - is 50% faster than the Index-based versions
+     * - assumes that at no time a generator 
+     * on a high level lamj needs to be reconstructed on a lower level j. In such
+     * a situation the numbering fails.
+     * - numbering is as if the minimal level j0 would be set to j, e.g., 
+     * the first generator on level j has the number 0 (= it is stored at position 0)
     */
     void reconstruct_1(const Index& lambda, const int j,
 		       InfiniteVector<double, Index>& c) const;
+    /*
+    // implemented, but unused:
+    void reconstruct_1(const int lamj, const int lame, const int lamk, const int j,
+		       InfiniteVector<double, Index>& c) const;
+     */
+    void reconstruct_1(const int lamj, const int lame, const int lamk, const int j,
+		       InfiniteVector<double, int>& c) const;
 
     //! RECONSTRUCT routine, full version
     /*!
@@ -306,16 +339,14 @@ namespace WaveletTL
       generator or wavelet \psi_\lambda or \tilde\psi_\lambda
     */
     double evaluate(const unsigned int derivative, const Index& lambda, const double x) const;
+    double evaluate(const unsigned int derivative, const int j, const int e, const int k, const double x) const;
 
     /*!
       point evaluation of (derivatives) of a single primal generator
       or wavelet \psi_\lambda at several points simultaneously
     */
-    void
-    evaluate
-    (const unsigned int derivative,
-     const Index& lambda,
-     const Array1D<double>& points, Array1D<double>& values) const;
+    void evaluate(const unsigned int derivative, const Index& lambda, const Array1D<double>& points, Array1D<double>& values) const;
+    void evaluate(const unsigned int derivative, const int j_, const int e_, const int k_, const Array1D<double>& points, Array1D<double>& values) const;
 
 
     //! read access to the internal instance of the CDF basis

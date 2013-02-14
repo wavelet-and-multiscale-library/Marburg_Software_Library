@@ -27,7 +27,7 @@ namespace WaveletTL
             }
 	}
 
-	template <class IBASIS, unsigned int DIM, class TENSORBASIS>
+        template <class IBASIS, unsigned int DIM, class TENSORBASIS>
 	TensorIndex<IBASIS,DIM,TENSORBASIS>:: TensorIndex(const level_type& j, const type_type& e, const translation_type& k, const TENSORBASIS* basis)
 	: basis_(basis), j_(j), e_(e), k_(k)
 	{
@@ -36,104 +36,130 @@ namespace WaveletTL
                 MathTL::FixedArray1D<std::map<int, int>,DIM> sizes; // store number of basis elements. Generators on level j0 (0), wavelets on level j0 (1), j0+1 (2), ...
                 int uptothislevel(0); // number of basis function below the current level
 		int oncurrentlevel(1); // number of base elements on current level j
-		int range(0); // determines whether a new entry has to be computed in "sizes"
-		level_type currentlevel, j0(basis_->j0());
-		type_type currenttype;		
-		for (unsigned int i=0; i < DIM; i++) {
-                    currentlevel[i]=j0[i];
-                    currenttype[i]=0;
-                    sizes[i][0] = basis_->bases()[i]->Deltasize(j0[i]); // Number of generators on level j0
-                    sizes[i][1] = basis_->bases()[i]->Nablasize(j0[i]); // Number of Wavelets on level j0
-		}
-		// iterate over all level up to j_ and add up number of basis functions up to the level
-                if (currentlevel != j_ || currenttype != e_)
-                while (true)
-		{
-                    // compute number of functions on this level
-                    oncurrentlevel = 1;
-                    for (unsigned int i = 0; i < DIM; i++)
+                level_type j0(basis->j0());
+                MultiIndex<int,DIM> j_minus_j0(j);
+                MultiIndex<bool,DIM> min_type;
+                unsigned int levelrange(0); // multi_degree (j) - multi_degree(j0)
+                for (unsigned int i=0; i<DIM; ++i)
+                {
+                    j_minus_j0 [i] -= j0[i];
+                    levelrange += j_minus_j0[i];
+                    min_type[i] = (j_minus_j0[i] != 0); // min_type = 0 => generators are allowed in this direction
+                }
+                
+                for (unsigned int i=0; i < DIM; i++) {
+                    sizes[i][0] = basis->bases()[i]->Deltasize(j0[i]); // Number of generators on level j0
+                    for (unsigned int k = 0; k <= levelrange; ++k)
                     {
-                        oncurrentlevel *= sizes[i][currentlevel[i]+currenttype[i]-j0[i]];
+                        sizes[i][k+1] = basis->bases()[i]->Nablasize(j0[i]+k); // Number of Wavelets on level j0+k
+                    }
+		}
+                // sizes[0][j0[0]+levelrange] is never used
+                
+                unsigned int l(0);
+                unsigned int maxnum(j_minus_j0.number());
+                
+                MultiIndex<int,DIM> mult_it;
+                for (unsigned int i=0; i<DIM; ++i)
+                {
+                    mult_it[i] = 0;
+                }
+                
+                while (l < maxnum)
+                {
+                    oncurrentlevel = 1;
+                    for (unsigned int i=0; i<DIM; ++i)
+                    {
+                        if (mult_it[i] == 0)
+                        {
+                            oncurrentlevel *= (sizes[i][0] + sizes[i][1]);
+                        }
+                        else
+                        {
+                            oncurrentlevel *= sizes[i][mult_it[i]+1];
+                        }
                     }
                     uptothislevel += oncurrentlevel;
-                    // increase index = (currentlevel,currenttype)
-                    // "small loop"
-                    // iterate over all combinations of generators/wavelets for all dimensions with currentlevel[i]=j0[i]
-                    // this looks like binary addition: (in 3 Dim:) all wavelets of type "gwg" are followed by those of type "gww" (g=0,w=1)
+                    ++l;
+                    ++mult_it;
+                }
+                // count the number of (j,e,k) with j = j_, but with e < e_
+                // iterate over all allowed types <= e_
+
+                
+                l=0;
+                for (unsigned int i=0; i<DIM; ++i)
+                {
+                    mult_it[i] = min_type[i];
+                }
+                //cout << "target_e = " << e_ << endl;
+                while (mult_it.lex(e_))
+                {
+                    //cout << "current_e at beginning of loop = " << mult_it << endl;
+                    oncurrentlevel = 1;
+                    for (unsigned int i=0; i<DIM; ++i)
+                    {
+                        if (mult_it[i] == 0)
+                        {
+                            oncurrentlevel *= sizes[i][0];
+                        }
+                        else
+                        {
+                            oncurrentlevel *= sizes[i][j_minus_j0[i] +1];
+                        }
+                    }
+                    uptothislevel += oncurrentlevel;
+                    
+                    // mult_it ++ (type++)
                     bool done = true;
                     for (int i(DIM-1); i >= 0; i--)
                     {
                         // find first position on level j0
-                        if (currentlevel[i] == j0[i])
+                        if (min_type[i] == false)
                         {
-                            if (currenttype[i] == 1)
+                            if (mult_it[i] == 1)
                             {
-                                currenttype[i]=0;
+                                mult_it[i]=0;
+                                //k_[i]=basis_->bases()[i]->DeltaLmin();
                             } else
                             {
-                                currenttype[i]=1;
+                                mult_it[i]=1;
+                                //k_[i]=basis_->bases()[i]->Nablamin();
                                 done = false;
                                 break;
                             }
                         }
                     }
-                    // done == true means that all components with currentlevel[i]=j0[i] were wavelets.
-                    // the level j has to be increased.
-                    // iterate "big loop", meaning: "currentlevel++"
-
-                    if (done == true)
+                    assert (!done); // while loop assumes mult_it < e_
+                    //cout << "current_e at end of loop = " << mult_it << "; " << mult_it << " < " << e_ << " = " << (mult_it < e_) << endl;
+                    
+                }
+                //cout << "current_e after loop = " << mult_it << endl;
+                // count wavelets with same j,e but lower k
+                oncurrentlevel = 1; // product of ksize(DIM-1) * ...* ksize(current_dim)
+                for (int i=DIM-1; i>0; --i)
+                {
+                    if (e_[i] == 0)
                     {
-                    for (int i(DIM-1); i >= 0; i--)
-                    {
-                        if (i != 0)
-                        {
-                            if (currentlevel[i] != j0[i])
-                            {
-                                // increase left neighbor
-                                currentlevel[i-1]=currentlevel[i-1]+1;
-                                if (currentlevel[i-1]-j0[i-1] == range) sizes[i-1][range+1]=basis ->bases()[i-1]->Nablasize(currentlevel[i-1]); // if needed compute and store new size information
-                                currenttype[i-1]=1;
-                                int temp = currentlevel[i]-j0[i];
-                                currentlevel[i]=j0[i];
-                                currenttype[i]=0;
-                                currentlevel[DIM-1]=j0[DIM-1]+temp-1;
-                                currenttype[DIM-1]= (temp == 1?0:1);
-  				break;
-                            }
-  			} else // i == 0. "big loop" arrived at the last index. We have to increase the level!
-  			{
-                            range = range +1;
-                            if (DIM == 1)
-                            {
-                                currenttype[i] = 1;
-                                currentlevel[i]=currentlevel[i]+1;
-                                sizes[0][range+1]=basis ->bases()[0]->Nablasize(currentlevel[0]); // if needed compute and store new size information
-                            }
-                            else
-                            {
-                                //currentlevel[DIM-1]=j0[DIM-1]+currentlevel[0]-j0[0]+1; currenttype[DIM-1]=1;
-                                currentlevel[DIM-1]=j0[DIM-1]+range; currenttype[DIM-1]=1;
-				currenttype[0]=0; currentlevel[0]=j0[0];
-                                sizes[DIM-1][range+1]=basis ->bases()[DIM-1]->Nablasize(currentlevel[DIM-1]); // if needed compute and store new size information
-                            }
-  			break; // unnoetig, da i==0 gilt.
-  			}
-                    } // end of "big loop"
+                        uptothislevel += (k_[i] - basis->bases()[i]->DeltaLmin())*oncurrentlevel;
+                        oncurrentlevel *= sizes[i][0];
                     }
-                    if (currentlevel == j_ && currenttype == e_) break;
-		}
-                // determine number of the function described by k in (currentlevel,currenttype)
-		translation_type ktemp; // we only use that this is a multiindex
-		for (unsigned int i = 0; i < DIM; i++)
-                    if (e_[i] == 0) ktemp[i]=k_[i]-basis_->bases()[i]->DeltaLmin();
-                    else ktemp[i]=k_[i]-basis_->bases()[i]->Nablamin();
-                oncurrentlevel = ktemp[0];
-		for (unsigned int i=1; i <= DIM-1; i++)
-		{
-                    oncurrentlevel *= sizes[i][currentlevel[i]+currenttype[i]-j0[i]];
-                    oncurrentlevel += ktemp[i];
-		}
-		num_ = uptothislevel+oncurrentlevel;
+                    else
+                    {
+                        uptothislevel += (k_[i] - basis->bases()[i]->Nablamin())*oncurrentlevel;
+                        oncurrentlevel *= sizes[i][j_[i]-j0[i]+1];
+                    }
+                }
+                // dimension 0 : no blocksizes need to be computed
+                if (e_[0] == 0)
+                {
+                    uptothislevel += (k_[0] - basis->bases()[0]->DeltaLmin())*oncurrentlevel;
+                }
+                else
+                {
+                    uptothislevel += (k_[0] - basis->bases()[0]->Nablamin())*oncurrentlevel;
+                }
+                num_ = uptothislevel;
             }
             else
             {
@@ -143,7 +169,7 @@ namespace WaveletTL
                 abort();
 #endif
             }
-	}
+        }
 
         template <class IBASIS, unsigned int DIM, class TENSORBASIS>
 	TensorIndex<IBASIS, DIM, TENSORBASIS>::TensorIndex(const int& j, const int& e, const int& k, const TENSORBASIS* basis)
@@ -166,11 +192,14 @@ namespace WaveletTL
         template <class IBASIS, unsigned int DIM, class TENSORBASIS>
         TensorIndex<IBASIS,DIM,TENSORBASIS>:: TensorIndex(const level_type& j, const type_type& e, const translation_type& k, const int number, const TENSORBASIS* basis)
         : basis_(basis), j_(j), e_(e), k_(k), num_(number) {}
-
+        
 	template <class IBASIS, unsigned int DIM, class TENSORBASIS>
 	TensorIndex<IBASIS, DIM, TENSORBASIS>::TensorIndex(const int number, const TENSORBASIS* basis)
 	: basis_(basis), num_(number)
 	{
+#if _TBASIS_DEBUGLEVEL_ >= 1
+            cout << "TensorIndex(number) is called. Use full_collection[number] instead!" << endl;
+#endif
           /* 
             This implementation for DIM = 2,3 assumes that Nablasize(j) = Deltasize(j0) + sum_{l=0}^{j-j0} 2^l * Nablasize(j0)
             and uses a lot of div and mod
@@ -624,7 +653,6 @@ namespace WaveletTL
           }
           else //DIM >3
           {
-
                 MathTL::FixedArray1D<std::map<int, int>,DIM> sizes; // Store number of basis elements. Generators on level j0 (0), wavelets on level j0 (1), j0+1 (2), ...
 		int remains = number+1; // numbering begins at 0
 		int oncurrentlevel(1); // number of base elements on current level j
@@ -786,7 +814,7 @@ namespace WaveletTL
             }
             if (jplusplus == false) return *this;
             // else: determine next level index
-            // "small loop" "e_++" (j_ fest)
+            // "small loop" "e_++" (j_ is not changed)
             // iterate over all combinations of generators/wavelets for all dimensions with j_[i]=j0[i]
             // this looks like binary addition: (in 3 Dim:) gwg is followed by gww (g=0,w=1)
             bool done = true;
@@ -828,7 +856,7 @@ namespace WaveletTL
                             k_[i]=basis_->bases()[i]->DeltaLmin();
                             j_[DIM-1]=j0[DIM-1]+temp-1;
                             e_[DIM-1]= (temp == 1?0:1);
-                            k_[DIM-1]= (temp == 1?basis_->bases()[i]->DeltaLmin():basis_->bases()[i]->Nablamin());
+                            k_[DIM-1]= (temp == 1?basis_->bases()[DIM-1]->DeltaLmin():basis_->bases()[DIM-1]->Nablamin());
                             break;
                         }
                     } else // i == 0. "big loop" arrived at the last index. We have to increase the level!
@@ -843,10 +871,10 @@ namespace WaveletTL
                         {
                             j_[DIM-1]=j0[DIM-1]+j_[0]-j0[0]+1;
                             e_[DIM-1]=1;
-                            k_[DIM-1]=basis_->bases()[i]->Nablamin();
+                            k_[DIM-1]=basis_->bases()[DIM-1]->Nablamin();
                             j_[0]=j0[0];
                             e_[0]=0;
-                            k_[0]=basis_->bases()[i]->DeltaLmin();
+                            k_[0]=basis_->bases()[0]->DeltaLmin();
                         }
                         break; // unnoetig, da i==0 gilt.
                     }
@@ -993,18 +1021,6 @@ namespace WaveletTL
             typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::level_type j;
             typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::type_type e;
             typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::translation_type k;
-            j[0]= basis->j0()[0]+level-multi_degree(basis->j0());
-            e[0]=1;
-            k[0]= basis->bases()[0]->Nablamax(j[0]);
-            for (unsigned int i = 1; i < DIM; i++) {
-                j[i] = basis->j0()[i];
-                e[i] = 1;
-                k[i] = basis->bases()[i]->Nablamax(basis->bases()[i]->j0());
-            }
-            TODO 
-                    
-            return TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(j, e, k, basis);
-            
             int temp_i;
             j[0] = level;
             for (unsigned int i = DIM -1 ; i > 0 ; i--)
@@ -1020,7 +1036,7 @@ namespace WaveletTL
             k[0]= basis->bases()[0]->Nablamax(j[0]);
             return TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(j, e, k, basis);
 	}
-
+        
 	template <class IBASIS, unsigned int DIM, class TENSORBASIS>
 	const int
 	first_generator_num(const TENSORBASIS* basis)

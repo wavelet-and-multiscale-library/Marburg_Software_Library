@@ -47,7 +47,10 @@ namespace WaveletTL
 
         /*
          * Constructor with given j,e,k
-         * Code is similar to Tensorindex(int,Basis). Apply any changes also there!
+         * Code is similar to Tensorindex(int,Basis).
+         * 
+         * PERFORMANCE: This constructor can be improved by using explicit formulas as in
+         * TensorIndex(const int number, const TENSORBASIS* basis)
         */
         TensorIndex(const level_type& j, const type_type& e, const translation_type& k, const TENSORBASIS* basis);
 
@@ -65,7 +68,7 @@ namespace WaveletTL
 
         // Constructor with all parameters given
         TensorIndex(const level_type& j, const type_type& e, const translation_type& k, const int number, const TENSORBASIS* basis);
-
+        
         /*
          * Constructor for given number of wavelet index.
          * The number is determined by the ordering "<", i.e.,
@@ -80,7 +83,10 @@ namespace WaveletTL
          * (334,001)->(334,011)->(334,101)->(334,111)->(343,010)->...->(433,111)->  (range=1)
          * (335,001)-> ... (range=2)
          *
-         * Code is similar to Tensorindex(j,e,k,Basis). Apply any changes also there!
+         * Code is speed up by using explicit formulas for DIM=2,3
+         * DIM=1 is not optimized as it shouldn't be used anyways
+         * 
+         * full_collection[i] is an alternative! less CPU, more memory usage
         */
         TensorIndex(const int number, const TENSORBASIS* basis);
 
@@ -203,7 +209,7 @@ namespace WaveletTL
     template <class IBASIS, unsigned int DIM, class TENSORBASIS>
     TensorIndex<IBASIS,DIM,TENSORBASIS>
     last_wavelet(const TENSORBASIS* basis, const unsigned int level);
-
+    
     /*
      * number of first generator on level j0
      */

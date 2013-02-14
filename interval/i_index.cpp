@@ -59,32 +59,30 @@ namespace WaveletTL
 				       const IBASIS* basis)
   :  basis_(basis)
   {
-    if(true)
-    {
-    int j0 = basis->j0();
-    int nabla = basis->Nablasize(j0);
-    double tmp;
-    int delta = basis->Deltasize(j0);
-
-    // using that delta(j0) + sum_{l=0}^{j} 2^l *nabla = Deltasize(j+j0) 
-    if (num < delta) 
-    {
-      j_ = j0;
-      e_ = 0;
-    }
-    else 
-    {
-      tmp = num - delta;
-      tmp = (double)tmp/nabla +1.;
-      j_ = floor(log2(tmp)) + j0;
-      e_ = 1;
-    }
-
-    if (e_ == 0)
-      k_ = basis_->DeltaLmin() + num;
-    else
-      k_ = basis_->Nablamin()  + num -delta +nabla -(1<<(j_-j0))*nabla ;
-    }
+      if(true)
+      {
+          int j0 = basis_->j0();
+          int nabla = basis_->Nablasize(j0);
+          int tmp;
+          int delta = basis_->Deltasize(j0);
+          // using that delta(j0) + sum_{l=0}^{j} 2^l *nabla = Deltasize(j+j0) 
+          if (num < delta) 
+          {
+              j_ = j0;
+              e_ = 0;
+          }
+          else 
+          {
+              tmp = num - delta;
+              tmp = tmp/nabla +1; // (double)tmp/nabla +1.;
+              j_ = log2((unsigned int) tmp) + j0; // floor(log2(tmp)) + j0;
+              e_ = 1;
+          }
+          if (e_ == 0)
+              k_ = basis_->DeltaLmin() + num;
+          else
+              k_ = basis_->Nablamin() +num - delta + nabla - (1<<j_); // basis_->Nablamin()  + num -delta +nabla -(1<<(j_-j0))*nabla ;
+      }
     else
     {
     // num_ = num; 

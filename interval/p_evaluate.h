@@ -44,13 +44,17 @@ namespace WaveletTL
   /*!
     point evaluation of (derivatives) of a single primal [P] generator
     or wavelet \psi_\lambda
+    The Index version is slow. Usage is disadvised!
   */
   template <int d, int dT>
   double evaluate(const PBasis<d,dT>& basis, const unsigned int derivative,
 		  const typename PBasis<d,dT>::Index& lambda,
 		  const double x);
 
-
+  template <int d, int dT>
+  double evaluate(const PBasis<d,dT>& basis, const unsigned int derivative,
+		  const int j, const int e, const int k,
+		  const double x);
 
   /*!
     Expand of a single primal [P] generator or wavelet \psi_\lambda as a PP Funktion
@@ -62,10 +66,16 @@ namespace WaveletTL
   /*!
     point evaluation of (derivatives) of a single primal [P] generator
     or wavelet \psi_\lambda at several points simultaneously
+   * 
+   * Function using Index is slower than j,e,k version. Usage is disadvised
   */
   template <int d, int dT>
   void evaluate(const PBasis<d,dT>& basis, const unsigned int derivative,
 		const typename PBasis<d,dT>::Index& lambda,
+		const Array1D<double>& points, Array1D<double>& values);
+  template <int d, int dT>
+  void evaluate(const PBasis<d,dT>& basis, const unsigned int derivative,
+		const int j, const int e, const int k,
 		const Array1D<double>& points, Array1D<double>& values);
 
   /*!
@@ -75,6 +85,14 @@ namespace WaveletTL
   template <int d, int dT>
   void evaluate(const PBasis<d,dT>& basis,
 		const typename PBasis<d,dT>::Index& lambda,
+		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);
+  template <int d, int dT>
+  void evaluate2(const PBasis<d,dT>& basis,
+		const typename PBasis<d,dT>::Index& lambda,
+		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);
+  template <int d, int dT>
+  void evaluate(const PBasis<d,dT>& basis,
+		const int j, const int e, const int k,
 		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);
 
 

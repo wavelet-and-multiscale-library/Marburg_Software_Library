@@ -50,7 +50,9 @@ namespace WaveletTL
      * For a given wavelet \psi_\lambda, compute all generators OR wavelets
      * \psi_\nu with level |\nu|=j (multiindex), such that the respective supports
      * have a nontrivial intersection.
-     * OUTPUT IS NOT(!) SORTED
+     * OUTPUT IS SORTED
+     * 
+     * output std::list<int>& intersecting is easy to implement and may be faster
      */
     template <class IBASIS, unsigned int DIM>
     void intersecting_wavelets(const TensorBasis<IBASIS,DIM>& basis,
@@ -62,14 +64,16 @@ namespace WaveletTL
      * For a given wavelet \psi_\lambda, compute all generators AND wavelets
      * \psi_\nu with level |\nu|=j (multiindex), such that the respective supports
      * have a nontrivial intersection.
-     * OUTPUT IS SORTED
+     * 
+     * Routine is slow. Use is disadvised. However, it propably produces correct sets, so it might be useful for debugging
      */
+    /*
     template <class IBASIS, unsigned int DIM>
     void intersecting_elements(const TensorBasis<IBASIS,DIM>& basis,
                                const typename TensorBasis<IBASIS,DIM>::Index& lambda,
                                const MultiIndex<int,DIM> j,
                                std::list<typename TensorBasis<IBASIS,DIM>::Index>& intersecting);
-
+*/
   /*!
    * Decide whether the support of a given (primal) generator/wavelet \psi_\lambda
    * intersects the singular support of another (primal) generator/wavelet \psi_\nu..

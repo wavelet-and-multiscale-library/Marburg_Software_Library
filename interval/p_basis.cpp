@@ -7,6 +7,8 @@
 #include <utils/tiny_tools.h>
 #include <interval/boundary_gramian.h>
 
+#include "i_index.h"
+
 namespace WaveletTL
 {
   template <int d, int dT>
@@ -476,11 +478,11 @@ namespace WaveletTL
  
     setup_CXT();
     setup_CXAT();
-
-    setup_Mj0(ML_, MR_, Mj0); // [DKU, (3.5.1)]
- 
-    Mj0.compress(1e-8);
     
+    setup_Mj0(ML_, MR_, Mj0); // [DKU, (3.5.1)]
+
+    Mj0.compress(1e-8);
+   
     SparseMatrix<double> mj0tp;
     setup_Mj0Tp(MLTp, MRTp, mj0tp); // [DKU, (3.5.5)]
     mj0tp.compress(1e-8);
@@ -1011,53 +1013,126 @@ namespace WaveletTL
     return result;
   }
 
-  template <int d, int dT>
-  void
-  PBasis<d,dT>::support(const Index& lambda, int& k1, int& k2) const {
-    if (lambda.e() == 0) // generator
-      {
-	// phi_{j,k}(x) = 2^{j/2} B_{j,k-ell_1}
-	k1 = std::max(0, lambda.k() + ell1<d>());
-	k2 = std::min(1<<lambda.j(), lambda.k() + ell2<d>());
-      }
-    else // wavelet
-      {
-	// cf. [P, p. 125]
-	if (lambda.k() < (d+dT)/2-1) {
-	  // left boundary wavelet
-	  k1 = 0;
+    template <int d, int dT>
+    void
+    PBasis<d,dT>::support(const Index& lambda, int& k1, int& k2) const 
+    {
+        if (lambda.e() == 0) // generator
+        {
+            // phi_{j,k}(x) = 2^{j/2} B_{j,k-ell_1}
+            k1 = std::max(0, lambda.k() + ell1<d>());
+            k2 = std::min(1<<lambda.j(), lambda.k() + ell2<d>());
+        }
+        else // wavelet
+        {
+            // cf. [P, p. 125]
+            if (lambda.k() < (d+dT)/2-1) 
+            {
+                // left boundary wavelet
+                k1 = 0;
 
- 	  // hard code special case
-//  	  if ( (d==3 && dT==3) &&  ((basis.get_s0()==1) && (basis.get_s1()==1)) ) {
-// 	    k2 = 8;
-//  	  }
-//  	  else
-
-	  k2 = 2*(d+dT)-2; // overestimate, TODO
-
-	} else {
-	  if ((1<<lambda.j())-lambda.k() <= (d+dT)/2-1) {
-	    // right boundary wavelet
-
-	    // hard code special case
-// 	    if ( (d==3 && dT==3) &&  ((basis.get_s0()==1) && (basis.get_s1()==1)) ) {
-// 	      k1 = (1<<(lambda.j()+1)) - 8;
-//  	    }
-//  	    else
-
-	    k1 = (1<<(lambda.j()+1))-(2*(d+dT)-2); // overestimate, TODO
-
-	    k2 = 1<<(lambda.j()+1);
-	  } else {
-	    // interior wavelet (CDF)
-	    // note: despite the fact that the wavelets in the right half of the interval
-	    //       are reflected CDF wavelets, their support does not "see" the reflection!
-	    k1 = 2*(lambda.k()-(d+dT)/2+1);
-	    k2 = k1+2*(d+dT)-2;
-	  }
-	}
-      }
-  }
+                // hard code special case
+                //  	  if ( (d==3 && dT==3) &&  ((basis.get_s0()==1) && (basis.get_s1()==1)) ) {
+                // 	    k2 = 8;
+                //  	  }
+                //  	  else
+                //k2 = 2*(d+dT)-2; // overestimate, TODO 
+                //k2 = 2*(d+dT)-4; // thats the formula in [P] for free BC
+                if (s0 == (d-1) )
+                {
+                    k2 = 2*(d+dT)-2;
+                }
+                else
+                {
+                    k2 = 2*(d+dT)-4;
+                }
+            } 
+            else 
+            {
+                if ((1<<lambda.j())-lambda.k() <= (d+dT)/2-1) 
+                {
+                    // right boundary wavelet
+                    // hard code special case
+                    // 	    if ( (d==3 && dT==3) &&  ((basis.get_s0()==1) && (basis.get_s1()==1)) ) {
+                    // 	      k1 = (1<<(lambda.j()+1)) - 8;
+                    //  	    }
+                    //  	    else
+                    //k1 = (1<<(lambda.j()+1))-(2*(d+dT)-2); // overestimate, TODO
+                    //k1 = (1<<(lambda.j()+1))-2*(d+dT)+4; // thats the formula in [P] for free BC
+                    if (s1 == (d-1) )
+                    {
+                        k1 = (1<<(lambda.j()+1)) - 2*(d+dT) + 2;
+                    }
+                    else
+                    {
+                        k1 = (1<<(lambda.j()+1)) - 2*(d+dT) + 4;
+                    }
+                    k2 = 1<<(lambda.j()+1);
+                } else 
+                {
+                    // interior wavelet (CDF)
+                    // note: despite the fact that the wavelets in the right half of the interval
+                    //       are reflected CDF wavelets, their support does not "see" the reflection!
+                    // k1 = 2*(lambda.k()-(d+dT)/2+1);
+                    k1 = 2*lambda.k()-(d+dT)+2;
+                    k2 = k1+2*(d+dT)-2;
+                }
+            }
+        }
+    }
+  
+    template <int d, int dT>
+    void
+    PBasis<d,dT>::support(const int j_, const int e_, const int k_, int& k1, int& k2) const 
+    {
+        if (e_ == 0) // generator
+        {
+            // phi_{j,k}(x) = 2^{j/2} B_{j,k-ell_1}
+            k1 = std::max(0, k_ + ell1<d>());
+            k2 = std::min(1<<j_, k_ + ell2<d>());
+        }
+        else // wavelet
+        {
+            // cf. [P, p. 125]
+            if (k_ < (d+dT)/2-1) {
+                // left boundary wavelet
+                k1 = 0;
+                //k2 = 2*(d+dT)-2; // overestimate, TODO
+                //k2 = 2*(d+dT)-4; // thats the formula in [P]
+                if (s0 == (d-1) )
+                {
+                    k2 = 2*(d+dT)-2;
+                }
+                else
+                {
+                    k2 = 2*(d+dT)-4;
+                }
+            } else {
+                if ((1<<j_)-k_ <= (d+dT)/2-1) 
+                {
+                    // right boundary wavelet
+                    //k1 = (1<<(j_+1))-(2*(d+dT)-2); // overestimate, TODO
+                    //k1 = (1<<(j_+1))-2*(d+dT)+4; // thats the formula in [P]
+                    if (s1 == (d-1) )
+                    {
+                        k1 = (1<<(j_+1)) - 2*(d+dT) + 2;
+                    }
+                    else
+                    {
+                        k1 = (1<<(j_+1)) - 2*(d+dT) + 4;
+                    }
+                    k2 = 1<<(j_+1);
+                } else {
+                    // interior wavelet (CDF)
+                    // note: despite the fact that the wavelets in the right half of the interval
+                    //       are reflected CDF wavelets, their support does not "see" the reflection!
+                    //k1 = 2*(k_-(d+dT)/2+1);
+                    k1 = 2*k_-(d+dT)+2;
+                    k2 = k1+2*(d+dT)-2;
+                }
+            }
+        }
+    }
   
   template <int d, int dT>
   void
@@ -2621,6 +2696,9 @@ namespace WaveletTL
 			       const int j,
 			       InfiniteVector<double, Index>& c) const {
     c.clear();
+    int temp_int1 (DeltaLmin()), temp_int2(Deltasize(lambda.j())), temp_int3(Nablamin());
+    int tempint4(get_s0()), temp_int5(get_s1());
+    int temp_int6(s0), temp_int7(s1);
     
     if (lambda.j() >= j)
       c.set_coefficient(lambda, 1.0); 
@@ -2688,6 +2766,170 @@ namespace WaveletTL
     }
   }
 
+#if 0
+  template <int d, int dT>
+  void
+  PBasis<d, dT>::reconstruct_1(const int lamj, const int lame, const int lamk,
+			       const int j,
+			       InfiniteVector<double, Index>& c) const {
+    c.clear();
+    
+    if (lamj >= j)
+      c.set_coefficient(Index(lamj,lame,lamk, this), 1.0);
+                        //lambda, 1.0); 
+    else {
+      // For the reconstruction of psi_lambda, we have to compute
+      // the corresponding column of the transformation matrix Mj=(Mj0, Mj1).
+      
+      // reconstruct by recursion
+      typedef Vector<double>::size_type size_type;
+      
+      const size_type row = (lame == 0 ? lamk - DeltaLmin() : lamk);
+      
+      const SparseMatrix<double>& M = (lame == 0 ? Mj0_t : Mj1_t);
+      
+      size_type row_j0 = row;
+      size_type offset = 0;
+      if (lame == 0) {
+	if (lamj > j0()) {
+	  const size_type rows_top = (int)ceil(Deltasize(j0())/2.0);
+	  if (row >= rows_top) {
+	    const size_type bottom = Deltasize(lamj)-Deltasize(j0())/2;
+	    if (row >= bottom) {
+	      row_j0 = row+rows_top-bottom;
+	      offset = Deltasize(lamj+1)-Deltasize(j0()+1);
+	    } else {
+	      row_j0 = rows_top-1;
+	      offset = 2*(row-rows_top)+2;
+	    }
+	  }
+	}
+      }
+      else {
+	if (lamj > j0()) {
+	  const size_type rows_top = 1<<(j0()-1);
+	  if (row >= rows_top) {
+	    const size_type bottom = (1<<lamj)-(1<<(j0()-1));
+	    if (row >= bottom) {
+	      row_j0 = row+rows_top-bottom;
+	      offset = Deltasize(lamj+1)-Deltasize(j0()+1);
+	    } else {
+	      if ((int)row < (1<<(lamj-1))) {
+		row_j0 = rows_top-1;
+		offset = 2*(row-rows_top)+2;
+	      } else {
+		row_j0 = 1<<(j0()-1);
+		offset = Deltasize(lamj+1)-Deltasize(j0()+1)+2*((int)row-bottom);
+	      }
+	    }
+	  }
+	}
+      }
+      if (lamj+1 >= j) {
+	for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
+	  c.add_coefficient(Index(lamj+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this),
+			    M.get_nth_entry(row_j0,k));
+	}
+      } else {
+	for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
+	  InfiniteVector<double, Index> dhelp;
+	  reconstruct_1(Index(lamj+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this), j, dhelp);
+	  c.add(M.get_nth_entry(row_j0,k), dhelp);
+	}
+      }
+    }
+  }
+#endif
+  
+  template <int d, int dT>
+  void
+  PBasis<d, dT>::reconstruct_1(const int lamj, const int lame, const int lamk,
+			       const int j,
+			       InfiniteVector<double, int>& c) const {
+    c.clear();
+    assert ((lamj <= j) || (lame == 1)); 
+    // ! ( (lamj > j) && (lame == e) ), i.e., the reconstruction of a generator on a level higher than j will fail (because of a wrong number)
+    if (lamj >= j)
+    {
+        if (lame == 0)
+        {
+            c.set_coefficient(lamk - DeltaLmin(), 1.0);
+        }
+        else
+        {
+            c.set_coefficient(Deltasize(lamj) + lamk - Nablamin(), 1.0);
+        }
+        //c.set_coefficient(lambda, 1.0); 
+    }
+    else {
+      // For the reconstruction of psi_lambda, we have to compute
+      // the corresponding column of the transformation matrix Mj=(Mj0, Mj1).
+      
+      // reconstruct by recursion
+      typedef Vector<double>::size_type size_type;
+      
+      const size_type row = (lame == 0 ? lamk - DeltaLmin() : lamk);
+
+      const SparseMatrix<double>& M = (lame == 0 ? Mj0_t : Mj1_t);
+      bool temp_bool = Mj1_t.empty();
+      int temp_rows(M.row_dimension());
+      int temp_cols(M.column_dimension());
+      
+      size_type row_j0 = row;
+      size_type offset = 0;
+      if (lame == 0) {
+	if (lamj > j0()) {
+	  const size_type rows_top = (int)ceil(Deltasize(j0())/2.0);
+	  if (row >= rows_top) {
+	    const size_type bottom = Deltasize(lamj)-Deltasize(j0())/2;
+	    if (row >= bottom) {
+	      row_j0 = row+rows_top-bottom;
+	      offset = Deltasize(lamj+1)-Deltasize(j0()+1);
+	    } else {
+	      row_j0 = rows_top-1;
+	      offset = 2*(row-rows_top)+2;
+	    }
+	  }
+	}
+      }
+      else {
+	if (lamj > j0()) {
+	  const size_type rows_top = 1<<(j0()-1);
+	  if (row >= rows_top) {
+	    const size_type bottom = (1<<lamj)-(1<<(j0()-1));
+	    if (row >= bottom) {
+	      row_j0 = row+rows_top-bottom;
+	      offset = Deltasize(lamj+1)-Deltasize(j0()+1);
+	    } else {
+	      if ((int)row < (1<<(lamj-1))) {
+		row_j0 = rows_top-1;
+		offset = 2*(row-rows_top)+2;
+	      } else {
+		row_j0 = 1<<(j0()-1);
+		offset = Deltasize(lamj+1)-Deltasize(j0()+1)+2*((int)row-bottom);
+	      }
+	    }
+	  }
+	}
+      }
+      if (lamj+1 >= j) {
+	for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
+            c.add_coefficient(M.get_nth_index(row_j0,k)+offset , M.get_nth_entry(row_j0,k));
+	  //c.add_coefficient(Index(lamj+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this),
+	//		    M.get_nth_entry(row_j0,k));
+	}
+      } else {
+	for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
+	  InfiniteVector<double, int> dhelp;
+          reconstruct_1(lamj+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, j, dhelp);
+	  //reconstruct_1(Index(lamj+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this), j, dhelp);
+	  c.add(M.get_nth_entry(row_j0,k), dhelp);
+	}
+      }
+    }
+  }
+  
+  
   template <int d, int dT>
   void
   PBasis<d, dT>::reconstruct_t_1(const Index& lambda,
@@ -2767,6 +3009,14 @@ namespace WaveletTL
   {
     return WaveletTL::evaluate(*this, derivative, lambda, x);
   }
+  
+  template <int d, int dT>
+  inline
+  double
+  PBasis<d, dT>::evaluate(const unsigned int derivative, const int j, const int e, const int k, const double x) const
+  {
+    return WaveletTL::evaluate(*this, derivative, j, e, k, x);
+  }
 
   template <int d, int dT>
   inline
@@ -2777,6 +3027,17 @@ namespace WaveletTL
    const Array1D<double>& points, Array1D<double>& values) const
   {
     WaveletTL::evaluate(*this, derivative, lambda, points, values);
+  }
+  
+  template <int d, int dT>
+  inline
+  void
+  PBasis<d,dT>::evaluate
+  (const unsigned int derivative,
+   const int j_, const int e_, const int k_,
+   const Array1D<double>& points, Array1D<double>& values) const
+  {
+    WaveletTL::evaluate(*this, derivative, j_, e_, k_, points, values);
   }
 
    /* Compute the Picewiese expansion of all wavelets and Generatoren for given j, d */

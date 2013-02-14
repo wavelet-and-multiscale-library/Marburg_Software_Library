@@ -60,7 +60,215 @@ namespace WaveletTL
                                const MultiIndex<int,DIM> j, const bool generators,
                                std::list<typename TensorBasis<IBASIS,DIM>::Index>& intersecting)
     {
-        #if 0
+        /*
+         * we utilize neighboring relations of wavelets with nontrivial intersection in the translation index k!
+         * 
+         * iterate over all possible types on the level j. For all such j:
+         * find the first valid k on this level and store its number -> current_num
+         * find the first k with intersection -> k_hit
+         * for all k's that differ only in k[dim] from k_hit:
+         * - compute number of k's before k_hit ("jump_before[dim]" in the number)
+         * - compute number of k's that intersect ("num_of_intersections[dim])
+         * - compute number of k's after k_hit ("jump_after[dim]")
+         * - add all wavelets from current_num+jump_before[dim] to current_num+jump_after[dim]
+         * current_num = current_num + number of all k's that only differ in the last dimension
+         * increase k_hit[dim-1] (if possible)
+         * - if we have arrived at the last possible value for k_hit[dim-1]:
+         * -- jump_after[dim-1] = number of possible values after k_hit[dim-1] times number of possible values for k[dim]
+         * -- jump_before[dim-1] = number of possible values before k_hit[dim-1] times number of possible values for k[dim]
+         * continue at num = currentnum + jump_after[dim-1]+jump_after[dim-1]
+         * 
+         * and analogous with dim-2 ...
+         * this results in
+         * 
+         * while (!done)
+         * {
+         *      "jump_before" for all dimensions (current_jump_dim, current_jump_dim+1,...,dim)
+         *      add wavelets
+         *      increase k
+         *      "jump_after" all dimensions where we are at the last possible value for k (dim, dim-1, ..., current_jump_dim)
+         *      have we arrived at the very last possible k? -> increase type vector
+         *      have we arrived at the type vector (1,1,...,1)? -> done = true
+         * }
+         * 
+         * Also included: old code which works without get_intersecting_wavelets_on_level that is compatible with DSBasis
+         * and even older code which works with brute force
+         */
+#if 1
+        typedef typename TensorBasis<IBASIS,DIM>::Index Index;
+        typedef typename IBASIS::Index Index1D;
+        typedef typename Index::type_type type_type;
+        if (generators) assert (j==basis.j0());
+        intersecting.clear();
+        // initialize the type-vector e
+        type_type min_type, current_type;
+        for (unsigned int i=0;i<DIM;i++)
+        {
+            min_type[i]=(j[i]==basis.j0()[i]) ?0:1; // remember whether we are on the minimal levels to avoid calls of basis.j0()
+            current_type[i]=min_type[i];
+        }
+        if ( (!generators) && (j == basis.j0()))
+        {
+            current_type[DIM-1] = 1;
+        }
+        FixedArray1D<int,DIM> jump_before, jump_after, mink_gen, mink_wav, maxk_gen, maxk_wav;
+        for (unsigned int i = 0; i < DIM; i++) 
+        {
+            if (min_type[i] == 0)
+            {
+                get_intersecting_wavelets_on_level(*(basis.bases()[i]),
+                        lambda.j()[i],
+                        lambda.e()[i],
+                        lambda.k()[i],
+                        j[i], true, mink_gen[i],maxk_gen[i]);
+            }
+            if (!(generators))
+            {
+                get_intersecting_wavelets_on_level(*basis.bases()[i],
+                        lambda.j()[i],
+                        lambda.e()[i],
+                        lambda.k()[i],
+                        j[i], false, mink_wav[i],maxk_wav[i]);
+            }
+        }
+        unsigned int cjd(0); // current_jump_dim
+        int blocksize;
+        unsigned int number;
+        if (generators == true)
+        {
+            number = 0;
+        }
+        else
+        {
+            number = basis.first_wavelet(j).number();
+        }
+        bool done = false;
+        if (DIM == 1)
+        {
+            if (generators == true)
+            {
+                number += mink_gen[0] - basis.bases()[0]->DeltaLmin();
+                blocksize = maxk_gen[0] - mink_gen[0] +1;
+            } else
+            {
+                number += mink_wav[0] - basis.bases()[0]->Nablamin();
+                blocksize = maxk_wav[0] - mink_wav[0] +1;
+            }
+    // add wavelets
+            for (unsigned int n = number; n < number + blocksize; ++n)
+            {
+                intersecting.push_back(basis.get_wavelet(n));
+            }
+            done = true;
+        }
+        int basf(0); // "blocks added so far" (on the current type e) via modulo calculus we can deduce which block we have to add next
+        while (!done)
+        {
+            if (cjd == 0)
+            {
+            // compute all jump_numbers that are needed for the currenttype
+                int temp_int(1);
+                for (int i = DIM-1; i >= 0; i--)
+                {
+                    if (current_type[i] == 0)
+                    {
+                        jump_before[i] = temp_int;
+                        jump_before[i] *= mink_gen[i] - basis.bases()[i]->DeltaLmin();
+                        jump_after[i] = temp_int;
+                        jump_after[i] *= basis.bases()[i]->DeltaRmax(j[i]) - maxk_gen[i];
+                        temp_int *= basis.bases()[i]->Deltasize(j[i]);
+                    }
+                    else
+                    {
+                        jump_before[i] = temp_int;
+                        jump_before[i] *= mink_wav[i] - basis.bases()[i]->Nablamin();
+                        jump_after[i] = temp_int;
+                        jump_after[i] *= basis.bases()[i]->Nablamax(j[i]) - maxk_wav[i];
+                        temp_int *= basis.bases()[i]->Nablasize(j[i]);
+                    }
+                }
+                for (int i = DIM-2; i >= 0; --i)
+                {
+                    jump_before[i] += jump_before[i+1];
+                    jump_after[i] += jump_after[i+1];
+                }
+                if (current_type[DIM-1] == 0)
+                {
+                    blocksize = maxk_gen[DIM-1] - mink_gen[DIM-1] +1;
+                } else
+                {
+                    blocksize = maxk_wav[DIM-1] - mink_wav[DIM-1] +1;
+                }
+                basf = 0; // no blocks with the current type were added so far
+            }
+            // "jump_before" for all dimensions (current_jump_dim, current_jump_dim+1,...,dim)
+            number += jump_before[cjd];
+            // add wavelets
+            for (unsigned int n = number; n < number + blocksize; ++n)
+            {
+                intersecting.push_back(basis.get_wavelet(n));
+            }
+            ++basf; // we have added a block!
+            number += blocksize;
+            // "increase k"
+            // "jump_after" all dimensions where we are at the last possible value for k (dim, dim-1, ..., current_jump_dim)
+            // have we arrived at the very last possible k? -> done = true
+            
+            // compute the dimension in which we want to increase k
+            bool last_k(false); // have we just added the last possible block for the type vector e?
+            int temp_i(basf);
+            
+            for (int i(DIM-1); i >= 0; --i)
+            {
+                if (i == 0) //we have already added the last possible block for this type, i.e., k[0] = maxk[0]
+                {
+                    last_k = true;
+                    cjd = 0;
+                    break;
+                }
+                int temp_count = (current_type[i-1] == 0)? (maxk_gen[i-1] - mink_gen[i-1] + 1) : (maxk_wav[i-1] - mink_wav[i-1] + 1); // blocksize in this dimension
+                if ((temp_i % temp_count) != 0)
+                {
+                    cjd = i; // == "we can increase k[cjd]"
+                    break;
+                }
+                temp_i = temp_i / temp_count;
+            }
+            // have we arrived at the very last possible k? -> increase type vector
+            if (last_k == true)
+            {
+                done = true;
+                if (generators == false) // == true => there is only one allowed type vector
+                {
+                    // "small loop"
+                    // try to increase currenttype
+                    // iterate over all combinations of generators/wavelets for all dimensions with currentlevel[i]=j0[i]
+                    // this looks like binary addition: (in 3 Dim:) gwg is followed by gww (g=0,w=1)
+                    for (int i(DIM-1); i >= 0; i--)
+                    {
+                        // find first position on level j0
+                        if (j[i] == basis.j0()[i])
+                        {
+                            if (current_type[i] == 1)
+                            {
+                                current_type[i]=0;
+                            } else
+                            {
+                                current_type[i]=1;
+                                done = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            // have we arrived at the type vector (1,1,...,1)? -> done = true
+            // done == true means that all components with currentlevel[i]=j0[i] were wavelets.
+            number += jump_after[cjd];
+        }
+#endif
+#if 0 //compatible with DSBasis -> produces unsorted output
+        
         if (generators) assert (j==basis.j0());
 
         typedef typename TensorBasis<IBASIS,DIM>::Index Index;
@@ -151,290 +359,28 @@ namespace WaveletTL
             }
             intersecting.push_back(Index(j, help_e, help_k, &basis));
         }
-#else
-     if (generators) assert (j==basis.j0());
-
-    typedef typename TensorBasis<IBASIS,DIM>::Index Index;
-    intersecting.clear();
- 
- //   if (! generators) {
-      FixedArray1D<int,DIM>
-      minkwavelet, maxkwavelet, minkgen, maxkgen;
-      typedef typename IBASIS::Index Index1D;
-      int minkkkk;
-      int maxkkkk;
-
-      // prepare all intersecting wavelets and generators in the i-th coordinate direction
-      for (unsigned int i = 0; i < DIM; i++) {
-        get_intersecting_wavelets_on_level(*(basis.bases()[i]),
-	    	Index1D(lambda.j()[i],
-		    lambda.e()[i],
-		    lambda.k()[i],
-		    basis.bases()[i]),
-		    j[i], true, minkkkk,maxkkkk);
-        minkgen[i] = minkkkk;
-        maxkgen[i] = maxkkkk;
-        if (!(generators))
-	  get_intersecting_wavelets_on_level(*basis.bases()[i],
-		      Index1D(lambda.j()[i],
-			      lambda.e()[i],
-			      lambda.k()[i],
-			      basis.bases()[i]),
-		      j[i], false, minkkkk,maxkkkk);
-        minkwavelet[i] = minkkkk;
-        maxkwavelet[i] = maxkkkk;
-       } // end for
-
-      unsigned int result = 0;
-      int deltaresult = 0;
-      int genfstlvl = 0;
-      bool gen = 0;
-      //const Array1D<Index>* full_collection = &basis.full_collection;
-
-      MultiIndex<int,DIM> type;
-      type[DIM-1] = 1;
-      int tmp = 1;
-      bool exit = 0;
-      bool nureinmal = 0;
-      bool doch = 0;
-
-      // determine how many wavelets there are on all the levels
-      // below the level of this index
-
-      MathTL::FixedArray1D<std::map<int, int>,DIM> sizes; // store number of basis elements. Generators on level j0 (0), wavelets on level j0 (1), j0+1 (2), ...
-                int uptothislevel(0); // number of basis function below the current level
-		int oncurrentlevel(1); // number of base elements on current level j
-		int range(0); // determines wether a new entry has to be computed in "sizes"
-		MultiIndex<int,DIM> currentlevel, j0(basis.j0());
-		MultiIndex<int,DIM> currenttype;		
-		for (unsigned int i=0; i < DIM; i++) {
-                    currentlevel[i]=j0[i];
-                    currenttype[i]=0;
-                    sizes[i][0] = basis.bases()[i]->Deltasize(j0[i]); // Number of generators on level j0
-                    sizes[i][1] = basis.bases()[i]->Nablasize(j0[i]); // Number of Wavelets on level j0
-		}
-		// iterate over all level up to j_ and add up number of basis functions up to the level
-                while(!exit){
-                exit=1;
-                doch = 0;
-
-                if (!generators)
-                while (true)
-		{
-                   // if(!nureinmal || doch){
-                      // compute number of functions on this level
-                      oncurrentlevel = 1;
-                      for (unsigned int i = 0; i < DIM; i++)
-                      {
-                          oncurrentlevel *= sizes[i][currentlevel[i]+currenttype[i]-j0[i]];
-                      }
-                      uptothislevel += oncurrentlevel;
-                //    }
-                    // increase index = (currentlevel,currenttype)
-                    // "small loop"
-                    // iterate over all combinations of generators/wavelets for all dimensions with currentlevel[i]=j0[i]
-                    // this looks like binary addition: (in 3 Dim:) gwg is followed by gww (g=0,w=1)
-                    bool done = true;
-                    for (int i(DIM-1); i >= 0; i--)
-                    {
-                        // find first position on level j0
-                        if (currentlevel[i] == j0[i])
-                        {
-                            if (currenttype[i] == 1)
-                            {
-                                currenttype[i]=0;
-                            } else
-                            {
-                                currenttype[i]=1;
-                                done = false;
-                    //            doch = 1;
-                                break;
-                            }
-                        }
-                    }
-                    // done == true means that all components with currentlevel[i]=j0[i] were wavelets.
-                    // the level j has to be increased.
-                    // iterate "big loop", meaning: "currentlevel++"
-
-                    if (done == true)
-                    {
-                    for (int i(DIM-1); i >= 0; i--)
-                    {
-                        if (i != 0)
-                        {
-                            if (currentlevel[i] != j0[i])
-                            {
-                                // increase left neighbor
-                                currentlevel[i-1]=currentlevel[i-1]+1;
-                                if (currentlevel[i-1]-j0[i-1] == range) sizes[i-1][range+1]=basis.bases()[i-1]->Nablasize(currentlevel[i-1]); // if needed compute and store new size information
-                                currenttype[i-1]=1;
-                                int temp = currentlevel[i]-j0[i];
-                                currentlevel[i]=j0[i];
-                                currenttype[i]=0;
-                                currentlevel[DIM-1]=j0[DIM-1]+temp-1;
-                                currenttype[DIM-1]= (temp == 1?0:1);
-  				break;
-                            }
-  			} else // i == 0. "big loop" arrived at the last index. We have to increase the level!
-  			{
-                            range = range +1;
-                            if (DIM == 1)
-                            {
-                                currenttype[i] = 1;
-                                currentlevel[i]=currentlevel[i]+1;
-                                sizes[0][range+1]=basis.bases()[0]->Nablasize(currentlevel[0]); // if needed compute and store new size information
-                            }
-                            else
-                            {
-                                //currentlevel[DIM-1]=j0[DIM-1]+currentlevel[0]-j0[0]+1; currenttype[DIM-1]=1;
-                                currentlevel[DIM-1]=j0[DIM-1]+range; currenttype[DIM-1]=1;
-				currenttype[0]=0; currentlevel[0]=j0[0];
-                                sizes[DIM-1][range+1]=basis.bases()[DIM-1]->Nablasize(currentlevel[DIM-1]); // if needed compute and store new size information
-                            }
-  			break; // unnoetig, da i==0 gilt.
-  			}
-                    } // end of "big loop"
-                    }  // end if done == true
-                    if (currentlevel == j || nureinmal) break; 
-		}  // end while
-                //berechnet wie viele Wavelets es gibt mit zu kleinem Indices
-
-      FixedArray1D<int,DIM> help1, help2;
-      
-      for(unsigned int i = 0; i<DIM; i++)
-         help1[i]=0;
-
-      // berechnet wie viele indices mit einem zu kleinem translationstyp es gibt, so dass sich die Wavelets nicht schneiden
-      unsigned int result2 = 0;
-      for (unsigned int i = 0; i < DIM; i++) {  // begin for1
-        int tmp = 1;
-
-        for (unsigned int l = i+1; l < DIM; l++) 
-	    tmp *= sizes[l][currentlevel[l]+currenttype[l]-j0[l]];;
-        
-
-        help2[i] = tmp;
-        if (currenttype[i] == 0) {
-	  if (minkgen[i] == (basis.bases()[i]->DeltaLmin()))
-	    continue;
-        }
-        else
-	  if (minkwavelet[i] == (basis.bases()[i]->Nablamin()))
-	    continue;
-      
-        
-        if (currenttype[i] == 0) {
-	tmp *= minkgen[i]-basis.bases()[i]->DeltaLmin();
-        }
-        else
-	  tmp *= minkwavelet[i]-basis.bases()[i]->Nablamin();
-
-        result2 += tmp;
-      }  // end for1
-
-      tmp = 0;
-
-      if (currenttype[DIM-1] == 0) {
-	tmp = maxkgen[DIM-1] - minkgen[DIM-1]+1;
-      }
-      else{
-	tmp = maxkwavelet[DIM-1] - minkwavelet[DIM-1]+1; 
-      }
-     
-      bool exit2 = 0;
-
-      while(!exit2){
-
-      // fügt die Indizes ein die sich überlappen
-      for (unsigned int i = uptothislevel + result2; i < uptothislevel + result2 + tmp; i++) {
-        const Index* ind = basis.get_wavelet(i);   //&((*full_collection)[i]);
-	intersecting.push_back(*ind);
-      }
-
-      for (unsigned int i = DIM-2; i >= 0; i--) {
-            if(currenttype[i]==0){
-	      if ( help1[i] < maxkgen[i]-minkgen[i]) {
-	        help1[i]++;
-                result2 = result2 + help2[i];
-               // result2 = result2 +4;
-                for (unsigned int j = i+1; j<=DIM-2;j++){
-                    if(currenttype[i] == 0){
-                       result2 = result2 - help2[j]*(maxkgen[j] - minkgen[j]+1);
-                    } 
-                    else
-                       result2 = result2 - help2[j]*(maxkwavelet[j] - minkwavelet[j]+1);
-                }
-                break;
-              }
-              else {
-                 help1[i]=0;
-                 exit2 = (i==0);
-                 break;
-              }
-            }
-            else {
-              if ( help1[i] < maxkwavelet[i] - minkwavelet[i]) {
-	        help1[i]++;
-                result2 = result2 + help2[i];
-                //result2 = result2 +5;
-                for (unsigned int j = i+1; j<=DIM-2;j++){
-                    if(currenttype[i] == 0){
-                       result2 = result2 - help2[j]*(maxkgen[j] - minkgen[j]+1);
-                    }
-                    else
-                       result2 = result2 - help2[j]*(maxkwavelet[j] - minkwavelet[j]+1);
-                }
-                break;
-              }
-              else {
-                 help1[i]=0;
-                 exit2 = (i==0);
-                 break;
-              }
-	    }
-	  } //end for
-      } //end while 2
-  
-
-     // berechnet den nächsten Typ 
-   if(!generators)
-     for (unsigned int i = DIM-1; i >= 0; i--) {
-	    if (currenttype[i] == 0 ){  // ()   //  && currentlevel[i] == j0[i] && 
-	     // currenttype[i]++;
-              nureinmal = 1;
-              exit = 0;
-	      break;
-	    }
-            else if (currentlevel[i] = j0[i]){
-              exit = (i==0);
-              if(exit)
-                break;
-            }
-	  } //end for
-       } // end while 1
-
 #endif
-//#else
-#if 0
-                // a brute force solution
-                typedef typename TensorBasis<IBASIS,DIM>::Support Support;
-                Support supp;
-                if (generators) {
-                    for (Index mu = first_generator<IBASIS,DIM>(&basis, j);; ++mu) {
-                        if (intersect_supports(basis, lambda, mu, supp))
-                            intersecting.push_back(mu);
-                        if (mu == last_generator<IBASIS,DIM>(&basis, j)) break;
-                    }
-                } else {
-                    for (Index mu = first_wavelet<IBASIS,DIM>(&basis, j);; ++mu) {
-                        if (intersect_supports(basis, lambda, mu, supp))
-                            intersecting.push_back(mu);
-                        if (mu == last_wavelet<IBASIS,DIM>(&basis, j)) break;
-                    }
-                }
-#endif
+        /*
+        // a brute force solution
+        typedef typename TensorBasis<IBASIS,DIM>::Support Support;
+        Support supp;
+        if (generators) {
+            for (Index mu = first_generator<IBASIS,DIM>(&basis, j);; ++mu) {
+                if (intersect_supports(basis, lambda, mu, supp))
+                    intersecting.push_back(mu);
+                if (mu == last_generator<IBASIS,DIM>(&basis, j)) break;
+            }
+        } else {
+            for (Index mu = first_wavelet<IBASIS,DIM>(&basis, j);; ++mu) {
+                if (intersect_supports(basis, lambda, mu, supp))
+                    intersecting.push_back(mu);
+                if (mu == last_wavelet<IBASIS,DIM>(&basis, j)) break;
+            }
+        }
+         */
     }
-
+    
+#if 0
     template <class IBASIS, unsigned int DIM>
     void intersecting_elements(const TensorBasis<IBASIS,DIM>& basis,
                                const typename TensorBasis<IBASIS,DIM>::Index& lambda,
@@ -449,21 +395,19 @@ namespace WaveletTL
         typedef typename IBASIS::Index Index1D;
         FixedArray1D<std::list<Index1D>,DIM> intersecting_1d_generators, intersecting_1d_wavelets;
         // prepare all intersecting wavelets and generators in the i-th coordinate direction
-
-        /*
-        typedef typename Index::type_type type_type;       
-        type_type min_type,max_type;
-        for (unsigned int i=0; i<DIM;i++)
+        // initialize the type-vector e
+        typename Index::type_type min_type,current_type;
+        for (unsigned int i=0;i<DIM;i++)
         {
-            min_type[i]= (basis.j0()[i] == j[i])? 0:1;
-            max_type[i]=1;
+            min_type[i]=(j[i]==basis.j0()[i]) ?0:1;
+            current_type[i]=min_type[i];
         }
-        */
+        
         for (unsigned int i = 0; i < DIM; i++)
         {
 
             //if (mintype[i]==0)
-            if (j[i] == basis.j0()[i])
+            if (min_type[i] == 0)
                 intersecting_wavelets(*basis.bases()[i],
                                       Index1D(lambda.j()[i],
                                               lambda.e()[i],
@@ -478,18 +422,8 @@ namespace WaveletTL
                                           basis.bases()[i]),
                                   j[i], false, intersecting_1d_wavelets[i]);
         }
+
         // generate all tensor product indices
-
-        // Iteration over the type-vector e
-
-        typename Index::type_type min_type,current_type;
-        for (unsigned int i=0;i<DIM;i++)
-        {
-            min_type[i]=(j[i]==basis.j0()[i]) ?0:1;
-            current_type[i]=min_type[i];
-        }
-
-        
         // --------------------------------------------
         // speichere zu jedem Typ was bisher berechnet wurde. key = nummer des typs
         typedef std::list<FixedArray1D<Index1D,DIM> > list_type;
@@ -528,10 +462,8 @@ namespace WaveletTL
             for (typename type_storage::const_iterator it(sofar.begin()), itend(sofar.end()); it != itend; ++it)
             {
                 // combine every element in "it" with every generator (if applicable) and wavelet in direction i
-
                 //list_type sofar1;
                 //sofar1.swap(indices1);
-
                 if (min_type[i] == 0)
                 { // add all possible generators
                     for (typename list_type::const_iterator itready((*it).begin()), itreadyend((*it).end()); itready != itreadyend; ++itready)
@@ -580,19 +512,20 @@ namespace WaveletTL
                 intersecting.push_back(Index(j, help_e, help_k, &basis));
             }
         }
-    };
+    }
+#endif
 
     template <class IBASIS, unsigned int DIM>
     bool intersect_singular_support(const TensorBasis<IBASIS,DIM>& basis,
                                     const typename TensorBasis<IBASIS,DIM>::Index& lambda,
                                     const typename TensorBasis<IBASIS,DIM>::Index& mu)
     {
-        typedef typename IBASIS::Index Index1D;
+        int j, k1, k2;
         for (unsigned int i = 0; i < DIM; i++) {
             if (!(intersect_singular_support(*basis.bases()[i],
-                                             Index1D(lambda.j()[i], lambda.e()[i], lambda.k()[i], basis.bases()[i]),
-                                             Index1D(mu.j()[i], mu.e()[i], mu.k()[i], basis.bases()[i]))
-                          ))
+                                             lambda.j()[i], lambda.e()[i], lambda.k()[i],
+                                             mu.j()[i], mu.e()[i], mu.k()[i],
+                                             j, k1, k2) ))
                 return false;
         }
         return true;

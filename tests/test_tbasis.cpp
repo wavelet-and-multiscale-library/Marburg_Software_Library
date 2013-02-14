@@ -133,6 +133,32 @@ int main()
     unsigned int maxlevelrange(4); // levels up to \|j0\|+maxlevelrange are tested
     unsigned int jmax(multi_degree(basis.j0())+maxlevelrange);
     
+    // Run tests with this basis:
+
+    basis.set_jmax(multi_degree(basis.j0())+maxlevelrange);
+    basisBas.set_jmax(multi_degree(basisBas.j0())+maxlevelrange);
+    
+    basesArray[0] = &bas10;
+    Basis basisBas2(basesArray);
+    basisBas2.set_jmax(multi_degree(basisBas2.j0())+maxlevelrange);
+    basesArray[0] = &bas01;
+    Basis basisBas3(basesArray);basisBas3.set_jmax(multi_degree(basisBas3.j0())+maxlevelrange);
+    basesArray[DIM-1] = &bas10;
+    Basis basisBas4(basesArray);basisBas4.set_jmax(multi_degree(basisBas4.j0())+maxlevelrange);
+    basesArray[DIM-1] = &bas01;
+    Basis basisBas5(basesArray);basisBas5.set_jmax(multi_degree(basisBas5.j0())+maxlevelrange);
+    basesArray[0] = &bas11; basesArray[DIM-1] = &bas01;
+    Basis basisBas6(basesArray);basisBas6.set_jmax(multi_degree(basisBas6.j0())+maxlevelrange);
+    
+    FixedArray1D<Basis*,6> TBasisArray;
+    TBasisArray[0] = &basisBas;
+    TBasisArray[1] = &basisBas2;
+    TBasisArray[2] = &basisBas3;
+    TBasisArray[3] = &basisBas4;
+    TBasisArray[4] = &basisBas5;
+    TBasisArray[5] = &basisBas6;
+    
+    
     cout << "Testing set_jmax" << endl;
     cout << "basisH ...";
     basisH.set_jmax(jmax);
@@ -610,6 +636,89 @@ int main()
     my_wavelet1.matlab_output(file1);
     file0.close();
     file1.close();
+#endif
+    
+#if 0
+    cout << "Check code for precomputation of first/last wavelets" << endl;
+    
+    MultiIndex<int,DIM> offset_it, level_it;
+    Index temp_ind1, temp_ind2;
+    for (unsigned int b=0; b< TBasisArray.size(); ++b)
+    {
+        cout << "Basis b = " << b << endl;
+        for (unsigned int i=0; i<DIM; ++i)
+            {
+                offset_it[i] = 0;
+            }
+        while(multi_degree(offset_it) <= maxlevelrange)
+        {
+            for (unsigned int i=0; i<DIM; ++i)
+                level_it[i] = offset_it[i] + TBasisArray[b]->j0()[i];
+            //cout << "level = " << level_it << endl;
+            temp_ind1 = TBasisArray[b]->first_wavelet( level_it );
+            temp_ind2 = TBasisArray[b]->first_wavelet2( level_it );
+            //cout << "j = " << level_it << "; first_wavelet" << temp_ind1 << "; first_wavelet2 = " << temp_ind2 << endl;
+            assert ( (temp_ind1 == temp_ind2) && (temp_ind1.number() == temp_ind2.number()) );
+            temp_ind1 = TBasisArray[b]->last_wavelet( level_it );
+            temp_ind2 = TBasisArray[b]->last_wavelet2( level_it );
+            //cout << "j = " << level_it << "; last_wavelet" << temp_ind1 << "; last_wavelet2 = " << temp_ind2 << endl;
+            assert ( (temp_ind1 == temp_ind2) && (temp_ind1.number() == temp_ind2.number()) );
+            ++offset_it;
+        }
+    }
+            
+    int repetitions(100);
+    clock_t tstart, tend;
+    double time1(0), time2(0);
+    tstart = clock();
+    for (unsigned int r = 0; r < repetitions; ++r)
+    {
+        for (unsigned int b=0; b< TBasisArray.size(); ++b)
+        {
+            for (unsigned int i=0; i<DIM; ++i)
+            {
+                offset_it[i] = 0;
+            }
+            while(multi_degree(offset_it) <= maxlevelrange)
+            {
+                for (unsigned int i=0; i<DIM; ++i)
+                {
+                    level_it[i] = offset_it[i] + TBasisArray[b]->j0()[i];
+                }
+                temp_ind1 = TBasisArray[b]->first_wavelet( level_it );
+                temp_ind2 = TBasisArray[b]->last_wavelet( level_it );
+                ++offset_it;
+            }
+        }
+    }
+    tend = clock();
+    time1 = (double)(tend-tstart)/CLOCKS_PER_SEC;
+    tstart = clock();
+    for (unsigned int r = 0; r < repetitions; ++r)
+    {
+        for (unsigned int b=0; b< TBasisArray.size(); ++b)
+        {
+            for (unsigned int i=0; i<DIM; ++i)
+            {
+                offset_it[i] = 0;
+            }
+            while(multi_degree(offset_it) <= maxlevelrange)
+            {
+                for (unsigned int i=0; i<DIM; ++i)
+                {
+                    level_it[i] = offset_it[i] + TBasisArray[b]->j0()[i];
+                }
+                temp_ind1 = TBasisArray[b]->first_wavelet2( level_it );
+                temp_ind2 = TBasisArray[b]->last_wavelet2( level_it );
+                ++offset_it;
+            }
+        }
+    }
+    tend = clock();
+    time2 = (double)(tend-tstart)/CLOCKS_PER_SEC;
+    
+    cout << "Repetitions = " << repetitions << "; old code " << time1 << "sec; new code " << time2 << "sec; time1/time2 = " << (time1/time2) << endl;
+    
 #endif
     return 0;
 }

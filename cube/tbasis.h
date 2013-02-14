@@ -9,7 +9,15 @@
 
 #ifndef _WAVELETTL_TBASIS_H_
 #define _WAVELETTL_TBASIS_H_
-#define _TBASIS_DEBUGLEVEL_  1
+#define _TBASIS_DEBUGLEVEL_  1 // more output, more tests
+
+/*
+ * replace online computation of first_ and last_ wavelet indices by precomputation
+ * This shifts work from the CPU to the Memory. 
+ * Its faster in simple tests. Not sure about Programs that use a lot of memory.
+ * 1 == precomputation is active
+ */
+#define _PRECOMPUTE_FIRSTLAST_WAVELETS 1 
 
 #include <list>
 
@@ -90,6 +98,9 @@ namespace WaveletTL
     	inline void set_jmax(const MultiIndex<int,DIM> jmax) {
       		jmax_ = multi_degree(jmax);
       		setup_full_collection();
+#if _PRECOMPUTE_FIRSTLAST_WAVELETS
+                precompute_firstlast_wavelets();
+#endif
     	}
 
         inline const unsigned int get_jmax() const {
@@ -99,6 +110,9 @@ namespace WaveletTL
         inline void set_jmax(const int jmax) {
       		jmax_ = jmax;
       		setup_full_collection();
+#if _PRECOMPUTE_FIRSTLAST_WAVELETS
+                precompute_firstlast_wavelets();
+#endif
     	}
     	//! Wavelet index class
     	typedef TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> > Index;
@@ -174,6 +188,15 @@ namespace WaveletTL
         //! Index of last wavelet on level j >= ||j0||_1
     	Index last_wavelet(const int levelsum) const;
 
+#if _PRECOMPUTE_FIRSTLAST_WAVELETS
+        /*
+         * Compute the indices of the first and last wavelet for all wavelets up to
+         * \|\lambda\| == jmax. Indices are stored. 
+         * first/last_wavelet routines do not compute indices any more
+         */
+        void precompute_firstlast_wavelets();
+#endif
+        
     	/*!
     	 * For a given function, compute all integrals w.r.t. the primal
     	 * or dual generators/wavelets \psi_\lambda with |\lambda|\le jmax.
@@ -234,6 +257,14 @@ namespace WaveletTL
     protected:
     	//! Collection of all wavelets between coarsest and finest level
     	Array1D<Index> full_collection;
+        
+        /*
+         *  Collection of first and last wavelet indices on all levels up to jmax
+         *  Precomputed for speedup
+         */
+#if _PRECOMPUTE_FIRSTLAST_WAVELETS
+        Array1D<Index> first_wavelets, last_wavelets;
+#endif
         
         //! Coarsest possible level j0
     	MultiIndex<int,DIM> j0_;

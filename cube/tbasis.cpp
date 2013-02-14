@@ -1,18 +1,5 @@
 // implementation for tbasis.h
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 namespace WaveletTL
 {
   	template <class IBASIS, unsigned int DIM>
@@ -117,7 +104,7 @@ namespace WaveletTL
 	    if (delete_pointers) {
 			for (typename list<IBASIS*>::const_iterator it(bases_infact.begin()); it != bases_infact.end(); ++it)
 				delete *it;
-    	}
+            }
   	}
 
 
@@ -125,18 +112,19 @@ namespace WaveletTL
   	void
   	TensorBasis<IBASIS,DIM>::support(const Index& lambda, Support& supp) const
   	{
-  		// PERFORMANCE?
-    	MultiIndex<int,DIM> temp_j=lambda.j(),temp_e=lambda.e();
-    	for (unsigned int i(0); i < DIM; i++) {
-    		supp.j[i] = temp_j[i]+temp_e[i];
-    		//supp.j[i] = lambda.j()[i] + lambda.e()[i];
-      		bases()[i]->support(typename IBASIS::Index(lambda.j()[i],
-													   lambda.e()[i],
-						 							   lambda.k()[i],
-						 							   bases()[i]),
-			  					supp.a[i],
-			  					supp.b[i]);
-    	}
+            // PERFORMANCE?
+            typename Index::level_type temp_j = lambda.j();
+            typename Index::type_type temp_e = lambda.e();
+            //MultiIndex<int,DIM> temp_j=lambda.j(),temp_e=lambda.e();
+            for (unsigned int i(0); i < DIM; i++) {
+                supp.j[i] = temp_j[i]+temp_e[i];
+                //supp.j[i] = lambda.j()[i] + lambda.e()[i];
+                bases()[i]->support(temp_j[i],
+                                    temp_e[i],
+                                    lambda.k()[i],
+                                    supp.a[i],
+                                    supp.b[i]);
+            }
   	}
   
         template <class IBASIS, unsigned int DIM>
@@ -195,6 +183,118 @@ namespace WaveletTL
             return TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(j0_, e, k, (res-1), this);
         }
 
+#if _PRECOMPUTE_FIRSTLAST_WAVELETS
+               
+        template <class IBASIS, unsigned int DIM>
+        typename TensorBasis<IBASIS,DIM>::Index
+        TensorBasis<IBASIS,DIM>::first_wavelet(const MultiIndex<int,DIM> j) const
+        {
+            MultiIndex<int,DIM> temp_mi(j);
+            for (unsigned int i=0; i<DIM; ++i)
+                temp_mi[i] -= j0_[i];
+            return first_wavelets[temp_mi.number()];
+        }
+        
+        template <class IBASIS, unsigned int DIM>
+        typename TensorBasis<IBASIS,DIM>::Index
+        TensorBasis<IBASIS,DIM>::first_wavelet(const int levelsum) const
+        {            
+            MultiIndex<int,DIM> temp_mi;
+            temp_mi[0] = levelsum - multi_degree(j0_);
+            return first_wavelets[temp_mi.number()];
+        }
+        
+        template <class IBASIS, unsigned int DIM>
+        typename TensorBasis<IBASIS,DIM>::Index
+        TensorBasis<IBASIS,DIM>::last_wavelet(const MultiIndex<int,DIM> j) const
+        {            
+            MultiIndex<int,DIM> temp_mi(j);
+            for (unsigned int i=0; i<DIM; ++i)
+                temp_mi[i] -= j0_[i];
+            return last_wavelets[temp_mi.number()];
+        }
+        
+        template <class IBASIS, unsigned int DIM>
+        typename TensorBasis<IBASIS,DIM>::Index
+        TensorBasis<IBASIS,DIM>::last_wavelet(const int levelsum) const
+        {
+            MultiIndex<int,DIM> temp_mi;
+            temp_mi[0] = levelsum - multi_degree(j0_);
+            return last_wavelets[temp_mi.number()];
+        }
+        
+                
+        template <class IBASIS, unsigned int DIM>
+        void
+        TensorBasis<IBASIS,DIM>::precompute_firstlast_wavelets()
+        {
+            MultiIndex<int,DIM> level_it;
+            level_it[0] = jmax_ - multi_degree(j0_);
+            const int numoflevels = level_it.number() + 1;
+            level_it[0] = 0;
+            first_wavelets.resize(numoflevels);
+            last_wavelets.resize(numoflevels);
+            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::level_type temp_j(j0_);
+            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::type_type temp_e;
+            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::translation_type temp_k;
+            
+            // first_level
+            unsigned int l = 0;
+            if (DIM == 1)
+            {
+                temp_e[0] = 1;
+                temp_k[0] = bases_[0]->Nablamin();
+            }
+            else
+            {
+                for (unsigned int i = 0; i < DIM-1; i++) 
+                {
+                    temp_e[i] = 0;
+                    temp_k[i] = bases_[i]->DeltaLmin();
+                }
+                temp_e[DIM-1] = 1;
+                temp_k[DIM-1] = bases_[DIM-1]->Nablamin();
+            }
+            first_wavelets[0] = TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(temp_j, temp_e, temp_k, this);
+            for (unsigned int i = 0; i < DIM; i++) 
+                {
+                    temp_e[i] = 1;
+                    temp_k[i] = bases_[i]->Nablamax(temp_j[i]);
+                }
+            last_wavelets[0] = TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(temp_j, temp_e, temp_k, this);
+            ++level_it;
+            ++l;
+            while (l < numoflevels)
+            {
+                //cout << "level_it == " << level_it << "; l == " << l <<  endl;
+                for (unsigned int i = 0; i < DIM; i++) 
+                {
+                    temp_j[i] = j0_[i] + level_it[i];
+                    if (level_it[i] == 0)
+                    {
+                        temp_e[i] = 0;
+                        temp_k[i] = bases_[i]->DeltaLmin();
+                    } else
+                    {
+                        temp_e[i] = 1;
+                        temp_k[i] = bases_[i]->Nablamin();
+                    }
+                }
+                //cout << "temp_j == " << temp_j << "; temp_e == " << temp_e << "; temp_k == " << temp_k << endl;
+                first_wavelets[l] = TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(temp_j, temp_e, temp_k, this);
+                for (unsigned int i = 0; i < DIM; i++) 
+                {
+                    temp_e[i] = 1;
+                    temp_k[i] = bases_[i]->Nablamax(temp_j[i]);
+                }
+                //cout << "temp_j == " << temp_j << "; temp_e == " << temp_e << "; temp_k == " << temp_k << endl;
+                last_wavelets[l] = TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(temp_j, temp_e, temp_k, this);
+                ++level_it;
+                ++l;
+            }
+        }
+#else
+        
         template <class IBASIS, unsigned int DIM>
         typename TensorBasis<IBASIS,DIM>::Index
         TensorBasis<IBASIS,DIM>::first_wavelet(const MultiIndex<int,DIM> j) const
@@ -289,7 +389,8 @@ namespace WaveletTL
             }
             return TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(j, e, k, this);
         }
-
+        
+#endif // if _PRECOMPUTE_FIRSTLAST_WAVELETS
 	template <class IBASIS, unsigned int DIM>
 	void
 	TensorBasis<IBASIS,DIM>::expand(const Function<DIM>* f,
@@ -342,7 +443,7 @@ namespace WaveletTL
             }
             
   	}
-        //PERFORMANCE: IBasis::Index(a,b,c,d) berechnet auch die Nummer des Wavelets. Dies ist hier doch garnicht noetig! -> neuer Hilfskonstruktor für die IBasis!
+        
 	template <class IBASIS, unsigned int DIM>
 	double
 	TensorBasis<IBASIS,DIM>::integrate(const Function<DIM>* f,
@@ -374,10 +475,9 @@ namespace WaveletTL
             // compute the point values of the integrand (where we use that it is a tensor product)
             for (unsigned int i = 0; i < DIM; i++)
                 bases()[i]->evaluate(0,
-                                     typename IBASIS::Index(lambda.j()[i],
-                                                            lambda.e()[i],
-                                                            lambda.k()[i],
-                                                            bases()[i]),
+                                     lambda.j()[i],
+                                     lambda.e()[i],
+                                     lambda.k()[i],
                                      gauss_points[i],
                                      v_values[i]);
             // iterate over all points and sum up the integral shares
@@ -408,7 +508,6 @@ namespace WaveletTL
             return r;
         }
 
-        //PERFORMANCE: Wie schon bei Integrate wird hier zu viel Aufwand bei den Indizes betrieben!
         template <class IBASIS, unsigned int DIM>
   	double
   	TensorBasis<IBASIS,DIM>::evaluate(const unsigned int derivative, 
@@ -418,7 +517,7 @@ namespace WaveletTL
             double value = 1.0;
             for (unsigned int i = 0; i < DIM; i++) // loop through components of the tensor product
                 value *= bases_[i]->evaluate(derivative,
-                                             typename IBASIS::Index(lambda.j()[i], lambda.e()[i], lambda.k()[i], bases_[i]),
+                                             lambda.j()[i], lambda.e()[i], lambda.k()[i],
                                              x[i]);
             return value;
         }
@@ -429,7 +528,7 @@ namespace WaveletTL
         TensorBasis<IBASIS,DIM>::setup_full_collection()
         {
             if (jmax_ < multi_degree(j0_) ) {
-                cout << "TensorBasis<IBASIS,DIM>::setup_full_collection(): th specified maximal level jmax is invalid. Specify a higher maximal level jmax_" << endl;
+                cout << "TensorBasis<IBASIS,DIM>::setup_full_collection(): the specified maximal level jmax is invalid. Specify a higher maximal level jmax_" << endl;
                 cout << "jmax_ = " << jmax_ << "; j0_ = " << j0_ << endl;
                 abort();
             }

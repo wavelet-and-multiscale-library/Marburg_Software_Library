@@ -38,11 +38,12 @@ int main()
     const unsigned int dim = 2;
 #else
 
-    const int d  = 3;
-    const int dT = 5;
-    const unsigned int dim = 3;
-    //typedef PBasis<d,dT> Basis1d;
-    typedef DSBasis<d,dT> Basis1d;
+    const int d  = 2;
+    const int dT = 2;
+    //const unsigned int dim = 2; const int levelrange(4);
+    const unsigned int dim = 3; const int levelrange(2);
+    typedef PBasis<d,dT> Basis1d;
+    //typedef DSBasis<d,dT> Basis1d;
     typedef TensorBasis<Basis1d,dim> Basis;
     typedef Basis::Index Index;
     typedef TensorIndex<Basis1d,dim>::level_type level_type;
@@ -64,25 +65,13 @@ int main()
     }
     //bc[0]=bc[1]=bc[2]=bc[3]=bc[4]=bc[5]=true;
     Basis basisBC(bc);
-    Basis1d bas00(false,false);
-    Basis1d bas10(true,false);
-    Basis1d bas01(false,true);
-    Basis1d bas11(true,true);
-    bas00.set_jmax(5);
-    bas10.set_jmax(5);
-    bas01.set_jmax(5);
-    bas11.set_jmax(5);
+    Basis1d bas00(false,false); Basis1d bas10(true,false); Basis1d bas01(false,true); Basis1d bas11(true,true);
+    bas00.set_jmax(5); bas10.set_jmax(5); bas01.set_jmax(5); bas11.set_jmax(5);
     FixedArray1D<Basis1d*,dim> basesArray;
     for(int i=0;i<dim;i++)
     {
         basesArray[i] = &bas00;
     }
-    //basesArray[0] = &bas10;
-    // // basesArray[0] = &bas01;
-    // //basesArray[dim-1] = &bas10;
-    basesArray[dim-1] = &bas01;
-    
-    Basis basisBas(basesArray);
     
 #endif
 
@@ -91,8 +80,27 @@ int main()
     //Basis basis(s);
     //Basis basis(bc);
     Basis basis(basesArray);
+    basis.set_jmax(multi_degree(basis.j0())+levelrange);
+    
+    Basis basisBas(basesArray); basisBas.set_jmax(multi_degree(basisBas.j0())+levelrange);
+    basesArray[0] = &bas10;
+    Basis basisBas2(basesArray);basisBas2.set_jmax(multi_degree(basisBas2.j0())+levelrange);
+    basesArray[0] = &bas01;
+    Basis basisBas3(basesArray);basisBas3.set_jmax(multi_degree(basisBas3.j0())+levelrange);
+    basesArray[dim-1] = &bas10;
+    Basis basisBas4(basesArray);basisBas4.set_jmax(multi_degree(basisBas4.j0())+levelrange);
+    basesArray[1] = &bas01;
+    Basis basisBas5(basesArray);basisBas5.set_jmax(multi_degree(basisBas5.j0())+levelrange);
+    basesArray[0] = &bas11; basesArray[dim-1] = &bas01;
+    Basis basisBas6(basesArray);basisBas6.set_jmax(multi_degree(basisBas6.j0())+levelrange);
 
-    basis.set_jmax(multi_degree(basis.j0())+4);
+    FixedArray1D<Basis*,6> TBasisArray;
+    TBasisArray[0] = &basisBas;
+    TBasisArray[1] = &basisBas2;
+    TBasisArray[2] = &basisBas3;
+    TBasisArray[3] = &basisBas4;
+    TBasisArray[4] = &basisBas5;
+    TBasisArray[5] = &basisBas6;
     
     cout << "1d bases bas11 in each dimension" << endl;
     cout << "DeltaLmin  = " << bas11.DeltaLmin()  << endl
@@ -151,6 +159,14 @@ int main()
     if (dim > 1) cout << " " << basis.bases()[1]->Nablasize(basis.j0()[1]+3);
     if (dim > 2) cout << " " << basis.bases()[2]->Nablasize(basis.j0()[2]+3);  cout << endl;
     
+#if 0
+    // some output for debugging
+    for (unsigned int i=0; i<TBasisArray[0]->degrees_of_freedom(); ++i)
+    {
+        cout << "i = " << i << "; lambda(i) = " << *TBasisArray[0]->get_wavelet(i) << endl;
+    }
+    abort();
+#endif
 #if 0
     cout << "Testing TensorIndex constructors" << endl;
     //TensorIndex(const TENSORBASIS* basis = 0);
@@ -226,7 +242,7 @@ int main()
             
 #endif
     
-#if 1
+#if 0
     cout << "Testing ++ and construction by number" << endl;    
 /*
     cout << "by number" << endl;
@@ -321,7 +337,7 @@ int main()
     }
 #endif
 
-#if 1
+#if 0
     const int step(1),maxnumber(500); // 1,4000 = 3 min
 
     bool error = false;
@@ -349,7 +365,7 @@ int main()
     cout << "skipping test of <= operator" << endl;
 #endif
     
-#if 1
+#if 0
     cout << "Testing first/last _ generator/wavelet" << endl;
     cout << "first_generator(&basis) = " << first_generator<Basis1d,dim,Basis>(&basis) << "; .number() = " << first_generator<Basis1d,dim,Basis>(&basis).number() << endl;
     cout << "last_generator(&basis) = "  << last_generator<Basis1d,dim,Basis>(&basis)  << "; .number() = " << last_generator<Basis1d,dim,Basis>(&basis).number() << endl;
@@ -502,5 +518,184 @@ int main()
     }
 #endif
     
+#if 0
+    cout << "Testing modified code for last_wavelet(basis,level)" << endl;
+    
+    for (unsigned int level=multi_degree(basis.j0()); level< multi_degree(basis.j0())+15;++level)
+    {
+        assert ((last_wavelet<Basis1d,dim,Basis>(&basis,level) == last_wavelet2<Basis1d,dim,Basis>(&basis,level))
+                && (last_wavelet<Basis1d,dim,Basis>(&basis,level).number() == last_wavelet2<Basis1d,dim,Basis>(&basis,level).number()));
+    }
+    
+    int repetitions(500), minlevel(multi_degree(basis.j0()));
+    int maxlevel = minlevel + 15;
+    
+    Index lambda_run2;
+    clock_t tstart, tend;
+    double time1(0), time2(0);
+    
+    tstart = clock();
+    for (unsigned int r=0; r < repetitions; ++r)
+    {
+        for (unsigned int level=minlevel; level< maxlevel;++level)
+        {
+            lambda_run2 = last_wavelet<Basis1d,dim,Basis>(&basis,level);
+        }
+    }
+    tend = clock();
+    time1 = (double)(tend-tstart)/CLOCKS_PER_SEC;
+    
+    tstart = clock();
+    for (unsigned int r=0; r < repetitions; ++r)
+    {
+        for (unsigned int level=minlevel; level< maxlevel;++level)
+        {
+            lambda_run2 = last_wavelet2<Basis1d,dim,Basis>(&basis,level);
+        }
+    }
+    tend = clock();
+    time2 = (double)(tend-tstart)/CLOCKS_PER_SEC;
+    
+    cout << "Repetitions = " << repetitions << "; minlevel = " << minlevel << "; maxlevel = " << maxlevel << "; "
+            << "last_wavelet1 " << time1 << "sec; last_wavelet2 " << time2 << "sec" << endl;
+#endif
+    
+    
+#if 0
+    cout << "Testing modified code for TensorIndex(num,basis)" << endl;
+    
+    int minnum(0);
+    //int maxnum(100);
+    int maxnum(basis.degrees_of_freedom());
+    
+    for (unsigned int b=0; b< TBasisArray.size(); ++b)
+    //int b=1;
+    {
+        for (unsigned int n = minnum; n < maxnum;++n)
+        {
+            Index temp_ind1(n,TBasisArray[b]);
+            Index temp_ind2(0,n,TBasisArray[b]);
+            /*
+            cout << "N = " << n << "; temp_ind1 = " << temp_ind1 << "; .number() = " << temp_ind1.number() << "; "
+                    "temp_ind2 = " << temp_ind2 << "; .number() = " << temp_ind2.number();
+
+            if (!((temp_ind1 == temp_ind2) && (temp_ind1.number() == temp_ind2.number())))
+                cout << " (Problem)";
+            cout << endl;
+             * */
+            assert ((temp_ind1 == temp_ind2) && (temp_ind1.number() == temp_ind2.number()));
+        }
+    }
+    
+    int repetitions2(000), minnum2(0), maxnum2(basis.degrees_of_freedom());
+
+    Index lambda_run3;
+    clock_t tstart2, tend2;
+    double time3(0), time4(0);
+    
+    tstart2 = clock();
+    for (unsigned int r=0; r < repetitions2; ++r)
+    {
+        for (unsigned int n=minnum2; n < maxnum2;++n)
+        {
+            Index lambda_run3(n,&basis);
+        }
+    }
+    tend2 = clock();
+    time3 = (double)(tend2-tstart2)/CLOCKS_PER_SEC;
+    
+    tstart2 = clock();
+    for (unsigned int r=0; r < repetitions2; ++r)
+    {
+        for (unsigned int n=minnum2; n < maxnum2;++n)
+        {
+            Index lambda_run3(0,n,&basis);
+        }
+    }
+    tend2 = clock();
+    time4 = (double)(tend2-tstart2)/CLOCKS_PER_SEC;
+    
+    cout << "Repetitions = " << repetitions2 << "; min lambdanum = " << minnum2 << "; max lambdanum = " << maxnum2 << "; "
+            << "new code " << time3 << "sec; old code " << time4 << "sec" << endl;
+#endif
+    
+#if 0
+    cout << "Testing modified code for TensorIndex(j,e,k)" << endl;
+    
+    Index temp_ind1;
+    //for (unsigned int b=0; b<TBasisArray.size(); ++b)
+    for (unsigned int b=3; b<4; ++b)
+    {
+        cout << "Basis b = " << b << endl;
+        for (unsigned int  i=0; i<TBasisArray[b]->degrees_of_freedom(); ++i)
+        //for (unsigned int  i=6656; i<6670; ++i)
+        //for (unsigned int  i=0; i<2000; ++i)
+        {
+            //cout << "j0 = " << TBasisArray[b]->j0() << "; bases()[d]->j0() = [" << TBasisArray[b]->bases()[0]->j0();
+            //for (unsigned int d = 1; d < dim; ++d)
+            //    cout << ", " << TBasisArray[b]->bases()[d]->j0();
+            //cout << "]" << endl;
+            temp_ind1 = TBasisArray[b]->get_wavelet(i);
+            //cout << "i = " << i << "; temp_ind1 = " << temp_ind1 << endl;
+            Index temp_ind2(temp_ind1.j(), temp_ind1.e(), temp_ind1.k(),TBasisArray[b]);
+            //cout << "temp_ind2 = " << temp_ind2 << endl;
+            Index temp_ind3(temp_ind1.j(), temp_ind1.e(), temp_ind1.k(),TBasisArray[b],0);
+            if (   ( !( (temp_ind1 == temp_ind2) && (temp_ind2 == temp_ind3)) )
+                || (! (((temp_ind1.number() == i) && (temp_ind2.number() == i)) && (temp_ind3.number() == i)) )
+               )
+            {
+                cout << "i = " << i << "; temp_ind1 = " << temp_ind1 << "; .number() = " << temp_ind1.number() << "; temp_ind2 = " << temp_ind2 << "; .number() = " << temp_ind2.number() << "; temp_ind3 = " << temp_ind3 << "; .number() = " << temp_ind3.number() << endl;
+                abort();
+            }
+            //cout << "i = " << i << "; temp_ind1 = " << temp_ind1 << "; .number() = " << temp_ind1.number() << "; temp_ind2 = " << temp_ind2 << "; .number() = " << temp_ind2.number() << "; temp_ind3 = " << temp_ind3 << "; .number() = " << temp_ind3.number() << endl;
+            assert ( (temp_ind1 == temp_ind2) && (temp_ind2 == temp_ind3));
+            assert (((temp_ind1.number() == i) && (temp_ind2.number() == i)) && (temp_ind3.number() == i));
+        }
+    }
+
+    cout << "no differences detected" << endl;
+    cout << "checking speedup" << endl;
+    int repetitions(10);
+    
+    Index lambda_run2;
+    clock_t tstart, tend;
+    double time1(0), time2(0);
+    
+    cout << "testing old code" << endl;
+    tstart = clock();
+    for (unsigned int r=0; r < repetitions; ++r)
+    {
+        for (unsigned int b=0; b<TBasisArray.size(); ++b)
+        {
+            //cout << "Basis b = " << b << endl;
+            for (unsigned int  i=0; i<TBasisArray[b]->degrees_of_freedom(); ++i)
+            {
+                temp_ind1 = TBasisArray[b]->get_wavelet(i);
+                Index temp_ind2(temp_ind1.j(), temp_ind1.e(), temp_ind1.k(),TBasisArray[b]);
+            }
+        }
+    }
+    tend = clock();
+    time1 = (double)(tend-tstart)/CLOCKS_PER_SEC;
+    
+    cout << "testing new code" << endl;
+    tstart = clock();
+    for (unsigned int r=0; r < repetitions; ++r)
+    {
+        for (unsigned int b=0; b<TBasisArray.size(); ++b)
+        {
+            //cout << "Basis b = " << b << endl;
+            for (unsigned int  i=0; i<TBasisArray[b]->degrees_of_freedom(); ++i)
+            {
+                temp_ind1 = TBasisArray[b]->get_wavelet(i);
+                Index temp_ind2(temp_ind1.j(), temp_ind1.e(), temp_ind1.k(),TBasisArray[b],0);
+            }
+        }
+    }
+    tend = clock();
+    time2 = (double)(tend-tstart)/CLOCKS_PER_SEC;
+    
+    cout << "Repetitions = " << repetitions << "; old code " << time1 << "sec; new code " << time2 << "sec" << "; time1/time2 = " << (time1/time2) << endl;
+#endif
     return 0;
 }

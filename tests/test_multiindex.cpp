@@ -257,7 +257,8 @@ int main()
           << "indexmapping(" << lambda << ") = " << endl;
   for (map<MIndex3,int>::const_iterator it(ind_map.begin()); it!=ind_map.end(); ++it)
   {
-      cout << it->first << ", " << it->second << endl;
+      MIndex3 temp_ind (it->first);
+      cout << it->first << ", " << it->second << "; .number() = " << temp_ind.number() << endl;
       if (it==ind_map.end()) break;
   }
     

@@ -147,4 +147,43 @@ int dyadic_modulo (const int x, const int j)
 	  : (x+(((-x)>>j)<<j)) ? x+((((-x)>>j)+1)<<j) : 0);
 }
 
+
+/*
+ * computes floor(log2(n)), where n is a positive integer
+ * Tested for int n, unsigned int n.
+ * 2.5 times faster than log2(double)
+ * 
+ * Be careful with negative arguments and automatic conversion to unsigned int.
+ * 
+ * There might be more clever alternatives for this function!
+ * 
+ * Assumption: 
+ * sizeof(int) = sizeof(unsigned int) = 4
+ * 
+ * Code borrowed from:
+ * Bit Twiddling Hacks - http://graphics.stanford.edu/~seander/bithacks.html#IntegerLogLookup
+ * By Sean Eron Anderson
+ * seander@cs.stanford.edu 
+ * (with additions from Andrew Shapira) 
+ */
+const unsigned int log2Bits[] = {0x2, 0xC, 0xF0, 0xFF00, 0xFFFF0000}; //, 0xFFFFFFFF00000000}; // uncomment for 64 bit integers
+const unsigned int log2Sizes[] = {1, 2, 4, 8, 16}; //, 32}; // uncomment for 64 bit integers
+
+inline unsigned int log2(const unsigned int n)
+{
+    unsigned int v;  // 32-bit value to find the log2 of 
+    v = n;
+    register unsigned int r = 0; // result of log2(v) will go here
+    int i;
+    for (i = 4; i >= 0; i--) // unroll for speed...
+    {
+        if (v & log2Bits[i])
+        {
+            v >>= log2Sizes[i];
+            r |= log2Sizes[i];
+        } 
+    }
+    return r;
+}
+
 #endif

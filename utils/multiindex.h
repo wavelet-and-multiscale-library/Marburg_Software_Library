@@ -93,7 +93,7 @@ namespace MathTL
     };
 
     /*
-     * Return Number of MulitiIndex.
+     * Return Number of MulitiIndex with respect to the ordering "<"
      * Counting begins at 0.
      */
     unsigned long int number();

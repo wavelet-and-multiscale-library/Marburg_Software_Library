@@ -50,7 +50,7 @@ namespace MathTL
   template <class C, class I>
   C InfiniteVector<C,I>::get_coefficient(const I& index) const
   {
-    typename std::map<I,C>::const_iterator it(lower_bound(index));
+    typename std::map<I,C>::const_iterator it(this->lower_bound(index));
     if (it != std::map<I,C>::end())
       {
 	if (!std::map<I,C>::key_comp()(index, it->first))
@@ -63,7 +63,7 @@ namespace MathTL
   C& InfiniteVector<C,I>::operator [] (const I& index)
   {
     // efficient add-or-update, cf. Meyers, Effective STL
-    typename std::map<I,C>::iterator it(lower_bound(index));
+    typename std::map<I,C>::iterator it(this->lower_bound(index));
     if (it != std::map<I,C>::end() &&
 	!std::map<I,C>::key_comp()(index, it->first))
       return it->second;
@@ -75,7 +75,7 @@ namespace MathTL
   template <class C, class I>
   void InfiniteVector<C,I>::set_coefficient(const I& index, const C value)
   {
-    typename std::map<I,C>::iterator it(lower_bound(index));
+    typename std::map<I,C>::iterator it(this->lower_bound(index));
     if (it != std::map<I,C>::end() &&
 	!std::map<I,C>::key_comp()(index,it->first)) {
       it->second = value;
@@ -90,7 +90,7 @@ namespace MathTL
   void InfiniteVector<C,I>::add_coefficient(const I& index, const C increment)
   {
     // efficient add-or-update, cf. Meyers, Effective STL
-    typename std::map<I,C>::iterator it(lower_bound(index));
+    typename std::map<I,C>::iterator it(this->lower_bound(index));
     if (it != std::map<I,C>::end() &&
 	!std::map<I,C>::key_comp()(index, it->first)) {
       // we already have a nontrivial coefficient

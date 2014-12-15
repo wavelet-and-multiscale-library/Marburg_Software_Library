@@ -39,7 +39,7 @@ namespace MathTL
   const C SymmetricMatrix<C>::operator () (const size_type row,
 					   const size_type column) const
   {
-    return LowerTriangularMatrix<C>::entries_[triangle_index(row,column,
+    return LowerTriangularMatrix<C>::entries_[LowerTriangularMatrix<C>::triangle_index(row,column,
 							     LowerTriangularMatrix<C>::rowdim_,
 							     LowerTriangularMatrix<C>::coldim_)];
   }
@@ -57,7 +57,7 @@ namespace MathTL
   C& SymmetricMatrix<C>::operator () (const size_type row,
 				      const size_type column)
   {
-    return LowerTriangularMatrix<C>::entries_[triangle_index(row,column,
+    return LowerTriangularMatrix<C>::entries_[LowerTriangularMatrix<C>::triangle_index(row,column,
 							     LowerTriangularMatrix<C>::rowdim_,
 							     LowerTriangularMatrix<C>::coldim_)];    
   }

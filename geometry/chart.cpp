@@ -222,7 +222,7 @@ namespace MathTL
     return strs.str();
   }
 //################### LinearBezierMapping ###################
-  const string LinearBezierMapping::className = "LinearBezierMapping";
+  //const string LinearBezierMapping::className = "LinearBezierMapping";
 
   inline
   LinearBezierMapping::LinearBezierMapping ()
@@ -656,11 +656,12 @@ namespace MathTL
     return true;;
   }
   
+  inline
   const string LinearBezierMapping::to_string() const
   {   
     std::stringstream strs;
  
-    strs << className << ":" << endl
+    strs << "LinearBezierMapping" << ":" << endl
 	 << "b_00=" << b_00 << endl
 	 << "b_01=" << b_01 << endl
 	 << "b_10=" << b_10 << endl

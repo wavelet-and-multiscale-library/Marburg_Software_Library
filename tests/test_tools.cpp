@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <cmath>
 #include <iostream>
 #include <utils/tiny_tools.h>

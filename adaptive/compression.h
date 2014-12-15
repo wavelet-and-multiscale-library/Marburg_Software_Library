@@ -10,10 +10,14 @@
 #ifndef _WAVELETTL_COMPRESSION_H
 #define _WAVELETTL_COMPRESSION_H
 
-#include <algebra/infinite_vector.h>
+namespace MathTL {
+template <class C>
+class Vector;
+}
 
+//#include <algebra/infinite_vector.h>
 
-using std::set;
+//using std::set;
 
 namespace WaveletTL
 {
@@ -62,6 +66,9 @@ namespace WaveletTL
     [DSS09] Dijkema/Schwab/Stevenson:
             An Adaptive Wavelet Method for Solving High-Dimensional Elliptic PDES
   */
+
+  using MathTL::Vector;
+
   template <class PROBLEM>
   void add_compressed_column(const PROBLEM& P,
 			     const double factor,

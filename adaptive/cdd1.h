@@ -38,6 +38,8 @@ namespace WaveletTL
            Adaptive Wavelet Methods II - Beyond the Elliptic Case
   */
 
+  using MathTL::InfiniteVector;
+
   /*!
     the routine ALGORITHMc from [BB+]
    */
@@ -87,7 +89,7 @@ namespace WaveletTL
   /*!
     the parameters chosen or computed in the INIT phase of ALGORITHMc
    */
-  typedef struct {
+  typedef struct CDD1Parameters {
     double c1, c2;
     double kappa;
     double gamma;

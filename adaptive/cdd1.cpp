@@ -304,11 +304,19 @@ namespace WaveletTL
     cout << "* NGROW: current residual norm is " << residual_norm << endl;
 #endif
 
-    if (residual_norm > 1000) {
-      cout << "* NGROW: residual norm is greater than 1000, some debugging output:" << endl;
-      cout << "u_bar=" << endl << u_bar << endl;
-      cout << "xi1=" << xi1 << ", xi2=" << xi2 << endl;
-      abort();
+    if (residual_norm > 1000)
+    {
+        cout << "* NGROW: residual norm is greater than 1000, some debugging output:" << endl;
+        cout << "u_bar=" << endl << u_bar << endl;
+        cout << "xi1=" << xi1 << ", xi2=" << xi2 << endl;
+#ifdef ENABLE_NGROW_THROW_EXCEPTION
+        std::stringstream ss;
+        ss << "* NGROW: residual norm is greater than 1000!\nSome debugging output:\n"
+           << "u_bar=\n" << u_bar << "\nxi1=" << xi1 << ", xi2=" << xi2 << std::endl;
+        throw std::runtime_error(ss.str());
+#else
+        abort();
+#endif
     }
 
     InfiniteVector<double,Index> pr;

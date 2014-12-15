@@ -72,7 +72,8 @@ EXEOBJF = \
  test_splines.o test_bezier.o test_up_function.o\
  test_one_step_scheme.o test_rosenbrock.o\
  test_differences.o\
- test_multiindex.o test_multi_lp.o\
+# test_multiindex.o\
+ test_multi_lp.o\
  test_sturm_bvp.o test_bvp.o\
  test_chart.o test_atlas.o\
  test_corner_singularity.o\

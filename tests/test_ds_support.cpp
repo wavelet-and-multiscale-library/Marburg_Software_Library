@@ -27,7 +27,7 @@ int main()
 //   lambda = last_wavelet(&basis, basis.j0()+1);
 
   cout << "get_intersecting_wavelets_on_level does NOT work!!" << endl;
-  cout << "The following code was moved from test_tbasis_support and may not compile correctly"
+  cout << "The following code was moved from test_tbasis_support and may not compile correctly" << endl;
   abort();
 #if 0
     /*

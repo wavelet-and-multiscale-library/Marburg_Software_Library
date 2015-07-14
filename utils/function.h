@@ -107,6 +107,7 @@ namespace MathTL
   {
   public:
     ConstantFunction(const Vector<VALUE>& value);
+    ConstantFunction(const VALUE& value);
     virtual ~ConstantFunction();
     VALUE value(const Point<DIM,VALUE>& p,
 		const unsigned int component = 0) const;

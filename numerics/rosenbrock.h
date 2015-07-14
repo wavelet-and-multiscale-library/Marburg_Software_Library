@@ -90,7 +90,7 @@ namespace MathTL
     /*!
       increment function u^{(m)} -> u^{(m+1)}
     */
-    void increment(const IVP& ivp,
+    void increment(IVP& ivp,
 		   const double t_m, const VECTOR& u_m,
 		   const double tau,
 		   VECTOR& u_mplus1) const;
@@ -99,7 +99,7 @@ namespace MathTL
       increment function u^{(m)} -> u^{(m+1)},
       also returns a local error estimator
     */
-    void increment(const IVP& ivp,
+    void increment(IVP& ivp,
 		   const double t_m, const VECTOR& u_m,
 		   const double tau,
 		   VECTOR& u_mplus1,

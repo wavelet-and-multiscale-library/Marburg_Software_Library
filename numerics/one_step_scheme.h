@@ -34,7 +34,7 @@ namespace MathTL
     the overall spatial error introduced by the evaluations of the
     right-hand side).
   */
-  template <class VECTOR>
+  template <class VECTOR, class IVP = AbstractIVP<VECTOR> >
   class OneStepScheme
   {
   public:
@@ -47,7 +47,7 @@ namespace MathTL
       increment function u^{(m)} -> u^{(m+1)},
       also returns a local error estimator
     */
-    virtual void increment(const AbstractIVP<VECTOR>* ivp,
+    virtual void increment(IVP* ivp,
 			   const double t_m, const VECTOR& u_m,
 			   const double tau,
 			   VECTOR& u_mplus1,
@@ -80,9 +80,9 @@ namespace MathTL
     Both absolute and relative tolerances can be specified, a step is accepted when
       ||y-yhat|| <= atol + max(||u_m||,||u_{m+1}||) * rtol
   */
-  template <class VECTOR>
-  void solve_IVP(const AbstractIVP<VECTOR>* ivp,
-		 const OneStepScheme<VECTOR>* scheme,
+  template <class VECTOR, class IVP>
+  void solve_IVP(IVP* ivp,
+		 OneStepScheme<VECTOR, IVP>* scheme,
 		 const double T,
 		 const double atol,
 		 const double rtol,

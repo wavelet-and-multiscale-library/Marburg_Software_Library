@@ -27,15 +27,15 @@ namespace MathTL
     Essentially, a ROW-method is a W-method with T = F_v(t_m,u^{(m)}) and
     g = F_t(t_m,u^{(m)}, see w_method.h for details.
   */
-  template <class VECTOR>
+  template <class VECTOR, class IVP = AbstractIVP<VECTOR> >
   class ROWMethod
-    : public WMethod<VECTOR>, public WMethodStageEquationHelper<VECTOR>
+    : public WMethod<VECTOR, IVP>, public WMethodStageEquationHelper<VECTOR, IVP>
   {
   public:
     /*!
       constructor for one of the builtin ROW-methods, cf. w_method.h for details
     */
-    ROWMethod(const typename WMethod<VECTOR>::Method method);
+    ROWMethod(const typename WMethod<VECTOR, IVP>::Method method);
 
     /*!
       virtual destructor
@@ -46,7 +46,7 @@ namespace MathTL
       (adaptive) solver for one of the systems (alpha*I-T)x=y,
       inherited from WMethodStageEquationHelper
     */
-    void solve_W_stage_equation(const AbstractIVP<VECTOR>* ivp,
+    void solve_W_stage_equation(IVP* ivp,
 				const double t,
 				const VECTOR& v,
 				const double alpha,
@@ -62,7 +62,7 @@ namespace MathTL
       Approximation of the temporal derivative f_t(t_m,u^{(m)}),
       inherited from WMethodStageEquationHelper
     */
-    void approximate_ft(const AbstractIVP<VECTOR>* ivp,
+    void approximate_ft(IVP* ivp,
 			const double t,
 			const VECTOR& v,
 			const double tolerance,

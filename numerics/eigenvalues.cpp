@@ -4,9 +4,12 @@
 #include <algebra/atra.h>
 #include <algebra/shifted_matrix.h>
 #include <algebra/symmetric_matrix.h>
+#include <algebra/matrix.h>
 #include <numerics/iteratsolv.h>
 #include <utils/tiny_tools.h>
 #include <utils/random.h>
+#include <utils/array1d.h>
+
 
 namespace MathTL
 {

@@ -9,8 +9,9 @@ using std::endl;
 
 namespace MathTL
 {
-  template <class VECTOR>
-  WMethodStageEquationHelper<VECTOR>::~WMethodStageEquationHelper()
+  //template <class VECTOR>
+    template <class VECTOR, class IVP>
+  WMethodStageEquationHelper<VECTOR, IVP>::~WMethodStageEquationHelper()
   {
   }
 
@@ -19,9 +20,9 @@ namespace MathTL
   {
   }
 
-  template <class VECTOR>
-  WMethod<VECTOR>::WMethod(const Method method,
-			   const WMethodStageEquationHelper<VECTOR>* s)
+  template <class VECTOR, class IVP>
+  WMethod<VECTOR, IVP>::WMethod(const Method method,
+			   const WMethodStageEquationHelper<VECTOR,IVP>* s)
     : stage_equation_helper(s), preprocessor(0)
   {
     LowerTriangularMatrix<double> Alpha, Gamma;
@@ -474,9 +475,9 @@ namespace MathTL
       }
   }
   
-  template <class VECTOR>
+  template <class VECTOR, class IVP>
   void
-  WMethod<VECTOR>::transform_coefficients(const LowerTriangularMatrix<double>& Alpha,
+  WMethod<VECTOR, IVP>::transform_coefficients(const LowerTriangularMatrix<double>& Alpha,
 					  const LowerTriangularMatrix<double>& Gamma,
 					  const Vector<double>& b,
 					  const Vector<double>& bhat,
@@ -530,9 +531,9 @@ namespace MathTL
 //     check_order_conditions(Alpha, Gamma, b, bhat, false);
   }
 
-  template <class VECTOR>
+  template <class VECTOR, class IVP>
   void
-  WMethod<VECTOR>::check_order_conditions(const LowerTriangularMatrix<double>& Alpha,
+  WMethod<VECTOR, IVP>::check_order_conditions(const LowerTriangularMatrix<double>& Alpha,
 					  const LowerTriangularMatrix<double>& Gamma,
 					  const Vector<double>& b,
 					  const Vector<double>& bhat,
@@ -613,9 +614,9 @@ namespace MathTL
     cout << help-1./6.+gamma-gamma*gamma << endl;
   }
 
-  template <class VECTOR>
+  template <class VECTOR, class IVP>
   void
-  WMethod<VECTOR>::increment(const AbstractIVP<VECTOR>* ivp,
+  WMethod<VECTOR, IVP>::increment(IVP* ivp,
 			     const double t_m, const VECTOR& u_m,
 			     const double tau,
 			     VECTOR& u_mplus1,

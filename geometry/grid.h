@@ -148,6 +148,12 @@ namespace MathTL
     */
     void octave_output(std::ostream& os) const;
     
+    /*!
+      reading access to the grid points
+    */
+    inline const Matrix<double>& gridx() const { return gridx_; };
+    inline const Matrix<double>& gridy() const { return gridy_; };
+    
   protected:
     /*!
       internal storage for the grid points

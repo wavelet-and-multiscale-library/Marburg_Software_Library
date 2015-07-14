@@ -8,14 +8,14 @@ using std::endl;
 
 namespace MathTL
 {
-  template <class VECTOR>
-  OneStepScheme<VECTOR>::~OneStepScheme()
+  template <class VECTOR, class IVP>
+  OneStepScheme<VECTOR, IVP>::~OneStepScheme()
   {
   }
 
-  template <class VECTOR>
-  void solve_IVP(const AbstractIVP<VECTOR>* ivp,
-		 const OneStepScheme<VECTOR>* scheme,
+  template <class VECTOR, class IVP>
+  void solve_IVP(IVP* ivp,
+		 OneStepScheme<VECTOR, IVP>* scheme,
 		 const double T,
 		 const double atol,
 		 const double rtol,

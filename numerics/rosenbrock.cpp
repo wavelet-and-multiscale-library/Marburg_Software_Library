@@ -69,7 +69,7 @@ namespace MathTL
   }
 
   template <class VECTOR, class IVP>
-  void Rosenbrock<VECTOR, IVP>::increment(const IVP& ivp,
+  void Rosenbrock<VECTOR, IVP>::increment(IVP& ivp,
 					  const double t_m, const VECTOR& u_m,
 					  const double tau,
 					  VECTOR& u_mplus1) const

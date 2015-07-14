@@ -341,6 +341,28 @@ namespace MathTL
       for (unsigned int n(0); n < values_.column_dimension(); n++)
 	values_(m,n) += alpha * s.values_(m,n); // Matrix does not (yet) have an add() method
   }
+  
+  template <class C>
+  void
+  SampledMapping<2,C>::add(const Matrix<C>& mat)
+  {
+    assert(values_.row_dimension() == mat.row_dimension()
+	   && values_.column_dimension() == mat.column_dimension());
+    for (unsigned int m(0); m < values_.row_dimension(); m++)
+      for (unsigned int n(0); n < values_.column_dimension(); n++)
+	values_(m,n) += mat(m,n); // Matrix does not (yet) have an add() method
+  }
+  
+  template <class C>
+  void
+  SampledMapping<2,C>::add(const C alpha, const Matrix<C>& mat)
+  {
+    assert(values_.row_dimension() == mat.row_dimension()
+	   && values_.column_dimension() == mat.column_dimension());
+    for (unsigned int m(0); m < values_.row_dimension(); m++)
+      for (unsigned int n(0); n < values_.column_dimension(); n++)
+	values_(m,n) += alpha * mat(m,n); // Matrix does not (yet) have an add() method
+  }
 
   template <class C>
   void

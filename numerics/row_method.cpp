@@ -2,9 +2,9 @@
 
 namespace MathTL
 {
-  template <class VECTOR>
-  ROWMethod<VECTOR>::ROWMethod(const typename WMethod<VECTOR>::Method method)
-    : WMethod<VECTOR>(method, this)
+  template <class VECTOR, class IVP>
+  ROWMethod<VECTOR, IVP>::ROWMethod(const typename WMethod<VECTOR, IVP>::Method method)
+    : WMethod<VECTOR, IVP>(method, this)
   {
   }
   

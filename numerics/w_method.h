@@ -32,7 +32,7 @@ namespace MathTL
     For example, the class ROWMethod uses a special WMethodStageEquationHelper
     class, see row_method.h for details.
   */
-  template <class VECTOR>
+  template <class VECTOR, class IVP = AbstractIVP<VECTOR> >
   class WMethodStageEquationHelper
   {
   public:
@@ -44,7 +44,7 @@ namespace MathTL
       implicitly this also specifies the approximation T to the
       Jacobian f_v(t,v)
     */
-    virtual void solve_W_stage_equation(const AbstractIVP<VECTOR>* ivp,
+    virtual void solve_W_stage_equation(IVP* ivp,
 					const double t,
 					const VECTOR& v,
 					const double alpha,
@@ -58,7 +58,7 @@ namespace MathTL
       In practice, g will often be chosen as zero, for stability reasons
       (reducing the overall consistency order of the W-method).
     */
-    virtual void approximate_ft(const AbstractIVP<VECTOR>* ivp,
+    virtual void approximate_ft(IVP* ivp,
 				const double t,
 				const VECTOR& v,
 				const double tolerance,
@@ -82,7 +82,7 @@ namespace MathTL
 
     //! preprocess the vector w (up to the current tolerance)
     virtual void preprocess_rhs_share(VECTOR& wbeforeandafter,
-				      const double tolerance) const
+				      const double tolerance)
     { // default behaviour: do nothing
     }
   };
@@ -135,9 +135,9 @@ namespace MathTL
 
       uhat^{(m+1)} = u^{(m)} + \tau * \sum_{i=1}^s bhat_i*k_i
   */
-  template <class VECTOR>
+  template <class VECTOR, class IVP = AbstractIVP<VECTOR> >
   class WMethod
-    : public OneStepScheme<VECTOR>
+    : public OneStepScheme<VECTOR, IVP>
   {
   public:
     /*!
@@ -193,7 +193,7 @@ namespace MathTL
       constructor from some builtin methods and a given stage equation solver
     */
     WMethod(const Method method,
-	    const WMethodStageEquationHelper<VECTOR>* stage_equation_solver);
+	    const WMethodStageEquationHelper<VECTOR, IVP>* stage_equation_solver);
     
     /*!
       virtual destructor
@@ -204,7 +204,7 @@ namespace MathTL
       increment function u^{(m)} -> u^{(m+1)},
       also returns a local error estimator
     */
-    void increment(const AbstractIVP<VECTOR>* ivp,
+    void increment(IVP* ivp,
 		   const double t_m,
 		   const VECTOR& u_m,
 		   const double tau,
@@ -270,7 +270,7 @@ namespace MathTL
 
   protected:
     //! instance of the stage equation helper
-    const WMethodStageEquationHelper<VECTOR>* stage_equation_helper;
+    const WMethodStageEquationHelper<VECTOR, IVP>* stage_equation_helper;
 
     //! instance of the RHS preprocessor
     WMethodPreprocessRHSHelper<VECTOR>* preprocessor;

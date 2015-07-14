@@ -346,6 +346,16 @@ namespace MathTL
       of two sampled mappings over the same grid
     */
     void add(const C alpha, const SampledMapping<2,C>& s);
+    
+    /*!
+     * add a matrix to the values_ of *this
+    */
+    void add(const Matrix<C>& mat);
+    
+    /*!
+     add alpha*mat to values_
+    */
+    void add(const C alpha, const Matrix<C>& mat);
 
     /*!
       pointwise in-place multiplication *this *= alpha

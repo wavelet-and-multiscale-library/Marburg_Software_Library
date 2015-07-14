@@ -91,6 +91,7 @@ namespace MathTL
       evaluate the right--hand side f at (t,v),
       up to some tolerance (w.r.t. the ||.||_2 norm)
     */
+    
     virtual void evaluate_f(const double t,
 			    const VECTOR& v,
 			    const double tolerance,
@@ -122,6 +123,62 @@ namespace MathTL
 					  const double tolerancs,
 					  VECTOR& result) const = 0;
   };
+  
+  /*
+   * same as AbstractIVP, but with non const functions.
+   * This allows the use of cached evaluations
+   */
+  template <class VECTOR>
+  class AbstractCachedIVP
+  {
+  public:
+    /*!
+      initial value
+    */
+    VECTOR u0;
+
+    /*!
+      virtual destructor
+    */
+    virtual ~AbstractCachedIVP();
+
+    /*!
+      evaluate the right--hand side f at (t,v),
+      up to some tolerance (w.r.t. the ||.||_2 norm)
+    */
+    
+    virtual void evaluate_f(const double t,
+			    const VECTOR& v,
+			    const double tolerance,
+			    VECTOR& result);
+
+    /*!
+      evaluate the derivative f_t at (t,v),
+      up to some tolerance (w.r.t. the ||.||_2 norm)
+    */
+    virtual void evaluate_ft(const double t,
+			     const VECTOR& v,
+			     const double tolerance,
+			     VECTOR& result);
+
+    /*!
+      Up to a given tolerance (w.r.t. the ||.||_2 norm), solve the special
+      linear system 
+      
+        (alpha*I-J)x = y,
+      
+      where J = \partial_v f(t,v) is the (exact) Jacobian of f.
+      This routine will primarily be used to solve the stage equations of
+      an ROW-method.
+    */
+    virtual void solve_ROW_stage_equation(const double t,
+					  const VECTOR& v,
+					  const double alpha,
+					  const VECTOR& y,
+					  const double tolerancs,
+					  VECTOR& result);
+  };
+  
 }
 
 #include <numerics/ivp.cpp>

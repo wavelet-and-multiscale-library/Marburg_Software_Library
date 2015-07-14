@@ -11,4 +11,9 @@ namespace MathTL
   AbstractIVP<VECTOR>::~AbstractIVP()
   {
   }
+  
+  template <class VECTOR>
+  AbstractCachedIVP<VECTOR>::~AbstractCachedIVP()
+  {
+  }
 }

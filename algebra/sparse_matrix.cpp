@@ -502,7 +502,7 @@ namespace MathTL
                                   ++count;
                                   ind2 = M.indices_[row][it2];
                                   helpi[count] = ind2;
-                                  helpd[count-1] = M.entries_[row][it2-1];
+                                  helpd[count-1] = s*M.entries_[row][it2-1];
                                   ++it2;
                               }
                               done = true;
@@ -541,7 +541,7 @@ namespace MathTL
                                   ++count;
                                   ind2 = M.indices_[row][it2];
                                   helpi[count] = ind2;
-                                  helpd[count-1] = M.entries_[row][it2-1];
+                                  helpd[count-1] = s*M.entries_[row][it2-1];
                                   ++it2;
                               }
                               done = true;
@@ -556,7 +556,7 @@ namespace MathTL
                       {
                           ++count;
                           helpi[count] = ind2;
-                          helpd[count-1] = M.entries_[row][it2-1];
+                          helpd[count-1] = s*M.entries_[row][it2-1];
                           //cout << " ind1 == " << ind1 << " > ind2 == " << ind2 << " helpd[" << count-1 << "] = " << helpd[count-1] << endl;
                           if (it2 == M.indices_[row][0])
                           {
@@ -602,7 +602,7 @@ namespace MathTL
                   for (size_type j(0); j < indices_[row][0];++j)
                   {
                       indices_[row][j+1] = M.indices_[row][j+1];
-                      entries_[row][j] = M.entries_[row][j];
+                      entries_[row][j] = s*M.entries_[row][j];
                   }
               }
               // else // nothing to do
@@ -882,7 +882,7 @@ namespace MathTL
 	s.setf(std::ios::scientific, std::ios::fixed);
 	s.precision(15);
 	 
-	s << Matrixname << "=sparse(" << (r+1) << "," << (c+1) << ");" << endl;
+	s << Matrixname << "=sparse(" << (r) << "," << (c) << ");" << endl;
 	
 	for (i=rowstart; i<=rowend; i++) {
 	  if (indices_[i]) {

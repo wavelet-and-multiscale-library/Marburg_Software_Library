@@ -65,6 +65,13 @@ namespace MathTL
   
   template <unsigned int DIM, class VALUE>
   inline
+  ConstantFunction<DIM, VALUE>::ConstantFunction(const VALUE& value)
+    : Function<DIM, VALUE>((unsigned int)1), c(value)
+  {
+  }
+  
+  template <unsigned int DIM, class VALUE>
+  inline
   ConstantFunction<DIM, VALUE>::~ConstantFunction()
   {
   } 

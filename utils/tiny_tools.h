@@ -186,4 +186,97 @@ inline unsigned int log2(const unsigned int n)
     return r;
 }
 
+
+
+/* For sorting arrays, e.g., multiindices, by their values from position 
+ * 
+ * i to DIM-1
+ * 
+ * T = const Array1D < MultiIndex<int,DIM> >  == j0
+ * Assumption: f < DIM, otherwise nothing will be compared!
+ */
+template<class T> 
+struct index_cmp
+{
+    index_cmp(const T arr, unsigned int f) : arr(arr), from(f) {}
+    bool operator()(const size_t a, const size_t b) const
+    {
+        //return arr[a] > arr[b];
+        // compare the MultiIndex stored in arr from f to the end lexicographically
+        for (unsigned int i=from; i < arr[a].size(); ++i)
+        {
+            if (arr[a][i] > arr[b][i])
+            {
+                return false;
+            }
+            else if (arr[a][i] < arr[b][i])
+            {
+                return true;
+            }
+        }
+        return (a<b);
+    }
+    const T arr;
+    const unsigned int from;
+};
+/*
+ * Similar, but the last entry of arr is ignored. This is relevant for the first level j_ with a certain norm \|j_\|. 
+ * All but the last entry of such a level are equal to j0()[patch][i]. 
+ * However, the last entry is of some value independent of j0()[patch][DIM-1]
+ */
+template<class T> 
+struct index_cmp_ignoreLastEntry
+{
+    index_cmp_ignoreLastEntry(const T arr, unsigned int f) : arr(arr), from(f) {}
+    bool operator()(const size_t a, const size_t b) const
+    {
+        //return arr[a] > arr[b];
+        // compare the MultiIndex stored in arr from f to the end lexicographically
+        for (unsigned int i=from; i < (arr[a].size()-1); ++i)
+        {
+            if (arr[a][i] > arr[b][i])
+            {
+                return false;
+            }
+            else if (arr[a][i] < arr[b][i])
+            {
+                return true;
+            }
+        }
+        return (a<b);
+    }
+    const T arr;
+    const unsigned int from;
+};
+/* For sorting arrays, e.g., multiindices, by their values from position 
+ * 
+ * DIM-1 to 0 (reversed order in the dimensions)
+ * 
+ * (ordering w.r.t. entry in the array, i.e., a and b, is not reversed)
+ * 
+ * T = const Array1D < MultiIndex<int,DIM>>  == j0
+ */
+template<class T> 
+struct index_cmp_reversed
+{
+    index_cmp_reversed(const T arr) : arr(arr) {}
+    bool operator()(const size_t a, const size_t b) const
+    {
+        //return arr[a] > arr[b];
+        // compare the MultiIndex stored in arr from f to the end lexicographically
+        for (int i=arr[a].size()-1; i >= 0; i--)
+        {
+            if (arr[a][i] > arr[b][i])
+            {
+                return false;
+            }
+            else if (arr[a][i] < arr[b][i])
+            {
+                return true;
+            }
+        }
+        return (a<b);
+    }
+    const T arr;
+};
 #endif

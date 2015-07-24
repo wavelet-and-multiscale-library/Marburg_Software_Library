@@ -3,7 +3,7 @@
 // +--------------------------------------------------------------------+
 // | This file is part of WaveletTL - the Wavelet Template Library      |
 // |                                                                    |
-// | Copyright (c) 2002-2009                                            |
+// | Copyright (c) 2002-2015                                            |
 // | Thorsten Raasch, Manuel Werner, Ulrich Friedrich                   |
 // +--------------------------------------------------------------------+
 
@@ -14,12 +14,8 @@
 #include <numerics/ivp.h>
 #include <numerics/w_method.h>
 #include <utils/function.h>
-
-//#include <galerkin/gramian.h>
 #include <galerkin/cached_tproblem.h>
-
 #include <galerkin/infinite_preconditioner.h>
-//#include <adaptive/apply.h>
 #include <adaptive/apply_tensor.h>
 #include <adaptive/cdd1.h>
 

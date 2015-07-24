@@ -54,7 +54,7 @@ namespace WaveletTL
         {
             if (g_full[i] != 0.)
             {
-                g.set_coefficient(basis().full_collection[i], g_full[i]);
+                g.set_coefficient(basis().get_wavelet(i), g_full[i]);
             }
         }
         g.scale(this, -1);
@@ -115,7 +115,7 @@ namespace WaveletTL
         result.clear();
         InfiniteVector<double,Index> w(v), temp;
         w.scale(elliptic, 1); // w = Dv
-        APPLY(*elliptic, w, tolerance, temp, jmax_, tensor_simple); // yields -D^{-1}AD^{-1}w
+        APPLY_TENSOR(*elliptic, w, tolerance, temp, jmax_, tensor_simple); // yields -D^{-1}AD^{-1}w
         temp.scale(elliptic, 1);
         temp.scale(-1.0); // result = -D(-D^{-1}AD^{-1}Dv) = Av
         //     // multiply with inverse primal gramian (i.e., switch from dual to primal basis)

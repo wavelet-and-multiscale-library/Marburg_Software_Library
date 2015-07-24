@@ -49,7 +49,7 @@ namespace WaveletTL
     is modeled in the template parameter class ELLIPTIC_EQ.
     
   */
-  template <class ELLIPTIC_EQ, class GRAMIAN>
+  template <class ELLIPTIC_EQ, class GRAMIAN, class IVP = AbstractIVP<Vector<double> >
   class ROWStageEquation
     : public FullyDiagonalEnergyNormPreconditioner<typename ELLIPTIC_EQ::Index>
   {
@@ -60,7 +60,7 @@ namespace WaveletTL
       a (time-dependent) driving term f and its derivative f'.
       If ft and/or f are omitted (or set to zero), we assume that f and/or ft=0.
     */
-    ROWStageEquation(const ROWMethod<Vector<double> >* row_method,
+    ROWStageEquation(const ROWMethod<Vector<double>, IVP >* row_method,
 		     const ELLIPTIC_EQ* elliptic,
 		     const GRAMIAN* gramian,
 		     MathTL::Function<ELLIPTIC_EQ::space_dimension,double>* f = 0,
@@ -199,7 +199,7 @@ namespace WaveletTL
 		   const std::list<InfiniteVector<double,Index> >& Dalpha_uj,
 		   const int jmax = 10);
 
-    const ROWMethod<Vector<double> >* row_method_;
+    const ROWMethod<Vector<double>, IVP >* row_method_;
     const ELLIPTIC_EQ* elliptic_;
     const GRAMIAN* gramian_;
     

@@ -198,6 +198,8 @@ namespace WaveletTL
          */
         void RHS(const double eta,
                  InfiniteVector<double,typename WaveletBasis::Index>& coeffs) const;
+        void RHS(const double eta,
+                 InfiniteVector<double, int>& coeffs) const;
 
         /*
          * compute (or estimate) ||F||_2

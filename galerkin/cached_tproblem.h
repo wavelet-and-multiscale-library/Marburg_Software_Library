@@ -11,13 +11,19 @@
 #define	_WAVELETTL_CACHED_TPROBLEM_H
 
 #include <map>
-#include <algebra/infinite_vector.h>
+#include <cmath>
 #include <adaptive/compression.h>
+#include <algebra/infinite_vector.h>
+#include <algebra/vector.h>
+#include <galerkin/galerkin_utils.h>
 #include <galerkin/infinite_preconditioner.h>
+#include <numerics/eigenvalues.h>
+
 
 using MathTL::InfiniteVector;
 using std::max;
 using std::min;
+using std::set;
 
 namespace WaveletTL
 {
@@ -140,7 +146,7 @@ namespace WaveletTL
          * estimate the compression constants alpha_k in
          * ||A-A_k|| <= alpha_k * 2^{-rho*k}
          *
-         * we assume they are independent of k and hadcode some results from the theory.
+         * we assume they are independent of k and hardcode some results from the theory.
          *
          * rho tends to 1/2 for tbasis
          *
@@ -190,6 +196,12 @@ namespace WaveletTL
         {
             problem->RHS(eta, coeffs);
         }
+        
+        inline void RHS(const double eta,
+                 InfiniteVector<double, int>& coeffs) const
+        {
+            problem->RHS(eta, coeffs);
+        }
 
         /*
          * applys the galerkin system matrix corresponding to the given index set
@@ -219,7 +231,7 @@ namespace WaveletTL
         inline double F_norm() const { return problem->F_norm(); }
 
         /*
-         * Called by add_compresed_column
+         * Called by APPLY // add_compressed_column
          * w += factor * (stiffness matrix entries in column lambda with ||nu-lambda|| <= range && ||nu|| <= maxlevel)
          * Hack? : works with non dynamic vector w of size = degrees_of_freedom
          *
@@ -251,7 +263,7 @@ namespace WaveletTL
          */
 
         /*
-         * Called by add_ball. Recursivly all levels with |J-|lambda||<=range are added.
+         * Called by add_ball. Recursively all levels with |J-|lambda||<=range are added.
          * All dimensions are visited with the current dimension denoted by current_dim.
          * Indices with the highest recursion depth (level = DIM) are added to w
          */
@@ -340,7 +352,7 @@ namespace WaveletTL
          * (if zero, CachedProblem will compute the estimates)
          * the stiffness matrix is given by matrix.
          * preconditioned specifies, whether the entries of matrix are preconditioned.
-         * To accieve that setup_stiffness_matrix and setup_rhs still work correctly, f() is modified.
+         * To achieve that setup_stiffness_matrix and setup_rhs still work correctly, f() is modified.
          */
         CompressedProblemFromMatrix(PROBLEM* P,
                                     const SparseMatrix<double>* matrix,
@@ -425,7 +437,7 @@ namespace WaveletTL
          * estimate the compression constants alpha_k in
          * ||A-A_k|| <= alpha_k * 2^{-rho*k}
          *
-         * we assume they are independent of k and hadcode some results from the theory.
+         * we assume they are independent of k and hardcode some results from the theory.
          *
          * rho tends to 1/2 for tbasis
          *

@@ -53,10 +53,10 @@ namespace WaveletTL
         fnorm_sqr = 0;
         for (unsigned int i = 0; i< basis_.degrees_of_freedom();i++)
         {
-            const double coeff = f(basis_.full_collection[i])/D(basis_.full_collection[i]);
+            const double coeff = f(basis_.get_wavelet(i)) / D(basis_.get_wavelet(i));
             if (fabs(coeff)>1e-15)
             {
-                fhelp.set_coefficient(basis_.full_collection[i], coeff);
+                fhelp.set_coefficient(basis_.get_wavelet(i), coeff);
                 fnorm_sqr += coeff*coeff;
             }
         }
@@ -356,6 +356,24 @@ namespace WaveletTL
         {
             coarsenorm += it->second * it->second;
             coeffs.set_coefficient(it->first, it->second);
+            ++it;
+        }
+    }
+    
+    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
+    void
+    TensorEquation<IBASIS,DIM,TENSORBASIS>::RHS(const double eta,
+                                                InfiniteVector<double, int>& coeffs) const
+    {
+        coeffs.clear();
+        double coarsenorm(0);
+        double bound(fnorm_sqr - eta*eta);
+        typedef typename WaveletBasis::Index Index;
+        typename Array1D<std::pair<Index, double> >::const_iterator it(fcoeffs.begin());
+        while (it != fcoeffs.end() && coarsenorm < bound)
+        {
+            coarsenorm += it->second * it->second;
+            coeffs.set_coefficient(it->first.number(), it->second);
             ++it;
         }
     }

@@ -12,13 +12,24 @@
 
 #include <algebra/infinite_vector.h>
 #include <adaptive/compression.h>
+#include <utils/array1d.h>
+#include <utils/tiny_tools.h>
+
+#include <iostream>
+#include <list>
+#include <map>
+#include <limits> // to use -inf as a literal
+#include <algorithm>
+
+using MathTL::Array1D;
+
 
 namespace WaveletTL
 {
     /*!
     These APPLY routines are tailored for the case that the
     underlying wavelet basis has a vector valued minimal level j, e.g.
-    bases of tensor structure type as modeled by tbasis.
+    bases of tensor structure type as modeled by tbasis/qtbasis.
 
     Apply the stiffness matrix A of an infinite-dimensional equation
 
@@ -57,19 +68,42 @@ namespace WaveletTL
 
   /*
    * Implmentation of APPLY from [DSS]
+   * 
+   * The coeffs of the vector v are sorted into buckets according to their absolute value. 
+   * A different approximation of A is applied to each bucket.
+   * The optimal approximation matrix for each bucket is computed directly. 
+   * The formula for L2-orthogonal wavelets from [DSS] is used. 
+   * This may lead to an overestimate and thus too high computational effort.
+   * 
+   * In a previous version of the code the optimal effort was computed by a costly minimization problem (-> commented code)
    */
   template <class PROBLEM>
-  void APPLY(const PROBLEM& P,
+  void APPLY_TENSOR(PROBLEM& P,
           const InfiniteVector<double, typename PROBLEM::Index>& v,
           const double eta,
           InfiniteVector<double, typename PROBLEM::Index>& w,
           const int jmax = 99,
           const CompressionStrategy strategy = tensor_simple,
           const bool preconditioning = true);
+  
+  template <class PROBLEM>
+  void APPLY_TENSOR(PROBLEM& P,
+          const InfiniteVector<double, int>& v,
+          const double eta,
+          InfiniteVector<double, int>& w,
+          const int jmax = 99,
+          const CompressionStrategy strategy = tensor_simple,
+          const bool preconditioning = true);
 
-  /*
-   * Same as above but with an initial guess for the solution of the
-   * minimization problem given by the computation of the optimal compression.
+#if 0
+  /* discontinued code:
+   * 
+   * In order to compute the approximation of Av, v is sorted into buckets (v_[p]).
+   * The entries in each bucket are applied to different approximations A^Jp of A.
+   * Better approximations A^jp are more costly. Therefore the optimal compression/benefit ratio
+   * has to be computed. cost((j_p))-> min; approximation_error <= eta
+   * The minimiation problem may use an inital guess for (j_p)
+   * 
    * There is commented code for a restriction to levels given by a levelvector
    */
   template <class PROBLEM>
@@ -82,6 +116,7 @@ namespace WaveletTL
           const int jmax = 99,
           const CompressionStrategy strategy = tensor_simple,
           const bool preconditioning = true);
+#endif
 }
 
 #include <adaptive/apply_tensor.cpp>

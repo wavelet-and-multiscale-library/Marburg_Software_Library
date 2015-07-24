@@ -42,6 +42,11 @@ namespace WaveletTL
   void CDD2_SOLVE(const PROBLEM& P, const double nu, const double epsilon,
 		         InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
                          const unsigned int maxlevel = 12);
+  /* same with int instead of Index */
+  template <class PROBLEM>
+  void CDD2_SOLVE(const PROBLEM& P, const double nu, const double epsilon,
+		         InfiniteVector<double, int>& u_epsilon,
+                         const unsigned int maxlevel = 12);
  
 }
 

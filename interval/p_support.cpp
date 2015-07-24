@@ -839,4 +839,111 @@ namespace WaveletTL
         }
     }
     
+    template <int d, int dT>
+    void get_intersecting_wavelets_on_level(const PBasis<d,dT>& basis,
+                                            const int lamj, const int lame, const int k1_lambda, const int k2_lambda,
+                                            const int j, 
+                                            const bool generators,
+                                            int& mink, 
+                                            int& maxk)
+    {
+        typedef typename PBasis<d,dT>::Index Index;
+        typedef typename PBasis<d,dT>::Support Support;
+        // compute support of \psi_\lambda
+        const int j_lambda = lamj+lame;
+        //int k1_lambda, k2_lambda;
+        //support(basis, lamj, lame, lamk, k1_lambda, k2_lambda);
+        if (generators) 
+        {
+            // the leftmost generator on the level j, s.th. its support intersects [a,b], fulfills
+            //   2^{-j}(k+ell2) > a  but  2^{-j}(k-1+ell2) <= a,
+            // so that ...
+            
+            // smallest n such that 2^{-j}n <= 2^{-j_lambda}k1_lambda < 2^{-j}(n+1)
+            mink = (j < j_lambda) ? (k1_lambda / (1<<(j_lambda-j)))
+                                  : (k1_lambda << (j-j_lambda));
+            // for generators: n = k-1+ell2<d>()
+            mink += 1 - (d - d/2); 
+            mink = std::max(basis.DeltaLmin(), mink);
+            // the rightmost generator on the level j, s.th. its support intersects [a,b], fulfills
+            //   2^{-j}(k+ell1) < b  but  2^{-j}(k+1+ell1) >= b,
+            // so that ...
+            maxk = (j < j_lambda) ? (k2_lambda / (1<<(j_lambda-j)) + ( ((k2_lambda % (1<<(j_lambda-j))) == 0)? 0 : 1) )
+                                  : (k2_lambda << (j-j_lambda));
+            maxk += d/2 -1;
+            //assert (maxk == (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda-(-d/2))-1);
+            maxk = std::min(basis.DeltaRmax(j), maxk);
+            //old code
+            //maxk = std::min(basis.DeltaRmax(j), (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda-(-d/2))-1);
+        }
+        else 
+        {
+            // find first inner wavelet that intersects
+            // smallest n such that 2^{-j}n <= 2^{-j_lambda}k1_lambda < 2^{-j}(n+1)
+            int n = (j < j_lambda) ? (k1_lambda / (1<<(j_lambda-j)))
+                                   : (k1_lambda << (j-j_lambda));
+            mink = d+dT-2; //used as temporary storage
+            if (n > mink)
+            {
+                // no left boundary wavelets intersect
+                mink = n - mink/2; // = n+1-(d+dt)/2;
+            }
+            else
+            {
+                if (n < mink)
+                {
+                    // all left boundary wavelets intersect
+                    mink = 0;
+                }
+                else
+                {
+                    // left boundary wavelets may intersect 
+                    if (basis.get_s0() == d-1)
+                    {
+                        // left boundary wavelets have the same support as the leftmost inner wavelet
+                        mink = 0;
+                    }
+                    else
+                    {
+                        // left boundary wavelets do not intersect
+                        mink /= 2;
+                        // newmink = n+1-(d+dt)/2;  // with n = newmink
+                    }
+                }
+            }
+            // find last inner wavelet that intersects
+            // biggest n such that 2^{-j}n < 2^{-j_lambda}k2_lambda <= 2^{-j}(n+1)
+            n = (j < j_lambda) ? (k2_lambda / (1<<(j_lambda-j)) + (((k2_lambda % (1<<j_lambda-j)) == 0)?0:1) ) -1 
+                               : (k2_lambda << (j-j_lambda)) -1;
+            maxk = (1<<j) -(d+dT)+1; // used as temporary value;
+            if (n < maxk)
+            {
+                // no right boundary wavelets intersect
+                maxk = n-1+(d+dT)/2;
+            }
+            else
+            {
+                if (n > maxk)
+                {
+                    // all right boundary wavelets intersect
+                    maxk = (1<<j)-1;
+                }
+                else
+                {
+                    // right boundary wavelets may intersect 
+                    if (basis.get_s1() == d-1)
+                    {
+                        // right boundary wavelets have the same support as the rightmost inner wavelet
+                        maxk = (1<<j)-1;
+                    }
+                    else
+                    {
+                        // right boundary wavelets do not intersect
+                        maxk = n-1+(d+dT)/2; // with n = newmaxk, but formula doesnt get cheaper without introducing another temp variable
+                    }
+                }
+            }
+        }
+    }
+    
 }

@@ -142,7 +142,7 @@ namespace WaveletTL
      *     k2 = 2*(d+dT)-4; 
      * It is precise for d=dt=2 and BC s=0 and d=dt 33 or 35 with BC 0 or 1,
      * so not only for free BC.
-     * I have not testet other combinations of d/dt and BCs 
+     * I have not tested other combinations of d/dt and BCs 
      * 
     */
     void support(const Index& lambda, int& k1, int& k2) const;

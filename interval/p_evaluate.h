@@ -87,10 +87,6 @@ namespace WaveletTL
 		const typename PBasis<d,dT>::Index& lambda,
 		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);
   template <int d, int dT>
-  void evaluate2(const PBasis<d,dT>& basis,
-		const typename PBasis<d,dT>::Index& lambda,
-		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);
-  template <int d, int dT>
   void evaluate(const PBasis<d,dT>& basis,
 		const int j, const int e, const int k,
 		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);

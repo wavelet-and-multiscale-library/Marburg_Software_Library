@@ -155,6 +155,20 @@ PERFORMANCE:
                                           const bool generators,
                                           int& mink, 
                                           int& maxk);
+  /*
+   * In this variant k1_lambda, k2_lambda correspond to the output of
+   * support(lambda_basis, lamj, lame, lamk, k1_lambda, k2_lambda)
+   * 
+   * this is useful if lambda_basis fulfills other boundary conditions than basis
+   */
+// PERFORMANCE :: this method only uses (lam_j+lam_e)! However, if you replace the 2 arguments lam_j and lam_e with only one, you end up with the same signature as the lamj,lame,lamk version above :(
+  template <int d, int dT>
+  void get_intersecting_wavelets_on_level(const PBasis<d,dT>& basis,
+                                            const int lamj, const int lame, const int k1_lambda, const int k2_lambda,
+                                            const int j, 
+                                            const bool generators,
+                                            int& mink, 
+                                            int& maxk);
   
 }
 

@@ -190,7 +190,7 @@ namespace WaveletTL
 
 #if _PRECOMPUTE_FIRSTLAST_WAVELETS
         /*
-         * Compute the indices of the first and last wavelet for all wavelets up to
+         * Compute the indices of the first and last wavelet for all wavelet levels up to
          * \|\lambda\| == jmax. Indices are stored. 
          * first/last_wavelet routines do not compute indices any more
          */
@@ -258,11 +258,11 @@ namespace WaveletTL
     	//! Collection of all wavelets between coarsest and finest level
     	Array1D<Index> full_collection;
         
+#if _PRECOMPUTE_FIRSTLAST_WAVELETS
         /*
          *  Collection of first and last wavelet indices on all levels up to jmax
          *  Precomputed for speedup
          */
-#if _PRECOMPUTE_FIRSTLAST_WAVELETS
         Array1D<Index> first_wavelets, last_wavelets;
 #endif
         

@@ -16,7 +16,8 @@ using std::endl;
 
 #include <utils/multiindex.h>
 #include <utils/fixed_array1d.h>
-
+#include <algebra/infinite_vector.h>
+using MathTL::InfiniteVector;
 using MathTL::MultiIndex;
 
 namespace WaveletTL
@@ -244,6 +245,177 @@ namespace WaveletTL
     template <class IBASIS, unsigned int DIM, class TENSORBASIS>
     const int
     last_wavelet_num(const TENSORBASIS* basis, const unsigned int level);
+    
+    
+
+
+    /*
+     *  write InfiniteVector<double,Index> to stream
+     * The only differences to the IO routines from qtbasis.h are that
+     *  - this was not tested
+     *  - there is no patchnumer p
+     */
+    
+    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
+    void writeIVToFile(const InfiniteVector<double, TensorIndex<IBASIS,DIM,TENSORBASIS> >& v, std::ofstream& ofs)
+    {
+        ofs.is_open();
+        if (ofs.is_open())
+        {
+            for (typename InfiniteVector<double,TensorIndex<IBASIS,DIM,TENSORBASIS> >::const_iterator it(v.begin()), itend(v.end()); it !=itend; ++it)
+            {
+                try
+                {
+                    double temp_d(*it);
+                    ofs.write(reinterpret_cast<char*>(&temp_d), sizeof(double));
+                    for (int i=0; i<DIM; ++i)
+                    {
+                        int temp_j (it.index().j()[i]);
+                        int temp_e (it.index().e()[i]);
+                        int temp_k (it.index().k()[i]);
+                        ofs.write(reinterpret_cast<char*>(&temp_j), sizeof(int));
+                        ofs.write(reinterpret_cast<char*>(&temp_e), sizeof(int));
+                        ofs.write(reinterpret_cast<char*>(&temp_k), sizeof(int));
+                    }
+                    int temp_num (it.index().number());
+                    ofs.write(reinterpret_cast<char*>(&temp_num), sizeof(int));
+                }
+                catch (...)
+                {
+                    cout << "writeIVToFile: Error while writing" << endl;
+                }
+            }
+            ofs.close();
+        }
+        else
+        {
+            cout << "writeIVToFile: Could not write file" << endl;
+        }
+    }
+    
+    //! write InfiniteVector<double,Index> to stream
+    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
+    void writeIVToFile(const InfiniteVector<double,TensorIndex<IBASIS,DIM,TENSORBASIS> >& v, const char* filename)
+    {
+        std::ofstream ofs(filename,std::ofstream::binary);
+        if (ofs.is_open())
+        {
+            for (typename InfiniteVector<double,TensorIndex<IBASIS,DIM,TENSORBASIS> >::const_iterator it(v.begin()), itend(v.end()); it !=itend; ++it)
+            {
+                try
+                {
+                    double temp_d(*it);
+                    ofs.write(reinterpret_cast<char*>(&temp_d), sizeof(double));
+                    for (int i=0; i<DIM; ++i)
+                    {
+                        int temp_j (it.index().j()[i]);
+                        int temp_e (it.index().e()[i]);
+                        int temp_k (it.index().k()[i]);
+                        ofs.write(reinterpret_cast<char*>(&temp_j), sizeof(int));
+                        ofs.write(reinterpret_cast<char*>(&temp_e), sizeof(int));
+                        ofs.write(reinterpret_cast<char*>(&temp_k), sizeof(int));
+                    }
+                    int temp_num (it.index().number());
+                    ofs.write(reinterpret_cast<char*>(&temp_num), sizeof(int));
+                }
+                catch (...)
+                {
+                    cout << "writeIVToFile: Error while writing" << endl;
+                }
+            }
+            ofs.close();
+        }
+        else
+        {
+            cout << "writeIVToFile: Could not write file" << endl;
+        }
+    }
+    
+    //! open a file written by writeVectorToFile
+    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
+    void readIVFromFile(const TENSORBASIS* basis, InfiniteVector<double, TensorIndex<IBASIS,DIM,TENSORBASIS> >& v, std::ifstream& ifs)
+    {
+        v.clear();
+        MultiIndex<int,DIM> temp_j, temp_e, temp_k;
+        if (ifs.is_open())
+        {
+            ifs.seekg (0, ifs.end);
+            int length = ifs.tellg()/(sizeof(double)+(3*DIM+1)*sizeof(int));
+            ifs.seekg (0, ifs.beg);
+            double temp_d;
+            int temp_i;
+            for (unsigned int i=0; i<length;++i)
+            {
+                try
+                {
+                    ifs.read(reinterpret_cast<char*>(&temp_d), sizeof(double));
+                    for (int i=0; i<DIM; ++i)
+                    {
+                        ifs.read(reinterpret_cast<char*>(&temp_i), sizeof(int));
+                        temp_j[i] = temp_i;
+                        ifs.read(reinterpret_cast<char*>(&temp_i), sizeof(int));
+                        temp_e[i] = temp_i;
+                        ifs.read(reinterpret_cast<char*>(&temp_i), sizeof(int));
+                        temp_k[i] = temp_i;
+                    }
+                    ifs.read(reinterpret_cast<char*>(&temp_i), sizeof(int));
+                    v.set_coefficient(TensorIndex<IBASIS,DIM,TENSORBASIS>(temp_j,temp_e, temp_k, temp_i, basis), temp_d);
+                }
+                catch (...)
+                {
+                    cout << "readIVFromFile: Read error" << endl;
+                }
+            }
+            ifs.close();
+        }
+        else
+        {
+            cout << "readIVFromFile: Could not read at all" << endl;
+        }
+    }
+    
+    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
+    void readIVFromFile(const TENSORBASIS* basis, InfiniteVector<double,TensorIndex<IBASIS,DIM,TENSORBASIS> >& v, const char* filename)
+    {
+        v.clear();
+        std::ifstream ifs(filename, std::ifstream::binary);
+        MultiIndex<int,DIM> temp_j, temp_e, temp_k;
+        if (ifs.is_open())
+        {
+            ifs.seekg (0, ifs.end);
+            int length = ifs.tellg()/(sizeof(double)+(3*DIM+1)*sizeof(int));
+            ifs.seekg (0, ifs.beg);
+            double temp_d;
+            int temp_i, temp_p;
+            for (unsigned int i=0; i<length;++i)
+            {
+                try
+                {
+                    ifs.read(reinterpret_cast<char*>(&temp_d), sizeof(double));
+                    for (int i=0; i<DIM; ++i)
+                    {
+                        ifs.read(reinterpret_cast<char*>(&temp_i), sizeof(int));
+                        temp_j[i] = temp_i;
+                        ifs.read(reinterpret_cast<char*>(&temp_i), sizeof(int));
+                        temp_e[i] = temp_i;
+                        ifs.read(reinterpret_cast<char*>(&temp_i), sizeof(int));
+                        temp_k[i] = temp_i;
+                    }
+                    ifs.read(reinterpret_cast<char*>(&temp_i), sizeof(int));
+                    v.set_coefficient(TensorIndex<IBASIS,DIM,TENSORBASIS>(temp_j,temp_e, temp_k, temp_i, basis), temp_d);
+                }
+                catch (...)
+                {
+                    cout << "readIVFromFile: Read error" << endl;
+                }
+            }
+            ifs.close();
+        }
+        else
+        {
+            cout << "readIVFromFile: Could not read at all" << endl;
+        }
+    }
 }
 
 #include <cube/tbasis_index.cpp>

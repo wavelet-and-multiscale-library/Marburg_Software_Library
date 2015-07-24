@@ -19,8 +19,6 @@ using namespace MathTL;
 int main()
 {
   cout << "Testing wavelet bases from [P] ..." << endl;
-
-
   const int d  = 3;
   const int dT = 3;
 
@@ -28,10 +26,12 @@ int main()
   typedef Basis::Index Index;
 
   //  Basis basis; // no b.c.'s
+
   Basis basis(0,0); // 1st order complementary b.c.'s at x=0 and x=1
   Basis basis10(1,0);
   Basis basis01(0,1);
   Basis basis11(1,1);
+
   //   Basis basis(1, 0); // complementary b.c. at x=0
   //   Basis basis(0, 1); // complementary b.c. at x=1
   //Array1D<int>() Ar;
@@ -64,7 +64,27 @@ int main()
     {
         BasisArray[b]->set_jmax(BasisArray[b]->j0()+levelrange);
     }
-        
+      
+#if 1
+    // evaluate boundary generators to check, whether they depend on the BC
+    cout << "check the values of some generators/wavelets" << endl;
+    unsigned int steps = 50;
+    double a=0.0, b=0.25;
+    unsigned int waveletnum = 0;
+    cout << "lambda = " << *BasisArray[0]->get_wavelet(waveletnum+1) 
+            << " || " << *BasisArray[1]->get_wavelet(waveletnum)
+            << " || " << *BasisArray[2]->get_wavelet(waveletnum+1)
+            << " || " << *BasisArray[3]->get_wavelet(waveletnum) << endl;
+    for (unsigned int i=0; i<=steps; ++i)
+    {
+        cout << (a + i*(b-a)/steps) << " => \t";
+        cout << BasisArray[0]->evaluate(0,BasisArray[0]->get_wavelet(waveletnum+1),a + i*(b-a)/steps) << "\t";
+        cout << BasisArray[1]->evaluate(0,BasisArray[1]->get_wavelet(waveletnum),a + i*(b-a)/steps) << "\t";
+        cout << BasisArray[2]->evaluate(0,BasisArray[2]->get_wavelet(waveletnum+1),a + i*(b-a)/steps) << "\t";
+        cout << BasisArray[3]->evaluate(0,BasisArray[3]->get_wavelet(waveletnum),a + i*(b-a)/steps) << endl;
+    }
+#endif
+    
 #if 0
     
     cout << "improving the log2 Function" << endl;
@@ -390,7 +410,7 @@ int main()
     cout << "time needed " << time1 << " sec" << endl;
 #endif
     
-#if 1
+#if 0
   
     //const int levelrange(8);
     //basis.set_jmax(basis.j0()+levelrange);
@@ -713,7 +733,7 @@ int main()
     cout << "done" << endl;
     return 0;
 #endif
-#if 1
+#if 0
     cout << "Compare speed of evaluate(lambda, points) and evaluate(j,e,k, points)" << endl;
     int repetitions(2);
     unsigned int minlambdanum(0), maxlambdanum;

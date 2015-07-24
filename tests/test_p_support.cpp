@@ -1,3 +1,80 @@
+/*
+ * This file contains code to compute supports and support intersections for PBasis.
+ * (support, intersection of supports, singular support ...)
+ * 
+ * Reason: Development of faster code for computation of (intersection of) supports.
+ * Automatically testing of all possible boundary conditions (very useful!).
+ * Speedup is measured.
+ * DSBasis behaves slightly different, so code is not interchangeable! 
+ */
+
+#if 0
+// I've found the following code by Gregor Kriwet, but I dont know if it works, if it is faster or wrong
+// It probably works only for PBasis, so the template arguments D,DT can be used, instead of the call to the primal/dual order function
+
+namespace WaveletTL
+/*
+  This class is needed for the new computation of the intersecting wavelets in cube_support, frame_support and tbasis_support.
+  The method is testet for the P Basis.
+ * 
+ * It does NOT work with the DS Basis.
+*/
+
+{
+
+  /*
+     This method gives the minimal and maximal shiftparameter k for such that the wavelets or generators on level j 
+     intersects with the wavelet or generator lambda.
+  */
+  template <class IBASIS>
+  void get_intersecting_wavelets_on_level(const IBASIS& basis,
+			     const typename IBASIS::Index& lambda,
+			     const int j, const bool generators,
+			     int& mink, int& maxk)
+  { typedef typename IBASIS::Index Index;
+    typedef typename IBASIS::Support Support;
+
+    // compute support of \psi_\lambda
+    const int j_lambda = lambda.j() + lambda.e();
+    int k1_lambda, k2_lambda;
+    support(basis, lambda, k1_lambda, k2_lambda);
+    int d = basis.get_primalorder();
+    int dT = basis.get_dualorder();
+    
+
+    // new code
+    if (generators) {
+      // the leftmost generator on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k+ell2) > a  but  2^{-j}(k-1+ell2) <= a,
+      // so that ...
+      mink = std::max(basis.DeltaLmin(), (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda-(d-d/2))+1);
+      
+      // the rightmost generator on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k+ell1) < b  but  2^{-j}(k+1+ell1) >= b,
+      // so that ...
+      maxk = std::min(basis.DeltaRmax(j), (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda-(-d/2))-1);
+
+    } else {
+      // if the left boundary wavelets are not involved, then
+      // the rightmost wavelet on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k+(d+dT)/2) > a  but  2^{-j}(k-1+(d+dT)/2) <= a,
+      // so that ...
+      mink = (ldexp(1.0,j-j_lambda)*k1_lambda < d+dT-1 // overestimate, TODO!
+			  ? 0
+			  : (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda-(d+dT)/2)+1);
+
+      // if the right boundary wavelets are not involved, then
+      // the leftmost wavelet on the level j, s.th. its support intersects [a,b], fulfills
+      //   2^{-j}(k-(d+dT)/2+1) < b  but  2^{-j}(k-(d+dT)/2+2) >= a,
+      // so that ...
+      maxk = (ldexp(1.0,-j_lambda)*k2_lambda > 1 - ldexp(1.0,-j)*(d+dT-1) // overestimate, TODO!
+			 ? (1<<j)-1
+			 : (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda+(d+dT)/2)-2);
+    }
+   }
+}
+#endif
+
 #include <iostream>
 
 #include <interval/p_basis.h>

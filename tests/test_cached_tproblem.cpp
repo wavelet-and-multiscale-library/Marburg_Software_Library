@@ -1,3 +1,11 @@
+/*
+ * Test cached_tproblem
+ * Use TBasis to solve elliptic problem on the hypercube. Use cache to reuse computed values.
+ * 
+ * Several aspects are tested. Entries of the stiffness matrix, the diagonal matrix D, test apply, test solution of whole problem with CDD1/CDD2, test some new tiny_tools, test some efficient sorting code ...
+ */
+
+
 // more output for the cached problemm (in normA())
 #define _WAVELETTL_CACHEDPROBLEM_VERBOSITY 0
 // normA uses setup_stiffness_matrix. here the verbosity of the call is controled:
@@ -6,6 +14,9 @@
 #define _WAVELETTL_USE_TBASIS 1
 // for verbose output of CDD1
 #define _WAVELETTL_CDD1_VERBOSITY 0
+
+#define _APPLY_TENSOR_DEBUGMODE 1
+
 #include <iostream>
 #include <map>
 #include <time.h>
@@ -477,7 +488,7 @@ int main()
   cout << "statistic part finished. Total time needed: " << time << " seconds" << endl;
 #endif
 
-#if 0 // I forgot to implement&call set_jmax for thee underlying equation!
+#if 0 // I forgot to implement&call set_jmax for the underlying equation!
   // non the less: could be moved to test basis:
   cout << "first_gen =("<< ctproblem.basis().first_generator().number() << ")="<< ctproblem.basis().first_generator() << endl;
   Index temp_index(ctproblem.basis().last_wavelet(multi_degree(ctproblem.basis().j0())+offset));
@@ -727,7 +738,7 @@ int main()
   }
 #endif
   
-# if 0
+# if 1
   cout << "Testing adaptive wavelet-Galerkin solution of a Sturm b.v.p. with CDD2_SOLVE ..." << endl;
   tstart = clock();
   cout << "main:: setting up RHS" << endl;

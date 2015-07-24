@@ -1,3 +1,13 @@
+/*
+ * This file contains some code to compute supports and support intersections for DSBasis "by hand" in order to test the computation in DSBasis.
+ * 
+ * Background: There had been a problem with exchanging PBasis and DSBasis (as building block of a tensor wavelet basis). 
+ * The problem was related to the support computation.
+ * 
+ * The computation of all intersecting wavelets with a given wavelet needs to be efficient.
+ * See also -> test_p_support.cpp.
+ */
+
 #include <iostream>
 
 #include <interval/ds_basis.h>
@@ -26,10 +36,10 @@ int main()
 //   for (int i = 1; i <= 4; i++, ++lambda);
 //   lambda = last_wavelet(&basis, basis.j0()+1);
 
-  cout << "get_intersecting_wavelets_on_level does NOT work!!" << endl;
-  cout << "The following code was moved from test_tbasis_support and may not compile correctly" << endl;
-  abort();
 #if 0
+    cout << "get_intersecting_wavelets_on_level does NOT work!!" << endl;
+    cout << "The following code was moved from test_tbasis_support and may not compile correctly" << endl;
+    abort();
     /*
      * get_intersecting_wavelets_on_level does not work for DSBasis!
      * The following code is copied to the dsbasis_testfile

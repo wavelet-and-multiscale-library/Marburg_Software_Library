@@ -41,7 +41,7 @@ int main()
     const int d  = 2;
     const int dT = 2;
     //const unsigned int dim = 2; const int levelrange(4);
-    const unsigned int dim = 3; const int levelrange(2);
+    const unsigned int dim = 2; const int levelrange(1);
     typedef PBasis<d,dT> Basis1d;
     //typedef DSBasis<d,dT> Basis1d;
     typedef TensorBasis<Basis1d,dim> Basis;
@@ -159,7 +159,7 @@ int main()
     if (dim > 1) cout << " " << basis.bases()[1]->Nablasize(basis.j0()[1]+3);
     if (dim > 2) cout << " " << basis.bases()[2]->Nablasize(basis.j0()[2]+3);  cout << endl;
     
-#if 0
+#if 1
     // some output for debugging
     for (unsigned int i=0; i<TBasisArray[0]->degrees_of_freedom(); ++i)
     {

@@ -95,28 +95,6 @@ namespace WaveletTL
           const CompressionStrategy strategy = tensor_simple,
           const bool preconditioning = true);
 
-#if 0
-  /* discontinued code:
-   * 
-   * In order to compute the approximation of Av, v is sorted into buckets (v_[p]).
-   * The entries in each bucket are applied to different approximations A^Jp of A.
-   * Better approximations A^jp are more costly. Therefore the optimal compression/benefit ratio
-   * has to be computed. cost((j_p))-> min; approximation_error <= eta
-   * The minimiation problem may use an inital guess for (j_p)
-   * 
-   * There is commented code for a restriction to levels given by a levelvector
-   */
-  template <class PROBLEM>
-  void APPLY(const PROBLEM& P,
-          const InfiniteVector<double, typename PROBLEM::Index>& v,
-          const double eta,
-          //const set<unsigned int> levelwindow,
-          Array1D<int>& jp_guess,
-          InfiniteVector<double, typename PROBLEM::Index>& w,
-          const int jmax = 99,
-          const CompressionStrategy strategy = tensor_simple,
-          const bool preconditioning = true);
-#endif
 }
 
 #include <adaptive/apply_tensor.cpp>

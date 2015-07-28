@@ -4,9 +4,11 @@
 #include <utils/array1d.h>
 #include <utils/multiindex.h>
 #include <algebra/infinite_vector.h>
+#include <algebra/vector.h>
 
 using namespace std;
 using namespace MathTL;
+
 
 int main()
 {

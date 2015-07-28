@@ -18,7 +18,7 @@ namespace MathTL
     
     template <class C, unsigned int ROW_DIM, unsigned int COL_DIM>
     void
-    writeFixedMatrixToFile(const FixedMatrix< C,ROW_DIM,COL_DIM> & A, std::ofstream& ofs)
+    fixed_matrix_writeToFile(const FixedMatrix< C,ROW_DIM,COL_DIM> & A, std::ofstream& ofs)
     {
         typedef typename FixedMatrix< C,ROW_DIM,COL_DIM>::size_type size_type;
         if (ofs.is_open())
@@ -40,19 +40,19 @@ namespace MathTL
             }
             catch (...)
             {
-                cout << "writeFixedMatrixToFile: Error while writing" << endl;
+                cout << "fixed_matrix_writeToFile: Error while writing" << endl;
             }
             ofs.close();
         }
         else
         {
-            cout << "writeFixedMatrixToFile: Could not write file" << endl;
+            cout << "fixed_matrix_writeToFile: Could not write file" << endl;
         }
     }
     
     template <class C, unsigned int ROW_DIM, unsigned int COL_DIM>
     void
-    writeFixedMatrixToFile(const FixedMatrix< C,ROW_DIM,COL_DIM> & A, const char* filename)
+    fixed_matrix_writeToFile(const FixedMatrix< C,ROW_DIM,COL_DIM> & A, const char* filename)
     {
         std::ofstream ofs(filename,std::ofstream::binary);
         typedef typename FixedMatrix< C,ROW_DIM,COL_DIM>::size_type size_type;
@@ -75,19 +75,19 @@ namespace MathTL
             }
             catch (...)
             {
-                cout << "writeFixedMatrixToFile: Error while writing" << endl;
+                cout << "fixed_matrix_writeToFile: Error while writing" << endl;
             }
             ofs.close();
         }
         else
         {
-            cout << "writeFixedMatrixToFile: Could not write file" << endl;
+            cout << "fixed_matrix_writeToFile: Could not write file" << endl;
         }
     }
     
     template <class C, unsigned int ROW_DIM, unsigned int COL_DIM>
     void
-    readFixedMatrixFromFile(FixedMatrix< C,ROW_DIM,COL_DIM> & A, std::ifstream& ifs)
+    fixed_matrix_readFromFile(FixedMatrix< C,ROW_DIM,COL_DIM> & A, std::ifstream& ifs)
     {
         typedef typename FixedMatrix< C,ROW_DIM,COL_DIM>::size_type size_type;
         if (ifs.is_open())
@@ -114,19 +114,19 @@ namespace MathTL
             }
             catch (...)
             {
-                cout << "readFixedMatrixFromFile: Read error" << endl;
+                cout << "fixed_matrix_readFromFile: Read error" << endl;
             }
             ifs.close();
         }
         else
         {
-            cout << "readFixedMatrixFromFile: Could not read at all" << endl;
+            cout << "fixed_matrix_readFromFile: Could not read at all" << endl;
         }
     }
     
     template <class C, unsigned int ROW_DIM, unsigned int COL_DIM>
     void
-    readFixedMatrixFromFile(FixedMatrix< C,ROW_DIM,COL_DIM> & A, const char* filename)
+    fixed_matrix_readFromFile(FixedMatrix< C,ROW_DIM,COL_DIM> & A, const char* filename)
     {
         std::ifstream ifs(filename, std::ifstream::binary);
         typedef typename FixedMatrix< C,ROW_DIM,COL_DIM>::size_type size_type;
@@ -154,17 +154,115 @@ namespace MathTL
             }
             catch (...)
             {
-                cout << "readFixedMatrixFromFile: Read error" << endl;
+                cout << "fixed_matrix_readFromFile: Read error" << endl;
             }
             ifs.close();
         }
         else
         {
-            cout << "readFixedMatrixFromFile: Could not read at all" << endl;
+            cout << "fixed_matrix_readFromFile: Could not read at all" << endl;
         }
     }
 
-    
+
+/* specifications of the above routines with C = double
+ */        
+    /*
+    template <unsigned int ROWSIZE, unsigned int COLUMNSIZE>
+    void fixed_matrix_writeToFile(const char *filename, const FixedMatrix<double, ROWSIZE, COLUMNSIZE> & A)
+    {
+        //char filename[200];
+        //filename[0] = '\x0';
+        //strcat(filename, file);
+        //strcat(filename, ".bin");
+        std::ofstream bin_file(filename);
+        if (bin_file.is_open())
+        {
+            try
+            {
+                int temp_i;
+                temp_i = ROWSIZE;
+                bin_file.write((char*)(&temp_i), sizeof(int));
+                temp_i = COLUMNSIZE;
+                bin_file.write((char*)(&temp_i), sizeof(int));
+                double temp_d;
+                for (unsigned int i=0; i < ROWSIZE; ++i)
+                {
+                    for (unsigned int j=0; j < COLUMNSIZE; ++j)
+                    {
+                        temp_d = A.get_entry(i,j);
+                        bin_file.write(reinterpret_cast<char*>(&temp_d), sizeof(double));
+                    }
+                }
+            }
+            catch (...)
+            {
+                cout << "fixed_matrix_writeToFile: Error while writing to " << filename << endl;
+            }
+            bin_file.close();
+        }
+        else
+        {
+            cout << "fixed_matrix_writeToFile: Could not write to " << filename << endl;
+        }
+    }
+
+
+    template <unsigned int ROWSIZE, unsigned int COLUMNSIZE>
+    void fixed_matrix_readFromFile(const char *filename, FixedMatrix<double, ROWSIZE, COLUMNSIZE>& A)
+    {
+        //char filename[200];
+        //filename[0] = '\x0';
+        //strcat(filename, file);
+        //strcat(filename, ".bin");
+        std::ifstream bin_file(filename);
+
+        if (bin_file.is_open())
+        {
+            //while (!bin_file.eof()) // doesn't work, see comment after .eof()
+            int temp_i, temp_j;
+            double temp_d;
+            try
+            {
+                bin_file.read((char*)(&temp_i), sizeof(int));
+                assert (temp_i == ROWSIZE);
+                bin_file.read((char*)(&temp_j), sizeof(int));
+                assert (temp_j == COLUMNSIZE);
+                temp_i=0; temp_j=0;
+                while(true)
+                {
+                    bin_file.read(reinterpret_cast<char*>(&temp_d), sizeof(double));
+                    if (bin_file.eof()) // the last meaningful .read operation sets the last bit to the last bit of the last variable read. that means that we are NOT at the end of file. So the whole try-block is executed again, resulting in one wrong entry in *this.
+                    {
+                        break;
+                    }
+                    //cout << "d="<<temp_d<<endl;
+                    A.set_entry(temp_i,temp_j, temp_d);
+                    if (temp_j < COLUMNSIZE-1)
+                    {
+                        ++temp_j;
+                    }
+                    else
+                    {
+                        ++temp_i;
+                        temp_j = 0;
+                    }
+                }
+                assert ((temp_i == ROWSIZE) && (temp_j == 0));
+            }
+            catch (...)
+            {
+                cout << "fixed_matrix_readFromFile: Read error in " << filename << endl;
+            }
+            bin_file.close();
+        }
+        else
+        {
+            cout << "fixed_matrix_readFromFile: Could not read from " << filename << endl;
+        }
+    }
+*/
+
 }
 
 

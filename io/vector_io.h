@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <algebra/vector.h>
 
 using std::cout;
 using std::endl;
@@ -27,7 +28,6 @@ namespace MathTL
      *     generic Matlab-style stream output of the form
      * [x_1 x_2 ... x_n]
      */
-  
     template <class VECTOR>
     void print_vector(const VECTOR& v, std::ostream& os)
     {

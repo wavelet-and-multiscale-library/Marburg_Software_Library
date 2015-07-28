@@ -14,7 +14,13 @@
 
 namespace MathTL
 {
-    //! write InfiniteVector<double,int> to stream
+    /*
+     * write InfiniteVector<double,int> to stream
+     * IO routines for more general vectors
+     *    InfiniteVector<double,INDEX>
+     * are maybe too specific for this file?
+     * Should be placed in basis_index.h, e.g., qtbasis_index.h
+     */
     void writeIVToFile(const InfiniteVector<double,int >& v, std::ofstream& ofs)
     {
         if (ofs.is_open())

@@ -53,6 +53,9 @@ namespace WaveletTL
     (const unsigned int derivative,
      const RIndex& lambda,
      const Array1D<double>& points, Array1D<double>& values);
+    
+    //integration in [-\infty,\infty] of the generator or wavelet \psi_\lambda 
+    static double integrate(const RIndex& lambda);
   };
 }
 

@@ -360,9 +360,15 @@ namespace WaveletTL
 	     const double eta,
 	     InfiniteVector<double, typename PROBLEM::Index>& w,
 	     const int jmax,
-	     const CompressionStrategy strategy)
+	     const CompressionStrategy strategy,
+             const int pmax,
+             const double a,
+             const double b)
   {
+      //cout << "AUSGEFÜHRT!: " << P.basis().degrees_of_freedom() << endl; @PHK
     typedef typename PROBLEM::Index Index;
+    
+    //cout << "bin drin" << endl;
 
     w.clear();
     // Binary Binning variant of APPLY from [S],[B]
@@ -373,12 +379,13 @@ namespace WaveletTL
 
     //cout << "size = " << v.size() << endl;
     if (v.size() > 0) {
+//        cout << "v größer 0" << endl;
       
       // compute the number of bins V_0,...,V_q
       const double norm_v_sqr = l2_norm_sqr(v);
       const double norm_v = sqrt(norm_v_sqr);
       const double norm_A = P.norm_A();
-
+      
       const unsigned int q = (unsigned int) std::max(ceil(log(sqrt((double)v.size())*norm_v*norm_A*2/eta)/M_LN2), 0.);
       // Setup the bins: The i-th bin contains the entries of v with modulus in the interval
       // (2^{-(i+1)}||v||,2^{-i}||v||], 0 <= i <= q-1, the remaining elements (with even smaller modulus)
@@ -388,6 +395,7 @@ namespace WaveletTL
  	   it != v.end(); ++it) {
  	const unsigned int i = std::min(q, (unsigned int)floor(-log(fabs(*it)/norm_v)/M_LN2));
 	bins[i].push_back(std::make_pair(it.index(), *it));
+        //cout << i << ", " << it.index() << ", " << *it << endl;
       }
       
       // glue all the bins together
@@ -438,7 +446,8 @@ namespace WaveletTL
 	J++;
       }
 
-      //cout << "J = " << J << endl;
+//      cout << ell << endl;
+//      cout << "J = " << J << endl;
 
       // hack: We let 'add_compressed_column' and 'add_level'
       // in cached_problem.cpp/.h work on full vectors. We do this because the call of 
@@ -449,7 +458,7 @@ namespace WaveletTL
       //cout << "done binning in apply..." << endl;
 
       Vector<double> ww(P.basis().degrees_of_freedom());
-
+      //cout << "AUSGEFÜHRT PART2: " << P.basis().degrees_of_freedom() << endl;//HIER WEITERMACHEN @PHK
       //cout << *(P.basis().get_wavelet(4000)) << endl;
       // compute w = \sum_{k=0}^\ell A_{J-k}v_{[k]}
       k = 0;
@@ -458,9 +467,14 @@ namespace WaveletTL
 	   k <= ell; ++it, ++k) {
 	for (typename std::list<std::pair<Index, double> >::const_iterator itk(it->begin());
 	     itk != it->end(); ++itk) {
-	  //add_compressed_column(P, itk->second, itk->first, J-k, w, jmax, strategy);
+	  //add_compressed_column(P, itk->second, itk->first, J-k, ww, jmax, strategy);
 	  //cout << "J-k = " << J-k << endl;
-	  add_compressed_column(P, itk->second, itk->first, J-k, ww, jmax, strategy);
+//            cout << "addcompressed wird ausgeführt" << endl;
+//            cout << itk->second << ", " << itk->first << endl;
+            //cout << "Beginn cc" << endl;
+	  add_compressed_column(P, itk->second, itk->first, J-k, ww, jmax, strategy, true, pmax, a, b);
+          //cout << "Ende cc" << endl;
+//          //cout << ww << endl;
 	  z++;
 	}
       }
@@ -472,6 +486,7 @@ namespace WaveletTL
 	}
       }
     }
+    //cout << "bin raus" << endl;
   }  
 
 

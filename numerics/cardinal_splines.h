@@ -50,6 +50,7 @@ namespace MathTL
     return (x < 0 || x >= d ? 0
 	    : (x * EvaluateCardinalBSpline<d-1>(x)
 	       + (d-x) * EvaluateCardinalBSpline<d-1>(x-1)) / (d-1));
+
   }
 
   /*!
@@ -70,6 +71,7 @@ namespace MathTL
   /*!
     evaluate a cardinal B-spline N_2(x)
     (fastest possible variant)
+
   */
   template <>
   inline
@@ -123,8 +125,7 @@ namespace MathTL
   double EvaluateCardinalBSpline_td(const int j, const int k, const double x)
   {
 #if 0
-    const double factor(1<<j);
-    return sqrt(factor) * EvaluateCardinalBSpline<d>(k, factor * x + d/2);
+    return sqrt(factor) * EvaluateCardinalBSpline<d>(pow(2,j) * x - k + d/2); Funktioniert auch für j<0
 #else
     return twotothejhalf(j) * EvaluateCardinalBSpline<d>((1<<j) * x - k + d/2);
 #endif
@@ -477,6 +478,41 @@ template <int d>
 			const unsigned int component = 0) const
     {
       return EvaluateCardinalBSpline<d>(0, p(0));
+    }
+  
+    /*!
+      value of a B-spline
+    */
+    void vector_value(const Point<1> &p,
+		      Vector<double>& values) const
+    {
+      values.resize(1, false);
+      values[0] = value(p);
+    }
+  };
+
+
+template <int d, int j, int k>
+  class CardinalBSpline_td : public Function<1>
+  {
+  public:
+    /*!
+      default constructor: B-splines are real-valued
+    */
+    CardinalBSpline_td() : Function<1>(1) {}
+
+    /*!
+      virtual destructor
+    */
+    virtual ~CardinalBSpline_td() {}
+
+    /*!
+      value of a B-spline
+    */
+    inline double value(const Point<1>& p,
+			const unsigned int component = 0) const
+    {
+      return EvaluateCardinalBSpline_td<d>(j, k, p(0));
     }
   
     /*!

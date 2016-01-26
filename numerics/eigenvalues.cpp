@@ -98,7 +98,7 @@ namespace MathTL
     evecs.resize(n,n);
     for (size_type i(0); i < n; i++)
       for (size_type j(0); j < n; j++)
-	evecs(i,j) = A(i,j);
+	evecs(i,j) = A.get_entry(i,j);
     
     // transform A to tridiagonal form via symmetric Householder reduction
     for (size_type j(0); j < n; j++)

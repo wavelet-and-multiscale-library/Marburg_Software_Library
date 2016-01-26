@@ -6,9 +6,12 @@
 #include <numerics/gauss_quadrature.h>
 #include <utils/function.h>
 #include <utils/array1d.h>
+#include <numerics/cardinal_splines.h>
+#include <numerics/quarks.h>
 
 using std::cout;
 using std::endl;
+using std::max;
 
 using namespace MathTL;
 
@@ -20,7 +23,7 @@ public:
   double value(const Point<1>& p,
 	       const unsigned int component = 0) const
   {
-    return M_PI*sin(M_PI*p[0]);
+    return  (std::max(0.0,1-abs(p[0]-1)));;
   }
   
   void vector_value(const Point<1> &p,
@@ -31,12 +34,18 @@ public:
   }
 };
 
+
+
+
+
+
+
 int main()
 {
-  TestFunction g;
+  CardinalBSpline_td<3,0,0> g;
 
   cout << "Testing GaussRule class ..." << endl;
-
+  Point<1> a(-1), b(2);
   for (unsigned int N(1); N <= 8; N++) {
       GaussLegendreRule Gauss(N);
       cout << "* Gauss-Legendre reference rule(N=" << N << "): " << endl;
@@ -45,7 +54,7 @@ int main()
       Gauss.get_points(points);
       Gauss.get_weights(weights);
       cout << "  points: " << points << ", weights: " << weights << endl;
-      cout << "  quadrature yields: " << Gauss.integrate(g) << endl;
+      cout << "  quadrature yields: " << Gauss.integrate(g,a,b) << endl;
     }
 
   LegendrePolynomial leg;

@@ -61,7 +61,7 @@ namespace MathTL
     /*!
       evaluate (a component of) the function
     */
-    virtual VALUE value (const Point<DIM,VALUE>& p,
+    virtual VALUE value(const Point<DIM,VALUE>& p,
 			 const unsigned int component = 0) const = 0;
 
     /*!
@@ -137,6 +137,35 @@ namespace MathTL
   protected:
     const Function<DIM,VALUE>* f1_;
     const Function<DIM,VALUE>* f2_;
+  };
+  
+  class MonomeFunction 
+    : public Function<1>
+  {
+    public:
+        MonomeFunction(const unsigned int degree=0);
+        inline double value(const Point<1>& p,
+                            const unsigned int component = 0) const
+        {
+            if(0<=p[0] && p[0]<=1){
+                return pow(p[0],degree_);
+                
+            }
+            else
+            return 0;
+            //return p[0]*p[0]*p[0]-1.5*p[0]*p[0]+0.5*p[0];
+        
+        }
+        
+        void vector_value(const Point<1> &p,
+                          Vector<double>& values) const
+        {
+            values.resize(1, false);
+            values[0] = value(p);
+        }
+    protected:
+    //! the value
+    unsigned int degree_;
   };
 }
 

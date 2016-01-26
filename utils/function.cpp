@@ -126,4 +126,11 @@ namespace MathTL
       values[i] *= v2[i];
   }
   
+  inline
+  MonomeFunction::MonomeFunction(const unsigned int degree)
+    : Function<1>(), degree_(degree)
+  {
+  }
+  
+  
 }

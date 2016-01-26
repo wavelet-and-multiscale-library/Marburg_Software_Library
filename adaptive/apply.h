@@ -56,7 +56,10 @@ namespace WaveletTL
 	     const double eta,
 	     InfiniteVector<double, typename PROBLEM::Index>& w,
 	     const int jmax = 99,
-	     const CompressionStrategy strategy = St04a);
+	     const CompressionStrategy strategy = St04a,
+             const int pmax = 0,
+             const double a = 0,
+             const double b = 0);//pmax, a and b only matter if strategy==DKOR
   /*
    */
   template <class PROBLEM>

@@ -3,6 +3,7 @@
 #include <cassert>
 #include <numerics/cardinal_splines.h>
 #include <utils/tiny_tools.h>
+#include <Rd/r_basis.h>
 
 namespace WaveletTL
 {
@@ -26,12 +27,13 @@ namespace WaveletTL
       {
 	// old generic version: readable and slow
  	InfiniteVector<double, RIndex> gcoeffs;
-	RBasis<CDFRefinementMask_primal<d>, CDFRefinementMask_dual<d, dt> >::reconstruct_1
-	  (lambda, lambda.j()+1, gcoeffs);
+	CDFBasis<d,dt> tempbasis;
+	tempbasis.reconstruct_1(lambda, lambda.j()+1, gcoeffs);
+	//RBasis<CDFRefinementMask_primal<d>, CDFRefinementMask_dual<d, dt> >::reconstruct_1(lambda, lambda.j()+1, gcoeffs);
  	for (typename InfiniteVector<double, RIndex>::const_iterator it(gcoeffs.begin());
  	     it != gcoeffs.end(); ++it)
  	  r += *it * evaluate(derivative, it.index(), x);
-      }
+	  }
     
     return r;
   }
@@ -189,7 +191,7 @@ namespace WaveletTL
 	}
       }
     return 0.;
-  }
+    }
   
   template <>
   double
@@ -480,6 +482,48 @@ namespace WaveletTL
 	}
       }
     return 0.;
+  }
+  
+  template <int d, int dt>
+  double
+  CDFBasis<d,dt>:: integrate(const RIndex& lambda){
+      
+    double r = 0;
+
+    // first we compute the support of psi_lambda
+    const int j = lambda.j()+lambda.e();
+    int k1, k2;
+    support(lambda, k1, k2);
+    const int length = k2 > k1 ? k2-k1 : k2+(1<<j)-k1;
+    //cout << k1 << ", " << k2 << endl;
+    
+    // setup Gauss points and weights for a composite quadrature formula:
+    const unsigned int N_Gauss = 5;
+    const double h = 1.0/(1<<j);
+
+    Array1D<double> gauss_points (N_Gauss*length);
+    int k = k1;
+    for (int patch = 0; patch < length; patch++, k++){ // work on 2^{-j}[k,k+1]
+        //cout << "k: " << k << endl; 
+        for (unsigned int n = 0; n < N_Gauss; n++)
+ 	gauss_points[patch*N_Gauss+n] = h*(2*k+1+GaussPoints[N_Gauss-1][n])/2;
+    }
+    // add all integral shares
+    for (unsigned int n = 0; n < N_Gauss; n++)
+      {
+ 	const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
+ 	for (int patch = k1; patch < k1+length; patch++)
+ 	  {
+ 	    const double t = gauss_points[(patch-k1)*N_Gauss+n];
+            //cout << t << endl;
+	    
+ 	    r += evaluate(0, lambda, t)
+ 		 * gauss_weight;
+ 	  }
+      }
+    
+    return r;
+      
   }
   
 }

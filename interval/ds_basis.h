@@ -153,6 +153,10 @@ namespace WaveletTL
       jmax_ = jmax;
       setup_full_collection();
     }
+    
+    int get_jmax_() const{
+        return jmax_;
+    }
 
     /*!
       boundary indices in \Delta_j^X and \tilde\Delta_j^X (4.10),(4.14),(4.26)

@@ -176,7 +176,10 @@ namespace WaveletTL
       jmax_ = jmax;
       setup_full_collection();
     }
-
+    
+    int get_jmax_() const{
+        return jmax_;
+    }
 
     //! extremal generator indices
     inline const int DeltaLmin() const { return 1-d-ell1<d>()+s0; }
@@ -433,7 +436,7 @@ namespace WaveletTL
     void pre_compute_wavelets(){
         int jmax = JMAX;  // wählen des max levels   12: 2,41 sek
                           //                         16: 37,0 sek
-                          //  Pro Level erhähung verdopelt sich die Zeit
+                          //  Pro Level erhöhung verdoppelt sich die Zeit
         evaluate_with_pre_computation = true;
         wavelets.resize(jmax+1);
         for(int i = j0_; i<=jmax; i++){

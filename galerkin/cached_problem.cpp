@@ -23,6 +23,8 @@ namespace WaveletTL
     double r = 0;
     
     if (problem->local_operator()) {
+        
+        
       const int lambda_num = lambda.number();
       const int nu_num = nu.number();
 
@@ -78,6 +80,7 @@ namespace WaveletTL
 	  for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());
 	       it != itend; ++it) {
 	    const double entry = problem->a(*it, nu);
+            //cout << *it << ", " << nu << ": " << entry << endl;
 	    typedef typename Block::value_type value_type_block;
 	    if (entry != 0.) {
 	      block.insert(block.end(), value_type_block((*it).number(), entry));
@@ -198,13 +201,17 @@ namespace WaveletTL
   
   template <class PROBLEM>
   void
-  CachedProblem<PROBLEM>::add_level (const Index& lambda,
+  CachedProblem<PROBLEM>::add_level(const Index& lambda,
 				     //InfiniteVector<double, Index>& w,
 				     Vector<double>& w,
 				     const int j,
 				     const double factor,
 				     const int J,
-				     const CompressionStrategy strategy) const
+				     const CompressionStrategy strategy,
+                                     const int jmax,
+                                     const int pmax,
+                                     const double a,
+                                     const double b) const
   {
     if (problem->local_operator()) {
 
@@ -249,7 +256,7 @@ namespace WaveletTL
 
 	  // do the rest of the job
 	  const double d1 = problem->D(lambda);
-	  if (strategy == St04a) {
+          if (strategy == St04a) {
 	    for (typename IntersectingList::iterator it2(nus.begin()), itend2(nus.end());
 		 it2 != itend2; ++it2) {
 	      if (abs(lambda.j()-j) <= J/((double) problem->space_dimension) ||
@@ -262,7 +269,7 @@ namespace WaveletTL
 	      }
 	    }
 	  }
-	  else if (strategy == CDD1) {
+	  else if (strategy == CDD1 || strategy == DKOR) {
 	    for (typename IntersectingList::const_iterator it2(nus.begin()), itend2(nus.end());
 		 it2 != itend2; ++it2) {
 	      const double entry = problem->a(*it2, lambda);
@@ -297,7 +304,7 @@ namespace WaveletTL
 	    }
 	  }
 	}
-	else if (strategy == CDD1) {
+	else if (strategy == CDD1 || strategy == DKOR) {
 	  for (typename Block::const_iterator it2(block.begin()), itend2(block.end());
 	       it2 != itend2; ++it2) {
 // 	    w.add_coefficient(*(problem->basis().get_wavelet(it2->first)),
@@ -403,20 +410,39 @@ namespace WaveletTL
       for (Index lambda = problem->basis().first_generator(j0);; ++lambda) {
 	Lambda.insert(lambda);
 	if (lambda == problem->basis().last_wavelet(jmax)) break;
+        //if (i==7) break;
       }
       SparseMatrix<double> A_Lambda;
-      setup_stiffness_matrix(*this, Lambda, A_Lambda);
       
-#if 1
+      Matrix<double> evecs;
+      Vector<double> evals;
+      setup_stiffness_matrix(*this, Lambda, A_Lambda);
+      A_Lambda.compress(1e-10);
+      
+#if 0
       double help;
       unsigned int iterations;
       LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
       normAinv = 1./help;
+      cout << "Norm:" << normA << endl;
+      cout << "inv Norm:" << normAinv << endl;
+      //cout << help << endl;
+      cout << "Iter: " << iterations << endl;
 #else
-      Vector<double> xk(Lambda.size(), false);
-      xk = 1;
-      unsigned int iterations;
-      normA = PowerIteration(A_Lambda, xk, 1e-6, 100, iterations);
+      //LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
+      SymmEigenvalues(A_Lambda, evals, evecs);
+      
+      cout << "Eigenwerte: " << evals << endl;
+      //cout << "Eigenvektoren: " << endl << evecs << endl;
+      normA = evals(evals.size()-1);
+      cout << "normA: " << normA << endl;
+      int i = 0;
+      while(abs(evals(i))<1e-10){
+          ++i;
+      }
+      cout << "rezinvers: " <<evals(i) << endl;;
+      normAinv = 1./evals(i);
+      cout << "inversnorm: " << normAinv << endl;
 #endif
 
 #if _WAVELETTL_CACHEDPROBLEM_VERBOSITY >= 1
@@ -441,21 +467,40 @@ namespace WaveletTL
       const int jmax = j0+2;
       for (Index lambda = problem->basis().first_generator(j0);; ++lambda) {
 	Lambda.insert(lambda);
+        //cout << lambda << endl;
 	if (lambda == problem->basis().last_wavelet(jmax)) break;
       }
+      //cout << "Schritt 1" << endl;
       SparseMatrix<double> A_Lambda;
+      Matrix<double> evecs;
       setup_stiffness_matrix(*this, Lambda, A_Lambda);
+      //cout << "Matrix aufgestellt" << endl;
+      //cout << A_Lambda << endl;
+      Vector<double> evals;
       
 #if 1
-      double help;
-      unsigned int iterations;
-      LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
-      normAinv = 1./help;
+      cout << "Beginne Normberechnung" << endl;
+      SymmEigenvalues(A_Lambda, evals, evecs);
+      normA = evals(evals.size()-1);
+      int i = 0;
+      while(abs(evals(i))<1e-10){
+          ++i;
+      }
+      cout << "rezinvers: " <<evals(i) << endl;;
+      normAinv = 1./evals(i);
+      cout << "Norm " << normA << endl;
+      cout << "Inv Norm " << normAinv << endl;
+      
 #else
       Vector<double> xk(Lambda.size(), false);
       xk = 1;
       unsigned int iterations;
-      normAinv = InversePowerIteration(A_Lambda, xk, 1e-6, 200, iterations);
+      normAinv = 1./InversePowerIteration(A_Lambda, xk, 1e-6, 200, iterations);
+      cout << "Inv Norm " << normAinv << endl;
+      cout << iterations << endl;
+      //cout << A_Lambda << endl;
+      
+      //cout << "Eigenvektoren: " << evecs << endl;
 #endif
 
 #if _WAVELETTL_CACHEDPROBLEM_VERBOSITY >= 1

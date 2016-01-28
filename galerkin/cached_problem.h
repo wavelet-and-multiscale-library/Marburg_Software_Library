@@ -36,8 +36,10 @@ namespace WaveletTL
   */
   template <class PROBLEM>
   class CachedProblem
-  //  : public FullyDiagonalDyadicPreconditioner<typename PROBLEM::Index>
-    : public FullyDiagonalEnergyNormPreconditioner<typename PROBLEM::Index>
+  //  : public TrivialPreconditioner<typename PROBLEM::Index>
+    : public FullyDiagonalDyadicPreconditioner<typename PROBLEM::Index>
+  //  : public FullyDiagonalEnergyNormPreconditioner<typename PROBLEM::Index>
+  //  : public FullyDyadicPenrichPreconditioner<typename PROBLEM::Index>
   {
   public:
     /*!
@@ -87,7 +89,7 @@ namespace WaveletTL
     }
 
     /*
-     * access to the undelying problem
+     * access to the underlying problem
      */
     const PROBLEM* get_problem() const {return problem;}
 
@@ -161,7 +163,7 @@ namespace WaveletTL
     double F_norm() const { return problem->F_norm(); }
     
     /*!
-      w += factor * (stiffness matrix entries in column lambda on level j)
+      w += factor * (stiffness matrix entries in column lambda on level j, p)
     */
     void add_level (const Index& lambda,
 		    //InfiniteVector<double, Index>& w,
@@ -169,7 +171,11 @@ namespace WaveletTL
 		    const int j,
 		    const double factor,
 		    const int J,
-		    const CompressionStrategy strategy = St04a) const;
+		    const CompressionStrategy strategy = St04a,
+                    const int jmax = 99,
+                    const int pmax = 0,
+                    const double a = 0,
+                    const double b = 0) const;
     
   protected:
     //! the underlying (uncached) problem

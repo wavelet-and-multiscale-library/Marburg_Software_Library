@@ -68,8 +68,8 @@ namespace WaveletTL
   */
   template <class WBASIS>
   class SturmEquation
-//     : public FullyDiagonalDyadicPreconditioner<typename WBASIS::Index>
-    : public FullyDiagonalEnergyNormPreconditioner<typename WBASIS::Index>
+     : public FullyDiagonalDyadicPreconditioner<typename WBASIS::Index>
+//    : public FullyDiagonalEnergyNormPreconditioner<typename WBASIS::Index>
   {
   public:
     /*!
@@ -149,6 +149,7 @@ namespace WaveletTL
     */
     double s_star() const {
       return 1.0 + WBASIS::primal_vanishing_moments(); // [St04a], Th. 2.3 for n=1
+      //return 1.5;
     }
 
     /*!

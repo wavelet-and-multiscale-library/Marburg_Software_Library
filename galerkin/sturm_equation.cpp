@@ -9,6 +9,8 @@
 #include <numerics/eigenvalues.h>
 #include <numerics/gauss_data.h>
 
+#undef QUARKSETTING
+
 namespace WaveletTL
 {
   template <class WBASIS>
@@ -17,8 +19,8 @@ namespace WaveletTL
     : bvp_(bvp), basis_(bvp.bc_left(), bvp.bc_right()), normA(0.0), normAinv(0.0)
   {
     if (precompute_f) precompute_rhs();
-    const int jmax = 12;
-    basis_.set_jmax(jmax);
+    //const int jmax = 12;
+    //basis_.set_jmax(jmax);
   }
 
   template <class WBASIS>
@@ -28,8 +30,8 @@ namespace WaveletTL
     : bvp_(bvp), basis_(basis), normA(0.0), normAinv(0.0)
   {
     if (precompute_f) precompute_rhs();
-    const int jmax = 12;
-    basis_.set_jmax(jmax);
+    //const int jmax = 12;
+    //basis_.set_jmax(jmax);
   }
 
   template <class WBASIS>
@@ -41,15 +43,39 @@ namespace WaveletTL
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
     const int j0   = basis().j0();
-    const int jmax = 8;
-    for (Index lambda(basis_.first_generator(j0));; ++lambda)
+    const int jmax = basis_.get_jmax_();
+#ifdef QUARKSETTING
+    const int pmax = basis_.get_pmax_();
+    int p = 0;
+    for (Index lambda(basis_.first_generator(j0));;)
+      {
+	const double coeff = f(lambda)/D(lambda);
+	if (fabs(coeff)>1e-15)
+	  fhelp.set_coefficient(lambda, coeff);
+	if (lambda == basis_.last_wavelet(jmax, pmax))
+	  break;
+        if (lambda == basis_.last_wavelet(jmax, p)){
+            ++p;
+            lambda = basis_.first_generator(j0,p);
+        }
+        else
+            ++lambda;
+            
+      }
+#else
+    for (Index lambda(basis_.first_generator(j0));;)
       {
 	const double coeff = f(lambda)/D(lambda);
 	if (fabs(coeff)>1e-15)
 	  fhelp.set_coefficient(lambda, coeff);
 	if (lambda == basis_.last_wavelet(jmax))
 	  break;
+        else
+            ++lambda;
+            
       }
+#endif
+    
     fnorm_sqr = l2_norm_sqr(fhelp);
     
     // sort the coefficients into fcoeffs
@@ -68,8 +94,9 @@ namespace WaveletTL
   double
   SturmEquation<WBASIS>::D(const typename WBASIS::Index& lambda) const
   {
-//     return ldexp(1.0, lambda.j());
-    return sqrt(a(lambda, lambda));
+     return ldexp(1.0, lambda.j());
+//    return sqrt(a(lambda, lambda));
+//    return 1;
 //     return lambda.e() == 0 ? 1.0 : ldexp(1.0, lambda.j()); // do not scale the generators
 //     return lambda.e() == 0 ? 1.0 : sqrt(a(lambda, lambda)); // do not scale the generators
   }
@@ -111,8 +138,14 @@ namespace WaveletTL
 	// Set up Gauss points and weights for a composite quadrature formula:
 	// (TODO: maybe use an instance of MathTL::QuadratureRule instead of computing
 	// the Gauss points and weights)
-	const unsigned int N_Gauss = (p+1)/2;
-	const double h = ldexp(1.0, -supp.j);
+        
+
+        #ifdef QUARKSETTING
+	const unsigned int N_Gauss = (p+1)/2+ (lambda.p()+nu.p())/2;
+         #else 
+        const unsigned int N_Gauss = (p+1)/2;
+        #endif
+        const double h = ldexp(1.0, -supp.j);
 	Array1D<double> gauss_points (N_Gauss*(supp.k2-supp.k1)), func1values, func2values, der1values, der2values;
 	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++) // refers to 2^{-j}[patch,patch+1]
 	  for (unsigned int n = 0; n < N_Gauss; n++, id++)
@@ -218,7 +251,7 @@ namespace WaveletTL
     support(basis_, lambda, k1, k2);
 
     // Set up Gauss points and weights for a composite quadrature formula:
-    const unsigned int N_Gauss = 7;
+    const unsigned int N_Gauss = 7; //perhaps we need +lambda.p() @PHK
     const double h = ldexp(1.0, -j);
     Array1D<double> gauss_points (N_Gauss*(k2-k1)), vvalues;
     for (int patch = k1; patch < k2; patch++) // refers to 2^{-j}[patch,patch+1]

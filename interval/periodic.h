@@ -20,6 +20,7 @@
 #include <geometry/sampled_mapping.h>
 
 #include <interval/i_index.h>
+#include <interval/periodic_support.h>
 
 using MathTL::Vector;
 using MathTL::InfiniteVector;
@@ -149,12 +150,20 @@ namespace WaveletTL
     */
     static Index last_index(const int j, const int e);
 
+    
+    
+    void set_jmax(const int jmax) {
+      jmax_ = jmax;
+      setup_full_collection();
+    }
+    
     /*!
       apply Mj0 to some vector x (partial "reconstruct");
       the routine writes only into the first part of y, i.e,
       y might be larger than necessary, which is helpful for other routines;
       offsets and an add_to flag can be specified also
     */
+    
     template <class V>
     void apply_Mj0(const int j, const V& x, V& y,
 		   const size_type x_offset, const size_type y_offset,
@@ -203,7 +212,7 @@ namespace WaveletTL
     SampledMapping<1>
     evaluate
     (const Index& lambda,
-     const int resolution) const;
+     const int resolution, const bool normalization = 1) const;
 
     /*!
       Evaluate an arbitrary linear combination of primal wavelets
@@ -212,15 +221,16 @@ namespace WaveletTL
     SampledMapping<1>
     evaluate
     (const InfiniteVector<double, Index>& coeffs,
-     const int resolution) const;
+     const int resolution, const bool normalization = 1) const;
     
     /*!
       point evaluation of (derivatives) of a single primal generator
       or wavelet \psi_\lambda
+     if normalization=1, we get the normalized scaling functions, so that \int_0^1 \phi = 0
     */
     double evaluate(const unsigned int derivative,
 		    const Index& lambda,
-		    const double x) const;
+		    const double x, const bool normalization = 1) const;
     
     /*!
       point evaluation of (derivatives) of a single primal generator
@@ -229,7 +239,7 @@ namespace WaveletTL
     void evaluate(const unsigned int derivative,
 		  const Index& lambda,
 		  const Array1D<double>& points,
-		  Array1D<double>& values) const;
+		  Array1D<double>& values, const bool normalization = 1) const;
     
     /*!
       point evaluation of 0-th and first derivative of a single primal generator
@@ -238,7 +248,7 @@ namespace WaveletTL
     void evaluate(const Index& lambda,
 		  const Array1D<double>& points,
 		  Array1D<double>& funcvalues,
-		  Array1D<double>& dervalues) const;
+		  Array1D<double>& dervalues, const bool normalization = 1) const;
 
     /*!
       For a given function, compute all integrals w.r.t. the primal
@@ -250,7 +260,7 @@ namespace WaveletTL
         coefficients with the inverse of the primal gramian.
 
       Maybe a thresholding of the returned coefficients is helpful (e.g. for
-      expansions of spline functions).
+      expansions of spline functions).!!!EDIT: THRESHOLDING NOW REALIZED @PHK
     */
     void
     expand
@@ -260,7 +270,7 @@ namespace WaveletTL
      InfiniteVector<double, Index>& coeffs) const;
 
     /*!
-      analogous routine for Vector<double> output
+      analogous routine for Vector<double> output EXPERIMENTAL @PHK
     */
     void
     expand
@@ -280,11 +290,11 @@ namespace WaveletTL
     
     /*!
       helper function, integrate two primal generators or wavelets
-      against each other (for the Gramian)
+      against each other (for the Gramian or if derivative = 1 for the Laplacian)
     */
     double
     integrate
-    (const Index& lambda,
+    (const unsigned int& derivative, const Index& lambda,
      const Index& mu) const;
 
     
@@ -372,10 +382,31 @@ namespace WaveletTL
     */
     void reconstruct_t(const InfiniteVector<double, Index>& c, const int j,
 		       InfiniteVector<double, Index>& v) const;
+    
+    //! get the wavelet index corresponding to a specified number
+    const inline Index* get_wavelet (const int number) const {
+      return &full_collection[number];
+    }
+
+    const int degrees_of_freedom() const { return full_collection.size(); };
 
   private:
     //! an instance of RBASIS
     RBASIS r_basis;
+    
+  protected:
+      
+    //! coarsest possible level
+    int j0_;
+
+    //! finest possible level
+    int jmax_;
+    
+     //! setup full collectin of wavelets between j0_ and jmax_ as long as a jmax_ has been specified
+    void setup_full_collection();
+
+    //! collection of all wavelets between coarsest and finest level
+    Array1D<Index> full_collection;
 
   public:
     //! refinement matrices

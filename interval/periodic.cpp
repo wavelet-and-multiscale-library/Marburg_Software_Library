@@ -21,12 +21,14 @@ namespace WaveletTL
       Mj0_(j0(), r_basis.offset_a, r_basis.band_a, M_SQRT1_2),
       Mj1_(j0(), r_basis.offset_b, r_basis.band_b, M_SQRT1_2),
       Mj0T_(j0(), r_basis.offset_aT, r_basis.band_aT, M_SQRT1_2),
-      Mj1T_(j0(), r_basis.offset_bT, r_basis.band_bT, M_SQRT1_2)
+      Mj1T_(j0(), r_basis.offset_bT, r_basis.band_bT, M_SQRT1_2),
+      j0_(j0())
   {
 //     cout << "Mj0=" << endl << Mj0_ << endl;
 //     cout << "Mj0T=" << endl << Mj0T_ << endl;
 //     cout << "Mj1=" << endl << Mj1_ << endl;
 //     cout << "Mj1T=" << endl << Mj1T_ << endl;
+      
   }
   
   template <class RBASIS>
@@ -265,84 +267,101 @@ namespace WaveletTL
   SampledMapping<1>
   PeriodicBasis<RBASIS>::evaluate
   (const typename PeriodicBasis<RBASIS>::Index& lambda,
-   const int resolution) const
+   const int resolution, const bool normalization) const
   {
     Grid<1> grid(0, 1, 1<<resolution);
     Array1D<double> values((1<<resolution)+1);
     for (unsigned int i(0); i < values.size(); i++) {
       const double x = i*ldexp(1.0, -resolution);
-      values[i] = evaluate(0, lambda, x);
+      values[i] = evaluate(0, lambda, x, normalization);
     }     
     return SampledMapping<1>(grid, values);
   }
 
-//   template <int d, int dT, SplineBasisFlavor flavor, int s0, int s1, int sT0, int sT1>
-//   SampledMapping<1>
-//   SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::evaluate
-//   (const InfiniteVector<double, typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index>& coeffs,
-//    const int resolution) const
-//   {
-//     Grid<1> grid(0, 1, 1<<resolution);
-//     SampledMapping<1> result(grid); // zero
-//     if (coeffs.size() > 0) {
-//       // determine maximal level
-//       int jmax(0);
-//       typedef typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index Index;
-//       for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
-//   	     itend(coeffs.end()); it != itend; ++it)
-//   	jmax = std::max(it.index().j()+it.index().e(), jmax);
+   template <class RBASIS>
+   SampledMapping<1>
+   PeriodicBasis<RBASIS>::evaluate
+   (const InfiniteVector<double, Index>& coeffs,
+    const int resolution, const bool normalization) const
+   {
+     Grid<1> grid(0, 1, 1<<resolution);
+     SampledMapping<1> result(grid); // zero
+     if (coeffs.size() > 0) {
+       // determine maximal level
+       int jmax(0);
+       //typedef typename SplineBasis<d,dT,flavor,s0,s1,sT0,sT1>::Index Index;
+       for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
+   	     itend(coeffs.end()); it != itend; ++it)
+   	jmax = std::max(it.index().j()+it.index().e(), jmax);
       
-//       // insert coefficients into a dense vector
-//       Vector<double> wcoeffs(Deltasize(jmax));
-//       for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
-//  	     itend(coeffs.end()); it != itend; ++it) {
-//  	// determine number of the wavelet
-//  	typedef typename Vector<double>::size_type size_type;
-//  	size_type number = 0;
-//  	if (it.index().e() == 0) {
-//  	  number = it.index().k()-DeltaLmin();
-//  	} else {
-//  	  number = Deltasize(it.index().j())+it.index().k()-Nablamin();
-//  	}
-//  	wcoeffs[number] = *it;
-//       }
+       // insert coefficients into a dense vector
+       Vector<double> wcoeffs(Deltasize(jmax));
+       for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
+  	     itend(coeffs.end()); it != itend; ++it) {
+  	// determine number of the wavelet
+  	typedef typename Vector<double>::size_type size_type;
+  	size_type number = 0;
+  	if (it.index().e() == 0) {
+  	  number = it.index().k()-DeltaLmin();
+  	} else {
+  	  number = Deltasize(it.index().j())+it.index().k()-Nablamin();
+  	}
+  	wcoeffs[number] = *it;
+       }
       
-//       // switch to generator representation
-//       Vector<double> gcoeffs(wcoeffs.size(), false);
-//       if (jmax == j0())
-//  	gcoeffs = wcoeffs;
-//       else
-//  	apply_Tj(jmax-1, wcoeffs, gcoeffs);
+       // switch to generator representation
+       Vector<double> gcoeffs(wcoeffs.size(), false);
+       if (jmax == j0())
+  	gcoeffs = wcoeffs;
+       else
+  	apply_Tj(jmax-1, wcoeffs, gcoeffs);
       
-//       Array1D<double> values((1<<resolution)+1);
-//       for (unsigned int i(0); i < values.size(); i++) {
-//  	values[i] = 0;
-//  	const double x = i*ldexp(1.0, -resolution);
-//  	for (unsigned int k = 0; k < gcoeffs.size(); k++) {
-// 	  values[i] += gcoeffs[k] * evaluate(0, Index(jmax, 0, DeltaLmin()+k), x);
-//  	}
-//       }
+       Array1D<double> values((1<<resolution)+1);
+       for (unsigned int i(0); i < values.size(); i++) {
+  	values[i] = 0;
+  	const double x = i*ldexp(1.0, -resolution);
+  	for (unsigned int k = 0; k < gcoeffs.size(); k++) {
+ 	  values[i] += gcoeffs[k] * evaluate(0, Index(jmax, 0, DeltaLmin()+k), x, normalization);
+  	}
+       }
       
-//       return SampledMapping<1>(grid, values);
-//     }
+       return SampledMapping<1>(grid, values);
+     }
     
-//     return result;
-//   }
+     return result;
+   }
 
 
   
+  //if normalization == 1 we take the normalized scaling function, so that int_0^1 \phi = 0 @PHK
+   
   template <class RBASIS>
   inline
   double
   PeriodicBasis<RBASIS>::evaluate
-  (const unsigned int derivative, const Index& lambda, const double x) const
+  (const unsigned int derivative, const Index& lambda, const double x, const bool normalization) const
   {
-    return r_basis.evaluate(derivative, lambda,
-			    x-floor(x-ldexp(1.0,-lambda.j())
-				    *((lambda.e() == 0
-				       ? RBASIS::primal_mask::begin()
-				       : (RBASIS::primal_mask::begin()+1-RBASIS::dual_mask::end())/2)
+    
+      if(lambda.e() == 0){
+          if(derivative == 0 && normalization == 1)
+                return r_basis.evaluate(derivative, lambda,
+                                x-floor(x-ldexp(1.0,-lambda.j())
+				    *(RBASIS::primal_mask::begin()
+				      +lambda.k())))
+                                - r_basis.integrate(lambda);
+          else
+                return r_basis.evaluate(derivative, lambda,
+                                x-floor(x-ldexp(1.0,-lambda.j())
+				    *(RBASIS::primal_mask::begin()
 				      +lambda.k())));
+      }
+      
+      else{
+        return r_basis.evaluate(derivative, lambda,
+			    x-floor(x-ldexp(1.0,-lambda.j())
+				    *((RBASIS::primal_mask::begin()+1-RBASIS::dual_mask::end())/2
+				      +lambda.k())));  
+      }
   }
   
   template <class RBASIS>
@@ -351,11 +370,11 @@ namespace WaveletTL
   PeriodicBasis<RBASIS>::evaluate(const unsigned int derivative,
 				  const Index& lambda,
 				  const Array1D<double>& points,
-				  Array1D<double>& values) const
+				  Array1D<double>& values,  const bool normalization) const
   {
     values.resize(points.size());
     for (unsigned int i = 0; i < points.size(); i++)
-      values[i] = evaluate(derivative, lambda, points[i]);
+      values[i] = evaluate(derivative, lambda, points[i], normalization);
   }
     
   template <class RBASIS>
@@ -364,11 +383,12 @@ namespace WaveletTL
   PeriodicBasis<RBASIS>::evaluate(const Index& lambda,
 				  const Array1D<double>& points,
 				  Array1D<double>& funcvalues,
-				  Array1D<double>& dervalues) const
+				  Array1D<double>& dervalues,
+                                  const bool normalization) const
   {
     funcvalues.resize(points.size());
     dervalues.resize(points.size());
-    evaluate(0, lambda, points, funcvalues);
+    evaluate(0, lambda, points, funcvalues, normalization);
     evaluate(1, lambda, points, dervalues );
   }
 
@@ -408,7 +428,7 @@ namespace WaveletTL
 	  for (typename std::set<Index>::const_iterator it2(Lambda.begin());
 	       it2 != itend; ++it2, ++column)
 	    {
-	      double entry = integrate(*it2, *it1);
+	      double entry = integrate(0, *it2, *it1);
 	      
 	      if (entry != 0) {
 		indices.push_back(column);
@@ -435,6 +455,9 @@ namespace WaveletTL
 	   it != itend; ++it, ++row)
 	coeffs.set_coefficient(*it, x[row]);
     }
+    InfiniteVector<double, Index> helpcoeffs;
+    coeffs.COARSE(1e-6,helpcoeffs);
+    coeffs = helpcoeffs;
   }
 
   template <class RBASIS>
@@ -444,8 +467,6 @@ namespace WaveletTL
 				const int jmax,
 				Vector<double>& coeffs) const
   {
-    assert(primal);
-
     coeffs.resize(Deltasize(jmax+1));
 
     int id = 0;
@@ -454,9 +475,62 @@ namespace WaveletTL
 	coeffs[id] = integrate(f, lambda);
 	if (lambda == last_wavelet(jmax))
 	  break;
-      }   
+      }
+    
+    
+    if (!primal) {
+      // setup active index set
+      std::set<Index> Lambda;
+      for (Index lambda = first_generator(j0());; ++lambda) {
+ 	Lambda.insert(lambda);
+	if (lambda == last_wavelet(jmax)) break;
+      }
+      
+      // setup Gramian A_Lambda
+      SparseMatrix<double> A_Lambda(Lambda.size());
+      typedef typename SparseMatrix<double>::size_type size_type;     
+      size_type row = 0;
+      for (typename std::set<Index>::const_iterator it1(Lambda.begin()), itend(Lambda.end());
+	   it1 != itend; ++it1, ++row)
+	{
+	  std::list<size_type> indices;
+	  std::list<double> entries;
+	  
+	  size_type column = 0;
+	  for (typename std::set<Index>::const_iterator it2(Lambda.begin());
+	       it2 != itend; ++it2, ++column)
+	    {
+	      double entry = integrate(0, *it2, *it1);
+	      
+	      if (entry != 0) {
+		indices.push_back(column);
+		entries.push_back(entry);
+	      }
+	    }
+	  A_Lambda.set_row(row, indices, entries);
+	} 
+      
+      // solve A_Lambda*x = b
+      Vector<double> b(Lambda.size());
+      row = 0;
+      for (typename std::set<Index>::const_iterator it(Lambda.begin()), itend(Lambda.end());
+	   it != itend; ++it, ++row)
+	b[row] = coeffs(row);
+      
+      Vector<double> x(b);
+      unsigned int iterations;
+      CG(A_Lambda, b, x, 1e-15, 500, iterations);
+      
+      coeffs.resize(Deltasize(jmax+1));
+      row = 0;
+      for (typename std::set<Index>::const_iterator it(Lambda.begin()), itend(Lambda.end());
+	   it != itend; ++it, ++row)
+	coeffs[row] = x[row];
+    }
+    coeffs.compress(1e-10);
   }
   
+  //not yet adapted to the normalized case @PHK
   template <class RBASIS>
   double
   PeriodicBasis<RBASIS>::integrate(const Function<1>* f,
@@ -474,6 +548,7 @@ namespace WaveletTL
     const unsigned int N_Gauss = 5;
     const double h = 1.0/(1<<j);
 
+      
     Array1D<double> gauss_points (N_Gauss*length);
     int k = k1;
     for (int patch = 0; patch < length; patch++, k = dyadic_modulo(++k,j)) // work on 2^{-j}[k,k+1]
@@ -499,14 +574,15 @@ namespace WaveletTL
     return r;
   }
   
+  //not yet adapted to the normalized case @PHK
   template <class RBASIS>
   double
-  PeriodicBasis<RBASIS>::integrate(const Index& lambda,
+  PeriodicBasis<RBASIS>::integrate(const unsigned int& derivative, const Index& lambda,
 				   const Index& mu) const
   {
     double r = 0;
     
-    if (intersect_supports(lambda, mu))
+    if (intersect_supports(lambda, mu))//gibt Probleme, falls beides Generatoren ohne Überlappung
       {
 	// first we determine the support over which to integrate
 	int j, k1, k2, length;
@@ -519,7 +595,10 @@ namespace WaveletTL
 	}
 	length = (k2 > k1 ? k2-k1 : k2+(1<<j)-k1); // number of subintervals
 	
-	// setup Gauss points and weights for a composite quadrature formula:
+	
+        if(lambda.e() == 1 && mu.e() == 1 && derivative > 0){// if only one of the functions is a wavelet, the constant
+                                           //part can be skipped because of the vanishing moments @PHK
+        // setup Gauss points and weights for a composite quadrature formula:
  	const unsigned int N_Gauss = primal_polynomial_degree();
 	const double h = 1.0/(1<<j);
 	
@@ -530,8 +609,8 @@ namespace WaveletTL
 	    gauss_points[patch*N_Gauss+n] = h*(2*k+1+GaussPoints[N_Gauss-1][n])/2;
 
   	// - compute point values of the integrands
-   	evaluate(0, lambda, gauss_points, func1values);
-  	evaluate(0, mu, gauss_points, func2values);
+   	evaluate(derivative, lambda, gauss_points, func1values, 0);
+  	evaluate(derivative, mu, gauss_points, func2values, 0);
 	
   	// - add all integral shares
 	for (int patch = k1, id = 0; patch < k1+length; patch++)
@@ -540,6 +619,31 @@ namespace WaveletTL
 	  }
 
 	return r;
+        }
+        else{// not yet changed to normalized setting
+         // setup Gauss points and weights for a composite quadrature formula:
+ 	const unsigned int N_Gauss = primal_polynomial_degree();
+	const double h = 1.0/(1<<j);
+	
+	Array1D<double> gauss_points (N_Gauss*(length)), func1values, func2values;
+	int k = k1;
+	for (int patch = 0; patch < length; patch++, k = dyadic_modulo(++k,j)) // work on 2^{-j}[k,k+1]
+	  for (unsigned int n = 0; n < N_Gauss; n++)
+	    gauss_points[patch*N_Gauss+n] = h*(2*k+1+GaussPoints[N_Gauss-1][n])/2;
+
+  	// - compute point values of the integrands
+   	evaluate(derivative, lambda, gauss_points, func1values, 0);
+  	evaluate(derivative, mu, gauss_points, func2values, 0);
+	
+  	// - add all integral shares
+	for (int patch = k1, id = 0; patch < k1+length; patch++)
+	  for (unsigned int n = 0; n < N_Gauss; n++, id++) {
+	    r += func1values[id] * func2values[id] * GaussWeights[N_Gauss-1][n] * h;
+	  }
+
+	return r;
+        }   
+        
       }
 
     return 0;
@@ -787,4 +891,29 @@ namespace WaveletTL
     }
   }
 
+  template <class RBASIS>
+  void
+  PeriodicBasis<RBASIS>::setup_full_collection()
+  {
+    if (jmax_ == -1 || jmax_ < j0_) {
+      cout << "PeriodicBasis<RBASIS>::setup_full_collection(): specify a maximal level of resolution first!" << endl;
+      abort();
+    }   
+
+    int degrees_of_freedom = Deltasize(jmax_+1);
+    cout << "total degrees of freedom between j0_ and jmax_ is " << degrees_of_freedom << endl;
+    cout << "j0_:" << j0_ << endl;
+    cout << "setting up collection of wavelet indices..." << endl;
+    
+    //cout << "jmax= " << jmax_ << endl;
+    full_collection.resize(degrees_of_freedom);
+    int k = 0;
+    
+    for (Index ind = first_generator(j0_); ind <= last_wavelet(jmax_); ++ind) {
+      full_collection[k] = ind;
+      k++;
+    }
+    cout << "done setting up collection of wavelet indices..." << endl;
+
+  }
 }

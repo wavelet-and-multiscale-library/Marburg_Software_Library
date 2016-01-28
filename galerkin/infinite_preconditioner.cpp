@@ -76,6 +76,14 @@ namespace WaveletTL
   {
     return pow(ldexp(1.0, lambda.j()), operator_order());
   }
+  
+  template <class INDEX>
+  inline
+  double
+  FullyDiagonalQuarkletPreconditioner<INDEX>::diag(const INDEX& lambda) const
+  {
+    return pow(ldexp(1.0, lambda.j())*pow(1+lambda.p(),4), operator_order()) * (1+lambda.p()); //2^j*(p+1)^5
+  }
 
   template <class INDEX>
   inline
@@ -83,6 +91,7 @@ namespace WaveletTL
   FullyDiagonalEnergyNormPreconditioner<INDEX>::diag(const INDEX& lambda) const
   {
     return sqrt(a(lambda, lambda));
+    //return ldexp(1.0, lambda.j()); //ATTENTION!!! HAS TO BE CHANGED BACK; ONLY FOR EXPERIMENTING
   };
 
   template <class INDEX>

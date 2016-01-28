@@ -25,19 +25,21 @@ int main()
 {
   cout << "Testing FullLaplacian ..." << endl;
 
-  const int d  = 2;
-  const int dT = 2;
+  const int d  = 4;
+  const int dT = 4;
   const int s0 = 1;
   const int s1 = 1;
   const int J0 = SplineBasisData_j0<d,dT,P_construction,s0,s1,0,0>::j0;
   
   // PBasis, complementary b.c.'s
   typedef SplineBasis<d,dT,P_construction,s0,s1,0,0,J0> Basis;
+  //typedef PeriodicBasis<CDFBasis<d, dt> > Basis;
+
 
   Basis basis;
 
 //   FullLaplacian<d,dT,J0> delta(basis, dyadic);
-  FullLaplacian<d,dT,s0,s1,J0> delta(basis, energy);
+  FullLaplacian<d,dT,s0,s1,J0/*basis.j0()*/> delta(basis, energy);
 
   cout << "* stiffness matrix on coarsest level j0=" << basis.j0() << ":" << endl
        << delta;
@@ -52,7 +54,7 @@ int main()
   cout << "* stiffness matrix on next level j0+1=" << basis.j0()+1 << ":" << endl
        << delta;
 
-  diagonal.resize(delta.row_dimension());
+  /*diagonal.resize(delta.row_dimension());
   for (unsigned int k = 0; k < diagonal.size(); k++)
     diagonal[k] = delta.diagonal(k);
   cout << "* main diagonal of unpreconditioned stiffness matrix:" << endl
@@ -341,5 +343,5 @@ int main()
   galerkin_stream.close();
 #endif
 
-  return 0;
+return 0;*/
 }

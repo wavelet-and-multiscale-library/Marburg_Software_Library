@@ -84,8 +84,8 @@ int main()
 //   cout << "- integration of p against psi<2,2> yields:" << endl
 //        << integrate<2,2>(p, RIndex(0,1,0)) << endl;
 
-  const int d = 2;
-  const int dT = 4; // be sure to use a continuous dual here!
+  const int d = 3;
+  const int dT = 3; // be sure to use a continuous dual here!
   CDFBasis<d,dT> basis;
   typedef CDFBasis<d,dT>::Index Index;
 
@@ -94,8 +94,8 @@ int main()
   for (int k = -12*(1<<j); k <= 12*(1<<j); k++)
     coeffs[Index(j,0,k)] = integrate<d,dT>(p,Index(j,0,k));
 
-//   cout << "- integrals of p against some primal generators:" << endl
-//        << coeffs << endl;
+   cout << "- integrals of p against some primal generators:" << endl
+        << coeffs << endl;
 
   cout << "- evaluating this linear combination of dual generators yields the pointwise error on [-8,8]" << endl;
   SampledMapping<1> s2(basis.evaluate(0, coeffs, false, -8, 8, 3));

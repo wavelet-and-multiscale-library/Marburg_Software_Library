@@ -11,7 +11,7 @@ int main()
 {
   cout << "Test CDFBasis class..." << endl;
 
-  const int d = 1;
+  const int d = 3;
   const int dt = 3;
 
   CDFBasis<d,dt> basis;
@@ -30,7 +30,8 @@ int main()
     cout << "b(" << k << ")=" << basis.b(k) << endl;
   }
 
-#if 1
+#if 0
+  cout << "NEUYEAH: " << basis.evaluate(0, RIndex(1,0,0),0.0) << endl;
   cout << "point values:" << endl;
 
   Grid<1> grid(-4.0, 4.0, 512);
@@ -38,6 +39,8 @@ int main()
   basis.evaluate(0, RIndex(3,1,0), grid.points(), values);
   SampledMapping<1>(grid,values).matlab_output(cout);
 #endif
+  
+  cout << "Integral: " << basis.integrate(RIndex(1,1,5)) << endl;
 
   return 0;
 }

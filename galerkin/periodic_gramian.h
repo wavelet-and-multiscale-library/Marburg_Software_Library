@@ -4,7 +4,7 @@
 // | This file is part of WaveletTL - the Wavelet Template Library      |
 // |                                                                    |
 // | Copyright (c) 2002-2009                                            |
-// | Thorsten Raasch, Manuel Werner                                     |
+// | Thorsten Raasch, Manuel Werner, Philipp Keding                     |
 // +--------------------------------------------------------------------+
 
 #ifndef _WAVELETTL_PERIODIC_GRAMIAN_H
@@ -16,8 +16,9 @@
 #include <algebra/infinite_vector.h>
 #include <algebra/vector.h>
 #include <interval/periodic.h>
+#include <numerics/periodiclp.h>
 
-using MathTL::InfiniteVector;
+using namespace MathTL;
 
 namespace WaveletTL
 {
@@ -30,17 +31,19 @@ namespace WaveletTL
     to be used in (adaptive) algorithms.
 
     The class has the minimal signature to be used within the APPLY routine
-    or within adaptive solvers like CDD1.
+    or within adaptive solvers like CDD1 or CDD2.
   */
   template <class RBASIS>
   class PeriodicIntervalGramian
   {
   public:
     /*!
-      constructor from a given wavelet basis and a given right-hand side y
+      constructor from a given wavelet basis and a given periodic problem plp
     */
-    PeriodicIntervalGramian(const PeriodicBasis<RBASIS>& basis,
- 			    const InfiniteVector<double, typename PeriodicBasis<RBASIS>::Index>& y);
+    PeriodicIntervalGramian(const PeriodicLaplacianProblem& plp, const PeriodicBasis<RBASIS>& basis);
+    
+    
+    
     
     /*!
       make template argument accessible
@@ -75,12 +78,21 @@ namespace WaveletTL
     /*!
       (half) order t of the operator
     */
-    static double operator_order() { return 0; }
+    static double operator_order() 
+        { 
+            return 0; 
+            
+        }
 
     /*!
-      evaluate the diagonal preconditioner D (essentially, we don't need any)
+      evaluate the diagonal preconditioner D (no scaling)
     */
-    double D(const typename WaveletBasis::Index& lambda) const { return 1; }
+    double D(const typename WaveletBasis::Index& lambda) const 
+    { 
+        //return ldexp(1.0, lambda.j()); //2^j
+        return 1;
+        //return sqrt(a(lambda,lambda));
+    }
 
     /*!
       evaluate the (unpreconditioned) bilinear form a
@@ -120,41 +132,56 @@ namespace WaveletTL
     /*!
       evaluate the (unpreconditioned) right-hand side f
     */
-    double f(const typename WaveletBasis::Index& lambda) const {
+    /*double f(const typename WaveletBasis::Index& lambda) const {
       return y_.get_coefficient(lambda);
-    }
+    }*/
+    double f(const Index& lambda) const;
 
     /*!
       approximate the wavelet coefficient set of the preconditioned right-hand side F
       within a prescribed \ell_2 error tolerance
     */
     void RHS(const double eta,
- 	     InfiniteVector<double,typename WaveletBasis::Index>& coeffs) const {
+ 	     InfiniteVector<double, Index>& coeffs) const; /*{
       coeffs = y_; // dirty
-    }
+    }*/
 
     /*!
       compute (or estimate) ||F||_2
     */
-    double F_norm() const { return l2_norm(y_); }
+    double F_norm() const { return sqrt(fnorm_sqr); }
 
     /*!
       set right-hand side y
     */
-    void set_rhs(const InfiniteVector<double, typename WaveletBasis::Index>& y) const {
+    /*void set_rhs(const InfiniteVector<double, typename WaveletBasis::Index>& y) const {
       y_ = y;
-    }
+    }*/
 
   protected:
-    const WaveletBasis& basis_;
+    const PeriodicLaplacianProblem& plp_;
+    WaveletBasis basis_;
     
-    // rhs, mutable to have 'const' method
-    mutable InfiniteVector<double, typename WaveletBasis::Index> y_;
+    
     
     // estimates for ||A|| and ||A^{-1}||
     mutable double normA, normAinv;
-  };
-
+    
+    // flag whether right-hand side has already been precomputed
+    mutable bool rhs_precomputed;
+    
+    // right-hand side coefficients on a fine level, sorted by modulus
+    mutable Array1D<std::pair<Index,double> > fcoeffs;
+    
+    // (squared) \ell_2 norm of the precomputed right-hand side
+    mutable double fnorm_sqr;
+    
+    /*!
+      precomputation of the right-hand side
+      (constness is not nice but necessary to have RHS a const function)
+    */
+    void precompute_rhs() const;
+  }; 
 }
 
 #include <galerkin/periodic_gramian.cpp>

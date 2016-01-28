@@ -102,7 +102,7 @@ namespace WaveletTL
 	  {
 	    // 	    if (intersect_singular_support(P.basis(), *it1, *it2)) {
 	    double entry = P.a(*it2, *it1);
-	    
+	    //cout << *it2 << ", " << *it1 << ": " << entry << endl;
 	    //const double entry = 0;
 #if _WAVELETTL_GALERKINUTILS_VERBOSITY >= 2
  	    if (fabs(entry) > 1e-15) {

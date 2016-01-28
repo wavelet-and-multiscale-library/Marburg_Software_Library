@@ -288,6 +288,10 @@ namespace WaveletTL
       jmax_ = jmax;
       setup_full_collection();
     }
+    
+    int get_jmax_() const{
+        return jmax_;
+    }
 
     //! get the wavelet index corresponding to a specified number
     const inline Index* get_wavelet (const int number) const {

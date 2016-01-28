@@ -48,6 +48,7 @@ namespace WaveletTL
 	      r += ft
 		* evaluate(basis, 0, lambda, t)
 		* gauss_weight;
+            //cout << "Stelle: " << t << ", Wert: " << evaluate(basis, 0, lambda, t) << endl;
 	  }
       }
     

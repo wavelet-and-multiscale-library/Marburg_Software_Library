@@ -436,7 +436,7 @@ namespace WaveletTL
   DSBasis<d,dT,BIO>::setup_full_collection()
   {
     if (jmax_ == -1 || jmax_ < j0_) {
-      cout << "DSBasis<d,dT,BIO>::setup_full_collection(): specify a mximal level of resolution first!" << endl;
+      cout << "DSBasis<d,dT,BIO>::setup_full_collection(): specify a maximal level of resolution first!" << endl;
       abort();
     }   
 

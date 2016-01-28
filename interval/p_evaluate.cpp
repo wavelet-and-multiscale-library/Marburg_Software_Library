@@ -170,6 +170,7 @@ namespace WaveletTL
           // gcoeffs contains only coeffs related to generators on level j+1
           // j_ = j+1; e_ = 0; k_ = DeltaLmin() + num
           r += *it * evaluate(basis, derivative, lambda.j()+1,0,Lmin+it.index(), x);
+          //cout << "Index: " << it.index() << ", Wert: " << evaluate(basis, derivative, lambda.j()+1,0,Lmin+it.index(), x) << endl;
       }
     }
     return r;

@@ -80,6 +80,8 @@ endif
 
 # set 1 of test programs: stuff on R and R^d
 EXEOBJF1 = \
+  test_periodic_frame.o\
+  test_r_frame.o\
   test_refinable.o test_r_basis.o\
   test_regularity.o\
   test_dm.o\
@@ -96,6 +98,7 @@ EXEOBJF2 = \
   test_s_basis.o\
   test_s_support.o\
   test_i_indexplot.o\
+  test_i_index.o\
 #  test_i_indexplot.o\ (temporarily commented out)
 
 # set 2a of test programs: wavelet bases on the interval with improved performance (periodic)
@@ -132,6 +135,7 @@ EXEOBJF4 = \
 
 # set 5 of test programs: adaptive wavelet schemes for elliptic equations
 EXEOBJF5 = \
+  test_full_laplacian.o\
   test_cdd1_cube.o\
   test_cdd1.o\
   test_cdd2.o test_duv.o\
@@ -150,15 +154,16 @@ EXEOBJF6 = \
 
 # set 7 of test programs: nonadaptive wavelet solvers for elliptic problems	
 EXEOBJF7 = \
-  test_full_laplacian.o test_full_laplacian_speed.o\
-  test_full_gramian.o test_full_helmholtz.o\
+  test_full_laplacian_speed.o\
+  test_full_gramian.o\
+  test_full_helmholtz.o\
   test_full_ring_helmholtz.o
 
 # set 8 of test programs: ExpandASPP	
 EXEOBJF8 = \
   test_expandWavelet.o\
   test_support.o\
-  test_i_index.o\
+  
 
 EXES1 = $(EXEOBJF1:.o=)
 EXES2 = $(EXEOBJF2:.o=)

@@ -1,0 +1,149 @@
+\hypertarget{classFrameTL_1_1Index1D}{
+\section{FrameTL::Index1D$<$ IBASIS $>$ Class Template Reference}
+\label{classFrameTL_1_1Index1D}\index{FrameTL::Index1D@{FrameTL::Index1D}}
+}
+{\tt \#include $<$index1D.h$>$}
+
+\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+\hyperlink{classFrameTL_1_1Index1D_009f4a2f3382426f8c0560c7e764e7a8}{Index1D} (const typename IBASIS::Index \&ind, const unsigned int p, const unsigned int dir, const unsigned int der)
+\item 
+bool \hyperlink{classFrameTL_1_1Index1D_276b4f8c960e7bce5cac8d63c5c07bad}{operator$<$} (const \hyperlink{classFrameTL_1_1Index1D}{Index1D}$<$ IBASIS $>$ \&lambda) const 
+\item 
+bool \hyperlink{classFrameTL_1_1Index1D_ae4f859de8325a33501146ddc6794473}{operator==} (const \hyperlink{classFrameTL_1_1Index1D}{Index1D}$<$ IBASIS $>$ \&lambda) const 
+\item 
+bool \hyperlink{classFrameTL_1_1Index1D_a966fed809d2871b7cec4eadeffb6814}{operator!=} (const \hyperlink{classFrameTL_1_1Index1D}{Index1D}$<$ IBASIS $>$ \&lambda) const 
+\item 
+bool \hyperlink{classFrameTL_1_1Index1D_3509b3f4c7673c40da1485b3b4b77274}{operator$<$=} (const \hyperlink{classFrameTL_1_1Index1D}{Index1D}$<$ IBASIS $>$ \&lambda) const 
+\item 
+IBASIS::Index \hyperlink{classFrameTL_1_1Index1D_c7730cfbad3d3f89e1a22f7f6b8ee6b9}{index} () const 
+\item 
+unsigned int \hyperlink{classFrameTL_1_1Index1D_46d0d42aec593b2e95c9b5c9d52c8996}{derivative} () const 
+\item 
+unsigned int \hyperlink{classFrameTL_1_1Index1D_81891e5fbcc38d52ac67b79f31fbe4e9}{p} () const 
+\item 
+unsigned int \hyperlink{classFrameTL_1_1Index1D_6b15c805cffc08a4c241b6343573fe0a}{direction} () const 
+\end{CompactItemize}
+\subsection*{Protected Attributes}
+\begin{CompactItemize}
+\item 
+IBASIS::Index \hyperlink{classFrameTL_1_1Index1D_b6de25bfbba40ba29cb649ee96c8e3dd}{ind\_\-}
+\item 
+unsigned int \hyperlink{classFrameTL_1_1Index1D_76b815344076e70d88f55782813d380e}{p\_\-}
+\item 
+unsigned int \hyperlink{classFrameTL_1_1Index1D_6415d2263117ba0f0b88acfb6b25558b}{dir\_\-}
+\item 
+unsigned int \hyperlink{classFrameTL_1_1Index1D_edcb84781a4ebd4dde1a85197fd270f6}{der\_\-}
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+\subsubsection*{template$<$class IBASIS$>$ class FrameTL::Index1D$<$ IBASIS $>$}
+
+This class is just used to attach to an IntervalIndex$<$IBASIS$>$ from interval/i\_\-index.h a patchnumber, a spatial direction and a derivative order. This class is only used, e.g., in simple\_\-elliptic\_\-equation.cpp (routine integrate) for the caching of one dimensional integrals (in a certain spatial direction) arising when the tensor product structure is used to evaluate the bilinear form associated to an elliptic operator. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classFrameTL_1_1Index1D_009f4a2f3382426f8c0560c7e764e7a8}{
+\index{FrameTL::Index1D@{FrameTL::Index1D}!Index1D@{Index1D}}
+\index{Index1D@{Index1D}!FrameTL::Index1D@{FrameTL::Index1D}}
+\subsubsection[{Index1D}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class IBASIS $>$ {\bf FrameTL::Index1D}$<$ IBASIS $>$::{\bf Index1D} (const typename IBASIS::Index \& {\em ind}, \/  const unsigned int {\em p}, \/  const unsigned int {\em dir}, \/  const unsigned int {\em der})\hspace{0.3cm}{\tt  \mbox{[}inline\mbox{]}}}}
+\label{classFrameTL_1_1Index1D_009f4a2f3382426f8c0560c7e764e7a8}
+
+
+Constructor. 
+
+\subsection{Member Function Documentation}
+\hypertarget{classFrameTL_1_1Index1D_46d0d42aec593b2e95c9b5c9d52c8996}{
+\index{FrameTL::Index1D@{FrameTL::Index1D}!derivative@{derivative}}
+\index{derivative@{derivative}!FrameTL::Index1D@{FrameTL::Index1D}}
+\subsubsection[{derivative}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class IBASIS$>$ unsigned int {\bf FrameTL::Index1D}$<$ IBASIS $>$::derivative () const\hspace{0.3cm}{\tt  \mbox{[}inline\mbox{]}}}}
+\label{classFrameTL_1_1Index1D_46d0d42aec593b2e95c9b5c9d52c8996}
+
+
+The order of derivative of the encoded wavelet or generator. \hypertarget{classFrameTL_1_1Index1D_6b15c805cffc08a4c241b6343573fe0a}{
+\index{FrameTL::Index1D@{FrameTL::Index1D}!direction@{direction}}
+\index{direction@{direction}!FrameTL::Index1D@{FrameTL::Index1D}}
+\subsubsection[{direction}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class IBASIS$>$ unsigned int {\bf FrameTL::Index1D}$<$ IBASIS $>$::direction () const\hspace{0.3cm}{\tt  \mbox{[}inline\mbox{]}}}}
+\label{classFrameTL_1_1Index1D_6b15c805cffc08a4c241b6343573fe0a}
+
+
+The spatial direction the 1D wavelet or generator belongs to. \hypertarget{classFrameTL_1_1Index1D_c7730cfbad3d3f89e1a22f7f6b8ee6b9}{
+\index{FrameTL::Index1D@{FrameTL::Index1D}!index@{index}}
+\index{index@{index}!FrameTL::Index1D@{FrameTL::Index1D}}
+\subsubsection[{index}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class IBASIS$>$ IBASIS::Index {\bf FrameTL::Index1D}$<$ IBASIS $>$::index () const\hspace{0.3cm}{\tt  \mbox{[}inline\mbox{]}}}}
+\label{classFrameTL_1_1Index1D_c7730cfbad3d3f89e1a22f7f6b8ee6b9}
+
+
+Read access to the encapsulated 1D wavelet index. \hypertarget{classFrameTL_1_1Index1D_a966fed809d2871b7cec4eadeffb6814}{
+\index{FrameTL::Index1D@{FrameTL::Index1D}!operator!=@{operator!=}}
+\index{operator!=@{operator!=}!FrameTL::Index1D@{FrameTL::Index1D}}
+\subsubsection[{operator!=}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class IBASIS $>$ bool {\bf FrameTL::Index1D}$<$ IBASIS $>$::operator!= (const {\bf Index1D}$<$ IBASIS $>$ \& {\em lambda}) const\hspace{0.3cm}{\tt  \mbox{[}inline\mbox{]}}}}
+\label{classFrameTL_1_1Index1D_a966fed809d2871b7cec4eadeffb6814}
+
+
+Check for inequality. \hypertarget{classFrameTL_1_1Index1D_276b4f8c960e7bce5cac8d63c5c07bad}{
+\index{FrameTL::Index1D@{FrameTL::Index1D}!operator$<$@{operator$<$}}
+\index{operator$<$@{operator$<$}!FrameTL::Index1D@{FrameTL::Index1D}}
+\subsubsection[{operator$<$}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class IBASIS $>$ bool {\bf FrameTL::Index1D}$<$ IBASIS $>$::operator$<$ (const {\bf Index1D}$<$ IBASIS $>$ \& {\em lambda}) const\hspace{0.3cm}{\tt  \mbox{[}inline\mbox{]}}}}
+\label{classFrameTL_1_1Index1D_276b4f8c960e7bce5cac8d63c5c07bad}
+
+
+Relation \char`\"{}less than\char`\"{} according to the hierarchy \char`\"{}IntervalIndex, patch, direction, derivative\char`\"{}. \hypertarget{classFrameTL_1_1Index1D_3509b3f4c7673c40da1485b3b4b77274}{
+\index{FrameTL::Index1D@{FrameTL::Index1D}!operator$<$=@{operator$<$=}}
+\index{operator$<$=@{operator$<$=}!FrameTL::Index1D@{FrameTL::Index1D}}
+\subsubsection[{operator$<$=}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class IBASIS $>$ bool {\bf FrameTL::Index1D}$<$ IBASIS $>$::operator$<$= (const {\bf Index1D}$<$ IBASIS $>$ \& {\em lambda}) const\hspace{0.3cm}{\tt  \mbox{[}inline\mbox{]}}}}
+\label{classFrameTL_1_1Index1D_3509b3f4c7673c40da1485b3b4b77274}
+
+
+Relation \char`\"{}less than or equal\char`\"{} according to the hierarchy \char`\"{}IntervalIndex, patch, direction, derivative\char`\"{}. \hypertarget{classFrameTL_1_1Index1D_ae4f859de8325a33501146ddc6794473}{
+\index{FrameTL::Index1D@{FrameTL::Index1D}!operator==@{operator==}}
+\index{operator==@{operator==}!FrameTL::Index1D@{FrameTL::Index1D}}
+\subsubsection[{operator==}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class IBASIS $>$ bool {\bf FrameTL::Index1D}$<$ IBASIS $>$::operator== (const {\bf Index1D}$<$ IBASIS $>$ \& {\em lambda}) const\hspace{0.3cm}{\tt  \mbox{[}inline\mbox{]}}}}
+\label{classFrameTL_1_1Index1D_ae4f859de8325a33501146ddc6794473}
+
+
+Check for equality. \hypertarget{classFrameTL_1_1Index1D_81891e5fbcc38d52ac67b79f31fbe4e9}{
+\index{FrameTL::Index1D@{FrameTL::Index1D}!p@{p}}
+\index{p@{p}!FrameTL::Index1D@{FrameTL::Index1D}}
+\subsubsection[{p}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class IBASIS$>$ unsigned int {\bf FrameTL::Index1D}$<$ IBASIS $>$::p () const\hspace{0.3cm}{\tt  \mbox{[}inline\mbox{]}}}}
+\label{classFrameTL_1_1Index1D_81891e5fbcc38d52ac67b79f31fbe4e9}
+
+
+The patchnumber of the encoded wavelet or generator. 
+
+\subsection{Member Data Documentation}
+\hypertarget{classFrameTL_1_1Index1D_edcb84781a4ebd4dde1a85197fd270f6}{
+\index{FrameTL::Index1D@{FrameTL::Index1D}!der\_\-@{der\_\-}}
+\index{der\_\-@{der\_\-}!FrameTL::Index1D@{FrameTL::Index1D}}
+\subsubsection[{der\_\-}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class IBASIS$>$ unsigned int {\bf FrameTL::Index1D}$<$ IBASIS $>$::{\bf der\_\-}\hspace{0.3cm}{\tt  \mbox{[}protected\mbox{]}}}}
+\label{classFrameTL_1_1Index1D_edcb84781a4ebd4dde1a85197fd270f6}
+
+
+The derivative order. \hypertarget{classFrameTL_1_1Index1D_6415d2263117ba0f0b88acfb6b25558b}{
+\index{FrameTL::Index1D@{FrameTL::Index1D}!dir\_\-@{dir\_\-}}
+\index{dir\_\-@{dir\_\-}!FrameTL::Index1D@{FrameTL::Index1D}}
+\subsubsection[{dir\_\-}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class IBASIS$>$ unsigned int {\bf FrameTL::Index1D}$<$ IBASIS $>$::{\bf dir\_\-}\hspace{0.3cm}{\tt  \mbox{[}protected\mbox{]}}}}
+\label{classFrameTL_1_1Index1D_6415d2263117ba0f0b88acfb6b25558b}
+
+
+The spatial direction. \hypertarget{classFrameTL_1_1Index1D_b6de25bfbba40ba29cb649ee96c8e3dd}{
+\index{FrameTL::Index1D@{FrameTL::Index1D}!ind\_\-@{ind\_\-}}
+\index{ind\_\-@{ind\_\-}!FrameTL::Index1D@{FrameTL::Index1D}}
+\subsubsection[{ind\_\-}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class IBASIS$>$ IBASIS::Index {\bf FrameTL::Index1D}$<$ IBASIS $>$::{\bf ind\_\-}\hspace{0.3cm}{\tt  \mbox{[}protected\mbox{]}}}}
+\label{classFrameTL_1_1Index1D_b6de25bfbba40ba29cb649ee96c8e3dd}
+
+
+The 1D wavelet or generator index. \hypertarget{classFrameTL_1_1Index1D_76b815344076e70d88f55782813d380e}{
+\index{FrameTL::Index1D@{FrameTL::Index1D}!p\_\-@{p\_\-}}
+\index{p\_\-@{p\_\-}!FrameTL::Index1D@{FrameTL::Index1D}}
+\subsubsection[{p\_\-}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class IBASIS$>$ unsigned int {\bf FrameTL::Index1D}$<$ IBASIS $>$::{\bf p\_\-}\hspace{0.3cm}{\tt  \mbox{[}protected\mbox{]}}}}
+\label{classFrameTL_1_1Index1D_76b815344076e70d88f55782813d380e}
+
+
+The patchnumber. 
+
+The documentation for this class was generated from the following files:\begin{CompactItemize}
+\item 
+/home/werner/PROMOTION/source/FrameTL/index1D.h\item 
+/home/werner/PROMOTION/source/FrameTL/index1D.cpp\end{CompactItemize}

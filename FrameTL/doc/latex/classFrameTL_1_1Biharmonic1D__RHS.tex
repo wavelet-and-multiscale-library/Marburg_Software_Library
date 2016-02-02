@@ -1,0 +1,59 @@
+\hypertarget{classFrameTL_1_1Biharmonic1D__RHS}{
+\section{FrameTL::Biharmonic1D\_\-RHS$<$ IBASIS $>$ Class Template Reference}
+\label{classFrameTL_1_1Biharmonic1D__RHS}\index{FrameTL::Biharmonic1D\_\-RHS@{FrameTL::Biharmonic1D\_\-RHS}}
+}
+{\tt \#include $<$biharmonic\_\-1d\_\-testcase.h$>$}
+
+Inheritance diagram for FrameTL::Biharmonic1D\_\-RHS$<$ IBASIS $>$::\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classFrameTL_1_1Biharmonic1D__RHS}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+\hyperlink{classFrameTL_1_1Biharmonic1D__RHS_c9600ba95f7c01ef6080a4372e0d3031}{Biharmonic1D\_\-RHS} (const \hyperlink{classFrameTL_1_1AggregatedFrame}{AggregatedFrame}$<$ IBASIS, 1 $>$ $\ast$frame)
+\item 
+virtual \hyperlink{classFrameTL_1_1Biharmonic1D__RHS_4b3957bc2e77d88486b21916c7a74030}{$\sim$Biharmonic1D\_\-RHS} ()
+\item 
+virtual double \hyperlink{classFrameTL_1_1Biharmonic1D__RHS_81cf28300f5a4991eea662f403b5ae88}{evaluate} (const typename \hyperlink{classFrameTL_1_1AggregatedFrame}{AggregatedFrame}$<$ IBASIS, 1 $>$::Index \&lambda) const 
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+\subsubsection*{template$<$class IBASIS$>$ class FrameTL::Biharmonic1D\_\-RHS$<$ IBASIS $>$}
+
+\hyperlink{classFrameTL_1_1Functional}{Functional} for the righthand side of the 1D test case for the biharmonic equation $ v \mapsto 4v'(1/2) - 384v(1/2) - 16 \int_0^1 (\cos(2\pi x)\pi^4-72) * v(x) dx$. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classFrameTL_1_1Biharmonic1D__RHS_c9600ba95f7c01ef6080a4372e0d3031}{
+\index{FrameTL::Biharmonic1D\_\-RHS@{FrameTL::Biharmonic1D\_\-RHS}!Biharmonic1D\_\-RHS@{Biharmonic1D\_\-RHS}}
+\index{Biharmonic1D\_\-RHS@{Biharmonic1D\_\-RHS}!FrameTL::Biharmonic1D_RHS@{FrameTL::Biharmonic1D\_\-RHS}}
+\subsubsection[{Biharmonic1D\_\-RHS}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class IBASIS $>$ {\bf FrameTL::Biharmonic1D\_\-RHS}$<$ IBASIS $>$::{\bf Biharmonic1D\_\-RHS} (const {\bf AggregatedFrame}$<$ IBASIS, 1 $>$ $\ast$ {\em frame})\hspace{0.3cm}{\tt  \mbox{[}inline\mbox{]}}}}
+\label{classFrameTL_1_1Biharmonic1D__RHS_c9600ba95f7c01ef6080a4372e0d3031}
+
+
+Constructor with an instance of a frame. \hypertarget{classFrameTL_1_1Biharmonic1D__RHS_4b3957bc2e77d88486b21916c7a74030}{
+\index{FrameTL::Biharmonic1D\_\-RHS@{FrameTL::Biharmonic1D\_\-RHS}!$\sim$Biharmonic1D\_\-RHS@{$\sim$Biharmonic1D\_\-RHS}}
+\index{$\sim$Biharmonic1D\_\-RHS@{$\sim$Biharmonic1D\_\-RHS}!FrameTL::Biharmonic1D_RHS@{FrameTL::Biharmonic1D\_\-RHS}}
+\subsubsection[{$\sim$Biharmonic1D\_\-RHS}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class IBASIS $>$ virtual {\bf FrameTL::Biharmonic1D\_\-RHS}$<$ IBASIS $>$::$\sim${\bf Biharmonic1D\_\-RHS} ()\hspace{0.3cm}{\tt  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classFrameTL_1_1Biharmonic1D__RHS_4b3957bc2e77d88486b21916c7a74030}
+
+
+Virtual destructor. 
+
+\subsection{Member Function Documentation}
+\hypertarget{classFrameTL_1_1Biharmonic1D__RHS_81cf28300f5a4991eea662f403b5ae88}{
+\index{FrameTL::Biharmonic1D\_\-RHS@{FrameTL::Biharmonic1D\_\-RHS}!evaluate@{evaluate}}
+\index{evaluate@{evaluate}!FrameTL::Biharmonic1D_RHS@{FrameTL::Biharmonic1D\_\-RHS}}
+\subsubsection[{evaluate}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class IBASIS $>$ double {\bf FrameTL::Biharmonic1D\_\-RHS}$<$ IBASIS $>$::evaluate (const typename {\bf AggregatedFrame}$<$ IBASIS, 1 $>$::Index \& {\em lambda}) const\hspace{0.3cm}{\tt  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classFrameTL_1_1Biharmonic1D__RHS_81cf28300f5a4991eea662f403b5ae88}
+
+
+Evaluate the functional with the wavelet with given index lambda. 
+
+The documentation for this class was generated from the following files:\begin{CompactItemize}
+\item 
+/home/werner/PROMOTION/source/FrameTL/biharmonic\_\-1d\_\-testcase.h\item 
+/home/werner/PROMOTION/source/FrameTL/biharmonic\_\-1d\_\-testcase.cpp\end{CompactItemize}

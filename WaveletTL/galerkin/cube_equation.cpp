@@ -4,23 +4,23 @@ namespace WaveletTL
 {
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
   CubeEquation<IBASIS,DIM,CUBEBASIS>::CubeEquation(const EllipticBVP<DIM>* bvp,
-						   const FixedArray1D<bool,2*DIM>& bc)
+						   const FixedArray1D<bool,2*DIM>& bc,
+                                                   const int& jmax)
     : bvp_(bvp), basis_(bc), normA(0.0), normAinv(0.0)
   {
-    compute_rhs();
-    const int jmax = 5; // for a first quick hack
+    
     basis_.set_jmax(jmax);
+    compute_rhs();
   }
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
   CubeEquation<IBASIS,DIM,CUBEBASIS>::CubeEquation(const EllipticBVP<DIM>* bvp,
-						   const FixedArray1D<int,2*DIM>& bc)
+						   const FixedArray1D<int,2*DIM>& bc,
+                                                   const int& jmax)
     : bvp_(bvp), basis_(bc), normA(0.0), normAinv(0.0)
   {
-    compute_rhs();
-    const int jmax = 5; // for a first quick hack
     basis_.set_jmax(jmax);
- 
+    compute_rhs();
   }
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
@@ -29,8 +29,7 @@ namespace WaveletTL
       fcoeffs(eq.fcoeffs), fnorm_sqr(eq.fnorm_sqr),
       normA(eq.normA), normAinv(eq.normAinv)
   {
-    const int jmax = 5; // for a first quick hack
-    basis_.set_jmax(jmax);
+    basis_.set_jmax(eq.basis_.get_jmax_()); //not sure if it works, bc of protected basis_
   }
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
@@ -44,7 +43,7 @@ namespace WaveletTL
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
     const int j0   = basis().j0();
-    const int jmax = 5; // for a first quick hack
+    const int jmax = basis_.get_jmax_(); // inserted get_jmax_ instead of 5;
     for (Index lambda(basis_.first_generator(j0));; ++lambda)
       {
 	const double coeff = f(lambda)/D(lambda);

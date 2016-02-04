@@ -73,7 +73,8 @@ namespace WaveletTL
       constructor from a boundary value problem and specified b.c.'s
     */
     CubeEquation(const EllipticBVP<DIM>* bvp,
-		 const FixedArray1D<bool,2*DIM>& bc);
+		 const FixedArray1D<bool,2*DIM>& bc,
+                 const int& jmax=5);
 
 //     /*!
 //     */
@@ -93,7 +94,8 @@ namespace WaveletTL
       constructor from a boundary value problem and specified b.c.'s
     */
     CubeEquation(const EllipticBVP<DIM>* bvp,
-		 const FixedArray1D<int,2*DIM>& bc);
+		 const FixedArray1D<int,2*DIM>& bc,
+                 const int& jmax=5);
 
     /*!
       copy constructor

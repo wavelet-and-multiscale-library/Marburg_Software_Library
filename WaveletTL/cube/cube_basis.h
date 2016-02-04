@@ -84,6 +84,10 @@ namespace WaveletTL
       jmax_ = jmax;
       setup_full_collection();
     }
+    
+    int get_jmax_() const{
+        return jmax_;
+    }
 
     //! wavelet index class
     typedef CubeIndex<IBASIS,DIM,CubeBasis<IBASIS,DIM> > Index;

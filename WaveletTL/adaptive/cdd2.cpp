@@ -16,7 +16,6 @@ namespace WaveletTL
   template <class PROBLEM>
   void CDD2_SOLVE(const PROBLEM& P, const double nu, const double epsilon,
                   InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
-                  InfiniteVector<double, double>& residuals,
                   const unsigned int maxlevel, CompressionStrategy strategy,
                   const int pmax, const double a, const double b)
   {

@@ -5,9 +5,8 @@ LDFLAGS =
 
 
 EXEOBJF = \
- Example_CDD2.o\
- kedingtestdatei.o
-
+ Example_CDD2.o
+ 
 
 EXES = $(EXEOBJF:.o=)
 

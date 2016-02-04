@@ -58,8 +58,7 @@ CXXFLAGS +=  -O2 -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 endif
 
 
-EXEOBJF1 = test_quarks.o\
-test_aggregated_frame.o\
+EXEOBJF1 = test_aggregated_frame.o\
 test_biharmonic_1d_testcase.o\
 test_elliptic_equation_1D.o\
 test_elliptic_equation.o\

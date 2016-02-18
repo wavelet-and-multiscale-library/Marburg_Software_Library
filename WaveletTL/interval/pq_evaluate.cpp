@@ -147,6 +147,7 @@ namespace WaveletTL
     
     if (lambda.e() == 0) {
       // generator
+        //Für folgende Fälle noch nicht die Ableitungen angepasst @PHK
       if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) {
 	switch (derivative){
 	case 0: r= MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
@@ -164,6 +165,8 @@ namespace WaveletTL
           break;
 	}
       } 
+      
+      
       else if (lambda.k() < -ell1<d>()){
 	switch (derivative){
 	  case 0: r=MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), x)*pow((1<<lambda.j())*x*leftside, lambda.p());
@@ -222,6 +225,7 @@ namespace WaveletTL
         
       if (k > (1<<j)-ell1<d>()-d) {
 	switch (derivative){
+            //Für folgende Fälle noch nicht die Ableitungen angepasst @PHK
 	case 0: r= MathTL::EvaluateSchoenbergBSpline_td<d>  (j,
 							     (1<<j)-d-k-2*ell1<d>(),
 							     1-x)*pow((1<<j)*(1-x)*rightside, p);

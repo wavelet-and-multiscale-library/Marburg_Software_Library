@@ -303,6 +303,8 @@ namespace WaveletTL
      * - numbering is as if the minimal level j0 would be set to j, e.g., 
      * the first generator on level j has the number 0 (= it is stored at position 0)
     */
+    
+    //quark-setting has to be done. Main routine for drawing.
     void reconstruct_1(const Index& lambda, const int j,
 		       InfiniteVector<double, Index>& c) const;
     /*
@@ -310,6 +312,8 @@ namespace WaveletTL
     void reconstruct_1(const int lamj, const int lame, const int lamk, const int j,
 		       InfiniteVector<double, Index>& c) const;
      */
+    
+    //implementred quark-setting
     void reconstruct_1(const int lamp, const int lamj, const int lame, const int lamk, const int j,
 		       InfiniteVector<double, int>& c) const;
 
@@ -543,6 +547,12 @@ namespace WaveletTL
     Matrix<double> CLAT, CRAT;
     //! representation of the (polynomial reproducing) dual boundary generators BEFORE BIORTHOGONALIZATION
     Matrix<double> CLAT_BB, CRAT_BB;
+    
+    //! setup adjusted coefficients for the quarklets with vanishing moments setting
+    void setup_CVM();
+    
+    //! storage for adjusted coefficients for the quarklets with vanishing moments setting
+    Matrix<double> CVM;
 
     
     //! generator biorthogonalization matrices on level j0 and j0+1 CjT, CjpT (5.2.5)

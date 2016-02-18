@@ -1,4 +1,4 @@
-// implementation for p_expansion.h
+// implementation for pq_expansion.h
 
 #include <set>
 #include <list>
@@ -283,6 +283,17 @@ namespace WaveletTL
   }
   
   template <int d, int dT>
+  double factor2(const PQFrame<d,dT>& basis, const int r, const int p, const int j, const int l){
+      double v=0;
+      typedef typename PQFrame<d,dT>::Index Index;
+      Index lambda(p,j+1,0,l,&basis);
+      MonomeFunction f(r);
+      v=integrate(&f, basis, lambda);
+      return v;
+  }
+  
+  
+  template <int d, int dT>
   void setup_factor_matrix(const PQFrame<d,dT>& basis, SparseMatrix<double>& A_Lambda, const int j, const int p)
   {
       //cout << "Hallo" << endl;
@@ -331,5 +342,88 @@ namespace WaveletTL
 	A_Lambda.set_row(row, indices, entries);
       }
     }
+  }
+  
+  template <int d, int dT>
+  double rightside(const PQFrame<d,dT>& basis, typename PQFrame<d,dT>::Index lambda, const int r, const bool leftborder){
+      
+      double wert = 0;
+      typedef typename PQFrame<d,dT>::Index Index;
+      InfiniteVector<double, Index> c;
+      basis.reconstruct_1(lambda, lambda.j()+1, c);
+      MonomeFunction f(r);
+      
+      
+      if(leftborder==1){
+        typename InfiniteVector<double, Index>::const_iterator it(c.begin()), it2(c.end());
+        for(int k=0; k<dT; k++, it++){
+            
+        }
+        
+      
+      
+        for(it; it<it2; it++){
+          wert-=*it*integrate(&f, basis, it.index());           
+        }
+      }
+      else{
+        typename InfiniteVector<double, Index>::const_reverse_iterator it3(c.rbegin()), it4(c.rend());
+        for(int k=0; k<dT; k++, it3++){
+            
+        }            
+        
+      
+      
+        for(it3; it3<it4; it3++){
+          wert-=*it3*integrate(&f, basis, it3.index());           
+        }
+      }
+      
+      
+      
+      return wert;
+      
+      
+  }
+  
+  template <int d, int dT>
+  void rightsidevector(const PQFrame<d,dT>& basis, typename PQFrame<d,dT>::Index lambda, Vector<double>& coeffs, const bool leftborder){
+      coeffs.resize(dT);
+      for(int i=0; i<dT; i++){
+          coeffs[i]=rightside(basis, lambda, i, leftborder);
+      }
+      
+  }
+  
+  template <int d, int dT>
+  void system_matrix(const PQFrame<d,dT>& basis, Matrix<double>& A, typename PQFrame<d,dT>::Index lambda, const bool leftborder){
+      typedef typename PQFrame<d,dT>::Index Index;
+      
+      A.resize(dT,dT);
+      InfiniteVector<double, Index> c;
+      std::set<Index> supp;
+      basis.reconstruct_1(lambda, lambda.j()+1, c);
+      
+      
+      if(leftborder == 1) {
+        typename InfiniteVector<double, Index>::const_iterator it(c.begin());
+        for(int l=0; l<dT; l++, it++){
+            for(int k=0; k<dT; k++){
+                MonomeFunction f(k);
+                A(k,l)=integrate(&f, basis, it.index());
+            }
+          
+        }
+      }
+      else{
+          
+        typename InfiniteVector<double, Index>::const_reverse_iterator it2(c.rbegin());
+        for(int l=dT-1; l>=0; l--, it2++){
+            for(int k=0; k<dT; k++){
+                MonomeFunction f(k);
+                A(k,l)=integrate(&f, basis, it2.index());
+            }
+        }
+      }
   }
 }

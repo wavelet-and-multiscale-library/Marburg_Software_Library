@@ -70,11 +70,30 @@ namespace WaveletTL
 	 const int jmax,
 	 Vector<double>& coeffs);
   
+  //gives back the l-th factor of \psi_0,j,k multiplied with int_0^1 x^q+r * \phi_0,j+1,l
+  //see v_l,k,j,r,q as in vanishing_moments fragment by @PHK
   template <int d, int dT>
   double factor(const PQFrame<d,dT>& basis, const int l, const int k, const int r, const int q, const int j);
   
+  //gives back int_0^1 x^r \phi_p,j+1,l(x) dx @PHK
+  template <int d, int dT>
+  double factor2(const PQFrame<d,dT>& basis, const int r, const int p, const int j, const int l);
+  
+  
+  //in one row are all the integrals of the quark functions times x^r+q with r<d, q<=p 
+  //multiplied with the factors belonging to the two-scale relation of the quarklets
+  //see v_l,k,j,r,q 
   template <int d, int dT>
   void setup_factor_matrix(const PQFrame<d,dT>& basis, SparseMatrix<double>& A_Lambda, const int j, const int p);
+  
+  template <int d, int dT>
+  double rightside(const PQFrame<d,dT>& basis, typename PQFrame<d,dT>::Index lambda, const int r, const bool leftborder = 1);
+  
+  template <int d, int dT>
+  void rightsidevector(const PQFrame<d,dT>& basis, typename PQFrame<d,dT>::Index lambda, Vector<double>& coeffs, const bool leftborder = 1);
+  
+  template <int d, int dT>
+  void system_matrix(const PQFrame<d,dT>& basis, Matrix<double>& A, typename PQFrame<d,dT>::Index lambda, const bool leftborder = 1);
 }
 
 #include <interval/pq_expansion.cpp>

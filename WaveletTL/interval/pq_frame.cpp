@@ -941,6 +941,8 @@ namespace WaveletTL
     Mj1_t  = transpose(Mj1);
     Mj1T_t = transpose(Mj1T);
     cout << "minLev = " << j0_ << endl;
+    
+    setup_CVM();
   }
 
   template <int d, int dT>
@@ -1497,6 +1499,35 @@ namespace WaveletTL
 #endif
   }
 
+  
+  template <int d, int dT>
+  void PQFrame<d,dT>::setup_CVM() {
+      //for fast implementation, can be changed @PHK
+      const int pmax=5;
+      CVM.resize(pmax, dT*(d+dT-2));
+      CVM(0,0)= 27;
+      
+      if(s0==0 && s1==0){
+            switch(d){
+              case 3: switch(dT){
+                      case 3: {
+                          Matrix <double> tempmat(pmax, dT*(d+dT-2), " 0.984380830463879  -0.604833768436096   0.338164347922360   -0.113642161262121  -0.234702630273304   1.121742833458210    1.154572791156149   0.944650465491500  -1.325825214724864   -1.40937982461958   1.87997872245133  -1.22742412457259"
+                                                                       " 0.85259  -0.53214   0.33077 -0.16632  -0.17018   1.09882 7 8 9 10 11 12"
+                                                                       " 31 32 33 34 35 36 7 8 9 10 11 12"
+                                                                       " 41 42 43 44 45 46 7 8 9 10 11 12"
+                                                                       " 51 52 53 54 55 56 7 8 9 10 11 12");
+                          cout << "setup: " << endl << tempmat << endl;
+                          CVM = tempmat;
+                      }
+                      }
+            }
+      }
+      
+      
+      
+      
+  }
+  
   template <int d, int dT>
   void
   PQFrame<d, dT>::F(SparseMatrix<double>& FF) {
@@ -2756,10 +2787,25 @@ namespace WaveletTL
 
       if (lambda.j()+1 >= j) {
 	for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
-	  c.add_coefficient(Index(lambda.p(), lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this),
+            
+          if(lambda.k() < dT-1  && lambda.p() > 0 && k<dT){
+              c.add_coefficient(Index(lambda.p(), lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this) , CVM(lambda.p()-1,dT*lambda.k()+k));
+            
+          }
+          else if(lambda.k() > Nablamax(lambda.j())-dT+1  && lambda.p() > 0 && k> M.entries_in_row(row_j0)-dT-1){
+                c.add_coefficient(Index(lambda.p(), lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this) , CVM(lambda.p()-1, dT*(lambda.k()+d+dT-2-Nablamax(lambda.j()))+ k-M.entries_in_row(row_j0))); 
+                
+          }
+          else{
+                c.add_coefficient(Index(lambda.p(), lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this),
 			    M.get_nth_entry(row_j0,k));
+          }
+            
+            
+	  
 	}
-      } else {
+      }
+      else {
 	for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
 	  InfiniteVector<double, Index> dhelp;
 	  reconstruct_1(Index(lambda.p(), lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this), j, dhelp);
@@ -2851,7 +2897,7 @@ namespace WaveletTL
 			       InfiniteVector<double, int>& c) const {
     c.clear();
     assert ((lamj <= j) || (lame == 1)); 
-    // ! ( (lamj > j) && (lame == e) ), i.e., the reconstruction of a generator on a level higher than j will fail (because of a wrong number)
+    // ! ( (lamj > j) && (lame == 0) ), i.e., the reconstruction of a generator on a level higher than j will fail (because of a wrong number)
     if (lamj >= j)
     {
         if (lame == 0)
@@ -2916,8 +2962,20 @@ namespace WaveletTL
 	}
       }
       if (lamj+1 >= j) {
+          
 	for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
-            c.add_coefficient(M.get_nth_index(row_j0,k)+offset , M.get_nth_entry(row_j0,k));
+            //adjusted to quarklet with vanishing Moments setting PHK
+            if(lamk < dT-1  && lamp > 0 && k<dT){
+                c.add_coefficient(M.get_nth_index(row_j0,k)+offset , CVM(lamp-1,dT*lamk+k));
+            
+            }
+            else if(lamk > Nablamax(lamj)-dT+1  && lamp > 0 && k> M.entries_in_row(row_j0)-dT-1){
+                c.add_coefficient(M.get_nth_index(row_j0,k)+offset , CVM(lamp-1, dT*(lamk+d+dT-2-Nablamax(lamj))+ k-M.entries_in_row(row_j0))); 
+                
+            }
+            else{
+                c.add_coefficient(M.get_nth_index(row_j0,k)+offset , M.get_nth_entry(row_j0,k));
+            }
 	  //c.add_coefficient(Index(lamj+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this),
 	//		    M.get_nth_entry(row_j0,k));
 	}

@@ -71,8 +71,8 @@ int main()
   cout << "Testing adaptive wavelet-Galerkin solution of a Poisson problem on the cube with CDD1_SOLVE ..." << endl;
 
 #if 1
-  const int d  = 3;
-  const int dT = 3;
+  const int d  = 2;
+  const int dT = 2;
   const int jmax = 3;
 //   typedef DSBasis<d,dT> Basis1D;
   typedef PBasis<d,dT> Basis1D;
@@ -154,7 +154,7 @@ int main()
    u_epsilon.scale(&cproblem, -1);
    cout << "saving computed solution to u_adaptCDD1_cube.m" << endl;
    SampledMapping<2> s(evaluate(cproblem.basis(), u_epsilon, true, d+2+2+1));
-   std::ofstream u_stream("u_adaptCDD1_cube.m");
+   std::ofstream u_stream("../../Desktop/plots/u_adaptCDD1_cube.m");
    s.matlab_output(u_stream);
    u_stream.close();
   

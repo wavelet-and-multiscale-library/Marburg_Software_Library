@@ -69,7 +69,7 @@ namespace WaveletTL
 
     intersecting.clear();
 
-#if 0
+#if 1
     // the set of intersecting wavelets is a cartesian product from d sets from the 1D case,
     // so we only have to compute the relevant 1D indices
     typedef typename IBASIS::Index Index1D;

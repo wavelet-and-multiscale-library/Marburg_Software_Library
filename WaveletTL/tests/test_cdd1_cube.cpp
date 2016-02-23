@@ -43,6 +43,9 @@ public:
   virtual ~TestRHS() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
     switch(N) {
+    case 1:
+       return 2*(p[0]*(1-p[0])+p[1]*(1-p[1]));
+       break;     
     case 2:
       return
 	(200.-(100.*p[0]-50.)*(100.*p[0]-50.)-(100.*p[1]-50.)*(100.*p[1]-50.))
@@ -55,9 +58,8 @@ public:
 	- 2*p[0]*(1-p[0])*(1-p[0])*(1-p[1])
 	+ 4*p[0]*(1-p[0])*(1-p[0])*p[1];
       break;
-    case 1:
     default:
-      return 2*(p[0]*(1-p[0])+p[1]*(1-p[1]));
+        return 1;
       break;
     }
   }
@@ -82,7 +84,7 @@ int main()
   typedef CubeBasis<Basis1D,2> Basis;
   typedef Basis::Index Index;
 
-  TestRHS<1> rhs;
+  TestRHS<3> rhs;
   PoissonBVP<2> poisson(&rhs);
 
   FixedArray1D<bool,4> bc;
@@ -146,7 +148,7 @@ int main()
 //   CDD1_SOLVE(cproblem, 1e-4, u_epsilon);
    
    std::ofstream plotstream;
-   plotstream.open("cube_indexplot_cdd1.m");
+   plotstream.open("../../Desktop/plots/cube_indexplot_cdd1.m");
    plot_indices(&cproblem.basis(), u_epsilon, jmax, plotstream, "jet", true, true);
 
    plotstream.close();
@@ -156,6 +158,8 @@ int main()
    SampledMapping<2> s(evaluate(cproblem.basis(), u_epsilon, true, d+2+2+1));
    std::ofstream u_stream("../../Desktop/plots/u_adaptCDD1_cube.m");
    s.matlab_output(u_stream);
+   u_stream << "figure;\nsurf(x,y,z);"
+              << "title('plotted cube-solution');" << endl;
    u_stream.close();
   
   return 0;

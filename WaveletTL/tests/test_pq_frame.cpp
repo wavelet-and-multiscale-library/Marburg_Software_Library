@@ -1,3 +1,16 @@
+#undef BASIS
+#define FRAME
+
+#ifdef FRAME
+#include <interval/pq_frame.h>
+#include <interval/pq_support.h>
+#include <interval/pq_expansion.h>
+#include <interval/pq_evaluate.h>
+#include <interval/periodic_frame.h>
+#include <Rd/quarklet_frame.h>
+#include <galerkin/cached_quarklet_problem.h>
+#endif
+
 #include <iostream>
 #include <interval/p_basis.h>
 #include <interval/p_evaluate.h>
@@ -7,23 +20,13 @@
 #include <cube/cube_basis.h>
 #include <galerkin/cube_equation.h>
 #include <geometry/grid.h>
-#include <interval/pq_frame.h>
-#include <interval/pq_support.h>
-#include <interval/pq_expansion.h>
-#include <interval/pq_evaluate.h>
-#include <interval/periodic_frame.h>
-#include <Rd/quarklet_frame.h>
-#include <galerkin/sturm_equation.h>
 #include <numerics/sturm_bvp.h>
-#include <galerkin/cached_quarklet_problem.h>
 #include <galerkin/cached_problem.h>
 #include <adaptive/cdd2.h>
 #include <utils/function.h>
 #include <algebra/vector.h>
 //#include <Example_CDD2/TestProblem.h>
-
-#undef BASIS
-#define FRAME
+#include <galerkin/sturm_equation.h>
 
 using WaveletTL::CubeEquation;
 using WaveletTL::CubeBasis;
@@ -204,16 +207,16 @@ int main()
 //  cout<< (1<<2)-ell1<d>()-d << endl;
   
   
-  double epsilon1 = 0.0001;
+  double epsilon1 = 1e-8;
   const int jmax = 6;
   
-  TestProblem<4> testproblem;
+  TestProblem<2> testproblem;
   
 #ifdef FRAME
   typedef PQFrame<d,dT> Frame;
   typedef Frame::Index Index;
   Frame frame(false,false);
-  const int pmax = 0;
+  const int pmax = 1;
   frame.set_jpmax(jmax,pmax);
   SturmEquation<Frame> problem(testproblem, frame);
   CachedQuarkletProblem<SturmEquation<Frame> > cproblem(&problem);
@@ -227,7 +230,8 @@ int main()
   Basis basis01(0,1);
   Basis basis11(true,true);
   basis11.set_jmax(jmax);
-  SturmEquation<Basis> problem(testproblem, basis11);
+  basis.set_jmax(jmax);
+  SturmEquation<Basis> problem(testproblem, basis);
   CachedProblem<SturmEquation<Basis> > cproblem(&problem);
 #endif
 #ifdef basis
@@ -238,25 +242,63 @@ int main()
   cout << "two-scale: " << endl << c << endl; 
   cout << "decompose" << endl << c2 << endl;
 #endif
-   SparseMatrix<double> mj1;
- frame.assemble_Mj0(4, mj1);
+  
+  
+  
+  
+#ifdef FRAME
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  
+  Matrix<double> A;
+  Index lambda(1,4,1,0, &frame);
+  system_matrix(frame, A, lambda, 0);
+  cout << "LGS linke Seite Ansatz 2" << endl;
+  cout << A << endl;
+  A.matlab_output("../../Desktop/plots/Ansatz2matrix", "A", 0);
+  const int r = 0;
+  cout << "rechte Seite: " <<rightside(frame, lambda, r, 0) << endl;
+  Vector<double> coeffs2;
+  rightsidevector(frame, lambda, coeffs2, 0);
+  cout << "RHS: " << coeffs2 << endl;
+  coeffs2.matlab_output("../../Desktop/plots/Ansatz2vector", "v");
+   
+  SparseMatrix<double> mj1;
+ frame.assemble_Mj0(3, mj1);
+ cout << "primale Zweiskalenrelation generator/generator" << endl;
   cout << mj1 << endl;
+  cout << "primale Zweiskalenrelation generator/wavelet" << endl;
   cout << frame.get_Mj1() << endl;
+  
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  
+  
+  
   //cproblem.norm_Ainv();
   //cproblem.norm_A();
-  MonomeFunction newfunction(2);
+  MonomeFunction newfunction(1);
   Index mu(0,4,0,-1, &frame);
-  Index phi(0,3,1,0,&frame);
+      Index phi(1,3,0,-1,&frame);
   InfiniteVector<double, Index> c;
+  InfiniteVector<double, int> c2;
   frame.reconstruct_1(phi, 4, c);
+  frame.reconstruct_1(phi.p(), phi.j(), phi.e(), phi.k(), 4, c2);
   cout << "two-scale: " << endl << c << endl;
+  cout << "alt. two-scale: " << endl << c2 << endl;
   double summe=0;
-  cout << "Size: " << frame.Deltasize(4) << endl;
+  //cout << "Size: " << frame.Deltasize(4) << endl;
+  cout << "Test auf verschwindende Momente: " << integrate(&newfunction, frame, phi) <<endl;
+  
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+ 
+#if 1
   SparseMatrix<double> A_Lambda;
-  setup_factor_matrix(frame, A_Lambda, 3, 0);
-  A_Lambda.matlab_output("../../Desktop/my2matrix", "A", 0);
-  cout << A_Lambda << endl;
-  cout << A_Lambda.row_dimension() << endl;
+//  setup_factor_matrix(frame, A_Lambda, 3, 0);
+//  A_Lambda.matlab_output("../../Desktop/plots/my2matrix", "A", 0);
+//  cout << A_Lambda << endl;
+  //cout << A_Lambda.row_dimension() << endl;
   Vector<double> x(A_Lambda.column_dimension()), Ax(A_Lambda.row_dimension());
   const double wert = 1;
   x = 1;
@@ -267,17 +309,20 @@ int main()
   cout << x << endl;
   cout << Ax << endl;
   Ax.compress();
-  cout << Ax << endl;
+  //cout << Ax << endl;
   for(int l = -1; l<=6; l++){
 //   cout << mu << ", " << integrate(&newfunction, frame, mu) <<endl;
 //   summe+=c[mu]*integrate(&newfunction, frame, mu);
    double Faktor=factor(frame, l, 0, 2, 0, 3);
-   cout << Faktor << endl;
+   //cout << Faktor << endl;
    summe+= Faktor;
+   
+
    
    //cout << "Zwischensumme: " << summe << endl;
   }
-  cout << "Summe: " << summe << endl;
+#endif
+  //cout << "Summe: " << summe << endl;
 //  cout << "Test auf verschwindende Momente: " << integrate(&newfunction, frame, mu) <<endl;
 //  Index lambda(0,3, 0,0, &basis11);
 //  cout << "Skalarprodukt: " << cproblem.f(lambda) << endl;
@@ -289,6 +334,9 @@ int main()
 //  cout << evaluate(basis11, 0, 9,0,basis11.DeltaLmin()+511, 0.999908) << endl;
   //cout << evaluate(frame, 0, 0, 9,0,frame.DeltaLmin()+511, 0.999908) << endl;
   //cout << "Integral: " << integrate(&newfunction, basis11, lambda) << endl; 
+  
+  
+#endif
   
   InfiniteVector<double,Index> f, v, Av;
   InfiniteVector<double, Index> F1_eta, coeffs, rhs, precrhs;
@@ -330,14 +378,14 @@ int main()
 //  cout << Av << endl;
   cproblem.RHS(1e-6, F1_eta);
 //  cout << F1_eta;
-//  const double nu1 = cproblem.norm_Ainv() * l2_norm(F1_eta);
-//  cout << "nu = " << nu1 << endl;
+  const double nu1 = cproblem.norm_Ainv() * l2_norm(F1_eta);
+  cout << "nu = " << nu1 << endl;
   InfiniteVector<double, Index> solution1_epsilon;
 #ifdef BASIS
-//  CDD2_SOLVE(cproblem, nu1, epsilon1, solution1_epsilon, jmax);
+  CDD2_SOLVE(cproblem, nu1, epsilon1, solution1_epsilon, jmax);
 #endif
 #ifdef FRAME  
-  //CDD2_SOLVE(cproblem, nu1, 1e-6, solution1_epsilon, jmax, DKOR, pmax, 2, 2);
+  CDD2_SOLVE(cproblem, nu1, epsilon1, solution1_epsilon, jmax, DKOR, pmax, 2, 2);
 #endif
 //  cout << solution1_epsilon << endl;
 //  cout << "exakte Lösung: " << endl;
@@ -345,10 +393,13 @@ int main()
 //  
   /* plot solution graph */
     coeffs.scale(&cproblem, -1); /* scaling because ... */
-    SampledMapping<1> sm3(evaluate(cproblem.basis(), coeffs, true, 2*jmax));
+    coeffs.clear();
+//    coeffs[phi]=1;
+    coeffs.scale(&cproblem, -1);
+//    SampledMapping<1> sm3(evaluate(cproblem.basis(), coeffs, true, 2*jmax));
     solution1_epsilon.scale(&cproblem, -1); /* scaling because ... */
-//    SampledMapping<1> sm3(evaluate(cproblem.basis(), solution1_epsilon, true, 2*jmax)); //" Increase last parameter, if Assertion `resolution >= 0' failed."
-    std::ofstream u_stream3("../../Desktop/plotthis3.m");
+    SampledMapping<1> sm3(evaluate(cproblem.basis(), solution1_epsilon, true, 2*jmax)); //" Increase last parameter, if Assertion `resolution >= 0' failed."
+    std::ofstream u_stream3("../../Desktop/plots/plotthis3.m");
     sm3.matlab_output(u_stream3);
     u_stream3 << "figure;\nplot(x,y);"
               << "title('superquarkgraph');" << endl;
@@ -359,8 +410,8 @@ int main()
 //  frame.reconstruct_1(0,2,1,2, 3, gcoeffs); 
 //  cout << gcoeffs;
   
-#if 1
-  SampledMapping<1> sm1(evaluate(frame, mu, 1,8));
+#if 0
+//  SampledMapping<1> sm1(evaluate(frame, mu, 1,8));
 //  SampledMapping<1> sm2(perframe.evaluate(mu, 8, 0));
 //  cout << "Periodisches Integral: " << perframe.integrate(0, mu, mu, 0) << endl;
 //  

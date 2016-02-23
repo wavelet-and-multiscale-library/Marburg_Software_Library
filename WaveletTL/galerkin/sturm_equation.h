@@ -68,8 +68,13 @@ namespace WaveletTL
   */
   template <class WBASIS>
   class SturmEquation
+#ifdef FRAME
+     : public FullyDiagonalQuarkletPreconditioner<typename WBASIS::Index>
+#else
      : public FullyDiagonalDyadicPreconditioner<typename WBASIS::Index>
+
 //    : public FullyDiagonalEnergyNormPreconditioner<typename WBASIS::Index>
+#endif
   {
   public:
     /*!

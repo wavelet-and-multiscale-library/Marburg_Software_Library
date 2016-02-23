@@ -9,7 +9,7 @@
 #include <numerics/eigenvalues.h>
 #include <numerics/gauss_data.h>
 
-#undef QUARKSETTING
+
 
 namespace WaveletTL
 {
@@ -44,7 +44,7 @@ namespace WaveletTL
     InfiniteVector<double,Index> fhelp;
     const int j0   = basis().j0();
     const int jmax = basis_.get_jmax_();
-#ifdef QUARKSETTING
+#ifdef FRAME
     const int pmax = basis_.get_pmax_();
     int p = 0;
     for (Index lambda(basis_.first_generator(j0));;)
@@ -94,7 +94,11 @@ namespace WaveletTL
   double
   SturmEquation<WBASIS>::D(const typename WBASIS::Index& lambda) const
   {
-     return ldexp(1.0, lambda.j());
+#ifdef FRAME
+      return pow(ldexp(1.0, lambda.j())*pow(1+lambda.p(),4),operator_order()) * (1+lambda.p()); //2^j*(p+1)^5, falls operator_order()=1
+#else
+      return ldexp(1.0, lambda.j());
+#endif
 //    return sqrt(a(lambda, lambda));
 //    return 1;
 //     return lambda.e() == 0 ? 1.0 : ldexp(1.0, lambda.j()); // do not scale the generators
@@ -140,7 +144,7 @@ namespace WaveletTL
 	// the Gauss points and weights)
         
 
-        #ifdef QUARKSETTING
+        #ifdef FRAME
 	const unsigned int N_Gauss = (p+1)/2+ (lambda.p()+nu.p())/2;
          #else 
         const unsigned int N_Gauss = (p+1)/2;

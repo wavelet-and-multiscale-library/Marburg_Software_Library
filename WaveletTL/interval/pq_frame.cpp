@@ -2788,11 +2788,11 @@ namespace WaveletTL
       if (lambda.j()+1 >= j) {
 	for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
             
-          if(lambda.k() < dT-1  && lambda.p() > 0 && k<dT){
+          if(lambda.e() == 1 && lambda.k() < dT-1  && lambda.p() > 0 && k<dT){
               c.add_coefficient(Index(lambda.p(), lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this) , CVM(lambda.p()-1,dT*lambda.k()+k));
             
           }
-          else if(lambda.k() > Nablamax(lambda.j())-dT+1  && lambda.p() > 0 && k> M.entries_in_row(row_j0)-dT-1){
+          else if(lambda.e() == 1 && lambda.k() > Nablamax(lambda.j())-dT+1  && lambda.p() > 0 && k> M.entries_in_row(row_j0)-dT-1){
                 c.add_coefficient(Index(lambda.p(), lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this) , CVM(lambda.p()-1, dT*(lambda.k()+d+dT-2-Nablamax(lambda.j()))+ k-M.entries_in_row(row_j0))); 
                 
           }
@@ -2965,11 +2965,11 @@ namespace WaveletTL
           
 	for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
             //adjusted to quarklet with vanishing Moments setting PHK
-            if(lamk < dT-1  && lamp > 0 && k<dT){
+            if(lame == 1 && lamk < dT-1  && lamp > 0 && k<dT){
                 c.add_coefficient(M.get_nth_index(row_j0,k)+offset , CVM(lamp-1,dT*lamk+k));
             
             }
-            else if(lamk > Nablamax(lamj)-dT+1  && lamp > 0 && k> M.entries_in_row(row_j0)-dT-1){
+            else if(lame == 1 && lamk > Nablamax(lamj)-dT+1  && lamp > 0 && k> M.entries_in_row(row_j0)-dT-1){
                 c.add_coefficient(M.get_nth_index(row_j0,k)+offset , CVM(lamp-1, dT*(lamk+d+dT-2-Nablamax(lamj))+ k-M.entries_in_row(row_j0))); 
                 
             }

@@ -1,10 +1,11 @@
-// implementation of MathTL::Vector inline functions
+// implementation of MathTL::Vector inline functions ...
 
 #include <io/vector_io.h>
 #include <cassert>
 #include <algorithm>
 #include <functional>
 #include <sstream>
+#include <cstring>
 
 namespace MathTL
 {
@@ -238,6 +239,44 @@ namespace MathTL
 
     return result == 0 ? 0 : sqrt(result/size());
   }
+  
+  
+  template <class C>
+  void Vector<C>::matlab_output (const char *file, const char *Vectorname) const
+  {
+    
+	char Filename[200];
+	Filename[0] = '\x0';
+	
+	strcat(Filename, file);
+	strcat(Filename, ".m");
+	
+	std::ofstream m_file(Filename);
+	
+	m_file << Vectorname << "=load('" << file << ".dat');" << std::endl;
+	
+	m_file.close();
+	
+	Filename[0] = '\x0';
+	
+	strcat(Filename, file);
+	strcat(Filename, ".dat");
+
+	std::ofstream dat_file(Filename);
+	
+	dat_file.setf(std::ios::scientific, std::ios::fixed);
+	dat_file.precision(15);
+	
+ 	for (typename Vector<C>::size_type i(0); i < size(); ++i)
+ 	      dat_file << this->operator () (i) << " ";
+ 	    dat_file << std::endl;
+ 	  
+	
+	dat_file.close();
+      
+  }
+  
+  
   
   template <class C>
   template <class C2>

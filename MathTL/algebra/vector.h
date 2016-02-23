@@ -4,7 +4,7 @@
 // | This file is part of MathTL - the Mathematical Template Library    |
 // |                                                                    |
 // | Copyright (c) 2002-2009                                            |
-// | Thorsten Raasch, Manuel Werner                                     |
+// | Thorsten Raasch, Manuel Werner, Philipp Keding                     |
 // +--------------------------------------------------------------------+
 
 #ifndef _MATHTL_VECTOR_H
@@ -279,6 +279,12 @@ namespace MathTL
     */
     double wrmsqr_norm(const double atol, const double rtol,
 		       const Vector<C>& v, const Vector<C>& w) const;
+    
+    
+    /*!
+      write vector into Matlab file 
+    */
+    void matlab_output(const char *file, const char *Vectorname) const;
     
   protected:
     /*!

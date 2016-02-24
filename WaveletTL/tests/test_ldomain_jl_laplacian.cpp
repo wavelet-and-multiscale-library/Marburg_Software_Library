@@ -117,10 +117,10 @@ int main()
 //   Array1D<SampledMapping<2> > s(evaluate(problem.basis(), u, 1<<5));
   const int N = 200;
   Array1D<SampledMapping<2> > s(evaluate(problem.basis(), u, N));
-//   std::ofstream u_Lambda_stream("u_lambda.m");
-//   matlab_output(u_Lambda_stream, s);
-//   u_Lambda_stream.close();
-//   cout << "  ... done, see file 'u_lambda.m'" << endl;
+   std::ofstream u_Lambda_stream("u_lambda.m");
+   matlab_output(u_Lambda_stream, s);
+   u_Lambda_stream.close();
+   cout << "  ... done, see file 'u_lambda.m'" << endl;
 
 //   for (int i = 0; i <= 2; i++) {
 //     s[i].add(-1.0, SampledMapping<2>(s[i], *uexact));

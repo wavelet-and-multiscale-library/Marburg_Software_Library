@@ -32,8 +32,8 @@ namespace WaveletTL
     cout << "CDD2_SOLVE: rho=" << rho << endl;
 
     // desired error reduction factor theta < 1/3
-    //     const double theta = 2.0/7.0;
-    const double theta = 0.333;
+         const double theta = 2.0/7.0;
+    //const double theta = 0.333;
     cout << "CDD2_SOLVE: theta=" << theta << endl;
 
     // compute minimal K such that 3*rho^K < theta
@@ -50,8 +50,8 @@ namespace WaveletTL
         while (epsilon_k > epsilon) {
         epsilon_k *= 3*pow(rho, K) / theta;
         cout << "CDD2_SOLVE: epsilon_k=" << epsilon_k << endl;
-        //eta = theta * epsilon_k / (6*omega*K) ;//WAS SOLL HIER DIE 10@PHK
-        eta = theta * epsilon_k / (6*omega*K)*10;
+        eta = theta * epsilon_k / (6*omega*K) ;//WAS SOLL HIER DIE 10@PHK
+        //eta = theta * epsilon_k / (6*omega*K)*10;
         cout << "eta = " << eta << endl;
         P.RHS(eta, f);
         //cout << f << endl;
@@ -66,11 +66,11 @@ namespace WaveletTL
 #else
           //APPLY_COARSE(P, v, eta, Av, 0.5, maxlevel, CDD1);
 
-          APPLY(P, v, eta, Av, maxlevel, strategy, pmax, a, b);
+ //         APPLY(P, v, eta, Av, maxlevel, strategy, pmax, a, b);
           //APPLY with successive COARSE @PHK
-//          APPLY(P, v, eta, tempAv, maxlevel, strategy, pmax, a, b);
-//          tempAv.COARSE(1e-6, Av);
-          
+         APPLY(P, v, eta, tempAv, maxlevel, strategy, pmax, a, b);
+          tempAv.COARSE(1e-6, Av);
+         
 
           
           
@@ -90,9 +90,9 @@ namespace WaveletTL
       
       
       
-      v.COARSE(std::min((1-theta)*epsilon_k,1.0e-6), u_epsilon);
-      //v.COARSE((1-theta)*epsilon_k, u_epsilon);
-      //v.COARSE(1.0e-6, u_epsilon);
+//      v.COARSE(std::min((1-theta)*epsilon_k,1.0e-6), u_epsilon);
+      v.COARSE((1-theta)*epsilon_k, u_epsilon);
+//      v.COARSE(1.0e-6, u_epsilon);
       
       //cout << u_epsilon << endl;
       //cout << "CDD2:: v.size() = " << v.size() << endl;
@@ -101,7 +101,9 @@ namespace WaveletTL
       
       
       
-    } 
+    }
+//        cout << "f" << f << endl;
+//        cout << "Av" << Av << endl;
   }        
         
   template <class PROBLEM>

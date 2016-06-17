@@ -131,14 +131,14 @@ namespace WaveletTL
             // Generator on level j has support 2^{-j}[k+ell1 ; k+ell2]
             // the leftmost generator on the level j, s.th. its support intersects [2^{-j_lambda}k1; 2^{-j_lambda}k2], fulfills
             //   2^{-j}(k+ell2-1) <= 2^{-j_lambda}k1 < 2^{-j}(k+ell2)
-            const int firstk = std::max(basis.DeltaLmin(),
+            const int firstk = std::max(basis.DeltaLmin(p),
                                         (j < j_lambda) ? (k1_lambda / (1<<(j_lambda-j))-ell2<d>()+1 )
                                                        : ((k1_lambda << (j-j_lambda)) -ell2<d>()+1) );
             //assert (firstk == std::max(basis.DeltaLmin(), (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda-ell2<d>())+1) );
             //const int firstk = std::max(basis.DeltaLmin(), (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda-ell2<d>())+1);
             // the rightmost generator on the level j, s.th. its support intersects [2^{-j_lambda}k1; 2^{-j_lambda}k2], fulfills
             //   2^{-j}(k+ell1) < 2^{-j_lambda}k2 <= 2^{-j}(k+1+ell1)
-            const int lastk = std::min(basis.DeltaRmax(j), (j < j_lambda) ? (k2_lambda / (1<<(j_lambda-j)) + ( ((k2_lambda % (1<<(j_lambda-j))) == 0)? 0 : 1 ) -1-ell1<d>() )
+            const int lastk = std::min(basis.DeltaRmax(j,p), (j < j_lambda) ? (k2_lambda / (1<<(j_lambda-j)) + ( ((k2_lambda % (1<<(j_lambda-j))) == 0)? 0 : 1 ) -1-ell1<d>() )
                                                                           : ((k2_lambda << (j-j_lambda)) -1-ell1<d>() )   );
             //assert (lastk == std::min(basis.DeltaRmax(j), (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda-ell1<d>())-1));
             //const int lastk  = std::min(basis.DeltaRmax(j), (int) ceil(ldexp(1.0,j-j_lambda)*k2_lambda-ell1<d>())-1);
@@ -164,7 +164,7 @@ namespace WaveletTL
                 if (n < mink)
                 {
                     // all left boundary wavelets intersect
-                    mink = 0;
+                    mink = basis.Nablamin(p);
                 }
                 else
                 {
@@ -172,7 +172,7 @@ namespace WaveletTL
                     if (basis.get_s0() == d-1)
                     {
                         // left boundary wavelets have the same support as the leftmost inner wavelet
-                        mink = 0;
+                        mink = basis.Nablamin(p);
                     }
                     else
                     {
@@ -205,7 +205,7 @@ namespace WaveletTL
                 if (n > maxk)
                 {
                     // all right boundary wavelets intersect
-                    maxk = (1<<j)-1;
+                    maxk = basis.Nablamax(j,p);
                 }
                 else
                 {
@@ -213,7 +213,7 @@ namespace WaveletTL
                     if (basis.get_s1() == d-1)
                     {
                         // right boundary wavelets have the same support as the rightmost inner wavelet
-                        maxk = (1<<j)-1;
+                        maxk = basis.Nablamax(j,p);
                     }
                     else
                     {

@@ -178,6 +178,7 @@ namespace WaveletTL
     */
     double diag(const INDEX& lambda) const;
   };
+
 #ifdef FRAME
   template <class INDEX>
   class FullyDiagonalQuarkletPreconditioner

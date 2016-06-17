@@ -171,17 +171,17 @@ namespace WaveletTL
     
     switch (e_) {
     case 0:
-      if (k_ == frame_->DeltaRmax(j_)) {
+      if (k_ == frame_->DeltaRmax(j_,p_)) {
 	e_ = 1;
-	k_ = frame_->Nablamin();
+	k_ = frame_->Nablamin(p_);
       }
       else
 	k_++;
       break;
     case 1:
-      if (k_ == frame_->Nablamax(j_)) {
+      if (k_ == frame_->Nablamax(j_,p_)) {
 	j_++;
-	k_ = frame_->Nablamin();
+	k_ = frame_->Nablamin(p_);
       }
       else
 	k_++;
@@ -212,7 +212,7 @@ namespace WaveletTL
       result += k_ - frame_->DeltaLmin();
     else
       result += k_ - frame_->Nablamin();
-//     num_ = result;
+//     num_ = result; //warum wurde das auskommentiert? So passiert überhaupt nichts @PHK
   }
 
 

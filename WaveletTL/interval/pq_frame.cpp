@@ -12,12 +12,13 @@
 namespace WaveletTL
 {
   template <int d, int dT>
-  PQFrame<d,dT>::PQFrame(const int s0, const int s1) {
+  PQFrame<d,dT>::PQFrame(const int s0, const int s1, const bool boundary_quarks) {
     assert(std::max(s0,s1) < d);
     //assert(std::min(s0,s1) >= d-2);
     
     this->s0 = s0;
     this->s1 = s1;
+    this->boundary_quarks = boundary_quarks;
     primal = d;
     dual = dT;
     evaluate_with_pre_computation = false;
@@ -30,9 +31,10 @@ namespace WaveletTL
   }
 
   template <int d, int dT>
-  PQFrame<d,dT>::PQFrame(const bool bc_left, const bool bc_right) {
+  PQFrame<d,dT>::PQFrame(const bool bc_left, const bool bc_right, const bool boundary_quarks) {
     this->s0 = bc_left ? 1 : 0;
     this->s1 = bc_right ? 1 : 0;
+    this->boundary_quarks = boundary_quarks;
     primal = d;
     dual = dT;
     evaluate_with_pre_computation = false;
@@ -51,7 +53,8 @@ namespace WaveletTL
   PQFrame<d,dT>::first_generator(const int j, const int p) const
   {
     assert(j >= j0());
-    return Index(p, j, 0, DeltaLmin(), this);
+    return Index(p, j, 0, DeltaLmin(p), this);
+     
   }
   
   template <int d, int dT>
@@ -60,7 +63,7 @@ namespace WaveletTL
   PQFrame<d,dT>::last_generator(const int j, const int p) const
   {
     assert(j >= j0());
-    return Index(p, j, 0, DeltaRmax(j), this);
+    return Index(p, j, 0, DeltaRmax(j,p), this);
   }
 
   template <int d, int dT>
@@ -69,7 +72,7 @@ namespace WaveletTL
   PQFrame<d,dT>::first_wavelet(const int j, const int p) const
   {
     assert(j >= j0());
-    return Index(p, j, 1, Nablamin(), this);
+    return Index(p, j, 1, Nablamin(p), this);
   }
   
   template <int d, int dT>
@@ -78,7 +81,7 @@ namespace WaveletTL
   PQFrame<d,dT>::last_wavelet(const int j, const int p) const
   {
     assert(j >= j0());
-    return Index(p, j, 1, Nablamax(j), this);
+    return Index(p, j, 1, Nablamax(j,p), this);
   }
   
   
@@ -953,8 +956,13 @@ namespace WaveletTL
       cout << "PQFrame<d,dT>::setup_full_collection(): specify a maximal level of resolution and polynomial degree first!" << endl;
       abort();
     }   
-
-    int degrees_of_freedom = Deltasize(jmax_+1)*(pmax_+1);
+    
+    int degrees_of_freedom;
+    if (boundary_quarks == true)
+        degrees_of_freedom = Deltasize(jmax_+1)*(pmax_+1);
+    else
+        degrees_of_freedom = Deltasize(jmax_+1)*(pmax_+1)-pmax_*(2*d-2-s0-s1)-pmax_*(jmax_-j0_+1)*(d+dT-2);
+    
     cout << "total degrees of freedom between (j0_, 0) and (jmax_, pmax_) is " << degrees_of_freedom << endl;
 
     cout << "setting up collection of quarklet indices..." << endl;
@@ -963,9 +971,11 @@ namespace WaveletTL
     int p = 0;
     for (Index ind = first_generator(j0_); ind <= last_wavelet(jmax_, pmax_); (ind == last_wavelet(jmax_,p))? (++p, ind=first_generator(j0_, p)) : ++ind) {
       full_collection[k] = ind;
+      //cout << ind << endl;
       k++;
     }
     cout << "done setting up collection of quarklet indices..." << endl;
+    //cout << k << endl;
 
   }
 
@@ -1506,6 +1516,22 @@ namespace WaveletTL
       const int pmax=5;
       CVM.resize(pmax, dT*(d+dT-2));
       CVM(0,0)= 27;
+      
+      if(s0==1 && s1==1){
+            switch(d){
+              case 3: switch(dT){
+                      case 3: {
+                          Matrix <double> tempmat(pmax, dT*(d+dT-2),   "-0.2983106733130841   0.5440026584167825   0.0609050958014104   -0.113642161262121  -0.234702630273304   1.121742833458210    1.154572791156149   0.944650465491500  -1.325825214724864   0.147083734758176   3.639804534804494  -3.480291188657561"
+                                                                       " 31 32 33 34 35 36 7 8 9 10 11 12"
+                                                                       " 31 32 33 34 35 36 7 8 9 10 11 12"
+                                                                       " 41 42 43 44 45 46 7 8 9 10 11 12"
+                                                                       " 51 52 53 54 55 56 7 8 9 10 11 12");
+                          cout << "setup: " << endl << tempmat << endl;
+                          CVM = tempmat;
+                      }
+                      }
+            }
+      }
       
       if(s0==0 && s1==0){
             switch(d){

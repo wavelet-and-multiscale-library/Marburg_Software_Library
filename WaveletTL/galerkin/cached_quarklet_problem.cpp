@@ -14,12 +14,25 @@ namespace WaveletTL
     : problem(P), normA(estnormA), normAinv(estnormAinv)
   {
   }
+  
+  template <class PROBLEM>
+  int 
+  CachedQuarkletProblem<PROBLEM>::number (const Index& lambda, const int jmax) const{
+      
+      WaveletBasis mybasis(basis());
+      const int waveletsonzerolevel = (mybasis.last_wavelet(jmax)).number()+1;
+      const int waveletsonplevel = ((mybasis.last_wavelet(jmax,lambda.p())).number()+1);
+      const int lambda_num = (lambda.p()==0) ? lambda.number() : lambda.number() + (lambda.p()-1) * waveletsonplevel + waveletsonzerolevel;
+      return lambda_num;
+  }
 
   template <class PROBLEM>
   double
   CachedQuarkletProblem<PROBLEM>::a(const Index& lambda,
 			    const Index& nu) const
   {
+      
+      //const int lambda_num = number(lambda,2);
       double r = 0;
       
       WaveletBasis mybasis(basis());
@@ -27,11 +40,8 @@ namespace WaveletTL
       
       const int jmax = mybasis.get_jmax_();
       const int pmax = mybasis.get_pmax_();
-      const int waveletsonplevel = ((mybasis.last_wavelet(jmax)).number()+1);
-      
-    
-      const int lambda_num = lambda.number() + lambda.p() * waveletsonplevel;
-      const int nu_num = nu.number()+ nu.p() * waveletsonplevel;
+      const int lambda_num = number(lambda, jmax);
+      const int nu_num = number(nu,jmax);
       
       //cout << "Punkt 1" << endl;
       // BE CAREFUL: KEY OF GENERATOR LEVEL IS j0-1 NOT j0 !!!!
@@ -97,8 +107,8 @@ namespace WaveletTL
 //                cout << (*it).number()+(*it).p()*waveletsonplevel << endl;
                 typedef typename Block::value_type value_type_block;
                 if (entry != 0.) {
-                    block.insert(block.end(), value_type_block((*it).number()+(*it).p()*waveletsonplevel, entry));
-                    if ((*it).number()+(*it).p()*waveletsonplevel == lambda_num) {
+                    block.insert(block.end(), value_type_block(number(*it,jmax), entry));
+                    if (number(*it,jmax) == lambda_num) {
                         r = entry;
                     }
                 }
@@ -130,6 +140,8 @@ namespace WaveletTL
     return r;
   }
   
+  
+  
   template <class PROBLEM>
   void
   CachedQuarkletProblem<PROBLEM>::add_level (const Index& lambda,
@@ -148,12 +160,13 @@ namespace WaveletTL
 //      cout << lambda << endl;
 //      cout << j << endl;
       
-      WaveletBasis mybasis(basis());
+//      WaveletBasis mybasis(basis());
       
       const int minplevel = std::max(0, lambda.p() + 1  - (int) pow(2,(J-b*abs(j-lambda.j())/a)));
       const int maxplevel = std::min(lambda.p() - 1  + (int) pow(2,(J-b*abs(j-lambda.j())/a)), pmax);
-      const int waveletsonplevel = ((mybasis.last_wavelet(jmax)).number()+1);
-      const int lambda_num = lambda.number() + lambda.p() * waveletsonplevel;
+
+      
+      const int lambda_num = number(lambda, jmax);
       //cout << lambda << ": " << lambda_num << endl;
       
       // search for column 'lambda'
@@ -202,7 +215,7 @@ namespace WaveletTL
           //cout << maxplevel << endl;
           
          for(int p = minplevel; p<=maxplevel; ++p){
-             //cout << "Hallo" << endl;
+//             cout << "Hallo" << endl;
           intersecting_wavelets(basis(), lambda,
 				std::max(j, basis().j0()),
 				j == (basis().j0()-1),
@@ -215,27 +228,27 @@ namespace WaveletTL
 	  
 	  // do the rest of the job
 	  const double d1 = problem->D(lambda);
-          //cout << d1 << endl;
+//          cout << d1 << endl;
           
 	    for (typename IntersectingList::const_iterator it2(nus.begin()), itend2(nus.end());
 		 it2 != itend2; ++it2) {
                 
 	      const double entry = problem->a(*it2, lambda);
-              //cout << *it2 << ", " << entry << endl;
+ //             cout << *it2 << ", " << entry << endl;
 	      typedef typename Block::value_type value_type_block;
 	      if (entry != 0.) {
-                  //cout << "ja3" << endl;
-		block.insert(block.end(), value_type_block((*it2).number()+(*it2).p()* waveletsonplevel, entry));
+ //                 cout << "ja3" << endl;
+		block.insert(block.end(), value_type_block(number(*it2,jmax), entry));
 	      //w.add_coefficient(*it2, (entry / (d1 * problem->D(*it2))) * factor);
-                //cout << *it2 << ": " << (*it2).number() << endl;
-		//cout << (*it2).number()+(*it2).p()*((1<<jmax+1)-1) << endl;
-                
-                w[(*it2).number()+(*it2).p()* waveletsonplevel] += (entry / (d1*problem->D(*it2))) * factor;
+ //               cout << *it2 << ": " << (*it2).number() << endl;
+ //             cout <<  number(*it2,jmax) << endl;
+ //               cout << w.size() << endl;
+                w[number(*it2,jmax)] += (entry / (d1*problem->D(*it2))) * factor;
                 //cout << "ja5" << endl;
 	      }
-              //cout << "ja1" << endl;
+ //             cout << "ja1" << endl;
 	    }
-	  //cout << "ja2" << endl;
+//	  cout << "ja2" << endl;
          }
 
         
@@ -259,15 +272,15 @@ namespace WaveletTL
                     //cout << it2->second << endl;
                     //cout << it2->first << endl;
               if(it2->first >= w.size()){
-                  cout << "Feeehler" << endl;
-                  cout << "level: " << j << endl;
-                  cout << it->first << endl;
-                  cout << col_it->first << endl;
+//                  cout << "Feeehler" << endl;
+//                  cout << "level: " << j << endl;
+//                  cout << it->first << endl;
+//                  cout << col_it->first << endl;
                   //cout << *col_it << endl;
                   for (typename Block::const_iterator it3(block.begin()), itend2(block.end());
 	       it3 != itend2; ++it3) {
                       
-                  cout << it3->first << endl;
+//                  cout << it3->first << endl;
                   
                   }
               }
@@ -402,13 +415,14 @@ namespace WaveletTL
       cout << "Eigenwerte: " << evals << endl;
       //cout << "Eigenvektoren: " << endl << evecs << endl;
       normA = evals(evals.size()-1);
-      //cout << "normA: " << normA << endl;
+      cout << "normA: " << normA << endl;
       int i = 0;
       while(abs(evals(i))<1e-3){
           ++i;
       }
       normAinv = 1./evals(i);
-      //cout << "inversnorm: " << normAinv << endl;
+      cout << evals(i) << endl;
+      cout << "inversnorm: " << normAinv << endl;
 #endif
 
 #if _WAVELETTL_CACHEDPROBLEM_VERBOSITY >= 1
@@ -418,4 +432,6 @@ namespace WaveletTL
 
     return normAinv;
   }
+  
+  
 }

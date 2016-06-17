@@ -163,6 +163,8 @@ namespace WaveletTL
                     const double a = 0,
                     const double b = 0) const;
     
+    int number (const Index& lambda, const int jmax) const;
+    
   protected:
     //! the underlying (uncached) problem
     const PROBLEM* problem;

@@ -94,13 +94,13 @@ namespace WaveletTL
       full range of polynomials of order dT.
 
     */
-    PQFrame(const int s0 = 0, const int s1 = 0);
+    PQFrame(const int s0 = 0, const int s1 = 0, const bool boundary_quarks = true);
 
     /*!
       alternative constructor, you can specify whether first order homogeneous Dirichlet b.c.'s
       for the primal functions are set or not. The dual functions have free b.c.'s
     */
-    PQFrame(const bool bc_left, const bool bc_right);
+    PQFrame(const bool bc_left, const bool bc_right, const bool boundary_quarks = true);
 
     //! coarsest possible level
     inline const int j0() const { return j0_; }
@@ -188,12 +188,14 @@ namespace WaveletTL
 
 
     //! extremal generator indices
-    inline const int DeltaLmin() const { return 1-d-ell1<d>()+s0; }
+    inline const int DeltaLmin(const int p=0) const { 
+        return (p==0 || boundary_quarks == true) ? 1-d-ell1<d>()+s0 : -ell1<d>(); }
     inline const int DeltaLmax() const { return -ell1<d>(); }
     inline const int Delta0min() const { return DeltaLmax()+1; }
     inline const int Delta0max(const int j) const { return DeltaRmin(j)-1; }
     inline const int DeltaRmin(const int j) const { return (1<<j)-(d%2)-(ell_r()-1-s1); }
-    inline const int DeltaRmax(const int j) const { return (1<<j)-1-ell1<d>()-s1; }
+    inline const int DeltaRmax(const int j, const int p=0) const {
+        return (p==0 || boundary_quarks == true) ? (1<<j)-1-ell1<d>()-s1 : (1<<j)-d-ell1<d>(); }
 
     inline const int DeltaLTmin() const
     { 
@@ -217,14 +219,19 @@ namespace WaveletTL
 
 
     //! size of Delta_j
-    inline const int Deltasize(const int j) const { return DeltaRmax(j)-DeltaLmin()+1; }
+    inline const int Deltasize(const int j, const int p=0) const { return DeltaRmax(j,p)-DeltaLmin(p)+1; }
 
     //! boundary indices in \nabla_j
-    inline const int Nablamin() const { return 0; }
-    inline const int Nablamax(const int j) const { return (1<<j)-1; }
+    inline const int Nablamin(const int p=0) const { return (p==0 || boundary_quarks == true) ? 0: (d+dT-2)/2; }
+    inline const int Nablamax(const int j, const int p=0) const { return (p==0 || boundary_quarks == true) ? (1<<j)-1 : (1<<j)-(d+dT)/2; }
 
     //! size of Nabla_j
-    inline const int Nablasize(const int j) const { return 1<<j; }
+    inline const int Nablasize(const int j, const int p=0) const { return Nablamax(j,p)-Nablamin(p)+1; }
+    
+    
+    //! size of Delta_j0+\sum_i=j0^(j-1) \Nabla_i
+    inline const int DeltaNablasize(const int j, const int p=0) const { return (p==0 || boundary_quarks == true) ? Deltasize(j,p) : 
+        (1<<j)-2*(d-2)-(j-j0_)*(d+dT-2); }
     
     //! index of first (leftmost) generator on level j >= j0, p
     Index first_generator(const int j, const int p = 0) const;
@@ -469,6 +476,9 @@ namespace WaveletTL
   protected:
     //! evaluate_with_pre_computation
     bool evaluate_with_pre_computation;
+    
+    //! quark and quarklet functions at the boundaries
+    bool boundary_quarks;
 
     //! the dual order
     int dual;

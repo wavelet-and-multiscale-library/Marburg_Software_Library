@@ -103,7 +103,7 @@ int main(){
   
   
 
-  QuarkletFrame<3, 3> frame2;
+  QuarkletFrame<2, 2> frame2;
   
   const RQIndex lambda3(0,0,1,0);
   int k1, k2;

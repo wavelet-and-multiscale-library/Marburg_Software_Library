@@ -27,7 +27,7 @@ namespace WaveletTL
       {
 	r = (derivative == 0
 	     ? MathTL::EvaluateCardinalBSpline_td<d>(j, k, x)*pow(y*pfktrez,p)
-	     : MathTL::EvaluateCardinalBSpline_td_x<d>(j, k, x)*pow(y*pfktrez,p)+MathTL::EvaluateCardinalBSpline_td<d>(j, k, x)*pow(y*pfktrez,p-1)*ldexp(1.0,j)*p*pfktrez);
+	     : MathTL::EvaluateCardinalBSpline_td_x<d>(j, k, x)*pow(y*pfktrez,p)+MathTL::EvaluateCardinalBSpline_td<d>(j, k, x)*pow(y*pfktrez,p-1)*(1<<j)*p*pfktrez);
       }
     else // wavelet
       {

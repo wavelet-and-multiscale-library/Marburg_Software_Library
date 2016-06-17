@@ -26,8 +26,10 @@ namespace WaveletTL
         
         
       const int lambda_num = lambda.number();
+      //cout << "number: " << lambda_num << endl;
       const int nu_num = nu.number();
-
+      //cout << "number2: " << nu_num << endl;
+      
       // BE CAREFUL: KEY OF GENERATOR LEVEL IS j0-1 NOT j0 !!!!
       typedef typename Index::type_type generator_type;
       int j = (lambda.e() == generator_type()) ? (lambda.j()-1) : lambda.j();

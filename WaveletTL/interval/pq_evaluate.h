@@ -29,7 +29,8 @@ namespace WaveletTL
   SampledMapping<1> evaluate(const PQFrame<d,dT>& basis,
 			     const typename PQFrame<d,dT>::Index& lambda,
 			     const bool primal,
-			     const int resolution);
+			     const int resolution,
+                             const int derivative = 0);
   
   /*!
     Evaluate an arbitrary linear combination of primal or dual
@@ -39,7 +40,8 @@ namespace WaveletTL
   SampledMapping<1> evaluate(const PQFrame<d,dT>& basis,
 			     const InfiniteVector<double, typename PQFrame<d,dT>::Index>& coeffs,
 			     const bool primal,
-			     const int resolution);
+			     const int resolution,
+                             const int derivative = 0);
 
   /*!
     point evaluation of (derivatives) of a single primal [P] generator

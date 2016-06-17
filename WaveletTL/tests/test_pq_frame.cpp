@@ -49,7 +49,7 @@ class TestProblem : public SimpleSturmBVP
                     return 0;
                     break;
                 case 2:
-                    return 0;
+                    return 1;
                     break;
                 case 3:
                     return 1;
@@ -57,6 +57,9 @@ class TestProblem : public SimpleSturmBVP
                 case 4:
                     return 0;
                     break;
+                case 5:
+                    return 1;
+                    break;   
                 default:
                     return 0;
                     break;
@@ -79,6 +82,9 @@ class TestProblem : public SimpleSturmBVP
                 case 4:
                     return 0;
                     break;
+                case 5:
+                    return 0;
+                    break;
                 default:
                     return 0;
                     break;
@@ -93,14 +99,17 @@ class TestProblem : public SimpleSturmBVP
                     return 1;
                     break;
                 case 2:
-                    return 1;
+                    return 0;
                     break;
                 case 3:
                     return 0;
                     break;
                 case 4:
-                    return 1;
+                    return 3.1;
                     break;
+                case 5:
+                    return 0;
+                    break;    
                 default:
                     return 0;
                     break;
@@ -116,15 +125,21 @@ class TestProblem : public SimpleSturmBVP
                     return t*(1-t);
                     break;
                 case 2:
-                    return exp(-100*(t-0.5)*(t-0.5));
+                    //return exp(-100*(t-0.5)*(t-0.5));
+                    return (200-(200*t-100)*(200*t-100))*exp(-100*(t-0.5)*(t-0.5));
                     break;
                 case 3:
                     return ( -100*exp(5*t)*(1-(exp(5*t)-1)/(exp(5.)-1)) /
                              (exp(5.)-1)+200*exp(10*t)/((exp(5.)-1) *
                              (exp(5.)-1))+100*(exp(5*t)-1)*exp(5*t) /
                              ((exp(5.)-1)*(exp(5.)-1)) );
+                    break;
                 case 4:
                     return 4;
+                    break;
+                case 5:
+                    return 2;
+                    break;
                 default:
                     return 0;
                     break;
@@ -147,7 +162,9 @@ class TestProblem : public SimpleSturmBVP
                 case 4:
                     return "konstante Funktion";
                     break;
-                default:
+                case 5:
+                    return "y(t) = t*(1-t), -y''(t)=2, y(0)=y(1)=0";
+                    break;default:
                     return "TestProblem: N not defined.";
                     break;
             }
@@ -198,7 +215,7 @@ int main()
 //  
 //  
 //  
-//  PerFrame perframe;
+//  PerFrame perframe;main.cpp:409:5: error: ‘sm3’ was not declared in this scope
 //  
 //  
 //  FrIndex lambda (1,2,0,2, &frame);
@@ -207,19 +224,45 @@ int main()
 //  cout<< (1<<2)-ell1<d>()-d << endl;
   
   
-  double epsilon1 = 1e-8;
+  double epsilon1 = 1e-6;
   const int jmax = 6;
   
   TestProblem<2> testproblem;
   
+  
 #ifdef FRAME
   typedef PQFrame<d,dT> Frame;
   typedef Frame::Index Index;
-  Frame frame(false,false);
+  Frame frame(true,true,false);
   const int pmax = 1;
   frame.set_jpmax(jmax,pmax);
   SturmEquation<Frame> problem(testproblem, frame);
   CachedQuarkletProblem<SturmEquation<Frame> > cproblem(&problem);
+  cout << "Deltas" << endl;
+  cout << frame.DeltaLmin(0) << endl;
+  cout << frame.DeltaRmax(3,0) << endl;
+  cout << frame.Nablamin(0) << endl;
+  cout << frame.Nablamax(3,0) << endl;
+  Index eta(1,5,1,9, &frame);
+  Index teta(1,5,1,9, &frame);
+  cout << eta.number() << endl;
+  cout << "Hau raus: " << cproblem.number(eta,jmax) << endl;
+  cout << "Deltasize: " << frame.Deltasize(4,1) << endl;
+  cout << "DeltaNablasize: " << frame.DeltaNablasize(4,1) << endl;
+  cout << cproblem.a(eta,teta) << endl;
+  cout << problem.a(eta,teta) << endl;
+  std::list<typename PQFrame<d,dT>::Index> intersecting;
+  
+  
+  typedef std::list<Index> IntersectingList;
+  IntersectingList nus;
+  intersecting_wavelets(frame,eta,5, 0,nus, 1);
+  
+  for (typename IntersectingList::const_iterator it2(nus.begin()), itend2(nus.end());
+		 it2 != itend2; ++it2) {
+                
+	      cout << *it2 <<  endl;
+  }
   
 #endif
 #ifdef BASIS
@@ -231,8 +274,14 @@ int main()
   Basis basis11(true,true);
   basis11.set_jmax(jmax);
   basis.set_jmax(jmax);
-  SturmEquation<Basis> problem(testproblem, basis);
+  SturmEquation<Basis> problem(testproblem, basis11);
   CachedProblem<SturmEquation<Basis> > cproblem(&problem);
+  Index eta(3,0,0, &basis11);
+  Index teta(5,1,0, &basis11);
+  cout << "nummer1: " << eta.number() << endl;
+  cout << "nummer2: " << teta.number() << endl;
+  cout << "Hier: " << problem.a(eta,teta) << endl;
+  cout << "Hier: " << cproblem.a(eta,teta) << endl;
 #endif
 #ifdef basis
  Index phi(6,1,0,&basis); 
@@ -249,9 +298,9 @@ int main()
 #ifdef FRAME
   //////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
-  
+#if 0 //für Randanpassung
   Matrix<double> A;
-  Index lambda(1,4,1,0, &frame);
+  Index lambda(0,6,0,-1, &frame);
   system_matrix(frame, A, lambda, 0);
   cout << "LGS linke Seite Ansatz 2" << endl;
   cout << A << endl;
@@ -262,7 +311,7 @@ int main()
   rightsidevector(frame, lambda, coeffs2, 0);
   cout << "RHS: " << coeffs2 << endl;
   coeffs2.matlab_output("../../Desktop/plots/Ansatz2vector", "v");
-   
+#endif  
   SparseMatrix<double> mj1;
  frame.assemble_Mj0(3, mj1);
  cout << "primale Zweiskalenrelation generator/generator" << endl;
@@ -277,15 +326,20 @@ int main()
   
   //cproblem.norm_Ainv();
   //cproblem.norm_A();
-  MonomeFunction newfunction(1);
+  MonomeFunction newfunction(2);
   Index mu(0,4,0,-1, &frame);
-      Index phi(1,3,0,-1,&frame);
+  Index phi(1,3,1,2,&frame);
   InfiniteVector<double, Index> c;
   InfiniteVector<double, int> c2;
   frame.reconstruct_1(phi, 4, c);
   frame.reconstruct_1(phi.p(), phi.j(), phi.e(), phi.k(), 4, c2);
   cout << "two-scale: " << endl << c << endl;
-  cout << "alt. two-scale: " << endl << c2 << endl;
+  cout << "alt. two-scale: " << endl << c2[5] << endl;
+  double mysumme=0;
+  for(int k=5;k<=12;k++){
+      mysumme+=pow(k+37,2)*c2[k];
+  cout << "Summe: " << mysumme << endl;
+  }
   double summe=0;
   //cout << "Size: " << frame.Deltasize(4) << endl;
   cout << "Test auf verschwindende Momente: " << integrate(&newfunction, frame, phi) <<endl;
@@ -361,7 +415,7 @@ int main()
 //  cproblem.RHS(1e-6, precrhs);
 ////  APPLY(cproblem, coeffs, 1e-6, Av, jmax, CDD1);
 #endif
-  
+#if 1  
 //  Index lambda(0,3,0,1, &frame);
 //  Index nu(0,5,1,31, &frame);
 //  cproblem.a(lambda, nu);
@@ -379,10 +433,11 @@ int main()
   cproblem.RHS(1e-6, F1_eta);
 //  cout << F1_eta;
   const double nu1 = cproblem.norm_Ainv() * l2_norm(F1_eta);
-  cout << "nu = " << nu1 << endl;
+//  cout << "nu = " << nu1 << endl;
   InfiniteVector<double, Index> solution1_epsilon;
+#endif
 #ifdef BASIS
-  CDD2_SOLVE(cproblem, nu1, epsilon1, solution1_epsilon, jmax);
+  //CDD2_SOLVE(cproblem, nu1, epsilon1, solution1_epsilon, jmax);
 #endif
 #ifdef FRAME  
   CDD2_SOLVE(cproblem, nu1, epsilon1, solution1_epsilon, jmax, DKOR, pmax, 2, 2);
@@ -392,20 +447,21 @@ int main()
 //  cout << coeffs << endl;
 //  
   /* plot solution graph */
-    coeffs.scale(&cproblem, -1); /* scaling because ... */
-    coeffs.clear();
-//    coeffs[phi]=1;
-    coeffs.scale(&cproblem, -1);
-//    SampledMapping<1> sm3(evaluate(cproblem.basis(), coeffs, true, 2*jmax));
+//    coeffs.scale(&cproblem, -1); /* scaling because ... */
+#if 1
+  coeffs.clear();
+    coeffs[phi]=1;
+   //coeffs.scale(&cproblem, -1);
+    //SampledMapping<1> sm3(evaluate(cproblem.basis(), coeffs, true, 2*jmax,1));
     solution1_epsilon.scale(&cproblem, -1); /* scaling because ... */
     SampledMapping<1> sm3(evaluate(cproblem.basis(), solution1_epsilon, true, 2*jmax)); //" Increase last parameter, if Assertion `resolution >= 0' failed."
     std::ofstream u_stream3("../../Desktop/plots/plotthis3.m");
     sm3.matlab_output(u_stream3);
     u_stream3 << "figure;\nplot(x,y);"
-              << "title('superquarkgraph');" << endl;
+              << "title('quarkgraph');" << endl;
     u_stream3.close();
 
-  
+#endif 
 //  InfiniteVector<double,int> gcoeffs;
 //  frame.reconstruct_1(0,2,1,2, 3, gcoeffs); 
 //  cout << gcoeffs;

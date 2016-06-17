@@ -46,10 +46,10 @@ namespace WaveletTL
             for (int level = std::max(P.basis().j0()-1, lambda.j()- (int) (J/(P.space_dimension * b)));
                    level <= maxlevel; level++)
                 {
-                //cout << "adding level: " << level << endl;
+//                cout << "adding level: " << level << endl;
                 P.add_level(lambda,w,level,factor,J,strategy,jmax,pmax,a,b);
 //                cout << w << endl;
-                //cout << "Stop" << endl;
+//                cout << "Stop" << endl;
                 }
           
         }

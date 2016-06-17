@@ -76,6 +76,7 @@ namespace WaveletTL
   {
     return pow(ldexp(1.0, lambda.j()), operator_order());
   }
+
 #ifdef FRAME  
   template <class INDEX>
   inline

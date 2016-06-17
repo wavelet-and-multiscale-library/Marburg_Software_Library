@@ -448,6 +448,7 @@ namespace WaveletTL
 
 //      cout << ell << endl;
 //      cout << "J = " << J << endl;
+ //     cout << 1 << endl;
 
       // hack: We let 'add_compressed_column' and 'add_level'
       // in cached_problem.cpp/.h work on full vectors. We do this because the call of 
@@ -458,7 +459,7 @@ namespace WaveletTL
       //cout << "done binning in apply..." << endl;
 
       Vector<double> ww(P.basis().degrees_of_freedom());
-      //cout << "AUSGEFÜHRT PART2: " << P.basis().degrees_of_freedom() << endl;//HIER WEITERMACHEN @PHK
+ //     cout << "AUSGEFÜHRT PART2: " << P.basis().degrees_of_freedom() << endl;//HIER WEITERMACHEN @PHK
       //cout << *(P.basis().get_wavelet(4000)) << endl;
       // compute w = \sum_{k=0}^\ell A_{J-k}v_{[k]}
       k = 0;
@@ -469,16 +470,17 @@ namespace WaveletTL
 	     itk != it->end(); ++itk) {
 	  //add_compressed_column(P, itk->second, itk->first, J-k, ww, jmax, strategy);
 	  //cout << "J-k = " << J-k << endl;
-//            cout << "addcompressed wird ausgeführt" << endl;
+ //           cout << "addcompressed wird ausgeführt" << endl;
 //            cout << itk->second << ", " << itk->first << endl;
             //cout << "Beginn cc" << endl;
-	  add_compressed_column(P, itk->second, itk->first, J-k, ww, jmax, strategy, true, pmax, a, b);
-          //cout << "Ende cc" << endl;
+	  
+            add_compressed_column(P, itk->second, itk->first, J-k, ww, jmax, strategy, true, pmax, a, b);
+ //         cout << "Ende cc" << endl;
 //          //cout << ww << endl;
 	  z++;
 	}
       }
-      //cout << "copying vector" << endl;
+//      cout << "copying vector" << endl;
       // copy ww into w
       for (unsigned int i = 0; i < ww.size(); i++) {
 	if (ww[i] != 0.) {
@@ -486,7 +488,7 @@ namespace WaveletTL
 	}
       }
     }
-    //cout << "bin raus" << endl;
+//    cout << "bin raus" << endl;
   }  
 
 

@@ -80,7 +80,6 @@ endif
 
 # set 1 of test programs: stuff on R and R^d
 EXEOBJF1 = \
-  test_periodic_frame.o\
   test_r_frame.o\
   test_refinable.o test_r_basis.o\
   test_regularity.o\
@@ -98,13 +97,13 @@ EXEOBJF2 = \
   test_s_basis.o\
   test_s_support.o\
   test_i_indexplot.o\
-  test_i_index.o\
-#  test_i_indexplot.o\ (temporarily commented out)
+  test_i_index.o
+  
 
 # set 2a of test programs: wavelet bases on the interval with improved performance (periodic)
 EXEOBJF2a = \
   test_periodic.o test_periodic_support.o\
-  test_periodic_gramian.o\
+  test_periodic_gramian.o
 
 # set 3 of test programs: wavelet bases on general higher-dim. domains ((mapped) cube, tensor prod.)
 EXEOBJF3 = \
@@ -115,8 +114,7 @@ EXEOBJF3 = \
 
 # set 3a of test programs: wavelet bases on the ring domain
 EXEOBJF3a = \
-  test_ring_basis.o test_ring_expansion.o\
-  test_ring_gramian.o test_ring_laplacian.o test_ring_helmholtz.o
+  test_ring_basis.o  
 
 # set 3b of test programs: generic tensor product wavelet bases
 EXEOBJF3b = \
@@ -126,23 +124,18 @@ EXEOBJF3b = \
 EXEOBJF4 = \
   test_ldomain_index.o test_ldomain_support.o test_ldomain_basis.o\
   test_ldomain_expansion.o test_ldomain_gramian.o test_ldomain_laplacian.o\
-  test_ldomain_helmholtz_equation.o
-#  test_ldomain_equation.o\
-#
-#  test_ldomain_jl_basis.o test_ldomain_jl_support.o\
-#  test_ldomain_jl_expansion.o test_ldomain_jl_gramian.o\
-#  test_ldomain_jl_laplacian.o\
+  test_ldomain_helmholtz_equation.o\
+  test_ldomain_jl_basis.o test_ldomain_jl_support.o\
+  test_ldomain_jl_expansion.o test_ldomain_jl_gramian.o\
+  test_ldomain_jl_laplacian.o
 
 # set 5 of test programs: adaptive wavelet schemes for elliptic equations
 EXEOBJF5 = \
-  test_full_laplacian.o\
   test_cdd1_cube.o\
-  test_cdd1.o\
   test_cdd2.o test_duv.o\
   test_cdd1_ldomain.o\
-  test_cdd1_gramian.o test_cdd1_poisson1d.o test_cdd1_helm1d.o\
-  test_helmholtz_equation.o\
-  test_tbasis_equation.o test_cached_tproblem.o
+  test_cdd1_gramian.o test_cdd1_poisson1d.o\
+  test_helmholtz_equation.o
 
 EXEOBJ5b = \
   test_cube_equation.o\
@@ -150,19 +143,17 @@ EXEOBJ5b = \
 
 # set 6 of test programs: adaptive wavelet schemes for parabolic equations
 EXEOBJF6 = \
-  test_lin_par_equation.o test_row_stage_equation.o 
+  
 
 # set 7 of test programs: nonadaptive wavelet solvers for elliptic problems	
 EXEOBJF7 = \
   test_full_laplacian_speed.o\
   test_full_gramian.o\
-  test_full_helmholtz.o\
-  test_full_ring_helmholtz.o
+  test_full_helmholtz.o
 
 # set 8 of test programs: ExpandASPP	
 EXEOBJF8 = \
-  test_expandWavelet.o\
-  test_support.o\
+  
   
 
 EXES1 = $(EXEOBJF1:.o=)

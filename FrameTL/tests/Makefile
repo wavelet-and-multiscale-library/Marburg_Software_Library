@@ -71,23 +71,7 @@ test_apply_1D.o \
 test_apply.o \
 test_compute_dual_frame_elements.o
 
-EXEOBJF2 = test_multiplicative_Schwarz33_1D.o\
-test_additive_Schwarz33_2D.o\
-test_multiplicative_Schwarz33_biharmonic_2D_v2.o\
-test_multiplicative_Schwarz46_biharmonic_2D.o\
-test_multiplicative_Schwarz33_2D_ring.o\
-test_additive_Schwarz33_2D_ring.o\
-test_additive_Schwarz33_1D.o\
-test_additive_Schwarz.o\
-test_multiplicative_Schwarz22_2D.o\
-test_multiplicative_Schwarz33_2D_Full.o\
-test_multiplicative_Schwarz22_1D.o\
-test_multiplicative_Schwarz46_1D.o\
-test_multiplicative_Schwarz33_2D.o\
-test_multiplicative_Schwarz33_Proj_1D.o\
-test_multiplicative_Schwarz46_2D.o\
-test_multiplicative_Schwarz33_2D_j03.o\
-test_multiplicative_Schwarz.o
+EXEOBJF2 = 
 
 EXEOBJF3 = test_richardson.o\
 test_richardson_projector_1D.o\
@@ -101,10 +85,9 @@ test_richardson_2D.o\
 test_steepest_descent22_2D.o\
 test_steepest_descent33_2D.o\
 test_steepest_descent46_2D.o\
-test_steepest_descent22.o\
-test_steepest_descent_2D.o
+test_steepest_descent22.o
 
-EXEOBJF4 = test_frame_support.o\
+EXEOBJF4 = 
 
 EXES1 = $(EXEOBJF1:.o=)
 EXES2 = $(EXEOBJF2:.o=)

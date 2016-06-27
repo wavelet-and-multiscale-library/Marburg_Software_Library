@@ -143,4 +143,5 @@ WaveletTL/tests/test_ldomain_jl_laplacian
 WaveletTL/tests/test_ldomain_jl_support
 WaveletTL/tests/test_ldomain_laplacian
 WaveletTL/tests/test_ldomain_support
+WaveletTL/tests/test_pq_frame
 WaveletTL/tests/test_tp_basis

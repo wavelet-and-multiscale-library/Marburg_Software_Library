@@ -80,6 +80,7 @@ endif
 
 # set 1 of test programs: stuff on R and R^d
 EXEOBJF1 = \
+  test_pq_frame.o\
   test_r_frame.o\
   test_refinable.o test_r_basis.o\
   test_regularity.o\

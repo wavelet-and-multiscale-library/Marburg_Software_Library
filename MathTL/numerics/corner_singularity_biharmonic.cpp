@@ -20,9 +20,6 @@ namespace MathTL
   {
     const Point<2> x(p-x0);
     const double r = hypot(x[0],x[1]);
-    double rootz[2];
-    rootz[0]=0.544483736782463929140876854601;
-    rootz[1]=0.908529189846098818660368657869;
     if (r >= r1) return 0.0;
 
     double theta = atan2(x[1],x[0]);
@@ -35,6 +32,9 @@ namespace MathTL
  
 #if 0
    //seems to work
+    double rootz[2];
+    rootz[0]=0.544483736782463929140876854601;
+    rootz[1]=0.908529189846098818660368657869;
     double res=0.0;
     for(unsigned int m=0; m<2; m++)
       res+= zeta(r) * pow(r, 1.0+rootz[m]) * ( (1./(rootz[m]-1.)*sin((rootz[m]-1.)*omega)

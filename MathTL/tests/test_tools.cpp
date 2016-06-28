@@ -41,7 +41,7 @@ int main()
         cout << "b[" << i <<"] = " << b[i] << endl;
     }
         
-    for (unsigned int num = 1; num < -1; ++num)
+    for (unsigned int num = 1; num < 0; ++num)
     {
         v = num;
         register unsigned int r = 0; // result of log2(v) will go here
@@ -82,7 +82,7 @@ int main()
 #endif
     
     cout << "Compare speed of floor(log2(double)) and log2(int)" << endl;
-    int repetitions(1); // about 6 minutes per repetition
+    unsigned int repetitions(1); // about 6 minutes per repetition
     clock_t tstart, tend;
     double time1(0), time2(0);
     //
@@ -90,7 +90,7 @@ int main()
     tstart = clock();
     for (unsigned int rep = 0; rep < repetitions; ++rep)
     {
-        for (unsigned int num = 1; num< -1; ++num)
+        for (unsigned int num = 1; num< 0; ++num)
         {
             v = num;
             register unsigned int r = 0; // result of log2(v) will go here
@@ -113,7 +113,7 @@ int main()
     tstart = clock();
     for (unsigned int rep = 0; rep < repetitions; ++rep)
     {
-        for (unsigned int num = 1; num< -1; ++num)
+        for (unsigned int num = 1; num< 0; ++num)
         {
             //v = floor(log2(num));
             v = log2(num);

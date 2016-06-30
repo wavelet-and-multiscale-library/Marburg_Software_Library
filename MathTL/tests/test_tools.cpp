@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <climits>
 #include <cmath>
 #include <iostream>
 #include <utils/tiny_tools.h>
@@ -7,6 +8,7 @@ using namespace std;
 
 int main()
 {
+    cout << UINT_MAX << endl;
   cout << "Testing some of the tiny tools..." << endl;
 
   for (int j = 0; j <= 10; j++) {
@@ -34,14 +36,14 @@ int main()
     const unsigned int S[] = {1, 2, 4, 8, 16}; //, 32};
     int i;
     
-#if 1
+#if 1 //1 if you want to check the equality of  log2(unsigned int n); 0 if you want to check the performance
     // first check what the new method does
     for (i = 4; i >= 0; i--)
     {
         cout << "b[" << i <<"] = " << b[i] << endl;
     }
         
-    for (unsigned int num = 1; num < 0; ++num)
+    for (unsigned int num = 1; num < UINT_MAX; ++num)
     {
         v = num;
         register unsigned int r = 0; // result of log2(v) will go here
@@ -59,7 +61,7 @@ int main()
     }
     
     //for (unsigned int num = 1; num < -1; ++num)
-    for (int num = 1; num > 0; ++num)
+    for (int num = 1; num < INT_MAX; ++num)
     {
         v = num;
         register unsigned int r = 0; // result of log2(v) will go here
@@ -90,7 +92,7 @@ int main()
     tstart = clock();
     for (unsigned int rep = 0; rep < repetitions; ++rep)
     {
-        for (unsigned int num = 1; num< 0; ++num)
+        for (unsigned int num = 1; num< UINT_MAX; ++num)
         {
             v = num;
             register unsigned int r = 0; // result of log2(v) will go here
@@ -113,7 +115,7 @@ int main()
     tstart = clock();
     for (unsigned int rep = 0; rep < repetitions; ++rep)
     {
-        for (unsigned int num = 1; num< 0; ++num)
+        for (unsigned int num = 1; num< UINT_MAX; ++num)
         {
             //v = floor(log2(num));
             v = log2(num);

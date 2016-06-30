@@ -66,7 +66,7 @@ int main()
 	 <<  Spline<3>().value(Point<1>(x)) << endl;
   }
 
-#if 0
+#if 1
   cout << "* a linear spline from a given knot sequence:" << endl;
   Array1D<double> knots(4+2);
   knots[0] =  0.0;
@@ -84,7 +84,7 @@ int main()
   sm1.matlab_output(cout);
 #endif
 
-#if 0
+#if 1
   cout << "* writing point values of a linear spline with multiple knots to a file..." << endl;
   knots[0] =  0.0;
   knots[1] =  0.0;
@@ -102,7 +102,7 @@ int main()
   fs.close();
 #endif
 
-#if 0
+#if 1
   {
     const unsigned int d = 3;
     Array1D<double> knots(5+d);
@@ -130,7 +130,7 @@ int main()
   }
 #endif
 
-#if 0
+#if 1
   cout << "* writing point values of a cubic spline with multiple knots to a file..." << endl;
   knots.resize(7);
   knots[0] =  0.0;

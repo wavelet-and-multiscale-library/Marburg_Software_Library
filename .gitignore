@@ -4,7 +4,9 @@
 *~
 *.zip
 *.gz
+*.dat
 nbproject
+MathTL/tests/octave-workspace
 Examples/Example_CDD1/Example_CDD1
 Examples/Example_CDD2/Example_CDD2
 Examples/Example_PlotCoefficients/Example_PlotCoefficients

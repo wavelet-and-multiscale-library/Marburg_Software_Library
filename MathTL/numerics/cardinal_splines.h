@@ -125,7 +125,7 @@ namespace MathTL
   double EvaluateCardinalBSpline_td(const int j, const int k, const double x)
   {
 #if 0
-    return sqrt(factor) * EvaluateCardinalBSpline<d>(pow(2,j) * x - k + d/2); Funktioniert auch für j<0
+    return sqrt(factor) * EvaluateCardinalBSpline<d>(pow(2,j) * x - k + d/2);
 #else
     return twotothejhalf(j) * EvaluateCardinalBSpline<d>((1<<j) * x - k + d/2);
 #endif

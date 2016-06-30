@@ -5,6 +5,7 @@
 *.zip
 *.gz
 *.dat
+*.txt
 nbproject
 MathTL/tests/octave-workspace
 Examples/Example_CDD1/Example_CDD1

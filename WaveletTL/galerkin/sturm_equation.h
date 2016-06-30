@@ -72,7 +72,6 @@ namespace WaveletTL
      : public FullyDiagonalQuarkletPreconditioner<typename WBASIS::Index>
 #else
      : public FullyDiagonalDyadicPreconditioner<typename WBASIS::Index>
-
 //    : public FullyDiagonalEnergyNormPreconditioner<typename WBASIS::Index>
 #endif
   {

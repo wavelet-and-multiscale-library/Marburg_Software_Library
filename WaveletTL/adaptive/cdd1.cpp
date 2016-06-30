@@ -166,7 +166,7 @@ namespace WaveletTL
         cout << "theta=" << params.theta << ", theta_bar=" << params.theta_bar << endl;
         cout << "K=" << params.K << endl;
 #endif
-        typedef typename PROBLEM::WaveletBasis::Index Index;
+//        typedef typename PROBLEM::WaveletBasis::Index Index;
         set<int> Lambda, Lambda_hat;
         u_epsilon = guess;
         u_epsilon.support(Lambda);
@@ -234,7 +234,7 @@ namespace WaveletTL
         cout << "theta=" << params.theta << ", theta_bar=" << params.theta_bar << endl;
         cout << "K=" << params.K << endl;
 #endif
-        typedef typename PROBLEM::WaveletBasis::Index Index;
+//        typedef typename PROBLEM::WaveletBasis::Index Index;
         set<int> Lambda, Lambda_hat;
         u_epsilon = guess;
         u_epsilon.support(Lambda);

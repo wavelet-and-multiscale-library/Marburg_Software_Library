@@ -434,17 +434,17 @@ namespace WaveletTL
       //LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
       SymmEigenvalues(A_Lambda, evals, evecs);
       
-      cout << "Eigenwerte: " << evals << endl;
+      //cout << "Eigenwerte: " << evals << endl;
       //cout << "Eigenvektoren: " << endl << evecs << endl;
       normA = evals(evals.size()-1);
-      cout << "normA: " << normA << endl;
+      //cout << "normA: " << normA << endl;
       int i = 0;
       while(abs(evals(i))<1e-10){
           ++i;
       }
-      cout << "rezinvers: " <<evals(i) << endl;;
+      //cout << "rezinvers: " <<evals(i) << endl;;
       normAinv = 1./evals(i);
-      cout << "inversnorm: " << normAinv << endl;
+      //cout << "inversnorm: " << normAinv << endl;
 #endif
 
 #if _WAVELETTL_CACHEDPROBLEM_VERBOSITY >= 1
@@ -481,17 +481,17 @@ namespace WaveletTL
       Vector<double> evals;
       
 #if 1
-      cout << "Beginne Normberechnung" << endl;
+      //cout << "Beginne Normberechnung" << endl;
       SymmEigenvalues(A_Lambda, evals, evecs);
       normA = evals(evals.size()-1);
       int i = 0;
       while(abs(evals(i))<1e-10){
           ++i;
       }
-      cout << "rezinvers: " <<evals(i) << endl;;
+      //cout << "rezinvers: " <<evals(i) << endl;;
       normAinv = 1./evals(i);
-      cout << "Norm " << normA << endl;
-      cout << "Inv Norm " << normAinv << endl;
+      //cout << "Norm " << normA << endl;
+      //cout << "Inv Norm " << normAinv << endl;
       
 #else
       Vector<double> xk(Lambda.size(), false);

@@ -2122,7 +2122,7 @@ namespace WaveletTL
 	Mj0.get_row(row, v);
       else {
 	const size_t bottom = Deltasize(j+1)-Deltasize(j0()+1)/2;
-	typedef Vector<double>::size_type size_type;
+//	typedef Vector<double>::size_type size_type;
 	if (row >= bottom)
 	  Mj0.get_row(row+rows_top-bottom, v, Deltasize(j)-Deltasize(j0()));
 	else
@@ -2696,9 +2696,9 @@ namespace WaveletTL
 			       const int j,
 			       InfiniteVector<double, Index>& c) const {
     c.clear();
-    int temp_int1 (DeltaLmin()), temp_int2(Deltasize(lambda.j())), temp_int3(Nablamin());
-    int tempint4(get_s0()), temp_int5(get_s1());
-    int temp_int6(s0), temp_int7(s1);
+//    int temp_int1 (DeltaLmin()), temp_int2(Deltasize(lambda.j())), temp_int3(Nablamin());
+//    int tempint4(get_s0()), temp_int5(get_s1());
+//    int temp_int6(s0), temp_int7(s1);
     
     if (lambda.j() >= j)
       c.set_coefficient(lambda, 1.0); 
@@ -2871,9 +2871,9 @@ namespace WaveletTL
       const size_type row = (lame == 0 ? lamk - DeltaLmin() : lamk);
 
       const SparseMatrix<double>& M = (lame == 0 ? Mj0_t : Mj1_t);
-      bool temp_bool = Mj1_t.empty();
-      int temp_rows(M.row_dimension());
-      int temp_cols(M.column_dimension());
+//      bool temp_bool = Mj1_t.empty();
+//      int temp_rows(M.row_dimension());
+//      int temp_cols(M.column_dimension());
       
       size_type row_j0 = row;
       size_type offset = 0;

@@ -49,9 +49,8 @@ using MathTL::SimpleSturmBVP;
  * _DS_BASIS
  * _PRIMBS_BASIS
  */
-#undef _SPLINE_BASIS
-#define _DS_BASIS
-#undef _PRIMBS_BASIS
+#undef _DS_BASIS
+#define _PRIMBS_BASIS
 
 
 
@@ -72,11 +71,6 @@ int main()
     const int d  = 3;    /* ... of wavelet basis */
     const int dT = 3;    /* vanishing moments of wavelet basis */
 
-#ifdef _SPLINE_BASIS
-    cout << "\nSetup Spline wavelet basis (d = "<< d <<", dT = "<< dT <<") ..." << endl;
-    typedef SplineBasis<d,dT,P_construction,1,1,0,0,SplineBasisData_j0<d,dT,P_construction,1,1,0,0>::j0> Basis;
-    const char* basis_type = "Spline";
-#endif
 #ifdef _DS_BASIS
     cout << "\nSetup DS wavelet basis (d = "<< d <<", dT = "<< dT <<") ..." << endl;
     typedef DSBasis<d,dT> Basis;

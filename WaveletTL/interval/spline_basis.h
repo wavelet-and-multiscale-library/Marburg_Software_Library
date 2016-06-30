@@ -621,7 +621,11 @@ namespace WaveletTL
       jmax_ = jmax;
       setup_full_collection();
     }
-
+    
+    //! get maximal level
+    int get_jmax_() const{
+        return jmax_;
+    }
     //! get the wavelet index corresponding to a specified number
     const inline Index* get_wavelet (const int number) const {
       return &full_collection[number];

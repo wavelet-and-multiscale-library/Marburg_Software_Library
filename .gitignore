@@ -4,7 +4,10 @@
 *~
 *.zip
 *.gz
+*.dat
 nbproject
+MathTL/tests/octave-workspace
+WaveletTL/tests/test_pq_frame
 Examples/Example_CDD1/Example_CDD1
 Examples/Example_CDD2/Example_CDD2
 Examples/Example_PlotCoefficients/Example_PlotCoefficients
@@ -143,5 +146,4 @@ WaveletTL/tests/test_ldomain_jl_laplacian
 WaveletTL/tests/test_ldomain_jl_support
 WaveletTL/tests/test_ldomain_laplacian
 WaveletTL/tests/test_ldomain_support
-WaveletTL/tests/test_pq_frame
 WaveletTL/tests/test_tp_basis

@@ -2416,7 +2416,6 @@ namespace WaveletTL
 	Mj0.get_row(row, v);
       else {
 	const size_t bottom = Deltasize(j+1)-Deltasize(j0()+1)/2;
-	typedef Vector<double>::size_type size_type;
 	if (row >= bottom)
 	  Mj0.get_row(row+rows_top-bottom, v, Deltasize(j)-Deltasize(j0()));
 	else

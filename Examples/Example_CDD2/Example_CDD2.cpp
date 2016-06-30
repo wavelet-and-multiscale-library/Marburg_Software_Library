@@ -49,9 +49,8 @@ using MathTL::SimpleSturmBVP;
  * _DS_BASIS
  * _PRIMBS_BASIS
  */
-#undef _SPLINE_BASIS
-#define _DS_BASIS
-#undef _PRIMBS_BASIS
+#undef _DS_BASIS
+#define _PRIMBS_BASIS
 
 
 
@@ -72,11 +71,6 @@ int main()
     const int d  = 3;    /* ... of wavelet basis */
     const int dT = 3;    /* vanishing moments of wavelet basis */
 
-#ifdef _SPLINE_BASIS
-    cout << "\nSetup Spline wavelet basis (d = "<< d <<", dT = "<< dT <<") ..." << endl;
-    typedef SplineBasis<d,dT,P_construction,1,1,0,0,SplineBasisData_j0<d,dT,P_construction,1,1,0,0>::j0> Basis;
-    const char* basis_type = "Spline";
-#endif
 #ifdef _DS_BASIS
     cout << "\nSetup DS wavelet basis (d = "<< d <<", dT = "<< dT <<") ..." << endl;
     typedef DSBasis<d,dT> Basis;
@@ -99,12 +93,17 @@ int main()
 
 
 
-    /*
+   #ifdef _SPLINE_BASIS
+    cout << "\nSetup Spline wavelet basis (d = "<< d <<", dT = "<< dT <<") ..." << endl;
+    typedef SplineBasis<d,dT,P_construction,1,1,0,0,SplineBasisData_j0<d,dT,P_construction,1,1,0,0>::j0> Basis;
+    const char* basis_type = "Spline";
+#endif
+ /*
      * First test problem
      */
-    double epsilon1 = 0.8;  /* set tolerance of the algorithm */
-    const char* filenameCoefficients1 = "../../../Desktop/Example_CDD2_Problem_1_solution_coefficients.m";
-    const char* filenameSolution1 = "../../../Desktop/Example_CDD2_Problem_1_solution.m";
+    double epsilon1 = 1e-6;  /* set tolerance of the algorithm */
+    const char* filenameCoefficients1 = "Example_CDD2_Problem_1_solution_coefficients.m";
+    const char* filenameSolution1 = "Example_CDD2_Problem_1_solution.m";
 
     TestProblem<1> testProblem1;
 
@@ -122,7 +121,7 @@ int main()
     const double nu1 = cproblem1.norm_Ainv() * l2_norm(F1_eta);
     cout << "nu = " << nu1 << endl;
     InfiniteVector<double, Index> solution1_epsilon;
-    CDD2_SOLVE(cproblem1, nu1, epsilon1, solution1_epsilon);
+    CDD2_SOLVE(cproblem1, nu1, epsilon1, solution1_epsilon, jmax);
 
     cout << "Done solving first test problem." << endl
          << "\nWrite results of first test problem to disk ..." << endl;
@@ -155,7 +154,7 @@ int main()
     /*
      * Second test problem
      */
-    double epsilon2 = 0.8;  /* set tolerance of the algorithm */
+    double epsilon2 = 1e-6;  /* set tolerance of the algorithm */
     const char* filenameCoefficients2 = "Example_CDD2_Problem_2_solution_coefficients.m";
     const char* filenameSolution2 = "Example_CDD2_Problem_2_solution.m";
 
@@ -175,7 +174,7 @@ int main()
     const double nu2 = cproblem2.norm_Ainv() * l2_norm(F2_eta);
     cout << "nu = " << nu2 << endl;
     InfiniteVector<double, Index> solution2_epsilon;
-    CDD2_SOLVE(cproblem2, nu2, epsilon2, solution2_epsilon);
+    CDD2_SOLVE(cproblem2, nu2, epsilon2, solution2_epsilon, jmax);
 
     cout << "Done solving second test problem." << endl
          << "\nWrite results of second test problem to disk ..." << endl;
@@ -208,7 +207,7 @@ int main()
     /*
      * Third test problem
      */
-    double epsilon3 = 0.8;  /* set tolerance of the algorithm */
+    double epsilon3 = 1e-6;  /* set tolerance of the algorithm */
     const char* filenameCoefficients3 = "Example_CDD2_Problem_3_solution_coefficients.m";
     const char* filenameSolution3 = "Example_CDD2_Problem_3_solution.m";
 
@@ -228,7 +227,7 @@ int main()
     const double nu3 = cproblem3.norm_Ainv() * l2_norm(F3_eta);
     cout << "nu = " << nu3 << endl;
     InfiniteVector<double, Index> solution3_epsilon;
-    CDD2_SOLVE(cproblem3, nu3, epsilon3, solution3_epsilon);
+    CDD2_SOLVE(cproblem3, nu3, epsilon3, solution3_epsilon, jmax);
 
     cout << "Done solving third test problem." << endl
          << "\nWrite results of third test problem to disk ..." << endl;

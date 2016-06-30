@@ -119,7 +119,7 @@ namespace WaveletTL
                                std::list<typename PBasis<d,dT>::Index>& intersecting)
     {
         typedef typename PBasis<d,dT>::Index Index;
-        typedef typename PBasis<d,dT>::Support Support;
+        //typedef typename PBasis<d,dT>::Support Support;
         intersecting.clear();
         // compute support of \psi_\lambda
         const int j_lambda = lambda.j() + lambda.e();
@@ -192,7 +192,7 @@ namespace WaveletTL
             // the rightmost inner wavelet on the level j, s.th. its support intersects [2^{-j_lambda}k1; 2^{-j_lambda}k2], fulfills
             //        2^{-j}(k-(d+dt)/2+1) < 2^{-j_lambda}k2 <= 2^{-j}(k-(d+dt)/2+2)
             // biggest n such that 2^{-j}n < 2^{-j_lambda}k2_lambda <= 2^{-j}(n+1)
-            n = (j < j_lambda) ? (k2_lambda / (1<<(j_lambda-j)) + (((k2_lambda % (1<<j_lambda-j)) == 0)?0:1) ) -1 
+            n = (j < j_lambda) ? (k2_lambda / (1<<(j_lambda-j)) + (((k2_lambda % (1<<(j_lambda-j))) == 0)?0:1) ) -1 
                                : (k2_lambda << (j-j_lambda)) -1;
             int maxk = (1<<j) -(d+dT)+1; // used as temporary value;
             if (n < maxk)
@@ -548,8 +548,8 @@ namespace WaveletTL
         //  the following code is equivalent to
         //get_intersecting_wavelets_on_level(basis,lambda.j(), lambda.e(), lambda.k(), j, generators, mink, maxk);
         // however, this call is slower!
-        typedef typename PBasis<d,dT>::Index Index;
-        typedef typename PBasis<d,dT>::Support Support;
+//        typedef typename PBasis<d,dT>::Index Index;
+//        typedef typename PBasis<d,dT>::Support Support;
         // compute support of \psi_\lambda
         const int j_lambda = lambda.j() + lambda.e();
         int k1_lambda, k2_lambda;
@@ -688,8 +688,8 @@ namespace WaveletTL
                                             int& mink, 
                                             int& maxk)
     {
-        typedef typename PBasis<d,dT>::Index Index;
-        typedef typename PBasis<d,dT>::Support Support;
+//        typedef typename PBasis<d,dT>::Index Index;
+//        typedef typename PBasis<d,dT>::Support Support;
         // compute support of \psi_\lambda
         const int j_lambda = lamj+lame;
         int k1_lambda, k2_lambda;
@@ -847,8 +847,8 @@ namespace WaveletTL
                                             int& mink, 
                                             int& maxk)
     {
-        typedef typename PBasis<d,dT>::Index Index;
-        typedef typename PBasis<d,dT>::Support Support;
+//        typedef typename PBasis<d,dT>::Index Index;
+//        typedef typename PBasis<d,dT>::Support Support;
         // compute support of \psi_\lambda
         const int j_lambda = lamj+lame;
         //int k1_lambda, k2_lambda;

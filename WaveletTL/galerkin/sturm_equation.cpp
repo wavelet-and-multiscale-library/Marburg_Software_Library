@@ -63,15 +63,14 @@ namespace WaveletTL
             
       }
 #else
-    for (Index lambda(basis_.first_generator(j0));;)
+    for (Index lambda(basis_.first_generator(j0));;++lambda)
       {
 	const double coeff = f(lambda)/D(lambda);
 	if (fabs(coeff)>1e-15)
 	  fhelp.set_coefficient(lambda, coeff);
 	if (lambda == basis_.last_wavelet(jmax))
 	  break;
-        else
-            ++lambda;
+        
             
       }
 #endif
@@ -98,11 +97,12 @@ namespace WaveletTL
       return pow(ldexp(1.0, lambda.j())*pow(1+lambda.p(),4),operator_order()) * (1+lambda.p()); //2^j*(p+1)^5, falls operator_order()=1
 #else
       return ldexp(1.0, lambda.j());
-#endif
-//    return sqrt(a(lambda, lambda));
+//      return sqrt(a(lambda, lambda));
 //    return 1;
 //     return lambda.e() == 0 ? 1.0 : ldexp(1.0, lambda.j()); // do not scale the generators
 //     return lambda.e() == 0 ? 1.0 : sqrt(a(lambda, lambda)); // do not scale the generators
+#endif
+
   }
 
   template <class WBASIS>

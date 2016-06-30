@@ -177,7 +177,7 @@ namespace WaveletTL
 			     std::list<typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index>& intersecting)
   {
     typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Index Index;
-    typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Support Support;
+    //typedef typename SplineBasis<d,dT,P_construction,s0,s1,sT0,sT1,J0>::Support Support;
 
     intersecting.clear();
 

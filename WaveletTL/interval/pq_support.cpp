@@ -119,7 +119,7 @@ namespace WaveletTL
                                std::list<typename PQFrame<d,dT>::Index>& intersecting, const int p)
     {
         typedef typename PQFrame<d,dT>::Index Index;
-        typedef typename PQFrame<d,dT>::Support Support;
+//        typedef typename PQFrame<d,dT>::Support Support;
         intersecting.clear();
         // compute support of \psi_\lambda
         const int j_lambda = lambda.j() + lambda.e();
@@ -548,8 +548,8 @@ namespace WaveletTL
         //  the following code is equivalent to
         //get_intersecting_wavelets_on_level(basis,lambda.j(), lambda.e(), lambda.k(), j, generators, mink, maxk);
         // however, this call is slower!
-        typedef typename PQFrame<d,dT>::Index Index;
-        typedef typename PQFrame<d,dT>::Support Support;
+//        typedef typename PQFrame<d,dT>::Index Index;
+//        typedef typename PQFrame<d,dT>::Support Support;
         // compute support of \psi_\lambda
         const int j_lambda = lambda.j() + lambda.e();
         int k1_lambda, k2_lambda;
@@ -688,8 +688,8 @@ namespace WaveletTL
                                             int& mink, 
                                             int& maxk)
     {
-        typedef typename PQFrame<d,dT>::Index Index;
-        typedef typename PQFrame<d,dT>::Support Support;
+//        typedef typename PQFrame<d,dT>::Index Index;
+//        typedef typename PQFrame<d,dT>::Support Support;
         // compute support of \psi_\lambda
         const int j_lambda = lamj+lame;
         int k1_lambda, k2_lambda;

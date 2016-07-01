@@ -94,9 +94,9 @@ namespace WaveletTL
   SturmEquation<WBASIS>::D(const typename WBASIS::Index& lambda) const
   {
 #ifdef FRAME
-      return pow(ldexp(1.0, lambda.j())*pow(1+lambda.p(),4),operator_order()) * (1+lambda.p()); //2^j*(p+1)^5, falls operator_order()=1
+      return pow(ldexp(1.0, lambda.j())*pow(1+lambda.p(),3),operator_order()) * (1+lambda.p()); //2^j*(p+1)^5, falls operator_order()=1
 #else
-      return ldexp(1.0, lambda.j());
+      return pow(ldexp(1.0, lambda.j()),operator_order());
 //      return sqrt(a(lambda, lambda));
 //    return 1;
 //     return lambda.e() == 0 ? 1.0 : ldexp(1.0, lambda.j()); // do not scale the generators
@@ -187,10 +187,32 @@ namespace WaveletTL
       std::set<Index> Lambda;
       const int j0 = basis().j0();
       const int jmax = j0+3;
+#ifdef FRAME
+     
+      const int pmax = std::min(basis().get_pmax_(),2);
+      //const int pmax = 0;
+      int p = 0;
+      
+      for (Index lambda = basis().first_generator(j0,0);;) {
+	Lambda.insert(lambda);
+	if (lambda == basis().last_wavelet(jmax,pmax)) break;
+        //if (i==7) break;
+        if (lambda == basis().last_wavelet(jmax,p)){
+            ++p;
+            lambda = basis().first_generator(j0,p);
+        }
+        else
+            ++lambda;
+      }
+#else
       for (Index lambda = first_generator(&basis(), j0);; ++lambda) {
 	Lambda.insert(lambda);
 	if (lambda == last_wavelet(&basis(), jmax)) break;
       }
+#endif      
+      
+      
+      
       SparseMatrix<double> A_Lambda;
       setup_stiffness_matrix(*this, Lambda, A_Lambda);
       
@@ -219,10 +241,30 @@ namespace WaveletTL
       std::set<Index> Lambda;
       const int j0 = basis().j0();
       const int jmax = j0+3;
+      
+#ifdef FRAME
+      
+      const int pmax = std::min(basis().get_pmax_(),2);
+      //const int pmax = 0;
+      int p = 0;
+      
+      for (Index lambda = basis().first_generator(j0,0);;) {
+	Lambda.insert(lambda);
+	if (lambda == basis().last_wavelet(jmax,pmax)) break;
+        //if (i==7) break;
+        if (lambda == basis().last_wavelet(jmax,p)){
+            ++p;
+            lambda = basis().first_generator(j0,p);
+        }
+        else
+            ++lambda;
+      }
+#else
       for (Index lambda = first_generator(&basis(), j0);; ++lambda) {
 	Lambda.insert(lambda);
 	if (lambda == last_wavelet(&basis(), jmax)) break;
       }
+#endif
       SparseMatrix<double> A_Lambda;
       setup_stiffness_matrix(*this, Lambda, A_Lambda);
 
@@ -278,7 +320,11 @@ namespace WaveletTL
 	    * gauss_weight;
       }
     
+#ifdef DELTADIS
+    return r + 4*basis_.evaluate(0, lambda, 0.5);
+#else
     return r;
+#endif
   }
   
   template <class WBASIS>

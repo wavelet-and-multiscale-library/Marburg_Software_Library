@@ -112,7 +112,12 @@ namespace WaveletTL
       (half) order t of the operator
       (inherited from FullyDiagonalDyadicPreconditioner)
     */
-    double operator_order() const { return 1.; }
+    double operator_order() const { 
+        if(bvp_.p(0)==0)
+            return 0.;
+        else
+            return 1.
+    ;}
     
     /*!
       evaluate the diagonal preconditioner D

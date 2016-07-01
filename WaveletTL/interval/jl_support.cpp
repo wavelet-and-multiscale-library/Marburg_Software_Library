@@ -162,7 +162,7 @@ namespace WaveletTL
   			     const int j, const bool generators,
   			     std::list<Index>& intersecting)
   {
-    typedef JLBasis::Support Support;
+//    typedef JLBasis::Support Support;
 
     intersecting.clear();
 

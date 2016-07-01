@@ -140,7 +140,7 @@ namespace WaveletTL
     const int dhalfsmall = d/2;
     const double pfktrez = 1./pfkt;
     const double y = (1<<lambda.j())*x-lambda.k();
-    const int lefthelper = lambda.k()+pfkt-1;
+//    const int lefthelper = lambda.k()+pfkt-1;
     const int righthelper = (1<<lambda.j())+dhalfsmall -lambda.k();
     const double leftside = 1./(pfkt+lambda.k());
     const double rightside = 1./righthelper;
@@ -226,7 +226,7 @@ namespace WaveletTL
       const int dhalfsmall = d/2;
       const double pfktrez = 1./pfkt;
       const double y = (1<<j)*x-k;
-      const int lefthelper = k+pfkt-1;
+//      const int lefthelper = k+pfkt-1;
       const int righthelper = (1<<j)+dhalfsmall -k;
       const double leftside = 1./(pfkt+k);
       const double rightside = 1./righthelper;
@@ -345,7 +345,6 @@ namespace WaveletTL
             const int pfkt = (d+1)/2;
             const int dhalfsmall = d/2;
             const double pfktrez = 1./pfkt;
-            const int lefthelper = lambda.k()+pfkt-1;
             const int righthelper = (1<<lambda.j())+dhalfsmall -lambda.k();
             const double leftside = 1./(pfkt+lambda.k());
             const double rightside = 1./righthelper;
@@ -465,7 +464,7 @@ namespace WaveletTL
             const int pfkt = (d+1)/2;
             const int dhalfsmall = d/2;
             const double pfktrez = 1./pfkt;
-            const int lefthelper = k_+pfkt-1;
+//            const int lefthelper = k_+pfkt-1;
             const int righthelper = (1<<j_)+dhalfsmall -k_;
             const double leftside = 1./(pfkt+k_);
             const double rightside = 1./righthelper;
@@ -588,7 +587,7 @@ namespace WaveletTL
             const int pfkt = (d+1)/2;
             const int dhalfsmall = d/2;
             const double pfktrez = 1./pfkt;
-            const int lefthelper = lambda.k()+pfkt-1;
+//            const int lefthelper = lambda.k()+pfkt-1;
             const int righthelper = (1<<lambda.j())+dhalfsmall -lambda.k();
             const double leftside = 1./(pfkt+lambda.k());
             const double rightside = 1./righthelper;
@@ -672,7 +671,7 @@ namespace WaveletTL
             const int pfkt = (d+1)/2;
             const int dhalfsmall = d/2;
             const double pfktrez = 1./pfkt;
-            const int lefthelper = k_+pfkt-1;
+//            const int lefthelper = k_+pfkt-1;
             const int righthelper = (1<<j_)+dhalfsmall -k_;
             const double leftside = 1./(pfkt+k_);
             const double rightside = 1./righthelper;

@@ -84,10 +84,8 @@ namespace WaveletTL
   FullyDiagonalQuarkletPreconditioner<INDEX>::diag(const INDEX& lambda) const
   {
 
-    return pow(ldexp(1.0, lambda.j())*pow(1+lambda.p(),4),operator_order()) * (1+lambda.p()); //2^j*(p+1)^5, falls operator_order()=1
-    //return pow(sqrt(a(lambda, lambda))*pow(1+lambda.p(),4),operator_order()) * (1+lambda.p());
-    ///return 1;
-   //return ldexp(1.0, lambda.j());
+    return pow(ldexp(1.0, lambda.j())*pow(1+lambda.p(),3),operator_order()) * (1+lambda.p()); //2^j*(p+1)^4, falls operator_order()=1
+    
   }
 #endif
 

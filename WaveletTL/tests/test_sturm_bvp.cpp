@@ -10,12 +10,19 @@
 #include <numerics/iteratsolv.h>
 
 #include <interval/i_index.h>
+#include <interval/i_indexplot.h>
+#include <interval/i_q_index.h>
+#include <interval/i_q_indexplot.h>
 #include <interval/ds_basis.h>
 #include <interval/p_basis.h>
+#include <interval/pq_frame.h>
 #include <interval/jl_basis.h>
 #include <interval/jl_support.h>
 #include <interval/jl_evaluate.h>
 #include <interval/spline_basis.h>
+#undef BASIS
+#define FRAME
+#undef DELTADIS
 
 #include <galerkin/sturm_equation.h>
 
@@ -39,6 +46,18 @@ public:
     case 1:
       return 1;
       break;
+    case 2:
+      return 0;
+      break;
+    case 3:
+      return 1;
+      break;
+    case 4:
+      return 1;
+      break;
+    case 5:
+       return 1;
+       break;
     default:
       return 0;
       break;
@@ -47,6 +66,18 @@ public:
   double p_prime(const double t) const {
     switch(N) {
     case 1:
+      return 0;
+      break;
+    case 2:
+      return 0;
+      break;
+    case 3:
+      return 0;
+      break;
+    case 4:
+      return 0;
+      break;
+    case 5:
       return 0;
       break;
     default:
@@ -59,6 +90,18 @@ public:
     case 1:
       return 0;
       break;
+    case 2:
+      return 1;
+      break;
+    case 3:
+      return 0;
+      break;
+    case 4:
+      return 0;
+      break;
+    case 5:
+      return 0;
+      break;  
     default:
       return 0;
       break;
@@ -68,6 +111,22 @@ public:
     switch(N) {
     case 1:
       return 2;
+      break;
+    case 2:
+      return t*(1-t);
+      break;
+    case 3:
+      //return exp(-100*(t-0.5)*(t-0.5));
+      return (200-(200*t-100)*(200*t-100))*exp(-100*(t-0.5)*(t-0.5));
+      break;
+    case 4:
+      return ( -100*exp(5*t)*(1-(exp(5*t)-1)/(exp(5.)-1)) /
+             (exp(5.)-1)+200*exp(10*t)/((exp(5.)-1) *
+             (exp(5.)-1))+100*(exp(5*t)-1)*exp(5*t) /
+             ((exp(5.)-1)*(exp(5.)-1)) );
+      break; 
+    case 5:
+      return -9*M_PI*M_PI*sin(3*M_PI*t)-4;  
       break;
     default:
       return 0;
@@ -85,20 +144,40 @@ int main()
 
   TestProblem<1> T;
 
-  const int d  = 4;
-  const int dT = 4; // be sure to use a continuous dual here, otherwise the RHS test will fail
+  const int d  = 3;
+  const int dT = 3; // be sure to use a continuous dual here, otherwise the RHS test will fail
+  
+  const int jmax = 4;
+#ifdef FRAME
+  const int pmax = 1;
+#endif
 
   // typedef DSBasis<d,dT> Basis; //Basis basis(true, true);
   // typedef PBasis<d,dT> Basis;
   // typedef JLBasis Basis;
   // typedef SplineBasis<d,dT,P_construction,1,1,0,0,SplineBasisData_j0<d,dT,P_construction,1,1,0,0>::j0> Basis;
+  
+#ifdef BASIS
   typedef PBasis<d,dT> Basis;
 
   Basis basis(1,1);
   typedef Basis::Index Index;
+  const char* basis_type = "Primbs basis";
+  basis.set_jmax(jmax);
+#endif
+  
+#ifdef FRAME
+  typedef PQFrame<d,dT> Basis;
 
+  Basis basis(1,1, false);
+  typedef Basis::Index Index;
+  const char* basis_type = "Primbs quarklet frame";
+  basis.set_jpmax(jmax,pmax);
+  
+#endif
+  
   SturmEquation<Basis> eq(T, basis);
-
+  const int j0=eq.basis().j0();
   InfiniteVector<double, Index> coeffs;
 
 #if 0
@@ -120,22 +199,43 @@ int main()
   cout << "- approximate coefficient set of the right-hand side:" << endl
        << coeffs << endl;
 //   cout << "- check expansion of the right-hand side in the dual basis:" << endl;
-//   eq.rescale(coeffs, 1);
+//   coeffs.scale(&eq, 1);
 //   evaluate(eq.basis(), coeffs, false, 8).matlab_output(cout);
-//   eq.rescale(coeffs, -1);
+//   coeffs.scale(&eq, -1);
 #endif  
 
+  //Implementation of the index set
   set<Index> Lambda;
-//  eq.basis().setWavelets();
-  const int jmax = 12; // eq.basis().j0()+3;
-  for (Index lambda = eq.basis().first_generator(eq.basis().j0());; ++lambda) {
-    Lambda.insert(lambda);
-    if (lambda == eq.basis().last_wavelet(jmax)) break;
-  }
+#ifdef FRAME
+    int p = 0;
+      
+      for (Index lambda = eq.basis().first_generator(j0,0);;) {
+	Lambda.insert(lambda);
+	if (lambda == eq.basis().last_wavelet(jmax,pmax)) break;
+        //if (i==7) break;
+        if (lambda == eq.basis().last_wavelet(jmax,p)){
+            ++p;
+            lambda = eq.basis().first_generator(j0,p);
+        }
+        else
+            ++lambda;
+      }
+#else
   
-  //   cout << "- set up stiffness matrix with respect to the index set Lambda=" << endl;
-  //   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it)
-  //     cout << *it << endl;
+//  eq.basis().setWavelets();
+  for (Index lambda = eq.basis().first_generator(j0);; ++lambda) {
+    Lambda.insert(lambda);
+    if (lambda == eq.basis().last_wavelet(jmax)) break;    
+  }
+#endif
+  
+  
+  
+
+  
+     cout << "- set up stiffness matrix with respect to the index set Lambda=" << endl;
+     for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it)
+       cout << *it << endl;
 
 #if 1
   cout << "- set up (preconditioned) stiffness matrix (j0=" << eq.basis().j0() << ",jmax=" << jmax << ")..." << endl;
@@ -164,35 +264,85 @@ int main()
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
 
-//  cout << "- right hand side: " << b << endl;
+  cout << "- right hand side: " << b << endl << endl;
 
-  Vector<double> x(Lambda.size()), err(Lambda.size()); x = 0;
+  Vector<double> x(Lambda.size()), err(Lambda.size()), err2(Lambda.size()); x = 0;
   unsigned int iterations;
+  
   CG(A, b, x, 1e-8, 200, iterations);
   
-  //cout << "- solution coefficients: " << x;
-//  cout << " with residual (infinity) norm ";
-
+  
   A.apply(x, err);
+  //cout << "Ax " << err << endl << endl;
+  
+    
   err -= b;
-//  cout << linfty_norm(err) << endl;
+  //cout << "residual " << err << endl;
+  cout << " residual (infinity) norm " << linfty_norm(err) << endl;
+  
   
 //  cout << "- point values of the solution:" << endl;
-  InfiniteVector<double,Index> u;
+  InfiniteVector<double,Index> u,v;
   unsigned int i = 0;
   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
     u.set_coefficient(*it, x[i]);
   
-  u.scale(&eq, -1);
+  
+  u.COARSE(1e-6,v);
+  
+  
+  
+  cout << "solution: " << endl << u << endl;
+  cout << "coarsed solution: " << endl << v << endl;
 
-  SampledMapping<1> s(evaluate(eq.basis(), u, true, 7));
-  cout << "  ... done, time needed: " << time << " seconds" << endl;
-//  cout << "- right hand side: " << b << endl;
-  s.matlab_output(cout);
+  
+  const char* filenameSolution1 = "sturm_bvp_solution.m";
+  
+  
+  /* plot solution coefficients */
+  
+#ifdef FRAME
+  string filenameCoefficients[4] = {"sturm_bvp_solution_coefficients_p_0.m", "sturm_bvp_solution_coefficients_p_1.m",
+  "sturm_bvp_solution_coefficients_p_2.m", "sturm_bvp_solution_coefficients_p_3.m"};
+  
+//  string filenameCoefficients[1] = {"sturm_bvp_solution_coefficients_p_0.m"};
+  
+  for(int p=0;p<=pmax;p++){
+  const char* cstr = filenameCoefficients[p].c_str();
+  cout << filenameCoefficients[p] << endl;
+  std::ofstream coeff_stream1 (cstr);
+  coeff_stream1 << "figure;" << endl;
+  plot_indices(&basis, u, jmax, coeff_stream1, p, "jet", false, true, -8);
+  coeff_stream1 << "title('coefficients on the level p=" << p <<" of the test problem ("
+                  << basis_type << " basis)');" << endl;
+  coeff_stream1.close();    
+  }
+#else
+    const char* filenameCoefficients1 = "sturm_bvp_solution_coefficients.m";
+    std::ofstream coeff_stream1;
+    coeff_stream1.open(filenameCoefficients1);
+    coeff_stream1 << "figure;" << endl;
+    plot_indices(&basis, v, jmax, coeff_stream1, "jet", false, true, -8);
+    coeff_stream1 << "title('Sturm_bvp: solution coefficients of the test problem ("
+                  << basis_type << ")');" << endl;
+    coeff_stream1.close();
+#endif
+    
+  
+ /* plot solution*/ 
+    
+  v.scale(&eq, -1);
+  SampledMapping<1> s(evaluate(eq.basis(), v, true, 7));
+  std::ofstream u_stream1(filenameSolution1);
+  s.matlab_output(u_stream1);
+  u_stream1 << "figure;\nplot(x,y);"
+            << "title('Sturm bvp: solution to test problem ("
+            << basis_type << ")');" << endl;
+  u_stream1.close();
 
 #endif
 
-#if 1
+#if 0
   cout << "- estimate for ||D^{-1}AD^{-1}||: " << eq.norm_A() << endl;
   cout << "- estimate for ||(D^{-1}AD^{-1})^{-1}||: " << eq.norm_Ainv() << endl;
   // von Ulli importiert:

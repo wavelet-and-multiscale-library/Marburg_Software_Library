@@ -136,11 +136,9 @@ EXEOBJF5 = \
   test_cdd2.o test_duv.o\
   test_cdd1_ldomain.o\
   test_cdd1_gramian.o test_cdd1_poisson1d.o\
-  test_helmholtz_equation.o
+  
+  
 
-EXEOBJ5b = \
-  test_cube_equation.o\
-  test_sturm_bvp.o
 
 # set 6 of test programs: adaptive wavelet schemes for parabolic equations
 EXEOBJF6 = \
@@ -150,7 +148,10 @@ EXEOBJF6 = \
 EXEOBJF7 = \
   test_full_laplacian_speed.o\
   test_full_gramian.o\
-  test_full_helmholtz.o
+  test_full_helmholtz.o\
+  test_sturm_bvp.o\
+  test_helmholtz_equation.o\
+  test_cube_equation.o
 
 # set 8 of test programs: ExpandASPP	
 EXEOBJF8 = \

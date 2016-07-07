@@ -113,9 +113,18 @@ int main()
   cout << "* Gramian matrix on coarsest level j0=" << basis.j0() << ":" << endl
        << G;
   
+  
+  
   G.set_level(basis.j0()+1);
   cout << "* Gramian matrix on next level j0+1=" << basis.j0()+1 << ":" << endl
        << G;
+  
+  cout << "- writing A to the file grammat.m ..." << endl;
+   std::ofstream Gstream("grammat.m");
+   Gstream << "G=[";
+   Gstream << G; 
+   Gstream << "];" << endl;
+   cout << "  ... done!" << endl;
 
 #if 1
 

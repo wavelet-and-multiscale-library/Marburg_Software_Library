@@ -13,6 +13,7 @@ WaveletTL/tests/test_sturm_bvp
 Examples/Example_CDD1/Example_CDD1
 Examples/Example_CDD2/Example_CDD2
 Examples/Example_PlotCoefficients/Example_PlotCoefficients
+WaveletTL/tests/octave-workspace
 MathTL/tests/test_array1d
 MathTL/tests/test_atlas
 MathTL/tests/test_bezier

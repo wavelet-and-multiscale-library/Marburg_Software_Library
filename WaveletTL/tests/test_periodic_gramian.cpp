@@ -1,201 +1,172 @@
+/* 
+ * File:   test_periodic_basis.cpp
+ * Author: keding
+ *
+ * Created on July 6, 2016, 2:33 PM
+ */
+
+#include <cstdlib>
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
 #include <iostream>
 #include <fstream>
 #include <utils/array1d.h>
+#include <utils/function.h>
 #include <Rd/r_basis.h>
 #include <Rd/cdf_basis.h>
 #include <interval/periodic.h>
+#include <interval/i_indexplot.h>
+#include <numerics/periodicgr.h>
+#define PERIODIC_CDFBASIS
+
 #include <galerkin/periodic_gramian.h>
 #include <galerkin/galerkin_utils.h>
-#include <algebra/sparse_matrix.h>
-#include <algebra/vector.h>
+#include <galerkin/Periodic_TestProblem.h>
+#include <galerkin/Periodic_TestFunctions.h>
+
 
 using namespace std;
 using namespace WaveletTL;
 
-//
-// some 1-periodic test functions
-
-// f(x)=1
-class Function1 : public Function<1> {
-public:
-  inline double value(const Point<1>& p, const unsigned int component = 0) const {
-    return 1.0;
-  }
-  
-  void vector_value(const Point<1> &p, Vector<double>& values) const {
-    values.resize(1, false);
-    values[0] = value(p);
-  }
-};
-
-// f(x)=x*(1-x)
-class Function2 : public Function<1> {
-public:
-  inline double value(const Point<1>& p, const unsigned int component = 0) const {
-    return p[0]*(1-p[0]);
-  }
-  
-  void vector_value(const Point<1> &p, Vector<double>& values) const {
-    values.resize(1, false);
-    values[0] = value(p);
-  }
-};
-
-template <unsigned int N>
-class PeriodicTestProblem
-  : public PeriodicLaplacianProblem
-{
-public:
-  double g(const double t) const {
-    switch(N) {
-    case 1:
-      //u(t) = 100*(t*t*t-1.5*t*t+0.5*t)
-        //return 100*(t*t*t-1.5*t*t+0.5*t);
-        return t*(1-t);
-      //return 100*(-6*t+3);
-      break;
-    case 2:
-      return sin(2*M_PI*t);
-    case 3:
-      return cos(2*M_PI*t);      
-    default:
-      return 0;
-      break;
+int main(int argc, char** argv) {
+    
+    const int d  = 3;
+    const int dT = 3;
+    const int jmax = 10;
+    const bool normalization = 0;//choose 1 for Laplacian
+    
+    const unsigned int testcase=5;
+    PeriodicTestProblem<testcase> tper;
+    Function<1>* uexact = 0;
+    switch(testcase) {
+        case 1:
+            uexact = new Function1();
+            break;
+        case 2:
+            uexact = new Function2();
+            break;
+        case 3:
+            uexact = new Function3();
+            break;
+        case 4:
+            uexact = new Function4();
+            break;
+        case 5:
+            uexact = new Hat();    
+        default:
+            break;
     }
-  }
-};
-
-int main()
-{
-  cout << "Testing periodic Gramians ..." << endl;
-
-  cout << "* a periodic CDF basis:" << endl;
-
-  typedef CDFBasis<2,2> RBasis;
-  typedef PeriodicBasis<RBasis> Basis;
-  typedef Basis::Index Index;
-  Basis basis;
-  PeriodicTestProblem<1> tper;
-
-  typedef PeriodicIntervalGramian<RBasis> Problem;
-  Problem G(tper, basis);
-  
-  const unsigned int testcase=2;
-  Function<1>* u = 0;
-
-  switch(testcase) {
-  case 1:
-    u = new Function1();
-    break;
-  case 2:
-    u = new Function2();
-    break;
-  default:
-    break;
-  }
-
-  cout << "* compute approximate expansions of the test function for several levels..." << endl;
-  const int jmin = basis.j0();
-//   const int jmax = jmin;
-  const int jmax = 4;
-  Vector<double> js(jmax-jmin+1);
-  Vector<double> Linfty_errors(jmax-jmin+1), L2_errors(jmax-jmin+1);
-
-  Vector<double> rhs;
-  InfiniteVector<double, Index> rhsinf;
-  
-
-  for (int j = jmin; j <= jmax; j++) {
-    cout << "  j=" << j << ":" << endl;
-    js[j-jmin] = j;
-
-    // compute expansion coefficients of u in the dual basis
-    basis.expand(u, true, j, rhs);
-//    cout << "  inner products of u against all wavelets on level " << j << ":" << endl
-//   	 << rhs << endl;
     
-    basis.expand(u, false, j, rhsinf);
-//    cout << "  inner products of u against all wavelets on level " << j << " (InfiniteVector-version):" << endl
-//   	 << rhsinf << endl;
     
-    // setup the set Lambda of active wavelets
+    
+#ifdef PERIODIC_CDFBASIS
+    typedef CDFBasis<d,dT> RBasis;
+    typedef PeriodicBasis<RBasis> Basis;
+    typedef Basis::Index Index;
+    Basis basis;
+    basis.set_jmax(jmax);
+    
+    typedef PeriodicIntervalGramian<RBasis> Problem;
+    Problem G(tper, basis);
+    const int j0= G.basis().j0();
+    
+#if 1
+    //Plot of wavelet with coefficient mu
+    Index mu(3,1,0);
+    SampledMapping<1> sm1(basis.evaluate(mu, 8, normalization));
+    std::ofstream u_stream1("plot_periodicwavelet.m");
+    sm1.matlab_output(u_stream1);
+    u_stream1 << "figure;\nplot(x,y);"
+            << "title('periodic wavelet/generator with index: " << mu << "');" << endl;
+    u_stream1.close();
+#endif
+    
     set<Index> Lambda;
-    for (Index lambda = basis.first_generator(basis.j0());; ++lambda) {
-      Lambda.insert(lambda);
-      if (lambda == basis.last_wavelet(j)) break;
+    Vector<double> x;
+    
+  for (int j = j0; j <= jmax; j++) {
+        Lambda.clear();
+        
+    cout << "  j=" << j << ":" << endl;
+    //Implementation of the index set
+    
+    for (Index lambda = G.basis().first_generator(j0);; ++lambda) {
+        Lambda.insert(lambda);
+        if (lambda == G.basis().last_wavelet(j)) break;    
     }
-//     cout << "  active wavelet set:" << endl;
-//     for (set<Index>::const_iterator it(Lambda.begin()); it != Lambda.end(); ++it) {
-//       cout << *it << endl;
-//     }
-
     SparseMatrix<double> A;
+    cout << "- set up stiffness matrix..." << endl;
     setup_stiffness_matrix(G, Lambda, A);
-//     cout << "  stiffness matrix:" << endl
-//  	 << A;
+//    
     
-    // solve Gramian system
-    Vector<double> uj(A.row_dimension()), residual(A.row_dimension(), false);
-    InfiniteVector<double, Index> ujinf, residualinf;
     
+    cout << "- set up right-hand side..." << endl;
+    Vector<double> b;
+    setup_righthand_side(G, Lambda, b);
+//    cout << "- right hand side: " << b << endl << endl;
+    
+    
+    x.resize(Lambda.size()); x = 0;
+    Vector<double> residual(Lambda.size()); 
     unsigned int iterations;
-    CG(A, rhs, uj, 1e-15, 250, iterations);
-    //CG(A, rhsinf, ujinf, 1e-15, 250, iterations);
-//     cout << "  solution coefficients: " << uj << endl;
+    
+    CG(A, b, x, 1e-15, 250, iterations);
     cout << "  Galerkin system solved with residual (infinity) norm ";
-    A.apply(uj, residual);
-    residual -= rhs;
+    A.apply(x, residual);
+    residual -= b;
     cout << linfty_norm(residual)
 	 << " (" << iterations << " iterations needed)" << endl;
-
+    
     // evaluate approximate solution on a grid
     const unsigned int N = 100;
     const double h = 1./N;
-    Vector<double> uj_values(N+1);
+    Vector<double> u_values(N+1);
     for (unsigned int i = 0; i <= N; i++) {
-      const double x = i*h;
+      const double point = i*h;
       int id = 0;
-      for (set<Index>::const_iterator it(Lambda.begin()); it != Lambda.end(); ++it, ++id) {
-	uj_values[i] +=
-	  uj[id] * basis.evaluate(0, *it, x);
-      }
+      for (set<Index>::const_iterator it(Lambda.begin()); it != Lambda.end(); ++it, ++id) 
+	u_values[i] += x[id] * basis.evaluate(0, *it, point, normalization);
     }
-//     cout << "  point values of Galerkin solution: " << uj_values << endl;
+//     cout << "  point values of Galerkin solution: " << u_values << endl;
 
     // evaluate exact solution
     Vector<double> uexact_values(N+1);
     for (unsigned int i = 0; i <= N; i++) {
-      const double x = i*h;
-      uexact_values[i] = u->value(Point<1>(x));
+      const double point = i*h;
+      uexact_values[i] = uexact->value(Point<1>(point));
     }
 //     cout << "  point values of exact solution: " << uexact_values << endl;
 
     // compute some errors
-    const double Linfty_error = linfty_norm(uj_values-uexact_values);
+    const double Linfty_error = linfty_norm(u_values-uexact_values);
     cout << "  L_infinity error on a subgrid: " << Linfty_error << endl;
-    Linfty_errors[j-jmin] = Linfty_error;
     
-    const double L2_error = sqrt(l2_norm_sqr(uj_values-uexact_values)*h);
+    
+    const double L2_error = sqrt(l2_norm_sqr(u_values-uexact_values)*h);
     cout << "  L_2 error on a subgrid: " << L2_error << endl;
-    L2_errors[j-jmin] = L2_error;
-    
-//    cout << uj << endl;
-//    cout << rhsinf << endl;
   }
+    
+    //Solution plot
+    InfiniteVector<double,Index> u;
+        unsigned int i = 0;
+    for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
+        u.set_coefficient(*it, x[i]);
+//    cout << "Solution: " << endl << u << endl;    
+        
+    SampledMapping<1> sm2(basis.evaluate(u, 8, 0));
+    std::ofstream u_stream2("plot_periodicsolution.m");
+    sm2.matlab_output(u_stream2);
+    u_stream2 << "figure;\nplot(x,y);"
+            << "title('solution of the gramian')" << endl;
+    u_stream2.close();
+    
+    
+    
+    
+  
+    
+#endif
+    
 
-  if (u) delete u;
-  
-  
-  
-  
-  //solution1_epsilon.scale(&cproblem, -1);
-  //cout << solution1_epsilon << endl;
-  SampledMapping<1> sm1(basis.evaluate(rhsinf, 8));
-  std::ofstream u_stream1("../../Desktop/plotthis.m");
-  sm1.matlab_output(u_stream1);
-  u_stream1 << "figure;\nplot(x,y);"
-            << "title('mygraph');" << endl;
-  u_stream1.close();
-
-  return 0;
+    
 }
+

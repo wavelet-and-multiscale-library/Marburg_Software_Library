@@ -25,6 +25,7 @@
 #undef DELTADIS
 
 #include <galerkin/sturm_equation.h>
+#include <galerkin/galerkin_utils.h>
 
 using namespace std;
 using namespace WaveletTL;
@@ -113,7 +114,7 @@ public:
       return 2;
       break;
     case 2:
-      return t*(1-t);
+      return 1;
       break;
     case 3:
       //return exp(-100*(t-0.5)*(t-0.5));
@@ -142,14 +143,14 @@ int main()
 {
   cout << "Testing wavelet-Galerkin solution of a Sturm b.v.p. ..." << endl;
 
-  TestProblem<1> T;
+  TestProblem<2> T;
 
-  const int d  = 3;
-  const int dT = 3; // be sure to use a continuous dual here, otherwise the RHS test will fail
+  const int d  = 2;
+  const int dT = 2; // be sure to use a continuous dual here, otherwise the RHS test will fail
   
-  const int jmax = 4;
+  const int jmax = 3;
 #ifdef FRAME
-  const int pmax = 1;
+  const int pmax = 2;
 #endif
 
   // typedef DSBasis<d,dT> Basis; //Basis basis(true, true);
@@ -169,7 +170,7 @@ int main()
 #ifdef FRAME
   typedef PQFrame<d,dT> Basis;
 
-  Basis basis(1,1, false);
+  Basis basis(0,0, false);
   typedef Basis::Index Index;
   const char* basis_type = "Primbs quarklet frame";
   basis.set_jpmax(jmax,pmax);
@@ -179,6 +180,15 @@ int main()
   SturmEquation<Basis> eq(T, basis);
   const int j0=eq.basis().j0();
   InfiniteVector<double, Index> coeffs;
+
+  
+#if 1
+ //Testing some entrys of the stiffness matrix
+  Index mu(1,3,0,2, &basis);
+  Index nu (1,3,0,2, &basis);
+  double entry=eq.a(mu,nu);
+  cout << "Entry in stiffness matrix A for indices " << mu << "and " << nu << ": " << entry << endl;
+#endif
 
 #if 0
   coeffs.set_coefficient(eq.basis().first_generator(eq.basis().j0()), 1.0);
@@ -232,12 +242,12 @@ int main()
   
   
 
-  
+#if 1  
      cout << "- set up stiffness matrix with respect to the index set Lambda=" << endl;
      for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it)
        cout << *it << endl;
 
-#if 1
+
   cout << "- set up (preconditioned) stiffness matrix (j0=" << eq.basis().j0() << ",jmax=" << jmax << ")..." << endl;
   clock_t tstart, tend;
   double time;
@@ -247,14 +257,15 @@ int main()
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
-//   cout << "- (preconditioned) stiffness matrix A=" << endl << A << endl;
+   //cout << "- (preconditioned) stiffness matrix A=" << endl << A << endl;
 
-//   cout << "- writing A to the file stiffmat.m ..." << endl;
-//   std::ofstream Astream("stiffmat.m");
-//   Astream << "A=";
-//   print_matrix(A, Astream);
-//   Astream << ";" << endl;
-//   cout << "  ... done!" << endl;
+   cout << "- writing A to the file stiffmat.m ..." << endl;
+   std::ofstream Astream("stiffmat.m");
+   Astream << "A=";
+   print_matrix(A, Astream);
+   Astream << ";" << endl;
+   Astream.close();
+   cout << "  ... done!" << endl;
 
   cout << "- set up right-hand side..." << endl;
   tstart = clock();
@@ -263,37 +274,84 @@ int main()
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
+  
+  cout << "- writing b to the file rhs.m ..." << endl;
+   std::ofstream bstream("rhs.m");
+   bstream << "b=";
+   print_vector(b, bstream);
+   bstream << ";" << endl;
+   bstream.close();
+   cout << "  ... done!" << endl;
 
+  
+  b.compress(1e-14);
   cout << "- right hand side: " << b << endl << endl;
 
   Vector<double> x(Lambda.size()), err(Lambda.size()), err2(Lambda.size()); x = 0;
   unsigned int iterations;
   
-  CG(A, b, x, 1e-8, 200, iterations);
   
+#ifdef FRAME
+//  Matrix<double> evecs;
+//  Vector<double> evals;
+//  SymmEigenvalues(A, evals, evecs); // for safety, we compute ALL eigenvalues
+////   double lambdamax = PowerIteration(A, xk, 1e-6, 1000, iterations);
+////   double lambdamin = 1./InversePowerIteration(A, xk, 1e-6, 1000, iterations);
+//  double lambdamax = evals[evals.size()-1];
+//  int j=0;
+//  while(evals[j]<1e-1) j++;
+//  double lambdamin = evals[j];
+//  cout << "  lambdamax=" << lambdamax
+//       << ", lambdamin=" << lambdamin << endl;
+//  double omegastar = 2./(lambdamin+lambdamax);
+//  cout << "omegastar: " << omegastar << endl;
+//  Richardson(A, b, x, omegastar, 1e-8, 10000, iterations);
+//  GaussSeidel(A, b, x, 1e-8, 10000, iterations);
+  CG(A, b, x, 1e-8, 200, iterations);
+#else
+  CG(A, b, x, 1e-8, 200, iterations);
+#endif
+  
+  
+ 
+  
+//  Vector<double> x2(Lambda.size()," -90.69813778142046 277.6049681626802 137.763924751933 3740.815469402151 -553.5220285733511 -2571.078754156906 -880.6581000170487 -90.82424114257628 -29.46472526365101 -32.48153042189944 340.9701025624454 -556.4234231003472 -313.6400421185935 67.8221987536722 -32.59435947723999 -29.43250221197568 -2708.989044118656 -6729.763648330345 -35809.96876058168 -1453.428184644519 14946.34582699998 6561.842913774125 -908.4681731417184 2406.360859896055 464.522704015511 1277.593500413668 -5807.643139152126 -12422.6705934792 55752.00389593931 55790.39412933643 -12372.14758315131 -5783.017058896096 -554.5402161403698 -4307.107220873145 -4307.086264666619 -553.7583062933044"); 
+ Vector<double> x2(Lambda.size()," 0.4995196796211758 0.4995930793194577 0.4993781557876391 0.4995930793195578 0.499519679621447 0.0001961663434695258 0.0004941575858113331 0.0004941575858145899 0.0001961663432735496 7.059617586933921e-05 4.386870953756039e-05 6.423344769786667e-05 7.433745784499037e-05 7.433745776920209e-05 6.42334477370391e-05 4.386870945398857e-05 7.059617587131275e-05 -0.00296136681093653 -3.799663503842528e-12 0.002961366805766139 -0.001841220606581801 0.001841220605553969 -1.056830778084215e-05 -0.0001740815697862949 -0.0001232956657777421 0.0001232956657720723 0.0001740815697222662 1.056830781413941e-05 0.00203775954392417 0.03041258804115368 0.00203775955151338 -0.0003098495771240994 -0.0003098495767476009 -3.977715111333296e-05 2.724649018440909e-05 -1.726262057569815e-05 -1.726262080100297e-05 2.724649042325838e-05 -3.977715130052654e-05");
+//  readVectorFromFile(x2,"myfile.m");
+  //cout << "x2: " << x2 << endl;
+  
+  A.apply(x2,err2);
+  
+  cout << "Ax2" << err2 << endl << endl;
+  
+  //x.compress(1e-4);
   
   A.apply(x, err);
-  //cout << "Ax " << err << endl << endl;
+  cout << "Ax " << err << endl << endl;
   
     
   err -= b;
-  //cout << "residual " << err << endl;
+  err2-=b;
+  cout << "residual " << err << endl;
+  cout << "residual Matlab " << err2 << endl;
   cout << " residual (infinity) norm " << linfty_norm(err) << endl;
-  
+  cout << " residual (infinity) norm Matlab " << linfty_norm(err2) << endl;
   
 //  cout << "- point values of the solution:" << endl;
   InfiniteVector<double,Index> u,v;
   unsigned int i = 0;
   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
-    u.set_coefficient(*it, x[i]);
-  
+//    u.set_coefficient(*it, x[i]);
+    u.set_coefficient(*it, x2[i]);
   
   u.COARSE(1e-6,v);
+  //v.set_coefficient(Index(0,2,0,0,&basis),1);
   
   
   
   cout << "solution: " << endl << u << endl;
   cout << "coarsed solution: " << endl << v << endl;
+  cout << "Number of iterations: " << iterations << endl;
 
   
   const char* filenameSolution1 = "sturm_bvp_solution.m";
@@ -331,8 +389,8 @@ int main()
   
  /* plot solution*/ 
     
-  v.scale(&eq, -1);
-  SampledMapping<1> s(evaluate(eq.basis(), v, true, 7));
+  u.scale(&eq, -1);
+  SampledMapping<1> s(evaluate(eq.basis(), u, true, 7));
   std::ofstream u_stream1(filenameSolution1);
   s.matlab_output(u_stream1);
   u_stream1 << "figure;\nplot(x,y);"

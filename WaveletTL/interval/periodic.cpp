@@ -18,11 +18,11 @@ namespace WaveletTL
   template <class RBASIS>
   PeriodicBasis<RBASIS>::PeriodicBasis()
     : r_basis(),
+      j0_(j0()),
       Mj0_(j0(), r_basis.offset_a, r_basis.band_a, M_SQRT1_2),
       Mj1_(j0(), r_basis.offset_b, r_basis.band_b, M_SQRT1_2),
       Mj0T_(j0(), r_basis.offset_aT, r_basis.band_aT, M_SQRT1_2),
-      Mj1T_(j0(), r_basis.offset_bT, r_basis.band_bT, M_SQRT1_2),
-      j0_(j0())
+      Mj1T_(j0(), r_basis.offset_bT, r_basis.band_bT, M_SQRT1_2)      
   {
 //     cout << "Mj0=" << endl << Mj0_ << endl;
 //     cout << "Mj0T=" << endl << Mj0T_ << endl;
@@ -348,7 +348,7 @@ namespace WaveletTL
                                 x-floor(x-ldexp(1.0,-lambda.j())
 				    *(RBASIS::primal_mask::begin()
 				      +lambda.k())))
-                                - r_basis.integrate(lambda);
+                                - rintegrate(lambda);
           else
                 return r_basis.evaluate(derivative, lambda,
                                 x-floor(x-ldexp(1.0,-lambda.j())
@@ -566,10 +566,42 @@ namespace WaveletTL
  	    const double ft = f->value(MathTL::Point<1>(t));
  	    if (ft != 0)
  	      r += ft
- 		* evaluate(0, lambda, t)
+ 		* evaluate(0, lambda, t, 0)//evaluate without normalization
  		* gauss_weight;
  	  }
       }
+    
+    if(lambda.e() == 0){
+        N_Gauss = 9;
+        Array1D<double> gauss_points2 (N_Gauss);
+            
+            for (unsigned int n = 0; n < N_Gauss; n++){
+                    gauss_points2[n] = 0.5+GaussPoints[N_Gauss-1][n]/2;
+            }
+                    
+            
+            
+//                    cout << h*k1 << ", " << h*k2 << endl;
+//                    cout << gauss_points2 << endl;
+            
+                    const double pvalue = -rintegrate(lambda);//only the value at the end of the interval is computed
+//                    cout << pvalue << endl;
+            // - add all integral shares
+                for (unsigned int n = 0; n < N_Gauss; n++) {
+                        const double t = gauss_points2[n];
+                        const double gauss_weight = GaussWeights[N_Gauss - 1][n];
+
+                        const double ft = f->value(MathTL::Point<1>(t));
+//                        cout << "(" << t << ", " << gt << ")" <<endl;
+                        if (ft != 0)
+                            r += ft
+                                * pvalue
+                                * gauss_weight;
+                }
+            
+       
+       
+    }
     
     return r;
   }
@@ -578,7 +610,7 @@ namespace WaveletTL
   template <class RBASIS>
   double
   PeriodicBasis<RBASIS>::integrate(const unsigned int& derivative, const Index& lambda,
-				   const Index& mu) const
+				   const Index& mu, const bool normalization) const
   {
     double r = 0;
     
@@ -596,8 +628,6 @@ namespace WaveletTL
 	length = (k2 > k1 ? k2-k1 : k2+(1<<j)-k1); // number of subintervals
 	
 	
-        if(lambda.e() == 1 && mu.e() == 1 && derivative > 0){// if only one of the functions is a wavelet, the constant
-                                           //part can be skipped because of the vanishing moments @PHK
         // setup Gauss points and weights for a composite quadrature formula:
  	const unsigned int N_Gauss = primal_polynomial_degree();
 	const double h = 1.0/(1<<j);
@@ -617,36 +647,13 @@ namespace WaveletTL
 	  for (unsigned int n = 0; n < N_Gauss; n++, id++) {
 	    r += func1values[id] * func2values[id] * GaussWeights[N_Gauss-1][n] * h;
 	  }
-
-	return r;
         }
-        else{// not yet changed to normalized setting
-         // setup Gauss points and weights for a composite quadrature formula:
- 	const unsigned int N_Gauss = primal_polynomial_degree();
-	const double h = 1.0/(1<<j);
 	
-	Array1D<double> gauss_points (N_Gauss*(length)), func1values, func2values;
-	int k = k1;
-	for (int patch = 0; patch < length; patch++, k = dyadic_modulo(++k,j)) // work on 2^{-j}[k,k+1]
-	  for (unsigned int n = 0; n < N_Gauss; n++)
-	    gauss_points[patch*N_Gauss+n] = h*(2*k+1+GaussPoints[N_Gauss-1][n])/2;
-
-  	// - compute point values of the integrands
-   	evaluate(derivative, lambda, gauss_points, func1values, 0);
-  	evaluate(derivative, mu, gauss_points, func2values, 0);
-	
-  	// - add all integral shares
-	for (int patch = k1, id = 0; patch < k1+length; patch++)
-	  for (unsigned int n = 0; n < N_Gauss; n++, id++) {
-	    r += func1values[id] * func2values[id] * GaussWeights[N_Gauss-1][n] * h;
-	  }
-
-	return r;
-        }   
+    if (normalization==1 && lambda.e()==0 && mu.e()==0){
+        r-=rintegrate(lambda)*rintegrate(mu);//hier weitermachen
+    }
+        return r;
         
-      }
-
-    return 0;
   }
 
   template <class RBASIS>

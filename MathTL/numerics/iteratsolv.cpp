@@ -21,6 +21,7 @@ namespace MathTL
 	A.apply(xk, rk);
 	rk -= b;
 	error = l2_norm(rk);
+//        cout << "Fehler: " << error << endl;
       }
   }
 
@@ -64,14 +65,15 @@ namespace MathTL
 	    xk[i] = b[i];
 	    for (typename MATRIX::size_type j(0); j < n; j++)
 	      if (j != i)
-		xk[i] -= A(i, j) * xk[j];
-	    xk[i] /= A(i, i);
+		xk[i] -= A.get_entry(i, j) * xk[j];
+	    xk[i] /= A.get_entry(i, i);
 	  }
 	
 	A.apply(xk, rk);
 	rk -= b;
 
 	error = l2_norm(rk);
+        //cout << "error: " << error << endl;
       }
   }
 
@@ -218,7 +220,7 @@ namespace MathTL
 	rk.add(-alpha, Apk);
 	normrk = l2_norm_sqr(rk);
 
-	//cout << "normrk = " << sqrt(normrk) << endl;
+//	cout << "normrk = " << sqrt(normrk) << endl;
 	oldrhok = rhok;
       }
 

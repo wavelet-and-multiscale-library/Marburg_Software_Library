@@ -145,7 +145,7 @@ namespace WaveletTL
         
 
         #ifdef FRAME
-	const unsigned int N_Gauss = (p+1)/2+ (lambda.p()+nu.p())/2;
+	const unsigned int N_Gauss = (p+1)/2+ (lambda.p()+nu.p()+1)/2;
          #else 
         const unsigned int N_Gauss = (p+1)/2;
         #endif

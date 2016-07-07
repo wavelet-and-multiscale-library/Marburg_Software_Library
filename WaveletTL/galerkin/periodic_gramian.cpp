@@ -14,8 +14,8 @@ namespace WaveletTL
 {
   template <class RBASIS>
   PeriodicIntervalGramian<RBASIS>::PeriodicIntervalGramian
-  (const PeriodicLaplacianProblem& plp, const PeriodicBasis<RBASIS>& basis)
-    : basis_(basis), plp_(plp),
+  (const PeriodicGramianProblem& pgr, const PeriodicBasis<RBASIS>& basis)
+    : pgr_(pgr), basis_(basis), 
       normA(1.0),
       normAinv(ldexp(1.0, 2*(RBASIS::primal_polynomial_degree()-1))) // lower bound from [Bittner]
   {
@@ -33,7 +33,7 @@ namespace WaveletTL
   PeriodicIntervalGramian<RBASIS>::a(const typename WaveletBasis::Index& lambda,
 				     const typename WaveletBasis::Index& mu) const
   {
-    return basis_.integrate(0, lambda, mu);
+    return basis_.integrate(0, lambda, mu, 0);
   }
   
   
@@ -107,7 +107,7 @@ namespace WaveletTL
     const int length = (k2 > k1 ? k2-k1 : k2+(1<<j)-k1); // number of subintervals
     
     // setup Gauss points and weights for a composite quadrature formula:
-    const unsigned int N_Gauss = 5;
+    unsigned int N_Gauss = 5;
     const double h = 1.0/(1<<j);
 
     Array1D<double> gauss_points (N_Gauss*length), vvalues;
@@ -121,7 +121,7 @@ namespace WaveletTL
     
 
     // - compute point values of the integrand
-    basis_.evaluate(0, lambda, gauss_points, vvalues);
+    basis_.evaluate(0, lambda, gauss_points, vvalues,0);//evaluate without normalization
     //cout << vvalues << endl;
     // - add all integral shares
     for (int patch = k1, id = 0; patch < k1+length; patch++)
@@ -129,13 +129,47 @@ namespace WaveletTL
 	const double t = gauss_points[id];
 	const double gauss_weight = GaussWeights[N_Gauss-1][n] * h;
 	    
-	const double gt = plp_.g(t);
+	const double gt = pgr_.g(t);
 	if (gt != 0)
 	  r += gt
 	    * vvalues[id]
 	    * gauss_weight;
       }
     //cout << r << endl;
+    
+//gramian won't be adapted to normalized setting    //adaption to normalized scaling functions
+    
+//    if(lambda.e() == 0){
+//        N_Gauss = 9;
+//        Array1D<double> gauss_points2 (N_Gauss);
+//            
+//            for (unsigned int n = 0; n < N_Gauss; n++){
+//                    gauss_points2[n] = 0.5+GaussPoints[N_Gauss-1][n]/2;
+//            }
+//                    
+//            
+//            
+////                    cout << h*k1 << ", " << h*k2 << endl;
+////                    cout << gauss_points2 << endl;
+//            
+//                    const double pvalue = -basis_.rintegrate(lambda);//only the value at the end of the interval is computed
+////                    cout << pvalue << endl;
+//            // - add all integral shares
+//                for (unsigned int n = 0; n < N_Gauss; n++) {
+//                        const double t = gauss_points2[n];
+//                        const double gauss_weight = GaussWeights[N_Gauss - 1][n];
+//
+//                        const double gt = pgr_.g(t);
+////                        cout << "(" << t << ", " << gt << ")" <<endl;
+//                        if (gt != 0)
+//                            r += gt
+//                                * pvalue
+//                                * gauss_weight;
+//                }
+//            
+//       
+//       
+//    }
     return r;
   }
 }

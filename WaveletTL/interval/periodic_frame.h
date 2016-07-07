@@ -293,7 +293,8 @@ namespace WaveletTL
       helper function, integrate two primal generators or wavelets
       against each other (for the Gramian or Laplacian) /PROBLEMS WITH NORMALIZATION =1 AND DERIVATIVE=0 @PHK look at routines in cachedquarkletproblem f(lambda)
       there are also problems. everything need to be fixed for the gramian.
-      bei zwei generatoren muss beachtet werden normalissierter wert= alter wert-integral(phi_lambda)*integral(phi_mu)  */
+      bei zwei generatoren muss beachtet werden normalissierter wert= alter wert-integral(phi_lambda)*integral(phi_mu) 
+     still errors: if two generators, we need to subtract 1 time the multiple of the integrals  */
     double
     integrate
     (const unsigned int& derivative,

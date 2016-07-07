@@ -140,7 +140,7 @@ namespace WaveletTL
     const int dhalfsmall = d/2;
     const double pfktrez = 1./pfkt;
     const double y = (1<<lambda.j())*x-lambda.k();
-    const int lefthelper = lambda.k()+pfkt-1;
+//    const int lefthelper = lambda.k()+pfkt-1;
     const int righthelper = (1<<lambda.j())+dhalfsmall -lambda.k();
     const double leftside = 1./(pfkt+lambda.k());
     const double rightside = 1./righthelper;
@@ -226,7 +226,7 @@ namespace WaveletTL
       const int dhalfsmall = d/2;
       const double pfktrez = 1./pfkt;
       const double y = (1<<j)*x-k;
-      const int lefthelper = k+pfkt-1;
+//      const int lefthelper = k+pfkt-1;
       const int righthelper = (1<<j)+dhalfsmall -k;
       const double leftside = 1./(pfkt+k);
       const double rightside = 1./righthelper;
@@ -345,12 +345,11 @@ namespace WaveletTL
             const int pfkt = (d+1)/2;
             const int dhalfsmall = d/2;
             const double pfktrez = 1./pfkt;
-            const int lefthelper = lambda.k()+pfkt-1;
             const int righthelper = (1<<lambda.j())+dhalfsmall -lambda.k();
             const double leftside = 1./(pfkt+lambda.k());
             const double rightside = 1./righthelper;
             
-            if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) 
+            if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) //right boundary quarks
                 switch (derivative) {
                     case 0:
                         for (unsigned int m(0); m < points.size(); m++)
@@ -371,7 +370,7 @@ namespace WaveletTL
                                     1-points[m]);
                         break;
                 }
-            else if(lambda.k() < -ell1<d>())
+            else if(lambda.k() < -ell1<d>()) //left boundary quarks
                 switch (derivative) {
                     case 0: 
                         for (unsigned int m(0); m < points.size(); m++)
@@ -390,8 +389,8 @@ namespace WaveletTL
                                     lambda.k(),
                                     points[m]);
                 }
-            else 
-                switch (derivative) {
+            else //inner quarks
+                switch (derivative) { 
                     case 0: 
                         for (unsigned int m(0); m < points.size(); m++)
                             values[m] = MathTL::EvaluateSchoenbergBSpline_td<d>(lambda.j(),
@@ -400,8 +399,13 @@ namespace WaveletTL
                         break;
                     case 1: 
                         for (unsigned int m(0); m < points.size(); m++)
-                            values[m] = MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
-                                    lambda.k(), points[m]); 
+                            values[m] = (lambda.p()==0 ? MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
+                                        lambda.k(), points[m])
+                                        : MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
+                                        lambda.k(), points[m])*pow(((1<<lambda.j())
+                                        *points[m]-lambda.k())*pfktrez,lambda.p())
+                                        +MathTL::EvaluateSchoenbergBSpline_td<d>(lambda.j(),lambda.k(), points[m])
+                                        *lambda.p()*pow(((1<<lambda.j())*points[m]-lambda.k())*pfktrez,lambda.p()-1)*(1<<lambda.j())*pfktrez); 
                         break;
                     case 2:
                         for (unsigned int m(0); m < points.size(); m++)
@@ -461,16 +465,16 @@ namespace WaveletTL
         if (e_ == 0) 
         {
             // generator
-            
+            //until now only implemented for case 0 @PHK
             const int pfkt = (d+1)/2;
             const int dhalfsmall = d/2;
             const double pfktrez = 1./pfkt;
-            const int lefthelper = k_+pfkt-1;
+//            const int lefthelper = k_+pfkt-1;
             const int righthelper = (1<<j_)+dhalfsmall -k_;
             const double leftside = 1./(pfkt+k_);
             const double rightside = 1./righthelper;
             
-            if (k_ > (1<<j_)-ell1<d>()-d) 
+            if (k_ > (1<<j_)-ell1<d>()-d)//left boundary quarks 
                 switch (derivative) {
                     case 0:
                         for (unsigned int m(0); m < points.size(); m++)
@@ -491,7 +495,7 @@ namespace WaveletTL
                                     1-points[m]);
                         break;
                 }
-            else if(k_ < -ell1<d>())
+            else if(k_ < -ell1<d>())//right boundary quarks
                 switch (derivative) {
                     case 0: 
                         for (unsigned int m(0); m < points.size(); m++)
@@ -514,7 +518,7 @@ namespace WaveletTL
                 }
             
             
-            else 
+            else //inner quarks
                 switch (derivative) {
                     case 0: 
                         for (unsigned int m(0); m < points.size(); m++)
@@ -588,12 +592,12 @@ namespace WaveletTL
             const int pfkt = (d+1)/2;
             const int dhalfsmall = d/2;
             const double pfktrez = 1./pfkt;
-            const int lefthelper = lambda.k()+pfkt-1;
+//            const int lefthelper = lambda.k()+pfkt-1;
             const int righthelper = (1<<lambda.j())+dhalfsmall -lambda.k();
             const double leftside = 1./(pfkt+lambda.k());
             const double rightside = 1./righthelper;
-            
-            if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) {
+            //until now only fucvalues are correct @PHK
+            if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) {//left boundary quarks
                 for (unsigned int m(0); m < npoints; m++) {
                     funcvalues[m] = MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
                             (1<<lambda.j())-d-lambda.k()-2*ell1<d>(), 1-points[m])
@@ -603,7 +607,7 @@ namespace WaveletTL
                             1-points[m]);
                 }
             } 
-             else if(lambda.k() < -ell1<d>()){
+             else if(lambda.k() < -ell1<d>()){//right boundary quarks
                 for (unsigned int m(0); m < npoints; m++) {
                     funcvalues[m] = MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
                             lambda.k(), points[m])
@@ -614,14 +618,15 @@ namespace WaveletTL
                 }
              }
             
-             else {
+             else {//inner quarks
                 for (unsigned int m(0); m < npoints; m++) {
                     funcvalues[m] = MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
                             lambda.k(), points[m])
                             *pow(((1<<lambda.j())*points[m]-lambda.k())*pfktrez,lambda.p());
-                    dervalues[m]  = MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
-                            lambda.k(), 
-                            points[m]);
+                    dervalues[m]  = (lambda.p()==0 ? MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),lambda.k(),points[m])
+                            : MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),lambda.k(),points[m])*pow(((1<<lambda.j())*points[m]-lambda.k())*pfktrez,lambda.p())
+                            + MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(),lambda.k(), points[m])
+                            * lambda.p()*pow(((1<<lambda.j())*points[m]-lambda.k())*pfktrez,lambda.p()-1)*(1<<lambda.j())*pfktrez);
                 }
             }
         } 
@@ -672,12 +677,12 @@ namespace WaveletTL
             const int pfkt = (d+1)/2;
             const int dhalfsmall = d/2;
             const double pfktrez = 1./pfkt;
-            const int lefthelper = k_+pfkt-1;
+//            const int lefthelper = k_+pfkt-1;
             const int righthelper = (1<<j_)+dhalfsmall -k_;
             const double leftside = 1./(pfkt+k_);
             const double rightside = 1./righthelper;
             
-            if (k_ > (1<<j_)-ell1<d>()-d) {
+            if (k_ > (1<<j_)-ell1<d>()-d) {//left boundary quarks
                 for (unsigned int m(0); m < npoints; m++) {
                     funcvalues[m] = MathTL::EvaluateSchoenbergBSpline_td<d>  (j_,
                             (1<<j_)-d-k_-2*ell1<d>(), 1-points[m])
@@ -687,7 +692,7 @@ namespace WaveletTL
                             1-points[m]);
                 }
             }
-            else if(k_ < -ell1<d>()){
+            else if(k_ < -ell1<d>()){//right boundary quarks
                 for (unsigned int m(0); m < npoints; m++) {
                     funcvalues[m] = MathTL::EvaluateSchoenbergBSpline_td<d>  (j_,
                             k_, points[m])
@@ -698,14 +703,14 @@ namespace WaveletTL
                 }
             }
             
-            else {
+            else {//inner quarks
                 for (unsigned int m(0); m < npoints; m++) {
-                    funcvalues[m] = MathTL::EvaluateSchoenbergBSpline_td<d>  (j_,
-                            k_, points[m])
-                            *pow(((1<<j_)*points[m]-k_)*pfktrez,p_);
-                    dervalues[m]  = MathTL::EvaluateSchoenbergBSpline_td_x<d>(j_,
-                            k_, 
-                            points[m]);
+                    funcvalues[m] = MathTL::EvaluateSchoenbergBSpline_td<d>(j_,k_,points[m])
+                                    *pow(((1<<j_)*points[m]-k_)*pfktrez,p_);
+                    dervalues[m]  = (j_==0 ? MathTL::EvaluateSchoenbergBSpline_td_x<d>(j_,k_,points[m])
+                                           : MathTL::EvaluateSchoenbergBSpline_td_x<d>(j_,k_,points[m])*pow(((1<<j_)*points[m]-k_)*pfktrez,p_)
+                                           + MathTL::EvaluateSchoenbergBSpline_td<d>(j_,k_,points[m])
+                                           * p_*pow(((1<<j_)*points[m]-k_)*pfktrez,p_-1)*(1<<j_)*pfktrez);
                 }
             }
         } 

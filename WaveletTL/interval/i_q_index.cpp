@@ -156,10 +156,10 @@ namespace WaveletTL
   bool
   IntervalQIndex<IFRAME>::operator < (const IntervalQIndex<IFRAME>& lambda) const
   {
-    return (p_ < lambda.p() ||
-	    p_ == lambda.p() && j_ < lambda.j() ||
-	    p_ == lambda.p() && j_ == lambda.j() && e_ < lambda.e() ||
-	    p_ == lambda.p() && j_ == lambda.j() && e_ == lambda.e() && k_ < lambda.k());
+    return ((p_ < lambda.p()) ||
+	    (p_ == lambda.p() && j_ < lambda.j()) ||
+	    (p_ == lambda.p() && j_ == lambda.j() && e_ < lambda.e()) ||
+	    (p_ == lambda.p() && j_ == lambda.j() && e_ == lambda.e() && k_ < lambda.k()));
   }
   
   template <class IFRAME>

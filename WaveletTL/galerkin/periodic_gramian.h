@@ -35,12 +35,13 @@ namespace WaveletTL
   */
   template <class RBASIS>
   class PeriodicIntervalGramian
+//    : public FullyDiagonalDyadicPreconditioner<typename PeriodicBasis<RBASIS>::Index>
   {
   public:
     /*!
       constructor from a given wavelet basis and a given periodic problem plp
     */
-    PeriodicIntervalGramian(const PeriodicLaplacianProblem& plp, const PeriodicBasis<RBASIS>& basis);
+    PeriodicIntervalGramian(const PeriodicGramianProblem& pgr, const PeriodicBasis<RBASIS>& basis);
     
     
     
@@ -159,7 +160,7 @@ namespace WaveletTL
     }*/
 
   protected:
-    const PeriodicLaplacianProblem& plp_;
+    const PeriodicGramianProblem& pgr_;
     WaveletBasis basis_;
     
     

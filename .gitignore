@@ -94,6 +94,7 @@ WaveletTL/tests/test_s_support
 WaveletTL/tests/test_spline_basis
 WaveletTL/tests/test_spline_expansion
 WaveletTL/tests/test_spline_support
+WaveletTL/tests/test_sturm_bvp
 WaveletTL/tests/test_tbasis
 WaveletTL/tests/test_tbasis_index
 WaveletTL/tests/test_tbasis_indexplot

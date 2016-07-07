@@ -131,7 +131,7 @@ namespace WaveletTL
 
     //! index of last (rightmost) generator on level j >= j0
     static Index last_generator(const int j);
-
+     
     //! index of first (leftmost) wavelet on level j >= j0
     static Index first_wavelet(const int j);
 
@@ -155,6 +155,14 @@ namespace WaveletTL
     void set_jmax(const int jmax) {
       jmax_ = jmax;
       setup_full_collection();
+    }
+    
+    int get_jmax_() const{
+        return jmax_;
+    }
+    
+    int get_j0_() const{
+        return j0_;
     }
     
     /*!
@@ -291,11 +299,18 @@ namespace WaveletTL
     /*!
       helper function, integrate two primal generators or wavelets
       against each other (for the Gramian or if derivative = 1 for the Laplacian)
+     * needs to be adjusted to normalization
     */
     double
     integrate
     (const unsigned int& derivative, const Index& lambda,
-     const Index& mu) const;
+     const Index& mu, const bool normalization=1) const;
+    
+    /*!
+     helper function, integrates a nonnormalized generator/wavelet
+     */
+    double inline 
+    rintegrate(const Index& lambda) const{return r_basis.integrate(lambda);}
 
     
     //

@@ -343,7 +343,7 @@ namespace WaveletTL
     }
 
     // now setting up MLTp
-    Matrix<double> MLTp(num_rows_boundref_L, num_dual_bound_gen_L);
+    Matrix<double> MLTp(num_rows_boundref_L, num_dual_bound_gen_L);//Fehler, wenn p zu groß und dT>d
     if (s0 >= d-2) {
       // setup the expansion coefficients of the unbiorthogonalized dual generators
       // w.r.t. the truncated CDF generators, see [DKU, Lemma 3.1]
@@ -1542,7 +1542,7 @@ namespace WaveletTL
                                                                        " 31 32 33 34 35 36 7 8 9 10 11 12"
                                                                        " 41 42 43 44 45 46 7 8 9 10 11 12"
                                                                        " 51 52 53 54 55 56 7 8 9 10 11 12");
-                          cout << "setup: " << endl << tempmat << endl;
+                          //cout << "setup: " << endl << tempmat << endl;
                           CVM = tempmat;
                       }
                       }

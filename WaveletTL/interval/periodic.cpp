@@ -649,7 +649,7 @@ namespace WaveletTL
 	  }
         }
 	
-    if (normalization==1 && lambda.e()==0 && mu.e()==0){
+    if (normalization==1 && lambda.e()==0 && mu.e()==0 && derivative==0){
         r-=rintegrate(lambda)*rintegrate(mu);//hier weitermachen
     }
         return r;

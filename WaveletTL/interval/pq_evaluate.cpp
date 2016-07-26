@@ -117,6 +117,7 @@ namespace WaveletTL
 	basis.reconstruct(coeffs,jmax,gcoeffs);
       else
 	basis.reconstruct_t(coeffs,jmax,gcoeffs);
+      
 
       for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
 	     itend(gcoeffs.end()); it != itend; ++it)

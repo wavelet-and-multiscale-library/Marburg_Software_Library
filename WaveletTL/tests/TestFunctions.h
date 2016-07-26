@@ -66,7 +66,7 @@ public:
 //    values.resize(1, false);
 //    values[0] = value(p);
 //  }
-//};
+};
 
 
 //hat function

@@ -7,6 +7,10 @@
 *.dat
 *.txt
 nbproject
+WaveletTL/tests/test_cube_equation
+WaveletTL/tests/test_periodic_laplacian
+WaveletTL/tests/test_pq_frame
+octave-workspace
 MathTL/tests/octave-workspace
 Examples/Example_CDD1/Example_CDD1
 Examples/Example_CDD2/Example_CDD2

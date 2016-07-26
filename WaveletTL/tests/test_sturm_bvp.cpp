@@ -16,10 +16,6 @@
 #include <interval/ds_basis.h>
 #include <interval/p_basis.h>
 #include <interval/pq_frame.h>
-#include <interval/jl_basis.h>
-#include <interval/jl_support.h>
-#include <interval/jl_evaluate.h>
-#include <interval/spline_basis.h>
 #undef BASIS
 #define FRAME
 #undef DELTADIS

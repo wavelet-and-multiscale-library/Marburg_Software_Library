@@ -104,7 +104,8 @@ EXEOBJF2 = \
 # set 2a of test programs: wavelet bases on the interval with improved performance (periodic)
 EXEOBJF2a = \
   test_periodic.o test_periodic_support.o\
-  test_periodic_gramian.o
+  test_periodic_gramian.o\
+  test_periodic_laplacian.o
 
 # set 3 of test programs: wavelet bases on general higher-dim. domains ((mapped) cube, tensor prod.)
 EXEOBJF3 = \

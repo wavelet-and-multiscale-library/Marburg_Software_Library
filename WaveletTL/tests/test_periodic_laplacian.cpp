@@ -18,9 +18,10 @@
 #include <numerics/periodicgr.h>
 #define PERIODIC_CDFBASIS
 
-#include <galerkin/periodic_gramian.h>
+#include <galerkin/periodic_laplacian.h>
 #include <galerkin/galerkin_utils.h>
 #include <galerkin/Periodic_TestProblem.h>
+#include <galerkin/cached_problem.h>
 #include "TestFunctions.h"
 
 
@@ -32,26 +33,26 @@ int main(int argc, char** argv) {
     const int d  = 3;
     const int dT = 3;
     const int jmax = 10;
-    const bool normalization = 0;//choose 1 for Laplacian
+    const bool normalization = 1;//choose 1 for Laplacian
     
-    const unsigned int testcase=5;
-    PeriodicTestProblem<testcase> tper;
+    const unsigned int testcase=3;
+    PeriodicTestProblem2<testcase> tper;
     Function<1>* uexact = 0;
     switch(testcase) {
         case 1:
-            uexact = new Function1();
-            break;
-        case 2:
             uexact = new Function2();
             break;
-        case 3:
+        case 2:
             uexact = new Function3();
-            break;
-        case 4:
+//            break;
+        case 3:
             uexact = new Function4();
-            break;
-        case 5:
-            uexact = new Hat();    
+//            break;
+//        case 4:
+//            uexact = new Function4();
+//            break;
+//        case 5:
+//            uexact = new Hat();    
         default:
             break;
     }
@@ -65,9 +66,11 @@ int main(int argc, char** argv) {
     Basis basis;
     basis.set_jmax(jmax);
     
-    typedef PeriodicIntervalGramian<RBasis> Problem;
-    Problem G(tper, basis);
-    const int j0= G.basis().j0();
+    typedef PeriodicIntervalLaplacian<RBasis> Problem;
+    Problem L(tper, basis);
+    typedef CachedProblem<Problem> CPROBLEM;
+    CPROBLEM cachedL(&L);
+    const int j0= L.basis().j0();
     
 #if 1
     //Plot of wavelet with coefficient mu
@@ -83,26 +86,26 @@ int main(int argc, char** argv) {
     set<Index> Lambda;
     Vector<double> x;
     
-  for (int j = j0; j <= jmax; j++) {
+  for (int j = j0; j <= 3; j++) {
         Lambda.clear();
         
     cout << "  j=" << j << ":" << endl;
     //Implementation of the index set
     
-    for (Index lambda = G.basis().first_generator(j0);; ++lambda) {
+    for (Index lambda = L.basis().first_generator(j0);; ++lambda) {
         Lambda.insert(lambda);
-        if (lambda == G.basis().last_wavelet(j)) break;    
+        if (lambda == L.basis().last_wavelet(j)) break;    
     }
     SparseMatrix<double> A;
     cout << "- set up stiffness matrix..." << endl;
-    setup_stiffness_matrix(G, Lambda, A);
-//    
+    setup_stiffness_matrix(L, Lambda, A);
+    cout << "A: " << endl << A << endl;
     
     
     cout << "- set up right-hand side..." << endl;
     Vector<double> b;
-    setup_righthand_side(G, Lambda, b);
-//    cout << "- right hand side: " << b << endl << endl;
+    setup_righthand_side(L, Lambda, b);
+    cout << "- right hand side: " << b << endl << endl;
     
     
     x.resize(Lambda.size()); x = 0;
@@ -124,7 +127,7 @@ int main(int argc, char** argv) {
       const double point = i*h;
       int id = 0;
       for (set<Index>::const_iterator it(Lambda.begin()); it != Lambda.end(); ++it, ++id) 
-	u_values[i] += x[id] * basis.evaluate(0, *it, point, normalization);
+	u_values[i] += x[id] * basis.evaluate(0, *it, point, normalization)*1./L.D(*it);
     }
 //     cout << "  point values of Galerkin solution: " << u_values << endl;
 
@@ -150,13 +153,15 @@ int main(int argc, char** argv) {
         unsigned int i = 0;
     for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
         u.set_coefficient(*it, x[i]);
-//    cout << "Solution: " << endl << u << endl;    
+    cout << "Solution: " << endl << u << endl;    
         
-    SampledMapping<1> sm2(basis.evaluate(u, 8, 0));
+    
+    u.scale(&cachedL,-1);
+    SampledMapping<1> sm2(basis.evaluate(u, 8, normalization));
     std::ofstream u_stream2("plot_periodicsolution.m");
     sm2.matlab_output(u_stream2);
     u_stream2 << "figure;\nplot(x,y);"
-            << "title('solution of the gramian')" << endl;
+            << "title('solution of the laplacian')" << endl;
     u_stream2.close();
     
     

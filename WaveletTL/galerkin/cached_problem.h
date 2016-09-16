@@ -38,7 +38,7 @@ namespace WaveletTL
   class CachedProblem
   //  : public TrivialPreconditioner<typename PROBLEM::Index>
     : public FullyDiagonalDyadicPreconditioner<typename PROBLEM::Index>
-  //  : public FullyDiagonalEnergyNormPreconditioner<typename PROBLEM::Index>
+//    : public FullyDiagonalEnergyNormPreconditioner<typename PROBLEM::Index>
   //  : public FullyDyadicPenrichPreconditioner<typename PROBLEM::Index>
   {
   public:

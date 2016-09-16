@@ -104,19 +104,33 @@ namespace WaveletTL
   {
     SampledMapping<1> result(Grid<1>(0, 1, 1<<resolution)); // zero
     if (coeffs.size() > 0) {
-      // determine maximal level
+      // determine maximal level and maximal polynomial degree
       int jmax(0);
+      int pmax(0);
+      
       typedef typename PQFrame<d,dT>::Index Index;
       for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
-	     itend(coeffs.end()); it != itend; ++it)
+	     itend(coeffs.end()); it != itend; ++it){
 	jmax = std::max(it.index().j()+it.index().e(), jmax);
-
-      // switch to generator representation
+        pmax = std::max(it.index().p(), pmax);
+      }
+//      cout << "jmax: " << jmax << endl;
+//      cout << "pmax: " << pmax << endl;
+      
       InfiniteVector<double,Index> gcoeffs;
-      if (primal)
-	basis.reconstruct(coeffs,jmax,gcoeffs);
+      if(pmax==0){
+        // switch to generator representation
+        if (primal)
+            basis.reconstruct(coeffs,jmax,gcoeffs);
+        else
+            basis.reconstruct_t(coeffs,jmax,gcoeffs);
+      }
       else
-	basis.reconstruct_t(coeffs,jmax,gcoeffs);
+          gcoeffs=coeffs;
+          
+          
+          
+//      cout << "Generator coeffs: " << endl << gcoeffs << endl;
 
       for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
 	     itend(gcoeffs.end()); it != itend; ++it)

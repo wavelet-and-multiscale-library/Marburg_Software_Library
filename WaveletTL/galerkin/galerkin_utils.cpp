@@ -79,6 +79,7 @@ namespace WaveletTL
 			      SparseMatrix<double>& A_Lambda,
 			      bool preconditioned)
   {
+    cout << "setup_stiffness_matrix()" << endl;
     A_Lambda.resize(Lambda.size(), Lambda.size());
     
     typedef typename SparseMatrix<double>::size_type size_type;
@@ -93,10 +94,7 @@ namespace WaveletTL
 	std::list<double> entries;
 
 	size_type column = 0;
-#if _WAVELETTL_GALERKINUTILS_VERBOSITY >= 1
-	cout << "setup_stiffness_matrix(): doing row " << row << " of " << Lambda.size()
-	     << " (wavelet index " << *it1 << ")" << endl;
-#endif
+
 	for (typename std::set<Index>::const_iterator it2(Lambda.begin());
 	     it2 != itend; ++it2, ++column)
 	  {
@@ -117,6 +115,7 @@ namespace WaveletTL
 	  }
 	A_Lambda.set_row(row, indices, entries);
       }
+    cout << "done" << endl;
   }
 
     template <class PROBLEM>
@@ -125,6 +124,7 @@ namespace WaveletTL
             SparseMatrix<double>& A_Lambda,
             bool preconditioned)
     {
+        cout << "setup_stiffness_matrix()" << endl;
         A_Lambda.resize(Lambda.size(), Lambda.size());
         typedef typename SparseMatrix<double>::size_type size_type;
         size_type row = 0;
@@ -139,10 +139,7 @@ namespace WaveletTL
                 std::list<double> entries;
 
                 size_type column = 0;
-    #if _WAVELETTL_GALERKINUTILS_VERBOSITY >= 1
-                cout << "setup_stiffness_matrix(): doing row " << row << " of " << Lambda.size()
-                        << " (wavelet index number " << *it1 << ")" << endl;
-    #endif
+    
                 for (typename std::set<int>::const_iterator it2(Lambda.begin());
                         it2 != itend; ++it2, ++column)
                 {
@@ -170,10 +167,7 @@ namespace WaveletTL
                 std::list<size_type> indices;
                 std::list<double> entries;
                 size_type column = 0;
-    #if _WAVELETTL_GALERKINUTILS_VERBOSITY >= 1
-                cout << "setup_stiffness_matrix(): doing row " << row << " of " << Lambda.size()
-                        << " (wavelet index number " << *it1 << ")" << endl;
-    #endif
+   
                 for (typename std::set<int>::const_iterator it2(Lambda.begin());
                         it2 != itend; ++it2, ++column)
                 {
@@ -193,6 +187,7 @@ namespace WaveletTL
                 A_Lambda.set_row(row, indices, entries);
             }
         }
+        cout << "done" << endl;
     }
   
 
@@ -203,6 +198,7 @@ namespace WaveletTL
 			      SparseMatrix<double>& A_Lambda,
 			      bool preconditioned)
   {
+      cout << "setup_stiffness_matrix()" << endl;
     A_Lambda.resize(Lambda1.size(), Lambda2.size());
     
     typedef typename SparseMatrix<double>::size_type size_type;
@@ -225,10 +221,7 @@ namespace WaveletTL
 	std::list<double> entries;
 
 	size_type column = 0;
-#if _WAVELETTL_GALERKINUTILS_VERBOSITY >= 1
-	cout << "setup_stiffness_matrix(): doing row " << row << " of " << Lambda1.size()
-	     << " (wavelet index " << *it1 << ")" << endl;
-#endif
+
 // 	for (typename std::set<Index>::const_iterator it2(Lambda2.begin()), itend2(Lambda2.end());
 // 	     it2 != itend2; ++it2, ++column)
 	for (typename std::list<Index>::const_iterator it2(Nu.begin()), itend2(Nu.end());
@@ -253,6 +246,7 @@ namespace WaveletTL
 	  }
 	A_Lambda.set_row(row, indices, entries);
       }
+        cout << "done" << endl;
   }
 //   template <class PROBLEM>
 //   void setup_stiffness_matrix(PROBLEM& P,

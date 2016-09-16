@@ -311,7 +311,7 @@ namespace WaveletTL
      * the first generator on level j has the number 0 (= it is stored at position 0)
     */
     
-    //quark-setting has to be done. Main routine for drawing.
+    //attention: two scale generator relations are only true for p=0.
     void reconstruct_1(const Index& lambda, const int j,
 		       InfiniteVector<double, Index>& c) const;
     /*

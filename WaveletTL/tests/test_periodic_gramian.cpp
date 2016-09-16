@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
     const int jmax = 10;
     const bool normalization = 0;//choose 1 for Laplacian
     
-    const unsigned int testcase=5;
+    const unsigned int testcase=6;
     PeriodicTestProblem<testcase> tper;
     Function<1>* uexact = 0;
     switch(testcase) {
@@ -51,7 +51,9 @@ int main(int argc, char** argv) {
             uexact = new Function4();
             break;
         case 5:
-            uexact = new Hat();    
+            uexact = new Hat(); 
+        case 6:
+            uexact = new Hat(); 
         default:
             break;
     }
@@ -83,7 +85,7 @@ int main(int argc, char** argv) {
     set<Index> Lambda;
     Vector<double> x;
     
-  for (int j = j0; j <= jmax; j++) {
+  for (int j = j0; j <= 3; j++) {
         Lambda.clear();
         
     cout << "  j=" << j << ":" << endl;
@@ -94,15 +96,19 @@ int main(int argc, char** argv) {
         if (lambda == G.basis().last_wavelet(j)) break;    
     }
     SparseMatrix<double> A;
+    Matrix<double> evecs;
     cout << "- set up stiffness matrix..." << endl;
     setup_stiffness_matrix(G, Lambda, A);
-//    
+    cout << "A: " << endl << A << endl;
+    Vector<double> evals;
+    SymmEigenvalues(A,evals,evecs);
+    cout<< "Eigenwerte A: " << evals << endl;
     
     
     cout << "- set up right-hand side..." << endl;
     Vector<double> b;
     setup_righthand_side(G, Lambda, b);
-//    cout << "- right hand side: " << b << endl << endl;
+    cout << "- right hand side: " << b << endl << endl;
     
     
     x.resize(Lambda.size()); x = 0;

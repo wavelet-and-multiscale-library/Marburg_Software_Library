@@ -157,7 +157,7 @@ namespace WaveletTL
 		    const int j,
 		    const double factor,
 		    const int J,
-		    const CompressionStrategy strategy = DKOR,
+		    const CompressionStrategy strategy = DKR,
                     const int jmax = 99,
                     const int pmax = 0,
                     const double a = 0,

@@ -233,7 +233,7 @@ int main()
 #ifdef FRAME
   typedef PQFrame<d,dT> Frame;
   typedef Frame::Index Index;
-  Frame frame(true,true,false);
+  Frame frame(true,true,true);
   const int pmax = 1;
   frame.set_jpmax(jmax,pmax);
   SturmEquation<Frame> problem(testproblem, frame);
@@ -328,7 +328,7 @@ int main()
   //cproblem.norm_A();
   MonomeFunction newfunction(2);
   Index mu(0,4,0,-1, &frame);
-  Index phi(1,3,1,2,&frame);
+  Index phi(0,3,0,0,&frame);
   InfiniteVector<double, Index> c;
   InfiniteVector<double, int> c2;
   frame.reconstruct_1(phi, 4, c);
@@ -440,7 +440,7 @@ int main()
   //CDD2_SOLVE(cproblem, nu1, epsilon1, solution1_epsilon, jmax);
 #endif
 #ifdef FRAME  
-  CDD2_SOLVE(cproblem, nu1, epsilon1, solution1_epsilon, jmax, DKOR, pmax, 2, 2);
+  //CDD2_SOLVE(cproblem, nu1, epsilon1, solution1_epsilon, jmax, DKOR, pmax, 2, 2);
 #endif
 //  cout << solution1_epsilon << endl;
 //  cout << "exakte Lösung: " << endl;
@@ -450,12 +450,13 @@ int main()
 //    coeffs.scale(&cproblem, -1); /* scaling because ... */
 #if 1
   coeffs.clear();
-    coeffs[phi]=1;
+    Index chi(1,3,0,8,&frame);
+    coeffs[chi]=1;
    //coeffs.scale(&cproblem, -1);
-    //SampledMapping<1> sm3(evaluate(cproblem.basis(), coeffs, true, 2*jmax,1));
-    solution1_epsilon.scale(&cproblem, -1); /* scaling because ... */
-    SampledMapping<1> sm3(evaluate(cproblem.basis(), solution1_epsilon, true, 2*jmax)); //" Increase last parameter, if Assertion `resolution >= 0' failed."
-    std::ofstream u_stream3("../../Desktop/plots/plotthis3.m");
+    SampledMapping<1> sm3(evaluate(cproblem.basis(), coeffs, true, 2*jmax,0));
+    //solution1_epsilon.scale(&cproblem, -1); /* scaling because ... */
+    //SampledMapping<1> sm3(evaluate(cproblem.basis(), solution1_epsilon, true, 2*jmax)); //" Increase last parameter, if Assertion `resolution >= 0' failed."
+    std::ofstream u_stream3("plotthis3.m");
     sm3.matlab_output(u_stream3);
     u_stream3 << "figure;\nplot(x,y);"
               << "title('quarkgraph');" << endl;

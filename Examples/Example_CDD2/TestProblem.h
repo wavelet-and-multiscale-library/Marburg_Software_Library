@@ -29,6 +29,10 @@ class TestProblem : public SimpleSturmBVP
                     break;
                 case 4:
                     return 0;
+                    break;
+               case 5:
+                    return 1;
+                    break;
                 default:
                     return 0;
                     break;
@@ -50,6 +54,10 @@ class TestProblem : public SimpleSturmBVP
                     break;
                 case 4:
                     return 0;
+                    break;
+                case 5:
+                    return 0;
+                    break;
                 default:
                     return 0;
                     break;
@@ -71,6 +79,10 @@ class TestProblem : public SimpleSturmBVP
                     break;
                 case 4:
                     return 1;
+                    break;
+                case 5:
+                    return 0;
+                    break;
                 default:
                     return 0;
                     break;
@@ -93,8 +105,13 @@ class TestProblem : public SimpleSturmBVP
                              (exp(5.)-1)+200*exp(10*t)/((exp(5.)-1) *
                              (exp(5.)-1))+100*(exp(5*t)-1)*exp(5*t) /
                              ((exp(5.)-1)*(exp(5.)-1)) );
+                    break;
                 case 4:
                     return 4.1;
+                    break;
+                case 5:
+                    return -9*M_PI*M_PI*sin(3*M_PI*t);  
+                    break;
                 default:
                     return 0;
                     break;
@@ -116,6 +133,10 @@ class TestProblem : public SimpleSturmBVP
                     break;
                 case 4:
                     return "constant function";
+                    break;
+                case 5:
+                     return "y(t) = sin(3*M_PI*t), -y''(t) = 9*M_PI*M_PI*sin(3*M_PI*t), y(0) = y(1) = 0";  
+                     break;
                 default:
                     return "TestProblem: N not defined.";
                     break;

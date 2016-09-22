@@ -24,8 +24,8 @@ int main()
 {
   cout << "Testing LDomainHelmholtzEquation ..." << endl;
 
-  const int d  = 2;
-  const int dT = 2;
+//  const int d  = 2;
+//  const int dT = 2;
 
 //   typedef SplineBasis<d,dT,DS_construction> Basis1D;
 //   Basis1D basis1d("bio5-energy",0,0,0,0);

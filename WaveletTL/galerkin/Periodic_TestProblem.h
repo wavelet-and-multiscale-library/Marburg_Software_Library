@@ -29,10 +29,10 @@ public:
       return t*(1-t);
       break;
     case 3:
-      return 4*M_PI*M_PI*cos(2*M_PI*t);
+      return cos(2*M_PI*t);
       break;
     case 4:
-      return sin(3*M_PI*t);
+      return -sin(3*M_PI*t);
       break;
     case 5:
         if(t<0.5)

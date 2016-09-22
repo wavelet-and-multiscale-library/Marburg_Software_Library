@@ -7,10 +7,10 @@ namespace WaveletTL
 		    const InfiniteVector<double, typename CUBEBASIS::Index>& coeffs,
 		    const int jmax,
 		    std::ostream& os,
-		    const char* colormap = "cool",
-		    bool boxed = false,
-		    bool colorbar = true,
-		    const double aa = -6)
+		    const char* colormap,
+		    bool boxed,
+		    bool colorbar,
+		    const double aa)
   {
     typedef typename CUBEBASIS::Index Index;
     typedef typename CUBEBASIS::IntervalBasis Basis1D;
@@ -22,11 +22,12 @@ namespace WaveletTL
     const double maxnorm = linfty_norm(coeffs);
 
     // determine smallest coefficient
-    typename InfiniteVector<double, typename CUBEBASIS::Index>::const_iterator it = coeffs.begin();
+    
 
     double a = 0.;
 
 #if 0
+    typename InfiniteVector<double, typename CUBEBASIS::Index>::const_iterator it = coeffs.begin();
     a = log10(fabs(*it));
     for (; it != coeffs.end();++it) {
       if (*it < a )

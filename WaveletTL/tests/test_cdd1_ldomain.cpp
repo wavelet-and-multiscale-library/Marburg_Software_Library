@@ -77,8 +77,8 @@ int main()
 {
   cout << "Testing adaptive wavelet-Galerkin solution of a Poisson problem on the L-shaped domain with CDD1_SOLVE ..." << endl;
 
-  const int d  = 2;
-  const int dT = 2;
+//  const int d  = 2;
+//  const int dT = 2;
   
 //   typedef SplineBasis<d,dT,DS_construction> Basis1D;
 //   Basis1D basis1d("bio5-energy",0,0,0,0);

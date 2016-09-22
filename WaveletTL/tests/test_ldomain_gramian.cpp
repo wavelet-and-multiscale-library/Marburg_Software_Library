@@ -27,8 +27,8 @@ int main()
 {
   cout << "Testing LDomainGramian ..." << endl;
 
-  const int d  = 2;
-  const int dT = 2;
+//  const int d  = 2;
+//  const int dT = 2;
 
 // #if 0
 //   typedef DSBasis<d,dT,BernsteinSVD> Basis1D;

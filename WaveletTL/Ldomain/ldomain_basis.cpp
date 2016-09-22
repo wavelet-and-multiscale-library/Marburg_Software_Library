@@ -816,8 +816,6 @@ namespace WaveletTL
   LDomainBasis<IBASIS>::reconstruct_1(const Index& lambda,
 				      const int j,
 				      InfiniteVector<double, Index>& c) const {
-    typedef typename IBASIS::Index IIndex;
-
     const int lambdaj = lambda.j();
 
     if (lambdaj >= j) {

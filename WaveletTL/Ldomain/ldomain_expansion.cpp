@@ -12,8 +12,6 @@ namespace WaveletTL
 		   const LDomainBasis<IBASIS>& basis,
 		   const typename LDomainBasis<IBASIS>::Index& lambda)
   {
-    typedef typename LDomainBasis<IBASIS>::Index Index;
-
     double r = 0;
 
 #if 1

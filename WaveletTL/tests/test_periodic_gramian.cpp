@@ -21,20 +21,29 @@
 #include <galerkin/periodic_gramian.h>
 #include <galerkin/galerkin_utils.h>
 #include <galerkin/Periodic_TestProblem.h>
-#include "TestFunctions.h"
+#include <galerkin/TestFunctions.h>
 
 
 using namespace std;
 using namespace WaveletTL;
 
+/*
+  different test problems with periodic b.c.'s y(0)=y(1)
+  1: y(t)=1;
+  2: y(t) = t*(1-t)
+  3: y(t)= cos(2*M_PI*t);
+  4: y(t) = -sin(3*M_PI*t)
+  5: y(t) = "hat function"
+  6: y(t) = t; */
+
 int main(int argc, char** argv) {
     
-    const int d  = 3;
-    const int dT = 3;
+    const int d  = 2;
+    const int dT = 2;
     const int jmax = 10;
-    const bool normalization = 0;//choose 1 for Laplacian
+    const bool normalization = 0;
     
-    const unsigned int testcase=6;
+    const unsigned int testcase=5;
     PeriodicTestProblem<testcase> tper;
     Function<1>* uexact = 0;
     switch(testcase) {
@@ -52,8 +61,10 @@ int main(int argc, char** argv) {
             break;
         case 5:
             uexact = new Hat(); 
-        case 6:
-            uexact = new Hat(); 
+            break;
+        /*case 6:
+            uexact = new Hat();
+            break;*/
         default:
             break;
     }
@@ -85,7 +96,7 @@ int main(int argc, char** argv) {
     set<Index> Lambda;
     Vector<double> x;
     
-  for (int j = j0; j <= 3; j++) {
+  for (int j = j0; j <= jmax; j++) {
         Lambda.clear();
         
     cout << "  j=" << j << ":" << endl;
@@ -99,23 +110,23 @@ int main(int argc, char** argv) {
     Matrix<double> evecs;
     cout << "- set up stiffness matrix..." << endl;
     setup_stiffness_matrix(G, Lambda, A);
-    cout << "A: " << endl << A << endl;
+//    cout << "A: " << endl << A << endl;
     Vector<double> evals;
-    SymmEigenvalues(A,evals,evecs);
-    cout<< "Eigenwerte A: " << evals << endl;
+//    SymmEigenvalues(A,evals,evecs);
+//    cout<< "Eigenwerte A: " << evals << endl;
     
     
     cout << "- set up right-hand side..." << endl;
     Vector<double> b;
     setup_righthand_side(G, Lambda, b);
-    cout << "- right hand side: " << b << endl << endl;
+//    cout << "- right hand side: " << b << endl << endl;
     
     
     x.resize(Lambda.size()); x = 0;
     Vector<double> residual(Lambda.size()); 
     unsigned int iterations;
     
-    CG(A, b, x, 1e-15, 250, iterations);
+    CG(A, b, x, 1e-15, 5000, iterations);
     cout << "  Galerkin system solved with residual (infinity) norm ";
     A.apply(x, residual);
     residual -= b;

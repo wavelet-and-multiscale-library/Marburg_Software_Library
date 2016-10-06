@@ -19,11 +19,11 @@ int main()
 
 #if 1
   typedef SplineBasis<2,2,P_construction,0,0,0,0,SplineBasisData_j0<2,2,P_construction,0,0,0,0>::j0> Basis0;
-  typedef Basis0::Index Index0;
+//  typedef Basis0::Index Index0;
 
 //   typedef SplineBasis<2,2,P_construction,1,0,0,0,SplineBasisData_j0<2,2,P_construction,1,0,0,0>::j0> Basis1;
   typedef PeriodicBasis<CDFBasis<2,2> > Basis1;
-  typedef Basis1::Index Index1;
+//  typedef Basis1::Index Index1;
 
   typedef TensorProductBasis<Basis0,Basis1> Basis;
   typedef Basis::Index Index;

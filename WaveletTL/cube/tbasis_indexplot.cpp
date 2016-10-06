@@ -13,7 +13,7 @@ namespace WaveletTL
             const double aa)
     {
         typedef typename TENSORBASIS::Index Index;
-        typedef typename TENSORBASIS::IntervalBasis Basis1D;
+//        typedef typename TENSORBASIS::IntervalBasis Basis1D;
         typedef typename Index::level_type level_type;
         typedef typename Index::type_type type_type;
         typedef typename Index::translation_type translation_type;

@@ -24,11 +24,11 @@ int main()
 
   typedef PBasis<d,dT> Basis1D;
   typedef Basis1D::Index Index1D;
-  typedef Basis1D::Support Support;
+//  typedef Basis1D::Support Support;
   typedef CubeBasis<Basis1D,dim> CBasis;
   //typedef TensorBasis<Basis1D,dim> TBasis;
   //typedef TBasis::Index Index;
-  typedef CBasis::Index Index;
+//  typedef CBasis::Index Index;
 
   //! type index type
   typedef MultiIndex<int,dim> type_type;
@@ -36,7 +36,7 @@ int main()
   //! translation index type
   typedef MultiIndex<int,dim> translation_type;
 
-  typedef MultiIndex<int,dim> level_type;
+//  typedef MultiIndex<int,dim> level_type;
 
 //   Basis basis(0, 0); // no b.c.'s
 //   Basis basis(1, 0); // complementary b.c. at x=0
@@ -61,7 +61,7 @@ int main()
   //int e = 0;
   //int k = 0;
   //level_type j;
-  int j;
+//  int j;
   type_type e;
   translation_type k;
   e = type_type();
@@ -70,7 +70,7 @@ int main()
   //e[2]=1;
 
   clock_t tstart, tend;
-  double time;
+//  double time;
 
   bool richtig = true;
   tstart = clock();

@@ -20,7 +20,7 @@
 #define FRAME
 #undef DELTADIS
 
-#define ADAPTIVE
+#undef ADAPTIVE
 #define NONADAPTIVE
 
 #include <galerkin/sturm_equation.h>

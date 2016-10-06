@@ -20,14 +20,14 @@ int main()
 
     //typedef DSBasis<2,2> Basis1d;
     typedef PBasis<2,2> Basis1d;
-    typedef Basis1d::Index IIndex;
+//    typedef Basis1d::Index IIndex;
     const unsigned int DIM = 3;
     typedef TensorBasis<Basis1d,DIM> Basis;
-    typedef Basis::Support Support;
+//    typedef Basis::Support Support;
     typedef Basis::Index Index;
     typedef Index::level_type level_type;
-    typedef Index::type_type type_type;
-    typedef Index::translation_type translation_type;
+//    typedef Index::type_type type_type;
+//    typedef Index::translation_type translation_type;
 
 
     const unsigned int tempj(9);
@@ -47,7 +47,7 @@ int main()
     cout << "Initialize FixedArray<int,4> with b.c.'s" << endl;
 
     FixedArray1D<int,2*DIM> s; // ,st; // BC for the dual basis can only be specified for dsbasis, not for pbasis
-    for (int i=0; i<2*DIM; i++)
+    for (unsigned int i=0; i<2*DIM; i++)
     {
         s[i]=0;
         //st[i]=0;
@@ -98,7 +98,7 @@ int main()
     
 
     FixedArray1D<Basis1d*,DIM> basesArray;
-    for (int i=0; i<DIM; i++)
+    for (unsigned int i=0; i<DIM; i++)
     {
         basesArray[i] = &bas00;
     }

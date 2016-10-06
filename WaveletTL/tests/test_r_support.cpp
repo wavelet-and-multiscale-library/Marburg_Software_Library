@@ -15,7 +15,7 @@ int main()
 
   typedef CDFBasis<d,dt> Basis;
   typedef Basis::Index Index;
-  typedef Basis::Support Support;
+//  typedef Basis::Support Support;
   Basis basis;
 
 #if 1

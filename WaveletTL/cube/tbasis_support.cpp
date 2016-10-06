@@ -96,7 +96,7 @@ namespace WaveletTL
          */
 #if 1
         typedef typename TensorBasis<IBASIS,DIM>::Index Index;
-        typedef typename IBASIS::Index Index1D;
+//        typedef typename IBASIS::Index Index1D;
         typedef typename Index::type_type type_type;
         if (generators) assert (j==basis.j0());
         intersecting.clear();

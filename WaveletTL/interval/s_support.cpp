@@ -101,8 +101,8 @@ namespace WaveletTL
                              const int j, const bool generators,
                              std::list<SBasis::Index>& intersecting)
   {
-    typedef SBasis::Index Index;
-    typedef SBasis::Support Support;
+//    typedef SBasis::Index Index;
+//    typedef SBasis::Support Support;
 
     intersecting.clear();
 

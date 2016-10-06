@@ -32,8 +32,8 @@ int main()
     typedef TensorBasis<Basis1D,DIM> Basis;
     typedef Basis::Index Index;
     typedef TensorIndex<Basis1D,DIM>::level_type level_type;
-    typedef TensorIndex<Basis1D,DIM>::type_type type_type;
-    typedef TensorIndex<Basis1D,DIM>::translation_type translation_type;
+//    typedef TensorIndex<Basis1D,DIM>::type_type type_type;
+//    typedef TensorIndex<Basis1D,DIM>::translation_type translation_type;
     typedef Basis1D::Index Index1D;
     
     FixedArray1D<bool,2*DIM> bc;
@@ -51,7 +51,7 @@ int main()
     Basis1D bas00(false,false); Basis1D bas10(true,false); Basis1D bas01(false,true); Basis1D bas11(true,true);
     bas00.set_jmax(5); bas10.set_jmax(5); bas01.set_jmax(5); bas11.set_jmax(5);
     FixedArray1D<Basis1D*,DIM> basesArray;
-    for(int i=0;i<DIM;i++)
+    for(unsigned int i=0;i<DIM;i++)
     {
         basesArray[i] = &bas00;
     }
@@ -237,8 +237,8 @@ int main()
     cout << "" << endl;
 #endif
 
-    typedef TensorIndex<Basis1D,DIM,Basis>::level_type level_type;
-    typedef std::list<Index> SupportList;
+//    typedef TensorIndex<Basis1D,DIM,Basis>::level_type level_type;
+//    typedef std::list<Index> SupportList;
     
 #if 0
     for (unsigned int b = 0; b < TBasisArray.size(); b++)

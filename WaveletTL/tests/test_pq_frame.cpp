@@ -224,7 +224,7 @@ int main()
 //  cout<< (1<<2)-ell1<d>()-d << endl;
   
   
-  double epsilon1 = 1e-6;
+//  double epsilon1 = 1e-6;
   const int jmax = 6;
   
   TestProblem<2> testproblem;
@@ -354,7 +354,7 @@ int main()
 //  cout << A_Lambda << endl;
   //cout << A_Lambda.row_dimension() << endl;
   Vector<double> x(A_Lambda.column_dimension()), Ax(A_Lambda.row_dimension());
-  const double wert = 1;
+//  const double wert = 1;
   x = 1;
   A_Lambda.apply(x, Ax);
   //for(int k=0; k<=x.size();k++){
@@ -432,7 +432,7 @@ int main()
 //  cout << Av << endl;
   cproblem.RHS(1e-6, F1_eta);
 //  cout << F1_eta;
-  const double nu1 = cproblem.norm_Ainv() * l2_norm(F1_eta);
+//  const double nu1 = cproblem.norm_Ainv() * l2_norm(F1_eta);
 //  cout << "nu = " << nu1 << endl;
   InfiniteVector<double, Index> solution1_epsilon;
 #endif

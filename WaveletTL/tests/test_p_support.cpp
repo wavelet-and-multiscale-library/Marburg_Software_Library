@@ -92,8 +92,8 @@ int main()
     //const int dT = 3;
 
     typedef PBasis<d,dT> Basis;
-    typedef Basis::Index Index;
-    typedef Basis::Support Support;
+//    typedef Basis::Index Index;
+//    typedef Basis::Support Support;
 
 //   Basis basis(0, 0); // no b.c.'s
 //   Basis basis(1, 0); // complementary b.c. at x=0

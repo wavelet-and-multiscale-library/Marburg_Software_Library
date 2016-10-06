@@ -18,7 +18,7 @@
 #include <numerics/periodicgr.h>
 #define PERIODIC_CDFBASIS
 
-#define ADAPTIVE
+#undef ADAPTIVE
 #define NONADAPTIVE
 
 #include <galerkin/periodic_laplacian.h>

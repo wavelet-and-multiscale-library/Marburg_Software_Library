@@ -45,21 +45,21 @@ int main()
     typedef PBasis<d,dT> Basis1d;
     //typedef DSBasis<d,dT> Basis1d;
     typedef TensorBasis<Basis1d,dim> Basis;
-    typedef Basis::Index Index;
-    typedef TensorIndex<Basis1d,dim>::level_type level_type;
-    typedef TensorIndex<Basis1d,dim>::type_type type_type;
-    typedef TensorIndex<Basis1d,dim>::translation_type translation_type;
+//    typedef Basis::Index Index;
+//    typedef TensorIndex<Basis1d,dim>::level_type level_type;
+//    typedef TensorIndex<Basis1d,dim>::type_type type_type;
+//    typedef TensorIndex<Basis1d,dim>::translation_type translation_type;
     
     Basis basisH;
     FixedArray1D<int,2*dim> s; //,st;
-    for (int i(0);i<(2*dim);i++) //s[0]=s[1]=s[2]=s[3]=s[4]=s[5]=0;
+    for (unsigned int i(0);i<(2*dim);i++) //s[0]=s[1]=s[2]=s[3]=s[4]=s[5]=0;
     {
         s[i]=0;
     }
     // st[0]=st[1]=st[2]=st[3]=0;
     Basis basisS(s);
     FixedArray1D<bool,2*dim> bc;
-    for (int i=0;i<2*dim;i++)
+    for (unsigned int i=0;i<2*dim;i++)
     {
         bc[i]=false;
     }
@@ -68,7 +68,7 @@ int main()
     Basis1d bas00(false,false); Basis1d bas10(true,false); Basis1d bas01(false,true); Basis1d bas11(true,true);
     bas00.set_jmax(5); bas10.set_jmax(5); bas01.set_jmax(5); bas11.set_jmax(5);
     FixedArray1D<Basis1d*,dim> basesArray;
-    for(int i=0;i<dim;i++)
+    for(unsigned int i=0;i<dim;i++)
     {
         basesArray[i] = &bas00;
     }

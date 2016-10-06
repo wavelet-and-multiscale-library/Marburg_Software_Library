@@ -16,8 +16,8 @@
 #include <interval/ds_basis.h>
 #include <interval/p_basis.h>
 #include <interval/pq_frame.h>
-#define BASIS
-#undef FRAME
+#undef BASIS
+#define FRAME
 #undef DELTADIS
 
 #define ADAPTIVE

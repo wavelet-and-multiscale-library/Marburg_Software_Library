@@ -22,8 +22,16 @@
 #include <Rd/cdf_basis.h>
 #include <Rd/quarklet_frame.h>
 #include <galerkin/sturm_equation.h>
+#undef DSBASIS
+#define PERIODIC_CDFBASIS
+#undef PERIODIC_QUARKLETFRAME
+
+#ifdef PERIODIC_CDFBASIS
 #include <galerkin/cached_problem.h>
+#endif
+#ifdef PERIODIC_QUARKLETFRAME
 #include <galerkin/cached_quarklet_problem.h>
+#endif
 #include <galerkin/periodic_gramian.h>
 #include <galerkin/periodic_laplacian.h>
 #include <galerkin/periodic_frame_laplacian.h>
@@ -32,9 +40,7 @@
 #include <adaptive/cdd2.h>
 
 
-#undef DSBASIS
-#undef PERIODIC_CDFBASIS
-#define PERIODIC_QUARKLETFRAME
+
 
 
 
@@ -314,8 +320,12 @@ int main()
   InfiniteVector<double, Index> solution1_epsilon;
   
   double epsilon1 = 1e-6;
-  CDD2_SOLVE(cproblem, nu1, epsilon1, solution1_epsilon, jmax, DKOR, pmax, a, b);
+#ifdef PERIODIC_QUARKLETFRAME
+  CDD2_SOLVE(cproblem, nu1, epsilon1, solution1_epsilon, jmax, DKR, pmax, a, b);
+#endif
+#ifdef PERIODIC_CDFBASIS
   //CDD2_SOLVE(cproblem, nu1, epsilon1, solution1_epsilon, jmax, CDD1);
+#endif
   cout << solution1_epsilon << endl;
   //cout << solution1_epsilon.size() << endl;
   cout << "Fertig" << endl;

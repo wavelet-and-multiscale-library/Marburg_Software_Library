@@ -359,9 +359,9 @@ namespace WaveletTL
   IntervalQIndex2<IFRAME>::operator < (const IntervalQIndex2<IFRAME>& lambda) const
   {
     return (p_ < lambda.p() ||
-	    p_ == lambda.p() && j_ < lambda.j() ||
-	    p_ == lambda.p() && j_ == lambda.j() && e_ < lambda.e() ||
-	    p_ == lambda.p() && j_ == lambda.j() && e_ == lambda.e() && k_ < lambda.k());
+	    (p_ == lambda.p() && j_ < lambda.j()) ||
+	    (p_ == lambda.p() && j_ == lambda.j() && e_ < lambda.e()) ||
+	    (p_ == lambda.p() && j_ == lambda.j() && e_ == lambda.e() && k_ < lambda.k()));
   }
   
   template <class IFRAME>

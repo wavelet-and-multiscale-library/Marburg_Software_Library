@@ -18,6 +18,9 @@
 #include <numerics/periodicgr.h>
 #define PERIODIC_CDFBASIS
 
+#define ADAPTIVE
+#define NONADAPTIVE
+
 #include <galerkin/periodic_laplacian.h>
 #include <galerkin/galerkin_utils.h>
 #include <galerkin/Periodic_TestProblem.h>
@@ -30,21 +33,24 @@
 using namespace std;
 using namespace WaveletTL;
 
+/*testcase -u''=f, u(0)=u(1), \int_0^1 u=0
+    different laplacian test problems with periodic b.c.'s -u''=f, u(0)=u(1), \int_0^1 u=0
+    1: u(t)=sin(2*M_PI*t)
+    2: u(t)=cos(2*M_PI*t)
+    3: u(t)= f(t)=9*M_PI*M_PI*sin(3*M_PI*t)-6*M_PI 
+    4: u(t)= f(t)=t-0.5 */
+
 int main(int argc, char** argv) {
     
-    const int d  = 3;
-    const int dT = 3;
-    const int jmax = 8;
+    const int d  = 2;
+    const int dT = 2;
+    const int jmax = 10;
     const bool normalization = 1;
     
     
-    /*testcase -u''=f, u(0)=u(1), \int_0^1 u=0
-    1: 4*M_PI*M_PI*sin(2*M_PI*t)
-    2: 4*M_PI*M_PI*cos(2*M_PI*t)
-    3: 9*M_PI*M_PI*sin(3*M_PI*t)-6*M_PI 
-    4: t-0.5 */
+    
      
-    const unsigned int testcase=2;
+    const unsigned int testcase=4;
     PeriodicTestProblem2<testcase> tper;
     Function<1>* uexact = 0;
     switch(testcase) {
@@ -79,7 +85,7 @@ int main(int argc, char** argv) {
     CPROBLEM cachedL(&L);
     const int j0= L.basis().j0();
     
-#if 1
+#if 0
     //Plot of wavelet with coefficient mu
     Index mu(3,0,7);
     SampledMapping<1> sm1(basis.evaluate(mu, 8, normalization));
@@ -91,12 +97,14 @@ int main(int argc, char** argv) {
     cout << "Integralwert: " << 1-basis.rintegrate(mu)*basis.rintegrate(mu) << endl;
     
 #endif
+#ifdef NONADAPTIVE
    //nonadaptive setting
+
     
     set<Index> Lambda;
     Vector<double> x;
     
-  for (int j = j0; j <= 3; j++) {
+  for (int j = j0; j <= jmax; j++) {
         Lambda.clear();
         
     cout << "  j=" << j << ":" << endl;
@@ -112,8 +120,8 @@ int main(int argc, char** argv) {
     setup_stiffness_matrix(L, Lambda, A);
  //   cout << "A: " << endl << A << endl;
     Vector<double> evals;
-    SymmEigenvalues(A,evals,evecs);
-    cout<< "Eigenwerte A: " << evals << endl;
+//    SymmEigenvalues(A,evals,evecs);
+//    cout<< "Eigenwerte A: " << evals << endl;
     
     
     cout << "- set up right-hand side..." << endl;
@@ -126,7 +134,7 @@ int main(int argc, char** argv) {
     Vector<double> residual(Lambda.size()); 
     unsigned int iterations;
     
-    CG(A, b, x, 1e-15, 250, iterations);
+    CG(A, b, x, 1e-8, 5000, iterations);
     cout << "  Galerkin system solved with residual (infinity) norm ";
     A.apply(x, residual);
     residual -= b;
@@ -178,6 +186,9 @@ int main(int argc, char** argv) {
     u_stream2 << "figure;\nplot(x,y);"
             << "title('solution of the laaaplacian')" << endl;
     u_stream2.close();
+#endif
+    
+#ifdef ADAPTIVE
     
     //adaptive setting
     
@@ -185,10 +196,10 @@ int main(int argc, char** argv) {
     cachedL.RHS(1e-6, F_eta);
     const double nu = cachedL.norm_Ainv() * l2_norm(F_eta);
     InfiniteVector<double, Index> u_epsilon;
-    const double epsilon= 1e-3;
+    const double epsilon= 1e-5;
     CDD2_SOLVE(cachedL, nu,  epsilon,  u_epsilon, jmax);
-     cout << "Adaptive Solution: " << endl << u_epsilon << endl; 
-     cout << "Nonadaptive Solution: " << endl << u << endl; 
+//     cout << "Adaptive Solution: " << endl << u_epsilon << endl; 
+//     cout << "Nonadaptive Solution: " << endl << u << endl; 
     
      u_epsilon.scale(&cachedL,-1);
     SampledMapping<1> sm3(basis.evaluate(u_epsilon, 8, normalization));
@@ -197,6 +208,7 @@ int main(int argc, char** argv) {
     u_stream3 << "figure;\nplot(x,y);"
             << "title('adaptive solution of the laplacian')" << endl;
     u_stream3.close();
+#endif
     
  #endif
     

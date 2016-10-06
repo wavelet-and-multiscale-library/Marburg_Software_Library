@@ -36,7 +36,8 @@ namespace WaveletTL
   template <int d, int dT>
   double integrate(const PQFrame<d,dT>& basis,
 		   const typename PQFrame<d,dT>::Index& lambda,
-		   const typename PQFrame<d,dT>::Index& mu);
+		   const typename PQFrame<d,dT>::Index& mu,
+                   const unsigned int& derivative = 0);
   
   /*!
     For a given function, compute all integrals w.r.t. the primal

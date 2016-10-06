@@ -19,11 +19,12 @@ namespace WaveletTL
   template <class RFRAME>
   PeriodicFrame<RFRAME>::PeriodicFrame()
     : r_frame(),
+      j0_(j0()),
       Mj0_(j0(), r_frame.offset_a, r_frame.band_a, M_SQRT1_2),
       Mj1_(j0(), r_frame.offset_b, r_frame.band_b, M_SQRT1_2),
       Mj0T_(j0(), r_frame.offset_aT, r_frame.band_aT, M_SQRT1_2),
-      Mj1T_(j0(), r_frame.offset_bT, r_frame.band_bT, M_SQRT1_2),
-      j0_(j0())
+      Mj1T_(j0(), r_frame.offset_bT, r_frame.band_bT, M_SQRT1_2)
+      
   {
 //     cout << "Mj0=" << endl << Mj0_ << endl;
 //     cout << "Mj0T=" << endl << Mj0T_ << endl;

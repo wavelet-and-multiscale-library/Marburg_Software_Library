@@ -31,11 +31,11 @@ namespace WaveletTL
       {
 	// differential operators
 	
-	if (strategy == DKOR) {//W.i.p. @PHK
+	if (strategy == DKR) {
 	  // Quarklet strategy:
 	  // active row indices nu have to fulfill ||nu|-|lambda|| <= J/(d*b) and
 	  // the supports of psi_lambda and psi_nu have to intersect
-	      //HIER WEITERMACHEN; KORREKTUR AUF COMPRESSION STRATEGY @PHK  
+	       
             
             //cout << "bin in DKOR drin" << endl;
             const int maxlevel = std::min(lambda.j()+ (int) (J/(P.space_dimension * b)), jmax);

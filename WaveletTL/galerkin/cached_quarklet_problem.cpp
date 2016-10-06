@@ -206,7 +206,7 @@ namespace WaveletTL
           IntersectingList nus;
           
           
-          //DKOR strategy
+          //DKR strategy
           
 //          cout << lambda << endl;
 //          cout << j << endl;
@@ -271,20 +271,7 @@ namespace WaveletTL
 // 			      (it2->second / (d1 * problem->D( *(problem->basis().get_wavelet(it2->first)) )))  * factor);
                     //cout << it2->second << endl;
                     //cout << it2->first << endl;
-              if(it2->first >= w.size()){
-//                  cout << "Feeehler" << endl;
-//                  cout << "level: " << j << endl;
-//                  cout << it->first << endl;
-//                  cout << col_it->first << endl;
-                  //cout << *col_it << endl;
-                  for (typename Block::const_iterator it3(block.begin()), itend2(block.end());
-	       it3 != itend2; ++it3) {
-                      
-//                  cout << it3->first << endl;
-                  
-                  }
-              }
-              assert(it2->first<w.size());
+              
                     w[it2->first] += (it2->second / (d1*problem->D(*(problem->basis().get_wavelet(it2->first))))) * factor;
                 }
 	

@@ -103,6 +103,7 @@ WaveletTL/tests/test_tbasis
 WaveletTL/tests/test_tbasis_index
 WaveletTL/tests/test_tbasis_indexplot
 WaveletTL/tests/test_tbasis_support
+WaveletTL/tests/test_quark_compression
 FrameTL/tests/test_aggregated_frame
 FrameTL/tests/test_apply
 FrameTL/tests/test_apply_1D

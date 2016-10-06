@@ -343,7 +343,7 @@ namespace WaveletTL
     }
 
     // now setting up MLTp
-    Matrix<double> MLTp(num_rows_boundref_L, num_dual_bound_gen_L);//Fehler, wenn p zu groß und dT>d
+    Matrix<double> MLTp(num_rows_boundref_L, num_dual_bound_gen_L);
     if (s0 >= d-2) {
       // setup the expansion coefficients of the unbiorthogonalized dual generators
       // w.r.t. the truncated CDF generators, see [DKU, Lemma 3.1]
@@ -1542,7 +1542,7 @@ namespace WaveletTL
                                                                        " 31 32 33 34 35 36 7 8 9 10 11 12"
                                                                        " 41 42 43 44 45 46 7 8 9 10 11 12"
                                                                        " 51 52 53 54 55 56 7 8 9 10 11 12");
-                          //cout << "setup: " << endl << tempmat << endl;
+                          cout << "setup: " << endl << tempmat << endl;
                           CVM = tempmat;
                       }
                       }
@@ -2508,6 +2508,7 @@ namespace WaveletTL
 			      InfiniteVector<double, Index>& c) const {
     assert(jmin >= j0());
     assert(lambda.j() >= jmin);
+    assert(lambda.p() == 0);
     
     c.clear();
 
@@ -2515,7 +2516,7 @@ namespace WaveletTL
       c.set_coefficient(lambda, 1.0); // true wavelet coefficients don't have to be modified
     else // generator
       {
-	if (lambda.j() == jmin) // generators on the coarsest level don't have to be modified
+	if (lambda.j() == jmin || lambda.p() > 0) // generators on the coarsest level don't have to be modified
 	  c.set_coefficient(lambda, 1.0);
 	else // j > jmin
 	  {
@@ -2533,7 +2534,7 @@ namespace WaveletTL
 
 	    if (lambda.j()-1 == j0()) {		
 	      for (size_type k(0); k < Mj1T.entries_in_row(row_j0); k++)
-		c.set_coefficient(Index(j0(), 1, Mj1T.get_nth_index(row_j0,k), this),
+		c.set_coefficient(Index(0, j0(), 1, Mj1T.get_nth_index(row_j0,k), this),
 				  Mj1T.get_nth_entry(row_j0,k));
 	    } else {
 	      // Due to the [DS] symmetrization, we have to be a bit careful here.
@@ -2542,7 +2543,7 @@ namespace WaveletTL
 	      if (row < upper_half) {
 		// read the first half of the corresponding row in Mj1T
 		for (size_type k(0); k < Mj1T.entries_in_row(row_j0) && (int)Mj1T.get_nth_index(row_j0,k) < 1<<(j0()-1); k++)
-		  c.set_coefficient(Index(lambda.j()-1, 1, Mj1T.get_nth_index(row_j0,k), this),
+		  c.set_coefficient(Index(0, lambda.j()-1, 1, Mj1T.get_nth_index(row_j0,k), this),
 				    Mj1T.get_nth_entry(row_j0,k));
 		fill_start = 1<<(j0()-1);
 		fill_end   = (1<<(lambda.j()-1))-1;
@@ -2555,7 +2556,7 @@ namespace WaveletTL
 		  offset = (1<<(lambda.j()-1))-(1<<j0());
 		  for (size_type k(0); k < Mj1T.entries_in_row(row_j0); k++)
 		    if ((int)Mj1T.get_nth_index(row_j0,k) >= 1<<(j0()-1))
-		      c.set_coefficient(Index(lambda.j()-1, 1, Mj1T.get_nth_index(row_j0,k)+offset, this),
+		      c.set_coefficient(Index(0, lambda.j()-1, 1, Mj1T.get_nth_index(row_j0,k)+offset, this),
 					Mj1T.get_nth_entry(row_j0,k));
 		  fill_start = 0;
 		  fill_end   = (1<<(lambda.j()-1))-(1<<(j0()-1))-1;
@@ -2578,7 +2579,7 @@ namespace WaveletTL
 	      for (int col = first_column_left, filter_row = last_row_left-abs(row-last_row_left)%2;
 		   col < (1<<(lambda.j()-2)) && col <= fill_end && filter_row >= first_row_left; col++, filter_row -= 2)
 		if (col >= fill_start)
-		  c.set_coefficient(Index(lambda.j()-1, 1, col, this),
+		  c.set_coefficient(Index(0, lambda.j()-1, 1, col, this),
 				    Mj1T_t.get_nth_entry(col_left, filter_row-first_row_left));
 	      
 	      // Analogous strategy for the right half:
@@ -2596,7 +2597,7 @@ namespace WaveletTL
 	      for (int col = last_column_right, filter_row = first_row_right-offset_right+abs(row-first_row_right)%2;
 		   col >= 1<<(lambda.j()-2) && col >= fill_start && filter_row <= last_row_right-offset_right; col--, filter_row += 2)
 		if (col <= fill_end)
-		  c.set_coefficient(Index(lambda.j()-1, 1, col, this),
+		  c.set_coefficient(Index(0, lambda.j()-1, 1, col, this),
 				    Mj1T_t.get_nth_entry(col_right, filter_row+offset_right-first_row_right));
 	    }
 	    
@@ -2755,6 +2756,7 @@ namespace WaveletTL
   PQFrame<d, dT>::reconstruct_1(const Index& lambda,
 			       const int j,
 			       InfiniteVector<double, Index>& c) const {
+      assert(lambda.p()==0 || lambda.e()==1);
     c.clear();
 //    int temp_int1 (DeltaLmin()), temp_int2(Deltasize(lambda.j())), temp_int3(Nablamin());
 //    int tempint4(get_s0()), temp_int5(get_s1());
@@ -3022,7 +3024,8 @@ namespace WaveletTL
   PQFrame<d, dT>::reconstruct_t_1(const Index& lambda,
 				  const int j,
 				  InfiniteVector<double, Index>& c) const {
-    c.clear();
+      assert(lambda.p()== 0 || lambda.e() == 1);
+      c.clear();
     
     if (lambda.j() >= j)
       c.set_coefficient(lambda, 1.0);

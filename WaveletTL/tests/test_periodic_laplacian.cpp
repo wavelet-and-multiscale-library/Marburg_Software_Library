@@ -18,41 +18,54 @@
 #include <numerics/periodicgr.h>
 #define PERIODIC_CDFBASIS
 
+#undef ADAPTIVE
+#define NONADAPTIVE
+
 #include <galerkin/periodic_laplacian.h>
 #include <galerkin/galerkin_utils.h>
 #include <galerkin/Periodic_TestProblem.h>
 #include <galerkin/cached_problem.h>
-#include "TestFunctions.h"
+#include <numerics/eigenvalues.h>
+#include <adaptive/cdd2.h>
+#include <galerkin/TestFunctions.h>
 
 
 using namespace std;
 using namespace WaveletTL;
 
+/*testcase -u''=f, u(0)=u(1), \int_0^1 u=0
+    different laplacian test problems with periodic b.c.'s -u''=f, u(0)=u(1), \int_0^1 u=0
+    1: u(t)=sin(2*M_PI*t)
+    2: u(t)=cos(2*M_PI*t)
+    3: u(t)= f(t)=9*M_PI*M_PI*sin(3*M_PI*t)-6*M_PI 
+    4: u(t)= f(t)=t-0.5 */
+
 int main(int argc, char** argv) {
     
-    const int d  = 3;
-    const int dT = 3;
+    const int d  = 2;
+    const int dT = 2;
     const int jmax = 10;
-    const bool normalization = 1;//choose 1 for Laplacian
+    const bool normalization = 1;
     
-    const unsigned int testcase=3;
+    
+    
+     
+    const unsigned int testcase=4;
     PeriodicTestProblem2<testcase> tper;
     Function<1>* uexact = 0;
     switch(testcase) {
         case 1:
-            uexact = new Function2();
+            uexact = new Function8();
             break;
         case 2:
             uexact = new Function3();
-//            break;
+            break;
         case 3:
-            uexact = new Function4();
-//            break;
-//        case 4:
-//            uexact = new Function4();
-//            break;
-//        case 5:
-//            uexact = new Hat();    
+            uexact = new Function7();
+            break;
+        case 4:
+            uexact = new Function6();
+            break;
         default:
             break;
     }
@@ -72,16 +85,21 @@ int main(int argc, char** argv) {
     CPROBLEM cachedL(&L);
     const int j0= L.basis().j0();
     
-#if 1
+#if 0
     //Plot of wavelet with coefficient mu
-    Index mu(3,0,1);
+    Index mu(3,0,7);
     SampledMapping<1> sm1(basis.evaluate(mu, 8, normalization));
     std::ofstream u_stream1("plot_periodicwavelet.m");
     sm1.matlab_output(u_stream1);
     u_stream1 << "figure;\nplot(x,y);"
             << "title('periodic wavelet/generator with index: " << mu << "');" << endl;
     u_stream1.close();
+    cout << "Integralwert: " << 1-basis.rintegrate(mu)*basis.rintegrate(mu) << endl;
+    
 #endif
+#ifdef NONADAPTIVE
+   //nonadaptive setting
+
     
     set<Index> Lambda;
     Vector<double> x;
@@ -97,9 +115,13 @@ int main(int argc, char** argv) {
         if (lambda == L.basis().last_wavelet(j)) break;    
     }
     SparseMatrix<double> A;
+    Matrix<double> evecs;
     cout << "- set up stiffness matrix..." << endl;
     setup_stiffness_matrix(L, Lambda, A);
-//    cout << "A: " << endl << A << endl;
+ //   cout << "A: " << endl << A << endl;
+    Vector<double> evals;
+//    SymmEigenvalues(A,evals,evecs);
+//    cout<< "Eigenwerte A: " << evals << endl;
     
     
     cout << "- set up right-hand side..." << endl;
@@ -112,7 +134,7 @@ int main(int argc, char** argv) {
     Vector<double> residual(Lambda.size()); 
     unsigned int iterations;
     
-    CG(A, b, x, 1e-15, 250, iterations);
+    CG(A, b, x, 1e-8, 5000, iterations);
     cout << "  Galerkin system solved with residual (infinity) norm ";
     A.apply(x, residual);
     residual -= b;
@@ -136,6 +158,7 @@ int main(int argc, char** argv) {
     for (unsigned int i = 0; i <= N; i++) {
       const double point = i*h;
       uexact_values[i] = uexact->value(Point<1>(point));
+      
     }
 //     cout << "  point values of exact solution: " << uexact_values << endl;
 
@@ -153,7 +176,7 @@ int main(int argc, char** argv) {
         unsigned int i = 0;
     for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
         u.set_coefficient(*it, x[i]);
-//    cout << "Solution: " << endl << u << endl;    
+//   cout << "Solution: " << endl << u << endl;    
         
     
     u.scale(&cachedL,-1);
@@ -161,15 +184,33 @@ int main(int argc, char** argv) {
     std::ofstream u_stream2("plot_periodicsolution.m");
     sm2.matlab_output(u_stream2);
     u_stream2 << "figure;\nplot(x,y);"
-            << "title('solution of the laplacian')" << endl;
+            << "title('solution of the laaaplacian')" << endl;
     u_stream2.close();
-    
-    
-    
-    
-  
-    
 #endif
+    
+#ifdef ADAPTIVE
+    
+    //adaptive setting
+    
+    InfiniteVector<double, Index> F_eta;
+    cachedL.RHS(1e-6, F_eta);
+    const double nu = cachedL.norm_Ainv() * l2_norm(F_eta);
+    InfiniteVector<double, Index> u_epsilon;
+    const double epsilon= 1e-5;
+    CDD2_SOLVE(cachedL, nu,  epsilon,  u_epsilon, jmax);
+//     cout << "Adaptive Solution: " << endl << u_epsilon << endl; 
+//     cout << "Nonadaptive Solution: " << endl << u << endl; 
+    
+     u_epsilon.scale(&cachedL,-1);
+    SampledMapping<1> sm3(basis.evaluate(u_epsilon, 8, normalization));
+    std::ofstream u_stream3("plot_adaptiveperiodicsolution.m");
+    sm3.matlab_output(u_stream3);
+    u_stream3 << "figure;\nplot(x,y);"
+            << "title('adaptive solution of the laplacian')" << endl;
+    u_stream3.close();
+#endif
+    
+ #endif
     
 
     

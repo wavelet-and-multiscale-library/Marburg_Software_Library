@@ -25,7 +25,7 @@ namespace WaveletTL
   //! enum for the different compression strategies, see below
   enum CompressionStrategy {
     CDD1,
-    DKOR,
+    DKR,
     St04a,
     tensor_simple
   };
@@ -33,7 +33,7 @@ namespace WaveletTL
   /*!
     For a given compressible matrix A stemming from the discretization of
     a differential or integral operator in wavelet coordinates, realize the column
-    compression strategies from [CDD1], [St04a] or [DSS09].@PHK added [DKOR] compression srategy.
+    compression strategies from [CDD1], [St04a] or [DSS09].@PHK added [DKR] compression srategy.
 
     Isotropic wavelets: (eg. cubeequation)
     The lambda-th column of A will be compressed by the J-th truncation rule

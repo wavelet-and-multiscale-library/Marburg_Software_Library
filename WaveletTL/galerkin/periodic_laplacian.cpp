@@ -15,7 +15,7 @@ namespace WaveletTL
   template <class RBASIS>
   PeriodicIntervalLaplacian<RBASIS>::PeriodicIntervalLaplacian
   (const PeriodicLaplacianProblem& plp, const PeriodicBasis<RBASIS>& basis)
-    : basis_(basis), plp_(plp),
+    : plp_(plp), basis_(basis), 
       normA(1.0),
       normAinv(ldexp(1.0, 2*(RBASIS::primal_polynomial_degree()-1))) // lower bound from [Bittner]
   {

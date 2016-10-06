@@ -192,7 +192,7 @@ namespace WaveletTL
             // the rightmost inner wavelet on the level j, s.th. its support intersects [2^{-j_lambda}k1; 2^{-j_lambda}k2], fulfills
             //        2^{-j}(k-(d+dt)/2+1) < 2^{-j_lambda}k2 <= 2^{-j}(k-(d+dt)/2+2)
             // biggest n such that 2^{-j}n < 2^{-j_lambda}k2_lambda <= 2^{-j}(n+1)
-            n = (j < j_lambda) ? (k2_lambda / (1<<(j_lambda-j)) + (((k2_lambda % (1<<j_lambda-j)) == 0)?0:1) ) -1 
+            n = (j < j_lambda) ? (k2_lambda / (1<<(j_lambda-j)) + (((k2_lambda % (1<<(j_lambda-j))) == 0)?0:1) ) -1 
                                : (k2_lambda << (j-j_lambda)) -1;
             int maxk = (1<<j) -(d+dT)+1; // used as temporary value;
             if (n < maxk)

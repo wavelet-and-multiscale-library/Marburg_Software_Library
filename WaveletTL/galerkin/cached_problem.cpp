@@ -271,7 +271,7 @@ namespace WaveletTL
 	      }
 	    }
 	  }
-	  else if (strategy == CDD1 || strategy == DKOR) {
+	  else if (strategy == CDD1 || strategy == DKR) {
 	    for (typename IntersectingList::const_iterator it2(nus.begin()), itend2(nus.end());
 		 it2 != itend2; ++it2) {
 	      const double entry = problem->a(*it2, lambda);
@@ -306,7 +306,7 @@ namespace WaveletTL
 	    }
 	  }
 	}
-	else if (strategy == CDD1 || strategy == DKOR) {
+	else if (strategy == CDD1 || strategy == DKR) {
 	  for (typename Block::const_iterator it2(block.begin()), itend2(block.end());
 	       it2 != itend2; ++it2) {
 // 	    w.add_coefficient(*(problem->basis().get_wavelet(it2->first)),

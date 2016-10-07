@@ -27,15 +27,23 @@ public:
       break;
     case 2:
       return t*(1-t);
+      break;
     case 3:
-      return cos(2*M_PI*t);      
+      return cos(2*M_PI*t);
+      break;
     case 4:
-      return sin(3*M_PI*t);
+      return -sin(3*M_PI*t);
+      break;
     case 5:
         if(t<0.5)
            return t;
+           
         else
            return 1-t;
+        break;
+    case 6:
+       return t;
+       break;            
     default:
       return 0;
       break;
@@ -51,15 +59,14 @@ public:
   double g(const double t) const {
     switch(N) {
     case 1:
-      //u(t) = 100*(t*t*t-1.5*t*t+0.5*t)
-        //return 100*(t*t*t-1.5*t*t+0.5*t);
-        return 2;
-      //return 100*(-6*t+3);
+      return 4*M_PI*M_PI*sin(2*M_PI*t);
       break;
     case 2:
       return 4*M_PI*M_PI*cos(2*M_PI*t);      
     case 3:
-      return 16*M_PI*M_PI*sin(4*M_PI*t);
+      return 9*M_PI*M_PI*sin(3*M_PI*t)-6*M_PI;
+    case 4:
+      return t-0.5;
     default:
       return 0;
       break;

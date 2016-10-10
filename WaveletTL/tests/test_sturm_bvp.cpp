@@ -104,8 +104,8 @@ int main()
   const int d  = 2;
   const int dT = 2; // be sure to use a continuous dual here, otherwise the RHS test will fail
   
-  const int jmax = 8;
-  const int pmax = 0;
+  const int jmax = 6;
+  const int pmax = 2;
   
   
 #ifdef BASIS

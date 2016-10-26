@@ -104,20 +104,33 @@ namespace WaveletTL
   {
     SampledMapping<1> result(Grid<1>(0, 1, 1<<resolution)); // zero
     if (coeffs.size() > 0) {
-      // determine maximal level
+      // determine maximal level and maximal polynomial degree
       int jmax(0);
+      int pmax(0);
+      
       typedef typename PQFrame<d,dT>::Index Index;
       for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
-	     itend(coeffs.end()); it != itend; ++it)
+	     itend(coeffs.end()); it != itend; ++it){
 	jmax = std::max(it.index().j()+it.index().e(), jmax);
-
-      // switch to generator representation
-      InfiniteVector<double,Index> gcoeffs;
-      if (primal)
-	basis.reconstruct(coeffs,jmax,gcoeffs);
-      else
-	basis.reconstruct_t(coeffs,jmax,gcoeffs);
+        pmax = std::max(it.index().p(), pmax);
+      }
+//      cout << "jmax: " << jmax << endl;
+//      cout << "pmax: " << pmax << endl;
       
+      InfiniteVector<double,Index> gcoeffs;
+      if(pmax==0){
+        // switch to generator representation
+        if (primal)
+            basis.reconstruct(coeffs,jmax,gcoeffs);
+        else
+            basis.reconstruct_t(coeffs,jmax,gcoeffs);
+      }
+      else
+          gcoeffs=coeffs;
+          
+          
+          
+//      cout << "Generator coeffs: " << endl << gcoeffs << endl;
 
       for (typename InfiniteVector<double,Index>::const_iterator it(gcoeffs.begin()),
 	     itend(gcoeffs.end()); it != itend; ++it)
@@ -150,17 +163,17 @@ namespace WaveletTL
     
     if (lambda.e() == 0) {
       // generator
-        //Für folgende Fälle noch nicht die Ableitungen angepasst @PHK
+        
       if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) {//right boundary quarks
 	switch (derivative){
 	case 0: r= MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
 							     (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
 							     1-x)*pow((1<<lambda.j())*(1-x)*rightside, lambda.p());
-        //Scheint zu gehen; nochmal nachvollziehen und vor allem mit d=3 testen @PHK HIER WEITERMACHEN; mit bisherigem Ansatz werden vanishing moments zerstört @PHK
-	  break;
-	case 1: r=-MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
-							     (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
-							     1-x);
+          break;
+	case 1: r=MathTL::EvaluateSchoenbergBSpline_td<d>(lambda.j(),(1<<lambda.j())-d-lambda.k()-2*ell1<d>(),1-x)*
+                (-lambda.p())*(1<<lambda.j())*rightside*pow((1<<lambda.j())*(1-x)*rightside, lambda.p()-1) -
+                MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),(1<<lambda.j())-d-lambda.k()-2*ell1<d>(),1-x)*
+                pow((1<<lambda.j())*(1-x)*rightside,lambda.p());
           break;
 	case 2: r=MathTL::EvaluateSchoenbergBSpline_td_xx<d>(lambda.j(),
 							     (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
@@ -174,7 +187,9 @@ namespace WaveletTL
 	switch (derivative){
 	  case 0: r=MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), x)*pow((1<<lambda.j())*x*leftside, lambda.p());
 	  break;
-	  case 1: r=MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), lambda.k(), x);
+	  case 1: r=MathTL::EvaluateSchoenbergBSpline_td<d> (lambda.j(), lambda.k(), x)*
+                  lambda.p()*(1<<lambda.j())*leftside *pow((1<<lambda.j())*x*leftside,lambda.p()-1) +
+                  MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),lambda.k(),x)*pow((1<<lambda.j())*x*leftside,lambda.p());
 	  break;
 	  case 2: r=MathTL::EvaluateSchoenbergBSpline_td_xx<d>(lambda.j(), lambda.k(), x);
 	  break;

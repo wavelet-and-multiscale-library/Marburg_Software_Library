@@ -163,17 +163,17 @@ namespace WaveletTL
     
     if (lambda.e() == 0) {
       // generator
-        //Für folgende Fälle noch nicht die Ableitungen angepasst @PHK
+        
       if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) {//right boundary quarks
 	switch (derivative){
 	case 0: r= MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(),
 							     (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
 							     1-x)*pow((1<<lambda.j())*(1-x)*rightside, lambda.p());
-        //Scheint zu gehen; nochmal nachvollziehen und vor allem mit d=3 testen @PHK HIER WEITERMACHEN; mit bisherigem Ansatz werden vanishing moments zerstört @PHK
-	  break;
-	case 1: r=-MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),
-							     (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
-							     1-x);
+          break;
+	case 1: r=MathTL::EvaluateSchoenbergBSpline_td<d>(lambda.j(),(1<<lambda.j())-d-lambda.k()-2*ell1<d>(),1-x)*
+                (-lambda.p())*(1<<lambda.j())*rightside*pow((1<<lambda.j())*(1-x)*rightside, lambda.p()-1) -
+                MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),(1<<lambda.j())-d-lambda.k()-2*ell1<d>(),1-x)*
+                pow((1<<lambda.j())*(1-x)*rightside,lambda.p());
           break;
 	case 2: r=MathTL::EvaluateSchoenbergBSpline_td_xx<d>(lambda.j(),
 							     (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
@@ -187,7 +187,9 @@ namespace WaveletTL
 	switch (derivative){
 	  case 0: r=MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), x)*pow((1<<lambda.j())*x*leftside, lambda.p());
 	  break;
-	  case 1: r=MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), lambda.k(), x);
+	  case 1: r=MathTL::EvaluateSchoenbergBSpline_td<d> (lambda.j(), lambda.k(), x)*
+                  lambda.p()*(1<<lambda.j())*leftside *pow((1<<lambda.j())*x*leftside,lambda.p()-1) +
+                  MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),lambda.k(),x)*pow((1<<lambda.j())*x*leftside,lambda.p());
 	  break;
 	  case 2: r=MathTL::EvaluateSchoenbergBSpline_td_xx<d>(lambda.j(), lambda.k(), x);
 	  break;

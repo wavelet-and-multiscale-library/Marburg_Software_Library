@@ -83,6 +83,7 @@ EXEOBJF1 = \
   test_pq_frame.o\
   test_r_frame.o\
   test_refinable.o test_r_basis.o\
+  test_refinement_matrices.o\
   test_regularity.o\
   test_dm.o\
   test_cdf_basis.o test_cdf_expansion.o\

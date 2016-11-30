@@ -224,7 +224,7 @@ namespace MathTL
      * where only a mxn part is filled
     */
     void matlab_output(const char *file, const char *Matrixname, const int binary, const int rowend = -1, const int columnend = -1) const;
-    void matlab_output(const char *file, const char *Matrixname, const int binary, const int rowstart, const int rowend, const int columnstart, const int columnend) const;
+    void matlab_output(const char *file, const char *Matrixname, const int binary, const unsigned int rowstart, const unsigned int rowend, const unsigned int columnstart, const unsigned int columnend) const;
 
     /*!
       read from matlab sparse matrix format (in binary==1 format)

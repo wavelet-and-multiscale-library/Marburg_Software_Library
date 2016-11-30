@@ -733,7 +733,7 @@ namespace MathTL
       }
   }
   template <class C>
-  void SparseMatrix<C>::matlab_output (const char *file, const char *Matrixname, const int binary, const int rowstart, const int rowend, const int columnstart, const int columnend) const
+  void SparseMatrix<C>::matlab_output (const char *file, const char *Matrixname, const int binary, const unsigned int rowstart, const unsigned int rowend, const unsigned int columnstart, const unsigned int columnend) const
   {
       int r = 1+rowend-rowstart, c = 1+columnend-columnstart; // number of rows/columns
       

@@ -231,7 +231,7 @@ namespace WaveletTL
     
     //! size of Delta_j0+\sum_i=j0^(j-1) \Nabla_i
     inline const int DeltaNablasize(const int j, const int p=0) const { return (p==0 || boundary_quarks == true) ? Deltasize(j,p) : 
-        (1<<j)-2*(d-2)-(j-j0_)*(d+dT-2); }
+        Deltasize(j,p)-(j-j0_)*(d+dT-2); }
     
     //! index of first (leftmost) generator on level j >= j0, p
     Index first_generator(const int j, const int p = 0) const;

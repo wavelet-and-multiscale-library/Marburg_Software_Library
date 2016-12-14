@@ -20,8 +20,8 @@
 #define FRAME
 #undef DELTADIS
 
-#undef ADAPTIVE
-#define NONADAPTIVE
+#define ADAPTIVE
+#undef NONADAPTIVE
 
 #include <galerkin/sturm_equation.h>
 #include <galerkin/galerkin_utils.h>
@@ -104,8 +104,10 @@ int main()
   const int d  = 2;
   const int dT = 2; // be sure to use a continuous dual here, otherwise the RHS test will fail
   
-  const int jmax = 8;
+
+  const int jmax = 6;
   const int pmax = 0;
+
   
   
 #ifdef BASIS
@@ -126,12 +128,13 @@ int main()
 #endif
   
   SturmEquation<Basis> eq(T, basis);
-  const int j0=eq.basis().j0();
+  
   
 
 #ifdef NONADAPTIVE
   //nonadaptive setting
   
+  const int j0=eq.basis().j0();
 #if 0
  //Testing some entrys of the stiffness matrix
   Index mu(1,3,0,2, &basis);

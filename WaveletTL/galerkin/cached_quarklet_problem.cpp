@@ -292,9 +292,9 @@ namespace WaveletTL
 
       std::set<Index> Lambda;
       const int j0 = basis().j0();
-      const int jmax = j0+2;
+      const int jmax = std::min(basis().get_jmax_(),j0+2);
       const int pmax = std::min(basis().get_pmax_(),2);
-      //const int pmax = 0;
+      
       int p = 0;
       
       for (Index lambda = problem->basis().first_generator(j0,0);;) {
@@ -359,8 +359,8 @@ namespace WaveletTL
 
       std::set<Index> Lambda;
       const int j0 = basis().j0();
-      const int jmax = j0+2;
-      int pmax = std::min(basis().get_pmax_(),2);
+      const int jmax = std::min(basis().get_jmax_(),j0+2);
+      const int pmax = std::min(basis().get_pmax_(),2);
       
       int p = 0;
       
@@ -404,7 +404,7 @@ namespace WaveletTL
       normA = evals(evals.size()-1);
       cout << "normA: " << normA << endl;
       int i = 0;
-      while(abs(evals(i))<1e-3){
+      while(abs(evals(i))<1e-1){
           ++i;
       }
       normAinv = 1./evals(i);

@@ -1514,18 +1514,18 @@ namespace WaveletTL
   void PQFrame<d,dT>::setup_CVM() {
       //for fast implementation, can be changed @PHK
       const int pmax=5;
-      CVM.resize(pmax, dT*(d+dT-2));
+      CVM.resize(pmax, (dT+1)*(d+dT-2));
       CVM(0,0)= 27;
       
       if(s0==1 && s1==1){
             switch(d){
               case 3: switch(dT){
                       case 3: {
-                          Matrix <double> tempmat(pmax, dT*(d+dT-2),   "-0.2983106733130841   0.5440026584167825   0.0609050958014104   -0.113642161262121  -0.234702630273304   1.121742833458210    1.154572791156149   0.944650465491500  -1.325825214724864   0.147083734758176   3.639804534804494  -3.480291188657561"
-                                                                       " 31 32 33 34 35 36 7 8 9 10 11 12"
-                                                                       " 31 32 33 34 35 36 7 8 9 10 11 12"
-                                                                       " 41 42 43 44 45 46 7 8 9 10 11 12"
-                                                                       " 51 52 53 54 55 56 7 8 9 10 11 12");
+                          Matrix <double> tempmat(pmax, (dT+1)*(d+dT-2)," 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16"
+                                                                        " 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16"
+                                                                        " 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16"
+                                                                        " 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16"
+                                                                        " 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16");
                           //cout << "setup: " << endl << tempmat << endl;
                           CVM = tempmat;
                       }
@@ -1537,11 +1537,11 @@ namespace WaveletTL
             switch(d){
               case 3: switch(dT){
                       case 3: {
-                          Matrix <double> tempmat(pmax, dT*(d+dT-2), " 0.984380830463879  -0.604833768436096   0.338164347922360   -0.113642161262121  -0.234702630273304   1.121742833458210    1.154572791156149   0.944650465491500  -1.325825214724864   -1.40937982461958   1.87997872245133  -1.22742412457259"
-                                                                       " 0.85259  -0.53214   0.33077 -0.16632  -0.17018   1.09882 7 8 9 10 11 12"
-                                                                       " 31 32 33 34 35 36 7 8 9 10 11 12"
-                                                                       " 41 42 43 44 45 46 7 8 9 10 11 12"
-                                                                       " 51 52 53 54 55 56 7 8 9 10 11 12");
+                          Matrix <double> tempmat(pmax, (dT+1)*(d+dT-2), " 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 "
+                                                                         " 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16"
+                                                                         " 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16"
+                                                                         " 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16"
+                                                                         " 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16");
                           cout << "setup: " << endl << tempmat << endl;
                           CVM = tempmat;
                       }
@@ -2991,22 +2991,24 @@ namespace WaveletTL
       }
       if (lamj+1 >= j) {
           
-	for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
-            //adjusted to quarklet with vanishing Moments setting PHK
-            if(lame == 1 && lamk < dT-1  && lamp > 0 && k<dT){
-                c.add_coefficient(M.get_nth_index(row_j0,k)+offset , CVM(lamp-1,dT*lamk+k));
-            
+        if(lame == 1 && lamk < dT-1  && lamp > 0){//left boundary quarklets
+            for (size_type k(0); k < dT+1; k++) { 
+                c.add_coefficient(M.get_nth_index(row_j0,k)+offset , CVM(lamp-1,(dT+1)*lamk+k));
+            }  
+        }  
+        else if(lame == 1 && lamk > Nablamax(lamj)-dT+1  && lamp > 0){//right boundary quarklets
+            for (size_type k(0); k < dT+1; k++) {
+                c.add_coefficient(M.get_nth_index(row_j0,k)+offset+M.entries_in_row(row_j0)-dT-1,
+                CVM(lamp-1, (dT+1)*(lamk-(Nablamax(lamj)-dT+1)-1+(d+dT-2)/2)+ k));
             }
-            else if(lame == 1 && lamk > Nablamax(lamj)-dT+1  && lamp > 0 && k> M.entries_in_row(row_j0)-dT-1){
-                c.add_coefficient(M.get_nth_index(row_j0,k)+offset , CVM(lamp-1, dT*(lamk+d+dT-2-Nablamax(lamj))+ k-M.entries_in_row(row_j0))); 
-                
-            }
-            else{
+        }  
+        else{
+            for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
                 c.add_coefficient(M.get_nth_index(row_j0,k)+offset , M.get_nth_entry(row_j0,k));
-            }
-	  //c.add_coefficient(Index(lamj+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this),
-	//		    M.get_nth_entry(row_j0,k));
-	}
+            } 
+        }
+	
+        
       } else {
 	for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
 	  InfiniteVector<double, int> dhelp;

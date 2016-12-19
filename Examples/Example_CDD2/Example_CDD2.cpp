@@ -93,11 +93,7 @@ int main()
 
 
 
-   #ifdef _SPLINE_BASIS
-    cout << "\nSetup Spline wavelet basis (d = "<< d <<", dT = "<< dT <<") ..." << endl;
-    typedef SplineBasis<d,dT,P_construction,1,1,0,0,SplineBasisData_j0<d,dT,P_construction,1,1,0,0>::j0> Basis;
-    const char* basis_type = "Spline";
-#endif
+   
  /*
      * First test problem
      */

@@ -79,7 +79,6 @@ namespace WaveletTL
 			      SparseMatrix<double>& A_Lambda,
 			      bool preconditioned)
   {
-    cout << "setup_stiffness_matrix()" << endl;
     A_Lambda.resize(Lambda.size(), Lambda.size());
     
     typedef typename SparseMatrix<double>::size_type size_type;
@@ -115,7 +114,7 @@ namespace WaveletTL
 	  }
 	A_Lambda.set_row(row, indices, entries);
       }
-    cout << "done" << endl;
+    
   }
 
     template <class PROBLEM>
@@ -124,7 +123,6 @@ namespace WaveletTL
             SparseMatrix<double>& A_Lambda,
             bool preconditioned)
     {
-        cout << "setup_stiffness_matrix()" << endl;
         A_Lambda.resize(Lambda.size(), Lambda.size());
         typedef typename SparseMatrix<double>::size_type size_type;
         size_type row = 0;
@@ -187,7 +185,7 @@ namespace WaveletTL
                 A_Lambda.set_row(row, indices, entries);
             }
         }
-        cout << "done" << endl;
+        
     }
   
 
@@ -198,7 +196,7 @@ namespace WaveletTL
 			      SparseMatrix<double>& A_Lambda,
 			      bool preconditioned)
   {
-      cout << "setup_stiffness_matrix()" << endl;
+      
     A_Lambda.resize(Lambda1.size(), Lambda2.size());
     
     typedef typename SparseMatrix<double>::size_type size_type;
@@ -246,7 +244,7 @@ namespace WaveletTL
 	  }
 	A_Lambda.set_row(row, indices, entries);
       }
-        cout << "done" << endl;
+        
   }
 //   template <class PROBLEM>
 //   void setup_stiffness_matrix(PROBLEM& P,

@@ -38,22 +38,24 @@ namespace WaveletTL
 
     // compute minimal K such that 3*rho^K < theta
     const int K = (int) ceil(log10(theta/3.0) / log10(rho));
-    cout << "CDD2_SOLVE: K=" << K << endl;
+    cout << "CDD2_SOLVE: K=" << K << endl << endl;
 
     u_epsilon.clear();
-
+    
     double epsilon_k = nu, eta;
         InfiniteVector<double,Index> f, v, Av, tempAv;
 #if _WAVELETTL_USE_TBASIS == 1
         Array1D<int> jp_guess(0);
 #endif
         while (epsilon_k > epsilon) {
+        cout << "CDD2:: u.size() = " << u_epsilon.size() << endl;
         epsilon_k *= 3*pow(rho, K) / theta;
         cout << "CDD2_SOLVE: epsilon_k=" << epsilon_k << endl;
-        //eta = theta * epsilon_k / (6*omega*K) ;//WAS SOLL HIER DIE 10@PHK
-        eta = theta * epsilon_k / (6*omega*K)*10;
+        eta = theta * epsilon_k / (6*omega*K) ;//WAS SOLL HIER DIE 10@PHK
+        //eta = theta * epsilon_k / (6*omega*K)*10;
         cout << "eta = " << eta << endl;
         P.RHS(eta, f);
+        cout << "CDD2:: f.size() = " << f.size() << endl;
         //cout << f << endl;
       
         v = u_epsilon;
@@ -68,8 +70,8 @@ namespace WaveletTL
 
           APPLY(P, v, eta, Av, maxlevel, strategy, pmax, a, b);
           //APPLY with successive COARSE @PHK
-         //APPLY(P, v, eta, tempAv, maxlevel, strategy, pmax, a, b);
-          //tempAv.COARSE(1e-6, Av);
+//         APPLY(P, v, eta, tempAv, maxlevel, strategy, pmax, a, b);
+//          tempAv.COARSE(1e-4, Av);
          
 
           
@@ -80,7 +82,8 @@ namespace WaveletTL
         //Av = tempAv;
         /////cout << tempAv << endl;
         //cout << Av << endl;
-	cout << "Number of degrees of freedom " << Av.size() << endl;
+//	cout << "Number of degrees of freedom (before coarsening) " << tempAv.size() << endl;
+        cout << "Number of degrees of freedom " << Av.size() << endl;
         cout << "current residual error ||f-Av||=" << l2_norm(f - Av) << endl;
         cout << "coarse tol = " << (1-theta)*epsilon_k << endl;
 	v += 0.5 *  omega * (f - Av); // the factor 0.5 is needed in case the computed value of normA or normAinv isn't accurate enough
@@ -89,21 +92,23 @@ namespace WaveletTL
       
       
       
-      
+      cout << "CDD2:: v.size() = " << v.size() << endl << endl;
       v.COARSE(std::min((1-theta)*epsilon_k,1.0e-6), u_epsilon);
 //      v.COARSE((1-theta)*epsilon_k, u_epsilon);
 //      v.COARSE(1.0e-6, u_epsilon);
       
-      //cout << u_epsilon << endl;
-      cout << "CDD2:: v.size() = " << v.size() << endl;
-      //cout << "CDD2:: u.size() = " << u_epsilon.size() << endl;
-      //cout << u_epsilon << endl;
+      
+      
+      
+//      cout << "f:" << endl<< f << endl;
+//      cout << "Av:" << endl << Av << endl;
+//      cout << "v:" << endl << v << endl;
+//      cout << "u:" << endl <<u_epsilon << endl;
       
       
       
     }
-//        cout << "f" << f << endl;
-//        cout << "Av" << Av << endl;
+        
   }        
         
   template <class PROBLEM>

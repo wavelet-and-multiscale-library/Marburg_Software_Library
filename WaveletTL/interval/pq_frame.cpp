@@ -2993,12 +2993,12 @@ namespace WaveletTL
           
         if(lame == 1 && lamk < dT-1  && lamp > 0){//left boundary quarklets
             for (size_type k(0); k < dT+1; k++) { 
-                c.add_coefficient(M.get_nth_index(row_j0,k)+offset , CVM(lamp-1,(dT+1)*lamk+k));
+                c.add_coefficient(lamk+k , CVM(lamp-1,(dT+1)*lamk+k));
             }  
         }  
         else if(lame == 1 && lamk > Nablamax(lamj)-dT+1  && lamp > 0){//right boundary quarklets
             for (size_type k(0); k < dT+1; k++) {
-                c.add_coefficient(M.get_nth_index(row_j0,k)+offset+M.entries_in_row(row_j0)-dT-1,
+                c.add_coefficient(DeltaRmax(lamj+1,lamp)-DeltaLmin(lamp)-dT+k-Nablamax(lamj)+lamk,
                 CVM(lamp-1, (dT+1)*(lamk-(Nablamax(lamj)-dT+1)-1+(d+dT-2)/2)+ k));
             }
         }  

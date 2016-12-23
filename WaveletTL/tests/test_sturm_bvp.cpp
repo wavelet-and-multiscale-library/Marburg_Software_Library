@@ -15,6 +15,7 @@
 #include <interval/i_q_indexplot.h>
 #include <interval/ds_basis.h>
 #include <interval/p_basis.h>
+
 #include <interval/pq_frame.h>
 #undef BASIS
 #define FRAME
@@ -26,6 +27,7 @@
 #include <galerkin/sturm_equation.h>
 #include <galerkin/galerkin_utils.h>
 #ifdef BASIS
+#include <interval/p_expansion.h>
 #include <galerkin/cached_problem.h>
 #endif
 #ifdef FRAME
@@ -34,6 +36,7 @@
 #include <galerkin/TestProblem.h>
 #include <galerkin/TestFunctions.h>
 #include <adaptive/cdd2.h>
+#include <adaptive/apply.h>
 
 using namespace std;
 using namespace WaveletTL;
@@ -58,7 +61,7 @@ int main()
 {
   cout << "Testing wavelet-Galerkin solution of a Sturm b.v.p. ..." << endl;
 
-  const unsigned int testcase=1;
+  const unsigned int testcase=2;
   TestProblem<testcase> T;
   Function<1>* uexact = 0;
     switch(testcase) {
@@ -101,12 +104,12 @@ int main()
   
   
 
-  const int d  = 2;
-  const int dT = 2; // be sure to use a continuous dual here, otherwise the RHS test will fail
+  const int d  = 3;
+  const int dT = 3; // be sure to use a continuous dual here, otherwise the RHS test will fail
   
 
-  const int jmax = 6;
-  const int pmax = 0;
+  const int jmax = 8;
+  const int pmax = 3;
 
   
   
@@ -200,7 +203,8 @@ int main()
 
   for (Index lambda = eq.basis().first_generator(j0);; ++lambda) {
     Lambda.insert(lambda);
-    if (lambda == eq.basis().last_wavelet(jmax)) break;    
+    if (lambda == eq.basis().last_wavelet(jmax)) break;
+//    if (lambda == eq.basis().last_generator(j0)) break;
   }
 #endif
   
@@ -384,11 +388,23 @@ A.apply(x, err);
 #endif
 #ifdef BASIS
   CachedProblem<SturmEquation<Basis> > ceq(&eq);
+  
+  //calculate the exact expansion and testing APPLY
+  InfiniteVector<double, Index> exact_solution, exact_solution_coarsed, apply_result, approx_apply_result, right_side;
+  expand(uexact, basis, 0, jmax, exact_solution);
+  exact_solution.scale(&ceq, 1);
+//  APPLY(ceq, exact_solution, 1e-9, apply_result, jmax, CDD1);
+//  ceq.RHS(1e-10,right_side);
+//  cout.precision(17);
+//  cout << "exact_solution: " << endl << exact_solution << endl;
+//  cout << "A*(exact_solution): " << endl << apply_result << endl;
+//  cout << "RHS: " << endl << right_side << endl;
+  
 #endif
   InfiniteVector<double, Index> F_eta;
   ceq.RHS(1e-6, F_eta);
   const double nu = ceq.norm_Ainv() * l2_norm(F_eta);
-  double epsilon = 1e-6;
+  double epsilon = 1e-3;
   InfiniteVector<double, Index> u_epsilon;
 #ifdef FRAME
   CDD2_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, DKR, pmax, 2, 2);
@@ -415,6 +431,21 @@ A.apply(x, err);
     
     const double L2_error_ad = sqrt(l2_norm_sqr(u_values_ad-uexact_values)*h);
     cout << "  L_2 error on a subgrid (adaptive): " << L2_error_ad << endl;
+    
+#ifdef BASIS
+    cout << "||u-u_epsilon||_{l_2}: " << l2_norm(u_epsilon-exact_solution) << endl;
+    cout << "||u-u_epsilon||_{l_infty}: " << linfty_norm(u_epsilon-exact_solution) << endl;
+    APPLY(ceq, exact_solution, 1e-9, apply_result, jmax, CDD1);
+    APPLY(ceq, u_epsilon, 1e-9, approx_apply_result, jmax, CDD1);
+    exact_solution.COARSE(1e-6,exact_solution_coarsed);
+    cout << "||Au-Au_epsilon||_{l_2}: " << l2_norm(apply_result-approx_apply_result) << endl;
+    cout << "||Au-Au_epsilon||_{l_infty}: " << linfty_norm(apply_result-approx_apply_result) << endl;
+//    cout << "Expansion of the exact solution" << endl << exact_solution_coarsed << endl;
+//    cout << "Expansion of the approximate solution" << endl << u_epsilon << endl;
+#endif
+    
+    
+    
     
     
 /* plot solution coefficients */
@@ -457,7 +488,7 @@ A.apply(x, err);
   s2.matlab_output(u_stream2);
   u_stream2 << "figure;\nplot(x,y);"
             << "title('Sturm bvp: adaptive solution to test problem ("
-            << basis_type << "), " << "pmax= " << pmax << ", " << "d= " << d << "');" << endl;
+            << basis_type << "), " << "pmax= " << pmax << ", jmax= " << jmax << ", d= " << d << ", dT= " << dT << "');" << endl;
   
   u_stream2.close();
 

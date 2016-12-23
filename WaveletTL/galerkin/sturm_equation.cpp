@@ -96,8 +96,12 @@ namespace WaveletTL
 #ifdef FRAME
       return pow(ldexp(1.0, lambda.j())*pow(1+lambda.p(),3),operator_order()) * (1+lambda.p()); //2^j*(p+1)^5, falls operator_order()=1
 #else
+
       return pow(ldexp(1.0, lambda.j()),operator_order());
+
+
 //      return sqrt(a(lambda, lambda));
+
 //    return 1;
 //     return lambda.e() == 0 ? 1.0 : ldexp(1.0, lambda.j()); // do not scale the generators
 //     return lambda.e() == 0 ? 1.0 : sqrt(a(lambda, lambda)); // do not scale the generators

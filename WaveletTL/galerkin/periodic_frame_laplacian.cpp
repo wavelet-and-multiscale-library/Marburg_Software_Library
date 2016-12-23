@@ -15,7 +15,7 @@ namespace WaveletTL
   template <class RFRAME>
   PeriodicFrameIntervalLaplacian<RFRAME>::PeriodicFrameIntervalLaplacian
   (const PeriodicLaplacianProblem& plp, const PeriodicFrame<RFRAME>& frame)
-    : basis_(frame), plp_(plp),
+    : plp_(plp), basis_(frame), 
       normA(1.0),
       normAinv(ldexp(1.0, 2*(RFRAME::primal_polynomial_degree()-1))) // lower bound from [Bittner]
   {
@@ -176,8 +176,11 @@ namespace WaveletTL
        
     }
      
-    
+#ifdef DELTADIS
     return r + 4*basis_.evaluate(0, lambda, 0.25); //second part can be added if you want a delta-distribution added at the rhs @PHK
+#else
+    return r;
+#endif
   }
   
     //alternative version for the delta-distribution at the point 0.5 for the RHS  

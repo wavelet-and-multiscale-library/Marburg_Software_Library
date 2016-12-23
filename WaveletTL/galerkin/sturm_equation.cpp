@@ -94,7 +94,7 @@ namespace WaveletTL
   SturmEquation<WBASIS>::D(const typename WBASIS::Index& lambda) const
   {
 #ifdef FRAME
-      return pow(ldexp(1.0, lambda.j())*pow(1+lambda.p(),3),operator_order()) * (1+lambda.p()); //2^j*(p+1)^5, falls operator_order()=1
+      return pow(ldexp(1.0, lambda.j())*pow(1+lambda.p(),3),operator_order()) * (1+lambda.p()); //2^j*(p+1)^4, falls operator_order()=1
 #else
 
       return pow(ldexp(1.0, lambda.j()),operator_order());

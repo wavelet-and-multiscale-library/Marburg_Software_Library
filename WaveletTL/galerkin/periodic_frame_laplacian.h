@@ -86,7 +86,7 @@ namespace WaveletTL
     double D(const typename WaveletBasis::Index& lambda) const 
     { 
         
-        return ldexp(1.0, lambda.j())*pow(1+lambda.p(),5); //2^j*(p+1)^2+delta (delta=3)
+        return ldexp(1.0, lambda.j())*pow(1+lambda.p(),4); //2^j*(p+1)^2+delta (delta=2)
         //return ldexp(1.0, lambda.j()); //2^j
         //return 1;
         //return sqrt(a(lambda,lambda));

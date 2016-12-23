@@ -12,21 +12,37 @@
 #include <utils/array1d.h>
 #include <utils/function.h>
 #include <Rd/r_basis.h>
+#include <Rd/r_frame.h>
+#include <Rd/quarklet_frame.h>
 #include <Rd/cdf_basis.h>
 #include <interval/periodic.h>
+#include <interval/periodic_frame.h>
 #include <interval/i_indexplot.h>
 #include <numerics/periodicgr.h>
-#define PERIODIC_CDFBASIS
+#undef PERIODIC_CDFBASIS
+#ifndef PERIODIC_CDFBASIS
+#define PERIODIC_FRAME
+#endif
 
-#undef ADAPTIVE
-#define NONADAPTIVE
+#define ADAPTIVE
+#undef NONADAPTIVE
+#undef  DELTADIS
 
+#ifdef PERIODIC_CDFBASIS
+#include <galerkin/cached_problem.h>
 #include <galerkin/periodic_laplacian.h>
+#endif
 #include <galerkin/galerkin_utils.h>
 #include <galerkin/Periodic_TestProblem.h>
-#include <galerkin/cached_problem.h>
+
+#ifdef PERIODIC_FRAME
+#include <galerkin/cached_quarklet_problem.h>
+#include <galerkin/periodic_frame_laplacian.h>
+#endif
 #include <numerics/eigenvalues.h>
+#include <adaptive/compression.h>
 #include <adaptive/cdd2.h>
+#include <adaptive/apply.h>
 #include <galerkin/TestFunctions.h>
 
 
@@ -42,10 +58,12 @@ using namespace WaveletTL;
 
 int main(int argc, char** argv) {
     
-    const int d  = 2;
-    const int dT = 2;
-    const int jmax = 10;
+    const int d  = 3;
+    const int dT = 3;
+    const int jmax = 8;
     const bool normalization = 1;
+    const int pmax = 2;
+
     
     
     
@@ -78,13 +96,38 @@ int main(int argc, char** argv) {
     typedef Basis::Index Index;
     Basis basis;
     basis.set_jmax(jmax);
-    
     typedef PeriodicIntervalLaplacian<RBasis> Problem;
     Problem L(tper, basis);
     typedef CachedProblem<Problem> CPROBLEM;
     CPROBLEM cachedL(&L);
-    const int j0= L.basis().j0();
+#endif
     
+#ifdef PERIODIC_FRAME
+    
+    typedef QuarkletFrame<d,dT> RBasis;
+    typedef PeriodicFrame<RBasis> Basis;
+    typedef Basis::Index Index;
+    Basis basis;
+    basis.set_jpmax(jmax, pmax);
+    typedef PeriodicFrameIntervalLaplacian<RBasis> Problem;
+    Problem L(tper, basis);
+    typedef CachedQuarkletProblem<Problem> CPROBLEM;
+    CPROBLEM cachedL(&L);
+#endif
+  
+    
+      
+    // evaluate exact solution
+    const unsigned int N = 100;
+    const double h = 1./N;
+    Vector<double> uexact_values(N+1);
+    for (unsigned int i = 0; i <= N; i++) {
+      const double point = i*h;
+      uexact_values[i] = uexact->value(Point<1>(point));
+      
+    }
+    
+   
 #if 0
     //Plot of wavelet with coefficient mu
     Index mu(3,0,7);
@@ -100,7 +143,7 @@ int main(int argc, char** argv) {
 #ifdef NONADAPTIVE
    //nonadaptive setting
 
-    
+    const int j0= L.basis().j0();
     set<Index> Lambda;
     Vector<double> x;
     
@@ -110,21 +153,35 @@ int main(int argc, char** argv) {
     cout << "  j=" << j << ":" << endl;
     //Implementation of the index set
     
+#ifdef PERIODIC_FRAME
+    int p=0;
+    for (Index lambda = L.basis().first_generator(j0,0);;) {
+	Lambda.insert(lambda);
+	if (lambda == L.basis().last_wavelet(j,pmax)) break;
+        //if (i==7) break;
+        if (lambda == L.basis().last_wavelet(j,p)){
+            ++p;
+            lambda = L.basis().first_generator(j0,p);
+        }
+        else
+            ++lambda;
+      }
+#else
+    
     for (Index lambda = L.basis().first_generator(j0);; ++lambda) {
         Lambda.insert(lambda);
         if (lambda == L.basis().last_wavelet(j)) break;    
     }
+#endif
     SparseMatrix<double> A;
     Matrix<double> evecs;
-    cout << "- set up stiffness matrix..." << endl;
     setup_stiffness_matrix(L, Lambda, A);
- //   cout << "A: " << endl << A << endl;
+//    cout << "A: " << endl << A << endl;
     Vector<double> evals;
 //    SymmEigenvalues(A,evals,evecs);
 //    cout<< "Eigenwerte A: " << evals << endl;
     
     
-    cout << "- set up right-hand side..." << endl;
     Vector<double> b;
     setup_righthand_side(L, Lambda, b);
 //    cout << "- right hand side: " << b << endl << endl;
@@ -142,8 +199,7 @@ int main(int argc, char** argv) {
 	 << " (" << iterations << " iterations needed)" << endl;
     
     // evaluate approximate solution on a grid
-    const unsigned int N = 100;
-    const double h = 1./N;
+    
     Vector<double> u_values(N+1);
     for (unsigned int i = 0; i <= N; i++) {
       const double point = i*h;
@@ -153,13 +209,7 @@ int main(int argc, char** argv) {
     }
 //     cout << "  point values of Galerkin solution: " << u_values << endl;
 
-    // evaluate exact solution
-    Vector<double> uexact_values(N+1);
-    for (unsigned int i = 0; i <= N; i++) {
-      const double point = i*h;
-      uexact_values[i] = uexact->value(Point<1>(point));
-      
-    }
+    
 //     cout << "  point values of exact solution: " << uexact_values << endl;
 
     // compute some errors
@@ -168,7 +218,7 @@ int main(int argc, char** argv) {
     
     
     const double L2_error = sqrt(l2_norm_sqr(u_values-uexact_values)*h);
-    cout << "  L_2 error on a subgrid: " << L2_error << endl;
+    cout << "  L_2 error on a subgrid: " << L2_error << endl << endl;
   }
     
     //Solution plot
@@ -184,7 +234,7 @@ int main(int argc, char** argv) {
     std::ofstream u_stream2("plot_periodicsolution.m");
     sm2.matlab_output(u_stream2);
     u_stream2 << "figure;\nplot(x,y);"
-            << "title('solution of the laaaplacian')" << endl;
+            << "title('solution of the laplacian, pmax= " << pmax << ", jmax=" << jmax << ", d=" << d << ", dT=" << dT << "')" << endl;
     u_stream2.close();
 #endif
     
@@ -196,21 +246,27 @@ int main(int argc, char** argv) {
     cachedL.RHS(1e-6, F_eta);
     const double nu = cachedL.norm_Ainv() * l2_norm(F_eta);
     InfiniteVector<double, Index> u_epsilon;
-    const double epsilon= 1e-5;
+    const double epsilon= 1e-6;
+#ifdef PERIODIC_CDFBASIS 
     CDD2_SOLVE(cachedL, nu,  epsilon,  u_epsilon, jmax);
-//     cout << "Adaptive Solution: " << endl << u_epsilon << endl; 
-//     cout << "Nonadaptive Solution: " << endl << u << endl; 
+#else
+    CDD2_SOLVE(cachedL, nu,  epsilon,  u_epsilon, jmax, DKR, pmax, 2, 2);
+#endif
+
+    
+    
     
      u_epsilon.scale(&cachedL,-1);
     SampledMapping<1> sm3(basis.evaluate(u_epsilon, 8, normalization));
     std::ofstream u_stream3("plot_adaptiveperiodicsolution.m");
     sm3.matlab_output(u_stream3);
     u_stream3 << "figure;\nplot(x,y);"
-            << "title('adaptive solution of the laplacian')" << endl;
+            << "title('adaptive solution of the laplacian, pmax= " << pmax << ", jmax=" << jmax << ", d=" << d << ", dT=" << dT << "')" << endl;
     u_stream3.close();
 #endif
+
     
- #endif
+ 
     
 
     

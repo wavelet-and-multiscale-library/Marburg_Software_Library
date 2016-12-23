@@ -299,12 +299,20 @@ namespace WaveletTL
   (const unsigned int derivative, const Index& lambda, const double x, const bool normalization) const
   {
     
-      if(derivative == 0 && lambda.e() == 0 && normalization == 1)
-          return r_frame.evaluate(derivative, lambda,
-			    x-floor(x-ldexp(1.0,-lambda.j())
+      if(lambda.e() == 0){
+        if(derivative == 0 && normalization == 1)
+              return r_frame.evaluate(derivative, lambda,
+            		    x-floor(x-ldexp(1.0,-lambda.j())
+            			    *(RFRAME::primal_mask::begin()
+            			       +lambda.k())))
+                      - r_frame.integrate(lambda);
+        else
+               return r_frame.evaluate(derivative, lambda,
+                                x-floor(x-ldexp(1.0,-lambda.j())
 				    *(RFRAME::primal_mask::begin()
-				       +lambda.k())))
-                  - r_frame.integrate(lambda);
+				      +lambda.k())));
+      }
+      
           
       else
       return r_frame.evaluate(derivative, lambda,

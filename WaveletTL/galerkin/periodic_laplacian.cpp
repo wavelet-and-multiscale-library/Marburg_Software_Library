@@ -168,8 +168,11 @@ namespace WaveletTL
        
     }
      
-    
-    return r /*+ basis_.evaluate(0, lambda, 0.5)*/; //second part can be added if you want a delta-distribution added at the rhs @PHK
+#ifdef DELTADIS 
+    return r + basis_.evaluate(0, lambda, 0.5); //second is a delta-distribution added at the rhs @PHK
+#else
+    return r;
+#endif
   }
   
 //  //alternative version for the delta-distribution at the point 0.5 for the RHS  

@@ -179,7 +179,7 @@ namespace WaveletTL
     double diag(const INDEX& lambda) const;
   };
 
-#ifdef FRAME
+//#ifdef FRAME
   template <class INDEX>
   class FullyDiagonalQuarkletPreconditioner
     : public FullyDiagonalPreconditioner<INDEX>
@@ -198,7 +198,7 @@ namespace WaveletTL
     */
     double diag(const INDEX& lambda) const;
   };
-#endif
+//#endif
   /*!
     Alternatively, one can also perform a diagonal preconditioning by the
     energy norms d_lambda=||psi_lambda||_A=sqrt(a(psi_lambda,psi_lambda)).

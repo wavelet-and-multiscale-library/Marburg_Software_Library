@@ -34,14 +34,15 @@
 #include <galerkin/sturm_equation.h>
 #include <galerkin/cached_problem.h>
 #include <./TestProblem.h>
+#define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
+#define _WAVELETTL_CDD1_VERBOSITY 1
 #include <adaptive/cdd2.h>
 
 using namespace std;
 using namespace WaveletTL;
 using MathTL::SimpleSturmBVP;
 
-#define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
-#define _WAVELETTL_CDD1_VERBOSITY 1
+
 
 /*
  * Select exactly one wavelet basis:

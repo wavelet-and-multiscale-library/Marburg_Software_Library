@@ -2814,25 +2814,33 @@ namespace WaveletTL
       }
 
       if (lambda.j()+1 >= j) {
-	for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
-            
-          if(lambda.e() == 1 && lambda.k() < dT-1  && lambda.p() > 0 && k<dT){
-              c.add_coefficient(Index(lambda.p(), lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this) , CVM(lambda.p()-1,dT*lambda.k()+k));
-            
-          }
-          else if(lambda.e() == 1 && lambda.k() > Nablamax(lambda.j())-dT+1  && lambda.p() > 0 && k> M.entries_in_row(row_j0)-dT-1){
-                c.add_coefficient(Index(lambda.p(), lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this) , CVM(lambda.p()-1, dT*(lambda.k()+d+dT-2-Nablamax(lambda.j()))+ k-M.entries_in_row(row_j0))); 
+	
+            if(lambda.e() == 1 && lambda.k() < dT-1  && lambda.p() > 0){//left boundary quarklets
+                for (size_type k(0); k < dT+1; k++) { 
+                    c.add_coefficient(Index(lambda.p(), lambda.j()+1, 0, lambda.k()+k+DeltaLmin(), this) , CVM(lambda.p()-1,(dT+1)*lambda.k()+k));
+                }  
+            }         
+            else if(lambda.e() == 1 && lambda.k() > Nablamax(lambda.j())-dT+1  && lambda.p() > 0){
+                for (size_type k(0); k < dT+1; k++) {            
+                    c.add_coefficient(Index(lambda.p(), lambda.j()+1, 0, DeltaRmax(lambda.j()+1,lambda.p())-dT+k-Nablamax(lambda.j())+lambda.k(), this) , CVM(lambda.p()-1, (dT+1)*(lambda.k()-(Nablamax(lambda.j())-dT+1)-1+(d+dT-2)/2)+ k));
+                }
                 
-          }
-          else{
+            }
+            else{
+                
+                for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
                 c.add_coefficient(Index(lambda.p(), lambda.j()+1, 0, DeltaLmin()+M.get_nth_index(row_j0,k)+offset, this),
 			    M.get_nth_entry(row_j0,k));
-          }
-            
-            
-	  
-	}
+                }
+            }
       }
+      
+      
+      
+      
+      
+      
+      
       else {
 	for (size_type k(0); k < M.entries_in_row(row_j0); k++) {
 	  InfiniteVector<double, Index> dhelp;

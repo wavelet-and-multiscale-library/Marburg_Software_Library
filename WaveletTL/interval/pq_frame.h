@@ -311,7 +311,8 @@ namespace WaveletTL
      * the first generator on level j has the number 0 (= it is stored at position 0)
     */
     
-    //attention: two scale generator relations are only true for p=0.
+    /*attention: there is no two scale relation for quarks, so for lamda.p()>0, lambda.e()=0 this routine does not work.
+     * Furthermore for p>0 this routine only works for j=lambda.j()+1.*/
     void reconstruct_1(const Index& lambda, const int j,
 		       InfiniteVector<double, Index>& c) const;
     /*
@@ -320,7 +321,7 @@ namespace WaveletTL
 		       InfiniteVector<double, Index>& c) const;
      */
     
-    //implementred quark-setting
+    //implemented quark-setting
     void reconstruct_1(const int lamp, const int lamj, const int lame, const int lamk, const int j,
 		       InfiniteVector<double, int>& c) const;
 

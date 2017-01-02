@@ -44,6 +44,7 @@
 #include <adaptive/cdd2.h>
 #include <adaptive/apply.h>
 #include <galerkin/TestFunctions.h>
+#include <interval/i_q_indexplot.h>
 
 
 using namespace std;
@@ -253,7 +254,23 @@ int main(int argc, char** argv) {
     CDD2_SOLVE(cachedL, nu,  epsilon,  u_epsilon, jmax, DKR, pmax, 2, 2);
 #endif
 
-    
+    #if 1
+  string filenameCoefficients2[3] = {"laplacian_solution_coefficients_p_0_ad.m", "laplacian_solution_coefficients_p_1_ad.m",
+  "laplacian_solution_coefficients_p_2_ad.m"};
+  
+//  string filenameCoefficients2[1] = {"sturm_bvp_solution_coefficients_p_0_ad.m"};
+  
+  for(int p=0;p<=pmax;p++){
+  const char* cstr = filenameCoefficients2[p].c_str();
+  cout << filenameCoefficients2[p] << endl;
+  std::ofstream coeff_stream2 (cstr);
+  coeff_stream2 << "figure;" << endl;
+  plot_indices2(&basis, u_epsilon, jmax, coeff_stream2, p, "jet", false, true, -8);
+  coeff_stream2 << "title('adaptive coefficients on the level p=" << p <<" of the test problem ("
+                  <<  "periodic frame)');" << endl;
+  coeff_stream2.close();   
+  }
+#endif
     
     
      u_epsilon.scale(&cachedL,-1);

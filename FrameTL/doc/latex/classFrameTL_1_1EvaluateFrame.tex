@@ -1,0 +1,63 @@
+\hypertarget{classFrameTL_1_1EvaluateFrame}{
+\section{FrameTL::EvaluateFrame$<$ IBASIS, DIM\_\-d, DIM\_\-m $>$ Class Template Reference}
+\label{classFrameTL_1_1EvaluateFrame}\index{FrameTL::EvaluateFrame@{FrameTL::EvaluateFrame}}
+}
+{\tt \#include $<$frame\_\-evaluate.h$>$}
+
+\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+virtual SampledMapping$<$ DIM\_\-d $>$ \hyperlink{classFrameTL_1_1EvaluateFrame_974094ff59dc684362f5237ea8813014}{evaluate} (const \hyperlink{classFrameTL_1_1AggregatedFrame}{AggregatedFrame}$<$ IBASIS, DIM\_\-d, DIM\_\-m $>$ \&frame, const typename \hyperlink{classFrameTL_1_1AggregatedFrame}{AggregatedFrame}$<$ IBASIS, DIM\_\-d, DIM\_\-m $>$::Index \&lambda, const unsigned int patch, const bool primal, const int resolution) const =0
+\item 
+virtual SampledMapping$<$ DIM\_\-d $>$ \hyperlink{classFrameTL_1_1EvaluateFrame_3315369302b4dfb8e73a7dae1658fc20}{evaluate} (const \hyperlink{classFrameTL_1_1AggregatedFrame}{AggregatedFrame}$<$ IBASIS, DIM\_\-d, DIM\_\-m $>$ \&frame, const typename \hyperlink{classFrameTL_1_1AggregatedFrame}{AggregatedFrame}$<$ IBASIS, DIM\_\-d, DIM\_\-m $>$::Index \&lambda, const bool primal, const int resolution) const =0
+\item 
+virtual Array1D$<$ SampledMapping$<$ DIM\_\-d $>$ $>$ \hyperlink{classFrameTL_1_1EvaluateFrame_e7bdc20b6e85b3c4a81511a234040467}{evaluate} (const \hyperlink{classFrameTL_1_1AggregatedFrame}{AggregatedFrame}$<$ IBASIS, DIM\_\-d, DIM\_\-m $>$ \&frame, const InfiniteVector$<$ double, typename \hyperlink{classFrameTL_1_1AggregatedFrame}{AggregatedFrame}$<$ IBASIS, DIM\_\-d, DIM\_\-m $>$::Index $>$ \&coeffs, const bool primal, const int resolution) const =0
+\item 
+virtual Array1D$<$ SampledMapping$<$ DIM\_\-d $>$ $>$ \hyperlink{classFrameTL_1_1EvaluateFrame_c61439dafa2ec4fa0793589ee3a84751}{evaluate\_\-difference} (const \hyperlink{classFrameTL_1_1AggregatedFrame}{AggregatedFrame}$<$ IBASIS, DIM\_\-d, DIM\_\-m $>$ \&frame, const InfiniteVector$<$ double, typename \hyperlink{classFrameTL_1_1AggregatedFrame}{AggregatedFrame}$<$ IBASIS, DIM\_\-d, DIM\_\-m $>$::Index $>$ \&coeffs, const Function$<$ DIM\_\-m $>$ \&f, const int resolution) const =0
+\item 
+\hypertarget{classFrameTL_1_1EvaluateFrame_4fc34092132a9f27407e50eb016071a3}{
+virtual double \textbf{L\_\-2\_\-error} (const \hyperlink{classFrameTL_1_1AggregatedFrame}{AggregatedFrame}$<$ IBASIS, 1, 1 $>$ \&frame, const InfiniteVector$<$ double, typename \hyperlink{classFrameTL_1_1AggregatedFrame}{AggregatedFrame}$<$ IBASIS, 1, 1 $>$::Index $>$ \&coeffs, const Function$<$ 1 $>$ \&f, const int resolution, const double a, const double b) const }
+\label{classFrameTL_1_1EvaluateFrame_4fc34092132a9f27407e50eb016071a3}
+
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+\subsubsection*{template$<$class IBASIS, unsigned int DIM\_\-d, unsigned int DIM\_\-m$>$ class FrameTL::EvaluateFrame$<$ IBASIS, DIM\_\-d, DIM\_\-m $>$}
+
+Abstract base class for classes providing functions for the point evaluation of single frame elements or linear combinations of frame elements. 
+
+\subsection{Member Function Documentation}
+\hypertarget{classFrameTL_1_1EvaluateFrame_e7bdc20b6e85b3c4a81511a234040467}{
+\index{FrameTL::EvaluateFrame@{FrameTL::EvaluateFrame}!evaluate@{evaluate}}
+\index{evaluate@{evaluate}!FrameTL::EvaluateFrame@{FrameTL::EvaluateFrame}}
+\subsubsection[{evaluate}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class IBASIS , unsigned int DIM\_\-d, unsigned int DIM\_\-m$>$ virtual Array1D$<$SampledMapping$<$DIM\_\-d$>$ $>$ {\bf FrameTL::EvaluateFrame}$<$ IBASIS, DIM\_\-d, DIM\_\-m $>$::evaluate (const {\bf AggregatedFrame}$<$ IBASIS, DIM\_\-d, DIM\_\-m $>$ \& {\em frame}, \/  const InfiniteVector$<$ double, typename {\bf AggregatedFrame}$<$ IBASIS, DIM\_\-d, DIM\_\-m $>$::Index $>$ \& {\em coeffs}, \/  const bool {\em primal}, \/  const int {\em resolution}) const\hspace{0.3cm}{\tt  \mbox{[}pure virtual\mbox{]}}}}
+\label{classFrameTL_1_1EvaluateFrame_e7bdc20b6e85b3c4a81511a234040467}
+
+
+Evaluate an arbitrary linear combination of primal/dual wavelets on a dyadic subgrid of each patch. \hypertarget{classFrameTL_1_1EvaluateFrame_3315369302b4dfb8e73a7dae1658fc20}{
+\index{FrameTL::EvaluateFrame@{FrameTL::EvaluateFrame}!evaluate@{evaluate}}
+\index{evaluate@{evaluate}!FrameTL::EvaluateFrame@{FrameTL::EvaluateFrame}}
+\subsubsection[{evaluate}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class IBASIS , unsigned int DIM\_\-d, unsigned int DIM\_\-m$>$ virtual SampledMapping$<$DIM\_\-d$>$ {\bf FrameTL::EvaluateFrame}$<$ IBASIS, DIM\_\-d, DIM\_\-m $>$::evaluate (const {\bf AggregatedFrame}$<$ IBASIS, DIM\_\-d, DIM\_\-m $>$ \& {\em frame}, \/  const typename {\bf AggregatedFrame}$<$ IBASIS, DIM\_\-d, DIM\_\-m $>$::Index \& {\em lambda}, \/  const bool {\em primal}, \/  const int {\em resolution}) const\hspace{0.3cm}{\tt  \mbox{[}pure virtual\mbox{]}}}}
+\label{classFrameTL_1_1EvaluateFrame_3315369302b4dfb8e73a7dae1658fc20}
+
+
+Evaluate a single primal/dual generator or wavelet $\psi_\lambda$ on a dyadic subgrid of its corresponding patch. \hypertarget{classFrameTL_1_1EvaluateFrame_974094ff59dc684362f5237ea8813014}{
+\index{FrameTL::EvaluateFrame@{FrameTL::EvaluateFrame}!evaluate@{evaluate}}
+\index{evaluate@{evaluate}!FrameTL::EvaluateFrame@{FrameTL::EvaluateFrame}}
+\subsubsection[{evaluate}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class IBASIS , unsigned int DIM\_\-d, unsigned int DIM\_\-m$>$ virtual SampledMapping$<$DIM\_\-d$>$ {\bf FrameTL::EvaluateFrame}$<$ IBASIS, DIM\_\-d, DIM\_\-m $>$::evaluate (const {\bf AggregatedFrame}$<$ IBASIS, DIM\_\-d, DIM\_\-m $>$ \& {\em frame}, \/  const typename {\bf AggregatedFrame}$<$ IBASIS, DIM\_\-d, DIM\_\-m $>$::Index \& {\em lambda}, \/  const unsigned int {\em patch}, \/  const bool {\em primal}, \/  const int {\em resolution}) const\hspace{0.3cm}{\tt  \mbox{[}pure virtual\mbox{]}}}}
+\label{classFrameTL_1_1EvaluateFrame_974094ff59dc684362f5237ea8813014}
+
+
+Evaluate a single primal/dual generator or wavelet $\psi_\lambda$ on a dyadic grid of the patch given by 'patch'. \hypertarget{classFrameTL_1_1EvaluateFrame_c61439dafa2ec4fa0793589ee3a84751}{
+\index{FrameTL::EvaluateFrame@{FrameTL::EvaluateFrame}!evaluate\_\-difference@{evaluate\_\-difference}}
+\index{evaluate\_\-difference@{evaluate\_\-difference}!FrameTL::EvaluateFrame@{FrameTL::EvaluateFrame}}
+\subsubsection[{evaluate\_\-difference}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class IBASIS , unsigned int DIM\_\-d, unsigned int DIM\_\-m$>$ virtual Array1D$<$SampledMapping$<$DIM\_\-d$>$ $>$ {\bf FrameTL::EvaluateFrame}$<$ IBASIS, DIM\_\-d, DIM\_\-m $>$::evaluate\_\-difference (const {\bf AggregatedFrame}$<$ IBASIS, DIM\_\-d, DIM\_\-m $>$ \& {\em frame}, \/  const InfiniteVector$<$ double, typename {\bf AggregatedFrame}$<$ IBASIS, DIM\_\-d, DIM\_\-m $>$::Index $>$ \& {\em coeffs}, \/  const Function$<$ DIM\_\-m $>$ \& {\em f}, \/  const int {\em resolution}) const\hspace{0.3cm}{\tt  \mbox{[}pure virtual\mbox{]}}}}
+\label{classFrameTL_1_1EvaluateFrame_c61439dafa2ec4fa0793589ee3a84751}
+
+
+Evaluates the difference between the function given by the expansion coefficients 'coeffs' and the function f 
+
+The documentation for this class was generated from the following file:\begin{CompactItemize}
+\item 
+/home/werner/PROMOTION/source/FrameTL/frame\_\-evaluate.h\end{CompactItemize}

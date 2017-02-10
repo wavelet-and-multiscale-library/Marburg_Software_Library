@@ -1,0 +1,48 @@
+\form#0:$\ell_2$
+\form#1:$d$
+\form#2:$R^m$
+\form#3:$2d$
+\form#4:$j \geq j_0$
+\form#5:$j_0$
+\form#6:$u(x) = -\cos(2\pi x)+1 + p(x)$
+\form#7:$p(x) = 48x^4-63x^3+47/2x^2$
+\form#8:$0 \leq x < 1/2$
+\form#9:$p(x) = 48x^4-127x^3+235/2x^2-46x+15/2$
+\form#10:$1/2 \leq x \leq 1$
+\form#11:$\int v(x) f(x) dx$
+\form#12:$ v \mapsto 4v'(1/2) - 384v(1/2) - 16 \int_0^1 (\cos(2\pi x)\pi^4-72) * v(x) dx$
+\form#13:$Au = F$
+\form#14:$||u-u_\epsilon|| \leq \epsilon$
+\form#15:$Au = D^{-1}LD^{-1}u = D^{-1}F$
+\form#16:$R^d$
+\form#17:$\Gamma=\partial \Omega$
+\form#18:$-\mbox{div}(a(x)\nabla u(x)) + q(x)u(x) = f(x)$
+\form#19:$\Omega$
+\form#20:$u(x) = 0$
+\form#21:$\Gamma$
+\form#22:$L = (a(\psi_\nu,\psi_\lambda))_{\lambda,\nu}$
+\form#23:$a(u,v) = \int_\Omega \langle a(x) \nabla u(x), \nabla v(x)\rangle dx + \int_\Omega q(x) u(x) v(x) dx$
+\form#24:$f(v) = \int_\Omega f(x) v(x) dx$
+\form#25:$a(.,.)$
+\form#26:$f$
+\form#27:$\psi_\lambda$
+\form#28:$\Psi=\{\psi_\lambda\}$
+\form#29:$c \mapsto D^{n}c$
+\form#30:$\|A\|$
+\form#31:$\|A^{-1}\|$
+\form#32:$s^\ast$
+\form#33:$\|A-A_k\| \leq \alpha_k 2^{-sk}$
+\form#34:$L_2$
+\form#35:$H^1$
+\form#36:$[-1,1]^2 \ [0,1)^2$
+\form#37:$j \geq j0$
+\form#38:$\psi_\mu$
+\form#39:$\psi_\nu$
+\form#40:$|\nu|=j$
+\form#41:$v \mapsto \int g(x) v(x) dx$
+\form#42:$\psi_\lambda \mapsto \int f(x) \psi_\lambda(x) dx$
+\form#43:$(-1,2)^2\setminus [0,1]^2$
+\form#44:$-\Delta^2 u(x) = f(x)$
+\form#45:$u(x) = 0 $
+\form#46:$a(u,v) = \int_\Omega \Delta u(x) \Delta v(x) dx$
+\form#47:$v \mapsto f(v)$

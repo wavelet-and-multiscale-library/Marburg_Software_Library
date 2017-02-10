@@ -58,11 +58,12 @@ namespace FrameTL
     char filename[50];
     char matrixname[50];
 
-    int d = IBASIS::primal_polynomial_degree();
-    int dT = IBASIS::primal_vanishing_moments();
+    
     
     // prepare filenames for 2D case
 #ifdef TWO_D
+    int d = IBASIS::primal_polynomial_degree();
+    int dT = IBASIS::primal_vanishing_moments();
     sprintf(filename, "%s%d%s%d", "rhs_biharm_lshaped_lap1_d", d, "_dT", dT);
     sprintf(matrixname, "%s%d%s%d", "rhs_biharm_2D_lap1_d", d, "_dT", dT);
 #endif
@@ -352,7 +353,7 @@ namespace FrameTL
 
     typedef WaveletTL::CubeBasis<IBASIS,DIM> CUBEBASIS;
 
-    typedef typename CUBEBASIS::Index CubeIndex;
+    //typedef typename CUBEBASIS::Index CubeIndex;
  
     typename CUBEBASIS::Support supp_lambda_ = frame_->all_supports[lambda.number()];
     typename CUBEBASIS::Support supp_mu_ = frame_->all_supports[mu.number()];
@@ -394,7 +395,7 @@ namespace FrameTL
     }
 #endif
 
-    typedef typename IBASIS::Index Index_1D;
+    //typedef typename IBASIS::Index Index_1D;
     
     const Chart<DIM>* chart_la = frame_->atlas()->charts()[lambda.p()];
     const Chart<DIM>* chart_mu = frame_->atlas()->charts()[mu.p()];

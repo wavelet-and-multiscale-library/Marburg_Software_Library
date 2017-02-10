@@ -59,10 +59,10 @@ int main(int argc, char* argv[])
   //typedef DSBasis<4,6> Basis1D;
   typedef PBasis<2,2> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
-  typedef CubeBasis<Basis1D> Basis;
+  //typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
 
-  EvaluateFrame<Basis1D,2,2> evalObj;
+  //EvaluateFrame<Basis1D,2,2> evalObj;
 
 //   //##############################  
   Matrix<double> A(DIM,DIM);
@@ -229,11 +229,11 @@ int main(int argc, char* argv[])
   map<double,double> asymptotic;
   map<double,double> time_asymptotic;
   map<double,double> alltime;
-  double applytime = 0.;
-  double algtime   = 0.;
+  //double applytime = 0.;
+  //double algtime   = 0.;
 
-  clock_t tstart, tend;
-  tstart = clock();
+  //clock_t tstart, tend;
+  //tstart = clock();
   for (int i = 0; i < 1000; i++) {
     
     //APPLY(problem, w, eta, w_res1, jmax, CDD1);

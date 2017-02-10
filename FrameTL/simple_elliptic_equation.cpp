@@ -74,8 +74,15 @@ namespace FrameTL
     char filename[50];
     char matrixname[50];
 
+#ifdef ONE_D
     int d = IBASIS::primal_polynomial_degree();
     int dT = IBASIS::primal_vanishing_moments();
+#else
+#ifdef TWO_D
+    int d = IBASIS::primal_polynomial_degree();
+    int dT = IBASIS::primal_vanishing_moments();
+#endif
+#endif
     
     // prepare filenames for 1D and 2D case
 #ifdef ONE_D
@@ -193,9 +200,15 @@ namespace FrameTL
     SparseMatrix<double> diag(1,frame_->degrees_of_freedom());
     char filename[50];
     char matrixname[50];
-
+#ifdef ONE_D
     int d = IBASIS::primal_polynomial_degree();
     int dT = IBASIS::primal_vanishing_moments();
+#else
+#ifdef TWO_D
+    int d = IBASIS::primal_polynomial_degree();
+    int dT = IBASIS::primal_vanishing_moments();
+#endif
+#endif
     
     // prepare filenames for 1D and 2D case
 #ifdef ONE_D
@@ -366,7 +379,7 @@ namespace FrameTL
 
     //const int N_Gauss = 3;
     const int N_Gauss = IBASIS::primal_polynomial_degree();
-    typedef typename IBASIS::Index Index_1D;
+    //typedef typename IBASIS::Index Index_1D;
     
     const Chart<DIM>* chart_la = frame_->atlas()->charts()[lambda->p()];
     const Chart<DIM>* chart_mu = frame_->atlas()->charts()[mu->p()];
@@ -640,6 +653,11 @@ namespace FrameTL
   
   
     return 4.0*tmp + r;
+#endif
+#ifndef TWO_D
+#ifndef ONE_D
+    return 0;
+#endif
 #endif
   }
 

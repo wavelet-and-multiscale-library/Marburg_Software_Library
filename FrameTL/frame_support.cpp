@@ -800,7 +800,7 @@ namespace FrameTL
     typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> Frame;
     typedef typename Frame::Index Index;
 
-    typedef typename CubeBasis<IBASIS,DIM_d>::Index CubeIndex;
+    //typedef typename CubeBasis<IBASIS,DIM_d>::Index CubeIndex;
 
     int k = -1;
 	if ( generators ) {
@@ -842,7 +842,7 @@ namespace FrameTL
        } // end for
 
       unsigned int result = 0;
-      int deltaresult = 0;
+      //int deltaresult = 0;
       const Array1D<Array1D<Index> >* full_collection_levelwise = frame.get_full_collection_levelwise();
 
       MultiIndex<int,DIM_d> type;
@@ -1031,7 +1031,7 @@ namespace FrameTL
     typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> Frame;
     typedef typename Frame::Index Index;
 
-    typedef typename CubeBasis<IBASIS,DIM_d>::Index CubeIndex;
+    //typedef typename CubeBasis<IBASIS,DIM_d>::Index CubeIndex;
 
     int k = -1;
 	if ( generators ) {
@@ -1093,7 +1093,7 @@ namespace FrameTL
 
     typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> Frame;
     typedef typename Frame::Index Index;
-    typedef typename CubeBasis<IBASIS,DIM_d>::Index CubeIndex;
+    //typedef typename CubeBasis<IBASIS,DIM_d>::Index CubeIndex;
     const typename CubeBasis<IBASIS,DIM_d>::Support* supp_lambda = &((frame.all_supports)[lambda.number()]);
     // loop over the set Lambda
     for (typename std::set<Index>::const_iterator it1(Lambda.begin()), itend(Lambda.end());
@@ -1121,7 +1121,7 @@ namespace FrameTL
     typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> Frame;
     typedef typename Frame::Index Index;
 
-    typedef typename CubeBasis<IBASIS,DIM_d>::Index CubeIndex;
+    //typedef typename CubeBasis<IBASIS,DIM_d>::Index CubeIndex;
 
     int k = -1;
 	if ( generators ) {
@@ -1409,7 +1409,7 @@ namespace FrameTL
     typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> Frame;
     typedef typename Frame::Index Index;
 
-    typedef typename CubeBasis<IBASIS,DIM_d>::Index CubeIndex;
+    //typedef typename CubeBasis<IBASIS,DIM_d>::Index CubeIndex;
 
     int k = -1;
 	if ( generators ) {

@@ -172,9 +172,9 @@ int main()
   // #####################################################################################
   // Plotting exact solution and right-hand side.
   // #####################################################################################
-  double tmp = 0.0;
-  int c = 0;
-  int d = 0;
+  //double tmp = 0.0;
+  //int c = 0;
+  //int d = 0;
   
   cout.precision(12);
   
@@ -247,7 +247,7 @@ int main()
   stiff.matlab_output("stiff_2D_out", "stiff",1);  
   
   
-  unsigned int iter= 0;
+  //unsigned int iter= 0;
   Vector<double> x(Lambda.size()); x = 1;
   //double lmax = PowerIteration(stiff, x, 0.01, 1000, iter);
   double lmax = 1;

@@ -23,7 +23,7 @@ int main()
   
   typedef PBasis<2,2> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame;
-  typedef Frame::Index Index;
+  //typedef Frame::Index Index;
 
    const unsigned int DIM = 2;
 

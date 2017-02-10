@@ -12,7 +12,7 @@ namespace FrameTL
 
 
     typedef typename AggregatedFrame<IBASIS,1,1>::Index Index;
-    typedef typename AggregatedFrame<IBASIS,1,1>::Support SuppType;
+    //typedef typename AggregatedFrame<IBASIS,1,1>::Support SuppType;
 
     const int granularity = 100;
     const double dx = 1./granularity;
@@ -234,7 +234,7 @@ namespace FrameTL
 
     typedef AggregatedFrame<IBASIS,2,2> Frame2D;
     typedef typename Frame2D::Index Index;
-    typedef typename Frame2D::Support SuppType;
+    //typedef typename Frame2D::Support SuppType;
     
     const int granularity = 10; // formerly 200 (for the tests in the PhD thesis)
     

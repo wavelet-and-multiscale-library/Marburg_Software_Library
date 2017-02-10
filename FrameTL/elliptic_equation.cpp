@@ -292,7 +292,7 @@ namespace FrameTL
 
     typedef WaveletTL::CubeBasis<IBASIS,DIM> CUBEBASIS;
 
-    typedef typename CUBEBASIS::Index CubeIndex;
+    //typedef typename CUBEBASIS::Index CubeIndex;
  
     typename CUBEBASIS::Support supp_lambda_ = frame_->all_supports[lambda.number()];
     typename CUBEBASIS::Support supp_mu_ = frame_->all_supports[mu.number()];
@@ -608,7 +608,7 @@ namespace FrameTL
 
 // #####################################################################################
 // Attention! This is a bad hack! It is assumed that in case macro ONE_D is defined,
-// the right hand side is the special functional defines on page 105 of Manuels thesis.
+// the right hand side is the special functional defined on page 105 of Manuels thesis.
 // We should use the class Functional instead!
 // #####################################################################################
 #ifdef ONE_D
@@ -628,6 +628,11 @@ namespace FrameTL
   
   
     return 4.0*tmp + r;
+#endif
+#ifndef TWO_D
+#ifndef ONE_D
+    return 0;
+#endif
 #endif
   }
 

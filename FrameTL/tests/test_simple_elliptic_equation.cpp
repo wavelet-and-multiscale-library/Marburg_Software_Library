@@ -58,7 +58,7 @@ int main()
   //typedef SplineBasis<d,dT,P_construction> Basis1D;
 
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
-  typedef CubeBasis<Basis1D> Basis;
+  //typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
 
   EvaluateFrame<Basis1D,2,2> evalObj;

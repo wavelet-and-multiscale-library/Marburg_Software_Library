@@ -51,7 +51,7 @@ template <class C>
 
     SparseMatrix<C> S = SparseMatrix<C>(v.size());
 
-    for(int i=0; i< v.size(); i++)
+    for(unsigned int i=0; i< v.size(); i++)
       S.set_entry( 0, i, v[i]);
 
     S.matlab_output("Rhs_2D_jmax5_b3_mod", "Matrix", 1);
@@ -79,10 +79,10 @@ int main()
   //typedef DSBasis<4,6> Basis1D;
   typedef PBasis<3,3> Basis1D;
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
-  typedef CubeBasis<Basis1D> Basis;
+  //typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
 
-  EvaluateFrame<Basis1D,2,2> evalObj;
+  //EvaluateFrame<Basis1D,2,2> evalObj;
 
   //##############################  
   Matrix<double> A(DIM,DIM);

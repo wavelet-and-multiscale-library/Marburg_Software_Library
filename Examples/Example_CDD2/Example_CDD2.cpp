@@ -87,7 +87,7 @@ int main()
     typedef Basis::Index Index;  /* (just an abbreviation) */
 
     /* set maximal available level within wavelet basis */
-    const int jmax = 8;
+    const int jmax = 12;
     basis.set_jmax(jmax);
 
     cout << "Wavelet basis setup done (maximal level = "<< jmax <<")."<< endl;

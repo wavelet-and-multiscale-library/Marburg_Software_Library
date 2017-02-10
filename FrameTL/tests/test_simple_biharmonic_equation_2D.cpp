@@ -129,7 +129,7 @@ int main()
   typedef AdaptedBasis<SBasis> Basis1D;
   #endif
   typedef AggregatedFrame<Basis1D,2,2> Frame2D;
-  typedef CubeBasis<Basis1D> Basis;
+  //typedef CubeBasis<Basis1D> Basis;
   typedef Frame2D::Index Index;
 
   //##############################  

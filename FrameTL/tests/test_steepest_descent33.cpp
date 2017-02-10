@@ -116,7 +116,7 @@ int main()
   //typedef DSBasis<3,3> Basis1D;
   typedef PBasis<d,dT> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
-  typedef CubeBasis<Basis1D,1> IntervalBasis;
+  //typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
 
 

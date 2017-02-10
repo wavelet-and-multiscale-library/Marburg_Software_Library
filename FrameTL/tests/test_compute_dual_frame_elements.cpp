@@ -126,7 +126,7 @@ int main()
   typedef DSBasis<d,dt> Basis1D;
   //typedef PBasis<2,4> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
-  typedef CubeBasis<Basis1D,1> IntervalBasis;
+  //typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
 
   //##############################  
@@ -229,7 +229,7 @@ int main()
   //############### 1D galerkin scheme test ##################
 #if 1
 
-  int z = 0;
+  //int z = 0;
   set<Index> Lambda;
   for (Index lambda = FrameTL::first_generator<Basis1D,1,1,Frame1D>(&frame, frame.j0());
        lambda <= FrameTL::last_wavelet<Basis1D,1,1,Frame1D>(&frame, frame.j0()+4); ++lambda) {
@@ -247,8 +247,8 @@ int main()
   WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, gramian);
   //WaveletTL::setup_stiffness_matrix(problem, Lambda, gramian);  
   // symmetry check
-  for (int i = 0; i < Lambda.size() ; i++) 
-    for (int j = 0; j < Lambda.size()  ; j++) {
+  for (unsigned int i = 0;i < Lambda.size() ; i++) 
+    for (unsigned int j = 0; j < Lambda.size()  ; j++) {
       if (! (fabs(gramian.get_entry(i,j) -  gramian.get_entry(j,i)) < 1.0e-13)) {
 	cout << gramian.get_entry(i,j) << endl;
 	cout << gramian.get_entry(j,i) << endl;

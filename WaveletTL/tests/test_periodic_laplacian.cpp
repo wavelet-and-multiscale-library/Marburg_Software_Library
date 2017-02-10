@@ -255,8 +255,8 @@ int main(int argc, char** argv) {
 #endif
 
     #if 1
-  string filenameCoefficients2[3] = {"laplacian_solution_coefficients_p_0_ad.m", "laplacian_solution_coefficients_p_1_ad.m",
-  "laplacian_solution_coefficients_p_2_ad.m"};
+  string filenameCoefficients2[3] = {"Matlab_outputs/laplacian_solution_coefficients_p_0_ad.m", "Matlab_outputs/laplacian_solution_coefficients_p_1_ad.m",
+  "Matlab_outputs/laplacian_solution_coefficients_p_2_ad.m"};
   
 //  string filenameCoefficients2[1] = {"sturm_bvp_solution_coefficients_p_0_ad.m"};
   
@@ -275,7 +275,7 @@ int main(int argc, char** argv) {
     
      u_epsilon.scale(&cachedL,-1);
     SampledMapping<1> sm3(basis.evaluate(u_epsilon, 8, normalization));
-    std::ofstream u_stream3("plot_adaptiveperiodicsolution.m");
+    std::ofstream u_stream3("Matlab_outputs/plot_adaptiveperiodicsolution.m");
     sm3.matlab_output(u_stream3);
     u_stream3 << "figure;\nplot(x,y);"
             << "title('adaptive solution of the laplacian, pmax= " << pmax << ", jmax=" << jmax << ", d=" << d << ", dT=" << dT << "')" << endl;

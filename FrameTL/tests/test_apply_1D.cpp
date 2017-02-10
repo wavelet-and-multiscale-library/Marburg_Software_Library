@@ -108,11 +108,11 @@ int main()
   //typedef DSBasis<2,2> Basis1D;
   typedef PBasis<3,3> Basis1D;
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
-  typedef CubeBasis<Basis1D,1> IntervalBasis;
+  //typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
-  typedef Basis1D::Index IIndex;
+  //typedef Basis1D::Index IIndex;
 
-  EvaluateFrame<Basis1D,1,1> evalObj;
+  //EvaluateFrame<Basis1D,1,1> evalObj;
 
   //##############################  
   Matrix<double> A(DIM,DIM);
@@ -268,7 +268,7 @@ int main()
   int step = 1;
   map<double,double> asymptotic;
   map<double,double> alltime;
-  double time = 0;
+  //double time = 0;
   for (int i = 0; i < 1000; i++) {
     
     //APPLY(problem, w, eta, w_res1, jmax, CDD1);

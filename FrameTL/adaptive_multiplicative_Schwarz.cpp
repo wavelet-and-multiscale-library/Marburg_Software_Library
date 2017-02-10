@@ -404,7 +404,7 @@ namespace FrameTL
     typedef typename PROBLEM::WaveletBasis::IntervalBasis Basis1D;
     const int jmax = JMAX;
     typedef typename PROBLEM::Index Index;
-    typedef typename PROBLEM::WaveletBasis Frame;
+    //typedef typename PROBLEM::WaveletBasis Frame;
 
     int d  = Basis1D::primal_polynomial_degree();
     int dT = Basis1D::primal_vanishing_moments();

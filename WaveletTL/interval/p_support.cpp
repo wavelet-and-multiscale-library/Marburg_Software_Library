@@ -633,7 +633,7 @@ namespace WaveletTL
             }
             // find last inner wavelet that intersects
             // biggest n such that 2^{-j}n < 2^{-j_lambda}k2_lambda <= 2^{-j}(n+1)
-            n = (j < j_lambda) ? (k2_lambda / (1<<(j_lambda-j)) + (((k2_lambda % (1<<j_lambda-j)) == 0)?0:1) ) -1 
+            n = (j < j_lambda) ? (k2_lambda / (1<<(j_lambda-j)) + (((k2_lambda % (1<<(j_lambda-j))) == 0)?0:1) ) -1 
                                : (k2_lambda << (j-j_lambda)) -1;
             /*
             // again some clear, but slightly slower code:

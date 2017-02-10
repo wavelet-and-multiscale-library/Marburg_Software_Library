@@ -787,8 +787,8 @@ namespace WaveletTL
       typedef typename Index::type_type generator_type;
       int j = (lambda.e() == generator_type()) ? (lambda.j()-1) : lambda.j();
       
-      // check wether entry has already been computed
-      typedef std::list<Index> IntersectingList;
+      
+      
 
       // search for column 'mu'
       typename ColumnCache::iterator col_lb(entries_cache[p].lower_bound(nu_num));
@@ -831,7 +831,9 @@ namespace WaveletTL
 	  typedef typename Column::value_type value_type;
 	  it = col.insert(lb, value_type(j, Block()));
 
-	  Block& block(it->second);	  
+	  Block& block(it->second);
+
+          typedef std::list<Index> IntersectingList;
 	  IntersectingList nus;
 	  
 	  intersecting_wavelets_on_patch(basis(), nu,

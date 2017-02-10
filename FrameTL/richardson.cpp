@@ -60,7 +60,7 @@ namespace FrameTL
     cout << "Rich_SOLVE: omega=" << omega << endl;
 
     // compute spectral norm rho
-    const double cond_A = P.norm_A() * P.norm_Ainv();
+    //const double cond_A = P.norm_A() * P.norm_Ainv();
     //const double rho = (cond_A - 1.0) / (cond_A + 1.0);
     const double rho = 0.8;
     cout << "Rich_SOLVE: rho=" << rho << endl;

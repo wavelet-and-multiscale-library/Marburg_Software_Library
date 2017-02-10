@@ -737,7 +737,7 @@ namespace MathTL
   {
       int r = 1+rowend-rowstart, c = 1+columnend-columnstart; // number of rows/columns
       
-    assert ((rowstart >= 0)&&(rowend < row_dimension()) && (columnstart >= 0) && (columnend < column_dimension()));
+    assert ((rowstart >= 0)&&((unsigned)rowend < row_dimension()) && (columnstart >= 0) && ((unsigned)columnend < column_dimension()));
     if (binary)
       {
 	unsigned int i,j;
@@ -776,17 +776,17 @@ namespace MathTL
 
         // compute the number of nontrivial entries
         int l(0);
-        for (i=rowstart; i <= rowend; ++i)
+        for (i=rowstart; i <= (unsigned)rowend; ++i)
         {
             if (indices_[i])
             {
                 for (j = 1; j <=indices_[i][0];++j)
                 {
-                    if (indices_[i][j] > columnend)
+                    if (indices_[i][j] > (unsigned)columnend)
                     {
                         break;
                     }
-                    if (indices_[i][j] >= columnstart)
+                    if (indices_[i][j] >= (unsigned)columnstart)
                     {
                         ++l;
                     }
@@ -798,7 +798,7 @@ namespace MathTL
 	bin_file.write((char*)(&c), sizeof(int));
 	bin_file.write((char*)(&l), sizeof(int));
 
-	for (i=rowstart; i<=rowend; i++)
+	for (i=rowstart; i<=(unsigned)rowend; i++)
         {
 	    if (indices_[i])
             {
@@ -806,11 +806,11 @@ namespace MathTL
 
 		for (j=1; j<=indices_[i][0]; j++)
                 {
-                    if (indices_[i][j] > columnend)
+                    if (indices_[i][j] > (unsigned)columnend)
                     {
                         break;
                     }
-                    if (indices_[i][j] >= columnstart)
+                    if (indices_[i][j] >= (unsigned)columnstart)
                     {
                         bin_file.write((char*)(&ii), sizeof(int));
                     }
@@ -818,7 +818,7 @@ namespace MathTL
             }
         }
 
-	for (i=rowstart; i<=rowend; i++)
+	for (i=rowstart; i<=(unsigned)rowend; i++)
 	{
 	    if (indices_[i])
 	    {
@@ -827,11 +827,11 @@ namespace MathTL
 		for (j=1; j<=indices_[i][0]; j++)
 		{
                     //int tempi = indices_[i][j];
-                    if (indices_[i][j] > columnend)
+                    if (indices_[i][j] > (unsigned)columnend)
                     {
                         break;
                     }
-                    if (indices_[i][j] >= columnstart)
+                    if (indices_[i][j] >= (unsigned)columnstart)
                     {
                         int jj=indices_[i][j]+1-columnstart;
                         //cout << jj << " ";
@@ -842,18 +842,18 @@ namespace MathTL
 	    }
 	}   
 
-        for (i=rowstart; i<=rowend; i++)
+        for (i=rowstart; i<=(unsigned)rowend; i++)
 	{
             if (indices_[i])
             {
                 //bin_file.write((char*)(entries_[i]), indices_[i][0]*sizeof(C));
                 for (j=1; j<=indices_[i][0]; j++)
 		{
-                    if (indices_[i][j] > columnend)
+                    if (indices_[i][j] > (unsigned)columnend)
                     {
                         break;
                     }
-                    if (indices_[i][j] >= columnstart)
+                    if (indices_[i][j] >= (unsigned)columnstart)
                     {
                         C temp(entries_[i][j-1]);
                         bin_file.write((char*)(&temp), sizeof(C));
@@ -884,15 +884,15 @@ namespace MathTL
 	 
 	s << Matrixname << "=sparse(" << (r) << "," << (c) << ");" << endl;
 	
-	for (i=rowstart; i<=rowend; i++) {
+	for (i=rowstart; i<=(unsigned)rowend; i++) {
 	  if (indices_[i]) {
 	    for (j = 1; j <= indices_[i][0]; j++)
             {
-                if (indices_[i][j] > columnend)
+                if (indices_[i][j] > (unsigned)columnend)
                 {
                     break;
                 }
-                if (indices_[i][j] >= columnstart)
+                if (indices_[i][j] >= (unsigned)columnstart)
                 {
                     s << Matrixname << "(" << i+1 << "," << indices_[i][j]+1 << ")="
                       << entries_[i][j-1] << ";" << endl;

@@ -68,9 +68,9 @@ int main()
   typedef PBasis<3,3> Basis1D;
   #endif
   typedef AggregatedFrame<Basis1D,1,1> Frame1D;
-  typedef CubeBasis<Basis1D,1> IntervalBasis;
+  //typedef CubeBasis<Basis1D,1> IntervalBasis;
   typedef Frame1D::Index Index;
-  typedef Basis1D::Index IIndex;
+  //typedef Basis1D::Index IIndex;
 
   EvaluateFrame<Basis1D,1,1> evalObj;
 

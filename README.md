@@ -7,6 +7,7 @@ As a good starting point we recommend to take a look at the Examples folder whic
 While for the other implemented algorithms it takes some basic c++ knowledge to specify the latter, these are essentially all the configurations the user needs to handle for the algorithms to work properly.  
 The in parctice very efficient frame schemes based on domain decompositions, e.g., the multiplicative Schwarz algorithm, can be found in the folder FrameTL/tests (see [We], [DFRSW], [DFPRW], [DFR] for the theoretical background).  
 In WaveletTL/tests there are implementations of the quarklet frame schemes as outlined in [DKR].
+During the execution of every algorithm there will be produced matlab plots of the solution and the solution indices to be stored in the respective tests/Matlab_outputs folder.
 We give a short overview of the available schemes and where to find them:
 
 

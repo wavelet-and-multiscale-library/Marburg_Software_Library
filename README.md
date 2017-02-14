@@ -7,9 +7,9 @@ As a good starting point we recommend to take a look at the Examples folder whic
 While for the other implemented algorithms it takes some basic c++ knowledge to specify the latter, these are essentially all the configurations the user needs to handle for the algorithms to work properly. We give a short overview of the available schemes and where to find them:
 
 
-Wavelet schemes in 1D:
-Examples/Example_CDD1/Example_CDD1.cpp
-Examples/Example_CDD2/Example_CDD2.cpp
+Wavelet schemes in 1D:  
+Examples/Example_CDD1/Example_CDD1.cpp  
+Examples/Example_CDD2/Example_CDD2.cpp  
 Examples/SturmBVP_Solver_v1.0 (GUI)
 
 Quarklet schemes in 1D:

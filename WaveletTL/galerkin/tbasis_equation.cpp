@@ -51,7 +51,7 @@ namespace WaveletTL
         // precompute the right-hand side on a fine level
         InfiniteVector<double,Index> fhelp;
         fnorm_sqr = 0;
-        for (unsigned int i = 0; i< basis_.degrees_of_freedom();i++)
+        for (unsigned int i = 0; (int)i< basis_.degrees_of_freedom();i++)
         {
             const double coeff = f(basis_.get_wavelet(i)) / D(basis_.get_wavelet(i));
             if (fabs(coeff)>1e-15)

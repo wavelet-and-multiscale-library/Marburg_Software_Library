@@ -399,7 +399,7 @@ namespace WaveletTL
                                         InfiniteVector<double,Index>& coeffs) const
   	{
             assert(primal == false); // only integrate against primal wavelets and generators
-            for (unsigned int i=0; i<degrees_of_freedom(); i++)
+            for (unsigned int i=0; (int)i<degrees_of_freedom(); i++)
             {
                 const double coeff = integrate(f, full_collection[i]);
                 if (fabs(coeff)>1e-15)

@@ -7,13 +7,13 @@ namespace WaveletTL
             const InfiniteVector<double, typename TENSORBASIS::Index>& coeffs,
             const int maxrange,
             std::ostream& os,
-            const char* colormap = "cool",
-            bool boxed = false,
-            bool colorbar = true,
-            const double aa = -6)
+            const char* colormap,
+            bool boxed,
+            bool colorbar,
+            const double aa)
     {
         typedef typename TENSORBASIS::Index Index;
-        typedef typename TENSORBASIS::IntervalBasis Basis1D;
+//        typedef typename TENSORBASIS::IntervalBasis Basis1D;
         typedef typename Index::level_type level_type;
         typedef typename Index::type_type type_type;
         typedef typename Index::translation_type translation_type;

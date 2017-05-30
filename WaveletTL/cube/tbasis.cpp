@@ -264,7 +264,7 @@ namespace WaveletTL
             last_wavelets[0] = TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(temp_j, temp_e, temp_k, this);
             ++level_it;
             ++l;
-            while (l < numoflevels)
+            while ((int)l < numoflevels)
             {
                 //cout << "level_it == " << level_it << "; l == " << l <<  endl;
                 for (unsigned int i = 0; i < DIM; i++) 

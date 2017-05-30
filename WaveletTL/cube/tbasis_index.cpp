@@ -793,7 +793,7 @@ namespace WaveletTL
   	TensorIndex<IBASIS,DIM,TENSORBASIS>&
   	TensorIndex<IBASIS,DIM,TENSORBASIS>::operator ++ ()
   	{
-            if (num_ == -1) return *this;
+            if ((int)num_ == -1) return *this;
             level_type j0(basis_->j0());
             num_++;
             // determine next translation index
@@ -972,7 +972,7 @@ namespace WaveletTL
         first_wavelet(const TENSORBASIS* basis, const int level)
         {
 #if _TBASIS_DEBUGLEVEL_ >= 1
-            assert(level >= multi_degree(basis->j0()) );
+            assert(level >= (int)multi_degree(basis->j0()) );
 #endif
             typename TensorIndex<IBASIS,DIM,TENSORBASIS>::level_type j;
             typename TensorIndex<IBASIS,DIM,TENSORBASIS>::type_type e;

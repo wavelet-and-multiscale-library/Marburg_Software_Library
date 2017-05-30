@@ -125,7 +125,7 @@ namespace WaveletTL
     Grid<DIM> grid(Point<DIM>(0), Point<DIM>(1), 1<<resolution);
     SampledMapping<DIM> result(grid); // zero
 
-    typedef typename TensorBasis<IBASIS,DIM>::Index Index;
+//    typedef typename TensorBasis<IBASIS,DIM>::Index Index;
     for (typename InfiniteVector<double,int>::const_iterator it(coeffs.begin()),
 	   itend(coeffs.end()); it != itend; ++it)
            {

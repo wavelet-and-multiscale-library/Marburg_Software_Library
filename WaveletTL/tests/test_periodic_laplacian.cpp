@@ -255,15 +255,14 @@ int main(int argc, char** argv) {
 #endif
 
     #if 1
-  string filenameCoefficients2[3] = {"Matlab_outputs/laplacian_solution_coefficients_p_0_ad.m", "Matlab_outputs/laplacian_solution_coefficients_p_1_ad.m",
-  "Matlab_outputs/laplacian_solution_coefficients_p_2_ad.m"};
+  
   
 //  string filenameCoefficients2[1] = {"sturm_bvp_solution_coefficients_p_0_ad.m"};
   
   for(int p=0;p<=pmax;p++){
-  const char* cstr = filenameCoefficients2[p].c_str();
-  cout << filenameCoefficients2[p] << endl;
-  std::ofstream coeff_stream2 (cstr);
+    char filenameCoefficients2[128];
+    sprintf(filenameCoefficients2, "%s%d%s", "Matlab_outputs/laplacian_solution_coefficients_p_" , p , "_ad.m");
+    std::ofstream coeff_stream2 (filenameCoefficients2);
   coeff_stream2 << "figure;" << endl;
   plot_indices2(&basis, u_epsilon, jmax, coeff_stream2, p, "jet", false, true, -8);
   coeff_stream2 << "title('adaptive coefficients on the level p=" << p <<" of the test problem ("

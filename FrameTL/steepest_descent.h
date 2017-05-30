@@ -17,7 +17,7 @@ namespace FrameTL
   
   /*!
     \file steepest_descent.h
-    The adaptive steepeste descent wavelet frame algorithm from Dahlke,
+    The adaptive steepest descent wavelet frame algorithm from Dahlke,
     Fornasier, Raasch, Stevenson, Werner 2007
    */
 

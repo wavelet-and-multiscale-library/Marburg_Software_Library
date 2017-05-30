@@ -289,11 +289,11 @@ int main()
   Array1D<SampledMapping<2> > Error = evalObj.evaluate_difference(frame, approximations[frame.n_p()], sing2D, 6);
   cout << "done plotting pointwise error" << endl;
 
-  std::ofstream ofs5("./sd_results2D_33/approx_sol_steep_2D_out.m");
+  std::ofstream ofs5("Matlab_outputs/approx_sol_steep_2D_out.m");
   matlab_output(ofs5,U);
   ofs5.close();
 
-  std::ofstream ofs6("./sd_results2D_33/error_steep_2D_out.m");
+  std::ofstream ofs6("Matlab_outputs/error_steep_2D_out.m");
   matlab_output(ofs6,Error);
   ofs6.close();
 
@@ -301,7 +301,7 @@ int main()
     cout << "plotting local approximation on patch " << i << endl;
 
     char filename3[128];
-    sprintf(filename3, "%s%d%s%d%s%d%s", "./sd_results2D_33/approx2Dsteep_local_on_patch_" , i , "_d" , d ,  "_dT", dT, ".m");
+    sprintf(filename3, "%s%d%s%d%s%d%s", "Matlab_outputs/approx2Dsteep_local_on_patch_" , i , "_d" , d ,  "_dT", dT, ".m");
 
     U = evalObj.evaluate(frame, approximations[i], true, 6);//expand in primal basis
     std::ofstream ofsloc(filename3);
@@ -310,7 +310,7 @@ int main()
     ofsloc.close();
   
   }
-  cout << "potting sets of active wavelet indices..." << endl;
+  cout << "plotting sets of active wavelet indices..." << endl;
   Array1D<InfiniteVector<double, CIndex> > approximations_cube(frame.n_p());
   
   // convert indices to CubeIndices
@@ -318,7 +318,7 @@ int main()
     MappedBasis* mapped_basis = frame.bases()[i];
     std::ofstream plotstream;
     char filename4[50];
-    sprintf(filename4, "%s%d%s%d%s%d%s", "./sd_results2D_33/coefficient_plot_2D_patch_" , i , "_d" , d ,  "_dT", dT, ".m");
+    sprintf(filename4, "%s%d%s%d%s%d%s", "Matlab_outputs/coefficient_plot_2D_patch_" , i , "_d" , d ,  "_dT", dT, ".m");
     plotstream.open(filename4);
     for (InfiniteVector<double, Index>::const_iterator it = approximations[frame.n_p()].begin(),
 	   itend = approximations[frame.n_p()].end(); it != itend; ++it)

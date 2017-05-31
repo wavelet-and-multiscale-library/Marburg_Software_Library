@@ -159,6 +159,8 @@ int main()
     if (dim > 1) cout << " " << basis.bases()[1]->Nablasize(basis.j0()[1]+3);
     if (dim > 2) cout << " " << basis.bases()[2]->Nablasize(basis.j0()[2]+3);  cout << endl;
     
+    
+    
 #if 1
     // some output for debugging
     for (unsigned int i=0; i<TBasisArray[0]->degrees_of_freedom(); ++i)

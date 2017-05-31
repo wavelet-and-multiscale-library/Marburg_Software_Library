@@ -1,30 +1,33 @@
-// implementation for tbasis.h
+
+#include "tframe_index.h"
+
+// implementation for tframe.h
 
 namespace WaveletTL
 {
-  	template <class IBASIS, unsigned int DIM>
-  	TensorBasis<IBASIS,DIM>::TensorBasis()
-    : bases_()
+  	template <class IFRAME, unsigned int DIM>
+  	TensorFrame<IFRAME,DIM>::TensorFrame()
+    : frames_()
 	{
-    	// we only need one instance of IBASIS, without b.c.
-    	IBASIS* b = new IBASIS();
-    	bases_infact.push_back(b);
+    	// we only need one instance of IFRAME, without b.c.
+    	IFRAME* b = new IFRAME();
+    	frames_infact.push_back(b);
     	for (unsigned int i = 0; i < DIM; i++)
-            bases_[i] = b;                    
+            frames_[i] = b;                    
         j0_[0] = b->j0();
         for (unsigned int i = 1; i < DIM; i++)
             j0_[i] = j0_[0];
     	delete_pointers = true;
   	}
 
-/* Works only with DSBasis, but not with PBasis : 
-  	template <class IBASIS, unsigned int DIM>
-  	TensorBasis<IBASIS,DIM>::TensorBasis(const FixedArray1D<int,2*DIM>& s, const FixedArray1D<int,2*DIM>& sT)
+/* Works only with DSFrame, but not with PFrame : 
+  	template <class IFRAME, unsigned int DIM>
+  	TensorFrame<IFRAME,DIM>::TensorFrame(const FixedArray1D<int,2*DIM>& s, const FixedArray1D<int,2*DIM>& sT)
 	{
     	for (unsigned int i = 0; i < DIM; i++) {
-      		// check whether the corresponding 1d basis already exists
-      		IBASIS* b = 0;
-      		for (typename list<IBASIS*>::const_iterator it(bases_infact.begin()); it != bases_infact.end(); ++it)
+      		// check whether the corresponding 1d frame already exists
+      		IFRAME* b = 0;
+      		for (typename list<IFRAME*>::const_iterator it(frames_infact.begin()); it != frames_infact.end(); ++it)
                 {
                     if ((*it)->get_s0() == s[2*i]
                             && (*it)->get_s1() == s[2*i+1]
@@ -35,22 +38,22 @@ namespace WaveletTL
                     }
       		}
       		if (b == 0) {
-				//b = new IBASIS("",s[2*i], s[2*i+1], sT[2*i], sT[2*i+1]);
-				b = new IBASIS(s[2*i], s[2*i+1], sT[2*i], sT[2*i+1]);
-				bases_infact.push_back(b);
+				//b = new IFRAME("",s[2*i], s[2*i+1], sT[2*i], sT[2*i+1]);
+				b = new IFRAME(s[2*i], s[2*i+1], sT[2*i], sT[2*i+1]);
+				frames_infact.push_back(b);
       		}
-      		bases_[i] = b;
+      		frames_[i] = b;
       		j0_[i] = b->j0();
     	}
     	delete_pointers = true;
   	}
 */
-  	template <class IBASIS, unsigned int DIM>
-  	TensorBasis<IBASIS,DIM>::TensorBasis(const FixedArray1D<int,2*DIM>& s) {
+  	template <class IFRAME, unsigned int DIM>
+  	TensorFrame<IFRAME,DIM>::TensorFrame(const FixedArray1D<int,2*DIM>& s) {
     	for (unsigned int i = 0; i < DIM; i++) {
-      		// check whether the corresponding 1d basis already exists
-      		IBASIS* b = 0;
-      		for (typename list<IBASIS*>::const_iterator it(bases_infact.begin()); it != bases_infact.end(); ++it) {
+      		// check whether the corresponding 1d frame already exists
+      		IFRAME* b = 0;
+      		for (typename list<IFRAME*>::const_iterator it(frames_infact.begin()); it != frames_infact.end(); ++it) {
       			if ((*it)->get_s0() == s[2*i]
 	    			&& (*it)->get_s1() == s[2*i+1]) {
 	  				b = *it;
@@ -58,21 +61,21 @@ namespace WaveletTL
 				}
       		}
       		if (b == 0) {
-				b = new IBASIS(s[2*i], s[2*i+1]);
-				bases_infact.push_back(b);
+				b = new IFRAME(s[2*i], s[2*i+1]);
+				frames_infact.push_back(b);
       		}
-      		bases_[i] = b;
+      		frames_[i] = b;
       		j0_[i] = b->j0();
     	}
     	delete_pointers = true;
   	}
 
-  	template <class IBASIS, unsigned int DIM>
-  	TensorBasis<IBASIS,DIM>::TensorBasis(const FixedArray1D<bool,2*DIM>& bc) {
+  	template <class IFRAME, unsigned int DIM>
+  	TensorFrame<IFRAME,DIM>::TensorFrame(const FixedArray1D<bool,2*DIM>& bc) {
     	for (unsigned int i = 0; i < DIM; i++) {
-      		// check whether the corresponding 1d basis already exists
-      		IBASIS* b = 0;
-      		for (typename list<IBASIS*>::const_iterator it(bases_infact.begin()); it != bases_infact.end(); ++it) {
+      		// check whether the corresponding 1d frame already exists
+      		IFRAME* b = 0;
+      		for (typename list<IFRAME*>::const_iterator it(frames_infact.begin()); it != frames_infact.end(); ++it) {
 				if (((*it)->get_s0()==1) == bc[2*i]
 	    			&& ((*it)->get_s1()==1) == bc[2*i+1]) {
 	  				b = *it;
@@ -80,37 +83,37 @@ namespace WaveletTL
 				}
       		}
       		if (b == 0) {
-				b = new IBASIS(bc[2*i], bc[2*i+1]);
-				bases_infact.push_back(b);
+				b = new IFRAME(bc[2*i], bc[2*i+1]);
+				frames_infact.push_back(b);
       		}
-      		bases_[i] = b;
+      		frames_[i] = b;
       		j0_[i] = b->j0();
     	}
     	delete_pointers = true;
   	}
 
-  	template <class IBASIS, unsigned int DIM>
-  	TensorBasis<IBASIS,DIM>::TensorBasis(const FixedArray1D<IBASIS*,DIM> bases) {
+  	template <class IFRAME, unsigned int DIM>
+  	TensorFrame<IFRAME,DIM>::TensorFrame(const FixedArray1D<IFRAME*,DIM> frames) {
     	for (unsigned int i = 0; i < DIM; i++) {
-      		bases_[i] = bases[i];
-      		j0_[i] = bases_[i]->j0();
+      		frames_[i] = frames[i];
+      		j0_[i] = frames_[i]->j0();
     	}
     	delete_pointers = false;
   	}
 
-  	template <class IBASIS, unsigned int DIM>
-  	TensorBasis<IBASIS,DIM>::~TensorBasis()
+  	template <class IFRAME, unsigned int DIM>
+  	TensorFrame<IFRAME,DIM>::~TensorFrame()
   	{
 	    if (delete_pointers) {
-			for (typename list<IBASIS*>::const_iterator it(bases_infact.begin()); it != bases_infact.end(); ++it)
+			for (typename list<IFRAME*>::const_iterator it(frames_infact.begin()); it != frames_infact.end(); ++it)
 				delete *it;
             }
   	}
 
 
-	template <class IBASIS, unsigned int DIM>
+	template <class IFRAME, unsigned int DIM>
   	void
-  	TensorBasis<IBASIS,DIM>::support(const Index& lambda, Support& supp) const
+  	TensorFrame<IFRAME,DIM>::support(const Index& lambda, Support& supp) const
   	{
             // PERFORMANCE?
             typename Index::level_type temp_j = lambda.j();
@@ -119,7 +122,7 @@ namespace WaveletTL
             for (unsigned int i(0); i < DIM; i++) {
                 supp.j[i] = temp_j[i]+temp_e[i];
                 //supp.j[i] = lambda.j()[i] + lambda.e()[i];
-                bases()[i]->support(temp_j[i],
+                frames()[i]->support(temp_j[i],
                                     temp_e[i],
                                     lambda.k()[i],
                                     supp.a[i],
@@ -127,67 +130,67 @@ namespace WaveletTL
             }
   	}
   
-        template <class IBASIS, unsigned int DIM>
-        typename TensorBasis<IBASIS,DIM>::Index
-        TensorBasis<IBASIS,DIM>::first_generator() const
+        template <class IFRAME, unsigned int DIM>
+        typename TensorFrame<IFRAME,DIM>::Index
+        TensorFrame<IFRAME,DIM>::first_generator(const typename Index::polynomial_type p) const
         {
             typename Index::type_type e;
             typename Index::translation_type k;
             for (unsigned int i = 0; i < DIM; i++) {
                 e[i]=0;
-                k[i]=bases_[i]->DeltaLmin();
+                k[i]=frames_[i]->DeltaLmin();
             }
-            return Index(j0_, e, k, 0, this);
+            return Index(p, j0_, e, k, 0, this);
         }
 
-        template <class IBASIS, unsigned int DIM>
-        typename TensorBasis<IBASIS,DIM>::Index
-        TensorBasis<IBASIS,DIM>::first_generator(const unsigned int j) const
+        template <class IFRAME, unsigned int DIM>
+        typename TensorFrame<IFRAME,DIM>::Index
+        TensorFrame<IFRAME,DIM>::first_generator(const unsigned int j, const typename Index::polynomial_type p) const
         {
             typename Index::type_type e;
             typename Index::translation_type k;
             for (unsigned int i = 0; i < DIM; i++) {
                 e[i]=0;
-                k[i]=bases_[i]->DeltaLmin();
+                k[i]=frames_[i]->DeltaLmin();
             }
-            return Index(j0_, e, k, 0,  this);
+            return Index(p, j0_, e, k, 0,  this);
         }
 
-        template <class IBASIS, unsigned int DIM>
-        typename TensorBasis<IBASIS,DIM>::Index
-        TensorBasis<IBASIS,DIM>::first_generator(const MultiIndex<int,DIM> j) const
+        template <class IFRAME, unsigned int DIM>
+        typename TensorFrame<IFRAME,DIM>::Index
+        TensorFrame<IFRAME,DIM>::first_generator(const MultiIndex<int,DIM> j, const typename Index::polynomial_type p) const
         {
             typename Index::type_type e;
             typename Index::translation_type k;
             for (unsigned int i = 0; i < DIM; i++) {
                 e[i]=0;
-                k[i]=bases_[i]->DeltaLmin();
+                k[i]=frames_[i]->DeltaLmin();
             }
-            return Index(j0_, e, k, 0, this);
+            return Index(p, j0_, e, k, 0, this);
         }
 
-        template <class IBASIS, unsigned int DIM>
-        typename TensorBasis<IBASIS,DIM>::Index
-        TensorBasis<IBASIS,DIM>::last_generator() const
+        template <class IFRAME, unsigned int DIM>
+        typename TensorFrame<IFRAME,DIM>::Index
+        TensorFrame<IFRAME,DIM>::last_generator(const typename Index::polynomial_type p) const
         {
-            typename TensorIndex<IBASIS,DIM,TensorIndex<IBASIS,DIM> >::type_type e;
-            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::translation_type k;
+            typename Index::type_type e;
+            typename Index::translation_type k;
             for (unsigned int i = 0; i < DIM; i++)
             {
                 e[i] = 0;
-                k[i] = bases_[i]->DeltaRmax(j0_[i]);
+                k[i] = frames_[i]->DeltaRmax(j0_[i]);
             }
             int res=1;
             for (unsigned int i = 0; i < DIM; i++)
-                res *= bases_[i]->Deltasize(j0_[i]);
-            return TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(j0_, e, k, (res-1), this);
+                res *= frames_[i]->Deltasize(j0_[i]);
+            return Index(p, j0_, e, k, (res-1), this);
         }
 
 #if _PRECOMPUTE_FIRSTLAST_WAVELETS
                
-        template <class IBASIS, unsigned int DIM>
-        typename TensorBasis<IBASIS,DIM>::Index
-        TensorBasis<IBASIS,DIM>::first_wavelet(const MultiIndex<int,DIM> j) const
+        template <class IFRAME, unsigned int DIM>
+        typename TensorFrame<IFRAME,DIM>::Index
+        TensorFrame<IFRAME,DIM>::first_wavelet(const MultiIndex<int,DIM> j) const
         {
             MultiIndex<int,DIM> temp_mi(j);
             for (unsigned int i=0; i<DIM; ++i)
@@ -195,18 +198,18 @@ namespace WaveletTL
             return first_wavelets[temp_mi.number()];
         }
         
-        template <class IBASIS, unsigned int DIM>
-        typename TensorBasis<IBASIS,DIM>::Index
-        TensorBasis<IBASIS,DIM>::first_wavelet(const int levelsum) const
+        template <class IFRAME, unsigned int DIM>
+        typename TensorFrame<IFRAME,DIM>::Index
+        TensorFrame<IFRAME,DIM>::first_wavelet(const int levelsum) const
         {            
             MultiIndex<int,DIM> temp_mi;
             temp_mi[0] = levelsum - multi_degree(j0_);
             return first_wavelets[temp_mi.number()];
         }
         
-        template <class IBASIS, unsigned int DIM>
-        typename TensorBasis<IBASIS,DIM>::Index
-        TensorBasis<IBASIS,DIM>::last_wavelet(const MultiIndex<int,DIM> j) const
+        template <class IFRAME, unsigned int DIM>
+        typename TensorFrame<IFRAME,DIM>::Index
+        TensorFrame<IFRAME,DIM>::last_wavelet(const MultiIndex<int,DIM> j) const
         {            
             MultiIndex<int,DIM> temp_mi(j);
             for (unsigned int i=0; i<DIM; ++i)
@@ -214,9 +217,9 @@ namespace WaveletTL
             return last_wavelets[temp_mi.number()];
         }
         
-        template <class IBASIS, unsigned int DIM>
-        typename TensorBasis<IBASIS,DIM>::Index
-        TensorBasis<IBASIS,DIM>::last_wavelet(const int levelsum) const
+        template <class IFRAME, unsigned int DIM>
+        typename TensorFrame<IFRAME,DIM>::Index
+        TensorFrame<IFRAME,DIM>::last_wavelet(const int levelsum) const
         {
             MultiIndex<int,DIM> temp_mi;
             temp_mi[0] = levelsum - multi_degree(j0_);
@@ -224,9 +227,9 @@ namespace WaveletTL
         }
         
                 
-        template <class IBASIS, unsigned int DIM>
+        template <class IFRAME, unsigned int DIM>
         void
-        TensorBasis<IBASIS,DIM>::precompute_firstlast_wavelets()
+        TensorFrame<IFRAME,DIM>::precompute_firstlast_wavelets()
         {
             MultiIndex<int,DIM> level_it;
             level_it[0] = jmax_ - multi_degree(j0_);
@@ -234,34 +237,41 @@ namespace WaveletTL
             level_it[0] = 0;
             first_wavelets.resize(numoflevels);
             last_wavelets.resize(numoflevels);
-            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::level_type temp_j(j0_);
-            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::type_type temp_e;
-            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::translation_type temp_k;
+            typename Index::polynomial_type temp_p;
+            typename Index::level_type temp_j(j0_);
+            typename Index::type_type temp_e;
+            typename Index::translation_type temp_k;
+            
+            
             
             // first_level
             unsigned int l = 0;
             if (DIM == 1)
             {
+                temp_p[0] = 0;
                 temp_e[0] = 1;
-                temp_k[0] = bases_[0]->Nablamin();
+                temp_k[0] = frames_[0]->Nablamin();
             }
             else
             {
                 for (unsigned int i = 0; i < DIM-1; i++) 
                 {
+                    temp_p[i] = 0;
                     temp_e[i] = 0;
-                    temp_k[i] = bases_[i]->DeltaLmin();
+                    temp_k[i] = frames_[i]->DeltaLmin();
                 }
+                temp_p[DIM-1] = 0;
                 temp_e[DIM-1] = 1;
-                temp_k[DIM-1] = bases_[DIM-1]->Nablamin();
+                temp_k[DIM-1] = frames_[DIM-1]->Nablamin();
             }
-            first_wavelets[0] = TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(temp_j, temp_e, temp_k, this);
+            first_wavelets[0] = Index(temp_p, temp_j, temp_e, temp_k, this);
             for (unsigned int i = 0; i < DIM; i++) 
                 {
+                    temp_p[i] = 0;
                     temp_e[i] = 1;
-                    temp_k[i] = bases_[i]->Nablamax(temp_j[i]);
+                    temp_k[i] = frames_[i]->Nablamax(temp_j[i]);
                 }
-            last_wavelets[0] = TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(temp_j, temp_e, temp_k, this);
+            last_wavelets[0] = Index(temp_p, temp_j, temp_e, temp_k, this);
             ++level_it;
             ++l;
             while ((int)l < numoflevels)
@@ -272,128 +282,140 @@ namespace WaveletTL
                     temp_j[i] = j0_[i] + level_it[i];
                     if (level_it[i] == 0)
                     {
+                        temp_p[i] = 0;
                         temp_e[i] = 0;
-                        temp_k[i] = bases_[i]->DeltaLmin();
+                        temp_k[i] = frames_[i]->DeltaLmin();
                     } else
                     {
+                        temp_p[i] = 0;
                         temp_e[i] = 1;
-                        temp_k[i] = bases_[i]->Nablamin();
+                        temp_k[i] = frames_[i]->Nablamin();
                     }
                 }
-                //cout << "temp_j == " << temp_j << "; temp_e == " << temp_e << "; temp_k == " << temp_k << endl;
-                first_wavelets[l] = TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(temp_j, temp_e, temp_k, this);
+//                cout << "temp_p == " << temp_p << "; temp_j == " << temp_j << "; temp_e == " << temp_e << "; temp_k == " << temp_k << endl;
+                first_wavelets[l] = Index(temp_p, temp_j, temp_e, temp_k, this);
                 for (unsigned int i = 0; i < DIM; i++) 
                 {
+                    temp_p[i] = 0;
                     temp_e[i] = 1;
-                    temp_k[i] = bases_[i]->Nablamax(temp_j[i]);
+                    temp_k[i] = frames_[i]->Nablamax(temp_j[i]);
                 }
-                //cout << "temp_j == " << temp_j << "; temp_e == " << temp_e << "; temp_k == " << temp_k << endl;
-                last_wavelets[l] = TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(temp_j, temp_e, temp_k, this);
+//                cout << "temp_p == " << temp_p << "; temp_j == " << temp_j << "; temp_e == " << temp_e << "; temp_k == " << temp_k << endl;
+                last_wavelets[l] = Index(temp_p, temp_j, temp_e, temp_k, this);
                 ++level_it;
                 ++l;
             }
         }
 #else
         
-        template <class IBASIS, unsigned int DIM>
-        typename TensorBasis<IBASIS,DIM>::Index
-        TensorBasis<IBASIS,DIM>::first_wavelet(const MultiIndex<int,DIM> j) const
+        template <class IFRAME, unsigned int DIM>
+        typename TensorFrame<IFRAME,DIM>::Index
+        TensorFrame<IFRAME,DIM>::first_wavelet(const MultiIndex<int,DIM> j) const
         {
-#if _TBASIS_DEBUGLEVEL_ >= 1
+#if _TFRAME_DEBUGLEVEL_ >= 1
             assert(multi_degree(j) > multi_degree(j0_)
                     || (multi_degree(j) == multi_degree(j0_) && j >= j0_)
                   );
 #endif
-            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::type_type e;
-            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::translation_type k;
+            typename Index::type_type e;
+            typename Index::translation_type k;
             bool first_level = true;
             for (unsigned int i = 0; i < DIM; i++) {
                 if (j[i] == j0_[i])
                 {
+                    p[i] = 0;
                     e[i] = 0;
-                    k[i] = bases_[i]->DeltaLmin();
+                    k[i] = frames_[i]->DeltaLmin();
                 } else
                 {
+                    p[i] = 0;
                     e[i] = 1;
-                    k[i] = bases_[i]->Nablamin();
+                    k[i] = frames_[i]->Nablamin();
                     first_level = false;
                 }
             }
             if (first_level == true)
             {
+                p[DIM-1] = 0;
                 e[DIM-1] = 1;
-                k[DIM-1] = bases_[DIM-1]->Nablamin();
+                k[DIM-1] = frames_[DIM-1]->Nablamin();
             }
-            return TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(j, e, k, this);
+            return Index(p, j, e, k, this);
         }
 
-        template <class IBASIS, unsigned int DIM>
-        typename TensorBasis<IBASIS,DIM>::Index
-        TensorBasis<IBASIS,DIM>::first_wavelet(const int levelsum) const
+        template <class IFRAME, unsigned int DIM>
+        typename TensorFrame<IFRAME,DIM>::Index
+        TensorFrame<IFRAME,DIM>::first_wavelet(const int levelsum) const
         {            
-#if _TBASIS_DEBUGLEVEL_ >= 1
+#if _TFRAME_DEBUGLEVEL_ >= 1
             assert(levelsum >= multi_degree(j0_) );
 #endif
-            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::level_type j;
-            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::type_type e;
-            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::translation_type k;
+            typename Index::level_type j;
+            typename Index::type_type e;
+            typename Index::translation_type k;
 
+            p[DIM-1] = 0;
             j[DIM-1] = j0_[DIM-1] + levelsum - multi_degree(j0_);
             e[DIM-1] = 1;
-            k[DIM-1] = bases_[DIM-1]->Nablamin();
+            k[DIM-1] = frames_[DIM-1]->Nablamin();
 
             for (unsigned int i = 0; i < DIM-1; i++)
             {
+                p[i] = 0;
                 j[i] = j0_[i];
                 e[i] = 0;
-                k[i] = bases_[i]->DeltaLmin();
+                k[i] = frames_[i]->DeltaLmin();
             }
-            return TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(j, e, k, this);
+            return Index(p, j, e, k, this);
         }
 
-        template <class IBASIS, unsigned int DIM>
-        typename TensorBasis<IBASIS,DIM>::Index
-        TensorBasis<IBASIS,DIM>::last_wavelet(const MultiIndex<int,DIM> j) const
+        template <class IFRAME, unsigned int DIM>
+        typename TensorFrame<IFRAME,DIM>::Index
+        TensorFrame<IFRAME,DIM>::last_wavelet(const MultiIndex<int,DIM> j) const
         {            
-#if _TBASIS_DEBUGLEVEL_ >= 1
+#if _TFRAME_DEBUGLEVEL_ >= 1
             assert(multi_degree(j) > multi_degree(j0_)
                     || ((multi_degree(j) == multi_degree(j0_)) && (j0_ <= j))
                   );
 #endif
-            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::type_type e;
-            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::translation_type k;
+            typename Index::type_type e;
+            typename Index::translation_type k;
             for (unsigned int i = 0; i < DIM; i++) {
+                p[i] = 0;
                 e[i] = 1;
-                k[i] = bases_[i]->Nablamax(j[i]);
+                k[i] = frames_[i]->Nablamax(j[i]);
             }
-            return TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(j, e, k, this);
+            return Index(p, j, e, k, this);
         }
 
-        template <class IBASIS, unsigned int DIM>
-        typename TensorBasis<IBASIS,DIM>::Index
-        TensorBasis<IBASIS,DIM>::last_wavelet(const int levelsum) const
+        template <class IFRAME, unsigned int DIM>
+        typename TensorFrame<IFRAME,DIM>::Index
+        TensorFrame<IFRAME,DIM>::last_wavelet(const int levelsum) const
         {
-#if _TBASIS_DEBUGLEVEL_ >= 1
+#if _TFRAME_DEBUGLEVEL_ >= 1
             assert(levelsum >= multi_degree(j0_));
 #endif
-            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::level_type j;
-            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::type_type e;
-            typename TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >::translation_type k;
+            typename Index::polynomial_type p;
+            typename Index::level_type j;
+            typename Index::type_type e;
+            typename Index::translation_type k;
+            p[0] = 0;
             j[0]= j0_[0]+levelsum-multi_degree(j0_);
             e[0]=1;
-            k[0]= bases_[0]->Nablamax(j[0]);
+            k[0]= frames_[0]->Nablamax(j[0]);
             for (unsigned int i = 1; i < DIM; i++) {
+                p[i] = 0;
                 j[i] = j0_[i];
                 e[i] = 1;
-                k[i] = bases_[i]->Nablamax(j0_[i]);
+                k[i] = frames_[i]->Nablamax(j0_[i]);
             }
-            return TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(j, e, k, this);
+            return Index(p, j, e, k, this);
         }
         
 #endif // if _PRECOMPUTE_FIRSTLAST_WAVELETS
-	template <class IBASIS, unsigned int DIM>
+	template <class IFRAME, unsigned int DIM>
 	void
-	TensorBasis<IBASIS,DIM>::expand(const Function<DIM>* f,
+	TensorFrame<IFRAME,DIM>::expand(const Function<DIM>* f,
                                         const bool primal,
                                         const MultiIndex<int,DIM> jmax,
                                         InfiniteVector<double,Index>& coeffs) const
@@ -417,9 +439,9 @@ namespace WaveletTL
             */
   	}
 
-	template <class IBASIS, unsigned int DIM>
+	template <class IFRAME, unsigned int DIM>
 	void
-	TensorBasis<IBASIS,DIM>::expand(const Function<DIM>* f,
+	TensorFrame<IFRAME,DIM>::expand(const Function<DIM>* f,
                                         const bool primal,
                                         const unsigned int jmax,
                                         InfiniteVector<double,Index>& coeffs) const
@@ -444,9 +466,9 @@ namespace WaveletTL
             
   	}
         
-	template <class IBASIS, unsigned int DIM>
+	template <class IFRAME, unsigned int DIM>
 	double
-	TensorBasis<IBASIS,DIM>::integrate(const Function<DIM>* f,
+	TensorFrame<IFRAME,DIM>::integrate(const Function<DIM>* f,
                                            const Index& lambda) const
   	{
             // f(v) = \int_0^1 g(t)v(t) dt
@@ -474,7 +496,7 @@ namespace WaveletTL
             }
             // compute the point values of the integrand (where we use that it is a tensor product)
             for (unsigned int i = 0; i < DIM; i++)
-                bases()[i]->evaluate(0,
+                frames()[i]->evaluate(0,
                                      lambda.j()[i],
                                      lambda.e()[i],
                                      lambda.k()[i],
@@ -508,38 +530,47 @@ namespace WaveletTL
             return r;
         }
 
-        template <class IBASIS, unsigned int DIM>
+        template <class IFRAME, unsigned int DIM>
   	double
-  	TensorBasis<IBASIS,DIM>::evaluate(const unsigned int derivative, 
+  	TensorFrame<IFRAME,DIM>::evaluate(const unsigned int derivative, 
                                           const Index& lambda,
                                           const Point<DIM> x) const
   	{
             double value = 1.0;
             for (unsigned int i = 0; i < DIM; i++) // loop through components of the tensor product
-                value *= bases_[i]->evaluate(derivative,
-                                             lambda.j()[i], lambda.e()[i], lambda.k()[i],
+                value *= frames_[i]->evaluate(derivative,
+                                             lambda.p()[i], lambda.j()[i], lambda.e()[i], lambda.k()[i],
                                              x[i]);
             return value;
         }
 
 
-        template <class IBASIS, unsigned int DIM>
+        template <class IFRAME, unsigned int DIM>
         void
-        TensorBasis<IBASIS,DIM>::setup_full_collection()
+        TensorFrame<IFRAME,DIM>::setup_full_collection()
         {
             if (jmax_ < multi_degree(j0_) ) {
-                cout << "TensorBasis<IBASIS,DIM>::setup_full_collection(): the specified maximal level jmax is invalid. Specify a higher maximal level jmax_" << endl;
+                cout << "TensorFrame<IFRAME,DIM>::setup_full_collection(): the specified maximal level jmax is invalid. Specify a higher maximal level jmax_" << endl;
                 cout << "jmax_ = " << jmax_ << "; j0_ = " << j0_ << endl;
                 abort();
             }
-            int degrees_of_freedom = last_wavelet_num<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(this, jmax_) +1; // +1 since numbering begins at 0
-            cout << "total degrees of freedom between j0_ = " << j0_ << " and jmax_= " << jmax_ << " is " << degrees_of_freedom << endl;
-            cout << "setting up collection of wavelet indices..." << endl;
+            int pdim;
+            pdim=(pmax_+1)*(pmax_+2)/2;
+            int degrees_of_freedom = pdim*(last_quarklet_num<IFRAME,DIM,TensorFrame<IFRAME,DIM> >(this, jmax_) +1); // +1 since numbering begins at 0
+            cout << "total degrees of freedom between j0_ = " << j0_ << " and (jmax_= " << jmax_ << ", pmax_= " << pmax_ << ") is " << degrees_of_freedom << endl;
+            cout << "setting up collection of quarklet indices..." << endl;
             full_collection.resize(degrees_of_freedom);
-            Index ind = first_generator();
+            typename Index::polynomial_type p;
+            Index ind = first_generator(j0_, p);
             for (int k = 0; k < degrees_of_freedom; k++) {
                 full_collection[k] = ind;
-                ++ind;
+                
+                if(ind==last_quarklet<IFRAME,DIM,TensorFrame<IFRAME,DIM> >(this, jmax_, p)){
+                    ++p;
+                    ind=first_generator(j0_, p);
+                }
+                    else
+                        ++ind;
             }
             /*
             int k=0;
@@ -547,7 +578,7 @@ namespace WaveletTL
                 full_collection[k] = ind;
                 k++;
             }*/
-            cout << "done setting up collection of wavelet indices..." << endl;
+            cout << "done setting up collection of quarklet indices..." << endl;
         }
 
 }

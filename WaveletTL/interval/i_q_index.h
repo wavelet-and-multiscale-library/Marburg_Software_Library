@@ -97,7 +97,7 @@ namespace WaveletTL
 //       return num_;
       return (e() == 0
   	      ? k() - frame_->DeltaLmin(p())
-  	      : frame_->DeltaNablasize(j(),p()) + k() - frame_->Nablamin(p()));//hier weitermachen; man muss etwas anderes als deltasize verwenden@PHK
+  	      : frame_->DeltaNablasize(j(),p()) + k() - frame_->Nablamin(p()));
     }
 
     /*!

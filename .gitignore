@@ -154,3 +154,4 @@ WaveletTL/tests/test_ldomain_laplacian
 WaveletTL/tests/test_ldomain_support
 WaveletTL/tests/test_tp_basis
 WaveletTL/tests/test_refinement_matrices
+WaveletTL/tests/test_tframe_index

@@ -7,9 +7,9 @@
 // | Ulrich Friedrich                                                   |
 // +--------------------------------------------------------------------+
 
-#ifndef _WAVELETTL_TBASIS_H_
-#define _WAVELETTL_TBASIS_H_
-#define _TBASIS_DEBUGLEVEL_  1 // more output, more tests
+#ifndef _WAVELETTL_TFRAME_H_
+#define _WAVELETTL_TFRAME_H_
+#define _TFRAME_DEBUGLEVEL_  1 // more output, more tests
 
 /*
  * replace online computation of first_ and last_ wavelet indices by precomputation
@@ -24,7 +24,7 @@
 #include <algebra/infinite_vector.h>
 #include <utils/fixed_array1d.h>
 #include <utils/multiindex.h>
-#include <cube/tbasis_index.h>
+#include <cube/tframe_index.h>
 #include <utils/function.h>
 #include <geometry/point.h>
 #include <utils/array1d.h>
@@ -32,7 +32,7 @@
 #include <numerics/gauss_data.h>
 
 // for convenience, include also some functionality
-#include <cube/tbasis_support.h>
+//#include <cube/tframe_support.h>
 
 using std::list;
 using MathTL::Point;
@@ -45,27 +45,27 @@ using MathTL::Array1D;
 namespace WaveletTL
 {
     /*
-     * Template class for tensor product wavelet bases on the d-dimensional unit cube [0,1]^d (or mapped versions thereof) of the type
+     * Template class for tensor product wavelet frames on the d-dimensional unit cube [0,1]^d (or mapped versions thereof) of the type
      * (V_0 \oplus W_0 \oplus W_1 \oplus W_2 \oplus ...)\times (V_0 \oplus W_0 \oplus W_1 \oplus W_2 \oplus ...)
      * For each of the 2*d facets, you can specify the orders s_i, sT_i of the Dirichlet boundary conditions of
-     * the primal and dual basis in the normal direction (this is tailored for the DSBasis constructor...).
+     * the primal and dual frame in the normal direction (this is tailored for the DSFrame constructor...).
      */
-    template <class IBASIS, unsigned int DIM = 2>
-    class TensorBasis
+    template <class IFRAME, unsigned int DIM = 2>
+    class TensorFrame
     {
     public:
-    	//! Interval basis
-    	typedef IBASIS IntervalBasis;
+    	//! Interval frame
+    	typedef IFRAME IntervalFrame;
         
         //! Default constructor (no b.c.'s)
-        TensorBasis();
+        TensorFrame();
 
         /* Constructor with specified boundary condition orders
          * i-th direction at x=0 <-> index 2*i
          * i-th direction at x=1 <-> index 2*i+1
          */
-        /* works only with DS Basis, not with PBasis
-    	TensorBasis(const FixedArray1D<int,2*DIM>& s, const FixedArray1D<int,2*DIM>& sT);
+        /* works only with DS Frame, not with PFrame
+    	TensorFrame(const FixedArray1D<int,2*DIM>& s, const FixedArray1D<int,2*DIM>& sT);
          */
 
     	/*
@@ -73,30 +73,31 @@ namespace WaveletTL
     	 * i-th direction at x=0 <-> index 2*i
     	 * i-th direction at x=1 <-> index 2*i+1
     	 */
-    	TensorBasis(const FixedArray1D<int,2*DIM>& s);
+    	TensorFrame(const FixedArray1D<int,2*DIM>& s);
 
     	/*
     	 * Constructor with specified Dirichlet boundary conditions for
     	 * the primal functions, the dual functions will be constructed to
     	 * fulfill free b.c.'s
     	 */
-    	TensorBasis(const FixedArray1D<bool,2*DIM>& bc);
+    	TensorFrame(const FixedArray1D<bool,2*DIM>& bc);
 
     	/*
-    	 * Constructor with precomputed instances of the 1D bases;
+    	 * Constructor with precomputed instances of the 1D frames;
     	 * in this case, the pointers are reused and
     	 * not deleted at destruction time.
     	 */
-        TensorBasis(const FixedArray1D<IBASIS*,DIM> bases);
+        TensorFrame(const FixedArray1D<IFRAME*,DIM> frames);
 
     	//! Destructor
-    	~TensorBasis();
+    	~TensorFrame();
 
     	//! Coarsest possible level j0
     	inline const MultiIndex<int,DIM> j0() const { return j0_; }
 
-    	inline void set_jmax(const MultiIndex<int,DIM> jmax) {
+    	inline void set_jpmax(const MultiIndex<int,DIM> jmax, const MultiIndex<int,DIM> pmax) {
       		jmax_ = multi_degree(jmax);
+                pmax_ =multi_degree(pmax);
       		setup_full_collection();
 #if _PRECOMPUTE_FIRSTLAST_WAVELETS
                 precompute_firstlast_wavelets();
@@ -106,19 +107,24 @@ namespace WaveletTL
         inline const unsigned int get_jmax() const {
             return jmax_;
         }
+        
+        inline const unsigned int get_pmax() const {
+            return pmax_;
+        }
 
-        inline void set_jmax(const int jmax) {
+        inline void set_jpmax(const int jmax, const int pmax=0) {
       		jmax_ = jmax;
+                pmax_ = pmax;
       		setup_full_collection();
 #if _PRECOMPUTE_FIRSTLAST_WAVELETS
                 precompute_firstlast_wavelets();
 #endif
     	}
     	//! Wavelet index class
-    	typedef TensorIndex<IBASIS,DIM,TensorBasis<IBASIS,DIM> > Index;
+    	typedef TensorQIndex<IFRAME,DIM,TensorFrame<IFRAME,DIM> > Index;
 
-    	//! Read access to the bases
-    	inline const FixedArray1D<IBASIS*,DIM>& bases() const { return bases_; }
+    	//! Read access to the frames
+    	inline const FixedArray1D<IFRAME*,DIM>& frames() const { return frames_; }
 
     	/*
     	 * Geometric type of the support sets
@@ -132,7 +138,7 @@ namespace WaveletTL
 
 
         /*
-         * For a given interval basis IBASIS, compute a cube
+         * For a given interval frame IFRAME, compute a cube
          * 2^{-j_}<a_,b_> = 2^{-j_1}[a_1,b_1]x...x2^{-j_n}[a_n,b_n]
          * which contains the support of a single primal cube generator
          * or wavelet psi_lambda.
@@ -143,32 +149,32 @@ namespace WaveletTL
     	 * Critical Sobolev regularity for the primal generators/wavelets.
     	 * We assume the same regularity in each dimension.
     	 */
-    	inline static double primal_regularity() { return IBASIS::primal_regularity(); }
+    	inline static double primal_regularity() { return IFRAME::primal_regularity(); }
 
     	/*
     	 * Degree of polynomial reproduction for the primal generators/wavelets
     	 * We assume the same polynomial degree in each dimension.
     	 * */
-    	inline static unsigned int primal_polynomial_degree() { return IBASIS::primal_polynomial_degree(); }
+    	inline static unsigned int primal_polynomial_degree() { return IFRAME::primal_polynomial_degree(); }
 
     	/*
     	 * Number of vanishing moments for the primal wavelets.
     	 * We assume the same number of vanishing moments in each dimension.
     	 */
-    	inline static unsigned int primal_vanishing_moments() { return IBASIS::primal_vanishing_moments(); }
+    	inline static unsigned int primal_vanishing_moments() { return IFRAME::primal_vanishing_moments(); }
 
     	//! Index of first generator 
-    	Index first_generator() const;
+    	Index first_generator(const typename Index::polynomial_type p) const;
 
         /*! 
          * For compatibility reasons, returns the same (!) as first_generator()
          * parameter j is ignored !
          */
-        Index first_generator(const unsigned int j) const;
-        Index first_generator(const MultiIndex<int,DIM> j) const;
+        Index first_generator(const unsigned int j, const typename Index::polynomial_type p) const;
+        Index first_generator(const MultiIndex<int,DIM> j, const typename Index::polynomial_type p) const;
 
         //! Index of last generator on level j0
-    	Index last_generator() const;
+    	Index last_generator(const typename Index::polynomial_type p) const;
 
     	/*! 
          * Index of first wavelet on level j >= j0.
@@ -201,7 +207,7 @@ namespace WaveletTL
     	 * For a given function, compute all integrals w.r.t. the primal
     	 * or dual generators/wavelets \psi_\lambda with |\lambda|\le jmax.
     	 * - When integrating against the primal functions, the integrand has to be smooth
-    	 *   to be accurately reproduced by the dual basis.
+    	 *   to be accurately reproduced by the dual frame.
     	 * - When integration against dual functions is specified,
     	 *   we integrate against the primal ones instead and multiply the resulting
     	 *   coefficients with the inverse of the primal gramian.
@@ -239,7 +245,7 @@ namespace WaveletTL
     	/*!
          * Compute all wavelet indices between beginning at j0_ and the last_wavelet 
          * with \|level\|\leq jmax_, i.e.,
-         * degrees_of_freedom = last_wavelet_num<IBASIS,DIM,TensorBasis<IBASIS,DIM> >(this, jmax_) +1
+         * degrees_of_freedom = last_wavelet_num<IFRAME,DIM,TensorFrame<IFRAME,DIM> >(this, jmax_) +1
          * many wavelet indices are computed. They are stored in full_collection
          * This codes the mapping \N -> wavelet_indices
          */
@@ -270,24 +276,29 @@ namespace WaveletTL
     	MultiIndex<int,DIM> j0_;
     	//int j0_[DIM];
 
-    	//! Finest possible level j0
+    	//! Finest possible level jmax
     	//MultiIndex<int,DIM> jmax_;
-        // wavelet indices with \|level\|\leq jmax_ are stored in full_collection
+        // quarklet indices with \|level\|\leq jmax_ are stored in full_collection
     	unsigned int jmax_;
+        
+        // quarklet indices with \|polynomial\|\leq pmax_ are stored in full_collection
+    	unsigned int pmax_;
+        
+        
 
     	/*
-    	 * The instances of the 1D bases
+    	 * The instances of the 1D frames
     	 */
-    	list<IBASIS*> bases_infact;
+    	list<IFRAME*> frames_infact;
 
-    	//! For faster access, all relevant pointers to the 1D bases
-    	FixedArray1D<IBASIS*,DIM> bases_;
+    	//! For faster access, all relevant pointers to the 1D frames
+    	FixedArray1D<IFRAME*,DIM> frames_;
 
     	//! Flag for deletion of the pointers
     	bool delete_pointers;
   	};
 }
 
-#include <cube/tbasis.cpp>
+#include <cube/tframe.cpp>
 
-#endif /*_WAVELETTL_TBASIS_H_*/
+#endif /*_WAVELETTL_TFRAME_H_*/

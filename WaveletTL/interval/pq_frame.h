@@ -172,7 +172,7 @@ namespace WaveletTL
     //! read access to the primal b.c. order at x=1
     const int get_sT1() const { return 0; }
 
-    void set_jpmax(const int jmax, const int pmax) {
+    void set_jpmax(const int jmax, const int pmax=0) {
       jmax_ = jmax;
       pmax_ = pmax;
       setup_full_collection();

@@ -7,8 +7,8 @@
 // | Ulrich Friedrich                   |
 // +--------------------------------------------------------------------+
 
-#ifndef _WAVELETTL_TBASIS_INDEX_H_
-#define _WAVELETTL_TBASIS_INDEX_H_
+#ifndef _WAVELETTL_TFRAME_INDEX_H_
+#define _WAVELETTL_TFRAME_INDEX_H_
 
 #include <iostream>
 using std::cout;
@@ -22,16 +22,18 @@ using MathTL::MultiIndex;
 
 namespace WaveletTL
 {
-    template <class IBASIS, unsigned int DIM> class TensorBasis;
+    template <class IFRAME, unsigned int DIM> class TensorFrame;
     /*
-     * An index class for tensor product wavelet bases over the d-dimensional unit cube [0,1]^d (or mapped versions thereof) of the type
+     * An index class for tensor product quarklet frames over the d-dimensional unit cube [0,1]^d (or mapped versions thereof) of the type
      * (V_0 \oplus W_0 \oplus W_1 \oplus W_2 \oplus ...)\times (V_0 \oplus W_0 \oplus W_1 \oplus W_2 \oplus ...)
-     * as modeled by TensorBasis
+     * as modeled by Tensorframe
     */
-    template <class IBASIS, unsigned int DIM, class TENSORBASIS = TensorBasis<IBASIS,DIM> >
-    class TensorIndex
+    template <class IFRAME, unsigned int DIM, class TENSORFRAME = TensorFrame<IFRAME,DIM> >
+    class TensorQIndex
     {
     public:
+        // polynomial index type
+        typedef MultiIndex<int,DIM> polynomial_type;
         // level index type
         typedef MultiIndex<int,DIM> level_type;
         // type index type
@@ -40,38 +42,38 @@ namespace WaveletTL
         typedef MultiIndex<int,DIM> translation_type;
 
         /*
-         * Constructor with a given tensor basis
+         * Constructor with a given tensor frame
          * (also serves as a default constructor, but yields an invalid index
          * in this case, because the underlying bases must be specified to work correctly)
          */
-        TensorIndex(const TENSORBASIS* basis = 0);
+        TensorQIndex(const TENSORFRAME* frame = 0);
 
         /*
-         * Constructor with given j,e,k
-         * Code is similar to Tensorindex(int,Basis).
+         * Constructor with given p,j,e,k
+         * Code is similar to Tensorindex(int,Frame).
          * 
          * PERFORMANCE: This constructor can be improved by using explicit formulas as in
-         * TensorIndex(const int number, const TENSORBASIS* basis)
+         * TensorQIndex(const int number, const TENSORFRAME* frame)
         */
-        TensorIndex(const level_type& j, const type_type& e, const translation_type& k, const TENSORBASIS* basis);
+        TensorQIndex(const polynomial_type& p, const level_type& j, const type_type& e, const translation_type& k, const TENSORFRAME* frame);
 
         /*
-         * 1D dummy constructor. does not yield a complete TensorIndex
+         * 1D dummy constructor. does not yield a complete TensorQIndex
          * number is always set to 0
          */
-        TensorIndex(const int& j, const int& e, const int& k, const TENSORBASIS* empty);
+        TensorQIndex(const int& p, const int& j, const int& e, const int& k, const TENSORFRAME* empty);
 
         // Copy constructor
-        TensorIndex(const TensorIndex& lambda);
+        TensorQIndex(const TensorQIndex& lambda);
 
         // Copy index from const pointer
-        TensorIndex(const TensorIndex* lambda);
+        TensorQIndex(const TensorQIndex* lambda);
 
         // Constructor with all parameters given
-        TensorIndex(const level_type& j, const type_type& e, const translation_type& k, const int number, const TENSORBASIS* basis);
+        TensorQIndex(const polynomial_type& p, const level_type& j, const type_type& e, const translation_type& k, const int number, const TENSORFRAME* frame);
         
         /*
-         * Constructor for given number of wavelet index.
+         * Constructor for given number of quarklet index.
          * The number is determined by the ordering "<", i.e.,
          * it is given first by \|level\|_1 
          * and on the same levelnorm lexicographical in the level and then in 
@@ -89,34 +91,37 @@ namespace WaveletTL
          * 
          * full_collection[i] is an alternative! less CPU, more memory usage
         */
-        TensorIndex(const int number, const TENSORBASIS* basis);
+        TensorQIndex(const int number, const TENSORFRAME* frame);
 
         // Assignment
-        TensorIndex& operator = (const TensorIndex& lambda);
+        TensorQIndex& operator = (const TensorQIndex& lambda);
 
         /*
          * Check equality.
-         * Only (j,e,k) are testet. NOT the basis or number
+         * Only (j,e,k) are testet. NOT the frame or number
          */
-        bool operator == (const TensorIndex& lambda) const;
+        bool operator == (const TensorQIndex& lambda) const;
 
         // Check non-equality
-        inline bool operator != (const TensorIndex& lambda) const
+        inline bool operator != (const TensorQIndex& lambda) const
         { return !(*this == lambda); }
 
         // Preincrement
-        TensorIndex& operator ++ ();
+        TensorQIndex& operator ++ ();
 
         /* Ordering <
          * First by level, i.e. the 1-norm of j,
          * then lexicographically w.r.t. j,e,k
          */
-        bool operator < (const TensorIndex& lambda) const;
+        bool operator < (const TensorQIndex& lambda) const;
 
         // Ordering <=
-        bool operator <= (const TensorIndex& lambda) const
+        bool operator <= (const TensorQIndex& lambda) const
         { return (*this < lambda || *this == lambda); }
 
+        // Scale j
+        const polynomial_type& p() const { return p_; }
+        
         // Scale j
         const level_type& j() const { return j_; }
 
@@ -126,16 +131,19 @@ namespace WaveletTL
         // Translation index k
         const translation_type& k() const { return k_; }
 
-        // Underlying basis
-        const TENSORBASIS* basis() const { return basis_; }
+        // Underlying frame
+        const TENSORFRAME* frame() const { return frame_; }
 
         const unsigned long int number() const { return num_; }
 
     protected:
 
-        // Pointer to the underlying basis
-        const TENSORBASIS* basis_;
+        // Pointer to the underlying frame
+        const TENSORFRAME* frame_;
 
+        // Polynomial
+        MultiIndex<int,DIM> p_;
+        
         // Scale
         MultiIndex<int,DIM> j_;
 
@@ -145,17 +153,19 @@ namespace WaveletTL
         // Translation
         MultiIndex<int,DIM> k_;
 
-        // Number of the index, only for the elements of a wavelet bases
+        // Number of the index, only for the elements of a quarklet frame
         unsigned int num_;
 
     };
 
     //! stream output
-    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
-    inline std::ostream& operator << (std::ostream& os, const TensorIndex<IBASIS,DIM,TENSORBASIS>& lambda)
+    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
+    inline std::ostream& operator << (std::ostream& os, const TensorQIndex<IFRAME,DIM,TENSORFRAME>& lambda)
     {
         using namespace std;
         os << "("
+        << lambda.p()
+        << ","
         << lambda.j()
         << ","
         << lambda.e()
@@ -168,101 +178,107 @@ namespace WaveletTL
     /*
      * index of first generator
      */
-    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
-    TensorIndex<IBASIS,DIM,TENSORBASIS>
-    first_generator(const TENSORBASIS* basis);
+    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
+    TensorQIndex<IFRAME,DIM,TENSORFRAME>
+    first_q_generator(const TENSORFRAME* frame);
 
     /*
      * index of last generator
      */
-    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
-    TensorIndex<IBASIS,DIM,TENSORBASIS>
-    last_generator(const TENSORBASIS* basis);
+    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
+    TensorQIndex<IFRAME,DIM,TENSORFRAME>
+    last_q_generator(const TENSORFRAME* frame);
 
     /*
-     * Index of first wavelet on level j.
+     * Index of first quarklet on level j.
      * It is not checket whether j is a valid level, i.e., j-j0 is nonnegative
      */
-    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
-    TensorIndex<IBASIS,DIM,TENSORBASIS>
-    first_wavelet(const TENSORBASIS* basis, const typename TensorIndex<IBASIS,DIM,TENSORBASIS>::level_type j);
+    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
+    TensorQIndex<IFRAME,DIM,TENSORFRAME>
+    first_quarklet(const TENSORFRAME* frame, const typename TensorQIndex<IFRAME,DIM,TENSORFRAME>::level_type j, 
+                   const typename TensorQIndex<IFRAME,DIM,TENSORFRAME>::polynomial_type p = typename TensorQIndex<IFRAME,DIM,TensorFrame<IFRAME,DIM> >::polynomial_type());
 
     /*
-     * Index of first wavelet on level j .
-     * The test j >= ||j0||_1 is only made if _TBASIS_DEBUGLEVEL_ >= 1
+     * Index of first quarklet on level j .
+     * The test j >= ||j0||_1 is only made if _TFRAME_DEBUGLEVEL_ >= 1
      */
-    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
-    TensorIndex<IBASIS,DIM,TENSORBASIS>
-    first_wavelet(const TENSORBASIS* basis, const int level);
+    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
+    TensorQIndex<IFRAME,DIM,TENSORFRAME>
+    first_quarklet(const TENSORFRAME* frame, const int level, 
+                   const typename TensorQIndex<IFRAME,DIM, TensorFrame<IFRAME,DIM> >::polynomial_type p = typename TensorQIndex<IFRAME,DIM,TensorFrame<IFRAME,DIM> >::polynomial_type());
 
     /*
-     * Index of last wavelet on level j.
+     * Index of last quarklet on level j.
      * It is not checket whether j is a valid level, i.e., j-j0 is nonnegative
      */
-    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
-    TensorIndex<IBASIS,DIM,TENSORBASIS>
-    last_wavelet(const TENSORBASIS* basis, const typename TensorIndex<IBASIS,DIM,TENSORBASIS>::level_type j);
+    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
+    TensorQIndex<IFRAME,DIM,TENSORFRAME>
+    last_quarklet(const TENSORFRAME* frame, const typename TensorQIndex<IFRAME,DIM,TENSORFRAME>::level_type j, 
+                  const typename TensorQIndex<IFRAME,DIM,TensorFrame<IFRAME,DIM> >::polynomial_type p = typename TensorQIndex<IFRAME,DIM,TensorFrame<IFRAME,DIM> >::polynomial_type());
 
     /*
-     * Index of last wavelet on level j >= ||j0||_1
-     * The test j >= ||j0||_1 is only made if _TBASIS_DEBUGLEVEL_ >= 1
+     * Index of last quarklet on level j >= ||j0||_1
+     * The test j >= ||j0||_1 is only made if _TFRAME_DEBUGLEVEL_ >= 1
      */
-    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
-    TensorIndex<IBASIS,DIM,TENSORBASIS>
-    last_wavelet(const TENSORBASIS* basis, const unsigned int level);
+    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
+    TensorQIndex<IFRAME,DIM,TENSORFRAME>
+    last_quarklet(const TENSORFRAME* frame, const unsigned int level, const typename TensorQIndex<IFRAME,DIM,
+                  TensorFrame<IFRAME,DIM> >::polynomial_type p = typename TensorQIndex<IFRAME,DIM,TensorFrame<IFRAME,DIM> >::polynomial_type());
     
     /*
      * number of first generator on level j0
      */
-    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
+    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
     const int
-    first_generator_num(const TENSORBASIS* basis);
+    first_q_generator_num(const TENSORFRAME* frame);
 
     /*
      * number of last generator on level j0
      */
-    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
+    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
     const int
-    last_generator_num(const TENSORBASIS* basis);
+    last_q_generator_num(const TENSORFRAME* frame);
 
     /*
-     * Number of first wavelet on level j >= j0.
-     * Note: This methods calls the constructor of TENSORBASIS. It it thus 
+     * Number of first quarklet on level j >= j0.
+     * Note: This methods calls the constructor of TENSORFRAME. It it thus 
      * inefficient to use the so computed number to create an Tensor Index. 
-     * This is the same for all ..._wavelet_num methods.
+     * This is the same for all ..._quarklet_num methods.
      */
-    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
+    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
     const int
-    first_wavelet_num(const TENSORBASIS* basis, const typename TensorIndex<IBASIS,DIM,TENSORBASIS>::level_type j);
+    first_quarklet_num(const TENSORFRAME* frame, const typename TensorQIndex<IFRAME,DIM,TENSORFRAME>::level_type j,
+                       const typename TensorQIndex<IFRAME,DIM,TENSORFRAME>::polynomial_type p);
 
     /*
-     * number of last wavelet on level j >= j0
+     * number of last quarklet on level j >= j0
      */
-    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
+    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
     const int
-    last_wavelet_num(const TENSORBASIS* basis, const typename TensorIndex<IBASIS,DIM,TENSORBASIS>::level_type j);
+    last_quarklet_num(const TENSORFRAME* frame, const typename TensorQIndex<IFRAME,DIM,TENSORFRAME>::level_type j,
+                      const typename TensorQIndex<IFRAME,DIM,TENSORFRAME>::polynomial_type p);
 
-    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
+    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
     const int
-    last_wavelet_num(const TENSORBASIS* basis, const unsigned int level);
+    last_quarklet_num(const TENSORFRAME* frame, const unsigned int level);
     
     
 
 
     /*
      *  write InfiniteVector<double,Index> to stream
-     * The only differences to the IO routines from qtbasis.h are that
+     * The only differences to the IO routines from qtframe.h are that
      *  - this was not tested
      *  - there is no patchnumer p
      */
     
-    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
-    void writeIVToFile(const InfiniteVector<double, TensorIndex<IBASIS,DIM,TENSORBASIS> >& v, std::ofstream& ofs)
+    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
+    void writeIVToFile(const InfiniteVector<double, TensorQIndex<IFRAME,DIM,TENSORFRAME> >& v, std::ofstream& ofs)
     {
         ofs.is_open();
         if (ofs.is_open())
         {
-            for (typename InfiniteVector<double,TensorIndex<IBASIS,DIM,TENSORBASIS> >::const_iterator it(v.begin()), itend(v.end()); it !=itend; ++it)
+            for (typename InfiniteVector<double,TensorQIndex<IFRAME,DIM,TENSORFRAME> >::const_iterator it(v.begin()), itend(v.end()); it !=itend; ++it)
             {
                 try
                 {
@@ -270,9 +286,11 @@ namespace WaveletTL
                     ofs.write(reinterpret_cast<char*>(&temp_d), sizeof(double));
                     for (int i=0; i<DIM; ++i)
                     {
+                        int temp_p (it.index().p()[i]);
                         int temp_j (it.index().j()[i]);
                         int temp_e (it.index().e()[i]);
                         int temp_k (it.index().k()[i]);
+                        ofs.write(reinterpret_cast<char*>(&temp_p), sizeof(int));
                         ofs.write(reinterpret_cast<char*>(&temp_j), sizeof(int));
                         ofs.write(reinterpret_cast<char*>(&temp_e), sizeof(int));
                         ofs.write(reinterpret_cast<char*>(&temp_k), sizeof(int));
@@ -294,13 +312,13 @@ namespace WaveletTL
     }
     
     //! write InfiniteVector<double,Index> to stream
-    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
-    void writeIVToFile(const InfiniteVector<double,TensorIndex<IBASIS,DIM,TENSORBASIS> >& v, const char* filename)
+    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
+    void writeIVToFile(const InfiniteVector<double,TensorQIndex<IFRAME,DIM,TENSORFRAME> >& v, const char* filename)
     {
         std::ofstream ofs(filename,std::ofstream::binary);
         if (ofs.is_open())
         {
-            for (typename InfiniteVector<double,TensorIndex<IBASIS,DIM,TENSORBASIS> >::const_iterator it(v.begin()), itend(v.end()); it !=itend; ++it)
+            for (typename InfiniteVector<double,TensorQIndex<IFRAME,DIM,TENSORFRAME> >::const_iterator it(v.begin()), itend(v.end()); it !=itend; ++it)
             {
                 try
                 {
@@ -308,9 +326,11 @@ namespace WaveletTL
                     ofs.write(reinterpret_cast<char*>(&temp_d), sizeof(double));
                     for (int i=0; i<DIM; ++i)
                     {
+                        int temp_p (it.index().p()[i]);
                         int temp_j (it.index().j()[i]);
                         int temp_e (it.index().e()[i]);
                         int temp_k (it.index().k()[i]);
+                        ofs.write(reinterpret_cast<char*>(&temp_p), sizeof(int));
                         ofs.write(reinterpret_cast<char*>(&temp_j), sizeof(int));
                         ofs.write(reinterpret_cast<char*>(&temp_e), sizeof(int));
                         ofs.write(reinterpret_cast<char*>(&temp_k), sizeof(int));
@@ -332,11 +352,11 @@ namespace WaveletTL
     }
     
     //! open a file written by writeVectorToFile
-    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
-    void readIVFromFile(const TENSORBASIS* basis, InfiniteVector<double, TensorIndex<IBASIS,DIM,TENSORBASIS> >& v, std::ifstream& ifs)
+    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
+    void readIVFromFile(const TENSORFRAME* frame, InfiniteVector<double, TensorQIndex<IFRAME,DIM,TENSORFRAME> >& v, std::ifstream& ifs)
     {
         v.clear();
-        MultiIndex<int,DIM> temp_j, temp_e, temp_k;
+        MultiIndex<int,DIM> temp_p, temp_j, temp_e, temp_k;
         if (ifs.is_open())
         {
             ifs.seekg (0, ifs.end);
@@ -352,6 +372,8 @@ namespace WaveletTL
                     for (int i=0; i<DIM; ++i)
                     {
                         ifs.read(reinterpret_cast<char*>(&temp_i), sizeof(int));
+                        temp_p[i] = temp_i;                       
+                        ifs.read(reinterpret_cast<char*>(&temp_i), sizeof(int));
                         temp_j[i] = temp_i;
                         ifs.read(reinterpret_cast<char*>(&temp_i), sizeof(int));
                         temp_e[i] = temp_i;
@@ -359,7 +381,7 @@ namespace WaveletTL
                         temp_k[i] = temp_i;
                     }
                     ifs.read(reinterpret_cast<char*>(&temp_i), sizeof(int));
-                    v.set_coefficient(TensorIndex<IBASIS,DIM,TENSORBASIS>(temp_j,temp_e, temp_k, temp_i, basis), temp_d);
+                    v.set_coefficient(TensorQIndex<IFRAME,DIM,TENSORFRAME>(temp_p, temp_j, temp_e, temp_k, temp_i, frame), temp_d);
                 }
                 catch (...)
                 {
@@ -374,19 +396,19 @@ namespace WaveletTL
         }
     }
     
-    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
-    void readIVFromFile(const TENSORBASIS* basis, InfiniteVector<double,TensorIndex<IBASIS,DIM,TENSORBASIS> >& v, const char* filename)
+    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
+    void readIVFromFile(const TENSORFRAME* frame, InfiniteVector<double,TensorQIndex<IFRAME,DIM,TENSORFRAME> >& v, const char* filename)
     {
         v.clear();
         std::ifstream ifs(filename, std::ifstream::binary);
-        MultiIndex<int,DIM> temp_j, temp_e, temp_k;
+        MultiIndex<int,DIM> temp_p, temp_j, temp_e, temp_k;
         if (ifs.is_open())
         {
             ifs.seekg (0, ifs.end);
             int length = ifs.tellg()/(sizeof(double)+(3*DIM+1)*sizeof(int));
             ifs.seekg (0, ifs.beg);
             double temp_d;
-            int temp_i, temp_p;
+            int temp_i;
             for (unsigned int i=0; i<length;++i)
             {
                 try
@@ -395,6 +417,8 @@ namespace WaveletTL
                     for (int i=0; i<DIM; ++i)
                     {
                         ifs.read(reinterpret_cast<char*>(&temp_i), sizeof(int));
+                        temp_p[i] = temp_i;
+                        ifs.read(reinterpret_cast<char*>(&temp_i), sizeof(int));
                         temp_j[i] = temp_i;
                         ifs.read(reinterpret_cast<char*>(&temp_i), sizeof(int));
                         temp_e[i] = temp_i;
@@ -402,7 +426,7 @@ namespace WaveletTL
                         temp_k[i] = temp_i;
                     }
                     ifs.read(reinterpret_cast<char*>(&temp_i), sizeof(int));
-                    v.set_coefficient(TensorIndex<IBASIS,DIM,TENSORBASIS>(temp_j,temp_e, temp_k, temp_i, basis), temp_d);
+                    v.set_coefficient(TensorQIndex<IFRAME,DIM,TENSORFRAME>(temp_p, temp_j, temp_e, temp_k, temp_i, frame), temp_d);
                 }
                 catch (...)
                 {
@@ -418,7 +442,7 @@ namespace WaveletTL
     }
 }
 
-#include <cube/tbasis_index.cpp>
+#include <cube/tframe_index.cpp>
 
-#endif /*_WAVELETTL_TBASIS_INDEX_H_*/
+#endif /*_WAVELETTL_TFRAME_INDEX_H_*/
 

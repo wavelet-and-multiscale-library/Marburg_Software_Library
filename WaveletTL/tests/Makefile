@@ -100,7 +100,9 @@ EXEOBJF3 = \
   test_tbasis_support.o\
   test_tbasis_index.o\
   test_tbasis_indexplot.o\
-  test_tbasis_equation.o
+  test_tbasis_index2.o\
+  test_tbasis_evaluate.o\
+  solve1.o
 
 # set 3a of test programs: wavelet bases on the ring domain
 EXEOBJF3a = \

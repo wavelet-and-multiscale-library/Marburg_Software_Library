@@ -28,7 +28,7 @@ namespace WaveletTL
     typedef std::list<Index> IntersectingList;
     
 //     if (P.local_operator()) 
-      {
+      
 	// differential operators
 	
 	if (strategy == DKR) {
@@ -113,7 +113,7 @@ namespace WaveletTL
 	      }
 	  }
 	}
-      }
+      
 //     else 
 //       {
 // 	// integral operators: branch is not implemented so far
@@ -128,6 +128,7 @@ namespace WaveletTL
             //
             // for local operator supports have to overlap
             // add all indizes within a 1-ball of range J around lambda:
+            
             P.add_ball(lambda,w,J,factor,jmax,strategy,preconditioning);
         }
 #endif

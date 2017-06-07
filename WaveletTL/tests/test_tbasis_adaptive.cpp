@@ -3,6 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+#undef NONADAPTIVE
+#define ADAPTIVE
+
+#define _WAVELETTL_USE_TBASIS 1
+//#define _WAVELETTL_CACHEDPROBLEM_VERBOSITY 0
+
 #include <iostream>
 
 #include <interval/p_basis.h>
@@ -14,16 +20,19 @@
 #include <numerics/bvp.h>
 #include <galerkin/tbasis_equation.h>
 #include <galerkin/cached_tproblem.h>
+#include <adaptive/cdd1.h>
 #include <adaptive/cdd2.h>
 #include <cube/tbasis_evaluate.h>
 #include <interval/pq_frame.h>
 #include <cube/tframe.h>
+#include <adaptive/compression.h>
+#include <adaptive/apply.h>
+#include <cube/tbasis_indexplot.h>
 
 //#include "TestFunctions2d.h"
 
 
-#define NONADAPTIVE
-#undef ADAPTIVE
+
 
 using namespace std;
 using namespace WaveletTL;
@@ -119,7 +128,7 @@ int main()
     cout << "Testing tbasis adaptive" << endl;
     const int d  = 2;
     const int dT = 2;
-    const unsigned int dim = 2; const int levelrange(6);
+    const unsigned int dim = 2; 
     const int jmax1=4;
     MultiIndex<int, dim> jmax;
     jmax[0]=jmax1 ,jmax[1]=jmax1;
@@ -127,8 +136,13 @@ int main()
     typedef Basis1d::Index Index1d;
     typedef TensorBasis<Basis1d,dim> Basis;
     typedef Basis::Index Index;
-    typedef PQFrame<d,dT> Frame1d;
-    typedef TensorFrame<Frame1d,dim> Frame;
+    //typedef PQFrame<d,dT> Frame1d;
+    //typedef TensorFrame<Frame1d,dim> Frame;
+    
+    
+    const int a=2;
+    const int b=2;
+    const int pmax=0;
     
     FixedArray1D<int,2*dim> s;          //set order of boundary conditions
     s[0]=0, s[1]=0; s[2]=0, s[3]=0; 
@@ -152,7 +166,7 @@ int main()
     //TensorEquation<Frame1d,dim,Frame> feq(&poisson1, bc);
     cout << eq.basis().degrees_of_freedom() << endl;
     //eq.basis().set_jmax(10);
-    //eq.set_jmax(2*jmax1);
+    eq.set_jmax(2*jmax1);                               //wichtig für cached problem
     cout << eq.basis().degrees_of_freedom() << endl;
     
 #if 0
@@ -197,6 +211,7 @@ int main()
     cout << "iterative solution computed" << endl;
     
     //plot solution
+    cout << "plotting solution" << endl;
     InfiniteVector<double,Index> u,v;
     unsigned int i2 = 0;
     for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i2){
@@ -207,13 +222,15 @@ int main()
     std::ofstream stream1("solution_na.m");
     sm1.matlab_output(stream1);
     stream1.close();
+    cout << "solution plotted" << endl;
     
     //alternative plot solution
+    cout << "plotting solution 2" << endl;
     int N=100;
     double h = 1e-2;
     Matrix<double> u_values(N+1,N+1);
     for (unsigned int i = 0; i <= N; i++) {
-        cout << i << endl;
+        //cout << i << endl;
         for(unsigned int j=0; j<=N; j++) {
             Point<2> point(i*h,j*h);
             int id = 0;
@@ -222,16 +239,47 @@ int main()
         }
     }
     u_values.matlab_output("solution_na_alt","solution_na_alt",0);      //richtiger output für quarklets
+    cout << "solution 2 plotted" << endl;
 #endif
 #ifdef ADAPTIVE
     CachedTProblem<TensorEquation<Basis1d,dim,Basis> > cproblem1(&eq);
     InfiniteVector<double, Index> F_eta;
     cproblem1.RHS(1e-6, F_eta);
-    const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);
+    const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
     double epsilon = 1e-3;
     InfiniteVector<double, Index> u_epsilon, v;
-    //CDD2_SOLVE(cproblem1, nu, epsilon, u_epsilon, 6);
-    //APPLY(cproblem1, u_epsilon, 1e-9, v, 2*jmax1, CDD1);
+    
+    //cout << eq.s_star() << endl;
+    //cout << cproblem1.s_star() << endl;
+    //cout << eq.space_dimension << endl;
+    //cout << cproblem1.space_dimension << endl;
+    //CDD1_SOLVE(cproblem1, epsilon, u_epsilon, 2*jmax1, tensor_simple);
+    CDD2_SOLVE(cproblem1, nu, epsilon, u_epsilon, 2*jmax1, tensor_simple, pmax, a, b);
+    
+    //APPLY(cproblem1, u_epsilon, 1e-3, v, 2*jmax1, tensor_simple);
+    //APPLY_TEST(cproblem1, v, 10^-3, u_epsilon, 8, tensor_simple);
+    //CompressionStrategy strategy1=tensor_simple;
+    //Vector<double> w;
+    //add_compressed_column(cproblem1, 1, eq.basis().first_generator(), 1, w, 2*jmax1, strategy1, false, pmax, a, b);
+    
+    //plot solution
+    cout << "plotting solution" << endl;
+    u_epsilon.scale(&eq, -1);
+    SampledMapping<2> sm1(evaluate(eq.basis(), u_epsilon , true, 6));
+    std::ofstream stream1("solution_ad.m");
+    sm1.matlab_output(stream1);
+    stream1.close();
+    cout << "solution plotted" << endl;
+    
+    //plot coefficients
+    cout << "plotting coefficients" << endl;
+    std::ofstream coeff_stream1;
+    coeff_stream1.open("coefficients_ad.m");
+    coeff_stream1 << "figure;" << endl;
+    plot_indices(&eq.basis(), u_epsilon, 4, coeff_stream1,"(flipud(gray))", false, true, -8);
+    coeff_stream1 << "title('solution coefficients') " << endl;
+    coeff_stream1.close();
+    cout << "coefficients plotted" << endl;
 #endif
     
     

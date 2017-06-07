@@ -64,7 +64,8 @@ namespace WaveletTL
       
         for (int j = 1; j <= 1 /*K*/; j++) {
 #if _WAVELETTL_USE_TBASIS == 1
-          APPLY(P, v, eta, jp_guess, Av, maxlevel, tensor_simple);
+          APPLY(P, v, eta, Av, maxlevel, tensor_simple, pmax, a, b);
+          //APPLY(P, v, eta, jp_guess, Av, maxlevel, tensor_simple);
 #else
           //APPLY_COARSE(P, v, eta, Av, 0.5, maxlevel, CDD1);
 

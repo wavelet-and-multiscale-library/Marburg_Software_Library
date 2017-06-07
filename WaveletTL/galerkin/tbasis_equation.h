@@ -176,7 +176,7 @@ namespace WaveletTL
          * estimate compressibility exponent s^*
          * (we assume that the coefficients a(x),q(x) are smooth)
          */
-        //double s_star() const;
+        double s_star() const {return 1.0;}
 
         /*
          * estimate the compression constants alpha_k in

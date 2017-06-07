@@ -137,9 +137,9 @@ namespace WaveletTL
          * useless since only s^*=\infty is considered.
          */
          
-        //inline double s_star() const {
-         //   return problem->s_star();
-        //}
+        inline double s_star() const {
+            return problem->s_star();
+        }
          
 
         /*
@@ -428,10 +428,10 @@ namespace WaveletTL
          * estimate compressibility exponent s^*
          * (we assume that the coefficients a(x),q(x) are smooth)
          */
-        //double s_star() const
-        //{
-        //    return problem->s_star();
-        //}
+        double s_star() const
+        {
+            return problem->s_star();
+        }
 
         /*
          * estimate the compression constants alpha_k in

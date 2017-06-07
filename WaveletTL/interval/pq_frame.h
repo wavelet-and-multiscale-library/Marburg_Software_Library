@@ -143,7 +143,7 @@ namespace WaveletTL
      * It is precise for d=dt=2 and BC s=0 and d=dt 33 or 35 with BC 0 or 1,
      * so not only for free BC.
      * I have not tested other combinations of d/dt and BCs 
-     * 
+     * // comment (Keding): since the boundary quarklets have smaller suport than the wavelets, their support is underestimated too
     */
     void support(const Index& lambda, int& k1, int& k2) const;
     void support(const int j_, const int e_, const int k_, int& k1, int& k2) const;

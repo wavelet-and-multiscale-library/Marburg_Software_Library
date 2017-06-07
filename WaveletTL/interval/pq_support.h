@@ -46,7 +46,7 @@ namespace WaveletTL
 			  int& j, int& k1, int& k2);
   
   /*!
-    Decide whether the supports of two generators/wavelets \psi_\lambda and
+    Decide whether the supports of two generators/quarklets \psi_\lambda and
     \psi_\nu have an intersection of positive measure and compute it
     in the form 2^{-j}[k1,k2]. If the return value is false, the computed
     support intersection will have no meaningful values, for performance reasons.
@@ -60,19 +60,19 @@ namespace WaveletTL
 
 
   /*!
-    For a given wavelet \psi_\lambda, compute all generators/wavelets
+    For a given wavelet \psi_\lambda, compute all generators/quarklets
     \psi_\nu with level |\nu|=j, such that the respective supports
     have a nontrivial intersection.
   */
   template <int d, int dT>
-  void intersecting_wavelets(const PQFrame<d,dT>& basis,
+  void intersecting_quarklets(const PQFrame<d,dT>& basis,
 			     const typename PQFrame<d,dT>::Index& lambda,
 			     const int j, const bool generators,
 			     std::list<typename PQFrame<d,dT>::Index>& intersecting,
                              const int p = 0);
   
   /*!
-    For a given wavelet \psi_\lambda, compute all generators/wavelets
+    For a given wavelet \psi_\lambda, compute all generators/quarklets
     \psi_\nu with level |\nu|=j, such that the respective supports
     have a nontrivial intersection;
     return those intersections
@@ -81,10 +81,10 @@ PERFORMANCE:
    * computation of the intersections is inefficient! 
    * It needs to be replaced by a direct approach!
    * For known k the support of a generator/ wavelet is immideately known. 
-   * As a result for a given range [firstk, lastk] of intersecting wavelets the respective support overlapps with supp(lambda) are directly accessible.
+   * As a result for a given range [firstk, lastk] of intersecting quarklets the respective support overlapps with supp(lambda) are directly accessible.
   */
     template <int d, int dT>
-    void intersecting_wavelets(const PQFrame<d,dT>& basis,
+    void intersecting_quarklets(const PQFrame<d,dT>& basis,
     			       const typename PQFrame<d,dT>::Index& lambda,
 			       const int j, const bool generators,
 			       std::list<std::pair<typename PQFrame<d,dT>::Index, typename PQFrame<d,dT>::Support> >& intersecting);
@@ -137,21 +137,21 @@ PERFORMANCE:
 				  int& j, int& k1, int& k2);
 
   /*
-   * This method gives the minimal and maximal shiftparameter k for such that the wavelets or generators on level j 
+   * This method gives the minimal and maximal shiftparameter k for such that the quarklets or generators on level j 
    * intersect with the wavelet or generator lambda.
    * 
    * Moved from interval/support.h
   */
   template <int d, int dT>
-  void get_intersecting_wavelets_on_level(const PQFrame<d,dT>& basis,
+  void get_intersecting_quarklets_on_level(const PQFrame<d,dT>& basis,
                                           const typename PQFrame<d,dT>::Index& lambda,
                                           const int j, 
                                           const bool generators,
                                           int& mink, 
                                           int& maxk);
   template <int d, int dT>
-  void get_intersecting_wavelets_on_level(const PQFrame<d,dT>& basis,
-                                          const int lamj, const int lame, const int lamk,
+  void get_intersecting_quarklets_on_level(const PQFrame<d,dT>& basis,
+                                          const int lamp, const int lamj, const int lame, const int lamk,
                                           const int j, 
                                           const bool generators,
                                           int& mink, 

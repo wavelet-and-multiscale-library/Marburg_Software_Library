@@ -91,7 +91,7 @@ namespace WaveletTL
          * 
          * full_collection[i] is an alternative! less CPU, more memory usage
         */
-        TensorQIndex(const int number, const TENSORFRAME* frame);
+//        TensorQIndex(const int number, const TENSORFRAME* frame);
 
         // Assignment
         TensorQIndex& operator = (const TensorQIndex& lambda);
@@ -191,7 +191,7 @@ namespace WaveletTL
 
     /*
      * Index of first quarklet on level j.
-     * It is not checket whether j is a valid level, i.e., j-j0 is nonnegative
+     * It is not checked whether j is a valid level, i.e., j-j0 is nonnegative
      */
     template <class IFRAME, unsigned int DIM, class TENSORFRAME>
     TensorQIndex<IFRAME,DIM,TENSORFRAME>

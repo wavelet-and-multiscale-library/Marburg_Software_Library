@@ -1,3 +1,6 @@
+
+#include "tframe_index.h"
+
 // implementation for tframe_index.h
 
 namespace WaveletTL
@@ -189,585 +192,585 @@ namespace WaveletTL
 
 	template <class IFRAME, unsigned int DIM, class TENSORFRAME>
 	TensorQIndex<IFRAME, DIM, TENSORFRAME>::TensorQIndex(const TensorQIndex* lambda)
-	: frame_(lambda->frame_), p_(lambda.p_), j_(lambda->j_), e_(lambda->e_), k_(lambda->k_), num_(lambda->num_) {}
+	: frame_(lambda->frame_), p_(lambda->p_), j_(lambda->j_), e_(lambda->e_), k_(lambda->k_), num_(lambda->num_) {}
 
         template <class IFRAME, unsigned int DIM, class TENSORFRAME>
         TensorQIndex<IFRAME,DIM,TENSORFRAME>:: TensorQIndex(const polynomial_type& p, const level_type& j, const type_type& e, const translation_type& k, const int number, const TENSORFRAME* frame)
         : frame_(frame), p_(p), j_(j), e_(e), k_(k), num_(number) {}
         
-	template <class IFRAME, unsigned int DIM, class TENSORFRAME>
-	TensorQIndex<IFRAME, DIM, TENSORFRAME>::TensorQIndex(const int number, const TENSORFRAME* frame)
-	: frame_(frame), num_(number)
-	{
-#if _TFRAME_DEBUGLEVEL_ >= 1
-            cout << "TensorQIndex(number) is called. Use full_collection[number] instead!" << endl;
-#endif
-          /* 
-            This implementation for DIM = 2,3 assumes that Nablasize(j) = Deltasize(j0) + sum_{l=0}^{j-j0} 2^l * Nablasize(j0)
-            and uses a lot of div and mod
-          */
-          if(DIM == 2)
-          {
-          level_type j0 = frame->j0();
-          int Nabla1 = frame->frames()[0]->Nablasize(j0[0]);
-          int Nabla2 = frame->frames()[1]->Nablasize(j0[1]);
-          int Delta1 = frame->frames()[0]->Deltasize(j0[0]);
-          int Delta2 = frame->frames()[1]->Deltasize(j0[1]);
-          int act_num = num_;
-          int i = 0; 
-          if (act_num < Delta1*Delta2) 
-          {
-            j_ = j0;
-            e_[0]=0;
-            e_[1]=0;
-            k_[0] = frame->frames()[0]->DeltaLmin() + act_num/Delta2;
-            k_[1] = frame->frames()[1]->DeltaLmin() + (act_num % Delta2);
-          }
-          else
-          {
-            act_num -= Delta1*Delta2;
-            // computes the outer level
-            while(true)
-            {
-              int tmp = (Delta1*Nabla2 + Delta2*Nabla1 + (i+1)*Nabla1*Nabla2)<<i;
-              if(act_num < tmp)
-                break;
-              act_num -= tmp;
-              i++;
-            }
-            if(act_num < (Delta1*Nabla2)<<i)
-            {
-              j_[0] = j0[0];
-              j_[1] = j0[1] + i;
-              e_[0]=0;
-              e_[1]=1;
-              k_[0] = frame->frames()[0]->DeltaLmin() + act_num/(Nabla2<<i);
-              k_[1] = frame->frames()[1]->Nablamin() + (act_num % (Nabla2<<i));
-            }
-            else if ((act_num - ((Delta1*Nabla2)<<i)) / ((Nabla1*Nabla2)<<i) < i)
-            {
-              unsigned int tmp2 = (act_num - ((Delta1*Nabla2)<<i)) / ((Nabla1*Nabla2)<<i);
-              j_[0] = j0[0] + tmp2;
-              j_[1] = j0[1] + i - tmp2;
-              e_[0]=1;
-              e_[1]=1;
-              act_num -= (Delta1*Nabla2 + tmp2 * (Nabla1*Nabla2))<<i;
-              k_[0] = frame->frames()[0]->Nablamin() + act_num/(Nabla2<<(i-tmp2));
-              k_[1] = frame->frames()[1]->Nablamin() + (act_num % (Nabla2<<(i-tmp2)));
-            }
-            else if (act_num < (Delta1*Nabla2 + (i) * Nabla1*Nabla2 + Delta2*Nabla1)<<i ) 
-            {
-              j_[0] = j0[0] + i;
-              j_[1] = j0[1];
-              e_[0]=1;
-              e_[1]=0;
-              act_num -= (Delta1*Nabla2 + (i) * (Nabla1*Nabla2))<<i;
-              k_[0] = frame->frames()[0]->Nablamin() + act_num/Delta2;
-              k_[1] = frame->frames()[1]->DeltaLmin() + (act_num % Delta2);
-            }
-            else
-            {
-              j_[0] = j0[0] + i;
-              j_[1] = j0[1];
-              e_[0]=1;
-              e_[1]=1;
-              act_num -= (Delta1*Nabla2 + (i) * (Nabla1*Nabla2) + Delta2*Nabla1)<<i;
-              k_[0] = frame->frames()[0]->Nablamin() + act_num/Nabla2;
-              k_[1] = frame->frames()[1]->Nablamin() + (act_num % Nabla2);
-            }
-          }
-          }
-          else if(DIM == 3)
-          {
-          level_type j0 = frame->j0();
-          int Nabla1 = frame->frames()[0]->Nablasize(j0[0]);
-          int Nabla2 = frame->frames()[1]->Nablasize(j0[1]);
-          int Nabla3 = frame->frames()[2]->Nablasize(j0[2]);
-          int Delta1 = frame->frames()[0]->Deltasize(j0[0]);
-          int Delta2 = frame->frames()[1]->Deltasize(j0[1]);
-          int Delta3 = frame->frames()[2]->Deltasize(j0[2]);
-          int act_num = num_;
-          int i = 0; 
-          if (act_num < Delta1*Delta2*Delta3) 
-          {
-            j_ = j0;
-            e_[0]=0;
-            e_[1]=0;
-            e_[2]=0;
-            k_[0] = frame->frames()[0]->DeltaLmin() + (act_num/(Delta3*Delta2));
-            k_[1] = frame->frames()[1]->DeltaLmin() + (act_num/Delta3) % Delta2;
-            k_[2] = frame->frames()[2]->DeltaLmin() + (act_num % Delta3);
-          }
-          else
-          {
-            act_num -= Delta1*Delta2*Delta3;
-            while(true)
-            {
-              int tmp = (Delta1*Nabla2*Delta3 + Delta2*Nabla1*Delta3 + Delta2*Nabla3*Delta1 
-                        + (i+1) * (Nabla1*Nabla2*Delta3 + Nabla1*Nabla3*Delta2 + Nabla3*Nabla2*Delta1)
-                        + ((i+1)*(i+2)/2)*Nabla1*Nabla2*Nabla3) <<i;
-              if(act_num < tmp)
-                break;
-              act_num -= tmp;
-              i++;
-            }
-            if(i == 0)
-            {
-              if (act_num < Delta1*Delta2*Nabla3)
-              {
-                j_ = j0;
-                e_[0] = 0;
-                e_[1] = 0;
-                e_[2] = 1;
-                k_[0] = frame->frames()[0]->DeltaLmin() + (act_num/(Nabla3*Delta2));
-                k_[1] = frame->frames()[1]->DeltaLmin() + (act_num/Nabla3) % Delta2;
-                k_[2] = frame->frames()[2]->Nablamin() + (act_num % Nabla3);
-              }
-              else
-              {
-              act_num -= Delta1*Delta2*Nabla3;
-              if(act_num < Delta1*Nabla2*Delta3)
-              {
-                j_ = j0;
-                e_[0] = 0;
-                e_[1] = 1;
-                e_[2] = 0;
-                k_[0] = frame->frames()[0]->DeltaLmin() + (act_num/(Delta3*Nabla2));
-                k_[1] = frame->frames()[1]->Nablamin() + (act_num/Delta3) % Nabla2;
-                k_[2] = frame->frames()[2]->DeltaLmin() + (act_num % Delta3);
-              }
-              else
-              {
-              act_num -= Delta1*Nabla2*Delta3;
-              if(act_num < Delta1*Nabla2*Nabla3)
-              {
-                j_ = j0;
-                e_[0] = 0;
-                e_[1] = 1;
-                e_[2] = 1;
-                k_[0] = frame->frames()[0]->DeltaLmin() + (act_num/(Nabla3*Nabla2));
-                k_[1] = frame->frames()[1]->Nablamin() + (act_num/Nabla3) % Nabla2;
-                k_[2] = frame->frames()[2]->Nablamin() + (act_num % Nabla3);
-              }
-              else
-              {
-              act_num -= Delta1*Nabla2*Nabla3;
-              if(act_num < Nabla1*Delta2*Delta3)
-              {
-                j_ = j0;
-                e_[0] = 1;
-                e_[1] = 0;
-                e_[2] = 0;
-                k_[0] = frame->frames()[0]->Nablamin() + (act_num/(Delta3*Delta2));
-                k_[1] = frame->frames()[1]->DeltaLmin() + (act_num/Delta3) % Delta2;
-                k_[2] = frame->frames()[2]->DeltaLmin() + (act_num % Delta3);
-              }
-              else
-              {
-              act_num -= Nabla1*Delta2*Delta3;
-              if(act_num < Nabla1*Delta2*Nabla3)
-              {
-                j_ = j0;
-                e_[0] = 1;
-                e_[1] = 0;
-                e_[2] = 1;
-                k_[0] = frame->frames()[0]->Nablamin() + (act_num/(Nabla3*Delta2));
-                k_[1] = frame->frames()[1]->DeltaLmin() + (act_num/Nabla3) % Delta2;
-                k_[2] = frame->frames()[2]->Nablamin() + (act_num % Nabla3);
-              }
-              else
-              {
-              act_num -= Nabla1*Delta2*Nabla3;
-              if(act_num < Nabla1*Nabla2*Delta3)
-              {
-                j_ = j0;
-                e_[0] = 1;
-                e_[1] = 1;
-                e_[2] = 0;
-                k_[0] = frame->frames()[0]->Nablamin() + (act_num/(Delta3*Nabla2));
-                k_[1] = frame->frames()[1]->Nablamin() + (act_num/Delta3) % Nabla2;
-                k_[2] = frame->frames()[2]->DeltaLmin() + (act_num % Delta3);
-              }
-              else
-              {
-              act_num -= Nabla1*Nabla2*Delta3;
-                j_ = j0;
-                e_[0] = 1;
-                e_[1] = 1;
-                e_[2] = 1;
-                k_[0] = frame->frames()[0]->Nablamin() + (act_num/(Nabla3*Nabla2));
-                k_[1] = frame->frames()[1]->Nablamin() + (act_num/Nabla3) % Nabla2;
-                k_[2] = frame->frames()[2]->Nablamin() + (act_num % Nabla3);
-              }}}}}}
-            }
-            else
-            {            
-              if(act_num < ((Delta1+Nabla1) * (Delta2 + Nabla2) * Nabla3)<<i)
-              {
-                if(act_num < (Delta1 * Delta2 * Nabla3)<<i)
-                {
-                  j_[0] = j0[0];
-                  j_[1] = j0[1];
-                  j_[2] = j0[2] + i;
-                  e_[0]=0;
-                  e_[1]=0;
-                  e_[2]=1;
-                  k_[0] = frame->frames()[0]->DeltaLmin() + act_num/((Delta2*Nabla3)<<i);
-                  k_[1] = frame->frames()[1]->DeltaLmin() + (act_num/(Nabla3<<i)) % Delta2;
-                  k_[2] = frame->frames()[2]->Nablamin() + (act_num % (Nabla3<<i));
-                }
-                else
-                {
-                act_num -= (Delta1 * Delta2 * Nabla3)<<i;
-                if(act_num < (Delta1 * Nabla2 * Nabla3)<<i)
-                {
-                  j_[0] = j0[0];
-                  j_[1] = j0[1];
-                  j_[2] = j0[2] + i;
-                  e_[0]=0;
-                  e_[1]=1;
-                  e_[2]=1;
-                  k_[0] = frame->frames()[0]->DeltaLmin() + act_num/((Nabla2*Nabla3)<<i);
-                  k_[1] = frame->frames()[1]->Nablamin() + (act_num/(Nabla3<<i)) % Nabla2;
-                  k_[2] = frame->frames()[2]->Nablamin() + (act_num % (Nabla3<<i));
-                }
-                else
-                {
-                act_num -= (Delta1 * Nabla2 * Nabla3)<<i;
-                if(act_num < (Nabla1 * Delta2 * Nabla3)<<i)
-                {
-                  j_[0] = j0[0];
-                  j_[1] = j0[1];
-                  j_[2] = j0[2] + i;
-                  e_[0]=1;
-                  e_[1]=0;
-                  e_[2]=1;
-                  k_[0] = frame->frames()[0]->Nablamin() + act_num/((Delta2*Nabla3)<<i);
-                  k_[1] = frame->frames()[1]->DeltaLmin() + (act_num/(Nabla3<<i)) % Delta2;
-                  k_[2] = frame->frames()[2]->Nablamin() + (act_num % (Nabla3<<i));
-                }
-                else
-                {
-                act_num -= (Nabla1 * Delta2 * Nabla3)<<i;
-                  j_[0] = j0[0];
-                  j_[1] = j0[1];
-                  j_[2] = j0[2] + i;
-                  e_[0]=1;
-                  e_[1]=1;
-                  e_[2]=1;
-                  k_[0] = frame->frames()[0]->Nablamin() + act_num/((Nabla2*Nabla3)<<i);
-                  k_[1] = frame->frames()[1]->Nablamin() + (act_num/(Nabla3<<i)) % Nabla2;
-                  k_[2] = frame->frames()[2]->Nablamin() + (act_num % (Nabla3<<i));
-                }}}
-              }
-              else if(((act_num - (((Delta1+Nabla1) * (Delta2 + Nabla2) * Nabla3)<<i))/(((Delta1+Nabla1)*Nabla2*Nabla3)<<i)) < (i-1))
-              {
-                unsigned int tmp2 = (act_num - (((Delta1+Nabla1) * (Delta2 + Nabla2) * Nabla3)<<i))/(((Delta1+Nabla1)*Nabla2*Nabla3)<<i);
-                j_[0] = j0[0];
-                j_[1] = j0[1] + tmp2+1;
-                j_[2] = j0[2] + i - tmp2 -1;
-                act_num -= ((Delta1+Nabla1) * (Delta2 + Nabla2) * Nabla3 + tmp2 * (Delta1+Nabla1)*Nabla2*Nabla3)<<i;
-                if(act_num < Delta1*Nabla2*Nabla3 <<i)
-                {
-                  e_[0] = 0;
-                  k_[0] = frame->frames()[0]->DeltaLmin() + act_num/((Nabla2*Nabla3)<<i);
-                }
-                else
-                {
-                  e_[0] = 1;
-                  act_num -= Delta1*Nabla2*Nabla3 <<i;
-                  k_[0] = frame->frames()[0]->Nablamin() + act_num/((Nabla2*Nabla3)<<i);
-                }
-                e_[1] = 1;
-                e_[2] = 1;
-                k_[1] = frame->frames()[1]->Nablamin() + (act_num/(Nabla3<<(i-tmp2-1))) % (Nabla2 <<(tmp2+1));
-                k_[2] = frame->frames()[2]->Nablamin() + (act_num % (Nabla3<<(i-tmp2-1)));
-              } 
-              else if((act_num -(((Delta1+Nabla1) * (Delta2 + Nabla2) * Nabla3 + (i-1) * (Delta1+Nabla1)*Nabla2*Nabla3)<<i)) 
-                          < ((Nabla2*(Delta1+Nabla1)*(Delta3+Nabla3))<<i ) )
-              {
-                j_[0] = j0[0];
-                j_[1] = j0[1] + i;
-                j_[2] = j0[2];
-                e_[1] = 1;
-                act_num -= ((Delta1+Nabla1) * (Delta2 + Nabla2) * Nabla3 + (i-1)*((Delta1+Nabla1)*Nabla2*Nabla3))<<i;
-                if(act_num < (Delta1*Nabla2*Delta3) <<i)
-                {
-                  e_[0] = 0;
-                  e_[2] = 0;
-                  k_[0] = frame->frames()[0]->DeltaLmin() + act_num/((Nabla2*Delta3)<<i);
-                  k_[1] = frame->frames()[1]->Nablamin() + (act_num/Delta3) % (Nabla2 <<i);
-                  k_[2] = frame->frames()[2]->DeltaLmin() + (act_num % Delta3);
-                }
-                else 
-                {
-                act_num -= (Delta1*Nabla2*Delta3) <<i;
-                if(act_num < (Delta1*Nabla2*Nabla3) <<i)
-                {
-                  e_[0] = 0;
-                  e_[2] = 1;
-                  k_[0] = frame->frames()[0]->DeltaLmin() + act_num/((Nabla2*Nabla3)<<i);
-                  k_[1] = frame->frames()[1]->Nablamin() + (act_num/Nabla3) % (Nabla2 <<i);
-                  k_[2] = frame->frames()[2]->Nablamin() + (act_num % Nabla3);
-                }
-                else 
-                {
-                act_num -= (Delta1*Nabla2*Nabla3) <<i;
-                if(act_num < (Nabla1*Nabla2*Delta3) <<i)
-                {
-                  e_[0] = 1;
-                  e_[2] = 0;
-                  k_[0] = frame->frames()[0]->Nablamin() + act_num/((Nabla2*Delta3)<<i);
-                  k_[1] = frame->frames()[1]->Nablamin() + (act_num/Delta3) % (Nabla2 <<i);
-                  k_[2] = frame->frames()[2]->DeltaLmin() + (act_num % Delta3);
-                }
-                else 
-                {
-                act_num -= (Nabla1*Nabla2*Delta3) <<i;
-                  e_[0] = 1;
-                  e_[2] = 1;
-                  k_[0] = frame->frames()[0]->Nablamin() + act_num/((Nabla2*Nabla3)<<i);
-                  k_[1] = frame->frames()[1]->Nablamin() + (act_num/Nabla3) % (Nabla2 <<i);
-                  k_[2] = frame->frames()[2]->Nablamin() + (act_num % Nabla3);
-                }}}
-              }
-              else
-              {
-                act_num -= ((Delta1+Nabla1) * (Delta2 + Nabla2) * Nabla3 
-                           + (i-1) * (Delta1+Nabla1)*Nabla2*Nabla3 
-                           + Nabla2*(Delta1+Nabla1)*(Delta3+Nabla3))<<i;
-                int l = 1;
-                while(true)
-                {
-                  int tmp = (Nabla1*Nabla2*Delta3 + Nabla1*Delta2*Nabla3 + (i+1-l)*Nabla1*Nabla2*Nabla3)<<i;
-                  if (l == i)
-                    tmp += Nabla1*Delta2*Delta3<<i;
-                  if (act_num < tmp)
-                    break;
-                  act_num -= tmp;
-                  l++;
-                }
-                j_[0] = j0[0] + l;
-                e_[0] = 1;
-                if(l < i)
-                {
-                  if(act_num < (Nabla1*Delta2*Nabla3)<<i)
-                  {
-                    j_[1] = j0[1];
-                    j_[2] = j0[2] + i - l;
-                    e_[1] = 0;
-                    e_[2] = 1;
-                    k_[0] = frame->frames()[0]->Nablamin() + act_num/((Delta2*Nabla3)<<(i-l));
-                    k_[1] = frame->frames()[1]->DeltaLmin() + (act_num/(Nabla3<<(i-l))) % Delta2;
-                    k_[2] = frame->frames()[2]->Nablamin() + (act_num % (Nabla3<<(i-l)));
-                  }
-                  else if( ((act_num - ((Nabla1*Delta2*Nabla3)<<i))/((Nabla1*Nabla2*Nabla3)<<i)) < (i-l) )
-                  {
-                    unsigned int tmp2 = ((act_num - ((Nabla1*Delta2*Nabla3)<<i))/((Nabla1*Nabla2*Nabla3)<<i));
-                    j_[1] = j0[1] + tmp2;
-                    j_[2] = j0[2] + i - l - tmp2;
-                    e_[1] = 1;
-                    e_[2] = 1;
-                    act_num -= (Nabla1*Delta2*Nabla3 + tmp2*Nabla1*Nabla2*Nabla3)<<i;
-                    k_[0] = frame->frames()[0]->Nablamin() + act_num/((Nabla2*Nabla3)<<(i-l));
-                    k_[1] = frame->frames()[1]->Nablamin() + (act_num/(Nabla3<<(i-l-tmp2))) % (Nabla2<<tmp2);
-                    k_[2] = frame->frames()[2]->Nablamin() + (act_num % (Nabla3<<(i-l-tmp2)));
-                  } 
-                  else
-                  {
-                    act_num -= (Nabla1*Delta2*Nabla3 + (i-l)*Nabla1*Nabla2*Nabla3)<<i;
-                    if(act_num < Nabla1*Nabla2*Delta3<<i)
-                    {
-                      j_[1] = j0[1] + i - l;
-                      j_[2] = j0[2];
-                      e_[1] = 1;
-                      e_[2] = 0;
-                      k_[0] = frame->frames()[0]->Nablamin() + act_num/((Nabla2*Delta3)<<(i-l));
-                      k_[1] = frame->frames()[1]->Nablamin() + (act_num/Delta3) % (Nabla2<<(i-l));
-                      k_[2] = frame->frames()[2]->DeltaLmin() + (act_num % Delta3);
-                    }
-                    else
-                    {
-                      j_[1] = j0[1] + i - l;
-                      j_[2] = j0[2];
-                      e_[1] = 1;
-                      e_[2] = 1;
-                      act_num -= Nabla1*Nabla2*Delta3<<i;
-                      k_[0] = frame->frames()[0]->Nablamin() + act_num/((Nabla2*Nabla3)<<(i-l));
-                      k_[1] = frame->frames()[1]->Nablamin() + (act_num/Nabla3) % (Nabla2<<(i-l));
-                      k_[2] = frame->frames()[2]->Nablamin() + (act_num % Nabla3);
-                    }
-                  }
-                }
-                else
-                {
-                  if(act_num < (Nabla1*Delta2*Delta3)<<i)
-                  {
-                    j_[1] = j0[1];
-                    j_[2] = j0[2];
-                    e_[1] = 0;
-                    e_[2] = 0;
-                    k_[0] = frame->frames()[0]->Nablamin() + act_num/(Delta2*Delta3);
-                    k_[1] = frame->frames()[1]->DeltaLmin() + (act_num/Delta3) % Delta2;
-                    k_[2] = frame->frames()[2]->DeltaLmin() + (act_num % Delta3);
-                  }
-                  else 
-                  {
-                  act_num -= Nabla1*Delta2*Delta3<<i;
-                  if(act_num < (Nabla1*Delta2*Nabla3)<<i)
-                  {
-                    j_[1] = j0[1];
-                    j_[2] = j0[2];
-                    e_[1] = 0;
-                    e_[2] = 1;
-                    k_[0] = frame->frames()[0]->Nablamin() + act_num/(Delta2*Nabla3);
-                    k_[1] = frame->frames()[1]->DeltaLmin() + (act_num/Nabla3) % Delta2;
-                    k_[2] = frame->frames()[2]->Nablamin() + (act_num % Nabla3);
-                  }
-                  else
-                  {
-                  act_num -= Nabla1*Delta2*Nabla3<<i;
-                  if(act_num < (Nabla1*Nabla2*Delta3)<<i)
-                  {
-                    j_[1] = j0[1];
-                    j_[2] = j0[2];
-                    e_[1] = 1;
-                    e_[2] = 0;
-                    k_[0] = frame->frames()[0]->Nablamin() + act_num/(Nabla2*Delta3);
-                    k_[1] = frame->frames()[1]->Nablamin() + (act_num/Delta3) % Nabla2;
-                    k_[2] = frame->frames()[2]->DeltaLmin() + (act_num % Delta3);
-                  }
-                  else
-                  {
-                  act_num -= Nabla1*Nabla2*Delta3<<i;
-                    j_[1] = j0[1];
-                    j_[2] = j0[2];
-                    e_[1] = 1;
-                    e_[2] = 1;
-                    k_[0] = frame->frames()[0]->Nablamin() + act_num/(Nabla2*Nabla3);
-                    k_[1] = frame->frames()[1]->Nablamin() + (act_num/Nabla3) % Nabla2;
-                    k_[2] = frame->frames()[2]->Nablamin() + (act_num % Nabla3);
-                  }}}
-                }
-              }
-            }
-          }
-          }
-          else //DIM >3
-          {
-                MathTL::FixedArray1D<std::map<int, int>,DIM> sizes; // Store number of frame elements. Generators on level j0 (0), quarklets on level j0 (1), j0+1 (2), ...
-		int remains = number+1; // numbering begins at 0
-		int oncurrentlevel(1); // number of base elements on current level j
-		int range(0); // number of level steps we have climbed so far. determines wether a new entry has to be computed in "sizes"
-		level_type currentlevel, j0(frame_->j0());
-		type_type currenttype;
-		currentlevel = j0;
-		for (unsigned int i=0; i < DIM; i++) {
-			currenttype[i]=0;
-			sizes[i][0] = frame_->frames()[i]->Deltasize(j0[i]); // Number of generators on level j0
-                        sizes[i][1] = frame_->frames()[i]->Nablasize(j0[i]); // N o Wavelets
-                        oncurrentlevel *= sizes[i][0];
-		}
-                
-                // iterate over all levels. Add up number of frame functions till looked for level is reached
-		while (remains > oncurrentlevel) // break if we are at the right level
-		{
-                    // else substract number of frame functions on current_index=(currentlevel,currentindex) and increase current_index
-                    remains -= oncurrentlevel;
-                    
-                    // increase index = (currentlevel,currenttype)
-                    // "small loop" "currenttype++" (currentlevel fest)
-                    // iterate over all combinations of generators/quarklets for all dimensions with currentlevel[i]=j0[i]
-                    // this looks like binary addition: (in 3 Dim:) gwg is followed by gww (g=0,w=1)
-                    bool done = true;
-                    for (int i(DIM-1); i >= 0; i--)
-                    {
-                        // find first position on level j0
-                        if (currentlevel[i] == j0[i])
-                        {
-                            if (currenttype[i] == 1)
-                            {
-                                currenttype[i]=0;
-                            } else
-                            {
-                                currenttype[i]=1;
-                                done = false;
-                                break;
-                            }
-                        }
-                    }
-                    // done == true means that all components with currentlevel[i]=j0[i] were quarklets.
-                    // the level j has to be increased.
-                    // iterate "big loop", meaning: "currentlevel++"
-                    if (done == true)
-                    {
-                        for (int i(DIM-1); i >= 0; i--)
-                        {
-                            if (i != 0)
-                            {
-                                if (currentlevel[i] != j0[i])
-                                {
-                                    // increase left neighbor
-                                    currentlevel[i-1]=currentlevel[i-1]+1;
-                                    if (currentlevel[i-1]-j0[i-1] == range)
-                                    {
-                                        sizes[i-1][range+1]=frame ->frames()[i-1]->Nablasize(currentlevel[i-1]); // if needed compute and store new size information
-                                    }
-                                    currenttype[i-1]=1;
-                                    int temp = currentlevel[i]-j0[i];
-                                    currentlevel[i]=j0[i];
-                                    currenttype[i]=0;
-                                    currentlevel[DIM-1]=j0[DIM-1]+temp-1;
-                                    currenttype[DIM-1]= (temp == 1?0:1);
-                                    break;
-                                }
-
-                            } else // i == 0. "big loop" arrived at the last index. We have to increase range!
-                            {
-                                range = range +1;
-                                if (DIM == 1)
-                                {
-                                    currenttype[0] = 1;
-                                    currentlevel[0]=currentlevel[0]+1;
-                                    sizes[0][range+1]=frame ->frames()[0]->Nablasize(currentlevel[0]); // if needed compute and store new size information
-                                }
-                                else
-                                {
-                                    //currentlevel[DIM-1]=j0[DIM-1]+currentlevel[0]-j0[0]+1; currenttype[DIM-1]=1;
-                                    currentlevel[DIM-1]=j0[DIM-1]+range; currenttype[DIM-1]=1;
-                                    for(int i(DIM-2); i>=0; i--)
-                                    {
-                                      currenttype[i]=0; currentlevel[i]=j0[i];
-                                    }
-                                    sizes[DIM-1][range+1]=frame ->frames()[DIM-1]->Nablasize(currentlevel[DIM-1]); // if needed compute and store new size information
-                                }
-                            break; // unnoetig, da i==0 gilt.
-                            }
-                        } // end of "big loop"
-                    }
-                    // compute number of functions on this level
-                    oncurrentlevel = 1;
-                    for (unsigned int i = 0; i < DIM; i++)
-                    {
-                        oncurrentlevel *= sizes[i][currentlevel[i]+currenttype[i]-j0[i]];
-                    }
-		} // end of while
-
-                // determine k corresponding to the number of the frame function given by "remains" (on level (currentlevel,currenttype) )
-		unsigned int modul;                
-		j_ = currentlevel;
-		e_ = currenttype;
-                remains -= 1; // numbering begins at 0
-		for (int i = DIM-1; i > 0; i--)
-		{
-			modul = sizes[i][currentlevel[i]+currenttype[i]-j0[i]];
-			k_[i]= remains % modul+(e_[i] == 0 ? frame->frames()[i]->DeltaLmin():frame->frames()[i]->Nablamin());
-			remains = remains / modul;
-		}
-                k_[0]=remains +(e_[0] == 0 ? frame->frames()[0]->DeltaLmin():frame->frames()[0]->Nablamin());
-
-          } //end DIM >3
-        }
+//	template <class IFRAME, unsigned int DIM, class TENSORFRAME>
+//	TensorQIndex<IFRAME, DIM, TENSORFRAME>::TensorQIndex(const int number, const TENSORFRAME* frame)
+//	: frame_(frame), num_(number)
+//	{
+//#if _TFRAME_DEBUGLEVEL_ >= 1
+//            cout << "TensorQIndex(number) is called. Use full_collection[number] instead!" << endl;
+//#endif
+//          /* 
+//            This implementation for DIM = 2,3 assumes that Nablasize(j) = Deltasize(j0) + sum_{l=0}^{j-j0} 2^l * Nablasize(j0)
+//            and uses a lot of div and mod
+//          */
+//          if(DIM == 2)
+//          {
+//          level_type j0 = frame->j0();
+//          int Nabla1 = frame->frames()[0]->Nablasize(j0[0]);
+//          int Nabla2 = frame->frames()[1]->Nablasize(j0[1]);
+//          int Delta1 = frame->frames()[0]->Deltasize(j0[0]);
+//          int Delta2 = frame->frames()[1]->Deltasize(j0[1]);
+//          int act_num = num_;
+//          int i = 0; 
+//          if (act_num < Delta1*Delta2) 
+//          {
+//            j_ = j0;
+//            e_[0]=0;
+//            e_[1]=0;
+//            k_[0] = frame->frames()[0]->DeltaLmin() + act_num/Delta2;
+//            k_[1] = frame->frames()[1]->DeltaLmin() + (act_num % Delta2);
+//          }
+//          else
+//          {
+//            act_num -= Delta1*Delta2;
+//            // computes the outer level
+//            while(true)
+//            {
+//              int tmp = (Delta1*Nabla2 + Delta2*Nabla1 + (i+1)*Nabla1*Nabla2)<<i;
+//              if(act_num < tmp)
+//                break;
+//              act_num -= tmp;
+//              i++;
+//            }
+//            if(act_num < (Delta1*Nabla2)<<i)
+//            {
+//              j_[0] = j0[0];
+//              j_[1] = j0[1] + i;
+//              e_[0]=0;
+//              e_[1]=1;
+//              k_[0] = frame->frames()[0]->DeltaLmin() + act_num/(Nabla2<<i);
+//              k_[1] = frame->frames()[1]->Nablamin() + (act_num % (Nabla2<<i));
+//            }
+//            else if ((act_num - ((Delta1*Nabla2)<<i)) / ((Nabla1*Nabla2)<<i) < i)
+//            {
+//              unsigned int tmp2 = (act_num - ((Delta1*Nabla2)<<i)) / ((Nabla1*Nabla2)<<i);
+//              j_[0] = j0[0] + tmp2;
+//              j_[1] = j0[1] + i - tmp2;
+//              e_[0]=1;
+//              e_[1]=1;
+//              act_num -= (Delta1*Nabla2 + tmp2 * (Nabla1*Nabla2))<<i;
+//              k_[0] = frame->frames()[0]->Nablamin() + act_num/(Nabla2<<(i-tmp2));
+//              k_[1] = frame->frames()[1]->Nablamin() + (act_num % (Nabla2<<(i-tmp2)));
+//            }
+//            else if (act_num < (Delta1*Nabla2 + (i) * Nabla1*Nabla2 + Delta2*Nabla1)<<i ) 
+//            {
+//              j_[0] = j0[0] + i;
+//              j_[1] = j0[1];
+//              e_[0]=1;
+//              e_[1]=0;
+//              act_num -= (Delta1*Nabla2 + (i) * (Nabla1*Nabla2))<<i;
+//              k_[0] = frame->frames()[0]->Nablamin() + act_num/Delta2;
+//              k_[1] = frame->frames()[1]->DeltaLmin() + (act_num % Delta2);
+//            }
+//            else
+//            {
+//              j_[0] = j0[0] + i;
+//              j_[1] = j0[1];
+//              e_[0]=1;
+//              e_[1]=1;
+//              act_num -= (Delta1*Nabla2 + (i) * (Nabla1*Nabla2) + Delta2*Nabla1)<<i;
+//              k_[0] = frame->frames()[0]->Nablamin() + act_num/Nabla2;
+//              k_[1] = frame->frames()[1]->Nablamin() + (act_num % Nabla2);
+//            }
+//          }
+//          }
+//          else if(DIM == 3)
+//          {
+//          level_type j0 = frame->j0();
+//          int Nabla1 = frame->frames()[0]->Nablasize(j0[0]);
+//          int Nabla2 = frame->frames()[1]->Nablasize(j0[1]);
+//          int Nabla3 = frame->frames()[2]->Nablasize(j0[2]);
+//          int Delta1 = frame->frames()[0]->Deltasize(j0[0]);
+//          int Delta2 = frame->frames()[1]->Deltasize(j0[1]);
+//          int Delta3 = frame->frames()[2]->Deltasize(j0[2]);
+//          int act_num = num_;
+//          int i = 0; 
+//          if (act_num < Delta1*Delta2*Delta3) 
+//          {
+//            j_ = j0;
+//            e_[0]=0;
+//            e_[1]=0;
+//            e_[2]=0;
+//            k_[0] = frame->frames()[0]->DeltaLmin() + (act_num/(Delta3*Delta2));
+//            k_[1] = frame->frames()[1]->DeltaLmin() + (act_num/Delta3) % Delta2;
+//            k_[2] = frame->frames()[2]->DeltaLmin() + (act_num % Delta3);
+//          }
+//          else
+//          {
+//            act_num -= Delta1*Delta2*Delta3;
+//            while(true)
+//            {
+//              int tmp = (Delta1*Nabla2*Delta3 + Delta2*Nabla1*Delta3 + Delta2*Nabla3*Delta1 
+//                        + (i+1) * (Nabla1*Nabla2*Delta3 + Nabla1*Nabla3*Delta2 + Nabla3*Nabla2*Delta1)
+//                        + ((i+1)*(i+2)/2)*Nabla1*Nabla2*Nabla3) <<i;
+//              if(act_num < tmp)
+//                break;
+//              act_num -= tmp;
+//              i++;
+//            }
+//            if(i == 0)
+//            {
+//              if (act_num < Delta1*Delta2*Nabla3)
+//              {
+//                j_ = j0;
+//                e_[0] = 0;
+//                e_[1] = 0;
+//                e_[2] = 1;
+//                k_[0] = frame->frames()[0]->DeltaLmin() + (act_num/(Nabla3*Delta2));
+//                k_[1] = frame->frames()[1]->DeltaLmin() + (act_num/Nabla3) % Delta2;
+//                k_[2] = frame->frames()[2]->Nablamin() + (act_num % Nabla3);
+//              }
+//              else
+//              {
+//              act_num -= Delta1*Delta2*Nabla3;
+//              if(act_num < Delta1*Nabla2*Delta3)
+//              {
+//                j_ = j0;
+//                e_[0] = 0;
+//                e_[1] = 1;
+//                e_[2] = 0;
+//                k_[0] = frame->frames()[0]->DeltaLmin() + (act_num/(Delta3*Nabla2));
+//                k_[1] = frame->frames()[1]->Nablamin() + (act_num/Delta3) % Nabla2;
+//                k_[2] = frame->frames()[2]->DeltaLmin() + (act_num % Delta3);
+//              }
+//              else
+//              {
+//              act_num -= Delta1*Nabla2*Delta3;
+//              if(act_num < Delta1*Nabla2*Nabla3)
+//              {
+//                j_ = j0;
+//                e_[0] = 0;
+//                e_[1] = 1;
+//                e_[2] = 1;
+//                k_[0] = frame->frames()[0]->DeltaLmin() + (act_num/(Nabla3*Nabla2));
+//                k_[1] = frame->frames()[1]->Nablamin() + (act_num/Nabla3) % Nabla2;
+//                k_[2] = frame->frames()[2]->Nablamin() + (act_num % Nabla3);
+//              }
+//              else
+//              {
+//              act_num -= Delta1*Nabla2*Nabla3;
+//              if(act_num < Nabla1*Delta2*Delta3)
+//              {
+//                j_ = j0;
+//                e_[0] = 1;
+//                e_[1] = 0;
+//                e_[2] = 0;
+//                k_[0] = frame->frames()[0]->Nablamin() + (act_num/(Delta3*Delta2));
+//                k_[1] = frame->frames()[1]->DeltaLmin() + (act_num/Delta3) % Delta2;
+//                k_[2] = frame->frames()[2]->DeltaLmin() + (act_num % Delta3);
+//              }
+//              else
+//              {
+//              act_num -= Nabla1*Delta2*Delta3;
+//              if(act_num < Nabla1*Delta2*Nabla3)
+//              {
+//                j_ = j0;
+//                e_[0] = 1;
+//                e_[1] = 0;
+//                e_[2] = 1;
+//                k_[0] = frame->frames()[0]->Nablamin() + (act_num/(Nabla3*Delta2));
+//                k_[1] = frame->frames()[1]->DeltaLmin() + (act_num/Nabla3) % Delta2;
+//                k_[2] = frame->frames()[2]->Nablamin() + (act_num % Nabla3);
+//              }
+//              else
+//              {
+//              act_num -= Nabla1*Delta2*Nabla3;
+//              if(act_num < Nabla1*Nabla2*Delta3)
+//              {
+//                j_ = j0;
+//                e_[0] = 1;
+//                e_[1] = 1;
+//                e_[2] = 0;
+//                k_[0] = frame->frames()[0]->Nablamin() + (act_num/(Delta3*Nabla2));
+//                k_[1] = frame->frames()[1]->Nablamin() + (act_num/Delta3) % Nabla2;
+//                k_[2] = frame->frames()[2]->DeltaLmin() + (act_num % Delta3);
+//              }
+//              else
+//              {
+//              act_num -= Nabla1*Nabla2*Delta3;
+//                j_ = j0;
+//                e_[0] = 1;
+//                e_[1] = 1;
+//                e_[2] = 1;
+//                k_[0] = frame->frames()[0]->Nablamin() + (act_num/(Nabla3*Nabla2));
+//                k_[1] = frame->frames()[1]->Nablamin() + (act_num/Nabla3) % Nabla2;
+//                k_[2] = frame->frames()[2]->Nablamin() + (act_num % Nabla3);
+//              }}}}}}
+//            }
+//            else
+//            {            
+//              if(act_num < ((Delta1+Nabla1) * (Delta2 + Nabla2) * Nabla3)<<i)
+//              {
+//                if(act_num < (Delta1 * Delta2 * Nabla3)<<i)
+//                {
+//                  j_[0] = j0[0];
+//                  j_[1] = j0[1];
+//                  j_[2] = j0[2] + i;
+//                  e_[0]=0;
+//                  e_[1]=0;
+//                  e_[2]=1;
+//                  k_[0] = frame->frames()[0]->DeltaLmin() + act_num/((Delta2*Nabla3)<<i);
+//                  k_[1] = frame->frames()[1]->DeltaLmin() + (act_num/(Nabla3<<i)) % Delta2;
+//                  k_[2] = frame->frames()[2]->Nablamin() + (act_num % (Nabla3<<i));
+//                }
+//                else
+//                {
+//                act_num -= (Delta1 * Delta2 * Nabla3)<<i;
+//                if(act_num < (Delta1 * Nabla2 * Nabla3)<<i)
+//                {
+//                  j_[0] = j0[0];
+//                  j_[1] = j0[1];
+//                  j_[2] = j0[2] + i;
+//                  e_[0]=0;
+//                  e_[1]=1;
+//                  e_[2]=1;
+//                  k_[0] = frame->frames()[0]->DeltaLmin() + act_num/((Nabla2*Nabla3)<<i);
+//                  k_[1] = frame->frames()[1]->Nablamin() + (act_num/(Nabla3<<i)) % Nabla2;
+//                  k_[2] = frame->frames()[2]->Nablamin() + (act_num % (Nabla3<<i));
+//                }
+//                else
+//                {
+//                act_num -= (Delta1 * Nabla2 * Nabla3)<<i;
+//                if(act_num < (Nabla1 * Delta2 * Nabla3)<<i)
+//                {
+//                  j_[0] = j0[0];
+//                  j_[1] = j0[1];
+//                  j_[2] = j0[2] + i;
+//                  e_[0]=1;
+//                  e_[1]=0;
+//                  e_[2]=1;
+//                  k_[0] = frame->frames()[0]->Nablamin() + act_num/((Delta2*Nabla3)<<i);
+//                  k_[1] = frame->frames()[1]->DeltaLmin() + (act_num/(Nabla3<<i)) % Delta2;
+//                  k_[2] = frame->frames()[2]->Nablamin() + (act_num % (Nabla3<<i));
+//                }
+//                else
+//                {
+//                act_num -= (Nabla1 * Delta2 * Nabla3)<<i;
+//                  j_[0] = j0[0];
+//                  j_[1] = j0[1];
+//                  j_[2] = j0[2] + i;
+//                  e_[0]=1;
+//                  e_[1]=1;
+//                  e_[2]=1;
+//                  k_[0] = frame->frames()[0]->Nablamin() + act_num/((Nabla2*Nabla3)<<i);
+//                  k_[1] = frame->frames()[1]->Nablamin() + (act_num/(Nabla3<<i)) % Nabla2;
+//                  k_[2] = frame->frames()[2]->Nablamin() + (act_num % (Nabla3<<i));
+//                }}}
+//              }
+//              else if(((act_num - (((Delta1+Nabla1) * (Delta2 + Nabla2) * Nabla3)<<i))/(((Delta1+Nabla1)*Nabla2*Nabla3)<<i)) < (i-1))
+//              {
+//                unsigned int tmp2 = (act_num - (((Delta1+Nabla1) * (Delta2 + Nabla2) * Nabla3)<<i))/(((Delta1+Nabla1)*Nabla2*Nabla3)<<i);
+//                j_[0] = j0[0];
+//                j_[1] = j0[1] + tmp2+1;
+//                j_[2] = j0[2] + i - tmp2 -1;
+//                act_num -= ((Delta1+Nabla1) * (Delta2 + Nabla2) * Nabla3 + tmp2 * (Delta1+Nabla1)*Nabla2*Nabla3)<<i;
+//                if(act_num < Delta1*Nabla2*Nabla3 <<i)
+//                {
+//                  e_[0] = 0;
+//                  k_[0] = frame->frames()[0]->DeltaLmin() + act_num/((Nabla2*Nabla3)<<i);
+//                }
+//                else
+//                {
+//                  e_[0] = 1;
+//                  act_num -= Delta1*Nabla2*Nabla3 <<i;
+//                  k_[0] = frame->frames()[0]->Nablamin() + act_num/((Nabla2*Nabla3)<<i);
+//                }
+//                e_[1] = 1;
+//                e_[2] = 1;
+//                k_[1] = frame->frames()[1]->Nablamin() + (act_num/(Nabla3<<(i-tmp2-1))) % (Nabla2 <<(tmp2+1));
+//                k_[2] = frame->frames()[2]->Nablamin() + (act_num % (Nabla3<<(i-tmp2-1)));
+//              } 
+//              else if((act_num -(((Delta1+Nabla1) * (Delta2 + Nabla2) * Nabla3 + (i-1) * (Delta1+Nabla1)*Nabla2*Nabla3)<<i)) 
+//                          < ((Nabla2*(Delta1+Nabla1)*(Delta3+Nabla3))<<i ) )
+//              {
+//                j_[0] = j0[0];
+//                j_[1] = j0[1] + i;
+//                j_[2] = j0[2];
+//                e_[1] = 1;
+//                act_num -= ((Delta1+Nabla1) * (Delta2 + Nabla2) * Nabla3 + (i-1)*((Delta1+Nabla1)*Nabla2*Nabla3))<<i;
+//                if(act_num < (Delta1*Nabla2*Delta3) <<i)
+//                {
+//                  e_[0] = 0;
+//                  e_[2] = 0;
+//                  k_[0] = frame->frames()[0]->DeltaLmin() + act_num/((Nabla2*Delta3)<<i);
+//                  k_[1] = frame->frames()[1]->Nablamin() + (act_num/Delta3) % (Nabla2 <<i);
+//                  k_[2] = frame->frames()[2]->DeltaLmin() + (act_num % Delta3);
+//                }
+//                else 
+//                {
+//                act_num -= (Delta1*Nabla2*Delta3) <<i;
+//                if(act_num < (Delta1*Nabla2*Nabla3) <<i)
+//                {
+//                  e_[0] = 0;
+//                  e_[2] = 1;
+//                  k_[0] = frame->frames()[0]->DeltaLmin() + act_num/((Nabla2*Nabla3)<<i);
+//                  k_[1] = frame->frames()[1]->Nablamin() + (act_num/Nabla3) % (Nabla2 <<i);
+//                  k_[2] = frame->frames()[2]->Nablamin() + (act_num % Nabla3);
+//                }
+//                else 
+//                {
+//                act_num -= (Delta1*Nabla2*Nabla3) <<i;
+//                if(act_num < (Nabla1*Nabla2*Delta3) <<i)
+//                {
+//                  e_[0] = 1;
+//                  e_[2] = 0;
+//                  k_[0] = frame->frames()[0]->Nablamin() + act_num/((Nabla2*Delta3)<<i);
+//                  k_[1] = frame->frames()[1]->Nablamin() + (act_num/Delta3) % (Nabla2 <<i);
+//                  k_[2] = frame->frames()[2]->DeltaLmin() + (act_num % Delta3);
+//                }
+//                else 
+//                {
+//                act_num -= (Nabla1*Nabla2*Delta3) <<i;
+//                  e_[0] = 1;
+//                  e_[2] = 1;
+//                  k_[0] = frame->frames()[0]->Nablamin() + act_num/((Nabla2*Nabla3)<<i);
+//                  k_[1] = frame->frames()[1]->Nablamin() + (act_num/Nabla3) % (Nabla2 <<i);
+//                  k_[2] = frame->frames()[2]->Nablamin() + (act_num % Nabla3);
+//                }}}
+//              }
+//              else
+//              {
+//                act_num -= ((Delta1+Nabla1) * (Delta2 + Nabla2) * Nabla3 
+//                           + (i-1) * (Delta1+Nabla1)*Nabla2*Nabla3 
+//                           + Nabla2*(Delta1+Nabla1)*(Delta3+Nabla3))<<i;
+//                int l = 1;
+//                while(true)
+//                {
+//                  int tmp = (Nabla1*Nabla2*Delta3 + Nabla1*Delta2*Nabla3 + (i+1-l)*Nabla1*Nabla2*Nabla3)<<i;
+//                  if (l == i)
+//                    tmp += Nabla1*Delta2*Delta3<<i;
+//                  if (act_num < tmp)
+//                    break;
+//                  act_num -= tmp;
+//                  l++;
+//                }
+//                j_[0] = j0[0] + l;
+//                e_[0] = 1;
+//                if(l < i)
+//                {
+//                  if(act_num < (Nabla1*Delta2*Nabla3)<<i)
+//                  {
+//                    j_[1] = j0[1];
+//                    j_[2] = j0[2] + i - l;
+//                    e_[1] = 0;
+//                    e_[2] = 1;
+//                    k_[0] = frame->frames()[0]->Nablamin() + act_num/((Delta2*Nabla3)<<(i-l));
+//                    k_[1] = frame->frames()[1]->DeltaLmin() + (act_num/(Nabla3<<(i-l))) % Delta2;
+//                    k_[2] = frame->frames()[2]->Nablamin() + (act_num % (Nabla3<<(i-l)));
+//                  }
+//                  else if( ((act_num - ((Nabla1*Delta2*Nabla3)<<i))/((Nabla1*Nabla2*Nabla3)<<i)) < (i-l) )
+//                  {
+//                    unsigned int tmp2 = ((act_num - ((Nabla1*Delta2*Nabla3)<<i))/((Nabla1*Nabla2*Nabla3)<<i));
+//                    j_[1] = j0[1] + tmp2;
+//                    j_[2] = j0[2] + i - l - tmp2;
+//                    e_[1] = 1;
+//                    e_[2] = 1;
+//                    act_num -= (Nabla1*Delta2*Nabla3 + tmp2*Nabla1*Nabla2*Nabla3)<<i;
+//                    k_[0] = frame->frames()[0]->Nablamin() + act_num/((Nabla2*Nabla3)<<(i-l));
+//                    k_[1] = frame->frames()[1]->Nablamin() + (act_num/(Nabla3<<(i-l-tmp2))) % (Nabla2<<tmp2);
+//                    k_[2] = frame->frames()[2]->Nablamin() + (act_num % (Nabla3<<(i-l-tmp2)));
+//                  } 
+//                  else
+//                  {
+//                    act_num -= (Nabla1*Delta2*Nabla3 + (i-l)*Nabla1*Nabla2*Nabla3)<<i;
+//                    if(act_num < Nabla1*Nabla2*Delta3<<i)
+//                    {
+//                      j_[1] = j0[1] + i - l;
+//                      j_[2] = j0[2];
+//                      e_[1] = 1;
+//                      e_[2] = 0;
+//                      k_[0] = frame->frames()[0]->Nablamin() + act_num/((Nabla2*Delta3)<<(i-l));
+//                      k_[1] = frame->frames()[1]->Nablamin() + (act_num/Delta3) % (Nabla2<<(i-l));
+//                      k_[2] = frame->frames()[2]->DeltaLmin() + (act_num % Delta3);
+//                    }
+//                    else
+//                    {
+//                      j_[1] = j0[1] + i - l;
+//                      j_[2] = j0[2];
+//                      e_[1] = 1;
+//                      e_[2] = 1;
+//                      act_num -= Nabla1*Nabla2*Delta3<<i;
+//                      k_[0] = frame->frames()[0]->Nablamin() + act_num/((Nabla2*Nabla3)<<(i-l));
+//                      k_[1] = frame->frames()[1]->Nablamin() + (act_num/Nabla3) % (Nabla2<<(i-l));
+//                      k_[2] = frame->frames()[2]->Nablamin() + (act_num % Nabla3);
+//                    }
+//                  }
+//                }
+//                else
+//                {
+//                  if(act_num < (Nabla1*Delta2*Delta3)<<i)
+//                  {
+//                    j_[1] = j0[1];
+//                    j_[2] = j0[2];
+//                    e_[1] = 0;
+//                    e_[2] = 0;
+//                    k_[0] = frame->frames()[0]->Nablamin() + act_num/(Delta2*Delta3);
+//                    k_[1] = frame->frames()[1]->DeltaLmin() + (act_num/Delta3) % Delta2;
+//                    k_[2] = frame->frames()[2]->DeltaLmin() + (act_num % Delta3);
+//                  }
+//                  else 
+//                  {
+//                  act_num -= Nabla1*Delta2*Delta3<<i;
+//                  if(act_num < (Nabla1*Delta2*Nabla3)<<i)
+//                  {
+//                    j_[1] = j0[1];
+//                    j_[2] = j0[2];
+//                    e_[1] = 0;
+//                    e_[2] = 1;
+//                    k_[0] = frame->frames()[0]->Nablamin() + act_num/(Delta2*Nabla3);
+//                    k_[1] = frame->frames()[1]->DeltaLmin() + (act_num/Nabla3) % Delta2;
+//                    k_[2] = frame->frames()[2]->Nablamin() + (act_num % Nabla3);
+//                  }
+//                  else
+//                  {
+//                  act_num -= Nabla1*Delta2*Nabla3<<i;
+//                  if(act_num < (Nabla1*Nabla2*Delta3)<<i)
+//                  {
+//                    j_[1] = j0[1];
+//                    j_[2] = j0[2];
+//                    e_[1] = 1;
+//                    e_[2] = 0;
+//                    k_[0] = frame->frames()[0]->Nablamin() + act_num/(Nabla2*Delta3);
+//                    k_[1] = frame->frames()[1]->Nablamin() + (act_num/Delta3) % Nabla2;
+//                    k_[2] = frame->frames()[2]->DeltaLmin() + (act_num % Delta3);
+//                  }
+//                  else
+//                  {
+//                  act_num -= Nabla1*Nabla2*Delta3<<i;
+//                    j_[1] = j0[1];
+//                    j_[2] = j0[2];
+//                    e_[1] = 1;
+//                    e_[2] = 1;
+//                    k_[0] = frame->frames()[0]->Nablamin() + act_num/(Nabla2*Nabla3);
+//                    k_[1] = frame->frames()[1]->Nablamin() + (act_num/Nabla3) % Nabla2;
+//                    k_[2] = frame->frames()[2]->Nablamin() + (act_num % Nabla3);
+//                  }}}
+//                }
+//              }
+//            }
+//          }
+//          }
+//          else //DIM >3
+//          {
+//                MathTL::FixedArray1D<std::map<int, int>,DIM> sizes; // Store number of frame elements. Generators on level j0 (0), quarklets on level j0 (1), j0+1 (2), ...
+//		int remains = number+1; // numbering begins at 0
+//		int oncurrentlevel(1); // number of base elements on current level j
+//		int range(0); // number of level steps we have climbed so far. determines wether a new entry has to be computed in "sizes"
+//		level_type currentlevel, j0(frame_->j0());
+//		type_type currenttype;
+//		currentlevel = j0;
+//		for (unsigned int i=0; i < DIM; i++) {
+//			currenttype[i]=0;
+//			sizes[i][0] = frame_->frames()[i]->Deltasize(j0[i]); // Number of generators on level j0
+//                        sizes[i][1] = frame_->frames()[i]->Nablasize(j0[i]); // N o Wavelets
+//                        oncurrentlevel *= sizes[i][0];
+//		}
+//                
+//                // iterate over all levels. Add up number of frame functions till looked for level is reached
+//		while (remains > oncurrentlevel) // break if we are at the right level
+//		{
+//                    // else substract number of frame functions on current_index=(currentlevel,currentindex) and increase current_index
+//                    remains -= oncurrentlevel;
+//                    
+//                    // increase index = (currentlevel,currenttype)
+//                    // "small loop" "currenttype++" (currentlevel fest)
+//                    // iterate over all combinations of generators/quarklets for all dimensions with currentlevel[i]=j0[i]
+//                    // this looks like binary addition: (in 3 Dim:) gwg is followed by gww (g=0,w=1)
+//                    bool done = true;
+//                    for (int i(DIM-1); i >= 0; i--)
+//                    {
+//                        // find first position on level j0
+//                        if (currentlevel[i] == j0[i])
+//                        {
+//                            if (currenttype[i] == 1)
+//                            {
+//                                currenttype[i]=0;
+//                            } else
+//                            {
+//                                currenttype[i]=1;
+//                                done = false;
+//                                break;
+//                            }
+//                        }
+//                    }
+//                    // done == true means that all components with currentlevel[i]=j0[i] were quarklets.
+//                    // the level j has to be increased.
+//                    // iterate "big loop", meaning: "currentlevel++"
+//                    if (done == true)
+//                    {
+//                        for (int i(DIM-1); i >= 0; i--)
+//                        {
+//                            if (i != 0)
+//                            {
+//                                if (currentlevel[i] != j0[i])
+//                                {
+//                                    // increase left neighbor
+//                                    currentlevel[i-1]=currentlevel[i-1]+1;
+//                                    if (currentlevel[i-1]-j0[i-1] == range)
+//                                    {
+//                                        sizes[i-1][range+1]=frame ->frames()[i-1]->Nablasize(currentlevel[i-1]); // if needed compute and store new size information
+//                                    }
+//                                    currenttype[i-1]=1;
+//                                    int temp = currentlevel[i]-j0[i];
+//                                    currentlevel[i]=j0[i];
+//                                    currenttype[i]=0;
+//                                    currentlevel[DIM-1]=j0[DIM-1]+temp-1;
+//                                    currenttype[DIM-1]= (temp == 1?0:1);
+//                                    break;
+//                                }
+//
+//                            } else // i == 0. "big loop" arrived at the last index. We have to increase range!
+//                            {
+//                                range = range +1;
+//                                if (DIM == 1)
+//                                {
+//                                    currenttype[0] = 1;
+//                                    currentlevel[0]=currentlevel[0]+1;
+//                                    sizes[0][range+1]=frame ->frames()[0]->Nablasize(currentlevel[0]); // if needed compute and store new size information
+//                                }
+//                                else
+//                                {
+//                                    //currentlevel[DIM-1]=j0[DIM-1]+currentlevel[0]-j0[0]+1; currenttype[DIM-1]=1;
+//                                    currentlevel[DIM-1]=j0[DIM-1]+range; currenttype[DIM-1]=1;
+//                                    for(int i(DIM-2); i>=0; i--)
+//                                    {
+//                                      currenttype[i]=0; currentlevel[i]=j0[i];
+//                                    }
+//                                    sizes[DIM-1][range+1]=frame ->frames()[DIM-1]->Nablasize(currentlevel[DIM-1]); // if needed compute and store new size information
+//                                }
+//                            break; // unnoetig, da i==0 gilt.
+//                            }
+//                        } // end of "big loop"
+//                    }
+//                    // compute number of functions on this level
+//                    oncurrentlevel = 1;
+//                    for (unsigned int i = 0; i < DIM; i++)
+//                    {
+//                        oncurrentlevel *= sizes[i][currentlevel[i]+currenttype[i]-j0[i]];
+//                    }
+//		} // end of while
+//
+//                // determine k corresponding to the number of the frame function given by "remains" (on level (currentlevel,currenttype) )
+//		unsigned int modul;                
+//		j_ = currentlevel;
+//		e_ = currenttype;
+//                remains -= 1; // numbering begins at 0
+//		for (int i = DIM-1; i > 0; i--)
+//		{
+//			modul = sizes[i][currentlevel[i]+currenttype[i]-j0[i]];
+//			k_[i]= remains % modul+(e_[i] == 0 ? frame->frames()[i]->DeltaLmin():frame->frames()[i]->Nablamin());
+//			remains = remains / modul;
+//		}
+//                k_[0]=remains +(e_[0] == 0 ? frame->frames()[0]->DeltaLmin():frame->frames()[0]->Nablamin());
+//
+//          } //end DIM >3
+//        }
 
 	template <class IFRAME, unsigned int DIM, class TENSORFRAME>
   	TensorQIndex<IFRAME,DIM,TENSORFRAME>&

@@ -97,7 +97,7 @@ namespace MathTL
   }
 
     template<class I, unsigned int DIMENSION>
-    unsigned long int MultiIndex<I, DIMENSION>::number()
+    unsigned long int MultiIndex<I, DIMENSION>::number() const
     {
         unsigned long int num;
         unsigned int level,a,b;

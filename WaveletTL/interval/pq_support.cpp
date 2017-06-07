@@ -113,7 +113,7 @@ namespace WaveletTL
 
   
     template <int d, int dT>
-    void intersecting_wavelets(const PQFrame<d,dT>& basis,
+    void intersecting_quarklets(const PQFrame<d,dT>& basis,
                                const typename PQFrame<d,dT>::Index& lambda,
                                const int j, const bool generators,
                                std::list<typename PQFrame<d,dT>::Index>& intersecting, const int p)
@@ -156,27 +156,27 @@ namespace WaveletTL
             int mink = d+dT-2; //used as temporary storage
             if (n > mink)
             {
-                // no left boundary wavelets intersect
+                // no left boundary quarklets intersect
                 mink = n - mink/2; // = n+1-(d+dt)/2;
             }
             else
             {
                 if (n < mink)
                 {
-                    // all left boundary wavelets intersect
+                    // all left boundary quarklets intersect
                     mink = basis.Nablamin(p);
                 }
                 else
                 {
-                    // left boundary wavelets may intersect 
+                    // left boundary quarklets may intersect 
                     if (basis.get_s0() == d-1)
                     {
-                        // left boundary wavelets have the same support as the leftmost inner wavelet
+                        // left boundary quarklets have the same support as the leftmost inner wavelet
                         mink = basis.Nablamin(p);
                     }
                     else
                     {
-                        // left boundary wavelets do not intersect
+                        // left boundary quarklets do not intersect
                         mink /= 2;
                         // newmink = n+1-(d+dt)/2;  // it holds that n == d+dt-2
                     }
@@ -197,27 +197,27 @@ namespace WaveletTL
             int maxk = (1<<j) -(d+dT)+1; // used as temporary value;
             if (n < maxk)
             {
-                // no right boundary wavelets intersect
+                // no right boundary quarklets intersect
                 maxk = n-1+(d+dT)/2;
             }
             else
             {
                 if (n > maxk)
                 {
-                    // all right boundary wavelets intersect
+                    // all right boundary quarklets intersect
                     maxk = basis.Nablamax(j,p);
                 }
                 else
                 {
-                    // right boundary wavelets may intersect 
+                    // right boundary quarklets may intersect 
                     if (basis.get_s1() == d-1)
                     {
-                        // right boundary wavelets have the same support as the rightmost inner wavelet
+                        // right boundary quarklets have the same support as the rightmost inner wavelet
                         maxk = basis.Nablamax(j,p);
                     }
                     else
                     {
-                        // right boundary wavelets do not intersect
+                        // right boundary quarklets do not intersect
                         maxk = n-1+(d+dT)/2; // with n = newmaxk, but formula doesnt get cheaper without introducing another temp variable
                     }
                 }
@@ -255,7 +255,7 @@ namespace WaveletTL
     }
     
     template <int d, int dT>
-    void intersecting_wavelets(const PQFrame<d,dT>& basis,
+    void intersecting_quarklets(const PQFrame<d,dT>& basis,
                                const typename PQFrame<d,dT>::Index& lambda,
                                const int j, const bool generators,
                                std::list<std::pair<typename PQFrame<d,dT>::Index, typename PQFrame<d,dT>::Support> >& intersecting)
@@ -305,27 +305,27 @@ namespace WaveletTL
             int mink = d+dT-2; //used as temporary storage
             if (n > mink)
             {
-                // no left boundary wavelets intersect
+                // no left boundary quarklets intersect
                 mink = n - mink/2; // = n+1-(d+dt)/2;
             }
             else
             {
                 if (n < mink)
                 {
-                    // all left boundary wavelets intersect
+                    // all left boundary quarklets intersect
                     mink = 0;
                 }
                 else
                 {
-                    // left boundary wavelets may intersect 
+                    // left boundary quarklets may intersect 
                     if (basis.get_s0() == d-1)
                     {
-                        // left boundary wavelets have the same support as the leftmost inner wavelet
+                        // left boundary quarklets have the same support as the leftmost inner wavelet
                         mink = 0;
                     }
                     else
                     {
-                        // left boundary wavelets do not intersect
+                        // left boundary quarklets do not intersect
                         mink /= 2;
                         // newmink = n+1-(d+dt)/2;  // it holds that n == d+dt-2
                     }
@@ -346,27 +346,27 @@ namespace WaveletTL
             int maxk = (1<<j) -(d+dT)+1; // used as temporary value;
             if (n < maxk)
             {
-                // no right boundary wavelets intersect
+                // no right boundary quarklets intersect
                 maxk = n-1+(d+dT)/2;
             }
             else
             {
                 if (n > maxk)
                 {
-                    // all right boundary wavelets intersect
+                    // all right boundary quarklets intersect
                     maxk = (1<<j)-1;
                 }
                 else
                 {
-                    // right boundary wavelets may intersect 
+                    // right boundary quarklets may intersect 
                     if (basis.get_s1() == d-1)
                     {
-                        // right boundary wavelets have the same support as the rightmost inner wavelet
+                        // right boundary quarklets have the same support as the rightmost inner wavelet
                         maxk = (1<<j)-1;
                     }
                     else
                     {
-                        // right boundary wavelets do not intersect
+                        // right boundary quarklets do not intersect
                         maxk = n-1+(d+dT)/2; // with n = newmaxk, but formula doesnt get cheaper without introducing another temp variable
                     }
                 }
@@ -538,7 +538,7 @@ namespace WaveletTL
     }
     
     template <int d, int dT>
-    void get_intersecting_wavelets_on_level(const PQFrame<d,dT>& basis,
+    void get_intersecting_quarklets_on_level(const PQFrame<d,dT>& basis,
                                             const typename PQFrame<d,dT>::Index& lambda,
                                             const int j, 
                                             const bool generators,
@@ -546,7 +546,7 @@ namespace WaveletTL
                                             int& maxk)
     { 
         //  the following code is equivalent to
-        //get_intersecting_wavelets_on_level(basis,lambda.j(), lambda.e(), lambda.k(), j, generators, mink, maxk);
+        //get_intersecting_quarklets_on_level(basis,lambda.j(), lambda.e(), lambda.k(), j, generators, mink, maxk);
         // however, this call is slower!
 //        typedef typename PQFrame<d,dT>::Index Index;
 //        typedef typename PQFrame<d,dT>::Support Support;
@@ -575,7 +575,7 @@ namespace WaveletTL
         } 
         else 
         {
-            //old code relies on an overestimate of the suppor size of the boundary wavelets
+            //old code relies on an overestimate of the suppor size of the boundary quarklets
             /*
             mink = (ldexp(1.0,j-j_lambda)*k1_lambda < d+dT-1 // overestimate, TODO!
                     ? 0
@@ -605,27 +605,27 @@ namespace WaveletTL
             mink = d+dT-2; //used as temporary storage
             if (n > mink)
             {
-                // no left boundary wavelets intersect
+                // no left boundary quarklets intersect
                 mink = n - mink/2; // = n+1-(d+dt)/2;
             }
             else
             {
                 if (n < mink)
                 {
-                    // all left boundary wavelets intersect
+                    // all left boundary quarklets intersect
                     mink = 0;
                 }
                 else
                 {
-                    // left boundary wavelets may intersect 
+                    // left boundary quarklets may intersect 
                     if (basis.get_s0() == d-1)
                     {
-                        // left boundary wavelets have the same support as the leftmost inner wavelet
+                        // left boundary quarklets have the same support as the leftmost inner wavelet
                         mink = 0;
                     }
                     else
                     {
-                        // left boundary wavelets do not intersect
+                        // left boundary quarklets do not intersect
                         mink /= 2;
                         // newmink = n+1-(d+dt)/2;  // with n = newmink
                     }
@@ -633,7 +633,7 @@ namespace WaveletTL
             }
             // find last inner wavelet that intersects
             // biggest n such that 2^{-j}n < 2^{-j_lambda}k2_lambda <= 2^{-j}(n+1)
-            n = (j < j_lambda) ? (k2_lambda / (1<<(j_lambda-j)) + (((k2_lambda % (1<<j_lambda-j)) == 0)?0:1) ) -1 
+            n = (j < j_lambda) ? (k2_lambda / (1<<(j_lambda-j)) + (((k2_lambda % (1<<(j_lambda-j))) == 0)?0:1) ) -1 
                                : (k2_lambda << (j-j_lambda)) -1;
             /*
             // again some clear, but slightly slower code:
@@ -652,27 +652,27 @@ namespace WaveletTL
             maxk = (1<<j) -(d+dT)+1; // used as temporary value;
             if (n < maxk)
             {
-                // no right boundary wavelets intersect
+                // no right boundary quarklets intersect
                 maxk = n-1+(d+dT)/2;
             }
             else
             {
                 if (n > maxk)
                 {
-                    // all right boundary wavelets intersect
+                    // all right boundary quarklets intersect
                     maxk = (1<<j)-1;
                 }
                 else
                 {
-                    // right boundary wavelets may intersect 
+                    // right boundary quarklets may intersect 
                     if (basis.get_s1() == d-1)
                     {
-                        // right boundary wavelets have the same support as the rightmost inner wavelet
+                        // right boundary quarklets have the same support as the rightmost inner wavelet
                         maxk = (1<<j)-1;
                     }
                     else
                     {
-                        // right boundary wavelets do not intersect
+                        // right boundary quarklets do not intersect
                         maxk = n-1+(d+dT)/2; // with n = newmaxk, but formula doesnt get cheaper without introducing another temp variable
                     }
                 }
@@ -681,8 +681,8 @@ namespace WaveletTL
     }
     
     template <int d, int dT>
-    void get_intersecting_wavelets_on_level(const PQFrame<d,dT>& basis,
-                                            const int lamj, const int lame, const int lamk,
+    void get_intersecting_quarklets_on_level(const PQFrame<d,dT>& basis,
+                                            const int lamp, const int lamj, const int lame, const int lamk,
                                             const int j, 
                                             const bool generators,
                                             int& mink, 
@@ -744,27 +744,27 @@ namespace WaveletTL
             mink = d+dT-2; //used as temporary storage
             if (n > mink)
             {
-                // no left boundary wavelets intersect
+                // no left boundary quarklets intersect
                 mink = n - mink/2; // = n+1-(d+dt)/2;
             }
             else
             {
                 if (n < mink)
                 {
-                    // all left boundary wavelets intersect
+                    // all left boundary quarklets intersect
                     mink = 0;
                 }
                 else
                 {
-                    // left boundary wavelets may intersect 
+                    // left boundary quarklets may intersect 
                     if (basis.get_s0() == d-1)
                     {
-                        // left boundary wavelets have the same support as the leftmost inner wavelet
+                        // left boundary quarklets have the same support as the leftmost inner wavelet
                         mink = 0;
                     }
                     else
                     {
-                        // left boundary wavelets do not intersect
+                        // left boundary quarklets do not intersect
                         mink /= 2;
                         // newmink = n+1-(d+dt)/2;  // with n = newmink
                     }
@@ -774,7 +774,7 @@ namespace WaveletTL
             
             // find last inner wavelet that intersects
             // biggest n such that 2^{-j}n < 2^{-j_lambda}k2_lambda <= 2^{-j}(n+1)
-            n = (j < j_lambda) ? (k2_lambda / (1<<(j_lambda-j)) + (((k2_lambda % (1<<j_lambda-j)) == 0)?0:1) ) -1 
+            n = (j < j_lambda) ? (k2_lambda / (1<<(j_lambda-j)) + (((k2_lambda % (1<<(j_lambda-j))) == 0)?0:1) ) -1 
                                : (k2_lambda << (j-j_lambda)) -1;
             /*
             // again some clear, but slightly slower code:
@@ -793,42 +793,42 @@ namespace WaveletTL
             maxk = (1<<j) -(d+dT)+1; // used as temporary value;
             if (n < maxk)
             {
-                // no right boundary wavelets intersect
+                // no right boundary quarklets intersect
                 maxk = n-1+(d+dT)/2;
             }
             else
             {
                 if (n > maxk)
                 {
-                    // all right boundary wavelets intersect
+                    // all right boundary quarklets intersect
                     maxk = (1<<j)-1;
                 }
                 else
                 {
-                    // right boundary wavelets may intersect 
+                    // right boundary quarklets may intersect 
                     if (basis.get_s1() == d-1)
                     {
-                        // right boundary wavelets have the same support as the rightmost inner wavelet
+                        // right boundary quarklets have the same support as the rightmost inner wavelet
                         maxk = (1<<j)-1;
                     }
                     else
                     {
-                        // right boundary wavelets do not intersect
+                        // right boundary quarklets do not intersect
                         maxk = n-1+(d+dT)/2; // with n = newmaxk, but formula doesnt get cheaper without introducing another temp variable
                     }
                 }
             }
             
-            // old code is much shorter, but relies on the fact that the outmost inner wavelets have the same support than the respective boundary wavelets
+            // old code is much shorter, but relies on the fact that the outmost inner quarklets have the same support than the respective boundary quarklets
             /*
-            // if the left boundary wavelets are not involved, then
+            // if the left boundary quarklets are not involved, then
             // the rightmost wavelet on the level j, s.th. its support intersects [a,b], fulfills
             //   2^{-j}(k+(d+dT)/2) > a  but  2^{-j}(k-1+(d+dT)/2) <= a,
             // so that ...
             mink = (ldexp(1.0,j-j_lambda)*k1_lambda < d+dT-1 // overestimate, TODO!
                     ? 0
                     : (int) floor(ldexp(1.0,j-j_lambda)*k1_lambda-(d+dT)/2)+1);
-            // if the right boundary wavelets are not involved, then
+            // if the right boundary quarklets are not involved, then
             // the leftmost wavelet on the level j, s.th. its support intersects [a,b], fulfills
             //   2^{-j}(k-(d+dT)/2+1) < b  but  2^{-j}(k-(d+dT)/2+2) >= a,
             // so that ...

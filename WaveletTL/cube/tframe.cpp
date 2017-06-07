@@ -140,7 +140,7 @@ namespace WaveletTL
                 e[i]=0;
                 k[i]=frames_[i]->DeltaLmin();
             }
-            return Index(p, j0_, e, k, 0, this);
+             return Index(p, j0_, e, k, p.number() * (last_quarklet(jmax_).number()+1), this);
         }
 
         template <class IFRAME, unsigned int DIM>
@@ -153,7 +153,7 @@ namespace WaveletTL
                 e[i]=0;
                 k[i]=frames_[i]->DeltaLmin();
             }
-            return Index(p, j0_, e, k, 0,  this);
+            return Index(p, j0_, e, k, p.number() * (last_quarklet(jmax_).number()+1),  this);
         }
 
         template <class IFRAME, unsigned int DIM>
@@ -166,7 +166,10 @@ namespace WaveletTL
                 e[i]=0;
                 k[i]=frames_[i]->DeltaLmin();
             }
-            return Index(p, j0_, e, k, 0, this);
+            return Index(p, j0_, e, k, p.number() * (last_quarklet(jmax_).number()+1), this);
+                
+            
+            
         }
 
         template <class IFRAME, unsigned int DIM>
@@ -183,47 +186,83 @@ namespace WaveletTL
             int res=1;
             for (unsigned int i = 0; i < DIM; i++)
                 res *= frames_[i]->Deltasize(j0_[i]);
-            return Index(p, j0_, e, k, (res-1), this);
+            return Index(p, j0_, e, k, p.number() * (last_quarklet(jmax_).number()+1)+(res-1), this);
         }
 
 #if _PRECOMPUTE_FIRSTLAST_WAVELETS
                
         template <class IFRAME, unsigned int DIM>
         typename TensorFrame<IFRAME,DIM>::Index
-        TensorFrame<IFRAME,DIM>::first_wavelet(const MultiIndex<int,DIM> j) const
+        TensorFrame<IFRAME,DIM>::first_quarklet(const MultiIndex<int,DIM> j, const typename Index::polynomial_type p) const
         {
             MultiIndex<int,DIM> temp_mi(j);
             for (unsigned int i=0; i<DIM; ++i)
                 temp_mi[i] -= j0_[i];
+            if(p.number()==0)
             return first_wavelets[temp_mi.number()];
+            else{
+                MultiIndex<int,DIM> tempj,tempe,tempk;
+                tempj = first_wavelets[temp_mi.number()].j();
+                tempe = first_wavelets[temp_mi.number()].e();
+                tempk = first_wavelets[temp_mi.number()].k();
+                return Index(p,tempj,tempe,tempk, p.number() * (last_quarklet(jmax_).number()+1) 
+                        + first_wavelets[temp_mi.number()].number(), this);
+            }
         }
         
         template <class IFRAME, unsigned int DIM>
         typename TensorFrame<IFRAME,DIM>::Index
-        TensorFrame<IFRAME,DIM>::first_wavelet(const int levelsum) const
+        TensorFrame<IFRAME,DIM>::first_quarklet(const int levelsum, const typename Index::polynomial_type p) const
         {            
             MultiIndex<int,DIM> temp_mi;
             temp_mi[0] = levelsum - multi_degree(j0_);
+            if(p.number()==0)
             return first_wavelets[temp_mi.number()];
+            else{
+                MultiIndex<int,DIM> tempj,tempe,tempk;
+                tempj = first_wavelets[temp_mi.number()].j();
+                tempe = first_wavelets[temp_mi.number()].e();
+                tempk = first_wavelets[temp_mi.number()].k();
+                return Index(p,tempj,tempe,tempk, p.number() * (last_quarklet(jmax_).number()+1) 
+                        + first_wavelets[temp_mi.number()].number()-1, this);
+            }
         }
         
         template <class IFRAME, unsigned int DIM>
         typename TensorFrame<IFRAME,DIM>::Index
-        TensorFrame<IFRAME,DIM>::last_wavelet(const MultiIndex<int,DIM> j) const
+        TensorFrame<IFRAME,DIM>::last_quarklet(const MultiIndex<int,DIM> j, const typename Index::polynomial_type p) const
         {            
             MultiIndex<int,DIM> temp_mi(j);
             for (unsigned int i=0; i<DIM; ++i)
                 temp_mi[i] -= j0_[i];
+            if(p.number()==0)
             return last_wavelets[temp_mi.number()];
+            else{
+                MultiIndex<int,DIM> tempj,tempe,tempk;
+                tempj = last_wavelets[temp_mi.number()].j();
+                tempe = last_wavelets[temp_mi.number()].e();
+                tempk = last_wavelets[temp_mi.number()].k();
+                return Index(p,tempj,tempe,tempk, (p.number()+1) * (last_quarklet(jmax_).number()+1) - 1,this);
+            }
         }
         
         template <class IFRAME, unsigned int DIM>
         typename TensorFrame<IFRAME,DIM>::Index
-        TensorFrame<IFRAME,DIM>::last_wavelet(const int levelsum) const
+        TensorFrame<IFRAME,DIM>::last_quarklet(const int levelsum, const typename Index::polynomial_type p) const
         {
             MultiIndex<int,DIM> temp_mi;
             temp_mi[0] = levelsum - multi_degree(j0_);
+            if(p.number()==0)
             return last_wavelets[temp_mi.number()];
+            else{
+                
+                MultiIndex<int,DIM> tempj,tempe,tempk;
+                tempj = last_wavelets[temp_mi.number()].j();
+                tempe = last_wavelets[temp_mi.number()].e();
+                tempk = last_wavelets[temp_mi.number()].k();
+                return Index(p,tempj,tempe,tempk, (p.number()+1) * (last_quarklet(jmax_).number()+1) - 1,this);
+            }
+                
         }
         
                 
@@ -457,7 +496,7 @@ namespace WaveletTL
                     break;
             }
             */
-            for (unsigned int i=0; i<degrees_of_freedom(); i++)
+            for (unsigned int i=0; (int)i<degrees_of_freedom(); i++)
             {
                 const double coeff = integrate(f, full_collection[i]);
                 if (fabs(coeff)>1e-15)
@@ -497,6 +536,7 @@ namespace WaveletTL
             // compute the point values of the integrand (where we use that it is a tensor product)
             for (unsigned int i = 0; i < DIM; i++)
                 frames()[i]->evaluate(0,
+                                     lambda.p()[i],
                                      lambda.j()[i],
                                      lambda.e()[i],
                                      lambda.k()[i],
@@ -565,7 +605,7 @@ namespace WaveletTL
             for (int k = 0; k < degrees_of_freedom; k++) {
                 full_collection[k] = ind;
                 
-                if(ind==last_quarklet<IFRAME,DIM,TensorFrame<IFRAME,DIM> >(this, jmax_, p)){
+                if(ind==last_quarklet(jmax_, p)){
                     ++p;
                     ind=first_generator(j0_, p);
                 }

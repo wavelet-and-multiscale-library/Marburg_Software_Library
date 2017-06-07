@@ -1,3 +1,6 @@
+
+#include "tframe_index.h"
+
 // implementation for tframe_index.h
 
 namespace WaveletTL
@@ -189,7 +192,7 @@ namespace WaveletTL
 
 	template <class IFRAME, unsigned int DIM, class TENSORFRAME>
 	TensorQIndex<IFRAME, DIM, TENSORFRAME>::TensorQIndex(const TensorQIndex* lambda)
-	: frame_(lambda->frame_), p_(lambda.p_), j_(lambda->j_), e_(lambda->e_), k_(lambda->k_), num_(lambda->num_) {}
+	: frame_(lambda->frame_), p_(lambda->p_), j_(lambda->j_), e_(lambda->e_), k_(lambda->k_), num_(lambda->num_) {}
 
         template <class IFRAME, unsigned int DIM, class TENSORFRAME>
         TensorQIndex<IFRAME,DIM,TENSORFRAME>:: TensorQIndex(const polynomial_type& p, const level_type& j, const type_type& e, const translation_type& k, const int number, const TENSORFRAME* frame)
@@ -969,7 +972,7 @@ namespace WaveletTL
                 e[DIM-1] = 0;
                 k[DIM-1] = frame->frames()[DIM-1]->DeltaLmin();
             }
-            return TensorQIndex<IFRAME,DIM,TENSORFRAME>(j, e, k, frame);
+            return TensorQIndex<IFRAME,DIM,TENSORFRAME>(p, j, e, k, frame);
         }
 
 

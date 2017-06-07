@@ -115,10 +115,10 @@ namespace WaveletTL
         inline void set_jpmax(const int jmax, const int pmax=0) {
       		jmax_ = jmax;
                 pmax_ = pmax;
-      		setup_full_collection();
 #if _PRECOMPUTE_FIRSTLAST_WAVELETS
                 precompute_firstlast_wavelets();
 #endif
+                setup_full_collection();
     	}
     	//! Wavelet index class
     	typedef TensorQIndex<IFRAME,DIM,TensorFrame<IFRAME,DIM> > Index;
@@ -164,7 +164,7 @@ namespace WaveletTL
     	inline static unsigned int primal_vanishing_moments() { return IFRAME::primal_vanishing_moments(); }
 
     	//! Index of first generator 
-    	Index first_generator(const typename Index::polynomial_type p) const;
+    	Index first_generator(const typename Index::polynomial_type p = typename Index::polynomial_type()) const;
 
         /*! 
          * For compatibility reasons, returns the same (!) as first_generator()
@@ -174,25 +174,25 @@ namespace WaveletTL
         Index first_generator(const MultiIndex<int,DIM> j, const typename Index::polynomial_type p) const;
 
         //! Index of last generator on level j0
-    	Index last_generator(const typename Index::polynomial_type p) const;
+    	Index last_generator(const typename Index::polynomial_type p = typename Index::polynomial_type()) const;
 
     	/*! 
-         * Index of first wavelet on level j >= j0.
+         * Index of first quarklet on level j >= j0.
          * Method does not check, whether j is valid, i.e., if j-j0 is nonnegative
          */
-    	Index first_wavelet(const MultiIndex<int,DIM> j) const;
+    	Index first_quarklet(const MultiIndex<int,DIM> j, const typename Index::polynomial_type p = typename Index::polynomial_type()) const;
         
-        //! Index of first wavelet on level j >= ||j0||_1
-        Index first_wavelet(const int levelsum) const;
+        //! Index of first quarklet on level j >= ||j0||_1
+        Index first_quarklet(const int levelsum, const typename Index::polynomial_type p = typename Index::polynomial_type()) const;
 
     	/*! 
-         * Index of last wavelet on sublevel j >= j0.
+         * Index of last quarklet on sublevel j >= j0.
          * Method does not check, whether j is valid, i.e., if j-j0 is nonnegative
          */
-    	Index last_wavelet(const MultiIndex<int,DIM> j) const;
+    	Index last_quarklet(const MultiIndex<int,DIM> j, const typename Index::polynomial_type p = typename Index::polynomial_type()) const;
 
-        //! Index of last wavelet on level j >= ||j0||_1
-    	Index last_wavelet(const int levelsum) const;
+        //! Index of last quarklet on level j >= ||j0||_1
+    	Index last_quarklet(const int levelsum, const typename Index::polynomial_type p = typename Index::polynomial_type()) const;
 
 #if _PRECOMPUTE_FIRSTLAST_WAVELETS
         /*
@@ -256,7 +256,7 @@ namespace WaveletTL
     	const int degrees_of_freedom() const { return full_collection.size(); };
 
     	//! Get the wavelet index corresponding to a specified number
-    	const inline Index* get_wavelet (const int number) const {
+    	const inline Index* get_quarklet (const int number) const {
       		return &full_collection[number];
     	}
 

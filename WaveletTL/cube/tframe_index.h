@@ -191,7 +191,7 @@ namespace WaveletTL
 
     /*
      * Index of first quarklet on level j.
-     * It is not checket whether j is a valid level, i.e., j-j0 is nonnegative
+     * It is not checked whether j is a valid level, i.e., j-j0 is nonnegative
      */
     template <class IFRAME, unsigned int DIM, class TENSORFRAME>
     TensorQIndex<IFRAME,DIM,TENSORFRAME>

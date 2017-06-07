@@ -20,9 +20,9 @@ namespace WaveletTL
   CachedQuarkletProblem<PROBLEM>::number (const Index& lambda, const int jmax) const{
       
       WaveletBasis mybasis(basis());
-      const int waveletsonzerolevel = (mybasis.last_wavelet(jmax)).number()+1;
-      const int waveletsonplevel = ((mybasis.last_wavelet(jmax,lambda.p())).number()+1);
-      const int lambda_num = (lambda.p()==0) ? lambda.number() : lambda.number() + (lambda.p()-1) * waveletsonplevel + waveletsonzerolevel;
+      const int quarkletsonzerolevel = (mybasis.last_wavelet(jmax)).number()+1;
+      const int quarkletsonplevel = ((mybasis.last_wavelet(jmax,lambda.p())).number()+1);
+      const int lambda_num = (lambda.p()==0) ? lambda.number() : lambda.number() + (lambda.p()-1) * quarkletsonplevel + quarkletsonzerolevel;
       return lambda_num;
   }
 
@@ -89,7 +89,7 @@ namespace WaveletTL
           
           for(int p=0; p<=pmax; p++){
 	   
-            intersecting_wavelets(basis(), nu,
+            intersecting_quarklets(basis(), nu,
                                   std::max(j, basis().j0()),
                                   j == (basis().j0()-1),
                                   nus, p);
@@ -104,7 +104,7 @@ namespace WaveletTL
                    it != itend; ++it) {
                 const double entry = problem->a(*it, nu);
 //                cout << *it << ", " << nu << ": " << entry << endl;
-//                cout << (*it).number()+(*it).p()*waveletsonplevel << endl;
+//                cout << (*it).number()+(*it).p()*quarkletsonplevel << endl;
                 typedef typename Block::value_type value_type_block;
                 if (entry != 0.) {
                     block.insert(block.end(), value_type_block(number(*it,jmax), entry));
@@ -216,7 +216,7 @@ namespace WaveletTL
           
          for(int p = minplevel; p<=maxplevel; ++p){
 //             cout << "Hallo" << endl;
-          intersecting_wavelets(basis(), lambda,
+          intersecting_quarklets(basis(), lambda,
 				std::max(j, basis().j0()),
 				j == (basis().j0()-1),
 				nus, p);

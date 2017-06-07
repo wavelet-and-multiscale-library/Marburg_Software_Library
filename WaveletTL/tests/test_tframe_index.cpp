@@ -6,6 +6,7 @@
 #include <cube/tframe_index.h>
 #include <utils/multiindex.h>
 
+
 using namespace std;
 using namespace WaveletTL;
 
@@ -18,11 +19,11 @@ int main()
 #if 1
     const unsigned int dim = 2; const int levelrange(2); const int pmax(2);
 //    const unsigned int dim = 2; const int levelrange(1);
-    typedef PQFrame<d,dT> Frame1d;
-//    typedef DSFrame<d,dT> Frame1d;
-    typedef TensorFrame<Frame1d,dim> Frame;
+    typedef PQFrame<d,dT> Frame1D;
+//    typedef DSFrame<d,dT> Frame1D;
+    typedef TensorFrame<Frame1D,dim> Frame;
 //    typedef Frame::Index Index;
-//    typedef TensorQIndex<Frame1d,dim>::polynomial_type polynomial_type;
+//    typedef TensorQIndex<Frame1D,dim>::polynomial_type polynomial_type;
 //    polynomial_type p;
 //    for(int i=0; i<100; i++){
 //        ++p;
@@ -30,9 +31,9 @@ int main()
 //    }
 //    
 //    abort();
-//    typedef TensorQIndex<Frame1d,dim>::level_type level_type;
-//    typedef TensorQIndex<Frame1d,dim>::type_type type_type;
-//    typedef TensorQIndex<Frame1d,dim>::translation_type translation_type;
+//    typedef TensorQIndex<Frame1D,dim>::level_type level_type;
+//    typedef TensorQIndex<Frame1D,dim>::type_type type_type;
+//    typedef TensorQIndex<Frame1D,dim>::translation_type translation_type;
     
     Frame frameH;
     FixedArray1D<int,2*dim> s; //,st;
@@ -49,9 +50,9 @@ int main()
     }
     //bc[0]=bc[1]=bc[2]=bc[3]=bc[4]=bc[5]=true;
     Frame frameBC(bc);
-    Frame1d fra00(false,false); Frame1d fra10(true,false); Frame1d fra01(false,true); Frame1d fra11(true,true);
-    fra00.set_jpmax(5,0); fra10.set_jpmax(5,0); fra01.set_jpmax(5,0); fra11.set_jpmax(5,0);
-    FixedArray1D<Frame1d*,dim> framesArray;
+    Frame1D fra00(false,false); Frame1D fra10(true,false); Frame1D fra01(false,true); Frame1D fra11(true,true);
+    fra00.set_jpmax(5,pmax); fra10.set_jpmax(5,pmax); fra01.set_jpmax(5,pmax); fra11.set_jpmax(5,pmax);
+    FixedArray1D<Frame1D*,dim> framesArray;
     for(unsigned int i=0;i<dim;i++)
     {
         framesArray[i] = &fra00;
@@ -88,6 +89,46 @@ int main()
     TFrameArray[3] = &frameFra4;
     TFrameArray[4] = &frameFra5;
     TFrameArray[5] = &frameFra6;
+    
+    #if 1
+    
+    typedef Frame1D::Index Index1D;
+    int tempA, tempB;
+    //Index1D temp_mu(4,1,6,TFrameArray[0]->frames()[1]);
+    Index1D first(TFrameArray[0]->frames()[1]->get_wavelet(0));
+    //typedef Frame1D::Support Support1D;
+    //Support1D supp1D;
+    TFrameArray[0]->frames()[1]->support(first, tempA, tempB);
+    cout << "wavelet = " << first << "; 1D support = (" << tempA << ", " << tempB << ")" << endl;
+            
+            
+    Index1D temp_mu(TFrameArray[0]->frames()[1]->get_wavelet(20));
+    cout << "temp_mu = " << temp_mu << endl;
+    
+    get_intersecting_wavelets_on_level(*(TFrameArray[0]->frames()[1]),
+                    temp_mu,
+            4,true,tempA,tempB);
+    cout << "temp_mu -> get_intersecting_wavelets (4, true) (min, max) = (" << tempA << ", " << tempB << ")" << endl;
+    get_intersecting_wavelets_on_level(*(TFrameArray[0]->frames()[1]),
+                    temp_mu,
+            4,false,tempA,tempB);
+    cout << "temp_mu -> get_intersecting_wavelets (4, true) (min, max) = (" << tempA << ", " << tempB << ")" << endl;
+     
+    cout << "evaluate wavelet mu = " << temp_mu << endl;
+    for (unsigned int i=0; i< 100; ++i)
+    {
+        cout << "f(" << (0.01*i) << ") = " << TFrameArray[0]->frames()[1]->evaluate(0, temp_mu, 0.01*i) << endl;
+    }
+
+    cout << "min = " << tempA << "; max = " << tempB << endl;
+    for (unsigned int i = 0; i< 400; ++i)
+    {
+        Index1D temp_index(TFrameArray[0]->frames()[1]->get_wavelet(i));
+        TFrameArray[0]->frames()[1]->support(temp_index, tempA, tempB);
+        cout << "N = " << i << "; lam = " << temp_index << "; k1 = " << tempA << "; k2 = " << tempB << endl;
+    }
+    abort();
+#endif
 
     
     cout << "Testing tframe_index" << endl;

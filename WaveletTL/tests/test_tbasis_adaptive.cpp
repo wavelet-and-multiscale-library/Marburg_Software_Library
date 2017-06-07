@@ -19,7 +19,8 @@
 #include <interval/pq_frame.h>
 #include <cube/tframe.h>
 
-#include "TestFunctions2d.h"
+//#include "TestFunctions2d.h"
+
 
 #define NONADAPTIVE
 #undef ADAPTIVE
@@ -235,4 +236,6 @@ int main()
     
     
     return 0;
+
 }
+

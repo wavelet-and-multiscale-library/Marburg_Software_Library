@@ -91,7 +91,7 @@ namespace WaveletTL
          * 
          * full_collection[i] is an alternative! less CPU, more memory usage
         */
-//        TensorQIndex(const int number, const TENSORFRAME* frame);
+        TensorQIndex(const int number, const TENSORFRAME* frame);
 
         // Assignment
         TensorQIndex& operator = (const TensorQIndex& lambda);

@@ -496,7 +496,7 @@ namespace WaveletTL
                     break;
             }
             */
-            for (unsigned int i=0; i<degrees_of_freedom(); i++)
+            for (unsigned int i=0; (int)i<degrees_of_freedom(); i++)
             {
                 const double coeff = integrate(f, full_collection[i]);
                 if (fabs(coeff)>1e-15)
@@ -536,6 +536,7 @@ namespace WaveletTL
             // compute the point values of the integrand (where we use that it is a tensor product)
             for (unsigned int i = 0; i < DIM; i++)
                 frames()[i]->evaluate(0,
+                                     lambda.p()[i],
                                      lambda.j()[i],
                                      lambda.e()[i],
                                      lambda.k()[i],

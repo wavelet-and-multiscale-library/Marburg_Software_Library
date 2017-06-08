@@ -157,4 +157,5 @@ WaveletTL/tests/test_refinement_matrices
 WaveletTL/tests/test_tframe_index
 WaveletTL/tests/test_tbasis_equation
 WaveletTL/tests/test_tbasis_adaptive
+WaveletTL/tests/test_tframe_adaptive
 WaveletTL/tests/test_tframe

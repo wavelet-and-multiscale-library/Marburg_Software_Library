@@ -102,6 +102,7 @@ EXEOBJF3 = \
   test_tbasis_indexplot.o\
   test_tframe_index.o\
   test_tbasis_adaptive.o\
+  test_tframe_adaptive.o\
 
 # set 3a of test programs: wavelet bases on the ring domain
 EXEOBJF3a = \

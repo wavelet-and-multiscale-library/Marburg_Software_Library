@@ -95,7 +95,7 @@ namespace WaveletTL
                         if (fabs(entry) > 1e-16 ) //(entry != 0.)
                         {
                             block.insert(block.end(), value_type_block((*it).number(), entry));
-                            if ((*it).number() == lambda_num)
+                            if ((int)(*it).number() == lambda_num)
                             {
                                 r = entry;
                             }
@@ -110,7 +110,7 @@ namespace WaveletTL
                         {
                             // Insertion should be efficient, since the wavelets coma after the generators
                             block.insert(block.end(), value_type_block((*it).number(), entry));
-                            if ((*it).number() == lambda_num)
+                            if ((int)(*it).number() == lambda_num)
                             {
                                 r = entry;
                             }
@@ -137,7 +137,7 @@ namespace WaveletTL
                         if (fabs(entry) > 1e-16 ) //(entry != 0.)
                         {
                             block.insert(block.end(), value_type_block((*it).number(), entry));
-                            if ((*it).number() == lambda_num)
+                            if ((int)(*it).number() == lambda_num)
                             {
                                 r = entry;
                             }
@@ -239,7 +239,7 @@ namespace WaveletTL
                     if (fabs(entry) > 1e-16 )
                     {
                         block.insert(block.end(), value_type_block((*it).number(), entry));
-                        if ((*it).number() == lambda_num)
+                        if ((int)(*it).number() == lambda_num)
                         {
                             r = entry;
                         }
@@ -448,12 +448,12 @@ namespace WaveletTL
             }
             // discs araound sublevels outside jmax can still contain levels below jmax!
             // If one entry grows another has to get smaller, thus we never need to increase the current index by more than radius/2
-            int rightrange2;
-
-            //if (rightrange > 0 )
-            {
-                rightrange2 = (radius-rightrange)/2;
-            }
+//            int rightrange2 = (radius-rightrange)/2;
+//
+//            //if (rightrange > 0 )
+//            
+//                rightrange2 = (radius-rightrange)/2;
+            
             if (current_dim < space_dimension -1)
             {
                 // if there would be no minimal level the following line would be satisfactory:
@@ -910,7 +910,7 @@ namespace WaveletTL
 //TODO PERFORMANCE :: reduce get_wavelet calls
 
         res.resize(x.size());
-        typedef typename Index::type_type generator_type;
+//        typedef typename Index::type_type generator_type;
         // cout << " size = " << entries_cache.size() << endl;
         if (entries_cache.size() == 0)
         {

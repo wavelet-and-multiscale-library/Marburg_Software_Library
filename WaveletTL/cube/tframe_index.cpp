@@ -895,21 +895,28 @@ namespace WaveletTL
 	bool
 	TensorQIndex<IFRAME,DIM,TENSORFRAME>::operator < (const TensorQIndex& lambda) const
 	{
-            // Ordering primary by level j as in MultiIndex
+            // Ordering primary by polynomial_level p as in MultiIndex
             // (ordering of \N^dim, that is the distance from 0, that is the same as
-            // ordering first by 1-norm of j and in the case of equal norms lexicographical in j.)
-            // secondly and tertiaryly lexicographical in e and k.
-            return ( multi_degree(j_) < multi_degree(lambda.j()) ||
-                    (multi_degree(j_) == multi_degree(lambda.j()) &&
-                     (j_ < lambda.j() ||
-                      (j_ == lambda.j() && 
-                       (e_.lex(lambda.e()) ||
-                        (e_ == lambda.e() && k_.lex(lambda.k()))
-                       )
-                      )
-                     )
-                    )
+            // ordering first by 1-norm of p and in the case of equal norms lexicographical in p.)
+            // secondly by 1-norm of j and in the case of equal norms lexicographical in j.
+            // tertiaryly and quarteryly lexicographical in e and k.
+            return (multi_degree(p_) < multi_degree(lambda.p())  ||
+                     ((multi_degree(p_) == multi_degree(lambda.p()) && p_ < lambda.p())  ||
+                      (p_ == lambda.p() && 
+                       ( multi_degree(j_) < multi_degree(lambda.j()) ||
+                        ((multi_degree(j_) == multi_degree(lambda.j()) && j_ < lambda.j()) ||
+                         (j_ == lambda.j() && 
+                          (e_.lex(lambda.e()) ||
+                           (e_ == lambda.e() && k_.lex(lambda.k()))
+                          )
+                         ) 
+                        )
+                       )                                             
+                      )                       
+                     )                     
                    );
+                     
+                    
 	}
 
 	template <class IFRAME, unsigned int DIM, class TENSORFRAME>

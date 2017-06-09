@@ -98,7 +98,7 @@ namespace WaveletTL
 
         /*
          * Check equality.
-         * Only (j,e,k) are testet. NOT the frame or number
+         * Only (p,j,e,k) are tested. NOT the frame or number
          */
         bool operator == (const TensorQIndex& lambda) const;
 
@@ -110,8 +110,9 @@ namespace WaveletTL
         TensorQIndex& operator ++ ();
 
         /* Ordering <
-         * First by level, i.e. the 1-norm of j,
-         * then lexicographically w.r.t. j,e,k
+         * First by polynomial, i.e. the 1-norm of p, 
+         * second by level, i.e. the 1-norm of j,
+         * then lexicographically w.r.t. p,j,e,k
          */
         bool operator < (const TensorQIndex& lambda) const;
 

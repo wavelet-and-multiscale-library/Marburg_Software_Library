@@ -594,9 +594,12 @@ namespace WaveletTL
                 cout << "jmax_ = " << jmax_ << "; j0_ = " << j0_ << endl;
                 abort();
             }
-            int pdim;
-            pdim=(pmax_+1)*(pmax_+2)/2;
-            int degrees_of_freedom = pdim*(last_quarklet_num<IFRAME,DIM,TensorFrame<IFRAME,DIM> >(this, jmax_) +1); // +1 since numbering begins at 0
+            typedef typename Index::polynomial_type polynomial_type;
+            typedef set<polynomial_type> pol_set;
+            pol_set temp(degree_indices<int,DIM>(pmax_));
+            typename pol_set::const_iterator itend(temp.end());
+            --itend;
+            int degrees_of_freedom = ((*itend).number()+1)*(last_quarklet_num<IFRAME,DIM,TensorFrame<IFRAME,DIM> >(this, jmax_) +1); // +1 since numbering begins at 0
             cout << "total degrees of freedom between j0_ = " << j0_ << " and (jmax_= " << jmax_ << ", pmax_= " << pmax_ << ") is " << degrees_of_freedom << endl;
             cout << "setting up collection of quarklet indices..." << endl;
             full_collection.resize(degrees_of_freedom);
@@ -612,12 +615,6 @@ namespace WaveletTL
                     else
                         ++ind;
             }
-            /*
-            int k=0;
-            for (Index ind = first_generator(), itend = last_wavelet(jmax_); ind <= itend; ++ind) {
-                full_collection[k] = ind;
-                k++;
-            }*/
             cout << "done setting up collection of quarklet indices..." << endl;
         }
 

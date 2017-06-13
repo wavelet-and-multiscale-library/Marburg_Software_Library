@@ -109,7 +109,7 @@ int main()
   
 
   const int jmax = 8;
-  const int pmax = 3;
+  const int pmax = 0;
 
   
   

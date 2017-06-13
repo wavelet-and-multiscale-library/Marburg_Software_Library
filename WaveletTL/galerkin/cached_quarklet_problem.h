@@ -154,6 +154,7 @@ namespace WaveletTL
     void add_level (const Index& lambda,
 		    //InfiniteVector<double, Index>& w,
 		    Vector<double>& w,
+                    const int p, 
 		    const int j,
 		    const double factor,
 		    const int J,
@@ -168,12 +169,16 @@ namespace WaveletTL
   protected:
     //! the underlying (uncached) problem
     const PROBLEM* problem;
+    
+    // type of one subblock in one column of stiffness matrix  A
+    typedef std::map<int, double> Subblock;
    
     // type of one block in one column of stiffness matrix  A
-    typedef std::map<int, double> Block;
+    // the key codes the level, that data are the entries
+    typedef std::map<int, Subblock> Block;
     
     // type of one column in the entry cache of A
-    // the key codes first p and second the level p, that data are the entries
+    // the key codes the polynomial, that data are the Subblocks to different levels
     //typedef std::map<int[2], Block> Column;
     typedef std::map<int, Block> Column;
     

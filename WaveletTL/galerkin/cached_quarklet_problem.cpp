@@ -32,109 +32,118 @@ namespace WaveletTL
 			    const Index& nu) const
   {
       
-      //const int lambda_num = number(lambda,2);
-      double r = 0;
-      
-      WaveletBasis mybasis(basis());
-      
-      
-      const int jmax = mybasis.get_jmax_();
-      const int pmax = mybasis.get_pmax_();
-      const int lambda_num = number(lambda, jmax);
-      const int nu_num = number(nu,jmax);
-      
-      //cout << "Punkt 1" << endl;
-      // BE CAREFUL: KEY OF GENERATOR LEVEL IS j0-1 NOT j0 !!!!
-      typedef typename Index::type_type generator_type;
-      int j = (lambda.e() == generator_type()) ? (lambda.j()-1) : lambda.j();
-      
-      // check wether entry has already been computed
-      typedef std::list<Index> IntersectingList;
+    //const int lambda_num = number(lambda,2);
+    double r = 0;
 
-      // search for column 'nu'
-      typename ColumnCache::iterator col_lb(entries_cache.lower_bound(nu_num));
-      typename ColumnCache::iterator col_it(col_lb);
-      
-      if (col_lb == entries_cache.end() ||
-	  entries_cache.key_comp()(nu_num, col_lb->first))
-	
-	{
-	  // insert a new column
-	  typedef typename ColumnCache::value_type value_type;
-	  col_it = entries_cache.insert(col_lb, value_type(nu_num, Column()));
-	}
-	 //cout << "Punkt 2" << endl; 
-      Column& col(col_it->second);
-      
-      // check wether the level 'lambda' belongs to has already been calculated
-      typename Column::iterator lb(col.lower_bound(j));
-      typename Column::iterator it(lb);
-      // no entries have ever been computed for this column and this level
-      if (lb == col.end() ||
-	  col.key_comp()(j, lb->first))
-	{
-         //cout << "Punkt 3" << endl; 
-	  // compute whole level block
-	  // #### ONLY CDD COMPRESSION STRATEGY IMPLEMENTED ####
-	  // #### MAYBE WE ADD TRUNK FOR STEVENSON APPROACH ####
-	  // #### LATER.                                    ####
-	  
-	  // insert a new level
-	  typedef typename Column::value_type value_type;
-	  it = col.insert(lb, value_type(j, Block()));
+    WaveletBasis mybasis(basis());
 
-	  Block& block(it->second);	  
 
-	  IntersectingList nus;
-          
-          for(int p=0; p<=pmax; p++){
-	   
+    const int jmax = mybasis.get_jmax_();
+    const int lambda_num = number(lambda, jmax);
+    const int nu_num = number(nu,jmax);
+
+    //cout << "Punkt 1" << endl;
+    // BE CAREFUL: KEY OF GENERATOR LEVEL IS j0-1 NOT j0 !!!!
+    typedef typename Index::type_type generator_type;
+    int j = (lambda.e() == generator_type()) ? (lambda.j()-1) : lambda.j();
+    int p = lambda.p();
+
+    // check wether entry has already been computed
+    typedef std::list<Index> IntersectingList;
+
+    // search for column 'nu'
+    typename ColumnCache::iterator col_lb(entries_cache.lower_bound(nu_num));
+    typename ColumnCache::iterator col_it(col_lb);
+    // no entries have ever been computed for this column
+    if (col_lb == entries_cache.end() ||
+        entries_cache.key_comp()(nu_num, col_lb->first))
+
+      {
+        // insert a new column
+        typedef typename ColumnCache::value_type value_type;
+        col_it = entries_cache.insert(col_lb, value_type(nu_num, Column()));
+      }
+       //cout << "Punkt 2" << endl; 
+    Column& col(col_it->second);
+
+    // check wether the polynomial 'lambda' belongs to has already been calculated
+    typename Column::iterator block_lb(col.lower_bound(p));
+    typename Column::iterator block_it(block_lb);
+    // no entries have ever been computed for this column and this polynomial
+    if (block_lb == col.end() ||
+        col.key_comp()(p, block_lb->first))
+      {
+        // insert a new polynomial
+         typedef typename Column::value_type value_type;
+         block_it = col.insert(block_lb, value_type(p, Block()));
+      }
+
+    Block& block(block_it->second);
+
+    // check wether the level 'lambda' belongs to has already been calculated
+    typename Block::iterator lb(block.lower_bound(j));
+    typename Block::iterator it(lb);
+    // no entries have ever been computed for this column, polynomial and level
+    if (lb == block.end() ||
+        block.key_comp()(j, lb->first))
+        {
+           //cout << "Punkt 3" << endl; 
+            // insert a new level
+            typedef typename Block::value_type value_type;
+            it = block.insert(lb, value_type(j, Subblock()));
+      
+
+            Subblock& subblock(it->second);
+
+            IntersectingList nus;
+
+
             intersecting_quarklets(basis(), nu,
                                   std::max(j, basis().j0()),
                                   j == (basis().j0()-1),
                                   nus, p);
-//            for (typename IntersectingList::const_iterator it100(nus.begin()), itend(nus.end());
-//                   it100 != itend; ++it100) {
-//                cout << *it100 << endl;
-//            }
-            
+        //            for (typename IntersectingList::const_iterator it100(nus.begin()), itend(nus.end());
+        //                   it100 != itend; ++it100) {
+        //                cout << *it100 << endl;
+        //            }
 
-	  // compute entries
+
+            // compute entries
             for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());
                    it != itend; ++it) {
                 const double entry = problem->a(*it, nu);
-//                cout << *it << ", " << nu << ": " << entry << endl;
-//                cout << (*it).number()+(*it).p()*quarkletsonplevel << endl;
-                typedef typename Block::value_type value_type_block;
+        //                cout << *it << ", " << nu << ": " << entry << endl;
+        //                cout << (*it).number()+(*it).p()*quarkletsonplevel << endl;
+                typedef typename Subblock::value_type value_type_subblock;
                 if (entry != 0.) {
-                    block.insert(block.end(), value_type_block(number(*it,jmax), entry));
+                    subblock.insert(subblock.end(), value_type_subblock(number(*it,jmax), entry));
                     if (number(*it,jmax) == lambda_num) {
                         r = entry;
                     }
                 }
             }
-          }
+          
           //cout << "nu" << nu << endl;
           //cout << block.end() << endl;
 	}
       // level already exists --> extract row corresponding to 'lambda'
-      else {
-	  //cout << "ja" << endl;
-          Block& block(it->second);
+    else {
+        //cout << "ja" << endl;
+        Subblock& subblock(it->second);
 
- 	//typename Block::iterator block_lb(block.lower_bound(lambda));
-	typename Block::iterator block_lb(block.lower_bound(lambda_num));
- 	typename Block::iterator block_it(block_lb);
-	// level exists, but in row 'lambda' no entry is available ==> entry must be zero
-	if (block_lb == block.end() ||
-	    block.key_comp()(lambda_num, block_lb->first))
-	  {
-	    r = 0;
-	  }
-	else {
-	  r = block_it->second;
-	}
+      //typename Block::iterator block_lb(block.lower_bound(lambda));
+      typename Subblock::iterator subblock_lb(subblock.lower_bound(lambda_num));
+      typename Subblock::iterator subblock_it(subblock_lb);
+      // level exists, but in row 'lambda' no entry is available ==> entry must be zero
+      if (subblock_lb == subblock.end() ||
+          subblock.key_comp()(lambda_num, subblock_lb->first))
+        {
+          r = 0;
+        }
+      else {
+        r = subblock_it->second;
       }
+    }
         
     
     return r;
@@ -147,6 +156,7 @@ namespace WaveletTL
   CachedQuarkletProblem<PROBLEM>::add_level (const Index& lambda,
 				     //InfiniteVector<double, Index>& w,
 				     Vector<double>& w,
+                                     const int p, 
 				     const int j,
 				     const double factor,
 				     const int J,
@@ -162,8 +172,7 @@ namespace WaveletTL
       
 //      WaveletBasis mybasis(basis());
       
-      const int minplevel = std::max(0, lambda.p() + 1  - (int) pow(2,(J-b*abs(j-lambda.j())/a)));
-      const int maxplevel = std::min(lambda.p() - 1  + (int) pow(2,(J-b*abs(j-lambda.j())/a)), pmax);
+      
 
       
       const int lambda_num = number(lambda, jmax);
@@ -181,51 +190,48 @@ namespace WaveletTL
 	  typedef typename ColumnCache::value_type value_type;
 	  col_it = entries_cache.insert(col_lb, value_type(lambda_num, Column()));
 	}
-
       Column& col(col_it->second);
+      
+        // check wether the polynomial 'lambda' belongs to has already been calculated
+      typename Column::iterator block_lb(col.lower_bound(p));
+      typename Column::iterator block_it(block_lb);
+      // no entries have ever been computed for this column and this polynomial
+      if (block_lb == col.end() ||
+          col.key_comp()(p, block_lb->first))
+        {
+          // insert a new polynomial
+           typedef typename Column::value_type value_type;
+           block_it = col.insert(block_lb, value_type(p, Block()));
+        }
 
-      // check wether the level has already been calculated
-      typename Column::iterator lb(col.lower_bound(j));
-      typename Column::iterator it(lb);
+      Block& block(block_it->second);
+      
+      
+        // check wether the level 'lambda' belongs to has already been calculated
+      typename Block::iterator lb(block.lower_bound(j));
+      typename Block::iterator it(lb);
+      // no entries have ever been computed for this column, polynomial and level
+      if (lb == block.end() ||
+          block.key_comp()(j, lb->first))
+          {
+             //cout << "Punkt 3" << endl; 
+              // insert a new level
+              typedef typename Block::value_type value_type;
+              it = block.insert(lb, value_type(j, Subblock()));
 
-      if (lb == col.end() ||
-	  col.key_comp()(j, lb->first))
-	{
-	  // no entries have ever been computed for this column and this level
-//         cout << "keine Einträge berechnet" << endl;
-          
-	  
-	  // insert a new level
-	  typedef typename Column::value_type value_type;
-	  it = col.insert(lb, value_type(j, Block()));
 
-	  
-          Block& block(it->second);
-          
-          
-          IntersectingList nus;
-          
-          
-          //DKR strategy
-          
-//          cout << lambda << endl;
-//          cout << j << endl;
-//          cout << J << endl;
-          //cout << minplevel << endl;
-          //cout << maxplevel << endl;
-          
-         for(int p = minplevel; p<=maxplevel; ++p){
-//             cout << "Hallo" << endl;
-          intersecting_quarklets(basis(), lambda,
-				std::max(j, basis().j0()),
-				j == (basis().j0()-1),
-				nus, p);
-          
-          
-          
-          
+              Subblock& subblock(it->second);
 
-	  
+              IntersectingList nus;
+
+
+              intersecting_quarklets(basis(), lambda,
+                                    std::max(j, basis().j0()),
+                                    j == (basis().j0()-1),
+                                    nus, p);
+
+      
+  
 	  // do the rest of the job
 	  const double d1 = problem->D(lambda);
 //          cout << d1 << endl;
@@ -235,10 +241,10 @@ namespace WaveletTL
                 
 	      const double entry = problem->a(*it2, lambda);
  //             cout << *it2 << ", " << entry << endl;
-	      typedef typename Block::value_type value_type_block;
+	      typedef typename Subblock::value_type value_type_subblock;
 	      if (entry != 0.) {
  //                 cout << "ja3" << endl;
-		block.insert(block.end(), value_type_block(number(*it2,jmax), entry));
+		subblock.insert(subblock.end(), value_type_subblock(number(*it2,jmax), entry));
 	      //w.add_coefficient(*it2, (entry / (d1 * problem->D(*it2))) * factor);
  //               cout << *it2 << ": " << (*it2).number() << endl;
  //             cout <<  number(*it2,jmax) << endl;
@@ -252,20 +258,20 @@ namespace WaveletTL
          }
 
         
-	}
+	
       else {
           //cout << "Einträge schon berechnet" << endl;
 	// level already exists --> extract level from cache
 
 	
           //cout << "Iterator: " << it->first << endl;
-          Block& block(it->second);
+          Subblock& subblock(it->second);
         
 	
 	const double d1 = problem->D(lambda);
 	
 	//cout << "Länge w: " << w.size() << endl;
-	  for (typename Block::const_iterator it2(block.begin()), itend2(block.end());
+	  for (typename Subblock::const_iterator it2(subblock.begin()), itend2(subblock.end());
 	       it2 != itend2; ++it2) {
 //              w.add_coefficient(*(problem->basis().get_wavelet(it2->first)),
 // 			      (it2->second / (d1 * problem->D( *(problem->basis().get_wavelet(it2->first)) )))  * factor);

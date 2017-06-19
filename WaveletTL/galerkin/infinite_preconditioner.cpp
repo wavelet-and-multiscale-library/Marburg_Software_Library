@@ -83,8 +83,11 @@ namespace WaveletTL
   double
   FullyDiagonalQuarkletPreconditioner<INDEX>::diag(const INDEX& lambda) const
   {
-
+#ifdef WAVELETTL_USE_TBASIS
+    return pow(ldexp(1.0, lambda.j())*pow(1+lambda.p(),3),operator_order()) * (1+lambda.p());
+#else
     return pow(ldexp(1.0, lambda.j())*pow(1+lambda.p(),3),operator_order()) * (1+lambda.p()); //2^j*(p+1)^4, falls operator_order()=1
+#endif
     
   }
 

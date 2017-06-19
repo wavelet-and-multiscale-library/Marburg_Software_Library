@@ -88,7 +88,9 @@ namespace WaveletTL
     for (typename std::set<Index>::const_iterator it1(Lambda.begin()), itend(Lambda.end());
 	 it1 != itend; ++it1, ++row)
       {
+//        cout << "Index nu: " << *it1 << endl;
 	const double d1 = preconditioned ? P.D(*it1) : 1.0;
+        
 	std::list<size_type> indices;
 	std::list<double> entries;
 
@@ -98,7 +100,7 @@ namespace WaveletTL
 	     it2 != itend; ++it2, ++column)
 	  {
 	    // 	    if (intersect_singular_support(P.basis(), *it1, *it2)) {
-	    double entry = P.a(*it2, *it1);
+            double entry = P.a(*it2, *it1);
 	    //cout << *it2 << ", " << *it1 << ": " << entry << endl;
 	    //const double entry = 0;
 #if _WAVELETTL_GALERKINUTILS_VERBOSITY >= 2

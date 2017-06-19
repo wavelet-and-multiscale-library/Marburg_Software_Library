@@ -439,14 +439,12 @@ namespace WaveletTL
                     offsetj = 0, offsetp = 0;
             }
             std::set<Index> Lambda;
+            
             // cout << "tframe_equation.norm_A :: last quarklet = " << (frame_.last_quarklet(multi_degree(frame_.j0())+offset)) << endl;
             polynomial_type p;
-            
-            for (Index lambda = frame_.first_generator() ;;) {
-                cout << lambda << endl;
+            for (Index lambda = frame_.first_generator(frame_.j0(), p) ;;) {
                 Lambda.insert(lambda);
-                
-                if (lambda == frame_.last_quarklet(multi_degree(frame_.j0())+offsetj, p) ){
+                if (lambda == frame_.last_quarklet(multi_degree(frame_.j0())+offsetj, p)){
                     ++p;
                     if ((int)multi_degree(p)>offsetp) break;
                     lambda = frame_.first_generator(frame_.j0(), p);
@@ -455,6 +453,11 @@ namespace WaveletTL
                     ++lambda;
                     
             }
+//            typename std::set<Index>::const_iterator it(Lambda.begin()), itend(Lambda.end());
+//            for(int zaehler=0;it!=itend;it++){
+//                ++zaehler;
+//                cout << zaehler << ", " << *it << endl;
+//            }
             SparseMatrix<double> A_Lambda;
             setup_stiffness_matrix(*this, Lambda, A_Lambda);
 #if 1

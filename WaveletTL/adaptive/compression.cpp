@@ -43,13 +43,21 @@ namespace WaveletTL
 //            cout << std::max(P.basis().j0()-1, lambda.j()- (int) (J/(P.space_dimension * 2))) <<endl;
               //cout << lambda << endl;
 	  
+            
             for (int level = std::max(P.basis().j0()-1, lambda.j()- (int) (J/(P.space_dimension * b)));
                    level <= maxlevel; level++)
                 {
-//                cout << "adding level: " << level << endl;
-                P.add_level(lambda,w,level,factor,J,strategy,jmax,pmax,a,b);
-//                cout << w << endl;
-//                cout << "Stop" << endl;
+                    const int minplevel = std::max(0, lambda.p() + 1  - (int) pow(2,(J-b*abs(level-lambda.j())/a)));
+                    const int maxplevel = std::min(lambda.p() - 1  + (int) pow(2,(J-b*abs(level-lambda.j())/a)), pmax);
+                    
+                    for (int polynomial = minplevel;
+                       polynomial <= maxplevel; polynomial++)
+                    {
+        //                cout << "adding level: " << level << endl;
+                        P.add_level(lambda,w,polynomial,level,factor,J,strategy,jmax,pmax,a,b);
+        //                cout << w << endl;
+        //                cout << "Stop" << endl;
+                    }
                 }
           
         }
@@ -128,8 +136,12 @@ namespace WaveletTL
             //
             // for local operator supports have to overlap
             // add all indizes within a 1-ball of range J around lambda:
-            
+#ifdef FRAME
+            P.add_ball(lambda,w,J,factor,jmax,strategy,preconditioning, pmax, a, b);
+#endif
+#ifdef BASIS
             P.add_ball(lambda,w,J,factor,jmax,strategy,preconditioning);
+#endif
         }
 #endif
   }
@@ -222,7 +234,7 @@ namespace WaveletTL
 // 	// integral operators: branch is not implemented so far
 //       }
 #else
-    cout << "compression.cpp:: branch not jet implemented" << endl;
+    cout << "compression.cpp:: branch not yet implemented" << endl;
     abort();
 #endif
   }

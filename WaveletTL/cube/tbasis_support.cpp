@@ -132,7 +132,7 @@ namespace WaveletTL
             }
         }
         unsigned int cjd(0); // current_jump_dim
-        int blocksize;
+        int blocksize=0;
         unsigned int number;
         if (generators == true)
         {

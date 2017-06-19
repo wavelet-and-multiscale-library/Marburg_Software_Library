@@ -109,7 +109,7 @@ int main()
   
 
   const int jmax = 8;
-  const int pmax = 0;
+  const int pmax = 3;
 
   
   
@@ -406,12 +406,22 @@ A.apply(x, err);
   const double nu = ceq.norm_Ainv() * l2_norm(F_eta);
   double epsilon = 1e-3;
   InfiniteVector<double, Index> u_epsilon;
+  clock_t tic = clock();
 #ifdef FRAME
   CDD2_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, DKR, pmax, 2, 2);
 #endif
 #ifdef BASIS
   CDD2_SOLVE(ceq, nu, epsilon, u_epsilon, jmax);
 #endif
+  
+
+/*
+  main programme body
+*/
+
+clock_t toc = clock();
+double time = (double)(toc-tic);
+cout << "\nTime taken: " << (time/CLOCKS_PER_SEC) << " s";
 
 
 

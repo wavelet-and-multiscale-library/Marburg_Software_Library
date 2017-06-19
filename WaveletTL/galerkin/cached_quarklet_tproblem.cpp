@@ -15,13 +15,14 @@ namespace WaveletTL
     CachedQuarkletTProblem<PROBLEM>::a(const Index& lambda,
 			       const Index& nu) const
     {
+        
         double r = 0;
 
         if (problem->local_operator())
         {
             const int lambda_num = lambda.number();
             const int nu_num = nu.number();
-            const unsigned int pmax = problem->frame().get_pmax();          
+//            const unsigned int pmax = problem->frame().get_pmax();          
 
             // Be careful, there is no generator level in the cache! The situation from the MRA setting:
             // KEY OF GENERATOR LEVEL IS j0-1 NOT j0 !!!!
@@ -30,12 +31,14 @@ namespace WaveletTL
             // this also applies to tensors of generators on the lowest level
 
             level_type lambda_key(lambda.j()),first_level(frame().j0());
+            polynomial_type lambda_p(lambda.p());
             for (int k=0;k<space_dimension;k++)
             {
                 lambda_key[k] = lambda_key[k]-first_level[k];
             }
 //TODO (PERFORMANCE): store the numbers of all levels up to jmax, do not compute anything here:
-            int blocknumber(lambda_key.number());
+            int blocknumber((lambda.p()).number());
+            int subblocknumber(lambda_key.number());
 
             // check wether entry has already been computed
             typedef std::list<Index> IntersectingList;
@@ -47,29 +50,52 @@ namespace WaveletTL
             if (col_lb == entries_cache.end() ||
                 entries_cache.key_comp()(nu_num, col_lb->first))
             {
+                cout << "zu berechnen " << nu << endl;
                 // insert a new column
                 typedef typename ColumnCache::value_type value_type;
                 col_it = entries_cache.insert(col_lb, value_type(nu_num, Column()));
             }
+            
 
             Column& col(col_it->second);
 
-            // check wether the level 'lambda' belongs to has already been calculated
-            typename Column::iterator lb(col.lower_bound(blocknumber));
-            typename Column::iterator it(lb);
+            // check wether the polynomial 'lambda' belongs to has already been calculated
+            typename Column::iterator block_lb(col.lower_bound(blocknumber));
+            typename Column::iterator block_it(block_lb);
 
-            if (lb == col.end() ||
-                col.key_comp()(blocknumber, lb->first))
+            if (block_lb == col.end() ||
+                col.key_comp()(blocknumber, block_lb->first))
             {
-                // no entries have ever been computed for this column and this level
-                // compute whole level block
-                // insert a new level
+                
+                
 
                 typedef typename Column::value_type value_type;
-                it = col.insert(lb, value_type(blocknumber, Block()));
-                Block& block(it->second);
+                block_it = col.insert(block_lb, value_type(blocknumber, Block()));
+            }
+            
+            Block& block(block_it->second);
+            
+            
+            
+            
+            
+            // check wether the level 'lambda' belongs to has already been calculated
+            typename Block::iterator lb(block.lower_bound(subblocknumber));
+            typename Block::iterator it(lb);
 
-                if ((blocknumber == 0) && (lambda.j() == first_level))
+            if (lb == block.end() ||
+                block.key_comp()(blocknumber, lb->first))
+            {
+                // no entries have ever been computed for this column, polynomial and level
+                // compute whole level block
+                // insert a new level
+                
+
+                typedef typename Block::value_type value_type;
+                it = block.insert(lb, value_type(subblocknumber, Subblock()));
+                Subblock& subblock(it->second);
+
+                if ((subblocknumber == 0) && (lambda.j() == first_level))
                 {
                     // Insert Generators and Quarklets
 
@@ -80,26 +106,25 @@ namespace WaveletTL
 
                     // TODO : produce nicer looking code:
                     IntersectingList nusG,nusW;
-                    for(polynomial_type p; multi_degree(p)<=pmax; p++){
                         intersecting_quarklets(frame(), nu,
                                                lambda.j(),
                                           true, // this argument isn't that helpful for the way the method is used in a() .  It doesn't play a role for DIM>1 and miserably fails for DIM=1. Need to work on the routine in tframe_support!
                                           nusG,
-                                          p);
+                                          lambda.p());
                         intersecting_quarklets(frame(), nu,
                                           lambda.j(),
                                           false, // this argument isn't that helpful for the way the method is used in a() .  It doesn't play a role for DIM>1 and miserably fails for DIM=1. Need to work on the routine in tframe_support!
                                           nusW,
-                                          p);
+                                          lambda.p());
                         // compute entries
                         for (typename IntersectingList::const_iterator it(nusG.begin()), itend(nusG.end());it != itend; ++it)
                         {
                             const double entry = problem->a(*it, nu);
-                            typedef typename Block::value_type value_type_block;
+                            typedef typename Subblock::value_type value_type_subblock;
                             if (fabs(entry) > 1e-16 ) 
 //                            if (entry != 0.)
                             {
-                                block.insert(block.end(), value_type_block((*it).number(), entry));
+                                subblock.insert(subblock.end(), value_type_subblock((*it).number(), entry));
                                 if ((int)(*it).number() == lambda_num)
                                 {
                                     r = entry;
@@ -110,12 +135,12 @@ namespace WaveletTL
                         for (typename IntersectingList::const_iterator it(nusW.begin()), itend(nusW.end());it != itend; ++it)
                         {
                             const double entry = problem->a(*it, nu);
-                            typedef typename Block::value_type value_type_block;
+                            typedef typename Subblock::value_type value_type_subblock;
                             if (fabs(entry) > 1e-16 ) 
 //                            if (entry != 0.)
                             {
                                 // Insertion should be efficient, since the quarklets coma after the generators
-                                block.insert(block.end(), value_type_block((*it).number(), entry));
+                                subblock.insert(subblock.end(), value_type_subblock((*it).number(), entry));
                                 if ((int)(*it).number() == lambda_num)
                                 {
                                     r = entry;
@@ -123,11 +148,10 @@ namespace WaveletTL
                             }
                         }
                     }
-                }
-                else
-                {
-                    // there are no Generators
-                    for(polynomial_type p; multi_degree(p)<=pmax; p++){
+                
+                    else
+                    {
+                        // there are no Generators
                         IntersectingList nus;
                         intersecting_quarklets(frame(),
                                                nu,
@@ -136,16 +160,16 @@ namespace WaveletTL
                                                false, // this argument isn't that helpful for the way the method is used in a() .  It doesn't play a role for DIM>1 and miserably fails for DIM=1. Need to work on the routine in tframe_support!
                          //                    == (frame().j0()-1),
                                                nus,
-                                               p);
+                                               lambda.p());
                     // compute entries
                         for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)
                         {
                             const double entry = problem->a(*it, nu);
-                            typedef typename Block::value_type value_type_block;
+                            typedef typename Subblock::value_type value_type_subblock;
                             if (fabs(entry) > 1e-16 ) 
-//                            if (entry != 0.)
+    //                            if (entry != 0.)
                             {
-                                block.insert(block.end(), value_type_block((*it).number(), entry));
+                                subblock.insert(subblock.end(), value_type_subblock((*it).number(), entry));
                                 if ((int)(*it).number() == lambda_num)
                                 {
                                     r = entry;
@@ -153,27 +177,27 @@ namespace WaveletTL
                             }
                         }
                     }
-                }
             }
             // level already exists --> extract row corresponding to 'lambda'
             else
             {
-                Block& block(it->second);
+                Subblock& subblock(it->second);
 
                 //typename Block::iterator block_lb(block.lower_bound(lambda));
-                typename Block::iterator block_lb(block.lower_bound(lambda_num));
-                typename Block::iterator block_it(block_lb);
+                typename Subblock::iterator subblock_lb(subblock.lower_bound(lambda_num));
+                typename Subblock::iterator subblock_it(subblock_lb);
                 // level exists, but in row 'lambda' no entry is available ==> entry must be zero
-                if (block_lb == block.end() ||
-                    block.key_comp()(lambda_num, block_lb->first))
+                if (subblock_lb == subblock.end() ||
+                    subblock.key_comp()(lambda_num, subblock_lb->first))
                   {
                     r = 0;
                   }
                 else {
-                  r = block_it->second;
+                  r = subblock_it->second;
                 }
             }
-        } // end of local operator
+        }
+         // end of local operator
 //        else
 //        {
 //            // for nonlocal operators, we put full level blocks into the cache, regardless of support intersections
@@ -274,6 +298,7 @@ namespace WaveletTL
 //                }
 //            }
 //      }
+        
       return r;
     }
 
@@ -295,6 +320,9 @@ namespace WaveletTL
          * For dim=1,2 it is easy to describe all levels in the (1-norm) ball of radius around lambda.
          * For higher dimensions this is done recursivly.
          */
+        
+        assert (space_dimension <= 2);// we only support dimensions up to 2
+        
         double d1 = precond?D(lambda):1.0;
         polynomial_type p;
         if (space_dimension == 1)
@@ -318,9 +346,9 @@ namespace WaveletTL
                     // using the first generator on level j0 would mean no difference, since block 0 contains quarklets and generators
                     a(mu,lambda);
                     // add the level
-                    Block& block (entries_cache[lambda.number()][level-j0]);
+                    Subblock& subblock (entries_cache[lambda.number()][polynomial][level-j0]);
     #if 1
-                    for (typename Block::const_iterator it(block.begin()), itend(block.end()); it != itend; ++it)
+                    for (typename Subblock::const_iterator it(subblock.begin()), itend(subblock.end()); it != itend; ++it)
                     {
 
 
@@ -367,7 +395,7 @@ namespace WaveletTL
             int dist2j0=lambdaline-lowestline;
             int dist2maxlevel=maxlevel-lambdaline;
             MultiIndex<int,space_dimension> currentlevel;
-            int xstart,xend,ystart,blocknumber;
+            int xstart,xend,ystart,subblocknumber;
             // iterate the levellines. offset relative to lambdas levelline
             for (int offset = -std::min(dist2j0,radius); offset < std::min(dist2maxlevel,radius)+1; offset++)
             {
@@ -384,12 +412,12 @@ namespace WaveletTL
                     mu = this->frame().first_quarklet(currentlevel);
 
                     a(mu,lambda); // computes & stores the block in the cache
-                    blocknumber = currentlevel[0]-j0[0] + ((lambdaline-lowestline+offset)*(lambdaline-lowestline+offset+1))/2;
+                    subblocknumber = currentlevel[0]-j0[0] + ((lambdaline-lowestline+offset)*(lambdaline-lowestline+offset+1))/2;
 
                     // add the level
-                    Block& block (entries_cache[lambda.number()][blocknumber]);
+                    Subblock& subblock (entries_cache[lambda.number()][0][subblocknumber]);
 #if 1
-                    for (typename Block::const_iterator it(block.begin()), itend(block.end()); it != itend; ++it)
+                    for (typename Subblock::const_iterator it(subblock.begin()), itend(subblock.end()); it != itend; ++it)
                     {
                         // high caching strategy
                         w[it->first]=w[it->first]+factor*(it->second)/( precond? (d1*D(this->frame().get_quarklet(it->first))):1.0);
@@ -410,140 +438,140 @@ namespace WaveletTL
                 }
             }
         }
-        else // dim > 2. iteration over all levels in 'range' is done recursivly for arbitrary dimensions
-        {
-            add_level_recurse(lambda,w,radius,factor,lambda.j(),0,maxlevel,true,d1,precond);
-        }
+//        else // dim > 2. iteration over all levels in 'range' is done recursivly for arbitrary dimensions
+//        {
+//            add_level_recurse(lambda,w,radius,factor,lambda.j(),0,maxlevel,true,d1,precond);
+//        }
     }
 
-    template <class PROBLEM>
-    void
-    CachedQuarkletTProblem<PROBLEM>::add_level_recurse(const Index& lambda,
-                                               Vector<double>& w,
-                                               const int radius,
-                                               const double factor,
-                                               const level_type & current_level,
-                                               const int current_dim,
-                                               const int maxlevel,
-                                               const bool legal,
-                                               const double d1,
-                                               const bool precond) const
-    {
-        if (current_dim < space_dimension)
-        {
-            /* we call a (multiindex) level legal, if its norm is <=maxlevel.
-             * let lmin and lmax be the lowest and largest (integer) values
-             * that result in a level with norm <= jmax if written at [curdimension]
-             * in the current_level. then we have j0[curdim]<= lmin[curdim] (left boundary)
-             * For the right boundary we observe that curlevel does not need to be a legal
-             * level in order for the disc with radius around it to contain legal levels.
-             * In such a case let r2 be the minimal radius such that the r2-ball around
-             * curlevel contains a legal level. Denote the level resulting from curlevel, where
-             * the entry [curdim] is increased by k by lvl_k. We observe that the minimal radius
-             * around lvl_k that gives a ball that contains legal levels has a radius of r2+2*k.
-             * r2 can be computed with lmax.
-             */
-            int current_j0 (this->frame().j0()[current_dim]);
-            level_type next_level(current_level);
-            int leftrange = - min (next_level[current_dim]-current_j0,radius);
-            // compiler complains about the line:
-            // int rightrange = std::min(radius, (maxlevel - multi_degree(current_level)));
-
-            int rightrange = (maxlevel - multi_degree(current_level));
-            rightrange = std::min (rightrange, radius); // rightrange describes the largest entry (in the current dimension) that results in legal level (<=jmax)
-
-            next_level[current_dim]+= leftrange;
-
-            /* the 2 ball around (5,3) with jmax = 8 leads to a call with current_level = (6,3) and radius 1.
-             * The only legal choice for the 2nd dimension would result in (6,2), but with j0 in this dimension being 3
-             * => leftrange = 0, rightrange = -1.
-             * In 3D: 2 ball around (5,3,4) (j0 = (3,3,3), jmax = 12) leads to 1 Ball around (6,3,4). This leads to the same situation,
-             * still this is no error, since in the next dimension the 1 ball around (6,3,4) contains (6,3,3) (legal).
-             */
-/*
-            if (multi_degree(next_level)>maxlevel)
-            {
-                cout << "lambda " << lambda.number() << " " << lambda << "cur_lvl " << current_level << " next_lvl " << next_level << " lr " << leftrange << " rr " << rightrange << endl;
-            }
-*/
-            //assert (multi_degree(next_level)<=maxlevel);
-            //assert (leftrange<=rightrange);
-
-            for (int k=leftrange; k <=rightrange; k++)
-            {
-                add_level_recurse(lambda,w,radius-abs(k),factor,next_level,current_dim+1,maxlevel,true,d1,precond);
-                ++next_level[current_dim];
-                // lambda_it[rec_level]=lambda[rec_level]+k; // fuer den naechsten iteranten versteht sich
-            }
-            // discs araound sublevels outside jmax can still contain levels below jmax!
-            // If one entry grows another has to get smaller, thus we never need to increase the current index by more than radius/2
-//            int rightrange2 = (radius-rightrange)/2;
+//    template <class PROBLEM>
+//    void
+//    CachedQuarkletTProblem<PROBLEM>::add_level_recurse(const Index& lambda,
+//                                               Vector<double>& w,
+//                                               const int radius,
+//                                               const double factor,
+//                                               const level_type & current_level,
+//                                               const int current_dim,
+//                                               const int maxlevel,
+//                                               const bool legal,
+//                                               const double d1,
+//                                               const bool precond) const
+//    {
+//        if (current_dim < space_dimension)
+//        {
+//            /* we call a (multiindex) level legal, if its norm is <=maxlevel.
+//             * let lmin and lmax be the lowest and largest (integer) values
+//             * that result in a level with norm <= jmax if written at [curdimension]
+//             * in the current_level. then we have j0[curdim]<= lmin[curdim] (left boundary)
+//             * For the right boundary we observe that curlevel does not need to be a legal
+//             * level in order for the disc with radius around it to contain legal levels.
+//             * In such a case let r2 be the minimal radius such that the r2-ball around
+//             * curlevel contains a legal level. Denote the level resulting from curlevel, where
+//             * the entry [curdim] is increased by k by lvl_k. We observe that the minimal radius
+//             * around lvl_k that gives a ball that contains legal levels has a radius of r2+2*k.
+//             * r2 can be computed with lmax.
+//             */
+//            int current_j0 (this->frame().j0()[current_dim]);
+//            level_type next_level(current_level);
+//            int leftrange = - min (next_level[current_dim]-current_j0,radius);
+//            // compiler complains about the line:
+//            // int rightrange = std::min(radius, (maxlevel - multi_degree(current_level)));
 //
-//            //if (rightrange > 0 )
+//            int rightrange = (maxlevel - multi_degree(current_level));
+//            rightrange = std::min (rightrange, radius); // rightrange describes the largest entry (in the current dimension) that results in legal level (<=jmax)
+//
+//            next_level[current_dim]+= leftrange;
+//
+//            /* the 2 ball around (5,3) with jmax = 8 leads to a call with current_level = (6,3) and radius 1.
+//             * The only legal choice for the 2nd dimension would result in (6,2), but with j0 in this dimension being 3
+//             * => leftrange = 0, rightrange = -1.
+//             * In 3D: 2 ball around (5,3,4) (j0 = (3,3,3), jmax = 12) leads to 1 Ball around (6,3,4). This leads to the same situation,
+//             * still this is no error, since in the next dimension the 1 ball around (6,3,4) contains (6,3,3) (legal).
+//             */
+///*
+//            if (multi_degree(next_level)>maxlevel)
+//            {
+//                cout << "lambda " << lambda.number() << " " << lambda << "cur_lvl " << current_level << " next_lvl " << next_level << " lr " << leftrange << " rr " << rightrange << endl;
+//            }
+//*/
+//            //assert (multi_degree(next_level)<=maxlevel);
+//            //assert (leftrange<=rightrange);
+//
+//            for (int k=leftrange; k <=rightrange; k++)
+//            {
+//                add_level_recurse(lambda,w,radius-abs(k),factor,next_level,current_dim+1,maxlevel,true,d1,precond);
+//                ++next_level[current_dim];
+//                // lambda_it[rec_level]=lambda[rec_level]+k; // fuer den naechsten iteranten versteht sich
+//            }
+//            // discs araound sublevels outside jmax can still contain levels below jmax!
+//            // If one entry grows another has to get smaller, thus we never need to increase the current index by more than radius/2
+////            int rightrange2 = (radius-rightrange)/2;
+////
+////            //if (rightrange > 0 )
+////            
+////                rightrange2 = (radius-rightrange)/2;
 //            
-//                rightrange2 = (radius-rightrange)/2;
-            
-            if (current_dim < space_dimension -1)
-            {
-                // if there would be no minimal level the following line would be satisfactory:
-                //for (int k(rightrange+1); k<=std::max(rightrange,0)+(radius - abs(rightrange))/2;k++)
-                for (int k(std::max(rightrange+1,leftrange)); k<=std::max(rightrange,0)+(radius - abs(rightrange))/2;k++)
-                {
-                    add_level_recurse(lambda,w,radius-abs(k),factor,next_level,current_dim+1,maxlevel,false,d1,precond);
-                    ++next_level[current_dim];
-                }
-            }
-        }
-        else
-        { // we have iterated over all dimensions and can now add the current level (if it is legal)!
-            assert (legal == true);
-            Index mu;
-            if (current_level == this->frame().j0())
-            {
-                mu = this->frame().first_generator();
-            }
-            else
-            {
-                mu = this->frame().first_quarklet(current_level);
-            }
-            // the result of the following call is that the cache holds the whole level block corresponing to all quarklets with level = |mu|
-            // ideally one should replace this mehtod call with a slightly modified version of the code from a(,)
-            a(mu,lambda);
-
-            level_type level_key(this->frame().j0());
-            for (int k=0;k<space_dimension;k++)
-            {
-                level_key[k] = current_level[k]-level_key[k];
-            }
-            //PERFORMANCE: store the numbers of all levels up to jmax, do not compute anything here:
-            int blocknumber(level_key.number());
-
-            // return the block corresponding to level = |mu|
-
-            // same as:
-            // w.add(factor,entries_cache[lambda.number()][blocknumber]);
-            Block& block (entries_cache[lambda.number()][blocknumber]);
-#if 1
-            for (typename Block::const_iterator it(block.begin()), itend(block.end()); it != itend; ++it)
-            {
-                // high caching strategy
-                w[it->first]=w[it->first]+factor*(it->second)/ (precond? (d1*D(this->frame().get_quarklet(it->first))):1.0);
-                // low caching strategy
-                //w[it->first]=w[it->first]+factor*(it->second)/precond/(problem->D(this->frame().get_quarklet(it->first)));
-            }
-#else
-            // mid caching strategy
-            typename Block::const_iterator it(block.begin()), itend(block.end());
-            w[it->first]=w[it->first]+factor*(it->second)/precond/D_diag(this->frame().get_quarklet(it->first));
-            it++;
-            for (; it != itend; ++it)
-            {
-                w[it->first]=w[it->first]+factor*(it->second)/precond/D_already(this->frame().get_quarklet(it->first));
-            }
-#endif
-        }
-
-    }
+//            if (current_dim < space_dimension -1)
+//            {
+//                // if there would be no minimal level the following line would be satisfactory:
+//                //for (int k(rightrange+1); k<=std::max(rightrange,0)+(radius - abs(rightrange))/2;k++)
+//                for (int k(std::max(rightrange+1,leftrange)); k<=std::max(rightrange,0)+(radius - abs(rightrange))/2;k++)
+//                {
+//                    add_level_recurse(lambda,w,radius-abs(k),factor,next_level,current_dim+1,maxlevel,false,d1,precond);
+//                    ++next_level[current_dim];
+//                }
+//            }
+//        }
+//        else
+//        { // we have iterated over all dimensions and can now add the current level (if it is legal)!
+//            assert (legal == true);
+//            Index mu;
+//            if (current_level == this->frame().j0())
+//            {
+//                mu = this->frame().first_generator();
+//            }
+//            else
+//            {
+//                mu = this->frame().first_quarklet(current_level);
+//            }
+//            // the result of the following call is that the cache holds the whole level block corresponing to all quarklets with level = |mu|
+//            // ideally one should replace this mehtod call with a slightly modified version of the code from a(,)
+//            a(mu,lambda);
+//
+//            level_type level_key(this->frame().j0());
+//            for (int k=0;k<space_dimension;k++)
+//            {
+//                level_key[k] = current_level[k]-level_key[k];
+//            }
+//            //PERFORMANCE: store the numbers of all levels up to jmax, do not compute anything here:
+//            int blocknumber(level_key.number());
+//
+//            // return the block corresponding to level = |mu|
+//
+//            // same as:
+//            // w.add(factor,entries_cache[lambda.number()][blocknumber]);
+//            Block& block (entries_cache[lambda.number()][blocknumber]);
+//#if 1
+//            for (typename Block::const_iterator it(block.begin()), itend(block.end()); it != itend; ++it)
+//            {
+//                // high caching strategy
+//                w[it->first]=w[it->first]+factor*(it->second)/ (precond? (d1*D(this->frame().get_quarklet(it->first))):1.0);
+//                // low caching strategy
+//                //w[it->first]=w[it->first]+factor*(it->second)/precond/(problem->D(this->frame().get_quarklet(it->first)));
+//            }
+//#else
+//            // mid caching strategy
+//            typename Block::const_iterator it(block.begin()), itend(block.end());
+//            w[it->first]=w[it->first]+factor*(it->second)/precond/D_diag(this->frame().get_quarklet(it->first));
+//            it++;
+//            for (; it != itend; ++it)
+//            {
+//                w[it->first]=w[it->first]+factor*(it->second)/precond/D_already(this->frame().get_quarklet(it->first));
+//            }
+//#endif
+//        }
+//
+//    }
 /*
     template <class PROBLEM>
     void
@@ -809,6 +837,8 @@ namespace WaveletTL
             //cout << "cached_tproblem.norm_A :: last quarklet = " << (problem->frame().last_quarklet(multi_degree(problem->frame().j0())+offset)) << endl;
             for (Index lambda ( problem->frame().first_generator() );;)
             {
+                
+//                cout << "index: " << lambda << endl;
                 Lambda.insert(lambda);
                 if (lambda == problem->frame().last_quarklet(multi_degree(problem->frame().j0())+offsetj, p) ){
                     ++p;
@@ -819,8 +849,17 @@ namespace WaveletTL
                     ++lambda;
                    
             }
+//            for (typename set<Index>::const_iterator it(Lambda.begin()), itend(Lambda.end());it != itend; ++it)
+//                        {   
+//                
+//                cout << "Lambda Index: " << *it << endl;
+//                            
+//                        }
+            
             SparseMatrix<double> A_Lambda;
             setup_stiffness_matrix(*this, Lambda, A_Lambda);
+            
+            
 //#if 1
             double help;
             unsigned int iterations;

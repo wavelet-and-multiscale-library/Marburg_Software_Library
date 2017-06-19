@@ -104,7 +104,8 @@ namespace WaveletTL
          * other element of the muth column. In such cases a mid caching strategy might be effective
          */
         inline double D(const Index& lambda) const {
-            return sqrt(a(lambda,lambda));//this needs to be changed to dyadic preconditioner
+//            return sqrt(a(lambda,lambda));//this needs to be changed to dyadic preconditioner
+            return 1;
         }
 
         /*
@@ -309,14 +310,20 @@ namespace WaveletTL
         //! the underlying (uncached) problem
         PROBLEM* problem;
 
-        // type of one block in one column of stiffness matrix  A
+        // type of one subblock in one block of stiffness matrix  A
         // entries are indexed by the number of the quarklet.
-        typedef std::map<int, double> Block;
-
-        // type of one column in the entry cache of A
+        typedef std::map<int, double> Subblock;
+        
+        // type of one block in one column of stiffness matrix  A
         // the key codes the sublevel, that data are the entries
         // a sublevel is a MultiIndex. Entries are indexed by the number of the
-        // sublevel as given by the ordering in MultiIndex, beginning at j_min
+        // sublevel as given by the ordering in MultiIndex, beginning at jmin
+        typedef std::map<int, Subblock> Block;
+
+        // type of one column in the entry cache of A
+        // the key codes the subpolynomial, that data are the entries
+        // a subpolynomial is a MultiIndex. Entries are indexed by the number of the
+        // sublevel as given by the ordering in MultiIndex, beginning at (0,0,...))
         typedef std::map<int, Block> Column;
 
         // type of the entry cache of A

@@ -136,7 +136,7 @@ int main()
     const int b=2;
     const unsigned int dim = 2; 
     const int jmax1=4;
-    const int pmax = 2;
+    const int pmax = 0;
     MultiIndex<int, dim> jmax;
     jmax[0]=jmax1, jmax[1]=jmax1;
         FixedArray1D<int,2*dim> s;          //set order of boundary conditions
@@ -272,18 +272,39 @@ int main()
 //    Index mu=eq.frame().first_generator();
 //    Index lambda=eq.frame().first_generator();
     
+    
+#if 1
+ cout << "NORMTEST" << endl;   
     cout.precision(20);
 //    cout << eq.a(lambda,mu) << endl;;
 //    cout << cproblem1.a(lambda,mu) << endl;;
     
 //    cproblem1.normtest(1,0);
-    cout << eq.norm_A() <<endl;
-    cout << eq.norm_Ainv() <<endl;
-    cout << cproblem1.norm_A() <<endl;
-    cout << cproblem1.norm_Ainv() <<endl;
     
-//    InfiniteVector<double, Index> F_eta;
-//    cproblem1.RHS(1e-6, F_eta);
+    double time1=0.0, time2=0.0, tstart1, tstart2;      // time measurment variables
+ 
+//     tstart1 = clock();              // start 
+//
+//    
+//
+//    
+//    
+//    cout << "Uncached: " << endl;
+//    cout << "norm_A: " << eq.norm_A() <<endl;
+//    cout << "norm_Ainv: " << eq.norm_Ainv() <<endl;
+//    time1 += (clock() - tstart1)/CLOCKS_PER_SEC;
+//    cout << "time = " << time1 << " sec." << endl;
+    tstart2 = clock();
+    cout << "Cached: " << endl;
+    cout << "norm_A: " << cproblem1.norm_A() <<endl;
+    cout << "norm_Ainv: " << cproblem1.norm_Ainv() <<endl;
+    time2 += (clock() - tstart2)/CLOCKS_PER_SEC;
+    cout << "time = " << time2 << " sec." << endl;
+    
+#endif
+    
+    InfiniteVector<double, Index> F_eta; 
+    cproblem1.RHS(1e-6, F_eta);
 //    const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
 //    double epsilon = 1e-3;
 //    InfiniteVector<double, Index> u_epsilon, v;

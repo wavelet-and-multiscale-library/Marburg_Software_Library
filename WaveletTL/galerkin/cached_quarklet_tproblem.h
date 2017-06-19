@@ -104,6 +104,7 @@ namespace WaveletTL
          * other element of the muth column. In such cases a mid caching strategy might be effective
          */
         inline double D(const Index& lambda) const {
+//            cout << "D" << endl;
 //            return sqrt(a(lambda,lambda));//this needs to be changed to dyadic preconditioner
             return 1;
         }

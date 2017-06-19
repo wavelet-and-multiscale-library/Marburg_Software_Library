@@ -50,7 +50,7 @@ namespace WaveletTL
             if (col_lb == entries_cache.end() ||
                 entries_cache.key_comp()(nu_num, col_lb->first))
             {
-                cout << "zu berechnen " << nu << endl;
+//                cout << "Neue Spalte " << nu << endl;
                 // insert a new column
                 typedef typename ColumnCache::value_type value_type;
                 col_it = entries_cache.insert(col_lb, value_type(nu_num, Column()));
@@ -84,8 +84,10 @@ namespace WaveletTL
             typename Block::iterator it(lb);
 
             if (lb == block.end() ||
-                block.key_comp()(blocknumber, lb->first))
+                block.key_comp()(subblocknumber, lb->first))
             {
+//                cout << "subblocknumber: " << subblocknumber << ", " << lambda << endl;
+            
                 // no entries have ever been computed for this column, polynomial and level
                 // compute whole level block
                 // insert a new level
@@ -856,9 +858,11 @@ namespace WaveletTL
 //                            
 //                        }
             
-            SparseMatrix<double> A_Lambda;
-            setup_stiffness_matrix(*this, Lambda, A_Lambda);
             
+            SparseMatrix<double> A_Lambda;
+            cout << "begin setup_stiffness_matrix" << endl;
+            setup_stiffness_matrix(*this, Lambda, A_Lambda);
+            cout << "end setup_stiffness_matrix" << endl;
             
 //#if 1
             double help;

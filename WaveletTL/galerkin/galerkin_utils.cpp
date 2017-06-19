@@ -88,7 +88,7 @@ namespace WaveletTL
     for (typename std::set<Index>::const_iterator it1(Lambda.begin()), itend(Lambda.end());
 	 it1 != itend; ++it1, ++row)
       {
-        cout << "Index nu: " << *it1 << endl;
+//        cout << "Index nu: " << *it1 << endl;
 	const double d1 = preconditioned ? P.D(*it1) : 1.0;
         
 	std::list<size_type> indices;

@@ -136,7 +136,7 @@ int main()
     const int b=2;
     const unsigned int dim = 2; 
     const int jmax1=4;
-    const int pmax = 0;
+    const int pmax = 2;
     MultiIndex<int, dim> jmax;
     jmax[0]=jmax1, jmax[1]=jmax1;
         FixedArray1D<int,2*dim> s;          //set order of boundary conditions
@@ -281,7 +281,7 @@ int main()
     
 //    cproblem1.normtest(1,0);
     
-    double time1=0.0, time2=0.0, tstart1, tstart2;      // time measurment variables
+    double /*time1=0.0,*/ time2=0.0/*, tstart1*/, tstart2;      // time measurment variables
  
 //     tstart1 = clock();              // start 
 //
@@ -305,14 +305,14 @@ int main()
     
     InfiniteVector<double, Index> F_eta; 
     cproblem1.RHS(1e-6, F_eta);
-//    const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
-//    double epsilon = 1e-3;
-//    InfiniteVector<double, Index> u_epsilon, v;
-//    
-//    //cout << eq.s_star() << endl;
-//    //cout << cproblem1.s_star() << endl;
-//    //cout << eq.space_dimension << endl;
-//    //cout << cproblem1.space_dimension << endl;
+    const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
+    double epsilon = 1e-3;
+    InfiniteVector<double, Index> u_epsilon, v;
+    
+    //cout << eq.s_star() << endl;
+    //cout << cproblem1.s_star() << endl;
+    //cout << eq.space_dimension << endl;
+    //cout << cproblem1.space_dimension << endl;
 //    //CDD1_SOLVE(cproblem1, epsilon, u_epsilon, 2*jmax1, tensor_simple);
 //    CDD2_SOLVE(cproblem1, nu, epsilon, u_epsilon, 2*jmax1, tensor_simple, pmax, a, b);
 //    

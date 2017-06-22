@@ -79,10 +79,20 @@ namespace WaveletTL
 			     Vector<double>& w,
 			     const int jmax = 999,
 			     const CompressionStrategy strategy = St04a,
+                             const bool preconditioning = true);
+  
+  template <class PROBLEM>
+  void add_compressed_column_quarklet(const PROBLEM& P,
+			     const double factor,
+			     const typename PROBLEM::Index& lambda,
+			     const int J,
+			     Vector<double>& w,
+			     const int jmax = 999,
+			     const CompressionStrategy strategy = DKR,
                              const bool preconditioning = true,// only relevant for the anisotropic case
                              const int pmax = 0,
-                             const double a = 0,
-                             const double b = 0);// pmax, a, b will only be specified for DKOR @PHK 
+                             const double a = 2,
+                             const double b = 2);
                                                
   /*
    */

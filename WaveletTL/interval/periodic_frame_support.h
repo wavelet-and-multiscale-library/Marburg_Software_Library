@@ -24,7 +24,7 @@ namespace WaveletTL
     have a nontrivial intersection
   */
   template <class RFRAME>
-  void intersecting_wavelets(const PeriodicFrame<RFRAME>& basis,
+  void intersecting_quarklets(const PeriodicFrame<RFRAME>& basis,
                              const typename PeriodicFrame<RFRAME>::Index& lambda,
 			     const int j, const bool generators,
 			     std::list<typename PeriodicFrame<RFRAME>::Index>& intersecting,
@@ -93,7 +93,7 @@ namespace WaveletTL
     return those intersections
   */
   template <class RBasis>
-  void intersecting_wavelets(const PeriodicBasis<RBasis>& basis,
+  void intersecting_quarklets(const PeriodicBasis<RBasis>& basis,
                              const typename PeriodicBasis<RBasis>::Index& lambda,
 			     const int j, const bool generators,
 			     std::list<std::pair<typename PeriodicBasis<RBasis>::Index,

@@ -304,7 +304,7 @@ namespace WaveletTL
     const int degrees_of_freedom() const { return full_collection.size(); };
     
     //! get the wavelet index corresponding to a specified number
-    const inline Index* get_wavelet (const int number) const {
+    const inline Index* get_quarklet (const int number) const {
       return &full_collection[number];
     }
 

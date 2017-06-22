@@ -71,6 +71,7 @@ namespace WaveletTL
                 it != itend; ++it, ++id)
         {
             fcoeffs[id] = std::pair<Index,double>(it.index(), *it);
+//            cout << it.index() << ", " << *it << endl;
         }
         sort(fcoeffs.begin(), fcoeffs.end(), typename InfiniteVector<double,Index>::decreasing_order());
         //cout << "... done, all integrals for right-hand side computed!" << endl;
@@ -81,7 +82,16 @@ namespace WaveletTL
     double
     TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::D(const typename QuarkletFrame::Index& lambda) const
     {
-        return sqrt(a(lambda, lambda));
+//        return sqrt(a(lambda, lambda));
+        double hspreconditioner(0), l2preconditioner(1);
+        for (int i=0; i<space_dimension; i++){
+            hspreconditioner+=pow(1+lambda.p()[i],8)*ldexp(1.0,2*lambda.j()[i]);
+            l2preconditioner*=pow(1+lambda.p()[i],2);
+        }
+        double preconditioner = sqrt(hspreconditioner)*l2preconditioner;
+        
+        return preconditioner;
+        
     }
 
     template <class IFRAME, unsigned int DIM, class TENSORFRAME>

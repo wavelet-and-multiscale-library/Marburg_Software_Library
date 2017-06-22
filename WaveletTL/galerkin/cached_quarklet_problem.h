@@ -52,9 +52,9 @@ namespace WaveletTL
 		  const double normAinv = 0.0);
     
     /*!
-      make wavelet basis type accessible
+      make wavelet frame type accessible
     */
-    typedef typename PROBLEM::WaveletBasis WaveletBasis;
+    typedef typename PROBLEM::WaveletBasis QuarkletFrame;
     
     /*!
       wavelet index class
@@ -62,9 +62,9 @@ namespace WaveletTL
     typedef typename PROBLEM::Index Index;
     
     /*!
-      read access to the basis
+      read access to the frame
     */
-    const WaveletBasis& basis() const { return problem->basis(); }
+    const QuarkletFrame& frame() const { return problem->basis(); }
     
     /*!
       space dimension of the problem

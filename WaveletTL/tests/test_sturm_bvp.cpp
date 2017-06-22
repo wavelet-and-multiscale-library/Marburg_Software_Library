@@ -37,6 +37,7 @@
 #include <galerkin/TestFunctions.h>
 #include <adaptive/cdd2.h>
 #include <adaptive/apply.h>
+#include <adaptive/compression.h>
 
 using namespace std;
 using namespace WaveletTL;
@@ -408,7 +409,7 @@ A.apply(x, err);
   InfiniteVector<double, Index> u_epsilon;
   clock_t tic = clock();
 #ifdef FRAME
-  CDD2_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, DKR, pmax, 2, 2);
+  CDD2_QUARKLET_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, DKR, pmax, 2, 2);
 #endif
 #ifdef BASIS
   CDD2_SOLVE(ceq, nu, epsilon, u_epsilon, jmax);
@@ -493,7 +494,7 @@ cout << "\nTime taken: " << (time/CLOCKS_PER_SEC) << " s";
 //plot of the adaptive solution
   const char* filenameSolution2 = "sturm_bvp_solution_adaptive.m";  
   u_epsilon.scale(&ceq, -1);
-  SampledMapping<1> s2(evaluate(ceq.basis(), u_epsilon, true, 7));
+  SampledMapping<1> s2(evaluate(ceq.frame(), u_epsilon, true, 7));
   std::ofstream u_stream2(filenameSolution2);
   s2.matlab_output(u_stream2);
   u_stream2 << "figure;\nplot(x,y);"

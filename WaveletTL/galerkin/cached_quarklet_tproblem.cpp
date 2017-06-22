@@ -315,7 +315,7 @@ namespace WaveletTL
                                       const CompressionStrategy strategy,
                                       const bool precond,
                                       const int maxpolynomial,
-                                      const double a,
+                                      const double vara,
                                       const double b) const
     {
         /*
@@ -327,28 +327,33 @@ namespace WaveletTL
         
         double d1 = precond?D(lambda):1.0;
         polynomial_type p;
+        
         if (space_dimension == 1)
         {
+            
+        
             int j0 = this->frame().j0()[0];
             
             Index mu;
             const int minlevel = max (j0, lambda.j()[0]-(int) (radius / b));
-            const int finalmaxlevel = min(lambda.j()+ (int) (radius / b), maxlevel);
+            const int finalmaxlevel = min(lambda.j()[0]+ (int) (radius / b), maxlevel);
             for (int level = minlevel; level  < finalmaxlevel ;level++)
             {
-                int minpolynomial = std::max(0, lambda.p() + 1  - (int) pow(2,(radius-b*abs(level-lambda.j())/a)));
-                int finalmaxpolynomial = std::min(lambda.p() - 1  + (int) pow(2,(radius-b*abs(level-lambda.j())/a)), maxpolynomial);
-                        
-                for(int polynomial = minpolynomial; p<=finalmaxpolynomial; ++p){
+                int minpolynomial = std::max(0, lambda.p()[0] + 1  - (int) pow(2,(radius-b*abs(level-lambda.j()[0])/vara)));
+                int finalmaxpolynomial = std::min(lambda.p()[0] - 1  + (int) pow(2,(radius-b*abs(level-lambda.j()[0])/vara)), maxpolynomial);
+                
+                
+                p[0]=minpolynomial;
+                for(;p[0]<=finalmaxpolynomial; ++p){
                 
                     // @ hier weitermachen: for schleife für p's einfügen
-                    mu = this->frame().first_quarklet(level, polynomial);
+                    mu = this->frame().first_quarklet(level, p);
                     // the result of the following call is that the cache holds the whole level block corresponding to all quarklets with level = |mu|
                     // ideally one should replace this method call with a slightly modified version of the code from a(,)
                     // using the first generator on level j0 would mean no difference, since block 0 contains quarklets and generators
                     a(mu,lambda);
                     // add the level
-                    Subblock& subblock (entries_cache[lambda.number()][polynomial][level-j0]);
+                    Subblock& subblock (entries_cache[lambda.number()][p[0]][level-j0]);
     #if 1
                     for (typename Subblock::const_iterator it(subblock.begin()), itend(subblock.end()); it != itend; ++it)
                     {
@@ -388,8 +393,10 @@ namespace WaveletTL
             // The first level in a levelline is determined with minx = min(j0[0], lambda.j[0]-radius)
             // The last level in a levelline is determined with miny = min(j0[1], lambda.j[1]-radius)
 
+            
             Index mu;
             level_type j0(this->frame().j0());
+            
             int lambdaline = multi_degree(lambda.j());
 //            int lambdaline = lambda.j()[0]+lambda.j()[1];
             int lowestline = multi_degree(j0);
@@ -865,10 +872,22 @@ namespace WaveletTL
             cout << "end setup_stiffness_matrix" << endl;
             
 //#if 1
-            double help;
-            unsigned int iterations;
-            LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
-            normAinv = 1./help;
+            
+            
+            A_Lambda.compress(1e-10);
+//            unsigned int iterations;
+//            double help;
+//            LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
+            Matrix<double> evecs;
+            Vector<double> evals;
+            SymmEigenvalues(A_Lambda, evals, evecs);
+            int i = 0;
+            while(abs(evals(i))<1e-2){
+                ++i;
+            }
+            normA = evals(evals.size()-1);
+            normAinv = 1./evals(i);
+            
 //#else
 //          Vector<double> xk(Lambda.size(), false);
 //          xk = 1;
@@ -911,10 +930,23 @@ namespace WaveletTL
             SparseMatrix<double> A_Lambda;
             setup_stiffness_matrix(*this, Lambda, A_Lambda);
 //#if 1
-            double help;
-            unsigned int iterations;
-            LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
-            normAinv = 1./help;
+//            double help;
+//            unsigned int iterations;
+//            LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
+            A_Lambda.compress(1e-10);
+//            unsigned int iterations;
+//            double help;
+//            LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
+            Matrix<double> evecs;
+            Vector<double> evals;
+            SymmEigenvalues(A_Lambda, evals, evecs);
+            int i = 0;
+            while(abs(evals(i))<1e-2){
+                ++i;
+            }
+            normA = evals(evals.size()-1);
+            normAinv = 1./evals(i);
+            
 //#else
 //          Vector<double> xk(Lambda.size(), false);
 //          xk = 1;
@@ -975,10 +1007,24 @@ namespace WaveletTL
             SparseMatrix<double> A_Lambda;
             setup_stiffness_matrix(*this, Lambda, A_Lambda);
 //#if 1
-            double help;
-            unsigned int iterations;
-            LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
-            normAinv = 1./help;
+//            double help;
+//            unsigned int iterations;
+//            LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
+//            normAinv = 1./help;
+            
+            A_Lambda.compress(1e-10);
+//            unsigned int iterations;
+//            double help;
+//            LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
+            Matrix<double> evecs;
+            Vector<double> evals;
+            SymmEigenvalues(A_Lambda, evals, evecs);
+            int i = 0;
+            while(abs(evals(i))<1e-2){
+                ++i;
+            }
+            normA = evals(evals.size()-1);
+            normAinv = 1./evals(i);
 //#else
 //            Vector<double> xk(Lambda.size(), false);
 //            xk = 1;

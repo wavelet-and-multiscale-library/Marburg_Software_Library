@@ -251,7 +251,7 @@ int main(int argc, char** argv) {
 #ifdef PERIODIC_CDFBASIS 
     CDD2_SOLVE(cachedL, nu,  epsilon,  u_epsilon, jmax);
 #else
-    CDD2_SOLVE(cachedL, nu,  epsilon,  u_epsilon, jmax, DKR, pmax, 2, 2);
+    CDD2_QUARKLET_SOLVE(cachedL, nu,  epsilon,  u_epsilon, jmax, DKR, pmax, 2, 2);
 #endif
 
     #if 1

@@ -41,6 +41,17 @@ namespace WaveletTL
 		    bool boxed = false,
 		    bool colorbar = true,
 		    const double aa = -6);
+  
+  template <class TENSORBASIS>
+  void plot_indices2(const TENSORBASIS* basis,
+		    const InfiniteVector<double, typename TENSORBASIS::Index>& coeffs,
+		    std::ostream& os,
+                    const typename TENSORBASIS::Index::level_type& j,
+                    const typename TENSORBASIS::Index::type_type& e,
+		    const char* colormap = "flipud(gray)",
+		    bool boxed = false,
+		    bool colorbar = true,
+		    const double lowerclim = -6);
 }
 
 // include implementation

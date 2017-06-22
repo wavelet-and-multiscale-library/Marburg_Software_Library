@@ -223,4 +223,68 @@ namespace WaveletTL
             } // end of "big loop"
         } // end of while(!atmaxrange)
     }
+    
+    template <class TENSORBASIS>
+    void plot_indices2(const TENSORBASIS* basis,
+            const InfiniteVector<double, typename TENSORBASIS::Index>& coeffs,
+            std::ostream& os,
+            const typename TENSORBASIS::Index::level_type& j,
+            const typename TENSORBASIS::Index::type_type& e,
+            const char* colormap,
+            bool boxed,
+            bool colorbar,
+            const double lowerclim)
+    {
+        typedef typename TENSORBASIS::Index Index;
+        //typedef typename TENSORBASIS::Support Support;
+        
+        const double maxnorm = linfty_norm(coeffs);
+        
+        //setup figure and properties
+        //os<<"figure;"<<endl;
+        os<<"clf;"<<endl;
+        os<<"box on;"<<endl;
+        os << "colormap( " << colormap<<");" << endl;
+        os << "set(gca,'CLim',[" << lowerclim << " 0])" << endl;
+        //convention: we denote generators as wavelets on level j_0 -1
+        os << "title(sprintf('wavelet coefficients on level (%i,%i)',"<<j[0]-1+e[0]<<","<<j[1]-1+e[1]<<"));"<<endl;
+        
+        const int startx= e[0] ? basis->bases()[0]->first_wavelet(j[0]).k() : basis->bases()[0]->first_generator(j[0]).k();
+        const int starty= e[1] ? basis->bases()[1]->first_wavelet(j[1]).k() : basis->bases()[1]->first_generator(j[1]).k();
+        const int columns= e[0] ? basis->bases()[0]->Nablasize(j[0]) : basis->bases()[0]->Deltasize(j[0]);
+        const int rows=e[1] ? basis->bases()[1]->Nablasize(j[1]) : basis->bases()[1]->Deltasize(j[1]);
+        //os<<"axis(["<<(double)0.5-e[0]<<" "<<(double)0.5-e[0]+columns<<" "<<(double)0.5-e[1]<<" "<<(double)0.5-e[1]+rows<<"]);"<<endl;
+        os<<"axis(["<<(double)startx-0.5<<" "<<(double)startx-0.5+columns<<" "<<(double)starty-0.5<<" "<<(double)starty-0.5+rows<<"]);"<<endl;
+        
+        for (typename InfiniteVector<double, Index>::const_iterator it(coeffs.begin()); it != coeffs.end(); ++it){
+            Index ind=it.index();
+            if(ind.j()==j && ind.e()==e){
+                //Support supp;
+                //basis->support(ind, supp);
+                //const double ax=(double)supp.a[0]/(1<<supp.j[0]);
+                //const double bx=(double)supp.b[0]/(1<<supp.j[0]);
+                //const double ay=(double)supp.a[1]/(1<<supp.j[1]);
+                //const double by=(double)supp.b[1]/(1<<supp.j[1]);
+                const double ax=(double)ind.k()[0]-0.5;
+                const double bx=(double)ind.k()[0]+0.5;
+                const double ay=(double)ind.k()[1]-0.5;
+                const double by=(double)ind.k()[1]+0.5;
+                const double val=std::max(log10(fabs(*it)/maxnorm),lowerclim);
+                //const double val=log10(fabs(*it)/maxnorm);
+                os << "patch(["<<ax<<","<<bx<<","<<bx<<","<<ax<<"],["<<ay<<","<<ay<<","<<by<<","<<by<<"],"<<val;
+                if(!boxed){
+                    os<<",'edgecolor','none'";
+                }
+                os<<");"<<endl;
+            }           
+        }
+        //correct colorbar labels
+        if (colorbar) {
+            os << "h=colorbar;" << endl;
+            os << "ytick=get(h,'ytick');"<<endl;
+            os << "labels = {};"<<endl;
+            os << "for v=ytick(1:end), labels{end+1} = sprintf('10^%i',v); end"<<endl;
+            os << "set(h, 'yticklabel',labels);"<<endl;
+        }
+    }
 }

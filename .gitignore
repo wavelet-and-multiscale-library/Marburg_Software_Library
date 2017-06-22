@@ -6,6 +6,7 @@
 *.gz
 *.dat
 *.txt
+*.jpg
 nbproject
 WaveletTL/tests/test_cube_equation
 WaveletTL/tests/test_periodic_laplacian

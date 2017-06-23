@@ -258,8 +258,8 @@ namespace WaveletTL
                      const CompressionStrategy strategy = tensor_simple,
                      const bool precond = true,
                      const int maxpolynomial = 0,
-                     const double vara = 0,
-                     const double b = 0) const;
+                     const double A = 0,
+                     const double B = 0) const;
 
         /*
          * Variant where only entries with levels given by levelwindow are added

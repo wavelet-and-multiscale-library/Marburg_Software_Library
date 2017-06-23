@@ -163,7 +163,7 @@ int main()
     
 #if 1
     // some output for debugging
-    for (unsigned int i=0; i<TBasisArray[0]->degrees_of_freedom(); ++i)
+    for (unsigned int i=0; (int)i<TBasisArray[0]->degrees_of_freedom(); ++i)
     {
         cout << "i = " << i << "; lambda(i) = " << *TBasisArray[0]->get_wavelet(i) << endl;
     }

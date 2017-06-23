@@ -221,7 +221,7 @@ namespace WaveletTL
         cout << "eta = " << eta << endl;
         P.RHS(eta, f);
         cout << "CDD2:: f.size() = " << f.size() << endl;
-        //cout << f << endl;
+//        cout << "f: " << endl << f << endl;
       
         v = u_epsilon;
         
@@ -233,8 +233,9 @@ namespace WaveletTL
 //          //APPLY(P, v, eta, jp_guess, Av, maxlevel, tensor_simple);
 //#else
           //APPLY_COARSE(P, v, eta, Av, 0.5, maxlevel, CDD1);
-
+//            cout << "v: " << endl << v << endl;
           APPLY_QUARKLET(P, v, eta, Av, maxlevel, strategy, pmax, a, b);
+//          cout << "Av: " << endl << Av << endl;
           //APPLY with successive COARSE @PHK
 //         APPLY(P, v, eta, tempAv, maxlevel, strategy, pmax, a, b);
 //          tempAv.COARSE(1e-4, Av);
@@ -274,6 +275,7 @@ namespace WaveletTL
       
       
     }
+        
         
   }
 }

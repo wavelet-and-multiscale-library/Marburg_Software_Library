@@ -133,7 +133,6 @@ namespace WaveletTL
                                 }
                             }
                         }
-
                         for (typename IntersectingList::const_iterator it(nusW.begin()), itend(nusW.end());it != itend; ++it)
                         {
                             const double entry = problem->a(*it, nu);
@@ -167,6 +166,8 @@ namespace WaveletTL
                         for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)
                         {
                             const double entry = problem->a(*it, nu);
+                            
+                            
                             typedef typename Subblock::value_type value_type_subblock;
                             if (fabs(entry) > 1e-16 ) 
     //                            if (entry != 0.)
@@ -183,6 +184,8 @@ namespace WaveletTL
             // level already exists --> extract row corresponding to 'lambda'
             else
             {
+                
+                
                 Subblock& subblock(it->second);
 
                 //typename Block::iterator block_lb(block.lower_bound(lambda));
@@ -315,8 +318,8 @@ namespace WaveletTL
                                       const CompressionStrategy strategy,
                                       const bool precond,
                                       const int maxpolynomial,
-                                      const double vara,
-                                      const double b) const
+                                      const double A,
+                                      const double B) const
     {
         /*
          * For dim=1,2 it is easy to describe all levels in the (1-norm) ball of radius around lambda.
@@ -335,12 +338,12 @@ namespace WaveletTL
             int j0 = this->frame().j0()[0];
             
             Index mu;
-            const int minlevel = max (j0, lambda.j()[0]-(int) (radius / b));
-            const int finalmaxlevel = min(lambda.j()[0]+ (int) (radius / b), maxlevel);
+            const int minlevel = max (j0, lambda.j()[0]-(int) (radius / B));
+            const int finalmaxlevel = min(lambda.j()[0]+ (int) (radius / B), maxlevel);
             for (int level = minlevel; level  < finalmaxlevel ;level++)
             {
-                int minpolynomial = std::max(0, lambda.p()[0] + 1  - (int) pow(2,(radius-b*abs(level-lambda.j()[0])/vara)));
-                int finalmaxpolynomial = std::min(lambda.p()[0] - 1  + (int) pow(2,(radius-b*abs(level-lambda.j()[0])/vara)), maxpolynomial);
+                int minpolynomial = std::max(0, lambda.p()[0] + 1  - (int) pow(2,(radius-B*abs(level-lambda.j()[0])/A)));
+                int finalmaxpolynomial = std::min(lambda.p()[0] - 1  + (int) pow(2,(radius-B*abs(level-lambda.j()[0])/A)), maxpolynomial);
                 
                 
                 p[0]=minpolynomial;
@@ -352,6 +355,7 @@ namespace WaveletTL
                     // ideally one should replace this method call with a slightly modified version of the code from a(,)
                     // using the first generator on level j0 would mean no difference, since block 0 contains quarklets and generators
                     a(mu,lambda);
+                    
                     // add the level
                     Subblock& subblock (entries_cache[lambda.number()][p[0]][level-j0]);
     #if 1
@@ -398,52 +402,78 @@ namespace WaveletTL
             level_type j0(this->frame().j0());
             
             int lambdaline = multi_degree(lambda.j());
+            int actualradius =(int)(radius/B);
 //            int lambdaline = lambda.j()[0]+lambda.j()[1];
             int lowestline = multi_degree(j0);
 //            int lowestline = j0[0]+j0[1];
             int dist2j0=lambdaline-lowestline;
             int dist2maxlevel=maxlevel-lambdaline;
-            MultiIndex<int,space_dimension> currentlevel;
+            level_type currentlevel;
+            polynomial_type currentpolynomial;
+            
             int xstart,xend,ystart,subblocknumber;
             // iterate the levellines. offset relative to lambdas levelline
-            for (int offset = -std::min(dist2j0,radius); offset < std::min(dist2maxlevel,radius)+1; offset++)
+            for (int offset = -std::min(dist2j0,actualradius); offset <= std::min(dist2maxlevel,actualradius); offset++)
             {
                 // iterate over the levels on the levelline
-                xstart = lambda.j()[0]-radius+ceil((radius+offset)/2.0); //x coordinate of the first level, ignoring restrictions by j0[0]
-                xend = lambda.j()[0]+floor((radius+offset)/2.0); // same for the last
-                ystart = lambda.j()[1]+floor((radius+offset)/2.0); // and for the second dimension
+                xstart = lambda.j()[0]-actualradius+ceil((actualradius+offset)/2.0); //x coordinate of the first level, ignoring restrictions by j0[0]
+                xend = lambda.j()[0]+floor((actualradius+offset)/2.0); // same for the last
+                ystart = lambda.j()[1]+floor((actualradius+offset)/2.0); // and for the second dimension
                 // the first level in the ball is denoted with steps=0.
                 // The first level on the current levelline in the ball may have steps >0.
                 for (int steps = max(0,j0[0]-xstart); steps <= min(xend-xstart,ystart-j0[1]) ; steps++ )
                 {
                     currentlevel[0]= xstart+steps;
                     currentlevel[1]= ystart-steps;
-                    mu = this->frame().first_quarklet(currentlevel);
-
-                    a(mu,lambda); // computes & stores the block in the cache
                     subblocknumber = currentlevel[0]-j0[0] + ((lambdaline-lowestline+offset)*(lambdaline-lowestline+offset+1))/2;
+                    
+                    
+//                    int dist2p0=multi_degree(lambda.p());
+//                    int dist2maxpolynomial=maxlevel-dist2p0;
+                    int jxdiff = currentlevel[0]-lambda.j()[0];
+                    int jydiff = currentlevel[1]-lambda.j()[1];
+                    int gap = abs(jxdiff) + abs(jydiff); 
+                    double boundary = pow(2,(radius-B*gap/A))/((1+lambda.p()[0])*(1+lambda.p()[1])); //ÄNDERN 1 bezieht sich auf (1+p_1')*(1+p_2')
+//                    cout << "boundary: " << boundary << endl;
+//                    cout << "maxpolynomial: " << maxpolynomial << endl;
+//                    cout << "gap: " << gap << endl;
+//                    cout << "radius: " << radius << endl;
+                    
+                    for (currentpolynomial[0]=0; currentpolynomial[0]<= std::min((int)boundary-1,maxpolynomial);currentpolynomial[0]++){
+                        
+                        for (currentpolynomial[1]=0; currentpolynomial[1]<= std::min((int)(boundary/(1+currentpolynomial[0]))-1,maxpolynomial-currentpolynomial[0]);currentpolynomial[1]++){
 
-                    // add the level
-                    Subblock& subblock (entries_cache[lambda.number()][0][subblocknumber]);
-#if 1
-                    for (typename Subblock::const_iterator it(subblock.begin()), itend(subblock.end()); it != itend; ++it)
-                    {
-                        // high caching strategy
-                        w[it->first]=w[it->first]+factor*(it->second)/( precond? (d1*D(this->frame().get_quarklet(it->first))):1.0);
+                            mu = this->frame().first_quarklet(currentlevel, currentpolynomial);
+                            a(mu,lambda);
+//                            cout << mu << endl;
+//                            int dist2p0 = multi_degree(lambda.p());
+//                            int blocknumber = currentpolynomial[0] + ((dist2p0+offset)*(dist2p0+offset+1))/2;;
+                            
 
-                        // low caching strategy
-                        //w[it->first]=w[it->first]+factor*(it->second)/d1/(problem->D(this->frame().get_quarklet(it->first)));
-                    }
-#else
-                    // mid caching strategy
-                    typename Block::const_iterator it(block.begin()), itend(block.end());
-                    w[it->first]=w[it->first]+factor*(it->second)/d1/D(this->frame().get_quarklet(it->first));
-                    ++it;
-                    for (; it != itend; ++it)
-                    {
-                        w[it->first]=w[it->first]+factor*(it->second)/d1/D_already(this->frame().get_quarklet(it->first));
-                    }
+
+                            // add the level
+                            Subblock& subblock (entries_cache[lambda.number()][currentpolynomial.number()][subblocknumber]);
+        #if 1
+                            for (typename Subblock::const_iterator it(subblock.begin()), itend(subblock.end()); it != itend; ++it)
+                            {
+                                // high caching strategy
+                                w[it->first]=w[it->first]+factor*(it->second)/( precond? (d1*D(this->frame().get_quarklet(it->first))):1.0);
+
+                                // low caching strategy
+                                //w[it->first]=w[it->first]+factor*(it->second)/d1/(problem->D(this->frame().get_quarklet(it->first)));
+                            }
+        #else
+                            // mid caching strategy
+                            typename Block::const_iterator it(block.begin()), itend(block.end());
+                            w[it->first]=w[it->first]+factor*(it->second)/d1/D(this->frame().get_quarklet(it->first));
+                            ++it;
+                            for (; it != itend; ++it)
+                            {
+                                w[it->first]=w[it->first]+factor*(it->second)/d1/D_already(this->frame().get_quarklet(it->first));
+                            }
 #endif
+                    }
+                    }
                 }
             }
         }

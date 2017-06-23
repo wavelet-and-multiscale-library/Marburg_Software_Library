@@ -581,7 +581,8 @@ namespace WaveletTL
       }
 
 //      cout << ell << endl;
-//      cout << "J = " << J << endl;
+//      J-=5;
+//      cout << "J = " << J << endl; //maybe J is too big, and that is the reason for the enormous amount of Degrees of freedom @PHK
  //     cout << 1 << endl;
 
       // hack: We let 'add_compressed_column' and 'add_level'
@@ -603,15 +604,15 @@ namespace WaveletTL
 	for (typename std::list<std::pair<Index, double> >::const_iterator itk(it->begin());
 	     itk != it->end(); ++itk) {
 	  //add_compressed_column(P, itk->second, itk->first, J-k, ww, jmax, strategy);
-	  //cout << "J-k = " << J-k << endl;
- //           cout << "addcompressed wird ausgeführt" << endl;
+//            cout << "J-k = " << J-k << endl;
+//            cout << "addcompressed wird ausgeführt" << endl;
 //            cout << itk->second << ", " << itk->first << endl;
             //cout << "Beginn cc" << endl;
 	  
-//            add_compressed_column_quarklet(P, itk->second, itk->first, J-k, ww, jmax, strategy, true, pmax, a, b);
-            add_compressed_column_quarklet(P, itk->second, itk->first, J-k, ww, jmax, strategy, true);
- //         cout << "Ende cc" << endl;
-//          //cout << ww << endl;
+            add_compressed_column_quarklet(P, itk->second, itk->first, J-k, ww, jmax, strategy, true, pmax, a, b);
+//            add_compressed_column_quarklet(P, itk->second, itk->first, J-k, ww, jmax, strategy, true);
+//          cout << "Ende cc" << endl;
+//          cout << ww << endl;
 	  z++;
 	}
       }

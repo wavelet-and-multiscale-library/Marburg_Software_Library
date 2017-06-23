@@ -13,6 +13,8 @@
 #include <algebra/infinite_vector.h>
 #include <adaptive/compression.h>
 
+
+
 namespace WaveletTL
 {
   /*!

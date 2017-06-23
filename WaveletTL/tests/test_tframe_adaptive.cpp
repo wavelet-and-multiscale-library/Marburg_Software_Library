@@ -31,6 +31,7 @@
 #include <adaptive/cdd1.h>
 #include <adaptive/cdd2.h>
 #include <cube/tbasis_evaluate.h>
+#include <cube/tframe_evaluate.h>
 #include <interval/pq_frame.h>
 #include <cube/tframe.h>
 #include <adaptive/compression.h>
@@ -140,10 +141,10 @@ int main()
     const int a=2;
     const int b=2;
     const unsigned int dim = 2; 
-    const int jmax1=4;
-    const int pmax = 0;
-    MultiIndex<int, dim> jmax;
-    jmax[0]=jmax1, jmax[1]=jmax1;
+    const int jmax=8;
+    const int pmax = 1;
+//    MultiIndex<int, dim> jmax;
+//    jmax[0]=jmax1, jmax[1]=jmax1;
         FixedArray1D<int,2*dim> s;          //set order of boundary conditions
     s[0]=0, s[1]=0; s[2]=0, s[3]=0; 
     //cout << s << endl;
@@ -168,7 +169,8 @@ int main()
     typedef TensorBasis<Basis1d,dim> Basis;
     typedef Basis::Index Index;
     TensorEquation<Basis1d,dim,Basis> eq(&poisson1, bc);
-    eq.set_jmax(2*jmax1);
+    eq.set_jmax(jmax);
+    
     
 #endif
     
@@ -181,7 +183,7 @@ int main()
     typedef TensorFrame<Frame1d,dim> Frame;
     typedef Frame::Index Index;
     TensorFrameEquation<Frame1d,dim,Frame> eq(&poisson1, bc);
-    eq.set_jpmax(2*jmax1, pmax);
+    eq.set_jpmax(jmax, pmax);
 #endif  
     
     
@@ -200,9 +202,9 @@ int main()
     int n=eq.basis().degrees_of_freedom();
     Matrix<double> L(n,n);
     int i=0;
-    for (Index ind1 = eq.basis().first_generator(), itend = eq.basis().last_wavelet(2*jmax1); ind1 <= itend; ++ind1, i++){
+    for (Index ind1 = eq.basis().first_generator(), itend = eq.basis().last_wavelet(jmax); ind1 <= itend; ++ind1, i++){
         int j=0;
-        for (Index ind2 = eq.basis().first_generator(), itend = eq.basis().last_wavelet(2*jmax1); ind2 <= itend; ++ind2, j++){
+        for (Index ind2 = eq.basis().first_generator(), itend = eq.basis().last_wavelet(jmax); ind2 <= itend; ++ind2, j++){
             //Index ind1=*it1;
             //Index ind2=*it2;
             L(i,j)=eq.a(ind2,ind1)/(eq.D(ind1)*eq.D(ind2));
@@ -250,7 +252,7 @@ int main()
     stream1.close();
     cout << "solution plotted" << endl;
     
-    //alternative plot solution
+    //alternative plot solutionkeding
     cout << "plotting solution 2" << endl;
     int N=100;
     double h = 1e-2;
@@ -269,6 +271,7 @@ int main()
 #endif
 #ifdef ADAPTIVE
 #ifdef BASIS
+    cout << "hier1" << endl;
     CachedTProblem<TensorEquation<Basis1d,dim,Basis> > cproblem1(&eq);
 #endif
 #ifdef FRAME
@@ -279,21 +282,23 @@ int main()
     
     
 #if 1
- cout << "NORMTEST" << endl;   
+// cout << "NORMTEST" << endl;   
 //    cout.precision(20);
 //    cout << eq.a(lambda,mu) << endl;;
 //    cout << cproblem1.a(lambda,mu) << endl;;
     
 //    cproblem1.normtest(1,0);
     
-    double time1=0.0, time2=0.0, tstart1, tstart2;      // time measurment variables
+    double time2=0.0, tstart2; 
+    
+    // time measurment variables
  
 //     tstart1 = clock();              // start 
 //
 //    
 //
 //    
-//    
+//    double time1=0.0, tstart1; 
 //    cout << "Uncached: " << endl;
 //    cout << "norm_A: " << eq.norm_A() <<endl;
 //    cout << "norm_Ainv: " << eq.norm_Ainv() <<endl;
@@ -305,42 +310,91 @@ int main()
     
     InfiniteVector<double, Index> F_eta; 
     cproblem1.RHS(1e-6, F_eta);
-    cout << F_eta << endl;
+////    cout << F_eta << endl;
     const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
-    cout << "TEST: " << l2_norm(F_eta) << ", " << cproblem1.norm_Ainv() << endl;
+//    cout << "TEST: " << l2_norm(F_eta) << ", " << cproblem1.norm_Ainv() << endl;
     double epsilon = 1e-3;
-    InfiniteVector<double, Index> u_epsilon, v;
+    InfiniteVector<double, Index> u_epsilon, v, test, test2;
     
     //cout << eq.s_star() << endl;
     //cout << cproblem1.s_star() << endl;
     //cout << eq.space_dimension << endl;
     //cout << cproblem1.space_dimension << endl;
 //    //CDD1_SOLVE(cproblem1, epsilon, u_epsilon, 2*jmax1, tensor_simple);
+    
     tstart2 = clock();
     
 #ifdef FRAME
+
+    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b); 
     
-    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon, 2*jmax1, tensor_simple, pmax, a, b);
-#else
-    CDD2_SOLVE(cproblem1, nu, epsilon, u_epsilon, 2*jmax1, tensor_simple);
+    
+    
+#if 0
+    
+    typedef typename Index::level_type level_type;
+    typedef typename Index::polynomial_type polynomial_type;
+    level_type level;
+    polynomial_type p;
+    level[0]=4, level[1]=3;
+    p[0]=1,p[1]=0;
+    cout << "Nummer: " << p.number() << endl;
+    Index lambda = cproblem1.frame().first_quarklet(level, p);
+    Index mu = cproblem1.frame().first_quarklet(level);
+    cout << mu << endl;
+    ++lambda;
+    test[lambda]=1;
+    cout << test << endl;
+    cout << "Integral: " << cproblem1.a(lambda,lambda) << endl;
+    cout << "Preconditioner: " << cproblem1.D(lambda) << ", " << cproblem1.D(mu) <<endl;
+    APPLY_QUARKLET(cproblem1, test, 1e-10, test2, jmax, tensor_simple, pmax, a, b);
+    cout << test2 << endl;
+    
+//    cproblem1.a(lambda,lambda);
+//    
+//    Vector<double> w(cproblem1.frame().degrees_of_freedom());
+//    
+//    cproblem1.add_ball(lambda,w,4,1,14,tensor_simple,true,7,a,b);
 #endif
-    time1 += (clock() - tstart1)/CLOCKS_PER_SEC;
-    cout << "time = " << time1 << " sec." << endl;
+
+#else
+    CDD2_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple);
+#endif
+    time2 += (clock() - tstart2)/CLOCKS_PER_SEC;
+    cout << "time = " << time2 << " sec." << endl;
+    
+    cout << u_epsilon << endl;
+    
 //    
 //    //APPLY(cproblem1, u_epsilon, 1e-3, v, 2*jmax1, tensor_simple);
 //    //APPLY_TEST(cproblem1, v, 10^-3, u_epsilon, 8, tensor_simple);
 //    //CompressionStrategy strategy1=tensor_simple;
 //    //Vector<double> w;
-//    //add_compressed_column(cproblem1, 1, eq.basis().first_generator(), 1, w, 2*jmax1, strategy1, false, pmax, a, b);
+//    //add_compressed_column(cproblem1, 1, eq.basis().first_generator(), 1, w, jmax, strategy1, false, pmax, a, b);
 //    
-//    //plot solution
-//    cout << "plotting solution" << endl;
-//    u_epsilon.scale(&eq, -1);
-//    SampledMapping<2> sm1(evaluate(eq.basis(), u_epsilon , true, 6));
-//    std::ofstream stream1("solution_ad.m");
-//    sm1.matlab_output(stream1);
-//    stream1.close();
-//    cout << "solution plotted" << endl;
+ 
+#ifdef FRAME
+    //plot solution
+    cout << "plotting solution" << endl;
+    u_epsilon.scale(&cproblem1, -1);
+    SampledMapping<2> sm1(evaluate(cproblem1.frame(), u_epsilon , true, 6));
+    std::ofstream stream1("solution_ad.m");
+    sm1.matlab_output(stream1);
+    stream1.close();
+    cout << "solution plotted" << endl;
+#endif
+    
+#ifdef BASIS
+    
+    //plot solution
+    cout << "plotting solution" << endl;
+    u_epsilon.scale(&eq, -1);
+    SampledMapping<2> sm1(evaluate(eq.basis(), u_epsilon , true, 6));
+    std::ofstream stream1("solution_ad.m");
+    sm1.matlab_output(stream1);
+    stream1.close();
+    cout << "solution plotted" << endl;
+#endif
 //    
 //    //plot coefficients
 //    cout << "plotting coefficients" << endl;

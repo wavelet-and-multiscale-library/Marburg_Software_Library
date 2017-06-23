@@ -33,7 +33,7 @@ int main()
     typedef Basis::Index Index;
 //    typedef TensorIndex<Basis1D,DIM>::level_type level_type;
 //    typedef TensorIndex<Basis1D,DIM>::type_type type_type;
-    typedef TensorIndex<Basis1D,DIM>::translation_type translation_type;
+//    typedef TensorIndex<Basis1D,DIM>::translation_type translation_type;
     typedef Basis1D::Index Index1D;
     
     FixedArray1D<bool,2*DIM> bc;

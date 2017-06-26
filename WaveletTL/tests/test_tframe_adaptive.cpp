@@ -3,8 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-#undef NONADAPTIVE
-#define ADAPTIVE
+#define NONADAPTIVE
+#undef ADAPTIVE
 
 #undef BASIS
 #define FRAME
@@ -28,6 +28,8 @@
 #include <cube/tbasis_evaluate.h>
 #include <interval/pq_frame.h>
 #include <cube/tframe.h>
+#include <cube/tframe_evaluate.h>
+#include <cube/tframe_indexplot.h>
 #include <adaptive/compression.h>
 #include <adaptive/apply.h>
 #include <cube/tbasis_indexplot.h>
@@ -130,13 +132,13 @@ public:
 int main()
 {
     cout << "Testing tbasis adaptive" << endl;
-    const int d  = 3;
-    const int dT = 3;
+    const int d  = 2;
+    const int dT = 2;
     const int a=2;
     const int b=2;
     const unsigned int dim = 2; 
     const int jmax1=4;
-    const int pmax = 2;
+    const int pmax = 0;
     MultiIndex<int, dim> jmax;
     jmax[0]=jmax1, jmax[1]=jmax1;
         FixedArray1D<int,2*dim> s;          //set order of boundary conditions
@@ -177,6 +179,7 @@ int main()
     typedef Frame::Index Index;
     TensorFrameEquation<Frame1d,dim,Frame> eq(&poisson1, bc);
     eq.set_jpmax(2*jmax1, pmax);
+    //eq.set_jpmax(6,2);
 #endif  
     
     
@@ -206,18 +209,34 @@ int main()
     L.matlab_output("L", "L",0);
     cout << "plot stiffness matrix done" << endl;
 #endif
-  
+   
 #ifdef NONADAPTIVE
-    set<Index> Lambda;  //setup index set
+    //setup index set
+    set<Index> Lambda;  
+    MultiIndex<int,dim> p;p[0]=0;p[1]=0;
+    Index lambda = eq.frame().first_generator(eq.frame().j0(), p);
     int zaehler=0;
-    for (Index lambda=eq.basis().first_generator(), itend=eq.basis().last_wavelet(6); lambda <= itend; ++lambda)
-    {
+    for (int l = 0; l < eq.frame().degrees_of_freedom(); l++) {
         Lambda.insert(lambda);
-        //cout << lambda << endl;
-        zaehler++;
+        if(lambda==eq.frame().last_quarklet(2*jmax1, p)){
+            ++p;
+            lambda=eq.frame().first_generator(eq.frame().j0(), p);
+        }
+        else
+        ++lambda;
+        ++zaehler;
+        
     }
-    cout << zaehler << endl;
+    //for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it){
+        //cout << *it << endl; 
+          //Index ind = *it;
+          //cout << ind.number() << endl;
+    //}
     
+    cout << eq.norm_A() << endl;
+    cout << eq.norm_Ainv() << endl;
+    
+    cout << "setup stiffness matrix" << endl;
     SparseMatrix<double> A;
     setup_stiffness_matrix(eq,Lambda,A); 
     cout << "setup stiffness matrix done" << endl;
@@ -228,9 +247,12 @@ int main()
     x =0;
     unsigned int iterations;
     const int maxiterations = 99;
+    //const double omega = 2.0 / (eq.norm_A() + 1.0/eq.norm_Ainv());
+    //cout << omega << endl;
+    
     CG(A,F,x,1e-8,maxiterations,iterations); 
     cout << "iterative solution computed" << endl;
-    
+
     //plot solution
     cout << "plotting solution" << endl;
     InfiniteVector<double,Index> u,v;
@@ -239,12 +261,34 @@ int main()
         u.set_coefficient(*it, x[i2]);
     }
     u.scale(&eq, -1);
-    SampledMapping<2> sm1(evaluate(eq.basis(), u , true, 6));
+    SampledMapping<2> sm1(evaluate(eq.frame(), u , true, 6));
     std::ofstream stream1("solution_na.m");
     sm1.matlab_output(stream1);
     stream1.close();
     cout << "solution plotted" << endl;
     
+    //plot coefficients
+    u.scale(&eq,1);
+    std::ofstream coeff_stream2;
+    coeff_stream2.open("coefficients_na.m");
+    MultiIndex<int,dim> pstart;//pstart[0]=0;pstart[1]=0;
+    MultiIndex<int,dim> jstart;//jstart[0]=3;jstart[1]=3;
+    MultiIndex<int,dim> estart;//estart[0]=0;estart[1]=0;
+    for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it){
+        Index ind = *it;
+        if(!(ind.j()==jstart && ind.e()==estart && ind.p()==pstart)){
+            cout << ind.p()[0]<<ind.p()[1]<<ind.j()[0]-1+ind.e()[0]<<ind.j()[1]-1+ind.e()[1] << endl;
+            jstart=ind.j();
+            estart=ind.e();
+            pstart=ind.p();
+            plot_indices2(&eq.frame(), u,  coeff_stream2, ind.p(), ind.j(), ind.e(), "(flipud(gray))", false, true, -5);
+            coeff_stream2<<"print('-djpg',sprintf('coeffs%i%i%i%i.jpg',"<<ind.p()[0]<<","<<ind.p()[1]<<","<<ind.j()[0]-1+ind.e()[0]<<","<<ind.j()[1]-1+ind.e()[1]<<"))"<<endl;
+        }    
+    }    
+    coeff_stream2.close();
+    cout << "coefficients plotted" << endl;
+    
+#if 0    
     //alternative plot solution
     cout << "plotting solution 2" << endl;
     int N=100;
@@ -261,6 +305,7 @@ int main()
     }
     u_values.matlab_output("solution_na_alt","solution_na_alt",0);      //richtiger output für quarklets
     cout << "solution 2 plotted" << endl;
+#endif
 #endif
 #ifdef ADAPTIVE
 #ifdef BASIS

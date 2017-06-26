@@ -60,6 +60,9 @@ public:
 	(p[0]<=0.5 ? 4*p[0]*p[0]*(3-4*p[0]) : (2-2*p[0])*(2-2*p[0])*(4*p[0]-1))
 	* (p[1]<=0.5 ? 4*p[1]*p[1]*(3-4*p[1]) : (2-2*p[1])*(2-2*p[1])*(4*p[1]-1));
       break;
+    case 4:
+      return 4*(exp(5*p[0])-1)/(exp(5)-1)*(1-(exp(5*p[0])-1)/(exp(5)-1))*4*(exp(5*p[1])-1)/(exp(5)-1)*(1-(exp(5*p[1])-1)/(exp(5)-1));
+      break;
     default:
       return 0;
       break;
@@ -80,6 +83,7 @@ public:
     switch(N) {
     case 1:
       return 2*(p[0]*(1-p[0])+p[1]*(1-p[1]));
+      //return ( (p[0] < 0.5 && p[1] < 0.5) ? 0: 2*(p[0]*(1-p[0])+p[1]*(1-p[1])) );  
       break;
     case 2:
       return 2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1]);
@@ -91,6 +95,9 @@ public:
 	  +(p[0]<=0.5 ? 4*p[0]*p[0]*(3-4*p[0]) : (2-2*p[0])*(2-2*p[0])*(4*p[0]-1))
 	  * (p[1]<=0.5 ? 24-96*p[1] : 96*p[1]-72));
       break;
+    case 4:
+      return 4*(4*5*5*exp(2*5*p[0])-5*5*(exp(5)+1)*exp(5*p[0]))/(pow(exp(5)-1,2))*4*(exp(5*p[1])-1)/(exp(5)-1)*(1-(exp(5*p[1])-1)/(exp(5)-1))+  4*(4*5*5*exp(2*5*p[1])-5*5*(exp(5)+1)*exp(5*p[1]))/(pow(exp(5)-1,2))*4*(exp(5*p[0])-1)/(exp(5)-1)*(1-(exp(5*p[0])-1)/(exp(5)-1));
+      break;      
     default:
       return 1;
       break;
@@ -136,6 +143,7 @@ int main()
     typedef Basis1d::Index Index1d;
     typedef TensorBasis<Basis1d,dim> Basis;
     typedef Basis::Index Index;
+    typedef Basis::Support Support;
     //typedef PQFrame<d,dT> Frame1d;
     //typedef TensorFrame<Frame1d,dim> Frame;
     
@@ -150,24 +158,53 @@ int main()
     FixedArray1D<bool, 2*dim> bc;
     bc[0]=true, bc[1]=true, bc[2]=true, bc[3]=true;
     
-    //Basis1d basis1d(true,true);
-    //basis1d.set_jmax(jmax1);
+    Basis1d basis1d(true,true);
+    basis1d.set_jmax(jmax1);
     
-    //Basis basis(bc); 
-    //basis.set_jmax(jmax);
+    Basis basis(bc); 
+    basis.set_jmax(jmax);
     
-    mySolution<1> solution1;
-    myRHS<1> rhs1;
+    mySolution<4> solution1;
+    myRHS<4> rhs1;
     //Function2 function2;
+#if 1
+    //plot exact solution
+    Point<2> p0(0,1);
+    Point<2> p1(1,0);
+    Grid<2> mygrid(p0,p1,100);
+    SampledMapping<2> smuexact(mygrid, solution1);
+    std::ofstream streamuexact("uexact.m");
+    smuexact.matlab_output(streamuexact);
+    streamuexact.close();
+    cout << "uxact plotted" << endl;
+  
+    //plot right hand side
+    //Point<2> p0(0,1);
+    //Point<2> p1(1,0);
+    //Grid<2> mygrid(p0,p1,100);
+    SampledMapping<2> smrhs(mygrid, rhs1);
     
+    std::ofstream streamrhs("rhs.m");
+    smrhs.matlab_output(streamrhs);
+    streamrhs.close();
+    cout << "rhs plotted" << endl;
+#endif  
     PoissonBVP<dim> poisson1(&rhs1);
-    cout << "hallo" << endl;
+    //cout << "hallo" << endl;
     TensorEquation<Basis1d,dim,Basis> eq(&poisson1, bc);
     //TensorEquation<Frame1d,dim,Frame> feq(&poisson1, bc);
     cout << eq.basis().degrees_of_freedom() << endl;
     //eq.basis().set_jmax(10);
     eq.set_jmax(2*jmax1);                               //wichtig für cached problem
     cout << eq.basis().degrees_of_freedom() << endl;
+    
+#if 1
+    //test support and output
+    Index ind1=basis.first_generator();
+    cout << ind1 << endl;
+    
+    
+#endif
     
 #if 0
     //plot stiffness matrix index version 
@@ -246,7 +283,7 @@ int main()
     InfiniteVector<double, Index> F_eta;
     cproblem1.RHS(1e-6, F_eta);
     const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
-    double epsilon = 1e-3;
+    double epsilon = 1e-1;
     InfiniteVector<double, Index> u_epsilon, v;
     
     //cout << eq.s_star() << endl;
@@ -269,6 +306,7 @@ int main()
     std::ofstream stream1("solution_ad.m");
     sm1.matlab_output(stream1);
     stream1.close();
+    u_epsilon.scale(&eq,1);
     cout << "solution plotted" << endl;
     
     //plot coefficients
@@ -280,6 +318,68 @@ int main()
     coeff_stream1 << "title('solution coefficients') " << endl;
     coeff_stream1.close();
     cout << "coefficients plotted" << endl;
+    
+    
+    //new coefficients plot
+    std::ofstream coeff_stream2;
+    coeff_stream2.open("coefficients_ad2.m");
+    //coeff_stream2 << "figure;" << endl;
+    MultiIndex<int,dim> jstart;// start=basis1.j0();
+    MultiIndex<int,dim> estart;
+    for (Index lambda=eq.basis().first_generator(), itend=eq.basis().last_wavelet(2*jmax1); lambda <= itend; ++lambda){
+        if(!(lambda.j()==jstart && lambda.e()==estart)){
+            cout << lambda.j()[0]-1+lambda.e()[0]<<lambda.j()[1]-1+lambda.e()[1] << endl;
+            jstart=lambda.j();
+            estart=lambda.e();
+            plot_indices2(&eq.basis(), u_epsilon, coeff_stream2, lambda.j(), lambda.e(),"(flipud(gray))", false, true, -5);
+            //coeff_stream2 << "title('solution coefficients') " << endl;
+            //coeff_stream2 << "title(sprintf('coefficients on level (%i,%i)',"<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"));"<<endl;
+            coeff_stream2<<"print('-djpg',sprintf('coeffs%i%i.jpg',"<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"))"<<endl;
+        }
+    }
+    coeff_stream2.close();
+    
+    //plot grid
+    cout << "plotting grid" << endl;
+    std::ofstream grid_stream1;
+    grid_stream1.open("grid_ad.m");
+    grid_stream1 << "figure;" << endl;
+    grid_stream1 << "box on;" << endl;
+    for (InfiniteVector<double, Index>::const_iterator it(u_epsilon.begin()); it != u_epsilon.end(); ++it){
+         //u_values_ad[i] += *it * basisframe.evaluate(0, it.index(), point)*1./cproblem1.D(it.index());
+        
+        //cout << ind << " : " << *it << endl;
+        if(abs(*it)>1e-16){
+            Index ind=it.index();
+            Support supp;
+            basis.support(ind, supp);
+            grid_stream1 << "patch([" << (double)supp.a[0]/(1<<supp.j[0])<<"," << (double)supp.b[0]/(1<<supp.j[0]) << "," << (double)supp.b[0]/(1<<supp.j[0]) << "," << (double)supp.a[0]/(1<<supp.j[0]) << "],[" << (double)supp.a[1]/(1<<supp.j[1])<<"," << (double)supp.a[1]/(1<<supp.j[1]) << "," << (double)supp.b[1]/(1<<supp.j[1]) << "," << (double)supp.b[1]/(1<<supp.j[1]) << "],'w','edgecolor','k')" <<endl;
+        }
+        
+    }
+    grid_stream1.close();
+    cout << "grid plotted" << endl;
+    
+    //all coefficients output
+    std::ofstream stream2;
+    stream2.open("coeffs_support.m");
+    stream2<<"A=["<<endl;
+    for (InfiniteVector<double, Index>::const_iterator it(u_epsilon.begin()); it != u_epsilon.end(); ++it){
+         //u_values_ad[i] += *it * basisframe.evaluate(0, it.index(), point)*1./cproblem1.D(it.index());
+        //cout << ind << " : " << *it << endl;
+        if(abs(*it)>1e-16){
+            Index ind=it.index();
+            Support supp;
+            basis.support(ind, supp);
+            //stream2<<ind.j()[0]<<","<<ind.j()[1]<<","<<ind.e()[0]<<","<<ind.e()[1]<<","<<ind.k()[0]<<","<<ind.k()[1]<<","<<(double)supp.a[0]/(1<<supp.j[0])<<","<<(double)supp.b[0]/(1<<supp.j[0])<<","<<(double)supp.a[1]/(1<<supp.j[1])<<","<<(double)supp.b[1]/(1<<supp.j[1])<<","<<*it<<";"<< endl;
+            stream2<<ind.j()[0]-1+ind.e()[0]<<","<<ind.j()[1]-1+ind.e()[1]<<","<<ind.k()[0]<<","<<ind.k()[1]<<","<<(double)supp.a[0]/(1<<supp.j[0])<<","<<(double)supp.b[0]/(1<<supp.j[0])<<","<<(double)supp.a[1]/(1<<supp.j[1])<<","<<(double)supp.b[1]/(1<<supp.j[1])<<","<<*it<<";"<< endl;
+        }
+        
+    }
+    stream2<<"];"<<endl;
+    stream2.close();
+    cout << "fertig" << endl;
+    
 #endif
     
     

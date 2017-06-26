@@ -19,9 +19,9 @@ namespace WaveletTL
   int 
   CachedQuarkletProblem<PROBLEM>::number (const Index& lambda, const int jmax) const{
       
-      WaveletBasis mybasis(basis());
-      const int quarkletsonzerolevel = (mybasis.last_wavelet(jmax)).number()+1;
-      const int quarkletsonplevel = ((mybasis.last_wavelet(jmax,lambda.p())).number()+1);
+      QuarkletFrame myframe(frame());
+      const int quarkletsonzerolevel = (myframe.last_wavelet(jmax)).number()+1;
+      const int quarkletsonplevel = ((myframe.last_wavelet(jmax,lambda.p())).number()+1);
       const int lambda_num = (lambda.p()==0) ? lambda.number() : lambda.number() + (lambda.p()-1) * quarkletsonplevel + quarkletsonzerolevel;
       return lambda_num;
   }
@@ -35,10 +35,10 @@ namespace WaveletTL
     //const int lambda_num = number(lambda,2);
     double r = 0;
 
-    WaveletBasis mybasis(basis());
+    QuarkletFrame myframe(frame());
 
 
-    const int jmax = mybasis.get_jmax_();
+    const int jmax = myframe.get_jmax_();
     const int lambda_num = number(lambda, jmax);
     const int nu_num = number(nu,jmax);
 
@@ -98,9 +98,9 @@ namespace WaveletTL
             IntersectingList nus;
 
 
-            intersecting_quarklets(basis(), nu,
-                                  std::max(j, basis().j0()),
-                                  j == (basis().j0()-1),
+            intersecting_quarklets(frame(), nu,
+                                  std::max(j, frame().j0()),
+                                  j == (frame().j0()-1),
                                   nus, p);
         //            for (typename IntersectingList::const_iterator it100(nus.begin()), itend(nus.end());
         //                   it100 != itend; ++it100) {
@@ -170,7 +170,7 @@ namespace WaveletTL
 //      cout << lambda << endl;
 //      cout << j << endl;
       
-//      WaveletBasis mybasis(basis());
+//      QuarkletFrame myframe(frame());
       
       
 
@@ -225,9 +225,9 @@ namespace WaveletTL
               IntersectingList nus;
 
 
-              intersecting_quarklets(basis(), lambda,
-                                    std::max(j, basis().j0()),
-                                    j == (basis().j0()-1),
+              intersecting_quarklets(frame(), lambda,
+                                    std::max(j, frame().j0()),
+                                    j == (frame().j0()-1),
                                     nus, p);
 
       
@@ -273,12 +273,12 @@ namespace WaveletTL
 	//cout << "Länge w: " << w.size() << endl;
 	  for (typename Subblock::const_iterator it2(subblock.begin()), itend2(subblock.end());
 	       it2 != itend2; ++it2) {
-//              w.add_coefficient(*(problem->basis().get_wavelet(it2->first)),
-// 			      (it2->second / (d1 * problem->D( *(problem->basis().get_wavelet(it2->first)) )))  * factor);
+//              w.add_coefficient(*(frame().get_wavelet(it2->first)),
+// 			      (it2->second / (d1 * problem->D( *(frame().get_wavelet(it2->first)) )))  * factor);
                     //cout << it2->second << endl;
                     //cout << it2->first << endl;
               
-                    w[it2->first] += (it2->second / (d1*problem->D(*(problem->basis().get_wavelet(it2->first))))) * factor;
+                    w[it2->first] += (it2->second / (d1*problem->D(*(frame().get_quarklet(it2->first))))) * factor;
                 }
 	
       }// end else
@@ -297,19 +297,19 @@ namespace WaveletTL
 #endif
 
       std::set<Index> Lambda;
-      const int j0 = basis().j0();
-      const int jmax = std::min(basis().get_jmax_(),j0+2);
-      const int pmax = std::min(basis().get_pmax_(),2);
+      const int j0 = frame().j0();
+      const int jmax = std::min(frame().get_jmax_(),j0+2);
+      const int pmax = std::min(frame().get_pmax_(),2);
       
       int p = 0;
       
-      for (Index lambda = problem->basis().first_generator(j0,0);;) {
+      for (Index lambda = frame().first_generator(j0,0);;) {
 	Lambda.insert(lambda);
-	if (lambda == problem->basis().last_wavelet(jmax,pmax)) break;
+	if (lambda == frame().last_wavelet(jmax,pmax)) break;
         //if (i==7) break;
-        if (lambda == problem->basis().last_wavelet(jmax,p)){
+        if (lambda == frame().last_wavelet(jmax,p)){
             ++p;
-            lambda = problem->basis().first_generator(j0,p);
+            lambda = frame().first_generator(j0,p);
         }
         else
             ++lambda;
@@ -364,19 +364,19 @@ namespace WaveletTL
 #endif
 
       std::set<Index> Lambda;
-      const int j0 = basis().j0();
-      const int jmax = std::min(basis().get_jmax_(),j0+2);
-      const int pmax = std::min(basis().get_pmax_(),2);
+      const int j0 = frame().j0();
+      const int jmax = std::min(frame().get_jmax_(),j0+2);
+      const int pmax = std::min(frame().get_pmax_(),2);
       
       int p = 0;
       
-      for (Index lambda = problem->basis().first_generator(j0,0);;) {
+      for (Index lambda = frame().first_generator(j0,0);;) {
 	Lambda.insert(lambda);
-	if (lambda == problem->basis().last_wavelet(jmax,pmax)) break;
+	if (lambda == frame().last_wavelet(jmax,pmax)) break;
         //if (i==7) break;
-        if (lambda == problem->basis().last_wavelet(jmax,p)){
+        if (lambda == frame().last_wavelet(jmax,p)){
             ++p;
-            lambda = problem->basis().first_generator(j0,p);
+            lambda = frame().first_generator(j0,p);
         }
         else
             ++lambda;

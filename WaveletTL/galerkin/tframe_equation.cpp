@@ -71,6 +71,7 @@ namespace WaveletTL
                 it != itend; ++it, ++id)
         {
             fcoeffs[id] = std::pair<Index,double>(it.index(), *it);
+//            cout << it.index() << ", " << *it << endl;
         }
         sort(fcoeffs.begin(), fcoeffs.end(), typename InfiniteVector<double,Index>::decreasing_order());
         //cout << "... done, all integrals for right-hand side computed!" << endl;
@@ -81,7 +82,16 @@ namespace WaveletTL
     double
     TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::D(const typename QuarkletFrame::Index& lambda) const
     {
-        return sqrt(a(lambda, lambda));
+//        return sqrt(a(lambda, lambda));
+        double hspreconditioner(0), l2preconditioner(1);
+        for (int i=0; i<space_dimension; i++){
+            hspreconditioner+=pow(1+lambda.p()[i],8)*ldexp(1.0,2*lambda.j()[i]);
+            l2preconditioner*=pow(1+lambda.p()[i],2);
+        }
+        double preconditioner = sqrt(hspreconditioner)*l2preconditioner;
+        
+        return preconditioner;
+        
     }
 
     template <class IFRAME, unsigned int DIM, class TENSORFRAME>
@@ -108,7 +118,6 @@ namespace WaveletTL
         {
             // setup Gauss points and weights for a composite quadrature formula:
             const int N_Gauss = (p+1)/2+(multi_degree(lambda.p())+multi_degree(mu.p())+1)/2;
-
             //const double h = ldexp(1.0, -supp.j); // granularity for the quadrature
             // FixedArray1D<double,DIM> h; // granularity for the quadrature
             double hi; // granularity for the quadrature
@@ -132,32 +141,28 @@ namespace WaveletTL
                                               psi_mu_der_values;     // -"-, for psi_mu
             for (unsigned int i = 0; i < DIM; i++) {
                 evaluate(*frame_.frames()[i], 0,
-                         typename IFRAME::Index(lambda.p()[i],
+                                                lambda.p()[i],
                                                 lambda.j()[i],
                                                 lambda.e()[i],
                                                 lambda.k()[i],
-                                                frame_.frames()[i]),
                          gauss_points[i], psi_lambda_values[i]);
                 evaluate(*frame_.frames()[i], 1,
-                         typename IFRAME::Index(lambda.p()[i],
+                                                lambda.p()[i],
                                                 lambda.j()[i],
                                                 lambda.e()[i],
                                                 lambda.k()[i],
-                                                frame_.frames()[i]),
                          gauss_points[i], psi_lambda_der_values[i]);
                 evaluate(*frame_.frames()[i], 0,
-                         typename IFRAME::Index(mu.p()[i],
+                                                mu.p()[i],
                                                 mu.j()[i],
                                                 mu.e()[i],
                                                 mu.k()[i],
-                                                frame_.frames()[i]),
                          gauss_points[i], psi_mu_values[i]);
                 evaluate(*frame_.frames()[i], 1,
-                         typename IFRAME::Index(mu.p()[i],
+                                                mu.p()[i],
                                                 mu.j()[i],
                                                 mu.e()[i],
                                                 mu.k()[i],
-                                                frame_.frames()[i]),
                          gauss_points[i], psi_mu_der_values[i]);
             }
             // iterate over all points and sum up the integral shares

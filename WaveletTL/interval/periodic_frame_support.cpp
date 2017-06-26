@@ -9,7 +9,7 @@ namespace WaveletTL
 {
     
   template <class RFRAME>
-  void intersecting_wavelets(const PeriodicFrame<RFRAME>& basis,
+  void intersecting_quarklets(const PeriodicFrame<RFRAME>& basis,
                              const typename PeriodicFrame<RFRAME>::Index& lambda,
 			     const int j, const bool generators, 
                              std::list<typename PeriodicFrame<RFRAME>::Index>& intersecting,
@@ -79,7 +79,7 @@ namespace WaveletTL
   //computing the support doesn't work until now because of difficulties with periodicity 
 
   template <class RBasis>
-  void intersecting_wavelets(const PeriodicBasis<RBasis>& basis,
+  void intersecting_quarklets(const PeriodicBasis<RBasis>& basis,
                              const typename PeriodicBasis<RBasis>::Index& lambda,
 			     const int j, const bool generators, std::list<std::pair<typename PeriodicBasis<RBasis>::Index,
 			     typename PeriodicBasis<RBasis>::Support> >& intersecting)

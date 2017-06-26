@@ -281,7 +281,7 @@ namespace WaveletTL
                 const double x = i * ldexp(1.0, -resolution);
                 for (unsigned int k = 0; k < wcoeffs.size(); k++) {
                     if(wcoeffs[k] != 0)
-                    values[i] += wcoeffs[k] * evaluate(derivative, *get_wavelet(k), x, normalization);
+                    values[i] += wcoeffs[k] * evaluate(derivative, *get_quarklet(k), x, normalization);
                 }
             }
 

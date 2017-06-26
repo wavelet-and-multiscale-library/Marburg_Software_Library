@@ -2970,6 +2970,7 @@ namespace WaveletTL
     c.clear();
     assert ((lamj <= j) || (lame == 1)); 
     // ! ( (lamj > j) && (lame == 0) ), i.e., the reconstruction of a generator on a level higher than j will fail (because of a wrong number)
+    
     if (lamj >= j)
     {
         if (lame == 0)
@@ -3036,11 +3037,14 @@ namespace WaveletTL
       if (lamj+1 >= j) {
           
         if(lame == 1 && lamk < dT-1  && lamp > 0){//left boundary quarklets
+            assert (lamp<=6);
             for (size_type k(0); k < dT+1; k++) { 
                 c.add_coefficient(lamk+k , CVM(lamp-1,(dT+1)*lamk+k));
             }  
         }  
         else if(lame == 1 && lamk > Nablamax(lamj)-dT+1  && lamp > 0){//right boundary quarklets
+            assert (lamp<=6);
+            
             for (size_type k(0); k < dT+1; k++) {
                 c.add_coefficient(DeltaRmax(lamj+1,lamp)-DeltaLmin(lamp)-dT+k-Nablamax(lamj)+lamk,
                 CVM(lamp-1, (dT+1)*(lamk-(Nablamax(lamj)-dT+1)-1+(d+dT-2)/2)+ k));

@@ -140,7 +140,7 @@ int main()
     MultiIndex<int, dim> jmax;
     jmax[0]=jmax1 ,jmax[1]=jmax1;
     typedef PBasis<d,dT> Basis1d;
-    typedef Basis1d::Index Index1d;
+//    typedef Basis1d::Index Index1d;
     typedef TensorBasis<Basis1d,dim> Basis;
     typedef Basis::Index Index;
     typedef Basis::Support Support;
@@ -148,9 +148,7 @@ int main()
     //typedef TensorFrame<Frame1d,dim> Frame;
     
     
-    const int a=2;
-    const int b=2;
-    const int pmax=0;
+    
     
     FixedArray1D<int,2*dim> s;          //set order of boundary conditions
     s[0]=0, s[1]=0; s[2]=0, s[3]=0; 
@@ -291,7 +289,7 @@ int main()
     //cout << eq.space_dimension << endl;
     //cout << cproblem1.space_dimension << endl;
     //CDD1_SOLVE(cproblem1, epsilon, u_epsilon, 2*jmax1, tensor_simple);
-    CDD2_SOLVE(cproblem1, nu, epsilon, u_epsilon, 2*jmax1, tensor_simple, pmax, a, b);
+    CDD2_SOLVE(cproblem1, nu, epsilon, u_epsilon, 2*jmax1, tensor_simple);
     
     //APPLY(cproblem1, u_epsilon, 1e-3, v, 2*jmax1, tensor_simple);
     //APPLY_TEST(cproblem1, v, 10^-3, u_epsilon, 8, tensor_simple);

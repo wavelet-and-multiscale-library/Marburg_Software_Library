@@ -49,8 +49,8 @@ namespace WaveletTL
      */
     template <class PROBLEM>
     class CachedQuarkletTProblem
-//      : public FullyDiagonalDyadicPreconditioner<typename PROBLEM::Index>
-    : public FullyDiagonalEnergyNormPreconditioner<typename PROBLEM::Index>
+      : public FullyDiagonalQuarkletPreconditioner<typename PROBLEM::Index>
+//    : public FullyDiagonalEnergyNormPreconditioner<typename PROBLEM::Index>
     {
     public:
         /*
@@ -106,7 +106,8 @@ namespace WaveletTL
         inline double D(const Index& lambda) const {
 //            cout << "D" << endl;
 //            return sqrt(a(lambda,lambda));//this needs to be changed to dyadic preconditioner
-            return 1;
+//            return 1;
+            return problem->D(lambda);
         }
 
         /*
@@ -257,8 +258,8 @@ namespace WaveletTL
                      const CompressionStrategy strategy = tensor_simple,
                      const bool precond = true,
                      const int maxpolynomial = 0,
-                     const double a = 0,
-                     const double b = 0) const;
+                     const double A = 0,
+                     const double B = 0) const;
 
         /*
          * Variant where only entries with levels given by levelwindow are added

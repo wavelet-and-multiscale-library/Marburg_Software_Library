@@ -13,6 +13,8 @@
 #include <algebra/infinite_vector.h>
 #include <adaptive/compression.h>
 
+
+
 namespace WaveletTL
 {
   /*!
@@ -56,10 +58,19 @@ namespace WaveletTL
 	     const double eta,
 	     InfiniteVector<double, typename PROBLEM::Index>& w,
 	     const int jmax = 99,
-	     const CompressionStrategy strategy = St04a,
+	     const CompressionStrategy strategy = St04a);
+  
+  
+  template <class PROBLEM>
+  void APPLY_QUARKLET(const PROBLEM& P,
+	     const InfiniteVector<double, typename PROBLEM::Index>& v,
+	     const double eta,
+	     InfiniteVector<double, typename PROBLEM::Index>& w,
+	     const int jmax = 99,
+	     const CompressionStrategy strategy = DKR,
              const int pmax = 0,
-             const double a = 0,
-             const double b = 0);//pmax, a and b only matter if strategy==DKOR
+             const double a = 2,
+             const double b = 2);
   /*
    */
   template <class PROBLEM>

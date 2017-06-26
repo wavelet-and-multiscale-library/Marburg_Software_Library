@@ -595,7 +595,7 @@ namespace WaveletTL
                 abort();
             }
             typedef typename Index::polynomial_type polynomial_type;
-            typedef set<polynomial_type> pol_set;
+            typedef  std::set<polynomial_type> pol_set;
             pol_set temp(degree_indices<int,DIM>(pmax_));
             typename pol_set::const_iterator itend(temp.end());
             --itend;

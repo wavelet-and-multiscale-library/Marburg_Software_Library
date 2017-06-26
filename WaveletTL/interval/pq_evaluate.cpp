@@ -518,7 +518,7 @@ namespace WaveletTL
                         for (unsigned int m(0); m < points.size(); m++)
                             values[m] = MathTL::EvaluateSchoenbergBSpline_td<d>(j_, k_, points[m])*pow((1<<j_)*points[m]*leftside, p_);
                         break;
-                    case 1: 
+                    case 1:
                         for (unsigned int m(0); m < points.size(); m++)
                             values[m] = (p_==0 ? MathTL::EvaluateSchoenbergBSpline_td_x<d>(j_, k_, points[m])
                                                  : MathTL::EvaluateSchoenbergBSpline_td_x<d>(j_, k_, points[m])*pow((1<<j_)*points[m]*leftside, p_)

@@ -42,6 +42,17 @@ namespace WaveletTL
 		    bool boxed = false,
 		    bool colorbar = true,
 		    const double aa = -6);
+  template <class TENSORFRAME>
+  void plot_indices2(const TENSORFRAME* frame,
+                     const InfiniteVector<double, typename TENSORFRAME::Index>& coeffs,
+		     std::ostream& os,
+                     const typename TENSORFRAME::Index::polynomial_type p = typename TENSORFRAME::Index::polynomial_type(),
+                     const typename TENSORFRAME::Index::level_type j = typename TENSORFRAME::Index::level_type(),
+                     const typename TENSORFRAME::Index::type_type e = typename TENSORFRAME::Index::type_type(),
+		     const char* colormap = "cool",
+		     bool boxed = false,
+		     bool colorbar = true,
+		     const double lowerclim = -6);
 }
 
 // include implementation

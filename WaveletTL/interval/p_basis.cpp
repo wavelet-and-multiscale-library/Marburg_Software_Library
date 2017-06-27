@@ -3039,6 +3039,15 @@ namespace WaveletTL
   {
     WaveletTL::evaluate(*this, derivative, j_, e_, k_, points, values);
   }
+  
+  //new: evaluate of type SampledMapping<1>
+  template <int d, int dT>
+  inline
+  SampledMapping<1>
+  PBasis<d,dT>::evaluate(const Index& lambda, const bool primal, const int resolution) const
+  {
+    return WaveletTL::evaluate(*this, lambda, primal, resolution);
+  }
 
    /* Compute the Picewiese expansion of all wavelets and Generatoren for given j, d */
   template <int d, int dT>

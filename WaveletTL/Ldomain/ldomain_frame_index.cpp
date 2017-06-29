@@ -1,3 +1,7 @@
+
+#include "ldomain_frame_index.h"
+#include "ldomain_frame.h"
+
 // implementation for ldomain_index.h
 
 namespace WaveletTL
@@ -62,6 +66,8 @@ namespace WaveletTL
   LDomainFrameIndex<IFRAME>&
   LDomainFrameIndex<IFRAME>::operator ++ ()
   {
+      num_++;
+      level_type j0(frame_->j0());
     // decide whether the patch number has to be increased
     bool pplusplus = false;
     for (int i = 1; i >= 0; i--) {
@@ -73,23 +79,41 @@ namespace WaveletTL
 	case 0:
 	case 1:
 	case 2:
-	  last_index = frame_->frame1d().DeltaRmax(j_)-1;
+	  last_index = frame_->frame1d().DeltaRmax(j_[i])-1;
 	  break;
 	case 3:
 	  last_index = (i == 0
-			? frame_->frame1d().DeltaRmax(j_)-1
+			? frame_->frame1d().DeltaRmax(j_[i])-1
 			: 0); // by convention
 	  break;
 	case 4:
 	  last_index = (i == 0
 			? 0 // by convention
-			: frame_->frame1d().DeltaRmax(j_)-1);
+			: frame_->frame1d().DeltaRmax(j_[i])-1);
 	  break;
 	}
       } else {
-	// wavelet in the i-th direction,
-	// the maximal translation index is independent from the patch number
-	last_index = frame_->frame1d().Nablamax(j_); // should be (1<<j)-1
+	
+          switch(patch_) {
+            case 0:
+            case 1:
+            case 2:
+              last_index = frame_->frame1d().Nablamax(j_[i]);
+              break;
+            case 3:
+              last_index = (i == 0
+                            ? frame_->frame1d().Nablamax(j_[i])
+                            : 0); // by convention
+              break;
+            case 4:
+              last_index = (i == 0
+                            ? 0 // by convention
+                            : frame_->frame1d().Nablamax(j_[i]));
+              break;
+            }
+          
+        
+	
       }
 
       if (k_[i] == last_index) {
@@ -112,8 +136,33 @@ namespace WaveletTL
 		     : frame_->frame1d().DeltaLmin()+1);
 	    break;
 	  }
-	} else { // wavelet, minimal translation index is independent from the patch number
-	  k_[i] = frame_->frame1d().Nablamin(); // should be 0
+	} else { // quarklet, minimal translation index is independent from the patch number
+            switch(patch_) {
+            case 0:
+              k_[i] = (i == 0
+                       ? frame_->frame1d().Nablamin()
+                       : frame_->frame1d().Nablamin()+1);
+              break;
+            case 1:
+              k_[i] = frame_->frame1d().Nablamin(); 
+              break;
+            case 2:
+              k_[i] = (i == 0
+                       ? frame_->frame1d().Nablamin()+1
+                       : frame_->frame1d().Nablamin());
+              break;
+            case 3:
+              k_[i] = (i == 0
+                       ? frame_->frame1d().Nablamin()+1
+                       : 0); // by convention
+              break;
+            case 4:
+              k_[i] = (i == 0
+                       ? 0 // by convention
+                       : frame_->frame1d().Nablamin()+1);
+              break;
+            }
+//	  k_[i] = frame_->frame1d().Nablamin(); // should be 0
 	}
 	pplusplus = (i == 0);
       } else {
@@ -121,7 +170,7 @@ namespace WaveletTL
 	break;
       }
     }
-
+//    cout << k_[0] << k_[1] << endl;
     bool eplusplus = false;
     if (pplusplus) {
       switch (patch_) {
@@ -130,17 +179,17 @@ namespace WaveletTL
 	patch_++;
 	break;
       case 2:
-	if (e_[1] == 1) {
+	/*if (e_[1] == 1) {
 	  if (e_[0] == 0)
-	    patch_ = 4; // there are no (0,1) wavelets on the interface 3
+	    patch_ = 4; // there are no (0,1) quarklets on the interface 3
 	  else
-	    eplusplus = true; // there are no (1,1) wavelets on the interfaces
-	} else patch_ = 3;
+	    eplusplus = true; // there are no (1,1) quarklets on the interfaces
+	} else*/ patch_ = 3;
 	break;
       case 3:
-	if (e_[0] == 1)
-	  eplusplus = true; // there are no (1,*) wavelets on the interface 4
-	else
+	/*if (e_[0] == 1)
+	  eplusplus = true; // there are no (1,*) quarklets on the interface 4
+	else*/
 	  patch_ = 4;
 	break;
       case 4:
@@ -151,13 +200,24 @@ namespace WaveletTL
       if (!eplusplus) { // then choose lowest translation index k=k(j,e,p)
 	switch(patch_) { // we know that patch_>0
 	case 1:
-	case 2:
-	  k_[0] = (e_[0] == 0
+          k_[0] = (e_[0] == 0
 		   ? frame_->frame1d().DeltaLmin()+1
 		   : frame_->frame1d().Nablamin());
 	  k_[1] = (e_[1] == 0
 		   ? frame_->frame1d().DeltaLmin()+1
 		   : frame_->frame1d().Nablamin());
+//        cout << "2.: " << k_[0] << k_[1] << endl; 
+//        cout << "Probe: " << frame_->frame1d().DeltaLmin()+1 << endl; 
+	  break;  
+	case 2:
+	  k_[0] = (e_[0] == 0
+		   ? frame_->frame1d().DeltaLmin()+1
+		   : frame_->frame1d().Nablamin()+1);
+	  k_[1] = (e_[1] == 0
+		   ? frame_->frame1d().DeltaLmin()+1
+		   : frame_->frame1d().Nablamin());
+//        cout << "2.: " << k_[0] << k_[1] << endl; 
+//        cout << "Probe: " << frame_->frame1d().DeltaLmin()+1 << endl; 
 	  break;
 	case 3:
 	  k_[0] = (e_[0] == 0
@@ -200,24 +260,109 @@ namespace WaveletTL
 		 : frame_->frame1d().Nablamin());
 	k_[1] = (e_[1] == 0
 		 ? frame_->frame1d().DeltaLmin()+1
-		 : frame_->frame1d().Nablamin());
+		 : frame_->frame1d().Nablamin()+1);
       }
 
     } else return *this;
 
     if (jplusplus) {
-      ++j_;
+      // else: determine next level index
+            // "small loop" "e_++" (j_ is not changed)
+            // iterate over all combinations of generators/quarklets for all dimensions with j_[i]=j0[i]
+            // this looks like binary addition: (in 3 Dim:) gwg is followed by gww (g=0,w=1)
+            bool done = true;
+            for (int i(1); i >= 0; i--)
+            {
+                // find first position on level j0
+                if (j_[i] == j0[i])
+                {
+                    if (e_[i] == 1)
+                    {
+                        e_[i]=0;
+                        k_[i]=frame_->frame1d().DeltaLmin()+1;
+                    } else
+                    {
+                        e_[i]=1;
+                        k_[i]=frame_->frame1d().Nablamin();
+                        done = false;
+                        break;
+                    }
+                }
+            }
+            // done == true bedeutet, dass alle Komponenten auf level j0() quarklets waren.
+            // "big loop" "j_++"
+            if (done == true)
+            {
+//                if (j_[1] != j0[1])
+//                        {
+//                            // increase left neighbor
+//                            j_[0]=j_[0]+1;
+//                            e_[0]=1;
+//                            k_[0]=frame_->frame1d().Nablamin();
+//                            int temp = j_[1]-j0[1];
+//                            j_[1]=j0[1]+temp-1;
+//                            e_[1]= (temp == 1?0:1);
+//                            k_[1]= (temp == 1?frame_->frame1d().DeltaLmin()+1:frame_->frame1d().Nablamin());
+//                            
+//                        }
+//                else{
+//                            j_[0]=j0[1]+j_[0]-j0[0]+1;
+//                            e_[0]=1;
+//                            k_[0]=frame_->frame1d().Nablamin();
+////                            j_[0]=j0[0];
+////                            e_[0]=0;
+////                            k_[0]=frame_->frame1d().DeltaLmin()+1;
+//                        
+//                             // unnoetig, da i==0 gilt.
+//                }
+                
+                for(int i =1;i>=0;i--){
+                    if (i == 1)
+                    {
+                        if (j_[1] != j0[1])
+                        {
+                            // increase left neighbor
+                            j_[0]=j_[0]+1;
+                            e_[0]=1;
+                            k_[0]=frame_->frame1d().Nablamin();
+                            int temp = j_[1]-j0[1];
+                            j_[1]=j0[1]+temp-1;
+                            e_[1]= (temp == 1?0:1);
+                            k_[1]= (temp == 1?frame_->frame1d().DeltaLmin()+1:frame_->frame1d().Nablamin()+1);
+                            break;
+                        }
+                    }
+//                i=0;    
+                
+                    else // i == 0. "big loop" arrived at the last index. We have to increase the level!
+                    {
+                        j_[1]=j0[1]+j_[0]-j0[0]+1;
+                        e_[1]=1;
+                        k_[1]=frame_->frame1d().Nablamin()+1;
+                        j_[0]=j0[0];
+                        e_[0]=0;
+                        k_[0]=frame_->frame1d().DeltaLmin()+1;
+                        break; // unnoetig, da i==0 gilt.
+                    }
+                }
+                    
+                 
+            }
+            
+        
+        
+//        ++j_;
 
-      // choose lowest type (we have to advance to a wavelet) ...
-      e_[0] = 0;
-      e_[1] = 1;
+      // choose lowest type (we have to advance to a quarklet) ...
+//      e_[0] = 0;
+//      e_[1] = 1;
       
       // ... lowest patch number ...
       patch_ = 0;
       
       // ... and lowest translation index k = k(j,(0,1),0)
-      k_[0] = frame_->frame1d().DeltaLmin()+1;
-      k_[1] = frame_->frame1d().Nablamin();
+//      k_[0] = frame_->frame1d().DeltaLmin()+1;
+//      k_[1] = frame_->frame1d().Nablamin();
     }
     
     return *this;
@@ -229,25 +374,26 @@ namespace WaveletTL
   {
     // standard lexicographic order on (j,e,p,k),
     // we assume that e and k are already lexicographically ordered (cf. MultiIndex)
-    return (multi_degree(p_) < multi_degree(lambda.p())  ||
-                     ((multi_degree(p_) == multi_degree(lambda.p()) && p_ < lambda.p())  ||
-                      (p_ == lambda.p() && 
-                       ( multi_degree(j_) < multi_degree(lambda.j()) ||
-                        ((multi_degree(j_) == multi_degree(lambda.j()) && j_ < lambda.j()) ||
-                         (j_ == lambda.j() && 
-                          (e_ < lambda.e() ||
-                           (e == lambda.e() &&
-                            (p_ < lambda.p() ||
-                             (p_ == lambda.p() && k_ < lambda.k())
-                            )
-                           )
-                          ) 
-                         )
-                        )                                             
-                       )                       
-                      )                     
-                     )
-            );
+      return (num_<lambda.number());
+//    return (multi_degree(p_) < multi_degree(lambda.p())  ||
+//                     ((multi_degree(p_) == multi_degree(lambda.p()) && p_ < lambda.p())  ||
+//                      (p_ == lambda.p() && 
+//                       ( multi_degree(j_) < multi_degree(lambda.j()) ||
+//                        ((multi_degree(j_) == multi_degree(lambda.j()) && j_ < lambda.j()) ||
+//                         (j_ == lambda.j() && 
+//                          (e_ < lambda.e() ||
+//                           (e_ == lambda.e() &&
+//                            (p_ < lambda.p() ||
+//                             (p_ == lambda.p() && k_ < lambda.k())
+//                            )
+//                           )
+//                          ) 
+//                         )
+//                        )                                             
+//                       )                       
+//                      )                     
+//                     )
+//            );
   }
 
 //  template <class IFRAME>
@@ -402,7 +548,7 @@ namespace WaveletTL
   
   template <class IFRAME>
   LDomainFrameIndex<IFRAME>
-  first_generator(const LDomainFrame<IFRAME>* frame, const typename LDomainIndex<IFRAME>::level_type& j, const typename LDomainIndex<IFRAME>::polynomial_type& p)
+  first_generator(const LDomainFrame<IFRAME>* frame, const typename LDomainIndex<IFRAME>::level_type& j, const typename LDomainIndex<IFRAME>::polynomial_type& p, const int number)
   {
     assert(j >= frame->j0());
 
@@ -411,8 +557,10 @@ namespace WaveletTL
     // setup lowest translation index for e=(0,0), p=0
     typename LDomainFrameIndex<IFRAME>::translation_type k(frame->frame1d().DeltaLmin()+1,
 						      frame->frame1d().DeltaLmin()+1);
-    
-    return LDomainFrameIndex<IFRAME>(p,j, e, 0, k, frame);
+    if (number==-1)
+        return LDomainFrameIndex<IFRAME>(p,j, e, 0, k, p.number()*frame->degrees_of_freedom(), frame);
+    else
+        return LDomainFrameIndex<IFRAME>(p,j, e, 0, k, number, frame);
   }
 
   template <class IFRAME>
@@ -431,7 +579,7 @@ namespace WaveletTL
 
   template <class IFRAME>
   LDomainFrameIndex<IFRAME>
-  first_wavelet(const LDomainFrame<IFRAME>* frame, const typename LDomainIndex<IFRAME>::level_type& j, const typename LDomainIndex<IFRAME>::polynomial_type& p)
+  first_quarklet(const LDomainFrame<IFRAME>* frame, const typename LDomainIndex<IFRAME>::level_type& j, const typename LDomainIndex<IFRAME>::polynomial_type& p)
   {
     assert(j >= frame->j0());
 
@@ -446,7 +594,7 @@ namespace WaveletTL
 
   template <class IFRAME>
   LDomainFrameIndex<IFRAME>
-  first_wavelet(const LDomainFrame<IFRAME>* frame,
+  first_quarklet(const LDomainFrame<IFRAME>* frame,
 		const typename LDomainIndex<IFRAME>::level_type& j,
 		const typename LDomainIndex<IFRAME>::type_type& e,
                 const typename LDomainIndex<IFRAME>::polynomial_type& p)
@@ -483,7 +631,7 @@ namespace WaveletTL
   
   template <class IFRAME>
   LDomainFrameIndex<IFRAME>
-  last_wavelet(const LDomainFrame<IFRAME>* frame, const typename LDomainIndex<IFRAME>::level_type& j, const typename LDomainIndex<IFRAME>::polynomial_type& p)
+  last_quarklet(const LDomainFrame<IFRAME>* frame, const typename LDomainIndex<IFRAME>::level_type& j, const typename LDomainIndex<IFRAME>::polynomial_type& p)
   {
     assert(j >= frame->j0());
     
@@ -493,6 +641,6 @@ namespace WaveletTL
     typename LDomainFrameIndex<IFRAME>::translation_type k(frame->frame1d().Nablamax(j),
 						      frame->frame1d().Nablamax(j));
     
-    return LDomainFrameIndex<IFRAME>(p, j, e, 2, k, frame);
+    return LDomainFrameIndex<IFRAME>(p, j, e, 4, k, frame);
   }
 }

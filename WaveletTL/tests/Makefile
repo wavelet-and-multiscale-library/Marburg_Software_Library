@@ -117,6 +117,10 @@ EXEOBJF3b = \
 
 # set 4 of test programs: wavelet bases on the L-domain
 EXEOBJF4 = \
+  test_ldomain_basis.o\
+  test_ldomain_equation.o\
+  
+
   
 
 # set 5 of test programs: adaptive wavelet schemes for elliptic equations

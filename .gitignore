@@ -162,3 +162,5 @@ WaveletTL/tests/test_tframe_adaptive
 WaveletTL/tests/test_tframe
 WaveletTL/tests/test_ldomain
 WaveletTL/tests/test_qtbasis
+WaveletTL/tests/test_ldomain_equation
+

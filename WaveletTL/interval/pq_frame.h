@@ -368,6 +368,13 @@ namespace WaveletTL
     */
     void evaluate(const unsigned int derivative, const Index& lambda, const Array1D<double>& points, Array1D<double>& values) const;
     void evaluate(const unsigned int derivative, const int p_, const int j_, const int e_, const int k_, const Array1D<double>& points, Array1D<double>& values) const;
+    
+    //new: evaluate of type SampledMapping<1>
+    SampledMapping<1> evaluate(const typename PQFrame<d,dT>::Index& lambda, const bool primal, const int resolution) const;
+    SampledMapping<1> evaluate(const typename PQFrame<d,dT>::Index& lambda, const int resolution) const
+    {
+        return evaluate(lambda, true, resolution);
+    }
 
 
     //! read access to the internal instance of the CDF basis

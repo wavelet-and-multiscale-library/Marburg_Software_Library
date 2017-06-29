@@ -171,7 +171,7 @@ namespace WaveletTL
   */
   template <class IFRAME>
   LDomainFrameIndex<IFRAME>
-  first_generator(const LDomainFrame<IFRAME>* frame, const typename LDomainIndex<IFRAME>::level_type& j, const typename LDomainIndex<IFRAME>::polynomial_type& p);
+  first_generator(const LDomainFrame<IFRAME>* frame, const typename LDomainIndex<IFRAME>::level_type& j, const typename LDomainIndex<IFRAME>::polynomial_type& p, const int number = -1);
 
   /*!
     index of last generator on level j >= j0

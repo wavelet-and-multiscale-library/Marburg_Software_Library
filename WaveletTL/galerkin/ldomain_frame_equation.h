@@ -14,6 +14,7 @@
 #include <utils/fixed_array1d.h>
 #include <utils/array1d.h>
 #include <numerics/bvp.h>
+#include <Ldomain/ldomain_frame_support.h>
 
 #include <galerkin/galerkin_utils.h>
 #include <galerkin/infinite_preconditioner.h>
@@ -57,25 +58,25 @@ namespace WaveletTL
     However, in the future, this may be changed to allow also other wavelet frames
     over the L--shaped domain.
   */
-  template <class IFRAME>
+  //template <class IFRAME>
+  template <class IFRAME,  class LDOMAINFRAME = LDomainFrame<IFRAME> >
   class LDomainFrameEquation
 //     : public FullyDiagonalDyadicPreconditioner<typename LDomainBasis<IBASIS>::Index>
-    : public FullyDiagonalEnergyNormPreconditioner<typename LDomainFrame<IFRAME>::Index>
+    : public FullyDiagonalEnergyNormPreconditioner<typename LDOMAINFRAME::Index>
   {
   public:
     /*!
-      constructor from a boundary value problem and specified b.c.'s
+      constructor from a boundary value problem 
     */
     LDomainFrameEquation(const EllipticBVP<2>* bvp,
-                    const FixedArray1D<bool,8>& bc,
 		    const bool precompute_rhs = true);
 
     /*!
       constructor from a boundary value problem and specified b.c.'s
     */
-    LDomainFrameEquation(const EllipticBVP<2>* bvp,
-		    const FixedArray1D<bool,8>& bc,
-		    const bool precompute_rhs = true);
+    //LDomainFrameEquation(const EllipticBVP<2>* bvp,
+	//	    const FixedArray1D<bool,8>& bc,
+	//	    const bool precompute_rhs = true);
 
     /*!
       copy constructor
@@ -85,7 +86,7 @@ namespace WaveletTL
     /*!
       make template argument accessible
     */
-    typedef LDomainFrame<IFRAME> Frame;
+    typedef LDOMAINFRAME Frame;
     /*!
       quarklet index class
     */
@@ -192,7 +193,7 @@ namespace WaveletTL
 
   protected:
     const EllipticBVP<2>* bvp_;
-    Frame frame_;
+    LDOMAINFRAME frame_;
 
     // right-hand side coefficients on a fine level, sorted by modulus
     Array1D<std::pair<Index,double> > fcoeffs;

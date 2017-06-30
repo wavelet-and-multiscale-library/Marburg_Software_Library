@@ -5,14 +5,15 @@
 #include <utils/fixed_array1d.h>
 #include <numerics/gauss_data.h>
 #include <numerics/eigenvalues.h>
+#include <Ldomain/ldomain_frame_support.h>
+
 
 namespace WaveletTL
 {
-    template <class IFRAME>
-    LDomainFrameEquation<IFRAME>::LDomainFrameEquation(const EllipticBVP<2>* bvp,
-                                            const FixedArray1D<bool,8>& bc,
+    template <class IFRAME, class LDOMAINFRAME>
+    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::LDomainFrameEquation(const EllipticBVP<2>* bvp,
 					    const bool precompute_rhs)
-    : bvp_(bvp), frame(bc), normA(0.0), normAinv(0.0)
+    : bvp_(bvp), frame_(), normA(0.0), normAinv(0.0)
     {
         if (precompute_rhs)
         {
@@ -22,22 +23,22 @@ namespace WaveletTL
         }
     }
   
-    template <class IFRAME>
-    LDomainFrameEquation<IFRAME>::LDomainFrameEquation(const EllipticBVP<2>* bvp,
-					   const FixedArray1D<int,8>& bc,
-					   const bool precompute_rhs)
-    : bvp_(bvp), basis_(basis), normA(0.0), normAinv(0.0)
-    {
-        if (precompute_rhs)
-        {
-            cout << "Maximal level is set to "<<multi_degree(frame_.j0())<< ". Maximal polynomial to " << 0 << ". You may want to increase that." << endl;
-            frame_.set_jpmax(multi_degree(frame_.j0()),0);
-            compute_rhs();
-        }
-    }
+    //template <class IFRAME, class LDOMAINFRAME>
+    //LDomainFrameEquation<IFRAME, LDOMAINFRAME>::LDomainFrameEquation(const EllipticBVP<2>* bvp,
+	//				   const FixedArray1D<bool,8>& bc,
+	//				   const bool precompute_rhs)
+    //: bvp_(bvp), frame_(bc), normA(0.0), normAinv(0.0)
+    //{
+    //    if (precompute_rhs)
+    //    {
+    //        cout << "Maximal level is set to "<<multi_degree(frame_.j0())<< ". Maximal polynomial to " << 0 << ". You may want to increase that." << endl;
+    //        frame_.set_jpmax(multi_degree(frame_.j0()),0);
+    //        compute_rhs();
+    //   }
+    //}
   
-    template <class IFRAME>
-    LDomainFrameEquation<IFRAME>::LDomainFrameEquation(const LDomainFrameEquation& eq)
+    template <class IFRAME, class LDOMAINFRAME>
+    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::LDomainFrameEquation(const LDomainFrameEquation& eq)
     : bvp_(eq.bvp_), frame_(eq.frame_),
       fcoeffs(eq.fcoeffs), fnorm_sqr(eq.fnorm_sqr),
       normA(eq.normA), normAinv(eq.normAinv)
@@ -46,9 +47,9 @@ namespace WaveletTL
             frame_.set_jpmax(multi_degree(frame_.j0()),0);
     }
     
-    template <class IFRAME>
+    template <class IFRAME, class LDOMAINFRAME>
     void
-    LDomainFrameEquation<IFRAME>::compute_rhs()
+    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::compute_rhs()
     {
         cout << "LDomainFrameEquation(): precompute right-hand side..." << endl;
         // precompute the right-hand side on a fine level
@@ -76,10 +77,10 @@ namespace WaveletTL
         cout << "... done, all integrals for right-hand side computed!" << endl;
     }
 
-    template <class IFRAME>
+    template <class IFRAME, class LDOMAINFRAME>
     inline
     double
-    LDomainFrameEquation<IFRAME>::D(const Index& lambda) const
+    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::D(const Index& lambda) const
     {
         //return ldexp(1.0, lambda.j());
         //return sqrt(a(lambda, lambda));
@@ -90,35 +91,37 @@ namespace WaveletTL
         }
         double preconditioner = sqrt(hspreconditioner)*l2preconditioner;
         
-        return preconditioner;
+        //return preconditioner;
+        return 1;
     }
 
-    template <class IFRAME>
+    template <class IFRAME, class LDOMAINFRAME>
     inline
     double
-    LDomainFrameEquation<IFRAME>::a(const Index& lambda,
+    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::a(const Index& lambda,
 			     const Index& nu) const
     {
         return a(lambda, nu, IFRAME::primal_polynomial_degree()*IFRAME::primal_polynomial_degree());
     }
 
-    template <class IFRAME>
+    template <class IFRAME, class LDOMAINFRAME>
     double
-    LDomainFrameEquation<IFRAME>::a(const Index& lambda,
+    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::a(const Index& lambda,
 			     const Index& mu,
 			     const unsigned int p) const
     {
         // a(u,v) = \int_Omega [a(x)grad u(x)grad v(x)+q(x)u(x)v(x)] dx
         double r = 0;
         // first compute the support intersection of psi_lambda and psi_mu
-        typename Frame::Support supp;
+        typedef typename Frame::Support Support;
+        Support supp;
         if (intersect_supports(frame_, lambda, mu, supp)) {
             //determine on which patches the support lies
             int main_patch=1;           //the patch we will perform our computations on
             if(supp.xmin[0]!=-1) main_patch=0;
             if(supp.xmin[2]!=-1) main_patch=2;
                     
-            bool extended [2];
+            bool extended[2];
             extended[0]=(lambda.patch()>2) ? 1 : 0;
             extended[1]=(mu.patch()>2) ? 1 : 0;
             int mother_patch [2];
@@ -136,7 +139,8 @@ namespace WaveletTL
             
             //compute gauss points on main patch
             for(int i=0;i<space_dimension;i++){
-                h = ldexp(1.0, -supp.j[i]);
+                int e = std::max(lambda.e()[i], mu.e()[i]); //correct granularity
+                h = ldexp(1.0, -supp.j[i]-e);
                 gauss_points[i].resize(N_Gauss*(b[i]-a[i]));
                 gauss_weights[i].resize(N_Gauss*(b[i]-a[i]));
                 for (int interval = a[i]; interval < b[i]; interval++){
@@ -147,65 +151,298 @@ namespace WaveletTL
                 }
             }
             
-            //temp gauss points for reflection
-            FixedArray1D<Array1D<double>,space_dimension> lambda_gauss_points(gauss_points), mu_gauss_points(gauss_points);
-            //reflect gauss points
-            if(main_patch==1){
-                if(mother_patch[0]==0){ //lambda has been extended from north so south, reflect gauss points in y-direction
-                    for(int i=0;i<lambda_gauss_points[1].size();i++){
-                        lambda_gauss_points[1][i]=1-lambda_gauss_points[1][i];
-                    }    
-                }
-                if(mother_patch[0]==2){ //lambda has been extended from east to west, reflect gauss points in x-direction
-                    for(int i=0;i<lambda_gauss_points[0].size();i++){
-                        lambda_gauss_points[0][i]=1-lambda_gauss_points[0][i];
-                    }  
-                }
-                if(mother_patch[1]==0){ //mu has been extended from north so south, reflect gauss points in y-direction
-                    for(int i=0;i<mu_gauss_points[1].size();i++){
-                        mu_gauss_points[1][i]=1-mu_gauss_points[1][i];
-                    }  
-                }
-                if(mother_patch[1]==2){ //mu has been extended from east to west, reflect gauss points in x-direction
-                    for(int i=0;i<mu_gauss_points[0].size();i++){
-                        mu_gauss_points[0][i]=1-mu_gauss_points[0][i];
-                    } 
-                }
-            }
-            
-            
             // compute point values of the integrand (where we use that it is a tensor product)
             // evaluate method of the interval frame is called
             FixedArray1D<Array1D<double>,space_dimension> psi_lambda_values,     // values of the components of psi_lambda at gauss_points[i]
                                               psi_mu_values,         // -"-, for psi_mu
                                               psi_lambda_der_values, // values of the 1st deriv. of the components of psi_lambda at gauss_points[i]
                                               psi_mu_der_values;     // -"-, for psi_mu
-            for (unsigned int i = 0; i < space_dimension; i++) {
-                evaluate(*frame_.frame1d(), 0,
-                                                lambda.p()[i],
-                                                lambda.j()[i],
-                                                lambda.e()[i],
-                                                lambda.k()[i],
-                         lambda_gauss_points[i], psi_lambda_values[i]);
-                evaluate(*frame_.frame1d(), 1,
-                                                lambda.p()[i],
-                                                lambda.j()[i],
-                                                lambda.e()[i],
-                                                lambda.k()[i],
-                         lambda_gauss_points[i], psi_lambda_der_values[i]);
-                evaluate(*frame_.frame1d(), 0,
-                                                mu.p()[i],
-                                                mu.j()[i],
-                                                mu.e()[i],
-                                                mu.k()[i],
-                         mu_gauss_points[i], psi_mu_values[i]);
-                evaluate(*frame_.frame1d(), 1,
-                                                mu.p()[i],
-                                                mu.j()[i],
-                                                mu.e()[i],
-                                                mu.k()[i],
-                         mu_gauss_points[i], psi_mu_der_values[i]);
+            //cout << main_patch <<endl;
+            if(main_patch==0){  //both functions lie on patch 0, evaluate with 0,1 boundary conditions
+                evaluate(frame_.frame1d_11(), 0,            //in x-direction evaluate with homogeneous boundary conditions
+                                                lambda.p()[0],
+                                                lambda.j()[0],
+                                                lambda.e()[0],
+                                                lambda.k()[0],
+                         gauss_points[0], psi_lambda_values[0]);
+                evaluate(frame_.frame1d_11(), 1,
+                                                lambda.p()[0],
+                                                lambda.j()[0],
+                                                lambda.e()[0],
+                                                lambda.k()[0],
+                         gauss_points[0], psi_lambda_der_values[0]);
+                evaluate(frame_.frame1d_11(), 0,
+                                                mu.p()[0],
+                                                mu.j()[0],
+                                                mu.e()[0],
+                                                mu.k()[0],
+                         gauss_points[0], psi_mu_values[0]);
+                evaluate(frame_.frame1d_11(), 1,
+                                                mu.p()[0],
+                                                mu.j()[0],
+                                                mu.e()[0],
+                                                mu.k()[0],
+                         gauss_points[0], psi_mu_der_values[0]);
+                
+                evaluate(frame_.frame1d_01(), 0,                //in y-direction evaluate with asymmetric boundary conditions
+                                                lambda.p()[1],
+                                                lambda.j()[1],
+                                                lambda.e()[1],
+                                                lambda.k()[1],
+                         gauss_points[1], psi_lambda_values[1]);
+                evaluate(frame_.frame1d_01(), 1,
+                                                lambda.p()[1],
+                                                lambda.j()[1],
+                                                lambda.e()[1],
+                                                lambda.k()[1],
+                         gauss_points[1], psi_lambda_der_values[1]);
+                evaluate(frame_.frame1d_01(), 0,
+                                                mu.p()[1],
+                                                mu.j()[1],
+                                                mu.e()[1],
+                                                mu.k()[1],
+                         gauss_points[1], psi_mu_values[1]);
+                evaluate(frame_.frame1d_01(), 1,
+                                                mu.p()[1],
+                                                mu.j()[1],
+                                                mu.e()[1],
+                                                mu.k()[1],
+                         gauss_points[1], psi_mu_der_values[1]);
             }
+            
+            //temp gauss points for reflection
+            FixedArray1D<Array1D<double>,space_dimension> lambda_gauss_points(gauss_points), mu_gauss_points(gauss_points);
+            //reflect gauss points
+            if(main_patch==1){
+                //first assume that both functions stem from patch 1, evaluate with zero bc
+                evaluate(frame_.frame1d_11(), 0,            
+                                                lambda.p()[0],
+                                                lambda.j()[0],
+                                                lambda.e()[0],
+                                                lambda.k()[0],
+                                        lambda_gauss_points[0], psi_lambda_values[0]);
+                evaluate(frame_.frame1d_11(), 1,
+                                                lambda.p()[0],
+                                                lambda.j()[0],
+                                                lambda.e()[0],
+                                                lambda.k()[0],
+                                        lambda_gauss_points[0], psi_lambda_der_values[0]);
+                evaluate(frame_.frame1d_11(), 0,
+                                                mu.p()[0],
+                                                mu.j()[0],
+                                                mu.e()[0],
+                                                mu.k()[0],
+                                        mu_gauss_points[0], psi_mu_values[0]);
+                evaluate(frame_.frame1d_11(), 1,
+                                                mu.p()[0],
+                                                mu.j()[0],
+                                                mu.e()[0],
+                                                mu.k()[0],
+                                        mu_gauss_points[0], psi_mu_der_values[0]);
+                
+                evaluate(frame_.frame1d_11(), 0,                
+                                                lambda.p()[1],
+                                                lambda.j()[1],
+                                                lambda.e()[1],
+                                                lambda.k()[1],
+                                        lambda_gauss_points[1], psi_lambda_values[1]);
+                evaluate(frame_.frame1d_11(), 1,
+                                                lambda.p()[1],
+                                                lambda.j()[1],
+                                                lambda.e()[1],
+                                                lambda.k()[1],
+                                        lambda_gauss_points[1], psi_lambda_der_values[1]);
+                evaluate(frame_.frame1d_11(), 0,
+                                                mu.p()[1],
+                                                mu.j()[1],
+                                                mu.e()[1],
+                                                mu.k()[1],
+                                        mu_gauss_points[1], psi_mu_values[1]);
+                evaluate(frame_.frame1d_11(), 1,
+                                                mu.p()[1],
+                                                mu.j()[1],
+                                                mu.e()[1],
+                                                mu.k()[1],
+                                        mu_gauss_points[1], psi_mu_der_values[1]);
+                if(mother_patch[0]==0){ //lambda has been extended from north so south, reflect gauss points in y-direction
+                    for(int i=0;i<lambda_gauss_points[1].size();i++){
+                        lambda_gauss_points[1][i]=1-lambda_gauss_points[1][i];
+                        //evaluate lambda with asymmetric bc in y-direction
+                        evaluate(frame_.frame1d_11(), 0,            
+                                                lambda.p()[0],
+                                                lambda.j()[0],
+                                                lambda.e()[0],
+                                                lambda.k()[0],
+                                        lambda_gauss_points[0], psi_lambda_values[0]);
+                        evaluate(frame_.frame1d_11(), 1,
+                                                lambda.p()[0],
+                                                lambda.j()[0],
+                                                lambda.e()[0],
+                                                lambda.k()[0],
+                                        lambda_gauss_points[0], psi_lambda_der_values[0]);
+                        evaluate(frame_.frame1d_01(), 0,                
+                                                lambda.p()[1],
+                                                lambda.j()[1],
+                                                lambda.e()[1],
+                                                lambda.k()[1],
+                                        lambda_gauss_points[1], psi_lambda_values[1]);
+                        evaluate(frame_.frame1d_01(), 1,
+                                                lambda.p()[1],
+                                                lambda.j()[1],
+                                                lambda.e()[1],
+                                                lambda.k()[1],
+                                        lambda_gauss_points[1], psi_lambda_der_values[1]);
+                    }    
+                }
+                if(mother_patch[0]==2){ //lambda has been extended from east to west, reflect gauss points in x-direction
+                    for(int i=0;i<lambda_gauss_points[0].size();i++){
+                        lambda_gauss_points[0][i]=1-lambda_gauss_points[0][i];
+                        //evaluate lambda with asymmetric bc in x-direction, mu with zero boundary conditions
+                        evaluate(frame_.frame1d_01(), 0,            
+                                                lambda.p()[0],
+                                                lambda.j()[0],
+                                                lambda.e()[0],
+                                                lambda.k()[0],
+                                        lambda_gauss_points[0], psi_lambda_values[0]);
+                        evaluate(frame_.frame1d_01(), 1,
+                                                lambda.p()[0],
+                                                lambda.j()[0],
+                                                lambda.e()[0],
+                                                lambda.k()[0],
+                                        lambda_gauss_points[0], psi_lambda_der_values[0]);
+                        evaluate(frame_.frame1d_11(), 0,                
+                                                lambda.p()[1],
+                                                lambda.j()[1],
+                                                lambda.e()[1],
+                                                lambda.k()[1],
+                                        lambda_gauss_points[1], psi_lambda_values[1]);
+                        evaluate(frame_.frame1d_11(), 1,
+                                                lambda.p()[1],
+                                                lambda.j()[1],
+                                                lambda.e()[1],
+                                                lambda.k()[1],
+                                        lambda_gauss_points[1], psi_lambda_der_values[1]);
+                    }  
+                }
+                if(mother_patch[1]==0){ //mu has been extended from north so south, reflect gauss points in y-direction
+                    for(int i=0;i<mu_gauss_points[1].size();i++){
+                        mu_gauss_points[1][i]=1-mu_gauss_points[1][i];
+                        //evaluate mu with asymmetric bc in y-direction, lambda with zero boundary conditions
+                        evaluate(frame_.frame1d_11(), 0,
+                                                mu.p()[0],
+                                                mu.j()[0],
+                                                mu.e()[0],
+                                                mu.k()[0],
+                                        mu_gauss_points[0], psi_mu_values[0]);
+                        evaluate(frame_.frame1d_11(), 1,
+                                                mu.p()[0],
+                                                mu.j()[0],
+                                                mu.e()[0],
+                                                mu.k()[0],
+                                        mu_gauss_points[0], psi_mu_der_values[0]);
+                        evaluate(frame_.frame1d_01(), 0,
+                                                mu.p()[1],
+                                                mu.j()[1],
+                                                mu.e()[1],
+                                                mu.k()[1],
+                                        mu_gauss_points[1], psi_mu_values[1]);
+                        evaluate(frame_.frame1d_01(), 1,
+                                                mu.p()[1],
+                                                mu.j()[1],
+                                                mu.e()[1],
+                                                mu.k()[1],
+                                        mu_gauss_points[1], psi_mu_der_values[1]);
+                    }  
+                }
+                if(mother_patch[1]==2){ //mu has been extended from east to west, reflect gauss points in x-direction
+                    for(int i=0;i<mu_gauss_points[0].size();i++){
+                        mu_gauss_points[0][i]=1-mu_gauss_points[0][i];
+                        //evaluate mu with asymmetric bc in x-direction, lambda with zero boundary conditions
+                        evaluate(frame_.frame1d_01(), 0,
+                                                mu.p()[0],
+                                                mu.j()[0],
+                                                mu.e()[0],
+                                                mu.k()[0],
+                                        mu_gauss_points[0], psi_mu_values[0]);
+                        evaluate(frame_.frame1d_01(), 1,
+                                                mu.p()[0],
+                                                mu.j()[0],
+                                                mu.e()[0],
+                                                mu.k()[0],
+                                        mu_gauss_points[0], psi_mu_der_values[0]);
+                        evaluate(frame_.frame1d_11(), 0,
+                                                mu.p()[1],
+                                                mu.j()[1],
+                                                mu.e()[1],
+                                                mu.k()[1],
+                                        mu_gauss_points[1], psi_mu_values[1]);
+                        evaluate(frame_.frame1d_11(), 1,
+                                                mu.p()[1],
+                                                mu.j()[1],
+                                                mu.e()[1],
+                                                mu.k()[1],
+                                        mu_gauss_points[1], psi_mu_der_values[1]);
+                    } 
+                }
+                    
+                
+            }
+            
+            if(main_patch==2){  //both functions lie on patch 2, evaluate with 0,1 boundary conditions
+                evaluate(frame_.frame1d_01(), 0,            //in x-direction evaluate with asymmetric boundary conditions
+                                                lambda.p()[0],
+                                                lambda.j()[0],
+                                                lambda.e()[0],
+                                                lambda.k()[0],
+                         gauss_points[0], psi_lambda_values[0]);
+                evaluate(frame_.frame1d_01(), 1,
+                                                lambda.p()[0],
+                                                lambda.j()[0],
+                                                lambda.e()[0],
+                                                lambda.k()[0],
+                         gauss_points[0], psi_lambda_der_values[0]);
+                evaluate(frame_.frame1d_01(), 0,
+                                                mu.p()[0],
+                                                mu.j()[0],
+                                                mu.e()[0],
+                                                mu.k()[0],
+                         gauss_points[0], psi_mu_values[0]);
+                evaluate(frame_.frame1d_01(), 1,
+                                                mu.p()[0],
+                                                mu.j()[0],
+                                                mu.e()[0],
+                                                mu.k()[0],
+                         gauss_points[0], psi_mu_der_values[0]);
+                
+                evaluate(frame_.frame1d_11(), 0,                //in y-direction evaluate with homogeneous boundary conditions
+                                                lambda.p()[1],
+                                                lambda.j()[1],
+                                                lambda.e()[1],
+                                                lambda.k()[1],
+                         gauss_points[1], psi_lambda_values[1]);
+                evaluate(frame_.frame1d_11(), 1,
+                                                lambda.p()[1],
+                                                lambda.j()[1],
+                                                lambda.e()[1],
+                                                lambda.k()[1],
+                         gauss_points[1], psi_lambda_der_values[1]);
+                evaluate(frame_.frame1d_11(), 0,
+                                                mu.p()[1],
+                                                mu.j()[1],
+                                                mu.e()[1],
+                                                mu.k()[1],
+                         gauss_points[1], psi_mu_values[1]);
+                evaluate(frame_.frame1d_11(), 1,
+                                                mu.p()[1],
+                                                mu.j()[1],
+                                                mu.e()[1],
+                                                mu.k()[1],
+                         gauss_points[1], psi_mu_der_values[1]);
+            }
+            
+            
+            
+            
             
             // iterate over all points and sum up the integral shares
             int index[space_dimension]; // current multiindex for the point values
@@ -318,15 +555,15 @@ namespace WaveletTL
                     if (exit) break;
                 }
             }
-               
+        if(extended[0] && extended[1] && mother_patch[0]==mother_patch[1]) r= 2*r;       
         }
-        if(extended[0] && extended[1] && mother_patch[0]==mother_patch[1]) return 2*r;
-        else return r;
+        
+        return r;
     }
     
-    template <class IFRAME>
+    template <class IFRAME, class LDOMAINFRAME>
     double
-    LDomainFrameEquation<IFRAME>::f(const Index& lambda) const
+    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::f(const Index& lambda) const
     {
         // f(v) = \int_0^1 g(t)v(t) dt
         //cout << "LDomainEquation::f() called with lambda=" << lambda << endl;
@@ -335,13 +572,19 @@ namespace WaveletTL
         typedef typename Frame::Support Support;
         Support supp;
         support(frame_,lambda,supp);
+        //cout << "patch 0: [" << supp.xmin[0]  <<" , " <<supp.xmax[0] <<"]x["<<supp.ymin[0] <<" , "<<supp.ymax[0] <<"]"<<  endl;
+        //cout << "patch 1: [" << supp.xmin[1]  <<" , " <<supp.xmax[1] <<"]x["<<supp.ymin[1] <<" , "<<supp.ymax[1] <<"]"<<  endl;
+        //cout << "patch 2: [" << supp.xmin[2]  <<" , " <<supp.xmax[2] <<"]x["<<supp.ymin[2] <<" , "<<supp.ymax[2] <<"]"<<  endl;
         
         //determine on which patch lambda lies
         const bool extended=(lambda.patch()>2) ? 1 : 0;
         const int mother_patch=(lambda.patch()==3) ? 0: (lambda.patch()==4 ? 2: lambda.patch());
+        //cout << "extended: "<<extended<<endl;
+        //cout << "mother_patch: "<<mother_patch<<endl;
     
         //setup gauss points
-        const int N_Gauss = (p+1)/2+(multi_degree(lambda.p())+multi_degree(mu.p())+1)/2;
+        //const int N_Gauss = (p+1)/2+(multi_degree(lambda.p()))/2;
+        const int N_Gauss=10;
         double h; // granularity for the quadrature
         FixedArray1D<Array1D<double>,space_dimension> gauss_points, gauss_weights, v_values;
 	
@@ -350,17 +593,34 @@ namespace WaveletTL
  	    if (supp.xmin[patch] != -1) { // psi_mu is nontrivial on patch p
                 double a [2]; a[0]=supp.xmin[patch]; a[1]=supp.ymin[patch];
                 double b [2]; b[0]=supp.xmax[patch]; b[1]=supp.ymax[patch];
+                //cout << "current support: ["<<a[0]<<","<<b[0]<<"]x["<<a[1]<<","<<b[1]<<"]"<<endl;
                 for (unsigned int i = 0; i < space_dimension; i++) {
                     // prepare Gauss points and weights 
-                    h = ldexp(1.0,-supp.j[i]);
+                    h = ldexp(1.0,-supp.j[i]-lambda.e()[i]);
+                    //cout << "current interval :" <<a[i]*h <<","<<b[i]*h<<endl;
                     gauss_points[i].resize(N_Gauss*(b[i]-a[i]));
                     gauss_weights[i].resize(N_Gauss*(b[i]-a[i]));
                     for (int interval = a[i]; interval < b[i]; interval++){
                         for (int n = 0; n < N_Gauss; n++) {
-                            gauss_points[i][(interval-a[i]])*N_Gauss = h*(2*interval+1+GaussPoints[N_Gauss-1][n])/2.;
+                            gauss_points[i][(interval-a[i])*N_Gauss+n] = h*(2*interval+1+GaussPoints[N_Gauss-1][n])/2.;
                             gauss_weights[i][(interval-a[i])*N_Gauss+n]= h*GaussWeights[N_Gauss-1][n];
                         }
                     }
+                    //cout << gauss_points[i] << endl;
+                }
+                if(patch==0){   // compute the point values of the integrand (where we use that it is a tensor product)
+                    evaluate(frame_.frame1d_11(), 0,        //different 1d-frames for x- and y-direction due to boundary conditions
+                                            lambda.p()[0],
+                                            lambda.j()[0],
+                                            lambda.e()[0],
+                                            lambda.k()[0],
+                         gauss_points[0], v_values[0]);  
+                    evaluate(frame_.frame1d_01(), 0,
+                                            lambda.p()[1],
+                                            lambda.j()[1],
+                                            lambda.e()[1],
+                                            lambda.k()[1],
+                         gauss_points[1], v_values[1]); 
                 }
                 //special treat for patch 1 if the quarklet is extended:    
                 FixedArray1D<Array1D<double>,space_dimension> lambda_gauss_points(gauss_points);
@@ -369,23 +629,66 @@ namespace WaveletTL
                     if(mother_patch==0){ //lambda has been extended from north so south, reflect gauss points in y-direction
                         for(int i=0;i<lambda_gauss_points[1].size();i++){
                             lambda_gauss_points[1][i]=1-lambda_gauss_points[1][i];
-                        }    
+                        }
+                        evaluate(frame_.frame1d_11(), 0,        //different 1d-frames for x- and y-direction due to boundary conditions
+                                            lambda.p()[0],
+                                            lambda.j()[0],
+                                            lambda.e()[0],
+                                            lambda.k()[0],
+                                        lambda_gauss_points[0], v_values[0]);  
+                        evaluate(frame_.frame1d_01(), 0,
+                                            lambda.p()[1],
+                                            lambda.j()[1],
+                                            lambda.e()[1],
+                                            lambda.k()[1],
+                                        lambda_gauss_points[1], v_values[1]); 
+                    }
+                    if(mother_patch==1){
+                        evaluate(frame_.frame1d_11(), 0,        
+                                            lambda.p()[0],
+                                            lambda.j()[0],
+                                            lambda.e()[0],
+                                            lambda.k()[0],
+                                        lambda_gauss_points[0], v_values[0]);  
+                        evaluate(frame_.frame1d_11(), 0,
+                                            lambda.p()[1],
+                                            lambda.j()[1],
+                                            lambda.e()[1],
+                                            lambda.k()[1],
+                                        lambda_gauss_points[1], v_values[1]);
                     }
                     if(mother_patch==2){ //lambda has been extended from east to west, reflect gauss points in x-direction
                         for(int i=0;i<lambda_gauss_points[0].size();i++){
                             lambda_gauss_points[0][i]=1-lambda_gauss_points[0][i];
-                        }  
+                        }
+                        evaluate(frame_.frame1d_01(), 0,        
+                                            lambda.p()[0],
+                                            lambda.j()[0],
+                                            lambda.e()[0],
+                                            lambda.k()[0],
+                                        lambda_gauss_points[0], v_values[0]);  
+                        evaluate(frame_.frame1d_11(), 0,
+                                            lambda.p()[1],
+                                            lambda.j()[1],
+                                            lambda.e()[1],
+                                            lambda.k()[1],
+                                        lambda_gauss_points[1], v_values[1]);
                     }
                 } 
             
-                // compute the point values of the integrand (where we use that it is a tensor product)
-                for (unsigned int i = 0; i < space_dimension; i++){
-                    evaluate(*frame_.frame1d(), 0,
-                                            lambda.p()[i],
-                                            lambda.j()[i],
-                                            lambda.e()[i],
-                                            lambda.k()[i],
-                         lambda_gauss_points[i], v_values[i]);
+                if(patch==2){
+                    evaluate(frame_.frame1d_01(), 0,        
+                                            lambda.p()[0],
+                                            lambda.j()[0],
+                                            lambda.e()[0],
+                                            lambda.k()[0],
+                         gauss_points[0], v_values[0]);  
+                    evaluate(frame_.frame1d_11(), 0,
+                                            lambda.p()[1],
+                                            lambda.j()[1],
+                                            lambda.e()[1],
+                                            lambda.k()[1],
+                         gauss_points[1], v_values[1]); 
                 }
                 // iterate over all points and sum up the integral shares
                 int index[space_dimension]; // current multiindex for the point values
@@ -419,9 +722,9 @@ namespace WaveletTL
 	return r;  
     }
     
-    template <class IFRAME>
+    template <class IFRAME, class LDOMAINFRAME>
     void
-    LDomainFrameEquation<IFRAME>::RHS(const double eta,
+    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::RHS(const double eta,
                                     InfiniteVector<double,Index>& coeffs) const
     {
         coeffs.clear();
@@ -436,14 +739,14 @@ namespace WaveletTL
     }
         
 
-    template <class IFRAME>
+    template <class IFRAME, class LDOMAINFRAME>
     double
-    LDomainFrameEquation<IFRAME>::norm_A() const
+    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::norm_A() const
     {
         if (normA == 0.0) {
         //typedef typename Frame::Index Index;
         typedef typename Index::polynomial_type polynomial_type;
-        int offsetj=1;
+        int offsetj=std::min(1,frame_.get_jmax()-(int)multi_degree(frame_.j0()));
         int offsetp=std::min((int)frame_.get_pmax(),2);
         std::set<Index> Lambda;
       
@@ -459,6 +762,7 @@ namespace WaveletTL
                 ++lambda;
                     
         }
+        //cout << "Lambda size: "<<Lambda.size()<<endl;
         
         SparseMatrix<double> A_Lambda;
         setup_stiffness_matrix(*this, Lambda, A_Lambda);
@@ -480,12 +784,12 @@ namespace WaveletTL
    
     
     
-    template <class IFRAME>
+    template <class IFRAME, class LDOMAINFRAME>
     double
-    LDomainFrameEquation<IFRAMe>::norm_Ainv() const
+    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::norm_Ainv() const
     {
-        if (normA == 0.0) {
-        //typedef typename Frame::Index Index;
+        if (normAinv == 0.0) {
+        typedef typename Frame::Index Index;
         typedef typename Index::polynomial_type polynomial_type;
         int offsetj=1;
         int offsetp=std::min((int)frame_.get_pmax(),2);
@@ -503,6 +807,7 @@ namespace WaveletTL
                 ++lambda;
                     
         }
+        //cout << "Lambda size: "<<Lambda.size()<<endl;
         
         SparseMatrix<double> A_Lambda;
         setup_stiffness_matrix(*this, Lambda, A_Lambda);
@@ -523,9 +828,9 @@ namespace WaveletTL
     }
   
 
-    template <class IFRAME>
+    template <class IFRAME, class LDOMAINFRAME>
     double
-    LDomainFrameEquation<IFRAME>::s_star() const
+    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::s_star() const
     {
         // notation from [St04a]
         const double t = operator_order();

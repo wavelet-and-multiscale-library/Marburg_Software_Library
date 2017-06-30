@@ -13,18 +13,19 @@ namespace WaveletTL
 {
   template <class IFRAME>
   LDomainFrame<IFRAME>::LDomainFrame()
-    : frame1d_(false, false)
+    : frame1d_(false, false), frame1d_11_(true, true), frame1d_01_(false, true)
   {
-
+      j0_[0] = frame1d_11.j0();
+      j0_[1] = frame1d_11.j0();
   }
 
   template <class IFRAME>
   LDomainFrame<IFRAME>::LDomainFrame(const IntervalFrame& frame1d)
-    : frame1d_(frame1d)
+    : frame1d_(frame1d), frame1d_11_(true, true), frame1d_01_(false, true)
   {
 
-    j0_[0] = frame1d.j0();
-    j0_[1] = frame1d.j0();
+    j0_[0] = frame1d_11_.j0();
+    j0_[1] = frame1d_11_.j0();
   }
 
 
@@ -345,13 +346,13 @@ namespace WaveletTL
       switch (lambda.patch()) {
       case 0:
  	// psi_lambda completely lives on patch 0
- 	values[0] = frame1d().evaluate(typename IFRAME::Index(lambda.p()[0],
+ 	values[0] = frame1d_11().evaluate(typename IFRAME::Index(lambda.p()[0],
                                                               lambda.j()[0],
 							      lambda.e()[0],
 							      lambda.k()[0],
 							      &frame1d()),
 				       resolution).values();
- 	values[1] = frame1d().evaluate(typename IFRAME::Index(lambda.p()[1],
+ 	values[1] = frame1d_01().evaluate(typename IFRAME::Index(lambda.p()[1],
                                                               lambda.j()[1],
 							      lambda.e()[1],
 							      lambda.k()[1],
@@ -367,13 +368,13 @@ namespace WaveletTL
  	break;
       case 1:
  	// psi_lambda completely lives on patch 1
- 	values[0] = frame1d().evaluate(typename IFRAME::Index(lambda.p()[0],
+ 	values[0] = frame1d_11().evaluate(typename IFRAME::Index(lambda.p()[0],
                                                               lambda.j()[0],
 							      lambda.e()[0],
 							      lambda.k()[0],
 							      &frame1d()),
 				       resolution).values();
- 	values[1] = frame1d().evaluate(typename IFRAME::Index(lambda.p()[1],
+ 	values[1] = frame1d_11().evaluate(typename IFRAME::Index(lambda.p()[1],
                                                               lambda.j()[1],
 							      lambda.e()[1],
 							      lambda.k()[1],
@@ -389,19 +390,29 @@ namespace WaveletTL
 	break;
       case 2:
  	// psi_lambda completely lives on patch 2
- 	values[0] = frame1d().evaluate(typename IFRAME::Index(lambda.p()[0],
+ 	values[0] = frame1d_01().evaluate(typename IFRAME::Index(lambda.p()[0],
                                                               lambda.j()[0],
 							      lambda.e()[0],
 							      lambda.k()[0],
 							      &frame1d()),
 				       resolution).values();
- 	values[1] = frame1d().evaluate(typename IFRAME::Index(lambda.p()[1],
+ 	values[1] = frame1d_11().evaluate(typename IFRAME::Index(lambda.p()[1],
                                                               lambda.j()[1],
 							      lambda.e()[1],
 							      lambda.k()[1],
 							      &frame1d()),
 				       resolution).values();
  	r[2] = SampledMapping<2>(Point<2>( 0,-1), Point<2>(1,0), values);
+        
+        //Test
+//        cout << "Test" << endl;
+//        frame1d_11().evaluate(typename IFRAME::Index(lambda.p()[1],
+//                                                              lambda.j()[1],
+//							      lambda.e()[1],
+//							      lambda.k()[1],
+//							      &frame1d()),
+//				       resolution).matlab_output(cout);
+//        //TESTEND
 
  	for (int i = 0; i <= 1<<resolution; i++) {
  	  values[0][i] = values[1][i] = 0;
@@ -411,13 +422,13 @@ namespace WaveletTL
  	break;
       case 3:
   	// psi_lambda lives on patches 0 and 1
-  	values[0] = frame1d().evaluate(typename IFRAME::Index(lambda.p()[0],
+  	values[0] = frame1d_11().evaluate(typename IFRAME::Index(lambda.p()[0],
                                                               lambda.j()[0],
 							      lambda.e()[0],
 							      lambda.k()[0],
 							      &frame1d()),
 				       resolution).values();
- 	values[1] = frame1d().evaluate(typename IFRAME::Index(lambda.p()[1],
+ 	values[1] = frame1d_01().evaluate(typename IFRAME::Index(lambda.p()[1],
                                                               lambda.j()[1],
 							      lambda.e()[1],
 							      lambda.k()[1],
@@ -442,18 +453,19 @@ namespace WaveletTL
       case 4:
  	// psi_lambda lives on patches 1 and 2
 
- 	values[0] = frame1d().evaluate(typename IFRAME::Index(lambda.p()[0],
+ 	values[0] = frame1d_01().evaluate(typename IFRAME::Index(lambda.p()[0],
                                                               lambda.j()[0],
 							      lambda.e()[0],
 							      lambda.k()[0],
 							      &frame1d()),
 				       resolution).values();
- 	values[1] = frame1d().evaluate(typename IFRAME::Index(lambda.p()[1],
+ 	values[1] = frame1d_11().evaluate(typename IFRAME::Index(lambda.p()[1],
                                                               lambda.j()[1],
 							      lambda.e()[1],
 							      lambda.k()[1],
 							      &frame1d()),
 				       resolution).values();
+        
 //	for (int i = 0; i <= 1<<resolution; i++) values[1][i] *= M_SQRT1_2;
 	r[2] = SampledMapping<2>(Point<2>( 0,-1), Point<2>(1,0), values);
         
@@ -544,7 +556,7 @@ namespace WaveletTL
     int i = 0;
     for (typename set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, i++){
         full_collection[i] = *it;
-        cout << *it << ", " << (*it).number() << endl;
+//        cout << *it << ", " << (*it).number() << endl;
     }
     
     cout << "done setting up collection of quarklet indices..." << endl;

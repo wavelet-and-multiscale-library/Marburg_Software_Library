@@ -943,7 +943,7 @@ namespace WaveletTL
     Mj0T_t = transpose(Mj0T);
     Mj1_t  = transpose(Mj1);
     Mj1T_t = transpose(Mj1T);
-    cout << "minLev = " << j0_ << endl;
+//    cout << "minLev = " << j0_ << endl;
     
     setup_CVM();
   }

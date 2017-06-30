@@ -116,6 +116,12 @@ namespace WaveletTL
 
     //! read access to the underlying 1D frame
     const IntervalFrame& frame1d() const { return frame1d_; }
+    
+    //! read access to the underlying 1D frame
+    const IntervalFrame& frame1d_11() const { return frame1d_11_; }
+    
+    //! read access to the underlying 1D frame
+    const IntervalFrame& frame1d_01() const { return frame1d_01_; }
 
 //    //! size of Delta_j
 //    const int Deltasize(const int j) const;
@@ -237,7 +243,8 @@ namespace WaveletTL
     Array1D<Index> full_collection;
 
     //! the interval 1d quarklet frame
-    IntervalFrame frame1d_;
+    IntervalFrame frame1d_, frame1d_11_, frame1d_01_;
+    
 
     //! support cache
     typedef std::map<Index,Support> SupportCache;

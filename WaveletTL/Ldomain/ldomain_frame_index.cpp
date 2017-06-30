@@ -588,7 +588,7 @@ namespace WaveletTL
 
     // setup lowest translation index for e=(0,1), p=0
     typename LDomainFrameIndex<IFRAME>::translation_type k(frame->frame1d().DeltaLmin()+1,
-						      frame->frame1d().Nablamin());
+						      frame->frame1d().Nablamin()+1);
     
     return LDomainFrameIndex<IFRAME>(p, j, e, 0, k, frame);
   }
@@ -613,16 +613,16 @@ namespace WaveletTL
     } else {
       if (ecode == 1) {
 	// e = (1,0)
-	k[0] = frame->frame1d().Nablamin();
+	k[0] = frame->frame1d().Nablamin()+1;
 	k[1] = frame->frame1d().DeltaLmin()+1;
       } else {
 	if (ecode == 2) {
 	  // e = (0,1)
 	  k[0] = frame->frame1d().DeltaLmin()+1;
-	  k[1] = frame->frame1d().Nablamin();
+	  k[1] = frame->frame1d().Nablamin()+1;
 	} else {
 	  // e = (1,1)
-	  k[0] = k[1] = frame->frame1d().Nablamin();
+	  k[0] = k[1] = frame->frame1d().Nablamin()+1;
 	}
       }
     }
@@ -639,7 +639,7 @@ namespace WaveletTL
     typename LDomainFrameIndex<IFRAME>::type_type e(1, 1);
 
     // setup highest translation index for e=(1,1), p=2
-    typename LDomainFrameIndex<IFRAME>::translation_type k(frame->frame1d().Nablamax(j),
+    typename LDomainFrameIndex<IFRAME>::translation_type k(0,
 						      frame->frame1d().Nablamax(j));
     
     return LDomainFrameIndex<IFRAME>(p, j, e, 4, k, frame);

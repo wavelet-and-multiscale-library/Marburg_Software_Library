@@ -66,7 +66,7 @@ namespace WaveletTL
     typename Index::type_type e(0, 1);
 
     // setup lowest translation index for e=(0,1), p=0
-    typename Index::translation_type k(frame1d().DeltaLmin()+1, frame1d().Nablamin());
+    typename Index::translation_type k(frame1d().DeltaLmin()+1, frame1d().Nablamin()+1);
     
     return Index(p,j, e, 0, k, 0, this);
   }
@@ -114,7 +114,7 @@ namespace WaveletTL
     typename Index::type_type e(1, 1);
 
     // setup highest translation index for e=(1,1), p=2
-    typename Index::translation_type k(frame1d().Nablamax(j[0]), frame1d().Nablamax(j[1]));
+    typename Index::translation_type k(0, frame1d().Nablamax(j[1]));
     
     return Index(p,j, e, 4, k, 0, this);
   }
@@ -544,7 +544,7 @@ namespace WaveletTL
     int i = 0;
     for (typename set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, i++){
         full_collection[i] = *it;
-//        cout << *it << ", " << (*it).number() << endl;
+        cout << *it << ", " << (*it).number() << endl;
     }
     
     cout << "done setting up collection of quarklet indices..." << endl;

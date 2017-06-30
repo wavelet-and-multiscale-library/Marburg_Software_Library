@@ -79,7 +79,7 @@ namespace WaveletTL
     
 //    typename Index::type_type e(ewish);
     
-    // setup lowest translation index appropriately
+    // setup lowest translation index appropriately 
     typename Index::translation_type k;
     const int ecode(e[0]+2*e[1]);
     if (ecode == 0) {
@@ -88,16 +88,16 @@ namespace WaveletTL
     } else {
       if (ecode == 1) {
 	// e = (1,0)
-	k[0] = frame1d().Nablamin();
+	k[0] = frame1d().Nablamin()+1;
 	k[1] = frame1d().DeltaLmin()+1;
       } else {
 	if (ecode == 2) {
 	  // e = (0,1)
 	  k[0] = frame1d().DeltaLmin()+1;
-	  k[1] = frame1d().Nablamin();
+	  k[1] = frame1d().Nablamin()+1;
 	} else {
 	  // e = (1,1)
-	  k[0] = k[1] = frame1d().Nablamin();
+	  k[0] = k[1] = frame1d().Nablamin()+1;
 	}
       }
     }
@@ -342,7 +342,7 @@ namespace WaveletTL
       values[0].resize((1<<resolution)+1); // values in x-direction
       values[1].resize((1<<resolution)+1); // values in y-direction
 
-      switch (lambda.p()) {
+      switch (lambda.patch()) {
       case 0:
  	// psi_lambda completely lives on patch 0
  	values[0] = frame1d().evaluate(typename IFRAME::Index(lambda.p()[0],

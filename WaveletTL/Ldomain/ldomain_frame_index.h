@@ -171,21 +171,21 @@ namespace WaveletTL
   */
   template <class IFRAME>
   LDomainFrameIndex<IFRAME>
-  first_generator(const LDomainFrame<IFRAME>* frame, const typename LDomainIndex<IFRAME>::level_type& j, const typename LDomainIndex<IFRAME>::polynomial_type& p, const int number = -1);
+  first_generator(const LDomainFrame<IFRAME>* frame, const typename LDomainFrameIndex<IFRAME>::level_type& j, const typename LDomainFrameIndex<IFRAME>::polynomial_type& p, const int number = -1);
 
   /*!
     index of last generator on level j >= j0
   */
   template <class IFRAME>
   LDomainFrameIndex<IFRAME>
-  last_generator(const LDomainFrame<IFRAME>* frame, const typename LDomainIndex<IFRAME>::level_type& j, const typename LDomainIndex<IFRAME>::polynomial_type& p);
+  last_generator(const LDomainFrame<IFRAME>* frame, const typename LDomainFrameIndex<IFRAME>::level_type& j, const typename LDomainFrameIndex<IFRAME>::polynomial_type& p);
 
   /*!
     index of first quarklet on level j >= j0
   */
   template <class IFRAME>
   LDomainFrameIndex<IFRAME>
-  first_quarklet(const LDomainFrame<IFRAME>* frame, const typename LDomainIndex<IFRAME>::level_type& j, const typename LDomainIndex<IFRAME>::polynomial_type& p);
+  first_quarklet(const LDomainFrame<IFRAME>* frame, const typename LDomainFrameIndex<IFRAME>::level_type& j, const typename LDomainFrameIndex<IFRAME>::polynomial_type& p);
   
   /*!
     index of first quarklet with a given type on level j >= j0
@@ -193,15 +193,15 @@ namespace WaveletTL
   template <class IFRAME>
   LDomainFrameIndex<IFRAME>
   first_quarklet(const LDomainFrame<IFRAME>* frame,
-		const typename LDomainIndex<IFRAME>::level_type& j,
-		const typename LDomainIndex<IFRAME>::type_type& e, const typename LDomainIndex<IFRAME>::polynomial_type& p);
+		const typename LDomainFrameIndex<IFRAME>::level_type& j,
+		const typename LDomainFrameIndex<IFRAME>::type_type& e, const typename LDomainFrameIndex<IFRAME>::polynomial_type& p);
   
   /*!
     index of last quarklet on level j >= j0
   */
   template <class IFRAME>
   LDomainFrameIndex<IFRAME>
-  last_quarklet(const LDomainFrame<IFRAME>* frame, const typename LDomainIndex<IFRAME>::level_type& j, const typename LDomainIndex<IFRAME>::polynomial_type& p);
+  last_quarklet(const LDomainFrame<IFRAME>* frame, const typename LDomainFrameIndex<IFRAME>::level_type& j, const typename LDomainFrameIndex<IFRAME>::polynomial_type& p);
 }
 
 #include <Ldomain/ldomain_frame_index.cpp>

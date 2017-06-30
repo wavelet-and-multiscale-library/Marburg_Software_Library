@@ -94,7 +94,8 @@ namespace WaveletTL
 	}
       } else {
 	
-          switch(patch_) {
+          switch(patch_) {//If we want k more quarklets to be mirrored, we have to set last_index-=k for i==0, and last_index=k for i!=0,
+                          //also you need to change the first indices in the following routines
             case 0:
             case 1:
             case 2:
@@ -141,14 +142,14 @@ namespace WaveletTL
             case 0:
               k_[i] = (i == 0
                        ? frame_->frame1d().Nablamin()
-                       : frame_->frame1d().Nablamin()+1);
+                       : frame_->frame1d().Nablamin()+1);//here
               break;
             case 1:
               k_[i] = frame_->frame1d().Nablamin(); 
               break;
             case 2:
               k_[i] = (i == 0
-                       ? frame_->frame1d().Nablamin()+1
+                       ? frame_->frame1d().Nablamin()+1//here, and some more. :)
                        : frame_->frame1d().Nablamin());
               break;
             case 3:
@@ -548,7 +549,7 @@ namespace WaveletTL
   
   template <class IFRAME>
   LDomainFrameIndex<IFRAME>
-  first_generator(const LDomainFrame<IFRAME>* frame, const typename LDomainIndex<IFRAME>::level_type& j, const typename LDomainIndex<IFRAME>::polynomial_type& p, const int number)
+  first_generator(const LDomainFrame<IFRAME>* frame, const typename LDomainFrameIndex<IFRAME>::level_type& j, const typename LDomainFrameIndex<IFRAME>::polynomial_type& p, const int number)
   {
     assert(j >= frame->j0());
 
@@ -565,7 +566,7 @@ namespace WaveletTL
 
   template <class IFRAME>
   LDomainFrameIndex<IFRAME>
-  last_generator(const LDomainFrame<IFRAME>* frame, const typename LDomainIndex<IFRAME>::level_type& j,const typename LDomainIndex<IFRAME>::polynomial_type& p )
+  last_generator(const LDomainFrame<IFRAME>* frame, const typename LDomainFrameIndex<IFRAME>::level_type& j,const typename LDomainFrameIndex<IFRAME>::polynomial_type& p )
   {
     assert(j >= frame->j0());
 
@@ -579,7 +580,7 @@ namespace WaveletTL
 
   template <class IFRAME>
   LDomainFrameIndex<IFRAME>
-  first_quarklet(const LDomainFrame<IFRAME>* frame, const typename LDomainIndex<IFRAME>::level_type& j, const typename LDomainIndex<IFRAME>::polynomial_type& p)
+  first_quarklet(const LDomainFrame<IFRAME>* frame, const typename LDomainFrameIndex<IFRAME>::level_type& j, const typename LDomainFrameIndex<IFRAME>::polynomial_type& p)
   {
     assert(j >= frame->j0());
 
@@ -595,9 +596,9 @@ namespace WaveletTL
   template <class IFRAME>
   LDomainFrameIndex<IFRAME>
   first_quarklet(const LDomainFrame<IFRAME>* frame,
-		const typename LDomainIndex<IFRAME>::level_type& j,
-		const typename LDomainIndex<IFRAME>::type_type& e,
-                const typename LDomainIndex<IFRAME>::polynomial_type& p)
+		const typename LDomainFrameIndex<IFRAME>::level_type& j,
+		const typename LDomainFrameIndex<IFRAME>::type_type& e,
+                const typename LDomainFrameIndex<IFRAME>::polynomial_type& p)
   {
     assert(j >= frame->j0());
 
@@ -631,7 +632,7 @@ namespace WaveletTL
   
   template <class IFRAME>
   LDomainFrameIndex<IFRAME>
-  last_quarklet(const LDomainFrame<IFRAME>* frame, const typename LDomainIndex<IFRAME>::level_type& j, const typename LDomainIndex<IFRAME>::polynomial_type& p)
+  last_quarklet(const LDomainFrame<IFRAME>* frame, const typename LDomainFrameIndex<IFRAME>::level_type& j, const typename LDomainFrameIndex<IFRAME>::polynomial_type& p)
   {
     assert(j >= frame->j0());
     

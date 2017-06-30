@@ -144,10 +144,10 @@ namespace WaveletTL
     Index last_generator(const level_type& j, const polynomial_type& p = polynomial_type()) const;
       
     //! index of first quarklet on level j >= j0
-    Index first_quarklet(const level_type& j, const polynomial_type& p = polynomial_type()) const;
+    Index first_quarklet(const level_type& j, const polynomial_type& p) const;
       
     //! index of first quarklet on level j >= j0 with type e
-    Index first_quarklet(const level_type& j, const type_type& e, const polynomial_type& p = polynomial_type()) const;
+    Index first_quarklet(const level_type& j, const type_type& e, const polynomial_type& p) const;
 
     //! index of last quarklet on level j >= j0
     Index last_quarklet(const level_type& j, const polynomial_type& p = polynomial_type()) const;

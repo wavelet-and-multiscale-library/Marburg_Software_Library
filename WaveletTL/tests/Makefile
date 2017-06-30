@@ -103,7 +103,6 @@ EXEOBJF3 = \
   test_tframe_index.o\
   test_tbasis_adaptive.o\
   test_tframe_adaptive.o\
-  test_tbasis_index2.o\
   test_qtbasis.o\
   test_ldomain.o
 

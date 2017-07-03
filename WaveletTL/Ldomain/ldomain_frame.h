@@ -75,12 +75,18 @@ namespace WaveletTL
     
 
     //! geometric type of the support sets
-    typedef struct {
+    typedef struct Support{
       int j[2];       // granularity
       int xmin[3];
       int xmax[3];
       int ymin[3];
       int ymax[3];
+//      Support() 
+//      {
+//          j[0]=0,j[1]=0,xmin[0]=0,xmin[1]=0,xmin[2]=0, xmax[0]=0, xmax[1]=0, xmax[2]=0,
+//                  ymin[0]=0,ymin[1]=0,ymin[2]=0, ymax[0]=0, ymax[1]=0, ymax[2]=0;
+//      }
+      
     } Support;
     
 //    inline std::ostream& operator << (std::ostream& os,
@@ -223,6 +229,8 @@ namespace WaveletTL
 
     //! number of quarklets between coarsest and finest level
     const int degrees_of_freedom() const { return full_collection.size(); };
+    typedef std::map<Index,Support> SupportCache;
+    const SupportCache suppcache() const{ return supp_cache;};
 
 
   protected:
@@ -247,7 +255,7 @@ namespace WaveletTL
     
 
     //! support cache
-    typedef std::map<Index,Support> SupportCache;
+//    typedef std::map<Index,Support> SupportCache;
     mutable SupportCache supp_cache;
 
   };

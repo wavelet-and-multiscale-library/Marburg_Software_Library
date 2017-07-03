@@ -65,12 +65,20 @@ namespace WaveletTL
     : public FullyDiagonalEnergyNormPreconditioner<typename LDOMAINFRAME::Index>
   {
   public:
+      
+    /*!
+    make template argument accessible
+    */
+    typedef LDOMAINFRAME Frame;
     /*!
       constructor from a boundary value problem 
     */
     LDomainFrameEquation(const EllipticBVP<2>* bvp,
 		    const bool precompute_rhs = true);
-
+    
+    
+    LDomainFrameEquation(const EllipticBVP<2>* bvp, const Frame& frame,
+		    const bool precompute_rhs = true);
     /*!
       constructor from a boundary value problem and specified b.c.'s
     */
@@ -83,10 +91,7 @@ namespace WaveletTL
     */
     LDomainFrameEquation(const LDomainFrameEquation&);
     
-    /*!
-      make template argument accessible
-    */
-    typedef LDOMAINFRAME Frame;
+    
     /*!
       quarklet index class
     */
@@ -193,7 +198,7 @@ namespace WaveletTL
 
   protected:
     const EllipticBVP<2>* bvp_;
-    LDOMAINFRAME frame_;
+    Frame frame_;
 
     // right-hand side coefficients on a fine level, sorted by modulus
     Array1D<std::pair<Index,double> > fcoeffs;

@@ -15,8 +15,8 @@ namespace WaveletTL
   LDomainFrame<IFRAME>::LDomainFrame()
     : frame1d_(false, false), frame1d_11_(true, true), frame1d_01_(false, true)
   {
-      j0_[0] = frame1d_11.j0();
-      j0_[1] = frame1d_11.j0();
+      j0_[0] = frame1d_11_.j0();
+      j0_[1] = frame1d_11_.j0();
   }
 
   template <class IFRAME>
@@ -147,13 +147,14 @@ namespace WaveletTL
     if (supp_lb == supp_cache.end() ||
 	supp_cache.key_comp()(lambda, supp_lb->first))
       {
-	// compute supp(psi_lambda) and insert it into the cache
+//        cout << "Neuberechnung" << endl;
+//	 compute supp(psi_lambda) and insert it into the cache
 	typedef typename SupportCache::value_type value_type;
 
-
+              
 	  
-	  supp.j[0] = lambda.j()[0];
-          supp.j[1] = lambda.j()[1];
+	  supp.j[0] = lambda.j()[0]+lambda.e()[0];
+          supp.j[1] = lambda.j()[1]+lambda.e()[1];
 	  
 	  switch (lambda.patch()) {
 	  case 0:
@@ -312,7 +313,19 @@ namespace WaveletTL
       }
     else
       {
+        
+//        typename SupportCache::iterator it(supp_cache.begin());
+//        typename SupportCache::iterator itend(supp_cache.end());
+//        for(typename SupportCache::iterator it = supp_cache.begin();it!=itend;it++){
+//            cout << endl << it->first << endl;
+//            cout << "patch 0: [" << it->second.xmin[0]  <<" , " <<it->second.xmax[0] <<"]x["<<it->second.ymin[0] <<" , "<<it->second.ymax[0] <<"]"<<  endl;
+//            cout << "patch 1: [" << it->second.xmin[1]  <<" , " <<it->second.xmax[1] <<"]x["<<it->second.ymin[1] <<" , "<<it->second.ymax[1] <<"]"<<  endl;
+//            cout << "patch 2: [" << it->second.xmin[2]  <<" , " <<it->second.xmax[2] <<"]x["<<it->second.ymin[2] <<" , "<<it->second.ymax[2] <<"]"<<  endl;
+//            
+//        }
 	// cache hit, copy the precomputed support
+//        cout << "Cache hitted" << supp_it->first << endl;
+        
   	supp.j[0] = supp_it->second.j[0];
         supp.j[1] = supp_it->second.j[1];
   	for (unsigned int i = 0; i < 3; i++) {

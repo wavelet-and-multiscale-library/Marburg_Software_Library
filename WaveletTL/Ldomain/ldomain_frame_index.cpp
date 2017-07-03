@@ -382,26 +382,27 @@ namespace WaveletTL
   {
     // standard lexicographic order on (j,e,p,k),
     // we assume that e and k are already lexicographically ordered (cf. MultiIndex)
-      return (num_<lambda.number());
-//    return (multi_degree(p_) < multi_degree(lambda.p())  ||
-//                     ((multi_degree(p_) == multi_degree(lambda.p()) && p_ < lambda.p())  ||
-//                      (p_ == lambda.p() && 
-//                       ( multi_degree(j_) < multi_degree(lambda.j()) ||
-//                        ((multi_degree(j_) == multi_degree(lambda.j()) && j_ < lambda.j()) ||
-//                         (j_ == lambda.j() && 
-//                          (e_ < lambda.e() ||
-//                           (e_ == lambda.e() &&
-//                            (p_ < lambda.p() ||
-//                             (p_ == lambda.p() && k_ < lambda.k())
-//                            )
-//                           )
-//                          ) 
-//                         )
-//                        )                                             
-//                       )                       
-//                      )                     
-//                     )
-//            );
+//      return (num_<lambda.number());
+    return (multi_degree(p_) < multi_degree(lambda.p())  ||
+                     ((multi_degree(p_) == multi_degree(lambda.p()) && p_ < lambda.p())  ||
+                      (p_ == lambda.p() && 
+                       ( multi_degree(j_) < multi_degree(lambda.j()) ||
+                        ((multi_degree(j_) == multi_degree(lambda.j()) && j_ < lambda.j()) ||
+                         (j_ == lambda.j() && 
+                          (e_ < lambda.e() ||
+                           (e_ == lambda.e() &&
+                            (patch_ < lambda.patch() ||
+                             (patch_ == lambda.patch() &&  k_.lex(lambda.k())                           
+                             )
+                            )
+                           )
+                          ) 
+                         )
+                        )                                             
+                       )                       
+                      )                     
+                     )
+            );
   }
 
 //  template <class IFRAME>

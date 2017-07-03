@@ -25,6 +25,9 @@
 #include <Ldomain/ldomain_frame_index.h>
 #include <Ldomain/ldomain_frame_support.h>
 #include <Ldomain/ldomain_frame_evaluate.h>
+#include <galerkin/ldomain_frame_equation.h>
+#include <cube/tframe.h>
+#include <galerkin/tframe_equation.h>
 
 
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
@@ -44,12 +47,18 @@ int main()
 
   const int d  = 2;
   const int dT = 2;
+  
+  const int jmax=8;
+  const int pmax=0;
 //  typedef DSBasis<d,dT,BernsteinSVD> Basis1D;
   
 #ifdef FRAME
   typedef PQFrame<d,dT> Frame1D;
+//  typedef PBasis<d,dT> Frame1D;
+  Frame1D frame1D_11(true,true);
   
   Frame1D frame1D;
+  typedef Frame1D::Index Index1D;
   
   typedef LDomainFrame<Frame1D> LFrame;
   typedef LFrame::Index Index;
@@ -57,50 +66,162 @@ int main()
   polynomial_type p;
   typedef Index::level_type level_type;
   LFrame frame(frame1D);
-  frame.set_jpmax(5,3);
+//  LFrame frame2();
+  
+  Vector<double> val(1, "1.0");
+  ConstantFunction<2> rhs1(val);
+  PoissonBVP<2> poisson1(&rhs1);
+  LDomainFrameEquation<Frame1D,LFrame> eq(&poisson1, frame, true);
+  
+  frame.set_jpmax(jmax,pmax);
+//  abort();
+//  eq.norm_A();
+  
+  typedef PQFrame<d,dT> Frame1d;
+//    typedef Basis1d::Index Index1d;
+    typedef TensorFrame<Frame1d,2> CubeFrame;
+    
+    typedef CubeFrame::Index CubeIndex;
+    FixedArray1D<bool, 4> bc;
+    bc[0]=true, bc[1]=true, bc[2]=true, bc[3]=true;
+    CubeFrame cubeframe(bc);
+    TensorFrameEquation<Frame1d,2,CubeFrame> cubeeq(&poisson1, bc);
+//    cubeeq.norm_A();
+    MultiIndex<int,2> lp(0,0), lj(3,3), le(0,1), lk(1,0), mp(0,0), mj(3,3), me(0,0), mk(1,1);
+    Index lambdal(lp,lj,le,1,lk,0,&eq.frame()), mul(mp,mj,me,1,mk,0,&eq.frame());
+//    eq.frame().suppcache()[lambdal];
+    CubeIndex lambdacube(lp,lj,le,lk,&cubeeq.frame()), mucube(mp,mj,me,mk,&cubeeq.frame());
+//  eq.a(lambdal,lambdal);
   
   InfiniteVector<double, Index> coeffs;
   Index lambda = frame.first_generator(frame.j0());
   typedef LFrame::Support Support;
-  
-  
-  
-  Support suppconst;
-  suppconst.j[0]=0, suppconst.j[1]=0;
-  for(int i=0;i<3;i++){
-      suppconst.xmin[i]=0, suppconst.xmax[i]=0,suppconst.ymin[i]=0,suppconst.ymax[i]=0;
-  }
-  
-  
-  set<Index> Lambda;
-  int counter = 0;
-  for (Index lambda = frame.first_generator(frame.j0());counter<=3000;) {
-      Support supp = suppconst;
-      frame.support(lambda,supp);
-      cout << "("<< supp.j[0] << "," << supp.j[1] << ", [" << supp.xmin[0]  << "," << supp.xmax[0]<< "]x["   << supp.ymin[0]<< "," << supp.ymax[0]<< "]"<< ", ["<< supp.xmin[1]<< "," << supp.xmax[1]<< "]x["<< supp.ymin[1]
-           << ","<< supp.ymax[1]<< "]"<< ", ["<< supp.xmin[2]<< ","<< supp.xmax[2]<< "]x["<< supp.ymin[2]<< ","<< supp.ymax[2]<< "])"<< endl;
-    Lambda.insert(lambda);
-//    cout << lambda << ", " << lambda.number() << endl;
-    if(lambda==frame.last_quarklet(5,p)){
-            ++p;
-            lambda=frame.first_generator(frame.j0(), p, counter+1);
-        }
-            else
-                ++lambda;
+  typedef CubeFrame::Support CubeSupport;
+  Support supp, supp2;
+  CubeSupport cubesupp;
     
-    counter++;
-//    if (lambda == frame.last_quarklet(frame.j0())) break;
-  }
-  cout << "Test" << endl;
-  polynomial_type p2(2,3);
-  level_type j2(2,3);
-  Support supp;
-  Index lambda2 = frame.first_generator(frame.j0(), p2);
-  Index lambda3 = frame.first_quarklet(j2);
-  intersect_supports(frame,lambda2,lambda3,supp);
-  cout << "("<< supp.j[0] << "," << supp.j[1] << ", [" << supp.xmin[0]  << "," << supp.xmax[0]<< "]x["   << supp.ymin[0]<< "," << supp.ymax[0]<< "]"<< ", ["<< supp.xmin[1]<< "," << supp.xmax[1]<< "]x["<< supp.ymin[1]
-       << ","<< supp.ymax[1]<< "]"<< ", ["<< supp.xmin[2]<< ","<< supp.xmax[2]<< "]x["<< supp.ymin[2]<< ","<< supp.ymax[2]<< "])"<< endl;
+  intersect_supports(cubeeq.frame(), lambdacube, mucube, cubesupp);
+    //    cout << "some tests: " << eq.frame().get_jmax() << eq.frame().j0() << endl;
+     cout << "wichtig evaluate quarklet with index " << lambdacube << ", " << mucube << endl;
+    cout << "j[0]: " << cubesupp.j[0] << ", j[1]: " << cubesupp.j[1] << endl;
+    cout << "[" << cubesupp.a[0] <<" , " <<cubesupp.b[0]<<"]x["<<cubesupp.a[1]<<" , "<<cubesupp.b[1]<<"]"<<  endl;
+//    cout << "Cube: " << cubeeq.a(lambdacube,lambdacube) << ", LDomain: " << eq.a(lambdal,lambdal) << endl;   
+    
+    
+//    support(eq.frame(),lambdal,supp);
+////    support(eq.frame(),lambdal,supp);
+//    //intersect_supports(frame,frame.get_quarklet(27),frame.get_quarklet(29),supp);
+//    cout << "wichtig evaluate quarklet with index " << lambdal << endl;
+//    cout << "j[0]: " << supp.j[0] << ", j[1]: " << supp.j[1] << endl;
+//    cout << "patch 0: [" << supp.xmin[0] <<" , " <<supp.xmax[0]<<"]x["<<supp.ymin[0]<<" , "<<supp.ymax[0]<<"]"<<  endl;
+//    cout << "patch 1: [" << supp.xmin[1] <<" , " <<supp.xmax[1]<<"]x["<<supp.ymin[1]<<" , "<<supp.ymax[1]<<"]"<<  endl;
+//    cout << "patch 2: [" << supp.xmin[2] <<" , " <<supp.xmax[2]<<"]x["<<supp.ymin[2]<<" , "<<supp.ymax[2]<<"]"<<  endl;
+//  
+//  
+  intersect_supports(eq.frame(), lambdal, mul, supp2);
+  cout << "intersect support: " << endl;
+    cout << "j[0]: " << supp2.j[0] << ", j[1]: " << supp2.j[1] << endl;
+    cout << "patch 0: [" << supp2.xmin[0] <<" , " <<supp2.xmax[0]<<"]x["<<supp2.ymin[0]<<" , "<<supp2.ymax[0]<<"]"<<  endl;
+    cout << "patch 1: [" << supp2.xmin[1] <<" , " <<supp2.xmax[1]<<"]x["<<supp2.ymin[1]<<" , "<<supp2.ymax[1]<<"]"<<  endl;
+    cout << "patch 2: [" << supp2.xmin[2] <<" , " <<supp2.xmax[2]<<"]x["<<supp2.ymin[2]<<" , "<<supp2.ymax[2]<<"]"<<  endl;
+//    eq.a(lambdal,lambdal);
+    cout << "Cube: " << cubeeq.a(lambdacube,mucube) << ", LDomain: " << eq.a(lambdal,mul) << endl;
+    
+    eq.norm_A();
+//    cubeeq.norm_A();
+    cout << "Norm: " << eq.norm_A() << ", Norm_Inv: " << eq.norm_Ainv() << endl;
+  
+  
+  
+  
+  
+  
+//  Support suppconst;
+//  suppconst.j[0]=0, suppconst.j[1]=0;
+//  for(int i=0;i<3;i++){
+//      suppconst.xmin[i]=0, suppconst.xmax[i]=0,suppconst.ymin[i]=0,suppconst.ymax[i]=0;
+//  }
+//  
+//  
+//  set<Index> Lambda;
+//  int counter = 0;
+//  for (Index lambda = frame.first_generator(frame.j0());counter<=3000;) {
+//      Support supp = suppconst;
+//      frame.support(lambda,supp);
+//      cout << "("<< supp.j[0] << "," << supp.j[1] << ", [" << supp.xmin[0]  << "," << supp.xmax[0]<< "]x["   << supp.ymin[0]<< "," << supp.ymax[0]<< "]"<< ", ["<< supp.xmin[1]<< "," << supp.xmax[1]<< "]x["<< supp.ymin[1]
+//           << ","<< supp.ymax[1]<< "]"<< ", ["<< supp.xmin[2]<< ","<< supp.xmax[2]<< "]x["<< supp.ymin[2]<< ","<< supp.ymax[2]<< "])"<< endl;
+//    Lambda.insert(lambda);
+////    cout << lambda << ", " << lambda.number() << endl;
+//    if(lambda==frame.last_quarklet(5,p)){
+//            ++p;
+//            lambda=frame.first_generator(frame.j0(), p, counter+1);
+//        }
+//            else
+//                ++lambda;
+//    
+//    counter++;
+////    if (lambda == frame.last_quarklet(frame.j0())) break;
+//  }
+//  cout << "Test" << endl;
+//  polynomial_type p2(0,0);
+//  level_type j2(2,3);
+//  Support supp;
+//  Index lambda2 = frame.first_generator(frame.j0(), p2);
+//  Index lambda3 = frame.first_quarklet(j2,p2);
+//  intersect_supports(frame,lambda2,lambda3,supp);
+//  cout << "("<< supp.j[0] << "," << supp.j[1] << ", [" << supp.xmin[0]  << "," << supp.xmax[0]<< "]x["   << supp.ymin[0]<< "," << supp.ymax[0]<< "]"<< ", ["<< supp.xmin[1]<< "," << supp.xmax[1]<< "]x["<< supp.ymin[1]
+//       << ","<< supp.ymax[1]<< "]"<< ", ["<< supp.xmin[2]<< ","<< supp.xmax[2]<< "]x["<< supp.ymin[2]<< ","<< supp.ymax[2]<< "])"<< endl;
 //  cout << lambda2 << ", " << lambda2.number() << endl;
+  
+  
+//  plot one function
+    polynomial_type p2(0,0);
+    level_type j2(3,3);
+    Array1D<SampledMapping<2> > eval(3);
+//    Index ind=frame.last_quarklet(j2,p2); 
+    Index ind=frame.get_quarklet(588);   //0-26:generatoren auf patches,
+                                        //27-32:überlappende generatoren, indiziert mit p=3,4
+                                        //
+    cout << "evaluate quarklet with index " << ind << endl;
+    eval=frame.evaluate(ind,6);
+    std::ofstream os("Ldomainoutput.m");
+    os << "clf;" << endl;
+    os << "axis([-1 1 -1 1 0 1]);" << endl;
+    for(int i=0;i<3;i++){
+        eval[i].matlab_output(os);
+        os << "surf(x,y,z);" << endl;
+        
+        os << "hold on;" << endl;
+    }
+    os << "view(30,55);"<<endl;
+    os << "hold off" << endl;
+    os.close(); 
+    
+//        cout << "support of quarklet on patches:"  << endl;
+//    Support supp;
+//    frame.support(ind, supp);
+//    //intersect_supports(frame,frame.get_quarklet(27),frame.get_quarklet(29),supp);
+//    cout << "j[0]: " << supp.j[0] << ", j[1]: " << supp.j[1] << endl;
+//    cout << "patch 0: [" << supp.xmin[0] <<" , " <<supp.xmax[0]<<"]x["<<supp.ymin[0]<<" , "<<supp.ymax[0]<<"]"<<  endl;
+//    cout << "patch 1: [" << supp.xmin[1] <<" , " <<supp.xmax[1]<<"]x["<<supp.ymin[1]<<" , "<<supp.ymax[1]<<"]"<<  endl;
+//    cout << "patch 2: [" << supp.xmin[2] <<" , " <<supp.xmax[2]<<"]x["<<supp.ymin[2]<<" , "<<supp.ymax[2]<<"]"<<  endl;
+    
+//    const char* filenameSolution2 = "dim1output.m";
+//    Index1D lambda1D(0,4,1,15,&frame1D_11);
+//    InfiniteVector<double, Index1D> u_epsilon;
+//    u_epsilon[lambda1D]=1;
+////    u_epsilon.scale(&ceq, -1);
+//    SampledMapping<1> s2(evaluate(frame1D_11, u_epsilon, true, 7));
+//    std::ofstream u_stream2(filenameSolution2);
+//    s2.matlab_output(u_stream2);
+//    u_stream2 << "figure;\nplot(x,y);"
+//              << "title('Testausgabe');"
+//              << endl;
+//
+//    u_stream2.close();
+//    cout << "Kontrolle: mit RB: " << frame1D_11.j0() << ", ohne RB: " << frame1D.j0() << endl;
+     
+
   
 #endif
 #ifdef BASIS

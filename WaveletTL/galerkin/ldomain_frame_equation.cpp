@@ -618,7 +618,7 @@ namespace WaveletTL
 //        cout << "patch 2: [" << supp.xmin[2]  <<" , " <<supp.xmax[2] <<"]x["<<supp.ymin[2] <<" , "<<supp.ymax[2] <<"]"<<  endl;
         
         //determine on which patch lambda lies
-        const bool extended=(lambda.patch()>2) ? 1 : 0;
+//        const bool extended=(lambda.patch()>2) ? 1 : 0;
         const int mother_patch=(lambda.patch()==3) ? 0: (lambda.patch()==4 ? 2: lambda.patch());
         //cout << "extended: "<<extended<<endl;
         //cout << "mother_patch: "<<mother_patch<<endl;

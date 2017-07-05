@@ -28,87 +28,145 @@ namespace WaveletTL
     j0_[1] = frame1d_11_.j0();
   }
 
+  template <class IFRAME>
+  const int
+  LDomainFrame<IFRAME>::Deltasize(const int j) const {
+    const unsigned int Deltaj = frame1d().Deltasize(j);
+    return 3*(Deltaj-2)*(Deltaj-2)+2*(Deltaj-2);
+  }
+
+//  template <class IBASIS>
+//  const int
+//  LDomainBasis<IBASIS>::Nabla01size(const int j) const {
+//    return (3*basis1d().Deltasize(j)-5)*(1<<j);
+//  }
+//  
+//  template <class IBASIS>
+//  const int
+//  LDomainBasis<IBASIS>::Nabla10size(const int j) const {
+//    return (3*basis1d().Deltasize(j)-5)*(1<<j);
+//  }
+//  
+//  template <class IBASIS>
+//  const int
+//  LDomainBasis<IBASIS>::Nabla11size(const int j) const {
+//    return 3*(1<<(2*j));
+//  }
 
   
   template <class IFRAME>
   typename LDomainFrame<IFRAME>::Index
-  LDomainFrame<IFRAME>::first_generator(const level_type& j, const polynomial_type& p, const int& number) const
+  LDomainFrame<IFRAME>::first_generator(const level_type& j, const polynomial_type& p) const
   {
-    assert(j >= j0());
+    assert(j >= j0_);
 
     typename Index::type_type e;
 
     // setup lowest translation index for e=(0,0), p=0
     typename Index::translation_type k(frame1d().DeltaLmin()+1, frame1d().DeltaLmin()+1);
     
-    return Index(p,j, e, 0, k, number, this);
+//   if(number==-1)
+        return Index(p,j, e, 0, k, p.number()* Nablasize_, this);
+//    else
+//        return Index(p,j, e, 0, k, number, this);
   }
 
   template <class IFRAME>
   typename LDomainFrame<IFRAME>::Index
   LDomainFrame<IFRAME>::last_generator(const level_type& j, const polynomial_type& p) const
   {
-    assert(j >= j0());
+    assert(j >= j0_);
 
     typename Index::type_type e;
 
     // setup highest translation index for e=(0,0), p=4
-    typename Index::translation_type k(0, frame1d().DeltaRmax(j)-1);
+    typename Index::translation_type k(0, frame1d().DeltaRmax(j[1])-1);
     
-    return Index(p,j, e, 4, k, 0, this);
+    return Index(p,j, e, 4, k, p.number()* Nablasize_+Deltasize(j[0])-1, this);
   }
 
   template <class IFRAME>
   typename LDomainFrame<IFRAME>::Index
-  LDomainFrame<IFRAME>::first_quarklet(const level_type& j, const polynomial_type& p) const
+  LDomainFrame<IFRAME>::first_quarklet(const level_type& j, const polynomial_type& p, const int& number) const
   {
     assert(j >= j0());
 
-    typename Index::type_type e(0, 1);
-
-    // setup lowest translation index for e=(0,1), p=0
-    typename Index::translation_type k(frame1d().DeltaLmin()+1, frame1d().Nablamin()+1);
-    
-    return Index(p,j, e, 0, k, 0, this);
-  }
-
-  template <class IFRAME>
-  typename LDomainFrame<IFRAME>::Index
-  LDomainFrame<IFRAME>::first_quarklet(const level_type& j, const type_type& e, const polynomial_type& p) const
-  {
-    assert(j >= j0());
-    
-//    typename Index::type_type e(ewish);
-    
-    // setup lowest translation index appropriately 
+    typename Index::type_type e;
     typename Index::translation_type k;
-    const int ecode(e[0]+2*e[1]);
-    if (ecode == 0) {
-      // e = (0,0)
-      k[0] = k[1] = frame1d().DeltaLmin()+1;
-    } else {
-      if (ecode == 1) {
-	// e = (1,0)
-	k[0] = frame1d().Nablamin()+1;
-	k[1] = frame1d().DeltaLmin()+1;
-      } else {
-	if (ecode == 2) {
-	  // e = (0,1)
-	  k[0] = frame1d().DeltaLmin()+1;
-	  k[1] = frame1d().Nablamin()+1;
-	} else {
-	  // e = (1,1)
-	  k[0] = k[1] = frame1d().Nablamin()+1;
-	}
-      }
+    
+    bool sofar_only_generators = true;
+    
+    if (j[0] == j0_[0])
+    {
+        e[0] = 0;
+        k[0] = frame1d().DeltaLmin()+1;
+    } else
+    {
+        e[0] = 1;
+        k[0] = frame1d().Nablamin();
+        sofar_only_generators = false;
     }
     
-    return Index(p,j, e, 0, k, 0, this);
+    if ( (sofar_only_generators == true) || (j[1] != j0_[0]) )
+    {
+        e[1] = 1;
+        k[1] = frame1d().Nablamin()+1;
+        //sofar_only_generators = false;
+    } else
+    {
+        e[1] = 0;
+        k[1] = frame1d().DeltaLmin()+1;
+    }
+    
+    if (number==-1)
+    {
+        level_type jdiff;
+        jdiff[0]= j[0]-j0_[0], jdiff[1]= j[1]-j0_[1];
+        int level = jdiff.number();
+        int altnumber = p.number()* Nablasize_+first_wavelet_numbers[level];
+        return Index(p,j, e, 0, k, altnumber, this);
+    }
+    else
+       return Index(p,j, e, 0, k, number, this); 
   }
+
+//  template <class IFRAME>
+//  typename LDomainFrame<IFRAME>::Index
+//  LDomainFrame<IFRAME>::first_quarklet(const level_type& j, const type_type& e, const polynomial_type& p) const
+//  {
+//    assert(j >= j0());
+//    
+////    typename Index::type_type e(ewish);
+//    
+//    // setup lowest translation index appropriately 
+//    typename Index::translation_type k;
+//    const int ecode(e[0]+2*e[1]);
+//    if (ecode == 0) {
+//      // e = (0,0)
+//      k[0] = k[1] = frame1d().DeltaLmin()+1;
+//    } else {
+//      if (ecode == 1) {
+//	// e = (1,0)
+//	k[0] = frame1d().Nablamin()+1;
+//	k[1] = frame1d().DeltaLmin()+1;
+//      } else {
+//	if (ecode == 2) {
+//	  // e = (0,1)
+//	  k[0] = frame1d().DeltaLmin()+1;
+//	  k[1] = frame1d().Nablamin()+1;
+//	} else {
+//	  // e = (1,1)
+//	  k[0] = k[1] = frame1d().Nablamin()+1;
+//	}
+//      }
+//    }
+//    
+//    return Index(p,j, e, 0, k, 0, this);
+//  }
 
   template <class IFRAME>
   typename LDomainFrame<IFRAME>::Index
-  LDomainFrame<IFRAME>::last_quarklet(const level_type& j, const polynomial_type& p) const
+  LDomainFrame<IFRAME>::last_quarklet(const level_type& j, const polynomial_type& p, const int& number) const
   {
     assert(j >= j0());
     
@@ -116,23 +174,48 @@ namespace WaveletTL
 
     // setup highest translation index for e=(1,1), p=2
     typename Index::translation_type k(0, frame1d().Nablamax(j[1]));
+//    cout << "in last_quarklet level_type" << endl;
+    if (number==-1)
+    {
+        level_type jdiff;
+        jdiff[0]= j[0]-j0_[0], jdiff[1]= j[1]-j0_[1];
+        int level = jdiff.number();
+        int altnumber = p.number()* Nablasize_+last_wavelet_numbers[level];
+        return Index(p,j, e, 4, k, altnumber, this);
+    }
+    else
     
-    return Index(p,j, e, 4, k, 0, this);
+       return Index(p,j, e, 4, k, number, this);
   }
   
   template <class IFRAME>
   typename LDomainFrame<IFRAME>::Index
-  LDomainFrame<IFRAME>::last_quarklet(const int levelsum, const polynomial_type& p) const
+  LDomainFrame<IFRAME>::last_quarklet(const int levelsum, const polynomial_type& p, const int& number) const
   {
-    assert(levelsum >= (int) multi_degree(j0()));
+    assert(levelsum >= (int) multi_degree(j0_));
     
     typename Index::type_type e(1, 1);
     typename Index::level_type j(levelsum - j0_[0],  j0_[0]);
 
     // setup highest translation index for e=(1,1), p=2
     typename Index::translation_type k(0, frame1d().Nablamax(j[1]));
-    
-    return Index(p,j, e, 4, k, 0, this);
+//    cout << "in last_quarklet" << endl;
+    if (number==-1)
+    {
+//        cout << "altnumber" << endl;
+//        cout << "j: " << j << ", j.number" << j.number() << endl;
+//        cout << "j0_: " << j0_ <<", j0_.number" << j0_.number() << endl;
+        level_type jdiff;
+        jdiff[0]= j[0]-j0_[0], jdiff[1]= j[1]-j0_[1];
+        int level = jdiff.number();
+//        cout << "level: " << level << endl;
+        int altnumber = p.number()* Nablasize_+last_wavelet_numbers[level];
+        return Index(p,j, e, 4, k, altnumber, this);
+    }
+    else{
+//        cout << "number" << endl;
+       return Index(p,j, e, 4, k, number, this); 
+    }
   }
   
 
@@ -545,21 +628,40 @@ namespace WaveletTL
     
     cout << "setting up collection of quarklet indices..." << endl;
 
-
+    MultiIndex<int,2> level_it;
+    level_it[0] = jmax_ - multi_degree(j0());
+    const int numoflevels = level_it.number() + 1;
+    level_it[0] = 0;
+    first_wavelet_numbers.resize(numoflevels);
+    last_wavelet_numbers.resize(numoflevels);
     
-    typename Index::polynomial_type p(0,0), pmax(pmax_,0);
+    typename Index::polynomial_type p(0,0), pmax(pmax_,0), pmin(0,0);
     set<Index> Lambda;
+    int waveletlevel=0;
     Index ind = first_generator(j0_, p);
     for (int k = 0;; k++) {
 //        full_collection[k] = ind;
         Lambda.insert(ind);
 //        cout << ind << ", " << ind.number() << endl;
- 
-        if(ind==last_quarklet(jmax_, p)){
+        if(ind==first_quarklet(ind.j(),pmin,k)){
+                first_wavelet_numbers[waveletlevel]=k;
+//                cout << "first: " << k << endl;
+        }
+        if(ind==last_quarklet(ind.j(),pmin,k)){
+            last_wavelet_numbers[waveletlevel]=k;
+//            cout << "last: " << k << endl;
+            waveletlevel++;
+        }
+        if(ind==last_quarklet(jmax_, p,k)){
+            if(multi_degree(p)==0){
+//                cout << "Nablasize wird gesetzt auf " << k+1 << endl;
+                Nablasize_=k+1;
+            }
             if(p==pmax)
                 break;
+            
             ++p;
-            ind=first_generator(j0_, p, k+1);
+            ind=first_generator(j0_, p);
         }
             else
                 ++ind;
@@ -571,6 +673,7 @@ namespace WaveletTL
         full_collection[i] = *it;
 //        cout << *it << ", " << (*it).number() << endl;
     }
+//    cout << "Nablasize in setup: " << Nablasize_ << endl;
     
     cout << "done setting up collection of quarklet indices..." << endl;
     cout << "total degrees of freedom between j0_ = " << j0_ << " and (jmax_= " << jmax_ << ", pmax_= " << pmax_ << ") is " << full_collection.size() << endl;

@@ -1,3 +1,6 @@
+
+#include "ldomain_frame_index.h"
+
 // implementation for ldomain_frame_support.h
 
 namespace WaveletTL
@@ -118,7 +121,7 @@ namespace WaveletTL
   template <class IFRAME>
   void intersecting_quarklets(const LDomainFrame<IFRAME>& frame,
 			     const typename LDomainFrame<IFRAME>::Index& lambda,
-			     const typename LDomainFrameIndex<IFRAME>::level_type& j, const bool generators,
+			     const typename LDomainFrameIndex<IFRAME>::level_type& j,
 			     std::list<typename LDomainFrame<IFRAME>::Index>& intersecting,
                              const typename LDomainFrameIndex<IFRAME>::polynomial_type& p)
   {
@@ -131,16 +134,19 @@ namespace WaveletTL
     support(frame, lambda, supp_lambda);
     
     // a brute force solution
-    if (generators) {
-      Index last_gen(last_generator<IFRAME>(&frame, j, p));
+    if (j==frame.j0()) {
+      Index last_qua(last_quarklet<IFRAME>(&frame, j, p));
       for (Index mu = first_generator<IFRAME>(&frame, j, p);; ++mu) {
 	if (intersect_supports(frame, mu, supp_lambda, supp))
 	  intersecting.push_back(mu);
-	if (mu == last_gen) break;
+	if (mu == last_qua) break;
       }
     } else {
       Index last_qua(last_quarklet<IFRAME>(&frame, j, p));
+//      cout << "First quarklet: " << first_quarklet<IFRAME>(&frame, j, p) << endl;
+//      cout << "Last quarklet: " << last_qua << endl;
       for (Index mu = first_quarklet<IFRAME>(&frame, j, p);; ++mu) {
+//          cout << "Mu: " << mu << ", " << mu.number() << endl;
 	if (intersect_supports(frame, mu, supp_lambda, supp))
 	  intersecting.push_back(mu);
 	if (mu == last_qua) break;

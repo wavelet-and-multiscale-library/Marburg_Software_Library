@@ -557,7 +557,7 @@ namespace WaveletTL
   
   template <class IFRAME>
   LDomainFrameIndex<IFRAME>
-  first_generator(const LDomainFrame<IFRAME>* frame, const typename LDomainFrameIndex<IFRAME>::level_type& j, const typename LDomainFrameIndex<IFRAME>::polynomial_type& p, const int number)
+  first_generator(const LDomainFrame<IFRAME>* frame, const typename LDomainFrameIndex<IFRAME>::level_type& j, const typename LDomainFrameIndex<IFRAME>::polynomial_type& p)
   {
     assert(j >= frame->j0());
 
@@ -566,24 +566,24 @@ namespace WaveletTL
     // setup lowest translation index for e=(0,0), p=0
     typename LDomainFrameIndex<IFRAME>::translation_type k(frame->frame1d().DeltaLmin()+1,
 						      frame->frame1d().DeltaLmin()+1);
-    if (number==-1)
-        return LDomainFrameIndex<IFRAME>(p,j, e, 0, k, p.number()*frame->degrees_of_freedom(), frame);
-    else
-        return LDomainFrameIndex<IFRAME>(p,j, e, 0, k, number, frame);
+    
+        return LDomainFrameIndex<IFRAME>(p,j, e, 0, k, p.number()* frame->get_Nablasize(), frame);
+    
+//        return LDomainFrameIndex<IFRAME>(p,j, e, 0, k, number, frame);
   }
 
   template <class IFRAME>
   LDomainFrameIndex<IFRAME>
   last_generator(const LDomainFrame<IFRAME>* frame, const typename LDomainFrameIndex<IFRAME>::level_type& j,const typename LDomainFrameIndex<IFRAME>::polynomial_type& p )
   {
-    assert(j >= frame->j0());
+    assert(j >= frame->j0() && j[0]==j[1]);
 
     typename LDomainFrameIndex<IFRAME>::type_type e;
 
     // setup highest translation index for e=(0,0), p=4
-    typename LDomainFrameIndex<IFRAME>::translation_type k(0, frame->frame1d().DeltaRmax(j)-1);
+    typename LDomainFrameIndex<IFRAME>::translation_type k(0, frame->frame1d().DeltaRmax(j[1])-1);
     
-    return LDomainFrameIndex<IFRAME>(p,j, e, 4, k, frame);
+    return LDomainFrameIndex<IFRAME>(p,j, e, 4, k, p.number()* frame->get_Nablasize()+frame->Deltasize(j[0])-1, frame);
   }
 
   template <class IFRAME>
@@ -592,51 +592,81 @@ namespace WaveletTL
   {
     assert(j >= frame->j0());
 
-    typename LDomainFrameIndex<IFRAME>::type_type e(0, 1);
-
-    // setup lowest translation index for e=(0,1), p=0
-    typename LDomainFrameIndex<IFRAME>::translation_type k(frame->frame1d().DeltaLmin()+1,
-						      frame->frame1d().Nablamin()+1);
-    
-    return LDomainFrameIndex<IFRAME>(p, j, e, 0, k, frame);
-  }
-
-  template <class IFRAME>
-  LDomainFrameIndex<IFRAME>
-  first_quarklet(const LDomainFrame<IFRAME>* frame,
-		const typename LDomainFrameIndex<IFRAME>::level_type& j,
-		const typename LDomainFrameIndex<IFRAME>::type_type& e,
-                const typename LDomainFrameIndex<IFRAME>::polynomial_type& p)
-  {
-    assert(j >= frame->j0());
-
-//    typename LDomainFrameIndex<IFRAME>::type_type e(ewish);
-    
-    // setup lowest translation index appropriately
+    typename LDomainFrameIndex<IFRAME>::type_type e;
     typename LDomainFrameIndex<IFRAME>::translation_type k;
-    const int ecode(e[0]+2*e[1]);
-    if (ecode == 0) {
-      // e = (0,0)
-      k[0] = k[1] = frame->frame1d().DeltaLmin()+1;
-    } else {
-      if (ecode == 1) {
-	// e = (1,0)
-	k[0] = frame->frame1d().Nablamin()+1;
-	k[1] = frame->frame1d().DeltaLmin()+1;
-      } else {
-	if (ecode == 2) {
-	  // e = (0,1)
-	  k[0] = frame->frame1d().DeltaLmin()+1;
-	  k[1] = frame->frame1d().Nablamin()+1;
-	} else {
-	  // e = (1,1)
-	  k[0] = k[1] = frame->frame1d().Nablamin()+1;
-	}
-      }
+    typename LDomainFrameIndex<IFRAME>::level_type jdiff;
+    /*(frame->frame1d().DeltaLmin()+1,
+						      frame->frame1d().Nablamin()+1);*/
+    
+    bool sofar_only_generators = true;
+    
+    if (j[0] == frame->j0()[0] )
+    {
+        e[0] = 0;
+        k[0] = frame->frame1d().DeltaLmin()+1;
+    } else
+    {
+        e[0] = 1;
+        k[0] = frame->frame1d().Nablamin();
+        sofar_only_generators = false;
     }
     
-    return LDomainFrameIndex<IFRAME>(p, j, e, 0, k, frame);
+    if ( (sofar_only_generators == true) || (j[1] != frame->j0()[1]) )
+    {
+        e[1] = 1;
+        k[1] = frame->frame1d().Nablamin()+1;
+        //sofar_only_generators = false;
+    } else
+    {
+        e[1] = 0;
+        k[1] = frame->frame1d().DeltaLmin()+1;
+    }
+    
+    jdiff[0]= j[0]-frame->j0()[0], jdiff[1]= j[1]-frame->j0()[1];
+    int level = jdiff.number();
+    int number = p.number()* frame->get_Nablasize()+frame->get_first_wavelet_numbers()[level];
+    
+    
+    
+    return LDomainFrameIndex<IFRAME>(p, j, e, 0, k, number, frame);
   }
+
+//  template <class IFRAME>
+//  LDomainFrameIndex<IFRAME>
+//  first_quarklet(const LDomainFrame<IFRAME>* frame,
+//		const typename LDomainFrameIndex<IFRAME>::level_type& j,
+//		const typename LDomainFrameIndex<IFRAME>::type_type& e,
+//                const typename LDomainFrameIndex<IFRAME>::polynomial_type& p)
+//  {
+//    assert(j >= frame->j0());
+//
+////    typename LDomainFrameIndex<IFRAME>::type_type e(ewish);
+//    
+//    // setup lowest translation index appropriately
+//    typename LDomainFrameIndex<IFRAME>::translation_type k;
+//    const int ecode(e[0]+2*e[1]);
+//    if (ecode == 0) {
+//      // e = (0,0)
+//      k[0] = k[1] = frame->frame1d().DeltaLmin()+1;
+//    } else {
+//      if (ecode == 1) {
+//	// e = (1,0)
+//	k[0] = frame->frame1d().Nablamin()+1;
+//	k[1] = frame->frame1d().DeltaLmin()+1;
+//      } else {
+//	if (ecode == 2) {
+//	  // e = (0,1)
+//	  k[0] = frame->frame1d().DeltaLmin()+1;
+//	  k[1] = frame->frame1d().Nablamin()+1;
+//	} else {
+//	  // e = (1,1)
+//	  k[0] = k[1] = frame->frame1d().Nablamin()+1;
+//	}
+//      }
+//    }
+//    
+//    return LDomainFrameIndex<IFRAME>(p, j, e, 0, k, frame);
+//  }
   
   template <class IFRAME>
   LDomainFrameIndex<IFRAME>
@@ -645,11 +675,16 @@ namespace WaveletTL
     assert(j >= frame->j0());
     
     typename LDomainFrameIndex<IFRAME>::type_type e(1, 1);
-
+    typename LDomainFrameIndex<IFRAME>::level_type jdiff;
+    
     // setup highest translation index for e=(1,1), p=2
     typename LDomainFrameIndex<IFRAME>::translation_type k(0,
-						      frame->frame1d().Nablamax(j));
+						      frame->frame1d().Nablamax(j[1]));
     
-    return LDomainFrameIndex<IFRAME>(p, j, e, 4, k, frame);
+    jdiff[0]= j[0]-frame->j0()[0], jdiff[1]= j[1]-frame->j0()[1];
+    int level = jdiff.number();
+    int number = p.number()* frame->get_Nablasize()+frame->get_last_wavelet_numbers()[level];
+    
+    return LDomainFrameIndex<IFRAME>(p, j, e, 4, k, number, frame);
   }
 }

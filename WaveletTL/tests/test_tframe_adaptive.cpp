@@ -225,6 +225,7 @@ int main()
     int zaehler=0;
     for (int l = 0; l < eq.frame().degrees_of_freedom(); l++) {
         Lambda.insert(lambda);
+        cout << lambda << ", Number: " << lambda.number() << endl;
         if(lambda==eq.frame().last_quarklet(jmax, p)){
             ++p;
             lambda=eq.frame().first_generator(eq.frame().j0(), p);

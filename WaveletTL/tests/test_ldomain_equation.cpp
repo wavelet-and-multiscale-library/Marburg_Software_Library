@@ -1,5 +1,12 @@
 #undef BASIS
 #define FRAME
+#ifdef FRAME
+#define _WAVELETTL_USE_TFRAME 1
+#else
+#define _WAVELETTL_USE_TBASIS 1
+#endif
+
+#define _DIM 2
 
 #include <cmath>
 #include <iostream>
@@ -28,6 +35,8 @@
 #include <galerkin/ldomain_frame_equation.h>
 #include <cube/tframe.h>
 #include <galerkin/tframe_equation.h>
+#include <galerkin/cached_quarklet_ldomain_problem.h>
+#include <adaptive/cdd2.h>
 
 
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
@@ -45,11 +54,13 @@ int main()
 {
   cout << "Testing wavelet-Galerkin solution of an elliptic equation on the L-shaped domain ..." << endl;
 
-  const int d  = 2;
-  const int dT = 2;
+  const int d  = 3;
+  const int dT = 3;
   
   const int jmax=8;
-  const int pmax=0;
+  const int pmax=1;
+  const int a = 2;
+  const int b = 2;
 //  typedef DSBasis<d,dT,BernsteinSVD> Basis1D;
   
 #ifdef FRAME
@@ -58,7 +69,7 @@ int main()
   Frame1D frame1D_11(true,true);
   
   Frame1D frame1D;
-  typedef Frame1D::Index Index1D;
+//  typedef Frame1D::Index Index1D;
   
   typedef LDomainFrame<Frame1D> LFrame;
   typedef LFrame::Index Index;
@@ -72,13 +83,31 @@ int main()
   ConstantFunction<2> rhs1(val);
   PoissonBVP<2> poisson1(&rhs1);
   LDomainFrameEquation<Frame1D,LFrame> eq(&poisson1, frame, true);
+  eq.set_jpmax(jmax, pmax);
+  CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1D,LFrame> > ceq(&eq);
+  InfiniteVector<double, Index> F_eta; 
+  ceq.RHS(1e-6, F_eta);
+////    cout << F_eta << endl;
+    const double nu = ceq.norm_Ainv() * l2_norm(F_eta);   
+//    cout << "TEST: " << l2_norm(F_eta) << ", " << ceq.norm_Ainv() << endl;
+    double epsilon = 1e-3;
+    InfiniteVector<double, Index> u_epsilon;
+    
+    //cout << eq.s_star() << endl;
+    //cout << ceq.s_star() << endl;
+    //cout << eq.space_dimension << endl;
+    //cout << ceq.space_dimension << endl;
+    CDD2_QUARKLET_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b); 
+    
   
-  frame.set_jpmax(jmax,pmax);
+  
+//  frame.set_jpmax(jmax,pmax);
 //  abort();
 //  eq.norm_A();
   
-  typedef PQFrame<d,dT> Frame1d;
+//  typedef PQFrame<d,dT> Frame1d;
 //    typedef Basis1d::Index Index1d;
+#if 0
     typedef TensorFrame<Frame1d,2> CubeFrame;
     
     typedef CubeFrame::Index CubeIndex;
@@ -87,17 +116,53 @@ int main()
     CubeFrame cubeframe(bc);
     TensorFrameEquation<Frame1d,2,CubeFrame> cubeeq(&poisson1, bc);
 //    cubeeq.norm_A();
+#endif
     MultiIndex<int,2> lp(0,0), lj(3,3), le(0,1), lk(1,0), mp(0,0), mj(3,3), me(0,0), mk(1,1);
     Index lambdal(lp,lj,le,1,lk,0,&eq.frame()), mul(mp,mj,me,1,mk,0,&eq.frame());
-//    eq.frame().suppcache()[lambdal];
-    CubeIndex lambdacube(lp,lj,le,lk,&cubeeq.frame()), mucube(mp,mj,me,mk,&cubeeq.frame());
+    
+    cout << last_generator(&ceq.frame(), lj,lp) << last_generator(&ceq.frame(), lj,lp).number() << endl;
+    cout << ceq.frame().last_generator(lj,lp) << ceq.frame().last_generator(lj,lp).number() << endl;
+    cout << first_generator(&ceq.frame(), lj,lp) << first_generator(&ceq.frame(), lj,lp).number() << endl;
+    cout << ceq.frame().first_generator(lj,lp) << ceq.frame().first_generator(lj,lp).number() << endl;
+    cout << first_quarklet(&ceq.frame(), lj,lp) << first_quarklet(&ceq.frame(), lj,lp).number() << endl;
+    cout << ceq.frame().first_quarklet(lj,lp) << ceq.frame().first_quarklet(lj,lp).number() << endl;
+    cout << last_quarklet(&ceq.frame(), lj,lp) << last_quarklet(&ceq.frame(), lj,lp).number() << endl;
+    cout << ceq.frame().last_quarklet(lj,lp) << ceq.frame().last_quarklet(lj,lp).number() << endl;
+    ceq.a(ceq.frame().get_quarklet(210),ceq.frame().get_quarklet(49));
+    
+//    cout << "Nablasize: " << ceq.frame().get_Nablasize() << endl;
+    cout << ceq.frame().get_first_wavelet_numbers()[0] << endl;
+    
+//    cout << "Cached: " << ceq.a(ceq.frame().get_quarklet(210),ceq.frame().get_quarklet(49)) << ", Uncached: " << eq.a(ceq.frame().get_quarklet(210),ceq.frame().get_quarklet(49)) << endl;
+//    ceq.norm_A();
+    double time2=0.0, tstart2; 
+    tstart2 = clock();
+    cout << "Cached: " << endl;
+    cout << "norm_A: " << ceq.norm_A() <<endl;
+    cout << "norm_Ainv: " << ceq.norm_Ainv() <<endl;
+    time2 += (clock() - tstart2)/CLOCKS_PER_SEC;
+    cout << "time = " << time2 << " sec." << endl;
+    double time1=0.0, tstart1;
+    tstart1 = clock();
+    cout << "Uncached: " << endl;
+    cout << "norm_A: " << eq.norm_A() <<endl;
+    cout << "norm_Ainv: " << eq.norm_Ainv() <<endl;
+    time1 += (clock() - tstart1)/CLOCKS_PER_SEC;
+    cout << "time = " << time1 << " sec." << endl;
+//    cout << "Cached Norms: " << ceq.norm_A() << ", " << ceq.norm_Ainv() << ", Uncached norms: " << eq.norm_A() << ", " << eq.norm_Ainv() << endl;
+
+    abort();
+    //    eq.frame().suppcache()[lambdal];
+    
 //  eq.a(lambdal,lambdal);
   
   InfiniteVector<double, Index> coeffs;
   Index lambda = frame.first_generator(frame.j0());
-  typedef LFrame::Support Support;
+//  typedef LFrame::Support Support;
+#if 0
+  CubeIndex lambdacube(lp,lj,le,lk,&cubeeq.frame()), mucube(mp,mj,me,mk,&cubeeq.frame());
   typedef CubeFrame::Support CubeSupport;
-  Support supp, supp2;
+  Support supp2;
   CubeSupport cubesupp;
     
   intersect_supports(cubeeq.frame(), lambdacube, mucube, cubesupp);
@@ -105,9 +170,10 @@ int main()
      cout << "wichtig evaluate quarklet with index " << lambdacube << ", " << mucube << endl;
     cout << "j[0]: " << cubesupp.j[0] << ", j[1]: " << cubesupp.j[1] << endl;
     cout << "[" << cubesupp.a[0] <<" , " <<cubesupp.b[0]<<"]x["<<cubesupp.a[1]<<" , "<<cubesupp.b[1]<<"]"<<  endl;
-//    cout << "Cube: " << cubeeq.a(lambdacube,lambdacube) << ", LDomain: " << eq.a(lambdal,lambdal) << endl;   
+//    cout << "Cube: " << cubeeq.a(lambdacube,lambdacube) << ", LDomain: " << eq.a(lambdal,lambdal) << endl; 
+#endif
     
-    
+//    Support supp
 //    support(eq.frame(),lambdal,supp);
 ////    support(eq.frame(),lambdal,supp);
 //    //intersect_supports(frame,frame.get_quarklet(27),frame.get_quarklet(29),supp);
@@ -117,7 +183,9 @@ int main()
 //    cout << "patch 1: [" << supp.xmin[1] <<" , " <<supp.xmax[1]<<"]x["<<supp.ymin[1]<<" , "<<supp.ymax[1]<<"]"<<  endl;
 //    cout << "patch 2: [" << supp.xmin[2] <<" , " <<supp.xmax[2]<<"]x["<<supp.ymin[2]<<" , "<<supp.ymax[2]<<"]"<<  endl;
 //  
-//  
+// 
+    
+#if 0
   intersect_supports(eq.frame(), lambdal, mul, supp2);
   cout << "intersect support: " << endl;
     cout << "j[0]: " << supp2.j[0] << ", j[1]: " << supp2.j[1] << endl;
@@ -130,6 +198,7 @@ int main()
     eq.norm_A();
 //    cubeeq.norm_A();
     cout << "Norm: " << eq.norm_A() << ", Norm_Inv: " << eq.norm_Ainv() << endl;
+#endif
   
   
   

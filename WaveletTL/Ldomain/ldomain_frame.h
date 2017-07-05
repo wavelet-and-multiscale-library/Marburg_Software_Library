@@ -74,8 +74,9 @@ namespace WaveletTL
     
     
 
-    //! geometric type of the support sets
-    typedef struct Support{
+    //! geometric type of the support sets 
+    //Maybe a constructor is necessary for correct initialization. Put it on, if errors occur @PHK
+    typedef struct /*Support*/{
       int j[2];       // granularity
       int xmin[3];
       int xmax[3];
@@ -130,7 +131,7 @@ namespace WaveletTL
     const IntervalFrame& frame1d_01() const { return frame1d_01_; }
 
 //    //! size of Delta_j
-//    const int Deltasize(const int j) const;
+    const int Deltasize(const int j) const;
 //
 //    //! sizes of the different quarklet index sets
 //    const int Nabla01size(const int j) const;
@@ -150,22 +151,22 @@ namespace WaveletTL
 //    const BlockMatrix<double>&  get_Mj1c_11  (const int j) const;
 
     //! index of first generator on level j >= j0
-    Index first_generator(const level_type& j, const polynomial_type& p = polynomial_type(), const int& number = 0) const;
+    Index first_generator(const level_type& j, const polynomial_type& p = polynomial_type()) const;
       
     //! index of last generator on level j >= j0
     Index last_generator(const level_type& j, const polynomial_type& p = polynomial_type()) const;
       
     //! index of first quarklet on level j >= j0
-    Index first_quarklet(const level_type& j, const polynomial_type& p) const;
+    Index first_quarklet(const level_type& j, const polynomial_type& p, const int& number=-1) const;
       
     //! index of first quarklet on level j >= j0 with type e
-    Index first_quarklet(const level_type& j, const type_type& e, const polynomial_type& p) const;
+//    Index first_quarklet(const level_type& j, const type_type& e, const polynomial_type& p) const;
 
     //! index of last quarklet on level j >= j0
-    Index last_quarklet(const level_type& j, const polynomial_type& p = polynomial_type()) const;
+    Index last_quarklet(const level_type& j, const polynomial_type& p = polynomial_type(), const int& number=-1) const;
     
     //! index of last quarklet on level j >= j0
-    Index last_quarklet(const int levelsum, const polynomial_type& p = polynomial_type()) const;
+    Index last_quarklet(const int levelsum, const polynomial_type& p = polynomial_type(), const int& number=-1) const;
     
 //    //! Index of last quarklet on level j >= ||j0||_1
 //    Index last_quarklet(const int levelsum, const polynomial_type& p = polynomial_type()) const;
@@ -218,14 +219,28 @@ namespace WaveletTL
             return jmax_;
         }
         
-    inline const  int get_pmax() const {
+    inline const int get_pmax() const {
         return pmax_;
     }
+    
+    inline const int get_Nablasize() const {
+        return Nablasize_;
+    }
 
+    inline const Array1D<int> get_first_wavelet_numbers() const {
+        return first_wavelet_numbers;
+    }
+    
+    inline const Array1D<int> get_last_wavelet_numbers() const {
+        return last_wavelet_numbers;
+    }
+    
     //! get the quarklet index corresponding to a specified number
     const inline Index* get_quarklet (const int number) const {
       return &full_collection[number];
     }
+    
+    
 
     //! number of quarklets between coarsest and finest level
     const int degrees_of_freedom() const { return full_collection.size(); };
@@ -234,6 +249,12 @@ namespace WaveletTL
 
 
   protected:
+      
+    /*
+    *  Collection of first and last wavelet numbers on all levels up to jmax
+    *  Precomputed for speedup
+    */
+    Array1D<int> first_wavelet_numbers, last_wavelet_numbers;
       
     //! Coarsest possible level j0
     level_type j0_;
@@ -253,6 +274,8 @@ namespace WaveletTL
     //! the interval 1d quarklet frame
     IntervalFrame frame1d_, frame1d_11_, frame1d_01_;
     
+    //! Degrees of freedom on level p=(0,0) 
+    int Nablasize_;
 
     //! support cache
 //    typedef std::map<Index,Support> SupportCache;

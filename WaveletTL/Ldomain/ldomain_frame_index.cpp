@@ -67,6 +67,7 @@ namespace WaveletTL
   LDomainFrameIndex<IFRAME>::operator ++ ()
   {
 //      cout << "DeltaLmin=" << frame_->frame1d().DeltaLmin() <<endl;
+//      cout << "DeltaRmax=" << frame_->frame1d().DeltaRmax(3) <<endl;
       num_++;
       level_type j0(frame_->j0());
     // decide whether the patch number has to be increased

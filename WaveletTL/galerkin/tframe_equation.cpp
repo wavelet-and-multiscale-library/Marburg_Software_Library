@@ -116,6 +116,10 @@ namespace WaveletTL
         Support supp;
         if (intersect_supports(frame_, lambda, mu, supp))
         {
+//            cout << "support in a-routine for index " << lambda << ", " << mu << endl;
+//    cout << "j[0]: " << supp.j[0] << ", j[1]: " << supp.j[1] << endl;
+//    
+//            cout << "Vergleichswerte Cube: [" << supp.a[0] << ", " << supp.b[0] << "] x [" << supp.a[1] << ", " << supp.b[1] <<"]" << endl;
             // setup Gauss points and weights for a composite quadrature formula:
             const int N_Gauss = (p+1)/2+(multi_degree(lambda.p())+multi_degree(mu.p())+1)/2;
             //const double h = ldexp(1.0, -supp.j); // granularity for the quadrature
@@ -146,24 +150,29 @@ namespace WaveletTL
                                                 lambda.e()[i],
                                                 lambda.k()[i],
                          gauss_points[i], psi_lambda_values[i]);
+//                cout << "Gauss Points Cube: " << gauss_points[i] << endl;
+//                cout << psi_lambda_values[i] << endl;
                 evaluate(*frame_.frames()[i], 1,
                                                 lambda.p()[i],
                                                 lambda.j()[i],
                                                 lambda.e()[i],
                                                 lambda.k()[i],
                          gauss_points[i], psi_lambda_der_values[i]);
+//                cout << psi_lambda_der_values[0] << endl;
                 evaluate(*frame_.frames()[i], 0,
                                                 mu.p()[i],
                                                 mu.j()[i],
                                                 mu.e()[i],
                                                 mu.k()[i],
                          gauss_points[i], psi_mu_values[i]);
+//                cout << psi_mu_values[i] << endl;
                 evaluate(*frame_.frames()[i], 1,
                                                 mu.p()[i],
                                                 mu.j()[i],
                                                 mu.e()[i],
                                                 mu.k()[i],
                          gauss_points[i], psi_mu_der_values[i]);
+//                cout << psi_mu_der_values[i] << endl;
             }
             // iterate over all points and sum up the integral shares
             int index[DIM]; // current multiindex for the point values

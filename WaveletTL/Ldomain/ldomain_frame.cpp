@@ -243,7 +243,7 @@ namespace WaveletTL
 	  case 0:
 	    // psi_lambda completely lives on patch 0
 	    
-	    frame1d().support(typename IFRAME::Index(lambda.p()[0],
+	    frame1d_11().support(typename IFRAME::Index(lambda.p()[0],
                                                      lambda.j()[0],
 						     lambda.e()[0],
 						     lambda.k()[0],
@@ -251,7 +251,7 @@ namespace WaveletTL
 			      supp.xmin[0],
 			      supp.xmax[0]);
 	    
-	    frame1d().support(typename IFRAME::Index(lambda.p()[1],
+	    frame1d_01().support(typename IFRAME::Index(lambda.p()[1],
                                                      lambda.j()[1],
                                                      lambda.e()[1],
 						     lambda.k()[1],
@@ -265,7 +265,7 @@ namespace WaveletTL
 	  case 1:
 	    // psi_lambda completely lives on patch 1
 	    
-	    frame1d().support(typename IFRAME::Index(lambda.p()[0],
+	    frame1d_11().support(typename IFRAME::Index(lambda.p()[0],
                                                      lambda.j()[0],
 						     lambda.e()[0],
 						     lambda.k()[0],
@@ -273,7 +273,7 @@ namespace WaveletTL
 			      supp.xmin[1],
 			      supp.xmax[1]);
 	    
-	    frame1d().support(typename IFRAME::Index(lambda.p()[1],
+	    frame1d_11().support(typename IFRAME::Index(lambda.p()[1],
                                                      lambda.j()[1],
 						     lambda.e()[1],
 						     lambda.k()[1],
@@ -287,7 +287,7 @@ namespace WaveletTL
 	  case 2:
 	    // psi_lambda completely lives on patch 2
 	    
-	    frame1d().support(typename IFRAME::Index(lambda.p()[0],
+	    frame1d_01().support(typename IFRAME::Index(lambda.p()[0],
                                                      lambda.j()[0],
 						     lambda.e()[0],
 						     lambda.k()[0],
@@ -295,7 +295,7 @@ namespace WaveletTL
 			      supp.xmin[2],
 			      supp.xmax[2]);
 	    
-	    frame1d().support(typename IFRAME::Index(lambda.p()[1],
+	    frame1d_11().support(typename IFRAME::Index(lambda.p()[1],
                                                      lambda.j()[1],
 						     lambda.e()[1],
 						     lambda.k()[1],
@@ -309,7 +309,7 @@ namespace WaveletTL
 	  case 3:
 	    // psi_lambda lives on patches 0 and 1
               
-	    frame1d().support(typename IFRAME::Index(lambda.p()[0],
+	    frame1d_11().support(typename IFRAME::Index(lambda.p()[0],
                                                      lambda.j()[0],
 						     lambda.e()[0],
 						     lambda.k()[0],
@@ -317,7 +317,7 @@ namespace WaveletTL
 			      supp.xmin[0],
 			      supp.xmax[0]);
 	    
-	    frame1d().support(typename IFRAME::Index(lambda.p()[1],
+	    frame1d_01().support(typename IFRAME::Index(lambda.p()[1],
                                                      lambda.j()[1],
 						     lambda.e()[1],
 						     (lambda.e()[1]==0?frame1d().DeltaLmin()
@@ -326,7 +326,7 @@ namespace WaveletTL
 			      supp.ymin[0],
 			      supp.ymax[0]);
 	    
-	    frame1d().support(typename IFRAME::Index(lambda.p()[0],
+	    frame1d_11().support(typename IFRAME::Index(lambda.p()[0],
                                                      lambda.j()[0],
 						     lambda.e()[0],
 						     lambda.k()[0],
@@ -334,7 +334,8 @@ namespace WaveletTL
 			      supp.xmin[1],
 			      supp.xmax[1]);
 	    
-	    frame1d().support(typename IFRAME::Index(lambda.p()[1],
+	    //mirrored, therefore we need free boundary conditions in the north
+            frame1d_10().support(typename IFRAME::Index(lambda.p()[1],
                                                      lambda.j()[1],
 						     lambda.e()[1],
 						     (lambda.e()[1]==0?frame1d().DeltaRmax(lambda.j()[1])
@@ -349,7 +350,7 @@ namespace WaveletTL
 	  case 4:
 	    // psi_lambda lives on patches 1 and 2
 	    
-	    frame1d().support(typename IFRAME::Index(lambda.p()[0],
+	    frame1d_01().support(typename IFRAME::Index(lambda.p()[0],
                                                      lambda.j()[0],
 						     lambda.e()[0],
 						     (lambda.e()[0]==0?frame1d().DeltaRmax(lambda.j()[0])
@@ -358,7 +359,7 @@ namespace WaveletTL
 			      supp.xmin[1],
 			      supp.xmax[1]);
 	    
-	    frame1d().support(typename IFRAME::Index(lambda.p()[1],
+	    frame1d_11().support(typename IFRAME::Index(lambda.p()[1],
                                                      lambda.j()[1],
 						     lambda.e()[1],
 						     lambda.k()[1],
@@ -366,7 +367,8 @@ namespace WaveletTL
 			      supp.ymin[1],
 			      supp.ymax[1]);
 	    
-	    frame1d().support(typename IFRAME::Index(lambda.p()[0],
+	    //mirrored, therefore we need free boundary conditions in the east
+            frame1d_10().support(typename IFRAME::Index(lambda.p()[0],
                                                      lambda.j()[0],
 						     lambda.e()[0],
 						     (lambda.e()[0]==0?frame1d().DeltaLmin()
@@ -375,7 +377,7 @@ namespace WaveletTL
 			      supp.xmin[2],
 			      supp.xmax[2]);
 	    
-	    frame1d().support(typename IFRAME::Index(lambda.p()[1],
+	    frame1d_11().support(typename IFRAME::Index(lambda.p()[1],
                                                      lambda.j()[1],
 						     lambda.e()[1],
 						     lambda.k()[1],
@@ -642,7 +644,7 @@ namespace WaveletTL
     for (int k = 0;; k++) {
 //        full_collection[k] = ind;
         Lambda.insert(ind);
-        cout << ind << ", " << ind.number() << endl;
+//        cout << ind << ", " << ind.number() << endl;
         if(ind==first_quarklet(ind.j(),pmin,k)){
                 first_wavelet_numbers[waveletlevel]=k;
 //                cout << "first: " << k << endl;
@@ -671,7 +673,7 @@ namespace WaveletTL
     int i = 0;
     for (typename set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, i++){
         full_collection[i] = *it;
-        cout << *it << ", " << (*it).number() << endl;
+//        cout << *it << ", " << (*it).number() << endl;
     }
 //    cout << "Nablasize in setup: " << Nablasize_ << endl;
     

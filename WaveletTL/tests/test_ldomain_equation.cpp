@@ -58,7 +58,7 @@ int main()
   const int dT = 3;
   
   const int jmax=8;
-  const int pmax=0;
+  const int pmax=1;
   const int a = 2;
   const int b = 2;
 //  typedef DSBasis<d,dT,BernsteinSVD> Basis1D;
@@ -92,7 +92,7 @@ int main()
 //    level_type j2(3,3);
     Array1D<SampledMapping<2> > eval(3);
 //    Index ind=frame.last_quarklet(j2,p2); 
-    Index ind=ceq.frame().get_quarklet(192);   //0-26:generatoren auf patches,
+    Index ind=ceq.frame().get_quarklet(7060);   //0-26:generatoren auf patches,
 //                                        //27-32:überlappende generatoren, indiziert mit p=3,4
 //                                        //
     cout << "evaluate quarklet with index " << ind << endl;
@@ -111,23 +111,23 @@ int main()
     os.close(); 
     cout << "Bilinearform Cached/Uncached: " << ceq.a(ind,ind) << ", " << eq.a(ind,ind) << endl;
     
-    abort();
-  
-  
-  
-  InfiniteVector<double, Index> F_eta; 
-  ceq.RHS(1e-6, F_eta);
-////    cout << F_eta << endl;
-    const double nu = ceq.norm_Ainv() * l2_norm(F_eta);   
-//    cout << "TEST: " << l2_norm(F_eta) << ", " << ceq.norm_Ainv() << endl;
-    double epsilon = 1e-3;
-    InfiniteVector<double, Index> u_epsilon;
     
-    //cout << eq.s_star() << endl;
-    //cout << ceq.s_star() << endl;
-    //cout << eq.space_dimension << endl;
-    //cout << ceq.space_dimension << endl;
-    CDD2_QUARKLET_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b); 
+  
+  
+  
+//  InfiniteVector<double, Index> F_eta; 
+//  ceq.RHS(1e-6, F_eta);
+//////    cout << F_eta << endl;
+//    const double nu = ceq.norm_Ainv() * l2_norm(F_eta);   
+////    cout << "TEST: " << l2_norm(F_eta) << ", " << ceq.norm_Ainv() << endl;
+//    double epsilon = 1e-3;
+//    InfiniteVector<double, Index> u_epsilon;
+//    
+//    //cout << eq.s_star() << endl;
+//    //cout << ceq.s_star() << endl;
+//    //cout << eq.space_dimension << endl;
+//    //cout << ceq.space_dimension << endl;
+//    CDD2_QUARKLET_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b); 
     
   
   
@@ -137,16 +137,21 @@ int main()
   
 //  typedef PQFrame<d,dT> Frame1d;
 //    typedef Basis1d::Index Index1d;
-#if 0
-    typedef TensorFrame<Frame1d,2> CubeFrame;
+#if 1
+    typedef TensorFrame<Frame1D,2> CubeFrame;
     
     typedef CubeFrame::Index CubeIndex;
     FixedArray1D<bool, 4> bc;
     bc[0]=true, bc[1]=true, bc[2]=true, bc[3]=true;
     CubeFrame cubeframe(bc);
-    TensorFrameEquation<Frame1d,2,CubeFrame> cubeeq(&poisson1, bc);
+    TensorFrameEquation<Frame1D,2,CubeFrame> cubeeq(&poisson1, bc);
+    CubeIndex ind2=cubeeq.frame().get_quarklet(184);
+    cout << "Cubeevaluate quarklet with index: " << ind2 << endl;
+    cout << "Bilinearform Cube: " << cubeeq.a(ind2,ind2) << endl;
 //    cubeeq.norm_A();
 #endif
+    
+    abort();
     MultiIndex<int,2> lp(0,0), lj(3,3), le(0,1), lk(1,0), mp(0,0), mj(3,3), me(0,0), mk(1,1);
     Index lambdal(lp,lj,le,1,lk,0,&eq.frame()), mul(mp,mj,me,1,mk,0,&eq.frame());
     

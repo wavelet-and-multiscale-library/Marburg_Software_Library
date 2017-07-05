@@ -177,6 +177,8 @@ namespace WaveletTL
                     }
                 }
             }
+//            cout << "Gauss Points LDomain vor Änderung xrichtung: " << gauss_points[0] << endl;
+//            cout << "Gauss Points LDomain vor Änderung yrichtung: " << gauss_points[1] << endl;
             
             // compute point values of the integrand (where we use that it is a tensor product)
             // evaluate method of the interval frame is called
@@ -249,7 +251,7 @@ namespace WaveletTL
                                                 lambda.e()[0],
                                                 lambda.k()[0],
                                         lambda_gauss_points[0], psi_lambda_values[0]);
-//                cout << "Gauss Ponts LDomain: " << lambda_gauss_points[0] << endl;
+//                cout << "Gauss Points LDomain: " << lambda_gauss_points[0] << endl;
 //                cout << psi_lambda_values[0] << endl;
                 evaluate(frame_.frame1d_11(), 1,
                                                 lambda.p()[0],

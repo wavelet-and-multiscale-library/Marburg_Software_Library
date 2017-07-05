@@ -58,7 +58,7 @@ int main()
   const int dT = 3;
   
   const int jmax=8;
-  const int pmax=1;
+  const int pmax=0;
   const int a = 2;
   const int b = 2;
 //  typedef DSBasis<d,dT,BernsteinSVD> Basis1D;
@@ -83,8 +83,38 @@ int main()
   ConstantFunction<2> rhs1(val);
   PoissonBVP<2> poisson1(&rhs1);
   LDomainFrameEquation<Frame1D,LFrame> eq(&poisson1, frame, true);
+//  cout << "DeltaLmin=" << eq.frame().frame1d().DeltaLmin() << endl; 
   eq.set_jpmax(jmax, pmax);
   CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1D,LFrame> > ceq(&eq);
+  
+  //  plot one function
+//    polynomial_type p2(0,0);
+//    level_type j2(3,3);
+    Array1D<SampledMapping<2> > eval(3);
+//    Index ind=frame.last_quarklet(j2,p2); 
+    Index ind=ceq.frame().get_quarklet(192);   //0-26:generatoren auf patches,
+//                                        //27-32:überlappende generatoren, indiziert mit p=3,4
+//                                        //
+    cout << "evaluate quarklet with index " << ind << endl;
+    eval=frame.evaluate(ind,6);
+    std::ofstream os("Ldomainoutput.m");
+    os << "clf;" << endl;
+    os << "axis([-1 1 -1 1 0 1]);" << endl;
+    for(int i=0;i<3;i++){
+        eval[i].matlab_output(os);
+        os << "surf(x,y,z);" << endl;
+        
+        os << "hold on;" << endl;
+    }
+    os << "view(30,55);"<<endl;
+    os << "hold off" << endl;
+    os.close(); 
+    cout << "Bilinearform Cached/Uncached: " << ceq.a(ind,ind) << ", " << eq.a(ind,ind) << endl;
+    
+    abort();
+  
+  
+  
   InfiniteVector<double, Index> F_eta; 
   ceq.RHS(1e-6, F_eta);
 ////    cout << F_eta << endl;
@@ -243,28 +273,7 @@ int main()
 //  cout << lambda2 << ", " << lambda2.number() << endl;
   
   
-//  plot one function
-    polynomial_type p2(0,0);
-    level_type j2(3,3);
-    Array1D<SampledMapping<2> > eval(3);
-//    Index ind=frame.last_quarklet(j2,p2); 
-    Index ind=frame.get_quarklet(588);   //0-26:generatoren auf patches,
-                                        //27-32:überlappende generatoren, indiziert mit p=3,4
-                                        //
-    cout << "evaluate quarklet with index " << ind << endl;
-    eval=frame.evaluate(ind,6);
-    std::ofstream os("Ldomainoutput.m");
-    os << "clf;" << endl;
-    os << "axis([-1 1 -1 1 0 1]);" << endl;
-    for(int i=0;i<3;i++){
-        eval[i].matlab_output(os);
-        os << "surf(x,y,z);" << endl;
-        
-        os << "hold on;" << endl;
-    }
-    os << "view(30,55);"<<endl;
-    os << "hold off" << endl;
-    os.close(); 
+
     
 //        cout << "support of quarklet on patches:"  << endl;
 //    Support supp;

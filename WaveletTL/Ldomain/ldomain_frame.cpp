@@ -80,7 +80,7 @@ namespace WaveletTL
     typename Index::type_type e;
 
     // setup highest translation index for e=(0,0), p=4
-    typename Index::translation_type k(0, frame1d().DeltaRmax(j[1])-1);
+    typename Index::translation_type k(frame1d().DeltaLmin(), frame1d().DeltaRmax(j[1])-1);
     
     return Index(p,j, e, 4, k, p.number()* Nablasize_+Deltasize(j[0])-1, this);
   }
@@ -642,7 +642,7 @@ namespace WaveletTL
     for (int k = 0;; k++) {
 //        full_collection[k] = ind;
         Lambda.insert(ind);
-//        cout << ind << ", " << ind.number() << endl;
+        cout << ind << ", " << ind.number() << endl;
         if(ind==first_quarklet(ind.j(),pmin,k)){
                 first_wavelet_numbers[waveletlevel]=k;
 //                cout << "first: " << k << endl;
@@ -671,7 +671,7 @@ namespace WaveletTL
     int i = 0;
     for (typename set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, i++){
         full_collection[i] = *it;
-//        cout << *it << ", " << (*it).number() << endl;
+        cout << *it << ", " << (*it).number() << endl;
     }
 //    cout << "Nablasize in setup: " << Nablasize_ << endl;
     

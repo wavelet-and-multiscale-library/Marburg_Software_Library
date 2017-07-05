@@ -66,10 +66,11 @@ namespace WaveletTL
   LDomainFrameIndex<IFRAME>&
   LDomainFrameIndex<IFRAME>::operator ++ ()
   {
+//      cout << "DeltaLmin=" << frame_->frame1d().DeltaLmin() <<endl;
       num_++;
       level_type j0(frame_->j0());
     // decide whether the patch number has to be increased
-    bool pplusplus = false;
+    bool patchplusplus = false;
     for (int i = 1; i >= 0; i--) {
       // determine the highest possible translation index into the i-th direction,
       // this will in general depend on the current patch number
@@ -84,11 +85,11 @@ namespace WaveletTL
 	case 3:
 	  last_index = (i == 0
 			? frame_->frame1d().DeltaRmax(j_[i])-1
-			: 0); // by convention
+			: frame_->frame1d().DeltaLmin()); // by convention
 	  break;
 	case 4:
 	  last_index = (i == 0
-			? 0 // by convention
+			? frame_->frame1d().DeltaLmin() // by convention
 			: frame_->frame1d().DeltaRmax(j_[i])-1);
 	  break;
 	}
@@ -104,11 +105,11 @@ namespace WaveletTL
             case 3:
               last_index = (i == 0
                             ? frame_->frame1d().Nablamax(j_[i])
-                            : 0); // by convention
+                            : frame_->frame1d().Nablamin()); // by convention
               break;
             case 4:
               last_index = (i == 0
-                            ? 0 // by convention
+                            ? frame_->frame1d().Nablamin() // by convention
                             : frame_->frame1d().Nablamax(j_[i]));
               break;
             }
@@ -118,22 +119,28 @@ namespace WaveletTL
       }
 
       if (k_[i] == last_index) {
+//          cout << "Hier1" << endl;
 	// reset k_[i] to the lowest possible translation index
 	if (e_[i] == 0) { // generator, 
 	  switch(patch_) {
 	  case 0:
 	  case 1:
+            k_[i] = frame_->frame1d().DeltaLmin()+1;
+//            cout << "Hier1" << endl;
 	  case 2:
 	    k_[i] = frame_->frame1d().DeltaLmin()+1;
+//            cout << "Hier2" << endl;
 	    break;
 	  case 3:
+//            cout << "Hier3" << endl;  
 	    k_[i] = (i == 0
 		     ? frame_->frame1d().DeltaLmin()+1
-		     : 0); // by convention
+		     : frame_->frame1d().DeltaLmin()); // by convention
 	    break;
 	  case 4:
+//            cout << "Hier4" << endl;  
 	    k_[i] = (i == 0
-		     ? 0 // by convention
+		     ? frame_->frame1d().DeltaLmin() // by convention
 		     : frame_->frame1d().DeltaLmin()+1);
 	    break;
 	  }
@@ -155,17 +162,17 @@ namespace WaveletTL
             case 3:
               k_[i] = (i == 0
                        ? frame_->frame1d().Nablamin()+1
-                       : 0); // by convention
+                       : frame_->frame1d().Nablamin()); // by convention
               break;
             case 4:
               k_[i] = (i == 0
-                       ? 0 // by convention
+                       ? frame_->frame1d().Nablamin() // by convention
                        : frame_->frame1d().Nablamin()+1);
               break;
             }
 //	  k_[i] = frame_->frame1d().Nablamin(); // should be 0
 	}
-	pplusplus = (i == 0);
+	patchplusplus = (i == 0);
       } else {
 	++k_[i];
 	break;
@@ -173,7 +180,7 @@ namespace WaveletTL
     }
 //    cout << k_[0] << k_[1] << endl;
     bool eplusplus = false;
-    if (pplusplus) {
+    if (patchplusplus) {
       switch (patch_) {
       case 0:
       case 1:
@@ -186,6 +193,8 @@ namespace WaveletTL
 	  else
 	    eplusplus = true; // there are no (1,1) quarklets on the interfaces
 	} else*/ patch_ = 3;
+//            cout << "Hier patch" << endl;
+            
 	break;
       case 3:
 	/*if (e_[0] == 1)
@@ -224,10 +233,14 @@ namespace WaveletTL
 	  k_[0] = (e_[0] == 0
 		   ? frame_->frame1d().DeltaLmin()+1
 		   : frame_->frame1d().Nablamin());
-	  k_[1] = 0; // by convention;
+	  k_[1] = (e_[1] == 0
+		   ? frame_->frame1d().DeltaLmin()
+		   : frame_->frame1d().Nablamin()); // by convention;
 	  break;
 	case 4:
-	  k_[0] = 0; // by convention
+	  k_[0] = (e_[0] == 0
+		   ? frame_->frame1d().DeltaLmin()
+		   : frame_->frame1d().Nablamin()); // by convention
 	  k_[1] = (e_[1] == 0
 		   ? frame_->frame1d().DeltaLmin()+1
 		   : frame_->frame1d().Nablamin());
@@ -581,7 +594,7 @@ namespace WaveletTL
     typename LDomainFrameIndex<IFRAME>::type_type e;
 
     // setup highest translation index for e=(0,0), p=4
-    typename LDomainFrameIndex<IFRAME>::translation_type k(0, frame->frame1d().DeltaRmax(j[1])-1);
+    typename LDomainFrameIndex<IFRAME>::translation_type k(frame->frame1d().DeltaLmin(), frame->frame1d().DeltaRmax(j[1])-1);
     
     return LDomainFrameIndex<IFRAME>(p,j, e, 4, k, p.number()* frame->get_Nablasize()+frame->Deltasize(j[0])-1, frame);
   }

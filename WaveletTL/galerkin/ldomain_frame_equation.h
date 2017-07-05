@@ -62,7 +62,7 @@ namespace WaveletTL
   template <class IFRAME,  class LDOMAINFRAME = LDomainFrame<IFRAME> >
   class LDomainFrameEquation
 //     : public FullyDiagonalDyadicPreconditioner<typename LDomainBasis<IBASIS>::Index>
-    : public FullyDiagonalEnergyNormPreconditioner<typename LDOMAINFRAME::Index>
+    : public FullyDiagonalQuarkletPreconditioner<typename LDOMAINFRAME::Index>
   {
   public:
       

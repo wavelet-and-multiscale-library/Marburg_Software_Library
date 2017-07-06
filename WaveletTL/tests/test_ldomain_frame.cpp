@@ -3,8 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-#define NONADAPTIVE
-#undef ADAPTIVE
+#undef NONADAPTIVE
+#define ADAPTIVE
 
 #define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
@@ -21,7 +21,7 @@
 #include <Ldomain/ldomain_frame.h>
 #include <Ldomain/ldomain_frame_evaluate.h>
 #include <galerkin/ldomain_frame_equation.h>
-//#include <galerkin/cached_lproblem.h>
+#include <galerkin/cached_quarklet_ldomain_problem.h>
 
 #include <adaptive/compression.h>
 #include <adaptive/apply.h>
@@ -87,7 +87,7 @@ int main(){
     typedef LDomainFrame<Frame1d> Frame;
     typedef Frame::Index Index;
     //Frame frame(frame1d);
-    Frame frame;
+    Frame frame(frame1d);
     frame.set_jpmax(jmax,pmax);
     
     //CornerSingularity uexact1(Point<2>(0,0), 0.5, 1.5);
@@ -98,8 +98,8 @@ int main(){
     myRHS rhs1;
     
     PoissonBVP<dim> poisson1(&rhs1);
-    LDomainFrameEquation<Frame1d,Frame> eq(&poisson1, false);
-    eq.set_jpmax(jmax,pmax,false);
+    LDomainFrameEquation<Frame1d,Frame> eq(&poisson1,frame, true);
+    eq.set_jpmax(jmax,pmax);
     
     
     Index testindex=frame.get_quarklet(71);
@@ -201,12 +201,14 @@ int main(){
     //CG(A,F,x,1e-8,maxiterations,iterations);
     cout << "iterations:" << iterations << endl;
     
-    //plot solution
+    
     InfiniteVector<double,Index> u;
     unsigned int i2 = 0;
     for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i2){
       u.set_coefficient(*it, x[i2]);
     }
+    
+    //plot solution
     //u.COARSE(1e-6,v);
     u.scale(&eq, -1);
     Array1D<SampledMapping<dim> > eval(3);
@@ -220,13 +222,40 @@ int main(){
     os2 << "view(30,55);"<<endl;
     os2 << "hold off" << endl;
     os2.close(); 
+ #endif   
+
+#ifdef ADAPTIVE
+    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq);
+    InfiniteVector<double, Index> F_eta; 
+    cproblem1.RHS(1e-6, F_eta);
+    const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
+    double epsilon = 1e-3;
+    InfiniteVector<double, Index> u_epsilon, v;
+    const double a=2;
+    const double b=2;
+    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b);
     
-    
-    
+    //plot solution
+    //u.COARSE(1e-6,v);
+    u_epsilon.scale(&cproblem1, -1);
+    Array1D<SampledMapping<dim> > eval(3);
+    eval=cproblem1.frame().evaluate(u_epsilon,6);
+    std::ofstream os2("solution_ad.m");
+    for(int i=0;i<3;i++){
+        eval[i].matlab_output(os2);
+        os2 << "surf(x,y,z);" << endl;
+        os2 << "hold on;" << endl;
+    }  
+    os2 << "view(30,55);"<<endl;
+    os2 << "hold off" << endl;
+    os2.close();
 #endif
     
+    
 
-#if 1 //test bilinearform
+    
+
+#if 0 //test bilinearform
     const int resolution=6;
     Index testindex1(testindex);
     Index testindex2=eq.frame().get_quarklet(192);
@@ -254,7 +283,7 @@ int main(){
     os.close(); 
 #endif
     
-#if 1 //test rhs
+#if 0 //test rhs
     const int resolution2=6;
     Index testindex3(testindex);
     Array1D<SampledMapping<dim> > eval3(3);
@@ -290,7 +319,7 @@ int main(){
 #endif
     
     
-#if 1
+#if 0
     //plot one function
     Array1D<SampledMapping<dim> > evalf(3);
     //Index ind=frame.get_quarklet(159);    //0-26:generatoren auf patches,

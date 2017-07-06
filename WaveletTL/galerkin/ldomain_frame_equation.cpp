@@ -146,7 +146,7 @@ namespace WaveletTL
             if(supp.xmin[2]!=-1){
                 main_patch=2;
             }
-//            cout << "Mainpatch: " << main_patch << endl;
+            //cout << "Mainpatch: " << main_patch << endl;
                     
             bool extended[2];
             extended[0]=(lambda.patch()>2) ? 1 : 0;
@@ -155,6 +155,7 @@ namespace WaveletTL
             mother_patch[0]=(lambda.patch()==3) ? 0: (lambda.patch()==4 ? 2: lambda.patch());
             mother_patch[1]=(mu.patch()==3) ? 0: (mu.patch()==4 ? 2: mu.patch());
             //due to symmetry we compute the bilinearform just on one patch
+            //if(main_patch==1 && mother_patch[0]==mother_patch[1]) cout << mother_patch[0] << endl;
             
             // setup Gauss points and weights for a composite quadrature formula:
             const int N_Gauss = (p+1)/2+(multi_degree(lambda.p())+multi_degree(mu.p())+1)/2;
@@ -163,6 +164,7 @@ namespace WaveletTL
             //compute gauss points and weights for x- and y-direction (since the quarklets are anisotropic)
             double a [2]; a[0]=supp.xmin[main_patch]; a[1]=supp.ymin[main_patch];
             double b [2]; b[0]=supp.xmax[main_patch]; b[1]=supp.ymax[main_patch];
+            //cout << "current support: ["<<a[0]<<","<<b[0]<<"]x["<<a[1]<<","<<b[1]<<"]"<<endl;
             
             //compute gauss points on main patch
             for(int i=0;i<space_dimension;i++){
@@ -179,71 +181,74 @@ namespace WaveletTL
             }
             
             // compute point values of the integrand (where we use that it is a tensor product)
+            //temp gauss points for reflection
+            FixedArray1D<Array1D<double>,space_dimension> lambda_gauss_points(gauss_points), mu_gauss_points(gauss_points);
             // evaluate method of the interval frame is called
             FixedArray1D<Array1D<double>,space_dimension> psi_lambda_values,     // values of the components of psi_lambda at gauss_points[i]
                                               psi_mu_values,         // -"-, for psi_mu
                                               psi_lambda_der_values, // values of the 1st deriv. of the components of psi_lambda at gauss_points[i]
                                               psi_mu_der_values;     // -"-, for psi_mu
             //cout << main_patch <<endl;
-            if(main_patch==0){  //both functions lie on patch 0, evaluate with 0,1 boundary conditions
-                evaluate(frame_.frame1d_11(), 0,            //in x-direction evaluate with homogeneous boundary conditions
+            switch(main_patch){
+                case 0:            //both functions lie on patch 0, evaluate with 0,1 boundary conditions
+                    evaluate(frame_.frame1d_11(), 0,            //in x-direction evaluate with homogeneous boundary conditions
                                                 lambda.p()[0],
                                                 lambda.j()[0],
                                                 lambda.e()[0],
                                                 lambda.k()[0],
                          gauss_points[0], psi_lambda_values[0]);
-                evaluate(frame_.frame1d_11(), 1,
+                    evaluate(frame_.frame1d_11(), 1,
                                                 lambda.p()[0],
                                                 lambda.j()[0],
                                                 lambda.e()[0],
                                                 lambda.k()[0],
                          gauss_points[0], psi_lambda_der_values[0]);
-                evaluate(frame_.frame1d_11(), 0,
+                    evaluate(frame_.frame1d_11(), 0,
                                                 mu.p()[0],
                                                 mu.j()[0],
                                                 mu.e()[0],
                                                 mu.k()[0],
                          gauss_points[0], psi_mu_values[0]);
-                evaluate(frame_.frame1d_11(), 1,
+                    evaluate(frame_.frame1d_11(), 1,
                                                 mu.p()[0],
                                                 mu.j()[0],
                                                 mu.e()[0],
                                                 mu.k()[0],
                          gauss_points[0], psi_mu_der_values[0]);
                 
-                evaluate(frame_.frame1d_01(), 0,                //in y-direction evaluate with asymmetric boundary conditions
+                    evaluate(frame_.frame1d_01(), 0,                //in y-direction evaluate with asymmetric boundary conditions
                                                 lambda.p()[1],
                                                 lambda.j()[1],
                                                 lambda.e()[1],
                                                 lambda.k()[1],
                          gauss_points[1], psi_lambda_values[1]);
-                evaluate(frame_.frame1d_01(), 1,
+                    evaluate(frame_.frame1d_01(), 1,
                                                 lambda.p()[1],
                                                 lambda.j()[1],
                                                 lambda.e()[1],
                                                 lambda.k()[1],
                          gauss_points[1], psi_lambda_der_values[1]);
-                evaluate(frame_.frame1d_01(), 0,
+                    evaluate(frame_.frame1d_01(), 0,
                                                 mu.p()[1],
                                                 mu.j()[1],
                                                 mu.e()[1],
                                                 mu.k()[1],
                          gauss_points[1], psi_mu_values[1]);
-                evaluate(frame_.frame1d_01(), 1,
+                    evaluate(frame_.frame1d_01(), 1,
                                                 mu.p()[1],
                                                 mu.j()[1],
                                                 mu.e()[1],
                                                 mu.k()[1],
                          gauss_points[1], psi_mu_der_values[1]);
-            }
+                    break;
             
-            //temp gauss points for reflection
-            FixedArray1D<Array1D<double>,space_dimension> lambda_gauss_points(gauss_points), mu_gauss_points(gauss_points);
+            
             //reflect gauss points
-            if(main_patch==1){
+                case 1:
                 //first assume that both functions stem from patch 1, evaluate with zero bc
-//                cout << "bin hier" << endl;
-                evaluate(frame_.frame1d_11(), 0,            
+                //cout << "bin hier" << endl;
+                
+                    evaluate(frame_.frame1d_11(), 0,            
                                                 lambda.p()[0],
                                                 lambda.j()[0],
                                                 lambda.e()[0],
@@ -251,21 +256,21 @@ namespace WaveletTL
                                         lambda_gauss_points[0], psi_lambda_values[0]);
 //                cout << "Gauss Ponts LDomain: " << lambda_gauss_points[0] << endl;
 //                cout << psi_lambda_values[0] << endl;
-                evaluate(frame_.frame1d_11(), 1,
+                    evaluate(frame_.frame1d_11(), 1,
                                                 lambda.p()[0],
                                                 lambda.j()[0],
                                                 lambda.e()[0],
                                                 lambda.k()[0],
                                         lambda_gauss_points[0], psi_lambda_der_values[0]);
 //                cout << psi_lambda_der_values[0] << endl;
-                evaluate(frame_.frame1d_11(), 0,
+                    evaluate(frame_.frame1d_11(), 0,
                                                 mu.p()[0],
                                                 mu.j()[0],
                                                 mu.e()[0],
                                                 mu.k()[0],
                                         mu_gauss_points[0], psi_mu_values[0]);
 //                cout << psi_mu_values[0] << endl;
-                evaluate(frame_.frame1d_11(), 1,
+                    evaluate(frame_.frame1d_11(), 1,
                                                 mu.p()[0],
                                                 mu.j()[0],
                                                 mu.e()[0],
@@ -273,148 +278,149 @@ namespace WaveletTL
                                         mu_gauss_points[0], psi_mu_der_values[0]);
 //                cout << psi_mu_der_values[0] << endl;
                 
-                evaluate(frame_.frame1d_11(), 0,                
+                    evaluate(frame_.frame1d_11(), 0,                
                                                 lambda.p()[1],
                                                 lambda.j()[1],
                                                 lambda.e()[1],
                                                 lambda.k()[1],
                                         lambda_gauss_points[1], psi_lambda_values[1]);
 //                cout << psi_lambda_values[1] << endl;
-                evaluate(frame_.frame1d_11(), 1,
+                    evaluate(frame_.frame1d_11(), 1,
                                                 lambda.p()[1],
                                                 lambda.j()[1],
                                                 lambda.e()[1],
                                                 lambda.k()[1],
                                         lambda_gauss_points[1], psi_lambda_der_values[1]);
 //                cout << psi_lambda_der_values[1] << endl;
-                evaluate(frame_.frame1d_11(), 0,
+                    evaluate(frame_.frame1d_11(), 0,
                                                 mu.p()[1],
                                                 mu.j()[1],
                                                 mu.e()[1],
                                                 mu.k()[1],
                                         mu_gauss_points[1], psi_mu_values[1]);
 //                cout << psi_mu_values[1] << endl;
-                evaluate(frame_.frame1d_11(), 1,
+                    evaluate(frame_.frame1d_11(), 1,
                                                 mu.p()[1],
                                                 mu.j()[1],
                                                 mu.e()[1],
                                                 mu.k()[1],
                                         mu_gauss_points[1], psi_mu_der_values[1]);
 //                cout << psi_mu_der_values[1] << endl;
-                if(mother_patch[0]==0){ //lambda has been extended from north so south, reflect gauss points in y-direction
-                    for(int i=0;i<(int)lambda_gauss_points[1].size();i++){
-                        lambda_gauss_points[1][i]=1-lambda_gauss_points[1][i];
-                    }    
+                    if(mother_patch[0]==0 && mother_patch[1]!=0){ //lambda has been extended from north so south, reflect gauss points in y-direction
+                        for(int i=0;i<(int)lambda_gauss_points[1].size();i++){
+                            lambda_gauss_points[1][i]=1-lambda_gauss_points[1][i];
+                        }    
                         //evaluate lambda with asymmetric bc in y-direction
-                    evaluate(frame_.frame1d_01(), 0,                
+                        evaluate(frame_.frame1d_01(), 0,                
                                                 lambda.p()[1],
                                                 lambda.j()[1],
                                                 lambda.e()[1],
                                                 lambda.k()[1],
                                         lambda_gauss_points[1], psi_lambda_values[1]);
-                    evaluate(frame_.frame1d_01(), 1,
+                        evaluate(frame_.frame1d_01(), 1,
                                                 lambda.p()[1],
                                                 lambda.j()[1],
                                                 lambda.e()[1],
                                                 lambda.k()[1],
                                         lambda_gauss_points[1], psi_lambda_der_values[1]);
-                    for(int i=0;i<=(int)psi_lambda_values[1].size()/2;i++){    //switch direction of values
-                        psi_lambda_values[1].swap(i,psi_lambda_values[1].size()-1-i);
-                        psi_lambda_der_values[1].swap(i,psi_lambda_der_values[1].size()-1-i);
-                    }   
-                }
-                if(mother_patch[0]==2){ //lambda has been extended from east to west, reflect gauss points in x-direction
-                    for(int i=0;i<(int)lambda_gauss_points[0].size();i++){
-                        lambda_gauss_points[0][i]=1-lambda_gauss_points[0][i];
-                    }    
+                        for(int i=0;i<=(int)psi_lambda_values[1].size()/2;i++){    //switch direction of values
+                            psi_lambda_values[1].swap(i,psi_lambda_values[1].size()-1-i);
+                            psi_lambda_der_values[1].swap(i,psi_lambda_der_values[1].size()-1-i);
+                        }   
+                    }
+                    if(mother_patch[0]==2 && mother_patch[1]!=2){ //lambda has been extended from east to west, reflect gauss points in x-direction
+                        for(int i=0;i<(int)lambda_gauss_points[0].size();i++){
+                            lambda_gauss_points[0][i]=1-lambda_gauss_points[0][i];
+                        }    
                         //evaluate lambda with asymmetric bc in x-direction, mu with zero boundary conditions
-                    evaluate(frame_.frame1d_01(), 0,            
+                        evaluate(frame_.frame1d_01(), 0,            
                                                 lambda.p()[0],
                                                 lambda.j()[0],
                                                 lambda.e()[0],
                                                 lambda.k()[0],
                                         lambda_gauss_points[0], psi_lambda_values[0]);
-                    evaluate(frame_.frame1d_01(), 1,
+                        evaluate(frame_.frame1d_01(), 1,
                                                 lambda.p()[0],
                                                 lambda.j()[0],
                                                 lambda.e()[0],
                                                 lambda.k()[0],
                                         lambda_gauss_points[0], psi_lambda_der_values[0]);
-                    for(int i=0;i<=(int)psi_lambda_values[0].size()/2;i++){    //switch direction of values
-                        psi_lambda_values[0].swap(i,psi_lambda_values[0].size()-1-i);
-                        psi_lambda_der_values[0].swap(i,psi_lambda_der_values[0].size()-1-i);
-                    }        
-                }
-                if(mother_patch[1]==0){ //mu has been extended from north so south, reflect gauss points in y-direction
-                    for(int i=0;i<(int)mu_gauss_points[1].size();i++){
-                        mu_gauss_points[1][i]=1-mu_gauss_points[1][i];
-                    }    
+                        for(int i=0;i<=(int)psi_lambda_values[0].size()/2;i++){    //switch direction of values
+                            psi_lambda_values[0].swap(i,psi_lambda_values[0].size()-1-i);
+                            psi_lambda_der_values[0].swap(i,psi_lambda_der_values[0].size()-1-i);
+                        }        
+                    }
+                    if(mother_patch[1]==0 && mother_patch[0]!=0){ //mu has been extended from north so south, reflect gauss points in y-direction
+                        for(int i=0;i<(int)mu_gauss_points[1].size();i++){
+                            mu_gauss_points[1][i]=1-mu_gauss_points[1][i];
+                        }    
                         //evaluate mu with asymmetric bc in y-direction, lambda with zero boundary conditions
-                    evaluate(frame_.frame1d_01(), 0,
+                        evaluate(frame_.frame1d_01(), 0,
                                                 mu.p()[1],
                                                 mu.j()[1],
                                                 mu.e()[1],
                                                 mu.k()[1],
                                         mu_gauss_points[1], psi_mu_values[1]);
-                    evaluate(frame_.frame1d_01(), 1,
+                        evaluate(frame_.frame1d_01(), 1,
                                                 mu.p()[1],
                                                 mu.j()[1],
                                                 mu.e()[1],
                                                 mu.k()[1],
                                         mu_gauss_points[1], psi_mu_der_values[1]);
-                    for(int i=0;i<=(int)psi_mu_values[1].size()/2;i++){    //switch direction of values
-                        psi_mu_values[1].swap(i,psi_mu_values[1].size()-1-i);
-                        psi_mu_der_values[1].swap(i,psi_mu_der_values[1].size()-1-i);
-                    }
+                        for(int i=0;i<=(int)psi_mu_values[1].size()/2;i++){    //switch direction of values
+                            psi_mu_values[1].swap(i,psi_mu_values[1].size()-1-i);
+                            psi_mu_der_values[1].swap(i,psi_mu_der_values[1].size()-1-i);
+                        }
                       
-                }
-                if(mother_patch[1]==2){ //mu has been extended from east to west, reflect gauss points in x-direction
-                    for(int i=0;i<(int)mu_gauss_points[0].size();i++){
-                        mu_gauss_points[0][i]=1-mu_gauss_points[0][i];
-                    }    
+                    }
+                    if(mother_patch[1]==2 && mother_patch[0]!=2){ //mu has been extended from east to west, reflect gauss points in x-direction
+                        for(int i=0;i<(int)mu_gauss_points[0].size();i++){
+                            mu_gauss_points[0][i]=1-mu_gauss_points[0][i];
+                        }    
                         //evaluate mu with asymmetric bc in x-direction, lambda with zero boundary conditions
-                    evaluate(frame_.frame1d_01(), 0,
+                        evaluate(frame_.frame1d_01(), 0,
                                                 mu.p()[0],
                                                 mu.j()[0],
                                                 mu.e()[0],
                                                 mu.k()[0],
                                         mu_gauss_points[0], psi_mu_values[0]);
-                    evaluate(frame_.frame1d_01(), 1,
+                        evaluate(frame_.frame1d_01(), 1,
                                                 mu.p()[0],
                                                 mu.j()[0],
                                                 mu.e()[0],
                                                 mu.k()[0],
                                         mu_gauss_points[0], psi_mu_der_values[0]);
-                    for(int i=0;i<=(int)psi_mu_values[0].size()/2;i++){    //switch direction of values
-                        psi_mu_values[0].swap(i,psi_mu_values[0].size()-1-i);
-                        psi_mu_der_values[0].swap(i,psi_mu_der_values[0].size()-1-i);
-                    } 
-                }        
-            }
+                        for(int i=0;i<=(int)psi_mu_values[0].size()/2;i++){    //switch direction of values
+                            psi_mu_values[0].swap(i,psi_mu_values[0].size()-1-i);
+                            psi_mu_der_values[0].swap(i,psi_mu_der_values[0].size()-1-i);
+                        } 
+                    }
+                    else{}
+                    break;
             
-            if(main_patch==2){  //both functions lie on patch 2, evaluate with 0,1 boundary conditions
-                evaluate(frame_.frame1d_01(), 0,            //in x-direction evaluate with asymmetric boundary conditions
+                case 2:  //both functions lie on patch 2, evaluate with 0,1 boundary conditions
+                    evaluate(frame_.frame1d_01(), 0,            //in x-direction evaluate with asymmetric boundary conditions
                                                 lambda.p()[0],
                                                 lambda.j()[0],
                                                 lambda.e()[0],
                                                 lambda.k()[0],
                          gauss_points[0], psi_lambda_values[0]);
 //                cout << psi_lambda_values[0] << endl;
-                evaluate(frame_.frame1d_01(), 1,
+                    evaluate(frame_.frame1d_01(), 1,
                                                 lambda.p()[0],
                                                 lambda.j()[0],
                                                 lambda.e()[0],
                                                 lambda.k()[0],
                          gauss_points[0], psi_lambda_der_values[0]);
 //                cout << psi_lambda_der_values[0] << endl;
-                evaluate(frame_.frame1d_01(), 0,
+                    evaluate(frame_.frame1d_01(), 0,
                                                 mu.p()[0],
                                                 mu.j()[0],
                                                 mu.e()[0],
                                                 mu.k()[0],
                          gauss_points[0], psi_mu_values[0]);
 //                cout << psi_mu_values[0] << endl;
-                evaluate(frame_.frame1d_01(), 1,
+                    evaluate(frame_.frame1d_01(), 1,
                                                 mu.p()[0],
                                                 mu.j()[0],
                                                 mu.e()[0],
@@ -422,34 +428,35 @@ namespace WaveletTL
                          gauss_points[0], psi_mu_der_values[0]);
 //                cout << psi_mu_der_values[0] << endl;
                 
-                evaluate(frame_.frame1d_11(), 0,                //in y-direction evaluate with homogeneous boundary conditions
+                    evaluate(frame_.frame1d_11(), 0,                //in y-direction evaluate with homogeneous boundary conditions
                                                 lambda.p()[1],
                                                 lambda.j()[1],
                                                 lambda.e()[1],
                                                 lambda.k()[1],
                          gauss_points[1], psi_lambda_values[1]);
 //                cout << psi_lambda_values[1] << endl;
-                evaluate(frame_.frame1d_11(), 1,
+                    evaluate(frame_.frame1d_11(), 1,
                                                 lambda.p()[1],
                                                 lambda.j()[1],
                                                 lambda.e()[1],
                                                 lambda.k()[1],
                          gauss_points[1], psi_lambda_der_values[1]);
 //                cout << psi_lambda_der_values[1] << endl;
-                evaluate(frame_.frame1d_11(), 0,
+                    evaluate(frame_.frame1d_11(), 0,
                                                 mu.p()[1],
                                                 mu.j()[1],
                                                 mu.e()[1],
                                                 mu.k()[1],
                          gauss_points[1], psi_mu_values[1]);
 //                cout << psi_mu_values[1] << endl;
-                evaluate(frame_.frame1d_11(), 1,
+                    evaluate(frame_.frame1d_11(), 1,
                                                 mu.p()[1],
                                                 mu.j()[1],
                                                 mu.e()[1],
                                                 mu.k()[1],
                          gauss_points[1], psi_mu_der_values[1]);
 //                cout << psi_mu_der_values[1] << endl;
+                    break;
             }
             
             

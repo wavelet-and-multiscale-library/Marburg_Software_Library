@@ -76,17 +76,17 @@ namespace WaveletTL
 
     //! geometric type of the support sets 
     //Maybe a constructor is necessary for correct initialization. Put it on, if errors occur @PHK
-    typedef struct /*Support*/{
+    typedef struct Support{
       int j[2];       // granularity
       int xmin[3];
       int xmax[3];
       int ymin[3];
       int ymax[3];
-//      Support() 
-//      {
-//          j[0]=0,j[1]=0,xmin[0]=0,xmin[1]=0,xmin[2]=0, xmax[0]=0, xmax[1]=0, xmax[2]=0,
-//                  ymin[0]=0,ymin[1]=0,ymin[2]=0, ymax[0]=0, ymax[1]=0, ymax[2]=0;
-//      }
+      Support() 
+      {
+          j[0]=0,j[1]=0,xmin[0]=0,xmin[1]=0,xmin[2]=0, xmax[0]=0, xmax[1]=0, xmax[2]=0,
+                  ymin[0]=0,ymin[1]=0,ymin[2]=0, ymax[0]=0, ymax[1]=0, ymax[2]=0;
+      }
       
     } Support;
     
@@ -129,7 +129,9 @@ namespace WaveletTL
     
     //! read access to the underlying 1D frame
     const IntervalFrame& frame1d_01() const { return frame1d_01_; }
-
+    
+    //! read access to the underlying 1D frame
+    const IntervalFrame& frame1d_10() const { return frame1d_10_; }
 //    //! size of Delta_j
     const int Deltasize(const int j) const;
 //
@@ -272,7 +274,7 @@ namespace WaveletTL
     Array1D<Index> full_collection;
 
     //! the interval 1d quarklet frame
-    IntervalFrame frame1d_, frame1d_11_, frame1d_01_;
+    IntervalFrame frame1d_, frame1d_11_, frame1d_01_, frame1d_10_;
     
     //! Degrees of freedom on level p=(0,0) 
     int Nablasize_;

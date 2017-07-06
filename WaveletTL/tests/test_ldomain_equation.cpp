@@ -83,21 +83,51 @@ int main()
   ConstantFunction<2> rhs1(val);
   PoissonBVP<2> poisson1(&rhs1);
   LDomainFrameEquation<Frame1D,LFrame> eq(&poisson1, frame, true);
+//  cout << "DeltaLmin=" << eq.frame().frame1d().DeltaLmin() << endl; 
   eq.set_jpmax(jmax, pmax);
   CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1D,LFrame> > ceq(&eq);
-  InfiniteVector<double, Index> F_eta; 
-  ceq.RHS(1e-6, F_eta);
-////    cout << F_eta << endl;
-    const double nu = ceq.norm_Ainv() * l2_norm(F_eta);   
-//    cout << "TEST: " << l2_norm(F_eta) << ", " << ceq.norm_Ainv() << endl;
-    double epsilon = 1e-3;
-    InfiniteVector<double, Index> u_epsilon;
+  
+  //  plot one function
+//    polynomial_type p2(0,0);
+//    level_type j2(3,3);
+    Array1D<SampledMapping<2> > eval(3);
+//    Index ind=frame.last_quarklet(j2,p2); 
+    Index ind=ceq.frame().get_quarklet(7060);   //0-26:generatoren auf patches,
+//                                        //27-32:überlappende generatoren, indiziert mit p=3,4
+//                                        //
+    cout << "evaluate quarklet with index " << ind << endl;
+    eval=frame.evaluate(ind,6);
+    std::ofstream os("Ldomainoutput.m");
+    os << "clf;" << endl;
+    os << "axis([-1 1 -1 1 0 1]);" << endl;
+    for(int i=0;i<3;i++){
+        eval[i].matlab_output(os);
+        os << "surf(x,y,z);" << endl;
+        
+        os << "hold on;" << endl;
+    }
+    os << "view(30,55);"<<endl;
+    os << "hold off" << endl;
+    os.close(); 
+    cout << "Bilinearform Cached/Uncached: " << ceq.a(ind,ind) << ", " << eq.a(ind,ind) << endl;
     
-    //cout << eq.s_star() << endl;
-    //cout << ceq.s_star() << endl;
-    //cout << eq.space_dimension << endl;
-    //cout << ceq.space_dimension << endl;
-    CDD2_QUARKLET_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b); 
+    
+  
+  
+  
+//  InfiniteVector<double, Index> F_eta; 
+//  ceq.RHS(1e-6, F_eta);
+//////    cout << F_eta << endl;
+//    const double nu = ceq.norm_Ainv() * l2_norm(F_eta);   
+////    cout << "TEST: " << l2_norm(F_eta) << ", " << ceq.norm_Ainv() << endl;
+//    double epsilon = 1e-3;
+//    InfiniteVector<double, Index> u_epsilon;
+//    
+//    //cout << eq.s_star() << endl;
+//    //cout << ceq.s_star() << endl;
+//    //cout << eq.space_dimension << endl;
+//    //cout << ceq.space_dimension << endl;
+//    CDD2_QUARKLET_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b); 
     
   
   
@@ -107,16 +137,21 @@ int main()
   
 //  typedef PQFrame<d,dT> Frame1d;
 //    typedef Basis1d::Index Index1d;
-#if 0
-    typedef TensorFrame<Frame1d,2> CubeFrame;
+#if 1
+    typedef TensorFrame<Frame1D,2> CubeFrame;
     
     typedef CubeFrame::Index CubeIndex;
     FixedArray1D<bool, 4> bc;
     bc[0]=true, bc[1]=true, bc[2]=true, bc[3]=true;
     CubeFrame cubeframe(bc);
-    TensorFrameEquation<Frame1d,2,CubeFrame> cubeeq(&poisson1, bc);
+    TensorFrameEquation<Frame1D,2,CubeFrame> cubeeq(&poisson1, bc);
+    CubeIndex ind2=cubeeq.frame().get_quarklet(184);
+    cout << "Cubeevaluate quarklet with index: " << ind2 << endl;
+    cout << "Bilinearform Cube: " << cubeeq.a(ind2,ind2) << endl;
 //    cubeeq.norm_A();
 #endif
+    
+    abort();
     MultiIndex<int,2> lp(0,0), lj(3,3), le(0,1), lk(1,0), mp(0,0), mj(3,3), me(0,0), mk(1,1);
     Index lambdal(lp,lj,le,1,lk,0,&eq.frame()), mul(mp,mj,me,1,mk,0,&eq.frame());
     
@@ -243,28 +278,7 @@ int main()
 //  cout << lambda2 << ", " << lambda2.number() << endl;
   
   
-//  plot one function
-    polynomial_type p2(0,0);
-    level_type j2(3,3);
-    Array1D<SampledMapping<2> > eval(3);
-//    Index ind=frame.last_quarklet(j2,p2); 
-    Index ind=frame.get_quarklet(588);   //0-26:generatoren auf patches,
-                                        //27-32:überlappende generatoren, indiziert mit p=3,4
-                                        //
-    cout << "evaluate quarklet with index " << ind << endl;
-    eval=frame.evaluate(ind,6);
-    std::ofstream os("Ldomainoutput.m");
-    os << "clf;" << endl;
-    os << "axis([-1 1 -1 1 0 1]);" << endl;
-    for(int i=0;i<3;i++){
-        eval[i].matlab_output(os);
-        os << "surf(x,y,z);" << endl;
-        
-        os << "hold on;" << endl;
-    }
-    os << "view(30,55);"<<endl;
-    os << "hold off" << endl;
-    os.close(); 
+
     
 //        cout << "support of quarklet on patches:"  << endl;
 //    Support supp;

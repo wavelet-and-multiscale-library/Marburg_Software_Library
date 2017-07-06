@@ -328,13 +328,10 @@ namespace WaveletTL
                                                 lambda.e()[1],
                                                 lambda.k()[1],
                                         lambda_gauss_points[1], psi_lambda_der_values[1]);
-                        for(int i=0;i<psi_lambda_values[1].size();i++){
+                        for(int i=0;i<(int)psi_lambda_values[1].size();i++){
                             psi_lambda_der_values[1][i]=-psi_lambda_der_values[1][i];
                         }
-                        for(int i=0;i<=(int)psi_lambda_values[1].size()/2;i++){    //switch direction of values
-                            //psi_lambda_values[1].swap(i,psi_lambda_values[1].size()-1-i);
-                            //psi_lambda_der_values[1].swap(i,psi_lambda_der_values[1].size()-1-i);
-                        }   
+                          
                     }
                     if(mother_patch[0]==2 && mother_patch[1]!=2){ //lambda has been extended from east to west, reflect gauss points in x-direction
                         for(int i=0;i<(int)lambda_gauss_points[0].size();i++){
@@ -353,13 +350,10 @@ namespace WaveletTL
                                                 lambda.e()[0],
                                                 lambda.k()[0],
                                         lambda_gauss_points[0], psi_lambda_der_values[0]);
-                        for(int i=0;i<psi_lambda_values[0].size();i++){
+                        for(int i=0;i<(int)psi_lambda_values[0].size();i++){
                             psi_lambda_der_values[0][i]=-psi_lambda_der_values[0][i];
                         }
-                        for(int i=0;i<=(int)psi_lambda_values[0].size()/2;i++){    //switch direction of values
-                            //psi_lambda_values[0].swap(i,psi_lambda_values[0].size()-1-i);
-                            //psi_lambda_der_values[0].swap(i,psi_lambda_der_values[0].size()-1-i);
-                        }        
+                               
                     }
                     if(mother_patch[1]==0 && mother_patch[0]!=0){ //mu has been extended from north so south, reflect gauss points in y-direction
                         for(int i=0;i<(int)mu_gauss_points[1].size();i++){
@@ -380,14 +374,11 @@ namespace WaveletTL
                                                 mu.e()[1],
                                                 mu.k()[1],
                                         mu_gauss_points[1], psi_mu_der_values[1]);
-                        for(int i=0;i<psi_mu_values[1].size();i++){
+                        for(int i=0;i<(int)psi_mu_values[1].size();i++){
                             psi_mu_der_values[1][i]=-psi_mu_der_values[1][i];
                         }
                         //cout << "psi_mu_der_values[1]: "<<psi_mu_der_values[1] << endl;
-                        for(int i=0;i<=(int)psi_mu_values[1].size()/2;i++){    //switch direction of values
-                            //psi_mu_values[1].swap(i,psi_mu_values[1].size()-1-i);
-                            //psi_mu_der_values[1].swap(i,psi_mu_der_values[1].size()-1-i);
-                        }
+                        
                       
                     }
                     if(mother_patch[1]==2 && mother_patch[0]!=2){ //mu has been extended from east to west, reflect gauss points in x-direction
@@ -407,13 +398,10 @@ namespace WaveletTL
                                                 mu.e()[0],
                                                 mu.k()[0],
                                         mu_gauss_points[0], psi_mu_der_values[0]);
-                        for(int i=0;i<psi_mu_values[0].size();i++){
+                        for(int i=0;i<(int)psi_mu_values[0].size();i++){
                             psi_mu_der_values[0][i]=-psi_mu_der_values[0][i];
                         }
-                        for(int i=0;i<=(int)psi_mu_values[0].size()/2;i++){    //switch direction of values
-                            //psi_mu_values[0].swap(i,psi_mu_values[0].size()-1-i);
-                            //psi_mu_der_values[0].swap(i,psi_mu_der_values[0].size()-1-i);
-                        } 
+                         
                     }
                     else{}
                     break;

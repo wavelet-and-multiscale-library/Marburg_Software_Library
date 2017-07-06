@@ -50,6 +50,20 @@ using namespace MathTL;
 using namespace WaveletTL;
 
 
+class myRHS
+  : public Function<2,double>
+{
+public:
+  virtual ~myRHS() {};
+  double value(const Point<2>& p, const unsigned int component = 0) const {
+    return 2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1]);
+  }
+  void vector_value(const Point<2>& p, Vector<double>& values) const {
+    values[0] = value(p);
+  }
+};
+
+
 int main()
 {
   cout << "Testing wavelet-Galerkin solution of an elliptic equation on the L-shaped domain ..." << endl;
@@ -57,8 +71,8 @@ int main()
   const int d  = 3;
   const int dT = 3;
   
-  const int jmax=8;
-  const int pmax=1;
+  const int jmax=6;
+  const int pmax=0;
   const int a = 2;
   const int b = 2;
 //  typedef DSBasis<d,dT,BernsteinSVD> Basis1D;
@@ -75,41 +89,106 @@ int main()
   typedef LFrame::Index Index;
   typedef Index::polynomial_type polynomial_type;
   polynomial_type p;
-  typedef Index::level_type level_type;
+//  typedef Index::level_type level_type;
   LFrame frame(frame1D);
 //  LFrame frame2();
   
-  Vector<double> val(1, "1.0");
-  ConstantFunction<2> rhs1(val);
+  myRHS rhs1;
+    
+//  PoissonBVP<dim> poisson1(&rhs1);
+  
+//  Vector<double> val(1, "1.0");
+//  ConstantFunction<2> rhs1(val);
   PoissonBVP<2> poisson1(&rhs1);
   LDomainFrameEquation<Frame1D,LFrame> eq(&poisson1, frame, true);
+  Index myindex=eq.frame().get_quarklet(192);
+//  for(int i= 0;i<8;i++,++myindex){
+//  cout << "RHS with quarklet: " <<  myindex << ", " << eq.f(myindex) << endl;
+//  }
+//  abort();
 //  cout << "DeltaLmin=" << eq.frame().frame1d().DeltaLmin() << endl; 
   eq.set_jpmax(jmax, pmax);
   CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1D,LFrame> > ceq(&eq);
+  InfiniteVector<double, Index> F_eta; 
+  ceq.RHS(1e-6, F_eta);
+////    cout << F_eta << endl;
+    const double nu = ceq.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
+//    cout << "TEST: " << l2_norm(F_eta) << ", " << cproblem1.norm_Ainv() << endl;
+  double epsilon = 1e-3;
+  InfiniteVector<double, Index> u_epsilon, v, test, test2;
+    
+    //cout << eq.s_star() << endl;
+    //cout << cproblem1.s_star() << endl;
+    //cout << eq.space_dimension << endl;
+    //cout << cproblem1.space_dimension << endl;
+//    //CDD1_SOLVE(cproblem1, epsilon, u_epsilon, 2*jmax1, tensor_simple);
+    
+    
+    
+
+
+    CDD2_QUARKLET_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b);
+    //plot solution
+    cout << "plotting solution" << endl;
+    u_epsilon.scale(&ceq, -1);
+    Array1D<SampledMapping<2> > eval(3);
+    eval=eq.frame().evaluate(u_epsilon,6);
+    std::ofstream os2("solution_cdd2.m");
+    for(int i=0;i<3;i++){
+        eval[i].matlab_output(os2);
+        os2 << "surf(x,y,z);" << endl;
+        os2 << "hold on;" << endl;
+    }  
+    os2 << "view(30,55);"<<endl;
+    os2 << "hold off" << endl;
+    os2.close(); 
+//    SampledMapping<2> sm1(evaluate(ceq.frame(), u_epsilon , true, 6));
+//    std::ofstream stream1("solution_cdd2.m");
+//    sm1.matlab_output(stream1);
+//    stream1.close();
+    cout << "solution plotted" << endl;
+    abort();
+    
+//    Array1D<SampledMapping<dim> > eval(3);
+//    eval=eq.frame().evaluate(u,6);
+//    std::ofstream os2("solution_na.m");
+//    for(int i=0;i<3;i++){
+//        eval[i].matlab_output(os2);
+//        os2 << "surf(x,y,z);" << endl;
+//        os2 << "hold on;" << endl;
+//    }  
+//    os2 << "view(30,55);"<<endl;
+//    os2 << "hold off" << endl;
+//    os2.close(); 
   
   //  plot one function
 //    polynomial_type p2(0,0);
 //    level_type j2(3,3);
-    Array1D<SampledMapping<2> > eval(3);
+//    Array1D<SampledMapping<2> > eval(3);
 //    Index ind=frame.last_quarklet(j2,p2); 
-    Index ind=ceq.frame().get_quarklet(7060);   //0-26:generatoren auf patches,
+//    Index ind=ceq.frame().get_quarklet(192), indrun=ceq.frame().get_quarklet(70), indrunnew=ceq.frame().get_quarklet(1);   //0-26:generatoren auf patches,
 //                                        //27-32:überlappende generatoren, indiziert mit p=3,4
 //                                        //
-    cout << "evaluate quarklet with index " << ind << endl;
-    eval=frame.evaluate(ind,6);
-    std::ofstream os("Ldomainoutput.m");
-    os << "clf;" << endl;
-    os << "axis([-1 1 -1 1 0 1]);" << endl;
-    for(int i=0;i<3;i++){
-        eval[i].matlab_output(os);
-        os << "surf(x,y,z);" << endl;
-        
-        os << "hold on;" << endl;
-    }
-    os << "view(30,55);"<<endl;
-    os << "hold off" << endl;
-    os.close(); 
-    cout << "Bilinearform Cached/Uncached: " << ceq.a(ind,ind) << ", " << eq.a(ind,ind) << endl;
+//    cout << "bilinearform of all quarklets with " << ind << endl;
+////    for(int i=0; i<800; i++, ++indrun){
+////    
+////    eval=frame.evaluate(ind,6);
+////    std::ofstream os("Ldomainoutput.m");
+////    os << "clf;" << endl;
+////    os << "axis([-1 1 -1 1 0 1]);" << endl;
+////    for(int i=0;i<3;i++){
+////        eval[i].matlab_output(os);
+////        os << "surf(x,y,z);" << endl;
+////        
+////        os << "hold on;" << endl;
+////    }
+////    os << "view(30,55);"<<endl;
+////    os << "hold off" << endl;
+////    os.close(); 
+//    cout << "Bilinearform Cached/Uncached for quarklet with index " << indrun  << ",  " /*<< ceq.a(ind,indrun) << ", " */<< eq.a(ind,indrun) << endl;
+//cout << "Bilinearform Cached/Uncached for quarklet with index " << indrunnew  << ",  " /*<< ceq.a(ind,indrunnew) << ", "*/ << eq.a(ind,indrunnew) << endl;
+//    //    }
+//    
     
     
   
@@ -142,48 +221,51 @@ int main()
     
     typedef CubeFrame::Index CubeIndex;
     FixedArray1D<bool, 4> bc;
-    bc[0]=true, bc[1]=true, bc[2]=true, bc[3]=true;
+    bc[0]=true, bc[1]=true, bc[2]=false, bc[3]=true;
     CubeFrame cubeframe(bc);
     TensorFrameEquation<Frame1D,2,CubeFrame> cubeeq(&poisson1, bc);
-    CubeIndex ind2=cubeeq.frame().get_quarklet(184);
+    CubeIndex ind2=cubeeq.frame().get_quarklet(0), ind2run=cubeeq.frame().get_quarklet(0);
     cout << "Cubeevaluate quarklet with index: " << ind2 << endl;
-    cout << "Bilinearform Cube: " << cubeeq.a(ind2,ind2) << endl;
+    for(int i=0;i<272;i++, ++ind2run){
+
+    cout << "Bilinearform Cube for q with index: " << ind2run << ", " << cubeeq.a(ind2,ind2run) << endl;
+    }
 //    cubeeq.norm_A();
 #endif
     
-    abort();
-    MultiIndex<int,2> lp(0,0), lj(3,3), le(0,1), lk(1,0), mp(0,0), mj(3,3), me(0,0), mk(1,1);
-    Index lambdal(lp,lj,le,1,lk,0,&eq.frame()), mul(mp,mj,me,1,mk,0,&eq.frame());
-    
-    cout << last_generator(&ceq.frame(), lj,lp) << last_generator(&ceq.frame(), lj,lp).number() << endl;
-    cout << ceq.frame().last_generator(lj,lp) << ceq.frame().last_generator(lj,lp).number() << endl;
-    cout << first_generator(&ceq.frame(), lj,lp) << first_generator(&ceq.frame(), lj,lp).number() << endl;
-    cout << ceq.frame().first_generator(lj,lp) << ceq.frame().first_generator(lj,lp).number() << endl;
-    cout << first_quarklet(&ceq.frame(), lj,lp) << first_quarklet(&ceq.frame(), lj,lp).number() << endl;
-    cout << ceq.frame().first_quarklet(lj,lp) << ceq.frame().first_quarklet(lj,lp).number() << endl;
-    cout << last_quarklet(&ceq.frame(), lj,lp) << last_quarklet(&ceq.frame(), lj,lp).number() << endl;
-    cout << ceq.frame().last_quarklet(lj,lp) << ceq.frame().last_quarklet(lj,lp).number() << endl;
-    ceq.a(ceq.frame().get_quarklet(210),ceq.frame().get_quarklet(49));
-    
-//    cout << "Nablasize: " << ceq.frame().get_Nablasize() << endl;
-    cout << ceq.frame().get_first_wavelet_numbers()[0] << endl;
-    
-//    cout << "Cached: " << ceq.a(ceq.frame().get_quarklet(210),ceq.frame().get_quarklet(49)) << ", Uncached: " << eq.a(ceq.frame().get_quarklet(210),ceq.frame().get_quarklet(49)) << endl;
-//    ceq.norm_A();
-    double time2=0.0, tstart2; 
-    tstart2 = clock();
-    cout << "Cached: " << endl;
-    cout << "norm_A: " << ceq.norm_A() <<endl;
-    cout << "norm_Ainv: " << ceq.norm_Ainv() <<endl;
-    time2 += (clock() - tstart2)/CLOCKS_PER_SEC;
-    cout << "time = " << time2 << " sec." << endl;
-    double time1=0.0, tstart1;
-    tstart1 = clock();
-    cout << "Uncached: " << endl;
-    cout << "norm_A: " << eq.norm_A() <<endl;
-    cout << "norm_Ainv: " << eq.norm_Ainv() <<endl;
-    time1 += (clock() - tstart1)/CLOCKS_PER_SEC;
-    cout << "time = " << time1 << " sec." << endl;
+//    abort();
+//    MultiIndex<int,2> lp(0,0), lj(3,3), le(0,1), lk(1,0), mp(0,0), mj(3,3), me(0,0), mk(1,1);
+//    Index lambdal(lp,lj,le,1,lk,0,&eq.frame()), mul(mp,mj,me,1,mk,0,&eq.frame());
+//    
+//    cout << last_generator(&ceq.frame(), lj,lp) << last_generator(&ceq.frame(), lj,lp).number() << endl;
+//    cout << ceq.frame().last_generator(lj,lp) << ceq.frame().last_generator(lj,lp).number() << endl;
+//    cout << first_generator(&ceq.frame(), lj,lp) << first_generator(&ceq.frame(), lj,lp).number() << endl;
+//    cout << ceq.frame().first_generator(lj,lp) << ceq.frame().first_generator(lj,lp).number() << endl;
+//    cout << first_quarklet(&ceq.frame(), lj,lp) << first_quarklet(&ceq.frame(), lj,lp).number() << endl;
+//    cout << ceq.frame().first_quarklet(lj,lp) << ceq.frame().first_quarklet(lj,lp).number() << endl;
+//    cout << last_quarklet(&ceq.frame(), lj,lp) << last_quarklet(&ceq.frame(), lj,lp).number() << endl;
+//    cout << ceq.frame().last_quarklet(lj,lp) << ceq.frame().last_quarklet(lj,lp).number() << endl;
+//    ceq.a(ceq.frame().get_quarklet(210),ceq.frame().get_quarklet(49));
+//    
+////    cout << "Nablasize: " << ceq.frame().get_Nablasize() << endl;
+//    cout << ceq.frame().get_first_wavelet_numbers()[0] << endl;
+//    
+////    cout << "Cached: " << ceq.a(ceq.frame().get_quarklet(210),ceq.frame().get_quarklet(49)) << ", Uncached: " << eq.a(ceq.frame().get_quarklet(210),ceq.frame().get_quarklet(49)) << endl;
+////    ceq.norm_A();
+//    double time2=0.0, tstart2; 
+//    tstart2 = clock();
+//    cout << "Cached: " << endl;
+//    cout << "norm_A: " << ceq.norm_A() <<endl;
+//    cout << "norm_Ainv: " << ceq.norm_Ainv() <<endl;
+//    time2 += (clock() - tstart2)/CLOCKS_PER_SEC;
+//    cout << "time = " << time2 << " sec." << endl;
+//    double time1=0.0, tstart1;
+//    tstart1 = clock();
+//    cout << "Uncached: " << endl;
+//    cout << "norm_A: " << eq.norm_A() <<endl;
+//    cout << "norm_Ainv: " << eq.norm_Ainv() <<endl;
+//    time1 += (clock() - tstart1)/CLOCKS_PER_SEC;
+//    cout << "time = " << time1 << " sec." << endl;
 //    cout << "Cached Norms: " << ceq.norm_A() << ", " << ceq.norm_Ainv() << ", Uncached norms: " << eq.norm_A() << ", " << eq.norm_Ainv() << endl;
 
     abort();

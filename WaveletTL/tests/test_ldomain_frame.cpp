@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-#undef NONADAPTIVE
+#define NONADAPTIVE
 #undef ADAPTIVE
 
 #define _WAVELETTL_USE_TBASIS 1
@@ -99,11 +99,11 @@ int main(){
     
     PoissonBVP<dim> poisson1(&rhs1);
     LDomainFrameEquation<Frame1d,Frame> eq(&poisson1, false);
-    eq.set_jpmax(jmax,pmax);
+    eq.set_jpmax(jmax,pmax,false);
     
     
-    Index testindex=frame.get_quarklet(127);
-#if 1 //plot rhs and exact solution
+    Index testindex=frame.get_quarklet(71);
+#if 0 //plot rhs and exact solution
     Array1D<Point<dim,int> > corners;
     corners.resize(3);
     corners[0][0]=-1;
@@ -137,8 +137,37 @@ int main(){
     cout << "rhs and uexact plotted" << endl;
 #endif
     
+#if 1
+    //setup index set
+    //Vector<double> a;
+    //a.resize(eq.frame().degrees_of_freedom(),true);
+    //setup Index set
+    set<Index> Lambda;  
+    MultiIndex<int,dim> p;p[0]=0;p[1]=0;
+    Index lambda = eq.frame().first_generator(eq.frame().j0(), p);
+    int zaehler=0;
+    for (int l = 0; l < eq.frame().degrees_of_freedom(); l++) {
+        //cout << lambda << " : "<<lambda.number()<< endl;
+        //cout << lambda << " : " << eq.a(lambda,lambda) << endl;
+        //if(multi_degree(lambda.e())<1 && lambda.patch()<4){
+            Lambda.insert(lambda);
+            ++zaehler; 
+        //}
+        if(lambda==eq.frame().last_quarklet(jmax, p)){
+            ++p;
+            lambda=eq.frame().first_generator(eq.frame().j0(), p);
+        }
+        else
+        //a(zaehler)=eq.a(eq.frame().get_quarklet(126),lambda);
+        ++lambda;
+            
+    }
+    //a.matlab_output("a","a");
     
-#if 1 //test methods of ldomain_frame_equation
+    cout << "size of Lambda: " << zaehler << endl;
+#endif
+        
+#if 0 //test methods of ldomain_frame_equation
     cout << "testindex: "<<testindex<<endl;
     cout << "a(lambda_0,lambda_0) : "<<eq.a(testindex,testindex) << endl;
     cout << "f(lambda_0): "<<eq.f(testindex)<<endl;
@@ -148,33 +177,6 @@ int main(){
     //cout << "normAinv: "<<eq.norm_Ainv() << endl;
     
     
-#endif
-    
-#if 1
-    //setup index set
-    Vector<double> a;
-    a.resize(eq.frame().degrees_of_freedom(),true);
-    //setup Index set
-    set<Index> Lambda;  
-    MultiIndex<int,dim> p;p[0]=0;p[1]=0;
-    Index lambda = eq.frame().first_generator(eq.frame().j0(), p);
-    int zaehler=0;
-    for (int l = 0; l < eq.frame().degrees_of_freedom(); l++) {
-        //cout << lambda << " : "<<lambda.number()<< endl;
-        //cout << lambda << " : " << eq.a(lambda,lambda) << endl;
-        Lambda.insert(lambda);
-        if(lambda==eq.frame().last_quarklet(jmax, p)){
-            ++p;
-            lambda=eq.frame().first_generator(eq.frame().j0(), p);
-        }
-        else
-        a(zaehler)=eq.a(lambda,lambda);
-        ++lambda;
-        ++zaehler;        
-    }
-    a.matlab_output("a","a");
-    
-    //cout << "size of Lambda: " << zaehler << endl;
 #endif
  #ifdef NONADAPTIVE   
     //setup stiffness matrix and rhs
@@ -192,11 +194,11 @@ int main(){
     
     //richardson iteration
     unsigned int iterations;
-    const int maxiterations = 999;
+    const int maxiterations = 9999;
     const double omega = 2.0 / (eq.norm_A() + 1.0/eq.norm_Ainv());
     cout << "omega: "<<omega<<endl;
-    //Richardson(A,F,x,omega,1e-6,maxiterations,iterations);
-    CG(A,F,x,1e-8,maxiterations,iterations);
+    Richardson(A,F,x,omega,1e-6,maxiterations,iterations);
+    //CG(A,F,x,1e-8,maxiterations,iterations);
     cout << "iterations:" << iterations << endl;
     
     //plot solution
@@ -209,34 +211,42 @@ int main(){
     u.scale(&eq, -1);
     Array1D<SampledMapping<dim> > eval(3);
     eval=eq.frame().evaluate(u,6);
-    std::ofstream os("solution_na.m");
+    std::ofstream os2("solution_na.m");
     for(int i=0;i<3;i++){
-        eval[i].matlab_output(os);
-        os << "surf(x,y,z);" << endl;
-        os << "hold on;" << endl;
+        eval[i].matlab_output(os2);
+        os2 << "surf(x,y,z);" << endl;
+        os2 << "hold on;" << endl;
     }  
-    os << "view(30,55);"<<endl;
-    os << "hold off" << endl;
-    os.close(); 
+    os2 << "view(30,55);"<<endl;
+    os2 << "hold off" << endl;
+    os2.close(); 
     
     
     
 #endif
     
 
-#if 0 //test bilinearform
+#if 1 //test bilinearform
     const int resolution=6;
-    Array1D<SampledMapping<dim> > eval(3);
-    eval=frame.evaluate(testindex,resolution);
+    Index testindex1(testindex);
+    Index testindex2=eq.frame().get_quarklet(192);
+    Array1D<SampledMapping<dim> > eval1(3);
+    Array1D<SampledMapping<dim> > eval2(3);
+    eval1=frame.evaluate(testindex1,resolution);
+    eval2=frame.evaluate(testindex2,resolution);
     std::ofstream os("testa.m");
-    os<<"Iexakt="<<eq.a(testindex,testindex)<<endl;
+    os<<"Iexakt="<<eq.a(testindex1,testindex2)<<endl;
     os<<"I=0;"<<endl;
     for(int i=0;i<3;i++){
-        eval[i].matlab_output(os);
+        eval1[i].matlab_output(os);
+        os<<"z1=z;"<<endl;
+        eval2[i].matlab_output(os);
+        os<<"z2=z;"<<endl;
         os<<"xx=x(1,:);"<<endl;
         os<<"yy=y'(1,:);"<<endl;
-        os<<"[gx,gy]=gradient(z,2^-"<<resolution<<",2^-"<<resolution<<");"<<endl;
-        os<<"L=gx.^2.+gy.^2;"<<endl;
+        os<<"[gx1,gy1]=gradient(z1,2^-"<<resolution<<",2^-"<<resolution<<");"<<endl;
+        os<<"[gx2,gy2]=gradient(z2,2^-"<<resolution<<",2^-"<<resolution<<");"<<endl;
+        os<<"L=gx1.*gx2.+gy1.*gy2;"<<endl;
         os<<"I=I+trapz(yy,trapz(xx,L,2)');"<<endl;
     }
     os<<"I"<<endl;
@@ -244,28 +254,63 @@ int main(){
     os.close(); 
 #endif
     
+#if 1 //test rhs
+    const int resolution2=6;
+    Index testindex3(testindex);
+    Array1D<SampledMapping<dim> > eval3(3);
+    eval3=frame.evaluate(testindex3, resolution2);
+    Array1D<Point<dim,int> > corners;
+    corners.resize(3);
+    corners[0][0]=-1;
+    corners[0][1]=0;
+    corners[1][0]=-1;
+    corners[1][1]=-1;
+    corners[2][0]=0;
+    corners[2][1]=-1;
+
+    std::ofstream os3("testf.m");
+    os3<<"Iexakt="<<eq.f(testindex)<<endl;
+    os3<<"I=0;"<<endl;
+    for(int i=0;i<3;i++){
+        eval3[i].matlab_output(os3);
+        os3<<"zalt=z;"<<endl;
+        Point<2> q0(corners[i][0],corners[i][1]);
+        Point<2> q1(corners[i][0]+1,corners[i][1]+1);
+        Grid<2> mygrid(q0,q1,pow(2,resolution2));
+        SampledMapping<2> smf(mygrid, rhs1); 
+        smf.matlab_output(os3);
+        os3<<"z=z.*zalt;"<<endl;
+        os3<<"xx=x(1,:);"<<endl;
+        os3<<"yy=y'(1,:);"<<endl;
+        os3<<"I=I+trapz(yy,trapz(xx,z,2)');"<<endl;
+    }
+    os3<<"I"<<endl;
+    os3<<"relative_error=abs(I-Iexakt)/Iexakt"<<endl; 
+    os3.close();
+#endif
     
-#if 0
+    
+#if 1
     //plot one function
-    Array1D<SampledMapping<dim> > eval(3);
+    Array1D<SampledMapping<dim> > evalf(3);
     //Index ind=frame.get_quarklet(159);    //0-26:generatoren auf patches,
                                         //27-32:überlappende generatoren, indiziert mit p=3,4
                                         //33:überlappendes wavelet
                                         //34:nicht-überlappendes wavelet
     cout << "evaluate quarklet with index " << testindex << endl;
-    eval=frame.evaluate(testindex,6);
-    std::ofstream os("Ldomainoutput.m");
-    os << "clf;" << endl;
-    os << "axis([-1 1 -1 1 0 1]);" << endl;
+    evalf=frame.evaluate(testindex,6);
+    std::ofstream osf("Ldomainoutput.m");
+    osf << "clf;" << endl;
+    osf << "axis([-1 1 -1 1 0 1]);" << endl;
     for(int i=0;i<3;i++){
-        eval[i].matlab_output(os);
-        os << "surf(x,y,z);" << endl;
+        evalf[i].matlab_output(osf);
+        osf << "surf(x,y,z);" << endl;
         
-        os << "hold on;" << endl;
+        osf << "hold on;" << endl;
     }
-    os << "view(30,55);"<<endl;
-    os << "hold off" << endl;
-    os.close(); 
+    osf << "view(30,55);"<<endl;
+    osf << "hold off" << endl;
+    osf.close(); 
 #endif  
     
     

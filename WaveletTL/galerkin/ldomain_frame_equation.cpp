@@ -159,6 +159,7 @@ namespace WaveletTL
             
             // setup Gauss points and weights for a composite quadrature formula:
             const int N_Gauss = (p+1)/2+(multi_degree(lambda.p())+multi_degree(mu.p())+1)/2;
+            //const int N_Gauss=10;
             double h; // granularity for the quadrature
             FixedArray1D<Array1D<double>,space_dimension> gauss_points, gauss_weights;
             //compute gauss points and weights for x- and y-direction (since the quarklets are anisotropic)
@@ -179,8 +180,8 @@ namespace WaveletTL
                     }
                 }
             }
-//            cout << "Gauss Points LDomain vor Änderung xrichtung: " << gauss_points[0] << endl;
-//            cout << "Gauss Points LDomain vor Änderung yrichtung: " << gauss_points[1] << endl;
+            //cout << "Gauss Points LDomain vor Änderung xrichtung: " << gauss_points[0] << endl;
+            //cout << "Gauss Points LDomain vor Änderung yrichtung: " << gauss_points[1] << endl;
             
             // compute point values of the integrand (where we use that it is a tensor product)
             //temp gauss points for reflection
@@ -249,36 +250,38 @@ namespace WaveletTL
                 case 1:
                 //first assume that both functions stem from patch 1, evaluate with zero bc
                 //cout << "bin hier" << endl;
-                
+                //cout << "points and values before reflection"<<endl;
+                //cout << "mu_gauss_points[0]: "<<mu_gauss_points[0]<<endl;
+                //cout << "mu_gauss_points[1]: "<<mu_gauss_points[1]<<endl;
                     evaluate(frame_.frame1d_11(), 0,            
                                                 lambda.p()[0],
                                                 lambda.j()[0],
                                                 lambda.e()[0],
                                                 lambda.k()[0],
                                         lambda_gauss_points[0], psi_lambda_values[0]);
-//                cout << "Gauss Points LDomain: " << lambda_gauss_points[0] << endl;
-//                cout << psi_lambda_values[0] << endl;
+                //cout << "Gauss Points LDomain: " << lambda_gauss_points[0] << endl;
+               // cout << "psi_lambda_values[0]: "<<psi_lambda_values[0] << endl;
                     evaluate(frame_.frame1d_11(), 1,
                                                 lambda.p()[0],
                                                 lambda.j()[0],
                                                 lambda.e()[0],
                                                 lambda.k()[0],
                                         lambda_gauss_points[0], psi_lambda_der_values[0]);
-//                cout << psi_lambda_der_values[0] << endl;
+                //cout <<"psi_lambda_der_values[0]: "<< psi_lambda_der_values[0] << endl;
                     evaluate(frame_.frame1d_11(), 0,
                                                 mu.p()[0],
                                                 mu.j()[0],
                                                 mu.e()[0],
                                                 mu.k()[0],
                                         mu_gauss_points[0], psi_mu_values[0]);
-//                cout << psi_mu_values[0] << endl;
+                //cout << "psi_mu_values[0]: "<<psi_mu_values[0] << endl;
                     evaluate(frame_.frame1d_11(), 1,
                                                 mu.p()[0],
                                                 mu.j()[0],
                                                 mu.e()[0],
                                                 mu.k()[0],
                                         mu_gauss_points[0], psi_mu_der_values[0]);
-//                cout << psi_mu_der_values[0] << endl;
+                //cout << "psi_mu_der_values[0]: "<<psi_mu_der_values[0] << endl;
                 
                     evaluate(frame_.frame1d_11(), 0,                
                                                 lambda.p()[1],
@@ -286,28 +289,28 @@ namespace WaveletTL
                                                 lambda.e()[1],
                                                 lambda.k()[1],
                                         lambda_gauss_points[1], psi_lambda_values[1]);
-//                cout << psi_lambda_values[1] << endl;
+                //cout << "psi_lambda_values[1]: "<<psi_lambda_values[1] << endl;
                     evaluate(frame_.frame1d_11(), 1,
                                                 lambda.p()[1],
                                                 lambda.j()[1],
                                                 lambda.e()[1],
                                                 lambda.k()[1],
                                         lambda_gauss_points[1], psi_lambda_der_values[1]);
-//                cout << psi_lambda_der_values[1] << endl;
+                //cout <<"psi_lambda_der_values[1]"<< psi_lambda_der_values[1] << endl;
                     evaluate(frame_.frame1d_11(), 0,
                                                 mu.p()[1],
                                                 mu.j()[1],
                                                 mu.e()[1],
                                                 mu.k()[1],
                                         mu_gauss_points[1], psi_mu_values[1]);
-//                cout << psi_mu_values[1] << endl;
+                //cout << "psi_mu_values[1]: "<<psi_mu_values[1] << endl;
                     evaluate(frame_.frame1d_11(), 1,
                                                 mu.p()[1],
                                                 mu.j()[1],
                                                 mu.e()[1],
                                                 mu.k()[1],
                                         mu_gauss_points[1], psi_mu_der_values[1]);
-//                cout << psi_mu_der_values[1] << endl;
+                //cout << "psi_mu_der_values[1]: "<<psi_mu_der_values[1] << endl;
                     if(mother_patch[0]==0 && mother_patch[1]!=0){ //lambda has been extended from north so south, reflect gauss points in y-direction
                         for(int i=0;i<(int)lambda_gauss_points[1].size();i++){
                             lambda_gauss_points[1][i]=1-lambda_gauss_points[1][i];
@@ -325,9 +328,12 @@ namespace WaveletTL
                                                 lambda.e()[1],
                                                 lambda.k()[1],
                                         lambda_gauss_points[1], psi_lambda_der_values[1]);
+                        for(int i=0;i<psi_lambda_values[1].size();i++){
+                            psi_lambda_der_values[1][i]=-psi_lambda_der_values[1][i];
+                        }
                         for(int i=0;i<=(int)psi_lambda_values[1].size()/2;i++){    //switch direction of values
-                            psi_lambda_values[1].swap(i,psi_lambda_values[1].size()-1-i);
-                            psi_lambda_der_values[1].swap(i,psi_lambda_der_values[1].size()-1-i);
+                            //psi_lambda_values[1].swap(i,psi_lambda_values[1].size()-1-i);
+                            //psi_lambda_der_values[1].swap(i,psi_lambda_der_values[1].size()-1-i);
                         }   
                     }
                     if(mother_patch[0]==2 && mother_patch[1]!=2){ //lambda has been extended from east to west, reflect gauss points in x-direction
@@ -347,15 +353,19 @@ namespace WaveletTL
                                                 lambda.e()[0],
                                                 lambda.k()[0],
                                         lambda_gauss_points[0], psi_lambda_der_values[0]);
+                        for(int i=0;i<psi_lambda_values[0].size();i++){
+                            psi_lambda_der_values[0][i]=-psi_lambda_der_values[0][i];
+                        }
                         for(int i=0;i<=(int)psi_lambda_values[0].size()/2;i++){    //switch direction of values
-                            psi_lambda_values[0].swap(i,psi_lambda_values[0].size()-1-i);
-                            psi_lambda_der_values[0].swap(i,psi_lambda_der_values[0].size()-1-i);
+                            //psi_lambda_values[0].swap(i,psi_lambda_values[0].size()-1-i);
+                            //psi_lambda_der_values[0].swap(i,psi_lambda_der_values[0].size()-1-i);
                         }        
                     }
                     if(mother_patch[1]==0 && mother_patch[0]!=0){ //mu has been extended from north so south, reflect gauss points in y-direction
                         for(int i=0;i<(int)mu_gauss_points[1].size();i++){
                             mu_gauss_points[1][i]=1-mu_gauss_points[1][i];
-                        }    
+                        }  
+                        //cout << "bin hier"<<endl;
                         //evaluate mu with asymmetric bc in y-direction, lambda with zero boundary conditions
                         evaluate(frame_.frame1d_01(), 0,
                                                 mu.p()[1],
@@ -363,15 +373,20 @@ namespace WaveletTL
                                                 mu.e()[1],
                                                 mu.k()[1],
                                         mu_gauss_points[1], psi_mu_values[1]);
+                        //cout << "psi_mu_der_values[1]: "<<psi_mu_der_values[1] << endl;
                         evaluate(frame_.frame1d_01(), 1,
                                                 mu.p()[1],
                                                 mu.j()[1],
                                                 mu.e()[1],
                                                 mu.k()[1],
                                         mu_gauss_points[1], psi_mu_der_values[1]);
+                        for(int i=0;i<psi_mu_values[1].size();i++){
+                            psi_mu_der_values[1][i]=-psi_mu_der_values[1][i];
+                        }
+                        //cout << "psi_mu_der_values[1]: "<<psi_mu_der_values[1] << endl;
                         for(int i=0;i<=(int)psi_mu_values[1].size()/2;i++){    //switch direction of values
-                            psi_mu_values[1].swap(i,psi_mu_values[1].size()-1-i);
-                            psi_mu_der_values[1].swap(i,psi_mu_der_values[1].size()-1-i);
+                            //psi_mu_values[1].swap(i,psi_mu_values[1].size()-1-i);
+                            //psi_mu_der_values[1].swap(i,psi_mu_der_values[1].size()-1-i);
                         }
                       
                     }
@@ -392,13 +407,17 @@ namespace WaveletTL
                                                 mu.e()[0],
                                                 mu.k()[0],
                                         mu_gauss_points[0], psi_mu_der_values[0]);
+                        for(int i=0;i<psi_mu_values[0].size();i++){
+                            psi_mu_der_values[0][i]=-psi_mu_der_values[0][i];
+                        }
                         for(int i=0;i<=(int)psi_mu_values[0].size()/2;i++){    //switch direction of values
-                            psi_mu_values[0].swap(i,psi_mu_values[0].size()-1-i);
-                            psi_mu_der_values[0].swap(i,psi_mu_der_values[0].size()-1-i);
+                            //psi_mu_values[0].swap(i,psi_mu_values[0].size()-1-i);
+                            //psi_mu_der_values[0].swap(i,psi_mu_der_values[0].size()-1-i);
                         } 
                     }
                     else{}
                     break;
+                    
             
                 case 2:  //both functions lie on patch 2, evaluate with 0,1 boundary conditions
                     evaluate(frame_.frame1d_01(), 0,            //in x-direction evaluate with asymmetric boundary conditions
@@ -460,7 +479,20 @@ namespace WaveletTL
 //                cout << psi_mu_der_values[1] << endl;
                     break;
             }
-            
+            //cout << "gauss points used for evaluation for a"<<endl;
+            //    cout << lambda_gauss_points[0]<<endl;
+            //    cout << lambda_gauss_points[1]<<endl;
+            //cout << "points and values after reflection and evaluation"<<endl;
+            //cout << "mu_gauss_points[0]: "<<mu_gauss_points[0]<<endl;
+            //cout << "mu_gauss_points[1]: "<<mu_gauss_points[1]<<endl;
+            //cout << "psi_lambda_values[0]: "<<psi_lambda_values[0] << endl;
+            //cout << "psi_lambda_der_values[0]: "<<psi_lambda_der_values[0] << endl;
+            //cout << "psi_mu_values[0]: "<<psi_mu_values[0] << endl;
+            //cout << "psi_mu_der_values[0]: "<<psi_mu_der_values[0] << endl;
+            //cout << "psi_lambda_values[1]: "<<psi_lambda_values[1] << endl;
+            //cout << "psi_lambda_der_values[1]: "<<psi_lambda_der_values[1] << endl;
+            //cout << "psi_mu_values[1]: "<<psi_mu_values[1] << endl;
+            //cout << "psi_mu_der_values[1]: "<<psi_mu_der_values[1] << endl;
             
             
             
@@ -645,13 +677,14 @@ namespace WaveletTL
 	
  	// per patch, collect all point values
  	for (int patch = 0; patch <= 2; patch++) {
+            //cout << "current patch: "<<patch<<endl;
  	    if (supp.xmin[patch] != -1) { // psi_mu is nontrivial on patch p
                 double a [2]; a[0]=supp.xmin[patch]; a[1]=supp.ymin[patch];
                 double b [2]; b[0]=supp.xmax[patch]; b[1]=supp.ymax[patch];
                 //cout << "current support: ["<<a[0]<<","<<b[0]<<"]x["<<a[1]<<","<<b[1]<<"]"<<endl;
                 for (unsigned int i = 0; i < space_dimension; i++) {
                     // prepare Gauss points and weights 
-                    h = ldexp(1.0,-supp.j[i]-lambda.e()[i]);
+                    h = ldexp(1.0,-supp.j[i]);
                     //cout << "current interval :" <<a[i]*h <<","<<b[i]*h<<endl;
                     gauss_points[i].resize(N_Gauss*(b[i]-a[i]));
                     gauss_weights[i].resize(N_Gauss*(b[i]-a[i]));
@@ -662,22 +695,30 @@ namespace WaveletTL
                         }
                     }
                 }
+                
+                
+                
+                //cout << "gauss points before reflection"<<endl;
+                //cout << gauss_points[0]<<endl;
+                //cout << gauss_points[1]<<endl;
+                
+                //special treat for patch 1 if the quarklet is extended:    
+                FixedArray1D<Array1D<double>,space_dimension> lambda_gauss_points(gauss_points);
                 if(patch==0){   // compute the point values of the integrand (where we use that it is a tensor product)
                     evaluate(frame_.frame1d_11(), 0,        //different 1d-frames for x- and y-direction due to boundary conditions
                                             lambda.p()[0],
                                             lambda.j()[0],
                                             lambda.e()[0],
                                             lambda.k()[0],
-                         gauss_points[0], v_values[0]);  
+                         lambda_gauss_points[0], v_values[0]);  
                     evaluate(frame_.frame1d_01(), 0,
                                             lambda.p()[1],
                                             lambda.j()[1],
                                             lambda.e()[1],
                                             lambda.k()[1],
-                         gauss_points[1], v_values[1]); 
+                         lambda_gauss_points[1], v_values[1]); 
                 }
-                //special treat for patch 1 if the quarklet is extended:    
-                FixedArray1D<Array1D<double>,space_dimension> lambda_gauss_points(gauss_points);
+                
                 //reflect gauss points
                 if(patch==1){
                     if(mother_patch==0){ //lambda has been extended from north so south, reflect gauss points in y-direction
@@ -697,7 +738,7 @@ namespace WaveletTL
                                             lambda.k()[1],
                                         lambda_gauss_points[1], v_values[1]); 
                         for(int i=0;i<=(int)v_values[1].size()/2;i++){    //switch direction of values
-                            v_values[1].swap(i,v_values[1].size()-1-i);
+                            //v_values[1].swap(i,v_values[1].size()-1-i);
                         }
                                 
                     }
@@ -732,7 +773,7 @@ namespace WaveletTL
                                             lambda.k()[1],
                                         lambda_gauss_points[1], v_values[1]);
                         for(int i=0;i<=(int)v_values[0].size()/2;i++){    //switch direction of values
-                            v_values[0].swap(i,v_values[0].size()-1-i);
+                            //v_values[0].swap(i,v_values[0].size()-1-i);
                         }
                     }
                 } 
@@ -743,14 +784,22 @@ namespace WaveletTL
                                             lambda.j()[0],
                                             lambda.e()[0],
                                             lambda.k()[0],
-                         gauss_points[0], v_values[0]);  
+                         lambda_gauss_points[0], v_values[0]);  
                     evaluate(frame_.frame1d_11(), 0,
                                             lambda.p()[1],
                                             lambda.j()[1],
                                             lambda.e()[1],
                                             lambda.k()[1],
-                         gauss_points[1], v_values[1]); 
+                         lambda_gauss_points[1], v_values[1]); 
                 }
+                /*
+                cout << "gauss points used for evaluation"<<endl;
+                cout << lambda_gauss_points[0]<<endl;
+                cout << lambda_gauss_points[1]<<endl;
+                cout << "values:"<<endl;
+                cout << v_values[0]<<endl;
+                cout << v_values[1]<<endl;
+                 */
                 // iterate over all points and sum up the integral shares
                 int index[space_dimension]; // current multiindex for the point values
                 for (unsigned int i = 0; i < space_dimension; i++)

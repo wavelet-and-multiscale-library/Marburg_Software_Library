@@ -3,10 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-#undef NONADAPTIVE
-#define ADAPTIVE
+#define NONADAPTIVE
+#undef ADAPTIVE
 
-#define _WAVELETTL_USE_TBASIS 1
+#define FRAME
+//#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
 
@@ -20,6 +21,7 @@
 #include <Ldomain/ldomain_frame_index.h>
 #include <Ldomain/ldomain_frame.h>
 #include <Ldomain/ldomain_frame_evaluate.h>
+#include <Ldomain/ldomain_frame_indexplot.h>
 #include <galerkin/ldomain_frame_equation.h>
 #include <galerkin/cached_quarklet_ldomain_problem.h>
 
@@ -86,19 +88,20 @@ int main(){
     Frame1d frame1d(false,false);
     typedef LDomainFrame<Frame1d> Frame;
     typedef Frame::Index Index;
+    //typedef Frame::Support Support;
     //Frame frame(frame1d);
-    Frame frame(frame1d);
+    Frame frame;
     frame.set_jpmax(jmax,pmax);
     
-    //CornerSingularity uexact1(Point<2>(0,0), 0.5, 1.5);
-    mySolution uexact1;
-    //CornerSingularityRHS rhs1(Point<2>(0,0), 0.5, 1.5); //Fnorm=0?
+    CornerSingularity uexact1(Point<2>(0,0), 0.5, 1.5);
+    //mySolution uexact1;
+    CornerSingularityRHS rhs1(Point<2>(0,0), 0.5, 1.5); //Fnorm=0?
     //Vector<double> val(1, "1.0");
     //ConstantFunction<dim> rhs1(val);
-    myRHS rhs1;
+    //myRHS rhs1;
     
     PoissonBVP<dim> poisson1(&rhs1);
-    LDomainFrameEquation<Frame1d,Frame> eq(&poisson1,frame, true);
+    LDomainFrameEquation<Frame1d,Frame> eq(&poisson1, true);
     eq.set_jpmax(jmax,pmax);
     
     
@@ -222,6 +225,28 @@ int main(){
     os2 << "view(30,55);"<<endl;
     os2 << "hold off" << endl;
     os2.close(); 
+    
+    //new coefficients plot
+    std::ofstream coeff_stream;
+    coeff_stream.open("coefficients_na.m");
+    //coeff_stream2 << "figure;" << endl;
+    MultiIndex<int,dim> pstart;
+    MultiIndex<int,dim> jstart;// start=basis1.j0();
+    MultiIndex<int,dim> estart;
+    for (set<Index>::const_iterator it(Lambda.begin()); it!=Lambda.end(); ++it){
+        Index lambda=*it;
+        if(!(lambda.j()==jstart && lambda.e()==estart)){
+            //cout <<lambda.p()[0]<<lambda.p()[1]<< lambda.j()[0]-1+lambda.e()[0]<<lambda.j()[1]-1+lambda.e()[1] << endl;
+            jstart=lambda.j();
+            estart=lambda.e();
+            plot_indices(&eq.frame(), u, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(flipud(gray))", false, true, -6);
+            //coeff_stream2 << "title('solution coefficients') " << endl;
+            //coeff_stream2 << "title(sprintf('coefficients on level (%i,%i)',"<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"));"<<endl;
+            coeff_stream<<"print('-djpg',sprintf('coeffs%i%i%i%i.jpg',"<<lambda.p()[0]<<","<<lambda.p()[1]<<","<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"))"<<endl;
+        }
+    }
+    coeff_stream.close();
+    cout << "coefficients plotted"<<endl;
  #endif   
 
 #ifdef ADAPTIVE
@@ -249,6 +274,27 @@ int main(){
     os2 << "view(30,55);"<<endl;
     os2 << "hold off" << endl;
     os2.close();
+    
+    //all coefficients output
+    u_epsilon.scale(&cproblem1, 1);
+    std::ofstream os4;
+    os4.open("coeffs_support.m");
+    os4<<"A=["<<endl;
+    for (InfiniteVector<double, Index>::const_iterator it(u_epsilon.begin()); it != u_epsilon.end(); ++it){
+         //u_values_ad[i] += *it * basisframe.evaluate(0, it.index(), point)*1./cproblem1.D(it.index());
+        //cout << ind << " : " << *it << endl;
+        //if(abs(*it)>1e-16){
+            Index ind=it.index();
+            //Support supp;
+            //frame.support(ind, supp);
+            //stream2<<ind.j()[0]<<","<<ind.j()[1]<<","<<ind.e()[0]<<","<<ind.e()[1]<<","<<ind.k()[0]<<","<<ind.k()[1]<<","<<(double)supp.a[0]/(1<<supp.j[0])<<","<<(double)supp.b[0]/(1<<supp.j[0])<<","<<(double)supp.a[1]/(1<<supp.j[1])<<","<<(double)supp.b[1]/(1<<supp.j[1])<<","<<*it<<";"<< endl;
+            os4<<ind.p()[0]<<","<<ind.p()[1]<<","<<ind.j()[0]-1+ind.e()[0]<<","<<ind.j()[1]-1+ind.e()[1]<<","<<ind.patch()<<","<<ind.k()[0]<<","<<ind.k()[1]<<","<<*it<<";"<< endl;
+       // }
+        
+    }
+    os4<<"];"<<endl;
+    os4.close();
+    cout << "fertig" << endl;
 #endif
     
     

@@ -3,8 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-#define NONADAPTIVE
-#undef ADAPTIVE
+#undef NONADAPTIVE
+#define ADAPTIVE
 
 #define FRAME
 //#define _WAVELETTL_USE_TBASIS 1
@@ -43,7 +43,8 @@ class myRHS
 public:
   virtual ~myRHS() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
-    return 2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1]);
+    CornerSingularityRHS csrhs(Point<2>(0,0), 0.5, 1.5);
+    return 2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1])+5*csrhs.value(p);
   }
   void vector_value(const Point<2>& p, Vector<double>& values) const {
     values[0] = value(p);
@@ -56,7 +57,8 @@ class mySolution
 public:
   virtual ~mySolution() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
-    return sin(M_PI*p[0])*sin(M_PI*p[1]);
+    CornerSingularity cs(Point<2>(0,0), 0.5, 1.5);
+    return sin(M_PI*p[0])*sin(M_PI*p[1])+5*cs.value(p);
   }
   void vector_value(const Point<2>& p, Vector<double>& values) const {
     values[0] = value(p);
@@ -81,32 +83,32 @@ int main(){
     const int d  = 3;
     const int dT = 3;
     const int dim = 2;
-    const int jmax = 6;
-    const int pmax = 0;
+    const int jmax=6;
+    const int pmax=0;
     
     typedef PQFrame<d,dT> Frame1d;
-    Frame1d frame1d(false,false);
+    //Frame1d frame1d(false,false);
     typedef LDomainFrame<Frame1d> Frame;
     typedef Frame::Index Index;
     //typedef Frame::Support Support;
     //Frame frame(frame1d);
-    Frame frame;
-    frame.set_jpmax(jmax,pmax);
+    //Frame frame;
+    //frame.set_jpmax(jmax,pmax);
     
-    CornerSingularity uexact1(Point<2>(0,0), 0.5, 1.5);
-    //mySolution uexact1;
-    CornerSingularityRHS rhs1(Point<2>(0,0), 0.5, 1.5); //Fnorm=0?
+    //CornerSingularity uexact1(Point<2>(0,0), 0.5, 1.5);
+    mySolution uexact1;
+    //CornerSingularityRHS rhs1(Point<2>(0,0), 0.5, 1.5); 
     //Vector<double> val(1, "1.0");
     //ConstantFunction<dim> rhs1(val);
-    //myRHS rhs1;
+    myRHS rhs1;
     
     PoissonBVP<dim> poisson1(&rhs1);
     LDomainFrameEquation<Frame1d,Frame> eq(&poisson1, true);
     eq.set_jpmax(jmax,pmax);
     
     
-    Index testindex=frame.get_quarklet(71);
-#if 0 //plot rhs and exact solution
+    //Index testindex=frame.get_quarklet(71);
+#if 1 //plot rhs and exact solution
     Array1D<Point<dim,int> > corners;
     corners.resize(3);
     corners[0][0]=-1;
@@ -140,7 +142,7 @@ int main(){
     cout << "rhs and uexact plotted" << endl;
 #endif
     
-#if 1
+#if 0
     //setup index set
     //Vector<double> a;
     //a.resize(eq.frame().degrees_of_freedom(),true);
@@ -275,6 +277,29 @@ int main(){
     os2 << "hold off" << endl;
     os2.close();
     
+    //new coefficients plot
+    u_epsilon.scale(&cproblem1, 1);
+    std::ofstream coeff_stream;
+    coeff_stream.open("coefficients_ad.m");
+    //coeff_stream2 << "figure;" << endl;
+    MultiIndex<int,dim> pstart;
+    MultiIndex<int,dim> jstart;// start=basis1.j0();
+    MultiIndex<int,dim> estart;
+    for (InfiniteVector<double, Index>::const_iterator it(u_epsilon.begin()); it != u_epsilon.end(); ++it){
+        Index lambda=it.index();
+        if(!(lambda.j()==jstart && lambda.e()==estart)){
+            //cout <<lambda.p()[0]<<lambda.p()[1]<< lambda.j()[0]-1+lambda.e()[0]<<lambda.j()[1]-1+lambda.e()[1] << endl;
+            jstart=lambda.j();
+            estart=lambda.e();
+            plot_indices(&eq.frame(), u_epsilon, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(flipud(gray))", false, true, -6);
+            //coeff_stream2 << "title('solution coefficients') " << endl;
+            //coeff_stream2 << "title(sprintf('coefficients on level (%i,%i)',"<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"));"<<endl;
+            coeff_stream<<"print('-djpg',sprintf('coeffs%i%i%i%i.jpg',"<<lambda.p()[0]<<","<<lambda.p()[1]<<","<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"))"<<endl;
+        }
+    }
+    coeff_stream.close();
+    cout << "coefficients plotted"<<endl;
+#if 0   
     //all coefficients output
     u_epsilon.scale(&cproblem1, 1);
     std::ofstream os4;
@@ -294,7 +319,7 @@ int main(){
     }
     os4<<"];"<<endl;
     os4.close();
-    cout << "fertig" << endl;
+#endif
 #endif
     
     
@@ -389,6 +414,6 @@ int main(){
 #endif  
     
     
-    
+    cout << "fertig" << endl;
     return 0;
 }

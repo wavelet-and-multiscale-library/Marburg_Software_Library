@@ -35,7 +35,7 @@ else
 ifeq ($(CXX),$(HOME)/gcc-4.2-20060610/bin/g++)
 LDFLAGS += -Xlinker -rpath -Xlinker $(HOME)/gcc-4.2-20060610/lib
 else
-LDFLAGS =
+LDFLAGS = 
 endif
 endif
 endif
@@ -118,6 +118,7 @@ EXEOBJF3b = \
 EXEOBJF4 = \
   test_ldomain_basis.o\
   test_ldomain_equation.o\
+  test_ldomain_frame.o\
   
 
   

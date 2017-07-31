@@ -68,7 +68,7 @@ namespace WaveletTL
         // precompute the right-hand side on a fine level
         InfiniteVector<double,Index> fhelp;
         fnorm_sqr = 0;
-        for (unsigned int i = 0; (int)i< frame_.degrees_of_freedom();i++)
+        for (int i = 0; (int)i< frame_.degrees_of_freedom();i++)
         {
             const double coeff = f(frame_.get_quarklet(i)) / D(frame_.get_quarklet(i));
             if (fabs(coeff)>1e-15)
@@ -487,7 +487,7 @@ namespace WaveletTL
             
             // iterate over all points and sum up the integral shares
             int index[space_dimension]; // current multiindex for the point values
-            for (unsigned int i = 0; i < space_dimension; i++)
+            for (int i = 0; i < space_dimension; i++)
                 index[i] = 0;
             Point<space_dimension> x;
             const double ax = bvp_->constant_coefficients() ? bvp_->a(x) : 0.0;
@@ -516,14 +516,14 @@ namespace WaveletTL
                     }
                     // product of current Gauss weights
                     weights = 1.0;
-                    for (unsigned int i = 0; i < space_dimension; i++)
+                    for (int i = 0; i < space_dimension; i++)
                         weights *= gauss_weights[i][index[i]];
                     // compute the share a(x)(grad psi_lambda)(x)(grad psi_mu)(x)
-                    for (unsigned int i = 0; i < space_dimension; i++)
+                    for (int i = 0; i < space_dimension; i++)
                     {
                         grad_psi_lambda[i] = 1.0;
                         grad_psi_mu[i] = 1.0;
-                        for (unsigned int s = 0; s < space_dimension; s++) 
+                        for (int s = 0; s < space_dimension; s++) 
                         {
                             if (i == s)
                             {
@@ -537,17 +537,17 @@ namespace WaveletTL
                         }
                     }
                     double share = 0;
-                    for (unsigned int i = 0; i < space_dimension; i++)
+                    for (int i = 0; i < space_dimension; i++)
                         share += grad_psi_lambda[i]*grad_psi_mu[i];
                     r += ax * weights * share;
                     // compute the share q(x)psi_lambda(x)psi_mu(x)
                     share = qx * weights;
-                    for (unsigned int i = 0; i < space_dimension; i++)
+                    for (int i = 0; i < space_dimension; i++)
                         share *= psi_lambda_values[i][index[i]] * psi_mu_values[i][index[i]];
                     r += share;
                     // "++index"
                     bool exit = false;
-                    for(unsigned int i=0;i<space_dimension;i++){
+                    for(int i=0;i<space_dimension;i++){
                         if (index[i] == N_Gauss*(b[i]-a[i])-1)    
                         {
                             index[i] = 0;
@@ -583,13 +583,13 @@ namespace WaveletTL
                     }
                     // product of current Gauss weights
                     weights = 1.0;
-                    for (unsigned int i = 0; i < space_dimension; i++)
+                    for (int i = 0; i < space_dimension; i++)
                         weights *= gauss_weights[i][index[i]];
                     // compute the share a(x)(grad psi_lambda)(x)(grad psi_mu)(x)
-                    for (unsigned int i = 0; i < space_dimension; i++) {
+                    for (int i = 0; i < space_dimension; i++) {
                         grad_psi_lambda[i] = 1.0;
                         grad_psi_mu[i] = 1.0;
-                        for (unsigned int s = 0; s < space_dimension; s++) {
+                        for (int s = 0; s < space_dimension; s++) {
                             if (i == s) {
                                 grad_psi_lambda[i] *= psi_lambda_der_values[i][index[i]];
                                 grad_psi_mu[i]     *= psi_mu_der_values[i][index[i]];
@@ -600,18 +600,18 @@ namespace WaveletTL
                         }
                     }
                     double share = 0;
-                    for (unsigned int i = 0; i < space_dimension; i++)
+                    for (int i = 0; i < space_dimension; i++)
                         share += grad_psi_lambda[i]*grad_psi_mu[i];
                     r += bvp_->a(x) * weights * share;
                     // compute the share q(x)psi_lambda(x)psi_mu(x)
                     share = bvp_->q(x) * weights;
-                    for (unsigned int i = 0; i < space_dimension; i++)
+                    for (int i = 0; i < space_dimension; i++)
                         share *= psi_lambda_values[i][index[i]] * psi_mu_values[i][index[i]];
                     r += share;
                     // "++index"
                     bool exit = false;
                     
-                    for(unsigned int i=0;i<space_dimension;i++){
+                    for(int i=0;i<space_dimension;i++){
                         if (index[i] == N_Gauss*(b[i]-a[i])-1)    
                         {
                             index[i] = 0;
@@ -670,7 +670,7 @@ namespace WaveletTL
                 double a [2]; a[0]=supp.xmin[patch]; a[1]=supp.ymin[patch];
                 double b [2]; b[0]=supp.xmax[patch]; b[1]=supp.ymax[patch];
                 //cout << "current support: ["<<a[0]<<","<<b[0]<<"]x["<<a[1]<<","<<b[1]<<"]"<<endl;
-                for (unsigned int i = 0; i < space_dimension; i++) {
+                for (int i = 0; i < space_dimension; i++) {
                     // prepare Gauss points and weights 
                     h = ldexp(1.0,-supp.j[i]);
                     //cout << "current interval :" <<a[i]*h <<","<<b[i]*h<<endl;
@@ -790,7 +790,7 @@ namespace WaveletTL
                  */
                 // iterate over all points and sum up the integral shares
                 int index[space_dimension]; // current multiindex for the point values
-                for (unsigned int i = 0; i < space_dimension; i++)
+                for (int i = 0; i < space_dimension; i++)
                     index[i] = 0;
                 Point<space_dimension> x;
                 while (true) {
@@ -814,12 +814,12 @@ namespace WaveletTL
                     }
                         
                     double share = bvp_->f(x);
-                    for (unsigned int i = 0; i < space_dimension; i++)
+                    for (int i = 0; i < space_dimension; i++)
                         share *= gauss_weights[i][index[i]] * v_values[i][index[i]];
                     r += share;
                     // "++index"
                     bool exit = false;
-                    for (unsigned int i = 0; i < space_dimension; i++) {
+                    for (int i = 0; i < space_dimension; i++) {
                         if (index[i] == N_Gauss*(b[i]-a[i])-1) {
                             index[i] = 0;
                             exit = (i == space_dimension-1);

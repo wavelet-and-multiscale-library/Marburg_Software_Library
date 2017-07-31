@@ -84,9 +84,9 @@ namespace WaveletTL
                 case 4:
                     os<<"subplot(3,3,8,'position',[omargin+psize+imargin omargin smallpsize psize])"<<endl;       
                     startx= e[0] ? frame->frame1d_01().first_wavelet(j[0],p[0]).k() : frame->frame1d_01().first_generator(j[0],p[0]).k();
-                    starty= e[0] ? frame->frame1d_11().first_wavelet(j[0],p[0]).k() : frame->frame1d_11().first_generator(j[0],p[0]).k();
+                    starty= e[1] ? frame->frame1d_11().first_wavelet(j[1],p[1]).k() : frame->frame1d_11().first_generator(j[1],p[1]).k();
                     columns=1;
-                    rows= e[0] ? frame->frame1d_11().Nablasize(j[0],p[0]) : frame->frame1d_11().Deltasize(j[0],p[0]);
+                    rows= e[1] ? frame->frame1d_11().Nablasize(j[1],p[1]) : frame->frame1d_11().Deltasize(j[1],p[1]);
                     os<<"axis(["<<(double)startx-0.5<<" "<<(double)startx-0.5+columns<<" "<<(double)starty-0.5<<" "<<(double)starty-0.5+rows<<"],'nolabel','ticy');"<<endl;
                     break;
             }

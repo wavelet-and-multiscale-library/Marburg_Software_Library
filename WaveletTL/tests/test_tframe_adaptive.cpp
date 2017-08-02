@@ -3,8 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-#define NONADAPTIVE
-#undef ADAPTIVE
+#undef NONADAPTIVE
+#define ADAPTIVE
 
 #undef BASIS
 #define FRAME
@@ -138,13 +138,13 @@ public:
 int main()
 {
     cout << "Testing tbasis adaptive" << endl;
-    const int d  = 2;
-    const int dT = 2;
+    const int d  = 3;
+    const int dT = 3;
     const int a=2;
     const int b=2;
     const unsigned int dim = 2; 
     const int jmax=8;
-    const int pmax = 1;
+    const int pmax = 0;
 
         FixedArray1D<int,2*dim> s;          //set order of boundary conditions
     s[0]=0, s[1]=0; s[2]=0, s[3]=0; 
@@ -158,8 +158,8 @@ int main()
     //Basis basis(bc); 
     //basis.set_jmax(jmax);
     
-    mySolution<1> solution1;
-    myRHS<1> rhs1;
+    mySolution<2> solution1;
+    myRHS<2> rhs1;
     //Function2 function2;
     
     PoissonBVP<dim> poisson1(&rhs1);

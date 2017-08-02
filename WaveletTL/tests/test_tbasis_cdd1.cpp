@@ -5,9 +5,12 @@
  */
 #undef NONADAPTIVE
 #define ADAPTIVE
+#define BASIS
 
 #define _WAVELETTL_USE_TBASIS 1
-//#define _WAVELETTL_CACHEDPROBLEM_VERBOSITY 0
+#define _WAVELETTL_CACHEDPROBLEM_VERBOSITY 1
+#define _WAVELETTL_CDD1_VERBOSITY 1
+
 
 #include <iostream>
 
@@ -136,9 +139,10 @@ int main()
     const int d  = 3;
     const int dT = 3;
     const unsigned int dim = 2; 
-    const int jmax=8;
-    
-    
+    const int jmax=10;
+//    const int jmax1=4;
+//    MultiIndex<int, dim> jmax;
+//    jmax[0]=jmax1 ,jmax[1]=jmax1;
     typedef PBasis<d,dT> Basis1d;
 //    typedef Basis1d::Index Index1d;
     typedef TensorBasis<Basis1d,dim> Basis;
@@ -281,15 +285,15 @@ int main()
     InfiniteVector<double, Index> F_eta;
     cproblem1.RHS(1e-6, F_eta);
     const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
-    double epsilon = 1e-1;
+    double epsilon = 1e-5;
     InfiniteVector<double, Index> u_epsilon, v;
     
     //cout << eq.s_star() << endl;
     //cout << cproblem1.s_star() << endl;
     //cout << eq.space_dimension << endl;
     //cout << cproblem1.space_dimension << endl;
-    //CDD1_SOLVE(cproblem1, epsilon, u_epsilon, 2*jmax1, tensor_simple);
-    CDD2_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple);
+    CDD1_SOLVE(cproblem1, epsilon, u_epsilon, jmax, tensor_simple);
+//    CDD2_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple);
     
     //APPLY(cproblem1, u_epsilon, 1e-3, v, 2*jmax1, tensor_simple);
     //APPLY_TEST(cproblem1, v, 10^-3, u_epsilon, 8, tensor_simple);

@@ -102,6 +102,7 @@ EXEOBJF3 = \
   test_tbasis_indexplot.o\
   test_tframe_index.o\
   test_tbasis_adaptive.o\
+  test_tbasis_cdd1.o\
   test_tframe_adaptive.o\
   test_qtbasis.o\
   test_ldomain.o
@@ -126,6 +127,7 @@ EXEOBJF4 = \
 
 # set 5 of test programs: adaptive wavelet schemes for elliptic equations
 EXEOBJF5 = \
+  test_cdd1_cube.o\
   
   
   

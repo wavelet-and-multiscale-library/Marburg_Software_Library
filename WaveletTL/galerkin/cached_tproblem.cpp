@@ -355,7 +355,7 @@ namespace WaveletTL
                     mu = this->basis().first_wavelet(currentlevel);
 
                     a(mu,lambda); // computes & stores the block in the cache
-                    cout << mu << endl;
+//                    cout << mu << endl;
                     blocknumber = currentlevel[0]-j0[0] + ((lambdaline-lowestline+offset)*(lambdaline-lowestline+offset+1))/2;
 
                     // add the level

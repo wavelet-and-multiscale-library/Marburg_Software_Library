@@ -83,10 +83,10 @@ int main(){
     const int d  = 3;
     const int dT = 3;
     const int dim = 2;
-    const int jmax=8;
-    const int pmax=2;
-    const int offsetj=0;
-    const int offsetp=0;
+    const int jmax=9;
+    const int pmax=3;
+    const int offsetj=3;
+    const int offsetp=3;
     
     typedef PQFrame<d,dT> Frame1d;
     typedef LDomainFrame<Frame1d> Frame;

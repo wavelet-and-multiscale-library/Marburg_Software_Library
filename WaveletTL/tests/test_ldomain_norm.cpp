@@ -85,20 +85,20 @@ int main(){
     const int dim = 2;
     const int jmax=8;
     const int pmax=2;
+    const int offsetj=0;
+    const int offsetp=0;
     
     typedef PQFrame<d,dT> Frame1d;
     typedef LDomainFrame<Frame1d> Frame;
     myRHS rhs1;
     
     PoissonBVP<dim> poisson1(&rhs1);
-    LDomainFrameEquation<Frame1d,Frame> eq(&poisson1, true);
-    eq.set_jpmax(jmax,pmax);
+    LDomainFrameEquation<Frame1d,Frame> eq(&poisson1, false);
+    eq.set_jpmax(jmax,pmax,false);
     CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > ceq(&eq);
     
-    ceq.normtest(2,2);
-    cout << "Norm: " << ceq.norm_A() << endl;
-    cout << "Norm_inv: " << ceq.norm_Ainv() << endl;
-    
+    ceq.normtest(offsetj,offsetp);
+      
     
     
     return 0;

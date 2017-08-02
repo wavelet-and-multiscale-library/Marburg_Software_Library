@@ -119,6 +119,7 @@ EXEOBJF4 = \
   test_ldomain_basis.o\
   test_ldomain_equation.o\
   test_ldomain_frame.o\
+  test_ldomain_norm.o\
   
 
   

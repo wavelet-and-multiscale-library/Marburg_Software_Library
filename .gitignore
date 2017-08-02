@@ -164,4 +164,4 @@ WaveletTL/tests/test_ldomain
 WaveletTL/tests/test_qtbasis
 WaveletTL/tests/test_ldomain_equation
 WaveletTL/tests/test_ldomain_frame
-
+WaveletTL/tests/test_ldomain_norm

@@ -252,7 +252,7 @@ int main(){
  #endif   
 
 #ifdef ADAPTIVE
-    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq);
+    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 119, 25);
     InfiniteVector<double, Index> F_eta; 
     cproblem1.RHS(1e-6, F_eta);
     const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax

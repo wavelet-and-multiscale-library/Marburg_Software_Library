@@ -71,7 +71,7 @@ int main()
   const int d  = 3;
   const int dT = 3;
   
-  const int jmax=6;
+  const int jmax=9;
   const int pmax=0;
   const int a = 2;
   const int b = 2;
@@ -108,7 +108,7 @@ int main()
 //  abort();
 //  cout << "DeltaLmin=" << eq.frame().frame1d().DeltaLmin() << endl; 
   eq.set_jpmax(jmax, pmax);
-  CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1D,LFrame> > ceq(&eq);
+  CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1D,LFrame> > ceq(&eq, 119, 25);
   InfiniteVector<double, Index> F_eta; 
   ceq.RHS(1e-6, F_eta);
 ////    cout << F_eta << endl;

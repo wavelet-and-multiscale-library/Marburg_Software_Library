@@ -181,7 +181,7 @@ namespace WaveletTL
         // The last level in a levelline is determined with miny = min(j0[1], lambda.j[1]-radius)
 
 
-        Index mu;
+        //Index mu;
         level_type j0(this->frame().j0());
 
         int lambdaline = multi_degree(lambda.j());
@@ -215,9 +215,15 @@ namespace WaveletTL
 //                    int dist2maxpolynomial=maxlevel-dist2p0;
                 int jxdiff = currentlevel[0]-lambda.j()[0];
                 int jydiff = currentlevel[1]-lambda.j()[1];
-                int gap = abs(jxdiff) + abs(jydiff); 
-                double boundary = pow(2,(radius-B*gap/A))/((1+lambda.p()[0])*(1+lambda.p()[1])); //ÄNDERN 1 bezieht sich auf (1+p_1')*(1+p_2')
-//                    cout << "boundary: " << boundary << endl;
+                int gap = abs(jxdiff) + abs(jydiff);
+                double boundary;
+                if(A==B){
+                    boundary = 1<<(radius-gap)/((1+lambda.p()[0])*(1+lambda.p()[1]));
+                }
+                else{
+                    boundary = pow(2,(radius-B*gap/A))/((1+lambda.p()[0])*(1+lambda.p()[1])); //ÄNDERN 1 bezieht sich auf (1+p_1')*(1+p_2')
+                }
+                    //cout << "boundary: " << boundary << endl;
 //                    cout << "maxpolynomial: " << maxpolynomial << endl;
 //                    cout << "gap: " << gap << endl;
 //                    cout << "radius: " << radius << endl;
@@ -228,8 +234,8 @@ namespace WaveletTL
                     for (currentpolynomial[1]=0; currentpolynomial[1]<= std::min((int)(boundary/(1+currentpolynomial[0]))-1,maxpolynomial-currentpolynomial[0]);currentpolynomial[1]++)
                     {
 
-                        mu = this->frame().first_quarklet(currentlevel, currentpolynomial);
-                        a(mu,lambda);
+                        //mu = this->frame().first_quarklet(currentlevel, currentpolynomial);
+                        a(this->frame().first_quarklet(currentlevel, currentpolynomial),lambda);
 //                            cout << mu << endl;
 //                            int dist2p0 = multi_degree(lambda.p());
 //                            int blocknumber = currentpolynomial[0] + ((dist2p0+offset)*(dist2p0+offset+1))/2;;

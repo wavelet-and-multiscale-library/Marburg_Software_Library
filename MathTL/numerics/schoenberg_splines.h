@@ -99,7 +99,48 @@ namespace MathTL
   inline
   double EvaluateSchoenbergBSpline<2>(const int k, const double x)
   {
-    return (x < 0 ? 0 : EvaluateCardinalBSpline<2>(k, x));
+    //return (x < 0 ? 0 : EvaluateCardinalBSpline<2>(k, x));  //recursive
+      //non-recursive:
+      if(k==-1){
+          if(x>=0 && x<=1)
+              return 1-x;
+          else
+              return 0;
+      }
+      if(k>=0){
+          return EvaluateCardinalBSpline<2>((double) x-k);
+      }
+      else
+          return 0;
+  }
+  
+  /*!
+    evaluate an arbitrary Schoenberg B-spline N_{k,3}(x) 
+  */
+  template <>
+  inline
+  double EvaluateSchoenbergBSpline<3>(const int k, const double x)
+  {
+      if(k==-2){
+          if(x>=0 && x<=1)
+              return (1-x)*(1-x);
+          else
+              return 0;
+      }  
+      if(k==-1){
+          if(x>=0 && x<=1)
+              return -1.5*x*x+2*x;
+          if(x>=1 && x<=2)
+              return 0.5*(2-x)*(2-x);
+          else
+              return 0;
+      }
+      if(k>=0){
+          return EvaluateCardinalBSpline<3>((double) x-k);  //non-recursive
+      }
+      else
+          return 0;
+       
   }
 
   /*!

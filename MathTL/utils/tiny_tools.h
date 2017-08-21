@@ -109,6 +109,77 @@ int intpower(const I n, const J k)
   return r;
 }
 
+double mypow(double base, int power){
+    double r=1.0;
+    while(power--){
+        r*=base;
+    }
+    return r;
+}
+
+
+long long fast_power(long long base, long long power) {
+    #define MOD 1000000007
+    long long result = 1;
+    while(power > 0) {
+
+        if(power % 2 == 1) { // Can also use (power & 1) to make code even faster
+            result = (result*base) % MOD;
+        }
+        base = (base * base) % MOD;
+        power = power / 2; // Can also use power >>= 1; to make code even faster
+    }
+    return result;
+}
+
+long long fast_power2(long base, long power) {
+    #define MOD 1000000007
+    long long result = 1;
+    while(power > 0) {
+
+        if(power & 1) { // Can also use (power & 1) to make code even faster
+            result = (result*base) % MOD;
+        }
+        base = (base * base) % MOD;
+        power>>=1; // Can also use power >>= 1; to make code even faster
+    }
+    return result;
+}
+
+inline double fastPow(double a, int b) {
+  union {
+    double d;
+    int x[2];
+  } u = { a };
+  u.x[1] = (int)(b * (u.x[1] - 1072632447) + 1072632447);
+  u.x[0] = 0;
+  return u.d;
+}
+
+inline double fastPrecisePow(double a, int b) {
+  // calculate approximation with fraction of the exponent
+  int e = (int) b;
+  union {
+    double d;
+    int x[2];
+  } u = { a };
+  u.x[1] = (int)((b - e) * (u.x[1] - 1072632447) + 1072632447);
+  u.x[0] = 0;
+
+  // exponentiation by squaring with the exponent's integer part
+  // double r = u.d makes everything much slower, not sure why
+  double r = 1.0;
+  while (e) {
+    if (e & 1) {
+      r *= a;
+    }
+    a *= a;
+    e >>= 1;
+  }
+
+  return r * u.d;
+}
+
 /*!
   helper function object for thresholding within a std::map<I,C>:
   returns true if argument is strictly less than eta in modulus
@@ -194,7 +265,7 @@ inline unsigned int log2(const unsigned int n)
  * 
  * T = const Array1D < MultiIndex<int,DIM> >  == j0
  * Assumption: f < DIM, otherwise nothing will be compared!
- */
+ *
 template<class T> 
 struct index_cmp
 {
@@ -219,11 +290,12 @@ struct index_cmp
     const T arr;
     const unsigned int from;
 };
-/*
+
+
  * Similar, but the last entry of arr is ignored. This is relevant for the first level j_ with a certain norm \|j_\|. 
  * All but the last entry of such a level are equal to j0()[patch][i]. 
  * However, the last entry is of some value independent of j0()[patch][DIM-1]
- */
+ 
 template<class T> 
 struct index_cmp_ignoreLastEntry
 {
@@ -248,14 +320,14 @@ struct index_cmp_ignoreLastEntry
     const T arr;
     const unsigned int from;
 };
-/* For sorting arrays, e.g., multiindices, by their values from position 
+ For sorting arrays, e.g., multiindices, by their values from position 
  * 
  * DIM-1 to 0 (reversed order in the dimensions)
  * 
  * (ordering w.r.t. entry in the array, i.e., a and b, is not reversed)
  * 
  * T = const Array1D < MultiIndex<int,DIM>>  == j0
- */
+ *
 template<class T> 
 struct index_cmp_reversed
 {
@@ -279,4 +351,5 @@ struct index_cmp_reversed
     }
     const T arr;
 };
+*/
 #endif

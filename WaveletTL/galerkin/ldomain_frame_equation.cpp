@@ -99,7 +99,7 @@ namespace WaveletTL
         //return sqrt(a(lambda, lambda));
         double hspreconditioner(0), l2preconditioner(1);
         for (int i=0; i<space_dimension; i++){
-            hspreconditioner+=pow(1+lambda.p()[i],8)*ldexp(1.0,2*lambda.j()[i]);
+            hspreconditioner+=pow(1+lambda.p()[i],8)*(1<<(2*lambda.j()[i]));
             l2preconditioner*=pow(1+lambda.p()[i],2);
         }
         double preconditioner = sqrt(hspreconditioner)*l2preconditioner;

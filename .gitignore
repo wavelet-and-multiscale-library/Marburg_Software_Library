@@ -165,3 +165,5 @@ WaveletTL/tests/test_qtbasis
 WaveletTL/tests/test_ldomain_equation
 WaveletTL/tests/test_ldomain_frame
 WaveletTL/tests/test_ldomain_norm
+MathTL/tests/test_schoenberg_splines
+WaveletTL/tests/test_tbasis_cdd1

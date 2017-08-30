@@ -315,6 +315,8 @@ int main()
   
   // convert indices to CubeIndices
   for (int i = 0; i < frame.n_p(); i++) {
+      //rescaling, so that the coefficients are plotted appropiately to the preconditioning
+      approximations[i].scale(&discrete_poisson,1); 
     MappedBasis* mapped_basis = frame.bases()[i];
     std::ofstream plotstream;
     char filename4[50];

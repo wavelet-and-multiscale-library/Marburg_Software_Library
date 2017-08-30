@@ -167,7 +167,8 @@ int main()
   PoissonBVP<DIM> poisson(&sing1D);
   //BiharmonicBVP<DIM> biharm(&const_fun);  
   SimpleEllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax);
-  // EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
+//  SturmEquation<Basis> eq(T, basis);
+//   EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
   //BiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharm, &frame, jmax);
 
@@ -295,6 +296,36 @@ int main()
 
   //u_epsilon.scale(&discrete_poisson,-1);
   //u_epsilon.scale(&discrete_biharmonic,-1);
+  
+  
+    
+  
+  
+  
+  typedef Basis1D::Index Index1D;
+
+  FixedArray1D<InfiniteVector<double, Index1D>, 2> indices;
+ 
+  InfiniteVector<double, Index>::const_iterator it = approximations[frame.n_p()].begin();
+  for (; it!= approximations[frame.n_p()].end(); ++it) {
+    //cout << *it << endl;
+    Index ind(it.index());
+    //cout << "level = " << ind.j() << endl;
+    indices[ind.p()].set_coefficient(Index1D(ind.j(),ind.e()[0],ind.k()[0],
+					     frame.bases()[0]->bases()[0]), *it);
+  
+    //cout << log10(fabs(*it)) << endl;
+  }
+
+  
+
+  // compute infinite vectors of 1D indices, one for each patch
+  // and plot them
+    
+  std::ofstream ofs7("./sd_results33_basis/indices_patch_0.m");
+  WaveletTL::plot_indices<Basis1D>(frame.bases()[0]->bases()[0], indices[0], JMAX, ofs7, "jet", true, -6);
+  
+  
   for (int i = 0; i <= frame.n_p(); i++)
     approximations[i].scale(&discrete_poisson,-1);
   
@@ -329,26 +360,7 @@ int main()
 
 
 
-  typedef Basis1D::Index Index1D;
-
-  FixedArray1D<InfiniteVector<double, Index1D>, 2> indices;
- 
-  InfiniteVector<double, Index>::const_iterator it = approximations[frame.n_p()].begin();
-  for (; it!= approximations[frame.n_p()].end(); ++it) {
-    //cout << *it << endl;
-    Index ind(it.index());
-    //cout << "level = " << ind.j() << endl;
-    indices[ind.p()].set_coefficient(Index1D(ind.j(),ind.e()[0],ind.k()[0],
-					     frame.bases()[0]->bases()[0]), *it);
   
-    //cout << log10(fabs(*it)) << endl;
-  }
-
-  std::ofstream ofs7("./sd_results33_basis/indices_patch_0.m");
-  WaveletTL::plot_indices<Basis1D>(frame.bases()[0]->bases()[0], indices[0], JMAX, ofs7, "jet", true, -16);
-
-  // compute infinite vectors of 1D indices, one for each patch
-  // and plot them
 
   return 0;
 

@@ -68,8 +68,11 @@ namespace FrameTL
    */
   template <class IBASIS, unsigned int DIM>
   class SimpleEllipticEquation
-  //: public FullyDiagonalDyadicPreconditioner<typename AggregatedFrame<IBASIS,DIM>::Index>
+#ifdef DYADIC
+  : public FullyDiagonalDyadicPreconditioner<typename AggregatedFrame<IBASIS,DIM>::Index>
+#else
       : public FullyDiagonalEnergyNormPreconditioner<typename AggregatedFrame<IBASIS,DIM>::Index>
+#endif
   {
   public:
 

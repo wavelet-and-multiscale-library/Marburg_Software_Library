@@ -62,7 +62,11 @@ namespace WaveletTL
   template <class IFRAME,  class LDOMAINFRAME = LDomainFrame<IFRAME> >
   class LDomainFrameEquation
 //     : public FullyDiagonalDyadicPreconditioner<typename LDomainBasis<IBASIS>::Index>
-    : public FullyDiagonalQuarkletPreconditioner<typename LDOMAINFRAME::Index>
+#ifdef DYADIC  
+  : public FullyDiagonalQuarkletPreconditioner<typename LDOMAINFRAME::Index>
+#else
+    : public FullyDiagonalEnergyNormPreconditioner<typename LDOMAINFRAME::Index>
+#endif
   {
   public:
       
@@ -193,7 +197,12 @@ namespace WaveletTL
     inline void set_jpmax(const unsigned int jmax, const unsigned int pmax, const bool computerhs = true)
     {
         frame_.set_jpmax(jmax, pmax);
-        if (computerhs) compute_rhs();
+        if (computerhs) {
+#ifndef DYADIC
+            compute_diagonal();
+#endif
+            compute_rhs();
+        }
     }
 
   protected:
@@ -205,6 +214,15 @@ namespace WaveletTL
 
     // precompute the right-hand side
     void compute_rhs();
+    
+    /*!
+      precomputation of the right-hand side
+      (constness is not nice but necessary to have RHS a const function)
+    */
+    void compute_diagonal();
+    
+    //! Square root of coefficients on diagonal of stiffness matrix.
+    Array1D<double> stiff_diagonal;
 
     // (squared) \ell_2 norm of the precomputed right-hand side
     double fnorm_sqr;

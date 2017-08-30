@@ -37,10 +37,15 @@ namespace WaveletTL
 
     QuarkletFrame myframe(frame());
 
-
+//!!! number() seems to be a huge bottleneck
     const int jmax = myframe.get_jmax_();
     const int lambda_num = number(lambda, jmax);
     const int nu_num = number(nu,jmax);
+    
+//    const int lambda_num = lambda.number();
+//      //cout << "number: " << lambda_num << endl;
+//      const int nu_num = nu.number();
+//      //cout << "number2: " << nu_num << endl;
 
     //cout << "Punkt 1" << endl;
     // BE CAREFUL: KEY OF GENERATOR LEVEL IS j0-1 NOT j0 !!!!
@@ -144,8 +149,8 @@ namespace WaveletTL
         r = subblock_it->second;
       }
     }
-        
     
+
     return r;
   }
   
@@ -174,8 +179,9 @@ namespace WaveletTL
       
       
 
-      
+      //!!! number() seems to be a huge bottleneck
       const int lambda_num = number(lambda, jmax);
+//      const int lambda_num = lambda.number();
       //cout << lambda << ": " << lambda_num << endl;
       
       // search for column 'lambda'
@@ -215,7 +221,7 @@ namespace WaveletTL
           block.key_comp()(j, lb->first))
           {
              //cout << "Punkt 3" << endl; 
-              // insert a new level
+//              cout << "insert a new level: " << j << ", in the block: " << lambda << endl;
               typedef typename Block::value_type value_type;
               it = block.insert(lb, value_type(j, Subblock()));
 
@@ -260,7 +266,7 @@ namespace WaveletTL
         
 	
       else {
-          //cout << "Einträge schon berechnet" << endl;
+//          cout << "Einträge schon berechnet" << endl;
 	// level already exists --> extract level from cache
 
 	
@@ -282,8 +288,8 @@ namespace WaveletTL
                 }
 	
       }// end else
-    
-    
+
+      
   }
 
 
@@ -367,6 +373,8 @@ namespace WaveletTL
       const int j0 = frame().j0();
       const int jmax = std::min(frame().get_jmax_(),j0+2);
       const int pmax = std::min(frame().get_pmax_(),2);
+//      cout << "jmax: " << jmax << endl;
+//      cout << "pmax: " << pmax << endl;
       
       int p = 0;
       
@@ -383,11 +391,11 @@ namespace WaveletTL
       }
       
       
-      //cout << "Schritt 1" << endl;
+//      cout << "Schritt 1" << endl;
       SparseMatrix<double> A_Lambda;
       Matrix<double> evecs;
       setup_stiffness_matrix(*this, Lambda, A_Lambda);
-      //cout << "Matrix aufgestellt" << endl;
+//      cout << "Matrix aufgestellt" << endl;
       //cout << A_Lambda << endl;
      Vector<double> evals;
       

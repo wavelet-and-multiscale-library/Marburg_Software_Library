@@ -129,30 +129,30 @@ namespace WaveletTL
                                               psi_lambda_der_values, // values of the 1st deriv. of the components of psi_lambda at gauss_points[i]
                                               psi_mu_der_values;     // -"-, for psi_mu
             for (unsigned int i = 0; i < DIM; i++) {
-                evaluate(*basis_.bases()[i], 0,
+                evaluate(*basis_.bases()[i],
                          typename IBASIS::Index(lambda.j()[i],
                                                 lambda.e()[i],
                                                 lambda.k()[i],
                                                 basis_.bases()[i]),
-                         gauss_points[i], psi_lambda_values[i]);
-                evaluate(*basis_.bases()[i], 1,
-                         typename IBASIS::Index(lambda.j()[i],
-                                                lambda.e()[i],
-                                                lambda.k()[i],
-                                                basis_.bases()[i]),
-                         gauss_points[i], psi_lambda_der_values[i]);
-                evaluate(*basis_.bases()[i], 0,
+                         gauss_points[i], psi_lambda_values[i], psi_lambda_der_values[i]);
+//                evaluate(*basis_.bases()[i], 1,
+//                         typename IBASIS::Index(lambda.j()[i],
+//                                                lambda.e()[i],
+//                                                lambda.k()[i],
+//                                                basis_.bases()[i]),
+//                         gauss_points[i], psi_lambda_der_values[i]);
+                evaluate(*basis_.bases()[i],
                          typename IBASIS::Index(mu.j()[i],
                                                 mu.e()[i],
                                                 mu.k()[i],
                                                 basis_.bases()[i]),
-                         gauss_points[i], psi_mu_values[i]);
-                evaluate(*basis_.bases()[i], 1,
-                         typename IBASIS::Index(mu.j()[i],
-                                                mu.e()[i],
-                                                mu.k()[i],
-                                                basis_.bases()[i]),
-                         gauss_points[i], psi_mu_der_values[i]);
+                         gauss_points[i], psi_mu_values[i], psi_mu_der_values[i]);
+//                evaluate(*basis_.bases()[i], 1,
+//                         typename IBASIS::Index(mu.j()[i],
+//                                                mu.e()[i],
+//                                                mu.k()[i],
+//                                                basis_.bases()[i]),
+//                         gauss_points[i], psi_mu_der_values[i]);
             }
             // iterate over all points and sum up the integral shares
             int index[DIM]; // current multiindex for the point values
@@ -191,14 +191,18 @@ namespace WaveletTL
                         }
                     }
                     double share = 0;
-                    for (unsigned int i = 0; i < DIM; i++)
-                        share += grad_psi_lambda[i]*grad_psi_mu[i];
-                    r += ax * weights * share;
-                    // compute the share q(x)psi_lambda(x)psi_mu(x)
-                    share = qx * weights;
-                    for (unsigned int i = 0; i < DIM; i++)
-                        share *= psi_lambda_values[i][index[i]] * psi_mu_values[i][index[i]];
-                    r += share;
+                    if(ax != 0){
+                        for (unsigned int i = 0; i < DIM; i++)
+                            share += grad_psi_lambda[i]*grad_psi_mu[i];
+                        r += ax * weights * share;
+                    }
+                    if(qx != 0){
+                        // compute the share q(x)psi_lambda(x)psi_mu(x)
+                        share = qx * weights;
+                        for (unsigned int i = 0; i < DIM; i++)
+                            share *= psi_lambda_values[i][index[i]] * psi_mu_values[i][index[i]];
+                        r += share;
+                    }
                     // "++index"
                     bool exit = false;
                     for (unsigned int i = 0; i < DIM; i++)

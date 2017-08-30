@@ -165,7 +165,7 @@ namespace WaveletTL
                     {
                         cout << "adding level: " << level << endl;
                         P.add_level(lambda,w,polynomial,level,factor,J,strategy,jmax,pmax,a,b);
-                        P.add_level(lambda,w,0,level,factor,J);
+//                        P.add_level(lambda,w,0,level,factor,J);
         //                cout << w << endl;
         //                cout << "Stop" << endl;
                     }

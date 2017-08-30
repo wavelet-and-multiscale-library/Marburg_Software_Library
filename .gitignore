@@ -7,6 +7,7 @@
 *.dat
 *.txt
 *.jpg
+*.out
 nbproject
 WaveletTL/tests/test_cube_equation
 WaveletTL/tests/test_periodic_laplacian
@@ -165,5 +166,6 @@ WaveletTL/tests/test_qtbasis
 WaveletTL/tests/test_ldomain_equation
 WaveletTL/tests/test_ldomain_frame
 WaveletTL/tests/test_ldomain_norm
-MathTL/tests/test_schoenberg_splines
 WaveletTL/tests/test_tbasis_cdd1
+MathTL/tests/test_schoenberg_splines
+

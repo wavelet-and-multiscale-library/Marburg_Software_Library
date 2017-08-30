@@ -1,3 +1,4 @@
+#define DYADIC
 #undef BASIS
 #define FRAME
 #ifdef FRAME
@@ -71,10 +72,12 @@ int main()
   const int d  = 3;
   const int dT = 3;
   
-  const int jmax=9;
-  const int pmax=0;
+  const int jmax=7;
+  const int pmax=1;
   const int a = 2;
   const int b = 2;
+//  cout << pow(2,3) << ", hier"  << endl;
+//  abort();
 //  typedef DSBasis<d,dT,BernsteinSVD> Basis1D;
   
 #ifdef FRAME
@@ -101,14 +104,41 @@ int main()
 //  ConstantFunction<2> rhs1(val);
   PoissonBVP<2> poisson1(&rhs1);
   LDomainFrameEquation<Frame1D,LFrame> eq(&poisson1, frame, true);
-  Index myindex=eq.frame().get_quarklet(192);
-//  for(int i= 0;i<8;i++,++myindex){
-//  cout << "RHS with quarklet: " <<  myindex << ", " << eq.f(myindex) << endl;
-//  }
-//  abort();
-//  cout << "DeltaLmin=" << eq.frame().frame1d().DeltaLmin() << endl; 
   eq.set_jpmax(jmax, pmax);
   CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1D,LFrame> > ceq(&eq, 119, 25);
+//  Index myindex=eq.frame().get_quarklet(0);
+//  Index myindex2=eq.frame().get_quarklet(0);
+//  clock_t tic= clock();
+////  typename Index::polynomial_type p1(0,0), p2(0,0);
+//  for(int i= 0;i<eq.frame().degrees_of_freedom();i++){
+//      
+////      myindex2=eq.frame().get_quarklet(0);
+////      p2[0]=0, p2[1]=0;
+//      for(int j= 0;j<eq.frame().degrees_of_freedom();j++){
+//            myindex2=eq.frame().get_quarklet(j);
+////          if(myindex2==eq.frame().last_quarklet(jmax,p2)){
+////            ++p2;
+////            myindex2=eq.frame().first_generator(eq.frame().j0(), p2);
+////          }
+////          else
+////              ++myindex2;
+//        
+////    cout << "RHS with quarklet: " <<  myindex << ", " << eq.f(myindex) << endl;
+////    cout << "Bilinearform with quarklet: " <<  myindex << ", " << myindex2 << ": " << eq.a(myindex,myindex2) << endl;
+//          ceq.a(myindex,myindex2);
+////          ceq.a(myindex,myindex2);
+////          eq.a(myindex,myindex2);
+//      }
+//      myindex=eq.frame().get_quarklet(i);
+//      
+//  }
+//  clock_t toc = clock();
+//  double time = (double)(toc-tic);
+//  cout << "\nTime taken: " << (time/CLOCKS_PER_SEC) << " s";
+//  abort();
+//  cout << "DeltaLmin=" << eq.frame().frame1d().DeltaLmin() << endl; 
+  
+  
   InfiniteVector<double, Index> F_eta; 
   ceq.RHS(1e-6, F_eta);
 ////    cout << F_eta << endl;

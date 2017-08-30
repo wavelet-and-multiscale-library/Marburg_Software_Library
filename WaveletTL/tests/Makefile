@@ -41,7 +41,7 @@ endif
 endif
 
 #CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
-CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe -pg
 #CXXFLAGS += -O2 -msse2 -ffast-math -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -ffast-math -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
@@ -104,7 +104,6 @@ EXEOBJF3 = \
   test_tbasis_adaptive.o\
   test_tbasis_cdd1.o\
   test_tframe_adaptive.o\
-  test_qtbasis.o\
   test_ldomain.o
 
 # set 3a of test programs: wavelet bases on the ring domain
@@ -128,6 +127,7 @@ EXEOBJF4 = \
 # set 5 of test programs: adaptive wavelet schemes for elliptic equations
 EXEOBJF5 = \
   test_cdd1_cube.o\
+  test_sturm_bvp.o\
   
   
   
@@ -139,7 +139,7 @@ EXEOBJF6 = \
 
 # set 7 of test programs: nonadaptive wavelet solvers for elliptic problems	
 EXEOBJF7 = \
-  test_sturm_bvp.o\
+  
   
 
 # set 8 of test programs: ExpandASPP	
@@ -344,4 +344,3 @@ ifeq ($(DEBUGMODE),on)
 else
 	$(CXX) $(LDFLAGS) $< -o $@
 endif
-

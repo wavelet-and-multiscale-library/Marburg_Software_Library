@@ -36,7 +36,13 @@ namespace WaveletTL
   //! steepest descent
   template <class PROBLEM>
   void DUV_SOLVE_SD(const PROBLEM& P, const double nu, const double epsilon,
-		    InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon);
+		    InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon, const int jmax = 12);
+  
+  //! steepest descent quarklet version
+  template <class PROBLEM>
+  void DUV_QUARKLET_SOLVE_SD(const PROBLEM& P, const double nu, const double epsilon,
+		    InfiniteVector<double, typename PROBLEM::QuarkletFrame::Index>& u_epsilon, CompressionStrategy strategy, const int pmax = 0, 
+                    const int jmax = 12, const double a = 2, const double b = 2);
 }
 
 #include <adaptive/duv.cpp>

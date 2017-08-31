@@ -1,6 +1,6 @@
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
 
-#define JMAX 18
+#define JMAX 11
 #define ONE_D
 
 #define PRIMALORDER 3
@@ -11,47 +11,35 @@
 #include <time.h> 
 #include <interval/ds_basis.h>
 #include <interval/p_basis.h>
-#include <elliptic_equation.h>
-#include <simple_elliptic_equation.h>
-#include <biharmonic_equation.h>
 #include <algebra/sparse_matrix.h>
 #include <algebra/infinite_vector.h>
 #include <numerics/iteratsolv.h>
 #include <numerics/eigenvalues.h>
-#include <frame_evaluate.h>
 #include <cube/cube_basis.h>
 #include <cube/cube_index.h>
 #include <galerkin/galerkin_utils.h>
-#include <frame_support.h>
-#include <frame_index.h>
-#include <steepest_descent.h>
+#include <adaptive/steepest_descent_ks.h>
 //#include <additive_Schwarz.h>
 //#include <steepest_descent_basis.h>
 //#include <richardson_CDD2.h>
 #include <galerkin/cached_problem.h>
+#include <galerkin/sturm_equation.h>
 #include <utils/plot_tools.h>
 #include <interval/i_indexplot.h>
+#include <galerkin/TestProblem.h>
 
 using std::cout;
 using std::endl;
 
-using FrameTL::FrameIndex;
-//using FrameTL::EllipticEquation;
-using FrameTL::SimpleEllipticEquation;
-using FrameTL::BiharmonicEquation;
-using FrameTL::EvaluateFrame;
-using FrameTL::AggregatedFrame;
-using MathTL::EllipticBVP;
-using MathTL::PoissonBVP;
-using MathTL::ConstantFunction;
-using MathTL::SparseMatrix;
-using MathTL::InfiniteVector;
-using WaveletTL::CubeBasis;
-using WaveletTL::CubeIndex;
-using WaveletTL::CachedProblem;
+//using MathTL::PoissonBVP;
+//using MathTL::ConstantFunction;
+//using MathTL::SparseMatrix;
+//using MathTL::InfiniteVector;
+//using WaveletTL::CubeBasis;
+//using WaveletTL::CubeIndex;
+//using WaveletTL::CachedProblem;
 
 using namespace std;
-using namespace FrameTL;
 using namespace MathTL;
 using namespace WaveletTL;
 
@@ -105,6 +93,38 @@ public:
 
 int main()
 {
+    
+    const unsigned int testcase=4;
+    TestProblem<testcase> T;
+    Function<1>* uexact = 0;
+    switch(testcase) {
+        case 1:
+            uexact = new Function2();
+            break;
+        case 2:
+            uexact = new Function2b();
+            break;
+        case 3:
+            uexact = new FunctionBBCCDDU();
+            break;
+        case 4:
+            uexact = new Function4();
+            break;
+        case 5:
+            uexact = new Function2a();
+            break;
+        case 6:
+            uexact = new scaledHat2a();
+            break;
+        case 7:
+            uexact = new scaledHat2b();
+            break;
+        case 8:
+            uexact = new scaledQuark();
+            break;
+        default:
+            break;
+    }
  
   cout << "testing steepest descent in 1D..." << endl;
   
@@ -115,89 +135,12 @@ int main()
 
   //typedef DSBasis<3,3> Basis1D;
   typedef PBasis<d,dT> Basis1D;
-  typedef AggregatedFrame<Basis1D,1,1> Frame1D;
-  //typedef CubeBasis<Basis1D,1> IntervalBasis;
-  typedef Frame1D::Index Index;
-
-
-  //##############################  
-  Matrix<double> A(DIM,DIM);
-  A(0,0) = 0.7;
-  Point<1> b;
-  b[0] = 0.;
-  AffineLinearMapping<1> affineP(A,b);
+  Basis1D basis;
+  Singularity1D_RHS<double> sing1D;
+  Singularity1D<double> exactSolution1D;
+  SturmEquation<Basis1D> eq(T, basis);
+  CachedProblem<SturmEquation<Basis1D> > ceq(&eq);
   
-  Matrix<double> A2(DIM,DIM);
-  A2(0,0) = 0.7;
-  Point<1> b2;
-  b2[0] = 1-A2.get_entry(0,0);
-  AffineLinearMapping<1> affineP2(A2,b2);
-
-
-  FixedArray1D<double,1> A3;
-  A3[0] = 0.75;
-  SimpleAffineLinearMapping<1> simlpeaffine1(A3,b);
-  
-  FixedArray1D<double,1> A4;
-  A4[0] = 0.75;
-  SimpleAffineLinearMapping<1> simlpeaffine2(A4,b2);
-
-  //##############################
-  
-  Array1D<Chart<DIM,DIM>* > charts(2);
-  charts[0] = &affineP;
-  charts[1] = &affineP2;
-  
-  //charts[0] = &simlpeaffine1;
-  //charts[1] = &simlpeaffine2;
-
-
-  SymmetricMatrix<bool> adj(2);
-  adj(0,0) = 1;
-  adj(1,1) = 1;
-  adj(1,0) = 1;
-  adj(0,1) = 1;
-  
-  //to specify primal boundary the conditions
-  Array1D<FixedArray1D<int,2*DIM> > bc(2);
-  
-  //primal boundary conditions for first patch: all Dirichlet
-  FixedArray1D<int,2*DIM> bound_1;
-  bound_1[0] = 1;
-  bound_1[1] = d-1;
-  
-  bc[0] = bound_1;
-  
-  //primal boundary conditions for second patch: all Dirichlet
-  FixedArray1D<int,2*DIM> bound_2;
-  bound_2[0] = d-1;
-  bound_2[1] = 1;
-  
-  bc[1] = bound_2;
-  
-  //to specify primal boundary the conditions
-  Array1D<FixedArray1D<int,2*DIM> > bcT(2);
-
-  //dual boundary conditions for first patch
-  FixedArray1D<int,2*DIM> bound_3;
-  bound_3[0] = 0;
-  bound_3[1] = 0;
-
-  bcT[0] = bound_3;
-
-  //dual boundary conditions for second patch
-  FixedArray1D<int,2*DIM> bound_4;
-  bound_4[0] = 0;
-  bound_4[1] = 0;
- 
-  bcT[1] = bound_4;
-
-  Atlas<DIM,DIM> Lshaped(charts,adj);  
-  cout << Lshaped << endl;
-
-  //finally a frame can be constructed
-  //Frame1D frame(&Lshaped, bc, bcT, jmax);
-  Frame1D frame(&Lshaped, bc, jmax);
 
 //   Vector<double> value(1);
 //   value[0] = 384;
@@ -206,14 +149,13 @@ int main()
   //  Singularity1D_RHS<double> sing1D;
   //  Singularity1D<double> exactSolution1D;
 
-  Singularity1D_RHS_2<double> sing1D;
-  Singularity1D_2<double> exactSolution1D;
-
+  
   
   //PoissonBVP<DIM> poisson(&const_fun);
-  PoissonBVP<DIM> poisson(&sing1D);
+//  PoissonBVP<DIM> poisson(&sing1D);
   //BiharmonicBVP<DIM> biharm(&const_fun);  
-  SimpleEllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax);
+//  SimpleEllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax);
+//  SturmEquation<Basis> eq(T, basis);
 //   EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, TrivialAffine);
   //EllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, Composite);
   //BiharmonicEquation<Basis1D,DIM> discrete_biharmonic(&biharm, &frame, jmax);
@@ -233,10 +175,10 @@ int main()
 //     discrete_poisson.set_Ainv(1.0/0.146);
 
   // (d,dT) = (3,3)
-    CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 1.0, 1.0);
-    discrete_poisson.set_norm_A(1.0);
-    // optimistic guess:
-    discrete_poisson.set_Ainv(1.0);
+//    CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 1.0, 1.0);
+//    discrete_poisson.set_norm_A(1.0);
+//    // optimistic guess:
+//    discrete_poisson.set_Ainv(1.0);
 
 //    CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0581, 1.0/0.146);
 //    discrete_poisson.set_norm_A(5.0581);
@@ -330,9 +272,9 @@ int main()
   double time;
   tstart = clock();
 
-  Array1D<InfiniteVector<double, Index> > approximations(frame.n_p()+1);
+  Array1D<InfiniteVector<double, Index> > approximations(1);
 
-  steepest_descent_SOLVE(problem, epsilon, approximations);
+  steepest_descent_ks_SOLVE(problem, epsilon, approximations);
 
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
@@ -340,10 +282,10 @@ int main()
 
   cout << "steepest descent done" << endl;
 
-  for (int i = 0; i <= frame.n_p(); i++)
-    approximations[i].scale(&discrete_poisson,-1);
   //u_epsilon.scale(&discrete_poisson,-1);
   //u_epsilon.scale(&discrete_biharmonic,-1);
+  for (int i = 0; i <= 0; i++)
+    approximations[i].scale(&ceq,-1);
   
 
   EvaluateFrame<Basis1D,1,1> evalObj;
@@ -353,19 +295,19 @@ int main()
   Array1D<SampledMapping<1> > Error = evalObj.evaluate_difference(frame, approximations[frame.n_p()], exactSolution1D, 12);
   cout << "...finished plotting error" << endl;
   
-  std::ofstream ofs5("./sd_results33/approx_sol_steep_1D_out.m");
+  std::ofstream ofs5("./sd_results33_basis/approx_sol_steep_1D_out.m");
   matlab_output(ofs5,U);
   ofs5.close();
 
-  std::ofstream ofs6("sd_results33/error_steep_1D_out.m");
+  std::ofstream ofs6("sd_results33_basis/error_steep_1D_out.m");
   matlab_output(ofs6,Error);
   ofs6.close();
-
+  
   for (int i = 0; i < frame.n_p(); i++) {
     cout << "plotting local approximation on patch " << i << endl;
 
     char filename3[128];
-    sprintf(filename3, "%s%d%s%d%s%d%s", "sd_results33/approx1Dsteep_local_on_patch_" , i , "_d" , d ,  "_dT", dT, ".m");
+    sprintf(filename3, "%s%d%s%d%s%d%s", "sd_results33_basis/approx1Dsteep_local_on_patch_" , i , "_d" , d ,  "_dT", dT, ".m");
 
     U = evalObj.evaluate(frame, approximations[i], true, 12);//expand in primal basis
     std::ofstream ofsloc(filename3);
@@ -391,11 +333,9 @@ int main()
     //cout << log10(fabs(*it)) << endl;
   }
 
-  std::ofstream ofs7("./sd_results33/indices_patch_0.m");
+  std::ofstream ofs7("./sd_results33_basis/indices_patch_0.m");
   WaveletTL::plot_indices<Basis1D>(frame.bases()[0]->bases()[0], indices[0], JMAX, ofs7, "jet", true, -16);
 
-  std::ofstream ofs8("./sd_results33/indices_patch_1.m");
-  WaveletTL::plot_indices<Basis1D>(frame.bases()[1]->bases()[0], indices[1], JMAX, ofs8, "jet", true, -16);
   // compute infinite vectors of 1D indices, one for each patch
   // and plot them
 

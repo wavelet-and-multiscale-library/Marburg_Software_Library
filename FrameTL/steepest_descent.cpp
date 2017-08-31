@@ -209,7 +209,7 @@ namespace FrameTL{
 	  break;
 	}
 	case 3: {
-	  weak_ell_tau_norms[loops] = w.weak_norm(1./2.5);
+          weak_ell_tau_norms[loops] = w.weak_norm(1./2.5);
 	  sprintf(name1, "%s%d%s%d%s", "./sd_results33_basis/steep1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
 	  sprintf(name2, "%s%d%s%d%s", "./sd_results33_basis/steep1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
 	  sprintf(name3, "%s%d%s%d%s", "./sd_results33_basis/steep1D_descent_params_P_jmax18_", d, "_dT", dT, ".m");
@@ -306,7 +306,8 @@ namespace FrameTL{
 #ifdef TWO_D
 	  if (residual_norm < 0.01 || loops == 5000) {
 #endif
-	    approximations[P.basis().n_p()] = w;
+//	    cout<< "Solution:" << endl << w << endl;
+              approximations[P.basis().n_p()] = w;
 	    //u_epsilon = w;
 	    exit = true;
 	    break;

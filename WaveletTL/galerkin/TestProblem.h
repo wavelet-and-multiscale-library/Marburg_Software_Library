@@ -42,6 +42,9 @@ class TestProblem : public SimpleSturmBVP
                 case 8:
                     return 0;
                     break;
+                case 9:
+                    return 1;
+                    break;
                 default:
                     return 0;
                     break;
@@ -74,6 +77,9 @@ class TestProblem : public SimpleSturmBVP
                     return 0;
                     break;
                 case 8:
+                    return 0;
+                    break;
+                case 9:
                     return 0;
                     break;
                 default:
@@ -109,6 +115,9 @@ class TestProblem : public SimpleSturmBVP
                     break;
                 case 8:
                     return 1;
+                    break;
+                case 9:
+                    return 0;
                     break;
                 default:
                     return 0;
@@ -146,6 +155,9 @@ class TestProblem : public SimpleSturmBVP
                     break;
                 case 8:
                     return (8*t-1)*std::max(0.0, 4-32*abs(t-0.125))/sqrt(2);
+                    break;
+                case 9:
+                    return  -sin(3.*M_PI*t)*9.*M_PI*M_PI - 4.;
                     break;
                 default:
                     return 0;

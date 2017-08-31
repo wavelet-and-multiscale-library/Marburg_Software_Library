@@ -3,6 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+#define DYADIC
 #undef NONADAPTIVE
 #define ADAPTIVE
 
@@ -12,6 +13,12 @@
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
+#define JMAX 6
+#define PMAX 0
+#define TWO_D
+
+#define PRIMALORDER 3
+#define DUALORDER   3
 
 #include <iostream>
 #include <utils/fixed_array1d.h>
@@ -27,9 +34,12 @@
 #include <galerkin/ldomain_frame_equation.h>
 #include <galerkin/cached_quarklet_ldomain_problem.h>
 
+
 #include <adaptive/compression.h>
 #include <adaptive/apply.h>
 #include <adaptive/cdd2.h>
+#include <adaptive/duv.h>
+#include <adaptive/steepest_descent_ks.h>
 
 #include "ldomain_solutions.h"
 
@@ -85,11 +95,11 @@ int main(){
     
     tic=clock();
     cout << "testing L-domain quarklet frame" << endl;
-    const int d  = 3;
-    const int dT = 3;
-    const int dim = 2;
-    const int jmax=6;
-    const int pmax=0;
+    const int d  = PRIMALORDER;
+    const int dT = DUALORDER;
+    const int dim = _DIM;
+    const int jmax=JMAX;
+    const int pmax=PMAX;
     
     typedef PQFrame<d,dT> Frame1d;
     //Frame1d frame1d(false,false);
@@ -257,8 +267,13 @@ int main(){
  #endif   
 
 #ifdef ADAPTIVE
+
     //CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 65, 20);
-    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq);
+    //CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq);
+
+    //CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 119, 25);
+    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
+
     cout<<"normA: "<<cproblem1.norm_A()<<endl;
     cout<<"normAinv: "<<cproblem1.norm_Ainv()<<endl;
 #if 1 //for parallel test    
@@ -270,13 +285,15 @@ int main(){
     const double a=2;
     const double b=2;
     CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b);
+//    DUV_QUARKLET_SOLVE_SD(cproblem1, nu, epsilon, u_epsilon, tensor_simple, pmax, jmax, a, b);
+//    steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon, tensor_simple, 2, 2);
     
     //plot solution
     //u.COARSE(1e-6,v);
     u_epsilon.scale(&cproblem1, -1);
     Array1D<SampledMapping<dim> > eval(3);
     eval=cproblem1.frame().evaluate(u_epsilon,6);
-    std::ofstream os2("solution_ad.m");
+    std::ofstream os2("./sd_quarklets_results/solution_ad.m");
     for(int i=0;i<3;i++){
         eval[i].matlab_output(os2);
         os2 << "surf(x,y,z);" << endl;
@@ -289,7 +306,7 @@ int main(){
     //new coefficients plot
     u_epsilon.scale(&cproblem1, 1);
     std::ofstream coeff_stream;
-    coeff_stream.open("coefficients_ad.m");
+    coeff_stream.open("./sd_quarklets_results/coefficients_ad.m");
     //coeff_stream2 << "figure;" << endl;
     MultiIndex<int,dim> pstart;
     MultiIndex<int,dim> jstart;// start=basis1.j0();

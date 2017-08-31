@@ -15,10 +15,15 @@ namespace WaveletTL
 					    const bool precompute_rhs)
     : bvp_(bvp), frame_(), normA(0.0), normAinv(0.0)
     {
+        
+        
         if (precompute_rhs)
         {
             cout << "Maximal level is set to "<<multi_degree(frame_.j0())<< ". Maximal polynomial to " << 0 << ". You may want to increase that." << endl;
             frame_.set_jpmax(multi_degree(frame_.j0()),0);
+#ifndef DYADIC
+            compute_diagonal(); 
+#endif
             compute_rhs();
         }
     }
@@ -28,6 +33,9 @@ namespace WaveletTL
 					    const bool precompute_rhs)
     : bvp_(bvp), frame_(frame), normA(0.0), normAinv(0.0)
     {
+#ifndef DYADIC
+            compute_diagonal(); 
+#endif
         if (precompute_rhs)
         {
             cout << "Maximal level is set to "<<multi_degree(frame_.j0())<< ". Maximal polynomial to " << 0 << ". You may want to increase that." << endl;
@@ -56,6 +64,9 @@ namespace WaveletTL
       fcoeffs(eq.fcoeffs), fnorm_sqr(eq.fnorm_sqr),
       normA(eq.normA), normAinv(eq.normAinv)
     {
+#ifndef DYADIC
+            compute_diagonal(); 
+#endif
         cout << "Maximal level is set to "<<multi_degree(frame_.j0())<< ". Maximal polynomial to " << 0 << ". You may want to increase that." << endl;
             frame_.set_jpmax(multi_degree(frame_.j0()),0);
     }
@@ -72,13 +83,15 @@ namespace WaveletTL
         cout<<"parallel computing rhs"<<endl;
 #pragma omp parallel for //to do: reduction
 #endif
-        for (int i = 0; (int)i< frame_.degrees_of_freedom();i++)
+        for (int i = 0; i< frame_.degrees_of_freedom();i++)
         {
-            const double coeff = f(frame_.get_quarklet(i)) / D(frame_.get_quarklet(i));
+            double coeff = f(frame_.get_quarklet(i)) / D(frame_.get_quarklet(i));
             if (fabs(coeff)>1e-15)
             {
                 fhelp.set_coefficient(frame_.get_quarklet(i), coeff);
                 fnorm_sqr += coeff*coeff;
+                if (i % 100 == 0)
+                cout << *(frame_.get_quarklet(i)) << " " << coeff << endl;
             }
         }
         cout << "... done, sort the entries in modulus..." << endl;
@@ -101,6 +114,7 @@ namespace WaveletTL
     {
         //return ldexp(1.0, lambda.j());
         //return sqrt(a(lambda, lambda));
+#ifdef DYADIC
         double hspreconditioner(0), l2preconditioner(1);
         for (int i=0; i<space_dimension; i++){
             hspreconditioner+=pow(1+lambda.p()[i],8)*(1<<(2*lambda.j()[i]));
@@ -109,6 +123,9 @@ namespace WaveletTL
         double preconditioner = sqrt(hspreconditioner)*l2preconditioner;
         
         return preconditioner;
+#else        
+        return stiff_diagonal[lambda.number()];
+#endif
 //        return 1;
     }
 
@@ -942,4 +959,70 @@ namespace WaveletTL
     }
 
 
+    template <class IFRAME, class LDOMAINFRAME>
+        void
+        LDomainFrameEquation<IFRAME, LDOMAINFRAME>::compute_diagonal()
+        {
+          cout << " LDomainFrameEquation(): precompute diagonal of stiffness matrix..." << endl;
+
+          SparseMatrix<double> diag(1,frame_.degrees_of_freedom());
+          char filename[50];
+          char matrixname[50];
+      #ifdef ONE_D
+          int d = IFRAME::primal_polynomial_degree();
+          int dT = IFRAME::primal_vanishing_moments();
+      #else
+      #ifdef TWO_D
+          int d = IFRAME::primal_polynomial_degree();
+          int dT = IFRAME::primal_vanishing_moments();
+      #endif
+      #endif
+
+          // prepare filenames for 1D and 2D case
+      #ifdef ONE_D
+          sprintf(filename, "%s%d%s%d", "stiff_diagonal_poisson_interval_lap07_d", d, "_dT", dT);
+          sprintf(matrixname, "%s%d%s%d", "stiff_diagonal_poisson_1D_lap07_d", d, "_dT", dT);
+      #endif
+      #ifdef TWO_D
+          sprintf(filename, "%s%d%s%d", "stiff_diagonal_poisson_lshaped_lap1_d", d, "_dT", dT);
+          sprintf(matrixname, "%s%d%s%d", "stiff_diagonal_poisson_2D_lap1_d", d, "_dT", dT);
+      #endif
+      #ifndef PRECOMP_DIAG
+          std::list<Vector<double>::size_type> indices;
+          std::list<double> entries;
+      #endif
+      #ifdef PRECOMP_DIAG
+          cout << "reading in diagonal of unpreconditioned stiffness matrix from file "
+               << filename << "..." << endl;
+          diag.matlab_input(filename);
+          cout << "...ready" << endl;
+      #endif
+          stiff_diagonal.resize(frame_.degrees_of_freedom());
+          for (int i = 0; i < frame_.degrees_of_freedom(); i++) {
+      #ifdef PRECOMP_DIAG
+            stiff_diagonal[i] = diag.get_entry(0,i);
+      #endif 
+      #ifndef PRECOMP_DIAG
+      #ifdef FRAME
+            stiff_diagonal[i] = sqrt(a(*(frame_.get_quarklet(i)),*(frame_.get_quarklet(i))));
+      #endif
+      #ifdef BASIS
+            stiff_diagonal[i] = sqrt(a(*(frame_.get_wavelet(i)),*(frame_.get_wavelet(i))));
+      #endif
+
+            indices.push_back(i);
+            entries.push_back(stiff_diagonal[i]);
+      #endif
+            //cout << stiff_diagonal[i] << " " << *(frame_->get_wavelet(i)) << endl;
+          }
+      #ifndef PRECOMP_DIAG
+          diag.set_row(0,indices, entries);
+          diag.matlab_output(filename, matrixname, 1);
+      #endif
+
+          cout << "... done, diagonal of stiffness matrix computed" << endl;
+        }
 }
+    
+    
+

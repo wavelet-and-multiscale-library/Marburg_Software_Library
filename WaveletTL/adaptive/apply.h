@@ -71,6 +71,24 @@ namespace WaveletTL
              const int pmax = 0,
              const double a = 2,
              const double b = 2);
+  
+  template <class PROBLEM>
+  void APPLY_QUARKLET_COARSE(const PROBLEM& P,
+	     const InfiniteVector<double, typename PROBLEM::Index>& v,
+	     const double eta,
+	     InfiniteVector<double, typename PROBLEM::Index>& w,
+	     const int jmax = 99,
+	     const CompressionStrategy strategy = DKR,
+             const int pmax = 0,
+             const double a = 2,
+             const double b = 2,
+             const double lambda = 0.5){
+      InfiniteVector<double, typename PROBLEM::Index> help;
+      APPLY_QUARKLET(P, v, lambda*eta, help, jmax, strategy, pmax, a, b);
+      help.COARSE((1-lambda)*eta, w);
+  };
+  
+  
   /*
    */
   template <class PROBLEM>
@@ -137,7 +155,27 @@ namespace WaveletTL
 	   const CompressionStrategy strategy = St04a
 	   );
 
+
+
+template <class PROBLEM>
+  void RES_QUARKLET(const PROBLEM& P,
+	   const InfiniteVector<double, typename PROBLEM::Index>& w,
+	   const double xi,
+	   const double delta,
+	   const double epsilon,
+	   const int jmax,
+	   InfiniteVector<double, typename PROBLEM::Index>& tilde_r,
+	   double& nu,
+	   unsigned int& niter,
+	   const CompressionStrategy strategy = DKR,
+           const int pmax = 0,
+           const double a = 2,
+           const double b = 2
+	   );
+
 }
+
+
 
 #include <adaptive/apply.cpp>
 

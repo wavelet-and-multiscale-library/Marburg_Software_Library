@@ -5,8 +5,8 @@
 # | Thorsten Raasch, Manuel Werner                                 |
 # +----------------------------------------------------------------+
 
-DEBUGMODE = on
-#DEBUGMODE = off
+#DEBUGMODE = on
+DEBUGMODE = off
 
 # choose between GNU/Intel/Portland Group compiler
 COMPILER = gnu
@@ -41,7 +41,7 @@ endif
 endif
 
 #CXXFLAGS += -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
-CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
+CXXFLAGS += -O2 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe 
 #CXXFLAGS += -O2 -msse2 -ffast-math -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 #CXXFLAGS += -O3 -ffast-math -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
@@ -279,14 +279,14 @@ $(EXEOBJF4): %.o: %.cpp
 ifeq ($(DEBUGMODE),on)
 	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
 else
-	$(CXX) $(CXXFLAGS) -c -DNDEBUG -o $@ $<
+	$(CXX) $(CXXFLAGS) -fopenmp -Ofast -c -DNDEBUG -o $@ $<
 endif
 
 $(EXES4): %: %.o
 ifeq ($(DEBUGMODE),on)
 	$(CXX) $(LDFLAGS) $< -g -o $@
 else
-	$(CXX) $(LDFLAGS) $< -o $@
+	$(CXX) $(LDFLAGS) $< -fopenmp -Ofast -o  $@
 endif
 
 $(EXEOBJF5): %.o: %.cpp

@@ -6,6 +6,8 @@
 #undef NONADAPTIVE
 #define ADAPTIVE
 
+#define PARALLEL 1
+
 #define FRAME
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
@@ -78,7 +80,10 @@ public:
 };
 
 int main(){
+    clock_t tic, toc;
+    double time;
     
+    tic=clock();
     cout << "testing L-domain quarklet frame" << endl;
     const int d  = 3;
     const int dT = 3;
@@ -103,7 +108,7 @@ int main(){
     myRHS rhs1;
     
     PoissonBVP<dim> poisson1(&rhs1);
-    LDomainFrameEquation<Frame1d,Frame> eq(&poisson1, true);
+    LDomainFrameEquation<Frame1d,Frame> eq(&poisson1, false);
     eq.set_jpmax(jmax,pmax);
     
     
@@ -252,12 +257,12 @@ int main(){
  #endif   
 
 #ifdef ADAPTIVE
-    //CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 119, 25);
+    //CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 65, 20);
     CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq);
     cout<<"normA: "<<cproblem1.norm_A()<<endl;
     cout<<"normAinv: "<<cproblem1.norm_Ainv()<<endl;
-    
-    InfiniteVector<double, Index> F_eta; 
+#if 1 //for parallel test    
+    InfiniteVector<double, Index> F_eta;
     cproblem1.RHS(1e-6, F_eta);
     const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
     double epsilon = 1e-3;
@@ -303,6 +308,7 @@ int main(){
     }
     coeff_stream.close();
     cout << "coefficients plotted"<<endl;
+#endif
 #if 0   
     //all coefficients output
     u_epsilon.scale(&cproblem1, 1);
@@ -417,7 +423,9 @@ int main(){
     osf.close(); 
 #endif  
     
-    
+    toc = clock();
+    time = (double)(toc-tic);
+    cout << "Time taken: " << (time/CLOCKS_PER_SEC) << " s\n"<<endl;
     cout << "fertig" << endl;
     return 0;
 }

@@ -68,6 +68,10 @@ namespace WaveletTL
         // precompute the right-hand side on a fine level
         InfiniteVector<double,Index> fhelp;
         fnorm_sqr = 0;
+#if PARALLEL==1
+        cout<<"parallel computing rhs"<<endl;
+#pragma omp parallel for //to do: reduction
+#endif
         for (int i = 0; (int)i< frame_.degrees_of_freedom();i++)
         {
             const double coeff = f(frame_.get_quarklet(i)) / D(frame_.get_quarklet(i));

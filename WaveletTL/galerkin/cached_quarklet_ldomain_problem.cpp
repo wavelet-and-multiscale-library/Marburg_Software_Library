@@ -52,7 +52,7 @@ namespace WaveletTL
             if (col_lb == entries_cache.end() ||
                 entries_cache.key_comp()(nu_num, col_lb->first))
             {
-//                cout << "Neue Spalte " << nu << endl;
+                //cout << "Neue Spalte " << nu << endl;
                 // insert a new column
                 typedef typename ColumnCache::value_type value_type;
                 col_it = entries_cache.insert(col_lb, value_type(nu_num, Column()));
@@ -109,8 +109,18 @@ namespace WaveletTL
                                        nus,
                                        lambda.p());
                 // compute entries
+                //cout << "bin hier"<<endl;
+                //cout<<nus.size()<<endl;
+#if 0
+#pragma omp parallel for shared(subblock)
+                for(int i=0;i<nus.size();i++){
+                    typename IntersectingList::const_iterator it(nus.begin());
+                    advance(it,i);
+#else
                 for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)
                 {
+#endif
+                    //cout<<*it<<endl;
                     const double entry = problem->a(*it, nu);
 
 
@@ -165,6 +175,8 @@ namespace WaveletTL
                                       const double A,
                                       const double B) const
     {
+        //cout <<"entering add_ball"<<endl; 
+        //cout << lambda << " : " << radius << " : " << factor << " : " << maxlevel<<endl;
         
         
         assert (space_dimension <= 2);// we only support dimensions up to 2
@@ -196,6 +208,9 @@ namespace WaveletTL
 
         int xstart,xend,ystart,subblocknumber;
         // iterate the levellines. offset relative to lambdas levelline
+#if 0
+#pragma omp parallel for
+#endif
         for (int offset = -std::min(dist2j0,actualradius); offset <= std::min(dist2maxlevel,actualradius); offset++)
         {
             // iterate over the levels on the levelline
@@ -320,15 +335,15 @@ namespace WaveletTL
             SparseMatrix<double> A_Lambda;
             cout << "begin setup_stiffness_matrix" << endl;
             setup_stiffness_matrix(*this, Lambda, A_Lambda);
-            cout << "end setup_stiffness_matrix" << endl;
+            cout << "end setup_stiffness_matrix, computing eigenvalues" << endl;
             
-//#if 1
+#if 0
             
             
             A_Lambda.compress(1e-10);
 //            unsigned int iterations;
 //            double help;
-//            LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
+ //           LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
             Matrix<double> evecs;
             Vector<double> evals;
             SymmEigenvalues(A_Lambda, evals, evecs);
@@ -339,12 +354,16 @@ namespace WaveletTL
             normA = evals(evals.size()-1);
             normAinv = 1./evals(i);
             
-//#else
-//          Vector<double> xk(Lambda.size(), false);
-//          xk = 1;
-//          unsigned int iterations;
+#else
+          Vector<double> xk(Lambda.size(), false);
+          xk = 1;
+          unsigned int iterations;
 //          normA = PowerIteration(A_Lambda, xk, 1e-6, 100, iterations);
-//#endif
+         double lambdamax=PowerIteration<Vector<double>,SparseMatrix<double> >(A_Lambda, xk, 1e-3, 100, iterations);
+         double lambdamin=InversePowerIteration<Vector<double>,SparseMatrix<double> >(A_Lambda, xk, 1e-10,  1e-3, 100, iterations);
+         normA=lambdamax;
+         normAinv=1./lambdamin;
+#endif
 
 #if _WAVELETTL_CACHEDPROBLEM_VERBOSITY >= 1
             cout << "... done!" << endl;

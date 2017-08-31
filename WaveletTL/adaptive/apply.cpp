@@ -594,28 +594,71 @@ namespace WaveletTL
       //cout << "done binning in apply..." << endl;
 
       Vector<double> ww(P.frame().degrees_of_freedom());
+      //Vector<double> wwhelp(P.frame().degrees_of_freedom());
+      //cout << ww<<endl;
  //     cout << "AUSGEFÜHRT PART2: " << P.basis().degrees_of_freedom() << endl;//HIER WEITERMACHEN @PHK
       //cout << *(P.basis().get_wavelet(4000)) << endl;
       // compute w = \sum_{k=0}^\ell A_{J-k}v_{[k]}
+#if PARALLEL==1
+#pragma omp parallel
+{       
+          Vector<double> wwprivate(P.frame().degrees_of_freedom()); 
+#pragma omp for
+      for(k=0;k<ell;k++){
+          typename std::list<std::list<std::pair<Index, double> > >::const_iterator it(vks.begin());
+          advance(it, k);          
+#else
       k = 0;
-      unsigned int z = 0;
       for (typename std::list<std::list<std::pair<Index, double> > >::const_iterator it(vks.begin());
 	   k <= ell; ++it, ++k) {
+#endif
+#if 0
+#pragma omp parallel
+{       
+          Vector<double> wwprivate(P.frame().degrees_of_freedom()); 
+#pragma omp for
+        for(int z=0;z<P.frame().degrees_of_freedom();z++){
+            typename std::list<std::pair<Index, double> >::const_iterator itk(it->begin());
+            //cout<<"bin hier"<<endl;
+            advance(itk,z);
+#else
+        unsigned int z = 0;
 	for (typename std::list<std::pair<Index, double> >::const_iterator itk(it->begin());
-	     itk != it->end(); ++itk) {
+	     itk != it->end(); ++itk,++z) {
+#endif
+          //  Vector<double> wwhelp(P.frame().degrees_of_freedom());
 	  //add_compressed_column(P, itk->second, itk->first, J-k, ww, jmax, strategy);
 //            cout << "J-k = " << J-k << endl;
 //            cout << "addcompressed wird ausgeführt" << endl;
 //            cout << itk->second << ", " << itk->first << endl;
             //cout << "Beginn cc" << endl;
-	  
-            add_compressed_column_quarklet(P, itk->second, itk->first, J-k, ww, jmax, strategy, true, pmax, a, b);
-//            add_compressed_column_quarklet(P, itk->second, itk->first, J-k, ww, jmax, strategy, true);
+           // add_compressed_column_quarklet(P, itk->second, itk->first, J-k, ww, jmax, strategy, true, pmax, a, b);
+           //Vector<double> wwhelp(P.frame().degrees_of_freedom());
+#if PARALLEL==1
+            add_compressed_column_quarklet(P, itk->second, itk->first, J-k, wwprivate, jmax, strategy, true);
+#else
+            add_compressed_column_quarklet(P, itk->second, itk->first, J-k, ww, jmax, strategy, true);
+#endif
+
+
 //          cout << "Ende cc" << endl;
-//          cout << ww << endl;
-	  z++;
+          //cout << ww << endl;
+	  //z++;
 	}
+        //cout<<"z="<<z<<endl;
       }
+#if PARALLEL==1
+#pragma omp critical
+{
+        for(int i=0;i<ww.size();i++){
+            ww(i)+=wwprivate(i);
+        }
+}
+} 
+#endif
+       //}
+      //cout<<"k= "<<k<<endl;
+      
 //      cout << "copying vector" << endl;
       // copy ww into w
       for (unsigned int i = 0; i < ww.size(); i++) {

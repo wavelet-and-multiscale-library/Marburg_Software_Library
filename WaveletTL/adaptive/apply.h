@@ -73,6 +73,39 @@ namespace WaveletTL
              const double b = 2);
   
   template <class PROBLEM>
+  void APPLY_QUARKLET_SEQENTIAL(const PROBLEM& P,
+	     const InfiniteVector<double, typename PROBLEM::Index>& v,
+	     const double eta,
+	     InfiniteVector<double, typename PROBLEM::Index>& w,
+	     const int jmax = 99,
+	     const CompressionStrategy strategy = DKR,
+             const int pmax = 0,
+             const double a = 2,
+             const double b = 2);
+  
+  template <class PROBLEM>
+  void APPLY_QUARKLET_PARALLEL_OUTER(const PROBLEM& P,
+	     const InfiniteVector<double, typename PROBLEM::Index>& v,
+	     const double eta,
+	     InfiniteVector<double, typename PROBLEM::Index>& w,
+	     const int jmax = 99,
+	     const CompressionStrategy strategy = DKR,
+             const int pmax = 0,
+             const double a = 2,
+             const double b = 2);
+  
+  template <class PROBLEM>
+  void APPLY_QUARKLET_PARALLEL_INNER(const PROBLEM& P,
+	     const InfiniteVector<double, typename PROBLEM::Index>& v,
+	     const double eta,
+	     InfiniteVector<double, typename PROBLEM::Index>& w,
+	     const int jmax = 99,
+	     const CompressionStrategy strategy = DKR,
+             const int pmax = 0,
+             const double a = 2,
+             const double b = 2);
+  
+  template <class PROBLEM>
   void APPLY_QUARKLET_COARSE(const PROBLEM& P,
 	     const InfiniteVector<double, typename PROBLEM::Index>& v,
 	     const double eta,

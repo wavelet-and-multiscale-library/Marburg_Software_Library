@@ -87,7 +87,9 @@ namespace WaveletTL
     typedef typename PROBLEM::Index Index;
 #if PARALLEL==1
     cout<<"parallel computing stiffness matrix"<<endl;
-#pragma omp parallel for
+#pragma omp parallel
+    {
+#pragma omp for
     for(size_type row=0;row<Lambda.size();row++){
         typename std::set<Index>::const_iterator it1(Lambda.begin());
         advance(it1, row);
@@ -131,7 +133,9 @@ namespace WaveletTL
 	  }
 	A_Lambda.set_row(row, indices, entries);
       }
-    
+#if PARALLEL==1
+    }
+#endif
   }
 
     template <class PROBLEM>

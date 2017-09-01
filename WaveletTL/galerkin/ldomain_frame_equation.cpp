@@ -78,24 +78,34 @@ namespace WaveletTL
         cout << "LDomainFrameEquation(): precompute right-hand side..." << endl;
         // precompute the right-hand side on a fine level
         InfiniteVector<double,Index> fhelp;
-        fnorm_sqr = 0;
+        fnorm_sqr = 0; 
+        double coeff;
+        double fnorm_sqr_help;
 #if PARALLEL==1
         cout<<"parallel computing rhs"<<endl;
-#pragma omp parallel for //to do: reduction
+        
+#pragma omp parallel 
+{
+//        cout<<"number of threads: "<<omp_get_num_threads()<<endl;
+#pragma omp for  private(coeff) reduction(+:fnorm_sqr_help)
 #endif
         for (int i = 0; i< frame_.degrees_of_freedom();i++)
         {
-            double coeff = f(frame_.get_quarklet(i)) / D(frame_.get_quarklet(i));
+            coeff = f(frame_.get_quarklet(i)) / D(frame_.get_quarklet(i));
             if (fabs(coeff)>1e-15)
             {
                 fhelp.set_coefficient(frame_.get_quarklet(i), coeff);
-                fnorm_sqr += coeff*coeff;
-                if (i % 100 == 0)
-                cout << *(frame_.get_quarklet(i)) << " " << coeff << endl;
+                fnorm_sqr_help += coeff*coeff;
+                //if (i % 100 == 0)
+                //cout << *(frame_.get_quarklet(i)) << " " << coeff << endl;
             }
         }
+#if PARALLEL==1
+}
+#endif
+        fnorm_sqr=fnorm_sqr_help;
         cout << "... done, sort the entries in modulus..." << endl;
-
+//        cout<<"number of threads: "<<omp_get_num_threads()<<endl;
         // sort the coefficients into fcoeffs
         fcoeffs.resize(0); // clear eventual old values
         fcoeffs.resize(fhelp.size());
@@ -984,8 +994,8 @@ namespace WaveletTL
           sprintf(matrixname, "%s%d%s%d", "stiff_diagonal_poisson_1D_lap07_d", d, "_dT", dT);
       #endif
       #ifdef TWO_D
-          sprintf(filename, "%s%d%s%d", "stiff_diagonal_poisson_lshaped_lap1_d", d, "_dT", dT);
-          sprintf(matrixname, "%s%d%s%d", "stiff_diagonal_poisson_2D_lap1_d", d, "_dT", dT);
+          //sprintf(filename, "%s%d%s%d", "stiff_diagonal_poisson_lshaped_lap1_d", d, "_dT", dT);
+          //sprintf(matrixname, "%s%d%s%d", "stiff_diagonal_poisson_2D_lap1_d", d, "_dT", dT);
       #endif
       #ifndef PRECOMP_DIAG
           std::list<Vector<double>::size_type> indices;
@@ -1017,7 +1027,7 @@ namespace WaveletTL
           }
       #ifndef PRECOMP_DIAG
           diag.set_row(0,indices, entries);
-          diag.matlab_output(filename, matrixname, 1);
+          //diag.matlab_output(filename, matrixname, 1);
       #endif
 
           cout << "... done, diagonal of stiffness matrix computed" << endl;

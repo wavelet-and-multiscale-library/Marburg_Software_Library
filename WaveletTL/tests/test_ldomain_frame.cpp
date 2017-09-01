@@ -13,8 +13,8 @@
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
-#define JMAX 6
-#define PMAX 0
+#define JMAX 8
+#define PMAX 3
 #define TWO_D
 
 #define PRIMALORDER 3
@@ -98,8 +98,8 @@ int main(){
     const int d  = PRIMALORDER;
     const int dT = DUALORDER;
     const int dim = _DIM;
-    const int jmax=JMAX;
-    const int pmax=PMAX;
+    const int jmax=8;
+    const int pmax=3;
     
     typedef PQFrame<d,dT> Frame1d;
     //Frame1d frame1d(false,false);
@@ -268,11 +268,11 @@ int main(){
 
 #ifdef ADAPTIVE
 
-    //CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 65, 20);
-    //CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq);
+//    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 43, 9);
+    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq);
 
     //CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 119, 25);
-    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
+    //CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
 
     cout<<"normA: "<<cproblem1.norm_A()<<endl;
     cout<<"normAinv: "<<cproblem1.norm_Ainv()<<endl;
@@ -293,7 +293,7 @@ int main(){
     u_epsilon.scale(&cproblem1, -1);
     Array1D<SampledMapping<dim> > eval(3);
     eval=cproblem1.frame().evaluate(u_epsilon,6);
-    std::ofstream os2("./sd_quarklets_results/solution_ad.m");
+    std::ofstream os2("solution_ad.m");
     for(int i=0;i<3;i++){
         eval[i].matlab_output(os2);
         os2 << "surf(x,y,z);" << endl;
@@ -306,7 +306,7 @@ int main(){
     //new coefficients plot
     u_epsilon.scale(&cproblem1, 1);
     std::ofstream coeff_stream;
-    coeff_stream.open("./sd_quarklets_results/coefficients_ad.m");
+    coeff_stream.open("coefficients_ad.m");
     //coeff_stream2 << "figure;" << endl;
     MultiIndex<int,dim> pstart;
     MultiIndex<int,dim> jstart;// start=basis1.j0();
@@ -317,7 +317,7 @@ int main(){
             //cout <<lambda.p()[0]<<lambda.p()[1]<< lambda.j()[0]-1+lambda.e()[0]<<lambda.j()[1]-1+lambda.e()[1] << endl;
             jstart=lambda.j();
             estart=lambda.e();
-            plot_indices(&eq.frame(), u_epsilon, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(flipud(gray))", false, true, -6);
+            plot_indices(&eq.frame(), u_epsilon, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(jet)", false, true, -6);
             //coeff_stream2 << "title('solution coefficients') " << endl;
             //coeff_stream2 << "title(sprintf('coefficients on level (%i,%i)',"<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"));"<<endl;
             coeff_stream<<"print('-djpg',sprintf('coeffs%i%i%i%i.jpg',"<<lambda.p()[0]<<","<<lambda.p()[1]<<","<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"))"<<endl;

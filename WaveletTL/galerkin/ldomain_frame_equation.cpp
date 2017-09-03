@@ -689,7 +689,7 @@ namespace WaveletTL
 //            mother_patch_la=(lambda->patch()==3) ? 0: (lambda->patch()==4 ? 2: lambda->patch());
 //            mother_patch_mu=(mu->patch()==3) ? 0: (mu->patch()==4 ? 2: mu->patch());
             
-            //compute gauss points and weights for x- and y-direction (since the quarklets are anisotropic)
+            //compute gauss points and weights
             double a ; a=(dir==0? supp.xmin[main_patch] : =supp.ymin[main_patch]);
             double b ; b=(dir==0? supp.xmax[main_patch] : =supp.ymax[main_patch]);
             //cout << "current support: ["<<a[0]<<","<<b[0]<<"]x["<<a[1]<<","<<b[1]<<"]"<<endl;
@@ -708,15 +708,10 @@ namespace WaveletTL
             
             
             Array1D<double> lambda_gauss_points(gauss_points), mu_gauss_points(gauss_points);
-            // evaluate method of the interval frame is called
             Array1D<double> lambda_values,     // values of the components of psi_lambda at gauss_points[i]
                             mu_values,         // -"-, for psi_mu
                             
             
-
-
-
-
             IFRAME* frame1D_lambda = frame_->frames(lambda->patch(),dir);
             IFRAME* frame1D_mu     = frame_->frames(mu->patch(),dir);
 

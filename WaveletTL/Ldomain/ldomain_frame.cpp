@@ -339,6 +339,7 @@ namespace WaveletTL
                                                      lambda.j()[1],
 						     lambda.e()[1],
 						     (lambda.e()[1]==0?frame1d().DeltaRmax(lambda.j()[1])
+                                                     //!!Attention: only works, if only the most outter quark is mirrored
                                                      :frame1d().Nablamax(lambda.j()[1])),
 						     &frame1d()),
 			      supp.ymin[1],

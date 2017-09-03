@@ -233,10 +233,10 @@ namespace WaveletTL
             //cout << "Mainpatch: " << main_patch << endl;
                     
             bool extended[2];
-            extended[0]=(lambda.patch()>2) ? 1 : 0;
+            extended[0]=(lambda->patch()>2) ? 1 : 0;
             extended[1]=(mu->patch()>2) ? 1 : 0;
             int mother_patch [2];
-            mother_patch[0]=(lambda.patch()==3) ? 0: (lambda->patch()==4 ? 2: lambda->patch());
+            mother_patch[0]=(lambda->patch()==3) ? 0: (lambda->patch()==4 ? 2: lambda->patch());
             mother_patch[1]=(mu->patch()==3) ? 0: (mu->patch()==4 ? 2: mu->patch());
             //due to symmetry we compute the bilinearform just on one patch
             //if(main_patch==1 && mother_patch[0]==mother_patch[1]) cout << mother_patch[0] << endl;
@@ -1082,7 +1082,140 @@ namespace WaveletTL
 
           cout << "... done, diagonal of stiffness matrix computed" << endl;
         }
-}
+    
+#if 0
+    template <class IFRAME, class LDOMAINFRAME>
+    double
+    LDomainFrameEquation<IFRAME, LDOMAINFRAME>:: integrate(const IndexQ1D<IFRAME>& lambda,
+                                                            const IndexQ1D<IFRAME>& mu,
+                                                            const int N_Gauss,
+                                                            const int dir,
+                                                            typename Frame::Support supp) const
+      {
+
+         double res = 0;
+
+         // If the dimension is larger that just 1, it makes sense to store the one dimensional
+         // integrals arising when we make use of the tensor product structure. This costs quite
+         // some memory, but really speeds up the algorithm!
+    #ifdef TWO_D
+
+        typename One_D_IntegralCache::iterator col_lb(one_d_integrals.lower_bound(lambda));
+        typename One_D_IntegralCache::iterator col_it(col_lb);
+        if (col_lb == one_d_integrals.end() ||
+            one_d_integrals.key_comp()(lambda,col_lb->first))
+          {
+            // insert a new column
+            typedef typename One_D_IntegralCache::value_type value_type;
+            col_it = one_d_integrals.insert(col_lb, value_type(lambda, Column1D()));
+          }
+
+        Column1D& col(col_it->second);
+
+        typename Column1D::iterator lb(col.lower_bound(mu));
+        typename Column1D::iterator it(lb);
+        if (lb == col.end() ||
+            col.key_comp()(mu, lb->first))
+          {
+    #endif
+            // compute 1D irregular grid
+//            Array1D<double> irregular_grid;
+
+
+            // Check whether the supports of the two functions intersect and compute the intersection
+            // of the two singular supports. We obtain a non-uniform grid with respect to which the
+            // present integrand is a piecewise polynomial; see �6.3, page 57-62 in Manuel diploma thesis.
+            double h; // granularity for the quadrature
+            Array1D<double> gauss_points, gauss_weights;
+            int main_patch=1;           //the patch we will perform our computations on
+            if(supp.xmin[0]!=-1){
+                main_patch=0;
+            }
+            if(supp.xmin[2]!=-1){
+                main_patch=2;
+            }
+            //cout << "Mainpatch: " << main_patch << endl;
+                    
+            bool extended[2];
+            extended[0]=(lambda->patch()>2) ? 1 : 0;
+            extended[1]=(mu->patch()>2) ? 1 : 0;
+            int mother_patch [2];
+            mother_patch[0]=(lambda->patch()==3) ? 0: (lambda->patch()==4 ? 2: lambda->patch());
+            mother_patch[1]=(mu->patch()==3) ? 0: (mu->patch()==4 ? 2: mu->patch());
+            
+            //compute gauss points and weights for x- and y-direction (since the quarklets are anisotropic)
+            double a ; a=(dir==0? supp.xmin[main_patch] : =supp.ymin[main_patch]);
+            double b ; b=(dir==0? supp.xmax[main_patch] : =supp.ymax[main_patch]);
+            //cout << "current support: ["<<a[0]<<","<<b[0]<<"]x["<<a[1]<<","<<b[1]<<"]"<<endl;
+            
+            
+//                int e = std::max(lambda->e()[i], mu->e()[i]); //correct granularity
+            h = ldexp(1.0, -supp.j[dir]/*-e*/);
+            gauss_points.resize(N_Gauss*(b-a));
+            gauss_weights.resize(N_Gauss*(b-a));
+            for (int interval = a; interval < b; interval++){
+                for (int n = 0; n < N_Gauss; n++) {
+                    gauss_points[(interval-a)*N_Gauss+n]= h*(2*interval+1+GaussPoints[N_Gauss-1][n])/2.;
+                    gauss_weights[(interval-a)*N_Gauss+n]= h*GaussWeights[N_Gauss-1][n];
+                }
+            }
+            
+
+
+//            Array1D<double> gauss_points_la, gauss_points_mu, gauss_weights,
+//              values_lambda, values_mu;
+//
+//            // Setup gauss knots and weights for each of the little pieces where the integrand is smooth.
+//            // The gauss knots and weights for the interval [-1,1] are given in <numerics/gauss_data.h>.
+//            gauss_points_la.resize(N_Gauss*(irregular_grid.size()-1));
+//            gauss_points_mu.resize(N_Gauss*(irregular_grid.size()-1));
+//            gauss_weights.resize(N_Gauss*(irregular_grid.size()-1));
+//            for (unsigned int k = 0; k < irregular_grid.size()-1; k++)
+//              for (int n = 0; n < N_Gauss; n++) {
+//                gauss_points_la[ k*N_Gauss+n  ]
+//                  = 0.5 * (irregular_grid[k+1]-irregular_grid[k]) * (GaussPoints[N_Gauss-1][n]+1)
+//                  + irregular_grid[k];
+//
+//                gauss_weights[ k*N_Gauss+n ]
+//                  = (irregular_grid[k+1]-irregular_grid[k])*GaussWeights[N_Gauss-1][n];
+//              }
+
+            IFRAME* frame1D_lambda = frame_->frames(lambda.patch(),dir);
+            IFRAME* frame1D_mu     = frame_->frames(mu.patch(),dir);
+
+            evaluate(*(basis1D_lambda), lambda.derivative(),
+                                lambda.index(),
+                                gauss_points_la, values_lambda);
+
+            const Array1D<double> gouss_points_mu;
+
+            // setup mapped gauss points
+            for (unsigned int i = 0; i < gauss_points_la.size(); i++) {
+              gauss_points_mu[i] = chart_mu->map_point_inv(chart_la->map_point(gauss_points_la[i], dir), dir);
+            }
+
+            //	cout << "deriv_mu = " << mu.derivative() << endl;
+            WaveletTL::evaluate(*(basis1D_mu), mu.derivative(),
+                                mu.index(),
+                                gauss_points_mu, values_mu);
+
+            //cout << "doing the job.." << endl;
+            for (unsigned int i = 0; i < values_lambda.size(); i++)
+              res += gauss_weights[i] * values_lambda[i] * values_mu[i];
+
+            // in the 2D case store the calculated value
+    #ifdef TWO_D
+            typedef typename Column1D::value_type value_type;
+            it = col.insert(lb, value_type(mu, res));
+          }
+        else {
+          res = it->second;
+        }
+    #endif
+        return res;
+      }
+#endif
+    }
     
     
 

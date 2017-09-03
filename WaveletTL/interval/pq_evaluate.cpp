@@ -496,7 +496,8 @@ namespace WaveletTL
                 switch (derivative) {
                     case 0:
                         for (unsigned int m(0); m < points.size(); m++)
-                            values[m] = MathTL::EvaluateSchoenbergBSpline_td<d>(j_,(1<<j_)-d-k_-2*ell1<d>(),1-points[m])*pow((1<<j_)*(1-points[m])*rightside, p_);
+                            values[m] = (p_==0 ? MathTL::EvaluateSchoenbergBSpline_td<d>(j_,(1<<j_)-d-k_-2*ell1<d>(),1-points[m])
+                                                : MathTL::EvaluateSchoenbergBSpline_td<d>(j_,(1<<j_)-d-k_-2*ell1<d>(),1-points[m])*pow((1<<j_)*(1-points[m])*rightside, p_));
                         break;
                     case 1: 
                         for (unsigned int m(0); m < points.size(); m++)
@@ -516,7 +517,8 @@ namespace WaveletTL
                 switch (derivative) {
                     case 0: 
                         for (unsigned int m(0); m < points.size(); m++)
-                            values[m] = MathTL::EvaluateSchoenbergBSpline_td<d>(j_, k_, points[m])*pow((1<<j_)*points[m]*leftside, p_);
+                            values[m] = (p_==0 ? MathTL::EvaluateSchoenbergBSpline_td<d>(j_, k_, points[m])
+                                                : MathTL::EvaluateSchoenbergBSpline_td<d>(j_, k_, points[m])*pow((1<<j_)*points[m]*leftside, p_));
                         break;
                     case 1:
                         for (unsigned int m(0); m < points.size(); m++)
@@ -538,7 +540,8 @@ namespace WaveletTL
                 switch (derivative) {
                     case 0: 
                         for (unsigned int m(0); m < points.size(); m++)
-                            values[m] = MathTL::EvaluateSchoenbergBSpline_td<d>(j_, k_, points[m])*pow(((1<<j_)*points[m]-k_)*pfktrez,p_);
+                            values[m] = (p_==0 ? MathTL::EvaluateSchoenbergBSpline_td<d>(j_, k_, points[m])
+                                                : MathTL::EvaluateSchoenbergBSpline_td<d>(j_, k_, points[m])*pow(((1<<j_)*points[m]-k_)*pfktrez,p_));
                         break;
                     case 1: 
                         for (unsigned int m(0); m < points.size(); m++)

@@ -4,7 +4,7 @@
 // | This file is part of WaveletTL - the Wavelet Template Library      |
 // |                                                                    |
 // | Copyright (c) 2002-2009                                            |
-// | Thorsten Raasch, Manuel Werner                                     |
+// | Philipp Keding, Alexander Sieber                                   |
 // +--------------------------------------------------------------------+
 
 #ifndef _WAVELETTL_LDOMAIN_FRAME_H
@@ -122,16 +122,31 @@ namespace WaveletTL
     static unsigned int primal_vanishing_moments() { return IntervalFrame::primal_vanishing_moments(); }
 
     //! read access to the underlying 1D frame
-    const IntervalFrame& frame1d() const { return frame1d_; }
+    const IntervalFrame* frame1d() const { return frame1d_; }
     
     //! read access to the underlying 1D frame
-    const IntervalFrame& frame1d_11() const { return frame1d_11_; }
+    const IntervalFrame* frame1d_11() const { return frame1d_11_; }
     
     //! read access to the underlying 1D frame
-    const IntervalFrame& frame1d_01() const { return frame1d_01_; }
+    const IntervalFrame* frame1d_01() const { return frame1d_01_; }
     
     //! read access to the underlying 1D frame
-    const IntervalFrame& frame1d_10() const { return frame1d_10_; }
+    const IntervalFrame* frame1d_10() const { return frame1d_10_; }
+    
+    //! read access to the underlying 1D frame
+    const IntervalFrame* frames(const int patch, const int dir) const { 
+        switch(patch){
+            case 0: 
+            case 3:(dir==0 ? return frame1d_11_ : return frame1d_01_);
+            break;
+            case 1: return frame1d_11_;
+            break;
+            case 2:
+            case 4:(dir==0 ? return frame1d_01_ : return frame1d_11_);
+            break;
+        }
+    }
+    
 //    //! size of Delta_j
     const int Deltasize(const int j) const;
 //
@@ -274,7 +289,7 @@ namespace WaveletTL
     Array1D<Index> full_collection;
 
     //! the interval 1d quarklet frame
-    IntervalFrame frame1d_, frame1d_11_, frame1d_01_, frame1d_10_;
+    IntervalFrame* frame1d_, frame1d_11_, frame1d_01_, frame1d_10_;
     
     //! Degrees of freedom on level p=(0,0) 
     int Nablasize_;

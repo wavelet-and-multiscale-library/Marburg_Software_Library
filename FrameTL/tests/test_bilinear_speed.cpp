@@ -34,6 +34,7 @@
 #include <frame_support.h>
 #endif
 #include <interval/pq_frame.h>
+#include <interval/pq_evaluate.h>
 #ifdef QUARKLET
 #include <Ldomain/ldomain_frame_index.h>
 #include <Ldomain/ldomain_frame.h>
@@ -76,9 +77,9 @@ int main()
   cout << "Testing class SimpleEllipticEquation..." << endl;
   
   const int DIM = 2;
-  const int jmax = 6;
+  const int jmax = 7;
 #ifdef QUARKLET
-  const int pmax = 1;
+  const int pmax = 0;
 #endif
 
   const int d  = 3;
@@ -203,10 +204,19 @@ int main()
   CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0048, 1.0/0.01);
 #endif
 #ifdef QUARKLET
-    LDomainFrameEquation<Frame1d,Frame2D> discrete_poisson(&poisson, false);
-    
-    discrete_poisson.set_jpmax(jmax,pmax);
-    Frame2D frame = discrete_poisson.frame();
+  
+    Frame1d frame1d(false,false);
+    Frame1d frame1d_11(true,true);
+    Frame1d frame1d_01(false,true);
+    Frame1d frame1d_10(true,false);
+  
+//    Frame2D frame(frame1d);
+    Frame2D frame(&frame1d, &frame1d_11, &frame1d_01, &frame1d_10);
+    frame.set_jpmax(jmax,pmax);
+    LDomainFrameEquation<Frame1d,Frame2D> discrete_poisson(&poisson, &frame, false);
+//    discrete_poisson.set_jpmax(jmax,pmax);
+//    Frame2D frame = discrete_poisson.frame();
+//    
     
     CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame2D> > problem(&discrete_poisson, 1., 1.);
 #endif
@@ -224,8 +234,8 @@ int main()
     //    cout << *frame.get_wavelet(i) << endl;
 #endif
 #ifdef QUARKLET
-    Lambda.insert(*frame.get_quarklet(i));
-    cout << *frame.get_quarklet(i) << endl;
+    Lambda.insert(frame.get_quarklet(i));
+    cout << *(frame.get_quarklet(i)) << endl;
 #endif
 
   }
@@ -246,13 +256,14 @@ int main()
   cout << "setting up full stiffness matrix..." << endl;
   SparseMatrix<double> stiff;
   
+  
   clock_t tstart, tend;
   double time;
   tstart = clock();
 
-//    WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff, false);
+    WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff, false);
 //    WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
-  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff, false);
+//  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff, false);
 //  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
   
 

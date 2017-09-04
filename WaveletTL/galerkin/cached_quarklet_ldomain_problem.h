@@ -80,7 +80,7 @@ namespace WaveletTL
         /*
          * read access to the frame
          */
-        inline const QuarkletFrame& frame() const { return problem->frame(); }
+        inline const QuarkletFrame frame() const { return problem->frame(); }
 
         /*
          * space dimension of the problem

@@ -18,6 +18,8 @@
 
 #include <galerkin/galerkin_utils.h>
 #include <galerkin/infinite_preconditioner.h>
+#include <interval/indexq1D.h>
+#include <interval/i_q_index.h>
 
 using MathTL::FixedArray1D;
 using MathTL::EllipticBVP;
@@ -74,14 +76,16 @@ namespace WaveletTL
     make template argument accessible
     */
     typedef LDOMAINFRAME Frame;
+//    typedef LDomainFrame<IFRAME> Frame;
     /*!
       constructor from a boundary value problem 
+      not used anymore
     */
-    LDomainFrameEquation(const EllipticBVP<2>* bvp,
-		    const bool precompute_rhs = true);
+//    LDomainFrameEquation(const EllipticBVP<2>* bvp,
+//		    const bool precompute_rhs = true);
     
     
-    LDomainFrameEquation(const EllipticBVP<2>* bvp, const Frame& frame,
+    LDomainFrameEquation(const EllipticBVP<2>* bvp, const Frame* frame,
 		    const bool precompute_rhs = true);
     /*!
       constructor from a boundary value problem and specified b.c.'s
@@ -104,7 +108,7 @@ namespace WaveletTL
     /*!
       read access to the frame
     */
-    const Frame& frame() const { return frame_; }
+    const Frame frame() const { return *frame_; }
     
     /*!
       space dimension of the problem
@@ -192,28 +196,58 @@ namespace WaveletTL
     /*
      * set the maximal wavelet level jmax.
      * modifies
-     *   frame_.full_collection, fcoeffs, fnorm_sqr
+     *   frame_->full_collection, fcoeffs, fnorm_sqr
      */
-    inline void set_jpmax(const unsigned int jmax, const unsigned int pmax, const bool computerhs = true)
-    {
-        frame_.set_jpmax(jmax, pmax);
-        if (computerhs) {
-#ifndef DYADIC
-            compute_diagonal();
-#endif
-            compute_rhs();
-        }
-    }
+//    inline void set_jpmax(const unsigned int jmax, const unsigned int pmax, const bool computerhs = true)
+//    {
+//        cout << "hier4" << endl;
+//        frame_->set_jpmax(jmax, pmax);
+//        cout << "hier5" << endl;
+//        if (computerhs) {
+//#ifndef DYADIC
+//            compute_diagonal();
+//#endif
+//            compute_rhs();
+//        }
+//    }
 
   protected:
     const EllipticBVP<2>* bvp_;
-    Frame frame_;
+    const Frame* frame_;
 
     // right-hand side coefficients on a fine level, sorted by modulus
     Array1D<std::pair<Index,double> > fcoeffs;
 
     // precompute the right-hand side
     void compute_rhs();
+    
+    
+    
+    // #####################################################################################
+    // Caching of appearing 1D integrals when making use of the tensor product structure of the wavelets
+    // during the evaluation of the bilinear form.
+    typedef std::map<IndexQ1D<IFRAME>,double > Column1D;
+    typedef std::map<IndexQ1D<IFRAME>,Column1D> One_D_IntegralCache;
+    
+    mutable One_D_IntegralCache one_d_integrals;
+    // #####################################################################################
+
+    /*
+    @param lambda Index of first wavelet or generator.
+    @param mu Index of second wavelet or generator.
+    @param N_Gauss Number of Gauss quadrature knots to be used. This should be cosen equal
+    to the spline order in the constant coefficient case to be sure to integrate exactly.
+    @param dir The spatial direction under considerattion.
+    @param supp_lambda Support of the reference wavelet on the cube having the function given by lambda
+    as component in the direction dir.
+    @param supp_mu Support of the reference wavelet on the cube having the function given by mu
+    as component in the direction dir.
+     */
+    double integrate(const IndexQ1D<IFRAME>& lambda,
+		     const IndexQ1D<IFRAME>& mu,
+		     const int N_Gauss,
+		     const int dir,
+                     typename Frame::Support supp) const;
     
     /*!
       precomputation of the right-hand side

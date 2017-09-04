@@ -47,46 +47,46 @@ namespace WaveletTL
             switch(patch){
                 case 0:
                     os<<"subplot(3,3,1,'position',[omargin omargin+2*imargin+psize+smallpsize psize psize])"<<endl; 
-                    startx= e[0] ? frame->frame1d_11().first_wavelet(j[0],p[0]).k() : frame->frame1d_11().first_generator(j[0],p[0]).k();
-                    starty= e[1] ? frame->frame1d_01().first_wavelet(j[1],p[1]).k()+1 : frame->frame1d_01().first_generator(j[1],p[1]).k()+1; //shift because first generator/wavelet lies on patch 3
-                    columns= e[0] ? frame->frame1d_11().Nablasize(j[0],p[0]) : frame->frame1d_11().Deltasize(j[0],p[0]);
-                    rows=e[1] ? frame->frame1d_01().Nablasize(j[1],p[1])-1 : frame->frame1d_01().Deltasize(j[1],p[1])-1;//shift because first generator/wavelet lies on patch 3
+                    startx= e[0] ? frame->frame1d_11()->first_wavelet(j[0],p[0]).k() : frame->frame1d_11()->first_generator(j[0],p[0]).k();
+                    starty= e[1] ? frame->frame1d_01()->first_wavelet(j[1],p[1]).k()+1 : frame->frame1d_01()->first_generator(j[1],p[1]).k()+1; //shift because first generator/wavelet lies on patch 3
+                    columns= e[0] ? frame->frame1d_11()->Nablasize(j[0],p[0]) : frame->frame1d_11()->Deltasize(j[0],p[0]);
+                    rows=e[1] ? frame->frame1d_01()->Nablasize(j[1],p[1])-1 : frame->frame1d_01()->Deltasize(j[1],p[1])-1;//shift because first generator/wavelet lies on patch 3
                     //os<<"axis(axlabels);"<<endl;
                     os<<"axis(["<<(double)startx-0.5<<" "<<(double)startx-0.5+columns<<" "<<(double)starty-0.5<<" "<<(double)starty-0.5+rows<<"],axlabels);"<<endl;
                     os<<"set(gca,'xaxislocation','top')"<<endl;
                     break;
                 case 1:
                     os<<"subplot(3,3,7,'position',[omargin omargin psize psize])"<<endl;
-                    startx= e[0] ? frame->frame1d_11().first_wavelet(j[0],p[0]).k() : frame->frame1d_11().first_generator(j[0],p[0]).k();
-                    starty= e[1] ? frame->frame1d_11().first_wavelet(j[1],p[1]).k() : frame->frame1d_11().first_generator(j[1],p[1]).k();
-                    columns= e[0] ? frame->frame1d_11().Nablasize(j[0],p[0]) : frame->frame1d_11().Deltasize(j[0],p[0]);
-                    rows=e[1] ? frame->frame1d_11().Nablasize(j[1],p[1]) : frame->frame1d_11().Deltasize(j[1],p[1]);
+                    startx= e[0] ? frame->frame1d_11()->first_wavelet(j[0],p[0]).k() : frame->frame1d_11()->first_generator(j[0],p[0]).k();
+                    starty= e[1] ? frame->frame1d_11()->first_wavelet(j[1],p[1]).k() : frame->frame1d_11()->first_generator(j[1],p[1]).k();
+                    columns= e[0] ? frame->frame1d_11()->Nablasize(j[0],p[0]) : frame->frame1d_11()->Deltasize(j[0],p[0]);
+                    rows=e[1] ? frame->frame1d_11()->Nablasize(j[1],p[1]) : frame->frame1d_11()->Deltasize(j[1],p[1]);
                     os<<"axis(["<<(double)startx-0.5<<" "<<(double)startx-0.5+columns<<" "<<(double)starty-0.5<<" "<<(double)starty-0.5+rows<<"],axlabels);"<<endl;
                     break;
                 case 2:
                     os<<"subplot(3,3,9,'position',[omargin+2*imargin+psize+smallpsize omargin psize psize])"<<endl;
                     
-                    startx= e[0] ? frame->frame1d_01().first_wavelet(j[0],p[0]).k()+1 : frame->frame1d_01().first_generator(j[0],p[0]).k()+1;   //shift because first generator/wavelet lies on patch 4
-                    starty= e[1] ? frame->frame1d_11().first_wavelet(j[1],p[1]).k() : frame->frame1d_11().first_generator(j[1],p[1]).k(); 
-                    columns= e[0] ? frame->frame1d_01().Nablasize(j[0],p[0])-1 : frame->frame1d_01().Deltasize(j[0],p[0])-1;
-                    rows=e[1] ? frame->frame1d_11().Nablasize(j[1],p[1]) : frame->frame1d_11().Deltasize(j[1],p[1]);
+                    startx= e[0] ? frame->frame1d_01()->first_wavelet(j[0],p[0]).k()+1 : frame->frame1d_01()->first_generator(j[0],p[0]).k()+1;   //shift because first generator/wavelet lies on patch 4
+                    starty= e[1] ? frame->frame1d_11()->first_wavelet(j[1],p[1]).k() : frame->frame1d_11()->first_generator(j[1],p[1]).k(); 
+                    columns= e[0] ? frame->frame1d_01()->Nablasize(j[0],p[0])-1 : frame->frame1d_01()->Deltasize(j[0],p[0])-1;
+                    rows=e[1] ? frame->frame1d_11()->Nablasize(j[1],p[1]) : frame->frame1d_11()->Deltasize(j[1],p[1]);
                     os<<"axis(["<<(double)startx-0.5<<" "<<(double)startx-0.5+columns<<" "<<(double)starty-0.5<<" "<<(double)starty-0.5+rows<<"],axlabels);"<<endl;
                     os<<"set(gca,'yaxislocation','right')"<<endl;
                     break;
                 case 3:
                     os<<"subplot(3,3,4,'position',[omargin omargin+psize+imargin psize smallpsize])"<<endl;                    
-                    startx= e[0] ? frame->frame1d_11().first_wavelet(j[0],p[0]).k() : frame->frame1d_11().first_generator(j[0],p[0]).k();
-                    starty= e[1] ? frame->frame1d_01().first_wavelet(j[1],p[1]).k() : frame->frame1d_01().first_generator(j[1],p[1]).k();
-                    columns= e[0] ? frame->frame1d_11().Nablasize(j[0],p[0]) : frame->frame1d_11().Deltasize(j[0],p[0]);
+                    startx= e[0] ? frame->frame1d_11()->first_wavelet(j[0],p[0]).k() : frame->frame1d_11()->first_generator(j[0],p[0]).k();
+                    starty= e[1] ? frame->frame1d_01()->first_wavelet(j[1],p[1]).k() : frame->frame1d_01()->first_generator(j[1],p[1]).k();
+                    columns= e[0] ? frame->frame1d_11()->Nablasize(j[0],p[0]) : frame->frame1d_11()->Deltasize(j[0],p[0]);
                     rows=1;
                     os<<"axis(["<<(double)startx-0.5<<" "<<(double)startx-0.5+columns<<" "<<(double)starty-0.5<<" "<<(double)starty-0.5+rows<<"],'nolabel','ticx');"<<endl;
                     break;
                 case 4:
                     os<<"subplot(3,3,8,'position',[omargin+psize+imargin omargin smallpsize psize])"<<endl;       
-                    startx= e[0] ? frame->frame1d_01().first_wavelet(j[0],p[0]).k() : frame->frame1d_01().first_generator(j[0],p[0]).k();
-                    starty= e[1] ? frame->frame1d_11().first_wavelet(j[1],p[1]).k() : frame->frame1d_11().first_generator(j[1],p[1]).k();
+                    startx= e[0] ? frame->frame1d_01()->first_wavelet(j[0],p[0]).k() : frame->frame1d_01()->first_generator(j[0],p[0]).k();
+                    starty= e[1] ? frame->frame1d_11()->first_wavelet(j[1],p[1]).k() : frame->frame1d_11()->first_generator(j[1],p[1]).k();
                     columns=1;
-                    rows= e[1] ? frame->frame1d_11().Nablasize(j[1],p[1]) : frame->frame1d_11().Deltasize(j[1],p[1]);
+                    rows= e[1] ? frame->frame1d_11()->Nablasize(j[1],p[1]) : frame->frame1d_11()->Deltasize(j[1],p[1]);
                     os<<"axis(["<<(double)startx-0.5<<" "<<(double)startx-0.5+columns<<" "<<(double)starty-0.5<<" "<<(double)starty-0.5+rows<<"],'nolabel','ticy');"<<endl;
                     break;
             }

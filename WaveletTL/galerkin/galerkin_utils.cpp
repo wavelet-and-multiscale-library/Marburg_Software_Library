@@ -79,6 +79,7 @@ namespace WaveletTL
 			      SparseMatrix<double>& A_Lambda,
 			      bool preconditioned)
   {
+      
     A_Lambda.resize(Lambda.size(), Lambda.size());
 
     typedef typename SparseMatrix<double>::size_type size_type;
@@ -87,7 +88,9 @@ namespace WaveletTL
     typedef typename PROBLEM::Index Index;
 #if PARALLEL==1
     cout<<"parallel computing stiffness matrix"<<endl;
-#pragma omp parallel for
+#pragma omp parallel
+    {
+#pragma omp for
     for(size_type row=0;row<Lambda.size();row++){
         typename std::set<Index>::const_iterator it1(Lambda.begin());
         advance(it1, row);
@@ -115,8 +118,9 @@ namespace WaveletTL
 	  {
 #endif
 	    // 	    if (intersect_singular_support(P.basis(), *it1, *it2)) {
+            
             double entry = P.a(*it2, *it1);
-	    //cout << *it2 << ", " << *it1 << ": " << entry << endl;
+	    
 	    //const double entry = 0;
 #if _WAVELETTL_GALERKINUTILS_VERBOSITY >= 2
  	    if (fabs(entry) > 1e-15) {
@@ -131,7 +135,9 @@ namespace WaveletTL
 	  }
 	A_Lambda.set_row(row, indices, entries);
       }
-    
+#if PARALLEL==1
+    }
+#endif
   }
 
     template <class PROBLEM>

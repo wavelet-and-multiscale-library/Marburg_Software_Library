@@ -91,10 +91,15 @@ int main(){
     typedef PQFrame<d,dT> Frame1d;
     typedef LDomainFrame<Frame1d> Frame;
     myRHS rhs1;
+    Frame1d frame1d(false,false);
+    Frame1d frame1d_11(true,true);
+    Frame1d frame1d_01(false,true);
+    Frame1d frame1d_10(true,false);
+    Frame frame(&frame1d, &frame1d_11, &frame1d_01, &frame1d_10);
+    frame.set_jpmax(jmax,pmax);
     
     PoissonBVP<dim> poisson1(&rhs1);
-    LDomainFrameEquation<Frame1d,Frame> eq(&poisson1, false);
-    eq.set_jpmax(jmax,pmax,false);
+    LDomainFrameEquation<Frame1d,Frame> eq(&poisson1, &frame, false);
     CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > ceq(&eq);
     
     ceq.normtest(offsetj,offsetp);

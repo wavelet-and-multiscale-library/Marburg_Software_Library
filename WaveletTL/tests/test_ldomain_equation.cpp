@@ -83,9 +83,12 @@ int main()
 #ifdef FRAME
   typedef PQFrame<d,dT> Frame1D;
 //  typedef PBasis<d,dT> Frame1D;
-  Frame1D frame1D_11(true,true);
+  Frame1D frame1d(false,false);
+  Frame1D frame1d_11(true,true);
+  Frame1D frame1d_01(false,true);
+  Frame1D frame1d_10(true,false);
   
-  Frame1D frame1D;
+  
 //  typedef Frame1D::Index Index1D;
   
   typedef LDomainFrame<Frame1D> LFrame;
@@ -93,7 +96,9 @@ int main()
   typedef Index::polynomial_type polynomial_type;
   polynomial_type p;
 //  typedef Index::level_type level_type;
-  LFrame frame(frame1D);
+  LFrame frame(&frame1d, &frame1d_11, &frame1d_01, &frame1d_10);
+  frame.set_jpmax(jmax, pmax);
+  
 //  LFrame frame2();
   
   myRHS rhs1;
@@ -103,8 +108,9 @@ int main()
 //  Vector<double> val(1, "1.0");
 //  ConstantFunction<2> rhs1(val);
   PoissonBVP<2> poisson1(&rhs1);
-  LDomainFrameEquation<Frame1D,LFrame> eq(&poisson1, frame, true);
-  eq.set_jpmax(jmax, pmax);
+  
+  LDomainFrameEquation<Frame1D,LFrame> eq(&poisson1, &frame, true);
+  
   CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1D,LFrame> > ceq(&eq, 119, 25);
 //  Index myindex=eq.frame().get_quarklet(0);
 //  Index myindex2=eq.frame().get_quarklet(0);

@@ -20,7 +20,7 @@ namespace WaveletTL
     } else {
       j_ = frame_->j0(); // coarsest level;
       // e_ is zero by default: generator
-      k_[0] = frame->frame1d().DeltaLmin();
+      k_[0] = frame->frame1d()->DeltaLmin();
       k_[1] = k_[0]+1;
       num_ = 0;
     }
@@ -66,8 +66,8 @@ namespace WaveletTL
   LDomainFrameIndex<IFRAME>&
   LDomainFrameIndex<IFRAME>::operator ++ ()
   {
-//      cout << "DeltaLmin=" << frame_->frame1d().DeltaLmin() <<endl;
-//      cout << "DeltaRmax=" << frame_->frame1d().DeltaRmax(3) <<endl;
+//      cout << "DeltaLmin=" << frame_->frame1d()->).DeltaLmin() <<endl;
+//      cout << "DeltaRmax=" << frame_->frame1d()->).DeltaRmax(3) <<endl;
       num_++;
       level_type j0(frame_->j0());
     // decide whether the patch number has to be increased
@@ -81,17 +81,17 @@ namespace WaveletTL
 	case 0:
 	case 1:
 	case 2:
-	  last_index = frame_->frame1d().DeltaRmax(j_[i])-1;
+	  last_index = frame_->frame1d()->DeltaRmax(j_[i])-1;
 	  break;
 	case 3:
 	  last_index = (i == 0
-			? frame_->frame1d().DeltaRmax(j_[i])-1
-			: frame_->frame1d().DeltaLmin()); // by convention
+			? frame_->frame1d()->DeltaRmax(j_[i])-1
+			: frame_->frame1d()->DeltaLmin()); // by convention
 	  break;
 	case 4:
 	  last_index = (i == 0
-			? frame_->frame1d().DeltaLmin() // by convention
-			: frame_->frame1d().DeltaRmax(j_[i])-1);
+			? frame_->frame1d()->DeltaLmin() // by convention
+			: frame_->frame1d()->DeltaRmax(j_[i])-1);
 	  break;
 	}
       } else {
@@ -101,17 +101,17 @@ namespace WaveletTL
             case 0:
             case 1:
             case 2:
-              last_index = frame_->frame1d().Nablamax(j_[i]);
+              last_index = frame_->frame1d()->Nablamax(j_[i]);
               break;
             case 3:
               last_index = (i == 0
-                            ? frame_->frame1d().Nablamax(j_[i])
-                            : frame_->frame1d().Nablamin()); // by convention
+                            ? frame_->frame1d()->Nablamax(j_[i])
+                            : frame_->frame1d()->Nablamin()); // by convention
               break;
             case 4:
               last_index = (i == 0
-                            ? frame_->frame1d().Nablamin() // by convention
-                            : frame_->frame1d().Nablamax(j_[i]));
+                            ? frame_->frame1d()->Nablamin() // by convention
+                            : frame_->frame1d()->Nablamax(j_[i]));
               break;
             }
           
@@ -126,52 +126,52 @@ namespace WaveletTL
 	  switch(patch_) {
 	  case 0:
 	  case 1:
-            k_[i] = frame_->frame1d().DeltaLmin()+1;
+            k_[i] = frame_->frame1d()->DeltaLmin()+1;
 //            cout << "Hier1" << endl;
 	  case 2:
-	    k_[i] = frame_->frame1d().DeltaLmin()+1;
+	    k_[i] = frame_->frame1d()->DeltaLmin()+1;
 //            cout << "Hier2" << endl;
 	    break;
 	  case 3:
 //            cout << "Hier3" << endl;  
 	    k_[i] = (i == 0
-		     ? frame_->frame1d().DeltaLmin()+1
-		     : frame_->frame1d().DeltaLmin()); // by convention
+		     ? frame_->frame1d()->DeltaLmin()+1
+		     : frame_->frame1d()->DeltaLmin()); // by convention
 	    break;
 	  case 4:
 //            cout << "Hier4" << endl;  
 	    k_[i] = (i == 0
-		     ? frame_->frame1d().DeltaLmin() // by convention
-		     : frame_->frame1d().DeltaLmin()+1);
+		     ? frame_->frame1d()->DeltaLmin() // by convention
+		     : frame_->frame1d()->DeltaLmin()+1);
 	    break;
 	  }
 	} else { // quarklet, minimal translation index is independent from the patch number
             switch(patch_) {
             case 0:
               k_[i] = (i == 0
-                       ? frame_->frame1d().Nablamin()
-                       : frame_->frame1d().Nablamin()+1);//here
+                       ? frame_->frame1d()->Nablamin()
+                       : frame_->frame1d()->Nablamin()+1);//here
               break;
             case 1:
-              k_[i] = frame_->frame1d().Nablamin(); 
+              k_[i] = frame_->frame1d()->Nablamin(); 
               break;
             case 2:
               k_[i] = (i == 0
-                       ? frame_->frame1d().Nablamin()+1//here, and some more. :)
-                       : frame_->frame1d().Nablamin());
+                       ? frame_->frame1d()->Nablamin()+1//here, and some more. :)
+                       : frame_->frame1d()->Nablamin());
               break;
             case 3:
               k_[i] = (i == 0
-                       ? frame_->frame1d().Nablamin()+1
-                       : frame_->frame1d().Nablamin()); // by convention
+                       ? frame_->frame1d()->Nablamin()+1
+                       : frame_->frame1d()->Nablamin()); // by convention
               break;
             case 4:
               k_[i] = (i == 0
-                       ? frame_->frame1d().Nablamin() // by convention
-                       : frame_->frame1d().Nablamin()+1);
+                       ? frame_->frame1d()->Nablamin() // by convention
+                       : frame_->frame1d()->Nablamin()+1);
               break;
             }
-//	  k_[i] = frame_->frame1d().Nablamin(); // should be 0
+//	  k_[i] = frame_->frame1d()->Nablamin(); // should be 0
 	}
 	patchplusplus = (i == 0);
       } else {
@@ -212,39 +212,39 @@ namespace WaveletTL
 	switch(patch_) { // we know that patch_>0
 	case 1:
           k_[0] = (e_[0] == 0
-		   ? frame_->frame1d().DeltaLmin()+1
-		   : frame_->frame1d().Nablamin());
+		   ? frame_->frame1d()->DeltaLmin()+1
+		   : frame_->frame1d()->Nablamin());
 	  k_[1] = (e_[1] == 0
-		   ? frame_->frame1d().DeltaLmin()+1
-		   : frame_->frame1d().Nablamin());
+		   ? frame_->frame1d()->DeltaLmin()+1
+		   : frame_->frame1d()->Nablamin());
 //        cout << "2.: " << k_[0] << k_[1] << endl; 
-//        cout << "Probe: " << frame_->frame1d().DeltaLmin()+1 << endl; 
+//        cout << "Probe: " << frame_->frame1d()->DeltaLmin()+1 << endl; 
 	  break;  
 	case 2:
 	  k_[0] = (e_[0] == 0
-		   ? frame_->frame1d().DeltaLmin()+1
-		   : frame_->frame1d().Nablamin()+1);
+		   ? frame_->frame1d()->DeltaLmin()+1
+		   : frame_->frame1d()->Nablamin()+1);
 	  k_[1] = (e_[1] == 0
-		   ? frame_->frame1d().DeltaLmin()+1
-		   : frame_->frame1d().Nablamin());
+		   ? frame_->frame1d()->DeltaLmin()+1
+		   : frame_->frame1d()->Nablamin());
 //        cout << "2.: " << k_[0] << k_[1] << endl; 
-//        cout << "Probe: " << frame_->frame1d().DeltaLmin()+1 << endl; 
+//        cout << "Probe: " << frame_->frame1d()->DeltaLmin()+1 << endl; 
 	  break;
 	case 3:
 	  k_[0] = (e_[0] == 0
-		   ? frame_->frame1d().DeltaLmin()+1
-		   : frame_->frame1d().Nablamin());
+		   ? frame_->frame1d()->DeltaLmin()+1
+		   : frame_->frame1d()->Nablamin());
 	  k_[1] = (e_[1] == 0
-		   ? frame_->frame1d().DeltaLmin()
-		   : frame_->frame1d().Nablamin()); // by convention;
+		   ? frame_->frame1d()->DeltaLmin()
+		   : frame_->frame1d()->Nablamin()); // by convention;
 	  break;
 	case 4:
 	  k_[0] = (e_[0] == 0
-		   ? frame_->frame1d().DeltaLmin()
-		   : frame_->frame1d().Nablamin()); // by convention
+		   ? frame_->frame1d()->DeltaLmin()
+		   : frame_->frame1d()->Nablamin()); // by convention
 	  k_[1] = (e_[1] == 0
-		   ? frame_->frame1d().DeltaLmin()+1
-		   : frame_->frame1d().Nablamin());
+		   ? frame_->frame1d()->DeltaLmin()+1
+		   : frame_->frame1d()->Nablamin());
 	}
       }
     } else return *this;
@@ -278,11 +278,11 @@ namespace WaveletTL
 
 	// ... and lowest translation index k = k(j,e,0)
 	k_[0] = (e_[0] == 0
-		 ? frame_->frame1d().DeltaLmin()+1
-		 : frame_->frame1d().Nablamin());
+		 ? frame_->frame1d()->DeltaLmin()+1
+		 : frame_->frame1d()->Nablamin());
 	k_[1] = (e_[1] == 0
-		 ? frame_->frame1d().DeltaLmin()+1
-		 : frame_->frame1d().Nablamin()+1);
+		 ? frame_->frame1d()->DeltaLmin()+1
+		 : frame_->frame1d()->Nablamin()+1);
       }
 
     } else return *this;
@@ -301,11 +301,11 @@ namespace WaveletTL
                     if (e_[i] == 1)
                     {
                         e_[i]=0;
-                        k_[i]=frame_->frame1d().DeltaLmin()+1;
+                        k_[i]=frame_->frame1d()->DeltaLmin()+1;
                     } else
                     {
                         e_[i]=1;
-                        k_[i]=frame_->frame1d().Nablamin();
+                        k_[i]=frame_->frame1d()->Nablamin();
                         done = false;
                         break;
                     }
@@ -320,20 +320,20 @@ namespace WaveletTL
 //                            // increase left neighbor
 //                            j_[0]=j_[0]+1;
 //                            e_[0]=1;
-//                            k_[0]=frame_->frame1d().Nablamin();
+//                            k_[0]=frame_->frame1d()->Nablamin();
 //                            int temp = j_[1]-j0[1];
 //                            j_[1]=j0[1]+temp-1;
 //                            e_[1]= (temp == 1?0:1);
-//                            k_[1]= (temp == 1?frame_->frame1d().DeltaLmin()+1:frame_->frame1d().Nablamin());
+//                            k_[1]= (temp == 1?frame_->frame1d()->DeltaLmin()+1:frame_->frame1d()->Nablamin());
 //                            
 //                        }
 //                else{
 //                            j_[0]=j0[1]+j_[0]-j0[0]+1;
 //                            e_[0]=1;
-//                            k_[0]=frame_->frame1d().Nablamin();
+//                            k_[0]=frame_->frame1d()->Nablamin();
 ////                            j_[0]=j0[0];
 ////                            e_[0]=0;
-////                            k_[0]=frame_->frame1d().DeltaLmin()+1;
+////                            k_[0]=frame_->frame1d()->DeltaLmin()+1;
 //                        
 //                             // unnoetig, da i==0 gilt.
 //                }
@@ -346,11 +346,11 @@ namespace WaveletTL
                             // increase left neighbor
                             j_[0]=j_[0]+1;
                             e_[0]=1;
-                            k_[0]=frame_->frame1d().Nablamin();
+                            k_[0]=frame_->frame1d()->Nablamin();
                             int temp = j_[1]-j0[1];
                             j_[1]=j0[1]+temp-1;
                             e_[1]= (temp == 1?0:1);
-                            k_[1]= (temp == 1?frame_->frame1d().DeltaLmin()+1:frame_->frame1d().Nablamin()+1);
+                            k_[1]= (temp == 1?frame_->frame1d()->DeltaLmin()+1:frame_->frame1d()->Nablamin()+1);
                             break;
                         }
                     }
@@ -360,10 +360,10 @@ namespace WaveletTL
                     {
                         j_[1]=j0[1]+j_[0]-j0[0]+1;
                         e_[1]=1;
-                        k_[1]=frame_->frame1d().Nablamin()+1;
+                        k_[1]=frame_->frame1d()->Nablamin()+1;
                         j_[0]=j0[0];
                         e_[0]=0;
-                        k_[0]=frame_->frame1d().DeltaLmin()+1;
+                        k_[0]=frame_->frame1d()->DeltaLmin()+1;
                         break; // unnoetig, da i==0 gilt.
                     }
                 }
@@ -383,8 +383,8 @@ namespace WaveletTL
       patch_ = 0;
       
       // ... and lowest translation index k = k(j,(0,1),0)
-//      k_[0] = frame_->frame1d().DeltaLmin()+1;
-//      k_[1] = frame_->frame1d().Nablamin();
+//      k_[0] = frame_->frame1d()->DeltaLmin()+1;
+//      k_[1] = frame_->frame1d()->Nablamin();
     }
     
     return *this;
@@ -425,10 +425,10 @@ namespace WaveletTL
 //  {
 //    const int ecode(e()[0]+2*e()[1]);
 //    
-//    const int DeltaLmin = frame_->frame1d().DeltaLmin();
-//    const int Nablamin  = frame_->frame1d().Nablamin();
-//    const int Deltasize = frame_->frame1d().Deltasize(j());
-//    const int Nablasize = frame_->frame1d().Nablasize(j());
+//    const int DeltaLmin = frame_->frame1d()->DeltaLmin();
+//    const int Nablamin  = frame_->frame1d()->Nablamin();
+//    const int Deltasize = frame_->frame1d()->Deltasize(j());
+//    const int Nablasize = frame_->frame1d()->Nablasize(j());
 //
 //    switch(ecode) {
 //    case 0: // e=(0,0)
@@ -578,8 +578,8 @@ namespace WaveletTL
     typename LDomainFrameIndex<IFRAME>::type_type e;
 
     // setup lowest translation index for e=(0,0), p=0
-    typename LDomainFrameIndex<IFRAME>::translation_type k(frame->frame1d().DeltaLmin()+1,
-						      frame->frame1d().DeltaLmin()+1);
+    typename LDomainFrameIndex<IFRAME>::translation_type k(frame->frame1d()->DeltaLmin()+1,
+						      frame->frame1d()->DeltaLmin()+1);
     
         return LDomainFrameIndex<IFRAME>(p,j, e, 0, k, p.number()* frame->get_Nablasize(), frame);
     
@@ -595,7 +595,7 @@ namespace WaveletTL
     typename LDomainFrameIndex<IFRAME>::type_type e;
 
     // setup highest translation index for e=(0,0), p=4
-    typename LDomainFrameIndex<IFRAME>::translation_type k(frame->frame1d().DeltaLmin(), frame->frame1d().DeltaRmax(j[1])-1);
+    typename LDomainFrameIndex<IFRAME>::translation_type k(frame->frame1d()->DeltaLmin(), frame->frame1d()->DeltaRmax(j[1])-1);
     
     return LDomainFrameIndex<IFRAME>(p,j, e, 4, k, p.number()* frame->get_Nablasize()+frame->Deltasize(j[0])-1, frame);
   }
@@ -609,31 +609,31 @@ namespace WaveletTL
     typename LDomainFrameIndex<IFRAME>::type_type e;
     typename LDomainFrameIndex<IFRAME>::translation_type k;
     typename LDomainFrameIndex<IFRAME>::level_type jdiff;
-    /*(frame->frame1d().DeltaLmin()+1,
-						      frame->frame1d().Nablamin()+1);*/
+    /*(frame->frame1d()->DeltaLmin()+1,
+						      frame->frame1d()->Nablamin()+1);*/
     
     bool sofar_only_generators = true;
     
     if (j[0] == frame->j0()[0] )
     {
         e[0] = 0;
-        k[0] = frame->frame1d().DeltaLmin()+1;
+        k[0] = frame->frame1d()->DeltaLmin()+1;
     } else
     {
         e[0] = 1;
-        k[0] = frame->frame1d().Nablamin();
+        k[0] = frame->frame1d()->Nablamin();
         sofar_only_generators = false;
     }
     
     if ( (sofar_only_generators == true) || (j[1] != frame->j0()[1]) )
     {
         e[1] = 1;
-        k[1] = frame->frame1d().Nablamin()+1;
+        k[1] = frame->frame1d()->Nablamin()+1;
         //sofar_only_generators = false;
     } else
     {
         e[1] = 0;
-        k[1] = frame->frame1d().DeltaLmin()+1;
+        k[1] = frame->frame1d()->DeltaLmin()+1;
     }
     
     jdiff[0]= j[0]-frame->j0()[0], jdiff[1]= j[1]-frame->j0()[1];
@@ -661,20 +661,20 @@ namespace WaveletTL
 //    const int ecode(e[0]+2*e[1]);
 //    if (ecode == 0) {
 //      // e = (0,0)
-//      k[0] = k[1] = frame->frame1d().DeltaLmin()+1;
+//      k[0] = k[1] = frame->frame1d()->DeltaLmin()+1;
 //    } else {
 //      if (ecode == 1) {
 //	// e = (1,0)
-//	k[0] = frame->frame1d().Nablamin()+1;
-//	k[1] = frame->frame1d().DeltaLmin()+1;
+//	k[0] = frame->frame1d()->Nablamin()+1;
+//	k[1] = frame->frame1d()->DeltaLmin()+1;
 //      } else {
 //	if (ecode == 2) {
 //	  // e = (0,1)
-//	  k[0] = frame->frame1d().DeltaLmin()+1;
-//	  k[1] = frame->frame1d().Nablamin()+1;
+//	  k[0] = frame->frame1d()->DeltaLmin()+1;
+//	  k[1] = frame->frame1d()->Nablamin()+1;
 //	} else {
 //	  // e = (1,1)
-//	  k[0] = k[1] = frame->frame1d().Nablamin()+1;
+//	  k[0] = k[1] = frame->frame1d()->Nablamin()+1;
 //	}
 //      }
 //    }
@@ -693,7 +693,7 @@ namespace WaveletTL
     
     // setup highest translation index for e=(1,1), p=2
     typename LDomainFrameIndex<IFRAME>::translation_type k(0,
-						      frame->frame1d().Nablamax(j[1]));
+						      frame->frame1d()->Nablamax(j[1]));
     
     jdiff[0]= j[0]-frame->j0()[0], jdiff[1]= j[1]-frame->j0()[1];
     int level = jdiff.number();

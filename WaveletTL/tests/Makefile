@@ -279,7 +279,7 @@ $(EXEOBJF4): %.o: %.cpp
 ifeq ($(DEBUGMODE),on)
 	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
 else
-	$(CXX) $(CXXFLAGS) -fopenmp -Ofast -c -DNDEBUG -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -DNDEBUG -fopenmp -Ofast -o $@ $<
 endif
 
 $(EXES4): %: %.o

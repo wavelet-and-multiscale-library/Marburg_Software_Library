@@ -250,6 +250,8 @@ namespace WaveletTL
                     {
 
                         //mu = this->frame().first_quarklet(currentlevel, currentpolynomial);
+                        // the result of the following call is that the cache holds the whole level subblock corresponding to all 
+                        // quarklets with level and polynomial degree of mu
                         a(this->frame().first_quarklet(currentlevel, currentpolynomial),lambda);
 //                            cout << mu << endl;
 //                            int dist2p0 = multi_degree(lambda.p());

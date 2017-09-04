@@ -124,6 +124,8 @@ namespace WaveletTL
 //      return sqrt(a(lambda, lambda));
       return stiff_diagonal[lambda.number()];
 #endif
+#else
+ return 1;     
 #endif
 
 //    return 1;

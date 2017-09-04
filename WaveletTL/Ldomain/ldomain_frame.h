@@ -4,7 +4,7 @@
 // | This file is part of WaveletTL - the Wavelet Template Library      |
 // |                                                                    |
 // | Copyright (c) 2002-2009                                            |
-// | Thorsten Raasch, Manuel Werner                                     |
+// | Philipp Keding, Alexander Sieber                                   |
 // +--------------------------------------------------------------------+
 
 #ifndef _WAVELETTL_LDOMAIN_FRAME_H
@@ -64,10 +64,11 @@ namespace WaveletTL
     
 
     //! default constructor
-    LDomainFrame();
+    LDomainFrame(const IntervalFrame* frame1d, const IntervalFrame* frame1d_11, 
+          const IntervalFrame* frame1d_01, const IntervalFrame* frame1d_10);
 
-    //! constructor with a precomputed 1D frame
-    LDomainFrame(const IntervalFrame& frame1d);
+//    //! constructor with a precomputed 1D frame
+//    LDomainFrame(const IntervalFrame& frame1d);
 
     //! coarsest possible level j0
     inline const level_type& j0() const { return j0_; }
@@ -122,16 +123,43 @@ namespace WaveletTL
     static unsigned int primal_vanishing_moments() { return IntervalFrame::primal_vanishing_moments(); }
 
     //! read access to the underlying 1D frame
-    const IntervalFrame& frame1d() const { return frame1d_; }
+    const IntervalFrame* frame1d() const { return frame1d_; }
     
     //! read access to the underlying 1D frame
-    const IntervalFrame& frame1d_11() const { return frame1d_11_; }
+    const IntervalFrame* frame1d_11() const { return frame1d_11_; }
     
     //! read access to the underlying 1D frame
-    const IntervalFrame& frame1d_01() const { return frame1d_01_; }
+    const IntervalFrame* frame1d_01() const { return frame1d_01_; }
     
     //! read access to the underlying 1D frame
-    const IntervalFrame& frame1d_10() const { return frame1d_10_; }
+    const IntervalFrame* frame1d_10() const { return frame1d_10_; }
+    
+    //! read access to the underlying 1D frame
+    const IntervalFrame* frames(const int patch, const int dir) const { 
+        
+        switch(patch){
+            case 0: 
+            case 3:
+                if(dir==0)
+                     return frame1d_11_;
+                else
+                     return frame1d_01_;
+            break;
+            case 1: return frame1d_11_;
+            break;
+            case 2:
+            case 4:
+                if(dir==0)
+                    return frame1d_01_; 
+                else
+                    return frame1d_11_;
+            break;
+            default:
+                return frame1d_;
+                break;
+        }
+    }
+    
 //    //! size of Delta_j
     const int Deltasize(const int j) const;
 //
@@ -274,7 +302,10 @@ namespace WaveletTL
     Array1D<Index> full_collection;
 
     //! the interval 1d quarklet frame
-    IntervalFrame frame1d_, frame1d_11_, frame1d_01_, frame1d_10_;
+    const IntervalFrame* frame1d_;
+    const IntervalFrame* frame1d_11_;
+    const IntervalFrame* frame1d_01_;
+    const IntervalFrame* frame1d_10_;
     
     //! Degrees of freedom on level p=(0,0) 
     int Nablasize_;

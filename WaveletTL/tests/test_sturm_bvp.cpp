@@ -1,7 +1,7 @@
 #include <iostream>
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
 #define DYADIC
-#define JMAX 9
+#define JMAX 14
 #define PMAX 0
 #define ONE_D
 
@@ -147,7 +147,7 @@ int main()
   cout << "setup equation.." << endl;
   SturmEquation<Basis> eq(T, basis);
   cout << "end setup equation!" << endl;
-  
+  abort();
   
 
 #ifdef NONADAPTIVE
@@ -439,11 +439,11 @@ A.apply(x, err);
   
 #endif
 #ifdef BASIS
-//  CDD2_SOLVE(ceq, nu, epsilon, u_epsilon, jmax);
+  CDD2_SOLVE(ceq, nu, epsilon, u_epsilon, jmax);
 //  DUV_SOLVE_SD(ceq, nu, epsilon, u_epsilon, jmax);
 //  Array1D<InfiniteVector<double, Index> > approximations(1);
 
-  steepest_descent_ks_SOLVE(ceq, epsilon, u_epsilon);
+//  steepest_descent_ks_SOLVE(ceq, epsilon, u_epsilon);
 //  cout << "Solution:" << endl << u_epsilon << endl;
   
   

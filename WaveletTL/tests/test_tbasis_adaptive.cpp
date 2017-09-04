@@ -7,10 +7,19 @@
 #define ADAPTIVE
 #define BASIS
 
+#define DYADIC
+#define JMAX 8
+#define PMAX 0
+#define TWO_D
+
+#define PRIMALORDER 3
+#define DUALORDER   3
+
 #define _WAVELETTL_USE_TBASIS 1
 //#define _WAVELETTL_CACHEDPROBLEM_VERBOSITY 0
 
 #include <iostream>
+
 
 #include <interval/p_basis.h>
 #include <interval/ds_basis.h>
@@ -29,6 +38,7 @@
 #include <adaptive/compression.h>
 #include <adaptive/apply.h>
 #include <cube/tbasis_indexplot.h>
+#include <adaptive/steepest_descent_ks.h>
 
 //#include "TestFunctions2d.h"
 
@@ -134,10 +144,10 @@ public:
 int main()
 {
     cout << "Testing tbasis adaptive" << endl;
-    const int d  = 3;
-    const int dT = 3;
+    const int d  = PRIMALORDER;
+    const int dT = DUALORDER;
     const unsigned int dim = 2; 
-    const int jmax=8;
+    const int jmax=JMAX;
     
     
     typedef PBasis<d,dT> Basis1d;
@@ -278,11 +288,52 @@ int main()
     cout << "solution 2 plotted" << endl;
 #endif
 #ifdef ADAPTIVE
-    CachedTProblem<TensorEquation<Basis1d,dim,Basis> > cproblem1(&eq);
+//    CachedTProblem<TensorEquation<Basis1d,dim,Basis> > cproblem1(&eq);
+    CachedTProblem<TensorEquation<Basis1d,dim,Basis> > cproblem1(&eq,20.,10.);
+    
+    set<Index> Lambda;
+  for (int i=0; i<basis.degrees_of_freedom();i++) {
+    Lambda.insert(*basis.get_wavelet(i));
+        cout << *basis.get_wavelet(i) << endl;
+  }
+    
+    cout << "setting up full right hand side..." << endl;
+  Vector<double> rh;
+  WaveletTL::setup_righthand_side(cproblem1, Lambda, rh);
+//  cout << rh << endl;
+  cout << "setting up full stiffness matrix..." << endl;
+  SparseMatrix<double> stiff;
+  
+  clock_t tstart, tend;
+  double time;
+  tstart = clock();
+
+//    WaveletTL::setup_stiffness_matrix(cproblem1, Lambda, stiff, false);
+//    WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
+  WaveletTL::setup_stiffness_matrix(eq, Lambda, stiff, false);
+//  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
+  
+
+  tend = clock();
+  time = (double)(tend-tstart)/CLOCKS_PER_SEC;
+  cout << "  ... done, time needed: " << time << " seconds" << endl;
+
+  stiff.matlab_output("stiff_2D_out", "stiff",1); 
+  
+  abort();
+    
+    
+    
+    
+    
+    
+    
+    
+    
     InfiniteVector<double, Index> F_eta;
     cproblem1.RHS(1e-6, F_eta);
     const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
-    double epsilon = 1e-1;
+    double epsilon = 1e-4;
     InfiniteVector<double, Index> u_epsilon, v;
     
     //cout << eq.s_star() << endl;
@@ -291,6 +342,7 @@ int main()
     //cout << cproblem1.space_dimension << endl;
     //CDD1_SOLVE(cproblem1, epsilon, u_epsilon, 2*jmax1, tensor_simple);
     CDD2_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple);
+//    steepest_descent_ks_SOLVE(cproblem1, epsilon, u_epsilon);
     
     //APPLY(cproblem1, u_epsilon, 1e-3, v, 2*jmax1, tensor_simple);
     //APPLY_TEST(cproblem1, v, 10^-3, u_epsilon, 8, tensor_simple);

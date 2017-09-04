@@ -63,13 +63,15 @@ test_biharmonic_1d_testcase.o\
 test_elliptic_equation_1D.o\
 test_elliptic_equation.o\
 test_simple_elliptic_equation.o\
+test_simple_elliptic_equation_1D.o\
 test_simple_biharmonic_equation_1D.o\
 test_simple_biharmonic_equation_2D.o\
 test_biharmonic_equation_1D.o\
 test_biharmonic_equation.o\
 test_apply_1D.o \
 test_apply.o \
-test_compute_dual_frame_elements.o
+test_compute_dual_frame_elements.o\
+test_bilinear_speed.o\
 
 EXEOBJF2 = 
 

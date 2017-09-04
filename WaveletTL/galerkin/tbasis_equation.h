@@ -110,11 +110,14 @@ namespace WaveletTL
          * make template argument accessible
          */
         typedef TENSORBASIS WaveletBasis;
+        typedef IBASIS Basis1D;
+        
 
         /*
          * wavelet index class
          */
         typedef typename WaveletBasis::Index Index;
+        typedef typename Basis1D::Index Index1D;
 
         /*
          * read access to the basis
@@ -227,7 +230,15 @@ namespace WaveletTL
             if (computerhs) compute_rhs();
         }
 
-    //protected:
+    protected:
+        // #####################################################################################
+    // Caching of appearing 1D integrals when making use of the tensor product structure of the wavelets
+    // during the evaluation of the bilinear form.
+    typedef std::map<Index1D,double > Column1D;
+    typedef std::map<Index1D,Column1D> One_D_IntegralCache;
+    
+    mutable One_D_IntegralCache one_d_integrals;
+    // #####################################################################################
         EllipticBVP<DIM>* bvp_;
         TENSORBASIS basis_;
         // right-hand side coefficients on a fine level, sorted by modulus

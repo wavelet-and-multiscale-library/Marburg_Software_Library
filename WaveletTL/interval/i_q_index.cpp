@@ -180,8 +180,16 @@ namespace WaveletTL
       break;
     case 1:
       if (k_ == frame_->Nablamax(j_,p_)) {
-	j_++;
-	k_ = frame_->Nablamin(p_);
+          if(j_== frame_->get_jmax_()){
+              j_= frame_->j0();
+              e_= 0;
+              k_ = frame_->DeltaLmin(p_); 
+              p_++;
+          }
+          else{
+                j_++;
+                k_ = frame_->Nablamin(p_);
+          }
       }
       else
 	k_++;

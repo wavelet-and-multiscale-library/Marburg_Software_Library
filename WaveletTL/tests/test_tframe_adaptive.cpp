@@ -186,6 +186,7 @@ int main()
     TensorFrameEquation<Frame1d,dim,Frame> eq(&poisson1, bc);
 
     eq.set_jpmax(jmax, pmax);
+    Frame frame = eq.frame();
 
 #endif  
     
@@ -325,6 +326,39 @@ int main()
 #endif
 #ifdef FRAME
     CachedQuarkletTProblem<TensorFrameEquation<Frame1d,dim,Frame> > cproblem1(&eq);
+    
+    Frame1d frame1d;
+//    cout << "integral: " << eq.integrate(frame1d, 0,5,1,31,0,5,1,31,0) << endl;
+    set<Index> Lambda;
+  for (int i=0; i<frame.degrees_of_freedom();i++) {
+    Lambda.insert(*frame.get_quarklet(i));
+        cout << *frame.get_quarklet(i) << endl;
+  }
+    
+    cout << "setting up full right hand side..." << endl;
+  Vector<double> rh;
+  WaveletTL::setup_righthand_side(cproblem1, Lambda, rh);
+//  cout << rh << endl;
+  cout << "setting up full stiffness matrix..." << endl;
+  SparseMatrix<double> stiff;
+  
+  clock_t tstart, tend;
+  double time;
+  tstart = clock();
+
+//    WaveletTL::setup_stiffness_matrix(cproblem1, Lambda, stiff, false);
+//    WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
+  WaveletTL::setup_stiffness_matrix(eq, Lambda, stiff, false);
+//  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
+  
+
+  tend = clock();
+  time = (double)(tend-tstart)/CLOCKS_PER_SEC;
+  cout << "  ... done, time needed: " << time << " seconds" << endl;
+
+  stiff.matlab_output("stiff_frame_2D_out", "stiff",1); 
+  
+  abort();
 #endif
 //    Index mu=eq.frame().first_generator();
 //    Index lambda=eq.frame().first_generator();

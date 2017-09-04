@@ -266,9 +266,9 @@ namespace FrameTL
 
       @param lambda Index of first wavelet or generator.
       @param mu Index of second wavelet or generator.
-      @param N_Gauss Number of Gauss quadrature knots to be used. This should be cosen equal
+      @param N_Gauss Number of Gauss quadrature knots to be used. This should be chosen equal
       to the spline order in the constant coefficient case to be sure to integrate exactly.
-      @param dir The spatial direction under considerattion.
+      @param dir The spatial direction under consideration.
       @param supp_lambda Support of the reference wavelet on the cube having the function given by lambda
       as component in the direction dir.
       @param supp_mu Support of the reference wavelet on the cube having the function given by mu

@@ -137,7 +137,7 @@ namespace WaveletTL
        << lambda.e()
        << ","
        << lambda.k()
-       << ")";
+       << ")" << " number = " << lambda.number();
     return os;
   }
 

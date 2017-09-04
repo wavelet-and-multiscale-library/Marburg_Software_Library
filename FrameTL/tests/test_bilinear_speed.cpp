@@ -1,4 +1,14 @@
 #define TWO_D
+#define PARALLEL 0
+#define QUARKLET
+#undef AGGREGATED
+
+#ifdef QUARKLET
+#define _DIM 2
+#define DYADIC
+#define FRAME
+#define _WAVELETTL_USE_TFRAME 1
+#endif
 
 
 #include <map>
@@ -9,35 +19,54 @@
 #include <interval/p_basis.h>
 #include <interval/spline_basis.h>
 #include <numerics/corner_singularity.h>
-#include <simple_elliptic_equation.h>
+
 #include <algebra/sparse_matrix.h>
 #include <algebra/infinite_vector.h>
 #include <numerics/iteratsolv.h>
+
+#include <galerkin/galerkin_utils.h>
+#ifdef AGGREGATED
+#include <simple_elliptic_equation.h>
 #include <frame_evaluate.h>
 #include <cube/cube_basis.h>
 #include <cube/cube_index.h>
-#include <galerkin/galerkin_utils.h>
 #include <galerkin/cached_problem.h>
 #include <frame_support.h>
+#endif
+#include <interval/pq_frame.h>
+#ifdef QUARKLET
+#include <Ldomain/ldomain_frame_index.h>
+#include <Ldomain/ldomain_frame.h>
+#include <Ldomain/ldomain_frame_evaluate.h>
+#include <Ldomain/ldomain_frame_indexplot.h>
+#include <galerkin/ldomain_frame_equation.h>
+#include <galerkin/cached_quarklet_ldomain_problem.h>
+#endif
+
+
 
 
 using std::cout;
 using std::endl;
-
+#ifdef AGGREGATED
 using FrameTL::EvaluateFrame;
 using FrameTL::SimpleEllipticEquation;
 using FrameTL::AggregatedFrame;
+using WaveletTL::CubeBasis;
+using WaveletTL::CubeIndex;
+#endif
 using MathTL::EllipticBVP;
 using MathTL::PoissonBVP;
 using MathTL::ConstantFunction;
 using MathTL::CornerSingularityRHS;
 using MathTL::SparseMatrix;
 using MathTL::InfiniteVector;
-using WaveletTL::CubeBasis;
-using WaveletTL::CubeIndex;
+
 
 using namespace std;
-using namespace FrameTL;
+#ifdef AGGREGATED
+//using namespace FrameTL;
+#endif
 using namespace MathTL;
 using namespace WaveletTL;
 
@@ -47,13 +76,16 @@ int main()
   cout << "Testing class SimpleEllipticEquation..." << endl;
   
   const int DIM = 2;
-  const int jmax = 4;
+  const int jmax = 6;
+#ifdef QUARKLET
+  const int pmax = 1;
+#endif
 
   const int d  = 3;
   const int dT = 3;
 
   //typedef DSBasis<2,2> Basis1D;
-
+#ifdef AGGREGATED
   typedef PBasis<d,dT> Basis1D;
   //typedef SplineBasis<d,dT,P_construction> Basis1D;
 
@@ -139,6 +171,17 @@ int main()
   //finally a frame can be constructed
   //AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, bcT, jmax);
   AggregatedFrame<Basis1D, DIM, DIM> frame(&Lshaped, bc, jmax);
+#endif
+#ifdef QUARKLET
+    typedef PQFrame<d,dT> Frame1d;
+    //Frame1d frame1d(false,false);
+    typedef LDomainFrame<Frame1d> Frame2D;
+    
+    typedef Frame2D::Index Index;
+
+
+    
+#endif
 
   Vector<double> value(1);
   value[0] = 1;
@@ -155,9 +198,19 @@ int main()
   //PoissonBVP<DIM> poisson(&const_fun);
 
   // BiharmonicBVP<DIM> biahrmonic(&singRhs);
-
+#ifdef AGGREGATED
   SimpleEllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax);
   CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0048, 1.0/0.01);
+#endif
+#ifdef QUARKLET
+    LDomainFrameEquation<Frame1d,Frame2D> discrete_poisson(&poisson, false);
+    
+    discrete_poisson.set_jpmax(jmax,pmax);
+    Frame2D frame = discrete_poisson.frame();
+    
+    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame2D> > problem(&discrete_poisson, 1., 1.);
+#endif
+  
 
   cout.precision(12);
   
@@ -166,9 +219,17 @@ int main()
   
   set<Index> Lambda;
   for (int i=0; i<frame.degrees_of_freedom();i++) {
+#ifdef AGGREGATED
     Lambda.insert(*frame.get_wavelet(i));
-    cout << *frame.get_wavelet(i) << endl;
+    //    cout << *frame.get_wavelet(i) << endl;
+#endif
+#ifdef QUARKLET
+    Lambda.insert(*frame.get_quarklet(i));
+    cout << *frame.get_quarklet(i) << endl;
+#endif
+
   }
+  
   
   
 //  for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
@@ -176,12 +237,12 @@ int main()
 //    Lambda.insert(lambda);
 //    cout << lambda << endl;
 //  }
-  abort();
+  
   
   cout << "setting up full right hand side..." << endl;
   Vector<double> rh;
-  WaveletTL::setup_righthand_side(discrete_poisson, Lambda, rh);
-  cout << rh << endl;
+  WaveletTL::setup_righthand_side(problem, Lambda, rh);
+//  cout << rh << endl;
   cout << "setting up full stiffness matrix..." << endl;
   SparseMatrix<double> stiff;
   
@@ -189,20 +250,25 @@ int main()
   double time;
   tstart = clock();
 
-  WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
-  //WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
-  //WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
+//    WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff, false);
+//    WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
+  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff, false);
+//  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
+  
 
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
 
-  stiff.matlab_output("stiff_2D_out", "stiff",1);  
+  stiff.matlab_output("stiff_2D_out", "stiff",1); 
+  
+  abort();
+#ifdef AGGREGATED
   
   Vector<double> x(Lambda.size()); x = 1;
   //double lmax = PowerIteration(stiff, x, 0.01, 1000, iter);
   double lmax = 1;
-  cout << "lmax = " << lmax << endl;
+//  cout << "lmax = " << lmax << endl;
 
   x = 1;
   //double lmin = InversePowerIteration(stiff, x, 0.01, 1000, iter);
@@ -244,6 +310,6 @@ int main()
   std::ofstream ofs5("approx_solution_out.m");
   matlab_output(ofs5,U);
   ofs5.close();
-
+#endif
    return 0;
 }

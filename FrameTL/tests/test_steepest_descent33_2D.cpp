@@ -1,6 +1,6 @@
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
 
-#define JMAX 8
+#define JMAX 6
 #define TWO_D
 
 //#define PRECOMP_RHS

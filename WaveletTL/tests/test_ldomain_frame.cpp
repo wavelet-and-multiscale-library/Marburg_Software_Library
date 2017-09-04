@@ -7,7 +7,7 @@
 #undef NONADAPTIVE
 #define ADAPTIVE
 
-#define PARALLEL 1
+#define PARALLEL 0
 
 #define FRAME
 //#define _WAVELETTL_USE_TBASIS 1

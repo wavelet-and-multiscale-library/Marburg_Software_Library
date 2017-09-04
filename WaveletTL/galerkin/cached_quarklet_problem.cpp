@@ -40,7 +40,9 @@ namespace WaveletTL
 //!!! number() seems to be a huge bottleneck
     const int jmax = myframe.get_jmax_();
     const int lambda_num = number(lambda, jmax);
+//    const int lambda_num = lambda.number();
     const int nu_num = number(nu,jmax);
+//    const int nu_num = nu.number();
     
 //    const int lambda_num = lambda.number();
 //      //cout << "number: " << lambda_num << endl;

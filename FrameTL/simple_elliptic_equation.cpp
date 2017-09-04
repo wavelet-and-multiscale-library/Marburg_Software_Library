@@ -267,7 +267,7 @@ namespace FrameTL
     
      double res = 0;
      
-     // If the dimension is larger that just 1, it makes sense to store the one dimensional
+     // If the dimension is larger than just 1, it makes sense to store the one dimensional
      // integrals arising when we make use of the tensor product structure. This costs quite
      // some memory, but really speeds up the algorithm!
 #ifdef TWO_D

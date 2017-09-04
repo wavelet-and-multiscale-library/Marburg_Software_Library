@@ -137,12 +137,20 @@ namespace WaveletTL
     const IntervalFrame* frames(const int patch, const int dir) const { 
         switch(patch){
             case 0: 
-            case 3:(dir==0 ? return frame1d_11_ : return frame1d_01_);
+            case 3:
+                if(dir==0)
+                     return frame1d_11_;
+                else
+                     return frame1d_01_;
             break;
             case 1: return frame1d_11_;
             break;
             case 2:
-            case 4:(dir==0 ? return frame1d_01_ : return frame1d_11_);
+            case 4:
+                if(dir==0)
+                    return frame1d_01_; 
+                else
+                    return frame1d_11_;
             break;
         }
     }

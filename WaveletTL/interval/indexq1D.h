@@ -100,6 +100,6 @@ namespace WaveletTL
 
   };
 }
-#include <indexq1D.cpp>
+#include <interval/indexq1D.cpp>
 
 #endif

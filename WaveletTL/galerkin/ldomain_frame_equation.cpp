@@ -167,10 +167,10 @@ namespace WaveletTL
              N_Gauss[0] = (p+1)/2+(lambda->p()[0]+mu->p()[0]+1)/2;
              N_Gauss[1] = (p+1)/2+(lambda->p()[1]+mu->p()[1]+1)/2;
              
-        double t = 1.;
+        
         // loop over spatial direction
             for (int i = 0; i < 2; i++) {
-              
+              double t = 1.;
 
               for (int j = 0; j < 2; j++) {
                 if (j == i)
@@ -191,6 +191,7 @@ namespace WaveletTL
 
 
                 t *= integrate(i1, i2, N_Gauss[j], j, supp);
+//                cout << "Zwischenergebnis Richtung: " << j << "Wert: " << t << endl;
               }
 
 //              IFRAME frame1d_la= frame_->frames(lambda->patch(),i);
@@ -779,9 +780,11 @@ namespace WaveletTL
            
             //store the calculated values
             typedef typename Column1D::value_type value_type;
+//            cout << "Neuberechnung" << endl;
             it = col.insert(lb, value_type(*mu, res));
           }
         else {
+//            cout << "aus dem Cache" << endl;
           res = it->second;
         }
     

@@ -21,9 +21,9 @@ namespace WaveletTL
         if (problem->local_operator())
         {
             const int lambda_num = lambda.number();
-//            cout << "Lambda: " << lambda << ", " << lambda.number() << endl;
+//            cout << endl << "Lambda: " << lambda  << endl;
             const int nu_num = nu.number();
-//            cout << "Nu: " << nu << ", " << nu.number() << endl;
+//            cout << "Nu: " << nu << ", " << endl;
 //            const unsigned int pmax = problem->frame().get_pmax();          
 
             // Be careful, there is no generator level in the cache! The situation from the MRA setting:
@@ -32,11 +32,17 @@ namespace WaveletTL
             // the minimal level are thrown together in one index set (componentwise),
             // this also applies to tensors of generators on the lowest level
 
-            level_type lambda_key(lambda.j()),first_level(frame().j0());
-            polynomial_type lambda_p(lambda.p());
+            level_type lambda_key(lambda.j())/*,first_level(frame().j0())*/;
+//            level_type lambda_key;
+//            polynomial_type lambda_p(lambda.p());
+//            polynomial_type lambda_p5(lambda.p());
+//            polynomial_type lambda_p1(lambda.p());
+//            polynomial_type lambda_p2(lambda.p());
+//            polynomial_type lambda_p3(lambda.p());
+//            polynomial_type lambda_p4(lambda.p());
             for (int k=0;k<2;k++)
             {
-                lambda_key[k] = lambda_key[k]-first_level[k];
+                lambda_key[k] -= MINJ/*first_level[k]*/;
             }
 //TODO (PERFORMANCE): store the numbers of all levels up to jmax, do not compute anything here:
             int blocknumber((lambda.p()).number());
@@ -52,7 +58,7 @@ namespace WaveletTL
             if (col_lb == entries_cache.end() ||
                 entries_cache.key_comp()(nu_num, col_lb->first))
             {
-                //cout << "Neue Spalte " << nu << endl;
+//                cout << "Neue Spalte " << nu << endl;
                 // insert a new column
                 typedef typename ColumnCache::value_type value_type;
                 col_it = entries_cache.insert(col_lb, value_type(nu_num, Column()));
@@ -70,7 +76,7 @@ namespace WaveletTL
             {
                 
                 
-
+//                cout << "Neuer block" << endl;
                 typedef typename Column::value_type value_type;
                 block_it = col.insert(block_lb, value_type(blocknumber, Block()));
             }
@@ -93,7 +99,9 @@ namespace WaveletTL
                 // no entries have ever been computed for this column, polynomial and level
                 // compute whole level block
                 // insert a new level
-                
+//                cout << "Neuer subblock" << endl;
+//                cout << "Lambda: " << lambda  << endl;
+//                cout << "Nu: " << nu << ", " << endl << endl;
 
                 typedef typename Block::value_type value_type;
                 it = block.insert(lb, value_type(subblocknumber, Subblock()));
@@ -140,7 +148,7 @@ namespace WaveletTL
             // level already exists --> extract row corresponding to 'lambda'
             else
             {
-                
+//                cout << "Ergebnis aus L2 Cache"  << endl;
                 
                 Subblock& subblock(it->second);
 
@@ -152,9 +160,12 @@ namespace WaveletTL
                     subblock.key_comp()(lambda_num, subblock_lb->first))
                   {
                     r = 0;
+//                    cout << "Ergebnis ist 0" << endl;
                   }
                 else {
+                    
                   r = subblock_it->second;
+//                  cout << "Ergenis: " << r << endl;
                 }
             }
         }

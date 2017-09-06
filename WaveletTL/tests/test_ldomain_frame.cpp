@@ -4,8 +4,8 @@
  * and open the template in the editor.
  */
 #define DYADIC
-#undef NONADAPTIVE
-#define ADAPTIVE
+#define NONADAPTIVE
+#undef ADAPTIVE
 
 #define PARALLEL 0
 
@@ -13,8 +13,9 @@
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
-#define JMAX 8
-#define PMAX 3
+#define JMAX 7
+#define MINJ 3
+#define PMAX 0
 #define TWO_D
 
 #define PRIMALORDER 3
@@ -98,8 +99,8 @@ int main(){
     const int d  = PRIMALORDER;
     const int dT = DUALORDER;
     const int dim = _DIM;
-    const int jmax=8;
-    const int pmax=3;
+    const int jmax=JMAX;
+    const int pmax=PMAX;
     
     typedef PQFrame<d,dT> Frame1d;
     //Frame1d frame1d(false,false);
@@ -163,35 +164,46 @@ int main(){
     cout << "rhs and uexact plotted" << endl;
 #endif
     
-#if 0
+#if 1
     //setup index set
     //Vector<double> a;
     //a.resize(eq.frame().degrees_of_freedom(),true);
     //setup Index set
-    set<Index> Lambda;  
-    MultiIndex<int,dim> p;p[0]=0;p[1]=0;
-    Index lambda = eq.frame().first_generator(eq.frame().j0(), p);
-    int zaehler=0;
-    for (int l = 0; l < eq.frame().degrees_of_freedom(); l++) {
-        //cout << lambda << " : "<<lambda.number()<< endl;
-        //cout << lambda << " : " << eq.a(lambda,lambda) << endl;
-        //if(multi_degree(lambda.e())<1 && lambda.patch()<4){
-            Lambda.insert(lambda);
-            ++zaehler; 
-        //}
-        if(lambda==eq.frame().last_quarklet(jmax, p)){
-            ++p;
-            lambda=eq.frame().first_generator(eq.frame().j0(), p);
-        }
-        else
-        //a(zaehler)=eq.a(eq.frame().get_quarklet(126),lambda);
-        ++lambda;
-            
-    }
-    //a.matlab_output("a","a");
     
-    cout << "size of Lambda: " << zaehler << endl;
+    set<Index> Lambda;
+  for (int i=0; i<frame.degrees_of_freedom();i++) {
+
+    Lambda.insert(*(frame.get_quarklet(i)));
+    cout << *(frame.get_quarklet(i)) << endl;
 #endif
+
+  }
+    
+    
+//    set<Index> Lambda;  
+//    MultiIndex<int,dim> p;p[0]=0;p[1]=0;
+//    Index lambda = eq.frame().first_generator(eq.frame().j0(), p);
+//    int zaehler=0;
+//    for (int l = 0; l < eq.frame().degrees_of_freedom(); l++) {
+//        cout << lambda << " : "<<lambda.number()<< endl;
+//        //cout << lambda << " : " << eq.a(lambda,lambda) << endl;
+//        //if(multi_degree(lambda.e())<1 && lambda.patch()<4){
+//            Lambda.insert(lambda);
+//            ++zaehler; 
+//        //}
+//        if(lambda==eq.frame().last_quarklet(jmax, p)){
+//            ++p;
+//            lambda=eq.frame().first_generator(eq.frame().j0(), p);
+//        }
+//        else
+//        //a(zaehler)=eq.a(eq.frame().get_quarklet(126),lambda);
+//        ++lambda;
+//            
+//    }
+//    //a.matlab_output("a","a");
+//    
+//    cout << "size of Lambda: " << zaehler << endl;
+//#endif
         
 #if 0 //test methods of ldomain_frame_equation
     cout << "testindex: "<<testindex<<endl;
@@ -262,7 +274,7 @@ int main(){
             //cout <<lambda.p()[0]<<lambda.p()[1]<< lambda.j()[0]-1+lambda.e()[0]<<lambda.j()[1]-1+lambda.e()[1] << endl;
             jstart=lambda.j();
             estart=lambda.e();
-            plot_indices(&eq.frame(), u, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(flipud(gray))", false, true, -6);
+            plot_indices(&frame, u, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(flipud(gray))", false, true, -6);
             //coeff_stream2 << "title('solution coefficients') " << endl;
             //coeff_stream2 << "title(sprintf('coefficients on level (%i,%i)',"<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"));"<<endl;
             coeff_stream<<"print('-djpg',sprintf('coeffs%i%i%i%i.jpg',"<<lambda.p()[0]<<","<<lambda.p()[1]<<","<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"))"<<endl;

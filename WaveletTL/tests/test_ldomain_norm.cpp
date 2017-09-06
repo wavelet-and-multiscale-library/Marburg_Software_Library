@@ -10,6 +10,7 @@
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
+#define MINJ 3
 
 #include <iostream>
 #include <utils/fixed_array1d.h>

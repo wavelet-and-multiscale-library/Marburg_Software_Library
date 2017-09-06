@@ -8,6 +8,7 @@
 #endif
 
 #define _DIM 2
+#define MINJ 3
 
 #include <cmath>
 #include <iostream>

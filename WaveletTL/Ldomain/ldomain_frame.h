@@ -270,11 +270,15 @@ namespace WaveletTL
       return &full_collection[number];
     }
     
+    inline const bool get_setup_full_collection() const {
+            return setup_full_collection_;
+        }
+    
     
 
     //! number of quarklets between coarsest and finest level
     const int degrees_of_freedom() const { return full_collection.size(); };
-    typedef std::map<Index,Support> SupportCache;
+    typedef std::map<int,Support> SupportCache;
     const SupportCache suppcache() const{ return supp_cache;};
 
 
@@ -297,6 +301,9 @@ namespace WaveletTL
 
     //! setup full collectin of quarklets between j0_ and jmax_ as long as a jmax_ has been specified
     void setup_full_collection();
+    
+    //! setup_full_collection_ is set to 1 after initialising full collection
+    bool setup_full_collection_;
 
     //! collection of all quarklets between coarsest and finest level
     Array1D<Index> full_collection;
@@ -313,6 +320,11 @@ namespace WaveletTL
     //! support cache
 //    typedef std::map<Index,Support> SupportCache;
     mutable SupportCache supp_cache;
+    
+    //!todo: alternative for SupportCache
+    Array1D<Support> all_supports_;
+    
+    bool precomputed_supports_;
 
   };
   

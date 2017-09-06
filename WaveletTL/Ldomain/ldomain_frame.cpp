@@ -226,17 +226,21 @@ namespace WaveletTL
   void
   LDomainFrame<IFRAME>::support(const Index& lambda, Support& supp) const
   {
-    // check whether the supp(psi_lambda) already exists in the cache
-    typename SupportCache::iterator supp_lb(supp_cache.lower_bound(lambda));
-    typename SupportCache::iterator supp_it(supp_lb);
-    if (supp_lb == supp_cache.end() ||
-	supp_cache.key_comp()(lambda, supp_lb->first))
-      {
-//        cout << "Neuberechnung" << endl;
-//	 compute supp(psi_lambda) and insert it into the cache
-	typedef typename SupportCache::value_type value_type;
+//      int lam_num=lambda.number();
+////     check whether the supp(psi_lambda) already exists in the cache
+//    typename SupportCache::iterator supp_lb(supp_cache.lower_bound(lam_num));
+//    typename SupportCache::iterator supp_it(supp_lb);
+//    if (supp_lb == supp_cache.end() ||
+//	supp_cache.key_comp()(lam_num, supp_lb->first))
+//      {
+////        cout << "Neuberechnung" << endl;
+////	 compute supp(psi_lambda) and insert it into the cache
+//	typedef typename SupportCache::value_type value_type;
 
-              
+     if (precomputed_supports_){
+         supp=all_supports_[lambda.number()];
+     }
+     else{
 	  
 	  supp.j[0] = lambda.j()[0]+lambda.e()[0];
           supp.j[1] = lambda.j()[1]+lambda.e()[1];
@@ -392,39 +396,39 @@ namespace WaveletTL
 	    
 	    break;
 	  }
-        
+     }
 
 	
-	supp_it = supp_cache.insert(supp_lb, value_type(lambda, supp));
-
-
-      }
-    else
-      {
-        
-//        typename SupportCache::iterator it(supp_cache.begin());
-//        typename SupportCache::iterator itend(supp_cache.end());
-//        for(typename SupportCache::iterator it = supp_cache.begin();it!=itend;it++){
-//            cout << endl << it->first << endl;
-//            cout << "patch 0: [" << it->second.xmin[0]  <<" , " <<it->second.xmax[0] <<"]x["<<it->second.ymin[0] <<" , "<<it->second.ymax[0] <<"]"<<  endl;
-//            cout << "patch 1: [" << it->second.xmin[1]  <<" , " <<it->second.xmax[1] <<"]x["<<it->second.ymin[1] <<" , "<<it->second.ymax[1] <<"]"<<  endl;
-//            cout << "patch 2: [" << it->second.xmin[2]  <<" , " <<it->second.xmax[2] <<"]x["<<it->second.ymin[2] <<" , "<<it->second.ymax[2] <<"]"<<  endl;
-//            
-//        }
-	// cache hit, copy the precomputed support
-//        cout << "Cache hitted" << supp_it->first << endl;
-        
-  	supp.j[0] = supp_it->second.j[0];
-        supp.j[1] = supp_it->second.j[1];
-  	for (unsigned int i = 0; i < 3; i++) {
-  	  supp.xmin[i] = supp_it->second.xmin[i];
-  	  supp.xmax[i] = supp_it->second.xmax[i];
-  	  supp.ymin[i] = supp_it->second.ymin[i];
-  	  supp.ymax[i] = supp_it->second.ymax[i];
-  	}
-	
-
-      }  
+//	supp_it = supp_cache.insert(supp_lb, value_type(lam_num, supp));
+//
+//
+//      }
+//    else
+//      {
+//        
+////        typename SupportCache::iterator it(supp_cache.begin());
+////        typename SupportCache::iterator itend(supp_cache.end());
+////        for(typename SupportCache::iterator it = supp_cache.begin();it!=itend;it++){
+////            cout << endl << it->first << endl;
+////            cout << "patch 0: [" << it->second.xmin[0]  <<" , " <<it->second.xmax[0] <<"]x["<<it->second.ymin[0] <<" , "<<it->second.ymax[0] <<"]"<<  endl;
+////            cout << "patch 1: [" << it->second.xmin[1]  <<" , " <<it->second.xmax[1] <<"]x["<<it->second.ymin[1] <<" , "<<it->second.ymax[1] <<"]"<<  endl;
+////            cout << "patch 2: [" << it->second.xmin[2]  <<" , " <<it->second.xmax[2] <<"]x["<<it->second.ymin[2] <<" , "<<it->second.ymax[2] <<"]"<<  endl;
+////            
+////        }
+//	// cache hit, copy the precomputed support
+////        cout << "Cache hitted" << supp_it->first << endl;
+//        
+//  	supp.j[0] = supp_it->second.j[0];
+//        supp.j[1] = supp_it->second.j[1];
+//  	for (unsigned int i = 0; i < 3; i++) {
+//  	  supp.xmin[i] = supp_it->second.xmin[i];
+//  	  supp.xmax[i] = supp_it->second.xmax[i];
+//  	  supp.ymin[i] = supp_it->second.ymin[i];
+//  	  supp.ymax[i] = supp_it->second.ymax[i];
+//  	}
+//	
+//
+//      }  
   }
   
   template <class IFRAME>
@@ -673,16 +677,22 @@ namespace WaveletTL
     }
     
     full_collection.resize(Lambda.size());
+    all_supports_.resize(Lambda.size());
     int i = 0;
     for (typename set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, i++){
         full_collection[i] = *it;
+        Support supp;
+        support(*it,supp);
+        all_supports_[i] = supp;
+        
 //        cout << *it << ", " << (*it).number() << endl;
     }
+    precomputed_supports_ = true;
 //    cout << "Nablasize in setup: " << Nablasize_ << endl;
     
-    cout << "done setting up collection of quarklet indices..." << endl;
+    cout << "done setting up collection of quarklet indices and precompute supports..." << endl;
     cout << "total degrees of freedom between j0_ = " << j0_ << " and (jmax_= " << jmax_ << ", pmax_= " << pmax_ << ") is " << full_collection.size() << endl;
-    
+    setup_full_collection_ = true;
 
   }
 

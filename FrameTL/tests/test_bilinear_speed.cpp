@@ -5,6 +5,7 @@
 
 #ifdef QUARKLET
 #define _DIM 2
+#define MINJ 3
 #define DYADIC
 #define FRAME
 #define _WAVELETTL_USE_TFRAME 1
@@ -234,12 +235,13 @@ int main()
     //    cout << *frame.get_wavelet(i) << endl;
 #endif
 #ifdef QUARKLET
-    Lambda.insert(frame.get_quarklet(i));
+    Lambda.insert(*(frame.get_quarklet(i)));
     cout << *(frame.get_quarklet(i)) << endl;
+//    cout << discrete_poisson.a(*(frame.get_quarklet(i)),*(frame.get_quarklet(i)))<<endl;
 #endif
 
   }
-  
+//  abort();
   
   
 //  for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
@@ -249,10 +251,7 @@ int main()
 //  }
   
   
-  cout << "setting up full right hand side..." << endl;
-  Vector<double> rh;
-  WaveletTL::setup_righthand_side(problem, Lambda, rh);
-//  cout << rh << endl;
+  
   cout << "setting up full stiffness matrix..." << endl;
   SparseMatrix<double> stiff;
   
@@ -260,11 +259,10 @@ int main()
   clock_t tstart, tend;
   double time;
   tstart = clock();
-
-    WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff, false);
+//   WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff, false);
 //    WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
 //  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff, false);
-//  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
+  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
   
 
   tend = clock();
@@ -273,8 +271,14 @@ int main()
 
   stiff.matlab_output("stiff_2D_out", "stiff",1); 
   
-  abort();
-#ifdef AGGREGATED
+ 
+  
+  cout << "setting up full right hand side..." << endl;
+  Vector<double> rh;
+  WaveletTL::setup_righthand_side(problem, Lambda, rh);
+//  cout << rh << endl;
+  
+
   
   Vector<double> x(Lambda.size()); x = 1;
   //double lmax = PowerIteration(stiff, x, 0.01, 1000, iter);
@@ -296,7 +300,7 @@ int main()
   
   Vector<double> resid(xk.size());
   Vector<double> help(xk.size());
-  for (int i = 0; i < 500;i++) {
+  for (int i = 0; i < 2000;i++) {
     stiff.apply(xk,help);
     resid = rh - help;
     cout << "i = " << i << " " << sqrt(resid*resid) << endl;
@@ -308,6 +312,7 @@ int main()
 
   cout << "performing output..." << endl;
   
+  
   InfiniteVector<double,Frame2D::Index> u;
   unsigned int i = 0;
   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
@@ -315,12 +320,29 @@ int main()
   
   u.scale(&discrete_poisson,-1);
   
-  
+#ifdef AGGREGATED
   Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u, true, 6);//expand in primal basis
+ 
   
   std::ofstream ofs5("approx_solution_out.m");
   matlab_output(ofs5,U);
   ofs5.close();
 #endif
+  
+#ifdef QUARKLET
+  
+ Array1D<SampledMapping<2> > eval(3);
+    eval=frame.evaluate(u,6);
+    std::ofstream os2("approx_solution_out.m");
+    for(int i=0;i<3;i++){
+        eval[i].matlab_output(os2);
+        os2 << "surf(x,y,z);" << endl;
+        os2 << "hold on;" << endl;
+    }  
+    os2 << "view(30,55);"<<endl;
+    os2 << "hold off" << endl;
+    os2.close();  
+#endif
+  
    return 0;
 }

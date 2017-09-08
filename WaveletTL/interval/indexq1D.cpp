@@ -8,15 +8,16 @@ namespace WaveletTL
 			   const unsigned int der)
     : ind_(ind), patch_(patch), dir_(dir), der_(der)
   {
+      num_=ind.number();
   }
 
   template <class IFRAME>
   bool
   IndexQ1D<IFRAME>::operator < (const IndexQ1D<IFRAME>& lambda) const
   {
-    return ind_ < lambda.index() ||
+    return num_ < lambda.number() ||
       (
-       ind_ == lambda.index() &&
+       num_ == lambda.number() &&
        (
 	patch_ < lambda.patch() ||
 	(
@@ -35,7 +36,7 @@ namespace WaveletTL
   template <class IFRAME>
   bool IndexQ1D<IFRAME>::operator == (const IndexQ1D<IFRAME>& lambda) const
   {
-    return (ind_ == lambda.index()) && (patch_ == lambda.patch()) && (der_ == lambda.derivative());
+    return (num_ == lambda.number()) && (patch_ == lambda.patch()) && (der_ == lambda.derivative());
   };
 
   template <class IFRAME>

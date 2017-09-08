@@ -19,9 +19,8 @@ namespace WaveletTL
   int 
   CachedQuarkletProblem<PROBLEM>::number (const Index& lambda, const int jmax) const{
       
-      QuarkletFrame myframe(frame());
-      const int quarkletsonzerolevel = (myframe.last_wavelet(jmax)).number()+1;
-      const int quarkletsonplevel = ((myframe.last_wavelet(jmax,lambda.p())).number()+1);
+      const int quarkletsonzerolevel = (frame().last_wavelet(jmax)).number()+1;
+      const int quarkletsonplevel = ((frame().last_wavelet(jmax,lambda.p())).number()+1);
       const int lambda_num = (lambda.p()==0) ? lambda.number() : lambda.number() + (lambda.p()-1) * quarkletsonplevel + quarkletsonzerolevel;
       return lambda_num;
   }
@@ -38,10 +37,10 @@ namespace WaveletTL
     QuarkletFrame myframe(frame());
 
 //!!! number() seems to be a huge bottleneck
-    const int jmax = myframe.get_jmax_();
-    const int lambda_num = number(lambda, jmax);
+//    const int jmax = myframe.get_jmax_();
+    const int lambda_num = lambda.number();
 //    const int lambda_num = lambda.number();
-    const int nu_num = number(nu,jmax);
+    const int nu_num = nu.number();
 //    const int nu_num = nu.number();
     
 //    const int lambda_num = lambda.number();
@@ -123,8 +122,8 @@ namespace WaveletTL
         //                cout << (*it).number()+(*it).p()*quarkletsonplevel << endl;
                 typedef typename Subblock::value_type value_type_subblock;
                 if (entry != 0.) {
-                    subblock.insert(subblock.end(), value_type_subblock(number(*it,jmax), entry));
-                    if (number(*it,jmax) == lambda_num) {
+                    subblock.insert(subblock.end(), value_type_subblock((*it).number(), entry));
+                    if ((*it).number() == lambda_num) {
                         r = entry;
                     }
                 }

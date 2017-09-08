@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-#define DYADIC
+#undef DYADIC
 #define NONADAPTIVE
 #undef ADAPTIVE
 
@@ -14,7 +14,6 @@
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
 #define JMAX 7
-#define MINJ 3
 #define PMAX 0
 #define TWO_D
 
@@ -120,12 +119,16 @@ int main(){
     
     PoissonBVP<dim> poisson1(&rhs1);
     Frame1d frame1d(false,false);
+    frame1d.set_jpmax(jmax-frame1d.j0(),pmax);
     Frame1d frame1d_11(true,true);
+    frame1d_11.set_jpmax(jmax-frame1d.j0(),pmax);
     Frame1d frame1d_01(false,true);
+    frame1d_01.set_jpmax(jmax-frame1d.j0(),pmax);
     Frame1d frame1d_10(true,false);
+    frame1d_10.set_jpmax(jmax-frame1d.j0(),pmax);
     Frame frame(&frame1d, &frame1d_11, &frame1d_01, &frame1d_10);
     frame.set_jpmax(jmax,pmax);
-    LDomainFrameEquation<Frame1d,Frame> eq(&poisson1, &frame, false);
+    LDomainFrameEquation<Frame1d,Frame> eq(&poisson1, &frame, true);
     
     
     
@@ -233,6 +236,9 @@ int main(){
     //richardson iteration
     unsigned int iterations;
     const int maxiterations = 9999;
+//    cout << eq.norm_A(), ", " << eq.norm_Ainv() << endl;
+    cout << eq.norm_A() << endl;
+    cout << eq.norm_Ainv() << endl;
     const double omega = 2.0 / (eq.norm_A() + 1.0/eq.norm_Ainv());
     cout << "omega: "<<omega<<endl;
     Richardson(A,F,x,omega,1e-6,maxiterations,iterations);
@@ -290,7 +296,7 @@ int main(){
     CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq);
 
     //CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 119, 25);
-    //CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
+//    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
 
     cout<<"normA: "<<cproblem1.norm_A()<<endl;
     cout<<"normAinv: "<<cproblem1.norm_Ainv()<<endl;

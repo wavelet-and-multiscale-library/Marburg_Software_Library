@@ -138,6 +138,7 @@ namespace WaveletTL
 #if PARALLEL==1
     }
 #endif
+    cout << "done setting up stiffness matrix..." << endl;
   }
 
     template <class PROBLEM>
@@ -233,7 +234,7 @@ namespace WaveletTL
 	 it1 != itend; ++it1, ++row)
       {
 
-	// determine list of thise indices which intersect with *it1
+	// determine list of these indices which intersect with *it1
 	IntersectingList Nu;
 	intersecting_wavelets(P.basis(), *it1.p(), *it1.p(), Lambda2, Nu);
 

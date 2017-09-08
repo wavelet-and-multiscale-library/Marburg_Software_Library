@@ -169,13 +169,15 @@ namespace WaveletTL
         
       if (lambda.k() > (1<<lambda.j())-ell1<d>()-d) {//right boundary quarks
 	switch (derivative){
-	case 0: r= MathTL::EvaluateSchoenbergBSpline_td<d>(lambda.j(), (1<<lambda.j())-d-lambda.k()-2*ell1<d>(), 1-x)
-                 * pow((1<<lambda.j())*(1-x)*rightside, lambda.p());
+	case 0: (lambda.p()==0 ? r= MathTL::EvaluateSchoenbergBSpline_td<d>(lambda.j(), (1<<lambda.j())-d-lambda.k()-2*ell1<d>(), 1-x)
+                               : r=MathTL::EvaluateSchoenbergBSpline_td<d>(lambda.j(), (1<<lambda.j())-d-lambda.k()-2*ell1<d>(), 1-x)
+                                  * pow((1<<lambda.j())*(1-x)*rightside, lambda.p()));
           break;
-	case 1: r=-MathTL::EvaluateSchoenbergBSpline_td<d>(lambda.j(),(1<<lambda.j())-d-lambda.k()-2*ell1<d>(),1-x)
+	case 1: (lambda.p()==0 ? r=-MathTL::EvaluateSchoenbergBSpline_td<d>(lambda.j(),(1<<lambda.j())-d-lambda.k()-2*ell1<d>(),1-x)
+                : r=-MathTL::EvaluateSchoenbergBSpline_td<d>(lambda.j(),(1<<lambda.j())-d-lambda.k()-2*ell1<d>(),1-x)
                  * lambda.p()*(1<<lambda.j())*rightside*pow((1<<lambda.j())*(1-x)*rightside, lambda.p()-1)
                  - MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),(1<<lambda.j())-d-lambda.k()-2*ell1<d>(),1-x)
-                 * pow((1<<lambda.j())*(1-x)*rightside,lambda.p());
+                 * pow((1<<lambda.j())*(1-x)*rightside,lambda.p()));
           break;
 //	case 2: r=MathTL::EvaluateSchoenbergBSpline_td_xx<d>(lambda.j(),
 //							     (1<<lambda.j())-d-lambda.k()-2*ell1<d>(),
@@ -187,11 +189,14 @@ namespace WaveletTL
       
       else if (lambda.k() < -ell1<d>()){//left boundary quarks
 	switch (derivative){
-	  case 0: r= MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), x)*pow((1<<lambda.j())*x*leftside, lambda.p());
+	  case 0:  (lambda.p()==0 ? r= MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), x)
+                                  : r= MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), x)
+                                    *pow((1<<lambda.j())*x*leftside, lambda.p()));
 	  break;
-	  case 1: r= MathTL::EvaluateSchoenbergBSpline_td<d> (lambda.j(), lambda.k(), x)
+	  case 1: (lambda.p()==0 ? r= MathTL::EvaluateSchoenbergBSpline_td<d> (lambda.j(), lambda.k(), x)
+                                   : r= MathTL::EvaluateSchoenbergBSpline_td<d> (lambda.j(), lambda.k(), x)
                    * lambda.p()*(1<<lambda.j())*leftside *pow((1<<lambda.j())*x*leftside,lambda.p()-1)
-                   + MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),lambda.k(),x)*pow((1<<lambda.j())*x*leftside,lambda.p());
+                   + MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),lambda.k(),x)*pow((1<<lambda.j())*x*leftside,lambda.p()));
 	  break;
 //	  case 2: r=MathTL::EvaluateSchoenbergBSpline_td_xx<d>(lambda.j(), lambda.k(), x);
 //	  break;
@@ -199,7 +204,8 @@ namespace WaveletTL
       }
       else{//inner quarks
         switch (derivative){
-	  case 0: r= MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), x)*pow(y*pfktrez,lambda.p());
+	  case 0: (lambda.p()==0 ? r= MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), x)
+                                 : MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), x)*pow(y*pfktrez,lambda.p()));
 	  break;
 	  case 1: (lambda.p()==0 ? r= MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), lambda.k(), x)
                                  : r= MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), lambda.k(), x)*pow(y*pfktrez ,lambda.p())

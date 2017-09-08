@@ -24,8 +24,8 @@
 #include <interval/p_basis.h>
 
 #include <interval/pq_frame.h>
-#define BASIS
-#undef FRAME
+#undef BASIS
+#define FRAME
 #define DELTADIS
 
 #define ADAPTIVE
@@ -147,7 +147,7 @@ int main()
   cout << "setup equation.." << endl;
   SturmEquation<Basis> eq(T, basis);
   cout << "end setup equation!" << endl;
-  abort();
+  
   
 
 #ifdef NONADAPTIVE
@@ -510,7 +510,7 @@ cout << "\nTime taken: " << (time/CLOCKS_PER_SEC) << " s";
   coeff_stream2 << "figure;" << endl;
   plot_indices(&basis, u_epsilon, jmax, coeff_stream2, p, "jet", true, true, -6);
   coeff_stream2 << "title('adaptive coefficients on the level p=" << p <<" of the test problem ("
-                  << basis_type << " basis)');" << endl;
+                  << basis_type << ")');" << endl;
   coeff_stream2.close();   
   }
 #endif

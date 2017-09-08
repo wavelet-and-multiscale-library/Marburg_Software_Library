@@ -170,4 +170,5 @@ WaveletTL/tests/test_ldomain_norm
 WaveletTL/tests/test_tbasis_cdd1
 FrameTL/tests/test_bilinear_speed
 MathTL/tests/test_schoenberg_splines
+FrameTL/tests/test_simple_elliptic_equation_1D
 

@@ -75,6 +75,13 @@ namespace WaveletTL
       The spatial direction the 1D wavelet or generator belongs to.
      */
     unsigned int direction() const { return dir_; };
+    
+    /*
+     The index number of the encoded quarklet or quark
+     */
+    
+    int number () const { return num_; };
+    
 
   protected:
 
@@ -97,6 +104,11 @@ namespace WaveletTL
       The derivative order.
      */
     unsigned int der_;
+    
+    /*!
+     The number of the 1D Wavelet
+     */
+    int num_;
 
   };
 }

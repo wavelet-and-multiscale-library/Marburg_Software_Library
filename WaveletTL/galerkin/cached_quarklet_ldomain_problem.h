@@ -49,8 +49,16 @@ namespace WaveletTL
      */
     template <class PROBLEM>
     class CachedQuarkletLDomainProblem
+#ifdef DYADIC
       : public FullyDiagonalQuarkletPreconditioner<typename PROBLEM::Index>
-//    : public FullyDiagonalEnergyNormPreconditioner<typename PROBLEM::Index>
+    
+#else
+#ifdef TRIVIAL
+    : public TrivialPreconditioner<typename PROBLEM::Index>
+#else
+    : public FullyDiagonalEnergyNormPreconditioner<typename PROBLEM::Index>
+#endif
+#endif
     {
     public:
         /*
@@ -80,7 +88,7 @@ namespace WaveletTL
         /*
          * read access to the frame
          */
-        inline const QuarkletFrame frame() const { return problem->frame(); }
+        const QuarkletFrame& frame() const { return problem->frame(); }
 
         /*
          * space dimension of the problem
@@ -106,8 +114,9 @@ namespace WaveletTL
         inline double D(const Index& lambda) const {
 //            cout << "D" << endl;
 //            return sqrt(a(lambda,lambda));//this needs to be changed to dyadic preconditioner
-//            return 1;
+
             return problem->D(lambda);
+
         }
 
         /*
@@ -175,6 +184,7 @@ namespace WaveletTL
          */
         inline double f(const Index& lambda) const {
             return problem->f(lambda);
+
         }
 
         /*

@@ -12,17 +12,20 @@ namespace WaveletTL
 
     template <class PROBLEM>
     double
-    CachedQuarkletLDomainProblem<PROBLEM>::a(const Index& lambda,
-			       const Index& nu) const
+    CachedQuarkletLDomainProblem<PROBLEM>::a(const Index& la,
+			       const Index& mu) const
     {
         
         double r = 0;
 
         if (problem->local_operator())
         {
-            const int lambda_num = lambda.number();
+            const Index* lambda= &la;
+            const Index* nu = &mu;
+            
+            const int lambda_num = lambda->number();
 //            cout << endl << "Lambda: " << lambda  << endl;
-            const int nu_num = nu.number();
+            const int nu_num = nu->number();
 //            cout << "Nu: " << nu << ", " << endl;
 //            const unsigned int pmax = problem->frame().get_pmax();          
 
@@ -32,7 +35,7 @@ namespace WaveletTL
             // the minimal level are thrown together in one index set (componentwise),
             // this also applies to tensors of generators on the lowest level
 
-            level_type lambda_key(lambda.j())/*,first_level(frame().j0())*/;
+            level_type lambda_key/*(lambda.j())*//*,first_level(frame().j0())*/;
 //            level_type lambda_key;
 //            polynomial_type lambda_p(lambda.p());
 //            polynomial_type lambda_p5(lambda.p());
@@ -42,14 +45,18 @@ namespace WaveletTL
 //            polynomial_type lambda_p4(lambda.p());
             for (int k=0;k<2;k++)
             {
-                lambda_key[k] -= MINJ/*first_level[k]*/;
+                lambda_key[k] = lambda->j()[k]-frame().j0()[k]/*first_level[k]*/;
             }
 //TODO (PERFORMANCE): store the numbers of all levels up to jmax, do not compute anything here:
-            int blocknumber((lambda.p()).number());
+            int blocknumber((lambda->p()).number());
+//            int blocknumber(0);
             int subblocknumber(lambda_key.number());
+//            int subblocknumber(0);
 
             // check wether entry has already been computed
             typedef std::list<Index> IntersectingList;
+//            typedef std::list<Index*> IntersectingPointerList;
+//            typedef std::list<int> IntersectingIntList;
 
             // search for column 'mu'
             typename ColumnCache::iterator col_lb(entries_cache.lower_bound(nu_num));
@@ -110,12 +117,34 @@ namespace WaveletTL
 //                
                 // there are no Generators
                 IntersectingList nus;
+//                IntersectingPointerList nus;
+//                IntersectingIntList nus;
+//                cout << 
+//                    cout << lambda->j() << endl;
                 intersecting_quarklets(frame(),
-                                       nu,
+                                       *nu,
                                        //std::max(j, frame().j0()),
-                                       lambda.j(),
+                                       lambda->j(),
                                        nus,
-                                       lambda.p());
+                                       lambda->p());
+                
+//                intersecting_quarklets(frame(),
+//                                       nu_num,
+//                                       //std::max(j, frame().j0()),
+//                                       lambda->j(),
+//                                       nus,
+//                                       lambda->p());
+                
+//                frame();
+//                frame();
+//                frame();
+//                frame();
+//                                       nu_num;
+//                                       //std::max(j, frame().j0()),
+//                                       lambda->j();
+//                                       nus;
+//                                       lambda->p();
+                
                 // compute entries
                 //cout << "bin hier"<<endl;
                 //cout<<nus.size()<<endl;
@@ -125,11 +154,19 @@ namespace WaveletTL
                     typename IntersectingList::const_iterator it(nus.begin());
                     advance(it,i);
 #else
+                
                 for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)
+//                 for (typename IntersectingPointerList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)   
+//                for (typename IntersectingIntList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)    
                 {
 #endif
                     //cout<<*it<<endl;
-                    const double entry = problem->a(*it, nu);
+//                    const double entry = 0;
+//                    const double entry = problem->a(*it, *nu);
+                    const double entry = problem->a(*it, *nu);
+                    
+//                    const double entry = problem->a(*(frame().get_quarklet(*it)), *nu);
+//                    *(frame().get_quarklet(*it));
 
 
                     typedef typename Subblock::value_type value_type_subblock;
@@ -137,8 +174,10 @@ namespace WaveletTL
 //                            if (entry != 0.)
                     {
                         subblock.insert(subblock.end(), value_type_subblock((*it).number(), entry));
+//                        subblock.insert(subblock.end(), value_type_subblock(*it, entry));
 //                                cout << *it << ", " << (*it).number() <<endl;
                         if ((int)(*it).number() == lambda_num)
+//                        if (*it == lambda_num)    
                         {
                             r = entry;
                         }
@@ -412,7 +451,7 @@ namespace WaveletTL
             }
             SparseMatrix<double> A_Lambda;
             setup_stiffness_matrix(*this, Lambda, A_Lambda);
-//#if 1
+#if 1
 //            double help;
 //            unsigned int iterations;
 //            LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
@@ -423,13 +462,23 @@ namespace WaveletTL
             Matrix<double> evecs;
             Vector<double> evals;
             SymmEigenvalues(A_Lambda, evals, evecs);
+            cout << "Eigenwerte: " << evals << endl;
             int i = 0;
             while(abs(evals(i))<1e-2){
                 ++i;
             }
             normA = evals(evals.size()-1);
             normAinv = 1./evals(i);
-            
+#else            
+            Vector<double> xk(Lambda.size(), false);
+          xk = 1;
+          unsigned int iterations;
+//          normA = PowerIteration(A_Lambda, xk, 1e-6, 100, iterations);
+         double lambdamax=PowerIteration<Vector<double>,SparseMatrix<double> >(A_Lambda, xk, 1e-3, 100, iterations);
+         double lambdamin=InversePowerIteration<Vector<double>,SparseMatrix<double> >(A_Lambda, xk, 1e-10,  1e-3, 100, iterations);
+         normA=lambdamax;
+         normAinv=1./lambdamin;
+#endif           
 //#else
 //          Vector<double> xk(Lambda.size(), false);
 //          xk = 1;

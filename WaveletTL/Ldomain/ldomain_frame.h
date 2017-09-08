@@ -113,6 +113,9 @@ namespace WaveletTL
     //! compute the support of psi_lambda, using the internal cache
     void support(const Index& lambda, Support& supp) const;
     
+    //! compute the support of psi_lambda, using the internal cache; only works for precomputed supports
+    void support(const int& lambda_num, Support& supp) const;
+    
     //! critical Sobolev regularity for the primal generators/quarklets
     static double primal_regularity() { return IntervalFrame::primal_regularity(); } // dirty, we should use max(1.5,~) instead
     
@@ -196,7 +199,7 @@ namespace WaveletTL
     Index last_quarklet(const level_type& j, const polynomial_type& p = polynomial_type(), const int& number=-1) const;
     
     //! index of last quarklet on level j >= j0
-    Index last_quarklet(const int levelsum, const polynomial_type& p = polynomial_type(), const int& number=-1) const;
+    Index last_quarklet(const int& levelsum, const polynomial_type& p = polynomial_type(), const int& number=-1) const;
     
 //    //! Index of last quarklet on level j >= ||j0||_1
 //    Index last_quarklet(const int levelsum, const polynomial_type& p = polynomial_type()) const;
@@ -274,12 +277,19 @@ namespace WaveletTL
             return setup_full_collection_;
         }
     
+    const inline Support& get_support (const int number) const {
+        return all_supports_[number];
+    }
+    
     
 
     //! number of quarklets between coarsest and finest level
     const int degrees_of_freedom() const { return full_collection.size(); };
-    typedef std::map<int,Support> SupportCache;
-    const SupportCache suppcache() const{ return supp_cache;};
+//    typedef std::map<int,Support> SupportCache;
+//    const SupportCache suppcache() const{ return supp_cache;};
+    
+    //alternative for SupportCache
+    Array1D<Support> all_supports_;
 
 
   protected:
@@ -289,6 +299,7 @@ namespace WaveletTL
     *  Precomputed for speedup
     */
     Array1D<int> first_wavelet_numbers, last_wavelet_numbers;
+    Array1D<Array1D<int> > first_quarklet_numbers, last_quarklet_numbers, first_quark_numbers;
       
     //! Coarsest possible level j0
     level_type j0_;
@@ -317,12 +328,11 @@ namespace WaveletTL
     //! Degrees of freedom on level p=(0,0) 
     int Nablasize_;
 
-    //! support cache
-//    typedef std::map<Index,Support> SupportCache;
-    mutable SupportCache supp_cache;
+//    //! support cache
+////    typedef std::map<Index,Support> SupportCache;
+//    mutable SupportCache supp_cache;
     
-    //!todo: alternative for SupportCache
-    Array1D<Support> all_supports_;
+    
     
     bool precomputed_supports_;
 

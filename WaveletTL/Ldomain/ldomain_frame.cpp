@@ -192,7 +192,7 @@ namespace WaveletTL
   
   template <class IFRAME>
   typename LDomainFrame<IFRAME>::Index
-  LDomainFrame<IFRAME>::last_quarklet(const int levelsum, const polynomial_type& p, const int& number) const
+  LDomainFrame<IFRAME>::last_quarklet(const int& levelsum, const polynomial_type& p, const int& number) const
   {
     assert(levelsum >= (int) multi_degree(j0_));
     
@@ -220,6 +220,19 @@ namespace WaveletTL
     }
   }
   
+  template <class IFRAME>
+  void
+  LDomainFrame<IFRAME>::support(const int& lambda_num, Support& supp) const
+  {
+
+     if (precomputed_supports_){
+         supp=all_supports_[lambda_num];
+     }
+     else {
+         cout << "LDomainFrame<IFRAME>::support(): precompute supports first!" << endl;
+         abort();      
+     }
+  }
 
 
   template <class IFRAME>

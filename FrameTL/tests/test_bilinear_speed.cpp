@@ -5,8 +5,8 @@
 
 #ifdef QUARKLET
 #define _DIM 2
-#define MINJ 3
-#define DYADIC
+#undef DYADIC
+#define TRIVIAL
 #define FRAME
 #define _WAVELETTL_USE_TFRAME 1
 #endif
@@ -79,9 +79,11 @@ int main()
   
   const int DIM = 2;
   const int jmax = 7;
+  
 #ifdef QUARKLET
   const int pmax = 0;
 #endif
+//  const int jmax1d=jmax-j0;
 
   const int d  = 3;
   const int dT = 3;
@@ -202,14 +204,26 @@ int main()
   // BiharmonicBVP<DIM> biahrmonic(&singRhs);
 #ifdef AGGREGATED
   SimpleEllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax);
-  CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson, 5.0048, 1.0/0.01);
+  CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson/*, 5.0048, 1.0/0.01*/);
 #endif
 #ifdef QUARKLET
   
     Frame1d frame1d(false,false);
+    frame1d.set_jpmax(jmax-frame1d.j0(),pmax);
     Frame1d frame1d_11(true,true);
+    frame1d_11.set_jpmax(jmax-frame1d.j0(),pmax);
     Frame1d frame1d_01(false,true);
+    frame1d_01.set_jpmax(jmax-frame1d.j0(),pmax);
     Frame1d frame1d_10(true,false);
+    frame1d_10.set_jpmax(jmax-frame1d.j0(),pmax);
+    
+//    typedef typename Frame1d::Index Index1D;
+//    
+//    for (Index1D it=frame1d_01.first_generator(3);it<=frame1d_11.last_wavelet(frame1d.get_jmax_(), frame1d_11.get_pmax_());++it){
+//        cout << it << endl;
+//    }
+    
+//    abort();
   
 //    Frame2D frame(frame1d);
     Frame2D frame(&frame1d, &frame1d_11, &frame1d_01, &frame1d_10);
@@ -230,13 +244,16 @@ int main()
   
   set<Index> Lambda;
   for (int i=0; i<frame.degrees_of_freedom();i++) {
+//  for (int i=0; i<817;i++) {    
 #ifdef AGGREGATED
     Lambda.insert(*frame.get_wavelet(i));
     //    cout << *frame.get_wavelet(i) << endl;
 #endif
 #ifdef QUARKLET
-    Lambda.insert(*(frame.get_quarklet(i)));
-    cout << *(frame.get_quarklet(i)) << endl;
+//    if(((*(frame.get_quarklet(i))).k()[1]>1 && (*(frame.get_quarklet(i))).k()[1]<6) || (*(frame.get_quarklet(i))).p()[1]==0){
+        Lambda.insert(*(frame.get_quarklet(i)));
+        cout << *(frame.get_quarklet(i)) << endl;
+//    }
 //    cout << discrete_poisson.a(*(frame.get_quarklet(i)),*(frame.get_quarklet(i)))<<endl;
 #endif
 
@@ -260,23 +277,27 @@ int main()
   double time;
   tstart = clock();
 //   WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff, false);
-//    WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
-//  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff, false);
-  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
+  WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
+// WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff, false);
+//  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
   
-
+    
+  cout << "Norm/InvNorm: " << problem.norm_A() << ", " << problem.norm_Ainv() << endl;
+  
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
 
   stiff.matlab_output("stiff_2D_out", "stiff",1); 
   
+  abort();
+  
  
   
   cout << "setting up full right hand side..." << endl;
   Vector<double> rh;
   WaveletTL::setup_righthand_side(problem, Lambda, rh);
-//  cout << rh << endl;
+  cout << rh << endl;
   
 
   
@@ -300,7 +321,7 @@ int main()
   
   Vector<double> resid(xk.size());
   Vector<double> help(xk.size());
-  for (int i = 0; i < 2000;i++) {
+  for (int i = 0; i < 5000;i++) {
     stiff.apply(xk,help);
     resid = rh - help;
     cout << "i = " << i << " " << sqrt(resid*resid) << endl;
@@ -315,10 +336,15 @@ int main()
   
   InfiniteVector<double,Frame2D::Index> u;
   unsigned int i = 0;
-  for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i)
+  for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i){
+//    if(i>799)
     u.set_coefficient(*it, xk[i]);
+//    if(i==799) break;
+  }
   
+//  cout << u << endl;
   u.scale(&discrete_poisson,-1);
+  cout << "u_new: " << endl << u << endl;
   
 #ifdef AGGREGATED
   Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u, true, 6);//expand in primal basis

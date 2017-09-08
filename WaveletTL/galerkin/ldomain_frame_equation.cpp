@@ -91,10 +91,10 @@ namespace WaveletTL
 #endif
         for (int i = 0; i< frame_->degrees_of_freedom();i++)
         {
-            coeff = f(frame_->get_quarklet(i)) / D(frame_->get_quarklet(i));
+            coeff = f(*(frame_->get_quarklet(i))) / D(*(frame_->get_quarklet(i)));
             if (fabs(coeff)>1e-15)
             {
-                fhelp.set_coefficient(frame_->get_quarklet(i), coeff);
+                fhelp.set_coefficient(*(frame_->get_quarklet(i)), coeff);
                 fnorm_sqr_help += coeff*coeff;
                 //if (i % 100 == 0)
                 //cout << *(frame_->get_quarklet(i)) << " " << coeff << endl;
@@ -123,7 +123,9 @@ namespace WaveletTL
     LDomainFrameEquation<IFRAME, LDOMAINFRAME>::D(const Index& lambda) const
     {
         //return ldexp(1.0, lambda.j());
-        //return sqrt(a(lambda, lambda));
+
+
+        
 #ifdef DYADIC
         double hspreconditioner(0), l2preconditioner(1);
         for (int i=0; i<space_dimension; i++){
@@ -133,8 +135,13 @@ namespace WaveletTL
         double preconditioner = sqrt(hspreconditioner)*l2preconditioner;
         
         return preconditioner;
-#else        
+#else  
+#ifdef TRIVIAL
+        return 1;
+#else
         return stiff_diagonal[lambda.number()];
+//        return sqrt(a(lambda, lambda));
+#endif 
 #endif
 //        return 1;
     }
@@ -485,7 +492,7 @@ namespace WaveletTL
         normA = evals(evals.size()-1);
         normAinv = 1./evals(i);
       
-//        cout << "Eigenwerte: " << evals << endl;
+        cout << "Eigenwerte: " << evals << endl;
       //cout << "Eigenvektoren: " << endl << evecs << endl;
 #else
         Vector<double> xk(Lambda.size(), false);
@@ -541,6 +548,7 @@ namespace WaveletTL
         Matrix<double> evecs;
         Vector<double> evals;
         SymmEigenvalues(A_Lambda, evals, evecs);
+        cout << evals << endl;
         int i = 0;
         while(abs(evals(i))<1e-2){
             ++i;
@@ -582,15 +590,15 @@ namespace WaveletTL
 
 //          char filename[50];
 //          char matrixname[50];
-      #ifdef ONE_D
-          int d = IFRAME::primal_polynomial_degree();
-          int dT = IFRAME::primal_vanishing_moments();
-      #else
-      #ifdef TWO_D
-          int d = IFRAME::primal_polynomial_degree();
-          int dT = IFRAME::primal_vanishing_moments();
-      #endif
-      #endif
+//      #ifdef ONE_D
+//          int d = IFRAME::primal_polynomial_degree();
+//          int dT = IFRAME::primal_vanishing_moments();
+//      #else
+//      #ifdef TWO_D
+//          int d = IFRAME::primal_polynomial_degree();
+//          int dT = IFRAME::primal_vanishing_moments();
+//      #endif
+//      #endif
 
           // prepare filenames for 1D and 2D case
       #ifdef ONE_D
@@ -656,6 +664,11 @@ namespace WaveletTL
         
         const IndexQ1D<IFRAME>* lambda= nu < la? &la : &nu;
         const IndexQ1D<IFRAME>* mu= nu < la ? &nu : &la;
+//        if(lambda->number()==lambda->index().number())
+//        cout << "truueee: " << lambda->index() << endl;
+//        if(lambda->number()!=lambda->index().number())
+//        cout << "faaaalsse: " << lambda->index() << ", " << lambda->number() << endl;
+//        cout << mu->number() << endl;
 
         typename One_D_IntegralCache::iterator col_lb(one_d_integrals.lower_bound(*lambda));
         typename One_D_IntegralCache::iterator col_it(col_lb);
@@ -736,18 +749,18 @@ namespace WaveletTL
                 }
             }
                 
-            evaluate(*frame1D_lambda, lambda->derivative(),           //in x-direction evaluate with asymmetric boundary conditions
-                                                lambda->index().p(),
+            evaluate(*frame1D_lambda, lambda->derivative(),  lambda->index(),         //in x-direction evaluate with asymmetric boundary conditions
+                                                /*lambda->index().p(),
                                                 lambda->index().j(),
                                                 lambda->index().e(),
-                                                lambda->index().k(),
+                                                lambda->index().k(),*/
                          lambda_gauss_points, lambda_values);
             
-            evaluate(*frame1D_mu, mu->derivative(),           //in x-direction evaluate with asymmetric boundary conditions
-                                                mu->index().p(),
+            evaluate(*frame1D_mu, mu->derivative(), mu->index(),          //in x-direction evaluate with asymmetric boundary conditions
+                                                /*mu->index().p(),
                                                 mu->index().j(),
                                                 mu->index().e(),
-                                                mu->index().k(),
+                                                mu->index().k(),*/
                          mu_gauss_points, mu_values);
             
             if(main_patch == 1){

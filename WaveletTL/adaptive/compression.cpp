@@ -163,7 +163,7 @@ namespace WaveletTL
                     for (int polynomial = minplevel;
                        polynomial <= maxplevel; polynomial++)
                     {
-                        cout << "adding level: " << level << endl;
+//                        cout << "adding level: " << level << endl;
                         P.add_level(lambda,w,polynomial,level,factor,J,strategy,jmax,pmax,a,b);
 //                        P.add_level(lambda,w,0,level,factor,J);
         //                cout << w << endl;

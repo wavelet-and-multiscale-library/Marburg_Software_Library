@@ -66,8 +66,14 @@ namespace WaveletTL
 //     : public FullyDiagonalDyadicPreconditioner<typename LDomainBasis<IBASIS>::Index>
 #ifdef DYADIC  
   : public FullyDiagonalQuarkletPreconditioner<typename LDOMAINFRAME::Index>
+
+    
+#else
+#ifdef TRIVIAL
+    : public TrivialPreconditioner<typename LDOMAINFRAME::Index>
 #else
     : public FullyDiagonalEnergyNormPreconditioner<typename LDOMAINFRAME::Index>
+#endif
 #endif
   {
   public:
@@ -108,7 +114,7 @@ namespace WaveletTL
     /*!
       read access to the frame
     */
-    const Frame frame() const { return *frame_; }
+    const Frame& frame() const { return *frame_; }
     
     /*!
       space dimension of the problem

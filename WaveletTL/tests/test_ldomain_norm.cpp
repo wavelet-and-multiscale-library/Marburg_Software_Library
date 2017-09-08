@@ -7,10 +7,16 @@
 #define ADAPTIVE
 
 #define FRAME
+
+//specify one of this three
+#undef DYADIC
+#undef TRIVIAL
+#define ENERGY
+
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
-#define MINJ 3
+
 
 #include <iostream>
 #include <utils/fixed_array1d.h>
@@ -84,26 +90,41 @@ int main(){
     const int d  = 3;
     const int dT = 3;
     const int dim = 2;
-    const int jmax=9;
-    const int pmax=3;
-    const int offsetj=3;
-    const int offsetp=3;
+    const int jmax=6;
+    const int pmax=1;
+    const int offsetj=0;
+    const int offsetp=1;
     
     typedef PQFrame<d,dT> Frame1d;
     typedef LDomainFrame<Frame1d> Frame;
     myRHS rhs1;
     Frame1d frame1d(false,false);
+    frame1d.set_jpmax(jmax-frame1d.j0(),pmax);
     Frame1d frame1d_11(true,true);
+    frame1d_11.set_jpmax(jmax-frame1d.j0(),pmax);
     Frame1d frame1d_01(false,true);
+    frame1d_01.set_jpmax(jmax-frame1d.j0(),pmax);
     Frame1d frame1d_10(true,false);
+    frame1d_10.set_jpmax(jmax-frame1d.j0(),pmax);
     Frame frame(&frame1d, &frame1d_11, &frame1d_01, &frame1d_10);
     frame.set_jpmax(jmax,pmax);
     
     PoissonBVP<dim> poisson1(&rhs1);
-    LDomainFrameEquation<Frame1d,Frame> eq(&poisson1, &frame, false);
+    LDomainFrameEquation<Frame1d,Frame> eq(&poisson1, &frame, true);
     CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > ceq(&eq);
     
-    ceq.normtest(offsetj,offsetp);
+    
+    clock_t tstart, tend;
+  double time;
+  tstart = clock();
+    ceq.normtest(offsetj,offsetp);  
+  tend = clock();
+  time = (double)(tend-tstart)/CLOCKS_PER_SEC;
+  cout << "  ... done, time needed: " << time << " seconds" << endl;
+
+  
+    
+    
       
     
     

@@ -8,7 +8,7 @@
 #endif
 
 #define _DIM 2
-#define MINJ 3
+
 
 #include <cmath>
 #include <iostream>
@@ -84,10 +84,14 @@ int main()
 #ifdef FRAME
   typedef PQFrame<d,dT> Frame1D;
 //  typedef PBasis<d,dT> Frame1D;
-  Frame1D frame1d(false,false);
-  Frame1D frame1d_11(true,true);
-  Frame1D frame1d_01(false,true);
-  Frame1D frame1d_10(true,false);
+    Frame1D frame1d(false,false);
+    frame1d.set_jpmax(jmax-frame1d.j0(),pmax);
+    Frame1D frame1d_11(true,true);
+    frame1d_11.set_jpmax(jmax-frame1d.j0(),pmax);
+    Frame1D frame1d_01(false,true);
+    frame1d_01.set_jpmax(jmax-frame1d.j0(),pmax);
+    Frame1D frame1d_10(true,false);
+    frame1d_10.set_jpmax(jmax-frame1d.j0(),pmax);
   
   
 //  typedef Frame1D::Index Index1D;

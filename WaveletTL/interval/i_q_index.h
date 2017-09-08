@@ -95,9 +95,9 @@ namespace WaveletTL
     //! number
     const int number() const {
 //       return num_;
-      return (e() == 0
-  	      ? k() - frame_->DeltaLmin(p())
-  	      : frame_->DeltaNablasize(j(),p()) + k() - frame_->Nablamin(p()));
+        return (e_ == 0 ? k_ - frame_->DeltaLmin(p()): frame_->DeltaNablasize(j_,p_) + k_ - frame_->Nablamin(p_)) 
+               +p_ * frame_->Deltasize(frame_->get_jmax_()+1);
+        
     }
 
     /*!

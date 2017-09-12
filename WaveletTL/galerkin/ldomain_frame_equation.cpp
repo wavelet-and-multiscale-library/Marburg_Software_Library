@@ -80,30 +80,40 @@ namespace WaveletTL
         InfiniteVector<double,Index> fhelp;
         fnorm_sqr = 0; 
         double coeff;
-        double fnorm_sqr_help = 0.;
+        
 #if PARALLEL==1
+        double fnorm_sqr_help = 0.;
         cout<<"parallel computing rhs"<<endl;
         
 #pragma omp parallel 
 {
 //        cout<<"number of threads: "<<omp_get_num_threads()<<endl;
-#pragma omp for  private(coeff) reduction(+:fnorm_sqr_help)
-#endif
+#pragma omp for  private(coeff) schedule(static) reduction(+:fnorm_sqr_help)
         for (int i = 0; i< frame_->degrees_of_freedom();i++)
         {
             coeff = f(*(frame_->get_quarklet(i))) / D(*(frame_->get_quarklet(i)));
             if (fabs(coeff)>1e-15)
             {
-                fhelp.set_coefficient(*(frame_->get_quarklet(i)), coeff);
+#pragma omp critical
+                {fhelp.set_coefficient(*(frame_->get_quarklet(i)), coeff);}
+                
                 fnorm_sqr_help += coeff*coeff;
-                //if (i % 100 == 0)
-                //cout << *(frame_->get_quarklet(i)) << " " << coeff << endl;
             }
         }
-#if PARALLEL==1
 }
-#endif
         fnorm_sqr=fnorm_sqr_help;
+#else 
+       for (int i = 0; i< frame_->degrees_of_freedom();i++)
+        {
+            coeff = f(*(frame_->get_quarklet(i))) / D(*(frame_->get_quarklet(i)));
+            if (fabs(coeff)>1e-15)
+            {
+                fhelp.set_coefficient(*(frame_->get_quarklet(i)), coeff);
+                fnorm_sqr += coeff*coeff;
+            }
+        } 
+#endif
+        
         cout << "... done, sort the entries in modulus..." << endl;
 //        cout<<"number of threads: "<<omp_get_num_threads()<<endl;
         // sort the coefficients into fcoeffs

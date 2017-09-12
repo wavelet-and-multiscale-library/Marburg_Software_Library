@@ -5,8 +5,8 @@
 # | Thorsten Raasch, Manuel Werner                                 |
 # +----------------------------------------------------------------+
 
-#DEBUGMODE = on
-DEBUGMODE = off
+DEBUGMODE = on
+#DEBUGMODE = off
 
 # choose between GNU/Intel/Portland Group compiler
 COMPILER = gnu
@@ -120,7 +120,7 @@ EXEOBJF4 = \
   test_ldomain_equation.o\
   test_ldomain_frame.o\
   test_ldomain_norm.o\
-  
+  test_parallel.o
 
   
 
@@ -277,14 +277,14 @@ endif
 
 $(EXEOBJF4): %.o: %.cpp
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -g -fopenmp -o $@ $<
 else
 	$(CXX) $(CXXFLAGS) -c -DNDEBUG -fopenmp -Ofast -o $@ $<
 endif
 
 $(EXES4): %: %.o
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $(LDFLAGS) $< -g -o $@
+	$(CXX) $(LDFLAGS) $< -g -fopenmp -o $@
 else
 	$(CXX) $(LDFLAGS) $< -fopenmp -Ofast -o  $@
 endif

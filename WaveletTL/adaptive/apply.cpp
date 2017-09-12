@@ -633,11 +633,12 @@ namespace WaveletTL
 {
 //            if(omp_get_thread_num()==0)
 //                cout<<"number of threads: "<<omp_get_num_threads()<<endl;
-            Vector<double> wwprivate(P.frame().degrees_of_freedom());    
+            Vector<double> wwprivate(P.frame().degrees_of_freedom()); 
+            unsigned int z = 0;
 #pragma omp for
             for(int z=0;z<vksize[k];z++){
               typename std::list<std::pair<Index, double> >::const_iterator itk(it->begin());
-              advance(itk,z);
+              advance(itk,z);          
               
             //collapse parallelization
 //#pragma omp parallel

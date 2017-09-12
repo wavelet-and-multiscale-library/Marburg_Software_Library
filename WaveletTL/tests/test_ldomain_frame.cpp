@@ -179,7 +179,7 @@ int main(){
   for (int i=0; i<frame.degrees_of_freedom();i++) {
 
     Lambda.insert(*(frame.get_quarklet(i)));
-    cout << *(frame.get_quarklet(i)) << endl;
+//    cout << *(frame.get_quarklet(i)) << endl;
 #endif
 
   }
@@ -304,6 +304,7 @@ int main(){
 
     cout<<"normA: "<<cproblem1.norm_A()<<endl;
     cout<<"normAinv: "<<cproblem1.norm_Ainv()<<endl;
+    
 #if 1 //for parallel test    
     InfiniteVector<double, Index> F_eta;
     cproblem1.RHS(1e-6, F_eta);

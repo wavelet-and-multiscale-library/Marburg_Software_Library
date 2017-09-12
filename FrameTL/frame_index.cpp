@@ -3,6 +3,8 @@
 #include <math.h>
 #include <cmath>
 
+#include "frame_index.h"
+
  namespace FrameTL
  {
 
@@ -472,7 +474,7 @@
 	 (
 	  p_ < lambda.p() ||
 	  (
-	   p_ == lambda.p() && k_ < lambda.k()
+	   p_ == lambda.p() &&  k_.lex(lambda.k())
 	  )
 	  )
 	 )

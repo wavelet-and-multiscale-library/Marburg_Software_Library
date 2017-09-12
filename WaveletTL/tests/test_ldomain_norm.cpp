@@ -90,10 +90,10 @@ int main(){
     const int d  = 3;
     const int dT = 3;
     const int dim = 2;
-    const int jmax=6;
-    const int pmax=1;
-    const int offsetj=0;
-    const int offsetp=1;
+    const int jmax=9;
+    const int pmax=0;
+    
+    const int offsetp=pmax;
     
     typedef PQFrame<d,dT> Frame1d;
     typedef LDomainFrame<Frame1d> Frame;
@@ -108,6 +108,8 @@ int main(){
     frame1d_10.set_jpmax(jmax-frame1d.j0(),pmax);
     Frame frame(&frame1d, &frame1d_11, &frame1d_01, &frame1d_10);
     frame.set_jpmax(jmax,pmax);
+    
+    const int offsetj=jmax- 2*frame1d.j0();
     
     PoissonBVP<dim> poisson1(&rhs1);
     LDomainFrameEquation<Frame1d,Frame> eq(&poisson1, &frame, true);

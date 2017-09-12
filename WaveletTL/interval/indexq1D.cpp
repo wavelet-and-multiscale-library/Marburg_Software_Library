@@ -17,7 +17,7 @@ namespace WaveletTL
   {
     return num_ < lambda.number() ||
       (
-       num_ == lambda.number() &&
+       num_ == lambda.number() &&      
        (
 	patch_ < lambda.patch() ||
 	(

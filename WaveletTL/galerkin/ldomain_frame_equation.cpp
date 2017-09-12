@@ -749,14 +749,14 @@ namespace WaveletTL
                 }
             }
                 
-            evaluate(*frame1D_lambda, lambda->derivative(),  lambda->index(),         //in x-direction evaluate with asymmetric boundary conditions
+            WaveletTL::evaluate(*frame1D_lambda, lambda->derivative(),  lambda->index(),         //in x-direction evaluate with asymmetric boundary conditions
                                                 /*lambda->index().p(),
                                                 lambda->index().j(),
                                                 lambda->index().e(),
                                                 lambda->index().k(),*/
                          lambda_gauss_points, lambda_values);
             
-            evaluate(*frame1D_mu, mu->derivative(), mu->index(),          //in x-direction evaluate with asymmetric boundary conditions
+            WaveletTL::evaluate(*frame1D_mu, mu->derivative(), mu->index(),          //in x-direction evaluate with asymmetric boundary conditions
                                                 /*mu->index().p(),
                                                 mu->index().j(),
                                                 mu->index().e(),

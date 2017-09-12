@@ -85,7 +85,7 @@ namespace WaveletTL
   void intersecting_quarklets(const LDomainFrame<IFRAME>& frame,
 			     const typename LDomainFrame<IFRAME>::Index& lambda,
 			     const typename LDomainFrameIndex<IFRAME>::level_type& j,
-			     std::list<typename LDomainFrame<IFRAME>::Index>& intersecting,
+                             std::list<int>& intersecting,
                              const typename LDomainFrameIndex<IFRAME>::polynomial_type& p);
   
   template <class IFRAME>

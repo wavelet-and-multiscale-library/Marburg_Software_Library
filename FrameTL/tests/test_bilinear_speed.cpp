@@ -1,12 +1,16 @@
 #define TWO_D
 #define PARALLEL 0
+
 #define QUARKLET
 #undef AGGREGATED
 
-#ifdef QUARKLET
+#define DYADIC
+#undef TRIVIAL
+#undef ENERGY
+
 #define _DIM 2
-#undef DYADIC
-#define TRIVIAL
+
+#ifdef QUARKLET
 #define FRAME
 #define _WAVELETTL_USE_TFRAME 1
 #endif
@@ -78,7 +82,7 @@ int main()
   cout << "Testing class SimpleEllipticEquation..." << endl;
   
   const int DIM = 2;
-  const int jmax = 7;
+  const int jmax = 6;
   
 #ifdef QUARKLET
   const int pmax = 0;
@@ -251,8 +255,10 @@ int main()
 #endif
 #ifdef QUARKLET
 //    if(((*(frame.get_quarklet(i))).k()[1]>1 && (*(frame.get_quarklet(i))).k()[1]<6) || (*(frame.get_quarklet(i))).p()[1]==0){
+//    if(i>=208){
         Lambda.insert(*(frame.get_quarklet(i)));
         cout << *(frame.get_quarklet(i)) << endl;
+//    }
 //    }
 //    cout << discrete_poisson.a(*(frame.get_quarklet(i)),*(frame.get_quarklet(i)))<<endl;
 #endif
@@ -282,14 +288,14 @@ int main()
 //  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
   
     
-  cout << "Norm/InvNorm: " << problem.norm_A() << ", " << problem.norm_Ainv() << endl;
+  
   
   tend = clock();
   time = (double)(tend-tstart)/CLOCKS_PER_SEC;
   cout << "  ... done, time needed: " << time << " seconds" << endl;
 
   stiff.matlab_output("stiff_2D_out", "stiff",1); 
-  
+//  cout << "Norm/InvNorm: " << problem.norm_A() << ", " << problem.norm_Ainv() << endl;
   abort();
   
  
@@ -337,7 +343,7 @@ int main()
   InfiniteVector<double,Frame2D::Index> u;
   unsigned int i = 0;
   for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i){
-//    if(i>799)
+//    if(i>=208 && i<800)
     u.set_coefficient(*it, xk[i]);
 //    if(i==799) break;
   }
@@ -360,13 +366,15 @@ int main()
  Array1D<SampledMapping<2> > eval(3);
     eval=frame.evaluate(u,6);
     std::ofstream os2("approx_solution_out.m");
+    os2 << "figure\n" << endl;
     for(int i=0;i<3;i++){
         eval[i].matlab_output(os2);
         os2 << "surf(x,y,z);" << endl;
         os2 << "hold on;" << endl;
     }  
     os2 << "view(30,55);"<<endl;
-    os2 << "hold off" << endl;
+    os2 << "hold off;" << endl;
+//    os2 << "figure;" << endl;
     os2.close();  
 #endif
   

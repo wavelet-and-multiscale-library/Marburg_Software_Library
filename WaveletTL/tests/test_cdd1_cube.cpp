@@ -1,3 +1,5 @@
+#define _DIM 2
+
 #include <iostream>
 #include <map>
 #include <time.h>

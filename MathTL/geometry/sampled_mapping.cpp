@@ -415,6 +415,7 @@ namespace MathTL
   {
     switch (DIM) {
     case 1: {
+      os << "figure\n" << endl;
       for (unsigned int i = 0; i < values.size(); i++) {
 	values[i].matlab_output(os);
 	os << "hold on" << std::endl
@@ -425,6 +426,7 @@ namespace MathTL
       break;
     }
     case 2: {
+      os << "figure\n" << endl;
       for (unsigned int i = 0; i < values.size(); i++) {
 	values[i].matlab_output(os);
 	os << "hold on" << std::endl

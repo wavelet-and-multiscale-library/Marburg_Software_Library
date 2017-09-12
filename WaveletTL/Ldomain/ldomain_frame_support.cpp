@@ -307,12 +307,15 @@ namespace WaveletTL
   void intersecting_quarklets(const LDomainFrame<IFRAME>& frame,
 			     const typename LDomainFrame<IFRAME>::Index& lambda,
 			     const typename LDomainFrameIndex<IFRAME>::level_type& j,
-			     std::list<typename LDomainFrame<IFRAME>::Index>& intersecting,
+                             std::list<int>& intersecting,
                              const typename LDomainFrameIndex<IFRAME>::polynomial_type& p)
   {
     typedef typename LDomainFrame<IFRAME>::Index Index;
     typedef typename LDomainFrame<IFRAME>::Support Support;
-
+//    std::list<int> intersectingint;
+    
+    
+//    intersectingint.clear();
     intersecting.clear();
 
     Support supp, supp_lambda(frame.get_support(lambda.number()));
@@ -332,10 +335,12 @@ namespace WaveletTL
       for (int it = mu.number();; ++it) {
           frame.get_support(it);
 //	if (intersect_supports(frame, *frame.get_quarklet(it), supp_lambda, supp))
-        if (intersect_supports(frame, lambda, *(frame.get_quarklet(it))))
+        if (intersect_supports(frame, lambda, *(frame.get_quarklet(it)))){
 //        if (intersect_supports(frame, it, supp_lambda, supp))
 //          intersect_supports(frame, *frame.get_quarklet(it), supp_lambda, supp); 
-	  intersecting.push_back(*frame.get_quarklet(it));
+//	  intersecting.push_back(*frame.get_quarklet(it));
+          intersecting.push_back(it);
+        }
 	if (it == lastquarkletnumber) break;
       }
     } else {
@@ -349,8 +354,10 @@ namespace WaveletTL
 //          cout << "Mu: " << mu << ", " << mu.number() << endl;
           frame.get_support(it);
 //	if (intersect_supports(frame, *frame.get_quarklet(it), supp_lambda, supp))
-        if (intersect_supports(frame, lambda, *(frame.get_quarklet(it))))
-	  intersecting.push_back(*(frame.get_quarklet(it)));
+        if (intersect_supports(frame, lambda, *(frame.get_quarklet(it)))){
+//	  intersecting.push_back(*(frame.get_quarklet(it)));
+          intersecting.push_back(it);
+        }
 	if (it == lastquarkletnumber) break;
       }
     }

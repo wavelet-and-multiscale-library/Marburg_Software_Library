@@ -35,7 +35,7 @@ namespace WaveletTL
             // the minimal level are thrown together in one index set (componentwise),
             // this also applies to tensors of generators on the lowest level
 
-            level_type lambda_key/*(lambda.j())*//*,first_level(frame().j0())*/;
+//            level_type lambda_key/*,first_level(frame().j0())*/;
 //            level_type lambda_key;
 //            polynomial_type lambda_p(lambda.p());
 //            polynomial_type lambda_p5(lambda.p());
@@ -43,20 +43,30 @@ namespace WaveletTL
 //            polynomial_type lambda_p2(lambda.p());
 //            polynomial_type lambda_p3(lambda.p());
 //            polynomial_type lambda_p4(lambda.p());
-            for (int k=0;k<2;k++)
-            {
-                lambda_key[k] = lambda->j()[k]-frame().j0()[k]/*first_level[k]*/;
-            }
-//TODO (PERFORMANCE): store the numbers of all levels up to jmax, do not compute anything here:
+//            for (int k=0;k<2;k++)
+//            {
+//                lambda_key[k] = lambda->j()[k]-3/*frame().j0()[k]*//*first_level[k]*/;
+//            }
+
             int blocknumber((lambda->p()).number());
 //            int blocknumber(0);
-            int subblocknumber(lambda_key.number());
+//HACK: due to performance reasons we compute the relativelevelnumber directly instead of calling the number() routine
+            int jmulti = lambda->j()[0] +lambda->j()[1]-2*frame().j0()[0];
+            int relativelevelnumber = jmulti*(jmulti+1)/2 + lambda->j()[0]-frame().j0()[0];
+//            if(lambda_key.number()==relativelevelnumber)
+//                cout << "ja" << *lambda << endl;
+//            else{
+//                cout << "nein" << *lambda << endl;
+//                abort();
+//            }
+            
+            int subblocknumber(relativelevelnumber);
 //            int subblocknumber(0);
 
             // check wether entry has already been computed
-            typedef std::list<Index> IntersectingList;
+//            typedef std::list<Index> IntersectingList;
 //            typedef std::list<Index*> IntersectingPointerList;
-//            typedef std::list<int> IntersectingIntList;
+            typedef std::list<int> IntersectingList;
 
             // search for column 'mu'
             typename ColumnCache::iterator col_lb(entries_cache.lower_bound(nu_num));
@@ -132,9 +142,9 @@ namespace WaveletTL
 
 //                
                 // there are no Generators
-                IntersectingList nus;
+//                IntersectingList nus;
 //                IntersectingPointerList nus;
-//                IntersectingIntList nus;
+                IntersectingList nus;
 //                cout << 
 //                    cout << lambda->j() << endl;
                 intersecting_quarklets(frame(),
@@ -171,16 +181,17 @@ namespace WaveletTL
                     advance(it,i);
 #else
                 
-                for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)
+//                for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)
 //                 for (typename IntersectingPointerList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)   
-//                for (typename IntersectingIntList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)    
+                for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)    
                 {
 #endif
                     //cout<<*it<<endl;
 //                    const double entry = 0;
 //                    const double entry = problem->a(*it, *nu);
-                    const double entry = problem->a(*it, *nu);
-                    
+//                    const double entry = problem->a(*it, *nu);
+//                    const double entry = problem->a(*(frame().get_quarklet((*it).number())), *nu);
+                        const double entry = problem->a(*(frame().get_quarklet(*it)), *nu);
 //                    const double entry = problem->a(*(frame().get_quarklet(*it)), *nu);
 //                    *(frame().get_quarklet(*it));
 
@@ -189,16 +200,13 @@ namespace WaveletTL
                     if (fabs(entry) > 1e-16 ) 
 //                            if (entry != 0.)
                     {
-#if PARALLEL==-1
-#pragma omp critical
-                        {subblock.insert(subblock.end(), value_type_subblock((*it).number(), entry));}
-#else
-                subblock.insert(subblock.end(), value_type_subblock((*it).number(), entry));        
-#endif
-//                        subblock.insert(subblock.end(), value_type_subblock(*it, entry));
+
+//                        subblock.insert(subblock.end(), value_type_subblock((*it).number(), entry));
+                        subblock.insert(subblock.end(), value_type_subblock(*it, entry));
+
 //                                cout << *it << ", " << (*it).number() <<endl;
-                        if ((int)(*it).number() == lambda_num)
-//                        if (*it == lambda_num)    
+//                        if ((int)(*it).number() == lambda_num)
+                        if (*it == lambda_num)    
                         {
                             r = entry;
                         }
@@ -456,7 +464,7 @@ namespace WaveletTL
     CachedQuarkletLDomainProblem<PROBLEM>::normtest(unsigned int offsetj, unsigned int offsetp) const
     {
         //if (normA == 0.0)
-        {
+        
 #if _WAVELETTL_CACHEDPROBLEM_VERBOSITY >= 1
             cout << "CachedQuarkletLDomainProblem()::norm_A() called..." << endl;
 #endif
@@ -478,34 +486,47 @@ namespace WaveletTL
             }
             SparseMatrix<double> A_Lambda;
             setup_stiffness_matrix(*this, Lambda, A_Lambda);
-#if 1
-//            double help;
-//            unsigned int iterations;
-//            LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
-            A_Lambda.compress(1e-10);
-//            unsigned int iterations;
-//            double help;
-//            LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
-            Matrix<double> evecs;
-            Vector<double> evals;
-            SymmEigenvalues(A_Lambda, evals, evecs);
-            cout << "Eigenwerte: " << evals << endl;
-            int i = 0;
-            while(abs(evals(i))<1e-2){
-                ++i;
-            }
-            normA = evals(evals.size()-1);
-            normAinv = 1./evals(i);
-#else            
-            Vector<double> xk(Lambda.size(), false);
-          xk = 1;
-          unsigned int iterations;
-//          normA = PowerIteration(A_Lambda, xk, 1e-6, 100, iterations);
-         double lambdamax=PowerIteration<Vector<double>,SparseMatrix<double> >(A_Lambda, xk, 1e-3, 100, iterations);
-         double lambdamin=InversePowerIteration<Vector<double>,SparseMatrix<double> >(A_Lambda, xk, 1e-10,  1e-3, 100, iterations);
-         normA=lambdamax;
-         normAinv=1./lambdamin;
-#endif           
+            double lambdamin, lambdamax;
+//            if (offsetp>0){
+//    //            double lambdamin;
+//    //            unsigned int iterations;
+//    //            LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
+//                A_Lambda.compress(1e-10);
+//    //            unsigned int iterations;
+//    //            double help;
+//    //            LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
+//                Matrix<double> evecs;
+//                Vector<double> evals;
+//                SymmEigenvalues(A_Lambda, evals, evecs);
+//    //            cout << "Eigenwerte: " << evals << endl;
+//                int i = 0;
+//                while(abs(evals(i))<1e-2){
+//                    ++i;
+//                }
+//                normA = evals(evals.size()-1);
+//                lambdamin = evals(i);
+//                normAinv = 1./lambdamin;
+////#else
+////        unsigned int iterations;
+////        LanczosIteration(A_Lambda, 1e-6, lambdamin, lambdamax, 200, iterations);
+////        normAinv = 1./lambdamin;
+////        normA= lambdamax;
+////#endif
+//            
+//            }
+            
+                Vector<double> xk(Lambda.size(), false);
+                Vector<double> yk(Lambda.size(), false);
+                xk = 1, yk = 1;
+                unsigned int iterations;
+        //          normA = PowerIteration(A_Lambda, xk, 1e-6, 100, iterations);
+                lambdamax=PowerIteration<Vector<double>,SparseMatrix<double> >(A_Lambda, xk, 1e-3, 100, iterations);
+
+                lambdamin=InversePowerIteration<Vector<double>,SparseMatrix<double> >(A_Lambda, yk, 1e-2,  1e-3, 100, iterations);
+                normA=lambdamax;
+                normAinv=1./lambdamin;
+            
+           
 //#else
 //          Vector<double> xk(Lambda.size(), false);
 //          xk = 1;
@@ -516,8 +537,9 @@ namespace WaveletTL
 #if _WAVELETTL_CACHEDPROBLEM_VERBOSITY >= 1
             cout << "... done!" << endl;
 #endif
-        }
-        cout << "normtest:: offsetj = " << offsetj <<  " offsetp = " << offsetp << "  normA = " << normA << " normAinv = " << normAinv << " Kondition = " << (normA*normAinv) << endl;
+        
+        cout << "normtest:: offsetj = " << offsetj <<  " offsetp = " << offsetp << "  normA = " << normA << " normAinv = " << normAinv << endl
+                << " kleinster Eigenwert = " << lambdamin <<" Kondition = " << (normA*normAinv) << endl;
     }
 
     template <class PROBLEM>

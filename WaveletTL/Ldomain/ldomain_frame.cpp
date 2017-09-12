@@ -701,13 +701,20 @@ namespace WaveletTL
 //        cout << *it << ", " << (*it).number() << endl;
     }
     precomputed_supports_ = true;
+    
+    
+    
 //    cout << "Nablasize in setup: " << Nablasize_ << endl;
     
     cout << "done setting up collection of quarklet indices and precompute supports..." << endl;
     cout << "total degrees of freedom between j0_ = " << j0_ << " and (jmax_= " << jmax_ << ", pmax_= " << pmax_ << ") is " << full_collection.size() << endl;
     setup_full_collection_ = true;
+    
+    
 
   }
+  
+  
 
 
 

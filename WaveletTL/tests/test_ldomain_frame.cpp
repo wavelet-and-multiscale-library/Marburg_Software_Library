@@ -3,7 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-#define DYADIC
+
+#undef DYADIC
+#define ENERGY
+
 #undef NONADAPTIVE
 #define ADAPTIVE
 
@@ -93,7 +96,7 @@ int main(){
     clock_t tic, toc;
     double time;
     
-    tic=clock();
+    
     cout << "testing L-domain quarklet frame" << endl;
     const int d  = PRIMALORDER;
     const int dT = DUALORDER;
@@ -293,10 +296,12 @@ int main(){
 #ifdef ADAPTIVE
 
 //    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 43, 9);
-    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq);
+//    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq);
 
     //CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 119, 25);
-//    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
+    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
+//    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 5.3, 46.3);
+    
 
     cout<<"normA: "<<cproblem1.norm_A()<<endl;
     cout<<"normAinv: "<<cproblem1.norm_Ainv()<<endl;
@@ -309,9 +314,15 @@ int main(){
     InfiniteVector<double, Index> u_epsilon, v;
     const double a=2;
     const double b=2;
-    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b);
+    
+    tic=clock();
+//    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b);
 //    DUV_QUARKLET_SOLVE_SD(cproblem1, nu, epsilon, u_epsilon, tensor_simple, pmax, jmax, a, b);
-//    steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon, tensor_simple, 2, 2);
+    steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon, tensor_simple, 2, 2);
+    toc = clock();
+    time = (double)(toc-tic);
+    cout << "Time taken: " << (time/CLOCKS_PER_SEC) << " s\n"<<endl;
+    cout << "fertig" << endl;
     
     //plot solution
     //u.COARSE(1e-6,v);
@@ -465,9 +476,6 @@ int main(){
     osf.close(); 
 #endif  
     
-    toc = clock();
-    time = (double)(toc-tic);
-    cout << "Time taken: " << (time/CLOCKS_PER_SEC) << " s\n"<<endl;
-    cout << "fertig" << endl;
+    
     return 0;
 }

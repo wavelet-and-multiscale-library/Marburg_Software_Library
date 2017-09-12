@@ -407,12 +407,11 @@ namespace WaveletTL
             normAinv = 1./evals(i);
             
 #else
-          Vector<double> xk(Lambda.size(), false);
-          xk = 1;
+          Vector<double> xk(Lambda.size(), false), yk(Lambda.size(), false);
+          xk = 1, yk=1;
           unsigned int iterations;
-//          normA = PowerIteration(A_Lambda, xk, 1e-6, 100, iterations);
          double lambdamax=PowerIteration<Vector<double>,SparseMatrix<double> >(A_Lambda, xk, 1e-3, 100, iterations);
-         double lambdamin=InversePowerIteration<Vector<double>,SparseMatrix<double> >(A_Lambda, xk, 1e-10,  1e-3, 100, iterations);
+         double lambdamin=InversePowerIteration<Vector<double>,SparseMatrix<double> >(A_Lambda, yk, 1e-2,  1e-3, 100, iterations);
          normA=lambdamax;
          normAinv=1./lambdamin;
 #endif
@@ -530,7 +529,7 @@ namespace WaveletTL
             }
             SparseMatrix<double> A_Lambda;
             setup_stiffness_matrix(*this, Lambda, A_Lambda);
-//#if 1
+#if 0
 //            double help;
 //            unsigned int iterations;
 //            LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
@@ -549,12 +548,15 @@ namespace WaveletTL
             }
             normA = evals(evals.size()-1);
             normAinv = 1./evals(i);
-//#else
-//            Vector<double> xk(Lambda.size(), false);
-//            xk = 1;
-//            unsigned int iterations;
-//            normAinv = InversePowerIteration(A_Lambda, xk, 1e-6, 200, iterations);
-//#endif
+#else
+            Vector<double> xk(Lambda.size(), false), yk(Lambda.size(), false);
+          xk = 1, yk=1;
+          unsigned int iterations;
+         double lambdamax=PowerIteration<Vector<double>,SparseMatrix<double> >(A_Lambda, xk, 1e-3, 100, iterations);
+         double lambdamin=InversePowerIteration<Vector<double>,SparseMatrix<double> >(A_Lambda, yk, 1e-2,  1e-3, 100, iterations);
+         normA=lambdamax;
+         normAinv=1./lambdamin;
+#endif
 
 #if _WAVELETTL_CACHEDPROBLEM_VERBOSITY >= 1
             cout << "... done!" << endl;

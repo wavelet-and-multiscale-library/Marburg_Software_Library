@@ -15,7 +15,7 @@ namespace WaveletTL
     CachedQuarkletLDomainProblem<PROBLEM>::a(const Index& la,
 			       const Index& mu) const
     {
-        
+//        printf("bin hier \n");
         double r = 0;
 
         if (problem->local_operator())
@@ -68,7 +68,12 @@ namespace WaveletTL
 //                cout << "Neue Spalte " << nu << endl;
                 // insert a new column
                 typedef typename ColumnCache::value_type value_type;
+#if PARALLEL==-1
+#pragma omp critical
+                {col_it = entries_cache.insert(col_lb, value_type(nu_num, Column()));}
+#else
                 col_it = entries_cache.insert(col_lb, value_type(nu_num, Column()));
+#endif
             }
             
 
@@ -85,7 +90,12 @@ namespace WaveletTL
                 
 //                cout << "Neuer block" << endl;
                 typedef typename Column::value_type value_type;
+#if PARALLEL==-1
+#pragma omp critical
+                {block_it = col.insert(block_lb, value_type(blocknumber, Block()));}
+#else
                 block_it = col.insert(block_lb, value_type(blocknumber, Block()));
+#endif
             }
             
             Block& block(block_it->second);
@@ -111,7 +121,13 @@ namespace WaveletTL
 //                cout << "Nu: " << nu << ", " << endl << endl;
 
                 typedef typename Block::value_type value_type;
+#if PARALLEL==-1
+#pragma omp critical
+                {it = block.insert(lb, value_type(subblocknumber, Subblock()));}
+#else
                 it = block.insert(lb, value_type(subblocknumber, Subblock()));
+#endif
+                
                 Subblock& subblock(it->second);
 
 //                
@@ -173,7 +189,12 @@ namespace WaveletTL
                     if (fabs(entry) > 1e-16 ) 
 //                            if (entry != 0.)
                     {
-                        subblock.insert(subblock.end(), value_type_subblock((*it).number(), entry));
+#if PARALLEL==-1
+#pragma omp critical
+                        {subblock.insert(subblock.end(), value_type_subblock((*it).number(), entry));}
+#else
+                subblock.insert(subblock.end(), value_type_subblock((*it).number(), entry));        
+#endif
 //                        subblock.insert(subblock.end(), value_type_subblock(*it, entry));
 //                                cout << *it << ", " << (*it).number() <<endl;
                         if ((int)(*it).number() == lambda_num)
@@ -225,7 +246,7 @@ namespace WaveletTL
                                       const double A,
                                       const double B) const
     {
-        //cout <<"entering add_ball"<<endl; 
+//        printf("entering add_ball \n");
         //cout << lambda << " : " << radius << " : " << factor << " : " << maxlevel<<endl;
         
         
@@ -302,7 +323,14 @@ namespace WaveletTL
                         //mu = this->frame().first_quarklet(currentlevel, currentpolynomial);
                         // the result of the following call is that the cache holds the whole level subblock corresponding to all 
                         // quarklets with level and polynomial degree of mu
+//                        printf("entering a \n");
+#if PARALLEL==1
+#pragma omp critical
+                        {a(this->frame().first_quarklet(currentlevel, currentpolynomial),lambda);}
+#else
                         a(this->frame().first_quarklet(currentlevel, currentpolynomial),lambda);
+#endif
+//                        printf("leaving a \n");
 //                            cout << mu << endl;
 //                            int dist2p0 = multi_degree(lambda.p());
 //                            int blocknumber = currentpolynomial[0] + ((dist2p0+offset)*(dist2p0+offset+1))/2;;
@@ -311,7 +339,7 @@ namespace WaveletTL
 
                         // add the level
                         Subblock& subblock (entries_cache[lambda.number()][currentpolynomial.number()][subblocknumber]);
-    
+//                        printf("writing to vector w \n");
                         for (typename Subblock::const_iterator it(subblock.begin()), itend(subblock.end()); it != itend; ++it)
                         {
                             // high caching strategy
@@ -411,7 +439,7 @@ namespace WaveletTL
           xk = 1, yk=1;
           unsigned int iterations;
          double lambdamax=PowerIteration<Vector<double>,SparseMatrix<double> >(A_Lambda, xk, 1e-3, 100, iterations);
-         double lambdamin=InversePowerIteration<Vector<double>,SparseMatrix<double> >(A_Lambda, yk, 1e-2,  1e-3, 100, iterations);
+         double lambdamin=InversePowerIteration<Vector<double>,SparseMatrix<double> >(A_Lambda, yk, 1e-1,  1e-3, 100, iterations);
          normA=lambdamax;
          normAinv=1./lambdamin;
 #endif
@@ -553,7 +581,7 @@ namespace WaveletTL
           xk = 1, yk=1;
           unsigned int iterations;
          double lambdamax=PowerIteration<Vector<double>,SparseMatrix<double> >(A_Lambda, xk, 1e-3, 100, iterations);
-         double lambdamin=InversePowerIteration<Vector<double>,SparseMatrix<double> >(A_Lambda, yk, 1e-2,  1e-3, 100, iterations);
+         double lambdamin=InversePowerIteration<Vector<double>,SparseMatrix<double> >(A_Lambda, yk, 1e-1,  1e-3, 100, iterations);
          normA=lambdamax;
          normAinv=1./lambdamin;
 #endif

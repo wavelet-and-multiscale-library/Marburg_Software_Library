@@ -94,32 +94,19 @@ namespace WaveletTL
     for(size_type row=0;row<Lambda.size();row++){
         typename std::set<Index>::const_iterator it1(Lambda.begin());
         advance(it1, row);
-#else
-    cout<<"sequentiell computing stiffness matrix"<<endl;
-    size_type row=0;
-    for (typename std::set<Index>::const_iterator it1(Lambda.begin()), itend(Lambda.end());
-	 it1 != itend; ++it1, ++row)
-      {
-#endif
+
 //        cout << "Index nu: " << *it1 << endl;
 	const double d1 = preconditioned ? P.D(*it1) : 1.0;
-        
 	std::list<size_type> indices;
 	std::list<double> entries;
-#if 0 //parallelization of inner for loop is not useful
-#pragma omp parallel for
-        for(int column=0;column<Lambda.size();column++){
-            typename std::set<Index>::const_iterator it2(Lambda.begin());
-            advance(it2,column);
-#else
 	size_type column = 0;
 	for (typename std::set<Index>::const_iterator it2(Lambda.begin()), itend(Lambda.end());
 	     it2 != itend; ++it2, ++column)
 	  {
-#endif
 	    // 	    if (intersect_singular_support(P.basis(), *it1, *it2)) {
-            
-            double entry = P.a(*it2, *it1);
+#pragma omp critical
+            {
+                double entry = P.a(*it2, *it1);
 	    
 	    //const double entry = 0;
 #if _WAVELETTL_GALERKINUTILS_VERBOSITY >= 2
@@ -131,13 +118,34 @@ namespace WaveletTL
 		indices.push_back(column);
 		entries.push_back(entry / (preconditioned ? d1 * P.D(*it2) : 1.0));
 	    }
-	    // 	    }
+	    }
 	  }
 	A_Lambda.set_row(row, indices, entries);
       }
-#if PARALLEL==1
     }
-#endif
+ #else
+    cout<<"sequentiell computing stiffness matrix"<<endl;
+    size_type row=0;
+    for (typename std::set<Index>::const_iterator it1(Lambda.begin()), itend(Lambda.end());
+	 it1 != itend; ++it1, ++row)
+      {
+        const double d1 = preconditioned ? P.D(*it1) : 1.0;
+	std::list<size_type> indices;
+	std::list<double> entries;
+	size_type column = 0;
+	for (typename std::set<Index>::const_iterator it2(Lambda.begin()), itend(Lambda.end());
+	     it2 != itend; ++it2, ++column)
+	  {
+            double entry = P.a(*it2, *it1);
+            if (fabs(entry) > 1e-15) {
+		indices.push_back(column);
+		entries.push_back(entry / (preconditioned ? d1 * P.D(*it2) : 1.0));
+	    }
+        }
+        A_Lambda.set_row(row, indices, entries);
+    }
+#endif   
+    
     cout << "done setting up stiffness matrix..." << endl;
   }
 

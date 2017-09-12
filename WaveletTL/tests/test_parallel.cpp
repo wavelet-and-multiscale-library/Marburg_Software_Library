@@ -92,8 +92,8 @@ int main(){
     const int d  = 3;
     const int dT = 3;
     const int dim = 2;
-    const int jmax=7;
-    const int pmax=0;
+    const int jmax=6;
+    const int pmax=1;
     typedef PQFrame<d,dT> Frame1d;
     //Frame1d frame1d(false,false);
     typedef LDomainFrame<Frame1d> Frame;
@@ -121,7 +121,7 @@ int main(){
     frame1d_10.set_jpmax(jmax-frame1d.j0(),pmax);
     Frame frame(&frame1d, &frame1d_11, &frame1d_01, &frame1d_10);
     frame.set_jpmax(jmax,pmax);
-    LDomainFrameEquation<Frame1d,Frame> eq(&poisson1, &frame, true);
+    LDomainFrameEquation<Frame1d,Frame> eq(&poisson1, &frame, false);
 //    LDomainFrameEquation<Frame1d,Frame> eq(&poisson1, false);
 //    eq.set_jpmax(jmax,pmax);
 //    for(int i=0;i<1000;i++){
@@ -205,13 +205,13 @@ int main(){
     
 #if 1
     //cout << "bin hier"<<endl;
-    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq,66,23);
-//    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq);
+//    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq,66,23);
+    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq);
 //    cout<<"hallo"<<endl;
     cout<<"normA="<<cproblem1.norm_A()<<endl;
     cout<<"normAinv="<<cproblem1.norm_Ainv()<<endl;
     
-    InfiniteVector<double, Index> F_eta; 
+    InfiniteVector<double, Index> F_eta;
     cproblem1.RHS(1e-6, F_eta);
 #if 0 //compare rhs
     std::ofstream stream1;

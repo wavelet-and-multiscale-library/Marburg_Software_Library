@@ -58,7 +58,7 @@ public:
   virtual ~myRHS() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
     CornerSingularityRHS csrhs(Point<2>(0,0), 0.5, 1.5);
-    return 2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1])+5*csrhs.value(p);
+    return /*2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1])+*/5*csrhs.value(p);
   }
   void vector_value(const Point<2>& p, Vector<double>& values) const {
     values[0] = value(p);
@@ -72,7 +72,7 @@ public:
   virtual ~mySolution() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
     CornerSingularity cs(Point<2>(0,0), 0.5, 1.5);
-    return sin(M_PI*p[0])*sin(M_PI*p[1])+5*cs.value(p);
+    return /*sin(M_PI*p[0])*sin(M_PI*p[1])+*/5*cs.value(p);
   }
   void vector_value(const Point<2>& p, Vector<double>& values) const {
     values[0] = value(p);
@@ -297,7 +297,7 @@ int main(){
 //    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 43, 9);
 //    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq);
 
-    //CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 119, 25);
+//    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 119, 25);
     CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
 //    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 5.3, 46.3);
     
@@ -306,22 +306,41 @@ int main(){
     cout<<"normAinv: "<<cproblem1.norm_Ainv()<<endl;
     
 #if 1 //for parallel test    
-    InfiniteVector<double, Index> F_eta;
-    cproblem1.RHS(1e-6, F_eta);
-    const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
+//    InfiniteVector<double, Index> F_eta;
+//    cproblem1.RHS(1e-6, F_eta);
+//    const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
     double epsilon = 1e-3;
+//    double epsilon = 10;
     InfiniteVector<double, Index> u_epsilon, v;
+    InfiniteVector<double, int> u_epsilon_int;
     const double a=2;
     const double b=2;
     
     tic=clock();
 //    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b);
 //    DUV_QUARKLET_SOLVE_SD(cproblem1, nu, epsilon, u_epsilon, tensor_simple, pmax, jmax, a, b);
-    steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon, tensor_simple, 2, 2);
+//    steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon, tensor_simple, 2, 2);
+    steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon_int, tensor_simple, 2, 2);
     toc = clock();
     time = (double)(toc-tic);
     cout << "Time taken: " << (time/CLOCKS_PER_SEC) << " s\n"<<endl;
     cout << "fertig" << endl;
+//    abort();
+#if 1
+    for (typename InfiniteVector<double,int>::const_iterator it(u_epsilon_int.begin()),
+ 	   itend(u_epsilon_int.end()); it != itend; ++it){
+        u_epsilon.set_coefficient(*(frame.get_quarklet(it.index())), *it);
+    }
+#endif
+        
+//    InfiniteVector<double,Frame2D::Index> u;
+//  unsigned int i = 0;
+//  for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i){
+////    if(i>=208 && i<800)
+//    u.set_coefficient(*it, xk[i]);
+////    if(i==799) break;
+//  }
+    
     
     //plot solution
     //u.COARSE(1e-6,v);
@@ -329,11 +348,13 @@ int main(){
     Array1D<SampledMapping<dim> > eval(3);
     eval=cproblem1.frame().evaluate(u_epsilon,6);
     std::ofstream os2("solution_ad.m");
+    os2 << "figure;"<< endl;
     for(int i=0;i<3;i++){
         eval[i].matlab_output(os2);
         os2 << "surf(x,y,z);" << endl;
         os2 << "hold on;" << endl;
     }  
+    os2 << "title('Ldomain Poisson Equation: adaptive solution to test problem ');" << endl;
     os2 << "view(30,55);"<<endl;
     os2 << "hold off" << endl;
     os2.close();

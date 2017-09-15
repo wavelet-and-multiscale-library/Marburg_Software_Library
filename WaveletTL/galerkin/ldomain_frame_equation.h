@@ -188,6 +188,9 @@ namespace WaveletTL
     */
     void RHS(const double eta,
 	     InfiniteVector<double,Index>& coeffs) const;
+    
+    void RHS(const double eta,
+	     InfiniteVector<double,int>& coeffs) const;
 
     /*!
       compute (or estimate) ||F||_2
@@ -223,6 +226,7 @@ namespace WaveletTL
 
     // right-hand side coefficients on a fine level, sorted by modulus
     Array1D<std::pair<Index,double> > fcoeffs;
+    Array1D<std::pair<int,double> > fcoeffs_int;
 
     // precompute the right-hand side
     void compute_rhs();

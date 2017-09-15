@@ -142,8 +142,10 @@ namespace FrameTL
 	  fhelp_patch[frame_->get_wavelet(i)->p()].set_coefficient(*(frame_->get_wavelet(i)), coeff);
 	  
 	  fnorms_sqr_patch[frame_->get_wavelet(i)->p()] += coeff*coeff;
-	  if (i % 100 == 0)
-	    cout << *(frame_->get_wavelet(i)) << " " << coeff << endl;
+	  if (i % 100 == 0){
+	    cout << *(frame_->get_wavelet(i)) << " " << coeff << endl;            
+          }
+          
 	}
       }
 

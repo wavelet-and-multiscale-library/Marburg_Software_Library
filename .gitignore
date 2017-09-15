@@ -172,4 +172,4 @@ FrameTL/tests/test_bilinear_speed
 MathTL/tests/test_schoenberg_splines
 FrameTL/tests/test_simple_elliptic_equation_1D
 WaveletTL/tests/test_parallel
-
+FrameTL/tests/test_adaptive_speed

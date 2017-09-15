@@ -1,18 +1,23 @@
 #define TWO_D
 #define PARALLEL 0
 
-#undef QUARKLET
-#define AGGREGATED
+#define QUARKLET
+#undef AGGREGATED
 
 #undef DYADIC
 #undef TRIVIAL
 #define ENERGY
 
 #define _DIM 2
+#define JMAX 8
+#define PRIMALORDER 3
+#define DUALORDER   3
+#define TWO_D
 
 #ifdef QUARKLET
-#define FRAME
 #define _WAVELETTL_USE_TFRAME 1
+#define PMAX 0
+#define FRAME
 #endif
 
 
@@ -38,6 +43,7 @@
 #include <cube/cube_index.h>
 #include <galerkin/cached_problem.h>
 #include <frame_support.h>
+#include <steepest_descent.h>
 #endif
 #include <interval/pq_frame.h>
 #include <interval/pq_evaluate.h>
@@ -48,6 +54,7 @@
 #include <Ldomain/ldomain_frame_indexplot.h>
 #include <galerkin/ldomain_frame_equation.h>
 #include <galerkin/cached_quarklet_ldomain_problem.h>
+#include <adaptive/steepest_descent_ks.h>
 
 #endif
 
@@ -78,22 +85,42 @@ using namespace std;
 using namespace MathTL;
 using namespace WaveletTL;
 
+class myRHS
+  : public Function<2,double>
+{
+public:
+  virtual ~myRHS() {};
+  double value(const Point<2>& p, const unsigned int component = 0) const {
+    CornerSingularityRHS csrhs(Point<2>(0,0), 0.5, 1.5);
+    return /*2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1])+*/5*csrhs.value(p);
+  }
+  void vector_value(const Point<2>& p, Vector<double>& values) const {
+    values[0] = value(p);
+  }
+};
+
 int main()
 {
   
-  cout << "Testing class SimpleEllipticEquation..." << endl;
+  cout << "Testing class Adaptive SD..." << endl;
   
   const int DIM = 2;
-  const int jmax = 6;
+  const int jmax = JMAX;
+  
+  
+  
+  double epsilon = 1e-6;
   
 #ifdef QUARKLET
-  const int pmax = 1;
+  const int pmax = PMAX;
 #endif
 //  const int jmax1d=jmax-j0;
 
-  const int d  = 3;
-  const int dT = 3;
-
+  const int d  = PRIMALORDER;
+  const int dT = DUALORDER;
+  
+  
+  
   //typedef DSBasis<2,2> Basis1D;
 #ifdef AGGREGATED
   typedef PBasis<d,dT> Basis1D;
@@ -107,10 +134,10 @@ int main()
 
   //##############################  
   Matrix<double> A(DIM,DIM);
-  A(0,0) = 2.;
+  A(0,0) = /*2.*/ 1.25;
   A(1,1) = 1.0;
   Point<2> b;
-  b[0] = -1.;
+  b[0] = /*-1.*/ -0.25;
   b[1] = -1.;
   AffineLinearMapping<2> affineP(A,b);
 
@@ -204,6 +231,10 @@ int main()
   CornerSingularityRHS singRhs(origin, 0.5, 1.5);
   CornerSingularity sing2D(origin, 0.5, 1.5);
   
+//  myRHS rhs1;
+//    
+//  PoissonBVP<DIM> poisson(&rhs1);
+  
   PoissonBVP<DIM> poisson(&singRhs);
   //PoissonBVP<DIM> poisson(&const_fun);
 
@@ -212,7 +243,25 @@ int main()
   SimpleEllipticEquation<Basis1D,DIM> discrete_poisson(&poisson, &frame, jmax);
 //  CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson/*, 5.0048, 1.0/0.01*/);
   CachedProblem<SimpleEllipticEquation<Basis1D,DIM> > problem(&discrete_poisson,1.,1.);
+  
+  Array1D<InfiniteVector<double, Index> > approximations(frame.n_p()+1);
+
+  
+
+  //steepest_descent_SOLVE(problem, epsilon, u_epsilon, approximations);
+  
+  clock_t tstart_sd, tend_sd;
+  double time_sd;
+  tstart_sd = clock();
+    steepest_descent_SOLVE(problem, epsilon, approximations);
+    tend_sd = clock();
+  time_sd = (double)(tend_sd-tstart_sd)/CLOCKS_PER_SEC;
+  cout << "  ... done, time needed for SD AGGREGATED: " << time_sd << " seconds" << endl;
+  
+//  abort();
+
 #endif
+  #if 1  
 #ifdef QUARKLET
   
     Frame1d frame1d(false,false);
@@ -235,191 +284,98 @@ int main()
 //    Frame2D frame(frame1d);
     Frame2D frame(&frame1d, &frame1d_11, &frame1d_01, &frame1d_10);
     frame.set_jpmax(jmax,pmax);
-    LDomainFrameEquation<Frame1d,Frame2D> discrete_poisson(&poisson, &frame, false);
+    LDomainFrameEquation<Frame1d,Frame2D> discrete_poisson(&poisson, &frame, true);
 //    discrete_poisson.set_jpmax(jmax,pmax);
 //    Frame2D frame = discrete_poisson.frame();
 //    
     
     CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame2D> > problem(&discrete_poisson, 1., 1.);
-#endif
+    
+    InfiniteVector<double, int> u_epsilon_int;
+    
+    clock_t tstart_sd, tend_sd;
+  double time_sd;
+  tstart_sd = clock();
+    steepest_descent_ks_QUARKLET_SOLVE(problem, epsilon, u_epsilon_int, tensor_simple, 2, 2);
+    tend_sd = clock();
+  time_sd = (double)(tend_sd-tstart_sd)/CLOCKS_PER_SEC;
+  cout << "  ... done, time needed for SD QUARKLET: " << time_sd << " seconds" << endl;
   
-
-  cout.precision(12);
-  
-  InfiniteVector<double,Frame2D::Index> rhs;
-  //Vector<double> v(225);
-  
-  set<Index> Lambda;
-  for (int i=0; i<frame.degrees_of_freedom();i++) {
-//  for (int i=0; i<817;i++) {    
-#ifdef AGGREGATED
-    Lambda.insert(*frame.get_wavelet(i));
-    //    cout << *frame.get_wavelet(i) << endl;
-#endif
-#ifdef QUARKLET
-//    if(((*(frame.get_quarklet(i))).k()[1]>1 && (*(frame.get_quarklet(i))).k()[1]<6) || (*(frame.get_quarklet(i))).p()[1]==0){
-//    if(i>=208){
-        Lambda.insert(*(frame.get_quarklet(i)));
-        cout << *(frame.get_quarklet(i)) << endl;
-//    }
-//    }
-//    cout << discrete_poisson.a(*(frame.get_quarklet(i)),*(frame.get_quarklet(i)))<<endl;
-#endif
-
-  }
 //  abort();
-  
-  
-//  for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
-//       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, jmax); ++lambda) {
-//    Lambda.insert(lambda);
-//    cout << lambda << endl;
-//  }
-  
-  
-  //Testin APPLY
-//  double epsilon = 1e-3;
-    InfiniteVector<double, Index> u_epsilon, v,w,Av,Av2,Avseq,Avopar,Avipar;
-    InfiniteVector<double, int> vint, Avint;
-    for(int i=0;i<frame.degrees_of_freedom();i++){
-#ifdef QUARKLET
-        v.set_coefficient(*(frame.get_quarklet(i)),1);
-        vint.set_coefficient(i,1);
-#endif
-#ifdef AGGREGATED
-        v.set_coefficient(*(frame.get_wavelet(i)),1);
-#endif      
-    }
-    
-    
-    
-
-cout << "setting up full stiffness matrix..." << endl;
-  SparseMatrix<double> stiff;
-  clock_t tstart, tend;
-  double time;
-  tstart = clock();
-//   WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff, false);
-  WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
-// WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff, false);
-//  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
-  
-    
-  
-  
-  tend = clock();
-  time = (double)(tend-tstart)/CLOCKS_PER_SEC;
-  cout << "  ... done, time needed: " << time << " seconds" << endl;
-
-  stiff.matlab_output("stiff_2D_out", "stiff",1); 
-//  cout << "Norm/InvNorm: " << problem.norm_A() << ", " << problem.norm_Ainv() << endl;
-  
-  
-  #if 0
-    cout<<"comparing APPLY"<<endl;
-    
-    clock_t tstart_apply, tend_apply;
-  double time_apply;
-  tstart_apply = clock();
-  for(int i=0;i<100;i++){
-#ifdef QUARKLET
-  
-    APPLY_QUARKLET(problem, vint, 1e-3, Avint, jmax, tensor_simple, pmax, 2,2);
-//    APPLY_QUARKLET(problem, vint, 1e-3, Av, jmax, tensor_simple, pmax, 2,2);
-        
-#endif
-#ifdef AGGREGATED
-    APPLY(problem, v, 1e-3, Av, jmax, CDD1);
-#endif  
-  }
-  tend_apply = clock();
-  time_apply = (double)(tend_apply-tstart_apply)/CLOCKS_PER_SEC;
-  cout << "  ... done, time needed for APPLY: " << time_apply << " seconds" << endl;
-  
-  
-  
-  abort();
-#endif
-  
- 
-  
-  cout << "setting up full right hand side..." << endl;
-  Vector<double> rh;
-  WaveletTL::setup_righthand_side(problem, Lambda, rh);
-  cout << rh << endl;
-  
-
-  
-  Vector<double> x(Lambda.size()); x = 1;
-  //double lmax = PowerIteration(stiff, x, 0.01, 1000, iter);
-  double lmax = 1;
-//  cout << "lmax = " << lmax << endl;
-
-  x = 1;
-  //double lmin = InversePowerIteration(stiff, x, 0.01, 1000, iter);
-  
-  cout << "performing iterative scheme to solve projected problem..." << endl;
-  Vector<double> xk(Lambda.size()), err(Lambda.size()); xk = 0;
-  
- 
-
-  //CG(stiff, rh, xk, 1.0e-6, 100, iter);
-  //cout << "CG iterations needed: "  << iter << endl;
-  //Richardson(stiff, rh, xk, 2. / lmax - 0.01, 0.0001, 2000, iter);
-  double alpha_n = 2. / lmax - 0.001;
-  
-  Vector<double> resid(xk.size());
-  Vector<double> help(xk.size());
-  for (int i = 0; i < 5000;i++) {
-    stiff.apply(xk,help);
-    resid = rh - help;
-    cout << "i = " << i << " " << sqrt(resid*resid) << endl;
-    stiff.apply(resid,help);
-    alpha_n = (resid * resid) * (1.0 / (resid * help));
-    resid *= alpha_n;
-    xk = xk + resid;
-  }
-
-  cout << "performing output..." << endl;
-  
-  
-  InfiniteVector<double,Frame2D::Index> u;
-  unsigned int i = 0;
-  for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i){
-//    if(i>=208 && i<800)
-    u.set_coefficient(*it, xk[i]);
-//    if(i==799) break;
+  InfiniteVector<double, Index> u_epsilon;
+  for (typename InfiniteVector<double,int>::const_iterator it(u_epsilon_int.begin()),
+ 	   itend(u_epsilon_int.end()); it != itend; ++it){
+        u_epsilon.set_coefficient(*(frame.get_quarklet(it.index())), *it);
   }
   
-//  cout << u << endl;
-  u.scale(&discrete_poisson,-1);
-  cout << "u_new: " << endl << u << endl;
+#endif
+  
+  
+  
+
   
 #ifdef AGGREGATED
-  Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, u, true, 6);//expand in primal basis
- 
+  for (int i = 0; i <= frame.n_p(); i++)
+    approximations[i].scale(&problem,-1);
+
+
+
+  Array1D<SampledMapping<2> > U = evalObj.evaluate(frame, approximations[frame.n_p()], true, 6);//expand in primal basis
   
-  std::ofstream ofs5("approx_solution_out.m");
+
+  
+
+  std::ofstream ofs5("adaptive_solution_out.m");
   matlab_output(ofs5,U);
+  ofs5 << "title('Adaptive solution to test problem (Aggregated Frame)');" << endl;
+  
   ofs5.close();
+  
 #endif
   
 #ifdef QUARKLET
-  
- Array1D<SampledMapping<2> > eval(3);
-    eval=frame.evaluate(u,6);
-    std::ofstream os2("approx_solution_out.m");
+  //  cout << u << endl;
+    u_epsilon.scale(&discrete_poisson,-1);
+//  cout << "u_new: " << endl << u_epsilon << endl;
+    Array1D<SampledMapping<2> > eval(3);
+    eval=frame.evaluate(u_epsilon,6);
+    std::ofstream os2("adaptive_solution_out.m");
     os2 << "figure\n" << endl;
     for(int i=0;i<3;i++){
         eval[i].matlab_output(os2);
         os2 << "surf(x,y,z);" << endl;
         os2 << "hold on;" << endl;
-    }  
+    } 
+    os2 << "title('Adaptive solution to test problem (Quarklet Frame), jmax=" << JMAX << ", pmax=" << PMAX << "');" << endl;
     os2 << "view(30,55);"<<endl;
     os2 << "hold off;" << endl;
 //    os2 << "figure;" << endl;
-    os2.close();  
+    os2.close(); 
+    
+    //new coefficients plot
+    u_epsilon.scale(&problem, 1);
+    std::ofstream coeff_stream;
+    coeff_stream.open("adaptive_coefficients.m");
+    //coeff_stream2 << "figure;" << endl;
+    MultiIndex<int,DIM> pstart;
+    MultiIndex<int,DIM> jstart;// start=basis1.j0();
+    MultiIndex<int,DIM> estart;
+    for (InfiniteVector<double, Index>::const_iterator it(u_epsilon.begin()); it != u_epsilon.end(); ++it){
+        Index lambda=it.index();
+        if(!(lambda.j()==jstart && lambda.e()==estart)){
+            //cout <<lambda.p()[0]<<lambda.p()[1]<< lambda.j()[0]-1+lambda.e()[0]<<lambda.j()[1]-1+lambda.e()[1] << endl;
+            jstart=lambda.j();
+            estart=lambda.e();
+            plot_indices(&frame, u_epsilon, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(jet)", false, true, -6);
+            //coeff_stream2 << "title('solution coefficients') " << endl;
+            //coeff_stream2 << "title(sprintf('coefficients on level (%i,%i)',"<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"));"<<endl;
+            coeff_stream<<"print('-djpg',sprintf('coeffs%i%i%i%i.jpg',"<<lambda.p()[0]<<","<<lambda.p()[1]<<","<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"))"<<endl;
+        }
+    }
+    coeff_stream.close();
+    cout << "coefficients plotted"<<endl;
 #endif
-  
+#endif
+  cout << "done plotting adaptive solution" << endl;
    return 0;
 }

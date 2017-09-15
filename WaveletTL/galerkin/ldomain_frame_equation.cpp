@@ -78,6 +78,7 @@ namespace WaveletTL
         cout << "LDomainFrameEquation(): precompute right-hand side..." << endl;
         // precompute the right-hand side on a fine level
         InfiniteVector<double,Index> fhelp;
+        InfiniteVector<double,int> fhelp_int;
         fnorm_sqr = 0; 
         double coeff;
         
@@ -110,6 +111,7 @@ namespace WaveletTL
             {
                 fhelp.set_coefficient(*(frame_->get_quarklet(i)), coeff);
                 fnorm_sqr += coeff*coeff;
+                fhelp_int.set_coefficient(i, coeff);
             }
         } 
 #endif
@@ -118,12 +120,18 @@ namespace WaveletTL
 //        cout<<"number of threads: "<<omp_get_num_threads()<<endl;
         // sort the coefficients into fcoeffs
         fcoeffs.resize(0); // clear eventual old values
+        fcoeffs_int.resize(0);
         fcoeffs.resize(fhelp.size());
-        unsigned int id(0);
+        fcoeffs_int.resize(fhelp_int.size());
+        unsigned int id(0), id2(0);
         for (typename InfiniteVector<double,Index>::const_iterator it(fhelp.begin()), itend(fhelp.end()); it != itend; ++it, ++id){
             fcoeffs[id] = std::pair<Index,double>(it.index(), *it);
         }
+        for (typename InfiniteVector<double,int>::const_iterator it(fhelp_int.begin()), itend(fhelp_int.end()); it != itend; ++it, ++id2){
+            fcoeffs_int[id2] = std::pair<int,double>(it.index(), *it);
+        }
         sort(fcoeffs.begin(), fcoeffs.end(), typename InfiniteVector<double,Index>::decreasing_order());
+        sort(fcoeffs_int.begin(), fcoeffs_int.end(), typename InfiniteVector<double,int>::decreasing_order());
         cout << "... done, all integrals for right-hand side computed!" << endl;
     }
 
@@ -259,7 +267,7 @@ namespace WaveletTL
     
         //setup gauss points
         //const int N_Gauss = (p+1)/2+(multi_degree(lambda.p()))/2;
-        const int N_Gauss=10;
+        const int N_Gauss=6;
         double h; // granularity for the quadrature
         FixedArray1D<Array1D<double>,space_dimension> gauss_points, gauss_weights, v_values;
 	
@@ -447,6 +455,22 @@ namespace WaveletTL
         double bound(fnorm_sqr - eta*eta);
         typename Array1D<std::pair<Index, double> >::const_iterator it(fcoeffs.begin());
         while (it != fcoeffs.end() && coarsenorm < bound){
+            coarsenorm += it->second * it->second;
+            coeffs.set_coefficient(it->first, it->second);
+            ++it;
+        } 
+    }
+    
+    template <class IFRAME, class LDOMAINFRAME>
+    void
+    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::RHS(const double eta,
+                                    InfiniteVector<double,int>& coeffs) const
+    {
+        coeffs.clear();
+        double coarsenorm(0);
+        double bound(fnorm_sqr - eta*eta);
+        typename Array1D<std::pair<int, double> >::const_iterator it(fcoeffs_int.begin());
+        while (it != fcoeffs_int.end() && coarsenorm < bound){
             coarsenorm += it->second * it->second;
             coeffs.set_coefficient(it->first, it->second);
             ++it;

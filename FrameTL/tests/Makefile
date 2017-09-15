@@ -72,6 +72,7 @@ test_apply_1D.o \
 test_apply.o \
 test_compute_dual_frame_elements.o\
 test_bilinear_speed.o\
+test_adaptive_speed.o\
 
 EXEOBJF2 = 
 
@@ -121,8 +122,8 @@ veryclean:: clean
 	rm -f *~
 
 $(EXEOBJF1): %.o: %.cpp
-#	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
-	$(CXX) $(CXXFLAGS) -c -o $@ $< 
+	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
+#	$(CXX) $(CXXFLAGS) -c -o $@ $< 
 
 $(EXES1): %: %.o
 #	$(CXX) $< -g -o $@

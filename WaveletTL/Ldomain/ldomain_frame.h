@@ -299,7 +299,7 @@ namespace WaveletTL
     *  Precomputed for speedup
     */
     Array1D<int> first_wavelet_numbers, last_wavelet_numbers;
-    Array1D<Array1D<int> > first_quarklet_numbers, last_quarklet_numbers, first_quark_numbers;
+//    Array1D<Array1D<int> > first_quarklet_numbers, last_quarklet_numbers, first_quark_numbers;
       
     //! Coarsest possible level j0
     level_type j0_;

@@ -243,7 +243,7 @@ namespace WaveletTL
         assert (space_dimension <= 2);// we only support dimensions up to 2
         
         double d1 = precond?D(lambda):1.0;
-        polynomial_type p;
+//        polynomial_type p;
         
         
         
@@ -264,7 +264,7 @@ namespace WaveletTL
 //            int lowestline = j0[0]+j0[1];
         int dist2j0=lambdaline-lowestline;
         int dist2maxlevel=maxlevel-lambdaline;
-        level_type currentlevel;
+        level_type currentlevel, leveldiffj0;
         polynomial_type currentpolynomial;
 
         int xstart,xend,ystart,subblocknumber;
@@ -283,7 +283,9 @@ namespace WaveletTL
             for (int steps = max(0,j0[0]-xstart); steps <= min(xend-xstart,ystart-j0[1]) ; steps++ )
             {
                 currentlevel[0]= xstart+steps;
+                leveldiffj0[0]=currentlevel[0]-frame().j0()[0];
                 currentlevel[1]= ystart-steps;
+                leveldiffj0[1]=currentlevel[1]-frame().j0()[1];
                 subblocknumber = currentlevel[0]-j0[0] + ((lambdaline-lowestline+offset)*(lambdaline-lowestline+offset+1))/2;
 
 
@@ -313,7 +315,27 @@ namespace WaveletTL
                         //mu = this->frame().first_quarklet(currentlevel, currentpolynomial);
                         // the result of the following call is that the cache holds the whole level subblock corresponding to all 
                         // quarklets with level and polynomial degree of mu
-                        a(this->frame().first_quarklet(currentlevel, currentpolynomial),lambda);
+//                        a(this->frame().first_quarklet(currentlevel, currentpolynomial),lambda);
+//                        cout << frame().first_quarklet(currentlevel, currentpolynomial) << endl;
+//                        
+                        a(*(frame().get_quarklet(frame().get_first_wavelet_numbers()[leveldiffj0.number()]+currentpolynomial.number() * frame().get_Nablasize())),lambda);
+//                        cout << (frame().get_first_wavelet_numbers()[0]) << endl;
+//                        cout << (frame().get_first_wavelet_numbers()[leveldiffj0.number()]) << endl;
+//                        leveldiffnumber = (int) currentlevel.number()-24;
+//                        cout << (*(frame().get_quarklet(frame().get_first_wavelet_numbers()[leveldiffnumber]))) << endl;
+//                        cout << currentlevel << endl;
+////                        cout << "Pause" << endl;
+////                        cout << *(frame().get_quarklet(208)) << endl;
+////                        int number = frame().get_first_wavelet_numbers()[currentlevel.number()-24];
+////                        cout << number << endl;
+//                        Index mu = *(frame().get_quarklet(208));
+//                        Index nu = frame().first_quarklet(currentlevel, currentpolynomial);
+//                        cout << nu << endl;
+//                        cout << mu << endl;
+////                          a(nu,lambda);
+//                        a(frame().first_quarklet(currentlevel, currentpolynomial),lambda);  
+                     
+//                        a(lambda,lambda);
 //                            cout << mu << endl;
 //                            int dist2p0 = multi_degree(lambda.p());
 //                            int blocknumber = currentpolynomial[0] + ((dist2p0+offset)*(dist2p0+offset+1))/2;;
@@ -326,7 +348,7 @@ namespace WaveletTL
                         for (typename Subblock::const_iterator it(subblock.begin()), itend(subblock.end()); it != itend; ++it)
                         {
                             // high caching strategy
-                            w[it->first]=w[it->first]+factor*(it->second)/( precond? (d1*D(this->frame().get_quarklet(it->first))):1.0);
+                            w[it->first]=w[it->first]+factor*(it->second)/( precond? (d1*D(*(frame().get_quarklet(it->first)))):1.0);
 
                             // low caching strategy
                             //w[it->first]=w[it->first]+factor*(it->second)/d1/(problem->D(this->frame().get_quarklet(it->first)));

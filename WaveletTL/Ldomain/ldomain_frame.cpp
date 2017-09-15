@@ -667,6 +667,7 @@ namespace WaveletTL
 //        cout << ind << ", " << ind.number() << endl;
         if(ind==first_quarklet(ind.j(),pmin,k)){
                 first_wavelet_numbers[waveletlevel]=k;
+                
 //                cout << "first: " << k << endl;
         }
         if(ind==last_quarklet(ind.j(),pmin,k)){

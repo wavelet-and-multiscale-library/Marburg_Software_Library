@@ -670,7 +670,7 @@ namespace WaveletTL
 #if PARALLEL==1
             add_compressed_column_quarklet(P, itk->second, itk->first, J-k, wwprivate, jmax, strategy, true);
 #else
-            add_compressed_column_quarklet(P, itk->second, itk->first, J-k, ww, jmax, strategy, true);
+            add_compressed_column_quarklet(P, itk->second, itk->first, J-k, ww, jmax, strategy, true, pmax, a, b);
 #endif
 //          cout << "Ende cc" << endl;
           //cout << ww << endl;
@@ -702,6 +702,222 @@ namespace WaveletTL
     }
 //    cout << "bin raus" << endl;
   }
+          
+          
+  template <class PROBLEM>
+  void APPLY_QUARKLET(const PROBLEM& P,
+	     const InfiniteVector<double,int>& v,
+	     const double eta,
+	     InfiniteVector<double,int>& w,
+	     const int jmax,
+	     const CompressionStrategy strategy,
+             const int pmax,
+             const double a,
+             const double b)
+  {
+      //cout << "AUSGEFÜHRT!: " << P.basis().degrees_of_freedom() << endl; @PHK
+//    typedef typename PROBLEM::Index Index;
+    
+    //cout << "bin drin" << endl;
+
+    w.clear();
+    // Binary Binning variant of APPLY from [S],[B]
+    // Remark: it is possible to perform binary binning without actually assembling
+    // the bins, however, in this first version we do setup the bins to avoid
+    // unnecessary difficulties
+    //cout << "entering apply..." << endl;
+
+    //cout << "size = " << v.size() << endl;
+    if (v.size() > 0) {
+//        cout << "v größer 0" << endl;
+      
+      // compute the number of bins V_0,...,V_q
+      const double norm_v_sqr = l2_norm_sqr(v);
+      const double norm_v = sqrt(norm_v_sqr);
+      const double norm_A = P.norm_A();
+      
+      const unsigned int q = (unsigned int) std::max(ceil(log(sqrt((double)v.size())*norm_v*norm_A*2/eta)/M_LN2), 0.);
+      // Setup the bins: The i-th bin contains the entries of v with modulus in the interval
+      // (2^{-(i+1)}||v||,2^{-i}||v||], 0 <= i <= q-1, the remaining elements (with even smaller modulus)
+      // are collected in the q-th bin.
+      Array1D<std::list<std::pair<int, double> > > bins(q+1);
+      for (typename InfiniteVector<double,int>::const_iterator it(v.begin());
+ 	   it != v.end(); ++it) {
+ 	const unsigned int i = std::min(q, (unsigned int)floor(-log(fabs(*it)/norm_v)/M_LN2));
+	bins[i].push_back(std::make_pair(it.index(), *it));
+        //cout << i << ", " << it.index() << ", " << *it << endl;
+      }
+      
+      // glue all the bins together
+      Array1D<std::pair<int, double> > v_binned(v.size());
+      for (unsigned int bin = 0, id = 0; bin <= q; bin++)
+	for (typename std::list<std::pair<int, double> >::const_iterator it(bins[bin].begin());
+	     it != bins[bin].end(); ++it, ++id)
+	  v_binned[id] = *it;
+
+      const double theta = 0.5;
+      // setup the segments v_{[0]},...,v_{[\ell]},
+      // \ell being the smallest number such that
+      //   ||A||*||v-\sum_{k=0}^\ell v_{[k]}|| <= theta * eta
+      // i.e.
+      //   ||v-\sum_{k=0}^\ell v_{[k]}||^2 <= eta^2 * theta^2 / ||A||^2
+      // see [S, (3.9)]
+      const double threshold = eta*eta*theta*theta/(norm_A*norm_A);
+      unsigned int id = 0, k = 0;
+      double error_sqr = norm_v_sqr;
+      typename std::list<std::list<std::pair<int, double> > > vks;
+      typename std::list<double> vks_norm;
+      std::vector<int> vksize;          //for parallelization
+      while (true) {
+	// setup the k-th segment v_{[k]}
+          vksize.resize(vksize.size()+1);
+	std::list<std::pair<int, double> > vk;
+	double vk_norm_sqr = 0;
+	for (unsigned int n = 1; error_sqr > threshold && id < v.size() && n <= ldexp(1.0, k)-floor(ldexp(1.0, k-1)); n++, id++) {
+	  vk.push_back(v_binned[id]);
+          //vksize[k]++;
+	  const double help = v_binned[id].second * v_binned[id].second;
+	  error_sqr -= help;
+	  vk_norm_sqr += help;
+	}
+//        cout<<"k="<<k<<endl;
+//        cout<<"vksize: "<<vk.size()<<endl;
+        vksize[k]=vk.size();
+	vks.push_back(vk);
+	vks_norm.push_back(sqrt(vk_norm_sqr));
+	if (error_sqr <= threshold || id >= v.size()) break; // in this case, ell=k
+	k++;
+        
+      }
+      const unsigned int ell = k;
+      // compute the smallest J >= ell, such that
+      //   \sum_{k=0}^{\ell} alpha_{J-k}*2^{-s(J-k)}*||v_{[k]}|| <= (1-theta) * eta
+      unsigned int J = ell;
+      const double s = P.s_star();
+      while (true) {
+	double check = 0.0;
+	unsigned int k = 0;
+	for (std::list<double>::const_iterator it(vks_norm.begin()); k <= ell; ++it, ++k)
+	  check += P.alphak(J-k) * pow(ldexp(1.0,J-k),-s) * (*it);
+	if (check <= (1-theta)*eta) break;
+	J++;
+      }
+
+//      cout << "ell: " << ell << endl;
+//      cout << "J: " << J << endl;
+//      J-=5;
+//      cout << "J = " << J << endl; //maybe J is too big, and that is the reason for the enormous amount of Degrees of freedom @PHK
+ //     cout << 1 << endl;
+
+      // hack: We let 'add_compressed_column' and 'add_level'
+      // in cached_problem.cpp/.h work on full vectors. We do this because the call of 
+      // 'w.add_coefficient();' in 'add_level' is inefficient. 
+      // Below we will then copy ww into the sparse vector w.
+      // Probably this will be handled in a more elegant way in the near future.
+
+      //cout << "done binning in apply..." << endl;
+
+      Vector<double> ww(P.frame().degrees_of_freedom());
+      //Vector<double> wwhelp(P.frame().degrees_of_freedom());
+      //cout << ww<<endl;
+ //     cout << "AUSGEFÜHRT PART2: " << P.basis().degrees_of_freedom() << endl;//HIER WEITERMACHEN @PHK
+      //cout << *(P.basis().get_wavelet(4000)) << endl;
+      // compute w = \sum_{k=0}^\ell A_{J-k}v_{[k]}
+//      for(int i=0;i<vksize.size();i++) cout<<vksize[i]<<endl;
+#if PARALLEL==1
+      //outer loop parallelization
+//#pragma omp parallel
+//{       
+//          if(omp_get_thread_num()==0)
+//            cout<<"number of threads: "<<omp_get_num_threads()<<endl;
+//          Vector<double> wwprivate(P.frame().degrees_of_freedom());        
+//          #pragma omp for
+//      for(k=0;k<ell;k++){
+//          typename std::list<std::list<std::pair<Index, double> > >::const_iterator it(vks.begin());
+//          advance(it, k); 
+//          unsigned int z = 0;
+//            for (typename std::list<std::pair<Index, double> >::const_iterator itk(it->begin());
+//	     itk != it->end(); ++itk,++z) {
+          
+          //inner loop parallelization
+          k = 0;
+          for (typename std::list<std::list<std::pair<int, double> > >::const_iterator it(vks.begin());
+	      k <= ell; ++it, ++k) {
+//              cout <<vksize[k]<<endl;
+//              int my_num_threads = (vksize[k]>=64) ? 8 : 1;
+#pragma omp parallel //num_threads(my_num_threads)
+{
+//            if(omp_get_thread_num()==0)
+//                cout<<"number of threads: "<<omp_get_num_threads()<<endl;
+            Vector<double> wwprivate(P.frame().degrees_of_freedom()); 
+            unsigned int z = 0;
+#pragma omp for
+            for(int z=0;z<vksize[k];z++){
+              typename std::list<std::pair<int, double> >::const_iterator itk(it->begin());
+              advance(itk,z);          
+              
+            //collapse parallelization
+//#pragma omp parallel
+//{
+//            Vector<double> wwprivate(P.frame().degrees_of_freedom()); 
+//#pragma omp for collapse(2)
+//            for(int k=0;k<ell;k++){
+//                typename std::list<std::list<std::pair<Index, double> > >::const_iterator it(vks.begin());
+//                advance(it, k);
+//                for(int z=0;z<vksize[k];z++){
+//                    typename std::list<std::pair<Index, double> >::const_iterator itk(it->begin());
+//                    advance(itk,z);
+#else
+      k = 0;
+      for (typename std::list<std::list<std::pair<int, double> > >::const_iterator it(vks.begin());
+	   k <= ell; ++it, ++k) {
+           unsigned int z = 0;
+            for (typename std::list<std::pair<int, double> >::const_iterator itk(it->begin());
+	     itk != it->end(); ++itk,++z) {
+#endif
+          //  Vector<double> wwhelp(P.frame().degrees_of_freedom());
+	  //add_compressed_column(P, itk->second, itk->first, J-k, ww, jmax, strategy);
+//            cout << "J-k = " << J-k << endl;
+//            cout << "addcompressed wird ausgeführt" << endl;
+//            cout << itk->second << ", " << itk->first << endl;
+            //cout << "Beginn cc" << endl;
+           // add_compressed_column_quarklet(P, itk->second, itk->first, J-k, ww, jmax, strategy, true, pmax, a, b);
+           //Vector<double> wwhelp(P.frame().degrees_of_freedom());
+#if PARALLEL==1
+            add_compressed_column_quarklet(P, itk->second, itk->first, J-k, wwprivate, jmax, strategy, true);
+#else
+            add_compressed_column_quarklet(P, itk->second, *(P.frame().get_quarklet(itk->first)), J-k, ww, jmax, strategy, true, pmax, a, b);
+#endif
+//          cout << "Ende cc" << endl;
+          //cout << ww << endl;
+	  //z++;
+	}
+//        cout<<"z="<<z<<":"<<vksize[k]<<endl;
+           //outer loop or collapse parallelization
+//      }
+#if PARALLEL==1
+#pragma omp critical
+{
+        for(int i=0;i<ww.size();i++){
+            ww(i)+=wwprivate(i);
+        }
+}
+} 
+#endif
+      //inner loop parallelization
+       }
+//      cout<<"k= "<<k<<endl;
+//          cout<<"vksize="<<vksize<<endl;
+//      cout << "copying vector" << endl;
+      // copy ww into w
+      for (unsigned int i = 0; i < ww.size(); i++) {
+	if (ww[i] != 0.) {
+	  w.set_coefficient(i, ww[i]);
+	}
+      }
+    }
+//    cout << "bin raus" << endl;
+  }        
       
       template <class PROBLEM>
   void APPLY_QUARKLET_SEQUENTIAL(const PROBLEM& P,
@@ -1363,6 +1579,41 @@ namespace WaveletTL
       zeta /= 2.;
       P.RHS (zeta/2., tilde_r);
       InfiniteVector<double, typename PROBLEM::Index> help;
+      //APPLY(P, w, .0/*zeta/2.*/, help, jmax, strategy);
+      APPLY_QUARKLET_COARSE(P, w, zeta/2., help, jmax, strategy, pmax, a, b, 1.0e-6);
+      //APPLY_COARSE(P, w, zeta/2., help, 0.5, jmax, strategy);
+      tilde_r -= help;
+      l2n = l2_norm(tilde_r);
+      nu = l2n + zeta;
+      ++niter;
+    }
+    while ( (nu > epsilon) && (zeta > delta*l2n) );
+    
+  }
+  
+  template <class PROBLEM>
+  void RES_QUARKLET(const PROBLEM& P,
+	   const InfiniteVector<double, int>& w,
+	   const double xi,
+	   const double delta,
+	   const double epsilon,
+	   const int jmax,
+	   InfiniteVector<double, int>& tilde_r,
+	   double& nu,
+	   unsigned int& niter,
+	   const CompressionStrategy strategy,
+           const int pmax,
+           const double a,
+           const double b
+	   )
+  {
+    //    unsigned int k = 0;
+    double zeta = 2.*xi;
+    double l2n = 0.;
+    do {
+      zeta /= 2.;
+      P.RHS (zeta/2., tilde_r);
+      InfiniteVector<double, int> help;
       //APPLY(P, w, .0/*zeta/2.*/, help, jmax, strategy);
       APPLY_QUARKLET_COARSE(P, w, zeta/2., help, jmax, strategy, pmax, a, b, 1.0e-6);
       //APPLY_COARSE(P, w, zeta/2., help, 0.5, jmax, strategy);

@@ -39,6 +39,12 @@ namespace WaveletTL
   void steepest_descent_ks_QUARKLET_SOLVE(const PROBLEM& P, const double epsilon,
 			      InfiniteVector<double, typename PROBLEM::Index>& approximations,
                               const CompressionStrategy strategy = DKR, const double a = 2, const double b = 2);
+  
+  template <class PROBLEM>
+  void steepest_descent_ks_QUARKLET_SOLVE(const PROBLEM& P, const double epsilon,
+			      InfiniteVector<double, int>& approximations,
+                              const CompressionStrategy strategy = DKR, const double a = 2, const double b = 2);
+  
 }
 
 #include <adaptive/steepest_descent_ks.cpp>

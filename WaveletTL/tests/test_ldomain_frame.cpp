@@ -3,6 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 #undef DYADIC
 #define ENERGY
 
@@ -15,7 +16,7 @@
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
-#define JMAX 7
+#define JMAX 6
 #define PMAX 0
 #define TWO_D
 

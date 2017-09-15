@@ -197,6 +197,7 @@ namespace WaveletTL
     //     if (P.local_operator())
         if (strategy == tensor_simple)
         {
+//            printf("entering add_compressed_column \n");
             // Strategy from [DSS] (works also for biorthogonal bases)
             // take all (indizes in all) levels nu with ||nu-lambda||_1 <= J
             // additionally demand ||nu||_1 <= jmax to limit computational effort

@@ -93,7 +93,7 @@ int main(){
     const int dT = 3;
     const int dim = 2;
     const int jmax=6;
-    const int pmax=0;
+    const int pmax=1;
     typedef PQFrame<d,dT> Frame1d;
     //Frame1d frame1d(false,false);
     typedef LDomainFrame<Frame1d> Frame;
@@ -205,14 +205,16 @@ int main(){
     
 #if 1
     //cout << "bin hier"<<endl;
-    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq,66,23);
-//    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq);
+//    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq,66,23);
+    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq);
 //    cout<<"hallo"<<endl;
-//    cout<<"normA="<<cproblem1.norm_A()<<endl;
-//    cout<<"normAinv="<<cproblem1.norm_Ainv()<<endl;
-//    
-//    InfiniteVector<double, Index> F_eta; 
-//    cproblem1.RHS(1e-6, F_eta);
+
+    cout<<"normA="<<cproblem1.norm_A()<<endl;
+    cout<<"normAinv="<<cproblem1.norm_Ainv()<<endl;
+    
+    InfiniteVector<double, Index> F_eta;
+    cproblem1.RHS(1e-6, F_eta);
+
 #if 0 //compare rhs
     std::ofstream stream1;
 #if PARALLEL==1

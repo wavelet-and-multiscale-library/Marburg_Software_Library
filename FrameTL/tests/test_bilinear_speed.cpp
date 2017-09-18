@@ -1,12 +1,12 @@
 #define TWO_D
 #define PARALLEL 0
 
-#undef QUARKLET
-#define AGGREGATED
+#define QUARKLET
+#undef AGGREGATED
 
 #undef DYADIC
-#undef TRIVIAL
-#define ENERGY
+#define TRIVIAL
+#undef ENERGY
 
 #define _DIM 2
 
@@ -78,16 +78,44 @@ using namespace std;
 using namespace MathTL;
 using namespace WaveletTL;
 
+class myRHS
+  : public Function<2,double>
+{
+public:
+  virtual ~myRHS() {};
+  double value(const Point<2>& p, const unsigned int component = 0) const {
+    CornerSingularityRHS csrhs(Point<2>(0,0), 0.5, 1.5);
+    return 2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1])/*+5*csrhs.value(p)*/;
+  }
+  void vector_value(const Point<2>& p, Vector<double>& values) const {
+    values[0] = value(p);
+  }
+};
+
+class mySolution
+  : public Function<2,double>
+{
+public:
+  virtual ~mySolution() {};
+  double value(const Point<2>& p, const unsigned int component = 0) const {
+    CornerSingularity cs(Point<2>(0,0), 0.5, 1.5);
+    return /*sin(M_PI*p[0])*sin(M_PI*p[1])+*/5*cs.value(p);
+  }
+  void vector_value(const Point<2>& p, Vector<double>& values) const {
+    values[0] = value(p);
+  }
+};
+
 int main()
 {
   
   cout << "Testing class SimpleEllipticEquation..." << endl;
   
   const int DIM = 2;
-  const int jmax = 6;
+  const int jmax = 7;
   
 #ifdef QUARKLET
-  const int pmax = 1;
+  const int pmax = 0;
 #endif
 //  const int jmax1d=jmax-j0;
 
@@ -205,6 +233,11 @@ int main()
   CornerSingularity sing2D(origin, 0.5, 1.5);
   
   PoissonBVP<DIM> poisson(&singRhs);
+//  mySolution rhs;
+//  myRHS rhs;
+//    
+//  PoissonBVP<DIM> poisson(&rhs);
+  
   //PoissonBVP<DIM> poisson(&const_fun);
 
   // BiharmonicBVP<DIM> biahrmonic(&singRhs);
@@ -240,18 +273,18 @@ int main()
 //    Frame2D frame = discrete_poisson.frame();
 //    
     
-    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame2D> > problem(&discrete_poisson, 1., 1.);
+//    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame2D> > problem(&discrete_poisson, 1., 1.);
 #endif
   
 
   cout.precision(12);
   
-  InfiniteVector<double,Frame2D::Index> rhs;
+//  InfiniteVector<double,Frame2D::Index> rhs;
   //Vector<double> v(225);
   
   set<Index> Lambda;
   for (int i=0; i<frame.degrees_of_freedom();i++) {
-//  for (int i=0; i<817;i++) {    
+//  for (int i=0; i<928;i++) {    
 #ifdef AGGREGATED
     Lambda.insert(*frame.get_wavelet(i));
     //    cout << *frame.get_wavelet(i) << endl;
@@ -300,9 +333,9 @@ cout << "setting up full stiffness matrix..." << endl;
   double time;
   tstart = clock();
 //   WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff, false);
-  WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
+//  WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
 // WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff, false);
-//  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
+  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
   
     
   
@@ -345,27 +378,30 @@ cout << "setting up full stiffness matrix..." << endl;
   
   cout << "setting up full right hand side..." << endl;
   Vector<double> rh;
-  WaveletTL::setup_righthand_side(problem, Lambda, rh);
+//  WaveletTL::setup_righthand_side(problem, Lambda, rh);
+  WaveletTL::setup_righthand_side(discrete_poisson, Lambda, rh);
   cout << rh << endl;
   
 
   
-  Vector<double> x(Lambda.size()); x = 1;
+//  Vector<double> x(Lambda.size()); x = 1;
   //double lmax = PowerIteration(stiff, x, 0.01, 1000, iter);
   double lmax = 1;
 //  cout << "lmax = " << lmax << endl;
 
-  x = 1;
+//  x = 1;
   //double lmin = InversePowerIteration(stiff, x, 0.01, 1000, iter);
   
   cout << "performing iterative scheme to solve projected problem..." << endl;
   Vector<double> xk(Lambda.size()), err(Lambda.size()); xk = 0;
   
  
-
-  //CG(stiff, rh, xk, 1.0e-6, 100, iter);
-  //cout << "CG iterations needed: "  << iter << endl;
-  //Richardson(stiff, rh, xk, 2. / lmax - 0.01, 0.0001, 2000, iter);
+//unsigned int iter;
+//  CG(stiff, rh, xk, 1.0e-6, 5000, iter);
+//  cout << "CG iterations needed: "  << iter << endl;
+  
+//  Richardson(stiff, rh, xk, 2. / lmax - 0.01, 0.0001, 2000, iter);
+//  cout << "Iterations: " << iter << endl;
   double alpha_n = 2. / lmax - 0.001;
   
   Vector<double> resid(xk.size());
@@ -418,7 +454,7 @@ cout << "setting up full stiffness matrix..." << endl;
     os2 << "view(30,55);"<<endl;
     os2 << "hold off;" << endl;
 //    os2 << "figure;" << endl;
-    os2.close();  
+    os2.close(); 
 #endif
   
    return 0;

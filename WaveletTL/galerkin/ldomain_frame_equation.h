@@ -33,9 +33,9 @@ namespace WaveletTL
     
       Au = D^{-1}LD^{-1}u = D^{-1}F
 
-    when reformulating an elliptic boundary value problem on the L--shaped domain
+    when reformulating an poisson boundary value problem on the L--shaped domain
     
-      -div(a(x)grad u(x)) + q(x)u(x) = f(x)
+      -div(grad u(x)) = f(x)
 
     with first order b.c.'s as an equivalent operator equation
     within \ell_2 by means of a quarklet frame.
@@ -46,7 +46,7 @@ namespace WaveletTL
 
     is
 
-      a(u,v) = \int_Omega [a(x)grad u(x)grad v(x)+q(x)u(x)v(x)] dx
+      a(u,v) = \int_Omega [grad u(x)grad v(x)] dx
       
     and the right-hand side is
  

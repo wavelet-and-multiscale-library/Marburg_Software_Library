@@ -170,7 +170,7 @@ namespace WaveletTL
     LDomainFrameEquation<IFRAME, LDOMAINFRAME>::a(const Index& lambda,
 			     const Index& nu) const
     {
-        return a(lambda, nu, IFRAME::primal_polynomial_degree()*IFRAME::primal_polynomial_degree());
+        return a(lambda, nu, 2 * IFRAME::primal_polynomial_degree());
     }
 
     template <class IFRAME, class LDOMAINFRAME>
@@ -191,6 +191,8 @@ namespace WaveletTL
              int N_Gauss [2];
              N_Gauss[0] = (p+1)/2+(lambda->p()[0]+mu->p()[0]+1)/2;
              N_Gauss[1] = (p+1)/2+(lambda->p()[1]+mu->p()[1]+1)/2;
+//             N_Gauss[0] = 6;
+//             N_Gauss[1] = 6;
              
         
         // loop over spatial direction

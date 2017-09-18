@@ -10,13 +10,18 @@
 #undef NONADAPTIVE
 #define ADAPTIVE
 
+#ifdef ADAPTIVE
+#define SD
+#undef CDD2
+#endif
+
 #define PARALLEL 0
 
 #define FRAME
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
-#define JMAX 6
+#define JMAX 7
 #define PMAX 0
 #define TWO_D
 
@@ -59,7 +64,7 @@ public:
   virtual ~myRHS() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
     CornerSingularityRHS csrhs(Point<2>(0,0), 0.5, 1.5);
-    return /*2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1])+*/5*csrhs.value(p);
+    return 2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1])+5*csrhs.value(p);
   }
   void vector_value(const Point<2>& p, Vector<double>& values) const {
     values[0] = value(p);
@@ -73,7 +78,7 @@ public:
   virtual ~mySolution() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
     CornerSingularity cs(Point<2>(0,0), 0.5, 1.5);
-    return /*sin(M_PI*p[0])*sin(M_PI*p[1])+*/5*cs.value(p);
+    return sin(M_PI*p[0])*sin(M_PI*p[1])+5*cs.value(p);
   }
   void vector_value(const Point<2>& p, Vector<double>& values) const {
     values[0] = value(p);
@@ -299,35 +304,50 @@ int main(){
 //    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq);
 
 //    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 119, 25);
+#ifdef SD
     CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
+#endif
+#ifdef CDD2
+    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 43, 9);
 //    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 5.3, 46.3);
+#endif
     
 
     cout<<"normA: "<<cproblem1.norm_A()<<endl;
     cout<<"normAinv: "<<cproblem1.norm_Ainv()<<endl;
     
-#if 1 //for parallel test    
-//    InfiniteVector<double, Index> F_eta;
-//    cproblem1.RHS(1e-6, F_eta);
-//    const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
-    double epsilon = 1e-3;
+#if 1 //for parallel test 
+#ifdef CDD2
+    InfiniteVector<double, Index> F_eta;
+    cproblem1.RHS(1e-6, F_eta);
+    const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
+#endif
+    
 //    double epsilon = 10;
-    InfiniteVector<double, Index> u_epsilon, v;
-    InfiniteVector<double, int> u_epsilon_int;
+    InfiniteVector<double, Index> u_epsilon;
+    
     const double a=2;
     const double b=2;
+    double epsilon = 1e-3;
     
     tic=clock();
-//    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b);
+#ifdef CDD2
+    const char* scheme_type = "CDD2";
+    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b);
+#endif
 //    DUV_QUARKLET_SOLVE_SD(cproblem1, nu, epsilon, u_epsilon, tensor_simple, pmax, jmax, a, b);
 //    steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon, tensor_simple, 2, 2);
-    steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon_int, tensor_simple, 2, 2);
+#ifdef SD
+    const char* scheme_type = "SD";
+    InfiniteVector<double, int> u_epsilon_int;
+    steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon_int, tensor_simple, a, b);
+#endif
     toc = clock();
     time = (double)(toc-tic);
     cout << "Time taken: " << (time/CLOCKS_PER_SEC) << " s\n"<<endl;
     cout << "fertig" << endl;
 //    abort();
-#if 1
+#ifdef SD
     for (typename InfiniteVector<double,int>::const_iterator it(u_epsilon_int.begin()),
  	   itend(u_epsilon_int.end()); it != itend; ++it){
         u_epsilon.set_coefficient(*(frame.get_quarklet(it.index())), *it);
@@ -355,7 +375,8 @@ int main(){
         os2 << "surf(x,y,z);" << endl;
         os2 << "hold on;" << endl;
     }  
-    os2 << "title('Ldomain Poisson Equation: adaptive solution to test problem ');" << endl;
+    os2 << "title('Ldomain Poisson Equation: adaptive solution to test problem ("
+            << scheme_type << "), " << "pmax= " << pmax << ", jmax= " << jmax << ", d= " << d << ", dT= " << dT << "');" << endl;
     os2 << "view(30,55);"<<endl;
     os2 << "hold off" << endl;
     os2.close();

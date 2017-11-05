@@ -8,60 +8,90 @@ namespace WaveletTL
   // the different values of j0 for the available spline wavelet bases
 
   template <>
-  const int
-  SplineBasisData_j0<2,2,DS_construction_bio5,0,0,0,0>::j0 = 3; // 2 does not work with composite bases
+  struct SplineBasisData_j0<2,2,DS_construction_bio5,0,0,0,0>
+  {
+    static const int j0 = 3; // 2 does not work with composite bases
+  };
 
   template <>
-  const int
-  SplineBasisData_j0<2,2,DS_construction_bio5e,0,0,0,0>::j0 = 3; // 2 does not work with composite bases
+  struct SplineBasisData_j0<2,2,DS_construction_bio5e,0,0,0,0>
+  {
+    static const int j0 = 3; // 2 does not work with composite bases
+  };
 
   template <>
-  const int
-  SplineBasisData_j0<3,3,DS_construction_bio5,0,0,0,0>::j0 = 4;
+  struct SplineBasisData_j0<3,3,DS_construction_bio5,0,0,0,0>
+  {
+    static const int j0 = 4;
+  };
 
   template <>
-  const int
-  SplineBasisData_j0<3,3,DS_construction_bio5e,0,0,0,0>::j0 = 4;
+  struct SplineBasisData_j0<3,3,DS_construction_bio5e,0,0,0,0>
+  {
+    static const int j0 = 4;
+  };
 
   template <>
-  const int
-  SplineBasisData_j0<1,1,P_construction,0,0,0,0>::j0 = 1; // for technical reasons, QuasiStationaryMatrix should have at least 2 columns
+  struct SplineBasisData_j0<1,1,P_construction,0,0,0,0>
+  {
+    static const int j0 = 1; // for technical reasons, QuasiStationaryMatrix should have at least 2 columns
+  };
 
   template <>
-  const int
-  SplineBasisData_j0<1,3,P_construction,0,0,0,0>::j0 = 3;
+  struct SplineBasisData_j0<1,3,P_construction,0,0,0,0>
+  {
+    static const int j0 = 3;
+  };
 
   template <>
-  const int
-  SplineBasisData_j0<2,2,P_construction,0,0,0,0>::j0 = 2;
+  struct SplineBasisData_j0<2,2,P_construction,0,0,0,0>
+  {
+    static const int j0 = 2;
+  };
 
   template <>
-  const int
-  SplineBasisData_j0<2,2,P_construction,1,0,0,0>::j0 = 2;
+  struct SplineBasisData_j0<2,2,P_construction,1,0,0,0>
+  {
+    static const int j0 = 2;
+  };
 
   template <>
-  const int
-  SplineBasisData_j0<2,2,P_construction,0,1,0,0>::j0 = 2;
+  struct SplineBasisData_j0<2,2,P_construction,0,1,0,0>
+  {
+    static const int j0 = 2;
+  };
 
   template <>
-  const int
-  SplineBasisData_j0<2,2,P_construction,1,1,0,0>::j0 = 3;
+  struct SplineBasisData_j0<2,2,P_construction,1,1,0,0>
+  {
+    static const int j0 = 3;
+  };
 
   template <>
-  const int
-  SplineBasisData_j0<3,3,P_construction,0,0,0,0>::j0 = 3;
+  struct SplineBasisData_j0<3,3,P_construction,0,0,0,0>
+  {
+    static const int j0 = 3;
+  };
 
   template <>
-  const int
-  SplineBasisData_j0<3,3,P_construction,1,0,0,0>::j0 = 3;
+  struct SplineBasisData_j0<3,3,P_construction,1,0,0,0>
+  {
+    static const int j0 = 3;
+  };
 
   template <>
-  const int
-  SplineBasisData_j0<3,3,P_construction,0,1,0,0>::j0 = 3;
+  struct SplineBasisData_j0<3,3,P_construction,0,1,0,0>
+  {
+    static const int j0 = 3;
+  };
 
   template <>
-  const int
-  SplineBasisData_j0<3,3,P_construction,1,1,0,0>::j0 = 3;
+  struct SplineBasisData_j0<3,3,P_construction,1,1,0,0>
+  {
+    static const int j0 = 3;
+  };
+
+
 
 
   //
@@ -292,6 +322,7 @@ namespace WaveletTL
   // some precomputed data for DS bases
 
   template <>
+  inline
   SplineBasisData<2,2,DS_construction_bio5,0,0,0,0>::SplineBasisData()
   {
     const int j0 = SplineBasisData_j0<2,2,DS_construction_bio5,0,0,0,0>::j0;
@@ -355,7 +386,9 @@ namespace WaveletTL
     CRAT_ = CLAT_;
   }
 
+
   template <>
+  inline
   SplineBasisData<2,2,DS_construction_bio5e,0,0,0,0>::SplineBasisData()
   {
     const int j0 = SplineBasisData_j0<2,2,DS_construction_bio5e,0,0,0,0>::j0;
@@ -419,7 +452,9 @@ namespace WaveletTL
     CRAT_ = CLAT_;
   }
 
+
   template <>
+  inline
   SplineBasisData<3,3,DS_construction_bio5,0,0,0,0>::SplineBasisData()
   {
     const int j0 = SplineBasisData_j0<3,3,DS_construction_bio5,0,0,0,0>::j0;
@@ -533,7 +568,9 @@ namespace WaveletTL
     CRAT_ = CLAT_;
   }
 
+
   template <>
+  inline
   SplineBasisData<3,3,DS_construction_bio5e,0,0,0,0>::SplineBasisData()
   {
     const int j0 = SplineBasisData_j0<3,3,DS_construction_bio5e,0,0,0,0>::j0;
@@ -654,6 +691,7 @@ namespace WaveletTL
   // some precomputed data for P bases
 
   template <>
+  inline
   SplineBasisData<1,1,P_construction,0,0,0,0>::SplineBasisData()
   {
     const int j0 = SplineBasisData_j0<1,1,P_construction,0,0,0,0>::j0;
@@ -674,7 +712,9 @@ namespace WaveletTL
     CDF_factor = 1.0;
   }
 
+
   template <>
+  inline
   SplineBasisData<1,3,P_construction,0,0,0,0>::SplineBasisData()
   {
     const int j0 = SplineBasisData_j0<1,3,P_construction,0,0,0,0>::j0;
@@ -719,7 +759,9 @@ namespace WaveletTL
     CDF_factor = 1.0;
   }
 
+
   template <>
+  inline
   SplineBasisData<2,2,P_construction,0,0,0,0>::SplineBasisData()
   {
     const int j0 = SplineBasisData_j0<2,2,P_construction,0,0,0,0>::j0;
@@ -741,7 +783,9 @@ namespace WaveletTL
     CDF_factor = -0.5;
   }
 
+
   template <>
+  inline
   SplineBasisData<2,2,P_construction,1,1,0,0>::SplineBasisData()
   {
     const int j0 = SplineBasisData_j0<2,2,P_construction,1,1,0,0>::j0;
@@ -763,7 +807,9 @@ namespace WaveletTL
     CDF_factor = -0.5;
   }
 
+
   template <>
+  inline
   SplineBasisData<2,2,P_construction,1,0,0,0>::SplineBasisData()
   {
     const int j0 = SplineBasisData_j0<2,2,P_construction,1,0,0,0>::j0;
@@ -786,7 +832,9 @@ namespace WaveletTL
     CDF_factor = -0.5;
   }
 
+
   template <>
+  inline
   SplineBasisData<2,2,P_construction,0,1,0,0>::SplineBasisData()
   {
     const int j0 = SplineBasisData_j0<2,2,P_construction,0,1,0,0>::j0;
@@ -809,7 +857,9 @@ namespace WaveletTL
     CDF_factor = -0.5;
   }
 
+
   template <>
+  inline
   SplineBasisData<3,3,P_construction,0,0,0,0>::SplineBasisData()
   {
     const int j0 = SplineBasisData_j0<3,3,P_construction,0,0,0,0>::j0;
@@ -863,7 +913,9 @@ namespace WaveletTL
     CDF_factor = 1./3.;
   }
 
+
   template <>
+  inline
   SplineBasisData<3,3,P_construction,1,0,0,0>::SplineBasisData()
   {
     const int j0 = SplineBasisData_j0<3,3,P_construction,1,0,0,0>::j0;
@@ -924,7 +976,9 @@ namespace WaveletTL
     CDF_factor = 1./3.;
   }
 
+
   template <>
+  inline
   SplineBasisData<3,3,P_construction,0,1,0,0>::SplineBasisData()
   {
     const int j0 = SplineBasisData_j0<3,3,P_construction,0,1,0,0>::j0;
@@ -985,7 +1039,9 @@ namespace WaveletTL
     CDF_factor = 1./3.;
   }
 
+
   template <>
+  inline
   SplineBasisData<3,3,P_construction,1,1,0,0>::SplineBasisData()
   {
     const int j0 = SplineBasisData_j0<3,3,P_construction,1,1,0,0>::j0;

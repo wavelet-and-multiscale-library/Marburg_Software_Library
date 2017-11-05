@@ -55,6 +55,7 @@ namespace WaveletTL
   // some fast template specializations without reconstruct_1() calls
 
   template <>
+  inline
   double
   CDFBasis<1,1>::evaluate(const unsigned int derivative,
  			  const RIndex& lambda,
@@ -75,6 +76,7 @@ namespace WaveletTL
   }
   
   template <>
+  inline
   double
   CDFBasis<1,3>::evaluate(const unsigned int derivative,
 			  const RIndex& lambda,
@@ -105,6 +107,7 @@ namespace WaveletTL
   }
   
   template <>
+  inline
   double
   CDFBasis<1,5>::evaluate(const unsigned int derivative,
 			  const RIndex& lambda,
@@ -139,6 +142,7 @@ namespace WaveletTL
   }
 
   template <>
+  inline
   double
   CDFBasis<2,2>::evaluate(const unsigned int derivative,
  			  const RIndex& lambda,
@@ -194,6 +198,7 @@ namespace WaveletTL
     }
   
   template <>
+  inline
   double
   CDFBasis<2,4>::evaluate(const unsigned int derivative,
  			  const RIndex& lambda,
@@ -259,6 +264,7 @@ namespace WaveletTL
   }
   
   template <>
+  inline
   double
   CDFBasis<3,3>::evaluate(const unsigned int derivative,
  			  const RIndex& lambda,
@@ -366,6 +372,7 @@ namespace WaveletTL
   }
   
   template <>
+  inline
   double
   CDFBasis<3,5>::evaluate(const unsigned int derivative,
  			  const RIndex& lambda,

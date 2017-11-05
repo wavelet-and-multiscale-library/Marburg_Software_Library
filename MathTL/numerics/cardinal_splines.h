@@ -58,6 +58,7 @@ namespace MathTL
     (fastest possible variant)
   */
   template <>
+  inline
   double EvaluateCardinalBSpline<3>(const double x)
   {
     if (x < 0 || x >= 3)
@@ -235,7 +236,7 @@ namespace MathTL
     evaluate a shifted cardinal B-spline N_d(x-k) via recursion
     (remark: only use this version if the spline order d is unknown at compile time)
   */
-
+  inline
   double EvaluateCardinalBSpline(const int d, const int k, double x)
   {
     if (x < k)
@@ -308,6 +309,7 @@ namespace MathTL
  *  Rekursive Berechnung, damit keine zu grossen Zahlen entstehen   *
  *------------------------------------------------------------------*/
 
+inline
 double binomd (long int n, long int k)
    {
    long int i;
@@ -324,6 +326,7 @@ double binomd (long int n, long int k)
 
 
 // helper function for cBspline
+inline
 SparseMatrix<double> localBSplineCoeffs(const int d)
 {
   int k, mu, nu;

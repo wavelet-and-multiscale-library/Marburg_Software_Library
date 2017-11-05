@@ -2,16 +2,19 @@
 
 namespace MathTL
 {
+  inline
   Grid<1>::Grid()
     : grid_()
   {
   }
 
+  inline
   Grid<1>::Grid(const Array1D<double>& grid)
     : grid_(grid)
   {
   }
 
+  inline
   Grid<1>::Grid(const double a, const double b, const unsigned int N)
     : grid_(N+1)
   {
@@ -19,6 +22,7 @@ namespace MathTL
       grid_[n] = a+((b-a)*n)/N;
   }
 
+  inline
   void
   Grid<1>::matlab_output(std::ostream& os) const
   {
@@ -28,16 +32,19 @@ namespace MathTL
        << std::endl;
   }
   
+  inline
   Grid<2>::Grid()
     : gridx_(), gridy_()
   {
   }
 
+  inline
   Grid<2>::Grid(const Matrix<double>& gridx, const Matrix<double>& gridy)
     : gridx_(gridx), gridy_(gridy)
   {
   }
 
+  inline
   Grid<2>::Grid(const Grid<1>& gridx, const Grid<1>& gridy)
     : gridx_(gridy.points().size(), gridx.points().size()),
       gridy_(gridy.points().size(), gridx.points().size())
@@ -50,6 +57,7 @@ namespace MathTL
 	}
   }
   
+  inline
   Grid<2>::Grid(const Point<2>& a, const Point<2>& b,
 		const unsigned int N_x, const unsigned int N_y)
     : gridx_(N_y+1, N_x+1), gridy_(N_y+1, N_x+1)
@@ -62,6 +70,7 @@ namespace MathTL
 	}
   }
 
+  inline
   Grid<2>::Grid(const Point<2>& a, const Point<2>& b,
 		const unsigned int N)
     : gridx_(N+1, N+1), gridy_(N+1, N+1)
@@ -74,6 +83,7 @@ namespace MathTL
 	}
   }
   
+  inline
   Grid<2>&
   Grid<2>::operator = (const Grid<2>& grid)
   {
@@ -82,6 +92,7 @@ namespace MathTL
     return *this;
   }
 
+  inline
   void
   Grid<2>::matlab_output(std::ostream& os) const
   {
@@ -94,6 +105,7 @@ namespace MathTL
     os << ";" << std::endl;
   }
   
+  inline
   void
   Grid<2>::octave_output(std::ostream& os) const
   {

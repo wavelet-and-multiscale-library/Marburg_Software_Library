@@ -26,7 +26,7 @@ namespace MathTL
   class KnotSequence
   {
   public:
-    virtual ~KnotSequence() = 0;
+    virtual ~KnotSequence() {}
     
     /*
       index of the first knot
@@ -39,7 +39,7 @@ namespace MathTL
     virtual double knot(const int k) const = 0;
   };
 
-  KnotSequence::~KnotSequence() {}
+
 
   /*!
     evaluate an arbitrary B-spline N_{j,d}(x) via recursion

@@ -12,6 +12,7 @@
 
 namespace MathTL
 {
+  inline
   GaussLegendreRule::GaussLegendreRule(const unsigned int N)
   {
     assert(N <= 10);
@@ -26,6 +27,7 @@ namespace MathTL
       }
   }
 
+  inline
   GaussRule::GaussRule(const OrthogonalPolynomial& P,
 		       const double a, const double b,
 		       const unsigned int N)
@@ -33,6 +35,7 @@ namespace MathTL
     init(P, a, b, N);
   }
 
+  inline
   GaussRule::GaussRule(const Array1D<double>& moments,
 		       const OrthogonalPolynomial& T,
 		       const double a, const double b,
@@ -42,6 +45,7 @@ namespace MathTL
     init(P, a, b, N);
   }
 
+  inline
   GaussRule::GaussRule(const Array1D<double>& moments,
 		       const double a, const double b,
 		       const unsigned int N)
@@ -57,6 +61,7 @@ namespace MathTL
     init(P, a, b, N);
   }
 
+  inline
   void GaussRule::init(const OrthogonalPolynomial& P,
 		       const double a, const double b,
 		       const unsigned int N)

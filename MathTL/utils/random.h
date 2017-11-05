@@ -19,6 +19,7 @@ namespace MathTL
   /*!
     generate uniformly distributed double random numbers in [a,b)
   */
+  inline
   double random_double(const double a = 0, const double b = 1)
   {
     return a + (b-a) * (double(rand())/RAND_MAX);
@@ -27,6 +28,7 @@ namespace MathTL
   /*!
     generate uniformly distributed integer random numbers in [a,b]
   */
+  inline
   int random_integer(const int a = 0, const int b = 1)
   {
     return (int) (floor) (a + (b-a+1) * (double(rand())/RAND_MAX));

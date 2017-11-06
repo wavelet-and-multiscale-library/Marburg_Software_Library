@@ -25,6 +25,8 @@
 using std::list;
 using MathTL::FixedArray1D;
 using MathTL::InfiniteVector;
+using MathTL::Point;
+using MathTL::Function;
 
 namespace WaveletTL
 {
@@ -41,6 +43,9 @@ namespace WaveletTL
   public:
     //! default constructor (no b.c.'s)
     CubeBasis();
+
+    //! copy constructor
+    CubeBasis(const CubeBasis<IBASIS, DIM>& other);
 
     /*!
       constructor with specified boundary condition orders

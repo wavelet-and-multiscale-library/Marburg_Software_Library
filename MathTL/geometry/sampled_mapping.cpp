@@ -151,13 +151,17 @@ namespace MathTL
 
   template <class C>
   void
-  SampledMapping<1,C>::matlab_output(std::ostream& os) const
+  SampledMapping<1,C>::matlab_output(std::ostream& os,
+				     bool add_plot_command) const
   {
     Grid<1>::matlab_output(os);
     os << "y = " // here we can take y
        << values_
        << ";"
        << std::endl;
+
+    if (add_plot_command)
+      os << "plot(x,y)\n" << std::endl;
   }
 
   template <class C>
@@ -373,16 +377,19 @@ namespace MathTL
 	values_(m,n) *= alpha; // Matrix does not (yet) have an add() method    
   }
 
-
   template <class C>
   void
-  SampledMapping<2,C>::matlab_output(std::ostream& os) const
+  SampledMapping<2,C>::matlab_output(std::ostream& os,
+				     bool add_plot_command) const
   {
     Grid<2>::matlab_output(os);
     os << "z = ";
     print_matrix(values_, os);
     os << ";"
        << std::endl;
+
+    if (add_plot_command)
+      os << "surf(x,y,z)\n" << std::endl;
   }
 
   template <class C>
@@ -408,34 +415,26 @@ namespace MathTL
 //     os << ";"
 //        << std::endl;
   }
+
+  template <unsigned int DIM, class C>
+  void matlab_output(std::ostream& os,
+		     const SampledMapping<DIM,C>& sm)
+  {
+    os << "figure\n" << std::endl;
+    sm.matlab_output(os, true);
+  }
   
   template <unsigned int DIM, class C>
   void matlab_output(std::ostream& os,
 		     const Array1D<SampledMapping<DIM,C> >& values)
   {
-    switch (DIM) {
-    case 1: {
-      for (unsigned int i = 0; i < values.size(); i++) {
-	values[i].matlab_output(os);
-	os << "hold on" << std::endl
-	   << "plot(x,y)" << std::endl;
-	if (i == (values.size()-1))
-	  os << "hold off" << std::endl;
-      }
-      break;
+    os << "figure\n" << std::endl;
+    os << "hold on\n" << std::endl;
+    
+    for (unsigned int i = 0; i < values.size(); i++) {
+      values[i].matlab_output(os, true);
     }
-    case 2: {
-      for (unsigned int i = 0; i < values.size(); i++) {
-	values[i].matlab_output(os);
-	os << "hold on" << std::endl
- 	   << "surf(x,y,z)" << std::endl;
-	if (i == (values.size()-1))
-	  os << "hold off" << std::endl;
-      }
-      break;
-    }      
-    }// end switch
-
+    os << "hold off\n" << std::endl;
   }
 
   template <unsigned int DIM, class C>

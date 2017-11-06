@@ -125,7 +125,8 @@ namespace MathTL
     /*!
       Matlab output of the sampled mapping onto a stream
     */
-    void matlab_output(std::ostream& os) const;
+    void matlab_output(std::ostream& os,
+		       bool add_plot_command = false) const;
   };
 
   //
@@ -238,7 +239,8 @@ namespace MathTL
     /*!
       Matlab output of the sampled mapping onto a stream
     */
-    void matlab_output(std::ostream& os) const;
+    void matlab_output(std::ostream& os,
+		       bool add_plot_command = false) const;
 
     /*!
       Gnuplot output of the sampled mapping onto a stream
@@ -370,8 +372,9 @@ namespace MathTL
     /*!
       Matlab output of the sampled mapping onto a stream
     */
-    void matlab_output(std::ostream& os) const;
-       
+    void matlab_output(std::ostream& os,
+		       bool add_plot_command = false) const;
+
     /*!
       Matlab output of the sampled mapping onto a stream
     */
@@ -389,6 +392,14 @@ namespace MathTL
     */
     Matrix<C> values_;
   };
+
+
+  /*!
+    Matlab output for a single SampledMapping
+  */
+  template <unsigned int DIM, class C>
+  void matlab_output(std::ostream& os,
+		     const SampledMapping<DIM,C>& sm);
 
   /*!
     Matlab output for an Array1D of SampledMapping's

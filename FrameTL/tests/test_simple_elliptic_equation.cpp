@@ -165,11 +165,18 @@ int main()
   //Vector<double> v(225);
   
   set<Index> Lambda;
-  for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
-       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, jmax); ++lambda) {
-    Lambda.insert(lambda);
-    //cout << lambda << endl;
+  for (int i=0; i<frame.degrees_of_freedom();i++) {
+    Lambda.insert(*frame.get_wavelet(i));
+    cout << *frame.get_wavelet(i) << endl;
   }
+  
+  
+//  for (FrameIndex<Basis1D,2,2> lambda = FrameTL::first_generator<Basis1D,2,2,Frame2D>(&frame, frame.j0());
+//       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame2D>(&frame, jmax); ++lambda) {
+//    Lambda.insert(lambda);
+//    cout << lambda << endl;
+//  }
+  abort();
   
   cout << "setting up full right hand side..." << endl;
   Vector<double> rh;

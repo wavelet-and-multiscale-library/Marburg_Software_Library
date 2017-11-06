@@ -140,13 +140,15 @@ namespace WaveletTL
 	// differential operators
 	
 	if (strategy == DKR) {
+////            
 	  // Quarklet strategy:
 	  // active row indices nu have to fulfill ||nu|-|lambda|| <= J/(d*b) and
 	  // the supports of psi_lambda and psi_nu have to intersect
 	       
             
             //cout << "bin in DKOR drin" << endl;
-            const int maxlevel = std::min(lambda.j()+ (int) (J/(P.space_dimension * b)), jmax);
+            //ATTENTION: does not seem to work correctly with b and a
+            const int maxlevel = std::min(lambda.j()+ (int) (J/(P.space_dimension)), jmax);
 //            cout << maxlevel << endl;
 //            cout << std::max(P.basis().j0()-1, lambda.j()- (int) (J/(P.space_dimension * 2))) <<endl;
               //cout << lambda << endl;
@@ -161,14 +163,29 @@ namespace WaveletTL
                     for (int polynomial = minplevel;
                        polynomial <= maxplevel; polynomial++)
                     {
-        //                cout << "adding level: " << level << endl;
+//                        cout << "adding level: " << level << endl;
                         P.add_level(lambda,w,polynomial,level,factor,J,strategy,jmax,pmax,a,b);
+//                        P.add_level(lambda,w,0,level,factor,J);
         //                cout << w << endl;
         //                cout << "Stop" << endl;
                     }
                 }
           
         }
+        
+        if (strategy == CDD1) {
+	  // [CDD1] strategy:
+	  // active row indices nu have to fulfill ||nu|-|lambda|| <= J/d and
+	  // the supports of psi_lambda and psi_nu have to intersect
+	  
+	  const int maxlevel = std::min(lambda.j()+(J/P.space_dimension), jmax);
+          for (int level = std::max(P.frame().j0()-1, lambda.j()-(J/P.space_dimension));
+	       level <= maxlevel; level++)
+	    {
+	      //cout << "adding level: " << level << endl;
+	      P.add_level(lambda,w,0,level,factor,J);
+	    }
+	}
         
         
       
@@ -180,6 +197,7 @@ namespace WaveletTL
     //     if (P.local_operator())
         if (strategy == tensor_simple)
         {
+//            printf("entering add_compressed_column \n");
             // Strategy from [DSS] (works also for biorthogonal bases)
             // take all (indizes in all) levels nu with ||nu-lambda||_1 <= J
             // additionally demand ||nu||_1 <= jmax to limit computational effort
@@ -195,6 +213,108 @@ namespace WaveletTL
         }
 #endif
   }
+  
+//  template <class PROBLEM>
+//  void
+//  add_compressed_column_quarklet(const PROBLEM& P,
+//			const double factor,
+//			const int& lambda,
+//			const int J,
+//			//InfiniteVector<double, typename PROBLEM::Index>& w,
+//			Vector<double>& w,
+//			const int jmax,
+//			const CompressionStrategy strategy,
+//                        const bool preconditioning,
+//                        const int pmax,
+//                        const double a,
+//                        const double b) //a and b prefactors in strategy DKOR
+//  {
+//#if _WAVELETTL_USE_TFRAME == 0
+//    //typedef typename PROBLEM::QuarkletFrame QuarkletFrame;
+////    typedef typename PROBLEM::Index Index;
+//    //typedef typename WaveletBasis::Support Support;
+//    
+//    
+////     if (P.local_operator()) 
+//      
+//	// differential operators
+//	
+//	if (strategy == DKR) {
+//////            
+//	  // Quarklet strategy:
+//	  // active row indices nu have to fulfill ||nu|-|lambda|| <= J/(d*b) and
+//	  // the supports of psi_lambda and psi_nu have to intersect
+//	       
+//            
+//            //cout << "bin in DKOR drin" << endl;
+//            //ATTENTION: does not seem to work correctly with b and a
+//            const int maxlevel = std::min(lambda.j()+ (int) (J/(P.space_dimension)), jmax);
+////            cout << maxlevel << endl;
+////            cout << std::max(P.basis().j0()-1, lambda.j()- (int) (J/(P.space_dimension * 2))) <<endl;
+//              //cout << lambda << endl;
+//	  
+//            
+//            for (int level = std::max(P.frame().j0()-1, lambda.j()- (int) (J/(P.space_dimension * b)));
+//                   level <= maxlevel; level++)
+//                {
+//                    const int minplevel = std::max(0, lambda.p() + 1  - (int) pow(2,(J-b*abs(level-lambda.j())/a)));
+//                    const int maxplevel = std::min(lambda.p() - 1  + (int) pow(2,(J-b*abs(level-lambda.j())/a)), pmax);
+//                    
+//                    for (int polynomial = minplevel;
+//                       polynomial <= maxplevel; polynomial++)
+//                    {
+////                        cout << "adding level: " << level << endl;
+//                        P.add_level(lambda,w,polynomial,level,factor,J,strategy,jmax,pmax,a,b);
+////                        P.add_level(lambda,w,0,level,factor,J);
+//        //                cout << w << endl;
+//        //                cout << "Stop" << endl;
+//                    }
+//                }
+//          
+//        }
+//        
+//        if (strategy == CDD1) {
+//	  // [CDD1] strategy:
+//	  // active row indices nu have to fulfill ||nu|-|lambda|| <= J/d and
+//	  // the supports of psi_lambda and psi_nu have to intersect
+//	  
+//	  const int maxlevel = std::min(lambda.j()+(J/P.space_dimension), jmax);
+//          for (int level = std::max(P.frame().j0()-1, lambda.j()-(J/P.space_dimension));
+//	       level <= maxlevel; level++)
+//	    {
+//	      //cout << "adding level: " << level << endl;
+//	      P.add_level(lambda,w,0,level,factor,J);
+//	    }
+//	}
+//        
+//        
+//      
+////     else 
+////       {
+//// 	// integral operators: branch is not implemented so far
+////       } 
+//#else
+//    //     if (P.local_operator())
+//        if (strategy == tensor_simple)
+//        {
+//            // Strategy from [DSS] (works also for biorthogonal bases)
+//            // take all (indizes in all) levels nu with ||nu-lambda||_1 <= J
+//            // additionally demand ||nu||_1 <= jmax to limit computational effort
+//            //
+//            // for local operator supports have to overlap
+//            // add all indizes within a 1-ball of range J around lambda:
+//#ifdef FRAME
+//            P.add_ball(lambda,w,J,factor,jmax,strategy,preconditioning, pmax, a, b);
+//#endif
+//#ifdef BASIS
+//            P.add_ball(lambda,w,J,factor,jmax,strategy,preconditioning);
+//#endif
+//        }
+//#endif
+//  }
+  
+  
+  
 
 
   template <class PROBLEM>

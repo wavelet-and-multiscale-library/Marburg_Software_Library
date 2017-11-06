@@ -18,6 +18,7 @@
 
 #include <galerkin/galerkin_utils.h>
 #include <galerkin/infinite_preconditioner.h>
+#include <interval/pq_expansion.h>
 
 using MathTL::FixedArray1D;
 using MathTL::EllipticBVP;
@@ -111,12 +112,14 @@ namespace WaveletTL
          * make template argument accessible
          */
         typedef TENSORFRAME QuarkletFrame;
+        typedef IFRAME Frame1D;
 
         /*
          * wavelet index class
          */
         typedef typename QuarkletFrame::Index Index;
-
+        typedef typename Frame1D::Index Index1D;
+        
         /*
          * read access to the frame
          */
@@ -227,8 +230,22 @@ namespace WaveletTL
             frame_.set_jpmax(jmax, pmax);
             if (computerhs) compute_rhs();
         }
+        
+        double integrate(const int lp, const int lj, const int le, const int lk,
+		   const int mp, const int mj, const int me, const int mk, const int derivative=0) const;
 
-    //protected:
+    protected:
+        
+        
+        // #####################################################################################
+        // Caching of appearing 1D integrals when making use of the tensor product structure of the wavelets
+        // during the evaluation of the bilinear form.
+        typedef std::map<Index1D,double > Column1D;
+        typedef std::map<Index1D,Column1D> One_D_IntegralCache;
+
+        mutable One_D_IntegralCache one_d_integrals;
+        // #####################################################################################
+        
         EllipticBVP<DIM>* bvp_;
         TENSORFRAME frame_;
         // right-hand side coefficients on a fine level, sorted by modulus

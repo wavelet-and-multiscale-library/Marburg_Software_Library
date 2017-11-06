@@ -7,6 +7,8 @@
 *.dat
 *.txt
 *.jpg
+*.out
+callgrind.*
 nbproject
 WaveletTL/tests/test_cube_equation
 WaveletTL/tests/test_periodic_laplacian
@@ -164,4 +166,10 @@ WaveletTL/tests/test_ldomain
 WaveletTL/tests/test_qtbasis
 WaveletTL/tests/test_ldomain_equation
 WaveletTL/tests/test_ldomain_frame
-
+WaveletTL/tests/test_ldomain_norm
+WaveletTL/tests/test_tbasis_cdd1
+FrameTL/tests/test_bilinear_speed
+MathTL/tests/test_schoenberg_splines
+FrameTL/tests/test_simple_elliptic_equation_1D
+WaveletTL/tests/test_parallel
+FrameTL/tests/test_adaptive_speed

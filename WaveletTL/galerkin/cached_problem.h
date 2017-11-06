@@ -36,13 +36,16 @@ namespace WaveletTL
     used within the APPLY routine.
   */
   template <class PROBLEM>
-  class CachedProblem
-  //  : public TrivialPreconditioner<typename PROBLEM::Index>
-
+  class CachedProblem  
+#ifdef DYADIC
     : public FullyDiagonalDyadicPreconditioner<typename PROBLEM::Index>
-
-//    : public FullyDiagonalEnergyNormPreconditioner<typename PROBLEM::Index>
-
+#else
+#ifdef TRIVIAL
+  : public TrivialPreconditioner<typename PROBLEM::Index>
+#else
+    : public FullyDiagonalEnergyNormPreconditioner<typename PROBLEM::Index>
+#endif    
+#endif
   //  : public FullyDyadicPenrichPreconditioner<typename PROBLEM::Index>
   {
   public:

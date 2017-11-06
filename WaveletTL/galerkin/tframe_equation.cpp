@@ -111,18 +111,59 @@ namespace WaveletTL
     {
         // a(u,v) = \int_Omega [a(x)grad u(x)grad v(x)+q(x)u(x)v(x)] dx
         double r = 0;
+        Frame1D myframe;
+        
         // first decide whether the supports of psi_lambda and psi_mu intersect
         typedef typename QuarkletFrame::Support Support;
         Support supp;
         if (intersect_supports(frame_, lambda, mu, supp))
         {
+            Point<DIM> x;
+            const double ax = bvp_->constant_coefficients() ? bvp_->a(x) : 0.0;
+            const double qx = bvp_->constant_coefficients() ? bvp_->q(x) : 0.0;
+            double integral[space_dimension], der_integral[space_dimension];
+            integral[0]=0, integral[1]=0, der_integral[0]=0, der_integral[1]=0;
+            // compute point values of the integrand (where we use that it is a tensor product)
+            FixedArray1D<Array1D<double>,DIM> psi_lambda_values,     // values of the components of psi_lambda at gauss_points[i]
+                                              psi_mu_values,         // -"-, for psi_mu
+                                              psi_lambda_der_values, // values of the 1st deriv. of the components of psi_lambda at gauss_points[i]
+                                              psi_mu_der_values;     // -"-, for psi_mu
+            
+//            cout << "support in a-routine for index " << lambda << ", " << mu << endl;
+//    cout << "j[0]: " << supp.j[0] << ", j[1]: " << supp.j[1] << endl;
+//    
+//            cout << "Vergleichswerte Cube: [" << supp.a[0] << ", " << supp.b[0] << "] x [" << supp.a[1] << ", " << supp.b[1] <<"]" << endl;
             // setup Gauss points and weights for a composite quadrature formula:
             const int N_Gauss = (p+1)/2+(multi_degree(lambda.p())+multi_degree(mu.p())+1)/2;
             //const double h = ldexp(1.0, -supp.j); // granularity for the quadrature
             // FixedArray1D<double,DIM> h; // granularity for the quadrature
             double hi; // granularity for the quadrature
             FixedArray1D<Array1D<double>,DIM> gauss_points, gauss_weights;
+            const Index* lambda_new = &lambda;
             for (unsigned int i = 0; i < DIM; i++) {
+                //hier schauen, ob 1D Integral schon berechnet wurde
+                
+                Index1D lambda1D(lambda_new->p()[i], lambda_new->j()[i], lambda_new->e()[i], lambda_new->k()[i], &myframe);
+//                Index1D mu1D(mu.p()[i], mu.j()[i], mu.e()[i], mu.k()[i], &myframe);
+                
+//                typename One_D_IntegralCache::iterator col_lb(one_d_integrals.lower_bound(lambda));
+//                typename One_D_IntegralCache::iterator col_it(col_lb);
+//                if (col_lb == one_d_integrals.end() ||
+//                    one_d_integrals.key_comp()(lambda,col_lb->first))
+//                  {
+//                    // insert a new column
+//                    typedef typename One_D_IntegralCache::value_type value_type;
+//                    col_it = one_d_integrals.insert(col_lb, value_type(lambda, Column1D()));
+//                  }
+//
+//                Column1D& col(col_it->second);
+//
+//                typename Column1D::iterator lb(col.lower_bound(mu));
+//                typename Column1D::iterator it(lb);
+//                if (lb == col.end() ||
+//                    col.key_comp()(mu, lb->first))
+//                  {
+                
                 hi = ldexp(1.0, -supp.j[i]);
                 gauss_points[i].resize(N_Gauss*(supp.b[i]-supp.a[i]));
                 gauss_weights[i].resize(N_Gauss*(supp.b[i]-supp.a[i]));
@@ -133,145 +174,98 @@ namespace WaveletTL
                         gauss_weights[i][(patch-supp.a[i])*N_Gauss+n]
                                 = hi*GaussWeights[N_Gauss-1][n];
                     }
-            }
-            // compute point values of the integrand (where we use that it is a tensor product)
-            FixedArray1D<Array1D<double>,DIM> psi_lambda_values,     // values of the components of psi_lambda at gauss_points[i]
-                                              psi_mu_values,         // -"-, for psi_mu
-                                              psi_lambda_der_values, // values of the 1st deriv. of the components of psi_lambda at gauss_points[i]
-                                              psi_mu_der_values;     // -"-, for psi_mu
-            for (unsigned int i = 0; i < DIM; i++) {
-                evaluate(*frame_.frames()[i], 0,
+            
+            
+            
+                evaluate(*frame_.frames()[i], 
                                                 lambda.p()[i],
                                                 lambda.j()[i],
                                                 lambda.e()[i],
                                                 lambda.k()[i],
-                         gauss_points[i], psi_lambda_values[i]);
-                evaluate(*frame_.frames()[i], 1,
-                                                lambda.p()[i],
-                                                lambda.j()[i],
-                                                lambda.e()[i],
-                                                lambda.k()[i],
-                         gauss_points[i], psi_lambda_der_values[i]);
-                evaluate(*frame_.frames()[i], 0,
+                         gauss_points[i], psi_lambda_values[i], psi_lambda_der_values[i]);
+//                cout << "Gauss Points Cube: " << gauss_points[i] << endl;
+//                cout << psi_lambda_values[i] << endl;
+                evaluate(*frame_.frames()[i],
                                                 mu.p()[i],
                                                 mu.j()[i],
                                                 mu.e()[i],
                                                 mu.k()[i],
-                         gauss_points[i], psi_mu_values[i]);
-                evaluate(*frame_.frames()[i], 1,
-                                                mu.p()[i],
-                                                mu.j()[i],
-                                                mu.e()[i],
-                                                mu.k()[i],
-                         gauss_points[i], psi_mu_der_values[i]);
+                         gauss_points[i], psi_mu_values[i], psi_mu_der_values[i]);
+//                cout << psi_mu_values[i] << endl;
+                
+                
+//                    cout << endl << "gauss_weights[" << i << "]: " << gauss_weights[i] << endl;
+//                    cout << "psi_lambda_values[" << i << "]: " << psi_lambda_values[i] << endl;
+//                    cout << "psi_mu_values[" << i << "]: " << psi_mu_values[i] << endl;
+                    for (unsigned int ind = 0; ind < gauss_points[i].size(); ind++){
+//                        if(i==1)
+//                        cout << "Zwischenwert integral: " << integral[i] << endl;
+                        integral[i] += psi_lambda_values[i][ind] * psi_mu_values[i][ind] * gauss_weights[i][ind];
+                        der_integral[i] += psi_lambda_der_values[i][ind] * psi_mu_der_values[i][ind] * gauss_weights[i][ind];
+                    }
+                
             }
-            // iterate over all points and sum up the integral shares
-            int index[DIM]; // current multiindex for the point values
-            for (unsigned int i = 0; i < DIM; i++)
-                index[i] = 0;
-            Point<DIM> x;
-            const double ax = bvp_->constant_coefficients() ? bvp_->a(x) : 0.0;
-            const double qx = bvp_->constant_coefficients() ? bvp_->q(x) : 0.0;
-            double grad_psi_lambda[DIM], grad_psi_mu[DIM], weights;
-            if (bvp_->constant_coefficients())
-            {
-                while (true)
-                {
-                    for (unsigned int i = 0; i < DIM; i++)
-                        x[i] = gauss_points[i][index[i]];
-                    // product of current Gauss weights
-                    weights = 1.0;
-                    for (unsigned int i = 0; i < DIM; i++)
-                        weights *= gauss_weights[i][index[i]];
-                    // compute the share a(x)(grad psi_lambda)(x)(grad psi_mu)(x)
-                    for (unsigned int i = 0; i < DIM; i++)
-                    {
-                        grad_psi_lambda[i] = 1.0;
-                        grad_psi_mu[i] = 1.0;
-                        for (unsigned int s = 0; s < DIM; s++) 
-                        {
-                            if (i == s)
-                            {
-                                grad_psi_lambda[i] *= psi_lambda_der_values[i][index[i]];
-                                grad_psi_mu[i]     *= psi_mu_der_values[i][index[i]];
-                            } else
-                            {
-                                grad_psi_lambda[i] *= psi_lambda_values[s][index[s]];
-                                grad_psi_mu[i] *= psi_mu_values[s][index[s]];
-                            }
-                        }
-                    }
-                    double share = 0;
-                    for (unsigned int i = 0; i < DIM; i++)
-                        share += grad_psi_lambda[i]*grad_psi_mu[i];
-                    r += ax * weights * share;
-                    // compute the share q(x)psi_lambda(x)psi_mu(x)
-                    share = qx * weights;
-                    for (unsigned int i = 0; i < DIM; i++)
-                        share *= psi_lambda_values[i][index[i]] * psi_mu_values[i][index[i]];
-                    r += share;
-                    // "++index"
-                    bool exit = false;
-                    for (unsigned int i = 0; i < DIM; i++)
-                    {
-                        if (index[i] == N_Gauss*(supp.b[i]-supp.a[i])-1)
-                        {
-                            index[i] = 0;
-                            exit = (i == DIM-1);
-                        } else
-                        {
-                            index[i]++;
-                            break;
-                        }
-                    }
-                    if (exit) break;
-                }
-            } else // coefficients are not constant:
-            {
-                while (true) {
-                    for (unsigned int i = 0; i < DIM; i++)
-                        x[i] = gauss_points[i][index[i]];
-                    // product of current Gauss weights
-                    weights = 1.0;
-                    for (unsigned int i = 0; i < DIM; i++)
-                        weights *= gauss_weights[i][index[i]];
-                    // compute the share a(x)(grad psi_lambda)(x)(grad psi_mu)(x)
-                    for (unsigned int i = 0; i < DIM; i++) {
-                        grad_psi_lambda[i] = 1.0;
-                        grad_psi_mu[i] = 1.0;
-                        for (unsigned int s = 0; s < DIM; s++) {
-                            if (i == s) {
-                                grad_psi_lambda[i] *= psi_lambda_der_values[i][index[i]];
-                                grad_psi_mu[i]     *= psi_mu_der_values[i][index[i]];
-                            } else {
-                                grad_psi_lambda[i] *= psi_lambda_values[s][index[s]];
-                                grad_psi_mu[i] *= psi_mu_values[s][index[s]];
-                            }
-                        }
-                    }
-                    double share = 0;
-                    for (unsigned int i = 0; i < DIM; i++)
-                        share += grad_psi_lambda[i]*grad_psi_mu[i];
-                    r += bvp_->a(x) * weights * share;
-                    // compute the share q(x)psi_lambda(x)psi_mu(x)
-                    share = bvp_->q(x) * weights;
-                    for (unsigned int i = 0; i < DIM; i++)
-                        share *= psi_lambda_values[i][index[i]] * psi_mu_values[i][index[i]];
-                    r += share;
-                    // "++index"
-                    bool exit = false;
-                    for (unsigned int i = 0; i < DIM; i++) {
-                        if (index[i] == N_Gauss*(supp.b[i]-supp.a[i])-1) {
-                            index[i] = 0;
-                            exit = (i == DIM-1);
-                        } else {
-                            index[i]++;
-                            break;
-                        }
-                    }
-                    if (exit) break;
-                }
-            }
+            
+            
+            
+//            if (bvp_->constant_coefficients())
+//            {
+                
+                
+//                cout << "der_integral[0]: " << der_integral[0] << endl;
+//                cout << "der_integral[1]: " << der_integral[1] << endl;
+//                cout << "integral[0]: " << integral[0] << endl;
+//                cout << "integral[1]: " << integral[1] << endl;
+                
+                r = ax * (der_integral[0] * integral[1] + integral[0] * der_integral[1]) + qx * (integral[0] * integral[1]); 
+//            }
+//                else // coefficients are not constant:
+//            {
+//                while (true) {
+//                    double grad_psi_lambda[DIM], grad_psi_mu[DIM], weights;
+//                    for (unsigned int i = 0; i < DIM; i++)
+//                        x[i] = gauss_points[i][index[i]];
+//                    // product of current Gauss weights
+//                    weights = 1.0;
+//                    for (unsigned int i = 0; i < DIM; i++)
+//                        weights *= gauss_weights[i][index[i]];
+//                    // compute the share a(x)(grad psi_lambda)(x)(grad psi_mu)(x)
+//                    for (unsigned int i = 0; i < DIM; i++) {
+//                        grad_psi_lambda[i] = 1.0;
+//                        grad_psi_mu[i] = 1.0;
+//                        for (unsigned int s = 0; s < DIM; s++) {
+//                            if (i == s) {
+//                                grad_psi_lambda[i] *= psi_lambda_der_values[i][index[i]];
+//                                grad_psi_mu[i]     *= psi_mu_der_values[i][index[i]];
+//                            } else {
+//                                grad_psi_lambda[i] *= psi_lambda_values[s][index[s]];
+//                                grad_psi_mu[i] *= psi_mu_values[s][index[s]];
+//                            }
+//                        }
+//                    }
+//                    double share = 0;
+//                    for (unsigned int i = 0; i < DIM; i++)
+//                        share += grad_psi_lambda[i]*grad_psi_mu[i];
+//                    r += bvp_->a(x) * weights * share;
+//                    // compute the share q(x)psi_lambda(x)psi_mu(x)
+//                    share = bvp_->q(x) * weights;
+//                    for (unsigned int i = 0; i < DIM; i++)
+//                        share *= psi_lambda_values[i][index[i]] * psi_mu_values[i][index[i]];
+//                    r += share;
+//                    // "++index"
+//                    bool exit = false;
+//                    for (unsigned int i = 0; i < DIM; i++) {
+//                        if (index[i] == N_Gauss*(supp.b[i]-supp.a[i])-1) {
+//                            index[i] = 0;
+//                            exit = (i == DIM-1);
+//                        } else {
+//                            index[i]++;
+//                            break;
+//                        }
+//                    }
+//                    if (exit) break;
+//                }
+//            }
         }
         return r;
     }

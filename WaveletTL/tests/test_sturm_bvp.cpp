@@ -1,5 +1,12 @@
 #include <iostream>
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
+#define DYADIC
+#define JMAX 14
+#define PMAX 0
+#define ONE_D
+
+#define PRIMALORDER 3
+#define DUALORDER   3
 #include <fstream>
 #include <map>
 #include <time.h>
@@ -19,7 +26,7 @@
 #include <interval/pq_frame.h>
 #undef BASIS
 #define FRAME
-#undef DELTADIS
+#define DELTADIS
 
 #define ADAPTIVE
 #undef NONADAPTIVE
@@ -36,11 +43,15 @@
 #include <galerkin/TestProblem.h>
 #include <galerkin/TestFunctions.h>
 #include <adaptive/cdd2.h>
+#include <adaptive/steepest_descent_ks.h>
+#include <adaptive/duv.h>
 #include <adaptive/apply.h>
 #include <adaptive/compression.h>
 
+
 using namespace std;
 using namespace WaveletTL;
+
 
 using MathTL::SimpleSturmBVP;
 using MathTL::CG;
@@ -62,37 +73,41 @@ int main()
 {
   cout << "Testing wavelet-Galerkin solution of a Sturm b.v.p. ..." << endl;
 
-  const unsigned int testcase=2;
-  TestProblem<testcase> T;
-  Function<1>* uexact = 0;
-    switch(testcase) {
-        case 1:
-            uexact = new Function2();
-            break;
-        case 2:
-            uexact = new Function2b();
-            break;
-        case 3:
-            uexact = new FunctionBBCCDDU();
-            break;
-        case 4:
-            uexact = new Function4();
-            break;
-        case 5:
-            uexact = new Function2a();
-            break;
-        case 6:
-            uexact = new scaledHat2a();
-            break;
-        case 7:
-            uexact = new scaledHat2b();
-            break;
-        case 8:
-            uexact = new scaledQuark();
-            break;
-        default:
-            break;
-    }
+    const unsigned int testcase=9;
+    TestProblem<testcase> T;
+    Function<1>* uexact = 0;
+      switch(testcase) {
+          case 1:
+              uexact = new Function2();
+              break;
+          case 2:
+              uexact = new Function2b();
+              break;
+          case 3:
+              uexact = new FunctionBBCCDDU();
+              break;
+          case 4:
+              uexact = new Function4();
+              break;
+          case 5:
+              uexact = new Function2a();
+              break;
+          case 6:
+              uexact = new scaledHat2a();
+              break;
+          case 7:
+              uexact = new scaledHat2b();
+              break;
+          case 8:
+              uexact = new scaledQuark();
+              break;
+          case 9:
+              //dummy. needs to be replacedwith the correct function. Not yet implemented
+              uexact = new scaledQuark();
+              break;    
+          default:
+              break;
+      }
     
     // evaluate exact solution
     const unsigned int N = 100;
@@ -108,9 +123,8 @@ int main()
   const int d  = 3;
   const int dT = 3; // be sure to use a continuous dual here, otherwise the RHS test will fail
   
-
-  const int jmax = 8;
-  const int pmax = 3;
+  const int jmax = JMAX;
+  const int pmax = PMAX;
 
   
   
@@ -130,8 +144,9 @@ int main()
   basis.set_jpmax(jmax,pmax);
   
 #endif
-  
+  cout << "setup equation.." << endl;
   SturmEquation<Basis> eq(T, basis);
+  cout << "end setup equation!" << endl;
   
   
 
@@ -385,15 +400,18 @@ A.apply(x, err);
   //adaptive setting (CDD2)
   
 #ifdef FRAME  
+  cout << "setup cached equation.." << endl;
   CachedQuarkletProblem<SturmEquation<Basis> > ceq(&eq);
+  cout << "end setup cached equation.." << endl;
 #endif
 #ifdef BASIS
+//  CachedProblem<SturmEquation<Basis> > ceq(&eq, 1.0, 1.0);
   CachedProblem<SturmEquation<Basis> > ceq(&eq);
   
   //calculate the exact expansion and testing APPLY
   InfiniteVector<double, Index> exact_solution, exact_solution_coarsed, apply_result, approx_apply_result, right_side;
-  expand(uexact, basis, 0, jmax, exact_solution);
-  exact_solution.scale(&ceq, 1);
+//  expand(uexact, basis, 0, jmax, exact_solution);
+//  exact_solution.scale(&ceq, 1);
 //  APPLY(ceq, exact_solution, 1e-9, apply_result, jmax, CDD1);
 //  ceq.RHS(1e-10,right_side);
 //  cout.precision(17);
@@ -404,15 +422,31 @@ A.apply(x, err);
 #endif
   InfiniteVector<double, Index> F_eta;
   ceq.RHS(1e-6, F_eta);
-  const double nu = ceq.norm_Ainv() * l2_norm(F_eta);
-  double epsilon = 1e-3;
+  cout << "calculate norminv.." << endl;
+  const double norminv = ceq.norm_Ainv();
+  cout << "end calculate norminv.." << endl; 
+  cout << "calculate nu.." << endl;
+  const double nu = norminv*l2_norm(F_eta);
+  cout << "end calculate nu!" << endl;
+  double epsilon = 1e-6;
   InfiniteVector<double, Index> u_epsilon;
   clock_t tic = clock();
 #ifdef FRAME
-  CDD2_QUARKLET_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, DKR, pmax, 2, 2);
+  
+//  CDD2_QUARKLET_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, DKR, pmax, 2, 2);
+//  DUV_QUARKLET_SOLVE_SD(ceq, nu, epsilon, u_epsilon, CDD1, pmax, jmax, 2, 2);
+  steepest_descent_ks_QUARKLET_SOLVE(ceq, epsilon, u_epsilon, DKR, 2, 2);
+  
 #endif
 #ifdef BASIS
   CDD2_SOLVE(ceq, nu, epsilon, u_epsilon, jmax);
+//  DUV_SOLVE_SD(ceq, nu, epsilon, u_epsilon, jmax);
+//  Array1D<InfiniteVector<double, Index> > approximations(1);
+
+//  steepest_descent_ks_SOLVE(ceq, epsilon, u_epsilon);
+//  cout << "Solution:" << endl << u_epsilon << endl;
+  
+  
 #endif
   
 
@@ -463,8 +497,8 @@ cout << "\nTime taken: " << (time/CLOCKS_PER_SEC) << " s";
   // output for Frame has to be renewed
   
 #ifdef FRAME
-#if 0
-  string filenameCoefficients2[4] = {"sturm_bvp_solution_coefficients_p_0_ad.m", "sturm_bvp_solution_coefficients_p_1_ad.m",
+#if 1
+  string filenameCoefficients2[4] = {"./sd_results33_basis/sturm_bvp_solution_coefficients_p_0_ad.m", "sturm_bvp_solution_coefficients_p_1_ad.m",
   "sturm_bvp_solution_coefficients_p_2_ad.m", "sturm_bvp_solution_coefficients_p_3_ad.m"};
   
 //  string filenameCoefficients2[1] = {"sturm_bvp_solution_coefficients_p_0_ad.m"};
@@ -474,27 +508,31 @@ cout << "\nTime taken: " << (time/CLOCKS_PER_SEC) << " s";
   cout << filenameCoefficients2[p] << endl;
   std::ofstream coeff_stream2 (cstr);
   coeff_stream2 << "figure;" << endl;
-  plot_indices(&basis, u_epsilon, jmax, coeff_stream2, p, "jet", false, true, -8);
+  plot_indices(&basis, u_epsilon, jmax, coeff_stream2, p, "jet", true, true, -6);
   coeff_stream2 << "title('adaptive coefficients on the level p=" << p <<" of the test problem ("
-                  << basis_type << " basis)');" << endl;
+                  << basis_type << ")');" << endl;
   coeff_stream2.close();   
   }
 #endif
 #else
-    const char* filenameCoefficients2 = "sturm_bvp_solution_coefficients_adaptive.m";
+    const char* filenameCoefficients2 = "./sd_results33_basis/sturm_bvp_solution_coefficients_adaptive.m";
     std::ofstream coeff_stream2;
     coeff_stream2.open(filenameCoefficients2);
     coeff_stream2 << "figure;" << endl;
-    plot_indices(&basis, u_epsilon, jmax, coeff_stream2, "jet", false, true, -8);
+    plot_indices(&basis, u_epsilon, jmax, coeff_stream2, "jet", true, true, -6);
     coeff_stream2 << "title('Sturm bvp: adaptive solution coefficients of the test problem ("
                   << basis_type << ")');" << endl;
     coeff_stream2.close();
 #endif    
   
 //plot of the adaptive solution
-  const char* filenameSolution2 = "sturm_bvp_solution_adaptive.m";  
+  const char* filenameSolution2 = "./sd_results33_basis/sturm_bvp_solution_adaptive.m";  
   u_epsilon.scale(&ceq, -1);
+#ifdef FRAME
   SampledMapping<1> s2(evaluate(ceq.frame(), u_epsilon, true, 7));
+#else
+  SampledMapping<1> s2(evaluate(ceq.basis(), u_epsilon, true, 7));
+#endif
   std::ofstream u_stream2(filenameSolution2);
   s2.matlab_output(u_stream2);
   u_stream2 << "figure;\nplot(x,y);"

@@ -10,7 +10,6 @@
 #include <utils/random.h>
 #include <utils/array1d.h>
 
-
 namespace MathTL
 {
   template <class VECTOR, class MATRIX>
@@ -24,7 +23,7 @@ namespace MathTL
     // start with xk=(1,...,1)^T
 //     xk.resize(A.row_dimension(), false);
 //     xk = 1;
-
+    //cout<<"computing biggest eigenvalue"<<endl;
     VECTOR yk(xk.size(), false), diff(xk.size(), false);
     A.apply(xk, yk);
 
@@ -37,7 +36,7 @@ namespace MathTL
 
  	error = l2_norm(diff) / abs(lambdak);
       }
-
+    //cout<<"iterations: "<<iterations<<endl;
     xk.scale(1.0/l1_norm(xk));
 
     return lambdak;
@@ -60,6 +59,7 @@ namespace MathTL
     
     assert(zk.size() == A.row_dimension());
 
+    //cout<<"computing smallest eigenvalue"<<endl;
     ShiftedMatrix<MATRIX> ATilde(A, lambda);
     VECTOR qk(zk.size(), false);
 
@@ -78,6 +78,7 @@ namespace MathTL
 // 	     << ", lambdak=" << lambdak << ", difference " << error << endl;
       }
 
+    //cout<<"iterations: "<<iterations<<endl;
     zk.scale(1./linfty_norm(zk));
 
     return lambdak;
@@ -96,16 +97,22 @@ namespace MathTL
 
     // use evecs as working copy of A
     evecs.resize(n,n);
-    for (size_type i(0); i < n; i++)
+#if PARALLEL==1
+#pragma omp parallel for
+#endif
+    for (size_type i=0; i < n; i++)
       for (size_type j(0); j < n; j++)
 	evecs(i,j) = A.get_entry(i,j);
     
     // transform A to tridiagonal form via symmetric Householder reduction
     for (size_type j(0); j < n; j++)
       evals[j] = evecs(n-1,j);
-    
-    for (size_type i(n-1); i > 0;)
+#if 0
+#pragma omp parallel for
+#endif
+    for (size_type i=n-1; i > 0;i--)
       {
+        //cout << "bin hier "<<i<<endl;
 	// Scale to avoid under/overflow.
 	double scale = 0.0;
 	double h = 0.0;
@@ -174,11 +181,14 @@ namespace MathTL
 	  }
 	evals[i] = h;
 
-	if (i > 0) --i;
+	//if (i > 0) --i;
       }
     
     // Accumulate transformations.
-    for (size_type i(0); i < n-1; i++) {
+#if 0
+#pragma omp parallel for
+#endif
+    for (size_type i=0; i < n-1; i++) {
       evecs(n-1,i) = evecs(i,i);
       evecs(i,i) = 1.0;
       double h = evals(i+1);

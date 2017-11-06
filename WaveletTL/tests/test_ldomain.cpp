@@ -34,6 +34,8 @@
 #include <numerics/corner_singularity.h>
 
 #include <Ldomain/ldomain_basis.h>
+#include <Ldomain/ldomain_frame.h>
+#include <Ldomain/ldomain_evaluate.h>
 #include <Ldomain/ldomain_evaluate.h>
 #include <galerkin/ldomain_equation.h>
 

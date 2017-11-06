@@ -39,7 +39,11 @@ namespace WaveletTL
   */
   template <class PROBLEM>
   class CachedQuarkletProblem
+#ifdef DYADIC
    :public FullyDiagonalQuarkletPreconditioner<typename PROBLEM::Index>
+#else
+  : public FullyDiagonalEnergyNormPreconditioner<typename PROBLEM::Index>
+#endif
   {
   public:
     /*!
@@ -124,6 +128,7 @@ namespace WaveletTL
     */
     double alphak(const unsigned int k) const {
       return 2*norm_A(); // pessimistic
+//      return 1;
     }
     
     /*!
@@ -185,7 +190,7 @@ namespace WaveletTL
     // type of the entry cache of A
     //typedef std::map<Index, Column> ColumnCache;
     typedef std::map<int, Column> ColumnCache;
-
+    
     // entries cache for A (mutable to overcome the constness of add_column())
     mutable ColumnCache entries_cache;
     

@@ -624,8 +624,11 @@ namespace MathTL
   void SparseMatrix<C>::apply(const VECTOR& x, VECTOR& Mx) const
   {
     assert(Mx.size() == rowdim_);
-    
-    for (size_type i(0); i < rowdim_; i++) {
+#if PARALLEL==1
+    //cout<<"parallel apply"<<endl;
+#pragma omp parallel for
+#endif    
+    for (size_type i=0; i < rowdim_; i++) {
       C help(0);
       if (indices_[i]) {
 	for (size_type j(1); j <= indices_[i][0]; j++)
@@ -639,8 +642,11 @@ namespace MathTL
   void SparseMatrix<C>::apply(const Vector<C>& x, Vector<C>& Mx) const
   {
     assert(Mx.size() == rowdim_);
-    
-    for (size_type i(0); i < rowdim_; i++) {
+#if PARALLEL==1
+    //cout<<"parallel apply"<<endl;
+#pragma omp parallel for
+#endif
+    for (size_type i=0; i < rowdim_; i++) {
       C help(0);
       if (indices_[i]) {
 	for (size_type j(1); j <= indices_[i][0]; j++)

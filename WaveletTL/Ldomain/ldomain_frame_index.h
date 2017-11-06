@@ -162,8 +162,10 @@ namespace WaveletTL
        << lambda.patch()
        << ","
        << lambda.k()
-       << ")";
+       << ")" << " number = " << lambda.number();
     return os;
+    
+    
   }
 
   /*!
@@ -171,7 +173,7 @@ namespace WaveletTL
   */
   template <class IFRAME>
   LDomainFrameIndex<IFRAME>
-  first_generator(const LDomainFrame<IFRAME>* frame, const typename LDomainFrameIndex<IFRAME>::level_type& j, const typename LDomainFrameIndex<IFRAME>::polynomial_type& p, const int number = -1);
+  first_generator(const LDomainFrame<IFRAME>* frame, const typename LDomainFrameIndex<IFRAME>::level_type& j, const typename LDomainFrameIndex<IFRAME>::polynomial_type& p);
 
   /*!
     index of last generator on level j >= j0
@@ -190,11 +192,11 @@ namespace WaveletTL
   /*!
     index of first quarklet with a given type on level j >= j0
   */
-  template <class IFRAME>
-  LDomainFrameIndex<IFRAME>
-  first_quarklet(const LDomainFrame<IFRAME>* frame,
-		const typename LDomainFrameIndex<IFRAME>::level_type& j,
-		const typename LDomainFrameIndex<IFRAME>::type_type& e, const typename LDomainFrameIndex<IFRAME>::polynomial_type& p);
+//  template <class IFRAME>
+//  LDomainFrameIndex<IFRAME>
+//  first_quarklet(const LDomainFrame<IFRAME>* frame,
+//		const typename LDomainFrameIndex<IFRAME>::level_type& j,
+//		const typename LDomainFrameIndex<IFRAME>::type_type& e, const typename LDomainFrameIndex<IFRAME>::polynomial_type& p);
   
   /*!
     index of last quarklet on level j >= j0

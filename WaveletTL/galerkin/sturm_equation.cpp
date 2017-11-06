@@ -18,7 +18,12 @@ namespace WaveletTL
 				       const bool precompute_f)
     : bvp_(bvp), basis_(bvp.bc_left(), bvp.bc_right()), normA(0.0), normAinv(0.0)
   {
+//#ifndef DYADIC
+//      compute_diagonal();
+//#endif
     if (precompute_f) precompute_rhs();
+    
+    
     //const int jmax = 12;
     //basis_.set_jmax(jmax);
   }
@@ -29,7 +34,12 @@ namespace WaveletTL
 				       const bool precompute_f)
     : bvp_(bvp), basis_(basis), normA(0.0), normAinv(0.0)
   {
+//#ifndef DYADIC
+//      compute_diagonal();
+//#endif
     if (precompute_f) precompute_rhs();
+    
+    
     //const int jmax = 12;
     //basis_.set_jmax(jmax);
   }
@@ -39,7 +49,7 @@ namespace WaveletTL
   SturmEquation<WBASIS>::precompute_rhs() const
   {
     typedef typename WaveletBasis::Index Index;
-    
+    cout << "precompute rhs.." << endl;
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
     const int j0   = basis().j0();
@@ -86,6 +96,9 @@ namespace WaveletTL
     sort(fcoeffs.begin(), fcoeffs.end(), typename InfiniteVector<double,Index>::decreasing_order());
     
     rhs_precomputed = true;
+    cout << "end precompute rhs.." << endl;
+//    cout << fhelp << endl;
+//    cout << fcoeffs << endl;
   }
 
   template <class WBASIS>
@@ -94,18 +107,31 @@ namespace WaveletTL
   SturmEquation<WBASIS>::D(const typename WBASIS::Index& lambda) const
   {
 #ifdef FRAME
+#ifdef DYADIC
       return pow(ldexp(1.0, lambda.j())*pow(1+lambda.p(),4),operator_order()) * pow(1+lambda.p(),2); //2^j*(p+1)^6, falls operator_order()=1 (\delta=4)
+//      return 1<<(lambda.j()*(int) operator_order());
 #else
+      return stiff_diagonal[lambda.number()];
+#endif
+#endif
+#ifdef BASIS
+#ifdef DYADIC
 
-      return pow(ldexp(1.0, lambda.j()),operator_order());
+      return 1<<(lambda.j()*(int) operator_order());
+//      return pow(ldexp(1.0, lambda.j()),operator_order());
 
-
+#else
 //      return sqrt(a(lambda, lambda));
+      return stiff_diagonal[lambda.number()];
+#endif
+#else
+ return 1;     
+#endif
 
 //    return 1;
 //     return lambda.e() == 0 ? 1.0 : ldexp(1.0, lambda.j()); // do not scale the generators
 //     return lambda.e() == 0 ? 1.0 : sqrt(a(lambda, lambda)); // do not scale the generators
-#endif
+
 
   }
 
@@ -325,6 +351,21 @@ namespace WaveletTL
       }
     
 #ifdef DELTADIS
+//    double tmp = 1;
+//    Point<1> p1;
+//    p1[0] = 0.5;
+//    Point<1> p2;
+//    chart->map_point_inv(p1,p2);
+//    tmp =  evaluate(basis_, 0,
+//			       typename WBASIS::Index(lambda.j(),
+//						      lambda.e()[0],
+//						      lambda.k()[0],
+//						      basis_),
+//			       p2[0]);
+//    tmp /= chart->Gram_factor(p2);
+//  
+//  
+//    return 4.0*tmp + r;
     return r + 4*basis_.evaluate(0, lambda, 0.5);
 #else
     return r;
@@ -349,5 +390,71 @@ namespace WaveletTL
       coeffs.set_coefficient(it->first, it->second);
       ++it;
     } while (it != fcoeffs.end() && coarsenorm < bound);
+  }
+
+
+
+  template <class WBASIS>
+  void
+  SturmEquation<WBASIS>::compute_diagonal()
+  {
+    cout << "SturmEquation(): precompute diagonal of stiffness matrix..." << endl;
+
+    SparseMatrix<double> diag(1,basis_.degrees_of_freedom());
+    char filename[50];
+    char matrixname[50];
+#ifdef ONE_D
+    int d = WBASIS::primal_polynomial_degree();
+    int dT = WBASIS::primal_vanishing_moments();
+#else
+#ifdef TWO_D
+    int d = WBASIS::primal_polynomial_degree();
+    int dT = WBASIS::primal_vanishing_moments();
+#endif
+#endif
+    
+    // prepare filenames for 1D and 2D case
+#ifdef ONE_D
+    sprintf(filename, "%s%d%s%d", "stiff_diagonal_poisson_interval_lap07_d", d, "_dT", dT);
+    sprintf(matrixname, "%s%d%s%d", "stiff_diagonal_poisson_1D_lap07_d", d, "_dT", dT);
+#endif
+#ifdef TWO_D
+    sprintf(filename, "%s%d%s%d", "stiff_diagonal_poisson_lshaped_lap1_d", d, "_dT", dT);
+    sprintf(matrixname, "%s%d%s%d", "stiff_diagonal_poisson_2D_lap1_d", d, "_dT", dT);
+#endif
+#ifndef PRECOMP_DIAG
+    std::list<Vector<double>::size_type> indices;
+    std::list<double> entries;
+#endif
+#ifdef PRECOMP_DIAG
+    cout << "reading in diagonal of unpreconditioned stiffness matrix from file "
+	 << filename << "..." << endl;
+    diag.matlab_input(filename);
+    cout << "...ready" << endl;
+#endif
+    stiff_diagonal.resize(basis_.degrees_of_freedom());
+    for (int i = 0; i < basis_.degrees_of_freedom(); i++) {
+#ifdef PRECOMP_DIAG
+      stiff_diagonal[i] = diag.get_entry(0,i);
+#endif 
+#ifndef PRECOMP_DIAG
+#ifdef FRAME
+      stiff_diagonal[i] = sqrt(a(*(basis_.get_quarklet(i)),*(basis_.get_quarklet(i))));
+#endif
+#ifdef BASIS
+      stiff_diagonal[i] = sqrt(a(*(basis_.get_wavelet(i)),*(basis_.get_wavelet(i))));
+#endif
+      
+      indices.push_back(i);
+      entries.push_back(stiff_diagonal[i]);
+#endif
+      //cout << stiff_diagonal[i] << " " << *(basis_->get_wavelet(i)) << endl;
+    }
+#ifndef PRECOMP_DIAG
+    diag.set_row(0,indices, entries);
+    diag.matlab_output(filename, matrixname, 1);
+#endif
+
+    cout << "... done, diagonal of stiffness matrix computed" << endl;
   }
 }

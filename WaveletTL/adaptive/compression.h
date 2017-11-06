@@ -93,6 +93,20 @@ namespace WaveletTL
                              const int pmax = 0,
                              const double a = 2,
                              const double b = 2);
+  
+  
+//  template <class PROBLEM>
+//  void add_compressed_column_quarklet(const PROBLEM& P,
+//			     const double factor,
+//			     const int& lambda,
+//			     const int J,
+//			     Vector<double>& w,
+//			     const int jmax = 999,
+//			     const CompressionStrategy strategy = DKR,
+//                             const bool preconditioning = true,// only relevant for the anisotropic case
+//                             const int pmax = 0,
+//                             const double a = 2,
+//                             const double b = 2);
                                                
   /*
    */

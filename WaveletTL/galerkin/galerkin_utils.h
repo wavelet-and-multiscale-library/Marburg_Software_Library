@@ -14,6 +14,7 @@
 
 #include <algebra/sparse_matrix.h>
 #include <algebra/vector.h>
+#include <omp.h>
 
 using MathTL::SparseMatrix;
 using MathTL::Vector;

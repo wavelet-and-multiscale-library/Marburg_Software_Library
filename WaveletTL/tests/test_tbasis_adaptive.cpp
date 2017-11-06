@@ -5,11 +5,21 @@
  */
 #undef NONADAPTIVE
 #define ADAPTIVE
+#define BASIS
+
+#define DYADIC
+#define JMAX 8
+#define PMAX 0
+#define TWO_D
+
+#define PRIMALORDER 3
+#define DUALORDER   3
 
 #define _WAVELETTL_USE_TBASIS 1
 //#define _WAVELETTL_CACHEDPROBLEM_VERBOSITY 0
 
 #include <iostream>
+
 
 #include <interval/p_basis.h>
 #include <interval/ds_basis.h>
@@ -28,6 +38,7 @@
 #include <adaptive/compression.h>
 #include <adaptive/apply.h>
 #include <cube/tbasis_indexplot.h>
+#include <adaptive/steepest_descent_ks.h>
 
 //#include "TestFunctions2d.h"
 
@@ -133,12 +144,12 @@ public:
 int main()
 {
     cout << "Testing tbasis adaptive" << endl;
-    const int d  = 2;
-    const int dT = 2;
+    const int d  = PRIMALORDER;
+    const int dT = DUALORDER;
     const unsigned int dim = 2; 
-    const int jmax1=4;
-    MultiIndex<int, dim> jmax;
-    jmax[0]=jmax1 ,jmax[1]=jmax1;
+    const int jmax=JMAX;
+    
+    
     typedef PBasis<d,dT> Basis1d;
 //    typedef Basis1d::Index Index1d;
     typedef TensorBasis<Basis1d,dim> Basis;
@@ -157,7 +168,7 @@ int main()
     bc[0]=true, bc[1]=true, bc[2]=true, bc[3]=true;
     
     Basis1d basis1d(true,true);
-    basis1d.set_jmax(jmax1);
+    basis1d.set_jmax(jmax);
     
     Basis basis(bc); 
     basis.set_jmax(jmax);
@@ -193,7 +204,7 @@ int main()
     //TensorEquation<Frame1d,dim,Frame> feq(&poisson1, bc);
     cout << eq.basis().degrees_of_freedom() << endl;
     //eq.basis().set_jmax(10);
-    eq.set_jmax(2*jmax1);                               //wichtig für cached problem
+    eq.set_jmax(jmax);                               //wichtig für cached problem
     cout << eq.basis().degrees_of_freedom() << endl;
     
 #if 1
@@ -277,11 +288,52 @@ int main()
     cout << "solution 2 plotted" << endl;
 #endif
 #ifdef ADAPTIVE
-    CachedTProblem<TensorEquation<Basis1d,dim,Basis> > cproblem1(&eq);
+//    CachedTProblem<TensorEquation<Basis1d,dim,Basis> > cproblem1(&eq);
+    CachedTProblem<TensorEquation<Basis1d,dim,Basis> > cproblem1(&eq,20.,10.);
+    
+    set<Index> Lambda;
+  for (int i=0; i<basis.degrees_of_freedom();i++) {
+    Lambda.insert(*basis.get_wavelet(i));
+        cout << *basis.get_wavelet(i) << endl;
+  }
+    
+    cout << "setting up full right hand side..." << endl;
+  Vector<double> rh;
+  WaveletTL::setup_righthand_side(cproblem1, Lambda, rh);
+//  cout << rh << endl;
+  cout << "setting up full stiffness matrix..." << endl;
+  SparseMatrix<double> stiff;
+  
+  clock_t tstart, tend;
+  double time;
+  tstart = clock();
+
+//    WaveletTL::setup_stiffness_matrix(cproblem1, Lambda, stiff, false);
+//    WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
+  WaveletTL::setup_stiffness_matrix(eq, Lambda, stiff, false);
+//  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
+  
+
+  tend = clock();
+  time = (double)(tend-tstart)/CLOCKS_PER_SEC;
+  cout << "  ... done, time needed: " << time << " seconds" << endl;
+
+  stiff.matlab_output("stiff_2D_out", "stiff",1); 
+  
+  abort();
+    
+    
+    
+    
+    
+    
+    
+    
+    
     InfiniteVector<double, Index> F_eta;
     cproblem1.RHS(1e-6, F_eta);
     const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
-    double epsilon = 1e-1;
+    double epsilon = 1e-4;
     InfiniteVector<double, Index> u_epsilon, v;
     
     //cout << eq.s_star() << endl;
@@ -289,7 +341,8 @@ int main()
     //cout << eq.space_dimension << endl;
     //cout << cproblem1.space_dimension << endl;
     //CDD1_SOLVE(cproblem1, epsilon, u_epsilon, 2*jmax1, tensor_simple);
-    CDD2_SOLVE(cproblem1, nu, epsilon, u_epsilon, 2*jmax1, tensor_simple);
+    CDD2_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple);
+//    steepest_descent_ks_SOLVE(cproblem1, epsilon, u_epsilon);
     
     //APPLY(cproblem1, u_epsilon, 1e-3, v, 2*jmax1, tensor_simple);
     //APPLY_TEST(cproblem1, v, 10^-3, u_epsilon, 8, tensor_simple);
@@ -324,7 +377,7 @@ int main()
     //coeff_stream2 << "figure;" << endl;
     MultiIndex<int,dim> jstart;// start=basis1.j0();
     MultiIndex<int,dim> estart;
-    for (Index lambda=eq.basis().first_generator(), itend=eq.basis().last_wavelet(2*jmax1); lambda <= itend; ++lambda){
+    for (Index lambda=eq.basis().first_generator(), itend=eq.basis().last_wavelet(jmax); lambda <= itend; ++lambda){
         if(!(lambda.j()==jstart && lambda.e()==estart)){
             cout << lambda.j()[0]-1+lambda.e()[0]<<lambda.j()[1]-1+lambda.e()[1] << endl;
             jstart=lambda.j();

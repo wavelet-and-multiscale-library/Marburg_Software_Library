@@ -4,7 +4,7 @@
 // | This file is part of WaveletTL - the Wavelet Template Library      |
 // |                                                                    |
 // | Copyright (c) 2002-2009                                            |
-// | Thorsten Raasch, Manuel Werner                                     |
+// | Philipp Keding, Alexander Sieber                                   |
 // +--------------------------------------------------------------------+
 
 #ifndef _WAVELETTL_LDOMAIN_FRAME_H
@@ -64,23 +64,31 @@ namespace WaveletTL
     
 
     //! default constructor
-    LDomainFrame();
+    LDomainFrame(const IntervalFrame* frame1d, const IntervalFrame* frame1d_11, 
+          const IntervalFrame* frame1d_01, const IntervalFrame* frame1d_10);
 
-    //! constructor with a precomputed 1D frame
-    LDomainFrame(const IntervalFrame& frame1d);
+//    //! constructor with a precomputed 1D frame
+//    LDomainFrame(const IntervalFrame& frame1d);
 
     //! coarsest possible level j0
     inline const level_type& j0() const { return j0_; }
     
     
 
-    //! geometric type of the support sets
-    typedef struct {
+    //! geometric type of the support sets 
+    //Maybe a constructor is necessary for correct initialization. Put it on, if errors occur @PHK
+    typedef struct Support{
       int j[2];       // granularity
       int xmin[3];
       int xmax[3];
       int ymin[3];
       int ymax[3];
+      Support() 
+      {
+          j[0]=0,j[1]=0,xmin[0]=0,xmin[1]=0,xmin[2]=0, xmax[0]=0, xmax[1]=0, xmax[2]=0,
+                  ymin[0]=0,ymin[1]=0,ymin[2]=0, ymax[0]=0, ymax[1]=0, ymax[2]=0;
+      }
+      
     } Support;
     
 //    inline std::ostream& operator << (std::ostream& os,
@@ -105,6 +113,9 @@ namespace WaveletTL
     //! compute the support of psi_lambda, using the internal cache
     void support(const Index& lambda, Support& supp) const;
     
+    //! compute the support of psi_lambda, using the internal cache; only works for precomputed supports
+    void support(const int& lambda_num, Support& supp) const;
+    
     //! critical Sobolev regularity for the primal generators/quarklets
     static double primal_regularity() { return IntervalFrame::primal_regularity(); } // dirty, we should use max(1.5,~) instead
     
@@ -115,16 +126,45 @@ namespace WaveletTL
     static unsigned int primal_vanishing_moments() { return IntervalFrame::primal_vanishing_moments(); }
 
     //! read access to the underlying 1D frame
-    const IntervalFrame& frame1d() const { return frame1d_; }
+    const IntervalFrame* frame1d() const { return frame1d_; }
     
     //! read access to the underlying 1D frame
-    const IntervalFrame& frame1d_11() const { return frame1d_11_; }
+    const IntervalFrame* frame1d_11() const { return frame1d_11_; }
     
     //! read access to the underlying 1D frame
-    const IntervalFrame& frame1d_01() const { return frame1d_01_; }
-
+    const IntervalFrame* frame1d_01() const { return frame1d_01_; }
+    
+    //! read access to the underlying 1D frame
+    const IntervalFrame* frame1d_10() const { return frame1d_10_; }
+    
+    //! read access to the underlying 1D frame
+    const IntervalFrame* frames(const int patch, const int dir) const { 
+        
+        switch(patch){
+            case 0: 
+            case 3:
+                if(dir==0)
+                     return frame1d_11_;
+                else
+                     return frame1d_01_;
+            break;
+            case 1: return frame1d_11_;
+            break;
+            case 2:
+            case 4:
+                if(dir==0)
+                    return frame1d_01_; 
+                else
+                    return frame1d_11_;
+            break;
+            default:
+                return frame1d_;
+                break;
+        }
+    }
+    
 //    //! size of Delta_j
-//    const int Deltasize(const int j) const;
+    const int Deltasize(const int j) const;
 //
 //    //! sizes of the different quarklet index sets
 //    const int Nabla01size(const int j) const;
@@ -144,22 +184,22 @@ namespace WaveletTL
 //    const BlockMatrix<double>&  get_Mj1c_11  (const int j) const;
 
     //! index of first generator on level j >= j0
-    Index first_generator(const level_type& j, const polynomial_type& p = polynomial_type(), const int& number = 0) const;
+    Index first_generator(const level_type& j, const polynomial_type& p = polynomial_type()) const;
       
     //! index of last generator on level j >= j0
     Index last_generator(const level_type& j, const polynomial_type& p = polynomial_type()) const;
       
     //! index of first quarklet on level j >= j0
-    Index first_quarklet(const level_type& j, const polynomial_type& p) const;
+    Index first_quarklet(const level_type& j, const polynomial_type& p, const int& number=-1) const;
       
     //! index of first quarklet on level j >= j0 with type e
-    Index first_quarklet(const level_type& j, const type_type& e, const polynomial_type& p) const;
+//    Index first_quarklet(const level_type& j, const type_type& e, const polynomial_type& p) const;
 
     //! index of last quarklet on level j >= j0
-    Index last_quarklet(const level_type& j, const polynomial_type& p = polynomial_type()) const;
+    Index last_quarklet(const level_type& j, const polynomial_type& p = polynomial_type(), const int& number=-1) const;
     
     //! index of last quarklet on level j >= j0
-    Index last_quarklet(const int levelsum, const polynomial_type& p = polynomial_type()) const;
+    Index last_quarklet(const int& levelsum, const polynomial_type& p = polynomial_type(), const int& number=-1) const;
     
 //    //! Index of last quarklet on level j >= ||j0||_1
 //    Index last_quarklet(const int levelsum, const polynomial_type& p = polynomial_type()) const;
@@ -212,20 +252,54 @@ namespace WaveletTL
             return jmax_;
         }
         
-    inline const  int get_pmax() const {
+    inline const int get_pmax() const {
         return pmax_;
     }
+    
+    inline const int get_Nablasize() const {
+        return Nablasize_;
+    }
 
+    inline const Array1D<int> get_first_wavelet_numbers() const {
+        return first_wavelet_numbers;
+    }
+    
+    inline const Array1D<int> get_last_wavelet_numbers() const {
+        return last_wavelet_numbers;
+    }
+    
     //! get the quarklet index corresponding to a specified number
     const inline Index* get_quarklet (const int number) const {
       return &full_collection[number];
     }
+    
+    inline const bool get_setup_full_collection() const {
+            return setup_full_collection_;
+        }
+    
+    const inline Support& get_support (const int number) const {
+        return all_supports_[number];
+    }
+    
+    
 
     //! number of quarklets between coarsest and finest level
     const int degrees_of_freedom() const { return full_collection.size(); };
+//    typedef std::map<int,Support> SupportCache;
+//    const SupportCache suppcache() const{ return supp_cache;};
+    
+    //alternative for SupportCache
+    Array1D<Support> all_supports_;
 
 
   protected:
+      
+    /*
+    *  Collection of first and last wavelet numbers on all levels up to jmax
+    *  Precomputed for speedup
+    */
+    Array1D<int> first_wavelet_numbers, last_wavelet_numbers;
+//    Array1D<Array1D<int> > first_quarklet_numbers, last_quarklet_numbers, first_quark_numbers;
       
     //! Coarsest possible level j0
     level_type j0_;
@@ -238,17 +312,29 @@ namespace WaveletTL
 
     //! setup full collectin of quarklets between j0_ and jmax_ as long as a jmax_ has been specified
     void setup_full_collection();
+    
+    //! setup_full_collection_ is set to 1 after initialising full collection
+    bool setup_full_collection_;
 
     //! collection of all quarklets between coarsest and finest level
     Array1D<Index> full_collection;
 
     //! the interval 1d quarklet frame
-    IntervalFrame frame1d_, frame1d_11_, frame1d_01_;
+    const IntervalFrame* frame1d_;
+    const IntervalFrame* frame1d_11_;
+    const IntervalFrame* frame1d_01_;
+    const IntervalFrame* frame1d_10_;
     
+    //! Degrees of freedom on level p=(0,0) 
+    int Nablasize_;
 
-    //! support cache
-    typedef std::map<Index,Support> SupportCache;
-    mutable SupportCache supp_cache;
+//    //! support cache
+////    typedef std::map<Index,Support> SupportCache;
+//    mutable SupportCache supp_cache;
+    
+    
+    
+    bool precomputed_supports_;
 
   };
   

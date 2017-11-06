@@ -1,6 +1,6 @@
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
 
-#define JMAX 8
+#define JMAX 5
 #define TWO_D
 
 //#define PRECOMP_RHS
@@ -315,6 +315,8 @@ int main()
   
   // convert indices to CubeIndices
   for (int i = 0; i < frame.n_p(); i++) {
+      //rescaling, so that the coefficients are plotted appropiately to the preconditioning
+      approximations[i].scale(&discrete_poisson,1); 
     MappedBasis* mapped_basis = frame.bases()[i];
     std::ofstream plotstream;
     char filename4[50];

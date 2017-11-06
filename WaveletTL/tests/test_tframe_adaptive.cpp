@@ -3,8 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-#define NONADAPTIVE
-#undef ADAPTIVE
+#undef NONADAPTIVE
+#define ADAPTIVE
 
 #undef BASIS
 #define FRAME
@@ -138,13 +138,13 @@ public:
 int main()
 {
     cout << "Testing tbasis adaptive" << endl;
-    const int d  = 2;
-    const int dT = 2;
+    const int d  = 3;
+    const int dT = 3;
     const int a=2;
     const int b=2;
     const unsigned int dim = 2; 
     const int jmax=8;
-    const int pmax = 1;
+    const int pmax = 0;
 
         FixedArray1D<int,2*dim> s;          //set order of boundary conditions
     s[0]=0, s[1]=0; s[2]=0, s[3]=0; 
@@ -158,8 +158,8 @@ int main()
     //Basis basis(bc); 
     //basis.set_jmax(jmax);
     
-    mySolution<1> solution1;
-    myRHS<1> rhs1;
+    mySolution<2> solution1;
+    myRHS<2> rhs1;
     //Function2 function2;
     
     PoissonBVP<dim> poisson1(&rhs1);
@@ -186,6 +186,7 @@ int main()
     TensorFrameEquation<Frame1d,dim,Frame> eq(&poisson1, bc);
 
     eq.set_jpmax(jmax, pmax);
+    Frame frame = eq.frame();
 
 #endif  
     
@@ -225,6 +226,7 @@ int main()
     int zaehler=0;
     for (int l = 0; l < eq.frame().degrees_of_freedom(); l++) {
         Lambda.insert(lambda);
+        cout << lambda << ", Number: " << lambda.number() << endl;
         if(lambda==eq.frame().last_quarklet(jmax, p)){
             ++p;
             lambda=eq.frame().first_generator(eq.frame().j0(), p);
@@ -324,6 +326,39 @@ int main()
 #endif
 #ifdef FRAME
     CachedQuarkletTProblem<TensorFrameEquation<Frame1d,dim,Frame> > cproblem1(&eq);
+    
+    Frame1d frame1d;
+//    cout << "integral: " << eq.integrate(frame1d, 0,5,1,31,0,5,1,31,0) << endl;
+    set<Index> Lambda;
+  for (int i=0; i<frame.degrees_of_freedom();i++) {
+    Lambda.insert(*frame.get_quarklet(i));
+        cout << *frame.get_quarklet(i) << endl;
+  }
+    
+    cout << "setting up full right hand side..." << endl;
+  Vector<double> rh;
+  WaveletTL::setup_righthand_side(cproblem1, Lambda, rh);
+//  cout << rh << endl;
+  cout << "setting up full stiffness matrix..." << endl;
+  SparseMatrix<double> stiff;
+  
+  clock_t tstart, tend;
+  double time;
+  tstart = clock();
+
+//    WaveletTL::setup_stiffness_matrix(cproblem1, Lambda, stiff, false);
+//    WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
+  WaveletTL::setup_stiffness_matrix(eq, Lambda, stiff, false);
+//  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
+  
+
+  tend = clock();
+  time = (double)(tend-tstart)/CLOCKS_PER_SEC;
+  cout << "  ... done, time needed: " << time << " seconds" << endl;
+
+  stiff.matlab_output("stiff_frame_2D_out", "stiff",1); 
+  
+  abort();
 #endif
 //    Index mu=eq.frame().first_generator();
 //    Index lambda=eq.frame().first_generator();

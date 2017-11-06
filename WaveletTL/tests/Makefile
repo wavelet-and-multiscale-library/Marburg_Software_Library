@@ -35,7 +35,7 @@ else
 ifeq ($(CXX),$(HOME)/gcc-4.2-20060610/bin/g++)
 LDFLAGS += -Xlinker -rpath -Xlinker $(HOME)/gcc-4.2-20060610/lib
 else
-LDFLAGS =
+LDFLAGS = 
 endif
 endif
 endif
@@ -102,8 +102,8 @@ EXEOBJF3 = \
   test_tbasis_indexplot.o\
   test_tframe_index.o\
   test_tbasis_adaptive.o\
+  test_tbasis_cdd1.o\
   test_tframe_adaptive.o\
-  test_qtbasis.o\
   test_ldomain.o
 
 # set 3a of test programs: wavelet bases on the ring domain
@@ -118,12 +118,16 @@ EXEOBJF3b = \
 EXEOBJF4 = \
   test_ldomain_basis.o\
   test_ldomain_equation.o\
-  
+  test_ldomain_frame.o\
+  test_ldomain_norm.o\
+  test_parallel.o
 
   
 
 # set 5 of test programs: adaptive wavelet schemes for elliptic equations
 EXEOBJF5 = \
+  test_cdd1_cube.o\
+  test_sturm_bvp.o\
   
   
   
@@ -135,7 +139,7 @@ EXEOBJF6 = \
 
 # set 7 of test programs: nonadaptive wavelet solvers for elliptic problems	
 EXEOBJF7 = \
-  test_sturm_bvp.o\
+  
   
 
 # set 8 of test programs: ExpandASPP	
@@ -273,16 +277,16 @@ endif
 
 $(EXEOBJF4): %.o: %.cpp
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -g -fopenmp -o $@ $<
 else
-	$(CXX) $(CXXFLAGS) -c -DNDEBUG -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -DNDEBUG -fopenmp -Ofast -o $@ $<
 endif
 
 $(EXES4): %: %.o
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $(LDFLAGS) $< -g -o $@
+	$(CXX) $(LDFLAGS) $< -g -fopenmp -o $@
 else
-	$(CXX) $(LDFLAGS) $< -o $@
+	$(CXX) $(LDFLAGS) $< -fopenmp -Ofast -o  $@
 endif
 
 $(EXEOBJF5): %.o: %.cpp
@@ -340,4 +344,3 @@ ifeq ($(DEBUGMODE),on)
 else
 	$(CXX) $(LDFLAGS) $< -o $@
 endif
-

@@ -18,10 +18,11 @@ namespace FrameTL
 							     const int jmax)
     : ell_bvp_(ell_bvp), frame_(frame), jmax_(jmax)
   {
-    // precomputation of the right-hand side up to the maximal level
+    // precomputation of the diagonal up to the maximal level
     compute_diagonal();
 
-    // precomputation of the diagonal up to the maximal level
+    
+    // precomputation of the right-hand side up to the maximal level
     compute_rhs();
   }
 
@@ -30,9 +31,13 @@ namespace FrameTL
   SimpleEllipticEquation<IBASIS,DIM>::D(const typename AggregatedFrame<IBASIS,DIM>::Index& lambda) const
   {
     //return 1;
-    //return 1 << lambda.j();
+#ifdef DYADIC
+    return 1 << lambda.j();
     //return stiff_diagonal.get_coefficient(lambda);
+#else
     return stiff_diagonal[lambda.number()];
+#endif
+//    return sqrt(a(lambda, lambda));
   }
 
   template <class IBASIS, unsigned int DIM>
@@ -137,8 +142,10 @@ namespace FrameTL
 	  fhelp_patch[frame_->get_wavelet(i)->p()].set_coefficient(*(frame_->get_wavelet(i)), coeff);
 	  
 	  fnorms_sqr_patch[frame_->get_wavelet(i)->p()] += coeff*coeff;
-	  if (i % 100 == 0)
-	    cout << *(frame_->get_wavelet(i)) << " " << coeff << endl;
+	  if (i % 100 == 0){
+	    cout << *(frame_->get_wavelet(i)) << " " << coeff << endl;            
+          }
+          
 	}
       }
 
@@ -262,7 +269,7 @@ namespace FrameTL
     
      double res = 0;
      
-     // If the dimension is larger that just 1, it makes sense to store the one dimensional
+     // If the dimension is larger than just 1, it makes sense to store the one dimensional
      // integrals arising when we make use of the tensor product structure. This costs quite
      // some memory, but really speeds up the algorithm!
 #ifdef TWO_D
@@ -651,8 +658,11 @@ namespace FrameTL
 			       p2[0]);
     tmp /= chart->Gram_factor(p2);
   
-  
+#ifdef DELTADIS
     return 4.0*tmp + r;
+#else
+    return r;
+#endif
 #endif
 #ifndef TWO_D
 #ifndef ONE_D

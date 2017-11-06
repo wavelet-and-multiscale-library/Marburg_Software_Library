@@ -18,6 +18,8 @@
 
 #include <galerkin/galerkin_utils.h>
 #include <galerkin/infinite_preconditioner.h>
+#include <interval/indexq1D.h>
+#include <interval/i_q_index.h>
 
 using MathTL::FixedArray1D;
 using MathTL::EllipticBVP;
@@ -31,9 +33,9 @@ namespace WaveletTL
     
       Au = D^{-1}LD^{-1}u = D^{-1}F
 
-    when reformulating an elliptic boundary value problem on the L--shaped domain
+    when reformulating an poisson boundary value problem on the L--shaped domain
     
-      -div(a(x)grad u(x)) + q(x)u(x) = f(x)
+      -div(grad u(x)) = f(x)
 
     with first order b.c.'s as an equivalent operator equation
     within \ell_2 by means of a quarklet frame.
@@ -44,7 +46,7 @@ namespace WaveletTL
 
     is
 
-      a(u,v) = \int_Omega [a(x)grad u(x)grad v(x)+q(x)u(x)v(x)] dx
+      a(u,v) = \int_Omega [grad u(x)grad v(x)] dx
       
     and the right-hand side is
  
@@ -62,15 +64,35 @@ namespace WaveletTL
   template <class IFRAME,  class LDOMAINFRAME = LDomainFrame<IFRAME> >
   class LDomainFrameEquation
 //     : public FullyDiagonalDyadicPreconditioner<typename LDomainBasis<IBASIS>::Index>
+#ifdef DYADIC  
+  : public FullyDiagonalQuarkletPreconditioner<typename LDOMAINFRAME::Index>
+
+    
+#else
+#ifdef TRIVIAL
+    : public TrivialPreconditioner<typename LDOMAINFRAME::Index>
+#else
     : public FullyDiagonalEnergyNormPreconditioner<typename LDOMAINFRAME::Index>
+#endif
+#endif
   {
   public:
+      
+    /*!
+    make template argument accessible
+    */
+    typedef LDOMAINFRAME Frame;
+//    typedef LDomainFrame<IFRAME> Frame;
     /*!
       constructor from a boundary value problem 
+      not used anymore
     */
-    LDomainFrameEquation(const EllipticBVP<2>* bvp,
+//    LDomainFrameEquation(const EllipticBVP<2>* bvp,
+//		    const bool precompute_rhs = true);
+    
+    
+    LDomainFrameEquation(const EllipticBVP<2>* bvp, const Frame* frame,
 		    const bool precompute_rhs = true);
-
     /*!
       constructor from a boundary value problem and specified b.c.'s
     */
@@ -83,10 +105,7 @@ namespace WaveletTL
     */
     LDomainFrameEquation(const LDomainFrameEquation&);
     
-    /*!
-      make template argument accessible
-    */
-    typedef LDOMAINFRAME Frame;
+    
     /*!
       quarklet index class
     */
@@ -95,7 +114,7 @@ namespace WaveletTL
     /*!
       read access to the frame
     */
-    const Frame& frame() const { return frame_; }
+    const Frame& frame() const { return *frame_; }
     
     /*!
       space dimension of the problem
@@ -169,6 +188,9 @@ namespace WaveletTL
     */
     void RHS(const double eta,
 	     InfiniteVector<double,Index>& coeffs) const;
+    
+    void RHS(const double eta,
+	     InfiniteVector<double,int>& coeffs) const;
 
     /*!
       compute (or estimate) ||F||_2
@@ -183,23 +205,68 @@ namespace WaveletTL
     /*
      * set the maximal wavelet level jmax.
      * modifies
-     *   frame_.full_collection, fcoeffs, fnorm_sqr
+     *   frame_->full_collection, fcoeffs, fnorm_sqr
      */
-    inline void set_jpmax(const unsigned int jmax, const unsigned int pmax, const bool computerhs = true)
-    {
-        frame_.set_jpmax(jmax, pmax);
-        if (computerhs) compute_rhs();
-    }
+//    inline void set_jpmax(const unsigned int jmax, const unsigned int pmax, const bool computerhs = true)
+//    {
+//        cout << "hier4" << endl;
+//        frame_->set_jpmax(jmax, pmax);
+//        cout << "hier5" << endl;
+//        if (computerhs) {
+//#ifndef DYADIC
+//            compute_diagonal();
+//#endif
+//            compute_rhs();
+//        }
+//    }
 
   protected:
     const EllipticBVP<2>* bvp_;
-    LDOMAINFRAME frame_;
+    const Frame* frame_;
 
     // right-hand side coefficients on a fine level, sorted by modulus
     Array1D<std::pair<Index,double> > fcoeffs;
+    Array1D<std::pair<int,double> > fcoeffs_int;
 
     // precompute the right-hand side
     void compute_rhs();
+    
+    
+    
+    // #####################################################################################
+    // Caching of appearing 1D integrals when making use of the tensor product structure of the wavelets
+    // during the evaluation of the bilinear form.
+    typedef std::map<IndexQ1D<IFRAME>,double > Column1D;
+    typedef std::map<IndexQ1D<IFRAME>,Column1D> One_D_IntegralCache;
+    
+    mutable One_D_IntegralCache one_d_integrals;
+    // #####################################################################################
+
+    /*
+    @param lambda Index of first wavelet or generator.
+    @param mu Index of second wavelet or generator.
+    @param N_Gauss Number of Gauss quadrature knots to be used. This should be cosen equal
+    to the spline order in the constant coefficient case to be sure to integrate exactly.
+    @param dir The spatial direction under considerattion.
+    @param supp_lambda Support of the reference wavelet on the cube having the function given by lambda
+    as component in the direction dir.
+    @param supp_mu Support of the reference wavelet on the cube having the function given by mu
+    as component in the direction dir.
+     */
+    double integrate(const IndexQ1D<IFRAME>& lambda,
+		     const IndexQ1D<IFRAME>& mu,
+		     const int N_Gauss,
+		     const int dir,
+                     typename Frame::Support supp) const;
+    
+    /*!
+      precomputation of the right-hand side
+      (constness is not nice but necessary to have RHS a const function)
+    */
+    void compute_diagonal();
+    
+    //! Square root of coefficients on diagonal of stiffness matrix.
+    Array1D<double> stiff_diagonal;
 
     // (squared) \ell_2 norm of the precomputed right-hand side
     double fnorm_sqr;

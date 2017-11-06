@@ -86,7 +86,8 @@ EXEOBJF = \
  test_corner_singularity_biharmonic.o\
  test_gram_schmidt.o test_piecewise.o\
  test_fixed_vector.o test_fixed_matrix.o\
- test_cardinalsplines.o
+ test_cardinalsplines.o\
+ test_schoenberg_splines.o
  
 
 EXES = $(EXEOBJF:.o=)

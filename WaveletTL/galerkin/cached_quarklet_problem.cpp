@@ -19,9 +19,8 @@ namespace WaveletTL
   int 
   CachedQuarkletProblem<PROBLEM>::number (const Index& lambda, const int jmax) const{
       
-      QuarkletFrame myframe(frame());
-      const int quarkletsonzerolevel = (myframe.last_wavelet(jmax)).number()+1;
-      const int quarkletsonplevel = ((myframe.last_wavelet(jmax,lambda.p())).number()+1);
+      const int quarkletsonzerolevel = (frame().last_wavelet(jmax)).number()+1;
+      const int quarkletsonplevel = ((frame().last_wavelet(jmax,lambda.p())).number()+1);
       const int lambda_num = (lambda.p()==0) ? lambda.number() : lambda.number() + (lambda.p()-1) * quarkletsonplevel + quarkletsonzerolevel;
       return lambda_num;
   }
@@ -37,10 +36,17 @@ namespace WaveletTL
 
     QuarkletFrame myframe(frame());
 
-
-    const int jmax = myframe.get_jmax_();
-    const int lambda_num = number(lambda, jmax);
-    const int nu_num = number(nu,jmax);
+//!!! number() seems to be a huge bottleneck
+//    const int jmax = myframe.get_jmax_();
+    const int lambda_num = lambda.number();
+//    const int lambda_num = lambda.number();
+    const int nu_num = nu.number();
+//    const int nu_num = nu.number();
+    
+//    const int lambda_num = lambda.number();
+//      //cout << "number: " << lambda_num << endl;
+//      const int nu_num = nu.number();
+//      //cout << "number2: " << nu_num << endl;
 
     //cout << "Punkt 1" << endl;
     // BE CAREFUL: KEY OF GENERATOR LEVEL IS j0-1 NOT j0 !!!!
@@ -116,8 +122,8 @@ namespace WaveletTL
         //                cout << (*it).number()+(*it).p()*quarkletsonplevel << endl;
                 typedef typename Subblock::value_type value_type_subblock;
                 if (entry != 0.) {
-                    subblock.insert(subblock.end(), value_type_subblock(number(*it,jmax), entry));
-                    if (number(*it,jmax) == lambda_num) {
+                    subblock.insert(subblock.end(), value_type_subblock((*it).number(), entry));
+                    if ((*it).number() == lambda_num) {
                         r = entry;
                     }
                 }
@@ -144,8 +150,8 @@ namespace WaveletTL
         r = subblock_it->second;
       }
     }
-        
     
+
     return r;
   }
   
@@ -174,8 +180,9 @@ namespace WaveletTL
       
       
 
-      
+      //!!! number() seems to be a huge bottleneck
       const int lambda_num = number(lambda, jmax);
+//      const int lambda_num = lambda.number();
       //cout << lambda << ": " << lambda_num << endl;
       
       // search for column 'lambda'
@@ -215,7 +222,7 @@ namespace WaveletTL
           block.key_comp()(j, lb->first))
           {
              //cout << "Punkt 3" << endl; 
-              // insert a new level
+//              cout << "insert a new level: " << j << ", in the block: " << lambda << endl;
               typedef typename Block::value_type value_type;
               it = block.insert(lb, value_type(j, Subblock()));
 
@@ -260,7 +267,7 @@ namespace WaveletTL
         
 	
       else {
-          //cout << "Einträge schon berechnet" << endl;
+//          cout << "Einträge schon berechnet" << endl;
 	// level already exists --> extract level from cache
 
 	
@@ -282,8 +289,8 @@ namespace WaveletTL
                 }
 	
       }// end else
-    
-    
+
+      
   }
 
 
@@ -367,6 +374,8 @@ namespace WaveletTL
       const int j0 = frame().j0();
       const int jmax = std::min(frame().get_jmax_(),j0+2);
       const int pmax = std::min(frame().get_pmax_(),2);
+//      cout << "jmax: " << jmax << endl;
+//      cout << "pmax: " << pmax << endl;
       
       int p = 0;
       
@@ -383,11 +392,11 @@ namespace WaveletTL
       }
       
       
-      //cout << "Schritt 1" << endl;
+//      cout << "Schritt 1" << endl;
       SparseMatrix<double> A_Lambda;
       Matrix<double> evecs;
       setup_stiffness_matrix(*this, Lambda, A_Lambda);
-      //cout << "Matrix aufgestellt" << endl;
+//      cout << "Matrix aufgestellt" << endl;
       //cout << A_Lambda << endl;
      Vector<double> evals;
       

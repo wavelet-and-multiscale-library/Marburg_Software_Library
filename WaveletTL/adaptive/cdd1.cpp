@@ -730,7 +730,8 @@ namespace WaveletTL
         typedef typename PROBLEM::WaveletBasis::Index Index;
         InfiniteVector<double,Index> w;
 #if _WAVELETTL_USE_TBASIS == 1
-        APPLY_TENSOR(P,v,eta1,w,jmax,strategy);
+//        APPLY_TENSOR(P,v,eta1,w,jmax,strategy);
+       APPLY(P, v, eta1, w, jmax, tensor_simple); 
 #else
         APPLY(P, v, eta1, w, jmax, strategy);
 #endif

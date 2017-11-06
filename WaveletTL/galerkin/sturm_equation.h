@@ -69,14 +69,20 @@ namespace WaveletTL
   template <class WBASIS>
   class SturmEquation
 #ifdef FRAME
+  #ifdef DYADIC  
      : public FullyDiagonalQuarkletPreconditioner<typename WBASIS::Index>
 #else
+  : public FullyDiagonalEnergyNormPreconditioner<typename WBASIS::Index>
+#endif
+#endif
+#ifdef BASIS
+#ifdef DYADIC
 
      : public FullyDiagonalDyadicPreconditioner<typename WBASIS::Index>
+#else
 
-
-//    : public FullyDiagonalEnergyNormPreconditioner<typename WBASIS::Index>
-
+    : public FullyDiagonalEnergyNormPreconditioner<typename WBASIS::Index>
+#endif
 #endif
   {
   public:
@@ -196,9 +202,15 @@ namespace WaveletTL
       (constness is not nice but necessary to have RHS a const function)
     */
     void precompute_rhs() const;
+    
+    //! Precompute the diagonal of the stiffness matrix between minimal and maximal level.
+    void compute_diagonal();
 
     // right-hand side coefficients on a fine level, sorted by modulus
     mutable Array1D<std::pair<Index,double> > fcoeffs;
+    
+    //! Square root of coefficients on diagonal of stiffness matrix.
+    Array1D<double> stiff_diagonal;
 
     // (squared) \ell_2 norm of the precomputed right-hand side
     mutable double fnorm_sqr;

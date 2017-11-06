@@ -26,7 +26,19 @@ namespace WaveletTL
   void support(const LDomainFrame<IFRAME>& frame,
 	       const typename LDomainFrame<IFRAME>::Index& lambda,
 	       typename LDomainFrame<IFRAME>::Support& supp);
+  
+  template <class IFRAME>
+  void support(const LDomainFrame<IFRAME>& frame,
+	       const int& lambda_num,
+	       typename LDomainFrame<IFRAME>::Support& supp);
 
+  template <class IFRAME>
+  bool intersect_supports(const LDomainFrame<IFRAME>& frame,
+			  const typename LDomainFrame<IFRAME>::Index& lambda,
+			  const typename LDomainFrame<IFRAME>::Index& mu);
+  
+  
+  
   /*!
     Compute the support intersection of a quarklet psi_lambda with the
     support of another quarklet psi_mu.
@@ -37,6 +49,12 @@ namespace WaveletTL
   template <class IFRAME>
   bool intersect_supports(const LDomainFrame<IFRAME>& frame,
 			  const typename LDomainFrame<IFRAME>::Index& lambda,
+			  const typename LDomainFrame<IFRAME>::Support& supp_mu,
+			  typename LDomainFrame<IFRAME>::Support& supp);
+  
+  template <class IFRAME>
+  bool intersect_supports(const LDomainFrame<IFRAME>& frame,
+			  const int& lambda_num,
 			  const typename LDomainFrame<IFRAME>::Support& supp_mu,
 			  typename LDomainFrame<IFRAME>::Support& supp);
 
@@ -51,6 +69,12 @@ namespace WaveletTL
 			  const typename LDomainFrame<IFRAME>::Index& lambda,
 			  const typename LDomainFrame<IFRAME>::Index& mu,
 			  typename LDomainFrame<IFRAME>::Support& supp);
+  
+  template <class IFRAME>
+  bool intersect_supports(const LDomainFrame<IFRAME>& frame,
+			  const int& lambda_num,
+			  const int& mu_num,
+			  typename LDomainFrame<IFRAME>::Support& supp);
 
   /*!
     For a given quarklet \psi_\lambda, compute all generators/quarklets
@@ -60,9 +84,18 @@ namespace WaveletTL
   template <class IFRAME>
   void intersecting_quarklets(const LDomainFrame<IFRAME>& frame,
 			     const typename LDomainFrame<IFRAME>::Index& lambda,
-			     const typename LDomainFrameIndex<IFRAME>::level_type& j, const bool generators,
-			     std::list<typename LDomainFrame<IFRAME>::Index>& intersecting,
+			     const typename LDomainFrameIndex<IFRAME>::level_type& j,
+                             std::list<int>& intersecting,
                              const typename LDomainFrameIndex<IFRAME>::polynomial_type& p);
+  
+  template <class IFRAME>
+  void intersecting_quarklets(const LDomainFrame<IFRAME>& frame,
+			     const int& lambda_num,
+			     const typename LDomainFrameIndex<IFRAME>::level_type& j,
+			     std::list<int>& intersecting,
+                             const typename LDomainFrameIndex<IFRAME>::polynomial_type& p);
+  
+  
 
   /*!
     Decide whether the support of a given (primal) generator/quarklet \psi_\lambda

@@ -62,7 +62,7 @@ namespace WaveletTL
   template <int d, int dT>
   double integrate(const PQFrame<d,dT>& basis,
 		   const typename PQFrame<d,dT>::Index& lambda,
-		   const typename PQFrame<d,dT>::Index& mu)
+		   const typename PQFrame<d,dT>::Index& mu, const int derivative)
   {
     double r = 0;
     
@@ -81,8 +81,8 @@ namespace WaveletTL
  	    gauss_points[id] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
 	
  	// - compute point values of the integrands
-  	evaluate(basis, 0, lambda, gauss_points, func1values);
- 	evaluate(basis, 0, mu, gauss_points, func2values);
+  	evaluate(basis, derivative, lambda.p(), lambda.j(), lambda.e(), lambda.k(), gauss_points, func1values);
+ 	evaluate(basis, derivative, mu.p(), mu.j(), mu.e(), mu.k(), gauss_points, func2values);
 	
  	// - add all integral shares
  	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++)
@@ -94,6 +94,10 @@ namespace WaveletTL
     
     return r;
   }
+  
+  
+  
+  
   
   template <int d, int dT>
   void

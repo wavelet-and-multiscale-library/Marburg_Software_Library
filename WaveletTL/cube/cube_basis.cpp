@@ -23,24 +23,18 @@ namespace WaveletTL
     : full_collection(other.full_collection), j0_(other.j0_), jmax_(other.jmax_),
       bases_infact(), bases_()
   {
-    // deep copy of bases_infact:
     for (typename list<IBASIS*>::const_iterator it(other.bases_infact.begin());
          it != other.bases_infact.end(); ++it)
     {
-        bases_infact.push_back(new IBASIS(*(*it)));
+        // make deep copy of the 1D bases:
+        IBASIS* ibasis = new IBASIS(*(*it));
+        bases_infact.push_back(ibasis);
+        for (int i = 0; i < DIM; ++i)
+        {
+			if (*it == other.bases_[i])
+				bases_[i] = ibasis;
+		}
     }
-
-    for (unsigned int i = 0; i < DIM; i++)
-    {
-        typename list<IBASIS*>::const_iterator it(bases_infact.begin());
-        typename list<IBASIS*>::const_iterator ito(other.bases_infact.begin());
-        while (*ito != other.bases_[i]) {
-            ++it;
-            ++ito;
-        }
-        bases_[i] = *it;
-    }
-
     delete_pointers = true;
   }
 

@@ -98,6 +98,14 @@ namespace WaveletTL
                  const int& jmax=5);
 
     /*!
+      Constructor from a boundary value problem and a given cube basis.
+      The cube basis is supposed to incorporate the desired boundary
+      conditions and a maximal level 'jmax' should have been set to it
+      beforehand (generally by a call of set_jmax(int)).
+    */
+    CubeEquation(const EllipticBVP<DIM>* bvp, const CUBEBASIS& basis);
+
+    /*!
       copy constructor
     */
     CubeEquation(const CubeEquation&);

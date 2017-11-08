@@ -59,6 +59,9 @@ namespace WaveletTL
         
         //! Default constructor (no b.c.'s)
         TensorFrame();
+        
+        //! copy constructor
+        TensorFrame(const TensorFrame<IFRAME, DIM>& other);
 
         /* Constructor with specified boundary condition orders
          * i-th direction at x=0 <-> index 2*i

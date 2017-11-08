@@ -16,6 +16,30 @@ namespace WaveletTL
             j0_[i] = j0_[0];
     	delete_pointers = true;
   	}
+  	
+  	template <class IBASIS, unsigned int DIM>
+	TensorBasis<IBASIS,DIM>::TensorBasis(const TensorBasis<IBASIS, DIM>& other)
+    : full_collection(other.full_collection),
+#if _PRECOMPUTE_FIRSTLAST_WAVELETS
+      first_wavelets(other.first_wavelets), last_wavelets(other.last_wavelets),
+#endif
+	  j0_(other.j0_), jmax_(other.jmax_),
+      bases_infact(), bases_()
+  {
+    for (typename list<IBASIS*>::const_iterator it(other.bases_infact.begin());
+         it != other.bases_infact.end(); ++it)
+    {
+        // make deep copy of the 1D bases:
+        IBASIS* ibasis = new IBASIS(*(*it));
+        bases_infact.push_back(ibasis);
+        for (int i = 0; i < DIM; ++i)
+        {
+			if (*it == other.bases_[i])
+				bases_[i] = ibasis;
+		}
+    }
+    delete_pointers = true;
+  }
 
 /* Works only with DSBasis, but not with PBasis : 
   	template <class IBASIS, unsigned int DIM>

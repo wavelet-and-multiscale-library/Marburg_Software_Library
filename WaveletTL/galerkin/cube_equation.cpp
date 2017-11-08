@@ -22,6 +22,16 @@ namespace WaveletTL
     basis_.set_jmax(jmax);
     compute_rhs();
   }
+  
+  template <class IBASIS, unsigned int DIM, class CUBEBASIS>
+  CubeEquation<IBASIS,DIM,CUBEBASIS>::CubeEquation(const EllipticBVP<DIM>* bvp,
+                                                   const CUBEBASIS& basis)
+    : bvp_(bvp), basis_(basis), normA(0.0), normAinv(0.0)
+  {
+
+    // basis_.set_jmax(basis.get_jmax_());
+    compute_rhs();
+  }
 
   template <class IBASIS, unsigned int DIM, class CUBEBASIS>
   CubeEquation<IBASIS,DIM,CUBEBASIS>::CubeEquation(const CubeEquation& eq)

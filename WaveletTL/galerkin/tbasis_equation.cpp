@@ -30,6 +30,15 @@ namespace WaveletTL
             compute_rhs();
         }
     }
+    
+    template <class IBASIS, unsigned int DIM, class TENSORBASIS>
+	TensorEquation<IBASIS,DIM,TENSORBASIS>::TensorEquation(EllipticBVP<DIM>* bvp,
+														   const TENSORBASIS& basis)
+    : bvp_(bvp), basis_(basis), normA(0.0), normAinv(0.0)
+	{
+		// basis_.set_jmax(basis.get_jmax());
+		compute_rhs();
+	}
 
     template <class IBASIS, unsigned int DIM, class TENSORBASIS>
     TensorEquation<IBASIS,DIM,TENSORBASIS>::TensorEquation(const TensorEquation& eq)

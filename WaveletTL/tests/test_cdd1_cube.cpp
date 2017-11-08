@@ -151,7 +151,7 @@ int main()
    
    std::ofstream plotstream;
    plotstream.open("../../Desktop/plots/cube_indexplot_cdd1.m");
-   plot_indices(&cproblem.basis(), u_epsilon, jmax, plotstream, "jet", true, true);
+   plot_indices_cube(&cproblem.basis(), u_epsilon, jmax, plotstream, "jet", true, true);
 
    plotstream.close();
 

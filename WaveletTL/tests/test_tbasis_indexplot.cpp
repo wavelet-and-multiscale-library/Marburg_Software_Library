@@ -186,7 +186,7 @@ cout << "HERE" << endl;
     std::ofstream plotstream;
     plotstream.open("coefficient_plot.m");
 cout << "Writing coefficient_plot.m" << endl;
-    plot_indices(&basis,coeffs, maxrange, plotstream, "jet", true, true);
+    plot_indices_tbasis(&basis,coeffs, maxrange, plotstream, "jet", true, true);
     plotstream.close();
     // */
     if (f) delete f;
@@ -194,7 +194,7 @@ cout << "Writing coefficient_plot.m" << endl;
     std::ofstream plotstream2;
     plotstream2.open("coefficient_plot2.m");
 cout << "Writing coefficient_plot2.m" << endl;
-    plot_indices(&basis,coeffs2, maxrange, plotstream2, "jet", false, true);
+    plot_indices_tbasis(&basis,coeffs2, maxrange, plotstream2, "jet", false, true);
     plotstream2.close();
 
     // */
@@ -203,7 +203,7 @@ cout << "Writing coefficient_plot2.m" << endl;
     std::ofstream plotstream3;
     plotstream3.open("coefficient_plot3.m");
 cout << "Writing coefficient_plot3.m" << endl;
-    plot_indices(&basis,coeffs3, maxrange, plotstream3, "jet", false, true);
+    plot_indices_tbasis(&basis,coeffs3, maxrange, plotstream3, "jet", false, true);
     plotstream3.close();
 
     if (f3) delete f3;

@@ -3,7 +3,7 @@
 namespace WaveletTL
 {
     template <class TENSORBASIS>
-    void plot_indices(const TENSORBASIS* basis,
+    void plot_indices_tbasis(const TENSORBASIS* basis,
             const InfiniteVector<double, typename TENSORBASIS::Index>& coeffs,
             const int maxrange,
             std::ostream& os,
@@ -225,7 +225,7 @@ namespace WaveletTL
     }
     
     template <class TENSORBASIS>
-    void plot_indices2(const TENSORBASIS* basis,
+    void plot_indices_tbasis2(const TENSORBASIS* basis,
             const InfiniteVector<double, typename TENSORBASIS::Index>& coeffs,
             std::ostream& os,
             const typename TENSORBASIS::Index::level_type& j,

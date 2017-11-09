@@ -33,7 +33,7 @@ namespace WaveletTL
     You can choose a Matlab colormap and toggle the boxes and a colorbar on or off.
   */
   template <class TENSORFRAME>
-  void plot_indices(const TENSORFRAME* frame,
+  void plot_indices_tframe(const TENSORFRAME* frame,
 		    const InfiniteVector<double, typename TENSORFRAME::Index>& coeffs,
 		    const int range,
 		    std::ostream& os,
@@ -42,8 +42,9 @@ namespace WaveletTL
 		    bool boxed = false,
 		    bool colorbar = true,
 		    const double aa = -6);
+		    
   template <class TENSORFRAME>
-  void plot_indices2(const TENSORFRAME* frame,
+  void plot_indices_tframe2(const TENSORFRAME* frame,
                      const InfiniteVector<double, typename TENSORFRAME::Index>& coeffs,
 		     std::ostream& os,
                      const typename TENSORFRAME::Index::polynomial_type p = typename TENSORFRAME::Index::polynomial_type(),

@@ -4,7 +4,7 @@ namespace WaveletTL
 {
     
     template <class LDOMAINFRAME>
-    void plot_indices(const LDOMAINFRAME* frame,
+    void plot_indices_ldomain(const LDOMAINFRAME* frame,
                        const InfiniteVector<double, typename LDOMAINFRAME::Index>& coeffs,
                        std::ostream& os,
                        const typename LDOMAINFRAME::Index::polynomial_type p,

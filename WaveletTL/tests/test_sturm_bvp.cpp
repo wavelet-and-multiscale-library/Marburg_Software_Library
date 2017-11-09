@@ -358,7 +358,7 @@ A.apply(x, err);
   cout << filenameCoefficients[p] << endl;
   std::ofstream coeff_stream1 (cstr);
   coeff_stream1 << "figure;" << endl;
-  plot_indices(&basis, u, jmax, coeff_stream1, p, "jet", false, true, -8);
+  plot_indices_iq(&basis, u, jmax, coeff_stream1, p, "jet", false, true, -8);
   coeff_stream1 << "title('coefficients on the level p=" << p <<" of the test problem ("
                   << basis_type << " basis)');" << endl;
   coeff_stream1.close();   
@@ -508,7 +508,7 @@ cout << "\nTime taken: " << (time/CLOCKS_PER_SEC) << " s";
   cout << filenameCoefficients2[p] << endl;
   std::ofstream coeff_stream2 (cstr);
   coeff_stream2 << "figure;" << endl;
-  plot_indices(&basis, u_epsilon, jmax, coeff_stream2, p, "jet", true, true, -6);
+  plot_indices_iq(&basis, u_epsilon, jmax, coeff_stream2, p, "jet", true, true, -6);
   coeff_stream2 << "title('adaptive coefficients on the level p=" << p <<" of the test problem ("
                   << basis_type << ")');" << endl;
   coeff_stream2.close();   

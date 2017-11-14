@@ -1,3 +1,5 @@
+#define PARALLEL 0
+
 #include <fstream>
 #include <iostream>
 #include <time.h> 

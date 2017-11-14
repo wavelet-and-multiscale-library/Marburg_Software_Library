@@ -7,6 +7,8 @@
 #include <utility>
 #include <utils/tiny_tools.h>
 
+#include "infinite_vector.h"
+
 using std::cout;
 using std::endl;
 
@@ -168,6 +170,22 @@ namespace MathTL
 		   std::inserter(v, v.end()),
 		   threshold_criterion<I,C>(eta));
     std::map<I,C>::swap(v);
+  }
+  
+  template <class C, class I>
+  void InfiniteVector<C,I>::shrinkage(const double mu)
+  {
+    compress(mu);
+    // a hardcore STL implementation inspired by Meyers, Effective STL:
+    for (typename InfiniteVector<C,I>::const_iterator it(begin()),
+ 	   itend(end()); it != itend; ++it){
+//        if(*it<=mu)
+//            std::map<I,C>::erase(it.index());
+        if(*it>mu)
+          set_coefficient(it.index(), *it-0.5*mu);  
+        if(*it < -mu)
+          set_coefficient(it.index(), *it+0.5*mu);        
+    }
   }
 
   template <class C, class I>

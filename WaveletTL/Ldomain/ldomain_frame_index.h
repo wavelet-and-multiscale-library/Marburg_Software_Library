@@ -120,7 +120,7 @@ namespace WaveletTL
     */
 //    const int number() const;
     
-    const unsigned int number() const { return num_; }
+    const unsigned int& number() const { return num_; }
     
   protected:
     //! pointer to the underlying frame

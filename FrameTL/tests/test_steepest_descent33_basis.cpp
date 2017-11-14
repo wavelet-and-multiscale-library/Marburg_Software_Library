@@ -1,10 +1,11 @@
-#define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
+ #define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
+#define PARALLEL 0
 
-#define JMAX 18
+#define JMAX 10
 #define ONE_D
 
-#define PRIMALORDER 3
-#define DUALORDER   3
+#define PRIMALORDER 2
+#define DUALORDER   2
 
 #include <fstream>
 #include <iostream>

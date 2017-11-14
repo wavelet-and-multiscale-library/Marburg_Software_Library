@@ -146,12 +146,12 @@ namespace WaveletTL
 	  // the supports of psi_lambda and psi_nu have to intersect
 	       
             
-            //cout << "bin in DKOR drin" << endl;
+//            cout << "bin in DKOR drin" << endl;
             //ATTENTION: does not seem to work correctly with b and a
             const int maxlevel = std::min(lambda.j()+ (int) (J/(P.space_dimension)), jmax);
 //            cout << maxlevel << endl;
 //            cout << std::max(P.basis().j0()-1, lambda.j()- (int) (J/(P.space_dimension * 2))) <<endl;
-              //cout << lambda << endl;
+//              cout << lambda << endl;
 	  
             
             for (int level = std::max(P.frame().j0()-1, lambda.j()- (int) (J/(P.space_dimension * b)));

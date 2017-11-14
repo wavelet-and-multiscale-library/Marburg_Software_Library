@@ -21,7 +21,7 @@
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
-#define JMAX 7
+#define JMAX 6
 #define PMAX 0
 #define TWO_D
 
@@ -40,6 +40,7 @@
 #include <Ldomain/ldomain_frame_evaluate.h>
 #include <Ldomain/ldomain_frame_indexplot.h>
 #include <galerkin/ldomain_frame_equation.h>
+#include <galerkin/ldomain_frame_gramian.h>
 #include <galerkin/cached_quarklet_ldomain_problem.h>
 
 
@@ -64,7 +65,7 @@ public:
   virtual ~myRHS() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
     CornerSingularityRHS csrhs(Point<2>(0,0), 0.5, 1.5);
-    return 2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1])+5*csrhs.value(p);
+    return /*2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1])+*/5*csrhs.value(p);
   }
   void vector_value(const Point<2>& p, Vector<double>& values) const {
     values[0] = value(p);
@@ -125,7 +126,9 @@ int main(){
     //ConstantFunction<dim> rhs1(val);
     myRHS rhs1;
     
+    
     PoissonBVP<dim> poisson1(&rhs1);
+//    PoissonBVP<dim> poisson1(&uexact1);
     Frame1d frame1d(false,false);
     frame1d.set_jpmax(jmax-frame1d.j0(),pmax);
     Frame1d frame1d_11(true,true);
@@ -137,6 +140,7 @@ int main(){
     Frame frame(&frame1d, &frame1d_11, &frame1d_01, &frame1d_10);
     frame.set_jpmax(jmax,pmax);
     LDomainFrameEquation<Frame1d,Frame> eq(&poisson1, &frame, true);
+//    LDomainFrameGramian<Frame1d,Frame> eq(&poisson1, &frame, true);
     
     
     
@@ -306,9 +310,11 @@ int main(){
 //    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 119, 25);
 #ifdef SD
     CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
+//    CachedQuarkletLDomainProblem<LDomainFrameGramian<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
 #endif
 #ifdef CDD2
     CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 43, 9);
+//    CachedQuarkletLDomainProblem<LDomainFrameGramian<Frame1d,Frame> > cproblem1(&eq);
 //    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 5.3, 46.3);
 #endif
     
@@ -325,6 +331,7 @@ int main(){
     
 //    double epsilon = 10;
     InfiniteVector<double, Index> u_epsilon;
+    InfiniteVector<double, int> u_epsilon_int;
     
     const double a=2;
     const double b=2;
@@ -333,13 +340,14 @@ int main(){
     tic=clock();
 #ifdef CDD2
     const char* scheme_type = "CDD2";
-    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b);
+    
+//    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b);
+    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, tensor_simple, pmax, a, b);
 #endif
 //    DUV_QUARKLET_SOLVE_SD(cproblem1, nu, epsilon, u_epsilon, tensor_simple, pmax, jmax, a, b);
 //    steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon, tensor_simple, 2, 2);
 #ifdef SD
     const char* scheme_type = "SD";
-    InfiniteVector<double, int> u_epsilon_int;
     steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon_int, tensor_simple, a, b);
 #endif
     toc = clock();
@@ -347,12 +355,12 @@ int main(){
     cout << "Time taken: " << (time/CLOCKS_PER_SEC) << " s\n"<<endl;
     cout << "fertig" << endl;
 //    abort();
-#ifdef SD
+
     for (typename InfiniteVector<double,int>::const_iterator it(u_epsilon_int.begin()),
  	   itend(u_epsilon_int.end()); it != itend; ++it){
         u_epsilon.set_coefficient(*(frame.get_quarklet(it.index())), *it);
     }
-#endif
+
         
 //    InfiniteVector<double,Frame2D::Index> u;
 //  unsigned int i = 0;

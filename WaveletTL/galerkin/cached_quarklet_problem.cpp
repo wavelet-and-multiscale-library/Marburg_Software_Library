@@ -15,15 +15,15 @@ namespace WaveletTL
   {
   }
   
-  template <class PROBLEM>
-  int 
-  CachedQuarkletProblem<PROBLEM>::number (const Index& lambda, const int jmax) const{
-      
-      const int quarkletsonzerolevel = (frame().last_wavelet(jmax)).number()+1;
-      const int quarkletsonplevel = ((frame().last_wavelet(jmax,lambda.p())).number()+1);
-      const int lambda_num = (lambda.p()==0) ? lambda.number() : lambda.number() + (lambda.p()-1) * quarkletsonplevel + quarkletsonzerolevel;
-      return lambda_num;
-  }
+//  template <class PROBLEM>
+//  int 
+//  CachedQuarkletProblem<PROBLEM>::number (const Index& lambda, const int jmax) const{
+//      
+//      const int quarkletsonzerolevel = (frame().last_wavelet(jmax)).number()+1;
+//      const int quarkletsonplevel = ((frame().last_wavelet(jmax,lambda.p())).number()+1);
+//      const int lambda_num = (lambda.p()==0) ? lambda.number() : lambda.number() + (lambda.p()-1) * quarkletsonplevel + quarkletsonzerolevel;
+//      return lambda_num;
+//  }
 
   template <class PROBLEM>
   double
@@ -181,7 +181,7 @@ namespace WaveletTL
       
 
       //!!! number() seems to be a huge bottleneck
-      const int lambda_num = number(lambda, jmax);
+      const int lambda_num = lambda.number();
 //      const int lambda_num = lambda.number();
       //cout << lambda << ": " << lambda_num << endl;
       
@@ -251,12 +251,12 @@ namespace WaveletTL
 	      typedef typename Subblock::value_type value_type_subblock;
 	      if (entry != 0.) {
  //                 cout << "ja3" << endl;
-		subblock.insert(subblock.end(), value_type_subblock(number(*it2,jmax), entry));
+		subblock.insert(subblock.end(), value_type_subblock((*it2).number(), entry));
 	      //w.add_coefficient(*it2, (entry / (d1 * problem->D(*it2))) * factor);
  //               cout << *it2 << ": " << (*it2).number() << endl;
  //             cout <<  number(*it2,jmax) << endl;
  //               cout << w.size() << endl;
-                w[number(*it2,jmax)] += (entry / (d1*problem->D(*it2))) * factor;
+                w[(*it2).number()] += (entry / (d1*problem->D(*it2))) * factor;
                 //cout << "ja5" << endl;
 	      }
  //             cout << "ja1" << endl;

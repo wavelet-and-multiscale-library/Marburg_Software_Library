@@ -220,6 +220,22 @@ namespace MathTL
 	  *it = C(0);
       }
   }
+  
+  template <class C>
+  void Vector<C>::shrinkage(const double mu)
+  {
+    for (iterator it(begin()), itend(end());
+	 it != itend; ++it)
+      {
+	if (fabs(*it) <= mu)
+	  *it = C(0);
+        if(*it > mu)
+            *it-=mu*0.5;
+        if(*it < -mu)
+            *it+=mu*0.5;
+      }
+  }
+  
 
   template <class C>
   double

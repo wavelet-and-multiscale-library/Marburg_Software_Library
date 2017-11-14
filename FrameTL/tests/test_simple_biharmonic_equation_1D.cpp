@@ -1,4 +1,5 @@
 #define ONE_D
+#define PARALLEL 0
 
 #include <fstream>
 #include <iostream>

@@ -4,11 +4,11 @@
 // | This file is part of WaveletTL - the Wavelet Template Library      |
 // |                                                                    |
 // | Copyright (c) 2002-2009                                            |
-// | Thorsten Raasch, Manuel Werner                                     |
+// | Thorsten Raasch, Manuel Werner, Philipp Keding, Alexander Sieber   |
 // +--------------------------------------------------------------------+
 
-#ifndef _WAVELETTL_LDOMAIN_FRAME_EQUATION_H
-#define _WAVELETTL_LDOMAIN_FRAME_EQUATION_H
+#ifndef _WAVELETTL_LDOMAIN_FRAME_GRAMIAN_H
+#define _WAVELETTL_LDOMAIN_FRAME_GRAMIAN_H
 
 #include <set>
 #include <utils/fixed_array1d.h>
@@ -62,7 +62,7 @@ namespace WaveletTL
   */
   //template <class IFRAME>
   template <class IFRAME,  class LDOMAINFRAME = LDomainFrame<IFRAME> >
-  class LDomainFrameEquation
+  class LDomainFrameGramian
 //     : public FullyDiagonalDyadicPreconditioner<typename LDomainBasis<IBASIS>::Index>
 #ifdef DYADIC  
   : public FullyDiagonalQuarkletPreconditioner<typename LDOMAINFRAME::Index>
@@ -87,23 +87,23 @@ namespace WaveletTL
       constructor from a boundary value problem 
       not used anymore
     */
-//    LDomainFrameEquation(const EllipticBVP<2>* bvp,
+//    LDomainFrameGramian(const EllipticBVP<2>* bvp,
 //		    const bool precompute_rhs = true);
     
     
-    LDomainFrameEquation(const EllipticBVP<2>* bvp, const Frame* frame,
+    LDomainFrameGramian(const EllipticBVP<2>* bvp, const Frame* frame,
 		    const bool precompute_rhs = true);
     /*!
       constructor from a boundary value problem and specified b.c.'s
     */
-    //LDomainFrameEquation(const EllipticBVP<2>* bvp,
+    //LDomainFrameGramian(const EllipticBVP<2>* bvp,
 	//	    const FixedArray1D<bool,8>& bc,
 	//	    const bool precompute_rhs = true);
 
     /*!
       copy constructor
     */
-    LDomainFrameEquation(const LDomainFrameEquation&);
+    LDomainFrameGramian(const LDomainFrameGramian&);
     
     
     /*!
@@ -276,6 +276,6 @@ namespace WaveletTL
   };
 }
 
-#include <galerkin/ldomain_frame_equation.cpp>
+#include <galerkin/ldomain_frame_gramian.cpp>
 
 #endif

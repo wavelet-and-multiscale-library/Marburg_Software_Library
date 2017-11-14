@@ -19,6 +19,8 @@
  * http://www.mathematik.uni-marburg.de/~numerik/
  */
 
+#define PARALLEL 0
+
 #include <iostream>
 
 #include <interval/i_index.h>

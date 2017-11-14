@@ -18,9 +18,9 @@ namespace WaveletTL
 				       const bool precompute_f)
     : bvp_(bvp), basis_(bvp.bc_left(), bvp.bc_right()), normA(0.0), normAinv(0.0)
   {
-//#ifndef DYADIC
+#ifdef ENERGY
 //      compute_diagonal();
-//#endif
+#endif
     if (precompute_f) precompute_rhs();
     
     
@@ -34,9 +34,9 @@ namespace WaveletTL
 				       const bool precompute_f)
     : bvp_(bvp), basis_(basis), normA(0.0), normAinv(0.0)
   {
-//#ifndef DYADIC
-//      compute_diagonal();
-//#endif
+#ifdef ENERGY
+      compute_diagonal();
+#endif
     if (precompute_f) precompute_rhs();
     
     
@@ -52,48 +52,58 @@ namespace WaveletTL
     cout << "precompute rhs.." << endl;
     // precompute the right-hand side on a fine level
     InfiniteVector<double,Index> fhelp;
-    const int j0   = basis().j0();
-    const int jmax = basis_.get_jmax_();
-#ifdef FRAME
-    const int pmax = basis_.get_pmax_();
-    int p = 0;
-    for (Index lambda(basis_.first_generator(j0));;)
-      {
-	const double coeff = f(lambda)/D(lambda);
-	if (fabs(coeff)>1e-15)
-	  fhelp.set_coefficient(lambda, coeff);
-	if (lambda == basis_.last_wavelet(jmax, pmax))
-	  break;
-        if (lambda == basis_.last_wavelet(jmax, p)){
-            ++p;
-            lambda = basis_.first_generator(j0,p);
-        }
-        else
-            ++lambda;
-            
-      }
-#else
-    for (Index lambda(basis_.first_generator(j0));;++lambda)
-      {
-	const double coeff = f(lambda)/D(lambda);
-	if (fabs(coeff)>1e-15)
-	  fhelp.set_coefficient(lambda, coeff);
-	if (lambda == basis_.last_wavelet(jmax))
-	  break;
-        
-            
-      }
-#endif
+    InfiniteVector<double,int> fhelp_int;
     
+#ifdef FRAME
+//    cout << "bin hier0" << endl;
+    for (int i=0; i<basis_.degrees_of_freedom();i++) {
+        const double coeff = f(*(basis_.get_quarklet(i)))/D(*(basis_.get_quarklet(i)));
+        fhelp.set_coefficient(*(basis_.get_quarklet(i)), coeff);
+        fhelp_int.set_coefficient(i, coeff);
+//        cout << *(basis_.get_quarklet(i)) << endl;
+    }
+//    cout << "bin hier1" << endl;
+    
+#else
+    for (int i=0; i<basis_.degrees_of_freedom();i++) {
+//        cout << "bin hier: " << i << endl;
+//        cout << D(*(basis_.get_wavelet(i))) << endl;
+//        cout << *(basis_.get_wavelet(i)) << endl;
+        const double coeff = f(*(basis_.get_wavelet(i)))/D(*(basis_.get_wavelet(i)));
+//        cout << f(*(basis_.get_wavelet(i))) << endl;
+//        cout << coeff << endl;
+        fhelp.set_coefficient(*(basis_.get_wavelet(i)), coeff);
+        fhelp_int.set_coefficient(i, coeff);
+//        cout << *(basis_.get_wavelet(i)) << endl;
+    }
+//    const int j0   = basis().j0();
+//    for (Index lambda(basis_.first_generator(j0));;++lambda)
+//      {
+//	const double coeff = f(lambda)/D(lambda);
+//	if (fabs(coeff)>1e-15)
+//	  fhelp.set_coefficient(lambda, coeff);
+//          fhelp_int.set_coefficient(i, coeff);
+//	if (lambda == basis_.last_wavelet(jmax))
+//	  break;
+//        
+//            
+//      }
+#endif
     fnorm_sqr = l2_norm_sqr(fhelp);
     
     // sort the coefficients into fcoeffs
     fcoeffs.resize(fhelp.size());
-    unsigned int id(0);
+    fcoeffs_int.resize(fhelp_int.size());
+    unsigned int id(0), id2(0);
     for (typename InfiniteVector<double,Index>::const_iterator it(fhelp.begin()), itend(fhelp.end());
 	 it != itend; ++it, ++id)
       fcoeffs[id] = std::pair<Index,double>(it.index(), *it);
     sort(fcoeffs.begin(), fcoeffs.end(), typename InfiniteVector<double,Index>::decreasing_order());
+    
+    for (typename InfiniteVector<double,int>::const_iterator it(fhelp_int.begin()), itend(fhelp_int.end());
+	 it != itend; ++it, ++id2)
+      fcoeffs_int[id2] = std::pair<int,double>(it.index(), *it);
+    sort(fcoeffs_int.begin(), fcoeffs_int.end(), typename InfiniteVector<double,int>::decreasing_order());
     
     rhs_precomputed = true;
     cout << "end precompute rhs.." << endl;
@@ -108,10 +118,14 @@ namespace WaveletTL
   {
 #ifdef FRAME
 #ifdef DYADIC
-      return pow(ldexp(1.0, lambda.j())*pow(1+lambda.p(),4),operator_order()) * pow(1+lambda.p(),2); //2^j*(p+1)^6, falls operator_order()=1 (\delta=4)
+      return mypow((1<<lambda.j())*mypow(1+lambda.p(),4),operator_order())*mypow(1+lambda.p(),2); //2^j*(p+1)^6, falls operator_order()=1 (\delta=4)
 //      return 1<<(lambda.j()*(int) operator_order());
 #else
-      return stiff_diagonal[lambda.number()];
+#ifdef TRIVIAL
+      return 1;
+#else
+      return stiff_diagonal[lambda.number()]*(lambda.p()+1);
+#endif
 #endif
 #endif
 #ifdef BASIS
@@ -121,8 +135,12 @@ namespace WaveletTL
 //      return pow(ldexp(1.0, lambda.j()),operator_order());
 
 #else
+#ifdef TRIVIAL
+      return 1;
+#else
 //      return sqrt(a(lambda, lambda));
       return stiff_diagonal[lambda.number()];
+#endif
 #endif
 #else
  return 1;     
@@ -175,7 +193,9 @@ namespace WaveletTL
         
 
         #ifdef FRAME
-	const unsigned int N_Gauss = (p+1)/2+ (lambda.p()+nu.p()+1)/2;
+	const unsigned int N_Gauss = std::min((unsigned int)10,(p+1)/2+ (lambda.p()+nu.p()+1)/2);
+//        const unsigned int N_Gauss = 10;
+//        const unsigned int N_Gauss = (p+1)/2;
          #else 
         const unsigned int N_Gauss = (p+1)/2;
         #endif
@@ -319,7 +339,7 @@ namespace WaveletTL
   SturmEquation<WBASIS>::f(const typename WBASIS::Index& lambda) const
   {
     // f(v) = \int_0^1 g(t)v(t) dt
-
+//      cout << "bin in f" << endl;
     double r = 0;
 
     const int j = lambda.j()+lambda.e();
@@ -327,7 +347,7 @@ namespace WaveletTL
     support(basis_, lambda, k1, k2);
 
     // Set up Gauss points and weights for a composite quadrature formula:
-    const unsigned int N_Gauss = 7; //perhaps we need +lambda.p() @PHK
+    const unsigned int N_Gauss = 7; //perhaps we need +lambda.p()/2 @PHK
     const double h = ldexp(1.0, -j);
     Array1D<double> gauss_points (N_Gauss*(k2-k1)), vvalues;
     for (int patch = k1; patch < k2; patch++) // refers to 2^{-j}[patch,patch+1]
@@ -336,7 +356,7 @@ namespace WaveletTL
 
     // - compute point values of the integrand
     evaluate(basis_, 0, lambda, gauss_points, vvalues);
-    
+//    cout << "bin immer noch in f" << endl;
     // - add all integral shares
     for (int patch = k1, id = 0; patch < k2; patch++)
       for (unsigned int n = 0; n < N_Gauss; n++, id++) {
@@ -390,6 +410,25 @@ namespace WaveletTL
       coeffs.set_coefficient(it->first, it->second);
       ++it;
     } while (it != fcoeffs.end() && coarsenorm < bound);
+  }
+  
+  template <class WBASIS>
+  inline
+  void
+  SturmEquation<WBASIS>::RHS(const double eta,
+			     InfiniteVector<double,int>& coeffs) const
+  {
+    if (!rhs_precomputed) precompute_rhs();
+
+    coeffs.clear();
+    double coarsenorm(0);
+    double bound(fnorm_sqr - eta*eta);
+    typename Array1D<std::pair<int, double> >::const_iterator it(fcoeffs_int.begin());
+    do {
+      coarsenorm += it->second * it->second;
+      coeffs.set_coefficient(it->first, it->second);
+      ++it;
+    } while (it != fcoeffs_int.end() && coarsenorm < bound);
   }
 
 

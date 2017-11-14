@@ -44,12 +44,12 @@ namespace FrameTL
     //const double omega = 2.0 / (P.norm_A() + 1.0/P.norm_Ainv());
     
     // ####### 1D #######
-    //const double omega = 0.4;
-    //const double omega = 0.15;
+//    const double omega = 0.4;
+    const double omega = 0.15;
 
     // ####### 2D #######
     // bad one
-    const double omega = 0.05;
+//    const double omega = 0.05;
     // good one
     //const double omega = 0.25;
 

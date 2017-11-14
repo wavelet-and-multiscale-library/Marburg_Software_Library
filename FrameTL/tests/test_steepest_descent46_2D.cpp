@@ -1,5 +1,7 @@
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
 
+#define PARALLEL 0
+
 #define JMAX 8
 #define TWO_D
 

@@ -1,4 +1,4 @@
-// implementation for ldomain_frame_equation.h
+// implementation for ldomain_frame_gramian.h
 
 #include <cmath>
 #include <time.h>
@@ -11,7 +11,7 @@
 namespace WaveletTL
 {
 //    template <class IFRAME, class LDOMAINFRAME>
-//    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::LDomainFrameEquation(const EllipticBVP<2>* bvp,
+//    LDomainFrameGramian<IFRAME, LDOMAINFRAME>::LDomainFrameGramian(const EllipticBVP<2>* bvp,
 //					    const bool precompute_rhs)
 //    : bvp_(bvp), frame_(), normA(0.0), normAinv(0.0)
 //    {
@@ -29,7 +29,7 @@ namespace WaveletTL
 //    }
     
     template <class IFRAME, class LDOMAINFRAME>
-    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::LDomainFrameEquation(const EllipticBVP<2>* bvp, const Frame* frame,
+    LDomainFrameGramian<IFRAME, LDOMAINFRAME>::LDomainFrameGramian(const EllipticBVP<2>* bvp, const Frame* frame,
 					    const bool precompute_rhs)
     : bvp_(bvp), frame_(frame), normA(0.0), normAinv(0.0)
     {
@@ -45,7 +45,7 @@ namespace WaveletTL
     }
   
     //template <class IFRAME, class LDOMAINFRAME>
-    //LDomainFrameEquation<IFRAME, LDOMAINFRAME>::LDomainFrameEquation(const EllipticBVP<2>* bvp,
+    //LDomainFrameGramian<IFRAME, LDOMAINFRAME>::LDomainFrameGramian(const EllipticBVP<2>* bvp,
 	//				   const FixedArray1D<bool,8>& bc,
 	//				   const bool precompute_rhs)
     //: bvp_(bvp), frame_(bc), normA(0.0), normAinv(0.0)
@@ -59,7 +59,7 @@ namespace WaveletTL
     //}
   
     template <class IFRAME, class LDOMAINFRAME>
-    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::LDomainFrameEquation(const LDomainFrameEquation& eq)
+    LDomainFrameGramian<IFRAME, LDOMAINFRAME>::LDomainFrameGramian(const LDomainFrameGramian& eq)
     : bvp_(eq.bvp_), frame_(eq.frame_),
       fcoeffs(eq.fcoeffs), fnorm_sqr(eq.fnorm_sqr),
       normA(eq.normA), normAinv(eq.normAinv)
@@ -73,9 +73,9 @@ namespace WaveletTL
     
     template <class IFRAME, class LDOMAINFRAME>
     void
-    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::compute_rhs()
+    LDomainFrameGramian<IFRAME, LDOMAINFRAME>::compute_rhs()
     {
-        cout << "LDomainFrameEquation(): precompute right-hand side..." << endl;
+        cout << "LDomainFrameGramian(): precompute right-hand side..." << endl;
         // precompute the right-hand side on a fine level
         InfiniteVector<double,Index> fhelp;
         InfiniteVector<double,int> fhelp_int;
@@ -138,21 +138,19 @@ namespace WaveletTL
     template <class IFRAME, class LDOMAINFRAME>
     inline
     double
-    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::D(const Index& lambda) const
+    LDomainFrameGramian<IFRAME, LDOMAINFRAME>::D(const Index& lambda) const
     {
         //return ldexp(1.0, lambda.j());
 
 
         
 #ifdef DYADIC
-        double hspreconditioner(0), l2preconditioner(1);
+        double l2preconditioner(1);
         for (int i=0; i<space_dimension; i++){
-            hspreconditioner+=pow(1+lambda.p()[i],8)*(1<<(2*lambda.j()[i]));
             l2preconditioner*=pow(1+lambda.p()[i],2);
         }
-        double preconditioner = sqrt(hspreconditioner)*l2preconditioner;
-        
-        return preconditioner;
+                
+        return l2preconditioner;
 #else  
 #ifdef TRIVIAL
         return 1;
@@ -167,7 +165,7 @@ namespace WaveletTL
     template <class IFRAME, class LDOMAINFRAME>
     inline
     double
-    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::a(const Index& lambda,
+    LDomainFrameGramian<IFRAME, LDOMAINFRAME>::a(const Index& lambda,
 			     const Index& nu) const
     {
         return a(lambda, nu, 2 * IFRAME::primal_polynomial_degree());
@@ -175,7 +173,7 @@ namespace WaveletTL
 
     template <class IFRAME, class LDOMAINFRAME>
     double
-    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::a(const Index& la,
+    LDomainFrameGramian<IFRAME, LDOMAINFRAME>::a(const Index& la,
 			     const Index& nu,
 			     const unsigned int p) const
     {
@@ -196,57 +194,42 @@ namespace WaveletTL
              
         
         // loop over spatial direction
-            for (int i = 0; i < 2; i++) {
-              double t = 1.;
+            
+            IndexQ1D<IFRAME> i1(IntervalQIndex<IFRAME> (
+                                                      lambda->p()[0],lambda->j()[0],lambda->e()[0],lambda->k()[0],
+                                                      frame_->frames(lambda->patch(),0)
+                                                      ),
+                               lambda->patch(),0,0
+                               );
+            IndexQ1D<IFRAME> i2(IntervalQIndex<IFRAME> (mu->p()[0],mu->j()[0],mu->e()[0],mu->k()[0],
+                                                      frame_->frames(mu->patch(),0)
+                                                      ),
+                               mu->patch(),0,0
+                               );
 
-              for (int j = 0; j < 2; j++) {
-                if (j == i)
-                  continue;
-//                IFRAME frame1d_la= frame_->frames(lambda->patch(),j);
-//                IFRAME frame1d_mu= frame_->frames(mu->patch(),j);
-                IndexQ1D<IFRAME> i1(IntervalQIndex<IFRAME> (
-                                                          lambda->p()[j],lambda->j()[j],lambda->e()[j],lambda->k()[j],
-                                                          frame_->frames(lambda->patch(),j)
-                                                          ),
-                                   lambda->patch(),j,0
-                                   );
-                IndexQ1D<IFRAME> i2(IntervalQIndex<IFRAME> (mu->p()[j],mu->j()[j],mu->e()[j],mu->k()[j],
-                                                          frame_->frames(mu->patch(),j)
-                                                          ),
-                                   mu->patch(),j,0
-                                   );
+            IndexQ1D<IFRAME> i3(IntervalQIndex<IFRAME> (
+                                                      lambda->p()[1],lambda->j()[1],lambda->e()[1],lambda->k()[1],
+                                                      frame_->frames(lambda->patch(),1)
+                                                      ),
+                               lambda->patch(),1,0
+                               );
+            IndexQ1D<IFRAME> i4(IntervalQIndex<IFRAME> (mu->p()[1],mu->j()[1],mu->e()[1],mu->k()[1],
+                                                      frame_->frames(mu->patch(),1)
+                                                      ),
+                               mu->patch(),1,0
+                               );
 
+              
 
-                t *= integrate(i1, i2, N_Gauss[j], j, supp);
-//                cout << "Zwischenergebnis Richtung: " << j << "Wert: " << t << endl;
-              }
-
-//              IFRAME frame1d_la= frame_->frames(lambda->patch(),i);
-//              IFRAME frame1d_mu= frame_->frames(mu->patch(),i);
-              IndexQ1D<IFRAME> i1(IntervalQIndex<IFRAME> (
-                                                        lambda->p()[i],lambda->j()[i],lambda->e()[i],lambda->k()[i],
-                                                        frame_->frames(lambda->patch(),i)
-                                                        ),
-                                 lambda->patch(),i,1
-                                 );
-              IndexQ1D<IFRAME> i2(IntervalQIndex<IFRAME> (mu->p()[i],mu->j()[i],mu->e()[i],mu->k()[i],
-                                                        frame_->frames(mu->patch(),i)
-                                                        ),
-                                 mu->patch(),i,1
-                                 );
-
-              t *= integrate(i1, i2, N_Gauss[i], i, supp);
-
-              r += t;
-            }
-        }
+              r = integrate(i1, i2, N_Gauss[0], 0, supp)*integrate(i1, i2, N_Gauss[1], 1, supp);
+        }        
         return r;
     }
 //            
     
     template <class IFRAME, class LDOMAINFRAME>
     double
-    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::f(const Index& lambda) const
+    LDomainFrameGramian<IFRAME, LDOMAINFRAME>::f(const Index& lambda) const
     {
         // f(v) = \int_0^1 g(t)v(t) dt
 //        cout << "LDomainEquation::f() called with lambda=" << lambda << endl;
@@ -449,7 +432,7 @@ namespace WaveletTL
     
     template <class IFRAME, class LDOMAINFRAME>
     void
-    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::RHS(const double eta,
+    LDomainFrameGramian<IFRAME, LDOMAINFRAME>::RHS(const double eta,
                                     InfiniteVector<double,Index>& coeffs) const
     {
         coeffs.clear();
@@ -465,7 +448,7 @@ namespace WaveletTL
     
     template <class IFRAME, class LDOMAINFRAME>
     void
-    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::RHS(const double eta,
+    LDomainFrameGramian<IFRAME, LDOMAINFRAME>::RHS(const double eta,
                                     InfiniteVector<double,int>& coeffs) const
     {
         coeffs.clear();
@@ -482,7 +465,7 @@ namespace WaveletTL
 
     template <class IFRAME, class LDOMAINFRAME>
     double
-    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::norm_A() const
+    LDomainFrameGramian<IFRAME, LDOMAINFRAME>::norm_A() const
     {
         if (normA == 0.0) {
         //typedef typename Frame::Index Index;
@@ -544,7 +527,7 @@ namespace WaveletTL
     
     template <class IFRAME, class LDOMAINFRAME>
     double
-    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::norm_Ainv() const
+    LDomainFrameGramian<IFRAME, LDOMAINFRAME>::norm_Ainv() const
     {
         if (normAinv == 0.0) {
         typedef typename Frame::Index Index;
@@ -604,7 +587,7 @@ namespace WaveletTL
 
     template <class IFRAME, class LDOMAINFRAME>
     double
-    LDomainFrameEquation<IFRAME, LDOMAINFRAME>::s_star() const
+    LDomainFrameGramian<IFRAME, LDOMAINFRAME>::s_star() const
     {
         // notation from [St04a]
         const double t = operator_order();
@@ -618,9 +601,9 @@ namespace WaveletTL
 
     template <class IFRAME, class LDOMAINFRAME>
         void
-        LDomainFrameEquation<IFRAME, LDOMAINFRAME>::compute_diagonal()
+        LDomainFrameGramian<IFRAME, LDOMAINFRAME>::compute_diagonal()
         {
-          cout << " LDomainFrameEquation(): precompute diagonal of stiffness matrix..." << endl;
+          cout << " LDomainFrameGramian(): precompute diagonal of stiffness matrix..." << endl;
 
           SparseMatrix<double> diag(1,frame_->degrees_of_freedom());
 
@@ -684,7 +667,7 @@ namespace WaveletTL
 #if 1
     template <class IFRAME, class LDOMAINFRAME>
     double
-    LDomainFrameEquation<IFRAME, LDOMAINFRAME>:: integrate(const IndexQ1D<IFRAME>& la,
+    LDomainFrameGramian<IFRAME, LDOMAINFRAME>:: integrate(const IndexQ1D<IFRAME>& la,
                                                             const IndexQ1D<IFRAME>& nu,
                                                             const int N_Gauss,
                                                             const int dir,

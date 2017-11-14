@@ -93,10 +93,10 @@ namespace WaveletTL
     const translation_type& k() const { return k_; }
 
     //! number
-    const int number() const {
-//       return num_;
-        return (e_ == 0 ? k_ - frame_->DeltaLmin(p()): frame_->DeltaNablasize(j_,p_) + k_ - frame_->Nablamin(p_)) 
-               +p_ * frame_->Deltasize(frame_->get_jmax_()+1);
+    const int& number() const {
+       return num_;
+//        return (e_ == 0 ? k_ - frame_->DeltaLmin(p()): frame_->DeltaNablasize(j_,p_) + k_ - frame_->Nablamin(p_)) 
+//               +p_ * frame_->Deltasize(frame_->get_jmax_()+1);
         
     }
 
@@ -116,8 +116,8 @@ namespace WaveletTL
     //! polynomial degree, scale, type, translation
     int p_, j_, e_, k_;
     
-//     //! number of the index (not for generators on level j > j0)
-//     int num_;
+     //! number of the index (not for generators on level j > j0)
+     int num_;
     
 
     //! pointer to the underlying interval frame

@@ -141,6 +141,10 @@ namespace WaveletTL
 		indices.push_back(column);
 		entries.push_back(entry / (preconditioned ? d1 * P.D(*it2) : 1.0));
 	    }
+//            else{
+//                cout << *it2 << ", " << *it1 << ": " << entry << endl;
+//            }
+            
         }
         A_Lambda.set_row(row, indices, entries);
     }
@@ -341,6 +345,7 @@ namespace WaveletTL
     for (typename std::set<Index>::const_iterator it(Lambda.begin()), itend(Lambda.end());
 	 it != itend; ++it, ++row) {
       F_Lambda[row] = P.f(*it)/P.D(*it);
+//      cout << *it << ", " << P.f(*it) << endl;
     }
   }
   

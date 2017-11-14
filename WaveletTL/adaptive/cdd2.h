@@ -54,6 +54,28 @@ namespace WaveletTL
 		         InfiniteVector<double, typename PROBLEM::QuarkletFrame::Index>& u_epsilon,
                          const unsigned int maxlevel = 12, const CompressionStrategy strategy = DKR,
                          const int pmax = 0, const double a = 2, const double b = 2);
+  
+  template <class PROBLEM>
+  void CDD2_QUARKLET_SOLVE(const PROBLEM& P, const double nu, const double epsilon,
+		         InfiniteVector<double,int>& u_epsilon,
+                         const unsigned int maxlevel = 12, const CompressionStrategy strategy = DKR,
+                         const int pmax = 0, const double a = 2, const double b = 2);
+  
+  
+  //Richardson version of Manuels Diss. For test purposes
+  
+  template <class PROBLEM>
+  void richardson_QUARKLET_SOLVE(const PROBLEM& P, const double epsilon,
+			InfiniteVector<double, typename PROBLEM::Index>& u_epsilon, 
+                        const CompressionStrategy strategy = DKR, const double a = 2, const double b = 2);
+  
+  
+  //int version. runs faster
+  template <class PROBLEM>
+  void richardson_QUARKLET_SOLVE(const PROBLEM& P, const double epsilon,
+			InfiniteVector<double,int>& u_epsilon, 
+                        const CompressionStrategy strategy = DKR, const double a = 2, const double b = 2,
+                        const double shrink = 0);
 
  
 }

@@ -57,9 +57,9 @@ int main(){
     const int jmax = 4;
     
     typedef PBasis<d,dT> Basis1d;
-    typedef Basis1d::Index Index1d;
-    typedef TensorBasis<Basis1d,dim> TBasis;
-    typedef TBasis::Index TIndex;
+//    typedef Basis1d::Index Index1d;
+//    typedef TensorBasis<Basis1d,dim> TBasis;
+//    typedef TBasis::Index TIndex;
     typedef LDomainBasis<Basis1d> Basis;
     typedef Basis::Index Index;
     typedef Basis::Support Support;

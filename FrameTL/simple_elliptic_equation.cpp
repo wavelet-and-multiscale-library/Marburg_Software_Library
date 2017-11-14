@@ -658,11 +658,11 @@ namespace FrameTL
 			       p2[0]);
     tmp /= chart->Gram_factor(p2);
   
-#ifdef DELTADIS
+//#ifdef DELTADIS
     return 4.0*tmp + r;
-#else
-    return r;
-#endif
+//#else
+//    return r;
+//#endif
 #endif
 #ifndef TWO_D
 #ifndef ONE_D

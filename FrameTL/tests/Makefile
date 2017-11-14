@@ -122,33 +122,33 @@ veryclean:: clean
 	rm -f *~
 
 $(EXEOBJF1): %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -g -fopenmp -o $@ $<
 #	$(CXX) $(CXXFLAGS) -c -o $@ $< 
 
 $(EXES1): %: %.o
 #	$(CXX) $< -g -o $@
-	$(CXX) $< -o $@
+	$(CXX) $< -fopenmp -o $@
 
 $(EXEOBJF2): %.o: %.cpp
 #	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
-	$(CXX) $(CXXFLAGS) -c -o $@ $< 
+	$(CXX) $(CXXFLAGS) -c -fopenmp -o $@ $< 
 
 $(EXES2): %: %.o
 #	$(CXX) $< -g -o $@
-	$(CXX) $< -o $@
+	$(CXX) $< -fopenmp -o $@
 
 $(EXEOBJF3): %.o: %.cpp
 #	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
-	$(CXX) $(CXXFLAGS) -c -o $@ $< 
+	$(CXX) $(CXXFLAGS) -c -fopenmp -o $@ $< 
 
 $(EXES3): %: %.o
 #	$(CXX) $< -g -o $@
-	$(CXX) $< -o $@
+	$(CXX) $< -fopenmp -o $@
 
 $(EXEOBJF4): %.o: %.cpp
 #	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
-	$(CXX) $(CXXFLAGS) -c -o $@ $< 
+	$(CXX) $(CXXFLAGS) -c -fopenmp -o $@ $< 
 
 $(EXES4): %: %.o
 #	$(CXX) $< -g -o $@
-	$(CXX) $< -o $@
+	$(CXX) $< -fopenmp -o $@

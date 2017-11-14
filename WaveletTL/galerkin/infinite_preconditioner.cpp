@@ -97,7 +97,7 @@ namespace WaveletTL
     return preconditioner;
     
 #else
-    return pow(ldexp(1.0, lambda.j())*pow(1+lambda.p(),4),operator_order()) * pow(1+lambda.p(),2); //2^j*(p+1)^(2+\delta), falls operator_order()=1 (\delta=4)
+    return pow((1<<lambda.j())*pow(1+lambda.p(),4),operator_order())*pow(1+lambda.p(),2); //2^j*(p+1)^(2+\delta), falls operator_order()=1 (\delta=4)
 #endif
     
   }

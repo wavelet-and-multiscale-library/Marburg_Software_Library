@@ -17,7 +17,7 @@ namespace WaveletTL
       e_ = 0;                   // on the coarsest level
       j_ = frame_->j0();        // with polynomial degree 0.
 
-//       num_ = -1;
+       num_ = 0;
     }
   }
   
@@ -29,7 +29,7 @@ namespace WaveletTL
     e_ = lambda.e();
     k_ = lambda.k();
     frame_ = lambda.frame();
-    //num_ = lambda.number();
+    num_ = lambda.number();
   }
 
   template <class IFRAME>
@@ -40,7 +40,7 @@ namespace WaveletTL
     e_ = lambda->e();
     k_ = lambda->k();
     frame_ = lambda->frame();
-    //num_ = lambda->number();
+    num_ = lambda->number();
   }
 
 
@@ -53,7 +53,11 @@ namespace WaveletTL
     e_ = e;
     k_ = k;
     frame_ = frame;
-//     num_ = -1;
+//    cout << "Test: " << k_ << endl;
+//    cout <<  k_ - frame_->DeltaLmin(p_) << endl;
+    num_ = (e_ == 0 ? k_ - frame_->DeltaLmin(p_): frame_->DeltaNablasize(j_,p_) + k_ - frame_->Nablamin(p_)) 
+               +(p_>0? frame_->Deltasize(frame_->get_jmax_()+1)+(p_-1)*frame->DeltaNablasize(frame_->get_jmax_()+1,1):0);
+//    cout << frame->Deltasize(frame_->get_jmax_()+1) << ", " << frame->DeltaNablasize(frame_->get_jmax_()+1,p_) << endl;
   }
 
 
@@ -137,7 +141,7 @@ namespace WaveletTL
     e_ = lambda.e();
     k_ = lambda.k();
     frame_ = lambda.frame();
-//     num_ = lambda.number();
+     num_ = lambda.number();
 
     return *this;
   }
@@ -167,7 +171,7 @@ namespace WaveletTL
   IntervalQIndex<IFRAME>::operator ++ ()
   {
 //     if (num_ > -1)
-//       num_++;
+       num_++;
     
     switch (e_) {
     case 0:

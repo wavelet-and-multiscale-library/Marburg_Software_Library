@@ -82,11 +82,11 @@ namespace FrameTL{
 
     //beta in (0,1)
     //double beta      = 0.98;
-    //double beta      = 0.85;
+//    double beta      = 0.85;
 
-    //double beta      = 0.85; // this was chosen for d=2,3
+    double beta      = 0.85; // this was chosen for d=2,3
     //double beta      = 0.75; // this was chosen for d=4
-    double beta      = 0.5; // this was chosen for d=4
+//    double beta      = 0.5; // this was chosen for d=4
     
     cout << "beta = " << beta << endl;
 

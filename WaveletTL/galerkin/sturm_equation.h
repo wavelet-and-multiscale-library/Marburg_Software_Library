@@ -71,10 +71,15 @@ namespace WaveletTL
 #ifdef FRAME
   #ifdef DYADIC  
      : public FullyDiagonalQuarkletPreconditioner<typename WBASIS::Index>
-#else
+  #else
+  #ifdef TRIVIAL
+  : public TrivialPreconditioner<typename WBASIS::Index>
+  #else 
   : public FullyDiagonalEnergyNormPreconditioner<typename WBASIS::Index>
+  #endif
+  #endif
 #endif
-#endif
+  
 #ifdef BASIS
 #ifdef DYADIC
 
@@ -122,7 +127,7 @@ namespace WaveletTL
       (half) order t of the operator
       (inherited from FullyDiagonalDyadicPreconditioner)
     */
-    double operator_order() const { return 1.; }
+    double operator_order() const { return (bvp_.p(0.0)==1 ? 1. : 0.); }
     
     /*!
       evaluate the diagonal preconditioner D
@@ -184,6 +189,9 @@ namespace WaveletTL
       within a prescribed \ell_2 error tolerance
     */
     void RHS(const double eta, InfiniteVector<double,Index>& coeffs) const;
+    
+    //int version
+    void RHS(const double eta, InfiniteVector<double,int>& coeffs) const;
 
     /*!
       compute (or estimate) ||F||_2
@@ -208,6 +216,7 @@ namespace WaveletTL
 
     // right-hand side coefficients on a fine level, sorted by modulus
     mutable Array1D<std::pair<Index,double> > fcoeffs;
+    mutable Array1D<std::pair<int,double> > fcoeffs_int;
     
     //! Square root of coefficients on diagonal of stiffness matrix.
     Array1D<double> stiff_diagonal;

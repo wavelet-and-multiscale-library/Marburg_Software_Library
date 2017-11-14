@@ -41,8 +41,13 @@ namespace WaveletTL
   class CachedQuarkletProblem
 #ifdef DYADIC
    :public FullyDiagonalQuarkletPreconditioner<typename PROBLEM::Index>
+  
+#else
+#ifdef TRIVIAL
+  : public TrivialPreconditioner<typename PROBLEM::Index>
 #else
   : public FullyDiagonalEnergyNormPreconditioner<typename PROBLEM::Index>
+#endif
 #endif
   {
   public:
@@ -146,6 +151,11 @@ namespace WaveletTL
 	     InfiniteVector<double, Index>& coeffs) const {
       problem->RHS(eta, coeffs);
     }
+    
+    void RHS(const double eta,
+	     InfiniteVector<double,int>& coeffs) const {
+      problem->RHS(eta, coeffs);
+    }
 
     
     /*!
@@ -169,7 +179,7 @@ namespace WaveletTL
                     const double a = 0,
                     const double b = 0) const;
     
-    int number (const Index& lambda, const int jmax) const;
+//    int number (const Index& lambda, const int jmax) const;
     
   protected:
     //! the underlying (uncached) problem

@@ -102,6 +102,14 @@ namespace WaveletTL
                        const FixedArray1D<int,2*DIM>& bc,
                        const bool precompute = true);
 
+		/*
+		 * Constructor from a boundary value problem and a given tensor frame.
+		 * The tensor frame is supposed to incorporate the desired boundary
+		 * conditions and maximal levels 'jmax' and 'pmax' should have been set
+		 * to it beforehand (generally by a call of set_jpmax(int,int)).
+		 */
+		TensorFrameEquation(EllipticBVP<DIM>* bvp, const TENSORFRAME& frame);
+
         /*
          * copy constructor
          */

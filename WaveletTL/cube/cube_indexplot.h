@@ -32,7 +32,7 @@ namespace WaveletTL
     You can choose a Matlab colormap and toggle the boxes and a colorbar on or off.
   */
   template <class CUBEBASIS>
-  void plot_indices(const CUBEBASIS* basis,
+  void plot_indices_cube(const CUBEBASIS* basis,
 		    const InfiniteVector<double, typename CUBEBASIS::Index>& coeffs,
 		    const int jmax,
 		    std::ostream& os,

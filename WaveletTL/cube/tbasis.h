@@ -59,6 +59,9 @@ namespace WaveletTL
         
         //! Default constructor (no b.c.'s)
         TensorBasis();
+        
+        //! copy constructor
+        TensorBasis(const TensorBasis<IBASIS, DIM>& other);
 
         /* Constructor with specified boundary condition orders
          * i-th direction at x=0 <-> index 2*i

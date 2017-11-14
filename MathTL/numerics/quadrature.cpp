@@ -10,7 +10,9 @@ namespace MathTL
   {
   }
 
+
   template <>
+  inline
   QuadratureRule<0>::QuadratureRule()
   {
     // empty quadrature rule
@@ -47,7 +49,10 @@ namespace MathTL
 	  weights_[current_index] = Qweights[i] * Q1weights[j];
 	}
   }
+
+
   template <>
+  inline
   QuadratureRule<1>::QuadratureRule(const QuadratureRule<0>& Q,
 				    const QuadratureRule<1>& Q1)
   {
@@ -113,6 +118,7 @@ namespace MathTL
     return r;
   }
 
+  inline
   MidpointRule::MidpointRule()
   {
     points_.resize(1);
@@ -121,6 +127,7 @@ namespace MathTL
     weights_[0] = 1;
   }
 
+  inline
   TrapezoidalRule::TrapezoidalRule()
   {
     points_.resize(2);
@@ -130,6 +137,7 @@ namespace MathTL
     weights_[0] = weights_[1] = 0.5;
   }
 
+  inline
   SimpsonRule::SimpsonRule()
   {
     points_.resize(3);
@@ -141,6 +149,7 @@ namespace MathTL
     weights_[1] = 2.0/3.0;
   }
 
+  inline
   ClosedNewtonCotesRule::ClosedNewtonCotesRule(const unsigned int N)
   {
     points_.resize(N+1);
@@ -174,6 +183,7 @@ namespace MathTL
   }
 
   template <>
+  inline
   bool CompositeRule<1>::uses_both_endpoints(const QuadratureRule<1>& Q)
   {
     bool left(false), right(false);
@@ -193,6 +203,7 @@ namespace MathTL
   }  
 
   template <>
+  inline
   CompositeRule<1>::CompositeRule(const QuadratureRule<1>& Q,
 				  const unsigned int N)
     : Q_(Q), N_(N)

@@ -269,7 +269,7 @@ int main(int argc, char** argv) {
     sprintf(filenameCoefficients2, "%s%d%s", "Matlab_outputs/laplacian_solution_coefficients_p_" , p , "_ad.m");
     std::ofstream coeff_stream2 (filenameCoefficients2);
   coeff_stream2 << "figure;" << endl;
-  plot_indices2(&basis, u_epsilon, jmax, coeff_stream2, p, "jet", false, true, -8);
+  plot_indices_iq2(&basis, u_epsilon, jmax, coeff_stream2, p, "jet", false, true, -8);
   coeff_stream2 << "title('adaptive coefficients on the level p=" << p <<" of the test problem ("
                   <<  "periodic frame)');" << endl;
   coeff_stream2.close();   

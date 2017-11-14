@@ -3,7 +3,7 @@
 namespace WaveletTL
 {
   template <class CUBEBASIS>
-  void plot_indices(const CUBEBASIS* basis,
+  void plot_indices_cube(const CUBEBASIS* basis,
 		    const InfiniteVector<double, typename CUBEBASIS::Index>& coeffs,
 		    const int jmax,
 		    std::ostream& os,

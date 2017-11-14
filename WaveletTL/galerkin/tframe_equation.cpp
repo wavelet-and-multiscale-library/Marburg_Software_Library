@@ -34,6 +34,15 @@ namespace WaveletTL
     }
 
     template <class IFRAME, unsigned int DIM, class TENSORFRAME>
+	TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::TensorFrameEquation(EllipticBVP<DIM>* bvp,
+																	 const TENSORFRAME& frame)
+    : bvp_(bvp), frame_(frame), normA(0.0), normAinv(0.0)
+	{
+		// frame_.set_jpmax(frame.get_jmax(), frame.get_pmax());
+		compute_rhs();
+	}
+
+    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
     TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::TensorFrameEquation(const TensorFrameEquation& eq)
     : bvp_(eq.bvp_), frame_(eq.frame_),
       fcoeffs(eq.fcoeffs), fnorm_sqr(eq.fnorm_sqr),

@@ -482,14 +482,16 @@ A.apply(x, err);
   
   
   for(int p=0;p<=pmax;p++){
+
     char filenameCoefficients[128];
     sprintf(filenameCoefficients, "%s%d%s%d%s", "sturm_bvp_solution_coefficients_p_" , p , "_mu_", potenz , ".m");
     std::ofstream coeff_stream (filenameCoefficients);
   coeff_stream << "figure;" << endl;
-  plot_indices(&basis, u, jmax, coeff_stream, p, "jet", true, true, -8);
+  plot_indices_iq(&basis, u, jmax, coeff_stream, p, "jet", false, true, -8);
   coeff_stream << "title('nonadaptive coefficients on the level p=" << p <<" of the test problem ("
                   << basis_type << ")');" << endl;
   coeff_stream.close();   
+
   }
 #endif
 #else
@@ -670,7 +672,8 @@ cout << "\nTime taken: " << (time/CLOCKS_PER_SEC) << " s";
     sprintf(filenameCoefficients2, "%s%d%s", "sturm_bvp_solution_coefficients_p_" , p , "_ad.m");
     std::ofstream coeff_stream2 (filenameCoefficients2);
   coeff_stream2 << "figure;" << endl;
-  plot_indices(&basis, u_epsilon, jmax, coeff_stream2, p, "jet", true, true, -8);
+
+  plot_indices_iq(&basis, u_epsilon, jmax, coeff_stream2, p, "jet", false, true, -6);
   coeff_stream2 << "title('adaptive coefficients on the level p=" << p <<" of the test problem ("
                   << basis_type << ")');" << endl;
   coeff_stream2.close();   

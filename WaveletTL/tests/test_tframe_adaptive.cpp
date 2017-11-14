@@ -293,7 +293,7 @@ int main()
             jstart=ind.j();
             estart=ind.e();
             pstart=ind.p();
-            plot_indices2(&eq.frame(), u,  coeff_stream2, ind.p(), ind.j(), ind.e(), "(flipud(gray))", false, true, -5);
+            plot_indices_tframe2(&eq.frame(), u,  coeff_stream2, ind.p(), ind.j(), ind.e(), "(flipud(gray))", false, true, -5);
             coeff_stream2<<"print('-djpg',sprintf('coeffs%i%i%i%i.jpg',"<<ind.p()[0]<<","<<ind.p()[1]<<","<<ind.j()[0]-1+ind.e()[0]<<","<<ind.j()[1]-1+ind.e()[1]<<"))"<<endl;
         }    
     }    
@@ -486,7 +486,7 @@ int main()
 //    std::ofstream coeff_stream1;
 //    coeff_stream1.open("coefficients_ad.m");
 //    coeff_stream1 << "figure;" << endl;
-//    plot_indices(&eq.basis(), u_epsilon, 4, coeff_stream1,"(flipud(gray))", false, true, -8);
+//    plot_indices_tbasis(&eq.basis(), u_epsilon, 4, coeff_stream1,"(flipud(gray))", false, true, -8);
 //    coeff_stream1 << "title('solution coefficients') " << endl;
 //    coeff_stream1.close();
 //    cout << "coefficients plotted" << endl;

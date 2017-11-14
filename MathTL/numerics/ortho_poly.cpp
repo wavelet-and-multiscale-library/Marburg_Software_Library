@@ -9,6 +9,7 @@
 
 namespace MathTL
 {
+  inline
   double OrthogonalPolynomial::operator () (const unsigned int n, const double x) const
   {
     double pk(1.0); // p_0(x)
@@ -28,6 +29,7 @@ namespace MathTL
     return pk;
   }
   
+  inline
   Polynomial<double> OrthogonalPolynomial::assemble(const unsigned int n) const
   {
     Polynomial<double> pk(1.0); // p_0
@@ -49,6 +51,7 @@ namespace MathTL
     return pk;
   }
 
+  inline
   double OrthogonalPolynomial::forwardSummation(const Vector<double>& coeffs, const double x) const
   {
     double S(0.0);
@@ -71,6 +74,7 @@ namespace MathTL
     return S;
   }
 
+  inline
   double OrthogonalPolynomial::adjointSummation(const Vector<double>& coeffs, const double x) const
   {
     assert(coeffs.size() >= 1);
@@ -92,21 +96,25 @@ namespace MathTL
     return u0 + uk*(x-a(1));
   }
 
+  inline
   double Monomial::a(const unsigned int k) const
   {
     return 0.0;
   }
   
+  inline
   double Monomial::b(const unsigned int k) const
   {
     return 0.0;
   }
 
+  inline
   double ChebyshevPolynomial::a(const unsigned int k) const
   {
     return 0.0;
   }
 
+  inline
   double ChebyshevPolynomial::b(const unsigned int k) const
   {
     double r(0);
@@ -121,11 +129,13 @@ namespace MathTL
     return r;
   }
 
+  inline
   double LegendrePolynomial::a(const unsigned int k) const
   {
     return 0.0;
   }
 
+  inline
   double LegendrePolynomial::b(const unsigned int k) const
   {
     double r(0);
@@ -140,6 +150,7 @@ namespace MathTL
     return r;
   }
 
+  inline
   GenMomentsPolynomial::GenMomentsPolynomial(const Array1D<double>& moments,
 					     const double a, const double b,
 					     const unsigned int N)
@@ -184,6 +195,7 @@ namespace MathTL
     }
   }
 
+  inline
   GenMomentsPolynomial::GenMomentsPolynomial(const Array1D<double>& moments,
 					     const OrthogonalPolynomial& T,
 					     const double a, const double b,
@@ -214,12 +226,14 @@ namespace MathTL
     }
   }
   
+  inline
   double GenMomentsPolynomial::a(const unsigned int k) const
   {
     assert(k >= 1 && k <= ak_.size());
     return ak_[k-1];
   }
   
+  inline
   double GenMomentsPolynomial::b(const unsigned int k) const
   {
     assert(k >= 1 && k <= bk_.size());

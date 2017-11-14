@@ -3,7 +3,7 @@
 namespace WaveletTL
 {
     template <class TENSORFRAME>
-    void plot_indices(const TENSORFRAME* frame,
+    void plot_indices_tframe(const TENSORFRAME* frame,
             const InfiniteVector<double, typename TENSORFRAME::Index>& coeffs,
             const int maxrange,
             std::ostream& os,
@@ -225,8 +225,9 @@ namespace WaveletTL
             } // end of "big loop"
         } // end of while(!atmaxrange)
     }
+    
     template <class TENSORFRAME>
-    void plot_indices2(const TENSORFRAME* frame,
+    void plot_indices_tframe2(const TENSORFRAME* frame,
                        const InfiniteVector<double, typename TENSORFRAME::Index>& coeffs,
                        std::ostream& os,
                        const typename TENSORFRAME::Index::polynomial_type p,

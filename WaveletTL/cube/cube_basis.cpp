@@ -19,6 +19,26 @@ namespace WaveletTL
   }
 
   template <class IBASIS, unsigned int DIM>
+  CubeBasis<IBASIS,DIM>::CubeBasis(const CubeBasis<IBASIS, DIM>& other)
+    : full_collection(other.full_collection), j0_(other.j0_), jmax_(other.jmax_),
+      bases_infact(), bases_()
+  {
+    for (typename list<IBASIS*>::const_iterator it(other.bases_infact.begin());
+         it != other.bases_infact.end(); ++it)
+    {
+        // make deep copy of the 1D bases:
+        IBASIS* ibasis = new IBASIS(*(*it));
+        bases_infact.push_back(ibasis);
+        for (int i = 0; i < DIM; ++i)
+        {
+			if (*it == other.bases_[i])
+				bases_[i] = ibasis;
+		}
+    }
+    delete_pointers = true;
+  }
+
+  template <class IBASIS, unsigned int DIM>
   CubeBasis<IBASIS,DIM>::CubeBasis(const FixedArray1D<int,2*DIM>& s,
 				   const FixedArray1D<int,2*DIM>& sT) {
     for (unsigned int i = 0; i < DIM; i++) {

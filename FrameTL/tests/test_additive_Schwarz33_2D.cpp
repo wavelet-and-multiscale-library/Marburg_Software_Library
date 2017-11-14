@@ -494,7 +494,7 @@ int main(int argc, char* argv[])
 	approximations_cube[i].set_coefficient(CIndex(it.index().j(),it.index().e(),it.index().k(), mapped_basis),*it);
 	}
       
-      plot_indices(frame.bases()[i], approximations_cube[i], jmax, plotstream, "jet", false, true);
+      plot_indices_cube(frame.bases()[i], approximations_cube[i], jmax, plotstream, "jet", false, true);
       plotstream.close();
       
     }

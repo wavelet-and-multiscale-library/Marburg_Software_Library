@@ -12,6 +12,7 @@
 
 #include <map>
 #include <algebra/infinite_vector.h>
+#include <algebra/sparse_matrix.h>
 #include <adaptive/compression.h>
 #include <galerkin/infinite_preconditioner.h>
 

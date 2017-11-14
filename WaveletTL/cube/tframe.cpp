@@ -19,6 +19,30 @@ namespace WaveletTL
             j0_[i] = j0_[0];
     	delete_pointers = true;
   	}
+  	
+  	template <class IFRAME, unsigned int DIM>
+	TensorFrame<IFRAME,DIM>::TensorFrame(const TensorFrame<IFRAME, DIM>& other)
+    : full_collection(other.full_collection),
+#if _PRECOMPUTE_FIRSTLAST_WAVELETS
+      first_wavelets(other.first_wavelets), last_wavelets(other.last_wavelets),
+#endif
+	  j0_(other.j0_), jmax_(other.jmax_), pmax_(other.pmax_),
+      frames_infact(), frames_()
+  {
+    for (typename list<IFRAME*>::const_iterator it(other.frames_infact.begin());
+         it != other.frames_infact.end(); ++it)
+    {
+        // make deep copy of the 1D frames:
+        IFRAME* iframe = new IFRAME(*(*it));
+        frames_infact.push_back(iframe);
+        for (unsigned int i = 0; i < DIM; ++i)
+        {
+			if (*it == other.frames_[i])
+				frames_[i] = iframe;
+		}
+    }
+    delete_pointers = true;
+  }
 
 /* Works only with DSFrame, but not with PFrame : 
   	template <class IFRAME, unsigned int DIM>

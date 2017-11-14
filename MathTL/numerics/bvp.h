@@ -104,7 +104,10 @@ namespace MathTL
       flag to indicate whether all coefficients are constants
       (speeds up quadrature a bit)
     */
-    virtual const bool constant_coefficients() const = 0;
+    virtual const bool constant_coefficients() const
+    {
+        return false;
+    }
     
     /*!
       right-hand side f

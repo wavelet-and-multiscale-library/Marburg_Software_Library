@@ -322,7 +322,7 @@ int main()
     std::ofstream coeff_stream1;
     coeff_stream1.open("coefficients_ad.m");
     coeff_stream1 << "figure;" << endl;
-    plot_indices(&eq.basis(), u_epsilon, 4, coeff_stream1,"(flipud(gray))", false, true, -8);
+    plot_indices_tbasis(&eq.basis(), u_epsilon, 4, coeff_stream1,"(flipud(gray))", false, true, -8);
     coeff_stream1 << "title('solution coefficients') " << endl;
     coeff_stream1.close();
     cout << "coefficients plotted" << endl;
@@ -339,7 +339,7 @@ int main()
             cout << lambda.j()[0]-1+lambda.e()[0]<<lambda.j()[1]-1+lambda.e()[1] << endl;
             jstart=lambda.j();
             estart=lambda.e();
-            plot_indices2(&eq.basis(), u_epsilon, coeff_stream2, lambda.j(), lambda.e(),"(flipud(gray))", false, true, -5);
+            plot_indices_tbasis2(&eq.basis(), u_epsilon, coeff_stream2, lambda.j(), lambda.e(),"(flipud(gray))", false, true, -5);
             //coeff_stream2 << "title('solution coefficients') " << endl;
             //coeff_stream2 << "title(sprintf('coefficients on level (%i,%i)',"<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"));"<<endl;
             coeff_stream2<<"print('-djpg',sprintf('coeffs%i%i.jpg',"<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"))"<<endl;

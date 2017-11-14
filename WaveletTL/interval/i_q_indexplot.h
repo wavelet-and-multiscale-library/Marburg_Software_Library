@@ -32,7 +32,7 @@ namespace WaveletTL
     You can choose a Matlab colormap and toggle the boxes and a colorbar on or off.
   */
   template <class IBASIS>
-  void plot_indices(const IBASIS* basis,
+  void plot_indices_iq(const IBASIS* basis,
 		    const InfiniteVector<double, typename IBASIS::Index>& coeffs,
 		    const int jmax,
                     std::ostream& os,
@@ -56,7 +56,7 @@ namespace WaveletTL
     This version works with IntervalBasis2-like index classes
   */
   template <class IBASIS>
-  void plot_indices2(const IBASIS* basis,
+  void plot_indices_iq2(const IBASIS* basis,
 		     const InfiniteVector<double, typename IBASIS::Index>& coeffs,
 		     const int jmax,
 		     std::ostream& os,

@@ -3,12 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+#undef POISSON
+#define GRAMIAN
 
-#undef DYADIC
-#define ENERGY
 
-#undef NONADAPTIVE
-#define ADAPTIVE
+#define DYADIC
+#undef TRIVIAL
+#undef ENERGY
+
+#define NONADAPTIVE
+#undef ADAPTIVE
 
 #ifdef ADAPTIVE
 #define SD
@@ -21,7 +25,7 @@
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
-#define JMAX 6
+#define JMAX 7
 #define PMAX 0
 #define TWO_D
 
@@ -65,7 +69,7 @@ public:
   virtual ~myRHS() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
     CornerSingularityRHS csrhs(Point<2>(0,0), 0.5, 1.5);
-    return /*2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1])+*/5*csrhs.value(p);
+    return 2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1])+5*csrhs.value(p);
   }
   void vector_value(const Point<2>& p, Vector<double>& values) const {
     values[0] = value(p);
@@ -127,8 +131,10 @@ int main(){
     myRHS rhs1;
     
     
+    
     PoissonBVP<dim> poisson1(&rhs1);
 //    PoissonBVP<dim> poisson1(&uexact1);
+    IdentityBVP<dim> gramian1(&uexact1);
     Frame1d frame1d(false,false);
     frame1d.set_jpmax(jmax-frame1d.j0(),pmax);
     Frame1d frame1d_11(true,true);
@@ -139,8 +145,13 @@ int main(){
     frame1d_10.set_jpmax(jmax-frame1d.j0(),pmax);
     Frame frame(&frame1d, &frame1d_11, &frame1d_01, &frame1d_10);
     frame.set_jpmax(jmax,pmax);
+#ifdef POISSON
     LDomainFrameEquation<Frame1d,Frame> eq(&poisson1, &frame, true);
-//    LDomainFrameGramian<Frame1d,Frame> eq(&poisson1, &frame, true);
+#endif
+#ifdef GRAMIAN
+    LDomainFrameGramian<Frame1d,Frame> eq(&gramian1, &frame, true);
+#endif
+    
     
     
     
@@ -235,7 +246,7 @@ int main(){
     //setup stiffness matrix and rhs
     SparseMatrix<double> A;
     setup_stiffness_matrix(eq,Lambda,A); 
-    cout << "setup stiffness matrix done" << endl;
+//    cout << "setup stiffness matrix done" << endl;
     Vector<double> F;
     setup_righthand_side(eq, Lambda, F); 
     A.compress(1e-14);
@@ -249,12 +260,13 @@ int main(){
     unsigned int iterations;
     const int maxiterations = 9999;
 //    cout << eq.norm_A(), ", " << eq.norm_Ainv() << endl;
-    cout << eq.norm_A() << endl;
-    cout << eq.norm_Ainv() << endl;
-    const double omega = 2.0 / (eq.norm_A() + 1.0/eq.norm_Ainv());
-    cout << "omega: "<<omega<<endl;
-    Richardson(A,F,x,omega,1e-6,maxiterations,iterations);
-    //CG(A,F,x,1e-8,maxiterations,iterations);
+//    cout << eq.norm_A() << endl;
+//    cout << eq.norm_Ainv() << endl;
+//    const double omega = 2.0 / (eq.norm_A() + 1.0/eq.norm_Ainv());
+//    cout << "omega: "<<omega<<endl;
+    cout << "start iteration..." << endl; 
+//    Richardson(A,F,x,omega,1e-6,maxiterations,iterations);
+    CG(A,F,x,1e-8,maxiterations,iterations);
     cout << "iterations:" << iterations << endl;
     
     
@@ -270,8 +282,9 @@ int main(){
     Array1D<SampledMapping<dim> > eval(3);
     eval=eq.frame().evaluate(u,6);
     std::ofstream os2("solution_na.m");
+    os2 << "figure;" << endl;
     for(int i=0;i<3;i++){
-        eval[i].matlab_output(os2);
+        eval[i].matlab_output(os2);        
         os2 << "surf(x,y,z);" << endl;
         os2 << "hold on;" << endl;
     }  
@@ -292,7 +305,7 @@ int main(){
             //cout <<lambda.p()[0]<<lambda.p()[1]<< lambda.j()[0]-1+lambda.e()[0]<<lambda.j()[1]-1+lambda.e()[1] << endl;
             jstart=lambda.j();
             estart=lambda.e();
-            plot_indices_ldomain(&frame, u, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(flipud(gray))", false, true, -6);
+            plot_indices_ldomain(&frame, u, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(jet)", false, true, -6);
             //coeff_stream2 << "title('solution coefficients') " << endl;
             //coeff_stream2 << "title(sprintf('coefficients on level (%i,%i)',"<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"));"<<endl;
             coeff_stream<<"print('-djpg',sprintf('coeffs%i%i%i%i.jpg',"<<lambda.p()[0]<<","<<lambda.p()[1]<<","<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"))"<<endl;

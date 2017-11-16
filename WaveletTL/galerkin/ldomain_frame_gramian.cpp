@@ -145,12 +145,14 @@ namespace WaveletTL
 
         
 #ifdef DYADIC
-        double l2preconditioner(1);
+        double hspreconditioner(0), l2preconditioner(1);
         for (int i=0; i<space_dimension; i++){
+            hspreconditioner+=pow(1+lambda.p()[i],8)*(1<<(2*lambda.j()[i]));
             l2preconditioner*=pow(1+lambda.p()[i],2);
         }
-                
-        return l2preconditioner;
+        double preconditioner = sqrt(hspreconditioner)*l2preconditioner;
+        
+        return preconditioner;
 #else  
 #ifdef TRIVIAL
         return 1;
@@ -221,7 +223,7 @@ namespace WaveletTL
 
               
 
-              r = integrate(i1, i2, N_Gauss[0], 0, supp)*integrate(i1, i2, N_Gauss[1], 1, supp);
+              r = integrate(i1, i2, N_Gauss[0], 0, supp)*integrate(i3, i4, N_Gauss[1], 1, supp);
         }        
         return r;
     }

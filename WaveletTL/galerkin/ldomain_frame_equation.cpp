@@ -528,7 +528,7 @@ namespace WaveletTL
         normA = evals(evals.size()-1);
         normAinv = 1./evals(i);
       
-        cout << "Eigenwerte: " << evals << endl;
+//        cout << "Eigenwerte: " << evals << endl;
       //cout << "Eigenvektoren: " << endl << evecs << endl;
 #else
         Vector<double> xk(Lambda.size(), false);

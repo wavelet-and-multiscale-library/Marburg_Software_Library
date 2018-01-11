@@ -89,7 +89,7 @@ namespace WaveletTL
 //    int space_dimension = (*(lambda.frame())).space_dimension;
 //    int space_dimension = 2;
     for (int i=0; i<_DIM; i++){
-        hspreconditioner+=pow(1+lambda.p()[i],8)*ldexp(1.0,2*lambda.j()[i]);
+        hspreconditioner+=pow(1+lambda.p()[i],8)*(1<<(2*lambda.j()[i]));
         l2preconditioner*=pow(1+lambda.p()[i],2);
     }
     double preconditioner = sqrt(hspreconditioner)*l2preconditioner;
@@ -109,6 +109,26 @@ namespace WaveletTL
   FullyDiagonalEnergyNormPreconditioner<INDEX>::diag(const INDEX& lambda) const
   {
     return sqrt(a(lambda, lambda));
+    //return ldexp(1.0, lambda.j()); //ATTENTION!!! HAS TO BE CHANGED BACK; ONLY FOR EXPERIMENTING
+  };
+  
+  
+  template <class INDEX>
+  inline
+  double
+  FullyDiagonalDyPlusEnNormPreconditioner<INDEX>::diag(const INDEX& lambda) const
+  {
+   double hspreconditioner(0), l2preconditioner(1);
+//    int space_dimension = (*(lambda.frame())).space_dimension;
+//    int space_dimension = 2;
+    for (int i=0; i<_DIM; i++){
+        hspreconditioner+=pow(1+lambda.p()[i],6);
+        l2preconditioner*=pow(1+lambda.p()[i],2);
+    }
+    double preconditioner = sqrt(hspreconditioner)*l2preconditioner*sqrt(a(lambda, lambda))/sqrt(_DIM);
+        
+    return preconditioner;      
+   
     //return ldexp(1.0, lambda.j()); //ATTENTION!!! HAS TO BE CHANGED BACK; ONLY FOR EXPERIMENTING
   };
 

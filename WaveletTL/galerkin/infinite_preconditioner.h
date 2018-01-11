@@ -219,6 +219,23 @@ namespace WaveletTL
     */
     double diag(const INDEX& lambda) const;
   };
+  
+  template <class INDEX>
+  class FullyDiagonalDyPlusEnNormPreconditioner
+    : public FullyDiagonalPreconditioner<INDEX>
+  {
+  public:
+    /*!
+      evaluate the unpreconditioned bilinear form
+    */
+    virtual double a(const INDEX& lambda,
+		     const INDEX& nu) const = 0;
+    
+    /*!
+      evaluate the diagonal preconditioner D
+    */
+    double diag(const INDEX& lambda) const;
+  };
 
     /*!
      Trivial preconditioner, diag = 1

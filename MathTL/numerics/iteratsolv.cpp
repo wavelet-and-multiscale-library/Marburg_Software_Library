@@ -60,7 +60,7 @@ namespace MathTL
         double tmp1 = log10(error);
         residual_norm[log10( (double)iterations )]=tmp1;
         
-//        cout << "iteration: " << iterations <<  ", residual norm = " << error << endl;
+        cout << "iteration: " << iterations <<  ", residual norm = " << error <<  endl;
         
         
             for(unsigned int i = 0;i<xk.size();i++){
@@ -69,6 +69,7 @@ namespace MathTL
             }
 //        cout << "Degrees of freedom: " << dof << endl;
         degrees_of_freedom[log10( (double)iterations )]=log10( (double)dof );
+        cout << "dof= " << dof <<  endl;
         dof=0;
       }
     // perform matlab output

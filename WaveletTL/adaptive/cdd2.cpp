@@ -442,14 +442,14 @@ namespace WaveletTL
     // ####### 1D #######
 //    const double omega = 1;
 //    const double omega = 0.2; //for p=4
-    const double omega = 0.4;
+//    const double omega = 0.4;
 //    const double omega = 0.15;
 
     // ####### 2D #######
     // bad one
 //    const double omega = 0.05;
     // good one
-    //const double omega = 0.25;
+    const double omega = 0.25;
 
     //const double omega = 0.3;
 
@@ -502,7 +502,7 @@ namespace WaveletTL
       cout << "Rich_SOLVE: eta=" << eta << endl;
       P.RHS(eta, f);
       for (int j = 1; j <= 1/*K*/; j++) {
-	APPLY_QUARKLET_COARSE(P, v, eta, Av, jmax, DKR, pmax, a, b, 1.0e-6);
+	APPLY_QUARKLET_COARSE(P, v, eta, Av, jmax, strategy, pmax, a, b, 1.0e-6);
 
 	v += omega * (f - Av);
 
@@ -513,7 +513,7 @@ namespace WaveletTL
 
         // ############ output #############
 	P.RHS(1.0e-6, f);
- 	APPLY_QUARKLET(P, v, 1.0e-6, Av, jmax, DKR, pmax, a, b);
+ 	APPLY_QUARKLET(P, v, 1.0e-6, Av, jmax, strategy, pmax, a, b);
   	double residual_norm = l2_norm(f - Av);
  	double tmp1 = log10(residual_norm);
 	cout << "current residual error ||f-Av||=" << residual_norm << endl;
@@ -595,7 +595,8 @@ namespace WaveletTL
     
   template <class PROBLEM>
   void richardson_QUARKLET_SOLVE(const PROBLEM& P, const double epsilon,
-			InfiniteVector<double,int>& u_epsilon, CompressionStrategy strategy,
+			InfiniteVector<double,int>& u_epsilon, const unsigned int maxiter,
+                        CompressionStrategy strategy,
                         const double a, const double b, const double shrink)
   {
 
@@ -628,16 +629,16 @@ namespace WaveletTL
     // ####### 1D #######
 //    const double omega = 1.;
 //    const double omega = 0.1; //for p=4
-    const double omega = 0.4;
+//    const double omega = 0.4;
 //    const double omega = 0.15;
 
     // ####### 2D #######
     // bad one
 //    const double omega = 0.05;
     // good one
-    //const double omega = 0.25;
+    const double omega = 0.25;
 
-    //const double omega = 0.3;
+//    const double omega = 0.05;
 
 
     //const double omega = 2.0/2.47-0.5;
@@ -666,6 +667,7 @@ namespace WaveletTL
     map<double,double> time_asymptotic;
     map<double,double> log_10_L2_error;
     map<double,double> weak_ell_tau_norms;
+    map<double,double> loop_asymptotic;
     
     bool exit = 0;
     unsigned int loops = 0;
@@ -689,10 +691,10 @@ namespace WaveletTL
       cout << "Rich_SOLVE: eta=" << eta << endl;
       P.RHS(eta, f);
       for (int j = 1; j <= 1/*K*/; j++) {
-	APPLY_QUARKLET_COARSE(P, v, eta, Av, jmax, DKR, pmax, a, b, 1.0e-6);
+	APPLY_QUARKLET_COARSE(P, v, eta, Av, jmax, strategy, pmax, a, b, 1.0e-6);
 
 	v += 0.5 * omega * (f - Av);
-        v.shrinkage(shrink);
+//        v.shrinkage(shrink);
 
 	++loops;
 	tend = clock();
@@ -701,13 +703,14 @@ namespace WaveletTL
 
         // ############ output #############
 	P.RHS(1.0e-6, f);
- 	APPLY_QUARKLET(P, v, 1.0e-6, Av, jmax, DKR, pmax, a, b);
+ 	APPLY_QUARKLET(P, v, 1.0e-6, Av, jmax, strategy, pmax, a, b);
   	double residual_norm = l2_norm(f - Av);
  	double tmp1 = log10(residual_norm);
 	cout << "current residual error ||f-Av||=" << residual_norm << endl;
 #if 1	
 	asymptotic[log10( (double)v.size() )] = tmp1;
 	time_asymptotic[log10(time)] = tmp1;
+        loop_asymptotic[log10((double) loops)] = tmp1;
 
 
 #ifdef ONE_D
@@ -726,17 +729,20 @@ namespace WaveletTL
 	char name1[128];
 	char name2[128];
 	char name3[128];
+        char name4[128];
 
 #ifdef ONE_D
-	sprintf(name1, "%s%d%s%d%s", "./Richardson_results/rich1D_asymptotic_P_jmax18_d", d, "_dT", dT, ".m");
-	sprintf(name2, "%s%d%s%d%s", "./Richardson_results/rich1D_time_asymptotic_P_jmax18_d", d, "_dT", dT, ".m");
-	sprintf(name3, "%s%d%s%d%s", "./Richardson_results/rich1D_weak_ell_tau_norms_P_jmax18_d", d, "_dT", dT, ".m");
+	sprintf(name1, "%s%d%s%d%s", "./Richardson_results/rich1D_asymptotic_jmax18_d", d, "_dT", dT, ".m");
+	sprintf(name2, "%s%d%s%d%s", "./Richardson_results/rich1D_time_asymptotic_jmax18_d", d, "_dT", dT, ".m");
+	sprintf(name3, "%s%d%s%d%s", "./Richardson_results/rich1D_weak_ell_tau_norms_jmax18_d", d, "_dT", dT, ".m");
+        sprintf(name4, "%s%d%s%d%s", "./Richardson_results/rich1D_loop_asymptotic_jmax18_d", d, "_dT", dT, ".m");
 #endif	
 
 #ifdef TWO_D
-	sprintf(name1, "%s%d%s%d%s", "./Richardson_results_2D/rich2D_asymptotic_P_jmax", jmax,",_pmax", pmax,"_d", d, "_dT", dT, ".m");
-	sprintf(name2, "%s%d%s%d%s", "./Richardson_results_2D/rich2D_time_asymptotic_P_jmax18_d", jmax,",_pmax", pmax,"_d", d, "_dT", dT, ".m");
-	sprintf(name3, "%s%d%s%d%s", "./Richardson_results_2D/rich2D_weak_ell_tau_norms_P_jmax18_d", jmax,",_pmax", pmax,"_d", d, "_dT", dT, ".m");
+	sprintf(name1, "%s%d%s%d%s%d%s%d%s", "./Richardson_results_2D/rich2D_asymptotic_jmax", jmax,"_pmax", pmax,"_d", d, "_dT", dT, ".m");
+	sprintf(name2, "%s%d%s%d%s%d%s%d%s", "./Richardson_results_2D/rich2D_time_asymptotic_jmax", jmax,"_pmax", pmax,"_d", d, "_dT", dT, ".m");
+	sprintf(name3, "%s%d%s%d%s%d%s%d%s", "./Richardson_results_2D/rich2D_weak_ell_tau_norms_jmax", jmax,"_pmax", pmax,"_d", d, "_dT", dT, ".m");
+        sprintf(name4, "%s%d%s%d%s%d%s%d%s", "./Richardson_results_2D/rich2D_loop_asymptotic_jmax", jmax,"_pmax", pmax,"_d", d, "_dT", dT, ".m");
 #endif
 
 	std::ofstream os1(name1);
@@ -750,6 +756,10 @@ namespace WaveletTL
 	std::ofstream os3(name3);
 	matlab_output(weak_ell_tau_norms,os3);
 	os3.close();
+        
+        std::ofstream os4(name4);
+	matlab_output(loop_asymptotic,os4);
+	os4.close();
 
 	// ############ end output #############	
 #endif
@@ -759,7 +769,7 @@ namespace WaveletTL
 	if (residual_norm < 1e-4 || loops == 5000 || (shrink!=0 && residual_norm < 0.29)) 
 #endif
 #ifdef TWO_D
-	if (residual_norm < 0.01 || loops == 5000) 
+	if (residual_norm < 0.01 || loops == maxiter) 
 #endif
         {
 	  u_epsilon = v;

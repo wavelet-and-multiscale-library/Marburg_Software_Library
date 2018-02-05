@@ -12,6 +12,7 @@
 #define JMAX 6
 #define PMAX 1
 #define ONE_D
+#define _DIM 1
 
 #undef BASIS
 #define FRAME
@@ -374,7 +375,7 @@ double alpha_n = 2. / lmax - 0.001;
     sprintf(filenameCoefficients2, "%s%d%s", "sturm_bvp_solution_coefficients_p_" , p , ".m");
     std::ofstream coeff_stream2 (filenameCoefficients2);
   coeff_stream2 << "figure;" << endl;
-  plot_indices(&basis, u, jmax, coeff_stream2, p, "jet", false, true, -8);
+  plot_indices_iq(&basis, u, jmax, coeff_stream2, p, "jet", false, true, -8);
   coeff_stream2 << "title('coefficients on the level p=" << p <<" of the test problem ("
                   << basis_type << " basis)');" << endl;
   coeff_stream2.close();   

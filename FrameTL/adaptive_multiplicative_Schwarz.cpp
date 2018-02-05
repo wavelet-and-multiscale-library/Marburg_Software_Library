@@ -22,7 +22,7 @@ namespace FrameTL
   H_1_error_interval(const AggregatedFrame<IBASIS,DIM,DIM>& frame,
 		     const InfiniteVector<double, typename AggregatedFrame<IBASIS,DIM,DIM>::Index>& coeffs,
 		     const Function<1>& f);
-  
+
   // forward declaration
   template <class IBASIS, int DIM>
   double
@@ -49,10 +49,10 @@ namespace FrameTL
     {
       return 16*(p[0]*p[0])*(1-p[0])*(1-p[0]);
     }
-  
+
     void vector_value(const Point<1> &p,
 		      Vector<VALUE>& values) const { ; }
-  
+
   };
 
 
@@ -70,12 +70,12 @@ namespace FrameTL
     {
       return 10.0*p[0]*(1-p[0])*p[1]*(1-p[1]);
     }
-  
+
     void vector_value(const Point<2> &p,
 		      Vector<VALUE>& values) const {
-      ; 
+      ;
     }
-  
+
   };
 
   /*!
@@ -92,12 +92,12 @@ namespace FrameTL
     {
       return 10.0*2*(p[0]*(1-p[0]) + p[1]*(1-p[1]));
     }
-  
+
     void vector_value(const Point<2> &p,
 		      Vector<VALUE>& values) const {
-      ; 
+      ;
     }
-  
+
   };
 
   /*!
@@ -119,17 +119,17 @@ namespace FrameTL
       else if (component == 1) {
 	res = 10.0*(1-(2*p[1]))*(p[0]*(1-p[0]));
       }
-      
+
       return res;
-      
+
     }
-  
+
     void vector_value(const Point<2> &p,
 		      Vector<VALUE>& values) const {
       values[0] = value(p,0);
       values[1] = value(p,1);
     }
-  
+
   };
   // #####################################################################################
 
@@ -169,31 +169,41 @@ namespace FrameTL
 	const SuppType* supp = &(P.basis().all_patch_supports[it.index().number()]);
 	if ((it.index().p() == 0) && (supp->b[0] > 1-OVERLAP))
 	  u1.set_coefficient(it.index(), *it);
-	
+
 	if (it.index().p() == 0)
 	  u2.set_coefficient(it.index(), *it);
       }
     }
 #endif
 #ifdef TWO_D
-    if (i==0) {
-      for (; it != u.end(); ++it) {
-	const SuppType* supp = &(P.basis().all_patch_supports[it.index().number()]);
-	if ((it.index().p() == 1) && (supp->b[0] > -OVERLAP) && (supp->a[1] < 0.)) {
-	  u1.set_coefficient(it.index(), *it);
-	}
-	if (it.index().p() == 1)
-	  u2.set_coefficient(it.index(), *it);
+    if (i==0)
+    {
+      for (; it != u.end(); ++it)
+      {
+	    const SuppType* supp = &(P.basis().all_patch_supports[it.index().number()]);
+	    if ((it.index().p() == 1) && (supp->b[0] > -OVERLAP) && (supp->a[1] < 0.))
+	    {
+	      u1.set_coefficient(it.index(), *it);
+	    }
+	    if (it.index().p() == 1)
+	    {
+          u2.set_coefficient(it.index(), *it);
+	    }
       }
     }
-    else if (i==1) {
-      for (; it != u.end(); ++it) {
-	const SuppType* supp = &(P.basis().all_patch_supports[it.index().number()]);
-	if ((it.index().p() == 0) && (supp->a[0] < 0.)) {
-	  u1.set_coefficient(it.index(), *it);
-	}
-	if (it.index().p() == 0)
-	  u2.set_coefficient(it.index(), *it);
+    else if (i==1)
+    {
+      for (; it != u.end(); ++it)
+      {
+	    const SuppType* supp = &(P.basis().all_patch_supports[it.index().number()]);
+	    if ((it.index().p() == 0) && (supp->a[0] < 0.))
+	    {
+	      u1.set_coefficient(it.index(), *it);
+	    }
+	    if (it.index().p() == 0)
+	    {
+	      u2.set_coefficient(it.index(), *it);
+        }
       }
     }
 #endif
@@ -215,7 +225,7 @@ namespace FrameTL
 		      InfiniteVector<double, typename PROBLEM::Index>& u_sparse,
 		      InfiniteVector<double, typename PROBLEM::Index>& u_very_sparse)
   {
-#ifdef TWO_D 
+#ifdef TWO_D
     typedef typename PROBLEM::WaveletBasis::Support SuppType;
     u_sparse.clear();
     u_very_sparse.clear();
@@ -272,7 +282,7 @@ namespace FrameTL
     }
     }
 #endif
-  
+
 
   }
 
@@ -291,12 +301,12 @@ namespace FrameTL
 		 InfiniteVector<double, typename PROBLEM::Index>& u_sparse,
 		 InfiniteVector<double, typename PROBLEM::Index>& u_very_sparse)
   {
- 
+
     typedef typename PROBLEM::WaveletBasis::Support SuppType;
     u_sparse.clear();
     u_very_sparse.clear();
     typename InfiniteVector<double, typename PROBLEM::Index>::const_iterator it = u.begin();
-    
+
 #ifdef ONE_D
     if (i==0) {
       Point<1> x(OVERLAP);
@@ -304,7 +314,7 @@ namespace FrameTL
 	if (it.index().p() == 1) {
 	  if (in_support(P.basis(), it.index(),x))
 	    u_very_sparse.set_coefficient(it.index(), *it);
-	  
+
 	  const SuppType* supp = &(P.basis().all_patch_supports[it.index().number()]);
 	  if (supp->b[0] > OVERLAP)
 	    u_sparse.set_coefficient(it.index(), *it);
@@ -317,7 +327,7 @@ namespace FrameTL
 	if (it.index().p() == 0) {
 	  if (in_support(P.basis(), it.index(),x))
 	    u_very_sparse.set_coefficient(it.index(), *it);
-	  
+
 	  const SuppType* supp = &(P.basis().all_patch_supports[it.index().number()]);
 	  if (supp->a[0] < 1-OVERLAP)
 	    u_sparse.set_coefficient(it.index(), *it);
@@ -329,7 +339,7 @@ namespace FrameTL
     if (i==0) {
       for (; it != u.end(); ++it) {
 	const SuppType* supp = &(P.basis().all_patch_supports[it.index().number()]);
-	
+
 	// check whether first line is intersected
 	if ((it.index().p() == 1) && (supp->b[0] > -OVERLAP) && (supp->a[1] < 0.) && (0. < supp->b[1]) ) {
 	  u_very_sparse.set_coefficient(it.index(), *it);
@@ -358,7 +368,7 @@ namespace FrameTL
       }
     }
 #endif
-    
+
   }
 
   // Delete all coefficients of u corresponding to patch i.
@@ -366,17 +376,31 @@ namespace FrameTL
   void remove_i (const int i, InfiniteVector<double, typename PROBLEM::Index>& u)
   {
     typename InfiniteVector<double, typename PROBLEM::Index>::const_iterator it = u.begin();
-    for (; it != u.end(); ++it) {
+    for (; it != u.end(); ++it)
+    {
       if (it.index().p() == i)
-	u.set_coefficient(it.index(), 0.0);
+      {
+        u.set_coefficient(it.index(), 0.0);
+      }
     }
     u.compress();
   }
 
-  
+
+
   template <class PROBLEM>
   void  MultSchw(const PROBLEM& P, const double epsilon,
 		 Array1D<InfiniteVector<double, typename PROBLEM::Index> >& approximations)
+  {
+    // start with zero guess
+    MultSchw(P, epsilon, approximations, InfiniteVector<double, typename PROBLEM::Index>());
+  }
+
+
+  template <class PROBLEM>
+  void  MultSchw(const PROBLEM& P, const double epsilon,
+		 Array1D<InfiniteVector<double, typename PROBLEM::Index> >& approximations,
+		 const InfiniteVector<double, typename PROBLEM::Index>& guess)
   {
     // Exact solution and its first order derivative for the
     // one dimensional Poisson equation. This shall be used
@@ -396,18 +420,18 @@ namespace FrameTL
     Point<2> origin;
     origin[0] = 0.0;
     origin[1] = 0.0;
-    
+
     CornerSingularity exact2D(origin, 0.5, 1.5);
     CornerSingularityGradient singGrad(origin, 0.5, 1.5);
 #endif
 
     typedef typename PROBLEM::WaveletBasis::IntervalBasis Basis1D;
-    const int jmax = JMAX;
+    const int jmax = P.jmax();
     typedef typename PROBLEM::Index Index;
-    //typedef typename PROBLEM::WaveletBasis Frame;
+//    typedef typename PROBLEM::WaveletBasis Frame;
 
     int d  = Basis1D::primal_polynomial_degree();
-    int dT = Basis1D::primal_vanishing_moments();
+//    int dT = Basis1D::primal_vanishing_moments();
 
 #ifdef TWO_D
 #ifdef RINGDOMAIN
@@ -429,10 +453,19 @@ namespace FrameTL
 #else
     // Energy norm of the exact solution of the Poisson equation
     // in the L-shaped domain.
-    const double mu = 1.6544;
+    // const double mu = 1.6544;
+
+    // p-Poisson equation: since we do not know the exact solution of the current
+    // Kachanov iteration, as an estimate, we use the energy norm of the exact solution
+    // (of the original, unregularized problem) in the L-shaped domain.
+    const double mu = 0.765770110527;       //  p=1.5, example 1 ('Bump')
 #endif
 #endif
-    const double M = 1.0; // we choose the most optimistic case
+    //const double M = 1.0; // we choose the most optimistic case
+
+    //const double M = sqrt(P.norm_A());     //! Christoph
+
+    const double M = 2;             //! Christoph: speedup
 
     // (d,dt) = (2,2) jmin = 3
     //const double M = sqrt(5.01773);
@@ -455,7 +488,10 @@ namespace FrameTL
 #ifdef RINGDOMAIN
     const double rho = 0.2;
 #else
-    const double rho = 0.2996;
+    //const double rho = 0.6; //  p-Poisson equation, p=1.5, example 1 ('Bump')
+    const double rho = 0.3; // speedup
+    //const double rho = 0.2996;
+
 #endif
     //const double rho = 0.5;
     //const double rho = 0.1;
@@ -464,7 +500,7 @@ namespace FrameTL
 #ifdef ONE_D
     // Energy norm of the exact solution of the Poisson equation
     // from eq. (4.4.2) in Manuel's PhD thesis.
-    const double mu = 7.44609; 
+    const double mu = 7.44609;
     const double M = 1.0; // we choose the most optimistic case
 
     // (d,dt) = (2,2)
@@ -472,7 +508,7 @@ namespace FrameTL
 
     // (d,dt) = (3,3), jmin = 4
     //const double M = sqrt(4.17833); // spectral radius of stiffness matrix
-        
+
     // (d,dt) = (3,3), jmin = 3
     //const double M = sqrt(4.87718); // spectral radius of stiffness matrix
 
@@ -490,11 +526,12 @@ namespace FrameTL
     // Setup of constants.
     // #####################################################################################
     double rho_1 = pow(rho, 1./P.basis().n_p());
-    const double C = 0.5 * rho_1*((1./rho)-1) / (1-rho_1);
-
-    const double sigma = std::max(1./M, C + 1./M) + 0.1;//10.0
-    cout << "sigma = " << sigma << endl; 
-    const int K = std::max(1,(int)ceil(log(1.0/(2.0 * M * sigma)) / log(rho)));
+   // const double C = 0.5 * rho_1*((1./rho)-1) / (1-rho_1);
+    const double C = rho_1 * (1-rho) / (1-rho_1);               // Christoph: Due to Manuel's Diss, p.146 proof of Prop.6.2
+    //const double sigma = std::max(1./M, C + 1./M) + 0.1;//10.0
+    const double sigma = C/(2*rho*rho) + 1/M + 0.1;//       // Christoph: Due to Manuel's Diss, p.146 (6.1.20)
+    cout << "sigma = " << sigma << endl;
+    int K = std::max(1,(int)ceil(log(1.0/(2.0 * M * sigma)) / log(rho)));
     // #####################################################################################
 
     // #####################################################################################
@@ -538,13 +575,30 @@ namespace FrameTL
     }
     };
 #endif
-    cout << "epsilon = " << epsilon << endl
-	 << "mu = " << mu << endl
-	 << "M = " << M << endl
-	 << "rho = " <<  rho << endl
-	 << "sigma = " << sigma << endl
-	 << "K = " << K << endl
-	 << "L = " << L << endl;
+
+    L = std::max(1,(int)ceil( log(epsilon/mu) / log(2.0 * pow(rho,K) * M * sigma) ));
+   // L = 5;
+//! Christoph: quick hack
+#if 0
+L=8;
+//L = 10;
+#endif
+
+  //! Parameters for CDD1
+  double c1 = 1.0;   // Manuels's version
+  double c2 = 1.0;   //
+
+
+
+    cout << endl << "MultSchw parameters:" << endl
+         << "  epsilon = " << epsilon << endl
+	     << "  mu = " << mu << endl
+	     << "  M = " << M << endl
+	     << "  rho = " <<  rho << endl
+	     << "  C = " <<  C << endl
+	     << "  sigma = " << sigma << endl
+	     << "  K = " << K << endl
+	     << "  L = " << L << endl << endl;
     // #####################################################################################
     // End of constant setup.
     // #####################################################################################
@@ -556,6 +610,23 @@ namespace FrameTL
 
     Array1D<InfiniteVector<double, Index> > xks(P.basis().n_p()); // stores local approximations which are used as starting vectors
                                                                   // for the next cycle of local solves
+
+    // initialize u_k and xks with 'guess'
+    u_k.clear();
+    u_k += guess;
+
+    for (int i = 0; i < P.basis().n_p(); i++)
+    {
+      xks[i].clear();
+      for (typename InfiniteVector<double, Index>::const_iterator it = u_k.begin(), itend = u_k.end(); it != itend; ++it)
+      {
+        if (it.index().p() == i)
+        {
+          xks[i].set_coefficient(it.index(),*it);
+        }
+      }
+    }
+
     // map's used for generating output
     map<double,double> log_10_H1_error;
     map<double,double> log_10_H1_error_time;
@@ -566,6 +637,7 @@ namespace FrameTL
     map<double,double> tolerances;
     map<double,double> rho_estimates;
     map<double,double> weak_ell_tau_norms;
+    map<double,double> estimation_of_rho;
 
     // number of patches
     const int m = P.basis().n_p();
@@ -580,174 +652,216 @@ namespace FrameTL
     // #####################################################################################
     // The adaptive algorithm.
     // #####################################################################################
-    for (int l = 1; l < L; l++) {
+    for (int l = 1; l <= L; l++)
+    {
       //for (int p = 2; p <= K; p++) {// THAT WAS USED FOR THE 2D PLAIN DD CASE!!!
-	for (int p = 1; p <= K; p++) {
-	  for (int i = 0; i < P.basis().n_p(); i++) {
-	  k = (l-1)*m*K+(p-1)*m+i+1;
-	  cout << "################################" << endl;
-	  cout << "number of iteration = " << k << endl;
-	  cout << "################################" << endl;
+	  for (int p = 1; p <= K; p++)
+	  {
+	    for (int i = 0; i < m; i++)
+	    {
+	      k = (l-1)*m*K+(p-1)*m+i+1;
+	      cout << "################################" << endl;
+	      cout << "number of iteration = " << k << endl;
+	      cout << "################################" << endl;
 
-	  // Setup tolerance for the solution of the local problems.
-	  // This needs to be manually tuned not to end up with
-	  // slow performance.
+	      // Setup tolerance for the solution of the local problems.
+	      // This needs to be manually tuned not to end up with
+	      // slow performance.
 #ifdef RINGDOMAIN
- 	  local_eps = mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*pow(rho,p)/(m*K)*10;
+ 	      local_eps = mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*pow(rho,p)/(m*K)*10;
 #else
-	  local_eps = mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*pow(rho,p)/(m*K)*100;
+	      //local_eps = mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*pow(rho,p)/(m*K)*100;
+	      local_eps = mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*pow(rho,p)/(m*K)*50.0;       // Christoph: Test
+	      //local_eps = 1e-4;       // Christoph: for estimation of rho
 #endif
- 	  
-	  // write the tolerances
-	  tend = clock();
-	  time += ((double) (tend-tstart))/((double) CLOCKS_PER_SEC);
-	  tolerances[k] = local_eps;
-	  std::ofstream os2d("tolerances.m");
-	  matlab_output(tolerances,os2d);
-	  os2d.close();
-	  cout << "tolerance for solution of local problem = " << local_eps << endl;
-	  tstart = clock();
 
-	  precond_r_i.clear();
+	      // write the tolerances
+	      tend = clock();
+	      time += ((double) (tend-tstart))/((double) CLOCKS_PER_SEC);
+	      tolerances[k] = local_eps;
+	      std::ofstream os2d("tolerances.m");
+	      matlab_output(tolerances,os2d);
+	      os2d.close();
+	      cout << "tolerance for solution of local problem = " << local_eps << endl;
+	      tstart = clock();
 
-	  
-	  // #####################################################################################
-	  // Now follows the solution of the local problems.
-	  // #####################################################################################
-	  set<Index> Lambda_i;
-	  
-#if 1 // in this branch we perform the adaptive algorithm
+	      precond_r_i.clear();
+
+
+	      // #####################################################################################
+	      // Now follows the solution of the local problems.
+	      // #####################################################################################
+	      set<Index> Lambda_i;
+
+          // CDD1 parameter c1,c2
+          #if 1
+	      if(i==0)
+	      {
+	        c1 = P.c1_patch0;
+	        c2 = P.c2_patch0;
+	      }
+	      else
+	      {
+	        c1 = P.c1_patch1;
+	        c2 = P.c2_patch1;
+	      }
+	      #endif
+
+
+#if 1     // in this branch we perform the adaptive algorithm
 #ifdef SPARSE
 
 #ifdef RINGDOMAIN
-	  // Preparation for the ring-shaped domain case.
-	  thin_out_ring(P, i, u_k, u_k_sparse, u_k_very_sparse);
+	      // Preparation for the ring-shaped domain case.
+	      thin_out_ring(P, i, u_k, u_k_sparse, u_k_very_sparse);
 #else
-	  // Preparation for the L-shaped domain case.
-	  thin_out(P, i, u_k, u_k_sparse, u_k_very_sparse);
+	      // Preparation for the L-shaped domain case.
+	      thin_out(P, i, u_k, u_k_sparse, u_k_very_sparse);
 #endif
 #endif
-	  // CDD1
-	  cout << "entering CDD solver..." << endl;
+	      // CDD1
+	      cout << "entering CDD solver..." << endl;
+	      cout << "jmax = " << jmax << endl;
 #ifdef SPARSE
-	  // Solution of the local problem in case we use the sparse version of the algorithm
-	  // as proposed in Stevenson, Werner 2009, where it is proposed to throw away
-	  // all degrees of freedom that are contained in the current subdomain before the local solve.
-	  CDD1_LOCAL_SOLVE(P, i, local_eps, xks[i], precond_r_i, u_k_very_sparse, jmax, CDD1);
-	  //CDD1_LOCAL_SOLVE(P, i, local_eps, xks[i], precond_r_i, u_k_very_sparse, jmax, CDD1);
+	      // Solution of the local problem in case we use the sparse version of the algorithm
+	      // as proposed in Stevenson, Werner 2009, where it is proposed to throw away
+	      // all degrees of freedom that are contained in the current subdomain before the local solve.
+	      CDD1_LOCAL_SOLVE(P, i, local_eps, xks[i], precond_r_i, u_k_very_sparse, c1, c2, jmax, CDD1);
 #endif
 #ifdef FULL
-	  // Solution of the local problem in case we use a plain multiplicative Schwarz adaptive 
-	  // method, i.e., without removing degrees of freedom in the overlapping region before 
-	  // the local solve as in the SPARSE-branch.
-	  //remove_i<PROBLEM>(i, u_k);
-	  CDD1_LOCAL_SOLVE(P, i, local_eps, xks[i], precond_r_i, u_k, jmax, CDD1); // THAT WAS USED FOR THE 2D CASE
-	  //CDD1_LOCAL_SOLVE(P, i, 10.0*local_eps, xks[i], precond_r_i, u_k, jmax, CDD1); // THAT WAS USED FOR THE 1D CASE
+	      // Solution of the local problem in case we use a plain multiplicative Schwarz adaptive
+	      // method, i.e., without removing degrees of freedom in the overlapping region before
+	      // the local solve as in the SPARSE-branch.
+	      //remove_i<PROBLEM>(i, u_k);
+	      CDD1_LOCAL_SOLVE(P, i, local_eps, xks[i], precond_r_i, u_k, jmax, CDD1); // THAT WAS USED FOR THE 2D CASE
+	      //CDD1_LOCAL_SOLVE(P, i, 10.0*local_eps, xks[i], precond_r_i, u_k, jmax, CDD1); // THAT WAS USED FOR THE 1D CASE
 #endif
-	  cout << "CDD 1 solve completed, size of output is " << precond_r_i.size() << endl;
+	      cout << "CDD 1 solve completed, size of output is " << precond_r_i.size() << endl;
 
-	  // Store the calculated local solution. These are always used as the initial guess in the
-	  // next call of CDD1_LOCAL_SOLVE.
-	  xks[i] = precond_r_i;
-	  // ######################################################################################################
-#else // In this branch we use a different strategy for the solution of the local problem: Approximate the right-hand side
-      // for the local problem, apply COARSE to it, take the support of the right-hand side as Galerkin index set,
-      // and approximate the Galerkin solution with the cg solver.
 
-	  // approximate right hand side for local problem
-	  P.RHS(local_eps, i, f);
-	  cout << "fsize = " << f.size() << endl;
+	      // ######################################################################################################
+#else     // In this branch we use a different strategy for the solution of the local problem: Approximate the right-hand side
+          // for the local problem, apply COARSE to it, take the support of the right-hand side as Galerkin index set,
+          // and approximate the Galerkin solution with the cg solver.
+
+	      // approximate right hand side for local problem
+	      P.RHS(local_eps, i, f);
+	      cout << "fsize = " << f.size() << endl;
 #ifdef FULL
-	  APPLY(P, i, u_k, local_eps, w, jmax, CDD1);
+	      APPLY(P, i, u_k, local_eps, w, jmax, CDD1);
 #endif
 #ifdef SPARSE
-	  APPLY(P, i, u_k_very_sparse, local_eps, w, jmax, CDD1);
+	      APPLY(P, i, u_k_very_sparse, local_eps, w, jmax, CDD1);
 #endif
-	  
-	  r = f-w;
-	  r.COARSE(local_eps, tmp_w);
-	  r = tmp_w;
-	  tmp_w.clear();
 
-	  r.support(Lambda_i);
-// 	  for (Index lambda = FrameTL::first_generator<Basis1D,2,2,Frame>(&P.basis(), P.basis().j0());
-// 	       lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame>(&P.basis(), jmax); ++lambda) {
-// 	    if (lambda.p() == i)
-// 	      Lambda_i.insert(lambda);
-// 	  }
+	      r = f-w;
+	      r.COARSE(local_eps, tmp_w);
+	      r = tmp_w;
+	      tmp_w.clear();
 
-	  cout << "setting up full stiffness matrix..." << endl;
-	  cout << "size of local index set = " << Lambda_i.size() << endl;
-	  if (Lambda_i.size() > 0) {
-	    SparseMatrix<double> A_Lambda;
-	    WaveletTL::setup_stiffness_matrix(P, Lambda_i, A_Lambda);
-	    
-	    cout << "setting up full right hand side..." << endl;
-	    Vector<double> F(Lambda_i.size()), xk(Lambda_i.size());
-	    unsigned int id = 0;
-	    typename set<Index>::const_iterator it = Lambda_i.begin();
-	    for (; it != Lambda_i.end(); ++it, ++id) {
-	      F[id] = r.get_coefficient(*it);
-	      xk[id] = xks[i].get_coefficient(*it);
-	    }
-	    unsigned int iterations = 0;
-	    CG(A_Lambda, F, xk, 1.0e-15, 500, iterations);
-	    cout << "CG done!!!!" << " Needed " << iterations << " iterations" << endl;
-	    id = 0;
-	    for (typename set<Index>::const_iterator it = Lambda_i.begin(), itend = Lambda_i.end();
-		 it != itend; ++it, ++id)
-	    precond_r_i.set_coefficient(*it, xk[id]);
-	  }
-#endif 
-	  // ######################################################################################################  
+	      r.support(Lambda_i);
+// 	      for (Index lambda = FrameTL::first_generator<Basis1D,2,2,Frame>(&P.basis(), P.basis().j0());
+// 	           lambda <= FrameTL::last_wavelet<Basis1D,2,2,Frame>(&P.basis(), jmax); ++lambda)
+//        {
+// 	        if (lambda.p() == i)
+// 	          Lambda_i.insert(lambda);
+// 	      }
 
-	  // #####################################################################################
-	  // setup next global iterate
-	  // #####################################################################################
+	      cout << "setting up full stiffness matrix..." << endl;
+	      cout << "size of local index set = " << Lambda_i.size() << endl;
+	      if (Lambda_i.size() > 0)
+	      {
+	        SparseMatrix<double> A_Lambda;
+	        WaveletTL::setup_stiffness_matrix(P, Lambda_i, A_Lambda);
+
+	        cout << "setting up full right hand side..." << endl;
+	        Vector<double> F(Lambda_i.size()), xk(Lambda_i.size());
+	        unsigned int id = 0;
+	        typename set<Index>::const_iterator it = Lambda_i.begin();
+	        for (; it != Lambda_i.end(); ++it, ++id)
+	        {
+	          F[id] = r.get_coefficient(*it);
+	          xk[id] = xks[i].get_coefficient(*it);
+	        }
+	        unsigned int iterations = 0;
+	        CG(A_Lambda, F, xk, 1.0e-15, 500, iterations);
+	        cout << "CG done!!!!" << " Needed " << iterations << " iterations" << endl;
+	        id = 0;
+	        for (typename set<Index>::const_iterator it = Lambda_i.begin(), itend = Lambda_i.end();
+		      it != itend; ++it, ++id)
+	        precond_r_i.set_coefficient(*it, xk[id]);
+	      }
+#endif
+	      // ######################################################################################################
+
+	      // #####################################################################################
+	      // setup next global iterate
+	      // #####################################################################################
 #ifdef SPARSE
-	  u_k = precond_r_i + u_k_sparse;
+	      u_k = precond_r_i + u_k_sparse;
 #endif
 #ifdef FULL
-	  u_k = precond_r_i + u_k;
+	      u_k = precond_r_i + u_k;
 #endif
-	  cout << "degrees of freedom: " << u_k.size() << endl;
-	  // #####################################################################################
+	      cout << "degrees of freedom: " << u_k.size() << endl;
+	      // #####################################################################################
 
+          // Store the calculated local solution. These are always used as the initial guess in the
+	      // next call of CDD1_LOCAL_SOLVE.
+ 	      xks[i].clear();
+ 	      xks[i] = precond_r_i;
+        } // end loop over patches
+	  cout << "############## full cycle of local solves completed ##############"<< endl;
 
- 	  xks[i].clear();
- 	  xks[i] = precond_r_i;
-      	}// end loop over patches
-	cout << "############## full cycle of local solves completed ##############"<< endl;
-	
-	}// end loop p
+        #if 0
+        //! for estimation of rho:
+        //compute global residual
+              cout << "Estimation of rho... " << endl;
+              P.RHS(1.0e-6, f);     //! Christoph: for estimation of rho
+              tmp_w.clear();
+              for (int i = 0; i < P.basis().n_p(); i++) {
+                APPLY(P, i, u_k, 1.0e-6, w, jmax, CDD1);
+                tmp_w += w;
+              }
+        // perform matlab output
+              estimation_of_rho[k] = l2_norm(f-tmp_w);
+              std::ofstream os_rho("./estimate_rho_jmax4_3_dT3.m");
+              matlab_output(estimation_of_rho,os_rho);
+              os_rho.close();
+              cout << "finished!" << endl;
+        #endif
 
-	// setup tolerance for coarsening
+	  }// end loop p
+
+	  // setup tolerance for coarsening
 #ifdef RINGDOMAIN
       double coarse_tol = (sigma - 1./M)*2.0*pow(rho,K)*mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*0.1;
 #else
-      double coarse_tol = (sigma - 1./M)*2.0*pow(rho,K)*mu*pow(2.0*pow(rho,K)*M*sigma,l-1);
+      //double coarse_tol = (sigma - 1./M)*2.0*pow(rho,K)*mu*pow(2.0*pow(rho,K)*M*sigma,l-1);
+      double coarse_tol = (sigma - 1./M)*2.0*pow(rho,K)*mu*pow(2.0*pow(rho,K)*M*sigma,l-1)*0.5;     //! Christoph: test
 #endif
       cout << "tolerance for coarsening = " << coarse_tol << endl;
       cout << "norm of u_k = " << l2_norm(u_k) << endl;
-      u_k.COARSE(coarse_tol, tmp_w);
-      u_k = tmp_w;
+      u_k.COARSE(coarse_tol, tmp_w);                //! Christoph: for estimation of rho, comment this out
+      u_k = tmp_w;                                  //! Christoph: for estimation of rho, comment this out
       cout << "degrees of freedom after coarsening: " << u_k.size() << endl;
 
+#if 0
       // #####################################################################################
       //  Approximate global EXACT residual and perform output.
       // #####################################################################################
       tend = clock();
       time += ((double) (tend-tstart))/((double) CLOCKS_PER_SEC);
-      
+
       tmp = u_k;
       tmp.scale(&P,-1);
 
       //compute global residual
-      P.RHS(1.0e-8, f);
+      P.RHS(1.0e-6, f);
       cout << "fsize exact res = " << f.size() << endl;
-      tmp_w.clear(); 
+      tmp_w.clear();
       for (int i = 0; i < P.basis().n_p(); i++) {
-      	APPLY(P, i, u_k, 1.0e-8, w, jmax, CDD1);
+      	APPLY(P, i, u_k, 1.0e-6, w, jmax, CDD1);
       	tmp_w += w;
       }
       double residual_norm = l2_norm(f-tmp_w);
@@ -761,42 +875,46 @@ namespace FrameTL
       char name6[128];
       char name7[128];
 
-      	// setup filenames for output files for the one-dimensional cases
+      // setup filenames for output files for the one-dimensional cases
 #ifdef ONE_D
-      switch (d) {
-      case 2: {
-	weak_ell_tau_norms[k] = u_k.weak_norm(1./1.5);// (d,dT)=(2,2)=1./1.5 (d,dT)=(3,3)=1./2.5, (d,dT)=(4,6)=1./3.5
-	sprintf(name1, "%s%d%s%d%s", "./ms_results22/ms1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name2, "%s%d%s%d%s", "./ms_results22/ms1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name3, "%s%d%s%d%s", "./ms_results22/ms1D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name4, "%s%d%s%d%s", "./ms_results22/ms1D_H1err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name5, "%s%d%s%d%s", "./ms_results22/ms1D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name6, "%s%d%s%d%s", "./ms_results22/ms1D_L2err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name7, "%s%d%s%d%s", "./ms_results22/ms1D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
-	break;
-      }
-      case 3: {
-	weak_ell_tau_norms[k] = u_k.weak_norm(1./2.5);
-	sprintf(name1, "%s%d%s%d%s", "./ms_results33/ms1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name2, "%s%d%s%d%s", "./ms_results33/ms1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name3, "%s%d%s%d%s", "./ms_results33/ms1D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name4, "%s%d%s%d%s", "./ms_results33/ms1D_H1err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name5, "%s%d%s%d%s", "./ms_results33/ms1D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name6, "%s%d%s%d%s", "./ms_results33/ms1D_L2err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name7, "%s%d%s%d%s", "./ms_results33/ms1D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
-	break;
-      }
-      case 4: {
-	weak_ell_tau_norms[k] = u_k.weak_norm(1./3.5);
-	sprintf(name1, "%s%d%s%d%s", "./ms_results46/ms1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name2, "%s%d%s%d%s", "./ms_results46/ms1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name3, "%s%d%s%d%s", "./ms_results46/ms1D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");  
-	sprintf(name4, "%s%d%s%d%s", "./ms_results46/ms1D_H1err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name5, "%s%d%s%d%s", "./ms_results46/ms1D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name6, "%s%d%s%d%s", "./ms_results46/ms1D_L2err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name7, "%s%d%s%d%s", "./ms_results46/ms1D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
-	break;
-      }
+      switch (d)
+      {
+        case 2:
+        {
+	      weak_ell_tau_norms[k] = u_k.weak_norm(1./1.5);// (d,dT)=(2,2)=1./1.5 (d,dT)=(3,3)=1./2.5, (d,dT)=(4,6)=1./3.5
+	      sprintf(name1, "%s%d%s%d%s", "./ms_results22/ms1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	      sprintf(name2, "%s%d%s%d%s", "./ms_results22/ms1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	      sprintf(name3, "%s%d%s%d%s", "./ms_results22/ms1D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
+	      sprintf(name4, "%s%d%s%d%s", "./ms_results22/ms1D_H1err_P_jmax18_", d, "_dT", dT, ".m");
+	      sprintf(name5, "%s%d%s%d%s", "./ms_results22/ms1D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
+	      sprintf(name6, "%s%d%s%d%s", "./ms_results22/ms1D_L2err_P_jmax18_", d, "_dT", dT, ".m");
+	      sprintf(name7, "%s%d%s%d%s", "./ms_results22/ms1D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
+	      break;
+        }
+        case 3:
+        {
+	      weak_ell_tau_norms[k] = u_k.weak_norm(1./2.5);
+          sprintf(name1, "%s%d%s%d%s", "./ms_results33/ms1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name2, "%s%d%s%d%s", "./ms_results33/ms1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name3, "%s%d%s%d%s", "./ms_results33/ms1D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name4, "%s%d%s%d%s", "./ms_results33/ms1D_H1err_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name5, "%s%d%s%d%s", "./ms_results33/ms1D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name6, "%s%d%s%d%s", "./ms_results33/ms1D_L2err_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name7, "%s%d%s%d%s", "./ms_results33/ms1D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
+          break;
+        }
+        case 4:
+        {
+          weak_ell_tau_norms[k] = u_k.weak_norm(1./3.5);
+          sprintf(name1, "%s%d%s%d%s", "./ms_results46/ms1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name2, "%s%d%s%d%s", "./ms_results46/ms1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name3, "%s%d%s%d%s", "./ms_results46/ms1D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name4, "%s%d%s%d%s", "./ms_results46/ms1D_H1err_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name5, "%s%d%s%d%s", "./ms_results46/ms1D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name6, "%s%d%s%d%s", "./ms_results46/ms1D_L2err_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name7, "%s%d%s%d%s", "./ms_results46/ms1D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
+          break;
+        }
       };
 
       // perform matlab output
@@ -838,51 +956,55 @@ namespace FrameTL
 
 
 #endif
-	
-	// setup filenames for output files for the two-dimensional cases
+
+	  // setup filenames for output files for the two-dimensional cases
 #ifdef TWO_D
-      switch (d) {
-      case 2: {
-	weak_ell_tau_norms[k] = u_k.weak_norm(1./1.0);
-	sprintf(name1, "%s%d%s%d%s", "./ms_results2D_22/ms2D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name2, "%s%d%s%d%s", "./ms_results2D_22/ms2D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name3, "%s%d%s%d%s", "./ms_results2D_22/ms2D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name4, "%s%d%s%d%s", "./ms_results2D_22/ms2D_H1err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name5, "%s%d%s%d%s", "./ms_results2D_22/ms2D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name6, "%s%d%s%d%s", "./ms_results2D_22/ms2D_L2err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name7, "%s%d%s%d%s", "./ms_results2D_22/ms2D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
-	break;
-      }
-      case 3: {
+      switch (d)
+      {
+        case 2:
+        {
+          weak_ell_tau_norms[k] = u_k.weak_norm(1./1.0);
+          sprintf(name1, "%s%d%s%d%s", "./ms_results2D_22/ms2D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name2, "%s%d%s%d%s", "./ms_results2D_22/ms2D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name3, "%s%d%s%d%s", "./ms_results2D_22/ms2D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name4, "%s%d%s%d%s", "./ms_results2D_22/ms2D_H1err_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name5, "%s%d%s%d%s", "./ms_results2D_22/ms2D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name6, "%s%d%s%d%s", "./ms_results2D_22/ms2D_L2err_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name7, "%s%d%s%d%s", "./ms_results2D_22/ms2D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
+	      break;
+        }
+        case 3:
+        {
 #ifdef BIHARMONIC
-	weak_ell_tau_norms[k] = u_k.weak_norm(1./1.0);
+          weak_ell_tau_norms[k] = u_k.weak_norm(1./1.0);
 #else
-	weak_ell_tau_norms[k] = u_k.weak_norm(1./1.5);
+	      weak_ell_tau_norms[k] = u_k.weak_norm(1./1.5);
 #endif
-	sprintf(name1, "%s%d%s%d%s", "./ms_results2D_33_biharmL_v2/ms2D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name2, "%s%d%s%d%s", "./ms_results2D_33_biharmL_v2/ms2D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name3, "%s%d%s%d%s", "./ms_results2D_33_biharmL_v2/ms2D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name4, "%s%d%s%d%s", "./ms_results2D_33_biharmL_v2/ms2D_H1err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name5, "%s%d%s%d%s", "./ms_results2D_33_biharmL_v2/ms2D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name6, "%s%d%s%d%s", "./ms_results2D_33_biharmL_v2/ms2D_L2err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name7, "%s%d%s%d%s", "./ms_results2D_33_biharmL_v2/ms2D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
-	break;
-      }
-      case 4: {
+          sprintf(name1, "%s%d%s%d%s", "./residual_jmax4_", d, "_dT", dT, ".m");
+          sprintf(name2, "%s%d%s%d%s", "./ms_results2D_33_biharmL_v2/ms2D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name3, "%s%d%s%d%s", "./ms_results2D_33_biharmL_v2/ms2D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name4, "%s%d%s%d%s", "./ms_results2D_33_biharmL_v2/ms2D_H1err_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name5, "%s%d%s%d%s", "./ms_results2D_33_biharmL_v2/ms2D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name6, "%s%d%s%d%s", "./ms_results2D_33_biharmL_v2/ms2D_L2err_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name7, "%s%d%s%d%s", "./ms_results2D_33_biharmL_v2/ms2D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
+          break;
+        }
+        case 4:
+        {
 #ifdef BIHARMONIC
-	weak_ell_tau_norms[k] = u_k.weak_norm(1./1.5);
+          weak_ell_tau_norms[k] = u_k.weak_norm(1./1.5);
 #else
-	weak_ell_tau_norms[k] = u_k.weak_norm(1./2.0);
+          weak_ell_tau_norms[k] = u_k.weak_norm(1./2.0);
 #endif
-	sprintf(name1, "%s%d%s%d%s", "./ms_results2D_46_biharmL/ms2D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name2, "%s%d%s%d%s", "./ms_results2D_46_biharmL/ms2D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name3, "%s%d%s%d%s", "./ms_results2D_46_biharmL/ms2D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");  
-	sprintf(name4, "%s%d%s%d%s", "./ms_results2D_46_biharmL/ms2D_H1err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name5, "%s%d%s%d%s", "./ms_results2D_46_biharmL/ms2D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name6, "%s%d%s%d%s", "./ms_results2D_46_biharmL/ms2D_L2err_P_jmax18_", d, "_dT", dT, ".m");
-	sprintf(name7, "%s%d%s%d%s", "./ms_results2D_46_biharmL/ms2D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
-	break;
-      }
+          sprintf(name1, "%s%d%s%d%s", "./ms_results2D_46_biharmL/ms2D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name2, "%s%d%s%d%s", "./ms_results2D_46_biharmL/ms2D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name3, "%s%d%s%d%s", "./ms_results2D_46_biharmL/ms2D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name4, "%s%d%s%d%s", "./ms_results2D_46_biharmL/ms2D_H1err_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name5, "%s%d%s%d%s", "./ms_results2D_46_biharmL/ms2D_H1err_time_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name6, "%s%d%s%d%s", "./ms_results2D_46_biharmL/ms2D_L2err_P_jmax18_", d, "_dT", dT, ".m");
+          sprintf(name7, "%s%d%s%d%s", "./ms_results2D_46_biharmL/ms2D_L2err_time_P_jmax18_", d, "_dT", dT, ".m");
+          break;
+        }
       };
 
       // perform matlab output
@@ -899,7 +1021,7 @@ namespace FrameTL
       std::ofstream os2g(name3);
       matlab_output(weak_ell_tau_norms,os2g);
       os2g.close();
-      
+
 //       double H1err = error_H_scale_Lshaped<Basis1D>(1, P.basis(), tmp, singGrad);
 //       log_10_H1_error[log10(u_k.size())] = log10(H1err);
 //       std::ofstream os2h(name4);
@@ -927,6 +1049,8 @@ namespace FrameTL
       // #####################################################################################
       //  End performing output
       // #####################################################################################
+#endif   // Flag for output
+
 
       tstart = clock();
 
@@ -936,23 +1060,30 @@ namespace FrameTL
 
     // #####################################################################################
     // The adaptive algorithm is finished here.
-    // #####################################################################################    
-    
+    // #####################################################################################
+
     // collect final approximation and its local parts
     approximations[P.basis().n_p()] = u_k;
-    
-    for (int i = 0; i < P.basis().n_p(); i++) {
+
+    for (int i = 0; i < P.basis().n_p(); i++)
+    {
       approximations[i].clear();
-      for (typename InfiniteVector<double, Index>::const_iterator it = u_k.begin(), itend = u_k.end();
-	   it != itend; ++it)
-	if (it.index().p() == i)
-	  approximations[i].set_coefficient(it.index(),*it);
+      for (typename InfiniteVector<double, Index>::const_iterator it = u_k.begin(), itend = u_k.end(); it != itend; ++it)
+      {
+        if (it.index().p() == i)
+        {
+          approximations[i].set_coefficient(it.index(),*it);
+        }
+      }
     }
 
 
-
-
   }
+
+//! #####################################################################################
+//!  End of MultSchw
+//! #####################################################################################
+
 
 //   template <class PROBLEM>
 //   double compute_exact_residual_norm (const PROBLEM& P,
@@ -980,7 +1111,7 @@ namespace FrameTL
 //       U_k[id] = u_k.get_coefficient(*it);
 //     }
 
-//     Vector<double> F(Lambda1.size());    
+//     Vector<double> F(Lambda1.size());
 //     WaveletTL::setup_righthand_side(P, Lambda1, F);
 
 //     A.apply(U_k, A_U_k);
@@ -1004,7 +1135,7 @@ namespace FrameTL
 //     Point<2> origin;
 //     origin[0] = 0.0;
 //     origin[1] = 0.0;
-    
+
 //     CornerSingularity exact2D(origin, 0.5, 1.5);
 //     CornerSingularityGradient singGrad(origin, 0.5, 1.5);
 // #endif
@@ -1027,7 +1158,7 @@ namespace FrameTL
 
 
 //     Array1D<InfiniteVector<double, Index> > global_residual_parts(P.basis().n_p());
-      
+
 //     map<double,double> log_10_residual_norms;
 //     map<double,double> weak_ell_tau_norms;
 //     map<double,double> degrees_of_freedom;
@@ -1062,7 +1193,7 @@ namespace FrameTL
 // //       cout << "degrees of freedom = " << u_k.size() << endl;
 // //       cout << "loop = " << global_iterations << endl;
 // //       global_iterations++;
-// //     }    
+// //     }
 
 //     double time = 0.;
 //     clock_t tstart, tend;
@@ -1087,7 +1218,7 @@ namespace FrameTL
 // // 	APPLY(P, i, u_k, eps, w, jmax, CDD1);
 // //  	w.COARSE(eps/2,tmp_w);
 // //  	w = tmp_w;
-	
+
 // #endif
 
 //  	r = f - w;
@@ -1101,9 +1232,9 @@ namespace FrameTL
 // #if 0
 // 	// CDD1
 // 	CDD1_LOCAL_SOLVE(P, i, 100*eps, xks[i], precond_r_i, r, jmax, CDD1);
-// #endif	
+// #endif
 
-	
+
 
 // #if 0
 // 	// adaptive Richardson
@@ -1133,7 +1264,7 @@ namespace FrameTL
 // 	if (Lambda_i.size() > 0) {
 // 	  SparseMatrix<double> A_Lambda;
 // 	  WaveletTL::setup_stiffness_matrix(P, Lambda_i, A_Lambda);
-	  
+
 // 	  cout << "setting up full right hand side..." << endl;
 // 	  Vector<double> F(Lambda_i.size()), xk(Lambda_i.size());
 // 	  unsigned int id = 0;
@@ -1142,7 +1273,7 @@ namespace FrameTL
 // 	    F[id] = r.get_coefficient(*it);
 // 	    xk[id] = xks[i].get_coefficient(*it);
 // 	  }
-	  
+
 // 	  //cout << "size = " << F.size() << endl;
 // 	  unsigned int iterations = 0;
 // 	  CG(A_Lambda, F, xk, 1.0e-15, 500, iterations);
@@ -1177,12 +1308,12 @@ namespace FrameTL
 // #endif
 // 	cout << "norm of local residal = " << l2_norm(r) << endl;
 // 	cout << "weak ell tau norm = " << u_k.weak_norm(1./1.5) << endl;
-	
+
 // 	tend = clock();
 // 	time += ((double) (tend-tstart))/((double) CLOCKS_PER_SEC);
-      
+
 // 	if (global_iterations % P.basis().n_p() == 0) {
-	  
+
 // 	  weak_ell_tau_norms[global_iterations] = u_k.weak_norm(1./1.5);
 // 	  std::ofstream os3("weak_ell_tau_norms.m");
 // 	  matlab_output(weak_ell_tau_norms,os3);
@@ -1196,7 +1327,7 @@ namespace FrameTL
 // 	tstart = clock();
 //       }
 
-      
+
 //       tend = clock();
 //       time += ((double) (tend-tstart))/((double) CLOCKS_PER_SEC);
 
@@ -1212,7 +1343,7 @@ namespace FrameTL
 // // 	// //       double L_2_error = error_H_scale_Lshaped<Basis1D>(0, P.basis(), tmp, exact2D);
 // // 	// //       cout << "L_2 error = " << L_2_error << endl;
 // // 	// //       log_10_L2_error[log10(u_k.size())] = log10(L_2_error);
-	
+
 //          log_10_H1_error[log10(u_k.size())] = log10(H1err);
 //          std::ofstream os2a("log_10_H1_error1D.m");
 //          matlab_output(log_10_H1_error,os2a);
@@ -1220,21 +1351,21 @@ namespace FrameTL
 // // 	//        std::ofstream os2("log_10_L_2_error2D.m");
 // // 	//        matlab_output(log_10_L2_error,os2);
 // // 	//        os2.close();
-	
+
 // 	 time_asymptotic[log10(time)] = log10(H1err);
 // 	 std::ofstream os1("time_asymptotic1D.m");
 // 	 matlab_output(time_asymptotic,os1);
 // 	 os1.close();
-	
-	
+
+
 //        }
-	
+
 //      tstart = clock();
-     
+
 //      //eps *= 0.3;
 //      eps *= 0.3;
 //  }
-    
+
 //     //tmp = u_k;
 //     //tmp.scale(&P,-1);
 //      //double H1err = error_H_scale_Lshaped<Basis1D>(1, P.basis(), tmp, singGrad);
@@ -1249,14 +1380,14 @@ namespace FrameTL
 
 
 //     approximations[P.basis().n_p()] = u_k;
-    
+
 //     for (int i = 0; i < P.basis().n_p(); i++) {
 //       for (typename InfiniteVector<double, Index>::const_iterator it = u_k.begin(), itend = u_k.end();
 // 	   it != itend; ++it)
 // 	if (it.index().p() == i)
 // 	  approximations[i].set_coefficient(it.index(),*it);
 //     }
- 
+
 
 
     }

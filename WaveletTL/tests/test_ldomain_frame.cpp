@@ -105,8 +105,8 @@ public:
 };
 
 int main(){
-    clock_t tic, toc;
-    double time;
+//    clock_t tic, toc;
+//    double time;
     
     
     cout << "testing L-domain quarklet frame" << endl;
@@ -288,7 +288,7 @@ int main(){
     
     unsigned int nontrivial = 0;
     
-    for(int i=0; i<x.size();i++){
+    for(unsigned int i=0; i<x.size();i++){
         if(x[i]!=0)
         nontrivial++;
     }

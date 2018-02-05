@@ -133,6 +133,11 @@ namespace WaveletTL
 	std::list<size_type> indices;
 	std::list<double> entries;
 	size_type column = 0;
+        
+//        number_of_entries_computed = 0;  //! Christoph
+//        number_of_entries_from_cache = 0; //! Christoph
+        
+        
 	for (typename std::set<Index>::const_iterator it2(Lambda.begin()), itend(Lambda.end());
 	     it2 != itend; ++it2, ++column)
 	  {
@@ -146,7 +151,8 @@ namespace WaveletTL
 //            }
             
         }
-        A_Lambda.set_row(row, indices, entries);
+//        cout << "entries computed: " << number_of_entries_computed << ", entries from cache: " << number_of_entries_from_cache << endl;  //! Christoph
+//        A_Lambda.set_row(row, indices, entries);
     }
 #endif   
     

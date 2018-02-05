@@ -162,6 +162,59 @@ namespace MathTL
     */
     const bool constant_coefficients() const { return true; }
   };
+  
+  
+  /*!
+    The Poisson equation with non-constant diffusion coefficient a(x)
+    on a d-dimensional domain
+      -div(a(x)grad u(x)) = f(x) in Omega
+  */
+  template <unsigned int DIM>
+  class PoissonBVP_Coeff
+    : public EllipticBVP<DIM>
+  {
+  public:
+    /*!
+      constructor with given diffusion coefficient and right-hand side
+    */
+    PoissonBVP_Coeff(const Function<DIM>* a, const Function<DIM>* f);
+
+    /*!
+      constructor with given right-hand side, where also an alternative representation f_ar: \Omega -> \R^2 of the rhs is given in the sense of:
+      rhs_{\lambda} = \int_{\Omega} a(x) nabla u(x) * nabla \Psi_{\lambda}(x) dx = \int_{\Omega} f(x) \Psi_{\lambda}(x) dx for all \lambda \in \Lambda
+      alternative representation of rhs:
+      rhs_{\lambda} = \int_{\Omega} a(x) nabla u(x) * nabla \Psi_{\lambda}(x) dx = \int_{\Omega} f_ar(x) * \nabla \Psi_{\lambda}(x) dx for all \lambda \in \Lambda
+    */
+    PoissonBVP_Coeff(const Function<DIM>* a, const Function<DIM>* f, const Function<DIM>* f_ar);
+
+    /*!
+      reaction coefficient q
+    */
+    const double q(const Point<DIM>& x) const { return 0.0; }
+
+    /*!
+      flag for constant coefficients
+    */
+    const bool constant_coefficients() const { return false; }
+
+    /*!
+      set the coefficient a to another function
+    */
+    void set_a(const Function<DIM>* a);
+
+    /*!
+      evaluate right-hand side f_ar
+    */
+    const void f_ar(const Point<DIM>& x, Vector<double>& values) const { f_ar_->vector_value(x, values); }
+
+    protected:
+
+    //! alternative representation of the right-hand side
+    const Function<DIM>* f_ar_;
+
+  };
+  
+  
 
   /*!
     The Identity equation on a d-dimensional domain

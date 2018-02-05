@@ -1,4 +1,5 @@
 #define TWO_D
+#define _DIM 2
 
 #define MAX_LOOPS 10000
 #define PLOT_RESOLUTION 6

@@ -22,6 +22,10 @@ namespace WaveletTL
   {
     double r = 0;
     
+    
+#if 1
+//! DO use cache
+    
     if (problem->local_operator()) {
         
         
@@ -79,125 +83,175 @@ namespace WaveletTL
 				nus);
 
 	  // compute entries
-	  for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());
-	       it != itend; ++it) {
-	    const double entry = problem->a(*it, nu);
-            //cout << *it << ", " << nu << ": " << entry << endl;
-	    typedef typename Block::value_type value_type_block;
-	    if (entry != 0.) {
-	      block.insert(block.end(), value_type_block((*it).number(), entry));
-	      if ((*it).number() == lambda_num) {
-		r = entry;
+	  //  cout << "intersecting wavelets/generators for " << nu << ": " << endl;  // Christoph
+	    for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());
+	         it != itend; ++it)
+        {
+	      double entry = problem->a(*it, nu);
+#ifdef P_POISSON
+          number_of_entries_computed++;  //! Christoph
+#endif
+	     // cout << "cp: size: " << nus.size() << " index=" << *it  << " entry=" << entry << " number: " << (*it).number() << endl; // Christoph
+
+	      typedef typename Block::value_type value_type_block;
+	      if (entry != 0.)
+	      {
+	        block.insert(block.end(), value_type_block((*it).number(), entry));
+	        if ((*it).number() == lambda_num)
+	        {
+		      r = entry;
+	        }
 	      }
 	    }
-	  } 
-	}
-      // level already exists --> extract row corresponding to 'lambda'
-      else {
-	Block& block(it->second);
 
- 	//typename Block::iterator block_lb(block.lower_bound(lambda));
-	typename Block::iterator block_lb(block.lower_bound(lambda_num));
- 	typename Block::iterator block_it(block_lb);
-	// level exists, but in row 'lambda' no entry is available ==> entry must be zero
-	if (block_lb == block.end() ||
-	    block.key_comp()(lambda_num, block_lb->first))
-	  {
-	    r = 0;
+//	    cout << "return r: " << r << endl;
 	  }
-	else {
-	  r = block_it->second;
-	}
+      // level already exists --> extract row corresponding to 'lambda'
+      else
+      {
+	    Block& block(it->second);
+
+ 	    //typename Block::iterator block_lb(block.lower_bound(lambda));
+	    typename Block::iterator block_lb(block.lower_bound(lambda_num));
+ 	    typename Block::iterator block_it(block_lb);
+	    // level exists, but in row 'lambda' no entry is available ==> entry must be zero
+	    if (block_lb == block.end() ||
+	        block.key_comp()(lambda_num, block_lb->first))
+	    {
+	      r = 0;
+	    }
+	    else
+	    {
+	      r = block_it->second;
+	    }
+#ifdef P_POISSON
+        number_of_entries_from_cache++;  //! Christoph
+#endif
       }
     }
-    else {
+    else  // nonlocal operator
+    {
       // for nonlocal operators, we put full level blocks into the cache, regardless of support intersections
 
       const int lambda_num = lambda.number();
       const int nu_num = nu.number();
       
-      // BE CAREFUL: KEY OF GENERATOR LEVEL IS j0-1 NOT j0 !!!!
+       // BE CAREFUL: KEY OF GENERATOR LEVEL IS j0-1 NOT j0 !!!!
       typedef typename Index::type_type generator_type;
       int j = (lambda.e() == generator_type()) ? (lambda.j()-1) : lambda.j();
-      
+
       // search for column 'mu'
       typename ColumnCache::iterator col_lb(entries_cache.lower_bound(nu_num));
       typename ColumnCache::iterator col_it(col_lb);
-      
+
       if (col_lb == entries_cache.end() ||
 	  entries_cache.key_comp()(nu_num, col_lb->first))
-	{
-	  // insert a new column
-	  typedef typename ColumnCache::value_type value_type;
-	  col_it = entries_cache.insert(col_lb, value_type(nu_num, Column()));
-	}
-      
+	  {
+	    // insert a new column
+	    typedef typename ColumnCache::value_type value_type;
+	    col_it = entries_cache.insert(col_lb, value_type(nu_num, Column()));
+	  }
+
       Column& col(col_it->second);
-      
+
       // check wether the level block which 'lambda' belongs to has already been calculated
       typename Column::iterator lb(col.lower_bound(j));
       typename Column::iterator it(lb);
-      
+
       if (lb == col.end() ||
-	  col.key_comp()(j, lb->first))
-	{
-	  // no entries have ever been computed for this column and this level
-	  
-	  // compute whole level block
-	  
-	  // insert a new level
-	  typedef typename Column::value_type value_type;
-	  it = col.insert(lb, value_type(j, Block()));
+	     col.key_comp()(j, lb->first))
+	  {
+	    // no entries have ever been computed for this column and this level
 
-	  Block& block(it->second);	  
+	    // compute whole level block
 
-	  // collect all indices in the level block
-	  typedef std::list<Index> IndexList;
-	  IndexList nus;
-	  if (j == (basis().j0()-1)) {
-	    // generators on level j0
-	    for (Index lambda1 = basis().first_generator(basis().j0());; ++lambda1) {
-	      nus.push_back(lambda1);
-	      if (lambda1 == basis().last_generator(basis().j0())) break;
-	    }
-	  } else {
-	    // wavelets on level j
-	    for (Index lambda1 = basis().first_wavelet(j);; ++lambda1) {
-	      nus.push_back(lambda1);
-	      if (lambda1 == basis().last_wavelet(j)) break;
-	    }
-	  }
+	    // insert a new level
+	    typedef typename Column::value_type value_type;
+	    it = col.insert(lb, value_type(j, Block()));
 
-	  // compute entries
-	  for (typename IndexList::const_iterator it(nus.begin()), itend(nus.end());
-	       it != itend; ++it) {
-	    const double entry = problem->a(*it, nu);
-	    typedef typename Block::value_type value_type_block;
-	    if (fabs(entry) > 1e-16 ) {
-	      block.insert(block.end(), value_type_block((*it).number(), entry));
-	      if ((*it).number() == lambda_num) {
-		r = entry;
+	    Block& block(it->second);
+
+	    // collect all indices in the level block
+	    typedef std::list<Index> IndexList;
+	    IndexList nus;
+	    if (j == (basis().j0()-1))
+	    {
+	      // generators on level j0
+	      for (Index lambda1 = basis().first_generator(basis().j0());; ++lambda1)
+	      {
+            nus.push_back(lambda1);
+	        if (lambda1 == basis().last_generator(basis().j0()))
+	          break;
 	      }
 	    }
-	  } 
-	}
+	    else
+	    {
+	      // wavelets on level j
+	      for (Index lambda1 = basis().first_wavelet(j);; ++lambda1)
+	      {
+	        nus.push_back(lambda1);
+	        if (lambda1 == basis().last_wavelet(j))
+	          break;
+	      }
+	    }
+
+	    // compute entries
+	    for (typename IndexList::const_iterator it(nus.begin()), itend(nus.end());
+	       it != itend; ++it)
+        {
+	      const double entry = problem->a(*it, nu);
+	      typedef typename Block::value_type value_type_block;
+	      if (fabs(entry) > 1e-16 )
+	      {
+	        block.insert(block.end(), value_type_block((*it).number(), entry));
+	        if ((*it).number() == lambda_num)
+	        {
+		      r = entry;
+	        }
+	      }
+	    }
+	  }
       // level already exists --> extract row corresponding to 'lambda'
-      else {
-	Block& block(it->second);
-	
-	typename Block::iterator block_lb(block.lower_bound(lambda_num));
- 	typename Block::iterator block_it(block_lb);
-	// level exists, but in row 'lambda' no entry is available ==> entry must be zero
-	if (block_lb == block.end() ||
-	    block.key_comp()(lambda_num, block_lb->first)) {
-	  r = 0;
-	}
-	else {
-	  r = block_it->second;
-	}
+      else
+      {
+	    Block& block(it->second);
+
+	    typename Block::iterator block_lb(block.lower_bound(lambda_num));
+ 	    typename Block::iterator block_it(block_lb);
+	    // level exists, but in row 'lambda' no entry is available ==> entry must be zero
+	    if (block_lb == block.end() ||
+	        block.key_comp()(lambda_num, block_lb->first))
+        {
+	      r = 0;
+	    }
+	    else
+	    {
+	      r = block_it->second;
+	    }
       }
     }
-    
+
+#else
+//! DONT use cache
+    r = problem->a(lambda, nu);
+#endif
+
+#if 0
+//! Christoph: check sanity of cache:
+    double r2 = problem->a(lambda, nu);
+    double diff = r - r2;
+
+    std::cout << std::setprecision(20);
+    if (abs(diff) > 1e-15)
+    {
+      std::cout << "ERROR cached value of a(,): diff = " << diff << endl;
+      std::cout << "r = " << r << " r2 = " << r2 << endl;
+      exit(1);
+    }
+    std::cout << std::setprecision(6);
+//! check ENDE Christoph
+#endif
+
     return r;
   }
   
@@ -256,66 +310,96 @@ namespace WaveletTL
 
 	  Block& block(it->second);
 
-	  // do the rest of the job
-	  const double d1 = problem->D(lambda);
-          if (strategy == St04a) {
-	    for (typename IntersectingList::iterator it2(nus.begin()), itend2(nus.end());
-		 it2 != itend2; ++it2) {
-	      if (abs(lambda.j()-j) <= J/((double) problem->space_dimension) ||
-		  intersect_singular_support(problem->basis(), lambda, *it2)) {
-		const double entry = problem->a(*it2, lambda);
-		typedef typename Block::value_type value_type_block;
-		block.insert(block.end(), value_type_block((*it2).number(), entry));
-		//w.add_coefficient(*it2, (entry / (d1*problem->D(*it2))) * factor);
-		w[(*it2).number()] += (entry / (d1*problem->D(*it2))) * factor;
+	    // do the rest of the job
+	    const double d1 = D(lambda);
+	    if (strategy == St04a)
+	    {
+	      for (typename IntersectingList::iterator it2(nus.begin()), itend2(nus.end());
+		   it2 != itend2; ++it2)
+          {
+	        if (abs(lambda.j()-j) <= J/((double) problem->space_dimension) ||
+		      intersect_singular_support(problem->basis(), lambda, *it2))
+		    {
+		      const double entry = problem->a(*it2, lambda);
+		      typedef typename Block::value_type value_type_block;
+		      block.insert(block.end(), value_type_block((*it2).number(), entry));
+		      //w.add_coefficient(*it2, (entry / (d1*problem->D(*it2))) * factor);
+		      w[(*it2).number()] += (entry / (d1*D(*it2))) * factor;
+	        }
+	      }
+	    }
+
+	    else if (strategy == CDD1)
+	    {
+
+	      for (typename IntersectingList::const_iterator it2(nus.begin()), itend2(nus.end());
+		   it2 != itend2; ++it2)
+		  {
+	        const double entry = problem->a(*it2, lambda);
+	        typedef typename Block::value_type value_type_block;
+	        if (entry != 0.)
+	        {
+		      block.insert(block.end(), value_type_block((*it2).number(), entry));
+	          //w.add_coefficient(*it2, (entry / (d1 * problem->D(*it2))) * factor);
+		      w[(*it2).number()] += (entry / (d1*D(*it2))) * factor;
+	        }
 	      }
 	    }
 	  }
-	  else if (strategy == CDD1 || strategy == DKR) {
-	    for (typename IntersectingList::const_iterator it2(nus.begin()), itend2(nus.end());
-		 it2 != itend2; ++it2) {
-	      const double entry = problem->a(*it2, lambda);
-	      typedef typename Block::value_type value_type_block;
-	      if (entry != 0.) {
-		block.insert(block.end(), value_type_block((*it2).number(), entry));
-	      //w.add_coefficient(*it2, (entry / (d1 * problem->D(*it2))) * factor);
-		w[(*it2).number()] += (entry / (d1*problem->D(*it2))) * factor;
-	      }
-	    }
-	  }
-	}
       else {
-	// level already exists --> extract level from cache
+	  // level already exists --> extract level from cache
 
-	Block& block(it->second);
-	
-	const double d1 = problem->D(lambda);
-	
-	// do the rest of the job
-	if (strategy == St04a) {
-	  
-	  for (typename Block::const_iterator it2(block.begin()), itend2(block.end());
-	       it2 != itend2; ++it2) {
- 	    if (abs(lambda.j()-j) <= J/((double) problem->space_dimension) ||
- 		intersect_singular_support(problem->basis(), lambda, *(problem->basis().get_wavelet(it2->first)))) {
-// 	      w.add_coefficient(*(problem->basis().get_wavelet(it2->first)),
+	    Block& block(it->second);
+
+	    const double d1 = D(lambda);
+
+	    // do the rest of the job
+	    if (strategy == St04a)
+	    {
+
+	      for (typename Block::const_iterator it2(block.begin()), itend2(block.end());
+	           it2 != itend2; ++it2)
+          {
+ 	        if (abs(lambda.j()-j) <= J/((double) problem->space_dimension) ||
+ 		      intersect_singular_support(problem->basis(), lambda, *(problem->basis().get_wavelet(it2->first))))
+ 		    {
+// 	          w.add_coefficient(*(problem->basis().get_wavelet(it2->first)),
 // 				(it2->second / (d1*problem->D(*(problem->basis().get_wavelet(it2->first))))) * factor);
-	      
-	      w[it2->first] += (it2->second / (d1*problem->D(*(problem->basis().get_wavelet(it2->first))))) * factor;
 
+	          w[it2->first] += (it2->second / (d1*D(*(problem->basis().get_wavelet(it2->first))))) * factor;
+
+	        }
+	      }
 	    }
-	  }
-	}
-	else if (strategy == CDD1 || strategy == DKR) {
-	  for (typename Block::const_iterator it2(block.begin()), itend2(block.end());
-	       it2 != itend2; ++it2) {
-// 	    w.add_coefficient(*(problem->basis().get_wavelet(it2->first)),
+	    else if (strategy == CDD1)
+	    {
+	      for (typename Block::const_iterator it2(block.begin()), itend2(block.end());
+	           it2 != itend2; ++it2)
+          {
+// 	        w.add_coefficient(*(problem->basis().get_wavelet(it2->first)),
 // 			      (it2->second / (d1 * problem->D( *(problem->basis().get_wavelet(it2->first)) )))  * factor);
-	    w[it2->first] += (it2->second / (d1*problem->D(*(problem->basis().get_wavelet(it2->first))))) * factor;
-	  }
-	}
+
+
+// Christoph: original:
+              w[it2->first] += (it2->second / (d1*D(*(problem->basis().get_wavelet(it2->first))))) * factor;
+// Christoph: von mir:
+              //w[it2->first] += ((problem->a((problem->basis().get_wavelet(it2->first)), lambda)) / (d1*problem->D(*(problem->basis().get_wavelet(it2->first))))) * factor;
+	          // Check sanity of cache:
+#if 0
+	          double entry_new_computed = (problem->a((problem->basis().get_wavelet(it2->first)), lambda));
+	          double entry_from_cache = it2->second;
+	          double diff = entry_new_computed - entry_from_cache;
+	          if (abs(diff) > 1e-15)
+	          {
+                cout << "add_level: from cache: "  << entry_from_cache << " newly computed: " << entry_new_computed << endl;
+	            cout << "add_level diff: " << diff << endl;
+                exit(1);
+              }
+#endif
+	      }
+	    }
       }// end else
-    }
+    }  // end if problem->local_operator()
     else {
       // for nonlocal operators, we put full level blocks into the cache, regardless of support intersections
 
@@ -511,6 +595,20 @@ namespace WaveletTL
     }
 
     return normAinv;
+  }
+  
+  template <class PROBLEM>
+  void
+  CachedProblem<PROBLEM>::set_normA(const double norm_A_new)
+  {
+    this->normA = norm_A_new;
+  }
+
+  template <class PROBLEM>
+  void
+  CachedProblem<PROBLEM>::set_normAinv(const double norm_Ainv_new)
+  {
+    this->normAinv = norm_Ainv_new;
   }
 
   // ############## THE FOLLOWING TWO ROUTINES ARE PURELY EXPERIMENTAL AT THE MOMENT! ###########
@@ -767,6 +865,10 @@ namespace WaveletTL
     : problem(P), normA(estnormA), normAinv(estnormAinv)
   {
     entries_cache.resize(basis().n_p());
+#ifdef P_POISSON
+    P->set_normA(estnormA);
+    P->set_normAinv(estnormAinv);
+#endif
   }
 
   template <class PROBLEM>
@@ -774,6 +876,9 @@ namespace WaveletTL
   CachedProblemLocal<PROBLEM>::a(const Index& lambda,
 				 const Index& nu) const
   {
+    clock_t begin_a = clock();
+    typedef std::list<Index> IntersectingList;
+      
     const int p = lambda.p();
      
     double r = 0;
@@ -789,94 +894,108 @@ namespace WaveletTL
       
       
       
+      // check wether entry has already been computed
+//      typedef std::list<Index> IntersectingList;
+      
 
       // search for column 'mu'
       typename ColumnCache::iterator col_lb(entries_cache[p].lower_bound(nu_num));
       typename ColumnCache::iterator col_it(col_lb);
       
-      if (col_lb == entries_cache[p].end() ||
-	  entries_cache[p].key_comp()(nu_num, col_lb->first))
-	
-	{
+      if (col_lb == entries_cache[p].end() || entries_cache[p].key_comp()(nu_num, col_lb->first))
+      {
 #ifdef ONE_D
-	  return problem->a(lambda, nu);
+	    return problem->a(lambda, nu);
 #else
 	  // insert a new column
-	  typedef typename ColumnCache::value_type value_type;
-	  col_it = entries_cache[p].insert(col_lb, value_type(nu_num, Column()));
+	    typedef typename ColumnCache::value_type value_type;
+	    col_it = entries_cache[p].insert(col_lb, value_type(nu_num, Column()));
 #endif
-	}
-	  
+	  }
+
       Column& col(col_it->second);
-      
+
       // check wether the level 'lambda' belongs to has already been calculated
       typename Column::iterator lb(col.lower_bound(j));
       typename Column::iterator it(lb);
-      
-      
+
+
 
       // no entries have ever been computed for this column and this level
-      if (lb == col.end() ||
-	  col.key_comp()(j, lb->first))
-	{
+      if (lb == col.end() || col.key_comp()(j, lb->first))
+	  {
 #ifdef ONE_D
-	  return problem->a(lambda, nu);
+	    return problem->a(lambda, nu);
 #else
-	  // compute whole level block
-	  // #### ONLY CDD COMPRESSION STRATEGY IMPLEMENTED ####
-	  // #### MAYBE WE ADD TRUNK FOR STEVENSON APPROACH ####
-	  // #### LATER.                                    ####
-	  
-	  // insert a new level
-	  typedef typename Column::value_type value_type;
-	  it = col.insert(lb, value_type(j, Block()));
+	    // compute whole level block
+	    // #### ONLY CDD COMPRESSION STRATEGY IMPLEMENTED ####
+	    // #### MAYBE WE ADD TRUNK FOR STEVENSON APPROACH ####
+	    // #### LATER.                                    ####
 
-	  Block& block(it->second);
+	    // insert a new level
+	    typedef typename Column::value_type value_type;
+	    it = col.insert(lb, value_type(j, Block()));
 
-          typedef std::list<Index> IntersectingList;
-	  IntersectingList nus;
-	  
-	  intersecting_wavelets_on_patch(basis(), nu,
-					 p,
-					 std::max(j, basis().j0()),
-					 j == (basis().j0()-1),
-					 nus);
+	    Block& block(it->second);
+	    IntersectingList nus;
+
+	    intersecting_wavelets_on_patch(basis(), nu,
+			  		   p,
+					   std::max(j, basis().j0()),
+					   j == (basis().j0()-1),
+					   nus);
 	  // compute entries
-	  for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());
-	       it != itend; ++it) {
-	    const double entry = problem->a(*it, nu);
-	    typedef typename Block::value_type value_type_block;
-	    if (entry != 0.) {
-	      block.insert(block.end(), value_type_block((*it).number(), entry));
-	      if ((*it).number() == lambda_num) {
-		r = entry;
+	    for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end()); it != itend; ++it)
+        {
+	      const double entry = problem->a(*it, nu);
+#ifdef P_POISSON
+	      number_of_entries_computed++;         //! Christoph
+#endif
+
+	      typedef typename Block::value_type value_type_block;
+	      if (entry != 0.)
+	      {
+	        block.insert(block.end(), value_type_block((*it).number(), entry));
+	        if ((*it).number() == lambda_num)
+	        {
+		      r = entry;
+	        }
 	      }
 	    }
+#endif
 	  }
-#endif	  
-	}
       // level already exists --> extract row corresponding to 'lambda'
-      else {
-	Block& block(it->second);
-	
- 	//typename Block::iterator block_lb(block.lower_bound(lambda));
-	typename Block::iterator block_lb(block.lower_bound(lambda_num));
- 	typename Block::iterator block_it(block_lb);
-	// level exists, but in row 'lambda' no entry is available ==> entry must be zero
-	if (block_lb == block.end() ||
-	    block.key_comp()(lambda_num, block_lb->first))
+      else
+      {
+	    Block& block(it->second);
 
-	  {
-	    r = 0;
-	  }
-	else {
-	  r = block_it->second;
-	}
+ 	    //typename Block::iterator block_lb(block.lower_bound(lambda));
+	    typename Block::iterator block_lb(block.lower_bound(lambda_num));
+ 	    typename Block::iterator block_it(block_lb);
+	    // level exists, but in row 'lambda' no entry is available ==> entry must be zero
+	    if (block_lb == block.end() || block.key_comp()(lambda_num, block_lb->first))
+	    {
+	      r = 0;
+	    }
+	    else
+	    {
+	      r = block_it->second;
+	    }
+#ifdef P_POISSON
+	    number_of_entries_from_cache++;  //! Christoph
+#endif
       }
     }
-    else {// TODO
-      
+    else // TODO
+    {
     }
+
+
+    clock_t end_a = clock();
+    double elapsed_secs = double(end_a - begin_a) / CLOCKS_PER_SEC;
+#ifdef P_POISSON
+    time_consumption_of_a += elapsed_secs;
+#endif
 
     return r;
 
@@ -1000,16 +1119,38 @@ namespace WaveletTL
   double
   CachedProblemLocal<PROBLEM>::norm_A() const
   {
-    // TODO
-    return 1;;
+    if (normA == 0.0)
+    {
+      cout << "Compute Norm(A) ..." << endl;
+      std::set<Index> Lambda;
+      const int j0 = problem->basis().j0();
+      //const int jmax = j0+1;
+      const int jmax = problem->basis().jmax();
+
+      for (Index lambda = problem->basis().first_generator(j0);; ++lambda)
+      {
+	    Lambda.insert(lambda);
+	    if (lambda ==  problem->basis().last_wavelet(jmax)) break;
+      }
+
+      SparseMatrix<double> A_Lambda;
+      setup_stiffness_matrix(*this, Lambda, A_Lambda);
+
+      Vector<double> xk(Lambda.size(), false);
+      xk = 1;
+      unsigned int iterations;
+      normA = PowerIteration(A_Lambda, xk, 1e-6, 100, iterations);
+    }
+
+    return normA;
   }
+
    
   template <class PROBLEM>
   double
   CachedProblemLocal<PROBLEM>::norm_Ainv() const
   {
-    // TODO
-    return 1;
+    return normAinv;
   }
 
 
@@ -1156,5 +1297,7 @@ namespace WaveletTL
 
     return normAinv;
   }
+  
+  
 
 }

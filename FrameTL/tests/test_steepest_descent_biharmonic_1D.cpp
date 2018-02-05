@@ -6,6 +6,7 @@
 #define JMAX 7
 
 #define ONE_D
+#define _DIM 1
 
 // choose which righthand side to use
 //#define CONSTANT_RHS

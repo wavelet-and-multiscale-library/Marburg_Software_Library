@@ -18,6 +18,12 @@
 
 using MathTL::InfiniteVector;
 
+#ifdef P_POISSON
+extern int number_of_entries_computed;
+extern int number_of_entries_from_cache;
+extern double time_consumption_of_a;
+#endif
+
 namespace WaveletTL
 {
   /*!
@@ -92,7 +98,15 @@ namespace WaveletTL
       evaluate the diagonal preconditioner D
     */
     double D(const Index& lambda) const {
-      return problem->D(lambda);
+#ifdef DYADIC
+        return problem->D(lambda);
+#endif
+        
+#ifdef TRIVIAL
+       return problem->D(lambda);
+#endif
+
+      return sqrt(a(lambda, lambda));  // Christoph: to make use of entries cache!
     }
 
     /*
@@ -184,6 +198,17 @@ namespace WaveletTL
                     const double a = 0,
                     const double b = 0) const;
     
+    
+    void set_normA(const double norm_A_new);
+    void set_normAinv(const double norm_Ainv_new);
+
+    /*!
+      clear entries cache for A
+    */
+    void clear_cache() {
+      entries_cache.clear();
+    }
+    
   protected:
     //! the underlying (uncached) problem
     const PROBLEM* problem;
@@ -252,6 +277,11 @@ namespace WaveletTL
     const WaveletBasis& basis() const { return problem->basis(); }
     
     /*!
+      maximal level of the basis
+    */
+    int jmax() const { return problem->jmax(); }
+    
+    /*!
       space dimension of the problem
     */
     static const int space_dimension = PROBLEM::space_dimension;
@@ -294,6 +324,27 @@ namespace WaveletTL
       estimate the spectral norm ||A^{-1}||
     */
     double norm_Ainv() const;
+    
+    
+    /*!
+      Sets estimate for $\|A\|$.
+    */
+    void set_normA(const double _normA) const
+    {
+      problem->set_normA(_normA);
+      normA = _normA;
+    }
+
+    /*!
+      Sets estimate for $\|A^{-1}\|$.
+    */
+    void set_normAinv(const double nAinv)
+    {
+      problem->set_normAinv(nAinv);
+      normAinv = nAinv;
+    }
+    
+    
     
     /*!
       estimate compressibility exponent s^*
@@ -372,6 +423,23 @@ namespace WaveletTL
 		    const double factor,
 		    const int J,
 		    const CompressionStrategy strategy = St04a) const;
+    
+    
+    /*!
+      clear entries cache for A
+    */
+    void clear_cache() {
+      for (int i = 0; i < ( problem->frame().n_p() ); ++i)
+      {
+        entries_cache[i].clear();
+      }
+    }
+
+    //! just for Tests on L-domain. min. and max. eigenvalues of local stiffness matrix for each patch
+    double c1_patch0;
+    double c2_patch0;
+    double c1_patch1;
+    double c2_patch1;
     
   protected:
     //! the underlying (uncached) problem

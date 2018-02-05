@@ -3,6 +3,7 @@
 
 #define JMAX 12
 #define ONE_D
+#define _DIM 1
 
 #define AGGREGATED
 #undef BASIS

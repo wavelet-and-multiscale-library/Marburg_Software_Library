@@ -8,6 +8,7 @@
 #define DUALORDER 3
 #define JMAX 8
 #define PMAX 0
+#define _DIM 2
 
 #undef NONADAPTIVE
 #define ADAPTIVE

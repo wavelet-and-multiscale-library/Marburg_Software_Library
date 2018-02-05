@@ -11,6 +11,7 @@
 #define JMAX 8
 #define PMAX 0
 #define TWO_D
+#define _DIM 2
 
 #define PRIMALORDER 3
 #define DUALORDER   3

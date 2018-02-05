@@ -9,6 +9,7 @@
 #define DUALORDER 3
 #define JMAX 8
 #define PMAX 0
+#define _DIM 1
 
 #include <cstdlib>
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 0

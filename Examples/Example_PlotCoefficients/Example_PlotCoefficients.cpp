@@ -13,6 +13,7 @@
  */
 
 #define PARALLEL 0
+#define _DIM 1
 
 #include <iostream>
 #include <utils/function.h>

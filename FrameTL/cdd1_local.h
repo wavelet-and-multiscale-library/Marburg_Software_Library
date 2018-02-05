@@ -14,7 +14,7 @@
 #include <algebra/infinite_vector.h>
 #include <adaptive/compression.h>
 
-// using std::set;
+using std::set;
 
 /*!\namespace FrameTL
   The namespace FrameTL.
@@ -25,26 +25,26 @@ namespace FrameTL
    /*! \file cdd1_local.h
      \brief (The routines are taken from WaveletTL/adaptive/cdd1.{cpp,h}.
      They are here adapted in order to be able to use them as a local solver for a frame domain decomposition method.)
-     
+
      An adaptive, residual-based solver for the infinite-dimensional problem
-  
+
      \f$Au = F\f$,
-     
+
      as developed in [CDD1] and [BB+], where A is assumed to be s.p.d.
      Given the problem and a target accuracy epsilon,
      the algorithm constructs a coefficient vector u_epsilon, such that
-     
+
      \f$||u-u_\epsilon|| \leq \epsilon\f$.
-     
+
      You can specify a maximal level jmax for the internal APPLY calls.
-     
+
      References:
      [BB+]  Barinka/Barsch/Charton/Cohen/Dahlke/Dahmen/Urban:
      Adaptive Wavelet Schemes For Elliptic Problems: Implementation and Numerical Experiments
      [CDD1] Cohen/Dahmen/DeVore:
      Adaptive Wavelet Methods II - Beyond the Elliptic Case.
    */
-   
+
   /*! \fn template <class PROBLEM> void CDD1_LOCAL_SOLVE(const PROBLEM& P, const int patch, const double epsilon,
     const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& guess,
     InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
@@ -80,12 +80,12 @@ namespace FrameTL
     \brief The routine ALGORITHMc from [BB+], with a given initial guess for u_epsilon and for the parameters c1,c2.
 
   */
-  
+
   /*! \struct  typedef struct CDD1Parameters
     \brief The parameters chosen or computed in the INIT phase of ALGORITHMc.
   */
-  
-  /*! \fn  FrameTL::template <class PROBLEM> void NPROG(const PROBLEM& P, 
+
+  /*! \fn  FrameTL::template <class PROBLEM> void NPROG(const PROBLEM& P,
     const int patch,
     const CDD1Parameters& params,
     const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& F,
@@ -99,7 +99,7 @@ namespace FrameTL
     const int jmax = 99,
     const CompressionStrategy strategy = St04a)
     \brief NPROG.
-    
+
     Given an approximation v (the support of which is contained in Lambda)
     to the exact Galerkin solution u of Au = F with
     ||u-v||_2 <= delta, compute a new approximation v_hat supported in Lambda_hat,
@@ -107,7 +107,7 @@ namespace FrameTL
     An approximate residual r_hat as well as the last iterand ubar before the final thresholding
     are also returned.
   */
-  
+
   /*! \fn  template <class PROBLEM> void GALERKIN(const PROBLEM& P,
     const int patch,
     const CDD1Parameters& params,
@@ -120,14 +120,14 @@ namespace FrameTL
     const int jmax = 99,
     const CompressionStrategy strategy = St04a)
     \brief GALERKIN.
-    
+
     Given an approximation v to the exact Galerkin solution u_Lambda of Au = F w.r.t. the
     index set Lambda, such that ||u_Lambda-v||_2 <= delta, and a target accuracy eta,
     compute an approximation u_bar to u_Lambda which is supported on Lambda and satisfies
     ||u_bar-u_Lambda||_2 <= eta.
   */
-  
-  /*! \fn  template <class PROBLEM> void NGROW(const PROBLEM& P, 
+
+  /*! \fn  template <class PROBLEM> void NGROW(const PROBLEM& P,
     const int patch,
     const CDD1Parameters& params,
     const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& F,
@@ -140,14 +140,14 @@ namespace FrameTL
     const int jmax = 99,
     const CompressionStrategy strategy = St04a);
     \brief NGROW.
-    
+
     Given a set Lambda, an initial approximation ubar (supported in Lambda) to the
     Galerkin solutin u_Lambda of Au = F, calculate an approximate residual r with
     ||r-r_Lambda||_2 <= xi_1 + xi_2 + c_2 * ||ubar-u_Lambda||_2
     and a new index set Lambda_tilde\supset Lambda as small as possible such that
     ||P_{Lambda_tilde\setminus Lambda}r||_2 >= gamma * ||r||_2
   */
-  
+
   /*! \fn  template <class PROBLEM> void INRESIDUAL(const PROBLEM& P,
     const int patch,
     const CDD1Parameters& params,
@@ -160,12 +160,12 @@ namespace FrameTL
     const int jmax = 99,
     const CompressionStrategy strategy = St04a)
     \brief INRESIDUAL.
-    
+
     Given an index set Lambda, an approximation v to the exact Galerkin solution
     u_Lambda of Au = F, calculate an approximate INternal residual r, such that
     ||r - (A_Lambda v - P_Lambda f)||_2 <= eta_1 + eta_2
   */
-  
+
   /*! \fn  template <class PROBLEM> void NRESIDUAL(const PROBLEM& P,
     const int patch,
     const CDD1Parameters& params,
@@ -179,7 +179,7 @@ namespace FrameTL
     const int jmax = 99,
     const CompressionStrategy strategy = St04a)
     \brief NRESIDUAL.
-    
+
     Given an index set Lambda, an approximation v to the exact Galerkin solution
     u_Lambda of Au = F, calculate an approximate residual r (not necessarily supported
     in J\Lambda), such that
@@ -188,7 +188,7 @@ namespace FrameTL
   */
 
   template <class PROBLEM>
-  void CDD1_LOCAL_SOLVE(const PROBLEM& P, 
+  void CDD1_LOCAL_SOLVE(const PROBLEM& P,
 			const int patch,
 			const double epsilon,
 			const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& guess,
@@ -197,7 +197,8 @@ namespace FrameTL
 			const int jmax = 99,
 			const CompressionStrategy strategy = St04a);
   template <class PROBLEM>
-  void CDD1_LOCAL_SOLVE(const PROBLEM& P, const int patch,
+  void CDD1_LOCAL_SOLVE(const PROBLEM& P,
+            const int patch,
 			const double epsilon,
 			const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& guess,
 			InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
@@ -217,7 +218,7 @@ namespace FrameTL
   } CDD1Parameters;
 
   template <class PROBLEM>
-  void NPROG(const PROBLEM& P, 
+  void NPROG(const PROBLEM& P,
 	     const int patch,
 	     const CDD1Parameters& params,
 	     const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& F,
@@ -245,7 +246,7 @@ namespace FrameTL
 		const CompressionStrategy strategy = St04a);
 
   template <class PROBLEM>
-  void NGROW(const PROBLEM& P, 
+  void NGROW(const PROBLEM& P,
 	     const int patch,
 	     const CDD1Parameters& params,
 	     const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& F,

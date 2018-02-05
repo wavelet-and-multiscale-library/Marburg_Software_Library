@@ -1,4 +1,5 @@
 #define PARALLEL 0
+#define _DIM 2
 
 #include <fstream>
 #include <iostream>

@@ -1164,7 +1164,7 @@ namespace FrameTL
          } // end for
 
         unsigned int result = 0;
-        int deltaresult = 0;
+//        int deltaresult = 0;
         const Array1D<Array1D<Index> >* full_collection_levelwise = frame.get_full_collection_levelwise();
 
         MultiIndex<int,DIM_d> type;
@@ -1336,7 +1336,7 @@ namespace FrameTL
 
      else{  
         unsigned int result = 0;
-        int deltaresult = 0;
+//        int deltaresult = 0;
         const Array1D<Array1D<Index> >* full_collection_levelwise = frame.get_full_collection_levelwise();
 
         MultiIndex<int,DIM_d> type;

@@ -1,4 +1,5 @@
 #define ONE_D
+#define _DIM 1
 #define PARALLEL 0
 
 #include <fstream>

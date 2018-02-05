@@ -44,7 +44,7 @@ namespace FrameTL
     \f$d\f$-dimensional hypercube. By lifting a wavelet basis
     on the reference domain to the subdomains and taking
     the union of these lifted bases, a frame is obtained.
-    
+
     The manifold is given by an appropriate Atlas. The
     corresponding reference bases, or their
     lifted versions, are then internally constructed.
@@ -59,7 +59,7 @@ namespace FrameTL
   template<class IBASIS, unsigned int DIM_d, unsigned int DIM_m = DIM_d>
   class AggregatedFrame
   {
-  public:    
+  public:
 
     /*!
       Destructor.
@@ -73,7 +73,7 @@ namespace FrameTL
       A lot of information about the wavelets between the minimal and maximal level
       is preprocessed. The maximal level should be chosen large enough.
       In a future iteration of FrameTL, we should finally get rid of this.
-      
+
       @param Atlas The underlying Atlas of parametric mappings representing the domain covering.
       @param bc One-dimensional array of one-dimensional arrays of fixed length 2*DIM_d.
       The outer array runs over the subdomains. The inner one runs over the wavelet bases in each spatial
@@ -149,6 +149,12 @@ namespace FrameTL
     const int j0() const { return j0_; }
 
     /*!
+      Finest level.
+     */
+    const int jmax() const { return jmax_; }
+
+
+    /*!
       Number of patches.
      */
     const int n_p() const { return lifted_bases.size(); }
@@ -176,7 +182,7 @@ namespace FrameTL
       Critical Sobolev regularity for the primal generators/wavelets.
     */
     static double primal_regularity() { return IBASIS::primal_regularity(); }
-    
+
     /*!
       Number of vanishing moments of the primal wavelets.
     */
@@ -219,22 +225,22 @@ namespace FrameTL
 
     //! Index of first generator on level \f$j \geq j_0\f$.
     Index first_generator(const int j) const;
-      
+
     //! Index of last generator on level \f$j \geq j_0\f$.
     Index last_generator(const int j) const;
-      
+
     //! Index of first wavelet on level \f$j \geq j_0\f$.
     Index first_wavelet(const int j) const;
-      
+
     //! Index of last wavelet on level \f$j \geq j_0\f$.
     Index last_wavelet(const int j) const;
-    
+
 
     /*!
       All supports of the reference wavelets on the unit cube,
       preprocessed between minimal and maximal level.
     */
-    
+
     Array1D<typename WaveletTL::CubeBasis<IBASIS,DIM_d>::Support> all_supports;
 
     /*!
@@ -258,7 +264,7 @@ namespace FrameTL
       Collection of all wavelet indices between coarsest and finest level
       stored level by level.
     */
-    
+
     Array1D<Array1D<Index> > full_collection_levelwise;
 
     //! Collection of all wavelet indices between coarsest and finest level.

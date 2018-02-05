@@ -17,7 +17,7 @@ using MathTL::CG;
 namespace FrameTL
 {
   template <class PROBLEM>
-  void CDD1_LOCAL_SOLVE(const PROBLEM& P, 
+  void CDD1_LOCAL_SOLVE(const PROBLEM& P,
 			const int patch,
 			const double epsilon,
 			const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& guess,
@@ -30,12 +30,12 @@ namespace FrameTL
     //     CDD1_SOLVE(P, epsilon, guess, u_epsilon,
     // 	       1.0/P.norm_Ainv(), P.norm_A(),
     // 	       jmax, strategy);
-    
+
     // We presume that the spectryl norm of the diagonal block of the stiffness matrix as well as
     // the spectral norm of its inverse are 1.
     CDD1_LOCAL_SOLVE(P, patch, epsilon, guess, u_epsilon, v_k, 1., 1., jmax, strategy);
   }
-  
+
   template <class PROBLEM>
   void CDD1_LOCAL_SOLVE(const PROBLEM& P, const int patch,
 			const double epsilon,
@@ -47,7 +47,7 @@ namespace FrameTL
 			const int jmax,
 			const CompressionStrategy strategy)
   {
-    // INIT, cf. [BB+] 
+    // INIT, cf. [BB+]
     CDD1Parameters params;
 
     params.c1 = c1;
@@ -71,7 +71,7 @@ namespace FrameTL
 
     //params.F = P.F_norm_local(patch);
     //params.F = l2_norm(rhs);
-    
+
     // determination of q=q1=q2=q3,q4 according to [CDD1, (7.23)ff]
     params.q4 = 1. / (20. * params.kappa);
     const double A = params.c1 / (20. * (3. + params.c1 / params.c2));
@@ -108,7 +108,7 @@ namespace FrameTL
 
     //F = rhs;
     //P.RHS(2*params.q2*epsilon, F);
-    
+
     P.RHS(2*params.q2*epsilon / 2., patch, f);
     APPLY(P, patch, v_k, 2*params.q2*epsilon / 2., w, jmax, CDD1);
 
@@ -117,27 +117,28 @@ namespace FrameTL
 //     w.COARSE(2*params.q2*epsilon / 2.,tmp);
 //     w=tmp;
 // #endif
-    
+
     F = f-w;
     InfiniteVector<double,Index> tmp;
     F.COARSE(2*params.q2*epsilon / 2.,tmp);
     F=tmp;
-  
-    while (delta > epsilon) { // sqrt(params.c1)*epsilon) { // check the additional factor c1^{1/2} in [BB+] !?
+
+    while (delta > epsilon)  // sqrt(params.c1)*epsilon) { // check the additional factor c1^{1/2} in [BB+] !?
+    {
 #if _WAVELETTL_CDD1_VERBOSITY >= 1
       cout << "CDD1_SOLVE: delta=" << delta << endl;
 #endif
       NPROG(P, patch, params, F, Lambda, u_epsilon, delta, v_hat, Lambda_hat, r_hat, u_bar, jmax, strategy);
       if (l2_norm(r_hat)+(params.q1+params.q2+(1+1./params.kappa)*params.q3)*delta <= params.c1*epsilon)
-	{
-	  u_epsilon.swap(u_bar);
-	  break;
-	}
+	  {
+	    u_epsilon.swap(u_bar);
+	    break;
+	  }
       else
-	{
-	  u_epsilon.swap(v_hat);
-	  Lambda.swap(Lambda_hat);
-	}
+	  {
+	    u_epsilon.swap(v_hat);
+	    Lambda.swap(Lambda_hat);
+	  }
 //       delta *= 0.5; // original
       delta *= 0.1; // tuned
     }
@@ -166,16 +167,18 @@ namespace FrameTL
     set<Index> Lambda_k(Lambda), Lambda_kplus1;
     unsigned int k = 0;
     GALERKIN(P, patch, params, F, Lambda_k, v, delta, params.q3*delta/params.c2, u_Lambda_k, jmax, strategy);
-    while (true) {
+    while (true)
+    {
 #if _WAVELETTL_CDD1_VERBOSITY >= 1
       cout << "NPROG: k=" << k << " (K=" << params.K << ")" << endl;
 #endif
       NGROW(P, patch, params, F, Lambda_k, u_Lambda_k, params.q1*delta, params.q2*delta, Lambda_kplus1, r_hat, jmax, strategy);
-      if (l2_norm(r_hat) <= params.c1*delta/20. || k == params.K || Lambda_k.size() == Lambda_kplus1.size()) {
+      if (l2_norm(r_hat) <= params.c1*delta/20. || k == params.K || Lambda_k.size() == Lambda_kplus1.size())
+      {
 //  	u_Lambda_k.COARSE(2.*delta/5., v_hat);
- 	v_hat = u_Lambda_k;
-	v_hat.support(Lambda_hat);
-	break;
+ 	    v_hat = u_Lambda_k;
+	    v_hat.support(Lambda_hat);
+	    break;
       }
       GALERKIN(P, patch, params, F, Lambda_kplus1, u_Lambda_k, params.q0*delta, params.q3*delta/params.c2, v_hat, jmax, strategy);
       u_Lambda_k.swap(v_hat);
@@ -201,6 +204,8 @@ namespace FrameTL
 		const CompressionStrategy strategy)
   {
     typedef typename PROBLEM::WaveletBasis::Index Index;
+
+//    clock_t begin_GALERKIN = clock();
 
 #if 0
     // original GALERKIN version from [CDD1],[BB+]
@@ -230,18 +235,20 @@ namespace FrameTL
     cout << "GALERKIN called..." << endl;
 #endif
 #if _WAVELETTL_CDD1_VERBOSITY >= 2
-      cout << "... with Lambda=" << endl;
-      for (typename set<Index>::const_iterator it = Lambda.begin(), itend = Lambda.end();
-	   it != itend; ++it) {
-	cout << *it << endl;
-      }
+    cout << "... with Lambda=" << endl;
+    for (typename set<Index>::const_iterator it = Lambda.begin(), itend = Lambda.end();
+	   it != itend; ++it)
+    {
+	  cout << *it << endl;
+    }
 #endif
-    
+
     u_bar.clear();
-    
+
     cout << "... GALERKIN: Lambda_size=" << endl << Lambda.size() << endl;;
-    
-    if (Lambda.size() > 0) {
+
+    if (Lambda.size() > 0)
+    {
       // setup A_Lambda and f_Lambda
       SparseMatrix<double> A_Lambda;
       setup_stiffness_matrix(P, Lambda, A_Lambda);
@@ -253,8 +260,9 @@ namespace FrameTL
       F_Lambda.resize(Lambda.size());
       unsigned int id = 0;
       for (typename set<Index>::const_iterator it = Lambda.begin(), itend = Lambda.end();
-	   it != itend; ++it, ++id) {
-	F_Lambda[id] = F.get_coefficient(*it);
+	       it != itend; ++it, ++id)
+      {
+	    F_Lambda[id] = F.get_coefficient(*it);
       }
 
 #if _WAVELETTL_CDD1_VERBOSITY >= 1
@@ -266,26 +274,38 @@ namespace FrameTL
       //unsigned int id = 0;
       id = 0;
       for (typename set<Index>::const_iterator it = Lambda.begin(), itend = Lambda.end();
-	   it != itend; ++it, ++id)
-	xk[id] = v.get_coefficient(*it);
-      
+	       it != itend; ++it, ++id)
+      {
+	    xk[id] = v.get_coefficient(*it);
+      }
       unsigned int iterations = 0;
 //       CG(A_Lambda, F_Lambda, xk, eta, 150, iterations);
       CG(A_Lambda, F_Lambda, xk, 1e-15, 250, iterations);
 #if _WAVELETTL_CDD1_VERBOSITY >= 1
       cout << "... GALERKIN done, " << iterations << " CG iterations needed" << endl;
 #endif
-      
+
       id = 0;
       for (typename set<Index>::const_iterator it = Lambda.begin(), itend = Lambda.end();
-	   it != itend; ++it, ++id)
-	u_bar.set_coefficient(*it, xk[id]);
-    } else {
+	       it != itend; ++it, ++id)
+      {
+	    u_bar.set_coefficient(*it, xk[id]);
+	  }
+    }
+    else
+    {
 #if _WAVELETTL_CDD1_VERBOSITY >= 1
       cout << "... GALERKIN done, no CG iteration needed" << endl;
 #endif
     }
 #endif
+
+//#ifdef P_POISSON
+//    clock_t end_GALERKIN = clock();
+//    double elapsed_secs = double(end_GALERKIN - begin_GALERKIN) / CLOCKS_PER_SEC;
+//    time_consumption_of_GALERKIN += elapsed_secs;
+//#endif
+
   }
 
   template <class PROBLEM>
@@ -306,8 +326,12 @@ namespace FrameTL
     cout << "NGROW called..." << endl;
 #endif
 
+//    clock_t begin_NGROW = clock();
+
     typedef typename PROBLEM::WaveletBasis::Index Index;
     set<Index> Lambda_c;
+
+
     NRESIDUAL(P, patch, params, F, Lambda, u_bar, xi1, xi2, r, Lambda_c, jmax, strategy);
     const double residual_norm = l2_norm(r);
 
@@ -355,6 +379,13 @@ namespace FrameTL
 #if _WAVELETTL_CDD1_VERBOSITY >= 1
     cout << "... NGROW done, size of new index set: " << Lambda_tilde.size() << endl;
 #endif
+    
+//#ifdef P_POISSON
+//    clock_t end_NGROW = clock();
+//    double elapsed_secs = double(end_NGROW - begin_NGROW) / CLOCKS_PER_SEC;
+//    time_consumption_of_NGROW += elapsed_secs;
+//#endif
+
   }
 
   template <class PROBLEM>
@@ -409,12 +440,15 @@ namespace FrameTL
 		 const CompressionStrategy strategy)
   {
     typedef typename PROBLEM::WaveletBasis::Index Index;
-    
+
+//    clock_t begin_NRESIDUAL = clock();
+
     InfiniteVector<double,Index> w;
-    
 
 
     APPLY(P, patch, v, eta1, w, jmax, strategy);
+
+
     InfiniteVector<double,Index> tmp;
     w.COARSE(eta1,tmp);
     w=tmp;
@@ -425,10 +459,16 @@ namespace FrameTL
 //     w.COARSE(eta1,tmp);
 //     w=tmp;
 // #endif
-    
+
     F.COARSE(eta2, r);
     r -= w;
     r.support(Lambda_tilde);
+
+//#ifdef P_POISSON
+//    clock_t end_NRESIDUAL = clock();
+//    double elapsed_secs = double(end_NRESIDUAL - begin_NRESIDUAL) / CLOCKS_PER_SEC;
+//    time_consumption_of_NRESIDUAL += elapsed_secs;
+//#endif
 
   }
 }

@@ -17,6 +17,7 @@
 #define JMAX 15
 #define PMAX 0
 #define ONE_D
+#define _DIM 1
 
 #define PRIMALORDER 3
 #define DUALORDER   3
@@ -564,6 +565,7 @@ A.apply(x, err);
   InfiniteVector<double,Index> u_epsilon;
   InfiniteVector<double,int> u_epsilon_int;
   clock_t tic = clock();
+  const unsigned int maxiter = 200;
 
 #ifdef FRAME
 //  const double norminv = ceq.norm_Ainv();  
@@ -583,7 +585,7 @@ A.apply(x, err);
   const double shrink = 0.01;
   richardson_QUARKLET_SOLVE(ceq,epsilon,u_epsilon_int,DKR, 1, 1, shrink);  
 #else
-  richardson_QUARKLET_SOLVE(ceq,epsilon,u_epsilon_int,DKR, 1, 1);
+  richardson_QUARKLET_SOLVE(ceq, epsilon, u_epsilon_int, maxiter, DKR, 1, 1);
   //  CDD2_QUARKLET_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, DKR, pmax, 2, 2);
 #endif
 

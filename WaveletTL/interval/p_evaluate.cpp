@@ -572,4 +572,364 @@ namespace WaveletTL
             }
         }
     }
+    
+    
+    //! Christoph: tuned versions. ATTENTION: ONLY LINEAR (d=2,dt=2) PRIMBS BASIS WITH HOMOG. BC's!!
+
+    double evaluate_primbs_22_bc11(const int j, const int e, const int k, const double x)
+    {
+
+      double scale = (1u << (j/2));  // the scaling factor
+      if ((j%2) == 1)
+      {
+        //scale *= sqrt(2);
+        scale *= 1.41421356237309504880L;  // i.e., scale *= sqrt(2);
+      }
+
+      if (e==1)  // wavelet
+      {
+        double x_scaled = (1u << (j+1)) * x;
+        int interval_choice = static_cast<int>(x_scaled);
+
+        if (k < ((int)((1u << j) - 1)))   // inner or left boundary wavelet
+        {
+          if (k)                   // inner wavelet
+          {
+            if ( (interval_choice == (2*k - 2)) ||  (interval_choice == (2*k - 1)) )
+            {
+              return (scale*( x_scaled - (2*k - 2) )*0.25);
+            }
+            else if (interval_choice == (2*k))
+            {
+              return (scale*( 0.5 - 2*(x_scaled - 2*k) ));
+            }
+            else if (interval_choice == (2*k + 1))
+            {
+              return (scale*( -1.5 + 2*(x_scaled - 2*k - 1) ));
+            }
+            else if ( (interval_choice == (2*k + 2)) ||  (interval_choice == (2*k + 3)) )
+            {
+              return (scale*( 0.5 - 0.25*(x_scaled - 2*k - 2 ) ));
+            }
+            else
+            {
+              return 0.;
+            }
+
+          }
+          else                     // left boundary wavelet
+          {
+            switch (interval_choice)
+            {
+              case 0:
+                return ( scale * ( -1.25 * x_scaled ) );
+                break;
+              case 1:
+                return ( scale * ( -1.25 + 2.75 * (x_scaled-1) ) );
+                break;
+              case 2:
+              case 3:
+                return ( scale * ( 1.5 - x_scaled + 2 ) );
+                break;
+              case 4:
+              case 5:
+                return ( scale * ( -0.5 + 0.25 * (x_scaled - 4) ) );
+                break;
+              default:
+                return 0.;
+            }
+          }
+        }
+        else   // right boundary wavelet
+        {
+          int dummy_scale = 1u << (j+1);
+          interval_choice -= (dummy_scale - 6);
+          switch (interval_choice)
+          {
+            case (0):
+            case (1):
+              return ( scale * ( -0.25 *  (x_scaled - dummy_scale + 6) ) );
+              break;
+            case (2):
+            case (3):
+              return ( scale * ( -0.5 + x_scaled - dummy_scale + 4 ) );
+              break;
+            case (4):
+              return ( scale * ( 1.5 - 2.75 * ( x_scaled - dummy_scale + 2 ) ) );
+              break;
+            case (5):
+              return ( scale * ( -1.25 + 1.25 * (x_scaled - dummy_scale + 1) ) );
+              break;
+            default:
+              return 0.;
+          }
+        }
+
+
+      }    // Wavelet END
+      else     // generator
+      {
+        double x_scaled = (1u << j) * x;
+
+        if ( (x_scaled > (k-1)) && (x_scaled < (k+1)) )  // x is contained in support
+        {
+          if (x_scaled  < k)
+          {
+            return scale*(x_scaled - k + 1);
+          }
+          else
+          {
+            return scale*(k + 1 - x_scaled);
+          }
+        }
+        else
+        {
+          return 0.;
+        }
+
+      }   // generator END
+    }
+
+
+    double evaluate_primbs_22_bc11_v3(const int j, const int e, const int k, const double x)
+    {
+
+      double scale = (1u << (j/2));  // the scaling factor
+      if ((j%2) == 1)
+      {
+        //scale *= sqrt(2);
+        scale *= 1.41421356237309504880L;  // i.e., scale *= sqrt(2);
+      }
+
+      if (e==1)  // wavelet
+      {
+        double x_scaled = (1u << (j+1)) * x;
+
+        if (k < ((int)((1u << j) - 1)))   // inner or left boundary wavelet
+        {
+          if (k)                   // inner wavelet
+          {
+            int interval_choice = static_cast<int>(x_scaled) - 2*k + 2;
+            switch (interval_choice)
+            {
+              case 0:
+              case 1:
+                return (scale*( x_scaled - (2*k - 2) )*0.25);
+                break;
+              case 2:
+                return (scale*( 0.5 - 2*(x_scaled - 2*k) ));
+                break;
+              case 3:
+                return (scale*( -1.5 + 2*(x_scaled - 2*k - 1) ));
+                break;
+              case 4:
+              case 5:
+                return (scale*( 0.5 - 0.25*(x_scaled - 2*k - 2 ) ));
+                break;
+              default:
+                return 0.;
+            }
+          }
+          else                     // left boundary wavelet
+          {
+            int interval_choice = static_cast<int>(x_scaled);
+            switch (interval_choice)
+            {
+              case 0:
+                return ( scale * ( -1.25 * x_scaled ) );
+                break;
+              case 1:
+                return ( scale * ( -1.25 + 2.75 * (x_scaled-1) ) );
+                break;
+              case 2:
+              case 3:
+                return ( scale * ( 1.5 - x_scaled + 2 ) );
+                break;
+              case 4:
+              case 5:
+                return ( scale * ( -0.5 + 0.25 * (x_scaled - 4) ) );
+                break;
+              default:
+                return 0.;
+            }
+          }
+        }
+        else   // right boundary wavelet
+        {
+          int dummy_scale = 1u << (j+1);
+          int interval_choice = static_cast<int>(x_scaled) - dummy_scale + 6;
+
+          switch (interval_choice)
+          {
+            case (0):
+            case (1):
+              return ( scale * ( -0.25 *  (x_scaled - dummy_scale + 6) ) );
+              break;
+            case (2):
+            case (3):
+              return ( scale * ( -0.5 + x_scaled - dummy_scale + 4 ) );
+              break;
+            case (4):
+              return ( scale * ( 1.5 - 2.75 * ( x_scaled - dummy_scale + 2 ) ) );
+              break;
+            case (5):
+              return ( scale * ( -1.25 + 1.25 * (x_scaled - dummy_scale + 1) ) );
+              break;
+            default:
+              return 0.;
+          }
+        }
+
+
+      }    // Wavelet END
+      else     // generator
+      {
+        double x_scaled = (1u << j) * x;
+        int interval_choice = static_cast<int>(x_scaled) - k + 1;
+
+        switch (interval_choice)
+        {
+          case 0:
+            return scale*(x_scaled - k + 1);
+            break;
+          case 1:
+            return scale*(k + 1 - x_scaled);
+            break;
+          default:
+            return 0.;
+        }
+
+      }   // generator END
+    }
+
+
+
+    double evaluate_primbs_22_bc11_deriv(const int j, const int e, const int k, const double x)
+    {
+
+      double scale = (1u << (j/2));  // the scaling factor
+      if ((j%2) == 1)
+      {
+        //scale *= sqrt(2);
+        scale *= 1.41421356237309504880L;  // i.e., scale *= sqrt(2);
+      }
+
+      if (e==1)  // wavelet
+      {
+        double x_scaled = (1u << (j+1)) * x;
+
+        if (k < (int)(((1u << j) - 1)))   // inner or left boundary wavelet
+        {
+          if (k)                   // inner wavelet
+          {
+            int interval_choice = static_cast<int>(x_scaled) - 2*k + 2;
+            switch (interval_choice)
+            {
+              case 0:
+              case 1:
+                return (scale*( 1u << (j-1) ));
+                break;
+              case 2:
+                return (-scale*( 1u << (j+2) ));
+                break;
+              case 3:
+                return (scale*( 1u << (j+2) ));
+                break;
+              case 4:
+              case 5:
+                return (-scale*( 1u << (j-1) ));
+                break;
+              default:
+                return 0.;
+            }
+          }
+          else                     // left boundary wavelet
+          {
+            int interval_choice = static_cast<int>(x_scaled);
+            switch (interval_choice)
+            {
+              case 0:
+                return (-scale*( 5 * (1u << (j-1)) ));
+                break;
+              case 1:
+                return (scale*( 11 * (1u << (j-1)) ));
+                break;
+              case 2:
+              case 3:
+                return (-scale*( (1u << (j+1)) ));
+                break;
+              case 4:
+              case 5:
+                return (scale*( (1u << (j-1)) ));
+                break;
+              default:
+                return 0.;
+            }
+          }
+        }
+        else   // right boundary wavelet
+        {
+          int dummy_scale = 1u << (j+1);
+          int interval_choice = static_cast<int>(x_scaled) - dummy_scale + 6;
+
+          switch (interval_choice)
+          {
+            case (0):
+            case (1):
+              return (-scale*( 1u << (j-1) ));
+              break;
+            case (2):
+            case (3):
+              return (scale*( 1u << (j+1) ));
+              break;
+            case (4):
+              return (-scale*( 11 * (1u << (j-1)) ));
+              break;
+            case (5):
+              return (scale*( 5 * (1u << (j-1)) ));
+              break;
+            default:
+              return 0.;
+          }
+        }
+
+
+      }    // Wavelet END
+      else     // generator
+      {
+        double x_scaled = (1u << j) * x;
+        int interval_choice = static_cast<int>(x_scaled) - k + 1;
+
+        switch (interval_choice)
+        {
+          case 0:
+            return scale*(1u << j);
+            break;
+          case 1:
+            return -scale*(1u << j);
+            break;
+          default:
+            return 0.;
+        }
+
+      }   // generator END
+    }
+
+
+    void evaluate_primbs_22_bc11_v3(const int j, const int e, const int k, const Array1D<double>& points, Array1D<double>& values)
+    {
+
+        values.resize(points.size());
+        for (unsigned int i(0); i < values.size(); i++)
+        {
+          values[i] = 0.0;
+        }
+
+        for (unsigned int i(0); i < points.size(); i++)
+        {
+          values[i] = evaluate_primbs_22_bc11_v3(j, e, k, points[i]);
+        }
+
+
+    }
 }

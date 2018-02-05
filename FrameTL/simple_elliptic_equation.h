@@ -117,7 +117,12 @@ namespace FrameTL
       Read access to the frame. The routine is called basis() to be
       compatible with the routines in WaveletTL's compression.h.
     */
-    const AggregatedFrame<IBASIS,DIM>& basis() const { return *frame_; }  
+    const AggregatedFrame<IBASIS,DIM>& basis() const { return *frame_; }
+    
+    /*!
+      maximal level of the underlying wavelet basis
+    */
+    int jmax() const { return jmax_; }
 
     /*!
       Space dimension of the problem.

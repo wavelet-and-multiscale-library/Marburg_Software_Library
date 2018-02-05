@@ -245,6 +245,17 @@ namespace WaveletTL
     integrate
     (const Function<DIM>* f,
      const Index& lambda) const;
+    
+    
+    /*! C. Hartmann on 12.10.15:
+      helper function, integrate a primal wavelet or generator lambda against another
+      primal generator or wavelet mu
+    */
+    double integrate(const Index& lambda, const Index& mu) const;
+
+
+    //! point evaluation of (derivatives of) primal generators or wavelets \psi_\lambda
+    //! Christoph: !! evaluation of derivatives not correct !! use functions in cube_evaluate.h instead !!
 
     //! point evaluation of (derivatives of) primal generators or wavelets \psi_\lambda
     double evaluate(const unsigned int derivative, const Index& lambda, const Point<DIM> x) const;

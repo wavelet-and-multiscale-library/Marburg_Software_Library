@@ -636,16 +636,106 @@ namespace WaveletTL
    const int jmax,
    InfiniteVector<double,Index>& coeffs) const
   {
-    assert(primal == false); // only integrate against primal wavelets and generators
-
-    for (Index lambda = first_generator(j0());;++lambda)
+    if (primal == false)        //! integrate against primal wavelets and generators
+    {
+      for (Index lambda = first_generator(j0());;++lambda)
       {
-	const double coeff = integrate(f, lambda);
-	if (fabs(coeff)>1e-15)
-	  coeffs.set_coefficient(lambda, coeff);
- 	if (lambda == last_wavelet(jmax))
- 	  break;
-      } 
+	    const double coeff = integrate(f, lambda);
+	    if (fabs(coeff)>1e-15)
+	    {
+	      coeffs.set_coefficient(lambda, coeff);
+ 	    }
+ 	    if (lambda == last_wavelet(jmax))
+ 	    {
+ 	      break;
+        }
+      }
+    }    
+    else                        //! integrate against dual wavelets and generators (we integrate against the primal wavelets
+                                //! and generators and multiply the resulting coefficients with the inverse of the primal gramian)
+
+    {
+#ifdef P_POISSON
+      //! integrate against the primal wavelets and generators
+      InfiniteVector<double,Index> dual_coeffs;
+      for (Index lambda = first_generator(j0());;++lambda)
+      {
+	    const double coeff = integrate(f, lambda);
+        dual_coeffs.set_coefficient(lambda, coeff);
+ 	    if (lambda == last_wavelet(jmax))
+ 	    {
+ 	      break;
+        }
+      }
+
+      //! setup the primal gramian
+      SparseMatrix<double> A_Lambda;
+      //set<typename PROBLEM::WaveletBasis::Index>& Lambda;
+      std::set<Index> Lambda;
+
+      dual_coeffs.support(Lambda);
+      A_Lambda.resize(Lambda.size(), Lambda.size());
+
+      typedef typename SparseMatrix<double>::size_type size_type;
+
+      size_type row = 0;
+      //typedef typename PROBLEM::Index Index;
+
+      for (typename std::set<Index>::const_iterator it1(Lambda.begin()), itend(Lambda.end()); it1 != itend; ++it1, ++row)
+      {
+	    // double d1 = preconditioned ? P.D(*it1) : 1.0;
+	    std::list<size_type> indices;
+	    std::list<double> entries;
+
+	    size_type column = 0;
+
+	    for (typename std::set<Index>::const_iterator it2(Lambda.begin()); it2 != itend; ++it2, ++column)
+	    {
+          double entry = integrate(*it2, *it1);
+	      if (fabs(entry) > 1e-15)
+	      {
+		    indices.push_back(column);
+		    //entries.push_back(entry / (preconditioned ? d1 * P.D(*it2) : 1.0));
+		    entries.push_back(entry);
+	      }
+	    }
+
+	    A_Lambda.set_row(row, indices, entries);
+      }
+
+
+      //! solve system of linear equations
+      Vector<double> F_Lambda(Lambda.size());
+
+      // copy dual_coeffs into F_Lambda
+      unsigned int id = 0;
+      for (typename std::set<Index>::const_iterator it = Lambda.begin(), itend = Lambda.end(); it != itend; ++it, ++id)
+      {
+	    F_Lambda[id] = dual_coeffs.get_coefficient(*it);
+      }
+
+      // setup initial approximation xk
+      Vector<double> xk(Lambda.size());
+      id = 0;
+      for (typename std::set<Index>::const_iterator it = Lambda.begin(), itend = Lambda.end(); it != itend; ++it, ++id)
+      {
+	    //xk[id] = dual_coeffs.get_coefficient(*it);
+	    xk[id] = 0.0;
+      }
+
+      unsigned int iterations = 0;
+      CG(A_Lambda, F_Lambda, xk, 1e-15, 150, iterations);
+
+      id = 0;
+      for (typename std::set<Index>::const_iterator it = Lambda.begin(), itend = Lambda.end(); it != itend; ++it, ++id)
+      {
+	    coeffs.set_coefficient(*it, xk[id]);
+      }
+
+#endif
+    }  // else END
+
+  
   }
   
   template <class IBASIS, unsigned int DIM>
@@ -723,6 +813,12 @@ namespace WaveletTL
   CubeBasis<IBASIS,DIM>::evaluate(const unsigned int derivative, const Index& lambda, const Point<DIM> x) const
   {
     double value = 1.0;
+    
+    if (derivative > 0)
+    {
+      cout << "CubeBasis.evaluate: evaluation of derivative not implemented correctly!!" << endl;
+      exit(1);
+    }
 
     for (unsigned int i = 0; i < DIM; i++) // loop through components of the tensor product
       value *= bases_[i]->evaluate(derivative,
@@ -758,6 +854,105 @@ namespace WaveletTL
     }
     cout << "done setting up collection of wavelet indices..." << endl;
 
+  }
+  
+  template <class IBASIS, unsigned int DIM>
+  double
+  CubeBasis<IBASIS,DIM>::integrate(const Index& lambda, const Index& mu) const
+  {
+
+    double r = 0.0;
+
+    // first decide whether the supports of psi_lambda and psi_mu intersect
+    Support supp;
+
+    if (intersect_supports(*this, lambda, mu, supp))
+    {
+
+	  // setup Gauss points and weights for a composite quadrature formula:
+	  const int doe = DIM * primal_polynomial_degree();
+	  const int N_Gauss = (doe+1)/2;
+	  const double h = ldexp(1.0, -supp.j); // granularity for the quadrature (h=2^-j)
+	  FixedArray1D<Array1D<double>,DIM> gauss_points, gauss_weights;
+	  for (unsigned int i = 0; i < DIM; i++)
+	  {
+	    gauss_points[i].resize(N_Gauss*(supp.b[i]-supp.a[i]));
+	    gauss_weights[i].resize(N_Gauss*(supp.b[i]-supp.a[i]));
+	    for (int patch = supp.a[i]; patch < supp.b[i]; patch++)
+	    {
+	      for (int n = 0; n < N_Gauss; n++)
+	      {
+	        gauss_points[i][(patch-supp.a[i])*N_Gauss+n] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
+	        gauss_weights[i][(patch-supp.a[i])*N_Gauss+n] = h*GaussWeights[N_Gauss-1][n];
+	      }
+        }
+  	  }
+
+
+	  // compute point values of the integrand (where we use that it is a tensor product)
+	  FixedArray1D<Array1D<double>,DIM>
+	    psi_lambda_values,     // values of the components of psi_lambda at gauss_points[i]
+	    psi_mu_values;         // -"-, for psi_mu
+
+	  for (unsigned int i = 0; i < DIM; i++)
+      {
+	    bases()[i]->evaluate(0,
+                             typename IBASIS::Index(lambda.j(), lambda.e()[i], lambda.k()[i], bases()[i]),
+                             gauss_points[i], psi_lambda_values[i]);
+
+	    bases()[i]->evaluate(0,
+                             typename IBASIS::Index(mu.j(), mu.e()[i], mu.k()[i], bases()[i]),
+                             gauss_points[i], psi_mu_values[i]);
+	  }
+
+	  // iterate over all points and sum up the integral shares
+	  int index[DIM]; // current multiindex for the point values
+	  for (unsigned int i = 0; i < DIM; i++)
+	  {
+	    index[i] = 0;
+      }
+
+	  double weights, share;
+
+	  while (true)
+	  {
+
+	    // product of current Gauss weights
+	    weights = 1.0;
+	    for (unsigned int i = 0; i < DIM; i++)
+	    {
+	      weights *= gauss_weights[i][index[i]];
+        }
+
+	    // compute the share psi_lambda(x)psi_mu(x)
+	    share = weights;
+	    for (unsigned int i = 0; i < DIM; i++)
+	    {
+	      share *= psi_lambda_values[i][index[i]] * psi_mu_values[i][index[i]];
+	    }
+	    r += share;
+
+	    // "++index"
+	    bool exit = false;
+	    for (unsigned int i = 0; i < DIM; i++)
+	    {
+	      if (index[i] == N_Gauss*(supp.b[i]-supp.a[i])-1)
+	      {
+		    index[i] = 0;
+		    exit = (i == DIM-1);
+	      }
+	      else
+	      {
+		    index[i]++;
+		    break;
+	      }
+	    }
+	    if (exit) break;
+	  }
+
+    }     // if (intersect_supports(basis_, lambda, mu, supp)) ENDE
+
+    return r;
   }
 
 }

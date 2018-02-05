@@ -1,4 +1,4 @@
-
+#define _DIM 2
 #include <map>
 #include <fstream>
 #include <iostream>

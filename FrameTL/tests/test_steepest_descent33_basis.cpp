@@ -3,6 +3,7 @@
 
 #define JMAX 10
 #define ONE_D
+#define _DIM 1
 
 #define PRIMALORDER 2
 #define DUALORDER   2

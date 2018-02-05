@@ -104,7 +104,8 @@ EXEOBJF3 = \
   test_tbasis_adaptive.o\
   test_tbasis_cdd1.o\
   test_tframe_adaptive.o\
-  test_ldomain.o
+  test_ldomain.o\
+  test_p_poisson_cube.o
 
 # set 3a of test programs: wavelet bases on the ring domain
 EXEOBJF3a = \

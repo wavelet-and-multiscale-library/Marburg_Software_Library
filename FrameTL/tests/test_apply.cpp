@@ -1,5 +1,6 @@
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
 #define PARALLEL 0
+#define _DIM 2
 
 #include <fstream>
 #include <iostream>

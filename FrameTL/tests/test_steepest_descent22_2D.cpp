@@ -3,6 +3,7 @@
 
 #define JMAX 8
 #define TWO_D
+#define _DIM 2
 
 //#define PRECOMP_RHS
 

@@ -27,35 +27,43 @@ namespace WaveletTL
   {
     typename CubeBasis<IBASIS,DIM>::Support supp_lambda;
     WaveletTL::support<IBASIS,DIM>(basis, lambda, supp_lambda);
-      
+
     typename CubeBasis<IBASIS,DIM>::Support supp_mu;
     WaveletTL::support<IBASIS,DIM>(basis, mu, supp_mu);
 
     // determine support intersection granularity,
     // adjust single support granularities if necessary
     supp.j = std::max(supp_lambda.j, supp_mu.j);
-    if (supp_lambda.j > supp_mu.j) {
+    if (supp_lambda.j > supp_mu.j)
+    {
       const int adjust = 1<<(supp_lambda.j-supp_mu.j);
-      for (unsigned int i = 0; i < DIM; i++) {
-	supp_mu.a[i] *= adjust;
-	supp_mu.b[i] *= adjust;
-      }
-    } else {
-      const int adjust = 1<<(supp_mu.j-supp_lambda.j);
-      for (unsigned int i = 0; i < DIM; i++) {
-	supp_lambda.a[i] *= adjust;
-	supp_lambda.b[i] *= adjust;
+      for (unsigned int i = 0; i < DIM; i++)
+      {
+	    supp_mu.a[i] *= adjust;
+	    supp_mu.b[i] *= adjust;
       }
     }
-    
-    for (unsigned int i = 0; i < DIM; i++) {
+    else
+    {
+      const int adjust = 1<<(supp_mu.j-supp_lambda.j);
+      for (unsigned int i = 0; i < DIM; i++)
+      {
+	    supp_lambda.a[i] *= adjust;
+	    supp_lambda.b[i] *= adjust;
+      }
+    }
+
+    for (unsigned int i = 0; i < DIM; i++)
+    {
       supp.a[i] = std::max(supp_lambda.a[i],supp_mu.a[i]);
       supp.b[i] = std::min(supp_lambda.b[i],supp_mu.b[i]);
-      
+
       if (supp.a[i] >= supp.b[i])
-	return false;
+      {
+	    return false;
+      }
     }
-    
+
     return true;
   }
 
@@ -77,7 +85,8 @@ namespace WaveletTL
       intersecting_1d_generators, intersecting_1d_wavelets;
 
     // prepare all intersecting wavelets and generators in the i-th coordinate direction
-    for (unsigned int i = 0; i < DIM; i++) {
+    for (unsigned int i = 0; i < DIM; i++)
+    {
       intersecting_wavelets(*basis.bases()[i],
 			    Index1D(lambda.j(),
 				    lambda.e()[i],
@@ -85,12 +94,14 @@ namespace WaveletTL
 				    basis.bases()[i]),
 			    j, true, intersecting_1d_generators[i]);
       if (!(generators))
-	intersecting_wavelets(*basis.bases()[i],
+      {
+	    intersecting_wavelets(*basis.bases()[i],
 			      Index1D(lambda.j(),
 				      lambda.e()[i],
 				      lambda.k()[i],
 				      basis.bases()[i]),
 			      j, false, intersecting_1d_wavelets[i]);
+      }
     }
 
     // generate all relevant tensor product indices with either e=(0,...,0) or e!=(0,...,0)
@@ -98,47 +109,59 @@ namespace WaveletTL
     list_type indices;
     FixedArray1D<Index1D,DIM> helpindex;
 
-    if (DIM > 1 || (DIM == 1 && generators)) {
+    if (DIM > 1 || (DIM == 1 && generators))
+    {
       for (typename std::list<Index1D>::const_iterator it(intersecting_1d_generators[0].begin()),
-	     itend(intersecting_1d_generators[0].end());
-	   it != itend; ++it) {
-	helpindex[0] = *it;
-	indices.push_back(helpindex);
-      }
+	       itend(intersecting_1d_generators[0].end());
+	       it != itend; ++it)
+	   {
+	     helpindex[0] = *it;
+	     indices.push_back(helpindex);
+       }
     }
-    if (!(generators)) {
+    if (!(generators))
+    {
       for (typename std::list<Index1D>::const_iterator it(intersecting_1d_wavelets[0].begin()),
 	     itend(intersecting_1d_wavelets[0].end());
-	   it != itend; ++it) {
-	helpindex[0] = *it;
-	indices.push_back(helpindex);
-      }
+	   it != itend; ++it)
+	   {
+	     helpindex[0] = *it;
+	     indices.push_back(helpindex);
+       }
     }
-    for (unsigned int i = 1; i < DIM; i++) {
+    for (unsigned int i = 1; i < DIM; i++)
+    {
       list_type sofar;
       sofar.swap(indices);
       for (typename list_type::const_iterator itready(sofar.begin()), itreadyend(sofar.end());
-	   itready != itreadyend; ++itready) {
-	helpindex = *itready;
-	unsigned int esum = 0;
-	for (unsigned int k = 0; k < i; k++)
-	  esum += helpindex[k].e();
-	if (generators || (i < DIM-1 || (i == (DIM-1) && esum > 0))) {
-	  for (typename std::list<Index1D>::const_iterator it(intersecting_1d_generators[i].begin()),
-		 itend(intersecting_1d_generators[i].end());
-	       it != itend; ++it) {
-	    helpindex[i] = *it;
-	    indices.push_back(helpindex);
-	  }
-	}
-	if (!(generators)) {
-	  for (typename std::list<Index1D>::const_iterator it(intersecting_1d_wavelets[i].begin()),
-		 itend(intersecting_1d_wavelets[i].end());
-	       it != itend; ++it) {
-	    helpindex[i] = *it;
-	    indices.push_back(helpindex);
-	  }
-	}
+	       itready != itreadyend; ++itready)
+      {
+	    helpindex = *itready;
+	    unsigned int esum = 0;
+	    for (unsigned int k = 0; k < i; k++)
+	    {
+	      esum += helpindex[k].e();
+        }
+	    if (generators || (i < DIM-1 || (i == (DIM-1) && esum > 0)))
+	    {
+	      for (typename std::list<Index1D>::const_iterator it(intersecting_1d_generators[i].begin()),
+		       itend(intersecting_1d_generators[i].end());
+	           it != itend; ++it)
+	       {
+	         helpindex[i] = *it;
+	         indices.push_back(helpindex);
+	       }
+	    }
+	    if (!(generators))
+	    {
+	      for (typename std::list<Index1D>::const_iterator it(intersecting_1d_wavelets[i].begin()),
+		       itend(intersecting_1d_wavelets[i].end());
+	           it != itend; ++it)
+          {
+	        helpindex[i] = *it;
+	        indices.push_back(helpindex);
+	      }
+	    }
       }
     }
 
@@ -146,10 +169,12 @@ namespace WaveletTL
     typename Index::type_type help_e;
     typename Index::translation_type help_k;
     for (typename list_type::const_iterator it(indices.begin()), itend(indices.end());
-	 it != itend; ++it) {
-      for (unsigned int i = 0; i < DIM; i++) {
-	help_e[i] = (*it)[i].e();
-	help_k[i] = (*it)[i].k();
+	     it != itend; ++it)
+    {
+      for (unsigned int i = 0; i < DIM; i++)
+      {
+	    help_e[i] = (*it)[i].e();
+	    help_k[i] = (*it)[i].k();
       }
       intersecting.push_back(Index(j, help_e, help_k, &basis));
     }
@@ -214,12 +239,12 @@ namespace WaveletTL
         result = 0;
         genfstlvl =1;
         //generators on level j0
-        for (unsigned int i = 0; i< DIM; i++)                     
+        for (unsigned int i = 0; i< DIM; i++)
 	  genfstlvl *= (basis.bases()[i])->Deltasize((basis.bases()[i])->j0());
         //additional wavelets on level j
         //            =(#Gen[1]+#Wav[1])*...*(#Gen[Dim-1]+#Wav[Dim-1])
         //             -#Gen[1]*...*#Gen[Dim-1]
-        for (int lvl= 0 ; 
+        for (int lvl= 0 ;
 	     lvl < (j -basis.j0());
 	     lvl++){
 	  int genCurLvl = 1;
@@ -239,7 +264,7 @@ namespace WaveletTL
 
       while(!exit){
       FixedArray1D<int,DIM> help1, help2;
-      
+
       for(unsigned int i = 0; i<DIM; i++)
          help1[i]=0;
 
@@ -264,8 +289,8 @@ namespace WaveletTL
         else
 	  if (minkwavelet[i] == (basis.bases())[i]->Nablamin())
 	    continue;
-      
-        
+
+
         if (type[i] == 0) {
 	tmp *= minkgen[i]-(basis.bases())[i]->DeltaLmin();
         }
@@ -281,11 +306,11 @@ namespace WaveletTL
 	tmp = maxkgen[DIM-1] - minkgen[DIM-1]+1;
       }
       else{
-	tmp = maxkwavelet[DIM-1] - minkwavelet[DIM-1]+1; 
+	tmp = maxkwavelet[DIM-1] - minkwavelet[DIM-1]+1;
       }
-     
+
       bool exit2 = 0;
-      
+
       while(!exit2){
 
       // fügt die Indizes ein die sich überlappen
@@ -302,7 +327,7 @@ namespace WaveletTL
                 for (unsigned int j = i+1; j<=DIM-2;j++){
                     if(type[i] == 0){
                        result2 = result2 - help2[j]*(maxkgen[j] - minkgen[j]+1);
-                    } 
+                    }
                     else
                        result2 = result2 - help2[j]*(maxkwavelet[j] - minkwavelet[j]+1);
                 }
@@ -337,7 +362,7 @@ namespace WaveletTL
       } //end while 2
 
 
-      // berechnet wie viele Indizes von dem jeweiligen Typ in Patches p liegen 
+      // berechnet wie viele Indizes von dem jeweiligen Typ in Patches p liegen
       tmp = 1;
       for (unsigned int i = 0; i < DIM; i++) {
 	      if (type[i] == 0)
@@ -345,11 +370,11 @@ namespace WaveletTL
 	      else
 	        tmp *= (basis.bases())[i]->Nablasize(j);
 	    }
-         
+
       result += tmp;
 
-     
-     // berechnet den nächsten Typ 
+
+     // berechnet den nächsten Typ
      for (unsigned int i = DIM-1; i >= 0; i--) {
 	    if ( type[i] == 1 ) {
 	      type[i] = 0;
@@ -376,10 +401,10 @@ namespace WaveletTL
 	  intersecting.push_back(mu);
 	if (mu == basis.last_generator(j)) break;
       }
-    } 
+    }
     }
 
-    
+
 //*/
 #endif
 //#else
@@ -400,9 +425,9 @@ namespace WaveletTL
 	if (mu == last_wavelet<IBASIS,DIM>(&basis, j)) break;
       }
     }
-#endif      
+#endif
   }
-    
+
   template <class IBASIS, unsigned int DIM>
   bool intersect_singular_support(const CubeBasis<IBASIS,DIM>& basis,
 				  const typename CubeBasis<IBASIS,DIM>::Index& lambda,

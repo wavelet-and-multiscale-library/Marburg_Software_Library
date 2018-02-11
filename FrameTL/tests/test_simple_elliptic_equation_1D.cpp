@@ -1,7 +1,9 @@
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
+#define PARALLEL 0
 
 #define JMAX 12
 #define ONE_D
+#define _DIM 1
 
 #define AGGREGATED
 #undef BASIS

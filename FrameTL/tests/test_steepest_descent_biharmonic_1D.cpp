@@ -2,10 +2,11 @@
 //#define _WAVELETTL_CACHEDPROBLEM_VERBOSITY 2
 //#define _FRAMETL_SIMPLEBIHARMONICEQUATION_VERBOSITY 2
 //#define _WAVELETTL_INDEX_VERBOSITY 1
-
+#define PARALLEL 0
 #define JMAX 7
 
 #define ONE_D
+#define _DIM 1
 
 // choose which righthand side to use
 //#define CONSTANT_RHS

@@ -1,5 +1,5 @@
 #define TWO_D
-
+#define _DIM 2
 
 #include <map>
 #include <fstream>

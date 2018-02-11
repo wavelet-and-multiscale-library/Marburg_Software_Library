@@ -3,6 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
+#define PRIMALORDER 3
+#define DUALORDER 3
+#define JMAX 8
+#define PMAX 0
+#define _DIM 2
+
 #undef NONADAPTIVE
 #define ADAPTIVE
 #define BASIS
@@ -136,10 +143,10 @@ public:
 int main()
 {
     cout << "Testing tbasis adaptive" << endl;
-    const int d  = 3;
-    const int dT = 3;
+    const int d  = PRIMALORDER;
+    const int dT = DUALORDER;
     const unsigned int dim = 2; 
-    const int jmax=10;
+    const int jmax=JMAX;
 //    const int jmax1=4;
 //    MultiIndex<int, dim> jmax;
 //    jmax[0]=jmax1 ,jmax[1]=jmax1;
@@ -283,8 +290,7 @@ int main()
 #ifdef ADAPTIVE
     CachedTProblem<TensorEquation<Basis1d,dim,Basis> > cproblem1(&eq);
     InfiniteVector<double, Index> F_eta;
-    cproblem1.RHS(1e-6, F_eta);
-    const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
+    cproblem1.RHS(1e-6, F_eta);    
     double epsilon = 1e-5;
     InfiniteVector<double, Index> u_epsilon, v;
     
@@ -293,6 +299,7 @@ int main()
     //cout << eq.space_dimension << endl;
     //cout << cproblem1.space_dimension << endl;
     CDD1_SOLVE(cproblem1, epsilon, u_epsilon, jmax, tensor_simple);
+//    const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
 //    CDD2_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple);
     
     //APPLY(cproblem1, u_epsilon, 1e-3, v, 2*jmax1, tensor_simple);

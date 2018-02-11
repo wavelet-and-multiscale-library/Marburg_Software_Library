@@ -45,6 +45,9 @@ class TestProblem : public SimpleSturmBVP
                 case 9:
                     return 1;
                     break;
+                case 10:
+                    return 0;
+                    break;    
                 default:
                     return 0;
                     break;
@@ -82,6 +85,9 @@ class TestProblem : public SimpleSturmBVP
                 case 9:
                     return 0;
                     break;
+                case 10:
+                    return 0;
+                    break;  
                 default:
                     return 0;
                     break;
@@ -119,6 +125,9 @@ class TestProblem : public SimpleSturmBVP
                 case 9:
                     return 0;
                     break;
+                case 10:
+                    return 1;
+                    break;  
                 default:
                     return 0;
                     break;
@@ -158,6 +167,9 @@ class TestProblem : public SimpleSturmBVP
                     break;
                 case 9:
                     return  -sin(3.*M_PI*t)*9.*M_PI*M_PI - 4.;
+                    break;                    
+                case 10:
+                    return -sin(3*M_PI*t)+(t<0.5 ? 2*t*t : 2*(1-t)*(1-t));  
                     break;
                 default:
                     return 0;

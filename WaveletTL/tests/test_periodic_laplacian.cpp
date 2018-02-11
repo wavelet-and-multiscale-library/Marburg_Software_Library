@@ -4,6 +4,12 @@
  *
  * Created on July 6, 2016, 2:33 PM
  */
+#define PARALLEL 0
+#define PRIMALORDER 3
+#define DUALORDER 3
+#define JMAX 8
+#define PMAX 0
+#define _DIM 1
 
 #include <cstdlib>
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
@@ -59,11 +65,11 @@ using namespace WaveletTL;
 
 int main(int argc, char** argv) {
     
-    const int d  = 3;
-    const int dT = 3;
-    const int jmax = 8;
+    const int d  = PRIMALORDER;
+    const int dT = DUALORDER;
+    const int jmax = JMAX;
     const bool normalization = 1;
-    const int pmax = 2;
+    const int pmax = PMAX;
 
     
     

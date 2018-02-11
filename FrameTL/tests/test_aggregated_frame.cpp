@@ -1,8 +1,12 @@
+#define _DIM 2
+
 #include <iostream>
 #include <interval/ds_basis.h>
 #include <interval/p_basis.h>
 #include <frame_support.h>
 #include <frame_index.h>
+
+
 
 
 using std::cout;

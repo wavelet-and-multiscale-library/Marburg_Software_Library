@@ -1,3 +1,5 @@
+#define _DIM 1
+
 #include <fstream>
 #include <iostream>
 #include <biharmonic_equation.h>

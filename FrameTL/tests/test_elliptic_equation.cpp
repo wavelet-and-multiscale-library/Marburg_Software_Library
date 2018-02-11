@@ -1,6 +1,7 @@
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
 
 #define TWO_D
+#define _DIM 2
 
 #include <map>
 #include <fstream>

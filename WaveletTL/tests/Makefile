@@ -104,7 +104,8 @@ EXEOBJF3 = \
   test_tbasis_adaptive.o\
   test_tbasis_cdd1.o\
   test_tframe_adaptive.o\
-  test_ldomain.o
+  test_ldomain.o\
+  test_p_poisson_cube.o
 
 # set 3a of test programs: wavelet bases on the ring domain
 EXEOBJF3a = \
@@ -139,7 +140,7 @@ EXEOBJF6 = \
 
 # set 7 of test programs: nonadaptive wavelet solvers for elliptic problems	
 EXEOBJF7 = \
-  
+  test_sturm_nonadaptive.o\
   
 
 # set 8 of test programs: ExpandASPP	
@@ -193,86 +194,86 @@ veryclean:: clean
 
 $(EXEOBJF1): %.o: %.cpp
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -g -fopenmp -o $@ $<
 else
-	$(CXX) $(CXXFLAGS) -c -DNDEBUG -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -DNDEBUG -fopenmp -o $@ $<
 endif
 
 $(EXES1): %: %.o
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $(LDFLAGS) $< -g -o $@
+	$(CXX) $(LDFLAGS) $< -g -fopenmp -o $@
 else
-	$(CXX) $(LDFLAGS) $< -o $@
+	$(CXX) $(LDFLAGS) $< -fopenmp -o $@
 endif
 
 $(EXEOBJF2): %.o: %.cpp
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -g -fopenmp -o $@ $<
 else
-	$(CXX) $(CXXFLAGS) -c -DNDEBUG -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -DNDEBUG -fopenmp -o $@ $<
 endif
 
 $(EXES2): %: %.o
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $(LDFLAGS) $< -g -o $@
+	$(CXX) $(LDFLAGS) $< -g -fopenmp -o $@
 else
-	$(CXX) $(LDFLAGS) $< -o $@
+	$(CXX) $(LDFLAGS) $< -fopenmp -o $@
 endif
 
 $(EXEOBJF2a): %.o: %.cpp
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -g -fopenmp -o $@ $<
 else
-	$(CXX) $(CXXFLAGS) -c -DNDEBUG -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -DNDEBUG -fopenmp -o $@ $<
 endif
 
 $(EXES2a): %: %.o
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $(LDFLAGS) $< -g -o $@
+	$(CXX) $(LDFLAGS) $< -g -fopenmp -o $@
 else
-	$(CXX) $(LDFLAGS) $< -o $@
+	$(CXX) $(LDFLAGS) $< -fopenmp -o $@
 endif
 
 $(EXEOBJF3): %.o: %.cpp
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -g -fopenmp -o $@ $<
 else
-	$(CXX) $(CXXFLAGS) -c -DNDEBUG -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -DNDEBUG -fopenmp -o $@ $<
 endif
 
 $(EXES3): %: %.o
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $(LDFLAGS) $< -g -o $@
+	$(CXX) $(LDFLAGS) $< -g -fopenmp -o $@
 else
-	$(CXX) $(LDFLAGS) $< -o $@
+	$(CXX) $(LDFLAGS) $< -fopenmp -o $@
 endif
 
 $(EXEOBJF3a): %.o: %.cpp
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -g -fopenmp -o $@ $<
 else
-	$(CXX) $(CXXFLAGS) -c -DNDEBUG -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -DNDEBUG -fopenmp -o $@ $<
 endif
 
 $(EXES3a): %: %.o
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $(LDFLAGS) $< -g -o $@
+	$(CXX) $(LDFLAGS) $< -g -fopenmp -o $@
 else
-	$(CXX) $(LDFLAGS) $< -o $@
+	$(CXX) $(LDFLAGS) $< -fopenmp -o $@
 endif
 
 $(EXEOBJF3b): %.o: %.cpp
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -g -fopenmp -o $@ $<
 else
-	$(CXX) $(CXXFLAGS) -c -DNDEBUG -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -DNDEBUG -fopenmp -o $@ $<
 endif
 
 $(EXES3b): %: %.o
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $(LDFLAGS) $< -g -o $@
+	$(CXX) $(LDFLAGS) $< -g -fopenmp -o $@
 else
-	$(CXX) $(LDFLAGS) $< -o $@
+	$(CXX) $(LDFLAGS) $< -fopenmp -o $@
 endif
 
 $(EXEOBJF4): %.o: %.cpp
@@ -291,16 +292,16 @@ endif
 
 $(EXEOBJF5): %.o: %.cpp
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -g -fopenmp -o $@ $<
 else
-	$(CXX) $(CXXFLAGS) -c -DNDEBUG -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -DNDEBUG -fopenmp -o $@ $<
 endif
 
 $(EXES5): %: %.o
 ifeq ($(DEBUGMODE),on)
-	$(CXX) $(LDFLAGS) $< -g -o $@
+	$(CXX) $(LDFLAGS) $< -g -fopenmp -o $@
 else
-	$(CXX) $(LDFLAGS) $< -o $@
+	$(CXX) $(LDFLAGS) $< -fopenmp -o  $@
 endif
 
 $(EXEOBJF6): %.o: %.cpp

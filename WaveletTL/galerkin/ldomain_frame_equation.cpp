@@ -153,14 +153,25 @@ namespace WaveletTL
         double preconditioner = sqrt(hspreconditioner)*l2preconditioner;
         
         return preconditioner;
-#else  
+#endif  
 #ifdef TRIVIAL
         return 1;
-#else
-        return stiff_diagonal[lambda.number()];
-//        return sqrt(a(lambda, lambda));
-#endif 
 #endif
+#ifdef ENERGY
+        return stiff_diagonal[lambda.number()];
+#endif
+#ifdef DYPLUSEN
+        double hspreconditioner(0), l2preconditioner(1);
+        for (int i=0; i<space_dimension; i++){
+            hspreconditioner+=pow(1+lambda.p()[i],6);
+            l2preconditioner*=pow(1+lambda.p()[i],2);
+        }
+        double preconditioner = sqrt(hspreconditioner)*l2preconditioner*stiff_diagonal[lambda.number()]/sqrt(space_dimension);
+//        double preconditioner = sqrt(0.1)*stiff_diagonal[lambda.number()];
+        return preconditioner;
+
+#endif 
+
 //        return 1;
     }
 
@@ -528,7 +539,7 @@ namespace WaveletTL
         normA = evals(evals.size()-1);
         normAinv = 1./evals(i);
       
-        cout << "Eigenwerte: " << evals << endl;
+//        cout << "Eigenwerte: " << evals << endl;
       //cout << "Eigenvektoren: " << endl << evecs << endl;
 #else
         Vector<double> xk(Lambda.size(), false);

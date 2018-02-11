@@ -60,7 +60,7 @@ public:
   }
 };
 
-// f(x)=-sin(3*pi*x)
+// f(x)=-sin(3*pi*x)-4
 class Function4 : public Function<1> {
 public:
   inline double value(const Point<1>& p, const unsigned int component = 0) const {
@@ -73,6 +73,22 @@ public:
     values[0] = value(p);
   }
 };  
+
+
+// f(x)=-sin(3*pi*x)+2x^2 or 2(1-x)^2)
+class SolutionToDeltadis : public Function<1> {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    return -sin(3*M_PI*p[0])+(p[0]<0.5 ? 2*p[0]*p[0] : 2*(1-p[0])*(1-p[0]));
+  }
+
+
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};  
+
 // f(x)=x
 class Function5 : public Function<1> {
 public:

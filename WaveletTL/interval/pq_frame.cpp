@@ -971,7 +971,7 @@ namespace WaveletTL
     int p = 0;
     for (Index ind = first_generator(j0_); ind <= last_wavelet(jmax_, pmax_); (ind == last_wavelet(jmax_,p))? (++p, ind=first_generator(j0_, p)) : ++ind) {
       full_collection[k] = ind;
-      //cout << ind << endl;
+//      cout << ind << endl;
       k++;
     }
     cout << "done setting up collection of quarklet indices..." << endl;

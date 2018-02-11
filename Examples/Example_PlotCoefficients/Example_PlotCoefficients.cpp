@@ -12,6 +12,9 @@
  * http://www.mathematik.uni-marburg.de/~numerik/
  */
 
+#define PARALLEL 0
+#define _DIM 1
+
 #include <iostream>
 #include <utils/function.h>
 #include <interval/p_basis.h>

@@ -427,9 +427,9 @@ namespace WaveletTL{
     //double beta      = 0.98;
     //double beta      = 0.85;
 
-    //double beta      = 0.85; // this was chosen for d=2,3
+    double beta      = 0.85; // this was chosen for d=2,3
     //double beta      = 0.75; // this was chosen for d=4
-    double beta      = 0.5; // this was chosen for d=4
+//    double beta      = 0.5; // this was chosen for d=4
     
     cout << "beta = " << beta << endl;
 
@@ -554,10 +554,10 @@ namespace WaveletTL{
 	}
 	case 3: {
           weak_ell_tau_norms[loops] = w.weak_norm(1./2.5);
-	  sprintf(name1, "%s%d%s%d%s", "./sd_results33_basis/steep1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	  sprintf(name2, "%s%d%s%d%s", "./sd_results33_basis/steep1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
-	  sprintf(name3, "%s%d%s%d%s", "./sd_results33_basis/steep1D_descent_params_P_jmax18_", d, "_dT", dT, ".m");
-	  sprintf(name4, "%s%d%s%d%s", "./sd_results33_basis/steep1D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name1, "%s%d%s%d%s", "./sd_results33/steep1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name2, "%s%d%s%d%s", "./sd_results33/steep1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name3, "%s%d%s%d%s", "./sd_results33/steep1D_descent_params_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name4, "%s%d%s%d%s", "./sd_results3/steep1D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
 	  break;
 	}
 	case 4: {
@@ -631,7 +631,8 @@ namespace WaveletTL{
 	double tol=1.0;
 	switch (d) {
 	case 2: {
-	  tol=0.015;
+//	  tol=0.015;
+          tol=1e-5;
 	  break;
 	}
 	case 3: {
@@ -639,6 +640,10 @@ namespace WaveletTL{
 	  break;
 	}
 	case 4: {
+	  tol=3.1623e-04;
+	  break;
+	}
+        case 5: {
 	  tol=3.1623e-04;
 	  break;
 	}
@@ -984,6 +989,10 @@ namespace WaveletTL{
 	  break;
 	}
 	case 4: {
+	  tol=3.1623e-04;
+	  break;
+	}
+        case 5: {
 	  tol=3.1623e-04;
 	  break;
 	}

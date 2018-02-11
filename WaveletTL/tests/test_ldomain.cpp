@@ -3,6 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
+#define _DIM 2
 #undef NONADAPTIVE
 #define ADAPTIVE
 
@@ -57,9 +59,9 @@ int main(){
     const int jmax = 4;
     
     typedef PBasis<d,dT> Basis1d;
-    typedef Basis1d::Index Index1d;
-    typedef TensorBasis<Basis1d,dim> TBasis;
-    typedef TBasis::Index TIndex;
+//    typedef Basis1d::Index Index1d;
+//    typedef TensorBasis<Basis1d,dim> TBasis;
+//    typedef TBasis::Index TIndex;
     typedef LDomainBasis<Basis1d> Basis;
     typedef Basis::Index Index;
     typedef Basis::Support Support;

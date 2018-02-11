@@ -1,7 +1,9 @@
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 0
+#define PARALLEL 0
 
-#define JMAX 13
+#define JMAX 18
 #define ONE_D
+#define _DIM 1
 //#define _PRE_COMPUTE_WAVELETS
 
 #define PRIMALORDER 3

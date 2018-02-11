@@ -109,6 +109,34 @@ int intpower(const I n, const J k)
   return r;
 }
 
+
+//is only fast for power<=5
+inline double faster_pow(double base, int power){
+    double r;
+    switch(power) {
+          case 1:
+              r = base;
+              break;
+          case 2:
+              r = base*base;
+              break;
+          case 3:
+              r = base*base*base;
+              break;
+          case 4:
+              r = base*base*base*base;
+              break;
+          case 5:
+              r = base*base*base*base*base;
+              break;
+          default:
+              r = pow(base,power);
+              break;
+    }
+    return r;
+}
+
+
 inline
 double mypow(double base, int power){
     double r=1.0;

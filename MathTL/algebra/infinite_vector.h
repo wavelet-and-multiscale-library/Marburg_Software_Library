@@ -273,6 +273,8 @@ namespace MathTL
       (fabs<C> should exist)
     */
     void compress(const double eta = 1e-15);
+    
+    void shrinkage(const double mu);
 
     /*!
       add a value to a vector entry

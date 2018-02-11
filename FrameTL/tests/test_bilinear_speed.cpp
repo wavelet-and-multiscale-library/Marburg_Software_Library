@@ -8,6 +8,9 @@
 #define TRIVIAL
 #undef ENERGY
 
+#define GRAMIAN
+#undef POISSON
+
 #define _DIM 2
 
 #ifdef QUARKLET
@@ -46,6 +49,7 @@
 #include <Ldomain/ldomain_frame.h>
 #include <Ldomain/ldomain_frame_evaluate.h>
 #include <Ldomain/ldomain_frame_indexplot.h>
+#include <galerkin/ldomain_frame_gramian.h>
 #include <galerkin/ldomain_frame_equation.h>
 #include <galerkin/cached_quarklet_ldomain_problem.h>
 
@@ -85,7 +89,7 @@ public:
   virtual ~myRHS() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
     CornerSingularityRHS csrhs(Point<2>(0,0), 0.5, 1.5);
-    return 2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1])/*+5*csrhs.value(p)*/;
+    return /*2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1])+*/5*csrhs.value(p);
   }
   void vector_value(const Point<2>& p, Vector<double>& values) const {
     values[0] = value(p);
@@ -233,10 +237,12 @@ int main()
   CornerSingularity sing2D(origin, 0.5, 1.5);
   
   PoissonBVP<DIM> poisson(&singRhs);
-//  mySolution rhs;
+  mySolution gramianrhs;
+  IdentityBVP<DIM> gramian(&gramianrhs);
+//  
 //  myRHS rhs;
 //    
-//  PoissonBVP<DIM> poisson(&rhs);
+//  PoissonBVP<DIM> poisson(&gramianrhs);
   
   //PoissonBVP<DIM> poisson(&const_fun);
 
@@ -268,6 +274,7 @@ int main()
 //    Frame2D frame(frame1d);
     Frame2D frame(&frame1d, &frame1d_11, &frame1d_01, &frame1d_10);
     frame.set_jpmax(jmax,pmax);
+    LDomainFrameGramian<Frame1d,Frame2D> discrete_gramian(&gramian, &frame, false);
     LDomainFrameEquation<Frame1d,Frame2D> discrete_poisson(&poisson, &frame, false);
 //    discrete_poisson.set_jpmax(jmax,pmax);
 //    Frame2D frame = discrete_poisson.frame();
@@ -335,7 +342,12 @@ cout << "setting up full stiffness matrix..." << endl;
 //   WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff, false);
 //  WaveletTL::setup_stiffness_matrix(problem, Lambda, stiff);
 // WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff, false);
+#ifdef POISSON
   WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
+#endif
+#ifdef GRAMIAN
+  WaveletTL::setup_stiffness_matrix(discrete_poisson, Lambda, stiff);
+#endif
   
     
   
@@ -379,7 +391,13 @@ cout << "setting up full stiffness matrix..." << endl;
   cout << "setting up full right hand side..." << endl;
   Vector<double> rh;
 //  WaveletTL::setup_righthand_side(problem, Lambda, rh);
+#ifdef POISSON
   WaveletTL::setup_righthand_side(discrete_poisson, Lambda, rh);
+#endif
+#ifdef GRAMIAN
+  WaveletTL::setup_righthand_side(discrete_gramian, Lambda, rh);
+#endif
+  
   cout << rh << endl;
   
 

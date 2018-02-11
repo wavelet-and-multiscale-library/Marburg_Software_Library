@@ -35,7 +35,7 @@ namespace WaveletTL
         // make deep copy of the 1D frames:
         IFRAME* iframe = new IFRAME(*(*it));
         frames_infact.push_back(iframe);
-        for (int i = 0; i < DIM; ++i)
+        for (unsigned int i = 0; i < DIM; ++i)
         {
 			if (*it == other.frames_[i])
 				frames_[i] = iframe;

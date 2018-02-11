@@ -18,7 +18,7 @@ namespace FrameTL
     \file adaptive_multiplicative_Schwarz.h
     The adaptive multiplicative Schwarz solver.
   */
-  
+
   /*!
     \brief  Adaptive multiplicative Schwarz wavelet frame algorithm from Stevenson, Werner 2009.
 
@@ -31,6 +31,16 @@ namespace FrameTL
   template <class PROBLEM>
   void  MultSchw(const PROBLEM& P, const double epsilon,
 		 Array1D<InfiniteVector<double, typename PROBLEM::Index> >& approximations);
+
+
+  /*!
+    The adaptive multiplicative Schwarz solver
+    with a given initial guess for 'approximations'
+  */
+  template <class PROBLEM>
+  void  MultSchw(const PROBLEM& P, const double epsilon,
+		 Array1D<InfiniteVector<double, typename PROBLEM::Index> >& approximations,
+		 const InfiniteVector<double, typename PROBLEM::Index>& guess);
 
 //   /*!
 //     adaptive multiplicative Schwarz method from [DRSW]

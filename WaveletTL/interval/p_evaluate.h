@@ -85,11 +85,28 @@ namespace WaveletTL
   template <int d, int dT>
   void evaluate(const PBasis<d,dT>& basis,
 		const typename PBasis<d,dT>::Index& lambda,
-		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);
+		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);  
+  
+  
   template <int d, int dT>
   void evaluate(const PBasis<d,dT>& basis,
 		const int j, const int e, const int k,
 		const Array1D<double>& points, Array1D<double>& funcvalues, Array1D<double>& dervalues);
+  
+  /*! Author: C. Hartmann Date: 30.08.15
+    point evaluation of a single primal generator or wavelet \psi_\lambda.
+    ATTENTION: This is a direct approach, i.e. we don't expand wavelets into generators
+               of a higher level before evaluation.
+    !!! ONLY FOR PRIMBS BASIS WITH d=dt=2 AND homog. bc's !!!
+  */
+
+  double evaluate_primbs_22_bc11(const int j, const int e, const int k, const double x);
+
+  double evaluate_primbs_22_bc11_v3(const int j, const int e, const int k, const double x);
+
+  double evaluate_primbs_22_bc11_deriv(const int j, const int e, const int k, const double x);
+
+  void evaluate_primbs_22_bc11_v3(const int j, const int e, const int k, const Array1D<double>& points, Array1D<double>& values);
 
 
 }

@@ -68,13 +68,17 @@ namespace WaveletTL
   : public FullyDiagonalQuarkletPreconditioner<typename LDOMAINFRAME::Index>
 
     
-#else
+#endif
 #ifdef TRIVIAL
     : public TrivialPreconditioner<typename LDOMAINFRAME::Index>
-#else
+#endif
+#ifdef ENERGY
     : public FullyDiagonalEnergyNormPreconditioner<typename LDOMAINFRAME::Index>
 #endif
+#ifdef DYPLUSEN
+    : public FullyDiagonalDyPlusEnNormPreconditioner<typename LDOMAINFRAME::Index>
 #endif
+
   {
   public:
       

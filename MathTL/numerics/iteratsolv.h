@@ -38,7 +38,14 @@ namespace FLAT
   template <class VECTOR, class MATRIX>
   void Richardson(const MATRIX &A, const VECTOR &b, VECTOR &xk, const double omega,
 		  const double tol, const unsigned int maxiter, unsigned int& iterations);
-
+  
+  template <class VECTOR, class MATRIX>
+  void Richardson_sparse(const MATRIX &A, const VECTOR &b, VECTOR &xk, const double omega, const double mu,
+		  const double tol, const unsigned int maxiter, unsigned int& iterations);
+  
+  template <class VECTOR, class MATRIX>
+    void Landweber(const MATRIX &A, const VECTOR &b, VECTOR &xk, const double omega,
+                   const double tol, const unsigned int maxiter, unsigned int& iterations, const double& mu = 0);
   //! Jacobi iteration
   /*!
     Jacobi iteration (for quadratic matrices; routine only uses APPLY() and the values on the diagonal)

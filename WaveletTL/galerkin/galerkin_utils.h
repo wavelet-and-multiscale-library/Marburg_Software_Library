@@ -19,6 +19,9 @@
 using MathTL::SparseMatrix;
 using MathTL::Vector;
 
+//extern int number_of_entries_computed;
+//extern int number_of_entries_from_cache;
+
 namespace WaveletTL
 {
   /*!

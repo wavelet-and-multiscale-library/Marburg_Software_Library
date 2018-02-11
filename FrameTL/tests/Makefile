@@ -58,7 +58,8 @@ CXXFLAGS +=  -O2 -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 endif
 
 
-EXEOBJF1 = test_aggregated_frame.o\
+EXEOBJF1 = test_p_poisson_frame.o\
+test_aggregated_frame.o\
 test_biharmonic_1d_testcase.o\
 test_elliptic_equation_1D.o\
 test_elliptic_equation.o\
@@ -122,33 +123,33 @@ veryclean:: clean
 	rm -f *~
 
 $(EXEOBJF1): %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -g -fopenmp -o $@ $<
 #	$(CXX) $(CXXFLAGS) -c -o $@ $< 
 
 $(EXES1): %: %.o
 #	$(CXX) $< -g -o $@
-	$(CXX) $< -o $@
+	$(CXX) $< -fopenmp -o $@
 
 $(EXEOBJF2): %.o: %.cpp
 #	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
-	$(CXX) $(CXXFLAGS) -c -o $@ $< 
+	$(CXX) $(CXXFLAGS) -c -fopenmp -o $@ $< 
 
 $(EXES2): %: %.o
 #	$(CXX) $< -g -o $@
-	$(CXX) $< -o $@
+	$(CXX) $< -fopenmp -o $@
 
 $(EXEOBJF3): %.o: %.cpp
 #	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
-	$(CXX) $(CXXFLAGS) -c -o $@ $< 
+	$(CXX) $(CXXFLAGS) -c -fopenmp -o $@ $< 
 
 $(EXES3): %: %.o
 #	$(CXX) $< -g -o $@
-	$(CXX) $< -o $@
+	$(CXX) $< -fopenmp -o $@
 
 $(EXEOBJF4): %.o: %.cpp
 #	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
-	$(CXX) $(CXXFLAGS) -c -o $@ $< 
+	$(CXX) $(CXXFLAGS) -c -fopenmp -o $@ $< 
 
 $(EXES4): %: %.o
 #	$(CXX) $< -g -o $@
-	$(CXX) $< -o $@
+	$(CXX) $< -fopenmp -o $@

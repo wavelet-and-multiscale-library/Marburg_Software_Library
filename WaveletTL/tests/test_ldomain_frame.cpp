@@ -3,16 +3,22 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+#undef POISSON
+#define GRAMIAN
+
 
 #undef DYADIC
-#define ENERGY
+#define TRIVIAL
+#undef ENERGY
+#undef DYPLUSEN
 
-#undef NONADAPTIVE
-#define ADAPTIVE
+#define NONADAPTIVE
+#undef ADAPTIVE
 
 #ifdef ADAPTIVE
-#define SD
+#undef SD
 #undef CDD2
+#define RICHARDSON
 #endif
 
 #define PARALLEL 0
@@ -22,7 +28,7 @@
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
 #define JMAX 7
-#define PMAX 0
+#define PMAX 1
 #define TWO_D
 
 #define PRIMALORDER 3
@@ -40,6 +46,7 @@
 #include <Ldomain/ldomain_frame_evaluate.h>
 #include <Ldomain/ldomain_frame_indexplot.h>
 #include <galerkin/ldomain_frame_equation.h>
+#include <galerkin/ldomain_frame_gramian.h>
 #include <galerkin/cached_quarklet_ldomain_problem.h>
 
 
@@ -98,8 +105,8 @@ public:
 };
 
 int main(){
-    clock_t tic, toc;
-    double time;
+//    clock_t tic, toc;
+//    double time;
     
     
     cout << "testing L-domain quarklet frame" << endl;
@@ -125,7 +132,11 @@ int main(){
     //ConstantFunction<dim> rhs1(val);
     myRHS rhs1;
     
+    
+    
     PoissonBVP<dim> poisson1(&rhs1);
+//    PoissonBVP<dim> poisson1(&uexact1);
+    IdentityBVP<dim> gramian1(&uexact1);
     Frame1d frame1d(false,false);
     frame1d.set_jpmax(jmax-frame1d.j0(),pmax);
     Frame1d frame1d_11(true,true);
@@ -136,7 +147,13 @@ int main(){
     frame1d_10.set_jpmax(jmax-frame1d.j0(),pmax);
     Frame frame(&frame1d, &frame1d_11, &frame1d_01, &frame1d_10);
     frame.set_jpmax(jmax,pmax);
+#ifdef POISSON
     LDomainFrameEquation<Frame1d,Frame> eq(&poisson1, &frame, true);
+#endif
+#ifdef GRAMIAN
+    LDomainFrameGramian<Frame1d,Frame> eq(&gramian1, &frame, true);
+#endif
+    
     
     
     
@@ -231,7 +248,7 @@ int main(){
     //setup stiffness matrix and rhs
     SparseMatrix<double> A;
     setup_stiffness_matrix(eq,Lambda,A); 
-    cout << "setup stiffness matrix done" << endl;
+//    cout << "setup stiffness matrix done" << endl;
     Vector<double> F;
     setup_righthand_side(eq, Lambda, F); 
     A.compress(1e-14);
@@ -239,56 +256,89 @@ int main(){
     A.matlab_output("A","A",0,A.row_dimension()-1,A.column_dimension()-1 );
     F.matlab_output("F","F");
     Vector<double> x(Lambda.size());
-    x =0;
+    
+    double mu = 0.0001;
+    InfiniteVector<double,Index> u;
+    for(int loop=0; loop<1 ; loop++){
+        u.clear();
+        
+        x =F;
+        mu*=0.1;
     
     //richardson iteration
     unsigned int iterations;
-    const int maxiterations = 9999;
-//    cout << eq.norm_A(), ", " << eq.norm_Ainv() << endl;
-    cout << eq.norm_A() << endl;
-    cout << eq.norm_Ainv() << endl;
-    const double omega = 2.0 / (eq.norm_A() + 1.0/eq.norm_Ainv());
-    cout << "omega: "<<omega<<endl;
-    Richardson(A,F,x,omega,1e-6,maxiterations,iterations);
-    //CG(A,F,x,1e-8,maxiterations,iterations);
+    const int maxiterations = 5000;
+//    cout << eq.norm_A() << endl;
+//    cout << eq.norm_Ainv() << endl;
+//    const double omega = 2.0 / (eq.norm_A() + 1.0/eq.norm_Ainv());
+//    cout << "omega: "<<omega<<endl;
+    const double omega2 = 0.05;
+    
+//    const double mu = 0;
+    
+    cout << "start iteration..." << endl; 
+    Richardson_sparse(A,F,x,omega2,mu,1e-6,maxiterations,iterations);
+    char name[128];
+    sprintf(name, "%s%d", "x", loop);
+    x.matlab_output(name,name);
+//    Richardson(A,F,x,omega2,1e-6,maxiterations,iterations);
+//    CG(A,F,x,1e-8,maxiterations,iterations);
     cout << "iterations:" << iterations << endl;
     
     
-    InfiniteVector<double,Index> u;
+    unsigned int nontrivial = 0;
+    
+    for(unsigned int i=0; i<x.size();i++){
+        if(x[i]!=0)
+        nontrivial++;
+    }
+    cout << "Number of nontrivial entries: " << nontrivial << endl;
+    
+    
+    
     unsigned int i2 = 0;
     for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i2){
-      u.set_coefficient(*it, x[i2]);
+        if(x[i2]!=0)
+        u.set_coefficient(*it, x[i2]);
     }
+//    cout << u << endl;
     
     //plot solution
     //u.COARSE(1e-6,v);
     u.scale(&eq, -1);
     Array1D<SampledMapping<dim> > eval(3);
     eval=eq.frame().evaluate(u,6);
-    std::ofstream os2("solution_na.m");
+    char name1[128];
+    sprintf(name1, "%s%d%s", "solution_na_loop", loop, ".m");
+    std::ofstream os2(name1);
+    os2 << "figure;" << endl;
     for(int i=0;i<3;i++){
-        eval[i].matlab_output(os2);
+        eval[i].matlab_output(os2);        
         os2 << "surf(x,y,z);" << endl;
         os2 << "hold on;" << endl;
     }  
+    os2 << "title('nonadaptive sparse solution, mu=" << mu << ", dof=" << nontrivial << "')" << endl;
     os2 << "view(30,55);"<<endl;
     os2 << "hold off" << endl;
     os2.close(); 
     
     //new coefficients plot
-    std::ofstream coeff_stream;
-    coeff_stream.open("coefficients_na.m");
+    char name2[128];
+    sprintf(name2, "%s%d%s", "coefficients_na_loop", loop, ".m");
+    std::ofstream coeff_stream(name2);;
+//    coeff_stream.open("coefficients_na.m");
     //coeff_stream2 << "figure;" << endl;
     MultiIndex<int,dim> pstart;
     MultiIndex<int,dim> jstart;// start=basis1.j0();
     MultiIndex<int,dim> estart;
-    for (set<Index>::const_iterator it(Lambda.begin()); it!=Lambda.end(); ++it){
-        Index lambda=*it;
+    for (InfiniteVector<double, Index>::const_iterator it(u.begin()); it != u.end(); ++it){
+//    for (set<Index>::const_iterator it(Lambda.begin()); it!=Lambda.end(); ++it){
+        Index lambda=it.index();
         if(!(lambda.j()==jstart && lambda.e()==estart)){
             //cout <<lambda.p()[0]<<lambda.p()[1]<< lambda.j()[0]-1+lambda.e()[0]<<lambda.j()[1]-1+lambda.e()[1] << endl;
             jstart=lambda.j();
             estart=lambda.e();
-            plot_indices_ldomain(&frame, u, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(flipud(gray))", false, true, -6);
+            plot_indices_ldomain(&frame, u, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(jet)", false, true, -6);
             //coeff_stream2 << "title('solution coefficients') " << endl;
             //coeff_stream2 << "title(sprintf('coefficients on level (%i,%i)',"<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"));"<<endl;
             coeff_stream<<"print('-djpg',sprintf('coeffs%i%i%i%i.jpg',"<<lambda.p()[0]<<","<<lambda.p()[1]<<","<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"))"<<endl;
@@ -296,6 +346,7 @@ int main(){
     }
     coeff_stream.close();
     cout << "coefficients plotted"<<endl;
+    }
  #endif   
 
 #ifdef ADAPTIVE
@@ -306,9 +357,12 @@ int main(){
 //    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 119, 25);
 #ifdef SD
     CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
+//    CachedQuarkletLDomainProblem<LDomainFrameGramian<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
 #endif
-#ifdef CDD2
-    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 43, 9);
+#if defined CDD2 || defined RICHARDSON
+    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
+//    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 43, 9);
+//    CachedQuarkletLDomainProblem<LDomainFrameGramian<Frame1d,Frame> > cproblem1(&eq);
 //    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 5.3, 46.3);
 #endif
     
@@ -325,34 +379,47 @@ int main(){
     
 //    double epsilon = 10;
     InfiniteVector<double, Index> u_epsilon;
+    InfiniteVector<double, int> u_epsilon_int;
     
     const double a=2;
     const double b=2;
-    double epsilon = 1e-3;
+    double epsilon = 1e-12;
     
     tic=clock();
-#ifdef CDD2
+#ifdef CDD2 
     const char* scheme_type = "CDD2";
-    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b);
+    
+//    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b);
+    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, tensor_simple, pmax, a, b);
 #endif
 //    DUV_QUARKLET_SOLVE_SD(cproblem1, nu, epsilon, u_epsilon, tensor_simple, pmax, jmax, a, b);
 //    steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon, tensor_simple, 2, 2);
 #ifdef SD
     const char* scheme_type = "SD";
-    InfiniteVector<double, int> u_epsilon_int;
     steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon_int, tensor_simple, a, b);
+#endif
+#ifdef RICHARDSON
+    const char* scheme_type = "Richardson";
+    const unsigned int maxiter = 500;
+    richardson_QUARKLET_SOLVE(cproblem1,epsilon,u_epsilon_int, maxiter, tensor_simple, 2, 2);
 #endif
     toc = clock();
     time = (double)(toc-tic);
     cout << "Time taken: " << (time/CLOCKS_PER_SEC) << " s\n"<<endl;
     cout << "fertig" << endl;
 //    abort();
-#ifdef SD
+    
+    
+    
+    
+    
+
     for (typename InfiniteVector<double,int>::const_iterator it(u_epsilon_int.begin()),
  	   itend(u_epsilon_int.end()); it != itend; ++it){
         u_epsilon.set_coefficient(*(frame.get_quarklet(it.index())), *it);
     }
-#endif
+//    cout << u_epsilon << endl;
+
         
 //    InfiniteVector<double,Frame2D::Index> u;
 //  unsigned int i = 0;
@@ -366,6 +433,12 @@ int main(){
     //plot solution
     //u.COARSE(1e-6,v);
     u_epsilon.scale(&cproblem1, -1);
+    unsigned int i2 = 0;
+    Vector<double> x(Lambda.size());
+    for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i2){
+        x[i2]=u_epsilon.get_coefficient(*it);        
+    }
+    x.matlab_output("x","x");
     Array1D<SampledMapping<dim> > eval(3);
     eval=cproblem1.frame().evaluate(u_epsilon,6);
     std::ofstream os2("solution_ad.m");

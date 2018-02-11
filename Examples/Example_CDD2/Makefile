@@ -19,8 +19,8 @@ clean::
 	rm -f *~
 
 $(EXEOBJF): %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c -g -o $@ $<
+	$(CXX) $(CXXFLAGS) -c -g -fopenmp -o $@ $<
 
 $(EXES): %: %.o
-	$(CXX) $(LDFLAGS) $< -g -o $@
+	$(CXX) $(LDFLAGS) $< -g -fopenmp -o $@
 

@@ -52,13 +52,17 @@ namespace WaveletTL
 #ifdef DYADIC
       : public FullyDiagonalQuarkletPreconditioner<typename PROBLEM::Index>
     
-#else
+#endif
 #ifdef TRIVIAL
     : public TrivialPreconditioner<typename PROBLEM::Index>
-#else
+#endif
+#ifdef ENERGY
     : public FullyDiagonalEnergyNormPreconditioner<typename PROBLEM::Index>
 #endif
+#ifdef DYPLUSEN
+    : public FullyDiagonalDyPlusEnNormPreconditioner<typename PROBLEM::Index>
 #endif
+
     {
     public:
         /*

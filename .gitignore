@@ -173,3 +173,6 @@ MathTL/tests/test_schoenberg_splines
 FrameTL/tests/test_simple_elliptic_equation_1D
 WaveletTL/tests/test_parallel
 FrameTL/tests/test_adaptive_speed
+WaveletTL/tests/test_sturm_nonadaptive
+FrameTL/tests/test_p_poisson_frame
+WaveletTL/tests/test_p_poisson_cube

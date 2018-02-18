@@ -21,6 +21,7 @@
 
 #define PARALLEL 0
 #define _DIM 1
+#define BASIS
 
 #include <iostream>
 

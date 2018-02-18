@@ -21,6 +21,7 @@
 
 #define PARALLEL 0
 #define _DIM 1
+#define BASIS
 
 #include <iostream>
 
@@ -137,7 +138,7 @@ int main()
 
     /* plot solution graph */
     solution1_epsilon.scale(&cproblem1, -1); /* scaling because ... */
-    SampledMapping<1> sm1(evaluate(cproblem1.basis(), solution1_epsilon, true, 2*jmax)); // Increase last parameter, if "Assertion `resolution >= 0' failed."
+    SampledMapping<1> sm1(evaluate(cproblem1.basis(), solution1_epsilon, true, jmax+1)); // Increase last parameter, if "Assertion `resolution >= 0' failed."
     std::ofstream u_stream1(filenameSolution1);
     sm1.matlab_output(u_stream1);
     u_stream1 << "figure;\nplot(x,y);"
@@ -190,7 +191,7 @@ int main()
 
     /* plot solution graph */
     solution2_epsilon.scale(&cproblem2, -1); /* scaling because ... */
-    SampledMapping<1> sm2(evaluate(cproblem2.basis(), solution2_epsilon, true, 2*jmax)); //" Increase last parameter, if Assertion `resolution >= 0' failed."
+    SampledMapping<1> sm2(evaluate(cproblem2.basis(), solution2_epsilon, true, jmax+1)); //" Increase last parameter, if Assertion `resolution >= 0' failed."
     std::ofstream u_stream2(filenameSolution2);
     sm2.matlab_output(u_stream2);
     u_stream2 << "figure;\nplot(x,y);"
@@ -243,7 +244,7 @@ int main()
 
     /* plot solution graph */
     solution3_epsilon.scale(&cproblem3, -1); /* scaling because ... */
-    SampledMapping<1> sm3(evaluate(cproblem3.basis(), solution3_epsilon, true, 2*jmax)); //" Increase last parameter, if Assertion `resolution >= 0' failed."
+    SampledMapping<1> sm3(evaluate(cproblem3.basis(), solution3_epsilon, true, jmax+1)); //" Increase last parameter, if Assertion `resolution >= 0' failed."
     std::ofstream u_stream3(filenameSolution3);
     sm3.matlab_output(u_stream3);
     u_stream3 << "figure;\nplot(x,y);"

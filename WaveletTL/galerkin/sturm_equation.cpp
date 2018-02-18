@@ -117,39 +117,41 @@ namespace WaveletTL
   SturmEquation<WBASIS>::D(const typename WBASIS::Index& lambda) const
   {
 #ifdef FRAME
-#ifdef DYADIC
+  #ifdef DYADIC
       return mypow((1<<lambda.j())*mypow(1+lambda.p(),4),operator_order())*mypow(1+lambda.p(),2); //2^j*(p+1)^6, falls operator_order()=1 (\delta=4)
 //      return 1<<(lambda.j()*(int) operator_order());
-#else
-#ifdef TRIVIAL
+  #else
+    #ifdef TRIVIAL
       return 1;
-#else
+    #else
       return stiff_diagonal[lambda.number()]*(lambda.p()+1);
+    #endif
+  #endif
 #endif
-#endif
-#endif
+
 #ifdef BASIS
-#ifdef DYADIC
-
-      return 1<<(lambda.j()*(int) operator_order());
-//      return pow(ldexp(1.0, lambda.j()),operator_order());
-
-#else
-#ifdef TRIVIAL
+  #ifdef DYADIC
+    return 1<<(lambda.j()*(int) operator_order());
+//    return pow(ldexp(1.0, lambda.j()),operator_order());
+  #else
+    #ifdef TRIVIAL
       return 1;
+    #else
+      #ifdef ENERGY
+//        return sqrt(a(lambda, lambda));
+        return stiff_diagonal[lambda.number()];
+      #else
+        return sqrt(a(lambda, lambda));
+      #endif  
+    #endif
+  #endif
 #else
-//      return sqrt(a(lambda, lambda));
-      return stiff_diagonal[lambda.number()];
-#endif
-#endif
-#else
- return 1;     
+  return 1;
 #endif
 
 //    return 1;
 //     return lambda.e() == 0 ? 1.0 : ldexp(1.0, lambda.j()); // do not scale the generators
 //     return lambda.e() == 0 ? 1.0 : sqrt(a(lambda, lambda)); // do not scale the generators
-
 
   }
 

@@ -3,22 +3,22 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-#undef POISSON
-#define GRAMIAN
+#define POISSON
+#undef GRAMIAN
 
 
-#undef DYADIC
-#define TRIVIAL
+#define DYADIC
+#undef TRIVIAL
 #undef ENERGY
 #undef DYPLUSEN
 
-#define NONADAPTIVE
-#undef ADAPTIVE
+#undef NONADAPTIVE
+#define ADAPTIVE
 
 #ifdef ADAPTIVE
 #undef SD
-#undef CDD2
-#define RICHARDSON
+#define CDD2
+#undef RICHARDSON
 #endif
 
 #define PARALLEL 0
@@ -27,8 +27,8 @@
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
-#define JMAX 7
-#define PMAX 1
+#define JMAX 6
+#define PMAX 0
 #define TWO_D
 
 #define PRIMALORDER 3
@@ -203,10 +203,10 @@ int main(){
 
     Lambda.insert(*(frame.get_quarklet(i)));
 //    cout << *(frame.get_quarklet(i)) << endl;
-#endif
+
 
   }
-    
+#endif    
     
 //    set<Index> Lambda;  
 //    MultiIndex<int,dim> p;p[0]=0;p[1]=0;
@@ -360,10 +360,10 @@ int main(){
 //    CachedQuarkletLDomainProblem<LDomainFrameGramian<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
 #endif
 #if defined CDD2 || defined RICHARDSON
-    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
-//    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 43, 9);
+  //  CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
+    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 43, 9);
 //    CachedQuarkletLDomainProblem<LDomainFrameGramian<Frame1d,Frame> > cproblem1(&eq);
-//    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 5.3, 46.3);
+//   CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 5.3, 46.3);
 #endif
     
 
@@ -383,9 +383,9 @@ int main(){
     
     const double a=2;
     const double b=2;
-    double epsilon = 1e-12;
+    double epsilon = 1e-3;
     
-    tic=clock();
+    double tic=clock();
 #ifdef CDD2 
     const char* scheme_type = "CDD2";
     
@@ -403,8 +403,8 @@ int main(){
     const unsigned int maxiter = 500;
     richardson_QUARKLET_SOLVE(cproblem1,epsilon,u_epsilon_int, maxiter, tensor_simple, 2, 2);
 #endif
-    toc = clock();
-    time = (double)(toc-tic);
+    double toc = clock();
+    double time = (double)(toc-tic);
     cout << "Time taken: " << (time/CLOCKS_PER_SEC) << " s\n"<<endl;
     cout << "fertig" << endl;
 //    abort();
@@ -571,10 +571,10 @@ int main(){
 #if 0
     //plot one function
     Array1D<SampledMapping<dim> > evalf(3);
-    //Index ind=frame.get_quarklet(159);    //0-26:generatoren auf patches,
-                                        //27-32:überlappende generatoren, indiziert mit p=3,4
-                                        //33:überlappendes wavelet
-                                        //34:nicht-überlappendes wavelet
+    Index testindex=frame.get_quarklet(195);    //:generatoren auf patches,
+                                        //:überlappende generatoren, indiziert mit p=3,4
+                                        //:überlappendes wavelet
+                                        //:nicht-überlappendes wavelet
     cout << "evaluate quarklet with index " << testindex << endl;
     evalf=frame.evaluate(testindex,6);
     std::ofstream osf("Ldomainoutput.m");

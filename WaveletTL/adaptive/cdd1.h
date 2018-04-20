@@ -26,6 +26,8 @@
 #include <adaptive/apply.h>
 #endif
 
+#include "utils/convergence_logger.h"
+
 using std::set;
 using std::cout;
 using std::endl;
@@ -57,119 +59,141 @@ namespace WaveletTL
 
   
     using MathTL::InfiniteVector;
+    using MathTL::AbstractConvergenceLogger;
+
     /*!
       the routine ALGORITHMc from [BB+]
      */
-    template <class PROBLEM>
+    template <class PROBLEM, typename INDEX>
     void CDD1_SOLVE(PROBLEM& P, const double epsilon,
-            InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
-            const int jmax = 99,
+                    InfiniteVector<double, INDEX>& u_epsilon,
+                    const int jmax = 99,
 #if _WAVELETTL_USE_TBASIS == 1
-            const CompressionStrategy strategy = tensor_simple);
+                    const CompressionStrategy strategy = tensor_simple);
 #else
-            const CompressionStrategy strategy = St04a);
-#endif
-
-    template <class PROBLEM>
-    void CDD1_SOLVE(PROBLEM& P, const double epsilon,
-            InfiniteVector<double, int>& u_epsilon,
-            const int jmax = 99,
-#if _WAVELETTL_USE_TBASIS == 1
-            const CompressionStrategy strategy = tensor_simple);
-#else
-            const CompressionStrategy strategy = St04a);
+                    const CompressionStrategy strategy = St04a);
 #endif
       
-      
-/*
- *  Clone of CDD1_SOLVE, but with a filestream for logging the residual errors
- */
-    template <class PROBLEM>
-    void CDD1_SOLVE_LOGGED(std::ofstream& logstream, 
-            PROBLEM& P, const double epsilon,
-            InfiniteVector<double, int>& u_epsilon,
-            const int jmax = 99,
-#if _WAVELETTL_USE_TBASIS == 1
-            const CompressionStrategy strategy = tensor_simple);
-#else
-            const CompressionStrategy strategy = St04a);
-#endif
             
     /*!
       the routine ALGORITHMc from [BB+],
       with a given initial guess for u_epsilon
      */
-    template <class PROBLEM>
+    template <class PROBLEM, typename INDEX>
     void CDD1_SOLVE(PROBLEM& P, const double epsilon,
-		    const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& guess,
-		    InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
-		    const int jmax = 99,
+                    const InfiniteVector<double, INDEX>& guess,
+                    InfiniteVector<double, INDEX>& u_epsilon,
+                    const int jmax = 99,
 #if _WAVELETTL_USE_TBASIS == 1
                     const CompressionStrategy strategy = tensor_simple);
 #else
-		    const CompressionStrategy strategy = St04a);
+                    const CompressionStrategy strategy = St04a);
 #endif
 
-    template <class PROBLEM>
-    void CDD1_SOLVE(PROBLEM& P, const double epsilon,
-		    const InfiniteVector<double, int>& guess,
-		    InfiniteVector<double, int>& u_epsilon,
-		    const int jmax = 99,
-#if _WAVELETTL_USE_TBASIS == 1
-                    const CompressionStrategy strategy = tensor_simple);
-#else
-		    const CompressionStrategy strategy = St04a);
-#endif
                     
     /*!
       the routine ALGORITHMc from [BB+],
       with a given initial guess for u_epsilon and for the parameters c1,c2
      */
-    template <class PROBLEM>
+    template <class PROBLEM, typename INDEX>
     void CDD1_SOLVE(PROBLEM& P, const double epsilon,
-		    const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& guess,
-		    InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_epsilon,
-		    const double c1,
-		    const double c2,
-		    const int jmax = 99,  
+                    const InfiniteVector<double, INDEX>& guess,
+                    InfiniteVector<double, INDEX>& u_epsilon,
+                    const double c1,
+                    const double c2,
+                    const int jmax = 99,
 #if _WAVELETTL_USE_TBASIS == 1
                     const CompressionStrategy strategy = tensor_simple);
 #else
-		    const CompressionStrategy strategy = St04a);
-#endif
-          
-    /*
-     * int variant
-     */
-    template <class PROBLEM>
-    void CDD1_SOLVE(PROBLEM& P, const double epsilon,
-		    const InfiniteVector<double, int>& guess,
-		    InfiniteVector<double, int>& u_epsilon,
-		    const double c1,
-		    const double c2,
-		    const int jmax = 99,  
-#if _WAVELETTL_USE_TBASIS == 1
-                    const CompressionStrategy strategy = tensor_simple);
-#else
-		    const CompressionStrategy strategy = St04a);
+                    const CompressionStrategy strategy = St04a);
 #endif
 
+
+
+    /*!
+      the routine ALGORITHMc from [BB+] with convergence logger
+     */
+    template <class PROBLEM, typename INDEX>
+    void CDD1_SOLVE(PROBLEM& P, const double epsilon,
+                    InfiniteVector<double, INDEX>& u_epsilon,
+                    AbstractConvergenceLogger& logger,
+                    const int jmax = 99,
+#if _WAVELETTL_USE_TBASIS == 1
+                    const CompressionStrategy strategy = tensor_simple);
+#else
+                    const CompressionStrategy strategy = St04a);
+#endif
+
+
+    /*!
+      the routine ALGORITHMc from [BB+] with convergence logger and
+      with a given initial guess for u_epsilon
+     */
+    template <class PROBLEM, typename INDEX>
+    void CDD1_SOLVE(PROBLEM& P, const double epsilon,
+                    const InfiniteVector<double, INDEX>& guess,
+                    InfiniteVector<double, INDEX>& u_epsilon,
+                    AbstractConvergenceLogger& logger,
+                    const int jmax = 99,
+#if _WAVELETTL_USE_TBASIS == 1
+                    const CompressionStrategy strategy = tensor_simple);
+#else
+                    const CompressionStrategy strategy = St04a);
+#endif
+
+
+    /*!
+      the routine ALGORITHMc from [BB+] with convergence logger and
+      with a given initial guess for u_epsilon and for the parameters c1,c2
+     */
+    template <class PROBLEM, typename INDEX>
+    void CDD1_SOLVE(PROBLEM& P, const double epsilon,
+                    const InfiniteVector<double, INDEX>& guess,
+                    InfiniteVector<double, INDEX>& u_epsilon,
+                    const double c1,
+                    const double c2,
+                    AbstractConvergenceLogger& logger,
+                    const int jmax = 99,
+#if _WAVELETTL_USE_TBASIS == 1
+                    const CompressionStrategy strategy = tensor_simple);
+#else
+                    const CompressionStrategy strategy = St04a);
+#endif
+
+
+	/*
+	 * Clone of CDD1_SOLVE, but with a filestream for logging the residual errors
+	 */
+    template <class PROBLEM>
+    void CDD1_SOLVE_LOGGED(std::ofstream& logstream, 
+                           PROBLEM& P, const double epsilon,
+                           InfiniteVector<double, int>& u_epsilon,
+                           const int jmax = 99,
+#if _WAVELETTL_USE_TBASIS == 1
+                           const CompressionStrategy strategy = tensor_simple);
+#else
+                           const CompressionStrategy strategy = St04a);
+#endif
+
+
     /*
-     * Clone of the int variant, but with logstream
+     * Clone of CDD1_SOLVE, but with a filestream for logging the residual errors and
+     * with a given initial guess for u_epsilon and for the parameters c1,c2 
      */
     template <class PROBLEM>
     void CDD1_SOLVE_LOGGED(std::ofstream & logstream,
-                    PROBLEM& P, const double epsilon,
-		    const InfiniteVector<double, int>& guess,
-		    InfiniteVector<double, int>& u_epsilon,
-		    const double c1,
-		    const double c2,
-		    const int jmax = 99,  
+                           PROBLEM& P, const double epsilon,
+                           const InfiniteVector<double, int>& guess,
+                           InfiniteVector<double, int>& u_epsilon,
+                           const double c1,
+                           const double c2,
+                           const int jmax = 99,  
 #if _WAVELETTL_USE_TBASIS == 1
-                    const CompressionStrategy strategy = tensor_simple);
+                           const CompressionStrategy strategy = tensor_simple);
 #else
-		    const CompressionStrategy strategy = St04a);
+                           const CompressionStrategy strategy = St04a);
 #endif
+
                     
     /*!
       the parameters chosen or computed in the INIT phase of ALGORITHMc
@@ -193,31 +217,20 @@ namespace WaveletTL
       An approximate residual r_hat as well as the last iterand ubar before the final thresholding
       are also returned.
      */
-    template <class PROBLEM>
+    template <class PROBLEM, typename INDEX>
     void NPROG(PROBLEM& P, const CDD1Parameters& params,
-               const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& F,
-	       const set<typename PROBLEM::WaveletBasis::Index>& Lambda,
-	       const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
-	       const double delta,
-	       InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v_hat,
-	       set<typename PROBLEM::WaveletBasis::Index>& Lambda_hat,
-	       InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r_hat,
-	       InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& u_Lambda_k,
-	       const int jmax = 99,
-	       const CompressionStrategy strategy = St04a);
+               const InfiniteVector<double, INDEX>& F,
+               const set<INDEX>& Lambda,
+               const InfiniteVector<double, INDEX>& v,
+               const double delta,
+               InfiniteVector<double, INDEX>& v_hat,
+               set<INDEX>& Lambda_hat,
+               InfiniteVector<double, INDEX>& r_hat,
+               InfiniteVector<double, INDEX>& u_Lambda_k,
+               AbstractConvergenceLogger& logger,
+               const int jmax = 99,
+               const CompressionStrategy strategy = St04a);
     
-    template <class PROBLEM>
-    void NPROG(PROBLEM& P, const CDD1Parameters& params,
-               const InfiniteVector<double, int>& F,
-	       const set<int>& Lambda,
-	       const InfiniteVector<double, int>& v,
-	       const double delta,
-	       InfiniteVector<double, int>& v_hat,
-	       set<int>& Lambda_hat,
-	       InfiniteVector<double, int>& r_hat,
-	       InfiniteVector<double, int>& u_Lambda_k,
-	       const int jmax = 99,
-	       const CompressionStrategy strategy = St04a);
 
     /*!
       GALERKIN:
@@ -226,27 +239,17 @@ namespace WaveletTL
       compute an approximation u_bar to u_Lambda which is supported on Lambda and satisfies
       ||u_bar-u_Lambda||_2 <= eta.
     */
-    template <class PROBLEM>
+    template <class PROBLEM, typename INDEX>
     void GALERKIN(PROBLEM& P, const CDD1Parameters& params,
-		  const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& F,
-		  const set<typename PROBLEM::WaveletBasis::Index>& Lambda,
- 		  const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
- 		  const double delta,
-		  const double eta,
- 		  InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& ubar,
-		  const int jmax = 99,
-		  const CompressionStrategy strategy = St04a);
+                  const InfiniteVector<double, INDEX>& F,
+                  const set<INDEX>& Lambda,
+                  const InfiniteVector<double, INDEX>& v,
+                  const double delta,
+                  const double eta,
+                  InfiniteVector<double, INDEX>& ubar,
+                  const int jmax = 99,
+                  const CompressionStrategy strategy = St04a);
     
-    template <class PROBLEM>
-    void GALERKIN(PROBLEM& P, const CDD1Parameters& params,
-		  const InfiniteVector<double, int>& F,
-		  const set<int>& Lambda,
- 		  const InfiniteVector<double, int>& v,
- 		  const double delta,
-		  const double eta,
- 		  InfiniteVector<double, int>& ubar,
-		  const int jmax = 99,
-		  const CompressionStrategy strategy = St04a);
     
     /*!
       NGROW:
@@ -256,29 +259,18 @@ namespace WaveletTL
       and a new index set Lambda_tilde\supset Lambda as small as possible such that
         ||P_{Lambda_tilde\setminus Lambda}r||_2 >= gamma * ||r||_2
     */
-    template <class PROBLEM>
+    template <class PROBLEM, typename INDEX>
     void NGROW(PROBLEM& P, const CDD1Parameters& params,
-	       const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& F,
-	       const set<typename PROBLEM::WaveletBasis::Index>& Lambda,
- 	       const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& ubar,
- 	       const double xi1,
- 	       const double xi2,
- 	       set<typename PROBLEM::WaveletBasis::Index>& Lambda_tilde,
- 	       InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r,
-	       const int jmax = 99,
-	       const CompressionStrategy strategy = St04a);
+               const InfiniteVector<double, INDEX>& F,
+               const set<INDEX>& Lambda,
+               const InfiniteVector<double, INDEX>& ubar,
+               const double xi1,
+               const double xi2,
+               set<INDEX>& Lambda_tilde,
+               InfiniteVector<double, INDEX>& r,
+               const int jmax = 99,
+               const CompressionStrategy strategy = St04a);
 
-    template <class PROBLEM>
-    void NGROW(PROBLEM& P, const CDD1Parameters& params,
-	       const InfiniteVector<double, int>& F,
-	       const set<int>& Lambda,
- 	       const InfiniteVector<double, int>& ubar,
- 	       const double xi1,
- 	       const double xi2,
- 	       set<int>& Lambda_tilde,
- 	       InfiniteVector<double, int>& r,
-	       const int jmax = 99,
-	       const CompressionStrategy strategy = St04a);
     
     /*!
       INRESIDUAL:
@@ -288,27 +280,17 @@ namespace WaveletTL
 
       If using TBasis an initial for the computational effort per bin is submitted and modified.
     */
-    template <class PROBLEM>
+    template <class PROBLEM, typename INDEX>
     void INRESIDUAL(PROBLEM& P, const CDD1Parameters& params,
-		    const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& F,
-		    const set<typename PROBLEM::WaveletBasis::Index>& Lambda,
-		    const InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& v,
-		    const double eta1,
-		    const double eta2,
-		    InfiniteVector<double, typename PROBLEM::WaveletBasis::Index>& r,
-		    const int jmax = 99,
-		    const CompressionStrategy strategy = St04a);
+                    const InfiniteVector<double, INDEX>& F,
+                    const set<INDEX>& Lambda,
+                    const InfiniteVector<double, INDEX>& v,
+                    const double eta1,
+                    const double eta2,
+                    InfiniteVector<double, INDEX>& r,
+                    const int jmax = 99,
+                    const CompressionStrategy strategy = St04a);
 
-    template <class PROBLEM>
-    void INRESIDUAL(PROBLEM& P, const CDD1Parameters& params,
-		    const InfiniteVector<double, int>& F,
-		    const set<int>& Lambda,
-		    const InfiniteVector<double, int>& v,
-		    const double eta1,
-		    const double eta2,
-		    InfiniteVector<double, int>& r,
-		    const int jmax = 99,
-		    const CompressionStrategy strategy = St04a);
     
     /*!
       NRESIDUAL:

@@ -21,6 +21,7 @@
 
 #define PARALLEL 0
 #define _DIM 1
+#define BASIS
 
 #include <iostream>
 
@@ -101,6 +102,7 @@ int main()
      * First test problem
      */
     double epsilon1 = 1e-5;  /* set tolerance of the algorithm */
+    const char* filenameConvergence1 = "Example_CDD1_Problem_1_convergence_logs.m";
     const char* filenameCoefficients1 = "Example_CDD1_Problem_1_solution_coefficients.m";
     const char* filenameSolution1 = "Example_CDD1_Problem_1_solution.m";
 
@@ -115,11 +117,18 @@ int main()
     cout << "Done with setup of first test problem." << endl
          << "\nBegin to solve first test problem (up to tolerance " << epsilon1 << ") ..." << endl;
 
+    MathTL::ConvergenceLogger logger1;
     InfiniteVector<double, Index> solution1_epsilon;
-    CDD1_SOLVE(cproblem1, epsilon1, solution1_epsilon, solution1_epsilon, jmax);
+    CDD1_SOLVE(cproblem1, epsilon1, solution1_epsilon, logger1, jmax);
 
     cout << "Done solving first test problem." << endl
          << "\nWrite results of first test problem to disk ..." << endl;
+
+    /* writing convergence logs to disk */
+    std::ofstream conv_stream1(filenameConvergence1);
+    conv_stream1 << "figure;" << endl;
+    logger1.writeConvergencePlots(conv_stream1);
+    conv_stream1.close();
 
     /* plot solution coefficients */
     std::ofstream coeff_stream1;
@@ -142,7 +151,8 @@ int main()
 
     cout << "Output of first test problem written to files: " << endl
          << filenameCoefficients1 << endl
-         << filenameSolution1 << endl;
+         << filenameSolution1 << endl
+         << filenameConvergence1 << endl;
 
 
 
@@ -150,6 +160,7 @@ int main()
      * Second test problem
      */
     double epsilon2 = 1e-5;  /* set tolerance of the algorithm */
+    const char* filenameConvergence2 = "Example_CDD1_Problem_2_convergence_logs.m";
     const char* filenameCoefficients2 = "Example_CDD1_Problem_2_solution_coefficients.m";
     const char* filenameSolution2 = "Example_CDD1_Problem_2_solution.m";
 
@@ -164,11 +175,18 @@ int main()
     cout << "Done with setup of second test problem." << endl
          << "\nBegin to solve second test problem (up to tolerance " << epsilon2 << ") ..." << endl;
 
+    MathTL::ConvergenceLogger logger2;
     InfiniteVector<double, Index> solution2_epsilon;
-    CDD1_SOLVE(cproblem2, epsilon2, solution2_epsilon, solution2_epsilon, jmax);
+    CDD1_SOLVE(cproblem2, epsilon2, solution2_epsilon, logger2, jmax);
 
     cout << "Done solving second test problem." << endl
          << "\nWrite results of second test problem to disk ..." << endl;
+
+    /* writing convergence logs to disk */
+    std::ofstream conv_stream2(filenameConvergence2);
+    conv_stream2 << "figure;" << endl;
+    logger2.writeConvergencePlots(conv_stream2);
+    conv_stream2.close();
 
     /* plot solution coefficients */
     std::ofstream coeff_stream2;
@@ -191,7 +209,8 @@ int main()
 
     cout << "Output of second test problem written to files: " << endl
          << filenameCoefficients2 << endl
-         << filenameSolution2 << endl;
+         << filenameSolution2 << endl
+         << filenameConvergence2 << endl;
 
 
 
@@ -199,6 +218,7 @@ int main()
      * Third test problem
      */
     double epsilon3 = 1e-5;  /* set tolerance of the algorithm */
+    const char* filenameConvergence3 = "Example_CDD1_Problem_3_convergence_logs.m";
     const char* filenameCoefficients3 = "Example_CDD1_Problem_3_solution_coefficients.m";
     const char* filenameSolution3 = "Example_CDD1_Problem_3_solution.m";
 
@@ -213,11 +233,18 @@ int main()
     cout << "Done with setup of third test problem." << endl
          << "\nBegin to solve third test problem (up to tolerance " << epsilon3 << ") ..." << endl;
 
+    MathTL::ConvergenceLogger logger3;
     InfiniteVector<double, Index> solution3_epsilon;
-    CDD1_SOLVE(cproblem3, epsilon3, solution3_epsilon, solution3_epsilon, jmax);
+    CDD1_SOLVE(cproblem3, epsilon3, solution3_epsilon, logger3, jmax);
 
     cout << "Done solving third test problem." << endl
          << "\nWrite results of third test problem to disk ..." << endl;
+
+    /* writing convergence logs to disk */
+    std::ofstream conv_stream3(filenameConvergence3);
+    conv_stream3 << "figure;" << endl;
+    logger3.writeConvergencePlots(conv_stream3);
+    conv_stream3.close();
 
     /* plot solution coefficients */
     std::ofstream coeff_stream3;
@@ -240,7 +267,8 @@ int main()
 
     cout << "Output of third test problem written to files: " << endl
          << filenameCoefficients3 << endl
-         << filenameSolution3 << endl;
+         << filenameSolution3 << endl
+         << filenameConvergence3 << endl;
 
 
     /**

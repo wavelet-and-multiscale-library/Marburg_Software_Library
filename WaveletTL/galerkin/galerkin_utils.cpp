@@ -152,7 +152,7 @@ namespace WaveletTL
             
         }
 //        cout << "entries computed: " << number_of_entries_computed << ", entries from cache: " << number_of_entries_from_cache << endl;  //! Christoph
-//        A_Lambda.set_row(row, indices, entries);
+        A_Lambda.set_row(row, indices, entries);
     }
 #endif   
     

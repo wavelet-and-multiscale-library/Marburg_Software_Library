@@ -41,14 +41,13 @@
 #include <numerics/corner_singularity.h>
 #include <interval/p_basis.h>
 #include <interval/pq_frame.h>
-#include <Ldomain/ldomain_frame_index.h>
-#include <Ldomain/ldomain_frame.h>
-#include <Ldomain/ldomain_frame_evaluate.h>
-#include <Ldomain/ldomain_frame_indexplot.h>
-#include <galerkin/ldomain_frame_equation.h>
-#include <galerkin/ldomain_frame_gramian.h>
-#include <galerkin/cached_quarklet_ldomain_problem.h>
-
+#include <slitdomain/slitdomain_frame_index.h>
+#include <slitdomain/slitdomain_frame.h>
+#include <slitdomain/slitdomain_frame_evaluate.h>
+#include <slitdomain/slitdomain_frame_support.h>
+#include <slitdomain/slitdomain_frame_indexplot.h>
+#include <galerkin/slitdomain_frame_equation.h>
+#include <galerkin/cached_quarklet_slitdomain_problem.h>
 
 #include <adaptive/compression.h>
 #include <adaptive/apply.h>
@@ -56,21 +55,20 @@
 #include <adaptive/duv.h>
 #include <adaptive/steepest_descent_ks.h>
 
-#include "ldomain_solutions.h"
 
 using namespace std;
 using namespace WaveletTL;
 
 using MathTL::FixedArray1D;
 
-
+//test problems
 class myRHS
   : public Function<2,double>
 {
 public:
   virtual ~myRHS() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
-    CornerSingularityRHS csrhs(Point<2>(0,0), 0.5, 1.5);
+    CornerSingularityRHS csrhs(Point<2>(0,0), 0.5, 2.0);
     return 2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1])+5*csrhs.value(p);
   }
   void vector_value(const Point<2>& p, Vector<double>& values) const {
@@ -84,7 +82,7 @@ class mySolution
 public:
   virtual ~mySolution() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
-    CornerSingularity cs(Point<2>(0,0), 0.5, 1.5);
+    CornerSingularity cs(Point<2>(0,0), 0.5, 1.9);
     return sin(M_PI*p[0])*sin(M_PI*p[1])+5*cs.value(p);
   }
   void vector_value(const Point<2>& p, Vector<double>& values) const {
@@ -105,38 +103,21 @@ public:
 };
 
 int main(){
-//    clock_t tic, toc;
-//    double time;
+    cout << "testing slitdomain quarklet frame" << endl;
     
-    
-    cout << "testing L-domain quarklet frame" << endl;
     const int d  = PRIMALORDER;
     const int dT = DUALORDER;
     const int dim = _DIM;
     const int jmax=JMAX;
     const int pmax=PMAX;
     
+    //definitions
     typedef PQFrame<d,dT> Frame1d;
-    //Frame1d frame1d(false,false);
-    typedef LDomainFrame<Frame1d> Frame;
+    typedef SlitDomainFrame<Frame1d> Frame;
     typedef Frame::Index Index;
-    //typedef Frame::Support Support;
-    //Frame frame(frame1d);
-    //Frame frame;
-    //frame.set_jpmax(jmax,pmax);
+    typedef Frame::Support Support;
     
-    //CornerSingularity uexact1(Point<2>(0,0), 0.5, 1.5);
-    mySolution uexact1;
-    //CornerSingularityRHS rhs1(Point<2>(0,0), 0.5, 1.5); 
-    //Vector<double> val(1, "1.0");
-    //ConstantFunction<dim> rhs1(val);
-    myRHS rhs1;
-    
-    
-    
-    PoissonBVP<dim> poisson1(&rhs1);
-//    PoissonBVP<dim> poisson1(&uexact1);
-    IdentityBVP<dim> gramian1(&uexact1);
+    //instances of 1d frames with different boundary conditions
     Frame1d frame1d(false,false);
     frame1d.set_jpmax(jmax-frame1d.j0(),pmax);
     Frame1d frame1d_11(true,true);
@@ -145,32 +126,38 @@ int main(){
     frame1d_01.set_jpmax(jmax-frame1d.j0(),pmax);
     Frame1d frame1d_10(true,false);
     frame1d_10.set_jpmax(jmax-frame1d.j0(),pmax);
+    
+    //call frame constructor
     Frame frame(&frame1d, &frame1d_11, &frame1d_01, &frame1d_10);
+    //set jpmax
     frame.set_jpmax(jmax,pmax);
+    
+    //set test problem
+    mySolution uexact1;
+    myRHS rhs1;
+    PoissonBVP<dim> poisson1(&rhs1);
 #ifdef POISSON
-    LDomainFrameEquation<Frame1d,Frame> eq(&poisson1, &frame, true);
+    SlitDomainFrameEquation<Frame1d,Frame> eq(&poisson1, &frame, true);
 #endif
 #ifdef GRAMIAN
     LDomainFrameGramian<Frame1d,Frame> eq(&gramian1, &frame, true);
 #endif
     
-    
-    
-    
-    //Index testindex=frame.get_quarklet(71);
 #if 1 //plot rhs and exact solution
     Array1D<Point<dim,int> > corners;
-    corners.resize(3);
+    corners.resize(4);
     corners[0][0]=-1;
     corners[0][1]=0;
     corners[1][0]=-1;
     corners[1][1]=-1;
     corners[2][0]=0;
     corners[2][1]=-1;
+    corners[3][0]=0;
+    corners[3][0]=0;
 
     std::ofstream osrhs("rhs.m");
     std::ofstream osuexact("uexact.m");
-    for(int i=0;i<3;i++){
+    for(int i=0;i<4;i++){
         Point<2> q0(corners[i][0],corners[i][1]);
         Point<2> q1(corners[i][0]+1,corners[i][1]+1);
         Grid<2> mygrid(q0,q1,100);
@@ -190,65 +177,22 @@ int main(){
     osrhs.close();
     osuexact.close();
     cout << "rhs and uexact plotted" << endl;
-#endif
+#endif  
     
-#if 1
-    //setup index set
-    //Vector<double> a;
-    //a.resize(eq.frame().degrees_of_freedom(),true);
-    //setup Index set
-    
+#ifdef NONADAPTIVE
+    //setup Index set   
     set<Index> Lambda;
-  for (int i=0; i<frame.degrees_of_freedom();i++) {
-
-    Lambda.insert(*(frame.get_quarklet(i)));
+    for (int i=0; i<frame.degrees_of_freedom();i++) {
+        Index lambda = *(frame.get_quarklet(i));
+        if(multi_degree(lambda.e())<3 && lambda.patch()!=-1){ 
+            Lambda.insert(*(frame.get_quarklet(i)));
+        }    
 //    cout << *(frame.get_quarklet(i)) << endl;
-
-
-  }
-#endif    
+    }
     
-//    set<Index> Lambda;  
-//    MultiIndex<int,dim> p;p[0]=0;p[1]=0;
-//    Index lambda = eq.frame().first_generator(eq.frame().j0(), p);
-//    int zaehler=0;
-//    for (int l = 0; l < eq.frame().degrees_of_freedom(); l++) {
-//        cout << lambda << " : "<<lambda.number()<< endl;
-//        //cout << lambda << " : " << eq.a(lambda,lambda) << endl;
-//        //if(multi_degree(lambda.e())<1 && lambda.patch()<4){
-//            Lambda.insert(lambda);
-//            ++zaehler; 
-//        //}
-//        if(lambda==eq.frame().last_quarklet(jmax, p)){
-//            ++p;
-//            lambda=eq.frame().first_generator(eq.frame().j0(), p);
-//        }
-//        else
-//        //a(zaehler)=eq.a(eq.frame().get_quarklet(126),lambda);
-//        ++lambda;
-//            
-//    }
-//    //a.matlab_output("a","a");
-//    
-//    cout << "size of Lambda: " << zaehler << endl;
-//#endif
-        
-#if 0 //test methods of ldomain_frame_equation
-    cout << "testindex: "<<testindex<<endl;
-    cout << "a(lambda_0,lambda_0) : "<<eq.a(testindex,testindex) << endl;
-    cout << "f(lambda_0): "<<eq.f(testindex)<<endl;
-    cout << "D(lambda_0): "<<eq.D(testindex)<<endl;
-    //cout << "F_norm: "<<eq.F_norm() << endl;
-    //cout << "normA: "<<eq.norm_A() <<endl;
-    //cout << "normAinv: "<<eq.norm_Ainv() << endl;
-    
-    
-#endif
- #ifdef NONADAPTIVE   
     //setup stiffness matrix and rhs
     SparseMatrix<double> A;
-    setup_stiffness_matrix(eq,Lambda,A); 
-//    cout << "setup stiffness matrix done" << endl;
+    setup_stiffness_matrix(eq,Lambda,A);
     Vector<double> F;
     setup_righthand_side(eq, Lambda, F); 
     A.compress(1e-14);
@@ -257,88 +201,65 @@ int main(){
     F.matlab_output("F","F");
     Vector<double> x(Lambda.size());
     
-    double mu = 0.0001;
-    InfiniteVector<double,Index> u;
-    for(int loop=0; loop<1 ; loop++){
-        u.clear();
-        
-        x =F;
-        mu*=0.1;
     
     //richardson iteration
     unsigned int iterations;
-    const int maxiterations = 5000;
-//    cout << eq.norm_A() << endl;
-//    cout << eq.norm_Ainv() << endl;
-//    const double omega = 2.0 / (eq.norm_A() + 1.0/eq.norm_Ainv());
-//    cout << "omega: "<<omega<<endl;
-    const double omega2 = 0.05;
-    
-//    const double mu = 0;
-    
-    cout << "start iteration..." << endl; 
-    Richardson_sparse(A,F,x,omega2,mu,1e-6,maxiterations,iterations);
-    char name[128];
-    sprintf(name, "%s%d", "x", loop);
-    x.matlab_output(name,name);
-//    Richardson(A,F,x,omega2,1e-6,maxiterations,iterations);
-//    CG(A,F,x,1e-8,maxiterations,iterations);
+    const int maxiterations = 9999;
+    cout << eq.norm_A() << endl;
+    cout << eq.norm_Ainv() << endl;
+    const double omega = 2.0 / (eq.norm_A() + 1.0/eq.norm_Ainv());
+    cout << "omega: "<<omega<<endl;
+//    const double omega2 = 0.04;
+    Richardson(A,F,x,omega,1e-3,maxiterations,iterations);
+//    CG(A,F,x,1e-3,maxiterations,iterations);
     cout << "iterations:" << iterations << endl;
-    
-    
-    unsigned int nontrivial = 0;
-    
+//    cout<<x<<endl;
+    unsigned int nontrivial = 0; 
     for(unsigned int i=0; i<x.size();i++){
         if(x[i]!=0)
         nontrivial++;
     }
     cout << "Number of nontrivial entries: " << nontrivial << endl;
     
-    
-    
+    InfiniteVector<double,Index> u;
     unsigned int i2 = 0;
     for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i2){
         if(x[i2]!=0)
         u.set_coefficient(*it, x[i2]);
     }
-//    cout << u << endl;
     
     //plot solution
     //u.COARSE(1e-6,v);
     u.scale(&eq, -1);
     Array1D<SampledMapping<dim> > eval(3);
-    eval=eq.frame().evaluate(u,6);
-    char name1[128];
-    sprintf(name1, "%s%d%s", "solution_na_loop", loop, ".m");
-    std::ofstream os2(name1);
+    eval=eq.frame().evaluate(u,4);
+    std::ofstream os2("solution_na.m");
     os2 << "figure;" << endl;
-    for(int i=0;i<3;i++){
+    for(int i=0;i<4;i++){
         eval[i].matlab_output(os2);        
         os2 << "surf(x,y,z);" << endl;
         os2 << "hold on;" << endl;
     }  
-    os2 << "title('nonadaptive sparse solution, mu=" << mu << ", dof=" << nontrivial << "')" << endl;
+    os2 << "title('nonadaptive solution" << ", dof=" << nontrivial << "')" << endl;
     os2 << "view(30,55);"<<endl;
     os2 << "hold off" << endl;
-    os2.close(); 
+    os2.close();
     
     //new coefficients plot
-    char name2[128];
-    sprintf(name2, "%s%d%s", "coefficients_na_loop", loop, ".m");
-    std::ofstream coeff_stream(name2);;
-//    coeff_stream.open("coefficients_na.m");
+    u.scale(&eq, 1);
+    std::ofstream coeff_stream;
+    coeff_stream.open("coefficients_na.m");
     //coeff_stream2 << "figure;" << endl;
     MultiIndex<int,dim> pstart;
     MultiIndex<int,dim> jstart;// start=basis1.j0();
     MultiIndex<int,dim> estart;
     for (InfiniteVector<double, Index>::const_iterator it(u.begin()); it != u.end(); ++it){
-//    for (set<Index>::const_iterator it(Lambda.begin()); it!=Lambda.end(); ++it){
         Index lambda=it.index();
         if(!(lambda.j()==jstart && lambda.e()==estart)){
             //cout <<lambda.p()[0]<<lambda.p()[1]<< lambda.j()[0]-1+lambda.e()[0]<<lambda.j()[1]-1+lambda.e()[1] << endl;
             jstart=lambda.j();
             estart=lambda.e();
-            plot_indices_ldomain(&frame, u, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(jet)", false, true, -6);
+            plot_indices_slitdomain(&frame, u, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(jet)", false, true, -6);
             //coeff_stream2 << "title('solution coefficients') " << endl;
             //coeff_stream2 << "title(sprintf('coefficients on level (%i,%i)',"<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"));"<<endl;
             coeff_stream<<"print('-djpg',sprintf('coeffs%i%i%i%i.jpg',"<<lambda.p()[0]<<","<<lambda.p()[1]<<","<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"))"<<endl;
@@ -346,38 +267,50 @@ int main(){
     }
     coeff_stream.close();
     cout << "coefficients plotted"<<endl;
-    }
- #endif   
-
-#ifdef ADAPTIVE
-
-//    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 43, 9);
-//    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq);
-
-//    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 119, 25);
-#ifdef SD
-    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
-//    CachedQuarkletLDomainProblem<LDomainFrameGramian<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
-#endif
-#if defined CDD2 || defined RICHARDSON
-  //  CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
-    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 43, 9);
-//    CachedQuarkletLDomainProblem<LDomainFrameGramian<Frame1d,Frame> > cproblem1(&eq);
-//   CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 5.3, 46.3);
+    
+//    //new coefficients plot
+//    std::ofstream coeff_stream("coefficients_na.m");
+//    MultiIndex<int,dim> pstart;
+//    MultiIndex<int,dim> jstart;// start=basis1.j0();
+//    MultiIndex<int,dim> estart;
+//    for (InfiniteVector<double, Index>::const_iterator it(u.begin()); it != u.end(); ++it){
+//        Index lambda=it.index();
+//        if(!(lambda.j()==jstart && lambda.e()==estart)){
+//            //cout <<lambda.p()[0]<<lambda.p()[1]<< lambda.j()[0]-1+lambda.e()[0]<<lambda.j()[1]-1+lambda.e()[1] << endl;
+//            jstart=lambda.j();
+//            estart=lambda.e();
+//            plot_indices_slitdomain(&frame, u, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(jet)", false, true, -6);
+//            //coeff_stream2 << "title('solution coefficients') " << endl;
+//            //coeff_stream2 << "title(sprintf('coefficients on level (%i,%i)',"<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"));"<<endl;
+//            coeff_stream<<"print('-djpg',sprintf('coeffs%i%i%i%i.jpg',"<<lambda.p()[0]<<","<<lambda.p()[1]<<","<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"))"<<endl;
+//        }
+//    }
+//    coeff_stream.close();
+//    cout << "coefficients plotted"<<endl;
 #endif
     
-
+#ifdef ADAPTIVE
+    //setup Index set   
+    set<Index> Lambda;
+    for (int i=0; i<frame.degrees_of_freedom();i++) {
+        Index lambda = *(frame.get_quarklet(i));
+        if(multi_degree(lambda.e())<3 && lambda.patch()!=-1){ 
+            Lambda.insert(*(frame.get_quarklet(i)));
+        }    
+//    cout << *(frame.get_quarklet(i)) << endl;
+    }
+    
+    //setup problem
+    CachedQuarkletSlitDomainProblem<SlitDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq);
     cout<<"normA: "<<cproblem1.norm_A()<<endl;
     cout<<"normAinv: "<<cproblem1.norm_Ainv()<<endl;
     
-#if 1 //for parallel test 
-#ifdef CDD2
+    
     InfiniteVector<double, Index> F_eta;
     cproblem1.RHS(1e-6, F_eta);
     const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
-#endif
+    cout<<"nu: "<<nu<<endl;
     
-//    double epsilon = 10;
     InfiniteVector<double, Index> u_epsilon;
     InfiniteVector<double, int> u_epsilon_int;
     
@@ -385,50 +318,12 @@ int main(){
     const double b=2;
     double epsilon = 1e-3;
     
-    double tic=clock();
-#ifdef CDD2 
-    const char* scheme_type = "CDD2";
-    
-//    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b);
     CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, tensor_simple, pmax, a, b);
-#endif
-//    DUV_QUARKLET_SOLVE_SD(cproblem1, nu, epsilon, u_epsilon, tensor_simple, pmax, jmax, a, b);
-//    steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon, tensor_simple, 2, 2);
-#ifdef SD
-    const char* scheme_type = "SD";
-    steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon_int, tensor_simple, a, b);
-#endif
-#ifdef RICHARDSON
-    const char* scheme_type = "Richardson";
-    const unsigned int maxiter = 500;
-    richardson_QUARKLET_SOLVE(cproblem1,epsilon,u_epsilon_int, maxiter, tensor_simple, 2, 2);
-#endif
-    double toc = clock();
-    double time = (double)(toc-tic);
-    cout << "Time taken: " << (time/CLOCKS_PER_SEC) << " s\n"<<endl;
-    cout << "fertig" << endl;
-//    abort();
     
-    
-    
-    
-    
-
     for (typename InfiniteVector<double,int>::const_iterator it(u_epsilon_int.begin()),
  	   itend(u_epsilon_int.end()); it != itend; ++it){
         u_epsilon.set_coefficient(*(frame.get_quarklet(it.index())), *it);
     }
-//    cout << u_epsilon << endl;
-
-        
-//    InfiniteVector<double,Frame2D::Index> u;
-//  unsigned int i = 0;
-//  for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i){
-////    if(i>=208 && i<800)
-//    u.set_coefficient(*it, xk[i]);
-////    if(i==799) break;
-//  }
-    
     
     //plot solution
     //u.COARSE(1e-6,v);
@@ -439,17 +334,17 @@ int main(){
         x[i2]=u_epsilon.get_coefficient(*it);        
     }
     x.matlab_output("x","x");
-    Array1D<SampledMapping<dim> > eval(3);
+    Array1D<SampledMapping<dim> > eval(4);
     eval=cproblem1.frame().evaluate(u_epsilon,6);
     std::ofstream os2("solution_ad.m");
     os2 << "figure;"<< endl;
-    for(int i=0;i<3;i++){
+    for(int i=0;i<4;i++){
         eval[i].matlab_output(os2);
         os2 << "surf(x,y,z);" << endl;
         os2 << "hold on;" << endl;
     }  
-    os2 << "title('Ldomain Poisson Equation: adaptive solution to test problem ("
-            << scheme_type << "), " << "pmax= " << pmax << ", jmax= " << jmax << ", d= " << d << ", dT= " << dT << "');" << endl;
+    os2 << "title('slitdomain Poisson Equation: adaptive solution to test problem ("
+            << "CDD2" << "), " << "pmax= " << pmax << ", jmax= " << jmax << ", d= " << d << ", dT= " << dT << "');" << endl;
     os2 << "view(30,55);"<<endl;
     os2 << "hold off" << endl;
     os2.close();
@@ -468,7 +363,7 @@ int main(){
             //cout <<lambda.p()[0]<<lambda.p()[1]<< lambda.j()[0]-1+lambda.e()[0]<<lambda.j()[1]-1+lambda.e()[1] << endl;
             jstart=lambda.j();
             estart=lambda.e();
-            plot_indices_ldomain(&frame, u_epsilon, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(jet)", false, true, -6);
+            plot_indices_slitdomain(&frame, u_epsilon, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(jet)", false, true, -6);
             //coeff_stream2 << "title('solution coefficients') " << endl;
             //coeff_stream2 << "title(sprintf('coefficients on level (%i,%i)',"<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"));"<<endl;
             coeff_stream<<"print('-djpg',sprintf('coeffs%i%i%i%i.jpg',"<<lambda.p()[0]<<","<<lambda.p()[1]<<","<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"))"<<endl;
@@ -477,79 +372,48 @@ int main(){
     coeff_stream.close();
     cout << "coefficients plotted"<<endl;
 #endif
-#if 0   
-    //all coefficients output
-    u_epsilon.scale(&cproblem1, 1);
-    std::ofstream os4;
-    os4.open("coeffs_support.m");
-    os4<<"A=["<<endl;
-    for (InfiniteVector<double, Index>::const_iterator it(u_epsilon.begin()); it != u_epsilon.end(); ++it){
-         //u_values_ad[i] += *it * basisframe.evaluate(0, it.index(), point)*1./cproblem1.D(it.index());
-        //cout << ind << " : " << *it << endl;
-        //if(abs(*it)>1e-16){
-            Index ind=it.index();
-            //Support supp;
-            //frame.support(ind, supp);
-            //stream2<<ind.j()[0]<<","<<ind.j()[1]<<","<<ind.e()[0]<<","<<ind.e()[1]<<","<<ind.k()[0]<<","<<ind.k()[1]<<","<<(double)supp.a[0]/(1<<supp.j[0])<<","<<(double)supp.b[0]/(1<<supp.j[0])<<","<<(double)supp.a[1]/(1<<supp.j[1])<<","<<(double)supp.b[1]/(1<<supp.j[1])<<","<<*it<<";"<< endl;
-            os4<<ind.p()[0]<<","<<ind.p()[1]<<","<<ind.j()[0]-1+ind.e()[0]<<","<<ind.j()[1]-1+ind.e()[1]<<","<<ind.patch()<<","<<ind.k()[0]<<","<<ind.k()[1]<<","<<*it<<";"<< endl;
-       // }
-        
-    }
-    os4<<"];"<<endl;
-    os4.close();
-#endif
-#endif
-    
     
 
-    
-
-#if 0 //test bilinearform
-    const int resolution=6;
-    Index testindex1(testindex);
-    Index testindex2=eq.frame().get_quarklet(192);
-    Array1D<SampledMapping<dim> > eval1(3);
-    Array1D<SampledMapping<dim> > eval2(3);
-    eval1=frame.evaluate(testindex1,resolution);
-    eval2=frame.evaluate(testindex2,resolution);
-    std::ofstream os("testa.m");
-    os<<"Iexakt="<<eq.a(testindex1,testindex2)<<endl;
-    os<<"I=0;"<<endl;
-    for(int i=0;i<3;i++){
-        eval1[i].matlab_output(os);
-        os<<"z1=z;"<<endl;
-        eval2[i].matlab_output(os);
-        os<<"z2=z;"<<endl;
-        os<<"xx=x(1,:);"<<endl;
-        os<<"yy=y'(1,:);"<<endl;
-        os<<"[gx1,gy1]=gradient(z1,2^-"<<resolution<<",2^-"<<resolution<<");"<<endl;
-        os<<"[gx2,gy2]=gradient(z2,2^-"<<resolution<<",2^-"<<resolution<<");"<<endl;
-        os<<"L=gx1.*gx2.+gy1.*gy2;"<<endl;
-        os<<"I=I+trapz(yy,trapz(xx,L,2)');"<<endl;
-    }
-    os<<"I"<<endl;
-    os<<"relative_error=abs(I-Iexakt)/Iexakt"<<endl; 
-    os.close(); 
-#endif
+ 
+#if 0 //test index
+    MultiIndex<int,dim> p;p[0]=0;p[1]=0;
+    cout<<"coarsest level j="<<frame.j0()<<endl;
+    Index ind1=frame.first_generator(frame.j0(),p);
+    cout<<"first generator index="<<ind1<<endl;
+    ++ind1;
+    cout<<"second generator index="<<ind1<<endl;
+    cout<<"last generator index="<<frame.last_generator(frame.j0(),p)<<endl;
+    ind1=frame.first_quarklet(frame.j0(),p);
+    cout<<"first quarklet index="<<ind1<<endl;
+    ++ind1;
+    cout<<"second quarklet index"<<ind1<<endl;
+    cout<<"last quarklet index for p=0:"<<frame.last_quarklet(jmax,p)<<endl;
+//    cout<<frame.frames(6,1)->Deltasize(3,0)<<endl;
+//    cout<<*(frame.get_quarklet(1070))<<endl;
+#endif 
     
 #if 0 //test rhs
-    const int resolution2=6;
-    Index testindex3(testindex);
-    Array1D<SampledMapping<dim> > eval3(3);
+    const int resolution2=7;
+    Index testindex3=frame.get_quarklet(1063);
+    cout<<testindex3<<endl;
+    Array1D<SampledMapping<dim> > eval3(4);
     eval3=frame.evaluate(testindex3, resolution2);
     Array1D<Point<dim,int> > corners;
-    corners.resize(3);
+    corners.resize(4);
     corners[0][0]=-1;
     corners[0][1]=0;
     corners[1][0]=-1;
     corners[1][1]=-1;
     corners[2][0]=0;
     corners[2][1]=-1;
+    corners[3][0]=0;
+    corners[3][1]=0;
 
     std::ofstream os3("testf.m");
-    os3<<"Iexakt="<<eq.f(testindex)<<endl;
+    os3<<"Iexakt="<<eq.f(testindex3)<<endl;
+    cout<<"f="<<eq.f(testindex3)<<endl;
     os3<<"I=0;"<<endl;
-    for(int i=0;i<3;i++){
+    for(int i=0;i<4;i++){
         eval3[i].matlab_output(os3);
         os3<<"zalt=z;"<<endl;
         Point<2> q0(corners[i][0],corners[i][1]);
@@ -567,20 +431,58 @@ int main(){
     os3.close();
 #endif
     
+#if 0 //test bilinearform
+    const int resolution=7;
+    Index testindex4=eq.frame().get_quarklet(929); //1063,1064
+    Index testindex5=eq.frame().get_quarklet(1057);
+    cout<<testindex4<<endl;
+    cout<<testindex5<<endl;
+    Array1D<SampledMapping<dim> > eval1(4);
+    Array1D<SampledMapping<dim> > eval2(4);
+    eval1=frame.evaluate(testindex4,resolution);
+    eval2=frame.evaluate(testindex5,resolution);
+    std::ofstream os("testa.m");
+    os<<"Iexakt="<<eq.a(testindex4,testindex5)<<endl;
+    cout<<"a:"<<eq.a(testindex4,testindex5)<<endl;
+    os<<"I=0;"<<endl;
+    for(int i=0;i<4;i++){
+        eval1[i].matlab_output(os);
+        os<<"z1=z;"<<endl;
+        eval2[i].matlab_output(os);
+        os<<"z2=z;"<<endl;
+        os<<"xx=x(1,:);"<<endl;
+        os<<"yy=y'(1,:);"<<endl;
+        os<<"[gx1,gy1]=gradient(z1,2^-"<<resolution<<",2^-"<<resolution<<");"<<endl;
+        os<<"[gx2,gy2]=gradient(z2,2^-"<<resolution<<",2^-"<<resolution<<");"<<endl;
+        os<<"L=gx1.*gx2.+gy1.*gy2;"<<endl;
+        os<<"I=I+trapz(yy,trapz(xx,L,2)');"<<endl;
+    }
+    os<<"I"<<endl;
+    os<<"relative_error=abs(I-Iexakt)/Iexakt"<<endl;
+    os.close();
+#endif
     
-#if 0
-    //plot one function
-    Array1D<SampledMapping<dim> > evalf(3);
-    Index testindex=frame.get_quarklet(195);    //:generatoren auf patches,
-                                        //:überlappende generatoren, indiziert mit p=3,4
-                                        //:überlappendes wavelet
-                                        //:nicht-überlappendes wavelet
+#if 0 //test methods of slitdomain_frame_equation
+    Index testindex=frame.get_quarklet(1071); 
+    cout << "testindex: "<<testindex<<endl;
+    cout << "a(lambda_0,lambda_0) : "<<eq.a(testindex,testindex) << endl;
+    cout << "f(lambda_0): "<<eq.f(testindex)<<endl;
+    cout << "D(lambda_0): "<<eq.D(testindex)<<endl;
+    //cout << "F_norm: "<<eq.F_norm() << endl;
+    //cout << "normA: "<<eq.norm_A() <<endl;
+    //cout << "normAinv: "<<eq.norm_Ainv() << endl;
+#endif
+
+    
+#if 0   //test evaluate and plot one function
+    Array1D<SampledMapping<dim> > evalf(4);
+    Index testindex=frame.get_quarklet(1063);   
     cout << "evaluate quarklet with index " << testindex << endl;
     evalf=frame.evaluate(testindex,6);
-    std::ofstream osf("Ldomainoutput.m");
+    std::ofstream osf("slitdomainoutput.m");
     osf << "clf;" << endl;
     osf << "axis([-1 1 -1 1 0 1]);" << endl;
-    for(int i=0;i<3;i++){
+    for(int i=0;i<4;i++){
         evalf[i].matlab_output(osf);
         osf << "surf(x,y,z);" << endl;
         
@@ -589,8 +491,19 @@ int main(){
     osf << "view(30,55);"<<endl;
     osf << "hold off" << endl;
     osf.close(); 
-#endif  
     
+    //support test
+    Index testindex2(testindex); 
+    cout<<"test support of index "<<testindex2<<endl;
+    Support supp;
+    frame.support(testindex2, supp);
+    for(int i=0;i<4;i++){
+        supp.xmin[i]!=-1 ? cout<<"("<<supp.xmin[i]<<","<<supp.xmax[i]<<")/"<<(1<<supp.j[0])<<" x ("<<supp.ymin[i]<<","<<supp.ymax[i]<<")/"<<(1<<supp.j[1])<<endl : cout<<"0"<<endl;
+    }
+#endif   
     
-    return 0;
+  
+    
+    cout<<"fertig"<<endl;
+    
 }

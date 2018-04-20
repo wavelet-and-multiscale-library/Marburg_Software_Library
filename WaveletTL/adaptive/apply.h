@@ -17,6 +17,8 @@
 
 namespace WaveletTL
 {
+    using MathTL::InfiniteVector;
+
   /*!
     Apply the stiffness matrix A of an infinite-dimensional equation
 

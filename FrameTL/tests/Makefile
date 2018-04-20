@@ -58,7 +58,7 @@ CXXFLAGS +=  -O2 -I$(FRAMETL_DIR) -I$(WAVELETTL_DIR) -I$(MATHTL_DIR) -Wall -pipe
 endif
 
 
-EXEOBJF1 = test_p_poisson_frame.o\
+EXEOBJF1 = \
 test_aggregated_frame.o\
 test_biharmonic_1d_testcase.o\
 test_elliptic_equation_1D.o\
@@ -73,7 +73,8 @@ test_apply_1D.o \
 test_apply.o \
 test_compute_dual_frame_elements.o\
 test_bilinear_speed.o\
-test_adaptive_speed.o\
+test_adaptive_speed.o
+# test_p_poisson_frame.o\
 
 EXEOBJF2 = 
 
@@ -85,8 +86,8 @@ test_steepest_descent33_basis.o\
 test_richardson_2D.o\
 test_steepest_descent22_2D.o\
 test_steepest_descent33_2D.o\
-test_steepest_descent46_2D.o\
-test_steepest_descent22.o
+test_steepest_descent46_2D.o
+#test_steepest_descent22.o
 
 EXEOBJF4 = 
 

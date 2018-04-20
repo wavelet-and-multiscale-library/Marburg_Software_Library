@@ -109,8 +109,9 @@ int intpower(const I n, const J k)
   return r;
 }
 
+
 //is only fast for power<=5
-double faster_pow(double base, int power){
+inline double faster_pow(double base, int power){
     double r;
     switch(power) {
           case 1:
@@ -136,6 +137,7 @@ double faster_pow(double base, int power){
 }
 
 
+inline
 double mypow(double base, int power){
     double r=1.0;
     while(power--){
@@ -145,6 +147,7 @@ double mypow(double base, int power){
 }
 
 
+inline
 long long fast_power(long long base, long long power) {
     #define MOD 1000000007
     long long result = 1;
@@ -159,6 +162,7 @@ long long fast_power(long long base, long long power) {
     return result;
 }
 
+inline
 long long fast_power2(long base, long power) {
     #define MOD 1000000007
     long long result = 1;

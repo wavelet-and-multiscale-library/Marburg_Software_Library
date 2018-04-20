@@ -8,6 +8,8 @@
 *.txt
 *.jpg
 *.out
+*.pdf
+*.png
 callgrind.*
 nbproject
 WaveletTL/tests/test_cube_equation

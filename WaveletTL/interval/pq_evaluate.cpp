@@ -154,19 +154,22 @@ namespace WaveletTL
     assert(derivative <= 1); // we only support derivatives up to the second order
     double r = 0;
     
-    const int pfkt = (d+1)/2;
+    const double pfkt = d/2.;
 //    const double pfkt = d/2.;
     const int dhalfsmall = d/2;
     const double pfktrez = 1./pfkt;
-    const double y = (1<<lambda.j())*x-lambda.k();
+    
+    const double y = (1<<lambda.j())*x-lambda.k()-((d % 2 == 0)? 0 : 0.5);
 //    double y;
 //    if(d%2==0)
 //        y = (1<<lambda.j())*x-lambda.k();
 //    else
 //        y = (1<<lambda.j())*x-0.5-lambda.k();
 //    const int lefthelper = lambda.k()+pfkt-1;
+    
     const int righthelper = (1<<lambda.j())+dhalfsmall -lambda.k();
-    const double leftside = 1./(pfkt+lambda.k());
+    basis.DeltaLmin();//Den braucht man hier
+    const double leftside = (lambda.k()-basis.DeltaLmin()+1)/2.;//corresponds to (k+m)/2 in Diss Keding P.73
     const double rightside = 1./righthelper;
     //cout << boundsupplength;
     
@@ -198,7 +201,7 @@ namespace WaveletTL
 	switch (derivative){
 	  case 0: r=(lambda.p()==0 ?  MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), x)
                                    :  MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), x)
-                                    *mypow((1<<lambda.j())*x*leftside, lambda.p()));
+                                    *mypow(((1<<lambda.j())*x-leftside)/leftside, lambda.p()));
 	  break;
 	  case 1: r=(lambda.p()==0 ?  MathTL::EvaluateSchoenbergBSpline_td_x<d> (lambda.j(), lambda.k(), x)
                                    :  MathTL::EvaluateSchoenbergBSpline_td<d> (lambda.j(), lambda.k(), x)
@@ -255,11 +258,11 @@ namespace WaveletTL
     if (e == 0) {
       // generator
         
-      const int pfkt = (d+1)/2;
+      const double pfkt = d/2.;
 //      const double pfkt = d/2.;
       const int dhalfsmall = d/2;
       const double pfktrez = 1./pfkt;
-      const double y = (1<<j)*x-k;
+      const double y = (1<<j)*x-k-((d % 2 == 0)? 0 : 0.5);
 //      double y;
 //        if(d%2==0)
 //            y = (1<<j)*x-k;
@@ -267,7 +270,8 @@ namespace WaveletTL
 //            y = (1<<j)*x-0.5-k;
 //      const int lefthelper = k+pfkt-1;
       const int righthelper = (1<<j)+dhalfsmall -k;
-      const double leftside = 1./(pfkt+k);
+//      const double leftside = 1./(pfkt+k);
+      const double leftside = (k-basis.DeltaLmin()+1)/2.;
       const double rightside = 1./righthelper;
         
       if (k > (1<<j)-ell1<d>()-d) { //right boundary quarks
@@ -288,7 +292,7 @@ namespace WaveletTL
       else if (k < -ell1<d>()){ //left boundary quarks
 	switch (derivative){
 	  case 0: r=(p==0 ? MathTL::EvaluateSchoenbergBSpline_td<d>(j, k, x)
-                          : MathTL::EvaluateSchoenbergBSpline_td<d>(j, k, x)*mypow((1<<j)*x*leftside, p));
+                          : MathTL::EvaluateSchoenbergBSpline_td<d>(j, k, x)*mypow(((1<<j)*x-leftside)/leftside, p));
           //cout << "Fall 2" << endl;
 	  break;
 	  case 1: r=(p==0 ? MathTL::EvaluateSchoenbergBSpline_td_x<d>(j, k, x)
@@ -383,12 +387,13 @@ namespace WaveletTL
         {
             // generator
             
-            const int pfkt = (d+1)/2;
+            const double pfkt = d/2.;
 //            const double pfkt = d/2.;
             const int dhalfsmall = d/2;
             const double pfktrez = 1./pfkt;
             const int righthelper = (1<<lambda.j())+dhalfsmall -lambda.k();
-            const double leftside = 1./(pfkt+lambda.k());
+//            const double leftside = 1./(pfkt+lambda.k());
+            const double leftside = (lambda.k()-basis.DeltaLmin()+1)/2.;
             const double rightside = 1./righthelper;
 //            double trans(0);
 //            if(d%2==1)
@@ -423,7 +428,7 @@ namespace WaveletTL
                         for (unsigned int m(0); m < points.size(); m++)
                             values[m] = (lambda.p()==0 ?MathTL::EvaluateSchoenbergBSpline_td<d>(lambda.j(), lambda.k(), points[m])
                                                        :MathTL::EvaluateSchoenbergBSpline_td<d>(lambda.j(), lambda.k(), points[m])
-                                                        *mypow((1<<lambda.j())*points[m]*leftside, lambda.p()));
+                                                        *mypow(((1<<lambda.j())*points[m]-leftside)/leftside, lambda.p()));
                         break;
                     case 1: 
                         for (unsigned int m(0); m < points.size(); m++)
@@ -445,15 +450,15 @@ namespace WaveletTL
                         for (unsigned int m(0); m < points.size(); m++)
                             values[m] =(lambda.p()==0 ? MathTL::EvaluateSchoenbergBSpline_td<d>(lambda.j(),lambda.k(), points[m])
                                                       : MathTL::EvaluateSchoenbergBSpline_td<d>(lambda.j(),lambda.k(), points[m])
-                                                      * mypow(((1<<lambda.j())*points[m]-lambda.k())*pfktrez,lambda.p()));
+                                                      * mypow(((1<<lambda.j())*points[m]-lambda.k()-((d % 2 == 0)? 0 : 0.5))*pfktrez,lambda.p()));
                         break;
                     case 1: 
                         for (unsigned int m(0); m < points.size(); m++)
                             values[m] = (lambda.p()==0 ? MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), lambda.k(), points[m])
                                                        : MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(), lambda.k(), points[m])
-                                                       * mypow(((1<<lambda.j())*points[m]-lambda.k())*pfktrez,lambda.p())
+                                                       * mypow(((1<<lambda.j())*points[m]-lambda.k()-((d % 2 == 0)? 0 : 0.5))*pfktrez,lambda.p())
                                                        + MathTL::EvaluateSchoenbergBSpline_td<d>(lambda.j(),lambda.k(), points[m])
-                                                       * lambda.p()*mypow(((1<<lambda.j())*points[m]-lambda.k())*pfktrez,lambda.p()-1)*(1<<lambda.j())*pfktrez); 
+                                                       * lambda.p()*mypow(((1<<lambda.j())*points[m]-lambda.k()-((d % 2 == 0)? 0 : 0.5))*pfktrez,lambda.p()-1)*(1<<lambda.j())*pfktrez); 
                         break;
 //                    case 2:
 //                        for (unsigned int m(0); m < points.size(); m++)
@@ -514,13 +519,14 @@ namespace WaveletTL
         if (e_ == 0) 
         {
             // generator
-            const int pfkt = (d+1)/2;
+            const double pfkt = d/2.;
 //            const double pfkt = d/2.;
             const int dhalfsmall = d/2;
             const double pfktrez = 1./pfkt;
 //            const int lefthelper = k_+pfkt-1;
             const int righthelper = (1<<j_)+dhalfsmall -k_;
-            const double leftside = 1./(pfkt+k_);
+//            const double leftside = 1./(pfkt+k_);
+            const double leftside = (k_-basis.DeltaLmin()+1)/2.;
             const double rightside = 1./righthelper;
 //            double trans(0);
 //            if(d%2==1)
@@ -555,7 +561,7 @@ namespace WaveletTL
                         for (unsigned int m(0); m < points.size(); m++)
 
                             values[m] = (p_==0 ? MathTL::EvaluateSchoenbergBSpline_td<d>(j_, k_, points[m])
-                                               : MathTL::EvaluateSchoenbergBSpline_td<d>(j_, k_, points[m])*mypow((1<<j_)*points[m]*leftside, p_));
+                                               : MathTL::EvaluateSchoenbergBSpline_td<d>(j_, k_, points[m])*mypow(((1<<j_)*points[m]-leftside)/leftside, p_));
 
                         break;
                     case 1:
@@ -581,16 +587,16 @@ namespace WaveletTL
                         for (unsigned int m(0); m < points.size(); m++)
 
                             values[m] = (p_==0 ? MathTL::EvaluateSchoenbergBSpline_td<d>(j_, k_, points[m])
-                                               : MathTL::EvaluateSchoenbergBSpline_td<d>(j_, k_, points[m])*mypow(((1<<j_)*points[m]-k_)*pfktrez,p_));
+                                               : MathTL::EvaluateSchoenbergBSpline_td<d>(j_, k_, points[m])*mypow(((1<<j_)*points[m]-k_-((d % 2 == 0)? 0 : 0.5))*pfktrez,p_));
 
                         break;
                     case 1: 
                         for (unsigned int m(0); m < points.size(); m++)
                             values[m] = (p_==0 ? MathTL::EvaluateSchoenbergBSpline_td_x<d>(j_, k_, points[m])
                                                : MathTL::EvaluateSchoenbergBSpline_td_x<d>(j_, k_, points[m])
-                                               * mypow(((1<<j_)*points[m]-k_)*pfktrez,p_)
+                                               * mypow(((1<<j_)*points[m]-k_-((d % 2 == 0)? 0 : 0.5))*pfktrez,p_)
                                                + MathTL::EvaluateSchoenbergBSpline_td<d>(j_, k_, points[m])
-                                               * p_*mypow(((1<<j_)*points[m]-k_)*pfktrez,p_-1)*(1<<j_)*pfktrez); 
+                                               * p_*mypow(((1<<j_)*points[m]-k_-((d % 2 == 0)? 0 : 0.5))*pfktrez,p_-1)*(1<<j_)*pfktrez); 
                         break;
 //                    case 2:
 //                        for (unsigned int m(0); m < points.size(); m++)
@@ -649,13 +655,14 @@ namespace WaveletTL
         //basis.setWavelets();
         if (lambda.e() == 0) {
             // generator
-            const int pfkt = (d+1)/2;
+            const double pfkt = d/2.;
 //            const double pfkt = d/2.;
             const int dhalfsmall = d/2;
             const double pfktrez = 1./pfkt;
 //            const int lefthelper = lambda.k()+pfkt-1;
             const int righthelper = (1<<lambda.j())+dhalfsmall -lambda.k();
-            const double leftside = 1./(pfkt+lambda.k());
+            const double leftside = (lambda.k()-basis.DeltaLmin()+1)/2.;
+//            const double leftside = 1./(pfkt+lambda.k());
             const double rightside = 1./righthelper;
 //            double trans(0);
 //            if(d%2==1)
@@ -677,7 +684,7 @@ namespace WaveletTL
                 for (unsigned int m(0); m < npoints; m++) {
                     funcvalues[m] = (lambda.p()==0 ? MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), points[m])
                                                    :MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), points[m])
-                                                    *mypow((1<<lambda.j())*points[m]*leftside, lambda.p()));
+                                                    *mypow(((1<<lambda.j())*points[m]-leftside)/leftside, lambda.p()));
                     dervalues[m]  = (lambda.p()==0 ? MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),lambda.k(),points[m])
                                                    : MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),lambda.k(),points[m])
                                                    * mypow((1<<lambda.j())*points[m]*leftside, lambda.p())
@@ -690,12 +697,12 @@ namespace WaveletTL
                 for (unsigned int m(0); m < npoints; m++) {
                     funcvalues[m] = (lambda.p()==0 ? MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), points[m])
                                                    : MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(), lambda.k(), points[m])
-                                                    *mypow(((1<<lambda.j())*points[m]-lambda.k())*pfktrez,lambda.p()));
+                                                    *mypow(((1<<lambda.j())*points[m]-lambda.k()-((d % 2 == 0)? 0 : 0.5))*pfktrez,lambda.p()));
                     dervalues[m]  = (lambda.p()==0 ? MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),lambda.k(),points[m])
                                                    : MathTL::EvaluateSchoenbergBSpline_td_x<d>(lambda.j(),lambda.k(),points[m])
-                                                   * mypow(((1<<lambda.j())*points[m]-lambda.k())*pfktrez,lambda.p())
+                                                   * mypow(((1<<lambda.j())*points[m]-lambda.k()-((d % 2 == 0)? 0 : 0.5))*pfktrez,lambda.p())
                                                    + MathTL::EvaluateSchoenbergBSpline_td<d>  (lambda.j(),lambda.k(), points[m])
-                                                   * lambda.p()*mypow(((1<<lambda.j())*points[m]-lambda.k())*pfktrez,lambda.p()-1)*(1<<lambda.j())*pfktrez);
+                                                   * lambda.p()*mypow(((1<<lambda.j())*points[m]-lambda.k()-((d % 2 == 0)? 0 : 0.5))*pfktrez,lambda.p()-1)*(1<<lambda.j())*pfktrez);
                 }
             }
         } 
@@ -743,13 +750,14 @@ namespace WaveletTL
         if (e_ == 0) {
             // generator
             
-            const int pfkt = (d+1)/2;
+            const double pfkt = d/2.;
 //            const double pfkt = d/2.;
             const int dhalfsmall = d/2;
             const double pfktrez = 1./pfkt;
 //            const int lefthelper = k_+pfkt-1;
             const int righthelper = (1<<j_)+dhalfsmall -k_;
-            const double leftside = 1./(pfkt+k_);
+//            const double leftside = 1./(pfkt+k_);
+            const double leftside = (k_-basis.DeltaLmin()+1)/2.;
             const double rightside = 1./righthelper;
 //            double trans(0);
 //            if(d%2==1)
@@ -770,7 +778,7 @@ namespace WaveletTL
             else if(k_ < -ell1<d>()){//left boundary quarks
                 for (unsigned int m(0); m < npoints; m++) {
                     funcvalues[m] = (p_==0 ? MathTL::EvaluateSchoenbergBSpline_td<d>  (j_,k_, points[m])
-                                           : MathTL::EvaluateSchoenbergBSpline_td<d>  (j_,k_, points[m]) *mypow((1<<j_)*points[m]*leftside, p_));
+                                           : MathTL::EvaluateSchoenbergBSpline_td<d>  (j_,k_, points[m]) *mypow(((1<<j_)*points[m]-leftside)/leftside, p_));
                     dervalues[m]  = (p_==0 ? MathTL::EvaluateSchoenbergBSpline_td_x<d>(j_,k_,points[m])
                                            : MathTL::EvaluateSchoenbergBSpline_td_x<d>(j_,k_,points[m])*mypow((1<<j_)*points[m]*leftside, p_)
                                            + MathTL::EvaluateSchoenbergBSpline_td<d>  (j_,k_, points[m])
@@ -781,12 +789,12 @@ namespace WaveletTL
             else {//inner quarks
                 for (unsigned int m(0); m < npoints; m++) {
                     funcvalues[m] = (p_==0 ? MathTL::EvaluateSchoenbergBSpline_td<d>(j_,k_,points[m])
-                                           : MathTL::EvaluateSchoenbergBSpline_td<d>(j_,k_,points[m])*mypow(((1<<j_)*points[m]-k_)*pfktrez,p_));
+                                           : MathTL::EvaluateSchoenbergBSpline_td<d>(j_,k_,points[m])*mypow(((1<<j_)*points[m]-k_-((d % 2 == 0)? 0 : 0.5))*pfktrez,p_));
                     dervalues[m]  = (p_==0 ? MathTL::EvaluateSchoenbergBSpline_td_x<d>(j_,k_,points[m])
                                            : MathTL::EvaluateSchoenbergBSpline_td_x<d>(j_,k_,points[m])
-                                           * mypow(((1<<j_)*points[m]-k_)*pfktrez,p_)
+                                           * mypow(((1<<j_)*points[m]-k_-((d % 2 == 0)? 0 : 0.5))*pfktrez,p_)
                                            + MathTL::EvaluateSchoenbergBSpline_td<d>(j_,k_,points[m])
-                                           * p_*mypow(((1<<j_)*points[m]-k_)*pfktrez,p_-1)*(1<<j_)*pfktrez);
+                                           * p_*mypow(((1<<j_)*points[m]-k_-((d % 2 == 0)? 0 : 0.5))*pfktrez,p_-1)*(1<<j_)*pfktrez);
                 }
             }
         } 

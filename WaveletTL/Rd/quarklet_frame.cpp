@@ -19,15 +19,14 @@ namespace WaveletTL
     const int p = lambda.p();
     const int k = lambda.k();
     const int e = lambda.e();
-    const int pfkt = (d+1)/2;
-    const double pfktrez = 1./pfkt;
-    const double y = (1<<j)*x-k;
+//    const double pfkt = (d+1)/2;
+    const double y = 2*((1<<j)*x-k-((d % 2) == 0 ? 0 : 0.5))/d;
     
     if (e == 0) // generator
       {
 	r = (derivative == 0
-	     ? MathTL::EvaluateCardinalBSpline_td<d>(j, k, x)*pow(y*pfktrez,p)
-	     : MathTL::EvaluateCardinalBSpline_td_x<d>(j, k, x)*pow(y*pfktrez,p)+MathTL::EvaluateCardinalBSpline_td<d>(j, k, x)*pow(y*pfktrez,p-1)*(1<<j)*p*pfktrez);
+	     ? MathTL::EvaluateCardinalBSpline_td<d>(j, k, x)*pow(y,p)
+	     : MathTL::EvaluateCardinalBSpline_td_x<d>(j, k, x)*pow(y,p)+MathTL::EvaluateCardinalBSpline_td<d>(j, k, x)*pow(y,p-1)*(1<<j)*p*2./d);
       }
     else // wavelet
       {
@@ -268,192 +267,192 @@ namespace WaveletTL
     return 0.;
   }*/
 
-  //Auf neuem Stand
-  template <>
-  double
-  QuarkletFrame<3,3>::evaluate(const unsigned int derivative,
- 			  const RQIndex& lambda,
- 			  const double x)
-  {
-    const int j = lambda.j();
-    const int p = lambda.p();
-    const double y = (1<<j)*x-lambda.k();
-    if (lambda.e() == 0) // generator
-      {
-	if (y >= -1 && y < 2) {
-	  switch (derivative) {
-	  case 0: {
-	    const double factor = twotothejhalf(j) * pow(0.5 * y, p);
-	    switch((int) floor(y)) {
-	    case -1:
-	      return factor*(0.5*y*y+y+0.5);
-	    case 0:
-	      return factor*(-y*y+y+0.5);
-	    case 1:
-	      return factor*(0.5*y*y-2*y+2);
-	    }
-	  }
-	  case 1: {
-           if(p==0){
-	    const double factor = twotothejhalf(3*j) ;
-	    switch((int) floor(y)) {
-	    case -1:
-	      return factor*(y+1);
-	    case 0:
-	      return factor*(-2*y+1);
-	    case 1:
-	      return factor*(y-2);
-            }
-           }
-           else{
-            const double factor = twotothejhalf(3*j) * pow(0.5 * y, p-1) * 0.5;
-	    switch((int) floor(y)) {
-	    case -1:
-	      return factor*(y*y*(0.5*p+1)+y*(1+p)+0.5*p);
-	    case 0:
-	      return factor*(-y*y*(p+2)+y*(1+p)+0.5*p);
-	    case 1:
-	      return factor*(y*y*(0.5*p+1)-2*y*(1+p)+2*p);
-            }
-           }
-	  }
-	  /*case 2: {
-	    const double factor = twotothejhalf(5*j);
-	    switch((int) floor(y)) {
-	    case -1:
-	      return factor;
-	    case 0:
-	      return -2*factor;
-	    case 1:
-	      return factor;
-	    }
-	  }*/
-	  }
-	}
-      }
-    else // wavelet
-      {
-	if (y >= -2 && y < 3) {
-	  switch (derivative) {
-	  case 0: {
-	    const double factor = twotothejhalf(j);
-	    switch((int) floor(2*y)) {
-            case -4:
-              return factor*(-0.09375* pow(y+1.5, p)*((y+1.5)*(2*y+3)+2*y+3.5));
-            case -3:
-              return factor*(-0.28125* pow(y+1, p)*((y+1)*(2*y+2)+2*y+2.5)
-                      -0.09375* pow(y+1.5, p)*((-2*y-3)*(2*y+3)+2*y+3.5));
-	    case -2:
-	      return factor*(0.21875* pow(y+0.5, p)*((y+0.5)*(2*y+1)+2*y+1.5)
-                      -0.28125* pow(y+1, p)*((-2*y-2)*(2*y+2)+2*y+2.5)
-                      -0.09375* pow(y+1.5, p)*((y+1.5)*(2*y+3)-4*y-4));
-	    case -1:
-	      return factor*(1.40625* pow(y, p)*(y*2*y+2*y+0.5)
-                      +0.21875* pow(y+0.5, p)*((-2*y-1)*(2*y+1)+2*y+1.5)
-                      -0.28125* pow(y+1, p)*((y+1)*(2*y+2)-4*y-2));
-	    case 0:
-	      return factor*(-1.40625* pow(y-0.5, p)*((y-0.5)*(2*y-1)+2*y-0.5)
-                      +1.40625* pow(y, p)*(-4*y*y+2*y+0.5)
-                      +0.21875* pow(y+0.5, p)*((y+0.5)*(2*y+1)-4*y));
-	    case 1:
-	      return factor*(-0.21875* pow(y-1, p)*((y-1)*(2*y-2)+2*y-1.5)
-                      -1.40625* pow(y-0.5, p)*((-2*y+1)*(2*y-1)+2*y-0.5)
-                      +1.40625* pow(y, p)*(y*2*y-4*y+2));
-	    case 2:
-	      return factor*(0.28125* pow(y-1.5, p)*((y-1.5)*(2*y-3)+2*y-2.5)
-                      -0.21875* pow(y-1, p)*((-2*y+2)*(2*y-2)+2*y-1.5)
-                      -1.40625* pow(y-0.5, p)*((y-0.5)*(2*y-1)-4*y+4));
-            case 3:
-              return factor*(0.09375* pow(y-2, p)*((y-2)*(2*y-4)+2*y-3.5)
-                      +0.28125* pow(y-1.5, p)*((-2*y+3)*(2*y-3)+2*y-2.5)
-                      -0.21875* pow(y-1, p)*((y-1)*(2*y-2)-4*y+6));
-            case 4: 
-              return factor*(0.09375* pow(y-2, p)*((-2*y+4)*(2*y-4)+2*y-3.5)
-                      +0.28125* pow(y-1.5, p)*((y-1.5)*(2*y-3)-4*y+8));
-            case 5:
-              return factor*(0.09375* pow(y-2, p)*((y-2)*(2*y-4)-4*y+10));
-                            
-	    }
-	  }
-	  case 1: {
-           if(p == 0){
-              const double factor = twotothejhalf(3*j);
-	    switch((int) floor(y)) {
-	    case -2:
-	      return factor*(-0.375*y-0.75);
-	    case -1:
-	      return factor*(2.75*y+2.375);
-	    case 0:
-	      return (y < 0.5
-		      ? factor*(-16*y+2.375)
-		      : factor*(16*y-13.625));
-	    case 1:
-	      return factor*(-2.75*y+5.125);
-	    case 2:
-	      return factor*(0.375*y-1.125);
-	    }    
-           }
-           else{
-	    const double factor = twotothejhalf(3*j);
-	    switch((int) floor(2*y)) {
-            case -4:
-              return factor*(-0.09375* pow(y+1.5, p-1)*(p*((y+1.5)*(2*y+3)+2*y+3.5)+(2*y+3)*(2*y+4)));
-            case -3:
-              return factor*(-0.28125* pow(y+1, p-1)*(p*((y+1)*(2*y+2)+2*y+2.5)+(2*y+2)*(2*y+3))
-                      -0.09375* pow(y+1.5, p-1)*(p*((-2*y-3)*(2*y+3)+2*y+3.5)+(2*y+3)*(-4*y-5)));
-	    case -2:
-	      return factor*(0.21875* pow(y+0.5, p-1)*(p*((y+0.5)*(2*y+1)+2*y+1.5)+(2*y+1)*(2*y+2))
-                      -0.28125* pow(y+1, p-1)*(p*((-2*y-2)*(2*y+2)+2*y+2.5)+(2*y+2)*(-4*y-3))
-                      -0.09375* pow(y+1.5, p-1)*(p*((y+1.5)*(2*y+3)-4*y-4)+(2*y+3)*(2*y+1)));
-	    case -1:
-	      return factor*(1.40625* pow(y, p-1)*(p*(y*2*y+2*y+0.5)+2*y*(2*y+1))
-                      +0.21875* pow(y+0.5, p-1)*(p*((-2*y-1)*(2*y+1)+2*y+1.5)+(2*y+1)*(-4*y-1))
-                      -0.28125* pow(y+1, p-1)*(p*((y+1)*(2*y+2)-4*y-2)+(2*y+2)*(2*y)));
-            case 0:
-	      return factor*(-1.40625* pow(y-0.5, p-1)*(p*((y-0.5)*(2*y-1)+2*y-0.5)+(2*y-1)*2*y)
-                      +1.40625* pow(y, p-1)*(p*(-4*y*y+2*y+0.5)+(2*y)*(-4*y+1))
-                      +0.21875* pow(y+0.5, p-1)*(p*((y+0.5)*(2*y+1)-4*y)+(2*y+1)*(2*y-1)));
-            case 1:
-	      return factor*(-0.21875* pow(y-1, p-1)*(p*((y-1)*(2*y-2)+2*y-1.5)+(2*y-2)*(2*y-1))
-                      -1.40625* pow(y-0.5, p-1)*(p*((-2*y+1)*(2*y-1)+2*y-0.5)+(2*y-1)*(-4*y+3))
-                      +1.40625* pow(y, p-1)*(p*(y*2*y-4*y+2)+2*y*(2*y-2)));
-	    case 2:
-	      return factor*(0.28125* pow(y-1.5, p-1)*(p*((y-1.5)*(2*y-3)+2*y-2.5)+(2*y-3)*(2*y-2))
-                      -0.21875* pow(y-1, p-1)*(p*((-2*y+2)*(2*y-2)+2*y-1.5)+(2*y-2)*(-4*y+5))
-                      -1.40625* pow(y-0.5, p-1)*(p*((y-0.5)*(2*y-1)-4*y+4)+(2*y-1)*(2*y-3)));
-            case 3:
-              return factor*(0.09375* pow(y-2, p-1)*(p*((y-2)*(2*y-4)+2*y-3.5)+(2*y-4)*(2*y-3))
-                      +0.28125* pow(y-1.5, p-1)*(p*((-2*y+3)*(2*y-3)+2*y-2.5)+(2*y-3)*(-4*y+7))
-                      -0.21875* pow(y-1, p-1)*(p*((y-1)*(2*y-2)-4*y+6)+(2*y-2)*(2*y-4)));
-            case 4: 
-              return factor*(0.09375* pow(y-2, p-1)*(p*((-2*y+4)*(2*y-4)+2*y-3.5)+(2*y-4)*(-4*y+9))
-                      +0.28125* pow(y-1.5, p-1)*(p*((y-1.5)*(2*y-3)-4*y+8)+(2*y-3)*(2*y-5)));
-            case 5:
-              return factor*(0.09375* pow(y-2, p-1)*(p*((y-2)*(2*y-4)-4*y+10)+(2*y-4)*(2*y-6)));
-                            
-	    }
-           }
-	  }
-	  /*case 2: {
-	    const double factor = twotothejhalf(5*j);
-	    switch((int) floor(y)) {
-	    case -2:
-	      return -factor*0.375;
-	    case -1:
-	      return factor*2.75;
-	    case 0:
-	      return (y < 0.5 ? -factor*16 : factor*16);
-	    case 1:
-	      return -factor*2.75;
-	    case 2:
-	      return factor*0.375;
-	    }
-	  }*/
-	  }
-	}
-      }
-    return 0.;
-  }
+  
+//  template <>
+//  double
+//  QuarkletFrame<3,3>::evaluate(const unsigned int derivative,
+// 			  const RQIndex& lambda,
+// 			  const double x)
+//  {
+//    const int j = lambda.j();
+//    const int p = lambda.p();
+//    const double y = (1<<j)*x-lambda.k();
+//    if (lambda.e() == 0) // generator
+//      {
+//	if (y >= -1 && y < 2) {
+//	  switch (derivative) {
+//	  case 0: {
+//	    const double factor = twotothejhalf(j) * pow(0.5 * y, p);
+//	    switch((int) floor(y)) {
+//	    case -1:
+//	      return factor*(0.5*y*y+y+0.5);
+//	    case 0:
+//	      return factor*(-y*y+y+0.5);
+//	    case 1:
+//	      return factor*(0.5*y*y-2*y+2);
+//	    }
+//	  }
+//	  case 1: {
+//           if(p==0){
+//	    const double factor = twotothejhalf(3*j) ;
+//	    switch((int) floor(y)) {
+//	    case -1:
+//	      return factor*(y+1);
+//	    case 0:
+//	      return factor*(-2*y+1);
+//	    case 1:
+//	      return factor*(y-2);
+//            }
+//           }
+//           else{
+//            const double factor = twotothejhalf(3*j) * pow(0.5 * y, p-1) * 0.5;
+//	    switch((int) floor(y)) {
+//	    case -1:
+//	      return factor*(y*y*(0.5*p+1)+y*(1+p)+0.5*p);
+//	    case 0:
+//	      return factor*(-y*y*(p+2)+y*(1+p)+0.5*p);
+//	    case 1:
+//	      return factor*(y*y*(0.5*p+1)-2*y*(1+p)+2*p);
+//            }
+//           }
+//	  }
+//	  /*case 2: {
+//	    const double factor = twotothejhalf(5*j);
+//	    switch((int) floor(y)) {
+//	    case -1:
+//	      return factor;
+//	    case 0:
+//	      return -2*factor;
+//	    case 1:
+//	      return factor;
+//	    }
+//	  }*/
+//	  }
+//	}
+//      }
+//    else // wavelet
+//      {
+//	if (y >= -2 && y < 3) {
+//	  switch (derivative) {
+//	  case 0: {
+//	    const double factor = twotothejhalf(j);
+//	    switch((int) floor(2*y)) {
+//            case -4:
+//              return factor*(-0.09375* pow(y+1.5, p)*((y+1.5)*(2*y+3)+2*y+3.5));
+//            case -3:
+//              return factor*(-0.28125* pow(y+1, p)*((y+1)*(2*y+2)+2*y+2.5)
+//                      -0.09375* pow(y+1.5, p)*((-2*y-3)*(2*y+3)+2*y+3.5));
+//	    case -2:
+//	      return factor*(0.21875* pow(y+0.5, p)*((y+0.5)*(2*y+1)+2*y+1.5)
+//                      -0.28125* pow(y+1, p)*((-2*y-2)*(2*y+2)+2*y+2.5)
+//                      -0.09375* pow(y+1.5, p)*((y+1.5)*(2*y+3)-4*y-4));
+//	    case -1:
+//	      return factor*(1.40625* pow(y, p)*(y*2*y+2*y+0.5)
+//                      +0.21875* pow(y+0.5, p)*((-2*y-1)*(2*y+1)+2*y+1.5)
+//                      -0.28125* pow(y+1, p)*((y+1)*(2*y+2)-4*y-2));
+//	    case 0:
+//	      return factor*(-1.40625* pow(y-0.5, p)*((y-0.5)*(2*y-1)+2*y-0.5)
+//                      +1.40625* pow(y, p)*(-4*y*y+2*y+0.5)
+//                      +0.21875* pow(y+0.5, p)*((y+0.5)*(2*y+1)-4*y));
+//	    case 1:
+//	      return factor*(-0.21875* pow(y-1, p)*((y-1)*(2*y-2)+2*y-1.5)
+//                      -1.40625* pow(y-0.5, p)*((-2*y+1)*(2*y-1)+2*y-0.5)
+//                      +1.40625* pow(y, p)*(y*2*y-4*y+2));
+//	    case 2:
+//	      return factor*(0.28125* pow(y-1.5, p)*((y-1.5)*(2*y-3)+2*y-2.5)
+//                      -0.21875* pow(y-1, p)*((-2*y+2)*(2*y-2)+2*y-1.5)
+//                      -1.40625* pow(y-0.5, p)*((y-0.5)*(2*y-1)-4*y+4));
+//            case 3:
+//              return factor*(0.09375* pow(y-2, p)*((y-2)*(2*y-4)+2*y-3.5)
+//                      +0.28125* pow(y-1.5, p)*((-2*y+3)*(2*y-3)+2*y-2.5)
+//                      -0.21875* pow(y-1, p)*((y-1)*(2*y-2)-4*y+6));
+//            case 4: 
+//              return factor*(0.09375* pow(y-2, p)*((-2*y+4)*(2*y-4)+2*y-3.5)
+//                      +0.28125* pow(y-1.5, p)*((y-1.5)*(2*y-3)-4*y+8));
+//            case 5:
+//              return factor*(0.09375* pow(y-2, p)*((y-2)*(2*y-4)-4*y+10));
+//                            
+//	    }
+//	  }
+//	  case 1: {
+//           if(p == 0){
+//              const double factor = twotothejhalf(3*j);
+//	    switch((int) floor(y)) {
+//	    case -2:
+//	      return factor*(-0.375*y-0.75);
+//	    case -1:
+//	      return factor*(2.75*y+2.375);
+//	    case 0:
+//	      return (y < 0.5
+//		      ? factor*(-16*y+2.375)
+//		      : factor*(16*y-13.625));
+//	    case 1:
+//	      return factor*(-2.75*y+5.125);
+//	    case 2:
+//	      return factor*(0.375*y-1.125);
+//	    }    
+//           }
+//           else{
+//	    const double factor = twotothejhalf(3*j);
+//	    switch((int) floor(2*y)) {
+//            case -4:
+//              return factor*(-0.09375* pow(y+1.5, p-1)*(p*((y+1.5)*(2*y+3)+2*y+3.5)+(2*y+3)*(2*y+4)));
+//            case -3:
+//              return factor*(-0.28125* pow(y+1, p-1)*(p*((y+1)*(2*y+2)+2*y+2.5)+(2*y+2)*(2*y+3))
+//                      -0.09375* pow(y+1.5, p-1)*(p*((-2*y-3)*(2*y+3)+2*y+3.5)+(2*y+3)*(-4*y-5)));
+//	    case -2:
+//	      return factor*(0.21875* pow(y+0.5, p-1)*(p*((y+0.5)*(2*y+1)+2*y+1.5)+(2*y+1)*(2*y+2))
+//                      -0.28125* pow(y+1, p-1)*(p*((-2*y-2)*(2*y+2)+2*y+2.5)+(2*y+2)*(-4*y-3))
+//                      -0.09375* pow(y+1.5, p-1)*(p*((y+1.5)*(2*y+3)-4*y-4)+(2*y+3)*(2*y+1)));
+//	    case -1:
+//	      return factor*(1.40625* pow(y, p-1)*(p*(y*2*y+2*y+0.5)+2*y*(2*y+1))
+//                      +0.21875* pow(y+0.5, p-1)*(p*((-2*y-1)*(2*y+1)+2*y+1.5)+(2*y+1)*(-4*y-1))
+//                      -0.28125* pow(y+1, p-1)*(p*((y+1)*(2*y+2)-4*y-2)+(2*y+2)*(2*y)));
+//            case 0:
+//	      return factor*(-1.40625* pow(y-0.5, p-1)*(p*((y-0.5)*(2*y-1)+2*y-0.5)+(2*y-1)*2*y)
+//                      +1.40625* pow(y, p-1)*(p*(-4*y*y+2*y+0.5)+(2*y)*(-4*y+1))
+//                      +0.21875* pow(y+0.5, p-1)*(p*((y+0.5)*(2*y+1)-4*y)+(2*y+1)*(2*y-1)));
+//            case 1:
+//	      return factor*(-0.21875* pow(y-1, p-1)*(p*((y-1)*(2*y-2)+2*y-1.5)+(2*y-2)*(2*y-1))
+//                      -1.40625* pow(y-0.5, p-1)*(p*((-2*y+1)*(2*y-1)+2*y-0.5)+(2*y-1)*(-4*y+3))
+//                      +1.40625* pow(y, p-1)*(p*(y*2*y-4*y+2)+2*y*(2*y-2)));
+//	    case 2:
+//	      return factor*(0.28125* pow(y-1.5, p-1)*(p*((y-1.5)*(2*y-3)+2*y-2.5)+(2*y-3)*(2*y-2))
+//                      -0.21875* pow(y-1, p-1)*(p*((-2*y+2)*(2*y-2)+2*y-1.5)+(2*y-2)*(-4*y+5))
+//                      -1.40625* pow(y-0.5, p-1)*(p*((y-0.5)*(2*y-1)-4*y+4)+(2*y-1)*(2*y-3)));
+//            case 3:
+//              return factor*(0.09375* pow(y-2, p-1)*(p*((y-2)*(2*y-4)+2*y-3.5)+(2*y-4)*(2*y-3))
+//                      +0.28125* pow(y-1.5, p-1)*(p*((-2*y+3)*(2*y-3)+2*y-2.5)+(2*y-3)*(-4*y+7))
+//                      -0.21875* pow(y-1, p-1)*(p*((y-1)*(2*y-2)-4*y+6)+(2*y-2)*(2*y-4)));
+//            case 4: 
+//              return factor*(0.09375* pow(y-2, p-1)*(p*((-2*y+4)*(2*y-4)+2*y-3.5)+(2*y-4)*(-4*y+9))
+//                      +0.28125* pow(y-1.5, p-1)*(p*((y-1.5)*(2*y-3)-4*y+8)+(2*y-3)*(2*y-5)));
+//            case 5:
+//              return factor*(0.09375* pow(y-2, p-1)*(p*((y-2)*(2*y-4)-4*y+10)+(2*y-4)*(2*y-6)));
+//                            
+//	    }
+//           }
+//	  }
+//	  /*case 2: {
+//	    const double factor = twotothejhalf(5*j);
+//	    switch((int) floor(y)) {
+//	    case -2:
+//	      return -factor*0.375;
+//	    case -1:
+//	      return factor*2.75;
+//	    case 0:
+//	      return (y < 0.5 ? -factor*16 : factor*16);
+//	    case 1:
+//	      return -factor*2.75;
+//	    case 2:
+//	      return factor*0.375;
+//	    }
+//	  }*/
+//	  }
+//	}
+//      }
+//    return 0.;
+//  }
 
   /*template <>
   double

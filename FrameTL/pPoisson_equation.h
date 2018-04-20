@@ -325,7 +325,7 @@ namespace FrameTL
     const PoissonBVP_Coeff<DIM>* ell_bvp_;
     //const EllipticBVP<DIM>* ell_bvp_;
 
-    /*!
+//    /*!
       The underlying aggregated frame.
     */
     const AggregatedFrame<IBASIS,DIM>* frame_;

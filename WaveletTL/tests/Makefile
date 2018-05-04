@@ -85,7 +85,7 @@ EXEOBJF1 = \
 
 # set 2 of test programs: wavelet bases on the interval ([DS],[P],[JL],[A],[S])
 EXEOBJF2 = \
-  
+  test_pq_frame.o
   
 
 # set 2a of test programs: wavelet bases on the interval with improved performance (periodic)
@@ -121,7 +121,8 @@ EXEOBJF4 = \
   test_ldomain_frame.o\
   test_ldomain_norm.o\
   test_parallel.o\
-  test_slitdomain_frame.o
+  test_slitdomain_frame.o\
+  test_recring_frame.o
 #  test_ldomain_equation.o\
 
   

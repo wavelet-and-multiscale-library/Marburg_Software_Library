@@ -341,7 +341,7 @@ namespace WaveletTL
       //LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
       SymmEigenvalues(A_Lambda, evals, evecs);
       
-      //cout << "Eigenwerte: " << evals << endl;
+      cout << "Eigenwerte: " << evals << endl;
       //cout << "Eigenvektoren: " << endl << evecs << endl;
       normA = evals(evals.size()-1);
       //cout << "normA: " << normA << endl;

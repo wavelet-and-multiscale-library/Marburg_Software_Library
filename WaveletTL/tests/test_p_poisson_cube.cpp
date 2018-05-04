@@ -519,7 +519,8 @@ double epsilon_CDD1 = 0.1; // bad accuracy for testing (speedup)
   //! setup problem
   clock_t begin_compute_rhs = clock();
 
-  Problem_pPoisson problem(&poisson_coeff, bc, param_p, max_lev_wav_basis, max_lev_wav_rhs, doe_quad_a, min_res_quad_a, doe_quad_f, min_res_quad_f);
+  Problem_pPoisson problem(&poisson_coeff, bc, param_p, max_lev_wav_basis, max_lev_wav_rhs, 
+          doe_quad_a, min_res_quad_a, doe_quad_f, min_res_quad_f);
 
   clock_t end_compute_rhs = clock();
   time_consumption_of_compute_rhs = double(end_compute_rhs - begin_compute_rhs) / CLOCKS_PER_SEC;

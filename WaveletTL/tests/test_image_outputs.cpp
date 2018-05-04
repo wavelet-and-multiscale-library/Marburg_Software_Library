@@ -15,11 +15,11 @@
 
 
 #define JMAX 8
-#define PMAX 0
+#define PMAX 2
 #define _DIM 1
 
 #define PRIMALORDER 3
-#define DUALORDER   5
+#define DUALORDER   3
 #include <fstream>
 #include <map>
 #include <time.h>
@@ -108,11 +108,11 @@ int main()
   
 #ifdef FRAME
   typedef PQFrame<d,dT> Basis;
-  bool dirichlet_left=0;
-  bool dirchlet_right=0;
+  bool dirichlet_left=1;
+  bool dirchlet_right=1;
   Basis basis(dirichlet_left, dirchlet_right, true);
   typedef Basis::Index Index;
-  const char* basis_type = "Primbs quarklet frame";
+//  const char* basis_type = "Primbs quarklet frame";
   basis.set_jpmax(jmax,pmax);
   bool primal = true;
   
@@ -132,7 +132,7 @@ int main()
    Astream << ";" << endl;
    Astream.close();
    cout << "  ... done!" << endl;
-  abort();
+//  abort();
  
 
 #ifdef RFRAME
@@ -186,10 +186,10 @@ int main()
 #endif
   
 #ifdef FRAME
-  const int p = 3;
+  const int p = 1;
   const int j = basis.j0();
-  const int e = 0;
-  const int k = -1;
+  const int e = 1;
+  const int k = 5;
   
   InfiniteVector<double,Index> indplot;
 //  const char* filenameInd = "Image_outputs/indexplot.m";  

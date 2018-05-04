@@ -599,7 +599,7 @@ namespace WaveletTL
 
     typename LDomainFrameIndex<IFRAME>::type_type e;
 
-    // setup highest translation index for e=(0,0), p=4
+    // setup highest translation index for e=(0,0), p=4    
     typename LDomainFrameIndex<IFRAME>::translation_type k(frame->frame1d()->DeltaLmin(), frame->frame1d()->DeltaRmax(j[1])-1);
     
     return LDomainFrameIndex<IFRAME>(p,j, e, 4, k, p.number()* frame->get_Nablasize()+frame->Deltasize(j[0])-1, frame);

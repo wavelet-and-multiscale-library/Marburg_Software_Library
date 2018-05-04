@@ -55,12 +55,14 @@ namespace WaveletTL
     InfiniteVector<double,int> fhelp_int;
     
 #ifdef FRAME
-//    cout << "bin hier0" << endl;
+    cout << basis_.degrees_of_freedom() << endl;
     for (int i=0; i<basis_.degrees_of_freedom();i++) {
+//        cout << "hallo" << endl;
+//        cout << *(basis_.get_quarklet(i)) << endl;
         const double coeff = f(*(basis_.get_quarklet(i)))/D(*(basis_.get_quarklet(i)));
         fhelp.set_coefficient(*(basis_.get_quarklet(i)), coeff);
         fhelp_int.set_coefficient(i, coeff);
-//        cout << *(basis_.get_quarklet(i)) << endl;
+        cout << *(basis_.get_quarklet(i)) << endl;
     }
 //    cout << "bin hier1" << endl;
     
@@ -208,8 +210,14 @@ namespace WaveletTL
 	    gauss_points[id] = h*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
 
 	// - compute point values of the integrands
-	evaluate(basis_, lambda, gauss_points, func1values, der1values);
+	evaluate(basis_, lambda, gauss_points, func1values, der1values);        
 	evaluate(basis_, nu, gauss_points, func2values, der2values);
+//        if((lambda.number()==19 && nu.number()==19) || (lambda.number()==26 && nu.number()==26)){
+//            cout << lambda << endl;
+//            cout << gauss_points << endl;
+//            cout << func1values << endl;
+//            cout << func2values << endl;
+//        }
 
 	// - add all integral shares
 	for (int patch = supp.k1, id = 0; patch < supp.k2; patch++)

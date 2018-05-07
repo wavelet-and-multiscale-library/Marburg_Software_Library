@@ -99,13 +99,13 @@ EXEOBJF3 = \
   test_tbasis.o\
   test_tbasis_support.o\
   test_tbasis_index.o\
-  test_tframe_index.o
- # test_p_poisson_cube.o
- # test_tbasis_adaptive.o\
- # test_tbasis_cdd1.o\
- # test_tframe_adaptive.o\
- # test_ldomain.o\
-#  test_tbasis_indexplot.o\
+  test_tframe_index.o\
+  test_p_poisson_cube.o\
+  test_tbasis_adaptive.o\
+  test_tbasis_cdd1.o\
+  test_tframe_adaptive.o\
+  test_ldomain.o\
+  test_tbasis_indexplot.o\
 
 # set 3a of test programs: wavelet bases on the ring domain
 EXEOBJF3a = \
@@ -122,15 +122,15 @@ EXEOBJF4 = \
   test_ldomain_norm.o\
   test_parallel.o\
   test_slitdomain_frame.o\
-  test_recring_frame.o
-#  test_ldomain_equation.o\
+  test_recring_frame.o\
+  test_ldomain_equation.o
 
   
 
 # set 5 of test programs: adaptive wavelet schemes for elliptic equations
 EXEOBJF5 = \
-  test_sturm_bvp.o
-  # test_cdd1_cube.o\ 
+  test_sturm_bvp.o\
+  test_cdd1_cube.o
   
   
 
@@ -141,12 +141,12 @@ EXEOBJF6 = \
 
 # set 7 of test programs: nonadaptive wavelet solvers for elliptic problems	
 EXEOBJF7 = \
-  test_sturm_nonadaptive.o\
+  test_sturm_nonadaptive.o
   
 
 # set 8 of test programs: ExpandASPP	
 EXEOBJF8 = \
-  test_image_outputs.o\
+  test_image_outputs.o
   
   
 

@@ -597,7 +597,7 @@ namespace WaveletTL
   void richardson_QUARKLET_SOLVE(const PROBLEM& P, const double epsilon,
 			InfiniteVector<double,int>& u_epsilon, const unsigned int maxiter,
                         CompressionStrategy strategy,
-                        const double a, const double b, const double shrink)
+                        const double a, const double b, const double shrink, double omega)
   {
 
 
@@ -622,26 +622,27 @@ namespace WaveletTL
     
 
     cout << "Rich_SOLVE: nu=" << nu << endl;
-
+    if(omega==0){
     // compute optimal relaxation parameter omega
-    //const double omega = 2.0 / (P.norm_A() + 1.0/P.norm_Ainv());
+//    double omega = 2.0 / (P.norm_A() + 1.0/P.norm_Ainv());
     
     // ####### 1D #######
-//    const double omega = 1.;
-//    const double omega = 0.1; //for p=4
-//    const double omega = 0.4;
-//    const double omega = 0.15;
+//    double omega = 1.;
+//    double omega = 0.1; //for p=4
+//    double omega = 0.4;
+    omega = 0.15;
 
     // ####### 2D #######
     // bad one
-//    const double omega = 0.05;
+//    double omega = 0.05;
     // good one
-    const double omega = 0.25;
+//    double omega = 0.25;
 
-//    const double omega = 0.05;
+//    double omega = 0.05;
 
 
-    //const double omega = 2.0/2.47-0.5;
+    //double omega = 2.0/2.47-0.5;
+    }
     cout << "Rich_SOLVE: omega=" << omega << endl;
 
     // compute spectral norm rho
@@ -772,7 +773,8 @@ namespace WaveletTL
 	if (residual_norm < 0.01 || loops == maxiter) 
 #endif
         {
-	  u_epsilon = v;
+            cout << "ich bin raus" << endl;
+          u_epsilon = v;
 	  exit = true;
 	  break;
 	}
@@ -783,7 +785,7 @@ namespace WaveletTL
 	break;
       
     } 
-    
+    u_epsilon=v;
     
 
   }

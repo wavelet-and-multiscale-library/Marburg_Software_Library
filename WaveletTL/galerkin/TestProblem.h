@@ -47,7 +47,13 @@ class TestProblem : public SimpleSturmBVP
                     break;
                 case 10:
                     return 0;
-                    break;    
+                    break;
+                case 11:
+                    return 1;
+                    break;
+                case 12:
+                    return 1;
+                    break;
                 default:
                     return 0;
                     break;
@@ -87,7 +93,13 @@ class TestProblem : public SimpleSturmBVP
                     break;
                 case 10:
                     return 0;
-                    break;  
+                    break; 
+                case 11:
+                    return 0;
+                    break;    
+                case 12:
+                    return 0;
+                    break;    
                 default:
                     return 0;
                     break;
@@ -127,7 +139,13 @@ class TestProblem : public SimpleSturmBVP
                     break;
                 case 10:
                     return 1;
-                    break;  
+                    break; 
+                case 11:
+                    return 0;
+                    break;    
+                case 12:
+                    return 0;
+                    break;    
                 default:
                     return 0;
                     break;
@@ -171,6 +189,12 @@ class TestProblem : public SimpleSturmBVP
                 case 10:
                     return -sin(3*M_PI*t)+(t<0.5 ? 2*t*t : 2*(1-t)*(1-t));  
                     break;
+                case 11:
+                    return -2*(t-1)*(t-1)-8*t*(t-1)-2*t*t;  
+                    break;    
+                case 12:
+                    return -cos(2.*M_PI*t)*4.*M_PI*M_PI - 4.;  
+                    break; 
                 default:
                     return 0;
                     break;
@@ -196,6 +220,12 @@ class TestProblem : public SimpleSturmBVP
                 case 6:
                      return "Hat function as gramian problem (for test purposes)";  
                      break;
+                case 11:
+                     return "Neumann BC test problem";  
+                     break;     
+                case 12:
+                     return "Neumann BC test problem 2";  
+                     break;     
                 default:
                     return "TestProblem: N not defined.";
                     break;

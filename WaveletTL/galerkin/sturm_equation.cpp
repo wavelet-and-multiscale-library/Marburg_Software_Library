@@ -395,8 +395,12 @@ namespace WaveletTL
 //    tmp /= chart->Gram_factor(p2);
 //  
 //  
-//    return 4.0*tmp + r;
-    return r + 4*basis_.evaluate(0, lambda, 0.5);
+//    return 4.0*tmp + r;    
+#ifdef NONZERONEUMANN
+    return r + 4*basis_.evaluate(0, lambda, 0.5)+3*M_PI*(basis_.evaluate(0, lambda, 1)+basis_.evaluate(0, lambda, 0));
+#else
+    return r+ 4*basis_.evaluate(0, lambda, 0.5);
+#endif    
 #else
     return r;
 #endif

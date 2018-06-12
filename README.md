@@ -34,6 +34,7 @@ Sources:
 [CDD1] A. Cohen, W. Dahmen and R. DeVore, *Adaptive wavelet methods for elliptic operator eqautions - Convergence rates*, Math. Comput. **70** (2001), no. 233, 27-75
 
 [CDD2] A. Cohen, W. Dahmen and R. DeVore, *Adaptive wavelet methods II: Beyond the elliptic case*, Found. Comput. Math. **2** (2002), no. 3, 203-245
+
 [DFRSW] S. Dahlke, M. Fornasier, T. Raasch, R. Stevenson and M. Werner, *Adaptive frame methods for elliptic operator equations: The steepest descent approach*, IMA J. Numer. Anal. **27** (2007), no. 4, 717-740
 
 [DFPRW] S. Dahlke, M. Fornasier, M. Primbs, T. Raasch and M. Werner, *Nonlinear and adaptive frame approximation schemes for elliptic PDEs: Theory and numerical experiments*, Numer. Methods Partial Differ. Equations **6** (2009), no. 6, 1366-1401
@@ -43,6 +44,8 @@ Sources:
 [DKR] S. Dahlke, P. Keding and T. Raasch, *Quarkonial frames with compression properties*, Calcolo **27** (2017), no.3, 823-855
 
 [DS]  W. Dahmen and R. Schneider, *Composite wavelet bases for operator equations*, Math. Comput. **68** (1999), 1533-1567 
+
 [Pr]  M. Primbs, *New stable biorthogonal spline-wavelets on the interval*, **57** (2010), no.1, 121-162 
+
 [We]  M. Werner, *Adaptive Wavelet Frame Domain Decomposition Methods for Elliptic Operators*, Ph.D. thesis, Philipps-Universität Marburg, 2009 
  

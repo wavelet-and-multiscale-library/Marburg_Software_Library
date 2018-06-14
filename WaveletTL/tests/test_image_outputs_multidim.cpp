@@ -69,7 +69,7 @@ int main()
     const int dT = 3;
     const unsigned int dim = 2; 
     const int jmax=6;
-    const int pmax = 2;
+    const int pmax = 3;
     
 #ifdef LDOMAIN
     cout << "Testing ldomainframe image outputs" << endl;
@@ -106,15 +106,23 @@ int main()
     
     Array1D<SampledMapping<dim> > eval(3);
     eval=frame.evaluate(u,8);
+    char plotnameInd[128];
+    sprintf(plotnameInd, "%s%d%s%d%s%d%d%s%d%d%s%d%d%s%d%d%s%d%s%d%s", "ldomain_m_", d, "_mT_" , dT, "_p_" , lambda.p()[0],lambda.p()[1], "_j_" , lambda.j()[0],lambda.j()[1], 
+            "_e_" , lambda.e()[0],lambda.e()[1],"_k_" , lambda.k()[0],lambda.k()[1], "_patch_", lambda.patch(),"_number_",lambda.number(),   ".png");
     std::ofstream os2("Image_outputs/quarklet_ldomain.m");
     os2 << "figure;"<< endl;
 //    os2 <<  "cm=colormap('jet'); cm=[flipud(cm);cm]; colormap(cm); " << endl;
     for(int i=0;i<3;i++){
         eval[i].matlab_output(os2);        
-           os2 << "surf(x,y,z,'LineStyle','none');"
+           os2 << "surf(x,y,z);"
            << "hold on;" << endl;
     }  
     os2 << "hold off" << endl;
+    os2 << "shading('flat')" << endl;
+    os2 << "colormap([flipud(jet);jet])" << endl;
+    os2 << "set(gca,'CLim', [- min(abs(get(gca,'CLim')))  min(abs(get(gca,'CLim')))])" << endl;
+    os2 << "print('-dpng',sprintf('" << plotnameInd << "'));" << endl;   
+    
     os2.close();
     
 //    SampledMapping<2> sm1(evaluate(frame, u , true, 8));
@@ -168,21 +176,26 @@ int main()
 #endif  
     
     InfiniteVector<double,Index> u;
-    Index lambda=frame.get_quarklet(15);
+    Index lambda=frame.get_quarklet(2114);
     cout << lambda << endl;
     u.set_coefficient(lambda, 1);
     cout << u << endl;
     
     cout << "plotting quarklet on cube" << endl;
-    SampledMapping<2> sm1(evaluate(frame, u , true, 6));
+    SampledMapping<2> sm1(evaluate(frame, u , true, 9));
     std::ofstream stream1("Image_outputs/quarklet_cube.m");
+    char plotnameInd[128];
+    sprintf(plotnameInd, "%s%d%s%d%s%d%d%s%d%d%s%d%d%s%d%d%s%d%s", "cube_m_", d, "_mT_" , dT, "_p_" , lambda.p()[0],lambda.p()[1], "_j_" , lambda.j()[0],lambda.j()[1], 
+            "_e_" , lambda.e()[0],lambda.e()[1],"_k_" , lambda.k()[0],lambda.k()[1],"_number_",lambda.number(),  ".png");
     sm1.matlab_output(stream1);
     stream1 //<< "figure;\nsurf(x,y,z,'LineStyle','none');"
             << "figure;\ns=surf(x,y,z);"            
             << "\nview(30,55);" 
-//            << "\ngrid off;"
-//            << "\nshading interp;"
-//            << "print('-djpg',sprintf('jetztaber.jpg'));"
+            << "\ngrid off;"
+            << "\nshading('flat');"
+            << "colormap([flipud(jet);jet]);" 
+            << "set(gca,'CLim', [- min(abs(get(gca,'CLim')))  min(abs(get(gca,'CLim')))]);" 
+            << "print('-dpng',sprintf('" << plotnameInd << "'));"
 
 //              << "matlab2tikz('myquarklet.tex', 'standalone', true);"
               << endl;

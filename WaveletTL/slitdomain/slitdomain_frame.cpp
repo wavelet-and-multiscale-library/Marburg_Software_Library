@@ -796,7 +796,7 @@ namespace WaveletTL
     set<Index> Lambda;
     int waveletlevel=0;
     Index ind = first_generator(j0_, p);
-    cout<<ind<<endl;
+//    cout<<ind<<endl;
     for (int k = 0;; k++) {
 //        full_collection[k] = ind;
         Lambda.insert(ind);

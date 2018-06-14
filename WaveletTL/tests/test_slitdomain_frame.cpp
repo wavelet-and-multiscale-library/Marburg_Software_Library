@@ -7,9 +7,9 @@
 #undef GRAMIAN
 
 
-#define DYADIC
+#undef DYADIC
 #undef TRIVIAL
-#undef ENERGY
+#define ENERGY
 #undef DYPLUSEN
 
 #undef NONADAPTIVE
@@ -17,8 +17,8 @@
 
 #ifdef ADAPTIVE
 #undef SD
-#define CDD2
-#undef RICHARDSON
+#undef CDD2
+#define RICHARDSON
 #endif
 
 #define PARALLEL 0
@@ -27,7 +27,7 @@
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
-#define JMAX 6
+#define JMAX 7
 #define PMAX 0
 #define TWO_D
 
@@ -165,8 +165,8 @@ int main(){
         SampledMapping<2> smuexact(mygrid, uexact1);
         smrhs.matlab_output(osrhs);
         smuexact.matlab_output(osuexact);
-        osrhs << "surf(x,y,z)"<<endl;
-        osuexact<<"surf(x,y,z)"<<endl;
+        osrhs << "surf(x,y,z,'LineStyle','none')"<<endl;
+        osuexact<<"surf(x,y,z,'LineStyle','none')"<<endl;
         osrhs << "hold on;" << endl;
         osuexact<<"hold on;"<<endl;
     }
@@ -316,10 +316,15 @@ int main(){
     
     const double a=2;
     const double b=2;
-    double epsilon = 1e-3;
+    double epsilon = 1e-20;
     
+#ifdef CDD2
     CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, tensor_simple, pmax, a, b);
-    
+#endif
+#ifdef RICHARDSON
+    const unsigned int maxiter = 500;
+    richardson_QUARKLET_SOLVE(cproblem1,epsilon,u_epsilon_int, maxiter, tensor_simple, a, b, 0, 0.2);
+#endif
     for (typename InfiniteVector<double,int>::const_iterator it(u_epsilon_int.begin()),
  	   itend(u_epsilon_int.end()); it != itend; ++it){
         u_epsilon.set_coefficient(*(frame.get_quarklet(it.index())), *it);
@@ -340,7 +345,7 @@ int main(){
     os2 << "figure;"<< endl;
     for(int i=0;i<4;i++){
         eval[i].matlab_output(os2);
-        os2 << "surf(x,y,z);" << endl;
+        os2 << "surf(x,y,z,'LineStyle','none');" << endl;
         os2 << "hold on;" << endl;
     }  
     os2 << "title('slitdomain Poisson Equation: adaptive solution to test problem ("

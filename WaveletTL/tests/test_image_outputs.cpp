@@ -15,7 +15,7 @@
 
 
 #define JMAX 8
-#define PMAX 2
+#define PMAX 0
 #define _DIM 1
 
 #define PRIMALORDER 3
@@ -38,8 +38,8 @@
 #include <interval/pq_frame.h>
 
 #undef BASIS
-#define FRAME
-#undef RFRAME
+#undef FRAME
+#define RFRAME
 #undef CDF
 
 
@@ -108,15 +108,16 @@ int main()
   
 #ifdef FRAME
   typedef PQFrame<d,dT> Basis;
-  bool dirichlet_left=1;
-  bool dirchlet_right=1;
+  bool dirichlet_left=0;
+  bool dirchlet_right=0;
   Basis basis(dirichlet_left, dirchlet_right, true);
+  
   typedef Basis::Index Index;
 //  const char* basis_type = "Primbs quarklet frame";
   basis.set_jpmax(jmax,pmax);
   bool primal = true;
   
-#endif
+
   cout << "setup equation.." << endl;
   SturmEquation<Basis> eq(T, basis);
   cout << "end setup equation!" << endl;  
@@ -125,18 +126,18 @@ int main()
   cout << "M_j1: " << endl << basis.get_Mj1() << endl;
   cout << "tildeM_j0: " << endl << basis.get_Mj0T() << endl; 
   
-  cout << "- writing M_j0 to the file refinementmatrix.m ..." << endl;
+  cout << "- writing M_j1 to the file refinementmatrix.m ..." << endl;
    std::ofstream Astream("Image_outputs/refinementmatrix.m");
    Astream << "A=";
-   print_matrix(basis.get_Mj0(), Astream);
+   print_matrix(basis.get_Mj1(), Astream);
    Astream << ";" << endl;
    Astream.close();
    cout << "  ... done!" << endl;
 //  abort();
- 
+#endif 
 
 #ifdef RFRAME
-  const int p = 1;
+  const int p = 2;
   const int j = 0;
   const int e = 1;
   const int k = 0;
@@ -186,9 +187,9 @@ int main()
 #endif
   
 #ifdef FRAME
-  const int p = 1;
+  const int p = 2;
   const int j = basis.j0();
-  const int e = 1;
+  const int e = 0;
   const int k = 5;
   
   InfiniteVector<double,Index> indplot;

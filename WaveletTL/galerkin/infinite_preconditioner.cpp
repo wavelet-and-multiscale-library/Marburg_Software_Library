@@ -102,6 +102,15 @@ namespace WaveletTL
     
   }
 
+  
+  template <class INDEX>
+  inline
+  double
+  FullyDiagonalQuarkletEnergyNormPreconditioner<INDEX>::diag(const INDEX& lambda) const
+  {
+    return sqrt(a(lambda, lambda))*(lambda.p()+1);
+    //return ldexp(1.0, lambda.j()); //ATTENTION!!! HAS TO BE CHANGED BACK; ONLY FOR EXPERIMENTING
+  };
 
   template <class INDEX>
   inline

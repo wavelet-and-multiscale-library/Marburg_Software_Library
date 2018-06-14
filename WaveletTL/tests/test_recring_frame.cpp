@@ -17,8 +17,8 @@
 
 #ifdef ADAPTIVE
 #undef SD
-#define CDD2
-#undef RICHARDSON
+#undef CDD2
+#define RICHARDSON
 #endif
 
 #define PARALLEL 0
@@ -27,8 +27,8 @@
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
-#define JMAX 7
-#define PMAX 1
+#define JMAX 6
+#define PMAX 0
 #define TWO_D
 
 #define PRIMALORDER 3
@@ -346,9 +346,14 @@ int main(){
     
     const double a=2;
     const double b=2;
-    double epsilon = 1e-3;
-   
+    double epsilon = 1e-20;
+#ifdef CDD2
     CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, tensor_simple, pmax, a, b);
+#endif
+#ifdef RICHARDSON
+    const unsigned int maxiter = 500;
+    richardson_QUARKLET_SOLVE(cproblem1,epsilon,u_epsilon_int, maxiter, tensor_simple, a, b, 0, 0.05);
+#endif
     
     for (typename InfiniteVector<double,int>::const_iterator it(u_epsilon_int.begin()),
  	   itend(u_epsilon_int.end()); it != itend; ++it){
@@ -370,7 +375,7 @@ int main(){
     os2 << "figure;"<< endl;
     for(int i=0;i<8;i++){
         eval[i].matlab_output(os2);
-        os2 << "surf(x,y,z);" << endl;
+        os2 << "surf(x,y,z,'LineStyle','none');" << endl;
         os2 << "hold on;" << endl;
     }  
     os2 << "title('recring Poisson Equation: adaptive solution to test problem ("

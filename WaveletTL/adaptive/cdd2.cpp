@@ -630,13 +630,13 @@ namespace WaveletTL
 //    double omega = 1.;
 //    double omega = 0.1; //for p=4
 //    double omega = 0.4;
-    omega = 0.15;
+//    omega = 0.15;
 
     // ####### 2D #######
     // bad one
-//    double omega = 0.05;
+    omega = 0.05;
     // good one
-//    double omega = 0.25;
+//    omega = 0.25;
 
 //    double omega = 0.05;
 
@@ -767,13 +767,13 @@ namespace WaveletTL
 	tstart = clock();
 
 #ifdef ONE_D
-	if (residual_norm < 1e-4 || loops == 5000 || (shrink!=0 && residual_norm < 0.29)) 
+	if (residual_norm < 1e-4 || loops == maxiter || (shrink!=0 && residual_norm < 0.29)) 
 #endif
 #ifdef TWO_D
 	if (residual_norm < 0.01 || loops == maxiter) 
 #endif
         {
-            cout << "ich bin raus" << endl;
+           
           u_epsilon = v;
 	  exit = true;
 	  break;

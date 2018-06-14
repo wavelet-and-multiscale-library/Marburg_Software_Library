@@ -630,7 +630,7 @@ namespace WaveletTL
             typename Index::polynomial_type p;
             Index ind = first_generator(j0_, p);
             for (int k = 0; k < degrees_of_freedom; k++) {
-//                cout << ind << ", " << ind.number() << endl;
+                cout << ind << ", " << endl;
                 full_collection[k] = ind;
                 
                 if(ind==last_quarklet(jmax_, p)){

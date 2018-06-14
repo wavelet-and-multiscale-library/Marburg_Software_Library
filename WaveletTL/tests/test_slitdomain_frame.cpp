@@ -12,8 +12,8 @@
 #undef ENERGY
 #undef DYPLUSEN
 
-#undef NONADAPTIVE
-#define ADAPTIVE
+#define NONADAPTIVE
+#undef ADAPTIVE
 
 #ifdef ADAPTIVE
 #undef SD
@@ -82,7 +82,7 @@ class mySolution
 public:
   virtual ~mySolution() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
-    CornerSingularity cs(Point<2>(0,0), 0.5, 1.9);
+    CornerSingularity cs(Point<2>(0,0), 0.5, 2.0);
     return sin(M_PI*p[0])*sin(M_PI*p[1])+5*cs.value(p);
   }
   void vector_value(const Point<2>& p, Vector<double>& values) const {
@@ -115,7 +115,7 @@ int main(){
     typedef PQFrame<d,dT> Frame1d;
     typedef SlitDomainFrame<Frame1d> Frame;
     typedef Frame::Index Index;
-    typedef Frame::Support Support;
+    
     
     //instances of 1d frames with different boundary conditions
     Frame1d frame1d(false,false);
@@ -493,6 +493,7 @@ int main(){
     osf.close(); 
     
     //support test
+    typedef Frame::Support Support;
     Index testindex2(testindex); 
     cout<<"test support of index "<<testindex2<<endl;
     Support supp;

@@ -34,6 +34,12 @@ namespace WaveletTL
         os<<"imargin=0.025;"<<endl;
         os<<"omargin=0.05;"<<endl;
         
+//        os<<"axlabels='on';"<<endl;
+//        os<<"psize=0.40;"<<endl;
+//        os<<"smallpsize=0.055;"<<endl;
+//        os<<"imargin=0.0175;"<<endl;
+//        os<<"omargin=0.055;"<<endl;
+        
         //empty subplot for centered title
 //        os<<"subplot(3,3,2)"<<endl;
         os<<"axis('off')"<<endl;
@@ -155,7 +161,7 @@ namespace WaveletTL
             os<<"axes('position',[omargin+2*imargin+psize+smallpsize omargin+2*imargin+psize+smallpsize psize psize])"<<endl;
             os<<"axis('off');"<<endl;
             os << "set(gca,'CLim',[" << lowerclim << " 0])" << endl;
-            os<<"h=colorbar('position',[0.9 0.05 0.025 0.85]);"<<endl;
+            os<<"h=colorbar('position',[0.9 0.05 0.025 0.8]);"<<endl;
             //os << "h=colorbar;" << endl;
             os << "ytick=get(h,'ytick');"<<endl;
             os << "labels = {};"<<endl;

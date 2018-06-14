@@ -5,7 +5,7 @@ LDFLAGS =
 
 
 EXEOBJF = \
- #Example_CDD1.o
+ Example_CDD1.o
 
 
 EXES = $(EXEOBJF:.o=)

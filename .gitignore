@@ -3,11 +3,16 @@
 *.[oa]
 *~
 *.zip
+*.tex
+*.log
+*.aux
 *.gz
 *.dat
 *.txt
 *.jpg
 *.out
+*.pdf
+*.png
 callgrind.*
 nbproject
 WaveletTL/tests/test_cube_equation
@@ -177,3 +182,5 @@ WaveletTL/tests/test_sturm_nonadaptive
 FrameTL/tests/test_p_poisson_frame
 WaveletTL/tests/test_p_poisson_cube
 WaveletTL/tests/test_slitdomain_frame
+WaveletTL/tests/test_recring_frame
+WaveletTL/tests/test_image_outputs

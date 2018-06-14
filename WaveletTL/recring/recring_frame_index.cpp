@@ -1,13 +1,13 @@
 
-#include "slitdomain_frame_index.h"
-#include "slitdomain_frame.h"
+#include "recring_frame_index.h"
+#include "recring_frame.h"
 
-// implementation for slitdomain_frame_index.h
+// implementation for recring_frame_index.h
 
 namespace WaveletTL
 {
   template <class IFRAME>
-  SlitDomainFrameIndex<IFRAME>::SlitDomainFrameIndex(const SlitDomainFrame<IFRAME>* frame)
+  RecRingFrameIndex<IFRAME>::RecRingFrameIndex(const RecRingFrame<IFRAME>* frame)
     : frame_(frame), patch_(0)
   {
     if (frame_ == 0) {
@@ -27,25 +27,25 @@ namespace WaveletTL
   }
 
   template <class IFRAME>
-  SlitDomainFrameIndex<IFRAME>::SlitDomainFrameIndex(const polynomial_type& p,
+  RecRingFrameIndex<IFRAME>::RecRingFrameIndex(const polynomial_type& p,
                                      const level_type& j,
 				     const type_type& e,
 				     const int patch,
 				     const translation_type& k,
                                      const unsigned int number,
-				     const SlitDomainFrame<IFRAME>* frame)
+				     const RecRingFrame<IFRAME>* frame)
     : frame_(frame), p_(p),j_(j), e_(e), patch_(patch), k_(k), num_(number)
   {
   }
 
   template <class IFRAME>
-  SlitDomainFrameIndex<IFRAME>::SlitDomainFrameIndex(const SlitDomainFrameIndex& lambda)
+  RecRingFrameIndex<IFRAME>::RecRingFrameIndex(const RecRingFrameIndex& lambda)
     : frame_(lambda.frame_), p_(lambda.p_), j_(lambda.j_), e_(lambda.e_), patch_(lambda.patch_), k_(lambda.k_), num_(lambda.num_)
   {
   }
 
   template <class IFRAME>
-  SlitDomainFrameIndex<IFRAME>::SlitDomainFrameIndex(const SlitDomainFrameIndex* lambda)
+  RecRingFrameIndex<IFRAME>::RecRingFrameIndex(const RecRingFrameIndex* lambda)
     : frame_(lambda->frame_), p_(lambda->p_), j_(lambda->j_), e_(lambda->e_), patch_(lambda->patch_), k_(lambda->k_), num_(lambda->num_)
   {
   }
@@ -53,7 +53,7 @@ namespace WaveletTL
 
   template <class IFRAME>
   bool
-  SlitDomainFrameIndex<IFRAME>::operator == (const SlitDomainFrameIndex& lambda) const
+  RecRingFrameIndex<IFRAME>::operator == (const RecRingFrameIndex& lambda) const
   {
     return (p_ == lambda.p() &&
             j_ == lambda.j() &&
@@ -63,8 +63,8 @@ namespace WaveletTL
   }
 
   template <class IFRAME>
-  SlitDomainFrameIndex<IFRAME>&
-  SlitDomainFrameIndex<IFRAME>::operator ++ ()
+  RecRingFrameIndex<IFRAME>&
+  RecRingFrameIndex<IFRAME>::operator ++ ()
   {
 //      cout << "DeltaLmin=" << frame_->frame1d()->).DeltaLmin() <<endl;
 //      cout << "DeltaRmax=" << frame_->frame1d()->).DeltaRmax(3) <<endl;
@@ -82,49 +82,83 @@ namespace WaveletTL
 	case 1:
         case 2:
 	case 3:
+        case 4:
+	case 5:
+        case 6:
+	case 7:    
 	  last_index = frame_->frame1d()->DeltaRmax(j_[i])-1;
 	  break;
-	case 4:
+	case 8:
+        case 13:
+	  last_index = (i == 0
+			? frame_->frame1d()->DeltaRmax(j_[i])-1
+			: frame_->frame1d()->DeltaRmax(j_[i])); // by convention
+	  break;
+        case 9:
+        case 12:
 	  last_index = (i == 0
 			? frame_->frame1d()->DeltaRmax(j_[i])-1
 			: frame_->frame1d()->DeltaLmin()); // by convention
 	  break;
-	case 5:
+        case 10:
+        case 15:
 	  last_index = (i == 0
-			? frame_->frame1d()->DeltaLmin() // by convention
-			: frame_->frame1d()->DeltaRmax(j_[i])-1);
+			? frame_->frame1d()->DeltaLmin()
+			: frame_->frame1d()->DeltaRmax(j_[i])-1); // by convention
 	  break;
-        case 6:
-          last_index = (i == 0
-			? frame_->frame1d()->DeltaRmax(j_[i])-1
-			: frame_->frame1d()->DeltaLmin()); // by convention 
-          break;
+        case 11:
+        case 14:
+	  last_index = (i == 0
+			? frame_->frame1d()->DeltaRmax(j_[i])
+			: frame_->frame1d()->DeltaRmax(j_[i])-1); // by convention
+	  break;
 	}
       } else {
 	
           switch(patch_) {//If we want k more quarklets to be mirrored, we have to set last_index-=k for i==0, and last_index=k for i!=0,
                           //also you need to change the first indices in the following routines
             case 0:
-            case 1:
             case 2:
-            case 3:
+            case 4:
+            case 6:               
               last_index = frame_->frame1d()->Nablamax(j_[i]);
               break;
-            case 4:
+            case 1:
+            case 5:
+               last_index = (i == 0
+                            ? frame_->frame1d()->Nablamax(j_[i])
+                            : frame_->frame1d()->Nablamax(j_[i])-1); // by convention 
+              break;
+            case 3:
+            case 7:
+               last_index = (i == 0
+                            ? frame_->frame1d()->Nablamax(j_[i])-1
+                            : frame_->frame1d()->Nablamax(j_[i])); // by convention 
+               break;
+            case 8:
+            case 13:
+              last_index = (i == 0
+                            ? frame_->frame1d()->Nablamax(j_[i])
+                            : frame_->frame1d()->Nablamax(j_[i])); // by convention
+              break;
+            case 9:
+            case 12:
               last_index = (i == 0
                             ? frame_->frame1d()->Nablamax(j_[i])
                             : frame_->frame1d()->Nablamin()); // by convention
               break;
-            case 5:
+            case 10:
+            case 15:
               last_index = (i == 0
                             ? frame_->frame1d()->Nablamin() // by convention
                             : frame_->frame1d()->Nablamax(j_[i]));
               break;
-            case 6:
+            case 11:
+            case 14:
               last_index = (i == 0
-                            ? frame_->frame1d()->Nablamax(j_[i])
-                            : frame_->frame1d()->Nablamin()); // by convention
-              break;  
+                            ? frame_->frame1d()->Nablamax(j_[i]) // by convention
+                            : frame_->frame1d()->Nablamax(j_[i]));
+                break;
             }
           
         
@@ -138,70 +172,88 @@ namespace WaveletTL
 	  switch(patch_) {
 	  case 0:
 	  case 1:
+          case 2:
+	  case 3:
+          case 4:
+	  case 5:
+          case 6:
+	  case 7:              
             k_[i] = frame_->frame1d()->DeltaLmin()+1;
 //            cout << "Hier1" << endl;
-	  case 2:
-	    k_[i] = frame_->frame1d()->DeltaLmin()+1;
-//            cout << "Hier2" << endl;
-	    break;
-          case 3:
-	    k_[i] = frame_->frame1d()->DeltaLmin()+1;
-//            cout << "Hier2" << endl;
-	    break;  
-	  case 4:
+            break;
+	  case 8:
+          case 13:
 //            cout << "Hier3" << endl;  
 	    k_[i] = (i == 0
 		     ? frame_->frame1d()->DeltaLmin()+1
-		     : frame_->frame1d()->DeltaLmin()); // by convention
+		     : frame_->frame1d()->DeltaRmax(j_[i])); // by convention
 	    break;
-	  case 5:
+	  case 9:
+          case 12:
 //            cout << "Hier4" << endl;  
 	    k_[i] = (i == 0
-		     ? frame_->frame1d()->DeltaLmin() // by convention
-		     : frame_->frame1d()->DeltaLmin()+1);
+		     ? frame_->frame1d()->DeltaLmin()+1 // by convention
+		     : frame_->frame1d()->DeltaLmin());
 	    break;
-          case 6:
+          case 10:
+          case 15:
 //            cout << "Hier3" << endl;  
 	    k_[i] = (i == 0
-		     ? frame_->frame1d()->DeltaLmin()+1
-		     : frame_->frame1d()->DeltaLmin()); // by convention
-	    break;  
+		     ? frame_->frame1d()->DeltaLmin()
+		     : frame_->frame1d()->DeltaLmin()+1); // by convention
+	    break;
+          case 11:
+          case 14:
+//            cout << "Hier3" << endl;  
+	    k_[i] = (i == 0
+		     ? frame_->frame1d()->DeltaRmax(j_[i])
+		     : frame_->frame1d()->DeltaLmin()+1); // by convention
+	    break;
 	  }
 	} else { // quarklet, minimal translation index is independent from the patch number
             switch(patch_) {
             case 0:
-              k_[i] = (i == 0
-                       ? frame_->frame1d()->Nablamin()
-                       : frame_->frame1d()->Nablamin()+1);//here
-              break;
-            case 1:
+            case 2:
+            case 4:
+            case 6:    
               k_[i] = frame_->frame1d()->Nablamin(); 
               break;
-            case 2:
-              k_[i] = (i == 0
-                       ? frame_->frame1d()->Nablamin()+1//here, and some more. :)
-                       : frame_->frame1d()->Nablamin());
-              break;
-            case 3:
+            case 1:
+            case 5:
               k_[i] = (i == 0
                        ? frame_->frame1d()->Nablamin()
                        : frame_->frame1d()->Nablamin()+1);//here
-              break;  
-            case 4:
+              break;
+            case 3:
+            case 7:
               k_[i] = (i == 0
                        ? frame_->frame1d()->Nablamin()+1
-                       : frame_->frame1d()->Nablamin()); // by convention
+                       : frame_->frame1d()->Nablamin());//here
               break;
-            case 5:
+            case 8:
+            case 13:   
               k_[i] = (i == 0
-                       ? frame_->frame1d()->Nablamin() // by convention
+                       ? frame_->frame1d()->Nablamin()+1//here, and some more. :)
+                       : frame_->frame1d()->Nablamax(j_[i]));
+              break;
+            case 9:
+            case 12:
+              k_[i] = (i == 0
+                       ? frame_->frame1d()->Nablamin()+1
+                       : frame_->frame1d()->Nablamin());//here
+              break;  
+            case 10:
+            case 15:
+              k_[i] = (i == 0
+                       ? frame_->frame1d()->Nablamin()
+                       : frame_->frame1d()->Nablamin()+1); // by convention
+              break;
+            case 11:
+            case 14:
+              k_[i] = (i == 0
+                       ? frame_->frame1d()->Nablamax(j_[i]) // by convention
                        : frame_->frame1d()->Nablamin()+1);
-              break;
-            case 6:
-              k_[i] = (i == 0
-                       ? frame_->frame1d()->Nablamin()+1
-                       : frame_->frame1d()->Nablamin()); // by convention
-              break;  
+              break;            
             }
 //	  k_[i] = frame_->frame1d()->Nablamin(); // should be 0
 	}
@@ -217,38 +269,31 @@ namespace WaveletTL
       switch (patch_) {
       case 0:
       case 1:
-	patch_++;
-	break;
       case 2:
-	patch_++;
-	break;  
       case 3:
-	/*if (e_[1] == 1) {
-	  if (e_[0] == 0)
-	    patch_ = 4; // there are no (0,1) quarklets on the interface 3
-	  else
-	    eplusplus = true; // there are no (1,1) quarklets on the interfaces
-	} else*/ patch_ = 4;
-//            cout << "Hier patch" << endl;
-            
-	break;
       case 4:
-	/*if (e_[0] == 1)
-	  eplusplus = true; // there are no (1,*) quarklets on the interface 4
-	else*/
-	  patch_ = 5;
-	break;
       case 5:
-          patch_ = 6;
-        break;
       case 6:
+      case 7:
+      case 8:
+      case 9:
+      case 10:
+      case 11:
+      case 12:
+      case 13:
+      case 14:        
+	patch_++;
+	break;
+      case 15:
 	eplusplus = true; // highest patch number reached
 	break;
       }
 
       if (!eplusplus) { // then choose lowest translation index k=k(j,e,p)
 	switch(patch_) { // we know that patch_>0
-	case 1:
+	case 2:
+        case 4:
+        case 6:    
           k_[0] = (e_[0] == 0
 		   ? frame_->frame1d()->DeltaLmin()+1
 		   : frame_->frame1d()->Nablamin());
@@ -258,50 +303,64 @@ namespace WaveletTL
 //        cout << "2.: " << k_[0] << k_[1] << endl; 
 //        cout << "Probe: " << frame_->frame1d()->DeltaLmin()+1 << endl; 
 	  break;  
-	case 2:
+	case 1:
+        case 5:    
 	  k_[0] = (e_[0] == 0
 		   ? frame_->frame1d()->DeltaLmin()+1
-		   : frame_->frame1d()->Nablamin()+1);
+		   : frame_->frame1d()->Nablamin());
 	  k_[1] = (e_[1] == 0
 		   ? frame_->frame1d()->DeltaLmin()+1
-		   : frame_->frame1d()->Nablamin());
+		   : frame_->frame1d()->Nablamin()+1);
 //        cout << "2.: " << k_[0] << k_[1] << endl; 
 //        cout << "Probe: " << frame_->frame1d()->DeltaLmin()+1 << endl; 
 	  break;
         case 3:
+        case 7:   
 	  k_[0] = (e_[0] == 0
 		   ? frame_->frame1d()->DeltaLmin()+1
-		   : frame_->frame1d()->Nablamin());
+		   : frame_->frame1d()->Nablamin()+1);
 	  k_[1] = (e_[1] == 0
 		   ? frame_->frame1d()->DeltaLmin()+1
-		   : frame_->frame1d()->Nablamin()+1);
+		   : frame_->frame1d()->Nablamin());
 //        cout << "2.: " << k_[0] << k_[1] << endl; 
 //        cout << "Probe: " << frame_->frame1d()->DeltaLmin()+1 << endl; 
 	  break;  
-	case 4:
+	case 8:
+        case 13:    
 	  k_[0] = (e_[0] == 0
 		   ? frame_->frame1d()->DeltaLmin()+1
 		   : frame_->frame1d()->Nablamin());
 	  k_[1] = (e_[1] == 0
-		   ? frame_->frame1d()->DeltaLmin()
-		   : frame_->frame1d()->Nablamin()); // by convention;
+		   ? frame_->frame1d()->DeltaRmax(j_[1])
+		   : frame_->frame1d()->Nablamax(j_[1])); // by convention;
 	  break;
-	case 5:
+	case 9:
+        case 12:   
 	  k_[0] = (e_[0] == 0
-		   ? frame_->frame1d()->DeltaLmin()
+		   ? frame_->frame1d()->DeltaLmin()+1
 		   : frame_->frame1d()->Nablamin()); // by convention
 	  k_[1] = (e_[1] == 0
-		   ? frame_->frame1d()->DeltaLmin()+1
+		   ? frame_->frame1d()->DeltaLmin()
 		   : frame_->frame1d()->Nablamin());
           break;
-        case 6:
+        case 10:
+        case 15:    
 	  k_[0] = (e_[0] == 0
-		   ? frame_->frame1d()->DeltaLmin()+1
+		   ? frame_->frame1d()->DeltaLmin()
 		   : frame_->frame1d()->Nablamin());
 	  k_[1] = (e_[1] == 0
-		   ? frame_->frame1d()->DeltaLmin()
+		   ? frame_->frame1d()->DeltaLmin()+1
 		   : frame_->frame1d()->Nablamin()); // by convention;
-	  break;  
+	  break;
+         case 11:
+         case 14:    
+	  k_[0] = (e_[0] == 0
+		   ? frame_->frame1d()->DeltaRmax(j_[0])
+		   : frame_->frame1d()->Nablamax(j_[0]));
+	  k_[1] = (e_[1] == 0
+		   ? frame_->frame1d()->DeltaLmin()+1
+		   : frame_->frame1d()->Nablamin()); // by convention;
+	  break; 
 	}
       }
     } else return *this;
@@ -339,7 +398,7 @@ namespace WaveletTL
 		 : frame_->frame1d()->Nablamin());
 	k_[1] = (e_[1] == 0
 		 ? frame_->frame1d()->DeltaLmin()+1
-		 : frame_->frame1d()->Nablamin()+1);
+		 : frame_->frame1d()->Nablamin());
       }
 
     } else return *this;
@@ -407,7 +466,7 @@ namespace WaveletTL
                             int temp = j_[1]-j0[1];
                             j_[1]=j0[1]+temp-1;
                             e_[1]= (temp == 1?0:1);
-                            k_[1]= (temp == 1?frame_->frame1d()->DeltaLmin()+1:frame_->frame1d()->Nablamin()+1);
+                            k_[1]= (temp == 1?frame_->frame1d()->DeltaLmin()+1:frame_->frame1d()->Nablamin());
                             break;
                         }
                     }
@@ -417,7 +476,7 @@ namespace WaveletTL
                     {
                         j_[1]=j0[1]+j_[0]-j0[0]+1;
                         e_[1]=1;
-                        k_[1]=frame_->frame1d()->Nablamin()+1;
+                        k_[1]=frame_->frame1d()->Nablamin();
                         j_[0]=j0[0];
                         e_[0]=0;
                         k_[0]=frame_->frame1d()->DeltaLmin()+1;
@@ -449,7 +508,7 @@ namespace WaveletTL
 
   template <class IFRAME>
   bool
-  SlitDomainFrameIndex<IFRAME>::operator < (const SlitDomainFrameIndex& lambda) const
+  RecRingFrameIndex<IFRAME>::operator < (const RecRingFrameIndex& lambda) const
   {
     // standard lexicographic order on (j,e,p,k),
     // we assume that e and k are already lexicographically ordered (cf. MultiIndex)
@@ -483,7 +542,7 @@ namespace WaveletTL
 
 //  template <class IFRAME>
 //  const int
-//  SlitDomainFrameIndex<IFRAME>::number() const
+//  RecRingFrameIndex<IFRAME>::number() const
 //  {
 //    const int ecode(e()[0]+2*e()[1]);
 //    
@@ -632,46 +691,45 @@ namespace WaveletTL
 //  }
   
   template <class IFRAME>
-  SlitDomainFrameIndex<IFRAME>
-  first_generator(const SlitDomainFrame<IFRAME>* frame, const typename SlitDomainFrameIndex<IFRAME>::level_type& j, const typename SlitDomainFrameIndex<IFRAME>::polynomial_type& p)
+  RecRingFrameIndex<IFRAME>
+  first_generator(const RecRingFrame<IFRAME>* frame, const typename RecRingFrameIndex<IFRAME>::level_type& j, const typename RecRingFrameIndex<IFRAME>::polynomial_type& p)
   {
     assert(j >= frame->j0());
 
-    typename SlitDomainFrameIndex<IFRAME>::type_type e;
+    typename RecRingFrameIndex<IFRAME>::type_type e;
 
     // setup lowest translation index for e=(0,0), p=0
-    typename SlitDomainFrameIndex<IFRAME>::translation_type k(frame->frame1d()->DeltaLmin()+1,
+    typename RecRingFrameIndex<IFRAME>::translation_type k(frame->frame1d()->DeltaLmin()+1,
 						      frame->frame1d()->DeltaLmin()+1);
     
-        return SlitDomainFrameIndex<IFRAME>(p,j, e, 0, k, p.number()* frame->get_Nablasize(), frame);
+        return RecRingFrameIndex<IFRAME>(p,j, e, 0, k, p.number()* frame->get_Nablasize(), frame);
     
-//        return SlitDomainFrameIndex<IFRAME>(p,j, e, 0, k, number, frame);
+//        return RecRingFrameIndex<IFRAME>(p,j, e, 0, k, number, frame);
   }
 
   template <class IFRAME>
-  SlitDomainFrameIndex<IFRAME>
-  last_generator(const SlitDomainFrame<IFRAME>* frame, const typename SlitDomainFrameIndex<IFRAME>::level_type& j,const typename SlitDomainFrameIndex<IFRAME>::polynomial_type& p )
+  RecRingFrameIndex<IFRAME>
+  last_generator(const RecRingFrame<IFRAME>* frame, const typename RecRingFrameIndex<IFRAME>::level_type& j,const typename RecRingFrameIndex<IFRAME>::polynomial_type& p )
   {
     assert(j >= frame->j0() && j[0]==j[1]);
 
-    typename SlitDomainFrameIndex<IFRAME>::type_type e;
+    typename RecRingFrameIndex<IFRAME>::type_type e;
 
     // setup highest translation index for e=(0,0), p=4
-    // DAS IST FALSCH @PHK
-    typename SlitDomainFrameIndex<IFRAME>::translation_type k(frame->frame1d()->DeltaLmin(), frame->frame1d()->DeltaRmax(j[1])-1);
+    typename RecRingFrameIndex<IFRAME>::translation_type k(frame->frame1d()->DeltaLmin(), frame->frame1d()->DeltaRmax(j[1])-1);
     
-    return SlitDomainFrameIndex<IFRAME>(p,j, e, 6, k, p.number()* frame->get_Nablasize()+frame->Deltasize(j[0])-1, frame);
+    return RecRingFrameIndex<IFRAME>(p,j, e, 15, k, p.number()* frame->get_Nablasize()+frame->Deltasize(j[0])-1, frame);
   }
 
   template <class IFRAME>
-  SlitDomainFrameIndex<IFRAME>
-  first_quarklet(const SlitDomainFrame<IFRAME>* frame, const typename SlitDomainFrameIndex<IFRAME>::level_type& j, const typename SlitDomainFrameIndex<IFRAME>::polynomial_type& p)
+  RecRingFrameIndex<IFRAME>
+  first_quarklet(const RecRingFrame<IFRAME>* frame, const typename RecRingFrameIndex<IFRAME>::level_type& j, const typename RecRingFrameIndex<IFRAME>::polynomial_type& p)
   {
     assert(j >= frame->j0());
 
-    typename SlitDomainFrameIndex<IFRAME>::type_type e;
-    typename SlitDomainFrameIndex<IFRAME>::translation_type k;
-    typename SlitDomainFrameIndex<IFRAME>::level_type jdiff;
+    typename RecRingFrameIndex<IFRAME>::type_type e;
+    typename RecRingFrameIndex<IFRAME>::translation_type k;
+    typename RecRingFrameIndex<IFRAME>::level_type jdiff;
     /*(frame->frame1d()->DeltaLmin()+1,
 						      frame->frame1d()->Nablamin()+1);*/
     
@@ -691,7 +749,7 @@ namespace WaveletTL
     if ( (sofar_only_generators == true) || (j[1] != frame->j0()[1]) )
     {
         e[1] = 1;
-        k[1] = frame->frame1d()->Nablamin()+1;
+        k[1] = frame->frame1d()->Nablamin();
         //sofar_only_generators = false;
     } else
     {
@@ -705,22 +763,22 @@ namespace WaveletTL
     
     
     
-    return SlitDomainFrameIndex<IFRAME>(p, j, e, 0, k, number, frame);
+    return RecRingFrameIndex<IFRAME>(p, j, e, 0, k, number, frame);
   }
 
 //  template <class IFRAME>
-//  SlitDomainFrameIndex<IFRAME>
-//  first_quarklet(const SlitDomainFrame<IFRAME>* frame,
-//		const typename SlitDomainFrameIndex<IFRAME>::level_type& j,
-//		const typename SlitDomainFrameIndex<IFRAME>::type_type& e,
-//                const typename SlitDomainFrameIndex<IFRAME>::polynomial_type& p)
+//  RecRingFrameIndex<IFRAME>
+//  first_quarklet(const RecRingFrame<IFRAME>* frame,
+//		const typename RecRingFrameIndex<IFRAME>::level_type& j,
+//		const typename RecRingFrameIndex<IFRAME>::type_type& e,
+//                const typename RecRingFrameIndex<IFRAME>::polynomial_type& p)
 //  {
 //    assert(j >= frame->j0());
 //
-////    typename SlitDomainFrameIndex<IFRAME>::type_type e(ewish);
+////    typename RecRingFrameIndex<IFRAME>::type_type e(ewish);
 //    
 //    // setup lowest translation index appropriately
-//    typename SlitDomainFrameIndex<IFRAME>::translation_type k;
+//    typename RecRingFrameIndex<IFRAME>::translation_type k;
 //    const int ecode(e[0]+2*e[1]);
 //    if (ecode == 0) {
 //      // e = (0,0)
@@ -742,27 +800,26 @@ namespace WaveletTL
 //      }
 //    }
 //    
-//    return SlitDomainFrameIndex<IFRAME>(p, j, e, 0, k, frame);
+//    return RecRingFrameIndex<IFRAME>(p, j, e, 0, k, frame);
 //  }
   
   template <class IFRAME>
-  SlitDomainFrameIndex<IFRAME>
-  last_quarklet(const SlitDomainFrame<IFRAME>* frame, const typename SlitDomainFrameIndex<IFRAME>::level_type& j, const typename SlitDomainFrameIndex<IFRAME>::polynomial_type& p)
+  RecRingFrameIndex<IFRAME>
+  last_quarklet(const RecRingFrame<IFRAME>* frame, const typename RecRingFrameIndex<IFRAME>::level_type& j, const typename RecRingFrameIndex<IFRAME>::polynomial_type& p)
   {
     assert(j >= frame->j0());
     
-    typename SlitDomainFrameIndex<IFRAME>::type_type e(1, 1);
-    typename SlitDomainFrameIndex<IFRAME>::level_type jdiff;
+    typename RecRingFrameIndex<IFRAME>::type_type e(1, 1);
+    typename RecRingFrameIndex<IFRAME>::level_type jdiff;
     
     // setup highest translation index for e=(1,1), p=2
-    // DAS IST FALSCH @PHK
-    typename SlitDomainFrameIndex<IFRAME>::translation_type k(0,
+    typename RecRingFrameIndex<IFRAME>::translation_type k(0,
 						      frame->frame1d()->Nablamax(j[1]));
     
     jdiff[0]= j[0]-frame->j0()[0], jdiff[1]= j[1]-frame->j0()[1];
     int level = jdiff.number();
     int number = p.number()* frame->get_Nablasize()+frame->get_last_wavelet_numbers()[level];
     
-    return SlitDomainFrameIndex<IFRAME>(p, j, e, 6, k, number, frame);
+    return RecRingFrameIndex<IFRAME>(p, j, e, 15, k, number, frame);
   }
 }

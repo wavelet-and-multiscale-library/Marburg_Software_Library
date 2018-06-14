@@ -12,8 +12,8 @@
 #undef ENERGY
 #undef DYPLUSEN
 
-#define NONADAPTIVE
-#undef ADAPTIVE
+#undef NONADAPTIVE
+#define ADAPTIVE
 
 #ifdef ADAPTIVE
 #undef SD
@@ -27,8 +27,8 @@
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
-#define JMAX 6
-#define PMAX 0
+#define JMAX 7
+#define PMAX 1
 #define TWO_D
 
 #define PRIMALORDER 3
@@ -41,13 +41,13 @@
 #include <numerics/corner_singularity.h>
 #include <interval/p_basis.h>
 #include <interval/pq_frame.h>
-#include <slitdomain/slitdomain_frame_index.h>
-#include <slitdomain/slitdomain_frame.h>
-#include <slitdomain/slitdomain_frame_evaluate.h>
-#include <slitdomain/slitdomain_frame_support.h>
-#include <slitdomain/slitdomain_frame_indexplot.h>
-#include <galerkin/slitdomain_frame_equation.h>
-#include <galerkin/cached_quarklet_slitdomain_problem.h>
+#include <recring/recring_frame_index.h>
+#include <recring/recring_frame.h>
+#include <recring/recring_frame_evaluate.h>
+#include <recring/recring_frame_support.h>
+#include <recring/recring_frame_indexplot.h>
+#include <galerkin/recring_frame_equation.h>
+#include <galerkin/cached_quarklet_recring_problem.h>
 
 #include <adaptive/compression.h>
 #include <adaptive/apply.h>
@@ -68,8 +68,11 @@ class myRHS
 public:
   virtual ~myRHS() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
-    CornerSingularityRHS csrhs(Point<2>(0,0), 0.5, 2.0);
-    return 2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1])+5*csrhs.value(p);
+    CornerSingularityRHS csrhsleftbottom(Point<2>(0,0), 0.5, 1.5), csrhsrightbottom(Point<2>(1,0), 1, 1.5),
+                         csrhsrighttop(Point<2>(1,1), 1.5, 1.5), csrhslefttop(Point<2>(0,1), 0, 1.5);
+    
+    return 2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1])+5*csrhsleftbottom.value(p)
+            +5*csrhsrightbottom.value(p)+5*csrhsrighttop.value(p)+5*csrhslefttop.value(p);
   }
   void vector_value(const Point<2>& p, Vector<double>& values) const {
     values[0] = value(p);
@@ -82,8 +85,11 @@ class mySolution
 public:
   virtual ~mySolution() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
-    CornerSingularity cs(Point<2>(0,0), 0.5, 2.0);
-    return sin(M_PI*p[0])*sin(M_PI*p[1])+5*cs.value(p);
+    CornerSingularity csleftbottom(Point<2>(0,0), 0.5, 1.5), csrightbottom(Point<2>(1,0), 1, 1.5),
+                         csrighttop(Point<2>(1,1), 1.5, 1.5), cslefttop(Point<2>(0,1), 0, 1.5);
+    
+    return sin(M_PI*p[0])*sin(M_PI*p[1])+5*csleftbottom.value(p)
+            +5*csrightbottom.value(p)+5*csrighttop.value(p)+5*cslefttop.value(p);
   }
   void vector_value(const Point<2>& p, Vector<double>& values) const {
     values[0] = value(p);
@@ -103,21 +109,20 @@ public:
 };
 
 int main(){
-    cout << "testing slitdomain quarklet frame" << endl;
+    cout << "testing recring quarklet frame" << endl;
     
     const int d  = PRIMALORDER;
     const int dT = DUALORDER;
     const int dim = _DIM;
     const int jmax=JMAX;
     const int pmax=PMAX;
+#if 1
     
     //definitions
     typedef PQFrame<d,dT> Frame1d;
-    typedef SlitDomainFrame<Frame1d> Frame;
+    typedef RecRingFrame<Frame1d> Frame;
     typedef Frame::Index Index;
-
 //    typedef Frame::Support Support;
-
     
     //instances of 1d frames with different boundary conditions
     Frame1d frame1d(false,false);
@@ -133,33 +138,42 @@ int main(){
     Frame frame(&frame1d, &frame1d_11, &frame1d_01, &frame1d_10);
     //set jpmax
     frame.set_jpmax(jmax,pmax);
-    
+#endif
+ 
     //set test problem
     mySolution uexact1;
     myRHS rhs1;
     PoissonBVP<dim> poisson1(&rhs1);
 #ifdef POISSON
-    SlitDomainFrameEquation<Frame1d,Frame> eq(&poisson1, &frame, true);
+    RecRingFrameEquation<Frame1d,Frame> eq(&poisson1, &frame, true);
 #endif
 #ifdef GRAMIAN
-    LDomainFrameGramian<Frame1d,Frame> eq(&gramian1, &frame, true);
+    RecRingFrameGramian<Frame1d,Frame> eq(&gramian1, &frame, true);
 #endif
-    
+   
 #if 1 //plot rhs and exact solution
     Array1D<Point<dim,int> > corners;
-    corners.resize(4);
+    corners.resize(8);
     corners[0][0]=-1;
-    corners[0][1]=0;
+    corners[0][1]=1;
     corners[1][0]=-1;
-    corners[1][1]=-1;
-    corners[2][0]=0;
+    corners[1][1]=0;
+    corners[2][0]=-1;
     corners[2][1]=-1;
     corners[3][0]=0;
-    corners[3][0]=0;
+    corners[3][1]=-1;
+    corners[4][0]=1;
+    corners[4][1]=-1;
+    corners[5][0]=1;
+    corners[5][1]=0;
+    corners[6][0]=1;
+    corners[6][1]=1;
+    corners[7][0]=0;
+    corners[7][1]=1;
 
     std::ofstream osrhs("rhs.m");
     std::ofstream osuexact("uexact.m");
-    for(int i=0;i<4;i++){
+    for(int i=0;i<8;i++){
         Point<2> q0(corners[i][0],corners[i][1]);
         Point<2> q1(corners[i][0]+1,corners[i][1]+1);
         Grid<2> mygrid(q0,q1,100);
@@ -167,8 +181,8 @@ int main(){
         SampledMapping<2> smuexact(mygrid, uexact1);
         smrhs.matlab_output(osrhs);
         smuexact.matlab_output(osuexact);
-        osrhs << "surf(x,y,z)"<<endl;
-        osuexact<<"surf(x,y,z)"<<endl;
+        osrhs << "surf(x,y,z,'LineStyle','none')"<<endl;
+        osuexact<<"surf(x,y,z,'LineStyle','none')"<<endl;
         osrhs << "hold on;" << endl;
         osuexact<<"hold on;"<<endl;
     }
@@ -180,23 +194,24 @@ int main(){
     osuexact.close();
     cout << "rhs and uexact plotted" << endl;
 #endif  
-    
+#if 1       
 #ifdef NONADAPTIVE
     //setup Index set   
     set<Index> Lambda;
     for (int i=0; i<frame.degrees_of_freedom();i++) {
         Index lambda = *(frame.get_quarklet(i));
-        if(multi_degree(lambda.e())<3 && lambda.patch()!=-1){ 
+        if(multi_degree(lambda.e())==0 && lambda.patch()!=-1){ 
             Lambda.insert(*(frame.get_quarklet(i)));
+            cout << *(frame.get_quarklet(i)) << endl;
         }    
-//    cout << *(frame.get_quarklet(i)) << endl;
+    
     }
     
     //setup stiffness matrix and rhs
     SparseMatrix<double> A;
-    setup_stiffness_matrix(eq,Lambda,A);
     Vector<double> F;
     setup_righthand_side(eq, Lambda, F); 
+    setup_stiffness_matrix(eq,Lambda,A);    
     A.compress(1e-14);
     F.compress(1e-14);
     A.matlab_output("A","A",0,A.row_dimension()-1,A.column_dimension()-1 );
@@ -224,20 +239,27 @@ int main(){
     cout << "Number of nontrivial entries: " << nontrivial << endl;
     
     InfiniteVector<double,Index> u;
-    unsigned int i2 = 0;
+    unsigned int i2 = 0; 
+
     for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i2){
-        if(x[i2]!=0)
+        if(x[i2]!=0 /*&& (*it).patch()==14 || (*it).patch()==4|| (*it).patch()==5|| (*it).patch()==11|| (*it).patch()==12|| (*it).patch()==8)*/)
         u.set_coefficient(*it, x[i2]);
     }
+//    unsigned int nontrivial = 0;
+//    for (set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, ++i2){
+//        if((*it).number()==565)
+//        u.set_coefficient(*it, 1);
+//    }
+    cout << u << endl;
     
     //plot solution
     //u.COARSE(1e-6,v);
     u.scale(&eq, -1);
-    Array1D<SampledMapping<dim> > eval(3);
+    Array1D<SampledMapping<dim> > eval(8);
     eval=eq.frame().evaluate(u,4);
     std::ofstream os2("solution_na.m");
     os2 << "figure;" << endl;
-    for(int i=0;i<4;i++){
+    for(int i=0;i<8;i++){
         eval[i].matlab_output(os2);        
         os2 << "surf(x,y,z);" << endl;
         os2 << "hold on;" << endl;
@@ -261,10 +283,11 @@ int main(){
             //cout <<lambda.p()[0]<<lambda.p()[1]<< lambda.j()[0]-1+lambda.e()[0]<<lambda.j()[1]-1+lambda.e()[1] << endl;
             jstart=lambda.j();
             estart=lambda.e();
-            plot_indices_slitdomain(&frame, u, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(jet)", false, true, -6);
+            plot_indices_recring(&frame, u, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(jet)", false, true, -6);
             //coeff_stream2 << "title('solution coefficients') " << endl;
             //coeff_stream2 << "title(sprintf('coefficients on level (%i,%i)',"<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"));"<<endl;
             coeff_stream<<"print('-djpg',sprintf('coeffs%i%i%i%i.jpg',"<<lambda.p()[0]<<","<<lambda.p()[1]<<","<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"))"<<endl;
+//            coeff_stream<<"matlab2tikz(sprintf('mynewcoeffs%i%i%i%i.tex',"<<lambda.p()[0]<<","<<lambda.p()[1]<<","<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"), 'standalone', true);"<<endl;
         }
     }
     coeff_stream.close();
@@ -281,7 +304,7 @@ int main(){
 //            //cout <<lambda.p()[0]<<lambda.p()[1]<< lambda.j()[0]-1+lambda.e()[0]<<lambda.j()[1]-1+lambda.e()[1] << endl;
 //            jstart=lambda.j();
 //            estart=lambda.e();
-//            plot_indices_slitdomain(&frame, u, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(jet)", false, true, -6);
+//            plot_indices_recring(&frame, u, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(jet)", false, true, -6);
 //            //coeff_stream2 << "title('solution coefficients') " << endl;
 //            //coeff_stream2 << "title(sprintf('coefficients on level (%i,%i)',"<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"));"<<endl;
 //            coeff_stream<<"print('-djpg',sprintf('coeffs%i%i%i%i.jpg',"<<lambda.p()[0]<<","<<lambda.p()[1]<<","<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"))"<<endl;
@@ -296,20 +319,25 @@ int main(){
     set<Index> Lambda;
     for (int i=0; i<frame.degrees_of_freedom();i++) {
         Index lambda = *(frame.get_quarklet(i));
-        if(multi_degree(lambda.e())<3 && lambda.patch()!=-1){ 
+        if(multi_degree(lambda.e())==0 && lambda.patch()!=-1){ 
             Lambda.insert(*(frame.get_quarklet(i)));
         }    
 //    cout << *(frame.get_quarklet(i)) << endl;
     }
     
     //setup problem
-    CachedQuarkletSlitDomainProblem<SlitDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq);
+    
+    
+    CachedQuarkletRecRingProblem<RecRingFrameEquation<Frame1d,Frame> > cproblem1(&eq);
+//    cout << "TEEEST: " << *(frame.get_quarklet(2703)) << ", " << cproblem1.f(*(frame.get_quarklet(2703))) << endl;
     cout<<"normA: "<<cproblem1.norm_A()<<endl;
     cout<<"normAinv: "<<cproblem1.norm_Ainv()<<endl;
     
     
+    
     InfiniteVector<double, Index> F_eta;
     cproblem1.RHS(1e-6, F_eta);
+//    cout << F_eta << endl;
     const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
     cout<<"nu: "<<nu<<endl;
     
@@ -319,7 +347,7 @@ int main(){
     const double a=2;
     const double b=2;
     double epsilon = 1e-3;
-    
+   
     CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, tensor_simple, pmax, a, b);
     
     for (typename InfiniteVector<double,int>::const_iterator it(u_epsilon_int.begin()),
@@ -336,16 +364,16 @@ int main(){
         x[i2]=u_epsilon.get_coefficient(*it);        
     }
     x.matlab_output("x","x");
-    Array1D<SampledMapping<dim> > eval(4);
+    Array1D<SampledMapping<dim> > eval(8);
     eval=cproblem1.frame().evaluate(u_epsilon,6);
     std::ofstream os2("solution_ad.m");
     os2 << "figure;"<< endl;
-    for(int i=0;i<4;i++){
+    for(int i=0;i<8;i++){
         eval[i].matlab_output(os2);
         os2 << "surf(x,y,z);" << endl;
         os2 << "hold on;" << endl;
     }  
-    os2 << "title('slitdomain Poisson Equation: adaptive solution to test problem ("
+    os2 << "title('recring Poisson Equation: adaptive solution to test problem ("
             << "CDD2" << "), " << "pmax= " << pmax << ", jmax= " << jmax << ", d= " << d << ", dT= " << dT << "');" << endl;
     os2 << "view(30,55);"<<endl;
     os2 << "hold off" << endl;
@@ -365,10 +393,11 @@ int main(){
             //cout <<lambda.p()[0]<<lambda.p()[1]<< lambda.j()[0]-1+lambda.e()[0]<<lambda.j()[1]-1+lambda.e()[1] << endl;
             jstart=lambda.j();
             estart=lambda.e();
-            plot_indices_slitdomain(&frame, u_epsilon, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(jet)", false, true, -6);
+            plot_indices_recring(&frame, u_epsilon, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(jet)", false, true, -6);
             //coeff_stream2 << "title('solution coefficients') " << endl;
             //coeff_stream2 << "title(sprintf('coefficients on level (%i,%i)',"<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"));"<<endl;
             coeff_stream<<"print('-djpg',sprintf('coeffs%i%i%i%i.jpg',"<<lambda.p()[0]<<","<<lambda.p()[1]<<","<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"))"<<endl;
+//            coeff_stream<<"matlab2tikz(sprintf('mycoeffs%i%i%i%i.tex',"<<lambda.p()[0]<<","<<lambda.p()[1]<<","<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"), 'standalone', true);"<<endl;
         }
     }
     coeff_stream.close();
@@ -464,7 +493,7 @@ int main(){
     os.close();
 #endif
     
-#if 0 //test methods of slitdomain_frame_equation
+#if 0 //test methods of recring_frame_equation
     Index testindex=frame.get_quarklet(1071); 
     cout << "testindex: "<<testindex<<endl;
     cout << "a(lambda_0,lambda_0) : "<<eq.a(testindex,testindex) << endl;
@@ -481,7 +510,7 @@ int main(){
     Index testindex=frame.get_quarklet(1063);   
     cout << "evaluate quarklet with index " << testindex << endl;
     evalf=frame.evaluate(testindex,6);
-    std::ofstream osf("slitdomainoutput.m");
+    std::ofstream osf("recringoutput.m");
     osf << "clf;" << endl;
     osf << "axis([-1 1 -1 1 0 1]);" << endl;
     for(int i=0;i<4;i++){
@@ -495,7 +524,6 @@ int main(){
     osf.close(); 
     
     //support test
-    typedef Frame::Support Support;
     Index testindex2(testindex); 
     cout<<"test support of index "<<testindex2<<endl;
     Support supp;
@@ -505,7 +533,7 @@ int main(){
     }
 #endif   
     
-  
+#endif  
     
     cout<<"fertig"<<endl;
     

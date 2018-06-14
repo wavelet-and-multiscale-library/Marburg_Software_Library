@@ -3,18 +3,26 @@
 
 #define PARALLEL 0
 
-#undef DYADIC
-#define ENERGY
+#define DYADIC
+#undef ENERGY
 #undef TRIVIAL
 
 #undef SD
 #define RICHARDSON
 #undef CONGRAD
 
+
+#define NEUMANN
+#undef DIRICHLET
+
+#ifdef NEUMANN
+#define NONZERONEUMANN
+#endif
+
 #undef SHRINKAGE
 
 
-#define JMAX 15
+#define JMAX 9
 #define PMAX 0
 #define ONE_D
 #define _DIM 1
@@ -81,12 +89,18 @@ using MathTL::CG;
   5: y(t) = t*t*(1-t) 
   6: "Hat function as gramian problem (for test purposes)";  
   7: "Another hat function with bigger support as gramian problem (for test purposes)";
-  8: "Quark function";*/
+  8: "Quark function";
+  9: y(t) = -sin(3*M_PI*t)+different Polynoms for x<=0.5 and x>0.5, (TURN ON DELTADIS
+    solvable with DIRICHLET and NEUMANN (for NEUMANN turn on NONZERONEUMANN)
+ 11 and 12: Functions for Neumann B.C. (TURN ON DELTADIS FOR 12)
+ */
 
 int main()
 {
   cout << "Testing wavelet-Galerkin solution of a Sturm b.v.p. ..." << endl;
 
+  
+  
     const unsigned int testcase=9;
     TestProblem<testcase> T;
     Function<1>* uexact = 0;
@@ -117,11 +131,17 @@ int main()
               break;
           case 9:
               //dummy. needs to be replacedwith the correct function. Not yet implemented
-              uexact = new scaledQuark();
+              uexact = new SolutionToDeltadis();
               break;  
           case 10:
               uexact = new SolutionToDeltadis();
-              break;      
+              break; 
+          case 11:
+              uexact = new Neumanntest();
+              break; 
+          case 12:
+              uexact = new Neumanntest2();
+              break;     
           default:
               break;
       }
@@ -142,6 +162,7 @@ int main()
   
   const int jmax = JMAX;
   const int pmax = PMAX;
+  double stepsize = 0.05;
 
   
   
@@ -155,7 +176,12 @@ int main()
   
 #ifdef FRAME
   typedef PQFrame<d,dT> Basis;
-  Basis basis(true, true, true);
+#ifdef NEUMANN
+  Basis basis(false,false, true);
+#endif
+#ifdef DIRICHLET
+  Basis basis(ture,true, true);
+#endif
   typedef Basis::Index Index;
   const char* basis_type = "Primbs quarklet frame";
   basis.set_jpmax(jmax,pmax);
@@ -561,7 +587,7 @@ A.apply(x, err);
 #endif
   InfiniteVector<double, Index> F_eta;
   ceq.RHS(1e-6, F_eta);
-  double epsilon = 1e-6;
+  double epsilon = 1e-20;
   InfiniteVector<double,Index> u_epsilon;
   InfiniteVector<double,int> u_epsilon_int;
   clock_t tic = clock();
@@ -585,11 +611,12 @@ A.apply(x, err);
   const double shrink = 0.01;
   richardson_QUARKLET_SOLVE(ceq,epsilon,u_epsilon_int,DKR, 1, 1, shrink);  
 #else
-  richardson_QUARKLET_SOLVE(ceq, epsilon, u_epsilon_int, maxiter, DKR, 1, 1);
+  richardson_QUARKLET_SOLVE(ceq, epsilon, u_epsilon_int, maxiter, DKR, 1, 1, 0, stepsize);
   //  CDD2_QUARKLET_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, DKR, pmax, 2, 2);
 #endif
 
 #endif
+//  cout << u_epsilon_int << endl;
 for (typename InfiniteVector<double,int>::const_iterator it(u_epsilon_int.begin()),
  	   itend(u_epsilon_int.end()); it != itend; ++it){
         u_epsilon.set_coefficient(*(basis.get_quarklet(it.index())), *it);

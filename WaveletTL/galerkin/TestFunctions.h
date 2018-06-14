@@ -89,6 +89,32 @@ public:
   }
 };  
 
+class Neumanntest : public Function<1> {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    return p[0]*p[0]*(p[0]-1)*(p[0]-1)-0.02685;
+  }
+
+
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
+class Neumanntest2 : public Function<1> {
+public:
+  inline double value(const Point<1>& p, const unsigned int component = 0) const {
+    return -cos(2*M_PI*p[0])+(p[0]<0.5 ? 2*p[0]*p[0] : 2*(1-p[0])*(1-p[0]))+0.0645;
+  }
+
+
+  void vector_value(const Point<1> &p, Vector<double>& values) const {
+    values.resize(1, false);
+    values[0] = value(p);
+  }
+};
+
 // f(x)=x
 class Function5 : public Function<1> {
 public:

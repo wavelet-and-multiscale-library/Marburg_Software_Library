@@ -876,8 +876,12 @@ namespace WaveletTL
   CachedProblemLocal<PROBLEM>::a(const Index& lambda,
 				 const Index& nu) const
   {
+#ifdef P_POISSON
     clock_t begin_a = clock();
+#endif
+#ifndef ONE_D
     typedef std::list<Index> IntersectingList;
+#endif
       
     const int p = lambda.p();
      
@@ -990,10 +994,10 @@ namespace WaveletTL
     {
     }
 
-
+#ifdef P_POISSON
     clock_t end_a = clock();
     double elapsed_secs = double(end_a - begin_a) / CLOCKS_PER_SEC;
-#ifdef P_POISSON
+
     time_consumption_of_a += elapsed_secs;
 #endif
 

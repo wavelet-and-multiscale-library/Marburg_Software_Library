@@ -14,6 +14,7 @@
 // implementation for convergence_logger.h
 
 #include <iostream>
+#include <stdexcept>
 
 namespace MathTL
 {

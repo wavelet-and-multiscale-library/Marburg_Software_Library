@@ -75,7 +75,7 @@ namespace WaveletTL
   void richardson_QUARKLET_SOLVE(const PROBLEM& P, const double epsilon,
 			InfiniteVector<double,int>& u_epsilon, 
                         const unsigned int maxiter = 5000, const CompressionStrategy strategy = DKR, const double a = 2, const double b = 2,
-                        const double shrink = 0, double omega = 0);
+                        const double shrink = 0, double omega = 0, double residual_stop = 0.01);
 
  
 }

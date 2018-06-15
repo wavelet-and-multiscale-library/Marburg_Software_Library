@@ -57,7 +57,7 @@ namespace WaveletTL
     : public TrivialPreconditioner<typename PROBLEM::Index>
 #endif
 #ifdef ENERGY
-    : public FullyDiagonalEnergyNormPreconditioner<typename PROBLEM::Index>
+    : public FullyDiagonalQuarkletEnergyNormPreconditioner<typename PROBLEM::Index>
 #endif
 #ifdef DYPLUSEN
     : public FullyDiagonalDyPlusEnNormPreconditioner<typename PROBLEM::Index>

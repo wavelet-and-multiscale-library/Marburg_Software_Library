@@ -108,8 +108,12 @@ namespace WaveletTL
   double
   FullyDiagonalQuarkletEnergyNormPreconditioner<INDEX>::diag(const INDEX& lambda) const
   {
-    return sqrt(a(lambda, lambda))*(lambda.p()+1);
-    //return ldexp(1.0, lambda.j()); //ATTENTION!!! HAS TO BE CHANGED BACK; ONLY FOR EXPERIMENTING
+      double polynomialpreconditioner(1);
+      for (int i=0; i<_DIM; i++){
+        polynomialpreconditioner*=pow(1+lambda.p()[i],2);        
+      }
+      return sqrt(a(lambda, lambda)) *polynomialpreconditioner;
+    
   };
 
   template <class INDEX>

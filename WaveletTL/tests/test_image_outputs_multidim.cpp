@@ -11,8 +11,8 @@
 #undef BASIS
 #define FRAME
 
-#define CUBE
-#undef LDOMAIN
+#undef CUBE
+#define LDOMAIN
 
 #ifdef FRAME
 #define _WAVELETTL_USE_TFRAME 1
@@ -96,7 +96,7 @@ int main()
 #endif  
     
     InfiniteVector<double,Index> u;
-    Index lambda=frame.get_quarklet(3997);
+    Index lambda=frame.get_quarklet(7795);
     cout << lambda << endl;
     u.set_coefficient(lambda, 1);
 //    cout << u << endl;
@@ -105,7 +105,7 @@ int main()
     
     
     Array1D<SampledMapping<dim> > eval(3);
-    eval=frame.evaluate(u,8);
+    eval=frame.evaluate(u,9);
     char plotnameInd[128];
     sprintf(plotnameInd, "%s%d%s%d%s%d%d%s%d%d%s%d%d%s%d%d%s%d%s%d%s", "ldomain_m_", d, "_mT_" , dT, "_p_" , lambda.p()[0],lambda.p()[1], "_j_" , lambda.j()[0],lambda.j()[1], 
             "_e_" , lambda.e()[0],lambda.e()[1],"_k_" , lambda.k()[0],lambda.k()[1], "_patch_", lambda.patch(),"_number_",lambda.number(),   ".png");
@@ -117,11 +117,11 @@ int main()
            os2 << "surf(x,y,z);"
            << "hold on;" << endl;
     }  
-    os2 << "hold off" << endl;
-    os2 << "shading('flat')" << endl;
-    os2 << "colormap([flipud(jet);jet])" << endl;
-    os2 << "set(gca,'CLim', [- min(abs(get(gca,'CLim')))  min(abs(get(gca,'CLim')))])" << endl;
-    os2 << "print('-dpng',sprintf('" << plotnameInd << "'));" << endl;   
+    os2 << "hold off;" << endl;
+    os2 << "shading('flat');" << endl;
+    os2 << "colormap([flipud(jet);jet]);" << endl;
+    os2 << "set(gca,'CLim', [- min(abs(get(gca,'CLim')))  min(abs(get(gca,'CLim')))]);" << endl;
+//    os2 << "print('-dpng',sprintf('" << plotnameInd << "'));" << endl;   
     
     os2.close();
     
@@ -176,13 +176,13 @@ int main()
 #endif  
     
     InfiniteVector<double,Index> u;
-    Index lambda=frame.get_quarklet(2114);
+    Index lambda=frame.get_quarklet(2067);
     cout << lambda << endl;
     u.set_coefficient(lambda, 1);
     cout << u << endl;
     
     cout << "plotting quarklet on cube" << endl;
-    SampledMapping<2> sm1(evaluate(frame, u , true, 9));
+    SampledMapping<2> sm1(evaluate(frame, u , true, 6));
     std::ofstream stream1("Image_outputs/quarklet_cube.m");
     char plotnameInd[128];
     sprintf(plotnameInd, "%s%d%s%d%s%d%d%s%d%d%s%d%d%s%d%d%s%d%s", "cube_m_", d, "_mT_" , dT, "_p_" , lambda.p()[0],lambda.p()[1], "_j_" , lambda.j()[0],lambda.j()[1], 
@@ -195,7 +195,7 @@ int main()
             << "\nshading('flat');"
             << "colormap([flipud(jet);jet]);" 
             << "set(gca,'CLim', [- min(abs(get(gca,'CLim')))  min(abs(get(gca,'CLim')))]);" 
-            << "print('-dpng',sprintf('" << plotnameInd << "'));"
+//            << "print('-dpng',sprintf('" << plotnameInd << "'));"
 
 //              << "matlab2tikz('myquarklet.tex', 'standalone', true);"
               << endl;

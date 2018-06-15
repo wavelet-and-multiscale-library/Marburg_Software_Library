@@ -28,7 +28,7 @@
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
 #define JMAX 7
-#define PMAX 0
+#define PMAX 1
 #define TWO_D
 
 #define PRIMALORDER 3
@@ -178,15 +178,23 @@ int main(){
         SampledMapping<2> smuexact(mygrid, uexact1);
         smrhs.matlab_output(osrhs);
         smuexact.matlab_output(osuexact);
-        osrhs << "surf(x,y,z,'LineStyle','none')"<<endl;
-        osuexact<<"surf(x,y,z,'LineStyle','none')"<<endl;
+        osrhs << "surf(x,y,z)"<<endl;
+        osuexact<<"surf(x,y,z)"<<endl;
         osrhs << "hold on;" << endl;
         osuexact<<"hold on;"<<endl;
     }
     osrhs << "view(30,55);"<<endl;
     osrhs << "hold off;" << endl;
+    osrhs << "grid off;" << endl;
+    osrhs << "shading('flat');" << endl;
+    osrhs << "colormap([flipud(jet);jet]);" << endl;
+    osrhs << "set(gca,'CLim', [- min(abs(get(gca,'CLim')))  min(abs(get(gca,'CLim')))]);" << endl;
     osuexact << "view(30,55);"<<endl;
     osuexact<<"hold off;"<<endl;
+    osuexact << "grid off;" << endl;
+    osuexact << "shading('flat');" << endl;
+    osuexact << "colormap([flipud(jet);jet]);" << endl;
+    osuexact << "set(gca,'CLim', [- min(abs(get(gca,'CLim')))  min(abs(get(gca,'CLim')))]);" << endl;
     osrhs.close();
     osuexact.close();
     cout << "rhs and uexact plotted" << endl;
@@ -360,8 +368,8 @@ int main(){
 //    CachedQuarkletLDomainProblem<LDomainFrameGramian<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
 #endif
 #if defined CDD2 || defined RICHARDSON
-    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
-//    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 43, 9);
+//    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
+    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 43, 9);
 //    CachedQuarkletLDomainProblem<LDomainFrameGramian<Frame1d,Frame> > cproblem1(&eq);
 //   CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 5.3, 46.3);
 #endif
@@ -387,7 +395,7 @@ int main(){
     
     double tic=clock();
 #ifdef CDD2 
-    const char* scheme_type = "CDD2";
+//    const char* scheme_type = "CDD2";
     
 //    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b);
     CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, tensor_simple, pmax, a, b);
@@ -399,9 +407,12 @@ int main(){
     steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon_int, tensor_simple, a, b);
 #endif
 #ifdef RICHARDSON
-    const char* scheme_type = "Richardson";
-    const unsigned int maxiter = 500;
-    richardson_QUARKLET_SOLVE(cproblem1,epsilon,u_epsilon_int, maxiter, tensor_simple, a, b, 0, 0.2);
+//    const char* scheme_type = "Richardson";
+    const unsigned int maxiter = 2000;
+    const double omega = 0.15;
+    const double residual_stop = 0.01;
+    const double shrinkage = 0;
+    richardson_QUARKLET_SOLVE(cproblem1,epsilon,u_epsilon_int, maxiter, tensor_simple, a, b, shrinkage, omega, residual_stop);
 #endif
     double toc = clock();
     double time = (double)(toc-tic);
@@ -445,13 +456,16 @@ int main(){
     os2 << "figure;"<< endl;
     for(int i=0;i<3;i++){
         eval[i].matlab_output(os2);
-        os2 << "surf(x,y,z,'LineStyle','none');" << endl;
+        os2 << "surf(x,y,z);" << endl;
         os2 << "hold on;" << endl;
     }  
-    os2 << "title('Ldomain Poisson Equation: adaptive solution to test problem ("
-            << scheme_type << "), " << "pmax= " << pmax << ", jmax= " << jmax << ", d= " << d << ", dT= " << dT << "');" << endl;
-    os2 << "view(30,55);"<<endl;
+    os2 << "title('Ldomain Poisson Equation: adaptive solution to test problem pmax= " << pmax << ", jmax= " << jmax << ", d= " << d << ", dT= " << dT << "');" << endl;
+    os2 << "view(30,55);"<<endl;    
     os2 << "hold off" << endl;
+    os2 << "grid off;" << endl;
+    os2 << "shading('flat');" << endl;
+    os2 << "colormap([flipud(jet);jet]);" << endl;
+    os2 << "set(gca,'CLim', [- min(abs(get(gca,'CLim')))  min(abs(get(gca,'CLim')))]);" << endl;
     os2.close();
     
     //new coefficients plot

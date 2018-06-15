@@ -597,7 +597,7 @@ namespace WaveletTL
   void richardson_QUARKLET_SOLVE(const PROBLEM& P, const double epsilon,
 			InfiniteVector<double,int>& u_epsilon, const unsigned int maxiter,
                         CompressionStrategy strategy,
-                        const double a, const double b, const double shrink, double omega)
+                        const double a, const double b, const double shrink, double omega, double residual_stop)
   {
 
 
@@ -767,10 +767,10 @@ namespace WaveletTL
 	tstart = clock();
 
 #ifdef ONE_D
-	if (residual_norm < 1e-4 || loops == maxiter || (shrink!=0 && residual_norm < 0.29)) 
+	if (residual_norm < residual_stop || loops == maxiter || (shrink!=0 && residual_norm < 0.29)) 
 #endif
 #ifdef TWO_D
-	if (residual_norm < 0.01 || loops == maxiter) 
+	if (residual_norm < residual_stop || loops == maxiter) 
 #endif
         {
            

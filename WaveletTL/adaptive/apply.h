@@ -216,7 +216,8 @@ namespace WaveletTL
 	   InfiniteVector<double, typename PROBLEM::Index>& tilde_r,
 	   double& nu,
 	   unsigned int& niter,
-	   const CompressionStrategy strategy = St04a
+           const CompressionStrategy strategy = St04a,
+           const bool apply_coarse = true
 	   );
 
 

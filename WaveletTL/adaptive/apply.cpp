@@ -1526,16 +1526,16 @@ namespace WaveletTL
 
   template <class PROBLEM>
   void RES(const PROBLEM& P,
-	   const InfiniteVector<double, typename PROBLEM::Index>& w,
-	   const double xi,
-	   const double delta,
-	   const double epsilon,
-	   const int jmax,
-	   InfiniteVector<double, typename PROBLEM::Index>& tilde_r,
-	   double& nu,
-	   unsigned int& niter,
-	   const CompressionStrategy strategy
-	   )
+           const InfiniteVector<double, typename PROBLEM::Index>& w,
+           const double xi,
+           const double delta,
+           const double epsilon,
+           const int jmax,
+           InfiniteVector<double, typename PROBLEM::Index>& tilde_r,
+           double& nu,
+           unsigned int& niter,
+           const CompressionStrategy strategy,
+           const bool apply_coarse)
   {
     //    unsigned int k = 0;
     double zeta = 2.*xi;
@@ -1544,9 +1544,15 @@ namespace WaveletTL
       zeta /= 2.;
       P.RHS (zeta/2., tilde_r);
       InfiniteVector<double, typename PROBLEM::Index> help;
-      //APPLY(P, w, .0/*zeta/2.*/, help, jmax, strategy);
-      APPLY_COARSE(P, w, zeta/2., help, 1.0e-6, jmax, strategy);
-      //APPLY_COARSE(P, w, zeta/2., help, 0.5, jmax, strategy);
+      if (apply_coarse)
+      {
+        APPLY_COARSE(P, w, zeta/2., help, 1.0e-6, jmax, strategy);
+        //APPLY_COARSE(P, w, zeta/2., help, 0.5, jmax, strategy);
+      }
+      else
+      {
+        APPLY(P, w, zeta/2., help, jmax, strategy);
+      }
       tilde_r -= help;
       l2n = l2_norm(tilde_r);
       nu = l2n + zeta;

@@ -17,7 +17,7 @@ using std::map;
 
 namespace MathTL {
 
-  void matlab_output(const map<double,double>& log_10_residual_norms,
+  inline void matlab_output(const map<double,double>& log_10_residual_norms,
 		     std::ostream& os);
 
   /*!
@@ -48,7 +48,7 @@ namespace MathTL {
     for a given x in [-1,1] and a given Matlab colormap,
     compute the corresponding RGB values
   */
-  void get_color(const double x,
+  inline void get_color(const double x,
 		 const MatlabColorMap colormap,
 		 double& red, double& green, double& blue);
 }

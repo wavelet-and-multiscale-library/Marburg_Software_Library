@@ -5,6 +5,7 @@
 
 namespace MathTL
 {
+  inline
   CornerSingularity::CornerSingularity(const Point<2>& x,
 				       const double w0,
 				       const double w,
@@ -14,6 +15,7 @@ namespace MathTL
   {
   }
   
+  inline
   double
   CornerSingularity::value(const Point<2>& p,
 			   const unsigned int component) const
@@ -42,6 +44,7 @@ namespace MathTL
     values[0] = value(p);
   }
 
+  inline
   double
   CornerSingularity::zeta(const double r) const {
     if (r <= r0)
@@ -57,6 +60,7 @@ namespace MathTL
     }
   }
 
+  inline
   CornerSingularityRHS::CornerSingularityRHS(const Point<2>& x,
 					     const double w0,
 					     const double w,
@@ -66,6 +70,7 @@ namespace MathTL
   {
   }
   
+  inline
   double
   CornerSingularityRHS::value(const Point<2>& p,
 			      const unsigned int component) const
@@ -144,6 +149,7 @@ namespace MathTL
     values[0] = value(p);
   }
 
+  inline
   double
   CornerSingularityRHS::zeta(const double r) const {
     if (r <= r0)
@@ -159,6 +165,7 @@ namespace MathTL
     }
   }
 
+  inline
   double
   CornerSingularityRHS::zeta_prime(const double r) const {
     if (r <= r0 || r >= r1)
@@ -176,6 +183,7 @@ namespace MathTL
     }
   }
 
+  inline
   double
   CornerSingularityRHS::zeta_primeprime(const double r) const {
     if (r <= r0 || r >= r1)
@@ -204,6 +212,7 @@ namespace MathTL
     }
   }
 
+  inline
   CornerSingularityGradient::CornerSingularityGradient(const Point<2>& x,
 						       const double w0,
 						       const double w,
@@ -221,6 +230,8 @@ namespace MathTL
     values[0] = value(p,0);
     values[1] = value(p,1);
   }
+
+  inline
   double
   CornerSingularityGradient::value(const Point<2>& p,
 			      const unsigned int component) const
@@ -277,6 +288,7 @@ namespace MathTL
     return res;
   }
 
+  inline
   double
   CornerSingularityGradient::zeta(const double r) const {
     if (r <= r0)
@@ -292,6 +304,7 @@ namespace MathTL
     }
   }
 
+  inline
   double
   CornerSingularityGradient::zeta_prime(const double r) const {
     if (r <= r0 || r >= r1)
@@ -309,6 +322,7 @@ namespace MathTL
     }
   }
   
+  inline
   CornerTimeSingularity::CornerTimeSingularity(const Point<2>& x,
 					       const double w0,
 					       const double w)
@@ -316,6 +330,7 @@ namespace MathTL
   {
   }
   
+  inline
   double
   CornerTimeSingularity::value(const Point<2>& p,
 			       const unsigned int component) const
@@ -342,6 +357,7 @@ namespace MathTL
     values[0] = value(p);
   }
 
+  inline
   CornerTimeSingularityRHS::CornerTimeSingularityRHS(const Point<2>& x,
 						     const double w0,
 						     const double w)
@@ -349,6 +365,7 @@ namespace MathTL
   {
   }
   
+  inline
   double
   CornerTimeSingularityRHS::value(const Point<2>& p,
 				  const unsigned int component) const
@@ -388,6 +405,7 @@ namespace MathTL
     values[0] = value(p);
   }
 
+  inline
   CornerTimeSingularityRHSt::CornerTimeSingularityRHSt(const Point<2>& x,
 						       const double w0,
 						       const double w)
@@ -395,6 +413,7 @@ namespace MathTL
   {
   }
   
+  inline
   double
   CornerTimeSingularityRHSt::value(const Point<2>& p,
 				   const unsigned int component) const

@@ -5,6 +5,7 @@
 
 namespace MathTL
 {
+  inline
   CornerSingularityBiharmonic::CornerSingularityBiharmonic(const Point<2>& x,
 				       const double w0,
 				       const double w,
@@ -14,6 +15,7 @@ namespace MathTL
   {
   }
   
+  inline
   double
   CornerSingularityBiharmonic::value(const Point<2>& p,
 			   const unsigned int component) const
@@ -128,6 +130,7 @@ namespace MathTL
     values[0] = value(p);
   }
 
+  inline
   double
   CornerSingularityBiharmonic::zeta(const double r) const {
     if (r <= r0)
@@ -143,6 +146,7 @@ namespace MathTL
     }
   }
 
+  inline
   CornerSingularityBiharmonicRHS::CornerSingularityBiharmonicRHS(const Point<2>& x,
 					     const double w0,
 					     const double w,
@@ -152,6 +156,7 @@ namespace MathTL
   {
   }
   
+  inline
   double
   CornerSingularityBiharmonicRHS::value(const Point<2>& p,
 			      const unsigned int component) const
@@ -653,22 +658,24 @@ t109+t349+6.0*t516*t88*t120+t415+t613);
   }
 
 
- double
+  inline
+  double
   CornerSingularityBiharmonicRHS::zeta(const double r) const {
     if (r <= r0)
       return 1.0;
     else {
       if (r >= r1)
-	return 0.0;
+        return 0.0;
       else {
-	const double help1(r1-r);
-	const double help0(r-r0);
-	return exp(-1.0/(help1*help1))/(exp(-1.0/(help0*help0))+exp(-1.0/(help1*help1)));
+        const double help1(r1-r);
+        const double help0(r-r0);
+        return exp(-1.0/(help1*help1))/(exp(-1.0/(help0*help0))+exp(-1.0/(help1*help1)));
       }
     }
   }
 
 
+  inline
   double
   CornerSingularityBiharmonicRHS::zeta_prime(const double r) const {
     if (r <= r0 || r >= r1)
@@ -686,6 +693,8 @@ t109+t349+6.0*t516*t88*t120+t415+t613);
     }
   }
 
+
+  inline
   double
   CornerSingularityBiharmonicRHS::zeta_primeprime(const double r) const {
     if (r <= r0 || r >= r1)
@@ -714,7 +723,9 @@ t109+t349+6.0*t516*t88*t120+t415+t613);
     }
   }
 
-   double
+
+  inline
+  double
   CornerSingularityBiharmonicRHS::zeta_third_der(const double r) const {
     if (r <= r0 || r >= r1)
       return 0.0;
@@ -760,7 +771,9 @@ t109+t349+6.0*t516*t88*t120+t415+t613);
     }
   }
 
-   double
+
+  inline
+  double
   CornerSingularityBiharmonicRHS::zeta_fourth_der(const double r) const {
     if (r <= r0 || r >= r1)
       return 0.0;

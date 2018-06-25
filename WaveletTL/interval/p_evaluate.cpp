@@ -576,7 +576,7 @@ namespace WaveletTL
     
     //! Christoph: tuned versions. ATTENTION: ONLY LINEAR (d=2,dt=2) PRIMBS BASIS WITH HOMOG. BC's!!
 
-    double evaluate_primbs_22_bc11(const int j, const int e, const int k, const double x)
+    inline double evaluate_primbs_22_bc11(const int j, const int e, const int k, const double x)
     {
 
       double scale = (1u << (j/2));  // the scaling factor
@@ -691,7 +691,7 @@ namespace WaveletTL
     }
 
 
-    double evaluate_primbs_22_bc11_v3(const int j, const int e, const int k, const double x)
+    inline double evaluate_primbs_22_bc11_v3(const int j, const int e, const int k, const double x)
     {
 
       double scale = (1u << (j/2));  // the scaling factor
@@ -804,7 +804,7 @@ namespace WaveletTL
 
 
 
-    double evaluate_primbs_22_bc11_deriv(const int j, const int e, const int k, const double x)
+    inline double evaluate_primbs_22_bc11_deriv(const int j, const int e, const int k, const double x)
     {
 
       double scale = (1u << (j/2));  // the scaling factor
@@ -916,7 +916,7 @@ namespace WaveletTL
     }
 
 
-    void evaluate_primbs_22_bc11_v3(const int j, const int e, const int k, const Array1D<double>& points, Array1D<double>& values)
+    inline void evaluate_primbs_22_bc11_v3(const int j, const int e, const int k, const Array1D<double>& points, Array1D<double>& values)
     {
 
         values.resize(points.size());

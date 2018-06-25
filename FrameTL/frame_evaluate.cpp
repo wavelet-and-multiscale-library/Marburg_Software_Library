@@ -269,10 +269,10 @@ namespace FrameTL
 
     for (unsigned int i = 0; i < n_points; i++)
     {
-      x[0] = h*i;
+      x[1] = h*i;
       for (unsigned int j = 0; j < n_points; j++)
       {
-        x[1] = h*j;
+        x[0] = h*j;
         frame.atlas()->charts()[patch]->map_point(x,x_patch);
         gridx.set_entry(i,j,x_patch[0]);
         gridy.set_entry(i,j,x_patch[1]);

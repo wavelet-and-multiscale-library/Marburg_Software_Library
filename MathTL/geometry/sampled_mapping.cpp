@@ -263,13 +263,13 @@ namespace MathTL
 
     // setup grid
     for (unsigned int i = 0; i < n_points; i++) {
-      x[0] = h*i;
+      x[1] = h*i;
      for (unsigned int j = 0; j < n_points; j++) {
-       x[1] = h*j;
+       x[0] = h*j;
        ch.map_point(x,x_patch);
        gridx_.set_entry(i,j,x_patch[0]);
        gridy_.set_entry(i,j,x_patch[1]);
-       values_.set_entry(i,j,(values[0][i] * values[1][j]) / ch.Gram_factor(x));
+       values_.set_entry(i,j,(values[1][i] * values[0][j]) / ch.Gram_factor(x));
      }
     }
 
@@ -301,9 +301,9 @@ namespace MathTL
     
     // setup grid
     for (unsigned int i = 0; i < n_points; i++) {
-      x[0] = h*i;
+      x[1] = h*i;
       for (unsigned int j = 0; j < n_points; j++) {
-	x[1] = h*j;
+        x[0] = h*j;
 	ch.map_point(x,x_patch);
 	//cout << "i=" << x_patch[0] << " j= " << x_patch[1] << endl;
 	gridx_.set_entry(i,j,x_patch[0]);

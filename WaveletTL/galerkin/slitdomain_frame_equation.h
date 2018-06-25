@@ -65,7 +65,7 @@ namespace WaveletTL
   class SlitDomainFrameEquation
 //     : public FullyDiagonalDyadicPreconditioner<typename SlitDomainBasis<IBASIS>::Index>
 #ifdef DYADIC  
-  : public FullyDiagonalQuarkletPreconditioner<typename SLITDOMAINFRAME::Index>
+  : public FullyDiagonalQuarkletPreconditioner<typename SLITDOMAINFRAME::Index, 2>
 
     
 #endif
@@ -76,7 +76,7 @@ namespace WaveletTL
     : public FullyDiagonalEnergyNormPreconditioner<typename SLITDOMAINFRAME::Index>
 #endif
 #ifdef DYPLUSEN
-    : public FullyDiagonalDyPlusEnNormPreconditioner<typename SLITDOMAINFRAME::Index>
+    : public FullyDiagonalDyPlusEnNormPreconditioner<typename SLITDOMAINFRAME::Index, 2>
 #endif
 
   {

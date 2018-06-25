@@ -78,28 +78,28 @@ namespace WaveletTL
   }
 
  
-  template <class INDEX>
+  template <class INDEX, unsigned int DIM>
   inline
   double
-  FullyDiagonalQuarkletPreconditioner<INDEX>::diag(const INDEX& lambda) const
+  FullyDiagonalQuarkletPreconditioner<INDEX, DIM>::diag(const INDEX& lambda) const
   {
-      
+
 #if _WAVELETTL_USE_TFRAME==1
     double hspreconditioner(0), l2preconditioner(1);
 //    int space_dimension = (*(lambda.frame())).space_dimension;
 //    int space_dimension = 2;
-    for (int i=0; i<_DIM; i++){
+    for (int i = 0; i < DIM; i++){
         hspreconditioner+=pow(1+lambda.p()[i],8)*(1<<(2*lambda.j()[i]));
         l2preconditioner*=pow(1+lambda.p()[i],2);
     }
     double preconditioner = sqrt(hspreconditioner)*l2preconditioner;
         
     return preconditioner;
-    
+
 #else
     return pow((1<<lambda.j())*pow(1+lambda.p(),4),operator_order())*pow(1+lambda.p(),2); //2^j*(p+1)^(2+\delta), falls operator_order()=1 (\delta=4)
 #endif
-    
+
   }
 
 
@@ -113,19 +113,19 @@ namespace WaveletTL
   };
   
   
-  template <class INDEX>
+  template <class INDEX, unsigned int DIM>
   inline
   double
-  FullyDiagonalDyPlusEnNormPreconditioner<INDEX>::diag(const INDEX& lambda) const
+  FullyDiagonalDyPlusEnNormPreconditioner<INDEX, DIM>::diag(const INDEX& lambda) const
   {
    double hspreconditioner(0), l2preconditioner(1);
 //    int space_dimension = (*(lambda.frame())).space_dimension;
 //    int space_dimension = 2;
-    for (int i=0; i<_DIM; i++){
+    for (int i = 0; i < DIM; i++){
         hspreconditioner+=pow(1+lambda.p()[i],6);
         l2preconditioner*=pow(1+lambda.p()[i],2);
     }
-    double preconditioner = sqrt(hspreconditioner)*l2preconditioner*sqrt(a(lambda, lambda))/sqrt(_DIM);
+    double preconditioner = sqrt(hspreconditioner)*l2preconditioner*sqrt(a(lambda, lambda))/sqrt(DIM);
         
     return preconditioner;      
    

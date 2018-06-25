@@ -65,7 +65,7 @@ namespace WaveletTL
   class RecRingFrameGramian
 //     : public FullyDiagonalDyadicPreconditioner<typename RecRingBasis<IBASIS>::Index>
 #ifdef DYADIC  
-  : public FullyDiagonalQuarkletPreconditioner<typename RECRINGFRAME::Index>
+  : public FullyDiagonalQuarkletPreconditioner<typename RECRINGFRAME::Index, 2>
 
     
 #else

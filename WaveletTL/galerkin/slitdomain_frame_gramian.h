@@ -65,7 +65,7 @@ namespace WaveletTL
   class SlitDomainFrameGramian
 //     : public FullyDiagonalDyadicPreconditioner<typename SlitDomainBasis<IBASIS>::Index>
 #ifdef DYADIC  
-  : public FullyDiagonalQuarkletPreconditioner<typename SLITDOMAINFRAME::Index>
+  : public FullyDiagonalQuarkletPreconditioner<typename SLITDOMAINFRAME::Index, 2>
 
     
 #else

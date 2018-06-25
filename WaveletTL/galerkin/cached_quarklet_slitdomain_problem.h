@@ -50,7 +50,7 @@ namespace WaveletTL
     template <class PROBLEM>
     class CachedQuarkletSlitDomainProblem
 #ifdef DYADIC
-      : public FullyDiagonalQuarkletPreconditioner<typename PROBLEM::Index>
+      : public FullyDiagonalQuarkletPreconditioner<typename PROBLEM::Index, 2>
     
 #endif
 #ifdef TRIVIAL
@@ -60,7 +60,7 @@ namespace WaveletTL
     : public FullyDiagonalEnergyNormPreconditioner<typename PROBLEM::Index>
 #endif
 #ifdef DYPLUSEN
-    : public FullyDiagonalDyPlusEnNormPreconditioner<typename PROBLEM::Index>
+    : public FullyDiagonalDyPlusEnNormPreconditioner<typename PROBLEM::Index, 2>
 #endif
 
     {
@@ -146,6 +146,19 @@ namespace WaveletTL
          * estimate the spectral norm ||A^{-1}||
          */
         double norm_Ainv() const;
+
+
+        /*
+         * set the spectral norm ||A||
+         */
+        void set_normA(double value) const { normA = value; }
+
+
+        /*
+         * set the spectral norm ||A^{-1}||
+         */
+        void set_normAinv(double value) const { normAinv = value; }
+
 
         /*
          * estimate compressibility exponent s^*

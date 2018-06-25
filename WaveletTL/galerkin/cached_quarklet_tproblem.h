@@ -49,7 +49,7 @@ namespace WaveletTL
      */
     template <class PROBLEM>
     class CachedQuarkletTProblem
-      : public FullyDiagonalQuarkletPreconditioner<typename PROBLEM::Index>
+      : public FullyDiagonalQuarkletPreconditioner<typename PROBLEM::Index, PROBLEM::space_dimension>
 //    : public FullyDiagonalEnergyNormPreconditioner<typename PROBLEM::Index>
     {
     public:

@@ -65,7 +65,7 @@ namespace WaveletTL
   class RecRingFrameEquation
 //     : public FullyDiagonalDyadicPreconditioner<typename RecRingBasis<IBASIS>::Index>
 #ifdef DYADIC  
-  : public FullyDiagonalQuarkletPreconditioner<typename RECRINGFRAME::Index>
+  : public FullyDiagonalQuarkletPreconditioner<typename RECRINGFRAME::Index, 2>
 
     
 #endif
@@ -76,7 +76,7 @@ namespace WaveletTL
     : public FullyDiagonalEnergyNormPreconditioner<typename RECRINGFRAME::Index>
 #endif
 #ifdef DYPLUSEN
-    : public FullyDiagonalDyPlusEnNormPreconditioner<typename RECRINGFRAME::Index>
+    : public FullyDiagonalDyPlusEnNormPreconditioner<typename RECRINGFRAME::Index, 2>
 #endif
 
   {

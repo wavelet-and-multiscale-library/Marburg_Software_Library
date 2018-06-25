@@ -65,7 +65,7 @@ namespace WaveletTL
   class LDomainFrameEquation
 //     : public FullyDiagonalDyadicPreconditioner<typename LDomainBasis<IBASIS>::Index>
 #ifdef DYADIC  
-  : public FullyDiagonalQuarkletPreconditioner<typename LDOMAINFRAME::Index>
+  : public FullyDiagonalQuarkletPreconditioner<typename LDOMAINFRAME::Index, 2>
 
     
 #endif
@@ -76,7 +76,7 @@ namespace WaveletTL
     : public FullyDiagonalEnergyNormPreconditioner<typename LDOMAINFRAME::Index>
 #endif
 #ifdef DYPLUSEN
-    : public FullyDiagonalDyPlusEnNormPreconditioner<typename LDOMAINFRAME::Index>
+    : public FullyDiagonalDyPlusEnNormPreconditioner<typename LDOMAINFRAME::Index, 2>
 #endif
 
   {

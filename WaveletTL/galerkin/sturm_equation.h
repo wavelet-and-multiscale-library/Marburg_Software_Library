@@ -20,6 +20,7 @@ using namespace MathTL;
 
 namespace WaveletTL
 {
+
   /*!
     This class models the (preconditioned) infinite-dimensional matrix problem
     
@@ -70,7 +71,7 @@ namespace WaveletTL
   class SturmEquation
 #ifdef FRAME
   #ifdef DYADIC  
-     : public FullyDiagonalQuarkletPreconditioner<typename WBASIS::Index>
+     : public FullyDiagonalQuarkletPreconditioner<typename WBASIS::Index, 1>
   #else
   #ifdef TRIVIAL
   : public TrivialPreconditioner<typename WBASIS::Index>

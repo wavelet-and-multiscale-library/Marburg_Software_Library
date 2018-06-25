@@ -59,18 +59,45 @@ namespace FrameTL
     typedef AggregatedFrame<IBASIS,DIM> Frame;
     typedef typename Frame::Index Index;
 
+    // initialize array fnorms_sqr_patch
+    fnorms_sqr_patch.resize(frame_->n_p());
+    for (unsigned int i = 0; i < fnorms_sqr_patch.size(); i++)
+      fnorms_sqr_patch[i] = 0.;
+
     InfiniteVector<double,Index> fhelp;
-    const int j0   = frame_->j0();
-    for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
+    Array1D<InfiniteVector<double,Index> > fhelp_patch(frame_->n_p());
+
+//    const int j0   = frame_->j0();
+//    for (Index lambda(FrameTL::first_generator<IBASIS,DIM,DIM,Frame>(frame_,j0));; ++lambda)
+//      {
+//	const double coeff = f(lambda)/D(lambda);
+//	if (fabs(coeff)>1e-15) {
+//	  fhelp.set_coefficient(lambda, coeff);
+//	  //cout << lambda << endl;
+//	}
+//  	if (lambda == last_wavelet<IBASIS,DIM,DIM,Frame>(frame_,jmax_))
+//	  break;
+//      }
+
+    // loop over all wavelets between minimal and maximal level
+    for (int i = 0; i < frame_->degrees_of_freedom(); i++)
       {
-	const double coeff = f(lambda)/D(lambda);
-	if (fabs(coeff)>1e-15) {
-	  fhelp.set_coefficient(lambda, coeff);
-	  //cout << lambda << endl;
-	}
-  	if (lambda == last_wavelet<IBASIS,DIM,DIM,Frame>(frame_,jmax_))
-	  break;
+        // computation of one right-hand side coefficient
+        double coeff = f(*(frame_->get_wavelet(i)))/D(*(frame_->get_wavelet(i)));
+        // put the coefficient into an InfiniteVector and successively
+        // compute the squared \ell_2 norm
+        if (fabs(coeff)>1e-15) {
+          fhelp.set_coefficient(*(frame_->get_wavelet(i)), coeff);
+          fhelp_patch[frame_->get_wavelet(i)->p()].set_coefficient(*(frame_->get_wavelet(i)), coeff);
+
+          fnorms_sqr_patch[frame_->get_wavelet(i)->p()] += coeff*coeff;
+          if (i % 100 == 0){
+            cout << *(frame_->get_wavelet(i)) << " " << coeff << endl;
+          }
+
+        }
       }
+
     fnorm_sqr = l2_norm_sqr(fhelp);
 
     cout << "... done, all integrals for right-hand side computed" << endl;
@@ -83,6 +110,19 @@ namespace FrameTL
 	 it != itend; ++it, ++id)
       fcoeffs[id] = std::pair<Index,double>(it.index(), *it);
     sort(fcoeffs.begin(), fcoeffs.end(), typename InfiniteVector<double,Index>::decreasing_order());
+
+    // the same patchwise
+    fcoeffs_patch.resize(frame_->n_p());
+    for (int i = 0; i < frame_->n_p(); i++) {
+      //fcoeffs_patch[i].resize(0); // clear eventual old values
+      fcoeffs_patch[i].resize(fhelp_patch[i].size());
+      id = 0;
+      for (typename InfiniteVector<double,Index>::const_iterator it(fhelp_patch[i].begin()), itend(fhelp_patch[i].end());
+           it != itend; ++it, ++id) {
+        (fcoeffs_patch[i])[id] = std::pair<Index,double>(it.index(), *it);
+      }
+      sort(fcoeffs_patch[i].begin(), fcoeffs_patch[i].end(), typename InfiniteVector<double,Index>::decreasing_order());
+    }
   }
 
   template <class IBASIS, unsigned int DIM>
@@ -602,9 +642,6 @@ namespace FrameTL
       if (exit) break;
     }
 
-#ifdef TWO_D
-    return r;
-#endif
 
 // #####################################################################################
 // Attention! This is a bad hack! It is assumed that in case macro ONE_D is defined,
@@ -628,11 +665,8 @@ namespace FrameTL
   
   
     return 4.0*tmp + r;
-#endif
-#ifndef TWO_D
-#ifndef ONE_D
-    return 0;
-#endif
+#else
+    return r;
 #endif
   }
 
@@ -653,6 +687,32 @@ namespace FrameTL
       ++it;
     } while (it != fcoeffs.end() && coarsenorm < bound);
   }
+
+
+  template <class IBASIS, unsigned int DIM>
+  void
+  EllipticEquation<IBASIS,DIM>::RHS
+  (const double eta,
+   const int p,
+   InfiniteVector<double, typename AggregatedFrame<IBASIS,DIM>::Index>& coeffs) const
+  {
+    coeffs.clear();
+
+    if (fnorms_sqr_patch[p] < 1.0e-15)
+      return;
+
+    double coarsenorm(0);
+    double bound(fnorms_sqr_patch[p] - eta*eta);
+    typedef typename AggregatedFrame<IBASIS,DIM>::Index Index;
+    typename Array1D<std::pair<Index, double> >::const_iterator it(fcoeffs_patch[p].begin());
+    do {
+      coarsenorm += it->second * it->second;
+      //cout << it->first << " " << it->second << " " << coarsenorm  << " " << bound << endl;
+      coeffs.set_coefficient(it->first, it->second);
+      ++it;
+    } while (it != fcoeffs_patch[p].end() && coarsenorm < bound);
+  }
+
 
   template <class IBASIS, unsigned int DIM>
   void

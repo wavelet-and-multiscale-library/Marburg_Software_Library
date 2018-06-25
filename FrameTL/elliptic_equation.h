@@ -161,7 +161,7 @@ namespace FrameTL
       externally computed and to be set
       during initialization of the program.
     */
-    double norm_Ainv() const { return normAinv; };
+    double norm_Ainv() const { return normAinv; }
 
     /*!
       Sets estimate for \f$\|A\|\f$.
@@ -171,7 +171,7 @@ namespace FrameTL
     /*!
       Sets estimate for \f$\|A^{-1}\|\f$.
     */
-    void set_Ainv(const double nAinv) { normAinv = nAinv; };
+    void set_Ainv(const double nAinv) { normAinv = nAinv; }
 
     /*!
       Estimate compressibility exponent \f$s^\ast\f$.
@@ -199,9 +199,22 @@ namespace FrameTL
 	     typename AggregatedFrame<IBASIS,DIM>::Index>& coeffs) const;
 
     /*!
+      Approximate the wavelet coefficient set of the preconditioned right-hand side restricted
+      to patch p within a prescribed \f$\ell_2\f$ error tolerance.
+    */
+    void RHS(const double eta, const int p,
+             InfiniteVector<double,
+             typename AggregatedFrame<IBASIS,DIM>::Index>& coeffs) const;
+
+    /*!
       Compute (or estimate) the \f$\ell_2\f$ norm of the right-hand side.
     */
     double F_norm() const { return sqrt(fnorm_sqr); }
+
+    /*!
+      Compute the \f$\ell_2\f$ norm of the right-hand side coefficients on corresponding to a fixed patch.
+    */
+    double F_norm_local(const int patch) const { return sqrt(fnorms_sqr_patch[patch]); }
 
     /*!
       Set the boundary value problem.
@@ -269,6 +282,9 @@ namespace FrameTL
     //! Right-hand side coefficients up to a fine level, sorted by modulus.
     Array1D<std::pair<typename AggregatedFrame<IBASIS,DIM>::Index,double> > fcoeffs;
 
+    //! Patchwise right-hand side coefficients on a fine level, sorted by modulus.
+    Array1D<Array1D<std::pair<typename AggregatedFrame<IBASIS,DIM>::Index,double> > > fcoeffs_patch;
+
     //! Coefficients of the diagonal of the stiffness matrix up to a fine level, sorted by modulus.
     InfiniteVector<double,typename AggregatedFrame<IBASIS,DIM>::Index> stiff_diagonal;
 
@@ -276,6 +292,11 @@ namespace FrameTL
     //! (Squared) \f$\ell_2\f$ norm of the precomputed right-hand side.
     double fnorm_sqr;
 
+    /*!
+      (Squared) \f$\ell_2\f$ norm of the respective precomputed right-hand side coefficients
+      on each patch.
+     */
+    Array1D<double> fnorms_sqr_patch;
 
     // reminder: The keyword mutable can only be applied to non-static
     // and non-const data members of a class. If a data member is declared mutable,

@@ -95,9 +95,30 @@ namespace WaveletTL
              const unsigned int p) const;
 
     /*!
+      estimate the spectral norm ||A||
+    */
+    double norm_A() const;
+
+    /*!
+      estimate the spectral norm ||A^{-1}||
+    */
+    double norm_Ainv() const;
+
+    /*!
       evaluate the (unpreconditioned) right-hand side f
     */
     double f(const typename WaveletBasis::Index& lambda) const;
+
+    /*!
+      approximate the wavelet coefficient set of the preconditioned right-hand side F
+      within a prescribed \ell_2 error tolerance
+    */
+    void RHS(const double eta, InfiniteVector<double,Index>& coeffs) const;
+
+    /*!
+      compute (or estimate) ||F||_2
+    */
+    double F_norm() const { return sqrt(fnorm_sqr); }
 
     /*!
       estimate compressibility exponent s^*
@@ -118,6 +139,20 @@ namespace WaveletTL
   protected:
     const WaveletBasis& basis_;
     const Function<1>* g_;
+
+    /*!
+      precomputation of the right-hand side
+    */
+    void precompute_rhs();
+
+    // right-hand side coefficients on a fine level, sorted by modulus
+    Array1D<std::pair<Index,double> > fcoeffs;
+
+    // (squared) \ell_2 norm of the precomputed right-hand side
+    double fnorm_sqr;
+
+    // estimates for ||A|| and ||A^{-1}||
+    mutable double normA, normAinv;
   };
 
 }

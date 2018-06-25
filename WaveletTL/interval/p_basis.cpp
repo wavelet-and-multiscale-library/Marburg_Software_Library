@@ -3007,7 +3007,7 @@ namespace WaveletTL
   double
   PBasis<d, dT>::evaluate(const unsigned int derivative, const Index& lambda, const double x) const
   {
-    return WaveletTL::evaluate(*this, derivative, lambda, x);
+    return evaluate(*this, derivative, lambda, x);
   }
   
   template <int d, int dT>
@@ -3015,7 +3015,7 @@ namespace WaveletTL
   double
   PBasis<d, dT>::evaluate(const unsigned int derivative, const int j, const int e, const int k, const double x) const
   {
-    return WaveletTL::evaluate(*this, derivative, j, e, k, x);
+    return evaluate(*this, derivative, j, e, k, x);
   }
 
   template <int d, int dT>
@@ -3026,7 +3026,7 @@ namespace WaveletTL
    const Index& lambda,
    const Array1D<double>& points, Array1D<double>& values) const
   {
-    WaveletTL::evaluate(*this, derivative, lambda, points, values);
+    evaluate(*this, derivative, lambda, points, values);
   }
   
   template <int d, int dT>
@@ -3037,7 +3037,7 @@ namespace WaveletTL
    const int j_, const int e_, const int k_,
    const Array1D<double>& points, Array1D<double>& values) const
   {
-    WaveletTL::evaluate(*this, derivative, j_, e_, k_, points, values);
+    evaluate(*this, derivative, j_, e_, k_, points, values);
   }
   
   //new: evaluate of type SampledMapping<1>
@@ -3046,7 +3046,7 @@ namespace WaveletTL
   SampledMapping<1>
   PBasis<d,dT>::evaluate(const Index& lambda, const bool primal, const int resolution) const
   {
-    return WaveletTL::evaluate(*this, lambda, primal, resolution);
+    return evaluate(*this, lambda, primal, resolution);
   }
 
    /* Compute the Picewiese expansion of all wavelets and Generatoren for given j, d */

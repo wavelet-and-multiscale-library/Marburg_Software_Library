@@ -12,10 +12,13 @@
 
 #include <geometry/sampled_mapping.h>
 #include <algebra/infinite_vector.h>
-#include <interval/pq_frame.h>
+#include <algebra/piecewise.h>
+
 
 using MathTL::SampledMapping;
 using MathTL::InfiniteVector;
+using MathTL::Piecewise;
+using MathTL::Array1D;
 
 namespace WaveletTL
 {

@@ -329,9 +329,9 @@ namespace WaveletTL
     /*!
       Sets estimate for $\|A\|$.
     */
-    void set_normA(const double _normA) const
+    void set_normA(const double _normA)
     {
-      problem->set_normA(_normA);
+      //problem->set_normA(_normA);
       normA = _normA;
     }
 
@@ -340,7 +340,7 @@ namespace WaveletTL
     */
     void set_normAinv(const double nAinv)
     {
-      problem->set_normAinv(nAinv);
+      //problem->set_normAinv(nAinv);
       normAinv = nAinv;
     }
     

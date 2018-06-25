@@ -131,7 +131,7 @@ namespace MathTL
     /*!
       number of grid points
     */
-    inline unsigned int size() const { return gridx_.size() * gridy_.size(); }
+    inline unsigned int size() const { return gridx_.size(); }
 
     /*!
       assignment operator
@@ -151,8 +151,8 @@ namespace MathTL
     /*!
       reading access to the grid points
     */
-    inline const Matrix<double>& gridx() const { return gridx_; };
-    inline const Matrix<double>& gridy() const { return gridy_; };
+    inline const Matrix<double>& gridx() const { return gridx_; }
+    inline const Matrix<double>& gridy() const { return gridy_; }
     
   protected:
     /*!

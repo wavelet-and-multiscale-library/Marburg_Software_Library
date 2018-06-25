@@ -83,10 +83,8 @@ namespace FrameTL
     int d = IBASIS::primal_polynomial_degree();
     int dT = IBASIS::primal_vanishing_moments();
 #else
-#ifdef TWO_D
     int d = IBASIS::primal_polynomial_degree();
     int dT = IBASIS::primal_vanishing_moments();
-#endif
 #endif
     
     // prepare filenames for 1D and 2D case
@@ -151,11 +149,13 @@ namespace FrameTL
 
     // write the right-hand side into file in case ot has just been computed
 #ifndef PRECOMP_RHS
+#ifndef MSL_GUI
     rhs.set_row(0, indices, entries);
     // write right hand side to file
     cout << "writing right hand side into file..." << filename << "..." << endl;
     rhs.matlab_output(filename, matrixname, 1);
     cout << "...ready" << endl;
+#endif
 #endif
     
     fnorm_sqr = l2_norm_sqr(fhelp);
@@ -249,8 +249,10 @@ namespace FrameTL
       //cout << stiff_diagonal[i] << " " << *(frame_->get_wavelet(i)) << endl;
     }
 #ifndef PRECOMP_DIAG
+#ifndef MSL_GUI
     diag.set_row(0,indices, entries);
     diag.matlab_output(filename, matrixname, 1);
+#endif
 #endif
 
     cout << "... done, diagonal of stiffness matrix computed" << endl;
@@ -272,7 +274,7 @@ namespace FrameTL
      // If the dimension is larger than just 1, it makes sense to store the one dimensional
      // integrals arising when we make use of the tensor product structure. This costs quite
      // some memory, but really speeds up the algorithm!
-#ifdef TWO_D
+#ifndef ONE_D
 
     typename One_D_IntegralCache::iterator col_lb(one_d_integrals.lower_bound(lambda));
     typename One_D_IntegralCache::iterator col_it(col_lb);
@@ -351,7 +353,7 @@ namespace FrameTL
 	  res += gauss_weights[i] * values_lambda[i] * values_mu[i];
 
 	// in the 2D case store the calculated value
-#ifdef TWO_D
+#ifndef ONE_D
 	typedef typename Column1D::value_type value_type;
 	it = col.insert(lb, value_type(mu, res));
       }
@@ -640,9 +642,6 @@ namespace FrameTL
 // the right hand side is the special functional defines on page 105 of Manuels thesis.
 // We should use the class Functional instead!
 // #####################################################################################
-#ifdef TWO_D
-    return r;
-#endif
 #ifdef ONE_D
     assert(DIM == 1);
     double tmp = 1;
@@ -663,11 +662,8 @@ namespace FrameTL
 //#else
 //    return r;
 //#endif
-#endif
-#ifndef TWO_D
-#ifndef ONE_D
-    return 0;
-#endif
+#else
+    return r;
 #endif
   }
 

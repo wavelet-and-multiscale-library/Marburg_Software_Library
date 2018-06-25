@@ -500,7 +500,7 @@ namespace WaveletTL
       }
       SparseMatrix<double> A_Lambda;
       
-      Matrix<double> evecs;
+      MathTL::Matrix<double> evecs;
       Vector<double> evals;
       setup_stiffness_matrix(*this, Lambda, A_Lambda);
       A_Lambda.compress(1e-10);
@@ -558,7 +558,7 @@ namespace WaveletTL
       }
       //cout << "Schritt 1" << endl;
       SparseMatrix<double> A_Lambda;
-      Matrix<double> evecs;
+      MathTL::Matrix<double> evecs;
       setup_stiffness_matrix(*this, Lambda, A_Lambda);
       //cout << "Matrix aufgestellt" << endl;
       //cout << A_Lambda << endl;

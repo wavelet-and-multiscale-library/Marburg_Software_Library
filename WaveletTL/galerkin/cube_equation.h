@@ -18,13 +18,13 @@
 #include <galerkin/galerkin_utils.h>
 #include <galerkin/infinite_preconditioner.h>
 
+#include <cube/cube_basis.h>
+
 using MathTL::FixedArray1D;
 using MathTL::EllipticBVP;
 
 namespace WaveletTL
 {
-  template <class IBASIS, unsigned int DIM> class CubeBasis;
-
   /*!
     This class models the (preconditioned) infinite-dimensional matrix problem
     

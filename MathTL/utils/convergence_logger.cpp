@@ -93,7 +93,9 @@ namespace MathTL
     }
     else
     {
-      std::cout << "Error: optional data log '" << logName << "' was not defined!" << std::endl;
+      std::stringstream sstream;
+      sstream << "Error: optional data log '" << logName << "' was not defined!" << std::endl;
+      logMessage(sstream.str());
     }
   }
 
@@ -109,7 +111,9 @@ namespace MathTL
     }
     else
     {
-      std::cout << "Error: optional time log '" << logName << "' was not defined!" << std::endl;
+      std::stringstream sstream;
+      sstream << "Error: optional time log '" << logName << "' was not defined!" << std::endl;
+      logMessage(sstream.str());
     }
   }
 
@@ -134,13 +138,14 @@ namespace MathTL
 
 
   inline
-  void ConvergenceLogger::checkAbortConditions() const
+  void ConvergenceLogger::checkAbortConditions()
   {
     if (hasAbortCondition_Error_ && (lastApproxError_ > errorLimit_))
     {
       std::stringstream sstream;
       sstream << "Computation was aborted because the (residual) approximation error exceeded "
                  "the specified limit of " << errorLimit_ << std::endl;
+      logMessage(sstream.str());
       throw std::runtime_error(sstream.str());
     }
     if (hasAbortCondition_Iterations_ && (iterations_ > iterLimit_))
@@ -148,6 +153,7 @@ namespace MathTL
       std::stringstream sstream;
       sstream << "Computation was aborted because the number of iterations exceeded the "
                  "specified limit of " << iterLimit_ << " iterations!" << std::endl;
+      logMessage(sstream.str());
       throw std::runtime_error(sstream.str());
     }
   }

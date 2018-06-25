@@ -267,11 +267,16 @@ namespace MathTL
     */
     void matlab_output(const char *file, const char *Matrixname, const int binary) const;
 
+    /*!
+      read access to the vector containing the matrix entries in column major ordering
+    */
+    inline const Vector<C>& entries_vector() const { return entries_; }
+
   protected:
     /*!
       internal storage of densely populated matrices is just an
       appropriately sized vector, which holds the matrix entries
-      in row major ordering
+      in column major ordering
     */
     Vector<C> entries_;
 

@@ -1,7 +1,7 @@
 #ifndef MAX_LOOPS
  #define MAX_LOOPS 10000
 #endif
-#define COMPRESSION_STRATEGY CDD1
+#define COMPRESSION_STRATEGY WaveletTL::CDD1
 //#define PLOT_U_EPSILON 200
 
 

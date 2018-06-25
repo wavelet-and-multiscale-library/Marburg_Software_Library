@@ -5,6 +5,7 @@
 #include <utils/array1d.h>
 #include <utils/tiny_tools.h>
 #include <numerics/schoenberg_splines.h>
+#include <interval/pq_frame.h>
 
 namespace WaveletTL
 {

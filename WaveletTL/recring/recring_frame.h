@@ -70,6 +70,9 @@ namespace WaveletTL
 //    //! constructor with a precomputed 1D frame
 //    RecRingFrame(const IntervalFrame& frame1d);
 
+    //! virtual destructor
+    virtual ~RecRingFrame() {}
+
     //! coarsest possible level j0
     inline const level_type& j0() const { return j0_; }
     

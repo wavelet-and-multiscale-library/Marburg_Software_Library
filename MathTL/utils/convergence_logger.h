@@ -139,7 +139,7 @@ namespace MathTL
       Because of the last-mentioned use case, this should be called very
       regularly (at least once per iteration).
     */
-    virtual void checkAbortConditions() const = 0;
+    virtual void checkAbortConditions() = 0;
 
     /*!
       Start the clock which is used to measure time values for time
@@ -277,7 +277,7 @@ namespace MathTL
       in which case the computation is terminated by throwing an
       std::runtime_error.
     */
-    void checkAbortConditions() const;
+    void checkAbortConditions();
 
     /*!
       Start the clock which is used to measure time values for the
@@ -423,7 +423,7 @@ namespace MathTL
 
     void setAbortCondition_IterationCountExceeds(int iterLimit) {}
 
-    void checkAbortConditions() const {}
+    void checkAbortConditions() {}
 
     void startClock() {}
 

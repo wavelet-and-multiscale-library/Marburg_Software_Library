@@ -118,11 +118,13 @@ namespace FrameTL
 
     // write the right-hand side into file in case ot has just been computed
 #ifndef PRECOMP_RHS
+#ifndef MSL_GUI
     rhs.set_row(0, indices, entries);
     // write right hand side to file
     cout << "writing right hand side into file..." << filename << "..." << endl;
     rhs.matlab_output(filename, matrixname, 1);
     cout << "...ready" << endl;
+#endif
 #endif
 
     fnorm_sqr = l2_norm_sqr(fhelp);

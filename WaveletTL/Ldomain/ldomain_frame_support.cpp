@@ -1,6 +1,3 @@
-
-#include "ldomain_frame_index.h"
-
 // implementation for ldomain_frame_support.h
 
 namespace WaveletTL

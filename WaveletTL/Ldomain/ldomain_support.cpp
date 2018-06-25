@@ -1,5 +1,7 @@
 // implementation for ldomain_support.h
 
+#include "ldomain_frame_index.h"
+
 namespace WaveletTL
 {
   template <class IBASIS>

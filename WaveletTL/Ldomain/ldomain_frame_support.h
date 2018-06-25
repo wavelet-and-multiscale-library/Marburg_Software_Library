@@ -13,6 +13,7 @@
 #include <list>
 #include <set>
 #include <algebra/infinite_vector.h>
+#include <Ldomain/ldomain_frame_index.h>
 
 namespace WaveletTL
 {

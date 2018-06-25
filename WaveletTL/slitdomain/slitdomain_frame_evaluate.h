@@ -36,7 +36,7 @@ namespace WaveletTL
 	   const bool primal,
 	   const int resolution)
   {
-    return frame.evaluate(lambda, primal, resolution);
+    return frame.evaluate(lambda, resolution);
   }
    
   /*!
@@ -52,7 +52,7 @@ namespace WaveletTL
 	   const bool primal,
 	   const int resolution)
   {
-    return frame.evaluate(coeffs, primal, resolution);
+    return frame.evaluate(coeffs, resolution);
   }
 }
 

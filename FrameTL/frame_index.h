@@ -190,59 +190,59 @@ namespace FrameTL
   /*!
     Index of first generator on level \f$j \geq j_0\f$.
   */
-  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAMETYPE>
   FrameIndex<IBASIS,DIM_d,DIM_m>
-  first_generator(const FRAME* frame, const int j);
+  first_generator(const FRAMETYPE* frame, const int j);
 
   /*!
     Index of last generator on level \f$j \geq j_0\f$.
   */
-  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAMETYPE>
   FrameIndex<IBASIS,DIM_d,DIM_m>
-  last_generator(const FRAME* frame,const int j);
+  last_generator(const FRAMETYPE* frame,const int j);
 
     
   /*!
     Index of first wavelet on level \f$j \geq j_0\f$.
   */
-  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAMETYPE>
   FrameIndex<IBASIS,DIM_d,DIM_m>
-  first_wavelet(const FRAME* frame, const int j);
+  first_wavelet(const FRAMETYPE* frame, const int j);
     
   /*!
     Index of last wavelet on level \f$j \geq j_0\f$.
   */
-  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAMETYPE>
   FrameIndex<IBASIS,DIM_d,DIM_m>
-  last_wavelet(const FRAME* frame, const int j);
+  last_wavelet(const FRAMETYPE* frame, const int j);
 
   /*!
     Number of first generator on level \f$j_0\f$.
   */
-  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAMETYPE>
   int
-  first_generator_num(const FRAME* frame);
+  first_generator_num(const FRAMETYPE* frame);
 
   /*!
     Number of last generator on level \f$j_0\f$.
     */
-  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAMETYPE>
   int
-  last_generator_num(const FRAME* frame);
+  last_generator_num(const FRAMETYPE* frame);
     
   /*!
     Number of first wavelet on level \f$j \geq j0\f$.
   */
-  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAMETYPE>
   int
-  first_wavelet_num(const FRAME* frame, const int j);
+  first_wavelet_num(const FRAMETYPE* frame, const int j);
     
   /*!
     Index of last wavelet on level \f$j \geq j0\f$.
   */
-  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+  template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAMETYPE>
   int
-  last_wavelet_num(const FRAME* frame, const int j);
+  last_wavelet_num(const FRAMETYPE* frame, const int j);
   
 
   // The following are helpers for the parallel implementation, where,
@@ -254,9 +254,9 @@ namespace FrameTL
   void to_array (const InfiniteVector<double, INDEX>& ivec,
 		 Coefficient* coeff_array);
   
-  template <class INDEX, class FRAME>
+  template <class INDEX, class FRAMETYPE>
   void array_to_map (const Coefficient* coeff_array,
-		     const FRAME* frame,
+                     const FRAMETYPE* frame,
 		     InfiniteVector<double, INDEX>& ivec,
 		     const int count);
 

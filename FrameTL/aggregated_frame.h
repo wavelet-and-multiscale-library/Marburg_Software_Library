@@ -64,7 +64,7 @@ namespace FrameTL
     /*!
       Destructor.
      */
-    ~AggregatedFrame();
+    virtual ~AggregatedFrame();
 
     /*!
       Constructor, creates a frame from a given Atlas, sets primal and dual boundary conditions,

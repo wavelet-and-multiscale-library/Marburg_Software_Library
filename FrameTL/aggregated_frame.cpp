@@ -37,7 +37,7 @@ namespace FrameTL
     full_collection_levelwise.resize(jmax - j0_ + 2);
 
 
-    typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> FRAME;
+    typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> FRAMETYPE;
 
     int count = 0;
     int degrees_of_freedom = 0;
@@ -63,8 +63,8 @@ namespace FrameTL
           degees_of_freedom_on_lev += tmp;
         }
 
-        first =  FrameTL::first_generator<IBASIS, DIM_d, DIM_m, FRAME>(this, j0_);
-        last = FrameTL::last_generator<IBASIS, DIM_d, DIM_m, FRAME>(this, j0_);
+        first =  FrameTL::first_generator<IBASIS, DIM_d, DIM_m, FRAMETYPE>(this, j0_);
+        last = FrameTL::last_generator<IBASIS, DIM_d, DIM_m, FRAMETYPE>(this, j0_);
         cout << "degrees of freedom on level " << j << " = " <<  degees_of_freedom_on_lev << endl;
       }
       else
@@ -84,8 +84,8 @@ namespace FrameTL
           degees_of_freedom_on_lev_min_1 += tmp2;
         }
         degees_of_freedom_on_lev -= degees_of_freedom_on_lev_min_1;
-        first = FrameTL::first_wavelet<IBASIS, DIM_d, DIM_m, FRAME>(this, j);
-        last = FrameTL::last_wavelet<IBASIS, DIM_d, DIM_m, FRAME>(this, j);
+        first = FrameTL::first_wavelet<IBASIS, DIM_d, DIM_m, FRAMETYPE>(this, j);
+        last = FrameTL::last_wavelet<IBASIS, DIM_d, DIM_m, FRAMETYPE>(this, j);
         cout << "degrees of freedom on level " << j << " = " << degees_of_freedom_on_lev << endl;
       }
       // #####################################################################################
@@ -155,8 +155,8 @@ namespace FrameTL
     cout << "setting up full collection of wavelet indices..." << endl;
     full_collection.resize(degrees_of_freedom);
     int k = 0;
-    for (Index ind = FrameTL::first_generator<IBASIS, DIM_d, DIM_m, FRAME>(this, j0_);
-	 ind <= FrameTL::last_wavelet<IBASIS, DIM_d, DIM_m, FRAME>(this, jmax); ++ind) {
+    for (Index ind = FrameTL::first_generator<IBASIS, DIM_d, DIM_m, FRAMETYPE>(this, j0_);
+         ind <= FrameTL::last_wavelet<IBASIS, DIM_d, DIM_m, FRAMETYPE>(this, jmax); ++ind) {
       full_collection[k] = ind;
       k++;
     }
@@ -198,7 +198,7 @@ namespace FrameTL
     full_collection_levelwise.resize(jmax - j0_ + 2);
 
 
-    typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> FRAME;
+    typedef AggregatedFrame<IBASIS,DIM_d,DIM_m> FRAMETYPE;
 
     int count = 0;
     int degrees_of_freedom = 0;
@@ -223,8 +223,8 @@ namespace FrameTL
         degrees_of_freedom_on_lev += tmp;
         }
 
-        first =  FrameTL::first_generator<IBASIS, DIM_d, DIM_m, FRAME>(this, j0_);
-        last = FrameTL::last_generator<IBASIS, DIM_d, DIM_m, FRAME>(this, j0_);
+        first =  FrameTL::first_generator<IBASIS, DIM_d, DIM_m, FRAMETYPE>(this, j0_);
+        last = FrameTL::last_generator<IBASIS, DIM_d, DIM_m, FRAMETYPE>(this, j0_);
         cout << "degrees of freedom on level " << j << " = " << degrees_of_freedom_on_lev << endl;
       }
       else
@@ -244,8 +244,8 @@ namespace FrameTL
           degrees_of_freedom_on_lev_min_1 += tmp2;
         }
         degrees_of_freedom_on_lev -= degrees_of_freedom_on_lev_min_1;
-        first = FrameTL::first_wavelet<IBASIS, DIM_d, DIM_m, FRAME>(this, j);
-        last = FrameTL::last_wavelet<IBASIS, DIM_d, DIM_m, FRAME>(this, j);
+        first = FrameTL::first_wavelet<IBASIS, DIM_d, DIM_m, FRAMETYPE>(this, j);
+        last = FrameTL::last_wavelet<IBASIS, DIM_d, DIM_m, FRAMETYPE>(this, j);
         cout << "degrees of freedom on level " << j << " = "<< degrees_of_freedom_on_lev << endl;
       }
       // #####################################################################################
@@ -314,8 +314,8 @@ namespace FrameTL
     cout << "setting up collection of wavelet indices..." << endl;
     full_collection.resize(degrees_of_freedom);
     int k = 0;
-    for (Index ind = FrameTL::first_generator<IBASIS, DIM_d, DIM_m, FRAME>(this, j0_);
-	 ind <= FrameTL::last_wavelet<IBASIS, DIM_d, DIM_m, FRAME>(this, jmax); ++ind)
+    for (Index ind = FrameTL::first_generator<IBASIS, DIM_d, DIM_m, FRAMETYPE>(this, j0_);
+         ind <= FrameTL::last_wavelet<IBASIS, DIM_d, DIM_m, FRAMETYPE>(this, jmax); ++ind)
     {
       full_collection[k] = ind;
       k++;

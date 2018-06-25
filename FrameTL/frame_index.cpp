@@ -483,9 +483,9 @@
    }
 
 
-   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAMETYPE>
    FrameIndex<IBASIS,DIM_d,DIM_m>
-   first_generator(const FRAME* frame, const int j)
+   first_generator(const FRAMETYPE* frame, const int j)
    {
      assert(j >= frame->j0());
      
@@ -497,9 +497,9 @@
      return FrameIndex<IBASIS,DIM_d,DIM_m>(frame, j, e, 0, k);
    }
    
-   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAMETYPE>
    FrameIndex<IBASIS,DIM_d,DIM_m>
-   last_generator(const FRAME* frame, const int j)
+   last_generator(const FRAMETYPE* frame, const int j)
    {
      assert(j >= frame->j0());
 
@@ -511,9 +511,9 @@
      return FrameIndex<IBASIS,DIM_d,DIM_m>(frame, j, e, frame->bases().size()-1, k); 
    }
 
-   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAMETYPE>
    FrameIndex<IBASIS,DIM_d,DIM_m>
-   first_wavelet(const FRAME* frame, const int j)
+   first_wavelet(const FRAMETYPE* frame, const int j)
    {
      assert(j >= frame->j0());
 
@@ -528,9 +528,9 @@
      return FrameIndex<IBASIS,DIM_d,DIM_m>(frame, j, e, 0, k); 
    }
 
-   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAMETYPE>
    FrameIndex<IBASIS,DIM_d,DIM_m>
-   last_wavelet(const FRAME* frame, const int j)
+   last_wavelet(const FRAMETYPE* frame, const int j)
    {
      assert(j >= frame->j0());
      
@@ -545,36 +545,36 @@
    }
 
 
-   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAMETYPE>
    int
-   first_generator_num(const FRAME* frame)
+   first_generator_num(const FRAMETYPE* frame)
    {
      FrameIndex<IBASIS,DIM_d,DIM_m> ind(first_generator<IBASIS,DIM_d,DIM_m>(frame, frame->j0()));
      ind.set_number();
      return ind.number();
    }
    
-   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAMETYPE>
    int
-   last_generator_num(const FRAME* frame)
+   last_generator_num(const FRAMETYPE* frame)
    {
      FrameIndex<IBASIS,DIM_d,DIM_m> ind(last_generator<IBASIS,DIM_d,DIM_m>(frame, frame->j0()));
      ind.set_number();
      return ind.number();
    }
 
-   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAMETYPE>
    int
-   first_wavelet_num(const FRAME* frame, const int j)
+   first_wavelet_num(const FRAMETYPE* frame, const int j)
    {
      FrameIndex<IBASIS,DIM_d,DIM_m> ind(first_wavelet<IBASIS,DIM_d,DIM_m>(frame, j));
      ind.set_number();
      return ind.number();
    }
 
-   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAME>
+   template <class IBASIS, unsigned int DIM_d, unsigned int DIM_m, class FRAMETYPE>
    int
-   last_wavelet_num(const FRAME* frame, const int j)
+   last_wavelet_num(const FRAMETYPE* frame, const int j)
    {
      FrameIndex<IBASIS,DIM_d,DIM_m> ind(last_wavelet<IBASIS,DIM_d,DIM_m>(frame, j));
      ind.set_number();
@@ -616,9 +616,9 @@
      }
    }
 
-   template <class INDEX, class FRAME>
+   template <class INDEX, class FRAMETYPE>
    void array_to_map (const Coefficient* coeff_array,
-		      const FRAME* frame,
+                      const FRAMETYPE* frame,
 		      InfiniteVector<double, INDEX>& ivec,
 		      const int count) {
      ivec.clear();

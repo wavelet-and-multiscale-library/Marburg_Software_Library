@@ -6,12 +6,13 @@ namespace WaveletTL
     void CDD1_SOLVE(PROBLEM& P, const double epsilon,
             InfiniteVector<double, INDEX>& u_epsilon,
             const int jmax,
+            bool coarsening,
             const CompressionStrategy strategy)
     {
         // start with zero guess
         CDD1_SOLVE(P, epsilon,
                 InfiniteVector<double, INDEX>(),
-                u_epsilon, jmax, strategy);
+                u_epsilon, jmax, coarsening, strategy);
     }
 
 
@@ -20,12 +21,13 @@ namespace WaveletTL
             const InfiniteVector<double, INDEX>& guess,
             InfiniteVector<double, INDEX>& u_epsilon,
             const int jmax,
+            bool coarsening,
             const CompressionStrategy strategy)
     {
         // start with pessimistic parameters c1, c2
         CDD1_SOLVE(P, epsilon, guess, u_epsilon,
                 1.0/P.norm_Ainv(), P.norm_A(),
-                jmax, strategy);
+                jmax, coarsening, strategy);
     }
 
 
@@ -36,10 +38,11 @@ namespace WaveletTL
             const double c1,
             const double c2,
             const int jmax,
+            bool coarsening,
             const CompressionStrategy strategy)
     {
         MathTL::DummyLogger logger;
-        CDD1_SOLVE(P, epsilon, guess, u_epsilon, c1, c2, logger, jmax, strategy);
+        CDD1_SOLVE(P, epsilon, guess, u_epsilon, c1, c2, logger, jmax, coarsening, strategy);
     }
 
 
@@ -50,12 +53,13 @@ namespace WaveletTL
             InfiniteVector<double, INDEX>& u_epsilon,
             AbstractConvergenceLogger& logger,
             const int jmax,
+            bool coarsening,
             const CompressionStrategy strategy)
     {
         // start with zero guess
         CDD1_SOLVE(P, epsilon,
                 InfiniteVector<double, INDEX>(),
-                u_epsilon, logger, jmax, strategy);
+                u_epsilon, logger, jmax, coarsening, strategy);
     }
     
 
@@ -65,12 +69,13 @@ namespace WaveletTL
             InfiniteVector<double, INDEX>& u_epsilon,
             AbstractConvergenceLogger& logger,
             const int jmax,
+            bool coarsening,
             const CompressionStrategy strategy)
     {
         // start with pessimistic parameters c1, c2
         CDD1_SOLVE(P, epsilon, guess, u_epsilon,
                 1.0/P.norm_Ainv(), P.norm_A(),
-                logger, jmax, strategy);
+                logger, jmax, coarsening, strategy);
     }
 
     
@@ -82,6 +87,7 @@ namespace WaveletTL
             const double c2,
             AbstractConvergenceLogger& logger,
             const int jmax,
+            bool coarsening,
             const CompressionStrategy strategy)
     {
         // INIT, cf. [BB+] 
@@ -125,7 +131,7 @@ namespace WaveletTL
 #if _WAVELETTL_CDD1_VERBOSITY >= 1
             cout << "CDD1_SOLVE: delta=" << delta << endl;
 #endif
-            NPROG(P, params, F, Lambda, u_epsilon, delta, v_hat, Lambda_hat, r_hat, u_bar, logger, jmax, strategy);
+            NPROG(P, params, F, Lambda, u_epsilon, delta, v_hat, Lambda_hat, r_hat, u_bar, logger, jmax, coarsening, strategy);
 
             double res_norm = l2_norm(r_hat);
             logger.logConvergenceData(u_bar.size(), res_norm);
@@ -140,8 +146,10 @@ namespace WaveletTL
                 u_epsilon.swap(v_hat);
                 Lambda.swap(Lambda_hat);
             }
-            //       delta *= 0.5; // original
-            delta *= 0.1; // tuned
+            if (coarsening)
+              delta *= 0.5; // original
+            else
+              delta *= 0.1; // tuned
         }
 #if _WAVELETTL_CDD1_VERBOSITY >= 1
         cout << "CDD1_SOLVE: done!" << endl;
@@ -217,7 +225,7 @@ namespace WaveletTL
 #if _WAVELETTL_CDD1_VERBOSITY >= 1
             cout << "CDD1_SOLVE: delta=" << delta << endl;
 #endif
-            NPROG(P, params, F, Lambda, u_epsilon, delta, v_hat, Lambda_hat, r_hat, u_bar, logger, jmax, strategy);
+            NPROG(P, params, F, Lambda, u_epsilon, delta, v_hat, Lambda_hat, r_hat, u_bar, logger, jmax, false, strategy);
             res = l2_norm(r_hat);
             Dr_hat = r_hat;
             Dr_hat.scale(&P,1);
@@ -257,6 +265,7 @@ namespace WaveletTL
             InfiniteVector<double, INDEX>& u_Lambda_k,
             AbstractConvergenceLogger& logger,
             const int jmax,
+            bool coarsening,
             const CompressionStrategy strategy)
     {
         set<INDEX> Lambda_k(Lambda), Lambda_kplus1;
@@ -270,10 +279,12 @@ namespace WaveletTL
 #endif
             NGROW(P, params, F, Lambda_k, u_Lambda_k, params.q1*delta, params.q2*delta, Lambda_kplus1, r_hat, jmax, strategy);
             if (l2_norm(r_hat) <= params.c1*delta/20. || k == params.K || Lambda_k.size() == Lambda_kplus1.size()) {
-                //  	u_Lambda_k.COARSE(2.*delta/5., v_hat);
+              if (coarsening)
+                u_Lambda_k.COARSE(2.*delta/5., v_hat);
+              else
                 v_hat = u_Lambda_k;
-                v_hat.support(Lambda_hat);
-                break;
+              v_hat.support(Lambda_hat);
+              break;
             }
             GALERKIN(P, params, F, Lambda_kplus1, u_Lambda_k, params.q0*delta, params.q3*delta/params.c2, v_hat, jmax, strategy);
             u_Lambda_k.swap(v_hat);

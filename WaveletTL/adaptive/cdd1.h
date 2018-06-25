@@ -68,6 +68,7 @@ namespace WaveletTL
     void CDD1_SOLVE(PROBLEM& P, const double epsilon,
                     InfiniteVector<double, INDEX>& u_epsilon,
                     const int jmax = 99,
+                    bool coarsening = false,
 #if _WAVELETTL_USE_TBASIS == 1
                     const CompressionStrategy strategy = tensor_simple);
 #else
@@ -84,6 +85,7 @@ namespace WaveletTL
                     const InfiniteVector<double, INDEX>& guess,
                     InfiniteVector<double, INDEX>& u_epsilon,
                     const int jmax = 99,
+                    bool coarsening = false,
 #if _WAVELETTL_USE_TBASIS == 1
                     const CompressionStrategy strategy = tensor_simple);
 #else
@@ -102,6 +104,7 @@ namespace WaveletTL
                     const double c1,
                     const double c2,
                     const int jmax = 99,
+                    bool coarsening = false,
 #if _WAVELETTL_USE_TBASIS == 1
                     const CompressionStrategy strategy = tensor_simple);
 #else
@@ -118,6 +121,7 @@ namespace WaveletTL
                     InfiniteVector<double, INDEX>& u_epsilon,
                     AbstractConvergenceLogger& logger,
                     const int jmax = 99,
+                    bool coarsening = false,
 #if _WAVELETTL_USE_TBASIS == 1
                     const CompressionStrategy strategy = tensor_simple);
 #else
@@ -135,6 +139,7 @@ namespace WaveletTL
                     InfiniteVector<double, INDEX>& u_epsilon,
                     AbstractConvergenceLogger& logger,
                     const int jmax = 99,
+                    bool coarsening = false,
 #if _WAVELETTL_USE_TBASIS == 1
                     const CompressionStrategy strategy = tensor_simple);
 #else
@@ -154,6 +159,7 @@ namespace WaveletTL
                     const double c2,
                     AbstractConvergenceLogger& logger,
                     const int jmax = 99,
+                    bool coarsening = false,
 #if _WAVELETTL_USE_TBASIS == 1
                     const CompressionStrategy strategy = tensor_simple);
 #else
@@ -229,6 +235,7 @@ namespace WaveletTL
                InfiniteVector<double, INDEX>& u_Lambda_k,
                AbstractConvergenceLogger& logger,
                const int jmax = 99,
+               bool coarsening = false,
                const CompressionStrategy strategy = St04a);
     
 

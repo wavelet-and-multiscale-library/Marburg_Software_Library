@@ -88,7 +88,7 @@ namespace WaveletTL
     double hspreconditioner(0), l2preconditioner(1);
 //    int space_dimension = (*(lambda.frame())).space_dimension;
 //    int space_dimension = 2;
-    for (int i = 0; i < DIM; i++){
+    for (unsigned int i = 0; i < DIM; i++){
         hspreconditioner+=pow(1+lambda.p()[i],8)*(1<<(2*lambda.j()[i]));
         l2preconditioner*=pow(1+lambda.p()[i],2);
     }
@@ -121,7 +121,7 @@ namespace WaveletTL
    double hspreconditioner(0), l2preconditioner(1);
 //    int space_dimension = (*(lambda.frame())).space_dimension;
 //    int space_dimension = 2;
-    for (int i = 0; i < DIM; i++){
+    for (unsigned int i = 0; i < DIM; i++){
         hspreconditioner+=pow(1+lambda.p()[i],6);
         l2preconditioner*=pow(1+lambda.p()[i],2);
     }

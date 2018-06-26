@@ -4,6 +4,7 @@
 #include <Rd/cdf_utils.h>
 #include <utils/array1d.h>
 #include <numerics/schoenberg_splines.h>
+#include <interval/p_basis.h>
 
 namespace WaveletTL
 {

@@ -204,11 +204,16 @@ namespace WaveletTL
             //
             // for local operator supports have to overlap
             // add all indizes within a 1-ball of range J around lambda:
+#ifdef MSL_GUI
+            P.add_ball(lambda,w,J,factor,jmax,strategy,preconditioning, pmax, a, b);
+#else
 #ifdef FRAME
             P.add_ball(lambda,w,J,factor,jmax,strategy,preconditioning, pmax, a, b);
-#endif
+#else
 #ifdef BASIS
             P.add_ball(lambda,w,J,factor,jmax,strategy,preconditioning);
+#endif
+#endif
 #endif
         }
 #endif

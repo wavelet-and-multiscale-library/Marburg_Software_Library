@@ -82,7 +82,8 @@ namespace FrameTL
 #ifdef ONE_D
     int d = IBASIS::primal_polynomial_degree();
     int dT = IBASIS::primal_vanishing_moments();
-#else
+#endif
+#ifdef TWO_D
     int d = IBASIS::primal_polynomial_degree();
     int dT = IBASIS::primal_vanishing_moments();
 #endif

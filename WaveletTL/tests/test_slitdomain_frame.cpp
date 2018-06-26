@@ -3,14 +3,31 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
+// To reproduce the results of Chapter 8 Diss Keding use DYPLUSEN preconditioner, DELTA1=4, DELTA2 = 2, JMAX=9, PMAX=3
+
+
 #define POISSON
 #undef GRAMIAN
 
 
 #undef DYADIC
+
+//define the parameters \delta_1 and \delta_2 for the H^s weights, cf. Diss Keding Formula (6.1.20) 
+//and Theorem 7.12
+#ifdef DYADIC
+#define DELTA1 6
+#define DELTA2 2
+#endif
+
 #undef TRIVIAL
-#define ENERGY
-#undef DYPLUSEN
+#undef ENERGY
+#define DYPLUSEN
+
+#ifdef DYPLUSEN
+#define DELTA1 4
+#define DELTA2 2
+#endif
 
 #undef NONADAPTIVE
 #define ADAPTIVE
@@ -27,8 +44,8 @@
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
-#define JMAX 7
-#define PMAX 0
+#define JMAX 9
+#define PMAX 3
 #define TWO_D
 
 #define PRIMALORDER 3
@@ -48,6 +65,7 @@
 #include <slitdomain/slitdomain_frame_indexplot.h>
 #include <galerkin/slitdomain_frame_equation.h>
 #include <galerkin/cached_quarklet_slitdomain_problem.h>
+#include <galerkin/infinite_preconditioner.h>
 
 #include <adaptive/compression.h>
 #include <adaptive/apply.h>
@@ -311,15 +329,12 @@ int main(){
     }
     
     //setup problem
-    CachedQuarkletSlitDomainProblem<SlitDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq);
+    CachedQuarkletSlitDomainProblem<SlitDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq,1.,1.);
     cout<<"normA: "<<cproblem1.norm_A()<<endl;
     cout<<"normAinv: "<<cproblem1.norm_Ainv()<<endl;
     
     
-    InfiniteVector<double, Index> F_eta;
-    cproblem1.RHS(1e-6, F_eta);
-    const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
-    cout<<"nu: "<<nu<<endl;
+    
     
     InfiniteVector<double, Index> u_epsilon;
     InfiniteVector<double, int> u_epsilon_int;
@@ -329,13 +344,17 @@ int main(){
     double epsilon = 1e-20;
     
 #ifdef CDD2
+    InfiniteVector<double, Index> F_eta;
+    cproblem1.RHS(1e-6, F_eta);
+    const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
+    cout<<"nu: "<<nu<<endl;
     CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, tensor_simple, pmax, a, b);
 #endif
 #ifdef RICHARDSON
-    const unsigned int maxiter = 500;
+    const unsigned int maxiter = 10;
     const double shrinkage = 0;
-    const double omega = 0.05;
-    const double residual_stop = 0.01;
+    const double omega = 0.5;
+    const double residual_stop = 0.1;
     richardson_QUARKLET_SOLVE(cproblem1,epsilon,u_epsilon_int, maxiter, tensor_simple, a, b, shrinkage, omega, residual_stop);
 #endif
     for (typename InfiniteVector<double,int>::const_iterator it(u_epsilon_int.begin()),

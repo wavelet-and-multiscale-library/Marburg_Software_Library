@@ -202,7 +202,7 @@ namespace WaveletTL
   
   /*!
     Alternatively, one can also perform a diagonal preconditioning by the
-    energy norms times p+1 d_lambda=||psi_lambda||_A=sqrt(a(psi_lambda,psi_lambda))*(psi_p+1).
+    energy norms times p+1; d_lambda=||psi_lambda||_A=sqrt(a(psi_lambda,psi_lambda))*(psi_p+1).
   */
   template <class INDEX>
   class FullyDiagonalQuarkletEnergyNormPreconditioner
@@ -248,6 +248,11 @@ namespace WaveletTL
     : public FullyDiagonalPreconditioner<INDEX>
   {
   public:
+    /*!
+      (half) operator order t
+     */
+    virtual double operator_order() const = 0;  
+      
     /*!
       evaluate the unpreconditioned bilinear form
     */

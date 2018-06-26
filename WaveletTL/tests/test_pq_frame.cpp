@@ -2,6 +2,14 @@
 #define FRAME
 
 #define DYADIC
+
+//define the parameters \delta_1 and \delta_2 for the one-dimensional H^s weights, cf. Diss Keding  Chapter 5 Formula (5.3.9)
+#ifdef DYADIC
+#define DELTA1 6
+#define DELTA2 2
+#endif
+
+
 #undef TRIVIAL
 
 #define _DIM 1

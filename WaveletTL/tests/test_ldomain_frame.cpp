@@ -3,14 +3,34 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
+
+// To reproduce the results of Chapter 8 Diss Keding use DYPLUSEN preconditioner, DELTA1=4, DELTA2 = 2, JMAX=9, PMAX=3
+
+
+
 #define POISSON
 #undef GRAMIAN
 
 
 #undef DYADIC
+
+//define the parameters \delta_1 and \delta_2 for the H^s weights, cf. Diss Keding Formula (6.1.20) 
+//and Theorem 7.12
+#ifdef DYADIC
+#define DELTA1 6
+#define DELTA2 2
+#endif
+
 #undef TRIVIAL
-#define ENERGY
-#undef DYPLUSEN
+#undef ENERGY
+#define DYPLUSEN
+
+#ifdef DYPLUSEN
+#define DELTA1 4
+#define DELTA2 2
+#endif
+
 
 #undef NONADAPTIVE
 #define ADAPTIVE
@@ -27,8 +47,8 @@
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
-#define JMAX 7
-#define PMAX 1
+#define JMAX 9
+#define PMAX 3
 #define TWO_D
 
 #define PRIMALORDER 3
@@ -48,6 +68,7 @@
 #include <galerkin/ldomain_frame_equation.h>
 #include <galerkin/ldomain_frame_gramian.h>
 #include <galerkin/cached_quarklet_ldomain_problem.h>
+#include <galerkin/infinite_preconditioner.h>
 
 
 #include <adaptive/compression.h>
@@ -368,8 +389,8 @@ int main(){
 //    CachedQuarkletLDomainProblem<LDomainFrameGramian<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
 #endif
 #if defined CDD2 || defined RICHARDSON
-//    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
-    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 43, 9);
+    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
+//    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 43, 9);
 //    CachedQuarkletLDomainProblem<LDomainFrameGramian<Frame1d,Frame> > cproblem1(&eq);
 //   CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 5.3, 46.3);
 #endif
@@ -408,9 +429,9 @@ int main(){
 #endif
 #ifdef RICHARDSON
 //    const char* scheme_type = "Richardson";
-    const unsigned int maxiter = 2000;
-    const double omega = 0.15;
-    const double residual_stop = 0.01;
+    const unsigned int maxiter = 10;
+    const double omega = 0.5;
+    const double residual_stop = 0.1;
     const double shrinkage = 0;
     richardson_QUARKLET_SOLVE(cproblem1,epsilon,u_epsilon_int, maxiter, tensor_simple, a, b, shrinkage, omega, residual_stop);
 #endif

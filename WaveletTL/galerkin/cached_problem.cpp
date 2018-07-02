@@ -492,14 +492,25 @@ namespace WaveletTL
 
       std::set<Index> Lambda;
       const int j0 = problem->basis().j0();
-      const int jmax = j0+2;
+      const int jmax = std::min(j0+2, problem->basis().jmax());
+
       for (Index lambda = problem->basis().first_generator(j0);; ++lambda) {
 	Lambda.insert(lambda);
 	if (lambda == problem->basis().last_wavelet(jmax)) break;
         //if (i==7) break;
       }
       SparseMatrix<double> A_Lambda;
-      
+#if 1
+      setup_stiffness_matrix(*this, Lambda, A_Lambda);
+
+      Vector<double> xk(Lambda.size(), false), yk(Lambda.size(), false);
+      xk = 1, yk=1;
+      unsigned int iterations;
+      double lambdamax = MathTL::PowerIteration(A_Lambda, xk, 1e-3, 100, iterations);
+      double lambdamin = MathTL::InversePowerIteration(A_Lambda, yk, 1e-1,  1e-3, 100, iterations);
+      normA = lambdamax;
+      normAinv = 1./lambdamin;
+#else
       MathTL::Matrix<double> evecs;
       Vector<double> evals;
       setup_stiffness_matrix(*this, Lambda, A_Lambda);
@@ -530,6 +541,8 @@ namespace WaveletTL
       normAinv = 1./evals(i);
       //cout << "inversnorm: " << normAinv << endl;
 #endif
+#endif
+
 
 #if _WAVELETTL_CACHEDPROBLEM_VERBOSITY >= 1
       cout << "... done!" << endl;
@@ -538,7 +551,8 @@ namespace WaveletTL
 
     return normA;
   }
-   
+
+
   template <class PROBLEM>
   double
   CachedProblem<PROBLEM>::norm_Ainv() const
@@ -550,14 +564,25 @@ namespace WaveletTL
 
       std::set<Index> Lambda;
       const int j0 = problem->basis().j0();
-      const int jmax = j0+2;
+      const int jmax = std::min(j0+2, problem->basis().jmax());
+
       for (Index lambda = problem->basis().first_generator(j0);; ++lambda) {
 	Lambda.insert(lambda);
         //cout << lambda << endl;
 	if (lambda == problem->basis().last_wavelet(jmax)) break;
       }
-      //cout << "Schritt 1" << endl;
       SparseMatrix<double> A_Lambda;
+#if 1
+      setup_stiffness_matrix(*this, Lambda, A_Lambda);
+
+      Vector<double> xk(Lambda.size(), false), yk(Lambda.size(), false);
+      xk = 1, yk=1;
+      unsigned int iterations;
+      double lambdamax = MathTL::PowerIteration(A_Lambda, xk, 1e-3, 100, iterations);
+      double lambdamin = MathTL::InversePowerIteration(A_Lambda, yk, 1e-1,  1e-3, 100, iterations);
+      normA = lambdamax;
+      normAinv = 1./lambdamin;
+#else
       MathTL::Matrix<double> evecs;
       setup_stiffness_matrix(*this, Lambda, A_Lambda);
       //cout << "Matrix aufgestellt" << endl;
@@ -588,6 +613,7 @@ namespace WaveletTL
       
       //cout << "Eigenvektoren: " << evecs << endl;
 #endif
+#endif
 
 #if _WAVELETTL_CACHEDPROBLEM_VERBOSITY >= 1
       cout << "... done!" << endl;
@@ -597,6 +623,7 @@ namespace WaveletTL
     return normAinv;
   }
   
+
   template <class PROBLEM>
   void
   CachedProblem<PROBLEM>::set_normA(const double norm_A_new)
@@ -1129,7 +1156,7 @@ namespace WaveletTL
       std::set<Index> Lambda;
       const int j0 = problem->basis().j0();
       //const int jmax = j0+1;
-      const int jmax = problem->basis().jmax();
+      const int jmax = std::min(j0+2, problem->basis().jmax());
 
       for (Index lambda = problem->basis().first_generator(j0);; ++lambda)
       {
@@ -1140,10 +1167,13 @@ namespace WaveletTL
       SparseMatrix<double> A_Lambda;
       setup_stiffness_matrix(*this, Lambda, A_Lambda);
 
-      Vector<double> xk(Lambda.size(), false);
-      xk = 1;
+      Vector<double> xk(Lambda.size(), false), yk(Lambda.size(), false);
+      xk = 1, yk=1;
       unsigned int iterations;
-      normA = PowerIteration(A_Lambda, xk, 1e-6, 100, iterations);
+      double lambdamax = MathTL::PowerIteration(A_Lambda, xk, 1e-3, 100, iterations);
+      double lambdamin = MathTL::InversePowerIteration(A_Lambda, yk, 1e-1,  1e-3, 100, iterations);
+      normA = lambdamax;
+      normAinv = 1./lambdamin;
     }
 
     return normA;
@@ -1154,15 +1184,34 @@ namespace WaveletTL
   double
   CachedProblemLocal<PROBLEM>::norm_Ainv() const
   {
+    if (normAinv == 0.0)
+    {
+      cout << "Compute Norm(A) ..." << endl;
+      std::set<Index> Lambda;
+      const int j0 = problem->basis().j0();
+      //const int jmax = j0+1;
+      const int jmax = std::min(j0+2, problem->basis().jmax());
+
+      for (Index lambda = problem->basis().first_generator(j0);; ++lambda)
+      {
+            Lambda.insert(lambda);
+            if (lambda ==  problem->basis().last_wavelet(jmax)) break;
+      }
+
+      SparseMatrix<double> A_Lambda;
+      setup_stiffness_matrix(*this, Lambda, A_Lambda);
+
+      Vector<double> xk(Lambda.size(), false), yk(Lambda.size(), false);
+      xk = 1, yk=1;
+      unsigned int iterations;
+      double lambdamax = MathTL::PowerIteration(A_Lambda, xk, 1e-3, 100, iterations);
+      double lambdamin = MathTL::InversePowerIteration(A_Lambda, yk, 1e-1,  1e-3, 100, iterations);
+      normA = lambdamax;
+      normAinv = 1./lambdamin;
+    }
+
     return normAinv;
   }
-
-
-
-
-
-
-
 
 
   template <class PROBLEM>

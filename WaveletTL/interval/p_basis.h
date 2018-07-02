@@ -104,6 +104,9 @@ namespace WaveletTL
 
     //! coarsest possible level
     inline const int j0() const { return j0_; }
+    
+    //! finest possible level
+    inline const int jmax() const { return jmax_; }
 
     //! freezing parameters
     inline const int ellT_l() const { return (s0 >= (d-2)) ? -ell1T<d,dT>()+s0+2-d : -ell1T<d,dT>(); }

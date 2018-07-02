@@ -84,6 +84,9 @@ namespace WaveletTL
 
     //! coarsest possible level j0
     inline const int j0() const { return j0_; }
+    
+    //! finest possible level jmax
+    inline const int jmax() const { return jmax_; }
 
     void set_jmax(const int jmax) {
       jmax_ = jmax;

@@ -1,3 +1,5 @@
+*.ps
+*.eps*.tikz
 *.m
 *.bin
 *.[oa]
@@ -184,3 +186,4 @@ WaveletTL/tests/test_p_poisson_cube
 WaveletTL/tests/test_slitdomain_frame
 WaveletTL/tests/test_recring_frame
 WaveletTL/tests/test_image_outputs
+WaveletTL/tests/test_image_outputs_multidim

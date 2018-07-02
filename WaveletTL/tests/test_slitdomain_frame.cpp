@@ -3,22 +3,39 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
+// To reproduce the results of Chapter 8 Diss Keding use DYPLUSEN preconditioner, DELTA1=4, DELTA2 = 2, JMAX=9, PMAX=3
+
+
 #define POISSON
 #undef GRAMIAN
 
 
-#define DYADIC
+#undef DYADIC
+
+//define the parameters \delta_1 and \delta_2 for the H^s weights, cf. Diss Keding Formula (6.1.20) 
+//and Theorem 7.12
+#ifdef DYADIC
+#define DELTA1 6
+#define DELTA2 2
+#endif
+
 #undef TRIVIAL
 #undef ENERGY
-#undef DYPLUSEN
+#define DYPLUSEN
+
+#ifdef DYPLUSEN
+#define DELTA1 4
+#define DELTA2 2
+#endif
 
 #undef NONADAPTIVE
 #define ADAPTIVE
 
 #ifdef ADAPTIVE
 #undef SD
-#define CDD2
-#undef RICHARDSON
+#undef CDD2
+#define RICHARDSON
 #endif
 
 #define PARALLEL 0
@@ -27,8 +44,8 @@
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
-#define JMAX 6
-#define PMAX 0
+#define JMAX 9
+#define PMAX 3
 #define TWO_D
 
 #define PRIMALORDER 3
@@ -48,6 +65,7 @@
 #include <slitdomain/slitdomain_frame_indexplot.h>
 #include <galerkin/slitdomain_frame_equation.h>
 #include <galerkin/cached_quarklet_slitdomain_problem.h>
+#include <galerkin/infinite_preconditioner.h>
 
 #include <adaptive/compression.h>
 #include <adaptive/apply.h>
@@ -82,7 +100,7 @@ class mySolution
 public:
   virtual ~mySolution() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
-    CornerSingularity cs(Point<2>(0,0), 0.5, 1.9);
+    CornerSingularity cs(Point<2>(0,0), 0.5, 2.0);
     return sin(M_PI*p[0])*sin(M_PI*p[1])+5*cs.value(p);
   }
   void vector_value(const Point<2>& p, Vector<double>& values) const {
@@ -115,7 +133,9 @@ int main(){
     typedef PQFrame<d,dT> Frame1d;
     typedef SlitDomainFrame<Frame1d> Frame;
     typedef Frame::Index Index;
+
 //    typedef Frame::Support Support;
+
     
     //instances of 1d frames with different boundary conditions
     Frame1d frame1d(false,false);
@@ -172,8 +192,16 @@ int main(){
     }
     osrhs << "view(30,55);"<<endl;
     osrhs << "hold off;" << endl;
+    osrhs << "grid off;" << endl;
+    osrhs << "shading('flat');" << endl;
+    osrhs << "colormap([flipud(jet);jet]);" << endl;
+    osrhs << "set(gca,'CLim', [- min(abs(get(gca,'CLim')))  min(abs(get(gca,'CLim')))]);" << endl;
     osuexact << "view(30,55);"<<endl;
     osuexact<<"hold off;"<<endl;
+    osuexact << "grid off;" << endl;
+    osuexact << "shading('flat');" << endl;
+    osuexact << "colormap([flipud(jet);jet]);" << endl;
+    osuexact << "set(gca,'CLim', [- min(abs(get(gca,'CLim')))  min(abs(get(gca,'CLim')))]);" << endl;
     osrhs.close();
     osuexact.close();
     cout << "rhs and uexact plotted" << endl;
@@ -301,25 +329,34 @@ int main(){
     }
     
     //setup problem
-    CachedQuarkletSlitDomainProblem<SlitDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq);
+    CachedQuarkletSlitDomainProblem<SlitDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq,1.,1.);
     cout<<"normA: "<<cproblem1.norm_A()<<endl;
     cout<<"normAinv: "<<cproblem1.norm_Ainv()<<endl;
     
     
-    InfiniteVector<double, Index> F_eta;
-    cproblem1.RHS(1e-6, F_eta);
-    const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
-    cout<<"nu: "<<nu<<endl;
+    
     
     InfiniteVector<double, Index> u_epsilon;
     InfiniteVector<double, int> u_epsilon_int;
     
     const double a=2;
     const double b=2;
-    double epsilon = 1e-3;
+    double epsilon = 1e-20;
     
+#ifdef CDD2
+    InfiniteVector<double, Index> F_eta;
+    cproblem1.RHS(1e-6, F_eta);
+    const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
+    cout<<"nu: "<<nu<<endl;
     CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, tensor_simple, pmax, a, b);
-    
+#endif
+#ifdef RICHARDSON
+    const unsigned int maxiter = 10;
+    const double shrinkage = 0;
+    const double omega = 0.5;
+    const double residual_stop = 0.1;
+    richardson_QUARKLET_SOLVE(cproblem1,epsilon,u_epsilon_int, maxiter, tensor_simple, a, b, shrinkage, omega, residual_stop);
+#endif
     for (typename InfiniteVector<double,int>::const_iterator it(u_epsilon_int.begin()),
  	   itend(u_epsilon_int.end()); it != itend; ++it){
         u_epsilon.set_coefficient(*(frame.get_quarklet(it.index())), *it);
@@ -340,13 +377,16 @@ int main(){
     os2 << "figure;"<< endl;
     for(int i=0;i<4;i++){
         eval[i].matlab_output(os2);
-        os2 << "surf(x,y,z);" << endl;
+        os2 << "surf(x,y,z,'LineStyle','none');" << endl;
         os2 << "hold on;" << endl;
     }  
-    os2 << "title('slitdomain Poisson Equation: adaptive solution to test problem ("
-            << "CDD2" << "), " << "pmax= " << pmax << ", jmax= " << jmax << ", d= " << d << ", dT= " << dT << "');" << endl;
-    os2 << "view(30,55);"<<endl;
+    os2 << "title('slitdomain Poisson Equation: adaptive solution to test problem pmax= " << pmax << ", jmax= " << jmax << ", d= " << d << ", dT= " << dT << "');" << endl;
+    os2 << "view(30,55);"<<endl;    
     os2 << "hold off" << endl;
+    os2 << "grid off;" << endl;
+    os2 << "shading('flat');" << endl;
+    os2 << "colormap([flipud(jet);jet]);" << endl;
+    os2 << "set(gca,'CLim', [- min(abs(get(gca,'CLim')))  min(abs(get(gca,'CLim')))]);" << endl;
     os2.close();
     
     //new coefficients plot
@@ -493,6 +533,7 @@ int main(){
     osf.close(); 
     
     //support test
+    typedef Frame::Support Support;
     Index testindex2(testindex); 
     cout<<"test support of index "<<testindex2<<endl;
     Support supp;

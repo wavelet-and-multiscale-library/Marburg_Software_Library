@@ -146,7 +146,8 @@ EXEOBJF7 = \
 
 # set 8 of test programs: ExpandASPP	
 EXEOBJF8 = \
-  test_image_outputs.o
+  test_image_outputs.o\
+  test_image_outputs_multidim.o\
   
   
 

@@ -1,9 +1,20 @@
+
+// To reproduce the results of Chapter 8 Diss Keding use ENERGY preconditioner, JMAX=14, PMAX=5
+
+
 #include <iostream>
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
 
 #define PARALLEL 0
 
 #define DYADIC
+
+//define the parameters \delta_1 and \delta_2 for the one-dimensional H^s weights, cf. Diss Keding  Chapter 5 Formula (5.3.9)
+#ifdef DYADIC
+#define DELTA1 6
+#define DELTA2 2
+#endif
+
 #undef ENERGY
 #undef TRIVIAL
 
@@ -12,8 +23,8 @@
 #undef CONGRAD
 
 
-#define NEUMANN
-#undef DIRICHLET
+#undef NEUMANN
+#define DIRICHLET
 
 #ifdef NEUMANN
 #define NONZERONEUMANN
@@ -22,8 +33,8 @@
 #undef SHRINKAGE
 
 
-#define JMAX 9
-#define PMAX 0
+#define JMAX 12
+#define PMAX 5
 #define ONE_D
 #define _DIM 1
 
@@ -146,14 +157,7 @@ int main()
               break;
       }
     
-    // evaluate exact solution
-    const unsigned int N = 100;
-    const double h = 1./N;
-    Vector<double> uexact_values(N+1);
-    for (unsigned int i = 0; i <= N; i++) {
-      const double point = i*h;
-      uexact_values[i] = uexact->value(Point<1>(point));
-    }
+    
   
   
 
@@ -162,7 +166,7 @@ int main()
   
   const int jmax = JMAX;
   const int pmax = PMAX;
-  double stepsize = 0.05;
+  double relaxation = 0.4;
 
   
   
@@ -180,7 +184,7 @@ int main()
   Basis basis(false,false, true);
 #endif
 #ifdef DIRICHLET
-  Basis basis(ture,true, true);
+  Basis basis(true,true, true);
 #endif
   typedef Basis::Index Index;
   const char* basis_type = "Primbs quarklet frame";
@@ -190,6 +194,24 @@ int main()
   cout << "setup equation.." << endl;
   SturmEquation<Basis> eq(T, basis);
   cout << "end setup equation!" << endl;
+  
+  
+  // evaluate exact solution
+    const unsigned int N = 100;
+    const double h = 1./N;
+    Vector<double> uexact_values(N+1);
+    for (unsigned int i = 0; i <= N; i++) {
+      const double point = i*h;
+      uexact_values[i] = uexact->value(Point<1>(point));
+    }
+  /* plot exact solution*/ 
+  Grid<1> mygrid(0,1,100);    
+  std::ofstream osuexact("uexact.m");
+  SampledMapping<1> smuexact(mygrid, *uexact); 
+  smuexact.matlab_output(osuexact);
+  osuexact<<"\nfigure;"<<endl;
+  osuexact<<"\nplot(x,y);"<<endl;
+  
   
 #if 0
   for(int p=0; p<100; p++){
@@ -587,7 +609,7 @@ A.apply(x, err);
 #endif
   InfiniteVector<double, Index> F_eta;
   ceq.RHS(1e-6, F_eta);
-  double epsilon = 1e-20;
+  double epsilon = 1e-4;
   InfiniteVector<double,Index> u_epsilon;
   InfiniteVector<double,int> u_epsilon_int;
   clock_t tic = clock();
@@ -611,7 +633,7 @@ A.apply(x, err);
   const double shrink = 0.01;
   richardson_QUARKLET_SOLVE(ceq,epsilon,u_epsilon_int,DKR, 1, 1, shrink);  
 #else
-  richardson_QUARKLET_SOLVE(ceq, epsilon, u_epsilon_int, maxiter, DKR, 1, 1, 0, stepsize);
+  richardson_QUARKLET_SOLVE(ceq, epsilon, u_epsilon_int, maxiter, DKR, 1, 1, 0, relaxation);
   //  CDD2_QUARKLET_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, DKR, pmax, 2, 2);
 #endif
 
@@ -624,6 +646,8 @@ for (typename InfiniteVector<double,int>::const_iterator it(u_epsilon_int.begin(
   
 #endif
 #ifdef BASIS
+  const double norminv = ceq.norm_Ainv();  
+  const double nu = norminv*l2_norm(F_eta); 
   CDD2_SOLVE(ceq, nu, epsilon, u_epsilon, jmax);
 //  DUV_SOLVE_SD(ceq, nu, epsilon, u_epsilon, jmax);
 //  Array1D<InfiniteVector<double, Index> > approximations(1);
@@ -648,13 +672,15 @@ cout << "\nTime taken: " << (time/CLOCKS_PER_SEC) << " s";
     for (unsigned int i = 0; i <= N; i++) {
       const double point = i*h;
       for (InfiniteVector<double, Index>::const_iterator it(u_epsilon.begin()); it != u_epsilon.end(); ++it) 
-	u_values_ad[i] += *it * basis.evaluate(0, it.index(), point)*1./ceq.D(it.index());
+	u_values_ad[i] += *it * basis.evaluate(0, it.index(), point) *1./ceq.D(it.index());
     }
     
     // compute some error-norms
     const double Linfty_error_ad = linfty_norm(u_values_ad-uexact_values);
     cout << "  L_infinity error on a subgrid (adaptive): " << Linfty_error_ad << endl;
-    
+//    cout << u_values_ad << endl;
+//    cout << "exakte Lösung" << endl;
+//    cout << uexact_values << endl;
     
     const double L2_error_ad = sqrt(l2_norm_sqr(u_values_ad-uexact_values)*h);
     cout << "  L_2 error on a subgrid (adaptive): " << L2_error_ad << endl;
@@ -695,20 +721,20 @@ cout << "\nTime taken: " << (time/CLOCKS_PER_SEC) << " s";
 //                  << basis_type << ")');" << endl;
 //  coeff_stream2.close();   
 //  }
-  
+    cout << "hier1" << endl;
   for(int p=0;p<=pmax;p++){
     char filenameCoefficients2[128];
     sprintf(filenameCoefficients2, "%s%d%s", "sturm_bvp_solution_coefficients_p_" , p , "_ad.m");
     std::ofstream coeff_stream2 (filenameCoefficients2);
   coeff_stream2 << "figure;" << endl;
 
-  plot_indices_iq(&basis, u_epsilon, jmax, coeff_stream2, p, "jet", false, true, -6);
+  plot_indices_iq(&basis, u_epsilon, jmax, coeff_stream2, p, "jet", false, true, -6),
   coeff_stream2 << "title('adaptive coefficients on the level p=" << p <<" of the test problem ("
                   << basis_type << ")');" << endl;
   coeff_stream2.close();   
   }
   
-  
+  cout << "hier2" << endl;
 
 #else
     const char* filenameCoefficients2 = "./sd_results33_basis/sturm_bvp_solution_coefficients_adaptive.m";
@@ -722,18 +748,23 @@ cout << "\nTime taken: " << (time/CLOCKS_PER_SEC) << " s";
 #endif    
  
 //plot of the adaptive solution
-  const char* filenameSolution2 = "sturm_bvp_solution_adaptive.m";  
+  const char* filenameSolution2 = "sturm_bvp_solution_adaptive.m"; 
   u_epsilon.scale(&ceq, -1);
 #ifdef FRAME
+  cout << "hier3" << endl;
   SampledMapping<1> s2(evaluate(ceq.frame(), u_epsilon, true, 7));
+  cout << "hier4" << endl;
 #else
   SampledMapping<1> s2(evaluate(ceq.basis(), u_epsilon, true, 7));
 #endif
+  cout << "hier5" << endl;
   std::ofstream u_stream2(filenameSolution2);
   s2.matlab_output(u_stream2);
+  cout << "hier6" << endl;
   u_stream2 << "figure;\nplot(x,y);"
-            << "title('Sturm bvp: adaptive solution to test problem ("
-            << basis_type << "), " << "pmax= " << pmax << ", jmax= " << jmax << ", d= " << d << ", dT= " << dT << "');" << endl;
+//            << "title('Sturm bvp: adaptive solution to test problem ("
+//            << basis_type << "), " << "pmax= " << pmax << ", jmax= " << jmax << ", d= " << d << ", dT= " << dT << "');" 
+            << endl;
   
   u_stream2.close();
 

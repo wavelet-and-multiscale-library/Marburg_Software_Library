@@ -120,7 +120,7 @@ namespace WaveletTL
 //      cout << "pmax: " << pmax << endl;
       
       InfiniteVector<double,Index> gcoeffs;
-      if(pmax==0){
+      if(false){
         // switch to generator representation
         if (primal)
             basis.reconstruct(coeffs,jmax,gcoeffs);

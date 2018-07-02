@@ -3,22 +3,42 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
+
+// To reproduce the results of Chapter 8 Diss Keding use DYPLUSEN preconditioner, DELTA1=4, DELTA2 = 2, JMAX=9, PMAX=3
+
+
+
 #define POISSON
 #undef GRAMIAN
 
 
-#define DYADIC
+#undef DYADIC
+
+//define the parameters \delta_1 and \delta_2 for the H^s weights, cf. Diss Keding Formula (6.1.20) 
+//and Theorem 7.12
+#ifdef DYADIC
+#define DELTA1 6
+#define DELTA2 2
+#endif
+
 #undef TRIVIAL
 #undef ENERGY
-#undef DYPLUSEN
+#define DYPLUSEN
+
+#ifdef DYPLUSEN
+#define DELTA1 4
+#define DELTA2 2
+#endif
+
 
 #undef NONADAPTIVE
 #define ADAPTIVE
 
 #ifdef ADAPTIVE
 #undef SD
-#define CDD2
-#undef RICHARDSON
+#undef CDD2
+#define RICHARDSON
 #endif
 
 #define PARALLEL 0
@@ -27,8 +47,8 @@
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
-#define JMAX 6
-#define PMAX 0
+#define JMAX 9
+#define PMAX 3
 #define TWO_D
 
 #define PRIMALORDER 3
@@ -48,6 +68,7 @@
 #include <galerkin/ldomain_frame_equation.h>
 #include <galerkin/ldomain_frame_gramian.h>
 #include <galerkin/cached_quarklet_ldomain_problem.h>
+#include <galerkin/infinite_preconditioner.h>
 
 
 #include <adaptive/compression.h>
@@ -185,8 +206,16 @@ int main(){
     }
     osrhs << "view(30,55);"<<endl;
     osrhs << "hold off;" << endl;
+    osrhs << "grid off;" << endl;
+    osrhs << "shading('flat');" << endl;
+    osrhs << "colormap([flipud(jet);jet]);" << endl;
+    osrhs << "set(gca,'CLim', [- min(abs(get(gca,'CLim')))  min(abs(get(gca,'CLim')))]);" << endl;
     osuexact << "view(30,55);"<<endl;
     osuexact<<"hold off;"<<endl;
+    osuexact << "grid off;" << endl;
+    osuexact << "shading('flat');" << endl;
+    osuexact << "colormap([flipud(jet);jet]);" << endl;
+    osuexact << "set(gca,'CLim', [- min(abs(get(gca,'CLim')))  min(abs(get(gca,'CLim')))]);" << endl;
     osrhs.close();
     osuexact.close();
     cout << "rhs and uexact plotted" << endl;
@@ -360,8 +389,8 @@ int main(){
 //    CachedQuarkletLDomainProblem<LDomainFrameGramian<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
 #endif
 #if defined CDD2 || defined RICHARDSON
-  //  CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
-    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 43, 9);
+    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 1., 1.);
+//    CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 43, 9);
 //    CachedQuarkletLDomainProblem<LDomainFrameGramian<Frame1d,Frame> > cproblem1(&eq);
 //   CachedQuarkletLDomainProblem<LDomainFrameEquation<Frame1d,Frame> > cproblem1(&eq, 5.3, 46.3);
 #endif
@@ -383,11 +412,11 @@ int main(){
     
     const double a=2;
     const double b=2;
-    double epsilon = 1e-3;
+    double epsilon = 1e-20;
     
     double tic=clock();
 #ifdef CDD2 
-    const char* scheme_type = "CDD2";
+//    const char* scheme_type = "CDD2";
     
 //    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b);
     CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, tensor_simple, pmax, a, b);
@@ -399,9 +428,12 @@ int main(){
     steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon_int, tensor_simple, a, b);
 #endif
 #ifdef RICHARDSON
-    const char* scheme_type = "Richardson";
-    const unsigned int maxiter = 500;
-    richardson_QUARKLET_SOLVE(cproblem1,epsilon,u_epsilon_int, maxiter, tensor_simple, 2, 2);
+//    const char* scheme_type = "Richardson";
+    const unsigned int maxiter = 10;
+    const double omega = 0.5;
+    const double residual_stop = 0.1;
+    const double shrinkage = 0;
+    richardson_QUARKLET_SOLVE(cproblem1,epsilon,u_epsilon_int, maxiter, tensor_simple, a, b, shrinkage, omega, residual_stop);
 #endif
     double toc = clock();
     double time = (double)(toc-tic);
@@ -448,10 +480,13 @@ int main(){
         os2 << "surf(x,y,z);" << endl;
         os2 << "hold on;" << endl;
     }  
-    os2 << "title('Ldomain Poisson Equation: adaptive solution to test problem ("
-            << scheme_type << "), " << "pmax= " << pmax << ", jmax= " << jmax << ", d= " << d << ", dT= " << dT << "');" << endl;
-    os2 << "view(30,55);"<<endl;
+    os2 << "title('Ldomain Poisson Equation: adaptive solution to test problem pmax= " << pmax << ", jmax= " << jmax << ", d= " << d << ", dT= " << dT << "');" << endl;
+    os2 << "view(30,55);"<<endl;    
     os2 << "hold off" << endl;
+    os2 << "grid off;" << endl;
+    os2 << "shading('flat');" << endl;
+    os2 << "colormap([flipud(jet);jet]);" << endl;
+    os2 << "set(gca,'CLim', [- min(abs(get(gca,'CLim')))  min(abs(get(gca,'CLim')))]);" << endl;
     os2.close();
     
     //new coefficients plot

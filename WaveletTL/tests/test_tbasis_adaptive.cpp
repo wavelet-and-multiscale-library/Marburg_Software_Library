@@ -8,6 +8,13 @@
 #define BASIS
 
 #define DYADIC
+
+//define the parameters \delta_1 and \delta_2 for the one-dimensional H^s weights, cf. Diss Keding  Chapter 5 Formula (5.3.9)
+#ifdef DYADIC
+#define DELTA1 6
+#define DELTA2 2
+#endif
+
 #define JMAX 8
 #define PMAX 0
 #define TWO_D

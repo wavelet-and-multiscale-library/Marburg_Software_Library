@@ -24,7 +24,7 @@ namespace WaveletTL
         os<<"clf;"<<endl;
         //os<<"box on;"<<endl;
         os << "colormap( " << colormap<<");" << endl;
-        os << "set(gca,'CLim',[" << lowerclim << " 0])" << endl;
+//        os << "set(gca,'CLim',[" << lowerclim << " 0])" << endl;
         //convention: we denote generators as wavelets on level j_0 -1
         
         //set size of subplots
@@ -35,7 +35,7 @@ namespace WaveletTL
         os<<"omargin=0.05;"<<endl;
         
         //empty subplot for centered title
-        os<<"subplot(3,3,2)"<<endl;
+//        os<<"subplot(3,3,2)"<<endl;
         os<<"axis('off')"<<endl;
         os<<"title(sprintf('coefficients on degree (%i,%i) and level (%i,%i)',"<<p[0]<<","<<p[1]<<","<<j[0]-1+e[0]<<","<<j[1]-1+e[1]<<"))"<<endl;
                
@@ -46,7 +46,8 @@ namespace WaveletTL
             //set subplot properties for patches
             switch(patch){
                 case 0:
-                    os<<"subplot(3,3,1,'position',[omargin omargin+2*imargin+psize+smallpsize psize psize])"<<endl; 
+                    os<<"#patch 0:"<<endl;
+                    os<<"axes('position',[omargin omargin+2*imargin+psize+smallpsize psize psize])"<<endl; 
                     startx= e[0] ? frame->frame1d_11()->first_wavelet(j[0],p[0]).k() : frame->frame1d_11()->first_generator(j[0],p[0]).k();
                     starty= e[1] ? frame->frame1d_01()->first_wavelet(j[1],p[1]).k()+1 : frame->frame1d_01()->first_generator(j[1],p[1]).k()+1; //shift because first generator/wavelet lies on patch 3
                     columns= e[0] ? frame->frame1d_11()->Nablasize(j[0],p[0]) : frame->frame1d_11()->Deltasize(j[0],p[0]);
@@ -56,7 +57,8 @@ namespace WaveletTL
                     os<<"set(gca,'xaxislocation','top')"<<endl;
                     break;
                 case 1:
-                    os<<"subplot(3,3,7,'position',[omargin omargin psize psize])"<<endl;
+                    os<<"#patch 1:"<<endl;
+                    os<<"axes('position',[omargin omargin psize psize])"<<endl;
                     startx= e[0] ? frame->frame1d_11()->first_wavelet(j[0],p[0]).k() : frame->frame1d_11()->first_generator(j[0],p[0]).k();
                     starty= e[1] ? frame->frame1d_11()->first_wavelet(j[1],p[1]).k() : frame->frame1d_11()->first_generator(j[1],p[1]).k();
                     columns= e[0] ? frame->frame1d_11()->Nablasize(j[0],p[0]) : frame->frame1d_11()->Deltasize(j[0],p[0]);
@@ -64,7 +66,8 @@ namespace WaveletTL
                     os<<"axis(["<<(double)startx-0.5<<" "<<(double)startx-0.5+columns<<" "<<(double)starty-0.5<<" "<<(double)starty-0.5+rows<<"],axlabels);"<<endl;
                     break;
                 case 2:
-                    os<<"subplot(3,3,9,'position',[omargin+2*imargin+psize+smallpsize omargin psize psize])"<<endl;
+                    os<<"#patch 2:"<<endl;
+                    os<<"axes('position',[omargin+2*imargin+psize+smallpsize omargin psize psize])"<<endl;
                     
                     startx= e[0] ? frame->frame1d_01()->first_wavelet(j[0],p[0]).k()+1 : frame->frame1d_01()->first_generator(j[0],p[0]).k()+1;   //shift because first generator/wavelet lies on patch 4
                     starty= e[1] ? frame->frame1d_11()->first_wavelet(j[1],p[1]).k() : frame->frame1d_11()->first_generator(j[1],p[1]).k(); 
@@ -74,7 +77,8 @@ namespace WaveletTL
                     os<<"set(gca,'yaxislocation','right')"<<endl;
                     break;
                 case 3:
-                    os<<"subplot(3,3,4,'position',[omargin omargin+psize+imargin psize smallpsize])"<<endl;                    
+                    os<<"#patch 3:"<<endl;
+                    os<<"axes('position',[omargin omargin+psize+imargin psize smallpsize])"<<endl;                    
                     startx= e[0] ? frame->frame1d_11()->first_wavelet(j[0],p[0]).k() : frame->frame1d_11()->first_generator(j[0],p[0]).k();
                     starty= e[1] ? frame->frame1d_01()->first_wavelet(j[1],p[1]).k() : frame->frame1d_01()->first_generator(j[1],p[1]).k();
                     columns= e[0] ? frame->frame1d_11()->Nablasize(j[0],p[0]) : frame->frame1d_11()->Deltasize(j[0],p[0]);
@@ -82,7 +86,8 @@ namespace WaveletTL
                     os<<"axis(["<<(double)startx-0.5<<" "<<(double)startx-0.5+columns<<" "<<(double)starty-0.5<<" "<<(double)starty-0.5+rows<<"],'nolabel','ticx');"<<endl;
                     break;
                 case 4:
-                    os<<"subplot(3,3,8,'position',[omargin+psize+imargin omargin smallpsize psize])"<<endl;       
+                    os<<"#patch 4:"<<endl;
+                    os<<"axes('position',[omargin+psize+imargin omargin smallpsize psize])"<<endl;       
                     startx= e[0] ? frame->frame1d_01()->first_wavelet(j[0],p[0]).k() : frame->frame1d_01()->first_generator(j[0],p[0]).k();
                     starty= e[1] ? frame->frame1d_11()->first_wavelet(j[1],p[1]).k() : frame->frame1d_11()->first_generator(j[1],p[1]).k();
                     columns=1;
@@ -113,7 +118,7 @@ namespace WaveletTL
         //correct colorbar labels
         if (colorbar) {
             //empty subplot for colorbar
-            os<<"subplot(3,3,3,'position',[omargin+2*imargin+psize+smallpsize omargin+2*imargin+psize+smallpsize psize psize])"<<endl;
+            os<<"axes('position',[omargin+2*imargin+psize+smallpsize omargin+2*imargin+psize+smallpsize psize psize])"<<endl;
             os<<"axis('off');"<<endl;
             os << "set(gca,'CLim',[" << lowerclim << " 0])" << endl;
             os<<"h=colorbar('position',[0.9 0.05 0.025 0.85]);"<<endl;

@@ -83,33 +83,57 @@ namespace WaveletTL
   double
   FullyDiagonalQuarkletPreconditioner<INDEX, DIM>::diag(const INDEX& lambda) const
   {
-
+#ifdef DYADIC      
 #if _WAVELETTL_USE_TFRAME==1
     double hspreconditioner(0), l2preconditioner(1);
-//    int space_dimension = (*(lambda.frame())).space_dimension;
-//    int space_dimension = 2;
-    for (unsigned int i = 0; i < DIM; i++){
-        hspreconditioner+=pow(1+lambda.p()[i],8)*(1<<(2*lambda.j()[i]));
-        l2preconditioner*=pow(1+lambda.p()[i],2);
+//    H^s weights, cf. Diss Keding Formula (6.1.20):
+//    (\sum_{i=1}^d (p_i+1)^{4s+\delta_2}4^{s j_i})^{1/2}
+//    \prod_{i=1}^d \left(p_i+1\right)^{\delta_1/2}, \delta_1>0,\,\delta_2>1
+    
+    for (unsigned int i = 0; i < DIM; i++) {
+        hspreconditioner+=pow(1+lambda.p()[i],DELTA2+4*operator_order())*(1<<(2*lambda.j()[i])*(int) operator_order());
+        l2preconditioner*=pow(1+lambda.p()[i],DELTA1*0.5);
     }
     double preconditioner = sqrt(hspreconditioner)*l2preconditioner;
         
     return preconditioner;
 
 #else
-    return pow((1<<lambda.j())*pow(1+lambda.p(),4),operator_order())*pow(1+lambda.p(),2); //2^j*(p+1)^(2+\delta), falls operator_order()=1 (\delta=4)
+//    H^s weights, cf. Diss Keding Formula (5.3.9):
+//    2^{js}*(p+1)^(2s+\delta_1/2+\delta_2/2), falls operator_order()>0 
+    
+    if (operator_order()==0) 
+        return pow(1+lambda.p(),DELTA1*0.5);
+    else
+        return (1<<lambda.j()* (int) operator_order())*pow(1+lambda.p(),DELTA1*0.5+DELTA2*0.5+2*operator_order()); 
 #endif
-
+#else
+    return 1;
+#endif    
   }
 
+  
+  template <class INDEX>
+  inline
+  double
+  FullyDiagonalQuarkletEnergyNormPreconditioner<INDEX>::diag(const INDEX& lambda) const
+  {
+//      double polynomialpreconditioner(1);
+//      for (int i=0; i<_DIM; i++){
+//        polynomialpreconditioner*=pow(1+lambda.p()[i],2);        
+//      }
+//      return sqrt(a(lambda, lambda)) *polynomialpreconditioner;
+//      
+      return sqrt(a(lambda, lambda));
+      
+  };
 
   template <class INDEX>
   inline
   double
   FullyDiagonalEnergyNormPreconditioner<INDEX>::diag(const INDEX& lambda) const
   {
-    return sqrt(a(lambda, lambda));
-    //return ldexp(1.0, lambda.j()); //ATTENTION!!! HAS TO BE CHANGED BACK; ONLY FOR EXPERIMENTING
+    return sqrt(a(lambda, lambda));    
   };
   
   
@@ -119,17 +143,18 @@ namespace WaveletTL
   FullyDiagonalDyPlusEnNormPreconditioner<INDEX, DIM>::diag(const INDEX& lambda) const
   {
    double hspreconditioner(0), l2preconditioner(1);
-//    int space_dimension = (*(lambda.frame())).space_dimension;
-//    int space_dimension = 2;
-    for (unsigned int i = 0; i < DIM; i++){
-        hspreconditioner+=pow(1+lambda.p()[i],6);
-        l2preconditioner*=pow(1+lambda.p()[i],2);
+   //     weights used in the experiments for Diss Philipp Keding:
+//    (\sum_{i=1}^d (p_i+1)^{4s+\delta_2})^{1/2}
+//    \prod_{i=1}^d \left(p_i+1\right)^{\delta_1/2}*sqrt(a(\psi_\lambda,\psi_\lambda))/sqrt(dimension), \delta_1>0,\,\delta_2>1
+    for (unsigned int i = 0; i < DIM; i++) {
+        hspreconditioner+=pow(1+lambda.p()[i],DELTA2+4*operator_order());
+        l2preconditioner*=pow(1+lambda.p()[i],DELTA1*0.5);
     }
     double preconditioner = sqrt(hspreconditioner)*l2preconditioner*sqrt(a(lambda, lambda))/sqrt(DIM);
         
     return preconditioner;      
    
-    //return ldexp(1.0, lambda.j()); //ATTENTION!!! HAS TO BE CHANGED BACK; ONLY FOR EXPERIMENTING
+    
   };
 
   template <class INDEX>

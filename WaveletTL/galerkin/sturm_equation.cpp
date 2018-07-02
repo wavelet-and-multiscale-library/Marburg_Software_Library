@@ -55,7 +55,7 @@ namespace WaveletTL
     InfiniteVector<double,int> fhelp_int;
     
 #ifdef FRAME
-    cout << basis_.degrees_of_freedom() << endl;
+//    cout << basis_.degrees_of_freedom() << endl;
     for (int i=0; i<basis_.degrees_of_freedom();i++) {
 //        cout << "hallo" << endl;
 //        cout << *(basis_.get_quarklet(i)) << endl;
@@ -122,14 +122,16 @@ namespace WaveletTL
   #ifdef DYADIC
       return mypow((1<<lambda.j())*mypow(1+lambda.p(),4),operator_order())*mypow(1+lambda.p(),2); //2^j*(p+1)^6, falls operator_order()=1 (\delta=4)
 //      return 1<<(lambda.j()*(int) operator_order());
-  #else
+#endif
     #ifdef TRIVIAL
       return 1;
-    #else
-      return stiff_diagonal[lambda.number()]*(lambda.p()+1);
-    #endif
-  #endif
 #endif
+
+#ifdef ENERGY 
+      return stiff_diagonal[lambda.number()]*(lambda.p()+1);
+#endif
+#endif
+
 
 #ifdef BASIS
   #ifdef DYADIC

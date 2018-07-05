@@ -83,7 +83,6 @@ namespace WaveletTL
   double
   FullyDiagonalQuarkletPreconditioner<INDEX, DIM>::diag(const INDEX& lambda) const
   {
-#ifdef DYADIC      
 #if _WAVELETTL_USE_TFRAME==1
     double hspreconditioner(0), l2preconditioner(1);
 //    H^s weights, cf. Diss Keding Formula (6.1.20):
@@ -91,8 +90,8 @@ namespace WaveletTL
 //    \prod_{i=1}^d \left(p_i+1\right)^{\delta_1/2}, \delta_1>0,\,\delta_2>1
     
     for (unsigned int i = 0; i < DIM; i++) {
-        hspreconditioner+=pow(1+lambda.p()[i],DELTA2+4*operator_order())*(1<<(2*lambda.j()[i])*(int) operator_order());
-        l2preconditioner*=pow(1+lambda.p()[i],DELTA1*0.5);
+        hspreconditioner+=pow(1+lambda.p()[i],delta2_+4*operator_order())*(1<<(2*lambda.j()[i])*(int) operator_order());
+        l2preconditioner*=pow(1+lambda.p()[i],delta1_*0.5);
     }
     double preconditioner = sqrt(hspreconditioner)*l2preconditioner;
         
@@ -103,13 +102,10 @@ namespace WaveletTL
 //    2^{js}*(p+1)^(2s+\delta_1/2+\delta_2/2), falls operator_order()>0 
     
     if (operator_order()==0) 
-        return pow(1+lambda.p(),DELTA1*0.5);
+        return pow(1+lambda.p(),delta1_*0.5);
     else
-        return (1<<lambda.j()* (int) operator_order())*pow(1+lambda.p(),DELTA1*0.5+DELTA2*0.5+2*operator_order()); 
-#endif
-#else
-    return 1;
-#endif    
+        return (1<<lambda.j()* (int) operator_order())*pow(1+lambda.p(),delta1_*0.5+delta2_*0.5+2*operator_order());
+#endif   
   }
 
   
@@ -147,8 +143,8 @@ namespace WaveletTL
 //    (\sum_{i=1}^d (p_i+1)^{4s+\delta_2})^{1/2}
 //    \prod_{i=1}^d \left(p_i+1\right)^{\delta_1/2}*sqrt(a(\psi_\lambda,\psi_\lambda))/sqrt(dimension), \delta_1>0,\,\delta_2>1
     for (unsigned int i = 0; i < DIM; i++) {
-        hspreconditioner+=pow(1+lambda.p()[i],DELTA2+4*operator_order());
-        l2preconditioner*=pow(1+lambda.p()[i],DELTA1*0.5);
+        hspreconditioner+=pow(1+lambda.p()[i],delta2_+4*operator_order());
+        l2preconditioner*=pow(1+lambda.p()[i],delta1_*0.5);
     }
     double preconditioner = sqrt(hspreconditioner)*l2preconditioner*sqrt(a(lambda, lambda))/sqrt(DIM);
         

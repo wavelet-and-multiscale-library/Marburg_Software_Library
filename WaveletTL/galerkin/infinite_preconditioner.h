@@ -185,6 +185,15 @@ namespace WaveletTL
     : public FullyDiagonalPreconditioner<INDEX>
   {
   public:
+    FullyDiagonalQuarkletPreconditioner(double delta1 = 6, double delta2 = 2)
+        : delta1_(delta1), delta2_(delta2)
+    {
+
+    }
+
+    void set_delta1(double delta1) { delta1_ = delta1; }
+    void set_delta2(double delta2) { delta2_ = delta2; }
+
     /*!
       (half) operator order t
      */
@@ -197,6 +206,9 @@ namespace WaveletTL
       evaluate the diagonal preconditioner D
     */
     double diag(const INDEX& lambda) const;
+
+  private:
+    double delta1_, delta2_;
   };
 //#endif
   
@@ -247,6 +259,15 @@ namespace WaveletTL
     : public FullyDiagonalPreconditioner<INDEX>
   {
   public:
+    FullyDiagonalDyPlusEnNormPreconditioner(double delta1 = 4, double delta2 = 2)
+        : delta1_(delta1), delta2_(delta2)
+    {
+
+    }
+
+    void set_delta1(double delta1) { delta1_ = delta1; }
+    void set_delta2(double delta2) { delta2_ = delta2; }
+
     /*!
       (half) operator order t
      */
@@ -262,6 +283,9 @@ namespace WaveletTL
       evaluate the diagonal preconditioner D
     */
     double diag(const INDEX& lambda) const;
+
+  private:
+    double delta1_, delta2_;
   };
 
     /*!

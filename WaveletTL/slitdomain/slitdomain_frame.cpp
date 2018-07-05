@@ -18,6 +18,9 @@ namespace WaveletTL
   {
       j0_[0] = frame1d_11_->j0();
       j0_[1] = frame1d_11_->j0();
+
+      setup_full_collection_ = false;
+      precomputed_supports_ = false;
   }
 
 //  template <class IFRAME>

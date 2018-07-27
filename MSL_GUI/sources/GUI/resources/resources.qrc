@@ -1,0 +1,26 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/Logo-Marburg-Software-Library.png</file>
+        <file>icons/Logo-WMSL.png</file>
+        <file>icons/accessories-calculator.svg</file>
+        <file>icons/accessories-text-editor.svg</file>
+        <file>icons/applications-office.svg</file>
+        <file>icons/clock.svg</file>
+        <file>icons/document-revert.svg</file>
+        <file>icons/document-save.svg</file>
+        <file>icons/edit-delete.svg</file>
+        <file>icons/image-loading.svg</file>
+        <file>icons/libreoffice-oasis-formula.png</file>
+        <file>icons/list-add.svg</file>
+        <file>icons/locked.svg</file>
+        <file>icons/media-playback-start.svg</file>
+        <file>icons/process-stop.svg</file>
+        <file>icons/text-x-changelog.svg</file>
+        <file>icons/window-close.svg</file>
+        <file>icons/x-office-drawing.svg</file>
+        <file>icons/utilities-system-monitor.svg</file>
+        <file>icons/uni-marburg-logo.png</file>
+        <file>icons/help-contents.svg</file>
+        <file>icons/help-about.svg</file>
+    </qresource>
+</RCC>

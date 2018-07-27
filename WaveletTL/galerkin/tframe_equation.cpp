@@ -34,7 +34,7 @@ namespace WaveletTL
     }
 
     template <class IFRAME, unsigned int DIM, class TENSORFRAME>
-	TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::TensorFrameEquation(EllipticBVP<DIM>* bvp,
+        TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::TensorFrameEquation(const EllipticBVP<DIM>* bvp,
 																	 const TENSORFRAME& frame)
     : bvp_(bvp), frame_(frame), normA(0.0), normAinv(0.0)
 	{

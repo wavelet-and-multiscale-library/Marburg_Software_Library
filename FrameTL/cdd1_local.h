@@ -15,6 +15,9 @@
 #include <adaptive/compression.h>
 
 using std::set;
+using WaveletTL::CompressionStrategy;
+using WaveletTL::St04a;
+using WaveletTL::CDD1;
 
 /*!\namespace FrameTL
   The namespace FrameTL.

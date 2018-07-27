@@ -108,7 +108,7 @@ namespace WaveletTL
 		 * conditions and maximal levels 'jmax' and 'pmax' should have been set
 		 * to it beforehand (generally by a call of set_jpmax(int,int)).
 		 */
-		TensorFrameEquation(EllipticBVP<DIM>* bvp, const TENSORFRAME& frame);
+                TensorFrameEquation(const EllipticBVP<DIM>* bvp, const TENSORFRAME& frame);
 
         /*
          * copy constructor
@@ -120,6 +120,7 @@ namespace WaveletTL
          * make template argument accessible
          */
         typedef TENSORFRAME QuarkletFrame;
+        typedef TENSORFRAME WaveletBasis;
         typedef IFRAME Frame1D;
 
         /*
@@ -254,7 +255,7 @@ namespace WaveletTL
         mutable One_D_IntegralCache one_d_integrals;
         // #####################################################################################
         
-        EllipticBVP<DIM>* bvp_;
+        const EllipticBVP<DIM>* bvp_;
         TENSORFRAME frame_;
         // right-hand side coefficients on a fine level, sorted by modulus
         Array1D<std::pair<typename QuarkletFrame::Index,double> > fcoeffs;

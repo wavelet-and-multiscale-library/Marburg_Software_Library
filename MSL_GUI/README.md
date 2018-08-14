@@ -11,7 +11,7 @@ The program was developed using the *Qt* application/GUI-framework. It encapsula
 
 1. Download the Open Source version of the Qt-framework at [https://www.qt.io/download](https://www.qt.io/download).
 2. After starting the online-installer you can skip the step of creating or logging in to a Qt account.
-3. Select to install the latest Qt-version (at least Qt 5.7). It suffices to install the prebuilt components for your platform (for example *Desktop gcc 64-bit*) and the *Qt Charts* and *Qt Data Visualization* module. We also recommend to install the IDE *Qt Creator* under "Tools", which is checked by default.
+3. Select to install the latest Qt-version (at least Qt 5.10). It suffices to install the prebuilt components for your platform (for example *Desktop gcc 64-bit*) and the *Qt Charts* and *Qt Data Visualization* module. We also recommend to install the IDE *Qt Creator* under "Tools", which is checked by default.
 4. Start *Qt Creator*, click on "Open Project" and select the file *MSL_GUI.pro* in the MSL_GUI/sources folder to open the MSL GUI project (note: the full path to the project files must not contain any spaces!)
 5. When opening the project for the first time, it must be configured by selecting a *Kit*, which stores a build-configuration. The default Kit should be okay, so just click on "Configure Project" (if not, click on "Manage Kits..." and then "Add" to define a new one).
 6. Click on the computer icon in the left bottom corner and select *Release*.

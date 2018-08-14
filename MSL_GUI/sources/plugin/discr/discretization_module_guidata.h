@@ -27,6 +27,7 @@
 #ifndef DISCRETIZATION_MODULE_GUIDATA_H
 #define DISCRETIZATION_MODULE_GUIDATA_H
 
+#include <vector>
 #include <QStringList>
 
 struct DiscretizationModuleGuiData

@@ -33,13 +33,10 @@ namespace elliptic_bvp
 
 void ProblemType::setupNamesAndDescription()
 {
-    problemDescription_ = QString("Second-order elliptic boundary value problem on the cube %1 = (0,1)² with homogeneous Dirichlet boundary conditions:\n"
-                                  "\n"
+    problemDescription_ = QString("Second-order elliptic boundary value problem on the cube %1 = (0,1)² with homogeneous Dirichlet boundary conditions: "
                                   "Find u(x,y) with\n"
                                   "\n"
-                                  "  -%2%3(a(x,y) %2u(x,y)) + q(x,y)u(x,y) = f(x,y),   (x,y) %4 %1\n"
-                                  "\n"
-                                  "and u(x,y) = 0 on %5%1.")
+                                  "    -%2%3(a(x,y) %2u(x,y)) + q(x,y)u(x,y) = f(x,y),   (x,y) %4 %1    and u(x,y) = 0 on %5%1.")
                           .arg(QChar(0x03A9), QChar(0x2207), QChar(0x2219), QChar(0x2208), QChar(0x2202));
     functionIdentifiers_ = {"a", "q", "f"};
     functionVariables_ = {"x", "y"};

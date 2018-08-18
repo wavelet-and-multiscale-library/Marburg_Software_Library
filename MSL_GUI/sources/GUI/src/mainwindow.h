@@ -86,8 +86,6 @@ private slots:
 
     void on_comboBox_discretizationType_currentIndexChanged(int index);
 
-    void on_comboBox_Basis1D_currentTextChanged(const QString& text);
-
     void on_comboBox_method_currentIndexChanged(int index);
 
     void on_pushButton_computeSolutionPlotSamples_clicked();
@@ -95,8 +93,6 @@ private slots:
     void on_pushButton_export_clicked();
 
     void on_pushButton_deleteComputationEntry_clicked();
-
-    void on_spinBox_jmax_valueChanged(int value);
 
     void on_checkBox_plotSolution_toggled(bool checked);
 
@@ -116,8 +112,6 @@ private:
     QString inputSummary();
     QString inputSummaryMatlab();
     void setGuiInput(GuiInputData& input);
-
-    int getDefaultResolution(int jmax, const QString& basis1D) const;
 
     Ui::MainWindow* ui_;
     MatrixNormDialog* matrixNormDialog_;

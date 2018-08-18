@@ -33,13 +33,10 @@ namespace sturm_bvp
 
 void ProblemType::setupNamesAndDescription()
 {
-    problemDescription_ = QString("Sturm boundary value problem on the interval (0,1) with homogeneous Dirichlet boundary conditions:\n"
-                                  "\n"
+    problemDescription_ = QString("Sturm boundary value problem on the interval (0,1) with homogeneous Dirichlet boundary conditions: "
                                   "Find y(t) with\n"
                                   "\n"
-                                  "  -(p%1y')'(t) + q(t)%1y(t) = g(t),   0 %2 t %2 1\n"
-                                  "\n"
-                                  "and y(0) = y(1) = 0.")
+                                  "    -(p%1y')'(t) + q(t)%1y(t) = g(t),   0 %2 t %2 1    and y(0) = y(1) = 0.")
                           .arg(QChar(0x22C5), QChar(0x2264));
     functionIdentifiers_ = {"p", "q", "g"};
     functionVariables_ = {"t"};

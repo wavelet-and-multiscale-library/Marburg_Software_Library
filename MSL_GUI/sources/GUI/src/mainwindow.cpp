@@ -63,7 +63,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
     ui_->setupUi(this);
     setupDockWidgets();
-    resize(1320, 900);
+    resize(1280, 500);
     setWindowIcon(QIcon(":/icons/Logo-WMSL.png"));
 
     // Redirecting console output to textEdit_log:
@@ -418,16 +418,6 @@ void MainWindow::setGuiInput(GuiInputData& input)
 
 
 
-int MainWindow::getDefaultResolution(int jmax, const QString& basis1D) const
-{
-    if (basis1D.contains(QStringLiteral("DS")))
-        return jmax+1;
-    else
-        return jmax;
-}
-
-
-
 void MainWindow::handleSelectedProblemChanged(const QStringList& fullFunctionStrings, bool isExampleProblem)
 {
     if (isExampleProblem)
@@ -665,41 +655,38 @@ void MainWindow::on_comboBox_discretizationType_currentIndexChanged(int index)
         ui_->comboBox_method->addItems(selectedProblemType_->getMethodList(index));
         ui_->comboBox_method->setCurrentIndex(0);
 
-        ui_->spinBox_jmax->setValue(int (selectedProblemType_->getJmaxStandard(index)));
+        int jmax = int (selectedProblemType_->getJmaxStandard(index));
+        ui_->spinBox_jmax->setValue(jmax);
+        ui_->spinBox_resolution->setValue(jmax);
 
         if (ui_->comboBox_discretizationType->currentText().contains(QStringLiteral("quark"), Qt::CaseInsensitive))
         {
-            ui_->widget_pmax->setVisible(true);
+            ui_->stackedWidget_pmax_overlap->setCurrentWidget(ui_->page_pmax);
             ui_->spinBox_pmax->setEnabled(true);
         }
         else
         {
-            ui_->widget_pmax->setVisible(false);
             ui_->spinBox_pmax->setEnabled(false);
+
+            if (ui_->comboBox_discretizationType->currentText().contains(QStringLiteral("aggregated"), Qt::CaseInsensitive))
+            {
+                ui_->stackedWidget_pmax_overlap->setCurrentWidget(ui_->page_overlap);
+                if (ui_->comboBox_domain->currentText().contains(QStringLiteral("ring"), Qt::CaseInsensitive))
+                {
+                    ui_->doubleSpinBox_overlap->setValue(1.0);
+                    ui_->doubleSpinBox_overlap->setEnabled(false);
+                }
+                else
+                {
+                    ui_->doubleSpinBox_overlap->setEnabled(true);
+                }
+            }
+            else
+            {
+                ui_->doubleSpinBox_overlap->setEnabled(false);
+                ui_->stackedWidget_pmax_overlap->setCurrentWidget(ui_->page_void);
+            }
         }
-
-        if (ui_->comboBox_discretizationType->currentText().contains(QStringLiteral("aggregated"), Qt::CaseInsensitive)
-                && !(ui_->comboBox_domain->currentText().contains(QStringLiteral("ring"), Qt::CaseInsensitive)))
-        {
-            ui_->widget_overlap->setVisible(true);
-            ui_->doubleSpinBox_overlap->setEnabled(true);
-        }
-        else
-        {
-            ui_->widget_overlap->setVisible(false);
-            ui_->doubleSpinBox_overlap->setEnabled(false);
-        }
-    }
-}
-
-
-
-void MainWindow::on_comboBox_Basis1D_currentTextChanged(const QString& text)
-{
-    if (!text.isEmpty())
-    {
-        int defaultResolution = getDefaultResolution(ui_->spinBox_jmax->value(), text);
-        ui_->spinBox_resolution->setValue(defaultResolution);
     }
 }
 
@@ -722,7 +709,10 @@ void MainWindow::on_comboBox_method_currentIndexChanged(int index)
 
 void MainWindow::on_pushButton_computeSolutionPlotSamples_clicked()
 {
-    int defaultResolution = getDefaultResolution(selectedComputation_->input.jmax, selectedComputation_->input.basis1D);
+    int defaultResolution = selectedComputation_->input.jmax;
+
+    if (selectedComputation_->input.basis1D.contains(QStringLiteral("DS")))
+        defaultResolution++;
 
     bool ok;
     int resolution = QInputDialog::getInt(this, "Enter resolution",
@@ -801,14 +791,6 @@ void MainWindow::on_pushButton_deleteComputationEntry_clicked()
     plotManager_->removeSolutionPlot(computationNo);
     computationManager_->deleteComputation(computationNo);
     guiCommunicator_->deleteSolution(computationNo);
-}
-
-
-
-void MainWindow::on_spinBox_jmax_valueChanged(int value)
-{
-    int defaultResolution = getDefaultResolution(value, ui_->comboBox_Basis1D->currentText());
-    ui_->spinBox_resolution->setValue(defaultResolution);
 }
 
 

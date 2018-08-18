@@ -145,7 +145,7 @@ void PlotManager::setup1DsolutionPlotPatch(int computationNo, const double* xVal
     QLineSeries* solPlotPatch = new QLineSeries();
     solPlotPatch->setColor(ComputationTable::getColorForComputation(computationNo));
     QPen pen = solPlotPatch->pen();
-    pen.setWidth(3);
+    pen.setWidth(2);
     solPlotPatch->setPen(pen);
 
     //  Limit the number of sampling points:
@@ -216,7 +216,12 @@ void PlotManager::setup2DsolutionPlotPatch(int computationNo, const double* xVal
                                            const double* zValues, int sampleCountX, int sampleCountY, bool newPlot)
 {
     QSurface3DSeries* solPlotPatch = new QSurface3DSeries();
-    solPlotPatch->setDrawMode(QSurface3DSeries::DrawSurfaceAndWireframe);
+
+    if (sampleCountX < 100)
+        solPlotPatch->setDrawMode(QSurface3DSeries::DrawSurfaceAndWireframe);
+    else
+        solPlotPatch->setDrawMode(QSurface3DSeries::DrawSurface);
+
     solPlotPatch->setFlatShadingEnabled(true);
 
     solPlotPatch->setBaseGradient(colorGradient_);

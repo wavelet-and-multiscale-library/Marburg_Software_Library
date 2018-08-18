@@ -34,13 +34,10 @@ namespace elliptic_bvp
 
 void ProblemType::setupNamesAndDescription()
 {
-    problemDescription_ = QString("Elliptic boundary value problem in divergence form on the L-domain %1 = (-1,1)²\\[0,1)² with homogeneous Dirichlet boundary conditions:\n"
-                                  "\n"
+    problemDescription_ = QString("Elliptic boundary value problem in divergence form on the L-domain %1 = (-1,1)²\\[0,1)² with homogeneous Dirichlet boundary conditions: "
                                   "Find u(x,y) with\n"
                                   "\n"
-                                  "  -div(a(x,y)%2u(x,y)) + q(x,y)u(x,y) = f(x,y),   (x,y) %3 %1\n"
-                                  "\n"
-                                  "and u(x,y) = 0 on %4%1.")
+                                  "    -div(a(x,y)%2u(x,y)) + q(x,y)u(x,y) = f(x,y),   (x,y) %3 %1    and u(x,y) = 0 on %4%1.")
                           .arg(QChar(0x03A9), QChar(0x2207), QChar(0x2208), QChar(0x2202));
     functionIdentifiers_ = {"a", "q", "f"};
     functionVariables_ = {"x", "y"};

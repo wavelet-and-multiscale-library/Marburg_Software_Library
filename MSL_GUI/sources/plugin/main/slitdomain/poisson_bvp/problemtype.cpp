@@ -35,13 +35,10 @@ namespace poisson_bvp
 
 void ProblemType::setupNamesAndDescription()
 {
-    problemDescription_ = QString("Poisson boundary value problem on the slit domain %1 = (-1,1)² \\ {0}x(0,1) with homogeneous Dirichlet boundary conditions:\n"
-                                  "\n"
+    problemDescription_ = QString("Poisson boundary value problem on the slit domain %1 = (-1,1)² \\ {0}x(0,1) with homogeneous Dirichlet boundary conditions: "
                                   "Find u(x,y) with\n"
                                   "\n"
-                                  "  -%2u(x,y) = f(x,y),   (x,y) %3 %1\n"
-                                  "\n"
-                                  "and u(x,y) = 0 on %4%1.")
+                                  "    -%2u(x,y) = f(x,y),   (x,y) %3 %1    and u(x,y) = 0 on %4%1.")
                           .arg(QChar(0x03A9), QChar(0x2206), QChar(0x2208), QChar(0x2202));
     functionIdentifiers_ = {"f"};
     functionVariables_ = {"x", "y"};

@@ -69,7 +69,7 @@ void ConvergenceChart::addNewSeries(int computationNo, const QString& calloutTex
 
     newSeries->setPointsVisible(true);
     QPen pen = newSeries->pen();
-    pen.setWidth(3);
+    pen.setWidth(2);
     newSeries->setPen(pen);
 
     ConvergencePlot newPlot;

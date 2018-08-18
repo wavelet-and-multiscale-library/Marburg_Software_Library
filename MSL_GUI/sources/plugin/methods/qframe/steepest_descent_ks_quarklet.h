@@ -48,9 +48,9 @@ public:
 
     static void addParametersTo(ParameterWidget& widget)
     {
-        widget.addDoubleParameter("beta", 0.85, 0.01, 0.99, QChar(0x03B2), 0.01);
         widget.addDoubleParameter("a", 2.0, 1.0, 99.0);
         widget.addDoubleParameter("b", 2.0, 1.0, 99.0);
+        widget.addDoubleParameter("beta", 0.85, 0.01, 0.99, QChar(0x03B2), 0.01);
     }
 
 

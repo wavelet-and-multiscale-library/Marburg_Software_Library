@@ -35,13 +35,10 @@ namespace poisson_bvp
 
 void ProblemType::setupNamesAndDescription()
 {
-    problemDescription_ = QString("Poisson boundary value problem on the interval (0,1) with homogeneous Dirichlet boundary conditions:\n"
-                                  "\n"
+    problemDescription_ = QString("Poisson boundary value problem on the interval (0,1) with homogeneous Dirichlet boundary conditions: "
                                   "Find y(t) with\n"
                                   "\n"
-                                  "  -y''(t) = g(t),   0 %1 t %1 1\n"
-                                  "\n"
-                                  "and y(0) = y(1) = 0.")
+                                  "    -y''(t) = g(t),   0 %1 t %1 1    and y(0) = y(1) = 0.")
                           .arg(QChar(0x2264));
     functionIdentifiers_ = {"g"};
     functionVariables_ = {"t"};

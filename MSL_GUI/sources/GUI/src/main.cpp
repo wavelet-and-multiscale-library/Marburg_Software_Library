@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
     {
         MainWindow mainWindow;
         mainWindow.show();
+        mainWindow.resize(1280, 960);
 
         return application.exec();
     }

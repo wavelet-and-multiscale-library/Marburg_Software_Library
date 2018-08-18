@@ -31,9 +31,10 @@ namespace methods
 {
 
 ParameterWidget::ParameterWidget(const QString& methodName, QWidget* parent)
-    : QWidget(parent), layout_(new QFormLayout)
+    : QWidget(parent), layoutLeft_(new QFormLayout), layoutRight_(new QFormLayout), paramCount(0)
 {
-    layout_->setLabelAlignment(Qt::AlignLeft);
+    layoutLeft_->setLabelAlignment(Qt::AlignRight);
+    layoutRight_->setLabelAlignment(Qt::AlignRight);
 
     //QString widgetTitle = QString("Additional parameters for algorithm %1").arg(methodName);
     //setTitle(widgetTitle);
@@ -59,7 +60,13 @@ void ParameterWidget::addDoubleParameter(const QString& identifier, double start
     doubleSpinBox->setMaximumWidth(80);
 
     doubleBoxes_[identifier] = doubleSpinBox;
-    layout_->addRow(labelText + " =", doubleSpinBox);
+
+    if (paramCount%2 == 0)
+        layoutLeft_->addRow(labelText + " =", doubleSpinBox);
+    else
+        layoutRight_->addRow(labelText + " =", doubleSpinBox);
+
+    paramCount++;
 }
 
 
@@ -82,7 +89,13 @@ void ParameterWidget::addIntParameter(const QString& identifier, int startValue,
     spinBox->setMaximumWidth(80);
 
     intBoxes_[identifier] = spinBox;
-    layout_->addRow(labelText + " =", spinBox);
+
+    if (paramCount%2 == 0)
+        layoutLeft_->addRow(labelText + " =", spinBox);
+    else
+        layoutRight_->addRow(labelText + " =", spinBox);
+
+    paramCount++;
 }
 
 
@@ -101,7 +114,13 @@ void ParameterWidget::addBoolParameter(const QString& identifier, bool startValu
     checkBox->setChecked(startValue);
 
     boolBoxes_[identifier] = checkBox;
-    layout_->addRow(checkBox);
+
+    if (paramCount%2 == 0)
+        layoutLeft_->addRow(checkBox);
+    else
+        layoutRight_->addRow(checkBox);
+
+    paramCount++;
 }
 
 
@@ -120,14 +139,25 @@ void ParameterWidget::addStringParameter(const QString& identifier, const QStrin
     comboBox->addItems(stringValues);
 
     stringBoxes_[identifier] = comboBox;
-    layout_->addRow(labelText + ":", comboBox);
+
+    if (paramCount%2 == 0)
+        layoutLeft_->addRow(labelText + ":", comboBox);
+    else
+        layoutRight_->addRow(labelText + ":", comboBox);
+
+    paramCount++;
 }
 
 
 
 void ParameterWidget::setTheLayout()
 {
-    setLayout(layout_);
+    QHBoxLayout* horizontalLayout = new QHBoxLayout();
+    horizontalLayout->addLayout(layoutLeft_);
+    horizontalLayout->addSpacing(15);
+    horizontalLayout->addLayout(layoutRight_);
+    horizontalLayout->addStretch();
+    setLayout(horizontalLayout);
 }
 
 
@@ -164,31 +194,63 @@ QString ParameterWidget::getParamString() const
 {
     QStringList parameters;
 
-    for (int i = 0; i < layout_->rowCount(); i++)
+    for (int i = 0; i < layoutLeft_->rowCount(); i++)
     {
-        QWidget* field = layout_->itemAt(i, QFormLayout::FieldRole)->widget();
-
-        QCheckBox* checkbox = qobject_cast<QCheckBox*>(field);
-        if (checkbox)
         {
-            parameters << checkbox->text() + ((checkbox->isChecked())? ": Yes" : ": No");
-        }
-        else
-        {
-            QLabel* label = qobject_cast<QLabel*>(layout_->itemAt(i, QFormLayout::LabelRole)->widget());
-            QString param = label->text() + " %1";
+            QWidget* field = layoutLeft_->itemAt(i, QFormLayout::FieldRole)->widget();
 
-            QAbstractSpinBox* spinbox = qobject_cast<QAbstractSpinBox*>(field);
-            if (spinbox)
+            QCheckBox* checkbox = qobject_cast<QCheckBox*>(field);
+            if (checkbox)
             {
-                parameters << param.arg(spinbox->text());
+                parameters << checkbox->text() + ((checkbox->isChecked())? ": Yes" : ": No");
             }
             else
             {
-                QComboBox* combobox = qobject_cast<QComboBox*>(field);
-                if (combobox)
+                QLabel* label = qobject_cast<QLabel*>(layoutLeft_->itemAt(i, QFormLayout::LabelRole)->widget());
+                QString param = label->text() + " %1";
+
+                QAbstractSpinBox* spinbox = qobject_cast<QAbstractSpinBox*>(field);
+                if (spinbox)
                 {
-                    parameters << param.arg(combobox->currentText());
+                    parameters << param.arg(spinbox->text());
+                }
+                else
+                {
+                    QComboBox* combobox = qobject_cast<QComboBox*>(field);
+                    if (combobox)
+                    {
+                        parameters << param.arg(combobox->currentText());
+                    }
+                }
+            }
+        }
+
+        if (i < layoutRight_->rowCount())
+        {
+            QWidget* field = layoutRight_->itemAt(i, QFormLayout::FieldRole)->widget();
+
+            QCheckBox* checkbox = qobject_cast<QCheckBox*>(field);
+            if (checkbox)
+            {
+                parameters << checkbox->text() + ((checkbox->isChecked())? ": Yes" : ": No");
+            }
+            else
+            {
+                QLabel* label = qobject_cast<QLabel*>(layoutRight_->itemAt(i, QFormLayout::LabelRole)->widget());
+                QString param = label->text() + " %1";
+
+                QAbstractSpinBox* spinbox = qobject_cast<QAbstractSpinBox*>(field);
+                if (spinbox)
+                {
+                    parameters << param.arg(spinbox->text());
+                }
+                else
+                {
+                    QComboBox* combobox = qobject_cast<QComboBox*>(field);
+                    if (combobox)
+                    {
+                        parameters << param.arg(combobox->currentText());
+                    }
                 }
             }
         }

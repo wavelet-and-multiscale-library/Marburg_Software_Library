@@ -70,7 +70,10 @@ private:
     std::map<QString, QCheckBox*> boolBoxes_;
     std::map<QString, QComboBox*> stringBoxes_;
 
-    QFormLayout* layout_;
+    QFormLayout* layoutLeft_;
+    QFormLayout* layoutRight_;
+
+    int paramCount;
 };
 
 

@@ -35,13 +35,10 @@ namespace biharmonic_bvp
 
 void ProblemType::setupNamesAndDescription()
 {
-    problemDescription_ = QString("Biharmonic boundary value problem on the rectangular ring %1 = (-1,2)²\\[0,1]² with homogeneous Dirichlet boundary conditions:\n"
-                                  "\n"
+    problemDescription_ = QString("Biharmonic boundary value problem on the rectangular ring %1 = (-1,2)²\\[0,1]² with homogeneous Dirichlet boundary conditions: "
                                   "Find u(x,y) with\n"
                                   "\n"
-                                  "  -%2²u(x,y) = f(x,y),   (x,y) %3 %1\n"
-                                  "\n"
-                                  "and u = %4u/%4N = 0 on %4%1.")
+                                  "    -%2²u(x,y) = f(x,y),   (x,y) %3 %1    and u = %4u/%4N = 0 on %4%1.")
                           .arg(QChar(0x03A9), QChar(0x2206), QChar(0x2208), QChar(0x2202));
     functionIdentifiers_ = {"f"};
     functionVariables_ = {"x", "y"};

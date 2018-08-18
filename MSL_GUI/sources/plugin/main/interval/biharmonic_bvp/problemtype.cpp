@@ -34,13 +34,10 @@ namespace biharmonic_bvp
 
 void ProblemType::setupNamesAndDescription()
 {
-    problemDescription_ = QString("Biharmonic boundary value problem on the interval (0,1) with homogeneous Dirichlet boundary conditions:\n"
-                                  "\n"
+    problemDescription_ = QString("Biharmonic boundary value problem on the interval (0,1) with homogeneous Dirichlet boundary conditions: "
                                   "Find u(t) with\n"
                                   "\n"
-                                  "  -u%1%2%3(t) = g(t),   0 %4 t %4 1\n"
-                                  "\n"
-                                  "and u(0) = u(1) = u'(0) = u'(1) = 0.")
+                                  "    -u%1%2%3(t) = g(t),   0 %4 t %4 1    and u(0) = u(1) = u'(0) = u'(1) = 0.")
                           .arg(QChar(0x207D), QChar(0x2074), QChar(0x207E), QChar(0x2264));
     functionIdentifiers_ = {"g"};
     functionVariables_ = {"t"};

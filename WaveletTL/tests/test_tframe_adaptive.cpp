@@ -5,11 +5,16 @@
  */
 
 #define PARALLEL 0
-#undef NONADAPTIVE
-#define ADAPTIVE
+#define NONADAPTIVE
+#undef ADAPTIVE
+
+#define DYADIC
 
 #undef BASIS
 #define FRAME
+
+#undef DIRICHLET
+#define NEUMANN
 
 #ifdef FRAME
 #define _WAVELETTL_USE_TFRAME 1
@@ -142,17 +147,15 @@ int main()
     cout << "Testing tbasis adaptive" << endl;
     const int d  = 3;
     const int dT = 3;
+#ifdef ADAPTIVE
     const int a=2;
     const int b=2;
+#endif 
     const unsigned int dim = 2; 
-    const int jmax=8;
-    const int pmax = 0;
+    const int jmax=6;
+    const int pmax = 1;
 
-        FixedArray1D<int,2*dim> s;          //set order of boundary conditions
-    s[0]=0, s[1]=0; s[2]=0, s[3]=0; 
-    //cout << s << endl;
-    FixedArray1D<bool, 2*dim> bc;
-    bc[0]=true, bc[1]=true, bc[2]=true, bc[3]=true;
+
     
     //Basis1d basis1d(true,true);
     //basis1d.set_jmax(jmax1);
@@ -165,39 +168,43 @@ int main()
     //Function2 function2;
     
     PoissonBVP<dim> poisson1(&rhs1);
-    
-#ifdef BASIS
-    typedef PBasis<d,dT> Basis1d;
-//    typedef Basis1d::Index Index1d;
-    typedef TensorBasis<Basis1d,dim> Basis;
-    typedef Basis::Index Index;
-    TensorEquation<Basis1d,dim,Basis> eq(&poisson1, bc);
-    eq.set_jmax(jmax);
-    
-    
-#endif
-    
 
-    
-#ifdef FRAME
-    
+
+      
+#ifdef FRAME    
     typedef PQFrame<d,dT> Frame1d;
-//    typedef Basis1d::Index Index1d;
     typedef TensorFrame<Frame1d,dim> Frame;
     typedef Frame::Index Index;
-    TensorFrameEquation<Frame1d,dim,Frame> eq(&poisson1, bc);
+#ifdef DIRICHLET    
+    Frame1d frame1d(true,true);   
+#endif
+#ifdef NEUMANN    
+    Frame1d frame1d(false,false);
+#endif
+    
+    frame1d.set_jpmax(jmax-frame1d.j0(),pmax);
+    FixedArray1D<Frame1d*,2> frames;
+    frames[0]=&frame1d;
+    frames[1]=&frame1d;
+       
+    Frame frame(frames);
+    frame.set_jpmax(jmax,pmax);
+    cout<<"dof: "<<frame.degrees_of_freedom()<<endl;
 
-    eq.set_jpmax(jmax, pmax);
-    Frame frame = eq.frame();
+#ifdef DIRICHLET
+    TensorFrameEquation<Frame1d,dim,Frame> eq(&poisson1, &frame, false);
+#endif    
+#ifdef NEUMANN
+    TensorFrameEquation<Frame1d,dim,Frame> eq(&poisson1, &frame, false);
+#endif
+  
 
 #endif  
     
     
     
     
-#if 0
-    abort();
-#endif    
+   
     
 #if 1    
     
@@ -336,14 +343,14 @@ int main()
     Lambda.insert(*frame.get_quarklet(i));
         cout << *frame.get_quarklet(i) << endl;
   }
-    
+ #if 0    
     cout << "setting up full right hand side..." << endl;
   Vector<double> rh;
   WaveletTL::setup_righthand_side(cproblem1, Lambda, rh);
 //  cout << rh << endl;
   cout << "setting up full stiffness matrix..." << endl;
   SparseMatrix<double> stiff;
-  
+
   clock_t tstart, tend;
   double time;
   tstart = clock();
@@ -361,6 +368,7 @@ int main()
   stiff.matlab_output("stiff_frame_2D_out", "stiff",1); 
   
   abort();
+#endif
 #endif
 //    Index mu=eq.frame().first_generator();
 //    Index lambda=eq.frame().first_generator();

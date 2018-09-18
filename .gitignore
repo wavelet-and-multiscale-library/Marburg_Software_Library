@@ -187,3 +187,4 @@ WaveletTL/tests/test_slitdomain_frame
 WaveletTL/tests/test_recring_frame
 WaveletTL/tests/test_image_outputs
 WaveletTL/tests/test_image_outputs_multidim
+WaveletTL/tests/test_tframe_neumann

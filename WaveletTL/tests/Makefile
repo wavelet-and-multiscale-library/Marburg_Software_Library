@@ -85,8 +85,8 @@ EXEOBJF1 = \
 
 # set 2 of test programs: wavelet bases on the interval ([DS],[P],[JL],[A],[S])
 EXEOBJF2 = \
-  test_pq_frame.o
-  
+  test_pq_frame.o\
+  test_quark_compression.o
 
 # set 2a of test programs: wavelet bases on the interval with improved performance (periodic)
 EXEOBJF2a = \
@@ -106,6 +106,7 @@ EXEOBJF3 = \
   test_tframe_adaptive.o\
   test_ldomain.o\
   test_tbasis_indexplot.o\
+  test_tframe_neumann.o
 
 # set 3a of test programs: wavelet bases on the ring domain
 EXEOBJF3a = \

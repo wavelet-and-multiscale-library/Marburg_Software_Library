@@ -15,10 +15,14 @@
 #include <utils/array1d.h>
 #include <numerics/bvp.h>
 #include <cube/tframe_support.h>
+#include <utils/function.h>
+#include <geometry/point.h>
 
 #include <galerkin/galerkin_utils.h>
 #include <galerkin/infinite_preconditioner.h>
 #include <interval/pq_expansion.h>
+#include <interval/indexq1D.h>
+#include <interval/i_q_index.h>
 
 using MathTL::FixedArray1D;
 using MathTL::EllipticBVP;
@@ -71,17 +75,32 @@ namespace WaveletTL
     template <class IFRAME, unsigned int DIM, class TENSORFRAME = TensorFrame<IFRAME,DIM> >
     class TensorFrameEquation
     //     : public FullyDiagonalDyadicPreconditioner<typename TENSORFRAME::Index>
+#ifdef DYADIC  
+    : public FullyDiagonalQuarkletPreconditioner<typename TENSORFRAME::Index, DIM>   
+#endif
+#ifdef TRIVIAL
+    : public TrivialPreconditioner<typename TENSORFRAME::Index>
+#endif
+#ifdef ENERGY
     : public FullyDiagonalEnergyNormPreconditioner<typename TENSORFRAME::Index>
+#endif
+#ifdef DYPLUSEN
+    : public FullyDiagonalDyPlusEnNormPreconditioner<typename TENSORFRAME::Index, DIM>
+#endif
     {
     public:
+        /*!
+    make template argument accessible
+    */
+         typedef TENSORFRAME Frame;
         /*
          * constructor from a boundary value problem and specified b.c.'s
          */
 
-        TensorFrameEquation(EllipticBVP<DIM>* bvp,
-                       const FixedArray1D<bool,2*DIM>& bc,
-                       const bool precompute = true);
-
+//        TensorFrameEquation(EllipticBVP<DIM>* bvp,
+//                       const FixedArray1D<bool,2*DIM>& bc,
+//                       const bool precompute_rhs = true);
+        
 //     /*!
 //     */
 //     TensorFrameEquation(const TENSORFRAME* frame,
@@ -98,9 +117,9 @@ namespace WaveletTL
         /*
          * constructor from a boundary value problem and specified b.c.'s
          */
-        TensorFrameEquation(const EllipticBVP<DIM>* bvp,
-                       const FixedArray1D<int,2*DIM>& bc,
-                       const bool precompute = true);
+//        TensorFrameEquation(const EllipticBVP<DIM>* bvp,
+//                       const FixedArray1D<int,2*DIM>& bc,
+//                       const bool precompute_rhs = true);
 
 		/*
 		 * Constructor from a boundary value problem and a given tensor frame.
@@ -108,31 +127,25 @@ namespace WaveletTL
 		 * conditions and maximal levels 'jmax' and 'pmax' should have been set
 		 * to it beforehand (generally by a call of set_jpmax(int,int)).
 		 */
-                TensorFrameEquation(const EllipticBVP<DIM>* bvp, const TENSORFRAME& frame);
+        TensorFrameEquation(const EllipticBVP<DIM>* bvp, const Frame* frame, const bool precompute_rhs = true);
+        
+        //constructor with given neumann-bc function
+        TensorFrameEquation(const EllipticBVP<DIM>* bvp, const Frame* frame, const Function<DIM>* phi, const bool precompute_rhs = true);
 
         /*
          * copy constructor
          */
-        TensorFrameEquation(const TensorFrameEquation&);
-
-    
-        /*
-         * make template argument accessible
-         */
-        typedef TENSORFRAME QuarkletFrame;
-        typedef TENSORFRAME WaveletBasis;
-        typedef IFRAME Frame1D;
+        TensorFrameEquation(const TensorFrameEquation&);     
 
         /*
-         * wavelet index class
+         * quarklet index class
          */
-        typedef typename QuarkletFrame::Index Index;
-        typedef typename Frame1D::Index Index1D;
+        typedef typename Frame::Index Index;
         
         /*
          * read access to the frame
          */
-        const TENSORFRAME& frame() const { return frame_; }
+        const Frame& frame() const { return *frame_; }
 
         /*
          * space dimension of the problem
@@ -143,6 +156,7 @@ namespace WaveletTL
          * differential operators are local
          */
         static bool local_operator() { return true; }
+        
 
         /*
          * (half) order t of the operator
@@ -153,7 +167,7 @@ namespace WaveletTL
         /*
          * evaluate the diagonal preconditioner D
          */
-        double D(const typename QuarkletFrame::Index& lambda) const;
+        double D(const Index& lambda) const;
 
         /*
          * evaluate the (unpreconditioned) bilinear form a
@@ -170,8 +184,8 @@ namespace WaveletTL
          * to the singular supports of the spline wavelets involved,
          * so that m = (p+1)/2;
          */
-        double a(const typename QuarkletFrame::Index& lambda,
-                 const typename QuarkletFrame::Index& nu,
+        double a(const Index& lambda,
+                 const Index& nu,
                  const unsigned int p) const;
                     
         /*
@@ -202,7 +216,7 @@ namespace WaveletTL
         /*
          * evaluate the (unpreconditioned) right-hand side f
          */
-        double f(const typename QuarkletFrame::Index& lambda) const;
+        double f(const Index& lambda) const;
 
         /*
          * approximate the wavelet coefficient set of the preconditioned right-hand side F
@@ -210,7 +224,7 @@ namespace WaveletTL
          * uses only entries from fcoeffs.
          */
         void RHS(const double eta,
-                 InfiniteVector<double,typename QuarkletFrame::Index>& coeffs) const;
+                 InfiniteVector<double,Index>& coeffs) const;
         void RHS(const double eta,
                  InfiniteVector<double, int>& coeffs) const;
 
@@ -229,39 +243,63 @@ namespace WaveletTL
          */
         void set_f(const Function<DIM>* fnew);
         
+        /*!
+         function for neumann-bc
+        */
+        const double phi(const Point<DIM>& x) const
+        {
+            return phi_->value(x);
+        }
+        
         /*
          * set the maximal wavelet level jmax.
          * modifies
          *   frame_.full_collection, fcoeffs, fnorm_sqr
          */
-        inline void set_jpmax(const unsigned int jmax, const unsigned int pmax, const bool computerhs = true)
-        {
-            frame_.set_jpmax(jmax, pmax);
-            if (computerhs) compute_rhs();
-        }
+//        inline void set_jpmax(const unsigned int jmax, const unsigned int pmax, const bool computerhs = true)
+//        {
+////            frame_.set_jpmax(jmax, pmax);
+////            if (computerhs) compute_rhs();
+//        }
         
-        double integrate(const int lp, const int lj, const int le, const int lk,
-		   const int mp, const int mj, const int me, const int mk, const int derivative=0) const;
+//        double integrate(const int lp, const int lj, const int le, const int lk,
+//		   const int mp, const int mj, const int me, const int mk, const int derivative=0) const;
 
     protected:
+        const bool nonzeroneumann_;
+        const EllipticBVP<DIM>* bvp_;
+        const Frame* frame_;
         
+        //! function for neumann-bc
+        const Function<DIM>* phi_;
+        
+        // right-hand side coefficients on a fine level, sorted by modulus
+        Array1D<std::pair<Index,double> > fcoeffs;
+        Array1D<std::pair<int,double> > fcoeffs_int;
+
+        // precompute the right-hand side
+        void compute_rhs();
         
         // #####################################################################################
         // Caching of appearing 1D integrals when making use of the tensor product structure of the wavelets
         // during the evaluation of the bilinear form.
-        typedef std::map<Index1D,double > Column1D;
-        typedef std::map<Index1D,Column1D> One_D_IntegralCache;
+//        typedef std::map<Index1D,double > Column1D;
+//        typedef std::map<Index1D,Column1D> One_D_IntegralCache;
+        typedef std::map<IndexQ1D<IFRAME>,double > Column1D;
+        typedef std::map<IndexQ1D<IFRAME>,Column1D> One_D_IntegralCache;
 
         mutable One_D_IntegralCache one_d_integrals;
         // #####################################################################################
         
-        const EllipticBVP<DIM>* bvp_;
-        TENSORFRAME frame_;
-        // right-hand side coefficients on a fine level, sorted by modulus
-        Array1D<std::pair<typename QuarkletFrame::Index,double> > fcoeffs;
-        // precompute the right-hand side
-        // TODO PERFORMANCE:: use setup_full_collection entries
-        void compute_rhs();
+        
+        /*!
+        precomputation of the right-hand side
+        (constness is not nice but necessary to have RHS a const function)
+        */
+        void compute_diagonal();
+    
+        //! Square root of coefficients on diagonal of stiffness matrix.
+        Array1D<double> stiff_diagonal;
         // (squared) \ell_2 norm of the precomputed right-hand side
         double fnorm_sqr;
         // estimates for ||A|| and ||A^{-1}||

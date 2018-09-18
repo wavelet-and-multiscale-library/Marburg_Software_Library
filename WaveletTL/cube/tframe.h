@@ -4,7 +4,7 @@
 // | This file is part of WaveletTL - the Wavelet Template Library      |
 // |                                                                    |
 // | Copyright (c) 2002-2009                                            |
-// | Ulrich Friedrich                                                   |
+// | Ulrich Friedrich, Alexander Sieber                                 |
 // +--------------------------------------------------------------------+
 
 #ifndef _WAVELETTL_TFRAME_H_
@@ -56,6 +56,8 @@ namespace WaveletTL
     public:
     	//! Interval frame
     	typedef IFRAME IntervalFrame;
+        
+       
         
         //! Default constructor (no b.c.'s)
         TensorFrame();

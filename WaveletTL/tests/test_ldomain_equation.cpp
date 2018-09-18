@@ -264,7 +264,7 @@ int main()
   
 //  typedef PQFrame<d,dT> Frame1d;
 //    typedef Basis1d::Index Index1d;
-#if 1
+#if 0
     typedef TensorFrame<Frame1D,2> CubeFrame;
     
     typedef CubeFrame::Index CubeIndex;

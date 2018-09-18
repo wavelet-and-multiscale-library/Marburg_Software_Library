@@ -1,46 +1,74 @@
 // implementation for tframe_equation.h
 
-
+#include <cmath>
+#include <time.h>
+#include <utils/fixed_array1d.h>
+#include <numerics/gauss_data.h>
+#include <numerics/eigenvalues.h>
+#include <cube/tframe_support.h>
 
 namespace WaveletTL
 {
-    //PERFORMANCE : wozu compute_rhs? welches jmax in den Konstruktoren? (wenn überhaupt)
-    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
-    TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::TensorFrameEquation(EllipticBVP<DIM>* bvp,
-                                                           const FixedArray1D<bool,2*DIM>& bc,
-                                                           const bool precompute)
-    : bvp_(bvp), frame_(bc), normA(0.0), normAinv(0.0)
-    {
-        if (precompute == true)
-        {
-            cout << "Maximal level is set to "<<multi_degree(frame_.j0())<< ". Maximal polynomial to " << 0 << ". You may want to increase that." << endl;
-            frame_.set_jpmax(multi_degree(frame_.j0()),0);
-            compute_rhs();
-        }
-    }
+//    //PERFORMANCE : wozu compute_rhs? welches jmax in den Konstruktoren? (wenn überhaupt)
+//    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
+//    TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::TensorFrameEquation(EllipticBVP<DIM>* bvp,
+//                                                           const FixedArray1D<bool,2*DIM>& bc,
+//                                                           const bool precompute_rhs)
+//    : bvp_(bvp), frame_(bc), normA(0.0), normAinv(0.0)
+//    {
+//        if (precompute_rhs == true)
+//        {
+//            cout << "Maximal level is set to "<<multi_degree(frame_.j0())<< ". Maximal polynomial to " << 0 << ". You may want to increase that." << endl;
+//            frame_.set_jpmax(multi_degree(frame_.j0()),0);
+//            compute_rhs();
+//        }
+//    }
+
+//    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
+//    TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::TensorFrameEquation(const EllipticBVP<DIM>* bvp,
+//                                                     const FixedArray1D<int,2*DIM>& bc,
+//                                                     const bool precompute)
+//    : bvp_(bvp), frame_(bc), normA(0.0), normAinv(0.0)
+//    {
+//        if (precompute == true)
+//        {
+//            cout << "Maximal level is set to "<<multi_degree(frame_.j0())<< ". Maximal polynomial to " << 0 << ". You may want to increase that." << endl;
+//            frame_.set_jpmax(multi_degree(frame_.j0()),0); // for a first quick hack
+//            compute_rhs();
+//        }
+//    }
 
     template <class IFRAME, unsigned int DIM, class TENSORFRAME>
-    TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::TensorFrameEquation(const EllipticBVP<DIM>* bvp,
-                                                     const FixedArray1D<int,2*DIM>& bc,
-                                                     const bool precompute)
-    : bvp_(bvp), frame_(bc), normA(0.0), normAinv(0.0)
-    {
-        if (precompute == true)
-        {
-            cout << "Maximal level is set to "<<multi_degree(frame_.j0())<< ". Maximal polynomial to " << 0 << ". You may want to increase that." << endl;
-            frame_.set_jpmax(multi_degree(frame_.j0()),0); // for a first quick hack
-            compute_rhs();
-        }
-    }
-
-    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
-        TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::TensorFrameEquation(const EllipticBVP<DIM>* bvp,
-																	 const TENSORFRAME& frame)
-    : bvp_(bvp), frame_(frame), normA(0.0), normAinv(0.0)
+        TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::TensorFrameEquation(const EllipticBVP<DIM>* bvp, const Frame* frame, const bool precompute_rhs)
+    : nonzeroneumann_(false), bvp_(bvp), frame_(frame), normA(0.0), normAinv(0.0)
 	{
-		// frame_.set_jpmax(frame.get_jmax(), frame.get_pmax());
-		compute_rhs();
-	}
+#ifndef DYADIC
+            compute_diagonal(); 
+#endif
+        if (precompute_rhs)
+        {
+//            cout << "Maximal level is set to "<<multi_degree(frame_->j0())<< ". Maximal polynomial to " << 0 << ". You may want to increase that." << endl;
+//            frame_->set_jpmax(multi_degree(frame_->j0()),0);
+            compute_rhs();
+        }
+    }
+    
+    //constructor with given neumann-bc function
+    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
+        TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::TensorFrameEquation(const EllipticBVP<DIM>* bvp, const Frame* frame, const Function<DIM>* phi, const bool precompute_rhs)
+    : nonzeroneumann_(true), bvp_(bvp), frame_(frame), phi_(phi), normA(0.0), normAinv(0.0)
+	{
+        cout<<"set non-zero neumann boundary conditions"<<endl;
+#ifndef DYADIC
+            compute_diagonal(); 
+#endif
+        if (precompute_rhs)
+        {
+//            cout << "Maximal level is set to "<<multi_degree(frame_->j0())<< ". Maximal polynomial to " << 0 << ". You may want to increase that." << endl;
+//            frame_->set_jpmax(multi_degree(frame_->j0()),0);
+            compute_rhs();
+        }
+    }
 
     template <class IFRAME, unsigned int DIM, class TENSORFRAME>
     TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::TensorFrameEquation(const TensorFrameEquation& eq)
@@ -48,8 +76,11 @@ namespace WaveletTL
       fcoeffs(eq.fcoeffs), fnorm_sqr(eq.fnorm_sqr),
       normA(eq.normA), normAinv(eq.normAinv)
     {
-            cout << "Maximal level is set to "<<multi_degree(frame_.j0())<< ". Maximal polynomial to " << 0 << ". You may want to increase that." << endl;
-            frame_.set_jpmax(multi_degree(frame_.j0()),0);
+#ifndef DYADIC
+            compute_diagonal(); 
+#endif
+//            cout << "Maximal level is set to "<<multi_degree(frame_.j0())<< ". Maximal polynomial to " << 0 << ". You may want to increase that." << endl;
+//            frame_.set_jpmax(multi_degree(frame_.j0()),0);
     }
 
 // TODO PERFORMANCE:: use setup_full_collection entries
@@ -57,75 +88,100 @@ namespace WaveletTL
     void
     TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::compute_rhs()
     {
-        //cout << "TensorFrameEquation(): precompute right-hand side..." << endl;
-        typedef typename QuarkletFrame::Index Index;
+        cout << "TensorFrameEquation(): precompute right-hand side..." << endl;
         // precompute the right-hand side on a fine level
         InfiniteVector<double,Index> fhelp;
+        InfiniteVector<double,int> fhelp_int;
         fnorm_sqr = 0;
-        for (unsigned int i = 0; (int)i< frame_.degrees_of_freedom();i++)
+//        double coeff;
+        
+        for (unsigned int i = 0; (int)i< frame_->degrees_of_freedom();i++)
         {
-            const double coeff = f(frame_.get_quarklet(i)) / D(frame_.get_quarklet(i));
+            const double coeff = f(frame_->get_quarklet(i)) / D(frame_->get_quarklet(i));
             if (fabs(coeff)>1e-15)
             {
-                fhelp.set_coefficient(frame_.get_quarklet(i), coeff);
+                fhelp.set_coefficient(frame_->get_quarklet(i), coeff);
                 fnorm_sqr += coeff*coeff;
             }
         }
-        //cout << "... done, sort the entries in modulus..." << endl;
+        cout << "... done, sort the entries in modulus..." << endl;
         // sort the coefficients into fcoeffs
         fcoeffs.resize(0); // clear eventual old values
+        fcoeffs_int.resize(0);
         fcoeffs.resize(fhelp.size());
-        unsigned int id(0);
-        for (typename InfiniteVector<double,Index>::const_iterator it(fhelp.begin()), itend(fhelp.end());
-                it != itend; ++it, ++id)
+        fcoeffs_int.resize(fhelp_int.size());
+        unsigned int id(0), id2(0);
+        for (typename InfiniteVector<double,Index>::const_iterator it(fhelp.begin()), itend(fhelp.end());it != itend; ++it, ++id)
         {
             fcoeffs[id] = std::pair<Index,double>(it.index(), *it);
 //            cout << it.index() << ", " << *it << endl;
         }
+        for (typename InfiniteVector<double,int>::const_iterator it(fhelp_int.begin()), itend(fhelp_int.end()); it != itend; ++it, ++id2){
+            fcoeffs_int[id2] = std::pair<int,double>(it.index(), *it);
+        }
         sort(fcoeffs.begin(), fcoeffs.end(), typename InfiniteVector<double,Index>::decreasing_order());
+        sort(fcoeffs_int.begin(), fcoeffs_int.end(), typename InfiniteVector<double,int>::decreasing_order());
         //cout << "... done, all integrals for right-hand side computed!" << endl;
     }
 
     template <class IFRAME, unsigned int DIM, class TENSORFRAME>
     inline
     double
-    TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::D(const typename QuarkletFrame::Index& lambda) const
+    TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::D(const Index& lambda) const
     {
-//        return sqrt(a(lambda, lambda));
+#ifdef DYADIC
         double hspreconditioner(0), l2preconditioner(1);
         for (int i=0; i<space_dimension; i++){
-            hspreconditioner+=pow(1+lambda.p()[i],8)*ldexp(1.0,2*lambda.j()[i]);
+            hspreconditioner+=pow(1+lambda.p()[i],8)*(1<<(2*lambda.j()[i]));
             l2preconditioner*=pow(1+lambda.p()[i],2);
         }
         double preconditioner = sqrt(hspreconditioner)*l2preconditioner;
         
         return preconditioner;
-        
+#endif  
+#ifdef TRIVIAL
+        return 1;
+#endif
+#ifdef ENERGY
+        return stiff_diagonal[lambda.number()];
+#endif
+#ifdef DYPLUSEN
+        double hspreconditioner(0), l2preconditioner(1);
+        for (int i=0; i<space_dimension; i++){
+            hspreconditioner+=pow(1+lambda.p()[i],6);
+            l2preconditioner*=pow(1+lambda.p()[i],2);
+        }
+        double preconditioner = sqrt(hspreconditioner)*l2preconditioner*stiff_diagonal[lambda.number()]/sqrt(space_dimension);
+//        double preconditioner = sqrt(0.1)*stiff_diagonal[lambda.number()];
+        return preconditioner;
+
+#endif 
     }
 
     template <class IFRAME, unsigned int DIM, class TENSORFRAME>
     inline
     double
-    TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::a(const typename QuarkletFrame::Index& lambda,
-                                          const typename QuarkletFrame::Index& mu) const
+    TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::a(const Index& lambda,
+                                          const Index& nu) const
     {
-        return a(lambda, mu, IFRAME::primal_polynomial_degree()*IFRAME::primal_polynomial_degree());
+        return a(lambda, nu, IFRAME::primal_polynomial_degree()*IFRAME::primal_polynomial_degree());
     }
 
     template <class IFRAME, unsigned int DIM, class TENSORFRAME>
     double
-    TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::a(const typename QuarkletFrame::Index& lambda,
-                                              const typename QuarkletFrame::Index& mu,
+    TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::a(const Index& la,
+                                              const Index& nu,
                                               const unsigned int p) const
     {
         // a(u,v) = \int_Omega [a(x)grad u(x)grad v(x)+q(x)u(x)v(x)] dx
         double r = 0;
-        Frame1D myframe;
-        
+//        Frame1D myframe;
+        const Index* lambda = &la;
+        const Index* mu     = &nu;
         // first decide whether the supports of psi_lambda and psi_mu intersect
-        typedef typename QuarkletFrame::Support Support;
+        typedef typename Frame::Support Support;
         Support supp;
-        if (intersect_supports(frame_, lambda, mu, supp))
+        if (intersect_supports(*frame_, *lambda, *mu, supp))
         {
             Point<DIM> x;
             const double ax = bvp_->constant_coefficients() ? bvp_->a(x) : 0.0;
@@ -143,16 +199,16 @@ namespace WaveletTL
 //    
 //            cout << "Vergleichswerte Cube: [" << supp.a[0] << ", " << supp.b[0] << "] x [" << supp.a[1] << ", " << supp.b[1] <<"]" << endl;
             // setup Gauss points and weights for a composite quadrature formula:
-            const int N_Gauss = (p+1)/2+(multi_degree(lambda.p())+multi_degree(mu.p())+1)/2;
+            const int N_Gauss = (p+1)/2+(multi_degree(lambda->p())+multi_degree(mu->p())+1)/2;
             //const double h = ldexp(1.0, -supp.j); // granularity for the quadrature
             // FixedArray1D<double,DIM> h; // granularity for the quadrature
             double hi; // granularity for the quadrature
             FixedArray1D<Array1D<double>,DIM> gauss_points, gauss_weights;
-            const Index* lambda_new = &lambda;
+//            const Index* lambda_new = &lambda;
             for (unsigned int i = 0; i < DIM; i++) {
                 //hier schauen, ob 1D Integral schon berechnet wurde
                 
-                Index1D lambda1D(lambda_new->p()[i], lambda_new->j()[i], lambda_new->e()[i], lambda_new->k()[i], &myframe);
+//                Index1D lambda1D(lambda_new->p()[i], lambda_new->j()[i], lambda_new->e()[i], lambda_new->k()[i], &myframe);
 //                Index1D mu1D(mu.p()[i], mu.j()[i], mu.e()[i], mu.k()[i], &myframe);
                 
 //                typename One_D_IntegralCache::iterator col_lb(one_d_integrals.lower_bound(lambda));
@@ -186,19 +242,19 @@ namespace WaveletTL
             
             
             
-                evaluate(*frame_.frames()[i], 
-                                                lambda.p()[i],
-                                                lambda.j()[i],
-                                                lambda.e()[i],
-                                                lambda.k()[i],
+                evaluate(*(frame_->frames()[i]), 
+                                                lambda->p()[i],
+                                                lambda->j()[i],
+                                                lambda->e()[i],
+                                                lambda->k()[i],
                          gauss_points[i], psi_lambda_values[i], psi_lambda_der_values[i]);
 //                cout << "Gauss Points Cube: " << gauss_points[i] << endl;
 //                cout << psi_lambda_values[i] << endl;
-                evaluate(*frame_.frames()[i],
-                                                mu.p()[i],
-                                                mu.j()[i],
-                                                mu.e()[i],
-                                                mu.k()[i],
+                evaluate(*(frame_->frames()[i]),
+                                                mu->p()[i],
+                                                mu->j()[i],
+                                                mu->e()[i],
+                                                mu->k()[i],
                          gauss_points[i], psi_mu_values[i], psi_mu_der_values[i]);
 //                cout << psi_mu_values[i] << endl;
                 
@@ -281,7 +337,7 @@ namespace WaveletTL
 
     template <class IFRAME, unsigned int DIM, class TENSORFRAME>
     double
-    TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::f(const typename QuarkletFrame::Index& lambda) const
+    TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::f(const Index& lambda) const
     {
 
         // f(v) = \int_0^1 g(t)v(t) dt
@@ -300,8 +356,9 @@ namespace WaveletTL
 #if 1
         double r = 0;
         // first compute supp(psi_lambda)
-        typename QuarkletFrame::Support supp;
-        support(frame_, lambda, supp);
+        typedef typename Frame::Support Support;
+        Support supp;
+        support(*frame_, lambda, supp);
         // setup Gauss points and weights for a composite quadrature formula:
         const int N_Gauss = 5;
         // FixedArray1D<double,DIM> h; // = ldexp(1.0, -supp.j); // granularity for the quadrature
@@ -321,12 +378,11 @@ namespace WaveletTL
         }
         // compute the point values of the integrand (where we use that it is a tensor product)
         for (unsigned int i = 0; i < DIM; i++)
-            evaluate(*frame_.frames()[i], 0,
-                     typename IFRAME::Index(lambda.p()[i],
+            evaluate(*(frame_->frames()[i]), 0,
+                                            lambda.p()[i],
                                             lambda.j()[i],
                                             lambda.e()[i],
                                             lambda.k()[i],
-                                            frame_.frames()[i]),
                      gauss_points[i], v_values[i]);
         // iterate over all points and sum up the integral shares
         int index[DIM]; // current multiindex for the point values
@@ -353,6 +409,49 @@ namespace WaveletTL
             }
             if (exit) break;
         }
+//        cout<<"r="<<r<<endl;
+//#ifdef NONZERONEUMANN
+    if(nonzeroneumann_){
+        //add  boundary integral
+        double rrand=0;
+//        cout<<"bin hier"<<endl;
+        Array1D<double> phi_values;
+        if(DIM==2){
+            // loop over spatial direction
+            for (int i = 0; i < 2; i++) {
+              for (int j = 0; j < 2; j++) {
+                if (j == i)
+                  continue;
+                
+                phi_values.resize(N_Gauss*(supp.b[j]-supp.a[j]));
+                for(int rand_punkt=0;rand_punkt<2;rand_punkt++){
+                    double rand_value=frame_->frames()[i]->evaluate(0,lambda.p()[i],lambda.j()[i],lambda.e()[i],lambda.k()[i],rand_punkt);
+//                    if((j==1 && rand_punkt==0) || (j==0 && rand_punkt==1)){
+//                        
+//                    }                   
+                    for(unsigned int i2=0;i2<N_Gauss*(supp.b[j]-supp.a[j]);i2++){
+                        x[i]=rand_punkt; x[j]=gauss_points[j][i2];
+//                        cout<<x<<endl;
+                        phi_values[i2]=phi(x);
+                        rrand+=phi_values[i2]*rand_value*gauss_weights[j][i2]*v_values[j][i2]; 
+                    }
+//                    if(rand_value!=0){
+//                        cout<<"weights:"<<gauss_weights[j]<<endl;
+//                    cout<<"points:"<<gauss_points[j]<<endl;
+//                    cout<<"v_values:"<<v_values[j]<<endl;
+//                    cout<<"phi_values:"<<phi_values<<endl;
+//                    }
+                }
+              }
+//              cout<<"rrand="<<rrand<<endl;
+            }
+            
+            
+        } 
+        r+=rrand;
+    }
+//#endif
+//        cout<<"rrand="<<rrand<<endl;
         return r;
 #endif
     }
@@ -360,12 +459,12 @@ namespace WaveletTL
     template <class IFRAME, unsigned int DIM, class TENSORFRAME>
     void
     TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::RHS(const double eta,
-                                                InfiniteVector<double, typename QuarkletFrame::Index>& coeffs) const
+                                                InfiniteVector<double, Index>& coeffs) const
     {
         coeffs.clear();
         double coarsenorm(0);
         double bound(fnorm_sqr - eta*eta);
-        typedef typename QuarkletFrame::Index Index;
+//        typedef typename Frame::Index Index;
         typename Array1D<std::pair<Index, double> >::const_iterator it(fcoeffs.begin());
         while (it != fcoeffs.end() && coarsenorm < bound)
         {
@@ -383,12 +482,11 @@ namespace WaveletTL
         coeffs.clear();
         double coarsenorm(0);
         double bound(fnorm_sqr - eta*eta);
-        typedef typename QuarkletFrame::Index Index;
         typename Array1D<std::pair<Index, double> >::const_iterator it(fcoeffs.begin());
         while (it != fcoeffs.end() && coarsenorm < bound)
         {
             coarsenorm += it->second * it->second;
-            coeffs.set_coefficient(it->first.number(), it->second);
+            coeffs.set_coefficient(it->first, it->second);
             ++it;
         }
     }
@@ -433,15 +531,16 @@ namespace WaveletTL
     TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::norm_A() const
     {
         if (normA == 0.0) {
-            typedef typename QuarkletFrame::Index Index;
             typedef typename Index::polynomial_type polynomial_type;
             int offsetj, offsetp;
             switch (space_dimension) {
                 case 1:
-                    offsetj = 2, offsetp = std::min((int)frame_.get_pmax(),2);
+                    offsetj = 2, offsetp = std::min((int)frame_->get_pmax(),2);
                     break;
                 case 2:
-                    offsetj = 1, offsetp = std::min((int)frame_.get_pmax(),2);
+//                    offsetj = 1, 
+                    offsetj=std::min(1,(int)frame_->get_jmax()-(int)multi_degree(frame_->j0()));
+                    offsetp = std::min((int)frame_->get_pmax(),2);
                     break;
                 default:
                     offsetj = 0, offsetp = 0;
@@ -450,12 +549,12 @@ namespace WaveletTL
             
             // cout << "tframe_equation.norm_A :: last quarklet = " << (frame_.last_quarklet(multi_degree(frame_.j0())+offset)) << endl;
             polynomial_type p;
-            for (Index lambda = frame_.first_generator(frame_.j0(), p) ;;) {
+            for (Index lambda = frame_->first_generator(frame_->j0(), p) ;;) {
                 Lambda.insert(lambda);
-                if (lambda == frame_.last_quarklet(multi_degree(frame_.j0())+offsetj, p)){
+                if (lambda == frame_->last_quarklet(multi_degree(frame_->j0())+offsetj, p)){
                     ++p;
                     if ((int)multi_degree(p)>offsetp) break;
-                    lambda = frame_.first_generator(frame_.j0(), p);
+                    lambda = frame_->first_generator(frame_->j0(), p);
                 }
                 else
                     ++lambda;
@@ -468,11 +567,21 @@ namespace WaveletTL
 //            }
             SparseMatrix<double> A_Lambda;
             setup_stiffness_matrix(*this, Lambda, A_Lambda);
+            A_Lambda.compress(1e-10);
 #if 1
-            double help;
-            unsigned int iterations;
-            LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
-            normAinv = 1./help;
+//            double help;
+//            unsigned int iterations;
+//            LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
+//            normAinv = 1./help;
+            Matrix<double> evecs;
+            Vector<double> evals;
+            SymmEigenvalues(A_Lambda, evals, evecs);
+            int i = 0;
+            while(abs(evals(i))<1e-2){
+                ++i;
+            }
+            normA = evals(evals.size()-1);
+            normAinv = 1./evals(i);
 #else
             Vector<double> xk(Lambda.size(), false);
             xk = 1;
@@ -488,7 +597,7 @@ namespace WaveletTL
     TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::norm_Ainv() const
     {
         if (normAinv == 0.0) {
-            typedef typename QuarkletFrame::Index Index;
+            typedef typename Frame::Index Index;
             typedef typename Index::polynomial_type polynomial_type;
             std::set<Index> Lambda;
             polynomial_type p;
@@ -497,21 +606,23 @@ namespace WaveletTL
             int offsetj, offsetp;
             switch (space_dimension) {
                 case 1:
-                    offsetj = 2, offsetp = std::min((int)frame_.get_pmax(),2);
+                    offsetj = 2, offsetp = std::min((int)frame_->get_pmax(),2);
                     break;
                 case 2:
-                    offsetj = 1, offsetp = std::min((int)frame_.get_pmax(),2);
+//                    offsetj = 1, 
+                      offsetj=std::min(1,(int)frame_->get_jmax()-(int)multi_degree(frame_->j0()));
+                      offsetp = std::min((int)frame_->get_pmax(),2);
                     break;
                 default:
                     offsetj = 0, offsetp = 0;
             }
-            for (Index lambda = frame_.first_generator() ;;) {
+            for (Index lambda = frame_->first_generator() ;;) {
                 Lambda.insert(lambda);
                 
-                if (lambda == frame_.last_quarklet(multi_degree(frame_.j0())+offsetj, p) ){
+                if (lambda == frame_->last_quarklet(multi_degree(frame_->j0())+offsetj, p) ){
                     ++p;
                     if ((int)multi_degree(p)>offsetp) break;
-                    lambda = frame_.first_generator(frame_.j0(), p);
+                    lambda = frame_->first_generator(frame_->j0(), p);
                 }
                 else
                     ++lambda;
@@ -519,11 +630,22 @@ namespace WaveletTL
             }
             SparseMatrix<double> A_Lambda;
             setup_stiffness_matrix(*this, Lambda, A_Lambda);
+            A_Lambda.compress(1e-10);
 #if 1
-            double help;
-            unsigned int iterations;
-            LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
-            normAinv = 1./help;
+//            double help;
+//            unsigned int iterations;
+//            LanczosIteration(A_Lambda, 1e-6, help, normA, 200, iterations);
+//            normAinv = 1./help;
+            Matrix<double> evecs;
+            Vector<double> evals;
+            SymmEigenvalues(A_Lambda, evals, evecs);
+            cout << evals << endl;
+            int i = 0;
+            while(abs(evals(i))<1e-2){
+                ++i;
+            }
+            normA = evals(evals.size()-1);
+            normAinv = 1./evals(i);
 #else
             Vector<double> xk(Lambda.size(), false);
             xk = 1;

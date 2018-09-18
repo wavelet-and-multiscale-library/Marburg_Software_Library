@@ -11,7 +11,7 @@
 #undef GRAMIAN
 
 
-#undef DYADIC
+#define DYADIC
 
 //define the parameters \delta_1 and \delta_2 for the H^s weights, cf. Diss Keding Formula (6.1.20) 
 //and Theorem 7.12
@@ -22,7 +22,7 @@
 
 #undef TRIVIAL
 #undef ENERGY
-#define DYPLUSEN
+#undef DYPLUSEN
 
 #ifdef DYPLUSEN
 #define DELTA1 4
@@ -44,8 +44,8 @@
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
-#define JMAX 9
-#define PMAX 3
+#define JMAX 6
+#define PMAX 1
 #define TWO_D
 
 #define PRIMALORDER 3
@@ -212,9 +212,9 @@ int main(){
     set<Index> Lambda;
     for (int i=0; i<frame.degrees_of_freedom();i++) {
         Index lambda = *(frame.get_quarklet(i));
-        if(multi_degree(lambda.e())<3 && lambda.patch()!=-1){ 
+//        if(multi_degree(lambda.e())<3 && lambda.patch()!=-1){ 
             Lambda.insert(*(frame.get_quarklet(i)));
-        }    
+//        }    
 //    cout << *(frame.get_quarklet(i)) << endl;
     }
     

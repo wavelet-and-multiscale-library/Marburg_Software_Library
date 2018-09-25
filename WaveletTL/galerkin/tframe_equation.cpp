@@ -482,8 +482,8 @@ namespace WaveletTL
         coeffs.clear();
         double coarsenorm(0);
         double bound(fnorm_sqr - eta*eta);
-        typename Array1D<std::pair<Index, double> >::const_iterator it(fcoeffs.begin());
-        while (it != fcoeffs.end() && coarsenorm < bound)
+        typename Array1D<std::pair<int, double> >::const_iterator it(fcoeffs_int.begin());
+        while (it != fcoeffs_int.end() && coarsenorm < bound)
         {
             coarsenorm += it->second * it->second;
             coeffs.set_coefficient(it->first, it->second);
@@ -616,7 +616,7 @@ namespace WaveletTL
                 default:
                     offsetj = 0, offsetp = 0;
             }
-            for (Index lambda = frame_->first_generator() ;;) {
+            for (Index lambda = frame_->first_generator(frame_->j0()) ;;) {
                 Lambda.insert(lambda);
                 
                 if (lambda == frame_->last_quarklet(multi_degree(frame_->j0())+offsetj, p) ){

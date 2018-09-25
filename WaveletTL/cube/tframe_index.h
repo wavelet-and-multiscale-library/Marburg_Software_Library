@@ -28,8 +28,8 @@ namespace WaveletTL
      * (V_0 \oplus W_0 \oplus W_1 \oplus W_2 \oplus ...)\times (V_0 \oplus W_0 \oplus W_1 \oplus W_2 \oplus ...)
      * as modeled by Tensorframe
     */
-    template <class IFRAME, unsigned int DIM, class TENSORFRAME = TensorFrame<IFRAME,DIM> >
-    class TensorQIndex
+    template <class IFRAME, unsigned int DIM>
+    class TensorFrameIndex
     {
     public:
         // polynomial index type
@@ -46,7 +46,7 @@ namespace WaveletTL
          * (also serves as a default constructor, but yields an invalid index
          * in this case, because the underlying bases must be specified to work correctly)
          */
-        TensorQIndex(const TENSORFRAME* frame = 0);
+        TensorFrameIndex(const TensorFrame<IFRAME,DIM>* frame = 0);
 
         /*
          * Constructor with given p,j,e,k
@@ -55,22 +55,27 @@ namespace WaveletTL
          * PERFORMANCE: This constructor can be improved by using explicit formulas as in
          * TensorQIndex(const int number, const TENSORFRAME* frame)
         */
-        TensorQIndex(const polynomial_type& p, const level_type& j, const type_type& e, const translation_type& k, const TENSORFRAME* frame);
+        TensorFrameIndex(const polynomial_type& p, 
+                        const level_type& j, 
+                        const type_type& e, 
+                        const translation_type& k, 
+                        const unsigned int number,
+                        const TensorFrame<IFRAME,DIM>* frame);
 
         /*
          * 1D dummy constructor. does not yield a complete TensorQIndex
          * number is always set to 0
          */
-        TensorQIndex(const int& p, const int& j, const int& e, const int& k, const TENSORFRAME* empty);
+//        TensorFrameIndex(const int& p, const int& j, const int& e, const int& k, const TENSORFRAME* empty);
 
         // Copy constructor
-        TensorQIndex(const TensorQIndex& lambda);
+        TensorFrameIndex(const TensorFrameIndex& lambda);
 
         // Copy index from const pointer
-        TensorQIndex(const TensorQIndex* lambda);
+        TensorFrameIndex(const TensorFrameIndex* lambda);
 
         // Constructor with all parameters given
-        TensorQIndex(const polynomial_type& p, const level_type& j, const type_type& e, const translation_type& k, const int number, const TENSORFRAME* frame);
+//        TensorQIndex(const polynomial_type& p, const level_type& j, const type_type& e, const translation_type& k, const unsigned int number, const TENSORFRAME* frame);
         
         /*
          * Constructor for given number of quarklet index.
@@ -91,33 +96,33 @@ namespace WaveletTL
          * 
          * full_collection[i] is an alternative! less CPU, more memory usage
         */
-        TensorQIndex(const int number, const TENSORFRAME* frame);
+//        TensorFrameIndex(const unsigned int number, const TensorFrame<IFRAME,DIM>* frame);
 
         // Assignment
-        TensorQIndex& operator = (const TensorQIndex& lambda);
+//        TensorQIndex& operator = (const TensorQIndex& lambda);
 
         /*
          * Check equality.
          * Only (p,j,e,k) are tested. NOT the frame or number
          */
-        bool operator == (const TensorQIndex& lambda) const;
+        bool operator == (const TensorFrameIndex& lambda) const;
 
         // Check non-equality
-        inline bool operator != (const TensorQIndex& lambda) const
+        inline bool operator != (const TensorFrameIndex& lambda) const
         { return !(*this == lambda); }
 
         // Preincrement
-        TensorQIndex& operator ++ ();
+        TensorFrameIndex& operator ++ ();
 
         /* Ordering <
          * First by polynomial, i.e. the 1-norm of p, 
          * second by level, i.e. the 1-norm of j,
          * then lexicographically w.r.t. p,j,e,k
          */
-        bool operator < (const TensorQIndex& lambda) const;
+        bool operator < (const TensorFrameIndex& lambda) const;
 
         // Ordering <=
-        bool operator <= (const TensorQIndex& lambda) const
+        bool operator <= (const TensorFrameIndex& lambda) const
         { return (*this < lambda || *this == lambda); }
 
         // Scale j
@@ -133,14 +138,14 @@ namespace WaveletTL
         const translation_type& k() const { return k_; }
 
         // Underlying frame
-        const TENSORFRAME* frame() const { return frame_; }
+//        const TENSORFRAME* frame() const { return frame_; }
 
-        const unsigned long int number() const { return num_; }
+        const unsigned int& number() const { return num_; }
 
     protected:
 
         // Pointer to the underlying frame
-        const TENSORFRAME* frame_;
+        const TensorFrame<IFRAME,DIM>* frame_;
 
         // Polynomial
         MultiIndex<int,DIM> p_;
@@ -160,8 +165,8 @@ namespace WaveletTL
     };
 
     //! stream output
-    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
-    inline std::ostream& operator << (std::ostream& os, const TensorQIndex<IFRAME,DIM,TENSORFRAME>& lambda)
+    template <class IFRAME, unsigned int DIM>
+    inline std::ostream& operator << (std::ostream& os, const TensorFrameIndex<IFRAME,DIM>& lambda)
     {
         using namespace std;
         os << "("
@@ -175,7 +180,38 @@ namespace WaveletTL
         << ")" << " number: " << lambda.number();
         return os;
     }
+    
+        /*!
+    index of first generator on level j >= j0
+  */
+    template <class IFRAME,unsigned int DIM>
+    TensorFrameIndex<IFRAME,DIM>
+    first_generator(const TensorFrame<IFRAME,DIM>* frame, const typename TensorFrameIndex<IFRAME,DIM>::level_type& j, const typename TensorFrameIndex<IFRAME,DIM>::polynomial_type& p);
 
+  /*!
+    index of last generator on level j >= j0
+  */
+    template <class IFRAME,unsigned int DIM>
+    TensorFrameIndex<IFRAME,DIM>
+    last_generator(const TensorFrame<IFRAME,DIM>* frame, const typename TensorFrameIndex<IFRAME,DIM>::level_type& j, const typename TensorFrameIndex<IFRAME,DIM>::polynomial_type& p);
+
+  /*!
+    index of first quarklet on level j >= j0
+  */
+    template <class IFRAME,unsigned int DIM>
+    TensorFrameIndex<IFRAME,DIM>
+    first_quarklet(const TensorFrame<IFRAME,DIM>* frame, const typename TensorFrameIndex<IFRAME,DIM>::level_type& j, const typename TensorFrameIndex<IFRAME,DIM>::polynomial_type& p);
+  
+
+  /*!
+    index of last quarklet on level j >= j0
+  */
+    template <class IFRAME,unsigned int DIM>
+    TensorFrameIndex<IFRAME,DIM>
+    last_quarklet(const TensorFrame<IFRAME,DIM>* frame, const typename TensorFrameIndex<IFRAME,DIM>::level_type& j, const typename TensorFrameIndex<IFRAME,DIM>::polynomial_type& p);
+
+
+#if 0
     /*
      * index of first generator
      */
@@ -441,6 +477,7 @@ namespace WaveletTL
             cout << "readIVFromFile: Could not read at all" << endl;
         }
     }
+#endif
 }
 
 #include <cube/tframe_index.cpp>

@@ -49,14 +49,26 @@ namespace WaveletTL
      */
     template <class PROBLEM>
     class CachedQuarkletTProblem
+      #ifdef DYADIC
       : public FullyDiagonalQuarkletPreconditioner<typename PROBLEM::Index, PROBLEM::space_dimension>
-//    : public FullyDiagonalEnergyNormPreconditioner<typename PROBLEM::Index>
+    
+#endif
+#ifdef TRIVIAL
+    : public TrivialPreconditioner<typename PROBLEM::Index>
+#endif
+#ifdef ENERGY
+    : public FullyDiagonalQuarkletEnergyNormPreconditioner<typename PROBLEM::Index>
+#endif
+#ifdef DYPLUSEN
+    : public FullyDiagonalDyPlusEnNormPreconditioner<typename PROBLEM::Index, PROBLEM::space_dimension>
+#endif
+
     {
     public:
         /*
          * make quarklet frame type accessible
          */
-        typedef typename PROBLEM::QuarkletFrame QuarkletFrame;
+        typedef typename PROBLEM::Frame QuarkletFrame;
 
         /*
          * quarklet index class
@@ -80,7 +92,7 @@ namespace WaveletTL
         /*
          * read access to the frame
          */
-        inline const QuarkletFrame& frame() const { return problem->frame(); }
+        const QuarkletFrame& frame() const { return problem->frame(); }
 
         /*
          * space dimension of the problem
@@ -292,16 +304,16 @@ namespace WaveletTL
          * All dimensions are visited with the current dimension denoted by current_dim.
          * Indices with the highest recursion depth (level = DIM) are added to w
          */
-        void add_level_recurse(const Index& lambda,
-                               Vector<double>& w,
-                               const int radius,
-                               const double factor,
-                               const level_type & current_level,
-                               const int current_dim,
-                               const int maxlevel,
-                               const bool legal,
-                               const double d1,
-                               const bool precond) const;
+//        void add_level_recurse(const Index& lambda,
+//                               Vector<double>& w,
+//                               const int radius,
+//                               const double factor,
+//                               const level_type & current_level,
+//                               const int current_dim,
+//                               const int maxlevel,
+//                               const bool legal,
+//                               const double d1,
+//                               const bool precond) const;
 
         /*
          * Variant where only entries with levels given by levelwindow are added

@@ -1,12 +1,13 @@
 
 #include "tframe_index.h"
+#include "tframe.h"
 
 // implementation for tframe_index.h
 
 namespace WaveletTL
 {
-	template <class IFRAME, unsigned int DIM, class TENSORFRAME>
-	TensorQIndex<IFRAME,DIM,TENSORFRAME>::TensorQIndex(const TENSORFRAME* frame)
+	template <class IFRAME, unsigned int DIM>
+	TensorFrameIndex<IFRAME,DIM>::TensorFrameIndex(const TensorFrame<IFRAME,DIM>* frame)
 	:frame_(frame)
         {
             if (frame_ != 0)
@@ -31,10 +32,16 @@ namespace WaveletTL
             }
 	}
 
-        template <class IFRAME, unsigned int DIM, class TENSORFRAME>
-	TensorQIndex<IFRAME,DIM,TENSORFRAME>:: TensorQIndex(const polynomial_type& p, const level_type& j, const type_type& e, const translation_type& k, const TENSORFRAME* frame)
-	: frame_(frame), p_(p), j_(j), e_(e), k_(k)
+        template <class IFRAME, unsigned int DIM>
+	TensorFrameIndex<IFRAME,DIM>:: TensorFrameIndex(const polynomial_type& p, 
+                                                        const level_type& j, 
+                                                        const type_type& e, 
+                                                        const translation_type& k, 
+                                                        const unsigned int number,
+                                                        const TensorFrame<IFRAME,DIM>* frame)
+	: frame_(frame), p_(p), j_(j), e_(e), k_(k), num_(number)
 	{
+#if 0
             if (frame != 0)
             {
                 MathTL::FixedArray1D<std::map<int, int>,DIM> sizes; // store number of frame elements. Generators on level j0 (0), quarklets on level j0 (1), j0+1 (2), ...
@@ -173,33 +180,35 @@ namespace WaveletTL
                 abort();
 #endif
             }
+#endif   
         }
 
-        template <class IFRAME, unsigned int DIM, class TENSORFRAME>
-	TensorQIndex<IFRAME, DIM, TENSORFRAME>::TensorQIndex(const int& p, const int& j, const int& e, const int& k, const TENSORFRAME* frame)
-	: frame_(frame), num_(0)//, j_(j), e_(e), k_(k)
-        {
-            assert (DIM == 1);
-            p_[0]=p;
-            j_[0]=j;
-            e_[0]=e;
-            k_[0]=k;
-        }
+//        template <class IFRAME, unsigned int DIM>
+//	TensorFrameIndex<IFRAME, DIM>::TensorFrameIndex(const int& p, const int& j, const int& e, const int& k, const TENSORFRAME* frame)
+//	: frame_(frame), num_(0)//, j_(j), e_(e), k_(k)
+//        {
+//            assert (DIM == 1);
+//            p_[0]=p;
+//            j_[0]=j;
+//            e_[0]=e;
+//            k_[0]=k;
+//        }
 
-	template <class IFRAME, unsigned int DIM, class TENSORFRAME>
-	TensorQIndex<IFRAME, DIM, TENSORFRAME>::TensorQIndex(const TensorQIndex& lambda)
+	template <class IFRAME, unsigned int DIM>
+	TensorFrameIndex<IFRAME, DIM>::TensorFrameIndex(const TensorFrameIndex& lambda)
 	: frame_(lambda.frame_), p_(lambda.p_), j_(lambda.j_), e_(lambda.e_), k_(lambda.k_), num_(lambda.num_) {}
 
-	template <class IFRAME, unsigned int DIM, class TENSORFRAME>
-	TensorQIndex<IFRAME, DIM, TENSORFRAME>::TensorQIndex(const TensorQIndex* lambda)
+	template <class IFRAME, unsigned int DIM>
+	TensorFrameIndex<IFRAME, DIM>::TensorFrameIndex(const TensorFrameIndex* lambda)
 	: frame_(lambda->frame_), p_(lambda->p_), j_(lambda->j_), e_(lambda->e_), k_(lambda->k_), num_(lambda->num_) {}
 
-        template <class IFRAME, unsigned int DIM, class TENSORFRAME>
-        TensorQIndex<IFRAME,DIM,TENSORFRAME>:: TensorQIndex(const polynomial_type& p, const level_type& j, const type_type& e, const translation_type& k, const int number, const TENSORFRAME* frame)
-        : frame_(frame), p_(p), j_(j), e_(e), k_(k), num_(number) {}
-        
+//        template <class IFRAME, unsigned int DIM, class TENSORFRAME>
+//        TensorQIndex<IFRAME,DIM,TENSORFRAME>:: TensorQIndex(const polynomial_type& p, const level_type& j, const type_type& e, const translation_type& k, const unsigned int number, const TENSORFRAME* frame)
+//        : frame_(frame), p_(p), j_(j), e_(e), k_(k), num_(number) {}
+
+#if 0        
 	template <class IFRAME, unsigned int DIM, class TENSORFRAME>
-	TensorQIndex<IFRAME, DIM, TENSORFRAME>::TensorQIndex(const int number, const TENSORFRAME* frame)
+	TensorQIndex<IFRAME, DIM, TENSORFRAME>::TensorQIndex(const unsigned int number, const TENSORFRAME* frame)
 	: frame_(frame), num_(number)
 	{
 #if _TFRAME_DEBUGLEVEL_ >= 1
@@ -784,10 +793,10 @@ namespace WaveletTL
             num_ = lambda.number();
             return *this;
   	}
-
-	template <class IFRAME, unsigned int DIM, class TENSORFRAME>
+#endif
+	template <class IFRAME, unsigned int DIM>
 	bool
-	TensorQIndex<IFRAME, DIM, TENSORFRAME>::operator == (const TensorQIndex<IFRAME, DIM, TENSORFRAME>& lambda) const
+	TensorFrameIndex<IFRAME, DIM>::operator == (const TensorFrameIndex<IFRAME, DIM>& lambda) const
 	{
             return (p_ == lambda.p() &&
                     j_ == lambda.j() &&
@@ -796,9 +805,9 @@ namespace WaveletTL
 	}
 
         // PERFORMANCE: eventuell die vielen Aufrufe von frames_->j0() durch Hilfsvariable auf einen reduzieren
-	template <class IFRAME, unsigned int DIM, class TENSORFRAME>
-  	TensorQIndex<IFRAME,DIM,TENSORFRAME>&
-  	TensorQIndex<IFRAME,DIM,TENSORFRAME>::operator ++ ()
+	template <class IFRAME, unsigned int DIM>
+  	TensorFrameIndex<IFRAME,DIM>&
+  	TensorFrameIndex<IFRAME,DIM>::operator ++ ()
   	{
             if ((int)num_ == -1) return *this;
             level_type j0(frame_->j0());
@@ -891,15 +900,19 @@ namespace WaveletTL
          
   	}
 
-	template <class IFRAME, unsigned int DIM, class TENSORFRAME>
+	template <class IFRAME, unsigned int DIM>
 	bool
-	TensorQIndex<IFRAME,DIM,TENSORFRAME>::operator < (const TensorQIndex& lambda) const
+	TensorFrameIndex<IFRAME,DIM>::operator < (const TensorFrameIndex& lambda) const
 	{
             // Ordering primary by polynomial_level p as in MultiIndex
             // (ordering of \N^dim, that is the distance from 0, that is the same as
             // ordering first by 1-norm of p and in the case of equal norms lexicographical in p.)
             // secondly by 1-norm of j and in the case of equal norms lexicographical in j.
             // tertiaryly and quarteryly lexicographical in e and k.
+            if(frame_->get_setup_full_collection()){
+                return (num_<lambda.number());
+            }
+            else{
             return (multi_degree(p_) < multi_degree(lambda.p())  ||
                      ((multi_degree(p_) == multi_degree(lambda.p()) && p_ < lambda.p())  ||
                       (p_ == lambda.p() && 
@@ -915,10 +928,117 @@ namespace WaveletTL
                       )                       
                      )                     
                    );
-                     
+            }        
                     
 	}
+        
+        template <class IFRAME,unsigned int DIM>
+        TensorFrameIndex<IFRAME,DIM>
+        first_generator(const TensorFrame<IFRAME,DIM>* frame, 
+                        const typename TensorFrameIndex<IFRAME,DIM>::level_type& j, 
+                        const typename TensorFrameIndex<IFRAME,DIM>::polynomial_type& p)
+        {
+            assert(j >= frame->j0());
 
+            typename TensorFrameIndex<IFRAME,DIM>::type_type e;
+
+            // setup lowest translation index for e=(0,0), 
+            typename TensorFrameIndex<IFRAME,DIM>::translation_type k;
+            for (unsigned int i = 0; i < DIM; i++) {
+                    k[i] = frame->frames()[i]->DeltaLmin()+1;   //todo: +1 oder nicht?
+            }
+    
+            return TensorFrameIndex<IFRAME,DIM>(p,j, e, k, p.number()* frame->get_Nablasize(), frame);
+        }
+        
+        template <class IFRAME,unsigned int DIM>
+        TensorFrameIndex<IFRAME,DIM>
+        last_generator(const TensorFrame<IFRAME,DIM>* frame, 
+                        const typename TensorFrameIndex<IFRAME,DIM>::level_type& j,
+                        const typename TensorFrameIndex<IFRAME,DIM>::polynomial_type& p )
+        {
+            if(DIM==2){
+            assert(j >= frame->j0() && j[0]==j[1]);
+
+            typename TensorFrameIndex<IFRAME,DIM>::type_type e;
+
+            // setup highest translation index for e=(0,0),    
+            typename TensorFrameIndex<IFRAME,DIM>::translation_type k(frame->frames()[0]->DeltaRmax(j[0]), frame->frames()[1]->DeltaRmax(j[1]));
+    
+            return TensorFrameIndex<IFRAME,DIM>(p,j, e, k, p.number()* frame->get_Nablasize()+frame->Deltasize(j[0])-1, frame);
+            }
+        }
+        
+        template <class IFRAME,unsigned int DIM>
+        TensorFrameIndex<IFRAME,DIM>
+        first_quarklet(const TensorFrame<IFRAME,DIM>* frame, 
+                    const typename TensorFrameIndex<IFRAME,DIM>::level_type& j, 
+                    const typename TensorFrameIndex<IFRAME,DIM>::polynomial_type& p)
+        {
+                assert(j >= frame->j0());
+            if(DIM==2){
+                typename TensorFrameIndex<IFRAME,DIM>::type_type e;
+                typename TensorFrameIndex<IFRAME,DIM>::translation_type k;
+                typename TensorFrameIndex<IFRAME,DIM>::level_type jdiff;
+
+    
+                bool sofar_only_generators = true;
+            
+                if (j[0] == frame->j0()[0] )
+                {
+                    e[0] = 0;
+                    k[0] = frame->frames()[0]->DeltaLmin();
+                } else
+                {
+                    e[0] = 1;
+                    k[0] = frame->frames()[0]->Nablamin();
+                    sofar_only_generators = false;
+                }
+    
+                if ( (sofar_only_generators == true) || (j[1] != frame->j0()[1]) )
+                {
+                    e[1] = 1;
+                    k[1] = frame->frames()[1]->Nablamin();
+                    //sofar_only_generators = false;
+                } else
+                {
+                    e[1] = 0;
+                    k[1] = frame->frames()[1]->DeltaLmin();
+                }
+    
+                jdiff[0]= j[0]-frame->j0()[0], jdiff[1]= j[1]-frame->j0()[1];
+                int level = jdiff.number();
+                int number = p.number()* frame->get_Nablasize()+frame->get_first_wavelet_numbers()[level];
+    
+    
+    
+                return TensorFrameIndex<IFRAME,DIM>(p, j, e, k, number, frame);
+            }    
+        }
+        
+        template <class IFRAME, unsigned int DIM>
+        TensorFrameIndex<IFRAME,DIM>
+        last_quarklet(const TensorFrame<IFRAME,DIM>* frame, 
+                    const typename TensorFrameIndex<IFRAME,DIM>::level_type& j, 
+                    const typename TensorFrameIndex<IFRAME,DIM>::polynomial_type& p)
+        {
+            assert(j >= frame->j0());
+            if(DIM==2){
+                typename TensorFrameIndex<IFRAME,DIM>::type_type e(1, 1);
+                typename TensorFrameIndex<IFRAME,DIM>::level_type jdiff;
+    
+                // setup highest translation index for e=(1,1), p=2
+                typename TensorFrameIndex<IFRAME,DIM>::translation_type k(frame->frames()[0]->Nablamax(j[0]),
+						      frame->frames()[1]->Nablamax(j[1]));
+    
+                jdiff[0]= j[0]-frame->j0()[0], jdiff[1]= j[1]-frame->j0()[1];
+                int level = jdiff.number();
+                int number = p.number()* frame->get_Nablasize()+frame->get_last_wavelet_numbers()[level];
+    
+                return TensorFrameIndex<IFRAME,DIM>(p, j, e, k, number, frame);
+            }
+        }
+#if 0
 	template <class IFRAME, unsigned int DIM, class TENSORFRAME>
 	TensorQIndex<IFRAME,DIM,TENSORFRAME>
 	first_q_generator(const TENSORFRAME* frame)
@@ -1106,4 +1226,5 @@ namespace WaveletTL
             TensorQIndex<IFRAME,DIM,TENSORFRAME> temp (last_quarklet<IFRAME,DIM,TENSORFRAME>(frame,level));
             return temp.number();
 	}
+#endif
 }

@@ -3,6 +3,7 @@
 #include <utils/multiindex.h>
 #include <utils/fixed_array1d.h>
 #include <iostream>
+#include <cube/tframe_index.h>
 
 using MathTL::multi_degree;
 using MathTL::FixedArray1D;
@@ -18,13 +19,22 @@ namespace WaveletTL
     {
         frame.support(lambda, supp);
     }
-
+    
+    template <class IFRAME, unsigned int DIM>
+    inline
+    void
+    support(const TensorFrame<IFRAME,DIM>& frame,
+            const int& lambda_num,
+            typename TensorFrame<IFRAME,DIM>::Support& supp)
+    {
+        frame.support(lambda_num, supp);
+    }
+    
     template <class IFRAME, unsigned int DIM>
     bool
     intersect_supports(const TensorFrame<IFRAME,DIM>& frame,
                        const typename TensorFrame<IFRAME,DIM>::Index& lambda,
-                       const typename TensorFrame<IFRAME,DIM>::Index& mu,
-                       typename TensorFrame<IFRAME,DIM>::Support& supp)
+                       const typename TensorFrame<IFRAME,DIM>::Index& mu)
     {
         typename TensorFrame<IFRAME,DIM>::Support supp_lambda;
         frame.support(lambda, supp_lambda);
@@ -32,492 +42,229 @@ namespace WaveletTL
         frame.support(mu, supp_mu);
         // determine support intersection granularity,
         // adjust single support granularities if necessary
+        double a=0;
+        double b=0;
         for (unsigned int i=0;i<DIM;i++)
         {
             if (supp_lambda.j[i] > supp_mu.j[i]) {
-                supp.j[i] = supp_lambda.j[i];
+//                supp.j[i] = supp_lambda.j[i];
                 const int adjust = 1<<(supp_lambda.j[i]-supp_mu.j[i]);
                 supp_mu.a[i] *= adjust;
                 supp_mu.b[i] *= adjust;
             } else {
-                supp.j[i] = supp_mu.j[i];
+//                supp.j[i] = supp_mu.j[i];
                 const int adjust = 1<<(supp_mu.j[i]-supp_lambda.j[i]);
                 supp_lambda.a[i] *= adjust;
                 supp_lambda.b[i] *= adjust;
             }
-            supp.a[i] = std::max(supp_lambda.a[i],supp_mu.a[i]);
-            supp.b[i] = std::min(supp_lambda.b[i],supp_mu.b[i]);
-            if (supp.a[i] >= supp.b[i])
+            a = std::max(supp_lambda.a[i],supp_mu.a[i]);
+            b = std::min(supp_lambda.b[i],supp_mu.b[i]);
+            if (a >= b)
                 return false;
         }
         return true;
     }
 
+    template <class IFRAME, unsigned int DIM>
+    bool
+    intersect_supports(const TensorFrame<IFRAME,DIM>& frame,
+                       const typename TensorFrame<IFRAME,DIM>::Index& lambda,
+                       const typename TensorFrame<IFRAME,DIM>::Support& supp_mu,
+                       typename TensorFrame<IFRAME,DIM>::Support& supp)
+    {
+        typename TensorFrame<IFRAME,DIM>::Support supp_lambda;
+        frame.support(lambda, supp_lambda);
+//        typename TensorFrame<IFRAME,DIM>::Support supp_mu;
+//        frame.support(mu, supp_mu);
+//        typename TensorFrame<IFRAME,DIM>::Support supp_mu(supp2);       //todo: delete copy constructor
+        // determine support intersection granularity,
+        // adjust single support granularities if necessary
+        for (unsigned int i=0;i<DIM;i++)
+        {
+            int adjustlambda=1;
+            int adjustmu=1;
+            if (supp_lambda.j[i] > supp_mu.j[i]) {
+                supp.j[i] = supp_lambda.j[i];
+                adjustmu = 1<<(supp_lambda.j[i]-supp_mu.j[i]);
+//                supp_mu.a[i] *= adjust;
+//                supp_mu.b[i] *= adjust;
+            } else {
+                supp.j[i] = supp_mu.j[i];
+                adjustlambda = 1<<(supp_mu.j[i]-supp_lambda.j[i]);
+//                supp_lambda.a[i] *= adjust;
+//                supp_lambda.b[i] *= adjust;
+            }
+            supp.a[i] = std::max(supp_lambda.a[i]*adjustlambda,supp_mu.a[i]*adjustmu);
+            supp.b[i] = std::min(supp_lambda.b[i]*adjustlambda,supp_mu.b[i]*adjustmu);
+            if (supp.a[i] >= supp.b[i])
+                return false;
+        }
+        return true;
+    }
+    
+    template <class IFRAME, unsigned int DIM>
+    bool
+    intersect_supports(const TensorFrame<IFRAME,DIM>& frame,
+                       const int& lambda_num,
+                       const typename TensorFrame<IFRAME,DIM>::Support& supp_mu,
+                       typename TensorFrame<IFRAME,DIM>::Support& supp)
+    {
+        typename TensorFrame<IFRAME,DIM>::Support supp_lambda;
+        frame.support(lambda_num, supp_lambda);
+//        typename TensorFrame<IFRAME,DIM>::Support supp_mu;
+//        frame.support(mu, supp_mu);
+        // determine support intersection granularity,
+        // adjust single support granularities if necessary
+        for (unsigned int i=0;i<DIM;i++)
+        {
+            int adjustlambda=1;
+            int adjustmu=1;
+            if (supp_lambda.j[i] > supp_mu.j[i]) {
+                supp.j[i] = supp_lambda.j[i];
+                adjustmu = 1<<(supp_lambda.j[i]-supp_mu.j[i]);
+//                supp_mu.a[i] *= adjust;
+//                supp_mu.b[i] *= adjust;
+            } else {
+                supp.j[i] = supp_mu.j[i];
+                adjustlambda = 1<<(supp_mu.j[i]-supp_lambda.j[i]);
+//                supp_lambda.a[i] *= adjust;
+//                supp_lambda.b[i] *= adjust;
+            }
+            supp.a[i] = std::max(supp_lambda.a[i]*adjustlambda,supp_mu.a[i]*adjustmu);
+            supp.b[i] = std::min(supp_lambda.b[i]*adjustlambda,supp_mu.b[i]*adjustmu);
+            if (supp.a[i] >= supp.b[i])
+                return false;
+        }
+        return true;
+    }
+    
+    template <class IFRAME, unsigned int DIM>
+    inline
+    bool intersect_supports(const TensorFrame<IFRAME,DIM>& frame,
+			  const typename TensorFrame<IFRAME,DIM>::Index& lambda1,
+			  const typename TensorFrame<IFRAME,DIM>::Index& lambda2,
+			  typename TensorFrame<IFRAME,DIM>::Support& supp)
+    {
+        typedef typename TensorFrame<IFRAME,DIM>::Support Support;
+
+        Support supp2(frame.get_support(lambda2.number()));
+//    frame.support(lambda2, supp2);
+
+        return intersect_supports(frame, lambda1, supp2, supp);
+    }
+    
+    template <class IFRAME, unsigned int DIM>
+    inline
+    bool intersect_supports(const TensorFrame<IFRAME,DIM>& frame,
+			  const int& lambda_num,
+			  const int& mu_num,
+			  typename TensorFrame<IFRAME,DIM>::Support& supp)
+    {
+        typedef typename TensorFrame<IFRAME,DIM>::Support Support;
+
+        Support supp2(frame.get_support(mu_num));
+    
+
+        return intersect_supports(frame, lambda_num, supp2, supp);
+    }
+  
+
 
     template <class IFRAME, unsigned int DIM>
     void intersecting_quarklets(const TensorFrame<IFRAME,DIM>& frame,
                                const typename TensorFrame<IFRAME,DIM>::Index& lambda,
-                               const MultiIndex<int,DIM> j, const bool generators,
-                               std::list<typename TensorFrame<IFRAME,DIM>::Index>& intersecting,
+                               const typename TensorFrameIndex<IFRAME,DIM>::level_type& j,
+                               std::list<int>& intersecting,
                                const MultiIndex<int,DIM> p)
     {
-        /*
-         * we utilize neighboring relations of quarklets with nontrivial intersection in the translation index k!
-         * 
-         * iterate over all possible types on the level j. For all such j:
-         * find the first valid k on this level and store its number -> current_num
-         * find the first k with intersection -> k_hit
-         * for all k's that differ only in k[dim] from k_hit:
-         * - compute number of k's before k_hit ("jump_before[dim]" in the number)
-         * - compute number of k's that intersect ("num_of_intersections[dim])
-         * - compute number of k's after k_hit ("jump_after[dim]")
-         * - add all quarklets from current_num+jump_before[dim] to current_num+jump_after[dim]
-         * current_num = current_num + number of all k's that only differ in the last dimension
-         * increase k_hit[dim-1] (if possible)
-         * - if we have arrived at the last possible value for k_hit[dim-1]:
-         * -- jump_after[dim-1] = number of possible values after k_hit[dim-1] times number of possible values for k[dim]
-         * -- jump_before[dim-1] = number of possible values before k_hit[dim-1] times number of possible values for k[dim]
-         * continue at num = currentnum + jump_after[dim-1]+jump_after[dim-1]
-         * 
-         * and analogous with dim-2 ...
-         * this results in
-         * 
-         * while (!done)
-         * {
-         *      "jump_before" for all dimensions (current_jump_dim, current_jump_dim+1,...,dim)
-         *      add quarklets
-         *      increase k
-         *      "jump_after" all dimensions where we are at the last possible value for k (dim, dim-1, ..., current_jump_dim)
-         *      have we arrived at the very last possible k? -> increase type vector
-         *      have we arrived at the type vector (1,1,...,1)? -> done = true
-         * }
-         * 
-         * Also included: old code which works without get_intersecting_quarklets_on_level that is compatible with DSFrame
-         * and even older code which works with brute force
-         */
-#if 1
         typedef typename TensorFrame<IFRAME,DIM>::Index Index;
-//        typedef typename IFRAME::Index Index1D;
-        typedef typename Index::type_type type_type;
-        if (generators) assert (j==frame.j0());
-        intersecting.clear();
-        // initialize the type-vector e
-        type_type min_type, current_type;
-        for (unsigned int i=0;i<DIM;i++)
-        {
-            min_type[i]=(j[i]==frame.j0()[i]) ?0:1; // remember whether we are on the minimal levels to avoid calls of frame.j0()
-            current_type[i]=min_type[i];
-        }
-        if ( (!generators) && (j == frame.j0()))
-        {
-            current_type[DIM-1] = 1;
-        }
-        FixedArray1D<int,DIM> jump_before, jump_after, mink_gen, mink_wav, maxk_gen, maxk_wav;
-        for (unsigned int i = 0; i < DIM; i++) 
-        {
-            if (min_type[i] == 0)
-            {
-                get_intersecting_quarklets_on_level(*(frame.frames()[i]),
-                        lambda.p()[i],
-                        lambda.j()[i],
-                        lambda.e()[i],
-                        lambda.k()[i],
-                        j[i], true, mink_gen[i],maxk_gen[i]);
-            }
-            if (!(generators))
-            {
-                get_intersecting_quarklets_on_level(*frame.frames()[i],
-                        lambda.p()[i],
-                        lambda.j()[i],
-                        lambda.e()[i],
-                        lambda.k()[i],
-                        j[i], false, mink_wav[i],maxk_wav[i]);
-            }
-        }
-        unsigned int cjd(0); // current_jump_dim
-        int blocksize;
-        unsigned int number;
-        if (generators == true)
-        {
-            number = frame.first_generator(p).number();
-        }
-        else
-        {
-            number = frame.first_quarklet(j, p).number();
-        }
-        bool done = false;
-        if (DIM == 1)
-        {
-            if (generators == true)
-            {
-                number += mink_gen[0] - frame.frames()[0]->DeltaLmin();
-                blocksize = maxk_gen[0] - mink_gen[0] +1;
-                
-            } else
-            {
-                number += mink_wav[0] - frame.frames()[0]->Nablamin();
-                blocksize = maxk_wav[0] - mink_wav[0] +1;
-            }
-    // add quarklets
-            for (unsigned int n = number; n < number + blocksize; ++n)
-            {
-                intersecting.push_back(frame.get_quarklet(n));
-            }
-            done = true;
-        }
-        int basf(0); // "blocks added so far" (on the current type e) via modulo calculus we can deduce which block we have to add next
-        while (!done)
-        {
-            if (cjd == 0)
-            {
-            // compute all jump_numbers that are needed for the currenttype
-                int temp_int(1);
-                for (int i = DIM-1; i >= 0; i--)
-                {
-                    if (current_type[i] == 0)
-                    {
-                        jump_before[i] = temp_int;
-                        jump_before[i] *= mink_gen[i] - frame.frames()[i]->DeltaLmin();
-                        jump_after[i] = temp_int;
-                        jump_after[i] *= frame.frames()[i]->DeltaRmax(j[i]) - maxk_gen[i];
-                        temp_int *= frame.frames()[i]->Deltasize(j[i]);
-                    }
-                    else
-                    {
-                        jump_before[i] = temp_int;
-                        jump_before[i] *= mink_wav[i] - frame.frames()[i]->Nablamin();
-                        jump_after[i] = temp_int;
-                        jump_after[i] *= frame.frames()[i]->Nablamax(j[i]) - maxk_wav[i];
-                        temp_int *= frame.frames()[i]->Nablasize(j[i]);
-                    }
-                }
-                for (int i = DIM-2; i >= 0; --i)
-                {
-                    jump_before[i] += jump_before[i+1];
-                    jump_after[i] += jump_after[i+1];
-                }
-                if (current_type[DIM-1] == 0)
-                {
-                    blocksize = maxk_gen[DIM-1] - mink_gen[DIM-1] +1;
-                } else
-                {
-                    blocksize = maxk_wav[DIM-1] - mink_wav[DIM-1] +1;
-                }
-                basf = 0; // no blocks with the current type were added so far
-            }
-            // "jump_before" for all dimensions (current_jump_dim, current_jump_dim+1,...,dim)
-            number += jump_before[cjd];
-            // add quarklets
-            for (unsigned int n = number; n < number + blocksize; ++n)
-            {
-                intersecting.push_back(frame.get_quarklet(n));
-            }
-            ++basf; // we have added a block!
-            number += blocksize;
-            // "increase k"
-            // "jump_after" all dimensions where we are at the last possible value for k (dim, dim-1, ..., current_jump_dim)
-            // have we arrived at the very last possible k? -> done = true
-            
-            // compute the dimension in which we want to increase k
-            bool last_k(false); // have we just added the last possible block for the type vector e?
-            int temp_i(basf);
-            
-            for (int i(DIM-1); i >= 0; --i)
-            {
-                if (i == 0) //we have already added the last possible block for this type, i.e., k[0] = maxk[0]
-                {
-                    last_k = true;
-                    cjd = 0;
-                    break;
-                }
-                int temp_count = (current_type[i-1] == 0)? (maxk_gen[i-1] - mink_gen[i-1] + 1) : (maxk_wav[i-1] - mink_wav[i-1] + 1); // blocksize in this dimension
-                if ((temp_i % temp_count) != 0)
-                {
-                    cjd = i; // == "we can increase k[cjd]"
-                    break;
-                }
-                temp_i = temp_i / temp_count;
-            }
-            // have we arrived at the very last possible k? -> increase type vector
-            if (last_k == true)
-            {
-                done = true;
-                if (generators == false) // == true => there is only one allowed type vector
-                {
-                    // "small loop"
-                    // try to increase currenttype
-                    // iterate over all combinations of generators/quarklets for all dimensions with currentlevel[i]=j0[i]
-                    // this looks like binary addition: (in 3 Dim:) gwg is followed by gww (g=0,w=1)
-                    for (int i(DIM-1); i >= 0; i--)
-                    {
-                        // find first position on level j0
-                        if (j[i] == frame.j0()[i])
-                        {
-                            if (current_type[i] == 1)
-                            {
-                                current_type[i]=0;
-                            } else
-                            {
-                                current_type[i]=1;
-                                done = false;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            // have we arrived at the type vector (1,1,...,1)? -> done = true
-            // done == true means that all components with currentlevel[i]=j0[i] were quarklets.
-            number += jump_after[cjd];
-        }
-#endif
-#if 0 //compatible with DSFrame -> produces unsorted output
-        
-        if (generators) assert (j==frame.j0());
-
-        typedef typename TensorFrame<IFRAME,DIM>::Index Index;
-        intersecting.clear();
-
-        // the set of intersecting quarklets is a cartesian product from d sets from the 1D case,
-        // so we only have to compute the relevant 1D indices
-        typedef typename IFRAME::Index Index1D;
-        FixedArray1D<std::list<Index1D>,DIM> intersecting_1d_generators, intersecting_1d_quarklets;
-        // prepare all intersecting quarklets and generators in the i-th coordinate direction
-        for (unsigned int i = 0; i < DIM; i++) {
-            if ((j[i]==frame.j0()[i]) && (generators || DIM > 1) )
-                intersecting_quarklets(*frame.frames()[i],
-                                      Index1D(lambda.j()[i],
-                                              lambda.e()[i],
-                                              lambda.k()[i],
-                                              frame.frames()[i]),
-                                      j[i], true, intersecting_1d_generators[i]);
-            if (!generators)
-                intersecting_quarklets(*frame.frames()[i],
-                                      Index1D(lambda.j()[i],
-                                              lambda.e()[i],
-                                              lambda.k()[i],
-                                              frame.frames()[i]),
-                                      j[i], false, intersecting_1d_quarklets[i]);
-        }
-        // generate all relevant tensor product indices with either e=(0,...,0) or e!=(0,...,0)
-
-        // Version 1: unsortierter Output
-        // PERFORMANCE: Reihenfolge entspricht nicht der von tframe_index. 
-        // Problem? Ja! Reihenfolge wird in apply(window,y,res) ausgenutzt,
-        // um heraus zu finden, ob der Zeileniterator erhöht werden muss
-        typedef std::list<FixedArray1D<Index1D,DIM> > list_type;
-        list_type indices;
-        FixedArray1D<Index1D,DIM> helpindex;
-        if ((j[0] == frame.j0()[0]) && (generators || DIM > 1) ) {
-            for (typename std::list<Index1D>::const_iterator it(intersecting_1d_generators[0].begin()),
-                    itend(intersecting_1d_generators[0].end());
-                    it != itend; ++it) {
-                        helpindex[0] = *it;
-                        indices.push_back(helpindex);
-                    }
-        }
-        if (!(generators)) {
-            for (typename std::list<Index1D>::const_iterator it(intersecting_1d_quarklets[0].begin()),
-                    itend(intersecting_1d_quarklets[0].end());
-                    it != itend; ++it) {
-                        helpindex[0] = *it;
-                        indices.push_back(helpindex);
-                    }
-        }
-        for (unsigned int i = 1; i < DIM; i++) {
-            list_type sofar;
-            sofar.swap(indices);
-            for (typename list_type::const_iterator itready(sofar.begin()), itreadyend(sofar.end());
-                    itready != itreadyend; ++itready) {
-                        helpindex = *itready;
-                        unsigned int esum = 0;
-                        for (unsigned int k = 0; k < i; k++)
-                            esum += helpindex[k].e();
-                        if (generators || ( (j[i] == frame.j0()[i]) && ( i < DIM-1 || (i == (DIM-1) && esum > 0) ) ) ) {
-                            for (typename std::list<Index1D>::const_iterator it(intersecting_1d_generators[i].begin()),
-                                    itend(intersecting_1d_generators[i].end());
-                                    it != itend; ++it) {
-                                        helpindex[i] = *it;
-                                        indices.push_back(helpindex);
-                                    }
-                        }
-                        if (!(generators)) {
-                            for (typename std::list<Index1D>::const_iterator it(intersecting_1d_quarklets[i].begin()),
-                                    itend(intersecting_1d_quarklets[i].end());
-                                    it != itend; ++it) {
-                                        helpindex[i] = *it;
-                                        indices.push_back(helpindex);
-                                    }
-                        }
-                    }
-        }
-        // compose the results
-        typename Index::type_type help_e;
-        typename Index::translation_type help_k;
-        for (typename list_type::const_iterator it(indices.begin()), itend(indices.end()); it != itend; ++it)
-        {
-            for (unsigned int i = 0; i < DIM; i++)
-            {
-                help_e[i] = (*it)[i].e();
-                help_k[i] = (*it)[i].k();
-            }
-            intersecting.push_back(Index(j, help_e, help_k, &frame));
-        }
-#endif
-        /*
-        // a brute force solution
         typedef typename TensorFrame<IFRAME,DIM>::Support Support;
-        Support supp;
-        if (generators) {
-            for (Index mu = first_generator<IFRAME,DIM>(&frame, j);; ++mu) {
-                if (intersect_supports(frame, lambda, mu, supp))
-                    intersecting.push_back(mu);
-                if (mu == last_generator<IFRAME,DIM>(&frame, j)) break;
-            }
-        } else {
-            for (Index mu = first_wavelet<IFRAME,DIM>(&frame, j);; ++mu) {
-                if (intersect_supports(frame, lambda, mu, supp))
-                    intersecting.push_back(mu);
-                if (mu == last_wavelet<IFRAME,DIM>(&frame, j)) break;
-            }
+        intersecting.clear();
+        
+        Support supp, supp_lambda(frame.get_support(lambda.number()));
+//        cout<<"bin hier"<<endl;
+
+    // a brute force solution
+    if (j==frame.j0()) {
+        
+      Index last_qua(last_quarklet<IFRAME,DIM>(&frame, j, p));
+      int lastquarkletnumber(last_qua.number());
+
+      Index mu (first_generator<IFRAME,DIM>(&frame, j, p));
+//      cout << "First generator: " << first_generator<IFRAME>(&frame, j, p) << endl;
+//      cout << "Last quarklet: " << last_qua << endl;
+      for (int it = mu.number();; ++it) {
+          frame.get_support(it);
+        if (intersect_supports(frame, lambda, *(frame.get_quarklet(it)))){
+
+          intersecting.push_back(it);
         }
-         */
+	if (it == lastquarkletnumber) break;
+      }
+    
+    } 
+
+    else {
+      Index last_qua(last_quarklet<IFRAME,DIM >(&frame, j, p));
+      int lastquarkletnumber(last_qua.number());
+      Index mu = first_quarklet<IFRAME,DIM>(&frame, j, p);
+//      cout << "First quarklet: " << first_quarklet<IFRAME>(&frame, j, p) << endl;
+//      cout << "Last quarklet: " << last_qua << endl;
+      for (int it = mu.number() /*frame.get_first_wavelet_numbers()[0]*/;; ++it) {
+//          cout << "Mu: " << mu << ", " << mu.number() << endl;
+          frame.get_support(it);
+        if (intersect_supports(frame, lambda, *(frame.get_quarklet(it)))){
+          intersecting.push_back(it);
+        }
+	if (it == lastquarkletnumber) break;
+      }
+    }
+
     }
     
-#if 0
     template <class IFRAME, unsigned int DIM>
-    void intersecting_elements(const TensorFrame<IFRAME,DIM>& frame,
-                               const typename TensorFrame<IFRAME,DIM>::Index& lambda,
-                               const MultiIndex<int,DIM> j,
-                               std::list<typename TensorFrame<IFRAME,DIM>::Index>& intersecting)
-    {
-        typedef typename TensorFrame<IFRAME,DIM>::Index Index;
-        intersecting.clear();
+  void intersecting_quarklets(const TensorFrame<IFRAME,DIM>& frame,
+			     const int& lambda_num,
+			     const typename TensorFrameIndex<IFRAME,DIM>::level_type& j,
+			     std::list<int>& intersecting,
+                             const typename TensorFrameIndex<IFRAME,DIM>::polynomial_type& p)
+  {
+//    typedef typename TensorFrame<IFRAME,DIM>::Index Index;
+    typedef typename TensorFrame<IFRAME,DIM>::Support Support;
 
-        // the set of intersecting quarklets is a cartesian product from d sets from the 1D case,
-        // so we only have to compute the relevant 1D indices
-        typedef typename IFRAME::Index Index1D;
-        FixedArray1D<std::list<Index1D>,DIM> intersecting_1d_generators, intersecting_1d_quarklets;
-        // prepare all intersecting quarklets and generators in the i-th coordinate direction
-        // initialize the type-vector e
-        typename Index::type_type min_type,current_type;
-        for (unsigned int i=0;i<DIM;i++)
-        {
-            min_type[i]=(j[i]==frame.j0()[i]) ?0:1;
-            current_type[i]=min_type[i];
-        }
+    intersecting.clear();
+
+    Support supp, supp_lambda;
+    frame.support(lambda_num, supp_lambda);
+    int lastquarkletnumber(frame.get_last_wavelet_numbers()[0]);
+//    intersect_supports(frame, 0, supp_lambda, supp);
+    
+    // a brute force solution
+    if (j==frame.j0()) {
         
-        for (unsigned int i = 0; i < DIM; i++)
-        {
-
-            //if (mintype[i]==0)
-            if (min_type[i] == 0)
-                intersecting_quarklets(*frame.frames()[i],
-                                      Index1D(lambda.j()[i],
-                                              lambda.e()[i],
-                                              lambda.k()[i],
-                                              frame.frames()[i]),
-                                      j[i], true, intersecting_1d_generators[i]);
-
-            intersecting_quarklets(*frame.frames()[i],
-                                  Index1D(lambda.j()[i],
-                                          lambda.e()[i],
-                                          lambda.k()[i],
-                                          frame.frames()[i]),
-                                  j[i], false, intersecting_1d_quarklets[i]);
-        }
-
-        // generate all tensor product indices
-        // --------------------------------------------
-        // speichere zu jedem Typ was bisher berechnet wurde. key = nummer des typs
-        typedef std::list<FixedArray1D<Index1D,DIM> > list_type;
-        typedef std::list<list_type> type_storage;
-        type_storage storage;
-
-        list_type temp_indices;
-        FixedArray1D<Index1D,DIM> helpindex;
-        if (min_type[0] == 0)
-        {
-            for (typename std::list<Index1D>::const_iterator it(intersecting_1d_generators[0].begin()),
-                    itend(intersecting_1d_generators[0].end());
-                    it != itend; ++it)
-            {
-                helpindex[0] = *it;
-                temp_indices.push_back(helpindex);
-            }
-            storage.push_back(temp_indices);
-            temp_indices.clear();
-        }
-
-        for (typename std::list<Index1D>::const_iterator it(intersecting_1d_quarklets[0].begin()),
-                itend(intersecting_1d_quarklets[0].end());
-                it != itend; ++it)
-        {
-            helpindex[0] = *it;
-            temp_indices.push_back(helpindex);
-        }
-        storage.push_back(temp_indices);
-        temp_indices.clear();
-
-        for (int i = 1; i < DIM; i++)
-        {
-            type_storage sofar;
-            sofar.swap(storage);
-            for (typename type_storage::const_iterator it(sofar.begin()), itend(sofar.end()); it != itend; ++it)
-            {
-                // combine every element in "it" with every generator (if applicable) and wavelet in direction i
-                //list_type sofar1;
-                //sofar1.swap(indices1);
-                if (min_type[i] == 0)
-                { // add all possible generators
-                    for (typename list_type::const_iterator itready((*it).begin()), itreadyend((*it).end()); itready != itreadyend; ++itready)
-                    {
-                        helpindex = *itready;
-                        //unsigned int esum = 0;
-                        //for (unsigned int k = 0; k < i; k++)
-                        //esum += helpindex[k].e();
-                        for (typename std::list<Index1D>::const_iterator it2(intersecting_1d_generators[i].begin()), itend2(intersecting_1d_generators[i].end()); it2 != itend2; ++it2)
-                        {
-                            helpindex[i] = *it2;
-                            temp_indices.push_back(helpindex);
-                        }
-                    }
-                    storage.push_back(temp_indices);
-                    temp_indices.clear();
-                }
-                // now add all possible quarklets
-                for (typename list_type::const_iterator itready((*it).begin()), itreadyend((*it).end()); itready != itreadyend; ++itready)
-                {
-                    helpindex = *itready;
-                    for (typename std::list<Index1D>::const_iterator it2(intersecting_1d_quarklets[i].begin()), itend2(intersecting_1d_quarklets[i].end()); it2 != itend2; ++it2)
-                    {
-                        helpindex[i] = *it2;
-                        temp_indices.push_back(helpindex);
-                    }
-                }
-                storage.push_back(temp_indices);
-                temp_indices.clear();
-            }
-        }
-        // compose the results
-        typename Index::type_type help_e;
-        typename Index::translation_type help_k;
-        for (typename type_storage::const_iterator it_store(storage.begin()),it_store_end(storage.end());it_store != it_store_end; it_store++)
-        {
-            //list_type somelist(*it_store);
-            //typename list_type::const_iterator it22(*it_store.begin()), itend22(*it_store.end());
-            for (typename list_type::const_iterator it((*it_store).begin()), itend((*it_store).end()); it != itend; ++it)
-            {
-                for (unsigned int i = 0; i < DIM; i++)
-                {
-                    help_e[i] = (*it)[i].e();
-                    help_k[i] = (*it)[i].k();
-                }
-                intersecting.push_back(Index(j, help_e, help_k, &frame));
-            }
-        }
+//      Index last_qua(last_quarklet<IFRAME>(&frame, j, p));
+//      Index mu (first_generator<IFRAME>(&frame, j, p));
+      for (int it = /*mu.number()*/ 0;; ++it) {
+	if (intersect_supports(frame, it, supp_lambda, supp))
+            intersecting.push_back(it);
+	if (/* *frame.get_quarklet(it)*/ it == /*last_qua*/ lastquarkletnumber) break;
+      }
+    } 
+    else {
+//      Index last_qua(last_quarklet<IFRAME>(&frame, j, p));
+//      Index mu = first_quarklet<IFRAME>(&frame, j, p);
+//      cout << "First quarklet: " << first_quarklet<IFRAME>(&frame, j, p) << endl;
+//      cout << "Last quarklet: " << last_qua << endl;
+      for (int it = /*mu.number()*/ frame.get_first_wavelet_numbers()[0];; ++it) {
+//          cout << "Mu: " << mu << ", " << mu.number() << endl;
+	if (intersect_supports(frame, it, supp_lambda, supp))
+	  intersecting.push_back(it);
+	if (/* *frame.get_quarklet(it)*/ it == /*last_qua*/lastquarkletnumber) break;
+      }
     }
-#endif
+  }
+    
+
 
     template <class IFRAME, unsigned int DIM>
     bool intersect_singular_support(const TensorFrame<IFRAME,DIM>& frame,

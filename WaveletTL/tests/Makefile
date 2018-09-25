@@ -99,7 +99,6 @@ EXEOBJF3 = \
   test_tbasis.o\
   test_tbasis_support.o\
   test_tbasis_index.o\
-  test_tframe_index.o\
   test_p_poisson_cube.o\
   test_tbasis_adaptive.o\
   test_tbasis_cdd1.o\

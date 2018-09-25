@@ -97,7 +97,7 @@ int main()
 //    typedef Frame1D::Index Index1D;
         typedef TensorQIndex<Frame1D,DIM,Frame>::level_type level_type;
         typedef TensorQIndex<Frame1D,DIM,Frame>::polynomial_type polynomial_type;
-    typedef std::list<Index> SupportList;
+    typedef std::list<int> SupportList;
     for (unsigned int b = 0; b < TFrameArray.size(); b++)
     {
         Index lambda(TFrameArray[b]->get_quarklet(2000));
@@ -162,7 +162,7 @@ int main()
     // compute all intersecting_generators for lambda and print the support and support intersection
         cout << "intersecting_generators for lambda = " << lambda << "; .number() = " << lambda.number() << "; on level = " << lambda_j << 
                 ", and polynomial degree = " << p << endl;
-        intersecting_quarklets<Frame1D,DIM>(*TFrameArray[b], lambda, lambda_j, true, intwav1, p);
+        intersecting_quarklets<Frame1D,DIM>(*TFrameArray[b], lambda, lambda_j, intwav1, p);
         cout << "Number of intersecting generators is " << intwav1.size() << endl;
         for (SupportList::const_iterator it(intwav1.begin()); it != intwav1.end(); ++it)
         {
@@ -194,7 +194,7 @@ int main()
         }
         // compute all intersecting_wavelets for lambda and print the support and support intersection
         cout << "intersecting wavelets on level j0 = " << TFrameArray[b]->j0() << endl;
-        intersecting_quarklets<Frame1D,DIM>(*TFrameArray[b], lambda, lambda_j, false, intwav2, p);
+        intersecting_quarklets<Frame1D,DIM>(*TFrameArray[b], lambda, lambda_j, intwav2, p);
         cout << "Number of intersecting wavelets is " << intwav2.size() << endl;
         for (SupportList::const_iterator it(intwav2.begin()); it != intwav2.end(); ++it)
         {
@@ -228,7 +228,7 @@ int main()
         lambda_j[DIM-1]++;
 
         cout << "intersecting wavelets on level " << lambda_j << endl;
-        intersecting_quarklets<Frame1D,DIM>(*TFrameArray[b], lambda, lambda_j, false, intwav3, p);
+        intersecting_quarklets<Frame1D,DIM>(*TFrameArray[b], lambda, lambda_j, intwav3, p);
         cout << "Number of intersectiong wavelets is " << intwav3.size() << endl;
         for (SupportList::const_iterator it(intwav3.begin()); it != intwav3.end(); ++it)
         {

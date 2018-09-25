@@ -1,120 +1,12 @@
-
+#include <cmath>
+#include <time.h>
+#include <iostream>
 #include "tframe_index.h"
 
 // implementation for tframe.h
 
 namespace WaveletTL
 {
-  	template <class IFRAME, unsigned int DIM>
-  	TensorFrame<IFRAME,DIM>::TensorFrame()
-    : frames_()
-	{
-    	// we only need one instance of IFRAME, without b.c.
-    	IFRAME* b = new IFRAME();
-    	frames_infact.push_back(b);
-    	for (unsigned int i = 0; i < DIM; i++)
-            frames_[i] = b;                    
-        j0_[0] = b->j0();
-        for (unsigned int i = 1; i < DIM; i++)
-            j0_[i] = j0_[0];
-    	delete_pointers = true;
-  	}
-  	
-  	template <class IFRAME, unsigned int DIM>
-	TensorFrame<IFRAME,DIM>::TensorFrame(const TensorFrame<IFRAME, DIM>& other)
-    : full_collection(other.full_collection),
-#if _PRECOMPUTE_FIRSTLAST_WAVELETS
-      first_wavelets(other.first_wavelets), last_wavelets(other.last_wavelets),
-#endif
-	  j0_(other.j0_), jmax_(other.jmax_), pmax_(other.pmax_),
-      frames_infact(), frames_()
-  {
-    for (typename list<IFRAME*>::const_iterator it(other.frames_infact.begin());
-         it != other.frames_infact.end(); ++it)
-    {
-        // make deep copy of the 1D frames:
-        IFRAME* iframe = new IFRAME(*(*it));
-        frames_infact.push_back(iframe);
-        for (unsigned int i = 0; i < DIM; ++i)
-        {
-			if (*it == other.frames_[i])
-				frames_[i] = iframe;
-		}
-    }
-    delete_pointers = true;
-  }
-
-/* Works only with DSFrame, but not with PFrame : 
-  	template <class IFRAME, unsigned int DIM>
-  	TensorFrame<IFRAME,DIM>::TensorFrame(const FixedArray1D<int,2*DIM>& s, const FixedArray1D<int,2*DIM>& sT)
-	{
-    	for (unsigned int i = 0; i < DIM; i++) {
-      		// check whether the corresponding 1d frame already exists
-      		IFRAME* b = 0;
-      		for (typename list<IFRAME*>::const_iterator it(frames_infact.begin()); it != frames_infact.end(); ++it)
-                {
-                    if ((*it)->get_s0() == s[2*i]
-                            && (*it)->get_s1() == s[2*i+1]
-                            && (*it)->get_sT0() == sT[2*i]
-                            && (*it)->get_sT1() == sT[2*i+1]) {
-                        b = *it;
-                        break;
-                    }
-      		}
-      		if (b == 0) {
-				//b = new IFRAME("",s[2*i], s[2*i+1], sT[2*i], sT[2*i+1]);
-				b = new IFRAME(s[2*i], s[2*i+1], sT[2*i], sT[2*i+1]);
-				frames_infact.push_back(b);
-      		}
-      		frames_[i] = b;
-      		j0_[i] = b->j0();
-    	}
-    	delete_pointers = true;
-  	}
-*/
-  	template <class IFRAME, unsigned int DIM>
-  	TensorFrame<IFRAME,DIM>::TensorFrame(const FixedArray1D<int,2*DIM>& s) {
-    	for (unsigned int i = 0; i < DIM; i++) {
-      		// check whether the corresponding 1d frame already exists
-      		IFRAME* b = 0;
-      		for (typename list<IFRAME*>::const_iterator it(frames_infact.begin()); it != frames_infact.end(); ++it) {
-      			if ((*it)->get_s0() == s[2*i]
-	    			&& (*it)->get_s1() == s[2*i+1]) {
-	  				b = *it;
-	  				break;
-				}
-      		}
-      		if (b == 0) {
-				b = new IFRAME(s[2*i], s[2*i+1]);
-				frames_infact.push_back(b);
-      		}
-      		frames_[i] = b;
-      		j0_[i] = b->j0();
-    	}
-    	delete_pointers = true;
-  	}
-
-  	template <class IFRAME, unsigned int DIM>
-  	TensorFrame<IFRAME,DIM>::TensorFrame(const FixedArray1D<bool,2*DIM>& bc) {
-    	for (unsigned int i = 0; i < DIM; i++) {
-      		// check whether the corresponding 1d frame already exists
-      		IFRAME* b = 0;
-      		for (typename list<IFRAME*>::const_iterator it(frames_infact.begin()); it != frames_infact.end(); ++it) {
-				if (((*it)->get_s0()==1) == bc[2*i]
-	    			&& ((*it)->get_s1()==1) == bc[2*i+1]) {
-	  				b = *it;
-	  				break;
-				}
-      		}
-      		if (b == 0) {
-				b = new IFRAME(bc[2*i], bc[2*i+1]);
-				frames_infact.push_back(b);
-      		}
-      		frames_[i] = b;
-      		j0_[i] = b->j0();
-    	}
-    	delete_pointers = true;
-  	}
 
   	template <class IFRAME, unsigned int DIM>
   	TensorFrame<IFRAME,DIM>::TensorFrame(const FixedArray1D<IFRAME*,DIM> frames) {
@@ -123,6 +15,8 @@ namespace WaveletTL
       		j0_[i] = frames_[i]->j0();
     	}
     	delete_pointers = false;
+        setup_full_collection_ = false;
+        precomputed_supports_ = false;
   	}
 
   	template <class IFRAME, unsigned int DIM>
@@ -133,163 +27,219 @@ namespace WaveletTL
 				delete *it;
             }
   	}
-
-
-	template <class IFRAME, unsigned int DIM>
-  	void
-  	TensorFrame<IFRAME,DIM>::support(const Index& lambda, Support& supp) const
-  	{
-            // PERFORMANCE?
-            typename Index::level_type temp_j = lambda.j();
-            typename Index::type_type temp_e = lambda.e();
-            //MultiIndex<int,DIM> temp_j=lambda.j(),temp_e=lambda.e();
-            for (unsigned int i(0); i < DIM; i++) {
-                supp.j[i] = temp_j[i]+temp_e[i];
-                //supp.j[i] = lambda.j()[i] + lambda.e()[i];
-                frames()[i]->support(temp_j[i],
-                                    temp_e[i],
-                                    lambda.k()[i],
-                                    supp.a[i],
-                                    supp.b[i]);
-            }
-  	}
-  
+        
+        template <class IFRAME, unsigned int DIM>
+        const int
+        TensorFrame<IFRAME,DIM>::Deltasize(const int j) const {
+            const unsigned int Deltaj = frames_[0]->Deltasize(j);
+            return pow((Deltaj),DIM);
+        }
+        
         template <class IFRAME, unsigned int DIM>
         typename TensorFrame<IFRAME,DIM>::Index
-        TensorFrame<IFRAME,DIM>::first_generator(const typename Index::polynomial_type p) const
+        TensorFrame<IFRAME,DIM>::first_generator(const level_type& j, const polynomial_type& p) const
         {
+            assert(j >= j0_);
             typename Index::type_type e;
             typename Index::translation_type k;
             for (unsigned int i = 0; i < DIM; i++) {
                 e[i]=0;
-                k[i]=frames_[i]->DeltaLmin();
+                k[i]=frames_[i]->DeltaLmin();   //todo: +1?
             }
-             return Index(p, j0_, e, k, p.number() * (last_quarklet(jmax_).number()+1), this);
+            return Index(p, j0_, e, k, p.number() * Nablasize_, this);
+                          
         }
+        
+         template <class IFRAME, unsigned int DIM>
+        typename TensorFrame<IFRAME,DIM>::Index
+        TensorFrame<IFRAME,DIM>::last_generator(const level_type& j, const polynomial_type& p) const
+        {
+            if(DIM==2){
+                assert(j >= j0_);
+                typename Index::type_type e;
+                // setup highest translation index for e=(0,0), p=4
+                typename Index::translation_type k(frames_[0]->DeltaRmax(j[0]), frames_[1]->DeltaRmax(j[1]));
+                return Index(p,j, e, k, p.number()* Nablasize_+Deltasize(j[0])-1, this); 
+            }
+//            else{
+//            assert(j >= j0_);
+//            typename Index::type_type e;
+//            typename Index::translation_type k;
+//            for (unsigned int i = 0; i < DIM; i++)
+//            {
+//                e[i] = 0;
+//                k[i] = frames_[i]->DeltaRmax(j0_[i]);
+//            }
+//            int res=1;
+//            for (unsigned int i = 0; i < DIM; i++)
+//                res *= frames_[i]->Deltasize(j0_[i]);
+//            return Index(p, j0_, e, k, p.number() * (last_quarklet(jmax_).number()+1)+(res-1), this);
+//            }
+        }
+         
+         template <class IFRAME, unsigned int DIM>
+        typename TensorFrame<IFRAME,DIM>::Index
+        TensorFrame<IFRAME,DIM>::first_quarklet(const level_type& j, const polynomial_type& p, const int& number) const
+        {
+             if(DIM==2){
+                 assert(j >= j0());
 
+                typename Index::type_type e;
+                typename Index::translation_type k;
+    
+                bool sofar_only_generators = true;
+    
+                if (j[0] == j0_[0])
+                {
+                    e[0] = 0;
+                    k[0] = frames_[0]->DeltaLmin();
+                } else
+                {
+                    e[0] = 1;
+                    k[0] = frames_[0]->Nablamin();
+                    sofar_only_generators = false;
+                }
+    
+                if ( (sofar_only_generators == true) || (j[1] != j0_[0]) )
+                {
+                    e[1] = 1;
+                    k[1] = frames_[1]->Nablamin();
+                    //sofar_only_generators = false;
+                } else
+                {
+                    e[1] = 0;
+                    k[1] = frames_[1]->DeltaLmin();
+                }
+    
+                if (number==-1)
+                {
+                    level_type jdiff;
+                    jdiff[0]= j[0]-j0_[0], jdiff[1]= j[1]-j0_[1];
+                    int level = jdiff.number();
+                    int altnumber = p.number()* Nablasize_+first_wavelet_numbers[level];
+                    return Index(p,j, e, k, altnumber, this);
+                }
+                else
+                return Index(p,j, e, k, number, this);
+             }
+//            MultiIndex<int,DIM> temp_mi(j);
+//            for (unsigned int i=0; i<DIM; ++i)
+//                temp_mi[i] -= j0_[i];
+//            if(p.number()==0)
+//            return first_wavelets[temp_mi.number()];
+//            else{
+//                MultiIndex<int,DIM> tempj,tempe,tempk;
+//                tempj = first_wavelets[temp_mi.number()].j();
+//                tempe = first_wavelets[temp_mi.number()].e();
+//                tempk = first_wavelets[temp_mi.number()].k();
+//                return Index(p,tempj,tempe,tempk, p.number() * (last_quarklet(jmax_).number()+1) 
+//                        + first_wavelets[temp_mi.number()].number(), this);
+//            }
+        }
+        
+//        template <class IFRAME, unsigned int DIM>
+//        typename TensorFrame<IFRAME,DIM>::Index
+//        TensorFrame<IFRAME,DIM>::first_quarklet(const int levelsum, const typename Index::polynomial_type p) const
+//        {            
+//            MultiIndex<int,DIM> temp_mi;
+//            temp_mi[0] = levelsum - multi_degree(j0_);
+//            if(p.number()==0)
+//            return first_wavelets[temp_mi.number()];
+//            else{
+//                MultiIndex<int,DIM> tempj,tempe,tempk;
+//                tempj = first_wavelets[temp_mi.number()].j();
+//                tempe = first_wavelets[temp_mi.number()].e();
+//                tempk = first_wavelets[temp_mi.number()].k();
+//                return Index(p,tempj,tempe,tempk, p.number() * (last_quarklet(jmax_).number()+1) 
+//                        + first_wavelets[temp_mi.number()].number()-1, this);
+//            }
+//        }
+        
         template <class IFRAME, unsigned int DIM>
         typename TensorFrame<IFRAME,DIM>::Index
-        TensorFrame<IFRAME,DIM>::first_generator(const unsigned int j, const typename Index::polynomial_type p) const
-        {
-            typename Index::type_type e;
-            typename Index::translation_type k;
-            for (unsigned int i = 0; i < DIM; i++) {
-                e[i]=0;
-                k[i]=frames_[i]->DeltaLmin();
-            }
-            return Index(p, j0_, e, k, p.number() * (last_quarklet(jmax_).number()+1),  this);
-        }
+        TensorFrame<IFRAME,DIM>::last_quarklet(const level_type& j, const polynomial_type& p, const int& number) const
+        {   
+//            cout<<"number:"<<number<<endl;
+            if(DIM==2){
+               assert(j >= j0());
+    
+               typename Index::type_type e(1, 1);
 
-        template <class IFRAME, unsigned int DIM>
-        typename TensorFrame<IFRAME,DIM>::Index
-        TensorFrame<IFRAME,DIM>::first_generator(const MultiIndex<int,DIM> j, const typename Index::polynomial_type p) const
-        {
-            typename Index::type_type e;
-            typename Index::translation_type k;
-            for (unsigned int i = 0; i < DIM; i++) {
-                e[i]=0;
-                k[i]=frames_[i]->DeltaLmin();
+                // setup highest translation index for e=(1,1), p=2
+                typename Index::translation_type k(frames_[0]->Nablamax(j[0]), frames_[1]->Nablamax(j[1]));
+//              cout << "in last_quarklet level_type" << endl;
+                if (number==-1)
+                {
+                    level_type jdiff;
+                    jdiff[0]= j[0]-j0_[0], jdiff[1]= j[1]-j0_[1];
+                    int level = jdiff.number();
+                    int altnumber = p.number()* Nablasize_+last_wavelet_numbers[level];
+                    return Index(p,j, e, k, altnumber, this);
+                }
+                else
+    
+                return Index(p,j, e, k, number, this); 
             }
-            return Index(p, j0_, e, k, p.number() * (last_quarklet(jmax_).number()+1), this);
-                
-            
-            
-        }
-
-        template <class IFRAME, unsigned int DIM>
-        typename TensorFrame<IFRAME,DIM>::Index
-        TensorFrame<IFRAME,DIM>::last_generator(const typename Index::polynomial_type p) const
-        {
-            typename Index::type_type e;
-            typename Index::translation_type k;
-            for (unsigned int i = 0; i < DIM; i++)
-            {
-                e[i] = 0;
-                k[i] = frames_[i]->DeltaRmax(j0_[i]);
-            }
-            int res=1;
-            for (unsigned int i = 0; i < DIM; i++)
-                res *= frames_[i]->Deltasize(j0_[i]);
-            return Index(p, j0_, e, k, p.number() * (last_quarklet(jmax_).number()+1)+(res-1), this);
-        }
-
-#if _PRECOMPUTE_FIRSTLAST_WAVELETS
-               
-        template <class IFRAME, unsigned int DIM>
-        typename TensorFrame<IFRAME,DIM>::Index
-        TensorFrame<IFRAME,DIM>::first_quarklet(const MultiIndex<int,DIM> j, const typename Index::polynomial_type p) const
-        {
-            MultiIndex<int,DIM> temp_mi(j);
-            for (unsigned int i=0; i<DIM; ++i)
-                temp_mi[i] -= j0_[i];
-            if(p.number()==0)
-            return first_wavelets[temp_mi.number()];
-            else{
-                MultiIndex<int,DIM> tempj,tempe,tempk;
-                tempj = first_wavelets[temp_mi.number()].j();
-                tempe = first_wavelets[temp_mi.number()].e();
-                tempk = first_wavelets[temp_mi.number()].k();
-                return Index(p,tempj,tempe,tempk, p.number() * (last_quarklet(jmax_).number()+1) 
-                        + first_wavelets[temp_mi.number()].number(), this);
-            }
+//            MultiIndex<int,DIM> temp_mi(j);
+//            for (unsigned int i=0; i<DIM; ++i)
+//                temp_mi[i] -= j0_[i];
+//            if(p.number()==0)
+//            return last_wavelets[temp_mi.number()];
+//            else{
+//                MultiIndex<int,DIM> tempj,tempe,tempk;
+//                tempj = last_wavelets[temp_mi.number()].j();
+//                tempe = last_wavelets[temp_mi.number()].e();
+//                tempk = last_wavelets[temp_mi.number()].k();
+//                return Index(p,tempj,tempe,tempk, (p.number()+1) * (last_quarklet(jmax_).number()+1) - 1,this);
+//            }
         }
         
         template <class IFRAME, unsigned int DIM>
         typename TensorFrame<IFRAME,DIM>::Index
-        TensorFrame<IFRAME,DIM>::first_quarklet(const int levelsum, const typename Index::polynomial_type p) const
-        {            
-            MultiIndex<int,DIM> temp_mi;
-            temp_mi[0] = levelsum - multi_degree(j0_);
-            if(p.number()==0)
-            return first_wavelets[temp_mi.number()];
-            else{
-                MultiIndex<int,DIM> tempj,tempe,tempk;
-                tempj = first_wavelets[temp_mi.number()].j();
-                tempe = first_wavelets[temp_mi.number()].e();
-                tempk = first_wavelets[temp_mi.number()].k();
-                return Index(p,tempj,tempe,tempk, p.number() * (last_quarklet(jmax_).number()+1) 
-                        + first_wavelets[temp_mi.number()].number()-1, this);
-            }
-        }
-        
-        template <class IFRAME, unsigned int DIM>
-        typename TensorFrame<IFRAME,DIM>::Index
-        TensorFrame<IFRAME,DIM>::last_quarklet(const MultiIndex<int,DIM> j, const typename Index::polynomial_type p) const
-        {            
-            MultiIndex<int,DIM> temp_mi(j);
-            for (unsigned int i=0; i<DIM; ++i)
-                temp_mi[i] -= j0_[i];
-            if(p.number()==0)
-            return last_wavelets[temp_mi.number()];
-            else{
-                MultiIndex<int,DIM> tempj,tempe,tempk;
-                tempj = last_wavelets[temp_mi.number()].j();
-                tempe = last_wavelets[temp_mi.number()].e();
-                tempk = last_wavelets[temp_mi.number()].k();
-                return Index(p,tempj,tempe,tempk, (p.number()+1) * (last_quarklet(jmax_).number()+1) - 1,this);
-            }
-        }
-        
-        template <class IFRAME, unsigned int DIM>
-        typename TensorFrame<IFRAME,DIM>::Index
-        TensorFrame<IFRAME,DIM>::last_quarklet(const int levelsum, const typename Index::polynomial_type p) const
+        TensorFrame<IFRAME,DIM>::last_quarklet(const int& levelsum, const polynomial_type& p, const int& number) const
         {
-            MultiIndex<int,DIM> temp_mi;
-            temp_mi[0] = levelsum - multi_degree(j0_);
-            if(p.number()==0)
-            return last_wavelets[temp_mi.number()];
-            else{
-                
-                MultiIndex<int,DIM> tempj,tempe,tempk;
-                tempj = last_wavelets[temp_mi.number()].j();
-                tempe = last_wavelets[temp_mi.number()].e();
-                tempk = last_wavelets[temp_mi.number()].k();
-                return Index(p,tempj,tempe,tempk, (p.number()+1) * (last_quarklet(jmax_).number()+1) - 1,this);
+            if(DIM==2){
+                assert(levelsum >= (int) multi_degree(j0_));
+    
+                typename Index::type_type e(1, 1);
+                typename Index::level_type j(levelsum - j0_[0],  j0_[0]);
+
+                // setup highest translation index for e=(1,1), p=2
+                typename Index::translation_type k(frames_[0]->Nablamax(j[0]), frames_[1]->Nablamax(j[1]));
+//                cout << "in last_quarklet" << endl;
+                if (number==-1)
+                {
+//        cout << "altnumber" << endl;
+//        cout << "j: " << j << ", j.number" << j.number() << endl;
+//        cout << "j0_: " << j0_ <<", j0_.number" << j0_.number() << endl;
+                    level_type jdiff;
+                    jdiff[0]= j[0]-j0_[0], jdiff[1]= j[1]-j0_[1];
+                    int level = jdiff.number();
+//        cout << "level: " << level << endl;
+                    int altnumber = p.number()* Nablasize_+last_wavelet_numbers[level];
+                    return Index(p,j, e, k, altnumber, this);
+                }
+                else{
+//        cout << "number" << endl;
+                return Index(p,j, e, k, number, this); 
+                }
             }
+//            MultiIndex<int,DIM> temp_mi;
+//            temp_mi[0] = levelsum - multi_degree(j0_);
+//            if(p.number()==0)
+//            return last_wavelets[temp_mi.number()];
+//            else{
+//                
+//                MultiIndex<int,DIM> tempj,tempe,tempk;
+//                tempj = last_wavelets[temp_mi.number()].j();
+//                tempe = last_wavelets[temp_mi.number()].e();
+//                tempk = last_wavelets[temp_mi.number()].k();
+//                return Index(p,tempj,tempe,tempk, (p.number()+1) * (last_quarklet(jmax_).number()+1) - 1,this);
+//            }
                 
         }
         
-                
+#if 0               
         template <class IFRAME, unsigned int DIM>
         void
         TensorFrame<IFRAME,DIM>::precompute_firstlast_wavelets()
@@ -369,7 +319,222 @@ namespace WaveletTL
                 ++l;
             }
         }
-#else
+#endif
+        template <class IFRAME, unsigned int DIM>
+        void
+        TensorFrame<IFRAME,DIM>::support(const int& lambda_num, Support& supp) const
+        {
+
+            if (precomputed_supports_){
+                supp=all_supports_[lambda_num];
+            }
+            else {
+                cout << "TensorFrame<IFRAME,DIM>::support(): precompute supports first!" << endl;
+                abort();      
+            }
+        }
+
+	template <class IFRAME, unsigned int DIM>
+  	void
+  	TensorFrame<IFRAME,DIM>::support(const Index& lambda, Support& supp) const
+  	{
+        if (precomputed_supports_){
+         supp=all_supports_[lambda.number()];
+        }
+        else{    
+            // PERFORMANCE?
+            typename Index::level_type temp_j = lambda.j();
+            typename Index::type_type temp_e = lambda.e();
+            //MultiIndex<int,DIM> temp_j=lambda.j(),temp_e=lambda.e();
+            for (unsigned int i(0); i < DIM; i++) {
+                supp.j[i] = temp_j[i]+temp_e[i];
+                //supp.j[i] = lambda.j()[i] + lambda.e()[i];
+                frames_[i]->support(temp_j[i],
+                                    temp_e[i],
+                                    lambda.k()[i],
+                                    supp.a[i],
+                                    supp.b[i]);
+            }
+        }    
+  	}
+        
+        template <class IFRAME, unsigned int DIM>
+        SampledMapping<DIM>
+        TensorFrame<IFRAME,DIM>::evaluate
+            (const typename TensorFrame<IFRAME,DIM>::Index& lambda,
+            const int resolution) const
+        {
+        SampledMapping<DIM> r;
+
+        typedef typename TensorFrame<IFRAME,DIM>::Index Index;
+
+        typename Index::type_type zero;
+     
+        Point<DIM> x;
+        Point<DIM> y;
+        FixedArray1D<Array1D<double>,DIM> values;
+
+        for(int i=0;i<DIM;i++){
+            x[i]=0;
+            y[i]=1;
+            values[i].resize((1<<resolution)+1); 
+            values[i] = frames_[i]->evaluate(typename IFRAME::Index(lambda.p()[i],
+                                                              lambda.j()[i],
+							      lambda.e()[i],
+							      lambda.k()[i],
+							      frames_[i]),
+				       resolution).values();
+        }
+ 	r = SampledMapping<DIM>(x, y, values);
+        return r;
+        }
+        
+        template <class IFRAME, unsigned int DIM>
+        SampledMapping<DIM>
+        TensorFrame<IFRAME,DIM>::evaluate
+            (const InfiniteVector<double, typename TensorFrame<IFRAME,DIM>::Index>& coeffs,
+            const int resolution) const
+        {
+            // first prepare a plot of the zero function
+            Point<DIM> x;
+            Point<DIM> y;
+            FixedArray1D<Array1D<double>,DIM> values;
+            for(int i=0;i<DIM;i++){
+                x[i]=0;
+                y[i]=1;
+                values[i].resize((1<<resolution)+1);
+                for (int j = 0; j <= 1<<resolution; j++) {
+                    values[i][j]  = 0;
+                }
+            }
+            SampledMapping<DIM>  result;
+            result = SampledMapping<DIM>(x,y, values);
+          
+            // add all plots of the single functions
+            typedef typename TensorFrame<IFRAME,DIM>::Index Index;
+            for (typename InfiniteVector<double,Index>::const_iterator it(coeffs.begin()),
+            itend(coeffs.end()); it != itend; ++it) {
+            SampledMapping<DIM>  temp(evaluate(it.index(), resolution));
+            result.add(*it, temp);
+            }
+    
+            return result;
+        }
+        
+        template <class IFRAME, unsigned int DIM>
+        void
+        TensorFrame<IFRAME,DIM>::setup_full_collection()
+        {
+        if(DIM==2){
+            if (jmax_ == -1 || jmax_ < (int) multi_degree(j0())) {
+                cout << "TensorFrame<IFRAME,DIM>::setup_full_collection(): specify a maximal level of resolution first!" << endl;
+                abort();
+            }   
+    
+            cout << "setting up collection of quarklet indices..." << endl;
+
+            MultiIndex<int,DIM> level_it;
+            level_it[0] = jmax_ - multi_degree(j0());
+            const int numoflevels = level_it.number() + 1;
+            level_it[0] = 0;
+            first_wavelet_numbers.resize(numoflevels);
+            last_wavelet_numbers.resize(numoflevels);
+    
+            typename Index::polynomial_type p(0,0), pmax(pmax_,0), pmin(0,0);
+            set<Index> Lambda;
+            int waveletlevel=0;
+            Index ind = first_generator(j0_, p);
+            for (int k = 0;; k++) {
+//        full_collection[k] = ind;
+                Lambda.insert(ind);
+                cout << ind << ", " << endl;
+                if(ind==first_quarklet(ind.j(),pmin,k)){
+                    first_wavelet_numbers[waveletlevel]=k;
+                
+//                cout << "first: " << k << endl;
+                }
+                if(ind==last_quarklet(ind.j(),pmin,k)){
+                    last_wavelet_numbers[waveletlevel]=k;
+//            cout << "last: " << k << endl;
+                    waveletlevel++;
+                }
+                if(ind==last_quarklet(jmax_, p,k)){
+                    if(multi_degree(p)==0){
+//                cout << "Nablasize wird gesetzt auf " << k+1 << endl;
+                        Nablasize_=k+1;
+                    }
+                   if(p==pmax){
+//                       cout<<"bin hier"<<endl;
+//                       cout<<ind<<endl;
+                       break;
+                   }    
+                    ++p;
+                    ind=first_generator(j0_, p);
+                }
+                    else
+                        ++ind;
+            }
+    
+            full_collection.resize(Lambda.size());
+            all_supports_.resize(Lambda.size());
+            int i = 0;
+            for (typename set<Index>::const_iterator it = Lambda.begin(); it != Lambda.end(); ++it, i++){
+                full_collection[i] = *it;
+                Support supp;
+                support(*it,supp);
+                all_supports_[i] = supp;
+        
+//        cout << *it << ", " << (*it).number() << endl;
+            }
+            precomputed_supports_ = true;
+    
+    
+    
+//    cout << "Nablasize in setup: " << Nablasize_ << endl;
+    
+            cout << "done setting up collection of quarklet indices and precompute supports..." << endl;
+            cout << "total degrees of freedom between j0_ = " << j0_ << " and (jmax_= " << jmax_ << ", pmax_= " << pmax_ << ") is " << full_collection.size() << endl;
+            setup_full_collection_ = true;
+        }    
+        }
+}
+        
+        
+  
+//        template <class IFRAME, unsigned int DIM>
+//        typename TensorFrame<IFRAME,DIM>::Index
+//        TensorFrame<IFRAME,DIM>::first_generator(const typename Index::polynomial_type p) const
+//        {
+//            typename Index::type_type e;
+//            typename Index::translation_type k;
+//            for (unsigned int i = 0; i < DIM; i++) {
+//                e[i]=0;
+//                k[i]=frames_[i]->DeltaLmin();
+//            }
+//             return Index(p, j0_, e, k, p.number() * (last_quarklet(jmax_).number()+1), this);
+//        }
+
+//        template <class IFRAME, unsigned int DIM>
+//        typename TensorFrame<IFRAME,DIM>::Index
+//        TensorFrame<IFRAME,DIM>::first_generator(const unsigned int j, const typename Index::polynomial_type p) const
+//        {
+//            typename Index::type_type e;
+//            typename Index::translation_type k;
+//            for (unsigned int i = 0; i < DIM; i++) {
+//                e[i]=0;
+//                k[i]=frames_[i]->DeltaLmin();
+//            }
+//            return Index(p, j0_, e, k, p.number() * (last_quarklet(jmax_).number()+1),  this);
+//        }
+
+        
+
+       
+
+//#if _PRECOMPUTE_FIRSTLAST_WAVELETS
+               
+        
+#if 0
         
         template <class IFRAME, unsigned int DIM>
         typename TensorFrame<IFRAME,DIM>::Index
@@ -476,6 +641,7 @@ namespace WaveletTL
         }
         
 #endif // if _PRECOMPUTE_FIRSTLAST_WAVELETS
+#if 0      
 	template <class IFRAME, unsigned int DIM>
 	void
 	TensorFrame<IFRAME,DIM>::expand(const Function<DIM>* f,
@@ -593,54 +759,63 @@ namespace WaveletTL
             }
             return r;
         }
+#endif
+//        template <class IFRAME, unsigned int DIM>
+//  	double
+//  	TensorFrame<IFRAME,DIM>::evaluate(const unsigned int derivative, 
+//                                          const Index& lambda,
+//                                          const Point<DIM> x) const
+//  	{
+//            double value = 1.0;
+//            for (unsigned int i = 0; i < DIM; i++) // loop through components of the tensor product
+//                value *= frames_[i]->evaluate(derivative,
+//                                             lambda.p()[i], lambda.j()[i], lambda.e()[i], lambda.k()[i],
+//                                             x[i]);
+//            return value;
+//        }
 
-        template <class IFRAME, unsigned int DIM>
-  	double
-  	TensorFrame<IFRAME,DIM>::evaluate(const unsigned int derivative, 
-                                          const Index& lambda,
-                                          const Point<DIM> x) const
-  	{
-            double value = 1.0;
-            for (unsigned int i = 0; i < DIM; i++) // loop through components of the tensor product
-                value *= frames_[i]->evaluate(derivative,
-                                             lambda.p()[i], lambda.j()[i], lambda.e()[i], lambda.k()[i],
-                                             x[i]);
-            return value;
-        }
+
+        
+//            if (jmax_ < multi_degree(j0_) ) {
+//                cout << "TensorFrame<IFRAME,DIM>::setup_full_collection(): the specified maximal level jmax is invalid. Specify a higher maximal level jmax_" << endl;
+//                cout << "jmax_ = " << jmax_ << "; j0_ = " << j0_ << endl;
+//                abort();
+//            }
+//            typedef typename Index::polynomial_type polynomial_type;
+//            typedef  std::set<polynomial_type> pol_set;
+//            pol_set temp(degree_indices<int,DIM>(pmax_));
+//            typename pol_set::const_iterator itend(temp.end());
+//            --itend;
+//            int degrees_of_freedom = ((*itend).number()+1)*(last_quarklet_num<IFRAME,DIM,TensorFrame<IFRAME,DIM> >(this, jmax_) +1); // +1 since numbering begins at 0
+//            cout << "total degrees of freedom between j0_ = " << j0_ << " and (jmax_= " << jmax_ << ", pmax_= " << pmax_ << ") is " << degrees_of_freedom << endl;
+//            cout << "setting up collection of quarklet indices..." << endl;
+//            full_collection.resize(degrees_of_freedom);
+//            all_supports_.resize(degrees_of_freedom);
+//            typename Index::polynomial_type p;
+//            Index ind = first_generator(j0_, p);
+//            for (int k = 0; k < degrees_of_freedom; k++) {
+////                cout << ind << ", " << endl;
+//                full_collection[k] = ind;
+//                Support supp;
+//                support(ind,supp);
+//                all_supports_[k] = supp;
+//                
+//                if(ind==last_quarklet(jmax_, p)){
+//                    if(multi_degree(p)==0){
+////                cout << "Nablasize wird gesetzt auf " << k+1 << endl;
+//                    Nablasize_=k+1;
+//                    }
+////                    if(p==pmax)
+////                        break;
+//                    ++p;
+//                    ind=first_generator(j0_, p);
+//                }
+//                    else
+//                        ++ind;
+//            }
+//            setup_full_collection_ = true;
+//            precomputed_supports_ = true;
+//            cout << "done setting up collection of quarklet indices..." << endl;
+        
 
 
-        template <class IFRAME, unsigned int DIM>
-        void
-        TensorFrame<IFRAME,DIM>::setup_full_collection()
-        {
-            if (jmax_ < multi_degree(j0_) ) {
-                cout << "TensorFrame<IFRAME,DIM>::setup_full_collection(): the specified maximal level jmax is invalid. Specify a higher maximal level jmax_" << endl;
-                cout << "jmax_ = " << jmax_ << "; j0_ = " << j0_ << endl;
-                abort();
-            }
-            typedef typename Index::polynomial_type polynomial_type;
-            typedef  std::set<polynomial_type> pol_set;
-            pol_set temp(degree_indices<int,DIM>(pmax_));
-            typename pol_set::const_iterator itend(temp.end());
-            --itend;
-            int degrees_of_freedom = ((*itend).number()+1)*(last_quarklet_num<IFRAME,DIM,TensorFrame<IFRAME,DIM> >(this, jmax_) +1); // +1 since numbering begins at 0
-            cout << "total degrees of freedom between j0_ = " << j0_ << " and (jmax_= " << jmax_ << ", pmax_= " << pmax_ << ") is " << degrees_of_freedom << endl;
-            cout << "setting up collection of quarklet indices..." << endl;
-            full_collection.resize(degrees_of_freedom);
-            typename Index::polynomial_type p;
-            Index ind = first_generator(j0_, p);
-            for (int k = 0; k < degrees_of_freedom; k++) {
-//                cout << ind << ", " << endl;
-                full_collection[k] = ind;
-                
-                if(ind==last_quarklet(jmax_, p)){
-                    ++p;
-                    ind=first_generator(j0_, p);
-                }
-                    else
-                        ++ind;
-            }
-            cout << "done setting up collection of quarklet indices..." << endl;
-        }
-
-}

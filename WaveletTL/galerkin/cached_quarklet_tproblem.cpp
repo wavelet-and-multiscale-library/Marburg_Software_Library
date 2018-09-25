@@ -12,16 +12,19 @@ namespace WaveletTL
 
     template <class PROBLEM>
     double
-    CachedQuarkletTProblem<PROBLEM>::a(const Index& lambda,
-			       const Index& nu) const
+    CachedQuarkletTProblem<PROBLEM>::a(const Index& la,
+			       const Index& mu) const
     {
         
         double r = 0;
 
         if (problem->local_operator())
         {
-            const int lambda_num = lambda.number();
-            const int nu_num = nu.number();
+            const Index* lambda= &la;
+            const Index* nu = &mu;
+            
+            const int lambda_num = lambda->number();
+            const int nu_num = nu->number();
 //            const unsigned int pmax = problem->frame().get_pmax();          
 
             // Be careful, there is no generator level in the cache! The situation from the MRA setting:
@@ -30,18 +33,18 @@ namespace WaveletTL
             // the minimal level are thrown together in one index set (componentwise),
             // this also applies to tensors of generators on the lowest level
 
-            level_type lambda_key(lambda.j()),first_level(frame().j0());
-            polynomial_type lambda_p(lambda.p());
+            level_type lambda_key(lambda->j()),first_level(frame().j0());
+            polynomial_type lambda_p(lambda->p());
             for (int k=0;k<space_dimension;k++)
             {
                 lambda_key[k] = lambda_key[k]-first_level[k];
             }
 //TODO (PERFORMANCE): store the numbers of all levels up to jmax, do not compute anything here:
-            int blocknumber((lambda.p()).number());
+            int blocknumber((lambda->p()).number());
             int subblocknumber(lambda_key.number());
 
             // check wether entry has already been computed
-            typedef std::list<Index> IntersectingList;
+            typedef std::list<int> IntersectingList;
 
             // search for column 'mu'
             typename ColumnCache::iterator col_lb(entries_cache.lower_bound(nu_num));
@@ -97,7 +100,7 @@ namespace WaveletTL
                 it = block.insert(lb, value_type(subblocknumber, Subblock()));
                 Subblock& subblock(it->second);
 
-                if ((subblocknumber == 0) && (lambda.j() == first_level))
+                if ((subblocknumber == 0) && (lambda->j() == first_level))
                 {
                     // Insert Generators and Quarklets
 
@@ -108,26 +111,31 @@ namespace WaveletTL
 
                     // TODO : produce nicer looking code:
                     IntersectingList nusG,nusW;
-                        intersecting_quarklets(frame(), nu,
-                                               lambda.j(),
-                                          true, // this argument isn't that helpful for the way the method is used in a() .  It doesn't play a role for DIM>1 and miserably fails for DIM=1. Need to work on the routine in tframe_support!
+                        intersecting_quarklets(frame(), *nu,
+                                               lambda->j(),
+//                                          true, // this argument isn't that helpful for the way the method is used in a() .  It doesn't play a role for DIM>1 and miserably fails for DIM=1. Need to work on the routine in tframe_support!
                                           nusG,
-                                          lambda.p());
-                        intersecting_quarklets(frame(), nu,
-                                          lambda.j(),
-                                          false, // this argument isn't that helpful for the way the method is used in a() .  It doesn't play a role for DIM>1 and miserably fails for DIM=1. Need to work on the routine in tframe_support!
+                                          lambda->p());
+                        intersecting_quarklets(frame(), *nu,
+                                          lambda->j(),
+//                                          false, // this argument isn't that helpful for the way the method is used in a() .  It doesn't play a role for DIM>1 and miserably fails for DIM=1. Need to work on the routine in tframe_support!
                                           nusW,
-                                          lambda.p());
+                                          lambda->p());
                         // compute entries
                         for (typename IntersectingList::const_iterator it(nusG.begin()), itend(nusG.end());it != itend; ++it)
                         {
-                            const double entry = problem->a(*it, nu);
+//                            const double entry = problem->a(*it, nu);
+                            const double entry = problem->a(*(frame().get_quarklet(*it)), *nu);
                             typedef typename Subblock::value_type value_type_subblock;
                             if (fabs(entry) > 1e-16 ) 
 //                            if (entry != 0.)
                             {
-                                subblock.insert(subblock.end(), value_type_subblock((*it).number(), entry));
-                                if ((int)(*it).number() == lambda_num)
+                                subblock.insert(subblock.end(), value_type_subblock(*it, entry));
+//                                if ((int)(*it).number() == lambda_num)
+//                                {
+//                                    r = entry;
+//                                }
+                                if (*it == lambda_num)    
                                 {
                                     r = entry;
                                 }
@@ -135,14 +143,19 @@ namespace WaveletTL
                         }
                         for (typename IntersectingList::const_iterator it(nusW.begin()), itend(nusW.end());it != itend; ++it)
                         {
-                            const double entry = problem->a(*it, nu);
+//                            const double entry = problem->a(*it, nu);
+                            const double entry = problem->a(*(frame().get_quarklet(*it)), *nu);
                             typedef typename Subblock::value_type value_type_subblock;
                             if (fabs(entry) > 1e-16 ) 
 //                            if (entry != 0.)
                             {
                                 // Insertion should be efficient, since the quarklets coma after the generators
-                                subblock.insert(subblock.end(), value_type_subblock((*it).number(), entry));
-                                if ((int)(*it).number() == lambda_num)
+                                subblock.insert(subblock.end(), value_type_subblock(*it, entry));
+//                                if ((int)(*it).number() == lambda_num)
+//                                {
+//                                    r = entry;
+//                                }
+                                if (*it == lambda_num)    
                                 {
                                     r = entry;
                                 }
@@ -155,25 +168,30 @@ namespace WaveletTL
                         // there are no Generators
                         IntersectingList nus;
                         intersecting_quarklets(frame(),
-                                               nu,
+                                               *nu,
                                                //std::max(j, frame().j0()),
-                                               lambda.j(),
-                                               false, // this argument isn't that helpful for the way the method is used in a() .  It doesn't play a role for DIM>1 and miserably fails for DIM=1. Need to work on the routine in tframe_support!
+                                               lambda->j(),
+//                                               false, // this argument isn't that helpful for the way the method is used in a() .  It doesn't play a role for DIM>1 and miserably fails for DIM=1. Need to work on the routine in tframe_support!
                          //                    == (frame().j0()-1),
                                                nus,
-                                               lambda.p());
+                                               lambda->p());
                     // compute entries
                         for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)
                         {
-                            const double entry = problem->a(*it, nu);
+//                            const double entry = problem->a(*it, nu);
+                            const double entry = problem->a(*(frame().get_quarklet(*it)), *nu);
                             
                             
                             typedef typename Subblock::value_type value_type_subblock;
                             if (fabs(entry) > 1e-16 ) 
     //                            if (entry != 0.)
                             {
-                                subblock.insert(subblock.end(), value_type_subblock((*it).number(), entry));
-                                if ((int)(*it).number() == lambda_num)
+                                subblock.insert(subblock.end(), value_type_subblock(*it, entry));
+//                                if ((int)(*it).number() == lambda_num)
+//                                {
+//                                    r = entry;
+//                                }
+                                if (*it == lambda_num)    
                                 {
                                     r = entry;
                                 }
@@ -330,7 +348,7 @@ namespace WaveletTL
         
         double d1 = precond?D(lambda):1.0;
         polynomial_type p;
-        
+#if 0        
         if (space_dimension == 1)
         {
             
@@ -389,7 +407,8 @@ namespace WaveletTL
 #endif
             }
         }
-        else if (space_dimension == 2)
+#endif
+        if (space_dimension == 2)
         {
 
             // The ball can be described of levellines consisting of levels with the same multidegree
@@ -398,7 +417,7 @@ namespace WaveletTL
             // The last level in a levelline is determined with miny = min(j0[1], lambda.j[1]-radius)
 
             
-            Index mu;
+//            Index mu;
             level_type j0(this->frame().j0());
             
             int lambdaline = multi_degree(lambda.j());
@@ -408,7 +427,7 @@ namespace WaveletTL
 //            int lowestline = j0[0]+j0[1];
             int dist2j0=lambdaline-lowestline;
             int dist2maxlevel=maxlevel-lambdaline;
-            level_type currentlevel;
+            level_type currentlevel, leveldiffj0;
             polynomial_type currentpolynomial;
             
             int xstart,xend,ystart,subblocknumber;
@@ -424,7 +443,9 @@ namespace WaveletTL
                 for (int steps = max(0,j0[0]-xstart); steps <= min(xend-xstart,ystart-j0[1]) ; steps++ )
                 {
                     currentlevel[0]= xstart+steps;
+                    leveldiffj0[0]=currentlevel[0]-frame().j0()[0];
                     currentlevel[1]= ystart-steps;
+                    leveldiffj0[1]=currentlevel[1]-frame().j0()[1];
                     subblocknumber = currentlevel[0]-j0[0] + ((lambdaline-lowestline+offset)*(lambdaline-lowestline+offset+1))/2;
                     
                     
@@ -433,8 +454,14 @@ namespace WaveletTL
                     int jxdiff = currentlevel[0]-lambda.j()[0];
                     int jydiff = currentlevel[1]-lambda.j()[1];
                     int gap = abs(jxdiff) + abs(jydiff); 
-                    double boundary = pow(2,(radius-B*gap/A))/((1+lambda.p()[0])*(1+lambda.p()[1])); //ÄNDERN 1 bezieht sich auf (1+p_1')*(1+p_2')
-//                    cout << "boundary: " << boundary << endl;
+                    double boundary;// = pow(2,(radius-B*gap/A))/((1+lambda.p()[0])*(1+lambda.p()[1])); //ÄNDERN 1 bezieht sich auf (1+p_1')*(1+p_2')
+                    if(A==B){
+                        boundary = 1<<(radius-gap)/((1+lambda.p()[0])*(1+lambda.p()[1]));
+                    }
+                    else{
+                        boundary = pow(2,(radius-B*gap/A))/((1+lambda.p()[0])*(1+lambda.p()[1])); //ÄNDERN 1 bezieht sich auf (1+p_1')*(1+p_2')
+                    } 
+                    //                    cout << "boundary: " << boundary << endl;
 //                    cout << "maxpolynomial: " << maxpolynomial << endl;
 //                    cout << "gap: " << gap << endl;
 //                    cout << "radius: " << radius << endl;
@@ -443,8 +470,9 @@ namespace WaveletTL
                         
                         for (currentpolynomial[1]=0; currentpolynomial[1]<= std::min((int)(boundary/(1+currentpolynomial[0]))-1,maxpolynomial-currentpolynomial[0]);currentpolynomial[1]++){
 
-                            mu = this->frame().first_quarklet(currentlevel, currentpolynomial);
-                            a(mu,lambda);
+//                            mu = this->frame().first_quarklet(currentlevel, currentpolynomial);
+//                            a(mu,lambda);
+                            a(*(frame().get_quarklet(frame().get_first_wavelet_numbers()[leveldiffj0.number()]+currentpolynomial.number() * frame().get_Nablasize())),lambda);
 //                            cout << mu << endl;
 //                            int dist2p0 = multi_degree(lambda.p());
 //                            int blocknumber = currentpolynomial[0] + ((dist2p0+offset)*(dist2p0+offset+1))/2;;
@@ -457,7 +485,8 @@ namespace WaveletTL
                             for (typename Subblock::const_iterator it(subblock.begin()), itend(subblock.end()); it != itend; ++it)
                             {
                                 // high caching strategy
-                                w[it->first]=w[it->first]+factor*(it->second)/( precond? (d1*D(this->frame().get_quarklet(it->first))):1.0);
+                                w[it->first]=w[it->first]+factor*(it->second)/( precond? (d1*D(*(frame().get_quarklet(it->first)))):1.0);
+//                                w[it->first]=w[it->first]+factor*(it->second)/( precond? (d1*D(this->frame().get_quarklet(it->first))):1.0);
 
                                 // low caching strategy
                                 //w[it->first]=w[it->first]+factor*(it->second)/d1/(problem->D(this->frame().get_quarklet(it->first)));
@@ -874,7 +903,7 @@ namespace WaveletTL
             set<Index> Lambda;
             polynomial_type p;
             //cout << "cached_tproblem.norm_A :: last quarklet = " << (problem->frame().last_quarklet(multi_degree(problem->frame().j0())+offset)) << endl;
-            for (Index lambda ( problem->frame().first_generator() );;)
+            for (Index lambda ( problem->frame().first_generator(problem->frame().j0(), p) );;)
             {
                 
 //                cout << "index: " << lambda << endl;
@@ -945,7 +974,7 @@ namespace WaveletTL
             //cout << "cached_tproblem.norm_A :: last quarklet = " << (problem->frame().last_quarklet(multi_degree(problem->frame().j0())+offset)) << endl;
             polynomial_type p;
             //cout << "cached_tproblem.norm_A :: last quarklet = " << (problem->frame().last_quarklet(multi_degree(problem->frame().j0())+offset)) << endl;
-            for (Index lambda ( problem->frame().first_generator() );;)
+            for (Index lambda ( problem->frame().first_generator(problem->frame().j0(), p) );;)
             {
                 Lambda.insert(lambda);
                 if (lambda == problem->frame().last_quarklet(multi_degree(problem->frame().j0())+offsetj, p) ){
@@ -1023,7 +1052,7 @@ namespace WaveletTL
             set<Index> Lambda;
             polynomial_type p;
             //cout << "cached_tproblem.norm_A :: last quarklet = " << (problem->frame().last_quarklet(multi_degree(problem->frame().j0())+offset)) << endl;
-            for (Index lambda ( problem->frame().first_generator() );;)
+            for (Index lambda ( problem->frame().first_generator(problem->frame().j0(), p) );;)
             {
                 Lambda.insert(lambda);                
                 if (lambda == problem->frame().last_quarklet(multi_degree(problem->frame().j0())+offsetj, p) ){

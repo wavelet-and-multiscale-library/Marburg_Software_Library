@@ -11,6 +11,8 @@
 
 #include <list>
 #include <set>
+#include <algebra/infinite_vector.h>
+#include <cube/tframe_index.h>
 
 namespace WaveletTL
 {
@@ -29,7 +31,17 @@ namespace WaveletTL
     void support(const TensorFrame<IFRAME,DIM>& frame,
                  const typename TensorFrame<IFRAME,DIM>::Index& lambda,
                  typename TensorFrame<IFRAME,DIM>::Support& supp);
+    
+    template <class IFRAME, unsigned int DIM>
+    void support(const TensorFrame<IFRAME,DIM>& frame,
+                 const int& lambda_num,
+                 typename TensorFrame<IFRAME,DIM>::Support& supp);
 
+    template <class IFRAME, unsigned int DIM>
+    bool intersect_supports(const TensorFrame<IFRAME,DIM>& frame,
+  			  const typename TensorFrame<IFRAME,DIM>::Index& lambda,
+			  const typename TensorFrame<IFRAME,DIM>::Index& mu);
+    
     /*
      * For a given interval frame, compute a cube
      * 2^{-j_}<a_,b_> = 2^{-j_1}[a_1,b_1]x...x2^{-j_n}[a_n,b_n]
@@ -39,10 +51,30 @@ namespace WaveletTL
      * exists, false otherwise. In the latter case 'supp'
      * has no meaningful value.
      */
+    
+    
     template <class IFRAME, unsigned int DIM>
     bool intersect_supports(const TensorFrame<IFRAME,DIM>& frame,
   			  const typename TensorFrame<IFRAME,DIM>::Index& lambda,
+			  const typename TensorFrame<IFRAME,DIM>::Support& supp_mu,
+			  typename TensorFrame<IFRAME,DIM>::Support& supp);
+    
+    template <class IFRAME, unsigned int DIM>
+    bool intersect_supports(const TensorFrame<IFRAME,DIM>& frame,
+			  const int& lambda_num,
+			  const typename TensorFrame<IFRAME,DIM>::Support& supp_mu,
+			  typename TensorFrame<IFRAME,DIM>::Support& supp);
+    
+    template <class IFRAME, unsigned int DIM>
+    bool intersect_supports(const TensorFrame<IFRAME,DIM>& frame,
+			  const typename TensorFrame<IFRAME,DIM>::Index& lambda,
 			  const typename TensorFrame<IFRAME,DIM>::Index& mu,
+			  typename TensorFrame<IFRAME,DIM>::Support& supp);
+  
+    template <class IFRAME, unsigned int DIM>
+    bool intersect_supports(const TensorFrame<IFRAME,DIM>& frame,
+			  const int& lambda_num,
+			  const int& mu_num,
 			  typename TensorFrame<IFRAME,DIM>::Support& supp);
 
   
@@ -50,38 +82,28 @@ namespace WaveletTL
      * For a given quarklet \psi_\lambda, compute all quarks OR quarklets
      * \psi_\nu with level |\nu|=j (multiindex), such that the respective supports
      * have a nontrivial intersection.
-     * OUTPUT IS SORTED
-     * 
-     * output std::list<int>& intersecting is easy to implement and may be faster
      */
+    
     template <class IFRAME, unsigned int DIM>
     void intersecting_quarklets(const TensorFrame<IFRAME,DIM>& frame,
-                               const typename TensorFrame<IFRAME,DIM>::Index& lambda,
-                               const MultiIndex<int,DIM> j, const bool generators,
-                               std::list<typename TensorFrame<IFRAME,DIM>::Index>& intersecting,
-                               const MultiIndex<int,DIM> p);
-
-    /*
-     * For a given quarklet \psi_\lambda, compute all quarks AND quarklets
-     * \psi_\nu with level |\nu|=j (multiindex), such that the respective supports
-     * have a nontrivial intersection.
-     * 
-     * Routine is slow. Use is disadvised. However, it propably produces correct sets, so it might be useful for debugging
-     */
-    /*
+			     const typename TensorFrame<IFRAME,DIM>::Index& lambda,
+			     const typename TensorFrameIndex<IFRAME,DIM>::level_type& j,
+                             std::list<int>& intersecting,
+                             const typename TensorFrameIndex<IFRAME,DIM>::polynomial_type& p);
+  
     template <class IFRAME, unsigned int DIM>
-    void intersecting_elements(const TensorFrame<IFRAME,DIM>& frame,
-                               const typename TensorFrame<IFRAME,DIM>::Index& lambda,
-                               const MultiIndex<int,DIM> j,
-                               std::list<typename TensorFrame<IFRAME,DIM>::Index>& intersecting);
-*/
-  /*!
-   * Decide whether the support of a given (primal) quark/quarklet \psi_\lambda
-   * intersects the singular support of another (primal) quark/quarklet \psi_\nu..
-   *
-   * Note: We have intersection of the singular supports if and only if:
-   * (cube_support:)   one of the components has this property in one dimension
-   * (tframe_support:) all of the components have this property
+    void intersecting_quarklets(const TensorFrame<IFRAME,DIM>& frame,
+			     const int& lambda_num,
+			     const typename TensorFrameIndex<IFRAME,DIM>::level_type& j,
+			     std::list<int>& intersecting,
+                             const typename TensorFrameIndex<IFRAME,DIM>::polynomial_type& p);
+  
+  
+    
+
+/*!
+    Decide whether the support of a given (primal) generator/quarklet \psi_\lambda
+    intersects the singular support of another (primal) generator/quarklet \psi_\nu.
   */
   template <class IFRAME, unsigned int DIM>
   bool intersect_singular_support(const TensorFrame<IFRAME,DIM>& frame,

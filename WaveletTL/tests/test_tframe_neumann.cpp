@@ -6,7 +6,7 @@
 
 #define PARALLEL 0
 #define NONADAPTIVE
-#undef ADAPTIVE
+#define ADAPTIVE
 
 #undef BASIS
 #define FRAME
@@ -29,26 +29,27 @@
 
 #include <iostream>
 
-#include <interval/p_basis.h>
-#include <interval/ds_basis.h>
+//#include <interval/p_basis.h>
+#include <interval/pq_frame.h>
+//#include <interval/ds_basis.h>
 #include <utils/fixed_array1d.h>
-#include <cube/tbasis.h>
-#include <cube/tbasis_index.h>
+//#include <cube/tbasis.h>
+//#include <cube/tbasis_index.h>
 #include <utils/multiindex.h>
 #include <numerics/bvp.h>
-#include <galerkin/tbasis_equation.h>
-#include <galerkin/cached_tproblem.h>
+//#include <galerkin/tbasis_equation.h>
 #include <adaptive/cdd1.h>
 #include <adaptive/cdd2.h>
-#include <cube/tbasis_evaluate.h>
+//#include <cube/tbasis_evaluate.h>
 #include <cube/tframe_evaluate.h>
-#include <interval/pq_frame.h>
 #include <cube/tframe.h>
 #include <cube/tframe_evaluate.h>
 #include <cube/tframe_indexplot.h>
+#include <cube/tframe_index.h>
+#include <cube/tframe_support.h>
 #include <adaptive/compression.h>
 #include <adaptive/apply.h>
-#include <cube/tbasis_indexplot.h>
+//#include <cube/tbasis_indexplot.h>
 #include <galerkin/tframe_equation.h>
 #include <galerkin/cached_quarklet_tproblem.h>
 //#include "TestFunctions2d.h"
@@ -198,7 +199,7 @@ int main()
     const int b=2;
 #endif
     const unsigned int dim = 2; 
-    const int jmax=6;
+    const int jmax=7;
     const int pmax = 0;
 
 
@@ -239,6 +240,7 @@ int main()
     typedef PQFrame<d,dT> Frame1d;
     typedef TensorFrame<Frame1d,dim> Frame;
     typedef Frame::Index Index;
+    typedef Frame::Support Support;
 
 #ifdef DIRICHLET    
     Frame1d frame1d(true,true);   
@@ -255,26 +257,66 @@ int main()
     Frame frame(frames);
     frame.set_jpmax(jmax,pmax);
     cout<<"dof: "<<frame.degrees_of_freedom()<<endl;
-
+#if 0//index tests
+    cout<<frame1d.DeltaLmin(0)<<endl;
+    cout<<frame1d.DeltaRmax(3,0)<<endl;
+    cout<<frame1d.Deltasize(3,0)<<endl;
+    cout<<frame.first_generator(frame.j0())<<endl;
+    cout<<first_generator(&frame,frame.j0(),MultiIndex<int,2>())<<endl;
+    cout<<frame.last_generator(frame.j0())<<endl;
+    cout<<last_generator(&frame,frame.j0(),MultiIndex<int,2>())<<endl;
+    cout<<frame1d.Nablamin(0)<<endl;
+    cout<<frame1d.Nablamax(3,0)<<endl;
+    cout<<frame.first_quarklet(frame.j0())<<endl;
+    cout<<first_quarklet(&frame,frame.j0(),MultiIndex<int,2>())<<endl;
+    cout<<frame.last_quarklet(frame.j0())<<endl;
+    cout<<last_quarklet(&frame,frame.j0(),MultiIndex<int,2>())<<endl;
+    cout<<frame.get_first_wavelet_numbers()<<endl;
+    cout<<frame.get_last_wavelet_numbers()<<endl;
+#endif
 #ifdef DIRICHLET
     TensorFrameEquation<Frame1d,dim,Frame> eq(&poisson1, &frame, false);
 #endif    
 #ifdef NEUMANN
-    TensorFrameEquation<Frame1d,dim,Frame> eq(&poisson1, &frame, &phi1, false);
+    TensorFrameEquation<Frame1d,dim,Frame> eq(&poisson1, &frame, &phi1, true);
 #endif
       
 #if 0 //some frame tests
     cout<<eq.frame().degrees_of_freedom()<<endl;
     cout<<eq.frame().j0()<<endl;
-    cout<<eq.frame().first_generator()<<endl;
-    cout<<eq.a(eq.frame().first_generator(),eq.frame().first_generator())<<endl;
-    cout<<eq.f(eq.frame().first_generator())<<endl;
+    cout<<eq.frame().first_generator(eq.frame().j0())<<endl;
+    cout<<eq.a(eq.frame().first_generator(eq.frame().j0()),eq.frame().first_generator(eq.frame().j0()))<<endl;
+    cout<<eq.f(eq.frame().first_generator(eq.frame().j0()))<<endl;
+    Index ind=eq.frame().first_generator(eq.frame().j0());
+    
+
+    Support supp;
+    eq.frame().support(eq.frame().first_generator(eq.frame().j0()),supp);
+    cout<<supp.b[0]<<endl;
+    cout<<intersect_supports(eq.frame(),0,1,supp)<<endl;
+    std::list<int> inters;
+    
+    MultiIndex<int,2> q;
+    Index ind2=first_quarklet<Frame1d,dim>(&eq.frame(), eq.frame().j0(),q);
+    cout<<"ind2:"<<ind2<<endl;
+    ++ind2;
+    cout<<"ind2:"<<ind2<<endl;
+    ind2=last_quarklet<Frame1d,dim>(&eq.frame(), eq.frame().j0(),q);
+    cout<<(ind2==ind2)<<endl;
+    intersecting_quarklets<Frame1d,dim>(eq.frame(),ind2,eq.frame().j0(),inters,q);
+//    for(list<int>::const_iterator it = inters.begin();it!=inters.end();++it){
+//        cout<<*it<<endl;
+//    }
+//    cout<<supp<<endl;
+    Index ind3=frame.get_quarklet(0);
+    cout<<ind3<<endl;
 #endif
  
 #if 0
     //plot one function
     Index testindex=frame.get_quarklet(90);   
-    SampledMapping<dim> evalf(evaluate(frame, testindex, true, 6));
+//    SampledMapping<dim> evalf(evaluate(frame, testindex, true, 6));
+    SampledMapping<dim> evalf(frame.evaluate(testindex,6));
     
     cout << "evaluate quarklet with index " << testindex << endl;
 //    evalf=frame.evaluate(testindex,6);
@@ -320,7 +362,7 @@ int main()
         ++zaehler;
         
     }
-//    cout<<"using "<<Lambda.size()<<" generators and no wavelets"<<endl;
+    cout<<"using "<<Lambda.size()<<" dof"<<endl;
     cout << "setup stiffness matrix" << endl;
     SparseMatrix<double> A;
     setup_stiffness_matrix(eq,Lambda,A); 
@@ -402,7 +444,23 @@ int main()
 #endif
 
 #ifdef ADAPTIVE
-    CachedQuarkletTProblem<TensorFrameEquation<Frame1d,dim,Frame>> cproblem1(&eq,1.0,1.0);
+    CachedQuarkletTProblem<TensorFrameEquation<Frame1d,dim,Frame> > cproblem1(&eq,0.0,0.0);
+    cout<<"normA: "<<cproblem1.norm_A()<<endl;
+    cout<<"normAinv: "<<cproblem1.norm_Ainv()<<endl;
+    
+    InfiniteVector<double, Index> F_eta; 
+    cproblem1.RHS(1e-6, F_eta);
+    double epsilon = 1e-3;
+    InfiniteVector<double, Index> u_epsilon;
+    InfiniteVector<double, int> u_epsilon_int;
+    const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
+    const unsigned int maxiter = 10;
+    const double omega = 0.5;
+    const double residual_stop = 0.1;
+    const double shrinkage = 0;
+    
+//    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b); 
+    richardson_QUARKLET_SOLVE(cproblem1,epsilon,u_epsilon_int, maxiter, tensor_simple, a, b, shrinkage, omega, residual_stop);
 #endif
 
    

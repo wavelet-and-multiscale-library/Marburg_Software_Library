@@ -47,8 +47,8 @@
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
-#define JMAX 9
-#define PMAX 3
+#define JMAX 6
+#define PMAX 0
 #define TWO_D
 
 #define PRIMALORDER 3
@@ -208,14 +208,14 @@ int main(){
     osrhs << "hold off;" << endl;
     osrhs << "grid off;" << endl;
     osrhs << "shading('flat');" << endl;
-    osrhs << "colormap([flipud(jet);jet]);" << endl;
-    osrhs << "set(gca,'CLim', [- min(abs(get(gca,'CLim')))  min(abs(get(gca,'CLim')))]);" << endl;
+//    osrhs << "colormap([flipud(jet);jet]);" << endl;
+//    osrhs << "set(gca,'CLim', [- min(abs(get(gca,'CLim')))  min(abs(get(gca,'CLim')))]);" << endl;
     osuexact << "view(30,55);"<<endl;
     osuexact<<"hold off;"<<endl;
     osuexact << "grid off;" << endl;
     osuexact << "shading('flat');" << endl;
-    osuexact << "colormap([flipud(jet);jet]);" << endl;
-    osuexact << "set(gca,'CLim', [- min(abs(get(gca,'CLim')))  min(abs(get(gca,'CLim')))]);" << endl;
+//    osuexact << "colormap([flipud(jet);jet]);" << endl;
+//    osuexact << "set(gca,'CLim', [- min(abs(get(gca,'CLim')))  min(abs(get(gca,'CLim')))]);" << endl;
     osrhs.close();
     osuexact.close();
     cout << "rhs and uexact plotted" << endl;

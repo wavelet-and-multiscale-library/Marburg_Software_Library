@@ -5,6 +5,7 @@
 #include <utils/plot_tools.h>
 #include <adaptive/apply.h>
 #include <numerics/corner_singularity.h>
+#include <interval/p_basis.h>
 
 
 using std::set;

@@ -5,7 +5,7 @@
  */
 
 #define PARALLEL 0
-#define NONADAPTIVE
+#undef NONADAPTIVE
 #define ADAPTIVE
 
 #undef BASIS
@@ -18,6 +18,10 @@
 //#endif
 
 #define DYADIC
+#undef DYPLUSEN
+
+#define JMAX 6
+#define PMAX 1
 
 #ifdef FRAME
 #define _WAVELETTL_USE_TFRAME 1
@@ -25,6 +29,7 @@
 #define _WAVELETTL_USE_TBASIS 1
 #endif
 #define _DIM 2
+#define TWO_D
 //#define _WAVELETTL_CACHEDPROBLEM_VERBOSITY 2
 
 #include <iostream>
@@ -53,7 +58,8 @@
 #include <galerkin/tframe_equation.h>
 #include <galerkin/cached_quarklet_tproblem.h>
 //#include "TestFunctions2d.h"
-
+#include <adaptive/steepest_descent_ks.h>
+#include <adaptive/duv.h>
 
 
 
@@ -199,8 +205,8 @@ int main()
     const int b=2;
 #endif
     const unsigned int dim = 2; 
-    const int jmax=7;
-    const int pmax = 0;
+    const int jmax=JMAX;
+    const int pmax = PMAX;
 
 
     const unsigned int testcase1=1;
@@ -275,7 +281,7 @@ int main()
     cout<<frame.get_last_wavelet_numbers()<<endl;
 #endif
 #ifdef DIRICHLET
-    TensorFrameEquation<Frame1d,dim,Frame> eq(&poisson1, &frame, false);
+    TensorFrameEquation<Frame1d,dim,Frame> eq(&poisson1, &frame, true);
 #endif    
 #ifdef NEUMANN
     TensorFrameEquation<Frame1d,dim,Frame> eq(&poisson1, &frame, &phi1, true);
@@ -299,17 +305,17 @@ int main()
     MultiIndex<int,2> q;
     Index ind2=first_quarklet<Frame1d,dim>(&eq.frame(), eq.frame().j0(),q);
     cout<<"ind2:"<<ind2<<endl;
-    ++ind2;
-    cout<<"ind2:"<<ind2<<endl;
-    ind2=last_quarklet<Frame1d,dim>(&eq.frame(), eq.frame().j0(),q);
-    cout<<(ind2==ind2)<<endl;
+//    ++ind2;
+//    cout<<"ind2:"<<ind2<<endl;
+//    ind2=last_quarklet<Frame1d,dim>(&eq.frame(), eq.frame().j0(),q);
+//    cout<<(ind2==ind2)<<endl;
     intersecting_quarklets<Frame1d,dim>(eq.frame(),ind2,eq.frame().j0(),inters,q);
-//    for(list<int>::const_iterator it = inters.begin();it!=inters.end();++it){
-//        cout<<*it<<endl;
-//    }
+    for(list<int>::const_iterator it = inters.begin();it!=inters.end();++it){
+        cout<<*it<<endl;
+    }
 //    cout<<supp<<endl;
-    Index ind3=frame.get_quarklet(0);
-    cout<<ind3<<endl;
+//    Index ind3=frame.get_quarklet(0);
+//    cout<<ind3<<endl;
 #endif
  
 #if 0
@@ -342,6 +348,8 @@ int main()
     cout<<phi1.value(z)<<endl;
     cout<<eq.phi(z)<<endl;
 #endif
+    
+
        
 #ifdef NONADAPTIVE
     //setup index set
@@ -369,6 +377,9 @@ int main()
     cout << "setup stiffness matrix done" << endl;
     Vector<double> F;
     setup_righthand_side(eq, Lambda, F);
+//    cout<<"NONADAPTIVE f.size: "<<F.size()<<endl;
+//    cout<<"l2_norm: "<<l2_norm(F)<<endl;
+//    F.matlab_output("F","F");
     
 //    cout<<"normA: "<<eq.norm_A()<<endl;
 //    cout<<"normAinv: "<<eq.norm_Ainv()<<endl;
@@ -381,9 +392,10 @@ int main()
     //cout << omega << endl;
     
 //    CG(A,F,x,1e-8,maxiterations,iterations); 
-    Richardson(A,F,x,0.04,1e-3,maxiterations,iterations);
+    Richardson(A,F,x,0.04,1e-6,maxiterations,iterations);
     cout << "iterative solution computed with " <<iterations<<" iterations"<< endl;
 
+    {
     //plot solution
     cout << "plotting solution" << endl;
     InfiniteVector<double,Index> u,v;
@@ -420,6 +432,7 @@ int main()
     }    
     coeff_stream2.close();
     cout << "coefficients plotted" << endl;
+    }
  #if 0
     //all coefficients output
     u.scale(&eq, 1);
@@ -444,23 +457,79 @@ int main()
 #endif
 
 #ifdef ADAPTIVE
-    CachedQuarkletTProblem<TensorFrameEquation<Frame1d,dim,Frame> > cproblem1(&eq,0.0,0.0);
+    CachedQuarkletTProblem<TensorFrameEquation<Frame1d,dim,Frame> > cproblem1(&eq,41,27);
     cout<<"normA: "<<cproblem1.norm_A()<<endl;
     cout<<"normAinv: "<<cproblem1.norm_Ainv()<<endl;
     
-    InfiniteVector<double, Index> F_eta; 
+    InfiniteVector<double, int> F_eta; 
     cproblem1.RHS(1e-6, F_eta);
+//    cout<<"ADAPTIVE f.size: "<<F_eta.size()<<endl;
+//    cout<<"l2_norm: "<<l2_norm(F_eta)<<endl;
     double epsilon = 1e-3;
     InfiniteVector<double, Index> u_epsilon;
     InfiniteVector<double, int> u_epsilon_int;
     const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
-    const unsigned int maxiter = 10;
-    const double omega = 0.5;
-    const double residual_stop = 0.1;
+    const unsigned int maxiter = 99;
+    const double omega = 0.05;
+    const double residual_stop = 1e-10;
     const double shrinkage = 0;
     
-//    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon, jmax, tensor_simple, pmax, a, b); 
-    richardson_QUARKLET_SOLVE(cproblem1,epsilon,u_epsilon_int, maxiter, tensor_simple, a, b, shrinkage, omega, residual_stop);
+    //choose one scheme
+    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, tensor_simple, pmax, a, b); 
+//    richardson_QUARKLET_SOLVE(cproblem1,epsilon,u_epsilon_int, maxiter, tensor_simple, a, b, shrinkage, omega, residual_stop);
+//    DUV_QUARKLET_SOLVE_SD(cproblem1, nu, epsilon, u_epsilon, tensor_simple, pmax, jmax, a, b);
+//    steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon_int, tensor_simple, a, b);
+            
+    //    cout<<u_epsilon_int.size()<<endl;
+    for (typename InfiniteVector<double,int>::const_iterator it(u_epsilon_int.begin()),
+ 	   itend(u_epsilon_int.end()); it != itend; ++it){
+        u_epsilon.set_coefficient(*(frame.get_quarklet(it.index())), *it);
+    }
+//    cout<<u_epsilon.size()<<endl;
+    
+//    //testing APPLY
+//    InfiniteVector<double, Index>  v,Av;
+//    for(int i=0;i<cproblem1.frame().degrees_of_freedom();i++){
+//        v.set_coefficient(cproblem1.frame().get_quarklet(i),1);
+//    }
+//    cout<<v.size()<<endl;
+//    APPLY_QUARKLET(cproblem1, v, 1e-3, Av, jmax, tensor_simple, pmax, a,b);
+//    cout<<Av.size()<<endl;
+    
+    {
+    //plot solution
+    cout << "plotting solution" << endl;
+    u_epsilon.scale(&cproblem1, -1);
+    SampledMapping<2> sm1(evaluate(cproblem1.frame(), u_epsilon , true, 6));
+    std::ofstream stream1("solution_ad.m");
+    sm1.matlab_output(stream1);
+    stream1<<"surf(x,y,z)"<<endl;
+    stream1.close();
+    cout << "solution plotted" << endl;
+    
+    //new coefficients plot
+    u_epsilon.scale(&cproblem1, 1);
+    std::ofstream coeff_stream;
+    coeff_stream.open("coefficients_ad.m");
+    MultiIndex<int,dim> pstart;
+    MultiIndex<int,dim> jstart;// start=basis1.j0();
+    MultiIndex<int,dim> estart;
+    for (InfiniteVector<double, Index>::const_iterator it(u_epsilon.begin()); it != u_epsilon.end(); ++it){
+        Index lambda=it.index();
+        if(!(lambda.j()==jstart && lambda.e()==estart)){
+            jstart=lambda.j();
+            estart=lambda.e();
+            plot_indices_tframe2(&frame, u_epsilon, coeff_stream, lambda.p(), lambda.j(), lambda.e(),"(jet)", false, true, -6);
+            //coeff_stream2 << "title('solution coefficients') " << endl;
+            //coeff_stream2 << "title(sprintf('coefficients on level (%i,%i)',"<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"));"<<endl;
+            coeff_stream<<"print('-djpg',sprintf('coeffs%i%i%i%i.jpg',"<<lambda.p()[0]<<","<<lambda.p()[1]<<","<<lambda.j()[0]-1+lambda.e()[0]<<","<<lambda.j()[1]-1+lambda.e()[1]<<"))"<<endl;
+        }
+    }
+    coeff_stream.close();
+    cout << "coefficients plotted"<<endl;
+//    cout<<u_epsilon.size()<<endl;
+    }
+    
 #endif
 
    

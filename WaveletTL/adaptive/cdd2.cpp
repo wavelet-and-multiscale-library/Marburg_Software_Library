@@ -276,11 +276,11 @@ namespace WaveletTL
       
       
       cout << "CDD2:: v.size() = " << v.size() << endl << endl;
-      v.COARSE(std::min((1-theta)*epsilon_k,1.0e-6), u_epsilon);
+      v.COARSE(std::min((1-theta)*epsilon_k,1.0e-6), u_epsilon);   
 //      v.COARSE((1-theta)*epsilon_k, u_epsilon);
 //      v.COARSE(1.0e-6, u_epsilon);
       
-      
+      cout << "CDD2:: v.size() after coarsening= " << u_epsilon.size() << endl;
       
       
 //      cout << "f:" << endl<< f << endl;
@@ -388,6 +388,7 @@ namespace WaveletTL
       cout << "loop: " << loops << endl;
       cout << "Calls of APPLY_QUARKLET: " << iter << endl << endl;
       v.COARSE(std::min((1-theta)*epsilon_k,1.0e-6), u_epsilon);
+      
 //      v.COARSE((1-theta)*epsilon_k, u_epsilon);
 //      v.COARSE(1.0e-6, u_epsilon);
       

@@ -102,6 +102,7 @@ namespace WaveletTL
             {
                 fhelp.set_coefficient(frame_->get_quarklet(i), coeff);
                 fnorm_sqr += coeff*coeff;
+                fhelp_int.set_coefficient(i, coeff);
             }
         }
         cout << "... done, sort the entries in modulus..." << endl;
@@ -118,10 +119,12 @@ namespace WaveletTL
         }
         for (typename InfiniteVector<double,int>::const_iterator it(fhelp_int.begin()), itend(fhelp_int.end()); it != itend; ++it, ++id2){
             fcoeffs_int[id2] = std::pair<int,double>(it.index(), *it);
+//            cout << it.index() << ", " << *it << endl;
         }
         sort(fcoeffs.begin(), fcoeffs.end(), typename InfiniteVector<double,Index>::decreasing_order());
         sort(fcoeffs_int.begin(), fcoeffs_int.end(), typename InfiniteVector<double,int>::decreasing_order());
-        //cout << "... done, all integrals for right-hand side computed!" << endl;
+        cout << "... done, all integrals for right-hand side computed!" << endl;
+//        cout<<fcoeffs.size()<<endl;
     }
 
     template <class IFRAME, unsigned int DIM, class TENSORFRAME>
@@ -524,6 +527,71 @@ namespace WaveletTL
                 : std::min((t+dT)/(double)n, (gamma-t)/(n-1.))); // [St04a, Th. 2.3]
          */
 //    }
+    
+    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
+        void
+        TensorFrameEquation<IFRAME, DIM, TENSORFRAME>::compute_diagonal()
+        {
+          cout << " TensorFrameEquation(): precompute diagonal of stiffness matrix..." << endl;
+
+          SparseMatrix<double> diag(1,frame_->degrees_of_freedom());
+
+//          char filename[50];
+//          char matrixname[50];
+//      #ifdef ONE_D
+//          int d = IFRAME::primal_polynomial_degree();
+//          int dT = IFRAME::primal_vanishing_moments();
+//      #else
+//      #ifdef TWO_D
+//          int d = IFRAME::primal_polynomial_degree();
+//          int dT = IFRAME::primal_vanishing_moments();
+//      #endif
+//      #endif
+
+          // prepare filenames for 1D and 2D case
+      #ifdef ONE_D
+          sprintf(filename, "%s%d%s%d", "stiff_diagonal_poisson_interval_lap07_d", d, "_dT", dT);
+          sprintf(matrixname, "%s%d%s%d", "stiff_diagonal_poisson_1D_lap07_d", d, "_dT", dT);
+      #endif
+      #ifdef TWO_D
+          //sprintf(filename, "%s%d%s%d", "stiff_diagonal_poisson_lshaped_lap1_d", d, "_dT", dT);
+          //sprintf(matrixname, "%s%d%s%d", "stiff_diagonal_poisson_2D_lap1_d", d, "_dT", dT);
+      #endif
+      #ifndef PRECOMP_DIAG
+          std::list<Vector<double>::size_type> indices;
+          std::list<double> entries;
+      #endif
+      #ifdef PRECOMP_DIAG
+          cout << "reading in diagonal of unpreconditioned stiffness matrix from file "
+               << filename << "..." << endl;
+          diag.matlab_input(filename);
+          cout << "...ready" << endl;
+      #endif
+          stiff_diagonal.resize(frame_->degrees_of_freedom());
+          for (int i = 0; i < frame_->degrees_of_freedom(); i++) {
+      #ifdef PRECOMP_DIAG
+            stiff_diagonal[i] = diag.get_entry(0,i);
+      #endif 
+      #ifndef PRECOMP_DIAG
+      #ifdef FRAME
+            stiff_diagonal[i] = sqrt(a(*(frame_->get_quarklet(i)),*(frame_->get_quarklet(i))));
+      #endif
+      #ifdef BASIS
+            stiff_diagonal[i] = sqrt(a(*(frame_->get_wavelet(i)),*(frame_->get_wavelet(i))));
+      #endif
+
+            indices.push_back(i);
+            entries.push_back(stiff_diagonal[i]);
+      #endif
+            //cout << stiff_diagonal[i] << " " << *(frame_->get_wavelet(i)) << endl;
+          }
+      #ifndef PRECOMP_DIAG
+          diag.set_row(0,indices, entries);
+          //diag.matlab_output(filename, matrixname, 1);
+      #endif
+
+          cout << "... done, diagonal of stiffness matrix computed" << endl;
+        }
 
     // PERFORMANCE :: use setup_full_collection
     template <class IFRAME, unsigned int DIM, class TENSORFRAME>

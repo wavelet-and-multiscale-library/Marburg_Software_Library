@@ -447,7 +447,7 @@ namespace WaveletTL
             for (int k = 0;; k++) {
 //        full_collection[k] = ind;
                 Lambda.insert(ind);
-                cout << ind << ", " << endl;
+//                cout << ind << ", " << endl;
                 if(ind==first_quarklet(ind.j(),pmin,k)){
                     first_wavelet_numbers[waveletlevel]=k;
                 

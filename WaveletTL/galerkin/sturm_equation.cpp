@@ -120,7 +120,7 @@ namespace WaveletTL
   {
 #ifdef FRAME
   #ifdef DYADIC
-      return mypow((1<<lambda.j())*mypow(1+lambda.p(),4),operator_order())*mypow(1+lambda.p(),2); //2^j*(p+1)^6, falls operator_order()=1 (\delta=4)
+      return mypow((1<<lambda.j())*mypow(1+lambda.p(),6),operator_order())*mypow(1+lambda.p(),2); //2^j*(p+1)^6, falls operator_order()=1 (\delta=4)
 //      return 1<<(lambda.j()*(int) operator_order());
 #endif
     #ifdef TRIVIAL

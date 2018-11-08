@@ -28,6 +28,8 @@
 #undef PERIODIC
 #define PRIMBSQUARK
 
+#define COMPRESSION_LEVEL 2
+
 
 using namespace std;
 using namespace WaveletTL;
@@ -63,10 +65,18 @@ int main(){
   const double a = 2;
   const double b = 2;
   const int maxJ = 20;
+  double dist;
   //const int tau = delta + 3 - d;
   
-  ausgabe << endl << "Periodic Quarklet frame of order " << d <<
+  
+  ausgabe << endl << "Quarklet frame of order " << d <<
     " with " << dT << " vanishing moments, a=" << a << ", b=" << b << ", tau=" << delta+3-d<< endl;
+#if COMPRESSION_LEVEL==1
+  ausgabe<<"using only first compression"<<endl;
+#endif
+#if COMPRESSION_LEVEL==2
+  ausgabe<<"using second compression too"<<endl;
+#endif
 #endif
 
 #if 1
@@ -95,7 +105,7 @@ int main(){
 	  << ", pmax="<< pmax << ", Matrixdimension: " << matdim << endl;
   SparseMatrix<double> ARes, tempmat;
   tempmat.resize(matdim, matdim);
-  Vector<double> xval(maxJ+1), yval(maxJ+1);
+  Vector<double> xval(maxJ+1), yval(maxJ+1), yval2(maxJ+1);
   double time1 = 0.0, tstart;
   tstart = clock();
   
@@ -133,7 +143,15 @@ int main(){
 	 it2 != it2end; ++it2, ++column){
 //            cout << "column: " << *it2 << endl;
 //    //If Condition is fullfilled, the entry is 0
-      if(a * log_table[abs((*it1).p()-(*it2).p())] * ln2rez + b * abs((*it1).j()-(*it2).j()) <= J) ;
+      dist=a * log_table[abs((*it1).p()-(*it2).p())] * ln2rez + b * abs((*it1).j()-(*it2).j());
+#if COMPRESSION_LEVEL==1
+      if(dist <= J) ;
+#endif
+#if COMPRESSION_LEVEL==2
+//      if(dist <= 2*J || (dist<=J && intersect_singular_support(frame,*it1,*it2))) ;   logisch falsch
+//      if((dist <= J) || ((dist<=2*J) && intersect_singular_support(frame,*it1,*it2))) ;   alt
+      if((dist <= J/2) || ((dist<=J) && intersect_singular_support(frame,*it1,*it2))) ;
+#endif
       else{
          //Preconditioning factors
 	 double factor;
@@ -170,6 +188,7 @@ int main(){
 
   double anzeintr = pow(matdim,2);
   ausgabe << "Besetzungsgrad der Matrix=" << ARes.size()/anzeintr << endl;
+  yval2(J)=ARes.size()/anzeintr;
   
   time1 += clock() - tstart;     // end
  
@@ -180,13 +199,23 @@ int main(){
   
 
   ausgabe.close();
-
+  {
   ofstream ausgabe2("plotter_matrixnorm.m");
   ausgabe2 << "x=" << xval << ";" << endl;
   ausgabe2 << "y=" << yval << ";" << endl;
   ausgabe2 << "figure;\nsemilogy(x,y);"
               << "title('myplot');" << endl;
   ausgabe2.close();
+  }
+  {
+  ofstream ausgabe2("plotter_besetzung.m");
+  ausgabe2 << "x=" << xval << ";" << endl;
+  ausgabe2 << "y=" << yval2 << ";" << endl;
+  ausgabe2 << "figure;\nsemilogy(x,y);"
+              << "title('myplot');" << endl;
+  ausgabe2.close();    
+  }
+  
   
   #endif
   

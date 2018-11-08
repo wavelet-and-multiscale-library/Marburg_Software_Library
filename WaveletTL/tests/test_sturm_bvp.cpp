@@ -33,8 +33,8 @@
 #undef SHRINKAGE
 
 
-#define JMAX 12
-#define PMAX 5
+#define JMAX 8
+#define PMAX 3
 #define ONE_D
 #define _DIM 1
 
@@ -166,7 +166,7 @@ int main()
   
   const int jmax = JMAX;
   const int pmax = PMAX;
-  double relaxation = 0.4;
+  double relaxation = 0.05;
 
   
   
@@ -587,7 +587,9 @@ A.apply(x, err);
 #ifdef FRAME  
   cout << "setup cached equation.." << endl;
 //  CachedQuarkletProblem<SturmEquation<Basis> > ceq(&eq, 3.7, 5);
-  CachedQuarkletProblem<SturmEquation<Basis> > ceq(&eq, 1., 1.);
+  CachedQuarkletProblem<SturmEquation<Basis> > ceq(&eq, 0, 0);
+  cout<<"normA: "<<ceq.norm_A()<<endl;
+  cout<<"normAinv: "<<ceq.norm_Ainv()<<endl;
   cout << "end setup cached equation.." << endl;
 #endif
 
@@ -605,20 +607,37 @@ A.apply(x, err);
 //  cout << "exact_solution: " << endl << exact_solution << endl;
 //  cout << "A*(exact_solution): " << endl << apply_result << endl;
 //  cout << "RHS: " << endl << right_side << endl;
+
   
 #endif
+  #if 0 //testing APPLY strategies
+  {
+    
+    InfiniteVector<double, Index> v,Avc,Avs;
+    for(int i=0;i<ceq.frame().degrees_of_freedom();i++){
+        v.set_coefficient(ceq.frame().get_quarklet(i),1);
+    }
+    cout<<"testing APPLY"<<endl;
+    clock_t tic = clock();
+    APPLY_QUARKLET(ceq, v, 1e-3, Avc, jmax, S, pmax, 2,2);
+    clock_t toc = clock();
+    double time = (double)(toc-tic);
+    cout << "done APPLY in: " << (time/CLOCKS_PER_SEC) << " seconds"<<endl;
+  }
+#endif
+  
   InfiniteVector<double, Index> F_eta;
   ceq.RHS(1e-6, F_eta);
   double epsilon = 1e-4;
   InfiniteVector<double,Index> u_epsilon;
   InfiniteVector<double,int> u_epsilon_int;
   clock_t tic = clock();
-  const unsigned int maxiter = 200;
+  const unsigned int maxiter = 9999;
 
 #ifdef FRAME
-//  const double norminv = ceq.norm_Ainv();  
-//  const double nu = norminv*l2_norm(F_eta); 
-//  CDD2_QUARKLET_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, DKR, pmax, 2, 2);
+  const double norminv = ceq.norm_Ainv();  
+  const double nu = norminv*l2_norm(F_eta); 
+//  CDD2_QUARKLET_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, S, pmax, 2, 2);
 //  DUV_QUARKLET_SOLVE_SD(ceq, nu, epsilon, u_epsilon, CDD1, pmax, jmax, 2, 2);
 //  steepest_descent_ks_QUARKLET_SOLVE(ceq, epsilon, u_epsilon, DKR, 2, 2);
 #ifdef SD
@@ -633,7 +652,7 @@ A.apply(x, err);
   const double shrink = 0.01;
   richardson_QUARKLET_SOLVE(ceq,epsilon,u_epsilon_int,DKR, 1, 1, shrink);  
 #else
-  richardson_QUARKLET_SOLVE(ceq, epsilon, u_epsilon_int, maxiter, DKR, 1, 1, 0, relaxation);
+  richardson_QUARKLET_SOLVE(ceq, epsilon, u_epsilon_int, maxiter, S, 2, 2, 0, relaxation);
   //  CDD2_QUARKLET_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, DKR, pmax, 2, 2);
 #endif
 

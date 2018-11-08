@@ -86,7 +86,8 @@ EXEOBJF1 = \
 # set 2 of test programs: wavelet bases on the interval ([DS],[P],[JL],[A],[S])
 EXEOBJF2 = \
   test_pq_frame.o\
-  test_quark_compression.o
+  test_quark_compression.o\
+  test_singsupp.o
 
 # set 2a of test programs: wavelet bases on the interval with improved performance (periodic)
 EXEOBJF2a = \

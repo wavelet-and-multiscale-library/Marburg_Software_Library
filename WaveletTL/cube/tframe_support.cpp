@@ -4,6 +4,7 @@
 #include <utils/fixed_array1d.h>
 #include <iostream>
 #include <cube/tframe_index.h>
+#include <interval/pq_support.h>
 
 using MathTL::multi_degree;
 using MathTL::FixedArray1D;
@@ -271,14 +272,23 @@ namespace WaveletTL
                                     const typename TensorFrame<IFRAME,DIM>::Index& lambda,
                                     const typename TensorFrame<IFRAME,DIM>::Index& mu)
     {
+//        cout<<"bin hier"<<endl;
         int j, k1, k2;
         for (unsigned int i = 0; i < DIM; i++) {
-            if (!(intersect_singular_support(*frame.frames()[i],
+//            cout<<i<<endl;
+//            if (!(intersect_singular_support(*frame.frames()[i],                  //logisch falsch
+//                                             lambda.j()[i], lambda.e()[i], lambda.k()[i],
+//                                             mu.j()[i], mu.e()[i], mu.k()[i],
+//                                             j, k1, k2) ))
+//                return false;
+//        }
+//        return true;
+            if ((intersect_singular_support(*frame.frames()[i],        
                                              lambda.j()[i], lambda.e()[i], lambda.k()[i],
                                              mu.j()[i], mu.e()[i], mu.k()[i],
                                              j, k1, k2) ))
-                return false;
+                return true;
         }
-        return true;
+        return false;
     }
 }

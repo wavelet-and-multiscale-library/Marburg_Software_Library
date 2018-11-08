@@ -129,6 +129,10 @@ namespace WaveletTL
          */
         double a(const Index& lambda,
                  const Index& nu) const;
+        
+        //version for second compression
+        double a(const Index& lambda,
+                 const Index& nu, const int radius, const CompressionStrategy strategy, const double A, const double B) const;
 
         /*
          * estimate the spectral norm ||A||

@@ -112,7 +112,7 @@ namespace WaveletTL
     // set the y-tick marks
     os << "set(gca,'YTick',[";
     for (int j = j0; j <= jmax+1; j++)
-      os << j << " ";
+      os << j-1 << " ";
     os << "])" << endl;
 
     // plot a colorbar (or not)
@@ -231,7 +231,7 @@ namespace WaveletTL
     // set the y-tick marks
     os << "set(gca,'YTick',[";
     for (int j = j0; j <= jmax+1; j++)
-      os << j << " ";
+      os << j-1 << " ";
     os << "])" << endl;
 
     // plot a colorbar (or not)

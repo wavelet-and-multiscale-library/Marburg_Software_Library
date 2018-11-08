@@ -139,7 +139,7 @@ namespace WaveletTL
       
 	// differential operators
 	
-	if (strategy == DKR) {
+	if (strategy == DKR || strategy==S) {   //we postpone second compression to add_level
 ////            
 	  // Quarklet strategy:
 	  // active row indices nu have to fulfill ||nu|-|lambda|| <= J/(d*b) and
@@ -173,6 +173,8 @@ namespace WaveletTL
           
         }
         
+        
+        
         if (strategy == CDD1) {
 	  // [CDD1] strategy:
 	  // active row indices nu have to fulfill ||nu|-|lambda|| <= J/d and
@@ -195,7 +197,7 @@ namespace WaveletTL
 //       } 
 #else
     //     if (P.local_operator())
-        if (strategy == tensor_simple)
+        if (strategy == tensor_simple || strategy==tensor_second)   //we postpone second compression to add_ball
         {
 //            printf("entering add_compressed_column \n");
             // Strategy from [DSS] (works also for biorthogonal bases)
@@ -216,6 +218,8 @@ namespace WaveletTL
 #endif
 #endif
         }
+        
+        
 #endif
   }
   

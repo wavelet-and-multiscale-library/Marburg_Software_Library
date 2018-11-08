@@ -27,7 +27,9 @@ namespace WaveletTL
     CDD1,
     DKR,
     St04a,
-    tensor_simple
+    tensor_simple,
+    S,              //second compression in 1d
+    tensor_second   //second compression tensor case
   };
 
   /*!

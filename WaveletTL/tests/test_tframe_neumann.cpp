@@ -21,7 +21,7 @@
 #undef DYPLUSEN
 
 #define JMAX 6
-#define PMAX 1
+#define PMAX 0
 
 #ifdef FRAME
 #define _WAVELETTL_USE_TFRAME 1
@@ -92,6 +92,9 @@ public:
     case 4:
       return sin(M_PI*p[0])*sin(M_PI*p[0])*sin(M_PI*p[1])*sin(M_PI*p[1]);               
       break;
+    case 5:
+      return cos(M_PI*p[0]);
+      break;
     default:
       return 0;
       break;
@@ -127,7 +130,10 @@ public:
       return
            -2*M_PI*M_PI*(cos(M_PI*p[0])*cos(M_PI*p[0])-sin(M_PI*p[0])*sin(M_PI*p[0]))*sin(M_PI*p[1])*sin(M_PI*p[1])
            -2*M_PI*M_PI*(cos(M_PI*p[1])*cos(M_PI*p[1])-sin(M_PI*p[1])*sin(M_PI*p[1]))*sin(M_PI*p[0])*sin(M_PI*p[0]);
-       break;
+      break;
+    case 5:
+      return M_PI*M_PI*cos(M_PI*p[0]);
+      break;
     default:
       return 1;
       break;
@@ -152,7 +158,9 @@ public:
                 case 4:
                     return "u(x,y)=sin^2(pi*x)*sin^2(pi*y), zero-Neumann boundary conditions";
                     break;
-                   
+                case 5:
+                    return "u(x,y)=cos(pi*x)";
+                    break;
                 default:
                     return "TestProblem: N not defined.";
                     break;
@@ -185,6 +193,9 @@ public:
     case 4:
       return 0;               
       break;
+    case 5:
+      return 0;
+      break;
     default:
       return 0;
       break;
@@ -209,7 +220,7 @@ int main()
     const int pmax = PMAX;
 
 
-    const unsigned int testcase1=1;
+    const unsigned int testcase1=5;
     mySolution<testcase1> uexact1;
     myRHS<testcase1> rhs1;
     myBoundaryFunction<testcase1> phi1;
@@ -224,7 +235,7 @@ int main()
     std::ofstream osphi("phi.m");
         Point<2> q0(0,0);
         Point<2> q1(1,1);
-        Grid<2> mygrid(q0,q1,100);
+        Grid<2> mygrid(q0,q1,64);
         SampledMapping<2> smrhs(mygrid, rhs1); 
         SampledMapping<2> smuexact(mygrid, uexact1);
         SampledMapping<2> smphi(mygrid,phi1);
@@ -279,6 +290,28 @@ int main()
     cout<<last_quarklet(&frame,frame.j0(),MultiIndex<int,2>())<<endl;
     cout<<frame.get_first_wavelet_numbers()<<endl;
     cout<<frame.get_last_wavelet_numbers()<<endl;
+#endif
+#if 1
+    //support test
+    Index ind1=frame.first_generator(frame.j0());
+    cout<<ind1<<endl;
+    MultiIndex<int,2> q; q[0]=jmax/2; q[1]=jmax/2;
+    Index ind2=frame.first_quarklet(q);
+    cout<<ind2<<endl;
+    Support supp;
+    if(intersect_supports(frame,ind1,ind2,supp)){
+        cout<<"support wird geschnitten"<<endl;
+        if(intersect_singular_support(frame,ind1,ind2)){
+            cout<<"singular support wird geschnitten"<<endl;
+        }
+        else{
+            cout<<"singular support wird nicht geschnitten"<<endl;
+        }
+    }
+    else{
+        cout<<"support wird nicht geschnitten"<<endl;
+    }
+    
 #endif
 #ifdef DIRICHLET
     TensorFrameEquation<Frame1d,dim,Frame> eq(&poisson1, &frame, true);
@@ -458,6 +491,22 @@ int main()
 
 #ifdef ADAPTIVE
     CachedQuarkletTProblem<TensorFrameEquation<Frame1d,dim,Frame> > cproblem1(&eq,41,27);
+    
+#if 0 //testing APPLY strategies
+  {
+    
+    InfiniteVector<double, Index> v,Avc,Avs;
+    for(int i=0;i<cproblem1.frame().degrees_of_freedom();i++){
+        v.set_coefficient(cproblem1.frame().get_quarklet(i),1);
+    }
+    cout<<"testing APPLY"<<endl;
+    clock_t tic = clock();
+    APPLY_QUARKLET(cproblem1, v, 1e-3, Avc, jmax, tensor_second, pmax, 2,2);
+    clock_t toc = clock();
+    double time = (double)(toc-tic);
+    cout << "done APPLY in: " << (time/CLOCKS_PER_SEC) << " seconds"<<endl;
+  }
+#endif
     cout<<"normA: "<<cproblem1.norm_A()<<endl;
     cout<<"normAinv: "<<cproblem1.norm_Ainv()<<endl;
     
@@ -469,14 +518,15 @@ int main()
     InfiniteVector<double, Index> u_epsilon;
     InfiniteVector<double, int> u_epsilon_int;
     const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
-    const unsigned int maxiter = 99;
+    const unsigned int maxiter = 999;
     const double omega = 0.05;
     const double residual_stop = 1e-10;
     const double shrinkage = 0;
+    clock_t tic = clock();
     
     //choose one scheme
-    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, tensor_simple, pmax, a, b); 
-//    richardson_QUARKLET_SOLVE(cproblem1,epsilon,u_epsilon_int, maxiter, tensor_simple, a, b, shrinkage, omega, residual_stop);
+    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, tensor_second, pmax, a, b); 
+//    richardson_QUARKLET_SOLVE(cproblem1,epsilon,u_epsilon_int, maxiter, tensor_second, a, b, shrinkage, omega, residual_stop);
 //    DUV_QUARKLET_SOLVE_SD(cproblem1, nu, epsilon, u_epsilon, tensor_simple, pmax, jmax, a, b);
 //    steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon_int, tensor_simple, a, b);
             
@@ -495,6 +545,10 @@ int main()
 //    cout<<v.size()<<endl;
 //    APPLY_QUARKLET(cproblem1, v, 1e-3, Av, jmax, tensor_simple, pmax, a,b);
 //    cout<<Av.size()<<endl;
+    
+    clock_t toc = clock();
+    double time = (double)(toc-tic);
+    cout << "\nTime taken: " << (time/CLOCKS_PER_SEC) << " s"<<endl;
     
     {
     //plot solution
@@ -528,6 +582,15 @@ int main()
     coeff_stream.close();
     cout << "coefficients plotted"<<endl;
 //    cout<<u_epsilon.size()<<endl;
+    
+    //compare uexact and approximate solution
+    cout<<"comparing exact and approximate solution on a grid (be careful in the neumann case)"<<endl;
+    Matrix<double> A=sm1.values();
+//    cout<<row_sum_norm(A)<<endl;
+    Matrix<double> B=smuexact.values();
+    Matrix<double> C=A-B;
+    cout<<"l_infty_norm="<<row_sum_norm(C)<<endl;
+    cout<<"frobenius_norm="<<frobenius_norm(C)<<endl;
     }
     
 #endif
@@ -539,4 +602,5 @@ int main()
     return 0;
 
 }
+
 

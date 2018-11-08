@@ -493,6 +493,7 @@ namespace WaveletTL
                                     const int muj, const int mue, const int muk,
                                     int& j, int& k1, int& k2)
     {
+//        cout<<"bin hier 1d"<<endl;
         const int j_lambda = lamj+lame;
         const int j_mu = muj+mue;
         if (j_lambda < j_mu) 

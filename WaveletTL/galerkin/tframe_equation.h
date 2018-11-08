@@ -187,6 +187,7 @@ namespace WaveletTL
         double a(const Index& lambda,
                  const Index& nu,
                  const unsigned int p) const;
+        
                     
         /*
          * estimate the spectral norm ||A||

@@ -23,7 +23,7 @@ namespace WaveletTL
     const double h0 = 1./n_generators;
     for (int i = 0; i < n_generators; i++) {
       double x = i * h0;
-      double y = j0-0.5;
+      double y = j0-1.5;    //changed generator level to j0-1 in plot
       const double c = coeffs.get_coefficient(Index(p,j0,0,basis->DeltaLmin()+i,basis));
       if (c == 0) {
 // 	// draw an empty rectangle
@@ -61,7 +61,7 @@ namespace WaveletTL
       const double hj = 1./n_wavelets;
       for (int i = 0; i < n_wavelets; i++) {
  	double x = i * hj;
- 	double y = j+0.5;
+ 	double y = j-0.5;   //changed generator level to j0-1 in plot
   	const double c = coeffs.get_coefficient(Index(p,j,1,basis->Nablamin()+i,basis));
  	if (c == 0) {
 	  if (j <= 6) {
@@ -95,7 +95,7 @@ namespace WaveletTL
 //     os << "set(gca,'XLim',[" << -0.01 << " " << 1.01 << "])" << endl;
 
     // set y axis limits
-    os << "set(gca,'YLim',[" << j0-0.5 << " " << jmax+1.5 << "])" << endl;
+    os << "set(gca,'YLim',[" << j0-1.5 << " " << jmax+0.5 << "])" << endl;  //changed generator level to j0-1 in plot
 
     // set axis labels
     os << "xlabel 'k'" << endl
@@ -113,7 +113,7 @@ namespace WaveletTL
     // set the y-tick marks
     os << "set(gca,'YTick',[";
     for (int j = j0; j <= jmax+1; j++)
-      os << j << " ";
+      os << j-1 << " "; //changed generator level to j0-1 in plot
     os << "])" << endl;
 
     // plot a colorbar (or not)
@@ -143,7 +143,7 @@ namespace WaveletTL
     const double h0 = 1./n_generators;
     for (int i = 0; i < n_generators; i++) {
       double x = i * h0;
-      double y = j0-0.5;
+      double y = j0-1.5;    //changed generator level to j0-1 in plot
       const double c = coeffs.get_coefficient(Index(p,j0,0,basis->DeltaLmin()+i));
       if (c == 0) {
 // 	// draw an empty rectangle
@@ -181,7 +181,7 @@ namespace WaveletTL
       const double hj = 1./n_wavelets;
       for (int i = 0; i < n_wavelets; i++) {
  	double x = i * hj;
- 	double y = j+0.5;
+ 	double y = j-0.5;   //changed generator level to j0-1 in plot
  	const double c = coeffs.get_coefficient(Index(p,j,1,basis->Nablamin()+i));
  	if (c == 0) {
 	  if (j <= 6) {
@@ -215,7 +215,7 @@ namespace WaveletTL
 //     os << "set(gca,'XLim',[" << -0.01 << " " << 1.01 << "])" << endl;
 
     // set y axis limits
-    os << "set(gca,'YLim',[" << j0-0.5 << " " << jmax+1.5 << "])" << endl;
+    os << "set(gca,'YLim',[" << j0-1.5 << " " << jmax+0.5 << "])" << endl;  //changed generator level to j0-1 in plot
 
     // set axis labels
     os << "xlabel 'k'" << endl
@@ -233,7 +233,7 @@ namespace WaveletTL
     // set the y-tick marks
     os << "set(gca,'YTick',[";
     for (int j = j0; j <= jmax+1; j++)
-      os << j << " ";
+      os << j-1 << " "; //changed generator level to j0-1 in plot
     os << "])" << endl;
 
     // plot a colorbar (or not)

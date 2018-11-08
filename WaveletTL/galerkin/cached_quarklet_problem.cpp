@@ -177,7 +177,8 @@ namespace WaveletTL
 //      cout << j << endl;
       
 //      QuarkletFrame myframe(frame());
-      
+      double dist=a*log(1+abs(lambda.p()-p))/log(2)+b*abs(lambda.j()-j);
+//      cout<<"dist="<<dist<<endl;
       
 
       //!!! number() seems to be a huge bottleneck
@@ -245,7 +246,8 @@ namespace WaveletTL
           
 	    for (typename IntersectingList::const_iterator it2(nus.begin()), itend2(nus.end());
 		 it2 != itend2; ++it2) {
-                
+         //here second compression is applied
+            if(!(strategy==S) || (strategy==S && ((dist<J/2) || intersect_singular_support(frame(),lambda,*it2)) )){   
 	      const double entry = problem->a(*it2, lambda);
  //             cout << *it2 << ", " << entry << endl;
 	      typedef typename Subblock::value_type value_type_subblock;
@@ -260,6 +262,7 @@ namespace WaveletTL
                 //cout << "ja5" << endl;
 	      }
  //             cout << "ja1" << endl;
+            }//end of second compression
 	    }
 //	  cout << "ja2" << endl;
          }
@@ -292,6 +295,8 @@ namespace WaveletTL
 
       
   }
+  
+  
 
 
   template <class PROBLEM>

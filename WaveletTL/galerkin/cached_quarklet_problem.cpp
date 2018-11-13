@@ -263,6 +263,9 @@ namespace WaveletTL
 	      }
  //             cout << "ja1" << endl;
             }//end of second compression
+//            else if(strategy==S){
+//                cout<<"second compression: dropping entries"<<endl;
+//            }
 	    }
 //	  cout << "ja2" << endl;
          }

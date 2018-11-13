@@ -11,8 +11,8 @@
 #undef BASIS
 #define FRAME
 
-#undef DIRICHLET
-#define NEUMANN
+#define DIRICHLET
+#undef NEUMANN
 //#ifdef NEUMANN
 ////#define NONZERONEUMANN
 //#endif
@@ -20,7 +20,7 @@
 #define DYADIC
 #undef DYPLUSEN
 
-#define JMAX 6
+#define JMAX 10
 #define PMAX 0
 
 #ifdef FRAME
@@ -60,6 +60,7 @@
 //#include "TestFunctions2d.h"
 #include <adaptive/steepest_descent_ks.h>
 #include <adaptive/duv.h>
+#include <numerics/corner_singularity.h>
 
 
 
@@ -77,6 +78,7 @@ class mySolution
 public:
   virtual ~mySolution() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
+      CornerSingularity cs(Point<2>(1,1), 1, 0.5);
     switch(N) {
     case 1:
       return p[0]*(1-p[0])*p[1]*(1-p[1]);
@@ -95,6 +97,17 @@ public:
     case 5:
       return cos(M_PI*p[0]);
       break;
+    case 6:
+      return sin(3*M_PI*p[0])*sin(3*M_PI*p[1]);
+      break;
+    case 7: //not yet working
+      return 
+          (-sin(3*M_PI*p[0])+(p[0]<0.5 ? 2*p[0]*p[0] : 2*(1-p[0])*(1-p[0])))
+          *(-sin(3*M_PI*p[1])+(p[1]<0.5 ? 2*p[1]*p[1] : 2*(1-p[1])*(1-p[1])));   
+      break;
+    case 8:
+      return cs.value(p);
+      break;
     default:
       return 0;
       break;
@@ -112,6 +125,7 @@ class myRHS
 public:
   virtual ~myRHS() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
+      CornerSingularityRHS csrhs(Point<2>(1,1), 1, 0.5);
     switch(N) {
     case 1:
       return 2*(p[0]*(1-p[0])+p[1]*(1-p[1]));
@@ -133,6 +147,17 @@ public:
       break;
     case 5:
       return M_PI*M_PI*cos(M_PI*p[0]);
+      break;
+    case 6:
+      return 18*M_PI*M_PI*sin(3*M_PI*p[0])*sin(3*M_PI*p[1]);
+      break;
+    case 7:     //not yet working
+      return 
+          (-9*M_PI*M_PI*sin(3*M_PI*p[0])-4)*(-sin(3*M_PI*p[0])+(p[0]<0.5 ? 2*p[0]*p[0] : 2*(1-p[0])*(1-p[0])))
+          +(-9*M_PI*M_PI*sin(3*M_PI*p[1])-4)*(-sin(3*M_PI*p[1])+(p[1]<0.5 ? 2*p[1]*p[1] : 2*(1-p[1])*(1-p[1])));
+      break;   
+    case 8:
+      return csrhs.value(p);;
       break;
     default:
       return 1;
@@ -160,6 +185,12 @@ public:
                     break;
                 case 5:
                     return "u(x,y)=cos(pi*x)";
+                    break;
+                case 6:
+                    return "u(x,y)=sin(3*pi*x)*sin(3*pi*y)";
+                    break;
+                case 7: //not yet working
+                    return "case 6 + singularity in (0.5,0.5)";
                     break;
                 default:
                     return "TestProblem: N not defined.";
@@ -196,6 +227,15 @@ public:
     case 5:
       return 0;
       break;
+    case 6:
+      if(p[0]==1) return -3*M_PI*sin(3*M_PI*p[1]);
+      if(p[0]==0) return -3*M_PI*sin(3*M_PI*p[1]);
+      if(p[1]==1) return -3*M_PI*sin(3*M_PI*p[0]);
+      if(p[1]==0) return -3*M_PI*sin(3*M_PI*p[0]);
+      break;    
+    case 7: //not yet working
+      return 0;
+      break;
     default:
       return 0;
       break;
@@ -220,10 +260,14 @@ int main()
     const int pmax = PMAX;
 
 
-    const unsigned int testcase1=5;
+    const unsigned int testcase1=8;
     mySolution<testcase1> uexact1;
     myRHS<testcase1> rhs1;
     myBoundaryFunction<testcase1> phi1;
+    
+    CompressionStrategy strategy=tensor_simple;
+    if(strategy==tensor_second) cout<<"compression strategy: tensor_second"<<endl;
+    else cout<<"compression strategy: tensor_simple"<<endl;
     
     PoissonBVP<dim> poisson1(&rhs1);
     
@@ -273,7 +317,7 @@ int main()
        
     Frame frame(frames);
     frame.set_jpmax(jmax,pmax);
-    cout<<"dof: "<<frame.degrees_of_freedom()<<endl;
+//    cout<<"dof: "<<frame.degrees_of_freedom()<<endl;
 #if 0//index tests
     cout<<frame1d.DeltaLmin(0)<<endl;
     cout<<frame1d.DeltaRmax(3,0)<<endl;
@@ -291,7 +335,7 @@ int main()
     cout<<frame.get_first_wavelet_numbers()<<endl;
     cout<<frame.get_last_wavelet_numbers()<<endl;
 #endif
-#if 1
+#if 0
     //support test
     Index ind1=frame.first_generator(frame.j0());
     cout<<ind1<<endl;
@@ -490,7 +534,7 @@ int main()
 #endif
 
 #ifdef ADAPTIVE
-    CachedQuarkletTProblem<TensorFrameEquation<Frame1d,dim,Frame> > cproblem1(&eq,41,27);
+    CachedQuarkletTProblem<TensorFrameEquation<Frame1d,dim,Frame> > cproblem1(&eq,41,9); //41, 27 funktioniert auch
     
 #if 0 //testing APPLY strategies
   {
@@ -518,15 +562,15 @@ int main()
     InfiniteVector<double, Index> u_epsilon;
     InfiniteVector<double, int> u_epsilon_int;
     const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
-    const unsigned int maxiter = 999;
+    const unsigned int maxiter = 9999;
     const double omega = 0.05;
     const double residual_stop = 1e-10;
     const double shrinkage = 0;
     clock_t tic = clock();
     
     //choose one scheme
-    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, tensor_second, pmax, a, b); 
-//    richardson_QUARKLET_SOLVE(cproblem1,epsilon,u_epsilon_int, maxiter, tensor_second, a, b, shrinkage, omega, residual_stop);
+    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, strategy, pmax, a, b); 
+//    richardson_QUARKLET_SOLVE(cproblem1,epsilon*1e-25,u_epsilon_int, maxiter, tensor_second, a, b, shrinkage, omega, residual_stop);
 //    DUV_QUARKLET_SOLVE_SD(cproblem1, nu, epsilon, u_epsilon, tensor_simple, pmax, jmax, a, b);
 //    steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon_int, tensor_simple, a, b);
             

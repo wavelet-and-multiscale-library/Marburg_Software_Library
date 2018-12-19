@@ -62,7 +62,7 @@ namespace WaveletTL
         const double coeff = f(*(basis_.get_quarklet(i)))/D(*(basis_.get_quarklet(i)));
         fhelp.set_coefficient(*(basis_.get_quarklet(i)), coeff);
         fhelp_int.set_coefficient(i, coeff);
-        cout << *(basis_.get_quarklet(i)) << endl;
+//        cout << *(basis_.get_quarklet(i)) << endl;
     }
 //    cout << "bin hier1" << endl;
     

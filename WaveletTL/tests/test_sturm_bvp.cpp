@@ -168,7 +168,7 @@ int main()
   const int pmax = PMAX;
   double relaxation = 0.05;
 
-  CompressionStrategy strategy=S;
+  CompressionStrategy strategy=DKR;
   if(strategy==DKR) cout<<"using classical compression"<<endl;
   if(strategy==S) cout<<"using second compression"<<endl;
   
@@ -612,7 +612,7 @@ A.apply(x, err);
 
   
 #endif
-  #if 0 //testing APPLY strategies
+  #if 1 //testing APPLY strategies
   {
     
     InfiniteVector<double, Index> v,Avc,Avs;
@@ -621,10 +621,12 @@ A.apply(x, err);
     }
     cout<<"testing APPLY"<<endl;
     clock_t tic = clock();
-    APPLY_QUARKLET(ceq, v, 1e-3, Avc, jmax, S, pmax, 2,2);
+    APPLY_QUARKLET(ceq, v, 1e-4, Avc, jmax, strategy, pmax, 2,2);
     clock_t toc = clock();
     double time = (double)(toc-tic);
-    cout << "done APPLY in: " << (time/CLOCKS_PER_SEC) << " seconds"<<endl;
+    cout << "done APPLY in: " << (time/CLOCKS_PER_SEC) << " seconds ";
+    if(strategy==DKR) cout<<"using classical compression"<<endl;
+  if(strategy==S) cout<<"using second compression"<<endl;
   }
 #endif
   
@@ -639,7 +641,7 @@ A.apply(x, err);
 #ifdef FRAME
   const double norminv = ceq.norm_Ainv();  
   const double nu = norminv*l2_norm(F_eta); 
-  CDD2_QUARKLET_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, strategy, pmax, 2, 2);
+//  CDD2_QUARKLET_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, strategy, pmax, 2, 2);
 //  DUV_QUARKLET_SOLVE_SD(ceq, nu, epsilon, u_epsilon, CDD1, pmax, jmax, 2, 2);
 //  steepest_descent_ks_QUARKLET_SOLVE(ceq, epsilon, u_epsilon, DKR, 2, 2);
 #ifdef SD
@@ -654,7 +656,7 @@ A.apply(x, err);
   const double shrink = 0.01;
   richardson_QUARKLET_SOLVE(ceq,epsilon,u_epsilon_int,DKR, 1, 1, shrink);  
 #else
-//  richardson_QUARKLET_SOLVE(ceq, epsilon, u_epsilon_int, maxiter, strategy, 2, 2, 0, relaxation);
+//  richardson_QUARKLET_SOLVE(ceq, epsilon*1e-6, u_epsilon_int, maxiter, strategy, 2, 2, 0, relaxation);
   //  CDD2_QUARKLET_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, DKR, pmax, 2, 2);
 #endif
 
@@ -683,7 +685,7 @@ for (typename InfiniteVector<double,int>::const_iterator it(u_epsilon_int.begin(
 
 clock_t toc = clock();
 double time = (double)(toc-tic);
-cout << "\nTime taken: " << (time/CLOCKS_PER_SEC) << " s";
+cout << "\nTime taken: " << (time/CLOCKS_PER_SEC) << " seconds ";
 if(strategy==DKR) cout<<"using classical compression"<<endl;
   if(strategy==S) cout<<"using second compression"<<endl;
 

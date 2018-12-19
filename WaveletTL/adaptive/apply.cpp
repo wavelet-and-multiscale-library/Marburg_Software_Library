@@ -502,7 +502,7 @@ namespace WaveletTL
       //cout << "AUSGEFÜHRT!: " << P.basis().degrees_of_freedom() << endl; @PHK
     typedef typename PROBLEM::Index Index;
     
-    //cout << "bin drin" << endl;
+//    cout << "bin drin" << endl;
 
     w.clear();
     // Binary Binning variant of APPLY from [S],[B]
@@ -577,7 +577,7 @@ namespace WaveletTL
       // compute the smallest J >= ell, such that
       //   \sum_{k=0}^{\ell} alpha_{J-k}*2^{-s(J-k)}*||v_{[k]}|| <= (1-theta) * eta
       unsigned int J = ell;
-      const double s = P.s_star();
+      const double s = strategy==tensor_second ? 0.5*P.s_star() : P.s_star();  //hier pfusch: 0.5*
       while (true) {
 	double check = 0.0;
 	unsigned int k = 0;

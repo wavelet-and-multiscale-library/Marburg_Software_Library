@@ -276,19 +276,19 @@ namespace WaveletTL
         int j, k1, k2;
         for (unsigned int i = 0; i < DIM; i++) {
 //            cout<<i<<endl;
-//            if (!(intersect_singular_support(*frame.frames()[i],                  //logisch falsch
-//                                             lambda.j()[i], lambda.e()[i], lambda.k()[i],
-//                                             mu.j()[i], mu.e()[i], mu.k()[i],
-//                                             j, k1, k2) ))
-//                return false;
-//        }
-//        return true;
-            if ((intersect_singular_support(*frame.frames()[i],        
+            if (!(intersect_singular_support(*frame.frames()[i],                  //doch nicht logisch falsch
                                              lambda.j()[i], lambda.e()[i], lambda.k()[i],
                                              mu.j()[i], mu.e()[i], mu.k()[i],
                                              j, k1, k2) ))
-                return true;
+                return false;
         }
-        return false;
+        return true;
+//            if ((intersect_singular_support(*frame.frames()[i],        
+//                                             lambda.j()[i], lambda.e()[i], lambda.k()[i],
+//                                             mu.j()[i], mu.e()[i], mu.k()[i],
+//                                             j, k1, k2) ))
+//                return true;
+//        }
+//        return false;
     }
 }

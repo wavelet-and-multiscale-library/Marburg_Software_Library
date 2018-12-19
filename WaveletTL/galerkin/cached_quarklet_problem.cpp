@@ -247,7 +247,7 @@ namespace WaveletTL
 	    for (typename IntersectingList::const_iterator it2(nus.begin()), itend2(nus.end());
 		 it2 != itend2; ++it2) {
          //here second compression is applied
-            if(!(strategy==S) || (strategy==S && ((dist<J/2) || intersect_singular_support(frame(),lambda,*it2)) )){   
+            if(!(strategy==S) || (strategy==S && ((dist<=J/2) || intersect_singular_support(frame(),lambda,*it2)) )){   
 	      const double entry = problem->a(*it2, lambda);
  //             cout << *it2 << ", " << entry << endl;
 	      typedef typename Subblock::value_type value_type_subblock;
@@ -263,7 +263,7 @@ namespace WaveletTL
 	      }
  //             cout << "ja1" << endl;
             }//end of second compression
-//            else if(strategy==S){
+//            else if(strategy==S && dist>J/2 && !intersect_singular_support(frame(),lambda,*it2)){
 //                cout<<"second compression: dropping entries"<<endl;
 //            }
 	    }

@@ -20,7 +20,7 @@
 #define DYADIC
 #undef DYPLUSEN
 
-#define JMAX 10
+#define JMAX 8
 #define PMAX 0
 
 #ifdef FRAME
@@ -265,9 +265,9 @@ int main()
     myRHS<testcase1> rhs1;
     myBoundaryFunction<testcase1> phi1;
     
-    CompressionStrategy strategy=tensor_simple;
-    if(strategy==tensor_second) cout<<"compression strategy: tensor_second"<<endl;
-    else cout<<"compression strategy: tensor_simple"<<endl;
+    CompressionStrategy strategy=tensor_second;
+    if(strategy==tensor_second) cout<<"using second compression"<<endl;
+    if(strategy==tensor_simple) cout<<"using classical compression"<<endl;
     
     PoissonBVP<dim> poisson1(&rhs1);
     
@@ -397,7 +397,7 @@ int main()
  
 #if 0
     //plot one function
-    Index testindex=frame.get_quarklet(90);   
+    Index testindex=frame.get_quarklet(1);   
 //    SampledMapping<dim> evalf(evaluate(frame, testindex, true, 6));
     SampledMapping<dim> evalf(frame.evaluate(testindex,6));
     
@@ -405,7 +405,8 @@ int main()
 //    evalf=frame.evaluate(testindex,6);
     
     std::ofstream osf("tframeoutput.m");
-    osf << "clf;" << endl;
+//    osf << "clf;" << endl;
+    osf<<"figure;"<<endl;
     osf << "axis([0 1]);" << endl;
         evalf.matlab_output(osf);
         osf << "surf(x,y,z);" << endl;
@@ -535,20 +536,40 @@ int main()
 
 #ifdef ADAPTIVE
     CachedQuarkletTProblem<TensorFrameEquation<Frame1d,dim,Frame> > cproblem1(&eq,41,9); //41, 27 funktioniert auch
-    
+ 
+#if 0 //testing bilinearform compression
+  {   
+    cout<<"testing a(,)"<<endl;
+//    Index ind1=frame.first_generator(frame.j0());
+    Index ind1=frame.get_quarklet(1);
+//    cout<<ind1<<endl;
+    MultiIndex<int,2> q; q[0]=jmax/2; q[1]=jmax/2;
+    Index ind2=frame.first_quarklet(q);
+//    cout<<ind2<<endl;
+    clock_t tic = clock();
+    double a=cproblem1.a(ind2,ind1,10,strategy,2,2);
+    clock_t toc = clock();
+    double time = (double)(toc-tic);
+    cout << "computed a(,) in: " << (time/CLOCKS_PER_SEC) << " seconds ";
+    if(strategy==tensor_second) cout<<"using second compression"<<endl;
+    if(strategy==tensor_simple) cout<<"using classical compression"<<endl;
+  }
+#endif
 #if 0 //testing APPLY strategies
   {
     
     InfiniteVector<double, Index> v,Avc,Avs;
     for(int i=0;i<cproblem1.frame().degrees_of_freedom();i++){
-        v.set_coefficient(cproblem1.frame().get_quarklet(i),1);
+        v.set_coefficient(cproblem1.frame().get_quarklet(i),pow(0.5,i));
     }
     cout<<"testing APPLY"<<endl;
     clock_t tic = clock();
-    APPLY_QUARKLET(cproblem1, v, 1e-3, Avc, jmax, tensor_second, pmax, 2,2);
+    APPLY_QUARKLET(cproblem1, v, 1e-3, Avc, jmax, strategy, pmax, 2,2);
     clock_t toc = clock();
     double time = (double)(toc-tic);
-    cout << "done APPLY in: " << (time/CLOCKS_PER_SEC) << " seconds"<<endl;
+    cout << "done APPLY in: " << (time/CLOCKS_PER_SEC) << " seconds ";
+    if(strategy==tensor_second) cout<<"using second compression"<<endl;
+    if(strategy==tensor_simple) cout<<"using classical compression"<<endl;
   }
 #endif
     cout<<"normA: "<<cproblem1.norm_A()<<endl;
@@ -570,7 +591,7 @@ int main()
     
     //choose one scheme
     CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, strategy, pmax, a, b); 
-//    richardson_QUARKLET_SOLVE(cproblem1,epsilon*1e-25,u_epsilon_int, maxiter, tensor_second, a, b, shrinkage, omega, residual_stop);
+//    richardson_QUARKLET_SOLVE(cproblem1,epsilon*1e-25,u_epsilon_int, maxiter, strategy, a, b, shrinkage, omega, residual_stop);
 //    DUV_QUARKLET_SOLVE_SD(cproblem1, nu, epsilon, u_epsilon, tensor_simple, pmax, jmax, a, b);
 //    steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon_int, tensor_simple, a, b);
             
@@ -592,7 +613,9 @@ int main()
     
     clock_t toc = clock();
     double time = (double)(toc-tic);
-    cout << "\nTime taken: " << (time/CLOCKS_PER_SEC) << " s"<<endl;
+    cout << "\nTime taken: " << (time/CLOCKS_PER_SEC) << " s ";
+    if(strategy==tensor_second) cout<<"using second compression"<<endl;
+    if(strategy==tensor_simple) cout<<"using classical compression"<<endl;
     
     {
     //plot solution

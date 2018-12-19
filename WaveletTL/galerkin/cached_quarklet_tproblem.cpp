@@ -244,7 +244,8 @@ namespace WaveletTL
       return r;
     }
      
-    //version for second compression    
+    //version for second compression 
+        //mu is fixed, la is variable
     template <class PROBLEM>
     double
     CachedQuarkletTProblem<PROBLEM>::a(const Index& la,
@@ -425,7 +426,7 @@ namespace WaveletTL
                 {
 #endif
                     //hier second compression einbauen 
-                    if(!(strategy==tensor_second) || (strategy==tensor_second && (dist<radius/2 || intersect_singular_support(frame(),*(frame().get_quarklet(*it)), *nu)) ) ) 
+                    if(!(strategy==tensor_second) || (strategy==tensor_second && (dist<=radius*0.5 || intersect_singular_support(frame(),*(frame().get_quarklet(*it)), *nu)) ) ) 
                     {
                     //cout<<*it<<endl;
 //                    const double entry = 0;
@@ -453,8 +454,9 @@ namespace WaveletTL
                         }
                     }
                     } //second compression ende
-//                    else{
+//                    else if(strategy==tensor_second && dist>radius/2 && !intersect_singular_support(frame(),*(frame().get_quarklet(*it)), *nu)){
 //                        cout<<"second compression: dropping additional entries"<<endl;
+//                        cout<<*nu<<"  ,  "<<*(frame().get_quarklet(*it))<<endl;
 //                    }
                 }
             }

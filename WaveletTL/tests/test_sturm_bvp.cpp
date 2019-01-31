@@ -61,8 +61,8 @@
 #define FRAME
 #define DELTADIS
 
-#define ADAPTIVE
-#undef NONADAPTIVE
+#undef ADAPTIVE
+#define NONADAPTIVE
 
 #include <galerkin/sturm_equation.h>
 #include <galerkin/galerkin_utils.h>

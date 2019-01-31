@@ -54,6 +54,9 @@ class TestProblem : public SimpleSturmBVP
                 case 12:
                     return 1;
                     break;
+                case 13:
+                    return 0;
+                    break;
                 default:
                     return 0;
                     break;
@@ -99,7 +102,10 @@ class TestProblem : public SimpleSturmBVP
                     break;    
                 case 12:
                     return 0;
-                    break;    
+                    break;  
+                case 13:
+                    return 0;
+                    break;
                 default:
                     return 0;
                     break;
@@ -145,7 +151,10 @@ class TestProblem : public SimpleSturmBVP
                     break;    
                 case 12:
                     return 0;
-                    break;    
+                    break;
+                case 13:
+                    return 1;
+                    break;
                 default:
                     return 0;
                     break;
@@ -195,6 +204,8 @@ class TestProblem : public SimpleSturmBVP
                 case 12:
                     return -cos(2.*M_PI*t)*4.*M_PI*M_PI - 4.;  
                     break; 
+                case 13:
+                    return pow(t,0.75)-t;
                 default:
                     return 0;
                     break;
@@ -225,7 +236,10 @@ class TestProblem : public SimpleSturmBVP
                      break;     
                 case 12:
                      return "Neumann BC test problem 2";  
-                     break;     
+                     break;  
+                case 13:
+                    return "identity bvp of x^alpha singularity function";
+                    break;
                 default:
                     return "TestProblem: N not defined.";
                     break;

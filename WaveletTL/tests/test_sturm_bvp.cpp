@@ -33,8 +33,8 @@
 #undef SHRINKAGE
 
 
-#define JMAX 8
-#define PMAX 3
+#define JMAX 7
+#define PMAX 1
 #define ONE_D
 #define _DIM 1
 
@@ -59,10 +59,10 @@
 #include <interval/pq_frame.h>
 #undef BASIS
 #define FRAME
-#define DELTADIS
+#undef DELTADIS
 
-#undef ADAPTIVE
-#define NONADAPTIVE
+#define ADAPTIVE
+#undef NONADAPTIVE
 
 #include <galerkin/sturm_equation.h>
 #include <galerkin/galerkin_utils.h>
@@ -112,7 +112,7 @@ int main()
 
   
   
-    const unsigned int testcase=9;
+    const unsigned int testcase=2;
     TestProblem<testcase> T;
     Function<1>* uexact = 0;
       switch(testcase) {
@@ -612,7 +612,7 @@ A.apply(x, err);
 
   
 #endif
-  #if 1 //testing APPLY strategies
+  #if 0 //testing APPLY strategies
   {
     
     InfiniteVector<double, Index> v,Avc,Avs;
@@ -656,7 +656,7 @@ A.apply(x, err);
   const double shrink = 0.01;
   richardson_QUARKLET_SOLVE(ceq,epsilon,u_epsilon_int,DKR, 1, 1, shrink);  
 #else
-//  richardson_QUARKLET_SOLVE(ceq, epsilon*1e-6, u_epsilon_int, maxiter, strategy, 2, 2, 0, relaxation);
+  richardson_QUARKLET_SOLVE(ceq, epsilon*1e-6, u_epsilon_int, maxiter, strategy, 2, 2, 0, relaxation);
   //  CDD2_QUARKLET_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, DKR, pmax, 2, 2);
 #endif
 

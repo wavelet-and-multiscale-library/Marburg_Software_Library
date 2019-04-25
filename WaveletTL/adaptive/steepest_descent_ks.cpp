@@ -558,7 +558,7 @@ namespace WaveletTL{
 	  sprintf(name1, "%s%d%s%d%s", "./sd_results33/steep1D_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
 	  sprintf(name2, "%s%d%s%d%s", "./sd_results33/steep1D_time_asymptotic_P_jmax18_", d, "_dT", dT, ".m");
 	  sprintf(name3, "%s%d%s%d%s", "./sd_results33/steep1D_descent_params_P_jmax18_", d, "_dT", dT, ".m");
-	  sprintf(name4, "%s%d%s%d%s", "./sd_results3/steep1D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
+	  sprintf(name4, "%s%d%s%d%s", "./sd_results33/steep1D_weak_ell_tau_norms_P_jmax18_", d, "_dT", dT, ".m");
 	  break;
 	}
 	case 4: {

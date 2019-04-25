@@ -54,6 +54,13 @@ namespace WaveletTL
 		     bool boxed = false,
 		     bool colorbar = true,
 		     const double lowerclim = -6);
+  
+  //new compact plot
+  template <class TENSORFRAME>
+  void plot_indices_tframe3(const TENSORFRAME* frame,
+                     const InfiniteVector<double, typename TENSORFRAME::Index>& coeffs,
+		     std::ostream& os,
+                     const double threshold=1e-15);
 }
 
 // include implementation

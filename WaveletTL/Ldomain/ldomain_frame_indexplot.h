@@ -46,6 +46,13 @@ namespace WaveletTL
 		     bool boxed = false,
 		     bool colorbar = true,
 		     const double lowerclim = -6);
+  
+  //new compact plot
+  template <class LDOMAINFRAME>
+  void plot_indices_ldomain2(const LDOMAINFRAME* frame,
+                     const InfiniteVector<double, typename LDOMAINFRAME::Index>& coeffs,
+		     std::ostream& os,
+                     const double threshold=1e-15);
 }
 
 // include implementation

@@ -47,8 +47,8 @@
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
-#define JMAX 6
-#define PMAX 0
+#define JMAX 7
+#define PMAX 1
 #define TWO_D
 
 #define PRIMALORDER 3
@@ -510,6 +510,13 @@ int main(){
         }
     }
     coeff_stream.close();
+    
+    //newer compact coefficients plot
+    std::ofstream coeff_stream2;
+    coeff_stream2.open("coefficients_ad2.m");
+    plot_indices_ldomain2(&frame, u_epsilon, coeff_stream2,1e-15);
+    coeff_stream2.close();
+
     cout << "coefficients plotted"<<endl;
 #endif
 #if 0   

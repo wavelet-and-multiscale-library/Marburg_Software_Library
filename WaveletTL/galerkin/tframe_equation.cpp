@@ -432,7 +432,7 @@ namespace WaveletTL
 //                    if((j==1 && rand_punkt==0) || (j==0 && rand_punkt==1)){
 //                        
 //                    }                   
-                    for(unsigned int i2=0;i2<N_Gauss*(supp.b[j]-supp.a[j]);i2++){
+                    for(int i2=0;i2<N_Gauss*(supp.b[j]-supp.a[j]);i2++){
                         x[i]=rand_punkt; x[j]=gauss_points[j][i2];
 //                        cout<<x<<endl;
                         phi_values[i2]=phi(x);

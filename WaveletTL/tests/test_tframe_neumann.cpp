@@ -20,7 +20,7 @@
 #define DYADIC
 #undef DYPLUSEN
 
-#define JMAX 8
+#define JMAX 6
 #define PMAX 0
 
 #ifdef FRAME
@@ -647,6 +647,12 @@ int main()
         }
     }
     coeff_stream.close();
+    
+    //newer compact coefficients plot
+    std::ofstream coeff_stream2;
+    coeff_stream2.open("coefficients_ad2.m");
+    plot_indices_tframe3(&frame, u_epsilon, coeff_stream2,1e-15);
+    coeff_stream2.close();
     cout << "coefficients plotted"<<endl;
 //    cout<<u_epsilon.size()<<endl;
     

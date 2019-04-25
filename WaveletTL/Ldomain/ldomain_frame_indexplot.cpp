@@ -129,4 +129,62 @@ namespace WaveletTL
             os << "set(h, 'yticklabel',labels);"<<endl;
         }
     }
+    
+    template <class LDOMAINFRAME>
+    void plot_indices_ldomain2(const LDOMAINFRAME* frame,
+                       const InfiniteVector<double, typename LDOMAINFRAME::Index>& coeffs,
+                       std::ostream& os,
+                       const double threshold)
+    {
+        typedef typename LDOMAINFRAME::Index Index;
+        typedef typename LDOMAINFRAME::Support Support;
+        Support supp;
+
+        os<<"clear x, clear y, clear z"<<endl;
+        
+        for (typename InfiniteVector<double, Index>::const_iterator it(coeffs.begin()); it != coeffs.end(); ++it){
+            if(*it>threshold)
+            {
+                frame->support(it.index(),supp);
+                int patch=it.index().patch();
+                switch(patch){
+                    case 0:
+                        os<<"x(end+1)="<<(double) (supp.xmin[0]+supp.xmax[0])/(1<<(supp.j[0]+1)) -1<<";"<<endl;
+                        os<<"y(end+1)="<<(double) (supp.ymin[0]+supp.ymax[0])/(1<<(supp.j[1]+1)) <<";"<<endl;
+                        os<<"z(end+1)="<<it.index().p()[0]+it.index().p()[1]<<";"<<endl;
+                        break;
+                    case 1:
+                        os<<"x(end+1)="<<(double) (supp.xmin[1]+supp.xmax[1])/(1<<(supp.j[0]+1)) -1<<";"<<endl;
+                        os<<"y(end+1)="<<(double) (supp.ymin[1]+supp.ymax[1])/(1<<(supp.j[1]+1)) -1<<";"<<endl;
+                        os<<"z(end+1)="<<it.index().p()[0]+it.index().p()[1]<<";"<<endl;
+                        break;    
+                    case 2:
+                        os<<"x(end+1)="<<(double) (supp.xmin[2]+supp.xmax[2])/(1<<(supp.j[0]+1)) <<";"<<endl;
+                        os<<"y(end+1)="<<(double) (supp.ymin[2]+supp.ymax[2])/(1<<(supp.j[1]+1)) -1<<";"<<endl;
+                        os<<"z(end+1)="<<it.index().p()[0]+it.index().p()[1]<<";"<<endl;
+                        break;
+                    case 3:
+                        os<<"x(end+1)="<<(double) (supp.xmin[0]+supp.xmax[0])/(1<<(supp.j[0]+1)) -1<<";"<<endl;
+                        os<<"y(end+1)="<<0<<";"<<endl;
+                        os<<"z(end+1)="<<it.index().p()[0]+it.index().p()[1]<<";"<<endl;
+                        break;
+                    case 4:
+                        os<<"x(end+1)="<<0<<";"<<endl;
+                        os<<"y(end+1)="<<(double) (supp.ymin[2]+supp.ymax[2])/(1<<(supp.j[1]+1)) -1<<";"<<endl;
+                        os<<"z(end+1)="<<it.index().p()[0]+it.index().p()[1]<<";"<<endl;
+                        break;    
+                        
+                }
+                
+            }    
+        }
+        
+        os<<"plot3(x,y,z,'+')"<<endl;
+        os<<"xlabel('x')"<<endl;
+        os<<"ylabel('y')"<<endl;
+        os<<"zlabel('|p|')"<<endl;
+        os<<"title('centers of quarklet supports')"<<endl;
+        
+        os<<"axis([-1 1 -1 1 0 "<<frame->get_pmax()+1<<"]);"<<endl;
+    }    
 }

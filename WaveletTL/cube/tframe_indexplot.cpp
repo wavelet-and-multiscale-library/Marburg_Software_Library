@@ -290,4 +290,39 @@ namespace WaveletTL
             os << "set(h, 'yticklabel',labels);"<<endl;
         }
     }
+    
+    template <class TENSORFRAME>
+    void plot_indices_tframe3(const TENSORFRAME* frame,
+                       const InfiniteVector<double, typename TENSORFRAME::Index>& coeffs,
+                       std::ostream& os, const double threshold)
+    {
+        typedef typename TENSORFRAME::Index Index;
+        typedef typename TENSORFRAME::Support Support;
+        Support supp;
+
+        os<<"clear x, clear y, clear z"<<endl;
+        
+        for (typename InfiniteVector<double, Index>::const_iterator it(coeffs.begin()); it != coeffs.end(); ++it){
+            if(*it>threshold)
+            {
+                frame->support(it.index(),supp);
+                os<<"x(end+1)="<<(double) (supp.a[0]+supp.b[0])/(1<<(supp.j[0]+1))<<";"<<endl;     
+                os<<"y(end+1)="<<(double) (supp.a[1]+supp.b[1])/(1<<(supp.j[1]+1))<<";"<<endl;
+//            os<<"z(end+1)="<<*it<<";"<<endl; 
+                os<<"z(end+1)="<<it.index().p()[0]+it.index().p()[1]<<";"<<endl;
+            }    
+        }
+        
+        os<<"plot3(x,y,z,'+')"<<endl;
+        os<<"xlabel('x')"<<endl;
+        os<<"ylabel('y')"<<endl;
+        os<<"zlabel('|p|')"<<endl;
+        os<<"title('centers of quarklet supports')"<<endl;
+        
+        os<<"axis([0 1 0 1 0 "<<frame->get_pmax()+1<<"]);"<<endl;
+        
+//        os<<"disp('Achtung, Variablen x,y,z werden aufgefuellt!')"<<endl;
+
+    }
+    
 }

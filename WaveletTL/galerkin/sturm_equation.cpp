@@ -56,6 +56,29 @@ namespace WaveletTL
     
 #ifdef FRAME
 //    cout << basis_.degrees_of_freedom() << endl;
+    #if PARALLEL==1
+        double fnorm_sqr_help = 0.;
+        cout<<"parallel computing rhs"<<endl;
+        double coeff;
+        
+#pragma omp parallel 
+{
+//        cout<<"number of threads: "<<omp_get_num_threads()<<endl;
+#pragma omp for  private(coeff) schedule(static) reduction(+:fnorm_sqr_help)
+        for (int i = 0; i< basis_.degrees_of_freedom();i++)
+        {
+            coeff = f(*(basis_.get_quarklet(i))) / D(*(basis_.get_quarklet(i)));
+            if (fabs(coeff)>1e-15)
+            {
+#pragma omp critical
+                {fhelp.set_coefficient(*(basis_.get_quarklet(i)), coeff);}
+                
+                fnorm_sqr_help += coeff*coeff;
+            }
+        }
+}
+        fnorm_sqr=fnorm_sqr_help;
+#else
     for (int i=0; i<basis_.degrees_of_freedom();i++) {
 //        cout << "hallo" << endl;
 //        cout << *(basis_.get_quarklet(i)) << endl;
@@ -65,7 +88,7 @@ namespace WaveletTL
 //        cout << *(basis_.get_quarklet(i)) << endl;
     }
 //    cout << "bin hier1" << endl;
-    
+#endif
 #else
     for (int i=0; i<basis_.degrees_of_freedom();i++) {
 //        cout << "bin hier: " << i << endl;

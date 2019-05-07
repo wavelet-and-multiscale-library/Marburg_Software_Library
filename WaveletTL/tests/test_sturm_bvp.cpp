@@ -5,7 +5,11 @@
 #include <iostream>
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
 
-#define PARALLEL 0
+#define PARALLEL_APPLY 0
+#define PARALLEL_ADD_LEVEL_WRITE 0
+#define PARALLEL_ADD_LEVEL_READ 0
+#define PARALLEL_ADD_COLUMN 0
+#define PARALLEL_APPLY 0
 
 #define DYADIC
 
@@ -33,7 +37,7 @@
 #undef SHRINKAGE
 
 
-#define JMAX 7
+#define JMAX 8
 #define PMAX 1
 #define ONE_D
 #define _DIM 1
@@ -590,6 +594,7 @@ A.apply(x, err);
   cout << "setup cached equation.." << endl;
 //  CachedQuarkletProblem<SturmEquation<Basis> > ceq(&eq, 3.7, 5);
   CachedQuarkletProblem<SturmEquation<Basis> > ceq(&eq, 22, 7);
+//  CachedQuarkletProblem<SturmEquation<Basis> > ceq(&eq);
   cout<<"normA: "<<ceq.norm_A()<<endl;
   cout<<"normAinv: "<<ceq.norm_Ainv()<<endl;
   cout << "end setup cached equation.." << endl;

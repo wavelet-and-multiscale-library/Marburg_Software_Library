@@ -153,7 +153,15 @@ namespace WaveletTL
 //            cout << std::max(P.basis().j0()-1, lambda.j()- (int) (J/(P.space_dimension * 2))) <<endl;
 //              cout << lambda << endl;
 	  
-            
+#if PARALLEL_ADD_COLUMN==1
+            Vector<double> wprivate(w.size(),true); 
+#pragma omp parallel num_threads(4) 
+            {
+                
+//                cout<<"bin hier"<<endl;
+//                int i;
+#endif
+#pragma omp for 
             for (int level = std::max(P.frame().j0()-1, lambda.j()- (int) (J/(P.space_dimension * b)));
                    level <= maxlevel; level++)
                 {
@@ -164,12 +172,27 @@ namespace WaveletTL
                        polynomial <= maxplevel; polynomial++)
                     {
 //                        cout << "adding level: " << level << endl;
+//                        cout<<""<<endl;
+//                        i=0;
+#if PARALLEL_ADD_COLUMN==-1
+                        P.add_level(lambda,wprivate,polynomial,level,factor,J,strategy,jmax,pmax,a,b);
+#else               
                         P.add_level(lambda,w,polynomial,level,factor,J,strategy,jmax,pmax,a,b);
+#endif
 //                        P.add_level(lambda,w,0,level,factor,J);
         //                cout << w << endl;
         //                cout << "Stop" << endl;
                     }
                 }
+#if PARALLEL_ADD_COLUMN==1
+//#pragma omp critical
+//{
+//        for(int i=0;i<wprivate.size();i++){
+//            w(i)+=wprivate(i);
+//        }
+//}
+            }
+#endif
           
         }
         

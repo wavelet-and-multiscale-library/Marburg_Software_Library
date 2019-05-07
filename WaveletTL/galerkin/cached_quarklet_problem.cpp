@@ -30,7 +30,7 @@ namespace WaveletTL
   CachedQuarkletProblem<PROBLEM>::a(const Index& lambda,
 			    const Index& nu) const
   {
-      
+//      cout<<"bin hier"<<endl;
     //const int lambda_num = number(lambda,2);
     double r = 0;
 
@@ -196,7 +196,10 @@ namespace WaveletTL
 	{
 	  // insert a new column
 	  typedef typename ColumnCache::value_type value_type;
+#pragma omp critical
+          {
 	  col_it = entries_cache.insert(col_lb, value_type(lambda_num, Column()));
+      }
 	}
       Column& col(col_it->second);
       
@@ -209,7 +212,10 @@ namespace WaveletTL
         {
           // insert a new polynomial
            typedef typename Column::value_type value_type;
+#pragma omp critical
+           {
            block_it = col.insert(block_lb, value_type(p, Block()));
+      }
         }
 
       Block& block(block_it->second);
@@ -225,8 +231,10 @@ namespace WaveletTL
              //cout << "Punkt 3" << endl; 
 //              cout << "insert a new level: " << j << ", in the block: " << lambda << endl;
               typedef typename Block::value_type value_type;
+ #pragma omp critical             
+              {       
               it = block.insert(lb, value_type(j, Subblock()));
-
+      }
 
               Subblock& subblock(it->second);
 
@@ -242,24 +250,46 @@ namespace WaveletTL
   
 	  // do the rest of the job
 	  const double d1 = problem->D(lambda);
+          double entry;
 //          cout << d1 << endl;
-          
+#if PARALLEL_ADD_LEVEL_WRITE==1
+   #pragma omp parallel num_threads(2)
+          {
+#pragma omp for private(entry)
+              for(int n=0;n<nus.size();n++){
+                  typename IntersectingList::const_iterator it2(nus.begin());
+                  advance(it2,n);
+#else
 	    for (typename IntersectingList::const_iterator it2(nus.begin()), itend2(nus.end());
 		 it2 != itend2; ++it2) {
+#endif
          //here second compression is applied
             if(!(strategy==S) || (strategy==S && ((dist<=J/2) || intersect_singular_support(frame(),lambda,*it2)) )){   
-	      const double entry = problem->a(*it2, lambda);
- //             cout << *it2 << ", " << entry << endl;
+	      entry = problem->a(*it2, lambda);
+//              cout << *it2 << ", " << entry << endl;
 	      typedef typename Subblock::value_type value_type_subblock;
 	      if (entry != 0.) {
  //                 cout << "ja3" << endl;
+#if PARALLEL_ADD_LEVEL_WRITE==1
+#pragma omp critical
+                  {
+#endif
+       #pragma omp critical               
+                      {
 		subblock.insert(subblock.end(), value_type_subblock((*it2).number(), entry));
+                      }
 	      //w.add_coefficient(*it2, (entry / (d1 * problem->D(*it2))) * factor);
  //               cout << *it2 << ": " << (*it2).number() << endl;
  //             cout <<  number(*it2,jmax) << endl;
  //               cout << w.size() << endl;
+#pragma omp critical
+                      {
                 w[(*it2).number()] += (entry / (d1*problem->D(*it2))) * factor;
+                      }
                 //cout << "ja5" << endl;
+#if PARALLEL_ADD_LEVEL_WRITE==1
+                  }
+#endif
 	      }
  //             cout << "ja1" << endl;
             }//end of second compression
@@ -267,6 +297,9 @@ namespace WaveletTL
 //                cout<<"second compression: dropping entries"<<endl;
 //            }
 	    }
+#if PARALLEL_ADD_LEVEL_WRITE==1
+          }
+#endif
 //	  cout << "ja2" << endl;
          }
 
@@ -282,18 +315,38 @@ namespace WaveletTL
         
 	
 	const double d1 = problem->D(lambda);
-	
-	//cout << "Länge w: " << w.size() << endl;
+	double d2;
+//	cout << "Länge w: " << w.size() << endl;
+#if PARALLEL_ADD_LEVEL_READ==1
+#pragma omp parallel num_threads(2)
+          {
+#pragma omp for private(d2)
+              for(int n=0;n<subblock.size();n++){
+                  typename Subblock::const_iterator it2(subblock.begin());
+                  advance(it2,n);
+#else
 	  for (typename Subblock::const_iterator it2(subblock.begin()), itend2(subblock.end());
 	       it2 != itend2; ++it2) {
+#endif       
 //              w.add_coefficient(*(frame().get_wavelet(it2->first)),
 // 			      (it2->second / (d1 * problem->D( *(frame().get_wavelet(it2->first)) )))  * factor);
                     //cout << it2->second << endl;
                     //cout << it2->first << endl;
               
-                    w[it2->first] += (it2->second / (d1*problem->D(*(frame().get_quarklet(it2->first))))) * factor;
+              d2=problem->D(*(frame().get_quarklet(it2->first)));
+#if PARALLEL_ADD_LEVEL_READ==1
+#pragma omp critical
+                  {
+#endif     
+                      
+                    w[it2->first] += (it2->second / (d1*d2)) * factor;
+#if PARALLEL_ADD_LEVEL_READ==1
+                  }
+#endif
                 }
-	
+#if PARALLEL_ADD_LEVEL_READ==1
+          }
+#endif	
       }// end else
 
       

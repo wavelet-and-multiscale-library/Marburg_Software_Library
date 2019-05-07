@@ -86,11 +86,13 @@ namespace WaveletTL
 
    
     typedef typename PROBLEM::Index Index;
+    
+    double entry;
 #if PARALLEL==1
     cout<<"parallel computing stiffness matrix"<<endl;
 #pragma omp parallel
     {
-#pragma omp for
+#pragma omp for private(entry)
     for(size_type row=0;row<Lambda.size();row++){
         typename std::set<Index>::const_iterator it1(Lambda.begin());
         advance(it1, row);
@@ -104,10 +106,10 @@ namespace WaveletTL
 	     it2 != itend; ++it2, ++column)
 	  {
 	    // 	    if (intersect_singular_support(P.basis(), *it1, *it2)) {
+
+                entry = P.a(*it2, *it1);
 #pragma omp critical
             {
-                double entry = P.a(*it2, *it1);
-	    
 	    //const double entry = 0;
 #if _WAVELETTL_GALERKINUTILS_VERBOSITY >= 2
  	    if (fabs(entry) > 1e-15) {

@@ -608,7 +608,7 @@ namespace WaveletTL
       //cout << *(P.basis().get_wavelet(4000)) << endl;
       // compute w = \sum_{k=0}^\ell A_{J-k}v_{[k]}
 //      for(int i=0;i<vksize.size();i++) cout<<vksize[i]<<endl;
-#if PARALLEL==1
+#if PARALLEL_APPLY==1
       //outer loop parallelization
 //#pragma omp parallel
 //{       
@@ -667,7 +667,7 @@ namespace WaveletTL
             //cout << "Beginn cc" << endl;
            // add_compressed_column_quarklet(P, itk->second, itk->first, J-k, ww, jmax, strategy, true, pmax, a, b);
            //Vector<double> wwhelp(P.frame().degrees_of_freedom());
-#if PARALLEL==1
+#if PARALLEL_APPLY==1
             add_compressed_column_quarklet(P, itk->second, itk->first, J-k, wwprivate, jmax, strategy, true);
 #else
             add_compressed_column_quarklet(P, itk->second, itk->first, J-k, ww, jmax, strategy, true, pmax, a, b);
@@ -679,7 +679,7 @@ namespace WaveletTL
 //        cout<<"z="<<z<<":"<<vksize[k]<<endl;
            //outer loop or collapse parallelization
 //      }
-#if PARALLEL==1
+#if PARALLEL_APPLY==1
 #pragma omp critical
 {
         for(int i=0;i<ww.size();i++){
@@ -824,7 +824,7 @@ namespace WaveletTL
       //cout << *(P.basis().get_wavelet(4000)) << endl;
       // compute w = \sum_{k=0}^\ell A_{J-k}v_{[k]}
 //      for(int i=0;i<vksize.size();i++) cout<<vksize[i]<<endl;
-#if PARALLEL==1
+#if PARALLEL_APPLY==1
       //outer loop parallelization
 //#pragma omp parallel
 //{       
@@ -883,7 +883,7 @@ namespace WaveletTL
             //cout << "Beginn cc" << endl;
            // add_compressed_column_quarklet(P, itk->second, itk->first, J-k, ww, jmax, strategy, true, pmax, a, b);
            //Vector<double> wwhelp(P.frame().degrees_of_freedom());
-#if PARALLEL==1
+#if PARALLEL_APPLY==1
             add_compressed_column_quarklet(P, itk->second, itk->first, J-k, wwprivate, jmax, strategy, true);
 #else
             add_compressed_column_quarklet(P, itk->second, *(P.frame().get_quarklet(itk->first)), J-k, ww, jmax, strategy, true, pmax, a, b);
@@ -895,7 +895,7 @@ namespace WaveletTL
 //        cout<<"z="<<z<<":"<<vksize[k]<<endl;
            //outer loop or collapse parallelization
 //      }
-#if PARALLEL==1
+#if PARALLEL_APPLY==1
 #pragma omp critical
 {
         for(int i=0;i<ww.size();i++){
@@ -1017,7 +1017,7 @@ namespace WaveletTL
   }
       
       template <class PROBLEM>
-  void APPLY_QUARKLET_PARALLEL_OUTER(const PROBLEM& P,
+  void APPLY_QUARKLET_PARALLEL_APPLY_OUTER(const PROBLEM& P,
 	     const InfiniteVector<double, typename PROBLEM::Index>& v,
 	     const double eta,
 	     InfiniteVector<double, typename PROBLEM::Index>& w,
@@ -1198,7 +1198,7 @@ namespace WaveletTL
   }
    
       template <class PROBLEM>
-  void APPLY_QUARKLET_PARALLEL_INNER(const PROBLEM& P,
+  void APPLY_QUARKLET_PARALLEL_APPLY_INNER(const PROBLEM& P,
 	     const InfiniteVector<double, typename PROBLEM::Index>& v,
 	     const double eta,
 	     InfiniteVector<double, typename PROBLEM::Index>& w,

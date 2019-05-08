@@ -15,7 +15,7 @@ namespace WaveletTL
     CachedQuarkletTProblem<PROBLEM>::a(const Index& la,
 			       const Index& mu) const
     {
-//        printf("bin hier \n");
+//        printf("enter a");
         double r = 0;
 
         if (problem->local_operator())
@@ -78,12 +78,12 @@ namespace WaveletTL
 //                cout << "Neue Spalte " << nu << endl;
                 // insert a new column
                 typedef typename ColumnCache::value_type value_type;
-#if PARALLEL==-1
-#pragma omp critical
-                {col_it = entries_cache.insert(col_lb, value_type(nu_num, Column()));}
-#else
-                col_it = entries_cache.insert(col_lb, value_type(nu_num, Column()));
-#endif
+
+#pragma omp critical //(cache_insert)
+                {
+                    col_it = entries_cache.insert(col_lb, value_type(nu_num, Column()));
+                }
+
             }
             
 
@@ -100,12 +100,12 @@ namespace WaveletTL
                 
 //                cout << "Neuer block" << endl;
                 typedef typename Column::value_type value_type;
-#if PARALLEL==-1
-#pragma omp critical
-                {block_it = col.insert(block_lb, value_type(blocknumber, Block()));}
-#else
-                block_it = col.insert(block_lb, value_type(blocknumber, Block()));
-#endif
+
+#pragma omp critical //(column_insert)
+                {
+                    block_it = col.insert(block_lb, value_type(blocknumber, Block()));
+                }
+
             }
             
             Block& block(block_it->second);
@@ -131,12 +131,12 @@ namespace WaveletTL
 //                cout << "Nu: " << nu << ", " << endl << endl;
 
                 typedef typename Block::value_type value_type;
-#if PARALLEL==-1
-#pragma omp critical
-                {it = block.insert(lb, value_type(subblocknumber, Subblock()));}
-#else
-                it = block.insert(lb, value_type(subblocknumber, Subblock()));
-#endif
+
+#pragma omp critical //(block_insert)
+                {
+                    it = block.insert(lb, value_type(subblocknumber, Subblock()));
+                }
+
                 
                 Subblock& subblock(it->second);
 
@@ -172,20 +172,27 @@ namespace WaveletTL
 //                                       lambda->p();
                 
                 // compute entries
-                //cout << "bin hier"<<endl;
+//                cout << "bin hier"<<endl;
                 //cout<<nus.size()<<endl;
-#if 0
-#pragma omp parallel for shared(subblock)
-                for(int i=0;i<nus.size();i++){
-                    typename IntersectingList::const_iterator it(nus.begin());
-                    advance(it,i);
-#else
+
                 
 //                for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)
 //                 for (typename IntersectingPointerList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)   
+                double entry;
+#if PARALLEL_A==1
+#pragma omp parallel num_threads(NUM_THREADS) 
+#endif
+                {
+#if PARALLEL_A==1
+#pragma omp for private(entry) schedule(dynamic) nowait
+                 for(int n=0;n<nus.size();n++){
+                  typename IntersectingList::const_iterator it(nus.begin());
+                  advance(it,n);              
+#else
                 for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)    
                 {
 #endif
+
                     //hier second compression einbauen 
                     //if(!(strategy==tensor_second) || (strategy==tensor_second && (dist<radius/2 || intersect_singular_support(frame(),*(frame().get_quarklet(*it)), *nu)) ) ) {
                     //cout<<*it<<endl;
@@ -193,7 +200,7 @@ namespace WaveletTL
 //                    const double entry = problem->a(*it, *nu);
 //                    const double entry = problem->a(*it, *nu);
 //                    const double entry = problem->a(*(frame().get_quarklet((*it).number())), *nu);
-                        const double entry = problem->a(*(frame().get_quarklet(*it)), *nu);
+                      entry = problem->a(*(frame().get_quarklet(*it)), *nu);
 //                    const double entry = problem->a(*(frame().get_quarklet(*it)), *nu);
 //                    *(frame().get_quarklet(*it));
 
@@ -204,9 +211,13 @@ namespace WaveletTL
                     {
 
 //                        subblock.insert(subblock.end(), value_type_subblock((*it).number(), entry));
-                        subblock.insert(subblock.end(), value_type_subblock(*it, entry));
 
-//                                cout << *it << ", " << (*it).number() <<endl;
+#pragma omp critical //(subblock_insert)
+                        {
+                        subblock.insert(subblock.end(), value_type_subblock(*it, entry));
+                        }
+
+//                                cout << *it << endl;
 //                        if ((int)(*it).number() == lambda_num)
                         if (*it == lambda_num)    
                         {
@@ -216,8 +227,10 @@ namespace WaveletTL
                     //} //second compression ende
                 }
             }
+            }
             // level already exists --> extract row corresponding to 'lambda'
             else
+//#pragma omp critical
             {
 //                cout << "Ergebnis aus L2 Cache"  << endl;
                 
@@ -240,8 +253,9 @@ namespace WaveletTL
                 }
             }
         }
-         
+//       cout<<"exit a"<<endl;  
       return r;
+      
     }
      
     //version for second compression 
@@ -317,12 +331,12 @@ namespace WaveletTL
 //                cout << "Neue Spalte " << nu << endl;
                 // insert a new column
                 typedef typename ColumnCache::value_type value_type;
-#if PARALLEL==-1
-#pragma omp critical
-                {col_it = entries_cache.insert(col_lb, value_type(nu_num, Column()));}
-#else
-                col_it = entries_cache.insert(col_lb, value_type(nu_num, Column()));
-#endif
+                
+#pragma omp critical //(cache_insert)
+                {
+                    col_it = entries_cache.insert(col_lb, value_type(nu_num, Column()));
+                }
+
             }
             
 
@@ -339,12 +353,12 @@ namespace WaveletTL
                 
 //                cout << "Neuer block" << endl;
                 typedef typename Column::value_type value_type;
-#if PARALLEL==-1
-#pragma omp critical
-                {block_it = col.insert(block_lb, value_type(blocknumber, Block()));}
-#else
-                block_it = col.insert(block_lb, value_type(blocknumber, Block()));
-#endif
+
+#pragma omp critical //(columen_insert)
+                {
+                    block_it = col.insert(block_lb, value_type(blocknumber, Block()));
+                }
+
             }
             
             Block& block(block_it->second);
@@ -370,12 +384,12 @@ namespace WaveletTL
 //                cout << "Nu: " << nu << ", " << endl << endl;
 
                 typedef typename Block::value_type value_type;
-#if PARALLEL==-1
-#pragma omp critical
-                {it = block.insert(lb, value_type(subblocknumber, Subblock()));}
-#else
-                it = block.insert(lb, value_type(subblocknumber, Subblock()));
-#endif
+
+#pragma omp critical //(block_insert)
+                {
+                    it = block.insert(lb, value_type(subblocknumber, Subblock()));
+                }
+
                 
                 Subblock& subblock(it->second);
 
@@ -413,15 +427,21 @@ namespace WaveletTL
                 // compute entries
                 //cout << "bin hier"<<endl;
                 //cout<<nus.size()<<endl;
-#if 0
-#pragma omp parallel for shared(subblock)
-                for(int i=0;i<nus.size();i++){
-                    typename IntersectingList::const_iterator it(nus.begin());
-                    advance(it,i);
-#else
+
                 
 //                for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)
-//                 for (typename IntersectingPointerList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)   
+//                 for (typename IntersectingPointerList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)  
+                double entry;
+#if PARALLEL_A==1
+#pragma omp parallel num_threads(NUM_THREADS) 
+#endif
+                {
+#if PARALLEL_A==1
+#pragma omp for private(entry) schedule(dynamic) nowait
+                 for(int n=0;n<nus.size();n++){
+                  typename IntersectingList::const_iterator it(nus.begin());
+                  advance(it,n);              
+#else
                 for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)    
                 {
 #endif
@@ -433,7 +453,7 @@ namespace WaveletTL
 //                    const double entry = problem->a(*it, *nu);
 //                    const double entry = problem->a(*it, *nu);
 //                    const double entry = problem->a(*(frame().get_quarklet((*it).number())), *nu);
-                        const double entry = problem->a(*(frame().get_quarklet(*it)), *nu);
+                      entry = problem->a(*(frame().get_quarklet(*it)), *nu);
 //                    const double entry = problem->a(*(frame().get_quarklet(*it)), *nu);
 //                    *(frame().get_quarklet(*it));
 
@@ -444,7 +464,11 @@ namespace WaveletTL
                     {
 
 //                        subblock.insert(subblock.end(), value_type_subblock((*it).number(), entry));
+
+#pragma omp critical //(subblock_insert)
+                        {
                         subblock.insert(subblock.end(), value_type_subblock(*it, entry));
+                        }
 
 //                                cout << *it << ", " << (*it).number() <<endl;
 //                        if ((int)(*it).number() == lambda_num)
@@ -459,12 +483,13 @@ namespace WaveletTL
 //                        cout<<*nu<<"  ,  "<<*(frame().get_quarklet(*it))<<endl;
 //                    }
                 }
+                }
             }
             // level already exists --> extract row corresponding to 'lambda'
             else
             {
 //                cout << "Ergebnis aus L2 Cache"  << endl;
-                
+             
                 Subblock& subblock(it->second);
 
                 //typename Block::iterator block_lb(block.lower_bound(lambda));
@@ -478,14 +503,17 @@ namespace WaveletTL
 //                    cout << "Ergebnis ist 0" << endl;
                   }
                 else {
-                    
+
                   r = subblock_it->second;
+                    
 //                  cout << "Ergenis: " << r << endl;
                 }
+                
             }
         }
-         
+
       return r;
+      
     }    
 
 //    template <class PROBLEM>
@@ -723,6 +751,9 @@ namespace WaveletTL
          * For higher dimensions this is done recursivly.
          */
         
+//        cout<<"add_ball wird ausgefuehrt"<<endl;
+//        cout<<lambda<<endl;
+        
         assert (space_dimension <= 2);// we only support dimensions up to 2
         
         double d1 = precond?D(lambda):1.0;
@@ -811,6 +842,8 @@ namespace WaveletTL
             
             int xstart,xend,ystart,subblocknumber;
             // iterate the levellines. offset relative to lambdas levelline
+
+            {                     
             for (int offset = -std::min(dist2j0,actualradius); offset <= std::min(dist2maxlevel,actualradius); offset++)
             {
                 // iterate over the levels on the levelline
@@ -857,12 +890,14 @@ namespace WaveletTL
                             //if(!(strategy==tensor_second) || (strategy==tensor_second && (dist2<radius/2 || intersect_singular_support(frame(),lambda,*(frame().get_quarklet(frame().get_first_wavelet_numbers()[leveldiffj0.number()]+currentpolynomial.number() * frame().get_Nablasize())) ) )) ){
 //                            mu = this->frame().first_quarklet(currentlevel, currentpolynomial);
 //                            a(mu,lambda);
+//                            cout<<"computing a"<<endl;
                             if(strategy==tensor_second){
                                a(*(frame().get_quarklet(frame().get_first_wavelet_numbers()[leveldiffj0.number()]+currentpolynomial.number() * frame().get_Nablasize())),lambda, radius, strategy, A, B); 
                             }
                             else{
                             a(*(frame().get_quarklet(frame().get_first_wavelet_numbers()[leveldiffj0.number()]+currentpolynomial.number() * frame().get_Nablasize())),lambda);
                             }
+//                            cout<<"nach a"<<endl;
                             //                            cout << mu << endl;
 //                            int dist2p0 = multi_degree(lambda.p());
 //                            int blocknumber = currentpolynomial[0] + ((dist2p0+offset)*(dist2p0+offset+1))/2;;
@@ -870,18 +905,29 @@ namespace WaveletTL
 
 
                             // add the level
+//#pragma omp critical
+//                            {
                             Subblock& subblock (entries_cache[lambda.number()][currentpolynomial.number()][subblocknumber]);
+                            
+//                            cout<<"nach subblock"<<endl;
         #if 1
                             for (typename Subblock::const_iterator it(subblock.begin()), itend(subblock.end()); it != itend; ++it)
                             {
                                 // high caching strategy
-                                w[it->first]=w[it->first]+factor*(it->second)/( precond? (d1*D(*(frame().get_quarklet(it->first)))):1.0);
+                                const double d2=D(*(frame().get_quarklet(it->first)));
+                                
+#pragma omp critical //(write_output)
+                                {
+                                w[it->first]=w[it->first]+factor*(it->second)/( precond? (d1*d2):1.0);
+                                }
 //                                w[it->first]=w[it->first]+factor*(it->second)/( precond? (d1*D(this->frame().get_quarklet(it->first))):1.0);
 
                                 // low caching strategy
                                 //w[it->first]=w[it->first]+factor*(it->second)/d1/(problem->D(this->frame().get_quarklet(it->first)));
                             }
+//                            }
         #else
+                            
                             // mid caching strategy
                             typename Block::const_iterator it(block.begin()), itend(block.end());
                             w[it->first]=w[it->first]+factor*(it->second)/d1/D(this->frame().get_quarklet(it->first));
@@ -896,6 +942,9 @@ namespace WaveletTL
                     }
                 }
             }
+
+        }      
+
         }
 //        else // dim > 2. iteration over all levels in 'range' is done recursivly for arbitrary dimensions
 //        {

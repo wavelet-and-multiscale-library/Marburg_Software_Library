@@ -4,7 +4,11 @@
  * and open the template in the editor.
  */
 
-#define PARALLEL 0
+#define PARALLEL_APPLY 0
+#define NUM_THREADS 1
+#define PARALLEL_A 0
+#define PARALLEL_GALERKIN_UTILS 0
+
 #undef NONADAPTIVE
 #define ADAPTIVE
 
@@ -21,7 +25,7 @@
 #undef DYPLUSEN
 
 #define JMAX 6
-#define PMAX 0
+#define PMAX 1
 
 #ifdef FRAME
 #define _WAVELETTL_USE_TFRAME 1
@@ -265,7 +269,7 @@ int main()
     myRHS<testcase1> rhs1;
     myBoundaryFunction<testcase1> phi1;
     
-    CompressionStrategy strategy=tensor_second;
+    CompressionStrategy strategy=tensor_simple;
     if(strategy==tensor_second) cout<<"using second compression"<<endl;
     if(strategy==tensor_simple) cout<<"using classical compression"<<endl;
     
@@ -590,7 +594,7 @@ int main()
     clock_t tic = clock();
     
     //choose one scheme
-    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, strategy, pmax, a, b); 
+    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, strategy, pmax, a, b);
 //    richardson_QUARKLET_SOLVE(cproblem1,epsilon*1e-25,u_epsilon_int, maxiter, strategy, a, b, shrinkage, omega, residual_stop);
 //    DUV_QUARKLET_SOLVE_SD(cproblem1, nu, epsilon, u_epsilon, tensor_simple, pmax, jmax, a, b);
 //    steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon_int, tensor_simple, a, b);

@@ -5,11 +5,12 @@
 #include <iostream>
 #define _WAVELETTL_GALERKINUTILS_VERBOSITY 1
 
-#define PARALLEL_APPLY 0
 #define PARALLEL_ADD_LEVEL_WRITE 0
 #define PARALLEL_ADD_LEVEL_READ 0
 #define PARALLEL_ADD_COLUMN 0
 #define PARALLEL_APPLY 0
+#define PARALLEL_GALERKIN_UTILS 0
+#define NUM_THREADS 1
 
 #define DYADIC
 
@@ -37,8 +38,8 @@
 #undef SHRINKAGE
 
 
-#define JMAX 8
-#define PMAX 1
+#define JMAX 9
+#define PMAX 3
 #define ONE_D
 #define _DIM 1
 
@@ -662,7 +663,7 @@ A.apply(x, err);
   richardson_QUARKLET_SOLVE(ceq,epsilon,u_epsilon_int,DKR, 1, 1, shrink);  
 #else
   richardson_QUARKLET_SOLVE(ceq, epsilon*1e-6, u_epsilon_int, maxiter, strategy, 2, 2, 0, relaxation);
-  //  CDD2_QUARKLET_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, DKR, pmax, 2, 2);
+//    CDD2_QUARKLET_SOLVE(ceq, nu, epsilon, u_epsilon, jmax, DKR, pmax, 2, 2);
 #endif
 
 #endif

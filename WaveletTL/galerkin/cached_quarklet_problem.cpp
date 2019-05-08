@@ -196,7 +196,7 @@ namespace WaveletTL
 	{
 	  // insert a new column
 	  typedef typename ColumnCache::value_type value_type;
-#pragma omp critical
+#pragma omp critical (cache_insert)
           {
 	  col_it = entries_cache.insert(col_lb, value_type(lambda_num, Column()));
       }
@@ -212,7 +212,7 @@ namespace WaveletTL
         {
           // insert a new polynomial
            typedef typename Column::value_type value_type;
-#pragma omp critical
+#pragma omp critical (column_insert)
            {
            block_it = col.insert(block_lb, value_type(p, Block()));
       }
@@ -231,7 +231,7 @@ namespace WaveletTL
              //cout << "Punkt 3" << endl; 
 //              cout << "insert a new level: " << j << ", in the block: " << lambda << endl;
               typedef typename Block::value_type value_type;
- #pragma omp critical             
+ #pragma omp critical (block_insert)            
               {       
               it = block.insert(lb, value_type(j, Subblock()));
       }
@@ -255,7 +255,7 @@ namespace WaveletTL
 #if PARALLEL_ADD_LEVEL_WRITE==1
    #pragma omp parallel num_threads(2)
           {
-#pragma omp for private(entry)
+#pragma omp for private(entry) schedule(dynamic) nowait
               for(int n=0;n<nus.size();n++){
                   typename IntersectingList::const_iterator it2(nus.begin());
                   advance(it2,n);
@@ -274,7 +274,7 @@ namespace WaveletTL
 #pragma omp critical
                   {
 #endif
-       #pragma omp critical               
+#pragma omp critical (subblock_insert)              
                       {
 		subblock.insert(subblock.end(), value_type_subblock((*it2).number(), entry));
                       }
@@ -282,7 +282,7 @@ namespace WaveletTL
  //               cout << *it2 << ": " << (*it2).number() << endl;
  //             cout <<  number(*it2,jmax) << endl;
  //               cout << w.size() << endl;
-#pragma omp critical
+#pragma omp critical (output_write)
                       {
                 w[(*it2).number()] += (entry / (d1*problem->D(*it2))) * factor;
                       }
@@ -320,7 +320,7 @@ namespace WaveletTL
 #if PARALLEL_ADD_LEVEL_READ==1
 #pragma omp parallel num_threads(2)
           {
-#pragma omp for private(d2)
+#pragma omp for private(d2) schedule(dynamic) nowait
               for(int n=0;n<subblock.size();n++){
                   typename Subblock::const_iterator it2(subblock.begin());
                   advance(it2,n);

@@ -33,7 +33,7 @@
 
 
 #undef NONADAPTIVE
-#define ADAPTIVE
+#undef ADAPTIVE
 
 #ifdef ADAPTIVE
 #undef SD
@@ -47,8 +47,8 @@
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
-#define JMAX 7
-#define PMAX 1
+#define JMAX 6
+#define PMAX 0
 #define TWO_D
 
 #define PRIMALORDER 3
@@ -231,7 +231,7 @@ int main(){
   for (int i=0; i<frame.degrees_of_freedom();i++) {
 
     Lambda.insert(*(frame.get_quarklet(i)));
-//    cout << *(frame.get_quarklet(i)) << endl;
+    cout << *(frame.get_quarklet(i)) << endl;
 
 
   }

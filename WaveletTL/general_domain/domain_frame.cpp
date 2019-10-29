@@ -460,7 +460,7 @@ namespace WaveletTL
 
       }
       else{ //lambda has been extended and lives on two patches
-          cout<<"evaluate quarklet on interface"<<endl;
+//          cout<<"evaluate quarklet on interface"<<endl;
           int dir;
             int patch=extensions_[lambda.patch()-num_real_patches()][0];
             int target_patch=extensions_[lambda.patch()-num_real_patches()][1];

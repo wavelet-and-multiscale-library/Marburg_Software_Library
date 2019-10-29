@@ -370,6 +370,7 @@ namespace WaveletTL
     bool jplusplus = false;
     if (eplusplus) {
       // advance e
+//        cout<<"bin hier"<<endl;
       if (e_[0] == 1 && e_[1] == 1)
 	jplusplus = true;
       else {
@@ -393,7 +394,7 @@ namespace WaveletTL
 
 	// choose lowest patch number ...
 	patch_ = 0;
-
+        cout<<"bin hier"<<endl; //to do: extension from south no north, west to east
 	// ... and lowest translation index k = k(j,e,0)
 	for(unsigned int ext1=0;ext1<frame_->get_extensions().size();ext1++){
                 if(frame_->get_extensions()[ext1][0]==patch_){ //extension from patch to another one

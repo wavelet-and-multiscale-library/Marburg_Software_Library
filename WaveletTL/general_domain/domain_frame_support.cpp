@@ -20,7 +20,7 @@ namespace WaveletTL
     frame.support(lambda_num, supp);
   }
   
-  template <class IFRAME, NPATCHES>
+  template <class IFRAME, int NPATCHES>
   bool intersect_supports(const DomainFrame<IFRAME, NPATCHES>& frame,
 			  const typename DomainFrame<IFRAME, NPATCHES>::Index& lambda,
                             const typename DomainFrame<IFRAME, NPATCHES>::Index& mu){
@@ -29,17 +29,19 @@ namespace WaveletTL
         const Support* supp_la = &(frame.all_supports_[lambda.number()]);
 //        const Support* supp_mu = &(frame.get_support(mu.number()));
         const Support* supp_mu = &(frame.all_supports_[mu.number()]);
+              
+        //// quickly return false if the supports do not intersect at all
+        bool intersect = false;
+        for (int patch = 0; patch<frame.num_real_patches(); patch++){
+            if (supp_la->xmin[patch] != -1 && supp_mu->xmin[patch] != -1){
+                intersect = true;
+                break;
+            }
+        }
         
-        if (supp_la->xmin[0] == -1 && supp_mu->xmin[1] == -1 && supp_mu->xmin[2] == -1) return false;
-        if (supp_mu->xmin[0] == -1 && supp_la->xmin[1] == -1 && supp_mu->xmin[2] == -1) return false;
-        if (supp_mu->xmin[0] == -1 && supp_mu->xmin[1] == -1 && supp_la->xmin[2] == -1) return false;
-        if (supp_la->xmin[0] == -1 && supp_la->xmin[1] == -1 && supp_mu->xmin[2] == -1) return false;
-        if (supp_la->xmin[0] == -1 && supp_mu->xmin[1] == -1 && supp_la->xmin[2] == -1) return false;
-        if (supp_mu->xmin[0] == -1 && supp_la->xmin[1] == -1 && supp_la->xmin[2] == -1) return false;
+        if (intersect==false) return false;
         
-        
-        
-        
+     
         int xdiff1 = 0;
         int xdiff2 = supp_la->j[0]-supp_mu->j[0];
         int ydiff1 = 0;
@@ -53,7 +55,7 @@ namespace WaveletTL
           ydiff2 = 0;
         }
         
-    for (int patch = 0; patch <= 2; patch++) {
+    for (int patch = 0; patch <frame.num_real_patches(); patch++) {
       if (supp_la->xmin[patch] != -1 && supp_mu->xmin[patch] != -1) {
 	// intersection of two nontrivial sets on patch p
 	
@@ -91,14 +93,17 @@ namespace WaveletTL
     Support supp1(frame.get_support(lambda.number()));
 //    frame.support(lambda, supp1);
     
+    //// quickly return false if the supports do not intersect at all
+        bool intersect = false;
+        for (int patch = 0; patch<8; patch++){
+            if (supp1.xmin[patch] != -1 && supp2.xmin[patch] != -1){
+                intersect = true;
+                break;
+            }
+        }
+        
+        if (intersect==false) return false;
 
-    // quickly return false if the supports do not intersect at all
-    if (supp1.xmin[0] == -1 && supp2.xmin[1] == -1 && supp2.xmin[2] == -1) return false;
-    if (supp2.xmin[0] == -1 && supp1.xmin[1] == -1 && supp2.xmin[2] == -1) return false;
-    if (supp2.xmin[0] == -1 && supp2.xmin[1] == -1 && supp1.xmin[2] == -1) return false;
-    if (supp1.xmin[0] == -1 && supp1.xmin[1] == -1 && supp2.xmin[2] == -1) return false;
-    if (supp1.xmin[0] == -1 && supp2.xmin[1] == -1 && supp1.xmin[2] == -1) return false;
-    if (supp2.xmin[0] == -1 && supp1.xmin[1] == -1 && supp1.xmin[2] == -1) return false;
     
     
     bool r = false;
@@ -130,7 +135,7 @@ namespace WaveletTL
     const int ydiff2 = supp.j[1]-supp2.j[1];
 #endif
     
-    for (int patch = 0; patch <= 2; patch++) {
+    for (int patch = 0; patch <frame.num_real_patches(); patch++) {
       if (supp1.xmin[patch] != -1 && supp2.xmin[patch] != -1) {
 	// intersection of two nontrivial sets on patch p
 	
@@ -173,7 +178,7 @@ namespace WaveletTL
   }
   
   template <class IFRAME, int NPATCHES>
-  bool intersect_supports(const DomainFrame<IFRAME, NPATCHEs>& frame,
+  bool intersect_supports(const DomainFrame<IFRAME, NPATCHES>& frame,
 			  const int& lambda_num,
 			  const typename DomainFrame<IFRAME, NPATCHES>::Support& supp2,
 			  typename DomainFrame<IFRAME, NPATCHES>::Support& supp)
@@ -184,12 +189,15 @@ namespace WaveletTL
     frame.support(lambda_num, supp1);
     
     // quickly return false if the supports do not intersect at all
-    if (supp1.xmin[0] == -1 && supp2.xmin[1] == -1 && supp2.xmin[2] == -1) return false;
-    if (supp2.xmin[0] == -1 && supp1.xmin[1] == -1 && supp2.xmin[2] == -1) return false;
-    if (supp2.xmin[0] == -1 && supp2.xmin[1] == -1 && supp1.xmin[2] == -1) return false;
-    if (supp1.xmin[0] == -1 && supp1.xmin[1] == -1 && supp2.xmin[2] == -1) return false;
-    if (supp1.xmin[0] == -1 && supp2.xmin[1] == -1 && supp1.xmin[2] == -1) return false;
-    if (supp2.xmin[0] == -1 && supp1.xmin[1] == -1 && supp1.xmin[2] == -1) return false;
+     bool intersect = false;
+        for (int patch = 0; patch<frame.num_real_patches(); patch++){
+            if (supp1.xmin[patch] != -1 && supp2.xmin[patch] != -1){
+                intersect = true;
+                break;
+            }
+        }
+        
+        if (intersect==false) return false;
     
     
     bool r = false;
@@ -221,7 +229,7 @@ namespace WaveletTL
     const int ydiff2 = supp.j[1]-supp2.j[1];
 #endif
     
-    for (int patch = 0; patch <= 2; patch++) {
+    for (int patch = 0; patch <frame.num_real_patches(); patch++) {
       if (supp1.xmin[patch] != -1 && supp2.xmin[patch] != -1) {
 	// intersection of two nontrivial sets on patch p
 	
@@ -274,7 +282,7 @@ namespace WaveletTL
 			  const typename DomainFrame<IFRAME, NPATCHES>::Index& lambda2,
 			  typename DomainFrame<IFRAME, NPATCHES>::Support& supp)
   {
-    typedef typename DomainFrame<IFRAME>::Support Support;
+    typedef typename DomainFrame<IFRAME, NPATCHES>::Support Support;
 
     Support supp2(frame.get_support(lambda2.number()));
 //    frame.support(lambda2, supp2);

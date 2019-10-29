@@ -68,7 +68,7 @@
 #include <general_domain/domain_frame_indexplot.h>
 #include <galerkin/domain_frame_equation.h>
 //#include <galerkin/domain_frame_gramian.h>
-//#include <galerkin/cached_quarklet_domain_problem.h>
+#include <galerkin/cached_quarklet_domain_problem.h>
 #include <galerkin/infinite_preconditioner.h>
 
 
@@ -95,11 +95,40 @@ public:
   virtual ~mySolution() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
     CornerSingularity cs(Point<2>(0,0), 0.5, 1.5);
+    CornerSingularity cs1(Point<2>(0,-1), 0, 1.5);
+    CornerSingularity cs2(Point<2>(-1,-1), 1.5, 1.5);
+    CornerSingularity cs3(Point<2>(-1,0), 1, 1.5);
+    CornerSingularity cs4(Point<2>(1,1), 0, 1.5);
+    CornerSingularity cs5(Point<2>(2,2), 1, 1.5);
 //    return sin(M_PI*p[0])*sin(M_PI*p[1])+5*cs.value(p);
     switch(N) {
     case 1:
-      return sin(M_PI*p[0])*sin(M_PI*p[1]);
+      return sin(M_PI*p[0])*sin(M_PI*p[1]); //sine suitable for all domains
       break;
+    case 2:
+      return cs.value(p);       //classic L-domain singularity
+      break;
+    case 12:
+      return cs.value(p)+0.2*sin(M_PI*p[0])*sin(M_PI*p[1]);       // L-domain mixed
+      break;  
+    case 3:
+      return cs.value(p)+cs1.value(p);  //T-domain-singularities
+      break;
+    case 13:
+      return cs.value(p)+cs1.value(p)+0.2*sin(M_PI*p[0])*sin(M_PI*p[1]);  //T-domain-mixed
+      break;
+    case 4:
+      return cs.value(p)+cs1.value(p)+cs2.value(p)+cs3.value(p);  //+-domain-singularities
+      break; 
+    case 14:
+      return cs.value(p)+cs1.value(p)+cs2.value(p)+cs3.value(p)+0.2*sin(M_PI*p[0])*sin(M_PI*p[1]);  //+-domain mixed
+      break; 
+    case 5:
+      return cs4.value(p)+cs5.value(p);  //snake-domain-singularities
+      break; 
+    case 15:
+      return cs4.value(p)+cs5.value(p)-0.2*sin(M_PI*p[0])*sin(M_PI*p[1]);  //snake-domain mixed
+      break; 
     default:
       return 0;
       break;
@@ -118,10 +147,39 @@ public:
   virtual ~myRHS() {};
   double value(const Point<2>& p, const unsigned int component = 0) const {
     CornerSingularityRHS csrhs(Point<2>(0,0), 0.5, 1.5);
+    CornerSingularityRHS csrhs1(Point<2>(0,-1), 0, 1.5);
+    CornerSingularityRHS csrhs2(Point<2>(-1,-1), 1.5, 1.5);
+    CornerSingularityRHS csrhs3(Point<2>(-1,0), 1, 1.5);
+    CornerSingularityRHS csrhs4(Point<2>(1,1), 0, 1.5);
+    CornerSingularityRHS csrhs5(Point<2>(2,2), 1, 1.5);
 //    return 2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1])+5*csrhs.value(p);
     switch(N) {
     case 1:
-      return 2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1]);
+      return 2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1]); //sine suitable for all domains
+      break;
+    case 2:
+      return csrhs.value(p);    //L-domain-singularities
+      break;
+    case 12:
+      return csrhs.value(p)+0.2*2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1]);    //L-domain mixed
+      break;  
+    case 3:
+      return csrhs.value(p)+csrhs1.value(p);  //T-domain-singularities
+      break;
+    case 13:
+      return csrhs.value(p)+csrhs1.value(p)+0.2*2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1]);  //T-domain mixed
+      break;  
+    case 4:
+      return csrhs.value(p)+csrhs1.value(p)+csrhs2.value(p)+csrhs3.value(p);  //+-domain-singularities
+      break;
+    case 14:
+      return csrhs.value(p)+csrhs1.value(p)+csrhs2.value(p)+csrhs3.value(p)+0.2*2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1]);  //+-domain mixed
+      break;
+    case 5:
+      return csrhs4.value(p)+csrhs5.value(p);   //snake-domain-singularities
+      break;
+    case 15:
+      return csrhs4.value(p)+csrhs5.value(p)-0.2*2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1]);   //snake-domain mixed
       break;
     default:
       return 0;
@@ -163,23 +221,23 @@ int main(){
 //            extensions[0][1]=1;
 //            cout<<"Domain: high rectangle"<<endl;
 
-//            //L-Domain
-//            const int Npatches=3;
-//            corners.resize(Npatches);
-//            corners[0][0]=-1;
-//            corners[0][1]=0;
-//            corners[1][0]=-1;
-//            corners[1][1]=-1;
-//            corners[2][0]=0;
-//            corners[2][1]=-1;
-//            
-//            const int Nextensions=2;
-//            extensions.resize(Nextensions);
-//            extensions[0][0]=0;
-//            extensions[0][1]=1;
-//            extensions[1][0]=2;
-//            extensions[1][1]=1;
-//            cout<<"Domain: L-shaped"<<endl;
+            //L-Domain
+            const int Npatches=3;
+            corners.resize(Npatches);
+            corners[0][0]=-1;
+            corners[0][1]=0;
+            corners[1][0]=-1;
+            corners[1][1]=-1;
+            corners[2][0]=0;
+            corners[2][1]=-1;
+            
+            const int Nextensions=2;
+            extensions.resize(Nextensions);
+            extensions[0][0]=0;
+            extensions[0][1]=1;
+            extensions[1][0]=2;
+            extensions[1][1]=1;
+            cout<<"Domain: L-shaped"<<endl;
 
 
 //            //T-Domain
@@ -204,31 +262,31 @@ int main(){
 //            extensions[2][1]=1;   
 //            cout<<"Domain: T-shaped"<<endl;
 
-            //+-Domain
-            const int Npatches=5;
-            corners.resize(Npatches);
-            corners[0][0]=-1;
-            corners[0][1]=0;
-            corners[1][0]=-1;
-            corners[1][1]=-1;
-            corners[2][0]=0;
-            corners[2][1]=-1;
-            corners[3][0]=-1;
-            corners[3][1]=-2;
-            corners[4][0]=-2;
-            corners[4][1]=-1;
-            
-            const int Nextensions=4;
-            extensions.resize(Nextensions);
-            extensions[0][0]=0;
-            extensions[0][1]=1;
-            extensions[1][0]=2;
-            extensions[1][1]=1;
-            extensions[2][0]=3;
-            extensions[2][1]=1; 
-            extensions[3][0]=4;
-            extensions[3][1]=1;
-            cout<<"Domain: +-shaped"<<endl;
+//            //+-Domain
+//            const int Npatches=5;
+//            corners.resize(Npatches);
+//            corners[0][0]=-1;
+//            corners[0][1]=0;
+//            corners[1][0]=-1;
+//            corners[1][1]=-1;
+//            corners[2][0]=0;
+//            corners[2][1]=-1;
+//            corners[3][0]=-1;
+//            corners[3][1]=-2;
+//            corners[4][0]=-2;
+//            corners[4][1]=-1;
+//            
+//            const int Nextensions=4;
+//            extensions.resize(Nextensions);
+//            extensions[0][0]=0;
+//            extensions[0][1]=1;
+//            extensions[1][0]=2;
+//            extensions[1][1]=1;
+//            extensions[2][0]=3;
+//            extensions[2][1]=1; 
+//            extensions[3][0]=4;
+//            extensions[3][1]=1;
+//            cout<<"Domain: +-shaped"<<endl;
             
 //            //snake-shaped Domain
 //            const int Npatches=5;
@@ -266,7 +324,7 @@ int main(){
 //            corners[2][0]=0;
 //            corners[2][1]=0;
 //            corners[3][0]=-1;
-//            corners[1][1]=0;
+//            corners[3][1]=0;
 //            
 //            const int Nextensions=4;
 //            extensions.resize(Nextensions);
@@ -278,6 +336,7 @@ int main(){
 //            extensions[2][1]=2;
 //            extensions[3][0]=0;
 //            extensions[3][1]=3;
+//            cout<<"big cube"<<endl;
  
 
 //            //unit cube (not working)
@@ -294,7 +353,7 @@ int main(){
       
     
     //setup problem
-    const int N1=1;
+    const int N1=12;
     mySolution<N1> uexact1;
     myRHS<N1> rhs1;
     
@@ -323,7 +382,7 @@ int main(){
     }
     cout<<"deltasize: "<<frame.Deltasize(frame.j0()[0])<<endl;
 #endif
-    
+//    abort();
 #if 1
     {
     //output index set
@@ -347,7 +406,7 @@ int main(){
     Array1D<SampledMapping<dim> > evalf(Npatches);
 //    Index testindex=frame.last_generator(frame.j0());
 //    ++testindex;
-    Index testindex=frame.get_quarklet(0);
+    Index testindex=frame.get_quarklet(194);
 //    Index testindex=frame.last_quarklet(7,frame.j0(),0); //careful with number
     cout << "evaluate quarklet with index " << testindex << endl;
     evalf=frame.evaluate(testindex,6);
@@ -375,6 +434,42 @@ int main(){
     }
 
 #endif 
+    #if 1 //test rhs only on L-domain
+    {
+    const int resolution2=6;
+    Index testindex3(testindex);
+    Array1D<SampledMapping<dim> > eval3(3);
+    eval3=frame.evaluate(testindex3, resolution2);
+    Array1D<Point<dim,int> > corners;
+    corners.resize(3);
+    corners[0][0]=-1;
+    corners[0][1]=0;
+    corners[1][0]=-1;
+    corners[1][1]=-1;
+    corners[2][0]=0;
+    corners[2][1]=-1;
+
+    std::ofstream os3("testf.m");
+    os3<<"Iexakt="<<eq.f(testindex)<<endl;
+    os3<<"I=0;"<<endl;
+    for(int i=0;i<3;i++){
+        eval3[i].matlab_output(os3);
+        os3<<"zalt=z;"<<endl;
+        Point<2> q0(corners[i][0],corners[i][1]);
+        Point<2> q1(corners[i][0]+1,corners[i][1]+1);
+        Grid<2> mygrid(q0,q1,pow(2,resolution2));
+        SampledMapping<2> smf(mygrid, rhs1); 
+        smf.matlab_output(os3);
+        os3<<"z=z.*zalt;"<<endl;
+        os3<<"xx=x(1,:);"<<endl;
+        os3<<"yy=y'(1,:);"<<endl;
+        os3<<"I=I+trapz(yy,trapz(xx,z,2)');"<<endl;
+    }
+    os3<<"I"<<endl;
+    os3<<"relative_error=abs(I-Iexakt)/Iexakt"<<endl; 
+    os3.close();
+    }
+#endif
 #if 1 //test bilinearform
     const int resolution=6;
     Index testindex1(testindex);
@@ -409,6 +504,7 @@ int main(){
     os<<"relative_error=abs(I-Iexakt)/Iexakt"<<endl; 
     os.close(); 
 #endif
+
     
     
         
@@ -455,7 +551,7 @@ int main(){
     Index lambda = eq.frame().first_generator(eq.frame().j0(), p);
     int zaehler=0;
     for (int l = 0; l < eq.frame().degrees_of_freedom(); l++) {
-//        if(lambda.patch()<Npatches) 
+//        if(lambda.number()<207) 
             Lambda.insert(lambda);   //using just generators for test purpose
 //        cout << lambda << ", Number: " << lambda.number() << endl;
         if(lambda==eq.frame().last_quarklet(jmax, p)){
@@ -532,6 +628,68 @@ int main(){
     
     }
    
+#endif
+    
+#ifdef ADAPTIVE
+    const int a=2;
+    const int b=2;
+    CachedQuarkletDomainProblem<DomainFrameEquation<Frame1d,Npatches,Frame> > cproblem1(&eq, 43, 9);
+//    CachedQuarkletDomainProblem<DomainFrameEquation<Frame1d,Npatches,Frame> > cproblem1(&eq, 0, 0);
+    cout<<"normA: "<<cproblem1.norm_A()<<endl;
+    cout<<"normAinv: "<<cproblem1.norm_Ainv()<<endl;
+    
+    InfiniteVector<double, int> F_eta; 
+    cproblem1.RHS(1e-6, F_eta);
+    double epsilon = 1e-3;
+    InfiniteVector<double, Index> u_epsilon;
+    InfiniteVector<double, int> u_epsilon_int;
+    const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
+    const unsigned int maxiter = 999;
+    const double omega = 0.05;
+
+    
+    //choose one scheme
+    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, tensor_simple, pmax, a, b);
+//    richardson_QUARKLET_SOLVE(cproblem1,epsilon*1e-25,u_epsilon_int, maxiter, strategy, a, b, 0, omega, 1e-10);
+//    DUV_QUARKLET_SOLVE_SD(cproblem1, nu, epsilon, u_epsilon, tensor_simple, pmax, jmax, a, b);
+//    steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon_int, tensor_simple, a, b);
+            
+    //    cout<<u_epsilon_int.size()<<endl;
+    for (typename InfiniteVector<double,int>::const_iterator it(u_epsilon_int.begin()),
+ 	   itend(u_epsilon_int.end()); it != itend; ++it){
+        u_epsilon.set_coefficient(*(frame.get_quarklet(it.index())), *it);
+    }
+    {
+    //plot solution
+    cout << "plotting solution" << endl;
+    u_epsilon.scale(&cproblem1, -1);
+    Array1D<SampledMapping<dim> > eval(Npatches);
+    eval=eq.frame().evaluate(u_epsilon,6);
+    std::ofstream os2("solution_ad.m");
+    os2 << "figure;" << endl;
+    for(int i=0;i<Npatches;i++){
+        eval[i].matlab_output(os2);        
+        os2 << "surf(x,y,z);" << endl;
+        os2 << "hold on;" << endl;
+    }  
+    os2 << "view(30,55);"<<endl;
+    os2 << "hold off" << endl;
+    os2 << "grid off;" << endl;
+    os2 << "shading('flat');" << endl;
+    os2.close(); 
+    cout << "solution plotted" << endl;
+    
+    
+    //newer compact coefficients plot
+    std::ofstream coeff_stream2;
+    coeff_stream2.open("coefficients_ad.m");
+    plot_indices_domain2(&frame, u_epsilon, coeff_stream2,1e-15);
+    coeff_stream2.close();
+    cout << "coefficients plotted"<<endl;
+
+    
+
+    }
 #endif
     
 

@@ -394,8 +394,14 @@ namespace WaveletTL
 
 	// choose lowest patch number ...
 	patch_ = 0;
-        cout<<"bin hier"<<endl; //to do: extension from south no north, west to east
+//        cout<<"bin hier"<<endl; //to do: extension from south no north, west to east
 	// ... and lowest translation index k = k(j,e,0)
+        k_[0] = (e_[0] == 0
+                ? frame_->frame1d()->DeltaLmin()+1
+                : frame_->frame1d()->Nablamin());
+        k_[1] = (e_[1] == 0
+                ? frame_->frame1d()->DeltaLmin()+1
+                : frame_->frame1d()->Nablamin());
 	for(unsigned int ext1=0;ext1<frame_->get_extensions().size();ext1++){
                 if(frame_->get_extensions()[ext1][0]==patch_){ //extension from patch to another one
                     int target_patch=frame_->get_extensions()[ext1][1];

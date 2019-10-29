@@ -78,7 +78,7 @@ namespace WaveletTL
 #else 
        for (int i = 0; i< frame_->degrees_of_freedom();i++)
         {
-//           cout<<i<<endl;
+//           cout<<i<<": "<<*(frame_->get_quarklet(i))<<endl;
             coeff = f(*(frame_->get_quarklet(i))) / D(*(frame_->get_quarklet(i)));
             if (fabs(coeff)>1e-15)
             {
@@ -359,8 +359,10 @@ namespace WaveletTL
                         x[1] = gauss_points[1][index[1]]+frame_->get_corners()[lambda.patch()][1];
                     }
                     else{                                                       //mother patch -------------------------------------------------//
-                        x[0] = gauss_points[0][index[0]]+frame_->get_corners()[frame_->get_extensions()[lambda.patch()-frame_->num_real_patches()][0]][0];
-                        x[1] = gauss_points[1][index[1]]+frame_->get_corners()[frame_->get_extensions()[lambda.patch()-frame_->num_real_patches()][0]][1];
+//                        x[0] = gauss_points[0][index[0]]+frame_->get_corners()[frame_->get_extensions()[lambda.patch()-frame_->num_real_patches()][0]][0];
+//                        x[1] = gauss_points[1][index[1]]+frame_->get_corners()[frame_->get_extensions()[lambda.patch()-frame_->num_real_patches()][0]][1];
+                        x[0] = gauss_points[0][index[0]]+frame_->get_corners()[patch][0];
+                        x[1] = gauss_points[1][index[1]]+frame_->get_corners()[patch][1];
                     }
                             
                     

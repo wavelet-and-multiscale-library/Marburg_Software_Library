@@ -164,28 +164,48 @@ namespace WaveletTL
     
     //! read access to the underlying 1D frame
     const IntervalFrame* frames(const int patch, const int dir) const { 
-           
+           //methode nicht sinnvoll für logische patches
         //loop over non-logical patches
+        int s0=1,s1=1;
         for(unsigned int ext1=0;ext1<extensions_.size();ext1++){
             if(extensions_[ext1][0]==patch){ //extension from patch to another one
                 int target_patch=extensions_[ext1][1];
+//                cout<<"target_patch="<<target_patch<<endl;
                 if(corners_[target_patch][0]==corners_[patch][0] && dir==1){ //extension in y-direction
                     if(corners_[target_patch][1]<corners_[patch][1]){ //extension from north to south
-                        return frame1d_01_;
+//                        return frame1d_01_;
+                        s0=0;
+//                        cout<<"s0="<<s0<<endl;
                     }
                     else{
-                        return frame1d_10_; //extension from south to north
+//                        return frame1d_10_; //extension from south to north
+                        s1=0;
+//                        cout<<"s0="<<s0<<endl;
                     }
                 }
                 if(corners_[target_patch][1]==corners_[patch][1] && dir==0){ //extension in x-direction
                     if(corners_[target_patch][0]<corners_[patch][0]){ //extension from east to west
-                        return frame1d_01_;
+//                        return frame1d_01_;
+                        s0=0;
+//                        cout<<"s0="<<s0<<endl;
                     }
                     else{
-                        return frame1d_10_; //extension from west to east
+//                        return frame1d_10_; //extension from west to east
+                        s1=0;
+//                        cout<<"s0="<<s0<<endl;
                     }
                 }
             }
+        }
+//        cout<<s0<<s1<<endl;
+        if(s0==0 && s1==0){
+            return frame1d_;
+        }
+        if(s0==0 && s1==1){
+            return frame1d_01_;
+        }
+        if(s0==1 && s1==0){
+            return frame1d_10_;
         }
         //to do: extensions for domains such as big cubes, free boundary conditions for interface frames
         

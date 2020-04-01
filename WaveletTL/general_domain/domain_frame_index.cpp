@@ -394,7 +394,7 @@ namespace WaveletTL
 
 	// choose lowest patch number ...
 	patch_ = 0;
-//        cout<<"bin hier"<<endl; //to do: extension from south no north, west to east
+//        cout<<"increase type"<<endl; //to do: extension from south no north, west to east
 	// ... and lowest translation index k = k(j,e,0)
         k_[0] = (e_[0] == 0
                 ? frame_->frame1d()->DeltaLmin()+1
@@ -415,6 +415,16 @@ namespace WaveletTL
                                 ? frame_->frame1d()->DeltaLmin()+1
                             : frame_->frame1d()->Nablamin()+1);
                         }
+                        //new AS
+//                        if(frame_->get_corners()[target_patch][1]>frame_->get_corners()[patch_][1] ){ //extension from south to north
+//                             //quarklet indexing always starts at 0. in case of extension, quarklet 0 lies on the interface
+//                            k_[0] = (e_[0] == 0
+//                                ? frame_->frame1d()->DeltaLmin()+1
+//                                : frame_->frame1d()->Nablamin());
+//                            k_[1] = (e_[1] == 0
+//                                ? frame_->frame1d()->DeltaLmin()+1
+//                            : frame_->frame1d()->Nablamin()+0);
+//                        }
                         
                     }
                     if(frame_->get_corners()[target_patch][1]==frame_->get_corners()[patch_][1] ){ //extension in x-direction
@@ -426,6 +436,15 @@ namespace WaveletTL
                                 ? frame_->frame1d()->DeltaLmin()+1
                             : frame_->frame1d()->Nablamin());
                         }
+                        //new AS
+//                        if(frame_->get_corners()[target_patch][0]>frame_->get_corners()[patch_][0] ){ //extension from west to east
+//                            k_[0] = (e_[0] == 0
+//                                ? frame_->frame1d()->DeltaLmin()+1
+//                                : frame_->frame1d()->Nablamin()+0);
+//                            k_[1] = (e_[1] == 0
+//                                ? frame_->frame1d()->DeltaLmin()+1
+//                            : frame_->frame1d()->Nablamin());
+//                        }
                         
                     }
                 }
@@ -435,6 +454,7 @@ namespace WaveletTL
     } else return *this;
 
     if (jplusplus) {
+//        cout<<"increase level"<<endl;
       // else: determine next level index
             // "small loop" "e_++" (j_ is not changed)
             // iterate over all combinations of generators/quarklets for all dimensions with j_[i]=j0[i]
@@ -475,7 +495,18 @@ namespace WaveletTL
                             int temp = j_[1]-j0[1];
                             j_[1]=j0[1]+temp-1;
                             e_[1]= (temp == 1?0:1);
-                            k_[1]= (temp == 1?frame_->frame1d()->DeltaLmin()+1:frame_->frame1d()->Nablamin()+1);
+                            //special treatment needed by extension
+                            k_[1]= (temp == 1?frame_->frame1d()->DeltaLmin()+1:frame_->frame1d()->Nablamin()+0);
+                            for(unsigned int ext1=0;ext1<frame_->get_extensions().size();ext1++){
+                                if(frame_->get_extensions()[ext1][0]==0){ //extension from patch 0 to another one
+                                    int target_patch=frame_->get_extensions()[ext1][1];
+                                    if(frame_->get_corners()[target_patch][0]==frame_->get_corners()[0][0]){ //extension in y-direction
+                                        if(frame_->get_corners()[target_patch][1]<frame_->get_corners()[0][1] ){ //extension from north to south
+                                            k_[1]= (temp == 1?frame_->frame1d()->DeltaLmin()+1:frame_->frame1d()->Nablamin()+1);
+                                        }
+                                    }
+                                }
+                            }    
                             break;
                         }
                     }
@@ -485,7 +516,20 @@ namespace WaveletTL
                     {
                         j_[1]=j0[1]+j_[0]-j0[0]+1;
                         e_[1]=1;
-                        k_[1]=frame_->frame1d()->Nablamin()+1;
+                        //special treatment needed by extension
+                        //k_[1]=frame_->frame1d()->Nablamin()+1;
+                        //new AS
+                        k_[1]=frame_->frame1d()->Nablamin()+0;
+                        for(unsigned int ext1=0;ext1<frame_->get_extensions().size();ext1++){
+                                if(frame_->get_extensions()[ext1][0]==0){ //extension from patch 0 to another one
+                                    int target_patch=frame_->get_extensions()[ext1][1];
+                                    if(frame_->get_corners()[target_patch][0]==frame_->get_corners()[0][0]){ //extension in y-direction
+                                        if(frame_->get_corners()[target_patch][1]<frame_->get_corners()[0][1] ){ //extension from north to south
+                                            k_[1]=frame_->frame1d()->Nablamin()+1;
+                                        }
+                                    }
+                                }
+                        } 
                         j_[0]=j0[0];
                         e_[0]=0;
                         k_[0]=frame_->frame1d()->DeltaLmin()+1;
@@ -496,9 +540,10 @@ namespace WaveletTL
                  
             }
             
-        
-        
-//        ++j_;
+//            cout<<"k0="<<k_[0]<<endl;
+//            cout<<"k1="<<k_[1]<<endl;
+
+               //        ++j_;
 
       // choose lowest type (we have to advance to a quarklet) ...
 //      e_[0] = 0;
@@ -510,6 +555,7 @@ namespace WaveletTL
       // ... and lowest translation index k = k(j,(0,1),0)
 //      k_[0] = frame_->frame1d()->DeltaLmin()+1;
 //      k_[1] = frame_->frame1d()->Nablamin();
+      
     }
     
     return *this;

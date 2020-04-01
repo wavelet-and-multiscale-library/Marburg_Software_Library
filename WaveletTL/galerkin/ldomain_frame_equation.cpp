@@ -82,7 +82,7 @@ namespace WaveletTL
         fnorm_sqr = 0; 
         double coeff;
         
-#if PARALLEL==1
+#if PARALLEL_RHS==1
         double fnorm_sqr_help = 0.;
         cout<<"parallel computing rhs"<<endl;
         
@@ -96,7 +96,8 @@ namespace WaveletTL
             if (fabs(coeff)>1e-15)
             {
 #pragma omp critical
-                {fhelp.set_coefficient(*(frame_->get_quarklet(i)), coeff);}
+                {fhelp.set_coefficient(*(frame_->get_quarklet(i)), coeff);
+                fhelp_int.set_coefficient(i, coeff);}
                 
                 fnorm_sqr_help += coeff*coeff;
             }

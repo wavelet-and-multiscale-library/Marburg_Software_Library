@@ -114,6 +114,7 @@ namespace WaveletTL
 	for (typename std::set<Index>::const_iterator it2(Lambda.begin()), itend(Lambda.end());
 	     it2 != itend; ++it2, ++column)
 	  {
+//            cout << "Index nu2: " << *it2 << endl;
 	    // 	    if (intersect_singular_support(P.basis(), *it1, *it2)) {
 
                 entry = P.a(*it2, *it1);

@@ -35,18 +35,208 @@ namespace WaveletTL
             // the minimal level are thrown together in one index set (componentwise),
             // this also applies to tensors of generators on the lowest level
 
-//            level_type lambda_key/*,first_level(frame().j0())*/;
-//            level_type lambda_key;
-//            polynomial_type lambda_p(lambda.p());
-//            polynomial_type lambda_p5(lambda.p());
-//            polynomial_type lambda_p1(lambda.p());
-//            polynomial_type lambda_p2(lambda.p());
-//            polynomial_type lambda_p3(lambda.p());
-//            polynomial_type lambda_p4(lambda.p());
-//            for (int k=0;k<2;k++)
-//            {
-//                lambda_key[k] = lambda->j()[k]-3/*frame().j0()[k]*//*first_level[k]*/;
+            int blocknumber((lambda->p()).number());
+//            int blocknumber(0);
+//HACK: due to performance reasons we compute the relativelevelnumber directly instead of calling the number() routine
+            int jmulti = lambda->j()[0] +lambda->j()[1]-2*frame().j0()[0];
+            int relativelevelnumber = jmulti*(jmulti+1)/2 + lambda->j()[0]-frame().j0()[0];
+//            if(lambda_key.number()==relativelevelnumber)
+//                cout << "ja" << *lambda << endl;
+//            else{
+//                cout << "nein" << *lambda << endl;
+//                abort();
 //            }
+            
+            int subblocknumber(relativelevelnumber);
+//            int subblocknumber(0);
+
+            // check wether entry has already been computed
+//            typedef std::list<Index> IntersectingList;
+//            typedef std::list<Index*> IntersectingPointerList;
+            typedef std::list<int> IntersectingList;
+
+            // search for column 'mu'
+            typename ColumnCache::iterator col_lb(entries_cache.lower_bound(nu_num));
+            typename ColumnCache::iterator col_it(col_lb);
+
+            if (col_lb == entries_cache.end() ||
+                entries_cache.key_comp()(nu_num, col_lb->first))
+            {
+//                cout << "Neue Spalte " << nu << endl;
+                // insert a new column
+                typedef typename ColumnCache::value_type value_type;
+
+#pragma omp critical
+                {col_it = entries_cache.insert(col_lb, value_type(nu_num, Column()));}
+
+            }
+            
+
+            Column& col(col_it->second);
+
+            // check wether the polynomial 'lambda' belongs to has already been calculated
+            typename Column::iterator block_lb(col.lower_bound(blocknumber));
+            typename Column::iterator block_it(block_lb);
+
+            if (block_lb == col.end() ||
+                col.key_comp()(blocknumber, block_lb->first))
+            {
+                
+                
+//                cout << "Neuer block" << endl;
+                typedef typename Column::value_type value_type;
+#pragma omp critical
+                {block_it = col.insert(block_lb, value_type(blocknumber, Block()));}
+
+            }
+            
+            Block& block(block_it->second);
+            
+            
+            
+            
+            
+            // check wether the level 'lambda' belongs to has already been calculated
+            typename Block::iterator lb(block.lower_bound(subblocknumber));
+            typename Block::iterator it(lb);
+
+            if (lb == block.end() ||
+                block.key_comp()(subblocknumber, lb->first))
+            {
+//                cout << "subblocknumber: " << subblocknumber << ", " << lambda << endl;
+            
+                // no entries have ever been computed for this column, polynomial and level
+                // compute whole level block
+                // insert a new level
+//                cout << "Neuer subblock" << endl;
+//                cout << "Lambda: " << lambda  << endl;
+//                cout << "Nu: " << nu << ", " << endl << endl;
+
+                typedef typename Block::value_type value_type;
+
+#pragma omp critical
+                {it = block.insert(lb, value_type(subblocknumber, Subblock()));}
+
+                
+                Subblock& subblock(it->second);
+
+//                
+                // there are no Generators
+//                IntersectingList nus;
+//                IntersectingPointerList nus;
+                IntersectingList nus;
+//                cout << 
+//                    cout << lambda->j() << endl;
+                intersecting_quarklets(frame(),
+                                       *nu,
+                                       //std::max(j, frame().j0()),
+                                       lambda->j(),
+                                       nus,
+                                       lambda->p());
+                
+//                for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)
+//                 for (typename IntersectingPointerList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)   
+                
+                double entry;
+#if PARALLEL_A==1
+#pragma omp parallel num_threads(NUM_THREADS) 
+#endif
+                {
+#if PARALLEL_A==1
+#pragma omp for private(entry, r) schedule(dynamic) nowait
+                 for(int n=0;n<nus.size();n++){
+                  typename IntersectingList::const_iterator it(nus.begin());
+                  advance(it,n);              
+#else
+                for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)    
+                {
+#endif
+                    //cout<<*it<<endl;
+//                    const double entry = 0;
+//                    const double entry = problem->a(*it, *nu);
+//                    const double entry = problem->a(*it, *nu);
+//                    const double entry = problem->a(*(frame().get_quarklet((*it).number())), *nu);
+                        entry = problem->a(*(frame().get_quarklet(*it)), *nu);
+//                    const double entry = problem->a(*(frame().get_quarklet(*it)), *nu);
+//                    *(frame().get_quarklet(*it));
+
+
+                    typedef typename Subblock::value_type value_type_subblock;
+                    if (fabs(entry) > 1e-16 ) 
+//                            if (entry != 0.)
+                    {
+
+#pragma omp critical //(subblock_insert)
+                        {
+                        subblock.insert(subblock.end(), value_type_subblock(*it, entry));
+                        
+
+//                                cout << *it << ", " << (*it).number() <<endl;
+//                        if ((int)(*it).number() == lambda_num)
+                        if (*it == lambda_num)    
+                        {
+                            r = entry;
+                        }
+                        }
+                    }
+                }
+            }
+            }
+            // level already exists --> extract row corresponding to 'lambda'
+            else
+            {
+//                cout << "Ergebnis aus L2 Cache"  << endl;
+                
+                Subblock& subblock(it->second);
+
+                //typename Block::iterator block_lb(block.lower_bound(lambda));
+                typename Subblock::iterator subblock_lb(subblock.lower_bound(lambda_num));
+                typename Subblock::iterator subblock_it(subblock_lb);
+                // level exists, but in row 'lambda' no entry is available ==> entry must be zero
+                if (subblock_lb == subblock.end() ||
+                    subblock.key_comp()(lambda_num, subblock_lb->first))
+                  {
+                    r = 0;
+//                    cout << "Ergebnis ist 0" << endl;
+                  }
+                else {
+                    
+                  r = subblock_it->second;
+//                  cout << "Ergenis: " << r << endl;
+                }
+            }
+        }
+         
+      return r;
+    }
+
+    template <class PROBLEM>
+    double
+    CachedQuarkletDomainProblem<PROBLEM>::a(const Index& la,
+			       const Index& mu, const int radius, const CompressionStrategy strategy, const double A, const double B) const
+    {
+//        printf("bin hier \n");
+        double r = 0;
+
+        if (problem->local_operator())
+        {
+            const Index* lambda= &la;
+            const Index* nu = &mu;
+            
+            double dist=A*log(1+abs(nu->p()[0]-lambda->p()[0])+abs(nu->p()[1]-lambda->p()[1]))+B*(abs(nu->j()[0]-lambda->j()[0])+abs(nu->j()[1]-lambda->j()[1]));
+//          cout<<"dist="<<dist<<"  radius="<<radius<<endl;
+            
+            const int lambda_num = lambda->number();
+//            cout << endl << "Lambda: " << lambda  << endl;
+            const int nu_num = nu->number();
+//            cout << "Nu: " << nu << ", " << endl;
+//            const unsigned int pmax = problem->frame().get_pmax();          
+
+            // Be careful, there is no generator level in the cache! The situation from the MRA setting:
+            // KEY OF GENERATOR LEVEL IS j0-1 NOT j0 !!!!
+            // does not hold in the tensor setting. Generators and quarklets on
+            // the minimal level are thrown together in one index set (componentwise),
+            // this also applies to tensors of generators on the lowest level
 
             int blocknumber((lambda->p()).number());
 //            int blocknumber(0);
@@ -78,12 +268,10 @@ namespace WaveletTL
 //                cout << "Neue Spalte " << nu << endl;
                 // insert a new column
                 typedef typename ColumnCache::value_type value_type;
-#if PARALLEL==-1
+
 #pragma omp critical
                 {col_it = entries_cache.insert(col_lb, value_type(nu_num, Column()));}
-#else
-                col_it = entries_cache.insert(col_lb, value_type(nu_num, Column()));
-#endif
+
             }
             
 
@@ -100,12 +288,9 @@ namespace WaveletTL
                 
 //                cout << "Neuer block" << endl;
                 typedef typename Column::value_type value_type;
-#if PARALLEL==-1
 #pragma omp critical
                 {block_it = col.insert(block_lb, value_type(blocknumber, Block()));}
-#else
-                block_it = col.insert(block_lb, value_type(blocknumber, Block()));
-#endif
+
             }
             
             Block& block(block_it->second);
@@ -131,12 +316,10 @@ namespace WaveletTL
 //                cout << "Nu: " << nu << ", " << endl << endl;
 
                 typedef typename Block::value_type value_type;
-#if PARALLEL==-1
+
 #pragma omp critical
                 {it = block.insert(lb, value_type(subblocknumber, Subblock()));}
-#else
-                it = block.insert(lb, value_type(subblocknumber, Subblock()));
-#endif
+
                 
                 Subblock& subblock(it->second);
 
@@ -154,44 +337,32 @@ namespace WaveletTL
                                        nus,
                                        lambda->p());
                 
-//                intersecting_quarklets(frame(),
-//                                       nu_num,
-//                                       //std::max(j, frame().j0()),
-//                                       lambda->j(),
-//                                       nus,
-//                                       lambda->p());
-                
-//                frame();
-//                frame();
-//                frame();
-//                frame();
-//                                       nu_num;
-//                                       //std::max(j, frame().j0()),
-//                                       lambda->j();
-//                                       nus;
-//                                       lambda->p();
-                
-                // compute entries
-                //cout << "bin hier"<<endl;
-                //cout<<nus.size()<<endl;
-#if 0
-#pragma omp parallel for shared(subblock)
-                for(int i=0;i<nus.size();i++){
-                    typename IntersectingList::const_iterator it(nus.begin());
-                    advance(it,i);
-#else
-                
 //                for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)
 //                 for (typename IntersectingPointerList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)   
+                
+                double entry;
+#if PARALLEL_A==1
+#pragma omp parallel num_threads(NUM_THREADS) 
+#endif
+                {
+#if PARALLEL_A==1
+#pragma omp for private(entry, r) schedule(dynamic) nowait
+                 for(int n=0;n<nus.size();n++){
+                  typename IntersectingList::const_iterator it(nus.begin());
+                  advance(it,n);              
+#else
                 for (typename IntersectingList::const_iterator it(nus.begin()), itend(nus.end());it != itend; ++it)    
                 {
 #endif
+                    //hier second compression einbauen 
+                    if(!(strategy==tensor_second) || (strategy==tensor_second && (dist<=radius*0.5 || intersect_singular_support(frame(),*(frame().get_quarklet(*it)), *nu)) ) ) 
+                    {
                     //cout<<*it<<endl;
 //                    const double entry = 0;
 //                    const double entry = problem->a(*it, *nu);
 //                    const double entry = problem->a(*it, *nu);
 //                    const double entry = problem->a(*(frame().get_quarklet((*it).number())), *nu);
-                        const double entry = problem->a(*(frame().get_quarklet(*it)), *nu);
+                        entry = problem->a(*(frame().get_quarklet(*it)), *nu);
 //                    const double entry = problem->a(*(frame().get_quarklet(*it)), *nu);
 //                    *(frame().get_quarklet(*it));
 
@@ -201,8 +372,10 @@ namespace WaveletTL
 //                            if (entry != 0.)
                     {
 
-//                        subblock.insert(subblock.end(), value_type_subblock((*it).number(), entry));
+#pragma omp critical //(subblock_insert)
+                        {
                         subblock.insert(subblock.end(), value_type_subblock(*it, entry));
+                        
 
 //                                cout << *it << ", " << (*it).number() <<endl;
 //                        if ((int)(*it).number() == lambda_num)
@@ -210,8 +383,15 @@ namespace WaveletTL
                         {
                             r = entry;
                         }
+                        }
                     }
+                    } //second compression ende
+//                    else if(strategy==tensor_second && dist>radius/2 && !intersect_singular_support(frame(),*(frame().get_quarklet(*it)), *nu)){
+//                        cout<<"second compression: dropping additional entries"<<endl;
+////                        cout<<*nu<<"  ,  "<<*(frame().get_quarklet(*it))<<endl;
+//                    }
                 }
+            }
             }
             // level already exists --> extract row corresponding to 'lambda'
             else
@@ -239,8 +419,9 @@ namespace WaveletTL
         }
          
       return r;
-    }
-
+    }    
+        
+        
     template <class PROBLEM>
     void
     CachedQuarkletDomainProblem<PROBLEM>::add_ball(const Index& lambda,
@@ -336,12 +517,12 @@ namespace WaveletTL
 
 
 //                        printf("entering a \n");
-#if PARALLEL==1
-#pragma omp critical
-                        {a(*(frame().get_quarklet(frame().get_first_wavelet_numbers()[leveldiffj0.number()]+currentpolynomial.number() * frame().get_Nablasize())),lambda);}
-#else
-                        a(*(frame().get_quarklet(frame().get_first_wavelet_numbers()[leveldiffj0.number()]+currentpolynomial.number() * frame().get_Nablasize())),lambda);
-#endif
+                        if(strategy==tensor_second){
+                               a(*(frame().get_quarklet(frame().get_first_wavelet_numbers()[leveldiffj0.number()]+currentpolynomial.number() * frame().get_Nablasize())),lambda, radius, strategy, A, B); 
+                            }
+                            else{
+                            a(*(frame().get_quarklet(frame().get_first_wavelet_numbers()[leveldiffj0.number()]+currentpolynomial.number() * frame().get_Nablasize())),lambda);
+                            }
 //                        printf("leaving a \n");
 
 //                            cout << mu << endl;
@@ -356,8 +537,10 @@ namespace WaveletTL
                         for (typename Subblock::const_iterator it(subblock.begin()), itend(subblock.end()); it != itend; ++it)
                         {
                             // high caching strategy
+#pragma omp critical //(write_output)
+                            {
                             w[it->first]=w[it->first]+factor*(it->second)/( precond? (d1*D(*(frame().get_quarklet(it->first)))):1.0);
-
+                            }
                             // low caching strategy
                             //w[it->first]=w[it->first]+factor*(it->second)/d1/(problem->D(this->frame().get_quarklet(it->first)));
                         }

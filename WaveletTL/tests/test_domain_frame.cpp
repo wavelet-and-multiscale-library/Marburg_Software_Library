@@ -13,7 +13,7 @@
 #undef GRAMIAN
 
 
-#define DYADIC
+#undef DYADIC
 
 //define the parameters \delta_1 and \delta_2 for the H^s weights, cf. Diss Keding Formula (6.1.20) 
 //and Theorem 7.12
@@ -24,7 +24,7 @@
 
 #undef TRIVIAL
 #undef ENERGY
-#undef DYPLUSEN
+#define DYPLUSEN
 
 #ifdef DYPLUSEN
 #define DELTA1 4
@@ -32,8 +32,8 @@
 #endif
 
 
-#define NONADAPTIVE
-#undef ADAPTIVE
+#undef NONADAPTIVE
+#define ADAPTIVE
 
 #ifdef ADAPTIVE
 #undef SD
@@ -41,18 +41,23 @@
 #define RICHARDSON
 #endif
 
-#define PARALLEL 0
+#define PARALLEL_RHS 1 //for setup right-hand-side
+#define PARALLEL_A 0    //manchmal fehlerhaft
+#define PARALLEL_APPLY 0 //manchmal fehlerhaft
+#define PARALLEL_ADD_COLUMN 0
+
+#define NUM_THREADS 8
 
 #define FRAME
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
-#define JMAX 6
-#define PMAX 0
+#define JMAX 8
+#define PMAX 2
 #define TWO_D
 
 #define PRIMALORDER 3
-#define DUALORDER   3
+#define DUALORDER   3 
 
 #include <iostream>
 #include <utils/fixed_array1d.h>
@@ -106,28 +111,28 @@ public:
       return sin(M_PI*p[0])*sin(M_PI*p[1]); //sine suitable for all domains
       break;
     case 2:
-      return cs.value(p);       //classic L-domain singularity
+      return 5*cs.value(p);       //classic L-domain singularity
       break;
     case 12:
-      return cs.value(p)+0.2*sin(M_PI*p[0])*sin(M_PI*p[1]);       // L-domain mixed
+      return 5*cs.value(p)+sin(M_PI*p[0])*sin(M_PI*p[1]);       // L-domain mixed
       break;  
     case 3:
-      return cs.value(p)+cs1.value(p);  //T-domain-singularities
+      return 5*cs.value(p)+5*cs1.value(p);  //T-domain-singularities
       break;
     case 13:
-      return cs.value(p)+cs1.value(p)+0.2*sin(M_PI*p[0])*sin(M_PI*p[1]);  //T-domain-mixed
+      return 5*cs.value(p)+5*cs1.value(p)+sin(M_PI*p[0])*sin(M_PI*p[1]);  //T-domain-mixed
       break;
     case 4:
-      return cs.value(p)+cs1.value(p)+cs2.value(p)+cs3.value(p);  //+-domain-singularities
+      return 5*cs.value(p)+5*cs1.value(p)+5*cs2.value(p)+5*cs3.value(p);  //+-domain-singularities
       break; 
     case 14:
-      return cs.value(p)+cs1.value(p)+cs2.value(p)+cs3.value(p)+0.2*sin(M_PI*p[0])*sin(M_PI*p[1]);  //+-domain mixed
+      return 5*cs.value(p)+5*cs1.value(p)+5*cs2.value(p)+5*cs3.value(p)+sin(M_PI*p[0])*sin(M_PI*p[1]);  //+-domain mixed
       break; 
     case 5:
-      return cs4.value(p)+cs5.value(p);  //snake-domain-singularities
+      return 5*cs4.value(p)+5*cs5.value(p);  //snake-domain-singularities
       break; 
     case 15:
-      return cs4.value(p)+cs5.value(p)-0.2*sin(M_PI*p[0])*sin(M_PI*p[1]);  //snake-domain mixed
+      return 5*cs4.value(p)+5*cs5.value(p)-sin(M_PI*p[0])*sin(M_PI*p[1]);  //snake-domain mixed
       break; 
     default:
       return 0;
@@ -158,28 +163,28 @@ public:
       return 2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1]); //sine suitable for all domains
       break;
     case 2:
-      return csrhs.value(p);    //L-domain-singularities
+      return 5*csrhs.value(p);    //L-domain-singularities
       break;
     case 12:
-      return csrhs.value(p)+0.2*2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1]);    //L-domain mixed
+      return 5*csrhs.value(p)+2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1]);    //L-domain mixed
       break;  
     case 3:
-      return csrhs.value(p)+csrhs1.value(p);  //T-domain-singularities
+      return 5*csrhs.value(p)+5*csrhs1.value(p);  //T-domain-singularities
       break;
     case 13:
-      return csrhs.value(p)+csrhs1.value(p)+0.2*2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1]);  //T-domain mixed
+      return 5*csrhs.value(p)+5*csrhs1.value(p)+2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1]);  //T-domain mixed
       break;  
     case 4:
-      return csrhs.value(p)+csrhs1.value(p)+csrhs2.value(p)+csrhs3.value(p);  //+-domain-singularities
+      return 5*csrhs.value(p)+5*csrhs1.value(p)+5*csrhs2.value(p)+5*csrhs3.value(p);  //+-domain-singularities
       break;
     case 14:
-      return csrhs.value(p)+csrhs1.value(p)+csrhs2.value(p)+csrhs3.value(p)+0.2*2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1]);  //+-domain mixed
+      return 5*csrhs.value(p)+5*csrhs1.value(p)+5*csrhs2.value(p)+5*csrhs3.value(p)+2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1]);  //+-domain mixed
       break;
     case 5:
-      return csrhs4.value(p)+csrhs5.value(p);   //snake-domain-singularities
+      return 5*csrhs4.value(p)+5*csrhs5.value(p);   //snake-domain-singularities
       break;
     case 15:
-      return csrhs4.value(p)+csrhs5.value(p)-0.2*2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1]);   //snake-domain mixed
+      return 5*csrhs4.value(p)+5*csrhs5.value(p)-2*M_PI*M_PI*sin(M_PI*p[0])*sin(M_PI*p[1]);   //snake-domain mixed
       break;
     default:
       return 0;
@@ -221,23 +226,23 @@ int main(){
 //            extensions[0][1]=1;
 //            cout<<"Domain: high rectangle"<<endl;
 
-            //L-Domain
-            const int Npatches=3;
-            corners.resize(Npatches);
-            corners[0][0]=-1;
-            corners[0][1]=0;
-            corners[1][0]=-1;
-            corners[1][1]=-1;
-            corners[2][0]=0;
-            corners[2][1]=-1;
-            
-            const int Nextensions=2;
-            extensions.resize(Nextensions);
-            extensions[0][0]=0;
-            extensions[0][1]=1;
-            extensions[1][0]=2;
-            extensions[1][1]=1;
-            cout<<"Domain: L-shaped"<<endl;
+//            //L-Domain
+//            const int Npatches=3;
+//            corners.resize(Npatches);
+//            corners[0][0]=-1;
+//            corners[0][1]=0;
+//            corners[1][0]=-1;
+//            corners[1][1]=-1;
+//            corners[2][0]=0;
+//            corners[2][1]=-1;
+//            
+//            const int Nextensions=2;
+//            extensions.resize(Nextensions);
+//            extensions[0][0]=0;
+//            extensions[0][1]=1;
+//            extensions[1][0]=2;
+//            extensions[1][1]=1;
+//            cout<<"Domain: L-shaped"<<endl;
 
 
 //            //T-Domain
@@ -287,7 +292,7 @@ int main(){
 //            extensions[3][0]=4;
 //            extensions[3][1]=1;
 //            cout<<"Domain: +-shaped"<<endl;
-            
+//            
 //            //snake-shaped Domain
 //            const int Npatches=5;
 //            corners.resize(Npatches);
@@ -313,6 +318,32 @@ int main(){
 //            extensions[3][0]=2;
 //            extensions[3][1]=1;
 //            cout<<"snake-shaped domain"<<endl;
+            
+            //alternative snake-shaped Domain
+            const int Npatches=5;
+            corners.resize(Npatches);
+            corners[0][0]=2;
+            corners[0][1]=2;
+            corners[1][0]=2;
+            corners[1][1]=1;
+            corners[2][0]=1;
+            corners[2][1]=1;
+            corners[3][0]=0;
+            corners[3][1]=1;
+            corners[4][0]=0;
+            corners[4][1]=0;
+            
+            const int Nextensions=4;
+            extensions.resize(Nextensions);
+            extensions[0][0]=4;
+            extensions[0][1]=3;
+            extensions[1][0]=2;
+            extensions[1][1]=1;
+            extensions[2][0]=0;
+            extensions[2][1]=1;
+            extensions[3][0]=2;
+            extensions[3][1]=3;
+            cout<<"snake-shaped domain"<<endl;
             
 //            //big cube (not yet working)
 //            const int Npatches=4;
@@ -353,7 +384,7 @@ int main(){
       
     
     //setup problem
-    const int N1=12;
+    const int N1=15;
     mySolution<N1> uexact1;
     myRHS<N1> rhs1;
     
@@ -397,19 +428,20 @@ int main(){
     }
 #endif
     
+#if defined(NONADAPIVE) || defined(ADAPTIVE)
     PoissonBVP<dim> poisson1(&rhs1);
     DomainFrameEquation<Frame1d,Npatches,Frame> eq(&poisson1, &frame, true);
+#endif    
     
-    
-#if 1
+#if 0
     //plot one function
     Array1D<SampledMapping<dim> > evalf(Npatches);
 //    Index testindex=frame.last_generator(frame.j0());
 //    ++testindex;
-    Index testindex=frame.get_quarklet(194);
+    Index testindex=frame.get_quarklet(0);
 //    Index testindex=frame.last_quarklet(7,frame.j0(),0); //careful with number
     cout << "evaluate quarklet with index " << testindex << endl;
-    evalf=frame.evaluate(testindex,6);
+    evalf=frame.evaluate(testindex,7);
     std::ofstream osf("domainoutput.m");
     osf << "clf;" << endl;
 //    osf << "axis([-2 2 -2 2 0 1]);" << endl;
@@ -419,22 +451,36 @@ int main(){
         
         osf << "hold on;" << endl;
     }
-    osf << "view(30,55);"<<endl;
+    osf << "grid off;" << endl;
+    osf << "shading('flat');" << endl;
+    osf << "view(20,25);"<<endl;    //default view(30,55)),  +domain:(20,25), snake-domain:(0,55))
     osf << "hold off" << endl;
     osf.close();
     
     //support test
     typedef Frame::Support Support;
-    Index testindex2(testindex); 
+    Index testindex2=eq.frame().get_quarklet(799);
     cout<<"test support of index "<<testindex2<<endl;
     Support supp;
     frame.support(testindex2, supp);
     for(int i=0;i<Npatches;i++){
         supp.xmin[i]!=-1 ? cout<<"("<<supp.xmin[i]<<","<<supp.xmax[i]<<")/"<<(1<<supp.j[0])<<" x ("<<supp.ymin[i]<<","<<supp.ymax[i]<<")/"<<(1<<supp.j[1])<<endl : cout<<"0"<<endl;
     }
+    if(intersect_supports(frame,testindex,testindex2,supp)){
+        cout<<"support wird geschnitten"<<endl;
+        if(intersect_singular_support(frame,testindex,testindex2)){
+            cout<<"singular support wird geschnitten"<<endl;
+        }
+        else{
+            cout<<"singular support wird nicht geschnitten"<<endl;
+        }
+    }
+    else{
+        cout<<"support wird nicht geschnitten"<<endl;
+    }
 
 #endif 
-    #if 1 //test rhs only on L-domain
+    #if 0 //test rhs only on L-domain
     {
     const int resolution2=6;
     Index testindex3(testindex);
@@ -470,10 +516,10 @@ int main(){
     os3.close();
     }
 #endif
-#if 1 //test bilinearform
+#if 0 //test bilinearform
     const int resolution=6;
     Index testindex1(testindex);
-    testindex2=eq.frame().get_quarklet(0);
+    testindex2=eq.frame().get_quarklet(1344);
     //    Support supp;
     if(intersect_supports(frame,testindex1,testindex2,supp)){
         cout<<"support wird geschnitten"<<endl;
@@ -487,6 +533,7 @@ int main(){
     eval2=frame.evaluate(testindex2,resolution);
     std::ofstream os("testa.m");
     os<<"Iexakt="<<eq.a(testindex1,testindex2)<<endl;
+    cout<<"a:"<<eq.a(testindex1,testindex2)<<endl;
     os<<"I=0;"<<endl;
     for(int i=0;i<Npatches;i++){
         eval1[i].matlab_output(os);
@@ -525,13 +572,13 @@ int main(){
         osrhs << "hold on;" << endl;
         osuexact<<"hold on;"<<endl;
     }
-    osrhs << "view(30,55);"<<endl;
+    osrhs << "view(30,55);"<<endl;      //default view(30,55)),  +domain:(40,35), snake-domain:(-45,55))
     osrhs << "hold off;" << endl;
     osrhs << "grid off;" << endl;
     osrhs << "shading('flat');" << endl;
 //    osrhs << "colormap([flipud(jet);jet]);" << endl;
 //    osrhs << "set(gca,'CLim', [- min(abs(get(gca,'CLim')))  min(abs(get(gca,'CLim')))]);" << endl;
-    osuexact << "view(30,55);"<<endl;
+    osuexact << "view(30,55);"<<endl;       //default view(30,55)),  +domain:(40,35), snake-domain:(-45,55))
     osuexact<<"hold off;"<<endl;
     osuexact << "grid off;" << endl;
     osuexact << "shading('flat');" << endl;
@@ -633,24 +680,27 @@ int main(){
 #ifdef ADAPTIVE
     const int a=2;
     const int b=2;
-    CachedQuarkletDomainProblem<DomainFrameEquation<Frame1d,Npatches,Frame> > cproblem1(&eq, 43, 9);
+//    CachedQuarkletDomainProblem<DomainFrameEquation<Frame1d,Npatches,Frame> > cproblem1(&eq, 43, 9); //Ldomain
+//    CachedQuarkletDomainProblem<DomainFrameEquation<Frame1d,Npatches,Frame> > cproblem1(&eq, 66, 12); //plusdomain
 //    CachedQuarkletDomainProblem<DomainFrameEquation<Frame1d,Npatches,Frame> > cproblem1(&eq, 0, 0);
+    CachedQuarkletDomainProblem<DomainFrameEquation<Frame1d,Npatches,Frame> > cproblem1(&eq, 1., 1.);
     cout<<"normA: "<<cproblem1.norm_A()<<endl;
     cout<<"normAinv: "<<cproblem1.norm_Ainv()<<endl;
     
     InfiniteVector<double, int> F_eta; 
     cproblem1.RHS(1e-6, F_eta);
-    double epsilon = 1e-3;
+    double epsilon = 1e-20;
     InfiniteVector<double, Index> u_epsilon;
     InfiniteVector<double, int> u_epsilon_int;
     const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
-    const unsigned int maxiter = 999;
-    const double omega = 0.05;
-
+    const unsigned int maxiter = 100;
+//    const double omega = 2.0 / (cproblem1.norm_A() + 1.0/cproblem1.norm_Ainv());
+    const double omega = 0.5;
+//    abort();
     
     //choose one scheme
-    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, tensor_simple, pmax, a, b);
-//    richardson_QUARKLET_SOLVE(cproblem1,epsilon*1e-25,u_epsilon_int, maxiter, strategy, a, b, 0, omega, 1e-10);
+//    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, tensor_simple, pmax, a, b);
+    richardson_QUARKLET_SOLVE(cproblem1,epsilon,u_epsilon_int, maxiter, tensor_simple, a, b, 0, omega, 1e-1);
 //    DUV_QUARKLET_SOLVE_SD(cproblem1, nu, epsilon, u_epsilon, tensor_simple, pmax, jmax, a, b);
 //    steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon_int, tensor_simple, a, b);
             
@@ -683,7 +733,7 @@ int main(){
     //newer compact coefficients plot
     std::ofstream coeff_stream2;
     coeff_stream2.open("coefficients_ad.m");
-    plot_indices_domain2(&frame, u_epsilon, coeff_stream2,1e-15);
+    plot_indices_domain2(&frame, u_epsilon, coeff_stream2,1e-7); //to do: adjust threshold
     coeff_stream2.close();
     cout << "coefficients plotted"<<endl;
 

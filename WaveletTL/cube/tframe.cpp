@@ -31,7 +31,7 @@ namespace WaveletTL
         template <class IFRAME, unsigned int DIM>
         const int
         TensorFrame<IFRAME,DIM>::Deltasize(const int j) const {
-            const unsigned int Deltaj = frames_[0]->Deltasize(j);
+            const unsigned int Deltaj = frames_[0]->Deltasize(j);   //nicht für gemischte Randbedingungen geeignet
             return pow((Deltaj),DIM);
         }
         

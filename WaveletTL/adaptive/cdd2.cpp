@@ -693,6 +693,7 @@ namespace WaveletTL
       cout << "Rich_SOLVE: eta=" << eta << endl;
       P.RHS(eta, f);
       for (int j = 1; j <= 1/*K*/; j++) {
+//          cout<<j<<endl;
 	APPLY_QUARKLET_COARSE(P, v, eta, Av, jmax, strategy, pmax, a, b, 1.0e-6);
 
 	v += 0.5 * omega * (f - Av);

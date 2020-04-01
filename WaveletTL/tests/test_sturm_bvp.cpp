@@ -38,8 +38,8 @@
 #undef SHRINKAGE
 
 
-#define JMAX 9
-#define PMAX 3
+#define JMAX 7
+#define PMAX 1
 #define ONE_D
 #define _DIM 1
 

@@ -102,7 +102,7 @@ namespace WaveletTL
     int patch=0; //first quarklet always lives on patch 0
     k[0]=k[1]=frame1d_->Nablamin();  
             for(int ext1=0;ext1<num_logical_patches();ext1++){
-                if(extensions_[ext1][0]==patch){ //extension from patch to another one
+                if(extensions_[ext1][0]==patch){ //extension from patch 0 to another one
                     int target_patch=extensions_[ext1][1];
                     if(corners_[target_patch][0]==corners_[patch][0]){ //extension in y-direction
                         if(corners_[target_patch][1]<corners_[patch][1]){ //extension from north to south
@@ -122,6 +122,30 @@ namespace WaveletTL
                             {
                                 e[1] = 1;
                                 k[1] = frame1d_->Nablamin()+1;
+                                //sofar_only_generators = false;
+                            } else
+                            {
+                                e[1] = 0;
+                                k[1] = frame1d_->DeltaLmin()+1;
+                            }
+                        }
+                        if(corners_[target_patch][1]>corners_[patch][1]){ //new: extension from south to north
+                             //quarklet indexing always starts at 0. in case of extension, quarklet 0 lies on the interface
+                            if (j[0] == j0_[0])
+                            {
+                                e[0] = 0;
+                                k[0] = frame1d_->DeltaLmin()+1;
+                            } else
+                            {
+                                e[0] = 1;
+                                k[0] = frame1d_->Nablamin();
+                                sofar_only_generators = false;
+                            }
+    
+                            if ( (sofar_only_generators == true) || (j[1] != j0_[0]) )
+                            {
+                                e[1] = 1;
+                                k[1] = frame1d_->Nablamin()+0;
                                 //sofar_only_generators = false;
                             } else
                             {

@@ -292,7 +292,11 @@ namespace WaveletTL
         mutable One_D_IntegralCache one_d_integrals;
         // #####################################################################################
         
-        
+        double integrate(const IndexQ1D<IFRAME>& lambda,
+		     const IndexQ1D<IFRAME>& mu,
+		     const int N_Gauss,
+		     const int dir,
+                     typename Frame::Support supp) const;
         /*!
         precomputation of the right-hand side
         (constness is not nice but necessary to have RHS a const function)

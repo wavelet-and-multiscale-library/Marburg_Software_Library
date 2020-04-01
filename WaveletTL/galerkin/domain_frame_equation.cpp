@@ -54,27 +54,29 @@ namespace WaveletTL
         fnorm_sqr = 0; 
         double coeff;
         
-#if PARALLEL==1
+#if PARALLEL_RHS==1
         double fnorm_sqr_help = 0.;
         cout<<"parallel computing rhs"<<endl;
         
 #pragma omp parallel 
 {
 //        cout<<"number of threads: "<<omp_get_num_threads()<<endl;
-#pragma omp for  private(coeff) schedule(static) reduction(+:fnorm_sqr_help)
+#pragma omp for private(coeff) schedule(static) reduction(+:fnorm_sqr_help)
         for (int i = 0; i< frame_->degrees_of_freedom();i++)
         {
             coeff = f(*(frame_->get_quarklet(i))) / D(*(frame_->get_quarklet(i)));
             if (fabs(coeff)>1e-15)
             {
 #pragma omp critical
-                {fhelp.set_coefficient(*(frame_->get_quarklet(i)), coeff);}
+                {fhelp.set_coefficient(*(frame_->get_quarklet(i)), coeff);
+                fhelp_int.set_coefficient(i, coeff);}
                 
                 fnorm_sqr_help += coeff*coeff;
             }
         }
 }
         fnorm_sqr=fnorm_sqr_help;
+        
 #else 
        for (int i = 0; i< frame_->degrees_of_freedom();i++)
         {
@@ -90,6 +92,7 @@ namespace WaveletTL
 #endif
         
         cout << "... done, sort the entries in modulus..." << endl;
+//        cout<<"fnorm_sqr="<<fnorm_sqr<<endl;
 //        cout<<"number of threads: "<<omp_get_num_threads()<<endl;
         // sort the coefficients into fcoeffs
         fcoeffs.resize(0); // clear eventual old values
@@ -163,7 +166,7 @@ namespace WaveletTL
 			     const Index& nu,
 			     const unsigned int p) const
     {
-        
+//        cout<<"bin hier"<<endl;
         // a(u,v) = \int_Omega [a(x)grad u(x)grad v(x)+q(x)u(x)v(x)] dx
         double r = 0.;
         const Index* lambda = &la;

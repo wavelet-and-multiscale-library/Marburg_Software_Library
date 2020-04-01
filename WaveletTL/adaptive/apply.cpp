@@ -694,10 +694,10 @@ namespace WaveletTL
              const double a,
              const double b)
   {
-      //cout << "AUSGEFÜHRT!: " << P.basis().degrees_of_freedom() << endl; @PHK
+//      cout << "AUSGEFÜHRT!: " << P.basis().degrees_of_freedom() << endl; @PHK
 //    typedef typename PROBLEM::Index Index;
     
-    //cout << "bin drin" << endl;
+//    cout << "bin drin" << endl;
 
     w.clear();
     // Binary Binning variant of APPLY from [S],[B]

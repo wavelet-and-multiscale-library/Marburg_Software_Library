@@ -1,3 +1,6 @@
+
+#include "domain_frame.h"
+
 // implementation for domain_frame_support.h
 
 namespace WaveletTL
@@ -419,9 +422,20 @@ namespace WaveletTL
 				  const typename DomainFrame<IFRAME, NPATCHES>::Index& mu)
   {
     // we cheat a bit here: we return true if already the supports intersect (overestimate)
-    typedef typename DomainFrame<IFRAME, NPATCHES>::Support Support;
-    Support supp;
-    return intersect_supports(frame, lambda, mu, supp);
+//    typedef typename DomainFrame<IFRAME, NPATCHES>::Support Support;
+//    Support supp;
+//    return intersect_supports(frame, lambda, mu, supp);
+      if(lambda.patch()>=frame.num_real_patches() || mu.patch()>=frame.num_real_patches()) return true; //for simplicity we dont implement this for mirrored quarklets
+        int j, k1, k2;
+        for (unsigned int i = 0; i < 2; i++) {
+//            cout<<i<<endl;
+            if (!(intersect_singular_support(*frame.frames(lambda.patch(),i),                  //doch nicht logisch falsch
+                                             lambda.j()[i], lambda.e()[i], lambda.k()[i],
+                                             mu.j()[i], mu.e()[i], mu.k()[i],
+                                             j, k1, k2) ))
+                return false;
+        }
+        return true;
   }
 
 }

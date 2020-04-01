@@ -33,7 +33,7 @@
 
 
 #undef NONADAPTIVE
-#undef ADAPTIVE
+#define ADAPTIVE
 
 #ifdef ADAPTIVE
 #undef SD
@@ -42,13 +42,14 @@
 #endif
 
 #define PARALLEL 0
+#define PARALLEL_RHS 1 //for setup right-hand-side
 
 #define FRAME
 //#define _WAVELETTL_USE_TBASIS 1
 #define _WAVELETTL_USE_TFRAME 1
 #define _DIM 2
-#define JMAX 6
-#define PMAX 0
+#define JMAX 8
+#define PMAX 2
 #define TWO_D
 
 #define PRIMALORDER 3
@@ -231,7 +232,7 @@ int main(){
   for (int i=0; i<frame.degrees_of_freedom();i++) {
 
     Lambda.insert(*(frame.get_quarklet(i)));
-    cout << *(frame.get_quarklet(i)) << endl;
+//    cout << *(frame.get_quarklet(i)) << endl;
 
 
   }
@@ -429,7 +430,7 @@ int main(){
 #endif
 #ifdef RICHARDSON
 //    const char* scheme_type = "Richardson";
-    const unsigned int maxiter = 10;
+    const unsigned int maxiter = 100;
     const double omega = 0.5;
     const double residual_stop = 0.1;
     const double shrinkage = 0;

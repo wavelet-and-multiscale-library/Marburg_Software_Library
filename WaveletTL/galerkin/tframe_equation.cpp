@@ -93,18 +93,44 @@ namespace WaveletTL
         InfiniteVector<double,Index> fhelp;
         InfiniteVector<double,int> fhelp_int;
         fnorm_sqr = 0;
-//        double coeff;
+        double coeff;
+                
+#if PARALLEL_RHS==1
+        double fnorm_sqr_help = 0.;
+        cout<<"parallel computing rhs"<<endl;
         
+#pragma omp parallel 
+{
+//        cout<<"number of threads: "<<omp_get_num_threads()<<endl;
+#pragma omp for private(coeff) schedule(static) reduction(+:fnorm_sqr_help)
         for (unsigned int i = 0; (int)i< frame_->degrees_of_freedom();i++)
         {
-            const double coeff = f(frame_->get_quarklet(i)) / D(frame_->get_quarklet(i));
+            coeff = f(frame_->get_quarklet(i)) / D(frame_->get_quarklet(i));
             if (fabs(coeff)>1e-15)
             {
-                fhelp.set_coefficient(frame_->get_quarklet(i), coeff);
+#pragma omp critical
+                {fhelp.set_coefficient(frame_->get_quarklet(i), coeff);
+                fhelp_int.set_coefficient(i, coeff);}
+                fnorm_sqr_help += coeff*coeff;
+                
+            }
+        }
+}
+                fnorm_sqr=fnorm_sqr_help;
+        
+#else 
+       for (int i = 0; i< frame_->degrees_of_freedom();i++)
+        {
+//           cout<<i<<": "<<*(frame_->get_quarklet(i))<<endl;
+            coeff = f(*(frame_->get_quarklet(i))) / D(*(frame_->get_quarklet(i)));
+            if (fabs(coeff)>1e-15)
+            {
+                fhelp.set_coefficient(*(frame_->get_quarklet(i)), coeff);
                 fnorm_sqr += coeff*coeff;
                 fhelp_int.set_coefficient(i, coeff);
             }
-        }
+        } 
+#endif
         cout << "... done, sort the entries in modulus..." << endl;
         // sort the coefficients into fcoeffs
         fcoeffs.resize(0); // clear eventual old values
@@ -167,7 +193,7 @@ namespace WaveletTL
     TensorFrameEquation<IFRAME,DIM,TENSORFRAME>::a(const Index& lambda,
                                           const Index& nu) const
     {
-        return a(lambda, nu, IFRAME::primal_polynomial_degree()*IFRAME::primal_polynomial_degree());
+        return a(lambda, nu, 2*IFRAME::primal_polynomial_degree());
     }
 
     template <class IFRAME, unsigned int DIM, class TENSORFRAME>
@@ -186,154 +212,113 @@ namespace WaveletTL
         Support supp;
         if (intersect_supports(*frame_, *lambda, *mu, supp))
         {
-            Point<DIM> x;
-            const double ax = bvp_->constant_coefficients() ? bvp_->a(x) : 0.0;
-            const double qx = bvp_->constant_coefficients() ? bvp_->q(x) : 0.0;
-            double integral[space_dimension], der_integral[space_dimension];
-            integral[0]=0, integral[1]=0, der_integral[0]=0, der_integral[1]=0;
-            // compute point values of the integrand (where we use that it is a tensor product)
-            FixedArray1D<Array1D<double>,DIM> psi_lambda_values,     // values of the components of psi_lambda at gauss_points[i]
-                                              psi_mu_values,         // -"-, for psi_mu
-                                              psi_lambda_der_values, // values of the 1st deriv. of the components of psi_lambda at gauss_points[i]
-                                              psi_mu_der_values;     // -"-, for psi_mu
+//            Point<DIM> x;
+//            const double ax = bvp_->constant_coefficients() ? bvp_->a(x) : 0.0; //currently we do not support this
+//            const double qx = bvp_->constant_coefficients() ? bvp_->q(x) : 0.0;
             
-//            cout << "support in a-routine for index " << lambda << ", " << mu << endl;
-//    cout << "j[0]: " << supp.j[0] << ", j[1]: " << supp.j[1] << endl;
-//    
-//            cout << "Vergleichswerte Cube: [" << supp.a[0] << ", " << supp.b[0] << "] x [" << supp.a[1] << ", " << supp.b[1] <<"]" << endl;
-            // setup Gauss points and weights for a composite quadrature formula:
-            const int N_Gauss = (p+1)/2+(multi_degree(lambda->p())+multi_degree(mu->p())+1)/2;
-            //const double h = ldexp(1.0, -supp.j); // granularity for the quadrature
-            // FixedArray1D<double,DIM> h; // granularity for the quadrature
-            double hi; // granularity for the quadrature
-            FixedArray1D<Array1D<double>,DIM> gauss_points, gauss_weights;
-//            const Index* lambda_new = &lambda;
+            int N_Gauss [DIM];
             for (unsigned int i = 0; i < DIM; i++) {
-                //hier schauen, ob 1D Integral schon berechnet wurde
-                
-//                Index1D lambda1D(lambda_new->p()[i], lambda_new->j()[i], lambda_new->e()[i], lambda_new->k()[i], &myframe);
-//                Index1D mu1D(mu.p()[i], mu.j()[i], mu.e()[i], mu.k()[i], &myframe);
-                
-//                typename One_D_IntegralCache::iterator col_lb(one_d_integrals.lower_bound(lambda));
-//                typename One_D_IntegralCache::iterator col_it(col_lb);
-//                if (col_lb == one_d_integrals.end() ||
-//                    one_d_integrals.key_comp()(lambda,col_lb->first))
-//                  {
-//                    // insert a new column
-//                    typedef typename One_D_IntegralCache::value_type value_type;
-//                    col_it = one_d_integrals.insert(col_lb, value_type(lambda, Column1D()));
-//                  }
-//
-//                Column1D& col(col_it->second);
-//
-//                typename Column1D::iterator lb(col.lower_bound(mu));
-//                typename Column1D::iterator it(lb);
-//                if (lb == col.end() ||
-//                    col.key_comp()(mu, lb->first))
-//                  {
-                
-                hi = ldexp(1.0, -supp.j[i]);
-                gauss_points[i].resize(N_Gauss*(supp.b[i]-supp.a[i]));
-                gauss_weights[i].resize(N_Gauss*(supp.b[i]-supp.a[i]));
-                for (int patch = supp.a[i]; patch < supp.b[i]; patch++)
-                    for (int n = 0; n < N_Gauss; n++) {
-                        gauss_points[i][(patch-supp.a[i])*N_Gauss+n]
-                                = hi*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
-                        gauss_weights[i][(patch-supp.a[i])*N_Gauss+n]
-                                = hi*GaussWeights[N_Gauss-1][n];
-                    }
-            
-            
-            
-                evaluate(*(frame_->frames()[i]), 
-                                                lambda->p()[i],
-                                                lambda->j()[i],
-                                                lambda->e()[i],
-                                                lambda->k()[i],
-                         gauss_points[i], psi_lambda_values[i], psi_lambda_der_values[i]);
-//                cout << "Gauss Points Cube: " << gauss_points[i] << endl;
-//                cout << psi_lambda_values[i] << endl;
-                evaluate(*(frame_->frames()[i]),
-                                                mu->p()[i],
-                                                mu->j()[i],
-                                                mu->e()[i],
-                                                mu->k()[i],
-                         gauss_points[i], psi_mu_values[i], psi_mu_der_values[i]);
-//                cout << psi_mu_values[i] << endl;
-                
-                
-//                    cout << endl << "gauss_weights[" << i << "]: " << gauss_weights[i] << endl;
-//                    cout << "psi_lambda_values[" << i << "]: " << psi_lambda_values[i] << endl;
-//                    cout << "psi_mu_values[" << i << "]: " << psi_mu_values[i] << endl;
-                    for (unsigned int ind = 0; ind < gauss_points[i].size(); ind++){
-//                        if(i==1)
-//                        cout << "Zwischenwert integral: " << integral[i] << endl;
-                        integral[i] += psi_lambda_values[i][ind] * psi_mu_values[i][ind] * gauss_weights[i][ind];
-                        der_integral[i] += psi_lambda_der_values[i][ind] * psi_mu_der_values[i][ind] * gauss_weights[i][ind];
-                    }
-                
+               N_Gauss[i] = (p+1)/2+(lambda->p()[i]+mu->p()[i]+1)/2;
             }
             
+            // loop over spatial direction
+            for (unsigned int i = 0; i < DIM; i++) {
+              double t = 1.;
+
+              for (unsigned int j = 0; j < DIM; j++) {
+                if (j == i)
+                  continue;
+//                IFRAME frame1d_la= frame_->frames(lambda->patch(),j);
+//                IFRAME frame1d_mu= frame_->frames(mu->patch(),j);
+                IndexQ1D<IFRAME> i1(IntervalQIndex<IFRAME> (
+                                                          lambda->p()[j],lambda->j()[j],lambda->e()[j],lambda->k()[j],
+                                                          frame_->frames()[j]
+                                                          ),
+                                   0,j,0 //patch not relevant
+                                   );
+                IndexQ1D<IFRAME> i2(IntervalQIndex<IFRAME> (mu->p()[j],mu->j()[j],mu->e()[j],mu->k()[j],
+                                                          frame_->frames()[j]
+                                                          ),
+                                   0,j,0
+                                   );
+
+
+                t *= integrate(i1, i2, N_Gauss[j], j, supp);
+//                cout << "Zwischenergebnis Richtung: " << j << "Wert: " << t << endl;
+              }
+              
+//              IFRAME frame1d_la= frame_->frames(lambda->patch(),i);
+//              IFRAME frame1d_mu= frame_->frames(mu->patch(),i);
+              IndexQ1D<IFRAME> i1(IntervalQIndex<IFRAME> (
+                                                        lambda->p()[i],lambda->j()[i],lambda->e()[i],lambda->k()[i],
+                                                        frame_->frames()[i]
+                                                        ),
+                                 0,i,1 //patch not relevant
+                                 );
+              IndexQ1D<IFRAME> i2(IntervalQIndex<IFRAME> (mu->p()[i],mu->j()[i],mu->e()[i],mu->k()[i],
+                                                        frame_->frames()[i]
+                                                        ),
+                                 0,i,1
+                                 );
+
+              t *= integrate(i1, i2, N_Gauss[i], i, supp);
+
+              r += t;
+            }
+             
             
-            
-//            if (bvp_->constant_coefficients())
-//            {
-                
-                
-//                cout << "der_integral[0]: " << der_integral[0] << endl;
-//                cout << "der_integral[1]: " << der_integral[1] << endl;
-//                cout << "integral[0]: " << integral[0] << endl;
-//                cout << "integral[1]: " << integral[1] << endl;
-                
-                r = ax * (der_integral[0] * integral[1] + integral[0] * der_integral[1]) + qx * (integral[0] * integral[1]); 
-//            }
-//                else // coefficients are not constant:
-//            {
-//                while (true) {
-//                    double grad_psi_lambda[DIM], grad_psi_mu[DIM], weights;
-//                    for (unsigned int i = 0; i < DIM; i++)
-//                        x[i] = gauss_points[i][index[i]];
-//                    // product of current Gauss weights
-//                    weights = 1.0;
-//                    for (unsigned int i = 0; i < DIM; i++)
-//                        weights *= gauss_weights[i][index[i]];
-//                    // compute the share a(x)(grad psi_lambda)(x)(grad psi_mu)(x)
-//                    for (unsigned int i = 0; i < DIM; i++) {
-//                        grad_psi_lambda[i] = 1.0;
-//                        grad_psi_mu[i] = 1.0;
-//                        for (unsigned int s = 0; s < DIM; s++) {
-//                            if (i == s) {
-//                                grad_psi_lambda[i] *= psi_lambda_der_values[i][index[i]];
-//                                grad_psi_mu[i]     *= psi_mu_der_values[i][index[i]];
-//                            } else {
-//                                grad_psi_lambda[i] *= psi_lambda_values[s][index[s]];
-//                                grad_psi_mu[i] *= psi_mu_values[s][index[s]];
-//                            }
-//                        }
+//            double integral[space_dimension], der_integral[space_dimension];
+//            integral[0]=0, integral[1]=0, der_integral[0]=0, der_integral[1]=0;
+//            FixedArray1D<Array1D<double>,DIM> psi_lambda_values,     // values of the components of psi_lambda at gauss_points[i]
+//                                              psi_mu_values,         // -"-, for psi_mu
+//                                              psi_lambda_der_values, // values of the 1st deriv. of the components of psi_lambda at gauss_points[i]
+//                                              psi_mu_der_values;     // -"-, for psi_mu
+//            
+//
+//            const int N_Gauss = (p+1)/2+(multi_degree(lambda->p())+multi_degree(mu->p())+1)/2;
+//
+//            FixedArray1D<Array1D<double>,DIM> gauss_points, gauss_weights;
+//
+//            for (unsigned int i = 0; i < DIM; i++) {
+//
+//                
+//                hi = ldexp(1.0, -supp.j[i]);
+//                gauss_points[i].resize(N_Gauss*(supp.b[i]-supp.a[i]));
+//                gauss_weights[i].resize(N_Gauss*(supp.b[i]-supp.a[i]));
+//                for (int patch = supp.a[i]; patch < supp.b[i]; patch++)
+//                    for (int n = 0; n < N_Gauss; n++) {
+//                        gauss_points[i][(patch-supp.a[i])*N_Gauss+n]
+//                                = hi*(2*patch+1+GaussPoints[N_Gauss-1][n])/2.;
+//                        gauss_weights[i][(patch-supp.a[i])*N_Gauss+n]
+//                                = hi*GaussWeights[N_Gauss-1][n];
 //                    }
-//                    double share = 0;
-//                    for (unsigned int i = 0; i < DIM; i++)
-//                        share += grad_psi_lambda[i]*grad_psi_mu[i];
-//                    r += bvp_->a(x) * weights * share;
-//                    // compute the share q(x)psi_lambda(x)psi_mu(x)
-//                    share = bvp_->q(x) * weights;
-//                    for (unsigned int i = 0; i < DIM; i++)
-//                        share *= psi_lambda_values[i][index[i]] * psi_mu_values[i][index[i]];
-//                    r += share;
-//                    // "++index"
-//                    bool exit = false;
-//                    for (unsigned int i = 0; i < DIM; i++) {
-//                        if (index[i] == N_Gauss*(supp.b[i]-supp.a[i])-1) {
-//                            index[i] = 0;
-//                            exit = (i == DIM-1);
-//                        } else {
-//                            index[i]++;
-//                            break;
-//                        }
+//            
+//            
+//            
+//                evaluate(*(frame_->frames()[i]), 
+//                                                lambda->p()[i],
+//                                                lambda->j()[i],
+//                                                lambda->e()[i],
+//                                                lambda->k()[i],
+//                         gauss_points[i], psi_lambda_values[i], psi_lambda_der_values[i]);
+//
+//                evaluate(*(frame_->frames()[i]),
+//                                                mu->p()[i],
+//                                                mu->j()[i],
+//                                                mu->e()[i],
+//                                                mu->k()[i],
+//                         gauss_points[i], psi_mu_values[i], psi_mu_der_values[i]);
+//
+//                    for (unsigned int ind = 0; ind < gauss_points[i].size(); ind++){
+//
+//                        integral[i] += psi_lambda_values[i][ind] * psi_mu_values[i][ind] * gauss_weights[i][ind];
+//                        der_integral[i] += psi_lambda_der_values[i][ind] * psi_mu_der_values[i][ind] * gauss_weights[i][ind];
 //                    }
-//                    if (exit) break;
-//                }
+//                
 //            }
+//                 
+//                r = ax * (der_integral[0] * integral[1] + integral[0] * der_integral[1]) + qx * (integral[0] * integral[1]); 
+
         }
         return r;
     }
@@ -363,7 +348,7 @@ namespace WaveletTL
         Support supp;
         support(*frame_, lambda, supp);
         // setup Gauss points and weights for a composite quadrature formula:
-        const int N_Gauss = 5;
+        const int N_Gauss = 6;
         // FixedArray1D<double,DIM> h; // = ldexp(1.0, -supp.j); // granularity for the quadrature
         double hi; // granularity for the quadrature
         FixedArray1D<Array1D<double>,DIM> gauss_points, gauss_weights, v_values;
@@ -455,6 +440,12 @@ namespace WaveletTL
     }
 //#endif
 //        cout<<"rrand="<<rrand<<endl;
+#ifdef DELTADIS
+      //r+= 4*frame_->frames()[0]->evaluate(0,lambda.p()[0],lambda.j()[0],lambda.e()[0],lambda.k()[0],0.5);  
+      for(int i2=0;i2<N_Gauss*(supp.b[1]-supp.a[1]);i2++){
+                        r+=4*frame_->frames()[0]->evaluate(0,lambda.p()[0],lambda.j()[0],lambda.e()[0],lambda.k()[0],0.5)*gauss_weights[1][i2]*v_values[1][i2]; 
+                    }
+#endif
         return r;
 #endif
     }
@@ -723,4 +714,109 @@ namespace WaveletTL
         }
         return normAinv;
     }
+    
+    template <class IFRAME, unsigned int DIM, class TENSORFRAME>
+    double
+    TensorFrameEquation<IFRAME, DIM, TENSORFRAME>:: integrate(const IndexQ1D<IFRAME>& la,
+                                                            const IndexQ1D<IFRAME>& nu,
+                                                            const int N_Gauss,
+                                                            const int dir,
+                                                            typename Frame::Support supp) const
+      {
+        double res=0.;
+//        cout<<"testing integrate"<<endl;
+//        cout<<"direction="<<dir<<endl;
+         // It makes sense to store the one dimensional
+         // integrals arising when we make use of the tensor product structure. This costs quite
+         // some memory, but really speeds up the algorithm!
+        
+        
+        const IndexQ1D<IFRAME>* lambda= nu < la? &la : &nu;
+        const IndexQ1D<IFRAME>* mu= nu < la ? &nu : &la;
+//        if(lambda->number()==lambda->index().number())
+//        cout << "truueee: " << lambda->index() << endl;
+//        if(lambda->number()!=lambda->index().number())
+//        cout << "faaaalsse: " << lambda->index() << ", " << lambda->number() << endl;
+//        cout << mu->number() << endl;
+        typename One_D_IntegralCache::iterator col_lb(one_d_integrals.lower_bound(*lambda));
+        typename One_D_IntegralCache::iterator col_it(col_lb);
+        if (col_lb == one_d_integrals.end() ||
+            one_d_integrals.key_comp()(*lambda,col_lb->first))
+          {
+            // insert a new column
+            typedef typename One_D_IntegralCache::value_type value_type;
+            col_it = one_d_integrals.insert(col_lb, value_type(*lambda, Column1D()));
+          }
+
+        Column1D& col(col_it->second);
+
+        typename Column1D::iterator lb(col.lower_bound(*mu));
+        typename Column1D::iterator it(lb);
+        if (lb == col.end() ||
+            col.key_comp()(*mu, lb->first))
+          {
+    
+            double h; // granularity for the quadrature
+            Array1D<double> gauss_points, gauss_weights;
+            
+            //compute gauss points and weights
+            double a =supp.a[dir];
+            double b =supp.b[dir];
+//            cout << "current support: ["<<a<<","<<b<<"]"<<endl;
+            
+            
+//                int e = std::max(lambda->e()[i], mu->e()[i]); //correct granularity
+            h = ldexp(1.0, -supp.j[dir]/*-e*/);
+            gauss_points.resize(N_Gauss*(b-a));
+            gauss_weights.resize(N_Gauss*(b-a));
+            for (int interval = a; interval < b; interval++){
+                for (int n = 0; n < N_Gauss; n++) {
+                    gauss_points[(interval-a)*N_Gauss+n]= h*(2*interval+1+GaussPoints[N_Gauss-1][n])/2.;
+                    gauss_weights[(interval-a)*N_Gauss+n]= h*GaussWeights[N_Gauss-1][n];
+                }
+            }
+            
+            
+            Array1D<double> lambda_gauss_points(gauss_points), mu_gauss_points(gauss_points);
+            Array1D<double> lambda_values,     // values of the components of psi_lambda at gauss_points[i]
+                            mu_values;         // -"-, for psi_mu
+            
+            const IFRAME* frame1D_lambda = frame_->frames()[dir];
+            const IFRAME* frame1D_mu     = frame_->frames()[dir];
+            
+            WaveletTL::evaluate(*frame1D_lambda, lambda->derivative(),  lambda->index(),         
+                                                /*lambda->index().p(),
+                                                lambda->index().j(),
+                                                lambda->index().e(),
+                                                lambda->index().k(),*/
+                         lambda_gauss_points, lambda_values);
+            
+            WaveletTL::evaluate(*frame1D_mu, mu->derivative(), mu->index(),          
+                                                /*mu->index().p(),
+                                                mu->index().j(),
+                                                mu->index().e(),
+                                                mu->index().k(),*/
+                         mu_gauss_points, mu_values);
+            
+            // - add all integral shares
+            for (unsigned int ind = 0; ind < gauss_points.size(); ind++){
+                   res += lambda_values[ind] * mu_values[ind] * gauss_weights[ind];
+//                    der_integral += lambda_der_values[ind] * mu_der_values[ind] * gauss_weights[ind];
+            }
+            
+            //store the calculated values
+            typedef typename Column1D::value_type value_type;
+//            cout << "Neuberechnung" << endl;
+            it = col.insert(lb, value_type(*mu, res));
+          }
+        else {
+//            cout << "aus dem Cache" << endl;
+          res = it->second;
+        }
+    
+//        (lambda->derivative()==0? return integral : return der_integral);
+//        cout<<res<<endl;
+        return res;
+      }
+    
 }

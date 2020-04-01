@@ -140,11 +140,12 @@ namespace WaveletTL
         typedef typename DOMAINFRAME::Support Support;
         Support supp;
 
-        os<<"clear x, clear y, clear z"<<endl;
+        os<<"clear x, clear y, clear z, clear val"<<endl;
+        os<<"threshold="<<threshold<<endl;
         
         for (typename InfiniteVector<double, Index>::const_iterator it(coeffs.begin()); it != coeffs.end(); ++it){
-            if(*it>threshold)
-            {
+//            if(*it>threshold) //abs?
+//            {
 //                cout<<it.index()<<endl;
                 frame->support(it.index(),supp);
 //                cout<<"computed support"<<endl;
@@ -187,13 +188,13 @@ namespace WaveletTL
                         }
                     }
                 
+                os<<"val(end+1)="<<*it<<";"<<endl;
                 
-                
-            }    
+//            }    
         }
         
-        os<<"plot3(x,y,z,'+')"<<endl;
-        os << "view(30,55);"<<endl;
+        os<<"plot3(x(abs(val)>threshold),y(abs(val)>threshold),z(abs(val)>threshold),'+')"<<endl;
+        os << "view(30,35);"<<endl;
         os<<"xlabel('x')"<<endl;
         os<<"ylabel('y')"<<endl;
         os<<"zlabel('|p|')"<<endl;

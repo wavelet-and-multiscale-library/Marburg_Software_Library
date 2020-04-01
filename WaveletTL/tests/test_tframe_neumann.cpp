@@ -4,16 +4,49 @@
  * and open the template in the editor.
  */
 
-#define PARALLEL_APPLY 0
-#define NUM_THREADS 1
-#define PARALLEL_A 0
-#define PARALLEL_GALERKIN_UTILS 0
+#define POISSON
+#undef GRAMIAN
+
+
+#undef DYADIC
+
+#ifdef DYADIC
+#define DELTA1 6
+#define DELTA2 2
+#endif
+
+#undef TRIVIAL
+#undef ENERGY
+#define DYPLUSEN
+
+#ifdef DYPLUSEN
+#define DELTA1 4
+#define DELTA2 2
+#endif
+
 
 #undef NONADAPTIVE
 #define ADAPTIVE
 
-#undef BASIS
+#ifdef ADAPTIVE
+#undef SD
+#undef CDD2
+#define RICHARDSON
+#endif
+
+#define PARALLEL 0
+#define PARALLEL_RHS 1 //for setup right-hand-side
+
 #define FRAME
+//#define _WAVELETTL_USE_TBASIS 1
+#define _WAVELETTL_USE_TFRAME 1
+#define _DIM 2
+#define JMAX 10
+#define PMAX 3
+#define TWO_D
+
+#define PRIMALORDER 3
+#define DUALORDER   3
 
 #define DIRICHLET
 #undef NEUMANN
@@ -21,17 +54,9 @@
 ////#define NONZERONEUMANN
 //#endif
 
-#define DYADIC
-#undef DYPLUSEN
+//for test case 10
+#undef DELTADIS 
 
-#define JMAX 6
-#define PMAX 1
-
-#ifdef FRAME
-#define _WAVELETTL_USE_TFRAME 1
-#else
-#define _WAVELETTL_USE_TBASIS 1
-#endif
 #define _DIM 2
 #define TWO_D
 //#define _WAVELETTL_CACHEDPROBLEM_VERBOSITY 2
@@ -112,6 +137,12 @@ public:
     case 8:
       return cs.value(p);
       break;
+    case 9:
+         return pow(p[0],1.5);
+         break;
+    case 10:
+         return -cos(2*M_PI*p[0])+(p[0]<0.5 ? 2*p[0]*p[0] : 2*(1-p[0])*(1-p[0])); //turn on deltadis
+         break;
     default:
       return 0;
       break;
@@ -163,6 +194,12 @@ public:
     case 8:
       return csrhs.value(p);;
       break;
+    case 9:
+         return -1.5*0.5/sqrt(p[0]);
+         break;
+    case 10:
+         return -cos(2.*M_PI*p[0])*4.*M_PI*M_PI - 4.; 
+         break;
     default:
       return 1;
       break;
@@ -195,6 +232,12 @@ public:
                     break;
                 case 7: //not yet working
                     return "case 6 + singularity in (0.5,0.5)";
+                    break;
+                case 9: 
+                    return "x^alpha type singularity, alpha > 1";
+                    break;  
+                case 10:
+                    return "sine plus polynomial singularity in x-direction";
                     break;
                 default:
                     return "TestProblem: N not defined.";
@@ -240,6 +283,13 @@ public:
     case 7: //not yet working
       return 0;
       break;
+    case 9:
+         if(p[0]==1) return 1;
+         return 0;
+         break;
+    case 10:
+         return 0;
+         break;
     default:
       return 0;
       break;
@@ -253,8 +303,8 @@ public:
 int main()
 {
     cout << "Testing tframe ..." << endl;
-    const int d  = 3;
-    const int dT = 3;
+    const int d  = PRIMALORDER;
+    const int dT = DUALORDER;
 #ifdef ADAPTIVE
     const int a=2;
     const int b=2;
@@ -264,12 +314,12 @@ int main()
     const int pmax = PMAX;
 
 
-    const unsigned int testcase1=8;
+    const unsigned int testcase1=1;
     mySolution<testcase1> uexact1;
     myRHS<testcase1> rhs1;
     myBoundaryFunction<testcase1> phi1;
     
-    CompressionStrategy strategy=tensor_simple;
+    CompressionStrategy strategy=tensor_second;
     if(strategy==tensor_second) cout<<"using second compression"<<endl;
     if(strategy==tensor_simple) cout<<"using classical compression"<<endl;
     
@@ -539,7 +589,8 @@ int main()
 #endif
 
 #ifdef ADAPTIVE
-    CachedQuarkletTProblem<TensorFrameEquation<Frame1d,dim,Frame> > cproblem1(&eq,41,9); //41, 27 funktioniert auch
+//    CachedQuarkletTProblem<TensorFrameEquation<Frame1d,dim,Frame> > cproblem1(&eq,41,9); //41, 27 funktioniert auch
+    CachedQuarkletTProblem<TensorFrameEquation<Frame1d,dim,Frame> > cproblem1(&eq,1.,1.);
  
 #if 0 //testing bilinearform compression
   {   
@@ -583,19 +634,19 @@ int main()
     cproblem1.RHS(1e-6, F_eta);
 //    cout<<"ADAPTIVE f.size: "<<F_eta.size()<<endl;
 //    cout<<"l2_norm: "<<l2_norm(F_eta)<<endl;
-    double epsilon = 1e-3;
+    double epsilon = 1e-20;
     InfiniteVector<double, Index> u_epsilon;
     InfiniteVector<double, int> u_epsilon_int;
     const double nu = cproblem1.norm_Ainv() * l2_norm(F_eta);   //benötigt hinreichend großes jmax
-    const unsigned int maxiter = 9999;
-    const double omega = 0.05;
+    const unsigned int maxiter = 100;
+    const double omega = 0.5;
     const double residual_stop = 1e-10;
     const double shrinkage = 0;
     clock_t tic = clock();
     
     //choose one scheme
-    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, strategy, pmax, a, b);
-//    richardson_QUARKLET_SOLVE(cproblem1,epsilon*1e-25,u_epsilon_int, maxiter, strategy, a, b, shrinkage, omega, residual_stop);
+//    CDD2_QUARKLET_SOLVE(cproblem1, nu, epsilon, u_epsilon_int, jmax, strategy, pmax, a, b);
+    richardson_QUARKLET_SOLVE(cproblem1,epsilon,u_epsilon_int, maxiter, strategy, a, b, shrinkage, omega, residual_stop);
 //    DUV_QUARKLET_SOLVE_SD(cproblem1, nu, epsilon, u_epsilon, tensor_simple, pmax, jmax, a, b);
 //    steepest_descent_ks_QUARKLET_SOLVE(cproblem1, epsilon, u_epsilon_int, tensor_simple, a, b);
             
